@@ -571,8 +571,8 @@ Cyc_Absyn_Local_b_struct{ int tag; struct Cyc_Absyn_Vardecl* f1; } ; static
 const int Cyc_Absyn_Pat_b= 4; struct Cyc_Absyn_Pat_b_struct{ int tag; struct Cyc_Absyn_Vardecl*
 f1; } ; struct Cyc_Absyn_Vardecl{ void* sc; struct _tuple0* name; struct Cyc_Absyn_Tqual
 tq; void* type; struct Cyc_Absyn_Exp* initializer; struct Cyc_Core_Opt* rgn;
-struct Cyc_List_List* attributes; } ; struct Cyc_Absyn_Fndecl{ void* sc; int
-is_inline; struct _tuple0* name; struct Cyc_List_List* tvs; struct Cyc_Core_Opt*
+struct Cyc_List_List* attributes; int escapes; } ; struct Cyc_Absyn_Fndecl{ void*
+sc; int is_inline; struct _tuple0* name; struct Cyc_List_List* tvs; struct Cyc_Core_Opt*
 effect; void* ret_type; struct Cyc_List_List* args; int c_varargs; struct Cyc_Absyn_VarargInfo*
 cyc_varargs; struct Cyc_List_List* rgn_po; struct Cyc_Absyn_Stmt* body; struct
 Cyc_Core_Opt* cached_typ; struct Cyc_Core_Opt* param_vardecls; struct Cyc_List_List*
@@ -655,65 +655,58 @@ f2; struct Cyc_List_List* f3; struct Cyc_List_List* f4; unsigned char f5; int f6
 } ; struct Cyc_Core_Opt* Cyc_Formatstr_parse_conversionspecification( struct
 _tagged_arr s, int i){ unsigned int _temp0= Cyc_Std_strlen( s); if( i <  0? 1: i
 >=  _temp0){ return 0;}{ struct Cyc_List_List* _temp1= 0; unsigned char c=' ';
-for( 0; i <  _temp0; i ++){ c=*(( const unsigned char*) _check_unknown_subscript(
-s, sizeof( unsigned char), i)); switch( c){ case '+': _LL2: goto _LL3; case '-':
-_LL3: goto _LL4; case ' ': _LL4: goto _LL5; case '#': _LL5: goto _LL6; case '0':
-_LL6: _temp1=({ struct Cyc_List_List* _temp8=( struct Cyc_List_List*) _cycalloc(
-sizeof( struct Cyc_List_List)); _temp8->hd=( void*)(( int) c); _temp8->tl=
-_temp1; _temp8;}); continue; default: _LL7: break;} break;} if( i >=  _temp0){
-return 0;} _temp1=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)(
-_temp1);{ struct Cyc_List_List* _temp10= 0; c=*(( const unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char), i)); if( c == '*'){ _temp10=({
+for( 0; i <  _temp0; i ++){ c=(( const unsigned char*) s.curr)[ i]; switch( c){
+case '+': _LL2: goto _LL3; case '-': _LL3: goto _LL4; case ' ': _LL4: goto _LL5;
+case '#': _LL5: goto _LL6; case '0': _LL6: _temp1=({ struct Cyc_List_List*
+_temp8=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
+_temp8->hd=( void*)(( int) c); _temp8->tl= _temp1; _temp8;}); continue; default:
+_LL7: break;} break;} if( i >=  _temp0){ return 0;} _temp1=(( struct Cyc_List_List*(*)(
+struct Cyc_List_List* x)) Cyc_List_imp_rev)( _temp1);{ struct Cyc_List_List*
+_temp10= 0; c=(( const unsigned char*) s.curr)[ i]; if( c == '*'){ _temp10=({
 struct Cyc_List_List* _temp11=( struct Cyc_List_List*) _cycalloc( sizeof( struct
 Cyc_List_List)); _temp11->hd=( void*)(( int) c); _temp11->tl= _temp10; _temp11;});
-i ++;} else{ for( 0; i <  _temp0; i ++){ c=*(( const unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char), i)); if( isdigit(( int) c)){
-_temp10=({ struct Cyc_List_List* _temp12=( struct Cyc_List_List*) _cycalloc(
-sizeof( struct Cyc_List_List)); _temp12->hd=( void*)(( int) c); _temp12->tl=
-_temp10; _temp12;});} else{ break;}}} if( i >=  _temp0){ return 0;} _temp10=((
-struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)( _temp10);{
-struct Cyc_List_List* _temp13= 0; c=*(( const unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char), i)); if( c == '.'){ _temp13=({
-struct Cyc_List_List* _temp14=( struct Cyc_List_List*) _cycalloc( sizeof( struct
-Cyc_List_List)); _temp14->hd=( void*)(( int) c); _temp14->tl= _temp13; _temp14;});
-i ++; if( i >=  _temp0){ return 0;} c=*(( const unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char), i)); if( c == '*'){ _temp13=({
-struct Cyc_List_List* _temp15=( struct Cyc_List_List*) _cycalloc( sizeof( struct
-Cyc_List_List)); _temp15->hd=( void*)(( int) c); _temp15->tl= _temp13; _temp15;});
-i ++;} else{ for( 0; i <  _temp0; i ++){ c=*(( const unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char), i)); if( isdigit(( int) c)){
-_temp13=({ struct Cyc_List_List* _temp16=( struct Cyc_List_List*) _cycalloc(
-sizeof( struct Cyc_List_List)); _temp16->hd=( void*)(( int) c); _temp16->tl=
-_temp13; _temp16;});} else{ break;}}}} if( i >=  _temp0){ return 0;} _temp13=((
-struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)( _temp13);{
-struct Cyc_List_List* _temp17= 0; c=*(( const unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char), i)); switch( c){ case 'h':
-_LL18: _temp17=({ struct Cyc_List_List* _temp20=( struct Cyc_List_List*)
-_cycalloc( sizeof( struct Cyc_List_List)); _temp20->hd=( void*)(( int) c);
-_temp20->tl= _temp17; _temp20;}); i ++; if( i >=  _temp0){ return 0;} c=*((
-const unsigned char*) _check_unknown_subscript( s, sizeof( unsigned char), i));
-if( c == 'h'){ _temp17=({ struct Cyc_List_List* _temp21=( struct Cyc_List_List*)
-_cycalloc( sizeof( struct Cyc_List_List)); _temp21->hd=( void*)(( int) c);
-_temp21->tl= _temp17; _temp21;}); i ++;} break; case 'l': _LL19: _temp17=({
-struct Cyc_List_List* _temp23=( struct Cyc_List_List*) _cycalloc( sizeof( struct
-Cyc_List_List)); _temp23->hd=( void*)(( int) c); _temp23->tl= _temp17; _temp23;});
-i ++; if( i >=  _temp0){ return 0;} c=*(( const unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char), i)); if( c == 'l'){ _temp17=({
-struct Cyc_List_List* _temp24=( struct Cyc_List_List*) _cycalloc( sizeof( struct
-Cyc_List_List)); _temp24->hd=( void*)(( int) c); _temp24->tl= _temp17; _temp24;});
-i ++;} break; case 'j': _LL22: goto _LL25; case 'z': _LL25: goto _LL26; case 't':
-_LL26: goto _LL27; case 'L': _LL27: _temp17=({ struct Cyc_List_List* _temp29=(
-struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List)); _temp29->hd=(
-void*)(( int) c); _temp29->tl= _temp17; _temp29;}); i ++; break; default: _LL28:
-break;} if( i >=  _temp0){ return 0;} _temp17=(( struct Cyc_List_List*(*)(
-struct Cyc_List_List* x)) Cyc_List_imp_rev)( _temp17); c=*(( const unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char), i)); switch( c){ case 'd':
-_LL31: break; case 'i': _LL32: break; case 'o': _LL33: break; case 'u': _LL34:
-break; case 'x': _LL35: break; case 'X': _LL36: break; case 'f': _LL37: break;
-case 'F': _LL38: break; case 'e': _LL39: break; case 'E': _LL40: break; case 'g':
-_LL41: break; case 'G': _LL42: break; case 'a': _LL43: break; case 'A': _LL44:
-break; case 'c': _LL45: break; case 's': _LL46: break; case 'p': _LL47: break;
-case 'n': _LL48: break; case '%': _LL49: break; default: _LL50: return 0;}
+i ++;} else{ for( 0; i <  _temp0; i ++){ c=(( const unsigned char*) s.curr)[ i];
+if( isdigit(( int) c)){ _temp10=({ struct Cyc_List_List* _temp12=( struct Cyc_List_List*)
+_cycalloc( sizeof( struct Cyc_List_List)); _temp12->hd=( void*)(( int) c);
+_temp12->tl= _temp10; _temp12;});} else{ break;}}} if( i >=  _temp0){ return 0;}
+_temp10=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)(
+_temp10);{ struct Cyc_List_List* _temp13= 0; c=(( const unsigned char*) s.curr)[
+i]; if( c == '.'){ _temp13=({ struct Cyc_List_List* _temp14=( struct Cyc_List_List*)
+_cycalloc( sizeof( struct Cyc_List_List)); _temp14->hd=( void*)(( int) c);
+_temp14->tl= _temp13; _temp14;}); i ++; if( i >=  _temp0){ return 0;} c=(( const
+unsigned char*) s.curr)[ i]; if( c == '*'){ _temp13=({ struct Cyc_List_List*
+_temp15=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
+_temp15->hd=( void*)(( int) c); _temp15->tl= _temp13; _temp15;}); i ++;} else{
+for( 0; i <  _temp0; i ++){ c=(( const unsigned char*) s.curr)[ i]; if( isdigit((
+int) c)){ _temp13=({ struct Cyc_List_List* _temp16=( struct Cyc_List_List*)
+_cycalloc( sizeof( struct Cyc_List_List)); _temp16->hd=( void*)(( int) c);
+_temp16->tl= _temp13; _temp16;});} else{ break;}}}} if( i >=  _temp0){ return 0;}
+_temp13=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)(
+_temp13);{ struct Cyc_List_List* _temp17= 0; c=(( const unsigned char*) s.curr)[
+i]; switch( c){ case 'h': _LL18: _temp17=({ struct Cyc_List_List* _temp20=(
+struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List)); _temp20->hd=(
+void*)(( int) c); _temp20->tl= _temp17; _temp20;}); i ++; if( i >=  _temp0){
+return 0;} c=(( const unsigned char*) s.curr)[ i]; if( c == 'h'){ _temp17=({
+struct Cyc_List_List* _temp21=( struct Cyc_List_List*) _cycalloc( sizeof( struct
+Cyc_List_List)); _temp21->hd=( void*)(( int) c); _temp21->tl= _temp17; _temp21;});
+i ++;} break; case 'l': _LL19: _temp17=({ struct Cyc_List_List* _temp23=( struct
+Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List)); _temp23->hd=( void*)((
+int) c); _temp23->tl= _temp17; _temp23;}); i ++; if( i >=  _temp0){ return 0;} c=((
+const unsigned char*) s.curr)[ i]; if( c == 'l'){ _temp17=({ struct Cyc_List_List*
+_temp24=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
+_temp24->hd=( void*)(( int) c); _temp24->tl= _temp17; _temp24;}); i ++;} break;
+case 'j': _LL22: goto _LL25; case 'z': _LL25: goto _LL26; case 't': _LL26: goto
+_LL27; case 'L': _LL27: _temp17=({ struct Cyc_List_List* _temp29=( struct Cyc_List_List*)
+_cycalloc( sizeof( struct Cyc_List_List)); _temp29->hd=( void*)(( int) c);
+_temp29->tl= _temp17; _temp29;}); i ++; break; default: _LL28: break;} if( i >= 
+_temp0){ return 0;} _temp17=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x))
+Cyc_List_imp_rev)( _temp17); c=(( const unsigned char*) s.curr)[ i]; switch( c){
+case 'd': _LL31: break; case 'i': _LL32: break; case 'o': _LL33: break; case 'u':
+_LL34: break; case 'x': _LL35: break; case 'X': _LL36: break; case 'f': _LL37:
+break; case 'F': _LL38: break; case 'e': _LL39: break; case 'E': _LL40: break;
+case 'g': _LL41: break; case 'G': _LL42: break; case 'a': _LL43: break; case 'A':
+_LL44: break; case 'c': _LL45: break; case 's': _LL46: break; case 'p': _LL47:
+break; case 'n': _LL48: break; case '%': _LL49: break; default: _LL50: return 0;}
 return({ struct Cyc_Core_Opt* _temp52=( struct Cyc_Core_Opt*) _cycalloc( sizeof(
 struct Cyc_Core_Opt)); _temp52->v=( void*)({ struct _tuple3* _temp53=( struct
 _tuple3*) _cycalloc( sizeof( struct _tuple3)); _temp53->f1= _temp1; _temp53->f2=
@@ -721,10 +714,9 @@ _temp10; _temp53->f3= _temp13; _temp53->f4= _temp17; _temp53->f5= c; _temp53->f6
 i +  1; _temp53;}); _temp52;});}}}}} struct Cyc_List_List* Cyc_Formatstr_get_format_typs(
 struct Cyc_Tcenv_Tenv* te, struct _tagged_arr s, struct Cyc_Position_Segment*
 loc){ unsigned int _temp54= Cyc_Std_strlen( s); struct Cyc_List_List* _temp55= 0;
-int i; for( i= 0; i <  _temp54; i ++){ if(*(( const unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char), i)) != '%'){ continue;}{
-struct Cyc_Core_Opt* _temp56= Cyc_Formatstr_parse_conversionspecification( s, i
-+  1); if( _temp56 ==  0){({ void* _temp57[ 0u]={}; Cyc_Tcutil_terr( loc,
+int i; for( i= 0; i <  _temp54; i ++){ if((( const unsigned char*) s.curr)[ i]
+!= '%'){ continue;}{ struct Cyc_Core_Opt* _temp56= Cyc_Formatstr_parse_conversionspecification(
+s, i +  1); if( _temp56 ==  0){({ void* _temp57[ 0u]={}; Cyc_Tcutil_terr( loc,
 _tag_arr("bad format string", sizeof( unsigned char), 18u), _tag_arr( _temp57,
 sizeof( void*), 0u));}); return 0;}{ struct _tuple3 _temp60; int _temp61;
 unsigned char _temp63; struct Cyc_List_List* _temp65; struct Cyc_List_List*
@@ -930,71 +922,68 @@ return 0;} break; default: _LL277: return 0;}}}}} return Cyc_List_imp_rev(
 _temp55);} struct _tuple4{ int f1; struct Cyc_List_List* f2; struct Cyc_List_List*
 f3; unsigned char f4; int f5; } ; struct Cyc_Core_Opt* Cyc_Formatstr_parse_inputformat(
 struct _tagged_arr s, int i){ unsigned int _temp287= Cyc_Std_strlen( s); if( i < 
-0? 1: i >=  _temp287){ return 0;}{ int _temp288= 0; unsigned char _temp289=*((
-const unsigned char*) _check_unknown_subscript( s, sizeof( unsigned char), i));
-if( _temp289 == '*'){ _temp288= 1; i ++; if( i >=  _temp287){ return 0;}}{
-struct Cyc_List_List* _temp290= 0; for( 0; i <  _temp287; i ++){ _temp289=*((
-const unsigned char*) _check_unknown_subscript( s, sizeof( unsigned char), i));
-if( isdigit(( int) _temp289)){ _temp290=({ struct Cyc_List_List* _temp291=(
-struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List)); _temp291->hd=(
-void*)(( int) _temp289); _temp291->tl= _temp290; _temp291;});} else{ break;}}
-if( i >=  _temp287){ return 0;} _temp290=(( struct Cyc_List_List*(*)( struct Cyc_List_List*
-x)) Cyc_List_imp_rev)( _temp290);{ struct Cyc_List_List* _temp292= 0; _temp289=*((
-const unsigned char*) _check_unknown_subscript( s, sizeof( unsigned char), i));
-switch( _temp289){ case 'h': _LL293: _temp292=({ struct Cyc_List_List* _temp295=(
-struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List)); _temp295->hd=(
-void*)(( int) _temp289); _temp295->tl= _temp292; _temp295;}); i ++; if( i >= 
-_temp287){ return 0;} _temp289=*(( const unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char), i)); if( _temp289 == 'h'){
-_temp292=({ struct Cyc_List_List* _temp296=( struct Cyc_List_List*) _cycalloc(
-sizeof( struct Cyc_List_List)); _temp296->hd=( void*)(( int) _temp289); _temp296->tl=
-_temp292; _temp296;}); i ++;} break; case 'l': _LL294: _temp292=({ struct Cyc_List_List*
-_temp298=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
-_temp298->hd=( void*)(( int) _temp289); _temp298->tl= _temp292; _temp298;}); i
-++; if( i >=  _temp287){ return 0;} _temp289=*(( const unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char), i)); if( _temp289 == 'l'){
-_temp292=({ struct Cyc_List_List* _temp299=( struct Cyc_List_List*) _cycalloc(
-sizeof( struct Cyc_List_List)); _temp299->hd=( void*)(( int) _temp289); _temp299->tl=
-_temp292; _temp299;}); i ++;} break; case 'j': _LL297: goto _LL300; case 'z':
-_LL300: goto _LL301; case 't': _LL301: goto _LL302; case 'L': _LL302: _temp292=({
-struct Cyc_List_List* _temp304=( struct Cyc_List_List*) _cycalloc( sizeof(
-struct Cyc_List_List)); _temp304->hd=( void*)(( int) _temp289); _temp304->tl=
-_temp292; _temp304;}); i ++; break; default: _LL303: break;} if( i >=  _temp287){
-return 0;} _temp292=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)(
-_temp292); _temp289=*(( const unsigned char*) _check_unknown_subscript( s,
-sizeof( unsigned char), i)); switch( _temp289){ case 'd': _LL306: break; case 'i':
-_LL307: break; case 'o': _LL308: break; case 'u': _LL309: break; case 'x':
-_LL310: break; case 'X': _LL311: break; case 'f': _LL312: break; case 'F':
-_LL313: break; case 'e': _LL314: break; case 'E': _LL315: break; case 'g':
-_LL316: break; case 'G': _LL317: break; case 'a': _LL318: break; case 'A':
-_LL319: break; case 'c': _LL320: break; case 's': _LL321: break; case 'p':
-_LL322: break; case 'n': _LL323: break; case '%': _LL324: break; default: _LL325:
-return 0;} return({ struct Cyc_Core_Opt* _temp327=( struct Cyc_Core_Opt*)
-_cycalloc( sizeof( struct Cyc_Core_Opt)); _temp327->v=( void*)({ struct _tuple4*
-_temp328=( struct _tuple4*) _cycalloc( sizeof( struct _tuple4)); _temp328->f1=
-_temp288; _temp328->f2= _temp290; _temp328->f3= _temp292; _temp328->f4= _temp289;
-_temp328->f5= i +  1; _temp328;}); _temp327;});}}}} struct Cyc_List_List* Cyc_Formatstr_get_scanf_typs(
-struct Cyc_Tcenv_Tenv* te, struct _tagged_arr s, struct Cyc_Position_Segment*
-loc){ unsigned int _temp329= Cyc_Std_strlen( s); struct Cyc_List_List* _temp330=
-0; int i; for( i= 0; i <  _temp329; i ++){ if(*(( const unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char), i)) != '%'){ continue;}{
-struct Cyc_Core_Opt* _temp331= Cyc_Formatstr_parse_inputformat( s, i +  1); if(
-_temp331 ==  0){({ void* _temp332[ 0u]={}; Cyc_Tcutil_terr( loc, _tag_arr("bad format string",
-sizeof( unsigned char), 18u), _tag_arr( _temp332, sizeof( void*), 0u));});
-return 0;}{ struct _tuple4 _temp335; int _temp336; unsigned char _temp338;
-struct Cyc_List_List* _temp340; struct Cyc_List_List* _temp342; int _temp344;
-struct _tuple4* _temp333=( struct _tuple4*) _temp331->v; _temp335=* _temp333;
-_LL345: _temp344= _temp335.f1; goto _LL343; _LL343: _temp342= _temp335.f2; goto
-_LL341; _LL341: _temp340= _temp335.f3; goto _LL339; _LL339: _temp338= _temp335.f4;
-goto _LL337; _LL337: _temp336= _temp335.f5; goto _LL334; _LL334: i= _temp336 - 
-1;{ struct Cyc_List_List* _temp346= _temp340; struct Cyc_List_List _temp353;
-struct Cyc_List_List* _temp354; int _temp356; _LL348: if( _temp346 ==  0){ goto
-_LL350;} else{ _temp353=* _temp346; _LL357: _temp356=( int) _temp353.hd; goto
-_LL355; _LL355: _temp354= _temp353.tl; if( _temp354 ==  0){ goto _LL352;} else{
-goto _LL350;}} _LL352: if(( _temp356 == 'j'? 1: _temp356 == 'z')? 1: _temp356 == 't'){
-goto _LL349;} else{ goto _LL350;} _LL350: goto _LL351; _LL349:({ struct Cyc_Std_Int_pa_struct
-_temp359; _temp359.tag= Cyc_Std_Int_pa; _temp359.f1=( int)(( unsigned int)
-_temp356);{ void* _temp358[ 1u]={& _temp359}; Cyc_Tcutil_terr( loc, _tag_arr("length modifier '%c' is not supported",
+0? 1: i >=  _temp287){ return 0;}{ int _temp288= 0; unsigned char _temp289=((
+const unsigned char*) s.curr)[ i]; if( _temp289 == '*'){ _temp288= 1; i ++; if(
+i >=  _temp287){ return 0;}}{ struct Cyc_List_List* _temp290= 0; for( 0; i < 
+_temp287; i ++){ _temp289=(( const unsigned char*) s.curr)[ i]; if( isdigit((
+int) _temp289)){ _temp290=({ struct Cyc_List_List* _temp291=( struct Cyc_List_List*)
+_cycalloc( sizeof( struct Cyc_List_List)); _temp291->hd=( void*)(( int) _temp289);
+_temp291->tl= _temp290; _temp291;});} else{ break;}} if( i >=  _temp287){ return
+0;} _temp290=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)(
+_temp290);{ struct Cyc_List_List* _temp292= 0; _temp289=(( const unsigned char*)
+s.curr)[ i]; switch( _temp289){ case 'h': _LL293: _temp292=({ struct Cyc_List_List*
+_temp295=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
+_temp295->hd=( void*)(( int) _temp289); _temp295->tl= _temp292; _temp295;}); i
+++; if( i >=  _temp287){ return 0;} _temp289=(( const unsigned char*) s.curr)[ i];
+if( _temp289 == 'h'){ _temp292=({ struct Cyc_List_List* _temp296=( struct Cyc_List_List*)
+_cycalloc( sizeof( struct Cyc_List_List)); _temp296->hd=( void*)(( int) _temp289);
+_temp296->tl= _temp292; _temp296;}); i ++;} break; case 'l': _LL294: _temp292=({
+struct Cyc_List_List* _temp298=( struct Cyc_List_List*) _cycalloc( sizeof(
+struct Cyc_List_List)); _temp298->hd=( void*)(( int) _temp289); _temp298->tl=
+_temp292; _temp298;}); i ++; if( i >=  _temp287){ return 0;} _temp289=(( const
+unsigned char*) s.curr)[ i]; if( _temp289 == 'l'){ _temp292=({ struct Cyc_List_List*
+_temp299=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
+_temp299->hd=( void*)(( int) _temp289); _temp299->tl= _temp292; _temp299;}); i
+++;} break; case 'j': _LL297: goto _LL300; case 'z': _LL300: goto _LL301; case 't':
+_LL301: goto _LL302; case 'L': _LL302: _temp292=({ struct Cyc_List_List*
+_temp304=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
+_temp304->hd=( void*)(( int) _temp289); _temp304->tl= _temp292; _temp304;}); i
+++; break; default: _LL303: break;} if( i >=  _temp287){ return 0;} _temp292=((
+struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)( _temp292);
+_temp289=(( const unsigned char*) s.curr)[ i]; switch( _temp289){ case 'd':
+_LL306: break; case 'i': _LL307: break; case 'o': _LL308: break; case 'u':
+_LL309: break; case 'x': _LL310: break; case 'X': _LL311: break; case 'f':
+_LL312: break; case 'F': _LL313: break; case 'e': _LL314: break; case 'E':
+_LL315: break; case 'g': _LL316: break; case 'G': _LL317: break; case 'a':
+_LL318: break; case 'A': _LL319: break; case 'c': _LL320: break; case 's':
+_LL321: break; case 'p': _LL322: break; case 'n': _LL323: break; case '%':
+_LL324: break; default: _LL325: return 0;} return({ struct Cyc_Core_Opt*
+_temp327=( struct Cyc_Core_Opt*) _cycalloc( sizeof( struct Cyc_Core_Opt));
+_temp327->v=( void*)({ struct _tuple4* _temp328=( struct _tuple4*) _cycalloc(
+sizeof( struct _tuple4)); _temp328->f1= _temp288; _temp328->f2= _temp290;
+_temp328->f3= _temp292; _temp328->f4= _temp289; _temp328->f5= i +  1; _temp328;});
+_temp327;});}}}} struct Cyc_List_List* Cyc_Formatstr_get_scanf_typs( struct Cyc_Tcenv_Tenv*
+te, struct _tagged_arr s, struct Cyc_Position_Segment* loc){ unsigned int
+_temp329= Cyc_Std_strlen( s); struct Cyc_List_List* _temp330= 0; int i; for( i=
+0; i <  _temp329; i ++){ if((( const unsigned char*) s.curr)[ i] != '%'){
+continue;}{ struct Cyc_Core_Opt* _temp331= Cyc_Formatstr_parse_inputformat( s, i
++  1); if( _temp331 ==  0){({ void* _temp332[ 0u]={}; Cyc_Tcutil_terr( loc,
+_tag_arr("bad format string", sizeof( unsigned char), 18u), _tag_arr( _temp332,
+sizeof( void*), 0u));}); return 0;}{ struct _tuple4 _temp335; int _temp336;
+unsigned char _temp338; struct Cyc_List_List* _temp340; struct Cyc_List_List*
+_temp342; int _temp344; struct _tuple4* _temp333=( struct _tuple4*) _temp331->v;
+_temp335=* _temp333; _LL345: _temp344= _temp335.f1; goto _LL343; _LL343:
+_temp342= _temp335.f2; goto _LL341; _LL341: _temp340= _temp335.f3; goto _LL339;
+_LL339: _temp338= _temp335.f4; goto _LL337; _LL337: _temp336= _temp335.f5; goto
+_LL334; _LL334: i= _temp336 -  1;{ struct Cyc_List_List* _temp346= _temp340;
+struct Cyc_List_List _temp353; struct Cyc_List_List* _temp354; int _temp356;
+_LL348: if( _temp346 ==  0){ goto _LL350;} else{ _temp353=* _temp346; _LL357:
+_temp356=( int) _temp353.hd; goto _LL355; _LL355: _temp354= _temp353.tl; if(
+_temp354 ==  0){ goto _LL352;} else{ goto _LL350;}} _LL352: if(( _temp356 == 'j'?
+1: _temp356 == 'z')? 1: _temp356 == 't'){ goto _LL349;} else{ goto _LL350;}
+_LL350: goto _LL351; _LL349:({ struct Cyc_Std_Int_pa_struct _temp359; _temp359.tag=
+Cyc_Std_Int_pa; _temp359.f1=( int)(( unsigned int) _temp356);{ void* _temp358[ 1u]={&
+_temp359}; Cyc_Tcutil_terr( loc, _tag_arr("length modifier '%c' is not supported",
 sizeof( unsigned char), 38u), _tag_arr( _temp358, sizeof( void*), 1u));}});
 return 0; _LL351: goto _LL347; _LL347:;} if( _temp344){ continue;}{ void* t;
 switch( _temp338){ case 'd': _LL360: goto _LL361; case 'i': _LL361: { struct Cyc_Core_Opt*

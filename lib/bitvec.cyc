@@ -29,6 +29,7 @@
 // the same module as the middle end so as to promote inlining.
 #include <bitvec.h>
 #include <stdio.h>
+#include <assert.h>
 
 namespace Bitvec {
 // POS_TO_WORD is division by 32
@@ -66,25 +67,29 @@ bool get_and_set(bitvec_t bvec, int pos) {
 }
 
 void union_two(bitvec_t dest, bitvec_t src1, bitvec_t src2) {
-  int len = dest.size;
+  unsigned len = dest.size;
+  assert(len <= src1.size && len <= src2.size);
   for(int i=0; i<len; ++i)
     dest[i] = src1[i] | src2[i];
 }
 
 void intersect_two(bitvec_t dest, bitvec_t src1, bitvec_t src2) {
-  int len = dest.size;
+  unsigned len = dest.size;
+  assert(len <= src1.size && len <= src2.size);
   for(int i=0; i<len; ++i)
     dest[i] = (src1[i] & src2[i]);
 } 
 
 void diff_two(bitvec_t dest, bitvec_t src1, bitvec_t src2) {
- int len = dest.size;
- for(int i=0; i<len; ++i)
+  unsigned len = dest.size;
+  assert(len <= src1.size && len <= src2.size);
+  for(int i=0; i<len; ++i)
     dest[i] = src1[i] & ~src2[i];
 } 
 
 bool compare_two(bitvec_t src1, bitvec_t src2) {
-  int len = src1.size;
+  unsigned len = src1.size;
+  assert(len <= src2.size);
   for (int i=0; i<len; ++i)
     if (src1[i] != src2[i])
       return false;
@@ -128,20 +133,20 @@ List::list_t<int> to_sorted_list(bitvec_t bvec,int sz) {
 }  
   
 void clear_all(bitvec_t bvec) {
-  int len = bvec.size;
+  unsigned len = bvec.size;
   for (int i=0; i < len; ++i)
     bvec[i] = 0;
 }
 
 void set_all(bitvec_t bvec) {
-  int len = bvec.size;
+  unsigned len = bvec.size;
   for (int i=0; i < len; ++i)
     bvec[i] = 0xFFFFFFFF;
 }
 
 bool all_set(bitvec_t bvec, int sz) {
   int words = POS_TO_WORD(sz);
-
+  assert(words < bvec.size);
   for(int i=0; i < words; i++)
     if (bvec[i] != 0xFFFFFFFF)
       return false;

@@ -24,6 +24,7 @@
 #include <string.h>
 #include <strings.h>
 #include <stddef.h> // for size_t
+#include <assert.h>
 
 // Need to undefine these so that we can refer to their C versions
 #undef bcopy
@@ -60,7 +61,7 @@ size_t strlen(string_t s) {
 
 // Internal length after offset function, parameterized by what
 // to throw if the offset is out of range.
-static size_t int_strleno(string_t s, string_t<`H> error) {
+static inline size_t int_strleno(string_t s, string_t<`H> error) {
   int i;
   unsigned int sz = s.size;
   for (i = 0; i < sz; i++) {
@@ -71,35 +72,8 @@ static size_t int_strleno(string_t s, string_t<`H> error) {
 }
 
 ///////////////////////// COMPARISONS
-static int case_cmp(char c1, char c2) {
-  return (c1-c2);
-}
-
-static int cmp(string_t s1, size_t len1,
-               string_t s2, size_t len2,
-               int f(char, char))
-{
-  size_t min_length = (len1 < len2) ? len1 : len2;
-  int i = -1;
-  while (++i < min_length) {
-    int diff = f(s1[i],s2[i]);
-    if (diff != 0)
-      return diff;
-  }
-  return ((int)len1)-((int)len2);
-}
-
 // Compare two strings lexicographically.
 // Return <0, 0, or >0 depending on whether s1<s2, s1==s2, or s1>s2.
-/* JGM: I'm optimizing this one to see if we get a performance diff
-int strcmp(string_t s1, string_t s2) {
-  if (s1 == s2)
-    return 0;
-  size_t len1 = int_strleno(s1,"Std::strcmp");
-  size_t len2 = int_strleno(s2,"Std::strcmp");
-  return cmp(s1,len1,s2,len2,case_cmp);
-}
-*/
 int strcmp(string_t s1, string_t s2) {
   if (s1 == s2)
     return 0;
@@ -107,6 +81,7 @@ int strcmp(string_t s1, string_t s2) {
   unsigned int sz1 = s1.size;
   unsigned int sz2 = s2.size;
   unsigned int minsz = (sz1 < sz2) ? sz1 : sz2;
+  assert(minsz <= s1.size && minsz <= s2.size);
   while (i < minsz) {
     char c1 = s1[i];
     char c2 = s2[i];
@@ -134,18 +109,19 @@ int strptrcmp(stringptr_t s1, stringptr_t s2) {
   return strcmp(*s1, *s2);
 }
 
-static int ncmp(string_t s1, size_t len1,
-                string_t s2, size_t len2,
-                size_t n, int f(char, char))
+static inline int ncmp(string_t s1, size_t len1, string_t s2, size_t len2, 
+                       size_t n) 
 {
   if (n <= 0) return 0;
 
   size_t min_len = (len1 > len2) ? len2 : len1;
   size_t bound = (min_len > n) ? n : min_len;
 
+  assert(bound <= s1.size && bound <= s2.size);
+
   for (int i=0; i < bound; i++) {
     int retc;
-    if ((retc = f(s1[i],s2[i])) != 0)
+    if ((retc = (s1[i] - s2[i])) != 0)
       return retc;
   }
   if (len1 < n || len2 < n)
@@ -158,7 +134,7 @@ static int ncmp(string_t s1, size_t len1,
 int strncmp(string_t s1, string_t s2, size_t n) {
   size_t len1 = int_strleno(s1,"Std::strncmp");
   size_t len2 = int_strleno(s2,"Std::strncmp");
-  return ncmp(s1,len1,s2,len2,n,case_cmp);
+  return ncmp(s1,len1,s2,len2,n);
 }
 
 // Like strcmp but don't consider zeros (NUL characters) as marking
@@ -170,7 +146,10 @@ int zstrcmp(string_t a, string_t b) {
   size_t bs = b.size;
   size_t min_length = (as < bs) ? as : bs;
   int i  = -1;
-  while (++i < min_length) {
+
+  assert(min_length <= a.size && min_length <= b.size);
+
+  while (++i, i < min_length) {
     int diff = (int)(a[i]) - (int)(b[i]);
     if (diff != 0)
       return diff;
@@ -185,6 +164,8 @@ int zstrncmp(string_t s1, string_t s2,size_t n) {
   size_t s2size = s2.size;
   size_t min_size = (s1size > s2size) ? s2size : s1size;
   size_t bound = (min_size > n) ? n : min_size;
+
+  assert(bound <= s1.size && bound <= s2.size);
 
   for (int i=0; i < bound; i++) {
     if (s1[i] < s2[i])
@@ -210,7 +191,7 @@ int zstrptrcmp(stringptr_t a, stringptr_t b) {
 
 // Internal string concatenation function, parametized by what
 // to throw on bounds error
-static mstring_t<`r> int_strcato(mstring_t<`r> dest,string_t src,string_t<`H> error) {
+static inline mstring_t<`r> int_strcato(mstring_t<`r> dest,string_t src,string_t<`H> error) {
   int i;
   size_t dsize, slen, dlen;
 
@@ -219,6 +200,7 @@ static mstring_t<`r> int_strcato(mstring_t<`r> dest,string_t src,string_t<`H> er
   slen = int_strleno(src,error);
   
   if ((slen + dlen) <= dsize) {
+    assert(slen <= src.size);
     for (i = 0; i<slen; i++) {
       dest[i+dlen] = src[i];
     }
@@ -242,7 +224,9 @@ mstring_t<`r> rstrconcat(region_t<`r> r, string_t a, string_t b) {
   let blen = strlen(b);
   mstring_t<`r> ans = rnew_string(r,alen+blen+1);
   int i, j;
+  assert(alen <= ans.size && alen <= a.size);
   for (i=0; i < alen; ++i) ans[i]   = a[i];
+  assert(blen <= b.size);
   for (j=0; j < blen; ++j) ans[i+j] = b[j];
   return ans;
 }
@@ -334,12 +318,13 @@ mstring_t str_sepstr(list_t<stringptr_t> strs, string_t separator) {
 // Destructively copy at most n characters from src into dest
 mstring_t<`r> strncpy(mstring_t<`r> dest, string_t src, size_t n) {
   // Range checking
-  let destSz = dest.size;
-  let srcSz = src.size;
-  if (n <= 0) return dest;
-  if (n > destSz || n > srcSz)
-    throw new Invalid_argument("Std::strncpy");
+  //let destSz = dest.size;
+  //let srcSz = src.size;
+  //if (n <= 0) return dest;
+  //if (n > destSz || n > srcSz)
+  //  throw new Invalid_argument("Std::strncpy");
   int i;
+  assert(n <= src.size && n <= dest.size);
   for (i=0; i<n; i++) {
     let srcChar = src[i];
     if (srcChar == '\000') break;
@@ -372,11 +357,12 @@ mstring_t<`r> strncpy(mstring_t<`r> dest, string_t src, size_t n) {
 // Strncpy that does not pay attention to zero chars
 mstring_t<`r> zstrncpy(mstring_t<`r> dest, string_t src, size_t n) {
   // Range checking
-  let destSz = dest.size;
-  let srcSz  = src.size;
-  if (n <= 0) return dest;
-  if (n > destSz || n > srcSz)
-    throw new Invalid_argument("Std::zstrncpy");
+  //let destSz = dest.size;
+  //let srcSz  = src.size;
+  //if (n <= 0) return dest;
+  //if (n > destSz || n > srcSz)
+  //  throw new Invalid_argument("Std::zstrncpy");
+  assert(n <= dest.size && n <= src.size);
   int i;
   for (i=0; i<n; i++) 
     dest[i] = src[i];
@@ -386,7 +372,7 @@ mstring_t<`r> zstrncpy(mstring_t<`r> dest, string_t src, size_t n) {
 mstring_t<`r> strcpy(mstring_t<`r> dest, string_t src) {
   size_t len = strlen(src);
   strncpy(dest,src,len);
-  if (len != dest.size)
+  if (len < dest.size)
     dest[len] = '\000';
   return dest;
 }
@@ -459,6 +445,7 @@ mstring_t<`r> rsubstring(region_t<`r> r,string_t s,
   if (start < 0 || amt < 0 || start + ((int)amt) - 1 > (int)(s.size))
     throw new Invalid_argument("Std::substring");
   mstring_t ans = rnew_string(r,amt+1);
+  assert(amt < ans.size);
   for(size_t i=0; i<amt; ++i)
     ans[i] = s[start+i];
   ans[amt] = '\000';
@@ -496,9 +483,10 @@ mstring_t replace_suffix (string_t src, string_t curr_suffix, string_t new_suffi
 string_t<`r> strpbrk(string_t<`r> s, string_t accept) {
   int len = int_strleno(s,"Std::strpbrk");
   char c = '\000';
+  unsigned asize = accept.size;
 
   for (; len>0 && (c=*s)!=0; len--,s++) {
-    for (int j=0; j<accept.size; j++)
+    for (int j=0; j<asize; j++)
       if (c == accept[j])
 	return s;
   }
@@ -508,9 +496,10 @@ string_t<`r> strpbrk(string_t<`r> s, string_t accept) {
 mstring_t<`r> mstrpbrk(mstring_t<`r> s, string_t accept) {
   int len = int_strleno(s,"Std::strpbrk");
   char c = '\000';
+  unsigned asize = accept.size;
 
   for (; len>0 && (c=*s)!=0; len--,s++) {
-    for (int j=0; j<accept.size; j++)
+    for (int j=0; j<asize; j++)
       if (c == accept[j])
 	return s;
   }
@@ -602,13 +591,15 @@ mstring_t<`r> mstrstr(mstring_t<`r> haystack, string_t needle) {
 // of s if none.
 size_t strspn(string_t s, string_t accept) {
   size_t len = int_strleno(s,"Std::strspn");
+  unsigned asize = accept.size;
 
+  assert(len <= s.size);
   for (size_t i=0; i<len; i++) {
     int j;
-    for (j=0; j<accept.size; j++)
+    for (j=0; j<asize; j++)
       if (s[i] == accept[j])
 	break; /* inner loop */
-    if (j == accept.size) /* didn't find it */
+    if (j == asize) /* didn't find it */
       return i;
   }
       
@@ -620,13 +611,15 @@ size_t strspn(string_t s, string_t accept) {
 // of s if none.
 size_t strcspn(string_t s, string_t accept) {
   size_t len = int_strleno(s,"Std::strspn");
+  unsigned asize = accept.size;
 
+  assert(len <= s.size);
   for (size_t i=0; i<len; i++) {
     int j;
-    for (j=0; j<accept.size; j++)
+    for (j=0; j<asize; j++)
       if (s[i] != accept[j])
 	break; /* inner loop */
-    if (j == accept.size) /* didn't find it */
+    if (j == asize) /* didn't find it */
       return i;
   }
       
@@ -696,23 +689,55 @@ mstring_t implode(list_t<int> chars) {
 }
 
 // Like strcmp, but case insensitive.
+static inline int casecmp(string_t s1, size_t len1,
+                          string_t s2, size_t len2)
+{
+  size_t min_length = (len1 < len2) ? len1 : len2;
+
+  assert(min_length <= s1.size && min_length <= s2.size);
+
+  int i = -1;
+  while (++i, i < min_length) {
+    int diff = toupper(s1[i]) - toupper(s2[i]);
+    if (diff != 0)
+      return diff;
+  }
+  return ((int)len1)-((int)len2);
+}
+
 int strcasecmp(string_t s1, string_t s2) {
   if (s1 == s2)
     return 0;
   size_t len1 = int_strleno(s1,"Std::strcasecmp");
   size_t len2 = int_strleno(s2,"Std::strcasecmp");
-  return cmp(s1,len1,s2,len2,case_cmp);
+  return casecmp(s1,len1,s2,len2);
 }
 
-static int nocase_cmp(char c1, char c2) {
-  return case_cmp((char)toupper(c1),(char)toupper(c2));
+static inline int caseless_ncmp(string_t s1, size_t len1,string_t s2, 
+                                size_t len2, size_t n)
+{
+  if (n <= 0) return 0;
+
+  size_t min_len = (len1 > len2) ? len2 : len1;
+  size_t bound = (min_len > n) ? n : min_len;
+
+  assert(bound <= s1.size && bound <= s2.size);
+
+  for (int i=0; i < bound; i++) {
+    int retc;
+    if ((retc = (toupper(s1[i]) - toupper(s2[i]))) != 0)
+      return retc;
+  }
+  if (len1 < n || len2 < n)
+    return ((int)len1)-((int)len2);
+  return(0);
 }
 
 // Like strncmp, but case insensitive.
 int strncasecmp(string_t s1, string_t s2, size_t n) {
   size_t len1 = int_strleno(s1,"Std::strncasecmp");
   size_t len2 = int_strleno(s2,"Std::strncasecmp");
-  return ncmp(s1,len1,s2,len2,n,nocase_cmp);
+  return caseless_ncmp(s1,len1,s2,len2,n);
 }
 
 namespace Cstr {

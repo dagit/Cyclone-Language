@@ -35,6 +35,7 @@
 #include <arg.h>
 #include <buffer.h>
 #include <ctype.h>
+#include <assert.h>
 namespace Arg;
 using Core;
 using List;
@@ -90,6 +91,7 @@ static string_t<`r> break_line(Buffer::T b, int howmuch, string_t<`r> s) {
   if (s == NULL) return NULL;
   if (howmuch<0) howmuch = 0;
   let len = strlen(s);
+  assert(len <= s.size);
   if (howmuch>len) {
     Buffer::add_string(b,s);
     return NULL;
@@ -201,7 +203,7 @@ void parse(speclist_t<`r1,`r2> speclist,
   args = orig_args;
 
   int initpos = current;
-  int l       = args.size;
+  unsigned int l = args.size;
   ++current;
   while (current < l) {
     string_t s = args[current];

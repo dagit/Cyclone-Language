@@ -73,6 +73,8 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc, vardecl_t vd, bool check_
   type_t  t  = vd->type;
   scope_t sc = vd->sc;
   attributes_t atts = vd->attributes;
+  vd->escapes = true; // top-level variables all "escape" except for arrays --
+  // see below
 
   // reject explicitly qualified name
   switch ((*vd->name)[0]) {
@@ -88,24 +90,30 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc, vardecl_t vd, bool check_
   switch (compress(t)) {
   case &ArrayType(telt,tq,NULL) && vd->initializer != NULL:
     switch (vd->initializer->r) {
-    case &Const_e(&String_c(s)):
+      case &Const_e(&String_c(s)):
       t = vd->type = new ArrayType(telt,tq,uint_exp(s.size,NULL));
       break;
-    case &Comprehension_e(_,e,_):
-    // FIX: need to copy e here!
+      case &Comprehension_e(_,e,_):
+      // FIX: need to copy e here!
       t = vd->type = new ArrayType(telt,tq,e); 
       break;
-    case &UnresolvedMem_e(_,es): fallthru(es);
-    case &Array_e(es):
+      case &UnresolvedMem_e(_,es): fallthru(es);
+      case &Array_e(es):
       t = vd->type = new ArrayType(telt,tq,uint_exp(List::length(es),NULL));
       break;
-    default: break;
+      default: break;
     }
     break;
   default: break;
   }
   // reject ill-formed type
   check_valid_toplevel_type(loc,te,t);
+  // top-level arrays don't escape because they can't be assigned to, so
+  // their sizes do not change over time.
+  switch (compress(t)) {
+  case &ArrayType(_,_,_): vd->escapes = false; break;
+  default: break;
+  }
   if (is_function_type(t)) {
     // move any function type attributes into the function's type
     atts = transfer_fn_type_atts(t,atts);

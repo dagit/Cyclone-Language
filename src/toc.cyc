@@ -73,6 +73,9 @@ namespace Toc;
 // used for creation of all abstract syntax node locations created here
 #define DL NULL
 
+unsigned total_bounds_checks = 0;
+unsigned bounds_checks_eliminated = 0;
+
 // we aren't re-entrant -- we build this list of output decls (in
 // reverse order)  It's global b/c tuple types, tagged pointer types, and
 // strange top-level initializers need to "splice in" toplevel decls and
@@ -671,9 +674,9 @@ static void stmt_to_c(env_t nv, stmt_t s); // forward declaration
 
 static bool need_null_check(exp_t e) { // e must be pre-translation!
   switch(e->annot) {
-  case CfFlowInfo::UnknownZ: return is_nullable(e->topt->v);
-  case CfFlowInfo::NotZero:  return false;
-  case CfFlowInfo::IsZero: 
+  case &CfFlowInfo::UnknownZ(_): return is_nullable(e->topt->v);
+  case &CfFlowInfo::NotZero(_):  return false;
+  case &CfFlowInfo::IsZero(_): 
     Tcutil::terr(e->loc,"dereference of NULL pointer"); 
     return false;
   case EmptyAnnot: fprintf(stderr,"!"); 
@@ -682,6 +685,151 @@ static bool need_null_check(exp_t e) { // e must be pre-translation!
   default: throw new Core::Impossible("need_null_check");
   }
 }
+
+static CfFlowInfo::relns_t get_relns(exp_t e) { // e must be pre-translation!
+  switch (e->annot) {
+  case &CfFlowInfo::UnknownZ(r): return r;
+  case &CfFlowInfo::NotZero(r):  return r;
+  case &CfFlowInfo::IsZero(_): 
+    Tcutil::terr(e->loc,"dereference of NULL pointer"); 
+    return NULL;
+  case EmptyAnnot: return NULL;
+  default: throw new Core::Impossible("get_relns");
+  }
+}
+
+// returns true when i is <= the number of elements in t
+static bool check_const_array(unsigned i, type_t t) {
+  //fprintf(stderr,"checking const array %d and %s\n",i,typ2string(t));
+  switch (compress(t)) {
+  case &PointerType(PtrInfo{_,_,_,_,b}):
+    switch (conref_def(bounds_one,b)) {
+    case Unknown_b: return false;
+    case &Upper_b(e):
+      unsigned j = Evexp::eval_const_uint_exp(e);
+      return i <= j;
+    }
+  case &ArrayType(_,_,e):
+    if (e == NULL) return false;
+    unsigned j = Evexp::eval_const_uint_exp((exp_t)e);
+    return i <= j;
+  default: return false;
+  }
+}
+
+// see if y is <= v.size
+static bool check_leq_size_var(CfFlowInfo::relns_t relns, vardecl_t v, 
+                               vardecl_t y) {
+  for (; relns != NULL; relns = relns->tl) {
+    let r = relns->hd;
+    if (r->vd != y) continue;
+    switch (r->rop) {
+    case &CfFlowInfo::LessSize(z) : fallthru(z);
+    case &CfFlowInfo::LessEqSize(z): if (z == v) return true; else break; 
+    default: continue;
+    }
+  }
+  return false;
+}
+
+// see if e is <= v.size
+static bool check_leq_size(CfFlowInfo::relns_t relns, vardecl_t v, exp_t e) {
+  switch (e->r) {
+  case &Var_e(_,&Pat_b(y)): fallthru(y);
+  case &Var_e(_,&Local_b(y)): fallthru(y);
+  case &Var_e(_,&Global_b(y)): fallthru(y);
+  case &Var_e(_,&Param_b(y)):
+    if (y->escapes) return false;
+    // see if y <= v.size
+    if (check_leq_size_var(relns,v,y)) return true;
+    break;
+  case &Primop_e(Size,&List(e2,_)):
+    // see if e2 is v
+    switch (e2->r) {
+    case &Var_e(_,&Pat_b(y)): fallthru(y);
+    case &Var_e(_,&Local_b(y)): fallthru(y);
+    case &Var_e(_,&Global_b(y)): fallthru(y);
+    case &Var_e(_,&Param_b(y)):
+      return y == v;
+    default: break;
+    }
+    break;
+  default: break;
+  }
+  return false;
+}
+
+// return true if we can prove from relns that i < a.size
+//  FIX: doesn't deal with the case where i is a constant and a's size
+//  can be found.
+static bool check_bounds(CfFlowInfo::relns_t relns, exp_t a, exp_t i) {
+  //fprintf(stderr,"bounds check on %s and %s\n",exp2string(a),exp2string(i));
+  //fprintf(stderr,"relns: ["); CfFlowInfo::print_relns(relns); 
+  //fprintf(stderr,"]\n");
+  switch (a->r) {
+  case &Var_e(_,&Pat_b(x)): fallthru(x);
+  case &Var_e(_,&Local_b(x)): fallthru(x);
+  case &Var_e(_,&Global_b(x)): fallthru(x);
+  case &Var_e(_,&Param_b(x)):
+    if (x->escapes) return false; // no point in looking for escaping vars
+
+  inner_loop:
+    switch (i->r) {
+    case &Cast_e(t,e2): i = e2; goto inner_loop;
+    case &Const_e(&Int_c(Signed,i)): 
+      return ((i >= 0) && check_const_array(i+1,x->type));
+    case &Const_e(&Int_c(Unsigned,i)): 
+      return check_const_array(i+1,x->type);
+    case &Primop_e(Mod,&List(e1,&List(e2,_))):
+      // we have x[e1 % e2]
+      // if e2 is x.size or z such that z <= x.size then it's okay
+      return check_leq_size(relns, x, e2);
+    case &Var_e(_,&Pat_b(y)): fallthru(y);
+    case &Var_e(_,&Local_b(y)): fallthru(y);
+    case &Var_e(_,&Global_b(y)): fallthru(y);
+    case &Var_e(_,&Param_b(y)):
+      if (y->escapes) return false;
+      // the expression we're checking is x[y].
+      // find something such that y < something
+      for (let rs = relns; rs != NULL; rs = rs->tl) {
+        let r = rs->hd;
+        if (r->vd == y) {
+          switch (r->rop) {
+            // y < x.size
+          case &CfFlowInfo::LessSize(z): if (x == z) return true; else break;
+          case &CfFlowInfo::LessVar(z):
+            // y < z -- try to find z == x.size or z <= x.size
+            for (let rs = relns; rs != NULL; rs = rs->tl) {
+              let r = rs->hd;
+              if (r->vd == z) 
+                switch (r->rop) {
+                case &CfFlowInfo::LessEqSize(w): fallthru(w);
+                case &CfFlowInfo::LessSize(w):
+                  if (x == w) return true; else break;
+                case &CfFlowInfo::EqualConst(c): 
+                  return check_const_array(c,x->type);
+                case &CfFlowInfo::LessVar(w):
+                  if (check_leq_size_var(relns, x, w)) return true; else break;
+                default: break;
+                }
+            }
+            break;
+          case &CfFlowInfo::LessConst(c):
+            // y < c -- see if c <= x.size 
+            return check_const_array(c,x->type);
+          default: break;
+          }
+        }
+      }
+      break;
+    default: break;
+    }
+    break;
+  default: break;
+  }
+  return false;
+}
+
 
 static type_t get_c_typ(exp_t e) {
   if (e->topt == NULL) toc_impos("Missing type in primop ");
@@ -1082,14 +1230,20 @@ static void exp_to_c(env_t nv, exp_t e) {
       exp_t arg = es->hd;
       switch (compress(arg->topt->v)) {
       case &ArrayType(_,_,e2): e->r = e2->r;  break;
-      case &PointerType(PtrInfo{elt_typ,_,_,_,bound}):
+      case &PointerType(PtrInfo{elt_typ,_,nbl,_,bound}):
 	switch(conref_def(bounds_one,bound)) {
 	case Unknown_b: // retrieve (last_plus_one - curr) via runtime call
 	  e->r = fncall_exp(_get_arr_size_e,
 			    list(es->hd, 
 				 sizeoftyp_exp(typ_to_c(elt_typ),DL)), DL)->r;
 	  break;
-	case &Upper_b(e2): e->r = e2->r; break; // compile-time evaluation
+	case &Upper_b(e2): 
+          // careful! when this is a nullable pointer, the size might be 0
+          if (conref_def(false,nbl)) {
+            e->r = conditional_exp(arg,e2,uint_exp(0,DL),DL)->r;
+          } else {
+            e->r = e2->r; break; // compile-time evaluation
+          }
 	}
 	break;
       default: 
@@ -1702,42 +1856,67 @@ static void exp_to_c(env_t nv, exp_t e) {
     break;
   case &Subscript_e(e1,e2):
     let e1_typ = compress(e1->topt->v);
-    exp_to_c(nv, e1);
-    exp_to_c(nv, e2);
+    //fprintf(stderr,"subscript %s:",exp2string(e));
+    //CfFlowInfo::print_relns(relns); fprintf(stderr,"\n");
+    //fprintf(stderr,"in_bnds = %s\n",in_bnds ? "true " : "false");
     // e1 could be a tuple or an array of various sorts
     switch (e1_typ) {
     case &TupleType(ts):
       // e1->fi  where i = e2+1
+      exp_to_c(nv, e1);
+      exp_to_c(nv, e2);
       unsigned int i = Evexp::eval_const_uint_exp(e2)+1;
       e->r = structmember_exp(e1,fieldname(i),DL)->r;
       break;
     case &PointerType(PtrInfo{ta,rgn,bcr,tq,b}):
+      let relns = get_relns(e1);
+      let in_bnds = check_bounds(relns,e1,e2);
+      // fprintf(stderr,"check bounds returned %s\n",
+      //         in_bnds ? "true " : "false");
+      exp_to_c(nv, e1);
+      exp_to_c(nv, e2);
+      total_bounds_checks++;
       switch (conref_def(bounds_one,b)) {
       case &Upper_b(esz):
-	// FIX: should avoid bounds-check when e2 is constant
 	esz = uint_exp(Evexp::eval_const_uint_exp(esz),DL);
         bool possibly_null = conref_def(false,bcr);
 	type_t ta1 = typ_to_c(ta);
 	type_t ta2 = cstar_typ(ta1, tq);
-	if(possibly_null) {
-	  // *((ta2)_check_known_subscript_null(e1, esz, sizeof(ta), e2)
-	  e->r = deref_exp(cast_exp(ta2,
-		      fncall_exp(_check_known_subscript_null_e,
-                                 list(e1,esz,sizeoftyp_exp(ta1,DL),e2),DL),DL),
-			   DL)->r;
-	} else {
-	  // e1[_check_known_subscript_notnull(esz,e2)]
-	  e2->r = fncall_exp(_check_known_subscript_notnull_e,
-			     list(esz,copy_exp(e2)),DL)->r;
+        if (in_bnds) {
+            bounds_checks_eliminated++;
+        } else {
+          if(possibly_null) {
+            // *((ta2)_check_known_subscript_null(e1, esz, sizeof(ta), e2)
+            e->r = deref_exp(cast_exp(ta2,
+                                      fncall_exp(_check_known_subscript_null_e,
+                                                 list(e1,esz,
+                                                      sizeoftyp_exp(ta1,DL),
+                                                      e2),DL),DL),
+                             DL)->r;
+          } else {
+            // e1[_check_known_subscript_notnull(esz,e2)]
+            e2->r = fncall_exp(_check_known_subscript_notnull_e,
+                               list(esz,copy_exp(e2)),DL)->r;
+          }
 	}
 	break;
       case Unknown_b:
 	type_t ta1 = typ_to_c_array(ta);
-	// *((ta1 *) _check_unknown_subscript(e1, sizeof(ta1), e2))
-	e->r = deref_exp(cast_exp(cstar_typ(ta1,tq),
-			  fncall_exp(_check_unknown_subscript_e,
-				     list(e1,sizeoftyp_exp(ta1,DL),e2),DL),DL),
-			 DL)->r;
+        if (in_bnds) {
+          // there's no need for a null-check here either because
+          // a NULL ? pointer has size 0
+          bounds_checks_eliminated++;
+          e->r = subscript_exp(cast_exp(cstar_typ(ta1,tq),
+                                        structmember_exp(e1,curr_sp,DL),DL),
+                               e2,DL)->r;
+        } else {
+          // *((ta1 *) _check_unknown_subscript(e1, sizeof(ta1), e2))
+          e->r = deref_exp(cast_exp(cstar_typ(ta1,tq),
+                                    fncall_exp(_check_unknown_subscript_e,
+                                               list(e1,sizeoftyp_exp(ta1,DL),
+                                                    e2),DL),DL),
+                           DL)->r;
+        }
 	break;
       }
       break;
@@ -2013,7 +2192,7 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
           list_t<$(qvar_t,type_t)@`rgn,`rgn> decls) {
   stmt_t s; // the test statement
   switch (p->r) {
-  case &Var_p(&Vardecl(_,x,_,_,_,_,_)):
+  case &Var_p(&Vardecl(_,x,_,_,_,_,_,_)):
     // in essence, x = r; but achieved through the varmap
     nv = add_varmap(nv,x,r);
     fallthru;
@@ -2659,6 +2838,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
 ///////////////////////////////////////////////////////////////
 // function declaration translation -- straightforward
 static void fndecl_to_c(env_t nv, fndecl_t f) {
+  //fprintf(stderr,"translating %s\n",qvar2string(f->name));
   f->tvs      = NULL;
   f->effect   = NULL;
   f->rgn_po   = NULL;
@@ -3067,6 +3247,8 @@ static void init() {
   structs_so_far = NULL;
   tunions_so_far = NULL;
   xtunion_fields_so_far = NULL;
+  total_bounds_checks = 0;
+  bounds_checks_eliminated = 0;
 }
 
 // The entry point:  translate the list of Cyclone declarations to
@@ -3074,5 +3256,7 @@ static void init() {
 list_t<decl_t> toc(list_t<decl_t> ds) {
   init();
   decls_to_c(empty_env(),ds,true);
+  //fprintf(stderr,"***eliminated %d out of %d bounds checks\n",
+  //        bounds_checks_eliminated, total_bounds_checks);
   return imp_rev(result_decls);
 }

@@ -24,12 +24,14 @@
 #include <cstring.h>
 #include "absyn.h"
 #include "tcutil.h"
+#include "absynpp.h"
 
 #define CF_FLOWINFO_CYC
 #include "cf_flowinfo.h"
 
 using Absyn;
 using List;
+using Absynpp;
 namespace CfFlowInfo;
 
 ////////////////////////// Shared Constants //////////////////////////
@@ -408,21 +410,57 @@ static absRval_t join_absRval(joinenv_t env,`a a,absRval_t r1,absRval_t r2) {
     }
   }
 }
+bool same_relop(reln_op_t r1,reln_op_t r2) {
+  if (r1 == r2) return true;
+  switch ($(r1,r2)) {
+  case $(&EqualConst(c1),&EqualConst(c2)): return c1 == c2;
+  case $(&LessVar(v1),&LessVar(v2)):  return v1 == v2;
+  case $(&LessSize(v1),&LessSize(v2)): return v1 == v2;
+  case $(&LessConst(c1),&LessConst(c2)): return c1 == c2;
+  case $(&LessEqSize(v1),&LessEqSize(v2)): return v1 == v2;
+  default: return false;
+  }
+}
+relns_t join_relns(relns_t r1s, relns_t r2s) {
+  if (r1s == r2s) return r1s;
+  //fprintf(stderr,"join on ["); print_relns(r1s); 
+  //fprintf(stderr,"] and ["); print_relns(r2s); fprintf(stderr,"]\n");
+  list_t<reln_t> res = NULL;
+  bool diff = false;
+  for (let r1s = r1s; r1s != NULL; r1s = r1s->tl) {
+    let r1 = r1s->hd;
+    bool found = false;
+    for (let r2s = r2s; r2s != NULL; r2s = r2s->tl) {
+      let r2 = r2s->hd;
+      if (r1 == r2 || ((r1->vd == r2->vd) && same_relop(r1->rop,r2->rop))) {
+        res = new List(r1,res);
+        found = true;
+        break;
+      }
+    }
+    if (!found) diff = true;
+  }
+  if (!diff) res = r1s;
+  //fprintf(stderr,"result ["); print_relns(res); fprintf(stderr,"]\n");
+  return res;
+}
+
 flow_t join_flow(place_set_t* all_changed, flow_t f1, flow_t f2){
   if(f1 == f2) return f1;
   switch($(f1,f2)) {
   case $(BottomFL,_): return f2;
   case $(_,BottomFL): return f1;
-  case $(&ReachableFL(d1),&ReachableFL(d2)):
+  case $(&ReachableFL(d1,r1),&ReachableFL(d2,r2)):
     // A lot of computation to avoid allocation, but profiling suggests
     // that's the right thing to do.
-    if(d1 == d2) return f1;
+    if(d1 == d2 && r1 == r2) return f1;
     if(flow_lessthan_approx(f1,f2)) return f2;
     if(flow_lessthan_approx(f2,f1)) return f1;
     region rgn {
       let env     = JoinEnv(rnew(rgn) EscPile(rgn,NULL),d1,d2);
       let outdict = Dict::intersect_c(join_absRval,&env,d1,d2);
-      return new ReachableFL(escape_these(env.pile, all_changed, outdict));
+      let r       = join_relns(r1,r2);
+      return new ReachableFL(escape_these(env.pile, all_changed, outdict),r);
     }
   }
 }
@@ -487,8 +525,8 @@ flow_t after_flow(place_set_t* all_changed, flow_t f1, flow_t f2,
   switch($(f1,f2)) {
   case $(BottomFL,_): 
   case $(_,BottomFL): return BottomFL;
-  case $(&ReachableFL(d1),&ReachableFL(d2)):
-    if(d1 == d2) return f1;
+  case $(&ReachableFL(d1,r1),&ReachableFL(d2,r2)):
+    if(d1 == d2 && r1 == r2) return f1;
     // Should think about ways to avoid allocation here: (curr_place and
     // cut-off in presence of changes)
     region rgn {
@@ -498,7 +536,9 @@ flow_t after_flow(place_set_t* all_changed, flow_t f1, flow_t f2,
 			  curr_place, &curr_place->fields,
 			  Neither);
       let new_d = Dict::union_two_c(after_root,&env,d1,d2);
-      return new ReachableFL(escape_these(env.joinenv.pile,all_changed,new_d));
+      let new_r = join_relns(r1,r2);
+      return new ReachableFL(escape_these(env.joinenv.pile,all_changed,new_d),
+                             new_r);
     }
   }
 }
@@ -529,6 +569,29 @@ static bool absRval_lessthan_approx(`a ignore, absRval_t r1, absRval_t r2) {
   }
 }
 
+bool relns_approx(relns_t r2s, relns_t r1s) {
+  if (r1s == r2s) return true;
+  //fprintf(stderr,"approx on ["); print_relns(r1s); 
+  //fprintf(stderr,"] and ["); print_relns(r2s); fprintf(stderr,"]");
+  for (; r1s != NULL; r1s = r1s->tl) {
+    let r1 = r1s->hd;
+    bool found = false;
+    for (let r2s = r2s; r2s != NULL; r2s = r2s->tl) {
+      let r2 = r2s->hd;
+      if (r1 == r2 || ((r1->vd == r2->vd) && same_relop(r1->rop,r2->rop))) {
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      //fprintf(stderr,"--false\n"); 
+      return false; 
+    }
+  }
+  //fprintf(stderr,"--true\n");
+  return true;
+}
+
 // WARNING: We assume anything not in the intersection is IRRELEVANT.
 // WARNING: We might return false even when f1 < f2, but that's okay b/c
 //  that will just cause clients to take joins/afters and we always return true
@@ -539,8 +602,163 @@ bool flow_lessthan_approx(flow_t f1, flow_t f2) {
   switch($(f1,f2)) {
   case $(BottomFL,_): return true;
   case $(_,BottomFL): return false;
-  case $(&ReachableFL(d1),&ReachableFL(d2)):
-    if(d1 == d2) return true;
-    return Dict::forall_intersect(absRval_lessthan_approx,d1,d2);
+  case $(&ReachableFL(d1,r1),&ReachableFL(d2,r2)):
+    if(d1 == d2 && r1 == r2) return true;
+    return Dict::forall_intersect(absRval_lessthan_approx,d1,d2) &&
+      relns_approx(r1,r2);
+  }
+}
+
+relns_t reln_kill_var(relns_t rs, vardecl_t v) {
+  relns_t p;
+  bool found = false;
+  for (p = rs; !found && p != NULL; p = p->tl) {
+    let r = p->hd;
+    if (r->vd == v) { found = true; break; }
+    switch (r->rop) {
+    case &LessVar(v2):   fallthru(v2);
+    case &LessSize(v2):  fallthru(v2);
+    case &LessEqSize(v2):
+      found = true; continue;
+    default: break;
+    }
+  }
+  if (!found) return rs;
+
+  let new_rs = NULL;
+  for (p = rs; p != NULL; p = p->tl) {
+    let r = p->hd;
+    if (r->vd != v) {
+      switch (r->rop) {
+      case &LessVar(v2):   fallthru(v2);
+      case &LessSize(v2):  fallthru(v2);
+      case &LessEqSize(v2):  
+        if (v == v2) continue; else break;
+      default: break;;
+      }
+      new_rs = new List(r,new_rs);
+    }
+  }
+  return new_rs;
+}
+
+relns_t reln_kill_exp(relns_t r, exp_t e) {
+  switch (e->r) {
+  case &Var_e(_,&Global_b(vd)): fallthru(vd);
+  case &Var_e(_,&Param_b(vd)):  fallthru(vd);
+  case &Var_e(_,&Local_b(vd)):  fallthru(vd);
+  case &Var_e(_,&Pat_b(vd)):
+    if (!vd->escapes)
+      return reln_kill_var(r, vd);
+    break;
+  default: break;
+  }
+  return r;
+}
+
+
+relns_t reln_assign_var(relns_t r, vardecl_t v, exp_t e) {
+  //fprintf(stderr,"assigning %s to %s: \n", Absynpp::qvar2string(v->name),
+  //        Absynpp::exp2string(e));
+  if (v->escapes) return r;
+  // even if v isn't an integral type, it might be an array in which case
+  // we need to kill it.
+  r = reln_kill_var(r, v);
+  // if e is malloc(n*sizeof(t)) or a calloc(n,sizeof(t)) 
+  // then we can add n <= v.size.  Note that we can't easily
+  // do this for comprehensions (i.e., rnew(e1) {for i < n : e2})
+  // because e1 or e2 could modify n.  
+  switch (e->r) {
+  case &Malloc_e(MallocInfo{_,_,_,e2,true}):
+    malloc_loop:
+    switch (e2->r) {
+    case &Cast_e(_,e3): e2 = e3; goto malloc_loop;
+    case &Var_e(_,&Pat_b(n)): fallthru(n);
+    case &Var_e(_,&Local_b(n)): fallthru(n);
+    case &Var_e(_,&Param_b(n)): fallthru(n);
+    case &Var_e(_,&Global_b(n)): 
+      if (n->escapes) return r;
+      return new List(new Reln{n,new LessEqSize(v)},r);
+    default: return r;
+    }
+  default: break;
+  }
+  // otherwise ignore any situations where we have a non-integral type
+  switch (Tcutil::compress(v->type)) {
+  case &IntType(_,_): break;
+  default: 
+    return r;
+  }
+  // ignore if e isn't y.size or a constant
+  
+ loop:
+  switch (e->r) {
+  case &Cast_e(_,e1): e = e1; goto loop;
+  case &Const_e(&Int_c(_,i)): 
+    return new List(new Reln(v,new EqualConst(i)),r);
+  case &Primop_e(Mod, &List(_,&List(e2,_))):
+    // FIX: is this safe?  what if e modifies v2?
+    // when we have x = e % v2.size, add x < v2.size
+    switch (e2->r) {
+    case &Primop_e(Size, &List(e3,_)):
+      switch (e3->r) {
+      case &Var_e(_,&Global_b(v2)): fallthru(v2);
+      case &Var_e(_,&Local_b(v2)): fallthru(v2);
+      case &Var_e(_,&Param_b(v2)): fallthru(v2);
+      case &Var_e(_,&Pat_b(v2)):
+        if (v2->escapes) return r;
+        return new List(new Reln(v,new LessSize(v2)),r);
+      default: break;
+      }
+      break;
+    default: break;
+    }
+    break;
+  case &Primop_e(Size,&List(e2,_)):
+    switch (e2->r) {
+    case &Var_e(_,&Global_b(v2)): fallthru(v2);
+    case &Var_e(_,&Local_b(v2)): fallthru(v2);
+    case &Var_e(_,&Param_b(v2)): fallthru(v2);
+    case &Var_e(_,&Pat_b(v2)):
+      if (v2->escapes) return r;
+      return new List(new Reln(v,new LessEqSize(v2)),r);
+    default: break;
+    }
+    break;
+  default: break;
+  }
+  return r;
+}
+
+relns_t reln_assign_exp(relns_t r, exp_t e1, exp_t e2) {
+  switch (e1->r) {
+  case &Var_e(_,&Global_b(vd)): fallthru(vd);
+  case &Var_e(_,&Param_b(vd)):  fallthru(vd);
+  case &Var_e(_,&Local_b(vd)):  fallthru(vd);
+  case &Var_e(_,&Pat_b(vd)):
+    if (!vd->escapes)
+      return reln_assign_var(r, vd, e2);
+    break;
+  default: break;
+  }
+  return r;
+}
+
+void print_reln(reln_t r) {
+  fprintf(stderr,"%s",qvar2string(r->vd->name));
+  switch (r->rop) {
+  case &EqualConst(c): fprintf(stderr,"==%d",c); break;
+  case &LessVar(vd): fprintf(stderr,"<%s",qvar2string(vd->name)); break;
+  case &LessSize(vd): fprintf(stderr,"<%s.size",qvar2string(vd->name)); break;
+  case &LessConst(c): fprintf(stderr,"<%d",c); break;
+  case &LessEqSize(vd): 
+    fprintf(stderr,"<=%s.size",qvar2string(vd->name)); break;
+  }
+}
+
+void print_relns(relns_t r) {
+  for (; r != NULL; r = r->tl) {
+    print_reln(r->hd);
+    if (r->tl != NULL) fprintf(stderr,",");
   }
 }

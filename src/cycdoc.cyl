@@ -927,7 +927,7 @@ void dumpdecl(decl_t d, string_t comment) {
     dump_symbol("\n");
     dump_end();
     break;
-  case &Var_d(&Vardecl(_,name,tq,type,_,_,_)):
+  case &Var_d(&Vardecl(_,name,tq,type,_,_,_,_)):
       dump_begin();
       dumptqtd(tq, type, dump_boldqvar, name);
       dump_symbol(";\n");

@@ -456,24 +456,23 @@ base= 8; flags |= 256;} if( flags &  512){ flags &= ~(( 64 |  512) |  128);}
 else{ flags &= ~(( 64 |  256) |  128);} goto ok; case '1': _LL105: goto _LL106;
 case '2': _LL106: goto _LL107; case '3': _LL107: goto _LL108; case '4': _LL108:
 goto _LL109; case '5': _LL109: goto _LL110; case '6': _LL110: goto _LL111; case
-'7': _LL111: base=( int) basefix[ _check_known_subscript_notnull( 17u, base)];
-flags &= ~(( 64 |  256) |  128); goto ok; case '8': _LL112: goto _LL113; case '9':
-_LL113: base=( int) basefix[ _check_known_subscript_notnull( 17u, base)]; if(
-base <=  8){ break;} flags &= ~(( 64 |  256) |  128); goto ok; case 'A': _LL114:
-goto _LL115; case 'B': _LL115: goto _LL116; case 'C': _LL116: goto _LL117; case
-'D': _LL117: goto _LL118; case 'E': _LL118: goto _LL119; case 'F': _LL119: goto
-_LL120; case 'a': _LL120: goto _LL121; case 'b': _LL121: goto _LL122; case 'c':
-_LL122: goto _LL123; case 'd': _LL123: goto _LL124; case 'e': _LL124: goto
-_LL125; case 'f': _LL125: if( base <=  10){ break;} flags &= ~(( 64 |  256) | 
-128); goto ok; case '+': _LL126: goto _LL127; case '-': _LL127: if( flags &  64){
-flags &= ~ 64; goto ok;} break; case 'x': _LL128: goto _LL129; case 'X': _LL129:
-if( flags &  256? p.curr == ( _tagged_arr_plus( _tag_arr( buf, sizeof(
-unsigned char), 350u), sizeof( unsigned char), 1)).curr: 0){ base= 16; flags &=
-~ 256; goto ok;} break; default: _LL130: break;} break; ok:*(( unsigned char*)
-_check_unknown_subscript( _tagged_arr_inplace_plus_post(& p, sizeof(
-unsigned char), 1), sizeof( unsigned char), 0u))=( unsigned char) c; _IO_getc(
-fp); if( _IO_peekc( fp) ==  - 1){ seen_eof ++; break;}} if( flags &  128){ if( p.curr
-> ( _tag_arr( buf, sizeof( unsigned char), 350u)).curr){
+'7': _LL111: base=( int) basefix[ base]; flags &= ~(( 64 |  256) |  128); goto
+ok; case '8': _LL112: goto _LL113; case '9': _LL113: base=( int) basefix[ base];
+if( base <=  8){ break;} flags &= ~(( 64 |  256) |  128); goto ok; case 'A':
+_LL114: goto _LL115; case 'B': _LL115: goto _LL116; case 'C': _LL116: goto
+_LL117; case 'D': _LL117: goto _LL118; case 'E': _LL118: goto _LL119; case 'F':
+_LL119: goto _LL120; case 'a': _LL120: goto _LL121; case 'b': _LL121: goto
+_LL122; case 'c': _LL122: goto _LL123; case 'd': _LL123: goto _LL124; case 'e':
+_LL124: goto _LL125; case 'f': _LL125: if( base <=  10){ break;} flags &= ~(( 64
+|  256) |  128); goto ok; case '+': _LL126: goto _LL127; case '-': _LL127: if(
+flags &  64){ flags &= ~ 64; goto ok;} break; case 'x': _LL128: goto _LL129;
+case 'X': _LL129: if( flags &  256? p.curr == ( _tagged_arr_plus( _tag_arr( buf,
+sizeof( unsigned char), 350u), sizeof( unsigned char), 1)).curr: 0){ base= 16;
+flags &= ~ 256; goto ok;} break; default: _LL130: break;} break; ok:*((
+unsigned char*) _check_unknown_subscript( _tagged_arr_inplace_plus_post(& p,
+sizeof( unsigned char), 1), sizeof( unsigned char), 0u))=( unsigned char) c;
+_IO_getc( fp); if( _IO_peekc( fp) ==  - 1){ seen_eof ++; break;}} if( flags & 
+128){ if( p.curr > ( _tag_arr( buf, sizeof( unsigned char), 350u)).curr){
 _tagged_arr_inplace_plus(& p, sizeof( unsigned char), -1); _IO_ungetc(( int)*((
 unsigned char*) _check_unknown_subscript( p, sizeof( unsigned char), 0u)), fp);}
 goto match_failure;} c=( int)*(( unsigned char*) _check_unknown_subscript( p,
@@ -535,33 +534,32 @@ _check_unknown_subscript( _tagged_arr_inplace_plus_post(& fmt, sizeof(
 unsigned char), 1), sizeof( unsigned char), 0u)); if( c == '^'){ v= 1; c=( int)*((
 const unsigned char*) _check_unknown_subscript( _tagged_arr_inplace_plus_post(&
 fmt, sizeof( unsigned char), 1), sizeof( unsigned char), 0u));} else{ v= 0;}
-for( n= 0; n <  256; n ++){*(( unsigned char*) _check_unknown_subscript( tab,
-sizeof( unsigned char), n))=( unsigned char) v;} if( c ==  0){ return
-_tagged_arr_plus( fmt, sizeof( unsigned char), - 1);} v= 1 -  v; for( 0; 1; 0){*((
-unsigned char*) _check_unknown_subscript( tab, sizeof( unsigned char), c))=(
-unsigned char) v; doswitch: n=( int)*(( const unsigned char*)
-_check_unknown_subscript( _tagged_arr_inplace_plus_post(& fmt, sizeof(
-unsigned char), 1), sizeof( unsigned char), 0u)); switch( n){ case 0: _LL153:
-return _tagged_arr_plus( fmt, sizeof( unsigned char), - 1); case '-': _LL154: n=(
-int)*(( const unsigned char*) _check_unknown_subscript( fmt, sizeof(
-unsigned char), 0u)); if( n == ']'? 1: n <  c){ c=( int)'-'; break;}
-_tagged_arr_inplace_plus_post(& fmt, sizeof( unsigned char), 1); do {*((
-unsigned char*) _check_unknown_subscript( tab, sizeof( unsigned char), ++ c))=(
-unsigned char) v;} while ( c <  n); goto doswitch; break; case ']': _LL155:
-return fmt; default: _LL156: c= n; break;}}} static int Cyc_Std_string_getc(
-struct _tagged_arr* sptr){ unsigned char c; struct _tagged_arr s=* sptr; if(( s.curr
-== (( struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr? 1: _get_arr_size( s,
-sizeof( unsigned char)) ==  0)? 1:( c=*(( const unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char), 0))) == '\000'){ return - 1;}*
-sptr= _tagged_arr_plus( s, sizeof( unsigned char), 1); return( int) c;} static
-int Cyc_Std_string_ungetc( int ignore, struct _tagged_arr* sptr){* sptr=
-_tagged_arr_plus(* sptr, sizeof( unsigned char), - 1); return 0;} static int Cyc_Std_string_peekc(
-struct _tagged_arr* sptr){ unsigned char c; struct _tagged_arr s=* sptr; if(( s.curr
-== (( struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr? 1: _get_arr_size( s,
-sizeof( unsigned char)) ==  0)? 1:( c=*(( const unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char), 0))) == '\000'){ return - 1;}
-return( int) c;} int Cyc_Std_vsscanf( struct _tagged_arr src, struct _tagged_arr
-fmt, struct _tagged_arr ap){ int err= 0; int(* sgc)( struct _tagged_arr*)= Cyc_Std_string_getc;
+for( n= 0; n <  256; n ++){(( unsigned char*) tab.curr)[ n]=( unsigned char) v;}
+if( c ==  0){ return _tagged_arr_plus( fmt, sizeof( unsigned char), - 1);} v= 1
+-  v; for( 0; 1; 0){(( unsigned char*) tab.curr)[ c]=( unsigned char) v;
+doswitch: n=( int)*(( const unsigned char*) _check_unknown_subscript(
+_tagged_arr_inplace_plus_post(& fmt, sizeof( unsigned char), 1), sizeof(
+unsigned char), 0u)); switch( n){ case 0: _LL153: return _tagged_arr_plus( fmt,
+sizeof( unsigned char), - 1); case '-': _LL154: n=( int)*(( const unsigned char*)
+_check_unknown_subscript( fmt, sizeof( unsigned char), 0u)); if( n == ']'? 1: n
+<  c){ c=( int)'-'; break;} _tagged_arr_inplace_plus_post(& fmt, sizeof(
+unsigned char), 1); do {*(( unsigned char*) _check_unknown_subscript( tab,
+sizeof( unsigned char), ++ c))=( unsigned char) v;} while ( c <  n); goto
+doswitch; break; case ']': _LL155: return fmt; default: _LL156: c= n; break;}}}
+static int Cyc_Std_string_getc( struct _tagged_arr* sptr){ unsigned char c;
+struct _tagged_arr s=* sptr; if(( s.curr == (( struct _tagged_arr) _tag_arr( 0u,
+0u, 0u)).curr? 1: _get_arr_size( s, sizeof( unsigned char)) ==  0)? 1:( c=*((
+const unsigned char*) _check_unknown_subscript( s, sizeof( unsigned char), 0)))
+== '\000'){ return - 1;}* sptr= _tagged_arr_plus( s, sizeof( unsigned char), 1);
+return( int) c;} static int Cyc_Std_string_ungetc( int ignore, struct
+_tagged_arr* sptr){* sptr= _tagged_arr_plus(* sptr, sizeof( unsigned char), - 1);
+return 0;} static int Cyc_Std_string_peekc( struct _tagged_arr* sptr){
+unsigned char c; struct _tagged_arr s=* sptr; if(( s.curr == (( struct
+_tagged_arr) _tag_arr( 0u, 0u, 0u)).curr? 1: _get_arr_size( s, sizeof(
+unsigned char)) ==  0)? 1:( c=*(( const unsigned char*) _check_unknown_subscript(
+s, sizeof( unsigned char), 0))) == '\000'){ return - 1;} return( int) c;} int
+Cyc_Std_vsscanf( struct _tagged_arr src, struct _tagged_arr fmt, struct
+_tagged_arr ap){ int err= 0; int(* sgc)( struct _tagged_arr*)= Cyc_Std_string_getc;
 return(( int(*)( int(* _IO_getc)( struct _tagged_arr*), int(* _IO_ungetc)( int,
 struct _tagged_arr*), int(* _IO_peekc)( struct _tagged_arr*), struct _tagged_arr*
 fp, struct _tagged_arr fmt0, struct _tagged_arr ap, int* errp)) Cyc_Std__IO_vfscanf)(

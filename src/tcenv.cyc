@@ -931,7 +931,7 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
 			 .type = (*args->hd)[2],
 			 .initializer = NULL, 
                          .rgn = new Opt(param_rgn), 
-                         .attributes = NULL}};
+                         .attributes = NULL, .escapes = false}};
     vds = new{List(vd, vds)};
     locals = Dict::insert(locals, (*args->hd)[0], new Param_b(vd));
   }
@@ -945,7 +945,7 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
                            .type = typ,
                            .initializer = NULL,
                            .rgn = new Opt(param_rgn),
-                           .attributes = NULL}};
+                           .attributes = NULL, .escapes = false}};
       vds = new List(vd,vds);
       locals = Dict::insert(locals, nopt->v, new Param_b(vd));
     } 

@@ -517,19 +517,18 @@ unsigned char* _temp87=( unsigned char*) _cycalloc_atomic( _check_times( sizeof(
 unsigned char), _temp86)); struct _tagged_arr _temp89= _tag_arr( _temp87,
 sizeof( unsigned char),( unsigned int)((* x).f3 +  1));{ unsigned int _temp88=
 _temp86; unsigned int i; for( i= 0; i <  _temp88; i ++){ _temp87[ i]='\000';}};
-_temp89;}); int i= - 1; while( ++ i < (* x).f2) {*(( unsigned char*)
-_check_unknown_subscript( marker_str, sizeof( unsigned char), i))=' ';} while(
-++ i < (* x).f3) {*(( unsigned char*) _check_unknown_subscript( marker_str,
-sizeof( unsigned char), i))='^';}({ struct Cyc_Std_String_pa_struct _temp85;
-_temp85.tag= Cyc_Std_String_pa; _temp85.f1=( struct _tagged_arr) marker_str;{
-struct Cyc_Std_String_pa_struct _temp84; _temp84.tag= Cyc_Std_String_pa; _temp84.f1=(
-struct _tagged_arr)(* x).f1;{ void* _temp83[ 2u]={& _temp84,& _temp85}; Cyc_Std_fprintf(
-Cyc_Std_stderr, _tag_arr("  %s\n  %s\n", sizeof( unsigned char), 11u), _tag_arr(
-_temp83, sizeof( void*), 2u));}}});}; _pop_handler();} else{ void* _temp81=(
-void*) _exn_thrown; void* _temp91= _temp81; _LL93: if( _temp91 ==  Cyc_Position_Nocontext){
-goto _LL94;} else{ goto _LL95;} _LL95: goto _LL96; _LL94: goto _LL92; _LL96:(
-void) _throw( _temp91); _LL92:;}}}} if( Cyc_Position_num_errors ==  Cyc_Position_max_errors){({
-void* _temp97[ 0u]={}; Cyc_Std_fprintf( Cyc_Std_stderr, _tag_arr("Too many error messages!\n",
+_temp89;}); int i= - 1; while( ++ i < (* x).f2) {(( unsigned char*) marker_str.curr)[
+i]=' ';} while( ++ i < (* x).f3) {(( unsigned char*) marker_str.curr)[ i]='^';}({
+struct Cyc_Std_String_pa_struct _temp85; _temp85.tag= Cyc_Std_String_pa; _temp85.f1=(
+struct _tagged_arr) marker_str;{ struct Cyc_Std_String_pa_struct _temp84;
+_temp84.tag= Cyc_Std_String_pa; _temp84.f1=( struct _tagged_arr)(* x).f1;{ void*
+_temp83[ 2u]={& _temp84,& _temp85}; Cyc_Std_fprintf( Cyc_Std_stderr, _tag_arr("  %s\n  %s\n",
+sizeof( unsigned char), 11u), _tag_arr( _temp83, sizeof( void*), 2u));}}});};
+_pop_handler();} else{ void* _temp81=( void*) _exn_thrown; void* _temp91=
+_temp81; _LL93: if( _temp91 ==  Cyc_Position_Nocontext){ goto _LL94;} else{ goto
+_LL95;} _LL95: goto _LL96; _LL94: goto _LL92; _LL96:( void) _throw( _temp91);
+_LL92:;}}}} if( Cyc_Position_num_errors ==  Cyc_Position_max_errors){({ void*
+_temp97[ 0u]={}; Cyc_Std_fprintf( Cyc_Std_stderr, _tag_arr("Too many error messages!\n",
 sizeof( unsigned char), 26u), _tag_arr( _temp97, sizeof( void*), 0u));});} Cyc_Std_fflush((
 struct Cyc_Std___sFILE*) Cyc_Std_stderr); Cyc_Position_num_errors ++;} void Cyc_Position_reset_position(
 struct _tagged_arr s){ Cyc_Position_source= s; Cyc_Position_error_b= 0;} void

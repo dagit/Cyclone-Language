@@ -324,7 +324,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 
     switch (d->r) {
     case &Var_d(vd):
-      let &Vardecl(sc,&$(nsl,x),tq,t,initializer,*rgn_ptr,atts) = vd;
+      let &Vardecl(sc,&$(nsl,x),tq,t,initializer,*rgn_ptr,atts,_) = vd;
       let curr_bl = Tcenv::curr_rgn(te);
       bool is_local;
       switch (sc) {
@@ -419,7 +419,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       let te2 = te;
       for (; vds != NULL; vds = vds->tl) {
         let vd = vds->hd;
-        let &Vardecl(_,&$(nsl,_),_,t,_,*rgn_ptr,_) = vd;
+        let &Vardecl(_,&$(nsl,_),_,t,_,*rgn_ptr,_,_) = vd;
         *rgn_ptr = new Opt(curr_bl); // side effect
         switch (nsl) {
         case Loc_n: break;
@@ -455,7 +455,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     s->r = seq_stmt(new_stmt(s->r,s->loc), skip_stmt(s->loc), s->loc)->r;
     if (new_block)
       te = Tcenv::new_block(s0->loc,te);
-    let &Vardecl(_,_,_,t,_,*rgn_ptr,_) = vd;
+    let &Vardecl(_,_,_,t,_,*rgn_ptr,_,_) = vd;
     let curr_bl = Tcenv::curr_rgn(te);
     type_t rgn_typ = new VarType(tv);
     *rgn_ptr = new Opt(curr_bl); // side effect

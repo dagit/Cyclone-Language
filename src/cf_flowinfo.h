@@ -56,10 +56,26 @@ typedef struct Place<`r1> @`r2 place_t<`r1,`r2>;
 EXTERN_CFFLOW tunion InitLevel { NoneIL, ThisIL, AllIL };
 typedef tunion InitLevel initlevel_t;
 
+// primitive relations that we track for non-escaping, integral variables
+EXTERN_CFFLOW tunion RelnOp {
+  EqualConst(unsigned int); // == c
+  LessVar(Absyn::vardecl_t);       // < y
+  LessSize(Absyn::vardecl_t);      // < y.size
+  LessConst(unsigned int);  // < c
+  LessEqSize(Absyn::vardecl_t);      // <= y.size
+};
+typedef tunion RelnOp reln_op_t;
+EXTERN_CFFLOW struct Reln {
+  Absyn::vardecl_t vd; 
+  reln_op_t rop;
+};
+typedef struct Reln @reln_t;
+typedef List::list_t<reln_t> relns_t;
+
 xtunion Absyn::AbsynAnnot { 
-  EXTERN_CFFLOW IsZero;
-  EXTERN_CFFLOW NotZero;
-  EXTERN_CFFLOW UnknownZ;
+  EXTERN_CFFLOW IsZero(relns_t);
+  EXTERN_CFFLOW NotZero(relns_t);
+  EXTERN_CFFLOW UnknownZ(relns_t);
 };
 
 EXTERN_CFFLOW tunion AbsLVal { PlaceL(place_t); UnknownL; };
@@ -77,6 +93,7 @@ EXTERN_CFFLOW tunion AbsRVal {
   AddressOf(place_t);
   Aggregate(aggrdict_t);
 };
+
 // Note: It would be correct to make the domain of the pinfo_dict_t
 //       constant (all local roots in the function), but it easy to argue
 //       that we at program point p, we only need those roots that
@@ -87,7 +104,7 @@ EXTERN_CFFLOW tunion AbsRVal {
 // join takes the intersection of the dictionaries.
 EXTERN_CFFLOW tunion FlowInfo {
   BottomFL;
-  ReachableFL(flowdict_t);
+  ReachableFL(flowdict_t,relns_t);
 };
 typedef tunion FlowInfo flow_t;
 
@@ -107,6 +124,12 @@ extern initlevel_t initlevel   (flowdict_t d, absRval_t r);
 extern absRval_t   lookup_place(flowdict_t d, place_t place);
 extern bool        is_unescaped(flowdict_t d, place_t place);
 extern bool flow_lessthan_approx(flow_t f1, flow_t f2);
+
+extern relns_t reln_assign_var(relns_t, Absyn::vardecl_t, Absyn::exp_t);
+extern relns_t reln_assign_exp(relns_t, Absyn::exp_t, Absyn::exp_t);
+extern relns_t reln_kill_var(relns_t, Absyn::vardecl_t);
+extern relns_t reln_kill_exp(relns_t, Absyn::exp_t);
+extern void print_relns(relns_t);
 
   // all of the following throw EscNotInit as appropriate
   // the field list in the thrown place_t might be empty even if it shouldn't be

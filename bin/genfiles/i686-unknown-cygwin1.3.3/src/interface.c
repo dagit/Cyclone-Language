@@ -568,8 +568,8 @@ Cyc_Absyn_Local_b_struct{ int tag; struct Cyc_Absyn_Vardecl* f1; } ; static
 const int Cyc_Absyn_Pat_b= 4; struct Cyc_Absyn_Pat_b_struct{ int tag; struct Cyc_Absyn_Vardecl*
 f1; } ; struct Cyc_Absyn_Vardecl{ void* sc; struct _tuple0* name; struct Cyc_Absyn_Tqual
 tq; void* type; struct Cyc_Absyn_Exp* initializer; struct Cyc_Core_Opt* rgn;
-struct Cyc_List_List* attributes; } ; struct Cyc_Absyn_Fndecl{ void* sc; int
-is_inline; struct _tuple0* name; struct Cyc_List_List* tvs; struct Cyc_Core_Opt*
+struct Cyc_List_List* attributes; int escapes; } ; struct Cyc_Absyn_Fndecl{ void*
+sc; int is_inline; struct _tuple0* name; struct Cyc_List_List* tvs; struct Cyc_Core_Opt*
 effect; void* ret_type; struct Cyc_List_List* args; int c_varargs; struct Cyc_Absyn_VarargInfo*
 cyc_varargs; struct Cyc_List_List* rgn_po; struct Cyc_Absyn_Stmt* body; struct
 Cyc_Core_Opt* cached_typ; struct Cyc_Core_Opt* param_vardecls; struct Cyc_List_List*
@@ -1415,10 +1415,10 @@ _temp451->sc=( void*)(( void*) _temp446->sc); _temp451->name= _temp446->name;
 _temp451->tq=({ struct Cyc_Absyn_Tqual _temp452; _temp452.q_const= 0; _temp452.q_volatile=
 0; _temp452.q_restrict= 0; _temp452;}); _temp451->type=( void*)(( void*)((
 struct Cyc_Core_Opt*) _check_null( _temp446->cached_typ))->v); _temp451->initializer=
-0; _temp451->rgn= 0; _temp451->attributes= 0; _temp451;}); _temp423= 0; _temp448=
-_temp450; goto _LL443;} _LL443: if( _temp448->initializer !=  0){ _temp448=({
-struct Cyc_Absyn_Vardecl* _temp453=( struct Cyc_Absyn_Vardecl*) _cycalloc(
-sizeof( struct Cyc_Absyn_Vardecl)); _temp453[ 0]=* _temp448; _temp453;});
+0; _temp451->rgn= 0; _temp451->attributes= 0; _temp451->escapes= 0; _temp451;});
+_temp423= 0; _temp448= _temp450; goto _LL443;} _LL443: if( _temp448->initializer
+!=  0){ _temp448=({ struct Cyc_Absyn_Vardecl* _temp453=( struct Cyc_Absyn_Vardecl*)
+_cycalloc( sizeof( struct Cyc_Absyn_Vardecl)); _temp453[ 0]=* _temp448; _temp453;});
 _temp448->initializer= 0;}{ void* _temp454=( void*) _temp448->sc; _LL456: if(
 _temp454 == ( void*) Cyc_Absyn_Static){ goto _LL457;} else{ goto _LL458;} _LL458:
 if( _temp454 == ( void*) Cyc_Absyn_Abstract){ goto _LL459;} else{ goto _LL460;}

@@ -371,20 +371,20 @@ unsigned int), _temp34)); struct _tagged_arr _temp37= _tag_arr( _temp35, sizeof(
 unsigned int),( unsigned int)( 2 *  _temp30));{ unsigned int _temp36= _temp34;
 unsigned int j; for( j= 0; j <  _temp36; j ++){ _temp35[ j]= j <  _temp30?*((
 unsigned int*) _check_unknown_subscript( _temp32, sizeof( unsigned int),( int) j)):
-0;}}; _temp37;});}*(( unsigned int*) _check_unknown_subscript( _temp32, sizeof(
-unsigned int), _temp30))= i; return({ struct _tuple3 _temp38; _temp38.f1=
-_temp32; _temp38.f2= _temp30 +  1; _temp38;});} unsigned int Cyc_Marshal_table_lookup(
-struct _tuple3 tbl, int i){ return*(( unsigned int*) _check_unknown_subscript(
-tbl.f1, sizeof( unsigned int), i));} struct _tuple5{ unsigned int f1;
-unsigned int f2; unsigned int f3; } ; struct Cyc_Set_Set* Cyc_Marshal_print_type_base(
-void* rep, struct Cyc_Set_Set* env, void* val){{ void* _temp39= rep;
-unsigned int _temp61; void* _temp63; unsigned int _temp65; void* _temp67; struct
-_tagged_arr _temp69; struct _tagged_arr _temp71; struct _tagged_arr _temp73;
-struct _tagged_arr _temp75; _LL41: if(( unsigned int) _temp39 >  2u?*(( int*)
-_temp39) ==  Cyc_Typerep_Int: 0){ _LL62: _temp61=(( struct Cyc_Typerep_Int_struct*)
-_temp39)->f1; goto _LL42;} else{ goto _LL43;} _LL43: if( _temp39 == ( void*) Cyc_Typerep_Float){
-goto _LL44;} else{ goto _LL45;} _LL45: if( _temp39 == ( void*) Cyc_Typerep_Double){
-goto _LL46;} else{ goto _LL47;} _LL47: if(( unsigned int) _temp39 >  2u?*(( int*)
+0;}}; _temp37;});}(( unsigned int*) _temp32.curr)[ _temp30]= i; return({ struct
+_tuple3 _temp38; _temp38.f1= _temp32; _temp38.f2= _temp30 +  1; _temp38;});}
+unsigned int Cyc_Marshal_table_lookup( struct _tuple3 tbl, int i){ return*((
+unsigned int*) _check_unknown_subscript( tbl.f1, sizeof( unsigned int), i));}
+struct _tuple5{ unsigned int f1; unsigned int f2; unsigned int f3; } ; struct
+Cyc_Set_Set* Cyc_Marshal_print_type_base( void* rep, struct Cyc_Set_Set* env,
+void* val){{ void* _temp39= rep; unsigned int _temp61; void* _temp63;
+unsigned int _temp65; void* _temp67; struct _tagged_arr _temp69; struct
+_tagged_arr _temp71; struct _tagged_arr _temp73; struct _tagged_arr _temp75;
+_LL41: if(( unsigned int) _temp39 >  2u?*(( int*) _temp39) ==  Cyc_Typerep_Int:
+0){ _LL62: _temp61=(( struct Cyc_Typerep_Int_struct*) _temp39)->f1; goto _LL42;}
+else{ goto _LL43;} _LL43: if( _temp39 == ( void*) Cyc_Typerep_Float){ goto _LL44;}
+else{ goto _LL45;} _LL45: if( _temp39 == ( void*) Cyc_Typerep_Double){ goto
+_LL46;} else{ goto _LL47;} _LL47: if(( unsigned int) _temp39 >  2u?*(( int*)
 _temp39) ==  Cyc_Typerep_ThinPtr: 0){ _LL66: _temp65=(( struct Cyc_Typerep_ThinPtr_struct*)
 _temp39)->f1; goto _LL64; _LL64: _temp63=( void*)(( struct Cyc_Typerep_ThinPtr_struct*)
 _temp39)->f2; goto _LL48;} else{ goto _LL49;} _LL49: if(( unsigned int) _temp39
@@ -470,26 +470,25 @@ _temp123[ 0u]={}; Cyc_Std_printf( _tag_arr("$( ", sizeof( unsigned char), 4u),
 _tag_arr( _temp123, sizeof( void*), 0u));});{ int x=(( int(*)( void* x))
 unsafe_cast)( val);{ int i= 0; for( 0; i <  _get_arr_size( _temp69, sizeof(
 struct _tuple0*)); i ++){ void* _temp126; unsigned int _temp128; struct _tuple0
-_temp124=*(*(( struct _tuple0**) _check_unknown_subscript( _temp69, sizeof(
-struct _tuple0*), i))); _LL129: _temp128= _temp124.f1; goto _LL127; _LL127:
-_temp126= _temp124.f2; goto _LL125; _LL125: { int x_ofs=( int)( x +  _temp128);
-env= Cyc_Marshal_print_type_base( _temp126, env,( void*)(( void*(*)( int x))
-unsafe_cast)( x_ofs)); if( i !=  _get_arr_size( _temp69, sizeof( struct _tuple0*))
--  1){({ void* _temp130[ 0u]={}; Cyc_Std_printf( _tag_arr(", ", sizeof(
-unsigned char), 3u), _tag_arr( _temp130, sizeof( void*), 0u));});}}}}({ void*
-_temp131[ 0u]={}; Cyc_Std_printf( _tag_arr(" )", sizeof( unsigned char), 3u),
-_tag_arr( _temp131, sizeof( void*), 0u));}); goto _LL40;} _LL54:({ void*
-_temp132[ 0u]={}; Cyc_Std_printf( _tag_arr("&[( ", sizeof( unsigned char), 5u),
-_tag_arr( _temp132, sizeof( void*), 0u));});{ unsigned int* tagp=(( unsigned int*(*)(
-void* x)) unsafe_cast)( val); if(* tagp <  1024){({ struct Cyc_Std_Int_pa_struct
-_temp134; _temp134.tag= Cyc_Std_Int_pa; _temp134.f1=( int)* tagp;{ void*
-_temp133[ 1u]={& _temp134}; Cyc_Std_printf( _tag_arr("%d", sizeof( unsigned char),
-3u), _tag_arr( _temp133, sizeof( void*), 1u));}});} else{ struct _tuple4
-_temp137; struct Cyc_Set_Set* _temp138; int _temp140; struct _tuple4* _temp135=
-Cyc_Marshal_member_insert( env,* tagp); _temp137=* _temp135; _LL141: _temp140=
-_temp137.f1; goto _LL139; _LL139: _temp138= _temp137.f2; goto _LL136; _LL136:
-env= _temp138; if( ! _temp140){({ struct Cyc_Std_Int_pa_struct _temp143;
-_temp143.tag= Cyc_Std_Int_pa; _temp143.f1=* tagp;{ void* _temp142[ 1u]={&
+_temp124=*(( struct _tuple0**) _temp69.curr)[ i]; _LL129: _temp128= _temp124.f1;
+goto _LL127; _LL127: _temp126= _temp124.f2; goto _LL125; _LL125: { int x_ofs=(
+int)( x +  _temp128); env= Cyc_Marshal_print_type_base( _temp126, env,( void*)((
+void*(*)( int x)) unsafe_cast)( x_ofs)); if( i !=  _get_arr_size( _temp69,
+sizeof( struct _tuple0*)) -  1){({ void* _temp130[ 0u]={}; Cyc_Std_printf(
+_tag_arr(", ", sizeof( unsigned char), 3u), _tag_arr( _temp130, sizeof( void*),
+0u));});}}}}({ void* _temp131[ 0u]={}; Cyc_Std_printf( _tag_arr(" )", sizeof(
+unsigned char), 3u), _tag_arr( _temp131, sizeof( void*), 0u));}); goto _LL40;}
+_LL54:({ void* _temp132[ 0u]={}; Cyc_Std_printf( _tag_arr("&[( ", sizeof(
+unsigned char), 5u), _tag_arr( _temp132, sizeof( void*), 0u));});{ unsigned int*
+tagp=(( unsigned int*(*)( void* x)) unsafe_cast)( val); if(* tagp <  1024){({
+struct Cyc_Std_Int_pa_struct _temp134; _temp134.tag= Cyc_Std_Int_pa; _temp134.f1=(
+int)* tagp;{ void* _temp133[ 1u]={& _temp134}; Cyc_Std_printf( _tag_arr("%d",
+sizeof( unsigned char), 3u), _tag_arr( _temp133, sizeof( void*), 1u));}});}
+else{ struct _tuple4 _temp137; struct Cyc_Set_Set* _temp138; int _temp140;
+struct _tuple4* _temp135= Cyc_Marshal_member_insert( env,* tagp); _temp137=*
+_temp135; _LL141: _temp140= _temp137.f1; goto _LL139; _LL139: _temp138= _temp137.f2;
+goto _LL136; _LL136: env= _temp138; if( ! _temp140){({ struct Cyc_Std_Int_pa_struct
+_temp143; _temp143.tag= Cyc_Std_Int_pa; _temp143.f1=* tagp;{ void* _temp142[ 1u]={&
 _temp143}; Cyc_Std_printf( _tag_arr("(@%x)", sizeof( unsigned char), 6u),
 _tag_arr( _temp142, sizeof( void*), 1u));}});{ unsigned int* x=(( unsigned int*(*)(
 unsigned int x)) unsafe_cast)(* tagp); unsigned int tag=* x; void* typ= Cyc_Typerep_get_unionbranch(
@@ -530,29 +529,28 @@ _tag_arr("(#%x)", sizeof( unsigned char), 6u), _tag_arr( _temp160, sizeof( void*
 unsigned char), 4u), _tag_arr( _temp162, sizeof( void*), 0u));}); goto _LL40;}
 _LL58:({ void* _temp163[ 0u]={}; Cyc_Std_printf( _tag_arr("[[", sizeof(
 unsigned char), 3u), _tag_arr( _temp163, sizeof( void*), 0u));});{ int i= 0;
-for( 0; i <  _get_arr_size( _temp75, sizeof( void**)); i ++){ Cyc_Marshal_print_type_base(*(*((
-void***) _check_unknown_subscript( _temp75, sizeof( void**), i))), env, val);
-if( i <  _get_arr_size( _temp75, sizeof( void**)) -  1){({ void* _temp164[ 0u]={};
-Cyc_Std_printf( _tag_arr(" | ", sizeof( unsigned char), 4u), _tag_arr( _temp164,
-sizeof( void*), 0u));});}}}({ void* _temp165[ 0u]={}; Cyc_Std_printf( _tag_arr("]]",
-sizeof( unsigned char), 3u), _tag_arr( _temp165, sizeof( void*), 0u));}); goto
-_LL40; _LL60:( int) _throw(( void*)({ struct Cyc_Core_Failure_struct* _temp166=(
-struct Cyc_Core_Failure_struct*) _cycalloc( sizeof( struct Cyc_Core_Failure_struct));
-_temp166[ 0]=({ struct Cyc_Core_Failure_struct _temp167; _temp167.tag= Cyc_Core_Failure;
-_temp167.f1= _tag_arr("Unhandled case in print_type_base", sizeof( unsigned char),
-34u); _temp167;}); _temp166;})); _LL40:;} return env;} extern int* __errno();
-void Cyc_Marshal_print_type( void* ts, void* val){ struct _handler_cons _temp168;
-_push_handler(& _temp168);{ int _temp170= 0; if( setjmp( _temp168.handler)){
-_temp170= 1;} if( ! _temp170){ Cyc_Marshal_print_type_base( ts, Cyc_Marshal_empty_addr_set(),
-val);; _pop_handler();} else{ void* _temp169=( void*) _exn_thrown; void*
-_temp172= _temp169; struct _tagged_arr _temp178; _LL174: if(*(( void**) _temp172)
-==  Cyc_Core_Failure){ _LL179: _temp178=(( struct Cyc_Core_Failure_struct*)
-_temp172)->f1; goto _LL175;} else{ goto _LL176;} _LL176: goto _LL177; _LL175:({
-struct Cyc_Std_String_pa_struct _temp181; _temp181.tag= Cyc_Std_String_pa;
-_temp181.f1=( struct _tagged_arr) _temp178;{ void* _temp180[ 1u]={& _temp181};
-Cyc_Std_fprintf( Cyc_Std_stderr, _tag_arr("Core::Failure(%s)\n", sizeof(
-unsigned char), 19u), _tag_arr( _temp180, sizeof( void*), 1u));}});( int) _throw((
-void*)({ struct Cyc_Core_Failure_struct* _temp182=( struct Cyc_Core_Failure_struct*)
+for( 0; i <  _get_arr_size( _temp75, sizeof( void**)); i ++){ Cyc_Marshal_print_type_base(*((
+void***) _temp75.curr)[ i], env, val); if( i <  _get_arr_size( _temp75, sizeof(
+void**)) -  1){({ void* _temp164[ 0u]={}; Cyc_Std_printf( _tag_arr(" | ",
+sizeof( unsigned char), 4u), _tag_arr( _temp164, sizeof( void*), 0u));});}}}({
+void* _temp165[ 0u]={}; Cyc_Std_printf( _tag_arr("]]", sizeof( unsigned char), 3u),
+_tag_arr( _temp165, sizeof( void*), 0u));}); goto _LL40; _LL60:( int) _throw((
+void*)({ struct Cyc_Core_Failure_struct* _temp166=( struct Cyc_Core_Failure_struct*)
+_cycalloc( sizeof( struct Cyc_Core_Failure_struct)); _temp166[ 0]=({ struct Cyc_Core_Failure_struct
+_temp167; _temp167.tag= Cyc_Core_Failure; _temp167.f1= _tag_arr("Unhandled case in print_type_base",
+sizeof( unsigned char), 34u); _temp167;}); _temp166;})); _LL40:;} return env;}
+extern int* __errno(); void Cyc_Marshal_print_type( void* ts, void* val){ struct
+_handler_cons _temp168; _push_handler(& _temp168);{ int _temp170= 0; if( setjmp(
+_temp168.handler)){ _temp170= 1;} if( ! _temp170){ Cyc_Marshal_print_type_base(
+ts, Cyc_Marshal_empty_addr_set(), val);; _pop_handler();} else{ void* _temp169=(
+void*) _exn_thrown; void* _temp172= _temp169; struct _tagged_arr _temp178;
+_LL174: if(*(( void**) _temp172) ==  Cyc_Core_Failure){ _LL179: _temp178=((
+struct Cyc_Core_Failure_struct*) _temp172)->f1; goto _LL175;} else{ goto _LL176;}
+_LL176: goto _LL177; _LL175:({ struct Cyc_Std_String_pa_struct _temp181;
+_temp181.tag= Cyc_Std_String_pa; _temp181.f1=( struct _tagged_arr) _temp178;{
+void* _temp180[ 1u]={& _temp181}; Cyc_Std_fprintf( Cyc_Std_stderr, _tag_arr("Core::Failure(%s)\n",
+sizeof( unsigned char), 19u), _tag_arr( _temp180, sizeof( void*), 1u));}});( int)
+_throw(( void*)({ struct Cyc_Core_Failure_struct* _temp182=( struct Cyc_Core_Failure_struct*)
 _cycalloc( sizeof( struct Cyc_Core_Failure_struct)); _temp182[ 0]=({ struct Cyc_Core_Failure_struct
 _temp183; _temp183.tag= Cyc_Core_Failure; _temp183.f1= _temp178; _temp183;});
 _temp182;})); _LL177:( void) _throw( _temp172); _LL173:;}}} void Cyc_Marshal_cycputchar(
@@ -720,10 +718,9 @@ last_plus_one; i += typ_szb){ env= Cyc_Marshal_write_type_base( _temp257, env,
 fp,( void*)(( void*(*)( unsigned int x)) unsafe_cast)( i));}}} goto _LL230;}
 _LL242: { int x=(( int(*)( void* x)) unsafe_cast)( val);{ int i= 0; for( 0; i < 
 _get_arr_size( _temp259, sizeof( struct _tuple0*)); i ++){ void* _temp278;
-unsigned int _temp280; struct _tuple0 _temp276=*(*(( struct _tuple0**)
-_check_unknown_subscript( _temp259, sizeof( struct _tuple0*), i))); _LL281:
-_temp280= _temp276.f1; goto _LL279; _LL279: _temp278= _temp276.f2; goto _LL277;
-_LL277: { int x_ofs=( int)( x +  _temp280); env= Cyc_Marshal_write_type_base(
+unsigned int _temp280; struct _tuple0 _temp276=*(( struct _tuple0**) _temp259.curr)[
+i]; _LL281: _temp280= _temp276.f1; goto _LL279; _LL279: _temp278= _temp276.f2;
+goto _LL277; _LL277: { int x_ofs=( int)( x +  _temp280); env= Cyc_Marshal_write_type_base(
 _temp278, env, fp,( void*)(( void*(*)( int x)) unsafe_cast)( x_ofs));}}} goto
 _LL230;} _LL244: { unsigned int* tagp=(( unsigned int*(*)( void* x)) unsafe_cast)(
 val); if(* tagp <  1024){ Cyc_Marshal_cycputvarint(* tagp, fp);} else{ int
@@ -796,19 +793,18 @@ c ==  - 1){( int) _throw(( void*)({ struct Cyc_Core_Failure_struct* _temp315=(
 struct Cyc_Core_Failure_struct*) _cycalloc( sizeof( struct Cyc_Core_Failure_struct));
 _temp315[ 0]=({ struct Cyc_Core_Failure_struct _temp316; _temp316.tag= Cyc_Core_Failure;
 _temp316.f1= _tag_arr("Read error", sizeof( unsigned char), 11u); _temp316;});
-_temp315;}));}*(( unsigned char*) _check_unknown_subscript( s, sizeof(
-unsigned char), i))=( unsigned char) c; i ++;}*(( unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char), i))='\000';} struct _tuple3
-Cyc_Marshal_read_type_base( void* rep, struct _tuple3 env, struct Cyc_Std___sFILE*
-fp, void* result){{ void* _temp317= rep; unsigned int _temp339; void* _temp341;
-unsigned int _temp343; void* _temp345; struct _tagged_arr _temp347; struct
-_tagged_arr _temp349; struct _tagged_arr _temp351; struct _tagged_arr _temp353;
-_LL319: if(( unsigned int) _temp317 >  2u?*(( int*) _temp317) ==  Cyc_Typerep_Int:
-0){ _LL340: _temp339=(( struct Cyc_Typerep_Int_struct*) _temp317)->f1; goto
-_LL320;} else{ goto _LL321;} _LL321: if( _temp317 == ( void*) Cyc_Typerep_Float){
-goto _LL322;} else{ goto _LL323;} _LL323: if( _temp317 == ( void*) Cyc_Typerep_Double){
-goto _LL324;} else{ goto _LL325;} _LL325: if(( unsigned int) _temp317 >  2u?*((
-int*) _temp317) ==  Cyc_Typerep_ThinPtr: 0){ _LL344: _temp343=(( struct Cyc_Typerep_ThinPtr_struct*)
+_temp315;}));}(( unsigned char*) s.curr)[ i]=( unsigned char) c; i ++;}((
+unsigned char*) s.curr)[ i]='\000';} struct _tuple3 Cyc_Marshal_read_type_base(
+void* rep, struct _tuple3 env, struct Cyc_Std___sFILE* fp, void* result){{ void*
+_temp317= rep; unsigned int _temp339; void* _temp341; unsigned int _temp343;
+void* _temp345; struct _tagged_arr _temp347; struct _tagged_arr _temp349; struct
+_tagged_arr _temp351; struct _tagged_arr _temp353; _LL319: if(( unsigned int)
+_temp317 >  2u?*(( int*) _temp317) ==  Cyc_Typerep_Int: 0){ _LL340: _temp339=((
+struct Cyc_Typerep_Int_struct*) _temp317)->f1; goto _LL320;} else{ goto _LL321;}
+_LL321: if( _temp317 == ( void*) Cyc_Typerep_Float){ goto _LL322;} else{ goto
+_LL323;} _LL323: if( _temp317 == ( void*) Cyc_Typerep_Double){ goto _LL324;}
+else{ goto _LL325;} _LL325: if(( unsigned int) _temp317 >  2u?*(( int*) _temp317)
+==  Cyc_Typerep_ThinPtr: 0){ _LL344: _temp343=(( struct Cyc_Typerep_ThinPtr_struct*)
 _temp317)->f1; goto _LL342; _LL342: _temp341=( void*)(( struct Cyc_Typerep_ThinPtr_struct*)
 _temp317)->f2; goto _LL326;} else{ goto _LL327;} _LL327: if(( unsigned int)
 _temp317 >  2u?*(( int*) _temp317) ==  Cyc_Typerep_FatPtr: 0){ _LL346: _temp345=(
@@ -868,10 +864,9 @@ x).f1= Cyc_Marshal_table_lookup( env, mem);(* x).f2=(* x).f1 +  typ_szb *  pos;(
 x).f3=(* x).f1 +  typ_szb *  sz;} goto _LL318;} _LL330: { unsigned int x=((
 unsigned int(*)( void* x)) unsafe_cast)( result);{ int i= 0; for( 0; i < 
 _get_arr_size( _temp347, sizeof( struct _tuple0*)); i ++){ void* _temp372;
-unsigned int _temp374; struct _tuple0 _temp370=*(*(( struct _tuple0**)
-_check_unknown_subscript( _temp347, sizeof( struct _tuple0*), i))); _LL375:
-_temp374= _temp370.f1; goto _LL373; _LL373: _temp372= _temp370.f2; goto _LL371;
-_LL371: { int x_ofs=( int)( x +  _temp374); env= Cyc_Marshal_read_type_base(
+unsigned int _temp374; struct _tuple0 _temp370=*(( struct _tuple0**) _temp347.curr)[
+i]; _LL375: _temp374= _temp370.f1; goto _LL373; _LL373: _temp372= _temp370.f2;
+goto _LL371; _LL371: { int x_ofs=( int)( x +  _temp374); env= Cyc_Marshal_read_type_base(
 _temp372, env, fp,( void*)(( void*(*)( int x)) unsafe_cast)( x_ofs));}}} goto
 _LL318;} _LL332: { int tagmem=( int) Cyc_Marshal_cycgetvarint( fp); if( tagmem < 
 1024){ int tag= tagmem; unsigned int* x=(( unsigned int*(*)( void* x))

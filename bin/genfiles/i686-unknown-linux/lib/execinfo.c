@@ -347,34 +347,29 @@ sizeof( int), 1u)), size);} int Cyc_Execinfo_bt(){ int bt[ 20u];{ unsigned int
 _temp10= 20u; unsigned int i; for( i= 0; i <  _temp10; i ++){ bt[ i]= 0;}}{ int
 tochild[ 2u]={ 0, 0}; int fromchild[ 2u]={ 0, 0}; int pid; int self_pid; if(
 pipe( tochild)? 1: pipe( fromchild)){ return 1;} self_pid= getpid(); if(( pid=
-fork()) ==  0){ if( dup2( tochild[ _check_known_subscript_notnull( 2u, 0)], 0)
-==  - 1? 1: dup2( fromchild[ _check_known_subscript_notnull( 2u, 1)], 1) ==  - 1){
-return 1;}({ struct _tagged_arr _temp2[ 4u]; _temp2[ 3u]=( struct _tagged_arr)
-_tag_arr( 0u, 0u, 0u); _temp2[ 2u]=( struct _tagged_arr)({ struct Cyc_Std_Int_pa_struct
-_temp4; _temp4.tag= Cyc_Std_Int_pa; _temp4.f1=( int)(( unsigned int) self_pid);{
-void* _temp3[ 1u]={& _temp4}; Cyc_Std_aprintf( _tag_arr("/proc/%d/exe", sizeof(
-unsigned char), 13u), _tag_arr( _temp3, sizeof( void*), 1u));}}); _temp2[ 1u]=
-_tag_arr("-e", sizeof( unsigned char), 3u); _temp2[ 0u]= _tag_arr("--functions",
-sizeof( unsigned char), 12u); Cyc_Std_execlp( _tag_arr("addr2line", sizeof(
-unsigned char), 10u), _tag_arr("addr2line", sizeof( unsigned char), 10u),
-_tag_arr( _temp2, sizeof( struct _tagged_arr), 4u));}); return 1;} else{ if( pid
-<  0){ close( tochild[ _check_known_subscript_notnull( 2u, 0)]); close( tochild[
-_check_known_subscript_notnull( 2u, 1)]); close( fromchild[
-_check_known_subscript_notnull( 2u, 0)]); close( fromchild[
-_check_known_subscript_notnull( 2u, 1)]); return 1;}}{ struct Cyc_Std___sFILE* w=({
-struct Cyc_Std___sFILE* f= Cyc_Std_fdopen( tochild[
-_check_known_subscript_notnull( 2u, 1)], _tag_arr("w", sizeof( unsigned char), 2u));
-if( !(( unsigned int) f)){ return 1;}( struct Cyc_Std___sFILE*) _check_null( f);});
-struct Cyc_Std___sFILE* r=({ struct Cyc_Std___sFILE* f= Cyc_Std_fdopen(
-fromchild[ _check_known_subscript_notnull( 2u, 0)], _tag_arr("r", sizeof(
-unsigned char), 2u)); if( !(( unsigned int) f)){ Cyc_Std_fclose( w); return 1;}(
-struct Cyc_Std___sFILE*) _check_null( f);}); int n= Cyc_Execinfo_backtrace(
-_tag_arr( bt, sizeof( int), 20u),( int) 20u);{ int c= 0; for( 0; c <  n; c ++){({
-struct Cyc_Std_Int_pa_struct _temp6; _temp6.tag= Cyc_Std_Int_pa; _temp6.f1=(
-unsigned int) bt[ _check_known_subscript_notnull( 20u, c)];{ void* _temp5[ 1u]={&
-_temp6}; Cyc_Std_fprintf( w, _tag_arr("%#x\n", sizeof( unsigned char), 5u),
-_tag_arr( _temp5, sizeof( void*), 1u));}});}} Cyc_Std_fflush(( struct Cyc_Std___sFILE*)
-w);({ void* _temp7[ 0u]={}; Cyc_Std_printf( _tag_arr("Backtrace:\n  Function          Location\n  ----------------  --------------------------------\n",
+fork()) ==  0){ if( dup2( tochild[ 0], 0) ==  - 1? 1: dup2( fromchild[ 1], 1) == 
+- 1){ return 1;}({ struct _tagged_arr _temp2[ 4u]; _temp2[ 3u]=( struct
+_tagged_arr) _tag_arr( 0u, 0u, 0u); _temp2[ 2u]=( struct _tagged_arr)({ struct
+Cyc_Std_Int_pa_struct _temp4; _temp4.tag= Cyc_Std_Int_pa; _temp4.f1=( int)((
+unsigned int) self_pid);{ void* _temp3[ 1u]={& _temp4}; Cyc_Std_aprintf(
+_tag_arr("/proc/%d/exe", sizeof( unsigned char), 13u), _tag_arr( _temp3, sizeof(
+void*), 1u));}}); _temp2[ 1u]= _tag_arr("-e", sizeof( unsigned char), 3u);
+_temp2[ 0u]= _tag_arr("--functions", sizeof( unsigned char), 12u); Cyc_Std_execlp(
+_tag_arr("addr2line", sizeof( unsigned char), 10u), _tag_arr("addr2line",
+sizeof( unsigned char), 10u), _tag_arr( _temp2, sizeof( struct _tagged_arr), 4u));});
+return 1;} else{ if( pid <  0){ close( tochild[ 0]); close( tochild[ 1]); close(
+fromchild[ 0]); close( fromchild[ 1]); return 1;}}{ struct Cyc_Std___sFILE* w=({
+struct Cyc_Std___sFILE* f= Cyc_Std_fdopen( tochild[ 1], _tag_arr("w", sizeof(
+unsigned char), 2u)); if( !(( unsigned int) f)){ return 1;}( struct Cyc_Std___sFILE*)
+_check_null( f);}); struct Cyc_Std___sFILE* r=({ struct Cyc_Std___sFILE* f= Cyc_Std_fdopen(
+fromchild[ 0], _tag_arr("r", sizeof( unsigned char), 2u)); if( !(( unsigned int)
+f)){ Cyc_Std_fclose( w); return 1;}( struct Cyc_Std___sFILE*) _check_null( f);});
+int n= Cyc_Execinfo_backtrace( _tag_arr( bt, sizeof( int), 20u),( int) 20u);{
+int c= 0; for( 0; c <  n; c ++){({ struct Cyc_Std_Int_pa_struct _temp6; _temp6.tag=
+Cyc_Std_Int_pa; _temp6.f1=( unsigned int) bt[ c];{ void* _temp5[ 1u]={& _temp6};
+Cyc_Std_fprintf( w, _tag_arr("%#x\n", sizeof( unsigned char), 5u), _tag_arr(
+_temp5, sizeof( void*), 1u));}});}} Cyc_Std_fflush(( struct Cyc_Std___sFILE*) w);({
+void* _temp7[ 0u]={}; Cyc_Std_printf( _tag_arr("Backtrace:\n  Function          Location\n  ----------------  --------------------------------\n",
 sizeof( unsigned char), 94u), _tag_arr( _temp7, sizeof( void*), 0u));});{ int c=
 0; for( 0; c <  n; c ++){ int d; int pos= 0;({ void* _temp8[ 0u]={}; Cyc_Std_printf(
 _tag_arr("  ", sizeof( unsigned char), 3u), _tag_arr( _temp8, sizeof( void*), 0u));});

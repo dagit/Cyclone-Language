@@ -24,6 +24,8 @@
 #include <stdio.h>
 
 namespace Std {
+  xtunion exn.Core::Unreachable __unreachable_assert = 
+    Core::Unreachable("assert");
 
   `a
   __assert_fail (string_t assertion, string_t file, unsigned int line) {
@@ -31,6 +33,6 @@ namespace Std {
              file, line, assertion);
     fflush (stderr);
     exit(-1);
-    throw new Core::Unreachable("assert");
+    throw &__unreachable_assert;
   }
 }

@@ -449,11 +449,10 @@ sizeof( unsigned char)); unsigned char* _temp14=( unsigned char*)
 _cycalloc_atomic( _check_times( sizeof( unsigned char), _temp13)); struct
 _tagged_arr _temp16= _tag_arr( _temp14, sizeof( unsigned char), _get_arr_size(
 fname, sizeof( unsigned char)));{ unsigned int _temp15= _temp13; unsigned int i;
-for( i= 0; i <  _temp15; i ++){ _temp14[ i]=*(( const unsigned char*)
-_check_unknown_subscript( fname, sizeof( unsigned char),( int) i));}}; _temp16;});(
-int) _throw(( void*)({ struct Cyc_Std_FileOpenError_struct* _temp11=( struct Cyc_Std_FileOpenError_struct*)
-_cycalloc( sizeof( struct Cyc_Std_FileOpenError_struct)); _temp11[ 0]=({ struct
-Cyc_Std_FileOpenError_struct _temp12; _temp12.tag= Cyc_Std_FileOpenError;
+for( i= 0; i <  _temp15; i ++){ _temp14[ i]=(( const unsigned char*) fname.curr)[(
+int) i];}}; _temp16;});( int) _throw(( void*)({ struct Cyc_Std_FileOpenError_struct*
+_temp11=( struct Cyc_Std_FileOpenError_struct*) _cycalloc( sizeof( struct Cyc_Std_FileOpenError_struct));
+_temp11[ 0]=({ struct Cyc_Std_FileOpenError_struct _temp12; _temp12.tag= Cyc_Std_FileOpenError;
 _temp12.f1= fn; _temp12;}); _temp11;}));} return( struct Cyc_Std___sFILE*)
 _check_null( f);} void Cyc_Std_file_close( struct Cyc_Std___sFILE* f){ if( Cyc_Std_fclose(
 f) !=  0){( int) _throw(( void*) Cyc_Std_FileCloseError);}}

@@ -133,6 +133,7 @@ static void update_flow(analenv_t env, stmt_t s, flow_t flow) {
   let annot    = get_stmt_annot(s);
   let new_flow = join_flow(env->all_changed, flow, annot->flow);
   if(!flow_lessthan_approx(new_flow, annot->flow)) {
+    //fprintf(stderr,"iterate_again: %s",Absynpp::stmt2string(s));
     annot->flow = new_flow;
     if(annot->visited == env->iteration_num)
       env->iterate_again = true;
@@ -142,24 +143,24 @@ static void update_flow(analenv_t env, stmt_t s, flow_t flow) {
 static flow_t add_vars(flow_t inflow,list_t<vardecl_t> vds,absRval_t leafval) {
   switch(inflow) {
   case BottomFL: return BottomFL;
-  case &ReachableFL(d): 
+  case &ReachableFL(d,relns): 
     for(; vds != NULL; vds = vds->tl) {
       let root = new VarRoot(vds->hd);
       d = Dict::insert(d,root,typ_to_absrval(vds->hd->type,leafval));
     }
-    return new ReachableFL(d);
+    return new ReachableFL(d,relns);
   }
 }
 
 static flow_t use_Rval(analenv_t env, seg_t loc, flow_t inflow, absRval_t r){
   switch(inflow) {
   case BottomFL: return BottomFL;
-  case &ReachableFL(d):
+  case &ReachableFL(d,relns):
     if(initlevel(d,r) != AllIL)
       Tcutil::terr(loc,"expression may not be fully initialized");
     let ans_d = escape_deref(d, env->all_changed, r);
     if(d == ans_d) return inflow;
-    let ans = new ReachableFL(ans_d);
+    let ans = new ReachableFL(ans_d,relns);
     update_tryflow(env, ans);
     return ans;
   }
@@ -216,7 +217,7 @@ static $(flow_t,absRval_t) anal_use_ints(analenv_t env, flow_t inflow,
 					 list_t<exp_t> es) {
   let $(afterflow, rvals) = anal_unordered_Rexps(env,inflow,es);
   switch(afterflow) {
-  case &ReachableFL(d): 
+  case &ReachableFL(d,relns): 
     for(; rvals != NULL; rvals = rvals->tl, es = es->tl)
       if(initlevel(d,rvals->hd)==NoneIL)
 	Tcutil::terr(es->hd->loc, "expression may not be initialized");
@@ -235,12 +236,13 @@ static flow_t notzero(analenv_t env, flow_t inflow, flow_t outflow,
 		      exp_t e, initlevel_t il) {
   switch(outflow) {
   case BottomFL: return outflow;
-  case &ReachableFL(d):
+  case &ReachableFL(d,relns):
     switch(anal_Lexp(env,inflow,e)[1]) {
     case UnknownL: return outflow;
     case &PlaceL(p): // okay b/c p can't be escaped (it's Unknown) 
       absRval_t nzval = il==AllIL ? NotZeroAll : NotZeroThis;
-      return new ReachableFL(assign_place(e->loc,d,env->all_changed,p,nzval));
+      return new ReachableFL(assign_place(e->loc,d,env->all_changed,p,nzval),
+                             relns);
     }
   }
 }
@@ -249,14 +251,16 @@ static $(flow_t,flow_t) splitzero(analenv_t env, flow_t inflow, flow_t outflow,
 				  exp_t e, initlevel_t il) {
   switch(outflow) {
   case BottomFL: return $(outflow,outflow);
-  case &ReachableFL(d):
+  case &ReachableFL(d,relns):
     switch(anal_Lexp(env,inflow,e)[1]) {
     case UnknownL: return $(outflow,outflow);
     case &PlaceL(p): // okay b/c p can't be escaped (it's Unknown) 
       absRval_t nzval = il==AllIL ? NotZeroAll : NotZeroThis;
       return 
-	$(new ReachableFL(assign_place(e->loc,d,env->all_changed,p,nzval)),
-	  new ReachableFL(assign_place(e->loc,d,env->all_changed,p,Zero)));
+	$(new ReachableFL(assign_place(e->loc,d,env->all_changed,p,nzval),
+                          relns),
+	  new ReachableFL(assign_place(e->loc,d,env->all_changed,p,Zero),
+                          relns));
     }
   }
 }
@@ -270,23 +274,23 @@ static $(flow_t,absRval_t) anal_derefR(analenv_t env, flow_t inflow,
   case &PointerType(PtrInfo(elttype,_,_,_,bd)):
     switch(f) {
     case BottomFL: return $(f,typ_to_absrval(elttype,unknown_all));
-    case &ReachableFL(outdict):
+    case &ReachableFL(outdict,relns):
       // else cannot be known: FIX: determine notzero as appropriate
       if(Tcutil::is_bound_one(bd))
 	switch(r) {
 	case NotZeroAll: 
-	case NotZeroThis: e->annot = NotZero; break;
+	case NotZeroThis: e->annot = new NotZero(relns); break;
 	case &AddressOf(p): 
-	  e->annot = NotZero; 
+	  e->annot = new NotZero(relns); 
 	  return $(f,lookup_place(outdict,p));
 	case Zero: 
-	  e->annot = IsZero;
+	  e->annot = new IsZero(relns);
 	  return $(BottomFL,typ_to_absrval(elttype,unknown_all));
 	case &UnknownR(il): f = notzero(env,inflow,f,e,il); fallthru;
-	default: e->annot = UnknownZ;
+	default: e->annot = new UnknownZ(relns);
 	}
       else
-	e->annot = UnknownZ; // FIX: too conservative?
+	e->annot = new UnknownZ(relns); // FIX: too conservative?
       switch(initlevel(outdict,r)) {
       case NoneIL:
 	Tcutil::terr(e->loc,"dereference of possibly uninitialized pointer");
@@ -299,14 +303,54 @@ static $(flow_t,absRval_t) anal_derefR(analenv_t env, flow_t inflow,
   }
 }
 
+// we've performed e1[e2] -- if this is of the form x[i], then add
+// i < x.size to the relations.
+static relns_t add_subscript_reln(relns_t relns, exp_t e1, exp_t e2) {
+  switch (e1->r) {
+  case &Var_e(_,&Pat_b(x)):  fallthru(x);
+  case &Var_e(_,&Local_b(x)):fallthru(x);
+  case &Var_e(_,&Param_b(x)):fallthru(x);
+  case &Var_e(_,&Global_b(x)):
+    if (!x->escapes) {
+      switch (e2->r) {
+      case &Var_e(_,&Pat_b(i)):  fallthru(i);
+      case &Var_e(_,&Local_b(i)):fallthru(i);
+      case &Var_e(_,&Param_b(i)):fallthru(i);
+      case &Var_e(_,&Global_b(i)):
+        if (!i->escapes) {
+          // we have x[i] -- want to add i < x.size to relns if not already
+          // present.
+          bool found = false;
+          for (let rs = relns; rs != NULL; rs = rs->tl) {
+            let r = rs->hd;
+            if (r->vd == i) {
+              switch (r->rop) {
+              case &LessSize(v) && v == x: return relns;
+              default: continue;
+              }
+            }
+          }
+          if (!found) return new List(new Reln(i,new LessSize(x)),relns);
+        }
+        return relns;
+      default: return relns;
+      }
+    } else return relns;
+  default: return relns;
+  }
+}
+
 // Note: must deal with try-flow in all "base" cases!!!
 static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
   // Note: It is sound to return on BottomFL only because there is no way to
   //       jump into an expression (we reject goto into a StmtExp).
   flowdict_t d;
+  relns_t relns;
   switch(inflow) {
   case BottomFL: return $(BottomFL, unknown_all); // absRval_t irrelvent
-  case &ReachableFL(d2): d = d2;
+  case &ReachableFL(d2,relns2): d = d2; relns = relns2;
+    //fprintf(stderr,"inflow expression %s:",Absynpp::exp2string(e));
+    //print_relns(relns); fprintf(stderr,"\n");
   }
   switch(e->r) {
     // C doesn't allow "memory-kind casts", which is good because then
@@ -348,9 +392,10 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     let $(f,_) = anal_use_ints(env,inflow,list(e1));
     let $(_,lval) = anal_Lexp(env,f,e1);
     switch($(lval,f)) {
-    case $(&PlaceL(p),&ReachableFL(outdict)): 
+    case $(&PlaceL(p),&ReachableFL(outdict,relns)): 
+      relns = reln_kill_exp(relns,e1);
       f = new ReachableFL(assign_place(e1->loc,outdict,
-				       env->all_changed,p,unknown_all));
+				       env->all_changed,p,unknown_all),relns);
       break;
     default: break;
     }
@@ -359,9 +404,10 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     let $(f,_) = anal_use_ints(env,inflow,list(l,r));
     let $(_,lval) = anal_Lexp(env,f,e);
     switch($(lval,f)) {
-    case $(&PlaceL(p),&ReachableFL(outdict)): 
+    case $(&PlaceL(p),&ReachableFL(outdict,relns)): 
+      relns = reln_kill_exp(relns,l);
       f = new ReachableFL(assign_place(l->loc,outdict,
-				       env->all_changed,p,unknown_all));
+				       env->all_changed,p,unknown_all),relns);
       break;
     default: break;
     }
@@ -378,6 +424,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
       let right_changed     = *env->all_changed;
       let outflow = after_flow(&left_changed, left_out,right_out,
 			       left_changed, right_changed);
+      // FIX: need to kill any variables assigned in e1 or e2?
       let new_inflow = join_flow(outer_all_changed,inflow,outflow);
       if(flow_lessthan_approx(new_inflow,inflow)) {
 	if(outer_all_changed == NULL)
@@ -388,11 +435,12 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
 	// now actually do the assignment!
 	switch(outflow) {
 	case BottomFL: return $(BottomFL,rval);
-	case &ReachableFL(outdict):
+	case &ReachableFL(outdict,relns):
 	  switch(lval) {
 	  case &PlaceL(p): 
 	    outdict = assign_place(e->loc,outdict,env->all_changed,p,rval);
-	    outflow = new ReachableFL(outdict);
+            relns = reln_assign_exp(relns,e1,e2);
+	    outflow = new ReachableFL(outdict,relns);
 	    update_tryflow(env, outflow);
 	    return $(outflow, rval);
 	  case UnknownL: return $(use_Rval(env,e2->loc,outflow,rval), rval);
@@ -435,8 +483,8 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     }
     switch(outflow) {
     case BottomFL: return $(outflow,rval);
-    case &ReachableFL(d2):
-      return $(new ReachableFL(Dict::insert(d2,root,place_val)), rval);
+    case &ReachableFL(d2,relns):
+      return $(new ReachableFL(Dict::insert(d2,root,place_val),relns), rval);
     }
 
   case &New_e(eopt,e):
@@ -458,8 +506,8 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     }
     switch(outflow) {
     case BottomFL: return $(outflow,rval);
-    case &ReachableFL(d2):
-      return $(new ReachableFL(Dict::insert(d2,root,place_val)), rval);
+    case &ReachableFL(d2,relns):
+      return $(new ReachableFL(Dict::insert(d2,root,place_val),relns), rval);
     }
     
   case &Address_e(e1): // FIX: support & as a malloc-and-initialize???
@@ -518,9 +566,14 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
   case &Subscript_e(e1,e2): // FIX: avoid list allocation
     let $(f,rvals) = anal_unordered_Rexps(env,inflow,list(e1,e2));
     switch(f) {
-    case &ReachableFL(d2):
+    case &ReachableFL(d2,relns):
+      //fprintf(stderr,"subscript %s:",Absynpp::exp2string(e));
+      //print_relns(relns); fprintf(stderr,"\n");
       if(initlevel(d2,rvals->tl->hd)==NoneIL)
 	Tcutil::terr(e2->loc, "expression may not be initialized");
+      let new_relns = add_subscript_reln(relns,e1,e2);
+      if (relns != new_relns)
+        f = new ReachableFL(d2,new_relns);
       break;
     default: break;
     }
@@ -534,6 +587,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
       }
     default: break;
     }
+    // FIX: if we have x[i] then we can add i < x.size to relns
     return anal_derefR(env,inflow,f,e1,rvals->hd);
 
   case &Tunion_e(_,_,es,_,_): fallthru(es); // NULL case handled above
@@ -564,12 +618,46 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     return $(outflow,typ_to_absrval(e->topt->v,unknown_all));
 
   case &Comprehension_e(vd,e1,e2): 
+
     let $(f1,r1) = anal_Rexp(env,inflow,e1);
     switch(f1) {
     case BottomFL: return $(f1,unknown_all);
-    case &ReachableFL(d1):
+    case &ReachableFL(d1,relns):
       if(initlevel(d1,r1)==NoneIL)
 	Tcutil::terr(e1->loc, "expression may not be initialized");
+
+      // add vd < e1 when e1 is something useful
+      relns_t new_relns = relns;
+    comp_loop:
+      switch(e1->r) {
+      case &Cast_e(_,e2): e1 = e2; goto comp_loop;
+      case &Var_e(_,&Global_b(v2)) && !v2->escapes: fallthru(v2);
+      case &Var_e(_,&Local_b(v2)) && !v2->escapes: fallthru(v2);
+      case &Var_e(_,&Pat_b(v2)) && !v2->escapes: fallthru(v2);
+      case &Var_e(_,&Param_b(v2)) && !v2->escapes:
+        new_relns = new List(new Reln(vd,new LessVar(v2)),relns);
+        break;
+      case &Const_e(&Int_c(_,i)): 
+        new_relns = new List(new Reln(vd,new LessConst(i)),relns);
+        break;
+      case &Primop_e(Size,&List(e3,_)):
+        switch (e3->r) {
+        case &Var_e(_,&Global_b(v2)) && !v2->escapes: fallthru(v2);
+        case &Var_e(_,&Local_b(v2)) && !v2->escapes: fallthru(v2);
+        case &Var_e(_,&Pat_b(v2)) && !v2->escapes: fallthru(v2);
+        case &Var_e(_,&Param_b(v2)) && !v2->escapes:
+          // size is always unsigned
+          new_relns = new List(new Reln(vd,new LessSize(v2)),relns);
+          break;
+        default: break;
+        }
+        break;
+      default: break;
+      }
+      if (relns != new_relns) 
+        f1 = new ReachableFL(d1,new_relns);
+
+      // check e2 now
       switch(r1) {
       case Zero: return $(f1,unknown_all); // e2 executed 0 times
       case NotZeroThis:
@@ -580,7 +668,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
 	let $(f2,r2) = anal_Rexp(env,f1,e2);
 	switch(f2) {
 	case BottomFL: return $(f2,unknown_all);
-	case &ReachableFL(d2):
+	case &ReachableFL(d2,_):
 	  if(initlevel(d2,r2) != AllIL) {
 	    Tcutil::terr(e1->loc, "expression may not be initialized");
 	    return $(BottomFL,unknown_all);
@@ -595,7 +683,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
 	  let $(f2,r2) = anal_Rexp(env,f1,e2);
 	  switch(f2) {
 	  case BottomFL: break;
-	  case &ReachableFL(d2):
+	  case &ReachableFL(d2,_):
 	    if(initlevel(d2,r2) != AllIL) {
 	      Tcutil::terr(e1->loc, "expression may not be initialized");
 	      return $(BottomFL, unknown_all);
@@ -647,23 +735,23 @@ static $(flow_t,absLval_t) anal_derefL(analenv_t env, flow_t inflow, flow_t f,
   case &PointerType(PtrInfo(elttype,_,_,_,bd)):
     switch(f) {
     case BottomFL: return $(f,UnknownL);
-    case &ReachableFL(outdict):
+    case &ReachableFL(outdict,relns):
       // else cannot be known: FIX: determine notzero as appropriate
       if(Tcutil::is_bound_one(bd))
 	switch(r) {
 	case NotZeroAll:
-	case NotZeroThis: e->annot = NotZero; break;
+	case NotZeroThis: e->annot = new NotZero(relns); break;
 	case &AddressOf(&Place(root,flds2)): 
-	  e->annot = NotZero;
+	  e->annot = new NotZero(relns);
 	  return $(f, new PlaceL(new Place(root, append(flds2,flds))));
 	case Zero: 
-	  e->annot = IsZero;
+	  e->annot = new IsZero(relns);
 	  return $(BottomFL,UnknownL);
 	case &UnknownR(il): f = notzero(env,inflow,f,e,il); fallthru;
-	default: e->annot = UnknownZ;
+	default: e->annot = new UnknownZ(relns);
 	}
       else
-	e->annot = UnknownZ; // FIX: too conservative?
+	e->annot = new UnknownZ(relns); // FIX: too conservative?
       if(initlevel(outdict,r)==NoneIL)
 	Tcutil::terr(e->loc,"dereference of possibly uninitialized pointer");
       return $(f,UnknownL);
@@ -681,7 +769,10 @@ static $(flow_t,absLval_t) anal_Lexp_rec(analenv_t env, flow_t inflow,
   flowdict_t d;
   switch(inflow) {
   case BottomFL: return $(BottomFL, UnknownL); // absLval_t irrelvent
-  case &ReachableFL(d2): d = d2;
+  case &ReachableFL(d2,relns): 
+    d = d2;
+    //fprintf(stderr,"exp %s:",Absynpp::exp2string(e));
+    //print_relns(relns); fprintf(stderr,"\n");
   }
   switch(e->r) {
   case &Cast_e(_,e1):        fallthru(e1);
@@ -715,12 +806,16 @@ static $(flow_t,absLval_t) anal_Lexp_rec(analenv_t env, flow_t inflow,
     }
     let $(f,rvals) = anal_unordered_Rexps(env,inflow,list(e1,e2));
     switch(f) {
-    case &ReachableFL(d2):
+    case &ReachableFL(d2,relns):
       if(initlevel(d2,rvals->tl->hd)==NoneIL)
 	Tcutil::terr(e2->loc, "expression may not be initialized");
+      let new_relns = add_subscript_reln(relns,e1,e2);
+      if (relns != new_relns)
+        f = new ReachableFL(d2,new_relns);
       break;
     default: break;
     }
+    // FIX: if we have x[i] then we can add i < x.size to the flow info
     return anal_derefL(env,inflow,f,e1,rvals->hd,flds);
 
     // KLUDGE: unions (see comment at top of file)
@@ -751,6 +846,8 @@ static $(flow_t,flow_t) anal_test(analenv_t env, flow_t inflow, exp_t e) {
     let $(f3t,f3f) = anal_test(env,f1f,   e3);
     return $(join_flow(env->all_changed, f2t, f3t),
 	     join_flow(env->all_changed, f2f, f3f));
+  case &SeqExp_e(e1,e2):
+    return anal_test(env, anal_Rexp(env,inflow,e1)[0], e2);
   case &Primop_e(Not,&List(e1,NULL)):          
     let $(f1,f2) = anal_test(env,inflow,e1);
     return $(f2,f1);
@@ -758,7 +855,7 @@ static $(flow_t,flow_t) anal_test(analenv_t env, flow_t inflow, exp_t e) {
     let $(f,rvals) = anal_unordered_Rexps(env,inflow,es);
     switch(f) {
     case BottomFL: return $(f,f);
-    case &ReachableFL(d):
+    case &ReachableFL(d,relns):
       let r1 = rvals->hd;
       let r2 = rvals->tl->hd;
       if(initlevel(d,r1)==NoneIL)
@@ -779,7 +876,7 @@ static $(flow_t,flow_t) anal_test(analenv_t env, flow_t inflow, exp_t e) {
     let $(f,rvals) = anal_unordered_Rexps(env,inflow,es);
     switch(f) {
     case BottomFL: return $(f,f);
-    case &ReachableFL(d):
+    case &ReachableFL(d,relns):
       let r1 = rvals->hd;
       let r2 = rvals->tl->hd;
       if(initlevel(d,r1)==NoneIL)
@@ -794,12 +891,107 @@ static $(flow_t,flow_t) anal_test(analenv_t env, flow_t inflow, exp_t e) {
       default: return $(f,f);
       }
     }
+  // this case tracks most of the inequalities we need for bounds-checking
+  case &Primop_e(Lt,es):
+    let $(f,rvals) = anal_unordered_Rexps(env,inflow,es);
+    switch (f) {
+    case BottomFL: return $(f,f);
+    case &ReachableFL(d,relns):
+      let r1 = rvals->hd;
+      let r2 = rvals->tl->hd;
+      if(initlevel(d,r1)==NoneIL)
+	Tcutil::terr(es->hd->loc,"expression may not be initialized");
+      if(initlevel(d,r2)==NoneIL)
+	Tcutil::terr(es->tl->hd->loc,"expression may not be initialized");
+      let e1 = es->hd;
+      let e2 = es->tl->hd;
+      switch (e1->r) {
+      // Note: global arrays are the only thing that don't "escape"
+      case &Var_e(_,&Global_b(v1)) && !v1->escapes: fallthru(v1);
+      case &Var_e(_,&Local_b(v1)) && !v1->escapes: fallthru(v1);
+      case &Var_e(_,&Pat_b(v1)) && !v1->escapes: fallthru(v1);
+      case &Var_e(_,&Param_b(v1)) && !v1->escapes:
+        switch (e2->r) {
+        case &Var_e(_,&Global_b(v2)) && !v2->escapes: fallthru(v2);
+        case &Var_e(_,&Local_b(v2)) && !v2->escapes: fallthru(v2);
+        case &Var_e(_,&Pat_b(v2)) && !v2->escapes: fallthru(v2);
+        case &Var_e(_,&Param_b(v2)) && !v2->escapes:
+          // check that v1 or v2 is unsigned to ensure this is an
+          // unsigned comparison
+          switch ($(Tcutil::compress(v1->type),Tcutil::compress(v2->type))) {
+          case $(&IntType(Unsigned,B4),_): break;
+          case $(_,&IntType(Unsigned,B4)): break;
+          default: return $(f,f);
+          }
+          let relns_true = new List(new Reln(v1,new LessVar(v2)),relns);
+          return $(new ReachableFL(d,relns_true), f);
+        case &Const_e(&Int_c(_,i)): 
+          switch ($(Tcutil::compress(v1->type),Tcutil::compress(e2->topt->v))){
+          case $(&IntType(Unsigned,B4),_): break;
+          case $(_,&IntType(Unsigned,B4)): break;
+          default: return $(f,f);
+          }
+          let relns_true = new List(new Reln(v1,new LessConst(i)),relns);
+          return $(new ReachableFL(d,relns_true), f);
+        case &Primop_e(Size,&List(e3,_)):
+          switch (e3->r) {
+          case &Var_e(_,&Global_b(v2)) && !v2->escapes: fallthru(v2);
+          case &Var_e(_,&Local_b(v2)) && !v2->escapes: fallthru(v2);
+          case &Var_e(_,&Pat_b(v2)) && !v2->escapes: fallthru(v2);
+          case &Var_e(_,&Param_b(v2)) && !v2->escapes:
+            // size is always unsigned
+            let relns_true = new List(new Reln(v1,new LessSize(v2)),relns);
+            return $(new ReachableFL(d,relns_true), f);
+          default: return $(f,f);
+          }
+        default: return $(f,f);
+        }
+      default: return $(f,f);
+      }
+    }
+  // this case checks for i <= x.size
+  case &Primop_e(Lte,es):
+    let $(f,rvals) = anal_unordered_Rexps(env,inflow,es);
+    switch (f) {
+    case BottomFL: return $(f,f);
+    case &ReachableFL(d,relns):
+      let r1 = rvals->hd;
+      let r2 = rvals->tl->hd;
+      if(initlevel(d,r1)==NoneIL)
+	Tcutil::terr(es->hd->loc,"expression may not be initialized");
+      if(initlevel(d,r2)==NoneIL)
+	Tcutil::terr(es->tl->hd->loc,"expression may not be initialized");
+      let e1 = es->hd;
+      let e2 = es->tl->hd;
+      switch (e1->r) {
+      // Note: global arrays are the only thing that don't "escape"
+      case &Var_e(_,&Global_b(v1)) && !v1->escapes: fallthru(v1);
+      case &Var_e(_,&Local_b(v1)) && !v1->escapes: fallthru(v1);
+      case &Var_e(_,&Pat_b(v1)) && !v1->escapes: fallthru(v1);
+      case &Var_e(_,&Param_b(v1)) && !v1->escapes:
+        switch (e2->r) {
+        case &Primop_e(Size,&List(e3,_)):
+          switch (e3->r) {
+          case &Var_e(_,&Global_b(v2)) && !v2->escapes: fallthru(v2);
+          case &Var_e(_,&Local_b(v2)) && !v2->escapes: fallthru(v2);
+          case &Var_e(_,&Pat_b(v2)) && !v2->escapes: fallthru(v2);
+          case &Var_e(_,&Param_b(v2)) && !v2->escapes:
+            // size is always unsigned
+            let relns_true = new List(new Reln(v1,new LessEqSize(v2)),relns);
+            return $(new ReachableFL(d,relns_true), f);
+          default: return $(f,f);
+          }
+        default: return $(f,f);
+        }
+      default: return $(f,f);
+      }
+    }
   default: break;
   }
   let $(f,r) = anal_Rexp(env,inflow,e);
   switch(f) {
   case BottomFL: return $(f,f);
-  case &ReachableFL(d):
+  case &ReachableFL(d,relns):
     switch(r) {
     case Zero: return $(BottomFL,f);
     case NotZeroThis:
@@ -879,6 +1071,12 @@ static flow_t anal_stmt(analenv_t env, flow_t inflow, stmt_t s) {
     let e_inflow = pre_stmt_check(env,inflow,cont)->flow;
     let $(f1t,f1f) = anal_test(env,e_inflow,e);
     let body_outflow = anal_stmt(env,f1t,body);
+    //fprintf(stderr,"updating while with: ");
+    //switch (body_outflow) {
+    //case BottomFL: break;
+    //case &ReachableFL(_,rs): print_relns(rs);
+    //}
+    //fprintf(stderr,"\n");
     update_flow(env, cont, body_outflow);
     return f1f;
   case &Do_s(body,$(e,cont)):
@@ -984,11 +1182,14 @@ static flow_t anal_decl(analenv_t env, flow_t inflow, decl_t decl) {
     let $(f,r) = anal_Rexp(env,inflow,(exp_t)e);
     switch(f) {
     case BottomFL: return BottomFL;
-    case &ReachableFL(outdict):
+    case &ReachableFL(outdict,relns):
       outdict = assign_place(decl->loc,outdict,env->all_changed,
 			     new Place(new VarRoot(vd),NULL), r);
-      let outflow = new ReachableFL(outdict);
+      relns = reln_assign_var(relns,vd,(exp_t)vd->initializer);
+      let outflow = new ReachableFL(outdict,relns);
       update_tryflow(env,outflow);
+      //fprintf(stderr,"outflow for decl %s:",Absynpp::qvar2string(vd->name));
+      //print_relns(relns); fprintf(stderr,"\n");
       return outflow;
     }
 
@@ -1037,8 +1238,8 @@ static void postpass(stmt_t s) {
 // TO DO: account for init qualifier (add ThisIL for those params and
 //        check them on return and on fall off void)
 static void check_fun(fndecl_t fd) {
-  //  fprintf(stderr," %s ",*(*fd->name)[1]);
-  flow_t    inflow  = add_vars(new ReachableFL(Dict::empty(root_cmp)),
+  // fprintf(stderr,"checking %s \n",*(*fd->name)[1]);
+  flow_t    inflow  = add_vars(new ReachableFL(Dict::empty(root_cmp),NULL),
 			       fd->param_vardecls->v,
 			       unknown_all);
   analenv_t env     = new AnalEnv(true,0,false,inflow,NULL);

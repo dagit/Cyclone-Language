@@ -572,7 +572,8 @@ static void extract_ordinarie($(ienv_t, ienv_t, bool, aenv_t, seen_t, i_t) @ `r 
 	.type = (fd->cached_typ)->v,
 	.initializer = NULL,
 	.rgn = NULL,
-	.attributes = NULL
+	.attributes = NULL,
+        .escapes = false
       };
       check_complete_defs = false; // the body of the function has been defined
       fallthru(vd);

@@ -264,11 +264,12 @@ f1; } ; extern unsigned char* string_to_Cstring( struct _tagged_arr); extern
 unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
 _tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
 wrap_Cstring_as_string( unsigned char*, unsigned int); extern struct _tagged_arr
-ntCsl_to_ntsl( unsigned char**); extern void* Cyc_Std___assert_fail( struct
-_tagged_arr assertion, struct _tagged_arr file, unsigned int line); struct Cyc_Cstdio___sFILE;
-struct Cyc_Std___sFILE; extern struct Cyc_Std___sFILE* Cyc_Std_stderr; extern
-int Cyc_Std_fflush( struct Cyc_Std___sFILE*); extern unsigned char Cyc_Std_FileCloseError[
-19u]; extern unsigned char Cyc_Std_FileOpenError[ 18u]; struct Cyc_Std_FileOpenError_struct{
+ntCsl_to_ntsl( unsigned char**); extern struct Cyc_Core_Unreachable_struct Cyc_Std___unreachable_assert;
+extern void* Cyc_Std___assert_fail( struct _tagged_arr assertion, struct
+_tagged_arr file, unsigned int line); struct Cyc_Cstdio___sFILE; struct Cyc_Std___sFILE;
+extern struct Cyc_Std___sFILE* Cyc_Std_stderr; extern int Cyc_Std_fflush( struct
+Cyc_Std___sFILE*); extern unsigned char Cyc_Std_FileCloseError[ 19u]; extern
+unsigned char Cyc_Std_FileOpenError[ 18u]; struct Cyc_Std_FileOpenError_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; static const int Cyc_Std_String_pa=
 0; struct Cyc_Std_String_pa_struct{ int tag; struct _tagged_arr f1; } ; static
 const int Cyc_Std_Int_pa= 1; struct Cyc_Std_Int_pa_struct{ int tag; unsigned int
@@ -285,16 +286,14 @@ int tag; unsigned int* f1; } ; static const int Cyc_Std_StringPtr_sa= 4; struct
 Cyc_Std_StringPtr_sa_struct{ int tag; struct _tagged_arr f1; } ; static const
 int Cyc_Std_DoublePtr_sa= 5; struct Cyc_Std_DoublePtr_sa_struct{ int tag; double*
 f1; } ; static const int Cyc_Std_FloatPtr_sa= 6; struct Cyc_Std_FloatPtr_sa_struct{
-int tag; float* f1; } ; void* Cyc_Std___assert_fail( struct _tagged_arr
-assertion, struct _tagged_arr file, unsigned int line){({ struct Cyc_Std_String_pa_struct
-_temp3; _temp3.tag= Cyc_Std_String_pa; _temp3.f1=( struct _tagged_arr) assertion;{
-struct Cyc_Std_Int_pa_struct _temp2; _temp2.tag= Cyc_Std_Int_pa; _temp2.f1= line;{
-struct Cyc_Std_String_pa_struct _temp1; _temp1.tag= Cyc_Std_String_pa; _temp1.f1=(
-struct _tagged_arr) file;{ void* _temp0[ 3u]={& _temp1,& _temp2,& _temp3}; Cyc_Std_fprintf(
+int tag; float* f1; } ; static unsigned char _temp1[ 7u]="assert"; struct Cyc_Core_Unreachable_struct
+Cyc_Std___unreachable_assert={ Cyc_Core_Unreachable,{ _temp1, _temp1, _temp1 + 
+7u}}; void* Cyc_Std___assert_fail( struct _tagged_arr assertion, struct
+_tagged_arr file, unsigned int line){({ struct Cyc_Std_String_pa_struct _temp5;
+_temp5.tag= Cyc_Std_String_pa; _temp5.f1=( struct _tagged_arr) assertion;{
+struct Cyc_Std_Int_pa_struct _temp4; _temp4.tag= Cyc_Std_Int_pa; _temp4.f1= line;{
+struct Cyc_Std_String_pa_struct _temp3; _temp3.tag= Cyc_Std_String_pa; _temp3.f1=(
+struct _tagged_arr) file;{ void* _temp2[ 3u]={& _temp3,& _temp4,& _temp5}; Cyc_Std_fprintf(
 Cyc_Std_stderr, _tag_arr("%s:%u: Assertion `%s' failed.\n", sizeof(
-unsigned char), 31u), _tag_arr( _temp0, sizeof( void*), 3u));}}}}); Cyc_Std_fflush((
-struct Cyc_Std___sFILE*) Cyc_Std_stderr); exit( - 1);( int) _throw(( void*)({
-struct Cyc_Core_Unreachable_struct* _temp4=( struct Cyc_Core_Unreachable_struct*)
-_cycalloc( sizeof( struct Cyc_Core_Unreachable_struct)); _temp4[ 0]=({ struct
-Cyc_Core_Unreachable_struct _temp5; _temp5.tag= Cyc_Core_Unreachable; _temp5.f1=
-_tag_arr("assert", sizeof( unsigned char), 7u); _temp5;}); _temp4;}));}
+unsigned char), 31u), _tag_arr( _temp2, sizeof( void*), 3u));}}}}); Cyc_Std_fflush((
+struct Cyc_Std___sFILE*) Cyc_Std_stderr); exit( - 1);( int) _throw(( void*)& Cyc_Std___unreachable_assert);}

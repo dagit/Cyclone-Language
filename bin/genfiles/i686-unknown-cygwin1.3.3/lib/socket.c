@@ -352,29 +352,29 @@ unsigned char* tag; struct _tagged_arr f1; } ; static struct _tagged_arr Cyc_Std
 struct _tagged_arr args){ struct _tagged_arr res= _tag_arr(({ unsigned char*
 _temp10=( unsigned char*) _cycalloc_atomic( sizeof( unsigned char) *  1);
 _temp10[ 0]='\000'; _temp10;}), sizeof( unsigned char), 1u);{ int i= 0; for( 0;
-i <  _get_arr_size( args, sizeof( void*)); i ++){ void* _temp0=*(( void**)
-_check_unknown_subscript( args, sizeof( void*), i)); _LL2: if(*(( int*) _temp0)
-==  Cyc_Std_SO_int){ goto _LL3;} else{ goto _LL4;} _LL4: if(*(( int*) _temp0) == 
-Cyc_Std_SO_timeval){ goto _LL5;} else{ goto _LL6;} _LL6: if(*(( int*) _temp0) == 
-Cyc_Std_SO_socklenptr){ goto _LL7;} else{ goto _LL8;} _LL8: if(*(( int*) _temp0)
-==  Cyc_Std_SO_socklen){ goto _LL9;} else{ goto _LL1;} _LL3: res= Cyc_Std_strconcat((
-struct _tagged_arr) res, _tag_arr("|SO_int", sizeof( unsigned char), 8u)); goto
-_LL1; _LL5: res= Cyc_Std_strconcat(( struct _tagged_arr) res, _tag_arr("|SO_timeval",
-sizeof( unsigned char), 12u)); goto _LL1; _LL7: res= Cyc_Std_strconcat(( struct
-_tagged_arr) res, _tag_arr("|SO_socklenptr", sizeof( unsigned char), 15u)); goto
-_LL1; _LL9: res= Cyc_Std_strconcat(( struct _tagged_arr) res, _tag_arr("|SO_socklen",
-sizeof( unsigned char), 12u)); goto _LL1; _LL1:;}} return res;} struct _tuple0{
-void* f1; void* f2; } ; int Cyc_Std_accept( int fd, struct _tagged_arr ap){ if(
-_get_arr_size( ap, sizeof( void*)) !=  2){( int) _throw(( void*)({ struct Cyc_Std_SocketError_struct*
-_temp11=( struct Cyc_Std_SocketError_struct*) _cycalloc( sizeof( struct Cyc_Std_SocketError_struct));
-_temp11[ 0]=({ struct Cyc_Std_SocketError_struct _temp12; _temp12.tag= Cyc_Std_SocketError;
-_temp12.f1= _tag_arr("accept---need 2 args", sizeof( unsigned char), 21u);
-_temp12;}); _temp11;}));}{ struct _tuple0 _temp14=({ struct _tuple0 _temp13;
-_temp13.f1=*(( void**) _check_unknown_subscript( ap, sizeof( void*), 0));
-_temp13.f2=*(( void**) _check_unknown_subscript( ap, sizeof( void*), 1));
-_temp13;}); void* _temp22; unsigned int* _temp24; void* _temp26; struct Cyc_Std_sockaddr_in*
-_temp28; void* _temp30; unsigned int* _temp32; void* _temp34; struct Cyc_Std_sockaddr*
-_temp36; _LL16: _LL27: _temp26= _temp14.f1; if(*(( int*) _temp26) ==  Cyc_Std_SA_sockaddr_in){
+i <  _get_arr_size( args, sizeof( void*)); i ++){ void* _temp0=(( void**) args.curr)[
+i]; _LL2: if(*(( int*) _temp0) ==  Cyc_Std_SO_int){ goto _LL3;} else{ goto _LL4;}
+_LL4: if(*(( int*) _temp0) ==  Cyc_Std_SO_timeval){ goto _LL5;} else{ goto _LL6;}
+_LL6: if(*(( int*) _temp0) ==  Cyc_Std_SO_socklenptr){ goto _LL7;} else{ goto
+_LL8;} _LL8: if(*(( int*) _temp0) ==  Cyc_Std_SO_socklen){ goto _LL9;} else{
+goto _LL1;} _LL3: res= Cyc_Std_strconcat(( struct _tagged_arr) res, _tag_arr("|SO_int",
+sizeof( unsigned char), 8u)); goto _LL1; _LL5: res= Cyc_Std_strconcat(( struct
+_tagged_arr) res, _tag_arr("|SO_timeval", sizeof( unsigned char), 12u)); goto
+_LL1; _LL7: res= Cyc_Std_strconcat(( struct _tagged_arr) res, _tag_arr("|SO_socklenptr",
+sizeof( unsigned char), 15u)); goto _LL1; _LL9: res= Cyc_Std_strconcat(( struct
+_tagged_arr) res, _tag_arr("|SO_socklen", sizeof( unsigned char), 12u)); goto
+_LL1; _LL1:;}} return res;} struct _tuple0{ void* f1; void* f2; } ; int Cyc_Std_accept(
+int fd, struct _tagged_arr ap){ if( _get_arr_size( ap, sizeof( void*)) !=  2){(
+int) _throw(( void*)({ struct Cyc_Std_SocketError_struct* _temp11=( struct Cyc_Std_SocketError_struct*)
+_cycalloc( sizeof( struct Cyc_Std_SocketError_struct)); _temp11[ 0]=({ struct
+Cyc_Std_SocketError_struct _temp12; _temp12.tag= Cyc_Std_SocketError; _temp12.f1=
+_tag_arr("accept---need 2 args", sizeof( unsigned char), 21u); _temp12;});
+_temp11;}));}{ struct _tuple0 _temp14=({ struct _tuple0 _temp13; _temp13.f1=*((
+void**) _check_unknown_subscript( ap, sizeof( void*), 0)); _temp13.f2=*(( void**)
+_check_unknown_subscript( ap, sizeof( void*), 1)); _temp13;}); void* _temp22;
+unsigned int* _temp24; void* _temp26; struct Cyc_Std_sockaddr_in* _temp28; void*
+_temp30; unsigned int* _temp32; void* _temp34; struct Cyc_Std_sockaddr* _temp36;
+_LL16: _LL27: _temp26= _temp14.f1; if(*(( int*) _temp26) ==  Cyc_Std_SA_sockaddr_in){
 _LL29: _temp28=(( struct Cyc_Std_SA_sockaddr_in_struct*) _temp26)->f1; goto
 _LL23;} else{ goto _LL18;} _LL23: _temp22= _temp14.f2; if(*(( int*) _temp22) == 
 Cyc_Std_SA_socklenptr){ _LL25: _temp24=(( struct Cyc_Std_SA_socklenptr_struct*)

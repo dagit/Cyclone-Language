@@ -680,8 +680,8 @@ Cyc_Absyn_Local_b_struct{ int tag; struct Cyc_Absyn_Vardecl* f1; } ; static
 const int Cyc_Absyn_Pat_b= 4; struct Cyc_Absyn_Pat_b_struct{ int tag; struct Cyc_Absyn_Vardecl*
 f1; } ; struct Cyc_Absyn_Vardecl{ void* sc; struct _tuple0* name; struct Cyc_Absyn_Tqual
 tq; void* type; struct Cyc_Absyn_Exp* initializer; struct Cyc_Core_Opt* rgn;
-struct Cyc_List_List* attributes; } ; struct Cyc_Absyn_Fndecl{ void* sc; int
-is_inline; struct _tuple0* name; struct Cyc_List_List* tvs; struct Cyc_Core_Opt*
+struct Cyc_List_List* attributes; int escapes; } ; struct Cyc_Absyn_Fndecl{ void*
+sc; int is_inline; struct _tuple0* name; struct Cyc_List_List* tvs; struct Cyc_Core_Opt*
 effect; void* ret_type; struct Cyc_List_List* args; int c_varargs; struct Cyc_Absyn_VarargInfo*
 cyc_varargs; struct Cyc_List_List* rgn_po; struct Cyc_Absyn_Stmt* body; struct
 Cyc_Core_Opt* cached_typ; struct Cyc_Core_Opt* param_vardecls; struct Cyc_List_List*
@@ -1387,94 +1387,92 @@ const int[ 3749u]){ - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, 0, 25, 29,
 - 1, - 1, - 1, - 1}; int Cyc_lex_engine( int start_state, struct Cyc_Lexing_lexbuf*
 lbuf){ int state; int base; int backtrk; int c; state= start_state; if( state >= 
 0){ lbuf->lex_last_pos=( lbuf->lex_start_pos= lbuf->lex_curr_pos); lbuf->lex_last_action=
-- 1;} else{ state=( - state) -  1;} while( 1) { base= Cyc_lex_base[
-_check_known_subscript_notnull( 515u, state)]; if( base <  0){ return( - base) - 
-1;} backtrk= Cyc_lex_backtrk[ _check_known_subscript_notnull( 515u, state)]; if(
-backtrk >=  0){ lbuf->lex_last_pos= lbuf->lex_curr_pos; lbuf->lex_last_action=
-backtrk;} if( lbuf->lex_curr_pos >=  lbuf->lex_buffer_len){ if( ! lbuf->lex_eof_reached){
+- 1;} else{ state=( - state) -  1;} while( 1) { base= Cyc_lex_base[ state]; if(
+base <  0){ return( - base) -  1;} backtrk= Cyc_lex_backtrk[ state]; if( backtrk
+>=  0){ lbuf->lex_last_pos= lbuf->lex_curr_pos; lbuf->lex_last_action= backtrk;}
+if( lbuf->lex_curr_pos >=  lbuf->lex_buffer_len){ if( ! lbuf->lex_eof_reached){
 return( - state) -  1;} else{ c= 256;}} else{ c=( int)*(( unsigned char*)
 _check_unknown_subscript( lbuf->lex_buffer, sizeof( unsigned char), lbuf->lex_curr_pos
 ++)); if( c ==  - 1){ c= 256;}} if( Cyc_lex_check[
 _check_known_subscript_notnull( 3749u, base +  c)] ==  state){ state= Cyc_lex_trans[
 _check_known_subscript_notnull( 3749u, base +  c)];} else{ state= Cyc_lex_default[
-_check_known_subscript_notnull( 515u, state)];} if( state <  0){ lbuf->lex_curr_pos=
-lbuf->lex_last_pos; if( lbuf->lex_last_action ==  - 1){( int) _throw(( void*)({
-struct Cyc_Lexing_Error_struct* _temp2=( struct Cyc_Lexing_Error_struct*)
-_cycalloc( sizeof( struct Cyc_Lexing_Error_struct)); _temp2[ 0]=({ struct Cyc_Lexing_Error_struct
-_temp3; _temp3.tag= Cyc_Lexing_Error; _temp3.f1= _tag_arr("empty token", sizeof(
-unsigned char), 12u); _temp3;}); _temp2;}));} else{ return lbuf->lex_last_action;}}
-else{ if( c ==  256){ lbuf->lex_eof_reached= 0;}}}} struct _tuple8* Cyc_line_rec(
-struct Cyc_Lexing_lexbuf* lexbuf, int lexstate){ lexstate= Cyc_lex_engine(
-lexstate, lexbuf); switch( lexstate){ case 0: _LL4: Cyc_macroname( lexbuf); for(
-0; Cyc_current_args !=  0; Cyc_current_args=(( struct Cyc_List_List*)
-_check_null( Cyc_current_args))->tl){ Cyc_current_targets=({ struct Cyc_Set_Set**
-_temp6=( struct Cyc_Set_Set**) _cycalloc( sizeof( struct Cyc_Set_Set*)); _temp6[
-0]=(( struct Cyc_Set_Set*(*)( struct Cyc_Set_Set* s, struct _tagged_arr* elt))
-Cyc_Set_delete)(*(( struct Cyc_Set_Set**) _check_null( Cyc_current_targets)),(
-struct _tagged_arr*)(( struct Cyc_List_List*) _check_null( Cyc_current_args))->hd);
-_temp6;});} return({ struct _tuple8* _temp7=( struct _tuple8*) _cycalloc(
-sizeof( struct _tuple8)); _temp7->f1=( struct _tagged_arr*) _check_null( Cyc_current_source);
-_temp7->f2=*(( struct Cyc_Set_Set**) _check_null( Cyc_current_targets)); _temp7;});
-case 1: _LL5: return Cyc_line( lexbuf); case 2: _LL8: return 0; default: _LL9:(
-lexbuf->refill_buff)( lexbuf); return Cyc_line_rec( lexbuf, lexstate);}( int)
-_throw(( void*)({ struct Cyc_Lexing_Error_struct* _temp11=( struct Cyc_Lexing_Error_struct*)
-_cycalloc( sizeof( struct Cyc_Lexing_Error_struct)); _temp11[ 0]=({ struct Cyc_Lexing_Error_struct
-_temp12; _temp12.tag= Cyc_Lexing_Error; _temp12.f1= _tag_arr("some action didn't return!",
-sizeof( unsigned char), 27u); _temp12;}); _temp11;}));} struct _tuple8* Cyc_line(
-struct Cyc_Lexing_lexbuf* lexbuf){ return Cyc_line_rec( lexbuf, 0);} int Cyc_macroname_rec(
-struct Cyc_Lexing_lexbuf* lexbuf, int lexstate){ lexstate= Cyc_lex_engine(
-lexstate, lexbuf); switch( lexstate){ case 0: _LL13: Cyc_current_source=({
-struct _tagged_arr* _temp15=( struct _tagged_arr*) _cycalloc( sizeof( struct
-_tagged_arr)); _temp15[ 0]=( struct _tagged_arr) Cyc_Std_substring(( struct
-_tagged_arr) Cyc_Lexing_lexeme( lexbuf), 0,( unsigned int)(( Cyc_Lexing_lexeme_end(
-lexbuf) -  Cyc_Lexing_lexeme_start( lexbuf)) -  2)); _temp15;}); Cyc_current_args=
-0; Cyc_current_targets=({ struct Cyc_Set_Set** _temp16=( struct Cyc_Set_Set**)
-_cycalloc( sizeof( struct Cyc_Set_Set*)); _temp16[ 0]=(( struct Cyc_Set_Set*(*)(
-int(* cmp)( struct _tagged_arr*, struct _tagged_arr*))) Cyc_Set_empty)( Cyc_Std_strptrcmp);
-_temp16;}); Cyc_token( lexbuf); return 0; case 1: _LL14: Cyc_current_source=({
-struct _tagged_arr* _temp18=( struct _tagged_arr*) _cycalloc( sizeof( struct
-_tagged_arr)); _temp18[ 0]=( struct _tagged_arr) Cyc_Std_substring(( struct
-_tagged_arr) Cyc_Lexing_lexeme( lexbuf), 0,( unsigned int)(( Cyc_Lexing_lexeme_end(
-lexbuf) -  Cyc_Lexing_lexeme_start( lexbuf)) -  1)); _temp18;}); Cyc_current_args=
-0; Cyc_current_targets=({ struct Cyc_Set_Set** _temp19=( struct Cyc_Set_Set**)
-_cycalloc( sizeof( struct Cyc_Set_Set*)); _temp19[ 0]=(( struct Cyc_Set_Set*(*)(
-int(* cmp)( struct _tagged_arr*, struct _tagged_arr*))) Cyc_Set_empty)( Cyc_Std_strptrcmp);
-_temp19;}); Cyc_args( lexbuf); return 0; case 2: _LL17: Cyc_current_source=({
-struct _tagged_arr* _temp21=( struct _tagged_arr*) _cycalloc( sizeof( struct
-_tagged_arr)); _temp21[ 0]=( struct _tagged_arr) Cyc_Lexing_lexeme( lexbuf);
-_temp21;}); Cyc_current_args= 0; Cyc_current_targets=({ struct Cyc_Set_Set**
-_temp22=( struct Cyc_Set_Set**) _cycalloc( sizeof( struct Cyc_Set_Set*));
-_temp22[ 0]=(( struct Cyc_Set_Set*(*)( int(* cmp)( struct _tagged_arr*, struct
-_tagged_arr*))) Cyc_Set_empty)( Cyc_Std_strptrcmp); _temp22;}); Cyc_token(
-lexbuf); return 0; default: _LL20:( lexbuf->refill_buff)( lexbuf); return Cyc_macroname_rec(
-lexbuf, lexstate);}( int) _throw(( void*)({ struct Cyc_Lexing_Error_struct*
-_temp24=( struct Cyc_Lexing_Error_struct*) _cycalloc( sizeof( struct Cyc_Lexing_Error_struct));
-_temp24[ 0]=({ struct Cyc_Lexing_Error_struct _temp25; _temp25.tag= Cyc_Lexing_Error;
-_temp25.f1= _tag_arr("some action didn't return!", sizeof( unsigned char), 27u);
-_temp25;}); _temp24;}));} int Cyc_macroname( struct Cyc_Lexing_lexbuf* lexbuf){
-return Cyc_macroname_rec( lexbuf, 1);} int Cyc_args_rec( struct Cyc_Lexing_lexbuf*
+state];} if( state <  0){ lbuf->lex_curr_pos= lbuf->lex_last_pos; if( lbuf->lex_last_action
+==  - 1){( int) _throw(( void*)({ struct Cyc_Lexing_Error_struct* _temp2=(
+struct Cyc_Lexing_Error_struct*) _cycalloc( sizeof( struct Cyc_Lexing_Error_struct));
+_temp2[ 0]=({ struct Cyc_Lexing_Error_struct _temp3; _temp3.tag= Cyc_Lexing_Error;
+_temp3.f1= _tag_arr("empty token", sizeof( unsigned char), 12u); _temp3;});
+_temp2;}));} else{ return lbuf->lex_last_action;}} else{ if( c ==  256){ lbuf->lex_eof_reached=
+0;}}}} struct _tuple8* Cyc_line_rec( struct Cyc_Lexing_lexbuf* lexbuf, int
+lexstate){ lexstate= Cyc_lex_engine( lexstate, lexbuf); switch( lexstate){ case
+0: _LL4: Cyc_macroname( lexbuf); for( 0; Cyc_current_args !=  0; Cyc_current_args=((
+struct Cyc_List_List*) _check_null( Cyc_current_args))->tl){ Cyc_current_targets=({
+struct Cyc_Set_Set** _temp6=( struct Cyc_Set_Set**) _cycalloc( sizeof( struct
+Cyc_Set_Set*)); _temp6[ 0]=(( struct Cyc_Set_Set*(*)( struct Cyc_Set_Set* s,
+struct _tagged_arr* elt)) Cyc_Set_delete)(*(( struct Cyc_Set_Set**) _check_null(
+Cyc_current_targets)),( struct _tagged_arr*)(( struct Cyc_List_List*)
+_check_null( Cyc_current_args))->hd); _temp6;});} return({ struct _tuple8*
+_temp7=( struct _tuple8*) _cycalloc( sizeof( struct _tuple8)); _temp7->f1=(
+struct _tagged_arr*) _check_null( Cyc_current_source); _temp7->f2=*(( struct Cyc_Set_Set**)
+_check_null( Cyc_current_targets)); _temp7;}); case 1: _LL5: return Cyc_line(
+lexbuf); case 2: _LL8: return 0; default: _LL9:( lexbuf->refill_buff)( lexbuf);
+return Cyc_line_rec( lexbuf, lexstate);}( int) _throw(( void*)({ struct Cyc_Lexing_Error_struct*
+_temp11=( struct Cyc_Lexing_Error_struct*) _cycalloc( sizeof( struct Cyc_Lexing_Error_struct));
+_temp11[ 0]=({ struct Cyc_Lexing_Error_struct _temp12; _temp12.tag= Cyc_Lexing_Error;
+_temp12.f1= _tag_arr("some action didn't return!", sizeof( unsigned char), 27u);
+_temp12;}); _temp11;}));} struct _tuple8* Cyc_line( struct Cyc_Lexing_lexbuf*
+lexbuf){ return Cyc_line_rec( lexbuf, 0);} int Cyc_macroname_rec( struct Cyc_Lexing_lexbuf*
 lexbuf, int lexstate){ lexstate= Cyc_lex_engine( lexstate, lexbuf); switch(
-lexstate){ case 0: _LL26: { struct _tagged_arr* _temp28=({ struct _tagged_arr*
-_temp30=( struct _tagged_arr*) _cycalloc( sizeof( struct _tagged_arr)); _temp30[
+lexstate){ case 0: _LL13: Cyc_current_source=({ struct _tagged_arr* _temp15=(
+struct _tagged_arr*) _cycalloc( sizeof( struct _tagged_arr)); _temp15[ 0]=(
+struct _tagged_arr) Cyc_Std_substring(( struct _tagged_arr) Cyc_Lexing_lexeme(
+lexbuf), 0,( unsigned int)(( Cyc_Lexing_lexeme_end( lexbuf) -  Cyc_Lexing_lexeme_start(
+lexbuf)) -  2)); _temp15;}); Cyc_current_args= 0; Cyc_current_targets=({ struct
+Cyc_Set_Set** _temp16=( struct Cyc_Set_Set**) _cycalloc( sizeof( struct Cyc_Set_Set*));
+_temp16[ 0]=(( struct Cyc_Set_Set*(*)( int(* cmp)( struct _tagged_arr*, struct
+_tagged_arr*))) Cyc_Set_empty)( Cyc_Std_strptrcmp); _temp16;}); Cyc_token(
+lexbuf); return 0; case 1: _LL14: Cyc_current_source=({ struct _tagged_arr*
+_temp18=( struct _tagged_arr*) _cycalloc( sizeof( struct _tagged_arr)); _temp18[
 0]=( struct _tagged_arr) Cyc_Std_substring(( struct _tagged_arr) Cyc_Lexing_lexeme(
 lexbuf), 0,( unsigned int)(( Cyc_Lexing_lexeme_end( lexbuf) -  Cyc_Lexing_lexeme_start(
-lexbuf)) -  2)); _temp30;}); Cyc_current_args=({ struct Cyc_List_List* _temp29=(
-struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List)); _temp29->hd=(
-void*) _temp28; _temp29->tl= Cyc_current_args; _temp29;}); return Cyc_args(
-lexbuf);} case 1: _LL27: { struct _tagged_arr* _temp32=({ struct _tagged_arr*
-_temp34=( struct _tagged_arr*) _cycalloc( sizeof( struct _tagged_arr)); _temp34[
-0]=( struct _tagged_arr) Cyc_Std_substring(( struct _tagged_arr) Cyc_Lexing_lexeme(
-lexbuf), 0,( unsigned int)(( Cyc_Lexing_lexeme_end( lexbuf) -  Cyc_Lexing_lexeme_start(
-lexbuf)) -  1)); _temp34;}); Cyc_current_args=({ struct Cyc_List_List* _temp33=(
-struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List)); _temp33->hd=(
-void*) _temp32; _temp33->tl= Cyc_current_args; _temp33;}); return Cyc_token(
-lexbuf);} default: _LL31:( lexbuf->refill_buff)( lexbuf); return Cyc_args_rec(
-lexbuf, lexstate);}( int) _throw(( void*)({ struct Cyc_Lexing_Error_struct*
-_temp36=( struct Cyc_Lexing_Error_struct*) _cycalloc( sizeof( struct Cyc_Lexing_Error_struct));
-_temp36[ 0]=({ struct Cyc_Lexing_Error_struct _temp37; _temp37.tag= Cyc_Lexing_Error;
-_temp37.f1= _tag_arr("some action didn't return!", sizeof( unsigned char), 27u);
-_temp37;}); _temp36;}));} int Cyc_args( struct Cyc_Lexing_lexbuf* lexbuf){
-return Cyc_args_rec( lexbuf, 2);} int Cyc_token_rec( struct Cyc_Lexing_lexbuf*
+lexbuf)) -  1)); _temp18;}); Cyc_current_args= 0; Cyc_current_targets=({ struct
+Cyc_Set_Set** _temp19=( struct Cyc_Set_Set**) _cycalloc( sizeof( struct Cyc_Set_Set*));
+_temp19[ 0]=(( struct Cyc_Set_Set*(*)( int(* cmp)( struct _tagged_arr*, struct
+_tagged_arr*))) Cyc_Set_empty)( Cyc_Std_strptrcmp); _temp19;}); Cyc_args( lexbuf);
+return 0; case 2: _LL17: Cyc_current_source=({ struct _tagged_arr* _temp21=(
+struct _tagged_arr*) _cycalloc( sizeof( struct _tagged_arr)); _temp21[ 0]=(
+struct _tagged_arr) Cyc_Lexing_lexeme( lexbuf); _temp21;}); Cyc_current_args= 0;
+Cyc_current_targets=({ struct Cyc_Set_Set** _temp22=( struct Cyc_Set_Set**)
+_cycalloc( sizeof( struct Cyc_Set_Set*)); _temp22[ 0]=(( struct Cyc_Set_Set*(*)(
+int(* cmp)( struct _tagged_arr*, struct _tagged_arr*))) Cyc_Set_empty)( Cyc_Std_strptrcmp);
+_temp22;}); Cyc_token( lexbuf); return 0; default: _LL20:( lexbuf->refill_buff)(
+lexbuf); return Cyc_macroname_rec( lexbuf, lexstate);}( int) _throw(( void*)({
+struct Cyc_Lexing_Error_struct* _temp24=( struct Cyc_Lexing_Error_struct*)
+_cycalloc( sizeof( struct Cyc_Lexing_Error_struct)); _temp24[ 0]=({ struct Cyc_Lexing_Error_struct
+_temp25; _temp25.tag= Cyc_Lexing_Error; _temp25.f1= _tag_arr("some action didn't return!",
+sizeof( unsigned char), 27u); _temp25;}); _temp24;}));} int Cyc_macroname(
+struct Cyc_Lexing_lexbuf* lexbuf){ return Cyc_macroname_rec( lexbuf, 1);} int
+Cyc_args_rec( struct Cyc_Lexing_lexbuf* lexbuf, int lexstate){ lexstate= Cyc_lex_engine(
+lexstate, lexbuf); switch( lexstate){ case 0: _LL26: { struct _tagged_arr*
+_temp28=({ struct _tagged_arr* _temp30=( struct _tagged_arr*) _cycalloc( sizeof(
+struct _tagged_arr)); _temp30[ 0]=( struct _tagged_arr) Cyc_Std_substring((
+struct _tagged_arr) Cyc_Lexing_lexeme( lexbuf), 0,( unsigned int)(( Cyc_Lexing_lexeme_end(
+lexbuf) -  Cyc_Lexing_lexeme_start( lexbuf)) -  2)); _temp30;}); Cyc_current_args=({
+struct Cyc_List_List* _temp29=( struct Cyc_List_List*) _cycalloc( sizeof( struct
+Cyc_List_List)); _temp29->hd=( void*) _temp28; _temp29->tl= Cyc_current_args;
+_temp29;}); return Cyc_args( lexbuf);} case 1: _LL27: { struct _tagged_arr*
+_temp32=({ struct _tagged_arr* _temp34=( struct _tagged_arr*) _cycalloc( sizeof(
+struct _tagged_arr)); _temp34[ 0]=( struct _tagged_arr) Cyc_Std_substring((
+struct _tagged_arr) Cyc_Lexing_lexeme( lexbuf), 0,( unsigned int)(( Cyc_Lexing_lexeme_end(
+lexbuf) -  Cyc_Lexing_lexeme_start( lexbuf)) -  1)); _temp34;}); Cyc_current_args=({
+struct Cyc_List_List* _temp33=( struct Cyc_List_List*) _cycalloc( sizeof( struct
+Cyc_List_List)); _temp33->hd=( void*) _temp32; _temp33->tl= Cyc_current_args;
+_temp33;}); return Cyc_token( lexbuf);} default: _LL31:( lexbuf->refill_buff)(
+lexbuf); return Cyc_args_rec( lexbuf, lexstate);}( int) _throw(( void*)({ struct
+Cyc_Lexing_Error_struct* _temp36=( struct Cyc_Lexing_Error_struct*) _cycalloc(
+sizeof( struct Cyc_Lexing_Error_struct)); _temp36[ 0]=({ struct Cyc_Lexing_Error_struct
+_temp37; _temp37.tag= Cyc_Lexing_Error; _temp37.f1= _tag_arr("some action didn't return!",
+sizeof( unsigned char), 27u); _temp37;}); _temp36;}));} int Cyc_args( struct Cyc_Lexing_lexbuf*
+lexbuf){ return Cyc_args_rec( lexbuf, 2);} int Cyc_token_rec( struct Cyc_Lexing_lexbuf*
 lexbuf, int lexstate){ lexstate= Cyc_lex_engine( lexstate, lexbuf); switch(
 lexstate){ case 0: _LL38: Cyc_add_target(({ struct _tagged_arr* _temp40=( struct
 _tagged_arr*) _cycalloc( sizeof( struct _tagged_arr)); _temp40[ 0]=( struct
@@ -2639,19 +2637,15 @@ struct Cyc_Std_String_pa_struct _temp1074; _temp1074.tag= Cyc_Std_String_pa;
 _temp1074.f1=( struct _tagged_arr) filename;{ void* _temp1073[ 1u]={& _temp1074};
 Cyc_Std_aprintf( _tag_arr("_%s_", sizeof( unsigned char), 5u), _tag_arr(
 _temp1073, sizeof( void*), 1u));}});{ int _temp924= 0; for( 0; _temp924 < 
-_get_arr_size( ifdefmacro, sizeof( unsigned char)); _temp924 ++){ if(*((
-unsigned char*) _check_unknown_subscript( ifdefmacro, sizeof( unsigned char),
-_temp924)) == '.'? 1:*(( unsigned char*) _check_unknown_subscript( ifdefmacro,
-sizeof( unsigned char), _temp924)) == '/'){*(( unsigned char*)
-_check_unknown_subscript( ifdefmacro, sizeof( unsigned char), _temp924))='_';}
-else{ if(*(( unsigned char*) _check_unknown_subscript( ifdefmacro, sizeof(
-unsigned char), _temp924)) != '_'?*(( unsigned char*) _check_unknown_subscript(
-ifdefmacro, sizeof( unsigned char), _temp924)) != '/': 0){*(( unsigned char*)
-_check_unknown_subscript( ifdefmacro, sizeof( unsigned char), _temp924))=(
-unsigned char) toupper(( int)*(( unsigned char*) _check_unknown_subscript(
-ifdefmacro, sizeof( unsigned char), _temp924)));}}}}({ struct Cyc_Std_String_pa_struct
-_temp927; _temp927.tag= Cyc_Std_String_pa; _temp927.f1=( struct _tagged_arr)
-ifdefmacro;{ struct Cyc_Std_String_pa_struct _temp926; _temp926.tag= Cyc_Std_String_pa;
+_get_arr_size( ifdefmacro, sizeof( unsigned char)); _temp924 ++){ if(((
+unsigned char*) ifdefmacro.curr)[ _temp924] == '.'? 1:(( unsigned char*)
+ifdefmacro.curr)[ _temp924] == '/'){(( unsigned char*) ifdefmacro.curr)[
+_temp924]='_';} else{ if((( unsigned char*) ifdefmacro.curr)[ _temp924] != '_'?((
+unsigned char*) ifdefmacro.curr)[ _temp924] != '/': 0){(( unsigned char*)
+ifdefmacro.curr)[ _temp924]=( unsigned char) toupper(( int)(( unsigned char*)
+ifdefmacro.curr)[ _temp924]);}}}}({ struct Cyc_Std_String_pa_struct _temp927;
+_temp927.tag= Cyc_Std_String_pa; _temp927.f1=( struct _tagged_arr) ifdefmacro;{
+struct Cyc_Std_String_pa_struct _temp926; _temp926.tag= Cyc_Std_String_pa;
 _temp926.f1=( struct _tagged_arr) ifdefmacro;{ void* _temp925[ 2u]={& _temp926,&
 _temp927}; Cyc_Std_fprintf( out_file, _tag_arr("#ifndef %s\n#define %s\n",
 sizeof( unsigned char), 23u), _tag_arr( _temp925, sizeof( void*), 2u));}}}); if(
@@ -2961,8 +2955,7 @@ sizeof( unsigned char), 47u), _tag_arr("in_port_t", sizeof( unsigned char), 10u)
 Cyc_sizeof_inaddr= Cyc_getsize(( struct _tagged_arr) _temp1143, _tag_arr("#include <sys/types.h>\n#include <netinet/in.h>",
 sizeof( unsigned char), 47u), _tag_arr("struct in_addr", sizeof( unsigned char),
 15u));{ int i= 2; for( 0; i <  argc; i ++){ Cyc_process_specfile(( struct
-_tagged_arr)*(( struct _tagged_arr*) _check_unknown_subscript( argv, sizeof(
-struct _tagged_arr), i)),( struct _tagged_arr) _temp1143);}} Cyc_Std_fclose((
-struct Cyc_Std___sFILE*) _check_null( Cyc_log_file)); Cyc_Std_fclose(( struct
-Cyc_Std___sFILE*) _check_null( Cyc_cstubs_file)); Cyc_Std_fclose(( struct Cyc_Std___sFILE*)
-_check_null( Cyc_cycstubs_file)); return 0;}}
+_tagged_arr)(( struct _tagged_arr*) argv.curr)[ i],( struct _tagged_arr)
+_temp1143);}} Cyc_Std_fclose(( struct Cyc_Std___sFILE*) _check_null( Cyc_log_file));
+Cyc_Std_fclose(( struct Cyc_Std___sFILE*) _check_null( Cyc_cstubs_file)); Cyc_Std_fclose((
+struct Cyc_Std___sFILE*) _check_null( Cyc_cycstubs_file)); return 0;}}

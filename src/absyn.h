@@ -618,6 +618,9 @@ namespace Absyn {
     // functions cannot be aligned or packed.  And non-functions cannot
     // have regpar(n), stdcall, cdecl, noreturn, or const attributes.
     attributes_t       attributes; 
+    bool               escapes;     // set by type-checker -- used for simple
+    // flow analyses, means that &x is taken in some way so there can be
+    // aliasing going on.
   };
 
   // Function declarations.

@@ -625,8 +625,8 @@ Cyc_Absyn_Local_b_struct{ int tag; struct Cyc_Absyn_Vardecl* f1; } ; static
 const int Cyc_Absyn_Pat_b= 4; struct Cyc_Absyn_Pat_b_struct{ int tag; struct Cyc_Absyn_Vardecl*
 f1; } ; struct Cyc_Absyn_Vardecl{ void* sc; struct _tuple1* name; struct Cyc_Absyn_Tqual
 tq; void* type; struct Cyc_Absyn_Exp* initializer; struct Cyc_Core_Opt* rgn;
-struct Cyc_List_List* attributes; } ; struct Cyc_Absyn_Fndecl{ void* sc; int
-is_inline; struct _tuple1* name; struct Cyc_List_List* tvs; struct Cyc_Core_Opt*
+struct Cyc_List_List* attributes; int escapes; } ; struct Cyc_Absyn_Fndecl{ void*
+sc; int is_inline; struct _tuple1* name; struct Cyc_List_List* tvs; struct Cyc_Core_Opt*
 effect; void* ret_type; struct Cyc_List_List* args; int c_varargs; struct Cyc_Absyn_VarargInfo*
 cyc_varargs; struct Cyc_List_List* rgn_po; struct Cyc_Absyn_Stmt* body; struct
 Cyc_Core_Opt* cached_typ; struct Cyc_Core_Opt* param_vardecls; struct Cyc_List_List*
@@ -809,38 +809,36 @@ const int Cyc_lex_trans[ 266u]=( const int[ 266u]){ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 Cyc_Lexing_lexbuf* lbuf){ int state; int base; int backtrk; int c; state=
 start_state; if( state >=  0){ lbuf->lex_last_pos=( lbuf->lex_start_pos= lbuf->lex_curr_pos);
 lbuf->lex_last_action= - 1;} else{ state=( - state) -  1;} while( 1) { base= Cyc_lex_base[
-_check_known_subscript_notnull( 15u, state)]; if( base <  0){ return( - base) - 
-1;} backtrk= Cyc_lex_backtrk[ _check_known_subscript_notnull( 15u, state)]; if(
-backtrk >=  0){ lbuf->lex_last_pos= lbuf->lex_curr_pos; lbuf->lex_last_action=
+state]; if( base <  0){ return( - base) -  1;} backtrk= Cyc_lex_backtrk[ state];
+if( backtrk >=  0){ lbuf->lex_last_pos= lbuf->lex_curr_pos; lbuf->lex_last_action=
 backtrk;} if( lbuf->lex_curr_pos >=  lbuf->lex_buffer_len){ if( ! lbuf->lex_eof_reached){
 return( - state) -  1;} else{ c= 256;}} else{ c=( int)*(( unsigned char*)
 _check_unknown_subscript( lbuf->lex_buffer, sizeof( unsigned char), lbuf->lex_curr_pos
 ++)); if( c ==  - 1){ c= 256;}} if( Cyc_lex_check[
 _check_known_subscript_notnull( 266u, base +  c)] ==  state){ state= Cyc_lex_trans[
 _check_known_subscript_notnull( 266u, base +  c)];} else{ state= Cyc_lex_default[
-_check_known_subscript_notnull( 15u, state)];} if( state <  0){ lbuf->lex_curr_pos=
-lbuf->lex_last_pos; if( lbuf->lex_last_action ==  - 1){( int) _throw(( void*)({
-struct Cyc_Lexing_Error_struct* _temp0=( struct Cyc_Lexing_Error_struct*)
-_cycalloc( sizeof( struct Cyc_Lexing_Error_struct)); _temp0[ 0]=({ struct Cyc_Lexing_Error_struct
-_temp1; _temp1.tag= Cyc_Lexing_Error; _temp1.f1= _tag_arr("empty token", sizeof(
-unsigned char), 12u); _temp1;}); _temp0;}));} else{ return lbuf->lex_last_action;}}
-else{ if( c ==  256){ lbuf->lex_eof_reached= 0;}}}} struct _tuple10* Cyc_token_rec(
-struct Cyc_Lexing_lexbuf* lexbuf, int lexstate){ lexstate= Cyc_lex_engine(
-lexstate, lexbuf); switch( lexstate){ case 0: _LL2: { int _temp4= lexbuf->lex_start_pos
-+  5; int _temp5=( lexbuf->lex_curr_pos -  lexbuf->lex_start_pos) -  7; return({
-struct _tuple10* _temp6=( struct _tuple10*) _cycalloc( sizeof( struct _tuple10));
-_temp6->f1= Cyc_Lexing_lexeme_start( lexbuf); _temp6->f2=( void*)({ struct Cyc_Standalone_struct*
-_temp7=( struct Cyc_Standalone_struct*) _cycalloc( sizeof( struct Cyc_Standalone_struct));
-_temp7[ 0]=({ struct Cyc_Standalone_struct _temp8; _temp8.tag= Cyc_Standalone;
-_temp8.f1= Cyc_Std_substring(( struct _tagged_arr) lexbuf->lex_buffer, _temp4,(
-unsigned int) _temp5); _temp8;}); _temp7;}); _temp6;});} case 1: _LL3: { int
-_temp10= lexbuf->lex_start_pos +  4; int _temp11=( lexbuf->lex_curr_pos - 
-lexbuf->lex_start_pos) -  6; return({ struct _tuple10* _temp12=( struct _tuple10*)
-_cycalloc( sizeof( struct _tuple10)); _temp12->f1= Cyc_Lexing_lexeme_start(
-lexbuf); _temp12->f2=( void*)({ struct Cyc_MatchDecl_struct* _temp13=( struct
-Cyc_MatchDecl_struct*) _cycalloc( sizeof( struct Cyc_MatchDecl_struct)); _temp13[
-0]=({ struct Cyc_MatchDecl_struct _temp14; _temp14.tag= Cyc_MatchDecl; _temp14.f1=
-Cyc_Std_substring(( struct _tagged_arr) lexbuf->lex_buffer, _temp10,(
+state];} if( state <  0){ lbuf->lex_curr_pos= lbuf->lex_last_pos; if( lbuf->lex_last_action
+==  - 1){( int) _throw(( void*)({ struct Cyc_Lexing_Error_struct* _temp0=(
+struct Cyc_Lexing_Error_struct*) _cycalloc( sizeof( struct Cyc_Lexing_Error_struct));
+_temp0[ 0]=({ struct Cyc_Lexing_Error_struct _temp1; _temp1.tag= Cyc_Lexing_Error;
+_temp1.f1= _tag_arr("empty token", sizeof( unsigned char), 12u); _temp1;});
+_temp0;}));} else{ return lbuf->lex_last_action;}} else{ if( c ==  256){ lbuf->lex_eof_reached=
+0;}}}} struct _tuple10* Cyc_token_rec( struct Cyc_Lexing_lexbuf* lexbuf, int
+lexstate){ lexstate= Cyc_lex_engine( lexstate, lexbuf); switch( lexstate){ case
+0: _LL2: { int _temp4= lexbuf->lex_start_pos +  5; int _temp5=( lexbuf->lex_curr_pos
+-  lexbuf->lex_start_pos) -  7; return({ struct _tuple10* _temp6=( struct
+_tuple10*) _cycalloc( sizeof( struct _tuple10)); _temp6->f1= Cyc_Lexing_lexeme_start(
+lexbuf); _temp6->f2=( void*)({ struct Cyc_Standalone_struct* _temp7=( struct Cyc_Standalone_struct*)
+_cycalloc( sizeof( struct Cyc_Standalone_struct)); _temp7[ 0]=({ struct Cyc_Standalone_struct
+_temp8; _temp8.tag= Cyc_Standalone; _temp8.f1= Cyc_Std_substring(( struct
+_tagged_arr) lexbuf->lex_buffer, _temp4,( unsigned int) _temp5); _temp8;});
+_temp7;}); _temp6;});} case 1: _LL3: { int _temp10= lexbuf->lex_start_pos +  4;
+int _temp11=( lexbuf->lex_curr_pos -  lexbuf->lex_start_pos) -  6; return({
+struct _tuple10* _temp12=( struct _tuple10*) _cycalloc( sizeof( struct _tuple10));
+_temp12->f1= Cyc_Lexing_lexeme_start( lexbuf); _temp12->f2=( void*)({ struct Cyc_MatchDecl_struct*
+_temp13=( struct Cyc_MatchDecl_struct*) _cycalloc( sizeof( struct Cyc_MatchDecl_struct));
+_temp13[ 0]=({ struct Cyc_MatchDecl_struct _temp14; _temp14.tag= Cyc_MatchDecl;
+_temp14.f1= Cyc_Std_substring(( struct _tagged_arr) lexbuf->lex_buffer, _temp10,(
 unsigned int) _temp11); _temp14;}); _temp13;}); _temp12;});} case 2: _LL9:
 return 0; case 3: _LL15: return Cyc_token( lexbuf); default: _LL16:( lexbuf->refill_buff)(
 lexbuf); return Cyc_token_rec( lexbuf, lexstate);}( int) _throw(( void*)({
@@ -1834,20 +1832,18 @@ goto _LL845; _LL845: _temp844= _temp842.f3; goto _LL843; _LL843: Cyc_Dump_dumptq
 _temp848); Cyc_Dump_dumpntyp( _temp846); Cyc_Dump_dumptms( Cyc_List_imp_rev(
 _temp844), f, a);} void Cyc_Dump_pr_comment( struct Cyc_Std___sFILE* outf,
 struct _tagged_arr s){ int depth= 0; int len=( int) Cyc_Std_strlen( s); int i= 0;
-for( 0; i <  len; i ++){ unsigned char c=*(( const unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char), i)); if( c != '['){ Cyc_Std_fputc((
-int) c, outf); continue;} Cyc_Std_fputs( _tag_arr("\\texttt{", sizeof(
-unsigned char), 9u), outf); i ++; depth ++; for( 0; i <  len; i ++){
-unsigned char c=*(( const unsigned char*) _check_unknown_subscript( s, sizeof(
-unsigned char), i)); if( c == ']'){ depth --; if( depth ==  0){ Cyc_Std_fputc((
-int)'}', outf); break;}} else{ if( c == '['){ depth ++;}} Cyc_Std_fputc(( int) c,
-outf);}}} void Cyc_Dump_dump_comment( struct _tagged_arr s){ Cyc_Dump_pr_comment(
-Cyc_Std_stdout, s);} void Cyc_Dump_dumpdecl( struct Cyc_Absyn_Decl* d, struct
-_tagged_arr comment){ void* _temp850=( void*) d->r; struct Cyc_Absyn_Structdecl*
-_temp876; struct Cyc_Absyn_Uniondecl* _temp878; struct Cyc_Absyn_Vardecl*
-_temp880; struct Cyc_Absyn_Vardecl _temp882; void* _temp883; struct Cyc_Absyn_Tqual
-_temp885; struct _tuple1* _temp887; struct Cyc_Absyn_Tuniondecl* _temp889;
-struct Cyc_Absyn_Tuniondecl _temp891; int _temp892; struct Cyc_Core_Opt*
+for( 0; i <  len; i ++){ unsigned char c=(( const unsigned char*) s.curr)[ i];
+if( c != '['){ Cyc_Std_fputc(( int) c, outf); continue;} Cyc_Std_fputs( _tag_arr("\\texttt{",
+sizeof( unsigned char), 9u), outf); i ++; depth ++; for( 0; i <  len; i ++){
+unsigned char c=(( const unsigned char*) s.curr)[ i]; if( c == ']'){ depth --;
+if( depth ==  0){ Cyc_Std_fputc(( int)'}', outf); break;}} else{ if( c == '['){
+depth ++;}} Cyc_Std_fputc(( int) c, outf);}}} void Cyc_Dump_dump_comment( struct
+_tagged_arr s){ Cyc_Dump_pr_comment( Cyc_Std_stdout, s);} void Cyc_Dump_dumpdecl(
+struct Cyc_Absyn_Decl* d, struct _tagged_arr comment){ void* _temp850=( void*) d->r;
+struct Cyc_Absyn_Structdecl* _temp876; struct Cyc_Absyn_Uniondecl* _temp878;
+struct Cyc_Absyn_Vardecl* _temp880; struct Cyc_Absyn_Vardecl _temp882; void*
+_temp883; struct Cyc_Absyn_Tqual _temp885; struct _tuple1* _temp887; struct Cyc_Absyn_Tuniondecl*
+_temp889; struct Cyc_Absyn_Tuniondecl _temp891; int _temp892; struct Cyc_Core_Opt*
 _temp894; struct Cyc_List_List* _temp896; struct _tuple1* _temp898; void*
 _temp900; struct Cyc_Absyn_Enumdecl* _temp902; struct Cyc_Absyn_Enumdecl
 _temp904; struct Cyc_Core_Opt* _temp905; struct _tuple1* _temp907; void*
@@ -1941,14 +1937,13 @@ _LL923: goto _LL924; case ' ': _LL924: goto _LL925; case '\n': _LL925: goto
 _LL926; case '\t': _LL926: return 1; default: _LL927: return 0;}} static struct
 _tagged_arr Cyc_sh_escape_string( struct _tagged_arr s){ unsigned int _temp929=
 Cyc_Std_strlen( s); int _temp930= 0; int _temp931= 0;{ int i= 0; for( 0; i < 
-_temp929; i ++){ unsigned char _temp932=*(( const unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char), i)); if( _temp932 == '\''){
-_temp930 ++;} else{ if( Cyc_is_other_special( _temp932)){ _temp931 ++;}}}} if(
-_temp930 ==  0? _temp931 ==  0: 0){ return s;} if( _temp930 ==  0){ return(
-struct _tagged_arr) Cyc_Std_strconcat_l(({ struct _tagged_arr* _temp933[ 3u];
-_temp933[ 2u]= _init_tag_arr(( struct _tagged_arr*) _cycalloc( sizeof( struct
-_tagged_arr)),"'", sizeof( unsigned char), 2u); _temp933[ 1u]=({ struct
-_tagged_arr* _temp934=( struct _tagged_arr*) _cycalloc( sizeof( struct
+_temp929; i ++){ unsigned char _temp932=(( const unsigned char*) s.curr)[ i];
+if( _temp932 == '\''){ _temp930 ++;} else{ if( Cyc_is_other_special( _temp932)){
+_temp931 ++;}}}} if( _temp930 ==  0? _temp931 ==  0: 0){ return s;} if( _temp930
+==  0){ return( struct _tagged_arr) Cyc_Std_strconcat_l(({ struct _tagged_arr*
+_temp933[ 3u]; _temp933[ 2u]= _init_tag_arr(( struct _tagged_arr*) _cycalloc(
+sizeof( struct _tagged_arr)),"'", sizeof( unsigned char), 2u); _temp933[ 1u]=({
+struct _tagged_arr* _temp934=( struct _tagged_arr*) _cycalloc( sizeof( struct
 _tagged_arr)); _temp934[ 0]=( struct _tagged_arr) s; _temp934;}); _temp933[ 0u]=
 _init_tag_arr(( struct _tagged_arr*) _cycalloc( sizeof( struct _tagged_arr)),"'",
 sizeof( unsigned char), 2u);(( struct Cyc_List_List*(*)( struct _tagged_arr))
@@ -1959,17 +1954,16 @@ unsigned char*) _cycalloc_atomic( _check_times( sizeof( unsigned char), _temp940
 struct _tagged_arr _temp943= _tag_arr( _temp941, sizeof( unsigned char),
 _temp935 +  1);{ unsigned int _temp942= _temp940; unsigned int i; for( i= 0; i < 
 _temp942; i ++){ _temp941[ i]='\000';}}; _temp943;}); int _temp937= 0; int
-_temp938= 0; for( 0; _temp937 <  _temp929; _temp937 ++){ unsigned char _temp939=*((
-const unsigned char*) _check_unknown_subscript( s, sizeof( unsigned char),
-_temp937)); if( _temp939 == '\''? 1: Cyc_is_other_special( _temp939)){*((
-unsigned char*) _check_unknown_subscript( _temp936, sizeof( unsigned char),
-_temp938 ++))='\\';}*(( unsigned char*) _check_unknown_subscript( _temp936,
-sizeof( unsigned char), _temp938 ++))= _temp939;} return( struct _tagged_arr)
-_temp936;}} static struct _tagged_arr* Cyc_sh_escape_stringptr( struct
-_tagged_arr* sp){ return({ struct _tagged_arr* _temp944=( struct _tagged_arr*)
-_cycalloc( sizeof( struct _tagged_arr)); _temp944[ 0]= Cyc_sh_escape_string(* sp);
-_temp944;});} static struct Cyc_Lineno_Pos* Cyc_new_pos(){ return({ struct Cyc_Lineno_Pos*
-_temp945=( struct Cyc_Lineno_Pos*) _cycalloc( sizeof( struct Cyc_Lineno_Pos));
+_temp938= 0; for( 0; _temp937 <  _temp929; _temp937 ++){ unsigned char _temp939=((
+const unsigned char*) s.curr)[ _temp937]; if( _temp939 == '\''? 1: Cyc_is_other_special(
+_temp939)){*(( unsigned char*) _check_unknown_subscript( _temp936, sizeof(
+unsigned char), _temp938 ++))='\\';}*(( unsigned char*) _check_unknown_subscript(
+_temp936, sizeof( unsigned char), _temp938 ++))= _temp939;} return( struct
+_tagged_arr) _temp936;}} static struct _tagged_arr* Cyc_sh_escape_stringptr(
+struct _tagged_arr* sp){ return({ struct _tagged_arr* _temp944=( struct
+_tagged_arr*) _cycalloc( sizeof( struct _tagged_arr)); _temp944[ 0]= Cyc_sh_escape_string(*
+sp); _temp944;});} static struct Cyc_Lineno_Pos* Cyc_new_pos(){ return({ struct
+Cyc_Lineno_Pos* _temp945=( struct Cyc_Lineno_Pos*) _cycalloc( sizeof( struct Cyc_Lineno_Pos));
 _temp945->logical_file= _tag_arr("", sizeof( unsigned char), 1u); _temp945->line=
 Cyc_Core_new_string( 0); _temp945->line_no= 0; _temp945->col= 0; _temp945;});}
 struct _tuple14{ int f1; struct Cyc_Lineno_Pos* f2; } ; static struct _tuple14*

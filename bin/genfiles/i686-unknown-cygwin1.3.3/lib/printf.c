@@ -548,8 +548,7 @@ fieldsz += 2;}} fieldsz += dpad; if(( flags & ( 16 |  32)) ==  0){ if( Cyc_Std__
 ioputc, ioputc_env,' ', width -  fieldsz) <  width -  fieldsz){ goto error;}}
 if(( int) sign){ do { if( Cyc_Std__IO_sputn( ioputc, ioputc_env, _tag_arr(& sign,
 sizeof( unsigned char), 1u), 1) !=  1){ goto error;}} while ( 0);} else{ if(
-flags &  64){ ox[ _check_known_subscript_notnull( 2u, 0)]='0'; ox[
-_check_known_subscript_notnull( 2u, 1)]=( unsigned char) ch; do { if( Cyc_Std__IO_sputn(
+flags &  64){ ox[ 0]='0'; ox[ 1]=( unsigned char) ch; do { if( Cyc_Std__IO_sputn(
 ioputc, ioputc_env, _tag_arr( ox, sizeof( unsigned char), 2u), 2) !=  2){ goto
 error;}} while ( 0);}} if(( flags & ( 16 |  32)) ==  32){ if( Cyc_Std__IO_padn(
 ioputc, ioputc_env,'0', width -  fieldsz) <  width -  fieldsz){ goto error;}}
@@ -731,14 +730,14 @@ unsigned int _temp142= n; struct _tuple0 _temp143=({ struct _tuple0 _temp144;
 _temp144.f1=& _temp141; _temp144.f2=& _temp142; _temp144;}); ans=(( int(*)( int(*
 ioputc)( int, struct _tuple0*), struct _tuple0* ioputc_env, struct _tagged_arr
 fmt0, struct _tagged_arr ap)) Cyc_Std__IO_vfprintf)( Cyc_Std_putc_string,&
-_temp143, fmt, ap); if( 0 <=  ans){*(( unsigned char*) _check_unknown_subscript(
-s, sizeof( unsigned char), ans))='\000';} return ans;} int Cyc_Std_snprintf(
-struct _tagged_arr s, unsigned int n, struct _tagged_arr fmt, struct _tagged_arr
-ap){ return Cyc_Std_vsnprintf( s, n, fmt, ap);} int Cyc_Std_vsprintf( struct
-_tagged_arr s, struct _tagged_arr fmt, struct _tagged_arr ap){ return Cyc_Std_vsnprintf(
-s, _get_arr_size( s, sizeof( unsigned char)), fmt, ap);} int Cyc_Std_sprintf(
-struct _tagged_arr s, struct _tagged_arr fmt, struct _tagged_arr ap){ return Cyc_Std_vsnprintf(
-s, _get_arr_size( s, sizeof( unsigned char)), fmt, ap);} static int Cyc_Std_putc_void(
+_temp143, fmt, ap); if( 0 <=  ans){(( unsigned char*) s.curr)[ ans]='\000';}
+return ans;} int Cyc_Std_snprintf( struct _tagged_arr s, unsigned int n, struct
+_tagged_arr fmt, struct _tagged_arr ap){ return Cyc_Std_vsnprintf( s, n, fmt, ap);}
+int Cyc_Std_vsprintf( struct _tagged_arr s, struct _tagged_arr fmt, struct
+_tagged_arr ap){ return Cyc_Std_vsnprintf( s, _get_arr_size( s, sizeof(
+unsigned char)), fmt, ap);} int Cyc_Std_sprintf( struct _tagged_arr s, struct
+_tagged_arr fmt, struct _tagged_arr ap){ return Cyc_Std_vsnprintf( s,
+_get_arr_size( s, sizeof( unsigned char)), fmt, ap);} static int Cyc_Std_putc_void(
 int c, int dummy){ return 1;} struct _tagged_arr Cyc_Std_vrprintf( struct
 _RegionHandle* r1, struct _tagged_arr fmt, struct _tagged_arr ap){ int size=((
 int(*)( int(* ioputc)( int, int), int ioputc_env, struct _tagged_arr fmt0,

@@ -947,7 +947,7 @@ static void dumpids(list_t<vardecl_t> vds) {
 }
 
 void dumpvardecl(vardecl_t vd,Position::seg_t loc) {
-  let &Vardecl{sc,name,tq,type,initializer,_,atts} = vd;
+  let &Vardecl{sc,name,tq,type,initializer,_,atts,_} = vd;
   dumploc(loc);
   if(to_VC) {
     dumpatts(atts);

@@ -588,12 +588,12 @@ decl_t letv_decl(list_t<vardecl_t,`H> vds, seg_t loc) {
 vardecl_t new_vardecl(qvar_t x, type_t t, exp_opt_t init) {
   return new Vardecl{.sc=Public, .name=x, .tq=empty_tqual(),
                         .type=t, .initializer=init, .rgn=NULL, 
-                        .attributes=NULL};
+                        .attributes=NULL,false};
 }
 vardecl_t static_vardecl(qvar_t x, type_t t, exp_opt_t init) {
   return new Vardecl{.sc=Static, .name=x, .tq=empty_tqual(),
                         .type=t, .initializer=init, .rgn=NULL,
-                        .attributes=NULL};
+                        .attributes=NULL,false};
 }
 decl_t struct_decl(scope_t s,opt_t<typedef_name_t,`H> n,list_t<tvar_t,`H> ts,
                    opt_t<list_t<structfield_t,`H>,`H> fs, attributes_t atts,

@@ -592,8 +592,8 @@ Cyc_Absyn_Local_b_struct{ int tag; struct Cyc_Absyn_Vardecl* f1; } ; static
 const int Cyc_Absyn_Pat_b= 4; struct Cyc_Absyn_Pat_b_struct{ int tag; struct Cyc_Absyn_Vardecl*
 f1; } ; struct Cyc_Absyn_Vardecl{ void* sc; struct _tuple0* name; struct Cyc_Absyn_Tqual
 tq; void* type; struct Cyc_Absyn_Exp* initializer; struct Cyc_Core_Opt* rgn;
-struct Cyc_List_List* attributes; } ; struct Cyc_Absyn_Fndecl{ void* sc; int
-is_inline; struct _tuple0* name; struct Cyc_List_List* tvs; struct Cyc_Core_Opt*
+struct Cyc_List_List* attributes; int escapes; } ; struct Cyc_Absyn_Fndecl{ void*
+sc; int is_inline; struct _tuple0* name; struct Cyc_List_List* tvs; struct Cyc_Core_Opt*
 effect; void* ret_type; struct Cyc_List_List* args; int c_varargs; struct Cyc_Absyn_VarargInfo*
 cyc_varargs; struct Cyc_List_List* rgn_po; struct Cyc_Absyn_Stmt* body; struct
 Cyc_Core_Opt* cached_typ; struct Cyc_Core_Opt* param_vardecls; struct Cyc_List_List*
@@ -772,35 +772,32 @@ _check_unknown_subscript( _temp15, sizeof( unsigned char), j ++))=(
 unsigned char)('0' + ( c &  7)); return( struct _tagged_arr) _temp15;}}} static
 int Cyc_Absynpp_special( struct _tagged_arr s){ int sz=( int)( _get_arr_size( s,
 sizeof( unsigned char)) -  1);{ int i= 0; for( 0; i <  sz; i ++){ unsigned char
-c=*(( const unsigned char*) _check_unknown_subscript( s, sizeof( unsigned char),
-i)); if((( c <= ' '? 1: c >= '~')? 1: c == '"')? 1: c == '\\'){ return 1;}}}
-return 0;} struct _tagged_arr Cyc_Absynpp_string_escape( struct _tagged_arr s){
-if( ! Cyc_Absynpp_special( s)){ return s;}{ int n=( int)( _get_arr_size( s,
-sizeof( unsigned char)) -  1); if( n >  0?*(( const unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char), n)) == '\000': 0){ n --;}{
-int len= 0;{ int i= 0; for( 0; i <=  n; i ++){ unsigned char _temp16=*(( const
-unsigned char*) _check_unknown_subscript( s, sizeof( unsigned char), i)); _LL18:
-if( _temp16 == '\a'){ goto _LL19;} else{ goto _LL20;} _LL20: if( _temp16 == '\b'){
-goto _LL21;} else{ goto _LL22;} _LL22: if( _temp16 == '\f'){ goto _LL23;} else{
-goto _LL24;} _LL24: if( _temp16 == '\n'){ goto _LL25;} else{ goto _LL26;} _LL26:
-if( _temp16 == '\r'){ goto _LL27;} else{ goto _LL28;} _LL28: if( _temp16 == '\t'){
-goto _LL29;} else{ goto _LL30;} _LL30: if( _temp16 == '\v'){ goto _LL31;} else{
-goto _LL32;} _LL32: if( _temp16 == '\\'){ goto _LL33;} else{ goto _LL34;} _LL34:
-if( _temp16 == '"'){ goto _LL35;} else{ goto _LL36;} _LL36: goto _LL37; _LL19:
-goto _LL21; _LL21: goto _LL23; _LL23: goto _LL25; _LL25: goto _LL27; _LL27: goto
-_LL29; _LL29: goto _LL31; _LL31: goto _LL33; _LL33: goto _LL35; _LL35: len += 2;
-goto _LL17; _LL37: if( _temp16 >= ' '? _temp16 <= '~': 0){ len ++;} else{ len +=
-4;} goto _LL17; _LL17:;}}{ struct _tagged_arr t= Cyc_Core_new_string((
+c=(( const unsigned char*) s.curr)[ i]; if((( c <= ' '? 1: c >= '~')? 1: c == '"')?
+1: c == '\\'){ return 1;}}} return 0;} struct _tagged_arr Cyc_Absynpp_string_escape(
+struct _tagged_arr s){ if( ! Cyc_Absynpp_special( s)){ return s;}{ int n=( int)(
+_get_arr_size( s, sizeof( unsigned char)) -  1); if( n >  0?(( const
+unsigned char*) s.curr)[ n] == '\000': 0){ n --;}{ int len= 0;{ int i= 0; for( 0;
+i <=  n; i ++){ unsigned char _temp16=(( const unsigned char*) s.curr)[ i];
+_LL18: if( _temp16 == '\a'){ goto _LL19;} else{ goto _LL20;} _LL20: if( _temp16
+== '\b'){ goto _LL21;} else{ goto _LL22;} _LL22: if( _temp16 == '\f'){ goto
+_LL23;} else{ goto _LL24;} _LL24: if( _temp16 == '\n'){ goto _LL25;} else{ goto
+_LL26;} _LL26: if( _temp16 == '\r'){ goto _LL27;} else{ goto _LL28;} _LL28: if(
+_temp16 == '\t'){ goto _LL29;} else{ goto _LL30;} _LL30: if( _temp16 == '\v'){
+goto _LL31;} else{ goto _LL32;} _LL32: if( _temp16 == '\\'){ goto _LL33;} else{
+goto _LL34;} _LL34: if( _temp16 == '"'){ goto _LL35;} else{ goto _LL36;} _LL36:
+goto _LL37; _LL19: goto _LL21; _LL21: goto _LL23; _LL23: goto _LL25; _LL25: goto
+_LL27; _LL27: goto _LL29; _LL29: goto _LL31; _LL31: goto _LL33; _LL33: goto
+_LL35; _LL35: len += 2; goto _LL17; _LL37: if( _temp16 >= ' '? _temp16 <= '~': 0){
+len ++;} else{ len += 4;} goto _LL17; _LL17:;}}{ struct _tagged_arr t= Cyc_Core_new_string((
 unsigned int) len); int j= 0;{ int i= 0; for( 0; i <=  n; i ++){ unsigned char
-_temp38=*(( const unsigned char*) _check_unknown_subscript( s, sizeof(
-unsigned char), i)); _LL40: if( _temp38 == '\a'){ goto _LL41;} else{ goto _LL42;}
-_LL42: if( _temp38 == '\b'){ goto _LL43;} else{ goto _LL44;} _LL44: if( _temp38
-== '\f'){ goto _LL45;} else{ goto _LL46;} _LL46: if( _temp38 == '\n'){ goto
-_LL47;} else{ goto _LL48;} _LL48: if( _temp38 == '\r'){ goto _LL49;} else{ goto
-_LL50;} _LL50: if( _temp38 == '\t'){ goto _LL51;} else{ goto _LL52;} _LL52: if(
-_temp38 == '\v'){ goto _LL53;} else{ goto _LL54;} _LL54: if( _temp38 == '\\'){
-goto _LL55;} else{ goto _LL56;} _LL56: if( _temp38 == '"'){ goto _LL57;} else{
-goto _LL58;} _LL58: goto _LL59; _LL41:*(( unsigned char*)
+_temp38=(( const unsigned char*) s.curr)[ i]; _LL40: if( _temp38 == '\a'){ goto
+_LL41;} else{ goto _LL42;} _LL42: if( _temp38 == '\b'){ goto _LL43;} else{ goto
+_LL44;} _LL44: if( _temp38 == '\f'){ goto _LL45;} else{ goto _LL46;} _LL46: if(
+_temp38 == '\n'){ goto _LL47;} else{ goto _LL48;} _LL48: if( _temp38 == '\r'){
+goto _LL49;} else{ goto _LL50;} _LL50: if( _temp38 == '\t'){ goto _LL51;} else{
+goto _LL52;} _LL52: if( _temp38 == '\v'){ goto _LL53;} else{ goto _LL54;} _LL54:
+if( _temp38 == '\\'){ goto _LL55;} else{ goto _LL56;} _LL56: if( _temp38 == '"'){
+goto _LL57;} else{ goto _LL58;} _LL58: goto _LL59; _LL41:*(( unsigned char*)
 _check_unknown_subscript( t, sizeof( unsigned char), j ++))='\\';*((
 unsigned char*) _check_unknown_subscript( t, sizeof( unsigned char), j ++))='a';
 goto _LL39; _LL43:*(( unsigned char*) _check_unknown_subscript( t, sizeof(

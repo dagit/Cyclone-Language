@@ -912,6 +912,11 @@ int main(int argc, string_t<`H> ?`H argv) {
 
   Arg::parse(options, add_other, "Options:", argv);
 
+  if (cyclone_files == NULL && ccargs == NULL) {
+    fprintf(stderr,"missing file");
+    exit(1);
+  }
+  
   // Find the file cyc_include.h, needed to produce the .c output.
   // The Cyclone lib-path is specified with the following order (where
   // the earlier in the order, the first place we look for the file):

@@ -25,10 +25,12 @@
 #else
 #include <core.h>
 namespace Std {
+extern xtunion exn.Core::Unreachable __unreachable_assert;
 extern `a
 __assert_fail (string_t assertion, string_t file, unsigned int line);
 }
 #define __STRING(x) #x
 #define assert(expr) ((expr) ? 0 : \
-  (Std::__assert_fail(__STRING(expr), __FILE__, __LINE__), 0))
+  (Std::__assert_fail(__STRING(expr), __FILE__, __LINE__), \
+  throw &__unreachable_assert))
 #endif

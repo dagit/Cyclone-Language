@@ -702,9 +702,9 @@ Core::opt_t<`a> check_unique(int cmp(`a,`a),list_t<`a> x) {
   `a ?`r2 arr;
 
   s = length(x);
-  arr = rnew(r2) {for i < s : x->hd};
-  for (int i = 0; i < s; ++i, x = x->tl)
-    arr[i] = x->hd;
+  arr = rnew(r2) {for i < s : ({let v = x->hd; x=x->tl; v;})};
+  //for (int i = 0; i < s; ++i, x = x->tl)
+  //  arr[i] = x->hd;
   return arr;
 }
 

@@ -561,8 +561,8 @@ Cyc_Absyn_Local_b_struct{ int tag; struct Cyc_Absyn_Vardecl* f1; } ; static
 const int Cyc_Absyn_Pat_b= 4; struct Cyc_Absyn_Pat_b_struct{ int tag; struct Cyc_Absyn_Vardecl*
 f1; } ; struct Cyc_Absyn_Vardecl{ void* sc; struct _tuple1* name; struct Cyc_Absyn_Tqual
 tq; void* type; struct Cyc_Absyn_Exp* initializer; struct Cyc_Core_Opt* rgn;
-struct Cyc_List_List* attributes; } ; struct Cyc_Absyn_Fndecl{ void* sc; int
-is_inline; struct _tuple1* name; struct Cyc_List_List* tvs; struct Cyc_Core_Opt*
+struct Cyc_List_List* attributes; int escapes; } ; struct Cyc_Absyn_Fndecl{ void*
+sc; int is_inline; struct _tuple1* name; struct Cyc_List_List* tvs; struct Cyc_Core_Opt*
 effect; void* ret_type; struct Cyc_List_List* args; int c_varargs; struct Cyc_Absyn_VarargInfo*
 cyc_varargs; struct Cyc_List_List* rgn_po; struct Cyc_Absyn_Stmt* body; struct
 Cyc_Core_Opt* cached_typ; struct Cyc_Core_Opt* param_vardecls; struct Cyc_List_List*
@@ -747,11 +747,22 @@ int tag; struct Cyc_Absyn_Vardecl* f1; } ; static const int Cyc_CfFlowInfo_Mallo
 1; struct Cyc_CfFlowInfo_MallocPt_struct{ int tag; struct Cyc_Absyn_Exp* f1; } ;
 struct Cyc_CfFlowInfo_Place{ void* root; struct Cyc_List_List* fields; } ;
 static const int Cyc_CfFlowInfo_NoneIL= 0; static const int Cyc_CfFlowInfo_ThisIL=
-1; static const int Cyc_CfFlowInfo_AllIL= 2; extern unsigned char Cyc_CfFlowInfo_IsZero[
-11u]; extern unsigned char Cyc_CfFlowInfo_NotZero[ 12u]; extern unsigned char
-Cyc_CfFlowInfo_UnknownZ[ 13u]; static const int Cyc_CfFlowInfo_PlaceL= 0; struct
-Cyc_CfFlowInfo_PlaceL_struct{ int tag; struct Cyc_CfFlowInfo_Place* f1; } ;
-static const int Cyc_CfFlowInfo_UnknownL= 0; static const int Cyc_CfFlowInfo_Zero=
+1; static const int Cyc_CfFlowInfo_AllIL= 2; static const int Cyc_CfFlowInfo_EqualConst=
+0; struct Cyc_CfFlowInfo_EqualConst_struct{ int tag; unsigned int f1; } ; static
+const int Cyc_CfFlowInfo_LessVar= 1; struct Cyc_CfFlowInfo_LessVar_struct{ int
+tag; struct Cyc_Absyn_Vardecl* f1; } ; static const int Cyc_CfFlowInfo_LessSize=
+2; struct Cyc_CfFlowInfo_LessSize_struct{ int tag; struct Cyc_Absyn_Vardecl* f1;
+} ; static const int Cyc_CfFlowInfo_LessConst= 3; struct Cyc_CfFlowInfo_LessConst_struct{
+int tag; unsigned int f1; } ; static const int Cyc_CfFlowInfo_LessEqSize= 4;
+struct Cyc_CfFlowInfo_LessEqSize_struct{ int tag; struct Cyc_Absyn_Vardecl* f1;
+} ; struct Cyc_CfFlowInfo_Reln{ struct Cyc_Absyn_Vardecl* vd; void* rop; } ;
+extern unsigned char Cyc_CfFlowInfo_IsZero[ 11u]; struct Cyc_CfFlowInfo_IsZero_struct{
+unsigned char* tag; struct Cyc_List_List* f1; } ; extern unsigned char Cyc_CfFlowInfo_NotZero[
+12u]; struct Cyc_CfFlowInfo_NotZero_struct{ unsigned char* tag; struct Cyc_List_List*
+f1; } ; extern unsigned char Cyc_CfFlowInfo_UnknownZ[ 13u]; struct Cyc_CfFlowInfo_UnknownZ_struct{
+unsigned char* tag; struct Cyc_List_List* f1; } ; static const int Cyc_CfFlowInfo_PlaceL=
+0; struct Cyc_CfFlowInfo_PlaceL_struct{ int tag; struct Cyc_CfFlowInfo_Place* f1;
+} ; static const int Cyc_CfFlowInfo_UnknownL= 0; static const int Cyc_CfFlowInfo_Zero=
 0; static const int Cyc_CfFlowInfo_NotZeroAll= 1; static const int Cyc_CfFlowInfo_NotZeroThis=
 2; static const int Cyc_CfFlowInfo_UnknownR= 0; struct Cyc_CfFlowInfo_UnknownR_struct{
 int tag; void* f1; } ; static const int Cyc_CfFlowInfo_Esc= 1; struct Cyc_CfFlowInfo_Esc_struct{
@@ -760,19 +771,19 @@ int tag; struct Cyc_CfFlowInfo_Place* f1; } ; static const int Cyc_CfFlowInfo_Ag
 3; struct Cyc_CfFlowInfo_Aggregate_struct{ int tag; struct Cyc_Dict_Dict* f1; }
 ; static const int Cyc_CfFlowInfo_BottomFL= 0; static const int Cyc_CfFlowInfo_ReachableFL=
 0; struct Cyc_CfFlowInfo_ReachableFL_struct{ int tag; struct Cyc_Dict_Dict* f1;
-} ; extern void Cyc_NewControlFlow_set_encloser( struct Cyc_Absyn_Stmt* enclosee,
-struct Cyc_Absyn_Stmt* encloser); static void* Cyc_Tcexp_expr_err( struct Cyc_Tcenv_Tenv*
-te, struct Cyc_Position_Segment* loc, struct _tagged_arr msg, struct _tagged_arr
-ap){({ void* _temp0[ 0u]={}; Cyc_Tcutil_terr( loc,( struct _tagged_arr) Cyc_Std_vrprintf(
-Cyc_Core_heap_region, msg, ap), _tag_arr( _temp0, sizeof( void*), 0u));});
-return Cyc_Absyn_wildtyp(({ struct Cyc_Core_Opt* _temp1=( struct Cyc_Core_Opt*)
-_cycalloc( sizeof( struct Cyc_Core_Opt)); _temp1->v=( void*) Cyc_Tcenv_lookup_type_vars(
-te); _temp1;}));} static void Cyc_Tcexp_resolve_unknown_id( struct Cyc_Tcenv_Tenv*
-te, struct Cyc_Absyn_Exp* e, struct _tuple1* q){ struct _handler_cons _temp2;
-_push_handler(& _temp2);{ int _temp4= 0; if( setjmp( _temp2.handler)){ _temp4= 1;}
-if( ! _temp4){{ void* _temp5= Cyc_Tcenv_lookup_ordinary( te, e->loc, q); void*
-_temp17; struct Cyc_Absyn_Enumfield* _temp19; struct Cyc_Absyn_Enumdecl* _temp21;
-struct Cyc_Absyn_Enumfield* _temp23; void* _temp25; struct Cyc_Absyn_Tunionfield*
+struct Cyc_List_List* f2; } ; extern void Cyc_NewControlFlow_set_encloser(
+struct Cyc_Absyn_Stmt* enclosee, struct Cyc_Absyn_Stmt* encloser); static void*
+Cyc_Tcexp_expr_err( struct Cyc_Tcenv_Tenv* te, struct Cyc_Position_Segment* loc,
+struct _tagged_arr msg, struct _tagged_arr ap){({ void* _temp0[ 0u]={}; Cyc_Tcutil_terr(
+loc,( struct _tagged_arr) Cyc_Std_vrprintf( Cyc_Core_heap_region, msg, ap),
+_tag_arr( _temp0, sizeof( void*), 0u));}); return Cyc_Absyn_wildtyp(({ struct
+Cyc_Core_Opt* _temp1=( struct Cyc_Core_Opt*) _cycalloc( sizeof( struct Cyc_Core_Opt));
+_temp1->v=( void*) Cyc_Tcenv_lookup_type_vars( te); _temp1;}));} static void Cyc_Tcexp_resolve_unknown_id(
+struct Cyc_Tcenv_Tenv* te, struct Cyc_Absyn_Exp* e, struct _tuple1* q){ struct
+_handler_cons _temp2; _push_handler(& _temp2);{ int _temp4= 0; if( setjmp(
+_temp2.handler)){ _temp4= 1;} if( ! _temp4){{ void* _temp5= Cyc_Tcenv_lookup_ordinary(
+te, e->loc, q); void* _temp17; struct Cyc_Absyn_Enumfield* _temp19; struct Cyc_Absyn_Enumdecl*
+_temp21; struct Cyc_Absyn_Enumfield* _temp23; void* _temp25; struct Cyc_Absyn_Tunionfield*
 _temp27; struct Cyc_Absyn_Tuniondecl* _temp29; _LL7: if(*(( int*) _temp5) == 
 Cyc_Tcenv_VarRes){ _LL18: _temp17=( void*)(( struct Cyc_Tcenv_VarRes_struct*)
 _temp5)->f1; goto _LL8;} else{ goto _LL9;} _LL9: if(*(( int*) _temp5) ==  Cyc_Tcenv_EnumRes){
@@ -1093,9 +1104,8 @@ _temp257)->f1; goto _LL270;} else{ goto _LL258;} _LL260: return({ struct Cyc_Std
 _temp282; _temp282.tag= Cyc_Std_String_pa; _temp282.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(
 q);{ void* _temp281[ 1u]={& _temp282}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("undeclared identifier: %s",
 sizeof( unsigned char), 26u), _tag_arr( _temp281, sizeof( void*), 1u));}});
-_LL262: q[ _check_known_subscript_notnull( 1u, 0)]=( _temp271->name)[
-_check_known_subscript_notnull( 1u, 0)]; return( void*) _temp271->type; _LL264:
-q[ _check_known_subscript_notnull( 1u, 0)]=( _temp273->name)[
+_LL262: q[ 0]=( _temp271->name)[ _check_known_subscript_notnull( 1u, 0)]; return(
+void*) _temp271->type; _LL264: q[ 0]=( _temp273->name)[
 _check_known_subscript_notnull( 1u, 0)]; return Cyc_Tcutil_fndecl2typ( _temp273);
 _LL266: _temp277= _temp275; goto _LL268; _LL268: _temp279= _temp277; goto _LL270;
 _LL270:(* q).f1=( void*) Cyc_Absyn_Loc_n; return( void*) _temp279->type; _LL258:;}
