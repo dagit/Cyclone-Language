@@ -380,9 +380,7 @@ void Cyc_List_iter(void(*f)(void*),struct Cyc_List_List*x);
 # 135
 void Cyc_List_iter_c(void(*f)(void*,void*),void*env,struct Cyc_List_List*x);
 # 210
-struct Cyc_List_List*Cyc_List_merge_sort(int(*cmp)(void*,void*),struct Cyc_List_List*x);extern char Cyc_List_Nth[4U];struct Cyc_List_Nth_exn_struct{char*tag;};struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);};
-# 37 "iter.h"
-int Cyc_Iter_next(struct Cyc_Iter_Iter,void*);struct Cyc_Set_Set;
+struct Cyc_List_List*Cyc_List_merge_sort(int(*cmp)(void*,void*),struct Cyc_List_List*x);extern char Cyc_List_Nth[4U];struct Cyc_List_Nth_exn_struct{char*tag;};struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);};struct Cyc_Set_Set;
 # 100 "set.h"
 int Cyc_Set_member(struct Cyc_Set_Set*s,void*elt);
 # 106

@@ -392,8 +392,7 @@ unsigned long Cyc_strlen(struct _fat_ptr s);
 struct _fat_ptr Cyc_strdup(struct _fat_ptr src);
 # 109
 struct _fat_ptr Cyc_substring(struct _fat_ptr,int ofs,unsigned long n);struct Cyc_Lineno_Pos{struct _fat_ptr logical_file;struct _fat_ptr line;int line_no;int col;};
-# 31 "lineno.h"
-struct Cyc_Lineno_Pos*Cyc_Lineno_pos_of_abs(struct _fat_ptr,int);
+# 32 "lineno.h"
 void Cyc_Lineno_poss_of_abss(struct _fat_ptr filename,struct Cyc_List_List*places);
 # 26 "lineno.cyl"
 enum Cyc_Lineno_token_val{Cyc_Lineno_NEWLINE =0U,Cyc_Lineno_LINEDEF =1U,Cyc_Lineno_END =2U};

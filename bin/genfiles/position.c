@@ -387,7 +387,6 @@ unsigned long Cyc_strlen(struct _fat_ptr s);
 struct _fat_ptr Cyc_strncpy(struct _fat_ptr,struct _fat_ptr,unsigned long);struct Cyc_Lineno_Pos{struct _fat_ptr logical_file;struct _fat_ptr line;int line_no;int col;};
 # 31 "lineno.h"
 struct Cyc_Lineno_Pos*Cyc_Lineno_pos_of_abs(struct _fat_ptr,int);
-void Cyc_Lineno_poss_of_abss(struct _fat_ptr filename,struct Cyc_List_List*places);
 # 36 "position.h"
 struct _fat_ptr Cyc_Position_string_of_loc(unsigned);
 struct _fat_ptr Cyc_Position_string_of_segment(unsigned);struct Cyc_Position_Error;
