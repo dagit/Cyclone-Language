@@ -1,26 +1,7 @@
- typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef
-unsigned short Cyc_wchar_t; typedef unsigned int Cyc_wint_t; typedef
-unsigned char Cyc_u_char; typedef unsigned short Cyc_u_short; typedef
-unsigned int Cyc_u_int; typedef unsigned int Cyc_u_long; typedef unsigned short
-Cyc_ushort; typedef unsigned int Cyc_uint; typedef unsigned int Cyc_clock_t;
-typedef int Cyc_time_t; struct Cyc_timespec{ int tv_sec; int tv_nsec; } ; struct
-Cyc_itimerspec{ struct Cyc_timespec it_interval; struct Cyc_timespec it_value; }
-; typedef int Cyc_daddr_t; typedef unsigned char* Cyc_caddr_t; typedef
-unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t; typedef
-unsigned int Cyc_vm_size_t; typedef unsigned char Cyc_int8_t; typedef
-unsigned char Cyc_u_int8_t; typedef short Cyc_int16_t; typedef unsigned short
-Cyc_u_int16_t; typedef int Cyc_int32_t; typedef unsigned int Cyc_u_int32_t;
-typedef long long Cyc_int64_t; typedef unsigned long long Cyc_u_int64_t; typedef
-int Cyc_register_t; typedef short Cyc_dev_t; typedef int Cyc_off_t; typedef
-unsigned short Cyc_uid_t; typedef unsigned short Cyc_gid_t; typedef int Cyc_pid_t;
-typedef int Cyc_key_t; typedef int Cyc_ssize_t; typedef unsigned char* Cyc_addr_t;
-typedef int Cyc_mode_t; typedef unsigned short Cyc_nlink_t; typedef int Cyc_fd_mask;
-struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ; typedef struct Cyc__types_fd_set
-Cyc__types_fd_set; typedef unsigned char* Cyc_Cstring; typedef struct
-_tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t; typedef
-struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void exit(
-int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef struct Cyc_Core_Opt*
-Cyc_Core_opt_t; extern unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
+ struct Cyc_timespec{ int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct
+Cyc_timespec it_interval; struct Cyc_timespec it_value; } ; struct Cyc__types_fd_set{
+int fds_bits[ 8u]; } ; extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{
+void* v; } ; extern unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
 unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_Failure[
 12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_string
 f1; } ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
@@ -37,11 +18,8 @@ struct _tagged_string); extern struct _tagged_string Cyc_Filename_basename(
 struct _tagged_string); extern int Cyc_Filename_check_suffix( struct
 _tagged_string, struct _tagged_string); extern struct _tagged_string Cyc_Filename_gnuify(
 struct _tagged_string); struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl;
-} ; typedef struct Cyc_List_List* Cyc_List_glist_t; typedef struct Cyc_List_List*
-Cyc_List_list_t; typedef struct Cyc_List_List* Cyc_List_List_t; extern
-unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
-18u]; extern unsigned char Cyc_List_Nth[ 8u]; struct Cyc_Stdio___sFILE; typedef
-struct Cyc_Stdio___sFILE Cyc_Stdio_FILE; typedef int Cyc_Stdio_fpos_t; extern
+} ; extern unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
+18u]; extern unsigned char Cyc_List_Nth[ 8u]; struct Cyc_Stdio___sFILE; extern
 unsigned char Cyc_Stdio_FileCloseError[ 19u]; extern unsigned char Cyc_Stdio_FileOpenError[
 18u]; struct Cyc_Stdio_FileOpenError_struct{ unsigned char* tag; struct
 _tagged_string f1; } ; extern struct _tagged_string Cyc_String_strconcat_l(

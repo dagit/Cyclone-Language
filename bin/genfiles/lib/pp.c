@@ -1,27 +1,8 @@
- typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef
-unsigned short Cyc_wchar_t; typedef unsigned int Cyc_wint_t; typedef
-unsigned char Cyc_u_char; typedef unsigned short Cyc_u_short; typedef
-unsigned int Cyc_u_int; typedef unsigned int Cyc_u_long; typedef unsigned short
-Cyc_ushort; typedef unsigned int Cyc_uint; typedef unsigned int Cyc_clock_t;
-typedef int Cyc_time_t; struct Cyc_timespec{ int tv_sec; int tv_nsec; } ; struct
-Cyc_itimerspec{ struct Cyc_timespec it_interval; struct Cyc_timespec it_value; }
-; typedef int Cyc_daddr_t; typedef unsigned char* Cyc_caddr_t; typedef
-unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t; typedef
-unsigned int Cyc_vm_size_t; typedef unsigned char Cyc_int8_t; typedef
-unsigned char Cyc_u_int8_t; typedef short Cyc_int16_t; typedef unsigned short
-Cyc_u_int16_t; typedef int Cyc_int32_t; typedef unsigned int Cyc_u_int32_t;
-typedef long long Cyc_int64_t; typedef unsigned long long Cyc_u_int64_t; typedef
-int Cyc_register_t; typedef short Cyc_dev_t; typedef int Cyc_off_t; typedef
-unsigned short Cyc_uid_t; typedef unsigned short Cyc_gid_t; typedef int Cyc_pid_t;
-typedef int Cyc_key_t; typedef int Cyc_ssize_t; typedef unsigned char* Cyc_addr_t;
-typedef int Cyc_mode_t; typedef unsigned short Cyc_nlink_t; typedef int Cyc_fd_mask;
-struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ; typedef struct Cyc__types_fd_set
-Cyc__types_fd_set; typedef unsigned char* Cyc_Cstring; typedef struct
-_tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t; typedef
-struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void exit(
-int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef struct Cyc_Core_Opt*
-Cyc_Core_opt_t; extern struct _tagged_string Cyc_Core_new_string( int); extern
-void* Cyc_Core_identity( void*); extern int Cyc_Core_intcmp( int, int); extern
+ struct Cyc_timespec{ int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct
+Cyc_timespec it_interval; struct Cyc_timespec it_value; } ; struct Cyc__types_fd_set{
+int fds_bits[ 8u]; } ; extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{
+void* v; } ; extern struct _tagged_string Cyc_Core_new_string( int); extern void*
+Cyc_Core_identity( void*); extern int Cyc_Core_intcmp( int, int); extern
 unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
 unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_Failure[
 12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_string
@@ -32,30 +13,25 @@ unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char*
 string_to_Cstring( struct _tagged_string); extern unsigned char*
 underlying_Cstring( struct _tagged_string); extern struct _tagged_string
 Cstring_to_string( unsigned char*); extern int system( unsigned char*); struct
-Cyc_Stdio___sFILE; typedef struct Cyc_Stdio___sFILE Cyc_Stdio_FILE; typedef int
-Cyc_Stdio_fpos_t; extern unsigned char Cyc_Stdio_FileCloseError[ 19u]; extern
+Cyc_Stdio___sFILE; extern unsigned char Cyc_Stdio_FileCloseError[ 19u]; extern
 unsigned char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
 unsigned char* tag; struct _tagged_string f1; } ; struct Cyc_List_List{ void* hd;
-struct Cyc_List_List* tl; } ; typedef struct Cyc_List_List* Cyc_List_glist_t;
-typedef struct Cyc_List_List* Cyc_List_list_t; typedef struct Cyc_List_List* Cyc_List_List_t;
-extern int Cyc_List_length( struct Cyc_List_List* x); extern unsigned char Cyc_List_List_empty[
-15u]; extern unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char
-Cyc_List_Nth[ 8u]; extern unsigned int Cyc_String_strlen( struct _tagged_string
-s); extern int Cyc_String_zstrptrcmp( struct _tagged_string*, struct
-_tagged_string*); extern struct _tagged_string Cyc_String_str_sepstr( struct Cyc_List_List*,
-struct _tagged_string); struct Cyc_Hashtable_Table; typedef struct Cyc_Hashtable_Table*
-Cyc_Hashtable_table_t; extern struct Cyc_Hashtable_Table* Cyc_Hashtable_create(
-int sz, int(* cmp)( void*, void*), int(* hash)( void*)); extern void Cyc_Hashtable_insert(
-struct Cyc_Hashtable_Table* t, void* key, void* val); extern void* Cyc_Hashtable_lookup(
+struct Cyc_List_List* tl; } ; extern int Cyc_List_length( struct Cyc_List_List*
+x); extern unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
+18u]; extern unsigned char Cyc_List_Nth[ 8u]; extern unsigned int Cyc_String_strlen(
+struct _tagged_string s); extern int Cyc_String_zstrptrcmp( struct
+_tagged_string*, struct _tagged_string*); extern struct _tagged_string Cyc_String_str_sepstr(
+struct Cyc_List_List*, struct _tagged_string); struct Cyc_Hashtable_Table;
+extern struct Cyc_Hashtable_Table* Cyc_Hashtable_create( int sz, int(* cmp)(
+void*, void*), int(* hash)( void*)); extern void Cyc_Hashtable_insert( struct
+Cyc_Hashtable_Table* t, void* key, void* val); extern void* Cyc_Hashtable_lookup(
 struct Cyc_Hashtable_Table* t, void* key); extern int Cyc_Hashtable_hash_stringptr(
 struct _tagged_string* s); static const int Cyc_Fn_Fun= 0; struct Cyc_Fn_Fun_struct{
-int tag; void*(* f1)( void*, void*); void* f2; } ; typedef void* Cyc_Fn_fn;
-extern void* Cyc_Fn_make_fn( void*(* f)( void*, void*), void* x); extern void*
-Cyc_Fn_fp2fn( void*(* f)( void*)); extern void* Cyc_Fn_apply( void* f, void* x);
-struct Cyc_PP_Ppstate; typedef struct Cyc_PP_Ppstate* Cyc_PP_ppstate_t; struct
-Cyc_PP_Out; typedef struct Cyc_PP_Out* Cyc_PP_out_t; struct Cyc_PP_Doc; typedef
-struct Cyc_PP_Doc* Cyc_PP_doc_t; extern void Cyc_PP_file_of_doc( struct Cyc_PP_Doc*
-d, int w, struct Cyc_Stdio___sFILE* f); extern struct _tagged_string Cyc_PP_string_of_doc(
+int tag; void*(* f1)( void*, void*); void* f2; } ; extern void* Cyc_Fn_make_fn(
+void*(* f)( void*, void*), void* x); extern void* Cyc_Fn_fp2fn( void*(* f)( void*));
+extern void* Cyc_Fn_apply( void* f, void* x); struct Cyc_PP_Ppstate; struct Cyc_PP_Out;
+struct Cyc_PP_Doc; extern void Cyc_PP_file_of_doc( struct Cyc_PP_Doc* d, int w,
+struct Cyc_Stdio___sFILE* f); extern struct _tagged_string Cyc_PP_string_of_doc(
 struct Cyc_PP_Doc* d, int w); struct _tuple0{ struct _tagged_string f1; struct
 Cyc_List_List* f2; } ; extern struct _tuple0* Cyc_PP_string_and_links( struct
 Cyc_PP_Doc* d, int w); extern struct Cyc_PP_Doc* Cyc_PP_nil_doc(); extern struct
@@ -83,32 +59,30 @@ _tagged_string sep, struct Cyc_List_List* ss); extern struct Cyc_PP_Doc* Cyc_PP_
 struct _tagged_string start, struct _tagged_string stop, struct _tagged_string
 sep, struct Cyc_List_List* ss); struct _tagged_ptr1{ void** curr; void** base;
 void** last_plus_one; } ; struct Cyc_Xarray_Xarray{ struct _tagged_ptr1 elmts;
-int num_elmts; } ; typedef struct Cyc_Xarray_Xarray* Cyc_Xarray_xarray_t; extern
-int Cyc_Xarray_length( struct Cyc_Xarray_Xarray*); extern void* Cyc_Xarray_get(
-struct Cyc_Xarray_Xarray*, int); extern void Cyc_Xarray_set( struct Cyc_Xarray_Xarray*,
-int, void*); extern struct Cyc_Xarray_Xarray* Cyc_Xarray_create( int, void*);
-extern void Cyc_Xarray_add( struct Cyc_Xarray_Xarray*, void*); static const int
-Cyc_PP_Empty= 0; static const int Cyc_PP_Single= 0; struct Cyc_PP_Single_struct{
+int num_elmts; } ; extern int Cyc_Xarray_length( struct Cyc_Xarray_Xarray*);
+extern void* Cyc_Xarray_get( struct Cyc_Xarray_Xarray*, int); extern void Cyc_Xarray_set(
+struct Cyc_Xarray_Xarray*, int, void*); extern struct Cyc_Xarray_Xarray* Cyc_Xarray_create(
+int, void*); extern void Cyc_Xarray_add( struct Cyc_Xarray_Xarray*, void*);
+static const int Cyc_PP_Empty= 0; static const int Cyc_PP_Single= 0; struct Cyc_PP_Single_struct{
 int tag; void* f1; } ; static const int Cyc_PP_Append= 1; struct Cyc_PP_Append_struct{
-int tag; void* f1; void* f2; } ; typedef void* Cyc_PP_alist_t; void* Cyc_PP_append(
-void* a1, void* a2){ if( a1 ==( void*) Cyc_PP_Empty){ return a2;} else{ if( a2
-==( void*) Cyc_PP_Empty){ return a1;} else{ return( void*)({ struct Cyc_PP_Append_struct*
-_temp0=( struct Cyc_PP_Append_struct*) GC_malloc( sizeof( struct Cyc_PP_Append_struct));
-_temp0[ 0]=({ struct Cyc_PP_Append_struct _temp1; _temp1.tag= Cyc_PP_Append;
-_temp1.f1=( void*) a1; _temp1.f2=( void*) a2; _temp1;}); _temp0;});}}} struct
-Cyc_List_List* Cyc_PP_list_of_alist_f( void* y, struct Cyc_List_List* l){ void*
-_temp2= y; void* _temp10; void* _temp12; void* _temp14; _LL4: if( _temp2 ==(
-void*) Cyc_PP_Empty){ goto _LL5;} else{ goto _LL6;} _LL6: if(( unsigned int)
-_temp2 > 1u?*(( int*) _temp2) == Cyc_PP_Single: 0){ _LL11: _temp10=( void*)((
-struct Cyc_PP_Single_struct*) _temp2)->f1; goto _LL7;} else{ goto _LL8;} _LL8:
-if(( unsigned int) _temp2 > 1u?*(( int*) _temp2) == Cyc_PP_Append: 0){ _LL15:
-_temp14=( void*)(( struct Cyc_PP_Append_struct*) _temp2)->f1; goto _LL13; _LL13:
-_temp12=( void*)(( struct Cyc_PP_Append_struct*) _temp2)->f2; goto _LL9;} else{
-goto _LL3;} _LL5: return l; _LL7: return({ struct Cyc_List_List* _temp16=(
-struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp16->hd=(
-void*) _temp10; _temp16->tl= l; _temp16;}); _LL9: return(( struct Cyc_List_List*(*)(
-void* y, struct Cyc_List_List* l)) Cyc_PP_list_of_alist_f)( _temp14,(( struct
+int tag; void* f1; void* f2; } ; void* Cyc_PP_append( void* a1, void* a2){ if(
+a1 ==( void*) Cyc_PP_Empty){ return a2;} else{ if( a2 ==( void*) Cyc_PP_Empty){
+return a1;} else{ return( void*)({ struct Cyc_PP_Append_struct* _temp0=( struct
+Cyc_PP_Append_struct*) GC_malloc( sizeof( struct Cyc_PP_Append_struct)); _temp0[
+0]=({ struct Cyc_PP_Append_struct _temp1; _temp1.tag= Cyc_PP_Append; _temp1.f1=(
+void*) a1; _temp1.f2=( void*) a2; _temp1;}); _temp0;});}}} struct Cyc_List_List*
+Cyc_PP_list_of_alist_f( void* y, struct Cyc_List_List* l){ void* _temp2= y; void*
+_temp10; void* _temp12; void* _temp14; _LL4: if( _temp2 ==( void*) Cyc_PP_Empty){
+goto _LL5;} else{ goto _LL6;} _LL6: if(( unsigned int) _temp2 > 1u?*(( int*)
+_temp2) == Cyc_PP_Single: 0){ _LL11: _temp10=( void*)(( struct Cyc_PP_Single_struct*)
+_temp2)->f1; goto _LL7;} else{ goto _LL8;} _LL8: if(( unsigned int) _temp2 > 1u?*((
+int*) _temp2) == Cyc_PP_Append: 0){ _LL15: _temp14=( void*)(( struct Cyc_PP_Append_struct*)
+_temp2)->f1; goto _LL13; _LL13: _temp12=( void*)(( struct Cyc_PP_Append_struct*)
+_temp2)->f2; goto _LL9;} else{ goto _LL3;} _LL5: return l; _LL7: return({ struct
+Cyc_List_List* _temp16=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp16->hd=( void*) _temp10; _temp16->tl= l; _temp16;}); _LL9: return(( struct
 Cyc_List_List*(*)( void* y, struct Cyc_List_List* l)) Cyc_PP_list_of_alist_f)(
+_temp14,(( struct Cyc_List_List*(*)( void* y, struct Cyc_List_List* l)) Cyc_PP_list_of_alist_f)(
 _temp12, l)); _LL3:;} struct Cyc_List_List* Cyc_PP_list_of_alist( void* x){
 return(( struct Cyc_List_List*(*)( void* y, struct Cyc_List_List* l)) Cyc_PP_list_of_alist_f)(
 x, 0);} struct Cyc_PP_Ppstate{ int ci; int cc; int cl; int pw; int epw; } ;

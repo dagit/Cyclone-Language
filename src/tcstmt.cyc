@@ -174,7 +174,6 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
   // Note: NewControlFlow requires we add the label with s, not s0 !!
   //       (That way, we can use switch_clause bodies and stmtExp stmt's
   //       as enclosers and get the right behavior!!!)
-    // FIX: should use l for the region name.
   case &Label_s(l,s): 
     // Note that we set new_block to false because we're explicitly creating
     // a new named block here.
@@ -208,6 +207,26 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       te = set_fallthru(te, new_tvs, vds, scs->hd);
     }
     check_switch_exhaustive(s0->loc,scs0);
+    return;
+
+  case &SwitchC_s(e,scsC):
+    // translate to switch after evaluating the case expressions (which must
+    // be constant)
+    // FIX: not right for e an enum type b/c we produce int patterns
+    let scs = null;
+    for(; scsC !=null; scsC = scsC->tl) {
+      let &SwitchC_clause(e1,body1,loc1) = scsC->hd;
+      _ pat;
+      if(e1 != null) {
+	tcExp(te,null,(exp_t)e1);
+	pat = new_pat(new Int_p(Signed,Evexp::eval_const_uint_exp((exp_t)e1)),
+		      e1->loc);
+      } else
+	pat = new_pat(Wild_p, loc1);
+      scs = new List(new Switch_clause(pat, null, null, body1, loc1), scs);
+    }
+    s0->r = switch_stmt(e, imp_rev(scs), null)->r;
+    tcStmt(te, s0, new_block);
     return;
 
   case &TryCatch_s(s,scs0):

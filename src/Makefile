@@ -27,7 +27,7 @@ else
 TOC_FLAG =
 endif
 
-CYC_FLAGS := -I../lib -B../lib -save-c $(TOC_FLAG) $(PROF_RGN_FLAG)
+CYC_FLAGS := -I../lib -save-c $(TOC_FLAG) $(PROF_RGN_FLAG)
 
 LIBR:=../lib/$(OUT_PREFIX)$(CYCLIB)
 
@@ -42,7 +42,7 @@ $(OUT_PREFIX)$(CYCCOMP): $(addprefix $(OUT_PREFIX), $(O_SRCS)) $(LIBR)
 ifdef MS
 	cl /Fe$@ ../lib/snprintf.obj $^ ../bin/cyc-lib/gc.lib
 else
-	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
+	$(CYCC) -B../lib -o $@ $^ $(LDFLAGS)
 #	gcc -g -o $@ $^ ../bin/cyc-lib/gc.a $(LDFLAGS)
 #	gcc -o $@ $^ ../bin/cyc-lib/gc_pg.a -pg $(LDFLAGS)
 endif
@@ -61,7 +61,7 @@ $(OUT_PREFIX)parse_tab.h: parse.y $(CYCBISON)
 
 # This takes care of non-machine-generated versions (the .cyc is already there)
 $(OUT_PREFIX)%.o: %.cyc $(CYCC)
-	$(CYCC) $(CYC_FLAGS) -c $<
+	$(CYCC) $(CYC_FLAGS) -o $@ -c $<
 
 ifdef MS
 %.obj: %.c

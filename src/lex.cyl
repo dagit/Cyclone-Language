@@ -152,7 +152,7 @@ static int str_index(string buff, int offset, int len) {
       // new string, extend the trie and return
       while(i <= last) {
         let temp = (trie_child_v_t)(new { for q < 75 : null });
-        let temp2 = new {temp};
+        let temp2 = new temp;
 	t->children = (trie_child_t)temp2;
 	(*(t->children))[ch] = new Trie(null,-1);
 	t = (*(t->children))[ch];
@@ -162,7 +162,7 @@ static int str_index(string buff, int offset, int len) {
       let newstr = new_string(len+1);
       String::zstrncpy(newstr,0,buff,offset,len);
       int ans = Xarray::add_ind((Xarray::xarray_t<stringptr>)symbols, 
-				new {newstr});
+				new newstr);
       t->shared_str = ans;
       return ans;
     }
@@ -177,7 +177,7 @@ static int str_index(string buff, int offset, int len) {
     let newstr = new_string(len+1);
     String::zstrncpy(newstr,0,buff,offset,len);
     int ans = Xarray::add_ind((Xarray::xarray_t<stringptr>)symbols, 
-			      new {newstr});
+			      new newstr);
     t->shared_str = ans;
     return ans;
   }

@@ -2901,8 +2901,6 @@ static void stmt_to_c(env_t nv, stmt_t s) {
         break;
       }
       return;
-    case &Cut_s(_):    unimp("cut");    return;
-    case &Splice_s(_): unimp("splice"); return;
     case &Label_s(lab,s1):
       s = s1; continue;
     case &Do_s(s2,$(e,_)):
@@ -3028,6 +3026,9 @@ static void stmt_to_c(env_t nv, stmt_t s) {
                      declare_stmt(x_var, rh_struct_ptr_typ, addr_rh_exp,
                                   s2,DL),DL)->r;
       return;
+    case &SwitchC_s(_,_): toc_impos("switchC_s"); return;
+    case &Cut_s(_):       unimp("cut");    return;
+    case &Splice_s(_):    unimp("splice"); return;
     }
   }
 }

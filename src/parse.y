@@ -934,6 +934,7 @@ using Parse;
   QualId_tok(qvar_t);
   Stmt_tok(stmt_t);
   SwitchClauseList_tok(list_t<switch_clause_t>);
+  SwitchCClauseList_tok(list_t<switchC_clause_t>);
   Pattern_tok(pat_t);
   PatternList_tok(list_t<pat_t>);
   FnDecl_tok(fndecl_t);
@@ -1002,6 +1003,7 @@ using Parse;
 %type <Stmt_tok> expression_statement selection_statement iteration_statement
 %type <Stmt_tok> jump_statement
 %type <SwitchClauseList_tok> switch_clauses
+%type <SwitchCClauseList_tok> switchC_clauses
 %type <Pattern_tok> pattern
 %type <PatternList_tok> tuple_pattern_list tuple_pattern_list0
 %type <FieldPattern_tok> field_pattern
@@ -2073,6 +2075,11 @@ selection_statement:
  * statement; it must be a list of switch_clauses */
 | SWITCH '(' expression ')' '{' switch_clauses '}'
     { $$=^$(switch_stmt($3,$6,LOC(@1,@7))); }
+| SWITCH STRING  '(' expression ')' '{' switchC_clauses '}'
+  { if(String::strcmp($2,"C") != 0)
+     err("only switch \"C\" { ... } is allowed",LOC(@1,@8));
+  $$=^$(new_stmt(new SwitchC_s($4,$7),LOC(@1,@8)));
+  }
 | TRY statement CATCH '{' switch_clauses '}'
     { $$=^$(trycatch_stmt($2,$5,LOC(@1,@6))); }
 ;
@@ -2080,6 +2087,9 @@ selection_statement:
 /* Cyc: unlike C, we only allow default or case statements within
  * switches.  Also unlike C, we support a more general form of pattern
  * matching within cases. */
+/* DAN: We don't allow empty cases, but we get
+ * better error messages this way, rather than just "parse error"
+ */
 switch_clauses:
   /* empty */
     { $$=^$(null); }
@@ -2098,6 +2108,29 @@ switch_clauses:
 | CASE pattern AND_OP expression ':' block_item_list switch_clauses
     { $$=^$(new List(new Switch_clause($2,null,$4,$6,LOC(@1,@7)),$7)); }
 ;
+
+/* we leave the exps unevaluated so enum tags can be used, but we go ahead
+ * and add implicit fallthrus.  These are the two differences between these
+ * cases and the standard Cyclone ones.  We leave constant-only, no repeats,
+ * and exhaustive (here default is mandatory) to the type-checker.
+ */
+switchC_clauses:
+  /* empty */
+    { $$=^$(null); }
+| DEFAULT ':' block_item_list
+  { $$=^$(new List(new SwitchC_clause(null,seq_stmt($3,break_stmt(null),null),
+				      LOC(@1,@3)), 
+		   null)); }
+| CASE expression ':' switchC_clauses
+  { $$=^$(new List(new SwitchC_clause($2,fallthru_stmt(null,null),
+				      LOC(@1,@4)), 
+		   $4)); }
+| CASE expression ':' block_item_list switchC_clauses
+   { $$=^$(new List(new SwitchC_clause($2,seq_stmt($4,
+						   fallthru_stmt(null,null),
+						   null),
+				       LOC(@1,@5)),
+		    $5)); }
 
 iteration_statement:
   WHILE '(' expression ')' statement

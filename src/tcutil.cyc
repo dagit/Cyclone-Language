@@ -1217,7 +1217,17 @@ bool castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     }
     return false;
   // can cast a numeric type or bool to any numeric type
-  case &EnumType(_,_): fallthru;
+  case &EnumType(_,ed1): 
+    // can also cast an enum to a shorter enum
+    switch(t2) {
+    case &EnumType(_,ed2):
+      if(ed1->fields != null && ed2->fields != null
+	 && length(ed1->fields->v) >= length(ed2->fields->v))
+	return true;
+      break;
+    default: break;
+    }
+    fallthru;
   case &IntType(_,_): fallthru;
   case FloatType :  fallthru;
   case DoubleType:  return coerceable(t2);

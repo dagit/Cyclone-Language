@@ -93,7 +93,7 @@ clean_src_prefix:
 	$(MAKE) clean_prefix -C src OUT_PREFIX=$(OUT_PREFIX)
 	$(MAKE) clean_prefix -C lib OUT_PREFIX=$(OUT_PREFIX)
 
-clean:
+clean_nogc:
 	$(MAKE) clean -C tools/cycbison
 	$(MAKE) clean -C tools/cyclex
 #	$(MAKE) clean -C tools/cycocamllex
@@ -108,5 +108,10 @@ clean:
 	rm -f bin/$(RUNTIME).o
 	rm -f bin/cycbison.exe 
 	rm -f bin/cyclex.exe
-	rm -f bin/cyc-lib/gc.a bin/gc_pg.a
 	rm -f *~ doc/*~
+
+clean: clean_nogc
+	$(MAKE) clean -C gc
+	rm -f gc/*.exe gc/base_lib gc/*.obj gc/gc.lib
+	rm -f bin/cyc-lib/gc.a bin/gc_pg.a
+

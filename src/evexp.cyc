@@ -84,7 +84,9 @@ cnst_t eval_const_exp(exp_t e) {
   case &Cast_e(t,e2):
     // FIX: this needs to be generalized
     cn = eval_const_exp(e2);
-    switch ($(t,cn)) {
+    switch ($(compress(t),cn)) {
+    case $(&IntType(sn,sz),&Char_c(sn2,x)):  fallthru(sn,sz,sn2,x);
+    case $(&IntType(sn,sz),&Short_c(sn2,x)): fallthru(sn,sz,sn2,x);
     case $(&IntType(sn,sz),&Int_c(sn2,x)): 
       if(sn != sn2)
 	cn = new Int_c(sn,x); 

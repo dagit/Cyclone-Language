@@ -563,8 +563,8 @@ bool is_lvalue(exp_t e) {
   case &StructMember_e(e1,f):  return is_lvalue(e1);
   case &StructArrow_e(e1,f):   return true;
   case &Deref_e(e1):           return true;
-    //  case &Instantiate(e1,_): return is_lvalue(e1);
-    //  case &NoInstantiate(e1): return is_lvalue(e1);
+  case &Instantiate_e(e1,_): return is_lvalue(e1);
+  case &NoInstantiate_e(e1): return is_lvalue(e1);
   default:                    return false;
   }
 }

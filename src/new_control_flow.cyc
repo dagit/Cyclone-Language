@@ -845,9 +845,6 @@ void cf_prepass(absenv_t env, stmt_t s) {
       add_var_root(env,vds->hd);
     cf_prepass(env,s1);
     return;
-  case &Decl_s(_,_): fallthru;
-  case &Cut_s(_):    fallthru;
-  case &Splice_s(_): throw new Impossible("cf_prepass: bad stmt form");
   case &Label_s(_,s1): 
     cf_prepass(env,s1); 
     return;
@@ -860,6 +857,10 @@ void cf_prepass(absenv_t env, stmt_t s) {
     add_var_root(env,vd);
     cf_prepass(env,body);
     return;
+  case &Decl_s(_,_):    fallthru;
+  case &SwitchC_s(_,_): fallthru;
+  case &Cut_s(_):       fallthru;
+  case &Splice_s(_):    throw new Impossible("cf_prepass: bad stmt form");
   }
 }
 

@@ -626,6 +626,8 @@ static void check_writable(tenv_t te, exp_t e) {
     default: break;
     }
     break;
+  case &NoInstantiate_e(e1): fallthru(e1);
+  case &Instantiate_e(e1,_): check_writable(te,e1); return;
   default: break;
   }
   terr(e->loc, "attempt to write a read-only location");
@@ -768,9 +770,8 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t>
     check_nonzero_bound(loc,b);
     switch (compress(t1)) {
     case &FnType(FnInfo{tvars,eff,res_typ,args_info,c_vararg,cyc_vararg,atts}): 
-      //FIX: handle tvars
-      if (c_vararg)
-        terr(loc,"C-style vararg functions (...) not supported.");
+      //FIX: handle tvars??
+
       // unify the result type with the expected type to get better
       // information while type-checking the arguments.
       if (topt != null) unify(res_typ,*topt);
@@ -789,10 +790,13 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t>
       }
       if (args_info != null) terr(loc,"too few arguments for function");
       // if we have left-over arguments, then check for varargs
-      else if (es != null || cyc_vararg != null) {
-        if (cyc_vararg == null)
-          terr(loc,"too many arguments for function");
-        else {
+      else if (es != null) {
+	if(c_vararg)
+	  for(; es != null; es = es->tl)
+	    tcExp(te, null, es->hd);
+	else if(cyc_vararg == null)
+	  terr(loc, "too many arguments for function");
+	else {
           let VarargInfo{_,_,vt,vr,inject} = *cyc_vararg;
           te = new_block(loc,te); // needed for regions of params
           let vci = new VarargCallInfo {.num_varargs = 0, 

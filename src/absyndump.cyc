@@ -655,9 +655,6 @@ void dumpstmt(stmt_t s) {
   case &Break_s(_):         dump("break;");        break;
   case &Continue_s(_):      dump("continue;");     break;
   case &Goto_s(x,_):        dump("goto"); dump_str(x); dump_semi(); break;
-  case &Fallthru_s(null,_): dump("fallthru;");     break;
-  case &Fallthru_s(es,_):
-    dump("fallthru("); dumpexps_prec(20,es); dump_nospace(");"); break;
 
   case &For_s(e1,$(e2,_),$(e3,_),s1):
     dump("for("); dumpexp(e1);dump_semi(); dumpexp(e2);dump_semi(); dumpexp(e3);
@@ -669,9 +666,7 @@ void dumpstmt(stmt_t s) {
     dump_char('}');
     break;
 
-  case &Decl_s(d,s1): dumpdecl(d);    dumpstmt(s1); break;
-  case &Cut_s(s1):    dump("cut");    dumpstmt(s1); break;
-  case &Splice_s(s1): dump("splice"); dumpstmt(s1); break;
+  case &Decl_s(d,s1): dumpdecl(d); dumpstmt(s1); break;
 
   case &Label_s(x,s1):
     // FIX:  gcc does not allow declarations to be used immediately after
@@ -689,6 +684,24 @@ void dumpstmt(stmt_t s) {
     dump_nospace("} while ("); dumpexp(e); dump_nospace(");");
     break;
 
+  case &SwitchC_s(e,ss): 
+    dump("switch \"C\" ("); dumpexp(e); dump_nospace("){");
+    for(; ss != null; ss = ss->tl) {
+      let &SwitchC_clause(e,s,_) = ss->hd;
+      if(e == null)
+	dump("default: ");
+      else {
+	dump("case "); dumpexp((exp_t)e); dump_char(':');
+      }
+      dumpstmt(s);
+    }
+    dump_char('}');
+    break;
+
+  case &Fallthru_s(null,_): dump("fallthru;");     break;
+  case &Fallthru_s(es,_):
+    dump("fallthru("); dumpexps_prec(20,es); dump_nospace(");"); break;
+
   case &TryCatch_s(s1,ss):
     dump("try"); dumpstmt(s1); dump("catch {");
     dumpswitchclauses(ss); dump_char('}');
@@ -698,6 +711,9 @@ void dumpstmt(stmt_t s) {
     dump("region<"); dumptvar(tv); dump("> "); dumpqvar(vd->name);
     dump("{"); dumpstmt(ss); dump("}");
     break;
+
+  case &Cut_s(s1):    dump("cut");    dumpstmt(s1); break;
+  case &Splice_s(s1): dump("splice"); dumpstmt(s1); break;
   }
 }
 
@@ -929,9 +945,11 @@ void dumpdecl(decl_t d) {
     dump_semi();
     break;
   case &Typedef_d(td):
-    dump("typedef");
-    dumptqtd(Tqual(false,false,false),td->defn,dumptypedefname,td);
-    dump_semi();
+    if(!Absynpp::expand_typedefs) {
+      dump("typedef");
+      dumptqtd(Tqual(false,false,false),td->defn,dumptypedefname,td);
+      dump_semi();
+    }
     break;
   case &Namespace_d(v,tdl):
     dump("namespace");

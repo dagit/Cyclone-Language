@@ -107,6 +107,11 @@ static type_t num_type(type_t *`r topt, type_t numt) {
   // FIX:? Allow *topt to be an Enum ?
   if(topt != null && coerceable(*topt))
     return *topt;
+  // now allow enum to be cast up too
+  switch(compress(numt)) {
+  case &EnumType(_,_): if(topt != null) return *topt; break;
+  default: break;
+  }
   return numt;
 }
 static void set_vd(vardecl_t vd, list_t<vardecl_t>@`r v_result_ptr, type_t t){
@@ -148,9 +153,7 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
   case &Int_p(Signed,_):   t = num_type(topt, sint_t);  break;
   case &Char_p(_):         t = num_type(topt, uchar_t); break;
   case &Float_p(_):        t = num_type(topt, float_t); break;
-  case &Enum_p(ed,ef): // FIX? return numeric when topt is numeric??
-    t = new EnumType(ed->name,ed);
-    break;
+  case &Enum_p(ed,ef):     t = num_type(topt, new EnumType(ed->name,ed)); break;
   case Null_p:
     if(topt != null)
       switch(compress(*topt)) {

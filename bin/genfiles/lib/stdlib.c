@@ -1,26 +1,7 @@
- typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef
-unsigned short Cyc_wchar_t; typedef unsigned int Cyc_wint_t; typedef
-unsigned char Cyc_u_char; typedef unsigned short Cyc_u_short; typedef
-unsigned int Cyc_u_int; typedef unsigned int Cyc_u_long; typedef unsigned short
-Cyc_ushort; typedef unsigned int Cyc_uint; typedef unsigned int Cyc_clock_t;
-typedef int Cyc_time_t; struct Cyc_timespec{ int tv_sec; int tv_nsec; } ; struct
-Cyc_itimerspec{ struct Cyc_timespec it_interval; struct Cyc_timespec it_value; }
-; typedef int Cyc_daddr_t; typedef unsigned char* Cyc_caddr_t; typedef
-unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t; typedef
-unsigned int Cyc_vm_size_t; typedef unsigned char Cyc_int8_t; typedef
-unsigned char Cyc_u_int8_t; typedef short Cyc_int16_t; typedef unsigned short
-Cyc_u_int16_t; typedef int Cyc_int32_t; typedef unsigned int Cyc_u_int32_t;
-typedef long long Cyc_int64_t; typedef unsigned long long Cyc_u_int64_t; typedef
-int Cyc_register_t; typedef short Cyc_dev_t; typedef int Cyc_off_t; typedef
-unsigned short Cyc_uid_t; typedef unsigned short Cyc_gid_t; typedef int Cyc_pid_t;
-typedef int Cyc_key_t; typedef int Cyc_ssize_t; typedef unsigned char* Cyc_addr_t;
-typedef int Cyc_mode_t; typedef unsigned short Cyc_nlink_t; typedef int Cyc_fd_mask;
-struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ; typedef struct Cyc__types_fd_set
-Cyc__types_fd_set; typedef unsigned char* Cyc_Cstring; typedef struct
-_tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t; typedef
-struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void exit(
-int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef struct Cyc_Core_Opt*
-Cyc_Core_opt_t; extern unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
+ struct Cyc_timespec{ int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct
+Cyc_timespec it_interval; struct Cyc_timespec it_value; } ; struct Cyc__types_fd_set{
+int fds_bits[ 8u]; } ; extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{
+void* v; } ; extern unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
 unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_Failure[
 12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_string
 f1; } ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
@@ -29,10 +10,9 @@ unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_
 unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char*
 string_to_Cstring( struct _tagged_string); extern unsigned char*
 underlying_Cstring( struct _tagged_string); extern struct _tagged_string
-Cstring_to_string( unsigned char*); extern int system( unsigned char*); typedef
-int Cyc___int32_t; typedef unsigned int Cyc___uint32_t; struct Cyc_Time_tm{ int
-tm_sec; int tm_min; int tm_hour; int tm_mday; int tm_mon; int tm_year; int
-tm_wday; int tm_yday; int tm_isdst; } ; extern unsigned int clock()
+Cstring_to_string( unsigned char*); extern int system( unsigned char*); struct
+Cyc_Time_tm{ int tm_sec; int tm_min; int tm_hour; int tm_mday; int tm_mon; int
+tm_year; int tm_wday; int tm_yday; int tm_isdst; } ; extern unsigned int clock()
  __attribute__(( cdecl )) ; extern double difftime( int _time2, int _time1)
  __attribute__(( cdecl )) ; extern int mktime( struct Cyc_Time_tm* _timeptr)
  __attribute__(( cdecl )) ; extern int time( int* _timer)  __attribute__(( cdecl
@@ -44,15 +24,14 @@ localtime_r( const int*, struct Cyc_Time_tm*)  __attribute__(( cdecl )) ; extern
 int _timezone  __attribute__(( dllimport )) ; extern int _daylight
  __attribute__(( dllimport )) ; extern unsigned char* _tzname[ 2u]
  __attribute__(( dllimport )) ; extern void tzset()  __attribute__(( cdecl )) ;
-struct Cyc___sFILE; struct Cyc__reent; typedef unsigned int Cyc___ULong; struct
-Cyc__glue{ struct Cyc__glue* _next; int _niobs; struct Cyc___sFILE* _iobs; } ;
-struct Cyc__Bigint{ struct Cyc__Bigint* _next; int _k; int _maxwds; int _sign;
-int _wds; unsigned int _x[ 1u]; } ; struct Cyc__atexit{ struct Cyc__atexit*
-_next; int _ind; void(* _fns[ 32u])(); } ; struct Cyc___sbuf{ unsigned char*
-_base; int _size; } ; typedef int Cyc__fpos_t; struct Cyc___sFILE{ unsigned char*
-_p; int _r; int _w; short _flags; short _file; struct Cyc___sbuf _bf; int
-_lbfsize; void* _cookie; int(* _read)( void* _cookie, unsigned char* _buf, int
-_n)  __attribute__(( cdecl )) ; int(* _write)( void* _cookie, const
+struct Cyc___sFILE; struct Cyc__reent; struct Cyc__glue{ struct Cyc__glue* _next;
+int _niobs; struct Cyc___sFILE* _iobs; } ; struct Cyc__Bigint{ struct Cyc__Bigint*
+_next; int _k; int _maxwds; int _sign; int _wds; unsigned int _x[ 1u]; } ;
+struct Cyc__atexit{ struct Cyc__atexit* _next; int _ind; void(* _fns[ 32u])(); }
+; struct Cyc___sbuf{ unsigned char* _base; int _size; } ; struct Cyc___sFILE{
+unsigned char* _p; int _r; int _w; short _flags; short _file; struct Cyc___sbuf
+_bf; int _lbfsize; void* _cookie; int(* _read)( void* _cookie, unsigned char*
+_buf, int _n)  __attribute__(( cdecl )) ; int(* _write)( void* _cookie, const
 unsigned char* _buf, int _n)  __attribute__(( cdecl )) ; int(* _seek)( void*
 _cookie, int _offset, int _whence)  __attribute__(( cdecl )) ; int(* _close)(
 void* _cookie)  __attribute__(( cdecl )) ; struct Cyc___sbuf _ub; unsigned char*
@@ -71,14 +50,12 @@ Cyc__Bigint* _p5s; struct Cyc__Bigint** _freelist; int _cvtlen; unsigned char*
 _cvtbuf; union Cyc__reent_union _new; struct Cyc__atexit* _atexit; struct Cyc__atexit
 _atexit0; void(** _sig_func)( int); struct Cyc__glue __sglue; struct Cyc___sFILE
 __sf[ 3u]; } ; extern struct Cyc__reent* _impure_ptr; extern void _reclaim_reent(
-struct Cyc__reent*); struct Cyc_Stdlib__Div{ int quot; int rem; } ; typedef
-struct Cyc_Stdlib__Div Cyc_Stdlib_div_t; struct Cyc_Stdlib__Ldiv{ int quot; int
-rem; } ; typedef struct Cyc_Stdlib__Ldiv Cyc_Stdlib_ldiv_t; extern int
-__mb_cur_max  __attribute__(( dllimport )) ; extern int abs( int)
- __attribute__(( cdecl )) ; extern int atexit( void(* __func)())
- __attribute__(( cdecl )) ; extern struct Cyc_Stdlib__Div div( int __numer, int
-__denom)  __attribute__(( cdecl )) ; extern struct Cyc_Stdlib__Ldiv ldiv( int
-__numer, int __denom)  __attribute__(( cdecl )) ; extern int rand()
+struct Cyc__reent*); struct Cyc_Stdlib__Div{ int quot; int rem; } ; struct Cyc_Stdlib__Ldiv{
+int quot; int rem; } ; extern int __mb_cur_max  __attribute__(( dllimport )) ;
+extern int abs( int)  __attribute__(( cdecl )) ; extern int atexit( void(*
+__func)())  __attribute__(( cdecl )) ; extern struct Cyc_Stdlib__Div div( int
+__numer, int __denom)  __attribute__(( cdecl )) ; extern struct Cyc_Stdlib__Ldiv
+ldiv( int __numer, int __denom)  __attribute__(( cdecl )) ; extern int rand()
  __attribute__(( cdecl )) ; extern void srand( unsigned int __seed)
  __attribute__(( cdecl )) ; extern int rand_r( unsigned int* __seed)
  __attribute__(( cdecl )) ; extern int random()  __attribute__(( cdecl )) ;

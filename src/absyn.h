@@ -89,6 +89,7 @@ namespace Absyn {
   extern struct Pat;
   extern tunion Binding;
   extern struct Switch_clause;
+  extern struct SwitchC_clause;
   extern struct Fndecl;
   extern struct Structdecl;
   extern struct Uniondecl;
@@ -134,6 +135,7 @@ namespace Absyn {
   typedef struct Pat @pat_t;
   typedef tunion Binding binding_t;
   typedef struct Switch_clause @switch_clause_t;
+  typedef struct SwitchC_clause @switchC_clause_t;
   typedef struct Fndecl @fndecl_t;
   typedef struct Structdecl @structdecl_t;
   typedef struct Uniondecl @uniondecl_t;
@@ -416,6 +418,7 @@ namespace Absyn {
     Goto_s(var_t,stmt_opt_t); // stmt is dest, set by type-checking
     For_s(exp_t,$(exp_t,stmt_t),$(exp_t,stmt_t),stmt_t); 
     Switch_s(exp_t,list_t<switch_clause_t>); 
+    SwitchC_s(exp_t,list_t<switchC_clause_t>);
     // next case set by type-checking
     Fallthru_s(list_t<exp_t>,switch_clause_t *);
     Decl_s(decl_t,stmt_t);
@@ -468,6 +471,12 @@ namespace Absyn {
     exp_opt_t                where_clause;
     stmt_t                   body;
     seg_t                    loc;
+  };
+
+  EXTERN_ABSYN struct SwitchC_clause {
+    exp_opt_t cnst_exp; // KLUDGE: null => default (parser ensures it's last)
+    stmt_t    body;
+    seg_t     loc;
   };
 
   // only local and pat cases need to worry about shadowing
