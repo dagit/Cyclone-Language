@@ -285,6 +285,7 @@ gprof: \
 
 nocheck: \
   $(BL)/libcycboot_nocheck.a \
+  $(BL)/libcyc_nocheck.a \
   $(BL)/cyc-lib/$(build)/nogc_nocheck.a \
   $(BL)/cyc-lib/$(build)/runtime_cyc_nocheck.a \
   bin/cyclone_nocheck$(EXE)

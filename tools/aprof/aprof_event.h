@@ -29,6 +29,7 @@
 
 #include <core.h>
 #include <fn.h>
+#include <sys/types.h>
 #include <time.h>
 #include <list.h>
 

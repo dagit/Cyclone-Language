@@ -33,6 +33,7 @@
 #include "evexp.h"
 #include "tcstmt.h"
 #include "formatstr.h"
+#include "tc.h"
 #include "tcexp.h"
 #include "new_control_flow.h"
 using Core;
@@ -98,7 +99,9 @@ static void tcExpList(tenv_t te, list_t<exp_t> es) {
 // used to warn when a while, for, if, do, !, &&, or || contains an assignment
 static void check_contains_assign(exp_t e) {
   switch (e->r) {
-  case &AssignOp_e(_,NULL,_): warn(e->loc,"assignment in test"); break;
+  case &AssignOp_e(_,NULL,_): 
+    if (Tc::aggressive_warn) warn(e->loc,"assignment in test");
+    break;
   default: break;
   }
 }
@@ -165,7 +168,21 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
     t = (sn == Unsigned) ? ushort_typ : sshort_typ; break;
   case {.LongLong_c = $(sn,_)}:
     t = (sn == Unsigned) ? ulonglong_typ  : slonglong_typ;  break;
-  case {.Float_c = $(_,i)} : t = float_typ(i); break;
+  case {.Float_c = $(_,i)} : 
+    if (topt == NULL) t = float_typ(i);
+    else {
+      // If *topt calls for a shorter float, we assume it's ok to
+      // truncate without warning, as with ints below
+      switch (compress(*topt)) {
+      case &FloatType(0): t = float_typ(0); break;
+      case &FloatType(1): t = float_typ(1); break;
+      case &FloatType(n): t = float_typ(n); break;
+      default:
+	// presumably an error to be caught elsewhere ...
+	t = float_typ(i); break;
+      }
+    }
+    break;
   case {.Int_c = $(csn,i)}:
     if (topt == NULL)
       t = (csn == Unsigned) ? uint_typ : sint_typ;

@@ -2765,6 +2765,15 @@ pattern:
 				 type_name_to_type($5,SLOC(@5)),NULL);
       $$ = ^$(new_pat(new AliasVar_p(tv,vd),location));
     }
+| TYPEDEF_NAME '<' TYPE_VAR '>' type_name IDENTIFIER
+    { if (strcmp($1,"alias") != 0) 
+        Warn::err(SLOC(@2),"expecting `alias'");
+      let location = LOC(@1,@6);
+      tvar_t tv = new Tvar(new $3,-1,new Eq_kb(&Tcutil::rk));
+      vardecl_t vd = new_vardecl(SLOC(@1),new $(Loc_n, new $6),
+				 type_name_to_type($5,SLOC(@5)),NULL);
+      $$ = ^$(new_pat(new AliasVar_p(tv,vd),location));
+    }
 | '$' '(' tuple_pattern_list ')'
     { let $(ps, dots) = *($3);
       $$=^$(new_pat(new Tuple_p(ps,dots),LOC(@1,@4)));

@@ -38,7 +38,16 @@ struct _dyneither_ptr {
 struct _xtunion_struct { char *tag; };
 
 /* Regions */
-struct _RegionPage; // abstract -- defined in runtime_memory.c
+struct _RegionPage
+#ifdef CYC_REGION_PROFILE
+{ unsigned total_bytes;
+  unsigned free_bytes;
+  /* MWH: wish we didn't have to include the stuff below ... */
+  struct _RegionPage *next;
+  char data[1];
+}
+#endif
+; // abstract -- defined in runtime_memory.c
 
 struct _RegionHandle {
   struct _RuntimeStack s;
@@ -314,10 +323,12 @@ extern void* GC_calloc(unsigned,unsigned);
 extern void* GC_calloc_atomic(unsigned,unsigned);
 
 /* FIX?  Not sure if we want to pass filename and lineno in here... */
+#ifndef CYC_REGION_PROFILE
 #define _cycalloc(n)            (GC_malloc(n)          ? : _throw_badalloc())
 #define _cycalloc_atomic(n)     (GC_malloc_atomic(n)   ? : _throw_badalloc())
 #define _cyccalloc(n,s)         (GC_calloc(n,s)        ? : _throw_badalloc())
 #define _cyccalloc_atomic(n,s)  (GC_calloc_atomic(n,s) ? : _throw_badalloc())
+#endif
 
 #define MAX_MALLOC_SIZE (1 << 28)
 static _INLINE unsigned int _check_times(unsigned x, unsigned y) {
@@ -362,6 +373,11 @@ extern void* _profile_GC_malloc(int,const char *file,const char *func,
                                 int lineno);
 extern void* _profile_GC_malloc_atomic(int,const char *file,
                                        const char *func,int lineno);
+extern void* _profile_GC_calloc(unsigned n, unsigned s,
+                                const char *file, const char *func, int lineno);
+extern void* _profile_GC_calloc_atomic(unsigned n, unsigned s,
+                                       const char *file, const char *func,
+                                       int lineno);
 extern void* _profile_region_malloc(struct _RegionHandle *, unsigned,
                                     const char *file,
                                     const char *func,
@@ -387,6 +403,8 @@ extern void _profile_free_region(struct _RegionHandle *,
 #  endif
 #define _cycalloc(n) _profile_GC_malloc(n,__FILE__,__FUNCTION__,__LINE__)
 #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__,__FUNCTION__,__LINE__)
+#define _cyccalloc(n,s) _profile_GC_calloc(n,s,__FILE__,__FUNCTION__,__LINE__)
+#define _cyccalloc_atomic(n,s) _profile_GC_calloc_atomic(n,s,__FILE__,__FUNCTION__,__LINE__)
 #endif
 #endif
  struct Cyc___cycFILE;struct Cyc_String_pa_PrintArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};struct Cyc_LongDouble_pa_PrintArg_struct{int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};extern char Cyc_FileCloseError[15U];struct Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[14U];struct Cyc_FileOpenError_exn_struct{char*tag;struct _dyneither_ptr f1;};struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};

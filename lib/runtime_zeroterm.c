@@ -20,6 +20,7 @@
 
 /* Add i to zero-terminated pointer x.  Checks for x being null and
    ensures that x[0..i-1] are not 0. */
+#ifndef NO_CYC_BOUNDS_CHECKS
 char * _zero_arr_plus_char_fn(char *orig_x, unsigned int orig_sz, int orig_i,
 			      const char *filename, unsigned lineno) {
   unsigned int _czs_temp;
@@ -77,6 +78,7 @@ void * _zero_arr_plus_voidstar_fn(void **orig_x, unsigned int orig_sz, int orig_
     if (orig_x[_czs_temp] == 0) _throw_arraybounds_fn(filename,lineno);
   return orig_x + orig_i;
 }
+#endif
 
 /* Calculates the number of elements in a zero-terminated, thin array.
    If non-null, the array is guaranteed to have orig_offset elements. */

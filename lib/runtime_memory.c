@@ -26,6 +26,8 @@
 
 #include "runtime_internal.h"
 
+#ifndef CYC_REGION_PROFILE
+// defined in cyc_include.h when profiling turned on
 struct _RegionPage {
 #ifdef CYC_REGION_PROFILE
   unsigned total_bytes;
@@ -34,6 +36,7 @@ struct _RegionPage {
   struct _RegionPage *next;
   char data[1];  /*FJS: used to be size 0, but that's forbidden in ansi c*/
 };
+#endif
 
 #ifdef CYC_REGION_PROFILE
 static FILE *alloc_log = NULL;
@@ -738,15 +741,14 @@ void * _profile_region_calloc(struct _RegionHandle *r, unsigned int t1,
   return (void *)addr;
 }
 
-void * _profile_GC_malloc(int n, const char *file, const char *func, int lineno) {
-  void * result;
-  result =  GC_malloc(n);
-  if(!result)
-    _throw_badalloc();
+static void *_do_profile(void *result, int is_atomic,
+			 const char *file, const char *func, int lineno) {  
+  int n;
   set_finalizer((GC_PTR)result);
   _profile_check_gc();
   n = GC_size(result);
   heap_total_bytes += n;
+  if (is_atomic) heap_total_atomic_bytes += n;
   if (alloc_log != NULL) {
     fprintf(alloc_log,"%u %s:%s:%d\theap\talloc\t%d\t%d\t%d\t%d\t%x\n",
             clock(),
@@ -757,25 +759,38 @@ void * _profile_GC_malloc(int n, const char *file, const char *func, int lineno)
   return result;
 }
 
+void * _profile_GC_malloc(int n, const char *file, const char *func, int lineno) {
+  void * result;
+  result =  GC_malloc(n);
+  if(!result)
+    _throw_badalloc();
+  return _do_profile(result,0,file,func,lineno);
+}
+
 void * _profile_GC_malloc_atomic(int n, const char *file, const char *func,
                                  int lineno) {
   void * result;
   result =  GC_malloc_atomic(n);
   if(!result)
     _throw_badalloc();
-  set_finalizer((GC_PTR)result);
-  _profile_check_gc();
-  n = GC_size(result);
-  heap_total_bytes += n;
-  heap_total_atomic_bytes +=n;
-  if (alloc_log != NULL) {
-    fprintf(alloc_log,"%u %s:%s:%d\theap\talloc\t%d\t%d\t%d\t%d\t%x\n",
-            clock(),
-            file,func,lineno,n,
-	    GC_get_heap_size(),GC_get_free_bytes(),GC_get_total_bytes(),
-            (unsigned int)result);
-  }
-  return result;
+  return _do_profile(result,1,file,func,lineno);
+}
+
+void * _profile_GC_calloc(unsigned n, unsigned s, const char *file, const char *func, int lineno) {
+  void * result;
+  result =  GC_calloc(n,s);
+  if(!result)
+    _throw_badalloc();
+  return _do_profile(result,0,file,func,lineno);
+}
+
+void * _profile_GC_calloc_atomic(unsigned n, unsigned s, 
+				 const char *file, const char *func, int lineno) {
+  void * result;
+  result =  GC_calloc_atomic(n,s);
+  if(!result)
+    _throw_badalloc();
+  return _do_profile(result,1,file,func,lineno);
 }
 
 #else
