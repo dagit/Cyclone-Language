@@ -54,12 +54,13 @@ struct _tagged_arr, int ofs, unsigned int n); struct Cyc_Lineno_Pos{ struct
 _tagged_arr logical_file; struct _tagged_arr line; int line_no; int col; } ;
 extern struct Cyc_Lineno_Pos* Cyc_Lineno_pos_of_abs( struct _tagged_arr, int);
 extern void Cyc_Lineno_poss_of_abss( struct _tagged_arr filename, struct Cyc_List_List*
-places); const int Cyc_Lineno_lex_base[ 8u]=( const int[ 8u]){ 0, 1, - 2, 2, 5,
-- 3, - 1, 6}; const int Cyc_Lineno_lex_backtrk[ 8u]=( const int[ 8u]){ - 1, - 1,
-- 1, 1, - 1, - 1, - 1, 0}; const int Cyc_Lineno_lex_default[ 8u]=( const int[ 8u]){
-1, 1, 0, - 1, 4, 0, 0, - 1}; const int Cyc_Lineno_lex_trans[ 263u]=( const int[
-263u]){ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 3, 3, 6, 6, 0, 7, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+places); static const int Cyc_Lineno_NEWLINE= 0; static const int Cyc_Lineno_LINEDEF=
+1; static const int Cyc_Lineno_END= 2; const int Cyc_Lineno_lex_base[ 8u]=(
+const int[ 8u]){ 0, 1, - 2, 2, 5, - 3, - 1, 6}; const int Cyc_Lineno_lex_backtrk[
+8u]=( const int[ 8u]){ - 1, - 1, - 1, 1, - 1, - 1, - 1, 0}; const int Cyc_Lineno_lex_default[
+8u]=( const int[ 8u]){ 1, 1, 0, - 1, 4, 0, 0, - 1}; const int Cyc_Lineno_lex_trans[
+263u]=( const int[ 263u]){ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 3, 3, 6, 6, 0,
+7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -67,57 +68,58 @@ places); const int Cyc_Lineno_lex_base[ 8u]=( const int[ 8u]){ 0, 1, - 2, 2, 5,
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 0, 0, 0, 5, 0}; const int
-Cyc_Lineno_lex_check[ 263u]=( const int[ 263u]){ - 1, - 1, - 1, - 1, - 1, - 1, -
-1, - 1, - 1, - 1, 0, 1, 3, 0, 1, 4, 7, - 1, 4, - 1, - 1, - 1, - 1, - 1, - 1, - 1,
-- 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, 0, - 1, - 1, - 1, - 1, - 1, - 1, -
-1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, -
-1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, -
-1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, -
-1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, -
-1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, -
-1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, -
-1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, -
-1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, -
-1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, -
-1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, -
-1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, -
-1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, -
-1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, -
-1, - 1, - 1, - 1, - 1, - 1, 0, 1, - 1, - 1, - 1, 4, - 1}; int Cyc_Lineno_lex_engine(
-int start_state, struct Cyc_Lexing_lexbuf* lbuf){ int state; int base; int
-backtrk; int c; state= start_state; if( state >=  0){ lbuf->lex_last_pos=( lbuf->lex_start_pos=
-lbuf->lex_curr_pos); lbuf->lex_last_action= - 1;} else{ state=( - state) -  1;}
-while( 1) { base= Cyc_Lineno_lex_base[ _check_known_subscript_notnull( 8u, state)];
-if( base <  0){ return( - base) -  1;} backtrk= Cyc_Lineno_lex_backtrk[
-_check_known_subscript_notnull( 8u, state)]; if( backtrk >=  0){ lbuf->lex_last_pos=
-lbuf->lex_curr_pos; lbuf->lex_last_action= backtrk;} if( lbuf->lex_curr_pos >= 
-lbuf->lex_buffer_len){ if( ! lbuf->lex_eof_reached){ return( - state) -  1;}
-else{ c= 256;}} else{ c=( int)*(( unsigned char*) _check_unknown_subscript( lbuf->lex_buffer,
-sizeof( unsigned char), lbuf->lex_curr_pos ++)); if( c ==  - 1){ c= 256;}} if(
-Cyc_Lineno_lex_check[ _check_known_subscript_notnull( 263u, base +  c)] == 
-state){ state= Cyc_Lineno_lex_trans[ _check_known_subscript_notnull( 263u, base
-+  c)];} else{ state= Cyc_Lineno_lex_default[ _check_known_subscript_notnull( 8u,
-state)];} if( state <  0){ lbuf->lex_curr_pos= lbuf->lex_last_pos; if( lbuf->lex_last_action
-==  - 1){( int) _throw(( void*)({ struct Cyc_Lexing_Error_struct* _temp0=(
-struct Cyc_Lexing_Error_struct*) GC_malloc( sizeof( struct Cyc_Lexing_Error_struct));
-_temp0[ 0]=({ struct Cyc_Lexing_Error_struct _temp1; _temp1.tag= Cyc_Lexing_Error;
-_temp1.f1= _tag_arr("empty token", sizeof( unsigned char), 12u); _temp1;});
-_temp0;}));} else{ return lbuf->lex_last_action;}} else{ if( c ==  256){ lbuf->lex_eof_reached=
-0;}}}} int Cyc_Lineno_token_rec( struct Cyc_Lexing_lexbuf* lexbuf, int lexstate){
-lexstate= Cyc_Lineno_lex_engine( lexstate, lexbuf); switch( lexstate){ case 0:
-_LL2: return 2; case 1: _LL3: return 1; case 2: _LL4: return 3; default: _LL5:(
-lexbuf->refill_buff)( lexbuf); return Cyc_Lineno_token_rec( lexbuf, lexstate);}(
-int) _throw(( void*)({ struct Cyc_Lexing_Error_struct* _temp7=( struct Cyc_Lexing_Error_struct*)
-GC_malloc( sizeof( struct Cyc_Lexing_Error_struct)); _temp7[ 0]=({ struct Cyc_Lexing_Error_struct
-_temp8; _temp8.tag= Cyc_Lexing_Error; _temp8.f1= _tag_arr("some action didn't return!",
-sizeof( unsigned char), 27u); _temp8;}); _temp7;}));} int Cyc_Lineno_token(
-struct Cyc_Lexing_lexbuf* lexbuf){ return Cyc_Lineno_token_rec( lexbuf, 0);}
-struct Cyc_Lineno_Pos; struct _tuple0{ struct _tagged_arr f1; int f2; } ; static
-struct Cyc_Core_Opt* Cyc_Lineno_parse_linedef( struct _tagged_arr line){ struct
-_handler_cons _temp9; _push_handler(& _temp9);{ int _temp11= 0; if( setjmp(
-_temp9.handler)){ _temp11= 1;} if( ! _temp11){{ int i= 0; while( i < 
-_get_arr_size( line, sizeof( unsigned char))?*(( unsigned char*)
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 0, 0, 0,
+5, 0}; const int Cyc_Lineno_lex_check[ 263u]=( const int[ 263u]){ - 1, - 1, - 1,
+- 1, - 1, - 1, - 1, - 1, - 1, - 1, 0, 1, 3, 0, 1, 4, 7, - 1, 4, - 1, - 1, - 1, -
+1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, 0, - 1, - 1, - 1,
+- 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1,
+- 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1,
+- 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1,
+- 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1,
+- 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1,
+- 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1,
+- 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1,
+- 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1,
+- 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1,
+- 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1,
+- 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1,
+- 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1,
+- 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1,
+- 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, 0, 1, - 1, - 1, - 1, 4, - 1}; int
+Cyc_Lineno_lex_engine( int start_state, struct Cyc_Lexing_lexbuf* lbuf){ int
+state; int base; int backtrk; int c; state= start_state; if( state >=  0){ lbuf->lex_last_pos=(
+lbuf->lex_start_pos= lbuf->lex_curr_pos); lbuf->lex_last_action= - 1;} else{
+state=( - state) -  1;} while( 1) { base= Cyc_Lineno_lex_base[
+_check_known_subscript_notnull( 8u, state)]; if( base <  0){ return( - base) - 
+1;} backtrk= Cyc_Lineno_lex_backtrk[ _check_known_subscript_notnull( 8u, state)];
+if( backtrk >=  0){ lbuf->lex_last_pos= lbuf->lex_curr_pos; lbuf->lex_last_action=
+backtrk;} if( lbuf->lex_curr_pos >=  lbuf->lex_buffer_len){ if( ! lbuf->lex_eof_reached){
+return( - state) -  1;} else{ c= 256;}} else{ c=( int)*(( unsigned char*)
+_check_unknown_subscript( lbuf->lex_buffer, sizeof( unsigned char), lbuf->lex_curr_pos
+++)); if( c ==  - 1){ c= 256;}} if( Cyc_Lineno_lex_check[
+_check_known_subscript_notnull( 263u, base +  c)] ==  state){ state= Cyc_Lineno_lex_trans[
+_check_known_subscript_notnull( 263u, base +  c)];} else{ state= Cyc_Lineno_lex_default[
+_check_known_subscript_notnull( 8u, state)];} if( state <  0){ lbuf->lex_curr_pos=
+lbuf->lex_last_pos; if( lbuf->lex_last_action ==  - 1){( int) _throw(( void*)({
+struct Cyc_Lexing_Error_struct* _temp0=( struct Cyc_Lexing_Error_struct*)
+GC_malloc( sizeof( struct Cyc_Lexing_Error_struct)); _temp0[ 0]=({ struct Cyc_Lexing_Error_struct
+_temp1; _temp1.tag= Cyc_Lexing_Error; _temp1.f1= _tag_arr("empty token", sizeof(
+unsigned char), 12u); _temp1;}); _temp0;}));} else{ return lbuf->lex_last_action;}}
+else{ if( c ==  256){ lbuf->lex_eof_reached= 0;}}}} void* Cyc_Lineno_token_rec(
+struct Cyc_Lexing_lexbuf* lexbuf, int lexstate){ lexstate= Cyc_Lineno_lex_engine(
+lexstate, lexbuf); switch( lexstate){ case 0: _LL2: return( void*) Cyc_Lineno_LINEDEF;
+case 1: _LL3: return( void*) Cyc_Lineno_NEWLINE; case 2: _LL4: return( void*)
+Cyc_Lineno_END; default: _LL5:( lexbuf->refill_buff)( lexbuf); return Cyc_Lineno_token_rec(
+lexbuf, lexstate);}( int) _throw(( void*)({ struct Cyc_Lexing_Error_struct*
+_temp7=( struct Cyc_Lexing_Error_struct*) GC_malloc( sizeof( struct Cyc_Lexing_Error_struct));
+_temp7[ 0]=({ struct Cyc_Lexing_Error_struct _temp8; _temp8.tag= Cyc_Lexing_Error;
+_temp8.f1= _tag_arr("some action didn't return!", sizeof( unsigned char), 27u);
+_temp8;}); _temp7;}));} void* Cyc_Lineno_token( struct Cyc_Lexing_lexbuf* lexbuf){
+return Cyc_Lineno_token_rec( lexbuf, 0);} struct Cyc_Lineno_Pos; struct _tuple0{
+struct _tagged_arr f1; int f2; } ; static struct Cyc_Core_Opt* Cyc_Lineno_parse_linedef(
+struct _tagged_arr line){ struct _handler_cons _temp9; _push_handler(& _temp9);{
+int _temp11= 0; if( setjmp( _temp9.handler)){ _temp11= 1;} if( ! _temp11){{ int
+i= 0; while( i <  _get_arr_size( line, sizeof( unsigned char))?*(( unsigned char*)
 _check_unknown_subscript( line, sizeof( unsigned char), i)) < '0'? 1:*((
 unsigned char*) _check_unknown_subscript( line, sizeof( unsigned char), i)) > '9':
 0) { ++ i;}{ int j= i; while(( j <  _get_arr_size( line, sizeof( unsigned char))?*((
@@ -153,44 +155,37 @@ Cyc_Lineno_place_cmp, places);{ struct Cyc_std___sFILE* f= Cyc_std_file_open(
 filename, _tag_arr("r", sizeof( unsigned char), 2u));{ struct _handler_cons
 _temp27; _push_handler(& _temp27);{ int _temp29= 0; if( setjmp( _temp27.handler)){
 _temp29= 1;} if( ! _temp29){{ struct Cyc_Lexing_lexbuf* lbuf= Cyc_Lexing_from_file(
-f); struct _tagged_arr source_file= filename; int line= 1; struct _tagged_arr
-this_line; int eol; int next; while( places !=  0) { while( 1) { next=(( int(*)(
+f); struct _tagged_arr _temp30= filename; int _temp31= 1; struct _tagged_arr
+this_line; int eol; void* next; while( places !=  0) { while( 1) { next=(( void*(*)(
 struct Cyc_Lexing_lexbuf* lexbuf)) Cyc_Lineno_token)( lbuf); eol=(( int(*)(
 struct Cyc_Lexing_lexbuf*)) Cyc_Lexing_lexeme_end)( lbuf); this_line=(( struct
-_tagged_arr(*)( struct Cyc_Lexing_lexbuf*)) Cyc_Lexing_lexeme)( lbuf); if( eol > (*((
-struct _tuple1*)(( struct Cyc_List_List*) _check_null( places))->hd)).f1){
-break;} switch( next){ case 3: _LL30:( int) _throw(( void*)({ struct Cyc_Core_Failure_struct*
-_temp32=( struct Cyc_Core_Failure_struct*) GC_malloc( sizeof( struct Cyc_Core_Failure_struct));
-_temp32[ 0]=({ struct Cyc_Core_Failure_struct _temp33; _temp33.tag= Cyc_Core_Failure;
-_temp33.f1= _tag_arr("Lineno: Invalid file position", sizeof( unsigned char), 30u);
-_temp33;}); _temp32;})); case 1: _LL31: ++ line; break; case 2: _LL34: { struct
-Cyc_Core_Opt* fno= Cyc_Lineno_parse_linedef( this_line); if( fno ==  0){ ++ line;({
-struct Cyc_std_String_pa_struct _temp37; _temp37.tag= Cyc_std_String_pa; _temp37.f1=(
-struct _tagged_arr) this_line;{ void* _temp36[ 1u]={& _temp37}; Cyc_std_fprintf(
-Cyc_std_stderr, _tag_arr("Unknown directive: %s\n", sizeof( unsigned char), 23u),
-_tag_arr( _temp36, sizeof( void*), 1u));}});} else{ source_file=( struct
-_tagged_arr)(*(( struct _tuple0*)(( struct Cyc_Core_Opt*) _check_null( fno))->v)).f1;
-line=(*(( struct _tuple0*)(( struct Cyc_Core_Opt*) _check_null( fno))->v)).f2;}
-break;} default: _LL35:( int) _throw(( void*)({ struct Cyc_Core_Failure_struct*
-_temp39=( struct Cyc_Core_Failure_struct*) GC_malloc( sizeof( struct Cyc_Core_Failure_struct));
-_temp39[ 0]=({ struct Cyc_Core_Failure_struct _temp40; _temp40.tag= Cyc_Core_Failure;
-_temp40.f1= _tag_arr("Lineno: Impossible", sizeof( unsigned char), 19u); _temp40;});
-_temp39;}));}} while( places !=  0? eol > (*(( struct _tuple1*)(( struct Cyc_List_List*)
-_check_null( places))->hd)).f1: 0) { struct Cyc_Lineno_Pos* _temp41=(*(( struct
-_tuple1*)(( struct Cyc_List_List*) _check_null( places))->hd)).f2; _temp41->logical_file=(
-struct _tagged_arr) Cyc_std_strdup( source_file); _temp41->line= this_line;
-_temp41->line_no= line; _temp41->col=( int)( Cyc_std_strlen(( struct _tagged_arr)
-this_line) - ( eol - (*(( struct _tuple1*)(( struct Cyc_List_List*) _check_null(
-places))->hd)).f1)); places=(( struct Cyc_List_List*) _check_null( places))->tl;}
-++ line;}}; _pop_handler();} else{ void* _temp28=( void*) _exn_thrown; void*
-_temp43= _temp28; _LL45: goto _LL46; _LL47: goto _LL48; _LL46: Cyc_std_file_close(
-f);( int) _throw( _temp43); _LL48:( void) _throw( _temp43); _LL44:;}}} Cyc_std_file_close(
+_tagged_arr(*)( struct Cyc_Lexing_lexbuf*)) Cyc_Lexing_lexeme)( lbuf); if( next
+== ( void*) Cyc_Lineno_END? 1: eol > (*(( struct _tuple1*)(( struct Cyc_List_List*)
+_check_null( places))->hd)).f1){ break;} if( next == ( void*) Cyc_Lineno_NEWLINE){
+++ _temp31;} else{ struct Cyc_Core_Opt* fno= Cyc_Lineno_parse_linedef( this_line);
+if( fno ==  0){ ++ _temp31;({ struct Cyc_std_String_pa_struct _temp33; _temp33.tag=
+Cyc_std_String_pa; _temp33.f1=( struct _tagged_arr) this_line;{ void* _temp32[ 1u]={&
+_temp33}; Cyc_std_fprintf( Cyc_std_stderr, _tag_arr("Unknown directive: %s\n",
+sizeof( unsigned char), 23u), _tag_arr( _temp32, sizeof( void*), 1u));}});}
+else{ _temp30=( struct _tagged_arr)(*(( struct _tuple0*)(( struct Cyc_Core_Opt*)
+_check_null( fno))->v)).f1; _temp31=(*(( struct _tuple0*)(( struct Cyc_Core_Opt*)
+_check_null( fno))->v)).f2;}}} while( places !=  0? next == ( void*) Cyc_Lineno_END?
+1: eol > (*(( struct _tuple1*)(( struct Cyc_List_List*) _check_null( places))->hd)).f1:
+0) { struct Cyc_Lineno_Pos* _temp34=(*(( struct _tuple1*)(( struct Cyc_List_List*)
+_check_null( places))->hd)).f2; _temp34->logical_file=( struct _tagged_arr) Cyc_std_strdup(
+_temp30); _temp34->line= this_line; _temp34->line_no= _temp31; _temp34->col=(
+int)( Cyc_std_strlen(( struct _tagged_arr) this_line) - ( eol - (*(( struct
+_tuple1*)(( struct Cyc_List_List*) _check_null( places))->hd)).f1)); if( _temp34->col
+<  0){ _temp34->col= 0;} places=(( struct Cyc_List_List*) _check_null( places))->tl;}
+++ _temp31;}}; _pop_handler();} else{ void* _temp28=( void*) _exn_thrown; void*
+_temp36= _temp28; _LL38: goto _LL39; _LL40: goto _LL41; _LL39: Cyc_std_file_close(
+f);( int) _throw( _temp36); _LL41:( void) _throw( _temp36); _LL37:;}}} Cyc_std_file_close(
 f); return;}} struct Cyc_Lineno_Pos* Cyc_Lineno_pos_of_abs( struct _tagged_arr
-filename, int abs){ struct Cyc_Lineno_Pos* ans=({ struct Cyc_Lineno_Pos* _temp51=(
-struct Cyc_Lineno_Pos*) GC_malloc( sizeof( struct Cyc_Lineno_Pos)); _temp51->logical_file=
-_tag_arr("", sizeof( unsigned char), 1u); _temp51->line= Cyc_Core_new_string( 0);
-_temp51->line_no= 0; _temp51->col= 0; _temp51;}); Cyc_Lineno_poss_of_abss(
-filename,({ struct Cyc_List_List* _temp49=( struct Cyc_List_List*) GC_malloc(
-sizeof( struct Cyc_List_List)); _temp49->hd=( void*)({ struct _tuple1* _temp50=(
-struct _tuple1*) GC_malloc( sizeof( struct _tuple1)); _temp50->f1= abs; _temp50->f2=
-ans; _temp50;}); _temp49->tl= 0; _temp49;})); return ans;}
+filename, int abs){ struct Cyc_Lineno_Pos* ans=({ struct Cyc_Lineno_Pos* _temp44=(
+struct Cyc_Lineno_Pos*) GC_malloc( sizeof( struct Cyc_Lineno_Pos)); _temp44->logical_file=
+_tag_arr("", sizeof( unsigned char), 1u); _temp44->line= Cyc_Core_new_string( 0);
+_temp44->line_no= 0; _temp44->col= 0; _temp44;}); Cyc_Lineno_poss_of_abss(
+filename,({ struct Cyc_List_List* _temp42=( struct Cyc_List_List*) GC_malloc(
+sizeof( struct Cyc_List_List)); _temp42->hd=( void*)({ struct _tuple1* _temp43=(
+struct _tuple1*) GC_malloc( sizeof( struct _tuple1)); _temp43->f1= abs; _temp43->f2=
+ans; _temp43;}); _temp42->tl= 0; _temp42;})); return ans;}
