@@ -36,7 +36,7 @@ static unsigned int pos = 0;
 // It would be really nice to have a control character for untagged arrays!
 // (Think of all the saved allocation for punctuation and keywords!)
 void dump(dump_string_t s) {
-  pos += size(s)+1;
+  pos += s.size+1;
   if (pos > 80) {
     pos = 0; 
     fprintf((FILE @)dump_file, "\n");
@@ -44,7 +44,7 @@ void dump(dump_string_t s) {
   fprintf((FILE @)dump_file, " %s", s);
 }
 void dump_nospace(dump_string_t s) {
-  pos += size(s);
+  pos += s.size;
   fprintf((FILE @)dump_file, "%s", s);
 } 
 // this needs to take a boxed type b/c it's used to instantiate `a
@@ -265,9 +265,14 @@ void dumpexp_prec(int inprec, exp e) {
     string pstr = Absynpp::prim2str(p); 
     if(!is_format_prim(p)) {
       switch (List::length(es)) {
-      case 1: 
-	dump(pstr); 
-	dumpexp_prec(myprec,es->hd); 
+      case 1:
+	if (p == Size) {
+	  dumpexp_prec(myprec,es->hd);
+	  dump(".size");
+	} else {
+	  dump(pstr); 
+	  dumpexp_prec(myprec,es->hd); 
+	}
 	break;
       case 2: 
 	dumpexp_prec(myprec,es->hd); 
@@ -412,7 +417,7 @@ void dumpswitchclauses(list<switch_clause> scs) {
       dump("case");
       dumppat(c->pattern);
       if(c->where_clause != null) {
-	dump("where");
+	dump(" && ");
 	dumpexp(c->where_clause->v);
       }
       dump(":");

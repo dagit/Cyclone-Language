@@ -730,7 +730,7 @@ static void rule_occurs(int dummy, $(bool,segment)@ rhs) {
   rhs[0] = true;
 }
 void check_switch_exhaustive(segment loc, list<switch_clause> swcs) {
-  // We represent "pat where e" as (simple_pat,i) where i is a unique integer.
+  // We represent "pat && e" as (simple_pat,i) where i is a unique integer.
   // We represent patterns without where clauses as (simple_pat,_).
   // This way, if we have the same pattern repeated, we get exhuastiveness
   // right as long as one of the copies does not have a where-clause.

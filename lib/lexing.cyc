@@ -52,10 +52,10 @@ struct lex_tables {
 static string aux_buffer = "";
 
 void lex_refill<`c> (Lexbuf<Function_lexbuf_state<`c>> lexbuf) {
-  if (size(aux_buffer)==1) aux_buffer = new_string(AUX_SIZE);
+  if (aux_buffer.size==1) aux_buffer = new_string(AUX_SIZE);
   int read =
     lexbuf->refill_state->read_fun(aux_buffer,
-                                   size(aux_buffer),
+                                   aux_buffer.size,
                                    lexbuf->refill_state->read_fun_state);
   int n = read > 0 ? read : (lexbuf->lex_eof_reached = true, 0);
   if (lexbuf->lex_start_pos < n) {
@@ -113,7 +113,7 @@ Lexbuf<bool> from_string(string s) {
   return &lexbuf(set_eof,
                  false,     //ignored but can't instantiate with void
                  String::strdup(s), // copy to keep lexer shielded from updates
-                 size(s),
+                 s.size,
                  0,0,0,0,0,
                  true);
 }

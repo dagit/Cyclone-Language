@@ -41,12 +41,12 @@ static scope scope_redecl_okay<`a>(scope s1,Opt_t<`a> fields1,
   case $(Abstract,Public): redecl_err(loc, t, v, "abstract",   "public"); break;
   case $(_,       Public): s1 = Public; break;
   case $(Static,  Extern): redecl_err(loc, t, v, "static",     "extern"); break;
-  case $(Abstract,Extern) where fields2 != null: 
+  case $(Abstract,Extern) && fields2 != null: 
     redecl_err(loc,t,v, "abstract", "transparent"); break;
   case $(_,       Extern): break;
   case $(Static,Abstract): redecl_err(loc, t, v, "static", "abstract"); break;
   case $(Public,Abstract): redecl_err(loc, t, v, "public", "abstract"); break;
-  case $(Extern,Abstract) where fields1 != null: 
+  case $(Extern,Abstract) && fields1 != null: 
     redecl_err(loc,t,v, "[extern] transparent", "abstract"); break;
   case $(_,     Abstract): s1 = Abstract; break;
   }

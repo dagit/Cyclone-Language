@@ -42,7 +42,7 @@ int file_delete(string fname) { // this should be added to the runtime
 
 /* Popcorn version of fgets; returns the # of chars read */
 int file_gets(string buf,int ofs,FILE @f) {
-  int i, len = size(buf), retc;
+  int i, len = buf.size, retc;
   if (ofs < 0 || ofs >= len)
     throw InvalidArg("file_gets");
   /* built on f_string_read; pretty inefficient but oh well */
@@ -123,17 +123,17 @@ int int_of_string(string s)
   int sign = 1;
 
   // skip leading whitespace and eat the sign
-  for(i=0; i<size(s) && is_space(s[i]); ++i)
+  for(i=0; i<s.size && is_space(s[i]); ++i)
     ;
-  while (i<size(s) &&(s[i]=='-' || s[i]=='+')) {
+  while (i<s.size &&(s[i]=='-' || s[i]=='+')) {
     if (s[i]=='-') sign = - sign;
     i++;
   } 
-  if (i==size(s)) 
+  if (i==s.size) 
     throw InvalidArg("string to integer conversion");
 
   // determine the base
-  if (i+1 == size(s) || s[i]!='0') 
+  if (i+1 == s.size || s[i]!='0') 
     base = 10;
   else {
     switch (s[++i]) {
@@ -144,7 +144,7 @@ int int_of_string(string s)
     }
   }
   // do the math
-  for(n=0; i<size(s) && s[i] != '\000'; ++i) {
+  for(n=0; i<s.size && s[i] != '\000'; ++i) {
     int digit = int_of_char(s[i]);
     if (digit >= base) 
       throw InvalidArg("string to integer conversion");

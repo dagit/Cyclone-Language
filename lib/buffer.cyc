@@ -48,7 +48,7 @@ void clear (T b) {
 void reset (T b) {
   b->position = 0;
   b->buffer = b->initial_buffer;
-  b->length = size (b->buffer);
+  b->length = (b->buffer).size;
   return;
 }
 
@@ -78,7 +78,7 @@ void add_char(T b, char c) {
 // Note: like String::substring, this does not check for
 // null terminators within the specified substring
 void add_substring(T b, string s, int offset, int len) {
-  if (offset < 0 || len < 0 || offset + len > size(s))
+  if (offset < 0 || len < 0 || offset + len > s.size)
     throw InvalidArg("Buffer::add_substring");
   int new_position = b->position + len;
   if (new_position > b->length) resize (b, len);

@@ -60,7 +60,7 @@ static string args[?] = {};
 
 static void stop(int prog_pos, enum error e,
 		 list<$(string,spec,string)@> speclist, string errmsg) {
-  string progname = prog_pos < size(args) ? args[prog_pos] : "(?)";
+  string progname = prog_pos < args.size ? args[prog_pos] : "(?)";
   switch (e) {
   case Unknown(s):
      if (String::strcmp(s,"-help")!=0)
@@ -86,11 +86,11 @@ void parse(list<$(string,spec,string)@> speclist, void anonfun(string),
   args = std_args();
 
   int initpos = current;
-  int l       = size(args);
+  int l       = args.size;
   ++current;
   while (current < l) {
     string s = args[current];
-    if (size(s) >= 1 && s[0] == '-') {
+    if (s.size >= 1 && s[0] == '-') {
       spec action;
       try action = lookup(speclist, s);
       catch {

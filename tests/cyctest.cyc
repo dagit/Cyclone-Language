@@ -28,7 +28,7 @@ using Ref;
 using Fn;
 
 void test_begin(string t) {
-  int x = 12-size(t);
+  int x = 12-t.size;
   if (x<0) x=0;
   string padding = new { for i < x : ' ' };
   printf("%s%s: ",padding,t);
@@ -260,11 +260,11 @@ void pattern_match_test() {
   case $(&$(2,1),3): fail(); break;
   default: fail(); break;
   }
-  // where patterns
+  // && patterns
   switch ($(1,2,3)) {
-  case $(1,x,3) where x<2: fail(); break;
-  case $(1,x,3) where x==2: ok(); break;
-  case $(1,x,3) where x>2: fail(); break;
+  case $(1,x,3) && x<2: fail(); break;
+  case $(1,x,3) && x==2: ok(); break;
+  case $(1,x,3) && x>2: fail(); break;
   default: fail(); break;
   }
   test_end();;
@@ -761,8 +761,8 @@ void arg_test() {
   test_begin("Arg");
 
   let args = Core::std_args();
-  if (size(args)<=0) fail();
-  else if (size(args)==1) ok();
+  if (args.size<=0) fail();
+  else if (args.size==1) ok();
   else {
     let u = &$((string)"-u",Unit_spec(u_foo),(string)"unit");
     let s_foo = (bool@)&$(false);

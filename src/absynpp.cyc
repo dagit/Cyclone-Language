@@ -55,7 +55,7 @@ bool qvar_to_Cids = false;
 
 /* // I'm having trouble linking in the Buffer stuff
 string escape(string s) {
-  _ sz = size(s);
+  _ sz = s.size;
   _ b = Buffer::create(sz+10);
   for (int i = 0; i<sz; i++) {
     switch (s[i]) {
@@ -77,7 +77,7 @@ string escape(string s) {
 */
 
 bool special(string s){
-  int sz = size(s)-1;
+  int sz = s.size-1;
   for (int i = 0; i<sz; i++) {
     char c = s[i];
     if (c<=' ' || c>='~' || c=='\042' || c=='\\')
@@ -376,7 +376,7 @@ int exp_prec(exp e) {
     case Bitlshift:      return  90;
     case Bitlrshift:     return  80; // unlike C (see grammar)
     case Bitarshift:     return  80; // doesn't actually exist (see grammar)
-    case Size:           return 130; 
+    case Size:           return 140; // foo.size (same as struct member)
     case Printf:         return 130;
     case Fprintf:        return 130;
     case Xprintf:        return 130;
@@ -615,7 +615,14 @@ Doc cnst2doc(cnst c) {
 
 Doc primapp2doc(int inprec, primop p,list<exp> es) {
   Doc ps = prim2doc(p);
-  if (!is_format_prim(p)) {
+  if (p == Size) {
+    if (es == null || es->tl != null)
+      throw Failure(xprintf("Absynpp::primapp2doc Size: %s with bad args",
+			    string_of_doc(ps,72)));
+    let d = exp2doc_prec(inprec,es->hd);
+    return cat2(d,text(".size"));
+
+  } else if (!is_format_prim(p)) {
     list<Doc> ds = List::map_c(exp2doc_prec,inprec,es);
     if (ds == null) 
       throw Failure(xprintf("Absynpp::primapp2doc: %s with no args",
@@ -1024,7 +1031,7 @@ Doc switchclause2doc(switch_clause c) {
     return     
       cat6(text("case "),
            pat2doc(c->pattern),
-           text(" where "),
+           text(" && "),
            exp2doc(c->where_clause->v),
            text(": "),
            nest(2,cat2(line_doc(),stmt2doc(c->body))));

@@ -8,7 +8,7 @@ void cyc_main() {
   // The first string is the name of the program.
   string args[?] = std_args();  
 
-  if (size(args) <= 1) 
+  if (args.size <= 1) 
     throw Failure("missing name!");
   else
     printf("Hello, %s.\n",args[1]);

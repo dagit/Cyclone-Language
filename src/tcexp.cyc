@@ -152,7 +152,7 @@ static synth tcConst(tenv te, segment loc, Opt_t<typ> topt, cnst c) {
   case LongLong_c(sn,_): t = (sn == Unsigned) ? ulong_t  : slong_t;  break;
   case Float_c(_) : t = float_t; break;
   case String_c(s):
-    int len = size(s); // includes the trailing 0 character
+    int len = s.size; // includes the trailing 0 character
     let r   = Const_e(Int_c(Unsigned,len));
     exp e   = new_exp(r,loc);
     e->topt = &Opt(uint_t);
@@ -757,7 +757,7 @@ static synth tcDeref(tenv te, segment loc, Opt_t<typ> topt, exp e) {
 
 // e->f 
 static synth tcStructMember(tenv te, segment loc, Opt_t<typ> topt, 
-			    exp e, field_name f) {
+			    exp outer_e, exp e, field_name f) {
   synth esyn = tcExp(te,null,e);
   typ t = compress(e->topt->v);
   switch (t) {
@@ -773,8 +773,23 @@ static synth tcStructMember(tenv te, segment loc, Opt_t<typ> topt,
     let inst = List::zip(sd->tvs,ts);
     let t2 = substitute(inst,finfo_opt[1]);
     return synth_set_typ(esyn,t2);
+  case ArrayType(_,_,ak) && (String::zstrcmp(f,"size") == 0): 
+    switch (ak) {
+    case UntaggedArray:
+      return expr_err(te,loc,
+		      xprintf("size not applicable to untagged array type %s",
+			      typ2string(t)));
+    default:
+      outer_e->r = Primop_e(Size,&cons(e,null));
+      return synth_set_typ(esyn,uint_t);
+    }
   default:
-    return expr_err(te,loc,xprintf("expecting struct, found %s",typ2string(t)));
+    if (String::zstrcmp(f,"size") == 0)
+      return expr_err(te,loc,xprintf("expecting struct or array, found %s",
+				     typ2string(t)));
+    else 
+      return expr_err(te,loc,xprintf("expecting struct, found %s",
+				     typ2string(t)));
   }
 }
 
@@ -1327,7 +1342,8 @@ static synth tcExpNoInst(tenv te, Opt_t<typ> topt, exp e) {
   case Address_e(e1)            : esyn=tcAddress(te,loc,topt,e1); break;
   case Sizeof_e(t)              : esyn=tcSizeof(te,loc,topt,t); break;
   case Deref_e(e1)              : esyn=tcDeref(te,loc,topt,e1); break;
-  case StructMember_e(e1,f)     : esyn=tcStructMember(te,loc,topt,e1,f); break;
+  case StructMember_e(e1,f)     : 
+    esyn=tcStructMember(te,loc,topt,e,e1,f); break;
   case StructArrow_e(e1,f)      : esyn=tcStructArrow(te,loc,topt,e1,f); break;
   case Subscript_e(e1,e2)       : esyn=tcSubscript(te,loc,topt,e1,e2); break;
   case Tuple_e(es)              : esyn=tcTuple(te,loc,topt,es); break;

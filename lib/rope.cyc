@@ -30,7 +30,7 @@ uint length(rope r) {
   switch (r->v) {
   case String_rope(ss): return String::strlen(ss);
   case Array_rope(rs):
-    uint total = 0, sz = size(rs);
+    uint total = 0, sz = rs.size;
     for (uint i = 0; i < sz; i++)
       total += length(rs[i]);
     return total;
@@ -44,7 +44,7 @@ static uint flatten_it(string s, uint i, rope r) {
     String::strncpy(s,i,ss,0,len);
     return i+len;
   case Array_rope(rs):
-    let len = size(rs);
+    let len = rs.size;
     for (int j = 0; j < len; j++)
       i = flatten_it(s,i,rs[j]);
     return i;

@@ -69,7 +69,7 @@ enum Type_specifier {
   Unsigned_spec(segment);
   Short_spec(segment,bool);  /* true -> boxed */
   Long_spec(segment,bool);   /* true -> boxed */
-  Type_spec(typ,segment);    /* int, bool, `a, list<`a>, etc. */
+  Type_spec(typ,segment);    /* int, `a, list<`a>, etc. */
   Decl_spec(decl);
 };
 typedef enum Type_specifier type_specifier_t;
@@ -823,12 +823,11 @@ using Parse;
 %token STRUCT UNION CASE DEFAULT INLINE
 %token IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN SIZEOF ENUM
 /* Cyc:  CYCLONE additional keywords */
-%token BOOL BOXED_BOOL BOXED_CHAR BOXED_SHORT BOXED_INT BOXED_LONG
+%token BOXED_CHAR BOXED_SHORT BOXED_INT BOXED_LONG
 %token BOXED_FLOAT BOXED_DOUBLE NULL LET THROW TRY CATCH
-%token WHERE NEW ABSTRACT FALLTHRU USING NAMESPACE XENUM
-%token TRUE FALSE
+%token NEW ABSTRACT FALLTHRU USING NAMESPACE XENUM
 %token FILL CODEGEN CUT SPLICE
-%token PRINTF FPRINTF XPRINTF SIZE
+%token PRINTF FPRINTF XPRINTF 
 /* double and triple-character tokens */
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
 %token AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
@@ -1767,10 +1766,10 @@ switch_clauses:
                                  LOC(@1,@4)),$4)); }
 | CASE pattern ':' block_item_list switch_clauses
     { $$=^$(&cons(&Switch_clause($2,null,null,$4,LOC(@1,@4)),$5)); }
-| CASE pattern WHERE expression ':' switch_clauses
+| CASE pattern AND_OP expression ':' switch_clauses
     { $$=^$(&cons(&Switch_clause($2,null,&Opt($4),skip_stmt(LOC(@5,@5)),
                                  LOC(@1,@6)),$6)); }
-| CASE pattern WHERE expression ':' block_item_list switch_clauses
+| CASE pattern AND_OP expression ':' block_item_list switch_clauses
     { $$=^$(&cons(&Switch_clause($2,null,&Opt($4),$6,LOC(@1,@7)),$7)); }
 ;
 
@@ -2106,11 +2105,9 @@ unary_expression:
     { $$=^$(new_exp(Sizeof_e($3[2]),LOC(@1,@4))); }
 | SIZEOF unary_expression
     { $$=^$(prim1_exp(Size,$2,LOC(@1,@2))); }
-/* Cyc: throw, size, printf, fprintf, sprintf */
+/* Cyc: throw, printf, fprintf, sprintf */
 | THROW unary_expression
     { $$=^$(new_exp(Throw_e($2),LOC(@1,@2))); }
-| SIZE unary_expression
-    { $$ = ^$(prim1_exp(Size,$2,LOC(@1,@2))); }
 | format_primop '(' argument_expression_list ')'
     { $$=^$(new_exp(Primop_e($1,$3),LOC(@1,@4))); }
 ;

@@ -798,7 +798,7 @@ static exp printf_to_c(primop p,Opt_t<exp> aopt,list<exp> args,list<typ> typs) {
   default: return toc_impos("expecting a literal format string");
   }
   // Check for the usual case: no %s.
-  int len = size(fmt_str);
+  int len = fmt_str.size;
   int i   = 0;
   for (i=0; i<len; i++) {
     if (fmt_str[i] == '%') {
@@ -2368,7 +2368,7 @@ static list<decl> xenumdecl_to_c(xenumdecl xd, list<decl> res) {
       enumfield f = fs->hd;
       if (f->tag != null) unimp("xenum:  can't deal with explicit tags");
       string fn      = collapse_qvar(f->name)[1];
-      let    sz_exp  = uint_exp(size(fn),DL);
+      let    sz_exp  = uint_exp(fn.size,DL);
       let    tag_typ = ArrayType(uchar_t,empty_tqual(),FixedArray(sz_exp));
       Opt_t<exp> initopt = null;
       if (xd->sc != Extern) 

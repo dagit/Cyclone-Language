@@ -1,4 +1,4 @@
-#line 1 "cyc_bison.simple"
+#line 1 "cycbison.simple"
 /* This is a (simple) skeleton parser engine for Cyclone, adapted from
  * GNU bison's bison.simple parser engine.  The copyright information for
  * GNU bison is below.
@@ -429,7 +429,7 @@ yyerrlab:   /* here on detecting error */
 	    {
 	      count = 0;
 	      for (x = (yyn < 0 ? -yyn : 0);
-		   x < (size(yytname) / sizeof(char *)); x++)
+		   x < (yytname.size / sizeof(char *)); x++)
 		if (yycheck[x + yyn] == x)
 		  { /* JGM: NB -- casts are needed here.  Sigh. */
 		    strcat(msg, count == 0 ? (string)(", expecting `") : 

@@ -317,7 +317,7 @@ Doc concats(list<Doc> doclist) {
 
 static Out concats_arr_f(Doc docs[?], Ppstate st) {
   list<Out> os = null;
-  int sz = size(docs);
+  int sz = docs.size;
   for (int i=0; i < sz; ++i) {
     Doc d = docs[i];
     Out o = apply(d->f,st);
@@ -336,7 +336,7 @@ static Out concats_arr_f(Doc docs[?], Ppstate st) {
 }
 
 Doc concats_arr(Doc docs[?]) {
-  int sz = size(docs);
+  int sz = docs.size;
   if(sz==0)
     throw Failure("concats_arr -- size zero array");
   Doc d = docs[0];

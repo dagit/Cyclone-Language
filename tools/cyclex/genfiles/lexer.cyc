@@ -57,15 +57,15 @@ typedef int lexfun_t <`a>(Lexing::Lexbuf<`a>);
 
 #define SHRINK_THRESHOLD 16384
 void reset_string_buffer() {
-  if(size(string_buff) > SHRINK_THRESHOLD)
+  if(string_buff.size > SHRINK_THRESHOLD)
     string_buff = (string)"01234567012345670123456701234567";
   string_index = 0;
 }
 
 void store_string_char(char c) {
-  if(string_index >= size(string_buff)) {
-    string new_buff = new_string(size(string_buff)*2);
-    String::strncpy(string_buff, 0, new_buff, 0, size(string_buff));
+  if(string_index >= string_buff.size) {
+    string new_buff = new_string(string_buff.size*2);
+    String::strncpy(string_buff, 0, new_buff, 0, string_buff.size);
     string_buff = new_buff;
   }
   string_buff[string_index++] = c;

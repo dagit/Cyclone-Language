@@ -12,7 +12,7 @@ using List;
 ///////////////////////// LENGTH
 size_t strlen(string s) {
   size_t i;
-  for (i = 0; i<size(s); i++) {
+  for (i = 0; i<s.size; i++) {
     if (s[i] == '\000')
       return i;
   }
@@ -22,9 +22,9 @@ size_t strlen(string s) {
 // Internal length after offset function, parameterized by what
 // to throw if the offset is out of range.
 static size_t int_strleno(string s, int ofs, string error) {
-  if (ofs > size(s) || ofs < 0) throw InvalidArg(error);
+  if (ofs > s.size || ofs < 0) throw InvalidArg(error);
   int i;
-  for (i = ofs; i<size(s); i++) {
+  for (i = ofs; i<s.size; i++) {
     if (s[i] == '\000')
       break;
   }
@@ -117,8 +117,8 @@ int strncasecmp(string s1, int ofs1, string s2, int ofs2, size_t n) {
 int zstrcmp(string a, string b) {
   if(a == b)
     return 0;
-  size_t as = size(a);
-  size_t bs = size(b);
+  size_t as = a.size;
+  size_t bs = b.size;
   size_t min_length = (as < bs) ? as : bs;
   int i  = -1;
   while (++i < min_length) {
@@ -132,8 +132,8 @@ int zstrcmp(string a, string b) {
 int zstrncmp(string s1,string s2,size_t n) {
   if (n <= 0) return 0;
 
-  size_t s1size = size(s1);
-  size_t s2size = size(s2);
+  size_t s1size = s1.size;
+  size_t s2size = s2.size;
   size_t min_size = (s1size > s2size) ? s2size : s1size;
   size_t bound = (min_size > n) ? n : min_size;
 
@@ -160,7 +160,7 @@ static string int_strcato(string dest,string src,int srcOfs,string error) {
   int i;
   size_t dsize, slen, dlen;
 
-  dsize = size(dest);
+  dsize = dest.size;
   dlen = strlen(dest);
   slen = int_strleno(src,srcOfs,error);
   
@@ -252,8 +252,8 @@ string str_sepstr(list<string> strs, string separator) {
 // (C version does not take offsets)
 string strncpy(string dest, int destOfs, string src, int srcOfs, size_t n) {
   // Range checking
-  let destSz = size(dest);
-  let srcSz = size(src);
+  let destSz = dest.size;
+  let srcSz = src.size;
   if (destOfs < 0)
     throw InvalidArg("String::strncpy");
   if (srcOfs < 0 || (n > 0 && srcOfs >= srcSz))
@@ -294,8 +294,8 @@ string strncpy(string dest, int destOfs, string src, int srcOfs, size_t n) {
 // Strncpy that does not pay attention to zero chars
 string zstrncpy(string dest, int destOfs, string src, int srcOfs, size_t n) {
   // Range checking
-  let destSz = size(dest);
-  let srcSz  = size(src);
+  let destSz = dest.size;
+  let srcSz  = src.size;
   if (destOfs < 0)
     throw InvalidArg("String::zstrncpy");
   if (srcOfs < 0 || (n > 0 && srcOfs >= srcSz))
@@ -312,7 +312,7 @@ string zstrncpy(string dest, int destOfs, string src, int srcOfs, size_t n) {
 string strcpy(string dest,string src) {
   size_t len = strlen(src);
   strncpy(dest,0,src,0,len);
-  if (len != size(dest))
+  if (len != dest.size)
     dest[len] = '\000';
   return dest;
 }
@@ -340,7 +340,7 @@ string expand(string s, size_t sz) {
 
   strncpy(temp,0,s,0,slen);
 
-  if (slen != size(s))
+  if (slen != s.size)
     temp[slen] = '\000';
 
   return temp;
@@ -348,7 +348,7 @@ string expand(string s, size_t sz) {
 
 string realloc_str(string str, size_t sz)
 {
-  size_t maxsizeP = size(str);
+  size_t maxsizeP = str.size;
 
   if (maxsizeP == 0) {
     maxsizeP = (30>sz)?30:sz;	/* arbitrary */
@@ -367,7 +367,7 @@ string realloc_str(string str, size_t sz)
 ///////////////////////// TRANSFORMATIONS
 // Return a substring of a string, by allocation.
 string substring(string s, int start, size_t amt) {
-  if (start < 0 || amt < 0 || start + ((int)amt) - 1 > (int)size(s))
+  if (start < 0 || amt < 0 || start + ((int)amt) - 1 > (int)(s.size))
     throw InvalidArg("String::substring");
   string ans = new_string(amt+1);
   for(size_t i=0; i<amt; ++i)
@@ -379,17 +379,17 @@ string substring(string s, int start, size_t amt) {
 // replace last with second at end of first
 // raise InvalidArg if second is not end of first.
 string replace_suffix (string src, string curr_suffix, string new_suffix) {
-  size_t m = size(src);
-  size_t n = size(curr_suffix);
+  size_t m = src.size;
+  size_t n = curr_suffix.size;
   string err = "String::replace_suffix";
   if (m < n) 
     throw InvalidArg(err);
   for (size_t i = 1; i <= n; ++i)
     if (src[m-i] != curr_suffix[n-i])
       throw InvalidArg(err);
-  string ans = new_string(m-n+size(new_suffix));
+  string ans = new_string(m-n+new_suffix.size);
   strncpy(ans,0,src,0,m-n);
-  strncpy(ans,m-n,new_suffix,0,size(new_suffix));
+  strncpy(ans,m-n,new_suffix,0,new_suffix.size);
   return ans;
 }
 
@@ -404,7 +404,7 @@ int strpbrk(string s, int ofs, string accept) {
     int_strleno(s,ofs,"String::strpbrk") + ofs; // End of string after ofs
 
   for (int i=ofs; i<endOfs; i++)
-    for (int j=0; j<size(accept); j++)
+    for (int j=0; j<accept.size; j++)
       if (s[i] == accept[j])
 	return i;
   return -1;
@@ -452,10 +452,10 @@ int strspn(string s, int ofs, string accept) {
 
   for (int i=ofs; i<endOfs; i++) {
     int j;
-    for (j=0; j<size(accept); j++)
+    for (j=0; j<accept.size; j++)
       if (s[i] == accept[j])
 	break; /* inner loop */
-    if (j == size(accept)) /* didn't find it */
+    if (j == accept.size) /* didn't find it */
       return i;
   }
       
@@ -465,7 +465,7 @@ int strspn(string s, int ofs, string accept) {
 ////////////////////////// CONVERSIONS
 list<Char> explode(string s) {
   list<Char> result = null;
-  for (int i = size(s) - 1; i >= 0; i--)
+  for (int i = s.size - 1; i >= 0; i--)
     result = &cons((Char)s[i],result);
   return result;
 }

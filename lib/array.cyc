@@ -45,7 +45,7 @@ void qsort<`a>(int less_eq(`a,`a),`a arr[?],int base_ofs, int len)
   int sp_ofs;           /* stack and stack pointer        */
   int i, j, limit_ofs;         /* scan and limit pointers        */
 
-  if (base_ofs < 0 || base_ofs + len > size(arr))
+  if (base_ofs < 0 || base_ofs + len > arr.size)
     throw Core::InvalidArg("Array::qsort");
 
   limit_ofs = base_ofs + len;

@@ -18,7 +18,7 @@ string concat(string s1, string s2) {
 }
 
 string chop_extension(string filename) {
-  int i = size(filename) - 1;
+  int i = filename.size - 1;
   while (i >= 0 && filename[i] != '.')
     --i;
   if (i < 0)
@@ -29,7 +29,7 @@ string chop_extension(string filename) {
 // FIX: I've always thought the type of this was wrong.
 // It should return an option.  Root dirs have no dirname.
 string dirname(string filename) {
-  int i = size(filename) - 1;
+  int i = filename.size - 1;
   while (i >= 0 && filename[i] != DIR_SEPARATOR)
     --i;
   if (i < 0) return "";
@@ -38,15 +38,15 @@ string dirname(string filename) {
 
 // FIX: similarly, this should return an option.
 string basename(string filename) {
-  int i = size(filename) - 1;
+  int i = filename.size - 1;
   while (i >= 0 && filename[i] != DIR_SEPARATOR)
     --i;
-  return String::substring(filename, i+1, size(filename)-(i+1));
+  return String::substring(filename, i+1, filename.size-(i+1));
 }
 
 bool check_suffix(string filename, string suffix) {
-  int i = size(filename)-1;
-  int j = size(suffix)-1;
+  int i = filename.size-1;
+  int j = suffix.size-1;
   while (i >= 0 && j >= 0)
     if (filename[i--] != suffix[j--]) return false;
   if (j >= 0) return false;
@@ -54,19 +54,19 @@ bool check_suffix(string filename, string suffix) {
 }
 
 string gnuify(string filename) {
-  bool has_drive_name = size(filename)>1 && filename[1]==':';
+  bool has_drive_name = filename.size>1 && filename[1]==':';
   int i,j;
   string ans;
   int ans_sz;
   if (has_drive_name) {
-    ans_sz = size(filename)+1;
+    ans_sz = filename.size+1;
     ans = new {for k < ans_sz : '\000'};
     ans[0] = ans[1] = '/';
     ans[2] = filename[0];
     i = 3;
     j = 2;
   } else {
-    ans_sz = size(filename);
+    ans_sz = filename.size;
     ans = new {for k < ans_sz : '\000'};
     i = 0;
     j = 0;

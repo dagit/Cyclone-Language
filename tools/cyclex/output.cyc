@@ -34,9 +34,9 @@ void copy_chunk(string sourcename, FILE @ ic, FILE @ oc, Syntax::location_t loc)
 
 void output_array(FILE @ oc, int v[?]) { // Doesn't work for really short arrays?
   fprintf(oc, "{");
-  for(int i=0; i < size(v)-1; ++i)
+  for(int i=0; i < v.size-1; ++i)
     fprintf(oc, "%d,", v[i]);
-  fprintf(oc, "%d}", v[size(v)-1]);
+  fprintf(oc, "%d}", v[v.size-1]);
 }
 
 void output_tables(FILE @oc, Compact::lex_tables_t tbl) {
@@ -81,12 +81,12 @@ void output_lexdef(string sourcename,
 		   Syntax::location_t    trailer) {
   copy_buffer = Core::new_string(1024);
   fprintf(cyc_stderr, "%d states, %d transitions, table size %d bytes\n",
-	  size(tables->base),
-	  size(tables->trans),
-	  2 * (size(tables->base) + size(tables->backtrk)
-	       + size(tables->defaultX) + size(tables->trans)
-	       + size(tables->check)));
-  if(size(tables->trans) > 0x8000)
+	  tables->base.size,
+	  tables->trans.size,
+	  2 * ((tables->base).size + (tables->backtrk).size
+	       + (tables->defaultX).size + (tables->trans).size
+	       + (tables->check).size));
+  if((tables->trans).size > 0x8000)
     throw Table_overflow;
   copy_chunk(sourcename, ic, oc, header);
   fprintf(oc, "using Lexing {\n\n");

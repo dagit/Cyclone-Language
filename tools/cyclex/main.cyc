@@ -13,7 +13,7 @@ using Core;
 
 int cyc_main() {
   string argv[?] = std_args();
-  int    arglen  = size(argv);
+  int    arglen  = argv.size;
   if(arglen < 2 || arglen > 3) {
     fprintf(cyc_stderr, "Usage: cycocamllex <input file> [<output file>]");
     return 1;
