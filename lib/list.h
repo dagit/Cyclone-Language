@@ -164,5 +164,6 @@ extern list<`a> tabulate_c<`a,`b>(int n, `a f(`b,int), `b env);
 // Warning: Fairly inefficient implementation.
 extern list<`a> filter_c<`a,`b>(bool f(`b,`a), `b env, list<`a> l);
 
+extern list<`a> filter<`a>(bool f(`a), list<`a> l);
 }
 #endif

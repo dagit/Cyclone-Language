@@ -209,20 +209,28 @@ string strconcat(string a, string b) {
 
 // Allocate a new string and fill it with the concatenation of strs
 string strconcat_l(list<stringptr> strs) {
-  list<stringptr> p = strs;
-  size_t total_len  = 0;
-  while (p!=null) {
-    total_len += strlen(derefstr(p->hd));
-    p = p->tl;
-  }  
+  list<stringptr> p = strs;             // temp
+  size_t len;                           // temp
+  size_t total_len  = 0;                // sum of lengths of the strings
+  list<size_t> lens = &cons((size_t)0,  // save length of each string
+                            null);         // (with junk 0 on front)
+  list<size_t> end = lens;              // last cons cell in 'lens'
+  for(list<stringptr> p = strs; p!=null; p = p->tl) {
+    len = strlen(derefstr(p->hd));
+    total_len += len;
+    end->tl = &cons(len,null);
+    end = end->tl;
+  } 
+  lens = lens->tl;                      // remove junk/temporary 0
   string ans = new_string(total_len);
   size_t i = 0;
   while (strs != null) {
     string next    = derefstr(strs->hd);
-    size_t next_sz = strlen(next);  // FIX: inefficient to compute twice
-    strncpy(ans,i,next,0,next_sz);
-    i += next_sz;
+    len            = lens->hd;
+    strncpy(ans,i,next,0,len);
+    i += len;
     strs = strs->tl;
+    lens = lens->tl;
   }
   return ans;
 }
@@ -233,27 +241,34 @@ string str_sepstr(list<stringptr> strs, string separator) {
   if (strs == null)    return "";
   if (strs->tl == null) return strdup(derefstr(strs->hd));
   list<stringptr> p = strs;
+  list<size_t> lens = &cons((size_t)0,null);  // see comments in strconcat_l
+  list<size_t> end = lens;
+  size_t len        = 0;   // initialized to avoid warning
   size_t total_len  = 0;
   size_t list_len   = 0;
-  while (p!=null) {
-    total_len += strlen(derefstr(p->hd));
+  for(;p!=null;p=p->tl) {
+    len = strlen(derefstr(p->hd));
+    total_len += len;
+    end->tl = &cons(len,null);
+    end = end->tl;
     ++list_len;
-    p = p->tl;
   }
+  lens = lens->tl;
   size_t seplen = strlen(separator);
   total_len += (list_len - 1)*seplen;
   string ans = new_string(total_len);
   size_t i = 0;
   while (strs->tl != null) {
     string next    = derefstr(strs->hd);
-    size_t next_sz = strlen(next); // FIX: inefficient to compute twice
-    strncpy(ans,i,next,0,next_sz);
-    i += next_sz;
+    len            = lens->hd;
+    strncpy(ans,i,next,0,len);
+    i += len;
     strncpy(ans,i,separator,0,seplen);
     i += seplen;
     strs = strs->tl;
+    lens = lens->tl;
   }
-  strncpy(ans,i,derefstr(strs->hd),0,strlen(derefstr(strs->hd)));
+  strncpy(ans,i,derefstr(strs->hd),0,lens->hd);
   return ans;
 }
 

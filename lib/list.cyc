@@ -556,13 +556,31 @@ list<`a> tabulate_c<`a,`b>(int n, `a f(`b,int), `b env) {
   return imp_rev(res);
 }
 
-// FIX: do more efficiently -- currently makes calls and copies the list
 list<`a> filter_c<`a,`b>(bool f(`b,`a), `b env, list<`a> l) {
   if(l == null)
     return null;
-  _ rest = filter_c(f,env,l->tl);
-  if(f(env,l->hd))
-    return &cons(l->hd,rest);
-  else
-    return rest;
+  list<`a> result = &cons(l->hd,null); // First elt is purposefully junk!
+  list<`a> end = result; // pointer to last cons cell
+  for(;l != null;l=l->tl) {
+    if(f(env,l->hd)) {
+      end->tl = &cons(l->hd,null);
+      end = end->tl;
+    }
+  }
+  return result->tl; // Ditch the placeholder we inserted earlier.
 }
+
+list<`a> filter<`a>(bool f(`a), list<`a> l) {
+  if(l == null)
+    return null;
+  list<`a> result = &cons(l->hd,null); // First elt is purposefully junk!
+  list<`a> end = result; // pointer to last cons cell
+  for(;l != null;l=l->tl) {
+    if(f(l->hd)) {
+      end->tl = &cons(l->hd,null);
+      end = end->tl;
+    }
+  }
+  return (result->tl); // Ditch the placeholder we inserted earlier.
+}
+
