@@ -1,0 +1,206 @@
+/* Cycdoc: produce documentation from commented .h files.
+   Copyright (C) 2001 Greg Morrisett, AT&T
+   This file is part of the Cyclone compiler.
+
+   The Cyclone compiler is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   The Cyclone compiler is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with the Cyclone compiler; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+{
+#include <lexing.h>
+#include <core.h>
+#include <string.h>
+#include <lineno.h>
+#include <list.h>
+#include <filename.h>
+#include <position.h>
+#include <stdlib.h>
+#include <pp.h>
+#include "parse.h"
+#include "absynpp.h"
+namespace Lex {
+  extern void lex_init();
+}
+namespace Position {
+  /* Bad boy.  Break abstraction bad! */
+  extern struct Segment { int start; int end; };
+}
+using Core;
+using List;
+
+extern $(int,mstringptr_t)* token(Lexing::Lexbuf<`a> lexbuf);
+}
+let nostar = [^'*']
+let okstar = '*'+[^'*''/']
+
+rule token "$(int,mstringptr_t)*" = parse
+"/*" (nostar|okstar)* '*'+'/'
+      { let start = lexbuf->lex_start_pos+2;
+	let len = lexbuf->lex_curr_pos-lexbuf->lex_start_pos-4;
+	return new $(lexeme_start(lexbuf),
+                     new substring(lexbuf->lex_buffer, start, len)); }
+| eof { return NULL; }
+| _   { return token(lexbuf); }
+
+
+{
+  /* Is a character special to /bin/sh (except for single quote)? */
+  static bool is_other_special(char c) {
+    switch (c) {
+    case '\\': fallthru;
+    case '"': fallthru;
+    case ';': fallthru;
+    case '&': fallthru;
+    case '(': fallthru;
+    case ')': fallthru;
+    case '|': fallthru;
+    case '^': fallthru;
+    case '<': fallthru;
+    case '>': fallthru;
+    case ' ': fallthru;
+    case '\n': fallthru;
+    case '\t': return true;
+    default: return false;
+    }
+  }
+  /* Escape any characters special to /bin/sh */
+  static string_t sh_escape_string(string_t<`H> s) {
+    let len = strlen(s);
+
+    /* Count the number of single quotes and other special chars in s */
+    let single_quotes = 0;
+    let other_special = 0;
+    for (int i = 0; i < len; i++) {
+      let c = s[i];
+      if (c == '\'') single_quotes++;
+      else if (is_other_special(c)) other_special++;
+    }
+
+    /* No special chars to escape */
+    if (single_quotes == 0 && other_special == 0)
+      return s;
+
+    /* No single quotes, we can just single quote s */
+    if (single_quotes == 0)
+      return strconcat_l(list(new "'",new (string_t)s, new "'"));
+
+    /* We'll quote all special chars by prefixing with a backslash */
+    let len2 = len + single_quotes + other_special;
+    let s2 = new {for i < len2+1 : '\0'}; // add trailing NUL
+    let i = 0;
+    let j = 0;
+    for (; i < len; i++) {
+      let c = s[i];
+      if (c == '\'' || is_other_special(c))
+        s2[j++] = '\\';
+      s2[j++] = c;
+    }
+    return s2;
+  }
+
+  /* Given a starting position (character number) return the
+     character number paired with a pos_t that can be passed
+     to the lineno routines */
+  // FIX: this should be in lineno.cyc
+  static Lineno::pos_t new_pos() {
+    return new Lineno::Pos("",Core::new_string(0),0,0);
+  }
+  static $(int,Lineno::pos_t)@ start2pos(int x) {
+    return new $(x,new_pos());
+  }
+
+  /* Return the starting position (character number) of a declaration */
+  static int decl2start(Absyn::decl_t d) {
+    return d->loc->start;
+  }
+
+  static void printit($(Lineno::pos_t,Absyn::decl_t)@ x) {
+    printf("File %s, line %d:\n",(*x)[0]->logical_file,(*x)[0]->line_no);
+    PP::file_of_doc(Absynpp::decl2doc((*x)[1]),72,stdout);
+    printf("\n");
+  }
+
+  /* Filter a list of (pos_t,`a) pairs by file name */
+  static list_t<$(Lineno::pos_t,`a)@>
+    this_file(string_t file, list_t<$(Lineno::pos_t,`a)@`H> x) {
+    let result = NULL;
+    for (; x != NULL; x = x->tl) {
+      if (strcmp((*x->hd)[0]->logical_file,file) == 0)
+        result = new List(x->hd,result);
+    }
+    result = imp_rev(result);
+    return result;
+  }
+
+  /* Main loop */
+  static void process_file(string_t<`H> filename) {
+    let basename      = Filename::chop_extension(filename);
+    /* Preprocess the file so we can parse it */
+    let preprocfile   = strconcat(basename, ".cyp");
+    let cmd = aprintf("gcc -E -o %s -x c %s",
+                      sh_escape_string(preprocfile),
+                      sh_escape_string(filename));
+    if (system(string_to_Cstring(cmd)) != 0) {
+      fprintf(stderr,"\nError: preprocessing\n");
+      return;
+    }
+    /* Parse the file into a list of declarations */
+    Position::reset_position(preprocfile);
+    FILE @in_file = (FILE@)fopen(preprocfile,"r");
+    Lex::lex_init(); // must forget typedefs, may as well flush symbols too
+    let decls = Parse::parse_file(in_file);
+    Lex::lex_init(); // garbage collect those big tries
+    file_close((FILE@)in_file);
+    /* Find the location (pos_t) of each declaration */
+    let poss = map(start2pos,map(decl2start,decls));
+    Lineno::poss_of_abss(filename, poss);
+    let pos_decls = zip(map(snd,poss),decls);
+    /* Filter out declarations from other files (from #include) */
+    pos_decls = this_file(filename,pos_decls);
+    /* Print out the decls */
+    iter(printit,pos_decls);
+    /* Scan the file again, this time for the comments */
+    let f = (FILE @)fopen(filename,"r");
+    let lb = Lexing::from_file(f);
+    let comments = NULL;
+    let comment;
+    while ((comment = token(lb)) != NULL) {
+      /* The cast below is needed else comments gets the wrong type */
+      comments = new List(($(int,mstringptr_t)@)comment,
+                           comments);
+    }
+    fclose(f);
+    comments = imp_rev(comments);
+    /* Find the location (pos_t) of each comment */
+    let poss = map(start2pos,map(fst,comments));
+    Lineno::poss_of_abss(filename,poss);
+    let pos_comments = zip(map(snd,poss),map(snd,comments));
+    /* Filter out declarations from other files (from #include) */
+    pos_comments = this_file(filename,pos_comments);
+    /* Print out the comments */
+    for (; pos_comments != NULL;
+         pos_comments = pos_comments->tl) {
+      printf("File %s, line %d, comment:\n%s\n",
+             (*pos_comments->hd)[0]->logical_file,
+             (*pos_comments->hd)[0]->line_no,
+             *(*pos_comments->hd)[1]);
+    }
+  }
+
+  int main(int argc, char ??argv) {
+    let file = strdup(argv[1]); // need a version on the heap
+    process_file(file);
+    return 0;
+  }
+}

@@ -53,6 +53,15 @@ else
 endif
 	$(RM) install_path.c install_path.$(O)
 
+cycdoc$(EXE): cycdoc.$(O) lex.$(O) parse_tab.$(O) absyn.$(O) \
+ tcutil.$(O) tcenv.$(O) tcexp.$(O) tcstmt.$(O) tcpat.$(O) \
+ new_control_flow.$(O) cf_absexp.$(O) cf_flowinfo.$(O) \
+ formatstr.$(O) evexp.$(O) absynpp.$(O)
+	$(CYCC) -B$(CYC_LIB_PATH) -o $@ $^ $(LDFLAGS)
+
+cycdoc.cyc: cycdoc.cyl
+	$(CYCLEX) $< $@
+
 install_path.c:
 	@(echo "char *Carch = \"$(ARCH)\";"; \
 	  echo "char *Cdef_inc_path = \"$(INC_INSTALL)\";"; \
@@ -103,14 +112,15 @@ endif
 
 # delete generated files with a particular prefix
 clean_prefix:
-	rm -f $(addprefix $(OUT_PREFIX), $(C_SRCS) $(O_SRCS) $(CYCCOMP))
-	rm -f $(addprefix $(OUT_PREFIX), lex.cyc parse_tab.cyc parse_tab.h)
+	$(RM) $(addprefix $(OUT_PREFIX), $(C_SRCS) $(O_SRCS) $(CYCCOMP))
+	$(RM) $(addprefix $(OUT_PREFIX), lex.cyc parse_tab.cyc parse_tab.h)
 
 # delete generated .c and .o files with any OUT_PREFIX
 clean:
-	rm -f $(addprefix *, $(C_SRCS) $(O_SRCS) $(CYCCOMP))
-	rm -f $(addprefix *, lex.cyc parse_tab.cyc parse_tab.h)
-	rm -f *~ *.output *.stackdump *.d amon.out .target* install_path.c
+	$(RM) $(addprefix *, $(C_SRCS) $(O_SRCS) $(CYCCOMP))
+	$(RM) $(addprefix *, lex.cyc parse_tab.cyc parse_tab.h)
+	$(RM) cycdoc cycdoc.exe cycdoc.cyc
+	$(RM) *~ *.output *.stackdump *.d amon.out .target* install_path.c
 
 # Produce dependencies
 # We don't use $(CYCC) here because this would create a circular
