@@ -9,7 +9,7 @@ ifndef devel
 CYCC=cyclone$(EXE)
 else
 CYCC=../build/boot/cyclone$(EXE)
-CYCFLAGS=-I../include -B../build/boot -pp -save-c
+CYCFLAGS=-I../lib -I../include -B../build/boot -pp -save-c
 endif
 
 all: $(addsuffix $(EXE), cyctest foo hello test_regions histogram finger test_getopt)

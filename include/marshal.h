@@ -24,6 +24,7 @@
 #define _MARSHAL_H_
 
 #include <typerep.h>
+#include <dict.h>
 
 namespace Marshal {
   /** In all of the following functions, the representation [rep] passed 
@@ -47,6 +48,21 @@ extern void write_type(tunion Typerep::Typestruct rep, FILE@ fp, `a::A@ val);
       ([fp] should be in binary mode on operating systems where there is a
       difference).
   */
+
+typedef unsigned int addr_t;
+
+// utilities for addressing
+typedef Set::set_t<addr_t> addr_set_t;
+
+// NULL always maps to 0
+typedef $(Dict::dict_t<addr_t,int>,int) addr_index_t;
+// 0 always maps to NULL
+typedef $(addr_t?, int) addr_table_t;
+
+extern addr_index_t empty_addr_index();
+extern addr_index_t write_type_base(tunion Typerep::Typestruct rep, 
+				    addr_index_t env, FILE@ fp, `a::A@ val);
+
 extern `a::A@`r rread_type(region_t<`r> r,tunion Typerep::Typestruct rep, FILE@ fp);
   /** [rread_type(r,rep,fp)] reads a value encoded in the binary format of 
       [write_type] from [fp], allocating into region [`r], and returns 

@@ -994,7 +994,7 @@ void*)_exn_thrown;void*_tmpA9=_tmpA6;_LL31: if(*((void**)_tmpA9)!= Cyc_Core_Inva
 goto _LL33;_LL32: basename=*n;goto _LL30;_LL33:;_LL34:(void)_throw(_tmpA9);_LL30:;}}}{
 struct _tagged_arr _tmpAA=Cyc_Std_strconcat(basename,_tag_arr(".cycio",sizeof(char),
 7));struct Cyc_Std___cycFILE*_tmpAB=Cyc_try_file_open((struct _tagged_arr)_tmpAA,
-_tag_arr("r",sizeof(char),2),_tag_arr("interface object file",sizeof(char),22));
+_tag_arr("rb",sizeof(char),3),_tag_arr("interface object file",sizeof(char),22));
 if(_tmpAB == 0){Cyc_compile_failure=1;Cyc_remove_cfiles();exit(1);}Cyc_Position_reset_position((
 struct _tagged_arr)_tmpAA);{struct Cyc_Interface_I*_tmpAC=Cyc_Interface_load((
 struct Cyc_Std___cycFILE*)_check_null(_tmpAB));Cyc_Std_file_close((struct Cyc_Std___cycFILE*)
@@ -1347,7 +1347,7 @@ _tagged_arr _tmpC5=({struct Cyc_Std_String_pa_struct _tmpC9;_tmpC9.tag=0;_tmpC9.
 struct _tagged_arr)Cyc_Filename_chop_extension(*((struct _tagged_arr*)_check_null(
 Cyc_output_file)));{void*_tmpC8[1]={& _tmpC9};Cyc_Std_aprintf(_tag_arr("%s.cycio",
 sizeof(char),9),_tag_arr(_tmpC8,sizeof(void*),1));}});struct Cyc_Std___cycFILE*
-_tmpC6=Cyc_try_file_open((struct _tagged_arr)_tmpC5,_tag_arr("w",sizeof(char),2),
+_tmpC6=Cyc_try_file_open((struct _tagged_arr)_tmpC5,_tag_arr("wb",sizeof(char),3),
 _tag_arr("interface object file",sizeof(char),22));if(_tmpC6 == 0){Cyc_compile_failure=
 1;Cyc_remove_cfiles();{int _tmpC7=1;_npop_handler(0);return _tmpC7;}}Cyc_Interface_save((
 struct Cyc_Interface_I*)_check_null(_tmpC2),(struct Cyc_Std___cycFILE*)_check_null(

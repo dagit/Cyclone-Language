@@ -296,24 +296,26 @@ f1;};struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_S
 int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct
 Cyc_Std_StringPtr_sa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{
 int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};int Cyc_Std_strcmp(
-struct _tagged_arr s1,struct _tagged_arr s2);int isprint(int);void Cyc_Marshal_fprint_type(
-void*rep,struct Cyc_Std___cycFILE*fp,void*val);void Cyc_Marshal_print_type(void*
-rep,void*val);void Cyc_Marshal_write_type(void*rep,struct Cyc_Std___cycFILE*fp,
-void*val);void*Cyc_Marshal_rread_type(struct _RegionHandle*r,void*rep,struct Cyc_Std___cycFILE*
-fp);void*Cyc_Marshal_read_type(void*rep,struct Cyc_Std___cycFILE*fp);void*Cyc_Marshal_rcopy_type(
-struct _RegionHandle*,void*rep,void*val);void*Cyc_Marshal_copy_type(void*rep,void*
-val);int Cyc_Marshal_leq_type(void*rep,void*x,void*y);int Cyc_Marshal_eq_type(void*
-rep,void*x,void*y);int Cyc_Marshal_cmp_type(void*rep,void*x,void*y);struct Cyc_Dict_Dict;
+struct _tagged_arr s1,struct _tagged_arr s2);int isprint(int);struct Cyc_Dict_Dict;
 extern char Cyc_Dict_Present[12];extern char Cyc_Dict_Absent[11];struct Cyc_Dict_Dict*
 Cyc_Dict_empty(int(*cmp)(void*,void*));int Cyc_Dict_member(struct Cyc_Dict_Dict*d,
 void*k);struct Cyc_Dict_Dict*Cyc_Dict_insert(struct Cyc_Dict_Dict*d,void*k,void*v);
 void*Cyc_Dict_lookup(struct Cyc_Dict_Dict*d,void*k);struct Cyc_Core_Opt*Cyc_Dict_lookup_opt(
 struct Cyc_Dict_Dict*d,void*k);struct _tuple5{void*f1;void*f2;};struct _tuple5*Cyc_Dict_rchoose(
 struct _RegionHandle*r,struct Cyc_Dict_Dict*d);struct _tuple5*Cyc_Dict_rchoose(
-struct _RegionHandle*,struct Cyc_Dict_Dict*d);void*unsafe_cast(void*x);struct
-_tuple6{struct Cyc_Dict_Dict*f1;int f2;};struct _tuple7{struct _tagged_arr f1;int f2;}
-;static int Cyc_Marshal_uint_cmp(unsigned int a,unsigned int b){if(a == b)return 0;
-else{if(a < b)return 1;else{return - 1;}}}static struct Cyc_Set_Set*Cyc_Marshal_empty_addr_set(){
+struct _RegionHandle*,struct Cyc_Dict_Dict*d);void Cyc_Marshal_fprint_type(void*rep,
+struct Cyc_Std___cycFILE*fp,void*val);void Cyc_Marshal_print_type(void*rep,void*
+val);void Cyc_Marshal_write_type(void*rep,struct Cyc_Std___cycFILE*fp,void*val);
+struct _tuple6{struct Cyc_Dict_Dict*f1;int f2;};struct _tuple7{struct _tagged_arr f1;
+int f2;};struct _tuple6 Cyc_Marshal_empty_addr_index();struct _tuple6 Cyc_Marshal_write_type_base(
+void*rep,struct _tuple6 env,struct Cyc_Std___cycFILE*fp,void*val);void*Cyc_Marshal_rread_type(
+struct _RegionHandle*r,void*rep,struct Cyc_Std___cycFILE*fp);void*Cyc_Marshal_read_type(
+void*rep,struct Cyc_Std___cycFILE*fp);void*Cyc_Marshal_rcopy_type(struct
+_RegionHandle*,void*rep,void*val);void*Cyc_Marshal_copy_type(void*rep,void*val);
+int Cyc_Marshal_leq_type(void*rep,void*x,void*y);int Cyc_Marshal_eq_type(void*rep,
+void*x,void*y);int Cyc_Marshal_cmp_type(void*rep,void*x,void*y);void*unsafe_cast(
+void*x);static int Cyc_Marshal_uint_cmp(unsigned int a,unsigned int b){if(a == b)
+return 0;else{if(a < b)return 1;else{return - 1;}}}static struct Cyc_Set_Set*Cyc_Marshal_empty_addr_set(){
 return((struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*s,unsigned int elt))Cyc_Set_insert)(((
 struct Cyc_Set_Set*(*)(int(*cmp)(unsigned int,unsigned int)))Cyc_Set_empty)(Cyc_Marshal_uint_cmp),
 0);}struct _tuple8{int f1;struct Cyc_Set_Set*f2;};static struct _tuple8*Cyc_Marshal_member_insert(
@@ -322,7 +324,7 @@ sizeof(*_tmp0));_tmp0->f1=((int(*)(struct Cyc_Set_Set*s,unsigned int elt))Cyc_Se
 set,val);_tmp0->f2=((struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*s,unsigned int elt))
 Cyc_Set_insert)(set,val);_tmp0;});}inline static int Cyc_Marshal_index_member(
 struct _tuple6 idx,unsigned int m){int _tmp2;struct _tuple6 _tmp1=idx;_tmp2=_tmp1.f2;
-return m < _tmp2;}static struct _tuple6 Cyc_Marshal_empty_addr_index(){return({struct
+return m < _tmp2;}struct _tuple6 Cyc_Marshal_empty_addr_index(){return({struct
 _tuple6 _tmp3;_tmp3.f1=((struct Cyc_Dict_Dict*(*)(struct Cyc_Dict_Dict*d,
 unsigned int k,int v))Cyc_Dict_insert)(((struct Cyc_Dict_Dict*(*)(int(*cmp)(
 unsigned int,unsigned int)))Cyc_Dict_empty)(Cyc_Marshal_uint_cmp),0,0);_tmp3.f2=

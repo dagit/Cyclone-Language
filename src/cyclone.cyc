@@ -337,6 +337,8 @@ list_t<Absyn::decl_t> do_cfcheck(bool ignore, list_t<Absyn::decl_t,`H> tds) {
   return tds;
 }
 
+// do_interface [te] [if] [ifo] [decls] where [if] is the interface (cyci)
+// file, and [ifo] is the cycio file for the output
 list_t<Absyn::decl_t> do_interface($(Tcenv::tenv_t, FILE *`H, FILE @`H) @`H params, list_t<Absyn::decl_t,`H> tds) {
   let &$(te, fi, fo) = params;
   let i1 = Interface::extract(te -> ae);
@@ -747,7 +749,7 @@ static interface_t read_cycio(string_t<`H> @ n) {
   case &Invalid_argument(_): basename = *n; break;
   }
   let nf = strconcat(basename, ".cycio");
-  let f = try_file_open(nf, "r", "interface object file");
+  let f = try_file_open(nf, "rb", "interface object file");
   if (f == NULL) {
     compile_failure = true;
     remove_cfiles();
@@ -1033,7 +1035,7 @@ int main(int argc, string_t<`H> ?`H argv) {
     if (is_not_executable) {
       if (output_file != NULL) {
 	let output_file_io = aprintf("%s.cycio", Filename::chop_extension(*output_file));
-	let f = try_file_open(output_file_io, "w", "interface object file");
+	let f = try_file_open(output_file_io, "wb", "interface object file");
 	if (f == NULL) {
 	  compile_failure = true;
 	  remove_cfiles();

@@ -28,6 +28,7 @@
 #include "tcutil.h"
 #include "tcdecl.h"
 #include <position.h>
+#include <marshal.h>
 
 using Core;
 using List;
@@ -40,7 +41,7 @@ namespace Lex {
   extern void lex_init();
 }
 
-namespace Interface;
+namespace Interface {
 
 /* ------ definition of an interface ------- */
 
@@ -1201,12 +1202,74 @@ i_t parse(FILE @ f) {
 }
 
 /* ------ binary loading and saving ------ */
+}
+
+using Marshal;
+using Typerep;
+
+//  static tunion Typerep::Typestruct i_t_rep = gen(i_t);
+
+extern tunion Typestruct.Struct struct_Absyn_Aggrdecl_rep;
+static tunion Typestruct.ThinPtr aggrdecl_p = ThinPtr(1,(tunion Typestruct)&struct_Absyn_Aggrdecl_rep);
+tunion Typestruct aggrdecl_rep = (tunion Typestruct)&aggrdecl_p;
+
+extern tunion Typestruct.Struct struct_Absyn_Tuniondecl_rep;
+static tunion Typestruct.ThinPtr tuniondecl_p = ThinPtr(1,(tunion Typestruct)&struct_Absyn_Tuniondecl_rep);
+tunion Typestruct tuniondecl_rep = (tunion Typestruct)&tuniondecl_p;
+
+extern tunion Typestruct.Struct struct_Absyn_Enumdecl_rep;
+static tunion Typestruct.ThinPtr enumdecl_p = ThinPtr(1,(tunion Typestruct)&struct_Absyn_Enumdecl_rep);
+tunion Typestruct enumdecl_rep = (tunion Typestruct)&enumdecl_p;
+
+extern tunion Typestruct.Struct struct_Absyn_Typedefdecl_rep;
+static tunion Typestruct.ThinPtr typedefdecl_p = ThinPtr(1,(tunion Typestruct)&struct_Absyn_Typedefdecl_rep);
+tunion Typestruct typedefdecl_rep = (tunion Typestruct)&typedefdecl_p;
+
+extern tunion Typestruct.Struct struct_Absyn_Vardecl_rep;
+static tunion Typestruct.ThinPtr vardecl_p = ThinPtr(1,(tunion Typestruct)&struct_Absyn_Vardecl_rep);
+tunion Typestruct vardecl_rep = (tunion Typestruct)&vardecl_p;
+
+extern tunion Typestruct.Struct struct_Absyn_Tunionfield_rep;
+static tunion Typestruct.ThinPtr tunionfield_p = ThinPtr(1,(tunion Typestruct)&struct_Absyn_Tunionfield_rep);
+tunion Typestruct tunionfield_rep = (tunion Typestruct)&tunionfield_p;
+
+namespace Interface {
+
+#define MARSHALTYP(X,R)							\
+static addr_index_t write_##X(addr_index_t env, FILE @fp, X decl) {	\
+  return write_type_base(R,env,fp,decl);				\
+}
+
+MARSHALTYP(aggrdecl_t,aggrdecl_rep)
+MARSHALTYP(tuniondecl_t,tuniondecl_rep)
+MARSHALTYP(enumdecl_t,enumdecl_rep)
+MARSHALTYP(typedefdecl_t,typedefdecl_rep)
+MARSHALTYP(vardecl_t,vardecl_rep)
+MARSHALTYP(tunionfield_t,tunionfield_rep)
+  /* XXX need one for var_t's and for list_t<var_t>'s */
+
+/* construct xtunionfielddecl marshaller by hand from its components since
+   we can't do it automatically (due to parts of the rep structure being
+   generated already by absyn.h) */
+static addr_index_t write_xtunionfielddecl_t(addr_index_t env, FILE @fp,
+					     xtunionfielddecl_t decl) {
+  env = write_tuniondecl_t(env,fp,decl->base);
+  env = write_tunionfield_t(env,fp,decl->field);
+  return env;
+}
+
+  /* XXX need to create a function for ienv_t's */
 
 // Mathieu : so far, there's nothing binary here, but let's pretend it is :-)
 void save(i_t i, FILE @ f) {
   print(i, f);  
+//    write_type(i_t_rep,f,i);
 }
+
+  /* XXX need to create the dual of all of the write functions above */
 
 i_t load(FILE @ f) {
   return parse(f);
+//    return read_type(i_t_rep, f);
+}
 }

@@ -21,6 +21,7 @@
 
 #include <list.h>
 #include <iter.h>
+#include <stdio.h>
 
 namespace Dict {
 
@@ -272,6 +273,20 @@ extern Iter::iter_t<$(`a,`b),{`r1,`r2}> make_iter(region_t<`r1> rgn,
 						  dict_t<`a,`b,`r2> d);
   /** [make_iter(s)] returns an iterator over the set [s]; O(log n) space
       is allocated in [rgn] where n is the number of elements in d*/
+
+extern `c marshal(region_t<`r> rgn,
+		  `c env,
+		  `c (write_key<`a,`c,`r1::R>)(`c, FILE @`r1, `a),
+		  `c (write_val<`b,`c,`r1::R>)(`c, FILE @`r1, `b),
+		  FILE @ fp,
+		  dict_t<`a,`b> dict);
+
+extern dict_t<`a,`b> unmarshal(region_t<`r> rgn,
+			       `c @`H env,
+			       int cmp(`a,`a),
+			       `a (read_key<`a,`c>)(`c @`H, FILE @`r2),
+			       `b (read_val<`b,`c>)(`c @`H, FILE @`r2),
+			       FILE @`r2 fp);
 
 }
 #endif

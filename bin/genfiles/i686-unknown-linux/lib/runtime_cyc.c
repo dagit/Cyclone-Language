@@ -267,6 +267,15 @@ struct _tagged_arr pntlp_toCyc(void **in) {
   return result;
 }
 
+unsigned int arr_prevsize(struct _tagged_arr arr,size_t elt_sz) {
+  unsigned char *_get_arr_size_curr=arr.curr;
+  unsigned char *_get_arr_size_base=arr.base;
+  return 
+    (_get_arr_size_curr < _get_arr_size_base ||
+     _get_arr_size_curr >= arr.last_plus_one) ? 0 :
+    ((_get_arr_size_curr - _get_arr_size_base) / (elt_sz));
+}
+
 // FIX:  this isn't really needed since you can cast char[?] to char[]
 Cstring underlying_Cstring(struct _tagged_arr s) {
   char *str=s.curr;

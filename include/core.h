@@ -141,6 +141,10 @@ extern "C" Cstring<`r> underlying_Cstring(string_t<`r>);
 extern "C" mstring_t<`H> Cstring_to_string(Cstring);
 extern "C" mstring_t<`H> wrap_Cstring_as_string(Cstring, size_t);
 extern "C" mstring_t<`H> ?`H ntCsl_to_ntsl(Cstring @);
+extern "C" unsigned int arr_prevsize(`a::A ?,sizeof_t<`a>);
+  /** [array_prevsize(p,sz)] returns the buffer space available preceding
+      the pointer [p] in the dynamic array [p] points into.  [sz] is the
+      size of the elements in the array returned by [sizeof]. */
 }
 #endif
 

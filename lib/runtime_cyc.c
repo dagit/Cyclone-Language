@@ -267,6 +267,18 @@ struct _tagged_arr pntlp_toCyc(void **in) {
   return result;
 }
 
+// Returns the size of an array from the current pointer back to
+// its starting point.  If the curr pointer = start pointer, or 
+// the curr pointer is out of bounds, then this is 0.
+unsigned int arr_prevsize(struct _tagged_arr arr,size_t elt_sz) {
+  unsigned char *_get_arr_size_curr=arr.curr;
+  unsigned char *_get_arr_size_base=arr.base;
+  return 
+    (_get_arr_size_curr < _get_arr_size_base ||
+     _get_arr_size_curr >= arr.last_plus_one) ? 0 :
+    ((_get_arr_size_curr - _get_arr_size_base) / (elt_sz));
+}
+
 // FIX:  this isn't really needed since you can cast char[?] to char[]
 Cstring underlying_Cstring(struct _tagged_arr s) {
   char *str=s.curr;

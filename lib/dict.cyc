@@ -560,3 +560,47 @@ Iter::iter_t<$(`a,`b),{`r1,`r2}> make_iter(region_t<`r1> rgn,
   return Iter::Iter(rnew(rgn) $(stack, (t ? 0 : -1)),
 		    iter_f@<`a,`b,`r2,`r1><>);
 }
+
+// we need to do this by hand, since automated marshallers are not
+// yet polymorphic.  Furthermore, this will only work if the nested
+// marshallers are monomorphic.
+
+`c marshal(region_t<`r> rgn,
+	   `c env,
+	   `c (write_key<`a,`c,`r1::R>)(`c, FILE @`r1, `a),
+	   `c (write_val<`b,`c,`r1::R>)(`c, FILE @`r1, `b),
+	   FILE @ fp,
+	   dict_t<`a,`b> dict)
+{
+  List::list_t<$(`a,`b)@`r,`r> dict_list = rto_list(rgn, dict);
+  int len = List::length(dict_list);
+  if(fwrite( (char?)(int?)&len, sizeof(int), 1, fp) < 1) {
+    throw new Core::Failure("Dict::marshal: Write failure");
+  }
+  while (dict_list != NULL) {
+    env = write_key(env,fp,dict_list->hd);
+    env = write_val(env,fp,dict_list->hd);
+    dict_list = dict_list->tl;
+  }
+  return env;
+}
+
+dict_t<`a,`b> unmarshal(region_t<`r> rgn,
+			`c @`H env,
+			int cmp(`a,`a),
+			`a (read_key<`a,`c>)(`c @`H, FILE @`r2),
+			`b (read_val<`b,`c>)(`c @`H, FILE @`r2),
+			FILE @`r2 fp)
+{
+  dict_t<`a,`b,`H> dict = empty(cmp);
+  int len = getw(fp);
+  if (len == -1) {
+    throw new Core::Failure("Dict::unmarshal: list length is -1");
+  }
+  for (int i = 0; i<len; i++) {
+    `a key = read_key(env,fp);
+    `b val = read_val(env,fp);
+    dict = insert(dict,key,val);
+  }
+  return dict;
+}
