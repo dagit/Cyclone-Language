@@ -17,9 +17,9 @@ cyclone/makedist
 cyclone/\.excludelist
 cyclone/Makefile.inc$
 cyclone/doc/web
-cyclone/tests/boa-0.94.8.3/
-cyclone/tests/compress/
-cyclone/tests/tpop/
+cyclone/tests/boa-0.94.8.3
+cyclone/tests/compress
+cyclone/tests/tpop
 cyclone/tests/smlng/000-example.txt
 cyclone/tests/smlng/001-null.txt
 cyclone/tests/smlng/002-almost-empty.txt
