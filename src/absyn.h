@@ -379,6 +379,7 @@ namespace Absyn {
     Format_att(tunion Format_Type, 
                int,   // format string arg
                int);  // first arg to type-check
+    Initializes_att(int); // param that function initializes through
   };
 
   // Type modifiers are used for parsing/pretty-printing

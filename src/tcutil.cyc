@@ -498,17 +498,51 @@ static int boundscmp(bounds_t b1, bounds_t b2) {
   }
 }
 
-static bool equal_att(attribute_t a1, attribute_t a2) {
-  if (a1 == a2) return true;
-  switch ($(a1,a2)) {
-  case $(&Format_att(ft1,i1,j1), &Format_att(ft2,i2,j2)):
-    return (ft1 == ft2 && i1 == i2 && j1 == j2);
-  case $(&Regparm_att(i1), &Regparm_att(i2)): fallthru(i1,i2);
-  case $(&Aligned_att(i1), &Aligned_att(i2)): return i1 == i2;
-  case $(&Section_att(s1), &Section_att(s2)):
-    return strcmp(s1,s2) == 0;
-  default: return false;
+static int attribute_case_number(attribute_t att) {
+  switch(att) {
+  case &Regparm_att(_): return 0; 
+  case Stdcall_att: return 1;      
+  case Cdecl_att: return 2;        
+  case Fastcall_att: return 3;
+  case Noreturn_att: return 4;     
+  case Const_att: return 5;
+  case &Aligned_att(_): return 6;
+  case Packed_att: return 7;
+  case &Section_att(_): return 8;
+  case Nocommon_att: return 9;
+  case Shared_att: return 10;
+  case Unused_att: return 11;
+  case Weak_att: return 12;
+  case Dllimport_att: return 13;
+  case Dllexport_att: return 14;
+  case No_instrument_function_att: return 15;
+  case Constructor_att: return 16;
+  case Destructor_att: return 17;
+  case No_check_memory_usage_att: return 18;
+  case &Format_att(_,_,_): return 19;
+  case &Initializes_att(_): return 20;
   }
+}
+
+static int attribute_cmp(attribute_t att1, attribute_t att2) {
+  switch($(att1,att2)) {
+  case $(&Regparm_att(i1),&Regparm_att(i2)): fallthru(i1,i2);
+  case $(&Initializes_att(i1), &Initializes_att(i2)): fallthru(i1,i2);
+  case $(&Aligned_att(i1),&Aligned_att(i2)): return intcmp(i1,i2);
+  case $(&Section_att(s1),&Section_att(s2)): return strcmp(s1,s2);
+  case $(&Format_att(ft1,i1,j1),&Format_att(ft2,i2,j2)):
+    let ftc = intcmp((unsigned int)ft1, (unsigned int)ft2);
+    if(ftc != 0) return ftc;
+    let ic = intcmp(i1,i2);
+    if(ic != 0) return ic;
+    return intcmp(j1,j2);
+  default:
+    return intcmp(attribute_case_number(att1), attribute_case_number(att2));
+  }
+}
+
+static bool equal_att(attribute_t a1, attribute_t a2) {
+  return attribute_cmp(a1,a2)==0;
 }
 
 bool same_atts(attributes_t a1, attributes_t a2) {
@@ -527,7 +561,7 @@ static type_t rgns_of_field(aggrfield_t af) {
 }
 
 static $(tvar_t,type_t)@ region_free_subst(tvar_t tv) {
-  type_t t;
+  type_t t; // FIX: IntKind
   switch (tvar_kind(tv)) {
   case RgnKind: t = HeapRgn;      break;
   case EffKind: t = empty_effect; break;
@@ -1262,33 +1296,11 @@ void unify_it(type_t t1, type_t t2) {
   throw Unify;
 }
 
-int opt_cmp(int cmp(`a,`a),opt_t<`a,`r> a1, opt_t<`a,`r> a2) {
-  if(a1 == a2) return 0;
-  if(a1 == NULL && a2 != NULL) return -1;
-  if(a1 != NULL && a2 == NULL) return 1;
-  return cmp(a1->v,a2->v);
-}
 int star_cmp<`a::A,`r::R>(int cmp(`a@`r,`a@`r),`a*`r a1, `a*`r a2) {
   if(a1 == a2) return 0;
   if(a1 == NULL && a2 != NULL) return -1;
   if(a1 != NULL && a2 == NULL) return 1;
   return cmp((_@)a1,(_@)a2);
-}
-
-int list_cmp(int cmp(`a,`a), list_t<`a,`r> l1, list_t<`a,`r> l2) {
-  if(l1 == l2) return 0;
-  for( ; l1 != NULL && l2 != NULL; l1 = l1->tl, l2 = l2->tl) {
-    let c = cmp(l1->hd,l2->hd);
-    if(c != 0) return c;
-  }
-  // after this loop, one or both is null.
-  if(l2 != NULL) // l1 == NULL, NULL < non-NULL
-    return -1;
-  if(l1 != NULL) 
-    // l2 == NULL, non-NULL > NULL
-    return 1;
-  // both NULL, equal.
-  return 0;
 }
 
 static int tqual_cmp(tqual_t tq1, tqual_t tq2) {
@@ -1320,49 +1332,6 @@ static int tqual_type_cmp($(tqual_t,type_t)@ tqt1, $(tqual_t,type_t)@tqt2) {
   let tqc = tqual_cmp(tq1,tq2);
   if(tqc != 0) return tqc;
   return typecmp(t1,t2);
-}
-
-static int attribute_case_number(attribute_t att) {
-  switch(att) {
-    case &Regparm_att(_): return 0; 
-    case Stdcall_att: return 1;      
-    case Cdecl_att: return 2;        
-    case Fastcall_att: return 3;
-    case Noreturn_att: return 4;     
-    case Const_att: return 5;
-    case &Aligned_att(_): return 6;
-    case Packed_att: return 7;
-    case &Section_att(_): return 8;
-    case Nocommon_att: return 9;
-    case Shared_att: return 10;
-    case Unused_att: return 11;
-    case Weak_att: return 12;
-    case Dllimport_att: return 13;
-    case Dllexport_att: return 14;
-    case No_instrument_function_att: return 15;
-    case Constructor_att: return 16;
-    case Destructor_att: return 17;
-    case No_check_memory_usage_att: return 18;
-    case &Format_att(_,_,_): return 19;
-  }
-}
-
-static int attribute_cmp(attribute_t att1, attribute_t att2) {
-  switch($(att1,att2)) {
-  case $(&Regparm_att(i1),&Regparm_att(i2)): fallthru(i1,i2);
-  case $(&Aligned_att(i1),&Aligned_att(i2)):
-    return intcmp(i1,i2);
-  case $(&Section_att(s1),&Section_att(s2)):
-    return strcmp(s1,s2);
-  case $(&Format_att(ft1,i1,j1),&Format_att(ft2,i2,j2)):
-    let ftc = intcmp((unsigned int)ft1, (unsigned int)ft2);
-    if(ftc != 0) return ftc;
-    let ic = intcmp(i1,i2);
-    if(ic != 0) return ic;
-    return intcmp(j1,j2);
-  default:
-    return intcmp(attribute_case_number(att1), attribute_case_number(att2));
-  }
 }
 
 static int aggrfield_cmp(aggrfield_t f1, aggrfield_t f2) {

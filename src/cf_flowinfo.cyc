@@ -59,10 +59,15 @@ place_set_t mt_place_set() {
 int root_cmp(root_t r1, root_t r2) {
   if(((int)r1) == ((int)r2))
     return 0;
-  int p1, p2;
-  switch(r1) {case &VarRoot(x): p1=(int)x; break; case &MallocPt(x,_): p1=(int)x;}
-  switch(r2) {case &VarRoot(x): p2=(int)x; break; case &MallocPt(x,_): p2=(int)x;}
-  return p1 - p2;
+  switch ($(r1,r2)) {
+  case $(&VarRoot(vd1),&VarRoot(vd2)): return ((int) vd1) - ((int) vd2);
+  case $(&VarRoot(_),_): return -1;
+  case $(_,&VarRoot(_)): return 1;
+  case $(&MallocPt(e1,_),&MallocPt(e2,_)): return ((int) e1) - ((int) e2);
+  case $(&MallocPt(_,_),_): return -1;
+  case $(_,&MallocPt(_,_)): return 1;
+  case $(&InitParam(i1,_), &InitParam(i2,_)): return i1-i2;
+  }
 }
 int place_cmp(place_t p1, place_t p2) {
   if(((int)p1) == ((int)p2))
@@ -78,7 +83,8 @@ static mstringptr_t place2string(place_t p) {
   list_t<mstringptr_t> sl = NULL;
   switch(p->root) {
   case &VarRoot(vd): sl = new List(new aprintf("%s",*(*vd->name)[1]),sl); break;
-  case &MallocPt(e,_): sl = new List(new aprintf("mpt%d",(int)e),sl);
+  case &MallocPt(e,_):  sl = new List(new aprintf("mpt%d",(int)e),sl); break;
+  case &InitParam(i,_): sl = new List(new aprintf("param%d",i),sl); break;
   }
   for(_ fields = p->fields; fields != NULL; fields = fields->tl)
     sl = new List(new aprintf("%s", *fields->hd), sl);
@@ -846,6 +852,9 @@ static void kill_root($(flowdict_t,tvar_t)@ env, root_t root, absRval_t rval) {
     if (!contains_region(rgn,t))
       // insert the mapping into the new dictionary
       *fd = Dict::insert(*fd,root,rval);
+    break;
+  case &InitParam(_,_):
+    // when we have interprocedural resettable, this could be a problem?!
     break;
   }
 }

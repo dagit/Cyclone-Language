@@ -366,6 +366,7 @@ static type_t typ_to_c(type_t t) {
       case Noreturn_att: 
       case Const_att   : 
       case &Format_att(_,_,_): continue;
+      case &Initializes_att(_): continue; // correct: a Cyclone addition
       default: new_atts = new List(atts->hd,new_atts); break;
       }
     let new_args = List::map(arg_to_c,args);

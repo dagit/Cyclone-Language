@@ -723,6 +723,7 @@ string_t attribute2string(attribute_t a) {
   case No_check_memory_usage_att: return "no_check_memory_usage";
   case &Format_att(Printf_ft,n,m): return aprintf("format(printf,%u,%u)",n,m);
   case &Format_att(Scanf_ft,n,m):  return aprintf("format(scanf,%u,%u)", n,m);
+  case &Initializes_att(n): return aprintf("initializes(%d)",n);
   }
 }
 
@@ -736,6 +737,7 @@ bool fntype_att(attribute_t a) {
   case Noreturn_att:       
   case &Format_att(_,_,_): 
   case Const_att: return true;
+  case &Initializes_att(_): return true;
   default: return false;
   }
 }

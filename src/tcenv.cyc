@@ -884,7 +884,7 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
     } 
     else terr(loc,"missing name for varargs");
   }
-  fd->param_vardecls = new{Opt(vds)};
+  fd->param_vardecls = new{Opt(imp_rev(vds))};
   return new 
     Fenv{.shared = new SharedFenv{
                      .return_typ = fd->ret_type,

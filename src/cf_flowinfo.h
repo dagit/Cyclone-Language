@@ -45,6 +45,7 @@ EXTERN_CFFLOW tunion Root {
   VarRoot(Absyn::vardecl_t);
   // the type below is the type of the result of the malloc
   MallocPt(Absyn::exp_t,Absyn::type_t); // misnamed when do other analyses??
+  InitParam(int,Absyn::type_t); // int is parameter number, type is w/o @
 };
 typedef tunion Root root_t;
 
@@ -59,11 +60,11 @@ typedef tunion InitLevel initlevel_t;
 
 // primitive relations that we track for non-escaping, integral variables
 EXTERN_CFFLOW tunion RelnOp {
-  EqualConst(unsigned int); // == c
-  LessVar(Absyn::vardecl_t);       // < y
-  LessSize(Absyn::vardecl_t);      // < y.size
-  LessConst(unsigned int);  // < c
-  LessEqSize(Absyn::vardecl_t);      // <= y.size
+  EqualConst(unsigned int);     // == c
+  LessVar(Absyn::vardecl_t);    // < y
+  LessSize(Absyn::vardecl_t);   // < y.size
+  LessConst(unsigned int);      // < c
+  LessEqSize(Absyn::vardecl_t); // <= y.size
 };
 typedef tunion RelnOp reln_op_t;
 EXTERN_CFFLOW struct Reln {
@@ -95,13 +96,13 @@ EXTERN_CFFLOW tunion AbsRVal {
   Aggregate(aggrdict_t);
 };
 
-// Note: It would be correct to make the domain of the pinfo_dict_t
-//       constant (all local roots in the function), but it easy to argue
+// Note: It would be correct to make the domain of the flowdict_t
+//       constant (all roots in the function), but it easy to argue
 //       that we at program point p, we only need those roots that
-//       are the target of a MustPointTo or are locals in scope (so they
+//       are the target of an AddressOf or are locals in scope (so they
 //       might be mentioned explicitly in the program text).  A property
 //       of the analysis must be that at least these roots stay in the dict;
-//       for scalability reasons, we don't have others.
+//       for scalability, we don't have others.
 // join takes the intersection of the dictionaries.
 EXTERN_CFFLOW tunion FlowInfo {
   BottomFL;
@@ -115,6 +116,9 @@ extern place_set_t mt_place_set();
 extern absRval_t unknown_none;
 extern absRval_t unknown_this;
 extern absRval_t unknown_all;
+extern absRval_t esc_none;
+extern absRval_t esc_this;
+extern absRval_t esc_all;
 
 extern int root_cmp(root_t, root_t);
 extern int place_cmp(place_t, place_t);

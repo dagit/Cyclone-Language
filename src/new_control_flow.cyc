@@ -25,8 +25,6 @@
 
 // TO DO: Exploit @ types to know NotZero!
 
-// TO DO: Exploit noreturn attribute to know BottomFL
-
 // KLUDGE: For unions, we just pretend its initialized.  Since they're bits,
 // safety is not compromised.
 
@@ -98,6 +96,7 @@ struct AnalEnv {
   flow_t        tryflow;     // updated by any flow change while in a try-block.
   place_set_t * all_changed; // NULL for "not in unorderd so don't bother"
   bool          noreturn;    // true when function is "noreturn"
+  list_t<place_t> param_roots;
 };
 typedef struct AnalEnv @ analenv_t;
 
@@ -459,11 +458,62 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     return $(BottomFL,typ_to_absrval(e->topt->v,unknown_all));
 
   case &FnCall_e(e1,es,_): 
-    es = new List(e1,es); // FIX: avoid allocation
-    let $(outflow,rvals) = anal_unordered_Rexps(env,inflow,es);
-    // for strange reasons, use_Rval is fine for the function pointer
-    for(; rvals != NULL; rvals = rvals->tl, es = es->tl)
-      outflow = use_Rval(env,es->hd->loc,outflow,rvals->hd);
+    // FIX: avoid allocation
+    let $(fst_outflow,rvals) = anal_unordered_Rexps(env,inflow,new List(e1,es));
+    // for strange reasons, use_Rval is fine for the function pointer:
+    let outflow = use_Rval(env,e1->loc,fst_outflow,rvals->hd);
+    rvals = rvals->tl;
+    // we just just "use" each argument except for the "initializes" attribute
+    list_t<int> init_params = NULL;
+    switch(Tcutil::compress(e1->topt->v)) {
+    case &PointerType(PtrInfo(t,_,_,_,_)):
+      switch(Tcutil::compress(t)) {
+      case &FnType(FnInfo(_,_,_,_,_,_,_,atts)):
+	for(; atts != NULL; atts = atts->tl)
+	  switch(atts->hd) {
+	  case &Initializes_att(i): init_params=new List(i,init_params); break;
+	  default: break;
+	  }
+	break;
+      default: Tcutil::impos("anal_Rexp: bad function type");
+      }
+      break;
+    default: Tcutil::impos("anal_Rexp: bad function type");
+    }
+    for(int i=1; rvals != NULL; rvals = rvals->tl, es = es->tl, ++i) {
+      if(!List::memq(init_params,i)) {
+	outflow = use_Rval(env,es->hd->loc,outflow,rvals->hd);
+	continue;
+      }
+      switch(fst_outflow) {
+      case BottomFL: break;
+      case &ReachableFL(fst_d,_):
+	if(initlevel(fst_d,rvals->hd)==NoneIL)
+	  Tcutil::terr(es->hd->loc,"expression may not be initialized");
+	switch(outflow) {
+	case BottomFL: break;
+	case &ReachableFL(d,relns):
+	  // do the escape, but then set to esc_all in outflow
+	  let ans_d = escape_deref(d, env->all_changed, rvals->hd);
+	  switch(rvals->hd) {
+	  case &AddressOf(p): 
+	    switch(Tcutil::compress(es->hd->topt->v)) {
+	    case &PointerType(PtrInfo(t,_,_,_,_)):
+	      ans_d = assign_place(es->hd->loc, ans_d, env->all_changed,
+				   p, typ_to_absrval(t,esc_all));
+	      break;
+	    default: Tcutil::impos("anal_Rexp: bad type for initialized arg");
+	    }
+	    break;
+	  default: break;
+	  }
+	  outflow = new ReachableFL(ans_d,relns);
+	  break;
+	}
+	break;
+      }
+    }
+	 
     // if the called function doesn't return, we get BottomFL out
     if (Tcutil::is_noreturn(e1->topt->v)) 
       return $(BottomFL,typ_to_absrval(e->topt->v,unknown_all));
@@ -1009,6 +1059,18 @@ static $(flow_t,flow_t) anal_test(analenv_t env, flow_t inflow, exp_t e) {
   }
 }
 
+static void check_init_params(seg_t loc, analenv_t env, flow_t flow) {
+  switch(flow) {
+  case BottomFL: return;
+  case &ReachableFL(d,_):
+    for(let inits = env->param_roots; inits!=NULL; inits=inits->tl)
+      if(initlevel(d,lookup_place(d,inits->hd))!=AllIL)
+	Tcutil::terr(loc, "function may not initialize all the parameters "
+		     "with attribute 'initializes'");
+    return;
+  }
+}
+
 // For now, PATTERN VARS ARE INITIALIZED
 static flow_t anal_scs(analenv_t env,flow_t inflow,list_t<switch_clause_t> scs){
   for(; scs != NULL; scs = scs->tl) {
@@ -1051,18 +1113,17 @@ static flow_t anal_stmt(analenv_t env, flow_t inflow, stmt_t s) {
 
   switch(s->r) {
   case Skip_s: return inflow;
-    // FIX: when have init parameters, check they're init by "using" them here
   case &Return_s(NULL): 
-    // enforce noreturn here
     if (env->noreturn) 
       Tcutil::terr(s->loc,"`noreturn' function might return");
+    check_init_params(s->loc,env,inflow);
     return BottomFL;
   case &Return_s(e):    
-    // enforce noreturn here
     if (env->noreturn) 
       Tcutil::terr(s->loc,"`noreturn' function might return");
     let $(f,r) = anal_Rexp(env,inflow,(exp_t)e);
-    use_Rval(env,e->loc,f,r);
+    f = use_Rval(env,e->loc,f,r);
+    check_init_params(s->loc,env,f);
     return BottomFL;
     
   case &Exp_s(e): return anal_Rexp(env,inflow,e)[0];
@@ -1257,40 +1318,81 @@ static void postpass(stmt_t s) {
 static void check_fun(fndecl_t fd) {
   //fprintf(stderr,"checking %s of type %s\n",*(*fd->name)[1],
   //        Absynpp::typ2string(Tcutil::fndecl2typ(fd)));
-  flow_t    inflow  = add_vars(new ReachableFL(Dict::empty(root_cmp),NULL),
-			       fd->param_vardecls->v,
-			       unknown_all);
-  bool noreturn     = Tcutil::is_noreturn(Tcutil::fndecl2typ(fd));
-  analenv_t env     = new AnalEnv(true,0,false,inflow,NULL,noreturn);
-  flow_t    outflow = inflow;
+  let loc = fd->body->loc;
+  flow_t inflow = add_vars(new ReachableFL(Dict::empty(root_cmp),NULL),
+			   fd->param_vardecls->v, unknown_all);
+  let param_roots = NULL; // only for "initializes"
+  switch(inflow) {
+  case BottomFL: Tcutil::impos("check_fun");
+  case &ReachableFL(d,relns):
+    // NOTE: for reasons Dan doesn't understand, the attributes, are not
+    // on the fndecl, only on the type.
+    _ atts;
+    switch(Tcutil::compress(fd->cached_typ->v)) {
+    case &FnType(FnInfo(_,_,_,_,_,_,_,as)): atts = as; break;
+    default: Tcutil::impos("check_fun: non-function type cached with fndecl_t");
+    }
+    for(; atts != NULL; atts = atts->tl)
+      switch(atts->hd) {
+      case &Initializes_att(i):
+	unsigned j = i;
+	if(j > List::length(fd->param_vardecls->v)) {
+	  Tcutil::terr(loc,
+		       "initializes attribute exceeds number of parameters");
+	  continue;
+	}
+	let vd = List::nth(fd->param_vardecls->v,j-1);
+	switch(Tcutil::compress(vd->type)) {
+	case &PointerType(PtrInfo(t,_,nullable,_,bd)):
+	  if(conref_val(nullable))
+	    Tcutil::terr(loc, "initializes attribute not allowed on "
+			 "nullable pointers");
+	  if(!Tcutil::is_bound_one(bd))
+	    Tcutil::terr(loc, "initializes attribute allowed only on pointers"
+			 " of size 1");
+	  let r = new InitParam(j,t);
+	  let rp = new Place(r,NULL);
+	  d = Dict::insert(d,r,typ_to_absrval(t,esc_none));
+	  d = Dict::insert(d,new VarRoot(vd),new AddressOf(rp));
+	  param_roots = new List(rp,param_roots);
+	  break;
+	default: Tcutil::terr(loc, "initializes attribute on non-pointer");
+	}
+	break;
+      default: break;
+      }
+    inflow = new ReachableFL(d,relns);
+  }
+
+  bool      noreturn = Tcutil::is_noreturn(Tcutil::fndecl2typ(fd));
+  analenv_t env = new AnalEnv(true,0,false,inflow,NULL,noreturn,param_roots);
+  flow_t    outflow  = inflow;
   while(env->iterate_again) {
     ++(env->iteration_num);
     env->iterate_again = false;
     outflow = anal_stmt(env, inflow, fd->body);
   }
-
   switch(outflow) {
   case BottomFL: break;
   default: 
+    check_init_params(loc,env,outflow);
+
     // this is the case when the function "falls off the end"
     if (noreturn)
-      Tcutil::terr(fd->body->loc,
-		   "`noreturn' function might (implicitly) return");
-    else {
+      Tcutil::terr(loc, "`noreturn' function might (implicitly) return");
+    else
       switch (Tcutil::compress(fd->ret_type)) {
       case VoidType: break;
       case &DoubleType(_):
       case FloatType: 
       case &IntType(_,_):
-        Tcutil::warn(fd->body->loc, "function may not return a value");
-        break;
+        Tcutil::warn(loc, "function may not return a value"); break;
       default:
-        Tcutil::terr(fd->body->loc, "function may not return a value");
-        break;
+        Tcutil::terr(loc, "function may not return a value"); break;
       }
-      break;
-    }
+    break;
   }
+
   postpass(fd->body);
 }
 

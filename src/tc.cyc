@@ -116,7 +116,7 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
     if(initializer != NULL)
       terr(loc,"extern declaration should not have initializer");
   } else if (!is_function_type(t)) {
-    // we skip over function types -- these are function protypes.
+    // we skip over function types -- these are function prototypes.
     // otherwise, we compute default initializer, if necessary
     // first check that the attributes are okay
     for (; atts != NULL; atts = atts->tl)
@@ -164,7 +164,8 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
       case Cdecl_att:     
       case Fastcall_att: 
       case Noreturn_att: 
-      case &Format_att(_,_,_): fallthru;
+      case &Format_att(_,_,_):
+      case &Initializes_att(_):
       case Const_att: impos("tcVardecl: fn type atts in function var decl");
       // C doesn't allow these attributes on functions
       case &Aligned_att(_):
