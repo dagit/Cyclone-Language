@@ -343,7 +343,7 @@ assn_info_t new_assn_info(void){
   return new assn_info;
 }
 
-$(AssnDef::assn_t, AssnDef::assn_t) exp2ctxt_assn(assn_info_t assn_info, Absyn::exp_t e){
+$(assn_t, assn_t) exp2ctxt_assn(assn_info_t assn_info, Absyn::exp_t e){
   let result = Hashtable::lookup_opt(*assn_info, e);
   if (result == NULL){
     return $(&true_assn, &false_assn);
@@ -540,7 +540,7 @@ static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
       forward_assn(env, (stmt_t)dest, ain);
     return &false_assn;
   case &Absyn::For_s(e1,$(e2,dummy2),$(e3,dummy3),s):
-    let $(_,a) = vcgen_rexp(env,e2,ain);
+    let $(_,a) = vcgen_rexp(env,e1,ain);
     ain = a;
     // similar to while loop.
     while (true) {

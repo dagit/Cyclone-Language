@@ -534,7 +534,7 @@ unsigned sz=Cyc_strlen((struct _fat_ptr)s);
 # 127
 if(Cyc_Absyndump_need_space_before())
 Cyc_fputc((int)' ',*Cyc_Absyndump_dump_file);
-if(sz >= (unsigned)1){
+if(sz >= 1U){
 Cyc_Absyndump_prev_char=*((const char*)_check_fat_subscript(s,sizeof(char),(int)(sz - (unsigned)1)));
 Cyc_file_string_write(*Cyc_Absyndump_dump_file,s,0,(int)sz);}}
 # 135
@@ -553,7 +553,7 @@ Cyc_Absyndump_prev_char=(char)c;}static char _tmpF[1U]="";
 static void Cyc_Absyndump_dumploc(unsigned loc){
 static struct _fat_ptr last_file={_tmpF,_tmpF,_tmpF + 1U};
 static unsigned last_line=0U;
-if(loc == (unsigned)0)return;
+if(loc == 0U)return;
 if(!Cyc_Absyndump_generate_line_directives)return;{
 # 155
 struct _tuple15 _tmp2=Cyc_Lex_xlate_pos(loc);struct _tuple15 _stmttmp0=_tmp2;struct _tuple15 _tmp3=_stmttmp0;unsigned _tmp5;struct _fat_ptr _tmp4;_tmp4=_tmp3.f1;_tmp5=_tmp3.f2;{struct _fat_ptr f=_tmp4;unsigned d=_tmp5;
@@ -1391,7 +1391,7 @@ static void Cyc_Absyndump_dumpvardecl(struct Cyc_Absyn_Vardecl*vd,unsigned loc,i
 struct Cyc_Absyn_Vardecl*_tmp193=vd;int _tmp19B;void*_tmp19A;void*_tmp199;void*_tmp198;struct Cyc_Absyn_Tqual _tmp197;unsigned _tmp196;void*_tmp195;enum Cyc_Absyn_Scope _tmp194;_tmp194=_tmp193->sc;_tmp195=_tmp193->name;_tmp196=_tmp193->varloc;_tmp197=_tmp193->tq;_tmp198=_tmp193->type;_tmp199=_tmp193->initializer;_tmp19A=_tmp193->attributes;_tmp19B=_tmp193->is_proto;{enum Cyc_Absyn_Scope sc=_tmp194;struct _tuple0*name=_tmp195;unsigned varloc=_tmp196;struct Cyc_Absyn_Tqual tq=_tmp197;void*type=_tmp198;struct Cyc_Absyn_Exp*initializer=_tmp199;struct Cyc_List_List*atts=_tmp19A;int is_proto=_tmp19B;
 {enum Cyc_Flags_C_Compilers _tmp19C=Cyc_Flags_c_compiler;if(_tmp19C == Cyc_Flags_Gcc_c){
 # 1087
-if((int)sc == (int)3U && Cyc_Absyndump_qvar_to_Cids){
+if((int)sc == 3 && Cyc_Absyndump_qvar_to_Cids){
 void*_tmp19D=Cyc_Absyn_compress(type);void*_stmttmp15=_tmp19D;void*_tmp19E=_stmttmp15;if(*((int*)_tmp19E)== 5){
 # 1090
 if(!is_proto)

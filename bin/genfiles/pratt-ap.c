@@ -432,24 +432,24 @@ union Cyc_Pratt_Node Cyc_Pratt_NReturn (void){return({union Cyc_Pratt_Node _tmp4
 static int Cyc_Pratt_cmp_node(union Cyc_Pratt_Node n1,union Cyc_Pratt_Node n2){
 struct _tuple12 _tmp0=({struct _tuple12 _tmp46;_tmp46.f1=n1,_tmp46.f2=n2;_tmp46;});struct _tuple12 _stmttmp0=_tmp0;struct _tuple12 _tmp1=_stmttmp0;unsigned _tmp3;unsigned _tmp2;void*_tmp5;void*_tmp4;if(((_tmp1.f1).NZero).tag == 1){if(((_tmp1.f2).NZero).tag == 1)
 return 0;else{
-return - 1;}}else{if(((_tmp1.f2).NZero).tag == 1)
+return -1;}}else{if(((_tmp1.f2).NZero).tag == 1)
 return 1;else{if(((_tmp1.f1).NReturn).tag == 7){if(((_tmp1.f2).NReturn).tag == 7)
 return 0;else{
-return - 1;}}else{if(((_tmp1.f2).NReturn).tag == 7)
+return -1;}}else{if(((_tmp1.f2).NReturn).tag == 7)
 return 1;else{if(((_tmp1.f1).NVar).tag == 2){if(((_tmp1.f2).NVar).tag == 2){_tmp4=((_tmp1.f1).NVar).val;_tmp5=((_tmp1.f2).NVar).val;{struct Cyc_Absyn_Vardecl*x=_tmp4;struct Cyc_Absyn_Vardecl*y=_tmp5;
 return(int)x - (int)y;}}else{
-return - 1;}}else{if(((_tmp1.f2).NVar).tag == 2)
+return -1;}}else{if(((_tmp1.f2).NVar).tag == 2)
 return 1;else{if(((_tmp1.f1).NNumelts).tag == 3){if(((_tmp1.f2).NNumelts).tag == 3){_tmp4=((_tmp1.f1).NNumelts).val;_tmp5=((_tmp1.f2).NNumelts).val;{struct Cyc_Absyn_Vardecl*x=_tmp4;struct Cyc_Absyn_Vardecl*y=_tmp5;
 return(int)x - (int)y;}}else{_tmp4=((_tmp1.f1).NNumelts).val;{struct Cyc_Absyn_Vardecl*x=_tmp4;
-return - 1;}}}else{if(((_tmp1.f2).NNumelts).tag == 3){_tmp4=((_tmp1.f2).NNumelts).val;{struct Cyc_Absyn_Vardecl*y=_tmp4;
+return -1;}}}else{if(((_tmp1.f2).NNumelts).tag == 3){_tmp4=((_tmp1.f2).NNumelts).val;{struct Cyc_Absyn_Vardecl*y=_tmp4;
 return 1;}}else{if(((_tmp1.f1).NType).tag == 4){if(((_tmp1.f2).NType).tag == 4){_tmp4=((_tmp1.f1).NType).val;_tmp5=((_tmp1.f2).NType).val;{void*x=_tmp4;void*y=_tmp5;
 # 108
 if(Cyc_Unify_unify(x,y))return 0;
 return Cyc_Tcutil_typecmp(x,y);}}else{
-return - 1;}}else{if(((_tmp1.f2).NType).tag == 4)
+return -1;}}else{if(((_tmp1.f2).NType).tag == 4)
 return 1;else{if(((_tmp1.f1).NParam).tag == 5){if(((_tmp1.f2).NParam).tag == 5){_tmp2=((_tmp1.f1).NParam).val;_tmp3=((_tmp1.f2).NParam).val;{unsigned i=_tmp2;unsigned j=_tmp3;
 return(int)i - (int)j;}}else{_tmp2=((_tmp1.f1).NParam).val;{unsigned i=_tmp2;
-return - 1;}}}else{if(((_tmp1.f2).NParam).tag == 5){_tmp2=((_tmp1.f2).NParam).val;{unsigned j=_tmp2;
+return -1;}}}else{if(((_tmp1.f2).NParam).tag == 5){_tmp2=((_tmp1.f2).NParam).val;{unsigned j=_tmp2;
 return 1;}}else{_tmp2=((_tmp1.f1).NParamNumelts).val;_tmp3=((_tmp1.f2).NParamNumelts).val;{unsigned i=_tmp2;unsigned j=_tmp3;
 return(int)i - (int)j;}}}}}}}}}}}}};}
 # 119

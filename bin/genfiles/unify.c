@@ -504,7 +504,7 @@ pos=8;}else{
 # 79
 ({void*_tmp10=0U;({struct Cyc___cycFILE*_tmpF2=Cyc_stderr;struct _fat_ptr _tmpF1=({const char*_tmp11="and ";_tag_fat(_tmp11,sizeof(char),5U);});Cyc_fprintf(_tmpF2,_tmpF1,_tag_fat(_tmp10,sizeof(void*),0));});});
 pos +=4;
-if((unsigned)pos + _get_fat_size(s2,sizeof(char))>= (unsigned)80){
+if((unsigned)pos + _get_fat_size(s2,sizeof(char))>= 80U){
 ({void*_tmp12=0U;({struct Cyc___cycFILE*_tmpF4=Cyc_stderr;struct _fat_ptr _tmpF3=({const char*_tmp13="\n\t";_tag_fat(_tmp13,sizeof(char),3U);});Cyc_fprintf(_tmpF4,_tmpF3,_tag_fat(_tmp12,sizeof(void*),0));});});
 pos=8;}
 # 85

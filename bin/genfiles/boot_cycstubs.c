@@ -380,7 +380,7 @@ extern int open_with_mode(const char*,int,unsigned short);
 # 31
 int Cyc_open(const char*s,int i,struct _fat_ptr ms){
 # 34
-if(_get_fat_size(ms,sizeof(unsigned short))>= (unsigned)1)
+if(_get_fat_size(ms,sizeof(unsigned short))>= 1U)
 return open_with_mode(s,i,((unsigned short*)ms.curr)[0]);else{
 # 37
 return open_without_mode(s,i);}}struct __abstractFILE;struct Cyc___cycFILE{struct __abstractFILE*file;};

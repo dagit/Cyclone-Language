@@ -647,7 +647,7 @@ int _tmp30=Cyc_Tcutil_force_type2bool(0,(p1.ptr_atts).nullable);int n1=_tmp30;
 int _tmp31=Cyc_Tcutil_force_type2bool(0,(p2.ptr_atts).nullable);int n2=_tmp31;
 struct Cyc_Absyn_Exp*_tmp32=({void*_tmp7C=Cyc_Absyn_bounds_one();Cyc_Tcutil_get_bounds_exp(_tmp7C,(p1.ptr_atts).bounds);});struct Cyc_Absyn_Exp*b1=_tmp32;
 struct Cyc_Absyn_Exp*_tmp33=({void*_tmp7D=Cyc_Absyn_bounds_one();Cyc_Tcutil_get_bounds_exp(_tmp7D,(p2.ptr_atts).bounds);});struct Cyc_Absyn_Exp*b2=_tmp33;
-if((n1 && !n2)&&(int)coercion != (int)2U)
+if((n1 && !n2)&&(int)coercion != 2)
 ({void*_tmp34=0U;({unsigned _tmp7F=e->loc;struct _fat_ptr _tmp7E=({const char*_tmp35="null-check conversion mis-classified";_tag_fat(_tmp35,sizeof(char),37U);});((int(*)(unsigned,struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos_loc)(_tmp7F,_tmp7E,_tag_fat(_tmp34,sizeof(void*),0));});});else{
 if(((unsigned)b1 && !((unsigned)b2))&&(int)coercion == (int)2U)
 ({void*_tmp36=0U;({unsigned _tmp81=e->loc;struct _fat_ptr _tmp80=({const char*_tmp37="conversion mis-classified as null-check";_tag_fat(_tmp37,sizeof(char),40U);});((int(*)(unsigned,struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos_loc)(_tmp81,_tmp80,_tag_fat(_tmp36,sizeof(void*),0));});});}

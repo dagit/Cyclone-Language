@@ -471,9 +471,9 @@ break;}
 # 242
 continue;}
 # 244
-if(c != (int)'%')
+if(c != 37)
 goto literal;
-width=(long long)0;
+width=0;
 flags=0;
 # 252
 again: c=(int)*((const char*)_check_fat_subscript(_fat_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0U));
@@ -603,13 +603,13 @@ goto eof_failure;}}{
 # 415
 int _tmp19=c;switch((int)_tmp19){case 0:
 # 421
- if(width == (long long)0)
-width=(long long)1;
+ if(width == 0)
+width=1;
 if(flags & 8){
-long long sum=(long long)0;
-for(1;width > (long long)0;1){
+long long sum=0;
+for(1;width > 0;1){
 n=_IO_getc(fp);
-if(n == -1 && width != (long long)0)
+if(n == -1 && width != 0)
 goto eof_failure;else{
 if(n == -1){
 ++ seen_eof;
@@ -620,11 +620,11 @@ break;}}
 # 436
 nread +=sum;}else{
 # 438
-long long sum=(long long)0;
+long long sum=0;
 struct _fat_ptr _tmp1A=Cyc_va_arg_char_ptr(*((void**)_check_fat_subscript(ap,sizeof(void*),0U)));struct _fat_ptr z=_tmp1A;_fat_ptr_inplace_plus(& ap,sizeof(void*),1);
-for(1;width > (long long)0;1){
+for(1;width > 0;1){
 n=_IO_getc(fp);
-if(n == -1 && width != (long long)0)
+if(n == -1 && width != 0)
 goto eof_failure;else{
 if(n == -1){
 ++ seen_eof;
@@ -640,8 +640,8 @@ nread +=sum;
 # 456
 goto _LL47;case 1:
 # 460
- if(width == (long long)0)
-width=(long long)4294967295U;
+ if(width == 0)
+width=-1;
 # 463
 if(flags & 8){
 n=0;{
@@ -649,9 +649,9 @@ int c=_IO_peekc(fp);
 while((int)*((char*)_check_known_subscript_notnull(ccltab,256U,sizeof(char),(int)((char)c)))){
 ++ n;
 _IO_getc(fp);
-if(-- width == (long long)0)
+if(-- width == 0)
 break;
-if((c=_IO_peekc(fp))== - 1){
+if((c=_IO_peekc(fp))== -1){
 if(n == 0)
 goto eof_failure;
 ++ seen_eof;
@@ -664,13 +664,13 @@ struct _fat_ptr p4=(struct _fat_ptr)Cyc_va_arg_string_ptr(*((void**)_check_fat_s
 struct _fat_ptr p5=p4;
 int c=_IO_peekc(fp);
 while((int)*((char*)_check_known_subscript_notnull(ccltab,256U,sizeof(char),(int)((char)c)))){
-if(_get_fat_size(p5,sizeof(char))== (unsigned)0)goto eof_failure;
+if(_get_fat_size(p5,sizeof(char))== 0U)goto eof_failure;
 *((char*)_check_fat_subscript(p5,sizeof(char),0U))=(char)c;
 _fat_ptr_inplace_plus(& p5,sizeof(char),1);
 _IO_getc(fp);
-if(-- width == (long long)0)
+if(-- width == 0)
 break;
-if((c=_IO_peekc(fp))== - 1){
+if((c=_IO_peekc(fp))== -1){
 if((char*)p5.curr == (char*)p0.curr)
 goto eof_failure;
 ++ seen_eof;
@@ -679,24 +679,24 @@ break;}}
 n=(p5.curr - p4.curr)/ sizeof(char);
 if(n == 0)
 goto match_failure;
-if(_get_fat_size(p5,sizeof(char))== (unsigned)0)goto eof_failure;
+if(_get_fat_size(p5,sizeof(char))== 0U)goto eof_failure;
 *((char*)_check_fat_subscript(p5,sizeof(char),0U))='\000';
 ++ nassigned;}}
 # 505
 nread +=n;
 goto _LL47;case 2:
 # 510
- if(width == (long long)0)
-width=(long long)4294967295U;
+ if(width == 0)
+width=-1;
 if(flags & 8){
 n=0;{
 int c=_IO_peekc(fp);
 while(!isspace((int)((unsigned char)c))){
 ++ n;
 _IO_getc(fp);
-if(-- width == (long long)0)
+if(-- width == 0)
 break;
-if((c=_IO_peekc(fp))== - 1){
+if((c=_IO_peekc(fp))== -1){
 ++ seen_eof;
 break;}}
 # 525
@@ -707,12 +707,12 @@ struct _fat_ptr _tmp1C=p2;struct _fat_ptr p3=_tmp1C;
 int c=_IO_peekc(fp);
 while(!isspace((int)((unsigned char)c))){
 c=_IO_getc(fp);
-if(_get_fat_size(p3,sizeof(char))== (unsigned)0)goto eof_failure;
+if(_get_fat_size(p3,sizeof(char))== 0U)goto eof_failure;
 *((char*)_check_fat_subscript(p3,sizeof(char),0U))=(char)c;
 _fat_ptr_inplace_plus(& p3,sizeof(char),1);
-if(-- width == (long long)0)
+if(-- width == 0)
 break;
-if((c=_IO_peekc(fp))== - 1){
+if((c=_IO_peekc(fp))== -1){
 ++ seen_eof;
 break;}}
 # 542
@@ -723,10 +723,10 @@ nread +=(p3.curr - p2.curr)/ sizeof(char);
 # 547
 continue;case 3:
 # 551
- if(width == (long long)0 || width > (long long)(sizeof(buf)- (unsigned)1))
+ if(width == 0 || width > (long long)(sizeof(buf)- 1U))
 width=(long long)(sizeof(buf)- 1U);
 flags |=(64 | 128)| 512;
-for(p=({char*_tmp1D=buf;_tag_fat(_tmp1D,sizeof(char),351U);});width != (long long)0;-- width){
+for(p=({char*_tmp1D=buf;_tag_fat(_tmp1D,sizeof(char),351U);});width != 0;-- width){
 c=(int)((unsigned char)_IO_peekc(fp));
 # 560
 {int _tmp1E=c;switch((int)_tmp1E){case 48:
@@ -736,9 +736,9 @@ base=8;
 flags |=256;}
 # 579
 if(flags & 512)
-flags &=~((64 | 512)| 128);else{
+flags &=4294966591U;else{
 # 582
-flags &=~((64 | 256)| 128);}
+flags &=4294966847U;}
 goto ok;case 49:
 # 586
  goto _LL5A;case 50: _LL5A: goto _LL5C;case 51: _LL5C: goto _LL5E;case 52: _LL5E: goto _LL60;case 53: _LL60:
@@ -797,7 +797,7 @@ _IO_ungetc((int)*((char*)_check_fat_subscript(p,sizeof(char),0U)),fp);}
 goto match_failure;}
 # 660
 c=(int)*((char*)_check_fat_subscript(p,sizeof(char),-1));
-if(c == (int)'x' || c == (int)'X'){
+if(c == 120 || c == 88){
 _fat_ptr_inplace_plus(& p,sizeof(char),-1);
 _IO_ungetc(c,fp);}
 # 665
@@ -823,10 +823,10 @@ _fat_ptr_inplace_plus(& ap,sizeof(void*),1);
 ({int _tmp42=({unsigned char*_tmp41=p.curr;_tmp41 - ({char*_tmp25=buf;_tag_fat(_tmp25,sizeof(char),351U);}).curr;})/ sizeof(char);nread +=_tmp42;});
 goto _LL47;case 4:
 # 689
- if(width == (long long)0 || width > (long long)(sizeof(buf)- (unsigned)1))
+ if(width == 0 || width > (long long)(sizeof(buf)- 1U))
 width=(long long)(sizeof(buf)- 1U);
 flags |=((64 | 128)| 256)| 512;
-for(p=({char*_tmp26=buf;_tag_fat(_tmp26,sizeof(char),351U);});width != (long long)0;-- width){
+for(p=({char*_tmp26=buf;_tag_fat(_tmp26,sizeof(char),351U);});width != 0;-- width){
 c=_IO_peekc(fp);
 # 698
 {int _tmp27=c;switch((int)_tmp27){case 48:
@@ -879,7 +879,7 @@ goto match_failure;}
 # 754
 _fat_ptr_inplace_plus(& p,sizeof(char),-1);
 c=(int)*((char*)_check_fat_subscript(p,sizeof(char),0U));
-if(c != (int)'e' && c != (int)'E'){
+if(c != 101 && c != 69){
 _IO_ungetc(c,fp);
 _fat_ptr_inplace_plus(& p,sizeof(char),-1);
 c=(int)*((char*)_check_fat_subscript(p,sizeof(char),0U));}
@@ -921,7 +921,7 @@ static struct _fat_ptr Cyc___sccl(char*tab,struct _fat_ptr fmt){
 int c;int n;int v;
 # 810
 c=(int)*((const char*)_check_fat_subscript(_fat_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0U));
-if(c == (int)'^'){
+if(c == 94){
 v=1;
 c=(int)*((const char*)_check_fat_subscript(_fat_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0U));}else{
 # 815
@@ -942,8 +942,8 @@ int _tmp31=n;switch((int)_tmp31){case 0:
  return _fat_ptr_plus(fmt,sizeof(char),- 1);case 45:
 # 858 "scanf.cyc"
  n=(int)*((const char*)_check_fat_subscript(fmt,sizeof(char),0U));
-if(n == (int)']' || n < c){
-c=(int)'-';
+if(n == 93 || n < c){
+c=45;
 goto _LL0;}
 # 863
 _fat_ptr_inplace_plus(& fmt,sizeof(char),1);
@@ -962,7 +962,7 @@ goto _LL0;}_LL0:;}}}
 static int Cyc_string_getc(struct _fat_ptr*sptr){
 char c;
 struct _fat_ptr s=*sptr;
-if((({char*_tmp48=(char*)s.curr;_tmp48 == (char*)(_tag_fat(0,0,0)).curr;})|| _get_fat_size(s,sizeof(char))== (unsigned)0)||(int)(c=*((const char*)_check_fat_subscript(s,sizeof(char),0)))== (int)'\000')return - 1;
+if((({char*_tmp48=(char*)s.curr;_tmp48 == (char*)(_tag_fat(0,0,0)).curr;})|| _get_fat_size(s,sizeof(char))== 0U)||(int)(c=*((const char*)_check_fat_subscript(s,sizeof(char),0)))== 0)return -1;
 ({struct _fat_ptr _tmp49=_fat_ptr_plus(s,sizeof(char),1);*sptr=_tmp49;});
 return(int)c;}
 # 904
@@ -974,7 +974,7 @@ return 0;}
 static int Cyc_string_peekc(struct _fat_ptr*sptr){
 char c;
 struct _fat_ptr s=*sptr;
-if((({char*_tmp4B=(char*)s.curr;_tmp4B == (char*)(_tag_fat(0,0,0)).curr;})|| _get_fat_size(s,sizeof(char))== (unsigned)0)||(int)(c=*((const char*)_check_fat_subscript(s,sizeof(char),0)))== (int)'\000')return - 1;
+if((({char*_tmp4B=(char*)s.curr;_tmp4B == (char*)(_tag_fat(0,0,0)).curr;})|| _get_fat_size(s,sizeof(char))== 0U)||(int)(c=*((const char*)_check_fat_subscript(s,sizeof(char),0)))== 0)return -1;
 return(int)c;}
 # 917
 int Cyc_vsscanf(struct _fat_ptr src1,struct _fat_ptr fmt,struct _fat_ptr ap){

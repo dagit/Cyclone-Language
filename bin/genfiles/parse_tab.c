@@ -1182,7 +1182,7 @@ int istypedef=0;
  s=4U;goto _LL3;case Cyc_Parse_Static_sc:
  s=0U;goto _LL3;case Cyc_Parse_Auto_sc:
  s=2U;goto _LL3;case Cyc_Parse_Register_sc:
- s=Cyc_Flags_no_register?Cyc_Absyn_Public: Cyc_Absyn_Register;goto _LL3;case Cyc_Parse_Abstract_sc:
+ s=Cyc_Flags_no_register?2U: 5U;goto _LL3;case Cyc_Parse_Abstract_sc:
  s=1U;goto _LL3;default:
  goto _LL3;}_LL3:;}{
 # 838
@@ -1266,7 +1266,7 @@ return(unsigned)i;}case 2: _tmp147=((_tmp145.Char_c).val).f2;{char c=_tmp147;
 return(unsigned)c;}case 6: _tmp146=((_tmp145.LongLong_c).val).f2;{long long x=_tmp146;
 # 927
 unsigned long long y=(unsigned long long)x;
-if(y > (unsigned long long)-1)
+if(y > 4294967295U)
 ({void*_tmp149=0U;({unsigned _tmp775=loc;struct _fat_ptr _tmp774=({const char*_tmp14A="integer constant too large";_tag_fat(_tmp14A,sizeof(char),27U);});Cyc_Warn_err(_tmp775,_tmp774,_tag_fat(_tmp149,sizeof(void*),0));});});
 return(unsigned)x;}default:
 # 932

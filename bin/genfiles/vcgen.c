@@ -684,7 +684,7 @@ return(struct _fat_ptr)({struct Cyc_String_pa_PrintArg_struct _tmp37=({struct Cy
 return Cyc_Vcgen_stmt2shortstring(s);}default:  {
 # 415
 struct _fat_ptr _tmp38=Cyc_Absynpp_stmt2string(s);struct _fat_ptr s=_tmp38;
-unsigned max=_get_fat_size(s,sizeof(char))< (unsigned)11?_get_fat_size(s,sizeof(char)): 11U;
+unsigned max=_get_fat_size(s,sizeof(char))< 11U?_get_fat_size(s,sizeof(char)): 11U;
 struct _fat_ptr res=({unsigned _tmp3C=sizeof(char)* max;_tag_fat(_cycalloc_atomic(_tmp3C),1U,_tmp3C);});
 {int i=0;for(0;(unsigned)i < max - (unsigned)1;++ i){
 ({char _tmp216=*((const char*)_check_fat_subscript(s,sizeof(char),i));*((char*)_check_fat_subscript(res,sizeof(char),i))=_tmp216;});}}
@@ -745,7 +745,7 @@ Cyc_Vcgen_update_return(env,0,ain);else{
 Cyc_Vcgen_forward_assn(env,dest,ain);}
 return(void*)& Cyc_AssnDef_false_assn;}case 9: _tmp40=((struct Cyc_Absyn_For_s_Absyn_Raw_stmt_struct*)_tmp3F)->f1;_tmp41=(((struct Cyc_Absyn_For_s_Absyn_Raw_stmt_struct*)_tmp3F)->f2).f1;_tmp42=(((struct Cyc_Absyn_For_s_Absyn_Raw_stmt_struct*)_tmp3F)->f2).f2;_tmp43=(((struct Cyc_Absyn_For_s_Absyn_Raw_stmt_struct*)_tmp3F)->f3).f1;_tmp44=(((struct Cyc_Absyn_For_s_Absyn_Raw_stmt_struct*)_tmp3F)->f3).f2;_tmp45=((struct Cyc_Absyn_For_s_Absyn_Raw_stmt_struct*)_tmp3F)->f4;{struct Cyc_Absyn_Exp*e1=_tmp40;struct Cyc_Absyn_Exp*e2=_tmp41;struct Cyc_Absyn_Stmt*dummy2=_tmp42;struct Cyc_Absyn_Exp*e3=_tmp43;struct Cyc_Absyn_Stmt*dummy3=_tmp44;struct Cyc_Absyn_Stmt*s=_tmp45;
 # 543
-struct _tuple12 _tmp59=Cyc_Vcgen_vcgen_rexp_nodebug(env,e2,ain);struct _tuple12 _stmttmp6=_tmp59;struct _tuple12 _tmp5A=_stmttmp6;void*_tmp5B;_tmp5B=_tmp5A.f2;{void*a=_tmp5B;
+struct _tuple12 _tmp59=Cyc_Vcgen_vcgen_rexp_nodebug(env,e1,ain);struct _tuple12 _stmttmp6=_tmp59;struct _tuple12 _tmp5A=_stmttmp6;void*_tmp5B;_tmp5B=_tmp5A.f2;{void*a=_tmp5B;
 ain=a;
 # 546
 while(1){
@@ -1119,7 +1119,7 @@ return Cyc_Vcgen_vcgen_rexp_nodebug(env,e,ain);}case 13: _tmp100=((struct Cyc_Ab
 return Cyc_Vcgen_vcgen_rexp_nodebug(env,e,ain);}case 14: _tmp100=(void*)((struct Cyc_Absyn_Cast_e_Absyn_Raw_exp_struct*)_tmpFF)->f1;_tmp102=((struct Cyc_Absyn_Cast_e_Absyn_Raw_exp_struct*)_tmpFF)->f2;_tmp105=((struct Cyc_Absyn_Cast_e_Absyn_Raw_exp_struct*)_tmpFF)->f4;{void*tp=_tmp100;struct Cyc_Absyn_Exp*e=_tmp102;enum Cyc_Absyn_Coercion c=_tmp105;
 # 987
 struct _tuple12 _tmp15D=Cyc_Vcgen_vcgen_rexp_nodebug(env,e,ain);struct _tuple12 _stmttmp38=_tmp15D;struct _tuple12 _tmp15E=_stmttmp38;void*_tmp160;void*_tmp15F;_tmp15F=_tmp15E.f1;_tmp160=_tmp15E.f2;{void*topt=_tmp15F;void*a=_tmp160;
-if((int)c == (int)1U){
+if((int)c == 1){
 if(topt == 0)return({struct _tuple12 _tmp1DD;_tmp1DD.f1=0,_tmp1DD.f2=a;_tmp1DD;});{
 void*t=topt;
 # 997

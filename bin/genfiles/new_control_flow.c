@@ -605,10 +605,10 @@ unsigned minsz=sz1 < sz2?sz1: sz2;
 while((unsigned)i < minsz){
 char c1=*((const char*)_check_fat_subscript(s1,sizeof(char),i));
 char c2=*((const char*)_check_fat_subscript(s2,sizeof(char),i));
-if((int)c1 == (int)'\000'){
-if((int)c2 == (int)'\000')return 0;else{
-return - 1;}}else{
-if((int)c2 == (int)'\000')return 1;else{
+if((int)c1 == 0){
+if((int)c2 == 0)return 0;else{
+return -1;}}else{
+if((int)c2 == 0)return 1;else{
 # 69
 int diff=(int)c1 - (int)c2;
 if(diff != 0)return diff;}}
@@ -618,7 +618,7 @@ if(diff != 0)return diff;}}
 if(sz1 == sz2)return 0;
 if(minsz < sz2){
 if((int)*((const char*)_check_fat_subscript(s2,sizeof(char),i))== (int)'\000')return 0;else{
-return - 1;}}else{
+return -1;}}else{
 # 79
 if((int)*((const char*)_check_fat_subscript(s1,sizeof(char),i))== (int)'\000')return 0;else{
 return 1;}}}}struct Cyc_NewControlFlow_CFStmtAnnot{int visited;};static char Cyc_NewControlFlow_CFAnnot[8U]="CFAnnot";struct Cyc_NewControlFlow_CFAnnot_Absyn_AbsynAnnot_struct{char*tag;struct Cyc_NewControlFlow_CFStmtAnnot f1;};struct Cyc_NewControlFlow_AnalEnv{struct Cyc_JumpAnalysis_Jump_Anal_Result*all_tables;struct Cyc_Hashtable_Table*succ_table;struct Cyc_Hashtable_Table*pat_pop_table;struct Cyc_CfFlowInfo_FlowEnv*fenv;int iterate_again;int iteration_num;int in_try;union Cyc_CfFlowInfo_FlowInfo tryflow;int noreturn;void*return_type;struct Cyc_List_List*unique_pat_vars;struct Cyc_List_List*param_roots;struct Cyc_List_List*noconsume_params;struct Cyc_Hashtable_Table*flow_table;struct Cyc_List_List*return_relns;};struct _tuple18{void*f1;int f2;};
@@ -901,7 +901,7 @@ union Cyc_CfFlowInfo_AbsLVal _tmp78=(Cyc_NewControlFlow_anal_Lexp(env,inflow,0,0
 # 499
 return outflow;else{_tmp7A=(_tmp79.PlaceL).val;{struct Cyc_CfFlowInfo_Place*p=_tmp7A;
 # 503
-void*nzval=(int)il == (int)1U?(env->fenv)->notzeroall:(env->fenv)->unknown_none;
+void*nzval=(int)il == 1?(env->fenv)->notzeroall:(env->fenv)->unknown_none;
 for(1;names != 0;names=names->tl){
 nzval=(void*)({struct Cyc_CfFlowInfo_NamedLocation_CfFlowInfo_AbsRVal_struct*_tmp7B=_cycalloc(sizeof(*_tmp7B));_tmp7B->tag=8,_tmp7B->f1=(struct Cyc_Absyn_Vardecl*)names->hd,_tmp7B->f2=nzval;_tmp7B;});}
 # 507
@@ -918,7 +918,7 @@ return({struct _tuple20 _tmp515;_tmp515.f1=outflow,_tmp515.f2=outflow;_tmp515;})
 union Cyc_CfFlowInfo_AbsLVal _tmp80=(Cyc_NewControlFlow_anal_Lexp(env,inflow,0,0,e)).f2;union Cyc_CfFlowInfo_AbsLVal _stmttmp8=_tmp80;union Cyc_CfFlowInfo_AbsLVal _tmp81=_stmttmp8;void*_tmp82;if((_tmp81.UnknownL).tag == 2)
 return({struct _tuple20 _tmp516;_tmp516.f1=outflow,_tmp516.f2=outflow;_tmp516;});else{_tmp82=(_tmp81.PlaceL).val;{struct Cyc_CfFlowInfo_Place*p=_tmp82;
 # 529
-void*nzval=(int)il == (int)1U?(env->fenv)->notzeroall:(env->fenv)->unknown_none;
+void*nzval=(int)il == 1?(env->fenv)->notzeroall:(env->fenv)->unknown_none;
 void*zval=(env->fenv)->zero;
 for(1;names != 0;names=names->tl){
 nzval=(void*)({struct Cyc_CfFlowInfo_NamedLocation_CfFlowInfo_AbsRVal_struct*_tmp83=_cycalloc(sizeof(*_tmp83));_tmp83->tag=8,_tmp83->f1=(struct Cyc_Absyn_Vardecl*)names->hd,_tmp83->f2=nzval;_tmp83;});
@@ -1697,7 +1697,7 @@ void*_tmp269=(void*)ds->hd;void*_stmttmp50=_tmp269;void*_tmp26A=_stmttmp50;void*
 field_no=Cyc_CfFlowInfo_get_field_index_fs(fs,fld);
 *((void**)_check_fat_subscript(aggrdict,sizeof(void*),field_no))=(void*)rvals->hd;
 # 1572
-if((int)kind == (int)1U){
+if((int)kind == 1){
 struct Cyc_Absyn_Exp*_tmp26E=(*((struct _tuple27*)des->hd)).f2;struct Cyc_Absyn_Exp*e=_tmp26E;
 f=Cyc_NewControlFlow_use_Rval(env,e->loc,f,(void*)rvals->hd);
 # 1576
@@ -1917,7 +1917,7 @@ return({struct _tuple19 _tmp57B;_tmp57B.f1=f,({union Cyc_CfFlowInfo_AbsLVal _tmp
  possibly_null=0;goto _LL3C;default: _LL3B: _LL3C: {
 # 1861
 enum Cyc_CfFlowInfo_InitLevel il=Cyc_CfFlowInfo_initlevel(fenv,fd,rval);
-void*leaf=(int)il == (int)1U?fenv->unknown_all: fenv->unknown_none;
+void*leaf=(int)il == 1?fenv->unknown_all: fenv->unknown_none;
 void*res=(void*)({struct Cyc_CfFlowInfo_UniquePtr_CfFlowInfo_AbsRVal_struct*_tmp2FB=_cycalloc(sizeof(*_tmp2FB));_tmp2FB->tag=5,({void*_tmp688=({struct Cyc_CfFlowInfo_FlowEnv*_tmp687=fenv;void*_tmp686=Cyc_Tcutil_pointer_elt_type((void*)_check_null(e1->topt));Cyc_CfFlowInfo_typ_to_absrval(_tmp687,_tmp686,0,leaf);});_tmp2FB->f1=_tmp688;});_tmp2FB;});
 for(1;names != 0;names=names->tl){
 res=(void*)({struct Cyc_CfFlowInfo_NamedLocation_CfFlowInfo_AbsRVal_struct*_tmp2F6=_cycalloc(sizeof(*_tmp2F6));_tmp2F6->tag=8,_tmp2F6->f1=(struct Cyc_Absyn_Vardecl*)names->hd,_tmp2F6->f2=res;_tmp2F6;});}
@@ -2018,7 +2018,7 @@ if((int)Cyc_CfFlowInfo_initlevel(env->fenv,d,r2)== (int)Cyc_CfFlowInfo_NoneIL &&
 union Cyc_CfFlowInfo_FlowInfo _tmp339=f;union Cyc_CfFlowInfo_FlowInfo ft=_tmp339;
 union Cyc_CfFlowInfo_FlowInfo _tmp33A=f;union Cyc_CfFlowInfo_FlowInfo ff=_tmp33A;
 # 2002
-if((int)p == (int)5U ||(int)p == (int)6U){
+if((int)p == 5 ||(int)p == 6){
 struct _tuple16 _tmp33B=Cyc_CfFlowInfo_unname_rval(r1);struct _tuple16 _stmttmp6A=_tmp33B;struct _tuple16 _tmp33C=_stmttmp6A;void*_tmp33E;void*_tmp33D;_tmp33D=_tmp33C.f1;_tmp33E=_tmp33C.f2;{void*r1=_tmp33D;struct Cyc_List_List*r1n=_tmp33E;
 struct _tuple16 _tmp33F=Cyc_CfFlowInfo_unname_rval(r2);struct _tuple16 _stmttmp6B=_tmp33F;struct _tuple16 _tmp340=_stmttmp6B;void*_tmp342;void*_tmp341;_tmp341=_tmp340.f1;_tmp342=_tmp340.f2;{void*r2=_tmp341;struct Cyc_List_List*r2n=_tmp342;
 struct _tuple0 _tmp343=({struct _tuple0 _tmp585;_tmp585.f1=r1,_tmp585.f2=r2;_tmp585;});struct _tuple0 _stmttmp6C=_tmp343;struct _tuple0 _tmp344=_stmttmp6C;enum Cyc_CfFlowInfo_InitLevel _tmp345;switch(*((int*)_tmp344.f1)){case 2: if(*((int*)_tmp344.f2)== 0){_tmp345=((struct Cyc_CfFlowInfo_UnknownR_CfFlowInfo_AbsRVal_struct*)_tmp344.f1)->f1;{enum Cyc_CfFlowInfo_InitLevel il=_tmp345;
@@ -2039,14 +2039,14 @@ struct _tuple20 _tmp34D=Cyc_NewControlFlow_splitzero(env,f2,f,e2,il,r2n);struct 
 # 2021
 goto _LL11;}}case 0:
 # 2023
- if((int)p == (int)5U)ff=Cyc_CfFlowInfo_BottomFL();else{
+ if((int)p == 5)ff=Cyc_CfFlowInfo_BottomFL();else{
 ft=Cyc_CfFlowInfo_BottomFL();}
 goto _LL11;case 1:
  goto _LL1B;case 4: _LL1B:
  goto _LL1D;default: goto _LL20;}case 1: if(*((int*)_tmp344.f2)== 0){_LL1D:
  goto _LL1F;}else{goto _LL20;}case 4: if(*((int*)_tmp344.f2)== 0){_LL1F:
 # 2030
- if((int)p == (int)6U)ff=Cyc_CfFlowInfo_BottomFL();else{
+ if((int)p == 6)ff=Cyc_CfFlowInfo_BottomFL();else{
 ft=Cyc_CfFlowInfo_BottomFL();}
 goto _LL11;}else{goto _LL20;}default: _LL20:
  goto _LL11;}_LL11:;}}}

@@ -549,7 +549,7 @@ void*_tmp30=t;void*_tmp32;void*_tmp31;switch(*((int*)_tmp30)){case 0: _tmp31=(vo
 # 148
 {void*_tmp33=tc;enum Cyc_Absyn_Size_of _tmp34;switch(*((int*)_tmp33)){case 1: _tmp34=((struct Cyc_Absyn_IntCon_Absyn_TyCon_struct*)_tmp33)->f2;{enum Cyc_Absyn_Size_of sz=_tmp34;
 # 150
-return(int)sz == (int)2U ||(int)sz == (int)Cyc_Absyn_Long_sz;}case 3:
+return(int)sz == 2 ||(int)sz == (int)Cyc_Absyn_Long_sz;}case 3:
  goto _LLF;case 4: _LLF:
 # 153
  return 1;default:
@@ -1067,8 +1067,8 @@ if(changed)
 some_change=1;}
 # 787
 tv_ovrs=changed_decls;}}while(
-some_change && ++ niter < (unsigned)10);
-if(niter >= (unsigned)10){
+some_change && ++ niter < 10U);
+if(niter >= 10U){
 ({struct Cyc_String_pa_PrintArg_struct _tmp127=({struct Cyc_String_pa_PrintArg_struct _tmp172;_tmp172.tag=0,({
 struct _fat_ptr _tmp1FF=(struct _fat_ptr)((struct _fat_ptr)Cyc_Absynpp_decllist2string(changed_decls));_tmp172.f1=_tmp1FF;});_tmp172;});void*_tmp125[1];_tmp125[0]=& _tmp127;({struct Cyc___cycFILE*_tmp201=Cyc_stderr;struct _fat_ptr _tmp200=({const char*_tmp126="Suspected mutually recursive structs involving the following decls \n %s";_tag_fat(_tmp126,sizeof(char),72U);});Cyc_fprintf(_tmp201,_tmp200,_tag_fat(_tmp125,sizeof(void*),1));});});
 ({struct Cyc_Warn_String_Warn_Warg_struct _tmp129=({struct Cyc_Warn_String_Warn_Warg_struct _tmp173;_tmp173.tag=0,({struct _fat_ptr _tmp202=({const char*_tmp12A="Suspected mutually recursive structs -- abandoning cifc";_tag_fat(_tmp12A,sizeof(char),56U);});_tmp173.f1=_tmp202;});_tmp173;});void*_tmp128[1];_tmp128[0]=& _tmp129;({unsigned _tmp203=loc;Cyc_Warn_err2(_tmp203,_tag_fat(_tmp128,sizeof(void*),1));});});}

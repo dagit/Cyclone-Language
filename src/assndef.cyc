@@ -528,13 +528,13 @@ reduce_term(term_t t, list_t<$(vardecl_t,term_t)@`H,`H> non_esc_subst,
       let s = *esc_subst;
       for (; s != NULL; s = s->tl) {
         let $(vd2,t2) = *s->hd;
-        if (vd2 == vd) return t;
+        if (vd2 == vd) return t2;
       }
       // if not, then assign it a fresh variable and record it in the
       // esc_subst.
       let t = fresh_var();
       *esc_subst = new List{new $(vd,t),*esc_subst};
-      return fresh_var();
+      return t;
     } else if (!vd->escapes) {
       // it's a non-escaping variable -- look it up in non_esc_subst.
       for (; non_esc_subst != NULL; non_esc_subst = non_esc_subst->tl) {

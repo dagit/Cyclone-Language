@@ -410,7 +410,7 @@ if(j >= 0)return 0;else{
 return 1;}}
 # 75
 struct _fat_ptr Cyc_Filename_gnuify(struct _fat_ptr filename){
-int has_drive_name=_get_fat_size(filename,sizeof(char))> (unsigned)1 &&(int)((const char*)filename.curr)[1]== (int)':';
+int has_drive_name=_get_fat_size(filename,sizeof(char))> 1U &&(int)((const char*)filename.curr)[1]== (int)':';
 int i;int j;
 struct _fat_ptr ans;
 int ans_sz;
@@ -429,6 +429,6 @@ j=0;}
 # 93
 while(i < ans_sz){
 char c=*((const char*)_check_fat_subscript(filename,sizeof(char),j ++));
-({struct _fat_ptr _tmp10=_fat_ptr_plus(ans,sizeof(char),i ++);char _tmp11=*((char*)_check_fat_subscript(_tmp10,sizeof(char),0U));char _tmp12=(int)c == (int)'\\'?'/': c;if(_get_fat_size(_tmp10,sizeof(char))== 1U &&(_tmp11 == 0 && _tmp12 != 0))_throw_arraybounds();*((char*)_tmp10.curr)=_tmp12;});}
+({struct _fat_ptr _tmp10=_fat_ptr_plus(ans,sizeof(char),i ++);char _tmp11=*((char*)_check_fat_subscript(_tmp10,sizeof(char),0U));char _tmp12=(int)c == 92?'/': c;if(_get_fat_size(_tmp10,sizeof(char))== 1U &&(_tmp11 == 0 && _tmp12 != 0))_throw_arraybounds();*((char*)_tmp10.curr)=_tmp12;});}
 # 97
 return ans;}

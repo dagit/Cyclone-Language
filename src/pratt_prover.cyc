@@ -377,8 +377,9 @@ static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
     case SLte:
       if (!add_edge(g,true,t1,zero(),(int)c2, origin)) return false;
       // if c2 is positive then t1 S<= c2 implies t1 U<= c2
-      if (c2 <= (unsigned)MAXINT)
-	return add_edge(g,false,t1,zero(),(int)c2, NULL);
+      //      if (c2 <= (unsigned)MAXINT)
+      //	return add_edge(g,false,t1,zero(),(int)c2, NULL);
+      // above conclusion is not true
       else return true;
     default: Tcutil::impos("Vcgen: found bad primop in add_constraint");
     }
