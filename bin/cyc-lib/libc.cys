@@ -2603,6 +2603,16 @@ size_t
 off_t
 }
 hstub {
+  // FreeBSD doesn't seem to define off_t here but does it in unistd.h!
+  #if defined(__FreeBSD__)
+  #if !defined(_off_t_def_) && !defined(_OFF_T_DECLARED)
+  #define _off_t_def_
+  #define _OFF_T_DECLARED
+  typedef __off_t off_t;
+  #endif
+  #endif
+}
+hstub {
   // NOTES:
   // NULL is not defined because it is a keyword in Cyclone.
   // va_list is not defined because Cyclone has safe varargs.
@@ -4456,10 +4466,12 @@ hstub socketpair {
 
 sys/stat.h:
 cpp {
+
 #ifdef __linux__
 /* Linux does not define blkcnt_t dev_t ino_t mode_t nlink_t uid_t gid_t off_t time_t here, they are in sys/types.h */
 #include <sys/types.h>
 #endif
+
 }
 include {
 stat
