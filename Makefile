@@ -514,7 +514,7 @@ unupdate:
 
 # Test the bootstrap sequence and execute the test suite on the bootstrapped compiler;
 # if this fails, unupdate 
-safeupdate:
+safeupdate: test_src_compiler
 	@($(MAKE) update && $(MAKE) clean && $(MAKE) all && $(MAKE) test) \
            || (echo && echo "XXXXXXXXX Safe update failed; unupdating:" && echo\
                && $(MAKE) unupdate \
@@ -527,6 +527,11 @@ safeupdate:
 	@echo "\"make update\" or \"make safeupdate\"."
 	@echo
 
+test_src_compiler: cyclone_src
+	@rm -rf build/boot_test_src_compiler
+	$(MAKE) cyclone_src BUILDDIR=build/boot_test_src_compiler CYCC=`pwd`/$(BUILDDIR)/cyclone
+	@cmp -s build/boot_test_src_compiler/cyclone `pwd`/$(BUILDDIR)/cyclone || \
+            (echo "XXXXXXXXX Compiler cannot build itself correctly." && false)
 
 # a little testing (much more is in the tests directory)
 test:
