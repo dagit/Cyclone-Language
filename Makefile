@@ -86,7 +86,7 @@ clean:
 	$(MAKE) clean -C bin/genfiles
 	$(MAKE) clean -C tests
 	$(MAKE) clean -C gc
-	rm -f gc/*.exe
+	rm -f gc/*.exe gc/base_lib
 	rm -f bin/cyclone.exe 
 	rm -f bin/$(CYCLIB)
 	rm -f bin/$(RUNTIME).o
