@@ -458,8 +458,8 @@ sizeof(char),0));char _tmp29='\000';if(_get_arr_size(_tmp27,sizeof(char))== 1?
 _tmp28 == '\000'?_tmp29 != '\000': 0: 0)_throw_arraybounds();*((char*)_tmp27.curr)=
 _tmp29;});size=Cyc_Std___cvt_double(_double,prec,flags,& softsign,ch,cp,
 _tagged_arr_plus(({char*_tmp2A=buf;_tag_arr(_tmp2A,sizeof(char),
-_get_zero_arr_size(_tmp2A,349));}),sizeof(char),(int)sizeof(buf)));if(softsign)
-sign='-';if(*((char*)_check_unknown_subscript(cp,sizeof(char),0))== '\000')
+_get_zero_arr_size(_tmp2A,349));}),sizeof(char),(int)(sizeof(buf)- 1)));if(
+softsign)sign='-';if(*((char*)_check_unknown_subscript(cp,sizeof(char),0))== '\000')
 _tagged_arr_inplace_plus_post(& cp,sizeof(char),1);break;case 'n': _LL50: if(flags & 
 1)*((unsigned int*)Cyc_Std_va_arg_int_ptr(ap))=(unsigned int)ret;else{if(flags & 
 4)*((short*)Cyc_Std_va_arg_short_ptr(ap))=(short)ret;else{*((unsigned int*)Cyc_Std_va_arg_int_ptr(

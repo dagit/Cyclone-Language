@@ -452,7 +452,7 @@ reswitch:	use_cp2 = false;
 			*cp = '\0';
 			size = __cvt_double(_double, prec, flags, &softsign,
 					    ch, cp, 
-                                            (char ?)buf + sizeof(buf));
+                                            (char ?)buf + (sizeof(buf)-1));
 			if (softsign)
 				sign = '-';
 			if (*cp == '\0')
