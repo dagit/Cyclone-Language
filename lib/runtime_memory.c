@@ -148,7 +148,7 @@ void _profile_free_region_cleanup(struct _RuntimeStack *handler) {
 
 void _push_region(struct _RegionHandle * r) {
   //errprintf("pushing region %x\n",(unsigned int)r);  
-  r->s.tag = 1;
+  r->s.tag = LIFO_REGION;
 #ifdef CYC_REGION_PROFILE
   r->s.cleanup = _profile_free_region_cleanup;
 #else
@@ -158,7 +158,7 @@ void _push_region(struct _RegionHandle * r) {
 }
 
 void _pop_region() {
-  if (_top_frame() == NULL || _top_frame()->tag != 1) {
+  if (_top_frame() == NULL || _top_frame()->tag != LIFO_REGION) {
     errquit("internal error: _pop_region");
   }
   _npop_frame(0);
@@ -185,7 +185,7 @@ struct _RegionHandle *Cyc_Core_unique_region = CYC_CORE_UNIQUE_REGION;
 struct _RegionHandle *Cyc_Core_refcnt_region = CYC_CORE_REFCNT_REGION;
 
 struct _RegionHandle *Cyc_Core_current_handle(void) {
-  struct _RegionHandle *h = (struct _RegionHandle *)_frame_until(1,0);
+  struct _RegionHandle *h = (struct _RegionHandle *)_frame_until(LIFO_REGION,0);
   return h == NULL ? Cyc_Core_heap_region : h;
 }
 
@@ -275,48 +275,65 @@ void Cyc_Core_drop_refptr(unsigned char *ptr) {
 }
 
 /////// AUTORELEASE POOLS //////////
+
+/* MWH: the type definitions below and prototypes for the functions
+   need to go in cyc_include.h */
+
 #define POOLSIZE 256
 
-struct pool {
+struct _pool {
   size_t         count;
-  struct pool   *next;
+  struct _pool  *next;
   unsigned char *pointers[POOLSIZE];
 };
-struct pool_cons {
-  struct pool      *hd;
-  struct pool_cons *tl;
+
+struct _PoolHandle {
+  struct _RuntimeStack s;
+  struct _pool *p;
 };
-static struct pool_cons *pool_stack = NULL; // NB: should be thread-local
-void pool_pushnew() {
-  struct pool *p = (struct pool *)calloc(1,sizeof(struct pool));
-  struct pool_cons *s = (struct pool_cons *)calloc(1,sizeof(struct pool_cons));
-  s->hd = p;
-  s->tl = pool_stack;
-  pool_stack = s;
+
+struct _PoolHandle _new_pool() {
+  struct _PoolHandle h;
+  h.s.tag = AUTORELEASE_POOL;
+  h.s.next = NULL;
+  h.p = NULL;
+  return h;
 }
-void pool_pop() {
-  if (!pool_stack) return; // Maybe print a warning?
-  {struct pool *p = pool_stack->hd;
-  struct pool_cons *s = pool_stack->tl;
-  int i;
-  free(pool_stack);
-  pool_stack = s;
+
+void _free_pool(struct _PoolHandle *h) {
+  struct _pool *p = h->p;
   while (p) {
+    int i;
     for (i = 0; i < p->count; i++)
       Cyc_Core_drop_refptr(p->pointers[i]);
-    {struct pool *next = p->next;
-    free(p);
+    {struct _pool *next = p->next;
+    GC_free(p);
     p = next;}
-  }}
+  }
 }
-void autorelease(unsigned char *x) { // x must be a base pointer so we can find the refcount later
-  if (!pool_stack) return;         // No pool, so x will leak
-  {struct pool *p = pool_stack->hd;
-  if (!p) return;                  // No pool, so x will leak
-  if (p->count >= POOLSIZE) {
-    p = (struct pool *)calloc(1,sizeof(struct pool));
-    p->next = pool_stack->hd;
-    pool_stack->hd = p;
+
+void _push_pool(struct _PoolHandle * r) {
+  //errprintf("pushing pool %x\n",(unsigned int)r);  
+  r->s.tag = AUTORELEASE_POOL;
+  r->s.cleanup = (void (*)(struct _RuntimeStack *))_free_pool;
+  _push_frame((struct _RuntimeStack *)r);
+}
+
+void _pop_pool() {
+  if (_top_frame() == NULL || _top_frame()->tag != AUTORELEASE_POOL) {
+    errquit("internal error: _pop_pool");
+  }
+  _npop_frame(0);
+}
+
+void Cyc_Core_autorelease(unsigned char *x) { // x must be a base pointer so we can find the refcount later
+  struct _PoolHandle *h = (struct _PoolHandle *)_frame_until(AUTORELEASE_POOL,0);
+  if (!h) return;         // No pool, so x will leak
+  {struct _pool *p = h->p;
+  if (!p || p->count >= POOLSIZE) {
+    p = (struct _pool *)GC_calloc(1,sizeof(struct _pool));
+    p->next = h->p;
+    h->p = p;
   }
   p->pointers[p->count++] = x;}
 }
@@ -563,7 +580,7 @@ struct _RegionHandle _new_region(const char *rgn_name) {
   r.used_bytes = 0;
   r.wasted_bytes = 0;
 #endif
-  r.s.tag = 1;
+  r.s.tag = LIFO_REGION;
   r.s.next = NULL;
   r.curr = 0;
   r.offset = 0;

@@ -62,7 +62,7 @@ void _init_exceptions() {
 // jmp_buf can be filled in by the caller
 void _push_handler(struct _handler_cons * new_handler) {
   //errprintf("pushing handler %x\n",(unsigned int)new_handler);  
-  new_handler->s.tag = 0;
+  new_handler->s.tag = EXCEPTION_HANDLER;
   new_handler->s.cleanup = NULL;
   _push_frame((struct _RuntimeStack *)new_handler);
 }
@@ -160,7 +160,7 @@ void* _throw_fn(void* e, const char *filename, unsigned lineno) {
   // FIX: use struct _xtunion_struct *  ??
   struct _handler_cons *my_handler;
   // pop handlers until exception handler found
-  my_handler = (struct _handler_cons *)_pop_frame_until(0);
+  my_handler = (struct _handler_cons *)_pop_frame_until(EXCEPTION_HANDLER);
   _npop_frame(0);
 #ifdef HAVE_THREADS
   put_tlocal(_exn_thrown_key, e);
