@@ -37,7 +37,8 @@ using Absyn;
 using Position;
 
 extern struct CList<`a,`r::R> { `a hd; struct CList<`a,`r> const *`r const tl; };
-typedef struct CList<`a,`r> const *`r const clist_t<`a,`r>;
+typedef struct CList<`a,`r> const *`r mclist_t<`a,`r>;
+typedef mclist_t<`a,`r> const clist_t<`a,`r>;
 
 // Used to tell what an ordinary identifer refers to 
 extern datatype Resolved {

@@ -126,21 +126,21 @@ static list_t<var_t> curr_namespace = NULL;
 int print_for_cycdoc = false;
 
 struct Params {
-  bool expand_typedefs :1;
-  bool qvar_to_Cids :1;
-  bool add_cyc_prefix :1;
-  bool to_VC :1;
-  bool decls_first :1;
-  bool rewrite_temp_tvars :1;
-  bool print_all_tvars :1;
-  bool print_all_kinds :1;
-  bool print_all_effects :1;
-  bool print_using_stmts :1;
-  bool print_externC_stmts :1;
-  bool print_full_evars :1;
-  bool print_zeroterm :1;
-  bool generate_line_directives :1;
-  bool use_curr_namespace :1;
+  bool expand_typedefs;
+  bool qvar_to_Cids;
+  bool add_cyc_prefix;
+  bool to_VC;
+  bool decls_first;
+  bool rewrite_temp_tvars;
+  bool print_all_tvars;
+  bool print_all_kinds;
+  bool print_all_effects;
+  bool print_using_stmts;
+  bool print_externC_stmts;
+  bool print_full_evars;
+  bool print_zeroterm;
+  bool generate_line_directives;
+  bool use_curr_namespace;
   list_t<var_t> curr_namespace;
 };
 
@@ -1643,7 +1643,7 @@ doc_t vardecl2doc(vardecl_t vd) {
   case Gcc_c: beforenamedoc = attsdoc; break;
   case Vc_c:  
     switch(compress(type)) {
-    case &FnType(FnInfo(_,_,_,_,_,_,_,atts2)): 
+    case &FnType(FnInfo(_,_,_,_,_,_,_,_,atts2)): 
       beforenamedoc = callconv2doc(atts2);
       break;
     default: beforenamedoc = nil_doc(); break;
@@ -1736,6 +1736,7 @@ doc_t decl2doc(decl_t d) {
   case &Fn_d(fd):
     type_t t = new FnType(FnInfo{fd->tvs,
                                  fd->effect,
+                                 fd->ret_tqual,
                                  fd->ret_type,
                                  List::map(arg_mk_opt,fd->args),
                                  fd->c_varargs, fd->cyc_varargs,
@@ -1943,7 +1944,7 @@ bool is_anon_aggrtype(type_t t) {
   switch (t) {
   case &AnonAggrType(_,_): return true;
   case &AnonEnumType(_): return true;
-  case &TypedefType(_,_,_,&x):
+  case &TypedefType(_,_,td,&x):
     // This won't loop if the types come from a .cyc file,
     // because typedefs in Cyclone (or C) can't be recursive
     return is_anon_aggrtype(x);
@@ -1985,7 +1986,7 @@ $(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r> r,
     tml3 = rnew(r) List(rnew(r) Pointer_mod(ptratts,tq),tml3);
     return $(tq3, t3, tml3);
 
-  case &FnType(FnInfo{typvars,effopt,t2,args,c_varargs,cyc_varargs,
+  case &FnType(FnInfo{typvars,effopt,t2qual,t2,args,c_varargs,cyc_varargs,
                         rgn_po,fn_atts}):
     if (! print_all_tvars) {
       // don't print default effects
@@ -2004,7 +2005,7 @@ $(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r> r,
     }
 
     // discard tq because you can't qualify a function
-    let $(tq3,t3,tml3) = to_tms(r,empty_tqual(NULL),t2);
+    let $(tq3,t3,tml3) = to_tms(r,t2qual,t2);
     list_t<type_modifier_t<`r>,`r> tms = tml3;
     // mess with attributes and arguments:
     // * for gcc: we put all attributes after the args
@@ -2055,11 +2056,16 @@ $(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r> r,
     else
       return to_tms(r,tq,topt->v);
 
-  case &TypedefType(n,ts,_,topt):
+  case &TypedefType(n,ts,td,topt):
+    // we don't want to expand when either the flag is set, it's
+    // an anonymous aggregate, or it's qualified in some way...
     if (topt == NULL || !expand_typedefs || is_anon_aggrtype(*topt))
       return $(tq,t,NULL);
-    else
+    else {
+      if (tq.real_const)
+        tq.print_const = tq.real_const;
       return to_tms(r,tq,*topt);
+    }
 
   default: return $(tq,t,NULL);
   }

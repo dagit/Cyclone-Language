@@ -993,7 +993,9 @@ static type_t main_type() {
     new $(NULL,empty_tqual(NULL),
           dyneither_typ(string_typ(wildtyp(NULL)),wildtyp(NULL),
                                 empty_tqual(NULL), empty_conref()));
-  return new FnType(FnInfo{.tvars=NULL, .effect=NULL,.ret_typ = sint_typ,
+  return new FnType(FnInfo{.tvars=NULL, .effect=NULL,
+                              .ret_tqual = empty_tqual(NULL),
+                              .ret_typ = sint_typ,
                               .args = list(arg1,arg2), .c_varargs = false,
                               .cyc_varargs = NULL, .rgn_po = NULL,
                               .attributes = NULL});
@@ -1079,7 +1081,7 @@ static void register_rgns(cenv_t env, Dict::dict_t<tvarname_t,int@> counts,
   case $(&ArrayType(ArrayInfo{et,_,_,_,_}), &Array_ct(ec,_,_)):
     register_rgns(env, counts, fn_res, et, ec);
     break;
-  case $(&FnType(FnInfo{_,_,rt,argst,_,_,_,_}), &Fn_ct(rc,argsc)):
+  case $(&FnType(FnInfo{_,_,_,rt,argst,_,_,_,_}), &Fn_ct(rc,argsc)):
     register_rgns(env, counts, true, rt, rc);
     for (; argst != NULL && argsc != NULL; argst=argst->tl, argsc=argsc->tl) {
       let $(_,_,at) = *argst->hd;
@@ -1227,7 +1229,7 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
       return array_ct(cet,tq.print_const ? const_ct() : notconst_ct(),
                       orig_zt ? zterm_ct() : nozterm_ct());
     }
-  case &FnType(FnInfo{_,_,rt,args,_,_,_,_}):
+  case &FnType(FnInfo{_,_,_,rt,args,_,_,_,_}):
     let crt = type_to_ctype(set_cpos(env,FnRes_pos),rt);
     let env_arg = set_cpos(env,FnArg_pos);
     list_t<ctype_t> cargs = NULL;
@@ -1693,7 +1695,7 @@ static cenv_t gen_topdecl(cenv_t env, decl_t d) {
     let args = fd->args;
     let targs = map(make_targ,args);
     let fntype = 
-      new FnType(FnInfo{NULL,NULL,rettype,targs,false,NULL,NULL,NULL});
+      new FnType(FnInfo{NULL,NULL,empty_tqual(NULL),rettype,targs,false,NULL,NULL,NULL});
     // Note:  we do not set the cpos to FnRes_pos here because we want
     // to get constraint variables for the regions
     let fn_env = set_cpos(env,FnBody_pos);

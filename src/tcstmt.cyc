@@ -441,6 +441,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         let bound_vars = (!is_local) ? NULL : lookup_type_vars(te);
         let allow_evars = (!is_local) ? false : true;
         check_type(s0->loc,te,bound_vars,&tmk,allow_evars,t);
+        vd->tq.real_const = extract_const_from_typedef(s0->loc,
+                                                       vd->tq.print_const,t);
         let te2 = add_local_var(decl_rgn,s->loc,te,vd);
         if (sc == Extern || sc == ExternC)
           terr(d->loc,"local extern declarations not yet supported");

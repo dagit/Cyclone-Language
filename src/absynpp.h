@@ -32,21 +32,21 @@ using List;
 using PP;
 
 extern struct Params {
-  bool expand_typedefs :1;
-  bool qvar_to_Cids :1;
-  bool add_cyc_prefix :1;
-  bool to_VC :1;
-  bool decls_first :1;
-  bool rewrite_temp_tvars :1;
-  bool print_all_tvars :1;
-  bool print_all_kinds :1;
-  bool print_all_effects :1;
-  bool print_using_stmts :1;
-  bool print_externC_stmts :1;
-  bool print_full_evars :1;
-  bool print_zeroterm :1;
-  bool generate_line_directives:1;
-  bool use_curr_namespace :1;
+  bool expand_typedefs;
+  bool qvar_to_Cids;
+  bool add_cyc_prefix;
+  bool to_VC;
+  bool decls_first;
+  bool rewrite_temp_tvars;
+  bool print_all_tvars;
+  bool print_all_kinds;
+  bool print_all_effects;
+  bool print_using_stmts;
+  bool print_externC_stmts;
+  bool print_full_evars;
+  bool print_zeroterm;
+  bool generate_line_directives;
+  bool use_curr_namespace;
   list_t<var_t> curr_namespace;
 };
 

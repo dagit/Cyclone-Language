@@ -248,7 +248,6 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd,
   check_fndecl_valid_type(loc,te,fd);
   // check for redeclaration
   type_t t = fndecl2typ(fd);
-
   // move any function type attributes into the function's type
   fd->attributes = transfer_fn_type_atts(t,fd->attributes);
   // check that packed and aligned don't show up in the attributes

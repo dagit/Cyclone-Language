@@ -147,6 +147,16 @@ static void unimp(string_t msg,seg_t sg) {
 	  string_of_segment(sg),msg);
   return;
 }
+
+static type_t type_name_to_type($(opt_t<var_t>,tqual_t,type_t)@ tqt,
+                                seg_t loc) {
+  let &$(_,tq,t) = tqt;
+  if (tq.print_const || tq.q_volatile || tq.q_restrict) {
+    if (tq.loc != NULL) loc = tq.loc;
+    Tcutil::warn(loc,"qualifier on type is ignored");
+  }
+  return t;
+}
 ////////////////// Collapsing pointer qualifiers ///////////////////////////
 static $(conref_t<bool> nullable,conref_t<bounds_t> bound,
          conref_t<bool> zeroterm,type_t rgn) 
@@ -498,7 +508,7 @@ static fndecl_t make_function(opt_t<decl_spec_t> dso, declarator_t d,
     Tcutil::warn(loc,"bad type params, ignoring");
   // fn_type had better be a FnType
   switch (fn_type) {
-    case &FnType(FnInfo{tvs,eff,ret_type,args,c_varargs,cyc_varargs,
+    case &FnType(FnInfo{tvs,eff,ret_tqual,ret_type,args,c_varargs,cyc_varargs,
                           rgn_po,attributes}):
       let rev_newargs = NULL;
       for(let args2 = args; args2 != NULL; args2 = args2->tl) {
@@ -513,6 +523,7 @@ static fndecl_t make_function(opt_t<decl_spec_t> dso, declarator_t d,
       // to figure out the bound type variables and the effect.
       return new Fndecl {.sc=sc,.name=d->id,.tvs=tvs,
                             .is_inline=is_inline,.effect=eff,
+                            .ret_tqual=ret_tqual,
                             .ret_type=ret_type,.args=imp_rev(rev_newargs),
                             .c_varargs=c_varargs,
                             .cyc_varargs=cyc_varargs,
@@ -706,7 +717,7 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
       // anyway.  TODO: maybe we should issue a warning.  But right
       // now we don't have a loc so the warning will be confusing.
       return apply_tms(empty_tqual(tq.loc),
-		       function_typ(typvars,eff,t,args2,
+		       function_typ(typvars,eff,tq,t,args2,
 				    c_vararg,cyc_vararg,rgn_po,fn_atts),
 		       new_atts,
 		       tms->tl);
@@ -2197,7 +2208,7 @@ type_name:
 ;
 
 any_type_name:
-  type_name { $$ = ^$((*$1)[2]); }
+  type_name { $$ = ^$(type_name_to_type($1,LOC(@1,@1))); }
 | '{' '}' { $$ = ^$(new JoinEff(NULL)); }
 | '{' region_set '}' { $$ = ^$(new JoinEff($2)); }
 | REGIONS '(' any_type_name ')' { $$ = ^$(new RgnsEff($3)); }
@@ -2527,7 +2538,9 @@ multiplicative_pattern:
 cast_pattern:
   unary_pattern { $$=$!1; }
 | '(' type_name ')' cast_expression
-{ $$=^$(exp_pat(cast_exp((*$2)[2],$4,true,Unknown_coercion,LOC(@1,@4)))); }
+{  let t = type_name_to_type($2,LOC(@2,@2));
+   $$=^$(exp_pat(cast_exp(t,$4,true,Unknown_coercion,LOC(@1,@4)))); 
+}
 ;
 
 unary_pattern:
@@ -2538,7 +2551,9 @@ unary_pattern:
 | unary_operator cast_expression 
   { $$=^$(exp_pat(prim1_exp($1,$2,LOC(@1,@2)))); } 
 | SIZEOF '(' type_name ')' 
-  { $$=^$(exp_pat(sizeoftyp_exp((*$3)[2],LOC(@1,@4)))); }
+  { let t = type_name_to_type($3,LOC(@3,@3)); 
+    $$=^$(exp_pat(sizeoftyp_exp(t,LOC(@1,@4)))); 
+  }
 | SIZEOF unary_expression
   { $$=^$(exp_pat(sizeofexp_exp($2,LOC(@1,@2)))); }
 | OFFSETOF '(' type_name ',' field_name ')'
@@ -2546,8 +2561,9 @@ unary_pattern:
                                 new StructField(new $5),LOC(@1,@6)))); }
 /* not checking sign here...*/
 | OFFSETOF '(' type_name ',' INTEGER_CONSTANT ')' 
-   { $$=^$(exp_pat(offsetof_exp((*$3)[2],
-                                new TupleIndex($5[1]), LOC(@1,@6)))); }
+   { let t = type_name_to_type($3,LOC(@3,@3));
+     $$=^$(exp_pat(offsetof_exp(t,new TupleIndex($5[1]), LOC(@1,@6)))); 
+   }
 // disallow malloc, rmalloc, and cmalloc -- not constant expressions
 ;
 
@@ -2812,7 +2828,9 @@ cast_expression:
   unary_expression
     { $$=$!1; }
 | '(' type_name ')' cast_expression
-    { $$=^$(cast_exp((*$2)[2],$4,true,Unknown_coercion,LOC(@1,@4))); }
+   { let t = type_name_to_type($2,LOC(@2,@2));
+      $$=^$(cast_exp(t,$4,true,Unknown_coercion,LOC(@1,@4))); 
+    }
 ;
 
 unary_expression:
@@ -2823,13 +2841,20 @@ unary_expression:
 | '*' cast_expression     { $$=^$(deref_exp  ($2,LOC(@1,@2))); }
 | '+' cast_expression     { $$=$!2; }
 | unary_operator cast_expression { $$=^$(prim1_exp($1,$2,LOC(@1,@2))); }
-| SIZEOF '(' type_name ')'       { $$=^$(sizeoftyp_exp((*$3)[2],LOC(@1,@4))); }
+| SIZEOF '(' type_name ')'       
+  { let t = type_name_to_type($3,LOC(@3,@3));
+    $$=^$(sizeoftyp_exp(t,LOC(@1,@4))); 
+  }
 | SIZEOF unary_expression        { $$=^$(sizeofexp_exp($2,LOC(@1,@2))); }
 | OFFSETOF '(' type_name ',' field_name ')' 
-   { $$=^$(offsetof_exp((*$3)[2],new StructField(new $5),LOC(@1,@6))); }
+   { let t = type_name_to_type($3,LOC(@3,@3));
+     $$=^$(offsetof_exp(t,new StructField(new $5),LOC(@1,@6))); 
+   }
 /* not checking sign here...*/
 | OFFSETOF '(' type_name ',' INTEGER_CONSTANT ')' 
-   { $$=^$(offsetof_exp((*$3)[2],new TupleIndex($5[1]), LOC(@1,@6))); }
+  { let t = type_name_to_type($3,LOC(@3,@3));
+     $$=^$(offsetof_exp(t,new TupleIndex($5[1]), LOC(@1,@6))); 
+    }
 /* Cyc: malloc, rmalloc, numelts, swap, etc. */
 | MALLOC '(' expression ')'
    { $$=^$(new_exp(new Malloc_e(MallocInfo{false,NULL,NULL,$3,false}),
@@ -2838,12 +2863,12 @@ unary_expression:
    { $$=^$(new_exp(new Malloc_e(MallocInfo{false,$3,NULL,$5,false}),
                    LOC(@1,@6))); }
 | CALLOC '(' assignment_expression ',' SIZEOF '(' type_name ')' ')'
-   { let $(_,_,t) = *($7);
+   { let t = type_name_to_type($7,LOC(@7,@7));
      $$=^$(new_exp(new Malloc_e(MallocInfo{true,NULL,new(t),$3,false}),
                    LOC(@1,@9))); }
 | RCALLOC '(' assignment_expression ',' assignment_expression ',' 
               SIZEOF '(' type_name ')' ')'
-   { let $(_,_,t) = *($9);
+   { let t = type_name_to_type($9,LOC(@9,@9));
      $$=^$(new_exp(new Malloc_e(MallocInfo{true,$3,new(t),$5,false}),
                    LOC(@1,@11))); }
 | NUMELTS '(' expression ')'
@@ -2853,7 +2878,7 @@ unary_expression:
 | TAGCHECK '(' postfix_expression PTR_OP field_name ')'
    { $$=^$(new_exp(new Tagcheck_e(deref_exp($3,LOC(@3,@3)),new $5),LOC(@1,@6))); }
 | VALUEOF '(' type_name ')'
-   { let $(_,_,t) = *$3;
+   { let t = type_name_to_type($3,LOC(@3,@3));
      $$=^$(valueof_exp(t, LOC(@1,@4))); }
 | ASM
    { let $(v,s) = $1;

@@ -625,7 +625,7 @@ static type_t typ_to_c(type_t t) {
   case &DoubleType(_): return t;
   case &ArrayType(ArrayInfo{t2,tq,e,_,ztl}): 
     return array_typ(typ_to_c_array(t2),tq,e,false_conref,ztl);
-  case &FnType(FnInfo{_,_,t2,args,c_vararg,cyc_vararg,_,atts}):
+  case &FnType(FnInfo{_,_,tq2,t2,args,c_vararg,cyc_vararg,_,atts}):
     // just drop the type arguments & effect and translate the nested types
     // also, drop any format descriptors 
     // FIX:  problem with higher-order functions?  Again C's rules are strange.
@@ -647,7 +647,7 @@ static type_t typ_to_c(type_t t) {
       let vararg = new $(cyc_vararg->name,cyc_vararg->tq,t);
       new_args = List::imp_append(new_args,new List(vararg,NULL));
     }
-    return new FnType(FnInfo{NULL,NULL,typ_to_c(t2),new_args,
+    return new FnType(FnInfo{NULL,NULL,tq2,typ_to_c(t2),new_args,
                                c_vararg,NULL,NULL,new_atts});
   case &TupleType(tqs):
     // $(t1,...,tn) maps to struct tuple_type_n where we define

@@ -814,12 +814,14 @@ static
 }
 
 type_t function_typ(list_t<tvar_t,`H> tvs, opt_t<type_t,`H> eff_typ, 
+                    tqual_t ret_tqual,
                     type_t ret_typ, 
                     list_t<$(opt_t<var_t,`H>,tqual_t,type_t)@`H,`H> args, 
                     bool c_varargs, vararg_info_t *`H cyc_varargs,
                     list_t<$(type_t,type_t)@`H,`H> rgn_po,
                     attributes_t atts) {
   return new FnType(FnInfo{.tvars = tvs, 
+                              .ret_tqual = ret_tqual,
                               .ret_typ = pointer_expand(ret_typ,false),
                               .effect = eff_typ, 
                               .args = List::map(expand_arg,args), 

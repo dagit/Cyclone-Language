@@ -292,6 +292,7 @@ namespace Absyn {
     list_t<tvar_t>  tvars;   // abstracted type variables
     // effect describes those regions that must be live to call the fn
     opt_t<type_t>   effect;  // null => default effect
+    tqual_t         ret_tqual;   // return type qualifier
     type_t          ret_typ; // return type
     // arguments are optionally named
     list_t<$(opt_t<var_t>,tqual_t,type_t)@>  args; 
@@ -771,6 +772,7 @@ namespace Absyn {
     qvar_t                     name;       // function name
     list_t<tvar_t>             tvs;        // bound type variables
     opt_t<type_t>              effect;     // null => default effect
+    tqual_t                    ret_tqual;  // return type qualifier
     type_t                     ret_type;   // return type
     list_t<$(var_t,tqual_t,type_t)@> args; // arguments & their quals and types
     bool                       c_varargs;   // C vararg?
@@ -1120,6 +1122,7 @@ namespace Absyn {
                                     seg_t loc);
 
   extern type_t function_typ(list_t<tvar_t,`H> tvs,opt_t<type_t,`H> eff_typ,
+                             tqual_t ret_tqual,
                              type_t ret_typ, 
                              list_t<$(opt_t<var_t,`H>,tqual_t,type_t)@`H,`H> args,
                              bool c_varargs, vararg_info_t *`H cyc_varargs,

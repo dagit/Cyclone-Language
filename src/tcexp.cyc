@@ -952,8 +952,8 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
       // Check that the bounds on the pointer aren't 0
       check_nonzero_bound(loc,b);
       switch (compress(t1)) {
-      case &FnType(FnInfo{tvars,eff,res_typ,args_info,c_vararg,cyc_vararg,
-			    rgn_po,atts}): 
+      case &FnType(FnInfo{tvars,eff,res_tq,res_typ,args_info,c_vararg,
+                            cyc_vararg,rgn_po,atts}): 
 	//FIX: handle tvars??
 	// unify the result type with the expected type to get better
 	// information while type-checking the arguments.
@@ -1137,13 +1137,14 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t * topt,
   switch (t1) {
   case &PointerType(PtrInfo(t0,tq,PtrAtts(rt,x,b,zt,_))):
     switch (compress(t0)) {
-    case &FnType(FnInfo{tvars,eff,rtyp,args,c_varargs,cyc_varargs,rpo,atts}):
+    case &FnType(FnInfo{tvars,eff,rtq,rtyp,args,c_varargs,cyc_varargs,rpo,atts}):
       TEMP_RGN(te, temp) {
         list_t<$(tvar_t,type_t)@> instantiation = NULL;
         // now allows partial instantiation
         for (; ts != NULL && tvars != NULL; ts = ts->tl, tvars = tvars->tl) {
           kind_t k = tvar_kind(tvars->hd,&bk);
           check_type(loc,te,lookup_type_vars(te),k,true,ts->hd);
+          check_no_qual(loc,ts->hd);
           instantiation = 
             rnew(temp) List(rnew(temp) $(tvars->hd,ts->hd),instantiation);
         }
@@ -1152,7 +1153,7 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t * topt,
             expr_err(te,loc,topt,"too many type variables in instantiation");
         type_t new_fn_typ = 
           rsubstitute(temp,instantiation,
-                      new FnType(FnInfo{tvars,eff,rtyp,args,c_varargs,
+                      new FnType(FnInfo{tvars,eff,rtq,rtyp,args,c_varargs,
                                         cyc_varargs,rpo,atts}));
         return new PointerType(PtrInfo(new_fn_typ,tq,PtrAtts(rt,x,b,zt,NULL)));
       }
@@ -1169,6 +1170,7 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t * topt,
 static type_t tcCast(tenv_t te, seg_t loc, type_t * topt, type_t t, exp_t e,
                      coercion_t *c) {
   check_type(loc,te,lookup_type_vars(te),&tmk,true,t);
+  check_no_qual(loc,t);
   //  tcExp(te,NULL,e);
   tcExp(te,&t,e);
   type_t t2 = e->topt->v;
@@ -1289,6 +1291,7 @@ static type_t tcSizeof(tenv_t te, seg_t loc, type_t * topt, type_t t) {
     return uint_typ;
   }
   check_type(loc,te,lookup_type_vars(te),&tmk,true,t);
+  check_no_qual(loc,t);
   if(!Evexp::okay_szofarg(t))
     terr(loc, "sizeof applied to type %s, which has unknown size here",
          typ2string(t));
@@ -1315,6 +1318,7 @@ bool structfield_has_name(field_name_t n, aggrfield_t sf) {
 static type_t tcOffsetof(tenv_t te, seg_t loc, type_t * topt, 
 			 type_t t, offsetof_field_t n) {
   check_type(loc,te,lookup_type_vars(te),&tmk,true,t);
+  check_no_qual(loc,t);
   switch(n) {
   case &StructField(n):
     bool bad_type = true;
@@ -1787,6 +1791,7 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
   while(user_ex_ts != NULL && ex_ts != NULL) {
     // FIX: allow other kinds
     check_type(loc,te,lookup_type_vars(te),&ak,true,user_ex_ts->hd);
+    check_no_qual(loc,user_ex_ts->hd);
     unify(user_ex_ts->hd,ex_ts->hd);
     user_ex_ts = user_ex_ts->tl;
     ex_ts      = ex_ts->tl;
@@ -2019,6 +2024,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt,
     if (*t == NULL) impos("calloc with empty type");
     elt_type = **t;
     check_type(loc,te,lookup_type_vars(te),&tmk,true,elt_type);
+    check_no_qual(loc,elt_type);
     check_malloc_type(true,loc,topt,elt_type);
     num_elts = *e;
     one_elt = false;
@@ -2432,7 +2438,7 @@ static type_t tcExpNoPromote(tenv_t te, type_t * topt, exp_t e) {
     switch (compress(e->topt->v)) {
     case &PointerType(PtrInfo(t,tq,PtrAtts(rt,x,b,zt,_))):
       switch (compress(t)) {
-      case &FnType(FnInfo{tvs,eff,rtyp,args,c_varargs,cyc_varargs,rpo,atts}):
+      case &FnType(FnInfo{tvs,eff,rtq,rtyp,args,c_varargs,cyc_varargs,rpo,atts}):
 	if (tvs != NULL) {    // then, instantiate if necessary
 	  TEMP_RGN(te, rgn) {
            let env = $(lookup_type_vars(te),rgn);
@@ -2440,7 +2446,7 @@ static type_t tcExpNoPromote(tenv_t te, type_t * topt, exp_t e) {
 	     List::rmap_c(rgn,r_make_inst_var,&env,tvs);
 	   list_t<type_t> ts = List::map(snd,inst);
 	   type_t ftyp = rsubstitute(rgn, inst,
-				     new FnType(FnInfo{NULL,eff,rtyp,args,
+				     new FnType(FnInfo{NULL,eff,rtq,rtyp,args,
 						       c_varargs,cyc_varargs,
                                                        rpo,atts}));
 	   let new_typ = new PointerType(PtrInfo(ftyp,tq,PtrAtts(rt,x,b,zt,NULL)));

@@ -939,7 +939,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
       switch(Tcutil::compress(e1->topt->v)) {
       case &PointerType(PtrInfo(t,_,_)):
         switch(Tcutil::compress(t)) {
-        case &FnType(FnInfo(_,_,_,_,_,_,_,atts)):
+        case &FnType(FnInfo(_,_,_,_,_,_,_,_,atts)):
           for(; atts != NULL; atts = atts->tl)
             switch(atts->hd) {
             case &Initializes_att(i): init_params=rnew(temp) List(i,init_params); break;
@@ -2217,7 +2217,7 @@ static void check_nested_fun(flow_env_t<`r> fenv,
     // on the fndecl, only on the type.
     _ atts;
     switch(Tcutil::compress(fd->cached_typ->v)) {
-    case &FnType(FnInfo(_,_,_,_,_,_,_,as)): atts = as; break;
+    case &FnType(FnInfo(_,_,_,_,_,_,_,_,as)): atts = as; break;
     default: Tcutil::impos("check_fun: non-function type cached with fndecl_t");
     }
     for(; atts != NULL; atts = atts->tl)

@@ -1190,7 +1190,8 @@ void dumpdecl(decl_t d) {
       case Gc_c: dump("inline");   break;
       }
     dumpscope(fd->sc);
-    type_t t = new FnType(FnInfo{fd->tvs, fd->effect, fd->ret_type,
+    type_t t = new FnType(FnInfo{fd->tvs, fd->effect, fd->ret_tqual,
+                                 fd->ret_type,
                                  List::map(Absynpp::arg_mk_opt,fd->args), 
                                  fd->c_varargs, fd->cyc_varargs,
                                  fd->rgn_po, NULL});

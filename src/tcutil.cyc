@@ -260,7 +260,7 @@ type_t copy_type(type_t t) {
   case &ArrayType(ArrayInfo{et,tq,eopt,zt,ztl}): 
     // FIX: should really copy eopt???
     return new ArrayType(ArrayInfo{copy_type(et),tq,eopt,copy_conref(zt),ztl});
-  case &FnType(FnInfo{tvs,effopt,rt,args,c_varargs,cyc_varargs,rgn_po,atts}):
+  case &FnType(FnInfo{tvs,effopt,rt_tq,rt,args,c_varargs,cyc_varargs,rgn_po,atts}):
     let tvs2 = List::map(copy_tvar,tvs);
     let effopt2 = (effopt == NULL) ? NULL : new Opt(copy_type(effopt->v));
     let rt2 = copy_type(rt);
@@ -274,7 +274,7 @@ type_t copy_type(type_t t) {
     }
     let rgn_po2 = List::map(copy_rgncmp,rgn_po);
     let atts2 = atts;
-    return new FnType(FnInfo{tvs2,effopt2,rt2,args2,c_varargs2,
+    return new FnType(FnInfo{tvs2,effopt2,rt_tq,rt2,args2,c_varargs2,
                                cyc_varargs2,rgn_po2,atts2});
   case &TupleType(tqts): return new TupleType(List::map(copy_tqt,tqts));
   case &AggrType(AggrInfo({.UnknownAggr = $(k,n,tgd)},ts)):
@@ -608,7 +608,7 @@ static void occurs(type_t evar,region_t<`r> r,list_t<tvar_t,`r> env,type_t t) {
     occurs(evar,r,env,pinfo.ptr_atts.rgn); 
     break;
   case &ArrayType(ArrayInfo{t2,_,_,_,_}): occurs(evar,r,env,t2); break;
-  case &FnType(FnInfo{tvs,eff,rt,args,c_varargs,cyc_varargs,rgn_po,atts}): 
+  case &FnType(FnInfo{tvs,eff,rt_tq,rt,args,c_varargs,cyc_varargs,rgn_po,atts}): 
     env = List::rappend(r,tvs,env);
     if (eff != NULL) occurs(evar,r,env,eff->v);
     occurs(evar,r,env,rt);
@@ -856,7 +856,7 @@ static type_t rgns_of(type_t t) {
   case &AnonAggrType(_,fs): 
     return normalize_effect(new JoinEff(map(rgns_of_field,fs)));
   case &TagType(_): return empty_effect;
-  case &FnType(FnInfo{tvs,eff,rt,args,_,cyc_varargs,rpo,_}):
+  case &FnType(FnInfo{tvs,eff,rt_tq,rt,args,_,cyc_varargs,rpo,_}):
     // NOTE:  we define RgnsEff(t) in this case to be the regions in the
     // effect.  So, if the effect is smaller than the argument or return
     // types, they won't show up.  This saves us from a lot of complication
@@ -920,6 +920,7 @@ type_t normalize_effect(type_t e) {
 // Create a dummy type that includes the effect:  void (@`H)(;eff)
 static type_t dummy_fntype(type_t eff) {
   let fntype = new FnType(FnInfo{.tvars=NULL,.effect=new Opt(eff),
+                                 .ret_tqual = empty_tqual(NULL),
                                .ret_typ=&VoidType_val,.args=NULL,.c_varargs=false,
                                .cyc_varargs=NULL,.rgn_po=NULL,
                                .attributes = NULL});
@@ -1381,8 +1382,8 @@ void unify_it(type_t t1, type_t t2) {
     failure_reason = "(different array sizes)";
     break;
 
-  case $(&FnType(FnInfo{tvs2,eff2,rt2,args2,c_vararg2,cyc_vararg2,rpo2,atts2}), 
-         &FnType(FnInfo{tvs1,eff1,rt1,args1,c_vararg1,cyc_vararg1,rpo1,atts1})):
+  case $(&FnType(FnInfo{tvs2,eff2,rt_tq2,rt2,args2,c_vararg2,cyc_vararg2,rpo2,atts2}), 
+         &FnType(FnInfo{tvs1,eff1,rt_tq1,rt1,args1,c_vararg1,cyc_vararg1,rpo1,atts1})):
     bool done = false;
     region rgn; {
     list_t<$(tvar_t,type_t)@`rgn,`rgn> inst = NULL;
@@ -1409,17 +1410,18 @@ void unify_it(type_t t1, type_t t2) {
       break;
     }
     if (inst != NULL) {
-      unify_it(new FnType(FnInfo{NULL,eff1,rt1,args1,c_vararg1,
+      unify_it(new FnType(FnInfo{NULL,eff1,rt_tq1,rt1,args1,c_vararg1,
 				   cyc_vararg1,rpo1,atts1}),
 	       rsubstitute(rgn, inst,
-                           new FnType(FnInfo{NULL,eff2,rt2,args2,c_vararg2,
-					       cyc_vararg2,rpo2,atts2})));
+                           new FnType(FnInfo{NULL,eff2,rt_tq2,rt2,args2,
+                                               c_vararg2,cyc_vararg2,rpo2,atts2})));
       done = true;
     } 
     }
     if(done) 
       return;
     unify_it(rt1,rt2);
+    unify_tqual(rt_tq1,rt1,rt_tq2,rt2);
     for (; args1!=NULL && args2!=NULL; args1 = args1->tl, args2 = args2->tl) {
       let $(_,tqa,ta) = *args1->hd;
       let $(_,tqb,tb) = *args2->hd;
@@ -1728,8 +1730,8 @@ int typecmp(type_t t1, type_t t2) {
     }
     return star_cmp(Evexp::const_exp_cmp,e1,e2);
     
-  case $(&FnType(FnInfo{tvs2,eff2,rt2,args2,c_vararg2,cyc_vararg2,rpo2,atts2}), 
-	 &FnType(FnInfo{tvs1,eff1,rt1,args1,c_vararg1,cyc_vararg1,rpo1,atts1})):
+  case $(&FnType(FnInfo{tvs2,eff2,rtq2,rt2,args2,c_vararg2,cyc_vararg2,rpo2,atts2}), 
+	 &FnType(FnInfo{tvs1,eff1,rtq1,rt1,args1,c_vararg1,cyc_vararg1,rpo1,atts1})):
 	   impos("typecmp: function types not handled");
   
   case $(&TupleType(ts2), &TupleType(ts1)):
@@ -2880,7 +2882,7 @@ type_t fndecl2typ(fndecl_t fd) {
     for (_ atts = fd->attributes; atts != NULL; atts = atts->tl)
       if (fntype_att(atts->hd))
         fn_type_atts = new List(atts->hd,fn_type_atts); 
-    return new FnType(FnInfo{fd->tvs, fd->effect, fd->ret_type,
+    return new FnType(FnInfo{fd->tvs, fd->effect, fd->ret_tqual, fd->ret_type,
                                List::map(fndecl2typ_f, fd->args),
                                fd->c_varargs, fd->cyc_varargs, 
                                fd->rgn_po, fn_type_atts});
@@ -3033,7 +3035,7 @@ type_t rsubstitute(region_t<`r> rgn,
     if(new_t1 == t1 && new_r == r && new_b == b)
       return t;
     return new PointerType(PtrInfo(new_t1,tq,PtrAtts(new_r,n,new_b,zt,NULL)));
-  case &FnType(FnInfo{vs,eff,rtyp,args,c_varargs,cyc_varargs,rgn_po,atts}):
+  case &FnType(FnInfo{vs,eff,rtq,rtyp,args,c_varargs,cyc_varargs,rgn_po,atts}):
     for (let p = vs; p != NULL; p = p->tl)
       inst = rnew(rgn) List(rnew(rgn) $(p->hd,new VarType(p->hd)),inst);
     let $(qs,ts) = List::rsplit(rgn,rgn, 
@@ -3069,7 +3071,7 @@ type_t rsubstitute(region_t<`r> rgn,
     else 
       rgn_po2 = List::zip(rpo2a,rpo2b);
     return 
-      new FnType(FnInfo{vs,eff2,rsubstitute(rgn,inst,rtyp),args2,c_varargs,
+      new FnType(FnInfo{vs,eff2,rtq,rsubstitute(rgn,inst,rtyp),args2,c_varargs,
                           cyc_varargs2,rgn_po2,atts});
   case &TupleType(tqts):
     let ts  = List::rmap(rgn,snd_tqt,tqts);
@@ -3609,6 +3611,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
         }
 	kind_t k = tvar_kind(tv,&bk);
 	cvtenv = i_check_valid_type(loc,te,cvtenv,k,t,true);
+        check_no_qual(loc,t);
       }
       if (targs != NULL)
 	terr(loc,"too many type arguments for datatype %s",
@@ -3678,6 +3681,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
         }
 	kind_t k = tvar_kind(tv,&bk);
 	cvtenv = i_check_valid_type(loc,te,cvtenv,k,t,true);
+        check_no_qual(loc,t);
       }
       if (targs != NULL)
 	terr(loc,"too many type arguments for datatype %s.%s",
@@ -3826,7 +3830,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       *eptr = uint_exp(1,NULL);
     }
     break;
-  case &FnType(FnInfo{*btvs,*eff,tr,args,c_vararg,cyc_vararg,rgn_po,atts}):
+  case &FnType(FnInfo{*btvs,*eff,*rtq,tr,args,c_vararg,cyc_vararg,rgn_po,atts}):
     // This is an unusual and complicated case because (a) we may have to
     // bind type variables here, (b) we may have to calculate the effect.
 
@@ -3888,12 +3892,14 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       // results and arguments of functions cannot be abstract mem types
       // FIX?: should check that variables are unique and that tquals are ok
       new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,&tmk,tr,true);
+      rtq->real_const = extract_const_from_typedef(loc,rtq->print_const,tr);
       new_cvtenv.fn_result = false;
       for (_ a = args; a != NULL; a = a->tl) {
         let trip = a->hd;
         let t = (*trip)[2];
         new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,&tmk,t,true);
-        (*trip)[1].real_const = extract_const_from_typedef(loc,(*trip)[1].print_const,t);
+        let ec = extract_const_from_typedef(loc,(*trip)[1].print_const,t);
+        (*trip)[1].real_const = ec;
         // after resolving t, it may be an array type.  if so, as an argument
         // to a function, we need to convert it to a pointer type.
         switch (compress(t)) {
@@ -4167,6 +4173,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
         }
         kind_t k = tvar_kind(tvs->hd,&bk);
         cvtenv = i_check_valid_type(loc,te,cvtenv,k,ts->hd,true);
+        check_no_qual(loc,ts->hd);
       }
       if (ts != NULL)
 	terr(loc,"too many parameters for type %s", qvar2string(ad->name));
@@ -4207,6 +4214,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
 // 		kind2string(tvar_kind(tvs->hd,&tbk)),
 // 		kind2string(k));
         cvtenv = i_check_valid_type(loc,te,cvtenv,k,ts->hd,true);
+        check_no_qual(loc,ts->hd);
         inst = rnew(temp) List(rnew(temp) $(tvs->hd,ts->hd),inst);
       }
       if (ts != NULL)
@@ -4410,7 +4418,7 @@ void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t) {
     
     if (free_tvars != NULL || free_evars != NULL) {
       switch (compress(t)) {
-      case &FnType(FnInfo{*btvs,eff,tr,args,c_vararg,cyc_vararg,rgn_po,atts}):
+      case &FnType(FnInfo{*btvs,eff,trq,tr,args,c_vararg,cyc_vararg,rgn_po,atts}):
         if (*btvs == NULL) {
           // abstract the free tvars
           *btvs = List::copy(free_tvars);
@@ -4458,9 +4466,17 @@ void check_fndecl_valid_type(seg_t loc,tenv_t te,fndecl_t fd) {
   // this fills in the missing bound type variables and effects
   check_valid_toplevel_type(loc,te,t);
   switch (compress(t)) {
-  case &FnType(FnInfo{tvs,effect,rt,_,_,_,_,_}):
+  case &FnType(FnInfo{tvs,effect,rtq,rt,args,_,_,_,_}):
     fd->tvs = tvs;
     fd->effect = effect;
+    for (let fdargs = fd->args; fdargs != NULL; fdargs = fdargs->tl,
+           args = args->tl) {
+      (*fdargs->hd)[1] = (*args->hd)[1]; // to pick up resolved qualifiers
+      (*fdargs->hd)[2] = (*args->hd)[2]; // to pick up resolved types
+    }
+    fd->ret_tqual = rtq;
+    fd->ret_type = rt;
+    fd->ret_tqual.real_const = extract_const_from_typedef(loc,fd->ret_tqual.print_const,rt);
     break;
   default: impos("check_fndecl_valid_type: not a FnType");
   }
@@ -5185,6 +5201,23 @@ bool supports_default(type_t t) {
   }
 }
 
+// issue a warning if the type is a typedef with non-empty qualifiers
+void check_no_qual(seg_t loc, type_t t) {
+  switch (t) {
+  case &TypedefType(_,_,tdopt,_):
+    if (tdopt != NULL) {
+      let tq = tdopt->tq;
+      if (tq.print_const || tq.q_volatile || tq.q_restrict || 
+          tq.real_const) {
+        //if (tq.loc != NULL) loc = tq.loc;
+        warn(loc,"qualifier within typedef type %s is ignored",typ2string(t));
+      }
+    }
+    break;
+  default: break;
+  }
+}
+
 static bool fields_support_default(list_t<tvar_t> tvs, list_t<type_t> ts, 
                                    list_t<aggrfield_t> fs) {
   region rgn; {
@@ -5220,7 +5253,7 @@ bool admits_zero(type_t t) {
 bool is_noreturn(type_t t) {
   switch (compress(t)) {
   case &PointerType(PtrInfo(elt,_,_)): return is_noreturn(elt);
-  case &FnType(FnInfo{_,_,_,_,_,_,_,atts}):
+  case &FnType(FnInfo{_,_,_,_,_,_,_,_,atts}):
     for (; atts != NULL; atts = atts->tl)
       switch (atts->hd) {
       case &Noreturn_att: return true;
@@ -5236,7 +5269,7 @@ bool is_noreturn(type_t t) {
 // function type.  
 attributes_t transfer_fn_type_atts(type_t t, attributes_t atts) {
   switch (compress(t)) {
-  case &FnType(FnInfo{_,_,_,_,_,_,_,*fnatts}):
+  case &FnType(FnInfo{_,_,_,_,_,_,_,_,*fnatts}):
     let res_atts = NULL;
     for (; atts != NULL; atts = atts->tl)
       if (fntype_att(atts->hd))
