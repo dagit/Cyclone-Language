@@ -23,11 +23,7 @@ ifndef ARCH
 $(error "Must have ARCH variable defined -- perhaps forgot to run ./configure")
 endif
 
-CYC_BIN_PATH := $(CYCDIR)/bin
-CYC_LIB_PATH := $(CYCDIR)/bin/lib
-CYC_INC_PATH := $(CYCDIR)/lib
-
-CYC_INCLUDE_H := $(CYC_LIB_PATH)/cyc-lib/cyc_include.h
+CYC_INCLUDE_H := bin/lib/cyc-lib/cyc_include.h
 
 all: cyclone tools libs 
 
@@ -37,13 +33,13 @@ version:
 
 cyclone: \
 	$(CYC_INCLUDE_H) \
-	$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/gc.a \
-	$(CYC_LIB_PATH)/$(CYCBOOTLIB) \
-	$(addprefix $(CYC_BIN_PATH)/, cyclone$(EXE) cycdoc$(EXE) buildlib$(EXE)) \
-	$(addprefix $(CYC_LIB_PATH)/cyc-lib/, $(addsuffix /cycspecs, $(ALL_ARCHS))) \
-	$(addprefix $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/, nogc.a $(RUNTIME).$(O)) \
-	$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/cyc_setjmp.h \
-	$(CYC_LIB_PATH)/$(CYCLIB)
+	bin/lib/cyc-lib/$(ARCH)/gc.a \
+	bin/lib/$(CYCBOOTLIB) \
+	$(addprefix bin/, cyclone$(EXE) cycdoc$(EXE) buildlib$(EXE)) \
+	$(addprefix bin/lib/cyc-lib/, $(addsuffix /cycspecs, $(ALL_ARCHS))) \
+	$(addprefix bin/lib/cyc-lib/$(ARCH)/, nogc.a $(RUNTIME).$(O)) \
+	bin/lib/cyc-lib/$(ARCH)/cyc_setjmp.h \
+	bin/lib/$(CYCLIB)
 
 tools:
 	$(MAKE) -C tools/bison  install 
@@ -56,49 +52,49 @@ ifndef NO_XML_LIB
 	$(MAKE) -C lib/xml install 
 endif
 
-aprof: $(CYC_LIB_PATH)/libcycboot_a.a \
-  $(CYC_LIB_PATH)/libcyc_a.a \
-  $(addprefix $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/, nogc_a.a $(RUNTIME)_a.$(O))
+aprof: $(CYC_INCLUDE_H) \
+  bin/lib/libcycboot_a.a \
+  bin/lib/libcyc_a.a \
+  $(addprefix bin/lib/cyc-lib/$(ARCH)/, nogc_a.a $(RUNTIME)_a.$(O))
 	$(MAKE) -C tools/aprof install
 
-cyclone_a: aprof $(CYC_BIN_PATH)/cyclone_a$(EXE)
+cyclone_a: aprof bin/cyclone_a$(EXE)
 
-gprof: $(CYC_LIB_PATH)/libcyc_pg.a \
-  $(addprefix $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/, nogc_pg.a $(RUNTIME)_pg.$(O))
+gprof: bin/lib/libcyc_pg.a \
+  $(addprefix bin/lib/cyc-lib/$(ARCH)/, nogc_pg.a $(RUNTIME)_pg.$(O))
 
-nocheck: $(CYC_LIB_PATH)/libcyc_nocheck.a \
-  $(addprefix $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/, nogc.a $(RUNTIME).$(O))
+nocheck: bin/lib/libcyc_nocheck.a \
+  $(addprefix bin/lib/cyc-lib/$(ARCH)/, nogc.a $(RUNTIME).$(O))
 
 .PHONY: all tools cyclone aprof gprof libs nocheck
 
 # Executables for the bin directory
-$(CYC_BIN_PATH)/cyclone$(EXE): \
+bin/cyclone$(EXE): \
   $(addprefix bin/genfiles/, $(O_SRCS) install_path.$(O)) \
-  $(CYC_LIB_PATH)/$(CYCBOOTLIB) \
-  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/$(RUNTIME).$(O) \
-  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/gc.a
+  bin/lib/$(CYCBOOTLIB) \
+  bin/lib/cyc-lib/$(ARCH)/$(RUNTIME).$(O) \
+  bin/lib/cyc-lib/$(ARCH)/gc.a
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-$(CYC_BIN_PATH)/cyclone_a$(EXE): \
+bin/cyclone_a$(EXE): \
   $(addprefix bin/genfiles/, $(A_SRCS) install_path.$(O)) \
-  $(CYC_LIB_PATH)/libcycboot_a.a \
-  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/$(RUNTIME)_a.$(O) \
-  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/gc.a
+  bin/lib/libcycboot_a.a \
+  bin/lib/cyc-lib/$(ARCH)/$(RUNTIME)_a.$(O) \
+  bin/lib/cyc-lib/$(ARCH)/gc.a
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-$(CYC_BIN_PATH)/cycdoc$(EXE): \
+bin/cycdoc$(EXE): \
   $(addprefix bin/genfiles/, $(addsuffix .$(O), $(CYCDOC_SRCS))) \
-  $(CYC_LIB_PATH)/$(CYCBOOTLIB) \
-  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/$(RUNTIME).$(O) \
-  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/gc.a
+  bin/lib/$(CYCBOOTLIB) \
+  bin/lib/cyc-lib/$(ARCH)/$(RUNTIME).$(O) \
+  bin/lib/cyc-lib/$(ARCH)/gc.a
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-
-$(CYC_BIN_PATH)/buildlib$(EXE): \
+bin/buildlib$(EXE): \
   $(addprefix bin/genfiles/, $(addsuffix .$(O), $(BUILDLIB_SRCS)) install_path.$(O))\
-  $(CYC_LIB_PATH)/$(CYCBOOTLIB) \
-  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/$(RUNTIME).$(O) \
-  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/gc.a
+  bin/lib/$(CYCBOOTLIB) \
+  bin/lib/cyc-lib/$(ARCH)/$(RUNTIME).$(O) \
+  bin/lib/cyc-lib/$(ARCH)/gc.a
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 
@@ -131,8 +127,8 @@ $(CYC_BIN_PATH)/buildlib$(EXE): \
 # unnecessary rebuilds, because the mod time of a directory changes
 # when, e.g., you add a file to it.
 
-$(CYC_LIB_PATH)/$(CYCBOOTLIB): $(CYC_INCLUDE_H)
-$(CYC_LIB_PATH)/$(CYCBOOTLIB): \
+bin/lib/$(CYCBOOTLIB): $(CYC_INCLUDE_H)
+bin/lib/$(CYCBOOTLIB): \
   $(addprefix bin/genfiles/, $(O_BOOT_LIBS)) \
   bin/genfiles/boot_cstubs.$(O) \
   bin/genfiles/boot_cycstubs.$(O)
@@ -144,7 +140,7 @@ $(CYC_LIB_PATH)/$(CYCBOOTLIB): \
 	@echo Trying ranlib, if not found, probably ok to ignore error messages
 	-ranlib $@
 
-$(CYC_LIB_PATH)/libcycboot_a.a: \
+bin/lib/libcycboot_a.a: \
   $(addprefix bin/genfiles/, $(A_BOOT_LIBS)) \
   bin/genfiles/boot_cstubs_a.$(O) \
   bin/genfiles/boot_cycstubs_a.$(O)
@@ -157,25 +153,25 @@ $(CYC_LIB_PATH)/libcycboot_a.a: \
 	-ranlib $@
 
 %.$(O): %.cyc bin/cyclone$(EXE)
-	bin/cyclone$(EXE) -c -Iinclude -I$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include -B$(CYC_LIB_PATH)/cyc-lib -o $@ $<
+	bin/cyclone$(EXE) -c -Iinclude -Ibin/lib/cyc-lib/$(ARCH)/include -Bbin/lib/cyc-lib -o $@ $<
 
 %_a.$(O): %.c
 	$(CC) -c -o $@ -DCYC_REGION_PROFILE $(CFLAGS) $<
 
-%_a.$(O): %.cyc bin/cyclone$(EXE)
-	bin/cyclone$(EXE) -pa -c -Iinclude -I$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include -B$(CYC_LIB_PATH)/cyc-lib -o $@ $<
+%_a.$(O): %.cyc cyclone
+	bin/cyclone$(EXE) -pa -c -Iinclude -Ibin/lib/cyc-lib/$(ARCH)/include -Bbin/lib/cyc-lib -o $@ $<
 
 %_pg.$(O): %.c
 	$(CC) -c -o $@ -pg $(CFLAGS) $<
 
-%_pg.$(O): %.cyc bin/cyclone$(EXE)
-	bin/cyclone$(EXE) -pg -c -Iinclude -I$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include -B$(CYC_LIB_PATH)/cyc-lib -o $@ $<
+%_pg.$(O): %.cyc cyclone
+	bin/cyclone$(EXE) -pg -c -Iinclude -Ibin/lib/cyc-lib/$(ARCH)/include -Bbin/lib/cyc-lib -o $@ $<
 
 %_nocheck.$(O): %.c
 	$(CC) -c -o $@ -DNO_CYC_NULL_CHECKS -DNO_CYC_BOUNDS_CHECKS $(CFLAGS) $<
 
-%_nocheck.$(O): %.cyc bin/cyclone$(EXE)
-	bin/cyclone$(EXE) --nochecks -c -Iinclude -I$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include -B$(CYC_LIB_PATH)/cyc-lib -o $@ $<
+%_nocheck.$(O): %.cyc cyclone
+	bin/cyclone$(EXE) --nochecks -c -Iinclude -Ibin/lib/cyc-lib/$(ARCH)/include -Bbin/lib/cyc-lib -o $@ $<
 
 
 bin/genfiles/install_path.c: $(CYCDIR)/Makefile.inc
@@ -185,116 +181,116 @@ bin/genfiles/install_path.c: $(CYCDIR)/Makefile.inc
 	  echo "char *Ccomp = \"$(CC)\";"; \
 	  echo "char *Cversion = \"$(VERSION)\";") > $@
 
-$(CYC_LIB_PATH)/$(CYCLIB): $(CYC_INCLUDE_H)
-$(CYC_LIB_PATH)/$(CYCLIB): $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/cyc_setjmp.h
-$(CYC_LIB_PATH)/$(CYCLIB): \
+bin/lib/$(CYCLIB): $(CYC_INCLUDE_H)
+bin/lib/$(CYCLIB): bin/lib/cyc-lib/$(ARCH)/cyc_setjmp.h
+bin/lib/$(CYCLIB): \
   $(addprefix lib/, $(O_LIBS)) \
   $(addprefix bin/genfiles/, $(O_BOOT_LIBS)) \
-  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cstubs.$(O) \
-  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cycstubs.$(O)
+  bin/lib/cyc-lib/$(ARCH)/include/cstubs.$(O) \
+  bin/lib/cyc-lib/$(ARCH)/include/cycstubs.$(O)
 	-$(RM) $@
 	ar rc $@ \
 	  $(addprefix lib/, $(O_LIBS)) \
 	  $(addprefix bin/genfiles/, $(O_BOOT_LIBS)) \
-	  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cstubs.$(O) \
-	  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cycstubs.$(O)
+	  bin/lib/cyc-lib/$(ARCH)/include/cstubs.$(O) \
+	  bin/lib/cyc-lib/$(ARCH)/include/cycstubs.$(O)
 	@echo Trying ranlib, if not found, probably ok to ignore error messages
 	-ranlib $@
 
-$(CYC_LIB_PATH)/libcyc_a.a: \
+bin/lib/libcyc_a.a: \
   $(addprefix bin/genfiles/, $(A_BOOT_LIBS)) \
   $(addprefix lib/, $(A_LIBS)) \
-  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cstubs_a.$(O) \
-  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cycstubs_a.$(O)
+  bin/lib/cyc-lib/$(ARCH)/include/cstubs_a.$(O) \
+  bin/lib/cyc-lib/$(ARCH)/include/cycstubs_a.$(O)
 	-$(RM) $@
 	ar rc $@ \
 	  $(addprefix bin/genfiles/, $(A_BOOT_LIBS)) \
 	  $(addprefix lib/, $(A_LIBS)) \
-	  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cstubs_a.$(O) \
-	  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cycstubs_a.$(O)
+	  bin/lib/cyc-lib/$(ARCH)/include/cstubs_a.$(O) \
+	  bin/lib/cyc-lib/$(ARCH)/include/cycstubs_a.$(O)
 	@echo Trying ranlib, if not found, probably ok to ignore error messages
 	-ranlib $@
 
-$(CYC_LIB_PATH)/libcyc_pg.a: \
+bin/lib/libcyc_pg.a: \
   $(addprefix bin/genfiles/, $(PG_BOOT_LIBS)) \
   $(addprefix lib/, $(PG_LIBS)) \
-  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cstubs_pg.$(O) \
-  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cycstubs_pg.$(O)
+  bin/lib/cyc-lib/$(ARCH)/include/cstubs_pg.$(O) \
+  bin/lib/cyc-lib/$(ARCH)/include/cycstubs_pg.$(O)
 	-$(RM) $@
 	ar rc $@ \
 	  $(addprefix bin/genfiles/, $(PG_BOOT_LIBS)) \
 	  $(addprefix lib/, $(PG_LIBS)) \
-	  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cstubs_pg.$(O) \
-	  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cycstubs_pg.$(O)
+	  bin/lib/cyc-lib/$(ARCH)/include/cstubs_pg.$(O) \
+	  bin/lib/cyc-lib/$(ARCH)/include/cycstubs_pg.$(O)
 	@echo Trying ranlib, if not found, probably ok to ignore error messages
 	-ranlib $@
 
-$(CYC_LIB_PATH)/libcyc_nocheck.a: \
+bin/lib/libcyc_nocheck.a: \
   $(addprefix bin/genfiles/, $(NOCHECK_BOOT_LIBS)) \
   $(addprefix lib/, $(NOCHECK_LIBS)) \
-  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cstubs_nocheck.$(O) \
-  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cycstubs_nocheck.$(O)
+  bin/lib/cyc-lib/$(ARCH)/include/cstubs_nocheck.$(O) \
+  bin/lib/cyc-lib/$(ARCH)/include/cycstubs_nocheck.$(O)
 	-$(RM) $@
 	ar rc $@ \
-	  $(addprefix bin/genfiles/, $(PG_BOOT_LIBS)) \
-	  $(addprefix lib/, $(PG_LIBS)) \
-	  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cstubs_nocheck.$(O) \
-	  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cycstubs_nocheck.$(O)
+	  $(addprefix bin/genfiles/, $(NOCHECK_BOOT_LIBS)) \
+	  $(addprefix lib/, $(NOCHECK_LIBS)) \
+	  bin/lib/cyc-lib/$(ARCH)/include/cstubs_nocheck.$(O) \
+	  bin/lib/cyc-lib/$(ARCH)/include/cycstubs_nocheck.$(O)
 	@echo Trying ranlib, if not found, probably ok to ignore error messages
 	-ranlib $@
 
-$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/nogc.a: $(CYC_INCLUDE_H)
-$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/nogc.a: \
+bin/lib/cyc-lib/$(ARCH)/nogc.a: $(CYC_INCLUDE_H)
+bin/lib/cyc-lib/$(ARCH)/nogc.a: \
   bin/genfiles/nogc.$(O)
 	-$(RM) $@
 	ar rc $@ $<
 	@echo Trying ranlib, if not found, probably ok to ignore error messages
 	-ranlib $@
 
-$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/nogc_a.a: $(CYC_INCLUDE_H)
-$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/nogc_a.a: \
+bin/lib/cyc-lib/$(ARCH)/nogc_a.a: $(CYC_INCLUDE_H)
+bin/lib/cyc-lib/$(ARCH)/nogc_a.a: \
   bin/genfiles/nogc_a.$(O)
 	-$(RM) $@
 	ar rc $@ $<
 	@echo Trying ranlib, if not found, probably ok to ignore error messages
 	-ranlib $@
 
-$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/nogc_pg.a: $(CYC_INCLUDE_H)
-$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/nogc_pg.a: \
+bin/lib/cyc-lib/$(ARCH)/nogc_pg.a: $(CYC_INCLUDE_H)
+bin/lib/cyc-lib/$(ARCH)/nogc_pg.a: \
   bin/genfiles/nogc_pg.$(O)
 	-$(RM) $@
 	ar rc $@ $<
 	@echo Trying ranlib, if not found, probably ok to ignore error messages
 	-ranlib $@
 
-$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/$(RUNTIME).$(O): $(CYC_INCLUDE_H)
-$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/$(RUNTIME).$(O): \
+bin/lib/cyc-lib/$(ARCH)/$(RUNTIME).$(O): $(CYC_INCLUDE_H)
+bin/lib/cyc-lib/$(ARCH)/$(RUNTIME).$(O): \
   bin/genfiles/$(RUNTIME).$(O)
 	cp $< $@
 
-$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/$(RUNTIME)_a.$(O): $(CYC_INCLUDE_H)
-$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/$(RUNTIME)_a.$(O): \
+bin/lib/cyc-lib/$(ARCH)/$(RUNTIME)_a.$(O): $(CYC_INCLUDE_H)
+bin/lib/cyc-lib/$(ARCH)/$(RUNTIME)_a.$(O): \
   bin/genfiles/$(RUNTIME)_a.$(O)
 	cp $< $@
 
-$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/$(RUNTIME)_pg.$(O): $(CYC_INCLUDE_H)
-$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/$(RUNTIME)_pg.$(O): \
+bin/lib/cyc-lib/$(ARCH)/$(RUNTIME)_pg.$(O): $(CYC_INCLUDE_H)
+bin/lib/cyc-lib/$(ARCH)/$(RUNTIME)_pg.$(O): \
   bin/genfiles/$(RUNTIME)_pg.$(O)
 	cp $< $@
 
 # The rule for creating cyc_include.h creates as a side effect
 # the entire cyclone lib directory structure; see above.
-$(CYC_LIB_PATH)/cyc-lib/cyc_include.h: $(CYCDIR)/bin/cyc-lib/cyc_include.h
-	mkdir $(CYC_LIB_PATH)
-	mkdir $(CYC_LIB_PATH)/cyc-lib
+bin/lib/cyc-lib/cyc_include.h: $(CYCDIR)/bin/cyc-lib/cyc_include.h
+	mkdir bin/lib
+	mkdir bin/lib/cyc-lib
 	for i in $(ALL_ARCHS);\
-	  do mkdir $(CYC_LIB_PATH)/cyc-lib/$$i;\
+	  do mkdir bin/lib/cyc-lib/$$i;\
 	  done
-	mkdir $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include
+	mkdir bin/lib/cyc-lib/$(ARCH)/include
 	cp $< $@
 
-$(addprefix $(CYC_LIB_PATH)/cyc-lib/, $(addsuffix /cycspecs, $(ALL_ARCHS))): \
-  $(CYC_LIB_PATH)/cyc-lib/%/cycspecs: bin/genfiles/%.cycspecs \
+$(addprefix bin/lib/cyc-lib/, $(addsuffix /cycspecs, $(ALL_ARCHS))): \
+  bin/lib/cyc-lib/%/cycspecs: bin/genfiles/%.cycspecs \
   $(CYC_INCLUDE_H)
 	cp $< $@
 
@@ -302,30 +298,30 @@ $(addprefix $(CYC_LIB_PATH)/cyc-lib/, $(addsuffix /cycspecs, $(ALL_ARCHS))): \
 # on the architecture.  So, we give just three targets: cstubs.c,
 # cycstubs.cyc, and cyc_setjmp.h, which are always made by buildlib no
 # matter what.
-$(addprefix $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/, cstubs.c cycstubs.cyc) \
-$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/cyc_setjmp.h: \
+$(addprefix bin/lib/cyc-lib/$(ARCH)/include/, cstubs.c cycstubs.cyc) \
+bin/lib/cyc-lib/$(ARCH)/cyc_setjmp.h: \
   $(CYCDIR)/bin/genfiles/$(ARCH).headers.tgz \
   $(CYC_INCLUDE_H) \
   bin/cyc-lib/libc.cys
-	gunzip -c $< | tar xf - -C $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include
-	bin/buildlib -d $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include -finish -setjmp > $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/cyc_setjmp.h
-	bin/buildlib -d $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include -finish bin/cyc-lib/libc.cys
-	find $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include -name '*.i[BC]' -exec rm \{\} \;
+	gunzip -c $< | tar xf - -C bin/lib/cyc-lib/$(ARCH)/include
+	bin/buildlib -d bin/lib/cyc-lib/$(ARCH)/include -finish -setjmp > bin/lib/cyc-lib/$(ARCH)/cyc_setjmp.h
+	bin/buildlib -d bin/lib/cyc-lib/$(ARCH)/include -finish bin/cyc-lib/libc.cys
+	find bin/lib/cyc-lib/$(ARCH)/include -name '*.i[BC]' -exec rm \{\} \;
 
-$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/precore_c.h: $(CYC_INCLUDE_H)
-$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/precore_c.h: \
+bin/lib/cyc-lib/$(ARCH)/include/precore_c.h: $(CYC_INCLUDE_H)
+bin/lib/cyc-lib/$(ARCH)/include/precore_c.h: \
   include/core.h \
   bin/cyclone$(EXE) \
-  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/cycspecs
-	bin/cyclone$(EXE) -Iinclude -B$(CYC_LIB_PATH)/cyc-lib -stopafter-toc -pp -D_CYC_GENERATE_PRECORE_C_ -nocyc -noremoveunused -noexpandtypedefs -nocyc_setjmp -o $@ -x cyc $<
+  bin/lib/cyc-lib/$(ARCH)/cycspecs
+	bin/cyclone$(EXE) -Iinclude -Bbin/lib/cyc-lib -stopafter-toc -pp -D_CYC_GENERATE_PRECORE_C_ -nocyc -noremoveunused -noexpandtypedefs -nocyc_setjmp -o $@ -x cyc $<
 
-$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cstubs.$(O): \
-  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cstubs.c \
-  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/precore_c.h
+bin/lib/cyc-lib/$(ARCH)/include/cstubs.$(O): \
+  bin/lib/cyc-lib/$(ARCH)/include/cstubs.c \
+  bin/lib/cyc-lib/$(ARCH)/include/precore_c.h
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cycstubs.$(O): \
-  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cycstubs.cyc \
+bin/lib/cyc-lib/$(ARCH)/include/cycstubs.$(O): \
+  bin/lib/cyc-lib/$(ARCH)/include/cycstubs.cyc \
   bin/cyclone$(EXE)
 	bin/cyclone$(EXE) -save-c -Iinclude -Bbin/lib/cyc-lib -c -o $@ $<
 
@@ -335,7 +331,7 @@ $(CYCDIR)/bin/genfiles/$(ARCH).headers.tgz:
 	tar cf - -C BUILDLIB.OUT . | gzip -c > $@
 	$(RM) -r BUILDLIB.OUT
 
-$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/gc.a: gc/gc.a $(CYC_INCLUDE_H)
+bin/lib/cyc-lib/$(ARCH)/gc.a: gc/gc.a $(CYC_INCLUDE_H)
 	cp -p $< $@
 
 gc/gc.a:
