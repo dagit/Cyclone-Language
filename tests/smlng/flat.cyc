@@ -32,7 +32,8 @@ static ctxt_t new_ctxt(ctxt_t ctxt, tag_t tag) {
     ctxt.B = true; 
     break;
   case EM_tag:
-    ctxt.EM = !ctxt.EM; 
+    if(!ctxt.S)
+      ctxt.EM = !ctxt.EM; 
     break;
   case I_tag:
     ctxt.I = true;
@@ -50,7 +51,8 @@ static ctxt_t new_ctxt(ctxt_t ctxt, tag_t tag) {
     ctxt.TT = true;
     break;
   case U_tag:
-    ctxt.U++;
+    if(ctxt.U < 3)
+      ctxt.U++;
     break;
   case Zero:
   case One:
@@ -236,14 +238,14 @@ static unsigned int merge_mostly_same($(ctxt_t,doc_t)? a, unsigned int sz,
   unsigned int cur_target = 0;
   for (_ i = 0; i < sz; i++) {
     let $(c,d) = a[i];
-    for (_ j = i+1; j < sz; j++) {
+    int j = i+1;
+    for (; j < sz; j++) {
       let $(c2,d2) = a[j];
       let delta = ctxt_diff(c,c2);
       if (delta < curr_delta) {
         let $(c3,d3) = merge_doc(c,d,c2,d2);
         d = d3;
         c = c3;
-        i++;
       } else {
         i = j-1;
         break;
@@ -251,6 +253,8 @@ static unsigned int merge_mostly_same($(ctxt_t,doc_t)? a, unsigned int sz,
     }
     a[cur_target] = $(c,d);
     cur_target++;
+    if(j==sz)
+      break;
   }
   return cur_target;
 }
@@ -284,13 +288,17 @@ static doc_t finish_doc(ctxt_t c1,doc_t d1) {
 doc_t flatten_array(doc_t d) {
   unsigned int n = num_texts(d); // calculate number of leaves
   unsigned int c = 0;
+  fprintf(stderr," %d ",n);
   $(ctxt_t, doc_t) p = $(init_flat_context,d);
   $(ctxt_t, doc_t) ? a = new {for i < n : p}; // build an array
   flat_arr(init_flat_context,d,a,&c); // write the leaves in the array
+  fprintf(stderr," %d ",c);
   c = merge_same(a); // merge any nodes that are the same
-  for (_ k = 0; k < 8; k++) {
+  fprintf(stderr," %d ",c);
+  for (_ k = 1; k <= 8; k++) {
     // merge any nodes with a delta less than k
     c = merge_mostly_same(a,c,k);
+    fprintf(stderr," %d ",c);
     // stop if we only have one node left
     if (c == 1) break;
   }

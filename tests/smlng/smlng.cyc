@@ -276,13 +276,13 @@ int main(int argc, char ??argv) {
   // doc_t d = copy_doc(orig);
   doc_t d = get_docs(init_context,b,f);
 
-  /* JGM: uncomment to try the bottom up approach
-  fprintf(stderr,"%d\nflatten into array...", check_time());
-  d = Flat::flatten_array(d);
-  */
+   // JGM: uncomment to try the bottom up approach
+  // fprintf(stderr,"%d\nflatten into array...", check_time());
+  //d = Flat::flatten_array(d);
+  
   // List::list_t<doc_t> fds = flatten(d);
   // d = new Seq(fds);
-  
+  //is_change = false;
   is_change = true;
   int round_num = 1;
   while(is_change && check_time() > 2) {
