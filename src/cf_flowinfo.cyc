@@ -264,16 +264,19 @@ static absRval_t i_typ_to_absrval(flow_env_t fenv,
     DEBUG_PRINT_F(print_absrval,leafval);
     return new Aggregate(UnionRInfo(k==UnionA,-1),
 			 aggrfields_to_aggrdict(fenv,fs,k==UnionA,leafval));
-  case &ArrayType(ArrayInfo{et,_,_,zeroterm,_}) && conref_def(false,zeroterm):
-    // special case for zero-terminated arrays of bits-only things --
-    // here, we initialize them at translation by putting a 0 in at the end.
-    return (allow_zeroterm && !no_init_bits_only && Tcutil::bits_only(et)) ? fenv->unknown_all : leafval;
+  case &ArrayType(ArrayInfo{et,_,_,zeroterm,_}):
+    if (conref_def(false,zeroterm))
+      // special case for zero-terminated arrays of bits-only things --
+      // here, we initialize them at translation by putting a 0 in at the end.
+      return (allow_zeroterm && !no_init_bits_only && Tcutil::bits_only(et)) ? fenv->unknown_all : leafval;
+    break;
   case &TagType(t): return leafval;
-  case &PointerType(PtrInfo{_,_,PtrAtts{_,nbl,_,_,_}}) && !conref_def(false,nbl):
-    switch(leafval) {
-    case &UnknownR(AllIL): return fenv->notzeroall;
-    default: break;
-    }
+  case &PointerType(PtrInfo{_,_,PtrAtts{_,nbl,_,_,_}}): 
+    if (!conref_def(false,nbl))
+      switch(leafval) {
+      case &UnknownR(AllIL): return fenv->notzeroall;
+      default: break;
+      }
     break;
   default: break;
   }

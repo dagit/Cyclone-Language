@@ -378,8 +378,9 @@ static void check_nounique(analenv_t env, seg_t loc, type_t t, absRval_t r) {
     for (int i = 0; i < numelts(d); i++, fs = fs->tl)
       check_nounique(env,loc,fs->hd->type,d[i]);
     return;
-  case $(&PointerType(_),_) && Tcutil::is_noalias_pointer(t,false):
-    Warn::warn(loc,"argument may still contain alias-free pointers");
+  case $(&PointerType(_),_):
+    if (Tcutil::is_noalias_pointer(t,false))
+      Warn::warn(loc,"argument may still contain alias-free pointers");
     return;
   default: return;
   }

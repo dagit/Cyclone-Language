@@ -1769,6 +1769,11 @@ bool check_let_pat_exhaustive(seg_t loc,tenv_t te,pat_t p,decision_opt_t @dopt) 
 // to check for exhaustiveness.
 static $(simple_pat_t, rhs_t)@ get_match2(switch_clause_t swc) {
   simple_pat_t   sp0 = compile_pat(swc->pattern);
+  // must rule out where clauses since we do not compile the patterns
+  // properly otherwise (see below).
+  if (swc->where_clause != NULL) {
+    terr(swc->where_clause->loc,"&&-clauses not supported in exception handlers.");
+  }
   rhs_t rhs = new Rhs{false,swc->pattern->loc,swc->body};
   return new $(sp0, rhs);
 }
