@@ -1,5 +1,5 @@
 /* Name resolution
-   Copyright (C) 2003 Greg Morrisett, AT&T
+   Copyright (C) 2003 Dan Grossman, AT&T
    This file is part of the Cyclone compiler.
 
    The Cyclone compiler is free software; you can redistribute it
@@ -18,10 +18,10 @@
    Suite 330, Boston, MA 02111-1307, USA. */
 
 // This pass resolves binding (variables, structs, etc.)
-// We used to do it during type-check to save a deep-pass over the
-// abstract syntax.
 
-// Now only this pass has to worry about namespaces and relative names
+// We used to do it during type-check to save a deep-pass over the
+// abstract syntax. Now only this pass has to worry about namespaces 
+// and relative names
 
 // The lexer also uses the namespace-management code (or will eventually)
 // because we must resolve relative typedefs during parsing.
@@ -31,23 +31,21 @@
 #include <set.h>
 #include "absyn.h"
 #include "absynpp.h"
+#include "warn.h"
 using List;
 using Absyn;
+using Warn;
 namespace Binding;
-
-datatype exn {BindingError};
 
 typedef Dict::dict_t<`a,`b> dict_t<`a,`b>;
 typedef Position::seg_t seg_t;
 
-static void err(seg_t loc, string_t fmt, ... inject parg_t ap)
-  __attribute__((format(printf,2,3))) {
- Position::post_error(Position::mk_err(loc,vrprintf(Core::heap_region,fmt,ap)));
-}
+datatype exn {BindingError};
+
+bool warn_override = false;
 
 //////////////// Namespace Resolution ///////////////
-// After years of repeating this logic in the lexer and type-checker,
-// we are going to try to share it here
+//After years of repeating logic in the lexer and type-checker, we share it here
 typedef list_t<var_t> namespace_name_t;
 datatype NSDirective {
   Namespace(namespace_name_t); // absolute
@@ -109,6 +107,8 @@ namespace_name_t resolve_rel_ns(seg_t loc, nsctxt_t<`a> ctxt,
   let &$(ns,v) = qv;
   switch (ns) {
   case {.Rel_n = NULL}:
+    try return lookup(Dict::lookup(ctxt->ns_data,ctxt->curr_ns),v);
+    catch { case &Dict::Absent: break; }
     for(let as = ctxt->availables; as != NULL; as = as->tl)
       switch(as->hd) {
       case &Using(ns): fallthru(ns);
@@ -185,7 +185,7 @@ void leave_using(nsctxt_t<`a> ctxt) {
 // would mutate the abstract-syntax with pointers to previous
 // declarations with the same name, but extensible datatypes are funny.
 
-// we can leave tree-shaking info to type-checker I guess
+// we still leave tree-shaking info to type-checker for now
 datatype Resolved {
   VarRes(binding_t); // includes unresolved variant
   AggrRes(aggrdecl_t);
@@ -218,7 +218,6 @@ static inline bool in_cinclude(env_t env) {
 static inline bool at_toplevel(env_t env) {
   return env->local_vars == NULL;
 }
-
 static renv_t mt_renv(bool ignore) {
   return new ResolveNSEnv{.aggrdecls     = Dict::empty(strptrcmp),
 		          .datatypedecls = Dict::empty(strptrcmp),
@@ -226,6 +225,7 @@ static renv_t mt_renv(bool ignore) {
 		          .typedefs      = Dict::empty(strptrcmp),
 		          .ordinaries    = Dict::empty(strptrcmp)};
 }
+
 static aggrdecl_t lookup_aggrdecl(renv_t renv, var_t v) {
   return Dict::lookup(renv->aggrdecls,v);
 }
@@ -274,7 +274,6 @@ list_t<vardecl_t> get_fun_vardecls(var_opt_t (@f)(`a), bool, seg_t, env_t,
 				   vararg_info_t*);
 //void resolve_enumfields(seg_t, env_t, list_t<enumfield_t>); // FIX: DO ME
 
-// Note: qvar_t and typedef_name_t are the same
 void absolutize_decl(seg_t loc, env_t env, qvar_t qv, scope_t sc) {
   switch((*qv)[0]) {
   case {.Rel_n = NULL}: 
@@ -303,10 +302,38 @@ void absolutize_topdecl(seg_t loc, env_t env, qvar_t qv, scope_t sc) {
   env->local_vars = old_locals;
 }
 
+void check_warn_override(seg_t loc, env_t env, qvar_t q) {
+  string_t hides_what;
+  try { 
+    switch (lookup_ordinary(loc,env,q)) {
+    case &VarRes(b):
+      if(at_toplevel(env)) // globals can be redeclared -- leave to typechecker
+	return;
+      switch(b) {
+      case &Global_b(_):   hides_what = "global variable";  break;
+      case &Local_b(_):    hides_what = "local variable";   break;
+      case &Param_b(_):    hides_what = "parameter";        break;
+      case &Pat_b(_):      hides_what = "pattern variable"; break;
+      case &Funname_b(_):  hides_what = "function";         break;
+      case &Unresolved_b(_): impos("shadowing free variable!");
+      }
+      break;
+    case &AggrRes(...): hides_what = "struct constructor"; break;// FIX?: union?
+    case &DatatypeRes(...): hides_what = "datatype constructor"; break;
+    case &EnumRes(...):
+    case &AnonEnumRes(...): hides_what = "enum tag"; break;
+    }
+    warn(loc,"declaration hides %s",hides_what);
+    return;
+  } catch { case &BindingError: return; }
+}
+
 void resolve_and_add_vardecl(seg_t loc, env_t env, vardecl_t vd) {
   absolutize_decl(loc,env,vd->name,vd->sc);
   let &$(decl_ns,decl_name) = vd->name;
   resolve_type(loc,env,vd->type);
+  if(warn_override)
+    check_warn_override(loc,env,vd->name);
   if(!at_toplevel(env))
     *env->local_vars = Dict::insert(*env->local_vars, decl_name,
 				    new VarRes(new Local_b(vd)));
@@ -341,18 +368,14 @@ void resolve_stmt(env_t env, stmt_t s) {
     return;
   case &Label_s(_,s1): resolve_stmt(env,s1); return;
   case &ResetRegion_s(e): resolve_exp(env,e); return;
-
   case &Decl_s(d,s1):
     let old_locals = *env->local_vars;
     resolve_decl(env,d);
     resolve_stmt(env,s1);
     *env->local_vars = old_locals;
     return;
-
-  case &Switch_s(e,scs,_): 
-    resolve_exp(env,e); resolve_scs(env,scs); return;
-  case &TryCatch_s(s1,scs,_): 
-    resolve_stmt(env,s1); resolve_scs(env,scs); return;
+  case &Switch_s(e,scs,_):    resolve_exp(env,e);   resolve_scs(env,scs);return;
+  case &TryCatch_s(s1,scs,_): resolve_stmt(env,s1); resolve_scs(env,scs);return;
   }
 }
 void resolve_exp(env_t env, exp_t e) { 
@@ -360,19 +383,14 @@ void resolve_exp(env_t env, exp_t e) {
   case &Var_e(*b): 
     switch(*b) {
     case &Unresolved_b(q):
-      try
-	switch (lookup_ordinary(e->loc,env,q)) {
-	case &VarRes(bnd): 
-	  *b = bnd; return;
-	case &AggrRes(ad): 
-	  err(e->loc,"bad occurrence of type name %s", Absynpp::qvar2string(q));
-	  return;
-	case &DatatypeRes(tud,tuf):
-	  e->r = new Datatype_e(NULL,tud,tuf); return;
-	case &EnumRes(ed,ef):
-	  e->r = new Enum_e(ed,ef); return;
-	case &AnonEnumRes(t,ef):
-	  e->r = new AnonEnum_e(t,ef); return;
+      try switch (lookup_ordinary(e->loc,env,q)) {
+      case &VarRes(bnd):          *b = bnd; return;
+      case &DatatypeRes(tud,tuf): e->r = new Datatype_e(NULL,tud,tuf); return;
+      case &EnumRes(ed,ef):       e->r = new Enum_e(ed,ef); return;
+      case &AnonEnumRes(t,ef):    e->r = new AnonEnum_e(t,ef); return;
+      case &AggrRes(ad): 
+	err(e->loc,"bad occurrence of type name %s", Absynpp::qvar2string(q));
+	return;
 	}
       catch { case &BindingError:
          err(e->loc,"undeclared identifier %s", Absynpp::qvar2string(q));
@@ -389,30 +407,28 @@ void resolve_exp(env_t env, exp_t e) {
       case &Var_e(*b):
 	switch (*b) {
 	case &Unresolved_b(q):
-	  try
-	    switch (lookup_ordinary(e1->loc,env,q)) {
-	    case &VarRes(bnd):
-	      *b = bnd; return;
-	    case &AggrRes(ad):
-	      let dles = NULL;
-	      for(; es != NULL; es = es->tl)
-		dles = new List(new $(NULL,es->hd), dles);
-	      e->r = new Aggregate_e(ad->name,NULL,imp_rev(dles),ad);
-	      return;
-	    case &DatatypeRes(tud,tuf):
-	      if (tuf->typs == NULL)
-		// Don't allow "foo()", require "foo"
-		err(e->loc,"%s is a constant, not a function",
-		    Absynpp::qvar2string(tuf->name));
-	      e->r = new Datatype_e(es,tud,tuf);
-	      return;
-	    case &AnonEnumRes(...):
-	    case &EnumRes(...):
-	      err(e->loc,"%s is an enum constructor, not a function",
-		  Absynpp::qvar2string(q));
-	      return;
-	    }
-	  catch { case &BindingError:
+	  try switch (lookup_ordinary(e1->loc,env,q)) {
+	  case &VarRes(bnd):
+	    *b = bnd; return;
+	  case &AggrRes(ad):
+	    let dles = NULL;
+	    for(; es != NULL; es = es->tl)
+	      dles = new List(new $(NULL,es->hd), dles);
+	    e->r = new Aggregate_e(ad->name,NULL,imp_rev(dles),ad);
+	    return;
+	  case &DatatypeRes(tud,tuf):
+	    if (tuf->typs == NULL)
+	      // Don't allow "foo()", require "foo"
+	      err(e->loc,"%s is a constant, not a function",
+		  Absynpp::qvar2string(tuf->name));
+	    e->r = new Datatype_e(es,tud,tuf);
+	    return;
+	  case &AnonEnumRes(...):
+	  case &EnumRes(...):
+	    err(e->loc,"%s is an enum constructor, not a function",
+		Absynpp::qvar2string(q));
+	    return;
+	  } catch { case &BindingError:
 	    err(e->loc,"undeclared identifier %s", Absynpp::qvar2string(q));
 	    return;
 	  }
@@ -817,20 +833,18 @@ void resolve_pat(env_t env, pat_t p) { // must not be at top-level
   let &Pat(r,_,loc) = p;
   switch(r) {
   case &UnknownId_p(qv): 
-    try
-      switch(lookup_ordinary(loc,env,qv)) {
-      case &VarRes(_): break; // legal shadowing, same as BindingError
-      case &AggrRes(_):
-	err(loc,"struct tag used without arguments in pattern");
-	return;
-      case &DatatypeRes(tud,tuf):
-	p->r = new Datatype_p(tud,tuf,NULL,false); return;
-      case &EnumRes(ed,ef):
-	p->r = new Enum_p(ed,ef); return;
-      case &AnonEnumRes(t,ef):
-	p->r = new AnonEnum_p(t,ef); return;
-      }
-    catch { case &BindingError: break; } // a new variable
+    try switch(lookup_ordinary(loc,env,qv)) {
+    case &VarRes(_): break; // legal shadowing, same as BindingError
+    case &AggrRes(_):
+      err(loc,"struct tag used without arguments in pattern");
+      return;
+    case &DatatypeRes(tud,tuf):
+      p->r = new Datatype_p(tud,tuf,NULL,false); return;
+    case &EnumRes(ed,ef):
+      p->r = new Enum_p(ed,ef); return;
+    case &AnonEnumRes(t,ef):
+      p->r = new AnonEnum_p(t,ef); return;
+    } catch { case &BindingError: break; } // a new variable
     absolutize_decl(loc,env,qv,Public);
     let vd = new_vardecl(qv,&VoidType_val,NULL); //type set later
     p->r = new Var_p(vd, new_pat(&Wild_p_val,0));
@@ -841,23 +855,21 @@ void resolve_pat(env_t env, pat_t p) { // must not be at top-level
   case &UnknownCall_p(qv,ps,dots):
     for(let ps2 = ps; ps2 != NULL; ps2 = ps2->tl)
       resolve_pat(env,ps2->hd);
-    try
-      switch(lookup_ordinary(loc,env,qv)) {
-      case &VarRes(_): break; 
-      case &AggrRes(ad):
-	let new_ps = NULL;
-	for(; ps != NULL; ps = ps->tl)
-	  new_ps = new List(new $(NULL,ps->hd), new_ps);
-	p->r = new Aggr_p(new AggrInfo(KnownAggr(new ad),NULL),
-			  NULL,imp_rev(new_ps),dots);
-	return;
-      case &DatatypeRes(tud,tuf):
-	p->r = new Datatype_p(tud,tuf,ps,dots); return;
-      case &EnumRes(_,_):
-      case &AnonEnumRes(_,_):
-	err(loc,"enum tag used with arguments in pattern"); return;
-      }
-    catch { case &BindingError: break; }
+    try switch(lookup_ordinary(loc,env,qv)) {
+    case &VarRes(_): break; 
+    case &AggrRes(ad):
+      let new_ps = NULL;
+      for(; ps != NULL; ps = ps->tl)
+	new_ps = new List(new $(NULL,ps->hd), new_ps);
+      p->r = new Aggr_p(new AggrInfo(KnownAggr(new ad),NULL),
+			NULL,imp_rev(new_ps),dots);
+      return;
+    case &DatatypeRes(tud,tuf):
+      p->r = new Datatype_p(tud,tuf,ps,dots); return;
+    case &EnumRes(_,_):
+    case &AnonEnumRes(_,_):
+      err(loc,"enum tag used with arguments in pattern"); return;
+    } catch { case &BindingError: break; }
     err(loc, "%s is not a constructor in pattern", Absynpp::qvar2string(qv));
     return;
 

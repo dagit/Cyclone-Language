@@ -1,0 +1,69 @@
+/* Name resolution
+   Copyright (C) 2003 Dan Grossman, AT&T
+   This file is part of the Cyclone compiler.
+
+   The Cyclone compiler is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   The Cyclone compiler is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with the Cyclone compiler; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+#include <position.h>
+
+typedef Position::seg_t seg_t;
+
+namespace Warn;
+
+static List::list_t<seg_t>       warning_segs = NULL;
+static List::list_t<stringptr_t> warning_msgs = NULL;
+
+// we batch warnings because we have to parse the file to determine
+// line and column information.
+void vwarn(seg_t sg, string_t fmt, parg_t ? ap) {
+  string_t msg = vrprintf(Core::heap_region,fmt,ap);
+  warning_segs = new List::List(sg,      warning_segs);
+  warning_msgs = new List::List(new msg, warning_msgs);
+}
+
+void warn(seg_t sg, string_t fmt, ... inject parg_t ap)
+  __attribute__((format(printf,2,3))) {
+  vwarn(sg, fmt, ap);
+}
+void flush_warnings() {
+  if(warning_segs == NULL)
+    return;
+  fprintf(stderr,"***Warnings***\n");
+  let seg_strs = Position::strings_of_segments(warning_segs);
+  warning_segs = NULL;
+  warning_msgs = List::imp_rev(warning_msgs);
+  while(warning_msgs != NULL) {
+    fprintf(stderr,"%s: %s\n", *(seg_strs->hd), *(warning_msgs->hd));
+    seg_strs     = seg_strs->tl;
+    warning_msgs = warning_msgs->tl;
+  }
+  fprintf(stderr,"**************\n");
+  fflush(stderr);
+}
+
+void err(seg_t loc, string_t fmt, ... inject parg_t ap)
+  __attribute__((format(printf,2,3))) {
+ Position::post_error(Position::mk_err(loc,vrprintf(Core::heap_region,fmt,ap)));
+}
+
+`a impos(string_t fmt, ... inject parg_t ap)
+  __attribute__((format(printf,1,2), noreturn))
+{
+  string_t msg = vrprintf(Core::heap_region,fmt,ap);
+  fprintf(stderr,"Compiler Error: %s\n",msg);
+  fflush(stderr);
+  throw new Core::Impossible(msg);
+}

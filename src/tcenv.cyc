@@ -60,8 +60,6 @@ using Absynpp;
 using RgnOrder;
 namespace Tcenv;
 
-bool warn_override = false;
-
 datatype exn {Env_error};
 datacon(exn,Env_error);
 
@@ -112,10 +110,6 @@ datatype Resolved {
 typedef $(switch_clause_t, list_t<tvar_t>, clist_t<type_t,`r>) const *`r
 ftclause_t<`r>;
 
-static struct CtrlEnv<`r::R> {
-  ftclause_t<`r> fallthru_clause;
-};
-typedef struct CtrlEnv<`r> @`r2 ctrl_env_t<`r,`r2>;
 // This part is shared throughout type-checking of a function.
 // Hence mutations are seen by all subsequent type-checking, which is easier
 // than threading labels which must be function-wide unique anyway.
@@ -151,12 +145,12 @@ struct FenvFlags {
 
 // Local function environments -- this is getting a bit out of hand, no?
 abstract struct Fenv<`r::R> {
-  <`f::R,`c::R> : {`f} > `r, {`c} > `r
+  <`f::R> : {`f} > `r
   struct SharedFenv<`f> @`f shared;
   list_t<tvar_t>      type_vars; //type variables that can occur free
   rgn_po_t<`f>        region_order; // partial order on region variables
   bindings_t<`r>      locals;
-  ctrl_env_t<`c,`r>   ctrl_env;
+  ftclause_t<`r>      ctrl_env;
   type_t              capability;
   type_t              curr_rgn;   // current block's region
   struct FenvFlags    flags;
@@ -169,12 +163,10 @@ abstract struct Fenv<`r::R> {
 // them in abstract syntax (specifically evars).  I haven't messed with
 // the region_order yet, but presumably some of it can be region-allocated.
 
-
 //////////////////////// Lookup a local binding /////////////////////////////
 datatype exn { NoBinding; };
 datacon(exn,NoBinding);
 
-// lookup a binding, throwing NoBinding on failure.
 binding_t lookup_binding(bnds_t bs, var_t v) {
   for (; bs; bs = bs->tl)
     if (strptrcmp(v,bs->v) == 0) 
@@ -231,7 +223,7 @@ static fenv_t<`r> get_fenv(tenv_t<`g,`r> te, const char ?err_msg) {
 region_t<`r> get_fnrgn(tenv_t<`g,`r> te) {
   let le = te->le;
   if (le != NULL) {
-    let &Fenv{<`f,`c> .fnrgn=f,...} = (fenv_t)le;
+    let &Fenv{<`f> .fnrgn=f,...} = (fenv_t)le;
     return f;
   }
   return (region_t<`r>)Core::heap_region;
@@ -246,30 +238,17 @@ static tenv_t<`g,`l> put_emptyfenv(region_t<`l> l,tenv_t<`g,`l2> te) {
   return rnew(l) Tenv(te->ns, te->ae, NULL, te->allow_valueof, te->in_extern_c_include);
 }
 
-static fenv_t<`l> copy_fenv_old_ctrl(region_t<`l> l, fenv_t<`l2> f : {`l2}>`l)
+static fenv_t<`l> copy_fenv(region_t<`l> l, fenv_t<`l2> f : {`l2}>`l)
 {
-  let Fenv{<`f,`c> shared,type_vars,region_order,locals,ctrl_env,
+  let Fenv{<`f> shared,type_vars,region_order,locals,ctrl_env,
               capability,curr_rgn,flags,frgn} = *f;
   return rnew(l) Fenv{shared,type_vars,region_order,(bnds_t<`l>)locals,
                       ctrl_env,capability,curr_rgn,flags,l};
 
 }
-static fenv_t<`l> copy_fenv_new_ctrl(region_t<`l> l, fenv_t<`l2> f : {`l2}>`l)
-{
-  let Fenv{<`f,`c> shared,type_vars,region_order,locals,ctrl_env,
-              capability,curr_rgn,flags,_} = *f;
-  // WARNING: fallthru_clause shared with old
-  let CtrlEnv{fallthru_clause} = *ctrl_env;
-  let new_ctrl_env =
-    rnew(l) CtrlEnv{fallthru_clause};
-  return rnew(l) Fenv{shared,type_vars,region_order,(bnds_t<`l>)locals,
-                      new_ctrl_env,capability,curr_rgn,
-                      flags,l};
-}
-
 
 type_t return_typ(tenv_t te) {
-  let &Fenv{<`f,`c> .shared = s,...} = get_fenv(te,"return_typ");
+  let &Fenv{<`f> .shared = s,...} = get_fenv(te,"return_typ");
   let SharedFenv{.return_typ = rt, ...} = *s;
   return rt;
 }
@@ -277,7 +256,7 @@ type_t return_typ(tenv_t te) {
 list_t<tvar_t> lookup_type_vars(tenv_t te) {
   let le = te->le;
   if(te->le == NULL) return NULL;
-  let Fenv{<`f,`c> .type_vars = ts,...} = *le;
+  let Fenv{<`f> .type_vars = ts,...} = *le;
   return ts;
 }
 
@@ -287,7 +266,7 @@ opt_t<list_t<tvar_t>> lookup_opt_type_vars(tenv_t te) {
 
 tenv_t<`g,`r> add_type_vars(region_t<`r> r, seg_t loc,tenv_t<`g,`r2> te,
                             list_t<tvar_t> tvs : {`r2} > `r) {
-  let &Fenv{<`f,`c> shared,type_vars,region_order,locals,ctrl_env,
+  let &Fenv{<`f> shared,type_vars,region_order,locals,ctrl_env,
               capability,curr_rgn,flags,_} =
     get_fenv(te,"add_type_vars");
 
@@ -304,32 +283,21 @@ tenv_t<`g,`r> copy_tenv(region_t<`r> r, tenv_t<`g,`r2> te : {`r2} > `r) {
   if (le == NULL) {
     return put_emptyfenv(r,te);
   } else {
-    fenv_t<`r> fe = copy_fenv_old_ctrl(r, le);
+    fenv_t<`r> fe = copy_fenv(r, le);
     return put_fenv(r,te,fe);
   }
 }
 
 tenv_t<`g,`r> add_local_var(region_t<`r> r, seg_t loc, tenv_t<`g,`r2> te, vardecl_t vd : {`r2} > `r) {
-  //let fe = copy_fenv_old_ctrl(r,get_fenv(te,"add_local_var"));
   let v  = (*vd->name)[1];
   switch ((*vd->name)[0]) {
   case {.Loc_n = _}: break;
   default: throw new Impossible("add_local_var: called with non-local");
   }
-  if (Tcenv::warn_override)
-    try switch(lookup_ordinary(r,te,loc,vd->name,true)) {
-    case &VarRes(&Local_b(_)):  warn(loc,"declaration hides local"); break;
-    case &VarRes(&Global_b(_)): warn(loc,"declaration hides global"); break;
-    case &VarRes(&Pat_b(_)):    warn(loc,"declaration hides pattern variable"); break;
-    case &VarRes(&Param_b(_)):  warn(loc,"declaration hides parameter"); break;
-    default: break;
-    }
-  catch { case &Dict::Absent: break; }
-  let &Fenv{<`f,`c> shared,type_vars,region_order,locals,ctrl_env,
+  let &Fenv{<`f> shared,type_vars,region_order,locals,ctrl_env,
               capability,curr_rgn,flags,_} =
     get_fenv(te,"add_local_var");
-  let b = new Local_b(vd);
-  let new_locals = rnew(r) Bindings{v,b,(bnds_t<`r>)locals};
+  let new_locals = rnew(r) Bindings{v,new Local_b(vd),(bnds_t<`r>)locals};
   let fe = rnew(r) Fenv(shared,type_vars,region_order,new_locals,
                         ctrl_env,capability,curr_rgn,flags,r);
   return put_fenv(r,te,fe);
@@ -339,7 +307,7 @@ tenv_t<`g,`r> set_new_status(region_t<`r> r,enum NewStatus status,
 			     tenv_t<`g,`r2> te : {`r2}>`r){
   let le = te->le;
   if(le == NULL) return put_emptyfenv(r,te);
-  let Fenv{<`f,`c> shared,type_vars,region_order,locals,ctrl_env,
+  let Fenv{<`f> shared,type_vars,region_order,locals,ctrl_env,
               capability,curr_rgn,
 	      FenvFlags{in_notreadctxt,lhs,_,absok},_} = *le;
   let fe = rnew(r) Fenv(shared,type_vars,region_order,(bnds_t<`r>)locals,
@@ -351,14 +319,14 @@ tenv_t<`g,`r> set_new_status(region_t<`r> r,enum NewStatus status,
 enum NewStatus new_status(tenv_t te) {
   let le = te->le;
   if (le == NULL) return NoneNew;
-  let &Fenv{<`f,`c> .flags=FenvFlags{.in_new = inn,...},...} = (fenv_t)le;
+  let &Fenv{<`f> .flags=FenvFlags{.in_new = inn,...},...} = (fenv_t)le;
   return inn;
 }
 
 bool abstract_val_ok(tenv_t te) {
   let le = te->le;
   if (le == NULL) return false;
-  let &Fenv{<`f,`c> .flags=FenvFlags{.abstract_ok = aok,...},...} = (fenv_t)le;
+  let &Fenv{<`f> .flags=FenvFlags{.abstract_ok = aok,...},...} = (fenv_t)le;
   return aok;
 }
 
@@ -366,7 +334,7 @@ tenv_t<`g,`r> enter_abstract_val_ok(region_t<`r> r,
 				    tenv_t<`g,`r2> te : {`r2}>`r){
   let le = te->le;
   if(le == NULL) return put_emptyfenv(r,te);
-  let Fenv{<`f,`c> shared,type_vars,region_order,locals,ctrl_env,
+  let Fenv{<`f> shared,type_vars,region_order,locals,ctrl_env,
               capability,curr_rgn,
 	      FenvFlags{in_notreadctxt,lhs,innew,_},_} = *le;
   let fe = rnew(r) Fenv(shared,type_vars,region_order,(bnds_t<`r>)locals,
@@ -379,7 +347,7 @@ tenv_t<`g,`r> clear_abstract_val_ok(region_t<`r> r,
 				    tenv_t<`g,`r2> te : {`r2}>`r){
   let le = te->le;
   if(le == NULL) return put_emptyfenv(r,te);
-  let Fenv{<`f,`c> shared,type_vars,region_order,locals,ctrl_env,
+  let Fenv{<`f> shared,type_vars,region_order,locals,ctrl_env,
               capability,curr_rgn,
 	      FenvFlags{in_notreadctxt,lhs,innew,_},_} = *le;
   let fe = rnew(r) Fenv(shared,type_vars,region_order,(bnds_t<`r>)locals,
@@ -391,7 +359,7 @@ tenv_t<`g,`r> clear_abstract_val_ok(region_t<`r> r,
 tenv_t<`g,`r> enter_notreadctxt(region_t<`r> r,tenv_t<`g,`r2> te : {`r2}>`r){
   let le = te->le;
   if(le == NULL) return put_emptyfenv(r,te);
-  let Fenv{<`f,`c> shared,type_vars,region_order,locals,ctrl_env,
+  let Fenv{<`f> shared,type_vars,region_order,locals,ctrl_env,
               capability,curr_rgn,
 	      FenvFlags{_,lhs,innew,absok},_} = *le;
   let fe = rnew(r) Fenv(shared,type_vars,region_order,(bnds_t<`r>)locals,
@@ -403,7 +371,7 @@ tenv_t<`g,`r> enter_notreadctxt(region_t<`r> r,tenv_t<`g,`r2> te : {`r2}>`r){
 tenv_t<`g,`r> clear_notreadctxt(region_t<`r> r,tenv_t<`g,`r2> te : {`r2}>`r) {
   let le = te->le;
   if(le == NULL) return put_emptyfenv(r,te);
-  let Fenv{<`f,`c> shared,type_vars,region_order,locals,ctrl_env,
+  let Fenv{<`f> shared,type_vars,region_order,locals,ctrl_env,
               capability,curr_rgn,
 	      FenvFlags{_,lhs,innew,absok},_} = *le;
   let fe = rnew(r) Fenv(shared,type_vars,region_order,(bnds_t<`r>)locals,
@@ -415,14 +383,14 @@ tenv_t<`g,`r> clear_notreadctxt(region_t<`r> r,tenv_t<`g,`r2> te : {`r2}>`r) {
 bool in_notreadctxt(tenv_t te) {
   let le = te->le;
   if (le == NULL) return false;
-  let &Fenv{<`f,`c> .flags=FenvFlags{.in_notreadctxt = nr,...},...}=(fenv_t)le;
+  let &Fenv{<`f> .flags=FenvFlags{.in_notreadctxt = nr,...},...}=(fenv_t)le;
   return nr;
 }
 
 tenv_t<`g,`r> enter_lhs(region_t<`r> r,tenv_t<`g,`r2> te : {`r2}>`r){
   let le = te->le;
   if(le == NULL) return put_emptyfenv(r,te);
-  let Fenv{<`f,`c> shared,type_vars,region_order,locals,ctrl_env,
+  let Fenv{<`f> shared,type_vars,region_order,locals,ctrl_env,
               capability,curr_rgn,
 	      FenvFlags{in_notreadctxt,_,innew,absok},_} = *le;
   let fe = rnew(r) Fenv(shared,type_vars,region_order,(bnds_t<`r>)locals,
@@ -434,7 +402,7 @@ tenv_t<`g,`r> enter_lhs(region_t<`r> r,tenv_t<`g,`r2> te : {`r2}>`r){
 tenv_t<`g,`r> clear_lhs(region_t<`r> r,tenv_t<`g,`r2> te : {`r2}>`r) {
   let le = te->le;
   if(le == NULL) return put_emptyfenv(r,te);
-  let Fenv{<`f,`c> shared,type_vars,region_order,locals,ctrl_env,
+  let Fenv{<`f> shared,type_vars,region_order,locals,ctrl_env,
               capability,curr_rgn,
 	      FenvFlags{in_notreadctxt,_,innew,absok},_} = *le;
   let fe = rnew(r) Fenv(shared,type_vars,region_order,(bnds_t<`r>)locals,
@@ -446,33 +414,19 @@ tenv_t<`g,`r> clear_lhs(region_t<`r> r,tenv_t<`g,`r2> te : {`r2}>`r) {
 bool in_lhs(tenv_t te) {
   let le = te->le;
   if (le == NULL) return false;
-  let &Fenv{<`f,`c> .flags=FenvFlags{.in_lhs = lhs,...},...} = (fenv_t)le;
+  let &Fenv{<`f> .flags=FenvFlags{.in_lhs = lhs,...},...} = (fenv_t)le;
   return lhs;
 }
 
 // assume uniqueness has been checked elsewhere
 tenv_t<`g,`r> add_pat_var(region_t<`r> r, seg_t loc, tenv_t<`g,`r2> te,
                           vardecl_t vd : {`r2} > `r) {
-  if (Tcenv::warn_override)
-    try {
-      switch(lookup_ordinary(r,te,loc,vd->name,true)) {
-      case &VarRes(&Local_b(_)):  
-	Tcutil::warn(loc,"pattern variable hides local"); break;
-      case &VarRes(&Global_b(_)): 
-	Tcutil::warn(loc,"pattern variable hides global"); break;
-      case &VarRes(&Pat_b(_)):    
-	Tcutil::warn(loc,"pattern variable hides pattern variable"); break;
-      case &VarRes(&Param_b(_)):  
-	Tcutil::warn(loc,"pattern variable hides parameter"); break;
-      default: break;
-      }
-    } catch { case &Dict::Absent: break; }
   let v  = (*vd->name)[1];
-  let &Fenv{<`f,`c> shared,type_vars,region_order,locals,ctrl_env,
+  let &Fenv{<`f> shared,type_vars,region_order,locals,ctrl_env,
 	      capability,curr_rgn,flags,_} =
     get_fenv(te,"add_pat_var");
   let b = new Pat_b(vd);
-  let new_locals = rnew(r) Bindings{v,b,(bnds_t<`r>)locals};
+  let new_locals = rnew(r) Bindings{v,new Pat_b(vd),(bnds_t<`r>)locals};
   let fe = rnew(r) Fenv(shared,type_vars,region_order,new_locals,
                         ctrl_env,capability,curr_rgn,flags,r);
   return put_fenv(r,te,fe);
@@ -484,7 +438,7 @@ resolved_t<`r> lookup_ordinary(region_t<`r> r, tenv_t te,seg_t loc,qvar_t q,bool
   switch (nsl) {
   case {.Loc_n = _}:
     if (le == NULL) throw new Dict::Absent;
-    let &Fenv{<`f,`c> .locals = locals,...} = (fenv_t)le;
+    let &Fenv{<`f> .locals = locals,...} = (fenv_t)le;
     // NB a local overrides any global, without an ambiguity warning
     try return rnew(r) VarRes(lookup_binding(locals,v));
     catch {case &NoBinding: return lookup_ordinary_global(te,loc,q,is_use);}
@@ -499,11 +453,10 @@ resolved_t<`r> lookup_ordinary(region_t<`r> r, tenv_t te,seg_t loc,qvar_t q,bool
 // do not stop setting clauseopt -- JumpAnalysis needs it!
 $(switch_clause_t,list_t<tvar_t>,clist_t<type_t,`r>)const*`r const
 process_fallthru(tenv_t<`g,`r> te,stmt_t s, switch_clause_t *@ clauseopt){
-  let &Fenv{<`f,`c> .ctrl_env=ctrl_env,...} = get_fenv(te,"process_fallthru");
-  let ans = ($(_,_,clist_t<_,`r>)const *`r)ctrl_env->fallthru_clause;
-  if(ans != NULL) {
+  let &Fenv{<`f> .ctrl_env=ctrl_env,...} = get_fenv(te,"process_fallthru");
+  let ans = ($(_,_,clist_t<_,`r>)const *`r)ctrl_env;
+  if(ans != NULL)
     *clauseopt = new (*ans)[0];
-  }
   return ans;
 }
 
@@ -511,16 +464,15 @@ tenv_t<`g,`r> set_fallthru(region_t<`r> r, tenv_t<`g,`r2> te,
                            list_t<tvar_t,`H> new_tvs,
                            list_t<vardecl_t> vds,
                            switch_clause_t clause : {`r2} > `r) {
-  let &Fenv{<`f,`c> shared,type_vars,region_order,locals,ctrl_env,
+  let &Fenv{<`f> shared,type_vars,region_order,locals,ctrl_env,
               capability,curr_rgn,flags,_} =
     get_fenv(te,"set_fallthru");
-  let &CtrlEnv{fc} = ctrl_env;
-  list_t<type_t,`c> ft_typ = NULL;
+  let fc = ctrl_env;
+  list_t<type_t,`r> ft_typ = NULL;
   for(; vds!=NULL; vds=vds->tl)
     ft_typ = new List(vds->hd->type,ft_typ);
   let cft_typ = List::imp_rev(ft_typ);
-  let new_ctrl_env =
-    rnew(r) CtrlEnv{new $(clause,new_tvs,cft_typ)};
+  let new_ctrl_env = rnew (r) $(clause,new_tvs,cft_typ);
   let new_fe = rnew(r) Fenv{shared,type_vars,region_order,
                             (bnds_t<`r>)locals,
                             new_ctrl_env,capability,curr_rgn,
@@ -529,16 +481,16 @@ tenv_t<`g,`r> set_fallthru(region_t<`r> r, tenv_t<`g,`r2> te,
 }
 // fallthru is illegal in the last case
 tenv_t<`g,`r> clear_fallthru(region_t<`r> r, tenv_t<`g,`r2> te : {`r2} > `r) {
-  fenv_t fe = copy_fenv_new_ctrl(r,get_fenv(te,"clear_fallthru"));
-  let &Fenv{<`f,`c> .ctrl_env = ctrl_env,...} = fe;
-  ctrl_env->fallthru_clause = NULL;
+  fenv_t fe = copy_fenv(r,get_fenv(te,"clear_fallthru"));
+  let &Fenv{<`f> .ctrl_env = ctrl_env,...} = fe;
+  ctrl_env = NULL;
   return put_fenv(r,te,fe);
 }
 
 tenv_t<`g,`r2> allow_valueof(region_t<`r2> r2, tenv_t<`g,`r> te : {`r} > `r2) {
   if (te->le == NULL)
     return rnew(r2) Tenv(te->ns, te->ae, NULL, true,te->in_extern_c_include);
-  let Fenv{<`f,`c> s,t,r,l,ce,cp,cr,flags,_} = *te->le;
+  let Fenv{<`f> s,t,r,l,ce,cp,cr,flags,_} = *te->le;
   let fe = rnew(r2) Fenv{s,t,r,(bnds_t<`r2>)l,ce,cp,cr,flags,r2};
   return rnew(r2) Tenv(te->ns, te->ae, fe, true,te->in_extern_c_include);
 }
@@ -546,7 +498,7 @@ tenv_t<`g,`r2> allow_valueof(region_t<`r2> r2, tenv_t<`g,`r> te : {`r} > `r2) {
 tenv_t<`g,`r2> enter_extern_c_include(region_t<`r2> r2, tenv_t<`g,`r> te : {`r} > `r2) {
   if (te->le == NULL)
     return rnew(r2) Tenv(te->ns, te->ae, NULL, te->allow_valueof, true);
-  let Fenv{<`f,`c> s,t,r,l,ce,cp,cr,flags,_} = *te->le;
+  let Fenv{<`f> s,t,r,l,ce,cp,cr,flags,_} = *te->le;
   let fe = rnew(r2) Fenv{s,t,r,(bnds_t<`r2>)l,ce,cp,cr,flags,r2};
   return rnew(r2) Tenv(te->ns, te->ae, fe, te->allow_valueof, true);
 }
@@ -554,7 +506,7 @@ tenv_t<`g,`r2> enter_extern_c_include(region_t<`r2> r2, tenv_t<`g,`r> te : {`r} 
 tenv_t<`g,`r> add_region(region_t<`r> r, tenv_t<`g,`r2> te, type_t rgn,
                          bool resetable, bool opened : {`r2} > `r) {
 
-  let Fenv{<`f,`c> shared,type_vars,region_order,locals,ctrl_env,
+  let Fenv{<`f> shared,type_vars,region_order,locals,ctrl_env,
               capability,curr_rgn,flags,_} =
     *get_fenv(te,"add_region");
   switch (compress(rgn)) {
@@ -574,11 +526,11 @@ tenv_t<`g,`r> add_region(region_t<`r> r, tenv_t<`g,`r2> te, type_t rgn,
 
 tenv_t<`g,`r> new_named_block(region_t<`r> r, seg_t loc, tenv_t<`g,`r2> te,
                               tvar_t block_rgn : {`r2} > `r) {
-  let Fenv{<`f,`c> shared,type_vars,region_order,locals,ctrl_env,
+  let Fenv{<`f> shared,type_vars,region_order,locals,ctrl_env,
               capability,curr_rgn,flags,_} =
     *get_fenv(te,"new_named_block");
 
-  fenv_t fe = copy_fenv_old_ctrl(r,get_fenv(te,"new_block"));
+  fenv_t fe = copy_fenv(r,get_fenv(te,"new_block"));
   type_t block_typ = new VarType(block_rgn);
   type_vars = new List(block_rgn, type_vars);
   Tcutil::check_unique_tvars(loc, type_vars);
@@ -605,7 +557,7 @@ tenv_t<`g,`r> new_outlives_constraints(region_t<`r> r, tenv_t<`g,`r2> te,
                                        list_t<$(type_t,type_t)@> cs,
 				       seg_t loc
                                        : {`r2} > `r) {
-  let Fenv{<`f,`c> shared,type_vars,region_order,locals,ctrl_env,
+  let Fenv{<`f> shared,type_vars,region_order,locals,ctrl_env,
               capability,curr_rgn,flags,_} =
     *get_fenv(te,"new_outlives_constraints");
   for(; cs != NULL; cs = cs->tl)
@@ -668,7 +620,7 @@ type_t curr_rgn(tenv_t te) {
   let le = te->le;
   if (le == NULL) return &HeapRgn_val;
   fenv_t fe = le;
-  let &Fenv{<`f,`c> .curr_rgn = c, ...} = fe;
+  let &Fenv{<`f> .curr_rgn = c, ...} = fe;
   return c;
 }
 
@@ -677,7 +629,7 @@ type_t curr_rgn(tenv_t te) {
 // capability or outlives something in the capability.
 void check_rgn_accessible(tenv_t te, seg_t loc, type_t rgn) {
   fenv_t fe = get_fenv(te,"check_rgn_accessible");
-  let &Fenv{<`f,`c> .capability = capability, .region_order = ro, ...} = fe;
+  let &Fenv{<`f> .capability = capability, .region_order = ro, ...} = fe;
   if (region_in_effect(false, rgn, capability) ||
       region_in_effect(true, rgn, capability))
     return;
@@ -689,7 +641,7 @@ void check_rgn_accessible(tenv_t te, seg_t loc, type_t rgn) {
 // Check to see if a region is accessible and resetable
 void check_rgn_resetable(tenv_t te, seg_t loc, type_t rgn) {
   check_rgn_accessible(te,loc,rgn);
-  let &Fenv{<`f,`c> .region_order = ro, ...} =
+  let &Fenv{<`f> .region_order = ro, ...} =
     get_fenv(te,"check_rgn_resetable");
   switch (compress(rgn)) {
   case &VarType(r):
@@ -717,7 +669,7 @@ bool region_outlives(tenv_t te, type_t rt_a, type_t rt_b) {
     }
   // When typechecking a function body:
   fenv_t fe = le;
-  let &Fenv{<`f,`c> .region_order = ro, ...} = fe;
+  let &Fenv{<`f> .region_order = ro, ...} = fe;
   let res = effect_outlives(ro,new AccessEff(rt_a),rt_b);
 //    fprintf(stderr,"region_outlives: %s outlves %s = %s\n",
 //  	  typ2string(rt_a),typ2string(rt_b),res ? "true" : "false");
@@ -728,7 +680,7 @@ bool region_outlives(tenv_t te, type_t rt_a, type_t rt_b) {
 // Check that a function call's effect is contained in the current capability.
 // Do not constrain evars -- delay the check instead.
 void check_effect_accessible(tenv_t te, seg_t loc, type_t eff) {
-  let &Fenv{<`f,`c> .capability = capability, .region_order = ro,
+  let &Fenv{<`f> .capability = capability, .region_order = ro,
                .shared = shared, ...} = get_fenv(te,"check_effect_accessible");
   if(subset_effect(false, eff, capability))
     return;
@@ -740,7 +692,7 @@ void check_effect_accessible(tenv_t te, seg_t loc, type_t eff) {
                     shared->delayed_effect_checks);
 }
 void check_delayed_effects(tenv_t te) {
-  let &Fenv{<`f,`c> .shared = shared, ...} =
+  let &Fenv{<`f> .shared = shared, ...} =
     get_fenv(te,"check_delayed_effects");
   let checks = shared->delayed_effect_checks;
   for(; checks != NULL; checks = checks->tl) {
@@ -769,7 +721,7 @@ void check_rgn_partial_order(tenv_t te, seg_t loc,
 	terr(loc,"the required region ordering is not satisfied here");
     return;
   }
-  let &Fenv{<`f,`c> .region_order = ro, .shared = shared, ...} = (fenv_t)le;
+  let &Fenv{<`f> .region_order = ro, .shared = shared, ...} = (fenv_t)le;
   if(!satisfies_constraints(ro,po,&HeapRgn_val,false))
     shared->delayed_constraint_checks =
       rnew(shared->frgn) List(rnew(shared->frgn) $(ro,po,loc),
@@ -777,7 +729,7 @@ void check_rgn_partial_order(tenv_t te, seg_t loc,
 }
 
 void check_delayed_constraints(tenv_t te) {
-  let &Fenv{<`f,`c> .shared = shared,...} =
+  let &Fenv{<`f> .shared = shared,...} =
     get_fenv(te,"check_delayed_constraints");
   let checks = shared->delayed_constraint_checks;
   for(; checks != NULL; checks = checks->tl) {
@@ -824,7 +776,7 @@ fenv_t<`r> new_fenv(region_t<`r> r, seg_t loc, fndecl_t fd) {
          .type_vars   = tvs,
          .region_order = rgn_po,
          .locals      = locals,  // assumed unique
-         .ctrl_env    = rnew(r) CtrlEnv(NULL),
+         .ctrl_env    = NULL,
          .capability  = new JoinEff(new List(new AccessEff(param_rgn),
                                              new List((type_t)fd->effect,NULL))),
          .curr_rgn    = param_rgn,
@@ -833,51 +785,8 @@ fenv_t<`r> new_fenv(region_t<`r> r, seg_t loc, fndecl_t fd) {
        };
 }
 
-fenv_t<`r> bogus_fenv(region_t<`r> r, type_t ret_type,
-                      list_t<$(var_opt_t,tqual_t,type_t)@> args) {
-  
-  bnds_t<`r> locals = NULL;
-  tvar_t rgn0 = new Tvar(new "bogus", new_tvar_id(), &rgn_kb);
-  let tvs = new List(rgn0,NULL);
-  let rgn_po = initial_fn_po(r,NULL,NULL,new JoinEff(NULL),rgn0,0);
-  type_t param_rgn = new VarType(rgn0);
-  let vds = NULL;
-  for(; args != NULL; args = args->tl) {
-    let $(vopt,tq,t) = *args->hd;
-    if (vopt != NULL) {
-      let vd = new{Vardecl{.sc = Public,
-                           .name = new $((nmspace_t)Loc_n,vopt),
-                           .tq = tq,
-                           .type = t,
-                           .initializer = NULL,
-                           .rgn = param_rgn,
-                           .attributes = NULL, .escapes = false}};
-      vds = new{List(vd, vds)};
-      let b = new Param_b(vd);
-      let var = vopt;
-      locals = rnew(r) Bindings{var, b, locals};
-    }
-  }
-  return rnew(r)
-    Fenv{.shared = rnew(r) SharedFenv{
-                     .frgn = r,
-                     .return_typ = ret_type,
-		     .delayed_effect_checks = NULL,
-		     .delayed_constraint_checks = NULL
-                   },
-         .type_vars   = tvs,
-         .region_order = rgn_po,
-         .locals      = locals,  // assumed unique
-         .ctrl_env    = rnew(r) CtrlEnv(NULL),
-         .capability  = new JoinEff(new List(new AccessEff(param_rgn),NULL)),
-         .curr_rgn    = param_rgn,
-	 .flags       = FenvFlags{false,false,false,false},
-         .fnrgn       = r
-       };
-}
-
 fenv_t<`r> nested_fenv(seg_t loc, fenv_t<`r> old_fenv, fndecl_t fd) {
-  let &Fenv{<`f,`c> .locals = old_locals, .region_order = rgn_po,
+  let &Fenv{<`f> .locals = old_locals, .region_order = rgn_po,
                .type_vars = type_vars, .shared = shared, .fnrgn = fr, ...} = old_fenv;
   let r = shared->frgn;
   let locals = (bnds_t<`r>)old_locals;
@@ -923,11 +832,54 @@ fenv_t<`r> nested_fenv(seg_t loc, fenv_t<`r> old_fenv, fndecl_t fd) {
          .type_vars   = tvs,
          .region_order = rgn_po,
          .locals      = locals,  // assumed unique
-         .ctrl_env    = rnew(r) CtrlEnv(NULL),
+         .ctrl_env    = NULL,
          .capability  = new JoinEff(new List(new AccessEff(param_rgn),
                                              new List((type_t)fd->effect,NULL))),
          .curr_rgn    = param_rgn,
 	 .flags       = FenvFlags{false,false,false,false},
          .fnrgn       = fr
+       };
+}
+
+fenv_t<`r> bogus_fenv(region_t<`r> r, type_t ret_type,
+                      list_t<$(var_opt_t,tqual_t,type_t)@> args) {
+  
+  bnds_t<`r> locals = NULL;
+  tvar_t rgn0 = new Tvar(new "bogus", new_tvar_id(), &rgn_kb);
+  let tvs = new List(rgn0,NULL);
+  let rgn_po = initial_fn_po(r,NULL,NULL,new JoinEff(NULL),rgn0,0);
+  type_t param_rgn = new VarType(rgn0);
+  let vds = NULL;
+  for(; args != NULL; args = args->tl) {
+    let $(vopt,tq,t) = *args->hd;
+    if (vopt != NULL) {
+      let vd = new{Vardecl{.sc = Public,
+                           .name = new $((nmspace_t)Loc_n,vopt),
+                           .tq = tq,
+                           .type = t,
+                           .initializer = NULL,
+                           .rgn = param_rgn,
+                           .attributes = NULL, .escapes = false}};
+      vds = new{List(vd, vds)};
+      let b = new Param_b(vd);
+      let var = vopt;
+      locals = rnew(r) Bindings{var, b, locals};
+    }
+  }
+  return rnew(r)
+    Fenv{.shared = rnew(r) SharedFenv{
+                     .frgn = r,
+                     .return_typ = ret_type,
+		     .delayed_effect_checks = NULL,
+		     .delayed_constraint_checks = NULL
+                   },
+         .type_vars   = tvs,
+         .region_order = rgn_po,
+         .locals      = locals,  // assumed unique
+         .ctrl_env    = NULL,
+         .capability  = new JoinEff(new List(new AccessEff(param_rgn),NULL)),
+         .curr_rgn    = param_rgn,
+	 .flags       = FenvFlags{false,false,false,false},
+         .fnrgn       = r
        };
 }

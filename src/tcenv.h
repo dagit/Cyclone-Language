@@ -16,7 +16,6 @@
    along with the Cyclone compiler; see the file COPYING. If not,
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
-
 #ifndef _TCENV_H_
 #define _TCENV_H_
 
@@ -180,8 +179,6 @@ extern void check_rgn_accessible(tenv_t,seg_t,type_t rgn);
 extern void check_rgn_resetable(tenv_t,seg_t,type_t rgn);
 // Check that an effect is a sub-effect of the current capability, may delay
 extern void check_effect_accessible(tenv_t te, seg_t loc, type_t eff);
-// Returns the region in which a function's parameters live
-extern type_t parameter_rgn(tenv_t);
 // Returns true when region r1 outlives region r2 -- assumes r1 <> r2
 extern bool region_outlives(tenv_t, type_t r1, type_t r2);
 // Checks that for each pair of regions (r1,r2), r1 outlives r2 under
@@ -192,6 +189,5 @@ extern void check_rgn_partial_order(tenv_t te, seg_t loc,
 extern void check_delayed_effects(tenv_t te);
 extern void check_delayed_constraints(tenv_t te);
 
-extern bool warn_override;
 }
 #endif

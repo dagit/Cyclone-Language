@@ -31,7 +31,6 @@
 #include <cycboot.h>
 #include "tcdecl.h"
 #include "relations.h"
-
 using Core;
 using List;
 using Position;
@@ -39,7 +38,6 @@ using Absyn;
 using Absynpp;
 using Tcutil;
 using Tcenv;
-
 namespace Tc;
 
 // used for the error messages of tcdecl
@@ -279,19 +277,10 @@ static void tcVardecl(tenv_t te, seg_t loc, vardecl_t vd, bool check_var_init,
           te->ae->ordinaries = Dict::insert(te->ae->ordinaries, q,
 					    new $(new VarRes(b), true));
       return;
-    case &AggrRes(_): 
-      if (aggressive_warn)
-        warn(loc,"variable declaration shadows previous struct declaration");
-      break;
-    case &DatatypeRes(_,_): 
-      if (aggressive_warn)
-        warn(loc,"variable declaration shadows previous datatype constructor");
-      break;
-    case &AnonEnumRes(_,_): 
-    case &EnumRes(_,_): 
-      if (aggressive_warn)
-        warn(loc,"variable declaration shadows previous enum tag");
-      break;
+    case &AggrRes(...): // shadowing warnings now handled by Binding
+    case &DatatypeRes(...): 
+    case &AnonEnumRes(...): 
+    case &EnumRes(...): break;
     }
   } catch { case &Dict::Absent: break; }
   if (exports == NULL || export_member(vd->name,*exports))
@@ -1055,6 +1044,8 @@ static void tc_decls(tenv_t<`g> te, list_t<decl_t,`H> ds0,
       tc_decls(te,ds2,true,check_var_init,grgn,exports);
       break;
 
+      // FIX: there's a simpler way to do this that does not require remembering
+      // to mutate bools other places.  (See binding.)
     case &ExternCinclude_d(ds2,exports2):
       list_t<$(seg_t,qvar_t,bool)@> newexs = 
         List::append(exports2,exports ? *exports : NULL);

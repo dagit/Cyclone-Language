@@ -16,7 +16,6 @@
    along with the Cyclone compiler; see the file COPYING. If not,
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
-
 #include <core.h>
 #include <list.h>
 #include <dict.h>
@@ -31,7 +30,6 @@
 #include "tcpat.h"
 #include "evexp.h"
 #include <cycboot.h>
-
 using Core;
 using List;
 using Set;
@@ -53,9 +51,8 @@ static void resolve_pat(tenv_t te, type_t *topt, pat_t p) {
   switch(p->r) {
 
   case &Aggr_p(NULL, exist_ts, dps, dots): 
-    // DJG: this case will remain because binding does not have topt
+    // DJG: this case remains because binding does not have topt
     //      I think it's primarily used for tagged unions (not datatypes)
-    //      Would people mind if we got rid of it?
     if (topt == NULL) 
       terr(p->loc, "cannot determine pattern type");
     type_t t = compress(*topt);

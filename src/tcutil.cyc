@@ -25,6 +25,7 @@
 #include <position.h>
 #include "tcenv.h"
 #include <string.h>
+#include "warn.h"
 #include "evexp.h"
 #include "tcutil.h"
 #include "tcexp.h"
@@ -140,32 +141,9 @@ void print_tvars(list_t<tvar_t> tvs) {
   fprintf(stderr,"\n"); fflush(stderr);
 }
 
-static list_t<seg_t>       warning_segs = NULL;
-static list_t<stringptr_t> warning_msgs = NULL;
-
-// we batch warnings because we have to parse the file to determine
-// line and column information.
-void warn(seg_t sg, string_t fmt, ... inject parg_t<`r2> ap)
-  __attribute__((format(printf,2,3)))
-{
-  string_t msg = vrprintf(heap_region,fmt,ap);
-  warning_segs = new List(sg,      warning_segs);
-  warning_msgs = new List(new msg, warning_msgs);
-}
-void flush_warnings() {
-  if(warning_segs == NULL)
-    return;
-  fprintf(stderr,"***Warnings***\n");
-  let seg_strs = strings_of_segments(warning_segs);
-  warning_segs = NULL;
-  warning_msgs = List::imp_rev(warning_msgs);
-  while(warning_msgs != NULL) {
-    fprintf(stderr,"%s: %s\n", *(seg_strs->hd), *(warning_msgs->hd));
-    seg_strs     = seg_strs->tl;
-    warning_msgs = warning_msgs->tl;
-  }
-  fprintf(stderr,"**************\n");
-  fflush(stderr);
+void warn(seg_t sg, string_t fmt, ... inject parg_t ap)
+  __attribute__((format(printf,2,3))) {
+  Warn::vwarn(sg, fmt, ap);
 }
 
 // set by by Tcenv::tc_init, used to reduce allocation and calls to Set::empty.

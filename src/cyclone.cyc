@@ -18,13 +18,9 @@
    Suite 330, Boston, MA 02111-1307, USA. */
 
 #include <arg.h>
-#include <core.h>
 #include <cycboot.h>
-#include <list.h>
 #include <string.h>
-#include <dict.h>
 #include <filename.h>
-#include <position.h>
 #include "parse.h"
 #include "absyn.h"
 #include "absynpp.h"
@@ -38,6 +34,7 @@
 #include "new_control_flow.h"
 #include "jump_analysis.h"
 #include "interface.h"
+#include "warn.h"
 #include "cyclone.h"
 
 namespace Port {
@@ -306,6 +303,7 @@ static void set_all_warnings() {
   Tcutil::warn_alias_coerce = true;
   Tcutil::warn_region_coerce = true;
   Tc::aggressive_warn = true;
+  Binding::warn_override = true;
 }
 
 // This only works enough to support cycdoc so far
@@ -641,7 +639,7 @@ list_t<Absyn::decl_t> do_cfcheck(JumpAnalysis::jump_anal_res_t tables,
 list_t<Absyn::decl_t> do_interface($(Tcenv::tenv_t, FILE *`H, FILE @`H)@ params,
 				   list_t<Absyn::decl_t,`H> tds) {
   let &$(te, fi, fo) = params;
-  let i1 = Interface::extract(te -> ae);
+  let i1 = Interface::extract(te->ae, tds);
   if (fi == NULL) {
     Interface::save(i1, fo);
   } else {
@@ -1087,7 +1085,7 @@ static void process_file(string_t<`H> filename) {
     tds = do_stage("post-pass to VC", tds, do_tovc, true, ignore, true);
   if (compile_failure) return;
 
-  Tcutil::flush_warnings(); // cannot do after preprocfile is removed
+  Warn::flush_warnings(); // cannot do after preprocfile is removed
   remove_file(preprocfile);
 
   // jcheney: we make a (empty) .c file even if the .cyc file produced no decls
@@ -1215,7 +1213,7 @@ using Arg {
               Set_spec,&NewControlFlow::warn_lose_unique,
               "Try to warn when a unique pointer might get lost");
   make_option(opt19,"-Woverride",false,"",
-              Set_spec,&Tcenv::warn_override,
+              Set_spec,&Binding::warn_override,
               "Warn when a local variable overrides an existing variable");
   make_option(opt20,"-Wall",false,"",
               Unit_spec,set_all_warnings,

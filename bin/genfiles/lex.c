@@ -1072,56 +1072,57 @@ int Cyc_RgnOrder_satisfies_constraints(struct Cyc_RgnOrder_RgnPO*po,struct Cyc_L
 int Cyc_RgnOrder_eff_outlives_eff(struct Cyc_RgnOrder_RgnPO*po,void*eff1,void*eff2);
 # 51
 void Cyc_RgnOrder_print_region_po(struct Cyc_RgnOrder_RgnPO*po);extern char Cyc_Tcenv_Env_error[10];struct Cyc_Tcenv_Env_error_exn_struct{char*tag;};struct Cyc_Tcenv_CList{void*hd;const struct Cyc_Tcenv_CList*tl;};
-# 43 "tcenv.h"
+# 42 "tcenv.h"
 typedef const struct Cyc_Tcenv_CList*Cyc_Tcenv_mclist_t;
 typedef const struct Cyc_Tcenv_CList*const Cyc_Tcenv_clist_t;struct Cyc_Tcenv_VarRes_Tcenv_Resolved_struct{int tag;void*f1;};struct Cyc_Tcenv_AggrRes_Tcenv_Resolved_struct{int tag;struct Cyc_Absyn_Aggrdecl*f1;};struct Cyc_Tcenv_DatatypeRes_Tcenv_Resolved_struct{int tag;struct Cyc_Absyn_Datatypedecl*f1;struct Cyc_Absyn_Datatypefield*f2;};struct Cyc_Tcenv_EnumRes_Tcenv_Resolved_struct{int tag;struct Cyc_Absyn_Enumdecl*f1;struct Cyc_Absyn_Enumfield*f2;};struct Cyc_Tcenv_AnonEnumRes_Tcenv_Resolved_struct{int tag;void*f1;struct Cyc_Absyn_Enumfield*f2;};
-# 54
+# 53
 typedef void*Cyc_Tcenv_resolved_t;struct Cyc_Tcenv_Genv{struct _RegionHandle*grgn;struct Cyc_Dict_Dict aggrdecls;struct Cyc_Dict_Dict datatypedecls;struct Cyc_Dict_Dict enumdecls;struct Cyc_Dict_Dict typedefs;struct Cyc_Dict_Dict ordinaries;};
-# 70
+# 69
 typedef struct Cyc_Tcenv_Genv*Cyc_Tcenv_genv_t;struct Cyc_Tcenv_Fenv;
-# 74
+# 73
 typedef struct Cyc_Tcenv_Fenv*Cyc_Tcenv_fenv_t;struct Cyc_Tcenv_Tenv{struct Cyc_List_List*ns;struct Cyc_Tcenv_Genv*ae;struct Cyc_Tcenv_Fenv*le;int allow_valueof;int in_extern_c_include;};
-# 85
+# 84
 typedef struct Cyc_Tcenv_Tenv*Cyc_Tcenv_tenv_t;
-# 119 "tcenv.h"
+# 118 "tcenv.h"
 enum Cyc_Tcenv_NewStatus{Cyc_Tcenv_NoneNew  = 0,Cyc_Tcenv_InNew  = 1,Cyc_Tcenv_InNewAggr  = 2};extern char Cyc_Tcutil_AbortTypeCheckingFunction[26];struct Cyc_Tcutil_AbortTypeCheckingFunction_exn_struct{char*tag;};
 # 43 "lex.cyl"
-void Cyc_yyerror(struct _dyneither_ptr s,int state,int token);
-# 47
+void Cyc_yyerror(struct _dyneither_ptr s,int state,int token);struct Cyc_Lex_Trie;
+# 48
+typedef struct Cyc_Lex_Trie*Cyc_Lex_trie_t;struct _union_TrieChildren_Zero{int tag;int val;};struct _tuple19{int f1;struct Cyc_Lex_Trie*f2;};struct _union_TrieChildren_One{int tag;struct _tuple19 val;};struct _union_TrieChildren_Many{int tag;struct Cyc_Lex_Trie**val;};union Cyc_Lex_TrieChildren{struct _union_TrieChildren_Zero Zero;struct _union_TrieChildren_One One;struct _union_TrieChildren_Many Many;};
+# 54
+union Cyc_Lex_TrieChildren Cyc_Lex_Zero(){return({union Cyc_Lex_TrieChildren _tmp0;(_tmp0.Zero).val=0;(_tmp0.Zero).tag=1;_tmp0;});}
+union Cyc_Lex_TrieChildren Cyc_Lex_One(int i,struct Cyc_Lex_Trie*t){
+return({union Cyc_Lex_TrieChildren _tmp1;(_tmp1.One).val=({struct _tuple19 _tmp2;_tmp2.f1=i;_tmp2.f2=t;_tmp2;});(_tmp1.One).tag=2;_tmp1;});}
+# 58
+union Cyc_Lex_TrieChildren Cyc_Lex_Many(struct Cyc_Lex_Trie**ts){
+return({union Cyc_Lex_TrieChildren _tmp3;(_tmp3.Many).val=ts;(_tmp3.Many).tag=3;_tmp3;});}struct Cyc_Lex_Trie{union Cyc_Lex_TrieChildren children;int shared_str;};struct Cyc_Lex_DynTrie{struct Cyc_Core_DynamicRegion*dyn;struct Cyc_Lex_Trie*t;};
+# 70
+typedef struct Cyc_Lex_DynTrie*Cyc_Lex_dyn_trie_t;struct Cyc_Lex_DynTrieSymbols{struct Cyc_Core_DynamicRegion*dyn;struct Cyc_Lex_Trie*t;struct Cyc_Xarray_Xarray*symbols;};
+# 77
+typedef struct Cyc_Lex_DynTrieSymbols*Cyc_Lex_dyn_trie_symbols_t;
+# 82
+static int Cyc_Lex_num_kws=0;struct Cyc_Lex_KeyWordInfo{int token_index;int is_c_keyword;};
+# 84
+static struct _dyneither_ptr Cyc_Lex_kw_nums={(void*)0,(void*)0,(void*)(0 + 0)};
+# 86
 int Cyc_Lex_compile_for_boot_r=0;
 int Cyc_Lex_expand_specials=0;
-# 50
+# 89
 static int Cyc_Lex_in_extern_c=0;
 static struct Cyc_List_List*Cyc_Lex_prev_extern_c=0;
 void Cyc_Lex_enter_extern_c(){
 struct Cyc_List_List*x=0;
-({struct Cyc_List_List*_tmp0=x;struct Cyc_List_List*_tmp1=Cyc_Lex_prev_extern_c;x=_tmp1;Cyc_Lex_prev_extern_c=_tmp0;});
-Cyc_Lex_prev_extern_c=({struct Cyc_List_List*_tmp2=_region_malloc(Cyc_Core_unique_region,sizeof(*_tmp2));_tmp2->hd=(void*)Cyc_Lex_in_extern_c;_tmp2->tl=x;_tmp2;});
+({struct Cyc_List_List*_tmp4=x;struct Cyc_List_List*_tmp5=Cyc_Lex_prev_extern_c;x=_tmp5;Cyc_Lex_prev_extern_c=_tmp4;});
+Cyc_Lex_prev_extern_c=({struct Cyc_List_List*_tmp6=_region_malloc(Cyc_Core_unique_region,sizeof(*_tmp6));_tmp6->hd=(void*)Cyc_Lex_in_extern_c;_tmp6->tl=x;_tmp6;});
 Cyc_Lex_in_extern_c=1;}
-# 58
+# 97
 void Cyc_Lex_leave_extern_c(){
 struct Cyc_List_List*x=0;
-({struct Cyc_List_List*_tmp3=x;struct Cyc_List_List*_tmp4=Cyc_Lex_prev_extern_c;x=_tmp4;Cyc_Lex_prev_extern_c=_tmp3;});
+({struct Cyc_List_List*_tmp7=x;struct Cyc_List_List*_tmp8=Cyc_Lex_prev_extern_c;x=_tmp8;Cyc_Lex_prev_extern_c=_tmp7;});
 Cyc_Lex_in_extern_c=(int)((struct Cyc_List_List*)_check_null(x))->hd;
 Cyc_Lex_prev_extern_c=((struct Cyc_List_List*)_check_null(x))->tl;
-((void(*)(struct _dyneither_ptr ptr))Cyc_Core_ufree)(_tag_dyneither(x,sizeof(struct Cyc_List_List),1));}struct Cyc_Lex_Trie;
-# 67
-typedef struct Cyc_Lex_Trie*Cyc_Lex_trie_t;struct _union_TrieChildren_Zero{int tag;int val;};struct _tuple19{int f1;struct Cyc_Lex_Trie*f2;};struct _union_TrieChildren_One{int tag;struct _tuple19 val;};struct _union_TrieChildren_Many{int tag;struct Cyc_Lex_Trie**val;};union Cyc_Lex_TrieChildren{struct _union_TrieChildren_Zero Zero;struct _union_TrieChildren_One One;struct _union_TrieChildren_Many Many;};
-# 73
-union Cyc_Lex_TrieChildren Cyc_Lex_Zero(){return({union Cyc_Lex_TrieChildren _tmp5;(_tmp5.Zero).val=0;(_tmp5.Zero).tag=1;_tmp5;});}
-union Cyc_Lex_TrieChildren Cyc_Lex_One(int i,struct Cyc_Lex_Trie*t){
-return({union Cyc_Lex_TrieChildren _tmp6;(_tmp6.One).val=({struct _tuple19 _tmp7;_tmp7.f1=i;_tmp7.f2=t;_tmp7;});(_tmp6.One).tag=2;_tmp6;});}
-# 77
-union Cyc_Lex_TrieChildren Cyc_Lex_Many(struct Cyc_Lex_Trie**ts){
-return({union Cyc_Lex_TrieChildren _tmp8;(_tmp8.Many).val=ts;(_tmp8.Many).tag=3;_tmp8;});}struct Cyc_Lex_Trie{union Cyc_Lex_TrieChildren children;int shared_str;};
-# 88
-static int Cyc_Lex_num_kws=0;struct Cyc_Lex_KeyWordInfo{int token_index;int is_c_keyword;};
-# 90
-static struct _dyneither_ptr Cyc_Lex_kw_nums={(void*)0,(void*)0,(void*)(0 + 0)};struct Cyc_Lex_DynTrie{struct Cyc_Core_DynamicRegion*dyn;struct Cyc_Lex_Trie*t;};
-# 97
-typedef struct Cyc_Lex_DynTrie*Cyc_Lex_dyn_trie_t;struct Cyc_Lex_DynTrieSymbols{struct Cyc_Core_DynamicRegion*dyn;struct Cyc_Lex_Trie*t;struct Cyc_Xarray_Xarray*symbols;};
-# 104
-typedef struct Cyc_Lex_DynTrieSymbols*Cyc_Lex_dyn_trie_symbols_t;
+((void(*)(struct _dyneither_ptr ptr))Cyc_Core_ufree)(_tag_dyneither(x,sizeof(struct Cyc_List_List),1));}
+# 105
 static struct Cyc_Lex_DynTrieSymbols*Cyc_Lex_ids_trie=0;
 static struct Cyc_Lex_DynTrie*Cyc_Lex_typedefs_trie=0;
 # 108

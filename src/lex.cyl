@@ -44,6 +44,45 @@ extern void yyerror(string_t<`H> s, int state, int token);
 
 namespace Lex {
 
+struct Trie<`r::R>;
+typedef struct Trie<`r> *`r trie_t<`r>;
+@tagged union TrieChildren<`r::R> {
+  int Zero;
+  $(int, trie_t<`r>) One;
+  trie_t<`r> @{64}`r Many; // enough room for id chars and `
+};
+union TrieChildren<`r> Zero() { return TrieChildren{.Zero = 0}; }
+union TrieChildren<`r> One(int i,trie_t<`r> t) { 
+  return TrieChildren{.One = $(i,t)}; 
+}
+union TrieChildren<`r> Many(trie_t<`r>@{64}`r ts) {
+  return TrieChildren{.Many = ts}; 
+}
+struct Trie<`r::R> {
+  union TrieChildren<`r> children;
+  int shared_str; // meaning depends on which trie -- see below
+};
+struct DynTrie {
+  <`d::R> 
+  uregion_key_t<`d>  dyn;
+  trie_t<`d>         t;
+};
+typedef struct DynTrie *`U dyn_trie_t;
+struct DynTrieSymbols {
+  <`d::R> 
+  uregion_key_t<`d>  dyn;
+  trie_t<`d>         t;  //int field is symbol index, 0 for not there
+  Xarray::xarray_t<stringptr_t,`d> symbols;
+};
+typedef struct DynTrieSymbols *`U dyn_trie_symbols_t;
+
+/////////////////////////////// Globals /////////////////////////////
+
+// These must be (re-)initialized in lex_init.
+static int    num_kws  = 0;
+struct KeyWordInfo { int token_index; bool is_c_keyword; };
+static struct KeyWordInfo ?  kw_nums  = NULL;
+
 bool compile_for_boot_r = false;
 bool expand_specials = false;
 // state for recording whether or not we're parsing C code
@@ -63,45 +102,6 @@ void leave_extern_c() {
   ufree(x);
 }
 
-struct Trie<`r::R>;
-typedef struct Trie<`r> *`r trie_t<`r>;
-@tagged union TrieChildren<`r::R> {
-  int Zero;
-  $(int, trie_t<`r>) One;
-  trie_t<`r> @{64}`r Many; // enough room for id chars and `
-};
-union TrieChildren<`r> Zero() { return TrieChildren{.Zero = 0}; }
-union TrieChildren<`r> One(int i,trie_t<`r> t) { 
-  return TrieChildren{.One = $(i,t)}; 
-}
-union TrieChildren<`r> Many(trie_t<`r>@{64}`r ts) {
-  return TrieChildren{.Many = ts}; 
-}
-struct Trie<`r::R> {
-  union TrieChildren<`r> children;
-  int                 shared_str; // meaning depends on which trie -- see below
-};
-
-/////////////////////////////// Globals /////////////////////////////
-
-// These must be (re-)initialized in lex_init.
-static int    num_kws  = 0;
-struct KeyWordInfo { int token_index; bool is_c_keyword; };
-static struct KeyWordInfo ?  kw_nums  = NULL;
-  //static struct Xarray::Xarray<stringptr_t> * symbols  = NULL;
-struct DynTrie {
-  <`d::R> 
-  uregion_key_t<`d>  dyn;
-  trie_t<`d>         t;
-};
-typedef struct DynTrie *`U dyn_trie_t;
-struct DynTrieSymbols {
-  <`d::R> 
-  uregion_key_t<`d>  dyn;
-  trie_t<`d>         t;  //int field is symbol index, 0 for not there
-  Xarray::xarray_t<stringptr_t,`d> symbols;
-};
-typedef struct DynTrieSymbols *`U dyn_trie_symbols_t;
 static dyn_trie_symbols_t ids_trie  = NULL;
 static dyn_trie_t typedefs_trie = NULL;//int field true iff path is a typedef
 

@@ -93,6 +93,7 @@ CYCLONE_H:=arg.h\
 	xarray.h
 
 CYCLONE_SRCS:=absyn\
+	 warn\
          parse_tab\
          parse_errors\
          lex\
@@ -121,6 +122,7 @@ CYCLONE_SRCS:=absyn\
 	 cyclone
 
 CYCDOC_SRCS:=cycdoc\
+	warn\
         parse_errors\
 	lex\
 	parse_tab\
@@ -144,6 +146,7 @@ CYCDOC_SRCS:=cycdoc\
 	absynpp
 
 BUILDLIB_SRCS:=buildlib\
+	warn\
         parse_errors\
 	lex\
 	parse_tab\

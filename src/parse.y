@@ -1229,18 +1229,10 @@ prog:
 translation_unit:
   external_declaration translation_unit
     { list_t<decl_t> x, y;
-      try {
-        x = $1;
-      } catch {
-      case &Core::Failure(_):
-        x = NULL; break;
-      }
-      try {
-        y = $2;
-      } catch {
-      case &Core::Failure(_):
-        y = NULL; break;
-      }
+      try {x = $1;} 
+      catch { case &Core::Failure(_): x = NULL; break;}
+      try {y = $2;}
+      catch { case &Core::Failure(_): y = NULL; break;}
       $$=^$(List::imp_append(x,y)); 
     }
 /* Cyc: added using and namespace */

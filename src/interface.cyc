@@ -68,6 +68,7 @@ typedef struct Ienv @ienv_t;
 struct I {
   ienv_t imports; // what is needed
   ienv_t exports; // what is provided
+  list_t<decl_t> tds;
 };
 
 static ienv_t new_ienv() {
@@ -81,7 +82,7 @@ static ienv_t new_ienv() {
   };
 }
 i_t empty() {
-  return new I(new_ienv(), new_ienv());
+  return new I(new_ienv(), new_ienv(), NULL);
 }
 // dual of the initial environment defined in Tcenv::tc_init
 // + requirement for a function main
@@ -99,7 +100,8 @@ i_t final() {
     i->exports->xdatatypefielddecls = Dict::insert(i->exports->xdatatypefielddecls,
 						   tufs->hd->name, exn_fd);
   }    
-  // add requirement of function main
+  //polyvios: removed main() from the final interface, because of the various forms main(...) can have
+  /*  // add requirement of function main
   qvar_t qmain = new $(Nmspace{.Abs_n = NULL}, new ((string_t)"main"));
   let vd = new_vardecl(qmain,
 		       function_typ(NULL, NULL, empty_tqual(0), sint_typ,
@@ -115,7 +117,7 @@ i_t final() {
 		       NULL);
   vd->sc = Extern;
   i->exports->vardecls = Dict::insert(i->exports->vardecls, qmain, vd);
-
+  */
   i->imports = i->exports;
   return i;
 }
@@ -562,6 +564,102 @@ static void extract_ordinarie($(ienv_t,ienv_t,bool,genv_t,seen_t,i_t) @ env,
   }
 }
 
+static list_t<decl_t, `H> remove_decl_from_list(list_t<decl_t, `H> l, decl_t d) {
+  if(l == NULL) return NULL;
+  switch($(d->r,l->hd->r)) {
+    case $(&Typedef_d(a1), &Typedef_d(a2)):
+      if(qvar_cmp(a1->name, a2->name) != 0) break;
+      return remove_decl_from_list(l->tl, d);
+    case $(&Enum_d(a1), &Enum_d(a2)):
+      if(qvar_cmp(a1->name, a2->name) != 0) break;
+      if(a1->sc == Extern) a1->sc = a2->sc;
+      return remove_decl_from_list(l->tl, d);
+      break;
+    case $(&Var_d(*vd1), &Var_d(vd2)):
+      if(qvar_cmp((*vd1)->name, vd2->name) != 0) break;
+      if((*vd1)->sc == Extern) *vd1 = new *vd2;
+      return remove_decl_from_list(l->tl, d);
+    default:
+      break;
+  }
+  return new List(l->hd, remove_decl_from_list(l->tl, d));
+}
+
+static list_t<decl_t, `H> uniqify_decl_list(list_t<decl_t, `H> accum, decl_t d) {
+  if(accum == NULL) return new List(d, NULL);
+  list_t<decl_t> l;
+  for(l=accum; l != NULL; l = l->tl) {
+    switch($(d->r,l->hd->r)) {
+      case $(&Var_d(vd1), &Var_d(*vd2)):
+        if(qvar_cmp(vd1->name, (*vd2)->name) != 0) break;
+        if((*vd2)->sc == Extern) *vd2 = new *vd1;
+        return accum;
+      case $(&Typedef_d(a1), &Typedef_d(a2)):
+        if(qvar_cmp(a1->name, a2->name) != 0) break;
+        return accum;
+      case $(&Enum_d(a1), &Enum_d(a2)):
+        if(qvar_cmp(a1->name, a2->name) != 0) break;
+        return accum;
+      case $(&Namespace_d(a1,*b1), &Namespace_d(a2,b2)):
+        if(strptrcmp(a1, a2) != 0) break;
+        let dl = b2;
+        for(;dl != NULL; dl = dl->tl) {
+                *b1 = remove_decl_from_list(*b1, dl->hd);
+        }
+        break;
+      default:
+        break;
+    }
+  }
+  return new List(d, accum);
+}
+
+static list_t<decl_t, `H> filterstatics(list_t<decl_t, `H> accum, decl_t d) {
+  switch(d->r) {
+    case &Var_d(vd):
+      if(vd->sc == ExternC) return accum;
+      if(vd->sc == Static) return accum;
+      let nvd = new *vd;
+      nvd->initializer = NULL;
+      if(is_function_type(nvd->type) && nvd->sc != Extern)
+        nvd->sc = Extern;
+      return new List(new_decl(new Var_d(nvd),0), accum);
+    case &Fn_d(fd):
+      if(fd->sc == Static) return accum;
+      if(fd->sc == ExternC) return accum;
+      let vd = new_vardecl(fd->name, (type_t)fd->cached_typ, NULL);
+      vd->sc = fd->sc;
+      return new List(new_decl(new Var_d(vd),0), accum);
+    case &Aggr_d(a):
+      //if(a->sc == Static) return accum;
+      if(a->sc == ExternC) return accum;
+      break;
+    case &Datatype_d(a):
+      //if(a->sc == Static) return accum;
+      if(a->sc == ExternC) return accum;
+      break;
+    case &Enum_d(a):
+      if(a->sc == Static) return accum; // FIX? different than previous 2 cases
+      if(a->sc == ExternC) return accum;
+      break;
+    case &Typedef_d(a):
+      break;
+    case &Namespace_d(a,b):
+      let l = rev(fold_left(filterstatics, NULL, b));
+      return new List(new_decl(new Namespace_d(a, l),0), accum);
+    case &Using_d(_,b):
+      return append(fold_left(filterstatics, NULL, b), accum);
+    case &Let_d(...):
+    case &Letv_d(...):
+    case &Region_d(...):
+    case &ExternC_d(...):
+    case &ExternCinclude_d(...):
+    case &Porton_d:
+    case &Portoff_d: return accum;
+  }
+  return new List(new *d, accum);
+}
+
 static void extract_f($(i_t, bool, genv_t, seen_t) @ env_f) {
   let &$(i, check_complete_defs, ae, seen) = env_f;
   let env = $(i->imports, i->exports, check_complete_defs, ae, seen, i);
@@ -572,15 +670,18 @@ static void extract_f($(i_t, bool, genv_t, seen_t) @ env_f) {
   Dict::iter_c(extract_ordinarie,    &env,  ae->ordinaries);
 }
 
-static i_t gen_extract(genv_t ae, bool check_complete_defs) {
-  $(i_t,bool,genv_t,seen_t) env = 
+static i_t gen_extract(genv_t ae, bool check_complete_defs, list_t<decl_t> tds){
+  $(i_t,bool,genv_t,seen_t) env =
     $(empty(), check_complete_defs, ae, new_seen());
   extract_f(&env);
-  return env[0];
+  let i = env[0];
+  i->tds = rev(fold_left(filterstatics, NULL, tds));
+  i->tds = rev(fold_left(uniqify_decl_list, NULL, i->tds));
+  return i;
 }
 
-i_t extract(genv_t ae) {
-  return gen_extract(ae, true);
+i_t extract(genv_t ae, list_t<decl_t> tds) {
+  return gen_extract(ae, true, tds);
 }
 
 ////// checking inclusion ///////
@@ -832,7 +933,12 @@ struct I * merge(i_t i1, i_t i2, $(string_t<`H>, string_t<`H>) * info) {
     let imp = compat_merge_ienv(i1->imports, i2->imports, exp, msg);
     if (imp == NULL) return NULL;
 
-    return new I(imp, exp);
+    list_t<decl_t> newtds = NULL, l = i2->tds;
+    for(;l != NULL; l=l->tl) {
+      newtds = new List(new *l->hd, newtds);
+    }
+    newtds = rev(fold_left(uniqify_decl_list, newtds, i1->tds));
+    return new I(imp, exp, newtds);
   } catch { case &Tcdecl::Incompatible: return NULL; }
 }
 
@@ -1077,7 +1183,7 @@ i_t parse(FILE @ f) {
     Binding::resolve_all(tds);
     let te  = Tcenv::tc_init(r);
     Tc::tc(r, te, false, tds); // no "Cyc" prefix, no default initializer 
-    return gen_extract(te->ae, false); //don't check that definitions are complete
+    return gen_extract(te->ae, false, tds); //don't check that definitions are complete
   }
 }
 

@@ -50,7 +50,7 @@ namespace Interface {
   
   // build a maximal interface from the global environment computed by the type-checker
   // also check that each (non extern) function prototype is eventually provided
-  extern i_t extract(genv_t ae);
+  extern i_t extract(genv_t, list_t<decl_t>);
 
   // check if i1 may safely be used instead of i2 (ie. i1 is more restrictive than i2) :
   // _ everything provided by in i1 is provided by i2

@@ -16,13 +16,22 @@
    along with the Cyclone compiler; see the file COPYING. If not,
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
-#ifndef _BINDING_H
-#define _BINDING_H
+#ifndef _WARN_H
+#define _WARN_H
 
-#include "absyn.h"
+#include <position.h>
 
-namespace Binding {
-  extern bool warn_override;
-  void resolve_all(List::list_t<Absyn::decl_t,`H> tds);
+namespace Warn {
+  void vwarn(Position::seg_t sg, string_t fmt, parg_t ? ap);
+
+  void warn(Position::seg_t sg, string_t fmt, ... inject parg_t ap)
+    __attribute__((format(printf,2,3)));
+  void flush_warnings();
+
+  void err(Position::seg_t loc, string_t fmt, ... inject parg_t ap)
+    __attribute__((format(printf,2,3)));
+
+  `a impos(string_t fmt, ... inject parg_t ap)
+    __attribute__((format(printf,1,2), noreturn));
 }
 #endif
