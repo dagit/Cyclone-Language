@@ -170,6 +170,8 @@ static term_t hash_cons_term(datatype Term @t) {
   } else return *resopt;
 }
 
+
+// rewrite uint, cnst, var, 
 term_t uint(unsigned int i) {
   let t = Uint(i);
   return hash_cons_term(&t);
@@ -195,20 +197,15 @@ term_t logicvar(vardecl_opt_t vd,int i,type_opt_t tp) {
   return hash_cons_term(&t);
 }
 
-inline static bool is_commutative(Absyn::primop_t p) {
+inline static bool is_nonassociative_commutative(Absyn::primop_t p) {
   switch (p) {
-  case Absyn::Plus:
-  case Absyn::Times:
   case Absyn::Eq:
-  case Absyn::Neq:
-  case Absyn::Bitand:
-  case Absyn::Bitor:
-  case Absyn::Bitxor: return true;
+  case Absyn::Neq: return true;
   default: return false;
   }
 }
 
-inline static bool is_associative(Absyn::primop_t p) {
+inline static bool is_associative_commutative(Absyn::primop_t p) {
   switch (p) {
   case Absyn::Plus:
   case Absyn::Times:
@@ -239,12 +236,86 @@ term_t minus(term_t t1, term_t t2, type_opt_t tp) {
 }
 
 term_t unop(Absyn::primop_t p, term_t t, type_opt_t tp) {
+  // +t = t;
+  if (p == Absyn::Plus) return t;
   let ptr = Unop(p,t,tp);
   return hash_cons_term(&ptr);
 }
 
+
+//evaluating commutative associative bin op on constants.
+static term_t eval_binop(Absyn::primop_t p, unsigned i, unsigned j){
+  switch(p){
+  case Absyn::Plus: return uint(i+j);
+  case Absyn::Times: return uint(i*j);
+  case Absyn::Bitand: return uint(i & j);
+  case Absyn::Bitor: return uint(i | j);
+  case Absyn::Bitxor: return uint(i ^ j);
+  default: 
+    Tcutil::impos("Error in evaluating binop");
+  }
+}
+// for a binop p that is both commutative and associative
+// t has normal form for p, i.e., t = (((t1 p t2) p t3)...p tn)
+// where t1 >= t2 >= t3 >= tn
+static $(list_t<term_t,`H>, unsigned *) flatten(Absyn::primop_t p, term_t t){
+  list_t<term_t,`H> termlist = NULL;
+  unsigned * res = NULL;
+ LOOP:
+  switch (t){
+  case &Uint(i): res = new i; break;
+  case &Binop(p1,t1,&Uint(i),_) && p1 == p: 
+    res = new i;
+    t = t1;
+    goto LOOP;
+  case &Binop(p1, t1, t2,_)&& p1 == p:
+    termlist = new List(t2, termlist);
+    t = t1;
+    goto LOOP;
+  default:
+    termlist = new List(t, termlist);
+    break;
+  }
+  return $(termlist,res);
+}
+
+static int inv_cmp_term(term_t t1, term_t t2){
+  return -cmp_term(t1, t2);
+}
+static term_t flatten_merge(Absyn::primop_t p, term_t t1, term_t t2, type_opt_t topt){
+  let $(tlist1,ip1) = flatten(p,t1);
+  let $(tlist2,ip2) = flatten(p,t2);
+  // termlist is (tn, tn-1, ..., t2, t1) where ti >= t(i-1).
+  let termlist = List::imp_merge(inv_cmp_term, tlist1, tlist2);
+  if (termlist == NULL){
+    Tcutil::impos(" commutative associative operator has no non constant operators!");
+  }
+  term_t t = termlist->hd;
+  termlist = termlist -> tl;
+  while(termlist != NULL){
+    let ptr = Binop(p,t, termlist->hd, topt);
+    t = hash_cons_term(&ptr);
+    termlist = termlist->tl;
+  }
+  if (ip1 == NULL) {
+    if (ip2 != NULL) {
+      let ptr = Binop(p, t, uint(*ip2),topt);
+      t = hash_cons_term(&ptr);
+    }
+  } else {
+    if (ip2 != NULL) {
+      let ptr = Binop(p, t, eval_binop(p, *ip1, *ip2), topt);
+      t = hash_cons_term(&ptr);
+    } else {
+      let ptr = Binop(p, t, uint(*ip1), topt);
+      t = hash_cons_term(&ptr);
+    }
+  }
+  return t;
+}
+
 term_t binop(Absyn::primop_t p, term_t t1, term_t t2, type_opt_t tp) {
-  if (is_commutative(p) && cmp_term(t1,t2) < 0) {
+  if (is_nonassociative_commutative(p) && cmp_term(t1,t2) < 0) {
     t1 :=: t2;
   }
   switch $(p,t1,t2) {
@@ -271,23 +342,11 @@ term_t binop(Absyn::primop_t p, term_t t1, term_t t2, type_opt_t tp) {
   case $(Absyn::Plus,t1,&Uint(0)): return t1;
     // t1 * 1  ==>  t1
   case $(Absyn::Times,t1,&Uint(1)): return t1;
-    // (t1 + c1) + c2 ==> t1 + (c1 + c2)
-  case $(Absyn::Plus,&Binop(Absyn::Plus,t1,&Uint(c1),tp1),&Uint(c2)):
-    return plus(t1,uint(c1+c2),tp);
-    // (t1 * c1) * c2 ==> t1 * (c1 * c2)
-  case $(Absyn::Times,&Binop(Absyn::Plus,t1,&Uint(c1),tp1),&Uint(c2)):
-    return plus(t1,uint(c1*c2),tp);
-    // (t3 + t1) + t2 ==> (t3 + t2) + t1  when t1 < t2
-  case $(_,&Binop(p2,t3,t1,tp1),t2) && p2 == p:
-    if (is_commutative(p) && cmp_term(t1,t2) < 0)
-      return binop(p,binop(p,t3,t2,tp),t1,tp1);
-    else break;
-    // t1 p (t2 p t3) ==> (t1 p t2) p t3    when p is associative
-  case $(_,t1,&Binop(p2,t2,t3,tp2)) && p2 == p:
-    if (is_associative(p)) 
-      return binop(p,binop(p,t1,t2,tp),t3,tp2);
-    break;
-  default: 
+    // trying to normalize for commutative and associative operator p
+    // into the form ((t1 p t2) p t3) ... p tn) where
+    // t1 <= t2 <= t3 <= ... <= tn
+  default:
+    if (is_associative_commutative(p)) return flatten_merge(p,t1,t2,tp);
     break;
   }
   let p = Binop(p,t1,t2,tp);
@@ -300,8 +359,7 @@ term_t cast(Absyn::type_t tp, term_t tm) {
 }
 term_t fresh_var(type_opt_t t) {
   static int counter = 0;
-  let p = LogicVar(NULL,counter++,t);
-  return hash_cons_term(&p);
+  return logicvar(NULL,counter++,t);
 }
 
 static bool same_term(term_t t1, term_t t2) { return cmp_term(t1,t2) == 0; }

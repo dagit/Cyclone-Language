@@ -31,7 +31,7 @@ namespace PrattProver;
 
 
 /**********************************************************************
-This is a simple constraint solver that can (conservatibely) determine 
+This is a simple constraint solver that can (conservatively) determine 
 the unsatisfiability of a quantifier-free assertion, where the primitive
 assertions involve signed and unsigned int terms and [in]equations.
 The solver is based on Pratt's difference constraint algorithm, but
@@ -43,8 +43,8 @@ The algorithm that we use here is roughly as follows:
     A1 || A2 || ... || An  where the Ai's are conjunctions of 
     primitive relations.  
 
-(2) For each Ai, we build two distance graphs representing the signed and 
-    unsigned distances between terms respectively.
+(2) For each Ai, we build two distance graphs representing the difference
+    between signed and unsigned terms.
 
 (3) We then close the graph by computing the shortest path from each 
     term to another, and by performing congruence closure w.r.t. the 
