@@ -11,7 +11,7 @@ complications.  Then we describe all the \hyperlink{pat_forms}{pattern
   statements}.
 
 You must use patterns to access values carried by
-\hyperlink{tagged_unions}{tagged unions}, including exceptions.  In
+\hyperref[{sec:taggedunions}]{tagged unions}, including exceptions.  In
 other situations, patterns make code more readable and less verbose.
 
 \subsection{Let Declarations}\hypertarget{let_decls}{}
@@ -21,11 +21,10 @@ In Cyclone, you can write
   let x = e;
 \end{verbatim}
 as a local declaration.  The meaning is the same as \texttt{t x = e;}
-where \texttt{t} is the type of \texttt{e}.  In other words, \texttt{x} is
-bound to the new variable.  Unlike with variable declarations, a let
-declaration must have an initializer (the \texttt{e}). Patterns are much
-more powerful because they can bind several variables to different
-parts of an aggregate object.  Here is an example:
+where \texttt{t} is the type of \texttt{e}.  In other words,
+\texttt{x} is bound to the new variable.  Patterns are much more
+powerful because they can bind several variables to different parts of
+an aggregate object.  Here is an example:
 \begin{verbatim}
   struct Pair {  int x; int y; };
   void f(struct Pair pr) {
@@ -79,7 +78,7 @@ whole point is that one of the cases' patterns should match.
 
 \subsection{Pattern Forms}\hypertarget{pat_forms}{}
 
-So far, we have seen three pattern forms, variables patterns, struct
+So far, we have seen three pattern forms: variables patterns, struct
 patterns, and constant patterns.  We now describe all the pattern
 forms.  For each form, you need to know:
 
@@ -126,14 +125,16 @@ first because we have already explained their use informally.
   \item Syntax: \texttt{*x} (i.e., the * character followed by an
     identifier)
   \item Types for match: all types
-  \item Expressions matched: all expressions.  Note: Currently,
+  \item Expressions matched: all expressions.  (Very subtle notes: Currently,
     reference patterns may only appear inside of other patterns so
     that the compiler can determine the region for the pointer type
-    assigned to \texttt{x}.
+    assigned to \texttt{x}.  They also may not occur under a
+  \texttt{tunion} pattern that has existential types unless there is a
+  pointer pattern in-between.)
   \item Bindings introduced: \texttt{x} is bound to \emph{the address of}
     the expression being matched.  Hence if matched against a value
-    of type \texttt{t} in region \texttt{r}, the type of \texttt{x} is
-    \texttt{t@r}. 
+    of type \texttt{t} in region \texttt{`r}, the type of \texttt{x} is
+    \texttt{t@`r}. 
   \end{itemize}
   
 \item \textbf{Numeric constant patterns}
@@ -267,7 +268,10 @@ extension of C's switch statement.
   are not supported.
 \item A constant case label must be a constant, \emph{not a constant
     expression}.  That is, case 3+4: is allowed in C, but not in
-  Cyclone.
+  Cyclone.  Cyclone supports this feature with a separate construct:
+  \texttt{switch "C" (e) \{ case 3+4: ... \}}.  This construct is much
+  more like C's \texttt{switch}: The labels must be constant
+  numeric expressions and \texttt{fallthru} is never required.
 \end{itemize}
 
 \paragraph{An Extension of C}
@@ -279,7 +283,7 @@ the same meaning in C and Cyclone):
 \begin{verbatim}
   int f(int i) {
     switch(i) {
-    case 0:  return 17;
+    case 0:  f(34); return 17;
     case 1:  return 17;
     default: return i;
     }
@@ -296,16 +300,18 @@ C switch statements.  Other switch statements are translated to,
 ``a mess of tests and gotos''.
 
 We now discuss some of the restrictions in terms of the above example.
-Because there is no ``implicit fallthrough'', the body of case 0
-cannot be empty.  However, we can replace the ``return 17;'' with
-``fallthru;'' a special Cyclone statement that immediately transfers
-control to the next case.  fallthru does not have to appear at the end
-of a case body, so it acts more like a goto than a fallthrough.  As in
-our example, any case that matches all values of the type switched
-upon (e.g., \texttt{default:}, \texttt{case _:}, \texttt{case x:}) must
-appear last, otherwise later cases would be unreachable.  (Note that
-other types may have even more such patterns.  For example Pair(x,y)
-matches all values of type struct Pair {int x; int y};)
+Because there is no ``implicit fallthrough'' in non-empty cases, the
+return statement in case 0 cannot be omitted.  However, we can replace
+the ``return 17;'' with ``fallthru;'' a special Cyclone statement that
+immediately transfers control to the next case.  fallthru does not
+have to appear at the end of a case body, so it acts more like a goto
+than a fallthrough.  As in our example, any case that matches all
+values of the type switched upon (e.g., \texttt{default:},
+\texttt{case _:},
+\texttt{case x:}) must appear last, otherwise later cases would be
+unreachable.  (Note that other types may have even more such patterns.
+For example Pair(x,y) matches all values of type struct Pair {int x;
+int y};).
 
 \paragraph{Much More Powerful}
 
@@ -398,8 +404,8 @@ initialized.  Here is a silly example:
 extern int f(int);
 int g(int a, int b) {
   switch ($(a,b-1)) {
-  case $(0,y) &amp;&amp; y > 1: return 1;
-  case $(3,y) &amp;&amp; f(x+y) == 7 : return 2;
+  case $(0,y) && y > 1: return 1;
+  case $(3,y) && f(x+y) == 7 : return 2;
   case $(4,72): return 3;
   default: return 3;
   }

@@ -191,6 +191,7 @@ clean_nogc:
 	$(RM) bin/cyc-lib/libcyc.a bin/cyc-lib/libcyc_a.a
 	$(MAKE) clean -C bin/genfiles
 	$(MAKE) clean -C tests
+	$(MAKE) clean -C doc
 	$(RM) bin/cyclone bin/cyclone.exe 
 	$(RM) bin/cycbison bin/cycbison.exe 
 	$(RM) bin/cyclex bin/cyclex.exe

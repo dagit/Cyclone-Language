@@ -35,14 +35,15 @@
 
 The grammar of Cyclone is derived from ISO C99.
 It has the following additional keywords:
-
-\begin{center}
-\begin{tabular}{lllllll}
-\tk{abstract} &\tk{cut}      &\tk{let}       &\tk{NULL}     &\tk{rmalloc} &\tk{throw}  &\tk{xprintf}\\
-\tk{catch}    &\tk{fallthru} &\tk{namespace} &\tk{region}   &\tk{rnew}    &\tk{tunion} &\tk{xtunion}\\
-\tk{codegen}  &\tk{fill}     &\tk{new}       &\tk{region_t} &\tk{splice}  &\tk{using}  
-\end{tabular}
-\end{center}
+\texttt{abstract}, \texttt{catch},
+\texttt{codegen}, \texttt{cut}, \texttt{fallthru}, \texttt{fill},
+\texttt{let}, \texttt{malloc},
+\texttt{namespace}, \texttt{new}, \texttt{NULL},
+\texttt{region_t}, \texttt{regions},
+\texttt{rmalloc}, \texttt{rnew}, \texttt{splice},
+\texttt{throw}, \texttt{try}, \texttt{tunion}, \texttt{using},
+\texttt{xtunion}.  As in gcc,
+\texttt{__attribute__} is reserved as well.
 
 The non-terminals
 \hypertarget{character-constant}{\textit{character-constant}},

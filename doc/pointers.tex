@@ -135,7 +135,7 @@ We are taking pains not to say \verb|t@{37}| describes an array of 37
 \texttt{t} values because C (and therefore Cyclone) distinguishes arrays
 and pointers in certain contexts.  For example, a local declaration
 ``\verb|t@{37}| \texttt{x;}'' allocates space on the stack for a pointer
-(which must hold a pointer to 37 \texttt{t} values in the help) whereas
+(which must hold a pointer to 37 \texttt{t} values) whereas
 ``\texttt{t x[37];}'' allocates space on the stack for 37 \texttt{t}
 values.
 
@@ -182,61 +182,77 @@ to \verb|t@{n}| (for example), with the type of the result being
     pointer points}}
 
 \paragraph{Syntax and Semantics} The type \texttt{t@`r}
-describes pointers into region \texttt{r}.  All regions start with the
+describes pointers into region \texttt{`r}.  All regions start with the
 \texttt{`} character so that they are not confused with identifiers.  If
-the region is omitted, it is \texttt{`H}, which is the name for the heap
-region.  (The heap region conceptually lives forever; in practice, it
-is garbage-collected.)  As a result, you cannot say \texttt{int *x = \&y}
-if \texttt{y} is a local variable because \texttt{y} is not in the heap
-region.
+the region is omitted, the compiler inserts one.  The region inserted
+depends on where the type occurs, as described below.
+
+The heap region (written \texttt{`H}) conceptually lives forever; in
+practice, it is garbage-collected.
 
 Every block (i.e., local scope) is a region.  If you label a block
 with \texttt{L:}, then the region's name is \texttt{`L}.  Similarly, the
 parameters to a function \texttt{f} are in a region named \texttt{`f}.
-Thanks to type inference, you can point into regions without explicit
-names.  For example, you can say \texttt{int *_x = \&y} if \texttt{y} is a
+Thanks to region inference, you can point into regions without explicit
+names.  For example, you can say \texttt{int *x = \&y} if \texttt{y} is a
 local variable in an unlabeled block.  Conceptually, the compiler
 creates a label for the block and fills in the corresponding region
 name for you.  (The output need not actually have a label.)
 
 Because every pointer has a type and every pointer type has a region,
 a pointer cannot be mutated so that it points into a different region
-than it did before the assignment.  Hence you will need to re-write C
-code if the same variable holds heap pointers and stack pointers (or
-pointers into different local blocks) at different points.  Also,
-there is currently know way for a global variable to hold a stack
-pointer.
-
+than it did before the assignment.  Often subtyping (see below) is
+sufficient, but in some cases it is necessary to rewrite C code to use
+different variables for pointers into different regions.  Note that
+there is no way for a global variable to hold a stack pointer.
 
 Functions are implicitly polymorphic over the regions of their
 arguments.  For example, \texttt{void f(int *`r);} is a prototype that
 can be passed a pointer into any \emph{accessible} region.  That is,
 it can be passed a stack pointer or a heap pointer, so long as it is
-not passed a dangling pointer.  The exact meaning of regions and
-effects in function prototypes is defined elsewhere.  We just note
-that our example function \texttt{f} could not possibly assign its
-argument to a global, whereas \texttt{void g(int *);} could.  On the
+not passed a dangling pointer.  
+Note that our example function \texttt{f} could not possibly assign its
+argument to a global, whereas \texttt{void g(int *`H);} could.  On the
 other hand, \texttt{g} cannot be passed a stack pointer.
 
+The rules the compiler uses for filling in regions when they are
+omitted from pointer types are numerous, but they are designed to
+avoid clutter in the common case:
+\begin{itemize}
+\item In function-argument types, a fresh region name is used.
+\item In function-return types, \texttt{`H} is used.
+\item In type definitions, including \texttt{typedef}, \texttt{`H} is used.
+\item In function bodies, unification is used to infer the region
+based on how the location assigned the pointer type is used in the
+function.
+\end{itemize}
+In the future, we intend to change the rule for \texttt{typedef} so
+that the meaning can be different at each \emph{use} of the
+\texttt{typedef}, as dictated by the other rules.  Until then, be
+warned that 
+\begin{verbatim}
+typedef int * foo_t;
+void g(foo_t);
+\end{verbatim}
+is different than
+\begin{verbatim}
+void g(int *);
+\end{verbatim}
+Also, note that these rules are exactly the same as the rules for
+omitted regions in instantiations of parameterized types.
 
-\paragraph{Subtyping} Currently, if \texttt{`r1} does not
-equal \texttt{`r2}, then \texttt{t *`r1} and \texttt{t*`r2} are neither a
-subtype of the other.  A sound system could allow \texttt{t *`r1} to be
-a subtype of \texttt{t*`r2} so long as \texttt{`r1} is known to
-\emph{outlive} \texttt{`r2}.
-
+\paragraph{Subtyping} \texttt{t *`r1} is a subtype of \texttt{t *`r2}
+if \texttt{`r1} is known to \emph{outlive} \texttt{`r2}.  In
+particular, you can always cast a heap pointer to a pointer into
+another region.
 
 \paragraph{Implementation} A pointer's region is not stored with the
 pointer at run-time.  So there is no way to ask for the region into
 which a pointer points.  For stack regions there is no region object
 at run-time \emph{per se}, just the stack space for the objects.  As
 is normal with region-based systems, Cyclone does not prevent dangling
-pointers.  Rather, it prevents \emph{dereferencing} dangling points.
-
-
-\paragraph{Future} We may provide more subtyping with respect to
-regions.  Other additions have more to do with regions than pointers,
-so they are described elsewhere.
+pointers.  Rather, it prevents \emph{dereferencing} dangling pointers.
+But this is a subtle point.
 
 \subsection*{\hypertarget{pointer_unknown}{Pointers to an Unknown
     Number of Objects---The \texttt{t ?} Types}}
@@ -246,11 +262,12 @@ when the number is not known at compile-time.
 
 
 \paragraph{Syntax and Semantics} The type \texttt{t ?} describes such pointers
-to objects of type \texttt{t}.  Such types may be assigned \texttt{NULL}.
-They may have a region annotation, which as with other pointer types,
-is the region into which the pointer points and the default is
-\texttt{`H}, the heap.  Clearly, explicit bounds information makes no
-sense for these types.  If \texttt{e} has type \texttt{t ?}, then
+to objects of type \texttt{t}.  Such types may be assigned
+\texttt{NULL}.  They may regions, which as with other
+pointer types, is the region into which the pointer points and omitted
+region annotations are filled in by the compiler.  Clearly,
+explicit bounds information makes no sense for these types.  If
+\texttt{e} has type \texttt{t ?}, then
 \texttt{e.size} has type \texttt{int} and is the number of objects pointed
 to by type \texttt{t}.  (Actually, \texttt{e.size} is allowed for any
 pointer type, but for other pointers it is evaluated at compile-time.)
@@ -268,7 +285,7 @@ occurs at this point.  On the other hand, a subscript operation
 \texttt{e1[e2]} where \texttt{e1} has type \texttt{t?} checks that the
 access-pointer of \texttt{e1} plus \texttt{e2} is within bounds of
 \texttt{e1}.  Both \texttt{e1} and \texttt{e2} are evaluated once.  If the
-bound is violated the exception \texttt{Array_Bounds} is thrown.
+bound is violated the exception \texttt{Null_Exception} is thrown.
 
 When an object of type \texttt{t?} is assigned to, it gets the bounds
 information from the ``right-hand side'' of the assignment.  So
@@ -284,14 +301,14 @@ Even though, \texttt{t ?} types are implemented as multi-word values,
 comparison operations (e.g., \texttt{==}) are defined on them---the
 comparison is performed on the access pointers.
 
-Conversions to/from \texttt{t?`r} types from/to \verb|t*{n}`r| and
+Conversions to/from \texttt{t ? `r} types from/to \verb|t*{n}`r| and
 \verb|t@{n}`r| types exist.  Converting to a \texttt{t?} type just uses
 the \texttt{t*} or \texttt{t@}'s static type information to initialize the
 bounds information.  The cast may be implicit; no warning is given.
 Converting to a \texttt{t*} or \texttt{t@} type incurs a run-time check
 that the access pointer has a value such that the target type's bounds
 information is sound.  If so, the access pointer is returned, else the
-exception \texttt{Array_Bounds} is thrown.  Implicit casts of this form
+exception \texttt{Null_Exception} is thrown.  Implicit casts of this form
 cause the compiler to give a warning.
 
 
@@ -310,20 +327,18 @@ type and \texttt{n} is a constant unsigned expression:
   elements of type \texttt{t} in region \texttt{`r}
 \item \verb|t @{n}`r|, a non-\texttt{NULL} pointer to \texttt{n} elements
   of type \texttt{t} in region \texttt{`r}
-\item \texttt{t ?`r}, a pointer to an unknown number of elements of type
+\item \texttt{t ? `r}, a pointer to an unknown number of elements of type
   \texttt{t} in region \texttt{`r}.  Implemented as a multi-word object.
 \end{itemize}
 If \verb|{n}| is omitted, it is \verb|{1}|.  If the region is omitted,
-it is `H, the heap.
+the compiler inserts one.  The region inserted depends on where the
+type is written.
 
 The easiest way to port code is to replace uses of \texttt{t *} with
-\texttt{t ?}.  Of course, this technique will fail if the code makes
-assumptions about the size of pointers or if the pointers may point
-into the stack.  For functions that only read through their
-parameters, it is always possibly to make them region-polymorphic,
-i.e., replace each \texttt{t*} parameter with \texttt{t*`r} (or with the
-above suggestions \texttt{t?`r}), using a different region name for each
-pointer parameter.
+\texttt{t ?}.  Of course, this technique does not address region
+annotations.  Functions that can take only heap pointers (because the
+pointers escape into data structures, for example) will need to add
+\texttt{`H} annotations for the relevant parameters.
 
 Of course, using \texttt{t?} delays errors until run-time and is less
 efficient.  Using \texttt{t@} is the most efficient and

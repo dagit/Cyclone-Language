@@ -29,11 +29,12 @@
 \hyperlink{faq:heapregion}{What does \texttt{`H} mean?}\\
 \hyperlink{faq:boundsregion}{What does \texttt{int @\lb 37\rb `r} mean?}\\
 \hyperlink{faq:questionable}{What does \texttt{int ?} mean?}\\
+\hyperlink{faq:omitregion}{What is a pointer type's region when it's omitted?}\\
 \hyperlink{faq:typevar}{What does \texttt{`a} mean?}\\
 \hyperlink{faq:suitable}{What is a ``suitable'' type for a type variable?}\\
 \hyperlink{faq:voidstar}{How do I cast from \texttt{void *}?}\\
 \hyperlink{faq:uscore-types}{What does \texttt{_} (underscore) mean in types?}\\
-\hyperlink{faq:uscore-region}{In particular, what does \texttt{int *_} mean?}\\
+%\hyperlink{faq:uscore-region}{In particular, what does \texttt{int *_} mean?}\\
 \hyperlink{faq:kinds}{What do \texttt{`a::B}, \texttt{`a::M}, \texttt{`a::A}, \texttt{`a::R}, and \texttt{`a::E} mean?}\\
 \hyperlink{faq:nokinds}{What does it mean when type variables don't have explicit kinds?}\\
 \hyperlink{faq:list}{What does \texttt{struct List<`a,`r::R>} mean?}\\
@@ -52,7 +53,7 @@
 \hyperlink{faq:pattern}{What is a pattern and how do I use it?}\\
 \hyperlink{faq:uscore-pattern}{What does \texttt{_} mean in a pattern?}\\
 \hyperlink{faq:polymorphic}{What does it mean when a function has an argument with type \texttt{`a}?}\\
-\hyperlink{faq:templates}{Do functions with type variables get duplicated like C++ template functions?  Is there run-time overhead for using type variables?}\\
+\hyperlink{faq:templates}{Do functions with type variables get duplicated like C++ template functions?\\  Is there run-time overhead for using type variables?}\\
 \hyperlink{faq:vararg}{Can I use varargs?}\\
 \hyperlink{faq:typesinfunctions}{Why can't I declare types within functions?}\\
 \hyperlink{faq:casts}{What casts are allowed?}\\
@@ -62,21 +63,20 @@
 \hyperlink{faq:setjmp}{Can I use \texttt{setjmp} and \texttt{longjmp}?}\\
 \hyperlink{faq:uniontypes}{What types are allowed for union members?}\\
 \hyperlink{faq:voidstar2}{Why can't I do anything with values of type \texttt{void *}?}\\
-\hyperlink{faq:xprintf}{What is \texttt{xprintf}?}\\
-\hyperlink{faq:sscanf}{Is there \texttt{sscanf}?}\\
+\hyperlink{faq:aprintf}{What is \texttt{aprintf}?}\\
 \hyperlink{faq:commandline}{How do I access command-line arguments?}\\
 \hyperlink{faq:stackpointer}{Why can't I pass a stack pointer to certain functions?}\\
 \hyperlink{faq:localaddress}{Why do I get an incomprehensible error when I assign a local's address to a pointer variable?}\\
 \hyperlink{faq:pointerarith}{How much pointer arithmetic can I do?}\\
 \hyperlink{faq:litstring}{What is the type of a literal string?}\\
-\hyperlink{faq:nullterminate}{Are strings null terminated?}\\
+\hyperlink{faq:nullterminate}{Are strings null-terminated?}\\
 \hyperlink{faq:zero}{Why can't I assign 0 to a pointer?}\\
 \hyperlink{faq:malloc}{How do I use \texttt{malloc}?}\\
 \hyperlink{faq:free}{Can I call free?}\\
 \hyperlink{faq:gc}{Is there a garbage collector?}\\
 \hyperlink{faq:stackalloc}{How can I make a stack-allocated array?}\\
 \hyperlink{faq:realloc}{Can I use \texttt{salloc} or \texttt{realloc}?}\\
-\hyperlink{faq:nullcast}{Why do I have to cast from \texttt{*} to \texttt{@} if I've already tested for \texttt{null}?}\\
+\hyperlink{faq:nullcast}{Why do I have to cast from \texttt{*} to \texttt{@} if I've already tested for \texttt{NULL}?}\\
 \hyperlink{faq:memkind}{Why can't a function parameter or struct field have type \texttt{`a::M}?}\\
 \hyperlink{faq:compile}{Can I see how Cyclone compiles the code?}\\
 \hyperlink{faq:gdb}{Can I use \texttt{gdb} on the output?}\\
@@ -105,16 +105,16 @@ tuple, you use array-like notation: you write \texttt{x[0]}, not
 
 \begin{faqa}{faq:non-null}{What does \texttt{int @} mean?}
 In Cyclone \texttt{@} is a pointer that is guaranteed not to be
-\texttt{null}.  The Cyclone compiler guarantees through static or
+\texttt{NULL}.  The Cyclone compiler guarantees through static or
 dynamic checks.  For example,
 \begin{verbatim}
-  int *x = null;
+  int *x = NULL;
 \end{verbatim}
-will typecheck, but
+is not an error, but
 \begin{verbatim}
-  int @x = null;
+  int @x = NULL;
 \end{verbatim}
-will not.
+is an error
 \end{faqa}
 
 \begin{faqa}{faq:bounds}{What does \texttt{int *\lb 37\rb} mean?}
@@ -146,21 +146,29 @@ lifetime includes the lifetime of the function.
   dereferenced; conceptually, objects in the heap last ``forever,''
   since they are always available if needed; garbage collection is
   like an optimization that frees objects after they are no longer
-  needed.  Note that \texttt{int *} is just shorthand for \texttt{int
-    *`H}.
+  needed.  
 \end{faqa}
 
 \begin{faqa}{faq:boundsregion}{What does \texttt{int @\lb 37\rb `r} mean?}
 A pointer can come with all or none of the nullity, bound, and region
 annotation.  This type is the type of non-\texttt{null} pointers to
 at least 37 consecutive integers in region \texttt{`r}.  When the
-bound is omitted it default to 1, and when the region is omitted
-it defaults to \texttt{`H}.
+bound is omitted it default to 1.
+\end{faqa}
+
+\begin{faqa}{faq:omitregion}{What is a pointer type's region when it's
+omitted?} Every pointer type has a region; if you omit it, the
+compiler puts it in for you implicitly.  The region added depends on
+where the pointer type occurs.  In function arguments, a new region
+variable is used.  In function results and type definitions (inlcuding
+\texttt{typedef}), the heap region (\texttt{`H}) is used.  In function
+bodies, the compiler looks at the uses (using unification) to try to
+determine a region.
 \end{faqa}
 
 \begin{faqa}{faq:questionable}{What does \texttt{int ?} mean?}
 The \texttt{?} a special kind of pointer that carries along bounds
-information.  It is a ``questionable'' pointer: it might be null or
+information.  It is a ``questionable'' pointer: it might be NULL or
 pointing out of bounds.  An \texttt{int ?} is a pointer to an integer,
 along with some information that allows Cyclone to check whether the
 pointer is in bounds at run-time.  These are the only kinds of
@@ -182,8 +190,9 @@ Syntactically, a type variable is any identifier beginning with
 \begin{faqa}{faq:suitable}{What is a ``suitable'' type for a type variable?}
 The last question said that a type variable can stand for a
 ``suitable'' type.  Unfortunately, not all types are ``suitable.''
-Briefly, the ``suitable'' types are those that fit into a general
-purpose machine register, typically including \texttt{int}, pointers,
+Briefly, the ``suitable'' types are those that fit into a
+general-purpose machine register, typically including \texttt{int},
+pointers,
 \texttt{tunion} types, and \texttt{xtunion} types.  Non-suitable types
 include \texttt{float}, \texttt{struct} types (which can be of
 arbitrary size), tuples, and questionable pointers.
@@ -213,40 +222,40 @@ information for the compiler to succeed.  For example, if you write
 \end{verbatim}
 the compiler can easily infer that the wildcard stands for
 \texttt{struct Pair @}.  In fact, if \texttt{x} is later assigned
-\texttt{null}, the compiler will infer that \texttt{x} has type
+\texttt{NULL}, the compiler will infer that \texttt{x} has type
 \texttt{struct Pair *} instead.
 
-Note, \texttt{_} is not allowed as part of top-level declarations.
+Note that \texttt{_} is not allowed as part of top-level declarations.
 \end{faqa}
 
-\begin{faqa}{faq:uscore-region}{In particular, what does \texttt{int *_} mean?}
-Here the wildcard ranges over the region of the pointer.  This use of
-the wildcard is important in making the region system easier to use.
-For example, in Cyclone you cannot write the following local declarations:
-\begin{verbatim}
-  int x;
-  int *y = &x;
-\end{verbatim}
-This is because local declarations live on the stack, and \texttt{int
-  *} is short for \texttt{int *`H}, the type of pointers to integers
-in the heap region.  Here \texttt{y} points to an integer on the
-stack, so the second declaration doesn't type check.  To get it to
-type check, you can put in the name of the local stack region, but it
-is simpler to use the wildcard:
-\begin{verbatim}
-  int *_ y = &x;
-\end{verbatim}
-Of course, you could have also used
-\begin{verbatim}
-  _ y = &x;
-\end{verbatim}
-or
-\begin{verbatim}
-  let y = &x;
-\end{verbatim}
-but you might want to write down the additional type information for
-documentation.
-\end{faqa}
+% \begin{faqa}{faq:uscore-region}{In particular, what does \texttt{int *_} mean?}
+% Here the wildcard ranges over the region of the pointer.  This use of
+% the wildcard is important in making the region system easier to use.
+% For example, in Cyclone you cannot write the following local declarations:
+% \begin{verbatim}
+%   int x;
+%   int *y = &x;
+% \end{verbatim}
+% This is because local declarations live on the stack, and \texttt{int
+%   *} is short for \texttt{int *`H}, the type of pointers to integers
+% in the heap region.  Here \texttt{y} points to an integer on the
+% stack, so the second declaration doesn't type check.  To get it to
+% type check, you can put in the name of the local stack region, but it
+% is simpler to use the wildcard:
+% \begin{verbatim}
+%   int *_ y = &x;
+% \end{verbatim}
+% Of course, you could have also used
+% \begin{verbatim}
+%   _ y = &x;
+% \end{verbatim}
+% or
+% \begin{verbatim}
+%   let y = &x;
+% \end{verbatim}
+% but you might want to write down the additional type information for
+% documentation.
+% \end{faqa}
 
 \begin{faqa}{faq:kinds}{What do \texttt{`a::B}, \texttt{`a::M}, \texttt{`a::A}, \texttt{`a::R}, and \texttt{`a::E} mean?}
 Types are divided into different groups, which we call kinds.  There
@@ -259,7 +268,7 @@ that belong to its kind.
 Box types include \texttt{int}, pointers (except for questionable
 pointers) tagged unions, and extensible tagged unions.
 Memory types include all box types, tuples, \texttt{tunion} and
-\texttt{xtunion} variants, and non-abstract structs.
+\texttt{xtunion} variants, questionable pointers, and non-abstract structs.
 Any types include all types that don't have kind Region or Effect.
 Region types are regions, i.e., the heap and stack regions.
 Effect types are sets of regions (these are explained elsewhere).
@@ -337,11 +346,12 @@ be exported.
 In addition to the C keywords, the following have special meaning and
 cannot be used as identifiers: \texttt{abstract}, \texttt{catch},
 \texttt{codegen}, \texttt{cut}, \texttt{fallthru}, \texttt{fill},
-\texttt{fprintf}, \texttt{fscanf}, \texttt{let}, \texttt{malloc},
-\texttt{namespace}, \texttt{new}, \texttt{null}, \texttt{printf},
-\texttt{rmalloc}, \texttt{rnew}, \texttt{sscanf}, \texttt{splice},
+\texttt{let}, \texttt{malloc},
+\texttt{namespace}, \texttt{new}, \texttt{NULL},
+\texttt{region_t}, \texttt{regions},
+\texttt{rmalloc}, \texttt{rnew}, \texttt{splice},
 \texttt{throw}, \texttt{try}, \texttt{tunion}, \texttt{using},
-\texttt{xprintf}, \texttt{xscanf}, \texttt{xtunion}.  As in gcc,
+\texttt{xtunion}.  As in gcc,
 \texttt{__attribute__} is reserved as well.
 \end{faqa}
 
@@ -349,8 +359,7 @@ cannot be used as identifiers: \texttt{abstract}, \texttt{catch},
 These constructs provide a convenient way to help avoid name clashes.
 namespace X prepends X:: to the declarations in its body (rest of file
 in case of namespace X;) and using X makes the identifiers prepended
-with X:: available without having to write the X::.  A longer
-explanation and list of common pitfalls is here.
+with X:: available without having to write the X::.
 \end{faqa}
 
 \begin{faqa}{faq:fallthru}{What is \texttt{fallthru}?}
@@ -416,11 +425,12 @@ i
 is an identifier.  e1 is an unsigned int indicating the size of the
 array.  e2 is evaluated e1 times, with i having values 0, 1, ..., e1-1
 and the result initializes the ith element of the array.  The form new
-{for i < e1 : e2} allocates space for a new array and initializes it
+\texttt{\{for i < e1 : e2\}} allocates space for a new array and initializes it
 as just described.  This form is the only way to create arrays whose
-size depends on run-time information.  When {for i < e1: e2} is not an
-argument to new, e1 must be constant and e2 may not mention i.  This
-restriction includes all uses at top-level (for global variables).
+size depends on run-time information.  When \texttt{\{for i < e1:
+e2\}} is not an argument to new, e1 must be constant and e2 may not
+mention i.  This restriction includes all uses at top-level (for
+global variables).
 \end{faqa}
 
 \begin{faqa}{faq:exns}{How do I throw and catch exceptions?}
@@ -470,8 +480,8 @@ destructing objects of an xtunion type apply.
 
 \begin{faqa}{faq:exn-efficiency}{How efficient is exception handling?}
 Entering a \texttt{try} block is implemented using \texttt{setjmp}.
-Creating an \texttt{xtunion} requires a heap allocation.  Throwing an
-exception is implemented with \texttt{longjmp}.  Pattern-matching an
+Throwing an exception is implemented with \texttt{longjmp}.
+Pattern-matching an
 \texttt{xtunion} against each case variant in the catch clause is a
 pointer-comparsion.  In short, exception handling is fairly
 lightweight.
@@ -540,7 +550,7 @@ about using the same type still apply.  In general, Cyclone has
 parametric polymorphism as a safe alternative to casts and void *.
 \end{faqa}
 
-\begin{faqa}{faq:templates}{Do functions with type variables get duplicated like C++ template functions?  Is there run-time overhead for using type variables?}
+\begin{faqa}{faq:templates}{Do functions with type variables get duplicated like C++ template functions?\\  Is there run-time overhead for using type variables?}
 No and no.  Each Cyclone function gives rise to one function in the
 output, and types are not present at run-time.  When a function is
 called, it does not need to know the types with which the caller is
@@ -581,7 +591,7 @@ A cast to
 \textit{type}\texttt{@}\lb\textit{const}\rb
 from one of the
 other types includes a run-time check that the pointer is not
-\texttt{null}.
+\texttt{NULL}.
 No other casts between these type have run-time checks.
 A failed run-time check throws \texttt{Null_Exception}.
 A pointer into the heap can be cast to a pointer into another region.
@@ -620,11 +630,11 @@ bugs in C code.
 
 \begin{faqa}{faq:globalinit}{Do I have to initialize global variables?}
 Yes, you currently must provide explicit initializers for global
-variables so that the compiler is can be sure that uninitialized
+variables so that the compiler can be sure that uninitialized
 memory is not read.  In the future, we expect to provide some support
 for initializing globals in constructor functions.  Two techniques
 help with initializing global arrays.  First, if an array element
-could be 0 or null, the compiler will insert 0 for any elements you do
+could be 0 or NULL, the compiler will insert 0 for any elements you do
 not specify.  For example, you can write
 \begin{verbatim}
   int x[37] = {};
@@ -675,13 +685,9 @@ types, use type variables and polymorphism.  Tagged unions can also
 substitute in some cases where \texttt{void *} is used in C\@.
 \end{faqa}
 
-\begin{faqa}{faq:xprintf}{What is \texttt{xprintf}?}
-The \texttt{xprintf} function prints just like \texttt{printf}, but
+\begin{faqa}{faq:aprintf}{What is \texttt{aprintf}?}
+The \texttt{aprintf} function is just like \texttt{printf}, but
 the output is placed in a new string allocated on the heap.
-\end{faqa}
-
-\begin{faqa}{faq:sscanf}{Is there \texttt{sscanf}?}
-Not yet. 
 \end{faqa}
 
 \begin{faqa}{faq:commandline}{How do I access command-line arguments?}
@@ -697,26 +703,16 @@ equal to \texttt{argv.size}.
 \end{faqa}
 
 \begin{faqa}{faq:stackpointer}{Why can't I pass a stack pointer to certain functions?}
-If the type of a function parameter is a pointer without an explicit
-region, the default requires the region to be the heap region,
-\texttt{`H}.  If a parameter can be a stack pointer, just add a region
-variable to indicate this.  For example, instead of
-\begin{verbatim}
-  int f(int *x);
-\end{verbatim}
-declare
-\begin{verbatim}
-  int f(int *`r x);
-\end{verbatim}
+If the type of a function parameter is a pointer into the heap region,
+it cannot be passed a stack parameter.  Pointer types in typedef and
+struct definitions refer to the heap region unless there is an
+explicit region annotation.
 \end{faqa}
 
 \begin{faqa}{faq:localaddress}{Why do I get an incomprehensible error when I assign a local's address to a pointer variable?}
-If you've declared the type of the variable to be
-\textit{type}\texttt{*}, then you can only assign heap pointers to it.
-Locals are in the stack, not the heap, so you cannot assign a pointer
-to a local into your heap pointer.  The easiest solution is to declare
-the pointer variable to have type \textit{type}\texttt{*_}, or type
-\texttt{_}, or use \texttt{let} to declare the variable.
+If the pointer variable has a type indicating that it points into the
+heap, then the assignment is illegal.  Try initializng the pointer variable
+with the local's address, rather than delaying the assignment until later.
 \end{faqa}
 
 \begin{faqa}{faq:pointerarith}{How much pointer arithmetic can I do?}
@@ -733,14 +729,14 @@ type; the type of the result is \texttt{unsigned int}.
 
 \begin{faqa}{faq:litstring}{What is the type of a literal string?}
 The type of the string constant \texttt{"foo"} is \texttt{char @\lb
-  4\rb} (remember the trailing '\\0').  However, there are implicit
+  4\rb} (remember the trailing null character).  However, there are implicit
 casts from \texttt{char @\lb 4\rb} to \texttt{char @\lb 2\rb},
 \texttt{char *\lb 4\rb}, and \texttt{char ?}, so you shouldn't have to
 think too much about this.
 \end{faqa}
 
-\begin{faqa}{faq:nullterminate}{Are strings null terminated?}
-Cyclone follows C's lead on this.  String literals lie \texttt{"foo"}
+\begin{faqa}{faq:nullterminate}{Are strings null-terminated?}
+Cyclone follows C's lead on this.  String literals like \texttt{"foo"}
 are null-terminated.  Many of the library functions consider a null
 character to mark the end of a string.  And library functions that
 return strings often ensure that they are null terminated.  However,
@@ -753,8 +749,8 @@ a null character is found, or when the bounds are exceeded.
 \end{faqa}
 
 \begin{faqa}{faq:zero}{Why can't I assign 0 to a pointer?}
-We currently distinguish the keyword \texttt{null} from 0, so you have
-to assign \texttt{null} instead of 0.  We hope to be more flexible in
+We currently distinguish the keyword \texttt{NULL} from 0, so you have
+to assign \texttt{NULL} instead of 0.  We hope to be more flexible in
 the future.
 \end{faqa}
 
@@ -835,9 +831,9 @@ possible to write them in Cyclone.  Both features are hard to provide
 in a way that is guaranteed safe.
 \end{faqa}
 
-\begin{faqa}{faq:nullcast}{Why do I have to cast from \texttt{*} to \texttt{@} if I've already tested for \texttt{null}?} 
+\begin{faqa}{faq:nullcast}{Why do I have to cast from \texttt{*} to \texttt{@} if I've already tested for \texttt{NULL}?} 
 Our compiler is not as smart as you are.  It does not realize that you
-have tested for \texttt{null}, and it insists on a check (the cast)
+have tested for \texttt{NULL}, and it insists on a check (the cast)
 just to be sure.  You can leave the cast implicit, but the compiler
 will emit a warning.  In the future, we may define a flow-analysis to
 omit spurious warning.  Because of aliasing and undefined evaluation
@@ -862,7 +858,7 @@ declarations (because the code has already gone through the
 preprocessor) and generated type definitions (because of tuples,
 tagged unions, and questionable pointers).  Pattern-matching code gets
 translated to a mess of temporary variables and \texttt{goto}
-statements.  Array-bounds checks and \texttt{null} checks can clutter
+statements.  Array-bounds checks and \texttt{NULL} checks can clutter
 array-intensive and pointer-intensive code.  And all \texttt{typedef}s
 are expanded away before printing the output.
 \end{faqa}
@@ -928,8 +924,10 @@ chance to add it.
 You need a platform that has gcc 2.9, GNU make, ar, sed, and the
 ability to build the Boehm-Demers-Weiser garbage collector.
 Furthermore, the size of \texttt{int} and all C pointers must be the
-same.  We have built Cyclone on cygwin (Windows 98, NT, 2K), Linux
-(insert distributions here), Solaris, and OpenBSD.
+same.  We have built Cyclone on cygwin (Windows 98, NT, 2K), and Linux
+(insert distributions here).  We have built slightly older versions on
+Solaris and OpenBSD---we hope to ``officially'' support these
+platforms soon.
 \end{faqa}
 
 \begin{faqa}{faq:libs}{Why aren't there more libraries?}
@@ -945,7 +943,7 @@ first (old last) cell, but \texttt{l} still points to the old first
 \end{faqa}
 
 \begin{faqa}{faq:inline}{Can I inline functions?}
-Functions can be declared inline as ISO C99.  You can get additional
+Functions can be declared inline as in ISO C99.  You can get additional
 inlining by compiling the Cyclone output with the \texttt{-O2} flag.
 Whether a function is inlined or not has no effect on Cyclone
 type-checking.
@@ -964,14 +962,16 @@ execution.
 \end{faqa}
 
 \begin{faqa}{faq:ctc}{What are compile-time constants?}
-Compile-time constants are \texttt{null},
-\texttt{sizeof(\textit{type})}, integer and character constants, and
-arithmetic operations over compile-time constants.  Constructs
-requiring compile-time constants are: tuple-subscript (e.g.,
-\texttt{x[3]} for tuple \texttt{x}), case argument when the
-\texttt{switch} argument has a numeric type (e.g., \texttt{case
+Compile-time constants are \texttt{NULL}, integer and character
+constants, and arithmetic operations over compile-time constants.
+Constructs requiring compile-time constants are: tuple-subscript
+(e.g.,
+\texttt{x[3]} for tuple \texttt{x}), case argument for 
+\texttt{switch "C"} argument has a numeric type (e.g., \texttt{case
   3+4}:), sizes in array declarations (e.g., \texttt{int y[37]}, and
-sizes in pointer bounds (e.g., \texttt{int * x\lb 124\rb}).
+sizes in pointer bounds (e.g., \texttt{int * x\lb 124\rb}).  Unlike in
+C, \texttt{sizeof(t)} is not an integral constant expression because
+the Cyclone compiler does not know the actual size of aggregate types.
 \end{faqa}
 
 \begin{faqa}{faq:arraysize}{How can I get the size of an array?}

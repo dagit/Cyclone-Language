@@ -7,7 +7,7 @@
 
 C gives programmers complete control over how memory is managed.  An
 expert programmer can exploit this to write very fast programs.
-However, bugs that creep in to memory management code can cause
+However, bugs that creep into memory-management code can cause
 crashes and are notoriously hard to debug.
 
 Languages like Java and ML use garbage collectors instead of leaving
@@ -20,8 +20,8 @@ applications programmer can make for slower programs.
 Safety is the main goal of Cyclone, so we provide a garbage collector.
 But, like C, we also want to give programmers as much control over
 memory management as possible, without sacrificing safety.  Cyclone's
-region and effect system is a way to give programmers more explicit
-control over memory management.
+region system is a way to give programmers more explicit control over
+memory management.
 
 In Cyclone, objects are placed into \emph{regions}.  A region is
 simply an area of memory that is allocated and deallocated all at
@@ -44,13 +44,13 @@ Cyclone has three sorts of region:
   in the same stack region as the variables declared at the start of
   the function.
   
-\item[Growable regions] Cyclone also has \emph{growable regions},
+\item[Dynamic regions] Cyclone also has \emph{dynamic regions},
   which are regions that you can add objects to over time.  You create
-  a growable region in Cyclone with a statement,
+  a dynamic region in Cyclone with a statement,
 \begin{alltt}
   region {\it identifier} {\it statement}
 \end{alltt}
-  This declares and allocates a new growable region, named
+  This declares and allocates a new dynamic region, named
   \textit{identifier}, and executes \textit{statement}.  After
   \textit{statement} finishes executing, the region is deallocated.
   Within \textit{statement}, objects can be added to the region, as we
@@ -88,8 +88,6 @@ dangling pointer (a pointer into a deallocated region) might be
 followed.  There are no run-time checks of the form, ``is this
 pointing into a live region?''  As explained below, each pointer type
 has a region and objects of the type may only point into that region.
-The type ``\texttt{t *}'' is for pointers into the heap; see below for
-how to declare pointers into other regions.
 
 \subsection{Allocation}
 You can create a new object on the heap using one of three kinds of
@@ -99,7 +97,7 @@ expression:
   result into the heap, and returns a pointer to the result.  It is
   roughly equivalent to
 \begin{alltt}
-  let temp = malloc(sizeof({\it expr}));
+  let temp = malloc(sizeof({\it expr})); // not legal Cyclone
   *temp = {\it expr};
 \end{alltt}
   For example, \texttt{new 17} allocates space for an integer on the
@@ -126,7 +124,7 @@ expression:
   is roughly equivalent to
 \begin{alltt}
   unsigned int sz = {\it expr}\(\sb{1}\);
-  let temp = malloc(sz * sizeof({\it expr}\(\sb{2}\)));
+  let temp = malloc(sz * sizeof({\it expr}\(\sb{2}\))); // not legal Cyclone
   for (int {\it identifier} = 0; {\it identifier} < sz; {\it identifier}++)
     temp[{\it identifier}] = {\it expr}\(\sb{2}\);
 \end{alltt}
@@ -176,7 +174,7 @@ expression:
   so there is no need to cast the result from \texttt{char *}.
 \end{itemize}
 
-Objects can be created in a growable region using the following analogous
+Objects can be created in a dynamic region using the following analogous
 expressions.
 \begin{itemize}
 \item \texttt{rnew({\it identifier}) {\it expr}}
@@ -191,7 +189,7 @@ which contains a handle for the heap region, so, for example,
 
 The only way to create an object in a stack region is declaring it as
 a local variable.  Cyclone does not currently support \texttt{salloc};
-use a growable region instead.
+use a dynamic region instead.
 
 \subsection{Common Uses}
 
@@ -202,35 +200,34 @@ legacy C programs to Cyclone.
 
 Remember that every pointer points into a region, and although the
 pointer can be updated, it must always point into that same region.
-The region that the pointer points to is indicated in its type, and if
-no region is explicitly given, it defaults to the heap region.
-This means that the following local declarations are not permitted in
-Cyclone:
-\begin{verbatim}
-  int x = 7;
-  int *y = &x;
-\end{verbatim}
-Here the local variable \texttt{x} lives in a stack region, and
-\texttt{y} is declared as a heap pointer, so it cannot be assigned the
-address of \texttt{x}.
+The region that the pointer points to is indicated in its type, but
+omitted regions are filled in by the compiler according to context.
 
-To get \texttt{y} to point at \texttt{x}, you must declare it with a
-different type---it should be a pointer into the stack region.  The
-easiest way to do this is to let Cyclone figure out the type for you,
-either using a \texttt{let} declaration:
-\begin{verbatim}
-  int x = 7;
-  let y = &x;
-\end{verbatim}
-If you want to emphasize that \texttt{y} is a pointer to an integer,
-you can use the wildcard type to get Cyclone to fill in the region for
-you: 
-\begin{verbatim}
-  int x = 7;
-  int *_ y = &x;
-\end{verbatim}
-The wildcard (\texttt{_}) tells the compiler, ``fill in this part of
-the type for me.''
+% \begin{verbatim}
+%   int x = 7;
+%   int *y = &x;
+% \end{verbatim}
+% Here the local variable \texttt{x} lives in a stack region, and
+% \texttt{y} is declared as a heap pointer, so it cannot be assigned the
+% address of \texttt{x}.
+
+% To get \texttt{y} to point at \texttt{x}, you must declare it with a
+% different type---it should be a pointer into the stack region.  The
+% easiest way to do this is to let Cyclone figure out the type for you,
+% either using a \texttt{let} declaration:
+% \begin{verbatim}
+%   int x = 7;
+%   let y = &x;
+% \end{verbatim}
+% If you want to emphasize that \texttt{y} is a pointer to an integer,
+% you can use the wildcard type to get Cyclone to fill in the region for
+% you: 
+% \begin{verbatim}
+%   int x = 7;
+%   int *_ y = &x;
+% \end{verbatim}
+% The wildcard (\texttt{_}) tells the compiler, ``fill in this part of
+% the type for me.''
 
 Because pointers may only point into a single region during their
 lifetime, the following code won't type check, and there is
@@ -245,7 +242,7 @@ region and a pointer into the heap.
 
 If a function parameter is declared as a pointer into the heap, then
 you are not allowed to call the function with a stack pointer or
-growable region pointer for that parameter.  The function knows that
+dynamic region pointer for that parameter.  The function knows that
 the heap is never deallocated, so it is free to keep a copy of the
 pointer around even after it returns; it can safely dereference the saved
 pointer the next time it is called.  If you could pass a stack pointer
@@ -267,14 +264,14 @@ declares a function \texttt{f} that takes an argument \texttt{x}
 pointing into any region \texttt{`r}, an argument \texttt{y} that
 points into any region \texttt{`s}, and an argument \texttt{z} that
 points into the heap.  The regions \texttt{`r} and \texttt{`s} could
-be stack regions, growable regions, or the heap region.
+be stack regions, dynamic regions, or the heap region.
 
 A slightly more restrictive version of \texttt{f} can be declared,
 \begin{verbatim}
   void f(int *`r x, int *`r y, int *z);
 \end{verbatim}
 Here we have eliminated \texttt{`s} and replaced it by \texttt{`r}.
-Once again, \texttt{`r} could be a stack, growable, or heap region,
+Once again, \texttt{`r} could be a stack, dynamic, or heap region,
 however, \texttt{x} and \texttt{y} must point into the \emph{same}
 region.  In the previous version of \texttt{f}, \texttt{x} could point
 into the heap while \texttt{y} could point into the stack.
@@ -444,7 +441,7 @@ region name for the type of the object is in the capability.  It is
 rare for the check to fail because failing code has to do one of the
 following:
 \begin{itemize}
-\item Have a pointer that outlives the stack or growable region into
+\item Have a pointer that outlives the stack or dynamic region into
   which it points.  Here is a silly example:
 \begin{verbatim}
   int *_ x; // region name filled in with an inner block's name

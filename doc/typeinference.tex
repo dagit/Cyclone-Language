@@ -17,16 +17,7 @@ better style not to use inference.
 
 Inference is even more useful because of Cyclone's advanced typing
 constructs.  For example, it is much easier to write down \texttt{_}
-than a type for a function pointer.  Also, you can use it to omit
-explicit regions, such as in the following:
-\begin{verbatim}
-  void f() {
-    int x = 3;
-    int *_ y = &x;
-  }
-\end{verbatim}
-(If the \texttt{_} is omitted, the code is ill-typed because
-\texttt{int *} describes heap pointers.)
+than a type for a function pointer.  
 
 We now give a rough idea of when you can elide types and how types get
 inferred.  In practice, you tend to develop a sense of which idioms
@@ -44,17 +35,14 @@ should):
 \item As part of a top-level variable or function's type.
 \item As part of a \texttt{struct}, \texttt{tunion}, \texttt{xtunion}, or
   \texttt{typedef} declaration.
-\item As a part of an explicit type instantiation (e.g., \texttt{Foo<_,_>}) where
-  it is instantiating a region-name or effect-name.
 \end{itemize}
 
 Note that \texttt{_} can be used for part of a type.  A silly example is
 \texttt{\$(_,int) = \$(3,4)}; a more useful example is an explicit cast to
 a non-nullable pointer (to avoid a compiler warning).  For example:
 \begin{verbatim}
-  void f(some_big_type * x,
-  some_big_type @ y) {
-  if(x != null) {
+  void f(some_big_type * x, some_big_type @ y) {
+  if(x != NULL) {
     y = (_ @) x;
   }
 \end{verbatim}
@@ -70,7 +58,7 @@ members named \texttt{f}.
 The compiler infers the types of expressions based on uses.  For
 example, consider:
 \begin{verbatim}
-  _ x = null;
+  _ x = NULL;
   x = g();
   x->f;
 \end{verbatim}
@@ -79,7 +67,7 @@ pointer to a struct with a field named \texttt{f}.  If the two
 statements were in the other order, the code would not type-check. 
 Also, if \texttt{g} returned an \texttt{int}, the code would not
 type-check, even without the \texttt{x->f} expression, because the
-\texttt{_ x = null} constrains \texttt{x} to have a pointer type.
+\texttt{_ x = NULL} constrains \texttt{x} to have a pointer type.
 
 However, the above discussion assumes that sequences of statements are
 type-checked in order.  This is true, but \emph{in general the
@@ -120,25 +108,25 @@ the type-checker examines the function:
     if(maybe)
       a = c;
     else
-      a = null;
+      a = NULL;
   }
 \end{verbatim}
 At first, the type of \texttt{a} is completely unconstrained.  If we
 next consider \texttt{a = c}, we will give \texttt{a} the type of
 \texttt{c}, namely \texttt{int @}, an int pointer that cannot be
-\texttt{null}.  Clearly that makes the assignment \texttt{a = null}
+\texttt{NULL}.  Clearly that makes the assignment \texttt{a = NULL}
 problematic, but Cyclone allows assignment from nullable pointers to
 non-nullable pointers; it gives a compile-time warning and inserts a
-run-time check that the value is not \texttt{null}.  Here the check will
+run-time check that the value is not \texttt{NULL}.  Here the check will
 fail and an exception will be raised.  That is, \texttt{h1(p,0)} is
 guaranteed to raise an exception.
 
-But what if the type-checker examines \texttt{a = null} first?  Then the
+But what if the type-checker examines \texttt{a = NULL} first?  Then the
 type-checker will constrain \texttt{a}'s type to be a nullable pointer
 to an unconstrained type.  Then the assignment \texttt{a = c} will
 constrain that type to be \texttt{int}, so the type of \texttt{a} is
 \texttt{int *}.  An assignment from \texttt{int @} to \texttt{int *} is
-safe, so there is no warning.  Moreover, the assignment \texttt{a = null} is
+safe, so there is no warning.  Moreover, the assignment \texttt{a = NULL} is
 not a run-time error.
 
 \emph{The order of type-checking is left unspecified.  In the future,

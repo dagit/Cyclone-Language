@@ -134,6 +134,9 @@ function declarations are only allowed at top-level.
   hardcoded to #include "parse_tab.h", so everything breaks when you
   use a prefix.
 
+* tunion Blah should be shorthand for tunion _ Blah (like pointer
+  types), not tunion `H Blah.
+
 MISSING THINGS NEEDED TO PORT REAL CODE:
 ----------------------------------------
 * Need to port more C libraries

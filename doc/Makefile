@@ -35,3 +35,5 @@ clean:
 	$(RM) *.aux *.dvi *.hind *.haux *.idx *.ilg *.ind *.ing *.log
 	$(RM) *.pdf *.toc *.out
 	$(RM) main-screen.html
+
+.PHONY: main-screen.html main-screen.pdf main-letter.pdf main-a4.pdf

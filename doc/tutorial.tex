@@ -6,12 +6,12 @@ that Cyclone differs from C, and some of the reasons why; you should
 come away with enough knowledge to start writing, compiling, and
 running your own Cyclone programs.  We assume that the Cyclone
 compiler is already installed on your system (see
-\hyperref[{sec:install}]{Appendix~\ref{sec:install}} or the Cyclone
-web site if you need to install the compiler).
+\hyperref[{sec:install}]{Appendix~\ref{sec:install}} or \href{http://www.cs.cornell.edu/projects/cyclone}{http://www.cs.cornell.edu/projects/cyclone}
+if you need to install the compiler).
 
 \subsection{Getting Started}
 
-Here's a Cyclone program that prints the words ``\texttt{hello,
+Here's a Cyclone program that prints the string ``\texttt{hello,
   world}.''
 \begin{verbatim}
     #include <stdio.h>
@@ -67,9 +67,9 @@ correct type.  Since \texttt{main} is declared with return type
 Definite return reflects Cyclone's concern with safety.  The caller of
 the function expects to receive a value of the return type; if the
 function does not execute a \texttt{return} statement, the caller will
-receive some random value instead.  If the returned value is supposed
+receive some incorrect value instead.  If the returned value is supposed
 to be a pointer, the caller might try to dereference it, and
-dereferencing a random address can cause the program to crash.  So,
+dereferencing an arbitrary address can cause the program to crash.  So,
 Cyclone requires a return statement (even if the return type is not a
 pointer type).
 
@@ -115,7 +115,8 @@ Cyclone:
 \item There is one other way to crash a C program using pointers: you
   can dereference the null pointer or try to update the null location.
   Cyclone prevents this by inserting a null check whenever you
-  dereference a \texttt{*} pointer or try to assign to its contents.
+  dereference a \texttt{*} pointer (that is, whenever you use the
+  \texttt{*}, \texttt{->}, or subscript operation on a pointer)
 \end{itemize}
 
 These are drastic differences from C, particularly the restriction on
@@ -127,7 +128,7 @@ pointer arithmetic.  The benefit is that you can't cause a crash using
 If you need to do pointer arithmetic in Cyclone, you must use a second
 kind of pointer, called a \emph{fat pointer} and indicated by \texttt{?}\ 
 (the question mark).  For
-example, here is a program that echoes its command line arguments:
+example, here is a program that echoes its command-line arguments:
 \begin{verbatim}
     #include <stdio.h>
 
@@ -172,7 +173,7 @@ writing \texttt{argv.size}.  We've kept \texttt{argc} as an argument
 of \texttt{main} for backwards compatibility.
 
 It's worth remarking that you can always cast a \texttt{*} pointer
-to a \texttt{?} pointer (and vice-versa.)  So, it is possible to do
+to a \texttt{?} pointer (and vice-versa).  So, it is possible to do
 pointer arithmetic on a value of type \texttt{*}, but only when you
 insert the appropriate casts to convert from one pointer type to 
 another.  Note that some of these casts can fail at run-time.  For
@@ -349,6 +350,8 @@ type \texttt{int * `L} reflecting the fact that the value is
 a pointer into region \texttt{`L}.  So, the assignment 
 \texttt{y = \&a} fails to type-check because \texttt{y} expects
 to hold a pointer into region \texttt{`f}, not region \texttt{`L}.
+The restriction, compared to C, is that a pointer's type indicates
+\emph{one} region instead of \emph{all} regions.
 
 \subsubsection*{Region Inference}
 
@@ -386,10 +389,10 @@ of these details.
 
 \subsubsection*{The Heap Region}
 
-There is a special region for the heap, written \texttt{`H}
-that holds all of the storage for top-level variables, and for data
-allocated via \texttt{new} or \texttt{malloc}.  For instance, if
-we write the following declarations at the top-level:
+There is a special region for the heap, written \texttt{`H}, that
+holds all of the storage for top-level variables, and for data
+allocated via \texttt{new} or \texttt{malloc}.  For instance, if we
+write the following declarations at the top-level:
 \begin{verbatim}
 struct Point p = {0,1};
 struct Point *ptr = &p;
@@ -451,8 +454,8 @@ this declares a new region \texttt{`r} along with a \emph{region handle}
 \texttt{h}.  The handle can be used for dynamically allocating objects within
 the region.  All of the storage for
 the region is deallocated at the point of the closing brace.  
-Note that unlike block
-regions, the number of objects \texttt{`r} that you allocate into
+Unlike block
+regions, the number (and size) of objects that you allocate into
 the region is not fixed at compile time.  In this respect, dynamic
 regions are more like the heap.  You can use the \texttt{rnew(h)} and
 \texttt{rmalloc(h,...)} operations to allocate objects within a dynamic
@@ -480,9 +483,9 @@ the array, and then return the calculated result.
 
 It is worth remarking that the heap is really just a dynamic region
 with global scope, and you can use the global variable \texttt{heap_region}
-as a handle on the heap.  Indeed, \texttt{new} and \texttt{malloc(e)}
+as a handle on the heap.  Indeed, \texttt{new} and \texttt{malloc(...)}
 are just abbreviations for \texttt{rnew(heap_region)} and
-\texttt{rmalloc(heap_region,e)} respectively.  
+\texttt{rmalloc(heap_region,...)} respectively.  
 
 \subsubsection*{Region Polymorphism}
 
@@ -810,7 +813,7 @@ In pattern matching, we use the \texttt{\&} character to match a
 pointer.  So in the function \texttt{sum}, since \texttt{Leaf} and
 \texttt{Node} are constructed as pointers, the \texttt{\&} is required
 to match them.  Since \texttt{Empty} is not built as a pointer, the
-\texttt{\&} is not needed.
+\texttt{\&} must not appear.
 
 You might be wondering, ``how does Cyclone tell whether a
 \texttt{tunion} comes from a value-carrying case or a
@@ -909,7 +912,7 @@ matching:
     case Null_Exception:
       printf("Error: can't open /etc/passwd\n");
       exit(1);
-    case InvalidArg(s):
+    case &InvalidArg(s):
       printf("Error: InvalidArg(%s)\n",s);
       exit(1);
     }
@@ -920,7 +923,7 @@ the \texttt{getc} succeeds, then execution just continues, ignoring
 the \texttt{catch}.  But if \texttt{f} is NULL, then the null check
 will fail and the exception \texttt{Null_Exception} will be thrown;
 execution immediately continues with the \texttt{catch} (the call to
-\texttt{getc} never happens).  In the \texttt{catch} the thrown
+\texttt{getc} never happens).  In the \texttt{catch}, the thrown
 exception is pattern matched against the cases.  Since the thrown
 exception is \texttt{Null_Exception}, the first case is executed here.
 
@@ -975,7 +978,7 @@ In what follows, we give a brief overview of these added features.
 GCC and the
 \href{http://web.onetelnet.ch/~twolf/tw/c/c9x_changes.html}{ISO C99
   standard} have some useful new features that we have adopted for
-Cyclone. Some of the ones that we current support:
+Cyclone. Some of the ones that we currently support are:
 \begin{itemize}
 \item Statement expressions: There is a new expression form,
   \texttt{(\lb} \textit{statement} \textit{expression} \texttt{\rb)}.
@@ -983,8 +986,8 @@ Cyclone. Some of the ones that we current support:
   of the entire expression is the value of the expression
 \item Struct expressions:  If you've declared
   \texttt{struct point\{int x; int y;\};} then you can write
-  \texttt{point\{.x=expression, .y=expression\}} to allocate and
-  initialize a struct point
+  \texttt{point\{.x=\textit{expression}, .y=\textit{expression}\}}
+ to allocate and initialize a struct point
 \item \texttt{//} comments as in Java or C++
 \item Declarations can appear in any statement position.  It is not
   necessary to wrap braces around the declaration of a local variable.
@@ -1303,7 +1306,7 @@ familiar.  The basic idea is that you can write one function that
 abstracts the types of some of the values it manipulates.  For
 instance, consider the following two functions:
 \begin{verbatim}
-  $(string,int) swap1($(int,string) x) {
+  $(string_t,int) swap1($(int,string_t) x) {
      return $(x[1], x[0]);
   }
   $(int,int) swap2($(int,int) x) {
@@ -1314,7 +1317,7 @@ instance, consider the following two functions:
 The two functions are quite similar: They both take in a pair (i.e., a
 2-tuple) and return a pair with the components swapped.  At the
 machine-level, the code for these two functions will be exactly the
-same, assuming that \texttt{int}s and \texttt{string}s (\texttt{char *}) are
+same, assuming that \texttt{int}s and \texttt{string_t}s (\texttt{char *}) are
 represented the same way.  So it seems silly to write the code twice.
 Normally, a C programmer would replace the definition with simply:
 \begin{verbatim}
@@ -1396,7 +1399,7 @@ and the \texttt{tl} field contains a possibly-null pointer to a
 for instance, we can declare both integer and string lists like this:
 \begin{verbatim}
   list_t<int> ilist = new List{1,new List{2,null}};
-  list_t<string> slist = new List{.hd = "foo",
+  list_t<string_t> slist = new List{.hd = "foo",
                                   .tl = new List{"bar",null}};
 \end{verbatim}
 
@@ -1423,18 +1426,19 @@ if we write:
 then this declares a polymorphic \texttt{Queue} implementation that is
 abstract.  The definition of the struct is available within the unit
 that declares the Queue, but will not be made available to the outside
-world.  (This will be enforced by a link-time type-checker which we
+world.  (This will be enforced by a link-time type-checker that we
 are currently putting together.)  Typically, the provider of the
 \texttt{Queue} abstraction would write in an interface file:
 \begin{verbatim}
   extern struct Queue<`a>;
 \end{verbatim}
 The abstract keyword in the implementation ensures that the definition
-does not leak to a client.  One can also declare \texttt{tunion}s to be
-abstract, though I find it more useful to always use a \texttt{struct}
-to encapsulate the tunion, and make the \texttt{tunion} static, and the
-struct \texttt{abstract}.  That way, clients are always given an
-abstract struct to manipulate.
+does not leak to a client.  
+% One can also declare \texttt{tunion}s to be
+% abstract, though I find it more useful to always use a \texttt{struct}
+% to encapsulate the tunion, and make the \texttt{tunion} static, and the
+% struct \texttt{abstract}.  That way, clients are always given an
+% abstract struct to manipulate.
 
 \texttt{Typedef}s cannot be made abstract.  As in C, typedefs are type
 abbreviations and are expanded at compile time.  If we chose to make
@@ -1446,17 +1450,21 @@ It's also possible to code up ``first-class'' abstract data types
 using \texttt{tunion}s or \texttt{xtunion}s.  Individual [x]tunion
 constructors can be parameterized by additional type variables that
 are local to the type-constructor.  (From a type-theoretic point of
-view, these are existentially-quantified variables.)  I won't bother
-to say a lot more about these here, except that the approach used is
-quite similar to the treatment of existential types in Haskell.  In
-particular, pattern matching one of these constructors requires you to
-introduce explicit type variables into which the actual types are
-``unpacked.''  These variables are treated abstractly in the body of a
-case.  However, when creating one of the values, it is not necessary
-to explicitly ``pack'' the types to be abstracted.  Rather, the types
-are discovered through unification.  For an example of the use of
-existential types, see the \texttt{fn.h} and \texttt{fn.cyc} files in the
-standard library which implement first-class closures.
+view, these are existentially-quantified variables.)  Our current
+approach is quite similar to the treatment of existential types in
+Haskell.  Existential types are described in
+\hyperref[{sec:taggedunions}]{Section~\ref{sec:taggedunions}}.
+
+% In particular, pattern matching one of these constructors
+% requires you to introduce explicit type variables into which the
+% actual types are ``unpacked.''  
+% These variables are treated abstractly
+% in the body of a case.  However, when creating one of the values, it
+% is not necessary to explicitly ``pack'' the types to be abstracted.
+% Rather, the types are discovered through unification.  
+For an example of the use of existential types, see the \texttt{fn.h}
+and \texttt{fn.cyc} files in the standard library, which implement
+first-class closures.
 
 \subsection{Restrictions}
 
@@ -1483,7 +1491,7 @@ Here is a list of the major restrictions:
 
 \item Cyclone inserts a NULL check when a \texttt{*} pointer is
   dereferenced and it cannot determine statically that the pointer is
-  not NULL\@.  This prevents segmentation faults.
+  not NULL\@.
 
 \item Cyclone requires any function that is supposed to return a
   non-\texttt{void} value to execute a return statement (or throw an
@@ -1496,13 +1504,13 @@ Here is a list of the major restrictions:
   doubles, structs of bits, or tuples of bits. Pointer types are not
   supported.  This avoids the situation where an arbitrary bit pattern
   is cast to a pointer and then dereferenced. If you want to use
-  multiple types, then use tagged unions (\texttt{tunion}s.)
+  multiple types, then use tagged unions (\texttt{tunion}s).
 
 \item Cyclone only supports a limited form of \texttt{malloc} which is
-  baked in. Tuples, tunions, and structs can all be allocated via
-  \texttt{malloc} but this requires writing explicitly:
-  \texttt{malloc(sizeof(t))} where t is the type of the value that you
-  are allocating.
+  baked in. Tuples and structs can be allocated via \texttt{malloc}
+  but this requires writing explicitly: \texttt{malloc(sizeof(t))}
+  where t is the type of the value that you are allocating.  You
+  cannot use \texttt{malloc} to allocate an array.
 
 \item Cyclone performs a static analysis to ensure that every variable
   and every \texttt{struct} field is initialized before it is used. This
@@ -1546,7 +1554,7 @@ Here is a list of the major restrictions:
 
 \end{itemize}
 
-In addition, there are a number of short-comings of the current
+In addition, there are a number of shortcomings of the current
 implementation that we hope to correct in the near future.  For
 instance:
 \begin{itemize}
@@ -1562,6 +1570,9 @@ instance:
 \begin{verbatim}
   typedef struct Point {int x,y} *point_t;
 \end{verbatim}
+
+\item Cyclone does not allow a typedef declaration to be shadowed by
+another declaration.
 
 \item Cyclone does not allow 0 (zero) to be treated as the NULL pointer.
 \end{itemize}

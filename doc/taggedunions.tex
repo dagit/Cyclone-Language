@@ -1,5 +1,5 @@
 \section{Tagged Unions}
-\hypertarget{tagged_unions}{}
+\label{sec:taggedunions}
 
 In addition to \texttt{struct}, \texttt{enum}, and \texttt{union}, Cyclone
 has \texttt{tunion} (for ``tagged union'') and \texttt{xtunion} (for
@@ -92,9 +92,9 @@ arguments to a constructor can be arbitrary expressions of the correct
 type, for example, \texttt{Ellipse(rand(), sqrt(rand()))}.
 
 The second difference is that value-carrying variant types (e.g.,
-\texttt{tunion Shape.Circle}) are not subtypes or the \texttt{tunion} type
+\texttt{tunion Shape.Circle}) are not subtypes of the \texttt{tunion} type
 (e.g., \texttt{tunion Shape}).  Rather \textit{non-null pointers} to the
-value-carrying variant types are (e.g., \texttt{tunion Shape.Circle @}
+value-carrying variant types are (e.g., \texttt{tunion Shape.Circle @`H}
 is a subtype of \texttt{tunion Shape}).  So the following are correct
 initializations that use implicit subtyping:
 
@@ -140,8 +140,7 @@ pattern-matching.  For example, here is how you could define
 \begin{verbatim}
   bool isCircle(tunion Shape s) {
     switch(s) {
-    case &Circle(r):
-      return true;
+    case &Circle(r): return true;
     default: return false;
     }
   }
@@ -208,13 +207,12 @@ number or with a pointer.
 
 \paragraph{Regions for tunion} We have seen that non-null pointers to
 value-carrying variants are subtypes of the \texttt{tunion} type.  For
-example, \texttt{tunion Shape.Circle @} is a subtype of
-\texttt{tunion Shape}.  Because \texttt{tunion Shape.Circle @} is a
-pointer into the heap (it is shorthand for
-\texttt{tunion Shape.Circle @`H}),
-it would seem that all values of type \texttt{tunion Shape} are either
-non-value variants or pointers into the heap.  In fact, this is true,
-but only because \texttt{tunion Shape} is itself shorthand for
+example, \texttt{tunion Shape.Circle @`H} is a subtype of
+\texttt{tunion Shape}.  Because \texttt{tunion Shape.Circle @`H} is a
+pointer into the heap, it would seem that all values of type
+\texttt{tunion Shape} are either non-value variants or pointers into
+the heap.  In fact, this is true, but only because \texttt{tunion
+Shape} is itself shorthand for
 \texttt{tunion `H Shape}.
 
 In other words, \texttt{tunion} types are region-polymorphic over the region
@@ -237,6 +235,10 @@ type constructor which given a region creates a type.  For any region
 \texttt{tunion Foo.Bar @`r} if \texttt{tunion Foo.Bar} carries values.  If
 \texttt{tunion Foo.Bar} does not carry values, then it is a subtype of
 \texttt{tunion `r Foo} for all \texttt{`r}.
+
+In the future, we may make the implied region for \texttt{tunion Foo}
+depend on context, as we do with pointer types.  For now,
+\texttt{tunion Foo} is always shorthand \texttt{tunion `H Foo}.
 
 \paragraph{Polymorphism and tunion} A \texttt{tunion} declaration may be
 polymorphic over types and regions just like a \texttt{struct}
@@ -286,7 +288,7 @@ two arguments to \texttt{Foo} must have the same type.  There is no need
 Once a value of an existential variant is created, there is no way to
 determine the types at which it was used.  For example,
 \texttt{Foo("hi","mom",3)} and \texttt{Foo(8,9,3)} both have type, ``there
-exists an `a such that the type is \texttt{Foo<`a>}''.  When
+exists some \texttt{`a} such that the type is \texttt{Foo<`a>}''.  When
 pattern-matching an existential variant, you must give an explicit
 name to the type variables; the name can be different from the name in
 the type definition.  Continuing our useless example, we can write:
@@ -379,7 +381,7 @@ types like this:
   xtunion exn {BadFilename(string)};
 \end{verbatim}
 
-The implementation of \texttt{xtunion} types if very similar to that of
+The implementation of \texttt{xtunion} types is very similar to that of
 \texttt{tunion} types, but non-value variants cannot be represented as
 small integers because of separate compilation.  Instead, these
 variants are represented as pointers to unique locations in static
