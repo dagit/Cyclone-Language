@@ -2029,6 +2029,9 @@ semaphore.h:
 ;
 
 // Not supported yet
+// NB even though we don't support this yet, we must retain still
+// process this because we need the setjmp.h for every architecture
+// so we can make the internal compiler file cyc_setjmp.h
 setjmp.h:
 ;
 
@@ -2108,28 +2111,16 @@ hstub raise {
   extern "C" int raise(int);
 }
 hstub sigaddset {
-  #ifndef __CYGWIN__
-  /* In Cygwin, the #include <setjmp.h> in precore_c.h pollutes
-     the namespace of the C output with a different declaration
-     for sigaddset, sigdelset, sigemptyset, sigfillset,
-     sigismember, and signal, so we have to disable them for now. */
   extern "C" int sigaddset(sigset_t@, int);  
-  #endif
 }
 hstub sigdelset {
-  #ifndef __CYGWIN__
   extern "C" int sigdelset(sigset_t@, int);
-  #endif
 }
 hstub sigemptyset {
-  #ifndef __CYGWIN__
   extern "C" int sigemptyset(sigset_t@);
-  #endif
 }
 hstub sigfillset {
-  #ifndef __CYGWIN__
   extern "C" int sigfillset(sigset_t@);
-  #endif
 }
 hstub sighold {
   extern "C" int sighold(int);
@@ -2141,9 +2132,7 @@ hstub siginterrupt {
   extern "C" int siginterrupt(int,int);
 }
 hstub sigismember {
-  #ifndef __CYGWIN__
   extern "C" int sigismember(sigset_t@, int);
-  #endif
 }
 hstub sigpause {
   extern "C" int sigpause(int);
@@ -2261,12 +2250,9 @@ cstub sigset {
   }
 }
 hstub signal {
-  #ifndef __CYGWIN__
   extern sigarg_t signal(int, ... inject sigarg_t);
-  #endif
 }
 cycstub signal {
-  #ifndef __CYGWIN__
   namespace Csignal {
     extern "C" sigarg_t signal_SIG_DFL(int);
     extern "C" sigarg_t signal_SIG_ERR(int);
@@ -2292,10 +2278,8 @@ cycstub signal {
       return Csignal::signal(a,f);
     }
   }
-  #endif
 }
 cstub signal {
-  #ifndef __CYGWIN__
   Cyc_sigarg_t signal_SIG_DFL(int a) {
     return sig_wrap(signal(a,SIG_DFL));
   }
@@ -2310,7 +2294,6 @@ cstub signal {
   Cyc_sigarg_t signal_SIG_IGN(int a) {
     return sig_wrap(signal(a,SIG_IGN));
   }
-  #endif
 }
 hstub {
   // If we do 

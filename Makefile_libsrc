@@ -62,9 +62,10 @@ libs: $(CYCLIB) nogc.a $(RUNTIME).$(O)
 
 cfiles: cstubs.c $(C_SRCS) cycdoc.c buildlib.c $(C_LIBS) $(RUNTIME).c nogc.c precore_c.h
 
-cstubs.c cycstubs.cyc: libc.cys
+cyc_setjmp.h cstubs.c cycstubs.cyc: libc.cys
 	-mkdir include
 	tar -z -xf $(CYCDIR)/bin/genfiles/$(UPDATEARCH).headers.tgz -C include
+	$(CYCDIR)/bin/buildlib -d include -finish -setjmp > cyc_setjmp.h
 	$(CYCDIR)/bin/buildlib -d include -finish $<
 	find include -name '\*.i[BC]' -exec rm \{\} \;
 	mv include/cstubs.c .
@@ -153,16 +154,16 @@ precore_c.h: core.h $(CYCC) cyc_include.h cycspecs
 	$(CYCBISON) -d $< -o $@
 %_tab.h: %.y $(CYCBISON)
 	$(CYCBISON) -d $< -o $(patsubst %.h,%.cyc,$@)
-%.c: %.cyc $(CYCC) cyc_include.h cycspecs
+%.c: %.cyc $(CYCC) cyc_include.h cyc_setjmp.h cycspecs
 	$(CYCC) $(CYCFLAGS) -D__FILE2__=\"$(notdir $<)\" -c -o $@ -stopafter-toc $<
-%.$(O): %.cyc $(CYCC) cyc_include.h cycspecs
+%.$(O): %.cyc $(CYCC) cyc_include.h cyc_setjmp.h cycspecs
 	$(CYCC) $(CYCFLAGS) -D__FILE2__=\"$(notdir $<)\" -c -o $@ $<
 # For runtime_cyc.c and nogc.c and cstubs.c
-%.$(O): %.c precore_c.h cyc_include.h cycspecs
+%.$(O): %.c precore_c.h cyc_include.h cyc_setjmp.h cycspecs
 	$(CC) $(CFLAGS) -I. -c -o $@ $<
 
 ifdef MS
-%.obj: %.c precore_c.h cyc_include.h cycspecs
+%.obj: %.c precore_c.h cyc_include.h cyc_setjmp.h cycspecs
 	cl /I$(CYCDIR) /Dinline=__inline /c /w /nologo /Fo$@ $^
 endif
 

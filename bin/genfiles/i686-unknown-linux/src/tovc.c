@@ -1,10 +1,33 @@
-/* This is a C header file to be used by the output of the Cyclone
-   to C translator.  The corresponding definitions are in file lib/runtime_cyc.c
+#ifndef _SETJMP_H_
+#define _SETJMP_H_
+#ifndef ___sigset_t_def_
+#define ___sigset_t_def_
+typedef struct {unsigned long __val[1024 / (8 * sizeof(unsigned long))];} __sigset_t;
+#endif
+#ifndef ___jmp_buf_def_
+#define ___jmp_buf_def_
+typedef int __jmp_buf[6];
+#endif
+#ifndef ___jmp_buf_tag_def_
+#define ___jmp_buf_tag_def_
+struct __jmp_buf_tag{
+  __jmp_buf __jmpbuf;
+  int __mask_was_saved;
+  __sigset_t __saved_mask;
+};
+#endif
+#ifndef _jmp_buf_def_
+#define _jmp_buf_def_
+typedef struct __jmp_buf_tag jmp_buf[1];
+#endif
+extern int setjmp(jmp_buf);
+#endif
+/* This is a C header file to be used by the output of the Cyclone to
+   C translator.  The corresponding definitions are in file
+   lib/runtime_cyc.c
 */
 #ifndef _CYC_INCLUDE_H_
 #define _CYC_INCLUDE_H_
-
-#include <setjmp.h>
 
 #ifdef NO_CYC_PREFIX
 #define ADD_PREFIX(x) x

@@ -100,6 +100,8 @@ using Absyn;
 
 extern "C" Cstring Ccomp; // The string to invoke gcc
 
+static int do_setjmp = 0;
+
 FILE *log_file = NULL;
 FILE *cstubs_file = NULL;
 FILE *cycstubs_file = NULL;
@@ -1410,9 +1412,11 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
         reachable_decls = new List(decl,reachable_decls);
     }
     // reachable_decls = imp_rev(reachable_decls);
-    maybe = fopen(filename,"w");
-    if (!maybe) return 1;
-    out_file = (FILE @)maybe;
+    if (!do_setjmp) {
+      maybe = fopen(filename,"w");
+      if (!maybe) return 1;
+      out_file = (FILE @)maybe;
+    } else out_file = stdout;
     mstring_t ifdefmacro = aprintf("_%s_",filename);
     for (let j = 0; j < ifdefmacro.size; j++) {
       if (ifdefmacro[j] == '.' || ifdefmacro[j] == '/')
@@ -1530,9 +1534,10 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       }
     }
     fprintf(out_file,"#endif\n");
-    fclose(out_file);
+    if (do_setjmp) return 0; // Don't print C and Cyclone stubs files
+    else fclose(out_file);
 
-    /* Dump out the c stubs */
+    /* Dump out the C stubs */
     if (cstubs != NULL) {
       out_file = (FILE @)cstubs_file;
       for (let x = cstubs; x != NULL; x = x->tl) {
@@ -1543,7 +1548,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       }
     }
 
-    /* Dump out the cyclone stubs */
+    /* Dump out the Cyclone stubs */
     out_file = (FILE @)cycstubs_file;
     /* Always include the header, to make sure it has no errors */
     fprintf(out_file, "#include <%s>\n\n", filename);
@@ -1636,6 +1641,27 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     return 0;
   }
 
+  /* Return 1 on fatal error, else 0 */
+  int process_setjmp(const char @ dir) {
+    /* Cd into dir, where the header files will be built.  Remember
+       the current dir so we can cd back after we're done. */
+    char ? buf = new {for i<1024: '\0'};
+    let cwd = getcwd(buf,buf.size);
+    if (chdir(dir)) {
+      fprintf(stderr,"Error: can't change directory to %s\n",dir);
+      return 1;
+    }
+    if (process_file("setjmp.h", list(new "jmp_buf"), NULL,
+                     list(new $("setjmp", "extern int setjmp(jmp_buf);\n")),
+                     NULL, NULL))
+      return 1; /* fatal error */
+    if (chdir((char @)cwd)) {
+      fprintf(stderr,"Error: could not change directory to %s\n", cwd);
+      return 1;
+    }
+    return 0;
+  }
+
   /* Helper functions for command line argument processing */
   static string_t output_dir = "BUILDLIB.OUT";
   static void set_output_dir(string_t<`H> s) {
@@ -1680,6 +1706,12 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
            new $("-finish",false,"",
                  new Unit_spec(set_FINISH),
                  "Produce Cyclone headers from pre-gathered C library info"),
+           new $("-setjmp",false,"",
+                 new Set_spec(&do_setjmp),
+                 "Produce the jmp_buf and setjmp declarations"
+                 " on the standard output, for use by the Cyclone"
+                 " compiler special file cyc_setjmp.h.  Cannot be"
+                 " used with -gather, -gatherscript, or specfiles."),
            new $("-",true,"",
                  /* FIX: this is a crude way to see if there is an
                     invalid option on the command line, and halt if so.
@@ -1689,7 +1721,11 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
                  "")
            );
     Arg::parse(options, add_spec_file, "Options:", argv);
-    if (badparse || spec_files == NULL) {
+    if (badparse
+        || (!do_setjmp && spec_files == NULL)
+        || (do_setjmp && spec_files != NULL)
+        || (do_setjmp && mode == GATHER)
+        || (do_setjmp && mode == GATHERSCRIPT)) {
       Arg::usage(options,
                  "Usage: buildlib [options] specfile1 specfile2 ...\n"
                  "Options:");
@@ -1726,32 +1762,40 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
         return 1;
       }
 
-      /* Create an empty cstubs.cyc file */
-      cstubs_file = fopen((const char @)(Filename::concat(output_dir,"cstubs.c")),"w");
-      if (!cstubs_file) {
-        fprintf(stderr,"Error: could not create cstubs.c in directory %s\n",output_dir);
-        return 1;
-      }
+      if (!do_setjmp) {
+        /* Create an empty cstubs.cyc file */
+        cstubs_file = fopen((const char @)(Filename::concat(output_dir,"cstubs.c")),"w");
+        if (!cstubs_file) {
+          fprintf(stderr,"Error: could not create cstubs.c in directory %s\n",output_dir);
+          return 1;
+        }
 
-      /* Create a cycstubs.cyc file with the standard prologue */
-      cycstubs_file = fopen((const char @)(Filename::concat(output_dir,"cycstubs.cyc")),"w");
-      if (!cycstubs_file) {
-        fprintf(stderr,
-                "Error: could not create cycstubs.c in directory %s\n",
-                output_dir);
-        return 1;
+        /* Create a cycstubs.cyc file with the standard prologue */
+        cycstubs_file = fopen((const char @)(Filename::concat(output_dir,"cycstubs.cyc")),"w");
+        if (!cycstubs_file) {
+          fprintf(stderr,
+                  "Error: could not create cycstubs.c in directory %s\n",
+                  output_dir);
+          return 1;
+        }
+        fprintf((FILE@)cycstubs_file,
+                "#include <core.h>\n"
+                "using Core;\n\n");
       }
-      fprintf((FILE@)cycstubs_file,
-              "#include <core.h>\n"
-              "using Core;\n\n");
     }
             
-    /* Main loop -- process each spec file */
+
     const char @outdir = (const char @)output_dir;
-    for (; spec_files != NULL; spec_files = spec_files->tl) {
-      if (process_specfile(spec_files->hd,outdir)) {
-        fprintf(stderr,"FATAL ERROR -- QUIT!\n");
-        exit(1);
+    if (do_setjmp && process_setjmp(outdir)) {
+      return 1;
+    }
+    else {
+      /* Main loop -- process each spec file */
+      for (; spec_files != NULL; spec_files = spec_files->tl) {
+        if (process_specfile(spec_files->hd,outdir)) {
+          fprintf(stderr,"FATAL ERROR -- QUIT!\n");
+          exit(1);
+        }
       }
     }
 
@@ -1760,8 +1804,10 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     }
     else if (!gathering()) {
       fclose((FILE@)log_file);
-      fclose((FILE@)cstubs_file);
-      fclose((FILE@)cycstubs_file);
+      if (!do_setjmp) {
+        fclose((FILE@)cstubs_file);
+        fclose((FILE@)cycstubs_file);
+      }
     }
 
     return 0;

@@ -33,7 +33,6 @@ all: $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/gc.a cyclone \
 	$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include \
 	tools libs 
 
-# FIX: a bug in buildlib forces us to use a relative path for -d
 cyclone: $(CYC_LIB_PATH)
 	$(MAKE) -C bin/genfiles install 
 
@@ -70,6 +69,7 @@ $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include: $(CYC_LIB_PATH) \
   $(CYCDIR)/bin/genfiles/$(ARCH).headers.tgz bin/cyc-lib/libc.cys
 	-mkdir $@
 	tar -z -xf bin/genfiles/$(ARCH).headers.tgz -C $@
+	bin/buildlib -d $@ -finish -setjmp > $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/cyc_setjmp.h
 	bin/buildlib -d $@ -finish bin/cyc-lib/libc.cys
 	find $@ -name '*.i[BC]' -exec rm \{\} \;
 

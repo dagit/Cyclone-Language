@@ -582,12 +582,47 @@ list_t<Absyn::decl_t> do_tovc(bool ignore, list_t<Absyn::decl_t> tds) {
   return Tovc::tovc(tds);
 }
 
+static string_t cyc_setjmp = NULL;
 /* The absolute file name of cyc_include.h */
-static string_t cyc_include = "";
+static string_t cyc_include = NULL;
 
 static void set_cyc_include(string_t<`H> f) {
   cyc_include = f;
 }
+
+/* return 1 on error, 0 on no error */
+int copy_internal_file(string_t file, FILE @out_file) {
+  // FIX: would be better to use open, stat, and read but we don't
+  // have all those functions in the library yet.
+  if (file == NULL) {
+    fprintf(stderr,"Internal error: copy_internal_file called with NULL\n");
+    return 1;
+  }
+  let file_f = try_file_open(file,"r","internal compiler file");
+  if (file_f == NULL) return 1;
+  size_t n_read = 1024;
+  size_t n_written;
+  char buf[1024] = { for i < 1024 : 0 }; // init to avoid warning
+  while (n_read == 1024) {
+    n_read = fread(buf,1,1024,file_f);
+    if (n_read != 1024 && !(feof(file_f))) {
+      compile_failure = true;
+      fprintf(stderr, "\nError: problem copying %s\n",file);
+      fflush(stderr);
+      return 1;
+    }
+    n_written = fwrite(buf,1,n_read,out_file);
+    if (n_read != n_written) {
+      compile_failure = true;
+      fprintf(stderr, "\nError: problem copying %s\n",file);
+      fflush(stderr);
+      return 1;
+    }
+  }
+  fclose(file_f);
+  return 0;
+}
+
 
 list_t<Absyn::decl_t> do_print(FILE @ out_file, list_t<Absyn::decl_t,`H> tds) {
   let params_r = tc_r ? Absynpp::cyc_params_r : Absynpp::c_params_r;
@@ -603,31 +638,9 @@ list_t<Absyn::decl_t> do_print(FILE @ out_file, list_t<Absyn::decl_t,`H> tds) {
   if (inline_functions_r)
     fprintf(out_file,"#define _INLINE_FUNCTIONS\n");
 
-  // Copy cyc_include.h to out_file.
-  // FIX: would be better to use open, stat, and read but we don't
-  // have all those functions in the library yet.
-  let cyc_include_f = try_file_open(cyc_include,"r","internal compiler file");
-  if (cyc_include_f == NULL) return tds;
-  size_t n_read = 1024;
-  size_t n_written;
-  char buf[1024] = { for i < 1024 : 0 }; // init to avoid warning
-  while (n_read == 1024) {
-    n_read = fread(buf,1,1024,cyc_include_f);
-    if (n_read != 1024 && !(feof(cyc_include_f))) {
-      compile_failure = true;
-      fprintf(stderr, "\nError: problem copying cyc_include.h\n");
-      fflush(stderr);
-      return tds;
-    }
-    n_written = fwrite(buf,1,n_read,out_file);
-    if (n_read != n_written) {
-      compile_failure = true;
-      fprintf(stderr, "\nError: problem copying cyc_include.h\n");
-      fflush(stderr);
-      return tds;
-    }
-  }
-  fclose(cyc_include_f);
+  // Copy cyc_setjmp.h and cyc_include.h to out_file.
+  if (copy_internal_file(cyc_setjmp,out_file)) return tds;
+  if (copy_internal_file(cyc_include,out_file)) return tds;
   
   if (pp_r) {
     Absynpp::set_params(&params_r);
@@ -1337,11 +1350,14 @@ int main(int argc, string_t<`H> ?`H argv) {
     exit(1);
   }
   
-  // Find the file cyc_include.h, needed to produce the .c output.
+  // Find the files cyc_setjmp.h and cyc_include.h, needed to produce
+  // the .c output.
   /* The absolute file name is kept in a global variable */
   /* don't bother if we won't translate to C or if set explicitly */
-  if (!stop_after_cpp_r && strlen(cyc_include) == 0)
+  if (!stop_after_cpp_r && strlen(cyc_include) == 0) {
+    cyc_setjmp = do_find(cyclone_arch_path,"cyc_setjmp.h");
     cyc_include = do_find(cyclone_exec_path,"cyc_include.h");
+  }
 
   /* Process each .cyc file */
   for (let l = rev(cyclone_files); l != NULL; l = l->tl) {

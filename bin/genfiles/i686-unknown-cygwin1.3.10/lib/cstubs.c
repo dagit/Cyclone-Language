@@ -82,7 +82,6 @@
       return Cyc_Csignal_make_SIG_HANDLER(f);
   }
 
-  #ifndef __CYGWIN__
   Cyc_sigarg_t signal_SIG_DFL(int a) {
     return sig_wrap(signal(a,SIG_DFL));
   }
@@ -97,7 +96,6 @@
   Cyc_sigarg_t signal_SIG_IGN(int a) {
     return sig_wrap(signal(a,SIG_IGN));
   }
-  #endif
 
   #include <stdio.h>
   // Define struct __cycFILE, and initialize stdin, stdout, stderr
