@@ -127,13 +127,15 @@ static char ?`r copy_string(region_t<`r> r, const char ? s) {
 }
 
 // lookup variable in the environment
-object_t<`r> lookup(env_t<`r> env, unsigned int depth, unsigned int offset) {
+static object_t<`r> lookup(env_t<`r> env, unsigned int depth, 
+                           unsigned int offset) {
   for (; depth != 0; depth--) env = env->next;
   let vs = env->values;
   return vs[offset];
 }
 
-void setvar(env_t<`r> env, unsigned int depth, unsigned int offset, 
+// set the value of a variable in the environment
+static void setvar(env_t<`r> env, unsigned int depth, unsigned int offset, 
             object_t<`r> v) {
   for (; depth != 0; depth--) env = env->next;
   let vs = env->values;
@@ -176,7 +178,7 @@ datatype exn { Finished(int) };
 //          env should be a list of the values corresponding to the variables
 //          e is the expression to reduce or the last value reduced
 // outputs: updated stack, environment, and expression or value
-state_t<`r> step(region_t<`r> r, state_t<`r> arg) {
+static state_t<`r> step(region_t<`r> r, state_t<`r> arg) {
   switch (arg.result) {
     // we have an expression to evaluate -- if it's a value, return
     // it immediately.  Otherwise, push a frame on the stack and start
@@ -289,8 +291,8 @@ state_t<`r> step(region_t<`r> r, state_t<`r> arg) {
 
 
 // forward declaration
-env_t<next_rgn<`r>> copy_env(region_t<next_rgn<`r>> r2, env_t<`r> ;
-                             {`r,next_rgn<`r>});
+static env_t<next_rgn<`r>> copy_env(region_t<next_rgn<`r>> r2, env_t<`r> ;
+                                    {`r,next_rgn<`r>});
 
 // forward an object from `r to next_rgn<`r>, given a handle for
 // next_rgn<`r>.  We have to put in an explicit capability since
@@ -311,8 +313,8 @@ env_t<next_rgn<`r>> copy_env(region_t<next_rgn<`r>> r2, env_t<`r> ;
 // an explicit queue of some sort, and by pulling the same trick
 // that I do here (don't initialize the value in to-space until
 // its fields have been forwarded.)  
-object_t<next_rgn<`r>> forward(region_t<next_rgn<`r>> r2, object_t<`r> v ;
-                               {`r,next_rgn<`r>}) {
+static object_t<next_rgn<`r>> 
+  forward(region_t<next_rgn<`r>> r2, object_t<`r> v ; {`r,next_rgn<`r>}) {
   switch (v) {
   case NULL: return NULL;
   case &Int_v(i): return rnew(r2) Int_v(i);
@@ -353,8 +355,8 @@ object_t<next_rgn<`r>> forward(region_t<next_rgn<`r>> r2, object_t<`r> v ;
 }
 
 // forward an environment
-env_t<next_rgn<`r>> copy_env(region_t<next_rgn<`r>> r2, env_t<`r> env;
-                             {`r,next_rgn<`r>}) {
+static env_t<next_rgn<`r>> copy_env(region_t<next_rgn<`r>> r2, env_t<`r> env; 
+                                    {`r,next_rgn<`r>}) {
   if (env == NULL) return NULL;
   if (env->forward != NULL) return env->forward;
   unsigned n = numelts(env->values);
@@ -369,8 +371,8 @@ env_t<next_rgn<`r>> copy_env(region_t<next_rgn<`r>> r2, env_t<`r> env;
 
 // copy the stack and anything reachable from it from `r to next_rgn<`r>
 // This destroys the old stack.
-stack_t<next_rgn<`r>> copy_roots(region_t<next_rgn<`r>> r2, stack_t<`r> s ;
-                                 {`r,next_rgn<`r>}) {
+static stack_t<next_rgn<`r>> 
+  copy_roots(region_t<next_rgn<`r>> r2, stack_t<`r> s ; {`r,next_rgn<`r>}) {
   if (s == NULL) return NULL;
   stack_t<next_rgn<`r>> frame2;
   stack_t<next_rgn<`r>> next2 = copy_roots(r2, s->next);
@@ -409,7 +411,7 @@ typedef struct MachineState@`U mach_state_t;
 // given a machine state, produce a new one that is isomorphic
 // except that it drops all unreachable objects, and destroy the 
 // old machine state.
-struct MachineState gc(struct MachineState ms) {
+static struct MachineState gc(struct MachineState ms) {
   let MachineState{<`r> key, counter, state} = ms;
   // generate the to-space from the old-space's counter
   let CounterRgn{new_key, new_counter} = next_key(counter);
@@ -439,79 +441,13 @@ struct MachineState gc(struct MachineState ms) {
   return ms;     // return the new machine state
 }
 
-// cdr primop (tail)
-object_t<`r> cdr(region_t<`r> r, object_t<`r>?`r p) {
-  switch (p[0]) {
-  case &Pair_v(_,v1,v2): return v2;
-  default: fail("expected pair but found other");
-  }
-}
-
-// car primop (head)
-object_t<`r> car(region_t<`r> r, object_t<`r>?`r p) {
-  switch (p[0]) {
-  case &Pair_v(_,v1,v2): return v1;
-  default: fail("expected pair but found other");
-  }
-}
-
-// setcar primop (set head)
-object_t<`r> setcar(region_t<`r> r, object_t<`r>?`r p) {
-  switch (p[0]) {
-  case &Pair_v(_,*v1,_): *v1 = p[1]; return *v1;
-  default: fail("expected pair but found other");
-  }
-}
-
-// setcdr primop (set tail)
-object_t<`r> setcdr(region_t<`r> r, object_t<`r>?`r p) {
-  switch (p[0]) {
-  case &Pair_v(_,_,*v2): *v2 = p[1]; return *v2;
-  default: fail("expected pair but found other");
-  }
-}
-
-// + primop (sums all arguments)
-object_t<`r> plus(region_t<`r> r, object_t<`r>?`r p) {
-  int sum = 0;
-  unsigned n = numelts(p);
-  for (unsigned i = 0; i < numelts(p); i++)
-    switch (p[i]) {
-    case &Int_v(x): sum += x; break;
-    default: fail("expected number");
-    }
-  return rnew(r) Int_v(sum);
-}
-
-// - primop 
-object_t<`r> minus(region_t<`r> r, object_t<`r>?`r p) {
-  switch $(p[0],p[1]) {
-  case $(&Int_v(x),&Int_v(y)): return rnew(r) Int_v(x - y);
-  default: fail("expected number");
-  }
-}
-
-// * primop (muls all arguments)
-object_t<`r> times(region_t<`r> r, object_t<`r>?`r p) {
-  int prod = 0;
-  unsigned n = numelts(p);
-  for (unsigned i = 0; i < numelts(p); i++)
-    switch (p[i]) {
-    case &Int_v(x): prod *= x; break;
-    default: fail("expected number");
-    }
-  return rnew(r) Int_v(prod);
-}
-
-env_t<`r> initial_env(region_t<`r> r) {
-  return NULL;
-}
 
 // construct the initial machine state with a fresh dynamic region,
 // it's key, it's counter (for generating the next region), an
 // empty stack, an empty environment, and a result expression to be
 // evaluated.
-struct MachineState init_state(exp_t e) {
+static env_t<`r> initial_env(region_t<`r> r);
+static struct MachineState init_state(exp_t e) {
   let NewCounterRgn {<`r> CounterRgn{key, ctr}} = new_ukey_and_counter();
   env_t<`r> env;
   { region r = open(key);
@@ -526,14 +462,13 @@ struct MachineState init_state(exp_t e) {
 // the main loop of the interpreter -- run for GC_STEP steps
 // doing one reduction per step.  The steps update the stack,
 // environment, and expression to be evaluated.
-state_t<`r> trampoline(region_t<`r> r,state_t<`r> state) {
+static state_t<`r> trampoline(region_t<`r> r,state_t<`r> state) {
   for (int i = 0; i < GC_STEP; i++) {
     state = step(r, state);
   }
   return state;
 }
                                                 
-
 // the toplevel -- creates an initial abstract machine state,
 // and then enters a loop which does the trampoline followed
 // by a gc.  
@@ -553,10 +488,115 @@ int toplevel(exp_t e) {
   }
 }
 
+
+/////////////////////////////////////////////////////////////////////////////
+// primops
+/////////////////////////////////////////////////////////////////////////////
+
+// car primop (head)
+static object_t<`r> car(region_t<`r> r, object_t<`r>?`r p) {
+  switch (p[0]) {
+  case &Pair_v(_,v1,v2): return v1;
+  default: fail("expected pair but found other");
+  }
+}
+
+// cdr primop (tail)
+static object_t<`r> cdr(region_t<`r> r, object_t<`r>?`r p) {
+  switch (p[0]) {
+  case &Pair_v(_,v1,v2): return v2;
+  default: fail("expected pair but found other");
+  }
+}
+
+// setcar primop (set head)
+static object_t<`r> setcar(region_t<`r> r, object_t<`r>?`r p) {
+  switch (p[0]) {
+  case &Pair_v(_,*v1,_): *v1 = p[1]; return *v1;
+  default: fail("expected pair but found other");
+  }
+}
+
+// setcdr primop (set tail)
+static object_t<`r> setcdr(region_t<`r> r, object_t<`r>?`r p) {
+  switch (p[0]) {
+  case &Pair_v(_,_,*v2): *v2 = p[1]; return *v2;
+  default: fail("expected pair but found other");
+  }
+}
+
+// + primop (sums all arguments)
+static object_t<`r> plus(region_t<`r> r, object_t<`r>?`r p) {
+  int sum = 0;
+  unsigned n = numelts(p);
+  for (unsigned i = 0; i < numelts(p); i++)
+    switch (p[i]) {
+    case &Int_v(x): sum += x; break;
+    default: fail("expected number");
+    }
+  return rnew(r) Int_v(sum);
+}
+
+// - primop 
+static object_t<`r> minus(region_t<`r> r, object_t<`r>?`r p) {
+  switch $(p[0],p[1]) {
+  case $(&Int_v(x),&Int_v(y)): return rnew(r) Int_v(x - y);
+  default: fail("expected number");
+  }
+}
+
+// * primop
+object_t<`r> times(region_t<`r> r, object_t<`r>?`r p) {
+  int prod = 0;
+  unsigned n = numelts(p);
+  for (unsigned i = 0; i < numelts(p); i++)
+    switch (p[i]) {
+    case &Int_v(x): prod *= x; break;
+    default: fail("expected number");
+    }
+  return rnew(r) Int_v(prod);
+}
+
+struct Prim {
+  object_t<`r> (@`H primop)<`r>(region_t<`r>,object_t<`r>?`r);
+  const char ?`H id;
+};
+
+// table of all of the primops together with their identifier as a string
+// used to construct dynamic and static environments below
+static struct Prim primop_table[] = {
+  Prim{car<>, "car"},
+  Prim{cdr<>, "cdr"},
+  Prim{setcar<>, "setcar!"},
+  Prim{setcdr<>, "setcdr!"},
+  Prim{plus<>, "+"},
+  Prim{minus<>, "-"},
+  Prim{times<>, "*"}
+};
+
+
+// constructs the initial run-time environment which has a binding
+// for each of the primops.
+static env_t<`r> initial_env(region_t<`r> r) {
+  object_t<`r>?`r primops = rnew(r) {for i < numelts(primop_table) : NULL};
+  for (unsigned i = 0; i < numelts(primop_table); i++) {
+    primops[i] = rnew(r) Primop_v((primop_table[i].primop)<>);
+  }
+  return rnew(r) Env{NULL,NULL,primops};
+}
+
+// constructs the initial static environment which will map the
+// name of the primop to the write offset in the top-level environment.
+static list_t<const char?`H?`H@`r,`r> initial_static_env(region_t<`r> r) {
+  // needs to sync up with primops above!
+  let vars = new {for i < numelts(primop_table) : primop_table[i].id};
+  return rnew(r) List(rnew(r) (_ ?)vars,NULL);
+}
+
 // map a string variable to its debruijn depth and offset, given
 // an environment that has all of the bound variables in it.
-$(unsigned depth,unsigned offset) static_map(list_t<const char ?`H?`H@`r,`r> env,
-                                             const char ?`H x) {
+static $(unsigned depth,unsigned offset) 
+  static_map(list_t<const char ?`H?`H@`r,`r> env, const char ?`H x) {
   unsigned d = 0;
   unsigned off;
   while (env != NULL) {
@@ -570,7 +610,7 @@ $(unsigned depth,unsigned offset) static_map(list_t<const char ?`H?`H@`r,`r> env
 }
 
 // add debruijn indices in to all variables
-void debruijn(region_t<`r> r,list_t<const char?`H?`H@`r,`r> d, exp_t e) {
+static void deb(region_t<`r> r,list_t<const char?`H?`H@`r,`r> d, exp_t e) {
   switch (e) {
   case &Var_e(s,*depth,*offset):
     let $(dep,off) = static_map(d,s);
@@ -584,19 +624,28 @@ void debruijn(region_t<`r> r,list_t<const char?`H?`H@`r,`r> d, exp_t e) {
   case &String_e(_): 
   case &Primop_e(_): break;
   case &Apply_e(es):
-    for (unsigned i = 0; i < numelts(es); i++) debruijn(r,d,es[i]);
+    for (unsigned i = 0; i < numelts(es); i++) deb(r,d,es[i]);
     break;
   case &Lambda_e(args,body):
-    debruijn(r, rnew(r) List{rnew(r) args,d}, body);
+    deb(r, rnew(r) List{rnew(r) args,d}, body);
     break;
   case &If_e(e1,e2,e3):
-    debruijn(r,d,e1); debruijn(r,d,e2); debruijn(r,d,e3); 
+    deb(r,d,e1); deb(r,d,e2); deb(r,d,e3); 
     break;
   case &Set_e(s,*depth,*offset,e):
     let $(dep,off) = static_map(d,s);
     *depth = dep;
     *offset = off;
-    debruijn(r,d,e);
+    deb(r,d,e);
     break;
   }
+}
+
+// convert an expression using strings as variables to one
+// that has depth and offsets for the environments.  This
+// translation happens under a top-level environment for
+// the baked in primops.
+static void debruijn(exp_t e) {
+  region r;
+  deb(r, initial_static_env(r), e);
 }
