@@ -175,7 +175,7 @@ store_args_and_env (int argc, char ??argv)
   /* XXX This is no good solution.  We should rather copy the args so
      that we can compare them later.  But we must not use malloc(3).  */
   original_argc = argc;
-  original_argv = (int)argv;
+  original_argv = (int)((char?*)argv);
 }
 
 # define SWAP_FLAGS(ch1, ch2)

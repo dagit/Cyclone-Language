@@ -522,6 +522,7 @@ static int attribute_case_number(attribute_t att) {
   case No_check_memory_usage_att: return 18;
   case &Format_att(_,_,_): return 19;
   case &Initializes_att(_): return 20;
+  case Pure: return 21;
   }
 }
 
@@ -1975,7 +1976,7 @@ bool castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
   switch (t2) {
   // we can cast t1 to an int if t1 is a boxed type.
   case &IntType(_,B4):
-    if (typ_kind(t2) == BoxKind) return true;
+    if (typ_kind(t1) == BoxKind) return true;
     break;
   default: break;
   }

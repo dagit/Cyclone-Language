@@ -166,6 +166,7 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
       case Noreturn_att: 
       case &Format_att(_,_,_):
       case &Initializes_att(_):
+      case Pure_att:
       case Const_att: impos("tcVardecl: fn type atts in function var decl");
       // C doesn't allow these attributes on functions
       case &Aligned_att(_):

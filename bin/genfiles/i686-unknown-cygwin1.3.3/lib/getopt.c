@@ -340,11 +340,12 @@ static struct _tagged_arr Cyc_Std_posixly_correct;static int Cyc_Std_first_nonop
 static int Cyc_Std_last_nonopt;static int Cyc_Std_nonoption_flags_max_len;static int
 Cyc_Std_nonoption_flags_len;static int Cyc_Std_original_argc;static int Cyc_Std_original_argv;
 static void  __attribute__((unused )) Cyc_Std_store_args_and_env(int argc,struct
-_tagged_arr argv){Cyc_Std_original_argc=argc;Cyc_Std_original_argv=(int)argv.curr;}
-static void Cyc_Std_exchange(struct _tagged_arr argv){int bottom=Cyc_Std_first_nonopt;
-int middle=Cyc_Std_last_nonopt;int top=Cyc_Std_optind;struct _tagged_arr tem;while(
-top > middle?middle > bottom: 0){if(top - middle > middle - bottom){int len=middle - 
-bottom;register int i;for(i=0;i < len;i ++){tem=*((struct _tagged_arr*)
+_tagged_arr argv){Cyc_Std_original_argc=argc;Cyc_Std_original_argv=(int)((struct
+_tagged_arr*)_check_null(_untag_arr(argv,sizeof(struct _tagged_arr),1)));}static
+void Cyc_Std_exchange(struct _tagged_arr argv){int bottom=Cyc_Std_first_nonopt;int
+middle=Cyc_Std_last_nonopt;int top=Cyc_Std_optind;struct _tagged_arr tem;while(top > 
+middle?middle > bottom: 0){if(top - middle > middle - bottom){int len=middle - bottom;
+register int i;for(i=0;i < len;i ++){tem=*((struct _tagged_arr*)
 _check_unknown_subscript(argv,sizeof(struct _tagged_arr),bottom + i));*((struct
 _tagged_arr*)_check_unknown_subscript(argv,sizeof(struct _tagged_arr),bottom + i))=*((
 struct _tagged_arr*)_check_unknown_subscript(argv,sizeof(struct _tagged_arr),(top - (

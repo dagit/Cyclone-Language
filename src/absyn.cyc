@@ -735,6 +735,7 @@ string_t attribute2string(attribute_t a) {
   case &Format_att(Printf_ft,n,m): return aprintf("format(printf,%u,%u)",n,m);
   case &Format_att(Scanf_ft,n,m):  return aprintf("format(scanf,%u,%u)", n,m);
   case &Initializes_att(n): return aprintf("initializes(%d)",n);
+  case Pure_att: return "pure";
   }
 }
 
@@ -746,6 +747,7 @@ bool fntype_att(attribute_t a) {
   case Stdcall_att:        
   case Cdecl_att:          
   case Noreturn_att:       
+  case Pure_att:
   case &Format_att(_,_,_): 
   case Const_att: return true;
   case &Initializes_att(_): return true;

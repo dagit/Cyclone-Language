@@ -1162,7 +1162,8 @@ attribute:
     $("no_instrument_function", No_instrument_function_att),
     $("constructor", Constructor_att),
     $("destructor", Destructor_att),
-    $("no_check_memory_usage", No_check_memory_usage_att)
+    $("no_check_memory_usage", No_check_memory_usage_att),
+    $("pure",Pure_att),
   };
     let s = $1;
     // drop the surrounding __ in s, if it's there

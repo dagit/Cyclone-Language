@@ -1118,8 +1118,8 @@ _tmpB4=(void*)_tmpB3.ret_typ;_tmpB5=_tmpB3.args;_tmpB6=_tmpB3.c_varargs;_tmpB7=
 _tmpB3.cyc_varargs;_tmpB8=_tmpB3.attributes;_LL41: {struct Cyc_List_List*_tmpCD=0;
 for(0;_tmpB8 != 0;_tmpB8=_tmpB8->tl){void*_tmpCE=(void*)_tmpB8->hd;_LL64: if((int)
 _tmpCE != 3)goto _LL66;_LL65: goto _LL67;_LL66: if((int)_tmpCE != 4)goto _LL68;_LL67:
-goto _LL69;_LL68: if(_tmpCE <= (void*)16?1:*((int*)_tmpCE)!= 3)goto _LL6A;_LL69:
-continue;_LL6A: if(_tmpCE <= (void*)16?1:*((int*)_tmpCE)!= 4)goto _LL6C;_LL6B:
+goto _LL69;_LL68: if(_tmpCE <= (void*)17?1:*((int*)_tmpCE)!= 3)goto _LL6A;_LL69:
+continue;_LL6A: if(_tmpCE <= (void*)17?1:*((int*)_tmpCE)!= 4)goto _LL6C;_LL6B:
 continue;_LL6C:;_LL6D: _tmpCD=({struct Cyc_List_List*_tmpCF=_cycalloc(sizeof(*
 _tmpCF));_tmpCF->hd=(void*)((void*)_tmpB8->hd);_tmpCF->tl=_tmpCD;_tmpCF;});goto
 _LL63;_LL63:;}{struct Cyc_List_List*_tmpD0=((struct Cyc_List_List*(*)(struct

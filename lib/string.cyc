@@ -769,8 +769,8 @@ const char?`r memchr(const char ?`r s, char c, size_t n) {
     throw new Invalid_argument("Std::memchr");
   let p = Cstr::memchr((const char *)s, c, n);
   if (p == NULL) return NULL;
-  let sval = (unsigned int)s;
-  let pval = (unsigned int)p;
+  let sval = (unsigned int)((const char *)s);
+  let pval = (unsigned int)(const char *)p;
   let delta = pval - sval;
   return (s + delta);
 }
@@ -781,7 +781,7 @@ char?`r mmemchr(char ?`r s, char c, size_t n) {
     throw new Invalid_argument("Std::mmemchr");
   let p = Cstr::memchr((const char *)s, c, n);
   if (p == NULL) return NULL;
-  let sval = (unsigned int)s;
+  let sval = (unsigned int)((const char *)s);
   let pval = (unsigned int)p;
   let delta = pval - sval;
   return (s + delta);
