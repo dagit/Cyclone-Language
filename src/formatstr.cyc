@@ -6,14 +6,18 @@
 #include "position.h"
 #include "absyn.h"
 #include "tcutil.h"
+#include "tcenv.h"
 #include "formatstr.h"
 using Core;
 using List;
 using Position;
 using Absyn;
 using Tcutil;
+using Tcenv;
 
 namespace Formatstr;
+
+static struct Opt<kind_t> rk = {RgnKind};
 
 // Parse a conversion specification starting at index i in string s.
 // s[i] should be the first character after the leading '%'.
@@ -151,7 +155,7 @@ parse_conversionspecification(string s, int i) {
   return new Opt(new $(flags,width,precision,lenmod,c,i+1));
 }
 
-list_t<type_t> get_format_typs(string s,seg_t loc) {
+list_t<type_t> get_format_typs(tenv_t te,string s,seg_t loc) {
   // FIX: on error we return null.  This will probably lead to
   // cascading errors (e.g., too many arguments to printf).
   let len = String::strlen(s);
@@ -303,7 +307,7 @@ list_t<type_t> get_format_typs(string s,seg_t loc) {
 //         terr(loc,"length modifiers not allowed with %%s");
 //         return null;
 //       }
-      typs = new List(string_typ(new_evar(RgnKind)),typs);
+      typs = new List(string_typ(new_evar(&rk,new Opt(lookup_type_vars(te)))),typs);
       break;
     case 'p':
       // We don't support pointer printing
@@ -320,15 +324,16 @@ list_t<type_t> get_format_typs(string s,seg_t loc) {
                          String::implode(precision)));
         return null;
       }
+      let tenv_tvs = new Opt(lookup_type_vars(te));
       switch (lenmod) {
       case null:
-        t = at_typ(sint_t,new_evar(RgnKind),empty_tqual()); break;
+        t = at_typ(sint_t,new_evar(&rk,tenv_tvs),empty_tqual()); break;
       case &List(x,null) && x=='l':
-        t = at_typ(ulong_t,new_evar(RgnKind),empty_tqual()); break;
+        t = at_typ(ulong_t,new_evar(&rk,tenv_tvs),empty_tqual()); break;
       case &List(x,null) && x=='h':
-        t = at_typ(sshort_t,new_evar(RgnKind),empty_tqual()); break;
+        t = at_typ(sshort_t,new_evar(&rk,tenv_tvs),empty_tqual()); break;
       case &List(x,&List(y,null)) && (x=='h' && y=='h'):
-          t = at_typ(schar_t,new_evar(RgnKind),empty_tqual()); break;
+          t = at_typ(schar_t,new_evar(&rk,tenv_tvs),empty_tqual()); break;
       // We don't support ll
       default:
         terr(loc,xprintf("length modifier '%s' not allowed with %%n",
@@ -452,7 +457,7 @@ parse_inputformat(string s, int i) {
   }
   return new Opt(new $(suppress,width,lenmod,c,i+1));
 }
-list_t<type_t> get_scanf_typs(string s,seg_t loc) {
+list_t<type_t> get_scanf_typs(tenv_t te,string s,seg_t loc) {
   // FIX: on error we return null.  This will probably lead to
   // cascading errors (e.g., too many arguments to scanf).
   let len = String::strlen(s);
@@ -479,15 +484,16 @@ list_t<type_t> get_scanf_typs(string s,seg_t loc) {
     switch (c) {
     case 'd': fallthru;
     case 'i':
+      let tvs = new Opt(lookup_type_vars(te));
       switch (lenmod) {
       case null:
-        t = at_typ(sint_t,new_evar(RgnKind),empty_tqual()); break;
+        t = at_typ(sint_t,new_evar(&rk,tvs),empty_tqual()); break;
       case &List(x,null) && x=='l':
-        t = at_typ(slong_t,new_evar(RgnKind),empty_tqual()); break;
+        t = at_typ(slong_t,new_evar(&rk,tvs),empty_tqual()); break;
       case &List(x,null) && x=='h':
-        t = at_typ(sshort_t,new_evar(RgnKind),empty_tqual()); break;
+        t = at_typ(sshort_t,new_evar(&rk,tvs),empty_tqual()); break;
       case &List(x,&List(y,null)) && (x=='h' && y=='h'):
-        t = at_typ(schar_t,new_evar(RgnKind),empty_tqual()); break;
+        t = at_typ(schar_t,new_evar(&rk,tvs),empty_tqual()); break;
       // We don't support ll
       default:
         terr(loc,
@@ -502,16 +508,17 @@ list_t<type_t> get_scanf_typs(string s,seg_t loc) {
     case 'o': fallthru;
     case 'x': fallthru;
     case 'X':
+      let tvs = new Opt(lookup_type_vars(te));
       switch (lenmod) {
       case null:
-        t = at_typ(uint_t,new_evar(RgnKind),empty_tqual()); break;
+        t = at_typ(uint_t,new_evar(&rk,tvs),empty_tqual()); break;
       case &List(x,null) && x=='l':
-        t = at_typ(ulong_t,new_evar(RgnKind),empty_tqual()); break;
+        t = at_typ(ulong_t,new_evar(&rk,tvs),empty_tqual()); break;
       case &List(x,null) && x=='h':
-        t = at_typ(ushort_t,new_evar(RgnKind),empty_tqual()); break;
+        t = at_typ(ushort_t,new_evar(&rk,tvs),empty_tqual()); break;
       case &List(x,&List(y,null))
         && (x=='h' && y=='h'):
-          t = at_typ(uchar_t,new_evar(RgnKind),empty_tqual()); break;
+          t = at_typ(uchar_t,new_evar(&rk,tvs),empty_tqual()); break;
       // We don't support ll
       default:
         terr(loc,
@@ -529,12 +536,13 @@ list_t<type_t> get_scanf_typs(string s,seg_t loc) {
     case 'G': fallthru;
     case 'a': fallthru;
     case 'A':
+      let tvs = new Opt(lookup_type_vars(te));
       switch (lenmod) {
       case null:
         // Note, %f means float in scanf, double in printf!!
-        t = at_typ(float_t,new_evar(RgnKind),empty_tqual()); break;
+        t = at_typ(float_t,new_evar(&rk,tvs),empty_tqual()); break;
       case &List(x,null) && x=='l':
-        t = at_typ(double_t,new_evar(RgnKind),empty_tqual()); break;
+        t = at_typ(double_t,new_evar(&rk,tvs),empty_tqual()); break;
       // We don't support L
       default:
         terr(loc,
@@ -557,15 +565,16 @@ list_t<type_t> get_scanf_typs(string s,seg_t loc) {
       terr(loc,"%%p is not supported");
       return null;
     case 'n':
+      let tvs = new Opt(lookup_type_vars(te));
       switch (lenmod) {
       case null:
-        t = at_typ(sint_t,new_evar(RgnKind),empty_tqual()); break;
+        t = at_typ(sint_t,new_evar(&rk,tvs),empty_tqual()); break;
       case &List(x,null) && x=='l':
-        t = at_typ(ulong_t,new_evar(RgnKind),empty_tqual()); break;
+        t = at_typ(ulong_t,new_evar(&rk,tvs),empty_tqual()); break;
       case &List(x,null) && x=='h':
-        t = at_typ(sshort_t,new_evar(RgnKind),empty_tqual()); break;
+        t = at_typ(sshort_t,new_evar(&rk,tvs),empty_tqual()); break;
       case &List(x,&List(y,null)) && (x=='h' && y=='h'):
-	t = at_typ(schar_t,new_evar(RgnKind),empty_tqual()); break;
+	t = at_typ(schar_t,new_evar(&rk,tvs),empty_tqual()); break;
       // We don't support ll
       default:
         terr(loc,xprintf("length modifier '%s' not allowed with %%n",

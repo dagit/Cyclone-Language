@@ -484,6 +484,8 @@ list_t<tvar_t> lookup_type_vars(tenv_t te) {
 tenv_t add_type_vars(seg_t loc,tenv_t te,list_t<tvar_t> tvs) {
   if(te->le == null) env_err("Tcenv: unexpected add_type_vars");
   let fe      = copy_fenv_old_ctrl(get_fenv(te));
+  // add unique identities to the type variables;
+  add_tvar_identities(tvs);
   let new_tvs = List::append(tvs,fe->type_vars);
   Tcutil::check_unique_tvars(loc,new_tvs);
   fe->type_vars = new_tvs;
@@ -714,7 +716,9 @@ tenv_t new_named_block(seg_t loc, tenv_t te, tvar_t block_rgn) {
 }
 
 tenv_t new_block(seg_t loc, tenv_t te) {
-  return new_named_block(loc, te, new_tvar(RgnKind));
+  tvar_t t = new_tvar(RgnKind);
+  add_tvar_identity(t);
+  return new_named_block(loc, te, t);
 }
 
 type_t curr_rgn(tenv_t te) {
@@ -757,7 +761,8 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
   // FIX:  the user may need to get their hands on the region name
   // but if it's gensym'd, they can't.  
   tvar_t rgn0 = 
-    new Tvar(new xprintf("`%s",*(*fd->name)[1]),new_conref(RgnKind));
+    new Tvar(new xprintf("`%s",*(*fd->name)[1]),new_tvar_id(),
+             new_conref(RgnKind));
   let tvs = new List(rgn0,fd->tvs);
   Tcutil::check_unique_tvars(loc,tvs);
   type_t param_rgn = new VarType(rgn0);

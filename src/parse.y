@@ -315,7 +315,7 @@ static type_t id2type(string s, conref_t<kind_t> k) {
   if (zstrcmp(s,"`H") == 0)
     return HeapRgn;
   else
-    return new VarType(new Tvar(new {s},k));
+    return new VarType(new Tvar(new {s},null,k));
 }
 
 // convert a list of types to a list of typevars -- the parser can't
@@ -1142,7 +1142,7 @@ declaration:
       for (let ids = $2; ids != null; ids = ids->tl) {
         let id = ids->hd;
         let qv = new $((nmspace_t)(new Rel_n(null)), id);
-        let vd = new_vardecl(qv,wildtyp(),null);
+        let vd = new_vardecl(qv,wildtyp(null),null);
         vds = new List(vd,vds);
       }
       vds = List::imp_rev(vds);
@@ -1285,7 +1285,7 @@ attribute:
  */
 type_specifier:
   VOID      { $$=^$(type_spec(VoidType,LOC(@1,@1))); }
-| '_'       { $$=^$(type_spec(new_evar(MemKind),LOC(@1,@1))); }
+| '_'       { $$=^$(type_spec(new_evar(null,null),LOC(@1,@1))); }
 | CHAR      { $$=^$(type_spec(uchar_t,LOC(@1,@1))); }
 | SHORT     { $$=^$(new Short_spec(LOC(@1,@1))); }
 | INT       { $$=^$(type_spec(sint_t,LOC(@1,@1))); }
@@ -1668,7 +1668,7 @@ rgn:
   { if ($3 != (kind_t)RgnKind) err("expecting region kind\n",LOC(@3,@3));
     $$ = ^$(id2type($1,new_conref(RgnKind)));
   }
-| '_' { $$ = ^$(new_evar(RgnKind)); }
+| '_' { $$ = ^$(new_evar(new Opt(RgnKind),null)); }
 
 
 type_qualifier_list:
@@ -1990,7 +1990,7 @@ statement:
 | REGION '<' TYPE_VAR '>' IDENTIFIER statement
   { if (zstrcmp($3,"`H") == 0)
       err("bad occurrence of heap region `H",LOC(@3,@3));
-    tvar_t tv = new Tvar(new $3,new_conref(RgnKind));
+    tvar_t tv = new Tvar(new $3,null,new_conref(RgnKind));
     type_t t = new VarType(tv);
     $$=^$(new_stmt(new Region_s(tv,new_vardecl(new $((nmspace_t)Loc_n, new $5),
                                                new RgnHandleType(t),null),$6),
@@ -1999,7 +1999,7 @@ statement:
 | REGION IDENTIFIER statement
   { if (zstrcmp($2,"H") == 0)
       err("bad occurrence of heap region `H",LOC(@3,@3));
-    tvar_t tv = new Tvar(new xprintf("`%s",$2),new_conref(RgnKind));
+    tvar_t tv = new Tvar(new xprintf("`%s",$2),null,new_conref(RgnKind));
     type_t t = new VarType(tv);
     $$=^$(new_stmt(new Region_s(tv,new_vardecl(new $((nmspace_t)Loc_n, new $2),
                                                new RgnHandleType(t),null),$3),

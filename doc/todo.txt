@@ -19,48 +19,6 @@ BUG FIXES and UNSOUNDNESSES:
 We complain that g isn't initialized.  We should complain that
 function declarations are only allowed at top-level.
 
-* We need to ensure that locally-scoped type variables, introduced
-either by (a) a block, (b) a region block, (c) an existentially-quantified
-variable in a switch case, do not escape their scope.  For instance:
-
-  bool init = false;
-  _ x = null;
-  while (true) {
-    region r {
-      if (!init) {
-        x = rnew(r) $(3,4); init = true;
-      } else {
-        (*x)[0];
-      }
-    }
-  }
-
-Here, x is assigned the type "$(int,int) *`r" even though `r is not
-in scope where x is defined.  Note that when you execute this code,
-you'll allocate (3,4) in the region the first time, then free the
-region, and then try to dereference x the second time through the
-loop.  
-
-The fix is to assign a scope level to each VarType and each Evar
-and to prevent an Evar from becoming constrained with a type that
-includes a VarType (or Evar?) from a deeper scope.  Note that
-this would fix the following two bugs.
-
-* This won't re-parse and type-check after inference:
-
-  void f() {
-    int *_ p;
-   L: { 
-      int x = 7;
-      p = &x;
-    }
-  }
-
-* alpha-conversion issues with respect to type variables.  We should
-  keep around a list of all of the type variables used in a function
-  and ensure that they aren't duplicated (or else provide an internal
-  map from user-specified type variables to gensym'd representations.)
-
 * Better error message when programmer leaves off effect but
   can't. For example,
   void h() {}

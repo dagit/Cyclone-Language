@@ -75,12 +75,18 @@ void flush_warnings() {
 // set by by Tcenv::tc_init, used to reduce allocation and calls to Set::empty.
 opt_t<set_t<var_t>> empty_var_set = null;
 
+// fast type-variable comparison -- can only be used when a tvar has
+// an identity.
+static int fast_tvar_cmp(tvar_t tv1, tvar_t tv2) {
+  return (*tv1->identity - *tv2->identity);
+}
+
 // compress out any evars or typedefs
 type_t compress(type_t t) {
   switch (t) {
-  case &Evar(_,null,_): 
+  case &Evar(_,null,_,_): 
     return t;
-  case &Evar(_,*t2opt_ref,_): // TRICKY
+  case &Evar(_,*t2opt_ref,_,_): // TRICKY
     type_t t2 = compress((*t2opt_ref)->v);
     // only modify if something changed to avoid allocation
     if (t2 != (*t2opt_ref)->v)
@@ -120,9 +126,11 @@ static bool kind_leq(kind_t k1, kind_t k2) {
 
 // Return the "least" kind of a type, according to the lattice above
 // In some situations, we have to be conservative...
+// Note that both Evars and VarTypes should have their kinds established
+// by this point.
 kind_t typ_kind(type_t t) {
   switch (compress(t)) {
-  case &Evar(k,topt,_):   return k; 
+  case &Evar(k,topt,_,_): return k->v; 
   case &VarType(tv):      return conref_val(tv->kind);
   case VoidType:          return MemKind;
   case &IntType(_,sz):    return (sz==(size_of_t)B4) ? BoxKind : MemKind;
@@ -176,50 +184,71 @@ bool unify(type_t t1, type_t t2) {
   }
 }
 
-// see if evar occurs within t
-static void occurslist(type_t evar, list_t<type_t> ts); // mutually recursive fns
-static void occurs(type_t evar, type_t t) {
+// see if evar occurs within t and also check that every free type
+// variable in t occurs within the list env.
+static void occurslist(type_t evar, list_t<tvar_t> env, list_t<type_t> ts); // mutually recursive fns
+static void occurs(type_t evar, list_t<tvar_t> env, type_t t) {
   switch (compress(t)) {
-  case &Evar(_,r,_):
+  case &VarType(tv): 
+    if (!List::mem(fast_tvar_cmp,env,tv)) throw Unify; break;
+  case &Evar(_,r,_,*sopt):
     if (t == evar) throw Unify;
-    else if (r != null) occurs(evar,r->v);
+    else if (r != null) occurs(evar,env,r->v);
+    else {
+      // check to see if sopt is a subset of env
+      bool problem = false;
+      for (_ s = (*sopt)->v; s != null; s = s->tl) {
+        if (!List::mem(fast_tvar_cmp,env,s->hd)) {
+          problem = true; break;
+        }
+      }
+      // for sopt to be a subset of env
+      if (problem) {
+        let result = null;
+        for (_ s = (*sopt)->v; s != null; s = s->tl) {
+          if (List::mem(fast_tvar_cmp,env,s->hd)) 
+            result = new List(s->hd,result);
+        }
+        *sopt = new Opt(result);
+      }
+    }
     break;
   case &PointerType(pinfo): 
-    occurs(evar,pinfo.elt_typ); occurs(evar,pinfo.rgn_typ); break;
-  case &ArrayType(t2,_,_): occurs(evar,t2); break;
+    occurs(evar,env,pinfo.elt_typ); occurs(evar,env,pinfo.rgn_typ); break;
+  case &ArrayType(t2,_,_): occurs(evar,env,t2); break;
   case &FnType(FnInfo{tvs,eff,rt,args,c_varargs,cyc_varargs,atts}): 
-    if (eff != null) occurs(evar,eff->v);
-    occurs(evar,rt);
+    if (eff != null) occurs(evar,env,eff->v);
+    occurs(evar,env,rt);
     for(; args != null; args = args->tl)
-      occurs(evar,(*args->hd)[2]);
+      occurs(evar,env,(*args->hd)[2]);
     if (cyc_varargs != null) {
       let VarargInfo(_,_,t,r,_) = *cyc_varargs;
-      occurs(evar,t); occurs(evar,r);
+      occurs(evar,env,t); occurs(evar,env,r);
     }
     break;
   case &TupleType(args):
     for(; args != null; args = args->tl)
-      occurs(evar,(*args->hd)[1]);
+      occurs(evar,env,(*args->hd)[1]);
     break;
-  case &RgnHandleType(rt): occurs(evar,rt); break;
+  case &RgnHandleType(rt): occurs(evar,env,rt); break;
   case &TunionType(TunionInfo{_,ts,r}):
-    occurs(evar,r); occurslist(evar,ts); break;
+    occurs(evar,env,r); occurslist(evar,env,ts); break;
   case &TypedefType(_,ts,topt): fallthru(ts);
   case &TunionFieldType(TunionFieldInfo{_,ts}): fallthru(ts);
-  case &StructType(_,ts,_): occurslist(evar,ts); break;
+  case &StructType(_,ts,_): occurslist(evar,env,ts); break;
   case &AnonStructType(fs): fallthru(fs);
   case &AnonUnionType(fs):
     for (; fs != null; fs = fs->tl)
-      occurs(evar, fs->hd->type);
+      occurs(evar, env, fs->hd->type);
     break;
-  case &AccessEff(t0): occurs(evar,t0); break;
-  case &JoinEff(ts): occurslist(evar,ts); break;
+  case &AccessEff(t0): occurs(evar,env,t0); break;
+  case &JoinEff(ts): occurslist(evar,env,ts); break;
   default: break;
   }
 }
-static void occurslist(type_t evar, list_t<type_t> ts) {
+static void occurslist(type_t evar, list_t<tvar_t> env,list_t<type_t> ts) {
   for (; ts != null; ts = ts->tl)
-    occurs(evar,ts->hd);
+    occurs(evar,env,ts->hd);
 }
 
 // unify two lists of types
@@ -335,22 +364,26 @@ static void normalize_effect(type_t e) {
 }
 
 // Tries to break an effect into an effect evar and the rest of the
-// effect.  This fails unless the effect is either JoinEff(ev::rest)
+// effect along with the set of free type variables for the evar.
+// This fails unless the effect is either JoinEff(ev::rest)
 // where ev is an unconstrained effect evar, or else the effect is
 // an unconstrained evar.
-static $(type_t, list_t<type_t>)* get_effect_evar(type_t t) {
+static $(type_t, list_t<type_t>, list_t<tvar_t>)*get_effect_evar(type_t t)
+{
   switch (compress(t)) {
   case &JoinEff(&List{.hd=ef1,.tl=ef2}):
     switch (compress(ef1)) {
-    case &Evar(_,_,_): return new $(ef1,ef2);
+    case &Evar(_,_,_,s): return new $(ef1,ef2,s->v);
     default: return null;
     }
-  case &Evar(*k,*p,_): 
-    if (*k != EffKind) impos("effect evar has wrong kind");
-    return new $(t,null);
+  case &Evar(k,_,_,s): 
+    if (k == null || k->v != EffKind) impos("effect evar has wrong kind");
+    return new $(t,null,s->v);
   default: return null;
   }
 }
+
+static struct Opt<kind_t> ek = {EffKind};
 
 // Returns true if the region r is in the effect e or else r is the
 // heap region.  If constrain is true, this might cause region or
@@ -372,12 +405,15 @@ bool region_in_effect(bool constrain, type_t r, type_t e) {
     for (; es != null; es = es->tl) 
       if (region_in_effect(constrain, r, es->hd)) return true;
     return false;
-  case &Evar(*k,*p,_): 
-    if (*k != EffKind) impos("effect evar has wrong kind");
+  case &Evar(k,*p,_,s): 
+    if (k == null || k->v != EffKind) impos("effect evar has wrong kind");
     if (!constrain) return false;
     // we found a non-canonical evar -- we can grow it to include r
     // but this may cause problems later on with other constraints.
-    let ev = new_evar(EffKind);
+    let ev = new_evar(&ek,s);
+    // this has the effect of checking that any free variables in r
+    // are contained in s.
+    occurs(ev,s->v,r);
     let new_typ = new JoinEff(new List{ev,new List{new AccessEff(r),null}});
     *p = new Opt(new_typ);
     return true;
@@ -395,11 +431,14 @@ static bool variable_in_effect(bool constrain, tvar_t v, type_t e) {
     for (; es != null; es = es->tl) 
       if (variable_in_effect(constrain, v, es->hd)) return true;
     return false;
-  case &Evar(*k,*p,_):
-    if (*k != EffKind) impos("effect evar has wrong kind");
+  case &Evar(k,*p,_,s):
+    if (k == null || k->v != EffKind) impos("effect evar has wrong kind");
     // we found a non-canonical evar -- we can grow it to include v
     // but this may cause problems later on with other constraints.
-    let ev = new_evar(EffKind);
+    let ev = new_evar(&ek,s);
+    // make sure v is in the allowed set of type variables for the evar
+    if (!List::mem(fast_tvar_cmp,s->v,v))
+      return false;
     let new_typ = new JoinEff(new List{ev,new List{new VarType(v),null}});
     *p = new Opt(new_typ);
     return true;
@@ -415,7 +454,7 @@ static bool evar_in_effect(type_t evar, type_t e) {
     for (; es != null; es = es->tl) 
       if (evar_in_effect(evar, es->hd)) return true;
     return false;
-  case &Evar(_,_,_): return (evar == e);
+  case &Evar(_,_,_,_): return (evar == e);
   default: return false;
   }
 }
@@ -433,8 +472,8 @@ bool subset_effect(bool set_to_empty, type_t e1, type_t e2) {
   // if e2 is of the form JoinEff(ev::rest) where ev is an effect evar,
   // then we can instantiate ev to JoinEff(ev'::e1) where ev' is fresh
   switch (get_effect_evar(e2)) {
-  case &$(ev1,rest): 
-    let ev = new_evar(EffKind);
+  case &$(ev1,rest,s): 
+    let ev = new_evar(&ek,new Opt(s));
     let new_typ = new JoinEff(new List{ev,new List{e1,null}});
     return unify(ev1, new_typ);
   default: break;
@@ -457,7 +496,7 @@ bool subset_effect(bool set_to_empty, type_t e1, type_t e2) {
   case &VarType(v): 
     // Same idea with effect variables
     return variable_in_effect(false,v,e2) || variable_in_effect(true,v,e2);
-  case &Evar(_,*p,_): 
+  case &Evar(_,*p,_,s): 
     if (!evar_in_effect(e1,e2)) 
       // We can set the evar to be any subset of e2.  When set_to_empty
       // is true, we set it to the empty effect, and otherwise set it to
@@ -466,8 +505,12 @@ bool subset_effect(bool set_to_empty, type_t e1, type_t e2) {
       // For other situations, it's not clear what is the right thing to do.
       if (set_to_empty)
         *p = new Opt(new JoinEff(null));
-      else 
+      else {
+        // check that e1 doesn't occur in e2 and that the free type
+        // variables of e2 are contained in s.
+        occurs(e1,s->v,e2);
         *p = new Opt(e2);
+      }
 
     return true;
   default: 
@@ -509,9 +552,13 @@ static bool unify_effect(type_t e1, type_t e2) {
   normalize_effect(e1);
   normalize_effect(e2);
   switch ($(get_effect_evar(e1),get_effect_evar(e2))) {
-  case $(&$(ev1,rest1), &$(ev2,rest2)):
+  case $(&$(ev1,rest1,s1), &$(ev2,rest2,s2)):
     // The fast path:  both effects are of the form JoinEff(ev::rest)
-    let ev = new_evar(EffKind);
+    let s = null;
+    for (; s1 != null; s1 = s1->tl) {
+      if (List::mem(fast_tvar_cmp,s2,s1->hd)) s = new List(s1->hd,s);
+    }
+    let ev = new_evar(&ek,new Opt(s));
     let new_typ = new JoinEff(new List{ev,List::append(rest1,rest2)});
     // the calls to unify here do the occurs check and also set the evars
     // to point to the new "union" effect
@@ -529,27 +576,33 @@ void unify_it(type_t t1, type_t t2) {
   t2 = compress(t2);
   if (t1 == t2) return;
   switch (t1) {
-  case &Evar(kind1,*ref1_ref,_):
-    // check that the evar doesn't occur in t2
-    occurs(t1,t2);
+  case &Evar(kind1,*ref1_ref,_,s1opt):
+    // check that the evar doesn't occur in t2 and that any free variables
+    // of t2 are contained in s1.
+    occurs(t1,s1opt->v,t2);
     let kind2 = typ_kind(t2);
-    // we can constrain the Evar to be equal to t2 only when the kind of the
-    // evar is greater than or equal to the kind of t2 or t2 is an evar that
-    // we can constrain to be equal to t1.
-    if (kind_leq(kind2,kind1)) {
+    // we can constrain the Evar to be equal to t2 only when the kind of 
+    // the evar is greater than or equal to the kind of t2 or t2 is an 
+    // evar that we can constrain to be equal to t1.
+    if (kind_leq(kind2,kind1->v)) {
       *ref1_ref = new Opt(t2);
       return;
     } else {
       switch (t2) {
-      case &Evar(_,*ref2_ref,_): 
-        if (kind_leq(kind1,kind2)) {
+      case &Evar(_,*ref2_ref,_,s2opt): 
+        // check that s2 is a subset of s1
+        let s1 = s1opt->v;
+        for (_ s2 = s2opt->v; s2 != null; s2 = s2->tl) {
+          if (!List::mem(fast_tvar_cmp,s1,s2->hd)) throw Unify;
+        }
+        if (kind_leq(kind1->v,kind2)) {
           *ref2_ref = new Opt(t1); return;
         }
         break;
         // this is a special hack to deal with the fact that a boxed evar
         // can't unify with a pointer type where we don't know whether or
         // not it's a ? pointer vs. a * or @ pointer.  
-      case &PointerType(pinfo) && kind1 == BoxKind:
+      case &PointerType(pinfo) && kind1->v == BoxKind:
         let c = compress_conref(pinfo.bounds);
         switch (c->v) {
         case No_constr:
@@ -571,7 +624,7 @@ void unify_it(type_t t1, type_t t2) {
     // in what follows, we throw Unify unless we explicitly return.
   switch ($(t2,t1)) {
 
-  case $(&Evar(_,_,_),_): // t2 is an evar, t1 is not, swap and try again
+  case $(&Evar(_,_,_,_),_): // t2 is an evar, t1 is not, swap and try again
     unify_it(t2,t1);
     return;
 
@@ -580,10 +633,14 @@ void unify_it(type_t t1, type_t t2) {
   case $(&VarType(tv2),&VarType(tv1)):
     let x2 = tv2->name;
     let x1 = tv1->name;
+    // identities should be resolved
+    let id2 = *tv2->identity;
+    let id1 = *tv1->identity; 
     let k2 = conref_val(tv2->kind);
     let k1 = conref_val(tv1->kind);
     // kinds should already be resolved.  
-    if (String::zstrptrcmp(x2,x1) == 0) {
+    // FIX: shouldn't need the zstrptrcmp any more...
+    if (id1 == id2 && String::zstrptrcmp(x2,x1) == 0) {
       // sanity check
       if (k2 != k1)
         impos(xprintf("same type variable %s has kinds %s and %s",
@@ -1248,7 +1305,7 @@ bool is_integral(exp_t e) {
   switch (compress(e->topt->v)) {
   case &EnumType(_,_):  fallthru;
   case &IntType(_,_): return true;
-  case &Evar(_,_,_):
+  case &Evar(_,_,_,_):
     if (unify(e->topt->v,sint_t))
       return true;
     return false;
@@ -1319,55 +1376,16 @@ static bool constrain_kinds(conref_t<kind_t> c1, conref_t<kind_t> c2) {
 }
 
 
-// Warning: mucho side effects here...
-// Adds tv to the list of tvars unless it's already present.  If it's
-// already present, makes sure the kinds are compatible by choosing the
-// most constrained kind as the kind of the variable, and in fact
-// physically share the kinds so that further constraints on it are
-// propagated.  Returns the newly updated list.
-static list_t<tvar_t> add_free_tvar(seg_t loc, list_t<tvar_t> tvs, tvar_t tv)
-{
-  if (tvs == null) { 
-    return new List{tv,null};
-  } else {
-    for (_ tvs2 = tvs; tvs2 != null; tvs2 = tvs2->tl) {
-      if (String::zstrptrcmp(tvs2->hd->name, tv->name) == 0) {
-        conref_t<kind_t> k1 = tvs2->hd->kind;
-        conref_t<kind_t> k2 = tv->kind;
-        if (!constrain_kinds(k1,k2))
-          terr(loc,xprintf("type variable %s is used with inconsistent "
-                           "kinds %s and %s",*tv->name, 
-                           ckind2string(k1), ckind2string(k2)));
-        return tvs;
-      } else if (tvs2->tl == null) {
-        tvs2->tl = new List(tv,null);
-        return tvs;
-      }
-    }
-    return impos("Tcutil::add_free_tvar:expecting to have returned.");
-  }
-}
-
-static list_t<tvar_t> remove_bound_tvars(list_t<tvar_t> tvs, list_t<tvar_t> btvs) {
-  list_t<tvar_t> r = null;
-  for (; tvs != null; tvs = tvs->tl) {
-    bool present = false;
-    for (_ b = btvs; b != null; b = b->tl) {
-      if (String::zstrptrcmp(tvs->hd->name, b->hd->name) == 0) {
-        present = true;
-        break;
-      }
-    }
-    if (!present) r = new List(tvs->hd,r);
-  }
-  r = List::imp_rev(r);
-  return r;
+static int tvar_id_counter = 0;
+int *new_tvar_id() {
+  return new (tvar_id_counter++);
 }
 
 static int tvar_counter = 0;
 tvar_t new_tvar(kind_t k) {
-  string s = xprintf("#%d",tvar_counter++);
-  return new Tvar(new{s},new_conref(k));
+  int i = tvar_counter++;
+  string s = xprintf("#%d",i);
+  return new Tvar(new{s},null,new_conref(k));
 }
 
 bool is_temp_tvar(tvar_t t) {
@@ -1545,7 +1563,7 @@ type_t rsubstitute(region_t<`r> rgn,
       return t;
     let fs2 = List::map2(zip_field_type,fs,ts2);
     return new AnonStructType(fs2);
-  case &Evar(_,r,_):
+  case &Evar(_,r,_,_):
     if (r != null) return rsubstitute(rgn,inst,r->v);
     else return t;
   case &RgnHandleType(rt): 
@@ -1612,21 +1630,127 @@ exp_t default_initializer(tenv_t te, type_t t, seg_t loc) {
 }
 
 // Generate an appropriate evar for an instantiation of a type var
-$(tvar_t,type_t)@ make_inst_var(tvar_t tv) {
+$(tvar_t,type_t)@ make_inst_var(list_t<tvar_t> s, tvar_t tv) {
   kind_t k = conref_val(tv->kind);
-  return new $(tv, new_evar(k));
-}
-$(tvar_t,type_t)@`r r_make_inst_var(region_t<`r> rgn, tvar_t tv) {
-  kind_t k = conref_val(tv->kind);
-  return rnew(rgn) $(tv, new_evar(k));
+  return new $(tv, new_evar(new Opt(k),new Opt(s)));
 }
 
+$(tvar_t,type_t)@`r r_make_inst_var($(list_t<tvar_t>,region_t<`r>)@`r2 env,
+                                    tvar_t tv) {
+  let &$(s,rgn) = env;
+  kind_t k = conref_val(tv->kind);
+  return rnew(rgn) $(tv, new_evar(new Opt(k),new Opt(s)));
+}
+
+// Adds tv to the list of tvars unless it's already present.  If it's
+// already present, makes sure the kinds are compatible by choosing the
+// most constrained kind as the kind of the variable, and in fact
+// physically share the kinds so that further constraints on it are
+// propagated.  Also ensures that the tvars share the same identity.
+static list_t<tvar_t> add_free_tvar(seg_t loc, list_t<tvar_t> tvs, 
+                                    tvar_t tv)
+{
+  for (_ tvs2 = tvs; tvs2 != null; tvs2 = tvs2->tl) {
+    if (String::zstrptrcmp(tvs2->hd->name, tv->name) == 0) {
+      conref_t<kind_t> k1 = tvs2->hd->kind;
+      conref_t<kind_t> k2 = tv->kind;
+      if (!constrain_kinds(k1,k2))
+        terr(loc,xprintf("type variable %s is used with inconsistent "
+                         "kinds %s and %s",*tv->name, 
+                         ckind2string(k1), ckind2string(k2)));
+      if (tv->identity == null)
+        tv->identity = tvs2->hd->identity;
+      else if (*tv->identity != *tvs2->hd->identity)
+        impos(xprintf("same type variable has different identity!"));
+      return tvs;
+    }
+  }
+  tv->identity = new_tvar_id();
+  return new List(tv,tvs);
+}
+
+// This assumes the identities and kinds are set, and simply adds
+// the tvar if it's not already present.
+static list_t<tvar_t> fast_add_free_tvar(list_t<tvar_t> tvs, tvar_t tv)
+{
+  // sanity
+  if (tv->identity == null)
+      impos("fast_add_free_tvar: bad identity in tv");
+  for (_ tvs2 = tvs; tvs2 != null; tvs2 = tvs2->tl) {
+    // sanity
+    if (tvs2->hd->identity == null)
+      impos("fast_add_free_tvar: bad identity in tvs2");
+    if (*tvs2->hd->identity == *tv->identity) {
+      return tvs;
+    } 
+  }
+  return new List{tv,tvs};
+}
+
+// will shadow other variables
+static list_t<tvar_t> add_bound_tvar(list_t<tvar_t> tvs, tvar_t tv) {
+  // sanity
+  if (tv->identity == null) impos(xprintf("bound tvar id for %s is null",
+                                          tvar2string(tv)));
+  return new List(tv,tvs);
+}
+
+// assumes es is a list of evars, and e is an evar.  Adds in e only
+// if not already present.
+static list_t<type_t> add_free_evar(list_t<type_t> es, type_t e) {
+  switch (compress(e)) {
+  case &Evar(_,_,i,_):
+    for (_ es2 = es; es2 != null; es2 = es2->tl) {
+      switch (compress(es2->hd)) {
+      case &Evar(_,_,j,_): if (i == j) return es; break;
+      default: break;
+      }
+    }
+    return new List(e,es);
+  default: return es;
+  }
+}  
+
+static list_t<tvar_t> remove_bound_tvars(list_t<tvar_t> tvs, list_t<tvar_t> btvs) {
+  list_t<tvar_t> r = null;
+  for (; tvs != null; tvs = tvs->tl) {
+    bool present = false;
+    for (_ b = btvs; b != null; b = b->tl) {
+      if (*tvs->hd->identity == *b->hd->identity) {
+        present = true;
+        break;
+      }
+    }
+    if (!present) r = new List(tvs->hd,r);
+  }
+  r = List::imp_rev(r);
+  return r;
+}
+
+// Check-Valid-Type environments
+static struct CVTEnv { 
+  list_t<tvar_t> kind_env;  
+  list_t<tvar_t> free_vars; 
+  list_t<type_t> free_evars;
+};
+typedef struct CVTEnv cvtenv_t;
 
 // Checks that a type is well-formed and lives in kind expected_kind.  
-// This adds to the input list of free type variables any new free 
-// variables that arise.  This allows us to calculate free variables 
-// of types in a bottom-up fashion and then check that they are all bound 
-// at the top-level.
+// Takes as input a location (for error reporting), a type environment 
+// (for looking up struct, enum, tunion, etc. decls), a check-valid-type
+// environment (explained below), an expected kind, and the type itself t.
+// It returns a check-valid-type-env as a result.
+//
+// In addition to checking that the type is valid, the routine needs
+// to compute the set of free type variables and free evars in the
+// type, and to constrain their kinds appropriately.  Normally, this
+// would be coded by passing a kind_env down, and returning free_vars
+// and free_evars as a result.  However, to cut down on allocation,
+// we pass in the free variables of surrounding types and just add
+// any new free variables to the result.  This way, we can calculate
+// all of the free variables for a term in a store-passing style.
+// The only situation where this breaks down is where we have binders
+// as is the case for function types (see below).
 //
 // This also performs the following side-effects which most of the 
 // rest of the compiler rightfully assumes have occurred:
@@ -1636,23 +1760,32 @@ $(tvar_t,type_t)@`r r_make_inst_var(region_t<`r> rgn, tvar_t tv) {
 // * change relative type names to absolute type names
 // * set the kind field of type variables: we use the expected kind
 //   initially, but if later constraints force a more constrained kind,
-//   then we move to the more constrained kind.  To achieve this, we very
-//   carefully share all of the free occurrences of the type variable 
-//   in the type data structure.
+//   then we move to the more constrained kind.  This is why we propagate
+//   around the set of 
 // * add default effects for function types -- the default effect
 //   causes a fresh EffKind type variable e to be generated, and
-//   consists of e and any free effect or region variables within
+//   consists of e and any free effect or region variables/evars within
 //   the function type.  
-list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars, 
-				kind_t expected_kind, type_t t) {
+static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv, 
+                                   kind_t expected_kind, type_t t) {
   switch (compress(t)) {
   case VoidType: break;
-  case &Evar(_,_,_): break;
+  case &Evar(*k,_,_,_): 
+    if (*k == null) *k = new Opt(expected_kind);
+    // FIX: we should really only add the tvar if it's unique
+    cvtenv.free_evars = add_free_evar(cvtenv.free_evars,t);
+    break;
   case &VarType(v):
     conref_t<kind_t> c = compress_conref(v->kind);
     if (c->v == No_constr)
       c->v = new Eq_constr(expected_kind);
-    free_vars = add_free_tvar(loc, free_vars, v);
+    // this constrains the kind of the variable according to other
+    // occurrences of that variable and makes sure they share the same
+    // tvar identity.
+    cvtenv.kind_env = add_free_tvar(loc, cvtenv.kind_env, v);
+    // no need to constrain things here, but want to add it only if
+    // it hasn't already been added.
+    cvtenv.free_vars = fast_add_free_tvar(cvtenv.free_vars, v);
     break;
   case &EnumType(n,*edp):
     if (*edp == null)
@@ -1662,7 +1795,7 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
       } catch {
       case Dict::Absent:
         terr(loc,xprintf("unbound type enum %s",qvar2string(n)));
-        return free_vars;
+        return cvtenv;
       }
     enumdecl_t ed = (enumdecl_t)*edp;
     // Make relative name absolute
@@ -1673,9 +1806,10 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
     case &UnknownTunion(UnknownTunionInfo(n,is_x)):
       tuniondecl_t tud;
       try tud = *lookup_tuniondecl(te,loc,n);// FIX: lookup_xtuniondecl needed?
-      catch { case Dict::Absent:
+      catch { 
+      case Dict::Absent:
         terr(loc,xprintf("unbound type [x]tunion %s",qvar2string(n)));
-        return free_vars;
+        return cvtenv;
       }
       if(tud->is_xtunion != is_x)
 	terr(loc,xprintf("[x]tunion is different from type declaration %s",
@@ -1684,13 +1818,13 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
       fallthru(tud);
     case &KnownTunion(tud):
       // check the region is well-formed
-      free_vars = check_valid_type(loc,te,free_vars,RgnKind,rgn);
+      cvtenv = i_check_valid_type(loc,te,cvtenv,RgnKind,rgn);
       // check the type arguments are well-formed
       list_t<tvar_t> tvs = tud->tvs;
       for (; targs != null && tvs != null; targs = targs->tl, tvs = tvs->tl) {
 	type_t t1 = targs->hd;
 	kind_t k1 = conref_val(tvs->hd->kind);
-	free_vars = check_valid_type(loc,te,free_vars,k1,t1);
+	cvtenv = i_check_valid_type(loc,te,cvtenv,k1,t1);
       }
       if (targs != null)
 	terr(loc,xprintf("too many type arguments for tunion %s",
@@ -1710,7 +1844,7 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
       try *lookup_tuniondecl(te,loc,tname);//FIX lookup_xtuniondecl needed?
       catch { case Dict::Absent:
         terr(loc,xprintf("unbound type tunion %s",qvar2string(tname)));
-      return free_vars;
+      return cvtenv;
       }
       try 
 	switch(lookup_ordinary(te,loc,fname)) {
@@ -1720,7 +1854,7 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
 	  if(tud2 != tud) != 0) {
 	    terr(loc,xprintf("unbound field %s in type tunion %s",
                              qvar2string(fname), qvar2string(tname)));
-            return free_vars;
+            return cvtenv;
           }
 	  */
 	  tud = tud2;
@@ -1730,12 +1864,13 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
 	  break;
 	default: terr(loc,xprintf("unbound field %s in type tunion %s",
 				  qvar2string(fname), qvar2string(tname)));
-          return free_vars;
+          return cvtenv;
         }
-      catch {case Dict::Absent:
+      catch {
+      case Dict::Absent:
         terr(loc,xprintf("unbound field %s in type tunion %s",
                          qvar2string(fname), qvar2string(tname)));
-        return free_vars;
+        return cvtenv;
       }  
       *info = new KnownTunionfield(tud,tuf);
       fallthru(tud,tuf);
@@ -1745,7 +1880,7 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
       for (; targs != null && tvs != null; targs = targs->tl, tvs = tvs->tl) {
 	type_t t1 = targs->hd;
 	kind_t k1 = conref_val(tvs->hd->kind);
-	free_vars = check_valid_type(loc,te,free_vars,k1,t1);
+	cvtenv = i_check_valid_type(loc,te,cvtenv,k1,t1);
       }
       if (targs != null)
 	terr(loc,xprintf("too many type arguments for tunion %s.%s",
@@ -1756,12 +1891,12 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
       break;
     }
     break;
-  case &PointerType(PtrInfo{.elt_typ=t1,.rgn_typ=rgn_typ,.nullable=nullable,
-                               .tq=tq,.bounds=b}):
+  case &PointerType(PtrInfo{.elt_typ=t1,.rgn_typ=rgn_typ,.
+                               nullable=nullable,.tq=tq,.bounds=b}):
     // FIX: check that tqual is valid?
     // note that here, we allow AnyKind types under the pointer
-    free_vars = check_valid_type(loc,te,free_vars,AnyKind,t1);
-    free_vars = check_valid_type(loc,te,free_vars,RgnKind,rgn_typ);
+    cvtenv = i_check_valid_type(loc,te,cvtenv,AnyKind,t1);
+    cvtenv = i_check_valid_type(loc,te,cvtenv,RgnKind,rgn_typ);
     // check that any bound is a constant expression
     switch (compress_conref(b)->v) {
     case &Eq_constr(&Upper_b(e)): 
@@ -1781,7 +1916,7 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
   case &ArrayType(t1,tq,e):
     // FIX: check that tqual is valid?
     // we don't allow abstract mem types as the elt type of an array type
-    free_vars = check_valid_type(loc,te,free_vars,MemKind,t1);
+    cvtenv = i_check_valid_type(loc,te,cvtenv,MemKind,t1);
     // FIX: should memoize the size so that we don't have to worry about
     // evaluating it during unification
     if (e == null || !is_const_exp(te,(exp_t)e))
@@ -1816,8 +1951,11 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
       terr(loc,xprintf("function can't have multiple calling conventions"));
 
     check_unique_tvars(loc,*btvs);
-    // check that the function doesn't try to abstract a MemKind
+    // check that the function doesn't try to abstract a MemKind 
+    // and add the bound variable in to the kind_env of cvtenv
     for (_ b = *btvs; b != null; b = b->tl) {
+      b->hd->identity = new_tvar_id();
+      cvtenv.kind_env = add_bound_tvar(cvtenv.kind_env,b->hd);
       switch (compress_conref(b->hd->kind)->v) {
       case &Eq_constr(MemKind): 
         terr(loc,xprintf("function attempts to abstract Mem type variable %s",
@@ -1825,23 +1963,24 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
       default: break;
       }
     }
-    list_t<tvar_t> new_free_vars = null;
+    let new_cvtenv = CVTEnv{cvtenv.kind_env, null, null};
+
     // results and arguments of functions cannot be abstract mem types
-    new_free_vars = check_valid_type(loc,te,new_free_vars,MemKind,tr);
+    new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,MemKind,tr);
     for (; args != null; args = args->tl) {
-      // FIX: should check that variables are unique and that tquals are okay
-      new_free_vars = 
-        check_valid_type(loc,te,new_free_vars,MemKind,(*args->hd)[2]);
+      // FIX: should check that variables are unique and that tquals are ok
+      new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,MemKind,
+                                      (*args->hd)[2]);
     }
     // check the varargs
     if (cyc_vararg != null) {
       if (c_vararg) impos("both c_vararg and cyc_vararg"); // sanity
       let VarargInfo{vn,vtq,vt,vr,vi} = *cyc_vararg;
-      new_free_vars = check_valid_type(loc,te,new_free_vars,MemKind,vt);
+      new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,MemKind,vt);
       // if vr is an evar, constrain it to a gensym'd type variable, 
       // and complain if vr isn't a type variable (i.e., it's HeapRgn)
       switch (compress(vr)) {
-      case &Evar(_,_,_): 
+      case &Evar(_,_,_,_): 
         type_t vr_tvar = new VarType(new_tvar(RgnKind));
         unify(vr,vr_tvar);
         break;
@@ -1851,15 +1990,15 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
         break;
       default: break; // next line will pick up the error
       }
-      new_free_vars = check_valid_type(loc,te,new_free_vars,RgnKind,vr);
+      new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,RgnKind,vr);
       // if inject, then check the type is an appropriate [x]tunion
       if (vi) {
         switch (compress(vt)) {
         case &TunionType(TunionInfo{&KnownTunion(_),_,tuir}): 
-          // if tuir is an evar, constrain it to vr
-          // and complain if tuir isn't a type variable (i.e., it's HeapRgn).
+          // if tuir is an evar, constrain it to a vr
+          // and complain if tuir is HeapRgn.
           switch (compress(tuir)) {
-          case &Evar(_,_,_): 
+          case &Evar(_,_,_,_): 
             unify(vr,tuir);
             break;
           case &VarType(_): break;
@@ -1876,33 +2015,44 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
       }
     }
     if (*eff != null) {
-      new_free_vars = check_valid_type(loc,te,new_free_vars,EffKind,(*eff)->v);
+      new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,EffKind,(*eff)->v);
     } else {
       // add in an effect variable and calculate the default effect
       tvar_t e = new_tvar(EffKind); // guaranteed unique
-      new_free_vars = new List(e,new_free_vars);
+      // this will also give e a unique identity
+      new_cvtenv.free_vars = add_free_tvar(loc,new_cvtenv.free_vars,e);
+      // here, keep e at the rear of the effect -- we get reversed later on
       list_t<type_t> effect = null;
-      // add in any free region or effect variables to the effect.
-      for (_ tvs = new_free_vars; tvs != null; tvs = tvs->tl) {
+      // Add in any free region or effect variables to the effect.
+      // This is why we need a "new_cvtenv" above -- we only want the
+      // type variables that actually occur in the function type 
+      // as opposed to elsewhere.
+      for (_ tvs = new_cvtenv.free_vars; tvs != null; tvs = tvs->tl) {
         switch (compress_conref(tvs->hd->kind)->v) {
         case &Eq_constr(RgnKind):
-          effect = new List(new AccessEff(new VarType(tvs->hd)),effect); break;
+          effect = new List(new AccessEff(new VarType(tvs->hd)),effect); 
+          break;
         case &Eq_constr(EffKind):
           effect = new List(new VarType(tvs->hd),effect); break;
         default: break;
         }
       }
+      // Better add in any evars too:
+      for (_ ts = new_cvtenv.free_evars; ts != null; ts = ts->tl) {
+        switch (typ_kind(ts->hd)) {
+        case RgnKind: 
+          effect = new List(new AccessEff(ts->hd),effect); break;
+        case EffKind: effect = new List(ts->hd,effect); break;
+        default: break;
+        }
+      }
       *eff = new Opt(new JoinEff(List::imp_rev(effect)));
     }
-    // Add in the bound type variables -- this will cause their kinds
-    // to be constrained to the kinds of the free occurrences.  Warn
-    // if afterwards any kind is still unconstrained and set it to BoxKind.
-    // In addition, drive any MemKind type variables to BoxKind to ensure
-    // that we don't abstract a MemKind variable.
+    // Warn if afterwards any kind is still unconstrained and set it to 
+    // BoxKind. In addition, drive any MemKind type variables to BoxKind 
+    // to ensure that we don't abstract a MemKind variable.
     if (*btvs != null) {
-      list_t<tvar_t> new_btvs = null;
       for(list_t<tvar_t> bs = *btvs; bs != null; bs = bs->tl) {
-        new_free_vars = add_free_tvar(loc, new_free_vars, bs->hd);
         let c = compress_conref(bs->hd->kind);
         switch (c->v) {
         case No_constr:
@@ -1914,16 +2064,24 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
         default: break;
         }
       }
-      new_free_vars = remove_bound_tvars(new_free_vars,*btvs);
     }
-    for (; new_free_vars != null; new_free_vars = new_free_vars->tl) 
-      free_vars = (add_free_tvar(loc, free_vars, new_free_vars->hd));
+    // remove the bound vars from the kind environment
+    cvtenv.kind_env = remove_bound_tvars(new_cvtenv.kind_env,*btvs);
+    // remove the bound vars from the list of free vars
+    new_cvtenv.free_vars = 
+      remove_bound_tvars(new_cvtenv.free_vars,*btvs);
+    // add the free vars in to the set of all free vars
+    for (_ tvs = new_cvtenv.free_vars; tvs != null; tvs = tvs->tl)
+      cvtenv.free_vars = fast_add_free_tvar(cvtenv.free_vars,tvs->hd);
+    // add the free evars in to the set of all free evars
+    for (_ evs = new_cvtenv.free_evars; evs != null; evs = evs->tl)
+      cvtenv.free_evars = add_free_evar(cvtenv.free_evars,evs->hd);
     break;
 
   case &TupleType(tq_ts):
     // FIX: check the tquals
     for (; tq_ts != null; tq_ts = tq_ts->tl)
-      free_vars = check_valid_type(loc,te,free_vars,MemKind,(*tq_ts->hd)[1]);
+      cvtenv = i_check_valid_type(loc,te,cvtenv,MemKind,(*tq_ts->hd)[1]);
     break;
 
   case &AnonStructType(fs):
@@ -1936,7 +2094,7 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
           terr(loc,xprintf("duplicate field %s in struct",*fn));
         if (String::strcmp(*fn,"") != 0)
           prev_fields = rnew(sprev_rgn) List(fn,prev_fields);
-        check_valid_type(loc,te,free_vars,MemKind,t);
+        cvtenv = i_check_valid_type(loc,te,cvtenv,MemKind,t);
         if (width != null) {
           unsigned int w = 0;
           if (!is_const_exp(te,width->v))
@@ -1980,7 +2138,7 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
           terr(loc,xprintf("duplicate field %s in struct",*fn));
         if (String::strcmp(*fn,"") != 0)
           prev_fields = rnew(uprev_rgn) List(fn,prev_fields);
-        check_valid_type(loc,te,free_vars,MemKind,t);
+        cvtenv = i_check_valid_type(loc,te,cvtenv,MemKind,t);
         if (!bits_only(t)) 
           terr(loc,xprintf("%s has a type that is possibly incompatible "
                            "with other members of union",*fn));
@@ -2022,7 +2180,7 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
       // better be an anonymous struct
       if (*sdp == null) {
         terr(loc,xprintf("bad anonymous struct")); 
-        return free_vars;
+        return cvtenv;
       }
       structdecl_t sd = **sdp;
     }
@@ -2031,7 +2189,7 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
       catch { case Dict::Absent:
 	terr(loc,xprintf("unbound type struct %s",
                          qvar2string((qvar_t)tdnopt)));
-        return free_vars;
+        return cvtenv;
       }
     }
     structdecl_t sd = **sdp;
@@ -2048,19 +2206,19 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
     for (; targs != null; targs = targs->tl, tvs = tvs->tl) {
       type_t t1 = targs->hd;
       kind_t k1 = conref_val(tvs->hd->kind);
-      free_vars = check_valid_type(loc,te,free_vars,k1,t1);
+      cvtenv = i_check_valid_type(loc,te,cvtenv,k1,t1);
     }
     break;
   case &UnionType(tdnopt,targs,*udp):
     if (tdnopt == null) {
       terr(loc,"missing union name");
-      return free_vars;
+      return cvtenv;
     }
     if(*udp == null) {
       try *udp = lookup_uniondecl(te,loc,(qvar_t)tdnopt);
       catch { case Dict::Absent:
 	terr(loc,xprintf("unbound type union %s",qvar2string((qvar_t)tdnopt)));
-        return free_vars;
+        return cvtenv;
       }
     }
     uniondecl_t ud = **udp;
@@ -2077,7 +2235,7 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
     for (; targs != null; targs = targs->tl, tvs = tvs->tl) {
       type_t t1 = targs->hd;
       kind_t k1 = conref_val(tvs->hd->kind);
-      free_vars = check_valid_type(loc,te,free_vars,k1,t1);
+      cvtenv = i_check_valid_type(loc,te,cvtenv,k1,t1);
     }
     break;
   case &TypedefType(tdn,targs,*toptp):
@@ -2086,7 +2244,7 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
     try td = lookup_typedefdecl(te,loc,tdn);
     catch { case Dict::Absent:
       terr(loc,xprintf("unbound typedef name %s",qvar2string(tdn)));
-      return free_vars;
+      return cvtenv;
     }
     // Make relative name absolute (or replace absolute name with itself)
     tdn[0] = td->name[0];
@@ -2095,13 +2253,13 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
     list_t<$(tvar_t,type_t)@> inst = null;
     for (; ts != null && tvs != null; ts = ts->tl, tvs = tvs->tl) {
       kind_t k = conref_val(tvs->hd->kind);
-      free_vars = check_valid_type(loc,te,free_vars,k,ts->hd);
+      cvtenv = i_check_valid_type(loc,te,cvtenv,k,ts->hd);
       inst = new List(new $(tvs->hd,ts->hd),inst);
     }
     if (tvs != null || ts != null) {
       terr(loc,xprintf("typedef %s expects a different number of arguments",
 		       qvar2string(tdn)));
-      return free_vars;
+      return cvtenv;
     }
     type_t new_typ = substitute(inst,td->defn);
     *toptp = new Opt(new_typ);
@@ -2111,18 +2269,52 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
   case &RgnHandleType(t2): 
     fallthru(t2);
   case &AccessEff(t2): 
-    free_vars = check_valid_type(loc,te,free_vars,RgnKind,t2);
+    cvtenv = i_check_valid_type(loc,te,cvtenv,RgnKind,t2);
     break;
   case &JoinEff(ts):
     for (; ts != null; ts = ts->tl)
-      free_vars = check_valid_type(loc,te,free_vars,EffKind,ts->hd);
+      cvtenv = i_check_valid_type(loc,te,cvtenv,EffKind,ts->hd);
     break;
   } 
   if (!kind_leq(typ_kind(t), expected_kind))
     terr(loc,xprintf("type %s has kind %s but as used here needs kind %s",
                      typ2string(t), kind2string(typ_kind(t)), 
                      kind2string(expected_kind)));
-  return free_vars;
+  return cvtenv;
+}
+
+list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, 
+                                list_t<tvar_t> kind_env, 
+                                kind_t expected_kind, type_t t) {
+  let cvt = i_check_valid_type(loc,te,CVTEnv{kind_env,null,null},
+                               expected_kind,t);
+  // run through the evars and constrain them so that when unified,
+  // the resulting type can only have type variables drawn from the
+  // kind environment or the set of free type variables mentioned here.
+  for (_ vs = cvt.free_vars; vs != null; vs = vs->tl)
+    fast_add_free_tvar(kind_env,vs->hd);
+
+  for (_ evs = cvt.free_evars; evs != null; evs = evs->tl) {
+    switch (compress(evs->hd)) {
+    case &Evar(_,_,_,*s): 
+      if (*s == null)
+        *s = new Opt(kind_env); 
+      else {
+        // constrain to the intersection of the contexts
+        let tvs = (*s)->v;
+        let result = null;
+        for (; tvs != null; tvs = tvs->tl) {
+          if (List::mem(fast_tvar_cmp,kind_env,tvs->hd)) {
+            result = new List(tvs->hd,result);
+          }
+        }
+        *s = new Opt(result);
+      }
+      break;
+    default: break;
+    }
+  }
+  return cvt.free_vars;
 }
 
 // Same as check_valid_type except that for function types, we check
@@ -2130,7 +2322,7 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
 // plug them in) or else the free type variables are contained in the
 // list of the bound type variables and have the right kinds.
 void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t) {
-  list_t<tvar_t> free_tvars = check_valid_type(loc, te, null, MemKind, t);
+  let free_tvars = check_valid_type(loc, te, null, MemKind, t);
 
   // force type variables of unresolved or mem kinds to boxed kinds
   for (_ x = free_tvars; x != null; x = x->tl) {
@@ -2164,33 +2356,25 @@ void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t) {
   }
 }
 
-// Same as i_check_valid_type except that we ensure the free type variables
-// are compatible with a list of bound type variables.  
+void add_tvar_identity(tvar_t tv) {
+  if (tv->identity == null) 
+    tv->identity = new_tvar_id();
+}
+
+void add_tvar_identities(glist_t<tvar_t,`r> tvs) {
+  List::iter(add_tvar_identity,tvs);
+}
+
+// Same as check_valid_type except that we ensure the free type variables
+// are drawn from the given set of bound type variables.
 void check_type(seg_t loc, tenv_t te, list_t<tvar_t> bound_tvars, 
                 kind_t expected_kind, type_t t) {
-  list_t<tvar_t> free_tvars = check_valid_type(loc, te, null, expected_kind, t);
+  let free_tvars = check_valid_type(loc,te,bound_tvars,expected_kind,t);
+  let free_tvars = remove_bound_tvars(free_tvars, bound_tvars);
   for (_ fs = free_tvars; fs != null; fs = fs->tl) {
-    tvar_t ftv = fs->hd;
-    let ftvn = ftv->name;
-    let ftvk = ftv->kind;
-    bool present = false;
-    for (_ bs = bound_tvars; bs != null; bs = bs->tl) {
-      tvar_t btv = bs->hd;
-      let btvn = btv->name;
-      let btvk = btv->kind;
-      if (String::zstrptrcmp(ftvn,btvn) == 0) {
-        present = true;
-        // set their kinds to the most constrained kind
-        if (!constrain_kinds(btvk,ftvk))
-          terr(loc,xprintf("type variable %s has kind %s but is used here at"
-                           "kind %s",*ftvn,ckind2string(btvk),
-                           ckind2string(ftvk)));
-        break;
-      }
-    }
-    if (!present)
-      terr(loc,xprintf("unbound type variable %s in type %s",*ftvn,
-                       typ2string(t)));
+    let ftvn = fs->hd->name;
+    terr(loc,xprintf("unbound type variable %s in type %s",*ftvn,
+                     typ2string(t)));
   }
 }
 
@@ -2581,7 +2765,7 @@ static bool fields_support_default(list_t<tvar_t> tvs, list_t<type_t> ts,
 bool supports_default(type_t t) {
   switch (compress(t)) {
   case VoidType: return true;
-  case &Evar(_,_,_): return false;
+  case &Evar(_,_,_,_): return false;
   case &VarType(_): return false;
   case &TunionType(_): return false;
   case &TunionFieldType(_): return false;

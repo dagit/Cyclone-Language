@@ -21,6 +21,7 @@ extern bool print_all_tvars;
 extern bool print_all_kinds;
 extern bool print_using_stmts;
 extern bool print_externC_stmts;
+extern bool print_full_evars;
 
 extern void decllist2file(list_t<decl_t> tdl, FILE @f);
 

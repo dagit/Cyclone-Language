@@ -181,6 +181,7 @@ namespace Absyn {
   };
   EXTERN_ABSYN struct Tvar {
     tvarname_t name;
+    int       *identity; // for alpha-conversion
     conref_t<kind_t> kind;
   };
 
@@ -256,7 +257,13 @@ namespace Absyn {
   // FIX: May want to make this raw_typ and store the kinds with the types.
   EXTERN_ABSYN tunion Type {
     VoidType; // MemKind
-    Evar(kind_t,opt_t<type_t>,int); 
+    // Evars are introduced for unification or via _ by the user.
+    // The kind can get filled in during well-formedness checking.
+    // The type can get filled in during unification.
+    // The int is used as a unique identifier for printing messages.
+    // The list of tvars is the set of free type variables that can
+    // occur in the type to which the evar is constrained.  
+    Evar(opt_t<kind_t>,opt_t<type_t>,int,opt_t<list_t<tvar_t>>); 
     VarType(tvar_t); // kind induced by tvar
     TunionType(tunion_info_t);
     TunionFieldType(tunion_field_info_t);
@@ -630,9 +637,12 @@ namespace Absyn {
   extern `a conref_val(conref_t<`a> x);
 
   ////////////////////////////// Types //////////////////////////////
-  // return a fresh type variable of the given kind 
-  extern type_t new_evar(kind_t);
-  extern type_t wildtyp();
+  // return a fresh type variable of the given kind that can be unified
+  // only with types whose free type variables are drawn from tenv.
+  extern type_t new_evar(opt_t<kind_t> k,opt_t<list_t<tvar_t>> tenv);
+  // any memory type whose free type variables are drawn from the given 
+  // list
+  extern type_t wildtyp(opt_t<list_t<tvar_t>>);
   // unsigned types
   extern type_t uchar_t, ushort_t, uint_t, ulong_t;
   // signed types

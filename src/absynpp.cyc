@@ -73,6 +73,10 @@ bool print_using_stmts = false;
 // and we get a warning if we don't hide this one
 bool print_externC_stmts = false;
 
+// Flag controlling whether to print out free tvars that can be
+// used when instantiating evars
+bool print_full_evars = false;
+
 // ------ dealing with namespaces --------
 static list_t<var_t> curr_namespace = null;
 
@@ -411,15 +415,16 @@ doc_t ntyp2doc(type_t t) {
   case &PointerType(_)  : return nil_doc();
     // The remaining cases are possible.
   case VoidType: s = text("void"); break;
-  case &Evar(k,topt,i):
+  case &Evar(k,topt,i,tvs):
     if (topt != null)
       // This is an error case, topt should be null in a normalized type
       return(ntyp2doc(topt->v));
     else s = cat(text("%"),
                  text("("),
                  text(xprintf("%d",i)),
-                 text(")::"),
-                 kind2doc(k));
+                 (!print_full_evars || tvs == null) ?
+                 text("") : tvars2doc(tvs->v),
+                 text(")::"),k == null ? text("?") : kind2doc(k->v));
     break;
   case &VarType(tv):
     s = textptr(tv->name);
@@ -1571,7 +1576,7 @@ $(tqual_t,type_t,list_t<type_modifier_t>) to_tms(tqual_t tq,type_t t) {
       tms = new List(new TypeParams_mod(typvars,null,true),tms);
     return $(tq3,t3,tms);
 
-  case &Evar(k,topt,i):
+  case &Evar(k,topt,i,_):
     if (topt == null)
       return $(tq,t,null);
     else

@@ -294,9 +294,11 @@ void dumpntyp(type_t t) {
   case VoidType:         dump("void"); return;
   case &VarType(tv): 
     dump_str(tv->name); return; // FIX: may want explicit kinds
-  case &Evar(k,null,i): 
-    dump("%"); dumpkind(k); dump(xprintf("(%d)",i)); return;
-  case &Evar(k,&Opt(t),i): dumpntyp(t); return; // shouldn't happen!
+  case &Evar(k,null,i,_): 
+    dump("%"); 
+    if (k == null) dump("?"); else dumpkind(k->v); 
+    dump(xprintf("(%d)",i)); return;
+  case &Evar(k,&Opt(t),i,_): dumpntyp(t); return; // shouldn't happen!
   case &TunionType(TunionInfo(tu_info,ts,r)):
     switch(tu_info) {
     case &UnknownTunion(UnknownTunionInfo(n,is_x)): fallthru(n,is_x);

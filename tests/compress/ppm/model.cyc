@@ -46,7 +46,7 @@ static int tescape_incr = TESCAPE_INCR;
 static float determ_factor = 3.0;
 static float recent_factor = 0.1;
 
-static unsigned char Input [FILE_SIZE] = {for i < FILE_SIZE:0}; /* the input file */
+static unsigned char Input [FILE_SIZE]; /* the input file */
 static int inputPos = 0; /* Current position in the input */
 static int inputLen = 0; /* length of input */
 
@@ -55,8 +55,7 @@ struct contextType { /* context list record */
     int Cnext; /* next in the context list */
 };
 
-static struct contextType Context [CLIST_SIZE] = 
-   {for i < CLIST_SIZE:contextType{0,0}};
+static struct contextType Context [CLIST_SIZE];
 /* linked list of the current active contexts, longest first */
 static int contextLength; /* length of the context list */
 static int contextUsed; /* list of deleted context list records */
@@ -70,8 +69,7 @@ struct symbolsType { /* symbol list record */
     int Symbol; /* the symbol */
 };
 
-static struct symbolsType Symbols [SYMBOLS_SIZE] =
-  {for i < SYMBOLS_SIZE: symbolsType{0,0,0}};
+static struct symbolsType Symbols [SYMBOLS_SIZE];
 /* for storing lists of symbols associated with each node in the Trie */
 static int symbolsFree; /* next unused symbol record */
 
@@ -82,8 +80,7 @@ struct trieType { /* trie record */
     int Trecent; /* most recent symbol */
 };
 
-static struct trieType Trie [TRIE_SIZE] = 
-  {for i < TRIE_SIZE: trieType{0,0,0,0}}; /* the trie */
+static struct trieType Trie [TRIE_SIZE]; /* the trie */
 static int trieFree; /* next unused trie record */
 
 void init_arguments(argc,argv,argp)
@@ -261,7 +258,7 @@ int len;
     }
 }
 
-char dumpTrieStr [CLIST_SIZE] = {for i < CLIST_SIZE:'\0'};
+char dumpTrieStr [CLIST_SIZE];
 
 void dumpTrie( fp, t, d )
 /* Dump the trie T; d is 0 when at the top level. */

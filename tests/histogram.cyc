@@ -21,20 +21,38 @@ char buf[80];
 
 void print_results(stringptr pos, $(int,int) @totals) {
   let &$(byte_count, call_count) = totals;
-  printf("%s\t%d\t%d\n",*pos,byte_count,call_count);
+  printf("%d\t%s\n",byte_count,*pos);
 }
 
-bool getline(FILE @f) {
-  int c = fgetc(f);
+bool eof = false;
+
+void skip_whitespace(FILE @f) {
+  int c = getc(f);
+  while (c == ' ' || c == '\t' || c == '\n') 
+    c = getc(f);
+  ungetc(c,f);
+}
+  
+
+bool gettoken(FILE @f) {
   int i = 0;
-  while (c != '\n') {
-    if (c == EOF) return false;
-    buf[i] = (char)c;
-    i++;
-    c = fgetc(f);
+  int c;
+  skip_whitespace(f);
+  c = getc(f);
+  if (c == EOF || c == -1) return false;
+  while (c != EOF && c != -1 && c != ' ' && c != '\t' && c != '\n') {
+    buf[i++] = (char)c;
+    c = getc(f);
   }
   buf[i] = '\0';
+  ungetc(c,f);
   return true;
+}  
+
+void snarfline(FILE @f) {
+  int c = getc(f);
+  while (c != '\n' && c != EOF && c != -1) c = getc(f);
+  ungetc(c,f);
 }
 
 int main(int argc, string ?argv) {
@@ -47,18 +65,32 @@ int main(int argc, string ?argv) {
   table_t<stringptr,$(int,int)@,{},{}> table =
       create(101, strptrcmp, hash_stringptr);
 
-  while (getline(f)) {
-    int end_of_str = 0;
-    while (buf[end_of_str] != '\t') end_of_str++;
-    stringptr pos = new (substring(buf,0,end_of_str));
-    int count = to_int(buf, &end_of_str);
+  // get the program point
+  while (gettoken(f)) {
+    string @s = new String::strdup(buf);
+    // get the allocation amount
+    if (!gettoken(f)) {
+      fprintf(stderr,"missing allocation amount for %s\n",*s); return -1;
+    }
+    int count;
     try {
-      let &$(*byte_count,*call_count) = lookup(table, pos);
+      count = to_int(buf,null);
+    } catch {
+    default: fprintf(stderr,"bad integer %s\n",buf); return -1;
+    }
+    // skip the rest of the info on the line
+    try {
+      snarfline(f);
+    } catch {
+    default: fprintf(stderr,"snarfline failed\n"); break;
+    }
+    try {
+      let &$(*byte_count,*call_count) = lookup(table, s);
       *byte_count = *byte_count + count;
       *call_count = *call_count + 1;
     } catch {
     case Not_found:
-      insert(table, pos, new $(count,1)); break;
+      insert(table, s, new $(count,1)); break;
     }
   }
   iter(print_results, table);

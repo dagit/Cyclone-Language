@@ -96,10 +96,14 @@ static void resolve_pat(tenv_t te, pat_t p) {
 static var_t get_name(vardecl_t vd) {
   return (*vd->name)[1];
 }
-static type_t any_type(type_t *`r topt) {
+static struct Opt<kind_t> mk = {MemKind};
+static struct Opt<kind_t> rk = {RgnKind};
+static struct Opt<kind_t> ak = {AnyKind};
+
+static type_t any_type(list_t<tvar_t> s, type_t *`r topt) {
   if(topt != null)
     return *topt;
-  return new_evar(MemKind);
+  return new_evar(&mk,new Opt(s));
 }
 static type_t num_type(type_t *`r topt, type_t numt) {
   // by setting to whatever topt is, unification will succeed.  Because
@@ -132,14 +136,14 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
   switch (p->r) {
 
   case Wild_p:       
-    t = any_type(topt);
+    t = any_type(lookup_type_vars(te),topt);
     break;
   case &Var_p(vd):
-    t = any_type(topt);
+    t = any_type(lookup_type_vars(te),topt);
     set_vd(vd, &v_result, t);
     break;
   case &Reference_p(vd):
-    t = any_type(topt);
+    t = any_type(lookup_type_vars(te),topt);
     if(region_opt == null) {
       terr(p->loc, "* pattern would point into an unknown region");
       break;
@@ -160,8 +164,11 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
       case &PointerType(_): t = *topt; goto tcpat_end;
       default: break;
       }
-    t = new PointerType(PtrInfo(new_evar(AnyKind),new_evar(RgnKind),
-				new_conref(true),empty_tqual(),empty_conref()));
+    let tenv_tvs = lookup_type_vars(te);
+    t = new PointerType(PtrInfo(new_evar(&ak,new Opt(tenv_tvs)),
+                                new_evar(&rk,new Opt(tenv_tvs)),
+				new_conref(true),empty_tqual(),
+                                empty_conref()));
     break;
 
   case &Pointer_p(p2):
@@ -181,7 +188,7 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
     
     // we put in an unconstrained region.  Then the client calls
     // check_pat_regions after unifying against the type they're destructuring.
-    type_t ptr_rgn = new_evar(RgnKind);
+    type_t ptr_rgn = new_evar(&rk,new Opt(lookup_type_vars(te)));
     let $(sub_tvs,sub_vs) = tcPatRec(te,p2,inner_topt,&ptr_rgn);
     tv_result = List::append(tv_result, sub_tvs);
     v_result  = List::append(v_result,  sub_vs);
@@ -231,7 +238,8 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
       throw impos("tcPat: struct<...> not implemented");
     // type check the argument patterns
     region rgn {
-      let inst     = List::rmap_c(rgn,r_make_inst_var,rgn,sd->tvs);
+      let env = $(lookup_type_vars(te),rgn);
+      let inst     = List::rmap_c(rgn,r_make_inst_var,&env,sd->tvs);
       let all_typs = List::map(snd,inst);
       t = new StructType(sd->name->v,all_typs,new sd);
       // FIX:? I think topt could cause a failure as a result of the unify
@@ -289,7 +297,9 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
       tenv_t te2 = add_type_vars(p->loc,te,tvs);
       list_t<$(tqual_t,type_t)@> tqts = tuf->typs;
 
-      let all_inst   = List::rmap_c(rgn,r_make_inst_var,rgn,tud->tvs);
+      let tenv_tvs = lookup_type_vars(te);
+      let env = $(tenv_tvs,rgn);
+      let all_inst   = List::rmap_c(rgn,r_make_inst_var,&env,tud->tvs);
       let exist_inst = List::rzip(rgn,rgn,tuf->tvs,var_tvs);
       let all_typs   = List::map(snd,all_inst);
       let exist_typs = List::map(snd,exist_inst);
@@ -298,7 +308,7 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
       if(tqts == null)
 	t = new TunionType(TunionInfo{new KnownTunion(tud),
 				      all_typs,
-				      new_evar(RgnKind)});
+				      new_evar(&rk,new Opt(tenv_tvs))});
       else
 	t = new TunionFieldType(TunionFieldInfo{new KnownTunionfield(tud,tuf),
 						all_typs});
@@ -345,7 +355,8 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
 
   case &UnknownId_p(_):         fallthru;
   case &UnknownCall_p(_,_,_):   fallthru;
-  case &UnknownFields_p(_,_,_): t = wildtyp(); break;
+  case &UnknownFields_p(_,_,_): 
+    t = wildtyp(new Opt(lookup_type_vars(te))); break;
   }
  tcpat_end:
   p->topt = new Opt(t);

@@ -30,8 +30,13 @@ namespace Tcexp;
 
 static type_t expr_err(tenv_t te,seg_t loc,string msg) {
   terr(loc,msg);
-  return wildtyp();
+  return wildtyp(new Opt(lookup_type_vars(te)));
 }
+
+static struct Opt<kind_t> rk = {RgnKind};
+static struct Opt<kind_t> ak = {AnyKind};
+static struct Opt<kind_t> bk = {BoxKind};
+static struct Opt<kind_t> mk = {MemKind};
 
 //////////////////// Resolving References the Parser Cannot /////////////////
 
@@ -210,7 +215,8 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t *`r topt, cnst_t c, exp_t e) 
           t = *topt;
         } else {
           // maybe it's going in a different region
-          t = atb_typ(uchar_t, new_evar(RgnKind), empty_tqual(), 
+          t = atb_typ(uchar_t,new_evar(&rk,new Opt(lookup_type_vars(te))), 
+                      empty_tqual(), 
                       new Upper_b(elen));
           if (!unify(*topt,t) && silent_castable(te,loc,t,*topt)) {
             e->topt = new Opt(t);
@@ -224,9 +230,11 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t *`r topt, cnst_t c, exp_t e) 
     }
     return t;
   case Null_c:
+    let tenv_tvs = lookup_type_vars(te);
     // FIX: take advantage of topt
-    t = new PointerType(PtrInfo(new_evar(AnyKind), 
-                                new_evar(RgnKind), new_conref(true),
+    t = new PointerType(PtrInfo(new_evar(&ak,new Opt(tenv_tvs)), 
+                                new_evar(&rk,new Opt(tenv_tvs)), 
+                                new_conref(true),
                                 empty_tqual(), empty_conref()));
     break;
   }
@@ -253,11 +261,11 @@ static type_t tcVar(tenv_t te, seg_t loc, qvar_t q, binding_t b) {
 }
 
 static void check_format_args(tenv_t te, exp_t fmt, list_t<exp_t> args,
-			      list_t<type_t> type_getter(string,seg_t)) {
+			      list_t<type_t> type_getter(tenv_t,string,seg_t)) {
   // check the format string and get the types it requires
   list_t<type_t> desc_types;
   switch (fmt->r) {
-  case &Const_e(&String_c(s)): desc_types = type_getter(s,fmt->loc); break;
+  case &Const_e(&String_c(s)): desc_types = type_getter(te,s,fmt->loc); break;
   default: terr(fmt->loc, "expecting a literal format string"); return;
   }
   // check that each expression has the right type
@@ -316,12 +324,12 @@ static type_t tcArithBinop(tenv_t te, exp_t e1, exp_t e2,
   if (!checker(e1)) {
     terr(e1->loc,xprintf("type %s cannot be used here",
 			 typ2string(e1->topt->v)));
-    return wildtyp();
+    return wildtyp(new Opt(lookup_type_vars(te)));
   }
   if (!checker(e2)) {
     terr(e2->loc,xprintf("type %s cannot be used here",
 			 typ2string(e2->topt->v)));
-    return wildtyp();
+    return wildtyp(new Opt(lookup_type_vars(te)));
   }
   type_t t1 = compress(e1->topt->v);
   type_t t2 = compress(e2->topt->v);
@@ -407,7 +415,8 @@ static type_t tcAnyBinop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
   if (e1_is_num && e2_is_num)
     return sint_t;
   // okay if same types and boxed
-  else if (unify(t1,t2) && unify(t1,new_evar(BoxKind))) {
+  else if (unify(t1,t2) && 
+           unify(t1,new_evar(&bk,new Opt(lookup_type_vars(te))))) {
     return sint_t;
   // okay if t1 can be silently cast to t2 or vice versa 
   } else if (silent_castable(te,loc,t2,t1)) {
@@ -429,7 +438,7 @@ static type_t tcAnyBinop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
     }
     terr(loc,xprintf("comparison not allowed between %s and %s",
 		     typ2string(t1),typ2string(t2)));
-    return wildtyp();
+    return wildtyp(new Opt(lookup_type_vars(te)));
   }
 }
 
@@ -500,7 +509,7 @@ static type_t tcPrimop(tenv_t te, seg_t loc, type_t *`r topt,
     if (es == null)
       return expr_err(te,loc,"missing format string in xprintf");
     check_format_args(te, es->hd, es->tl, Formatstr::get_format_typs);
-    t = string_typ(new_evar(RgnKind));
+    t = string_typ(new_evar(&rk,new Opt(lookup_type_vars(te))));
     break;
   case Scanf:
     if (es == null)
@@ -654,7 +663,7 @@ static type_t tcConditional(tenv_t te, seg_t loc, type_t *`r topt,
   tcTest(te, e1, "conditional expression");
   tcExp(te,topt,e2);
   tcExp(te,topt,e3);
-  type_t t = new_evar(MemKind);
+  type_t t = new_evar(&mk,new Opt(lookup_type_vars(te)));
   let l1 = new List(e3,null);
   let l2 = new List(e2,l1);
   if (!coerce_list(te,t,l2))
@@ -755,6 +764,9 @@ static struct Tunionfield *tcInjection(tenv_t te,exp_t e,type_t tu,
 
 // e(es)
 static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t> es,vararg_call_info_t *@vararg_call_info){
+  // if e is a vararg function then we need to declare a new local
+  // region block -- we just do it always here.
+  te = new_block(loc,te); // needed for regions of params
   tcExp(te,null,e);
   type_t t = compress(e->topt->v);
   // NB: we should really unify t with an unconstrained FnType with the
@@ -798,7 +810,6 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t>
 	  terr(loc, "too many arguments for function");
 	else {
           let VarargInfo{_,_,vt,vr,inject} = *cyc_vararg;
-          te = new_block(loc,te); // needed for regions of params
           let vci = new VarargCallInfo {.num_varargs = 0, 
                                         .injectors = null,
                                         .vai = (vararg_info_t @)cyc_vararg};
@@ -870,7 +881,7 @@ static type_t tcThrow(tenv_t te, seg_t loc, type_t *`r topt, exp_t e) {
   if (!coerce_use(te,e,exn_typ))
     terr(loc,
          xprintf("expected xtunion exn but found %s",typ2string(e->topt->v)));
-  return wildtyp();
+  return wildtyp(new Opt(lookup_type_vars(te)));
 }
 
 // explicit instantiation
@@ -1185,7 +1196,7 @@ static type_t tcCompoundLit(tenv_t te, seg_t loc, type_t *`r topt,
 static type_t tcArray(tenv_t te,seg_t loc,type_t *`r elt_topt, 
                    list_t<$(list_t<designator_t>,exp_t)@> des) {
   list_t<exp_t> es      = List::map(snd,des);
-  type_t        res     = new_evar(MemKind);
+  type_t        res     = new_evar(&mk,new Opt(lookup_type_vars(te)));
   let           sz_rexp = new Const_e(new Int_c(Unsigned,List::length(es)));
   exp_t         sz_exp  = new_exp(sz_rexp,loc);
   sz_exp->topt = new Opt(uint_t);
@@ -1307,7 +1318,8 @@ static type_t tcStruct(tenv_t te, seg_t loc, type_t *`r topt,
   }
   region rgn {
   // calculate the instantiation and final type
-  let inst    = List::rmap_c(rgn,r_make_inst_var,rgn,sd->tvs);
+  let env = $(lookup_type_vars(te),rgn);
+  let inst    = List::rmap_c(rgn,r_make_inst_var,&env,sd->tvs);
   let typs    = List::map(snd,inst);
   let res_typ = new StructType(*tn,typs,new sd);
   // this will instantiate the struct if we have type information in topt
@@ -1367,8 +1379,9 @@ static type_t tcTunion(tenv_t te, seg_t loc, type_t *`r topt,
                     tuniondecl_t tud,
                     tunionfield_t tuf) {
   region rgn {
-  let all_inst   = List::rmap_c(rgn,r_make_inst_var,rgn,tud->tvs);
-  let exist_inst = List::rmap_c(rgn,r_make_inst_var,rgn,tuf->tvs);
+  let env = $(lookup_type_vars(te),rgn);
+  let all_inst   = List::rmap_c(rgn,r_make_inst_var,&env,tud->tvs);
+  let exist_inst = List::rmap_c(rgn,r_make_inst_var,&env,tuf->tvs);
   let all_typs   = List::map(snd,all_inst);
   let exist_typs = List::map(snd,exist_inst);
   let inst       = List::rappend(rgn,all_inst,exist_inst);
@@ -1427,7 +1440,8 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t *`r topt, exp_opt_t ropt,
   type_t rgn = HeapRgn;
   if (ropt != null) {
     // check that the region handle is still valid
-    type_t expected_type = new RgnHandleType(new_evar(RgnKind));
+    type_t expected_type = 
+      new RgnHandleType(new_evar(&rk,new Opt(lookup_type_vars(te))));
     type_t handle_type = tcExp(te,&expected_type,(exp_t)ropt);
     switch (compress(handle_type)) {
     case &RgnHandleType(r): 
@@ -1493,7 +1507,8 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t *`r topt,
   type_t rgn = HeapRgn;
   if (rgn_handle != null) {
     // check that the region handle is still valid
-    type_t expected_type = new RgnHandleType(new_evar(RgnKind));
+    type_t expected_type = 
+      new RgnHandleType(new_evar(&rk,new Opt(lookup_type_vars(te))));
     type_t handle_type = tcExp(te,&expected_type,(exp_t)rgn_handle);
     switch (compress(handle_type)) {
     case &RgnHandleType(r): 
@@ -1671,8 +1686,9 @@ static type_t tcExpNoPromote(tenv_t te, type_t *`r topt, exp_t e) {
       case &FnType(FnInfo{tvs,eff,rtyp,args,c_varargs,cyc_varargs,atts}):
 	if (tvs != null)    // then, instantiate if necessary
 	  region rgn {
+           let env = $(lookup_type_vars(te),rgn);
 	   glist_t<$(tvar_t,type_t)@`rgn,`rgn> inst = 
-	     List::rmap_c(rgn,r_make_inst_var,rgn,tvs);
+	     List::rmap_c(rgn,r_make_inst_var,&env,tvs);
 	   list_t<type_t> ts = List::map(snd,inst);
 	   type_t ftyp = rsubstitute(rgn, inst,
 				     new FnType(FnInfo{null,eff,rtyp,args,

@@ -502,7 +502,11 @@ int main(int argc, string ? argv) {
               "        Print all type variables (even implicit default effects)"),
          new $("-printallkinds", new Set_spec(&Absynpp::print_all_kinds),
                "\n"
-              "        Always print kinds of type variables"));
+               "        Always print kinds of type variables"),
+         new $("-printfullevars", new Set_spec(&Absynpp::print_full_evars),
+               "\n"
+               "       Print full information for evars (type debugging)")
+         );
 
   Arg::parse(options, add_other, "Options:", argv);
 

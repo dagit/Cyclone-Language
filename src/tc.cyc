@@ -282,6 +282,7 @@ static void tcTypedefdecl(tenv_t te, genv_t ge, seg_t loc, typedefdecl_t td) {
   (*td->name)[0] = new Abs_n(te->ns);
   // reject ill-formed type
   check_unique_tvars(loc,td->tvs);
+  add_tvar_identities(td->tvs);
   check_type(loc,te,td->tvs,AnyKind,td->defn);
   // add to environment
   ge->typedefs = Dict::insert(ge->typedefs,v,td);
@@ -392,6 +393,9 @@ static void tcStructOrUniondecl(tenv_t te, genv_t ge, string obj, seg_t loc, str
 
   // reject ill-formed type
   check_unique_tvars(loc, sd->tvs);
+  // give the bound type variables identities
+  add_tvar_identities(sd->tvs);
+
 }
 
 static void tcStructdecl(tenv_t te, genv_t ge, seg_t loc, structdecl_t sd) {
@@ -517,6 +521,8 @@ static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge, seg_t loc,
 
     list_t<tvar_t> alltvs = List::append(tvs,f->tvs);
     check_unique_tvars(loc,alltvs);
+    // give the bound type variables identities
+    add_tvar_identities(f->tvs);
 
     for (_ typs = f->typs; typs != null; typs=typs->tl) {
       check_type(f->loc, te, alltvs, MemKind, (*typs->hd)[1]);
@@ -605,6 +611,8 @@ static void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
   }
   // reject ill-formed type
   check_unique_tvars(loc,tvs);
+  // give the bound type variables identities
+  add_tvar_identities(tvs);
 
   // determine [x]tunion type's qualified name
   // set ge_decl to the namespace where the declaration 'lives'

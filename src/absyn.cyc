@@ -40,16 +40,23 @@ int qvar_cmp(qvar_t q1, qvar_t q2) {
 }
 // WARNING: Ignores the kinds.
 int tvar_cmp(tvar_t tv1, tvar_t tv2) {
-  return String::zstrptrcmp(tv1->name,tv2->name);
+  int i = String::zstrptrcmp(tv1->name,tv2->name);
+  if (i != 0) return i;
+  if (tv1->identity == tv2->identity) return 0;
+  if (tv1->identity != null && tv2->identity != null) 
+    return (*tv1->identity) - (*tv2->identity);
+  else if (tv1->identity == null) return -1;
+  else return 1;
 }
 
 static int new_type_counter = 0;
 
-type_t new_evar(kind_t k) {
-  return new Evar(k,null,new_type_counter++);
+type_t new_evar(opt_t<kind_t> k, opt_t<list_t<tvar_t>> env) {
+  return new Evar(k,null,new_type_counter++,env);
 }
-type_t wildtyp() {
-  return new_evar(MemKind); 
+static struct Opt<kind_t> mk = {MemKind};
+type_t wildtyp(opt_t<list_t<tvar_t>> tenv) {
+  return new_evar(&mk,tenv); 
 }
 
 tqual_t combine_tqual(tqual_t x,tqual_t y) { 

@@ -33,7 +33,8 @@ namespace Lex {
 // Should probably put this trie thing in the library
 static struct Trie;
 typedef struct Trie * trie_t;
-typedef trie_t @{75} trie_child_v_t; // enough room for Cyclone ids and `
+  //typedef trie_t @{75} trie_child_v_t; // enough room for Cyclone ids and `
+typedef trie_t @{63} trie_child_v_t; // enough room for Cyclone ids and `
 typedef trie_child_v_t * trie_child_t;
 static struct Trie {
   trie_child_t  children;   // null means none
@@ -148,16 +149,20 @@ static int str_index(string buff, int offset, int len) {
   trie_t t    = ids_trie;
   while(i <= last) {
     int ch = ((int)buff[i]) - 48; // see width of trie above
+    if (ch > 47) ch -= 12;
+    else if (ch > 16) ch -= 7;
     if(t->children == null) {
       // new string, extend the trie and return
       while(i <= last) {
-        let temp = (trie_child_v_t)(new { for q < 75 : null });
+        let temp = (trie_child_v_t)(new { for q < 63 : null });
         let temp2 = new temp;
 	t->children = (trie_child_t)temp2;
 	(*(t->children))[ch] = new Trie(null,-1);
 	t = (*(t->children))[ch];
 	++i;
 	ch = ((int)buff[i]) - 48; // see width of trie above
+        if (ch > 47) ch -= 12;
+        else if (ch > 16) ch -= 7;
       }
       let newstr = new_string(len+1);
       String::zstrncpy(newstr,0,buff,offset,len);
@@ -196,13 +201,17 @@ static void insert_typedef(stringptr sptr) {
   trie_t t   = typedefs_trie;
   for(int i=0; i < len; ++i) {
     int ch = ((int)s[i]) - 48;
+    if (ch > 47) ch -= 12;
+    else if (ch > 16) ch -= 7;
     if(t->children == null) {
       while(i < len) {
-	t->children = (trie_child_t) (new $((new { for i < 75 : null })));
+	t->children = (trie_child_t) (new $((new { for i < 63 : null })));
 	(*(t->children))[ch] = new Trie(null,0);
 	t = (*(t->children))[ch];
 	++i;
 	ch = ((int)s[i]) - 48; // see width of trie above
+        if (ch > 47) ch -= 12;
+        else if (ch > 16) ch -= 7;
       }
       t->shared_str = true;
       return;
@@ -402,8 +411,12 @@ static bool is_typedef(List::list_t<var_t> ns, var_t v) {
   for(int i = 0; i < len; ++i)
     if(t == null || t->children == null)
       return false;
-    else
-      t = (*(t->children))[((int)s[i])-48];
+    else {
+      int ch = ((int)s[i]) - 48;
+      if (ch > 47) ch -= 12;
+      else if (ch > 16) ch -= 7;
+      t = (*(t->children))[ch];
+    }
   if(t == null)
     return false;
   return t->shared_str;

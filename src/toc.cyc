@@ -292,7 +292,7 @@ static type_t typ_to_c_array(type_t t) {
   switch(t) {
   case &ArrayType(t2,tq,x): // FIX: do we handle tq correctly?
     return new ArrayType(typ_to_c_array(t2),tq,x);
-  case &Evar(_,&Opt{.v=t2},_): return typ_to_c_array(t2);
+  case &Evar(_,&Opt{.v=t2},_,_): return typ_to_c_array(t2);
   default:
     return typ_to_c(t);
   }
@@ -310,8 +310,8 @@ static type_t typ_to_c(type_t t) {
   case VoidType:               return t;
       // FIX:  Typically this happens with throw, and void seems to be
       // the right thing to return.  But, I'm not sure.
-  case &Evar(_,null,_):        return VoidType;
-  case &Evar(_,&Opt{.v=t2},_): return typ_to_c(t2);
+  case &Evar(_,null,_,_):        return VoidType;
+  case &Evar(_,&Opt{.v=t2},_,_): return typ_to_c(t2);
     // type variables (`a) are mapped to void*
   case &VarType(_):            return void_star_typ();
   case &TunionType(TunionInfo{&KnownTunion(tud),_,_}): return void_star_typ();

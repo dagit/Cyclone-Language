@@ -156,7 +156,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       return;
     }
     let &$(_,tvs,ts) = (_@)(trip_opt);
-    list_t<$(tvar_t,type_t)@> instantiation = List::map(make_inst_var,tvs);
+    list_t<$(tvar_t,type_t)@> instantiation = 
+      List::map_c(make_inst_var,lookup_type_vars(te),tvs);
     ts = List::map_c(substitute,instantiation,ts);
     for(; ts != null && es != null; ts = ts->tl, es = es->tl) {
       tcExp(te,null,es->hd);
@@ -178,7 +179,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     // Note that we set new_block to false because we're explicitly creating
     // a new named block here.
     tcStmt(Tcenv::new_named_block(s0->loc,add_label(te,l,s),
-                                  new Tvar(new xprintf("`%s",*l),
+                                  new Tvar(new xprintf("`%s",*l),new_tvar_id(),
                                            new_conref(RgnKind))),s,false); 
     return;
 
