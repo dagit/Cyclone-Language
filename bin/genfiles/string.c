@@ -637,9 +637,9 @@ return Cyc_rstr_sepstr(Cyc_Core_heap_region,strs,separator);}
 # 296
 struct _fat_ptr Cyc_strncpy(struct _fat_ptr dest,struct _fat_ptr src,unsigned long n){
 int i;
-n <= _get_fat_size(src,sizeof(char))&& n <= _get_fat_size(dest,sizeof(char))?0:({struct _fat_ptr _tmp92=({const char*_tmp29="n <= numelts(src) && n <= numelts(dest)";_tag_fat(_tmp29,sizeof(char),40U);});((int(*)(struct _fat_ptr assertion,struct _fat_ptr file,unsigned line))Cyc___assert_fail)(_tmp92,({const char*_tmp2A="string.cyc";_tag_fat(_tmp2A,sizeof(char),11U);}),298U);});
+n <= _get_fat_size(dest,sizeof(char))?0:({struct _fat_ptr _tmp92=({const char*_tmp29="n <= numelts(dest)";_tag_fat(_tmp29,sizeof(char),19U);});((int(*)(struct _fat_ptr assertion,struct _fat_ptr file,unsigned line))Cyc___assert_fail)(_tmp92,({const char*_tmp2A="string.cyc";_tag_fat(_tmp2A,sizeof(char),11U);}),298U);});
 for(i=0;(unsigned long)i < n;++ i){
-char _tmp2B=((const char*)src.curr)[i];char srcChar=_tmp2B;
+char _tmp2B=*((const char*)_check_fat_subscript(src,sizeof(char),i));char srcChar=_tmp2B;
 if((int)srcChar == (int)'\000')break;
 ((char*)dest.curr)[i]=srcChar;}
 # 304

@@ -56,6 +56,14 @@ extern `b lookup(table_t<`a,`b> t, `a key);
 extern `b*`r lookup_opt(table_t<`a,`b,`r> t, `a key);
   /** [lookup_opt(t,key)] returns a pointer to the value associated 
       with [key] in [t], or NULL if there is no value associated with [key].*/
+extern `b*`r lookup_other_opt(table_t<`a,`b,`r> t, `c key, 
+                              int cmp(`c,`a), int hash(`c));
+  /** [lookup_opt(t,key,cmp,hash) is similar to lookup_opt but
+      allows you to use keys in a different region (or of a different type.)
+      However, you must be sure to use the same hash and cmp function
+      as you used to build the initial table.  That is, those functions,
+      should've been polymorphic enough to support `c as well. **/
+
 extern bool try_lookup(table_t<`a,`b> t, `a key, `b@data);
   /** [try_lookup(t,key,p)] tries to find the [key] in the table [t].
       If successful, it sets [*p] to the value associated with [key]

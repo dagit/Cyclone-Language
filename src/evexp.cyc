@@ -255,11 +255,13 @@ static $(cnst_t,bool) eval_const_exp(exp_t e) {
         fallthru(it,sn2,x);
       case $(&AppType(&TagCon,&List(it,_)),{.Int_c = $(sn2,x)}):
 	if(x < 0)
-	  terr(e->loc,"cannot cast negative number to a tag type");
+	  //terr(e->loc,"cannot cast negative number to a tag type");
+          return $(Int_c(Signed,0), false); 
 	Unify::unify(it, new ValueofType(const_exp(ans[0],0)));
 	ans[0] = Int_c(Unsigned,x);
 	break;
-      default: terr(e->loc,"cannot cast to %s",typ2string(t)); break;
+      default: return $(Int_c(Signed,0), false); 
+        //terr(e->loc,"cannot cast to %s",typ2string(t)); break;
       }
     break;
   case &AnonEnum_e(_,ef): fallthru(ef);
@@ -299,23 +301,6 @@ bool c_can_eval(exp_t e) {
   }
 }
 
-static int const_exp_case_number(exp_t e) {
-  switch(e->r) {
-  case &Const_e(_): return 1;
-  case &Conditional_e(_,_,_): return 2;
-  case &Primop_e(_,_): return 3;
-  case &Sizeoftype_e(_): // do these the same so equal types are equal
-  case &Sizeofexp_e(_): return 4;
-  case &Offsetof_e(_,_): return 5;
-  case &Cast_e(_,_,_,_): return 6;
-  case &And_e(_,_): return 7;
-  case &Or_e(_,_): return 8;
-  case &Valueof_e(_): return 9;
-    // note: AnonEnum_e and Enum_e should be impossible b/c already replaced
-  default: terr(e->loc,"bad static expression %s", exp2string(e)); return 0;
-  }
-}
-
 // reduce (unsigned int)valueof(-) to valueof(-)
 static exp_t strip_cast(exp_t e) {
   switch (e->r) {
@@ -332,30 +317,130 @@ static exp_t strip_cast(exp_t e) {
   return e;
 }
 
+static unsigned long long integral_const_to_long_long(cnst_t c) {
+  unsigned long long res;
+  switch (c) {
+  case {.Char_c = $(_,c)}: res = c; break;
+  case {.Short_c = $(_,s)}: res = s; break;
+  case {.Int_c = $(_,i)}: res = i; break;
+  case {.LongLong_c = $(_,x)}: res = x; break;
+  default: impos("Evexp::integral_const_to_long_long");
+  }
+  return res;
+}
+
+static int cmp_cnst(cnst_t c1, cnst_t c2) {
+  switch $(c1,c2) {
+  case $({.Null_c = _},{.Null_c = _}): return 0;
+  case $({.Null_c = _},_): return -1;
+  case $(_,{.Null_c = _}): return 1;
+  case $({.Wchar_c = s1},{.Wchar_c = s2}): return strcmp(s1,s2);
+  case $({.Wchar_c = _},_): return -1;
+  case $(_,{.Wchar_c = _}): return 1;
+  case $({.String_c = s1},{.String_c = s2}): return strcmp(s1,s2);
+  case $({.String_c = _},_): return -1;
+  case $(_,{.String_c = _}): return 1;
+  case $({.Wstring_c = s1},{.Wstring_c = s2}): return strcmp(s1,s2);
+  case $({.Wstring_c = s1},_): return -1;
+  case $(_,{.Wstring_c = s1}): return 1;
+  case $({.Float_c = $(s1,i1)},{.Float_c = $(s2,i2)}): 
+    if (i1 != i2) return (i1 - i2);
+    return strcmp(s1,s2);
+  case $({.Float_c = _},_): return -1;
+  case $(_,{.Float_c = _}): return 1;
+  default:
+    unsigned long long i1 = integral_const_to_long_long(c1);
+    unsigned long long i2 = integral_const_to_long_long(c2);
+    long long diff = i1 - i2;
+    return (diff == 0) ? 0 : ((diff < 0) ? -1 : 1);
+  }
+}
+
+// This is probably not what we want.  It is used to evaluate
+// to "constant" expressions and try to determine if they are
+// equal.  For integral expressions, we get more information
+// (e.g., e1 < e2) but this really shouldn't be used in this
+// way because other expressions don't have this kind of ordering.
+int const_exp_cmp(exp_t e1, exp_t e2);
+
+int designator_cmp(designator_t d1, designator_t d2) {
+  switch $(d1,d2) {
+  case $(&ArrayElement(e1),&ArrayElement(e2)): return const_exp_cmp(e1,e2);
+  case $(&ArrayElement(e1),_): return -1;
+  case $(_,&ArrayElement(e1)): return 1;
+  case $(&FieldName(v1),&FieldName(v2)): return strcmp(*v1,*v2);
+  }
+}
+
+int designator_exp_cmp($(list_t<designator_t>,exp_t)@ d1,
+                       $(list_t<designator_t>,exp_t)@ d2) {
+  let $(des1,e1) = *d1;
+  let $(des2,e2) = *d2;
+  let c1 = const_exp_cmp(e1,e2);
+  if (c1 != 0) return c1;
+  return list_cmp(designator_cmp, des1, des2);
+}
+
+struct Vardecl *binding2vardecl(binding_t b) {
+  switch (b) {
+  case &Unresolved_b(_): return NULL;
+  case &Global_b(vd): return vd;
+  case &Funname_b(fd): return fd->fn_vardecl;
+  case &Param_b(vd): return vd;
+  case &Local_b(vd): return vd;
+  case &Pat_b(vd): return vd;
+  }
+}
+
+int cmp_binding(binding_t b1, binding_t b2) {
+  let vdopt1 = binding2vardecl(b1);
+  let vdopt2 = binding2vardecl(b2);
+  switch $(vdopt1,vdopt2) {
+  case $(NULL,NULL): return qvar_cmp(binding2qvar(b1),binding2qvar(b2));
+  case $(NULL,_): return -1;
+  case $(_,NULL): return 1;
+  default: return (int)vdopt1 - (int)vdopt2;
+  }
+}
+
+// FIX: we use this in inconstent ways.  Some functions need
+// a total order on expressions and this code sort of provides
+// that, but because we evaluate the integral expressions to
+// unsigned ints, we get out strange results.  
 int const_exp_cmp(exp_t e1, exp_t e2) {
   // strip off unnecessary casts
   e1 = strip_cast(e1);
   e2 = strip_cast(e2);
-  let $(i1,known1) = eval_const_uint_exp(e1);
-  let $(i2,known2) = eval_const_uint_exp(e2);
-  if(known1 && known2)
+  let $(c1,known1) = eval_const_exp(e1);
+  let $(c2,known2) = eval_const_exp(e2);
+  if(known1 && known2) {
+    let $(i1,_) = eval_const_uint_exp(e1);
+    let $(i2,_) = eval_const_uint_exp(e2);
     return i1 - i2;
-  let e1case = const_exp_case_number(e1);
-  let e2case = const_exp_case_number(e2);
+  }
+  let e1case = Absyn::exp_case_number(e1);
+  let e2case = Absyn::exp_case_number(e2);
   if(e1case != e2case)
     return e1case - e2case;
   switch($(e1->r, e2->r)) {
     // note: two consts are impossible -- they'd be known
+  case $(&Const_e(c1),&Const_e(c2)): return cmp_cnst(c1,c2);
+  case $(&Var_e(b1),&Var_e(b2)): return cmp_binding(b1,b2);
+  case $(&Pragma_e(s1),&Pragma_e(s2)): return strcmp(s1,s2);
   case $(&Conditional_e(e11,e12,e13), &Conditional_e(e21,e22,e23)):
     // FIX: not quite right -- if e11 and e21 are known and equal, then only
     // one of the remaining pairs should matter. Anybody care?
     let c1 = const_exp_cmp(e13,e23);
     if (c1 != 0) return c1;
     fallthru(e11,e12,e21,e22);
+  case $(&Comprehension_e(_,e11,e12,_), &Comprehension_e(_,e21,e22,_)):
+    fallthru(e11,e12,e21,e22);
   case $(&And_e(e11,e12),&And_e(e21,e22)): fallthru(e11,e12,e21,e22);
   case $(&Or_e(e11,e12),&Or_e(e21,e22)):
     let c1 = const_exp_cmp(e11,e21);
     if(c1 != 0) return c1;
+    fallthru(e12,e22);
+  case $(&SeqExp_e(_,e12),&SeqExp_e(_,e22)): 
     return const_exp_cmp(e12,e22);
   case $(&Primop_e(p1,es1), &Primop_e(p2,es2)):
     let c1 = (int)p1 - (int)p2;
@@ -414,6 +499,44 @@ int const_exp_cmp(exp_t e1, exp_t e2) {
   case $(&Valueof_e(t1), &Valueof_e(t2)):
     if (Unify::unify(t1,t2)) return 0;
     return typecmp(t1,t2);
+  case $(&Extension_e(e1),&Extension_e(e2)): fallthru(e1,e2);
+  case $(&NoInstantiate_e(e1),&NoInstantiate_e(e2)): 
+    return const_exp_cmp(e1,e2);
+  case $(&Instantiate_e(e1,t1),&Instantiate_e(e2,t2)):
+    let c1 = const_exp_cmp(e1,e2);
+    if (c1 != 0) return c1;
+    return list_cmp(typecmp, t1, t2);
+  case $(&Address_e(e1),&Address_e(e2)): return const_exp_cmp(e1,e2);
+  case $(&ComprehensionNoinit_e(e1,t1,b1),&ComprehensionNoinit_e(e2,t2,b2)):
+    let c1 = (b1 - b2);
+    if (c1 != 0) return c1;
+    c1 = typecmp(t1,t2);
+    if (c1 != 0) return c1;
+    return const_exp_cmp(e1,e2);
+  case $(&AnonStruct_e(t1,des1),&AnonStruct_e(t2,des2)):
+    let c1 = typecmp(t1,t2); 
+    if (c1 != 0) return c1;
+    fallthru(des1,des2);
+  case $(&Array_e(des1),&Array_e(des2)):
+    return list_cmp(designator_exp_cmp,des1,des2);
+  case $(&Aggregate_e(_,ts1,des1,ad1),&Aggregate_e(_,ts2,des2,ad2)):
+    let c1 = (int)ad1 - (int)ad2;
+    if (c1 != 0) return c1;
+    c1 = list_cmp(typecmp, ts1, ts2);
+    if (c1 != 0) return c1;
+    return list_cmp(designator_exp_cmp,des1,des1);
+  case $(&Tuple_e(es1),&Tuple_e(es2)):
+    return list_cmp(const_exp_cmp,es1,es2);
+  case $(&Datatype_e(es1,dd1,df1),&Datatype_e(es2,dd2,df2)):
+    let c1 = (int)dd1 - (int)dd2;
+    if (c1 != 0) return c1;
+    c1 = (int)df1 - (int)df2;
+    if (c1 != 0) return c1;
+    return list_cmp(const_exp_cmp,es1,es2);
+    // next two cases we shouldn't have to deal with since we've 
+    // evaluated things...
+  case $(&Enum_e(_,_),&Enum_e(_,_)):  
+  case $(&AnonEnum_e(_,_),&AnonEnum_e(_,_)):
   default: impos("Evexp::const_exp_cmp, unexpected case");
   }
 }

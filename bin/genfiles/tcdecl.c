@@ -421,7 +421,7 @@ struct Cyc_Absyn_Tqual Cyc_Absyn_empty_tqual(unsigned);
 int Cyc_Absyn_equal_tqual(struct Cyc_Absyn_Tqual,struct Cyc_Absyn_Tqual);
 # 891
 struct Cyc_Absyn_Kind*Cyc_Absyn_force_kb(void*);
-# 1130
+# 1132
 struct _fat_ptr Cyc_Absyn_attribute2string(void*);
 # 27 "unify.h"
 void Cyc_Unify_explain_failure();

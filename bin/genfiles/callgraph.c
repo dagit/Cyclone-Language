@@ -411,7 +411,7 @@ struct Cyc_Hashtable_Table*Cyc_Hashtable_create(int sz,int(*cmp)(void*,void*),in
 void Cyc_Hashtable_insert(struct Cyc_Hashtable_Table*t,void*key,void*val);
 # 52
 void*Cyc_Hashtable_lookup(struct Cyc_Hashtable_Table*t,void*key);
-# 74
+# 82
 int Cyc_Hashtable_hash_string(struct _fat_ptr s);
 # 47 "callgraph.cyc"
 static struct Cyc_Set_Set*Cyc_Callgraph_cg_stmt(struct Cyc_Hashtable_Table*fds,struct Cyc_Absyn_Stmt*,struct Cyc_Set_Set*s);

@@ -71,6 +71,21 @@ void insert(table_t<`a,`b> t, `a key, `b val) {
   return NULL;
 }
 
+// this is a hack to allow you to use a pointer in one region
+// as a key to lookup for table entries where the keys are in 
+// another region.  this is really necessary to avoid allocation
+// when building hash-cons tables.
+`b*`r lookup_other_opt(table_t<`a,`b,`r> t, `c key, 
+                       int cmp(`c,`a), int hash(`c)) {
+  let tab = t->tab;
+  let l = tab[hash(key) % numelts(tab)];
+  for (; l != NULL; l = l->tl) {
+    let &$(k,*v) = l->hd;
+    if (cmp(key,k) == 0) return v;
+  }
+  return NULL;
+}
+
 bool try_lookup(table_t<`a,`b> t, `a key, `b@ data) {
   let tab = t->tab;
   let l = tab[(t->hash)(key) % numelts(tab)];

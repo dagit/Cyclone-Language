@@ -391,7 +391,7 @@ struct Cyc_Hashtable_Table*Cyc_Hashtable_create(int sz,int(*cmp)(void*,void*),in
 void Cyc_Hashtable_insert(struct Cyc_Hashtable_Table*t,void*key,void*val);
 # 52
 void*Cyc_Hashtable_lookup(struct Cyc_Hashtable_Table*t,void*key);
-# 78
+# 86
 int Cyc_Hashtable_hash_stringptr(struct _fat_ptr*p);struct Cyc_Fn_Function{void*(*f)(void*,void*);void*env;};
 # 48 "fn.h"
 struct Cyc_Fn_Function*Cyc_Fn_make_fn(void*(*f)(void*,void*),void*x);

@@ -295,7 +295,7 @@ mstring_t str_sepstr(list_t<stringptr_t> strs, buffer_t separator) {
 // Destructively copy at most n characters from src into dest
 mbuffer_t<`r> strncpy(mbuffer_t<`r> dest, buffer_t src, size_t n) {
   int i;
-  assert(n <= numelts(src) && n <= numelts(dest));
+  assert(n <= numelts(dest));
   for (i=0; i<n; i++) {
     let srcChar = src[i];
     if (srcChar == '\000') break;

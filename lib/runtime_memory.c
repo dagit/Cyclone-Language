@@ -288,7 +288,7 @@ static size_t default_region_page_size = CYC_MIN_REGION_PAGE_SIZE;
 
 // set the default region page size -- returns false and has no effect 
 // if s is not at least CYC_MIN_REGION_PAGE_SIZE
-bool Cyc_set_default_region_page_size(size_t s) {
+int Cyc_set_default_region_page_size(size_t s) {
   if (s < CYC_MIN_REGION_PAGE_SIZE) 
     return 0;
   default_region_page_size = s;

@@ -44,7 +44,7 @@
 /* } */
 
 // no longer copying the C string (see above if this is bogus)
-static struct _fat_ptr Cstring_to_string(Cstring s) {
+static struct _fat_ptr Cstring_to_string(char *s) {
   struct _fat_ptr str;
   if (s == NULL) {
     str.base = str.curr = str.last_plus_one = NULL;
