@@ -4936,6 +4936,10 @@ hstub {
   // a constant.
 }
 hstub {
+// Need to #include our getopt.h file to grab getopt and friends
+  #include <getopt.h>
+}
+hstub {
 // Under Linux, crypt doesn't always get included here for some reason
 #ifdef __linux__
   extern "C" char *crypt (const char @__key, const char @__salt);

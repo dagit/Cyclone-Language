@@ -63,7 +63,7 @@ $(CYC_LIB_PATH):
 	cp $(CYCDIR)/bin/cyc-lib/cyc_include.h $@/cyc-lib
 
 $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include: $(CYC_LIB_PATH) \
-  $(CYCDIR)/bin/genfiles/$(ARCH).headers.tgz
+  $(CYCDIR)/bin/genfiles/$(ARCH).headers.tgz bin/cyc-lib/libc.cys
 	-mkdir $@
 	tar -z -xf bin/genfiles/$(ARCH).headers.tgz -C $@
 	bin/buildlib -d $@ -finish bin/cyc-lib/libc.cys
