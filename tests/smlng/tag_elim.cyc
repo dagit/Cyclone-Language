@@ -13,13 +13,22 @@ namespace TagElim;
 // making an outer tag unnecessary.  Another pass
 // gets the top-down things.  (Eg. This pass makes <r><r>x</r><r><y></r> into
 // <r>x</r><r><y></r> instead of <r>xy</r>)
+
+// Difference between useless and seen (can't think of better names):
+// <B><B>x</B><PL>y</PL></B> strips outer B b/c bold_useless is set
+// <B>x</B><B>y</B> wraps an outer B so that down_opt can elim the tags, but
+//                  only when bold_seen (and bold_useless) is set
 struct SynthS {
-  bool bold: 1;
+  bool bold_useless: 1;
+  bool bold_seen: 1;
   //  bool emph: 1;
-  bool ital: 1;
-  bool strong: 1;
+  bool ital_useless: 1;
+  bool ital_seen: 1;
+  bool strong_useless: 1;
+  bool strong_seen: 1; 
+  bool tt_useless: 1;
+  bool tt_seen: 1;
   bool plain: 1;
-  bool tt: 1;
   bool u1: 1; // invariant: true if u2 is true
   bool u2: 1; // invariant: true if u3 is true
   bool u3: 1;
@@ -36,57 +45,80 @@ union Synth {
   unsigned long long i;
 };
 
-synth_t all_ones;
+synth_t init;
 
 // currently destructive (of doc), but could easily be made functional
 $(doc_t, synth_t) up_opt(Buffer::buf_t b, doc_t doc) {
-  all_ones.i = ~0;
   switch(doc) {
   case &Seq(*dsp): 
     let ds = *dsp;
-    synth_t synth = all_ones;
+    init.s = SynthS(1,0,1,0,1,0,1,0,1,1,1,1,1,1,~0,~0);
+    synth_t synth      = init;
+    synth_t prev_synth = init;
     if(ds == null)
       return $(doc,synth);
+    list_t<doc_t> prev     = ds; // won't get used b/c of prev_synth
+    list_t<doc_t> prevprev = ds; // won't get used b/c of prev_synth
     while(ds != null) {
       let $(newd, inner_synth) = up_opt(b, ds->hd);
       ds->hd = newd; // destructive here
-      short split_tag = 0;
-      bool  do_split  = false;
-      // if size is guarded look for a size that appears in synth & inner_synth
-      if(synth.s.sz & inner_synth.s.sz 
-	 && ~(synth.s.sizes | inner_synth.s.sizes)) {
-	do_split = true;
-	// a bit-twiddle trick may be called for here
-	int sizes = synth.s.sizes | inner_synth.s.sizes;
+      // look for reasons to split the sequence and wrap with a redundant tag
+      // so the ensuing down optimization can remove the inner tags
+      list_t<int> split_tags = null; // no need to be heap-allocated
+      if(prev_synth.s.bold_seen && inner_synth.s.bold_seen)
+	split_tags = new List(B_tag, split_tags);
+      if(prev_synth.s.ital_seen && inner_synth.s.ital_seen)
+	split_tags = new List(I_tag, split_tags);
+      if(prev_synth.s.strong_seen && inner_synth.s.strong_seen)
+	split_tags = new List(S_tag, split_tags);
+      if(prev_synth.s.tt_seen && inner_synth.s.tt_seen)
+	split_tags = new List(TT_tag, split_tags);
+      
+      if(prev_synth.s.sz & inner_synth.s.sz 
+	 && ~(prev_synth.s.sizes | inner_synth.s.sizes)) {
+	int sizes = prev_synth.s.sizes | inner_synth.s.sizes;
 	// ASSUMES Zero is least and colors are consecutive.  Very destructive.
-	split_tag = Zero;
+	let split_tag = Zero;
 	while(sizes & 1 != 0) {
 	  sizes >>= 1;
 	  ++split_tag;
 	}
-      }
-      if(!do_split && synth.s.color & inner_synth.s.color
-	 && ~(synth.s.colors | inner_synth.s.colors)) {
-	do_split = true;
-	// a bit-twiddle trick may be called for here
-	int colors = synth.s.colors | inner_synth.s.colors;
+	split_tags = new List(split_tag,split_tags);
+	}
+      if(prev_synth.s.color & inner_synth.s.color
+	 && ~(prev_synth.s.colors | inner_synth.s.colors)) {
+	int colors = prev_synth.s.colors | inner_synth.s.colors;
 	// ASSUMES r_tag is least and colors are consecutive.  Very destructive.
-	split_tag = r_tag;
+	let split_tag = r_tag;
 	while(colors & 1 != 0) {
 	  colors >>= 1;
 	  ++split_tag;
 	}
+	split_tags = new List(split_tag,split_tags);
       }
-      if(do_split) { // subtle invariant: cannot happen on first loop iteration
+      if(split_tags != null) { //subtle: won't happen on first loop iteration
 	// IN PLACE sequence splitting
 	let next = ds->tl;
 	ds->tl = null;
-	let d = new Tagged(split_tag, new Seq(*dsp));
-	*dsp = new List(d, next);
+	doc_t d = new Seq(prev);
+	for(; split_tags != null; split_tags = split_tags->tl)
+	  d = new Tagged(split_tags->hd, d);
+	if(prev == *dsp)
+	  *dsp = prevprev = prev = new List(d,next);
+	else {
+	  prev = new List(d,next);
+	  prevprev->tl = null;
+	  *dsp = new List(new Seq(*dsp), prev);
+	  prevprev = *dsp;
+	}
 	ds = next;
-      } else
+      } else {
+	prevprev = prev;
+	prev = ds;
 	ds = ds->tl;
+      }
       synth.i = synth.i & inner_synth.i;
+      prev_synth = inner_synth;
     }
     return $(doc,synth);
   case &Text(pos): 
@@ -101,38 +133,38 @@ $(doc_t, synth_t) up_opt(Buffer::buf_t b, doc_t doc) {
   case &Tagged(tag,d):
     let $(d2, synth) = up_opt(b, d);
     bool useless = false;
-#define OPT(FIELD) do { useless = synth.s.FIELD; synth.s.FIELD = true;} while(0)
+#define USELESS(FIELD) do {useless=synth.s.FIELD; synth.s.FIELD=true;} while(0)
+#define SEEN(FIELD) do {synth.s.FIELD=true;} while(0)
     switch(tag) {
     case Zero: case One: case  Two: case  Three: case  Four: case  Five: 
     case Six: case  Seven: case  Eight: case  Nine:
-      OPT(sz);
+      USELESS(sz);
       // assumes Zero is least tag and they're consecutive
       if(!useless)
 	synth.s.sizes = ~(1 << (tag - Zero));
       break;
     case r_tag: case g_tag: case b_tag: case c_tag: case  m_tag: 
     case y_tag: case k_tag: case w_tag:
-      OPT(color); 
+      USELESS(color); 
       // assumes r_tag is least tag and they're consecutive
       if(!useless)
 	synth.s.colors = ~(1 << (tag - r_tag));
       break;
-    case B_tag:  OPT(bold); break;
-    case EM_tag: useless = synth.s.strong; break;
-    case I_tag:  OPT(ital); break;
-    case S_tag:  OPT(strong); break;
-    case TT_tag: OPT(tt); break;
+    case B_tag:  USELESS(bold_useless);   SEEN(bold_seen);   break;
+    case I_tag:  USELESS(ital_useless);   SEEN(ital_seen);   break;
+    case S_tag:  USELESS(strong_useless); SEEN(strong_seen); break;
+    case TT_tag: USELESS(tt_useless);     SEEN(tt_seen);     break;
+    case EM_tag: useless = synth.s.strong_useless; break; // can float EM?
     case PL_tag: // only color and size matter from outer tags
-      OPT(plain);
-      int color = synth.s.color;
-      int sz    = synth.s.sz;
-      int sizes = synth.s.sizes;
-      synth.i = ~0; 
-      synth.s.color = color;
-      synth.s.sz    = sz;
-      synth.s.sizes = sizes;
+      USELESS(plain);
+      synth.s.bold_useless = 1;   synth.s.bold_seen = 0;
+      synth.s.ital_useless = 1;   synth.s.ital_seen = 0;
+      synth.s.strong_useless = 1; synth.s.strong_seen = 0;
+      synth.s.tt_useless = 1;     synth.s.tt_seen = 0;
+      synth.s.tt_useless = 1;     synth.s.tt_seen = 0;
+      synth.s.u1 = synth.s.u2 = synth.s.u3 = 1;
       break;
-    case U_tag:
+    case U_tag: // can float U?
       if(synth.s.u3)
 	useless = true;
       if(synth.s.u2)
@@ -143,7 +175,8 @@ $(doc_t, synth_t) up_opt(Buffer::buf_t b, doc_t doc) {
       break;
     default: throw new Impossible("tag_elim: tag");
     }
-#undef OPT
+#undef USELESS
+#undef SEEN
     if(useless)
       return $(d2,synth);
     else if(d2 == d)

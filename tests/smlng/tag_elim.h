@@ -6,12 +6,16 @@
 
 namespace TagElim {
 extern struct SynthS {
-  bool bold: 1;
+  bool bold_useless: 1;
+  bool bold_seen: 1;
   //  bool emph: 1;
-  bool ital: 1;
-  bool strong: 1;
+  bool ital_useless: 1;
+  bool ital_seen: 1;
+  bool strong_useless: 1;
+  bool strong_seen: 1;
+  bool tt_useless: 1;
+  bool tt_seen: 1;
   bool plain: 1;
-  bool tt: 1;
   bool u1: 1; // invariant: true if u2 is true
   bool u2: 1; // invariant: true if u3 is true
   bool u3: 1;
