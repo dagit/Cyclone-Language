@@ -122,6 +122,26 @@ static stringptr _free_region_sp = (&_free_region_string);
 static string _new_region_string = "_new_region";
 static stringptr _new_region_sp = (&_new_region_string);
 
+// FIX:  should really allow evaluating expressions too
+static bool is_zero(exp_t e) {
+  switch (e->r) {
+  case &Const_e(&Char_c(_,c)): return c == '\0';
+  case &Const_e(&Short_c(_,i)): return i == 0;
+  case &Const_e(&Int_c(_,i)): return i == 0;
+  case &Const_e(&LongLong_c(_,i)): return i == 0;
+  case &Const_e(Null_c): return true;
+  case &Cast_e(_,e1): return is_zero(e1);
+  case &Tuple_e(es): return List::forall(is_zero,es);
+  case &Array_e(dles): fallthru(dles);
+  case &Struct_e(_,_,dles,_): fallthru(dles);
+  case &CompoundLit_e(_,dles): fallthru(dles);
+  case &UnresolvedMem_e(_,dles):
+    for (; dles != null; dles = dles->tl) 
+      if (!is_zero((*dles->hd)[1])) return false;
+    return true;
+  default: return false;
+  }
+}
 
 // return true if t is a nullable pointer type i.e., *
 static bool is_nullable(type_t t) {
@@ -1902,13 +1922,14 @@ static void exp_to_c(env_t nv, exp_t e) {
   case &Comprehension_e(vd,e1,e2):
     // a comprehension not under a "new" -- should only be the case
     // when e1 is constant.  For now, e2 must be too...
-    // FIX: at top-level, when e2 is 0 or null, etc. we shouldn't generate
-    // anything...
     let sz = Evexp::eval_const_uint_exp(e1);
     exp_to_c(nv,e2);
     list_t<$(list_t<designator_t>,exp_t)@> es = null;
-    for (unsigned int i = 0; i < sz; i++)
-      es = new List(new $(null,e2),es);
+    // generate an "empty" array intializer to avoid giant arrays
+    if (!is_zero(e2)) {
+      for (unsigned int i = 0; i < sz; i++)
+        es = new List(new $(null,e2),es);
+    }
     e->r = unresolvedmem_exp(null,es,DL)->r;
     break;
   case &Struct_e(tdn,ots,dles,sd):

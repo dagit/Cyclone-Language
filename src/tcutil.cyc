@@ -2391,7 +2391,7 @@ static bool cnst_exp(tenv_t te, bool var_okay, exp_t e) {
     return (cnst_exp(te,false,e1) && cnst_exp(te,false,e2));
   case &Instantiate_e(e2,_):
     return cnst_exp(te,var_okay,e2);
-  case &Cast_e(_,e2):
+  case &Cast_e(t,e2):
     // FIX:  We cannot allow casts w/ run-time effect b/c C will complain!
     return cnst_exp(te,var_okay,e2);
   case &Address_e(e2):
