@@ -473,6 +473,13 @@ static void tcUniondecl(tenv_t te, genv_t ge, seg_t loc, uniondecl_t ud) {
     ge->uniondecls = Dict::insert(ge->uniondecls, v, udp);
     
     tcStructFields(te, ge, loc, obj, fs, tvs);
+    // must check that fields are bits-only
+    for (_ f = fs; f != null; f = f->tl) {
+      if (!bits_only(f->hd->type))
+        terr(loc,xprintf("field %s of union %s has type %s which "
+                         "is not `bits-only'",*f->hd->name,*v,
+                         typ2string(f->hd->type)));
+    }
 
     *udp = ud; //insert ud in the environment
     break;

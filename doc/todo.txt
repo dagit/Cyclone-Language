@@ -98,10 +98,6 @@ MISSING THINGS NEEDED TO PORT REAL CODE:
 * add some way to forward varargs -- easiest would be to cast a vararg
   function to one with an explicit array.
 
-* command line arguments like GCC's with the proper defaults 
-  (e.g., -tc -toc -up should be default.)  Also, should support
-  passing flags through to GCC and the pre-processor.
-
 * wide characters and strings
 
 * attributes on enums? (e.g., packed)
@@ -134,8 +130,6 @@ THINGS NEEDED TO SIMPLIFY PORTING:
 * better formatting support in printf & friends (i.e., deal with full
   %-specifiers)  
 
-* varargs (...) (integrate with printf, fprintf, xprintf?)
-
 * multi-level initializers, e.g., {{0,1},{2,3}}
 
 * better constant expressions (no doubles? no longs?)
@@ -147,8 +141,6 @@ THINGS NEEDED TO SIMPLIFY PORTING:
 
 THINGS NEEDED TO MAKE REGIONS MORE REAL:
 ----------------------------------------
-* Need to add letregion, syntax for region handles, and a way to
-  allocate into a region (as opposed to the heap.)
 
 THINGS THAT WOULD BE NICE OR THAT HAVE SEX APPEAL:
 --------------------------------------------------
@@ -184,8 +176,6 @@ THINGS THAT WOULD BE NICE OR THAT HAVE SEX APPEAL:
 * Support qualified identifier declarations (instead of just uses).
 
 * as patterns.  views and abstract patterns.  
-
-* builtin list syntax: list(e1,e2,...,en)? -- also for patterns
 
 * string append operator (++)?
 
