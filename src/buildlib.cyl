@@ -89,6 +89,7 @@ using Absyn;
 extern "C" Cstring Ccomp; // The string to invoke gcc
 
 static int do_setjmp = 0;
+static int verbose = 0;
 
 FILE *log_file = NULL;
 FILE *cstubs_file = NULL;
@@ -1367,9 +1368,12 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
           fprintf(stderr,"Error: could not create file %s\n",cppinfile);
           return 1;
         }
+	if (verbose)
+          fprintf(stderr,"Creating %s\n",cppinfile);
         out_file = (FILE@)maybe;
-        for (let l = current_cpp; l != NULL; l = l->tl)
+        for (let l = current_cpp; l != NULL; l = l->tl) {
           fputs((const char @)(*(l->hd)),out_file);
+        }
         fprintf(out_file,"#include <%s>\n",filename);
         fclose(out_file);
         let GCC = Cstring_to_string(Ccomp);
@@ -1379,11 +1383,15 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
                      " ");
         char @cmd = (char @)aprintf("%s -E -dM -o %s -x c %s %s",
 				    GCC,macrosfile,cppargs_string,cppinfile);
+        if (verbose)
+          fprintf(stderr,"%s\n",cmd);
         if (!system(cmd)) {
           /* No error in creating the file of macros, so go ahead and create
              the file of declarations */
           cmd = (char @)aprintf("%s -E -o %s -x c %s %s",
 				GCC,declsfile,cppargs_string,cppinfile);
+          if (verbose)
+            fprintf(stderr,"%s\n",cmd);
           system(cmd); // if err, no declsfile created, and we'll handle later
         }
         //JGM:remove(cppinfile);
@@ -1713,6 +1721,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
 
   /* Return 1 on fatal error, else 0 */
   int process_specfile(const char @ file,const char @ dir) {
+    if (verbose)
+      fprintf(stderr,"Processing %s\n",file);
     let maybe = fopen(file,"r");
     if (!maybe) {
       fprintf(stderr,"Error: could not open %s\n", file);
@@ -1733,7 +1743,10 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     if (mode == GATHER) {
       /* This will be executed once for each specfile, but who cares */
       let GCC = Cstring_to_string(Ccomp);
-      system((const char @)(aprintf("echo | %s -E -dM - -o INITMACROS.h\n",GCC)));
+      let cmd = aprintf("echo | %s -E -dM - -o INITMACROS.h\n",GCC);
+      if (verbose)
+        fprintf(stderr,"%s\n",cmd);
+      system((const char @)cmd);
     }
 
     let l = Lexing::from_file(in_file);
@@ -1803,6 +1816,10 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     fprintf(stderr,"Unsupported option %s\n", s);
     badparse = true;
   }
+  static void set_machine(string_t<`H> s) {
+    add_cpparg("-b");
+    add_cpparg(s);
+  }
 
   using Arg;
 
@@ -1830,6 +1847,12 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
                  " on the standard output, for use by the Cyclone"
                  " compiler special file cyc_setjmp.h.  Cannot be"
                  " used with -gather, -gatherscript, or specfiles."),
+      	   new $("-b",false," <machine>",
+                 new String_spec(set_machine),
+                 "Set the target machine for compilation to <machine>"),
+           new $("-v",false,"",
+                 new Set_spec(&verbose),
+                 "Verbose operation"),
            new $("-",true,"", /* pass all other - flags to cpp */
                  new Flag_spec(add_cpparg),
                  "")
@@ -1847,6 +1870,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     }
 
     if (mode == GATHERSCRIPT) {
+      if (verbose)
+        fprintf(stderr,"Creating BUILDLIB.sh\n");
       script_file = fopen("BUILDLIB.sh","w");
       if (!script_file) {
         fprintf(stderr,"Could not create file BUILDLIB.sh\n");
@@ -1861,6 +1886,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       fprintf(stderr,"Error: could not create directory %s\n",output_dir);
       return 1;
     }
+    if (verbose)
+      fprintf(stderr,"Output directory is %s\n",output_dir);
 
     if (mode == GATHERSCRIPT) {
       prscript("cd %s\n",output_dir);

@@ -9,7 +9,8 @@
 # cross-compilation purposes.
 
 # USAGE
-# buildspecs > specsfile
+# buildspecs [options] > specsfile
+#   (options are passed to the C preprocessor)
 # gcc -specs specsfile ...
 
 # NOTES
@@ -29,7 +30,7 @@
 # literal tabs!!
 
 echo |\
-gcc - -E -dM |\
+gcc - -E -dM $* |\
 sed -e 's/ *$//' |\
 sed -e 's/#define /-D/' |\
 sed -e 's/ /=/' |\
