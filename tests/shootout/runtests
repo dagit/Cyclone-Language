@@ -1,0 +1,70 @@
+#!/bin/bash
+# runs all of the benchmark tests, in various flavors.  Output is printed
+# to stdout, one line per executable, with the elapsed times for each
+# iteration on the line.
+#
+# usage: runtests [n]
+#   where n is the number of iterations per test.
+
+if [ $# -lt 1 ]; then
+N=1
+else
+N=$1
+fi
+
+TEST=./test.sh
+
+#BENCHMARKS="ackermann ary3 except fibo hash hash2 heapsort hello matrix nestedloop random reversefile sieve sumcol wc lists spellcheck"
+BENCHMARKS="ackermann ary3 fibo hash hash2 heapsort hello matrix nestedloop random reversefile sieve sumcol wc"
+
+function getargs {
+  case "$1" in
+    ackermann) echo 8;;
+    ary3) echo 7000;;
+    fibo) echo 32;;
+    hash) echo 80000;;
+    hash2) echo 150;;
+    heapsort) echo 80000;;
+    hello) echo 200;;
+    matrix) echo 300;;
+    nestedloop) echo 16;;
+    random) echo 900000;;
+    reversefile) echo 20;;
+    sieve) echo 900;;
+    sumcol) echo 1000;;
+    wc) echo 2000;;
+    *) echo "failure"; exit 1;;
+  esac
+}
+
+function getinputfile {
+  case "$1" in
+    ackermann) echo;;
+    ary3) echo ;;
+    fibo) echo ;;
+    hash) echo ;;
+    hash2) echo ;;
+    heapsort) echo ;;
+    hello) echo ;;
+    matrix) echo ;;
+    nestedloop) echo ;;
+    random) echo ;;
+    reversefile) echo reversefile-Input;;
+    sieve) echo;;
+    sumcol) echo sumcol-Input;;
+    wc) echo wc-Input;;
+    *) echo "failure"; exit 1;;
+  esac
+}  
+
+# Do the benchmarks
+
+for file in $BENCHMARKS
+do
+  ARGS=`getargs $file`
+  INPUTFILE=`getinputfile $file`
+  $TEST $N "./${file} $ARGS" $INPUTFILE
+  $TEST $N "./gcc-${file} $ARGS" $INPUTFILE
+  $TEST $N "./nocheck-${file} $ARGS" $INPUTFILE
+  $TEST $N "./nobounds-${file} $ARGS" $INPUTFILE
+done
