@@ -416,6 +416,9 @@ static void extract_aggrdecl($(ienv_t,ienv_t,bool,aenv_t,seen_t,i_t) @ env,
     if (check_public_aggrdecl(ae, seen, d)) 
       imp->aggrdecls = Dict::insert(imp->aggrdecls, x, d);
     break;
+  case Register: 
+    invalid_arg("add_aggrdecl");
+    break;
   }
 }
 static void extract_enumdecl($(ienv_t,ienv_t,bool,aenv_t,seen_t,i_t) @ env,
@@ -451,6 +454,9 @@ static void extract_enumdecl($(ienv_t,ienv_t,bool,aenv_t,seen_t,i_t) @ env,
   case Extern:
     if (check_public_enumdecl(ae, seen, d))
       imp->enumdecls = Dict::insert(imp->enumdecls, x, d);
+    break;
+  case Register: 
+    invalid_arg("add_enumdecl");
     break;
   }
 }
@@ -538,6 +544,9 @@ static void extract_tuniondecl($(ienv_t,ienv_t,bool,aenv_t,seen_t,i_t) @ env,
       imp->tuniondecls = Dict::insert(imp->tuniondecls, x, d);
     }
     break;
+  case Register: 
+    invalid_arg("add_tuniondecl");
+    break;
   }
 }
 
@@ -580,6 +589,7 @@ static void extract_ordinarie($(ienv_t,ienv_t,bool,aenv_t,seen_t,i_t) @ env,
 	  body_err("static", d->name);
 	}
 	break;
+      case Register: 
       case Abstract: invalid_arg("extract_ordinarie");
       case Public:
 	if (check_complete_defs && Tcutil::is_function_type(d->type)) {

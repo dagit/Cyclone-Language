@@ -734,26 +734,27 @@ int)_throw((void*)({struct Cyc_Core_Failure_struct*_tmp102=_cycalloc(sizeof(*
 _tmp102));_tmp102[0]=({struct Cyc_Core_Failure_struct _tmp103;_tmp103.tag=Cyc_Core_Failure;
 _tmp103.f1=_tmpFF;_tmp103;});_tmp102;}));_LL44:;_LL45:(void)_throw(_tmpFE);_LL41:;}}}
 void Cyc_Marshal_fscanntstring(struct Cyc_Std___cycFILE*fp,struct _tagged_arr s){int
-c;int i=0;while(c=Cyc_Std_fgetc(fp)){if(c == - 1)(int)_throw((void*)({struct Cyc_Core_Failure_struct*
-_tmp104=_cycalloc(sizeof(*_tmp104));_tmp104[0]=({struct Cyc_Core_Failure_struct
-_tmp105;_tmp105.tag=Cyc_Core_Failure;_tmp105.f1=_tag_arr("Read error",sizeof(
-char),11);_tmp105;});_tmp104;}));((char*)s.curr)[i]=(char)c;i ++;}((char*)s.curr)[
-i]='\000';}struct _tuple7 Cyc_Marshal_rread_type_base(struct _RegionHandle*r,void*
-rep,struct _tuple7 env,struct Cyc_Std___cycFILE*fp,void*result){{void*_tmp106=rep;
-unsigned int _tmp107;unsigned int _tmp108;void*_tmp109;void*_tmp10A;struct
-_tagged_arr _tmp10B;struct _tagged_arr _tmp10C;struct _tagged_arr _tmp10D;struct
-_tagged_arr _tmp10E;struct _tagged_arr _tmp10F;struct _tagged_arr _tmp110;int _tmp111;
-int _tmp112;_LL47: if(_tmp106 <= (void*)2?1:*((int*)_tmp106)!= 0)goto _LL49;_tmp107=((
-struct Cyc_Typerep_Int_struct*)_tmp106)->f2;_LL48: switch(_tmp107){case 8: _LL5F: {
-char*x=((char*(*)(void*x))unsafe_cast)(result);*x=Cyc_Marshal_cycgetchar(fp);
-break;}case 16: _LL60: {short*x=((short*(*)(void*x))unsafe_cast)(result);*x=Cyc_Marshal_cycgetshort(
-fp);break;}case 32: _LL61: {int*x=((int*(*)(void*x))unsafe_cast)(result);*x=Cyc_Marshal_cycgetint(
-fp);break;}default: _LL62:(int)_throw((void*)({struct Cyc_Core_Failure_struct*
-_tmp113=_cycalloc(sizeof(*_tmp113));_tmp113[0]=({struct Cyc_Core_Failure_struct
-_tmp114;_tmp114.tag=Cyc_Core_Failure;_tmp114.f1=_tag_arr("read_type_base: illegal int size bits",
-sizeof(char),38);_tmp114;});_tmp113;}));}goto _LL46;_LL49: if((int)_tmp106 != 0)
-goto _LL4B;_LL4A: {float*y=((float*(*)(void*x))unsafe_cast)(result);*y=Cyc_Marshal_cycgetfloat(
-fp);goto _LL46;}_LL4B: if((int)_tmp106 != 1)goto _LL4D;_LL4C: {double*y=((double*(*)(
+c;int i=0;while((c=Cyc_Std_fgetc(fp))!= '\000'){if(c == - 1)(int)_throw((void*)({
+struct Cyc_Core_Failure_struct*_tmp104=_cycalloc(sizeof(*_tmp104));_tmp104[0]=({
+struct Cyc_Core_Failure_struct _tmp105;_tmp105.tag=Cyc_Core_Failure;_tmp105.f1=
+_tag_arr("Read error",sizeof(char),11);_tmp105;});_tmp104;}));((char*)s.curr)[i]=(
+char)c;i ++;}((char*)s.curr)[i]='\000';}struct _tuple7 Cyc_Marshal_rread_type_base(
+struct _RegionHandle*r,void*rep,struct _tuple7 env,struct Cyc_Std___cycFILE*fp,void*
+result){{void*_tmp106=rep;unsigned int _tmp107;unsigned int _tmp108;void*_tmp109;
+void*_tmp10A;struct _tagged_arr _tmp10B;struct _tagged_arr _tmp10C;struct _tagged_arr
+_tmp10D;struct _tagged_arr _tmp10E;struct _tagged_arr _tmp10F;struct _tagged_arr
+_tmp110;int _tmp111;int _tmp112;_LL47: if(_tmp106 <= (void*)2?1:*((int*)_tmp106)!= 0)
+goto _LL49;_tmp107=((struct Cyc_Typerep_Int_struct*)_tmp106)->f2;_LL48: switch(
+_tmp107){case 8: _LL5F: {char*x=((char*(*)(void*x))unsafe_cast)(result);*x=Cyc_Marshal_cycgetchar(
+fp);break;}case 16: _LL60: {short*x=((short*(*)(void*x))unsafe_cast)(result);*x=
+Cyc_Marshal_cycgetshort(fp);break;}case 32: _LL61: {int*x=((int*(*)(void*x))
+unsafe_cast)(result);*x=Cyc_Marshal_cycgetint(fp);break;}default: _LL62:(int)
+_throw((void*)({struct Cyc_Core_Failure_struct*_tmp113=_cycalloc(sizeof(*_tmp113));
+_tmp113[0]=({struct Cyc_Core_Failure_struct _tmp114;_tmp114.tag=Cyc_Core_Failure;
+_tmp114.f1=_tag_arr("read_type_base: illegal int size bits",sizeof(char),38);
+_tmp114;});_tmp113;}));}goto _LL46;_LL49: if((int)_tmp106 != 0)goto _LL4B;_LL4A: {
+float*y=((float*(*)(void*x))unsafe_cast)(result);*y=Cyc_Marshal_cycgetfloat(fp);
+goto _LL46;}_LL4B: if((int)_tmp106 != 1)goto _LL4D;_LL4C: {double*y=((double*(*)(
 void*x))unsafe_cast)(result);*y=Cyc_Marshal_cycgetdouble(fp);goto _LL46;}_LL4D:
 if(_tmp106 <= (void*)2?1:*((int*)_tmp106)!= 1)goto _LL4F;_tmp108=((struct Cyc_Typerep_ThinPtr_struct*)
 _tmp106)->f1;_tmp109=(void*)((struct Cyc_Typerep_ThinPtr_struct*)_tmp106)->f2;

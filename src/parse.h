@@ -32,6 +32,7 @@ using Lexing {
 namespace Parse {
 extern list_t<decl_t> parse_file(FILE @f);
 extern opt_t<Lexbuf<Function_lexbuf_state<FILE@>>> lbuf;
+extern bool no_register;
 }
 extern tunion Struct_or_union;
 typedef tunion Struct_or_union struct_or_union_t;
@@ -50,3 +51,6 @@ typedef struct Abstractdeclarator @abstractdeclarator_t;
 #include "parse_tab.h"
 }}}}}
 #endif
+
+
+

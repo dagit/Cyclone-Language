@@ -148,7 +148,8 @@ namespace Absyn {
     Abstract,  // definition is exported only abstractly (structs only)
     Public,    // definition is exported in full glory (most things)
     Extern,    // definition is provided elsewhere
-    ExternC    // definition is provided elsewhere by C code 
+    ExternC,   // definition is provided elsewhere by C code 
+    Register   // value may be stored in a register
   };
 
   // type qualifiers -- const, volatile, and restrict

@@ -76,6 +76,7 @@ $(scope_t, bool) merge_scope(scope_t s0, scope_t s1, string_t t, string_t v,
   case $(Static,   Static):
   case $(Public,   Public):
   case $(Abstract, Abstract): break;
+  case $(Register, Register): break;
   default: merge_scope_err(s0,s1,t,v,loc,msg); return $(s1, false);
   }
   return $(s1, true);

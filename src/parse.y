@@ -64,6 +64,9 @@ namespace Lex {
 
 namespace Parse {
 
+  // if true, parse register storage class as public
+bool no_register = false;
+
 ////////////////////// Type definitions needed only during parsing ///////////
 tunion Type_specifier {
   Signed_spec(seg_t);
@@ -672,7 +675,7 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
     case ExternC_sc:  s = ExternC;  break;
     case Static_sc:   s = Static;   break;
     case Auto_sc:     s = Public;   break;
-    case Register_sc: s = Public;   break;
+    case Register_sc: if(no_register) s = Public; else s = Register;   break;
     case Abstract_sc: s = Abstract; break;
     }
 

@@ -298,9 +298,10 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd) {
   if (is_main(fd->name)) {
     // result type should be int
     switch (compress(fd->ret_type)) {
+    case VoidType: warn(loc,"main declared with return type void"); break;
     case &IntType(_,B4): break;
     default: 
-      terr(loc,"main declared with return type %s instead of int",
+      terr(loc,"main declared with return type %s instead of int or void",
 	   typ2string(fd->ret_type)); 
       break;
     }
@@ -772,6 +773,7 @@ static bool okay_externC(seg_t loc, scope_t sc) {
     warn(loc,"abstract declaration nested within extern \"C\"");
     return false;
   case Public:
+  case Register: 
   case Extern: return true;
   case ExternC:
     warn(loc,"nested extern \"C\" declaration");

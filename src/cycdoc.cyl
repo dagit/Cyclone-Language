@@ -253,6 +253,7 @@ void dumpscope(scope_t sc) {
   case Extern:   dump_alpha("extern"); return;
   case ExternC:  dump_alpha("extern \"C\""); return;
   case Abstract: dump_alpha("abstract"); return;
+  case Register: dump_alpha("register"); return;
   }
 }
 

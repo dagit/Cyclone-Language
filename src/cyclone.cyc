@@ -926,7 +926,10 @@ int main(int argc, string_t<`H> ?`H argv) {
                "Print full information for evars (type debugging)"),
 	 new $("-warnboundschecks", false, "",
 	       new Set_spec(&Toc::warn_bounds_checks),
-	       "Warn when bounds checks can't be eliminated")
+	       "Warn when bounds checks can't be eliminated"),
+	 new $("-noregister", false, "",
+	       new Set_spec(&Parse::no_register),
+	       "Treat register storage class as public")
          );
 
   Arg::parse(options, add_other, "Options:", argv);

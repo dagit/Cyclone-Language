@@ -307,13 +307,13 @@ _tagged_arr argv){Cyc_Std_original_argc=argc;Cyc_Std_original_argv=(int)argv.cur
 static void Cyc_Std_exchange(struct _tagged_arr argv){int bottom=Cyc_Std_first_nonopt;
 int middle=Cyc_Std_last_nonopt;int top=Cyc_Std_optind;struct _tagged_arr tem;while(
 top > middle?middle > bottom: 0){if(top - middle > middle - bottom){int len=middle - 
-bottom;int i;for(i=0;i < len;i ++){tem=*((struct _tagged_arr*)
+bottom;register int i;for(i=0;i < len;i ++){tem=*((struct _tagged_arr*)
 _check_unknown_subscript(argv,sizeof(struct _tagged_arr),bottom + i));*((struct
 _tagged_arr*)_check_unknown_subscript(argv,sizeof(struct _tagged_arr),bottom + i))=*((
 struct _tagged_arr*)_check_unknown_subscript(argv,sizeof(struct _tagged_arr),(top - (
 middle - bottom))+ i));*((struct _tagged_arr*)_check_unknown_subscript(argv,
 sizeof(struct _tagged_arr),(top - (middle - bottom))+ i))=tem;}top -=len;}else{int
-len=top - middle;int i;for(i=0;i < len;i ++){tem=*((struct _tagged_arr*)
+len=top - middle;register int i;for(i=0;i < len;i ++){tem=*((struct _tagged_arr*)
 _check_unknown_subscript(argv,sizeof(struct _tagged_arr),bottom + i));*((struct
 _tagged_arr*)_check_unknown_subscript(argv,sizeof(struct _tagged_arr),bottom + i))=*((
 struct _tagged_arr*)_check_unknown_subscript(argv,sizeof(struct _tagged_arr),

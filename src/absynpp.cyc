@@ -1659,6 +1659,7 @@ doc_t scope2doc(scope_t sc) {
   case Extern:   return text("extern ");
   case ExternC:  return text("extern \"C\" ");
   case Abstract: return text("abstract ");
+  case Register: return text("register ");
   }
 }
 

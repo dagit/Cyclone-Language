@@ -600,7 +600,7 @@ void write_type(typestruct_t ts, FILE@ fp, `a::A@ val) {
 void fscanntstring(FILE@ fp, mstring_t s) {
   int c;
   int i = 0;
-  while(c = fgetc(fp)) {
+  while((c = fgetc(fp)) != '\0') {
     if(c == EOF) throw new Core::Failure("Read error");
     s[i] = (char)c;
     i++;

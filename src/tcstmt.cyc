@@ -343,6 +343,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       case Abstract: 
         terr(d->loc,"bad abstract scope for local variable"); 
         fallthru;
+      case Register: 
       case Public: is_local = true; break;
       }
         
