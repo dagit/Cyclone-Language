@@ -64,7 +64,7 @@ struct Cyc_Core_DynamicRegion {
 };
 
 /* Alias qualifier stuff */
-typedef unsigned char _AliasQualHandle_t;
+typedef unsigned int _AliasQualHandle_t; // must match aqualt_type() in toc.cyc
 
 struct _RegionHandle _new_region(unsigned int, const char*);
 void* _region_malloc(struct _RegionHandle*, _AliasQualHandle_t, unsigned);
