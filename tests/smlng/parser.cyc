@@ -36,7 +36,7 @@ static void die(const char ?`r desc, ...`r2 inject parg_t<`r4> ap)
 static bool was_space = false;
 static context_t space_ctxt = Context(0,0,0,0,0,0,DONT_KNOW, DONT_KNOW);
 bool eq_space_context(context_t t1, context_t t2){
-  return (t1.size==t2.size)||(t1.U==t2.U)||(t1.U?(t1.color==t2.color):true);
+  return (t1.size==t2.size)&&(t1.U==t2.U)&&(t1.U?(t1.color==t2.color):true);
 }
 /* keep going until you hit a tag or EOF 
  * and then return the text you've got so far.
