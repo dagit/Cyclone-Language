@@ -580,6 +580,9 @@ exp_t varb_exp(binding_t b, seg_t loc) {
 exp_t unknownid_exp(qvar_t q, seg_t loc) { 
   return var_exp(q,loc);
 }
+exp_t pragma_exp(string_t<`H> s,seg_t loc) {
+  return new_exp(new Pragma_e(s),loc);
+}
 exp_t primop_exp(primop_t p, list_t<exp_t,`H> es, seg_t loc) {
   return new_exp(new Primop_e(p,es),loc);
 }

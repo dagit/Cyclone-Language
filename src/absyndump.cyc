@@ -659,6 +659,8 @@ void dumpexp_prec(int inprec, exp_t e) {
 
   case &Var_e(b): dumpqvar(binding2qvar(b)); break;
 
+  case &Pragma_e(p): dump("__cyclone_pragma__("); dump_nospace(p); dump_char(')'); break;
+
   case &Primop_e(p,es):
     let pstr = Absynpp::prim2str(p);
     switch (List::length(es)) {

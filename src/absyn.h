@@ -589,6 +589,7 @@ namespace Absyn {
   EXTERN_ABSYN datatype Raw_exp {
     Const_e(cnst_t); // constants
     Var_e(binding_t); // variables -- binding_t gets filled in
+    Pragma_e(string_t); // pragmas for compiler debugging
     Primop_e(primop_t,list_t<exp_t>); // application of primitive
     AssignOp_e(exp_t,opt_t<primop_t>,exp_t); // e1 = e2, e1 += e2, etc.
     Increment_e(exp_t,incrementor_t);  // e++, ++e, --e, e--
@@ -1019,6 +1020,7 @@ namespace Absyn {
   extern exp_t var_exp(qvar_t, seg_t);
   extern exp_t varb_exp(binding_t, seg_t);
   extern exp_t unknownid_exp(qvar_t, seg_t);
+  extern exp_t pragma_exp(string_t<`H> s,seg_t loc);
   extern exp_t primop_exp(primop_t, list_t<exp_t,`H> es, seg_t);
   extern exp_t prim1_exp(primop_t, exp_t, seg_t);
   extern exp_t prim2_exp(primop_t, exp_t, exp_t, seg_t);
