@@ -2319,7 +2319,7 @@ if [ "$target" = "arm-unknown-elf" ]; then
   # because the cross gcc is called arm-elf-gcc, not arm-unknown-elf-gcc-3.2
   target="arm-elf"
   TARGET_CC="arm-elf-gcc"
-  TARGET_CFLAGS="-elf2flt"
+#  TARGET_CFLAGS="-elf2flt" # for ipod but not GameBoy devkitARM
   TARGET_AR="arm-elf-ar"
   TARGET_RANLIB="arm-elf-ranlib"
 fi

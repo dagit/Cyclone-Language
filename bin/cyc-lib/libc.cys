@@ -404,13 +404,19 @@ dirent
 ino_t
 NAME_MAX
 }
-hstub {
+hstub opendir {
+  // There is an odd case for arm-elf + newlib where the file dirent.h
+  // can exist but not define anything.  Because of the way we handle
+  // the DIR type, this would lead to parse errors in the buildlib
+  // output.  So, we make sure opendir is defined, here and below,
+  // before generating output.
+  //
   // We define DIR as an abstract struct because it can contain
   // pointers, e.g., in cygwin
   extern struct __cycDIR;  
   typedef struct __cycDIR DIR;
 }
-cycstub {
+cycstub opendir {
   namespace Cdirent {
     extern "C" struct __abstractDIR;
     typedef struct __abstractDIR __cDIR;
@@ -419,7 +425,7 @@ cycstub {
     Cdirent::__cDIR @dir;
   };
 }
-cstub {
+cstub opendir {
   /* OS X needs sys/types.h before dirent.h */
   #include <sys/types.h>
   #include <dirent.h>
@@ -2056,22 +2062,16 @@ pthread.h:
 
 // Defines a structure containing a char *
 pwd.h:
+cpp {
+#ifdef __linux__
+/* Linux does not define uid_t and gid_t in pwd.h, they are in sys/types.h */
+#include <sys/types.h>
+#endif
+}
 include {
 passwd
 uid_t
 gid_t
-}
-hstub {
-  // EXTREMELY irritating: under Linux, uid_t, etc., are not defined.
-  // Instead __uid_t, etc., are defined.  Deal with this here.
-  #if defined(___uid_t_def_) && !defined(_uid_t_def_)
-  #define _uid_t_def_
-  typedef __uid_t uid_t;
-  #endif
-  #if defined(___gid_t_def_) && !defined(_gid_t_def_)
-  #define _gid_t_def_
-  typedef __gid_t gid_t;
-  #endif
 }
 hstub getpwnam {
   extern "C" struct passwd *getpwnam(const char @name);
@@ -4028,11 +4028,6 @@ cstub {
   #include <sys/socket.h>
   #include <netinet/in.h>
 }
-cstub {
-  #ifdef __APPLE__
-  typedef int socklen_t;
-  #endif
-}
 cycstub accept {
   namespace Csocket {
     extern "C" int accept_in(int, const struct sockaddr_in @, socklen_t @);
@@ -4309,6 +4304,12 @@ hstub socketpair {
 ;
 
 sys/stat.h:
+cpp {
+#ifdef __linux__
+/* Linux does not define blkcnt_t dev_t ino_t mode_t nlink_t uid_t gid_t off_t time_t here, they are in sys/types.h */
+#include <sys/types.h>
+#endif
+}
 include {
 stat
 blkcnt_t
@@ -4360,48 +4361,12 @@ S_TYPEISSHM
 S_TYPEISTMO
 }
 hstub {
-  // EXTREMELY irritating: under Linux, mode_t, etc., are not defined
-  // in sys/stat.h, CONTRARY to the posix spec.  Instead __mode_t, etc.,
-  // are defined.  This makes mode_t, etc., defined under Linux.
-  #if defined(___blkcnt_t_def_) && !defined(_blkcnt_t_def_)
-  #define _blkcnt_t_def_
-  typedef __blkcnt_t blkcnt_t;
-  #endif
+  // EXTREMELY irritating: under Linux this is not defined
+  // in sys/stat.h, CONTRARY to the posix spec.  Instead __blksize_t
+  // is defined.
   #if defined(___blksize_t_def_) && !defined(_blksize_t_def_)
   #define _blksize_t_def_
   typedef __blksize_t blksize_t;
-  #endif
-  #if defined(___dev_t_def_) && !defined(_dev_t_def_)
-  #define _dev_t_def_
-  typedef __dev_t dev_t;
-  #endif
-  #if defined(___ino_t_def_) && !defined(_ino_t_def_)
-  #define _ino_t_def_
-  typedef __ino_t ino_t;
-  #endif
-  #if defined(___mode_t_def_) && !defined(_mode_t_def_)
-  #define _mode_t_def_
-  typedef __mode_t mode_t;
-  #endif
-  #if defined(___nlink_t_def_) && !defined(_nlink_t_def_)
-  #define _nlink_t_def_
-  typedef __nlink_t nlink_t;
-  #endif
-  #if defined(___uid_t_def_) && !defined(_uid_t_def_)
-  #define _uid_t_def_
-  typedef __uid_t uid_t;
-  #endif
-  #if defined(___gid_t_def_) && !defined(_gid_t_def_)
-  #define _gid_t_def_
-  typedef __gid_t gid_t;
-  #endif
-  #if defined(___off_t_def_) && !defined(_off_t_def_)
-  #define _off_t_def_
-  typedef __off_t off_t;
-  #endif
-  #if defined(___time_t_def_) && !defined(_time_t_def_)
-  #define _time_t_def_
-  typedef __time_t time_t;
   #endif
   /* Cygwin needs these definitions to smooth out the interface */
   #if defined(__CYGWIN32__) || defined(__CYGWIN__)
@@ -4610,6 +4575,12 @@ hstub uname {
 ;
 
 sys/wait.h:
+cpp {
+#ifdef __linux__
+/* Linux does not define pid_t in sys/wait.h, it is in sys/types.h */
+#include <sys/types.h>
+#endif
+}
 include {
 WNOHANG
 WUNTRACED
@@ -4627,7 +4598,6 @@ WNOHANG
 WNOWAIT
 idtype_t
 id_t
-__pid_t
 pid_t
 rusage
 }
@@ -4637,15 +4607,6 @@ hstub {
   /*
     extern "C" int waitid(idtype_t, id_t, siginfo_t @, int);
   */
-}
-hstub {
-  // EXTREMELY irritating: under Linux, pid_t is not defined
-  // in sys/wait.h, CONTRARY to the posix spec.  Instead __pid_t
-  // is defined.  So we include __pid_t above and do the following:
-  #if defined(___pid_t_def_) && !defined(_pid_t_def_)
-  #define _pid_t_def_
-  typedef __pid_t pid_t;
-  #endif
 }
 hstub wait {
   extern "C" pid_t wait(int *);
@@ -4920,6 +4881,12 @@ ulimit.h:
 ;
 
 unistd.h:
+cpp {
+#ifdef __linux__
+/* Linux does not define uid_t, gid_t, off_t, pid_t here, they are in sys/types.h */
+#include <sys/types.h>
+#endif
+}
 include {
 _POSIX_VERSION
 _POSIX2_VERSION
@@ -5052,13 +5019,9 @@ STDIN_FILENO
 STDOUT_FILENO
 size_t
 ssize_t
-__uid_t
 uid_t
-__gid_t
 gid_t
-__off_t
 off_t
-__pid_t
 pid_t
 __useconds_t
 useconds_t
@@ -5071,23 +5034,6 @@ hstub {
   #define _useconds_t_def_
   typedef __useconds_t useconds_t;
   #endif
-// JGM: similarly, __gid_t, __pid_t, __uid_t, __off_t
-#if defined(___gid_t_def_) && !defined(_gid_t_def_)
-#define _gid_t_def_
-typedef __gid_t gid_t;
-#endif
-#if defined(___pid_t_def_) && !defined(_pid_t_def_)
-#define _pid_t_def_
-typedef __pid_t pid_t;
-#endif
-#if defined(___uid_t_def_) && !defined(_uid_t_def_)
-#define _uid_t_def_
-typedef __uid_t uid_t;
-#endif
-#if defined(___off_t_def_) && !defined(_off_t_def_)
-#define _off_t_def_
-typedef __off_t off_t;
-#endif
 }
 hstub {
   /* Cygwin does not define this type so we take a guess :-( */
