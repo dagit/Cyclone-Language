@@ -30,6 +30,7 @@ test: xmlecho.exe
 libxml.a: $(OBJS)
 	-rm -f $@
 	ar qc $@ $^
+	ranlib $@
 
 csrc: $(CSRCS)
 

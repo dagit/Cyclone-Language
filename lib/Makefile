@@ -28,6 +28,7 @@ all: $(OUT_PREFIX)$(CYCLIB) xml/libxml.a
 $(OUT_PREFIX)$(CYCLIB): $(addprefix $(OUT_PREFIX), $(O_LIBS) $(RUNTIME).o)
 	-rm -f $@
 	ar qc $@ $^
+	ranlib $@
 
 precore_c.h: precore.h $(CYCC)
 	$(CYCC) $(CYC_FLAGS_PP) -nocyc -noremoveunused -noexpandtypedefs $< | grep -v __sFILE > $@
