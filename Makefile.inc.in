@@ -26,17 +26,15 @@ ifndef MS
 endif
 
 CYCLONE_LIBS:=arg\
-	inet\
         array\
         assert\
         bitvec\
         buffer\
         core\
 	crypt\
+	cycstubs\
         dict\
-	dirent\
 	execinfo\
-	fcntl\
         filename\
         fn\
         getopt\
@@ -48,8 +46,6 @@ CYCLONE_LIBS:=arg\
         list\
 	marshal\
 	mman\
-        netdb\
-        in\
         position\
         pp\
 	printf\
@@ -58,19 +54,11 @@ CYCLONE_LIBS:=arg\
         rope\
 	scanf\
         set\
-	signal\
         slowdict\
         splay\
-	stat\
-	stdio\
-        stdlib\
         string\
-        socket\
-        time\
 	tmp\
         typerep\
-	unistd\
-	utime\
         xarray
 
 CYCLONE_H:=arg.h\
