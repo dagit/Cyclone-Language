@@ -36,7 +36,7 @@ LC_FLAG =
 CYC_FLAGS := -I. -B. -save-c $(LC_FLAG) $(PROF_RGN_FLAG) $(TOC_FLAG)
 #CYC_FLAGS := -I. -save-c $(LC_FLAG) $(PROF_RGN_FLAG) $(TOC_FLAG)
 
-all: $(OUT_PREFIX)$(CYCLIB) xml/libxml.a
+all: $(OUT_PREFIX)$(CYCLIB) nogc.a xml/libxml.a
 
 $(OUT_PREFIX)$(CYCLIB): $(addprefix $(OUT_PREFIX), $(O_LIBS) $(RUNTIME).$(O))
 ifdef MS
@@ -49,6 +49,9 @@ else
 	$(CYCC) $(LC_FLAG) -o $@ $^
 endif
 endif
+
+nogc.a: nogc.o
+	ar rcs $@ $^
 
 precore_c.h: precore.h $(CYCC)
 	cp precore.h precore.cyc
@@ -90,6 +93,7 @@ clean_prefix:
 clean:
 	rm -f $(addprefix *, $(C_LIBS) $(O_LIBS) $(RUNTIME).o $(CYCLIB))
 	rm -f $(addprefix *, precore_c.h lineno.cyc)
+	rm -f nogc.o nogc.a
 	rm -f *~ *.output *.stackdump *.d
 	$(MAKE) clean -C xml
 

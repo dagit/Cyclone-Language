@@ -24,7 +24,7 @@ include Makefile.inc
 CYCC=../bin/$(CYCCOMP) # The .. is b/c this variable is used in lib and src
 OUT_PREFIX=
 
-all: bin/cyc-lib/gc.a cyclone tools 
+all: bin/cyc-lib/gc.a cyclone tools
 
 install: all
 
@@ -59,6 +59,7 @@ diff: cyclone_src
 	diff bin/genfiles/lib/$(C_RUNTIME) lib/$(C_RUNTIME)
 	diff bin/genfiles/lib/precore_c.h lib/precore_c.h
 	diff bin/cyc-lib/include/cyc_include.h lib/include/cyc_include.h
+	diff bin/genfiles/lib/nogc.c lib/nogc.c
 
 # This target compares the C files in bin/genfiles to those in src
 # Lack of difference means running the update would have no real effect.
@@ -69,6 +70,7 @@ cmp:
 	@cmp -s bin/genfiles/lib/$(C_RUNTIME) lib/$(C_RUNTIME) || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX lib/$(C_RUNTIME) CHANGED
 	@cmp -s bin/genfiles/lib/precore_c.h lib/precore_c.h || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX lib/precore_c.h CHANGED
 	@cmp -s bin/cyc-lib/include/cyc_include.h lib/include/cyc_include.h || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX cyc-lib/include/cyc_include.h CHANGED
+	@cmp -s bin/genfiles/lib/nogc.c lib/nogc.c || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX lib/nogc.c CHANGED
 
 # This target updates what is in bin/genfiles and include.
 # It would be "dangerous"
@@ -84,6 +86,7 @@ update: cyclone_src
 	@cmp -s lib/$(C_RUNTIME) bin/genfiles/lib/$(C_RUNTIME) || (echo UPDATING lib/$(C_RUNTIME); cp lib/$(C_RUNTIME) bin/genfiles/lib/$(C_RUNTIME))
 	@cmp -s lib/precore_c.h bin/genfiles/lib/precore_c.h || (echo UPDATING lib/precore_c.h; cp lib/precore_c.h bin/genfiles/lib/precore_c.h)
 	@cmp -s lib/include/cyc_include.h bin/cyc-lib/include/cyc_include.h || (echo UPDATING cyc-lib/include/cyc_include.h; cp lib/include/cyc_include.h bin/cyc-lib/include/cyc_include.h)
+	@cmp -s lib/nogc.c bin/genfiles/lib/nogc.c || (echo UPDATING lib/nogc.c; cp lib/nogc.c bin/genfiles/lib/nogc.c)
 
 test:
 	$(MAKE) -C tests CYCC=$(CYCC) OUT_PREFIX=$(OUT_PREFIX)
@@ -116,5 +119,5 @@ clean_nogc:
 clean: clean_nogc
 	$(MAKE) clean -C gc
 	rm -f gc/*.exe gc/base_lib gc/*.obj gc/gc.lib
-	rm -f bin/cyc-lib/gc.a bin/gc_pg.a
+	rm -f bin/cyc-lib/gc.a bin/gc_pg.a bin/cyc-lib/nogc.a
 
