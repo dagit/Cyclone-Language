@@ -11,9 +11,14 @@ PROG=cyclone$(EXE)
 
 all: $(PROG)
 
-$(PROG): $(O_SRCS)
+$(PROG): $(O_SRCS) install_path.o
 	$(MAKE) -C ../lib
 	$(CC) -O -o $@ $^ $(CYC_LIB_PATH)/$(CYCLIB) $(CYC_LIB_PATH)/gc.a $(LDFLAGS)
+	$(RM) install_path.c install_path.o
 
-clean::
-	rm -f $(O_SRCS) $(PROG) *~ 
+install_path.c:
+	@(echo "char *Cdef_inc_path = \"$(INC_INSTALL)\";"; \
+	  echo "char *Cdef_lib_path = \"$(LIB_INSTALL)\";") > $@
+
+clean:
+	rm -f $(O_SRCS) $(PROG) *~ install_path.*

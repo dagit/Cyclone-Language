@@ -58,7 +58,7 @@ all: $(OUT_PREFIX)$(CYCCOMP)
 # Note: although cyclone now automatically adds CYCLIB to the command
 # line when calling gcc, we leave in an explicit $(LIBR) below so that
 # we get the $(OUT_PREFIX) version instead of $(CYCDIR)/lib/cyclib.a
-$(OUT_PREFIX)$(CYCCOMP): $(addprefix $(OUT_PREFIX), $(O_SRCS)) $(LIBR)
+$(OUT_PREFIX)$(CYCCOMP): $(addprefix $(OUT_PREFIX), $(O_SRCS)) $(LIBR) install_path.$(O)
 ifdef MS
 	cl /Fe$@ $(CYC_LIB_PATH)/snprintf.obj $^ $(CYCDIR)/bin/cyc-lib/gc.lib
 else
@@ -66,6 +66,11 @@ else
 #	gcc -g -o $@ $^ $(CYCDIR)/bin/cyc-lib/gc.a $(LDFLAGS)
 #	gcc -o $@ $^ $(CYCDIR)/bin/cyc-lib/gc_pg.a -pg $(LDFLAGS)
 endif
+	$(RM) install_path.c install_path.$(O)
+
+install_path.c:
+	@(echo "char *Cdef_inc_path = \"$(INC_INSTALL)\";"; \
+	  echo "char *Cdef_lib_path = \"$(LIB_INSTALL)\";") > $@
 
 src: $(addprefix $(OUT_PREFIX), $(C_SRCS))
 

@@ -1,9 +1,7 @@
-ARCHS= \
-  i686-unknown-linux \
-  i686-unknown-cygwin1.3.2
+include ../../Makefile.inc
 
 clean:
-	for arch in $(ARCHS); \
+	for arch in $(ALL_ARCHS); \
 	do $(MAKE) -C $$arch clean; \
 	done
 

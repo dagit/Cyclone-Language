@@ -38,7 +38,39 @@ OUT_PREFIX=
 
 build: $(CYC_LIB_PATH)/gc.a cyclone tools
 
-install: build
+install: build inc_install lib_install bin_install
+
+ifdef INC_INSTALL
+inc_install:
+	@(if [ -d "$(INC_INSTALL)" ]; then \
+	cp -r include/* $(INC_INSTALL); \
+	else echo "include directory $(INC_INSTALL) does not exist"; \
+	exit 1; fi)
+else
+inc_install:
+	@(echo "no include directory specified"; exit 1)
+endif
+
+ifdef BIN_INSTALL
+bin_install:
+	@(if [ -d "$(BIN_INSTALL)" ]; then \
+	cp bin/cyclone$(EXE) bin/cycbison$(EXE) bin/cyclex$(EXE) $(BIN_INSTALL); \
+	else echo "bin directory $(BIN_INSTALL) does not exist"; \
+	exit 1; fi)
+else
+bin_install:
+	@(echo "no bin directory specified"; exit 1)
+endif
+
+ifdef LIB_INSTALL
+	@(if [ -d "$(LIB_INSTALL)" ]; then \
+	cp bin/cyc-lib/gc.a bin/nogc.a bin/cyc-lib/libcyc.a $(LIB_INSTALL); \
+	else echo "bin directory $(BIN_INSTALL) does not exist"; \
+	exit 1; fi)
+else
+lib_install:
+	@(echo "no lib directory specified"; exit 1)
+endif
 
 # This target builds off the C files in bin/genfiles
 cyclone:

@@ -6,14 +6,16 @@ include ../Makefile.inc
 
 # Choose which variables you want depending on the compiler you need
 # for the compiler in src
-# CYC_BIN_PATH := $(CYCDIR)/src
-# CYC_LIB_PATH := $(CYCDIR)/lib
-# CYC_INC_PATH := $(CYCDIR)/lib
-
+ifdef devel
+CYC_BIN_PATH := $(CYCDIR)/src
+CYC_LIB_PATH := $(CYCDIR)/lib
+CYC_INC_PATH := $(CYCDIR)/lib
+else
 # for the compiler in bin
 CYC_BIN_PATH := $(CYCDIR)/bin
 CYC_LIB_PATH := $(CYCDIR)/bin/cyc-lib
 CYC_INC_PATH := $(CYCDIR)/include
+endif
 
 # Override this variables to use a bootstrapped compiler (you may want
 # an absolute path)

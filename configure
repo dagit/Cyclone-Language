@@ -1,8 +1,82 @@
 #!/bin/sh
 # Architecture-specific configuration.
+# 
+# usage: configure
 
 # get the root directory of the source tree
 CYCDIR=`pwd`
+
+incdir="$CYCDIR/include"
+libdir="$CYCDIR/bin/cyc-lib"
+bindir=
+
+# arguments
+#
+while [ $# != 0 ]; do
+  case "$1" in
+    -bindir) # set the directory to store the binaries
+        shift
+        [[ $# = 0 ]] && echo "-bindir must specify a directory";
+        bindir=$1
+        shift
+    ;;
+    -libdir) # set the library directory
+        shift
+        [[ $# = 0 ]] && echo "-libdir must specify a directory";
+        libdir=$1
+        shift
+    ;;
+    -incdir) # set the include directory
+        shift
+        [[ $# = 0 ]] && echo "-incdir must specify a directory";
+        incdir=$1
+        shift
+    ;;
+    -prefix) # set directories to prefix/bin prefix/lib/cyclone ...
+        shift
+        [[ $# = 0 ]] && echo "-prefix must specify a directory prefix";
+	prefix=$1
+        shift
+    ;;
+    *) # bad option
+        echo "usage: $0 [-incdir dir] [-bindir dir] [-libdir dir] [-prefix pre]";
+        exit 1
+    ;;
+  esac
+done
+
+if [ -n "$prefix" ]; then
+bindir="$prefix/bin"
+libdir="$prefix/lib/cyclone"
+incdir="/usr/include/cyclone"
+fi
+
+# configure the install location
+
+dirs=
+if [ -n "$bindir" ]; then
+  dirs=$bindir
+fi
+if [ -n "$libdir" ]; then
+  dirs="$dirs $libdir"
+fi
+if [ -n "$incdir" ]; then
+  dirs="$dirs $incdir"
+fi
+
+# make sure the provided directories exist
+for dir in $dirs; do
+  if [ ! -d "$dir" ]; then
+    echo "install directory $dir does not exist; create it (y/n)?"
+    read resp
+    if [ "$resp" = "y" ]; then
+      mkdir -p $dir
+    else
+      echo "usage: $0 [-incdir dir] [-bindir dir] [-libdir dir] [-prefix pre]";
+      exit 1
+    fi
+  fi
+done
 
 # now figure out the architecture
 cd config
@@ -39,12 +113,17 @@ fi
 # figure out all supported architectures by checking for config files
 ALL_ARCHS=`cd arch; \ls -1 | grep -v CVS | awk '{ printf("%s ",$1); }`
 
+# set up the installation paths
+
 # write the config Makefile
 cd ..
 (cat <<EOF
 # architecture specific defines
 CYCDIR=${CYCDIR}
 ARCH=${ARCH}
+INC_INSTALL=${incdir}
+BIN_INSTALL=${bindir}
+LIB_INSTALL=${libdir}
 ALL_ARCHS=${ALL_ARCHS}
 
 EOF

@@ -38,10 +38,6 @@
 #include "new_control_flow.h"
 #include "interface.h"
 
-/* hard-coded for now; will make configurable soon */
-#define CYCLONE_INCLUDE_PATH "c:/cyclone/include"
-#define CYCLONE_LIB_PATH "c:/cyclone/bin/cyc-lib"
-
 namespace Lex {
   extern void lex_init();
 }
@@ -73,6 +69,13 @@ static bool print_all_kinds_r = false;
 static string_t *output_file = NULL;
 static void set_output_file(string_t<`H> s) {
   output_file = new s;
+}
+
+// This will cause the variables def_inc_path and def_lib_path
+// to be defined in cyc_include.h
+extern "C" {
+  extern Cstring Cdef_inc_path;
+  extern Cstring Cdef_lib_path;
 }
 
 static string_t cpp = "gcc -x c -E -U__GNUC__ -nostdinc";
@@ -455,13 +458,13 @@ static void process_file(string_t<`H> filename) {
   // for the file):
   // 1) command line arguments (with -I)
   // 2) environment var (with CYCLONE_INCLUDE_PATH)
-  // 3) hardwired in the build (by #defining CYCLONE_INCLUDE_PATH) 
-  string_t stdinc_string =
-#if defined(CYCLONE_INCLUDE_PATH)
-  " -I" CYCLONE_INCLUDE_PATH;
-#else
-  "";
-#endif
+  // 3) hardwired in the build (by setting def_inc_path)
+  string_t stdinc_string;
+  string_t def_inc_path = Cstring_to_string(Cdef_inc_path);
+  if (strlen(def_inc_path) > 0)
+    stdinc_string = aprintf("-I%s",def_inc_path);
+  else
+    stdinc_string = "";
   let cyclone_include_path = getenv("CYCLONE_INCLUDE_PATH");
   if (cyclone_include_path != NULL) {
     let x = split_by_char(cyclone_include_path,':');
@@ -777,14 +780,13 @@ int main(int argc, string_t<`H> ?`H argv) {
   // the earlier in the order, the first place we look for the file):
   // 1) command line arguments (with -B)
   // 2) environment var (with CYCLONE_EXEC_PREFIX)
-  // 3) hardwired in the build (by #defining CYCLONE_LIB_PATH) 
+  // 3) hardwired in the build (by setting lib_path)
   string_t cyclone_exec_prefix = getenv("CYCLONE_EXEC_PREFIX");
   if (cyclone_exec_prefix != NULL)
     cyclone_lib_path = new List(new cyclone_exec_prefix, cyclone_lib_path);
-#if defined(CYCLONE_LIB_PATH)
-  cyclone_lib_path = new List(new ((string_t)CYCLONE_LIB_PATH),
-                              cyclone_lib_path);
-#endif
+  string_t def_lib_path = Cstring_to_string(Cdef_lib_path);
+  if (strlen(def_lib_path) > 0)
+    cyclone_lib_path = new List(new def_lib_path, cyclone_lib_path);
   cyclone_lib_path = List::imp_rev(cyclone_lib_path);
   let cyc_include = do_find(cyclone_lib_path,"include/cyc_include.h");
 
