@@ -176,12 +176,29 @@ static void tcExpList(tenv_t te, list_t<exp_t> es) {
 }
 
 // Type check the if expressions, the loop guards, and the where clauses
-void tcTest(tenv_t te, exp_t e, string_t msg_part) {
+testenv_t<`r> tcTest(tenv_t<`g,`r> te, exp_t e, string_t msg_part) {
   check_contains_assign(e);
   tcExp(te,&sint_typ,e);
   if (!coerce_to_bool(te,e))
     terr(e->loc,"test of %s has type %s instead of integral or * type",
          msg_part, typ2string(e->topt->v));
+  // FIX: Hack alert!!!  Should do something more principled to
+  //   allow this sort of information to flow upward from the test
+  //   itself, rather than by re-pattern-matching here.
+  switch (e->r) {
+  case &Primop_e(p,es):
+    if (p == Eq || p == Neq) {
+      switch $(es->hd->topt->v,es->tl->hd->topt->v) {
+      case $(&RgnHandleType(r1),&RgnHandleType(r2)):
+	return TestEnv(rnew (Tcenv::get_fnrgn(te)) $(r1,r2),p == Eq);
+      default:
+	break;
+      }
+    }
+    break;
+  default: break;
+  }
+  return TestEnv(NULL,false);
 }
 
 // constants
@@ -511,13 +528,16 @@ static type_t tcAnyBinop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
       return sint_typ;
     else goto pointer_cmp;
   }
-  // support comparisons on pointers (which can be MemKind)
+  // support comparisons on pointers (which can be MemKind) and
+  //   region handles
   else {
   pointer_cmp:
     switch ($(compress(t1), compress(t2))) {
     case $(&PointerType(PtrInfo{t1a,_,_}),
 	   &PointerType(PtrInfo{t2a,_,_})):
       if (unify(t1a,t2a)) return sint_typ; break;
+    case $(&RgnHandleType(_),&RgnHandleType(_)):
+      return sint_typ;
     default: break;
     }
     terr(loc,"comparison not allowed between %s and %s",
@@ -525,6 +545,28 @@ static type_t tcAnyBinop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
     explain_failure();
     return wildtyp(lookup_opt_type_vars(te));
   }
+}
+
+static type_t tcEqPrimop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
+  // first see if normal comparison rules apply
+  if (tcAnyBinop(te,loc,e1,e2) == sint_typ)
+    return sint_typ;
+
+  // see if these are two region handles.  If so, allow the comparison,
+  // and make a note of region outlives constraints that should be added
+  // to the type environment if this comparison occurs as a test.
+  type_t t1 = compress(e1->topt->v);
+  type_t t2 = compress(e2->topt->v);
+  switch ($(t1, t2)) {
+    case $(&RgnHandleType(r1),&RgnHandleType(r2)):
+      // XXX note outlives stuff here
+      return sint_typ;
+    default: break;
+  }
+  terr(loc,"comparison not allowed between %s and %s",
+       typ2string(t1),typ2string(t2));
+  explain_failure();
+  return wildtyp(lookup_opt_type_vars(te));
 }
 
 // Binary primops like e1+e2, e1>>e2, etc.
@@ -548,8 +590,9 @@ static type_t tcBinPrimop(tenv_t te, seg_t loc, type_t * topt,
 
     // Note: comparing pointers relies on memory-manager properties
     //       (but darned useful for dictionaries)
-  case Eq:         
-  case Neq:        
+  case Eq:
+  case Neq: return tcEqPrimop(te, loc, e1, e2);
+       
   case Gt:         
   case Lt:         
   case Gte:        
@@ -679,7 +722,7 @@ static type_t tcIncrement(tenv_t te, seg_t loc, type_t * topt,
 // e1 ? e2 : e3
 static type_t tcConditional(tenv_t te, seg_t loc, type_t * topt,
                             exp_t e1, exp_t e2, exp_t e3) {
-  tcTest(te, e1, "conditional expression");
+  let TestEnv(eq,isT) = tcTest(te, e1, "conditional expression");
   tcExp(te,topt,e2);
   tcExp(te,topt,e3);
   type_t t = new_evar(&mk,lookup_opt_type_vars(te));
@@ -687,7 +730,7 @@ static type_t tcConditional(tenv_t te, seg_t loc, type_t * topt,
   let l2 = List(e2,&l1);
   if (!coerce_list(te,t,&l2)) {
     terr(loc,"conditional clause types do not match: %s != %s",
-         typ2string(e2->topt->v),typ2string(e3->topt->v));
+	 typ2string(e2->topt->v),typ2string(e3->topt->v));
     explain_failure();
   }
   return t;
@@ -695,6 +738,7 @@ static type_t tcConditional(tenv_t te, seg_t loc, type_t * topt,
 
 // e1 && e2
 static type_t tcAnd(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
+  // FIX: take rgn equalities into account?
   tcTest(te,e1,"logical-and expression");
   tcTest(te,e2,"logical-and expression");
   return sint_typ;
@@ -702,6 +746,7 @@ static type_t tcAnd(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
 
 // e1 || e2
 static type_t tcOr(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
+  // FIX: take rgn equalities into account?
   tcTest(te,e1,"logical-or expression");
   tcTest(te,e2,"logical-or expression");
   return sint_typ;

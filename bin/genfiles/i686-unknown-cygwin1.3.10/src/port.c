@@ -992,7 +992,9 @@ typedefs;struct Cyc_Dict_Dict ordinaries;struct Cyc_List_List*availables;};struc
 Cyc_Tcenv_Fenv;struct Cyc_Tcenv_Stmt_j_struct{int tag;struct Cyc_Absyn_Stmt*f1;};
 struct Cyc_Tcenv_Tenv{struct Cyc_List_List*ns;struct Cyc_Dict_Dict ae;struct Cyc_Tcenv_Fenv*
 le;int allow_valueof;};void*Cyc_Tcutil_impos(struct _dyneither_ptr fmt,struct
-_dyneither_ptr ap);extern char Cyc_Tcdecl_Incompatible[17];struct Cyc_Tcdecl_Xtunionfielddecl{
+_dyneither_ptr ap);struct Cyc_Tcexp_TestEnv{struct _tuple3*eq;int isTrue;};struct Cyc_Tcexp_TestEnv
+Cyc_Tcexp_tcTest(struct Cyc_Tcenv_Tenv*te,struct Cyc_Absyn_Exp*e,struct
+_dyneither_ptr msg_part);extern char Cyc_Tcdecl_Incompatible[17];struct Cyc_Tcdecl_Xtunionfielddecl{
 struct Cyc_Absyn_Tuniondecl*base;struct Cyc_Absyn_Tunionfield*field;};struct Cyc_Tcgenrep_RepInfo;
 struct Cyc_Position_Segment{int start;int end;};struct Cyc_Port_Edit{struct Cyc_Position_Segment*
 loc;struct _dyneither_ptr old_string;struct _dyneither_ptr new_string;};int Cyc_Port_cmp_edit(

@@ -93,6 +93,9 @@ extern struct Core::Opt<kind_t> ik;
 extern Core::opt_t<kind_t> kind_to_opt(kind_t k);
 extern kindbound_t kind_to_bound(kind_t k);
 
+extern $(tvar_t,kindbound_t) swap_kind(type_t t, kindbound_t kb);
+  // for temporary kind refinement
+
 // if t is a pointer type and e is 0, changes e to null and checks
 // that t is nullable pointer type by unifying e's type with t.
 extern bool zero_to_null(tenv_t, type_t t, exp_t e);

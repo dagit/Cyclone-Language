@@ -373,7 +373,7 @@ static int heap_total_atomic_bytes = 0;
 
 // exported in core.h
 struct _RegionHandle *Cyc_Core_heap_region = NULL;
-struct _RegionHandle *Cyc_Core_unique_region = NULL;
+struct _RegionHandle *Cyc_Core_unique_region = (struct _RegionHandle *)1;
 
 // for freeing unique pointers; might want to make this "free"
 // eventually (but currently this is set to a no-op in libc.cys).
@@ -526,7 +526,7 @@ static void grow_region(struct _RegionHandle *r, unsigned int s) {
   r->last_plus_one = r->offset + next_size;
 }
 
-
+// better not get called with the heap or unique regions ...
 static void _get_first_region_page(struct _RegionHandle *r, unsigned int s) {
   struct _RegionPage *p;
   unsigned int page_size = 
@@ -548,7 +548,7 @@ static void _get_first_region_page(struct _RegionHandle *r, unsigned int s) {
 // allocate s bytes within region r
 void * _region_malloc(struct _RegionHandle *r, unsigned int s) {
   char *result;
-  if (r != NULL) {
+  if (r != Cyc_Core_heap_region && r != Cyc_Core_unique_region) {
     // round s up to the nearest MIN_ALIGNMENT value
     s =  (s + MIN_ALIGNMENT - 1) & (~(MIN_ALIGNMENT - 1));
     // if no page yet, then fetch one
@@ -585,7 +585,7 @@ void * _region_calloc(struct _RegionHandle *r, unsigned int n, unsigned int t)
 {
   unsigned int s = n*t;
   char *result;
-  if (r != NULL) {
+  if (r != Cyc_Core_heap_region && r != Cyc_Core_unique_region) {
     // round s up to the nearest MIN_ALIGNMENT value
     s =  (s + MIN_ALIGNMENT - 1) & (~(MIN_ALIGNMENT - 1));
     // if no page yet, then fetch one
@@ -664,7 +664,7 @@ struct Core_NewRegion Cyc_Core_rnew_dynregion(struct _RegionHandle *r) {
    * free the dynregion when r is freed -- note that the Heap and
    * Unique regions end up generating free-floating sub-regions
    * that are reclaimed by the collector... */
-  if (r != NULL) {
+  if (r != Cyc_Core_heap_region && r != Cyc_Core_unique_region) {
     res->next = r->sub_regions;
     r->sub_regions = res;
   }
@@ -703,6 +703,7 @@ struct _RegionHandle _new_region(const char *rgn_name) {
 }
 
 // free all the resources associated with a region (except the handle)
+//   (assumes r is not heap or unique region)
 void _free_region(struct _RegionHandle *r) {
   struct _DynRegionHandle *d;
   struct _RegionPage *p;
@@ -726,6 +727,7 @@ void _free_region(struct _RegionHandle *r) {
 }
 
 // reset the region by freeing its pages and then reallocating a fresh page.
+//   (assumes r is not heap or unique region)
 void _reset_region(struct _RegionHandle *r) {
   _free_region(r);
 #ifdef CYC_REGION_PROFILE  
@@ -739,7 +741,7 @@ void _reset_region(struct _RegionHandle *r) {
 #ifdef CYC_REGION_PROFILE
 
 static int region_get_heap_size(struct _RegionHandle *r) {
-  if (r != NULL) {
+  if (r != Cyc_Core_heap_region && r != Cyc_Core_unique_region) {
     struct _RegionPage *p = r->curr;
     int sz = 0;
     while (p != NULL) {
@@ -756,7 +758,7 @@ static int region_get_heap_size(struct _RegionHandle *r) {
    the ones in the current page, or print the non-allocated bytes,
    which are the free bytes in all the pages.  Doing the former. */
 static int region_get_free_bytes(struct _RegionHandle *r) {
-  if (r != NULL) {
+  if (r != Cyc_Core_heap_region && r != Cyc_Core_unique_region) {
     struct _RegionPage *p = r->curr;
     if (p != NULL)
       return p->free_bytes;
@@ -768,7 +770,7 @@ static int region_get_free_bytes(struct _RegionHandle *r) {
 }
 
 static int region_get_total_bytes(struct _RegionHandle *r) {
-  if (r != NULL) {
+  if (r != Cyc_Core_heap_region && r != Cyc_Core_unique_region) {
     struct _RegionPage *p = r->curr;
     int sz = 0;
     while (p != NULL) {
@@ -805,7 +807,9 @@ struct _RegionHandle _profile_new_region(const char *rgn_name,
 void _profile_free_region(struct _RegionHandle *r, char *file, int lineno) {
   if (alloc_log != NULL) {
     fputs(file,alloc_log);
-    fprintf(alloc_log,":%d\t%s\tfree\n",lineno, r != NULL ? r->name : "heap");
+    fprintf(alloc_log,":%d\t%s\tfree\n",lineno,
+	    (r != Cyc_Core_heap_region && r != Cyc_Core_unique_region) ?
+	    r->name : "heap");
   }
   _free_region(r);
 }
@@ -815,7 +819,8 @@ void * _profile_region_malloc(struct _RegionHandle *r, unsigned int s,
   if (alloc_log != NULL) {
     fputs(file,alloc_log);
     fprintf(alloc_log,":%d\t%s\t%d\t%d\t%d\t%d\n",lineno,
-	    r != NULL ? r->name : "heap",s,
+	    (r != Cyc_Core_heap_region && r != Cyc_Core_unique_region) ?
+	    r->name : "heap", s,
 	    region_get_heap_size(r), 
 	    region_get_free_bytes(r),
 	    region_get_total_bytes(r));

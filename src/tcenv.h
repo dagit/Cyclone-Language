@@ -173,6 +173,10 @@ extern bool all_labels_resolved(tenv_t);
 extern tenv_t<`g,`r> new_block(region_t<`r>,seg_t,tenv_t<`g,`r2>:{`r2}>`r);
 extern tenv_t<`g,`r> new_named_block(region_t<`r>,seg_t,tenv_t<`g,`r2>,tvar_t name:{`r2}>`r);
 extern tenv_t<`g,`r> new_outlives_constraints(region_t<`r>, tenv_t<`g,`r2> te, list_t<$(type_t,type_t)@> cs, seg_t loc:{`r2}>`r);
+extern tenv_t<`g,`r> add_region_equality(region_t<`r> r, tenv_t<`g,`r2> te, 
+					 type_t r1, type_t r2, 
+					 $(tvar_t,kindbound_t) *`r @oldtv,
+					 seg_t loc: {`r2} > `r);
 
 extern type_t curr_rgn(tenv_t);
 

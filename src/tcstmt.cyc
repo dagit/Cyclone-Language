@@ -103,6 +103,20 @@ static list_t<`b,`r> cmap_c(region_t<`r> r,`b f(`c,`a), `c env, clist_t<`a> x)
   else return rnew(r) List(f(env,x->hd),cmap_c(r,f,env,x->tl));
 }
 
+// add a region equality between r1 and r2 for the duration of checking
+// this statement
+static void tcStmtRefine(tenv_t te, stmt_t s0,
+			 type_t r1, type_t r2,
+			 bool new_block) {
+  TEMP_RGN(te,r) {
+    $(tvar_t,kindbound_t) * tk = NULL;
+    let te2 = add_region_equality(r,te,r1,r2,&tk,s0->loc);
+    tcStmt(te2,s0,new_block);
+    if (tk != NULL)
+      (*tk)[0]->kind = (*tk)[1];
+  }
+}
+
 // new_block is a kludge because we he abstract syntax doesn't group the
 // local declarations in a block, but the region rules do.  (That is,
 // adjacent declarations are in the same region.  Those at the beginning
@@ -175,9 +189,23 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     return;
 
   case &IfThenElse_s(e,s1,s2):
-    tcTest(te,e,"if statement"); 
-    tcStmt(te,s1,true);
-    tcStmt(te,s2,true);
+    let TestEnv(eq,isT) = tcTest(te,e,"if statement"); 
+    switch (eq) {
+    case &$(r1,r2):
+      if (isT) {
+	tcStmtRefine(te,s1,r1,r2,true);
+	tcStmt(te,s2,true);
+      }
+      else {
+	tcStmt(te,s1,true);
+	tcStmtRefine(te,s2,r1,r2,true);
+      }
+      break;
+    default:
+      tcStmt(te,s1,true);
+      tcStmt(te,s2,true);
+      break;
+    }
     return;
 
   case &While_s($(e,cont_s),s):

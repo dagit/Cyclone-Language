@@ -86,7 +86,7 @@ namespace Core {
 typedef tag_t<valueof_t(sizeof(`a::A))> sizeof_t<`a>;
 extern struct Opt<`a> { `a v; };
   /** A [struct Opt] is a cell with a single field, [v] (for value). */
-typedef struct Opt<`a> *`r opt_t<`a,`r>;
+typedef struct Opt<`a> *`r::TR opt_t<`a,`r>;
   /** An [opt_t] is a pointer to a [struct Opt].  An [opt_t] can be
       used to pass an optional value to a function, or return an
       optional result.  For example, to return no result, return NULL;

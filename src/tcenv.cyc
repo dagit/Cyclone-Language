@@ -914,6 +914,7 @@ tenv_t<`g,`r> new_block(region_t<`r> r, seg_t loc, tenv_t<`g,`r2> te
   return new_named_block(r, loc, te, t);
 }
 
+
 tenv_t<`g,`r> new_outlives_constraints(region_t<`r> r, tenv_t<`g,`r2> te, 
                                        list_t<$(type_t,type_t)@> cs,
 				       seg_t loc
@@ -930,6 +931,51 @@ tenv_t<`g,`r> new_outlives_constraints(region_t<`r> r, tenv_t<`g,`r2> te,
     rnew(r) Fenv{shared,type_vars,region_order,(bindings_t<`r>)locals,
                  encloser,ctrl_env,capability,curr_rgn,in_notreadctxt,r};
   return put_fenv(r,te,fe);
+}
+
+tenv_t<`g,`r> add_region_equality(region_t<`r> r, tenv_t<`g,`r2> te, 
+				  type_t r1, type_t r2, 
+				  $(tvar_t,kindbound_t) *`r @oldtv,
+				  seg_t loc
+				  : {`r2} > `r) {
+
+  // we add outlives constraints and also refine the kind of
+  // the type variable
+  let r1 = compress(r1);
+  let r2 = compress(r2);
+  let r1k = typ_kind(r1);
+  let r2k = typ_kind(r2);
+
+  // first do kind refinement
+  bool r1_le_r2 = kind_leq(r1k,r2k);
+  bool r2_le_r1 = kind_leq(r2k,r1k);
+  if (!r1_le_r2 && !r2_le_r1) {
+    terr(loc,"Cannot compare region handles for %s and %s\n  kinds %s and %s are not compatible\n",
+	 typ2string(r1),typ2string(r2),kind2string(r1k),kind2string(r2k));
+    return new_outlives_constraints(r,te,NULL,loc);
+  }
+  else if (r1_le_r2 && !r2_le_r1) {
+    let $(tv,kb) = swap_kind(r2,kind_to_bound(r1k));
+    *oldtv = rnew (r) $(tv,kb);
+  }
+  else if (!r1_le_r2 && r2_le_r1) {
+    let $(tv,kb) = swap_kind(r1,kind_to_bound(r2k));
+    *oldtv = rnew (r) $(tv,kb);
+  }
+      
+  // now update the outlives constraints
+  let r = Tcenv::get_fnrgn(te);
+  let bds = NULL;
+  if (r1 != HeapRgn && r1 != UniqueRgn) {
+    type_t eff1 = new AccessEff(r1);
+    bds = rnew (r) List::List(rnew (r) $(eff1,r2),bds);
+  }
+  if (r2 != HeapRgn && r2 != UniqueRgn) {
+    type_t eff2 = new AccessEff(r2);
+    bds = rnew (r) List::List(rnew (r) $(eff2,r1),bds);
+  }
+ 
+  return new_outlives_constraints(r,te,bds,loc);
 }
 
 type_t curr_rgn(tenv_t te) {

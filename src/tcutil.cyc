@@ -324,6 +324,17 @@ kind_t tvar_kind(tvar_t tv) {
   }
 }
 
+$(tvar_t,kindbound_t) swap_kind(type_t t, kindbound_t kb) {
+  switch (compress(t)) {
+  case &VarType(tv):
+    let oldkb = tv->kind;
+    tv->kind = kb;
+    return $(tv,oldkb);
+  default:
+    impos("swap_kind: cannot update the kind of %s", typ2string(t));
+  }
+}
+
 // Return the "least" kind of a type, according to the lattice above
 // In some situations, we have to be conservative...
 // Note that both Evars and VarTypes should have their kinds established
@@ -755,6 +766,7 @@ static type_t dummy_fntype(type_t eff) {
                                .attributes = NULL});
   return atb_typ(fntype, HeapRgn, empty_tqual(NULL), bounds_one, false_conref);
 }
+
 
 // Returns true if the region r is in the effect e or else r is the
 // heap or unique region.  If constrain is true, this might cause region or
