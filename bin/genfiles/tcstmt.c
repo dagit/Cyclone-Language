@@ -1072,27 +1072,27 @@ void Cyc_Tcutil_explain_failure();
 int Cyc_Tcutil_unify(void*,void*);
 # 157
 void*Cyc_Tcutil_substitute(struct Cyc_List_List*,void*);
-# 168
+# 170
 void*Cyc_Tcutil_fndecl2typ(struct Cyc_Absyn_Fndecl*);
-# 172
+# 174
 struct _tuple11*Cyc_Tcutil_make_inst_var(struct Cyc_List_List*,struct Cyc_Absyn_Tvar*);
-# 210 "tcutil.h"
+# 212 "tcutil.h"
 void Cyc_Tcutil_check_fndecl_valid_type(unsigned int,struct Cyc_Tcenv_Tenv*,struct Cyc_Absyn_Fndecl*);
-# 218
+# 220
 void Cyc_Tcutil_check_type(unsigned int,struct Cyc_Tcenv_Tenv*,struct Cyc_List_List*bound_tvars,struct Cyc_Absyn_Kind*k,int allow_evars,void*);
-# 269
+# 271
 int Cyc_Tcutil_is_noalias_path(struct _RegionHandle*,struct Cyc_Absyn_Exp*e);
-# 274
+# 276
 int Cyc_Tcutil_is_noalias_pointer_or_aggr(struct _RegionHandle*,void*t);
-# 296
+# 298
 int Cyc_Tcutil_new_tvar_id();
-# 313
+# 315
 int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*e);
-# 331
+# 333
 int Cyc_Tcutil_extract_const_from_typedef(unsigned int,int declared_const,void*);
-# 335
+# 337
 struct Cyc_List_List*Cyc_Tcutil_transfer_fn_type_atts(void*t,struct Cyc_List_List*atts);
-# 342
+# 344
 void Cyc_Tcutil_check_no_qual(unsigned int loc,void*t);
 # 32 "tcexp.h"
 void*Cyc_Tcexp_tcExp(struct Cyc_Tcenv_Tenv*,void**,struct Cyc_Absyn_Exp*);

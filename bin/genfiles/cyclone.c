@@ -1103,7 +1103,7 @@ void Cyc_Tcutil_flush_warnings();
 extern int Cyc_Tcutil_warn_alias_coerce;
 # 90
 extern int Cyc_Tcutil_warn_region_coerce;
-# 342 "tcutil.h"
+# 344 "tcutil.h"
 void Cyc_Tcutil_check_no_qual(unsigned int loc,void*t);
 # 34 "tc.h"
 void Cyc_Tc_tc(struct _RegionHandle*,struct Cyc_Tcenv_Tenv*te,int var_default_init,struct Cyc_List_List*ds);

@@ -994,9 +994,9 @@ void*Cyc_Tcutil_compress(void*t);
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_bk;
 # 154
 int Cyc_Tcutil_unify(void*,void*);
-# 291 "tcutil.h"
+# 293 "tcutil.h"
 void*Cyc_Tcutil_normalize_effect(void*e);
-# 342
+# 344
 void Cyc_Tcutil_check_no_qual(unsigned int loc,void*t);struct Cyc_PP_Ppstate;
 # 41 "pp.h"
 typedef struct Cyc_PP_Ppstate*Cyc_PP_ppstate_t;struct Cyc_PP_Out;

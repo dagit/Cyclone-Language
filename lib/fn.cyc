@@ -68,23 +68,21 @@ fn_t<`a,`c,`bd> compose(fn_t<`a,`b,`bd> g, fn_t<`b,`c,`bd> f
 
 
 // These next two functions are used for currying
-static `c inner($(fn_t<$(`a,`b)@`H,`c,`bd>,`a*`H)@`H env, `b second) {
-  return apply((*env)[0],new $(*(*env)[1],second));
+static `c inner($(fn_t<$(`a,`b)@,`c,`bd>,`a)@ env, `b second) {
+  return apply((*env)[0],new $((*env)[1],second));
 }
-static fn_t<`b,`c,`bd> outer($(fn_t<`b,`c,`bd>, `a*@`H)@`H env, `a first) {
-  *(*env)[1] = new first;
-  return (*env)[0];
+static fn_t<`b,`c,`bd> outer(fn_t<$(`a,`b)@`H,`c,`bd> f, `a first 
+			     : regions($(`a,`b,`c)) > `bd) {
+  return make_fn(inner, new $(f,first));
 }
 
 // curry a closure that takes a pair
-fn_t<`a,fn_t<`b,`c,`bd>,`bd> curry(fn_t<$(`a,`b)@`H,`c,`bd> f
+fn_t<`a,fn_t<`b,`c,`bd>,`bd> curry(fn_t<$(`a,`b)@`H,`c,`bd> f 
 				   : regions($(`a,`b,`c)) > `bd) {
-  $(fn_t<$(`a,`b)@`H,`c,`bd>, `a*`H)@ inner_env = new $(f, NULL);
-  fn_t<`b,`c,`bd> inner_fn = make_fn(inner, inner_env);
-  return make_fn(outer, new $(inner_fn, &((*inner_env)[1])));
+  return make_fn(outer, f);
 }
 
-static `c lambda(fn_t<`a,fn_t<`b,`c,`bd>,`bd> f, $(`a,`b)@`H arg) {
+static `c lambda(fn_t<`a,fn_t<`b,`c>> f, $(`a,`b)@ arg) {
   return apply(apply(f,(*arg)[0]),(*arg)[1]);
 }
 

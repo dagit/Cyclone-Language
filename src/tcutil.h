@@ -157,7 +157,9 @@ extern int typecmp(type_t, type_t);
 extern type_t substitute(list_t<$(tvar_t,type_t)@`H,`H>, type_t);
   // could also have a version with two regions, but doesn't seem useful
 extern type_t rsubstitute(region_t<`r>,list_t<$(tvar_t,type_t)@`r,`r>,type_t);
-
+extern list_t<$(type_t,type_t)@> rsubst_rgnpo(region_t<`r>,
+					      list_t<$(tvar_t,type_t)@`r,`r>,
+					      list_t<$(type_t,type_t)@`H,`H>);
 // true when e1 is a sub-effect of e2
 extern bool subset_effect(bool may_constrain_evars, type_t e1, type_t e2);
 

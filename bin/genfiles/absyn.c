@@ -1251,7 +1251,7 @@ extern struct Cyc_Absyn_Kind Cyc_Tcutil_bk;
 extern struct Cyc_Core_Opt Cyc_Tcutil_tmko;
 # 138
 void*Cyc_Tcutil_kind_to_bound(struct Cyc_Absyn_Kind*k);
-# 342 "tcutil.h"
+# 344 "tcutil.h"
 void Cyc_Tcutil_check_no_qual(unsigned int loc,void*t);
 # 25 "cyclone.h"
 extern int Cyc_Cyclone_tovc_r;

@@ -1211,9 +1211,9 @@ extern struct Cyc_Core_Opt Cyc_Tcutil_trko;
 # 137
 struct Cyc_Core_Opt*Cyc_Tcutil_kind_to_opt(struct Cyc_Absyn_Kind*k);
 void*Cyc_Tcutil_kind_to_bound(struct Cyc_Absyn_Kind*k);
-# 294 "tcutil.h"
+# 296 "tcutil.h"
 struct Cyc_Absyn_Tvar*Cyc_Tcutil_new_tvar(void*k);
-# 342
+# 344
 void Cyc_Tcutil_check_no_qual(unsigned int loc,void*t);struct Cyc_PP_Ppstate;
 # 41 "pp.h"
 typedef struct Cyc_PP_Ppstate*Cyc_PP_ppstate_t;struct Cyc_PP_Out;

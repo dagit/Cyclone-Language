@@ -1016,11 +1016,11 @@ void*Cyc_Tcutil_compress(void*t);
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_bk;
 # 159
 void*Cyc_Tcutil_rsubstitute(struct _RegionHandle*,struct Cyc_List_List*,void*);
-# 264 "tcutil.h"
+# 266 "tcutil.h"
 int Cyc_Tcutil_is_noalias_pointer(void*t);
-# 310
+# 312
 int Cyc_Tcutil_bits_only(void*t);
-# 342
+# 344
 void Cyc_Tcutil_check_no_qual(unsigned int loc,void*t);struct Cyc_PP_Ppstate;
 # 41 "pp.h"
 typedef struct Cyc_PP_Ppstate*Cyc_PP_ppstate_t;struct Cyc_PP_Out;

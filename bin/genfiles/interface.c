@@ -1079,7 +1079,7 @@ int Cyc_Tcutil_is_function_type(void*t);
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_bk;
 # 138
 void*Cyc_Tcutil_kind_to_bound(struct Cyc_Absyn_Kind*k);
-# 342 "tcutil.h"
+# 344 "tcutil.h"
 void Cyc_Tcutil_check_no_qual(unsigned int loc,void*t);extern char Cyc_Tcdecl_Incompatible[13];struct Cyc_Tcdecl_Incompatible_exn_struct{char*tag;};struct Cyc_Tcdecl_Xdatatypefielddecl{struct Cyc_Absyn_Datatypedecl*base;struct Cyc_Absyn_Datatypefield*field;};
 # 41 "tcdecl.h"
 typedef struct Cyc_Tcdecl_Xdatatypefielddecl*Cyc_Tcdecl_xdatatypefielddecl_t;

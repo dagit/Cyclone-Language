@@ -61,7 +61,7 @@ extern fn_t<`a,`c,`bd> compose(fn_t<`a,`b,`bd> g, fn_t<`b,`c,`bd> f
       [apply(compose(g,f),x)] has the same effect as
       [apply(f,apply(g,x))]. */
 
-extern fn_t<`a,fn_t<`b,`c,`bd>,`bd> curry(fn_t<$(`a,`b)@`H,`c,`bd> f
+extern fn_t<`a,fn_t<`b,`c,`bd>,`bd> curry(fn_t<$(`a,`b)@`H,`c,`bd> f 
 					  : regions($(`a,`b,`c)) > `bd);
   /** [curry(f)] curries a closure that takes a pair as argument: if
       [x] points to a pair [\$(x1,x2)], then [apply(f,x)] has the same

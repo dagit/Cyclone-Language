@@ -1127,20 +1127,20 @@ extern struct Cyc_Absyn_Kind Cyc_Tcutil_bk;
 void*Cyc_Tcutil_kind_to_bound(struct Cyc_Absyn_Kind*k);
 # 141
 struct _tuple11 Cyc_Tcutil_swap_kind(void*t,void*kb);
-# 162
+# 164
 int Cyc_Tcutil_subset_effect(int may_constrain_evars,void*e1,void*e2);
-# 166
+# 168
 int Cyc_Tcutil_region_in_effect(int constrain,void*r,void*e);
-# 222 "tcutil.h"
+# 224 "tcutil.h"
 void Cyc_Tcutil_check_unique_tvars(unsigned int,struct Cyc_List_List*);
-# 294
-struct Cyc_Absyn_Tvar*Cyc_Tcutil_new_tvar(void*k);
 # 296
-int Cyc_Tcutil_new_tvar_id();
+struct Cyc_Absyn_Tvar*Cyc_Tcutil_new_tvar(void*k);
 # 298
+int Cyc_Tcutil_new_tvar_id();
+# 300
 void Cyc_Tcutil_add_tvar_identity(struct Cyc_Absyn_Tvar*);
 void Cyc_Tcutil_add_tvar_identities(struct Cyc_List_List*);
-# 342
+# 344
 void Cyc_Tcutil_check_no_qual(unsigned int loc,void*t);char Cyc_Tcenv_Env_error[10]="Env_error";struct Cyc_Tcenv_Env_error_exn_struct{char*tag;};
 # 88 "tcenv.cyc"
 struct Cyc_Tcenv_Env_error_exn_struct Cyc_Tcenv_Env_error_val={Cyc_Tcenv_Env_error};

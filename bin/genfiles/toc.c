@@ -1216,19 +1216,19 @@ extern struct Cyc_Absyn_Kind Cyc_Tcutil_tbk;
 int Cyc_Tcutil_unify(void*,void*);
 # 159
 void*Cyc_Tcutil_rsubstitute(struct _RegionHandle*,struct Cyc_List_List*,void*);
-# 236 "tcutil.h"
+# 238 "tcutil.h"
 struct Cyc_List_List*Cyc_Tcutil_resolve_aggregate_designators(struct _RegionHandle*rgn,unsigned int loc,struct Cyc_List_List*des,enum Cyc_Absyn_AggrKind,struct Cyc_List_List*fields);
-# 242
-int Cyc_Tcutil_is_tagged_pointer_typ(void*);
 # 244
-int Cyc_Tcutil_is_tagged_pointer_typ_elt(void*t,void**elt_typ_dest);
+int Cyc_Tcutil_is_tagged_pointer_typ(void*);
 # 246
+int Cyc_Tcutil_is_tagged_pointer_typ_elt(void*t,void**elt_typ_dest);
+# 248
 int Cyc_Tcutil_is_zero_pointer_typ_elt(void*t,void**elt_typ_dest);
-# 256
+# 258
 int Cyc_Tcutil_is_zero_ptr_deref(struct Cyc_Absyn_Exp*e1,void**ptr_type,int*is_dyneither,void**elt_type);struct _tuple10{struct Cyc_Absyn_Tqual f1;void*f2;};
-# 316
+# 318
 void*Cyc_Tcutil_snd_tqt(struct _tuple10*);
-# 342
+# 344
 void Cyc_Tcutil_check_no_qual(unsigned int loc,void*t);struct _tuple11{unsigned int f1;int f2;};
 # 28 "evexp.h"
 struct _tuple11 Cyc_Evexp_eval_const_uint_exp(struct Cyc_Absyn_Exp*e);

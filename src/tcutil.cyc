@@ -3105,6 +3105,18 @@ static exp_t rsubsexp(region_t<`r> r, list_t<$(tvar_t,type_t)@`r,`r> inst,
   }
 }
 
+list_t<$(type_t,type_t)@> rsubst_rgnpo(region_t<`r> rgn,
+				       list_t<$(tvar_t,type_t)@`r,`r> inst,
+				       list_t<$(type_t,type_t)@`H,`H> rgn_po) {
+  let $(rpo1a,rpo1b) = List::rsplit(rgn,rgn,rgn_po);
+  let rpo2a = substs(rgn,inst,rpo1a);
+  let rpo2b = substs(rgn,inst,rpo1b);
+  if (rpo2a == rpo1a && rpo2b == rpo1b)
+    return rgn_po;
+  else
+    return List::zip(rpo2a,rpo2b);
+}
+
 type_t rsubstitute(region_t<`r> rgn,
 		   list_t<$(tvar_t,type_t)@`r,`r> inst,
 		   type_t t) {
@@ -3177,14 +3189,7 @@ type_t rsubstitute(region_t<`r> rgn,
       else
         cyc_varargs2 = new VarargInfo{n,tq,t2,i};
     }
-    list_t<$(type_t,type_t)@> rgn_po2;
-    let $(rpo1a,rpo1b) = List::rsplit(rgn,rgn,rgn_po);
-    let rpo2a = substs(rgn,inst,rpo1a);
-    let rpo2b = substs(rgn,inst,rpo1b);
-    if (rpo2a == rpo1a && rpo2b == rpo1b)
-      rgn_po2 = rgn_po;
-    else
-      rgn_po2 = List::zip(rpo2a,rpo2b);
+    list_t<$(type_t,type_t)@> rgn_po2 = rsubst_rgnpo(rgn,inst,rgn_po);
     return
       new FnType(FnInfo{vs,eff2,rtq,rsubstitute(rgn,inst,rtyp),args2,c_varargs,
                           cyc_varargs2,rgn_po2,atts});

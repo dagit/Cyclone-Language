@@ -1029,7 +1029,8 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
       switch (compress(t1)) {
       case &FnType(FnInfo{tvars,eff,res_tq,res_typ,args_info,c_vararg,
                             cyc_vararg,rgn_po,atts}):
-	//FIX: handle tvars??
+	if(tvars != NULL || rgn_po != NULL)
+	  terr(e->loc,"function should have been instantiated prior to use -- probably a compiler bug");
 	// unify the result type with the expected type to get better
 	// information while type-checking the arguments.
 	if (topt != NULL) unify(res_typ,*topt);
@@ -1187,10 +1188,6 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
           // Check that the effect of the function is compatible with the 
           // current capability.  May be delayed.
           Tcenv::check_effect_accessible(te, loc, (type_t)eff);
-          // Check that the function's partial-order on region lifetimes
-          // is compatible with the current region partial order. May be 
-          // delayed.
-          Tcenv::check_rgn_partial_order(te, loc, rgn_po);
         }
         return res_typ;
       default: return expr_err(te,loc,topt,"expected pointer to function");
@@ -1236,11 +1233,19 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t * topt,
         if(ts != NULL)
           return
             expr_err(te,loc,topt,"too many type variables in instantiation");
-        type_t new_fn_typ =
+	// Check that the function's partial-order on region lifetimes
+	// is compatible with the current region partial order. 
+	// May be delayed. Don't do if more instantiation remains.
+	if(tvars == NULL) {
+	  rpo = rsubst_rgnpo(temp,instantiation,rpo);
+	  Tcenv::check_rgn_partial_order(te, loc, rpo);
+	  rpo = NULL;
+	}
+	type_t new_fn_typ =
           rsubstitute(temp,instantiation,
                       new FnType(FnInfo{tvars,eff,rtq,rtyp,args,c_varargs,
                                         cyc_varargs,rpo,atts}));
-        return new PointerType(PtrInfo(new_fn_typ,tq,PtrAtts(rt,x,b,zt,NULL)));
+	return new PointerType(PtrInfo(new_fn_typ,tq,PtrAtts(rt,x,b,zt,NULL)));
       }
     default: break;
     }
@@ -2693,10 +2698,15 @@ static type_t tcExpNoPromote(tenv_t te, type_t * topt, exp_t e) {
 	   list_t<$(tvar_t,type_t)@/*`rgn,`rgn*/> inst =
 	     List::rmap_c(rgn,r_make_inst_var,&env,tvs);
 	   list_t<type_t> ts = List::map(snd,inst);
+	   // Check that the function's partial-order on region lifetimes
+	   // is compatible with the current region partial order. 
+	   // Will be delayed. Don't do if more instantiation remains.
+	   rpo = rsubst_rgnpo(rgn,inst,rpo);
+	   Tcenv::check_rgn_partial_order(te, e->loc, rpo);
 	   type_t ftyp = rsubstitute(rgn, inst,
 				     new FnType(FnInfo{NULL,eff,rtq,rtyp,args,
 						       c_varargs,cyc_varargs,
-                                                       rpo,atts}));
+                                                       NULL,atts}));
 	   let new_typ = new PointerType(PtrInfo(ftyp,tq,PtrAtts(rt,x,b,zt,NULL)));
            // JGM: no need to put explicit instantiation in.
 	   let inner   = copy_exp(e);
