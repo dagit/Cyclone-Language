@@ -267,6 +267,7 @@ static void set_nocyc() {
 static void set_pa() {
   pa_r = true;
   add_ccarg("-DCYC_REGION_PROFILE");
+  add_cpparg("-DCYC_REGION_PROFILE");
 }
 
 static void set_pg() {
@@ -855,7 +856,7 @@ static void process_file(string_t<`H> filename) {
   fclose(f0);
 
   // Run the preprocessor, by building and running a command-line
-  // Pass -I and -D things onto preprocessor
+  // Pass -I and -D things onto preprocessor.
   let cppargs_string =
     str_sepstr(new List(new (string_t)"",
                         List::map(sh_escape_stringptr,rev(cppargs))),

@@ -170,12 +170,22 @@ extern region_t<`U> unique_region;
 extern void ufree(`a::TA ?`U ptr) __attribute__((noliveunique(1)));
   /** [ufree] frees a unique pointer. */
 
-extern struct NewRegion<`r2> rnew_dynregion(region_t<`r2>);
+extern struct NewRegion<`r2> _rnew_dynregion(region_t<`r2>,
+					     const char @ file,
+					     int lineno);
   /** A call to [rnew_dynregion(r2)] returns a new dynamic region allocated
       within [r2]. */
-extern struct NewRegion new_dynregion();
+extern struct NewRegion _new_dynregion(const char @ file,
+				       int lineno);
   /** A call to [new_dynregion()] returns a new dynamic region allocated
       in the heap. */
+#ifndef CYC_REGION_PROFILE
+#define rnew_dynregion(r) _rnew_dynregion(r,"internal-error",0)
+#define new_dynregion() _new_dynregion("internal-error",0)
+#else
+#define rnew_dynregion(r) _rnew_dynregion(r,__FILE__,__LINE__)
+#define new_dynregion() _new_dynregion(__FILE__,__LINE__)
+#endif
 extern datatype exn  { extern Open_Region };
   /** The [Open_Region] exception is thrown when one attempts to open 
       a dynamic region that is either already open or has been freed. */

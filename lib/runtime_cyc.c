@@ -667,7 +667,8 @@ int Cyc_Core_try_free_dynregion(struct _DynRegionHandle *x) {
 }
 
 /* Allocate a new dynamic region in region r */
-struct Core_NewRegion Cyc_Core_rnew_dynregion(struct _RegionHandle *r) {
+struct Core_NewRegion Cyc_Core__rnew_dynregion(struct _RegionHandle *r,
+					       char *file, int lineno) {
   struct Core_NewRegion resrgn;
   struct _DynRegionHandle *res = 
     _region_malloc(r, sizeof(struct _DynRegionHandle));
@@ -683,7 +684,11 @@ struct Core_NewRegion Cyc_Core_rnew_dynregion(struct _RegionHandle *r) {
     res->next = r->sub_regions;
     r->sub_regions = res;
   }
+#ifdef CYC_REGION_PROFILE
+  *d = _profile_new_region("dyn",file,lineno);
+#else
   *d = _new_region(NULL);
+#endif
   resrgn.dynregion = res;
   return resrgn;
 }

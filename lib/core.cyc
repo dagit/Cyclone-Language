@@ -45,10 +45,9 @@ mstring_t<`r::TR> rnew_string(region_t<`r> r, unsigned int i) {
   return rcalloc(r,i,sizeof(char));
 }
 
-struct NewRegion new_dynregion() {
-  return rnew_dynregion(heap_region);
+struct NewRegion _new_dynregion(const char @ file, int lineno) {
+  return _rnew_dynregion(heap_region, file, lineno);
 }
-
 
 bool true_f(`a x)  {  return true;  }
 bool false_f(`a x) {  return false; }
