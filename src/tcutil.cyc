@@ -375,8 +375,8 @@ bool unify(type_t t1, type_t t2) {
 
 // see if evar occurs within t and also check that every free type
 // variable in t occurs within the list env.
-static void occurslist(type_t evar, list_t<tvar_t> env, list_t<type_t> ts); // mutually recursive fns
-static void occurs(type_t evar, list_t<tvar_t> env, type_t t) {
+static void occurslist(type_t evar, region_t<`r> r, list_t<tvar_t,`r> env, list_t<type_t> ts); // mutually recursive fns
+static void occurs(type_t evar, region_t<`r> r, list_t<tvar_t,`r> env, type_t t) {
   switch (compress(t)) {
   case &VarType(tv): 
     if (!List::mem(fast_tvar_cmp,env,tv)) { 
@@ -384,12 +384,12 @@ static void occurs(type_t evar, list_t<tvar_t> env, type_t t) {
       throw Unify; 
     }
     break;
-  case &Evar(_,r,_,*sopt):
+  case &Evar(_,rg,_,*sopt):
     if (t == evar) {
       failure_reason = "(occurs check)";
       throw Unify;
     }
-    else if (r != NULL) occurs(evar,env,r->v);
+    else if (rg != NULL) occurs(evar,r,env,rg->v);
     else {
       // check to see if sopt is a subset of env
       bool problem = false;
@@ -410,48 +410,50 @@ static void occurs(type_t evar, list_t<tvar_t> env, type_t t) {
     }
     break;
   case &PointerType(pinfo): 
-    occurs(evar,env,pinfo.elt_typ); occurs(evar,env,pinfo.rgn_typ); break;
-  case &ArrayType(t2,_,_): occurs(evar,env,t2); break;
+    occurs(evar,r,env,pinfo.elt_typ); occurs(evar,r,env,pinfo.rgn_typ); break;
+  case &ArrayType(t2,_,_): occurs(evar,r,env,t2); break;
   case &FnType(FnInfo{tvs,eff,rt,args,c_varargs,cyc_varargs,rgn_po,atts}): 
-    if (eff != NULL) occurs(evar,env,eff->v);
-    occurs(evar,env,rt);
+    env = List::rappend(r,tvs,env);
+    if (eff != NULL) occurs(evar,r,env,eff->v);
+    occurs(evar,r,env,rt);
     for(; args != NULL; args = args->tl)
-      occurs(evar,env,(*args->hd)[2]);
+      occurs(evar,r,env,(*args->hd)[2]);
     if (cyc_varargs != NULL) {
       let VarargInfo(_,_,t,_) = *cyc_varargs;
-      occurs(evar,env,t); 
+      occurs(evar,r,env,t); 
     }
     for (; rgn_po != NULL; rgn_po = rgn_po->tl) {
       let &$(r1,r2) = rgn_po->hd;
-      occurs(evar,env,r1);
-      occurs(evar,env,r2);
+      occurs(evar,r,env,r1);
+      occurs(evar,r,env,r2);
     }
     break;
   case &TupleType(args):
     for(; args != NULL; args = args->tl)
-      occurs(evar,env,(*args->hd)[1]);
+      occurs(evar,r,env,(*args->hd)[1]);
     break;
-  case &RgnHandleType(rt): occurs(evar,env,rt); break;
-  case &TunionType(TunionInfo{_,ts,r}):
-    occurs(evar,env,r); occurslist(evar,env,ts); break;
+  case &RgnHandleType(rt): occurs(evar,r,env,rt); break;
+  case &TunionType(TunionInfo{_,ts,rg}):
+    occurs(evar,r,env,rg); occurslist(evar,r,env,ts); break;
   case &TypedefType(_,ts,topt): fallthru(ts);
   case &TunionFieldType(TunionFieldInfo{_,ts}): fallthru(ts);
-  case &StructType(_,ts,_): occurslist(evar,env,ts); break;
+  case &StructType(_,ts,_): occurslist(evar,r,env,ts); break;
   case &AnonStructType(fs): fallthru(fs);
   case &AnonUnionType(fs):
     for (; fs != NULL; fs = fs->tl)
-      occurs(evar, env, fs->hd->type);
+      occurs(evar, r, env, fs->hd->type);
     break;
-  case &SizeofType(t0): occurs(evar,env,t0); break;
-  case &AccessEff(t0): occurs(evar,env,t0); break;
-  case &JoinEff(ts): occurslist(evar,env,ts); break;
-  case &RgnsEff(t0): occurs(evar,env,t0); break;
+  case &SizeofType(t0): occurs(evar,r,env,t0); break;
+  case &AccessEff(t0): occurs(evar,r,env,t0); break;
+  case &JoinEff(ts): occurslist(evar,r,env,ts); break;
+  case &RgnsEff(t0): occurs(evar,r,env,t0); break;
   default: break;
   }
 }
-static void occurslist(type_t evar, list_t<tvar_t> env,list_t<type_t> ts) {
+static void occurslist(type_t evar, region_t<`r> r, list_t<tvar_t,`r> env,
+                       list_t<type_t> ts) {
   for (; ts != NULL; ts = ts->tl)
-    occurs(evar,env,ts->hd);
+    occurs(evar,r,env,ts->hd);
 }
 
 // unify two lists of types
@@ -719,7 +721,7 @@ bool region_in_effect(bool constrain, type_t r, type_t e) {
         let ev = new_evar(&ek,s);
         // this has the effect of checking that any free variables in r
         // are contained in s.
-        occurs(ev,s->v,r);
+        occurs(ev,heap_region,s->v,r);
         let new_typ = dummy_fntype(new JoinEff(list(ev,new AccessEff(r))));
         *p = new Opt(new_typ);
         return true;
@@ -735,7 +737,7 @@ bool region_in_effect(bool constrain, type_t r, type_t e) {
     let ev = new_evar(&ek,s);
     // this has the effect of checking that any free variables in r
     // are contained in s.
-    occurs(ev,s->v,r);
+    occurs(ev,heap_region,s->v,r);
     let new_typ = new JoinEff(new List{ev,new List{new AccessEff(r),NULL}});
     *p = new Opt(new_typ);
     return true;
@@ -775,7 +777,7 @@ static bool type_in_effect(bool constrain, type_t t, type_t e) {
     let ev = new_evar(&ek,s);
     // this has the effect of checking that any free variables in t
     // are contained in s.
-    occurs(ev,s->v,t);
+    occurs(ev,heap_region,s->v,t);
     let new_typ = new JoinEff(new List{ev,new List{new RgnsEff(t),NULL}});
     *p = new Opt(new_typ);
     return true;
@@ -912,7 +914,7 @@ bool subset_effect(bool set_to_empty, type_t e1, type_t e2) {
       else {
         // check that e1 doesn't occur in e2 and that the free type
         // variables of e2 are contained in s.
-        occurs(e1,s->v,e2);
+        occurs(e1,heap_region,s->v,e2);
         *p = new Opt(e2);
       }
 
@@ -1018,7 +1020,7 @@ void unify_it(type_t t1, type_t t2) {
   case &Evar(kind1,*ref1_ref,_,s1opt):
     // check that the evar doesn't occur in t2 and that any free variables
     // of t2 are contained in s1.
-    occurs(t1,s1opt->v,t2);
+    occurs(t1,heap_region,s1opt->v,t2);
     let kind2 = typ_kind(t2);
     // we can constrain the Evar to be equal to t2 only when the kind of 
     // the evar is greater than or equal to the kind of t2 or t2 is an 
