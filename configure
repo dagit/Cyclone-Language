@@ -309,7 +309,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os abs_srcdir CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT TARGET_CFLAGS TARGET_LDFLAGS CPP EGREP ac_cv_sizeof_wchar_t WCHAR_T_UNSIGNED SET_MAKE RANLIB ac_ct_RANLIB LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os abs_srcdir CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT TARGET_CC TARGET_AR TARGET_RANLIB TARGET_CFLAGS TARGET_LDFLAGS CPP EGREP ac_cv_sizeof_wchar_t WCHAR_T_UNSIGNED SET_MAKE RANLIB ac_ct_RANLIB LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -2303,17 +2303,29 @@ if [ "$build_vendor" = "sun" ]; then
 fi
 
 # Special cases -- these are for compiling the C output of Cyclone
-echo Target is $target
-echo Target_vender is $target_vendor
+TARGET_CC="gcc -b $target"
+TARGET_AR="ar"
+TARGET_RANLIB="ranlib"
 if [ "$target_vendor" = "apple" ]; then
   TARGET_CFLAGS="-no-cpp-precomp -Wno-long-double"
 fi
 if [ "$target_cpu" = "i686" ]; then
-  TARGET_CFLAGS=-march=i686
+  TARGET_CFLAGS="-march=i686"
 fi
 if [ "$target_vendor" = "sun" ]; then
-  TARGET_LDFLAGS=-lnsl -lsocket -lresolv
+  TARGET_LDFLAGS="-lnsl -lsocket -lresolv"
 fi
+if [ "$target" = "arm-unknown-elf" ]; then
+  # because the cross gcc is called arm-elf, not arm-unknown-elf
+  target="arm-elf"
+  TARGET_CC="arm-elf-gcc"
+  TARGET_CFLAGS="-elf2flt"
+  TARGET_AR="arm-elf-ar"
+  TARGET_RANLIB="arm-elf-ranlib"
+fi
+
+
+
 
 
 
@@ -4707,6 +4719,9 @@ s,@CPPFLAGS@,$CPPFLAGS,;t t
 s,@ac_ct_CC@,$ac_ct_CC,;t t
 s,@EXEEXT@,$EXEEXT,;t t
 s,@OBJEXT@,$OBJEXT,;t t
+s,@TARGET_CC@,$TARGET_CC,;t t
+s,@TARGET_AR@,$TARGET_AR,;t t
+s,@TARGET_RANLIB@,$TARGET_RANLIB,;t t
 s,@TARGET_CFLAGS@,$TARGET_CFLAGS,;t t
 s,@TARGET_LDFLAGS@,$TARGET_LDFLAGS,;t t
 s,@CPP@,$CPP,;t t

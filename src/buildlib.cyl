@@ -1638,16 +1638,16 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
           str_sepstr(new List(new (string_t)"",
                               List::map(sh_escape_stringptr,rev(cppargs))),
                      " ");
-        char @cmd = (char @)aprintf("%s %s %s %s -E -dM -o %s -x c %s",
-				    cyclone_cc,Specsfile::btarget,target_cflags,
+        char @cmd = (char @)aprintf("%s %s %s -E -dM -o %s -x c %s",
+				    cyclone_cc,target_cflags,
                                     cppargs_string,macrosfile,cppinfile);
         if (verbose)
           fprintf(stderr,"%s\n",cmd);
         if (!system(cmd)) {
           /* No error in creating the file of macros, so go ahead and create
              the file of declarations */
-          cmd = (char @)aprintf("%s %s %s %s -E -o %s -x c %s",
-				cyclone_cc,Specsfile::btarget,target_cflags,
+          cmd = (char @)aprintf("%s %s %s -E -o %s -x c %s",
+				cyclone_cc,target_cflags,
                                 cppargs_string,declsfile,cppinfile);
           if (verbose)
             fprintf(stderr,"%s\n",cmd);
@@ -2023,8 +2023,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     }
     if (mode == GATHER) {
       /* This will be executed once for each specfile, but who cares */
-      let cmd = aprintf("echo | %s %s %s -E -dM - -o INITMACROS.h\n",
-                        cyclone_cc,Specsfile::btarget,target_cflags);
+      let cmd = aprintf("echo | %s %s -E -dM - -o INITMACROS.h\n",
+                        cyclone_cc,target_cflags);
       if (verbose)
         fprintf(stderr,"%s\n",cmd);
       system((const char @)cmd);

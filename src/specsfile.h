@@ -27,7 +27,6 @@ namespace Specsfile {
   using List;
   using Core;
   string_t target_arch;
-  string_t btarget;
   void set_target_arch(string_t<`H> s);
   list_t<stringptr_t> cyclone_exec_path;
   void add_cyclone_exec_path(string_t s);

@@ -62,17 +62,29 @@ if [[ "$build_vendor" = "sun" ]]; then
 fi
 
 # Special cases -- these are for compiling the C output of Cyclone
-echo Target is $target
-echo Target_vender is $target_vendor
+TARGET_CC="gcc -b $target"
+TARGET_AR="ar"
+TARGET_RANLIB="ranlib"
 if [[ "$target_vendor" = "apple" ]]; then
   TARGET_CFLAGS="-no-cpp-precomp -Wno-long-double"
 fi
 if [[ "$target_cpu" = "i686" ]]; then
-  TARGET_CFLAGS=-march=i686
+  TARGET_CFLAGS="-march=i686"
 fi
 if [[ "$target_vendor" = "sun" ]]; then
-  TARGET_LDFLAGS=-lnsl -lsocket -lresolv
+  TARGET_LDFLAGS="-lnsl -lsocket -lresolv"
 fi
+if [[ "$target" = "arm-unknown-elf" ]]; then
+  # because the cross gcc is called arm-elf, not arm-unknown-elf
+  target="arm-elf"
+  TARGET_CC="arm-elf-gcc"
+  TARGET_CFLAGS="-elf2flt"
+  TARGET_AR="arm-elf-ar"
+  TARGET_RANLIB="arm-elf-ranlib"
+fi
+AC_SUBST(TARGET_CC)
+AC_SUBST(TARGET_AR)
+AC_SUBST(TARGET_RANLIB)
 AC_SUBST(TARGET_CFLAGS)
 AC_SUBST(TARGET_LDFLAGS)
 

@@ -349,22 +349,22 @@ BTARGET=-b $(target)
 
 define rmake-target
 @mkdir -p $(@D)
-$(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base $(@F) CFLAGS="$(BTARGET) $(TARGET_CFLAGS)" CYCFLAGS="$(BTARGET) $(CYCFLAGS)"
+$(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base $(@F) CC="$(TARGET_CC)" CFLAGS="$(TARGET_CFLAGS)" CYCFLAGS="$(BTARGET) $(CYCFLAGS)" BUILDLIBFLAGS="$(BTARGET)" AR="$(TARGET_AR)" RANLIB="$(TARGET_RANLIB)"
 endef
 
 define rmake-target-aprof
 @mkdir -p $(@D)
-$(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base CFLAGS="$(BTARGET) -DCYC_REGION_PROFILE $(TARGET_CFLAGS)" CYCFLAGS="$(BTARGET) -pa $(CYCFLAGS)" $(@F)
+$(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base CC="$(TARGET_CC)" CFLAGS="-DCYC_REGION_PROFILE $(TARGET_CFLAGS)" CYCFLAGS="$(BTARGET) -pa $(CYCFLAGS)" BUILDLIBFLAGS="$(BTARGET)" AR="$(TARGET_AR)" RANLIB="$(TARGET_RANLIB)" $(@F)
 endef
 
 define rmake-target-gprof
 @mkdir -p $(@D)
-$(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base CFLAGS="$(BTARGET) -pg $(TARGET_CFLAGS)" CYCFLAGS="$(BTARGET) -pg $(CYCFLAGS)" $(@F)
+$(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base CC="$(TARGET_CC)" CFLAGS="-pg $(TARGET_CFLAGS)" CYCFLAGS="$(BTARGET) -pg $(CYCFLAGS)" BUILDLIBFLAGS="$(BTARGET)" AR="$(TARGET_AR)" RANLIB="$(TARGET_RANLIB)" $(@F)
 endef
 
 define rmake-target-nocheck
 @mkdir -p $(@D)
-$(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base CFLAGS="$(BTARGET) -DNO_CYC_NULL_CHECKS -DNO_CYC_BOUNDS_CHECKS $(TARGET_CFLAGS)" CYCFLAGS="$(BTARGET) --nochecks $(CYCFLAGS)" $(@F)
+$(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base CC="$(TARGET_CC)" CFLAGS="-DNO_CYC_NULL_CHECKS -DNO_CYC_BOUNDS_CHECKS $(TARGET_CFLAGS)" CYCFLAGS="$(BTARGET) --nochecks $(CYCFLAGS)" BUILDLIBFLAGS="$(BTARGET)" AR="$(TARGET_AR)" RANLIB="$(TARGET_RANLIB)" $(@F)
 endef
 
 $(BT)/libcycboot.a:
@@ -442,12 +442,12 @@ $(BL)/cyc-lib/$(target)/cycspecs: $(CYCDIR)/config/buildspecs
 	echo "  $(TARGET_CFLAGS)" >> $@
 	echo "" >> $@
 	echo "*cyclone_cc:" >> $@
-	echo "  $(CC)" >> $@
+	echo "  $(TARGET_CC)" >> $@
 	echo "" >> $@
 	echo "*cyclone_inc_path:" >> $@
 	echo "  $(INC_INSTALL)" >> $@
 	echo "" >> $@
-	$(CYCDIR)/config/buildspecs $(BTARGET) >> $@
+	$(CYCDIR)/config/buildspecs $(TARGET_CC) >> $@
 
 $(BL)/cyc-lib/$(target)/cyc_setjmp.h: bin/cyc-lib/libc.cys bin/buildlib$(EXE)
 	bin/buildlib$(EXE) $(BTARGET) -B$(BL)/cyc-lib -d $(BT)/include -setjmp > $@

@@ -36,10 +36,8 @@ extern "C" {
 namespace Specsfile;
 
 string_t target_arch = NULL;
-string_t btarget = NULL;
 void set_target_arch(string_t<`H> s) {
   target_arch = s;
-  btarget = aprintf("-b %s",s);
 }
 
 list_t<stringptr_t> cyclone_exec_path = NULL;

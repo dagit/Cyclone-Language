@@ -5,17 +5,17 @@ VPATH=$(CYCDIR)/bin/genfiles:$(CYCDIR)/lib:$(CYCDIR)/lib/xml
 
 libcycboot.a: $(O_BOOT_LIBS) boot_cstubs.$(O) boot_cycstubs.$(O)
 	-$(RM) $@
-	ar rc $@ $^
+	$(AR) rc $@ $^
 	$(RANLIB) $@
 
 libcyc.a: include/cstubs.$(O) include/cycstubs.$(O) $(O_BOOT_LIBS) $(O_LIBS)
 	-$(RM) $@
-	ar rc $@ $^
+	$(AR) rc $@ $^
 	$(RANLIB) $@
 
 libxml.a: xml.$(O) xmlparse_tab.$(O) xmlscan.$(O) xmldump.$(O)
 	-$(RM) $@
-	ar rc $@ $^
+	$(AR) rc $@ $^
 	$(RANLIB) $@
 
 xmlparse_tab.cyc: xmlparse.y
@@ -35,7 +35,7 @@ include/cstubs.c: include/cycstubs.cyc include/precore_c.h
 # NB: the -B is needed so buildlib can find the cycspecs file
 # FIX: buildlib should be pre-req
 include/cycstubs.cyc: $(CYCDIR)/bin/cyc-lib/libc.cys
-	$(CYCDIR)/bin/buildlib -B$(CYCDIR)/bin/lib/cyc-lib -d $(@D) $<
+	$(CYCDIR)/bin/buildlib $(BUILDLIBFLAGS) -B$(CYCDIR)/bin/lib/cyc-lib -d $(@D) $<
 
 include/precore_c.h: $(CYCDIR)/include/core.h
 #  $(CYCDIR)/bin/cyclone$(EXE) \ # FIX: should be pre-req
@@ -44,12 +44,12 @@ include/precore_c.h: $(CYCDIR)/include/core.h
 
 nogc.a: nogc.$(O) $(CYCDIR)/bin/genfiles/malloc.c
 	-$(RM) $@
-	ar rc $@ $<
+	$(AR) rc $@ $<
 	$(RANLIB) $@
 
 runtime_cyc.a: $(O_RUNTIME)
 	-$(RM) $@
-	ar rc $@ $^
+	$(AR) rc $@ $^
 	$(RANLIB) $@
 
 # NB: use of $(build) prevents cross compilation, but we don't know

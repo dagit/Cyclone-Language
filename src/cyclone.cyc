@@ -1279,8 +1279,8 @@ int main(int argc, string_t<`H> ?`H argv) {
     // -E and -M are used together in some versions of gcc, we get a
     // compiler error, cpp0: too many filenames.
     let dash_E = (produce_dependencies ? "" : " -E");
-    set_cpp(aprintf("%s %s %s -w -x c%s -specs %s",
-                    cyclone_cc, Specsfile::btarget,
+    set_cpp(aprintf("%s %s -w -x c%s -specs %s",
+                    cyclone_cc,
                     target_cflags, dash_E, specs_file));
   }
   if (cyclone_files == NULL && ccargs == NULL) {
@@ -1427,8 +1427,8 @@ int main(int argc, string_t<`H> ?`H argv) {
     outfile_str = aprintf(" -o %s",sh_escape_string(*output_file));
 
   let cccmd =
-    aprintf("%s %s %s %s%s %s%s",
-            cyclone_cc, Specsfile::btarget, target_cflags,
+    aprintf("%s %s %s%s %s%s",
+            cyclone_cc, target_cflags,
             ccargs_string, outfile_str,
             stdlib_string, libargs_string);
   if (v_r) { fprintf(stderr,"%s\n",cccmd); fflush(stderr); }

@@ -9,8 +9,8 @@
 # cross-compilation purposes.
 
 # USAGE
-# buildspecs [options] > specsfile
-#   (options are passed to the C preprocessor)
+# buildspecs [gcc-cmd] > specsfile
+#  (optional gcc-cmd is how to invoke gcc, if "gcc" is no good)
 # gcc -specs specsfile ...
 
 # NOTES
@@ -29,8 +29,13 @@
 # there are two literal tabs in the last sed command which must remain
 # literal tabs!!
 
+case $# in
+  0) GCC=gcc;;
+  *) GCC=$*;;
+esac
+
 echo |\
-gcc $* - -E -dM |\
+$GCC - -E -dM |\
 sed -e 's/ *$//' |\
 sed -e 's/#define /-D/' |\
 sed -e 's/ /=/' |\
