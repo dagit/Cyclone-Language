@@ -3668,21 +3668,6 @@ rusage
 timeval
 id_t
 }
-hstub {
-  // We'd like to
-  // include {
-  // RLIMIT_CORE
-  // RLIMIT_CPU
-  // RLIMIT_DATA
-  // RLIMIT_FSIZE
-  // RLIMIT_NOFILE
-  // RLIMIT_STACK
-  // RLIMIT_AS
-  // }
-  // but in Linux this brings in code similar to
-  // enum { foo, bar = foo };
-  // which Cyclone can't handle
-}
 hstub getpriority {
   /* OS X doesn't define id_t */
   #ifndef _id_t_def_
@@ -4507,6 +4492,10 @@ time_t
 timer_t
 uid_t
 useconds_t
+u_char
+u_short
+u_int
+u_long
 }
 hstub {
 /* The pthread types are omitted for now since we don't support

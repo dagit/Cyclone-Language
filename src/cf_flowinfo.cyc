@@ -309,6 +309,7 @@ static absRval_t<`r> i_typ_to_absrval(flow_env_t<`r> fenv,
                                       bool allow_zeroterm,
 				      bool no_init_bits_only,
                                       type_t t, absRval_t<`r> leafval) {
+  bool is_tagged = false;
   //if(is_nontagged_union_type(t))
   //return fenv->unknown_all;
 
@@ -330,6 +331,7 @@ static absRval_t<`r> i_typ_to_absrval(flow_env_t<`r> fenv,
   case &AggrType(AggrInfo(info,targs)):
     let ad = get_known_aggrdecl(info);
     if (ad->kind == UnionA && !ad->impl->tagged) return fenv->unknown_all;
+    is_tagged = true;
     if(ad->impl==NULL)
       break;
     let fields = ad->impl->fields;
@@ -340,7 +342,7 @@ static absRval_t<`r> i_typ_to_absrval(flow_env_t<`r> fenv,
     DEBUG_PRINT("typ_to_absrval: type=%s, leaf_val=",
 		Absynpp::typ2string(t));
     DEBUG_PRINT_F(print_absrval,leafval);
-    if (k == UnionA) return fenv->unknown_all;
+    if (k == UnionA && !is_tagged) return fenv->unknown_all;
     return rnew(fenv->r) Aggregate(UnionRInfo(k==UnionA,-1),aggrfields_to_aggrdict(fenv,fs,k==UnionA,leafval));
   case &ArrayType(ArrayInfo{et,_,_,zeroterm,_}) && conref_def(false,zeroterm):
     // special case for zero-terminated arrays of bits-only things --
