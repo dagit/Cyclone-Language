@@ -175,8 +175,14 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc, vardecl_t vd, bool check_
       ge->ordinaries = Dict::insert(ge->ordinaries, v,
 				    new $(new VarRes(b), true));
       break;
-    default:
-      impos("tcVardecl: a variable is being declared with a wrong name");
+    case &StructRes(_):
+      warn(loc,"variable declaration shadows previous struct declaration");
+      break;
+    case &TunionRes(_,_): 
+      warn(loc,"variable declaration shadows previous [x]tunion constructor");
+      break;
+    case &EnumRes(_,_): 
+      warn(loc,"variable declaration shadows previous enum tag");
       break;
     }
   } catch {
@@ -235,8 +241,14 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd) {
       ge->ordinaries = Dict::insert(ge->ordinaries, v,
 				    new $(new VarRes(b), true));
       break;
-    default:
-      impos("tcFndecl: a variable is being declared with a wrong name");
+    case &StructRes(_):
+      warn(loc,"function declaration shadows previous struct declaration");
+      break;
+    case &TunionRes(_,_): 
+      warn(loc,"function declaration shadows previous [x]tunion constructor");
+      break;
+    case &EnumRes(_,_): 
+      warn(loc,"function declaration shadows previous enum tag");
       break;
     }
   } catch {
