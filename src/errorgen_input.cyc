@@ -1,4 +1,173 @@
-int x y;  /* missing comma in declaration */
-x y;      /* type has not been declared */
-int f[;   /* missing ']' */
+// These are code fragments with syntax errors to be fed into the
+// errorgen tool.  The comments associated with the fragments are
+// the associated error message to generate when we get a parse
+// error in the corresponding state.  If you want the error message
+// to be state and token-specific, then follow the beginning of
+// your comment's * with a $.
+
+int x y;  /*$ missing comma in declaration */
+
+x y;      /*$ type has not been declared */
+
+struct Foo {int x}; /* missing ';' */
+
+void f(int x { return; } /* missing ')' on parameter list */
+
+struct ; /* expecting IDENTIFIER or '{' */
+
+enum ;  /* expecting IDENTIFIER or '{' */
+
+int foo() {
+  let = 3;
+}      /* expecting PATTERN */
+
+using ; /* expecting IDENTIFIER */
+
+namespace;  /* expecting IDENTIFIER */
+
+valueof_t x;  /* expecting '(' EXPRESSION ')' */
+
+@tagged int x;  /* expecting 'union' */
+
+@extensible int x; /* expecting 'datatype' */
+
+int f() __attribute__; /* expecting '((' ATTRIBUTE_LIST '))' */
+
+typedef $int x;  /* expecting '(' PARAMETER_LIST ')' */
+
+`a:: int; /* expecting KIND */
+ _:: int;  /* expecting KIND */
+
+namespace Foo { int x; }
+using Foo int y;  /* expecting ';' or '{' */
+
+namespace Foo int x;  /* expecting ';' or '{' */
+
+void f() { region; }  /* expecting '<' or IDENTIFIER */
+
+struct Foo { int x;   /* missing '};' */
+
+datatype ; /* expecting IDENTIFIER */
+
+void f() { let $x,y = $(1,2); }  /* expecting '(' */
+
+void f() { let *_ = 1; } /* expecting IDENTIFIER */
+
+void f() { let &int = 1; } /* expecting PATTERN */
+
+void f() { let x,y,; } /* expecting IDENTIFIER or extra ',' */
+
+int *{int} x; /* expecting EXPRESSION */
+
+namespace Foo { int x;}
+using Foo {  /* missing '}' */
+
+namespace Foo { int x; /* missing '}' */
+
+int x /* missing ';' */
+
+int x = ; /* expecting EXPRESSION */
+
+int x = 3,; /* expecting DECLARATION */
+
+void f() {  /*$ missing '}' */
+
+int x[int]; /* expecting ']' or EXPRESSION */
+
+void f(int [int]);  /* expecting EXPRESSION */
+
+int* @region(x) y; /* expecting TYPE */
+int* @region(`r y;  /* missing ')' */
+int* @numelts(int) y; /* expecting EXPRESSION */
+int* @numelts(3 y; /* missing ')' */
+
+struct List<; /* expecting TYPE */
+
+enum Foo { x = ; } /* expecting EXPRESSION */
+enum Foo {; /* missing '}' */
+
+void foo() { let x<int> = 3; } /* expecting TYPE_VARIABLE or '_' */
+
+int x = sizeof;  /* expecting '(' EXPRESSION ')' or '( TYPE ')' */
+
+int x = sizeof(3; /* missing ')' */
+
+void foo() { throw; } /* expecting EXPRESSION */ 
+
+void foo() { new int; } /* expecting INITIALIZER or EXPRESSION */
+
+void foo() { malloc; }  /* expecting '(' EXPRESSION ') */
+void foo() { malloc(; }  /* expecting EXPRESSION ') */
+void foo() { malloc(3; }  /* missing ') */
+void foo() { rmalloc; }  /* expecting '(' EXPRESSION ',' EXPRESSION ') */
+void foo() { rmalloc(; }  /* expecting EXPRESSION ',' EXPRESSION ') */
+void foo() { rmalloc(3; }  /* expecting ',' EXPRESSION ') */
+void foo() { rmalloc(3,; }  /* missing ')' */
+
+void foo() { calloc; }  /* expecting '(' */
+void foo() { calloc(; }  /* expecting EXPRESSION */
+void foo() { calloc(3; }  /* expecting ',' */
+void foo() { calloc(3,; }  /* expecting 'sizeof(' TYPE ')' */
+void foo() { calloc(3,sizeof(3)); }  /* expecting TYPE */
+void foo() { calloc(3,sizeof(int);}  /* missing ')' */
+
+void foo() { rcalloc; }  /* expecting '(' */
+void foo() { rcalloc(; }  /* expecting EXPRESSION */
+void foo() { rcalloc(3; }  /* expecting ',' */
+void foo() { rcalloc(3,; }  /* expecting EXPRESSION */
+void foo() {rcalloc(3,3; } /* expecting ',' */
+void foo() { rcalloc(3,3,3; } /* expecting 'sizeof' */
+void foo() { rcalloc(3,3,sizeof;} /* expecting '(' */
+void foo() { rcalloc(3,3,sizeof(;} /* expecting TYPE */
+void foo() { rcalloc(3,3,sizeof(int;}}} /* missing ')' */
+
+void foo() { rnew 3; } /* expecting '(' REGION_EXPRESSION ')' */
+void foo() { rnew (3; } /* missing ')' */
+void foo() { rnew (3); } /* expecting INITIALIZER or EXPRESSION */
+
+void foo() { numelts; } /* expecting '(' EXPRESSION ')' */
+void foo() { numelts(; } /* expecting EXPRESSION ')' */
+void foo() { numelts(3; } /* missing ')' */
+
+void foo() { valueof; } /* expecting '(' TYPE ')' */
+void foo() { valueof(; } /* expecting TYPE ')' */
+void foo() { valueof(int; } /* missing ')' */
+
+void foo() { tagcheck; } /* expecting '(' */
+void foo() { tagcheck(; } /* expecting EXPRESSION */
+void foo() { tagcheck(3; } /* expecting '.' IDENTIFIER or missing ')' */
+void foo() { tagcheck(x.); } /* expecting IDENTIFIER */
+
+void foo() { $(; } /* expecting TYPE_LIST, EXPRESSION_LIST, or ')' */
+void foo() { $(x; } /* expecting ')' */
+void foo() { 3 ? 42; } /* missing ':' EXPRESSION */
+void foo() { 3 ?; /* missing EXPRESSION or extra '?' */
+void foo() { 3 + ; } /* missing EXPRESSION or extra '+' */
+void foo() { 3 - ; } /* missing EXPRESSION or extra '-' */
+void foo() { 3 * ; } /* missing EXPRESSION or extra '*' */
+void foo() { 3 / ; } /* missing EXPRESSION or extra '/' */
+void foo() { 3 | ; } /* missing EXPRESSION or extra '|' */
+void foo() { 3 & ; } /* missing EXPRESSION or extra '&' */
+void foo() { 3 ^ ; } /* missing EXPRESSION or extra '^' */
+void foo() { &; } /* missing EXPRESSION or extra '&' */
+void foo() { 3 ==; } /* missing EXPRESSION or extra '==' */
+void foo() { 3 !=; } /* missing EXPRESSION or extra '!=' */
+void foo() { 3 <; } /* missing EXPRESSION or extra '<' */
+void foo() { 3 <=; } /* missing EXPRESSION or extra '<=' */
+void foo() { 3 >; } /* missing EXPRESSION or extra '>' */
+void foo() { 3 >=; } /* missing EXPRESSION or extra '>=' */
+void foo() { 3 >>; } /* missing EXPRESSION or extra '>>' */
+void foo() { 3 <<; } /* missing EXPRESSION or extra '<<' */
+void foo() { 3 %; } /* missing EXPRESSION or extra '%' */
+void foo() { 3 = int; } /* expecting EXPRESSION */
+void foo() { ++int; } /* expecting EXPRESSION */
+void foo() { x[int; } /* expecting EXPRESSION */ 
+void foo() { f(x,) } /*$ extra ',' or missing argument */
+void foo() { f(x; } /*$ missing ')' */
+void foo() { f.int } /* expecting IDENTIFIER */
+void foo() { f->int } /* expecting IDENTIFIER */
+void foo() { f@< >} /*$ extra space not allowed in empty instantiation */
+void foo() { f@int } /* expecting '<>' or '<' TYPE_LIST '>' */
+
+
 

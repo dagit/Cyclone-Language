@@ -1,7 +1,9 @@
 #include <core.h>
 #include <stdio.h>
 #include <string.h>
+#include <hashtable.h>
 using Core;
+using Hashtable;
 
 // #define DEBUG
 
@@ -11,10 +13,14 @@ using Core;
 //
 // Reads in a file containing fragments of Cyclone code with
 // syntax errors, separated by /* comments */.  For each fragment,
-// runs the compiler to and prints out the state and token
+// runs the compiler and prints out the state and token
 // numbers for the given syntax error.  It then puts the 
 // trailing comment in a string.  This all gets emitted to
 // stdout.  
+//
+// By default, the token is ignored (i.e., we emit -1 for
+// the token value.)  If you want a token-specific rule
+// then the comment should begin with /*$ ... */.
 
 static void error(const char ? fmt, ... inject parg_t args) 
   __attribute__((format(printf,1,2),noreturn)) {
@@ -23,9 +29,27 @@ static void error(const char ? fmt, ... inject parg_t args)
   exit(1);
 }
 
+static int cmp_pair($(int,int)@`H x, $(int,int)@`H y) {
+  let $(s1,t1) = *x;
+  let $(s2,t2) = *y;
+  let s = s1 - s2;
+  let t = t1 - t2;
+  if (s == 0) return t;
+  return s;
+}
+
+static int hash_pair($(int,int)@`H x) {
+  let $(s,t) = *x;
+  return (s << 16) || (t && 0xffff);
+}
+
 int main(int argc, const char ?`H ? argv) {
   const char ?`H compiler = "cyclone";
   FILE @inf = stdin;
+  int lineno = 1;
+  // hash table maps state*token pairs to linenumbers
+  table_t<$(int,int)@`H,int> table = create(101,cmp_pair,hash_pair);
+                                                         
   argv++;
   if (*argv != NULL && strcmp(*argv,"-c") == 0) {
     argv++;
@@ -53,17 +77,21 @@ int main(int argc, const char ?`H ? argv) {
     FILE *tmp = fopen(tmpname, "w");
     if (tmp == NULL) error("cannot open file %s",tmpname);
     int c = fgetc(inf);
-    // skip white space
-    while (c == ' ' || c == '\t' || c == '\n' || c == '\r') c = fgetc(inf);
+    // skip white space 
+    while (c == ' ' || c == '\t' || c == '\n' || c == '\r') {
+      if (c == '\n') lineno++;
+      c = fgetc(inf);
+    }
     // check for no useful input
     if (c == EOF) { fclose(inf); fclose(tmp); exit(0); }
-    // copy the input to the tmp file up until we see "/* "
+    // copy the input to the tmp file up until we see "/*"
     while (true) {
       if (c != '/') {
+        if (c == EOF) error("unexpected end-of-file");
+        if (c == '\n') lineno++;
         fputc(c,tmp);
         c = fgetc(inf);
-      } else if (c == EOF) error("unexpected end-of-file");
-      else {
+      } else {
         c = fgetc(inf);
         if (c == '*') break;
         fputc('/',tmp);
@@ -87,19 +115,34 @@ int main(int argc, const char ?`H ? argv) {
     int i = fscanf(tmp, "parse error: state [%d], token [%d]\n", &state, &token);
     if (i != 2) error("misread compiler output with fscanf = %d",i);
     fclose(tmp);
-    // print out the state and token, then copy the comment from the
-    // input file as the message.
-    printf("{.state = %d, .token = %d, .msg = \"",state,token);
     c = fgetc(inf);
+    // see if the user has specified that this should be token-specific
+    // by writing /*$ instead of just /*
+    if (c != '$') { token = -1; } else { c = fgetc(inf); }
+    // see if we've already seen this state/token pair and if so, generate
+    // an error, otherwise record the lineno for this state/token pair.
+    let p = new $(state,token);
+    let r = lookup_opt(table,p);
+    if (r != NULL) {
+      error("duplicate parse states for input lines %d and %d\n",*r,lineno);
+    } else {
+      insert(table, p, lineno);
+    }
+    // print out the state and token
+    printf("{.state = %d, .token = %d, .msg = \"",state,token);
     // skip white space
-    while (c == ' ' || c == '\t' || c == '\n' || c == '\r') c = fgetc(inf);
+    while (c == ' ' || c == '\t' || c == '\n' || c == '\r') {
+      if (c == '\n') lineno++;
+      c = fgetc(inf);
+    }
     // copy the comment from the input to stdout 
     while (true) {
       if (c != '*') {
+        if (c == EOF) error("unexpected end-of-file\n");
+        if (c == '\n') lineno++;
         fputc(c,stdout);
         c = fgetc(inf);
-      } else if (c == EOF) error("unexpected end-of-file\n");
-      else {
+      } else {
         c = fgetc(inf);
         if (c == '/') break;
         fputc('*',stdout);
