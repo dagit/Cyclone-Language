@@ -115,7 +115,7 @@ endif
 CONFIGDIR := $(CYCDIR)/config
 TARGETDIR := ../$(TARGET)/
 
-$(TARGET): $(addprefix $(TARGETDIR), $(C_SRCS))
+$(TARGET): $(addprefix $(TARGETDIR), $(UPDATE_SRCS))
 
 $(TARGETDIR)%.c: %.cyc $(CYCC) $(CYCINC_H)
 	$(CYCC) -I$(CYC_INC_PATH) -B$(CYC_LIB_PATH) $(CPP_FLAG) -D_PLATFORM_INCLUDES_="\"arch/$(TARGET).h\"" -I$(CYC_INC_PATH) -stopafter-toc $(TOVC_FLAG) -save-c -use-cpp '$(CONFIGDIR)/cyccpp $(CONFIGDIR)/arch/$(ARCH) $(CONFIGDIR)/arch/$(TARGET)' -o $@ $<
