@@ -307,9 +307,10 @@ extern void _profile_free_region(struct _RegionHandle *,
 #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
 #endif
 #endif
- struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
-char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
-char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
+ void exit(int);void*abort();struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[
+21];struct Cyc_Core_Invalid_argument_struct{char*tag;struct _tagged_arr f1;};extern
+char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{char*tag;struct
+_tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
 16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};struct
 _tagged_arr wrap_Cbuffer_as_buffer(char*,unsigned int);struct Cyc_in_addr{
@@ -518,12 +519,12 @@ _cycalloc(sizeof(*_tmp31));_tmp31[0]=({struct Cyc_FileOpenError_struct _tmp32;
 _tmp32.tag=Cyc_FileOpenError;_tmp32.f1=fn;_tmp32;});_tmp31;}));}return(struct Cyc___cycFILE*)
 _check_null(f);}void Cyc_file_close(struct Cyc___cycFILE*f){if(Cyc_fclose(f)!= 0)(
 int)_throw((void*)Cyc_FileCloseError);}typedef struct{int quot;int rem;}Cyc_div_t;
-typedef struct{int quot;int rem;}Cyc_ldiv_t;void Cyc_free(struct _tagged_arr);void Cyc_qsort(
-struct _tagged_arr,unsigned int,unsigned int,int(*)(const void*,const void*));void
-Cyc_free(struct _tagged_arr ptr){;}void qsort(void*,unsigned int,unsigned int,int(*)(
-const void*,const void*));static char _tmp38[23]="qsort called with NULL";static
-struct Cyc_Core_Failure_struct Cyc___qsort_failure_1={Cyc_Core_Failure,{_tmp38,
-_tmp38,_tmp38 + 23}};static char _tmp3A[42]="qsort called with insufficient array size";
+typedef struct{int quot;int rem;}Cyc_ldiv_t;void*abort();void exit(int);void Cyc_free(
+struct _tagged_arr);void Cyc_qsort(struct _tagged_arr,unsigned int,unsigned int,int(*)(
+const void*,const void*));void Cyc_free(struct _tagged_arr ptr){;}void qsort(void*,
+unsigned int,unsigned int,int(*)(const void*,const void*));static char _tmp38[23]="qsort called with NULL";
+static struct Cyc_Core_Failure_struct Cyc___qsort_failure_1={Cyc_Core_Failure,{
+_tmp38,_tmp38,_tmp38 + 23}};static char _tmp3A[42]="qsort called with insufficient array size";
 static struct Cyc_Core_Failure_struct Cyc___qsort_failure_2={Cyc_Core_Failure,{
 _tmp3A,_tmp3A,_tmp3A + 42}};void Cyc_qsort(struct _tagged_arr tab,unsigned int nmemb,
 unsigned int szmemb,int(*compar)(const void*,const void*)){if(!((unsigned int)tab.curr))(

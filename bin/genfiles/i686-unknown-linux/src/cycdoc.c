@@ -307,7 +307,7 @@ extern void _profile_free_region(struct _RegionHandle *,
 #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
 #endif
 #endif
- void exit(int);struct Cyc_Core_Opt{void*v;};struct _tagged_arr Cyc_Core_new_string(
+ void exit(int);void*abort();struct Cyc_Core_Opt{void*v;};struct _tagged_arr Cyc_Core_new_string(
 unsigned int);struct _tuple0{void*f1;void*f2;};void*Cyc_Core_fst(struct _tuple0*);
 void*Cyc_Core_snd(struct _tuple0*);extern char Cyc_Core_Invalid_argument[21];struct
 Cyc_Core_Invalid_argument_struct{char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[
@@ -359,14 +359,14 @@ struct _tagged_arr);extern char Cyc_Position_Exit[9];void Cyc_Position_reset_pos
 struct _tagged_arr);struct Cyc_Position_Segment;struct Cyc_Position_Error{struct
 _tagged_arr source;struct Cyc_Position_Segment*seg;void*kind;struct _tagged_arr desc;
 };extern char Cyc_Position_Nocontext[14];typedef struct{int quot;int rem;}Cyc_div_t;
-typedef struct{int quot;int rem;}Cyc_ldiv_t;int system(const char*);extern int Cyc_PP_tex_output;
-struct Cyc_PP_Ppstate;struct Cyc_PP_Out;struct Cyc_PP_Doc;struct _tagged_arr Cyc_PP_string_of_doc(
-struct Cyc_PP_Doc*d,int w);extern char Cyc_Arg_Bad[8];struct Cyc_Arg_Bad_struct{char*
-tag;struct _tagged_arr f1;};extern char Cyc_Arg_Error[10];struct Cyc_Arg_Unit_spec_struct{
-int tag;void(*f1)();};struct Cyc_Arg_Flag_spec_struct{int tag;void(*f1)(struct
-_tagged_arr);};struct Cyc_Arg_FlagString_spec_struct{int tag;void(*f1)(struct
-_tagged_arr,struct _tagged_arr);};struct Cyc_Arg_Set_spec_struct{int tag;int*f1;};
-struct Cyc_Arg_Clear_spec_struct{int tag;int*f1;};struct Cyc_Arg_String_spec_struct{
+typedef struct{int quot;int rem;}Cyc_ldiv_t;void*abort();void exit(int);int system(
+const char*);extern int Cyc_PP_tex_output;struct Cyc_PP_Ppstate;struct Cyc_PP_Out;
+struct Cyc_PP_Doc;struct _tagged_arr Cyc_PP_string_of_doc(struct Cyc_PP_Doc*d,int w);
+extern char Cyc_Arg_Bad[8];struct Cyc_Arg_Bad_struct{char*tag;struct _tagged_arr f1;}
+;extern char Cyc_Arg_Error[10];struct Cyc_Arg_Unit_spec_struct{int tag;void(*f1)();}
+;struct Cyc_Arg_Flag_spec_struct{int tag;void(*f1)(struct _tagged_arr);};struct Cyc_Arg_FlagString_spec_struct{
+int tag;void(*f1)(struct _tagged_arr,struct _tagged_arr);};struct Cyc_Arg_Set_spec_struct{
+int tag;int*f1;};struct Cyc_Arg_Clear_spec_struct{int tag;int*f1;};struct Cyc_Arg_String_spec_struct{
 int tag;void(*f1)(struct _tagged_arr);};struct Cyc_Arg_Int_spec_struct{int tag;void(*
 f1)(int);};struct Cyc_Arg_Rest_spec_struct{int tag;void(*f1)(struct _tagged_arr);};
 void Cyc_Arg_usage(struct Cyc_List_List*,struct _tagged_arr);void Cyc_Arg_parse(

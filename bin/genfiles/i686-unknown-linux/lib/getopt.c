@@ -307,9 +307,10 @@ extern void _profile_free_region(struct _RegionHandle *,
 #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
 #endif
 #endif
- struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
-char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
-char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
+ void exit(int);void*abort();struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[
+21];struct Cyc_Core_Invalid_argument_struct{char*tag;struct _tagged_arr f1;};extern
+char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{char*tag;struct
+_tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
 16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};typedef
 struct{int __count;union{unsigned int __wch;char __wchb[4];}__value;}Cyc___mbstate_t;
@@ -326,48 +327,49 @@ struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_struct
 int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int tag;struct _tagged_arr f1;};
 extern char Cyc_FileCloseError[19];extern char Cyc_FileOpenError[18];struct Cyc_FileOpenError_struct{
 char*tag;struct _tagged_arr f1;};typedef struct{int quot;int rem;}Cyc_div_t;typedef
-struct{int quot;int rem;}Cyc_ldiv_t;char*getenv(const char*);enum Cyc___anonymous_enum_366__{
-Cyc__PC_LINK_MAX  = 0,Cyc__PC_MAX_CANON  = 1,Cyc__PC_MAX_INPUT  = 2,Cyc__PC_NAME_MAX
- = 3,Cyc__PC_PATH_MAX  = 4,Cyc__PC_PIPE_BUF  = 5,Cyc__PC_CHOWN_RESTRICTED  = 6,Cyc__PC_NO_TRUNC
- = 7,Cyc__PC_VDISABLE  = 8,Cyc__PC_SYNC_IO  = 9,Cyc__PC_ASYNC_IO  = 10,Cyc__PC_PRIO_IO
- = 11,Cyc__PC_SOCK_MAXBUF  = 12,Cyc__PC_FILESIZEBITS  = 13,Cyc__PC_REC_INCR_XFER_SIZE
- = 14,Cyc__PC_REC_MAX_XFER_SIZE  = 15,Cyc__PC_REC_MIN_XFER_SIZE  = 16,Cyc__PC_REC_XFER_ALIGN
- = 17,Cyc__PC_ALLOC_SIZE_MIN  = 18,Cyc__PC_SYMLINK_MAX  = 19};enum Cyc___anonymous_enum_368__{
-Cyc__CS_PATH  = 0,Cyc__CS_V6_WIDTH_RESTRICTED_ENVS  = 1};struct Cyc_List_List{void*
-hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[18];extern char Cyc_List_Nth[
-8];unsigned int Cyc_strlen(struct _tagged_arr s);int Cyc_strcmp(struct _tagged_arr s1,
-struct _tagged_arr s2);int Cyc_strncmp(struct _tagged_arr s1,struct _tagged_arr s2,
-unsigned int len);struct _tagged_arr Cyc_strchr(struct _tagged_arr s,char c);extern
-struct _tagged_arr Cyc_optarg;extern int Cyc_optind;extern int Cyc_opterr;extern int Cyc_optopt;
-struct Cyc_option{struct _tagged_arr name;int has_arg;int*flag;int val;};int Cyc_getopt(
-int __argc,struct _tagged_arr __argv,struct _tagged_arr __shortopts);int Cyc__getopt_internal(
-int __argc,struct _tagged_arr __argv,struct _tagged_arr __shortopts,struct _tagged_arr
-__longopts,int*__longind,int __long_only);struct _tagged_arr Cyc_optarg;int Cyc_optind=
-1;int Cyc___getopt_initialized;static struct _tagged_arr Cyc_nextchar;int Cyc_opterr=
-1;int Cyc_optopt=(int)'?';enum Cyc_ordering_tag{Cyc_REQUIRE_ORDER  = 0,Cyc_PERMUTE
- = 1,Cyc_RETURN_IN_ORDER  = 2};static enum Cyc_ordering_tag Cyc_ordering;static
-struct _tagged_arr Cyc_posixly_correct;static int Cyc_first_nonopt;static int Cyc_last_nonopt;
-static int Cyc_nonoption_flags_max_len;static int Cyc_nonoption_flags_len;static int
-Cyc_original_argc;static int Cyc_original_argv;static void  __attribute__((unused )) 
-Cyc_store_args_and_env(int argc,struct _tagged_arr argv){Cyc_original_argc=argc;Cyc_original_argv=(
-int)((struct _tagged_arr*)_check_null(_untag_arr(argv,sizeof(struct _tagged_arr),1)));}
-static void Cyc_exchange(struct _tagged_arr argv){int bottom=Cyc_first_nonopt;int
-middle=Cyc_last_nonopt;int top=Cyc_optind;struct _tagged_arr tem;while(top > middle?
-middle > bottom: 0){if(top - middle > middle - bottom){int len=middle - bottom;register
-int i;for(i=0;i < len;i ++){tem=*((struct _tagged_arr*)_check_unknown_subscript(argv,
+struct{int quot;int rem;}Cyc_ldiv_t;void*abort();void exit(int);char*getenv(const
+char*);enum Cyc___anonymous_enum_366__{Cyc__PC_LINK_MAX  = 0,Cyc__PC_MAX_CANON  = 
+1,Cyc__PC_MAX_INPUT  = 2,Cyc__PC_NAME_MAX  = 3,Cyc__PC_PATH_MAX  = 4,Cyc__PC_PIPE_BUF
+ = 5,Cyc__PC_CHOWN_RESTRICTED  = 6,Cyc__PC_NO_TRUNC  = 7,Cyc__PC_VDISABLE  = 8,Cyc__PC_SYNC_IO
+ = 9,Cyc__PC_ASYNC_IO  = 10,Cyc__PC_PRIO_IO  = 11,Cyc__PC_SOCK_MAXBUF  = 12,Cyc__PC_FILESIZEBITS
+ = 13,Cyc__PC_REC_INCR_XFER_SIZE  = 14,Cyc__PC_REC_MAX_XFER_SIZE  = 15,Cyc__PC_REC_MIN_XFER_SIZE
+ = 16,Cyc__PC_REC_XFER_ALIGN  = 17,Cyc__PC_ALLOC_SIZE_MIN  = 18,Cyc__PC_SYMLINK_MAX
+ = 19};enum Cyc___anonymous_enum_368__{Cyc__CS_PATH  = 0,Cyc__CS_V6_WIDTH_RESTRICTED_ENVS
+ = 1};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[
+18];extern char Cyc_List_Nth[8];unsigned int Cyc_strlen(struct _tagged_arr s);int Cyc_strcmp(
+struct _tagged_arr s1,struct _tagged_arr s2);int Cyc_strncmp(struct _tagged_arr s1,
+struct _tagged_arr s2,unsigned int len);struct _tagged_arr Cyc_strchr(struct
+_tagged_arr s,char c);extern struct _tagged_arr Cyc_optarg;extern int Cyc_optind;extern
+int Cyc_opterr;extern int Cyc_optopt;struct Cyc_option{struct _tagged_arr name;int
+has_arg;int*flag;int val;};int Cyc_getopt(int __argc,struct _tagged_arr __argv,struct
+_tagged_arr __shortopts);int Cyc__getopt_internal(int __argc,struct _tagged_arr
+__argv,struct _tagged_arr __shortopts,struct _tagged_arr __longopts,int*__longind,
+int __long_only);struct _tagged_arr Cyc_optarg;int Cyc_optind=1;int Cyc___getopt_initialized;
+static struct _tagged_arr Cyc_nextchar;int Cyc_opterr=1;int Cyc_optopt=(int)'?';enum 
+Cyc_ordering_tag{Cyc_REQUIRE_ORDER  = 0,Cyc_PERMUTE  = 1,Cyc_RETURN_IN_ORDER  = 2};
+static enum Cyc_ordering_tag Cyc_ordering;static struct _tagged_arr Cyc_posixly_correct;
+static int Cyc_first_nonopt;static int Cyc_last_nonopt;static int Cyc_nonoption_flags_max_len;
+static int Cyc_nonoption_flags_len;static int Cyc_original_argc;static int Cyc_original_argv;
+static void  __attribute__((unused )) Cyc_store_args_and_env(int argc,struct
+_tagged_arr argv){Cyc_original_argc=argc;Cyc_original_argv=(int)((struct
+_tagged_arr*)_check_null(_untag_arr(argv,sizeof(struct _tagged_arr),1)));}static
+void Cyc_exchange(struct _tagged_arr argv){int bottom=Cyc_first_nonopt;int middle=Cyc_last_nonopt;
+int top=Cyc_optind;struct _tagged_arr tem;while(top > middle?middle > bottom: 0){if(
+top - middle > middle - bottom){int len=middle - bottom;register int i;for(i=0;i < len;i
+++){tem=*((struct _tagged_arr*)_check_unknown_subscript(argv,sizeof(struct
+_tagged_arr),bottom + i));*((struct _tagged_arr*)_check_unknown_subscript(argv,
+sizeof(struct _tagged_arr),bottom + i))=*((struct _tagged_arr*)
+_check_unknown_subscript(argv,sizeof(struct _tagged_arr),(top - (middle - bottom))+ 
+i));*((struct _tagged_arr*)_check_unknown_subscript(argv,sizeof(struct _tagged_arr),(
+top - (middle - bottom))+ i))=tem;}top -=len;}else{int len=top - middle;register int i;
+for(i=0;i < len;i ++){tem=*((struct _tagged_arr*)_check_unknown_subscript(argv,
 sizeof(struct _tagged_arr),bottom + i));*((struct _tagged_arr*)
 _check_unknown_subscript(argv,sizeof(struct _tagged_arr),bottom + i))=*((struct
-_tagged_arr*)_check_unknown_subscript(argv,sizeof(struct _tagged_arr),(top - (
-middle - bottom))+ i));*((struct _tagged_arr*)_check_unknown_subscript(argv,
-sizeof(struct _tagged_arr),(top - (middle - bottom))+ i))=tem;}top -=len;}else{int
-len=top - middle;register int i;for(i=0;i < len;i ++){tem=*((struct _tagged_arr*)
-_check_unknown_subscript(argv,sizeof(struct _tagged_arr),bottom + i));*((struct
-_tagged_arr*)_check_unknown_subscript(argv,sizeof(struct _tagged_arr),bottom + i))=*((
+_tagged_arr*)_check_unknown_subscript(argv,sizeof(struct _tagged_arr),middle + i));*((
 struct _tagged_arr*)_check_unknown_subscript(argv,sizeof(struct _tagged_arr),
-middle + i));*((struct _tagged_arr*)_check_unknown_subscript(argv,sizeof(struct
-_tagged_arr),middle + i))=tem;}bottom +=len;}}Cyc_first_nonopt +=Cyc_optind - Cyc_last_nonopt;
-Cyc_last_nonopt=Cyc_optind;}static struct _tagged_arr Cyc__getopt_initialize(int
-argc,struct _tagged_arr argv,struct _tagged_arr optstring){Cyc_first_nonopt=(Cyc_last_nonopt=
+middle + i))=tem;}bottom +=len;}}Cyc_first_nonopt +=Cyc_optind - Cyc_last_nonopt;Cyc_last_nonopt=
+Cyc_optind;}static struct _tagged_arr Cyc__getopt_initialize(int argc,struct
+_tagged_arr argv,struct _tagged_arr optstring){Cyc_first_nonopt=(Cyc_last_nonopt=
 Cyc_optind);Cyc_nextchar=_tag_arr(0,0,0);Cyc_posixly_correct=({char*_tmp0=getenv((
 const char*)"POSIXLY_CORRECT");_tag_arr(_tmp0,sizeof(char),_get_zero_arr_size(
 _tmp0,1));});if(*((const char*)_check_unknown_subscript(optstring,sizeof(char),0))

@@ -307,11 +307,11 @@ extern void _profile_free_region(struct _RegionHandle *,
 #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
 #endif
 #endif
- void exit(int);struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[21];
-struct Cyc_Core_Invalid_argument_struct{char*tag;struct _tagged_arr f1;};extern char
-Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{char*tag;struct _tagged_arr f1;
-};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{char*tag;
-struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
+ void exit(int);void*abort();struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[
+21];struct Cyc_Core_Invalid_argument_struct{char*tag;struct _tagged_arr f1;};extern
+char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{char*tag;struct
+_tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
+char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
 16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};struct
 _tagged_arr Cstring_to_string(char*);struct Cyc_List_List{void*hd;struct Cyc_List_List*
 tl;};struct Cyc_List_List*Cyc_List_list(struct _tagged_arr);struct Cyc_List_List*
@@ -350,16 +350,17 @@ int Cyc_printf(struct _tagged_arr,struct _tagged_arr);int remove(const char*);ex
 char Cyc_FileCloseError[19];extern char Cyc_FileOpenError[18];struct Cyc_FileOpenError_struct{
 char*tag;struct _tagged_arr f1;};struct Cyc___cycFILE*Cyc_file_open(struct
 _tagged_arr,struct _tagged_arr);void Cyc_file_close(struct Cyc___cycFILE*);typedef
-struct{int quot;int rem;}Cyc_div_t;typedef struct{int quot;int rem;}Cyc_ldiv_t;char*
-getenv(const char*);int system(const char*);unsigned int Cyc_strlen(struct
-_tagged_arr s);int Cyc_strcmp(struct _tagged_arr s1,struct _tagged_arr s2);struct
-_tagged_arr Cyc_strconcat(struct _tagged_arr,struct _tagged_arr);struct _tagged_arr
-Cyc_strconcat_l(struct Cyc_List_List*);struct _tagged_arr Cyc_str_sepstr(struct Cyc_List_List*,
-struct _tagged_arr);struct _tagged_arr Cyc_substring(struct _tagged_arr,int ofs,
-unsigned int n);struct _tagged_arr Cyc_strchr(struct _tagged_arr s,char c);struct Cyc_Iter_Iter{
-void*env;int(*next)(void*env,void*dest);};int Cyc_Iter_next(struct Cyc_Iter_Iter,
-void*);struct Cyc_Dict_Dict;extern char Cyc_Dict_Present[12];extern char Cyc_Dict_Absent[
-11];struct _tuple0{void*f1;void*f2;};struct _tuple0*Cyc_Dict_rchoose(struct
+struct{int quot;int rem;}Cyc_div_t;typedef struct{int quot;int rem;}Cyc_ldiv_t;void*
+abort();void exit(int);char*getenv(const char*);int system(const char*);unsigned int
+Cyc_strlen(struct _tagged_arr s);int Cyc_strcmp(struct _tagged_arr s1,struct
+_tagged_arr s2);struct _tagged_arr Cyc_strconcat(struct _tagged_arr,struct
+_tagged_arr);struct _tagged_arr Cyc_strconcat_l(struct Cyc_List_List*);struct
+_tagged_arr Cyc_str_sepstr(struct Cyc_List_List*,struct _tagged_arr);struct
+_tagged_arr Cyc_substring(struct _tagged_arr,int ofs,unsigned int n);struct
+_tagged_arr Cyc_strchr(struct _tagged_arr s,char c);struct Cyc_Iter_Iter{void*env;int(*
+next)(void*env,void*dest);};int Cyc_Iter_next(struct Cyc_Iter_Iter,void*);struct
+Cyc_Dict_Dict;extern char Cyc_Dict_Present[12];extern char Cyc_Dict_Absent[11];
+struct _tuple0{void*f1;void*f2;};struct _tuple0*Cyc_Dict_rchoose(struct
 _RegionHandle*r,struct Cyc_Dict_Dict*d);struct _tuple0*Cyc_Dict_rchoose(struct
 _RegionHandle*,struct Cyc_Dict_Dict*d);struct _tagged_arr Cyc_Filename_concat(
 struct _tagged_arr,struct _tagged_arr);struct _tagged_arr Cyc_Filename_chop_extension(

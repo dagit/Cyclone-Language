@@ -307,9 +307,10 @@ extern void _profile_free_region(struct _RegionHandle *,
 #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
 #endif
 #endif
- struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
-char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
-char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
+ void exit(int);void*abort();struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[
+21];struct Cyc_Core_Invalid_argument_struct{char*tag;struct _tagged_arr f1;};extern
+char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{char*tag;struct
+_tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
 16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};extern
 struct _RegionHandle*Cyc_Core_heap_region;typedef struct{int __count;union{
@@ -338,60 +339,61 @@ _tagged_arr,struct _tagged_arr);extern char Cyc_FileCloseError[19];extern char C
 18];struct Cyc_FileOpenError_struct{char*tag;struct _tagged_arr f1;};struct Cyc_List_List{
 void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[18];extern char
 Cyc_List_Nth[8];typedef struct{int quot;int rem;}Cyc_div_t;typedef struct{int quot;
-int rem;}Cyc_ldiv_t;double modf(double,double*);static struct _tagged_arr Cyc_parg2string(
-void*x){void*_tmp0=x;_LL1: if(*((int*)_tmp0)!= 0)goto _LL3;_LL2: return({const char*
-_tmp1="string";_tag_arr(_tmp1,sizeof(char),_get_zero_arr_size(_tmp1,7));});_LL3:
-if(*((int*)_tmp0)!= 1)goto _LL5;_LL4: return({const char*_tmp2="int";_tag_arr(_tmp2,
-sizeof(char),_get_zero_arr_size(_tmp2,4));});_LL5: if(*((int*)_tmp0)!= 2)goto _LL7;
-_LL6: return({const char*_tmp3="double";_tag_arr(_tmp3,sizeof(char),
-_get_zero_arr_size(_tmp3,7));});_LL7: if(*((int*)_tmp0)!= 3)goto _LL9;_LL8: return({
-const char*_tmp4="short *";_tag_arr(_tmp4,sizeof(char),_get_zero_arr_size(_tmp4,8));});
-_LL9: if(*((int*)_tmp0)!= 4)goto _LL0;_LLA: return({const char*_tmp5="unsigned long *";
-_tag_arr(_tmp5,sizeof(char),_get_zero_arr_size(_tmp5,16));});_LL0:;}static void*
-Cyc_badarg(struct _tagged_arr s){return(void*)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
-_tmp6=_cycalloc(sizeof(*_tmp6));_tmp6[0]=({struct Cyc_Core_Invalid_argument_struct
-_tmp7;_tmp7.tag=Cyc_Core_Invalid_argument;_tmp7.f1=s;_tmp7;});_tmp6;}));}static
-int Cyc_va_arg_int(struct _tagged_arr ap){void*_tmp8=*((void**)
-_check_unknown_subscript(ap,sizeof(void*),0));unsigned int _tmp9;_LLC: if(*((int*)
-_tmp8)!= 1)goto _LLE;_tmp9=((struct Cyc_Int_pa_struct*)_tmp8)->f1;_LLD: return(int)
-_tmp9;_LLE:;_LLF: return((int(*)(struct _tagged_arr s))Cyc_badarg)(({const char*
-_tmpA="printf expected int";_tag_arr(_tmpA,sizeof(char),_get_zero_arr_size(_tmpA,
-20));}));_LLB:;}static int Cyc_va_arg_long(struct _tagged_arr ap){void*_tmpB=*((void**)
-_check_unknown_subscript(ap,sizeof(void*),0));unsigned int _tmpC;_LL11: if(*((int*)
-_tmpB)!= 1)goto _LL13;_tmpC=((struct Cyc_Int_pa_struct*)_tmpB)->f1;_LL12: return(
-int)_tmpC;_LL13:;_LL14: return((int(*)(struct _tagged_arr s))Cyc_badarg)(({const
-char*_tmpD="printf expected int";_tag_arr(_tmpD,sizeof(char),_get_zero_arr_size(
-_tmpD,20));}));_LL10:;}static unsigned int Cyc_va_arg_ulong(struct _tagged_arr ap){
-void*_tmpE=*((void**)_check_unknown_subscript(ap,sizeof(void*),0));unsigned int
-_tmpF;_LL16: if(*((int*)_tmpE)!= 1)goto _LL18;_tmpF=((struct Cyc_Int_pa_struct*)
-_tmpE)->f1;_LL17: return(unsigned int)_tmpF;_LL18:;_LL19: return((unsigned int(*)(
-struct _tagged_arr s))Cyc_badarg)(({const char*_tmp10="printf expected int";
-_tag_arr(_tmp10,sizeof(char),_get_zero_arr_size(_tmp10,20));}));_LL15:;}static
-unsigned int Cyc_va_arg_uint(struct _tagged_arr ap){void*_tmp11=*((void**)
-_check_unknown_subscript(ap,sizeof(void*),0));unsigned int _tmp12;_LL1B: if(*((int*)
-_tmp11)!= 1)goto _LL1D;_tmp12=((struct Cyc_Int_pa_struct*)_tmp11)->f1;_LL1C: return(
-unsigned int)_tmp12;_LL1D:;_LL1E: return((unsigned int(*)(struct _tagged_arr s))Cyc_badarg)(({
-const char*_tmp13="printf expected int";_tag_arr(_tmp13,sizeof(char),
-_get_zero_arr_size(_tmp13,20));}));_LL1A:;}static double Cyc_va_arg_double(struct
-_tagged_arr ap){void*_tmp14=*((void**)_check_unknown_subscript(ap,sizeof(void*),0));
-double _tmp15;_LL20: if(*((int*)_tmp14)!= 2)goto _LL22;_tmp15=((struct Cyc_Double_pa_struct*)
-_tmp14)->f1;_LL21: return _tmp15;_LL22:;_LL23:(int)_throw(Cyc_badarg((struct
-_tagged_arr)({struct Cyc_String_pa_struct _tmp18;_tmp18.tag=0;_tmp18.f1=(struct
-_tagged_arr)((struct _tagged_arr)Cyc_parg2string(*((void**)
-_check_unknown_subscript(ap,sizeof(void*),0))));{void*_tmp16[1]={& _tmp18};Cyc_aprintf(({
-const char*_tmp17="printf expected double but found %s";_tag_arr(_tmp17,sizeof(
-char),_get_zero_arr_size(_tmp17,36));}),_tag_arr(_tmp16,sizeof(void*),1));}})));
-_LL1F:;}static short*Cyc_va_arg_short_ptr(struct _tagged_arr ap){void*_tmp19=*((
-void**)_check_unknown_subscript(ap,sizeof(void*),0));short*_tmp1A;_LL25: if(*((
-int*)_tmp19)!= 3)goto _LL27;_tmp1A=((struct Cyc_ShortPtr_pa_struct*)_tmp19)->f1;
-_LL26: return _tmp1A;_LL27:;_LL28:(int)_throw(Cyc_badarg(({const char*_tmp1B="printf expected short pointer";
-_tag_arr(_tmp1B,sizeof(char),_get_zero_arr_size(_tmp1B,30));})));_LL24:;}static
-unsigned int*Cyc_va_arg_int_ptr(struct _tagged_arr ap){void*_tmp1C=*((void**)
-_check_unknown_subscript(ap,sizeof(void*),0));unsigned int*_tmp1D;_LL2A: if(*((
-int*)_tmp1C)!= 4)goto _LL2C;_tmp1D=((struct Cyc_IntPtr_pa_struct*)_tmp1C)->f1;
-_LL2B: return _tmp1D;_LL2C:;_LL2D:(int)_throw(Cyc_badarg(({const char*_tmp1E="printf expected int pointer";
-_tag_arr(_tmp1E,sizeof(char),_get_zero_arr_size(_tmp1E,28));})));_LL29:;}static
-struct _tagged_arr Cyc_va_arg_string(struct _tagged_arr ap){void*_tmp1F=*((void**)
+int rem;}Cyc_ldiv_t;void*abort();void exit(int);double modf(double,double*);static
+struct _tagged_arr Cyc_parg2string(void*x){void*_tmp0=x;_LL1: if(*((int*)_tmp0)!= 0)
+goto _LL3;_LL2: return({const char*_tmp1="string";_tag_arr(_tmp1,sizeof(char),
+_get_zero_arr_size(_tmp1,7));});_LL3: if(*((int*)_tmp0)!= 1)goto _LL5;_LL4: return({
+const char*_tmp2="int";_tag_arr(_tmp2,sizeof(char),_get_zero_arr_size(_tmp2,4));});
+_LL5: if(*((int*)_tmp0)!= 2)goto _LL7;_LL6: return({const char*_tmp3="double";
+_tag_arr(_tmp3,sizeof(char),_get_zero_arr_size(_tmp3,7));});_LL7: if(*((int*)
+_tmp0)!= 3)goto _LL9;_LL8: return({const char*_tmp4="short *";_tag_arr(_tmp4,
+sizeof(char),_get_zero_arr_size(_tmp4,8));});_LL9: if(*((int*)_tmp0)!= 4)goto _LL0;
+_LLA: return({const char*_tmp5="unsigned long *";_tag_arr(_tmp5,sizeof(char),
+_get_zero_arr_size(_tmp5,16));});_LL0:;}static void*Cyc_badarg(struct _tagged_arr s){
+return(void*)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*_tmp6=
+_cycalloc(sizeof(*_tmp6));_tmp6[0]=({struct Cyc_Core_Invalid_argument_struct _tmp7;
+_tmp7.tag=Cyc_Core_Invalid_argument;_tmp7.f1=s;_tmp7;});_tmp6;}));}static int Cyc_va_arg_int(
+struct _tagged_arr ap){void*_tmp8=*((void**)_check_unknown_subscript(ap,sizeof(
+void*),0));unsigned int _tmp9;_LLC: if(*((int*)_tmp8)!= 1)goto _LLE;_tmp9=((struct
+Cyc_Int_pa_struct*)_tmp8)->f1;_LLD: return(int)_tmp9;_LLE:;_LLF: return((int(*)(
+struct _tagged_arr s))Cyc_badarg)(({const char*_tmpA="printf expected int";_tag_arr(
+_tmpA,sizeof(char),_get_zero_arr_size(_tmpA,20));}));_LLB:;}static int Cyc_va_arg_long(
+struct _tagged_arr ap){void*_tmpB=*((void**)_check_unknown_subscript(ap,sizeof(
+void*),0));unsigned int _tmpC;_LL11: if(*((int*)_tmpB)!= 1)goto _LL13;_tmpC=((
+struct Cyc_Int_pa_struct*)_tmpB)->f1;_LL12: return(int)_tmpC;_LL13:;_LL14: return((
+int(*)(struct _tagged_arr s))Cyc_badarg)(({const char*_tmpD="printf expected int";
+_tag_arr(_tmpD,sizeof(char),_get_zero_arr_size(_tmpD,20));}));_LL10:;}static
+unsigned int Cyc_va_arg_ulong(struct _tagged_arr ap){void*_tmpE=*((void**)
+_check_unknown_subscript(ap,sizeof(void*),0));unsigned int _tmpF;_LL16: if(*((int*)
+_tmpE)!= 1)goto _LL18;_tmpF=((struct Cyc_Int_pa_struct*)_tmpE)->f1;_LL17: return(
+unsigned int)_tmpF;_LL18:;_LL19: return((unsigned int(*)(struct _tagged_arr s))Cyc_badarg)(({
+const char*_tmp10="printf expected int";_tag_arr(_tmp10,sizeof(char),
+_get_zero_arr_size(_tmp10,20));}));_LL15:;}static unsigned int Cyc_va_arg_uint(
+struct _tagged_arr ap){void*_tmp11=*((void**)_check_unknown_subscript(ap,sizeof(
+void*),0));unsigned int _tmp12;_LL1B: if(*((int*)_tmp11)!= 1)goto _LL1D;_tmp12=((
+struct Cyc_Int_pa_struct*)_tmp11)->f1;_LL1C: return(unsigned int)_tmp12;_LL1D:;
+_LL1E: return((unsigned int(*)(struct _tagged_arr s))Cyc_badarg)(({const char*_tmp13="printf expected int";
+_tag_arr(_tmp13,sizeof(char),_get_zero_arr_size(_tmp13,20));}));_LL1A:;}static
+double Cyc_va_arg_double(struct _tagged_arr ap){void*_tmp14=*((void**)
+_check_unknown_subscript(ap,sizeof(void*),0));double _tmp15;_LL20: if(*((int*)
+_tmp14)!= 2)goto _LL22;_tmp15=((struct Cyc_Double_pa_struct*)_tmp14)->f1;_LL21:
+return _tmp15;_LL22:;_LL23:(int)_throw(Cyc_badarg((struct _tagged_arr)({struct Cyc_String_pa_struct
+_tmp18;_tmp18.tag=0;_tmp18.f1=(struct _tagged_arr)((struct _tagged_arr)Cyc_parg2string(*((
+void**)_check_unknown_subscript(ap,sizeof(void*),0))));{void*_tmp16[1]={& _tmp18};
+Cyc_aprintf(({const char*_tmp17="printf expected double but found %s";_tag_arr(
+_tmp17,sizeof(char),_get_zero_arr_size(_tmp17,36));}),_tag_arr(_tmp16,sizeof(
+void*),1));}})));_LL1F:;}static short*Cyc_va_arg_short_ptr(struct _tagged_arr ap){
+void*_tmp19=*((void**)_check_unknown_subscript(ap,sizeof(void*),0));short*_tmp1A;
+_LL25: if(*((int*)_tmp19)!= 3)goto _LL27;_tmp1A=((struct Cyc_ShortPtr_pa_struct*)
+_tmp19)->f1;_LL26: return _tmp1A;_LL27:;_LL28:(int)_throw(Cyc_badarg(({const char*
+_tmp1B="printf expected short pointer";_tag_arr(_tmp1B,sizeof(char),
+_get_zero_arr_size(_tmp1B,30));})));_LL24:;}static unsigned int*Cyc_va_arg_int_ptr(
+struct _tagged_arr ap){void*_tmp1C=*((void**)_check_unknown_subscript(ap,sizeof(
+void*),0));unsigned int*_tmp1D;_LL2A: if(*((int*)_tmp1C)!= 4)goto _LL2C;_tmp1D=((
+struct Cyc_IntPtr_pa_struct*)_tmp1C)->f1;_LL2B: return _tmp1D;_LL2C:;_LL2D:(int)
+_throw(Cyc_badarg(({const char*_tmp1E="printf expected int pointer";_tag_arr(
+_tmp1E,sizeof(char),_get_zero_arr_size(_tmp1E,28));})));_LL29:;}static struct
+_tagged_arr Cyc_va_arg_string(struct _tagged_arr ap){void*_tmp1F=*((void**)
 _check_unknown_subscript(ap,sizeof(void*),0));struct _tagged_arr _tmp20;_LL2F: if(*((
 int*)_tmp1F)!= 0)goto _LL31;_tmp20=((struct Cyc_String_pa_struct*)_tmp1F)->f1;
 _LL30: return _tmp20;_LL31:;_LL32:(int)_throw(Cyc_badarg(({const char*_tmp21="printf expected string";

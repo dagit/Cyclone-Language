@@ -307,11 +307,11 @@ extern void _profile_free_region(struct _RegionHandle *,
 #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
 #endif
 #endif
- void exit(int);struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[21];
-struct Cyc_Core_Invalid_argument_struct{char*tag;struct _tagged_arr f1;};extern char
-Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{char*tag;struct _tagged_arr f1;
-};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{char*tag;
-struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
+ void exit(int);void*abort();struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[
+21];struct Cyc_Core_Invalid_argument_struct{char*tag;struct _tagged_arr f1;};extern
+char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{char*tag;struct
+_tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
+char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
 16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};extern
 struct _RegionHandle*Cyc_Core_heap_region;struct _tagged_arr Cstring_to_string(char*);
 typedef struct{int __count;union{unsigned int __wch;char __wchb[4];}__value;}Cyc___mbstate_t;
@@ -666,28 +666,28 @@ int tag;struct Cyc_Absyn_Stmt*f1;};struct Cyc_Tcenv_Outermost_struct{int tag;voi
 int tag;void*f1;void*f2;};struct Cyc_Tcenv_Tenv{struct Cyc_List_List*ns;struct Cyc_Dict_Dict*
 ae;struct Cyc_Core_Opt*le;};struct Cyc_Tcenv_Tenv*Cyc_Tcenv_tc_init();void Cyc_Tc_tc(
 struct Cyc_Tcenv_Tenv*te,int var_default_init,struct Cyc_List_List*ds);typedef
-struct{int quot;int rem;}Cyc_div_t;typedef struct{int quot;int rem;}Cyc_ldiv_t;int
-system(const char*);struct Cyc_stat{unsigned long long st_dev;unsigned short __pad1;
-unsigned int st_ino;unsigned int st_mode;unsigned int st_nlink;unsigned int st_uid;
-unsigned int st_gid;unsigned long long st_rdev;unsigned short __pad2;int st_size;int
-st_blksize;int st_blocks;int st_atime;unsigned int __unused1;int st_mtime;
-unsigned int __unused2;int st_ctime;unsigned int __unused3;unsigned int __unused4;
-unsigned int __unused5;};int mkdir(const char*pathname,unsigned int mode);struct Cyc_flock{
-short l_type;short l_whence;int l_start;int l_len;int l_pid;};struct Cyc_Flock_struct{
-int tag;struct Cyc_flock*f1;};struct Cyc_Long_struct{int tag;int f1;};int Cyc_open(
-const char*,int,struct _tagged_arr);enum Cyc___anonymous_enum_366__{Cyc__PC_LINK_MAX
- = 0,Cyc__PC_MAX_CANON  = 1,Cyc__PC_MAX_INPUT  = 2,Cyc__PC_NAME_MAX  = 3,Cyc__PC_PATH_MAX
- = 4,Cyc__PC_PIPE_BUF  = 5,Cyc__PC_CHOWN_RESTRICTED  = 6,Cyc__PC_NO_TRUNC  = 7,Cyc__PC_VDISABLE
- = 8,Cyc__PC_SYNC_IO  = 9,Cyc__PC_ASYNC_IO  = 10,Cyc__PC_PRIO_IO  = 11,Cyc__PC_SOCK_MAXBUF
- = 12,Cyc__PC_FILESIZEBITS  = 13,Cyc__PC_REC_INCR_XFER_SIZE  = 14,Cyc__PC_REC_MAX_XFER_SIZE
- = 15,Cyc__PC_REC_MIN_XFER_SIZE  = 16,Cyc__PC_REC_XFER_ALIGN  = 17,Cyc__PC_ALLOC_SIZE_MIN
- = 18,Cyc__PC_SYMLINK_MAX  = 19};enum Cyc___anonymous_enum_368__{Cyc__CS_PATH  = 0,
-Cyc__CS_V6_WIDTH_RESTRICTED_ENVS  = 1};int chdir(const char*);int close(int);struct
-_tagged_arr Cyc_getcwd(struct _tagged_arr buf,unsigned int size);int isspace(int);int
-toupper(int);void Cyc_Lex_lex_init();extern char*Ccomp;struct Cyc___cycFILE*Cyc_log_file=
-0;struct Cyc___cycFILE*Cyc_cstubs_file=0;struct Cyc___cycFILE*Cyc_cycstubs_file=0;
-int Cyc_log(struct _tagged_arr fmt,struct _tagged_arr ap){if(Cyc_log_file == 0){({void*
-_tmp0[0]={};Cyc_fprintf(Cyc_stderr,({const char*_tmp1="Internal error: log file is NULL\n";
+struct{int quot;int rem;}Cyc_div_t;typedef struct{int quot;int rem;}Cyc_ldiv_t;void*
+abort();void exit(int);int system(const char*);struct Cyc_stat{unsigned long long
+st_dev;unsigned short __pad1;unsigned int st_ino;unsigned int st_mode;unsigned int
+st_nlink;unsigned int st_uid;unsigned int st_gid;unsigned long long st_rdev;
+unsigned short __pad2;int st_size;int st_blksize;int st_blocks;int st_atime;
+unsigned int __unused1;int st_mtime;unsigned int __unused2;int st_ctime;unsigned int
+__unused3;unsigned int __unused4;unsigned int __unused5;};int mkdir(const char*
+pathname,unsigned int mode);struct Cyc_flock{short l_type;short l_whence;int l_start;
+int l_len;int l_pid;};struct Cyc_Flock_struct{int tag;struct Cyc_flock*f1;};struct Cyc_Long_struct{
+int tag;int f1;};int Cyc_open(const char*,int,struct _tagged_arr);enum Cyc___anonymous_enum_366__{
+Cyc__PC_LINK_MAX  = 0,Cyc__PC_MAX_CANON  = 1,Cyc__PC_MAX_INPUT  = 2,Cyc__PC_NAME_MAX
+ = 3,Cyc__PC_PATH_MAX  = 4,Cyc__PC_PIPE_BUF  = 5,Cyc__PC_CHOWN_RESTRICTED  = 6,Cyc__PC_NO_TRUNC
+ = 7,Cyc__PC_VDISABLE  = 8,Cyc__PC_SYNC_IO  = 9,Cyc__PC_ASYNC_IO  = 10,Cyc__PC_PRIO_IO
+ = 11,Cyc__PC_SOCK_MAXBUF  = 12,Cyc__PC_FILESIZEBITS  = 13,Cyc__PC_REC_INCR_XFER_SIZE
+ = 14,Cyc__PC_REC_MAX_XFER_SIZE  = 15,Cyc__PC_REC_MIN_XFER_SIZE  = 16,Cyc__PC_REC_XFER_ALIGN
+ = 17,Cyc__PC_ALLOC_SIZE_MIN  = 18,Cyc__PC_SYMLINK_MAX  = 19};enum Cyc___anonymous_enum_368__{
+Cyc__CS_PATH  = 0,Cyc__CS_V6_WIDTH_RESTRICTED_ENVS  = 1};int chdir(const char*);int
+close(int);struct _tagged_arr Cyc_getcwd(struct _tagged_arr buf,unsigned int size);
+int isspace(int);int toupper(int);void Cyc_Lex_lex_init();extern char*Ccomp;struct
+Cyc___cycFILE*Cyc_log_file=0;struct Cyc___cycFILE*Cyc_cstubs_file=0;struct Cyc___cycFILE*
+Cyc_cycstubs_file=0;int Cyc_log(struct _tagged_arr fmt,struct _tagged_arr ap){if(Cyc_log_file
+== 0){({void*_tmp0[0]={};Cyc_fprintf(Cyc_stderr,({const char*_tmp1="Internal error: log file is NULL\n";
 _tag_arr(_tmp1,sizeof(char),_get_zero_arr_size(_tmp1,34));}),_tag_arr(_tmp0,
 sizeof(void*),0));});exit(1);}{int _tmp2=Cyc_vfprintf((struct Cyc___cycFILE*)
 _check_null(Cyc_log_file),fmt,ap);Cyc_fflush((struct Cyc___cycFILE*)((struct Cyc___cycFILE*)

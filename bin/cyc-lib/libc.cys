@@ -3243,8 +3243,11 @@ hstub _Exit {
 }
 hstub abort {
   // This is the type of abort according to Posix, but we have a
-  // conflicting type for abort in core.h
+  // conflicting type for abort in core.h.
   //  extern "C" void abort(void);
+
+  // core.h version duplicated here
+  extern "C" `a abort() __attribute__((noreturn));
 }
 hstub abs {
   extern "C" int abs(int);
@@ -3279,8 +3282,8 @@ hstub erand48 {
   extern "C" double erand48(unsigned short @{3});
 }
 hstub exit {
-// currently causes ambiguity
-//  extern "C" void exit(int);
+  // duplicates version in core.h
+  extern "C" void exit(int) __attribute__((noreturn)) ;
 }
 hstub free {
   extern void free(`a::A ?);
