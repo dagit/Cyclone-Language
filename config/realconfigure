@@ -28,7 +28,7 @@ esac
 #  Such path names don't work in make's VPATH, so we convert them
 #  to path names without colons using the cygpath command.
 # We use 'command -v' for WHICH because it seems to work on Mac OS X, 
-* solaris, linux, and IRIX.  Other options are 'type -p' and 'which'.
+# solaris, linux, and IRIX.  Other options are 'type -p' and 'which'.
 case "$OS" in
   cygwin*)
     PWD=`pwd`
