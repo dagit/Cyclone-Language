@@ -41,6 +41,10 @@
 namespace Lex {
   extern void lex_init();
 }
+namespace Toc {
+  bool warn_bounds_checks;
+}
+
 using Core;
 using List;
 using Arg;
@@ -224,7 +228,7 @@ static void add_other(string_t<`H> s) {
 
     // The C compiler wants the .c file, not the .cyc files
     let basename = 
-      Filename::chop_extension(output_file==NULL ? s : *output_file);
+      output_file==NULL ?  (string_t)Filename::chop_extension(s)  : *output_file;
     let cfile    = strconcat(basename, ".c");
     add_ccarg(cfile);
   }
@@ -539,7 +543,7 @@ static stringptr_t sh_escape_stringptr(stringptr_t<`H,`H> sp) {
 static void process_file(string_t<`H> filename) {
 
   let basename = 
-    Filename::chop_extension(output_file==NULL ? filename : *output_file);
+    output_file==NULL ? (string_t)Filename::chop_extension(filename)  : *output_file;
   let preprocfile   = strconcat(basename, ".cyp");
   let interfacefile = strconcat(basename, ".cyci");
   let interfaceobjfile = strconcat(basename, ".cycio");
@@ -785,7 +789,7 @@ int main(int argc, string_t<`H> ?`H argv) {
                new Flag_spec(add_cpparg),
                "Add to the list of directories to search for include files"),
          new $("-L",true,"<dir>",
-               new Flag_spec(add_cpparg),
+               new Flag_spec(add_cyclone_lib_path),
                "Add to the list of directories for -l"),
          new $("-l",true,"<file>",
                new Flag_spec(add_libarg),
@@ -907,7 +911,10 @@ int main(int argc, string_t<`H> ?`H argv) {
                "Always print kinds of type variables"),
          new $("-printfullevars",false,"",
                new Set_spec(&print_full_evars_r),
-               "Print full information for evars (type debugging)")
+               "Print full information for evars (type debugging)"),
+	 new $("-warnboundschecks", false, "",
+	       new Set_spec(&Toc::warn_bounds_checks),
+	       "Warn when bounds checks can't be eliminated")
          );
 
   Arg::parse(options, add_other, "Options:", argv);
@@ -930,8 +937,13 @@ int main(int argc, string_t<`H> ?`H argv) {
   if (strlen(def_lib_path) > 0)
     cyclone_lib_path = new List(new def_lib_path, cyclone_lib_path);
   /* Look for other cyclone libraries during linking */
-  if (cyclone_lib_path != NULL)
-    add_ccarg(strconcat("-L",*cyclone_lib_path->hd));
+  list_t<stringptr_t> pp = cyclone_lib_path;
+  while(pp != NULL) {
+    add_ccarg(strconcat("-L",*pp->hd));
+    pp = pp->tl;
+  }
+    //if (cyclone_lib_path != NULL)
+    //add_ccarg(strconcat("-L",*cyclone_lib_path->hd));
   cyclone_lib_path = List::imp_rev(cyclone_lib_path);
   /* The absolute file name is kept in a global variable */
   cyc_include = do_find(cyclone_lib_path,"include/cyc_include.h");

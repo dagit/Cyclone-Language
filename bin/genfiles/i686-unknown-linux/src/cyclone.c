@@ -1619,8 +1619,8 @@ _tag_arr("-L", sizeof( unsigned char), 3u); _temp319->f2= 1; _temp319->f3=
 _tag_arr("<dir>", sizeof( unsigned char), 6u); _temp319->f4=( void*)({ struct
 Cyc_Arg_Flag_spec_struct* _temp320=( struct Cyc_Arg_Flag_spec_struct*) _cycalloc(
 sizeof( struct Cyc_Arg_Flag_spec_struct)); _temp320[ 0]=({ struct Cyc_Arg_Flag_spec_struct
-_temp321; _temp321.tag= Cyc_Arg_Flag_spec; _temp321.f1= Cyc_add_cpparg; _temp321;});
-_temp320;}); _temp319->f5= _tag_arr("Add to the list of directories for -l",
+_temp321; _temp321.tag= Cyc_Arg_Flag_spec; _temp321.f1= Cyc_add_cyclone_lib_path;
+_temp321;}); _temp320;}); _temp319->f5= _tag_arr("Add to the list of directories for -l",
 sizeof( unsigned char), 38u); _temp319;}); _temp300[ 5u]=({ struct _tuple10*
 _temp316=( struct _tuple10*) _cycalloc( sizeof( struct _tuple10)); _temp316->f1=
 _tag_arr("-I", sizeof( unsigned char), 3u); _temp316->f2= 1; _temp316->f3=
@@ -1685,10 +1685,10 @@ Cstring_to_string( Cdef_lib_path); if( Cyc_Std_strlen( def_lib_path) >  0){ Cyc_
 struct Cyc_List_List* _temp229=( struct Cyc_List_List*) _cycalloc( sizeof(
 struct Cyc_List_List)); _temp229->hd=( void*)({ struct _tagged_arr* _temp230=(
 struct _tagged_arr*) _cycalloc( sizeof( struct _tagged_arr)); _temp230[ 0]=
-def_lib_path; _temp230;}); _temp229->tl= Cyc_cyclone_lib_path; _temp229;});} if(
-Cyc_cyclone_lib_path !=  0){ Cyc_add_ccarg(( struct _tagged_arr) Cyc_Std_strconcat(
-_tag_arr("-L", sizeof( unsigned char), 3u),*(( struct _tagged_arr*)(( struct Cyc_List_List*)
-_check_null( Cyc_cyclone_lib_path))->hd)));} Cyc_cyclone_lib_path=(( struct Cyc_List_List*(*)(
+def_lib_path; _temp230;}); _temp229->tl= Cyc_cyclone_lib_path; _temp229;});}{
+struct Cyc_List_List* pp= Cyc_cyclone_lib_path; while( pp !=  0) { Cyc_add_ccarg((
+struct _tagged_arr) Cyc_Std_strconcat( _tag_arr("-L", sizeof( unsigned char), 3u),*((
+struct _tagged_arr*) pp->hd))); pp= pp->tl;} Cyc_cyclone_lib_path=(( struct Cyc_List_List*(*)(
 struct Cyc_List_List* x)) Cyc_List_imp_rev)( Cyc_cyclone_lib_path); Cyc_cyc_include=
 Cyc_do_find( Cyc_cyclone_lib_path, _tag_arr("include/cyc_include.h", sizeof(
 unsigned char), 22u));{ struct Cyc_List_List* _temp231=(( struct Cyc_List_List*(*)(
@@ -1822,4 +1822,4 @@ _tag_arr( _temp288, sizeof( void*), 1u));}});} if( Cyc_Std_system(( struct
 _tagged_arr) _temp287) !=  0){({ void* _temp290[ 0u]={}; Cyc_Std_fprintf( Cyc_Std_stderr,
 _tag_arr("Error: C compiler failed\n", sizeof( unsigned char), 26u), _tag_arr(
 _temp290, sizeof( void*), 0u));}); Cyc_compile_failure= 1; Cyc_remove_cfiles();
-return 1;} Cyc_remove_cfiles(); return Cyc_compile_failure? 1: 0;}}}}}}}}
+return 1;} Cyc_remove_cfiles(); return Cyc_compile_failure? 1: 0;}}}}}}}}}

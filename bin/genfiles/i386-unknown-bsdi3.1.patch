@@ -1,8 +1,8 @@
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c i386-unknown-bsdi3.1/lib/execinfo.c
-*** i686-unknown-linux/lib/execinfo.c	Sun Dec  2 16:30:56 2001
---- i386-unknown-bsdi3.1/lib/execinfo.c	Sun Dec  9 22:52:35 2001
+*** i686-unknown-linux/lib/execinfo.c	Tue Dec 11 11:43:15 2001
+--- i386-unknown-bsdi3.1/lib/execinfo.c	Tue Dec 11 13:50:27 2001
 ***************
-*** 265,387 ****
+*** 265,382 ****
   extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
   extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); int Cyc_Execinfo_backtrace(
   struct _tagged_arr, int); int Cyc_Execinfo_bt(); struct Cyc_Cstdio___sFILE;
@@ -88,34 +88,29 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c i386-unknown-bsdi3.1
 ! _temp10= 20u; unsigned int i; for( i= 0; i <  _temp10; i ++){ bt[ i]= 0;}}{ int
 ! tochild[ 2u]={ 0, 0}; int fromchild[ 2u]={ 0, 0}; int pid; int self_pid; if(
 ! pipe( tochild)? 1: pipe( fromchild)){ return 1;} self_pid= getpid(); if(( pid=
-! fork()) ==  0){ if( dup2( tochild[ _check_known_subscript_notnull( 2u, 0)], 0)
-! ==  - 1? 1: dup2( fromchild[ _check_known_subscript_notnull( 2u, 1)], 1) ==  - 1){
-! return 1;}({ struct _tagged_arr _temp2[ 4u]; _temp2[ 3u]=( struct _tagged_arr)
-! _tag_arr( 0u, 0u, 0u); _temp2[ 2u]=( struct _tagged_arr)({ struct Cyc_Std_Int_pa_struct
-! _temp4; _temp4.tag= Cyc_Std_Int_pa; _temp4.f1=( int)(( unsigned int) self_pid);{
-! void* _temp3[ 1u]={& _temp4}; Cyc_Std_aprintf( _tag_arr("/proc/%d/exe", sizeof(
-! unsigned char), 13u), _tag_arr( _temp3, sizeof( void*), 1u));}}); _temp2[ 1u]=
-! _tag_arr("-e", sizeof( unsigned char), 3u); _temp2[ 0u]= _tag_arr("--functions",
-! sizeof( unsigned char), 12u); Cyc_Std_execlp( _tag_arr("addr2line", sizeof(
-! unsigned char), 10u), _tag_arr("addr2line", sizeof( unsigned char), 10u),
-! _tag_arr( _temp2, sizeof( struct _tagged_arr), 4u));}); return 1;} else{ if( pid
-! <  0){ close( tochild[ _check_known_subscript_notnull( 2u, 0)]); close( tochild[
-! _check_known_subscript_notnull( 2u, 1)]); close( fromchild[
-! _check_known_subscript_notnull( 2u, 0)]); close( fromchild[
-! _check_known_subscript_notnull( 2u, 1)]); return 1;}}{ struct Cyc_Std___sFILE* w=({
-! struct Cyc_Std___sFILE* f= Cyc_Std_fdopen( tochild[
-! _check_known_subscript_notnull( 2u, 1)], _tag_arr("w", sizeof( unsigned char), 2u));
-! if( !(( unsigned int) f)){ return 1;}( struct Cyc_Std___sFILE*) _check_null( f);});
-! struct Cyc_Std___sFILE* r=({ struct Cyc_Std___sFILE* f= Cyc_Std_fdopen(
-! fromchild[ _check_known_subscript_notnull( 2u, 0)], _tag_arr("r", sizeof(
-! unsigned char), 2u)); if( !(( unsigned int) f)){ Cyc_Std_fclose( w); return 1;}(
-! struct Cyc_Std___sFILE*) _check_null( f);}); int n= Cyc_Execinfo_backtrace(
-! _tag_arr( bt, sizeof( int), 20u),( int) 20u);{ int c= 0; for( 0; c <  n; c ++){({
-! struct Cyc_Std_Int_pa_struct _temp6; _temp6.tag= Cyc_Std_Int_pa; _temp6.f1=(
-! unsigned int) bt[ _check_known_subscript_notnull( 20u, c)];{ void* _temp5[ 1u]={&
-! _temp6}; Cyc_Std_fprintf( w, _tag_arr("%#x\n", sizeof( unsigned char), 5u),
-! _tag_arr( _temp5, sizeof( void*), 1u));}});}} Cyc_Std_fflush(( struct Cyc_Std___sFILE*)
-! w);({ void* _temp7[ 0u]={}; Cyc_Std_printf( _tag_arr("Backtrace:\n  Function          Location\n  ----------------  --------------------------------\n",
+! fork()) ==  0){ if( dup2( tochild[ 0], 0) ==  - 1? 1: dup2( fromchild[ 1], 1) == 
+! - 1){ return 1;}({ struct _tagged_arr _temp2[ 4u]; _temp2[ 3u]=( struct
+! _tagged_arr) _tag_arr( 0u, 0u, 0u); _temp2[ 2u]=( struct _tagged_arr)({ struct
+! Cyc_Std_Int_pa_struct _temp4; _temp4.tag= Cyc_Std_Int_pa; _temp4.f1=( int)((
+! unsigned int) self_pid);{ void* _temp3[ 1u]={& _temp4}; Cyc_Std_aprintf(
+! _tag_arr("/proc/%d/exe", sizeof( unsigned char), 13u), _tag_arr( _temp3, sizeof(
+! void*), 1u));}}); _temp2[ 1u]= _tag_arr("-e", sizeof( unsigned char), 3u);
+! _temp2[ 0u]= _tag_arr("--functions", sizeof( unsigned char), 12u); Cyc_Std_execlp(
+! _tag_arr("addr2line", sizeof( unsigned char), 10u), _tag_arr("addr2line",
+! sizeof( unsigned char), 10u), _tag_arr( _temp2, sizeof( struct _tagged_arr), 4u));});
+! return 1;} else{ if( pid <  0){ close( tochild[ 0]); close( tochild[ 1]); close(
+! fromchild[ 0]); close( fromchild[ 1]); return 1;}}{ struct Cyc_Std___sFILE* w=({
+! struct Cyc_Std___sFILE* f= Cyc_Std_fdopen( tochild[ 1], _tag_arr("w", sizeof(
+! unsigned char), 2u)); if( !(( unsigned int) f)){ return 1;}( struct Cyc_Std___sFILE*)
+! _check_null( f);}); struct Cyc_Std___sFILE* r=({ struct Cyc_Std___sFILE* f= Cyc_Std_fdopen(
+! fromchild[ 0], _tag_arr("r", sizeof( unsigned char), 2u)); if( !(( unsigned int)
+! f)){ Cyc_Std_fclose( w); return 1;}( struct Cyc_Std___sFILE*) _check_null( f);});
+! int n= Cyc_Execinfo_backtrace( _tag_arr( bt, sizeof( int), 20u),( int) 20u);{
+! int c= 0; for( 0; c <  n; c ++){({ struct Cyc_Std_Int_pa_struct _temp6; _temp6.tag=
+! Cyc_Std_Int_pa; _temp6.f1=( unsigned int) bt[ c];{ void* _temp5[ 1u]={& _temp6};
+! Cyc_Std_fprintf( w, _tag_arr("%#x\n", sizeof( unsigned char), 5u), _tag_arr(
+! _temp5, sizeof( void*), 1u));}});}} Cyc_Std_fflush(( struct Cyc_Std___sFILE*) w);({
+! void* _temp7[ 0u]={}; Cyc_Std_printf( _tag_arr("Backtrace:\n  Function          Location\n  ----------------  --------------------------------\n",
 ! sizeof( unsigned char), 94u), _tag_arr( _temp7, sizeof( void*), 0u));});{ int c=
 ! 0; for( 0; c <  n; c ++){ int d; int pos= 0;({ void* _temp8[ 0u]={}; Cyc_Std_printf(
 ! _tag_arr("  ", sizeof( unsigned char), 3u), _tag_arr( _temp8, sizeof( void*), 0u));});
@@ -172,7 +167,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c i386-unknown-bsdi3.1
 ! return 1;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c i386-unknown-bsdi3.1/lib/getopt.c
 *** i686-unknown-linux/lib/getopt.c	Sun Dec  2 16:30:56 2001
---- i386-unknown-bsdi3.1/lib/getopt.c	Sun Dec  9 22:52:35 2001
+--- i386-unknown-bsdi3.1/lib/getopt.c	Tue Dec 11 13:50:27 2001
 ***************
 *** 297,309 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -200,7 +195,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c i386-unknown-bsdi3.1/l
   _tagged_arr __shortopts, struct _tagged_arr __longopts, int* __longind, int
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/in.c i386-unknown-bsdi3.1/lib/in.c
 *** i686-unknown-linux/lib/in.c	Sun Dec  2 16:30:56 2001
---- i386-unknown-bsdi3.1/lib/in.c	Sun Dec  9 22:52:35 2001
+--- i386-unknown-bsdi3.1/lib/in.c	Tue Dec 11 13:50:27 2001
 ***************
 *** 269,282 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -230,7 +225,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/in.c i386-unknown-bsdi3.1/lib/i
   const int Cyc_Std_SA_socklen= 3; struct Cyc_Std_SA_socklen_struct{ int tag;
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/inet.c i386-unknown-bsdi3.1/lib/inet.c
 *** i686-unknown-linux/lib/inet.c	Sun Dec  2 16:30:56 2001
---- i386-unknown-bsdi3.1/lib/inet.c	Sun Dec  9 22:52:35 2001
+--- i386-unknown-bsdi3.1/lib/inet.c	Tue Dec 11 13:50:27 2001
 ***************
 *** 269,282 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -259,52 +254,32 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/inet.c i386-unknown-bsdi3.1/lib
   2; struct Cyc_Std_SA_socklenptr_struct{ int tag; unsigned int* f1; } ; static
   const int Cyc_Std_SA_socklen= 3; struct Cyc_Std_SA_socklen_struct{ int tag;
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/marshal.c i386-unknown-bsdi3.1/lib/marshal.c
-*** i686-unknown-linux/lib/marshal.c	Tue Dec  4 11:48:21 2001
---- i386-unknown-bsdi3.1/lib/marshal.c	Sun Dec  9 22:52:37 2001
+*** i686-unknown-linux/lib/marshal.c	Tue Dec 11 11:43:16 2001
+--- i386-unknown-bsdi3.1/lib/marshal.c	Tue Dec 11 13:50:27 2001
 ***************
-*** 540,558 ****
-  struct Cyc_Core_Failure_struct*) _cycalloc( sizeof( struct Cyc_Core_Failure_struct));
-  _temp166[ 0]=({ struct Cyc_Core_Failure_struct _temp167; _temp167.tag= Cyc_Core_Failure;
-  _temp167.f1= _tag_arr("Unhandled case in print_type_base", sizeof( unsigned char),
-! 34u); _temp167;}); _temp166;})); _LL40:;} return env;} extern int*
-! __errno_location(); void Cyc_Marshal_print_type( void* ts, void* val){ struct
+*** 539,547 ****
+  _cycalloc( sizeof( struct Cyc_Core_Failure_struct)); _temp166[ 0]=({ struct Cyc_Core_Failure_struct
+  _temp167; _temp167.tag= Cyc_Core_Failure; _temp167.f1= _tag_arr("Unhandled case in print_type_base",
+  sizeof( unsigned char), 34u); _temp167;}); _temp166;})); _LL40:;} return env;}
+! extern int* __errno_location(); void Cyc_Marshal_print_type( void* ts, void* val){
+! struct _handler_cons _temp168; _push_handler(& _temp168);{ int _temp170= 0; if(
+! setjmp( _temp168.handler)){ _temp170= 1;} if( ! _temp170){ Cyc_Marshal_print_type_base(
+  ts, Cyc_Marshal_empty_addr_set(), val);; _pop_handler();} else{ void* _temp169=(
+  void*) _exn_thrown; void* _temp172= _temp169; struct _tagged_arr _temp178;
+  _LL174: if(*(( void**) _temp172) ==  Cyc_Core_Failure){ _LL179: _temp178=((
+--- 539,547 ----
+  _cycalloc( sizeof( struct Cyc_Core_Failure_struct)); _temp166[ 0]=({ struct Cyc_Core_Failure_struct
+  _temp167; _temp167.tag= Cyc_Core_Failure; _temp167.f1= _tag_arr("Unhandled case in print_type_base",
+  sizeof( unsigned char), 34u); _temp167;}); _temp166;})); _LL40:;} return env;}
+! extern int* __errno(); void Cyc_Marshal_print_type( void* ts, void* val){ struct
 ! _handler_cons _temp168; _push_handler(& _temp168);{ int _temp170= 0; if( setjmp(
 ! _temp168.handler)){ _temp170= 1;} if( ! _temp170){ Cyc_Marshal_print_type_base(
-! ts, Cyc_Marshal_empty_addr_set(), val);; _pop_handler();} else{ void* _temp169=(
-! void*) _exn_thrown; void* _temp172= _temp169; struct _tagged_arr _temp178;
-! _LL174: if(*(( void**) _temp172) ==  Cyc_Core_Failure){ _LL179: _temp178=((
-! struct Cyc_Core_Failure_struct*) _temp172)->f1; goto _LL175;} else{ goto _LL176;}
-! _LL176: goto _LL177; _LL175:({ struct Cyc_Std_String_pa_struct _temp181;
-! _temp181.tag= Cyc_Std_String_pa; _temp181.f1=( struct _tagged_arr) _temp178;{
-! void* _temp180[ 1u]={& _temp181}; Cyc_Std_fprintf( Cyc_Std_stderr, _tag_arr("Core::Failure(%s)\n",
-! sizeof( unsigned char), 19u), _tag_arr( _temp180, sizeof( void*), 1u));}});( int)
-! _throw(( void*)({ struct Cyc_Core_Failure_struct* _temp182=( struct Cyc_Core_Failure_struct*)
-  _cycalloc( sizeof( struct Cyc_Core_Failure_struct)); _temp182[ 0]=({ struct Cyc_Core_Failure_struct
-  _temp183; _temp183.tag= Cyc_Core_Failure; _temp183.f1= _temp178; _temp183;});
-  _temp182;})); _LL177:( void) _throw( _temp172); _LL173:;}}} void Cyc_Marshal_cycputchar(
---- 540,558 ----
-  struct Cyc_Core_Failure_struct*) _cycalloc( sizeof( struct Cyc_Core_Failure_struct));
-  _temp166[ 0]=({ struct Cyc_Core_Failure_struct _temp167; _temp167.tag= Cyc_Core_Failure;
-  _temp167.f1= _tag_arr("Unhandled case in print_type_base", sizeof( unsigned char),
-! 34u); _temp167;}); _temp166;})); _LL40:;} return env;} extern int* __errno();
-! void Cyc_Marshal_print_type( void* ts, void* val){ struct _handler_cons _temp168;
-! _push_handler(& _temp168);{ int _temp170= 0; if( setjmp( _temp168.handler)){
-! _temp170= 1;} if( ! _temp170){ Cyc_Marshal_print_type_base( ts, Cyc_Marshal_empty_addr_set(),
-! val);; _pop_handler();} else{ void* _temp169=( void*) _exn_thrown; void*
-! _temp172= _temp169; struct _tagged_arr _temp178; _LL174: if(*(( void**) _temp172)
-! ==  Cyc_Core_Failure){ _LL179: _temp178=(( struct Cyc_Core_Failure_struct*)
-! _temp172)->f1; goto _LL175;} else{ goto _LL176;} _LL176: goto _LL177; _LL175:({
-! struct Cyc_Std_String_pa_struct _temp181; _temp181.tag= Cyc_Std_String_pa;
-! _temp181.f1=( struct _tagged_arr) _temp178;{ void* _temp180[ 1u]={& _temp181};
-! Cyc_Std_fprintf( Cyc_Std_stderr, _tag_arr("Core::Failure(%s)\n", sizeof(
-! unsigned char), 19u), _tag_arr( _temp180, sizeof( void*), 1u));}});( int) _throw((
-! void*)({ struct Cyc_Core_Failure_struct* _temp182=( struct Cyc_Core_Failure_struct*)
-  _cycalloc( sizeof( struct Cyc_Core_Failure_struct)); _temp182[ 0]=({ struct Cyc_Core_Failure_struct
-  _temp183; _temp183.tag= Cyc_Core_Failure; _temp183.f1= _temp178; _temp183;});
-  _temp182;})); _LL177:( void) _throw( _temp172); _LL173:;}}} void Cyc_Marshal_cycputchar(
+  ts, Cyc_Marshal_empty_addr_set(), val);; _pop_handler();} else{ void* _temp169=(
+  void*) _exn_thrown; void* _temp172= _temp169; struct _tagged_arr _temp178;
+  _LL174: if(*(( void**) _temp172) ==  Cyc_Core_Failure){ _LL179: _temp178=((
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/netdb.c i386-unknown-bsdi3.1/lib/netdb.c
 *** i686-unknown-linux/lib/netdb.c	Sun Dec  2 16:30:56 2001
---- i386-unknown-bsdi3.1/lib/netdb.c	Sun Dec  9 22:52:35 2001
+--- i386-unknown-bsdi3.1/lib/netdb.c	Tue Dec 11 13:50:27 2001
 ***************
 *** 269,282 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -333,8 +308,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/netdb.c i386-unknown-bsdi3.1/li
   2; struct Cyc_Std_SA_socklenptr_struct{ int tag; unsigned int* f1; } ; static
   const int Cyc_Std_SA_socklen= 3; struct Cyc_Std_SA_socklen_struct{ int tag;
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/socket.c i386-unknown-bsdi3.1/lib/socket.c
-*** i686-unknown-linux/lib/socket.c	Sun Dec  2 16:30:56 2001
---- i386-unknown-bsdi3.1/lib/socket.c	Sun Dec  9 22:52:35 2001
+*** i686-unknown-linux/lib/socket.c	Tue Dec 11 11:43:16 2001
+--- i386-unknown-bsdi3.1/lib/socket.c	Tue Dec 11 13:50:27 2001
 ***************
 *** 290,303 ****
   Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -364,7 +339,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/socket.c i386-unknown-bsdi3.1/l
   const int Cyc_Std_SA_socklen= 3; struct Cyc_Std_SA_socklen_struct{ int tag;
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/stat.c i386-unknown-bsdi3.1/lib/stat.c
 *** i686-unknown-linux/lib/stat.c	Sun Dec  2 16:30:56 2001
---- i386-unknown-bsdi3.1/lib/stat.c	Sun Dec  9 22:52:35 2001
+--- i386-unknown-bsdi3.1/lib/stat.c	Tue Dec 11 13:50:27 2001
 ***************
 *** 268,279 ****
   tm_wday; int tm_yday; int tm_isdst; } ; extern void tzset(); extern int time(
@@ -392,7 +367,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/stat.c i386-unknown-bsdi3.1/lib
   filename, struct Cyc_Std_stat_t* buf); extern unsigned int umask( unsigned int
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/time.c i386-unknown-bsdi3.1/lib/time.c
 *** i686-unknown-linux/lib/time.c	Sun Dec  2 16:30:56 2001
---- i386-unknown-bsdi3.1/lib/time.c	Sun Dec  9 22:52:35 2001
+--- i386-unknown-bsdi3.1/lib/time.c	Tue Dec 11 13:50:27 2001
 ***************
 *** 279,298 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -433,8 +408,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/time.c i386-unknown-bsdi3.1/lib
   const int* timep){ return wrap_Cstring_as_string( ctime( timep), - 1);}
   unsigned int Cyc_Std_strftime( struct _tagged_arr s, unsigned int maxsize,
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/unistd.c i386-unknown-bsdi3.1/lib/unistd.c
-*** i686-unknown-linux/lib/unistd.c	Sun Dec  2 16:30:56 2001
---- i386-unknown-bsdi3.1/lib/unistd.c	Sun Dec  9 22:52:35 2001
+*** i686-unknown-linux/lib/unistd.c	Tue Dec 11 11:43:16 2001
+--- i386-unknown-bsdi3.1/lib/unistd.c	Tue Dec 11 13:50:27 2001
 ***************
 *** 269,312 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -522,8 +497,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/unistd.c i386-unknown-bsdi3.1/l
   extern int symlink( unsigned char* path1, unsigned char* path2); extern int
   truncate( unsigned char*, int); extern int write( int fd, unsigned char* buf,
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c i386-unknown-bsdi3.1/src/buildlib.c
-*** i686-unknown-linux/src/buildlib.c	Sun Dec  9 22:51:12 2001
---- i386-unknown-bsdi3.1/src/buildlib.c	Sun Dec  9 22:52:36 2001
+*** i686-unknown-linux/src/buildlib.c	Tue Dec 11 11:43:17 2001
+--- i386-unknown-bsdi3.1/src/buildlib.c	Tue Dec 11 13:50:27 2001
 ***************
 *** 355,383 ****
   tm_isdst; } ; extern void tzset(); extern int time( int* t); extern struct Cyc_Std_tm*

@@ -355,8 +355,8 @@ sz1 <  sz2? sz1: sz2;( minsz <=  _get_arr_size( s1, sizeof( unsigned char))?
 minsz <=  _get_arr_size( s2, sizeof( unsigned char)): 0)? 0:(( int(*)( struct
 _tagged_arr assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
 _tag_arr("minsz <= s1.size && minsz <= s2.size", sizeof( unsigned char), 37u),
-_tag_arr("/cygdrive/c/cyclone/lib/string.cyc", sizeof( unsigned char), 35u), 84);
-while( i <  minsz) { unsigned char c1=(( const unsigned char*) s1.curr)[ i];
+_tag_arr("/home/jcheney/src/cyclone/lib/string.cyc", sizeof( unsigned char), 41u),
+84); while( i <  minsz) { unsigned char c1=(( const unsigned char*) s1.curr)[ i];
 unsigned char c2=(( const unsigned char*) s2.curr)[ i]; if( c1 == '\000'){ if(
 c2 == '\000'){ return 0;} else{ return - 1;}} else{ if( c2 == '\000'){ return 1;}
 else{ int diff= c1 -  c2; if( diff !=  0){ return diff;}}} ++ i;} if( sz1 == 
@@ -370,8 +370,8 @@ min_len= len1 >  len2? len2: len1; unsigned int bound= min_len >  n? n: min_len;
 bound <=  _get_arr_size( s1, sizeof( unsigned char))? bound <=  _get_arr_size(
 s2, sizeof( unsigned char)): 0)? 0:(( int(*)( struct _tagged_arr assertion,
 struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)( _tag_arr("bound <= s1.size && bound <= s2.size",
-sizeof( unsigned char), 37u), _tag_arr("/cygdrive/c/cyclone/lib/string.cyc",
-sizeof( unsigned char), 35u), 120);{ int i= 0; for( 0; i <  bound; i ++){ int
+sizeof( unsigned char), 37u), _tag_arr("/home/jcheney/src/cyclone/lib/string.cyc",
+sizeof( unsigned char), 41u), 120);{ int i= 0; for( 0; i <  bound; i ++){ int
 retc; if(( retc=(( const unsigned char*) s1.curr)[ i] - (( const unsigned char*)
 s2.curr)[ i]) !=  0){ return retc;}}} if( len1 <  n? 1: len2 <  n){ return( int)
 len1 - ( int) len2;} return 0;}} int Cyc_Std_strncmp( struct _tagged_arr s1,
@@ -386,33 +386,33 @@ bs; int i= - 1;( min_length <=  _get_arr_size( a, sizeof( unsigned char))?
 min_length <=  _get_arr_size( b, sizeof( unsigned char)): 0)? 0:(( int(*)(
 struct _tagged_arr assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
 _tag_arr("min_length <= a.size && min_length <= b.size", sizeof( unsigned char),
-45u), _tag_arr("/cygdrive/c/cyclone/lib/string.cyc", sizeof( unsigned char), 35u),
-150); while(( ++ i, i <  min_length)) { int diff=( int)(( const unsigned char*)
-a.curr)[ i] - ( int)(( const unsigned char*) b.curr)[ i]; if( diff !=  0){
-return diff;}} return( int) as - ( int) bs;}} int Cyc_Std_zstrncmp( struct
-_tagged_arr s1, struct _tagged_arr s2, unsigned int n){ if( n <=  0){ return 0;}{
-unsigned int s1size= _get_arr_size( s1, sizeof( unsigned char)); unsigned int
-s2size= _get_arr_size( s2, sizeof( unsigned char)); unsigned int min_size=
-s1size >  s2size? s2size: s1size; unsigned int bound= min_size >  n? n: min_size;(
-bound <=  _get_arr_size( s1, sizeof( unsigned char))? bound <=  _get_arr_size(
-s2, sizeof( unsigned char)): 0)? 0:(( int(*)( struct _tagged_arr assertion,
-struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)( _tag_arr("bound <= s1.size && bound <= s2.size",
-sizeof( unsigned char), 37u), _tag_arr("/cygdrive/c/cyclone/lib/string.cyc",
-sizeof( unsigned char), 35u), 168);{ int i= 0; for( 0; i <  bound; i ++){ if(((
-const unsigned char*) s1.curr)[ i] < (( const unsigned char*) s2.curr)[ i]){
-return - 1;} else{ if((( const unsigned char*) s2.curr)[ i] < (( const
-unsigned char*) s1.curr)[ i]){ return 1;}}}} if( min_size <=  bound){ return 0;}
-if( s1size <  s2size){ return - 1;} else{ return 1;}}} int Cyc_Std_zstrptrcmp(
-struct _tagged_arr* a, struct _tagged_arr* b){ return Cyc_Std_zstrcmp(* a,* b);}
-inline static struct _tagged_arr Cyc_Std_int_strcato( struct _tagged_arr dest,
-struct _tagged_arr src, struct _tagged_arr error){ int i; unsigned int dsize;
-unsigned int slen; unsigned int dlen; dsize= _get_arr_size( dest, sizeof(
-unsigned char)); dlen= Cyc_Std_strlen(( struct _tagged_arr) dest); slen= Cyc_Std_int_strleno(
-src, error); if( slen +  dlen <=  dsize){ slen <=  _get_arr_size( src, sizeof(
-unsigned char))? 0:(( int(*)( struct _tagged_arr assertion, struct _tagged_arr
-file, unsigned int line)) Cyc_Std___assert_fail)( _tag_arr("slen <= src.size",
-sizeof( unsigned char), 17u), _tag_arr("/cygdrive/c/cyclone/lib/string.cyc",
-sizeof( unsigned char), 35u), 203); for( i= 0; i <  slen; i ++){*((
+45u), _tag_arr("/home/jcheney/src/cyclone/lib/string.cyc", sizeof( unsigned char),
+41u), 150); while(( ++ i, i <  min_length)) { int diff=( int)(( const
+unsigned char*) a.curr)[ i] - ( int)(( const unsigned char*) b.curr)[ i]; if(
+diff !=  0){ return diff;}} return( int) as - ( int) bs;}} int Cyc_Std_zstrncmp(
+struct _tagged_arr s1, struct _tagged_arr s2, unsigned int n){ if( n <=  0){
+return 0;}{ unsigned int s1size= _get_arr_size( s1, sizeof( unsigned char));
+unsigned int s2size= _get_arr_size( s2, sizeof( unsigned char)); unsigned int
+min_size= s1size >  s2size? s2size: s1size; unsigned int bound= min_size >  n? n:
+min_size;( bound <=  _get_arr_size( s1, sizeof( unsigned char))? bound <= 
+_get_arr_size( s2, sizeof( unsigned char)): 0)? 0:(( int(*)( struct _tagged_arr
+assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
+_tag_arr("bound <= s1.size && bound <= s2.size", sizeof( unsigned char), 37u),
+_tag_arr("/home/jcheney/src/cyclone/lib/string.cyc", sizeof( unsigned char), 41u),
+168);{ int i= 0; for( 0; i <  bound; i ++){ if((( const unsigned char*) s1.curr)[
+i] < (( const unsigned char*) s2.curr)[ i]){ return - 1;} else{ if((( const
+unsigned char*) s2.curr)[ i] < (( const unsigned char*) s1.curr)[ i]){ return 1;}}}}
+if( min_size <=  bound){ return 0;} if( s1size <  s2size){ return - 1;} else{
+return 1;}}} int Cyc_Std_zstrptrcmp( struct _tagged_arr* a, struct _tagged_arr*
+b){ return Cyc_Std_zstrcmp(* a,* b);} inline static struct _tagged_arr Cyc_Std_int_strcato(
+struct _tagged_arr dest, struct _tagged_arr src, struct _tagged_arr error){ int
+i; unsigned int dsize; unsigned int slen; unsigned int dlen; dsize=
+_get_arr_size( dest, sizeof( unsigned char)); dlen= Cyc_Std_strlen(( struct
+_tagged_arr) dest); slen= Cyc_Std_int_strleno( src, error); if( slen +  dlen <= 
+dsize){ slen <=  _get_arr_size( src, sizeof( unsigned char))? 0:(( int(*)(
+struct _tagged_arr assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
+_tag_arr("slen <= src.size", sizeof( unsigned char), 17u), _tag_arr("/home/jcheney/src/cyclone/lib/string.cyc",
+sizeof( unsigned char), 41u), 203); for( i= 0; i <  slen; i ++){*((
 unsigned char*) _check_unknown_subscript( dest, sizeof( unsigned char),( int)( i
 +  dlen)))=(( const unsigned char*) src.curr)[ i];} if( i !=  dsize){*((
 unsigned char*) _check_unknown_subscript( dest, sizeof( unsigned char),( int)( i
@@ -429,13 +429,13 @@ _temp2 +  _temp3) +  1); int i; int j;( _temp2 <=  _get_arr_size( ans, sizeof(
 unsigned char))? _temp2 <=  _get_arr_size( a, sizeof( unsigned char)): 0)? 0:((
 int(*)( struct _tagged_arr assertion, struct _tagged_arr file, unsigned int line))
 Cyc_Std___assert_fail)( _tag_arr("alen <= ans.size && alen <= a.size", sizeof(
-unsigned char), 35u), _tag_arr("/cygdrive/c/cyclone/lib/string.cyc", sizeof(
-unsigned char), 35u), 227); for( i= 0; i <  _temp2; ++ i){(( unsigned char*) ans.curr)[
-i]=(( const unsigned char*) a.curr)[ i];} _temp3 <=  _get_arr_size( b, sizeof(
-unsigned char))? 0:(( int(*)( struct _tagged_arr assertion, struct _tagged_arr
-file, unsigned int line)) Cyc_Std___assert_fail)( _tag_arr("blen <= b.size",
-sizeof( unsigned char), 15u), _tag_arr("/cygdrive/c/cyclone/lib/string.cyc",
-sizeof( unsigned char), 35u), 229); for( j= 0; j <  _temp3; ++ j){*((
+unsigned char), 35u), _tag_arr("/home/jcheney/src/cyclone/lib/string.cyc",
+sizeof( unsigned char), 41u), 227); for( i= 0; i <  _temp2; ++ i){((
+unsigned char*) ans.curr)[ i]=(( const unsigned char*) a.curr)[ i];} _temp3 <= 
+_get_arr_size( b, sizeof( unsigned char))? 0:(( int(*)( struct _tagged_arr
+assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
+_tag_arr("blen <= b.size", sizeof( unsigned char), 15u), _tag_arr("/home/jcheney/src/cyclone/lib/string.cyc",
+sizeof( unsigned char), 41u), 229); for( j= 0; j <  _temp3; ++ j){*((
 unsigned char*) _check_unknown_subscript( ans, sizeof( unsigned char), i +  j))=((
 const unsigned char*) b.curr)[ j];} return ans;} struct _tagged_arr Cyc_Std_strconcat(
 struct _tagged_arr a, struct _tagged_arr b){ return Cyc_Std_rstrconcat( Cyc_Core_heap_region,
@@ -489,8 +489,8 @@ struct _tagged_arr src, unsigned int n){ int i;( n <=  _get_arr_size( src,
 sizeof( unsigned char))? n <=  _get_arr_size( dest, sizeof( unsigned char)): 0)?
 0:(( int(*)( struct _tagged_arr assertion, struct _tagged_arr file, unsigned int
 line)) Cyc_Std___assert_fail)( _tag_arr("n <= src.size && n <= dest.size",
-sizeof( unsigned char), 32u), _tag_arr("/cygdrive/c/cyclone/lib/string.cyc",
-sizeof( unsigned char), 35u), 327); for( i= 0; i <  n; i ++){ unsigned char
+sizeof( unsigned char), 32u), _tag_arr("/home/jcheney/src/cyclone/lib/string.cyc",
+sizeof( unsigned char), 41u), 327); for( i= 0; i <  n; i ++){ unsigned char
 _temp14=(( const unsigned char*) src.curr)[ i]; if( _temp14 == '\000'){ break;}((
 unsigned char*) dest.curr)[ i]= _temp14;} for( 0; i <  n; i ++){(( unsigned char*)
 dest.curr)[ i]='\000';} return dest;} struct _tagged_arr Cyc_Std_zstrncpy(
@@ -498,8 +498,8 @@ struct _tagged_arr dest, struct _tagged_arr src, unsigned int n){( n <=
 _get_arr_size( dest, sizeof( unsigned char))? n <=  _get_arr_size( src, sizeof(
 unsigned char)): 0)? 0:(( int(*)( struct _tagged_arr assertion, struct
 _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)( _tag_arr("n <= dest.size && n <= src.size",
-sizeof( unsigned char), 32u), _tag_arr("/cygdrive/c/cyclone/lib/string.cyc",
-sizeof( unsigned char), 35u), 365);{ int i; for( i= 0; i <  n; i ++){((
+sizeof( unsigned char), 32u), _tag_arr("/home/jcheney/src/cyclone/lib/string.cyc",
+sizeof( unsigned char), 41u), 365);{ int i; for( i= 0; i <  n; i ++){((
 unsigned char*) dest.curr)[ i]=(( const unsigned char*) src.curr)[ i];} return
 dest;}} struct _tagged_arr Cyc_Std_strcpy( struct _tagged_arr dest, struct
 _tagged_arr src){ unsigned int len= Cyc_Std_strlen( src); Cyc_Std_strncpy( dest,
@@ -535,8 +535,8 @@ _temp16.f1= _tag_arr("Std::substring", sizeof( unsigned char), 15u); _temp16;});
 _temp15;}));}{ struct _tagged_arr ans= Cyc_Core_rnew_string( r, amt +  1); amt < 
 _get_arr_size( ans, sizeof( unsigned char))? 0:(( int(*)( struct _tagged_arr
 assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
-_tag_arr("amt < ans.size", sizeof( unsigned char), 15u), _tag_arr("/cygdrive/c/cyclone/lib/string.cyc",
-sizeof( unsigned char), 35u), 448);{ unsigned int i= 0; for( 0; i <  amt; ++ i){((
+_tag_arr("amt < ans.size", sizeof( unsigned char), 15u), _tag_arr("/home/jcheney/src/cyclone/lib/string.cyc",
+sizeof( unsigned char), 41u), 448);{ unsigned int i= 0; for( 0; i <  amt; ++ i){((
 unsigned char*) ans.curr)[( int) i]=*(( const unsigned char*)
 _check_unknown_subscript( s, sizeof( unsigned char),( int)( start +  i)));}}((
 unsigned char*) ans.curr)[( int) amt]='\000'; return ans;}} struct _tagged_arr
@@ -643,17 +643,17 @@ sizeof( unsigned char), 12u)); unsigned int asize= _get_arr_size( accept,
 sizeof( unsigned char)); len <=  _get_arr_size( s, sizeof( unsigned char))? 0:((
 int(*)( struct _tagged_arr assertion, struct _tagged_arr file, unsigned int line))
 Cyc_Std___assert_fail)( _tag_arr("len <= s.size", sizeof( unsigned char), 14u),
-_tag_arr("/cygdrive/c/cyclone/lib/string.cyc", sizeof( unsigned char), 35u), 596);{
-unsigned int i= 0; for( 0; i <  len; i ++){ int j; for( j= 0; j <  asize; j ++){
-if((( const unsigned char*) s.curr)[( int) i] == (( const unsigned char*) accept.curr)[
-j]){ break;}} if( j ==  asize){ return i;}}} return len;} unsigned int Cyc_Std_strcspn(
-struct _tagged_arr s, struct _tagged_arr accept){ unsigned int len= Cyc_Std_int_strleno(
-s, _tag_arr("Std::strspn", sizeof( unsigned char), 12u)); unsigned int asize=
-_get_arr_size( accept, sizeof( unsigned char)); len <=  _get_arr_size( s,
-sizeof( unsigned char))? 0:(( int(*)( struct _tagged_arr assertion, struct
-_tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)( _tag_arr("len <= s.size",
-sizeof( unsigned char), 14u), _tag_arr("/cygdrive/c/cyclone/lib/string.cyc",
-sizeof( unsigned char), 35u), 616);{ unsigned int i= 0; for( 0; i <  len; i ++){
+_tag_arr("/home/jcheney/src/cyclone/lib/string.cyc", sizeof( unsigned char), 41u),
+596);{ unsigned int i= 0; for( 0; i <  len; i ++){ int j; for( j= 0; j <  asize;
+j ++){ if((( const unsigned char*) s.curr)[( int) i] == (( const unsigned char*)
+accept.curr)[ j]){ break;}} if( j ==  asize){ return i;}}} return len;}
+unsigned int Cyc_Std_strcspn( struct _tagged_arr s, struct _tagged_arr accept){
+unsigned int len= Cyc_Std_int_strleno( s, _tag_arr("Std::strspn", sizeof(
+unsigned char), 12u)); unsigned int asize= _get_arr_size( accept, sizeof(
+unsigned char)); len <=  _get_arr_size( s, sizeof( unsigned char))? 0:(( int(*)(
+struct _tagged_arr assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
+_tag_arr("len <= s.size", sizeof( unsigned char), 14u), _tag_arr("/home/jcheney/src/cyclone/lib/string.cyc",
+sizeof( unsigned char), 41u), 616);{ unsigned int i= 0; for( 0; i <  len; i ++){
 int j; for( j= 0; j <  asize; j ++){ if((( const unsigned char*) s.curr)[( int)
 i] != (( const unsigned char*) accept.curr)[ j]){ break;}} if( j ==  asize){
 return i;}}} return len;} struct _tagged_arr Cyc_Std_strtok( struct _tagged_arr
@@ -687,23 +687,23 @@ len2;( min_length <=  _get_arr_size( s1, sizeof( unsigned char))? min_length <=
 _get_arr_size( s2, sizeof( unsigned char)): 0)? 0:(( int(*)( struct _tagged_arr
 assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
 _tag_arr("min_length <= s1.size && min_length <= s2.size", sizeof( unsigned char),
-47u), _tag_arr("/cygdrive/c/cyclone/lib/string.cyc", sizeof( unsigned char), 35u),
-697);{ int i= - 1; while(( ++ i, i <  min_length)) { int diff= toupper(( int)((
-const unsigned char*) s1.curr)[ i]) -  toupper(( int)(( const unsigned char*) s2.curr)[
-i]); if( diff !=  0){ return diff;}} return( int) len1 - ( int) len2;}} int Cyc_Std_strcasecmp(
-struct _tagged_arr s1, struct _tagged_arr s2){ if( s1.curr ==  s2.curr){ return
-0;}{ unsigned int len1= Cyc_Std_int_strleno( s1, _tag_arr("Std::strcasecmp",
-sizeof( unsigned char), 16u)); unsigned int len2= Cyc_Std_int_strleno( s2,
-_tag_arr("Std::strcasecmp", sizeof( unsigned char), 16u)); return Cyc_Std_casecmp(
-s1, len1, s2, len2);}} inline static int Cyc_Std_caseless_ncmp( struct
-_tagged_arr s1, unsigned int len1, struct _tagged_arr s2, unsigned int len2,
-unsigned int n){ if( n <=  0){ return 0;}{ unsigned int min_len= len1 >  len2?
-len2: len1; unsigned int bound= min_len >  n? n: min_len;( bound <= 
+47u), _tag_arr("/home/jcheney/src/cyclone/lib/string.cyc", sizeof( unsigned char),
+41u), 697);{ int i= - 1; while(( ++ i, i <  min_length)) { int diff= toupper((
+int)(( const unsigned char*) s1.curr)[ i]) -  toupper(( int)(( const
+unsigned char*) s2.curr)[ i]); if( diff !=  0){ return diff;}} return( int) len1
+- ( int) len2;}} int Cyc_Std_strcasecmp( struct _tagged_arr s1, struct
+_tagged_arr s2){ if( s1.curr ==  s2.curr){ return 0;}{ unsigned int len1= Cyc_Std_int_strleno(
+s1, _tag_arr("Std::strcasecmp", sizeof( unsigned char), 16u)); unsigned int len2=
+Cyc_Std_int_strleno( s2, _tag_arr("Std::strcasecmp", sizeof( unsigned char), 16u));
+return Cyc_Std_casecmp( s1, len1, s2, len2);}} inline static int Cyc_Std_caseless_ncmp(
+struct _tagged_arr s1, unsigned int len1, struct _tagged_arr s2, unsigned int
+len2, unsigned int n){ if( n <=  0){ return 0;}{ unsigned int min_len= len1 > 
+len2? len2: len1; unsigned int bound= min_len >  n? n: min_len;( bound <= 
 _get_arr_size( s1, sizeof( unsigned char))? bound <=  _get_arr_size( s2, sizeof(
 unsigned char)): 0)? 0:(( int(*)( struct _tagged_arr assertion, struct
 _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)( _tag_arr("bound <= s1.size && bound <= s2.size",
-sizeof( unsigned char), 37u), _tag_arr("/cygdrive/c/cyclone/lib/string.cyc",
-sizeof( unsigned char), 35u), 724);{ int i= 0; for( 0; i <  bound; i ++){ int
+sizeof( unsigned char), 37u), _tag_arr("/home/jcheney/src/cyclone/lib/string.cyc",
+sizeof( unsigned char), 41u), 724);{ int i= 0; for( 0; i <  bound; i ++){ int
 retc; if(( retc= toupper(( int)(( const unsigned char*) s1.curr)[ i]) -  toupper((
 int)(( const unsigned char*) s2.curr)[ i])) !=  0){ return retc;}}} if( len1 < 
 n? 1: len2 <  n){ return( int) len1 - ( int) len2;} return 0;}} int Cyc_Std_strncasecmp(

@@ -73,6 +73,8 @@ namespace Toc;
 // used for creation of all abstract syntax node locations created here
 #define DL NULL
 
+//#define BCE_DEBUG
+bool warn_bounds_checks = false;
 unsigned total_bounds_checks = 0;
 unsigned bounds_checks_eliminated = 0;
 
@@ -763,9 +765,11 @@ static bool check_leq_size(CfFlowInfo::relns_t relns, vardecl_t v, exp_t e) {
 //  FIX: doesn't deal with the case where i is a constant and a's size
 //  can be found.
 static bool check_bounds(CfFlowInfo::relns_t relns, exp_t a, exp_t i) {
-  //fprintf(stderr,"bounds check on %s and %s\n",exp2string(a),exp2string(i));
-  //fprintf(stderr,"relns: ["); CfFlowInfo::print_relns(relns); 
-  //fprintf(stderr,"]\n");
+#ifdef BCE_DEBUG
+  fprintf(stderr,"bounds check on %s and %s\n",exp2string(a),exp2string(i));
+  fprintf(stderr,"relns: ["); CfFlowInfo::print_relns(relns); 
+  fprintf(stderr,"]\n");
+#endif
   switch (a->r) {
   case &Var_e(_,&Pat_b(x)): fallthru(x);
   case &Var_e(_,&Local_b(x)): fallthru(x);
@@ -1871,8 +1875,13 @@ static void exp_to_c(env_t nv, exp_t e) {
     case &PointerType(PtrInfo{ta,rgn,bcr,tq,b}):
       let relns = get_relns(e1);
       let in_bnds = check_bounds(relns,e1,e2);
-      // fprintf(stderr,"check bounds returned %s\n",
-      //         in_bnds ? "true " : "false");
+      if(warn_bounds_checks && !in_bnds) 
+	Tcutil::warn(e->loc,"bounds check necessary for %s", exp2string(e));
+	
+#ifdef BCE_DEBUG
+      fprintf(stderr,"check bounds returned %s\n",
+	      in_bnds ? "true " : "false");
+#endif
       exp_to_c(nv, e1);
       exp_to_c(nv, e2);
       total_bounds_checks++;
@@ -3256,7 +3265,9 @@ static void init() {
 list_t<decl_t> toc(list_t<decl_t> ds) {
   init();
   decls_to_c(empty_env(),ds,true);
-  //fprintf(stderr,"***eliminated %d out of %d bounds checks\n",
-  //        bounds_checks_eliminated, total_bounds_checks);
+#ifdef BCE_DEBUG
+  fprintf(stderr,"***eliminated %d out of %d bounds checks\n",
+          bounds_checks_eliminated, total_bounds_checks);
+#endif
   return imp_rev(result_decls);
 }
