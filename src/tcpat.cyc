@@ -138,6 +138,18 @@ $(list_t<tvar_t>, list_t<vardecl_t>)@ tcPat(tenv_t te,pat_t p, type_t *`p region
     break;
 
   case &Tunion_p(q,_,tvs,ps,tud,tuf): 
+    // constrain the type variables to have box kind
+    for (_ t = tvs; t != null; t = t->tl) {
+      tvar_t tv = t->hd;
+      compress_conref(tv->kind);
+      switch (tv->kind->v) {
+      case &Eq_constr(BoxKind): break;
+      case &Eq_constr(k): terr(p->loc,xprintf("tunion member %s abstracts type variable %s of kind %s != B",qvar2string(q),*tv->name,kind2string(k))); break;
+      case No_constr: tv->kind->v = new Eq_constr(BoxKind); break;
+      case &Forward_constr(_): impos("forward after compress in conref");
+        break;
+      }
+    }
     // we put in an unconstrained region.  Then the client calls
     // check_pat_regions after unifying against the type they're destructuring.
     tenv_t te2 = add_type_vars(p->loc,te,tvs);
