@@ -105,6 +105,7 @@ extern enum Cyclone_Passes stop_after_pass;
 
 void set_cpponly();
 void set_parseonly();
+void set_crgnonly();
 void set_tconly();
 void set_cfonly();
 void set_toconly(); // somewhat misnamed, just doesn't call C compiler!

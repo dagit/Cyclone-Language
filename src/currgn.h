@@ -30,7 +30,11 @@ namespace CurRgn {
   tvar_t curr_rgn_tvar (void); // `C
   type_t curr_rgn_type (void); // `C
 
-  type_t instantiate(type_t fntype, type_t currgn);
+  string_t curr_poolrgn_name;
+  tvar_t curr_poolrgn_tvar (void); // `A
+  type_t curr_poolrgn_type (void); // `A
+
+  type_t instantiate(type_t fntype, type_t currgn, type_t currpoolrgn);
 
   bool is_curr_rgn(tvar_t v);
   bool is_not_curr_rgn(tvar_t v);

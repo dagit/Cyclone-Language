@@ -124,7 +124,7 @@ typedef struct Opt<`a> *`r opt_t<`a,`r>;
   /** [ptrcmp] is a comparison function on pointers. */
  int nptrcmp(`a::TA * `r, `a * `r);
 
-  region_t<`C> current_handle(void);
+ region_t<`C> current_handle(void);
   /** [current_handle()] returns the region handle on the top of the
       LIFO region stack.  If the region stack is empty, then this will
       be the heap region. */
@@ -197,6 +197,18 @@ extern region_t<`RC> refcnt_region;
       recursively decrement reference counts to embedded pointers,
       meaning that those pointers will have to get GC'ed if [p] ends
       up being freed. */
+
+ `a::TA ?`A autorelease(`a::TA ?`RC ptr)  __attribute__((noliveunique(1)));
+  /** [autorelease(p)] attaches the given reference-counted pointer to the
+      current autorelease pool.  An alias into the pool is returned, and
+      [p] is consumed. */
+
+  // AUTOFIX: need to make this type have kind ::AR
+ `a ?`RC inc_refptr(`a::TA ?`r ptr);
+  /** [inc_refptr(p)] increments the reference count of the given
+      autoreleased pointer, returning a reference-counted pointer to
+      that storage.  This pointer will outlive the current autorelease
+      pool. */
 
 struct DynamicRegion<`r::R>;
   /** [struct DynamicRegion<`r>] is an abstract type for the dynamic region 

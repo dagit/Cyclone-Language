@@ -719,6 +719,9 @@ decl_t letv_decl(list_t<vardecl_t,`H> vds, seg_t loc) {
 decl_t region_decl(tvar_t tv,vardecl_t vd,exp_opt_t open_exp,seg_t loc) {
   return new_decl(new Region_d(tv,vd,open_exp),loc);
 }
+decl_t pool_decl(tvar_t tv,seg_t loc) {
+  return new_decl(new Pool_d(tv),loc);
+}
 decl_t alias_decl(tvar_t tv,vardecl_t vd,exp_t e,seg_t loc) {
   // assumes the variable's initializer is NULL
  return new_decl(new Let_d(new_pat(new AliasVar_p(tv,vd),loc),NULL,e,NULL),loc);
@@ -896,6 +899,7 @@ string_t<`H> *decl_name(decl_t decl) {
   case &Using_d(_,_):
   case &ExternC_d(...):
   case &ExternCinclude_d(...):
+  case &Pool_d(...):
   case &Region_d(...): return NULL;
   }
 }

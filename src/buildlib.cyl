@@ -195,6 +195,7 @@ static void rename_decl(decl_t d) {
   case &Fn_d(_):
   case &Var_d(_):
   case &Region_d(...):
+  case &Pool_d(...):
   case &Datatype_d(_):
   case &Let_d(...):
   case &Letv_d(_):
@@ -1170,6 +1171,9 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     case &Region_d(...):
       fprintf(stderr,"Error: unexpected region declaration");
       exit(1); 
+    case &Pool_d(...):
+      fprintf(stderr,"Error: unexpected pool declaration");
+      exit(1); 
     case &Porton_d:
       fprintf(stderr,"Error: unexpected __cyclone_port_on__");
       exit(1);
@@ -1603,6 +1607,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       case &ExternC_d(...):
       case &ExternCinclude_d(...):
       case &Region_d(...):
+      case &Pool_d(...):
         name = NULL;
         break;
       }
@@ -1667,6 +1672,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
         name = v;
         break;
       case &Region_d(...): 
+      case &Pool_d(...): 
       case &Porton_d:
       case &Portoff_d:
       case &Tempeston_d:

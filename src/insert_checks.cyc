@@ -429,6 +429,7 @@ static void do_decl(env_t nv, decl_t d) {
   case &Let_d(_,_,e,_): do_exp(nv,e); break;    
   case &Letv_d(_): break;
   case &Region_d(_,_,eo): do_exp_opt(nv,eo); break; //key for open can't be NULL
+  case &Pool_d(...):
   case &Aggr_d(...):
   case &Datatype_d(...):
   case &Enum_d(...):

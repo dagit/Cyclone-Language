@@ -69,6 +69,17 @@ void   _free_region(struct _RegionHandle*);
 struct _RegionHandle*_open_dynregion(struct _DynRegionFrame*,struct _DynRegionHandle*);
 void   _pop_dynregion();
 
+/* Pools */
+struct _pool; // defined in runtime_memory.c
+struct _PoolHandle {
+  struct _RuntimeStack s;
+  struct _pool *p;
+};
+struct _PoolHandle _new_pool(void);
+void _free_pool(struct _PoolHandle *h);
+void _push_pool(struct _PoolHandle * r);
+void _pop_pool(void);
+
 /* Exceptions */
 struct _handler_cons {
   struct _RuntimeStack s;

@@ -286,6 +286,11 @@ static void anal_stmt(senv_t env, stmt_t s) {
       if(!Flags::no_regions)
 	++env.save_env.try_depth;
       break;
+    case &Pool_d(_): 
+      // AUTOFIX:
+      // MWH: not sure if this is the right thing to do here ...
+      ++env.save_env.try_depth;
+      break;
     case &Var_d(&Vardecl{.initializer=eo,...}):
       if(eo != NULL) anal_exp(env,eo);
       break;
@@ -412,6 +417,7 @@ static void jump_analysis_iter(jump_anal_res_t tables, list_t<decl_t,`H> tds) {
     case &Let_d(...):
     case &Letv_d(...):
     case &Region_d(...):
+    case &Pool_d(...):
     case &Var_d(...):
     case &Typedef_d(...):
     case &Aggr_d(...):

@@ -1108,6 +1108,7 @@ void check_valid_toplevel_type(seg_t loc, Tcenv::tenv_t te, type_t t) {
   switch (compress(t)) {
   case &FnType(FnInfo{btvs,...}):
     if (List::exists(CurRgn::is_curr_rgn,btvs))
+      // AUTOFIX: include pool region name to error message
       err2(loc,"cannot abstract current region ",CurRgn::curr_rgn_name," in ", t);
     break;
   default: break;

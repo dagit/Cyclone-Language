@@ -137,9 +137,11 @@ tenv_t add_region_equality(tenv_t, type_t r1, type_t r2,
 
 type_t curr_rgn(tenv_t);
 type_t curr_lifo_rgn(tenv_t);
+type_t curr_pool_rgn(tenv_t);
 RgnOrder::rgn_po_opt_t curr_rgnpo(tenv_t);
 
 tenv_t add_region(tenv_t, type_t, bool opened, bool lifo);
+tenv_t add_pool(tenv_t te, type_t poolrgn);
 // Check that the region is in the current capability
 void check_rgn_accessible(tenv_t,seg_t,type_t rgn);
 // Check that an effect is a sub-effect of the current capability, may delay

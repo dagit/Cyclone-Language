@@ -641,6 +641,7 @@ static list_t<decl_t, `H> filterstatics(list_t<decl_t, `H> accum, decl_t d) {
     case &Let_d(...):
     case &Letv_d(...):
     case &Region_d(...):
+    case &Pool_d(...):
     case &ExternC_d(...):
     case &ExternCinclude_d(...):
     case &Porton_d:

@@ -195,6 +195,7 @@ MAKE_STRING(val);
 MAKE_STRING(_handler_cons);
 MAKE_STRING(handler);
 MAKE_STRING(_RegionHandle);
+MAKE_STRING(_PoolHandle);
 
 /* Some pre-allocated qvars -- use foo_e for exp that is var "foo".
    NB we must record all of these so that tovc knows about them;
@@ -267,6 +268,9 @@ MAKE_VAR(_check_times);
 MAKE_VAR(_new_region);
 MAKE_VAR(_push_region);
 MAKE_VAR(_pop_region);
+MAKE_VAR(_new_pool);
+MAKE_VAR(_push_pool);
+MAKE_VAR(_pop_pool);
 MAKE_VAR(_throw_arraybounds);
 MAKE_VAR(_fat_ptr_decrease_size);
 MAKE_VAR(_throw_match);
@@ -3629,6 +3633,25 @@ static void stmt_to_c(env_t nv, stmt_t s) {
 				   DL),DL),DL),DL),DL)->r;
         } 
         return;
+      case &Pool_d(tv):
+        let body = s1;
+        // NOTE:  _npop_handler has to deal with regions as well as exceptions
+        type_t ph_struct_typ     = strct(_PoolHandle_sp);
+	let $(ph_var,ph_exp) = temp_var_and_exp();
+
+	stmt_to_c(nv,body);
+	// struct _PoolHandle rh = _new_pool();
+	// struct _PoolHandle *x = &rh;
+	// _push_pool(x);
+	// body;
+	// _pop_pool(x);
+	s->r = declare_stmt(ph_var,ph_struct_typ, fncall_exp_dl(_new_pool_e),
+		   seq_stmt(exp_stmt(fncall_exp_dl(_push_pool_e,
+						   address_exp(ph_exp,DL)),DL),
+		   seq_stmt(body, 
+		   exp_stmt(fncall_exp_dl(_pop_pool_e),
+			    DL),DL),DL),DL)->r;
+        return;
       default: Warn::impos2("bad nested declaration within function");
       }
       return;
@@ -4187,6 +4210,7 @@ static void decltypes_to_c(decl_t d) {
   case &Using_d(_,_):
   case &ExternC_d(...):
   case &ExternCinclude_d(...):
+  case &Pool_d(...):
   case &Region_d(...): // DJG: impossible because of parser?
     Warn::impos_loc(d->loc,"Cyclone declaration in C code");
   case &Porton_d:
@@ -4265,6 +4289,7 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds,
       break;
     case &Let_d(...):
     case &Letv_d(_):     toc_impos2("letdecl at toplevel");
+    case &Pool_d(...): toc_impos2("pool decl at toplevel");
     case &Region_d(...): toc_impos2("region decl at toplevel");
     case &Aggr_d(sd): aggrdecl_to_c(sd); break;
     case &Datatype_d(tud): 

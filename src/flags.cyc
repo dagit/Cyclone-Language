@@ -54,6 +54,9 @@ void set_cpponly() {
 void set_parseonly() {
   stop_after_pass = stop_after_pass < Parsing ? stop_after_pass : Parsing;
 }
+void set_crgnonly() {
+  stop_after_pass = stop_after_pass < CurrentRegion ? stop_after_pass : CurrentRegion;
+}
 void set_tconly() {
   stop_after_pass = stop_after_pass < TypeChecking ? stop_after_pass : TypeChecking;
 }

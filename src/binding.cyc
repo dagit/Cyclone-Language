@@ -1212,6 +1212,7 @@ void resolve_decl(env_t env, decl_t d) {
     //    Cifc::user_overrides(loc,ds2,ovrs);
     break;
 
+  case &Pool_d(_):
   case &Porton_d: // let Tc warn for now
   case &Portoff_d: 
   case &Tempeston_d:

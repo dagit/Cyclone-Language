@@ -1,6 +1,8 @@
 #include <core.h>
 using Core;
 
+// CURRENT REGION stuff
+
 region_t<`C> g(region_t<`C> f()) {
   return f(); // ret
 }
@@ -46,7 +48,43 @@ int f5() {
   return z;
 }
 
+// AUTORELEASE stuff
+
+int *`A auto_alloc_int(int x) {
+  let res = rnew (refcnt_region) 1;
+  return autorelease(res);
+}
+
+int *`A ?`A auto_alloc_array(int n) {
+  let arr = rnew (refcnt_region) { for i < n : auto_alloc_int(i) };
+  for (int i = 0; i<n; i++) *arr[i] += 5;
+  // TODO: I can ditch the autorelease() and it still typechecks I
+  // think this is because of the default outlives rules, which are
+  // bogus.  Once I add the ::AR kind, need to think about how to do
+  // this the right way.
+  return autorelease(arr);
+}
+
+int f6() {
+  auto_alloc_array(50);
+  int *`RC p;
+  { autopool<`r>;
+    let arr1 = auto_alloc_array(50);
+    { autopool<`r2>;
+      let arr2 = auto_alloc_array(60);
+      p = inc_refptr(arr2[1]); // not currently checked
+//     fprintf(stderr,"ending inner pool\n\n");
+    }
+//   fprintf(stderr,"ending outer pool\n\n");
+  }
+//   fprintf(stderr,"done\n\n");
+  drop_refptr(p);
+  return 0;
+}
+
+
 int main(int argc, string_t ?argv) {
   f5();
+  f6();
   return 0;
 }

@@ -244,18 +244,18 @@ int Cyc_Core_refptr_count(unsigned char *ptr) {
 struct _fat_ptr Cyc_Core_alias_refptr(struct _fat_ptr ptr) {
   int *cnt = get_refcnt(ptr.base);
   if (cnt != NULL) *cnt = *cnt + 1;
-/*   errprintf("refptr=%x, cnt=%x, updated *cnt=%d\n",ptr.base,cnt, */
-/* 	  cnt != NULL ? *cnt : 0); */
+  //   errprintf("refptr=%x, cnt=%x, updated *cnt=%d\n",ptr.base,cnt,
+  // 	  cnt != NULL ? *cnt : 0);
   return ptr;
 }
 
 void Cyc_Core_drop_refptr(unsigned char *ptr) {
   int *cnt = get_refcnt(ptr);
   if (cnt != NULL) {
-/*     errprintf("refptr=%x, cnt=%x, *cnt=%d\n",ptr.base,cnt,*cnt); */
+    //     errprintf("refptr=%x, cnt=%x, *cnt=%d\n",ptr,cnt,*cnt);
     *cnt = *cnt - 1;
     if (*cnt == 0) { // no more references
-/*       errprintf("freeing refptr=%x\n",ptr.base); */
+      //       errprintf("freeing refptr=%x\n",ptr);
 #ifdef CYC_REGION_PROFILE
       unsigned int sz = GC_size(ptr - sizeof(int));
       refcnt_freed_bytes += sz;
@@ -287,12 +287,7 @@ struct _pool {
   unsigned char *pointers[POOLSIZE];
 };
 
-struct _PoolHandle {
-  struct _RuntimeStack s;
-  struct _pool *p;
-};
-
-struct _PoolHandle _new_pool() {
+struct _PoolHandle _new_pool(void) {
   struct _PoolHandle h;
   h.s.tag = AUTORELEASE_POOL;
   h.s.next = NULL;
@@ -319,25 +314,31 @@ void _push_pool(struct _PoolHandle * r) {
   _push_frame((struct _RuntimeStack *)r);
 }
 
-void _pop_pool() {
+void _pop_pool(void) {
   if (_top_frame() == NULL || _top_frame()->tag != AUTORELEASE_POOL) {
     errquit("internal error: _pop_pool");
   }
   _npop_frame(0);
 }
 
-void Cyc_Core_autorelease(unsigned char *x) { // x must be a base pointer so we can find the refcount later
+struct _fat_ptr Cyc_Core_autorelease(struct _fat_ptr ptr) {
+  // ptr is a fat pointer, and we assume its base is correct
   struct _PoolHandle *h = (struct _PoolHandle *)_frame_until(AUTORELEASE_POOL,0);
-  if (!h) return;         // No pool, so x will leak
+  // No pool, so ptr will leak
+  if (!h) return ptr;
   {struct _pool *p = h->p;
   if (!p || p->count >= POOLSIZE) {
     p = (struct _pool *)GC_calloc(1,sizeof(struct _pool));
     p->next = h->p;
     h->p = p;
   }
-  p->pointers[p->count++] = x;}
+  p->pointers[p->count++] = ptr.base;}
+  return ptr;
 }
 
+struct _fat_ptr Cyc_Core_inc_refptr(struct _fat_ptr ptr) {
+  return Cyc_Core_alias_refptr(ptr);
+}
 
 /////////////////////////////////////////////////////////////////////
 

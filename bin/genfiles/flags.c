@@ -69,6 +69,17 @@ void   _free_region(struct _RegionHandle*);
 struct _RegionHandle*_open_dynregion(struct _DynRegionFrame*,struct _DynRegionHandle*);
 void   _pop_dynregion();
 
+/* Pools */
+struct _pool; // defined in runtime_memory.c
+struct _PoolHandle {
+  struct _RuntimeStack s;
+  struct _pool *p;
+};
+struct _PoolHandle _new_pool(void);
+void _free_pool(struct _PoolHandle *h);
+void _push_pool(struct _PoolHandle * r);
+void _pop_pool(void);
+
 /* Exceptions */
 struct _handler_cons {
   struct _RuntimeStack s;
@@ -422,11 +433,14 @@ Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < (int)Cyc_Flags_Cpp?Cy
 void Cyc_Flags_set_parseonly (void){
 Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < (int)Cyc_Flags_Parsing?Cyc_Flags_stop_after_pass: Cyc_Flags_Parsing;}
 # 57
+void Cyc_Flags_set_crgnonly (void){
+Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < (int)Cyc_Flags_CurrentRegion?Cyc_Flags_stop_after_pass: Cyc_Flags_CurrentRegion;}
+# 60
 void Cyc_Flags_set_tconly (void){
 Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < (int)Cyc_Flags_TypeChecking?Cyc_Flags_stop_after_pass: Cyc_Flags_TypeChecking;}
-# 60
+# 63
 void Cyc_Flags_set_cfonly (void){
 Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < (int)Cyc_Flags_FlowAnalysis?Cyc_Flags_stop_after_pass: Cyc_Flags_FlowAnalysis;}
-# 63
+# 66
 void Cyc_Flags_set_toconly (void){
 Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < (int)Cyc_Flags_EvalOrder?Cyc_Flags_stop_after_pass: Cyc_Flags_EvalOrder;}
