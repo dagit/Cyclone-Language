@@ -2451,6 +2451,10 @@ compound_statement:
 block_item_list:
   declaration { $$=^$(flatten_declarations($1,skip_stmt(DUMMYLOC))); }
 | declaration block_item_list { $$=^$(flatten_declarations($1,$2)); }
+| IDENTIFIER ':' declaration { $$=^$(new_stmt(new Label_s(new $1,flatten_declarations($3,skip_stmt(DUMMYLOC))),SLOC(@1))
+					      ); }
+| IDENTIFIER ':' declaration block_item_list { $$=^$(new_stmt(new Label_s(new $1,flatten_declarations($3,$4)),SLOC(@1))
+						     ); }
 | statement { $$=$!1; }
 | statement block_item_list { $$=^$(seq_stmt($1,$2,LOC(@1,@2))); }
 | function_definition2 { $$=^$(flatten_decl(new_decl(new Fn_d($1),SLOC(@1)),
