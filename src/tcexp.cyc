@@ -1119,11 +1119,12 @@ static type_t tcStruct(tenv_t te, seg_t loc, type_t *`r topt,
   let typs    = List::map(snd,inst);
   let res_typ = new StructType(*tn,typs,new sd);
   // this will instantiate the struct if we have type information in topt
+  // unfortunately, I think it allows topt to cause failure
   if (topt != null) unify(res_typ,*topt);
   *otyps = new Opt(typs);
   // make sure each argument has the right type
-  list_t<$(structfield_t,exp_t)@> fields =
-    resolve_struct_designators(loc,args,sd);
+  glist_t<$(structfield_t,exp_t)@`rgn,`rgn> fields =
+    resolve_struct_designators(rgn,loc,args,sd);
   for(; fields != null; fields = fields->tl) {
     let &$(field,field_exp) = fields->hd;
     let inst_fieldtyp = rsubstitute(rgn,inst,field->type);

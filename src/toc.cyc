@@ -1938,7 +1938,8 @@ static void exp_to_c(env_t nv, exp_t e) {
       let n = tdn;
       structdecl_t sd2 = 
 	(structdecl_t)((sd == null) ? toc_impos(xprintf("no structdecl %s",qvar2string(tdn))) : sd);
-      let fields = Tcutil::resolve_struct_designators(e->loc, dles, 
+      region rgn {
+      let fields = Tcutil::resolve_struct_designators(rgn, e->loc, dles, 
                                                       (structdecl_t)sd2);
       for (; fields != null; fields = fields->tl) {
 	let &$(field,fieldexp) = fields->hd;
@@ -1951,6 +1952,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       //for (let es = dles; es != null; es = es->tl)
       //  exp_to_c(nv,es->hd[1]);
       e->r = cast_exp(strctq(n), unresolvedmem_exp(null,dles,DL),DL)->r;
+      }
     }
     break;
 
@@ -2118,14 +2120,15 @@ static stmt_t if_eq_goto_stmt(exp_t e1, exp_t e2, var_t succ_lab, var_t fail_lab
 			 goto_stmt(fail_lab,DL), DL);
 }
 static $(env_t,list_t<$(qvar_t,type_t)@>,stmt_t)
-xlate_pat(env_t nv,type_t t,exp_t r,exp_t path,pat_t p,var_t succ_lab,var_t fail_lab,
-	  list_t<$(qvar_t,type_t)@> decls) {
+xlate_pat(env_t nv, type_t t, exp_t r, exp_t path, pat_t p,
+	  var_t succ_lab,var_t fail_lab, list_t<$(qvar_t,type_t)@> decls) {
   stmt_t s; // the test statement
   switch (p->r) {
-  case Wild_p: s = goto_stmt(succ_lab, DL); break;
   case &Var_p(&Vardecl(_,x,_,_,_,_,_)):
     // in essence, x = r; but achieved through the varmap
     nv = add_varmap(nv,x,r);
+    fallthru;
+  case Wild_p: 
     s  = goto_stmt(succ_lab,DL);
     break;
   case &Reference_p(vd):
@@ -2151,13 +2154,13 @@ xlate_pat(env_t nv,type_t t,exp_t r,exp_t path,pat_t p,var_t succ_lab,var_t fail
                         succ_lab, fail_lab); 
     break;
 
-  case &Tunion_p(qv,ot,ts,null,ed,ef):
+  case &Tunion_p(qv,ts,null,ed,ef):
     // when ps == null:  if (r == qv) goto succ_lab else goto fail_lab;
     s = if_eq_goto_stmt(cast_exp(sint_t,r,DL), 
                         var_exp(qv,DL), succ_lab, fail_lab);
     break;
 
-  case &Pointer_p(&Pat{&Tunion_p(qv,ot,ts,ps,ed,ef),_,_}):
+  case &Pointer_p(&Pat{&Tunion_p(qv,ts,ps,ed,ef),_,_}):
     // when ps == p1,...,pn:
     //   if ((unsigned int)r > max_tag && ((t)r)->tag == qv_tag)
     //      <similar to tuple and struct patterns>
@@ -2342,7 +2345,7 @@ xlate_pat(env_t nv,type_t t,exp_t r,exp_t path,pat_t p,var_t succ_lab,var_t fail
   case &UnknownId_p(_):         s = toc_impos("unknownid");     break;
   case &UnknownCall_p(_,_,_):   s = toc_impos("unknowncall");   break;
   case &UnknownFields_p(_,_,_): s = toc_impos("unknownfields"); break;
-  case &Tunion_p(_,_,_,_,_,_): fallthru;
+  case &Tunion_p(_,_,_,_,_): fallthru;
   case &XTunion_p(_,_,_,_,_):
     s = toc_impos("non-null [x]tunion pattern not under &"); break;
   }

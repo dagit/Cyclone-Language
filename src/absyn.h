@@ -429,7 +429,7 @@ namespace Absyn {
     Reference_p(vardecl_t); // only name field is right until tcpat is called
     Struct_p(structdecl_t,opt_t<list_t<type_t>>,list_t<tvar_t>,
 	     list_t<$(list_t<designator_t>,pat_t)@>);
-    Tunion_p(qvar_t,opt_t<list_t<type_t>>,list_t<tvar_t>,list_t<pat_t>,
+    Tunion_p(qvar_t,list_t<tvar_t>,list_t<pat_t>,
              tuniondecl_t,tunionfield_t);
     XTunion_p(qvar_t,list_t<tvar_t>,list_t<pat_t>,xtuniondecl_t,tunionfield_t);
     Enum_p(qvar_t,enumdecl_t,enumfield_t);

@@ -1300,7 +1300,7 @@ doc_t pat2doc(pat_t p) {
   case &Enum_p(n,_,_):
     s = qvar2doc(n);
     break;
-  case &Tunion_p(n,_,tvs,ps,_,_): fallthru(n,tvs,ps);
+  case &Tunion_p(n,tvs,ps,_,_): fallthru(n,tvs,ps);
   case &XTunion_p(n,tvs,ps,_,_):
     if (ps == null)
       // special case: a nullary [x]tunion constant is printed "foo" not 

@@ -116,9 +116,9 @@ extern void check_bound(seg_t, unsigned int i, conref_t<bounds_t>);
 
 extern bool equal_tqual(tqual_t tq1, tqual_t tq2);
 
-extern list_t<$(structfield_t,`a)@> 
-resolve_struct_designators(seg_t loc,
-                           list_t<$(list_t<designator_t>,`a)@> des, 
+extern glist_t<$(structfield_t,`a)@`r,`r> 
+resolve_struct_designators(region_t<`r>rgn, seg_t loc,
+                           glist_t<$(list_t<designator_t>,`a)@`r2,`r3> des, 
                            structdecl_t sd);
 // returns true if this is a t ? -- side effect unconstrained bounds
 extern bool is_tagged_pointer_typ(type_t);

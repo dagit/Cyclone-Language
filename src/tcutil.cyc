@@ -1520,12 +1520,12 @@ type_t rsubstitute(region_t<`r> rgn,
   case &RgnHandleType(rt): 
     let new_rt = rsubstitute(rgn,inst,rt);
     return new_rt == rt ? t : new RgnHandleType(new_rt);
-  case &EnumType(_,_):  return t;
-  case VoidType:        return t;
-  case &IntType(_,_):   return t;
-  case FloatType:       return t;
-  case DoubleType:      return t;
-  case HeapRgn:         return t;
+  case &EnumType(_,_): return t;
+  case VoidType:       return t;
+  case &IntType(_,_):  return t;
+  case FloatType:      return t;
+  case DoubleType:     return t;
+  case HeapRgn:        return t;
   case &AccessEff(r): 
     let new_r = rsubstitute(rgn,inst,r);
     return new_r == r ? t : new AccessEff(new_r);
@@ -2122,9 +2122,9 @@ void check_unique_tvars(seg_t loc, list_t<tvar_t> tvs) {
 //  * ensure that each field is used exactly once.
 // (This functionality was repeated in tcPat and tcExp and was annoying me.)
 // FIX: Pass in a flag to allow multiple field names ??
-list_t<$(structfield_t,`a)@>
-resolve_struct_designators(seg_t loc,
-                           list_t<$(list_t<designator_t>,`a)@> des, 
+glist_t<$(structfield_t,`a)@`r,`r>
+resolve_struct_designators(region_t<`r> rgn, seg_t loc,
+                           glist_t<$(list_t<designator_t>,`a)@`r2,`r3> des, 
                            structdecl_t sd) {
   if(sd->fields == null)
     terr(loc, "inappropriate use of abstract struct");
@@ -2140,7 +2140,7 @@ resolve_struct_designators(seg_t loc,
   fields = imp_rev(fields);
 
   // match up each element of des
-  list_t<$(structfield_t,`a)@> ans = null;
+  glist_t<$(structfield_t,`a)@`r,`r> ans = null;
   for(; des != null; des = des->tl) {
     let &$(dl,a) = des->hd;
     if(dl == null) {
@@ -2150,7 +2150,7 @@ resolve_struct_designators(seg_t loc,
 	if(!(*fields2->hd)[1]) {
 	  (*fields2->hd)[1] = true;
 	  (*des->hd)[0] = new List(new FieldName((*fields2->hd)[0]->name), null);
-	  ans = new List(new $((*fields2->hd)[0],a), ans);
+	  ans = rnew(rgn) List(rnew(rgn) $((*fields2->hd)[0],a), ans);
 	  break;
 	}
       if(fields2 == null)
@@ -2173,7 +2173,7 @@ resolve_struct_designators(seg_t loc,
 		   xprintf("field %s has already been used as an argument", 
 			   *v));
 	    (*fields2->hd)[1] = true;
-	    ans = new List(new $((*fields2->hd)[0],a), ans);
+	    ans = rnew(rgn) List(rnew(rgn) $((*fields2->hd)[0],a), ans);
 	    break;
 	  }
 	if(fields2 == null)

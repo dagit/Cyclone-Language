@@ -1145,8 +1145,10 @@ flow_info_t cf_analyze_stmt(analenv_t env, Absyn::stmt_t s, flow_info_t in_flow)
 // Note: This is just a space optimization.  Out of laziness, we don't
 //       traverse expressions to find nested statements (due to StmtExp_e),
 //       so the space for such annotations leaks.
+static xtunion StmtAnnot.EmptyAnnot empty_annot_v = EmptyAnnot;
+static xtunion StmtAnnot empty_annot = &empty_annot_v;
 void cf_postpass(stmt_t s) {
-  s->annot = new EmptyAnnot;
+  s->annot = empty_annot;
   switch(s->r) {
   case &Seq_s(s1,s2): fallthru(s1,s2);
   case &IfThenElse_s(_,s1,s2):

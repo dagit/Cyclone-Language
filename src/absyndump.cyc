@@ -675,7 +675,7 @@ void dumppat(pat_t p) {
     dumptvars(tvs);
     group(dumpdp,dps,"{","}",",");
     break;
-  case &Tunion_p(n,_,tvs,ps,_,_): fallthru(n,tvs,ps);
+  case &Tunion_p(n,tvs,ps,_,_): fallthru(n,tvs,ps);
   case &XTunion_p(n,tvs,ps,_,_):
     dumpqvar(n); dumptvars(tvs);
     if (ps != null) group(dumppat,ps,"(",")",",");
