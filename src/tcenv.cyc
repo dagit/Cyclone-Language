@@ -337,6 +337,7 @@ static resolved_t lookup_ordinary_global(tenv_t te,seg_t loc,qvar_t q) {
   case {.Rel_n = &List(x,y)}:
     let ge = lookup_namespace(te,loc,x,y);
     return lookup_ordinary_global_f(ge,v);
+  case {.C_n = y}: fallthru(y);
   case {.Abs_n = y}:
     return lookup_ordinary_global_f(Dict::lookup(te->ae,y),v);
   }
@@ -392,6 +393,7 @@ aggrdecl_t @ lookup_aggrdecl(tenv_t te,seg_t loc,qvar_t q) {
   case {.Loc_n = _}: fallthru;
   case {.Rel_n = NULL}:
     return scoped_lookup(te, loc, lookup_aggrdecl_f, v);
+  case {.C_n = y}: fallthru(y);
   case {.Abs_n = y}:
     let ads = Dict::lookup(te->ae,y)->aggrdecls;
     return Dict::lookup(ads,v);
@@ -414,6 +416,7 @@ datatypedecl_t @ lookup_datatypedecl(tenv_t te,seg_t loc,qvar_t q) {
   case {.Rel_n = &List(x,y)}:
     let tds = lookup_namespace(te,loc,x,y)->datatypedecls;
     return Dict::lookup(tds,v);
+  case {.C_n = y}: fallthru(y);
   case {.Abs_n = y}:
     let tds = Dict::lookup(te->ae,y)->datatypedecls;
     return Dict::lookup(tds,v);
@@ -449,6 +452,7 @@ datatypedecl_t@*`r lookup_xdatatypedecl(region_t<`r> r, tenv_t te,seg_t loc,qvar
     }
     let tds = ge->datatypedecls;
     return rnew(r) Dict::lookup(tds,v);
+  case {.C_n = y}: fallthru(y);
   case {.Abs_n = y}:
     let tds = Dict::lookup(te->ae,y)->datatypedecls;
     return rnew(r) Dict::lookup(tds,v);
@@ -468,6 +472,7 @@ enumdecl_t @lookup_enumdecl(tenv_t te, seg_t loc, qvar_t q) {
   case {.Rel_n = &List(x,y)}:
     let eds = lookup_namespace(te,loc,x,y)->enumdecls;
     return Dict::lookup(eds,v);
+  case {.C_n = y}: fallthru(y);
   case {.Abs_n = y}:
     let eds = Dict::lookup(te->ae,y)->enumdecls;
     return Dict::lookup(eds,v);
@@ -487,6 +492,7 @@ typedefdecl_t lookup_typedefdecl(tenv_t te, seg_t loc, qvar_t q) {
   case {.Rel_n = &List(x,y)}:
     let tds = lookup_namespace(te,loc,x,y)->typedefs;
     return Dict::lookup(tds,v);
+  case {.C_n = y}: fallthru(y);
   case {.Abs_n = y}:
     let tds = Dict::lookup(te->ae,y)->typedefs;
     return Dict::lookup(tds,v);

@@ -407,6 +407,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         case {.Rel_n = NULL}:
           (*vd->name)[0] = Loc_n;
           break;
+        case {.C_n = y}: throw impos("tcstmt: C_n declaration");
         case {.Abs_n = y}: throw impos("tcstmt: Abs_n declaration");
         default:
           terr(d->loc, "cannot declare a qualified local variable");

@@ -50,8 +50,8 @@
 //      They have all been replaced by
 //        Var_e, FnCall_e, Struct_e, Datatype_e, 
 //      In Var_e, Unresolved_b is not used.
-//  B2. All qvars are either Loc_n or Abs_n.  Any Rel_n has been
-//      replaced by Loc_n or Abs_n.
+//  B2. All qvars are either Loc_n, Abs_n or C_n.  Any Rel_n has been
+//      replaced by Loc_n, Abs_n or C_n.
 //  B3. All "dest fields" and non_local_preds fields in stmt objects
 //      are correct.
 //  B4. Every expression has a non-null and correct type field.
@@ -84,13 +84,15 @@ namespace Absyn {
   // Name spaces
   EXTERN_ABSYN @tagged union Nmspace {
     list_t<var_t> Rel_n; // Relative name
-    list_t<var_t> Abs_n; // Absolute name
+    list_t<var_t> Abs_n; // Absolute name in Cyclone namespace
+    list_t<var_t> C_n;   // Absolute name in C namespace
     int Loc_n;  // Local name, int is not used
   };
   typedef union Nmspace nmspace_t;
   nmspace_t Loc_n;
   nmspace_t Rel_n(list_t<var_t,`H>);
-  nmspace_t Abs_n(list_t<var_t,`H>);
+  // Abs_n(ns) when C_scope is false, C_n(ns) when C_scope is true
+  nmspace_t Abs_n(list_t<var_t,`H> ns, bool C_scope); 
 
   // Qualified variables
   typedef $(nmspace_t,var_t) @qvar_t, *qvar_opt_t;

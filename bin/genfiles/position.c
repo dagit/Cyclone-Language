@@ -710,16 +710,16 @@ char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cy
 char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_struct{
 char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{
 char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{
-char*tag;};static void*Cyc_Core_arrcast(struct _dyneither_ptr dyn,unsigned int bd,
-unsigned int sz);inline static void*Cyc_Core_arrcast(struct _dyneither_ptr dyn,
-unsigned int bd,unsigned int sz){if(bd >> 20  || sz >> 12)return 0;{unsigned char*
-ptrbd=dyn.curr + bd * sz;if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base)
- || ptrbd > dyn.last_plus_one)return 0;return dyn.curr;};}struct Cyc_List_List{void*
-hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[14];struct Cyc_List_List_mismatch_struct{
-char*tag;};struct Cyc_List_List*Cyc_List_imp_rev(struct Cyc_List_List*x);extern
-char Cyc_List_Nth[4];struct Cyc_List_Nth_struct{char*tag;};unsigned long Cyc_strlen(
-struct _dyneither_ptr s);int Cyc_strcmp(struct _dyneither_ptr s1,struct _dyneither_ptr
-s2);struct _dyneither_ptr Cyc_strncpy(struct _dyneither_ptr,struct _dyneither_ptr,
+char*tag;};static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,
+unsigned int sz);inline static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,
+unsigned int sz){if(bd >> 20  || sz >> 12)return 0;{unsigned char*ptrbd=dyn.curr + bd * 
+sz;if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)
+return 0;return dyn.curr;};}struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
+extern char Cyc_List_List_mismatch[14];struct Cyc_List_List_mismatch_struct{char*
+tag;};struct Cyc_List_List*Cyc_List_imp_rev(struct Cyc_List_List*x);extern char Cyc_List_Nth[
+4];struct Cyc_List_Nth_struct{char*tag;};unsigned long Cyc_strlen(struct
+_dyneither_ptr s);int Cyc_strcmp(struct _dyneither_ptr s1,struct _dyneither_ptr s2);
+struct _dyneither_ptr Cyc_strncpy(struct _dyneither_ptr,struct _dyneither_ptr,
 unsigned long);struct _dyneither_ptr Cyc_substring(struct _dyneither_ptr,int ofs,
 unsigned long n);struct Cyc_Lineno_Pos{struct _dyneither_ptr logical_file;struct
 _dyneither_ptr line;int line_no;int col;};struct Cyc_Lineno_Pos*Cyc_Lineno_pos_of_abs(

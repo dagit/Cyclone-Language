@@ -896,6 +896,10 @@ string_t qvar2string(qvar_t q) {
     match = false;
     prefix = x;
     break;
+  case {.C_n = x}:
+    match = use_curr_namespace && list_prefix(strptrcmp, x, curr_namespace);
+    // No namespace prefixes in the C namespace. 
+    break;
   case {.Abs_n = x}:
     match = use_curr_namespace && list_prefix(strptrcmp, x, curr_namespace);
     prefix = qvar_to_Cids && add_cyc_prefix ? new List(cyc_stringptr, x) : x;
@@ -936,6 +940,7 @@ string_t typedef_name2string(qvar_t v) {
     switch ((*v)[0]) {
     case {.Loc_n = _}: fallthru;
     case {.Rel_n = NULL}: return *((*v)[1]);
+    case {.C_n = l}: fallthru(l); // FIX: is this correct?
     case {.Abs_n = l}:
       if (list_cmp(strptrcmp, l, curr_namespace) == 0) {
 	return *((*v)[1]);

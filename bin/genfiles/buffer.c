@@ -706,14 +706,14 @@ char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cy
 char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_struct{
 char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{
 char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{
-char*tag;};static void*Cyc_Core_arrcast(struct _dyneither_ptr dyn,unsigned int bd,
-unsigned int sz);inline static void*Cyc_Core_arrcast(struct _dyneither_ptr dyn,
-unsigned int bd,unsigned int sz){if(bd >> 20  || sz >> 12)return 0;{unsigned char*
-ptrbd=dyn.curr + bd * sz;if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base)
- || ptrbd > dyn.last_plus_one)return 0;return dyn.curr;};}struct Cyc_Buffer_t;struct
-Cyc_Buffer_t*Cyc_Buffer_create(unsigned int n);struct _dyneither_ptr Cyc_Buffer_contents(
-struct Cyc_Buffer_t*);unsigned long Cyc_Buffer_length(struct Cyc_Buffer_t*);void Cyc_Buffer_clear(
-struct Cyc_Buffer_t*);void Cyc_Buffer_reset(struct Cyc_Buffer_t*);void Cyc_Buffer_add_char(
+char*tag;};static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,
+unsigned int sz);inline static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,
+unsigned int sz){if(bd >> 20  || sz >> 12)return 0;{unsigned char*ptrbd=dyn.curr + bd * 
+sz;if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)
+return 0;return dyn.curr;};}struct Cyc_Buffer_t;struct Cyc_Buffer_t*Cyc_Buffer_create(
+unsigned int n);struct _dyneither_ptr Cyc_Buffer_contents(struct Cyc_Buffer_t*);
+unsigned long Cyc_Buffer_length(struct Cyc_Buffer_t*);void Cyc_Buffer_clear(struct
+Cyc_Buffer_t*);void Cyc_Buffer_reset(struct Cyc_Buffer_t*);void Cyc_Buffer_add_char(
 struct Cyc_Buffer_t*,char);void Cyc_Buffer_add_substring(struct Cyc_Buffer_t*,
 struct _dyneither_ptr,int offset,int len);void Cyc_Buffer_add_string(struct Cyc_Buffer_t*,
 struct _dyneither_ptr);void Cyc_Buffer_add_buffer(struct Cyc_Buffer_t*buf_dest,

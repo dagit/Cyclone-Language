@@ -502,6 +502,7 @@ void enter_using(qvar_t q) {
     ns = (List_t<stringptr_t>)(new List((*q)[1],NULL));
     break;
   case {.Rel_n = y}: fallthru(y);
+  case {.C_n = y}: fallthru(y);
   case {.Abs_n = y}:
     ns = (List_t<stringptr_t>)List::append(y,new List((*q)[1],NULL));
     break;

@@ -319,7 +319,9 @@ static type_t tcVar(tenv_t te, seg_t loc, exp_t e, qvar_t q, binding_t b) {
   switch(b) {
   case &Unresolved_b:
     return expr_err(te,loc,NULL,"undeclared identifier: %s",qvar2string(q));
-  case &Global_b(vd):  *q = *vd->name; return vd->type;
+  case &Global_b(vd):  
+    *q = *vd->name; 
+    return vd->type;
   case &Funname_b(fd): *q = *fd->name; return fndecl2typ(fd);
   case &Pat_b(vd):     fallthru(vd);
   case &Local_b(vd):   fallthru(vd);

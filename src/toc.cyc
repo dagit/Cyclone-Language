@@ -1613,6 +1613,7 @@ static void lvalue_assign_stmt(stmt_t s,list_t<field_name_t> fs,
 
 // we want to take the address of e but it may no longer be a valid
 // lhs, due to a cast or null-check or whatever.
+static void push_address_stmt(stmt_t s);
 static exp_t push_address_exp(exp_t e) {
   switch (e->r) {
   case &Cast_e(*t,*e1,_,_):
@@ -1621,9 +1622,23 @@ static exp_t push_address_exp(exp_t e) {
     return e;
   case &Deref_e(e1):
     return e1;
+  case &StmtExp_e(s): 
+    // we only support this so that you can do swaps on tagged union fields
+    push_address_stmt(s);
+    return e;
   default:
     if (is_lvalue(e)) return address_exp(e,DL);
     toc_impos("can't take & of %s",exp2string(e));
+  }
+}
+static void push_address_stmt(stmt_t s) {
+  switch (s->r) {
+  case &Exp_s(*e): 
+    *e = push_address_exp(*e); return;
+  case &Decl_s(_,s2): fallthru(s2);
+  case &Seq_s(_,s2):  push_address_stmt(s2); return;
+  default: 
+    toc_impos("can't take & of statement-expression %s",stmt2string(s));
   }
 }
 

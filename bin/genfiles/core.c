@@ -716,10 +716,10 @@ _dyneither_ptr f1;};extern struct _RegionHandle*Cyc_Core_heap_region;struct Cyc_
 Cyc_Core_rnew_dynregion(struct _RegionHandle*);struct Cyc_Core_NewRegion Cyc_Core_new_dynregion();
 extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{char*tag;};
 extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{char*tag;};
-static void*Cyc_Core_arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned int
-sz);inline static void*Cyc_Core_arrcast(struct _dyneither_ptr dyn,unsigned int bd,
-unsigned int sz){if(bd >> 20  || sz >> 12)return 0;{unsigned char*ptrbd=dyn.curr + bd * 
-sz;if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)
+static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz);
+inline static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz){
+if(bd >> 20  || sz >> 12)return 0;{unsigned char*ptrbd=dyn.curr + bd * sz;if(((ptrbd < 
+dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)
 return 0;return dyn.curr;};}char Cyc_Core_Invalid_argument[17]="Invalid_argument";
 char Cyc_Core_SysError[9]="SysError";struct Cyc_Core_SysError_struct{char*tag;int
 f1;};char Cyc_Core_Failure[8]="Failure";char Cyc_Core_Impossible[11]="Impossible";

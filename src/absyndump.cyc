@@ -209,6 +209,12 @@ void dumpqvar(qvar_t v) {
   case {.Rel_n = x}:
     nsl = x;
     break;
+  case {.C_n = x}:
+    // No namespaces included in the C namespace.  
+    // We need a separator space here, because the rest of the name is 
+    // printed without spaces!
+    dump_char(' ');
+    break;
   case {.Abs_n = x}:
     if (qvar_to_Cids && add_cyc_prefix) 
       prefix = &Absynpp::cyc_stringptr;

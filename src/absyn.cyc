@@ -54,15 +54,18 @@ int qvar_cmp(qvar_t q1, qvar_t q2) {
   switch ($(n1,n2)) {
   case $({.Loc_n = _},{.Loc_n = _}): break;
   case $({.Rel_n = x1},{.Rel_n = x2}): fallthru(x1,x2);
-  case $({.Abs_n = x1},{.Abs_n = x2}):
+  case $({.Abs_n = x1},{.Abs_n = x2}): fallthru(x1,x2);
+  case $({.C_n = x1},{.C_n = x2}): 
     int i = strlist_cmp(x1,x2);
     if (i != 0) return i;
     break;
-  // we arbitrarily decide that Loc_n < Rel_n < Abs_n
-  case $({.Loc_n = _},_):     return -1;
-  case $(_,{.Loc_n = _}):     return 1;
+  // we arbitrarily decide that Loc_n < Rel_n < Abs_n < C_n
+  case $({.Loc_n = _},_): return -1;
+  case $(_,{.Loc_n = _}): return 1;
   case $({.Rel_n = _},_): return -1;
   case $(_,{.Rel_n = _}): return 1;
+  case $({.Abs_n = _},_): return -1;
+  case $(_,{.Abs_n = _}): return 1; 
   }
   return strptrcmp((*q1)[1],(*q2)[1]);
 }
@@ -74,7 +77,12 @@ int tvar_cmp(tvar_t tv1, tvar_t tv2) {
 }
   
 nmspace_t Loc_n = Nmspace{.Loc_n = 0};
-nmspace_t Abs_n(list_t<var_t,`H> x) { return Nmspace{.Abs_n = x}; }
+nmspace_t Abs_n(list_t<var_t,`H> x, bool C_scope) { 
+  if (C_scope)
+    return Nmspace{.C_n = x};
+  else 
+    return Nmspace{.Abs_n = x}; 
+}
 nmspace_t Rel_n(list_t<var_t,`H> x) { return Nmspace{.Rel_n = x}; }
 nmspace_t rel_ns_null       = Nmspace{.Rel_n = NULL};
 
@@ -429,7 +437,7 @@ type_t file_typ() {
   static stringptr_t sf = &sf_str;
 
   if(file_t_opt == NULL) {
-    typedef_name_t file_t_name = new $(Abs_n(NULL), sf);
+    typedef_name_t file_t_name = new $(Abs_n(NULL,false), sf);
     aggrdecl_t sd = new Aggrdecl(StructA,Abstract,file_t_name,NULL,NULL,NULL);
     type_t file_struct_typ = new AggrType(AggrInfo(KnownAggr(new sd),NULL));
     file_t_opt = new at_typ(file_struct_typ,&HeapRgn_val,empty_tqual(NULL),

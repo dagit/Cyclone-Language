@@ -1226,7 +1226,8 @@ export_list:
 ;    
 
 export_list_values:
-  struct_union_name ';' { $$=^$(new List(new $(LOC(@1,@1),$1,false),NULL)); }
+  struct_union_name { $$=^$(new List(new $(LOC(@1,@1),$1,false),NULL)); }
+| struct_union_name ';' { $$=^$(new List(new $(LOC(@1,@1),$1,false),NULL)); }
 | struct_union_name ',' export_list_values
   { $$=^$(new List(new $(LOC(@1,@1),$1,false),$3));}
 ;
@@ -3024,6 +3025,7 @@ void yyprint(int i, union YYSTYPE v) {
     switch (p) {
     case {.Rel_n = x}: prefix = x; break;
     case {.Abs_n = x}: prefix = x; break;
+    case {.C_n = x}: prefix = x; break;
     case {.Loc_n = _}: break;
     }
     for (; prefix != NULL; prefix = prefix->tl)

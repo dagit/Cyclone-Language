@@ -3393,7 +3393,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
         
         unsigned int t1 = Evexp::eval_const_uint_exp((exp_t)f->tag)[0];
         tag_count = t1+1;
-        (*f->name)[0] = Abs_n(te->ns);
+        (*f->name)[0] = Abs_n(te->ns,false); // Not clear if this can't be C_n
         ge->ordinaries = Dict::insert(ge->ordinaries, (*f->name)[1],
                                       new $(new AnonEnumRes(t,f), true));
       }

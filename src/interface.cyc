@@ -262,6 +262,7 @@ static bool check_public_vardecl(aenv_t ae, seen_t seen, vardecl_t d) {
 static list_t<var_t> get_abs_ns(nmspace_t ns) {
   switch (ns) {
   case {.Abs_n = l}: return l;
+  case {.C_n = l}: return l;
   default: invalid_arg("get_abs_ns");
   }
 }
@@ -465,6 +466,7 @@ extract_xdatatypefielddecl(i_t i, datatypedecl_t d, datatypefield_t f) {
   switch ((*(f->name))[0]) {
   case {.Rel_n = l}: fallthru(l);
   case {.Abs_n = l}: ns = l; break;
+  case {.C_n = l}: ns = l; break;// Cannot happen?
   default: break;
   }
   _ dict;
