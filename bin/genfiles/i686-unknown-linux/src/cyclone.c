@@ -1300,9 +1300,10 @@ Cyc_Interface_I* _temp226= Cyc_Interface_load(( struct Cyc_Std___sFILE*)
 _check_null( _temp225)); Cyc_Std_file_close(( struct Cyc_Std___sFILE*)
 _check_null( _temp225)); return _temp226;}}}} static int Cyc_is_cfile( struct
 _tagged_arr* n){ return*(( const unsigned char*) _check_unknown_subscript(* n,
-sizeof( unsigned char), 0)) != '-';} struct _tuple10{ struct _tagged_arr f1; int
-f2; struct _tagged_arr f3; void* f4; struct _tagged_arr f5; } ; int Cyc_main(
-int argc, struct _tagged_arr argv){ struct _tagged_arr comp=( struct _tagged_arr)
+sizeof( unsigned char), 0)) != '-';} extern void GC_blacklist_warn_clear();
+struct _tuple10{ struct _tagged_arr f1; int f2; struct _tagged_arr f3; void* f4;
+struct _tagged_arr f5; } ; int Cyc_main( int argc, struct _tagged_arr argv){
+GC_blacklist_warn_clear();{ struct _tagged_arr comp=( struct _tagged_arr)
 Cstring_to_string( Ccomp); Cyc_set_cpp(( struct _tagged_arr) Cyc_Std_strconcat(
 comp, _tag_arr(" -x c -E -U__GNUC__ -nostdinc", sizeof( unsigned char), 30u)));{
 struct Cyc_List_List* options=({ struct _tuple10* _temp300[ 47u]; _temp300[ 46u]=({
@@ -1810,4 +1811,4 @@ _tag_arr( _temp288, sizeof( void*), 1u));}});} if( Cyc_Std_system(( struct
 _tagged_arr) _temp287) !=  0){({ void* _temp290[ 0u]={}; Cyc_Std_fprintf( Cyc_Std_stderr,
 _tag_arr("Error: C compiler failed\n", sizeof( unsigned char), 26u), _tag_arr(
 _temp290, sizeof( void*), 0u));}); Cyc_compile_failure= 1; Cyc_remove_cfiles();
-return 1;} Cyc_remove_cfiles(); return Cyc_compile_failure? 1: 0;}}}}}}}
+return 1;} Cyc_remove_cfiles(); return Cyc_compile_failure? 1: 0;}}}}}}}}

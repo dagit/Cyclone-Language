@@ -859,7 +859,8 @@ extern GC_warn_proc GC_set_warn_proc(GC_warn_proc p);
 
 static void GC_noblacklist_warn_proc(char *msg, GC_word arg) {
   if (!msg) return;
-  if (!strcmp(msg,"Needed to allocate blacklisted block"))
+  if (!strncmp(msg,"Needed to allocate blacklisted block",
+               strlen("Needed to allocate blacklisted block")))
     return;
   GC_default_warn_proc(msg,arg);
 }

@@ -126,24 +126,15 @@ cfiles:
 	-mkdir $(BUILDDIR) >& /dev/null
 	$(DO_LIBSRC) CYCFLAGS="$(CYCFLAGS) -stopafter-toc" cfiles
 
+# Note: Tried doing this stuff with target-specific variables instead
+#       of recursive invocations, but it crashes gnumake 3.79.1
+#       due to "export CYCFLAGS" and "dbg_src: override CYCFLAGS+=-g".
+#       They say it's been fixed in their working version.  The crash
+#       happens only when the rule (e.g. dbg_src) fires.
 dbg_src:
 	$(MAKE) BUILDDIR=build/dbg CYCFLAGS="$(CYCFLAGS) -g" cyclone_src
 dbg_lib_src:
 	$(MAKE) BUILDDIR=build/dbg CYCFLAGS="$(CYCFLAGS) -g" lib_src
-
-# This target compares the C files in bin/genfiles to those in src
-# Lack of difference means running the update would have no real effect.
-diff: cyclone_src
-	for i in $(UPDATE_SRCS);\
-	   do (diff $(ARCHDIR)/src/$$i $(BUILDDIR)/$$i) done
-	for i in $(C_LIBS);\
-	   do (diff $(ARCHDIR)/lib/$$i $(BUILDDIR)/$$i) done
-	diff $(ARCHDIR)/lib/precore_c.h $(BUILDDIR)/precore_c.h
-	for i in $(CYCLONE_H);\
-	   do (diff include/$$i lib/$$i) done
-	diff $(ARCHDIR)/lib/$(C_RUNTIME) lib/$(C_RUNTIME)
-	diff $(ARCHDIR)/lib/nogc.c lib/nogc.c
-	diff bin/cyc-lib/include/cyc_include.h lib/include/cyc_include.h
 
 # This target compares the C files in bin/genfiles to those in src
 # Lack of difference means running the update would have no real effect.
@@ -254,7 +245,7 @@ update_all_archs:
 	 NODEPS=X\
 	 BUILDDIR=build/$$arch\
 	 UPDATEARCH=$$arch\
-	CYCFLAGS="$(CYCFLAGS) -use-cpp '$(addprefix $(CYCDIR)/config/, cyccpp arch/$(ARCH) arch/$$arch)'";\
+	 CYCFLAGS="$(CYCFLAGS) -use-cpp '$(addprefix $(CYCDIR)/config/, cyccpp arch/$(ARCH) arch/$$arch)'";\
 	    else\
 	      $(MAKE) update;\
 	    fi;\

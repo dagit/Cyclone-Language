@@ -134,8 +134,6 @@ csignal.h: csignal.h_in arch/$(UPDATEARCH).h
 	echo "#undef _EXTRACT_SIGNALCONSTS" >> $@
 	cat $< >> $@
 
-ifneq ($(MAKECMDGOALS),clean)
 ifndef NODEPS
 -include $(addsuffix .d, $(CYCLONE_LIBS) $(CYCLONE_SRCS) cycdoc)
-endif
 endif

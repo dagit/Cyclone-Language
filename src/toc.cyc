@@ -989,10 +989,9 @@ static void lvalue_assign(exp_t e1, list_t<field_name_t> fs,
     lvalue_assign(e1,new List(fld,fs),f,f_env);
     break;
   default:
-    // Sanity check: the translation of lvalues may change,
-    // so we may need to adjust how we find the inner lvalue.
-    if (!is_lvalue(e1))
-      toc_impos("lvalue_assign: could not find lvalue in `%s'",exp2string(e1));
+    // Note: this may not be an lvalue b/c of &arr where arr has an array type.
+    // WARNING: If the translation of lvalues changes, we may need to change
+    //          how we find the "inner lvalue".
     // make a copy so we don't create a loop
     exp_t e1_copy = copy_exp(e1);
     // add the path back on to the expression
