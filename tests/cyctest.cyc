@@ -453,10 +453,10 @@ void string_test() {
                                                  &cons(allocstr("world"),null)),
                                            "**"),
                         "hello**world")==0);
-  // FIX:  polymorphism requires the cast char->Char
-  okfail(String::strcmp(String::implode(&cons((Char)'a',
-                                              &cons((Char)'b',
-                                                    &cons((Char)'c',null)))),
+  // FIX:  polymorphism requires the cast char->int
+  okfail(String::strcmp(String::implode(&cons((int)'a',
+                                              &cons((int)'b',
+                                                    &cons((int)'c',null)))),
                         "abc")==0);
   switch ((char)String::explode("abc")->tl->hd) {
   case 'a': fail(); break;
@@ -596,7 +596,7 @@ void character_test() {
 
 void xarray_test() {
   test_begin("Xarray");
-  let xa = Xarray::create(3,(Char)'a');
+  let xa = Xarray::create(3,(int)'a');
   Xarray::add(xa,'a');
   Xarray::add(xa,'b');
   Xarray::add(xa,'c');
