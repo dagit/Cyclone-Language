@@ -3,7 +3,7 @@ CC=gcc
 # Assume with Windows
 
 O := o
-A := l
+A := a
 EXE := .exe
 
 # What we do when using VC++

@@ -68,9 +68,9 @@ extern mstring_t substring(string_t,int ofs, size_t n);
 extern mstring_t replace_suffix(string_t,string_t,string_t);
 
 ////////////////////////// SEARCHING
-extern mstring_t strchr(string_t s, char c);
-extern mstring_t strrchr(string_t s, char c);
-extern mstring_t strpbrk(string_t s, string_t accept);
+extern string_t strchr(string_t s, char c);
+extern mstring_t strrchr(mstring_t s, char c);
+extern mstring_t strpbrk(mstring_t s, string_t accept);
 extern size_t strspn(string_t s, string_t accept);
 
 ////////////////////////// CONVERSIONS

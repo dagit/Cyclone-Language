@@ -17,15 +17,21 @@ extern struct _tagged_ptr0 ntCsl_to_ntsl( unsigned char**); extern int system(
 unsigned char*); extern int* __errno(); struct Cyc_List_List{ void* hd; struct
 Cyc_List_List* tl; } ; extern int Cyc_List_length( struct Cyc_List_List* x);
 extern unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
-18u]; extern unsigned char Cyc_List_Nth[ 8u]; extern int isalnum( int __c);
-extern int isalpha( int __c); extern int iscntrl( int __c); extern int isdigit(
-int __c); extern int isgraph( int __c); extern int islower( int __c); extern int
-isprint( int __c); extern int ispunct( int __c); extern int isspace( int __c);
-extern int isupper( int __c); extern int isxdigit( int __c); extern int tolower(
-int __c); extern int toupper( int __c); extern int isascii( int __c); extern int
-toascii( int __c); extern int _tolower( int __c); extern int _toupper( int __c);
-struct Cyc_Stdio___sFILE; extern unsigned char Cyc_Stdio_FileCloseError[ 19u];
-extern unsigned char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
+18u]; extern unsigned char Cyc_List_Nth[ 8u]; extern int isalnum( int __c)
+ __attribute__(( cdecl )) ; extern int isalpha( int __c)  __attribute__(( cdecl
+)) ; extern int iscntrl( int __c)  __attribute__(( cdecl )) ; extern int isdigit(
+int __c)  __attribute__(( cdecl )) ; extern int isgraph( int __c)
+ __attribute__(( cdecl )) ; extern int islower( int __c)  __attribute__(( cdecl
+)) ; extern int isprint( int __c)  __attribute__(( cdecl )) ; extern int ispunct(
+int __c)  __attribute__(( cdecl )) ; extern int isspace( int __c)
+ __attribute__(( cdecl )) ; extern int isupper( int __c)  __attribute__(( cdecl
+)) ; extern int isxdigit( int __c)  __attribute__(( cdecl )) ; extern int
+tolower( int __c)  __attribute__(( cdecl )) ; extern int toupper( int __c)
+ __attribute__(( cdecl )) ; extern int isascii( int __c)  __attribute__(( cdecl
+)) ; extern int toascii( int __c)  __attribute__(( cdecl )) ; extern int
+_tolower( int __c)  __attribute__(( cdecl )) ; extern int _toupper( int __c)
+ __attribute__(( cdecl )) ; struct Cyc_Stdio___sFILE; extern unsigned char Cyc_Stdio_FileCloseError[
+19u]; extern unsigned char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
 unsigned char* tag; struct _tagged_string f1; } ; extern struct _tagged_string
 Cyc_String_strerror( int); extern unsigned int Cyc_String_strlen( struct
 _tagged_string s); extern int Cyc_String_strcmp( struct _tagged_string s1,
@@ -393,40 +399,40 @@ _temp89.last_plus_one - _temp89.curr);}))); Cyc_String_strncpy( ans, 0, src, 0,
 m - n); Cyc_String_strncpy( ans,( int)( m - n), new_suffix, 0,({ struct
 _tagged_string _temp88= new_suffix;( unsigned int)( _temp88.last_plus_one -
 _temp88.curr);})); return ans;}} struct _tagged_string Cyc_String_strpbrk(
-struct _tagged_string s, struct _tagged_string accept){ int len=( int) Cyc_String_int_strleno(
-s, 0,({ unsigned char* _temp100=( unsigned char*)"String::strpbrk"; struct
-_tagged_string _temp101; _temp101.curr= _temp100; _temp101.base= _temp100;
+struct _tagged_string s, struct _tagged_string accept){ int len=( int) Cyc_String_int_strleno((
+struct _tagged_string) s, 0,({ unsigned char* _temp100=( unsigned char*)"String::strpbrk";
+struct _tagged_string _temp101; _temp101.curr= _temp100; _temp101.base= _temp100;
 _temp101.last_plus_one= _temp100 + 16; _temp101;})); unsigned char c='\000';
-for( 0; len > 0?( c=({ struct _tagged_string _temp94= s; const unsigned char*
-_temp95= _temp94.curr; if( _temp94.base == 0? 1:( _temp95 < _temp94.base? 1:
-_temp95 >= _temp94.last_plus_one)){ _throw( Null_Exception);}* _temp95;})) != 0:
-0;( len --,({ struct _tagged_string* _temp96=& s; struct _tagged_string _temp97=*
-_temp96; _temp96->curr ++; _temp97;}))){ int j= 0; for( 0; j <({ struct
-_tagged_string _temp98= accept;( unsigned int)( _temp98.last_plus_one - _temp98.curr);});
-j ++){ if( c ==*(( const unsigned char*(*)( struct _tagged_string, unsigned int,
+for( 0; len > 0?( c=({ struct _tagged_string _temp94= s; unsigned char* _temp95=
+_temp94.curr; if( _temp94.base == 0? 1:( _temp95 < _temp94.base? 1: _temp95 >=
+_temp94.last_plus_one)){ _throw( Null_Exception);}* _temp95;})) != 0: 0;( len --,({
+struct _tagged_string* _temp96=& s; struct _tagged_string _temp97=* _temp96;
+_temp96->curr ++; _temp97;}))){ int j= 0; for( 0; j <({ struct _tagged_string
+_temp98= accept;( unsigned int)( _temp98.last_plus_one - _temp98.curr);}); j ++){
+if( c ==*(( const unsigned char*(*)( struct _tagged_string, unsigned int,
 unsigned int)) _check_unknown_subscript)( accept, sizeof( unsigned char), j)){
-return s;}}} return( struct _tagged_string)({ struct _tagged_string _temp99={ 0,
-0, 0}; _temp99;});} struct _tagged_string Cyc_String_strchr( struct
-_tagged_string s, unsigned char c){ int len=( int) Cyc_String_int_strleno( s, 0,({
-unsigned char* _temp107=( unsigned char*)"String::strchr"; struct _tagged_string
-_temp108; _temp108.curr= _temp107; _temp108.base= _temp107; _temp108.last_plus_one=
-_temp107 + 15; _temp108;})); unsigned char c2='\000'; for( 0; len > 0?( c2=({
-struct _tagged_string _temp102= s; const unsigned char* _temp103= _temp102.curr;
-if( _temp102.base == 0? 1:( _temp103 < _temp102.base? 1: _temp103 >= _temp102.last_plus_one)){
+return s;}}} return({ struct _tagged_string _temp99={ 0, 0, 0}; _temp99;});}
+struct _tagged_string Cyc_String_strchr( struct _tagged_string s, unsigned char
+c){ int len=( int) Cyc_String_int_strleno( s, 0,({ unsigned char* _temp107=(
+unsigned char*)"String::strchr"; struct _tagged_string _temp108; _temp108.curr=
+_temp107; _temp108.base= _temp107; _temp108.last_plus_one= _temp107 + 15;
+_temp108;})); unsigned char c2='\000'; for( 0; len > 0?( c2=({ struct
+_tagged_string _temp102= s; const unsigned char* _temp103= _temp102.curr; if(
+_temp102.base == 0? 1:( _temp103 < _temp102.base? 1: _temp103 >= _temp102.last_plus_one)){
 _throw( Null_Exception);}* _temp103;})) != 0: 0;( len --,({ struct
 _tagged_string* _temp104=& s; struct _tagged_string _temp105=* _temp104;
 _temp104->curr ++; _temp105;}))){ if( c2 == c){ return s;}} return( struct
 _tagged_string)({ struct _tagged_string _temp106={ 0, 0, 0}; _temp106;});}
 struct _tagged_string Cyc_String_strrchr( struct _tagged_string s, unsigned char
-c){ int len=( int) Cyc_String_int_strleno( s, 0,({ unsigned char* _temp114=(
-unsigned char*)"String::strrchr"; struct _tagged_string _temp115; _temp115.curr=
-_temp114; _temp115.base= _temp114; _temp115.last_plus_one= _temp114 + 16;
-_temp115;})); int i= len - 1; s.curr += i; for( 0; i >= 0;( i --,({ struct
-_tagged_string* _temp109=& s; struct _tagged_string _temp110=* _temp109;
-_temp109->curr --; _temp110;}))){ if(({ struct _tagged_string _temp111= s; const
-unsigned char* _temp112= _temp111.curr; if( _temp111.base == 0? 1:( _temp112 <
-_temp111.base? 1: _temp112 >= _temp111.last_plus_one)){ _throw( Null_Exception);}*
-_temp112;}) == c){ return s;}} return( struct _tagged_string)({ struct
+c){ int len=( int) Cyc_String_int_strleno(( struct _tagged_string) s, 0,({
+unsigned char* _temp114=( unsigned char*)"String::strrchr"; struct
+_tagged_string _temp115; _temp115.curr= _temp114; _temp115.base= _temp114;
+_temp115.last_plus_one= _temp114 + 16; _temp115;})); int i= len - 1; s.curr += i;
+for( 0; i >= 0;( i --,({ struct _tagged_string* _temp109=& s; struct
+_tagged_string _temp110=* _temp109; _temp109->curr --; _temp110;}))){ if(({
+struct _tagged_string _temp111= s; unsigned char* _temp112= _temp111.curr; if(
+_temp111.base == 0? 1:( _temp112 < _temp111.base? 1: _temp112 >= _temp111.last_plus_one)){
+_throw( Null_Exception);}* _temp112;}) == c){ return s;}} return({ struct
 _tagged_string _temp113={ 0, 0, 0}; _temp113;});} unsigned int Cyc_String_strspn(
 struct _tagged_string s, struct _tagged_string accept){ unsigned int len= Cyc_String_int_strleno(
 s, 0,({ unsigned char* _temp118=( unsigned char*)"String::strspn"; struct

@@ -29,7 +29,7 @@ else
 TOC_FLAG =
 endif
 
-CYC_FLAGS := -B. -save-c $(PROF_RGN_FLAG) $(TOC_FLAG)
+CYC_FLAGS := -I. -B. -save-c $(PROF_RGN_FLAG) $(TOC_FLAG)
 
 all: $(OUT_PREFIX)$(CYCLIB) xml/libxml.a
 

@@ -417,7 +417,7 @@ mstring_t replace_suffix (string_t src, string_t curr_suffix, string_t new_suffi
 
 // Search for any character of accept in s.
 // Return a ? pointer to the first such character, or null if none.
-string_t strpbrk(string_t s, string_t accept) {
+mstring_t strpbrk(mstring_t s, string_t accept) {
   int len = int_strleno(s,0,"String::strpbrk");
   char c = '\000';
 
@@ -444,7 +444,7 @@ string_t strchr(string_t s, char c) {
 
 // Return a pointer to the last occurrence of c in s,
 // or null if none.
-string_t strrchr(string_t s, char c) {
+mstring_t strrchr(mstring_t s, char c) {
   int len = int_strleno(s,0,"String::strrchr");
   int i = len - 1;
   s += i;
