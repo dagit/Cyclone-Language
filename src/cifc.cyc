@@ -93,8 +93,35 @@ void merge_sys_user_decl(seg_t loc, bool is_buildlib,
     }
     break;
 
-    // TODO: vardecls with fndecls (for inline definitions)
-    //       enum decls
+  case $(&Fn_d(cd),&Var_d(ud)):
+    if (!is_function_type(ud->type))
+      FAIL_MERGE(false,loc,is_buildlib,ud->name,
+		 ": type must be a function type to match decl\n");
+    type_t cdtype;
+    if (cd->cached_type != NULL)
+      cdtype = cd->cached_type;
+    else
+      cdtype = new FnType(cd->i);
+    if (!c_types_ok(ud->type,cdtype)) {
+      FAIL_MERGE(false,loc,is_buildlib,ud->name,
+		 aprintf(": type %s != %s",
+			 Absynpp::typ2string(cdtype),
+			 Absynpp::typ2string(ud->type)));
+    }
+    else {
+      // Copy the user type, qualifier, and attributes to the C version.
+      switch (ud->type) {
+      case &FnType(fi):
+	if (cd->i.attributes != NULL)
+	  fi.attributes = merge_attributes(fi.attributes,cd->i.attributes);
+	cd->i = fi;
+	break;
+      default: terr(0,"oops!\n");
+      }
+    }
+    break;
+
+    // TODO: enum decls
 
   case $(&Aggr_d(cd),&Aggr_d(ud)):
     // For an aggregate type, we allow the C version to have more fields.

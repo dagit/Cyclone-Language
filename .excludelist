@@ -1,6 +1,8 @@
 .*\.a$
 .*\.exe$
 .*\.o$
+.*\.rout$
+.*\.jar$
 .*\.output$
 /BUILDLIB\.OUT$
 /BUILDLIB\.LOG$

@@ -72,9 +72,9 @@ void _push_handler(struct _handler_cons * new_handler) {
 void _npop_handler(int n) { _npop_frame(n); }
 
 void _pop_handler() {
-  if (_top_frame() == NULL || _top_frame()->tag != 0) {
-    errquit("internal error: _pop_handler");
-  }
+/*   if (_top_frame() == NULL || _top_frame()->tag != 0) { */
+/*     errquit("internal error: _pop_handler"); */
+/*   } */
   _npop_handler(0);
 }
 

@@ -84,6 +84,7 @@ static bool print_all_effects_r = false;
 static bool nocyc_setjmp_r = false;
 static bool generate_interface_r = false;
 static bool toseqc_r = true;
+static bool pthread_r = false;
 
 // Arguments to pass to the C compiler
 static list_t<stringptr_t> ccargs = NULL;
@@ -205,8 +206,11 @@ static void add_libarg(string_t<`H> s) {
       add_ccarg("-lxml_a");
   else if (strncmp(s,"-lcyc",5) == 0)
     add_ccarg(s);
-  else
+  else {
+    if (strncmp(s,"-lpthread",9) == 0)
+      pthread_r = true;
     libargs = new List(new s,libargs);
+  }
 }
 
 static void add_marg(string_t<`H> s) {
@@ -1267,8 +1271,6 @@ int main(int argc, string_t<`H> ?`H argv) {
   }
   let target_cflags = Specsfile::get_spec(specs,"cyclone_target_cflags");
   let cyclone_cc = Specsfile::get_spec(specs,"cyclone_cc");
-  let target_libs = Specsfile::get_spec(specs,"cyclone_target_libs");
-  if (!target_libs) target_libs = "";
   if (!cyclone_cc) cyclone_cc = "gcc";
   def_inc_path = Specsfile::get_spec(specs,"cyclone_inc_path");
 
@@ -1376,19 +1378,26 @@ int main(int argc, string_t<`H> ?`H argv) {
       libcyc_flag = "-lcycboot";
       nogc_filename = "nogc.a";
       runtime_filename = "runtime_cyc.a";
+    } else if (pthread_r) {
+      libcyc_flag = "-lcyc";
+      nogc_filename = "nogc_pthread.a";
+      runtime_filename = "runtime_cyc_pthread.a";
     } else {
       libcyc_flag = "-lcyc";
       nogc_filename = "nogc.a";
       runtime_filename = "runtime_cyc.a";
     }
-    gc_filename = "gc.a";
+    if (!pthread_r)
+      gc_filename = "gc.a";
+    else
+      gc_filename = "gc_pthread.a";
 
     let gc = (nogc_r ? find_in_arch_path(nogc_filename): find_in_arch_path(gc_filename));
     let runtime = find_in_arch_path(runtime_filename);
 
     // FIX: temporarily removed from interface check below
     stdlib = NULL;     //stdlib = list(new libcyc_flag);
-    stdlib_string = aprintf(" %s %s %s %s ", libcyc_flag, runtime, gc, target_libs);
+    stdlib_string = aprintf(" %s %s %s ", libcyc_flag, runtime, gc);
     
   }
 

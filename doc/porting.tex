@@ -22,7 +22,7 @@ Though Cyclone resembles and shares a lot with C, porting is not
 always straightforward.  Furthermore, it's rare that you actually port
 an entire application to Cyclone.  You may decide to leave certain
 libraries or modules in C and port the rest to Cyclone.  In this
-Chapter, we want to share with you the tips and tricks that we have
+chapter, we want to share with you the tips and tricks that we have
 developed for porting C code to Cyclone and interfacing Cyclone
 code against legacy C code.
 
@@ -156,6 +156,32 @@ when porting C code is to just change all pointers to fat pointers.
 The code is then more likely to compile, but will have greater overhead.
 After changing to use all fat pointers, you may wish to profile or reexamine
 your code and figure out where you can profitably use thin pointers.
+
+Be careful with \texttt{char} pointers.  By default, a \texttt{char ?}
+is treated as zero-terminated, i.e. a \texttt{char * @fat @zeroterm}.
+If you are using the \texttt{char} pointer as a buffer of bytes, then
+you may actually wish to change it to be a \texttt{char ? @nozeroterm}
+instead.  Along these lines, you have to be careful that when you are
+using arrays that get promoted to pointers, that you correctly
+indicate the size of the array to account for the zero terminator.
+For example, say your original C code was
+\begin{verbatim}
+    char line[MAXLINELEN];
+    while (fgets(line, MAXLINELEN, stdin)) ...
+\end{verbatim}
+If you want your pointer to be zero-terminated, you would have to do
+the following:
+\begin{verbatim}
+    char line[MAXLINELEN+1] @zeroterm;
+    while (fgets(line, MAXLINELEN, stdin)) ...
+\end{verbatim}
+The \texttt{@zeroterm} qualifier is needed since \texttt{char}
+\emph{arrays} are not zero-terminated by default.  Adding the
+\texttt{+1} makes space for the extra zero terminator that Cyclone
+includes, ensuring that it won't be overwritten by \texttt{fgets}.  If
+you don't do this, you could well get an array bounds exception at
+runtime.  If you don't want your \texttt{char} array to be
+zero-terminated, you can simply leave the original C code as is.
 \end{porta}
 
 \begin{porta}{port:malloc}{Use comprehensions to heap-allocate arrays.}
@@ -283,10 +309,10 @@ int *foo(int *x, int *y, int b) {
 
 Cyclone complains when we compile this code:
 \begin{verbatim}
-returns value of type int *#0  but requires int *
-        #0 and `H failed to unify. 
-returns value of type int *#1  but requires int *
-        #1 and `H failed to unify. 
+foo.cyc:3: returns value of type int *`GR0 but requires int *
+  `GR0 and `H are not compatible. 
+foo.cyc:5: returns value of type int *`GR1 but requires int *
+  `GR1 and `H are not compatible. 
 \end{verbatim}
 The problem is that neither \texttt{x} nor \texttt{y} is a pointer
 into the heap.  You can fix this problem by putting in explicit regions
@@ -356,7 +382,9 @@ void foo(int b) {
 \end{verbatim}
 
 The point is that by giving Cyclone more type information, you can
-get it to do the right sorts of promotions.  
+get it to do the right sorts of promotions.  Other sorts of type
+information you might provide include region annotations (as outlined
+above), pointer qualifiers, and casts.
 \end{porta}
 
 \begin{porta}{port:const}{Copy ``const'' code or values to make it non-const.}
@@ -505,6 +533,9 @@ a Cyclone program from scratch, you'll want to be able to access
 legacy libraries.  To do so, you must understand how Cyclone
 represents data structures, how it compiles certain features,
 and how to write wrappers to make up for representation mismatches.
+
+\subsubsection{Extern ``C''}
+
 Sometimes, interfacing to C code is as simple as writing
 an appropriate interface.  For instance, if you want to
 call the \texttt{acos} function which is defined in the C
@@ -522,20 +553,40 @@ time you get down to C code.
 If you have a whole group of functions then you can wrap them with
 a single \texttt{extern "C" \{ ... \}}, as in:
 \begin{verbatim}
-extern "C" {
-  double acos(double);
-  float  acosf(float);
-  double acosh(double);
-  float  acoshf(float);
-  double asin(double);
-}
+  extern "C" {
+    double acos(double);
+    float  acosf(float);
+    double acosh(double);
+    float  acoshf(float);
+    double asin(double);
+  }
 \end{verbatim}
+You must be careful that the type you declare for the C function is
+its real type.  Misdeclaring the type could result in a runtime
+error.  Note that you can add Cyclonisms to the type that refine the
+meaning of the original C.  For example, you could declare:
+\begin{verbatim}
+  extern "C" int strlen(const char * @notnull str);
+\end{verbatim}
+Here we have refined the type of \texttt{strlen} to require that a
+non-NULL pointer is passed to it.  Because this type is
+representation-compatible with the C type (that is, it has the same
+storage requirements and semantics), this is legal.  However, the
+following would be incorrect:
+\begin{verbatim}
+  extern "C" int strlen(const char * @fat str);
+\end{verbatim}
+Giving the function this type would probably lead to an error because
+Cyclone fat pointers are represented as three words, but the standard
+C library function expects a single pointer (one word).
 
-The extern C approach works well enough that it covers many
-of the cases that you'll encounter.  However, the situation is
-not so when you run into more complicated interfaces.  Sometimes
-you will need to write some wrapper code to convert from 
-Cyclone's representations to C's and back.  
+The \texttt{extern "C"} approach works well enough that it covers many
+of the cases that you'll encounter.  However, the situation is not so
+when you run into more complicated interfaces.  Sometimes you will
+need to write some wrapper code to convert from Cyclone's
+representations to C's and back (so called \emph{wrapper} code).
+
+\subsubsection{Extern ``C include''}
 
 Another useful tool is the \texttt{extern "C include"} mechanism.
 It allows you to write C definitions within a Cyclone file.  Here
@@ -553,18 +604,127 @@ extern "C include" {
   peek, poke;
 }
 \end{verbatim}
-In this example, we've defined two C functions \texttt{peek} and 
-\texttt{poke}.  Cyclone will not compile or type-check them, but
+In this example, we've defined two C functions \texttt{peek} and
+\texttt{poke}.  Cyclone will not compile or type-check their code, but
 rather pass them on to the C compiler.  The \texttt{export} clause
-indicates which function and variable definitions should be 
-exported to the Cyclone code.  If we only wanted to export the
-\texttt{peek} function, then we would leave the \texttt{poke} function
-out of the export list.
+indicates which function and variable definitions should be exported
+to the Cyclone code.  If we only wanted to export the \texttt{peek}
+function, then we would leave the \texttt{poke} function out of the
+export list.  All all other definitions, like \texttt{typedef}s,
+\texttt{struct}s, etc., not to mention \texttt{\#define}s and other
+preprocessor effects, are exported by default (but this may change in
+a later release).
 
-A more complicated example can be found in \texttt{tests/pcredemo.cyc}.
+Any top-level types you mention in the \texttt{extern "C include"} are
+interpreted by the Cyclone code that uses them as Cyclone types.  If
+they are actually C types (as would be the case if you
+\texttt{\#include}d some header in the C block), this will be safe, but
+possibly undesirable, since they may not communicate the right
+information  to the Cyclone code.  There are two ways around this.
+In many cases, you can actually declare Cyclone types within the C
+code, and they will be treated as such.  For example, in
+\texttt{lib/core.cyc}, we have
+For example, you could do something like:
+\begin{verbatim}
+extern "C include" {
+  ... Cyc_Core_mkthin(`a ?`r dyn, sizeof_t<`a> sz) {
+    unsigned bd = _get_dyneither_size(dyn,sz);
+    return Cyc_Core_mktuple(dyn.curr,bd);
+  } 
+} export {
+  Cyc_Core_mkthin
+}
+\end{verbatim}
+In this case, we are able to include a \texttt{?} notation directly in
+the C type, but then manipulate it using the runtime system functions
+for fat pointers (see \texttt{cyc_include.h} for details).
+
+In the case that you are \texttt{\#include}ing a C header file, you
+may not be able to change its definitions to have a proper Cyclone
+type, or it may be that the Cyclone definitions will not parse for
+some reason.  In this case, you can declare a block to \emph{override}
+the definitions with Cyclone compatible versions.  For example, we
+could change the above code to be instead:
+\begin{verbatim}
+extern "C include" {
+  struct foo { int x; int y; };
+  struct foo *cast_charbuf(char *buf, unsigned int n) {
+    if (n >= sizeof(struct foo))
+      return (struct foo *)buf;
+    else
+      return (void *)0;
+  }
+} cyclone_override {
+  struct foo *cast_charbuf
+    (char * @numelts(valueof(`n)) @nozeroterm buf,tag_t<`n> n);
+} export {
+  cast_charbuf
+}
+\end{verbatim}
+Now we have given \texttt{cast_charbuf} its original C type, but then
+provided the Cyclone type in the override block.  The Cyclone type
+ensures the value of \texttt{n} correctly represents the length of the
+buffer, by using Cyclone's dependent types (see
+\sectionref{sec:pointers}).  Note that top-level \texttt{struct} and
+other type definitions can basically be entirely Cyclone syntax.  If
+you try to declare a Cyclone overriding type that is
+representation-incompatible with the C version, the compiler will
+complain.
+
+Here is a another example using an external header:
+\begin{verbatim}
+extern "C include" {  /* tell Cyclone that <pcre.h> is C code */
+#include <pcre/pcre.h>
+} cyclone_override {
+  pcre *`U pcre_compile(const char @pattern, int options,
+                        const char *`H *errptr, int *erroffset,
+                        const unsigned char *tableptr);
+  int pcre_exec(const pcre @code, const pcre_extra *extra, 
+                const char *subject, int length,
+                int startoffset, int options,
+                int *ovector, int ovecsize);
+} export { pcre_compile, pcre_exec; }
+\end{verbatim}
+In this case, we have included the Perl regular expression library C
+header, and then exported two of its functions, \texttt{pcre_compile}
+and \texttt{pcre_exec}.  Moreover, we have given these functions
+Cyclone types that are more expressive in the original C.  Probably we
+would yet want to write wrappers around these functions to check other
+invariants of the arguments (e.g., that the \texttt{length} passed to
+\texttt{pcre_exec} is indeed the length of the \texttt{subject}).
+Take a look at \texttt{tests/pcredemo.cyc} for more information on
+this example.  Another example that shows how you can override things
+is in \texttt{tests/cinclude.cyc}.
+
 The goal of this example is to show how you can safely suck in
 a large C interface (in this case, the Perl Compatible Regular Expression
 interface), write wrappers around some of the functions to convert
 represenations and check properties, and then safely export these
 wrappers to Cyclone.  
 
+One word of warning: when you \texttt{\#include} something within an
+\texttt{extern "C include"}, it will follow the normal include path,
+which is to say that it will look for \emph{Cyclone} versions of the
+headers first.  This means that if you do something like:
+\begin{verbatim}
+extern "C include" {
+#include <string.h>
+} export { ... }
+\end{verbatim}
+It will actually include the Cyclone version of the \texttt{string.h}
+header!  These easiest way around this is to use an absolute path, as
+in
+\begin{verbatim}
+extern "C include" {
+#include "/usr/include/string.h"
+} export { ... }
+\end{verbatim}
+Even worse is when a C header you wish to include itself includes a
+header for which there exists a Cyclone version.  In the
+\texttt{pcre.h} example above, this actually occurs in that
+\texttt{pcre.h} includes \texttt{stdlib.h}, and gets the Cyclone
+version.  To avoid this, the \texttt{pcredemo.cyc} program includes
+the Cyclone versions of these headers first.  Ultimately we will
+probably change the compiler so that header processing within
+\texttt{extern "C include"} searches the C header path but not the
+Cyclone one.

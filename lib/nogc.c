@@ -92,6 +92,11 @@ void *CYCALLOCPROFILE_sbrk(int incr) {
 #define MORECORE CYCALLOCPROFILE_sbrk
 #endif
 
+#ifdef _HAVE_PTHREAD_
+/* Make this implementation of malloc safe */
+#define USE_MALLOC_LOCK
+#endif
+
 #include "malloc.c"
 
 #define malloc_sizeb(p,n) mUSABLe(p)

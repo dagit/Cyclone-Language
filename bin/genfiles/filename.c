@@ -136,10 +136,16 @@ extern char Cyc_Bad_alloc[];
 #endif
 
 #ifdef NO_CYC_BOUNDS_CHECKS
-#define _check_known_subscript_null(ptr,bound,elt_sz,index)\
-   (((char *)ptr) + (elt_sz)*(index))
 #define _check_known_subscript_notnull(ptr,bound,elt_sz,index)\
    (((char *)ptr) + (elt_sz)*(index))
+#ifdef NO_CYC_NULL_CHECKS
+#define _check_known_subscript_null _check_known_subscript_notnull
+#else
+#define _check_known_subscript_null(ptr,bound,elt_sz,index) ({ \
+  char*_cks_ptr = (char*)(ptr); \
+  if (!_cks_ptr) _throw_null(); \
+  (_cks_ptr) + (elt_sz)*(index); })
+#endif
 
 #define _zero_arr_plus_char_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
 #define _zero_arr_plus_short_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))

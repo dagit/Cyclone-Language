@@ -64,11 +64,33 @@ $(BL)/cyc-lib/%/nogc_pg.a: build/%/gprof/nogc.a
 $(BL)/cyc-lib/%/nogc_nocheck.a: build/%/nocheck/nogc.a
 	cp -p $< $@
 
+ifeq ($(HAVE_PTHREAD),yes)
+$(BL)/cyc-lib/%/nogc_pthread.a: build/%/pthread/nogc.a
+	cp -p $< $@
+
+build/%/pthread/gc:
+	cp -r gc $@
+	(cd $@; make clean; ./configure --enable-threads=pthreads --enable-shared=no --enable-cplusplus=no)
+
+.PRECIOUS: build/%/pthread/gc build/%/pthread/gc/.libs/libgc.a
+
+build/%/pthread/gc/.libs/libgc.a: build/%/pthread/gc
+	$(MAKE) -C $^ libgc.la CC="$(CC)" CFLAGS="$(CFLAGS)"
+
+$(BL)/cyc-lib/%/gc_pthread.a: build/%/pthread/gc/.libs/libgc.a
+	cp -p $< $@
+endif
+
 $(BL)/cyc-lib/%/runtime_cyc.a: build/%/runtime_cyc.a
 	cp -p $< $@
 
 $(BL)/cyc-lib/%/runtime_cyc_a.a: build/%/aprof/runtime_cyc.a
 	cp -p $< $@
+
+ifeq ($(HAVE_PTHREAD),yes)
+$(BL)/cyc-lib/%/runtime_cyc_pthread.a: build/%/pthread/runtime_cyc.a
+	cp -p $< $@
+endif
 
 $(BL)/cyc-lib/%/runtime_cyc_pg.a: build/%/gprof/runtime_cyc.a
 	cp -p $< $@
@@ -112,6 +134,11 @@ endef
 define rmake-nocheck
 @mkdir -p $(@D)
 $(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base CFLAGS="-DNO_CYC_NULL_CHECKS -DNO_CYC_BOUNDS_CHECKS $(CFLAGS)" CYCFLAGS="--nochecks $(CYCFLAGS)" $(@F)
+endef
+
+define rmake-pthread
+@mkdir -p $(@D)
+$(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base CFLAGS="-D_HAVE_PTHREAD_ $(CFLAGS)" $(@F)
 endef
 
 $(BB)/libcycboot.a:
@@ -169,6 +196,11 @@ $(BB)/gprof/nogc.a:
 $(BB)/nocheck/nogc.a:
 	$(rmake-nocheck)
 
+ifeq ($(HAVE_PTHREAD),yes)
+$(BB)/pthread/nogc.a:
+	$(rmake-pthread)
+endif
+
 $(BB)/runtime_cyc.a:
 	$(rmake)
 
@@ -180,6 +212,11 @@ $(BB)/gprof/runtime_cyc.a:
 
 $(BB)/nocheck/runtime_cyc.a:
 	$(rmake-nocheck)
+
+ifeq ($(HAVE_PTHREAD),yes)
+$(BB)/pthread/runtime_cyc.a:
+	$(rmake-pthread)
+endif
 
 $(BB)/cyclone$(EXE): $(BL)/cyc-lib/$(build)/gc.a
 	$(rmake)
@@ -233,11 +270,6 @@ $(BL)/cyc-lib/$(build)/cycspecs: $(CYCDIR)/config/buildspecs
 	echo "*cyclone_inc_path:" >> $@
 	echo "  $(INC_INSTALL)" >> $@
 	echo "" >> $@
-	if [ -n "$(HAVE_PTHREAD)" ]; then \
-	echo "*cyclone_target_libs:" >> $@; \
-	echo "  -lpthread" >> $@; \
-	echo "" >> $@; \
-	fi
 	$(CYCDIR)/config/buildspecs >> $@
 
 $(BL)/cyc-lib/$(build)/cyc_setjmp.h: bin/cyc-lib/libc.cys bin/buildlib$(EXE)
@@ -272,6 +304,13 @@ cyclone: \
   bin/cyclone$(EXE) \
   bin/cycdoc$(EXE) \
   bin/buildlib$(EXE)
+
+ifeq ($(HAVE_PTHREAD),yes)
+cyclone: \
+  $(BL)/cyc-lib/$(build)/runtime_cyc_pthread.a \
+  $(BL)/cyc-lib/$(build)/nogc_pthread.a \
+  $(BL)/cyc-lib/$(build)/gc_pthread.a
+endif
 
 aprof: \
   $(BL)/libcycboot_a.a \
@@ -373,6 +412,11 @@ define rmake-target-nocheck
 $(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base CC="$(TARGET_CC)" CFLAGS="-DNO_CYC_NULL_CHECKS -DNO_CYC_BOUNDS_CHECKS $(TARGET_CFLAGS)" CYCFLAGS="$(BTARGET) --nochecks $(CYCFLAGS)" BUILDLIBFLAGS="$(BTARGET)" AR="$(TARGET_AR)" RANLIB="$(TARGET_RANLIB)" $(@F)
 endef
 
+define rmake-target-pthread
+@mkdir -p $(@D)
+$(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base CC="$(TARGET_CC)" CFLAGS="-D_HAVE_PTHREAD_ $(TARGET_CFLAGS)" CYCFLAGS="$(BTARGET) $(CYCFLAGS)" BUILDLIBFLAGS="$(BTARGET)" AR="$(TARGET_AR)" RANLIB="$(TARGET_RANLIB)" $(@F)
+endef
+
 $(BT)/libcycboot.a:
 	$(rmake-target)
 
@@ -428,6 +472,11 @@ $(BT)/gprof/nogc.a:
 $(BT)/nocheck/nogc.a:
 	$(rmake-target-nocheck)
 
+ifeq ($(HAVE_PTHREAD),yes)
+$(BT)/pthread/nogc.a:
+	$(rmake-target-pthread)
+endif
+
 $(BT)/runtime_cyc.a:
 	$(rmake-target)
 
@@ -439,6 +488,11 @@ $(BT)/gprof/runtime_cyc.a:
 
 $(BT)/nocheck/runtime_cyc.a:
 	$(rmake-target-nocheck)
+
+ifeq ($(HAVE_PTHREAD),yes)
+$(BT)/pthread/runtime_cyc.a:
+	$(rmake-target-pthread)
+endif
 
 directories::
 	@mkdir -p $(BL)/cyc-lib/$(target)/include
@@ -464,6 +518,12 @@ cyclone: \
   $(BL)/cyc-lib/$(target)/libcyc.a \
   $(BL)/cyc-lib/$(target)/nogc.a \
   $(BL)/cyc-lib/$(target)/runtime_cyc.a
+
+ifeq ($(HAVE_PTHREAD),yes)
+cyclone: \
+  $(BL)/cyc-lib/$(target)/nogc_pthread.a \
+  $(BL)/cyc-lib/$(target)/runtime_cyc_pthread.a
+endif
 
 aprof: \
   $(BL)/cyc-lib/$(target)/libcycboot_a.a \

@@ -1,5 +1,5 @@
 AC_INIT([[cyclone]],
-        [[0.8.1]],
+        [[0.8.2]],
         [[cyclone-bugs-l@lists.cs.cornell.edu]])
 # Look into the config subdir to find config.guess, config.sub, install-sh
 AC_CONFIG_AUX_DIR(config)
@@ -157,9 +157,9 @@ AC_SUBST(HAVE_PTHREAD)
 AC_SET_MAKE
 AC_PROG_RANLIB
 
-# configure the garbage collector
+# configure the garbage collector (without threads)
 # don't use AC_CONFIG_SUBDIRS(gc) because it can't pass flags
-(cd gc; ./configure --enable-threads=$ac_cv_pthreads --enable-shared=no --enable-cplusplus=no)
+(cd gc; ./configure --enable-threads=no --enable-shared=no --enable-cplusplus=no)
 
 AC_CONFIG_FILES(Makefile.inc)
 AC_OUTPUT
