@@ -23,6 +23,7 @@
 #include <stdarg.h>
 #include <signal.h>
 #include <time.h> // for clock()
+#include <limits.h>
 
 #include "runtime_internal.h"
 
@@ -66,6 +67,62 @@ void *GC_calloc_atomic(unsigned int n, unsigned int t) {
     _throw_badalloc();
   }
   bzero(res,p);
+  return res;
+}
+
+#define MAX_ALLOC_SIZE INT_MAX
+void *_bounded_GC_malloc(int n, const char*file, int lineno){
+  void * res = NULL;
+  if((unsigned)n >= MAX_ALLOC_SIZE){
+    fprintf(stderr, "malloc size ( = %d ) is too big or negative\n",n);
+    _throw_badalloc_fn(file, lineno);
+  }else{
+    res = GC_malloc(n) ;
+    if (res == NULL){
+      _throw_badalloc_fn(file, lineno);
+    }
+  }
+  return res;
+}
+void *_bounded_GC_malloc_atomic(int n, const char*file, int lineno){
+  void * res = NULL;
+  if((unsigned)n >= MAX_ALLOC_SIZE){
+    fprintf(stderr, "malloc size ( = %d ) is too big or negative\n",n);
+    _throw_badalloc_fn(file, lineno);
+  }else{
+    res = GC_malloc_atomic(n);
+    if( res == NULL){
+      _throw_badalloc_fn(file,lineno);
+    }
+  }
+  return res;
+}
+void *_bounded_GC_calloc(unsigned n, unsigned s, const char*file, int lineno){
+  unsigned int p = n*s;
+  void * res = NULL;
+  if(p >= MAX_ALLOC_SIZE){
+    fprintf(stderr, "calloc size ( = %d ) is too big or negative\n",p);
+    _throw_badalloc_fn(file, lineno);
+  }else{
+    res =GC_calloc(n,s);
+    if (res == NULL){
+      _throw_badalloc_fn(file, lineno);
+    }
+  }
+  return res;
+} 
+void *_bounded_GC_calloc_atomic(unsigned n,unsigned s,const char*file,int lineno){
+  unsigned int p = n*s;
+  void * res = NULL;
+  if(p >= MAX_ALLOC_SIZE){
+    fprintf(stderr, "calloc size ( = %d ) is too big or negative\n",p);
+    _throw_badalloc_fn(file, lineno);
+  }else{
+    res = GC_calloc(n,s);
+    if (res == NULL){
+      _throw_badalloc_fn(file,lineno);
+    }
+  }
   return res;
 }
 
@@ -249,7 +306,7 @@ static void grow_region(struct _RegionHandle *r, unsigned int s) {
     next_size = s + default_region_page_size;
 
   // Note, we call calloc here to ensure we get zero-filled pages
-  p = GC_calloc(sizeof(struct _RegionPage) + next_size,1);
+  p = _bounded_GC_calloc(sizeof(struct _RegionPage) + next_size,1,__FILE__, __LINE__);
   if (!p) {
     fprintf(stderr,"grow_region failure");
     _throw_badalloc();
@@ -279,8 +336,8 @@ static void _get_first_region_page(struct _RegionHandle *r, unsigned int s) {
   struct _RegionPage *p;
   unsigned int page_size = 
     default_region_page_size < s ? s : default_region_page_size;
-  p = (struct _RegionPage *)GC_calloc(sizeof(struct _RegionPage) + 
-                                      page_size,1);
+  p = (struct _RegionPage *)_bounded_GC_calloc(sizeof(struct _RegionPage) + 
+                                      page_size,1, __FILE__, __LINE__);
   if (p == NULL) 
     _throw_badalloc();
 #ifdef CYC_REGION_PROFILE
@@ -331,7 +388,7 @@ void * _region_malloc(struct _RegionHandle *r, unsigned int s) {
 #endif
     return (void *)result;
   } else if (r != CYC_CORE_REFCNT_REGION) {
-    result = GC_malloc(s);
+    result = _bounded_GC_malloc(s,__FILE__, __LINE__);
     if(!result)
       _throw_badalloc();
 #ifdef CYC_REGION_PROFILE
@@ -349,7 +406,7 @@ void * _region_malloc(struct _RegionHandle *r, unsigned int s) {
     // need to add a word for the reference count.  We use a word to
     // keep the resulting memory word-aligned.  Then bump the pointer.
     // FIX: probably need to keep it double-word aligned!
-    result = GC_malloc(s+sizeof(int));
+    result = _bounded_GC_malloc(s+sizeof(int),__FILE__, __LINE__);
     if(!result)
       _throw_badalloc();
     *(int *)result = 1;
@@ -392,7 +449,7 @@ void * _region_calloc(struct _RegionHandle *r, unsigned int n, unsigned int t)
     return (void *)result;
   } else if (r != CYC_CORE_REFCNT_REGION) {
     // allocate in the heap
-    result = GC_calloc(n,t);
+    result = _bounded_GC_calloc(n,t,__FILE__, __LINE__);
     if(!result)
       _throw_badalloc();
 #ifdef CYC_REGION_PROFILE
@@ -407,7 +464,7 @@ void * _region_calloc(struct _RegionHandle *r, unsigned int n, unsigned int t)
     return result;
   } else { // r == CYC_CORE_REFCNT_REGION)
     // allocate in the heap + 1 word for the refcount
-    result = GC_calloc(n*t+sizeof(int),1);
+    result = _bounded_GC_calloc(n*t+sizeof(int),1,__FILE__, __LINE__);
     if(!result)
       _throw_badalloc();
     *(int *)result = 1;
@@ -494,7 +551,8 @@ struct Cyc_Core_NewDynamicRegion Cyc_Core__new_ukey(const char *file,
 						    const char *func,
 						    int lineno) {
   struct Cyc_Core_NewDynamicRegion res;
-  res.key = GC_malloc(sizeof(struct Cyc_Core_DynamicRegion));
+  res.key = _bounded_GC_malloc(sizeof(struct Cyc_Core_DynamicRegion),__FILE__,
+			       __LINE__);
   if (!res.key)
     _throw_badalloc();
 #ifdef CYC_REGION_PROFILE
@@ -512,7 +570,8 @@ struct Cyc_Core_NewDynamicRegion Cyc_Core__new_rckey(const char *file,
 						     const char *func,
 						     int lineno) {
   struct Cyc_Core_NewDynamicRegion res;
-  int *krc = GC_malloc(sizeof(int)+sizeof(struct Cyc_Core_DynamicRegion));
+  int *krc = _bounded_GC_malloc(sizeof(int)+sizeof(struct Cyc_Core_DynamicRegion),
+				__FILE__, __LINE__);
   //fprintf(stderr,"creating rckey.  Initial address is %x\n",krc);fflush(stderr);
   if (!krc)
     _throw_badalloc();
@@ -647,7 +706,7 @@ struct _RegionHandle _profile_new_region(const char *rgn_name,
   static int cnt = 0;
 
   len = strlen(rgn_name)+10;
-  buf = GC_malloc_atomic(len);
+  buf = _bounded_GC_malloc_atomic(len, __FILE__, __LINE__);
   if(!buf)
     _throw_badalloc();
   else
@@ -782,7 +841,7 @@ static void *_do_profile(void *result, int is_atomic,
 
 void * _profile_GC_malloc(int n, const char *file, const char *func, int lineno) {
   void * result;
-  result =  GC_malloc(n);
+  result =  _bounded_GC_malloc(n,__FILE__, __LINE__,);
   if(!result)
     _throw_badalloc();
   return _do_profile(result,0,file,func,lineno);
@@ -791,7 +850,7 @@ void * _profile_GC_malloc(int n, const char *file, const char *func, int lineno)
 void * _profile_GC_malloc_atomic(int n, const char *file, const char *func,
                                  int lineno) {
   void * result;
-  result =  GC_malloc_atomic(n);
+  result =  _bounded_GC_malloc_atomic(n, file, lineno);
   if(!result)
     _throw_badalloc();
   return _do_profile(result,1,file,func,lineno);
@@ -799,7 +858,7 @@ void * _profile_GC_malloc_atomic(int n, const char *file, const char *func,
 
 void * _profile_GC_calloc(unsigned n, unsigned s, const char *file, const char *func, int lineno) {
   void * result;
-  result =  GC_calloc(n,s);
+  result =  _bounded_GC_calloc(n,s,__FILE__, __LINE__);
   if(!result)
     _throw_badalloc();
   return _do_profile(result,0,file,func,lineno);
@@ -808,7 +867,7 @@ void * _profile_GC_calloc(unsigned n, unsigned s, const char *file, const char *
 void * _profile_GC_calloc_atomic(unsigned n, unsigned s, 
 				 const char *file, const char *func, int lineno) {
   void * result;
-  result =  GC_calloc_atomic(n,s);
+  result =  _bounded_GC_calloc_atomic(n,s, __FILE__, __LINE__);
   if(!result)
     _throw_badalloc();
   return _do_profile(result,1,file,func,lineno);
