@@ -15,7 +15,7 @@ echo '#ifdef _EXTRACT_SIGNALCONSTS'
 echo '#include <signal.h>' | gcc -E -dD - | $EGREP -e '^#define[[:space:]]+SIG[A-Z0-9]+[[:space:]]+[A-Z0-9]+[[:space:]]*$'
 if [ $? != 0 ]; then
   echo Error: arch_include.  Maybe you have the wrong version of egrep.
-  echo Use 'export EGREP=<whatever>' to override the default (in bash).
+  echo Use 'export EGREP=<whatever>' to override the default in bash.
   exit 1
 fi
 echo '#endif'
@@ -24,7 +24,7 @@ echo '#ifdef _EXTRACT_STDIOCONSTS'
 echo '#include <stdio.h>' | gcc -E -dD - | $EGREP -e '#define[[:space:]]+(TMP_MAX|FOPEN_MAX|FILENAME_MAX|L_tmpnam|L_cuserid|L_ctermid)'
 if [ $? != 0 ]; then
   echo Error: arch_include.  Maybe you have the wrong version of egrep.
-  echo Use 'export EGREP=<whatever>' to override the default (in bash).
+  echo Use 'export EGREP=<whatever>' to override the default in bash.
   exit 1
 fi
 echo '#endif'
