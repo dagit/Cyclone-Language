@@ -1,0 +1,50 @@
+/* -*- mode: c -*-
+ * $Id: ary2.gcc,v 1.1 2004-09-06 19:33:43 mwh Exp $
+ * http://www.bagley.org/~doug/shootout/
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+
+int
+main(int argc, char *argv[]) {
+    int n = ((argc == 2) ? atoi(argv[1]) : 1);
+    int i, *x, *y;
+	
+    x = (int *) malloc(n * sizeof(int));
+    y = (int *) malloc(n * sizeof(int));
+
+    for (i = 0; i < n;) {
+	x[i] = i; ++i;
+	x[i] = i; ++i;
+	x[i] = i; ++i;
+	x[i] = i; ++i;
+	x[i] = i; ++i;
+
+	x[i] = i; ++i;
+	x[i] = i; ++i;
+	x[i] = i; ++i;
+	x[i] = i; ++i;
+	x[i] = i; ++i;
+    }
+    for (i = n-1; i >= 0;) {
+	y[i] = x[i]; --i;
+	y[i] = x[i]; --i;
+	y[i] = x[i]; --i;
+	y[i] = x[i]; --i;
+	y[i] = x[i]; --i;
+
+	y[i] = x[i]; --i;
+	y[i] = x[i]; --i;
+	y[i] = x[i]; --i;
+	y[i] = x[i]; --i;
+	y[i] = x[i]; --i;
+    }
+
+    fprintf(stdout, "%d\n", y[n-1]);
+
+    free(x);
+    free(y);
+
+    return(0);
+}

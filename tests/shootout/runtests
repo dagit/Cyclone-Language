@@ -7,8 +7,15 @@
 #   where n is the number of iterations per test.
 
 TEST=./test.sh
+TESTJAVA=./test-java.sh
 
-BENCHMARKS="ackermann ary3 except fibo hash hash2 heapsort lists matrix nestedloop random reversefile sieve spellcheck strcat sumcol wc"
+if [ -z "$LANGS" ]; then
+  LANGS="cyclone cyclone-port gcc"
+fi
+if [ -z "$BENCHMARKS" ]; then
+  BENCHMARKS="ackermann ary3 except fibo hash hash2 heapsort lists nestedloop random reversefile sieve spellcheck strcat sumcol wc"
+# matrix (after lists)
+fi
 
 if [ $# -lt 1 ]; then
 N=1
@@ -64,10 +71,11 @@ function getargs {
 
 function getinputfile {
   case "$1" in
-    reversefile) echo reversefile-Input;;
-    spellcheck) echo spell-Input;;
-    sumcol) echo sumcol-Input;;
-    wc) echo wc-Input;;
+    reversefile) echo data/reversefile-Input;;
+    spellcheck) echo data/spell-Input;;
+    sumcol) echo data/sumcol-Input;;
+    wc) echo data/wc-Input;;
+    moments) echo data/moments-Input;;
     *) echo ;;
   esac
 }  
@@ -78,9 +86,14 @@ for file in $BENCHMARKS
 do
   ARGS=`getargs $file`
   INPUTFILE=`getinputfile $file`
-  $TEST $N ./gcc-${file} $ARGS $INPUTFILE
-  $TEST $N ./${file} $ARGS $INPUTFILE
-#  $TEST $N ./nocheck-${file} $ARGS $INPUTFILE
-  $TEST $N ./cyc-${file} $ARGS $INPUTFILE
-#  $TEST $N ./nobounds-${file} $ARGS $INPUTFILE
+  for lang in $LANGS
+  do
+    if [ "${lang}" = "java" ]; then
+      $TESTJAVA $N ${lang} ${file} $ARGS $INPUTFILE
+    else
+      $TEST $N ${lang}/${file} $ARGS $INPUTFILE
+    fi
+#    $TEST $N ./nocheck-${file} $ARGS $INPUTFILE
+#    $TEST $N ./nobounds-${file} $ARGS $INPUTFILE
+  done
 done

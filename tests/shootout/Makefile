@@ -1,31 +1,37 @@
-include ../../Makefile.inc
+# include ../../Makefile.inc
 
-CYCC = $(CYCDIR)/bin/$(CYCCOMP)
-CFLAGS = -O3 -DTIMING
-CYC_FLAGS = -O3 -DTIMING -nogc
+CYCC = cyclone
+CFLAGS = -O3 -DTIMING -Iinclude
+CYC_FLAGS = -O3 -DTIMING -nogc -Iinclude
+
+# TO DO: parameterize by language here
+EXELANGS := gcc cyclone cyclone-port
+JAVALANGS :=  java
+LANGS := $(EXELANGS) $(JAVALANGS)
 
 # Not working yet: echo moments
-# Not implemented at all: lists methcall objinst prodcons regexmatch
-#  spellcheck strcat wordfreq
-#BENCHMARKS = ackermann ary3 except fibo hash hash2 heapsort\
-# hello matrix moments nestedloop random reversefile sieve sumcol wc
-BENCHMARKS = ackermann ary3 except fibo hash hash2 heapsort\
-hello matrix nestedloop random reversefile sieve sumcol wc lists \
-spellcheck strcat
+# Not implemented at all: methcall objinst prodcons regexmatch
+#  wordfreq
+BENCHMARKS := ackermann ary3 except fibo hash hash2 heapsort nestedloop random reversefile sieve sumcol wc lists strcat
 
-EXEFILES = $(addsuffix $(EXE), $(BENCHMARKS))
-GCCEXEFILES = $(addprefix gcc-, $(EXEFILES))
-# NOCHECKEXEFILES = $(addprefix nocheck-, $(EXEFILES))
-CYCEXEFILES = $(addprefix cyc-, $(EXEFILES))
-# NOBOUNDSEXEFILES = $(addprefix nobounds-, $(EXEFILES))
+N = 11
+
+# hello matrix (after nestedloop), spellcheck (after lists)
+
+EXEFILES = $(foreach lang,$(EXELANGS),$(addprefix $(lang)/, $(addsuffix $(EXE),$(BENCHMARKS))))
+JAVAFILES = $(foreach lang,$(JAVALANGS),$(addprefix $(lang)/, $(addsuffix .class,$(BENCHMARKS))))
 DIFFFILES = $(addsuffix .diff, $(BENCHMARKS))
 CYCHIST=cychist$(EXE)
 CATN=catn$(EXE)
 
-all: $(CYCEXEFILES) $(EXEFILES) $(GCCEXEFILES) $(NOCHECKEXEFILES)
+all: $(EXEFILES) $(JAVAFILES)
+
+run: all $(CATN)
+	@(RUN=`date +"%d%b%y-%H%M"`; \
+	LANGS="$(LANGS)" BENCHMARKS="$(BENCHMARKS)" ./runtests $(N) > run-$$RUN.rout)
 
 bench: all $(CYCHIST) $(CATN)
-	@(./runtests 11 | ./cychist)
+	LANGS="$(LANGS)" BENCHMARKS="$(BENCHMARKS)" ./runtests $(N) | ./cychist
 
 diff: $(DIFFFILES)
 	@(for file in $(DIFFFILES); do \
@@ -37,21 +43,28 @@ count:
 	wc -l $(addsuffix .gcc, $(BENCHMARKS))
 
 clean:
-	$(RM) $(NOCHECKEXEFILES) $(NOBOUNDSEXEFILES) $(CYCEXEFILES)
 	$(RM) $(EXEFILES)
-	$(RM) $(GCCEXEFILES)
+	$(RM) $(JAVAFILES)
 	$(RM) $(CYCHIST) $(CATN)
-	$(RM) *.diff
+	$(RM) *.diff */*.class *.eps
 
 $(CYCHIST): cychist.cyc
 	$(CYCC) $(CYC_FLAGS) -o $@ $^ -lm
-#gcc $(CFLAGS) -o $@ -x c $^ -lm
+
+%.eps: %.rout
+	cat $^ | ./makejgraph | jgraph > $@
 
 %.diff: %.gcc %.cyc
 	@(diff $*.gcc $*.cyc > $@; echo $@; exit 0)
 
-gcc-%$(EXE): %.gcc
+%$(EXE): %.gcc
 	gcc $(CFLAGS) -o $@ -x c $^ $(LDFLAGS)
+
+java/%.java: java-start/%.java
+	./inserttimer < $^ > $@
+
+%.class: %.java
+	@(cd `dirname $^`; javac `basename $^`; echo javac $^)
 
 # nobounds-%$(EXE): %.cyc
 # 	$(CYCC) --noboundschecks $(CYC_FLAGS) -o $@ $^
@@ -60,7 +73,4 @@ nocheck-%$(EXE): %.cyc
 	$(CYCC) --nochecks $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
 
 %$(EXE): %.cyc
-	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
-
-cyc-%$(EXE): cyc-%.cyc
 	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)

@@ -1,0 +1,124 @@
+/* -*- mode: c -*-
+ * $Id: lists2.gcc,v 1.1 2004-09-06 19:33:43 mwh Exp $
+ * http://www.bagley.org/~doug/shootout/
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+// a simple Double Linked List
+// the head node is special, it's val is length of list
+typedef struct DLL {
+    int val;
+    struct DLL *next;	/* points to next or head (if at tail) */
+    struct DLL *prev;	/* points to prev or tail (if at head) */
+} DLL;
+
+inline int list_length(DLL *head) { return(head->val); }
+inline int list_empty(DLL *head) { return(list_length(head) == 0); }
+inline DLL *list_first(DLL *head) { return(head->next); }
+inline DLL *list_last(DLL *head) { return(head->prev); }
+
+void list_push_tail(DLL *head, DLL *item) {
+    DLL *tail = head->prev;
+    tail->next = item;
+    item->next = head;
+    head->prev = item;
+    item->prev = tail;
+    head->val++;
+}
+
+DLL *list_pop_tail(DLL *head) {
+    DLL *prev, *tail;
+    if (list_empty(head)) return(NULL);
+    tail = head->prev;
+    prev = tail->prev;
+    prev->next = head;
+    head->prev = prev;
+    head->val--;
+    return(tail);
+}
+
+void list_push_head(DLL *head, DLL *item) {
+    DLL *next = head->next;
+    head->next = item;
+    next->prev = item;
+    item->next = next;
+    item->prev = head;
+    head->val++;
+}
+
+DLL *list_pop_head(DLL *head) {
+    DLL *next;
+    if (list_empty(head)) return(NULL);
+    next = head->next;
+    head->next = next->next;
+    next->next->prev = head;
+    head->val--;
+    return(next);
+}
+
+DLL *list_new_item(int v) {
+    DLL *l = (DLL *)malloc(sizeof(DLL));
+    l->next = l;
+    l->prev = l;
+    l->val = v;
+    return(l);
+}
+
+inline DLL* list_create()  { return(list_new_item(0)); }
+
+void dump_list(char *msg, DLL *x) {
+    DLL *xp = NULL, *first = list_first(x);
+    int i = 0, len = list_length(x);
+    fputs(msg, stdout);
+    printf("length: %d\n", len);
+    if (len > 0) {
+	for (xp=x->next; xp->next != first; xp=xp->next) {
+	    printf("i:%3d  v:%3d  n:%3d  p:%3d\n", ++i,
+		   xp->val, xp->next->val, xp->prev->val);
+	}
+	printf("[val of next of tail is:  %d]\n\n", xp->next->val);
+    }
+    // printf("[last entry points to list head]\n");
+}
+
+void print_list(char *msg, DLL *x) {
+    DLL *xp = NULL, *first = list_first(x);
+    int i = 0;
+    fputs(msg, stdout);
+    if (list_length(x) > 0) {
+	for (xp=x->next; xp->next != first; xp=xp->next) {
+	    printf("%d ", xp->val);
+	}
+    }
+    printf("\n");
+}
+
+int main(int argc, char *argv[]) {
+    int i, n = ((argc == 2) ? atoi(argv[1]) : 1);
+    DLL *p, *A, *B;
+
+    // create a list of integers (li1) from 1 to N
+    A = list_create();
+    for (i=n; i>0; i--) {
+	list_push_head(A, list_new_item(i));
+    }
+    B = list_create();
+
+    while (!list_empty(A)) {
+	list_push_tail(B, list_pop_head(A));
+	list_push_tail(B, list_pop_tail(A));
+    }
+    while (!list_empty(B)) {
+	list_push_head(A, list_pop_tail(B));
+	list_push_head(A, list_pop_head(B));
+    }
+    printf("%d\n", list_length(A));
+    for (i=0, p=list_first(A); p != list_last(A) && i<10; i++, p=p->next) {
+	printf("%d%s", p->val, (i<9) ? " " : "\n");
+    }
+    return 0;
+}

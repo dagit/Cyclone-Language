@@ -1,0 +1,51 @@
+/*
+ * http://www.bagley.org/~doug/shootout/
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+// #include <string.h>
+#include <unistd.h>
+#include "timer.h"
+
+extern "C" int strlen(const char @str);
+extern "C" char @`r strcat(char @`r dest, const char @src);
+
+#define STUFF "hello\n"
+
+extern "C include" {
+  extern void *GC_realloc(void *,size_t);
+  char @`H strrealloc(char @`H buf, unsigned sz) {
+    return (char *)GC_realloc((void *)buf,sz);
+  }
+} export { strrealloc }
+
+int
+main(int argc, char ?argv[]) {
+    int n = ((argc == 2) ? atoi(argv[1]) : 1);
+    int i, buflen = 32;
+    char @strbuf, @strend;
+    int stufflen;
+    START_TIME
+    strbuf = calloc(buflen, sizeof(char));
+    strend = strbuf;
+    stufflen = strlen(STUFF);
+
+//     if (!strbuf) { perror("calloc strbuf"); exit(1); }
+    for (i=0; i<n; i++) {
+	if ((((unsigned int)strbuf+buflen)-(unsigned int)strend) < (stufflen+1)) {
+	    buflen = 2*buflen;
+	    strbuf = strrealloc(strbuf, buflen);
+	    if (!strbuf) { perror("realloc strbuf"); exit(1); }
+// 	    strend = strbuf + strlen(strbuf);
+	    strend = strbuf;
+	}
+	/* much faster to strcat to strend than to strbuf */
+	strcat(strend, STUFF);
+	strend = strend + stufflen;
+    }
+    fprintf(stdout, "%d\n", strlen(strbuf));
+    free(strbuf);
+    END_TIME
+    return(0);
+}

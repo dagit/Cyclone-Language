@@ -1,0 +1,10 @@
+#!/usr/bin/awk -f
+#
+# Inserts code for doing timing in a .java file
+
+/@START/  { print "long endMS, startMS = System.currentTimeMillis();"; next }
+/@END/    { print "endMS = System.currentTimeMillis() - startMS;";
+	    print "double diff = (endMS / 1000) + ((endMS \% 1000) * 0.001);";
+	    print "System.err.println(diff);"; next }
+		    { print }
+# /@END/    { printf("endMS = System.currentTimeMillis() - startMS;\nSystem.err.println((endMS / 1000) + \".\" + ((endMS \% 1000) * .001));\n"); next }

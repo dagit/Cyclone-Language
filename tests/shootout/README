@@ -3,16 +3,39 @@ Programming Language Shootout,
 
    http://www.bagley.org/~doug/shootout/
 
-The benchmarks have simply been translated from the C versions and are
-not optimized in any way.
+There are five language subdirectories:
 
-The C versions are included; do
+  gcc/		These are the most recent C versions of the benchmarks
+  cyclone-port/	These aim to be as much like the C version as possible
+  cyclone/	These are more optimized for performance
+  java-start/	These are the most recent Java versions of the benchmarks
+		  with two additional directives in comments for measuring
+		  elapsed time after the program starts.  Just compiling
+		  the files directly will not perform any timing.
+  java/		This directory is empty initially; it is generated
+		  by processing the directives in the java-start/
+		  directory using the inserttimer script.
+	
+You can run the benchmarks in two ways.  The simplest is just to do
 
   make bench
 
-to compile and run the benchmarks in both languages for comparison.
+This prints the results for each benchmark, one per line for each
+language.  You can also generate the raw results by doing
 
-If you want to see how optimized versions run try, e.g.,
+  make run
 
-  make clean
-  make bench CFLAGS=-O2 CYCFLAGS=-O2
+This crates a file run-DATE.out where DATE is the time the command
+was run.  This can then be converted into a graph using the jgraph
+tool (http://www.cs.utk.edu/~plank/plank/jgraph/jgraph.html).
+Simply do
+
+  cat run-DATE | ./makejgraph | jgraph > run-DATE.eps
+
+More simply, the Makefile will do this for you if you do
+
+  make run-DATE.eps
+
+The graph shows the performance of cyclone, cyclone-port, java, and
+gcc, all normalized to be relative to the gcc performance.  The
+average over all benchmarks is plotted in the rightmost bar.

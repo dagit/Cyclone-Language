@@ -320,8 +320,8 @@ int main(int argc, const char ?argv[])
 
   if (infp == NULL) infp = stdin;
 
-  printf("name            mean     stddev/  median   loquart  hiquart  SIQR:\n");
-  printf("                         mean\n");
+  printf("name                            mean     stddev/  median   loquart  hiquart  SIQR:\n");
+  printf("                                         mean\n");
 
   /* read/process input one line at a time;
      store the input points into the points array */ 
@@ -369,7 +369,7 @@ int main(int argc, const char ?argv[])
       qhi = 3 * idx / 4;
       lowquart = points[qlow];
       hiquart = points[qhi];
-      printf("%-15.15s\t%lf %lf %lf %lf %lf %lf\n",
+      printf("%-25.25s\t%lf %lf %lf %lf %lf %lf\n",
 	     heapname, mean, stddev/mean, med, lowquart, hiquart, SIQR);
     }
   }

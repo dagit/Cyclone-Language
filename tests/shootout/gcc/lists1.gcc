@@ -1,0 +1,155 @@
+/* -*- mode: c -*-
+ * $Id: lists1.gcc,v 1.1 2004-09-06 19:33:43 mwh Exp $
+ * http://www.bagley.org/~doug/shootout/
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+#define SIZE 10000
+
+// a simple Single Linked List
+// the head node is special, it's val is length of list
+typedef struct LL {
+    int val;
+    struct LL *next;	/* points to next or head (if at tail) */
+} LL;
+
+inline int list_length(LL *head) { return(head->val); }
+inline int list_empty(LL *head)  { return(list_length(head) == 0); }
+inline LL* list_first(LL *head)  { return(head->next); }
+
+void list_push_head(LL *head, LL *item) {
+    LL *next = head->next;
+    head->next = item;
+    item->next = next;
+    head->val++;
+}
+
+LL *list_pop_head(LL *head) {
+    LL *next;
+    if (list_empty(head)) return(NULL);
+    next = head->next;
+    head->next = next->next;
+    head->val--;
+    return(next);
+}
+
+LL *list_new_item(int v) {
+    LL *l = (LL *)malloc(sizeof(LL));
+    l->next = NULL;
+    l->val = v;
+    return(l);
+}
+
+inline LL* list_create()  { return(list_new_item(0)); }
+
+void list_free (LL* head) {
+    LL *p, *tmp = head;
+    if (head == NULL) return;
+    if (head->next != NULL) {
+	for (p=head->next; p->next != NULL; p=p->next) {
+	    free(tmp);
+	    tmp = p;
+	}
+    }
+    free(tmp);
+}
+
+void list_append (LL* head_1, LL* head_2) {
+    LL *p;
+    for (p=head_1; p->next != NULL; p=p->next) ;
+    p->next = head_2->next;
+    head_2->next = NULL;
+    head_1->val += head_2->val;
+    head_2->val = 0;
+}
+
+int list_member(int item, LL* head) {
+    LL* p = head->next;
+    for (p=head; p != NULL; p=p->next) {
+	if (p->val == item) return(1);
+    }
+    return(0);
+}
+
+void list_reverse (LL *head) {
+    LL *prev, *p, *tmp, *first = list_first(head);
+    if (first != NULL) {
+	prev = NULL;
+	p = first;
+	while ((tmp = p->next) != NULL) {
+	    p->next = prev;
+	    prev = p;
+	    p = tmp;
+	}
+	p->next = prev;
+	head->next = p;
+    }
+}
+
+int list_last(LL *head) {
+    LL* p;
+    if (head == NULL) return(0);
+    for (p=head; p->next != NULL; p=p->next) ;
+    return(p->val);
+}
+
+int main(int argc, char *argv[]) {
+    int i, mid, sum = 0, n = ((argc == 2) ? atoi(argv[1]) : 1);
+    LL *p, *tmp, *A, *B;
+
+    // create list (A) of integers from 1 through N
+    A = list_create();
+    for (i=n; i>0; i--) list_push_head(A, list_new_item(i));
+
+    // create empty list B
+    B = list_create();
+
+    // move each individual item from A to B, in a loop, reversing order
+    while (!list_empty(A)) list_push_head(B, list_pop_head(A));
+
+    // print first 2 items in B
+    printf("%d %d\n", B->next->val, B->next->next->val);
+
+    // reverse B (can be done in place)
+    list_reverse(B);
+
+    // is 0 a member of B?
+    printf("%s\n", list_member(0, B) ? "true" : "false" );
+
+    // is N a member of B?
+    printf("%s\n", list_member(n, B) ? "true" : "false" );
+
+    // filter values from B to A that are less than N/2, preserving order
+    mid = n/2;
+    tmp = A; // tmp points to last item in list A
+    for (p=list_first(B); p!=NULL; p=p->next) {
+	if (p->val < mid) {
+	    tmp->next = list_new_item(p->val); // copy item
+	    tmp = tmp->next;
+	    A->val++;
+	}
+    }
+
+    // print first ten items of A
+    for (i=0, p=list_first(A); p != NULL && i<10; i++, p=p->next)
+	printf("%d%s", p->val, (i<9) ? " " : "\n");
+
+    // print sum of items in A that are less than 1000
+    for (p=list_first(A); p!=NULL; p=p->next)
+	if ((i = p->val) < 1000) sum += i;
+    printf("%d\n", sum);
+
+    // append B to end of A (can be done destructively)
+    list_append(A, B);
+
+    // print length and last element of A
+    printf("%d %d\n", list_length(A), list_last(A));
+
+    list_free(A);
+    list_free(B);
+    return 0;
+}
