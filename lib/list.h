@@ -119,6 +119,7 @@ extern bool forall_c<`a,`b>(bool pred(`a,`b),`a env,list<`b> x);
 // Given a predicate on `a values, determine whether there exists an element
 // in the list that satisfies the predicate.
 extern bool exists<`a>(bool pred(`a),list<`a> x);
+extern bool exists_c<`a,`b>(bool pred(`a,`b),`a env,list<`b> x);
 
 // Given [x1,...,xn] and [y1,...,yn], return [(x1,y1),...,(xn,yn)].  
 // Raises List_mismatch if the lengths are not the same.

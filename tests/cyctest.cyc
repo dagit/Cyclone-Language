@@ -26,6 +26,7 @@ using Xarray;
 using Bitvec;
 using Ref;
 using Fn;
+using Array;
 
 void test_begin(string t) {
   int x = 12-t.size;
@@ -61,6 +62,20 @@ int list_cmp<`a>(int cmp(`a,`a),list<`a> x,list<`a> y) {
   return list_cmp(cmp,x->tl,y->tl);
 }
 
+int array_cmp<`a>(int cmp(`a,`a),`a x[?],`a y[?]) {
+  int sx = sizeof(x);
+  int sy = sizeof(y);
+  if (sx > sy) return 1;
+  if (sx < sy) return -1;
+  int c;
+  for(int i = 0; i < sx; i++) {
+    c = cmp(x[i],y[i]);
+    if (c != 0) return c;
+  }
+  return 0;
+}
+  
+
 void pr_string(string s) {
   printf("%s; ",s);
 }
@@ -73,6 +88,12 @@ void pr_list(list<int> x) {
   printf("[");
   List::iter(pr_int,x);
   printf("]\n");
+}
+
+void pr_array(int x[?]) {
+  printf("[|");
+  Array::iter(pr_int,x);
+  printf("|]\n");
 }
 
 int int_cmp(int a, int b) {
@@ -197,6 +218,7 @@ void list_test() {
 }
 
 void array_test() {
+  // could definitely use more tests
   test_begin("Array");
   uint x[?] = new { for i < 6 : 2*i }; // Note, not int x[?]
   for (int i=0; i<6; i++)
@@ -211,11 +233,14 @@ void array_test() {
     okfail(x[i+1] == 2*i);
   }
   int z1[?] = new { for i < 10 : (int)(10-i) }; // 10 to 1
-  int z2[?] = new { for i < 10 : (int)(i+1) };  // 1 to 10
+  int z2[?] = Array::copy(z1);
+  Array::imp_rev(z2);
+  int z3[?] = Array::rev_copy(Array::rev_copy(z1));
+  okfail(0==array_cmp(int_cmp,z1,z3));
   Array::qsort(int_cmp,z1,0,10);
-  for (int i=0; i<10; i++) {
-    okfail(z1[i]==z2[i]);
-  }
+  okfail(0==array_cmp(int_cmp,z1,z2));
+  Array::msort(int_cmp,z3,0,10);
+  okfail(0==array_cmp(int_cmp,z3,z2));
   test_end();
 }
 

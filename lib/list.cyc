@@ -385,6 +385,10 @@ bool exists<`a>(bool pred(`a),list<`a> x) {
   while (x != null && (!pred(x->hd))) x=x->tl; // modified by Dan
   return(x != null);
 }
+bool exists_c<`a,`b>(bool pred(`a,`b),`a env,list<`b> x) {
+  while (x != null && (!pred(env,x->hd))) x=x->tl; // modified by Dan
+  return(x != null);
+}
 
 // Given [x1,...,xn] and [y1,...,yn], return [(x1,y1),...,(xn,yn)].  
 // Throws List_mismatch if the lengths are not the same.
@@ -429,7 +433,8 @@ $(list<`a>,list<`b>) split<`a,`b>(list<$(`a,`b)@> x) {
   return $(result1,result2);
 }
 
-// Given [(x1,y1),...,(xn,yn)], return ([x1,...,xn],[y1,...,yn]) 
+// Given [(x1,y1,z1),...,(xn,yn,zn)], return
+// ([x1,...,xn],[y1,...,yn],[z1,...,zn]) 
 $(list<`a>,list<`b>,list<`c>) split3<`a,`b,`c>(list<$(`a,`b,`c)@> x) {
   list<`a> result1,prev1;
   list<`b> result2,prev2;
