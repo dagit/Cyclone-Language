@@ -276,7 +276,9 @@ static cfexpsyn_t cf_check_exp(flow_info_t env, exp e0) {
   case Const_e(Int_c(Signed,_)): return CFExpSyn(env, empty_flow());
     // could try to evaluate expressions here, but I think it makes more
     // sense to do such constant folding earlier and separately.
-  case Const_e(_):     return CFExpSyn(env, env);
+  case Const_e(_):  fallthru;
+  case Sizeof_e(_): return CFExpSyn(env,env);
+
   case Primop_e(_,es): return cf_check_explist_unordered(env,es);
 
     // FIX: Once we support nested aggregates, we will need recursion to
@@ -362,8 +364,6 @@ static cfexpsyn_t cf_check_exp(flow_info_t env, exp e0) {
     // FIX: StructMember with a lhs of a local needs to be checked for 
     //      partial initialization.
   case StructArrow_e(e,_):  return cf_check_exp(env,e);
-
-  case Sizeof_e(_): return CFExpSyn(env,env);
 
   case Tuple_e(es):        fallthru(es);
   case Enum_e(_,_,es,_,_): fallthru(es); 

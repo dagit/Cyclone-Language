@@ -362,7 +362,7 @@ namespace Absyn {
     Unresolved_b; 
     Global_b(vardecl);
     Funname_b(fndecl); // good distinction between functions and function ptrs
-    Param_b($(var,tqual,typ)@);
+    Param_b(vardecl);
     Local_b(vardecl);
     Pat_b(vardecl); // may use a specialized type later
   };
@@ -372,7 +372,7 @@ namespace Absyn {
     qvar       name;
     tqual      tq;
     typ        type;
-    exp_opt    initializer; // ignored for pattern variables
+    exp_opt    initializer; // ignored for non-local variables
     int        shadow;      // FIX: NOT USED PROPERLY RIGHT NOW!!!
     opt_t<typ> region;      // filled in by type-checker
   };

@@ -137,7 +137,6 @@ static struct SharedFenv {
   typ                            return_typ;
   Dict::dict_t<var,stmt>           seen_labels;
   SlowDict::dict_t<var,list_t<stmt>> needed_labels;  // FIX: check empty when done!
-  typ                            parameter_rgn;  // region of parameters
 };
 
 // Local function environments -- this is getting a bit out of hand, no?
@@ -674,12 +673,6 @@ tenv new_block(tenv te) {
   return put_fenv(te,fe);
 }
 
-// Return the region in which the current function's parameters live
-typ parameter_rgn(tenv te) {
-  if (te->le == null) env_err("Tcenv: unexpected parameter_rgn");
-  return get_fenv(te)->shared->parameter_rgn;
-}
-
 typ curr_rgn(tenv te) {
   if (te->le == null) return HeapRgn; 
   return get_fenv(te)->curr_rgn;
@@ -722,14 +715,18 @@ fenv_t new_fenv(fndecl fd) {
   tvar rgn0 = new_tvar(RgnKind);
   typ param_rgn = VarType(rgn0);
   for(let args = fd->args; args != null; args = args->tl)
-    locals = Dict::insert(locals, (*args->hd)[0], Param_b(args->hd));
+    locals = Dict::insert(locals, (*args->hd)[0], 
+			  Param_b(new{Vardecl(Public, 
+					      new{$(Loc_n,(*args->hd)[0])},
+					      (*args->hd)[1],
+					      (*args->hd)[2],
+					      null, 0, new{Opt(param_rgn)})}));
   return &Fenv{.shared      = 
                   &SharedFenv{.return_typ = fd->ret_type,
 			      .seen_labels = Dict::empty(String::zstrptrcmp),
 			      .needed_labels = 
-			        SlowDict::empty(String::zstrptrcmp),
-                              .parameter_rgn = param_rgn
-                             }, 
+			        SlowDict::empty(String::zstrptrcmp)
+		             },
  	       .type_vars   = &List(rgn0,fd->tvs), // assumed unique
 	       .locals      = locals,  // assumed unique
 	       .encloser    = fd->body, // careful -- self loop at top!!!

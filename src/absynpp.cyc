@@ -672,8 +672,11 @@ doc_t exp2doc_prec(int inprec, exp e) {
              text(")"),
              group("{","}",",",List::map(de2doc,des)));
     break;
-  case Array_e(_,des): // FIX:  what about heap/rgn flag?
+  case Array_e(true,des): 
     s = group("new {","}",",",List::map(de2doc,des));
+    break;
+  case Array_e(_,des): 
+    s = group("{","}",",",List::map(de2doc,des));
     break;
   case Comprehension_e(vd,e1,e2):
     s = cat7(text("new {for "),

@@ -231,7 +231,7 @@ list_t<`a> revappend(glist_t<`a,`r> x,list_t<`a> y) {
 // Return the reverse of a list. 
 list_t<`a> rev(glist_t<`a,`r> x) {
   // avoid allocation for length-one lists
-  if(x==null /*|| x->tl==null*/)
+  if(x==null) // || x->tl==null)
     return null;
   return(revappend(x,null));
 }

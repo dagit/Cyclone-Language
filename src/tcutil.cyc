@@ -1959,10 +1959,8 @@ $(bool,typ) addressof_props(tenv te, exp e) {
       case ArrayType(_,_,_): return $(true, vd->region->v);
       default: return $(vd->tq->q_const, vd->region->v);
       }
-    case Pat_b(vd):    
-      return $(vd->tq->q_const, vd->region->v);
-      // KLUDGE: assumes parameters are block 0
-    case Param_b(&$(_,tq,_)): return $(tq->q_const, parameter_rgn(te));
+    case Pat_b(vd):   fallthru(vd);
+    case Param_b(vd): return $(vd->tq->q_const, vd->region->v);
     }
   case StructMember_e(e1,f):
     // we have an unboxed thing, so we inherit e2's region
@@ -2021,7 +2019,7 @@ $(bool,typ) addressof_props(tenv te, exp e) {
     default: return bogus_ans;
     }
   default: 
-    terr(e->loc,"invalid portion in left-hand-side"); 
+    terr(e->loc,"unary & applied to non-lvalue");
     return bogus_ans;
   }
 }

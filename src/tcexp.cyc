@@ -256,13 +256,11 @@ static typ tcVar(tenv te, seg_t loc, qvar q, binding_t b) {
   case Funname_b(fd):
     q[0] = fd->name[0];
     return fndecl2typ(fd);
-  case Pat_b(vd): fallthru(vd);
-  case Local_b(vd):
-    typ t = vd->type;
-    fallthru(t);
-  case Param_b(&$(_,_,t)):
+  case Pat_b(vd):   fallthru(vd);
+  case Local_b(vd): fallthru(vd);
+  case Param_b(vd):
     (*q)[0] = Loc_n;
-    return t;
+    return vd->type;
   }
 }
 
@@ -523,6 +521,8 @@ static typ tcIncrement(tenv te, seg_t loc, typ *`r topt,
                        exp e, incrementor_t i) {
   // Don't promote any arrays to pointers, as per K&R
   tcExpNoPromote(te,null,e);
+  if(!is_lvalue(e))
+    return expr_err(te,loc,"increment/decrement of non-lvalue");
   typ t = e->topt->v;
   // FIX: this is not right -- for instance, it allows incrementing an enum!!
   if (!arithmetic_promote(te,e) && !is_tagged_pointer_typ(t))
@@ -991,10 +991,10 @@ static typ tcComprehension(tenv te,seg_t loc,typ *`r topt,
     switch (compress(*topt)) {
     case PointerType(PtrInfo{elt_typ,_,n,tq,b}):
       // FIX:  bug in compiler prevents stack allocation...
-      topt2 = (typ @)&$(elt_typ);
-      nopt = (conref<bool> @)&$(n);
-      tqopt = (tqual @)&$(tq);
-      bopt = (conref<bounds_t> @)&$(b);
+      topt2 = new {elt_typ};
+      nopt  = new {n};
+      tqopt = new {tq};
+      bopt  = new {b};
       break;
     default:
       terr(loc,xprintf("initializer for %s is an array",typ2string(*topt)));
@@ -1020,11 +1020,10 @@ static typ tcComprehension(tenv te,seg_t loc,typ *`r topt,
     }
   else b_result = bound_is_const ? Upper_b(bound) : Unknown_b;
   tqual tq_result = (tqopt != null) ? *tqopt : empty_tqual();
-  typ result =
+  return 
     (b_result == Unknown_b) ?
     starb_typ(body->topt->v,HeapRgn,tq_result,b_result) :
       atb_typ(body->topt->v,HeapRgn,tq_result,b_result);
-  return result;
 }
 
  //////////////////// Struct (f{e1,...,en}) ///////////////////

@@ -11,6 +11,7 @@ CYCLEX:=../bin/cyclex.exe
 OUT_PREFIX:=
 
 CFLAGS:=-fwritable-strings -I..
+#CFLAGS:=-g -fwritable-strings -I..
 #CFLAGS:=-pg -fwritable-strings -I..
 #CFLAGS:=-O -fwritable-strings -I..
 

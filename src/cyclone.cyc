@@ -18,6 +18,7 @@
 #include "tc.h"
 #include "control_flow.h"
 #include "toc.h"
+#include "new_control_flow.h"
 
 namespace Lex {
 extern void lex_init();
@@ -151,6 +152,7 @@ void compile_file(string filename) {
       return;
     }
     ControlFlow::cf_check(tds);
+    //    NewControlFlow::abstract_decls(tds);
     PRINT_STAGE("Control-flow checking completed.\n");
     if (Position::error_p()) {
       compile_failure = true;

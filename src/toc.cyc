@@ -744,7 +744,7 @@ static env non_last_switchclause_env(env e, var break_l, var fallthru_l,
   let fallthru_vars = null;
   for(; fallthru_binders != null; fallthru_binders = fallthru_binders->tl)
     fallthru_vars = &List(fallthru_binders->hd->name, fallthru_vars);
-  List::imp_rev(fallthru_vars);
+  fallthru_vars = List::imp_rev(fallthru_vars);
     
   env ans = copy_env(e);
   ans->break_lab       = &Opt(break_l);
