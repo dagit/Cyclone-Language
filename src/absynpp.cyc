@@ -297,7 +297,7 @@ Doc ntyp2doc(typ t) {
                tps2doc(ts));
     else
       s = cat3(text("enum "),
-               (n==null)?nil_doc():qvar2doc(n->v),
+               (n==null)?nil_doc():qvar2doc((qvar)n),
                tps2doc(ts));
     break;
   case XenumType(n,_):
@@ -334,7 +334,7 @@ Doc ntyp2doc(typ t) {
       s = cat2(text("struct "),tps2doc(ts));
     else
       s = cat3(text("struct "),
-               (n==null) ? nil_doc() : qvar2doc(n->v),
+               (n==null) ? nil_doc() : qvar2doc((qvar)n),
                tps2doc(ts));
     break;
   case TypedefType(n,ts,topt):

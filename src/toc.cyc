@@ -280,7 +280,7 @@ static typ typ_to_c(typ t) {
   case EnumType(tdnopt,ts,_):
     if (tdnopt == null) unimp("anonymous enum");
     // enum foo is mapped to foo -- see enumdecl_to_c below
-    return TypedefType(tdnopt->v,null, &Opt(void_star_typ()));
+    return TypedefType((typedef_name_t)tdnopt, null, &Opt(void_star_typ()));
   case XenumType(tdn,_):
     // xenum bar is mapped to bar -- see xenumdecl_to_c below
     // FIX:  the actual type appears both here and in xenumdecl_to_c,
@@ -316,7 +316,7 @@ static typ typ_to_c(typ t) {
   case StructType(tdnopt,ts,_):
     if (tdnopt == null) unimp("anonymous struct");
     // just drop the type arguments and translate the nested types
-    return strctq(tdnopt->v);
+    return strctq((typedef_name_t)tdnopt);
   case TypedefType(tdn,ts,topt):
     if (topt == null) return toc_impos("Toc::typ_to_c: unresolved TypedefType");
     // just drop the type arguments and translate the nested types
@@ -393,21 +393,25 @@ static bool is_void_star(typ t) {
 // returns true when field f of the struct t has type void*.
 static bool is_poly_field(typ t, field_name f) {
   switch (compress(t)) {
-  case StructType(&Opt(tdn),_,&sd):
+  case StructType(tdn,_,&sd):
+    if(tdn == null)
+      toc_impos("StructType name not properly set");
     if (sd->fields == null)
       toc_impos(xprintf("is_poly_field:  struct %s missing fields",
-			qvar2string(tdn)));
+			qvar2string((qvar)tdn)));
     _ fields = sd->fields->v;
     for (; fields != null; fields = fields->tl) {
       if (String::zstrptrcmp(f,(*fields->hd)[0]) == 0)
 	return is_void_star((*fields->hd)[2]);
     }
     toc_impos(xprintf("is_poly_field:  struct %s has no %s field",
-		      qvar2string(tdn),*f));
+		      qvar2string((qvar)tdn),*f));
     return false;
-  case StructType(&Opt(tdn),_,null):
+  case StructType(tdn,_,null):
+    if(tdn == null)
+      toc_impos("StructType name not properly set");
     toc_impos(xprintf("is_poly_field:  struct %s missing structdecl",
-		      qvar2string(tdn)));
+		      qvar2string((qvar)tdn)));
     return false;
   default:
     toc_impos(xprintf("is_poly_field:  bad type %s",typ2string(t)));

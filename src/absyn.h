@@ -36,8 +36,9 @@ namespace Absyn {
   typedef stringptr field_name;
   typedef stringptr var;
   typedef stringptr tvarname_t;
-  typedef $(List::list<var>,var)@ qvar;
+  typedef $(List::list<var>,var) @qvar, *qvar_opt_t;
   typedef qvar typedef_name_t;
+  typedef qvar_opt_t typedef_name_opt_t;
   
   // forward declarations
   extern enum Scope;
@@ -172,7 +173,7 @@ namespace Absyn {
     VoidType;
     Evar(kind_t,Opt_t<typ>,int);
     VarType(tvar); // kind induced by tvar
-    EnumType(Opt_t<typedef_name_t>,list<typ>,enumdecl *);
+    EnumType(typedef_name_opt_t,list<typ>,enumdecl *);
     XenumType(typedef_name_t,xenumdecl *);
     PointerType(ptr_info_t);
     IntType(sign,size_of_t);
@@ -181,7 +182,7 @@ namespace Absyn {
     ArrayType(typ/* element typ*/,tqual,exp /* size */);
     FnType(list<tvar>,typ,list<$(Opt_t<var>,tqual,typ)@>,bool);
     TupleType(list<$(tqual,typ)@>);
-    StructType(Opt_t<typedef_name_t>,list<typ>,structdecl *);
+    StructType(typedef_name_opt_t,list<typ>,structdecl *);
     TypedefType(typedef_name_t,list<typ>,Opt_t<typ>);
     HeapRgnType; // has RgnKind
     RgnHandleType(typ);//singleton for deep alloc, has BoxUKind, typ has RgnKind

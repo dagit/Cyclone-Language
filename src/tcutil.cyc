@@ -342,7 +342,7 @@ void unify_it(typ t1, typ t2) {
   case $(StructType(nopt2,ts2,sd2), StructType(nopt1,ts1,sd1)): 
     // FIX: equivalent and more efficient to pointer-compare sds
     if ((nopt1 != null && nopt2 != null
-	 && qvar_cmp(nopt1->v,nopt2->v) == 0) 
+	 && qvar_cmp((qvar)nopt1,(qvar)nopt2) == 0) 
 	|| (nopt1 == null && nopt2 == null)) {
       unify_list(ts1,ts2);
       return;
@@ -687,7 +687,7 @@ static list<$(tqual,typ)@> flatten_typ(tenv te,typ t1) {
   case TupleType(tqs): return tqs; // FIX: recursively flatten here
   case StructType(tdnopt,ts,sdp):
     _ sd   = *sdp;
-    _ n    = tdnopt->v;
+    _ n    = *tdnopt;
     _ inst = List::zip(sd->tvs,ts);
     if (sd->fields == null) return &cons(&$(empty_tqual(),t1),null);
     // FIX: recursively flatten here
@@ -1192,23 +1192,22 @@ void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
       terr(loc,"missing enum name");
       return;
     }
-    _ tdn = tdnopt->v;
     if(*edp == null) {
-      try *edp = lookup_enumdecl(te,loc,tdn);
+      try *edp = lookup_enumdecl(te,loc,(typedef_name_t)tdnopt);
       catch { case Dict::Absent: 
-	terr(loc,xprintf("unbound type enum %s",qvar2string(tdn)));
+	terr(loc,xprintf("unbound type enum %s",qvar2string((qvar)tdnopt)));
       return;
       }
     } 
     enumdecl ed = **edp;
     // Make relative name absolute (or replace absolute name with itself)
     if (ed->name != null) // sanity check
-      tdn[0] = ed->name->v[0];
+      *tdnopt = ed->name->v[0];
     int lvs   = List::length(ed->tvs);
     int largs = List::length(targs);
     if (lvs != largs)
       terr(loc,xprintf("enum %s expects %d type arguments, not %d",
-		       qvar2string(tdn),lvs,largs));
+		       qvar2string((qvar)tdnopt),lvs,largs));
     // check that each of the type arguments is well-formed packable box type
     for (; targs != null; targs = targs->tl) {
       typ t1 = targs->hd;
@@ -1287,23 +1286,22 @@ void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
       terr(loc,"missing struct name");
       return;
     }
-    _ tdn = tdnopt->v;
     if(*sdp == null) {
-      try *sdp = lookup_structdecl(te,loc,tdn);
+      try *sdp = lookup_structdecl(te,loc,(qvar)tdnopt);
       catch { case Dict::Absent:
-	terr(loc,xprintf("unbound type struct %s",qvar2string(tdn)));
+	terr(loc,xprintf("unbound type struct %s",qvar2string((qvar)tdnopt)));
         return;
       }
     }
     structdecl sd = **sdp;
     // Make relative name absolute (or replace absolute name with itself)
     if (sd->name != null) // sanity check
-      tdn[0] = sd->name->v[0];
+      *tdnopt = sd->name->v[0];
     int lvs   = List::length(sd->tvs);
     int largs = List::length(targs);
     if (lvs != largs) 
       terr(loc,xprintf("struct %s expects %d type arguments but was given %d",
-		       qvar2string(tdn),lvs,largs));
+		       qvar2string((qvar)tdnopt),lvs,largs));
     // check that each of the type arguments is a well-formed packable box type
     for (; targs != null; targs = targs->tl) {
       typ t1 = targs->hd;

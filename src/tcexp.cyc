@@ -98,10 +98,10 @@ resolve_unresolved_mem<`r>(tenv te, segment loc, typ *`r topt, exp e,
   case ArrayType(at,aq,_):    
     e->r = Array_e(false,des); 
     break;
-  case StructType(tdopt,ts,sdp): 
-    if(sdp==null)
+  case StructType(tdnopt,ts,sdp): 
+    if(sdp==null || tdnopt == null)
       terr(loc,"Compiler bug: struct type not properly set");
-    e->r = Struct_e(tdopt->v,null,des,*sdp); 
+    e->r = Struct_e((typedef_name_t)tdnopt,null,des,*sdp); 
     break;
   default:
     // guess it is an array
@@ -736,13 +736,13 @@ static synth tcStructMember<`r>(tenv te, segment loc, typ *`r topt,
   tcExpNoPromote(te,null,e);
   typ t = compress(e->topt->v);
   switch (t) {
-  case StructType(nopt,ts,&sd):
-    if (nopt == null)
+  case StructType(tdnopt,ts,&sd):
+    if (tdnopt == null)
       return expr_err(te,loc,"unresolved struct type (COMPILER ERROR)");
     _ finfo = lookup_struct_field(sd,f);
     if (finfo == null) 
       return expr_err(te,loc,xprintf("struct %s has no %s field",
-				     qvar2string(nopt->v), *f));
+				     qvar2string((qvar)tdnopt), *f));
     _ inst = List::zip(sd->tvs,ts);
     _ t2   = substitute(inst,(*finfo)[2]);
     return standard_synth(te,t2);
@@ -771,11 +771,11 @@ static synth tcStructArrow<`r>(tenv te, segment loc, typ *`r topt,
   case PointerType(PtrInfo{t2,rt,_,_,b}):
     check_nonzero_bound(loc, b);
     switch (compress(t2)) {
-    case StructType(nopt,ts,&sd):
+    case StructType(tdnopt,ts,&sd):
       _ finfo = lookup_struct_field(sd,f);
       if (finfo == null)
 	return expr_err(te,loc,xprintf("struct %s has no %s field",
-				       qvar2string(nopt->v),*f));
+				       qvar2string((qvar)tdnopt),*f));
       _ inst = List::zip(sd->tvs,ts);
       _ t3   = substitute(inst,(*finfo)[2]);
       check_rgn_accessible(te,loc,rt);
@@ -1020,7 +1020,7 @@ static synth tcStruct<`r>(tenv_t te, seg_t loc, typ *`r topt,
   // calculate the instantiation and final type
   _ inst    = List::map(make_inst_var,sd->tvs);
   _ typs    = List::map(snd,inst); 
-  _ res_typ = StructType(&Opt(*tn),typs,(structdecl@)(&$(sd)));
+  _ res_typ = StructType(*tn,typs,(structdecl@)(&$(sd)));
   // this will instantiate the struct if we have type information in topt
   if (topt != null) unify(res_typ,*topt);
   *otyps = &Opt(typs);
@@ -1054,7 +1054,7 @@ static synth tcStruct<`r>(tenv_t te, seg_t loc, typ *`r topt,
    _ inst       = List::append(all_inst,exist_inst);
    *all_ref   = &Opt(all_typs);
    *exist_ref = &Opt(exist_typs);
-   typ res = EnumType(ed->name,all_typs,(enumdecl*)(&$(ed)));
+   typ res = EnumType(ed->name->v,all_typs,(enumdecl*)(&$(ed)));
    // this instantiates the type variables if we have top-down type info
    if (topt != null) unify(*topt,res);
    list<$(tqual,typ)@> ts = ef->typs;

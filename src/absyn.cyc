@@ -152,9 +152,9 @@ typ file_typ() {
   if (file_t_opt == null) {
     // struct Cyc::Stdio::__sFILE *
     typedef_name_t file_t_name = 
-      &$((list<var>)&cons(cyc,&cons(st,null)), sf);
+      new {$((list<var>)&cons(cyc,&cons(st,null)), sf)};
     structdecl sd = &Structdecl(Abstract,&Opt(file_t_name),null, null);
-    typ file_struct_typ = StructType(&Opt(file_t_name),null, new {sd});
+    typ file_struct_typ = StructType(file_t_name, null, new {sd});
     file_t_opt = &Opt(at_typ(file_struct_typ, HeapRgnType, empty_tqual()));
   }
   return file_t_opt->v;
@@ -172,10 +172,10 @@ typ void_star_typ() {
 //          the structdecl field.  Beware using them anywhere else!
 // (Probably we should require setting the third field even in Toc.)
 typ strct(var name) {
-  return StructType(&Opt(&$(null,name)),null,null);
+  return StructType(new {$(null,name)},null,null);
 }
 typ strctq(qvar name) {
-  return StructType(&Opt(name),null,null);
+  return StructType(name,null,null);
 }
 
 ///////////////////////// Expressions //////////////////////////////

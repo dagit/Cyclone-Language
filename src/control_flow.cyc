@@ -192,7 +192,7 @@ cfexpsyn_t cf_check_exp(flow_info_t env, exp e0) {
   case AssignOp_e(&Exp(_,Var_e(_,Local_b(vd)),_),null,e2):
     // notice we check e2 before initializing the var
     // also notice the primop must be null
-    let flow = remove_unassigned(expsynth_to_flow(cf_check_exp(env,e2)), vd);
+    _ flow = remove_unassigned(expsynth_to_flow(cf_check_exp(env,e2)), vd);
     return CFExpSyn(flow,flow);
   case AssignOp_e(e1,_,e2):
     // Perhaps C guarantees left before right, in which case we're

@@ -178,9 +178,9 @@ void dumpntyp(typ t) {
   case VarType(&$(v,k)): dump_str(v); return; // FIX: may want explicit kinds
   case Evar(k,null,i): dump("?"); dumpkind(k); dump(xprintf("(%d)",i)); return;
   case Evar(k,&Opt(t),i): dumpntyp(t); return; // shouldn't happen!
-  case EnumType(null,ts,_):    dump("enum");               dumptps(ts); return;
-  case EnumType(&Opt(n),ts,_): dump("enum");  dumpqvar(n); dumptps(ts); return;
-  case XenumType(n,_):         dump("xenum"); dumpqvar(n);              return;
+  case EnumType(null,ts,_):dump("enum");                    dumptps(ts); return;
+  case EnumType(n,  ts,_): dump("enum"); dumpqvar((qvar)n); dumptps(ts); return;
+  case XenumType(n,_):     dump("xenum"); dumpqvar(n);                  return;
   case IntType(Signed,   B1): dump("signed char");           return;
   case IntType(Unsigned, B1): dump("char");                  return;
   case IntType(Signed,   B2): dump("short");                 return;
@@ -193,8 +193,8 @@ void dumpntyp(typ t) {
   case DoubleType: dump("double"); return;
   case TupleType(ts): dump("$"); dumpargs(ts); return;
   case StructType(null,ts,_):   dump("struct"); dumptps(ts); return;
-  case StructType(&Opt(n),ts,_):
-    dump("struct");dumpqvar(n); dumptps(ts); return;
+  case StructType(n,  ts,_):
+    dump("struct"); dumpqvar((qvar)n); dumptps(ts); return;
   case TypedefType(n,ts,topt):  dumpqvar(n), dumptps(ts); return;
   case RgnHandleType(rgn): 
     dump("<<REGION HANDLE UNIMPLEMENTED>>"); return;//FIX

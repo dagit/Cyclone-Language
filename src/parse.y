@@ -447,12 +447,12 @@ static $(typ,Opt_t<decl>) collapse_type_specifiers(list<type_specifier_t> ts,
         switch (d->r) {
         case Struct_d(sd):
           let args = List::map(tvar2typ,sd->tvs);
-          t = StructType(sd->name,args,null);
+          t = StructType(sd->name->v,args,null);
           if (sd->fields!=null) declopt = &Opt(d);
 	  break;
         case Enum_d(ed):
           let args = List::map(tvar2typ,ed->tvs);
-          t = EnumType(ed->name,args,null);
+          t = EnumType(ed->name->v,args,null);
           if (ed->fields!=null) declopt = &Opt(d);
 	  break;
         case Xenum_d(xed):
@@ -649,11 +649,13 @@ static list<decl> make_declarations(decl_spec_t ds,
       switch (t) {
       case StructType(n,ts,_):
         _ ts2 = List::map_c(typ2tvar,loc,ts);
-        _ sd  = &Structdecl{.sc = s, .name = n, .tvs = ts2, .fields = null};
+        _ sd  = &Structdecl{.sc = s,.name = &Opt((typedef_name_t)n),
+			    .tvs = ts2,.fields = null};
         return &cons(&Decl(Struct_d(sd),loc),null);
       case EnumType(n,ts,_):
         _ ts2 = List::map_c(typ2tvar,loc,ts);
-        _ ed  = &Enumdecl{.sc = s, .name = n, .tvs = ts2, .fields = null};
+        _ ed  = &Enumdecl{.sc = s, .name = &Opt((typedef_name_t)n), 
+			  .tvs = ts2, .fields = null};
         return &cons(&Decl(Enum_d(ed),loc),null);
       case XenumType(n,_):
         _ ed = &Xenumdecl{.sc=s, .name=n, .fields=null};
@@ -1085,7 +1087,7 @@ struct_or_union_specifier:
 | struct_or_union qual_opt_identifier type_params_opt
     { switch ($1) {
       case Struct_su:
-	$$=^$(type_spec(StructType(&Opt($2),$3,null),LOC(@1,@3)));
+	$$=^$(type_spec(StructType($2,$3,null),LOC(@1,@3)));
 	break;
       case Union_su:
         unimp2("unions",LOC(@1,@3));
@@ -1097,7 +1099,7 @@ struct_or_union_specifier:
 | struct_or_union QUAL_TYPEDEF_NAME type_params_opt
     { switch ($1) {
       case Struct_su:
-        $$=^$(type_spec(StructType(&Opt($2),$3,null),LOC(@1,@3)));
+        $$=^$(type_spec(StructType($2,$3,null),LOC(@1,@3)));
 	break;
       case Union_su:
         unimp2("unions",LOC(@1,@3));
@@ -1222,7 +1224,7 @@ enum_specifier:
       $$ = ^$(Decl_spec(enum_decl(Public,&Opt($2),ts,&Opt($5),LOC(@1,@6))));
     }
 | ENUM qual_opt_identifier type_params_opt
-    { $$=^$(type_spec(EnumType(&Opt($2),$3,null),LOC(@1,@3))); }
+    { $$=^$(type_spec(EnumType($2,$3,null),LOC(@1,@3))); }
 | XENUM qual_opt_identifier '{' enumerator_list '}'
     { $$ = ^$(Decl_spec(xenum_decl(Public,$2,$4,LOC(@1,@5)))); }
 | XENUM qual_opt_identifier
