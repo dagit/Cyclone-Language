@@ -111,15 +111,15 @@ $(list_t<tvar>, list_t<vardecl>)@ tcPat(tenv_t te,pat p, typ *`p region_opt) {
     *topt_ref = &Opt(all_typs); // side effect
     t = StructType(sd->name->v,all_typs,(structdecl@)(new{sd}));
     // unify with the struct type
-    list_t<$($(field_name,tqual,typ)@,pat)@> fields = 
+    list_t<$(structfield_t,pat)@> fields = 
       resolve_struct_designators(p->loc,dps,sd);
     for(; fields != null; fields = fields->tl) {
-      let &$(&$(n,tq,fieldtyp),p_arg) = fields->hd;
-      let inst_fieldtyp = substitute(all_inst,fieldtyp);
+      let &$(field,p_arg) = fields->hd;
+      let inst_fieldtyp = substitute(all_inst,field->type);
       if (!unify(p_arg->topt->v,inst_fieldtyp))
 	terr(p->loc,
 	     xprintf("field %s of struct pattern expects type %s != %s",
-		     *n, typ2string(inst_fieldtyp), 
+		     *field->name, typ2string(inst_fieldtyp), 
 		     typ2string(p_arg->topt->v)));
     }
     break;
@@ -461,7 +461,7 @@ static simple_pat_t compile_pat(pat p) {
 	let &$(dl,p) = dlps0->hd;
 	switch (dl) {
 	case &List{.hd=FieldName(f), .tl=null}: 
-	  if(String::zstrptrcmp(f,(*fields->hd)[0]) == 0) {
+	  if(String::zstrptrcmp(f,fields->hd->name) == 0) {
 	    ps = &List(compile_pat(p),ps);
 	    found = true;
 	  }

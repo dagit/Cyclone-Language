@@ -1,37 +1,38 @@
 #include "cyc_include.h"
 
- struct _tuple0{ void* f1; void* f2;}; typedef unsigned int Cyc_uint; typedef
+ struct _tuple0{ void* f1; void* f2; } ; typedef unsigned int Cyc_uint; typedef
 char* Cyc_Cstring; typedef struct _tagged_string Cyc_string; typedef struct
 _tagged_string Cyc_string_t; typedef struct _tagged_string* Cyc_stringptr;
 typedef int Cyc_bool; extern void* exit( int); extern void* abort(); struct Cyc_Core_Opt{
-void* v;}; typedef struct Cyc_Core_Opt* Cyc_Core_opt_t; extern char Cyc_Core_InvalidArg_tag[
-11u]; struct Cyc_Core_InvalidArg_struct{ char* tag; struct _tagged_string f1;};
-extern char Cyc_Core_Failure_tag[ 8u]; struct Cyc_Core_Failure_struct{ char* tag;
-struct _tagged_string f1;}; extern char Cyc_Core_Impossible_tag[ 11u]; struct
-Cyc_Core_Impossible_struct{ char* tag; struct _tagged_string f1;}; extern char
-Cyc_Core_Not_found_tag[ 10u]; struct Cyc_Core_Not_found_struct{ char* tag;};
-extern char Cyc_Core_Unreachable_tag[ 12u]; struct Cyc_Core_Unreachable_struct{
-char* tag; struct _tagged_string f1;}; extern char* string_to_Cstring( struct
+void* v; } ; typedef struct Cyc_Core_Opt* Cyc_Core_opt_t; extern char Cyc_Core_InvalidArg_tag[
+11u]; struct Cyc_Core_InvalidArg_struct{ char* tag; struct _tagged_string f1; }
+; extern char Cyc_Core_Failure_tag[ 8u]; struct Cyc_Core_Failure_struct{ char*
+tag; struct _tagged_string f1; } ; extern char Cyc_Core_Impossible_tag[ 11u];
+struct Cyc_Core_Impossible_struct{ char* tag; struct _tagged_string f1; } ;
+extern char Cyc_Core_Not_found_tag[ 10u]; struct Cyc_Core_Not_found_struct{ char*
+tag; } ; extern char Cyc_Core_Unreachable_tag[ 12u]; struct Cyc_Core_Unreachable_struct{
+char* tag; struct _tagged_string f1; } ; extern char* string_to_Cstring( struct
 _tagged_string); extern char* underlying_Cstring( struct _tagged_string); extern
 struct _tagged_string Cstring_to_string( char*); extern int system( char*);
-struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl;}; typedef struct Cyc_List_List*
+struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; typedef struct Cyc_List_List*
 Cyc_List_glist_t; typedef struct Cyc_List_List* Cyc_List_list_t; typedef struct
 Cyc_List_List* Cyc_List_List_t; extern char Cyc_List_List_empty_tag[ 11u];
-struct Cyc_List_List_empty_struct{ char* tag;}; extern char Cyc_List_List_mismatch_tag[
-14u]; struct Cyc_List_List_mismatch_struct{ char* tag;}; extern char Cyc_List_Nth_tag[
-4u]; struct Cyc_List_Nth_struct{ char* tag;}; struct Cyc_Splay_node; struct Cyc_Splay_noderef{
-struct Cyc_Splay_node* v;}; typedef void* Cyc_Splay_tree; extern void* Cyc_Splay_Leaf;
-extern const int Cyc_Splay_Node_tag; struct Cyc_Splay_Node_struct{ int tag;
-struct Cyc_Splay_noderef* f1;}; struct Cyc_Splay_node{ void* key; void* data;
-void* left; void* right;}; extern int Cyc_Splay_splay( int(* f)( void*, void*),
-void*, void*); struct Cyc_SlowDict_Dict; typedef struct Cyc_SlowDict_Dict* Cyc_SlowDict_hdict_t;
-typedef struct Cyc_SlowDict_Dict* Cyc_SlowDict_dict_t; extern char Cyc_SlowDict_Present_tag[
-8u]; struct Cyc_SlowDict_Present_struct{ char* tag;}; extern char Cyc_SlowDict_Absent_tag[
-7u]; struct Cyc_SlowDict_Absent_struct{ char* tag;}; extern struct Cyc_SlowDict_Dict*
-Cyc_SlowDict_empty( int(* comp)( void*, void*)); extern int Cyc_SlowDict_is_empty(
-struct Cyc_SlowDict_Dict* d); extern int Cyc_SlowDict_member( struct Cyc_SlowDict_Dict*
-d, void* key); extern struct Cyc_SlowDict_Dict* Cyc_SlowDict_insert( struct Cyc_SlowDict_Dict*
-d, void* key, void* data); extern struct Cyc_SlowDict_Dict* Cyc_SlowDict_insert_new(
+struct Cyc_List_List_empty_struct{ char* tag; } ; extern char Cyc_List_List_mismatch_tag[
+14u]; struct Cyc_List_List_mismatch_struct{ char* tag; } ; extern char Cyc_List_Nth_tag[
+4u]; struct Cyc_List_Nth_struct{ char* tag; } ; struct Cyc_Splay_node; struct
+Cyc_Splay_noderef{ struct Cyc_Splay_node* v; } ; typedef void* Cyc_Splay_tree;
+extern void* Cyc_Splay_Leaf; extern const int Cyc_Splay_Node_tag; struct Cyc_Splay_Node_struct{
+int tag; struct Cyc_Splay_noderef* f1; } ; struct Cyc_Splay_node{ void* key;
+void* data; void* left; void* right; } ; extern int Cyc_Splay_splay( int(* f)(
+void*, void*), void*, void*); struct Cyc_SlowDict_Dict; typedef struct Cyc_SlowDict_Dict*
+Cyc_SlowDict_hdict_t; typedef struct Cyc_SlowDict_Dict* Cyc_SlowDict_dict_t;
+extern char Cyc_SlowDict_Present_tag[ 8u]; struct Cyc_SlowDict_Present_struct{
+char* tag; } ; extern char Cyc_SlowDict_Absent_tag[ 7u]; struct Cyc_SlowDict_Absent_struct{
+char* tag; } ; extern struct Cyc_SlowDict_Dict* Cyc_SlowDict_empty( int(* comp)(
+void*, void*)); extern int Cyc_SlowDict_is_empty( struct Cyc_SlowDict_Dict* d);
+extern int Cyc_SlowDict_member( struct Cyc_SlowDict_Dict* d, void* key); extern
+struct Cyc_SlowDict_Dict* Cyc_SlowDict_insert( struct Cyc_SlowDict_Dict* d, void*
+key, void* data); extern struct Cyc_SlowDict_Dict* Cyc_SlowDict_insert_new(
 struct Cyc_SlowDict_Dict* d, void* key, void* data); extern struct Cyc_SlowDict_Dict*
 Cyc_SlowDict_inserts( struct Cyc_SlowDict_Dict* d, struct Cyc_List_List* kds);
 extern struct Cyc_SlowDict_Dict* Cyc_SlowDict_singleton( int(* comp)( void*,
@@ -53,7 +54,7 @@ Cyc_SlowDict_map_c( void*(* f)( void*, void*), void* env, struct Cyc_SlowDict_Di
 d); extern struct _tuple0* Cyc_SlowDict_choose( struct Cyc_SlowDict_Dict* d);
 extern struct Cyc_List_List* Cyc_SlowDict_to_list( struct Cyc_SlowDict_Dict* d);
 char Cyc_SlowDict_Absent_tag[ 7u]="Absent"; char Cyc_SlowDict_Present_tag[ 8u]="Present";
-struct Cyc_SlowDict_Dict{ int(* reln)( void*, void*); void* tree;}; struct Cyc_SlowDict_Dict*
+struct Cyc_SlowDict_Dict{ int(* reln)( void*, void*); void* tree; } ; struct Cyc_SlowDict_Dict*
 Cyc_SlowDict_empty( int(* comp)( void*, void*)){ void* t= Cyc_Splay_Leaf; return({
 struct Cyc_SlowDict_Dict* _temp0=( struct Cyc_SlowDict_Dict*) GC_malloc( sizeof(
 struct Cyc_SlowDict_Dict)); _temp0->reln= comp; _temp0->tree=( void*) t; _temp0;});}

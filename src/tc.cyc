@@ -111,7 +111,8 @@ static void field_redecl_okay(enumfield f1, enumfield f2,
 // not bothering to do this now.
 
 // now returns whether there is a redeclaration or not -- needed for treeshaking
-static bool var_redecl_okay(genv_t ge, seg_t loc, var name, typ t, scope sc) {
+static bool var_redecl_okay(genv_t ge, seg_t loc, var name, typ t, 
+                            scope sc, attributes_t atts) {
   opt_t<$(resolved_t,bool)@> ans = Dict::lookup_opt(ge->ordinaries,name);
   if(ans == null)
     return false;
@@ -140,6 +141,8 @@ static bool var_redecl_okay(genv_t ge, seg_t loc, var name, typ t, scope sc) {
       // FIX: we should also check the tqual
       terr(loc,xprintf("redeclaration of %s at a different type: %s != %s",
 		       *name, typ2string(t), typ2string(vd->type)));
+    if (!same_atts(atts, vd->attributes))
+      terr(loc,xprintf("redeclaration of %s with different attributes",*name));
     break;
   default: break;
   }
@@ -153,6 +156,29 @@ static bool is_function_type(typ t) {
   }
 }
 
+// Transfer any function type attributes from the given list to the
+// function type.  
+static attributes_t transfer_fn_type_atts(typ t, attributes_t atts) {
+  switch (compress(t)) {
+  case FnType(FnInfo{_,_,_,_,_,*fnatts}):
+    let res_atts = null;
+    for (; atts != null; atts = atts->tl) {
+      switch (atts->hd) {
+      case Regparm_att(_): fallthru;
+      case Stdcall_att:    fallthru;
+      case Cdecl_att:      fallthru;
+      case Noreturn_att:   fallthru;
+      case Const_att:
+        *fnatts = &List(atts->hd,*fnatts); continue;
+      default:
+        res_atts = &List(atts->hd,res_atts); continue;
+      }
+    }
+    return res_atts;
+  default: return impos("transfer_fn_type_atts"); 
+  }
+}
+
 static void tcVardecl(tenv te, genv_t ge, seg_t loc, vardecl vd) {
   var   v  = (*vd->name)[1];
 #ifdef DEBUG
@@ -161,6 +187,7 @@ static void tcVardecl(tenv te, genv_t ge, seg_t loc, vardecl vd) {
 #endif
   typ   t  = vd->type;
   scope sc = vd->sc;
+  attributes_t atts = vd->attributes;
 
   // reject explicitly qualified name
   switch ((*vd->name)[0]) {
@@ -174,8 +201,12 @@ static void tcVardecl(tenv te, genv_t ge, seg_t loc, vardecl vd) {
   (*vd->name)[0] = Abs_n(te->ns);
   // reject ill-formed type
   check_valid_toplevel_type(loc,te,t);
+  if (is_function_type(t)) {
+    // move any function type attributes into the function's type
+    atts = transfer_fn_type_atts(t,atts);
+  }
   // check for redeclaration
-  bool is_redecl = var_redecl_okay(ge,loc,v,t,sc);
+  bool is_redecl = var_redecl_okay(ge,loc,v,t,sc,atts);
   // if extern, make sure it has no initializer
   if (sc == Extern || sc == ExternC) {
     if(vd->initializer != null)
@@ -183,6 +214,24 @@ static void tcVardecl(tenv te, genv_t ge, seg_t loc, vardecl vd) {
   } else if (!is_function_type(t)) {
     // we skip over function types -- these are function protypes.
     // otherwise, we compute default initializer, if necessary
+    // first check that the attributes are okay
+    for (; atts != null; atts = atts->tl) {
+      switch (atts->hd) {
+      case Aligned_att(_): continue;
+      case Packed_att:     continue;
+      case Section_att(_): continue;
+      case Nocommon_att:   continue;
+      case Shared_att:     continue;
+      case Unused_att:     continue;
+      case Weak_att:       continue;
+      case Dllimport_att:  continue;
+      case Dllexport_att:  continue;
+      default:
+        terr(loc,xprintf("bad attribute %s for variable %s",
+                         attribute2string(atts->hd), qvar2string(vd->name)));
+        break;
+      }
+    }
     exp e;
     if(vd->initializer == null) {
       e = default_initializer(te,t,loc);
@@ -217,6 +266,27 @@ static void tcVardecl(tenv te, genv_t ge, seg_t loc, vardecl vd) {
     // reject non-constant initializers
     if (!Tcexp::is_const_exp(te,e))
       terr(loc,"initializer is not a constant expression");
+  } else {
+    // it is a function type -- check that the attributes are okay
+    for (; atts != null; atts = atts->tl) {
+      switch (atts->hd) {
+      // these attributes should be in the function's type
+      case Regparm_att(_): fallthru;
+      case Stdcall_att:    fallthru;
+      case Cdecl_att:      fallthru;
+      case Noreturn_att:   fallthru;
+      case Const_att:
+        impos("tcVardecl: fn type attributes in function var decl");
+        break;
+      // C doesn't allow these attributes on functions
+      case Aligned_att(_): fallthru;
+      case Packed_att:
+        terr(loc,xprintf("bad attribute %s in function declaration",
+                         attribute2string(atts->hd)));
+        break;
+      default: continue;
+      }
+    }
   }
   // add to environment
   ge->ordinaries = Dict::insert(ge->ordinaries, v,
@@ -246,7 +316,18 @@ static void tcFndecl(tenv te, genv_t ge, seg_t loc, fndecl fd) {
   check_fndecl_valid_type(loc,te,fd);
   // check for redeclaration
   typ t = fndecl2typ(fd);
-  bool is_redecl = var_redecl_okay(ge, loc, v, t, sc);
+  bool is_redecl = var_redecl_okay(ge, loc, v, t, sc, fd->attributes);
+  // check that packed and aligned don't show up in the attributes
+  for (_ atts = fd->attributes; atts != null; atts = atts->tl) {
+    switch (atts->hd) {
+    case Packed_att: fallthru;
+    case Aligned_att(_): 
+      terr(loc,xprintf("bad attribute %s for function",
+                       attribute2string(atts->hd)));
+      break;
+    default: break;
+    }
+  }
   // due to recursion, add function to environment before checking body
   ge->ordinaries = Dict::insert(ge->ordinaries, v,
 				&$(VarRes(Funname_b(fd)),is_redecl));
@@ -291,9 +372,6 @@ static void tcTypedefdecl(tenv te, genv_t ge, seg_t loc, typedefdecl td) {
   ge->typedefs = Dict::insert(ge->typedefs,v,td);
 }
 
-// FIX: For now, all instantiations must be packable.
-//      Better is to have a decl field recording packability assuming
-//      packable fields.  Better yet is packable polymorphism.
 static void tcStructdecl(tenv te, genv_t ge, seg_t loc, structdecl sd) {
   // reject anonymous top-level
   if (sd->name == null) {
@@ -305,6 +383,16 @@ static void tcStructdecl(tenv te, genv_t ge, seg_t loc, structdecl sd) {
   fprintf(stderr,"type-checking structdecl %s",*v);
   fflush(stderr);
 #endif
+  // only allow packed and aligned attributes
+  for (_ atts = sd->attributes; atts != null; atts = atts->tl) {
+    switch (atts->hd) {
+    case Packed_att: continue;
+    case Aligned_att(_): continue;
+    default: terr(loc,xprintf("bad attribute %s in struct %s definition",
+                              attribute2string(atts->hd), *v));
+    break;
+    }
+  }
   // disallow MemKinds and set unconstrained kinds to BoxKind
   for(_ tvs2 = sd->tvs; tvs2 != null; tvs2 = tvs2->tl) {
     let c = compress_conref(tvs2->hd->kind);
@@ -377,16 +465,23 @@ static void tcStructdecl(tenv te, genv_t ge, seg_t loc, structdecl sd) {
       list_t<$(tvar,typ)@> inst = null;
       for(let tvs0 = tvs; tvs0 != null; tvs0 = tvs0->tl, tvs2 = tvs2->tl)
 	inst = &List(&$(tvs2->hd,VarType(tvs0->hd)), inst);
+      // check that attributes are the same
+      if (!same_atts(sd->attributes, sd2->attributes)) 
+        terr(loc,xprintf("redeclaration of struct %s has different attributes",
+                         *v));
       // check each field under the map
       let f1s = sd->fields->v;
       let f2s = sd2->fields->v;
       for(; f1s != null && f2s != null; f1s = f1s->tl, f2s = f2s->tl) {
-	let &$(fn1,tq1,t1) = f1s->hd;
-	let &$(fn2,tq2,t2) = f2s->hd;
-	// names, qualifiers, and types all must agree
+	let &Structfield(fn1,tq1,t1,atts1) = f1s->hd;
+	let &Structfield(fn2,tq2,t2,atts2) = f2s->hd;
+	// names, qualifiers, types, and attributes all must agree
 	if (String::zstrptrcmp(fn1,fn2) != 0)
 	  terr(loc, xprintf("redeclaration of struct %s: field name mismatch "
 			    "%s != %s", *v, *fn1, *fn2));
+        if (!same_atts(atts1,atts2))
+	  terr(loc, xprintf("redeclaration of struct %s: attribute mismatch on"
+			    " field %s", *v, *fn1));
 	if (!equal_tqual(tq1,tq2))
 	  terr(loc, xprintf("redeclaration of struct %s: qualifier mismatch on"
 			    " field %s", *v, *fn1));
@@ -401,10 +496,10 @@ static void tcStructdecl(tenv te, genv_t ge, seg_t loc, structdecl sd) {
       // check for field-number mismatch
       if (f2s != null)
 	terr(loc,xprintf("redeclaration of struct %s is missing field %s",
-			 *v, *((*f2s->hd)[0])));
+			 *v, *(f2s->hd->name)));
       if (f1s != null)
 	terr(loc,xprintf("redeclaration of struct %s has extra field %s",
-			 *v, *((*f1s->hd)[0])));
+			 *v, *(f1s->hd->name)));
       return;
     }
     break;
@@ -414,15 +509,26 @@ static void tcStructdecl(tenv te, genv_t ge, seg_t loc, structdecl sd) {
   // entry!
   // for the sake of recursive fields, make name abstract in body
   let sdp = Dict::lookup(ge->structdecls, v);
-  *sdp = &Structdecl(sd->sc, sd->name, tvs, null);
+  *sdp = &Structdecl(sd->sc, sd->name, tvs, null, null);
   // check fields, rejecting ill-formed types, bad fields, and duplicates
   list_t<field_name> prev_fields = null;
   for (let fs = sd->fields->v; fs != null; fs = fs->tl) {
-    let &$(fn,tq,t) = fs->hd;
+    let &Structfield(fn,tq,t,atts) = fs->hd;
     if (List::mem(String::zstrptrcmp,prev_fields,fn))
 	terr(loc,xprintf("duplicate field %s in struct",*fn));
     prev_fields = &List(fn,prev_fields);
     check_type(loc,te,tvs,MemKind,t);
+    // check that we have only packed or aligned attributes
+    for (; atts != null; atts = atts->tl) {
+      switch (atts->hd) {
+      case Packed_att: continue;
+      case Aligned_att(_): continue;
+      default: terr(loc,xprintf("bad attribute %s in struct %s, member %s",
+                                attribute2string(atts->hd), *v, *fn));
+      break;
+                                
+      }
+    }
     // FIX: check for consistent tquals?
   }
   // add the constructor to the environment
@@ -589,7 +695,6 @@ static void tcEnumdecl(tenv te, genv_t ge, seg_t loc, enumdecl ed) {
   *edp = ed;
 }
 
-// FIX: ensure the types are packable (see comment with tcStructdecl).
 static void tcXenumdecl(tenv te, genv_t ge, seg_t loc, xenumdecl xd) {
   var v = (*xd->name)[1];
 #ifdef DEBUG

@@ -44,6 +44,10 @@ MISSING THINGS NEEDED TO PORT REAL CODE:
 
 * long long, short, float, and double constants (including 12s, 3l, etc.)
 
+* better support for varargs and string descriptors.  Too many systems
+  codes have functions that write to log files or something like that
+  and have their own wrapper functions for fprintf/fscanf.  So I think
+  we have to bite the bullet and provide some support for this.
 
 THINGS NEEDED TO SIMPLIFY PORTING:
 ----------------------------------
@@ -85,15 +89,16 @@ THINGS NEEDED TO MAKE REGIONS MORE REAL:
 
 THINGS THAT WOULD BE NICE OR THAT HAVE SEX APPEAL:
 --------------------------------------------------
+* better type error messages:  keep track of the location where a type
+  comes from and merge this information during unification.  Also,
+  pretty-print types better (e.g., hide the effects when possible,
+  strip off qualifiers in a Using context, try to preserve typedefs,
+  etc.)  
+
 * dependent types for arrays (and lots more?)
 
 * nested functions (closures -- with RTCG approach to get calling convention
   right.)
-
-* typedefs should allow any type as an argument -- check well-formedness
-  again after expanding the definition.  For instance, I'd like to be able
-  to write:  typedef `a array<`a>[]; and typedef `a *opt<`a>; and 
-  typedef `a *ptr<`a>; etc.
 
 * better comprehensions/iterators
 
@@ -120,6 +125,12 @@ THINGS THAT WOULD BE NICE OR THAT HAVE SEX APPEAL:
 * builtin list syntax: list(e1,e2,...,en)? -- also for patterns
 
 * string append operator (++)?
+
+* we should leverage the effect stuff to do exception analysis.
+
+* we should add template-like mechanisms for generating code at
+  compile (or run?) time.  That would allow us to abstract over
+  Mem types.
 
 THINGS THAT WOULD MAKE THE COMPILER FASTER OR THE CODE BETTER:
 --------------------------------------------------------------
@@ -148,11 +159,10 @@ MISCELLANEOUS
 
 * better implementation of unresolved mem
 
-<<<<<<< todo.txt
 * deal with inline?
-=======
+
 * translation to C is busted with -noexpandtypedefs because we hoist
 tuples to the top (before typedef declarations)
->>>>>>> 1.16
+
 
 

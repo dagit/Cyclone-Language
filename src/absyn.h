@@ -95,6 +95,8 @@ namespace Absyn {
   extern struct Decl;
   extern enum Designator;
   extern xenum StmtAnnot;
+  extern enum Attribute;
+  extern struct Structfield;
 
   typedef enum Scope scope;
   typedef struct Tqual @tqual;
@@ -132,6 +134,9 @@ namespace Absyn {
   typedef struct Decl @decl;
   typedef enum Designator designator;
   typedef xenum StmtAnnot stmt_annot_t;
+  typedef enum Attribute attribute_t;
+  typedef list_t<attribute_t> attributes_t;
+  typedef struct Structfield @structfield_t;
 
   EXTERN_DEFINITION enum Nmspace {
     Loc_n,                  // Local name
@@ -183,6 +188,10 @@ namespace Absyn {
     typ                              ret_typ;
     list_t<$(opt_t<var>,tqual,typ)@> args;
     bool                             varargs;
+    // function type attributes can include regparm(n), stdcall xor cdecl,
+    // noreturn, and const.
+    attributes_t                     attributes; 
+
   };
 
   // Note: The last fields of EnumType, XenumType, StructType and TypedefType
@@ -232,6 +241,29 @@ namespace Absyn {
     TaggedArray_ps
   };
 
+  // GCC attributes that we currently try to support:  this definitions
+  // is only used for parsing and pretty-printing.  
+  EXTERN_DEFINITION enum Attribute {
+    Regparm_att(int); 
+    Stdcall_att;      
+    Cdecl_att;        
+    Noreturn_att;     
+    Const_att;
+    Aligned_att(int);
+    Packed_att;
+    Section_att(string);
+    Nocommon_att;
+    Shared_att;
+    Unused_att;
+    Weak_att;
+    Dllimport_att;
+    Dllexport_att;
+    No_instrument_function_att;
+    Constructor_att;
+    Destructor_att;
+    No_check_memory_usage_att;
+  };
+
   EXTERN_DEFINITION enum Type_modifier {
     Carray_mod; 
     ConstArray_mod(exp);
@@ -239,6 +271,7 @@ namespace Absyn {
     Pointer_mod(enum Pointer_Sort,typ,tqual); 
     Function_mod(funcparams_t);
     TypeParams_mod(list_t<tvar>,seg_t,bool); // when bool is true, print kinds
+    Attributes_mod(seg_t,attributes_t);
   };
 
   EXTERN_DEFINITION enum Cnst {
@@ -381,13 +414,18 @@ namespace Absyn {
   // need.  Makes this a struct with an enum componenent (Global, Pattern,
   // Param, Local)
   EXTERN_DEFINITION struct Vardecl {
-    scope      sc; 
-    qvar       name;
-    tqual      tq;
-    typ        type;
-    exp_opt    initializer; // ignored for non-local variables
-    int        shadow;      // FIX: NOT USED PROPERLY RIGHT NOW!!!
-    opt_t<typ> region;      // filled in by type-checker
+    scope              sc; 
+    qvar               name;
+    tqual              tq;
+    typ                type;
+    exp_opt            initializer; // ignored for non-local variables
+    int                shadow;      // FIX: NOT USED PROPERLY RIGHT NOW!!!
+    opt_t<typ>         region;      // filled in by type-checker
+    // attributes can include just about anything...but the type-checker
+    // must ensure that they are properly accounted for.  For instance,
+    // functions cannot be aligned or packed.  And non-functions cannot
+    // have regpar(n), stdcall, cdecl, noreturn, or const attributes.
+    attributes_t       attributes; 
   };
 
   EXTERN_DEFINITION struct Fndecl {
@@ -395,35 +433,45 @@ namespace Absyn {
     bool                    is_inline;
     qvar                    name;
     list_t<tvar>            tvs; 
-    opt_t<typ>              effect; // null => default effect
+    opt_t<typ>              effect;     // null => default effect
     typ                     ret_type;
     list_t<$(var,tqual,typ)@> args;
     bool                    varargs;
     stmt                    body;
     opt_t<typ>              cached_typ; // cached type of the function
     opt_t<list_t<vardecl>>  param_vardecls; // so we can use pointer equality
+    // any attributes except aligned or packed
+    attributes_t            attributes; 
+  };
+
+  EXTERN_DEFINITION struct Structfield {
+    field_name   name;    
+    tqual        tq;
+    typ          type;
+    attributes_t attributes; // only valid ones are aligned(i) or packed
   };
 
   // for structs and enums, we should really memoize the string to 
   // field-number mapping!
   EXTERN_DEFINITION struct Structdecl {
-    scope                                 sc;
-    opt_t<typedef_name_t>                 name;
-    list_t<tvar>                            tvs;
-    opt_t<list_t<$(field_name,tqual,typ)@>> fields;
+    scope                        sc;
+    opt_t<typedef_name_t>        name;
+    list_t<tvar>                 tvs;
+    opt_t<list_t<structfield_t>> fields;
+    attributes_t                 attributes;
   };
 
   EXTERN_DEFINITION struct Enumfield {
-    qvar                name;
-    exp_opt             tag;
+    qvar                  name;
+    exp_opt               tag;
     list_t<tvar>          tvs;
     list_t<$(tqual,typ)@> typs;
-    seg_t               loc;
+    seg_t                 loc;
   };
 
   EXTERN_DEFINITION struct Enumdecl {
-    scope                  sc;
-    opt_t<typedef_name_t>  name;
+    scope                    sc;
+    opt_t<typedef_name_t>    name;
     list_t<tvar>             tvs;
     opt_t<list_t<enumfield>> fields;
   };
@@ -606,7 +654,7 @@ namespace Absyn {
   extern vardecl new_vardecl(qvar x, typ t, exp_opt init);
   extern vardecl static_vardecl(qvar x, typ t, exp_opt init);
   extern decl struct_decl(scope s,opt_t<typedef_name_t> n,list_t<tvar> ts,
-			  opt_t<list_t<$(field_name,tqual,typ)@>> fs,
+			  opt_t<list_t<structfield_t>> fs, attributes_t atts,
 			  seg_t loc);
   extern decl enum_decl(scope s,opt_t<typedef_name_t> n,list_t<tvar> ts,
 			opt_t<list_t<enumfield>> fs,seg_t loc);
@@ -617,12 +665,14 @@ namespace Absyn {
   extern bool is_format_prim(primop p);
 
   extern typ function_typ(list_t<tvar> tvs,opt_t<typ> eff_typ,typ ret_typ,
-                          list_t<$(opt_t<var>,tqual,typ)@> args,bool varargs);
+                          list_t<$(opt_t<var>,tqual,typ)@> args,bool varargs,
+                          attributes_t);
   extern typ pointer_expand(typ);
   // extern typ pointer_abbrev(typ);
   extern bool is_lvalue(exp);
 
-  extern $(field_name,tqual,typ) * lookup_struct_field(structdecl,var);
+  extern struct Structfield * lookup_struct_field(structdecl,var);
   extern $(tqual,typ) * lookup_tuple_field(list_t<$(tqual,typ)@>,int);
+  extern string attribute2string(attribute_t);
 }
 #endif

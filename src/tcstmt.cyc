@@ -242,7 +242,7 @@ void tcStmt(tenv_t te, stmt s0, bool new_block) {
 
     switch (d->r) {
     case Var_d(vd):
-      let &Vardecl(sc,&$(nsl,x),tq,t,initializer,_,*rgn_ptr) = vd;
+      let &Vardecl(sc,&$(nsl,x),tq,t,initializer,_,*rgn_ptr,atts) = vd;
       let curr_bl = Tcenv::curr_rgn(te);
       *rgn_ptr = &Opt(curr_bl); // side effect
       switch (nsl) {

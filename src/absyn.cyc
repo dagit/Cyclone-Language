@@ -184,7 +184,7 @@ typ file_typ() {
     // struct Cyc::Stdio::__sFILE *
     typedef_name_t file_t_name = 
       new {$(Abs_n((list_t<var>)&List(cyc,&List(st,null))), sf)};
-    structdecl sd = &Structdecl(Abstract,&Opt(file_t_name),null, null);
+    structdecl sd = &Structdecl(Abstract,&Opt(file_t_name),null, null,null);
     typ file_struct_typ = StructType(file_t_name, null, new {sd});
     file_t_opt = &Opt(at_typ(file_struct_typ, HeapRgn, empty_tqual()));
   }
@@ -410,15 +410,19 @@ decl let_decl(pat p, opt_t<typ> t_opt, exp e, seg_t loc) {
 }
 vardecl new_vardecl(qvar x, typ t, exp_opt init) {
   return &Vardecl{.sc=Public, .name=x, .tq=empty_tqual(),
-		  .type=t, .initializer=init, .shadow=0, .region=null};
+		  .type=t, .initializer=init, .shadow=0, .region=null, 
+                  .attributes=null};
 }
 vardecl static_vardecl(qvar x, typ t, exp_opt init) {
   return &Vardecl{.sc=Static, .name=x, .tq=empty_tqual(),
-	          .type=t, .initializer=init, .shadow=0, .region=null};
+	          .type=t, .initializer=init, .shadow=0, .region=null,
+                  .attributes=null};
 }
 decl struct_decl(scope s,opt_t<typedef_name_t> n,list_t<tvar> ts,
-		 opt_t<list_t<$(field_name,tqual,typ)@>> fs,seg_t loc) {
-  return new_decl(Struct_d(&Structdecl {.sc=s,.name=n,.tvs=ts,.fields=fs}),loc);
+		 opt_t<list_t<structfield_t>> fs, attributes_t atts,
+                 seg_t loc) {
+  return new_decl(Struct_d(&Structdecl {.sc=s,.name=n,.tvs=ts,.fields=fs,
+                                        .attributes = atts}),loc);
 }
 decl enum_decl(scope s,opt_t<typedef_name_t> n,list_t<tvar> ts,
 	       opt_t<list_t<enumfield>> fs,seg_t loc) {
@@ -440,10 +444,11 @@ static $(opt_t<var>,tqual,typ)@ expand_arg($(opt_t<var>,tqual,typ)@ a) {
 }
 
 typ function_typ(list_t<tvar> tvs, opt_t<typ> eff_typ, typ ret_typ, 
-                 list_t<$(opt_t<var>,tqual,typ)@> args, bool varargs) {
+                 list_t<$(opt_t<var>,tqual,typ)@> args, bool varargs,
+                 attributes_t atts) {
   return FnType(FnInfo{.tvars = tvs, .ret_typ = pointer_expand(ret_typ),
                        .effect = eff_typ, .args = List::map(expand_arg,args), 
-                       .varargs = varargs});
+                       .varargs = varargs, .attributes=atts});
 }
 typ pointer_expand(typ t) {
   //  switch (compress(t)) {
@@ -494,12 +499,12 @@ bool is_lvalue(exp e) {
   }
 }
 
-$(field_name,tqual,typ) * lookup_struct_field(structdecl sd, var v) {
+struct Structfield * lookup_struct_field(structdecl sd, var v) {
   if (sd->fields == null) 
     return null;
   for(_ fs = sd->fields->v; fs != null; fs = fs->tl) {
     let f = fs->hd;
-    if (String::zstrptrcmp((*f)[0],v) == 0)
+    if (String::zstrptrcmp(f->name,v) == 0)
       return f;
   }
   return null;
@@ -514,4 +519,29 @@ $(tqual,typ) * lookup_tuple_field(list_t<$(tqual,typ)@> ts, int i) {
   if(ts == null)
     return null;
   return ts->hd;
+}
+
+string attribute2string(attribute_t a) {
+  switch (a) {
+  case Regparm_att(i): return xprintf("regparm(%d)",i);
+  case Stdcall_att: return "stdcall";
+  case Cdecl_att: return "cdecl";
+  case Noreturn_att: return "noreturn";
+  case Const_att: return "const";
+  case Aligned_att(i): 
+    if (i == -1) return "aligned";
+    else return xprintf("aligned(%d)",i);
+  case Packed_att: return "packed";
+  case Section_att(s): return xprintf("section(\"%s\")",s);
+  case Nocommon_att: return "nocommon";
+  case Shared_att: return "shared";
+  case Unused_att: return "unused";
+  case Weak_att: return "weak";
+  case Dllimport_att: return "dllimport";
+  case Dllexport_att: return "dllexport";
+  case No_instrument_function_att: return "no_instrument_function";
+  case Constructor_att: return "constructor";
+  case Destructor_att: return "destructor";
+  case No_check_memory_usage_att: return "no_check_memory_usage";
+  }
 }

@@ -75,6 +75,7 @@ static void runaway_err(string msg,Lexbuf<`a> lb) {
 // ************************** RESERVED WORDS **************************
 
 static $(string,short) rw_array[] = {
+  $("__attribute__", ATTRIBUTE),
   $("abstract", ABSTRACT),
   $("auto", AUTO),
   $("break", BREAK),

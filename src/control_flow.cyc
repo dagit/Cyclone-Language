@@ -71,7 +71,7 @@ static string           empty_string    = "";
 static $(enum Nmspace,var) bogus_qvar   = $(Abs_n(null),&empty_string);
 static struct Vardecl   bogus_vardecl_v = Vardecl(Public, &bogus_qvar,
 						  &bogus_tqual, VoidType, null,
-						  0, null);
+						  0, null, null);
 static vardecl_t bogus_vardecl = &bogus_vardecl_v;
 
 
@@ -119,10 +119,10 @@ static flow_info_t add_unassigned(flow_info_t f, vardecl_t vd) {
     for(; n >= 0; --n)
       s = Set::insert(s, n);
     return FlowInfo(f.simples, Dict::insert(f.tuples, vd, s), f.structs);
-  case StructType(_,_, & &Structdecl(_,_,_,&Opt(fs))):
+  case StructType(_,_, & &Structdecl(_,_,_,&Opt(fs),_)):
     let s = Set::empty(String::zstrptrcmp);
     for(; fs != null; fs = fs->tl)
-      s = Set::insert(s, (*fs->hd)[0]);
+      s = Set::insert(s, fs->hd->name);
     return FlowInfo(f.simples, f.tuples, Dict::insert(f.structs, vd, s));
   default:
     return FlowInfo(Set::insert(f.simples,vd), f.tuples, f.structs);

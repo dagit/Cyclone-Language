@@ -1085,7 +1085,6 @@ void cf_postpass(stmt_t s) {
 
 //////////////////////////// Top-level ////////////////////////////////
 void cf_check_fun(fndecl fd) {
-  //  fprintf(Stdio::stderr, "%s", *(*fd->name)[1]);
   absenv_t absenv = AbsEnv(new{SharedAbsEnv(Dict::empty(local_root_cmp), null)},
 			   null,
 			   null);

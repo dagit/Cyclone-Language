@@ -24,7 +24,8 @@ CYCLONE_LIBS:=arg\
          pp\
          lineno\
 	 stdio\
-         assert
+         assert\
+         errno
 
 CYCLONE_SRCS:=absyn\
          parse_tab\

@@ -80,10 +80,10 @@ path_info_t typ_to_unesc_none_pinfo(typ t) {
       d = Dict::insert(d, i, typ_to_unesc_none_pinfo(t2));
     }
     return TuplePI(d);
-  case StructType(_,_, & &Structdecl(_,_,_,&Core::Opt(fs))):
+  case StructType(_,_, & &Structdecl(_,_,_,&Core::Opt(fs),_)):
     let d = Dict::empty(String::zstrptrcmp);
     for(; fs != null; fs = fs->tl) {
-      let &$(n,_,t2) = fs->hd;
+      let &Structfield{n,_,t2,_} = fs->hd;
       d = Dict::insert(d, n, typ_to_unesc_none_pinfo(t2));
     }
     return StructPI(d);

@@ -1,32 +1,33 @@
 #include "cyc_include.h"
 
- struct _tuple0{ struct Cyc_List_List* f1; struct Cyc_List_List* f2;}; struct
+ struct _tuple0{ struct Cyc_List_List* f1; struct Cyc_List_List* f2; } ; struct
 _tuple1{ struct Cyc_List_List* f1; struct Cyc_List_List* f2; struct Cyc_List_List*
-f3;}; struct _tagged_ptr0{ void** curr; void** base; void** last_plus_one;};
-struct _tuple2{ void* f1; void* f2;}; struct _tuple3{ void* f1; void* f2; void*
-f3;}; typedef unsigned int Cyc_uint; typedef char* Cyc_Cstring; typedef struct
+f3; } ; struct _tagged_ptr0{ void** curr; void** base; void** last_plus_one; } ;
+struct _tuple2{ void* f1; void* f2; } ; struct _tuple3{ void* f1; void* f2; void*
+f3; } ; typedef unsigned int Cyc_uint; typedef char* Cyc_Cstring; typedef struct
 _tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t; typedef
 struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void* exit(
-int); extern void* abort(); struct Cyc_Core_Opt{ void* v;}; typedef struct Cyc_Core_Opt*
+int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef struct Cyc_Core_Opt*
 Cyc_Core_opt_t; extern char Cyc_Core_InvalidArg_tag[ 11u]; struct Cyc_Core_InvalidArg_struct{
-char* tag; struct _tagged_string f1;}; extern char Cyc_Core_Failure_tag[ 8u];
-struct Cyc_Core_Failure_struct{ char* tag; struct _tagged_string f1;}; extern
+char* tag; struct _tagged_string f1; } ; extern char Cyc_Core_Failure_tag[ 8u];
+struct Cyc_Core_Failure_struct{ char* tag; struct _tagged_string f1; } ; extern
 char Cyc_Core_Impossible_tag[ 11u]; struct Cyc_Core_Impossible_struct{ char* tag;
-struct _tagged_string f1;}; extern char Cyc_Core_Not_found_tag[ 10u]; struct Cyc_Core_Not_found_struct{
-char* tag;}; extern char Cyc_Core_Unreachable_tag[ 12u]; struct Cyc_Core_Unreachable_struct{
-char* tag; struct _tagged_string f1;}; extern char* string_to_Cstring( struct
-_tagged_string); extern char* underlying_Cstring( struct _tagged_string); extern
-struct _tagged_string Cstring_to_string( char*); extern int system( char*);
-struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl;}; typedef struct Cyc_List_List*
-Cyc_List_glist_t; typedef struct Cyc_List_List* Cyc_List_list_t; typedef struct
-Cyc_List_List* Cyc_List_List_t; extern int Cyc_List_length( struct Cyc_List_List*
-x); extern char Cyc_List_List_empty_tag[ 11u]; struct Cyc_List_List_empty_struct{
-char* tag;}; extern void* Cyc_List_hd( struct Cyc_List_List* x); extern struct
-Cyc_List_List* Cyc_List_tl( struct Cyc_List_List* x); extern struct Cyc_List_List*
-Cyc_List_copy( struct Cyc_List_List* src); extern struct Cyc_List_List* Cyc_List_map(
-void*(* f)( void*), struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_map_c(
-void*(* f)( void*, void*), void* env, struct Cyc_List_List* x); extern char Cyc_List_List_mismatch_tag[
-14u]; struct Cyc_List_List_mismatch_struct{ char* tag;}; extern struct Cyc_List_List*
+struct _tagged_string f1; } ; extern char Cyc_Core_Not_found_tag[ 10u]; struct
+Cyc_Core_Not_found_struct{ char* tag; } ; extern char Cyc_Core_Unreachable_tag[
+12u]; struct Cyc_Core_Unreachable_struct{ char* tag; struct _tagged_string f1; }
+; extern char* string_to_Cstring( struct _tagged_string); extern char*
+underlying_Cstring( struct _tagged_string); extern struct _tagged_string
+Cstring_to_string( char*); extern int system( char*); struct Cyc_List_List{ void*
+hd; struct Cyc_List_List* tl; } ; typedef struct Cyc_List_List* Cyc_List_glist_t;
+typedef struct Cyc_List_List* Cyc_List_list_t; typedef struct Cyc_List_List* Cyc_List_List_t;
+extern int Cyc_List_length( struct Cyc_List_List* x); extern char Cyc_List_List_empty_tag[
+11u]; struct Cyc_List_List_empty_struct{ char* tag; } ; extern void* Cyc_List_hd(
+struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_tl( struct Cyc_List_List*
+x); extern struct Cyc_List_List* Cyc_List_copy( struct Cyc_List_List* src);
+extern struct Cyc_List_List* Cyc_List_map( void*(* f)( void*), struct Cyc_List_List*
+x); extern struct Cyc_List_List* Cyc_List_map_c( void*(* f)( void*, void*), void*
+env, struct Cyc_List_List* x); extern char Cyc_List_List_mismatch_tag[ 14u];
+struct Cyc_List_List_mismatch_struct{ char* tag; } ; extern struct Cyc_List_List*
 Cyc_List_map2( void*(* f)( void*, void*), struct Cyc_List_List* x, struct Cyc_List_List*
 y); extern void Cyc_List_app( void*(* f)( void*), struct Cyc_List_List* x);
 extern void Cyc_List_app_c( void*(* f)( void*, void*), void*, struct Cyc_List_List*
@@ -53,9 +54,9 @@ Cyc_List_flatten( struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_Lis
 int(* less_eq)( void*, void*), struct Cyc_List_List* x); extern struct Cyc_List_List*
 Cyc_List_merge( int(* less_eq)( void*, void*), struct Cyc_List_List* a, struct
 Cyc_List_List* b); extern char Cyc_List_Nth_tag[ 4u]; struct Cyc_List_Nth_struct{
-char* tag;}; extern void* Cyc_List_nth( struct Cyc_List_List* x, int i); extern
-int Cyc_List_forall( int(* pred)( void*), struct Cyc_List_List* x); extern int
-Cyc_List_forall_c( int(* pred)( void*, void*), void* env, struct Cyc_List_List*
+char* tag; } ; extern void* Cyc_List_nth( struct Cyc_List_List* x, int i);
+extern int Cyc_List_forall( int(* pred)( void*), struct Cyc_List_List* x);
+extern int Cyc_List_forall_c( int(* pred)( void*, void*), void* env, struct Cyc_List_List*
 x); extern int Cyc_List_exists( int(* pred)( void*), struct Cyc_List_List* x);
 extern int Cyc_List_exists_c( int(* pred)( void*, void*), void* env, struct Cyc_List_List*
 x); extern struct Cyc_List_List* Cyc_List_zip( struct Cyc_List_List* x, struct

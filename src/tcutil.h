@@ -112,7 +112,7 @@ extern void check_bound(seg_t, unsigned int i, conref<bounds_t>);
 
 extern bool equal_tqual(tqual tq1, tqual tq2);
 
-extern list_t<$($(field_name,tqual,typ)@,`a)@>
+extern list_t<$(structfield_t,`a)@> 
 resolve_struct_designators(seg_t loc,
                            list_t<$(list_t<designator>,`a)@> des, 
                            structdecl sd);
@@ -135,5 +135,8 @@ extern $(list_t<tvar>, list_t<tvar>) split_effect(Core::opt_t<typ> effect);
 
 // Gensym a new type variable of kind k
 extern tvar new_tvar(kind_t k);
+
+// are the lists of attributes the same?  doesn't require the same order
+extern bool same_atts(attributes_t, attributes_t);
 }
 #endif

@@ -86,6 +86,7 @@ POSITION_H  := position.h   $(CORE_H) $(LIST_H) $(LINENO_H)
 BITVEC_H    := bitvec.h     $(LIST_H) $(SET_H)  
 MATH_H      := math.h
 ASSERT_H    := assert.h     $(CORE_H)
+ERRNO_H     := errno.h      
 
 $(OUT_PREFIX)arg.c: $(ARG_H) $(STRING_H)
 $(OUT_PREFIX)bitvec.c: $(BITVEC_H)
@@ -113,3 +114,4 @@ $(OUT_PREFIX)pp.c: $(CORE_H) $(LIST_H) $(STRING_H) $(HASHTABLE_H) $(FN_H) $(PP_H
 $(OUT_PREFIX)lineno.c: $(CORE_H) $(LEXING_H) $(STRING_H) $(LINENO_H) $(LEXING_H)
 $(OUT_PREFIX)stdio.c: $(STDIO_H)
 $(OUT_PREFIX)assert.c: $(ASSERT_H) $(CORE_H) $(STDIO_H)
+$(OUT_PREFIX)errno.c: $(CORE_H) $(ERRNO_H)

@@ -1,31 +1,31 @@
 #include "cyc_include.h"
 
- struct _tuple0{ void* f1; void* f2;}; struct _tuple1{ void* f1; struct Cyc_Dict_T*
-f2; struct Cyc_Dict_T* f3; struct _tuple0 f4;}; typedef unsigned int Cyc_uint;
+ struct _tuple0{ void* f1; void* f2; } ; struct _tuple1{ void* f1; struct Cyc_Dict_T*
+f2; struct Cyc_Dict_T* f3; struct _tuple0 f4; } ; typedef unsigned int Cyc_uint;
 typedef char* Cyc_Cstring; typedef struct _tagged_string Cyc_string; typedef
 struct _tagged_string Cyc_string_t; typedef struct _tagged_string* Cyc_stringptr;
 typedef int Cyc_bool; extern void* exit( int); extern void* abort(); struct Cyc_Core_Opt{
-void* v;}; typedef struct Cyc_Core_Opt* Cyc_Core_opt_t; extern char Cyc_Core_InvalidArg_tag[
-11u]; struct Cyc_Core_InvalidArg_struct{ char* tag; struct _tagged_string f1;};
-extern char Cyc_Core_Failure_tag[ 8u]; struct Cyc_Core_Failure_struct{ char* tag;
-struct _tagged_string f1;}; extern char Cyc_Core_Impossible_tag[ 11u]; struct
-Cyc_Core_Impossible_struct{ char* tag; struct _tagged_string f1;}; extern char
-Cyc_Core_Not_found_tag[ 10u]; struct Cyc_Core_Not_found_struct{ char* tag;};
-extern char Cyc_Core_Unreachable_tag[ 12u]; struct Cyc_Core_Unreachable_struct{
-char* tag; struct _tagged_string f1;}; extern char* string_to_Cstring( struct
+void* v; } ; typedef struct Cyc_Core_Opt* Cyc_Core_opt_t; extern char Cyc_Core_InvalidArg_tag[
+11u]; struct Cyc_Core_InvalidArg_struct{ char* tag; struct _tagged_string f1; }
+; extern char Cyc_Core_Failure_tag[ 8u]; struct Cyc_Core_Failure_struct{ char*
+tag; struct _tagged_string f1; } ; extern char Cyc_Core_Impossible_tag[ 11u];
+struct Cyc_Core_Impossible_struct{ char* tag; struct _tagged_string f1; } ;
+extern char Cyc_Core_Not_found_tag[ 10u]; struct Cyc_Core_Not_found_struct{ char*
+tag; } ; extern char Cyc_Core_Unreachable_tag[ 12u]; struct Cyc_Core_Unreachable_struct{
+char* tag; struct _tagged_string f1; } ; extern char* string_to_Cstring( struct
 _tagged_string); extern char* underlying_Cstring( struct _tagged_string); extern
 struct _tagged_string Cstring_to_string( char*); extern int system( char*);
-struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl;}; typedef struct Cyc_List_List*
+struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; typedef struct Cyc_List_List*
 Cyc_List_glist_t; typedef struct Cyc_List_List* Cyc_List_list_t; typedef struct
 Cyc_List_List* Cyc_List_List_t; extern char Cyc_List_List_empty_tag[ 11u];
-struct Cyc_List_List_empty_struct{ char* tag;}; extern char Cyc_List_List_mismatch_tag[
-14u]; struct Cyc_List_List_mismatch_struct{ char* tag;}; extern char Cyc_List_Nth_tag[
-4u]; struct Cyc_List_Nth_struct{ char* tag;}; struct Cyc_Dict_Dict; typedef
+struct Cyc_List_List_empty_struct{ char* tag; } ; extern char Cyc_List_List_mismatch_tag[
+14u]; struct Cyc_List_List_mismatch_struct{ char* tag; } ; extern char Cyc_List_Nth_tag[
+4u]; struct Cyc_List_Nth_struct{ char* tag; } ; struct Cyc_Dict_Dict; typedef
 struct Cyc_Dict_Dict* Cyc_Dict_hdict_t; typedef struct Cyc_Dict_Dict* Cyc_Dict_dict_t;
-extern char Cyc_Dict_Present_tag[ 8u]; struct Cyc_Dict_Present_struct{ char* tag;};
-extern char Cyc_Dict_Absent_tag[ 7u]; struct Cyc_Dict_Absent_struct{ char* tag;};
-extern struct Cyc_Dict_Dict* Cyc_Dict_empty( int(* comp)( void*, void*)); extern
-int Cyc_Dict_is_empty( struct Cyc_Dict_Dict* d); extern int Cyc_Dict_member(
+extern char Cyc_Dict_Present_tag[ 8u]; struct Cyc_Dict_Present_struct{ char* tag;
+} ; extern char Cyc_Dict_Absent_tag[ 7u]; struct Cyc_Dict_Absent_struct{ char*
+tag; } ; extern struct Cyc_Dict_Dict* Cyc_Dict_empty( int(* comp)( void*, void*));
+extern int Cyc_Dict_is_empty( struct Cyc_Dict_Dict* d); extern int Cyc_Dict_member(
 struct Cyc_Dict_Dict* d, void* key); extern struct Cyc_Dict_Dict* Cyc_Dict_insert(
 struct Cyc_Dict_Dict* d, void* key, void* data); extern struct Cyc_Dict_Dict*
 Cyc_Dict_insert_new( struct Cyc_Dict_Dict* d, void* key, void* data); extern
@@ -58,8 +58,8 @@ struct Cyc_List_List* Cyc_Dict_to_list( struct Cyc_Dict_Dict* d); char Cyc_Dict_
 7u]="Absent"; char Cyc_Dict_Present_tag[ 8u]="Present"; typedef void* Cyc_Dict_Color;
 static void* Cyc_Dict_R=( void*) 0; static void* Cyc_Dict_B=( void*) 1; struct
 Cyc_Dict_T{ void* color; struct Cyc_Dict_T* left; struct Cyc_Dict_T* right;
-struct _tuple0 key_val;}; typedef struct Cyc_Dict_T* Cyc_Dict_tree; struct Cyc_Dict_Dict{
-int(* rel)( void*, void*); struct Cyc_Dict_T* t;}; struct Cyc_Dict_Dict* Cyc_Dict_empty(
+struct _tuple0 key_val; } ; typedef struct Cyc_Dict_T* Cyc_Dict_tree; struct Cyc_Dict_Dict{
+int(* rel)( void*, void*); struct Cyc_Dict_T* t; } ; struct Cyc_Dict_Dict* Cyc_Dict_empty(
 int(* comp)( void*, void*)){ return({ struct Cyc_Dict_Dict* _temp0=( struct Cyc_Dict_Dict*)
 GC_malloc( sizeof( struct Cyc_Dict_Dict)); _temp0->rel= comp; _temp0->t= 0;
 _temp0;});} struct Cyc_Dict_Dict* Cyc_Dict_singleton( int(* comp)( void*, void*),
@@ -347,7 +347,7 @@ void*), void* env, struct Cyc_Dict_Dict* d){ if( d->t != 0){(( void(*)( void(* f
 void*, void*, void*), void* env, struct Cyc_Dict_T* t)) Cyc_Dict_iter_tree_c)( f,
 env,( struct Cyc_Dict_T*)({ struct Cyc_Dict_T* _temp276= d->t; if( _temp276 == 0){
 _throw( Null_Exception);} _temp276;}));}} struct Cyc_Dict_Iter2Env{ void(* f)(
-void*, void*, void*); void* inner_env; struct Cyc_Dict_Dict* d2;}; typedef
+void*, void*, void*); void* inner_env; struct Cyc_Dict_Dict* d2; } ; typedef
 struct Cyc_Dict_Iter2Env Cyc_Dict_iter2_env_t; static void Cyc_Dict_iter2_c_f(
 struct Cyc_Dict_Iter2Env* env, void* a, void* b1){ struct Cyc_Dict_Iter2Env
 _temp279; struct Cyc_Dict_Dict* _temp280; void* _temp282; void(* _temp284)( void*,
@@ -443,7 +443,7 @@ return 1;} return(( int(*)( int(* f)( void*, void*, void*), void* env, struct
 Cyc_Dict_T* t)) Cyc_Dict_forall_tree_c)( f, env,( struct Cyc_Dict_T*)({ struct
 Cyc_Dict_T* _temp350= d->t; if( _temp350 == 0){ _throw( Null_Exception);}
 _temp350;}));} struct Cyc_Dict_ForallIntEnv{ int(* f)( void*, void*, void*);
-struct Cyc_Dict_Dict* d1;}; typedef struct Cyc_Dict_ForallIntEnv Cyc_Dict_forall_int_env_t;
+struct Cyc_Dict_Dict* d1; } ; typedef struct Cyc_Dict_ForallIntEnv Cyc_Dict_forall_int_env_t;
 static int Cyc_Dict_forall_intersect_f( struct Cyc_Dict_ForallIntEnv* env, void*
 a, void* b){ struct Cyc_Dict_ForallIntEnv _temp353; struct Cyc_Dict_Dict*
 _temp354; int(* _temp356)( void*, void*, void*); struct Cyc_Dict_ForallIntEnv*
@@ -471,7 +471,7 @@ void*(* env)( void*, void*), struct Cyc_Dict_Dict* d, struct Cyc_Dict_Dict*
 accum)) Cyc_Dict_fold_c)(( struct Cyc_Dict_Dict*(*)( void*(* f)( void*, void*),
 void* a, void* b, struct Cyc_Dict_Dict* d1)) Cyc_Dict_union_f, f, d2, d1);}
 struct Cyc_Dict_IntArg{ void*(* f)( void*, void*); struct Cyc_Dict_Dict* d1;
-struct Cyc_Dict_Dict* d2;}; typedef struct Cyc_Dict_IntArg Cyc_Dict_intarg_t;
+struct Cyc_Dict_Dict* d2; } ; typedef struct Cyc_Dict_IntArg Cyc_Dict_intarg_t;
 static void Cyc_Dict_intersect_f( struct Cyc_Dict_IntArg* trip, void* a, void* b){
 struct Cyc_Dict_IntArg _temp361; struct Cyc_Dict_Dict* _temp362; struct Cyc_Dict_Dict**
 _temp364; struct Cyc_Dict_Dict* _temp365; void*(* _temp367)( void*, void*);
@@ -491,9 +491,9 @@ f)( struct Cyc_Dict_IntArg*, void*, void*), struct Cyc_Dict_IntArg* env, struct
 Cyc_Dict_Dict* d)) Cyc_Dict_iter_c)(( void(*)( struct Cyc_Dict_IntArg* trip,
 void* a, void* b)) Cyc_Dict_intersect_f,& env, d2); return env.d2;}} struct Cyc_Dict_IntArgC{
 void*(* f)( void*, void*, void*); void* env; struct Cyc_Dict_Dict* d1; struct
-Cyc_Dict_Dict* d2;}; typedef struct Cyc_Dict_IntArgC Cyc_Dict_intargc_t; static
-void Cyc_Dict_intersectc_f( struct Cyc_Dict_IntArgC* quad, void* a, void* b){
-struct Cyc_Dict_IntArgC _temp372; struct Cyc_Dict_Dict* _temp373; struct Cyc_Dict_Dict**
+Cyc_Dict_Dict* d2; } ; typedef struct Cyc_Dict_IntArgC Cyc_Dict_intargc_t;
+static void Cyc_Dict_intersectc_f( struct Cyc_Dict_IntArgC* quad, void* a, void*
+b){ struct Cyc_Dict_IntArgC _temp372; struct Cyc_Dict_Dict* _temp373; struct Cyc_Dict_Dict**
 _temp375; struct Cyc_Dict_Dict* _temp376; void* _temp378; void*(* _temp380)(
 void*, void*, void*); struct Cyc_Dict_IntArgC* _temp370= quad; _temp372=*
 _temp370; _LL381: _temp380=( void*(*)( void*, void*, void*)) _temp372.f; goto

@@ -1,37 +1,37 @@
 #include "cyc_include.h"
 
- struct _tagged_ptr0{ int* curr; int* base; int* last_plus_one;}; typedef
+ struct _tagged_ptr0{ int* curr; int* base; int* last_plus_one; } ; typedef
 unsigned int Cyc_uint; typedef char* Cyc_Cstring; typedef struct _tagged_string
 Cyc_string; typedef struct _tagged_string Cyc_string_t; typedef struct
 _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void* exit( int);
-extern void* abort(); struct Cyc_Core_Opt{ void* v;}; typedef struct Cyc_Core_Opt*
+extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef struct Cyc_Core_Opt*
 Cyc_Core_opt_t; extern struct _tagged_string Cyc_Core_new_string( int); extern
 char Cyc_Core_InvalidArg_tag[ 11u]; struct Cyc_Core_InvalidArg_struct{ char* tag;
-struct _tagged_string f1;}; extern char Cyc_Core_Failure_tag[ 8u]; struct Cyc_Core_Failure_struct{
-char* tag; struct _tagged_string f1;}; extern char Cyc_Core_Impossible_tag[ 11u];
-struct Cyc_Core_Impossible_struct{ char* tag; struct _tagged_string f1;}; extern
-char Cyc_Core_Not_found_tag[ 10u]; struct Cyc_Core_Not_found_struct{ char* tag;};
-extern char Cyc_Core_Unreachable_tag[ 12u]; struct Cyc_Core_Unreachable_struct{
-char* tag; struct _tagged_string f1;}; extern char* string_to_Cstring( struct
+struct _tagged_string f1; } ; extern char Cyc_Core_Failure_tag[ 8u]; struct Cyc_Core_Failure_struct{
+char* tag; struct _tagged_string f1; } ; extern char Cyc_Core_Impossible_tag[ 11u];
+struct Cyc_Core_Impossible_struct{ char* tag; struct _tagged_string f1; } ;
+extern char Cyc_Core_Not_found_tag[ 10u]; struct Cyc_Core_Not_found_struct{ char*
+tag; } ; extern char Cyc_Core_Unreachable_tag[ 12u]; struct Cyc_Core_Unreachable_struct{
+char* tag; struct _tagged_string f1; } ; extern char* string_to_Cstring( struct
 _tagged_string); extern char* underlying_Cstring( struct _tagged_string); extern
 struct _tagged_string Cstring_to_string( char*); extern int system( char*);
 struct Cyc_Stdio___sFILE; typedef struct Cyc_Stdio___sFILE Cyc_Stdio_FILE;
 typedef unsigned int Cyc_Stdio_size_t; typedef int Cyc_Stdio_fpos_t; extern char
 Cyc_Stdio_FileOpenError_tag[ 14u]; struct Cyc_Stdio_FileOpenError_struct{ char*
-tag; struct _tagged_string f1;}; extern char Cyc_Stdio_FileCloseError_tag[ 15u];
-struct Cyc_Stdio_FileCloseError_struct{ char* tag;}; extern int Cyc_Stdio_file_string_read(
+tag; struct _tagged_string f1; } ; extern char Cyc_Stdio_FileCloseError_tag[ 15u];
+struct Cyc_Stdio_FileCloseError_struct{ char* tag; } ; extern int Cyc_Stdio_file_string_read(
 struct Cyc_Stdio___sFILE* fd, struct _tagged_string dest, int dest_offset, int
 max_count); extern char Cyc_Lexing_Error_tag[ 6u]; struct Cyc_Lexing_Error_struct{
-char* tag; struct _tagged_string f1;}; struct Cyc_Lexing_lexbuf{ void(*
+char* tag; struct _tagged_string f1; } ; struct Cyc_Lexing_lexbuf{ void(*
 refill_buff)( struct Cyc_Lexing_lexbuf*); void* refill_state; struct
 _tagged_string lex_buffer; int lex_buffer_len; int lex_abs_pos; int
 lex_start_pos; int lex_curr_pos; int lex_last_pos; int lex_last_action; int
-lex_eof_reached;}; typedef struct Cyc_Lexing_lexbuf* Cyc_Lexing_Lexbuf; struct
+lex_eof_reached; } ; typedef struct Cyc_Lexing_lexbuf* Cyc_Lexing_Lexbuf; struct
 Cyc_Lexing_function_lexbuf_state{ int(* read_fun)( struct _tagged_string, int,
-void*); void* read_fun_state;}; typedef struct Cyc_Lexing_function_lexbuf_state*
+void*); void* read_fun_state; } ; typedef struct Cyc_Lexing_function_lexbuf_state*
 Cyc_Lexing_Function_lexbuf_state; struct Cyc_Lexing_lex_tables{ struct
 _tagged_ptr0 lex_base; struct _tagged_ptr0 lex_backtrk; struct _tagged_ptr0
-lex_default; struct _tagged_ptr0 lex_trans; struct _tagged_ptr0 lex_check;};
+lex_default; struct _tagged_ptr0 lex_trans; struct _tagged_ptr0 lex_check; } ;
 typedef struct Cyc_Lexing_lex_tables* Cyc_Lexing_LexTables; extern struct Cyc_Lexing_lexbuf*
 Cyc_Lexing_from_function( int(* read_fun)( struct _tagged_string, int, void*),
 void*); extern struct Cyc_Lexing_lexbuf* Cyc_Lexing_from_file( struct Cyc_Stdio___sFILE*);
@@ -41,11 +41,11 @@ extern char Cyc_Lexing_lexeme_char( struct Cyc_Lexing_lexbuf*, int); extern int
 Cyc_Lexing_lexeme_start( struct Cyc_Lexing_lexbuf*); extern int Cyc_Lexing_lexeme_end(
 struct Cyc_Lexing_lexbuf*); extern int Cyc_Lexing_lex_engine( struct Cyc_Lexing_lex_tables*,
 int, struct Cyc_Lexing_lexbuf*); struct Cyc_List_List{ void* hd; struct Cyc_List_List*
-tl;}; typedef struct Cyc_List_List* Cyc_List_glist_t; typedef struct Cyc_List_List*
+tl; } ; typedef struct Cyc_List_List* Cyc_List_glist_t; typedef struct Cyc_List_List*
 Cyc_List_list_t; typedef struct Cyc_List_List* Cyc_List_List_t; extern char Cyc_List_List_empty_tag[
-11u]; struct Cyc_List_List_empty_struct{ char* tag;}; extern char Cyc_List_List_mismatch_tag[
-14u]; struct Cyc_List_List_mismatch_struct{ char* tag;}; extern char Cyc_List_Nth_tag[
-4u]; struct Cyc_List_Nth_struct{ char* tag;}; extern struct _tagged_string Cyc_String_zstrncpy(
+11u]; struct Cyc_List_List_empty_struct{ char* tag; } ; extern char Cyc_List_List_mismatch_tag[
+14u]; struct Cyc_List_List_mismatch_struct{ char* tag; } ; extern char Cyc_List_Nth_tag[
+4u]; struct Cyc_List_Nth_struct{ char* tag; } ; extern struct _tagged_string Cyc_String_zstrncpy(
 struct _tagged_string, int, struct _tagged_string, int, unsigned int); extern
 struct _tagged_string Cyc_String_strdup( struct _tagged_string src); char Cyc_Lexing_Error_tag[
 6u]="Error"; struct Cyc_Lexing_lexbuf; struct Cyc_Lexing_function_lexbuf_state;

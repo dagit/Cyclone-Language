@@ -5,9 +5,9 @@
 #include "list.h"
 #include "buffer.h"
 #include "string.h"
-#include "absynpp.h"
 #include "evexp.h"
 #include "tcutil.h"
+#include "absynpp.h"
 
 namespace Absynpp;
 
@@ -37,7 +37,7 @@ extern doc_t cat2(doc_t,doc_t);
 extern doc_t dp2doc($(list_t<designator>,pat)@ dp);
 extern doc_t switchclauses2doc(list_t<switch_clause> cs);
 extern doc_t typ2doc(typ);
-extern doc_t structfields2doc(list_t<$(field_name,tqual,typ)@> fields);
+extern doc_t structfields2doc(list_t<structfield_t> fields);
 extern doc_t scope2doc(scope);
 extern doc_t stmt2doc(stmt);
 extern doc_t exp2doc(exp);
@@ -245,6 +245,16 @@ doc_t args2doc(list_t<$(tqual,typ)@> ts) {
   return(group("(",")",",",List::map(arg2doc,ts)));
 }
 
+doc_t att2doc(attribute_t a) {
+  return text(attribute2string(a));
+}
+
+doc_t atts2doc(list_t<attribute_t> atts) {
+  if (atts == null) return nil_doc();
+  return(cat2(text(" __attribute__"),
+              group("((","))",",",List::map(att2doc,atts))));
+}
+
 bool next_is_pointer(list_t<type_modifier> tms) {
   if (tms==null) return false;
   switch (tms->hd) {
@@ -274,6 +284,9 @@ doc_t dtms2doc(doc_t d,list_t<type_modifier> tms) {
     case NoTypes(sl,loc):
       return cat2(rest,group("(",")",",",List::map(textptr,sl)));
     }
+  case Attributes_mod(_, atts):
+    if (next_is_pointer(tms->tl)) rest = p_rest;
+    return cat2(rest, atts2doc(atts));
   case TypeParams_mod(ts,loc,print_kinds):
     if (next_is_pointer(tms->tl)) rest = p_rest;
     if (print_kinds) 
@@ -338,7 +351,6 @@ doc_t eff2doc(typ t) {
   return group("","","+",List::imp_append(effects,&List(doc1,null)));
 }
     
-
 // Convert a normalized typ to a doc
 doc_t ntyp2doc(typ t) {
   doc_t s;
@@ -1218,10 +1230,11 @@ doc_t decl2doc(decl d) {
                           fd->effect,
                           fd->ret_type,
                           List::map(arg_mk_opt,fd->args),
-                          fd->varargs});
-    s = cat7(text(fd->is_inline?(string)"inline ":(string)""),
+                          fd->varargs, null});
+    s = cat8(text(fd->is_inline?(string)"inline ":(string)""),
              scope2doc(fd->sc),
              tqtd2doc(&Tqual(false,false,false),t,&Opt(qvar2doc(fd->name))),
+             atts2doc(fd->attributes),
              text(" {"),
              nest(2,cat2(line_doc(),stmt2doc(fd->body))),
              line_doc(),
@@ -1234,23 +1247,27 @@ doc_t decl2doc(decl d) {
                (sd->name==null)?text(""):qvar2doc(sd->name->v),
                tvars2doc(sd->tvs),
                text(";"));
-    else
-      s = cat8(scope2doc(sd->sc),
-               text("struct "),
-               (sd->name==null)?text(""):qvar2doc(sd->name->v),
-               tvars2doc(sd->tvs),
-               text(" {"),
-               nest(2,(sd->fields==null)?text(""):
-                    cat2(line_doc(),structfields2doc(sd->fields->v))),
-               line_doc(),
-               text("};"));
+    else {
+      s = cat10(scope2doc(sd->sc),
+                text("struct "),
+                (sd->name==null)?text(""):qvar2doc(sd->name->v),
+                tvars2doc(sd->tvs),
+                text(" {"),
+                nest(2,(sd->fields==null)?text(""):
+                     cat2(line_doc(),structfields2doc(sd->fields->v))),
+                line_doc(),
+                text("}"),
+                atts2doc(sd->attributes),
+                text(";"));
+    }
     break;
-  case Var_d(&Vardecl(sc,name,tq,type,initializer,shadow_depth,_)):
+  case Var_d(&Vardecl(sc,name,tq,type,initializer,shadow_depth,_,atts)):
     doc_t sn = qvar2doc(name);
     if(shadow_depth > 0)
       sn = cat2(sn, text(xprintf("%d",shadow_depth)));
-    s = cat4(scope2doc(sc),
+    s = cat5(scope2doc(sc),
              tqtd2doc(tq,type,&Opt(sn)),
+             atts2doc(atts),
              (initializer == null)
 	       ? text("")
 	       : cat2(text(" = "),exp2doc((exp)initializer)),
@@ -1374,13 +1391,16 @@ $(tqual,typ,list_t<type_modifier>) to_tms(tqual tq,typ t) {
     return $(tq3, t3, (list_t<type_modifier>)&List(tm,tml3));
 
     // FIX: deal with effect?
-  case FnType(FnInfo{typvars,effopt,t2,args,varargs}):
+  case FnType(FnInfo{typvars,effopt,t2,args,varargs,fn_atts}):
     // discard tq because you can't qualify a function
     let $(tq3,t3,tml3) = to_tms(empty_tqual(),t2);
     list_t<type_modifier> tms = 
       &List(Function_mod(WithTypes(args,varargs,effopt)),tml3);
     if (typvars != null)
       tms = &List(TypeParams_mod(typvars,null,true),tms);
+    if (fn_atts != null) {
+      tms = &List(Attributes_mod(null,fn_atts),tms);
+    }
     return $(tq3,t3,tms);
 
   case Evar(k,topt,i):
@@ -1412,12 +1432,12 @@ doc_t tqtd2doc(tqual tq, typ t, opt_t<doc_t> dopt) {
            dtms2doc((dopt==null)?nil_doc():dopt->v,tms));
 }
 
-doc_t structfield2doc($(field_name,tqual,typ)@ f) {
-  return cat2(tqtd2doc((*f)[1],(*f)[2],&Opt(textptr((*f)[0]))),
-              text(";"));
+doc_t structfield2doc(structfield_t f) {
+  return cat3(tqtd2doc(f->tq, f->type, &Opt(textptr(f->name))),
+              atts2doc(f->attributes), text(";"));
 }
 
-doc_t structfields2doc(list_t<$(field_name,tqual,typ)@> fields) {
+doc_t structfields2doc(list_t<structfield_t> fields) {
   return ppseql(structfield2doc,"",fields);
 }
 
@@ -1452,4 +1472,5 @@ string typ2string(typ t)     {return string_of_doc(typ2doc(t),  PP_WIDTH);}
 string qvar2string(qvar v)   {return string_of_doc(qvar2doc(v), PP_WIDTH);}
 string prim2string(primop p) {return string_of_doc(prim2doc(p), PP_WIDTH);}
 string pat2string(pat p)     {return string_of_doc(pat2doc(p),  PP_WIDTH);}
+
 

@@ -603,7 +603,7 @@ static typ tcFnCall(tenv te,seg_t loc,typ *`r topt,exp e,list_t<exp> es){
     // Check that the bounds on the pointer aren't 0
     check_nonzero_bound(loc,b);
     switch (compress(t1)) {
-    case FnType(FnInfo{tvars,eff,res_typ,args_info,is_vararg}): 
+    case FnType(FnInfo{tvars,eff,res_typ,args_info,is_vararg,atts}): 
       //FIX: handle tvars
       if (is_vararg)
         terr(loc,"vararg functions (...) not supported yet");
@@ -656,7 +656,7 @@ static typ tcInstantiate(tenv te, seg_t loc, typ *`r topt,
   switch (t1) {
   case PointerType(PtrInfo{t0,rt,x,tq,b}):
     switch (compress(t0)) {
-    case FnType(FnInfo{tvars,eff,rtyp,args,varargs}):
+    case FnType(FnInfo{tvars,eff,rtyp,args,varargs,atts}):
       list_t<$(tvar,typ)@> instantiation = null;
       if (List::length(ts) != List::length(tvars))
 	return expr_err(te,loc,"type instantiation mismatch");
@@ -666,7 +666,8 @@ static typ tcInstantiate(tenv te, seg_t loc, typ *`r topt,
 	instantiation = &List(&$(tvars->hd,ts->hd),instantiation);
       }
       typ new_fn_typ = 
-        substitute(instantiation,FnType(FnInfo{null,eff,rtyp,args,varargs}));
+        substitute(instantiation,
+                   FnType(FnInfo{null,eff,rtyp,args,varargs,atts}));
       typ new_typ = PointerType(PtrInfo{new_fn_typ,rt,x,tq,b});
       return new_typ;
     default: break;
@@ -781,7 +782,7 @@ static typ tcStructMember(tenv te, seg_t loc, typ *`r topt,
       return expr_err(te,loc,xprintf("struct %s has no %s field",
 				     qvar2string((qvar)tdnopt), *f));
     let inst = List::zip(sd->tvs,ts);
-    let t2   = substitute(inst,(*finfo)[2]);
+    let t2   = substitute(inst,finfo->type);
     return t2;
   case ArrayType(_,_,_) && (String::zstrcmp(*f,"size") == 0):
     outer_e->r = Primop_e(Size,&List(e,null));
@@ -814,7 +815,7 @@ static typ tcStructArrow(tenv te, seg_t loc, typ *`r topt, exp e, field_name f)
 	return expr_err(te,loc,xprintf("struct %s has no %s field",
 				       qvar2string((qvar)tdnopt),*f));
       let inst = List::zip(sd->tvs,ts);
-      let t3   = substitute(inst,(*finfo)[2]);
+      let t3   = substitute(inst,finfo->type);
       check_rgn_accessible(te,loc,rt);
       return t3;
     default:
@@ -1061,16 +1062,16 @@ static typ tcStruct(tenv_t te, seg_t loc, typ *`r topt,
   if (topt != null) unify(res_typ,*topt);
   *otyps = &Opt(typs);
   // make sure each argument has the right type
-  list_t<$($(field_name,tqual,typ)@,exp)@> fields =
+  list_t<$(structfield_t,exp)@> fields =
     resolve_struct_designators(loc,args,sd);
   for(; fields != null; fields = fields->tl) {
-    let &$(&$(n,tq,fieldtyp),field_exp) = fields->hd;
-    let inst_fieldtyp = substitute(inst,fieldtyp);
+    let &$(field,field_exp) = fields->hd;
+    let inst_fieldtyp = substitute(inst,field->type);
     tcExpInitializer(te, &inst_fieldtyp, field_exp);
     if (!coerce_arg(te,field_exp,inst_fieldtyp))
       terr(field_exp->loc,
 	   xprintf("field %s of struct %s expects type %s != %s",
-		   *n,qvar2string(*tn),typ2string(inst_fieldtyp),
+		   *(field->name),qvar2string(*tn),typ2string(inst_fieldtyp),
 		   typ2string(field_exp->topt->v)));
   }
   return res_typ;
@@ -1292,12 +1293,13 @@ static typ tcExpNoPromote(tenv te, typ *`r topt, exp e) {
     switch (compress(e->topt->v)) {
     case PointerType(PtrInfo{t,rt,x,tq,b}):
       switch (compress(t)) {
-      case FnType(FnInfo{tvs,eff,rtyp,args,varargs}):
+      case FnType(FnInfo{tvs,eff,rtyp,args,varargs,atts}):
 	if (tvs != null) {   // then, instantiate if necessary
 	  list_t<$(tvar,typ)@> inst = List::map(make_inst_var,tvs);
 	  list_t<typ>          ts   = List::map(snd,inst);
 	  typ ftyp = substitute(inst,
-                                FnType(FnInfo{null,eff,rtyp,args,varargs}));
+                                FnType(FnInfo{null,eff,rtyp,args,
+                                              varargs,atts}));
 	  typ new_typ = PointerType(PtrInfo{ftyp,rt,x,tq,b});
 	  exp inner   = copy_exp(e);
 	  e->r        = Instantiate_e(inner,ts);

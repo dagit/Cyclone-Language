@@ -1,26 +1,26 @@
 #include "cyc_include.h"
 
  struct _tagged_ptr0{ struct _tagged_string* curr; struct _tagged_string* base;
-struct _tagged_string* last_plus_one;}; struct _tuple0{ void* f1; void* f2;};
-struct _tuple1{ void* f1; void* f2; void* f3;}; typedef unsigned int Cyc_uint;
+struct _tagged_string* last_plus_one; } ; struct _tuple0{ void* f1; void* f2; }
+; struct _tuple1{ void* f1; void* f2; void* f3; } ; typedef unsigned int Cyc_uint;
 typedef char* Cyc_Cstring; typedef struct _tagged_string Cyc_string; typedef
 struct _tagged_string Cyc_string_t; typedef struct _tagged_string* Cyc_stringptr;
 typedef int Cyc_bool; extern void* exit( int); extern void* abort(); extern
-struct _tagged_ptr0 Cyc_Core_std_args(); struct Cyc_Core_Opt{ void* v;}; typedef
-struct Cyc_Core_Opt* Cyc_Core_opt_t; extern struct Cyc_Core_Opt* Cyc_Core_opt_map(
+struct _tagged_ptr0 Cyc_Core_std_args(); struct Cyc_Core_Opt{ void* v; } ;
+typedef struct Cyc_Core_Opt* Cyc_Core_opt_t; extern struct Cyc_Core_Opt* Cyc_Core_opt_map(
 void*(* f)( void*), struct Cyc_Core_Opt* x); extern struct _tagged_string Cyc_Core_new_string(
 int); extern int Cyc_Core_true_f( void*); extern int Cyc_Core_false_f( void*);
 extern void* Cyc_Core_fst( struct _tuple0*); extern void* Cyc_Core_snd( struct
 _tuple0*); extern void* Cyc_Core_third( struct _tuple1*); extern void* Cyc_Core_identity(
 void*); extern int Cyc_Core_intcmp( int, int); extern int Cyc_Core_charcmp( char,
 char); extern int Cyc_Core_ptrcmp( void**, void**); extern char Cyc_Core_InvalidArg_tag[
-11u]; struct Cyc_Core_InvalidArg_struct{ char* tag; struct _tagged_string f1;};
-extern char Cyc_Core_Failure_tag[ 8u]; struct Cyc_Core_Failure_struct{ char* tag;
-struct _tagged_string f1;}; extern char Cyc_Core_Impossible_tag[ 11u]; struct
-Cyc_Core_Impossible_struct{ char* tag; struct _tagged_string f1;}; extern char
-Cyc_Core_Not_found_tag[ 10u]; struct Cyc_Core_Not_found_struct{ char* tag;};
-extern char Cyc_Core_Unreachable_tag[ 12u]; struct Cyc_Core_Unreachable_struct{
-char* tag; struct _tagged_string f1;}; extern int Cyc_Core_is_space( char);
+11u]; struct Cyc_Core_InvalidArg_struct{ char* tag; struct _tagged_string f1; }
+; extern char Cyc_Core_Failure_tag[ 8u]; struct Cyc_Core_Failure_struct{ char*
+tag; struct _tagged_string f1; } ; extern char Cyc_Core_Impossible_tag[ 11u];
+struct Cyc_Core_Impossible_struct{ char* tag; struct _tagged_string f1; } ;
+extern char Cyc_Core_Not_found_tag[ 10u]; struct Cyc_Core_Not_found_struct{ char*
+tag; } ; extern char Cyc_Core_Unreachable_tag[ 12u]; struct Cyc_Core_Unreachable_struct{
+char* tag; struct _tagged_string f1; } ; extern int Cyc_Core_is_space( char);
 extern int Cyc_Core_int_of_string( struct _tagged_string); extern struct
 _tagged_string Cyc_Core_string_of_int( int); extern struct _tagged_string Cyc_Core_string_of_uint(
 unsigned int); extern struct _tagged_string Cyc_Core_string_of_char( char);
@@ -29,7 +29,7 @@ underlying_Cstring( struct _tagged_string); extern struct _tagged_string
 Cstring_to_string( char*); extern int system( char*); extern int cyc_argc;
 extern void start_args(); extern struct _tagged_string next_arg(); char Cyc_Core_InvalidArg_tag[
 11u]="InvalidArg"; char Cyc_Core_SysError_tag[ 9u]="SysError"; struct Cyc_Core_SysError_struct{
-char* tag; int f1;}; struct _tagged_ptr0 Cyc_Core_std_args(){ struct
+char* tag; int f1; } ; struct _tagged_ptr0 Cyc_Core_std_args(){ struct
 _tagged_ptr0 args=({ unsigned int _temp2=( unsigned int) cyc_argc; struct
 _tagged_string* _temp3=( struct _tagged_string*) GC_malloc( sizeof( struct
 _tagged_string) * _temp2); unsigned int i; struct _tagged_ptr0 _temp4={ _temp3,

@@ -147,7 +147,8 @@ unsigned int szof(typ t, seg_t loc) {
     return s;
   case RgnHandleType(_): return 4u;
   case StructType(_,ts,sdp):
-    // FIX: we need to insert padding to ensure alignment
+    // FIX: we need to insert padding to ensure alignment and deal
+    // with packed and aligned attributes.
     if(sdp == null)
       return Tcutil::impos("szof on unchecked StructType");
     let sd = *sdp;
@@ -155,7 +156,7 @@ unsigned int szof(typ t, seg_t loc) {
       terr(loc,"cannot apply sizeof to abstract struct type");
     unsigned int s = 0;
     for(let fs = sd->fields->v; fs != null; fs = fs->tl)
-      s += szof((*fs->hd)[2],loc);
+      s += szof(fs->hd->type,loc);
     return s;
   case HeapRgn: terr(loc, "cannot apply sizoef to a region"); return 0u;
   case TypedefType(_,_,_): return Tcutil::impos("szof typedeftype");

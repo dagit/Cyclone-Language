@@ -1,48 +1,49 @@
 #include "cyc_include.h"
 
  struct _tagged_ptr0{ struct Cyc_List_List** curr; struct Cyc_List_List** base;
-struct Cyc_List_List** last_plus_one;}; struct _tuple0{ void* f1; void* f2;};
-typedef unsigned int Cyc_uint; typedef char* Cyc_Cstring; typedef struct
+struct Cyc_List_List** last_plus_one; } ; struct _tuple0{ void* f1; void* f2; }
+; typedef unsigned int Cyc_uint; typedef char* Cyc_Cstring; typedef struct
 _tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t; typedef
 struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void* exit(
-int); extern void* abort(); struct Cyc_Core_Opt{ void* v;}; typedef struct Cyc_Core_Opt*
+int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef struct Cyc_Core_Opt*
 Cyc_Core_opt_t; extern char Cyc_Core_InvalidArg_tag[ 11u]; struct Cyc_Core_InvalidArg_struct{
-char* tag; struct _tagged_string f1;}; extern char Cyc_Core_Failure_tag[ 8u];
-struct Cyc_Core_Failure_struct{ char* tag; struct _tagged_string f1;}; extern
+char* tag; struct _tagged_string f1; } ; extern char Cyc_Core_Failure_tag[ 8u];
+struct Cyc_Core_Failure_struct{ char* tag; struct _tagged_string f1; } ; extern
 char Cyc_Core_Impossible_tag[ 11u]; struct Cyc_Core_Impossible_struct{ char* tag;
-struct _tagged_string f1;}; extern char Cyc_Core_Not_found_tag[ 10u]; struct Cyc_Core_Not_found_struct{
-char* tag;}; extern char Cyc_Core_Unreachable_tag[ 12u]; struct Cyc_Core_Unreachable_struct{
-char* tag; struct _tagged_string f1;}; extern char* string_to_Cstring( struct
-_tagged_string); extern char* underlying_Cstring( struct _tagged_string); extern
-struct _tagged_string Cstring_to_string( char*); extern int system( char*);
-struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl;}; typedef struct Cyc_List_List*
-Cyc_List_glist_t; typedef struct Cyc_List_List* Cyc_List_list_t; typedef struct
-Cyc_List_List* Cyc_List_List_t; extern int Cyc_List_length( struct Cyc_List_List*
-x); extern char Cyc_List_List_empty_tag[ 11u]; struct Cyc_List_List_empty_struct{
-char* tag;}; extern char Cyc_List_List_mismatch_tag[ 14u]; struct Cyc_List_List_mismatch_struct{
-char* tag;}; extern char Cyc_List_Nth_tag[ 4u]; struct Cyc_List_Nth_struct{ char*
-tag;}; extern void* Cyc_List_assoc_cmp( int(* compare)( void*, void*), struct
-Cyc_List_List* l, void* x); struct Cyc_Hashtable_Table; typedef struct Cyc_Hashtable_Table*
-Cyc_Hashtable_table_t; extern struct Cyc_Hashtable_Table* Cyc_Hashtable_create(
-int sz, int(* cmp)( void*, void*), int(* hash)( void*)); extern void Cyc_Hashtable_insert(
-struct Cyc_Hashtable_Table* t, void* key, void* val); extern void* Cyc_Hashtable_lookup(
-struct Cyc_Hashtable_Table* t, void* key); extern void Cyc_Hashtable_resize(
-struct Cyc_Hashtable_Table* t); extern void Cyc_Hashtable_remove( struct Cyc_Hashtable_Table*
-t, void* key); extern int Cyc_Hashtable_hash_string( struct _tagged_string s);
-extern int Cyc_Hashtable_hash_stringptr( struct _tagged_string* s); extern void
-Cyc_Hashtable_iter( void(* f)( void*, void*), struct Cyc_Hashtable_Table* t);
-extern void Cyc_Hashtable_print_table_map( struct Cyc_Hashtable_Table* t, void(*
-prn_key)( void*), void(* prn_val)( void*)); struct Cyc_Stdio___sFILE; typedef
-struct Cyc_Stdio___sFILE Cyc_Stdio_FILE; typedef unsigned int Cyc_Stdio_size_t;
-typedef int Cyc_Stdio_fpos_t; extern char Cyc_Stdio_FileOpenError_tag[ 14u];
-struct Cyc_Stdio_FileOpenError_struct{ char* tag; struct _tagged_string f1;};
-extern char Cyc_Stdio_FileCloseError_tag[ 15u]; struct Cyc_Stdio_FileCloseError_struct{
-char* tag;}; struct Cyc_Hashtable_Table{ int(* cmp)( void*, void*); int(* hash)(
-void*); int max_len; struct _tagged_ptr0 tab;}; struct Cyc_Hashtable_Table* Cyc_Hashtable_create(
-int sz, int(* cmp)( void*, void*), int(* hash)( void*)){ struct Cyc_List_List*
-mt= 0; return({ struct Cyc_Hashtable_Table* _temp0=( struct Cyc_Hashtable_Table*)
-GC_malloc( sizeof( struct Cyc_Hashtable_Table)); _temp0->cmp= cmp; _temp0->hash=
-hash; _temp0->max_len= 3; _temp0->tab=({ unsigned int _temp1=( unsigned int) sz;
+struct _tagged_string f1; } ; extern char Cyc_Core_Not_found_tag[ 10u]; struct
+Cyc_Core_Not_found_struct{ char* tag; } ; extern char Cyc_Core_Unreachable_tag[
+12u]; struct Cyc_Core_Unreachable_struct{ char* tag; struct _tagged_string f1; }
+; extern char* string_to_Cstring( struct _tagged_string); extern char*
+underlying_Cstring( struct _tagged_string); extern struct _tagged_string
+Cstring_to_string( char*); extern int system( char*); struct Cyc_List_List{ void*
+hd; struct Cyc_List_List* tl; } ; typedef struct Cyc_List_List* Cyc_List_glist_t;
+typedef struct Cyc_List_List* Cyc_List_list_t; typedef struct Cyc_List_List* Cyc_List_List_t;
+extern int Cyc_List_length( struct Cyc_List_List* x); extern char Cyc_List_List_empty_tag[
+11u]; struct Cyc_List_List_empty_struct{ char* tag; } ; extern char Cyc_List_List_mismatch_tag[
+14u]; struct Cyc_List_List_mismatch_struct{ char* tag; } ; extern char Cyc_List_Nth_tag[
+4u]; struct Cyc_List_Nth_struct{ char* tag; } ; extern void* Cyc_List_assoc_cmp(
+int(* compare)( void*, void*), struct Cyc_List_List* l, void* x); struct Cyc_Hashtable_Table;
+typedef struct Cyc_Hashtable_Table* Cyc_Hashtable_table_t; extern struct Cyc_Hashtable_Table*
+Cyc_Hashtable_create( int sz, int(* cmp)( void*, void*), int(* hash)( void*));
+extern void Cyc_Hashtable_insert( struct Cyc_Hashtable_Table* t, void* key, void*
+val); extern void* Cyc_Hashtable_lookup( struct Cyc_Hashtable_Table* t, void*
+key); extern void Cyc_Hashtable_resize( struct Cyc_Hashtable_Table* t); extern
+void Cyc_Hashtable_remove( struct Cyc_Hashtable_Table* t, void* key); extern int
+Cyc_Hashtable_hash_string( struct _tagged_string s); extern int Cyc_Hashtable_hash_stringptr(
+struct _tagged_string* s); extern void Cyc_Hashtable_iter( void(* f)( void*,
+void*), struct Cyc_Hashtable_Table* t); extern void Cyc_Hashtable_print_table_map(
+struct Cyc_Hashtable_Table* t, void(* prn_key)( void*), void(* prn_val)( void*));
+struct Cyc_Stdio___sFILE; typedef struct Cyc_Stdio___sFILE Cyc_Stdio_FILE;
+typedef unsigned int Cyc_Stdio_size_t; typedef int Cyc_Stdio_fpos_t; extern char
+Cyc_Stdio_FileOpenError_tag[ 14u]; struct Cyc_Stdio_FileOpenError_struct{ char*
+tag; struct _tagged_string f1; } ; extern char Cyc_Stdio_FileCloseError_tag[ 15u];
+struct Cyc_Stdio_FileCloseError_struct{ char* tag; } ; struct Cyc_Hashtable_Table{
+int(* cmp)( void*, void*); int(* hash)( void*); int max_len; struct _tagged_ptr0
+tab; } ; struct Cyc_Hashtable_Table* Cyc_Hashtable_create( int sz, int(* cmp)(
+void*, void*), int(* hash)( void*)){ struct Cyc_List_List* mt= 0; return({
+struct Cyc_Hashtable_Table* _temp0=( struct Cyc_Hashtable_Table*) GC_malloc(
+sizeof( struct Cyc_Hashtable_Table)); _temp0->cmp= cmp; _temp0->hash= hash;
+_temp0->max_len= 3; _temp0->tab=({ unsigned int _temp1=( unsigned int) sz;
 struct Cyc_List_List** _temp2=( struct Cyc_List_List**) GC_malloc( sizeof(
 struct Cyc_List_List*) * _temp1); unsigned int i; struct _tagged_ptr0 _temp3={
 _temp2, _temp2, _temp2 + _temp1}; for( i= 0; i < _temp1; i ++){ _temp2[ i]= mt;}

@@ -1,36 +1,36 @@
 #include "cyc_include.h"
 
- struct _tuple0{ void* f1; struct Cyc_Splay_noderef* f2;}; typedef unsigned int
-Cyc_uint; typedef char* Cyc_Cstring; typedef struct _tagged_string Cyc_string;
-typedef struct _tagged_string Cyc_string_t; typedef struct _tagged_string* Cyc_stringptr;
-typedef int Cyc_bool; extern void* exit( int); extern void* abort(); struct Cyc_Core_Opt{
-void* v;}; typedef struct Cyc_Core_Opt* Cyc_Core_opt_t; extern char Cyc_Core_InvalidArg_tag[
-11u]; struct Cyc_Core_InvalidArg_struct{ char* tag; struct _tagged_string f1;};
-extern char Cyc_Core_Failure_tag[ 8u]; struct Cyc_Core_Failure_struct{ char* tag;
-struct _tagged_string f1;}; extern char Cyc_Core_Impossible_tag[ 11u]; struct
-Cyc_Core_Impossible_struct{ char* tag; struct _tagged_string f1;}; extern char
-Cyc_Core_Not_found_tag[ 10u]; struct Cyc_Core_Not_found_struct{ char* tag;};
-extern char Cyc_Core_Unreachable_tag[ 12u]; struct Cyc_Core_Unreachable_struct{
-char* tag; struct _tagged_string f1;}; extern char* string_to_Cstring( struct
-_tagged_string); extern char* underlying_Cstring( struct _tagged_string); extern
-struct _tagged_string Cstring_to_string( char*); extern int system( char*);
-struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl;}; typedef struct Cyc_List_List*
-Cyc_List_glist_t; typedef struct Cyc_List_List* Cyc_List_list_t; typedef struct
-Cyc_List_List* Cyc_List_List_t; extern char Cyc_List_List_empty_tag[ 11u];
-struct Cyc_List_List_empty_struct{ char* tag;}; extern char Cyc_List_List_mismatch_tag[
-14u]; struct Cyc_List_List_mismatch_struct{ char* tag;}; extern char Cyc_List_Nth_tag[
-4u]; struct Cyc_List_Nth_struct{ char* tag;}; struct Cyc_Splay_node; struct Cyc_Splay_noderef{
-struct Cyc_Splay_node* v;}; typedef void* Cyc_Splay_tree; extern void* Cyc_Splay_Leaf;
-extern const int Cyc_Splay_Node_tag; struct Cyc_Splay_Node_struct{ int tag;
-struct Cyc_Splay_noderef* f1;}; struct Cyc_Splay_node{ void* key; void* data;
-void* left; void* right;}; extern int Cyc_Splay_splay( int(* f)( void*, void*),
-void*, void*); void* Cyc_Splay_Leaf=( void*) 0; const int Cyc_Splay_Node_tag= 0;
-typedef void* Cyc_Splay_direction; static void* Cyc_Splay_LEFT=( void*) 0;
-static void* Cyc_Splay_RIGHT=( void*) 1; static void Cyc_Splay_rotate_left(
-struct Cyc_Splay_noderef* nr){ struct Cyc_Splay_node* n= nr->v; void* _temp0=(
-void*) n->left; struct Cyc_Splay_noderef* _temp6; _LL2: if(( unsigned int)
-_temp0 > 1u?(( struct _enum_struct*) _temp0)->tag == Cyc_Splay_Node_tag: 0){
-_LL7: _temp6=( struct Cyc_Splay_noderef*)(( struct Cyc_Splay_Node_struct*)
+ struct _tuple0{ void* f1; struct Cyc_Splay_noderef* f2; } ; typedef
+unsigned int Cyc_uint; typedef char* Cyc_Cstring; typedef struct _tagged_string
+Cyc_string; typedef struct _tagged_string Cyc_string_t; typedef struct
+_tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void* exit( int);
+extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef struct Cyc_Core_Opt*
+Cyc_Core_opt_t; extern char Cyc_Core_InvalidArg_tag[ 11u]; struct Cyc_Core_InvalidArg_struct{
+char* tag; struct _tagged_string f1; } ; extern char Cyc_Core_Failure_tag[ 8u];
+struct Cyc_Core_Failure_struct{ char* tag; struct _tagged_string f1; } ; extern
+char Cyc_Core_Impossible_tag[ 11u]; struct Cyc_Core_Impossible_struct{ char* tag;
+struct _tagged_string f1; } ; extern char Cyc_Core_Not_found_tag[ 10u]; struct
+Cyc_Core_Not_found_struct{ char* tag; } ; extern char Cyc_Core_Unreachable_tag[
+12u]; struct Cyc_Core_Unreachable_struct{ char* tag; struct _tagged_string f1; }
+; extern char* string_to_Cstring( struct _tagged_string); extern char*
+underlying_Cstring( struct _tagged_string); extern struct _tagged_string
+Cstring_to_string( char*); extern int system( char*); struct Cyc_List_List{ void*
+hd; struct Cyc_List_List* tl; } ; typedef struct Cyc_List_List* Cyc_List_glist_t;
+typedef struct Cyc_List_List* Cyc_List_list_t; typedef struct Cyc_List_List* Cyc_List_List_t;
+extern char Cyc_List_List_empty_tag[ 11u]; struct Cyc_List_List_empty_struct{
+char* tag; } ; extern char Cyc_List_List_mismatch_tag[ 14u]; struct Cyc_List_List_mismatch_struct{
+char* tag; } ; extern char Cyc_List_Nth_tag[ 4u]; struct Cyc_List_Nth_struct{
+char* tag; } ; struct Cyc_Splay_node; struct Cyc_Splay_noderef{ struct Cyc_Splay_node*
+v; } ; typedef void* Cyc_Splay_tree; extern void* Cyc_Splay_Leaf; extern const
+int Cyc_Splay_Node_tag; struct Cyc_Splay_Node_struct{ int tag; struct Cyc_Splay_noderef*
+f1; } ; struct Cyc_Splay_node{ void* key; void* data; void* left; void* right; }
+; extern int Cyc_Splay_splay( int(* f)( void*, void*), void*, void*); void* Cyc_Splay_Leaf=(
+void*) 0; const int Cyc_Splay_Node_tag= 0; typedef void* Cyc_Splay_direction;
+static void* Cyc_Splay_LEFT=( void*) 0; static void* Cyc_Splay_RIGHT=( void*) 1;
+static void Cyc_Splay_rotate_left( struct Cyc_Splay_noderef* nr){ struct Cyc_Splay_node*
+n= nr->v; void* _temp0=( void*) n->left; struct Cyc_Splay_noderef* _temp6; _LL2:
+if(( unsigned int) _temp0 > 1u?(( struct _enum_struct*) _temp0)->tag == Cyc_Splay_Node_tag:
+0){ _LL7: _temp6=( struct Cyc_Splay_noderef*)(( struct Cyc_Splay_Node_struct*)
 _temp0)->f1; goto _LL3;} else{ goto _LL4;} _LL4: goto _LL5; _LL3: { struct Cyc_Splay_node*
 n2= _temp6->v; void* t=({ struct Cyc_Splay_Node_struct* _temp8=( struct Cyc_Splay_Node_struct*)
 GC_malloc( sizeof( struct Cyc_Splay_Node_struct)); _temp8->tag= Cyc_Splay_Node_tag;

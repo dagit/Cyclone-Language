@@ -1,0 +1,13 @@
+#include "core.h"
+#include "errno.h"
+using Core;
+
+namespace Errno {
+  extern "C" __attribute__((dllimport)) Cstring _sys_errlist[135];
+
+  char ?sys_err(int i) {
+    if (i < 0 || i > Errno::_sys_nerr)
+      throw InvalidArg("sys_err: integer argument out of range");
+    return Cstring_to_string(Errno::_sys_errlist[i]);
+  }
+}

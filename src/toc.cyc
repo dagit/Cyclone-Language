@@ -149,23 +149,24 @@ static list_t<decl> added_decls = null;
 static void add_tuple_decl(var x, list_t<typ> ts) {
   let fs = null;
   for (int i=1; ts != null; ts = ts->tl, i++)
-    fs = &List(&$(new {xprintf("f%d",i)},mt_tq,ts->hd),fs);
+    fs = &List(&Structfield(new {xprintf("f%d",i)},mt_tq,ts->hd,null),fs);
   fs = List::imp_rev(fs);
   let sd = &Structdecl{.sc = Public, .name = &Opt(&$(abs_ns,x)),
-                       .tvs = null, .fields = &Opt(fs)};
+                       .tvs = null, .fields = &Opt(fs), .attributes = null};
   added_decls = &List(new_decl(Struct_d(sd),DL),added_decls);
 }
 
 static void add_tagged_ptr_decl(var x, typ t) {
-  typ tptr = star_typ(t,HeapRgn,mt_tq);
-  let f1 = &$(curr_sp,mt_tq,tptr);
-  let f2 = &$(base_sp,mt_tq,tptr);
-  let f3 = &$(last_plus_one_sp,mt_tq,tptr);
+  typ tptr = star_typ(t,HeapRgn,empty_tqual());
+  let f1 = &Structfield(curr_sp,mt_tq,tptr,null);
+  let f2 = &Structfield(base_sp,mt_tq,tptr,null);
+  let f3 = &Structfield(last_plus_one_sp,mt_tq,tptr,null);
   let fs = &List(f1,&List(f2,&List(f3,null)));
   let sd = &Structdecl{.sc = Public,
                        .name = &Opt(&$(abs_ns,x)),
                        .tvs = null,
-                       .fields = &Opt((list_t<$(stringptr,tqual,typ)@>)fs)};
+                       .fields = &Opt((list_t<structfield_t>)fs),
+                       .attributes = null};
   added_decls = &List(new_decl(Struct_d(sd),DL),added_decls);
 }
 
@@ -310,11 +311,11 @@ static typ typ_to_c(typ t) {
   case FloatType:    return t;
   case DoubleType:   return t;
   case ArrayType(t2,tq,e):   return ArrayType(typ_to_c_array(t2),tq,e);
-  case FnType(FnInfo{_,_,t2,args,vararg}):
+  case FnType(FnInfo{_,_,t2,args,vararg,atts}):
     // just drop the type arguments & effect and translate the nested types
     // FIX:  problem with higher-order functions?  Again C's rules are strange.
     return FnType(FnInfo{null,null,typ_to_c(t2),
-                         List::map(arg_to_c,args),vararg});
+                         List::map(arg_to_c,args),vararg,atts});
   case TupleType(tqs):
     // $(t1,...,tn) maps to struct tuple_type_n where we define
     // struct tuple_type_n { t1 f1; ...; tn fn; };
@@ -413,8 +414,8 @@ static bool is_poly_field(typ t, field_name f) {
 			qvar2string((qvar)tdn)));
     let fields = sd->fields->v;
     for (; fields != null; fields = fields->tl) {
-      if (String::zstrptrcmp(f,(*fields->hd)[0]) == 0)
-	return is_void_star((*fields->hd)[2]);
+      if (String::zstrptrcmp(f,fields->hd->name) == 0)
+	return is_void_star(fields->hd->type);
     }
     toc_impos(xprintf("is_poly_field:  struct %s has no %s field",
 		      qvar2string((qvar)tdn),*f));
@@ -1628,9 +1629,10 @@ static void exp_to_c(env nv, exp e) {
       structdecl sd2 = 
 	(structdecl)((sd == null) ? toc_impos(xprintf("no structdecl %s",qvar2string(tdn))) : sd);
       let fields = Tcutil::resolve_struct_designators(e->loc, dles, 
-						    (structdecl)sd2);
+                                                      (structdecl)sd2);
       for (; fields != null; fields = fields->tl) {
-	let &$(&$(_,_,fieldtyp),fieldexp) = fields->hd;
+	let &$(field,fieldexp) = fields->hd;
+        let fieldtyp = field->type;
 	exp_to_c(nv,fieldexp);
 	if (is_void_star(fieldtyp))
 	  fieldexp->r = cast_exp(void_star_typ(), 
@@ -1825,7 +1827,7 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
   stmt s; // the test statement
   switch (p->r) {
   case Wild_p: s = goto_stmt(succ_lab, DL); break;
-  case Var_p(&Vardecl(_,x,_,_,_,_,_)):
+  case Var_p(&Vardecl(_,x,_,_,_,_,_,_)):
     // in essence, x = r; but achieved through the varmap
     nv = add_varmap(nv,x,r);
     s  = goto_stmt(succ_lab,DL);
@@ -2447,7 +2449,7 @@ static void structdecl_to_c(structdecl s) {
       s->fields = null;
     else {
       for (let fields = s->fields->v; fields != null; fields = fields->tl)
-	(*fields->hd)[2] = typ_to_c_array((*fields->hd)[2]);
+        fields->hd->type = typ_to_c_array(fields->hd->type);
     }
 }
 
@@ -2542,14 +2544,17 @@ static list_t<decl> enumdecl_to_c(enumdecl ed, list_t<decl> res) {
         int i  = 1;
         for (let ts = f->typs; ts != null; ts = ts->tl, i++) {
           let fname = (stringptr)new {xprintf("f%d",i)};
-          fs = &List(&$(fname,(*ts->hd)[0],typ_to_c_array((*ts->hd)[1])),fs);
+          let f = &Structfield(fname,(*ts->hd)[0],
+                               typ_to_c_array((*ts->hd)[1]),null);
+          fs = &List(f,fs);
         }
         fs = List::imp_rev(fs);
-        fs = &List(&$(tag_sp,mt_tq,sint_t),fs);
-        let sd = &Structdecl{.sc = Public,
-                             .name = &Opt(collapse_qvar_tag(f->name,"_struct")),
-                             .tvs = null, 
-                             .fields = &Opt(fs)};
+        fs = &List(&Structfield(tag_sp,mt_tq,sint_t,null),fs);
+        let sd = 
+          &Structdecl{.sc = Public,
+                      .name = &Opt(collapse_qvar_tag(f->name,"_struct")),
+                      .tvs = null, 
+                      .fields = &Opt(fs), .attributes = null};
         res = &List(new_decl(Struct_d(sd),DL),res);
       }
     }
@@ -2625,21 +2630,23 @@ static list_t<decl> xenumdecl_to_c(xenumdecl xd, list_t<decl> res) {
       }
 
       if (!seen_before) {
-        list_t<$(field_name,tqual,typ)@> fields = null;
+        list_t<structfield_t> fields = null;
         int i = 1;
-        for (list_t<$(tqual,typ)@> ts = f->typs; ts != null; ts = ts->tl, i++) {
+        for (list_t<$(tqual,typ)@> ts = f->typs; ts != null; ts = ts->tl,i++) {
 	  let field_n = (stringptr)new {xprintf("f%d",i)};
-          let newf = &$(field_n,(*ts->hd)[0],typ_to_c_array((*ts->hd)[1]));
+          let newf = &Structfield(field_n,(*ts->hd)[0],
+                                  typ_to_c_array((*ts->hd)[1]),null);
           fields = &List(newf,fields);
         }
-        fields = &List(&$(tag_sp,mt_tq,
-			  cstar_typ(uchar_t,mt_tq)),
-        List::rev(fields));
+        fields = &List(&Structfield(tag_sp,mt_tq,
+                                    cstar_typ(uchar_t,mt_tq),null),
+                       List::imp_rev(fields));
         let strct_decl =
 	  &Structdecl{.sc     = Public,
 		      .name   = &Opt(collapse_qvar_tag(f->name,"_struct")),
 		      .tvs    = null,
-		      .fields = &Opt(fields)};
+		      .fields = &Opt(fields),
+                      .attributes = null};
         res = &List(new_decl(Struct_d(strct_decl),DL),res);
       }
     }

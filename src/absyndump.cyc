@@ -188,6 +188,16 @@ void dumpargs(list_t<$(tqual,typ)@> ts) {
   group(dumparg,ts,"(",")",",");
 }
 
+void dumpatts(attributes_t atts) {
+  if (atts == null) return;
+  dump(" __attribute__((");
+  for (; atts != null; atts = atts->tl) {
+    dump(attribute2string(atts->hd));
+    if (atts->tl != null) dump(",");
+  };
+  dump(")) ");
+}
+
 bool next_is_pointer(list_t<type_modifier> tms) {
   if (tms==null) return false;
   switch (tms->hd) {
@@ -631,10 +641,11 @@ void dumpenumfields(list_t<enumfield> fields) {
   dump_sep(dumpenumfield,fields,",");
 }
 
-void dumpstructfields(list_t<$(field_name,tqual,typ)@> fields) {
+void dumpstructfields(list_t<structfield_t> fields) {
   for(; fields != null; fields = fields->tl) {
-    let &$(name,tq,type) = fields->hd;
+    let &Structfield{name,tq,type,atts} = fields->hd;
     dumptqtd(tq,type,dump_str,name);
+    dumpatts(atts);
     dump_semi();
   }
 }
@@ -651,8 +662,9 @@ void dumpdecl(decl d) {
     dumpscope(fd->sc);
     typ t = FnType(FnInfo{fd->tvs, fd->effect, fd->ret_type,
                           List::map(Absynpp::arg_mk_opt,fd->args), 
-                          fd->varargs});
+                          fd->varargs, null});
     dumptqtd(null,t,dumpqvar,fd->name);
+    dumpatts(fd->attributes);
     dump_char('{');
     dumpstmt(fd->body);
     dump_char('}');
@@ -667,13 +679,16 @@ void dumpdecl(decl d) {
     else {
       dump_char('{');
       dumpstructfields(sd->fields->v);
-      dump_nospace("};");
+      dump("}");
+      dumpatts(sd->attributes);
+      dump(";");
     }
     break;
-  case Var_d(&Vardecl(sc,name,tq,type,initializer,shadow_depth,_)):
+  case Var_d(&Vardecl(sc,name,tq,type,initializer,shadow_depth,_,atts)):
     // FIX: use shadow_depth information
     dumpscope(sc);
     dumptqtd(tq,type,dumpqvar,name);
+    dumpatts(atts);
     if(initializer != null) {
       dump_char('=');
       dumpexp((exp)initializer);
@@ -797,6 +812,8 @@ void dumptms(list_t<type_modifier> tms, void f(`a), `a a) {
       group(dump_str,sl,"(",")",","); break;
     case TypeParams_mod(ts,loc,print_kinds): 
       if (print_kinds) dumpkindedtvars(ts); else dumptvars(ts); break;
+    case Attributes_mod(_,atts): 
+      dumpatts(atts); break;
     case Pointer_mod(nullable,tq2,_): throw Impossible("dumptms");
     }
     return;
