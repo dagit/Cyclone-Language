@@ -121,7 +121,7 @@ A function returning an expression representing the multiplication of
 its parameter by two could like this:
 \begin{verbatim}
   tunion Exp double_exp(tunion Exp e) {
-    return new Binop(Multiply, new Int(2));
+    return new Binop(Multiply, e, new Int(2));
   }
 \end{verbatim}
 
