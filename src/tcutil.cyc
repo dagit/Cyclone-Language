@@ -104,6 +104,99 @@ type_t compress(type_t t) {
   }
 }
 
+// does a deep copy of a type to avoid sharing type variables.
+// Note that any evars continue to be shared.  This should only 
+// be run before feeding the type to the well-formedness checker.
+type_t copy_type(type_t t);
+static list_t<type_t> copy_types(list_t<type_t> ts) {
+  return List::map(copy_type, ts);
+}
+static conref_t<`a> copy_conref(conref_t<`a> c) {
+  switch (c->v) {
+  case No_constr: return empty_conref();
+  case &Eq_constr(x): return new_conref(x);
+  case &Forward_constr(cr): return copy_conref(cr);
+  }
+}
+static tvar_t copy_tvar(tvar_t tv) {
+  // NB: loses sharing of identity here
+  return new Tvar(tv->name,null,copy_conref(tv->kind));
+}
+static $(opt_t<var_t>,tqual_t,type_t)@ 
+  copy_arg($(opt_t<var_t>,tqual_t,type_t) @arg) {
+  let $(x,y,t) = *arg;
+  return new $(x,y,copy_type(t));
+}
+static $(tqual_t,type_t)@ copy_tqt($(tqual_t,type_t) @arg) {
+  let $(x,t) = *arg;
+  return new $(x,copy_type(t));
+}
+static structfield_t copy_field(structfield_t f) {
+  return new Structfield{f->name,f->tq,copy_type(f->type),f->width,
+                           f->attributes};
+}
+
+type_t copy_type(type_t t) {
+  switch (compress(t)) {
+  case VoidType: return t;
+  case &Evar(_,_,_,_): return t;
+  case &VarType(tv):
+    return new VarType(copy_tvar(tv));
+  case &TunionType(TunionInfo{tui,targs,rgn}):
+    return new TunionType(TunionInfo{tui,copy_types(targs),
+                                       copy_type(rgn)});
+  case &TunionFieldType(TunionFieldInfo{fi,targs}):
+    return new TunionFieldType(TunionFieldInfo{fi,copy_types(targs)});
+  case &PointerType(PtrInfo{elt,rgn,nbl,tq,bs}):
+    let elt2 = copy_type(elt);
+    let rgn2 = copy_type(rgn);
+    let nbl2 = copy_conref(nbl);
+    let tq2 = tq;
+    let bs2 = copy_conref(bs);
+    return new PointerType(PtrInfo{elt2,rgn2,nbl2,tq2,bs2});
+  case &IntType(sn,sz): return new IntType(sn,sz);
+  case FloatType: fallthru;
+  case DoubleType: return t;
+  case &ArrayType(et,tq,eopt): 
+    // FIX: should really copy eopt
+    return new ArrayType(copy_type(et),tq,eopt);
+  case &FnType(FnInfo{tvs,effopt,rt,args,c_varargs,cyc_varargs,atts}):
+    let tvs2 = List::map(copy_tvar,tvs);
+    let effopt2 = (effopt == null) ? null : new Opt(copy_type(effopt->v));
+    let rt2 = copy_type(rt);
+    let args2 = List::map(copy_arg,args);
+    let c_varargs2 = c_varargs;
+    vararg_info_t * cyc_varargs2 = null;
+    if (cyc_varargs != null) {
+      vararg_info_t @cv = (vararg_info_t @)cyc_varargs;
+      cyc_varargs2 = new VarargInfo{cv->name,cv->tq,copy_type(cv->type),
+                                    copy_type(cv->rgn),cv->inject};
+    }
+    let atts2 = atts;
+    return new FnType(FnInfo{tvs2,effopt2,rt2,args2,c_varargs2,
+                               cyc_varargs2,atts2});
+  case &TupleType(tqts):
+    return new TupleType(List::map(copy_tqt,tqts));
+  case &StructType(tdnopt,ts,_):
+    return new StructType(tdnopt,copy_types(ts),null);
+  case &UnionType(tdnopt,ts,_):
+    return new UnionType(tdnopt,copy_types(ts),null);
+  case &AnonStructType(fs):
+    return new AnonStructType(List::map(copy_field,fs));
+  case &AnonUnionType(fs):
+    return new AnonUnionType(List::map(copy_field,fs));
+  case &EnumType(tdn,_):
+    return new EnumType(tdn,null);
+  case &RgnHandleType(t): return new RgnHandleType(copy_type(t));
+  case &TypedefType(tdn,ts,_):
+    return new TypedefType(tdn,copy_types(ts),null);
+  case HeapRgn: return t;
+  case &AccessEff(t): return new AccessEff(copy_type(t));
+  case &JoinEff(ts): return new JoinEff(copy_types(ts));
+  }
+
+}
+
 // Our lattice looks like this:
 //          AbsType   EffKind  RgnKind
 //             V

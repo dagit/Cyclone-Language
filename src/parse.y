@@ -29,6 +29,7 @@ extern void yyprint(int i, xtunion YYSTYPE v);
 #include "position.h"
 #include "absyn.h"
 #include "pp.h"
+#include "tcutil.h"
 using Core;
 using Stdio;
 using Lexing;
@@ -582,8 +583,9 @@ static list_t<$(qvar_t,tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)@>
   let d = ds->hd;
   let q = d->id;
   let $(tq,new_typ,tvs,atts) = apply_tms(tq,t,shared_atts,d->tms);
+  // NB: we copy the type here to avoid sharing definitions
   return new List(new $(q,tq,new_typ,tvs,atts),
-                  apply_tmss(tq,t,ds->tl,shared_atts));
+                  apply_tmss(tq,Tcutil::copy_type(t),ds->tl,shared_atts));
 }
 
 static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)

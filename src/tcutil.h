@@ -26,6 +26,11 @@ extern void err_noloc(string_t);
 // to Set::empty.
 extern Core::opt_t<set_t<var_t>> empty_var_set;
 
+// returns a deep copy of a type -- note that the evars will
+// still share and if the identity is set on type variables,
+// they will share, otherwise they won't.
+extern type_t copy_type(type_t t);
+
 // returns the type of a function declaration
 extern type_t fd_type(fndecl_t fd); 
 extern kind_t typ_kind(type_t t);
