@@ -399,6 +399,7 @@ static bool atomic_typ(type_t t) {
   case VoidType:      return true;
   case &VarType(_):   return false;
   case &IntType(_,_): return true;
+  case &EnumType(_,_):    return true;
   case FloatType:     return true;
   case DoubleType:    return true;
   case &FnType(_):    return true;
@@ -1009,8 +1010,7 @@ static $(list_t<designator_t>,exp_t)@ make_dle(exp_t e) {
 static struct PtrInfo get_ptr_type(type_t t) {
   switch (compress(t)) {
   case &PointerType(p): return p;
-  default: 
-    throw impos("get_ptr_typ:  not a pointer!");
+  default: throw impos("get_ptr_typ: not a pointer!");
   }
 }
 
@@ -1202,89 +1202,102 @@ static void exp_to_c(env_t nv, exp_t e) {
     List::iter_c(exp_to_c,nv,es);
     break;
   case &FnCall_e(e1,es,&VarargCallInfo{num_varargs,injectors,vai}):
-    // ({ f = e1;
-    //    x1 = es[0]; x2 = es[1]; ... ; xn = es[n-num_varargs];
-    //    t v1 = injector[0](es[n-num_varargs]); 
-    //    t v2 = injector[1](es[n-num_varargs+1]); 
-    //     ...
-    //    t vnum_varargs = injector[num_varargs-1](es[n-1]);
-    //    t argv[num_varargs] = { &v1, &v2, ..., &vnum_varargs };
-    //    struct tagged_t_array a = {argv,argv,argv+num_varargs};
-    //    f(x1,x2,...,xn,a);
-    //  })
+    // if vai->inject:
+    //    t vn = injector[n](es[n])
+    //    ...
+    //    t v0 = injector[0](es[n-num_varargs+1])
+    //    t argv[num_varargs] = {&v0, ..., &vn};
+    // else
+    //    t argv[num_varargs] = {es[n-num_varargs+1], ..., es[n]};
+    // e1(es[0], ..., es[n-num_varargs], tag_arr(argv, sizeof(t), num_varargs));
     region r {
-      let va_type = vai->type;
-      let cva_type = typ_to_c(va_type);
-      let ftype = typ_to_c(e1->topt->v);
-      let num_varargs_exp = uint_exp(num_varargs,DL);
-      type_t arr_type = typ_to_c(new ArrayType(va_type,mt_tq,num_varargs_exp));
-      let f = temp_var();
-      let argv = temp_var();
-      let argvexp = var_exp(argv,DL);
-      let a = temp_var();
-      let num_args = List::length(es);
-      let num_normargs = num_args - num_varargs;
-      qvar_t ?`r vs = rnew(r) {for i < num_varargs : temp_var()};
-      qvar_t ?`r xs = rnew(r) {for i < num_normargs : temp_var()};
-      // build f(x1,x2,...,xn,a);
-      list_t<exp_t> xexps = map_2c(var_exp,(seg_t)null,
-                                   List::rfrom_array(r,xs));
-      xexps = List::imp_append(xexps,new List{var_exp(a,null),null});
-      let s = exp_stmt(fncall_exp(var_exp(f,null),xexps,null),null);
-      // declare a = {argv,argv,argv+num_varargs}
-      let argvplus_nva = add_exp(argvexp,num_varargs_exp,null);
-      let alist = list(new $(null,cast_exp(void_star_typ(),argvexp,DL)), 
-		       new $(null,cast_exp(void_star_typ(),argvexp,DL)), 
-                       new $(null,cast_exp(void_star_typ(),argvplus_nva,DL)));
-      s = declare_stmt(a,typ_to_c(tagged_typ(va_type,vai->rgn,mt_tq)),
-                       unresolvedmem_exp(null,alist,null),s,null);
-      // declare argv = {&v1,&v2,...,&vnum_varargs}
-      let vlist = rmap_2c(r,var_exp,null,List::rfrom_array(r,vs));
-      let addr_vlist = List::map(make_dle,vlist);
-      s = declare_stmt(argv,arr_type,
-                       unresolvedmem_exp(null,addr_vlist,null),s,null);
-      let args = List::rrev(r,es);
-      let injs = List::rrev(r,injectors);
-      // add in declarations for varargs
-      for (int i = num_varargs-1; i >= 0; i--, args = args->tl) {
-        exp_t arg = args->hd;
-        type_t arg_type = arg->topt->v;
-        exp_to_c(nv,arg);
-        if (vai->inject) {
-          // struct qv_tag temp x;
-          // x.tag = i; x.f1 = arg;
-          // t v = &x;
-          let Tunionfield{qv,tvs,tqts,loc,sc} = *injs->hd;
-          injs = injs->tl;
-          let x = temp_var();
-          let xexp = var_exp(x,null);
-          let strct_typ = strctq(collapse_qvar_tag(qv,"_struct"));
-          s = declare_stmt(vs[i],cva_type,cast_exp(cva_type,
-                                                   address_exp(xexp,DL),DL),
-                           s,DL);
-          type_t field_typ = typ_to_c((*tqts->hd)[1]);
-          if (is_void_star(field_typ))
-            arg = cast_exp(field_typ,arg,null);
-          let a1 = assign_stmt(structmember_exp(xexp,fieldname(1),DL),
-                               arg,DL);
-          s = seq_stmt(a1,s,DL);
-          let a2 = assign_stmt(structmember_exp(xexp,tag_sp,DL),
-                               var_exp(qv,DL),DL);
-          s = seq_stmt(a2,s,DL);
-          s = declare_stmt(x,strct_typ,null,s,DL);
-        } else {
-          s = declare_stmt(vs[i],cva_type,arg,s,null);
-        }
+      qvar_t argv     = temp_var();
+      exp_t  argvexp  = var_exp(argv,DL);
+      exp_t  num_varargs_exp = uint_exp(num_varargs,DL);
+      type_t cva_type = typ_to_c(vai->type);
+      type_t arr_type = new ArrayType(cva_type,mt_tq,num_varargs_exp);
+
+      int num_args     = List::length(es);
+      int num_normargs = num_args - num_varargs;
+
+      // build argument list and set es to the varargs portion
+      list_t<exp_t> new_args = null;
+      for(int i=0; i < num_normargs; ++i, es=es->tl) {
+	exp_to_c(nv,es->hd);
+	new_args = new List(es->hd, new_args);
       }
-      // add in declarations for normal arguments
-      for (int i = num_normargs-1; i >= 0; i--, args = args->tl) {
-        exp_t arg = args->hd; 
-        type_t argtype = typ_to_c(arg->topt->v);
-        exp_to_c(nv,arg);
-        s = declare_stmt(xs[i],argtype,arg,s,null);
-      }
+      new_args = new List(fncall_exp(_tag_arr_e, 
+				     list(argvexp, 
+					  sizeoftyp_exp(cva_type,DL), 
+					  num_varargs_exp), DL),
+			  new_args);
+      new_args = imp_rev(new_args);
+      // make the function call
       exp_to_c(nv,e1);
-      s = declare_stmt(f,ftype,e1,s,null);
+      stmt_t s = exp_stmt(fncall_exp(e1,new_args,DL),DL);
+     
+      // make the declarations and prepend them
+      if(vai->inject) {
+	qvar_t ?`r vs = rnew(r) {for i < num_varargs : temp_var()};
+	// declare argv = {&v1,&v2,...,&vnum_varargs}
+	let array_args = null;
+	for(int i=num_varargs-1; i >= 0; --i)
+	  array_args = new List(make_dle(address_exp(var_exp(vs[i],DL),DL)),
+				array_args);
+	s = declare_stmt(argv, arr_type, unresolvedmem_exp(null,array_args,DL),
+			 s,DL);
+	// evaluate varargs (notice we're using a screwy evaluation order now)
+	for (int i=0; es != null; es = es->tl, injectors = injectors->tl, ++i) {
+	  exp_t  arg      = es->hd;
+	  type_t arg_type = arg->topt->v;
+	  qvar_t var      = vs[i];
+	  exp_t  varexp   = var_exp(var,DL);
+          let &Tunionfield{qv,_,tqts,_,_} = injectors->hd;
+          type_t field_typ = typ_to_c((*tqts->hd)[1]);
+	  exp_to_c(nv,arg);
+          if (is_void_star(field_typ))
+            arg = cast_exp(field_typ,arg,DL);
+	  // DAN: We don't use an initializer b/c we're afraid of the GCC bug,
+	  //   but I doubt it would happen and it causes a lot of gunk. :-(
+          // struct qv_tag temp x;
+          // x.tag = i; 
+	  // x.f1  = arg;
+          s = seq_stmt(assign_stmt(structmember_exp(varexp,fieldname(1),DL),
+				   arg,DL),
+		       s,DL);
+          s = seq_stmt(assign_stmt(structmember_exp(varexp,tag_sp,DL),
+				   var_exp(qv,DL),DL),
+		       s,DL);
+          s = declare_stmt(var,strctq(collapse_qvar_tag(qv,"_struct")), null,
+			   s,DL);
+        }
+      } else {
+	// we'd like: argv = { e1, ..., en} where ei is the ith vararg, but
+	// alas I hit the GCC BUG when I did that (in one place in the 
+	// pretty printer -- everything else went through fine).  So we do:
+	// t argv[n];
+	// argv[0] = e1; ... argv[n-1] = en;
+	// Sigh.
+	for(int i=0; es != null; es = es->tl, ++i) {
+	  exp_to_c(nv, es->hd);
+	  s = seq_stmt(assign_stmt(subscript_exp(argvexp,uint_exp(i,DL),DL),
+				   es->hd, DL),
+		       s, DL);
+	}
+	s = declare_stmt(argv, arr_type, null, s, DL);
+
+	/*	glist_t<exp_t,`r> array_args = null;
+	for(; es != null; es = es->tl) {
+	  exp_to_c(nv, es->hd);
+	  array_args = rnew(r) List(es->hd, array_args);
+	}
+	array_args = List::imp_rev(array_args);
+	let init = unresolvedmem_exp(null,List::map(make_dle,array_args),DL);
+	s = declare_stmt(argv, arr_type, init,
+			 s,DL);
+	*/
+      }
+      
       e->r = stmt_exp(s,null)->r;                         
     }
     break; 

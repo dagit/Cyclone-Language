@@ -124,13 +124,8 @@ words; i ++){ if(*(( int*) _check_unknown_subscript( bvec, sizeof( int), i)) !=
 -1){ return 0;}}}{ int i= words * 32; for( 0; i < sz; i ++){ if( ! Cyc_Bitvec_get(
 bvec, i)){ return 0;}}} return 1;} void Cyc_Bitvec_print_bvec( struct
 _tagged_arr bvec){{ int i= 0; for( 0; i < 32 * _get_arr_size( bvec, sizeof( int));
-++ i){({ int(* _temp14)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_printf;
-struct _tagged_arr _temp18= _tag_arr("%d", sizeof( unsigned char), 3u); struct
-Cyc_Stdio_Int_pa_struct _temp19; _temp19.tag= Cyc_Stdio_Int_pa; _temp19.f1=( int)((
-unsigned int)( Cyc_Bitvec_get( bvec, i)? 1: 0));{ void* _temp17=( void*)&
-_temp19; void* _temp15[ 1u]={ _temp17}; struct _tagged_arr _temp16={( void*)
-_temp15,( void*) _temp15,( void*)( _temp15 + 1u)}; _temp14( _temp18, _temp16);}});}}({
-int(* _temp20)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_printf;
-struct _tagged_arr _temp23= _tag_arr("\n", sizeof( unsigned char), 2u); void*
-_temp21[ 0u]={}; struct _tagged_arr _temp22={( void*) _temp21,( void*) _temp21,(
-void*)( _temp21 + 0u)}; _temp20( _temp23, _temp22);});}
+++ i){({ struct Cyc_Stdio_Int_pa_struct _temp15; _temp15.tag= Cyc_Stdio_Int_pa;
+_temp15.f1=( int)(( unsigned int)( Cyc_Bitvec_get( bvec, i)? 1: 0));{ void*
+_temp14[ 1u]={& _temp15}; Cyc_Stdio_printf( _tag_arr("%d", sizeof( unsigned char),
+3u), _tag_arr( _temp14, sizeof( void*), 1u));}});}}({ void* _temp16[ 0u]={}; Cyc_Stdio_printf(
+_tag_arr("\n", sizeof( unsigned char), 2u), _tag_arr( _temp16, sizeof( void*), 0u));});}

@@ -64,11 +64,11 @@ $(OUT_PREFIX)lex.cyc : lex.cyl $(CYCLEX)
 $(OUT_PREFIX)parse_tab.o: $(OUT_PREFIX)parse_tab.cyc $(CYCC) $(CYCINC_H)
 	$(CYCC) $(CYC_FLAGS) -c $< 
 $(OUT_PREFIX)parse_tab.cyc: parse.y $(CYCBISON)
-	$(CYCBISON) -v -d $< -o $@
+	$(CYCBISON) -d $< -o $@
 #$(OUT_PREFIX)parse_tab.h: parse.y $(CYCBISON)
 #	$(CYCBISON) -v -d $< -o $(OUT_PREFIX)parse_tab.cyc
 parse_tab.h: parse.y $(CYCBISON)
-	$(CYCBISON) -v -d $< -o parse_tab.cyc
+	$(CYCBISON) -d $< -o parse_tab.cyc
 
 # This takes care of non-machine-generated versions (the .cyc is already there)
 $(OUT_PREFIX)%.o: %.cyc $(CYCC) $(CYCINC_H)

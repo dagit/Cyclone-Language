@@ -186,11 +186,11 @@ doc_t text(string_t s) {
     t = str_hashtbl->v;
   }
   try
-    return Hashtable::lookup(t,new {s});
+    return Hashtable::lookup(t,new s);
   catch {
   case Not_found:
     doc_t d = text_doc(s);
-    Hashtable::insert(t,new {s},d);
+    Hashtable::insert(t,new s,d);
     return d;
   }
 }

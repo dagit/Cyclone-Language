@@ -40,9 +40,9 @@ clean:
 	$(CYCC) $(CYC_FLAGS) -c $< 
 
 xmlparse_tab.cyc: xmlparse.y
-	$(CYCBISON) -v -d $< -o $@
+	$(CYCBISON) -d $< -o $@
 xmlparse_tab.h: xmlparse.y
-	$(CYCBISON) -v -d $< -o xmlparse_tab.cyc
+	$(CYCBISON) -d $< -o xmlparse_tab.cyc
 
 xmlscan.cyc: xmlparse_tab.h
 xmlscan.cyc: xmlscan.cyl

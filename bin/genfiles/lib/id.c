@@ -69,13 +69,10 @@ _temp3->hd=( void*)({ struct _tagged_arr* _temp4=( struct _tagged_arr*)
 GC_malloc( sizeof( struct _tagged_arr) * 1); _temp4[ 0]=( struct _tagged_arr)
 Cyc_Core_string_of_int( x->i); _temp4;}); _temp3->tl= 0; _temp3;}); _temp2;});
 _temp1;}));} void Cyc_Id_id_prn( struct Cyc_Stdio___sFILE* f, struct Cyc_Id_id*
-x){({ int(* _temp6)( struct Cyc_Stdio___sFILE*, struct _tagged_arr fmt, struct
-_tagged_arr)= Cyc_Stdio_fprintf; struct Cyc_Stdio___sFILE* _temp10= f; struct
-_tagged_arr _temp11= _tag_arr("%s", sizeof( unsigned char), 3u); struct Cyc_Stdio_String_pa_struct
-_temp12; _temp12.tag= Cyc_Stdio_String_pa; _temp12.f1=( struct _tagged_arr) Cyc_Id_id_to_string(
-x);{ void* _temp9=( void*)& _temp12; void* _temp7[ 1u]={ _temp9}; struct
-_tagged_arr _temp8={( void*) _temp7,( void*) _temp7,( void*)( _temp7 + 1u)};
-_temp6( _temp10, _temp11, _temp8);}});} struct _tagged_arr Cyc_Id_id_to_source(
+x){({ struct Cyc_Stdio_String_pa_struct _temp7; _temp7.tag= Cyc_Stdio_String_pa;
+_temp7.f1=( struct _tagged_arr) Cyc_Id_id_to_string( x);{ void* _temp6[ 1u]={&
+_temp7}; Cyc_Stdio_fprintf( f, _tag_arr("%s", sizeof( unsigned char), 3u),
+_tag_arr( _temp6, sizeof( void*), 1u));}});} struct _tagged_arr Cyc_Id_id_to_source(
 struct Cyc_Id_id* x){ return Cyc_String_strdup( x->s);} int Cyc_Id_id_compare(
 struct Cyc_Id_id* x1, struct Cyc_Id_id* x2){ if( x1->i == x2->i){ return Cyc_String_zstrcmp(
 x1->s, x2->s);} else{ if( x1->i < x2->i){ return - 1;} else{ return 1;}}}

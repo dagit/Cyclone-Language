@@ -34,7 +34,7 @@ BINDIR = $(CYCDIR)/bin
 BISONDIR=$(shell pwd)
 
 CYCC = $(CYCDIR)/bin/cyclone$(EXE)
-LC_FLAG = -g
+LC_FLAG = #-g
 CYC_FLAGS = -I$(CYCDIR)/include -B$(BINDIR)/cyc-lib $(LC_FLAG)
 
 # names of parser files
@@ -58,7 +58,7 @@ $(BINDIR)/$(PROG): $(PROG)
 all: $(PROG)
 
 $(PROG): $(O_SRCS)
-	$(CYCC) -B$(BINDIR)/cyc-lib $(LC_FLAG) -g -o $@ $^ $(LDFLAGS)
+	$(CYCC) -B$(BINDIR)/cyc-lib $(LC_FLAG) -o $@ $^ $(LDFLAGS)
 
 
 # This file is different to pass the parser file names to the compiler.

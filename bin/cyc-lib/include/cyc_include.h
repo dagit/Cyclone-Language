@@ -72,9 +72,9 @@ extern void _push_region(struct _RegionHandle *);
 extern void _npop_handler(int);
 extern void _pop_handler();
 extern void _pop_region();
-extern int _throw_null();
 
 #ifndef _throw
+extern int _throw_null();
 extern int _throw(void * e);
 #endif
 

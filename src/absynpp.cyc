@@ -1567,8 +1567,8 @@ doc_t decl2doc(decl_t d) {
   case &Typedef_d(td):
     s = cat(text("typedef "),
             tqtd2doc(Tqual(false,false,false),
-                     td->defn,
-                     new Opt(cat(typedef_name2doc(td->name),tvars2doc(td->tvs)))),
+                   td->defn,
+		   new Opt(cat(typedef_name2doc(td->name),tvars2doc(td->tvs)))),
             text(";"));
 
     break;
