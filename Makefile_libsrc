@@ -53,8 +53,8 @@ cstubs.c cycstubs.cyc: libc.cys
 	mv include/cstubs.c .
 	mv include/cycstubs.cyc .
 
-libc.cys: $(CYCDIR)/bin/cyc-lib/libc.cys
-	cp $< $@
+libc.cys:
+	(test -e $(CYCDIR)/lib/libc.cys && cp $(CYCDIR)/lib/libc.cys $@) || cp $(CYCDIR)/bin/cyc-lib/libc.cys $@
 
 $(CYCCOMP): $(O_SRCS) $(LIBR) install_path.$(O)
 ifdef MS
