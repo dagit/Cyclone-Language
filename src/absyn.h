@@ -212,7 +212,7 @@ namespace Absyn {
   };
 
   EXTERN_DEFINITION enum Funcparams {
-    NoTypes(list<var>,segment);
+    NoTypes(list<var>,seg_t);
     WithTypes(list<$(Opt_t<var>,tqual,typ)@>,bool);
   };
 
@@ -228,7 +228,7 @@ namespace Absyn {
     // for Pointer_mod, the typ has RgnKind, default is RgnType(HeapRgn)
     Pointer_mod(enum Pointer_Sort,typ,tqual); 
     Function_mod(funcparams_t);
-    TypeParams_mod(list<tvar>,segment);
+    TypeParams_mod(list<tvar>,seg_t);
   };
 
   EXTERN_DEFINITION enum Cnst {
@@ -287,7 +287,7 @@ namespace Absyn {
   EXTERN_DEFINITION struct Exp {
     Opt_t<typ> topt;
     raw_exp_t  r;
-    segment    loc;
+    seg_t      loc;
   };
 
   // The $(exp,stmt) in loops are just a hack for holding the
@@ -316,7 +316,7 @@ namespace Absyn {
 
   EXTERN_DEFINITION struct Stmt {
     raw_stmt_t   r;
-    segment      loc;
+    seg_t        loc;
     list<stmt>   non_local_preds; // set by type-checking
     stmt_annot_t annot;
   };
@@ -343,7 +343,7 @@ namespace Absyn {
   EXTERN_DEFINITION struct Pat {
     raw_pat_t   r;
     Opt_t<typ>  topt;
-    segment     loc;
+    seg_t       loc;
   };
 
   EXTERN_DEFINITION struct Switch_clause {
@@ -351,7 +351,7 @@ namespace Absyn {
     Opt_t<list<qvar>> pat_vars; // set by type-checker, used by translation to C
     exp_opt           where_clause;
     stmt              body;
-    segment           loc;
+    seg_t             loc;
   };
 
   // only local and pat cases need to worry about shadowing
@@ -397,7 +397,7 @@ namespace Absyn {
     exp_opt             tag;
     list<tvar>          tvs;
     list<$(tqual,typ)@> typs;
-    segment             loc;
+    seg_t               loc;
   };
 
   EXTERN_DEFINITION struct Enumdecl {
@@ -435,7 +435,7 @@ namespace Absyn {
 
   EXTERN_DEFINITION struct Decl {
     raw_decl r;
-    segment  loc;
+    seg_t    loc;
   };
 
   EXTERN_DEFINITION enum Designator {
@@ -472,7 +472,7 @@ namespace Absyn {
   extern qvar exn_name;
   extern xenumdecl exn_xed;
   extern typ exn_typ;
-  // string (char[?])
+  // string (char ?)
   extern typ string_typ(typ rgn);
   // FILE
   extern typ file_typ();
@@ -489,102 +489,102 @@ namespace Absyn {
   extern typ strctq(qvar name);
 
   /////////////////////////////// Expressions ////////////////////////
-  extern exp new_exp(raw_exp_t, segment);
+  extern exp new_exp(raw_exp_t, seg_t);
   extern exp copy_exp(exp);
-  extern exp const_exp(cnst_t, segment);
-  extern exp null_exp(segment);
-  extern exp bool_exp(bool, segment);
-  extern exp true_exp(segment);
-  extern exp false_exp(segment);
-  extern exp int_exp(sign,int,segment);
-  extern exp signed_int_exp(int, segment);
-  extern exp uint_exp(unsigned int, segment);
-  extern exp char_exp(char c, segment);
-  extern exp float_exp(string f, segment);
-  extern exp string_exp(bool heap_allocate, string s, segment);
-  extern exp var_exp(qvar, segment);
-  extern exp varb_exp(qvar, binding_t, segment);
-  extern exp unknownid_exp(qvar, segment);
-  extern exp primop_exp(primop, list<exp> es, segment);
-  extern exp prim1_exp(primop, exp, segment);
-  extern exp prim2_exp(primop, exp, exp, segment);
-  extern exp add_exp(exp, exp, segment);
-  extern exp subtract_exp(exp, exp, segment);
-  extern exp times_exp(exp, exp, segment);
-  extern exp divide_exp(exp, exp, segment);
-  extern exp eq_exp(exp, exp, segment);
-  extern exp neq_exp(exp, exp, segment);
-  extern exp gt_exp(exp, exp, segment);
-  extern exp lt_exp(exp, exp, segment);
-  extern exp gte_exp(exp, exp, segment);
-  extern exp lte_exp(exp, exp, segment);
-  extern exp assignop_exp(exp, Opt_t<primop>, exp, segment);
-  extern exp assign_exp(exp, exp, segment);
-  extern exp post_inc_exp(exp, segment);
-  extern exp post_dec_exp(exp, segment);
-  extern exp pre_inc_exp(exp, segment);
-  extern exp pre_dec_exp(exp, segment);
-  extern exp conditional_exp(exp, exp, exp, segment);
-  extern exp and_exp(exp, exp, segment); // &&
-  extern exp or_exp(exp, exp, segment);  // ||
-  extern exp seq_exp(exp, exp, segment);
-  extern exp unknowncall_exp(exp, list<exp>, segment);
-  extern exp fncall_exp(exp, list<exp>, segment);
-  extern exp throw_exp(exp, segment);
-  extern exp noinstantiate_exp(exp, segment);
-  extern exp instantiate_exp(exp, Opt_t<list<typ>>, segment);
-  extern exp cast_exp(typ, exp, segment);
-  extern exp address_exp(exp, segment);
-  extern exp sizeof_exp(typ t, segment);
-  extern exp deref_exp(exp, segment);
-  extern exp structmember_exp(exp, field_name, segment);
-  extern exp structarrow_exp(exp, field_name, segment);
-  extern exp subscript_exp(exp, exp, segment);
-  extern exp tuple_exp(list<exp>, segment);
-  extern exp stmt_exp(stmt, segment);
-  extern exp null_pointer_exn_exp(segment);
-  extern exp array_exp(bool heap_allocate, list<exp>, segment);
+  extern exp const_exp(cnst_t, seg_t);
+  extern exp null_exp(seg_t);
+  extern exp bool_exp(bool, seg_t);
+  extern exp true_exp(seg_t);
+  extern exp false_exp(seg_t);
+  extern exp int_exp(sign,int,seg_t);
+  extern exp signed_int_exp(int, seg_t);
+  extern exp uint_exp(unsigned int, seg_t);
+  extern exp char_exp(char c, seg_t);
+  extern exp float_exp(string f, seg_t);
+  extern exp string_exp(bool heap_allocate, string s, seg_t);
+  extern exp var_exp(qvar, seg_t);
+  extern exp varb_exp(qvar, binding_t, seg_t);
+  extern exp unknownid_exp(qvar, seg_t);
+  extern exp primop_exp(primop, list<exp> es, seg_t);
+  extern exp prim1_exp(primop, exp, seg_t);
+  extern exp prim2_exp(primop, exp, exp, seg_t);
+  extern exp add_exp(exp, exp, seg_t);
+  extern exp subtract_exp(exp, exp, seg_t);
+  extern exp times_exp(exp, exp, seg_t);
+  extern exp divide_exp(exp, exp, seg_t);
+  extern exp eq_exp(exp, exp, seg_t);
+  extern exp neq_exp(exp, exp, seg_t);
+  extern exp gt_exp(exp, exp, seg_t);
+  extern exp lt_exp(exp, exp, seg_t);
+  extern exp gte_exp(exp, exp, seg_t);
+  extern exp lte_exp(exp, exp, seg_t);
+  extern exp assignop_exp(exp, Opt_t<primop>, exp, seg_t);
+  extern exp assign_exp(exp, exp, seg_t);
+  extern exp post_inc_exp(exp, seg_t);
+  extern exp post_dec_exp(exp, seg_t);
+  extern exp pre_inc_exp(exp, seg_t);
+  extern exp pre_dec_exp(exp, seg_t);
+  extern exp conditional_exp(exp, exp, exp, seg_t);
+  extern exp and_exp(exp, exp, seg_t); // &&
+  extern exp or_exp(exp, exp, seg_t);  // ||
+  extern exp seq_exp(exp, exp, seg_t);
+  extern exp unknowncall_exp(exp, list<exp>, seg_t);
+  extern exp fncall_exp(exp, list<exp>, seg_t);
+  extern exp throw_exp(exp, seg_t);
+  extern exp noinstantiate_exp(exp, seg_t);
+  extern exp instantiate_exp(exp, Opt_t<list<typ>>, seg_t);
+  extern exp cast_exp(typ, exp, seg_t);
+  extern exp address_exp(exp, seg_t);
+  extern exp sizeof_exp(typ t, seg_t);
+  extern exp deref_exp(exp, seg_t);
+  extern exp structmember_exp(exp, field_name, seg_t);
+  extern exp structarrow_exp(exp, field_name, seg_t);
+  extern exp subscript_exp(exp, exp, seg_t);
+  extern exp tuple_exp(list<exp>, seg_t);
+  extern exp stmt_exp(stmt, seg_t);
+  extern exp null_pointer_exn_exp(seg_t);
+  extern exp array_exp(bool heap_allocate, list<exp>, seg_t);
   extern exp unresolvedmem_exp(Opt_t<typedef_name_t>,
-			       list<$(list<designator>,exp)@>,segment);
+			       list<$(list<designator>,exp)@>,seg_t);
   /////////////////////////// Statements ///////////////////////////////
-  extern stmt new_stmt(raw_stmt_t s, segment loc);
-  extern stmt skip_stmt(segment loc);
-  extern stmt exp_stmt(exp e,segment loc);
-  extern stmt seq_stmt(stmt s1, stmt s2, segment loc);
-  extern stmt seq_stmts(list<stmt>, segment loc);
-  extern stmt return_stmt(exp_opt e,segment loc);
-  extern stmt ifthenelse_stmt(exp e,stmt s1,stmt s2,segment loc);
-  extern stmt while_stmt(exp e,stmt s,segment loc);
-  extern stmt break_stmt(segment loc);
-  extern stmt continue_stmt(segment loc);
-  extern stmt for_stmt(exp e1,exp e2,exp e3,stmt s, segment loc);
-  extern stmt switch_stmt(exp e, list<switch_clause>, segment loc);
-  extern stmt fallthru_stmt(list<exp> el, segment loc);
-  extern stmt decl_stmt(decl d, stmt s, segment loc); 
-  extern stmt declare_stmt(qvar, typ, exp_opt init, stmt, segment loc);
-  extern stmt cut_stmt(stmt s, segment loc);
-  extern stmt splice_stmt(stmt s, segment loc);
-  extern stmt label_stmt(var v, stmt s, segment loc);
-  extern stmt do_stmt(stmt s, exp e, segment loc);
-  extern stmt trycatch_stmt(stmt s, list<switch_clause> scs, segment loc);
-  extern stmt goto_stmt(var lab, segment loc);
-  extern stmt assign_stmt(exp e1, exp e2, segment loc);
+  extern stmt new_stmt(raw_stmt_t s, seg_t loc);
+  extern stmt skip_stmt(seg_t loc);
+  extern stmt exp_stmt(exp e,seg_t loc);
+  extern stmt seq_stmt(stmt s1, stmt s2, seg_t loc);
+  extern stmt seq_stmts(list<stmt>, seg_t loc);
+  extern stmt return_stmt(exp_opt e,seg_t loc);
+  extern stmt ifthenelse_stmt(exp e,stmt s1,stmt s2,seg_t loc);
+  extern stmt while_stmt(exp e,stmt s,seg_t loc);
+  extern stmt break_stmt(seg_t loc);
+  extern stmt continue_stmt(seg_t loc);
+  extern stmt for_stmt(exp e1,exp e2,exp e3,stmt s, seg_t loc);
+  extern stmt switch_stmt(exp e, list<switch_clause>, seg_t loc);
+  extern stmt fallthru_stmt(list<exp> el, seg_t loc);
+  extern stmt decl_stmt(decl d, stmt s, seg_t loc); 
+  extern stmt declare_stmt(qvar, typ, exp_opt init, stmt, seg_t loc);
+  extern stmt cut_stmt(stmt s, seg_t loc);
+  extern stmt splice_stmt(stmt s, seg_t loc);
+  extern stmt label_stmt(var v, stmt s, seg_t loc);
+  extern stmt do_stmt(stmt s, exp e, seg_t loc);
+  extern stmt trycatch_stmt(stmt s, list<switch_clause> scs, seg_t loc);
+  extern stmt goto_stmt(var lab, seg_t loc);
+  extern stmt assign_stmt(exp e1, exp e2, seg_t loc);
 
 /////////////////////////// Patterns //////////////////////////////
-  extern pat new_pat(raw_pat_t p, segment s);
+  extern pat new_pat(raw_pat_t p, seg_t s);
 
   ////////////////////////// Declarations ///////////////////////////
-  extern decl new_decl(raw_decl r, segment loc);
-  extern decl let_decl(pat p, Opt_t<typ> t_opt, exp e, segment loc);
+  extern decl new_decl(raw_decl r, seg_t loc);
+  extern decl let_decl(pat p, Opt_t<typ> t_opt, exp e, seg_t loc);
   extern vardecl new_vardecl(qvar x, typ t, exp_opt init);
   extern vardecl static_vardecl(qvar x, typ t, exp_opt init);
   extern decl struct_decl(scope s,Opt_t<typedef_name_t> n,list<tvar> ts,
 			  Opt_t<list<$(field_name,tqual,typ)@>> fs,
-			  segment loc);
+			  seg_t loc);
   extern decl enum_decl(scope s,Opt_t<typedef_name_t> n,list<tvar> ts,
-			Opt_t<list<enumfield>> fs,segment loc);
+			Opt_t<list<enumfield>> fs,seg_t loc);
   extern decl xenum_decl(scope s,typedef_name_t n,list<enumfield> fs,
-			 segment loc);
+			 seg_t loc);
 
   // return true if p is printf, sprintf, fprintf, scanf, fscanf, sscanf
   extern bool is_format_prim(primop p);

@@ -3,24 +3,24 @@ include ../Makefile.inc
 
 # Override this variable to use a bootstrapped compiler (you may want
 # an absolute path)
-CYCC=../bin/$(CYCCOMP)
+CYCC:=../bin/$(CYCCOMP)
 
-CYCLEX=../bin/cyclex.exe
+CYCLEX:=../bin/cyclex.exe
 
 # Override this prefix to check the compiler on itself w/o clobbering files
-OUT_PREFIX=
+OUT_PREFIX:=
 
-CFLAGS=-fwritable-strings -I..
-#CFLAGS=-pg -fwritable-strings -I..
-#CFLAGS=-O -fwritable-strings -I..
+CFLAGS:=-fwritable-strings -I..
+#CFLAGS:=-pg -fwritable-strings -I..
+#CFLAGS:=-O -fwritable-strings -I..
 
-CYC_LIBS=$(addsuffix .cyc, $(CYCLONE_LIBS))
+CYC_LIBS:=$(addsuffix .cyc, $(CYCLONE_LIBS))
 
 # uh, the precore_c.h building doesn't work with the ugly printer :-)
-CYC_FLAGS_PP = -tc -toc -pp
+CYC_FLAGS_PP := -tc -toc -pp
 
-#CYC_FLAGS= -tc -toc -pp
-CYC_FLAGS= -tc -toc -up
+#CYC_FLAGS:= -tc -toc -pp
+CYC_FLAGS:= -tc -toc -up
 
 all: $(OUT_PREFIX)$(CYCLIB)
 
@@ -57,34 +57,34 @@ clean:
 	rm -f *~ *.output *.stackdump
 
 # dependencies -- maintained by hand for now
-PRECORE_H   = precore.h
-CORE_H      = core.h       $(PRECORE_H)
-STDIO_H     = $(CORE_H)
-LIST_H      = list.h       $(CORE_H)
-ARRAY_H     = array.h      $(CORE_H) $(LIST_H)
-BUFFER_H    = buffer.h     $(CORE_H) $(STDIO_H)
-CHARACTER_H = character.h 
-SLOWDICT_H  = slowdict.h   $(CORE_H) $(LIST_H)
-DICT_H      = dict.h       $(CORE_H) $(LIST_H)
-FILENAME_H  = filename.h   $(CORE_H)
-FN_H        = fn.h         $(LIST_H)
-HASHTABLE_H = hashtable.h
-ID_H        = id.h         $(CORE_H) $(STDIO_H)
-LEXING_H    = lexing.h     $(CORE_H) $(STDIO_H)
-LINENO_H    = lineno.h     $(LIST_H)
-PP_H        = pp.h         $(CORE_H) $(LIST_H) $(STDIO_H)
-QUEUE_H     = queue.h
-REF_H       = ref.h
-ROPE_H      = rope.h       $(CORE_H) $(LIST_H)
-SET_H       = set.h        $(LIST_H)
-SPLAY_H     = splay.h      $(CORE_H) $(LIST_H)
-STRING_H    = string.h     $(CORE_H) $(LIST_H) $(STDIO_H)
-XARRAY_H    = xarray.h     $(CORE_H)
-ARG_H       = arg.h        $(CORE_H) $(LIST_H)
-POSITION_H  = position.h   $(CORE_H) $(LIST_H) $(LINENO_H)
-BITVEC_H    = bitvec.h     $(CORE_H) $(LIST_H) $(SET_H)    $(DICT_H)
-MATH_H      = math.h
-ASSERT_H    = assert.h     $(CORE_H)
+PRECORE_H   := precore.h
+CORE_H      := core.h       $(PRECORE_H)
+STDIO_H     := $(CORE_H)
+LIST_H      := list.h       $(CORE_H)
+ARRAY_H     := array.h      $(CORE_H) $(LIST_H)
+BUFFER_H    := buffer.h     $(CORE_H) $(STDIO_H)
+CHARACTER_H := character.h 
+SLOWDICT_H  := slowdict.h   $(CORE_H) $(LIST_H)
+DICT_H      := dict.h       $(CORE_H) $(LIST_H)
+FILENAME_H  := filename.h   $(CORE_H)
+FN_H        := fn.h         $(LIST_H)
+HASHTABLE_H := hashtable.h
+ID_H        := id.h         $(CORE_H) $(STDIO_H)
+LEXING_H    := lexing.h     $(CORE_H) $(STDIO_H)
+LINENO_H    := lineno.h     $(LIST_H)
+PP_H        := pp.h         $(CORE_H) $(LIST_H) $(STDIO_H)
+QUEUE_H     := queue.h
+REF_H       := ref.h
+ROPE_H      := rope.h       $(CORE_H) $(LIST_H)
+SET_H       := set.h        $(LIST_H)
+SPLAY_H     := splay.h      $(CORE_H) $(LIST_H)
+STRING_H    := string.h     $(CORE_H) $(LIST_H) $(STDIO_H)
+XARRAY_H    := xarray.h     $(CORE_H)
+ARG_H       := arg.h        $(CORE_H) $(LIST_H)
+POSITION_H  := position.h   $(CORE_H) $(LIST_H) $(LINENO_H)
+BITVEC_H    := bitvec.h     $(CORE_H) $(LIST_H) $(SET_H)    $(DICT_H)
+MATH_H      := math.h
+ASSERT_H    := assert.h     $(CORE_H)
 
 $(OUT_PREFIX)arg.c: $(ARG_H) $(STRING_H)
 $(OUT_PREFIX)bitvec.c: $(BITVEC_H)

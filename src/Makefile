@@ -7,25 +7,25 @@ include ../Makefile.inc
 
 # Override this variables to use a bootstrapped compiler (you may want
 # an absolute path)
-CYCC=../bin/$(CYCCOMP)
+CYCC:=../bin/$(CYCCOMP)
 
-#CYCLEX=../bin/cyclex.exe
-CYCLEX=../bin/cyclex.exe
-CYCBISON=../bin/cycbison.exe
+#CYCLEX:=../bin/cyclex.exe
+CYCLEX:=../bin/cyclex.exe
+CYCBISON:=../bin/cycbison.exe
 
 # Override this prefix to check the compiler on itself w/o clobbering files
 OUT_PREFIX=
 
-CFLAGS= -fwritable-strings -I.. 
-#CFLAGS=-pg -fwritable-strings -I.. 
-#CFLAGS=-O -fwritable-strings -I.. 
+CFLAGS:= -fwritable-strings -I.. 
+#CFLAGS:=-pg -fwritable-strings -I.. 
+#CFLAGS:=-O -fwritable-strings -I.. 
 
-CYC_SRCS=$(addsuffix .cyc, $(CYCLONE_SRCS))
+CYC_SRCS:=$(addsuffix .cyc, $(CYCLONE_SRCS))
 
-#CYC_FLAGS=-I ../lib -tc -toc -pp
-CYC_FLAGS=-I ../lib -tc -toc -up
+#CYC_FLAGS:=-I ../lib -tc -toc -pp
+CYC_FLAGS:=-I ../lib -tc -toc -up
 
-LIB=../lib/$(OUT_PREFIX)$(CYCLIB)
+LIB:=../lib/$(OUT_PREFIX)$(CYCLIB)
 
 all: $(OUT_PREFIX)$(CYCCOMP)
 
@@ -62,21 +62,21 @@ clean:
 	rm -f *~ *.output *.stackdump 
 
 # We do not bother to include library dependencies, but we could.
-ABSYN_H        = absyn.h
-PARSE_TAB_H    = parse_tab.h
-PARSE_H        = parse.h        $(ABSYN_H) $(PARSE_TAB_H)
-ABSYNPP_H      = absynpp.h      $(ABSYN_H)
-ABSYNDUMP_H    = absyndump.h    $(ABSYN_H)
-TCENV_H        = tcenv.h        $(ABSYN_H)
-TCUTIL_H       = tcutil.h       $(TCENV_H)
-TCSTMT_H       = tcstmt.h       $(ABSYN_H) $(TCENV_H)
-TCPAT_H        = tcpat.h        $(ABSYN_H) $(TCENV_H)
-FORMATSTR_H    = formatstr.h    $(ABSYN_H)
-EVEXP_H        = evexp.h        $(ABSYN_H)
-TCEXP_H        = tcexp.h        $(ABSYN_H) $(TCENV_H)
-TC_H           = tc.h           $(ABSYN_H) $(TCENV_H)
-CONTROL_FLOW_H = control_flow.h $(ABSYN_H)
-TOC_H          = toc.h          $(ABSYN_H)
+ABSYN_H        := absyn.h
+PARSE_TAB_H    := parse_tab.h
+PARSE_H        := parse.h        $(ABSYN_H) $(PARSE_TAB_H)
+ABSYNPP_H      := absynpp.h      $(ABSYN_H)
+ABSYNDUMP_H    := absyndump.h    $(ABSYN_H)
+TCENV_H        := tcenv.h        $(ABSYN_H)
+TCUTIL_H       := tcutil.h       $(TCENV_H)
+TCSTMT_H       := tcstmt.h       $(ABSYN_H) $(TCENV_H)
+TCPAT_H        := tcpat.h        $(ABSYN_H) $(TCENV_H)
+FORMATSTR_H    := formatstr.h    $(ABSYN_H)
+EVEXP_H        := evexp.h        $(ABSYN_H)
+TCEXP_H        := tcexp.h        $(ABSYN_H) $(TCENV_H)
+TC_H           := tc.h           $(ABSYN_H) $(TCENV_H)
+CONTROL_FLOW_H := control_flow.h $(ABSYN_H)
+TOC_H          := toc.h          $(ABSYN_H)
 
 $(OUT_PREFIX)absyn.c: $(ABSYN_H)
 $(OUT_PREFIX)parse_tab.c: $(ABSYN_H)

@@ -61,6 +61,7 @@ static scope scope_redecl_okay<`a>(scope s1, Opt_t<`a> fields1,
 static void field_redecl_okay(enumfield f1, enumfield f2,
 			      list<$(tvar,typ)@> inst, tenv te,
 			      string t, stringptr v) {
+
   segment loc = f1->loc;
   // must have same name
   if (String::zstrptrcmp((*f1->name)[1],(*f2->name)[1]) != 0)

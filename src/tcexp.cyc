@@ -95,7 +95,7 @@ static void resolve_unknown_fn(tenv te, exp e, exp e1, list<exp> es) {
 }
 
 static void
-resolve_unresolved_mem<`r>(tenv te, segment loc, typ *`r topt, exp e,
+resolve_unresolved_mem<`r>(tenv te, seg_t loc, typ *`r topt, exp e,
 			   list<$(list<designator>,exp)@> des) {
   // NOTE: must always bang e->r or caller will loop!
   if (topt == null) {
@@ -142,7 +142,7 @@ void tcTest(tenv te, exp e, string msg_part) {
 }
 
 // constants
-static typ tcConst<`r>(tenv te, segment loc, typ *`r topt, cnst_t c, exp e) {
+static typ tcConst<`r>(tenv te, seg_t loc, typ *`r topt, cnst_t c, exp e) {
   typ t;
   switch (c) {
   case Char_c(sn,_):     t = (sn == Unsigned) ? uchar_t  : schar_t;  break;
@@ -176,9 +176,9 @@ static typ tcConst<`r>(tenv te, segment loc, typ *`r topt, cnst_t c, exp e) {
     break;
   case String_c(heap_allocate,s):
     // FIX: deal with topt being pointer???
-    int len = s.size; // includes the trailing 0 character
-    let r   = Const_e(Int_c(Unsigned,len));
-    exp elen= new_exp(r,loc);
+    int len  = s.size; // includes the trailing 0 character
+    let r    = Const_e(Int_c(Unsigned,len));
+    exp elen = new_exp(r,loc);
     elen->topt = &Opt(uint_t);
     // The default is to treat a string as if it's heap allocated
     // Note that such strings are shared...
@@ -195,7 +195,7 @@ static typ tcConst<`r>(tenv te, segment loc, typ *`r topt, cnst_t c, exp e) {
 	if (len != len2)
 	  terr(loc,xprintf("string has length %d instead of %d",len,len2));
 	return *topt;
-      case PointerType(PtrInfo{telt,trgn,nullable,tq,b}):
+      case PointerType(PtrInfo(telt,trgn,nullable,tq,b)):
 	if (!unify(telt,uchar_t))
 	  terr(loc,xprintf("string cannot be used as %s pointer",
 			   typ2string(telt)));
@@ -225,8 +225,8 @@ static typ tcConst<`r>(tenv te, segment loc, typ *`r topt, cnst_t c, exp e) {
     break;
   case Null_c:
     // FIX: take advantage of topt
-    t = PointerType(PtrInfo{wildtyp(), new_evar(RgnKind), new_conref(true),
-			    empty_tqual(), empty_conref()});
+    t = PointerType(PtrInfo(wildtyp(), new_evar(RgnKind), new_conref(true),
+			    empty_tqual(), empty_conref()));
     break;
   }
   return t;
@@ -298,7 +298,7 @@ static typ tcUnPrimop<`r>(tenv te, segment loc, typ *`r topt, primop p, exp e){
     switch (t) {
     case ArrayType(_,_,_):
       break;
-    case PointerType(PtrInfo{_,_,_,_,_}):
+    case PointerType(PtrInfo(_,_,_,_,_)):
       break;
     default:
       terr(loc,xprintf("size requires pointer or array type, not %s",
@@ -594,11 +594,17 @@ static typ tcFnCall<`r>(tenv te,segment loc,typ *`r topt,exp e,list<exp> es){
       // information while type-checking the arguments.
       if (topt != null) unify(res_typ,*topt);
       // check that each argument has the right type or can be coerced to it
-      // FIX: need to check that any arguments are accessible!
+      // FIX: need to deal with null!!!
       while ((es != null) && (args_info != null)) {
         exp e1 = es->hd;
         typ t2 = (*args_info->hd)[2];
 	tcExp(te, &t2, e1);
+	/*	switch(e1->topt->v) {
+	case PointerType(PtrInfo{_,r,_,_,_}):
+	  check_rgn_accessible(te,loc,r);
+	  break;
+	default: break;
+	}*/
         if (!coerce_arg(te,e1,t2))
           terr(loc,
                xprintf("actual argument has type %s but formal has type %s",

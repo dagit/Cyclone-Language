@@ -558,7 +558,7 @@ bool silent_castable(tenv te, segment loc, typ t1, typ t2) {
 	// JGM:  the following would be legal, but perhaps we don't
 	// want to allow it to make porting easier -- I'm afraid
 	// that writing t *x = y, where y is an array will go through
-	// to easily...
+	// too easily...
 	//case $(Eq_constr(Upper_b(e1)),Eq_constr(Upper_b(e2))):
 	//okay = okay && (Evexp::eval_const_uint_exp(e1) >= 
 	//		Evexp::eval_const_uint_exp(e2)); 

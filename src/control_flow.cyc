@@ -100,7 +100,7 @@ xenum StmtAnnot { CFAnnot(cf_stmt_annot_t); };
 void set_encloser(stmt enclosee, stmt encloser) {
   enclosee->annot = CFAnnot(CFStmtAnnot(encloser, 0, empty_flow()));
 }
-cf_stmt_annot_t @ get_stmt_annot(stmt s) {
+static cf_stmt_annot_t @ get_stmt_annot(stmt s) {
   switch(s->annot) {
   case CFAnnot(*x): return x;
   default: throw Impossible("ControlFlow -- wrong stmt annotation");
@@ -160,11 +160,11 @@ static void update_flow(stmt s, flow_info_t new_flow) {
   }
 }
 
-extern flow_info_t cf_check_stmt(flow_info_t, stmt);
-extern cfexpsyn_t  cf_check_exp (flow_info_t, exp);
+static flow_info_t cf_check_stmt(flow_info_t, stmt);
+static cfexpsyn_t  cf_check_exp (flow_info_t, exp);
 
 // Note how monotonicity (things only become defined) helps us.
-cfexpsyn_t cf_check_explist_unordered(flow_info_t env, list<exp> es) {
+static cfexpsyn_t cf_check_explist_unordered(flow_info_t env, list<exp> es) {
   cfexpsyn_t accum = CFExpSyn(env,env);
   // undefined eval order means we check each exp under env
   for(; es != null; es = es->tl)
@@ -172,7 +172,7 @@ cfexpsyn_t cf_check_explist_unordered(flow_info_t env, list<exp> es) {
   return accum;
 }
 
-cfexpsyn_t cf_check_exp(flow_info_t env, exp e0) {
+static cfexpsyn_t cf_check_exp(flow_info_t env, exp e0) {
   switch(e0->r) {
   case Const_e(Int_c(Signed,0)): return CFExpSyn(empty_flow(), env);
   case Const_e(Int_c(Signed,_)): return CFExpSyn(env, empty_flow());
@@ -192,7 +192,7 @@ cfexpsyn_t cf_check_exp(flow_info_t env, exp e0) {
   case AssignOp_e(&Exp(_,Var_e(_,Local_b(vd)),_),null,e2):
     // notice we check e2 before initializing the var
     // also notice the primop must be null
-    _ flow = remove_unassigned(expsynth_to_flow(cf_check_exp(env,e2)), vd);
+    let flow = remove_unassigned(expsynth_to_flow(cf_check_exp(env,e2)), vd);
     return CFExpSyn(flow,flow);
   case AssignOp_e(e1,_,e2):
     // Perhaps C guarantees left before right, in which case we're
@@ -201,9 +201,9 @@ cfexpsyn_t cf_check_exp(flow_info_t env, exp e0) {
 			 cf_check_exp(env,e2));
 
   case Conditional_e(e1,e2,e3):
-    _ syn1 = cf_check_exp(env, e1);
-    _ syn2 = cf_check_exp(syn1.when_true,  e2);
-    _ syn3 = cf_check_exp(syn1.when_false, e3);
+    let syn1 = cf_check_exp(env, e1);
+    let syn2 = cf_check_exp(syn1.when_true,  e2);
+    let syn3 = cf_check_exp(syn1.when_false, e3);
     return CFExpSyn(merge_flow(syn2.when_true,  syn3.when_true),
 		    merge_flow(syn2.when_false, syn3.when_false));
 
@@ -249,7 +249,7 @@ cfexpsyn_t cf_check_exp(flow_info_t env, exp e0) {
     // Note that e2 does not execute when e1 evaluates to 0.
     // Monotonicity is why we can ignore the result of e2.
   case Comprehension_e(_,e1,e2): 
-    _ syn1 = cf_check_exp(env,e1);
+    let syn1 = cf_check_exp(env,e1);
     cf_check_exp(expsynth_to_flow(syn1),e2);
     return syn1;
 
@@ -263,7 +263,7 @@ cfexpsyn_t cf_check_exp(flow_info_t env, exp e0) {
   // written with SeqExp_e (and all of it if you allow declarations to
   // be hoisted), I won't bother.
   case StmtExp_e(s):
-    _ syn = cf_check_stmt(env, s);
+    let syn = cf_check_stmt(env, s);
     return CFExpSyn(syn,syn); 
 
   default: throw Impossible("ControlFlow::cf_check_exp -- bad exp syntax"
@@ -274,7 +274,7 @@ cfexpsyn_t cf_check_exp(flow_info_t env, exp e0) {
 // true means the statement might fall-through
 // The cute hack is adding a variable that can't be assigned to.
 // That way, we can distinguish all-real-varibles-assigned from a jump.
-bool cf_check_stmt_ft(flow_info_t env, stmt s) {
+static bool cf_check_stmt_ft(flow_info_t env, stmt s) {
   return !less_than_flow(cf_check_stmt(add_unassigned(env,bogus_vardecl), s),
 			 empty_flow());
 }
@@ -282,13 +282,12 @@ bool cf_check_stmt_ft(flow_info_t env, stmt s) {
 // NOTE: all control-flow to below a switch is currently done
 // via break, i.e. non-local-preds. That is why we seem to ignore
 // the synth from the clauses.
-void cf_check_switch_clauses(flow_info_t env, list<switch_clause> scs) {
+static void cf_check_switch_clauses(flow_info_t env, list<switch_clause> scs) {
   for(; scs != null; scs = scs->tl) {
     let &Switch_clause(_,_,where_opt,body,_) = scs->hd;
-    let body_env = env;
     if(where_opt!=null) 
-      body_env = expsynth_to_flow(cf_check_exp(env,(exp)where_opt));
-    if(cf_check_stmt_ft(body_env,body))
+      env = expsynth_to_flow(cf_check_exp(env,(exp)where_opt));
+    if(cf_check_stmt_ft(env,body))
       terr(body->loc, "switch clause may implicitly fallthru");
   }
 }
@@ -299,7 +298,7 @@ void cf_check_switch_clauses(flow_info_t env, list<switch_clause> scs) {
 // NOTE: On a non-local jump, we must iterate again whenever we change
 //       the destination's environment and the destination has already been
 //       traversed on the current pass. 
-flow_info_t cf_check_stmt(flow_info_t env, stmt s) {
+static flow_info_t cf_check_stmt(flow_info_t env, stmt s) {
 
   env = pre_stmt_check(env,s);
 
@@ -321,7 +320,7 @@ flow_info_t cf_check_stmt(flow_info_t env, stmt s) {
     return syn_e.when_false;
   case Do_s(body,$(e,cont)):
     let syn_b = cf_check_stmt(env,body);
-    let syn_e = cf_check_exp(pre_stmt_check(syn_b,cont),e);
+    _ syn_e = cf_check_exp(pre_stmt_check(syn_b,cont),e);
     update_flow(body, syn_e.when_true);
     return syn_e.when_false;
   case For_s(e1,$(e2,guard),$(e3,cont),body):
@@ -331,7 +330,6 @@ flow_info_t cf_check_stmt(flow_info_t env, stmt s) {
     let syn_e3 = expsynth_to_flow(cf_check_exp(pre_stmt_check(syn_b,cont),e3));
     update_flow(guard, syn_e3);
     return syn_e2.when_false;
-
   case Goto_s(_,dest):  
     // must make sure not into scope 
     // doesn't change, so can just do the first time.
@@ -392,7 +390,7 @@ flow_info_t cf_check_stmt(flow_info_t env, stmt s) {
   }
 }
 
-void cf_check_fun(fndecl fd) {
+static void cf_check_fun(fndecl fd) {
   iterate_cf_check = true;
   iteration_num    = 0;
   while(iterate_cf_check) {

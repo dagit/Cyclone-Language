@@ -149,7 +149,7 @@ unsigned int szof(typ t, segment loc) {
       s += szof((*tqs->hd)[1],loc);
     return s;
   case RgnHandleType(_): return 4u;
-  case StructType(tdnopt,ts,sdp):
+  case StructType(_,ts,sdp):
     // FIX: we need to insert padding to ensure alignment
     if(sdp == null)
       return Tcutil::impos("szof on unchecked StructType");
@@ -200,8 +200,8 @@ cnst_t eval_const_unprimop(primop p,exp e) {
 
 // FIX: should allow pointer-comparison of non-integers (eg. null==null)
 cnst_t eval_const_binprimop(primop p,exp e1,exp e2) {
-  _ cn1 = promote_const(eval_const_exp(e1));
-  _ cn2 = promote_const(eval_const_exp(e2));
+  let cn1 = promote_const(eval_const_exp(e1));
+  let cn2 = promote_const(eval_const_exp(e2));
   // FIX: See above, do non-integer possibilities here!
   sign s1, s2;
   int i1, i2;
