@@ -5,7 +5,7 @@ CFLAGS=-fwritable-strings -include ../../cyc-lib/include/cyc_include.h
 #CFLAGS=-g -fwritable-strings -include ../../cyc-lib/include/cyc_include.h
 #CFLAGS=-O -fwritable-strings -include ../../cyc-lib/include/cyc_include.h
 
-PROG=cyclone.exe
+PROG=cyclone$(EXE)
 
 all: $(PROG)
 

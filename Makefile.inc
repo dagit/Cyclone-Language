@@ -1,3 +1,4 @@
+CC=gcc
 
 ifdef MS
 O := obj
