@@ -147,11 +147,11 @@ first because we have already explained their use informally.
   \item Bindings introduced: none
   \end{itemize}
   
-\item \textbf{\texttt{null} constant patterns}
+\item \textbf{\texttt{NULL} constant patterns}
   \begin{itemize}
-  \item Syntax: \texttt{null}
+  \item Syntax: \texttt{NULL}
   \item Types for match: nullable pointer types, including \texttt{?} types
-  \item Expressions matched: \texttt{null}
+  \item Expressions matched: \texttt{NULL}
   \item Bindings introduced: none
   \end{itemize}
   
@@ -246,8 +246,10 @@ extension of C's switch statement.
 \item \emph{You cannot implicitly ``fall-through'' to the next case}.
   Instead, you must use the \texttt{fallthru;} statement, which has
   the effect of transferring control to the beginning of the next
-  case.  Even the last case may not implicitly ``fall-through.''
-  \texttt{fallthru} is discussed more below.
+  case.  There are two exceptions to this restriction:  First, adjacent
+  cases with no intervening statement do not require a fall-through.
+  Second, the last case of a switch does not require a fall-through
+  or break.
 \item The cases in a switch \emph{must be exhaustive}; it is a
   compile-time error if the compiler determines that it could be that
   no case matches.  The rules for what the compiler determines are
@@ -456,6 +458,7 @@ the third case is redundant:
 \end{verbatim}
 
 \paragraph{Rules for No Implicit Fall-Through}
+
 As mentioned several times now, Cyclone differs from C in that a case
 body may not implicitly fall-through to the next case.  It is a
 compile-time error if such a fall-through might occur.  Because the
