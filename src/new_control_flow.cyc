@@ -2509,7 +2509,19 @@ static flow_t<`r> unconsume_pat_vars(analenv_t<`r> env,
     // now see if [dest] is outside of [pat_stmt].  We do this
     // by continuing to follow the list of enclosing statements
     // until we either see it, or reach the end of the function.
+//     DEBUG_PRINT("unconsume_pat_vars: pat_stmt=(%x) %s\n  dest=(%x) %s\n",
+// 		(unsigned int)pat_stmt, stmt2string(pat_stmt),
+// 		(unsigned int)dest, stmt2string(dest));
+//     if (roots != NULL) {
+//       DEBUG_PRINT("  first root=");
+//       DEBUG_PRINT_F(print_place,roots->hd);
+//       DEBUG_PRINT("\n");
+//     }
+//     if (es != NULL)
+//       DEBUG_PRINT("  first exp=%s\n",exp2string(es->hd));
     let curr_encloser = get_stmt_annot((stmt_t)dest)->encloser;
+//     DEBUG_PRINT("unconsume_pat_vars: first encloser=(%x) %s\n",
+// 		(unsigned int)curr_encloser,stmt2string(curr_encloser));
     while(curr_encloser != pat_stmt) {
       let next_encloser = get_stmt_annot(curr_encloser)->encloser;
       if(next_encloser == curr_encloser) { // function body is own encloser
@@ -2520,8 +2532,12 @@ static flow_t<`r> unconsume_pat_vars(analenv_t<`r> env,
 	break;
       }
       curr_encloser = next_encloser;
+//       DEBUG_PRINT("unconsume_pat_vars: curr encloser=(%x) %s\n",
+// 		  (unsigned int)curr_encloser,
+// 		  stmt2string(curr_encloser));
     }
   }
+//   DEBUG_PRINT("unconsume_pat_vars: exiting\n");
   return inflow;
 } 
 
@@ -2718,7 +2734,7 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env,
     inflow = initialize_pat_vars(fenv,env,inflow,vds,roots != NULL,loc,e->loc);
     let old_unique_pat_vars = env->unique_pat_vars;
     env->unique_pat_vars = 
-      rnew(env->r) List(rnew (env->r) $(false,s1,roots,es),old_unique_pat_vars);
+      rnew(env->r) List(rnew (env->r) $(false,s,roots,es),old_unique_pat_vars);
     DEBUG_PRINT("flow for let body is {\n");
     DEBUG_PRINT_F(print_flow,inflow);
     DEBUG_PRINT("}\n");
@@ -2782,7 +2798,7 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env,
     // process the statement
     let old_unique_pat_vars = env->unique_pat_vars;
     env->unique_pat_vars = 
-      rnew(env->r) List(rnew (env->r) $(true,s1,roots,es),old_unique_pat_vars);
+      rnew(env->r) List(rnew (env->r) $(true,s,roots,es),old_unique_pat_vars);
     DEBUG_PRINT("flow for open body is {\n");
     DEBUG_PRINT_F(print_flow,f);
     DEBUG_PRINT("}\n");

@@ -12,6 +12,8 @@ struct MyContainer {
 
 struct MyContainer *`U global = NULL;
 
+void bar();
+
 int main() {
   // Create a new dynamic region
   let k = new_rckey();
@@ -57,6 +59,32 @@ int main() {
   // Finally, destroy the key and the region
   free_rckey(key2);
 
+  bar();
+
   return 0;
+}
+
+using Core;
+
+void foo(int *x) {
+  throw &Not_found_val;
+}
+
+// make sure we properly unconsume within a nested region block
+// exited via a break;
+void bar() {
+  let NewDynamicRegion{<`r> key} = new_ukey();
+  bool freeit = false;
+  { region r = open(key);
+    try {
+      foo(rnew(r) 10);
+    } catch { case ex: freeit = true; break; }
+  }
+  if (freeit) { free_ukey(key); return; }
+  printf("oops!\n");
+  { region r2 = open(key);
+    let x = rnew(r2) 10;
+  }
+  free_ukey(key);
 }
 
