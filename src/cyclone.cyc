@@ -98,9 +98,16 @@ static void set_save_temps() {
   add_ccarg("-save-temps");
 }
 
+static bool produce_dependencies = false;
 static void set_produce_dependencies() {
   stop_after_cpp_r = true;
+  produce_dependencies = true;
   add_cpparg("-M");
+}
+
+static string_t *dependencies_target = null;
+static void set_dependencies_target(string_t s) {
+  dependencies_target = new s;
 }
 
 static void set_stop_after_objectfile() {
@@ -357,14 +364,34 @@ void process_file(string_t filename) {
   string_t ofile_string;
   if (stop_after_cpp_r) {
     if (output_file != null)
-      ofile_string = xprintf(" -o %s", *output_file);
+      ofile_string = xprintf(" > %s", *output_file);
     else // output to standard out
       ofile_string = "";
   }
-  else ofile_string = xprintf(" -o %s", preprocfile);
+  else ofile_string = xprintf(" > %s", preprocfile);
 
-  let cmd = xprintf("gcc -x c -E -U__GNUC__ -nostdinc%s%s%s %s",
-                    cppargs_string, stdinc_string, ofile_string, filename);
+  string_t fixup_string;
+  if (produce_dependencies)
+    // Both of the below hacks can probably be eliminated when we move
+    // to gcc 3.0
+    if (dependencies_target == null)
+      // Hack to fix up dependency output of gcc 2.95: the target of
+      // the dependency produced by cpp will be something like foo.cyc.o,
+      // but we want it to be foo.o.
+      fixup_string = " | sed 's/^\\(.*\\)\\.cyc\\.o:/\\1.o:/'";
+    else {
+      // Hack to handle the -MT flag, which is not supported in gcc 2.95
+      // Note, we should probably make sure any special characters in
+      // *dependencies_target are escaped, but WE DON'T.
+      fixup_string =
+        xprintf(" | sed 's/^.*\\.cyc\\.o:/%s:/'",
+                *dependencies_target);
+    }
+  else fixup_string = "";
+
+  let cmd = xprintf("gcc -x c -E -U__GNUC__ -nostdinc%s%s %s%s%s",
+                    cppargs_string, stdinc_string, filename,
+                    fixup_string, ofile_string);
 
   if (v_r) fprintf(stderr,"%s\n",cmd);
   if (system(string_to_Cstring(cmd)) != 0) {
@@ -519,6 +546,8 @@ int main(int argc, string_t ? argv) {
                   "   Library file"),
          new $("-c",new Unit_spec(set_stop_after_objectfile),
                  "    Produce object file"),
+         new $("-s",new Flag_spec(add_ccarg),
+                 "    Remove all symbol table and relocation info from executable"),
          new $("-O",new Flag_spec(add_ccarg),
                  "    Optimize"),
          new $("-O2",new Flag_spec(add_ccarg),
@@ -535,6 +564,10 @@ int main(int argc, string_t ? argv) {
                  "    Stop after producing assembly code"),
          new $("-M",new Unit_spec(set_produce_dependencies),
                  "    Produce dependencies"),
+         new $("-MG",new Flag_spec(add_cpparg),
+                 "    When producing dependencies assume missing files are generated"),
+         new $("-MT",new String_spec(set_dependencies_target),
+                 "   Give target for dependencies"),
          new $("-E",new Set_spec(&stop_after_cpp_r),
                  "    Stop after preprocessing"),
          new $("-parseonly",new Set_spec(&parseonly_r),

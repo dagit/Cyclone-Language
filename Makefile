@@ -58,6 +58,7 @@ diff: cyclone_src
 	for i in $(CYCLONE_H); do (diff include/$$i lib/$$i) done
 	diff bin/genfiles/lib/$(C_RUNTIME) lib/$(C_RUNTIME)
 	diff bin/genfiles/lib/precore_c.h lib/precore_c.h
+	diff bin/cyc-lib/include/cyc_include.h lib/include/cyc_include.h
 
 # This target compares the C files in bin/genfiles to those in src
 # Lack of difference means running the update would have no real effect.
@@ -67,6 +68,7 @@ cmp:
 	@for i in $(CYCLONE_H); do (cmp -s include/$$i lib/$$i || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX lib/$$i CHANGED) done
 	@cmp -s bin/genfiles/lib/$(C_RUNTIME) lib/$(C_RUNTIME) || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX lib/$(C_RUNTIME) CHANGED
 	@cmp -s bin/genfiles/lib/precore_c.h lib/precore_c.h || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX lib/precore_c.h CHANGED
+	@cmp -s bin/cyc-lib/include/cyc_include.h lib/include/cyc_include.h || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX cyc-lib/include/cyc_include.h CHANGED
 
 # This target updates what is in bin/genfiles and include.
 # It would be "dangerous"
@@ -80,7 +82,8 @@ update: cyclone_src
 	@for i in $(C_LIBS); do (cmp -s lib/$$i bin/genfiles/lib/$$i || (echo UPDATING lib/$$i; cp lib/$$i bin/genfiles/lib/$$i)) done
 	@for i in $(CYCLONE_H); do (cmp -s lib/$$i include/$$i || (echo UPDATING lib/$$i; cp lib/$$i include/$$i)) done
 	@cmp -s lib/$(C_RUNTIME) bin/genfiles/lib/$(C_RUNTIME) || (echo UPDATING lib/$(C_RUNTIME); cp lib/$(C_RUNTIME) bin/genfiles/lib/$(C_RUNTIME))
-	@cmp -s lib/precore_c.h  bin/genfiles/lib/precore_c.h || (echo UPDATING lib/precore_c.h; cp lib/precore_c.h bin/genfiles/lib/precore_c.h)
+	@cmp -s lib/precore_c.h bin/genfiles/lib/precore_c.h || (echo UPDATING lib/precore_c.h; cp lib/precore_c.h bin/genfiles/lib/precore_c.h)
+	@cmp -s lib/include/cyc_include.h bin/cyc-lib/include/cyc_include.h || (echo UPDATING cyc-lib/include/cyc_include.h; cp lib/include/cyc_include.h bin/cyc-lib/include/cyc_include.h)
 
 test:
 	$(MAKE) -C tests CYCC=$(CYCC) OUT_PREFIX=$(OUT_PREFIX)
