@@ -63,10 +63,6 @@ tunion Nmspace abs_ns = &abs_ns_value;
 struct Tqual mt_tq_v = Tqual(false,false,false);
 tqual_t mt_tq = &mt_tq_v;
 
-// set to true to force null checking in generated code -- default to
-// false for now to simplify the output and make it more readable.
-bool check_for_null = false;
-
 // errors and reporting
 xtunion exn {Toc_Unimplemented};
 xtunion exn {Toc_Impossible};
@@ -120,7 +116,6 @@ static stringptr Cyc_new_string_sp = (&Cyc_new_string_string);
 
 // return true if t is a nullable pointer type i.e., *
 static bool is_nullable(type_t t) {
-  if (!check_for_null) return false;
   switch (compress(t)) {
   case &PointerType(PtrInfo{_,_,b,_,_}):
     switch (compress_conref(b)->v) {
@@ -129,13 +124,6 @@ static bool is_nullable(type_t t) {
     }
   default: toc_impos("is_nullable"); return false;
   }
-}
-static bool really_is_nullable(type_t t) {
-  bool b = check_for_null;
-  check_for_null = true;
-  bool ans = is_nullable(t);
-  check_for_null = b;
-  return ans;
 }
 
 static qvar_t collapse_qvar_tag(qvar_t x,string tag) {
@@ -1089,16 +1077,20 @@ static void lvalue_assign_stmt(stmt_t s,list_t<field_name_t> fs,
 
 // arr and ind must already be translated to C. sz must be constant
 // elt_typ must be before translation to C.
-static exp_t known_size_subscript(exp_t arr, exp_t ind, exp_t esz, 
-				type_t elt_typ, tqual_t tq,
-				bool take_address) {
+static exp_t known_size_subscript(exp_t arr, exp_t ind, bool possibly_null,
+                                  exp_t esz, type_t elt_typ, tqual_t tq,
+                                  bool take_address) {
   // ({elt_typ *a=arr; uint i=ind; if (i >= sz) throw(ArrayIndex); a[i]})
-  // but if take_address is true, end with &a[i]
+  // but if possibly_null replace test with (a == null || i >= sz)
+  // and if take_address is true, end with &a[i]
   unsigned int sz = Evexp::eval_const_uint_exp(esz);
   qvar_t a = temp_var();
   qvar_t i = temp_var();
   type_t ta = cstar_typ(typ_to_c(elt_typ), tq);
   exp_t e3 = prim2_exp(Gte, var_exp(i,DL), uint_exp(sz,DL), DL);
+  if (possibly_null)
+    e3 = or_exp(eq_exp(var_exp(a,DL), signed_int_exp(0,DL),DL),
+                new_exp(e3->r,DL),DL);
   // FIX:  should throw array out of bounds exception
   exp_t  e4 = newthrow_exp(null_pointer_exn_exp(DL));
   stmt_t s5 = exp_stmt(e4,DL);
@@ -1576,14 +1568,16 @@ static void exp_to_c(env_t nv, exp_t e) {
   case &Sizeoftyp_e(t): e->r = new Sizeoftyp_e(typ_to_c_array(t)); break;
   case &Sizeofexp_e(e1): exp_to_c(nv,e1); break;
   case &Deref_e(e1):
+    type_t e1_typ = compress(e1->topt->v);
     exp_to_c(nv, e1);
-    switch (compress(e1->topt->v)) {
+    switch (e1_typ) {
     case &PointerType(PtrInfo{t2,rgn,cr,tq,b}):
       switch (conref_val(b)) {
       case Unknown_b:
 	// ({ tagged_ptr x = e1;
 	//    t2 *a = x.curr;
-        //    if (a < x.base || a >= x.last_plus_one) throw(ArrayIndex);
+        //    if (x.base == 0 || a < x.base || a >= x.last_plus_one) 
+        //      throw(ArrayIndex);
         //    *a; })
 	qvar_t x = temp_var();
 	qvar_t a = temp_var();
@@ -1592,11 +1586,13 @@ static void exp_to_c(env_t nv, exp_t e) {
 	type_t tx  = strct(n);
 	type_t ta2 = cstar_typ(ta1,tq);
 	exp_t test_exp = 
+          or_exp(eq_exp(structmember_exp(var_exp(x,DL),base_sp,DL),
+                        signed_int_exp(0,DL),DL),
 	  or_exp(lt_exp(var_exp(a,DL),
 			structmember_exp(var_exp(x,DL),base_sp,DL),DL),
 		 gte_exp(var_exp(a,DL),
 			 structmember_exp(var_exp(x,DL),last_plus_one_sp,DL),
-			 DL),DL);
+			 DL),DL),DL);
 	exp_t a_init = structmember_exp(var_exp(x,DL),curr_sp,DL);
 	// FIX:  should throw array out of bounds exception
 	stmt_t s5 = exp_stmt(deref_exp(var_exp(a,DL),DL),DL);
@@ -1606,12 +1602,11 @@ static void exp_to_c(env_t nv, exp_t e) {
 	stmt_t s1 = declare_stmt(a,ta2,a_init,s2,DL);
 	e->r = stmt_exp(declare_stmt(x,tx,e1,s1,DL),DL)->r;
         break;
-      case &Upper_b(e):
-	bool nullable = is_nullable(e1->topt->v);
-	if (nullable) {
+      case &Upper_b(_):
+	if (is_nullable(e1_typ)) {
 	  // ({t x=e1; if (x == null) throw(NullPointer); *x;})
 	  qvar_t x  = temp_var();
-	  type_t  tx = typ_to_c(e1->topt->v);
+	  type_t tx = typ_to_c(e1->topt->v);
 	  exp_t  e2 = eq_exp(var_exp(x,DL),signed_int_exp(0,DL),DL);
 	  exp_t  e3 = newthrow_exp(null_pointer_exn_exp(DL));
 	  stmt_t s1 = ifthenelse_stmt(e2,exp_stmt(e3,DL),skip_stmt(DL),DL);
@@ -1666,17 +1661,24 @@ static void exp_to_c(env_t nv, exp_t e) {
       // is this possible (was it not promoted by the type-checker)
       if (esz == null) 
         toc_impos("exp_to_c: Subscript_e array type bound null");
-      e->r = known_size_subscript(e1,e2,(exp_t)esz,ta,tq,false)->r;
+      e->r = known_size_subscript(e1,e2,false,(exp_t)esz,ta,tq,false)->r;
       break;
     case &PointerType(PtrInfo{ta,rgn,bcr,tq,b}):
       switch (conref_val(b)) {
       case &Upper_b(esz):
-	e->r = known_size_subscript(e1,e2,esz,ta,tq,false)->r;
+        // FIX: need to check for null here
+        bool possibly_null = true;
+        switch (compress_conref(bcr)->v) {
+        case &Eq_constr(b): possibly_null = b; break;
+        default: possibly_null = false; break;
+        }
+	e->r = known_size_subscript(e1,e2,possibly_null,esz,ta,tq,false)->r;
 	break;
       case Unknown_b:
 	// ({tagptr x=e1; 
 	//   ta *a = x.curr + e2;
-        //   if (a < x.base || a >= x.last_plus_one) throw(ArrayIndex);
+        //   if (x.base == 0 || a < x.base || a >= x.last_plus_one) 
+        //      throw(ArrayIndex);
         //   *a;})
 	qvar_t x = temp_var();
 	qvar_t i = temp_var();
@@ -1686,11 +1688,13 @@ static void exp_to_c(env_t nv, exp_t e) {
 	type_t tx  = strct(n);
 	type_t ta2 = cstar_typ(ta1,tq);
 	exp_t test_exp = 
+          or_exp(eq_exp(structmember_exp(var_exp(x,DL),base_sp,DL),
+                        signed_int_exp(0,DL),DL),
 	  or_exp(lt_exp(var_exp(a,DL),
 			structmember_exp(var_exp(x,DL),base_sp,DL),DL),
 		 gte_exp(var_exp(a,DL),
 			 structmember_exp(var_exp(x,DL),last_plus_one_sp,DL),
-			 DL),DL);
+			 DL),DL),DL);
 	exp_t a_init = add_exp(structmember_exp(var_exp(x,DL),curr_sp,DL),e2,DL);
 		  
 	// FIX:  should throw array out of bounds exception
@@ -2148,7 +2152,7 @@ xlate_pat(env_t nv,type_t t,exp_t r,exp_t path,pat_t p,var_t succ_lab,var_t fail
     decls = result[1];
     let s2 = result[2];
     let s3 = seq_stmt(assign_stmt(var_exp(v,DL),deref_exp(r,DL),DL),s2,DL);
-    if (really_is_nullable(t))
+    if (is_nullable(t))
       s = ifthenelse_stmt(eq_exp(r,signed_int_exp(0,DL),DL),
 			  goto_stmt(fail_lab,DL),
 			  s3,DL);

@@ -30,6 +30,7 @@ typedef unsigned int __uint32_t;
 /* the following is used in errno.cyc */
 #define __CYCLONE_SYS_NUM_ERR 135
 #else /* architectures besides CYGWIN */
+#define __CYCLONE_SYS_NUM_ERR 124
 #define __IMPORT
 #ifndef __cdecl
 #define __cdecl

@@ -53,20 +53,29 @@ sizeof( struct Cyc_Queue_Queue)); _temp0->front= 0; _temp0->rear= 0; _temp0;});}
 void Cyc_Queue_add( struct Cyc_Queue_Queue* q, void* x){ struct Cyc_List_List*
 cell=({ struct Cyc_List_List* _temp1=( struct Cyc_List_List*) GC_malloc( sizeof(
 struct Cyc_List_List)); _temp1->hd=( void*) x; _temp1->tl= 0; _temp1;}); if( q->front
-== 0){ q->front= cell; q->rear= cell;} else{( q->rear)->tl= cell; q->rear= cell;}}
+== 0){ q->front= cell; q->rear= cell;} else{({ struct Cyc_List_List* _temp2= q->rear;
+if( _temp2 == 0){ _throw( Null_Exception);} _temp2->tl= cell;}); q->rear= cell;}}
 void* Cyc_Queue_take( struct Cyc_Queue_Queue* q){ if( q->front == 0){( void)
-_throw(( struct _xtunion_struct*)({ struct Cyc_Queue_Empty_struct* _temp2=(
+_throw(( struct _xtunion_struct*)({ struct Cyc_Queue_Empty_struct* _temp3=(
 struct Cyc_Queue_Empty_struct*) GC_malloc( sizeof( struct Cyc_Queue_Empty_struct));
-_temp2[ 0]=({ struct Cyc_Queue_Empty_struct _temp3; _temp3.tag= Cyc_Queue_Empty_tag;
-_temp3;}); _temp2;}));} else{ void* x=( void*)( q->front)->hd; q->front=( q->front)->tl;
-if( q->front == 0){ q->rear= 0;} return x;}} void* Cyc_Queue_peek( struct Cyc_Queue_Queue*
-q){ if( q->front == 0){( void) _throw(( struct _xtunion_struct*)({ struct Cyc_Queue_Empty_struct*
-_temp4=( struct Cyc_Queue_Empty_struct*) GC_malloc( sizeof( struct Cyc_Queue_Empty_struct));
-_temp4[ 0]=({ struct Cyc_Queue_Empty_struct _temp5; _temp5.tag= Cyc_Queue_Empty_tag;
-_temp5;}); _temp4;}));} else{ return( void*)( q->front)->hd;}} void Cyc_Queue_clear(
-struct Cyc_Queue_Queue* q){ q->front= 0; q->rear= 0;} int Cyc_Queue_length(
-struct Cyc_Queue_Queue* q){ return(( int(*)( struct Cyc_List_List* x)) Cyc_List_length)(
-q->front);} void Cyc_Queue_iter( void(* f)( void*), struct Cyc_Queue_Queue* q){
-struct Cyc_List_List* x= q->front; for( 0; x != 0; x= x->tl){ f(( void*) x->hd);}}
-void Cyc_Queue_app( void*(* f)( void*), struct Cyc_Queue_Queue* q){ struct Cyc_List_List*
-x= q->front; for( 0; x != 0; x= x->tl){ f(( void*) x->hd);}}
+_temp3[ 0]=({ struct Cyc_Queue_Empty_struct _temp4; _temp4.tag= Cyc_Queue_Empty_tag;
+_temp4;}); _temp3;}));} else{ void* x=( void*)({ struct Cyc_List_List* _temp5= q->front;
+if( _temp5 == 0){ _throw( Null_Exception);} _temp5->hd;}); q->front=({ struct
+Cyc_List_List* _temp6= q->front; if( _temp6 == 0){ _throw( Null_Exception);}
+_temp6->tl;}); if( q->front == 0){ q->rear= 0;} return x;}} void* Cyc_Queue_peek(
+struct Cyc_Queue_Queue* q){ if( q->front == 0){( void) _throw(( struct
+_xtunion_struct*)({ struct Cyc_Queue_Empty_struct* _temp7=( struct Cyc_Queue_Empty_struct*)
+GC_malloc( sizeof( struct Cyc_Queue_Empty_struct)); _temp7[ 0]=({ struct Cyc_Queue_Empty_struct
+_temp8; _temp8.tag= Cyc_Queue_Empty_tag; _temp8;}); _temp7;}));} else{ return(
+void*)({ struct Cyc_List_List* _temp9= q->front; if( _temp9 == 0){ _throw(
+Null_Exception);} _temp9->hd;});}} void Cyc_Queue_clear( struct Cyc_Queue_Queue*
+q){ q->front= 0; q->rear= 0;} int Cyc_Queue_length( struct Cyc_Queue_Queue* q){
+return(( int(*)( struct Cyc_List_List* x)) Cyc_List_length)( q->front);} void
+Cyc_Queue_iter( void(* f)( void*), struct Cyc_Queue_Queue* q){ struct Cyc_List_List*
+x= q->front; for( 0; x != 0; x=({ struct Cyc_List_List* _temp10= x; if( _temp10
+== 0){ _throw( Null_Exception);} _temp10->tl;})){ f(( void*)({ struct Cyc_List_List*
+_temp11= x; if( _temp11 == 0){ _throw( Null_Exception);} _temp11->hd;}));}} void
+Cyc_Queue_app( void*(* f)( void*), struct Cyc_Queue_Queue* q){ struct Cyc_List_List*
+x= q->front; for( 0; x != 0; x=({ struct Cyc_List_List* _temp12= x; if( _temp12
+== 0){ _throw( Null_Exception);} _temp12->tl;})){ f(( void*)({ struct Cyc_List_List*
+_temp13= x; if( _temp13 == 0){ _throw( Null_Exception);} _temp13->hd;}));}}

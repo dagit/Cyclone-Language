@@ -86,45 +86,48 @@ _temp12=( struct Cyc_Rope_Rope_node*) GC_malloc( sizeof( struct Cyc_Rope_Rope_no
 _temp12->v=( void*)(( void*)({ struct Cyc_Rope_Array_rope_struct* _temp13=(
 struct Cyc_Rope_Array_rope_struct*) GC_malloc( sizeof( struct Cyc_Rope_Array_rope_struct));
 _temp13[ 0]=({ struct Cyc_Rope_Array_rope_struct _temp14; _temp14.tag= Cyc_Rope_Array_rope_tag;
-_temp14.f1=({ unsigned int _temp15=( unsigned int)(( int(*)( struct Cyc_List_List*
-x)) Cyc_List_length)( l); struct Cyc_Rope_Rope_node** _temp16=( struct Cyc_Rope_Rope_node**)
-GC_malloc( sizeof( struct Cyc_Rope_Rope_node*) * _temp15); unsigned int i;
-struct _tagged_ptr0 _temp17={ _temp16, _temp16, _temp16 + _temp15}; for( i= 0; i
-< _temp15; i ++){ _temp16[ i]=({ struct Cyc_Rope_Rope_node* r=( struct Cyc_Rope_Rope_node*)
-l->hd; l= l->tl; r;});} _temp17;}); _temp14;}); _temp13;})); _temp12;});}
-unsigned int Cyc_Rope_length( struct Cyc_Rope_Rope_node* r){ void* _temp18=(
-void*) r->v; struct _tagged_string _temp24; struct _tagged_ptr0 _temp26; _LL20:
-if((( struct _tunion_struct*) _temp18)->tag == Cyc_Rope_String_rope_tag){ _LL25:
-_temp24=( struct _tagged_string)(( struct Cyc_Rope_String_rope_struct*) _temp18)->f1;
-goto _LL21;} else{ goto _LL22;} _LL22: if((( struct _tunion_struct*) _temp18)->tag
-== Cyc_Rope_Array_rope_tag){ _LL27: _temp26=( struct _tagged_ptr0)(( struct Cyc_Rope_Array_rope_struct*)
-_temp18)->f1; goto _LL23;} else{ goto _LL19;} _LL21: return Cyc_String_strlen(
-_temp24); _LL23: { unsigned int total=( unsigned int) 0; unsigned int sz=({
-struct _tagged_ptr0 _temp28= _temp26;( unsigned int)( _temp28.last_plus_one -
-_temp28.curr);});{ unsigned int i=( unsigned int) 0; for( 0; i < sz; i ++){
-total += Cyc_Rope_length(({ struct _tagged_ptr0 _temp29= _temp26; struct Cyc_Rope_Rope_node**
-_temp31= _temp29.curr +( int) i; if( _temp31 < _temp29.base? 1: _temp31 >=
-_temp29.last_plus_one){ _throw( Null_Exception);}* _temp31;}));}} return total;}
-_LL19:;} static unsigned int Cyc_Rope_flatten_it( struct _tagged_string s,
-unsigned int i, struct Cyc_Rope_Rope_node* r){ void* _temp32=( void*) r->v;
-struct _tagged_string _temp38; struct _tagged_ptr0 _temp40; _LL34: if((( struct
-_tunion_struct*) _temp32)->tag == Cyc_Rope_String_rope_tag){ _LL39: _temp38=(
-struct _tagged_string)(( struct Cyc_Rope_String_rope_struct*) _temp32)->f1; goto
-_LL35;} else{ goto _LL36;} _LL36: if((( struct _tunion_struct*) _temp32)->tag ==
-Cyc_Rope_Array_rope_tag){ _LL41: _temp40=( struct _tagged_ptr0)(( struct Cyc_Rope_Array_rope_struct*)
-_temp32)->f1; goto _LL37;} else{ goto _LL33;} _LL35: { unsigned int len= Cyc_String_strlen(
-_temp38); Cyc_String_strncpy( s,( int) i, _temp38, 0, len); return i + len;}
-_LL37: { unsigned int len=({ struct _tagged_ptr0 _temp42= _temp40;( unsigned int)(
-_temp42.last_plus_one - _temp42.curr);});{ int j= 0; for( 0;( unsigned int) j <
-len; j ++){ i= Cyc_Rope_flatten_it( s, i,({ struct _tagged_ptr0 _temp43= _temp40;
-struct Cyc_Rope_Rope_node** _temp45= _temp43.curr + j; if( _temp45 < _temp43.base?
-1: _temp45 >= _temp43.last_plus_one){ _throw( Null_Exception);}* _temp45;}));}}
-return i;} _LL33:;} struct _tagged_string Cyc_Rope_to_string( struct Cyc_Rope_Rope_node*
-r){ struct _tagged_string s= Cyc_Core_new_string(( int) Cyc_Rope_length( r));
-Cyc_Rope_flatten_it( s,( unsigned int) 0, r);( void*)( r->v=( void*)(( void*)({
-struct Cyc_Rope_String_rope_struct* _temp46=( struct Cyc_Rope_String_rope_struct*)
-GC_malloc( sizeof( struct Cyc_Rope_String_rope_struct)); _temp46[ 0]=({ struct
-Cyc_Rope_String_rope_struct _temp47; _temp47.tag= Cyc_Rope_String_rope_tag;
-_temp47.f1= s; _temp47;}); _temp46;}))); return s;} int Cyc_Rope_cmp( struct Cyc_Rope_Rope_node*
+_temp14.f1=({ unsigned int _temp17=( unsigned int)(( int(*)( struct Cyc_List_List*
+x)) Cyc_List_length)( l); struct Cyc_Rope_Rope_node** _temp18=( struct Cyc_Rope_Rope_node**)
+GC_malloc( sizeof( struct Cyc_Rope_Rope_node*) * _temp17); unsigned int i;
+struct _tagged_ptr0 _temp19={ _temp18, _temp18, _temp18 + _temp17}; for( i= 0; i
+< _temp17; i ++){ _temp18[ i]=({ struct Cyc_Rope_Rope_node* r=( struct Cyc_Rope_Rope_node*)({
+struct Cyc_List_List* _temp15= l; if( _temp15 == 0){ _throw( Null_Exception);}
+_temp15->hd;}); l=({ struct Cyc_List_List* _temp16= l; if( _temp16 == 0){ _throw(
+Null_Exception);} _temp16->tl;}); r;});} _temp19;}); _temp14;}); _temp13;}));
+_temp12;});} unsigned int Cyc_Rope_length( struct Cyc_Rope_Rope_node* r){ void*
+_temp20=( void*) r->v; struct _tagged_string _temp26; struct _tagged_ptr0
+_temp28; _LL22: if((( struct _tunion_struct*) _temp20)->tag == Cyc_Rope_String_rope_tag){
+_LL27: _temp26=( struct _tagged_string)(( struct Cyc_Rope_String_rope_struct*)
+_temp20)->f1; goto _LL23;} else{ goto _LL24;} _LL24: if((( struct _tunion_struct*)
+_temp20)->tag == Cyc_Rope_Array_rope_tag){ _LL29: _temp28=( struct _tagged_ptr0)((
+struct Cyc_Rope_Array_rope_struct*) _temp20)->f1; goto _LL25;} else{ goto _LL21;}
+_LL23: return Cyc_String_strlen( _temp26); _LL25: { unsigned int total=(
+unsigned int) 0; unsigned int sz=({ struct _tagged_ptr0 _temp30= _temp28;(
+unsigned int)( _temp30.last_plus_one - _temp30.curr);});{ unsigned int i=(
+unsigned int) 0; for( 0; i < sz; i ++){ total += Cyc_Rope_length(({ struct
+_tagged_ptr0 _temp31= _temp28; struct Cyc_Rope_Rope_node** _temp33= _temp31.curr
++( int) i; if( _temp31.base == 0? 1:( _temp33 < _temp31.base? 1: _temp33 >=
+_temp31.last_plus_one)){ _throw( Null_Exception);}* _temp33;}));}} return total;}
+_LL21:;} static unsigned int Cyc_Rope_flatten_it( struct _tagged_string s,
+unsigned int i, struct Cyc_Rope_Rope_node* r){ void* _temp34=( void*) r->v;
+struct _tagged_string _temp40; struct _tagged_ptr0 _temp42; _LL36: if((( struct
+_tunion_struct*) _temp34)->tag == Cyc_Rope_String_rope_tag){ _LL41: _temp40=(
+struct _tagged_string)(( struct Cyc_Rope_String_rope_struct*) _temp34)->f1; goto
+_LL37;} else{ goto _LL38;} _LL38: if((( struct _tunion_struct*) _temp34)->tag ==
+Cyc_Rope_Array_rope_tag){ _LL43: _temp42=( struct _tagged_ptr0)(( struct Cyc_Rope_Array_rope_struct*)
+_temp34)->f1; goto _LL39;} else{ goto _LL35;} _LL37: { unsigned int len= Cyc_String_strlen(
+_temp40); Cyc_String_strncpy( s,( int) i, _temp40, 0, len); return i + len;}
+_LL39: { unsigned int len=({ struct _tagged_ptr0 _temp44= _temp42;( unsigned int)(
+_temp44.last_plus_one - _temp44.curr);});{ int j= 0; for( 0;( unsigned int) j <
+len; j ++){ i= Cyc_Rope_flatten_it( s, i,({ struct _tagged_ptr0 _temp45= _temp42;
+struct Cyc_Rope_Rope_node** _temp47= _temp45.curr + j; if( _temp45.base == 0? 1:(
+_temp47 < _temp45.base? 1: _temp47 >= _temp45.last_plus_one)){ _throw(
+Null_Exception);}* _temp47;}));}} return i;} _LL35:;} struct _tagged_string Cyc_Rope_to_string(
+struct Cyc_Rope_Rope_node* r){ struct _tagged_string s= Cyc_Core_new_string((
+int) Cyc_Rope_length( r)); Cyc_Rope_flatten_it( s,( unsigned int) 0, r);( void*)(
+r->v=( void*)(( void*)({ struct Cyc_Rope_String_rope_struct* _temp48=( struct
+Cyc_Rope_String_rope_struct*) GC_malloc( sizeof( struct Cyc_Rope_String_rope_struct));
+_temp48[ 0]=({ struct Cyc_Rope_String_rope_struct _temp49; _temp49.tag= Cyc_Rope_String_rope_tag;
+_temp49.f1= s; _temp49;}); _temp48;}))); return s;} int Cyc_Rope_cmp( struct Cyc_Rope_Rope_node*
 r1, struct Cyc_Rope_Rope_node* r2){ return Cyc_String_strcmp( Cyc_Rope_to_string(
 r1), Cyc_Rope_to_string( r2));}

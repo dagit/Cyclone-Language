@@ -57,19 +57,20 @@ _temp0[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp1; _temp1.tag= Cyc_Core_Inv
 _temp1.f1=( struct _tagged_string)({ char* _temp2=( char*)"Xarray::get: bad index";
 struct _tagged_string _temp3; _temp3.curr= _temp2; _temp3.base= _temp2; _temp3.last_plus_one=
 _temp2 + 23; _temp3;}); _temp1;}); _temp0;}));} return({ struct _tagged_ptr0
-_temp4= xarr->elmts; void** _temp6= _temp4.curr + i; if( _temp6 < _temp4.base? 1:
-_temp6 >= _temp4.last_plus_one){ _throw( Null_Exception);}* _temp6;});} void Cyc_Xarray_set(
-struct Cyc_Xarray_Xarray* xarr, int i, void* a){ if( i < 0? 1: i >= xarr->num_elmts){(
-void) _throw(( struct _xtunion_struct*)({ struct Cyc_Core_InvalidArg_struct*
-_temp7=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
+_temp4= xarr->elmts; void** _temp6= _temp4.curr + i; if( _temp4.base == 0? 1:(
+_temp6 < _temp4.base? 1: _temp6 >= _temp4.last_plus_one)){ _throw(
+Null_Exception);}* _temp6;});} void Cyc_Xarray_set( struct Cyc_Xarray_Xarray*
+xarr, int i, void* a){ if( i < 0? 1: i >= xarr->num_elmts){( void) _throw((
+struct _xtunion_struct*)({ struct Cyc_Core_InvalidArg_struct* _temp7=( struct
+Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
 _temp7[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp8; _temp8.tag= Cyc_Core_InvalidArg_tag;
 _temp8.f1=( struct _tagged_string)({ char* _temp9=( char*)"Xarray::set: bad index";
 struct _tagged_string _temp10; _temp10.curr= _temp9; _temp10.base= _temp9;
 _temp10.last_plus_one= _temp9 + 23; _temp10;}); _temp8;}); _temp7;}));}({ struct
-_tagged_ptr0 _temp11= xarr->elmts; void** _temp13= _temp11.curr + i; if( _temp13
-< _temp11.base? 1: _temp13 >= _temp11.last_plus_one){ _throw( Null_Exception);}*
-_temp13= a;});} struct Cyc_Xarray_Xarray* Cyc_Xarray_create_empty(){ struct
-_tagged_ptr0 x=( struct _tagged_ptr0)({ void** _temp15=( void**)({ void**
+_tagged_ptr0 _temp11= xarr->elmts; void** _temp13= _temp11.curr + i; if( _temp11.base
+== 0? 1:( _temp13 < _temp11.base? 1: _temp13 >= _temp11.last_plus_one)){ _throw(
+Null_Exception);}* _temp13= a;});} struct Cyc_Xarray_Xarray* Cyc_Xarray_create_empty(){
+struct _tagged_ptr0 x=( struct _tagged_ptr0)({ void** _temp15=( void**)({ void**
 _temp14=( void**) GC_malloc( sizeof( void*) * 0); _temp14;}); struct
 _tagged_ptr0 _temp16; _temp16.curr= _temp15; _temp16.base= _temp15; _temp16.last_plus_one=
 _temp15 + 0; _temp16;}); return({ struct Cyc_Xarray_Xarray* _temp17=( struct Cyc_Xarray_Xarray*)
@@ -108,28 +109,29 @@ unsigned int)( xarr->num_elmts * 2); void** _temp39=( void**) GC_malloc( sizeof(
 void*) * _temp38); unsigned int i; struct _tagged_ptr0 _temp40={ _temp39,
 _temp39, _temp39 + _temp38}; for( i= 0; i < _temp38; i ++){ _temp39[ i]=({
 struct _tagged_ptr0 _temp35= xarr->elmts; void** _temp37= _temp35.curr + 0; if(
-_temp37 < _temp35.base? 1: _temp37 >= _temp35.last_plus_one){ _throw(
-Null_Exception);}* _temp37;});} _temp40;});{ int i= 1; for( 0; i < xarr->num_elmts;
+_temp35.base == 0? 1:( _temp37 < _temp35.base? 1: _temp37 >= _temp35.last_plus_one)){
+_throw( Null_Exception);}* _temp37;});} _temp40;});{ int i= 1; for( 0; i < xarr->num_elmts;
 ++ i){({ struct _tagged_ptr0 _temp41= newarr; void** _temp43= _temp41.curr + i;
-if( _temp43 < _temp41.base? 1: _temp43 >= _temp41.last_plus_one){ _throw(
-Null_Exception);}* _temp43=({ struct _tagged_ptr0 _temp44= xarr->elmts; void**
-_temp46= _temp44.curr + i; if( _temp46 < _temp44.base? 1: _temp46 >= _temp44.last_plus_one){
-_throw( Null_Exception);}* _temp46;});});}} xarr->elmts= newarr;}}({ struct
-_tagged_ptr0 _temp47= xarr->elmts; void** _temp49= _temp47.curr +( xarr->num_elmts
-++); if( _temp49 < _temp47.base? 1: _temp49 >= _temp47.last_plus_one){ _throw(
-Null_Exception);}* _temp49= a;});} int Cyc_Xarray_add_ind( struct Cyc_Xarray_Xarray*
-xarr, void* a){(( void(*)( struct Cyc_Xarray_Xarray* xarr, void* a)) Cyc_Xarray_add)(
-xarr, a); return xarr->num_elmts - 1;} struct _tagged_ptr0 Cyc_Xarray_to_array(
-struct Cyc_Xarray_Xarray* xarr){ if( xarr->num_elmts == 0){ return( struct
-_tagged_ptr0)({ void** _temp51=( void**)({ void** _temp50=( void**) GC_malloc(
-sizeof( void*) * 0); _temp50;}); struct _tagged_ptr0 _temp52; _temp52.curr=
-_temp51; _temp52.base= _temp51; _temp52.last_plus_one= _temp51 + 0; _temp52;});}{
-struct _tagged_ptr0 ans=({ unsigned int _temp56=( unsigned int) xarr->num_elmts;
-void** _temp57=( void**) GC_malloc( sizeof( void*) * _temp56); unsigned int i;
-struct _tagged_ptr0 _temp58={ _temp57, _temp57, _temp57 + _temp56}; for( i= 0; i
-< _temp56; i ++){ _temp57[ i]=({ struct _tagged_ptr0 _temp53= xarr->elmts; void**
-_temp55= _temp53.curr +( int) i; if( _temp55 < _temp53.base? 1: _temp55 >=
-_temp53.last_plus_one){ _throw( Null_Exception);}* _temp55;});} _temp58;});
+if( _temp41.base == 0? 1:( _temp43 < _temp41.base? 1: _temp43 >= _temp41.last_plus_one)){
+_throw( Null_Exception);}* _temp43=({ struct _tagged_ptr0 _temp44= xarr->elmts;
+void** _temp46= _temp44.curr + i; if( _temp44.base == 0? 1:( _temp46 < _temp44.base?
+1: _temp46 >= _temp44.last_plus_one)){ _throw( Null_Exception);}* _temp46;});});}}
+xarr->elmts= newarr;}}({ struct _tagged_ptr0 _temp47= xarr->elmts; void**
+_temp49= _temp47.curr +( xarr->num_elmts ++); if( _temp47.base == 0? 1:( _temp49
+< _temp47.base? 1: _temp49 >= _temp47.last_plus_one)){ _throw( Null_Exception);}*
+_temp49= a;});} int Cyc_Xarray_add_ind( struct Cyc_Xarray_Xarray* xarr, void* a){((
+void(*)( struct Cyc_Xarray_Xarray* xarr, void* a)) Cyc_Xarray_add)( xarr, a);
+return xarr->num_elmts - 1;} struct _tagged_ptr0 Cyc_Xarray_to_array( struct Cyc_Xarray_Xarray*
+xarr){ if( xarr->num_elmts == 0){ return( struct _tagged_ptr0)({ void** _temp51=(
+void**)({ void** _temp50=( void**) GC_malloc( sizeof( void*) * 0); _temp50;});
+struct _tagged_ptr0 _temp52; _temp52.curr= _temp51; _temp52.base= _temp51;
+_temp52.last_plus_one= _temp51 + 0; _temp52;});}{ struct _tagged_ptr0 ans=({
+unsigned int _temp56=( unsigned int) xarr->num_elmts; void** _temp57=( void**)
+GC_malloc( sizeof( void*) * _temp56); unsigned int i; struct _tagged_ptr0
+_temp58={ _temp57, _temp57, _temp57 + _temp56}; for( i= 0; i < _temp56; i ++){
+_temp57[ i]=({ struct _tagged_ptr0 _temp53= xarr->elmts; void** _temp55= _temp53.curr
++( int) i; if( _temp53.base == 0? 1:( _temp55 < _temp53.base? 1: _temp55 >=
+_temp53.last_plus_one)){ _throw( Null_Exception);}* _temp55;});} _temp58;});
 return ans;}} struct Cyc_Xarray_Xarray* Cyc_Xarray_from_array( struct
 _tagged_ptr0 arr){ if(({ struct _tagged_ptr0 _temp59= arr;( unsigned int)(
 _temp59.last_plus_one - _temp59.curr);}) ==( unsigned int) 0){ return(( struct
@@ -140,86 +142,87 @@ struct _tagged_ptr0 _temp62= arr;( unsigned int)( _temp62.last_plus_one -
 _temp62.curr);}); void** _temp67=( void**) GC_malloc( sizeof( void*) * _temp66);
 unsigned int i; struct _tagged_ptr0 _temp68={ _temp67, _temp67, _temp67 +
 _temp66}; for( i= 0; i < _temp66; i ++){ _temp67[ i]=({ struct _tagged_ptr0
-_temp63= arr; void** _temp65= _temp63.curr +( int) i; if( _temp65 < _temp63.base?
-1: _temp65 >= _temp63.last_plus_one){ _throw( Null_Exception);}* _temp65;});}
-_temp68;}); _temp60->num_elmts=( int)({ struct _tagged_ptr0 _temp61= arr;(
-unsigned int)( _temp61.last_plus_one - _temp61.curr);}); _temp60;}); return ans;}}
-struct Cyc_Xarray_Xarray* Cyc_Xarray_append( struct Cyc_Xarray_Xarray* xarr1,
-struct Cyc_Xarray_Xarray* xarr2){ int newsz=( int)(({ struct _tagged_ptr0
-_temp69= xarr1->elmts;( unsigned int)( _temp69.last_plus_one - _temp69.curr);})
-+({ struct _tagged_ptr0 _temp70= xarr2->elmts;( unsigned int)( _temp70.last_plus_one
-- _temp70.curr);})); if( newsz == 0){ return(( struct Cyc_Xarray_Xarray*(*)())
+_temp63= arr; void** _temp65= _temp63.curr +( int) i; if( _temp63.base == 0? 1:(
+_temp65 < _temp63.base? 1: _temp65 >= _temp63.last_plus_one)){ _throw(
+Null_Exception);}* _temp65;});} _temp68;}); _temp60->num_elmts=( int)({ struct
+_tagged_ptr0 _temp61= arr;( unsigned int)( _temp61.last_plus_one - _temp61.curr);});
+_temp60;}); return ans;}} struct Cyc_Xarray_Xarray* Cyc_Xarray_append( struct
+Cyc_Xarray_Xarray* xarr1, struct Cyc_Xarray_Xarray* xarr2){ int newsz=( int)(({
+struct _tagged_ptr0 _temp69= xarr1->elmts;( unsigned int)( _temp69.last_plus_one
+- _temp69.curr);}) +({ struct _tagged_ptr0 _temp70= xarr2->elmts;( unsigned int)(
+_temp70.last_plus_one - _temp70.curr);})); if( newsz == 0){ return(( struct Cyc_Xarray_Xarray*(*)())
 Cyc_Xarray_create_empty)();}{ void* init=({ struct _tagged_ptr0 _temp71= xarr1->elmts;(
 unsigned int)( _temp71.last_plus_one - _temp71.curr);}) ==( unsigned int) 0?({
 struct _tagged_ptr0 _temp72= xarr2->elmts; void** _temp74= _temp72.curr + 0; if(
-_temp74 < _temp72.base? 1: _temp74 >= _temp72.last_plus_one){ _throw(
-Null_Exception);}* _temp74;}):({ struct _tagged_ptr0 _temp75= xarr1->elmts; void**
-_temp77= _temp75.curr + 0; if( _temp77 < _temp75.base? 1: _temp77 >= _temp75.last_plus_one){
-_throw( Null_Exception);}* _temp77;}); struct Cyc_Xarray_Xarray* ans=({ struct
-Cyc_Xarray_Xarray* _temp78=( struct Cyc_Xarray_Xarray*) GC_malloc( sizeof(
-struct Cyc_Xarray_Xarray)); _temp78->elmts=({ unsigned int _temp79=(
-unsigned int) newsz; void** _temp80=( void**) GC_malloc( sizeof( void*) *
-_temp79); unsigned int i; struct _tagged_ptr0 _temp81={ _temp80, _temp80,
+_temp72.base == 0? 1:( _temp74 < _temp72.base? 1: _temp74 >= _temp72.last_plus_one)){
+_throw( Null_Exception);}* _temp74;}):({ struct _tagged_ptr0 _temp75= xarr1->elmts;
+void** _temp77= _temp75.curr + 0; if( _temp75.base == 0? 1:( _temp77 < _temp75.base?
+1: _temp77 >= _temp75.last_plus_one)){ _throw( Null_Exception);}* _temp77;});
+struct Cyc_Xarray_Xarray* ans=({ struct Cyc_Xarray_Xarray* _temp78=( struct Cyc_Xarray_Xarray*)
+GC_malloc( sizeof( struct Cyc_Xarray_Xarray)); _temp78->elmts=({ unsigned int
+_temp79=( unsigned int) newsz; void** _temp80=( void**) GC_malloc( sizeof( void*)
+* _temp79); unsigned int i; struct _tagged_ptr0 _temp81={ _temp80, _temp80,
 _temp80 + _temp79}; for( i= 0; i < _temp79; i ++){ _temp80[ i]= init;} _temp81;});
 _temp78->num_elmts= 0; _temp78;});{ int i= 0; for( 0; i < xarr1->num_elmts; ++ i){((
 void(*)( struct Cyc_Xarray_Xarray* xarr, void* a)) Cyc_Xarray_add)( ans,({
 struct _tagged_ptr0 _temp82= xarr1->elmts; void** _temp84= _temp82.curr + i; if(
-_temp84 < _temp82.base? 1: _temp84 >= _temp82.last_plus_one){ _throw(
-Null_Exception);}* _temp84;}));}}{ int i= 0; for( 0; i < xarr2->num_elmts; ++ i){((
-void(*)( struct Cyc_Xarray_Xarray* xarr, void* a)) Cyc_Xarray_add)( ans,({
+_temp82.base == 0? 1:( _temp84 < _temp82.base? 1: _temp84 >= _temp82.last_plus_one)){
+_throw( Null_Exception);}* _temp84;}));}}{ int i= 0; for( 0; i < xarr2->num_elmts;
+++ i){(( void(*)( struct Cyc_Xarray_Xarray* xarr, void* a)) Cyc_Xarray_add)( ans,({
 struct _tagged_ptr0 _temp85= xarr2->elmts; void** _temp87= _temp85.curr + i; if(
-_temp87 < _temp85.base? 1: _temp87 >= _temp85.last_plus_one){ _throw(
-Null_Exception);}* _temp87;}));}} return ans;}} void Cyc_Xarray_app( void*(* f)(
-void*), struct Cyc_Xarray_Xarray* xarr){ int i= 0; for( 0; i < xarr->num_elmts;
+_temp85.base == 0? 1:( _temp87 < _temp85.base? 1: _temp87 >= _temp85.last_plus_one)){
+_throw( Null_Exception);}* _temp87;}));}} return ans;}} void Cyc_Xarray_app(
+void*(* f)( void*), struct Cyc_Xarray_Xarray* xarr){ int i= 0; for( 0; i < xarr->num_elmts;
 ++ i){ f(({ struct _tagged_ptr0 _temp88= xarr->elmts; void** _temp90= _temp88.curr
-+ i; if( _temp90 < _temp88.base? 1: _temp90 >= _temp88.last_plus_one){ _throw(
-Null_Exception);}* _temp90;}));}} void Cyc_Xarray_app_c( void*(* f)( void*, void*),
-void* env, struct Cyc_Xarray_Xarray* xarr){ int i= 0; for( 0; i < xarr->num_elmts;
-++ i){ f( env,({ struct _tagged_ptr0 _temp91= xarr->elmts; void** _temp93=
-_temp91.curr + i; if( _temp93 < _temp91.base? 1: _temp93 >= _temp91.last_plus_one){
-_throw( Null_Exception);}* _temp93;}));}} void Cyc_Xarray_iter( void(* f)( void*),
-struct Cyc_Xarray_Xarray* xarr){ int i= 0; for( 0; i < xarr->num_elmts; ++ i){ f(({
-struct _tagged_ptr0 _temp94= xarr->elmts; void** _temp96= _temp94.curr + i; if(
-_temp96 < _temp94.base? 1: _temp96 >= _temp94.last_plus_one){ _throw(
-Null_Exception);}* _temp96;}));}} void Cyc_Xarray_iter_c( void(* f)( void*, void*),
-void* env, struct Cyc_Xarray_Xarray* xarr){ int i= 0; for( 0; i < xarr->num_elmts;
-++ i){ f( env,({ struct _tagged_ptr0 _temp97= xarr->elmts; void** _temp99=
-_temp97.curr + i; if( _temp99 < _temp97.base? 1: _temp99 >= _temp97.last_plus_one){
-_throw( Null_Exception);}* _temp99;}));}} struct Cyc_Xarray_Xarray* Cyc_Xarray_map(
-void*(* f)( void*), struct Cyc_Xarray_Xarray* xarr){ if( xarr->num_elmts == 0){
-return(( struct Cyc_Xarray_Xarray*(*)()) Cyc_Xarray_create_empty)();}{ struct
-Cyc_Xarray_Xarray* ans=({ struct Cyc_Xarray_Xarray* _temp100=( struct Cyc_Xarray_Xarray*)
-GC_malloc( sizeof( struct Cyc_Xarray_Xarray)); _temp100->elmts=({ unsigned int
-_temp105=({ struct _tagged_ptr0 _temp101= xarr->elmts;( unsigned int)( _temp101.last_plus_one
++ i; if( _temp88.base == 0? 1:( _temp90 < _temp88.base? 1: _temp90 >= _temp88.last_plus_one)){
+_throw( Null_Exception);}* _temp90;}));}} void Cyc_Xarray_app_c( void*(* f)(
+void*, void*), void* env, struct Cyc_Xarray_Xarray* xarr){ int i= 0; for( 0; i <
+xarr->num_elmts; ++ i){ f( env,({ struct _tagged_ptr0 _temp91= xarr->elmts; void**
+_temp93= _temp91.curr + i; if( _temp91.base == 0? 1:( _temp93 < _temp91.base? 1:
+_temp93 >= _temp91.last_plus_one)){ _throw( Null_Exception);}* _temp93;}));}}
+void Cyc_Xarray_iter( void(* f)( void*), struct Cyc_Xarray_Xarray* xarr){ int i=
+0; for( 0; i < xarr->num_elmts; ++ i){ f(({ struct _tagged_ptr0 _temp94= xarr->elmts;
+void** _temp96= _temp94.curr + i; if( _temp94.base == 0? 1:( _temp96 < _temp94.base?
+1: _temp96 >= _temp94.last_plus_one)){ _throw( Null_Exception);}* _temp96;}));}}
+void Cyc_Xarray_iter_c( void(* f)( void*, void*), void* env, struct Cyc_Xarray_Xarray*
+xarr){ int i= 0; for( 0; i < xarr->num_elmts; ++ i){ f( env,({ struct
+_tagged_ptr0 _temp97= xarr->elmts; void** _temp99= _temp97.curr + i; if( _temp97.base
+== 0? 1:( _temp99 < _temp97.base? 1: _temp99 >= _temp97.last_plus_one)){ _throw(
+Null_Exception);}* _temp99;}));}} struct Cyc_Xarray_Xarray* Cyc_Xarray_map( void*(*
+f)( void*), struct Cyc_Xarray_Xarray* xarr){ if( xarr->num_elmts == 0){ return((
+struct Cyc_Xarray_Xarray*(*)()) Cyc_Xarray_create_empty)();}{ struct Cyc_Xarray_Xarray*
+ans=({ struct Cyc_Xarray_Xarray* _temp100=( struct Cyc_Xarray_Xarray*) GC_malloc(
+sizeof( struct Cyc_Xarray_Xarray)); _temp100->elmts=({ unsigned int _temp105=({
+struct _tagged_ptr0 _temp101= xarr->elmts;( unsigned int)( _temp101.last_plus_one
 - _temp101.curr);}); void** _temp106=( void**) GC_malloc( sizeof( void*) *
 _temp105); unsigned int i; struct _tagged_ptr0 _temp107={ _temp106, _temp106,
 _temp106 + _temp105}; for( i= 0; i < _temp105; i ++){ _temp106[ i]= f(({ struct
 _tagged_ptr0 _temp102= xarr->elmts; void** _temp104= _temp102.curr + 0; if(
-_temp104 < _temp102.base? 1: _temp104 >= _temp102.last_plus_one){ _throw(
-Null_Exception);}* _temp104;}));} _temp107;}); _temp100->num_elmts= xarr->num_elmts;
+_temp102.base == 0? 1:( _temp104 < _temp102.base? 1: _temp104 >= _temp102.last_plus_one)){
+_throw( Null_Exception);}* _temp104;}));} _temp107;}); _temp100->num_elmts= xarr->num_elmts;
 _temp100;});{ int i= 1; for( 0; i < xarr->num_elmts; ++ i){({ struct
 _tagged_ptr0 _temp108= ans->elmts; void** _temp110= _temp108.curr + i; if(
-_temp110 < _temp108.base? 1: _temp110 >= _temp108.last_plus_one){ _throw(
-Null_Exception);}* _temp110= f(({ struct _tagged_ptr0 _temp111= xarr->elmts;
-void** _temp113= _temp111.curr + i; if( _temp113 < _temp111.base? 1: _temp113 >=
-_temp111.last_plus_one){ _throw( Null_Exception);}* _temp113;}));});}} return
-ans;}} struct Cyc_Xarray_Xarray* Cyc_Xarray_map_c( void*(* f)( void*, void*),
-void* env, struct Cyc_Xarray_Xarray* xarr){ if( xarr->num_elmts == 0){ return((
-struct Cyc_Xarray_Xarray*(*)()) Cyc_Xarray_create_empty)();}{ struct Cyc_Xarray_Xarray*
-ans=({ struct Cyc_Xarray_Xarray* _temp114=( struct Cyc_Xarray_Xarray*) GC_malloc(
-sizeof( struct Cyc_Xarray_Xarray)); _temp114->elmts=({ unsigned int _temp119=({
-struct _tagged_ptr0 _temp115= xarr->elmts;( unsigned int)( _temp115.last_plus_one
+_temp108.base == 0? 1:( _temp110 < _temp108.base? 1: _temp110 >= _temp108.last_plus_one)){
+_throw( Null_Exception);}* _temp110= f(({ struct _tagged_ptr0 _temp111= xarr->elmts;
+void** _temp113= _temp111.curr + i; if( _temp111.base == 0? 1:( _temp113 <
+_temp111.base? 1: _temp113 >= _temp111.last_plus_one)){ _throw( Null_Exception);}*
+_temp113;}));});}} return ans;}} struct Cyc_Xarray_Xarray* Cyc_Xarray_map_c(
+void*(* f)( void*, void*), void* env, struct Cyc_Xarray_Xarray* xarr){ if( xarr->num_elmts
+== 0){ return(( struct Cyc_Xarray_Xarray*(*)()) Cyc_Xarray_create_empty)();}{
+struct Cyc_Xarray_Xarray* ans=({ struct Cyc_Xarray_Xarray* _temp114=( struct Cyc_Xarray_Xarray*)
+GC_malloc( sizeof( struct Cyc_Xarray_Xarray)); _temp114->elmts=({ unsigned int
+_temp119=({ struct _tagged_ptr0 _temp115= xarr->elmts;( unsigned int)( _temp115.last_plus_one
 - _temp115.curr);}); void** _temp120=( void**) GC_malloc( sizeof( void*) *
 _temp119); unsigned int i; struct _tagged_ptr0 _temp121={ _temp120, _temp120,
 _temp120 + _temp119}; for( i= 0; i < _temp119; i ++){ _temp120[ i]= f( env,({
 struct _tagged_ptr0 _temp116= xarr->elmts; void** _temp118= _temp116.curr + 0;
-if( _temp118 < _temp116.base? 1: _temp118 >= _temp116.last_plus_one){ _throw(
-Null_Exception);}* _temp118;}));} _temp121;}); _temp114->num_elmts= xarr->num_elmts;
+if( _temp116.base == 0? 1:( _temp118 < _temp116.base? 1: _temp118 >= _temp116.last_plus_one)){
+_throw( Null_Exception);}* _temp118;}));} _temp121;}); _temp114->num_elmts= xarr->num_elmts;
 _temp114;});{ int i= 1; for( 0; i < xarr->num_elmts; ++ i){({ struct
 _tagged_ptr0 _temp122= ans->elmts; void** _temp124= _temp122.curr + i; if(
-_temp124 < _temp122.base? 1: _temp124 >= _temp122.last_plus_one){ _throw(
-Null_Exception);}* _temp124= f( env,({ struct _tagged_ptr0 _temp125= xarr->elmts;
-void** _temp127= _temp125.curr + i; if( _temp127 < _temp125.base? 1: _temp127 >=
-_temp125.last_plus_one){ _throw( Null_Exception);}* _temp127;}));});}} return
-ans;}} void Cyc_Xarray_reuse( struct Cyc_Xarray_Xarray* xarr){ xarr->num_elmts=
-0;}
+_temp122.base == 0? 1:( _temp124 < _temp122.base? 1: _temp124 >= _temp122.last_plus_one)){
+_throw( Null_Exception);}* _temp124= f( env,({ struct _tagged_ptr0 _temp125=
+xarr->elmts; void** _temp127= _temp125.curr + i; if( _temp125.base == 0? 1:(
+_temp127 < _temp125.base? 1: _temp127 >= _temp125.last_plus_one)){ _throw(
+Null_Exception);}* _temp127;}));});}} return ans;}} void Cyc_Xarray_reuse(
+struct Cyc_Xarray_Xarray* xarr){ xarr->num_elmts= 0;}

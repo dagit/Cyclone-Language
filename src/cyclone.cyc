@@ -51,9 +51,6 @@ static string *out_file_name_opt = null;
 static void set_out_file_name(string s) {
   out_file_name_opt = (string *)(new s);
 }
-static void set_check_null() {
-  Toc::check_for_null = true;
-}
 static list_t<stringptr> includes = null;
 static void add_include(string s) {
   includes = new List(new s,includes);
@@ -227,15 +224,13 @@ void compile_file(string filename) {
 }
 
 int main(int argc, string ? argv) {
-  $(string,spec_t,string) specs[15] = 
+  $(string,spec_t,string) specs[14] = 
     {$("-nocyc",new Clear_spec(add_cyc_namespace),
        "does not add implicit namespace Cyc"),
      $("-q",new Set_spec(q),
        "compile quietly"),
      $("-v",new Set_spec(v), 
        "print compilation stages verbosely"),
-     $("-check_null",new Unit_spec(set_check_null), 
-       "turn on null-checking in generated C code"),
      $("-D",new String_spec(add_define), 
        "pass definition to pre-processor"),
      $("-I",new String_spec(add_include), 
@@ -272,8 +267,7 @@ int main(int argc, string ? argv) {
   let l12 = List(&specs[11],&l11);
   let l13 = List(&specs[12],&l12);
   let l14 = List(&specs[13],&l13);
-  let l15 = List(&specs[14],&l14);
-  let options = &l15;
+  let options = &l14;
 		 
   Arg::parse(options, compile_file, "Options:", argv);
 
