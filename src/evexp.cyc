@@ -41,9 +41,8 @@ bool eval_const_bool_exp(exp e) {
   }
 }
 
-/* The main routine -- side-effects the expression e, overwriting its
-   r field with the resulting constant (only if there's no
-   error) */
+// The main routine -- side-effects the expression e, overwriting its
+// r field with the resulting constant (only if there's no error)
 cnst eval_const_exp(exp e) {
   cnst cn;
   switch (e->r) {

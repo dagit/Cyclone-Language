@@ -71,8 +71,8 @@ Pos pos_of_abs(string filename, int abs) {
     while (true) {
       next = token(lbuf);
       eol  = lexeme_end(lbuf);
+      if (eol >= abs) break;
       this_line = lexeme(lbuf);
-      if (eol > abs) break;
       
       switch (next) {
       case END:     throw Failure("Lineno: Invalid file position");

@@ -93,18 +93,15 @@ void parse(list<$(string,spec,string)@> speclist, void anonfun(string),
     string s = args[current];
     if (size(s) >= 1 && s[0] == '-') {
       spec action;
-      try
-	action = lookup(speclist, s);
+      try action = lookup(speclist, s);
       catch {
-      case Not_found:
-	stop(initpos, Unknown(s), speclist, errmsg);
-	return;
+      case Not_found: stop(initpos, Unknown(s), speclist, errmsg); return;
       }
       try
 	switch (action) {
-	case Unit_spec(f)  : f(); break;
-	case Set_spec(r)   : Ref::set(r,true); break;
-	case Clear_spec(r) : Ref::set(r,false); break;
+	case Unit_spec(f)  : f();                     break;
+	case Set_spec(r)   : Ref::set(r,(Bool)true);  break;
+	case Clear_spec(r) : Ref::set(r,(Bool)false); break;
 	case String_spec(f):
 	  if (current+1 < l) {
 	    f(args[current+1]);

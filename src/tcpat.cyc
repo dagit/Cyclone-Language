@@ -34,22 +34,19 @@ using Tcstmt;
 // and a list of the bound value variables, their types, and any
 // qualifiers (e->g., const).
 /////////////////////////////////////////////////////////////////////////
-static $(tqual,typ)@ tcPat_f1(typ t) {
-  return &$(empty_tqual(),t);
-}
-static $(list<designator>,pat)@ tcPat_f2(pat p) {
+static $(list<designator>,pat)@ null_designator(pat p) {
   return &$(null,p);
 }
-static var tcPat_f3($(var,tqual,typ)@ x) {
+static `a fst_trip<`a,`b,`c>($(`a,`b,`c)@ x) {
   return x[0];
 }
-static void tcPat_f4(segment loc,var v) {
+static void twice_msg(segment loc,var v) {
   terr(loc,xprintf("variable %s is defined twice in a pattern", v));
 }
 $(list<tvar>, list<$(var,tqual,typ)@>)@ tcPat(tenv te,pat p) {
   typ t;
-  list<tvar> tv_result = null;
-  list<$(var,tqual,typ)@> v_result = null;
+  list<tvar>              tv_result = null;
+  list<$(var,tqual,typ)@> v_result  = null;
 
   // Figure out what t should be; assign to p->topt and return after switch
   switch (p->r) {
@@ -63,19 +60,13 @@ $(list<tvar>, list<$(var,tqual,typ)@>)@ tcPat(tenv te,pat p) {
     // FIX: take i into account?
     t = (s == Unsigned) ? uint_t : sint_t;
     break;
-  case Char_p(c):
-    t = uchar_t;
-    break;
-  case Float_p(s):
-    t = float_t;
-    break;
-  case Bool_p(b):
-    t = bool_t;
-    break;
+  case Char_p(c):   t = uchar_t; break;
+  case Float_p(s):  t = float_t; break;
+  case Bool_p(b):   t = bool_t;  break;
   case Pointer_p(p2):
     let y = tcPat(te,p2);
-    tv_result = List::append(y[0],tv_result);
-    v_result = List::append(y[1],v_result);
+    tv_result = List::append(y[0], tv_result);
+    v_result  = List::append(y[1], v_result);
     t = PointerType(p2->topt->v, empty_conref(), empty_tqual());
     break;
   case Reference_p(v):
@@ -85,46 +76,17 @@ $(list<tvar>, list<$(var,tqual,typ)@>)@ tcPat(tenv te,pat p) {
     v_result = &cons(&$(v,empty_tqual(),u),v_result);
     break;
   case Tuple_p(ps):
-    list<typ> ts = null;
-    while (ps != null) {
+    list<$(tqual,typ)@> ts = null;
+    for(; ps != null; ps=ps->tl) {
       let y = tcPat(te,ps->hd);
       tv_result = List::append(y[0],tv_result);
-      v_result = List::append(y[1],v_result);
-      ts = &cons(ps->hd->topt->v,ts);
-      ps = ps->tl;
+      v_result  = List::append(y[1],v_result);
+      ts = &cons(&$(empty_tqual(),ps->hd->topt->v),ts);
     }
-    ts = List::imp_rev(ts);
-    t = TupleType(List::map(tcPat_f1, ts));
+    t = TupleType(List::imp_rev(ts));
     break;
   case UnknownId_p(q):
     switch (lookup_ordinary(te,p->loc,q)) {
-    case LocalRes(vi):
-      if (q[0] == null) {
-        p->r = Var_p(q[1]);
-        return tcPat(te,p);
-      }
-      terr(p->loc,
-           xprintf("unresolved identifier %s in pattern",qvar2string(q)));
-      t = wildtyp();
-      break;
-    case GlobalRes(_,vi):
-      if (q[0] == null) {
-        p->r = Var_p(q[1]);
-        return tcPat(te,p);
-      }
-      terr(p->loc,
-           xprintf("unresolved identifier %s in pattern",qvar2string(q)));
-      t = wildtyp();
-      break;
-    case UnknownRes:
-      if (q[0] == null) {
-        p->r = Var_p(q[1]);
-        return tcPat(te,p);
-      }
-      terr(p->loc,
-           xprintf("unresolved identifier %s in pattern",qvar2string(q)));
-      t = wildtyp();
-      break;
     case StructRes(_):
       terr(p->loc,"struct tag used without arguments in pattern");
       t = wildtyp();
@@ -135,27 +97,21 @@ $(list<tvar>, list<$(var,tqual,typ)@>)@ tcPat(tenv te,pat p) {
     case XenumRes(xed,ef):
       p->r = Xenum_p(ef->name,null,null,xed,ef);
       return tcPat(te,p);
+    default: // LocalRes, GlobalRes, UnknownRes
+      if (q[0] == null) {
+        p->r = Var_p(q[1]);
+        return tcPat(te,p);
+      }
+      terr(p->loc,
+           xprintf("unresolved identifier %s in pattern",qvar2string(q)));
+      t = wildtyp();
+      break;
     }
     break;
   case UnknownCall_p(q,tvs,ps):
     switch (lookup_ordinary(te,p->loc,q)) {
-    case LocalRes(_):
-      terr(p->loc,
-           xprintf("unresolved identifier %s in pattern",qvar2string(q)));
-      t = wildtyp();
-      break;
-    case GlobalRes(_,_):
-      terr(p->loc,
-           xprintf("unresolved identifier %s in pattern",qvar2string(q)));
-      t = wildtyp();
-      break;
-    case UnknownRes:
-      terr(p->loc,
-           xprintf("unresolved identifier %s in pattern",qvar2string(q)));
-      t = wildtyp();
-      break;
     case StructRes(sd):
-      let x = List::map(tcPat_f2, ps);
+      let x = List::map(null_designator, ps);
       p->r = Struct_p(sd,null,tvs,x);
       return tcPat(te,p);
     case EnumRes(ed,ef):
@@ -164,25 +120,15 @@ $(list<tvar>, list<$(var,tqual,typ)@>)@ tcPat(tenv te,pat p) {
     case XenumRes(xed,ef):
       p->r = Xenum_p(ef->name,tvs,ps,xed,ef);
       return tcPat(te,p);
+    default: // LocalRes, GlobalRes, UnknownRes
+      terr(p->loc,
+           xprintf("unresolved identifier %s in pattern",qvar2string(q)));
+      t = wildtyp();
+      break;
     }
     break;
   case UnknownFields_p(q,tvs,dps):
     switch (lookup_ordinary(te,p->loc,q)) {
-    case LocalRes(_):
-      terr(p->loc,
-           xprintf("unresolved identifier %s in pattern",qvar2string(q)));
-      t = wildtyp();
-      break;
-    case GlobalRes(_,_):
-      terr(p->loc,
-           xprintf("unresolved identifier %s in pattern",qvar2string(q)));
-      t = wildtyp();
-      break;
-    case UnknownRes:
-      terr(p->loc,
-           xprintf("unresolved identifier %s in pattern",qvar2string(q)));
-      t = wildtyp();
-      break;
     case StructRes(sd):
       p->r = Struct_p(sd,null,tvs,dps);
       return tcPat(te,p);
@@ -194,20 +140,25 @@ $(list<tvar>, list<$(var,tqual,typ)@>)@ tcPat(tenv te,pat p) {
       terr(p->loc,"xenum with designators not implemented");
       t = wildtyp();
       break;
+    default: // LocalRes, GlobalRes, UnknownRes
+      terr(p->loc,
+           xprintf("unresolved identifier %s in pattern",qvar2string(q)));
+      t = wildtyp();
+      break;
     }
     break;
   case Var_p(v):
     t = wildtyp();
     v_result = &cons(&$(v,empty_tqual(),t),v_result);
     break;
-  case Struct_p(sd, *topt_ref,tvs,dps): ;
+  case Struct_p(sd, *topt_ref,tvs,dps): 
     // FIX: make sure existentially bound tvs are distinct
     // FIX: existentials aren't handled at all
     // FIX: (JGM) structs shouldn't have existentially-bound type vars!
     if (tvs != null)
       return impos("tcPat: struct<...> not implemented");
     let all_inst = List::map(make_inst_var,sd->tvs);
-    let all_typs = List::map(snd,all_inst); //@<var,typ>
+    let all_typs = List::map(snd,all_inst); 
     *topt_ref = &Opt(all_typs); // side effect
     t = StructType(sd->name,all_typs);
     list<$(field_name,tqual,typ)@> fields;
@@ -221,10 +172,10 @@ $(list<tvar>, list<$(var,tqual,typ)@>)@ tcPat(tenv te,pat p) {
     for (let dps0 = dps; dps0 != null; dps0 = dps0->tl) {
       let y = tcPat(te,dps0->hd[1]);
       tv_result = List::append(y[0],tv_result);
-      v_result = List::append(y[1],v_result);
+      v_result  = List::append(y[1],v_result);
     }
     while (dps != null) {
-      let ds = dps->hd[0];
+      let ds    = dps->hd[0];
       let p_arg = dps->hd[1];
       Opt_t<$(field_name,tqual,typ)@> field = null;
       if (ds == null) {
@@ -269,28 +220,27 @@ $(list<tvar>, list<$(var,tqual,typ)@>)@ tcPat(tenv te,pat p) {
       dps = dps->tl;
     }
     if (fields != null)
-      terr(p->loc,xprintf("struct pattern is missing field %s",
-                         fields->hd[0]));
+      terr(p->loc,xprintf("struct pattern is missing field %s", fields->hd[0]));
     break;
   case Enum_p(q,_,tvs,ps,ed,ef): ;
     tenv te2 = add_type_vars(p->loc,te,tvs);
     tv_result = List::append(tvs,tv_result);
     let all_inst = List::map(make_inst_var,ed->tvs);
-    let all_typs = List::map(snd,all_inst); //@<var,typ>
+    let all_typs = List::map(snd,all_inst); 
     t = EnumType(ed->name,all_typs);
     list<$(tqual,typ)@> tqts = ef->typs;
     while (ps != null && tqts != null) {
       let p2 = ps->hd;
-      let y = tcPat(te2,p2);
-      tv_result = List::append(y[0],tv_result);
-      v_result = List::append(y[1],v_result);
+      let y  = tcPat(te2,p2);
+      tv_result = List::append(y[0], tv_result);
+      v_result  = List::append(y[1], v_result);
       let field_typ = substitute(all_inst,tqts->hd[1]);
       if (!unify(p2->topt->v,field_typ))
         terr(p2->loc,
              xprintf("%s expects argument type %s, not %s",
-                     qvar2string(q),typ2string(field_typ),
-                     typ2string(p2->topt->v)));
-      ps = ps->tl;
+                     qvar2string(q), typ2string(field_typ),
+		     typ2string(p2->topt->v)));
+      ps   = ps->tl;
       tqts = tqts->tl;
     }
     if (ps != null)
@@ -328,11 +278,10 @@ $(list<tvar>, list<$(var,tqual,typ)@>)@ tcPat(tenv te,pat p) {
     break;
   }
   p->topt = &Opt(t);
-  list<var> vs = List::map(tcPat_f3, v_result);
+  list<var> vs = List::map(fst_trip, v_result);
   Set<var> repeated = repeated_vars(vs);
-  if (!Set::is_empty(repeated)) {
-    Set::iter_c(tcPat_f4,p->loc,repeated);
-  }
+  if (!Set::is_empty(repeated)) 
+    Set::iter_c(twice_msg,p->loc,repeated);
   return &$(tv_result,v_result);
 }
 
@@ -374,170 +323,165 @@ $(list<tvar>, list<$(var,tqual,typ)@>)@ tcPat(tenv te,pat p) {
 // Constant patterns (e.g., 1, true, 3[0]4) have 0 arity.  The span
 // for bool is 2, for char is 256, and for integers, floats, and
 // Xenums is infinite (i.e., null).
-enum Name_value { Name_v(string); Int_v(int); };
-typedef enum Name_value name_value;
-struct Con_s {
-  name_value name;
-  int arity;
-  Opt_t<int> span;
+static enum Name_value { Name_v(string); Int_v(int); };
+typedef enum Name_value name_value_t;
+static struct Con_s {
+  name_value_t name;
+  int          arity;
+  Opt_t<int>   span;
 };
-typedef struct Con_s @con;
-enum Simple_pat { Any; Con(con,list<enum Simple_pat>); };
-typedef enum Simple_pat simple_pat;
+typedef struct Con_s @con_t;
+static enum Simple_pat { Any; Con(con_t,list<enum Simple_pat>); };
+typedef enum Simple_pat simple_pat_t;
 
 // used for creating sets of constructors
-static int compare_con(con c1, con c2) {
+static int compare_con(con_t c1, con_t c2) {
   switch (c1->name) {
   case Name_v(n1):
     switch (c2->name) {
-    case Name_v(n2): return(String::strcmp(n1,n2));
-    case Int_v(i2): return -1;
+    case Name_v(n2): return String::strcmp(n1,n2);
+    case Int_v(_):   return -1;
     }
   case Int_v(i1):
     switch (c2->name) {
     case Name_v(_): return 1;
-    case Int_v(i2): return(i1 - i2);
+    case Int_v(i2): return i1 - i2;
     }
   }
 }
+
 // build various cons
-static Set::Set<con> empty_con_set() { return(Set::empty(compare_con)); }
+static Set::Set<con_t> empty_con_set() { return Set::empty(compare_con); }
+
 static struct Opt<int> one_opt = { 1 };
 static struct Opt<int> two_opt = { 2 };
-static struct Con_s true_con0 = { Name_v("true"), 0, &two_opt };
-static con true_con = &true_con0;
-static struct Con_s false_con0 = { Name_v("false"), 0, &two_opt };
-static con false_con = &false_con0;
-static struct Con_s null_con0 = { Name_v("null"), 0, &two_opt };
-static con null_con = &null_con0;
-static struct Con_s null_ptr_con0 = { Name_v("ptr"), 1, &two_opt };
-static con null_ptr_con = &null_ptr_con0;
-static struct Con_s ptr_con0 = { Name_v("ptr"), 1, &one_opt };
-static con ptr_con = &ptr_con0;
-static con int_con(int i) { return &Con_s(Int_v(i), 0, null); }
-static con char_con(char c) { return &Con_s(Int_v((int)c),0,&Opt(256)); }
-static con float_con(string f) { return &Con_s(Name_v(f), 0, null); }
-static con double_con(string d) { return &Con_s(Name_v(d), 0, null); }
-static con tuple_con(int i) { return &Con_s(Name_v("tuple"), i, &Opt(1)); }
+
+static name_value_t tuple_name = Name_v("tuple") ;
+
+static struct Con_s true_con0     = { Name_v("true"),  0, &two_opt };
+static struct Con_s false_con0    = { Name_v("false"), 0, &two_opt };
+static struct Con_s null_con0     = { Name_v("null"),  0, &two_opt };
+static struct Con_s null_ptr_con0 = { Name_v("ptr"),   1, &two_opt };
+static struct Con_s ptr_con0      = { Name_v("ptr"),   1, &one_opt };
+
+static con_t true_con     = &true_con0;
+static con_t false_con    = &false_con0;
+static con_t null_con     = &null_con0;
+static con_t null_ptr_con = &null_ptr_con0;
+static con_t ptr_con      = &ptr_con0;
+
+static con_t int_con(int i)       { return &Con_s(Int_v(i),      0, null); }
+static con_t char_con(char c)     { return &Con_s(Int_v((int)c), 0, &Opt(256)); }
+static con_t float_con(string f)  { return &Con_s(Name_v(f),     0, null); }
+static con_t double_con(string d) { return &Con_s(Name_v(d),     0, null); }
+static con_t tuple_con(int i)     { return &Con_s(tuple_name,    i, &one_opt); }
+
 // build various simple patterns
-static simple_pat true_pat() { return Con(true_con,null); }
-static simple_pat false_pat() { return Con(false_con,null); }
-static simple_pat null_pat() { return Con(null_con,null); }
-static simple_pat null_ptr_pat(simple_pat p) {
+static simple_pat_t true_pat()           { return Con(true_con,      null); }
+static simple_pat_t false_pat()          { return Con(false_con,     null); }
+static simple_pat_t null_pat()           { return Con(null_con,      null); }
+static simple_pat_t int_pat(int i)       { return Con(int_con(i),    null); }
+static simple_pat_t char_pat(char c)     { return Con(char_con(c),   null); }
+static simple_pat_t float_pat(string f)  { return Con(float_con(f),  null); }
+static simple_pat_t double_pat(string d) { return Con(double_con(d), null); }
+
+static simple_pat_t null_ptr_pat(simple_pat_t p) {
   return Con(null_ptr_con,&cons(p,null));
 }
-static simple_pat ptr_pat(simple_pat p) {
-  return Con(ptr_con,&cons(p,null));
+static simple_pat_t ptr_pat(simple_pat_t p) { 
+  return Con(ptr_con,&cons(p,null)); 
 }
-static simple_pat int_pat(int i) {
-  return Con(int_con(i),null);
-}
-static simple_pat char_pat(char c) {
-  return Con(char_con(c),null);
-}
-static simple_pat float_pat(string f) {
-  return Con(float_con(f),null);
-}
-static simple_pat double_pat(string d) {
-  return Con(double_con(d),null);
-}
-static simple_pat tuple_pat(list<simple_pat> ss) {
+static simple_pat_t tuple_pat(list<simple_pat_t> ss) {
   return Con(tuple_con(List::length(ss)),ss);
 }
-static simple_pat con_pat(string con_name,Opt_t<int> span,list<simple_pat> ps) {
-  con c = &Con_s(Name_v(con_name), List::length(ps), span);
+static 
+simple_pat_t con_pat(string con_name,Opt_t<int> span,list<simple_pat_t> ps) {
+  con_t c = &Con_s(Name_v(con_name), List::length(ps), span);
   return Con(c,ps);
 }
-static $(string,pat)@ elim($(list<designator>,pat)@ x) {
-  let p = x[1];
-  let dls = x[0];
-  if (dls == null || dls->tl != null) impos("bad designator list");
-  switch (dls->hd) {
-  case FieldName(f): return &$(f,p);
-  case ArrayElement(e): return impos("bad designator");
-  }
-}
-list<$(string,pat)@> eliminate_descriptors(list<$(list<designator>,pat)@> dlps) {
-  return List::map(elim,dlps);
-}
+
 // compile a Cyclone pattern to a simple pattern
-static simple_pat compile_pat(pat p) {
-  simple_pat s;
+static simple_pat_t compile_pat(pat p) {
+  simple_pat_t s;
   switch (p->r) {
-  case Wild_p: s = Any; break;
-  case Var_p(_): s = Any; break;
-  case Null_p: s = null_pat(); break;
-  case Bool_p(b): s = b ? true_pat() : false_pat(); break;
-  case Int_p(sn,i): s = int_pat(i); break;
-  case Char_p(c): s = char_pat(c); break;
-  case Float_p(f): s = float_pat(f); break;
-  case Tuple_p(ps): s = tuple_pat(List::map(compile_pat,ps)); break;
+  case Wild_p:         s = Any; break;
+  case Var_p(_):       s = Any; break;
+  case Null_p:         s = null_pat(); break;
+  case Bool_p(b):      s = b ? true_pat() : false_pat(); break;
+  case Int_p(sn,i):    s = int_pat(i); break;
+  case Char_p(c):      s = char_pat(c); break;
+  case Float_p(f):     s = float_pat(f); break;
+  case Tuple_p(ps):    s = tuple_pat(List::map(compile_pat,ps)); break;
   case Reference_p(_): s = Any; break;
   case Pointer_p(pp):
-    simple_pat ss = compile_pat(pp);
+    simple_pat_t ss = compile_pat(pp);
     switch (compress(p->topt->v)) {
     case PointerType(_,n,_):
       bool is_nullable = false;
       bool still_working = true;
       while (still_working) {
 	switch (n->v) {
-	case Forward_constr(y): n->v = y->v; continue;
+	case Forward_constr(y): 
+	  n->v = y->v; 
+	  continue;
 	case No_constr:
           n->v = Eq_constr((Bool)false);
-          is_nullable = false;
+          is_nullable   = false;
           still_working = false;  // EXIT LOOP
           break;
 	case Eq_constr(x):
-          is_nullable = (bool)x;
+          is_nullable   = (bool)x;
           still_working = false;  // EXIT LOOP
           break;
 	}
       }
-      if (is_nullable) {
+      if (is_nullable) 
 	s = null_ptr_pat(ss);
-      } else {
+      else 
 	s = ptr_pat(ss);
-      }
       break;
-    default: return(impos("pointer pattern does not have pointer type!"));
+    default: s = impos("pointer pattern does not have pointer type!"); break;
     }
     break;
   case Struct_p(sd,_,_,dlps):
-    list<$(string,pat)@> fps = eliminate_descriptors(dlps);
-    list<simple_pat> ps = null;
+    list<simple_pat_t> ps = null;
     for (let fields = sd->fields->v; fields != null; fields = fields->tl) {
-      pat p1 = List::assoc_cmp(String::strcmp,fps,fields->hd[0]);
-      ps = &cons(compile_pat(p1),ps);
+      bool found = false;
+      for(let dlps0 = dlps; !found && dlps0 != null; dlps0 = dlps0->tl) {
+	let &$(dl,p) = dlps0->hd;
+	switch (dl) {
+	case &cons{.hd=FieldName(f), .tl=null}: 
+	  if(String::strcmp(f,fields->hd[0]) == 0) {
+	    ps = &cons(compile_pat(p),ps);
+	    found = true;
+	  }
+	  break;
+	default: impos("bad designator(s)"); break;
+	}
+      }
+      if(!found)
+	impos("bad designator");
     }
     s = tuple_pat(ps);
     break;
   case Enum_p(_,_,_,ps,ed,ef):
     int span = List::length(ed->fields->v);
-    s = con_pat(ef->name[1],&Opt(span),List::map(compile_pat,ps));
-    break;
+    s = con_pat(ef->name[1],&Opt(span),List::map(compile_pat,ps)); break;
   case Xenum_p(_,_,ps,xd,ef):
-    s = con_pat(ef->name[1],null,List::map(compile_pat,ps));
-    break;
-  case UnknownId_p(_):
-    s = impos("compile_pat: unknownid");
-    break;
-  case UnknownCall_p(_,_,_):
-    s = impos("compile_pat: unknowncall");
-    break;
-  case UnknownFields_p(_,_,_):
-    s = impos("compile_pat: unknownfields");
-    break;
+    s = con_pat(ef->name[1],null,List::map(compile_pat,ps)); break;
+  case UnknownId_p(_):         s = impos("compile_pat: unknownid");     break;
+  case UnknownCall_p(_,_,_):   s = impos("compile_pat: unknowncall");   break;
+  case UnknownFields_p(_,_,_): s = impos("compile_pat: unknownfields"); break;
   }
   return s;
 }
-
 
 // A match is a list of patterns and their right-hand sides.  We
 // parameterize over right-hand sides to make the code re-usable
 // for compilation later on.  What we should really do is go ahead
 // and compile to a decision tree and attach this to the abstract
 // syntax...
-#define match_t(rhs) list<$(simple_pat,rhs)@>
+#define match_t(rhs) list<$(simple_pat_t,rhs)@>
 // A term descriptor describes a set of values using positive and/or
 // negative information.  The descriptor Pos(c,[td1,...,tdn]) describes
 // all values v of the form c(v1,...,vn), where vi is in the set
@@ -545,61 +489,58 @@ static simple_pat compile_pat(pat p) {
 // values v that are not of the form ci(v1,...,vm) (1 <= i <= n).
 // Note that Neg[] denotes any possible value.
 enum Term_desc {
-  Pos(con,list<enum Term_desc>);
-  Neg(Set::Set<con>);
+  Pos(con_t,list<enum Term_desc>);
+  Neg(Set::Set<con_t>);
 };
-typedef enum Term_desc term_desc;
+typedef enum Term_desc term_desc_t;
 
 // Contexts represent a partial term-description matched thus far,
 // from the root node of the object in a left-to-right fashion.
-#define context list<$(con,list<term_desc>)@>
+#define context_t list<$(con_t,list<term_desc_t>)@>
 // A decision tree for compiling pattern-matches.  Failure denotes
 // that an exception should be thrown.  Success triggers a right-hand-side.
 // IfEq is a constructor test -- conceptually, the access path is a sequence
 // of projections applied to the root object to get at the field being
 // tested -- this will eventually have to change to have enough type
 // information to really generate the right code.
-extern enum Access;
-enum Decision<`rhs> {
+static enum Access { Obj; Sel(int, enum Access); }; // just an int list really
+typedef enum Access access_t;
+
+static enum Decision<`rhs> {
   Failure;
   Success(`rhs);
-  IfEq(enum Access,con,enum Decision<`rhs>,enum Decision<`rhs>);
+  IfEq(access_t, con_t, enum Decision<`rhs>, enum Decision<`rhs>);
 };
-typedef enum Decision<`rhs> decision<`rhs>;
-enum Access {
-  Obj;
-  Sel(int,enum Access);
-};
-typedef enum Access access;
+typedef enum Decision<`rhs> decision_t<`rhs>;
 
 // A work_stack records what tests we have to continue to do.  An
 // implicit invariant is that for each frame on the stack, the
 // length of the pattern, access, and term_desc lists are the same.
-#define work_stack_frame $(list<simple_pat>, list<access>, list<term_desc>)@
+#define work_stack_frame $(list<simple_pat_t>,list<access_t>,list<term_desc_t>)@
 #define work_stack list<work_stack_frame>
 // Used during primitive match compilation
-enum Answer { Yes, No, Maybe };
-typedef enum Answer answer;
+static enum Answer { Yes, No, Maybe };
+typedef enum Answer answer_t;
 
 // Add c to a set of negative constructors for a term description.
 // Assumes that td is a negative term description, that c is not
 // already in the set, and that adding c does not cover all of the
 // possible constructors.
-static term_desc add_neg(term_desc td, con c) {
+static term_desc_t add_neg(term_desc_t td, con_t c) {
   switch (td) {
   case Neg(cs):
     if (Set::member(cs,c))
       impos("add_neg called when constructor already in set");
-    if (c->span != null && ((Set::cardinality(cs) + 1) >= c->span->v))
+    if (c->span != null && (Set::cardinality(cs) + 1) >= c->span->v)
 	impos("add_neg called when |cs U {c}| >= span(c)");
     return Neg(Set::insert(cs,c));
-  case Pos(_,_): return(impos("add_neg called when td is Positive"));
+  case Pos(_,_): return impos("add_neg called when td is Positive");
   }
 }
 
 // Returns whether or not values that start with constructor c are in the set
 // described by the term descriptor td.
-static answer static_match(con c, term_desc td) {
+static answer_t static_match(con_t c, term_desc_t td) {
   switch (td) {
   case Pos(c2,_):
     // td is the set of all values that start with c2
@@ -621,28 +562,23 @@ static answer static_match(con c, term_desc td) {
 // is always at the beginning of the context.  Furthermore, the current
 // node's sub-term-descriptors are in reverse order.  Thus, we just
 // cons the dsc onto the first con's list of sub-term-desc's.
-static context augment(context ctxt, term_desc dsc) {
-  if (ctxt == null)
-    return null; // ???
-  else {
-    let pair = ctxt->hd;
-    let rest = ctxt->tl;
-    let c = pair[0];
-    let args = pair[1];
-    return &cons(&$(c,(list<term_desc>)&cons(dsc, args)),rest);
+static context_t augment(context_t ctxt, term_desc_t dsc) {
+  switch (ctxt) {
+  case null: return null; // ???
+  case &cons{.hd=&$(c,args), .tl=rest}:
+    return &cons(&$(c,(list<term_desc_t>)&cons(dsc, args)),rest);
   }
 }
 
 // When argument descriptions [dn,dn-1,...,d2,d1] have been found
 // for all arguments of the local-most constructor c, we turn it
 // into a positive descriptor Pos(c,[d1,d2,...,dn-1,dn]).
-static context norm_context(context ctxt) {
-  if (ctxt == null) impos("norm_context: empty context");
-  let pair = ctxt->hd;
-  let rest = ctxt->tl;
-  let c = pair[0];
-  let args = pair[1];
-  return augment(rest, Pos(c, List::rev(args)));
+static context_t norm_context(context_t ctxt) {
+  switch (ctxt) {
+  case null: return impos("norm_context: empty context");
+  case &cons{.hd=&$(c,args), .tl=rest}: 
+    return augment(rest, Pos(c, List::rev(args)));
+  }
 }
 
 // When moving from one match rule to another, we must re-construct the
@@ -650,75 +586,66 @@ static context norm_context(context ctxt) {
 // up to the left of the current subterm), the current subterm description,
 // and the term descriptions on the work stack, which, when taken together,
 // describe the object to the right of the current subterm.
-static term_desc build_desc<`a,`b>(context ctxt,term_desc dsc,work_stack work) {
-  if (ctxt == null && work == null) return dsc;
-  else if (ctxt != null && work != null) {
-    let c = ctxt->hd[0];
-    let args = ctxt->hd[1];
-    let rest = ctxt->tl;
-    let dargs = work->hd[2];
-    let work2 = work->tl;
-    let td = Pos(c, List::append(List::rev(args),
-                                 &cons(dsc,dargs)));
+static 
+term_desc_t build_desc<`a,`b>(context_t ctxt, term_desc_t dsc, work_stack work) {
+  switch ($(ctxt,work)) {
+  case $(null,null): return dsc;
+  case $(null,_):    return impos("build_desc: ctxt and work don't match");
+  case $(_,   null): return impos("build_desc: ctxt and work don't match");
+  case $(&cons{.hd=&$(c,args), .tl=rest}, &cons{.hd=&$(_,_,dargs), .tl=work2}):
+    let td = Pos(c, List::append(List::rev(args), &cons(dsc,dargs)));
     return build_desc(rest, td, work2);
-  } else return impos("build_desc: ctxt and work don't match");
+  } 
 }
 
-extern decision<`rhs> // forward declaration
-match<`rhs>(simple_pat p, access obj, term_desc dsc,
-            context ctx, work_stack work,
+extern decision_t<`rhs> // forward declaration
+match<`rhs>(simple_pat_t p, access_t obj, term_desc_t dsc,
+            context_t ctx, work_stack work,
             `rhs right_hand_side, match_t(`rhs) rules);
 
 // Checks to see that the term (thus far described by dsc) matches one
 // of the match_t rules.
-static decision<`rhs> or_match<`rhs>(term_desc dsc, match_t(`rhs) allmrules) {
-  if (allmrules == null) return Tcpat::Failure;
-  else {
-    let pat1 = allmrules->hd[0];
-    let rhs1 = allmrules->hd[1];
-    let rulerest = allmrules->tl;
+static decision_t<`rhs> or_match<`rhs>(term_desc_t dsc, match_t(`rhs) allmrules){
+  switch(allmrules) {
+  case null: return Tcpat::Failure;
+  case &cons{.hd = &$(pat1, rhs1), .tl = rulerest}:
     return match(pat1, Obj, dsc, null, null, rhs1, rulerest);
   }
 }
 
 // Compiles a set of match rules to a decision tree.
-static decision<`rhs> match_compile<`rhs>(match_t(`rhs) allmrules) {
+static decision_t<`rhs> match_compile<`rhs>(match_t(`rhs) allmrules) {
   return or_match(Neg(empty_con_set()), allmrules);
 }
 
 // Succeeds returning the right-hand-side if every pattern matches the
 // associated term-description in the work stack, or else the original
 // object matches some rule from rules.
-static decision<`rhs> and_match<`rhs>(context ctx, work_stack work,
+static decision_t<`rhs> and_match<`rhs>(context_t ctx, work_stack work,
 				    `rhs right_hand_side, match_t(`rhs) rules) {
-  if (work == null)
-    return Success(right_hand_side);
-  let w = work->hd;
-  let workr = work->tl;
-  let pats = w[0];
-  let objs = w[1];
-  let dscs = w[2];
-  if (pats == null && objs == null && dscs == null)
+  switch (work) {
+  case null: return Success(right_hand_side);
+  case &cons{.hd = &$(null,null,null), .tl = workr }:
     return and_match(norm_context(ctx), workr, right_hand_side, rules);
-  else if (pats != null && objs != null && dscs != null) {
+  case &cons{.hd = &$(pats,objs,dscs), .tl = workr }:
+    if (pats == null || objs == null || dscs == null)
+      return impos("tcpat:and_match: malformed work frame");    
     let pat1 = pats->hd; let patr = pats->tl;
     let obj1 = objs->hd; let objr = objs->tl;
     let dsc1 = dscs->hd; let dscr = dscs->tl;
     let wf = &$(patr, objr, dscr);
     return match(pat1,obj1,dsc1,ctx,&cons(wf,workr),right_hand_side,rules);
-  } else {
-    return impos("tcpat:and_match: malformed work frame");
-  }
+  } 
 }
 
 // Get the term description arguments for a constructor term-description.
-static list<term_desc> getdargs(con pcon, term_desc dsc) {
+static list<term_desc_t> getdargs(con_t pcon, term_desc_t dsc) {
   switch (dsc) {
   case Neg(ncs):
     // We only know that the term is con which is never in the set ncs.
     // So return Neg{} for each argument, reflecting that no information
     // is known about the arguments.
-    term_desc any = Neg(empty_con_set());
+    term_desc_t any = Neg(empty_con_set());
     let res = null;
     for (int i = 0; i < pcon->arity; ++i)
       res = &cons(any,res);
@@ -728,36 +655,37 @@ static list<term_desc> getdargs(con pcon, term_desc dsc) {
 }
 
 // Compute the paths for each argument when disassembling a constructor.
-static access getoarg(access obj, int i) {
+static access_t getoarg(access_t obj, int i) {
   return Sel(i+1,obj);
 }
-static list<access> getoargs(con pcon, access obj) {
-  return(List::tabulate_c(pcon->arity, getoarg, obj));
+static list<access_t> getoargs(con_t pcon, access_t obj) {
+  return List::tabulate_c(pcon->arity, getoarg, obj);
 }
 
 // Succeeds returning the right-hand-side if the pattern matches the
 // description and every pattern matches the associated description
 // in the work stack, or if the original object matches one of the rules.
-static decision<`rhs> match<`rhs>(simple_pat p, access obj, term_desc dsc,
-                                  context ctx, work_stack work,
-                                  `rhs right_hand_side, match_t(`rhs) rules) {
+static decision_t<`rhs> 
+match<`rhs>(simple_pat_t p, access_t obj, term_desc_t dsc,
+	    context_t ctx, work_stack work,
+	    `rhs right_hand_side, match_t(`rhs) rules) {
   switch (p) {
   case Any: return and_match(augment(ctx, dsc), work, right_hand_side, rules);
   case Con(pcon, pargs):
     switch (static_match(pcon, dsc)) {
     case Yes:
-      let ctx2 = &cons(&$(pcon,null), ctx);
+      let ctx2       = &cons(&$(pcon,null), ctx);
       let work_frame = &$(pargs, getoargs(pcon, obj), getdargs(pcon, dsc));
-      let work2 = &cons(work_frame, work);
+      let work2      = &cons(work_frame, work);
       return and_match(ctx2, work2, right_hand_side, rules);
     case No:
       return or_match(build_desc(ctx, dsc, work), rules);
     case Maybe:
-      let ctx2 = &cons(&$(pcon,null), ctx);
+      let ctx2       = &cons(&$(pcon,null), ctx);
       let work_frame = &$(pargs, getoargs(pcon, obj), getdargs(pcon, dsc));
-      let work2 = &cons(work_frame, work);
-      let s = and_match(ctx2, work2, right_hand_side, rules);
-      let f = or_match(build_desc(ctx, add_neg(dsc,pcon), work), rules);
+      let work2      = &cons(work_frame, work);
+      let s          = and_match(ctx2, work2, right_hand_side, rules);
+      let f          = or_match(build_desc(ctx, add_neg(dsc,pcon), work), rules);
       return IfEq(obj, pcon, s, f);
     }
   }
@@ -768,8 +696,9 @@ static decision<`rhs> match<`rhs>(simple_pat p, access obj, term_desc dsc,
 // implies the patterns are not exhastive.  Note also that if
 // any rhs for a match does not show up in the decision tree, then
 // the associated pattern was redundant.
-static void check_exhaust_overlap<`rhs,`a,`b>(decision<`rhs> d,
-                                              void not_exhaust(`a), `a env1,
+static void check_exhaust_overlap<`rhs,`a,`b>(decision_t<`rhs> d,
+                                              void not_exhaust(`a), 
+					      `a env1,
                                               void rhs_appears(`b,`rhs),
                                               `b env2) {
   switch (d) {
@@ -780,7 +709,7 @@ static void check_exhaust_overlap<`rhs,`a,`b>(decision<`rhs> d,
     rhs_appears(env2,r);
     break;
   case IfEq(_,_,left,right):
-    check_exhaust_overlap(left, not_exhaust, env1, rhs_appears, env2);
+    check_exhaust_overlap(left,  not_exhaust, env1, rhs_appears, env2);
     check_exhaust_overlap(right, not_exhaust, env1, rhs_appears, env2);
     break;
   }
@@ -790,10 +719,11 @@ static void check_exhaust_overlap<`rhs,`a,`b>(decision<`rhs> d,
 // if there are any failure nodes (pattern is inexhaustive) or if
 // any pattern doesn't show up in the tree (pattern is redundant.)
 // Both are considered errors as far as the type-checker is concerned.
-static $(simple_pat, $(bool,segment)@)@ get_match(ref<int> r, switch_clause swc) {
-  simple_pat sp0 = compile_pat(swc->pattern);
+static 
+$(simple_pat_t, $(bool,segment)@)@ get_match(ref<int> r, switch_clause swc) {
+  simple_pat_t sp0 = compile_pat(swc->pattern);
   $(bool,segment)@ rhs = &$(false,swc->pattern->loc);
-  simple_pat sp;
+  simple_pat_t sp;
   if (swc->where_clause != null) {
     sp = tuple_pat(&cons(sp0,&cons(int_pat(r->v++),null)));
   } else {
@@ -836,15 +766,16 @@ static void dummy_fn(int i,int j) {
 }
 void check_let_pat_exhaustive(segment loc,pat p) {
   let match_rules = &cons(&$(compile_pat(p),0),null);
-  let dec_tree = match_compile(match_rules);
+  let dec_tree    = match_compile(match_rules);
   check_exhaust_overlap(dec_tree, not_exhaust_warn, loc, dummy_fn, 0);
 }
 
 // Check that the patterns in a catch switch are non-overlapping.
 // There's an implicit "re-throw on wild" pattern here, so no need
 // to check for exhaustiveness.
-static $(simple_pat, $(bool,segment)@)@ get_match2(ref<int> r, switch_clause swc) {
-  simple_pat sp0 = compile_pat(swc->pattern);
+static 
+$(simple_pat_t, $(bool,segment)@)@ get_match2(ref<int> r, switch_clause swc) {
+  simple_pat_t sp0 = compile_pat(swc->pattern);
   $(bool,segment)@ rhs = &$(false,swc->pattern->loc);
   return &$(sp0, rhs);
 }
@@ -854,14 +785,11 @@ static void not_exhaust_err2(segment loc) {
 void check_catch_overlap(segment loc, list<switch_clause> swcs) {
   // We ignore where clauses here because catch's need not be exhaustive.
   let match_rules = List::map_c(get_match2,new_ref(0),swcs);
-  let dec_tree = match_compile(match_rules);
-  check_exhaust_overlap(dec_tree, not_exhaust_err2, loc,
-			rule_occurs, 0);
+  let dec_tree   = match_compile(match_rules);
+  check_exhaust_overlap(dec_tree, not_exhaust_err2, loc, rule_occurs, 0);
   for (; match_rules != null; match_rules = match_rules->tl) {
     let pair = match_rules->hd[1];
     if (!pair[0])
       terr(pair[1],"redundant pattern");
   }
 }
-
-

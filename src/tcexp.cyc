@@ -111,6 +111,7 @@ static void
 resolve_unresolved_mem(tenv te, segment loc, Opt_t<typ> topt, exp e,
 		       Opt_t<typedef_name> nopt,
 		       list<$(list<designator>,exp)@> des) {
+  // NOTE: must always bang e-> or caller will loop!
   if (topt == null) {
     terr(loc, "cannot resolve type of initializer");
     // guess it's an array
@@ -119,12 +120,14 @@ resolve_unresolved_mem(tenv te, segment loc, Opt_t<typ> topt, exp e,
   }
   typ t = topt->v;
   switch (compress(t)) {
-  case ArrayType(at,aq,ak):
-    e->r = Array_e(des); break;
-  case StructType(tdopt,ts):
-    e->r = Struct_e(tdopt->v,null,des,null); break;
+  case ArrayType(at,aq,ak):  e->r = Array_e(des); break;
+  case StructType(tdopt,ts): e->r = Struct_e(tdopt->v,null,des,null); break;
   default:
-    terr(loc, xprintf("invalid initializer for type %s -- expecting array or struct type",typ2string(t)));
+    terr(loc, 
+     xprintf("invalid initializer for type %s -- expecting array or struct type",
+	     typ2string(t)));
+    // guess it's an array
+    e->r = Array_e(des);
     break;
   }
 }

@@ -2206,9 +2206,9 @@ static void structdecl_to_c(structdecl s) {
   }
 
   s->sc =
-    // C does not like extern on struct declarations -- this avoids
+    // C does not like extern or static on struct declarations -- this avoids
     // a gcc warning
-    (s->sc == Extern) ? Public : scope_to_c(s->sc);
+    (s->sc == Extern || s->sc == Static) ? Public : scope_to_c(s->sc);
   s->tvs = null;
   s->name = &Opt(n);
   if (s->fields != null) {
