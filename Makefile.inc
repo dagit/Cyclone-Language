@@ -4,6 +4,7 @@ CYCLONE_LIBS=arg\
          buffer\
          character\
          core\
+         slowdict\
          dict\
          filename\
          hashtable\

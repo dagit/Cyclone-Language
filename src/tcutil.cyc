@@ -92,22 +92,22 @@ typ compress(typ t) {
 // return the "least" kind of a type, where Box <= Reg <= Mem
 static kind typ_kind(typ t) {
   switch (compress(t)) {
-  case VoidType:           return mem_k;
+  case VoidType:           return MemKind;
   case Evar(k,topt,_):     return k;
-  case VarType(_):         return box_k;
-  case EnumType(_,_,_):    return box_k;
-  case XenumType(_,_):     return box_k;
-  case PointerType(_,_,_,_): return box_k;
-  case IntType(_,sz,bx):   return (sz == B4 || bx == Boxed) ? box_k : reg_k;
-  case FloatType(bx):      return (bx == Boxed)             ? box_k : reg_k;
-  case DoubleType(bx):     return (bx == Boxed)             ? box_k : reg_k;
-  case ArrayType(_,_,ak):  return (ak == TaggedArray)       ? box_k : mem_k;
-  case FnType(_,_,_,_):    return mem_k;
-  case TupleType(_):       return mem_k;
-  case StructType(_,_,_):  return mem_k;
+  case VarType(_):         return BoxKind;
+  case EnumType(_,_,_):    return BoxKind;
+  case XenumType(_,_):     return BoxKind;
+  case PointerType(_,_,_,_): return BoxKind;
+  case IntType(_,sz,bx):   return (sz == B4 || bx == Boxed) ? BoxKind : RegKind;
+  case FloatType(bx):      return (bx == Boxed)             ? BoxKind : RegKind;
+  case DoubleType(bx):     return (bx == Boxed)             ? BoxKind : RegKind;
+  case ArrayType(_,_,ak):  return (ak == TaggedArray)       ? BoxKind : MemKind;
+  case FnType(_,_,_,_):    return MemKind;
+  case TupleType(_):       return MemKind;
+  case StructType(_,_,_):  return MemKind;
   case TypedefType(_,_,topt): 
     return impos(xprintf("typ_kind: typedef found: %s", typ2string(t)));
-  case RgnHandleType(_):   return box_k;
+  case RgnHandleType(_):   return BoxKind;
   case UnionType: return impos("union type");
   }
 }
@@ -116,8 +116,8 @@ static kind typ_kind(typ t) {
 static bool kind_leq(kind k1, kind k2) {
   switch (k2) {
   case MemKind: return true;
-  case RegKind: return (k1 == reg_k || k1 == box_k);
-  case BoxKind: return (k1 == box_k);
+  case RegKind: return (k1 == RegKind || k1 == BoxKind);
+  case BoxKind: return (k1 == BoxKind);
   }
 }
 
@@ -343,12 +343,12 @@ void unify_it(typ t1, typ t2) {
   case $(FnType(tvs2,rt2,args2,vararg2), FnType(tvs1,rt1,args1,vararg1)):
     list<$(var,typ)@> inst = null;
     while (tvs1 != null) {
-      if (tvs2 == null) throw Unify;
+      if (tvs2 == null) break;
       inst = &cons(&$(tvs2->hd,VarType(tvs1->hd)),inst);
       tvs1 = tvs1->tl;
       tvs2 = tvs2->tl;
     }
-    if (tvs2 != null) throw Unify;
+    if (tvs2 != null) break;
     if (inst != null) {
       unify_it(FnType(null,rt1,args1,vararg1),
 	       substitute(inst,FnType(null,rt2,args2,vararg2)));
@@ -359,7 +359,7 @@ void unify_it(typ t1, typ t2) {
       unify_tqual(args1->hd[1],args2->hd[1]);
       unify_it(args1->hd[2],args2->hd[2]);
     }
-    if ((args1 != null) || (args2 != null)) throw Unify;
+    if ((args1 != null) || (args2 != null)) break;
     if (vararg1 == vararg2) return;
     break;
 
@@ -486,7 +486,7 @@ bool coerce_uint_typ(tenv te, exp e) {
   if (unify(e->topt->v,uint_t)) 
     return true;
   // try unboxing e
-  if (typ_kind(e->topt->v) == box_k) {
+  if (typ_kind(e->topt->v) == BoxKind) {
     unbox_exp(te,e);
     if (unify(e->topt->v,uint_t)) 
       return true;
@@ -506,7 +506,7 @@ bool coerce_sint_typ(tenv te, exp e) {
   if (unify(e->topt->v,sint_t)) 
     return true;
   // try unboxing e
-  if (typ_kind(e->topt->v) == box_k) {
+  if (typ_kind(e->topt->v) == BoxKind) {
     unbox_exp(te,e);
     if (unify(e->topt->v,sint_t)) 
       return true;
@@ -564,7 +564,7 @@ bool coerce_arg(tenv te, exp e, typ t2) {
   // see if types immediately match
   if (unify(t1,t2)) return true;
   // try unboxing e
-  if (typ_kind(t1) == box_k && typ_kind(t2) == reg_k) {
+  if (typ_kind(t1) == BoxKind && typ_kind(t2) == RegKind) {
     unbox_exp(te,e);
     if (unify(t1,t2)) return true;
   }
@@ -621,7 +621,7 @@ bool coerce_use(tenv te, exp e, typ t2) {
   typ  t1 = compress(e->topt->v);
   kind k1 = typ_kind(t1);
   kind k2 = typ_kind(t2);
-  if (k1 == box_k && k2 == reg_k)
+  if (k1 == BoxKind && k2 == RegKind)
     unbox_exp(te,e);
   if (unify(t1,t2)) 
     return true;
@@ -1127,7 +1127,7 @@ void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
     for (; targs != null; targs = targs->tl) {
       typ t1 = targs->hd;
       check_valid_type(loc,te,bound_vars,t1);
-      if (typ_kind(t1) != box_k) 
+      if (typ_kind(t1) != BoxKind) 
 	terr(loc,xprintf("type %s is not a boxed type",typ2string(t1)));
     }
     // maybe we know more about the fields than we did 
@@ -1218,7 +1218,7 @@ void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
     for (; targs != null; targs = targs->tl) {
       typ t1 = targs->hd;
       check_valid_type(loc,te,bound_vars,t1);
-      if (typ_kind(t1) != box_k)
+      if (typ_kind(t1) != BoxKind)
 	terr(loc,xprintf("type %s is not a boxed type",typ2string(t1)));
     }
     break;
@@ -1235,7 +1235,7 @@ void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
     
     for (list<typ> ts = targs; ts != null; ts = ts->tl) {
       check_valid_type(loc,te,bound_vars,ts->hd);
-      if (typ_kind(ts->hd) != box_k)
+      if (typ_kind(ts->hd) != BoxKind)
 	terr(loc,xprintf("type %s is not a boxed type",typ2string(ts->hd)));
     }
     list<$(var,typ)@> inst;

@@ -49,6 +49,7 @@
 #include "dict.h"
 #include "set.h"
 #include "dict.h"
+#include "slowdict.h"
 #include "position.h"
 #include "absyn.h"
 #include "tcenv.h"
@@ -61,7 +62,6 @@ namespace Tcenv;
 using Core;
 using List;
 using Set;
-using Dict;
 using Position;
 using Absyn;
 using Tcutil;
@@ -79,18 +79,18 @@ xenum exn {Env_error};
 // Type environments 
 struct Tenv {
   list<var>            ns; // current namespace
-  Dict<list<var>,genv> ae; // absolute environment
+  Dict::Dict<list<var>,genv> ae; // absolute environment
   Opt_t<frames<fenv>>  le; // local environment == null, except in functions
 };
 
 // Global environments -- what's declared in a global scope 
 struct Genv {
-  Set<var>               namespaces;
-  Dict<var,structdecl@>  structdecls;
-  Dict<var,enumdecl@>    enumdecls;
-  Dict<var,xenumdecl@>   xenumdecls;
-  Dict<var,typedefdecl>  typedefs; // indirection unneeded b/c no redeclaration
-  Dict<var,resolved_t>   ordinaries;
+  Set<var>                     namespaces;
+  Dict::Dict<var,structdecl@>  structdecls;
+  Dict::Dict<var,enumdecl@>    enumdecls;
+  Dict::Dict<var,xenumdecl@>   xenumdecls;
+  Dict::Dict<var,typedefdecl>  typedefs; // no indirection b/c no redeclaration
+  Dict::Dict<var,resolved_t>   ordinaries;
   list<list<var>>        availables; // "using" namespaces
 };
 
@@ -135,16 +135,16 @@ typedef struct CtrlEnv @ ctrl_env_t;
 // Hence mutations are seen by all subsequent type-checking, which is easier
 // than threading labels which must be function-wide unique anyway.
 static struct SharedFenv {
-  typ                   return_typ;
-  Dict<var,stmt>        seen_labels;
-  Dict<var,list<stmt>>  needed_labels; // FIX: check empty when done!
+  typ                           return_typ;
+  Dict::Dict<var,stmt>           seen_labels;
+  SlowDict::Dict<var,list<stmt>> needed_labels; // FIX: check empty when done!
 };  
 
 // Local function environments 
 struct Fenv {
   struct SharedFenv @   shared;
   list<tvar>            type_vars; // type variables that can occur free
-  Dict<var,binding_t>   locals;    // binding will be Param_b, Local_b, or Pat_b
+  Dict::Dict<var,binding_t> locals;// binding will be Param_b, Local_b, or Pat_b
   stmt                  encloser;  // nearest stmt with a binder or a try
   ctrl_env_t            ctrl_env;
 };
@@ -483,10 +483,10 @@ void process_goto(tenv te, stmt s) {
     let needed = fe->shared->needed_labels;
     let sopt   = Dict::lookup_opt(fe->shared->seen_labels, l);
     if(sopt == null) {
-      let slopt = Dict::lookup_opt(needed, l);
+      let slopt = SlowDict::lookup_opt(needed, l);
       if(slopt == null)
 	slopt = &Opt(null);
-      fe->shared->needed_labels = Dict::insert(needed, l, &cons(s,slopt->v));
+      fe->shared->needed_labels = SlowDict::insert(needed,l,&cons(s,slopt->v));
     } else {
       *so = sopt;
       sopt->v->non_local_preds = &cons(s, sopt->v->non_local_preds);
@@ -574,9 +574,9 @@ tenv add_label(tenv te, var v, stmt s) {
   if (te->le == null) env_err("Tcenv: unexpected add_label");
   let fe     = get_fenv(te);
   let needed = fe->shared->needed_labels;
-  let sl_opt = Dict::lookup_opt(needed, v);
+  let sl_opt = SlowDict::lookup_opt(needed, v);
   if(sl_opt != null) {
-    fe->shared->needed_labels = Dict::delete(needed, v);
+    fe->shared->needed_labels = SlowDict::delete(needed, v);
     // backpatching
     let sl = sl_opt->v;
     s->non_local_preds = sl; 
@@ -593,7 +593,7 @@ tenv add_label(tenv te, var v, stmt s) {
 }
 
 bool all_labels_resolved(tenv te) {
-  return Dict::is_empty(get_fenv(te)->shared->needed_labels);
+  return SlowDict::is_empty(get_fenv(te)->shared->needed_labels);
 }
 
 stmt get_encloser(tenv te) {
@@ -617,7 +617,7 @@ fenv new_fenv(fndecl fd) {
     locals = Dict::insert(locals, args->hd[0], Param_b(args->hd));
   return &Fenv{.shared        = &SharedFenv(fd->ret_type,
 					    Dict::empty(String::zstrcmp),
-					    Dict::empty(String::zstrcmp)),
+					    SlowDict::empty(String::zstrcmp)),
  	       .type_vars     = fd->tvs, // assumed unique
 	       .locals        = locals,  // assumed unique
 	       .encloser      = fd->body, // careful -- self loop at top!!!
@@ -632,11 +632,11 @@ fenv new_fenv(fndecl fd) {
 struct Synth { typ type; };
 
 typ synth_typ(synth s) {
-  return s->type;
+  return s.type;
 }
 
 synth synth_set_typ(synth s, typ t) {
-  s->type = t;
+  s.type = t;
   return s;
 }
 
@@ -644,7 +644,7 @@ tenv layer_synth(tenv te, synth syn) { return te; }
 
 $(tenv,tenv) bool_layer_synth(tenv te, synth syn) { return $(te,te); }
 
-synth standard_synth(tenv te, typ t) { return &Synth(t); }
+synth standard_synth(tenv te, typ t) { return Synth(t); }
 
 // useful for error expressions
 synth wild_synth(tenv te) {
@@ -661,20 +661,20 @@ synth empty_synth(tenv te) { return wild_synth(te); }
 synth forward_jump_synth(tenv te) { return wild_synth(te); }
 
 // synth we get for sequencing.  
-synth seq_synth(synth s1, synth s2) { return &Synth(s2->type); }
+synth seq_synth(synth s1, synth s2) { return Synth(s2.type); }
 
 // synth we get upon join of two if statements or switch cases etc.
-synth join_synth(synth s1, synth s2) { return &Synth(s1->type); }
+synth join_synth(synth s1, synth s2) { return Synth(s2.type); }
 
-synth switch_bottom(synth s) { return &Synth(s->type); }
+synth switch_bottom(synth s) { return Synth(s.type); }
 
-synth loop_synth(synth e, synth s) { return &Synth(VoidType); }
+synth loop_synth(synth e, synth s) { return Synth(VoidType); }
 
 // an explicit fallthru -- similar to forward jump
-synth fallthru_synth(tenv te) { return &Synth(VoidType); }
+synth fallthru_synth(tenv te) { return Synth(VoidType); }
 
 // add the set v to both edges of the synth
-synth add_var_synth(Set<var> v, synth s) { return &Synth(s->type); }
+synth add_var_synth(Set<var> v, synth s) { return Synth(s.type); }
 
 // remove v from the fallthru edge of the synth
-synth initialize_var_synth(synth s, var v) { return &Synth(s->type); }
+synth initialize_var_synth(synth s, var v) { return Synth(s.type); }

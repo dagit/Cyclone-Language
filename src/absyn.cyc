@@ -29,7 +29,6 @@ int qvar_cmp(qvar q1, qvar q2) {
   if (i != 0) return i;
   else return zstrcmp(q1[1],q2[1]);
 }
-
 static int new_type_counter = 0;
 
 typ new_evar(kind k) {
@@ -58,11 +57,6 @@ bool is_format_prim(primop p) {
 
 // Various constructors
 
-//////////////////////////// Kinds ///////////////////////////////
-kind box_k = BoxKind;
-kind reg_k = RegKind;
-kind mem_k = MemKind;
-
 //////////////////////////// Constraints /////////////////////////
 conref<`a> new_conref<`a>(`a x) {
   return &Conref{.v = Eq_constr(x)};
@@ -72,26 +66,25 @@ conref<`a> empty_conref<`a>() {
   return &Conref{.v = c};
 }
 
-
 //////////////////////////// Types ///////////////////////////////
 // unboxed, unsigned types
-typ uchar_t = IntType(Unsigned,B1,Unboxed);
+typ uchar_t  = IntType(Unsigned,B1,Unboxed);
 typ ushort_t = IntType(Unsigned,B2,Unboxed);
-typ uint_t = IntType(Unsigned,B4,Unboxed);
-typ ulong_t = IntType(Unsigned,B8,Unboxed);
+typ uint_t   = IntType(Unsigned,B4,Unboxed);
+typ ulong_t  = IntType(Unsigned,B8,Unboxed);
 // unboxed, signed types
-typ schar_t = IntType(Signed,B1,Unboxed);
+typ schar_t  = IntType(Signed,B1,Unboxed);
 typ sshort_t = IntType(Signed,B2,Unboxed);
-typ sint_t = IntType(Signed,B4,Unboxed);
-typ slong_t = IntType(Signed,B8,Unboxed);
+typ sint_t   = IntType(Signed,B4,Unboxed);
+typ slong_t  = IntType(Signed,B8,Unboxed);
 // unboxed float, double
-typ float_t = FloatType(Unboxed);
+typ float_t  = FloatType(Unboxed);
 typ double_t = DoubleType(Unboxed);
 // boxed, unsigned types
-typ uChar_t = IntType(Unsigned,B1,Boxed);
+typ uChar_t  = IntType(Unsigned,B1,Boxed);
 typ uShort_t = IntType(Unsigned,B2,Boxed);
-typ uInt_t = IntType(Unsigned,B4,Boxed);
-typ uLong_t = IntType(Unsigned,B8,Boxed);
+typ uInt_t   = IntType(Unsigned,B4,Boxed);
+typ uLong_t  = IntType(Unsigned,B8,Boxed);
 // boxed, signed types
 typ sChar_t  = IntType(Signed,B1,Boxed);
 typ sShort_t = IntType(Signed,B2,Boxed);
@@ -112,13 +105,11 @@ typ string_typ() {
   if (string_t_opt == null) {
     typ t = ArrayType(uchar_t,empty_tqual(),TaggedArray);
     string_t_opt = &Opt(t);
-    return t;
-  } else
-    return string_t_opt->v;
+  }
+  return string_t_opt->v;
 }
 // FILE
 static Opt_t<typ> file_t_opt = null;
-
 // Maybe someday we'll allow FILE objects to live somewhere other than
 // in the heap (by making the runtime interface more flexible).  
 // If so, we'll need a rgn_t argument.
@@ -214,10 +205,10 @@ exp assignop_exp(exp e1, Opt_t<primop> popt, exp e2, segment loc) {
 exp assign_exp(exp e1, exp e2, segment loc) {
   return assignop_exp(e1,null,e2,loc);
 }
-exp post_inc_exp(exp e, segment loc){return new_exp(Increment_e(e,PostInc),loc);}
-exp pre_inc_exp(exp e,  segment loc) {return new_exp(Increment_e(e,PreInc),loc);}
-exp pre_dec_exp(exp e,  segment loc) {return new_exp(Increment_e(e,PreDec),loc);}
-exp post_dec_exp(exp e, segment loc){return new_exp(Increment_e(e,PostDec),loc);}
+exp post_inc_exp(exp e,segment loc){return new_exp(Increment_e(e,PostInc),loc);}
+exp pre_inc_exp(exp e, segment loc){return new_exp(Increment_e(e,PreInc),loc);}
+exp pre_dec_exp(exp e, segment loc){return new_exp(Increment_e(e,PreDec),loc);}
+exp post_dec_exp(exp e,segment loc){return new_exp(Increment_e(e,PostDec),loc);}
 exp conditional_exp(exp e1,exp e2,exp e3,segment loc) {
   return new_exp(Conditional_e(e1,e2,e3), loc);
 }
@@ -285,12 +276,6 @@ stmt new_stmt(raw_stmt s, segment loc) {
   return &Stmt{.r=s, .loc=loc, .non_local_preds=null, .annot=EmptyAnnot }; }
 stmt skip_stmt(segment loc) { return new_stmt(Skip_s, loc); }
 stmt exp_stmt(exp e,segment loc) { return new_stmt(Exp_s(e),loc); }
-stmt seq_stmt(stmt s1, stmt s2, segment loc) { 
-  switch (s1->r) {
-  case Skip_s: return s2;
-  default:     return new_stmt(Seq_s(s1,s2), loc); 
-  }
-}
 stmt seq_stmts(list<stmt> ss, segment loc) {
   if (ss == null) return skip_stmt(loc);
   else if (ss->tl == null) return ss->hd;
@@ -313,6 +298,12 @@ stmt for_stmt(exp e1,exp e2,exp e3,stmt s, segment loc) {
 }
 stmt switch_stmt(exp e, list<switch_clause> scs, segment loc) {
   return new_stmt(Switch_s(e,scs), loc);
+}
+stmt seq_stmt(stmt s1, stmt s2, segment loc) { 
+  switch (s1->r) {
+  case Skip_s: return s2;
+  default:     return new_stmt(Seq_s(s1,s2), loc); 
+  }
 }
 stmt fallthru_stmt(list<exp> el, segment loc) { 
   return new_stmt(Fallthru_s(el,null), loc); 
@@ -344,7 +335,6 @@ stmt assign_stmt(exp e1, exp e2, segment loc) {
 /////////////////////////// Patterns //////////////////////////////
 pat new_pat(raw_pat p, segment s) { return &Pat(p,null,s); }
 
-
 ////////////////////////// Declarations ///////////////////////////
 decl new_decl(raw_decl r, segment loc) { return &Decl{.r=r, .loc=loc}; }
 decl let_decl(pat p, Opt_t<typ> t_opt, exp e, segment loc) {
@@ -363,17 +353,14 @@ vardecl static_vardecl(qvar x, typ t, Opt_t<exp> init) {
 }
 decl struct_decl(scope s,Opt_t<typedef_name> n,list<var> ts,
 		 Opt_t<list<$(field_name,tqual,typ)@>> fs,segment loc) {
-  return new_decl(Struct_d(&Structdecl {.sc = s,.name = n,
-					.tvs = ts,.fields = fs}),loc);
+  return new_decl(Struct_d(&Structdecl {.sc=s,.name=n,.tvs=ts,.fields=fs}),loc);
 }
 decl enum_decl(scope s,Opt_t<typedef_name> n,list<var> ts,
 	       Opt_t<list<enumfield>> fs,segment loc) {
-  return new_decl(Enum_d(&Enumdecl {.sc = s, .name = n,
-				    .tvs = ts, .fields = fs}),loc);
+  return new_decl(Enum_d(&Enumdecl {.sc=s, .name=n, .tvs=ts, .fields=fs}),loc);
 }
 decl xenum_decl(scope s,typedef_name n,list<enumfield> fs,segment loc) {
- return new_decl(Xenum_d(&Xenumdecl{.sc = s, .name = n,
-                                    .fields = fs}),loc);
+ return new_decl(Xenum_d(&Xenumdecl{.sc=s, .name=n, .fields=fs}),loc);
 }
 
 // We treat function types in argument or return position as an
@@ -388,22 +375,20 @@ static $(Opt_t<var>,tqual,typ)@ expand_arg($(Opt_t<var>,tqual,typ)@ a) {
 }
 
 typ function_typ(list<tvar> tvs, typ t, list<$(Opt_t<var>,tqual,typ)@> args,
-               bool varargs) {
+		 bool varargs) {
   return FnType(tvs, pointer_expand(t),List::map(expand_arg,args),varargs);
 }
 typ pointer_expand(typ t) {
   //  switch (compress(t)) {
   switch (t) {
-  case FnType(_,_,_,_):
-    return nonnullableptr_typ(t,empty_tqual());
+  case FnType(_,_,_,_): return nonnullableptr_typ(t,empty_tqual());
 // Disabled for now because it is incompatible with C
 //  case ArrayType*(_,_,ak): 
 //    return
 //      (ak == TaggedArray) ? t : nonnullableptr_typ(t,empty_tqual());
 //  case TypedefType*(n,_,_): 
 //    return impos(sprintf("pointer_expand: typedef %s", qvar2string(n)));
-  default:
-    return t;
+  default: return t;
   }
 }
 
@@ -435,13 +420,13 @@ bool is_lvalue(exp e) {
   }
 }
 
-$(tqual,typ) * lookup_struct_field(structdecl sd, var v) {
+$(field_name,tqual,typ) * lookup_struct_field(structdecl sd, var v) {
   if (sd->fields == null) 
     return null;
   for(let fs = sd->fields->v; fs != null; fs = fs->tl) {
-    let &$(name,tq,t) = fs->hd;
-    if (String::zstrcmp(name,v) == 0)
-      return &$(tq,t);
+    let f = fs->hd;
+    if (String::zstrcmp(f[0],v) == 0)
+      return f;
   }
   return null;
 }

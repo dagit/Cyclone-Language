@@ -70,8 +70,8 @@ void compile_file(string filename) {
 
   // Run the preprocessor, by building and running a command-line
   // Pass -I and -D things onto pre-processor
-  string inc_string = String::str_sepstr(&cons((string)"", rev(includes))," -I");
-  string def_string = String::str_sepstr(&cons((string)"", rev(defines)), " -D");
+  string inc_string = String::str_sepstr(&cons((string)"",rev(includes))," -I");
+  string def_string = String::str_sepstr(&cons((string)"",rev(defines)), " -D");
   string cmd = xprintf("gcc -x c -E -U__GNUC__ %s %s %s > %s",
 		       inc_string, def_string, filename, preprocfile);
   fprintf(cyc_stderr,"%s\n",cmd);
@@ -82,8 +82,7 @@ void compile_file(string filename) {
 
   // Actually process the file
   FILE @f;
-  try
-    f = file_open(preprocfile, "r");
+  try f = file_open(preprocfile, "r");
   catch {
   default:
     fprintf(cyc_stderr, "couldn't open %s\n", preprocfile);

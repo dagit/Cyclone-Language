@@ -120,6 +120,7 @@ cnst eval_const_exp(exp e) {
 // called by tcSizeof (which ignores result) and eval_szof.
 // Note in the latter case, this code really needs to be in sync with the
 // type translation to C.
+// Note that a StructType better be checked so we can get the structdecl
 unsigned int szof(typ t, segment loc) {
   switch (Tcutil::compress(t)) {
   case VoidType:   terr(loc,"cannot apply sizeof to void type"); return 0u;
@@ -152,10 +153,17 @@ unsigned int szof(typ t, segment loc) {
       s += szof(tqs->hd[1],loc);
     return s;
   case RgnHandleType(_): return 4u;
-  case StructType(tdnopt,ts,sd):
-    // FIX: we need the environment to calculate
+  case StructType(tdnopt,ts,sdp):
     // FIX: we need to insert padding to ensure alignment
-                           return Tcutil::impos("szof on structtype");
+    if(sdp == null)
+      return Tcutil::impos("szof on unchecked StructType");
+    let sd = *sdp;
+    if(sd->fields == null)
+      terr(loc,"cannot apply sizeof to abstract struct type");
+    unsigned int s = 0;
+    for(let fs = sd->fields->v; fs != null; fs = fs->tl)
+      s += szof(fs->hd[2],loc);
+    return s;
   case TypedefType(_,_,_): return Tcutil::impos("szof typedeftype");
   case UnionType:          return Tcutil::impos("szof uniontype");
   }

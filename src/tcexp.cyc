@@ -134,23 +134,18 @@ static void resolve_any_unknown_id(tenv te, exp e) {
 }
 
 
-// Type check a list of expressions returning a sequentialized synth -- the
-// type in the resulting synth is bogus, but the other information is valid.
-static synth tcExpList(tenv te, list<exp> es) {
-  synth s = skip_synth(te);
-  while(es != null) {
-    s  = seq_synth(s, tcExp(te,null,es->hd));
-    te = layer_synth(te,s);
-    es = es->tl;
-  }
-  return s;
+// Type check a list of expressions -- we no longer bother returning
+// a sequentialized synth (we don't have left to right evaluation anyway) 
+static void tcExpList(tenv te, list<exp> es) {
+  for(; es != null; es = es->tl)
+    tcExp(te,null,es->hd);
 }
 
 // constants
 static synth tcConst(tenv te, segment loc, Opt_t<typ> topt, cnst c, exp e) {
   typ t;
   switch (c) {
-  case Char_c(sn,_): t = (sn == Unsigned) ? uchar_t : schar_t;  break;
+  case Char_c(sn,_):  t = (sn == Unsigned) ? uchar_t : schar_t;  break;
   case Short_c(sn,_): t = (sn == Unsigned) ? ushort_t : sshort_t; break;
   case Int_c(sn,i):
     if (topt == null)
@@ -214,9 +209,9 @@ static synth tcVar(tenv te, segment loc, Opt_t<typ> topt, qvar q, exp e) {
     case Pat_b(vd):
       return standard_synth(te,vd->type);
     }
-  case StructRes(_):  return impos("StructRes in tcVar");
-  case EnumRes(_,_):  return impos("EnumRes in tcVar");
-  case XenumRes(_,_): return impos("XenumRes in tcVar");
+  case StructRes(_):  throw impos("StructRes in tcVar");
+  case EnumRes(_,_):  throw impos("EnumRes in tcVar");
+  case XenumRes(_,_): throw impos("XenumRes in tcVar");
   }
 }
 static void check_format_args(tenv te, exp fmt, list<exp> args) {
@@ -420,7 +415,7 @@ static synth tcPrimop(tenv te, segment loc, Opt_t<typ> topt,
   // should not be allowed.  So for sizeof(e), we should not call tcExp on e,
   // because that will do pointer generation (convert a function to a pointer
   // to a function).  Instead we should call tcexpNoInst.
-  let es_result = tcExpList(te,es);
+  tcExpList(te,es);
   typ t;
   switch (p) {
   case Printf:
@@ -462,7 +457,7 @@ static synth tcPrimop(tenv te, segment loc, Opt_t<typ> topt,
     }
     break;
   }
-  return synth_set_typ(es_result,t);
+  return standard_synth(te,t);
 }
 
 static synth tcIncrement(tenv te, segment loc, Opt_t<typ> topt, 
@@ -555,14 +550,16 @@ static synth tcAssignOp(tenv te,segment loc, Opt_t<typ> topt, exp e0, exp e1,
 
 // e1,e2 
 static synth tcSeqExp(tenv te, segment loc, Opt_t<typ> topt, exp e1, exp e2) {
-  let r = tcExpList(te,&cons(e1,&cons(e2,null)));
-  return synth_set_typ(r,e2->topt->v);
+  tcExp(te,null,e1);
+  tcExp(te,null,e2);
+  return standard_synth(te,e2->topt->v);
 }
 
 // e(es) 
 static 
 synth tcFnCall(tenv te, segment loc, Opt_t<typ> topt, exp e, list<exp> es) {
-  let list_result = tcExpList(te,&cons(e,es));
+  tcExp(te,null,e);
+  tcExpList(te,es);
   typ t = compress(e->topt->v);
   // NB: we should really unify t with an unconstrained FnType with the
   // right arity but there may be coercions involved with the arguments
@@ -596,7 +593,7 @@ synth tcFnCall(tenv te, segment loc, Opt_t<typ> topt, exp e, list<exp> es) {
         return expr_err(te,loc,"too many arguments for function");
       else if (args_info != null) 
         return expr_err(te,loc,"too few arguments for function");
-      return synth_set_typ(list_result,res_typ);
+      return standard_synth(te,res_typ);
     default:
       return expr_err(te,loc,"expected pointer to function");
     }
@@ -729,57 +726,10 @@ static synth tcAddress(tenv te, segment loc, Opt_t<typ> topt, exp e) {
   return synth_set_typ(esyn,t);
 }
 
-// FIX: have szof return two values (or -1 for not okay)
-static void ok_sizeof(tenv te, segment loc, typ t) {
-  switch (compress(t)) {
-  case VoidType: terr(loc,"cannot apply sizeof to void type"); return;
-  case Evar(_,_,_): impos("sizeof on evar!"); return;
-  case VarType(_): return;
-  case EnumType(_,_,_): return;
-  case XenumType(_,_): return;
-  case PointerType(_,_,_,_): return;
-  case IntType(_,_,_): return;
-  case FloatType(_): return;
-  case DoubleType(_): return;
-  case ArrayType(t2,tq,ak):
-    switch (ak) {
-    case UntaggedArray: 
-      terr(loc,xprintf("cannot apply sizeof to untagged array type %s",
-		       typ2string(t2)));
-      return;
-    case TaggedArray: return;
-    case FixedArray(_): ok_sizeof(te,loc,t2); return;
-    }
-  case FnType(_,_,_,_): terr(loc,"sizeof applied to function type"); return;
-  case TupleType(tqts):
-    for (; tqts != null; tqts = tqts->tl)
-      ok_sizeof(te,loc,tqts->hd[1]);
-    return;
-  case StructType(tdopt,ts,sdp):
-    if(sdp == null)
-      terr(loc,"COMPILER ERROR -- StructType not properly set");
-    let sd = *sdp;
-    if (tdopt != null) {
-      let inst = List::map(make_inst_var,sd->tvs);
-      if (sd->fields == null) {
-	terr(loc,xprintf("struct %s is abstract -- cannot apply sizeof",
-			 qvar2string(tdopt->v)));
-	return;
-      }
-      for (let fs = sd->fields->v; fs != null; fs = fs->tl) 
-	ok_sizeof(te,loc,substitute(inst,fs->hd[2]));
-    }
-    return;
-  case UnionType: impos("ok_sizeof: uniontype"); return;
-  case RgnHandleType(_): impos("r"); return;
-  case TypedefType(_,_,_): impos("ok_sizeof: typedeftype"); return;
-  }
-}
-
 // sizeof t 
 static synth tcSizeof(tenv te, segment loc, Opt_t<typ> topt, typ t) {
   check_valid_type(loc,te,lookup_type_vars(te),t);
-  ok_sizeof(te,loc,t);
+  szof(t,loc); // just ignore result -- posts error for bad type
   return standard_synth(te,uint_t);
 }
 
@@ -804,12 +754,12 @@ static synth tcStructMember(tenv te, segment loc, Opt_t<typ> topt,
   case StructType(nopt,ts,&sd):
     if (nopt == null)
       return expr_err(te,loc,"unresolved struct type (COMPILER ERROR)");
-    let finfo_opt = lookup_struct_field(sd,f);
-    if (finfo_opt == null) 
+    let finfo = lookup_struct_field(sd,f);
+    if (finfo == null) 
       return expr_err(te,loc,xprintf("struct %s has no %s field",
 				     qvar2string(nopt->v), f));
     let inst = List::zip(sd->tvs,ts);
-    let t2   = substitute(inst,finfo_opt[1]);
+    let t2   = substitute(inst,finfo[2]);
     return synth_set_typ(esyn,t2);
   case ArrayType(_,_,ak) && (String::zstrcmp(f,"size") == 0): 
     switch (ak) {
@@ -840,13 +790,12 @@ static synth tcStructArrow(tenv te, segment loc, Opt_t<typ> topt,
   case PointerType(t2,_,_,_):
     switch (compress(t2)) {
     case StructType(nopt,ts,&sd):
-      let finfo_opt = lookup_struct_field(sd,f);
-      if (finfo_opt == null) {
+      let finfo = lookup_struct_field(sd,f);
+      if (finfo == null)
 	return expr_err(te,loc,xprintf("struct %s has no %s field",
 				       qvar2string(nopt->v),f));
-      }
       let inst = List::zip(sd->tvs,ts);
-      let t3   = substitute(inst,finfo_opt[1]);
+      let t3   = substitute(inst,finfo[2]);
       return synth_set_typ(esyn,t3);
     default:
       return expr_err(te,loc, xprintf("expecting struct pointer, found %s", 
@@ -860,7 +809,8 @@ static synth tcStructArrow(tenv te, segment loc, Opt_t<typ> topt,
 
 // e1[e2] 
 static synth tcSubscript(tenv te, segment loc, Opt_t<typ> topt, exp e1, exp e2){
-  let list_result = tcExpList(te,&cons(e1,&cons(e2,null)));
+  tcExp(te,null,e1);
+  tcExp(te,null,e2);
   typ res;
   typ t1 = compress(e1->topt->v);
   typ t2 = compress(e2->topt->v);
@@ -877,32 +827,23 @@ static synth tcSubscript(tenv te, segment loc, Opt_t<typ> topt, exp e1, exp e2){
     switch (t) {
     case TupleType(ts):
       unsigned int i = eval_const_uint_exp(e2);
-      try {
-        res = List::nth(ts,i)[1];
-      } catch {
-      case Nth:
+      try res = List::nth(ts,i)[1];
+      catch { case Nth:
         return expr_err(te,loc,
 			xprintf("index is %d but tuple has only %d fields",
                                 i, List::length(ts)));
       }
       break;
     default:
-      return
-        expr_err(te,loc,
-                 xprintf("subscript applied to %s (array or tuple required)",
-                         typ2string(t1)));
+      return expr_err(te,loc,xprintf("subscript applied to %s",typ2string(t1)));
     }
     break; 
   case TupleType(ts):
     unsigned int i = eval_const_uint_exp(e2);
-    try {
-      res = List::nth(ts,i)[1];
-    } catch {
-    case Nth:
-      return
-        expr_err(te,loc,
-                 xprintf("index is %d but tuple has only %d fields",
-                         i,List::length(ts)));
+    try res = List::nth(ts,i)[1];
+    catch {case Nth:
+      return expr_err(te,loc,xprintf("index is %d but tuple has only %d fields",
+				     i,List::length(ts)));
     }
     break;
   case ArrayType(ta,q,ak):
@@ -912,26 +853,20 @@ static synth tcSubscript(tenv te, segment loc, Opt_t<typ> topt, exp e1, exp e2){
     break;
   default:
     return expr_err(te,loc,
-		   xprintf("subscript applied to %s (array or tuple required)",
-			   typ2string(t1)));
+		    xprintf("subscript applied to %s (array or tuple required)",
+			    typ2string(t1)));
   }
-  return synth_set_typ(list_result,res);
-}
-
-static typ exp_typ(exp e) {
-  return e->topt->v;
+  return standard_synth(te,res);
 }
 
 // $(es) 
-static $(tqual,typ)@ make_tuple_field(typ t) {
-  return &$(&Tqual{.q_const = false,
-                      .q_volatile = false, .q_restrict = false},t);
-}
 static synth tcTuple(tenv te, segment loc, Opt_t<typ> topt, list<exp> es) {
-  let list_result = tcExpList(te,es);
-  list<typ>           ts     = List::map(exp_typ,es);
-  list<$(tqual,typ)@> fields = List::map(make_tuple_field,ts);
-  return synth_set_typ(list_result,TupleType(fields));
+  list<$(tqual,typ)@> fields = null;
+  for(; es != null; es = es->tl) {
+    tcExp(te,null,es->hd);
+    fields = &cons(&$(empty_tqual(), es->hd->topt->v), fields);
+  }
+  return standard_synth(te,TupleType(List::imp_rev(fields)));
 }
 
 // Compound literals, e.g., (struct foo){3,"abc"} 
@@ -946,39 +881,36 @@ static synth tcCompoundLit(tenv te, segment loc, Opt_t<typ> topt,
 // index) is supported and all of the array elements must be present.
 static synth tcArray(tenv te,segment loc,Opt_t<typ> topt, 
 		     list<$(list<designator>,exp)@> des) {
-  list<exp> es = List::map(snd,des); //@<list<designator>,exp>
-  let list_result = skip_synth(te);
-  if (topt == null) list_result = tcExpList(te,es);
+  list<exp> es = List::map(snd,des); 
+  if (topt == null) 
+    tcExpList(te,es);
   else {
     switch (compress(topt->v)) {
-    case ArrayType(elt_t,_,_):
-      let te1 = te;
-      let topt1 = &Opt(elt_t);
+    case ArrayType(elt_typ,_,_):
+      let topt1 = &Opt(elt_typ);
       for (let es1 = es; es1 != null; es1 = es1->tl) {
 	exp e = es1->hd;
-        list_result = seq_synth(list_result, tcExp(te1,topt1,e));
-        te1 = layer_synth(te1,list_result);
-        coerce_arg(te1,e,elt_t);
-        //	e->r = cast_exp(elt_t,new_exp(e->r,e->loc),e->loc)->r;
+	tcExp(te,topt1,e);
+        coerce_arg(te,e,elt_typ);
+        //	e->r = cast_exp(elt_typ,new_exp(e->r,e->loc),e->loc)->r;
       }
       break;
     default: 
       terr(loc,xprintf("initializer for %s is an array",typ2string(topt->v)));
-      list_result = tcExpList(te,es);
+      tcExpList(te,es);
       break;
     }
   }
 
-  //  let list_result = tcExpList(te,es);
   typ res = wildtyp();
   if (!coerce_list(te,res,es))
     terr(es->hd->loc,
 	 xprintf("elements of array do not all have the same type (%s)",
 		 typ2string(res)));
   let sz_rexp = Const_e(Int_c(Unsigned,List::length(es)));
-  exp sz_exp = new_exp(sz_rexp,loc);
+  exp sz_exp  = new_exp(sz_rexp,loc);
+  typ res_t2  = ArrayType(res,empty_tqual(),FixedArray(sz_exp));
   sz_exp->topt = &Opt(uint_t);
-  typ res_t2 = ArrayType(res,empty_tqual(),FixedArray(sz_exp));
   // check that any designators make sense
   for(int offset = 0; des != null; offset++, des = des->tl) {
     list<designator> ds = des->hd[0];
@@ -999,7 +931,7 @@ static synth tcArray(tenv te,segment loc,Opt_t<typ> topt,
       }
     }
   }
-  return synth_set_typ(list_result,res_t2);
+  return standard_synth(te,res_t2);
 }
 
 // {for x < e1 : e2} 
@@ -1071,7 +1003,7 @@ static synth tcStruct(tenv te, segment loc, Opt_t<typ> topt,
     // must make copy because we do imperative removes later on
     fields = List::copy(sd->fields->v);
   // type-check all of the argument expressions in order
-  let list_result = tcExpList(te,List::map(snd,args)); //@<list<designator>,exp>
+  tcExpList(te,List::map(snd,args));
   // for each argument find its field and make sure its type matches
   while (args != null) {
     let &$(ds,e) = args->hd;
@@ -1115,7 +1047,7 @@ static synth tcStruct(tenv te, segment loc, Opt_t<typ> topt,
   if (fields != null)
     terr(loc,xprintf("struct %s is missing a value for field %s",
                      qvar2string(*tn),fields->hd[0]));
-  return synth_set_typ(list_result,res_typ);
+  return standard_synth(te,res_typ);
 }
 
 // f(es)   where f is an enum 
@@ -1126,7 +1058,7 @@ static synth tcEnum(tenv te, segment loc, Opt_t<typ> topt,
 		    list<exp> es,
 		    enumdecl ed,
 		    enumfield ef) {
-  let list_result = tcExpList(te,es);
+  tcExpList(te,es);
   let all_inst    = List::map(make_inst_var,ed->tvs);
   let exist_inst  = List::map(make_inst_var,ef->tvs);
   let all_typs    = List::map(snd,all_inst);   
@@ -1155,7 +1087,7 @@ static synth tcEnum(tenv te, segment loc, Opt_t<typ> topt,
   if (ts != null) 
     return expr_err(te,loc, xprintf("too few arguments for enum constructor %s",
 				    qvar2string(f)));
-  return synth_set_typ(list_result,res);
+  return standard_synth(te,res);
 }
 
 // f(es)   where f is an xenum 
@@ -1165,7 +1097,7 @@ static synth tcXenum(tenv te, segment loc, Opt_t<typ> topt,
 		     list<exp> es,
 		     xenumdecl xd,
 		     enumfield ef) {
-  let list_result = tcExpList(te,es);
+  tcExpList(te,es);
   let exist_inst  = List::map(make_inst_var,ef->tvs);
   let exist_typs  = List::map(snd,exist_inst); //@<var,typ>
   *exist_ref = &Opt(exist_typs);
@@ -1186,7 +1118,7 @@ static synth tcXenum(tenv te, segment loc, Opt_t<typ> topt,
   else if (ts != null)
     terr(es->hd->loc,xprintf("too few arguments for xenum constructor %s",
 			     qvar2string(f)));
-  return synth_set_typ(list_result,res);
+  return standard_synth(te,res);
 
 }
 

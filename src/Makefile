@@ -17,6 +17,7 @@ CYCBISON=../bin/cycbison.exe
 OUT_PREFIX=
 
 CFLAGS=-fwritable-strings -I.. 
+#CFLAGS=-pg -fwritable-strings -I.. 
 #CFLAGS=-O -fwritable-strings -I.. 
 
 CYC_SRCS=$(addsuffix .cyc, $(CYCLONE_SRCS))
@@ -30,6 +31,7 @@ all: $(OUT_PREFIX)$(CYCCOMP)
 
 $(OUT_PREFIX)$(CYCCOMP): $(addprefix $(OUT_PREFIX), $(O_SRCS)) $(LIB)
 	gcc -o $@ $^ ../bin/gc.a
+#	gcc -o $@ $^ ../bin/gc_pg.a -pg
 
 # For machine-generated we need special targets (the .cyc is prefixed)
 $(OUT_PREFIX)lex.c : $(OUT_PREFIX)lex.cyc

@@ -1,13 +1,21 @@
-#ifndef DICT_H
-#define DICT_H
-
+#ifndef SLOWDICT_H
+#define SLOWDICT_H
+////////////////////////////////////////////////////////////////////////////
+// Popcorn library, file slowdict.h                                       //
+// Copyright Greg Morrisett, Dan Grossman                                 //
+// January 1999, all rights reserved                                      //
+//                                                                        //
+////////////////////////////////////////////////////////////////////////////
+#include "core.h"
 #include "list.h"
 
-// The entire interface is the same as SlowDict, except there is no
-// delete or delete_present.
+namespace SlowDict {
+using List;
 
-namespace Dict {
-  using List {
+// slowdict.h:   defines polymorphic, functional, finite maps from types 'a to 
+//           'b, where the domain must have a total order.  Follows the
+//           conventions of the Ocaml dict library as much as possible.
+// unlike Dict, we support delete.
 
 extern struct dict<`a,`b>;
 
@@ -50,6 +58,12 @@ extern `b lookup<`a,`b>(Dict<`a,`b> d,`a key);
 // option.
 extern Core::Opt_t<`b> lookup_opt<`a,`b>(Dict<`a,`b> d,`a key);
 
+// Delete a key/pair from the dict if present. 
+extern Dict<`a,`b> delete<`a,`b>(Dict<`a,`b> d,`a key);
+
+// Delete a key/pair from the dict.  Raise Absent if key doesn't exist 
+extern Dict<`a,`b> delete_present<`a,`b>(Dict<`a,`b> d,`a key);
+
 // Fold a function f across the dictionary yielding an accumulator. 
 extern `c fold<`a,`b,`c>(`c f(`a,`b,`c),Dict<`a,`b> d,`c accum);
 // Same but fold an unboxed closure across the dictionary
@@ -78,5 +92,5 @@ extern $(`a,`b)@ choose<`a,`b>(Dict<`a,`b> d);
 // Return an association list containing all the elements
 extern list<$(`a,`b)@> to_list<`a,`b>(Dict<`a,`b> d);
 
-  }}
+}
 #endif

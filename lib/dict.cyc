@@ -1,272 +1,222 @@
 
-// Port of the splay tree based dictionary implementation (c) Morrisett, Glew,
-// Walker, Crary.
-// Port by Dan, June 1999
-
 #include "core.h"
 #include "list.h"
-#include "splay.h"
 #include "dict.h"
 
 namespace Dict;
-using   Splay;
 
 xenum exn {Absent,Present};
 
+static enum Color { R, B };
+
+static struct T<`a,`b> {
+  enum   Color color;
+  struct T<`a,`b> *   left;
+  struct T<`a,`b> *   right;
+  $(`a,`b)     key_val; // flattened, but tuple convenient for patterns
+};
+typedef struct T<`a,`b> * tree<`a,`b>;
+
 abstract struct dict<`a,`b> {
-  int       (@reln)(`a,`a);
-  enum tree<`a,`b> tree;
+  int (@rel)(`a,`a);
+  tree<`a,`b> t;
 };
 
-// should be the commented out one, but unification is buggy
 Dict<`a,`b> empty<`a,`b>(int comp(`a,`a)) {
-  enum tree<`a,`b> t = Leaf;
-  return &dict(comp, t);
+  return &dict(comp,null);
 }
-//Dict<`a,`b> empty<`a,`b>(int comp(`a,`a)) {
-//  return &dict(comp, Leaf);
-//}
+Dict<`a,`b> singleton<`a,`b>(int comp(`a,`a),`a key,`b data) {
+  return &dict(comp,&T(B,null,null,$(key,data)));
+}
 
 bool is_empty<`a,`b>(Dict<`a,`b> d) {
-  switch (d->tree) {
-  case Leaf:    return true;
-  case Node(_): return false;
-  }
+  return d->t == null;
 }
 
 bool member<`a,`b>(Dict<`a,`b> d, `a key) {
-  return splay(d->reln, key, d->tree);
-}
-
-Dict<`a,`b> insert<`a,`b>(Dict<`a,`b> d, `a key, `b data) {
-  enum tree<`a,`b> newleft = Leaf, newright = Leaf;
-  if (splay(d->reln, key, d->tree)) {
-    // we're functional, so have to make a new root node?
-    switch (d->tree) {
-    case Node(n):
-      newleft     = n->v->left;
-      newright    = n->v->right;
-      break;
-    default:
-      break;
-    }
+  let rel = d->rel;
+  let t   = d->t;
+  while(t != null) {
+    let i = rel(key,t->key_val[0]);
+    if(i < 0) t = t->left;
+    else if (i > 0) t = t->right;
+    else return true;
   }
-  else {
-    switch (d->tree) {
-    case Node(nr):
-      let n = nr->v;
-      if (d->reln(key,n->key) < 0) {
-	newleft  = n->left;
-	newright = Node(&noderef(&node(n->key, n->data, Leaf, n->right)));
-      } else {
-	newleft  = Node(&noderef(&node(n->key, n->data, n->left, Leaf)));
-	newright = n->right;
-      }
-      break;
-    case Leaf:
-      break; // newleft and newright are already Leaf
-    }
+  return false;
+}
+`b lookup<`a,`b>(Dict<`a,`b> d, `a key) {
+  let rel = d->rel;
+  let t   = d->t;
+  while(t != null) {
+    let i = rel(key,t->key_val[0]);
+    if(i < 0) t = t->left;
+    else if (i > 0) t = t->right;
+    else return t->key_val[1];
   }
-  return &dict(d->reln, Node(&noderef(&node(key,data,newleft,newright))));
+  throw Absent;
 }
-
-Dict<`a,`b> insert_new<`a,`b>(Dict<`a,`b> d, `a key, `b data) {
-  // somewhat wasteful this way (makes two new top nodes)
-  if (splay(d->reln, key, d->tree))
-    throw Present();
-  return insert(d, key, data);
-}
-
-Dict<`a,`b> inserts<`a,`b>(Dict<`a,`b> d,List::list<$(`a,`b)@> kds) {  
-  for (; kds != null; kds = kds->tl)
-    d = insert(d, kds->hd[0], kds->hd[1]);
-  return d;
-}
-
-Dict<`a,`b> singleton<`a,`b>(int comp(`a,`a),`a key,`b data) {
-  return &dict(comp, Node(&noderef(&node(key, data, Leaf, Leaf))));
-}
-
-`b lookup<`a,`b>(Dict<`a,`b> d,`a key) {
-  if (splay(d->reln, key, d->tree))
-    switch (d->tree) {
-    case Node(nr): return nr->v->data;
-    case Leaf:     throw Core::Impossible("Dict::lookup");
-  }
-  throw Absent();
-}
-
-Core::Opt_t<`b> lookup_opt<`a,`b>(Dict<`a,`b> d,`a key) {
-  if (splay(d->reln, key, d->tree))
-    switch (d->tree) {
-    case Node(nr): return &Core::Opt(nr->v->data);
-    case Leaf:     throw Core::Impossible("Dict::lookup");
+Core::Opt_t<`b> lookup_opt<`a,`b>(Dict<`a,`b> d, `a key) {
+  let rel = d->rel;
+  let t   = d->t;
+  while(t != null) {
+    let i = rel(key,t->key_val[0]);
+    if(i < 0) t = t->left;
+    else if (i > 0) t = t->right;
+    else return &Core::Opt(t->key_val[1]);
   }
   return null;
 }
 
-static int get_largest<`a>(`a x, `a y) { return 1; }
-
-Dict<`a,`b> delete<`a,`b>(Dict<`a,`b> d,`a key) {
-  if (splay(d->reln, key, d->tree))
-    switch (d->tree) {
-    case Leaf: throw Core::Impossible("Dict::lookup");
-    case Node(nr):
-      struct node<`a,`b> @n = nr->v;
-      switch (n->left) {
-      case Leaf:    return &dict(d->reln, n->right);
-      case Node(noderef_left): 
-	switch (n->right) {
-	case Leaf:    return &dict(d->reln, n->left);
-	case Node(node_ref_right): 
-	  splay(get_largest, key, n->left);
-	  struct node<`a,`b> @newtop = noderef_left->v; // splay changes this
-	  return &dict(d->reln,
-		       Node(&noderef(&node(newtop->key, newtop->data,
-                                          newtop->left, n->right))));
-	}
-      }
+static tree<`a,`b> 
+balance<`a,`b>($(enum Color, tree<`a,`b>, tree<`a,`b>, $(`a,`b)) quad) {
+  switch(quad) {
+  case $(B,&T(R,&T(R,a,b,x),c,y),d,z): return &T(R,&T(B,a,b,x),&T(B,c,d,z),y);
+  case $(B,&T(R,a,&T(R,b,c,y),x),d,z): return &T(R,&T(B,a,b,x),&T(B,c,d,z),y);
+  case $(B,a,&T(R,&T(R,b,c,y),d,z),x): return &T(R,&T(B,a,b,x),&T(B,c,d,z),y);
+  case $(B,a,&T(R,b,&T(R,c,d,z),y),x): return &T(R,&T(B,a,b,x),&T(B,c,d,z),y);
+  case $(a,b,c,d): return &T(a,b,c,d);
   }
-  else
-    return d;
 }
-      
-Dict<`a,`b> delete_present<`a,`b>(Dict<`a,`b> d,`a key) {
-  let d2 = delete(d,key);
-  if (d == d2)
-    throw Absent();
-  return d2;
-}
-
-static `c fold_tree<`a,`b,`c>(`c f(`a,`b,`c), enum tree<`a,`b> t, `c accum) {
+static tree<`a,`b>
+ins<`a,`b>(int rel(`a,`a), $(`a,`b) key_val, tree<`a,`b> t) {
   switch (t) {
-  case Leaf: 
-    return accum;
-  case Node(nr): 
-    struct node<`a,`b> @n = nr->v;
-    return f(n->key, n->data, fold_tree(f, n->left, 
-                                        fold_tree(f, n->right, accum)));
+  case null: return &T(R,null,null,key_val);
+  case &T(color, a, b, y):
+    let i = rel(key_val[0], y[0]);
+    if(i < 0)       return balance($(color, ins(rel,key_val,a), b, y));
+    else if (i > 0) return balance($(color, a, ins(rel,key_val,b), y));
+    else            return &T(color,a,b,key_val);
   }
+}
+
+Dict<`a,`b> insert<`a,`b>(Dict<`a,`b> d,`a key,`b data) {
+  let ans = ins(d->rel, $(key,data), d->t);
+  ans->color = B;
+  return &dict(d->rel, ans);
+}
+
+// notice we descend twice -- we can live
+Dict<`a,`b> insert_new<`a,`b>(Dict<`a,`b> d,`a key,`b data) {
+  if(member(d,key))
+    throw Absent;
+  return insert(d, key, data);
+}
+
+Dict<`a,`b> inserts<`a,`b>(Dict<`a,`b> d,List::list<$(`a,`b)@> kds) {
+  for(; kds != null; kds = kds->tl)
+    d = insert(d, kds->hd[0], kds->hd[1]);
+  return d;
+}
+
+static `c fold_tree<`a,`b,`c>(`c f(`a,`b,`c), struct T<`a,`b> @ t, `c accum) {
+  let &T(_,left,right,$(key,val)) = t;
+  accum = f(key, val, accum);
+  if(left  != null) accum = fold_tree(f,(struct T<`a,`b>@)left,accum);
+  if(right != null) accum = fold_tree(f,(struct T<`a,`b>@)right,accum);
+  return accum;
 }
 `c fold<`a,`b,`c>(`c f(`a,`b,`c),Dict<`a,`b> d,`c accum) {
-  return fold_tree(f, d->tree, accum);
-}
-
-static `c fold_tree_c<`a,`b,`c,`d>(`c f(`d,`a,`b,`c),`d env, enum tree<`a,`b> t,`c accum) {
-  switch (t) {
-  case Leaf: 
+  if(d->t == null)
     return accum;
-  case Node(nr): 
-    struct node<`a,`b> @n = nr->v;
-    return f(env, n->key, n->data,
-             fold_tree_c(f,env,n->left,fold_tree_c(f,env,n->right,accum)));
-  }
-}
-`c fold_c<`a,`b,`c,`d>(`c f(`d,`a,`b,`c),`d env, Dict<`a,`b> dict,`c accum) {
-  return fold_tree_c(f,env,dict->tree,accum);
+  return fold_tree(f, (struct T<`a,`b>@)(d->t), accum);
 }
 
-static void app_tree<`a,`b,`c>(`c f(`a,`b),enum tree<`a,`b> t) {
-  switch (t) {
-  case Leaf: break;
-  case Node(nr):
-    let n = nr->v;
-    app_tree(f, n->left);
-    f(n->key, n->data);
-    app_tree(f, n->right);
-    break;
-  }
+static `c fold_tree_c<`a,`b,`c,`d>(`c f(`d,`a,`b,`c),   `d env,
+				   struct T<`a,`b> @ t, `c accum) {
+  let &T(_,left,right,$(key,val)) = t;
+  accum = f(env, key, val, accum);
+  if(left  != null) accum = fold_tree_c(f,env,(struct T<`a,`b>@)left,accum);
+  if(right != null) accum = fold_tree_c(f,env,(struct T<`a,`b>@)right,accum);
+  return accum;
+}
+`c fold_c<`a,`b,`c,`d>(`c f(`d,`a,`b,`c),`d env,Dict<`a,`b> d,`c accum) {
+  if(d->t == null)
+    return accum;
+  return fold_tree_c(f, env, (struct T<`a,`b>@)(d->t), accum);
+}
+
+static void app_tree<`a,`b,`c>(`c f(`a,`b), struct T<`a,`b> @ t) {
+  let &T(_,left,right,$(key,val)) = t;
+  f(key, val);
+  if(left  != null) app_tree(f,(struct T<`a,`b>@)left);
+  if(right != null) app_tree(f,(struct T<`a,`b>@)right);
 }
 void app<`a,`b,`c>(`c f(`a,`b),Dict<`a,`b> d) {
-  app_tree(f,d->tree);
+  if(d->t != null)
+    app_tree(f,(struct T<`a,`b>@)(d->t));
 }
 
-static void iter_tree<`a,`b>(void f(`a,`b),enum tree<`a,`b> t) {
-  switch (t) {
-  case Leaf: break;
-  case Node(nr):
-    struct node<`a,`b> @n = nr->v;
-    iter_tree(f, n->left);
-    f(n->key, n->data);
-    iter_tree(f, n->right);
-    break;
-  }
+static void app_tree_c<`a,`b,`c,`d>(`c f(`d,`a,`b), `d env, struct T<`a,`b>@ t){
+  let &T(_,left,right,$(key,val)) = t;
+  f(env, key, val);
+  if(left  != null) app_tree_c(f,env,(struct T<`a,`b>@)left);
+  if(right != null) app_tree_c(f,env,(struct T<`a,`b>@)right);
+}
+void app_c<`a,`b,`c,`d>(`c f(`d,`a,`b),`d env, Dict<`a,`b> d) {
+  if(d->t != null)
+    app_tree_c(f,env,(struct T<`a,`b>@)(d->t));
+}
+
+static void iter_tree<`a,`b>(void f(`a,`b), struct T<`a,`b> @ t) {
+  let &T(_,left,right,$(key,val)) = t;
+  f(key, val);
+  if(left  != null) iter_tree(f,(struct T<`a,`b>@)left);
+  if(right != null) iter_tree(f,(struct T<`a,`b>@)right);
 }
 void iter<`a,`b>(void f(`a,`b),Dict<`a,`b> d) {
-  iter_tree(f,d->tree);
+  if(d->t != null)
+    iter_tree(f,(struct T<`a,`b>@)(d->t));
 }
 
-static void app_tree_c<`a,`b,`c,`d>(`c f(`d,`a,`b),`d env,enum tree<`a,`b> t) {
-  switch (t) {
-  case Leaf: break;
-  case Node(nr):
-    struct node<`a,`b> @n = nr->v;
-    app_tree_c(f, env, n->left);
-    f(env, n->key, n->data);
-    app_tree_c(f, env, n->right);
-    break;
-  }
+static void iter_tree_c<`a,`b,`c>(void f(`c,`a,`b), `c env, struct T<`a,`b>@ t){
+  let &T(_,left,right,$(key,val)) = t;
+  f(env, key, val);
+  if(left  != null) iter_tree_c(f,env,(struct T<`a,`b>@)left);
+  if(right != null) iter_tree_c(f,env,(struct T<`a,`b>@)right);
 }
-void app_c<`a,`b,`c,`d>(`c f(`d,`a,`b),`d env,Dict<`a,`b> d) {
-  app_tree_c(f,env,d->tree);
+void iter_c<`a,`b,`c>(void f(`c,`a,`b),`c env, Dict<`a,`b> d) {
+  if(d->t != null)
+    iter_tree_c(f,env,(struct T<`a,`b>@)(d->t));
 }
 
-static void iter_tree_c<`a,`b,`c>(void f(`c,`a,`b),`c env,enum tree<`a,`b> t) {
-  switch (t) {
-  case Leaf: break;
-  case Node(nr):
-    struct node<`a,`b> @n = nr->v;
-    iter_tree_c(f, env, n->left);
-    f(env, n->key, n->data);
-    iter_tree_c(f, env, n->right);
-    break;
-  }
-}
-void iter_c<`a,`b,`c>(void f(`c,`a,`b),`c env,Dict<`a,`b> d) {
-  iter_tree_c(f,env,d->tree);
+static tree<`a,`c> map_tree<`a,`b,`c>(`c f(`b), struct T<`a,`b>@ t) {
+  let &T(c,left,right,$(key,val)) = t;
+  let new_left  = left  == null ? null : map_tree(f,(struct T<`a,`b>@)left);
+  let new_right = right == null ? null : map_tree(f,(struct T<`a,`b>@)right);
+  return &T(c,new_left,new_right,$(key,f(val)));
+} 
+
+Dict<`a,`c> map<`a,`b,`c>(`c f(`b),Dict<`a,`b> d) {
+  if(d->t == null)
+    return &dict(d->rel,null);
+  return &dict(d->rel,map_tree(f,(struct T<`a,`b>@)(d->t)));
 }
 
-static enum tree<`a,`c> map_tree<`a,`b,`c>(`c f(`b), enum tree<`a,`b> t) {
-  switch (t) {
-  case Leaf: return Leaf;
-  case Node(nr):
-    let n = nr->v;
-    return Node(&noderef(&node(n->key,
-                               f(n->data), 
-                               map_tree(f, n->left), 
-                               map_tree(f, n->right))));
-  }
-}
-Dict<`a,`c> map<`a,`b,`c>(`c f(`b), Dict<`a,`b> d) {
-  return &dict(d->reln, map_tree(f, d->tree));
-}
+// Note: walk is post-order
+static tree<`a,`c> map_tree_c<`a,`b,`c,`d>(`c f(`d,`b), `d env,
+					   struct T<`a,`b>@ t) {
+  let &T(c,left,right,$(key,val)) = t;
+  let new_left = left ==null ? null : map_tree_c(f,env,(struct T<`a,`b>@)left);
+  let new_right= right==null ? null : map_tree_c(f,env,(struct T<`a,`b>@)right);
+  return &T(c,new_left,new_right,$(key,f(env,val)));
+} 
 
-static enum tree<`a,`c> map_tree_c<`a,`b,`c,`d>(`c f(`d,`b), `d env, enum tree<`a,`b> t) {
-  switch (t) {
-  case Leaf: return Leaf;
-  case Node(nr):
-    struct node<`a,`b> @n = nr->v;
-    return Node(&noderef(&node(n->key, f(env, n->data), 
-                               map_tree_c(f, env, n->left), 
-                               map_tree_c(f, env, n->right))));
-  }
-}
-Dict<`a,`c> map_c<`a,`b,`c,`d>(`c f(`d,`b), `d env, Dict<`a,`b> d) {
-  return &dict(d->reln, map_tree_c(f, env, d->tree));
+Dict<`a,`c> map_c<`a,`b,`c,`d>(`c f(`d,`b),`d env,Dict<`a,`b> d) {
+  if(d->t == null)
+    return &dict(d->rel,null);
+  return &dict(d->rel,map_tree_c(f,env,(struct T<`a,`b>@)(d->t)));
 }
 
 $(`a,`b)@ choose<`a,`b>(Dict<`a,`b> d) {
-  switch (d->tree) {
-  case Leaf:     throw Absent();
-  case Node(nr): return &$(nr->v->key, nr->v->data);
-  }
+  if(d->t == null)
+    throw Absent;
+  return &$(d->t->key_val[0], d->t->key_val[1]);
 }
 
-List::list<$(`a,`b)@> to_list_f<`a,`b>(`a k, `b v, List::list<$(`a,`b)@> accum) {
+List::list<$(`a,`b)@> to_list_f<`a,`b>(`a k, `b v, List::list<$(`a,`b)@> accum){
   return &List::cons(&$(k,v),accum);
 }
 
 List::list<$(`a,`b)@> to_list<`a,`b>(Dict<`a,`b> d) {
   return fold(to_list_f, d, null);
 }
-

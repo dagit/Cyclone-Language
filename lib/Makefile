@@ -11,6 +11,7 @@ CYCLEX=../bin/cyclex.exe
 OUT_PREFIX=
 
 CFLAGS=-fwritable-strings -I..
+#CFLAGS=-pg -fwritable-strings -I..
 #CFLAGS=-O -fwritable-strings -I..
 
 CYC_LIBS=$(addsuffix .cyc, $(CYCLONE_LIBS))
@@ -62,6 +63,7 @@ LIST_H      = list.h       $(CORE_H)
 ARRAY_H     = array.h 
 BUFFER_H    = buffer.h     $(CORE_H)
 CHARACTER_H = character.h 
+SLOWDICT_H  = slowdict.h   $(CORE_H) $(LIST_H)
 DICT_H      = dict.h       $(CORE_H) $(LIST_H)
 FILENAME_H  = filename.h   $(CORE_H)
 FN_H        = fn.h         $(LIST_H)
@@ -86,7 +88,8 @@ $(OUT_PREFIX)bitvec.c: $(BITVEC_H)
 $(OUT_PREFIX)buffer.c: $(BUFFER_H) $(STRING_H)
 $(OUT_PREFIX)character.c:
 $(OUT_PREFIX)core.c: $(CORE_H)
-$(OUT_PREFIX)dict.c: $(CORE_H) $(LIST_H) $(SPLAY_H) $(DICT_H)
+$(OUT_PREFIX)slowdict.c: $(CORE_H) $(LIST_H) $(SPLAY_H) $(SLOWDICT_H)
+$(OUT_PREFIX)dict.c: $(DICT_H) $(CORE_H) $(LIST_H)
 $(OUT_PREFIX)filename.c: $(FILENAME_H) $(STRING_H)
 $(OUT_PREFIX)hashtable.c: $(LIST_H) $(CORE_H) $(HASHTABLE_H) $(STRING_H)
 $(OUT_PREFIX)list.c: $(LIST_H)

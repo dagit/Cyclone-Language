@@ -316,17 +316,17 @@ synth tcStmt(tenv te, stmt s0) {
       terr(d->loc,"using is allowed at top level only");
       return skip_synth(te);
     case Fn_d(fd):
-      return impos("tcStmt: nested function declarations are not implemented");
+      throw impos("tcStmt: nested function declarations are not implemented");
     case Struct_d(sd):
-      return impos("tcStmt: nested struct declarations are not implemented");
+      throw impos("tcStmt: nested struct declarations are not implemented");
     case Union_d:
-      return impos("tcStmt: nested union declarations are not implemented");
+      throw impos("tcStmt: nested union declarations are not implemented");
     case Enum_d(ed):
-      return impos("tcStmt: nested enum declarations are not implemented");
+      throw impos("tcStmt: nested enum declarations are not implemented");
     case Xenum_d(xed):
-      return impos("tcStmt: nested xenum declarations are not implemented");
+      throw impos("tcStmt: nested xenum declarations are not implemented");
     case Typedef_d(tdd):
-      return impos("tcStmt: nested typedef declarations are not implemented");
+      throw impos("tcStmt: nested typedef declarations are not implemented");
     }
 
   case Label_s(x,s):
@@ -339,7 +339,7 @@ synth tcStmt(tenv te, stmt s0) {
 
   case Cut_s(s):
     // FIX: cut
-    return impos("tcStmt: cut is not implemented");
+    throw impos("tcStmt: cut is not implemented");
 /*
     switch (te->le) {
     case Frame(p):
@@ -360,7 +360,7 @@ synth tcStmt(tenv te, stmt s0) {
 
   case Splice_s(s):
     // FIX: splice
-    return impos("tcStmt: splice is not implemented");
+    throw impos("tcStmt: splice is not implemented");
 /*
     switch (te->le) {
     case Hidden(p):

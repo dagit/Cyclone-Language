@@ -136,6 +136,7 @@ namespace Absyn {
   // Note: In block f, `f becomes a tvar, so block names must not conflict
   //       with tyvars.  Another approach is to add a third variant to Rgn
   //       for these induced region variables.
+  // Note: We probably want an EvarRgn and compress and substitution, ...
   EXTERN_DEFINITION enum Rgn { HeapRgn, VarRgn(tvar) };
 
   // Note: The last fields of EnumType, XenumType, StructType and TypedefType
@@ -173,7 +174,7 @@ namespace Absyn {
     Carray_mod; 
     Array_mod; 
     ConstArray_mod(exp);
-    Pointer_mod(bool,rgn_t,tqual); // default rgn_t is Heap
+    Pointer_mod(bool,rgn_t,tqual); // default rgn_t is HeapRgn
     Function_mod(funcparams);
     TypeParams_mod(list<tvar>,segment);
   };
@@ -400,9 +401,6 @@ namespace Absyn {
   extern tqual combine_tqual(tqual x,tqual y);
   extern tqual empty_tqual();
   
-  /////////////////////////////// Kinds /////////////////////////////
-  extern kind box_k, reg_k, mem_k;
-
   //////////////////////////// Constraints /////////////////////////
   extern conref<`a> new_conref<`a>(`a x); 
   extern conref<`a> empty_conref<`a>();
@@ -542,7 +540,7 @@ namespace Absyn {
   // extern typ pointer_abbrev(typ);
   extern bool is_lvalue(exp);
 
-  extern $(tqual,typ) * lookup_struct_field(structdecl,var);
+  extern $(field_name,tqual,typ) * lookup_struct_field(structdecl,var);
 
 }
 #endif

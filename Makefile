@@ -104,5 +104,5 @@ clean:
 	rm -f bin/$(RUNTIME).o
 	rm -f bin/cycbison.exe 
 	rm -f bin/cyclex.exe
-	rm -f bin/gc.a
+	rm -f bin/gc.a bin/gc_pg.a
 	rm -f *~ doc/*~

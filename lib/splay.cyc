@@ -87,7 +87,6 @@ static void rotate_right<`a,`b>(struct noderef<`a,`b> @nr) {
 //   }
 // }
 
-
 static void lift<`a,`b>(list<$(enum direction,struct noderef<`a,`b> @)@> dnl) {
   while (dnl != null) {
     if (dnl->tl == null) {
