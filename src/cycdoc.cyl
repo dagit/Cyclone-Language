@@ -897,22 +897,6 @@ void dumpdecl(decl_t d, string_t comment) {
     dump_end();
     break;
   case &Var_d(&Vardecl(_,name,tq,type,_,_,_)):
-//    switch (type) {
-//    case &FnType(_):
-//      dump_symbol("\\begin{defun2}{");
-//      let $(tq,t,tms) = Absynpp::to_tms(tq,type);
-//      dumptq(tq);
-//      dumpntyp(t);
-//      dump_symbol("}{");
-//      dumpqvar(name);
-//      dump_symbol("}{");
-//      dumptms(List::imp_rev(tms),ignore,0);
-//      dump_symbol(";}\n");
-//      dump_comment(comment);
-//      dump_symbol("\n");
-//      dump_symbol("\\end{defun2}\n");
-//      break;
-//    default:
       dump_begin();
       dumptqtd(tq, type, dump_boldqvar, name);
       dump_symbol(";\n");
@@ -920,8 +904,6 @@ void dumpdecl(decl_t d, string_t comment) {
       dump_comment(comment);
       dump_symbol("\n");
       dump_end();
-//      break;
-//    }
     break;
   case &Tunion_d(&Tuniondecl(sc,name,tvs,fields,is_xtunion)):
     dump_begin();
@@ -938,7 +920,7 @@ void dumpdecl(decl_t d, string_t comment) {
       dump_lb();
       dump_symbol("\\\\\n~~");
       dumptunionfields(fields->v);
-      dump_symbol("\n");
+      dump_symbol("\\\\\n");
       dump_rb();
       dump_symbol(";\n");
     }
@@ -958,7 +940,7 @@ void dumpdecl(decl_t d, string_t comment) {
       dump_lb();
       dump_symbol("\\\\\n~~");
       dumpenumfields(fields->v);
-      dump_symbol("\n");
+      dump_symbol("\\\\\n");
       dump_rb();
       dump_symbol(";\n");
     }
@@ -1107,7 +1089,6 @@ void dumpdecl(decl_t d, string_t comment) {
         result = new List(decls->hd,result);
         decls = decls->tl;
         break;
-
       }
     }
     return imp_rev(result);

@@ -37,10 +37,12 @@ main-a4.pdf: gen-libdoc.tex
 
 gen-libdoc.tex: \
   ../include/array.h \
+  ../include/bitvec.h \
   ../include/buffer.h \
   ../include/core.h \
   ../include/dict.h \
   ../include/filename.h \
+  ../include/fn.h \
   ../include/hashtable.h \
   ../include/id.h \
   ../include/list.h \
