@@ -7,12 +7,12 @@
 # TODO:
 # 1) tar the files into the directory $PWD-$version
 #
-# usage: makedist [version_num]
+# usage: makedist
 
 TMP=/tmp/makedist$$
 
 if [ $# != 0 ]; then
-  echo "usage: $0 [version_num]"
+  echo "usage: $0"
   exit 1
 else
   version=`make version`
