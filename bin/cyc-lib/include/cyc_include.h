@@ -141,7 +141,7 @@ char * _untag_arr(struct _tagged_arr arr, unsigned elt_sz, unsigned num_elts) {
   // Note: if arr is "null" base and curr should both be null, so this
   //       is correct (caller checks for null if untagging to @ type)
   // base may not be null if you use t ? pointer subtraction to get 0 -- oh well
-  if(arr.curr < arr.base || arr.curr + elt_sz * num_elts >= arr.last_plus_one)
+  if(arr.curr < arr.base || arr.curr + elt_sz * num_elts > arr.last_plus_one)
     _throw(ADD_PREFIX(Null_Exception));
   return arr.curr;
 }

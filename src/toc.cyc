@@ -330,7 +330,6 @@ static type_t typ_to_c(type_t t) {
     // just drop the type arguments & effect and translate the nested types
     // FIX:  problem with higher-order functions?  Again C's rules are strange.
     // FIX:  dropping noreturn and const attributes b/c C is complaining.
-    let new_atts = atts;
     let new_atts = null;
     for (; atts != null; atts = atts->tl)
       switch (atts->hd) {

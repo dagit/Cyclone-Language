@@ -1357,12 +1357,14 @@ return _tag_arr("no_instrument_function", sizeof( unsigned char), 23u); _LL445:
 return _tag_arr("constructor", sizeof( unsigned char), 12u); _LL447: return
 _tag_arr("destructor", sizeof( unsigned char), 11u); _LL449: return _tag_arr("no_check_memory_usage",
 sizeof( unsigned char), 22u); _LL411:;} int Cyc_Absyn_fntype_att( void* a){ void*
-_temp457= a; int _temp471; _LL459: if(( unsigned int) _temp457 > 16u?*(( int*)
-_temp457) == Cyc_Absyn_Regparm_att: 0){ _LL472: _temp471=(( struct Cyc_Absyn_Regparm_att_struct*)
+_temp457= a; int _temp473; _LL459: if(( unsigned int) _temp457 > 16u?*(( int*)
+_temp457) == Cyc_Absyn_Regparm_att: 0){ _LL474: _temp473=(( struct Cyc_Absyn_Regparm_att_struct*)
 _temp457)->f1; goto _LL460;} else{ goto _LL461;} _LL461: if( _temp457 ==( void*)
-Cyc_Absyn_Stdcall_att){ goto _LL462;} else{ goto _LL463;} _LL463: if( _temp457
-==( void*) Cyc_Absyn_Cdecl_att){ goto _LL464;} else{ goto _LL465;} _LL465: if(
-_temp457 ==( void*) Cyc_Absyn_Noreturn_att){ goto _LL466;} else{ goto _LL467;}
-_LL467: if( _temp457 ==( void*) Cyc_Absyn_Const_att){ goto _LL468;} else{ goto
-_LL469;} _LL469: goto _LL470; _LL460: goto _LL462; _LL462: goto _LL464; _LL464:
-goto _LL466; _LL466: goto _LL468; _LL468: return 1; _LL470: return 0; _LL458:;}
+Cyc_Absyn_Fastcall_att){ goto _LL462;} else{ goto _LL463;} _LL463: if( _temp457
+==( void*) Cyc_Absyn_Stdcall_att){ goto _LL464;} else{ goto _LL465;} _LL465: if(
+_temp457 ==( void*) Cyc_Absyn_Cdecl_att){ goto _LL466;} else{ goto _LL467;}
+_LL467: if( _temp457 ==( void*) Cyc_Absyn_Noreturn_att){ goto _LL468;} else{
+goto _LL469;} _LL469: if( _temp457 ==( void*) Cyc_Absyn_Const_att){ goto _LL470;}
+else{ goto _LL471;} _LL471: goto _LL472; _LL460: goto _LL462; _LL462: goto
+_LL464; _LL464: goto _LL466; _LL466: goto _LL468; _LL468: goto _LL470; _LL470:
+return 1; _LL472: return 0; _LL458:;}

@@ -1014,7 +1014,8 @@ static type_t tcSizeof(tenv_t te, seg_t loc, type_t *`r topt, type_t t) {
 }
 
 // offsetof(t,n)
-// FIX: check if t is allowed to be a union type
+// FIX: check that n is actually a field of f (currently caught by gcc)
+// FIX?: check if t is allowed to be a union type
 static type_t tcOffsetof(tenv_t te, seg_t loc, type_t *`r topt, 
 			 type_t t, field_name_t n) {
   check_type(loc,te,lookup_type_vars(te),MemKind,t);

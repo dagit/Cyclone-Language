@@ -700,6 +700,7 @@ string_t attribute2string(attribute_t a) {
 bool fntype_att(attribute_t a) {
   switch (a) {
   case &Regparm_att(_): fallthru;
+  case Fastcall_att:   fallthru;
   case Stdcall_att:    fallthru;
   case Cdecl_att:      fallthru;
   case Noreturn_att:   fallthru;

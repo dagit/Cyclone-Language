@@ -398,9 +398,9 @@ doc_t noncallatt2doc(attribute_t att) {
 doc_t callconv2doc(attributes_t atts) { // for MS only
   for(; atts != null; atts = atts->tl)
     switch(atts->hd) {
-    case Stdcall_att:  return text("_stdcall ");
-    case Cdecl_att:    return text("_cdecl ");
-    case Fastcall_att: return text("_fastcall ");
+    case Stdcall_att:  return text(" _stdcall ");
+    case Cdecl_att:    return text(" _cdecl ");
+    case Fastcall_att: return text(" _fastcall ");
     default: break;
     }
   return nil_doc();
@@ -438,6 +438,11 @@ bool next_is_pointer(list_t<type_modifier_t> tms) {
   if (tms==null) return false;
   switch (tms->hd) {
   case &Pointer_mod(_,_,_): return true;
+  case &Attributes_mod(_,_): 
+    if(!to_VC) return false;
+    // KLUDGE for VC calling conventions
+    // FIX -- not sure this is right
+    return next_is_pointer(tms->tl);
   default: return false;
   }
 }
@@ -464,8 +469,17 @@ doc_t dtms2doc(doc_t d,list_t<type_modifier_t> tms) {
       return cat(rest,group("(",")",",",List::map(textptr,sl)));
     }
   case &Attributes_mod(_, atts):
-    if (next_is_pointer(tms->tl)) rest = p_rest;
-    return cat(rest, atts2doc(atts));
+    if(!to_VC) {
+      if (next_is_pointer(tms->tl)) rest = p_rest;
+      return cat(rest, atts2doc(atts));
+    } else {
+      // KLUDGE for VC calling conventions
+      // FIX -- not sure this is right
+      if(next_is_pointer(tms->tl))
+	return cat(callconv2doc(atts), rest);
+      return rest;
+    }
+
   case &TypeParams_mod(ts,loc,print_kinds):
     if (next_is_pointer(tms->tl)) rest = p_rest;
     if (print_kinds)
@@ -1502,7 +1516,17 @@ doc_t decl2doc(decl_t d) {
   case &Var_d(&Vardecl(sc,name,tq,type,initializer,_,atts)):
     doc_t sn = typedef_name2doc(name);
     doc_t attsdoc   = atts2doc(atts);
-    doc_t beforenamedoc = (to_VC ? callconv2doc(atts) : attsdoc);
+    doc_t beforenamedoc;
+    if(!to_VC)
+      beforenamedoc = attsdoc;
+    else
+      // lots of VC calling convention KLUDGE here -- atts doesn't have
+      // the calling convention -- it's in type
+      switch(compress(type)) {
+      case &FnType(FnInfo(_,_,_,_,_,_,_,atts2)): 
+	beforenamedoc = callconv2doc(atts2); break;
+      default: beforenamedoc = nil_doc(); break;
+      }
     s = cat((to_VC ? attsdoc : nil_doc()),
 	    scope2doc(sc),
             tqtd2doc(tq,type,new Opt(cat(beforenamedoc,sn))),
@@ -1642,11 +1666,10 @@ $(tqual_t,type_t,list_t<type_modifier_t>) to_tms(tqual_t tq,type_t t) {
       tm = Carray_mod;
     else
       tm = new ConstArray_mod((exp_t)e);
-    return $(tq3, t3, (list_t<type_modifier_t>)(new List(tm,tml3)));
+    return $(tq3, t3, new List(tm,tml3));
 
-    case &PointerType(PtrInfo{.elt_typ = t2, .rgn_typ = rgntyp,
-                                 .nullable = nullable, .tq = tq2, .bounds = b}):
-                                   let $(tq3,t3,tml3) = to_tms(tq2,t2);
+  case &PointerType(PtrInfo(t2,rgntyp,nullable,tq2,b)):
+    let $(tq3,t3,tml3) = to_tms(tq2,t2);
     tunion Pointer_Sort ps;
     switch ($(compress_conref(nullable)->v,compress_conref(b)->v)) {
     case $(&Eq_constr(true), &Eq_constr(&Upper_b(e))):
@@ -1657,31 +1680,27 @@ $(tqual_t,type_t,list_t<type_modifier_t>) to_tms(tqual_t tq,type_t t) {
       ps = TaggedArray_ps; break;
     default:
       // We need to print out something...
+      // Dan: but this is impossible, isn't it??
       ps = TaggedArray_ps; break;
       // ps = impos("bad pointer type in Absynpp::to_tms"); break;
     }
     type_modifier_t tm = new Pointer_mod(ps,rgntyp,tq);
-    return $(tq3, t3, (list_t<type_modifier_t>)(new List(tm,tml3)));
+    return $(tq3, t3, new List(tm,tml3));
 
   case &FnType(FnInfo{typvars,effopt,t2,args,c_varargs,cyc_varargs,
                         rgn_po,fn_atts}):
     if (! print_all_tvars) {
       // don't print default effects
-      if (effopt == null
-	  /* || exists(is_temp_tvar, typvars) */
-	  || exists_temp_tvar_in_effect(effopt -> v)) {
-	// WARNING : this is our criterion to detect default effect, so it'd better be right...
-	// If true, we drop the existent effect
-	effopt = null;
-	// and the tvars
-	// (but could they be useful sometimes ??
-	// => yes if they have special kinds with them)
-	typvars = null;
+      // WARNING: this is our criterion to detect default effect, 
+      // so it'd better be right
+      if (effopt == null || exists_temp_tvar_in_effect(effopt->v)) {
+	effopt = null;	//drop the existing effect
+	typvars = null;	//drop the tvars, but they could be useful b/c of kinds!
       }
     } else {
       if (rewrite_temp_tvars) {
 	// rewrite the temp variables so that they could parse
-	// WARNING : we don't check for conflicts with some user-defined tvars
+	// WARNING : we don't check for conflicts with user-defined tvars
 	iter(rewrite_temp_tvar, typvars);
       }
     }
@@ -1689,11 +1708,31 @@ $(tqual_t,type_t,list_t<type_modifier_t>) to_tms(tqual_t tq,type_t t) {
     // discard tq because you can't qualify a function
     let $(tq3,t3,tml3) = to_tms(empty_tqual(),t2);
     list_t<type_modifier_t> tms = tml3;
-    if (fn_atts != null)
+    // mess with attributes and arguments:
+    // * for gcc: we put all attributes after the args
+    // * for VC: 
+    //   o we drop non-calling conventions on the floor (in fact,
+    //     decl printing puts them at the declaration beginning)
+    //   o for calling conventions, we put them before the args and rely
+    //     on the caller to move them to the right place. KLUDGE! FIX!
+    //     (I doubt this is right in all cases.)
+    if (fn_atts != null && !to_VC)
       tms = new List(new Attributes_mod(null,fn_atts),tms);
     tms = new List(new Function_mod(new WithTypes(args,c_varargs,
                                                   cyc_varargs,effopt,
                                                   rgn_po)),tms);
+    if(to_VC)
+      for(; fn_atts != null; fn_atts = fn_atts->tl)
+	switch(fn_atts->hd) {
+	case Stdcall_att:  fallthru;
+	case Cdecl_att:    fallthru;
+	case Fastcall_att:
+	  tms = new List(new Attributes_mod(null,new List(fn_atts->hd,null)),
+			 tms);
+	  goto AfterAtts;
+	default: break;
+	}
+  AfterAtts:
     if (typvars != null)
       tms = new List(new TypeParams_mod(typvars,null,true),tms);
     return $(tq3,t3,tms);
