@@ -644,7 +644,7 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t *`r topt,
 		      typ2string(t2));
     return t_result;
   }
-  return t2;
+  return t1;
 }
 
 // e1,e2

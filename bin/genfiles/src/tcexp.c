@@ -1227,7 +1227,7 @@ _temp628.tag= Cyc_Stdio_String_pa; _temp628.f1=( struct _tagged_arr) Cyc_Absynpp
 t1);{ void* _temp627[ 2u]={& _temp628,& _temp629}; Cyc_Tcexp_expr_err( te, loc,
 _tag_arr("Cannot use this operator in an assignment when the arguments have types %s and %s",
 sizeof( unsigned char), 82u), _tag_arr( _temp627, sizeof( void*), 2u));}}});}
-return _temp626;} return t2;}} static void* Cyc_Tcexp_tcSeqExp( struct Cyc_Tcenv_Tenv*
+return _temp626;} return t1;}} static void* Cyc_Tcexp_tcSeqExp( struct Cyc_Tcenv_Tenv*
 te, struct Cyc_Position_Segment* loc, void** topt, struct Cyc_Absyn_Exp* e1,
 struct Cyc_Absyn_Exp* e2){ Cyc_Tcexp_tcExp( te, 0, e1); Cyc_Tcexp_tcExp( te,
 topt, e2); return( void*)(( struct Cyc_Core_Opt*) _check_null( e2->topt))->v;}

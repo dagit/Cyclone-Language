@@ -4,6 +4,8 @@ BUG FIXES and UNSOUNDNESSES:
 ----------------------------
 * FIX all of the FIX things.
 
+* need to add anonymous enums
+
 * fix warning that we get when compiling tc.cyc
 
 * can't cast char?? to const char? const ? (or whatever it is.)
@@ -149,8 +151,6 @@ THINGS NEEDED TO SIMPLIFY PORTING:
 
 * remove cyc_include.h's dependency on setjmp.h, since that really
   pollutes the namespace
-
-* "using foo; using foo;" shouldn't cause ambiguities
 
 * buf+n should have the same type as &buf[n]
 
