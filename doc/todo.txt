@@ -4,6 +4,8 @@ BUG FIXES and UNSOUNDNESSES:
 ----------------------------
 * FIX all of the FIX things.
 
+* what to do with free evars at the top-level or within type definitions?
+
 * Provide offsetof as a primitive, as in C.
 
 * We rely on C to catch incomplete types, such as 
@@ -80,6 +82,14 @@ MISSING THINGS NEEDED TO PORT REAL CODE:
 ----------------------------------------
 * Need to port more C libraries
 
+* Some better way to deal with effects for function pointer types.
+  It makes sense to do what we do now (i.e., insert an effect tyvar)
+  for function definitions or function arguments or function results,
+  but it doesn't make sense for fields within structs or elsewhere.
+  For instance, when we declare a function variable, it's not clear
+  that we should do what we do.  Rather, we should perhaps insert an
+  evar?  
+
 * We don't allow enough pointer arithmetic.  For instance, we don't
   allow the following:
 
@@ -87,7 +97,12 @@ MISSING THINGS NEEDED TO PORT REAL CODE:
 
       x+1
 
-* default array initializers within a function: e.g., int x[4];
+* default array initializers within a function: e.g., int x[4];  Actually,
+  for bits-only things, we should only issue a warning if they're used
+  before being initialized.  
+
+* should use noreturn attribute, especially for exit, and also check
+  that noreturn is actually true for a given function definition.
 
 * nested type declarations? nested exception declarations? nested using?
 
@@ -108,10 +123,16 @@ MISSING THINGS NEEDED TO PORT REAL CODE:
 
 * Lots of headers currently define NULL in lots of incompatible ways.
 
-THINGS NEEDED TO SIMPLIFY PORTING:
-----------------------------------
 * get rid of null, replace with 0 (requires clever overloading)
 
+* add memcpy and memset somehow.
+
+* if in a procedure, we have a t*`r1, we should be able to coerce
+  this to a t*`r2 as long as we know that `r1 lives as long as `r2.
+  Within a procedure, we have enough info to tell this...
+
+THINGS NEEDED TO SIMPLIFY PORTING:
+----------------------------------
 * we should start on the porting tool -- use region inference to
   figure out the "right" interface for code.
 

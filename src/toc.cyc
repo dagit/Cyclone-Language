@@ -540,6 +540,7 @@ static stringptr_t fieldname(int i) {
 static tunion Conv {
   NullCheck(type_t);           // t* -> t@
   UntagPtr(type_t,exp_t,bool); // t? -> t*{e}  bool is whether result is nullable
+  UntagPtrNocheck(type_t);     // t? -> int 
   TagPtr(type_t,exp_t);        // t*{e} -> t?
   NoConv;
 };
@@ -565,6 +566,12 @@ static conv conversion(type_t t1, type_t t2) {
     case $(Unknown_b, Unknown_b): return NoConv;
     case $(&Upper_b(e1), Unknown_b): return new TagPtr(typ_to_c(t1),e1);
     case $(Unknown_b, &Upper_b(e2)): return new UntagPtr(typ_to_c(t1),e2,n2);
+    }
+  case $(&PointerType(p1), &IntType(_,_)):
+    let b1 = conref_val(p1.bounds);
+    switch (b1) {
+    case &Upper_b(_): return NoConv;
+    case Unknown_b: return new UntagPtrNocheck(typ_to_c(t1));
     }
   default: return NoConv;
   }
@@ -1700,6 +1707,8 @@ static void exp_to_c(env_t nv, exp_t e) {
     case &TagPtr(t,sz): e->r = tag_ptr_conv(nv->toplevel,t,sz,e1)->r; break;
     case &UntagPtr(tptr_typ,sz,nullable):
       e->r = untag_ptr_conv(nv->toplevel,tptr_typ,sz,nullable,e1)->r; break;
+    case &UntagPtrNocheck(t1):
+      e1->r = structmember_exp(new_exp(e1->r,e1->loc),curr_sp,DL)->r; break;
     }
     break;
   case &Address_e(e1):

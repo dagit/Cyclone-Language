@@ -36,7 +36,7 @@
 
 #ifndef lint
 /*static char sccsid[] = "from: @(#)net.c	5.5 (Berkeley) 6/1/90";*/
-char net_rcsid[] = "$Id: finger.cyc,v 1.1 2001-06-21 21:54:12 mharris Exp $";
+char net_rcsid[] = "$Id: finger.cyc,v 1.2 2001-06-22 14:40:44 jgm Exp $";
 #endif /* not lint */
 
 #include <core.h>
@@ -58,7 +58,7 @@ using Inet;
 using Socket;
 using Unistd;
 
-int main(int argc, mstring_t ?argv) {
+int main(int argc, char ?argv[]) {
   FILE *fp;
   struct in_addr *defaddr = new in_addr { 0 };
   int c, sawret, ateol;
@@ -75,7 +75,7 @@ int main(int argc, mstring_t ?argv) {
   }
 
   host = strrchr(argv[1], '@');
-  if (host == null) { // BUG: This breaks if we use !host instead
+  if (!host) { 
     fprintf(stderr, "%s: no host given\n", argv[0]);
     exit(1);
   }
