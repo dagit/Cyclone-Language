@@ -2338,7 +2338,7 @@ unsigned char* _temp1623=( unsigned char*)"tcExpNoPromote on Array_e returned no
 struct _tagged_string _temp1624; _temp1624.curr= _temp1623; _temp1624.base=
 _temp1623; _temp1624.last_plus_one= _temp1623 + 50; _temp1624;})); _LL1606:;}
 return res_typ;}}} _LL1541: { void* _temp1625= Cyc_Absyn_atb_typ( Cyc_Absyn_uchar_t,
-rgn, Cyc_Absyn_empty_tqual(),( void*) Cyc_Absyn_Unknown_b); goto _LL1626;
+rgn, Cyc_Absyn_const_tqual(),( void*) Cyc_Absyn_Unknown_b); goto _LL1626;
 _LL1626: { void* _temp1627= Cyc_Tcexp_tcExp( te,( void**)& _temp1625, e1); goto
 _LL1628; _LL1628: return Cyc_Absyn_atb_typ( _temp1627, rgn, Cyc_Absyn_empty_tqual(),(
 void*)({ struct Cyc_Absyn_Upper_b_struct* _temp1629=( struct Cyc_Absyn_Upper_b_struct*)

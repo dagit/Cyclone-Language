@@ -2097,11 +2097,11 @@ _LL1743: okay= okay? Cyc_Evexp_eval_const_uint_exp( _temp1768) >= Cyc_Evexp_eval
 _temp1762): 0; Cyc_Tcutil_warn( loc,({ unsigned char* _temp1778=( unsigned char*)"implicit cast to shorter array";
 struct _tagged_string _temp1779; _temp1779.curr= _temp1778; _temp1779.base=
 _temp1778; _temp1779.last_plus_one= _temp1778 + 31; _temp1779;})); goto _LL1739;
-_LL1745: okay= 1; goto _LL1739; _LL1747: okay= 0; goto _LL1739; _LL1739:;}
-return(( okay? Cyc_Tcutil_unify(( void*) _temp1659.elt_typ,( void*) _temp1655.elt_typ):
-0)? Cyc_Tcutil_unify(( void*) _temp1659.rgn_typ,( void*) _temp1655.rgn_typ): 0)?
-!( _temp1659.tq).q_const? 1:( _temp1655.tq).q_const: 0;} _LL1646: { int okay;
-okay=( _temp1671 != 0? _temp1663 != 0: 0)? Cyc_Evexp_eval_const_uint_exp((
+_LL1745: okay= 1; goto _LL1739; _LL1747: okay= 0; goto _LL1739; _LL1739:;} okay=
+okay? Cyc_Tcutil_unify(( void*) _temp1659.elt_typ,( void*) _temp1655.elt_typ): 0;
+okay= okay? Cyc_Tcutil_unify(( void*) _temp1659.rgn_typ,( void*) _temp1655.rgn_typ):
+0; okay= okay? !( _temp1659.tq).q_const? 1:( _temp1655.tq).q_const: 0; return
+okay;} _LL1646: { int okay; okay=( _temp1671 != 0? _temp1663 != 0: 0)? Cyc_Evexp_eval_const_uint_exp((
 struct Cyc_Absyn_Exp*) _check_null( _temp1671)) == Cyc_Evexp_eval_const_uint_exp((
 struct Cyc_Absyn_Exp*) _check_null( _temp1663)): 0; return( okay? Cyc_Tcutil_unify(
 _temp1675, _temp1667): 0)? ! _temp1673.q_const? 1: _temp1665.q_const: 0;}

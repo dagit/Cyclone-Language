@@ -1585,7 +1585,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t *`r topt,
     // here I'm going to guess that the user wants a char ?@ instead of
     // a char @{n}@.  They can get the char@{n}@ by using a cast.  This
     // is a total hack...
-    let topt2 = atb_typ(uchar_t, rgn, empty_tqual(), Unknown_b);
+    let topt2 = atb_typ(uchar_t, rgn, const_tqual(), Unknown_b);
     let t = tcExp(te,&topt2,e1);
     return atb_typ(t, rgn, empty_tqual(), new Upper_b(uint_exp(1,null)));
   default:

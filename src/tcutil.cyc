@@ -1056,9 +1056,10 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
 	okay = false; break;
       }
     }
-    return (okay && unify(pinfo_a.elt_typ,pinfo_b.elt_typ) &&
-	    unify(pinfo_a.rgn_typ,pinfo_b.rgn_typ) &&
-	    (!pinfo_a.tq.q_const || pinfo_b.tq.q_const));
+    okay = okay && unify(pinfo_a.elt_typ,pinfo_b.elt_typ);
+    okay = okay && unify(pinfo_a.rgn_typ,pinfo_b.rgn_typ);
+    okay = okay && (!pinfo_a.tq.q_const || pinfo_b.tq.q_const);
+    return okay;
 
   case $(&ArrayType(t1a,tq1a,e1),&ArrayType(t2a,tq2a,e2)):
     bool okay;
