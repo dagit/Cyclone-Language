@@ -1,10 +1,25 @@
-all: library.info library.html
+all: screen html
 
-library.info: library.texinfo
-	makeinfo --no-split library.texinfo
+html: main-screen.html
 
-library.html: library.texinfo
-	makeinfo --html library.texinfo
+main-screen.html:
+	hevea main-screen.tex
+
+screen: main-screen.pdf
+
+main-screen.pdf:
+	pdflatex '\nonstopmode\input' main-screen
+	makeindex main-screen
+	pdflatex '\nonstopmode\input' main-screen
+	pdflatex '\nonstopmode\input' main-screen
+
+main-letter.pdf:
+	pdflatex '\nonstopmode\input' main-letter
+	makeindex main-screen
+	pdflatex '\nonstopmode\input' main-letter
+	pdflatex '\nonstopmode\input' main-letter
 
 clean:
-	$(RM) -rf library.info library.html
+	$(RM) *.aux *.dvi *.hind *.idx *.ilg *.ind *.ing *.log
+	$(RM) *.pdf *.toc *.out
+	$(RM) main-screen.html

@@ -481,21 +481,21 @@ using Ctype;
 
 \subsubsection*{Functions}
 \begin{verbatim}
-int isalnum(int c));
-int isalpha(int c));
-int iscntrl(int c));
-int isdigit(int c));
-int isgraph(int c));
-int islower(int c));
-int isprint(int c));
-int ispunct(int c));
-int isspace(int c));
-int isupper(int c));
-int isxdigit(int c));
-int tolower(int c));
-int toupper(int c));
-int isascii(int c));
-int toascii(int c));
+int isalnum(int c);
+int isalpha(int c);
+int iscntrl(int c);
+int isdigit(int c);
+int isgraph(int c);
+int islower(int c);
+int isprint(int c);
+int ispunct(int c);
+int isspace(int c);
+int isupper(int c);
+int isxdigit(int c);
+int tolower(int c);
+int toupper(int c);
+int isascii(int c);
+int toascii(int c);
 \end{verbatim}
 
 \subsubsection*{Use}
@@ -1109,44 +1109,38 @@ using Lineno;
 
 \subsection{List}
 
+\begin{verbatim}
+    #include <list.h>
+    using List;
+\end{verbatim}
+
 Namespace \code{List} defines polymorphic lists and standard operations
-over them.
+over them.  It defines the following types.
 
-\subsubsection*{Header}
-\begin{verbatim}
-#include <list.h>
-using List;
-\end{verbatim}
+\begin{alltt}
+    \textbf{struct List}<`a,`r::R> \lb`a hd; struct List<`a,`r> *`r tl;\rb;
+    typedef struct List<`a,`r> *`r \textbf{list_t<`a,`r>};
+    typedef struct List<`a,`r> @\textbf{List_t<`a,`r>};
+\end{alltt}
 
-\subsubsection*{Types}
-\tindex{struct List}
-\tindex{glist_t}
-\tindex{list_t}
-\tindex{List_t}
-\begin{verbatim}
-struct List<`a,`r::R>{`a hd; struct List<`a,`r> *`r tl;};
-typedef struct List<`a,`r> *`r glist_t<`a,`r>;
-typedef struct List<`a,`H> *list_t<`a>;
-typedef struct List<`a,`H> @List_t<`a>;
-\end{verbatim}
+The type \texttt{struct List<`a,`r>} is a ``cons cell,'' a structure
+that comes with a head ('hd') field and a tail ('tl') field.  (The
+term ``cons'' comes from Lisp.)  The head of a cons cell holds the
+first element of the list, and the tail points to the remainder of the
+list; the head has type \texttt{`a} and the tail points into region
+\texttt{`r}.
 
-A list is built out of ``cons cells,'' which are structures with a
-head ('hd') field and a tail ('tl') field.  (The term ``cons'' comes
-from Lisp.)  The head of a cons cell holds the first element of the
-list, and the tail points to the remainder of the list.  Most
-functions use the typedef \code{list}, which is a possibly-null
-pointer to a cons cell.  \code{null} serves as the empty list.
+Most functions use the typedef \code{list_t}, which is a possibly-null
+pointer to a cons cell; null serves as the empty list.  The typedef
+\code{List_t} refers to non-null pointers to cons cells; so a
+\code{List_t} is a list that has at least one element.
 
-\subsubsection*{Exceptions}
-\exindex{List_empty}
-\exindex{List_mismatch}
-\exindex{Nth}
-\begin{verbatim}
-xenum exn { List_empty };
-xenum exn { List_mismatch };
-xenum exn { Nth };
-\end{verbatim}
-
+Namespace List defines three exceptions:
+\begin{alltt}
+    xtunion exn \lb \textbf{List_empty} \rb;
+    xtunion exn \lb \textbf{List_mismatch} \rb;
+    xtunion exn \lb \textbf{Nth} \rb;
+\end{alltt}
 The \code{List_empty} exception is typically thrown by a function that
 expects a non-empty list, but is passed null instead.  The
 \code{List_mismatch} exception is typically thrown by a function that
@@ -1155,130 +1149,121 @@ lengths instead.  The \code{Nth} exception is thrown when
 \code{list_nth} doesn't have enough elements in the list.
 
 \subsubsection*{Basic list operations}
-\subsubsection*{Functions}
-\begin{verbatim}
-int             length(glist_t<`a,`r> x);
-`a              hd(glist_t<`a,`r> x);
-glist_t<`a,`r>  tl(glist_t<`a,`r> x);
-list_t<`a>      copy(glist_t<`a,`r> src);
-glist_t<`a,`r2> rcopy(region_t<`r2>, glist_t<`a,`r> src);
-`a              nth(glist_t<`a,`r> x,int i);
-\end{verbatim}
 
-\subsubsection*{Use}
+\begin{defun2}{int}{length}{(list_t \vvar{x});}
+  Returns the length of the list \vvar{x}.
+\end{defun2}
 
-\begin{defun}{length}{(x)}
-Returns the length of the list \var{x}.
-\end{defun}
+\begin{defun2}{`a}{hd}{(list_t<`a> \vvar{x});}
+  Returns the first element of list \vvar{x}, or throws
+  \code{List_empty} if \vvar{x} is empty.
+\end{defun2}
 
-\begin{defun}{hd}{(x)}
-Returns the first element of list \var{x}, or throws \code{List_empty}
-if \var{x} is empty.
-\end{defun}
+\begin{defun2}{list_t<`a,`r>}{tl}{(list_t<`a,`r> \vvar{x});}
+  Returns the tail of \vvar{x}, or throws \code{List_empty} if
+  \vvar{x} is empty.  Note, \code{hd(\vvar{x})} is not quite
+  equivalent to \code{\vvar{x}->hd}, because the latter will throw
+  \code{Null_Exception} if \vvar{x} is empty.
+\end{defun2}
 
-\begin{defun}{tl}{(x)}
-Returns the tail of \var{x}, or throws \code{List_empty} if \var{x} is
-empty.  Note, \code{hd(\var{x})} is not quite equivalent to
-\code{\var{x}->hd}, because the latter will throw \code{Null_Exception}
-if \var{x} is empty.
-\end{defun}
+\begin{defun2}{list_t<`a>}{copy}{(list_t<`a> \vvar{src});}
+  Returns a fresh copy of the list \vvar{src} (all of the cons cells
+  are duplicated).
+\end{defun2}
 
-\begin{defun}{copy}{(src)}
-Returns a fresh copy of the list \var{src} (all of the cons cells are
-duplicated).
-\end{defun}
+\begin{defun2}{list_t<`a,`r>}{rcopy}{(region_t<`r>, list_t<`a> \vvar{src});}
+  Returns a fresh copy of the list \vvar{src}, allocated in region
+  \code{`r}.
+\end{defun2}
 
-\begin{defun}{nth}{(x,n)}
-Returns the \var{n}th element of list \var{x}.  The elements of \var{x}
-are numbered starting with 0.  If \var{n} does not correspond to an
-element of \var{x}, the exception \code{Nth} is thrown.
-\end{defun}
+\begin{defun2}{`a}{nth}{(list_t<`a> \vvar{x}, int \vvar{i});}
+  Returns the \vvar{i}th element of list \vvar{x}.  The elements of
+  \vvar{x} are numbered starting with 0.  If \vvar{i} does not
+  correspond to an element of \vvar{x}, the exception \code{Nth} is
+  thrown.
+\end{defun2}
+
+\begin{defun2}{list_t<`a,`r>}{nth_tail}{(list_t<`a,`r> \vvar{x},int \vvar{i});}
+  Returns the tail of the list \vvar{x} starting at the \vvar{i}th
+  element.  The elements of \vvar{x} are numbered starting with 0.  If
+  \vvar{i} does not correspond to an element of \vvar{x}, the
+  exception \code{Nth} is thrown.
+\end{defun2}
 
 \subsubsection*{Iteration and mapping}
-\subsubsection*{Functions}
-\begin{verbatim}
-list_t<`b>      map(`b f(`a),glist_t<`a,`r> x);
-glist_t<`b,`r2> rmap(region_t<`r2>,`b f(`a),glist_t<`a,`r> x);
-list_t<`b>      map_c(`b f(`c,`a),`c env,glist_t<`a,`r> x);
-glist_t<`b,`r2> rmap_c(region_t<`r2>,`b f(`c,`a),`c env,
-                       glist_t<`a,`r> x);
-list_t<`c>      map2(`c f(`a,`b),glist_t<`a,`r1> x,glist_t<`b,`r2> y);
-glist_t<`c,`r3> rmap2(region_t<`r3>,`c f(`a,`b),
-                      glist_t<`a,`r1> x,glist_t<`b,`r2> y);
 
-void app(`b f(`a),glist_t<`a,`r> x);
-void app_c(`c f(`a,`b),`a,glist_t<`b,`r> x);
-void app2(`c f(`a,`b),glist_t<`a,`r1> x,glist_t<`b,`r2> y);
-void app2_c(`d f(`a,`b,`c),`a env,
-             glist_t<`b,`r1> x,glist_t<`c,`r2> y);
+\begin{defun2}{list_t<`b>}{map}{(`b \vvar{f}(`a),list_t<`a> \vvar{x});}
+  Applies the function \vvar{f} to each element of list \vvar{x}, and
+  returns a new, heap-allocated list of the results.
+\end{defun2}
 
-void iter(void f(`a),glist_t<`a,`r> x);
-void iter_c(void f(`b,`a),`b env,glist_t<`a,`r> x);
-void iter2(void f(`a,`b),glist_t<`a,`r1> x,glist_t<`b,`r2> y);
-void iter2_c(void f(`a,`b,`c),`a env,
-             glist_t<`b,`r1> x,glist_t<`c,`r2> y);
-\end{verbatim}
+\begin{defun2}{list_t<`b,`r>}{rmap}{(region_t<`r>,`b \vvar{f}(`a),list_t<`a> \vvar{x});}
+  A version of map where the returned list is allocated in region
+  \vvar{`r}.
+\end{defun2}
 
-\subsubsection*{Use}
+\begin{defun2}{list_t<`b>}{map_c}{(`b \vvar{f}(`c,`a),`c \vvar{env},list_t<`a> \vvar{x});}
+  A version of map where \vvar{f} takes an environment.
+\end{defun2}
 
-\begin{defun}{map}{(f,x)}
-Applies the function \var{f} to each element of list \var{x}, and
-returns a new list of the results.
-\end{defun}
+\begin{defun2}{list_t<`b,`r>}{rmap_c}{(region_t<`r>, `b \vvar{f}(`c,`a), `c, list_t<`a>);}
+  A version of \code{map_c} where the returned list is allocated in
+  region \vvar{`r}.
+\end{defun2}
 
-\begin{defun}{map_c}{(f,env,x)}
-A version of map where \var{f} takes an environment.
-\end{defun}
+\begin{defun2}{list_t<`c>}{map2}{(`c \vvar{f}(`a,`b),list_t<`a> \vvar{x},list_t<`b> \vvar{y});}
+  Applies \vvar{f} to the pairs consisting of an element from list
+  \vvar{x} and its corresponding element from list \vvar{y}.  The
+  results are returned in a new list.  If \vvar{x} and \vvar{y} don't
+  have the same length, it throws \code{List_mismatch}.  Note,
+  \vvar{f} may be applied some number of times before
+  \code{List_mismatch} is thrown.
+\end{defun2}
 
-\begin{defun}{map2}{(f,x,y)}
-Applies \var{f} to the pairs consisting of an element from list \var{x}
-and its corresponding element from list \var{y}.  The results are
-returned in a new list.  If \var{x} and \var{y} don't have the same
-length, it throws \code{List_mismatch}.  Note, \var{f} may be applied
-some number of times before \code{List_mismatch} is thrown.
-\end{defun}
+\begin{defun2}{list_t<`c,`r>}{rmap2}{(region_t<`r>,`c \vvar{f}(`a,`b), list_t<`a>, list_t<`b>);}
+  A version of \code{map2} where the returned list is allocated in
+  region \vvar{`r}.
+\end{defun2}
 
-\begin{defun}{app}{(f,x)}
-Applies \var{f} to each element of list \var{x}.  The results of the
-function application are not saved.
-\end{defun}
+\begin{defun2}{void}{app}{(`b \vvar{f}(`a), list_t<`a> \vvar{x});}
+  Applies \vvar{f} to each element of list \vvar{x}.  The results of the
+  function application are not saved.
+\end{defun2}
 
-\begin{defun}{app_c}{(f,env,x)}
-A version of app, except that \var{env} is passed as an additional
-argument to \var{f}, along with each element of \var{x}.
-\end{defun}
+\begin{defun2}{void}{app_c}{(`c \vvar{f}(`a,`b), `a, list_t<`b> \vvar{x});}
+  A version of app, where \vvar{f} takes an environment.
+\end{defun2}
 
-\begin{defun}{app2}{(f,x,y)}
-Applies f to one element of x and one element of y in turn, from left to
-right in the lists x and y.  If the lists \var{x} and \var{y} are not
-the same length, \code{List_mismatch} is thrown.
-\end{defun}
+\begin{defun2}{void}{app2}{(`c \vvar{f}(`a,`b),list_t<`a> \vvar{x},list_t<`b> \vvar{y});}
+  Applies \vvar{f} to one element of \vvar{x} and one element of
+  \vvar{y} in turn, from left to right in the lists \vvar{x} and
+  \vvar{y}.  If the lists \vvar{x} and \vvar{y} are not the same
+  length, \code{List_mismatch} is thrown.
+\end{defun2}
 
-\begin{defun}{app2_c}{(f,env,x,y)}
-Applies f to env, and to one element of x and one element of y in turn,
-from left to right in the lists x and y.  If the lists \var{x} and
-\var{y} are not the same length, \code{List_mismatch} is thrown.
-\end{defun}
+\begin{defun2}{void}{app2_c}{(`d \vvar{f}(`a,`b,`c), `a \vvar{env}, list_t<`b> \vvar{x},list_t<`c> \vvar{y});}
+  A version of \code{app2} where \vvar{f} takes an environment
+  \vvar{env}.
+\end{defun2}
 
-\begin{defun}{iter}{(f,x)}
-Like \code{app(\var{f},\var{x})} except that \var{f} returns void.
-\end{defun}
+\begin{defun2}{void}{iter}{(void \vvar{f}(`a),list_t<`a> \vvar{x});}
+  Like \code{app(\vvar{f},\vvar{x})} except that \vvar{f} returns void.
+\end{defun2}
 
-\begin{defun}{iter_c}{(f,env,x)}
-Like \code{app_c(\var{f},\var{env},\var{x})} except that \var{f} returns
-void.
-\end{defun}
+\begin{defun2}{void}{iter_c}{(void \vvar{f}(`b,`a),`b \vvar{env},list_t<`a> \vvar{x});}
+  Like \code{app_c(\vvar{f},\vvar{env},\vvar{x})} except that \vvar{f}
+  returns void.
+\end{defun2}
 
-\begin{defun}{iter2}{(f,x,y)}
-Like \code{app2(\var{f},\var{x},\var{y})} except that \var{f} returns
-void.
-\end{defun}
+\begin{defun2}{void}{iter2}{(void f(`a,`b),list_t<`a> x,list_t<`b> y);}
+  Like \code{app2(\var{f},\var{x},\var{y})} except that \var{f}
+  returns void.
+\end{defun2}
 
-\begin{defun}{iter2_c}{(f,env,x,y)}
-Like \code{app2_c(\var{f},\var{env},\var{x},\var{y})} except that \var{f}
-returns void.
-\end{defun}
-
+\begin{defun2}{void}{iter2_c}{(void \vvar{f}(`a,`b,`c),`a \vvar{env},list_t<`b> \vvar{x},list_t<`c> \vvar{y});}
+  Like \code{app2_c(\vvar{f},\vvar{env},\vvar{x},\vvar{y})} except that
+  \vvar{f} returns void.
+\end{defun2}
 
 \subsubsection*{Fold}
 \subsubsection*{Functions}
@@ -2329,7 +2314,7 @@ A \texttt{string_t} is an immutable string, while an
 are useful to instantiate strings in polymorphic data types.  We use
 ``string'' to refer to any and all of these, depending on context.
 
-Most functions in \texttt{String} consider a zero (null) character as
+Most functions in \texttt{String} consider a zero (NUL) character as
 an end of string marker, so we may have \texttt{strlen(s)} <
 \texttt{s.size} for a string \var{s}.  Functions that do not follow
 this convention have names starting with 'z'.  Many functions accept a
