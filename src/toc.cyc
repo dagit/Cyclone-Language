@@ -991,6 +991,90 @@ static exp_t make_struct(env_t nv, qvar_t x, type_t struct_typ, stmt_t s,
   return stmt_exp(declare_stmt(x,t,eo,s,DL),DL);
 }
 
+static stmt_t init_comprehension(env_t nv, exp_t lhs, vardecl_t vd, 
+                                 exp_t e1, exp_t e2, stmt_t s, 
+                                 bool e1_already_translated);
+
+// code to initialize an array
+static stmt_t init_array(env_t nv, exp_t lhs, 
+                         list_t<$(list_t<designator_t>,exp_t)@> dles0,
+                         stmt_t s) {
+  int count = List::length(dles0)-1;
+  for (let dles = List::rev(dles0); dles != null; dles = dles->tl) {
+    // add lhs[e_index] = e to sequence of assignments
+    let &$(dl,e1) = dles->hd;
+    // calculate the index expression -- the front end checks that
+    // the designators are in ascending order...
+    // FIX:  real designator lists
+    exp_t e_index;
+    if (dl == null)
+      e_index = signed_int_exp(count--,DL);
+    else {
+      if (dl->tl != null) unimp("multiple designators in array");
+      let d = dl->hd;
+      switch (d) {
+      case &ArrayElement(e3):
+        exp_to_c(nv,e3);
+        e_index = e3;
+        break;
+      case &FieldName(_):
+        e_index = unimp("field name designators in array");
+        break;
+      }
+    }
+    exp_t lval = subscript_exp(lhs,e_index,DL);
+    switch (e1->r) {
+    case &Array_e(dles0):
+      s = init_array(nv, lval, dles0, s);
+      break;
+    case &Comprehension_e(vd,g1,g2):
+      s = init_comprehension(nv, lval, vd, g1, g2, s, false);
+      break;
+    default:
+      exp_to_c(nv,e1);
+      s = seq_stmt(assign_stmt(subscript_exp(lhs,e_index,DL),e1,DL),s,DL);
+      break;
+    }
+  }
+  return s;
+}
+
+// code to initialize a comprehension
+static stmt_t init_comprehension(env_t nv, exp_t lhs, vardecl_t vd, 
+                                 exp_t e1, exp_t e2, stmt_t s, 
+                                 bool e1_already_translated) {
+  let x1 = vd->name;
+  if (!e1_already_translated)
+    exp_to_c(nv,e1);
+  env_t nv2 = add_varmap(nv,x1,varb_exp(x1,new Local_b(vd),DL));
+  qvar_t max = temp_var();
+  qvar_t a   = temp_var();
+  exp_t ea = assign_exp(var_exp(x1,DL),signed_int_exp(0,DL),DL);
+  exp_t eb = lt_exp(var_exp(x1,DL),var_exp(max,DL),DL);
+  exp_t ec = post_inc_exp(var_exp(x1,DL),DL);
+  exp_t lval = subscript_exp(lhs,var_exp(x1,DL),DL);
+  stmt_t body;
+  // since we don't yet allow arrays or comprehensions within comprehensions
+  // these two cases shouldn't arise -- but we ought to support this.
+  switch (e2->r) {
+  case &Array_e(dles):
+    body = init_array(nv2, lval, dles, skip_stmt(DL));
+    break;
+  case &Comprehension_e(vd2,g1,g2):
+    body = init_comprehension(nv2, lval, vd2, g1,g2, skip_stmt(DL), false);
+    break;
+  default:
+    exp_to_c(nv2,e2);
+    body = assign_stmt(lval,e2,DL);
+    break;
+  }
+  stmt_t s2 = for_stmt(ea,eb,ec,body,DL);
+  // note that we get rid of the const on the index variable x1 here
+  s = seq_stmt(declare_stmt(max,uint_t,e1,
+                            declare_stmt(x1,uint_t,null,s2,DL),DL),s,DL);
+  return s;
+}
+
 // Would be nice to share more code with init_struct
 // but the designators get in the way.
 static exp_t init_tuple(env_t nv, bool pointer, 
@@ -1009,10 +1093,23 @@ static exp_t init_tuple(env_t nv, bool pointer,
   bool is_atomic = true;
   es = List::rev(es);
   for (int i = length(es); es != null; es = es->tl, --i) {
-    exp_to_c(nv,es->hd);
-    is_atomic = is_atomic && atomic_typ(es->hd->topt->v);
-    s = seq_stmt(exp_stmt(assign_exp(lval_f(xexp,new {xprintf("f%d",i)},
-					    DL),es->hd, DL), DL), s, DL);
+    exp_t e = es->hd;
+    exp_t lval = lval_f(xexp, new {xprintf("f%d",i)}, DL);
+    is_atomic = is_atomic && atomic_typ(e->topt->v);
+    switch (e->r) {
+    case &Array_e(dles):
+      s = init_array(nv, lval, dles, s);
+      break;
+    case &Comprehension_e(vd,e1,e2):
+      s = init_comprehension(nv, lval, vd, e1, e2, s, false);
+      break;
+    // FIX: deal with comprehensions
+    default:
+      exp_to_c(nv,e);
+      s = seq_stmt(exp_stmt(assign_exp(lval_f(xexp,new {xprintf("f%d",i)},
+                                              DL),e, DL), DL), s, DL);
+      break;
+    }
   }
   return make_struct(nv,x,strct(n),s,pointer,rgnopt,is_atomic);
 }
@@ -1036,6 +1133,7 @@ static exp_t init_struct(env_t nv, type_t struct_type,
       toc_impos("empty designator list");
     if(ds->tl != null) {
       // untested
+      // JGM: I don't understand this code
       let y    = temp_var();
       let yexp = var_exp(y,DL);
       for(; ds != null; ds = ds->tl)
@@ -1049,20 +1147,33 @@ static exp_t init_struct(env_t nv, type_t struct_type,
 	  break;
 	default: throw toc_impos("array designator in struct");
 	}
+      // FIX:  need to deal with nested arrays, comprehensions, etc.
       exp_to_c(nv,e);
       s = seq_stmt(exp_stmt(assign_exp(yexp, e, DL), DL), s, DL);
-    } else
+    } else{
       switch (ds->hd) {
       case &FieldName(f):
-        exp_to_c(nv,e);
-        // cast to void* if necessary
-        if (is_poly_field(struct_type,f))
-          e = cast_exp(void_star_typ(),e,DL);
-        s = seq_stmt(exp_stmt(assign_exp(lval_f(xexp,f,DL), e, DL), DL),
-                     s, DL);
+        exp_t lval = lval_f(xexp,f,DL);
+        switch (e->r) {
+        case &Array_e(dles):
+          s = init_array(nv, lval, dles, s);
+          break;
+        case &Comprehension_e(vd,e1,e2):
+          s = init_comprehension(nv, lval, vd, e1, e2, s, false);
+          break;
+        default:
+          exp_to_c(nv,e);
+          // cast to void* if necessary
+          if (is_poly_field(struct_type,f))
+            e = cast_exp(void_star_typ(),e,DL);
+          // FIX: deal with nested arrays and comprehensions
+          s = seq_stmt(exp_stmt(assign_exp(lval, e, DL), DL), s, DL);
+          break;
+        }
         break;
       default: throw toc_impos("array designator in struct");
       }
+    }
   }
   return make_struct(nv, x, strctq(tdn), s, pointer, rgnopt, is_atomic);
 }
@@ -1468,34 +1579,8 @@ static void exp_to_c(env_t nv, exp_t e) {
       // ({ t *x = (t*)(malloc(sizeof(t)*length(dles0)));
       //    x[d1] = e1; ... x[dn] = en; x; })
       let x = temp_var();
-      let s = exp_stmt(var_exp(x,DL),DL);
-      int count = List::length(dles0)-1;
-      for (let dles = List::rev(dles0); dles != null; dles = dles->tl) {
-	// add x[e_index] = e to sequence of assignments
-	let &$(dl,e1) = dles->hd;
-	// calculate the index expression -- the front end checks that
-	// the designators are in ascending order...
-	// FIX:  real designator lists
-	exp_t e_index;
-	if (dl == null)
-	  e_index = signed_int_exp(count--,DL);
-	else {
-	  if (dl->tl != null) unimp("multiple designators in array");
-	  let d = dl->hd;
-	  switch (d) {
-	  case &ArrayElement(e3):
-	    exp_to_c(nv,e3);
-	    e_index = e3;
-            break;
-	  case &FieldName(_):
-            e_index = unimp("field name designators in array");
-            break;
-	  }
-	}
-	exp_to_c(nv,e1);
-	s = seq_stmt(assign_stmt(subscript_exp(var_exp(x,DL),e_index,DL),
-				 e1,DL),s,DL);
-      }
+      let xexp = var_exp(x,DL);
+      let s = init_array(nv, xexp, dles0, exp_stmt(xexp,DL));
       type_t old_elt_typ;
       switch (compress(old_typ)) {
       case &PointerType(PtrInfo{et,_,_,tq,_}):
@@ -1537,12 +1622,11 @@ static void exp_to_c(env_t nv, exp_t e) {
     case &Comprehension_e(vd,e1,e2):
       // Drop the "tagged_ptr_t" struct stuff when type is a fixed-size array
       // ({ unsigned int max = e1;
-      //    unsigned int x ;
       //    t *a = (t*)malloc(sizeof(t)*max);
       //    struct tagged_ptr_t b = {a, a, a+max};
+      //    unsigned int x ;
       //    for (x = 0; x < max; x++) a[x] = e2;
       //    b; })
-      qvar_t x1 = vd->name;
       bool is_tagged_ptr = false;
       switch (compress(old_typ)) {
       case &PointerType(PtrInfo{et,_,_,tq,b}):
@@ -1555,23 +1639,16 @@ static void exp_to_c(env_t nv, exp_t e) {
         toc_impos("exp_to_c: comprehension not an array type");
         break;
       }
+      qvar_t max = temp_var();
+      qvar_t a = temp_var();
       type_t old_elt_typ = e2->topt->v;
       type_t elt_typ = typ_to_c(old_elt_typ);
       type_t ptr_typ = cstar_typ(elt_typ,mt_tq);
       exp_to_c(nv,e1);
-      env_t nv2 = add_varmap(nv,x1,varb_exp(x1,new Local_b(vd),DL));
-      exp_to_c(nv2,e2);
-      qvar_t max = temp_var();
-      qvar_t a = temp_var();
-      exp_t ea = assign_exp(var_exp(x1,DL),signed_int_exp(0,DL),DL);
-      exp_t eb = lt_exp(var_exp(x1,DL),var_exp(max,DL),DL);
-      exp_t ec = post_inc_exp(var_exp(x1,DL),DL);
-      stmt_t s = for_stmt(ea,eb,ec,
-                        assign_stmt(subscript_exp(var_exp(a,DL),
-                                                  var_exp(x1,DL),DL),e2,DL),
-                        DL);
+      stmt_t s = init_comprehension(nv, var_exp(a,DL), vd, var_exp(max,DL), 
+                                    e2, skip_stmt(DL), true);
       // FIX:  casts needed on exp_opts
-      list_t<$(qvar_t,type_t,exp_opt_t)@> decls =
+      list_t<$(qvar_t,type_t,exp_opt_t)@> decls = 
         new List(new $(max,uint_t,(exp_opt_t)e1),null);
       exp_t ai;
       if (rgnopt == null)
@@ -1585,7 +1662,6 @@ static void exp_to_c(env_t nv, exp_t e) {
       }
       exp_t ainit = cast_exp(ptr_typ,ai,DL);
       decls = new List(new $(a,ptr_typ,(exp_opt_t)ainit),decls);
-      decls = new List(new $(x1,uint_t,null),decls);
       if (is_tagged_ptr) {
         let b = temp_var();
         let t = typ_to_c(old_typ);
@@ -1814,7 +1890,8 @@ static void exp_to_c(env_t nv, exp_t e) {
     unimp("compoundlit");
     break;
   case &Array_e(dles0):
-    // An array not under a "new"
+    // An array not under a "new" -- it should only occur in initializer
+    // positions.
     // {e1,...,en}
     e->r = unresolvedmem_exp(null,dles0,DL)->r;
     for (let dles = dles0; dles != null; dles = dles->tl) {
@@ -1824,7 +1901,9 @@ static void exp_to_c(env_t nv, exp_t e) {
     break;
   case &Comprehension_e(vd,e1,e2):
     // a comprehension not under a "new" -- should only be the case
-    // when e1 is constant.  At top-level, e2 should be too.
+    // when e1 is constant.  For now, e2 must be too...
+    // FIX: at top-level, when e2 is 0 or null, etc. we shouldn't generate
+    // anything...
     let sz = Evexp::eval_const_uint_exp(e1);
     exp_to_c(nv,e2);
     list_t<$(list_t<designator_t>,exp_t)@> es = null;

@@ -61,125 +61,126 @@ struct Cyc_List_List* mt= 0; return({ struct Cyc_Hashtable_Table* _temp0=(
 struct Cyc_Hashtable_Table*) GC_malloc( sizeof( struct Cyc_Hashtable_Table));
 _temp0->cmp= cmp; _temp0->hash= hash; _temp0->max_len= 3; _temp0->tab=({
 unsigned int _temp1=( unsigned int) sz; struct Cyc_List_List** _temp2=( struct
-Cyc_List_List**) GC_malloc( sizeof( struct Cyc_List_List*) * _temp1);
-unsigned int i; struct _tagged_ptr0 _temp3={ _temp2, _temp2, _temp2 + _temp1};
-for( i= 0; i < _temp1; i ++){ _temp2[ i]= mt;} _temp3;}); _temp0;});} void Cyc_Hashtable_insert(
-struct Cyc_Hashtable_Table* t, void* key, void* val){ struct _tagged_ptr0 tab= t->tab;
-int bucket=( int)((* t->hash)( key) %({ struct _tagged_ptr0 _temp4= tab;(
-unsigned int)( _temp4.last_plus_one - _temp4.curr);}));({ struct _tagged_ptr0
-_temp5= tab; struct Cyc_List_List** _temp7= _temp5.curr + bucket; if( _temp5.base
-== 0? 1:( _temp7 < _temp5.base? 1: _temp7 >= _temp5.last_plus_one)){ _throw(
-Null_Exception);}* _temp7=({ struct Cyc_List_List* _temp8=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp8->hd=( void*)({ struct _tuple0*
-_temp12=( struct _tuple0*) GC_malloc( sizeof( struct _tuple0)); _temp12->f1= key;
-_temp12->f2= val; _temp12;}); _temp8->tl=({ struct _tagged_ptr0 _temp9= tab;
-struct Cyc_List_List** _temp11= _temp9.curr + bucket; if( _temp9.base == 0? 1:(
-_temp11 < _temp9.base? 1: _temp11 >= _temp9.last_plus_one)){ _throw(
-Null_Exception);}* _temp11;}); _temp8;});}); if((( int(*)( struct Cyc_List_List*
-x)) Cyc_List_length)(({ struct _tagged_ptr0 _temp13= tab; struct Cyc_List_List**
-_temp15= _temp13.curr + bucket; if( _temp13.base == 0? 1:( _temp15 < _temp13.base?
-1: _temp15 >= _temp13.last_plus_one)){ _throw( Null_Exception);}* _temp15;})) >
-t->max_len){(( void(*)( struct Cyc_Hashtable_Table* t)) Cyc_Hashtable_resize)( t);}}
-void* Cyc_Hashtable_lookup( struct Cyc_Hashtable_Table* t, void* key){ struct
-_tagged_ptr0 tab= t->tab; struct Cyc_List_List* l=({ struct _tagged_ptr0 _temp17=
-tab; struct Cyc_List_List** _temp19= _temp17.curr +( int)((* t->hash)( key) %({
-struct _tagged_ptr0 _temp16= tab;( unsigned int)( _temp16.last_plus_one -
-_temp16.curr);})); if( _temp17.base == 0? 1:( _temp19 < _temp17.base? 1: _temp19
->= _temp17.last_plus_one)){ _throw( Null_Exception);}* _temp19;}); return(( void*(*)(
-int(* compare)( void*, void*), struct Cyc_List_List* l, void* x)) Cyc_List_assoc_cmp)(
-t->cmp, l, key);} void Cyc_Hashtable_remove( struct Cyc_Hashtable_Table* t, void*
-key){ struct _tagged_ptr0 tab= t->tab; int(* cmp)( void*, void*)= t->cmp; int
-bucket=( int)((* t->hash)( key) %({ struct _tagged_ptr0 _temp20= tab;(
-unsigned int)( _temp20.last_plus_one - _temp20.curr);})); struct Cyc_List_List*
-l=({ struct _tagged_ptr0 _temp21= tab; struct Cyc_List_List** _temp23= _temp21.curr
-+ bucket; if( _temp21.base == 0? 1:( _temp23 < _temp21.base? 1: _temp23 >=
-_temp21.last_plus_one)){ _throw( Null_Exception);}* _temp23;}); if( l == 0){
-return;} if((* cmp)( key,({ struct _tuple0* _temp25=( struct _tuple0*)({ struct
-Cyc_List_List* _temp24= l; if( _temp24 == 0){ _throw( Null_Exception);} _temp24->hd;});
-unsigned int _temp26= 0; if( _temp26 >= 1u){ _throw( Null_Exception);} _temp25[
-_temp26];}).f1) == 0){({ struct _tagged_ptr0 _temp27= tab; struct Cyc_List_List**
-_temp29= _temp27.curr + bucket; if( _temp27.base == 0? 1:( _temp29 < _temp27.base?
-1: _temp29 >= _temp27.last_plus_one)){ _throw( Null_Exception);}* _temp29=({
-struct Cyc_List_List* _temp30= l; if( _temp30 == 0){ _throw( Null_Exception);}
-_temp30->tl;});}); return;}{ struct Cyc_List_List* prev= l; l=({ struct Cyc_List_List*
-_temp31= l; if( _temp31 == 0){ _throw( Null_Exception);} _temp31->tl;}); for( 0;({
-struct Cyc_List_List* _temp32= l; if( _temp32 == 0){ _throw( Null_Exception);}
-_temp32->tl;}) != 0; prev= l, l=({ struct Cyc_List_List* _temp33= l; if( _temp33
-== 0){ _throw( Null_Exception);} _temp33->tl;})){ if((* cmp)( key,({ struct
-_tuple0* _temp35=( struct _tuple0*)({ struct Cyc_List_List* _temp34= l; if(
-_temp34 == 0){ _throw( Null_Exception);} _temp34->hd;}); unsigned int _temp36= 0;
-if( _temp36 >= 1u){ _throw( Null_Exception);} _temp35[ _temp36];}).f1) == 0){({
-struct Cyc_List_List* _temp37= prev; if( _temp37 == 0){ _throw( Null_Exception);}
-_temp37->tl=({ struct Cyc_List_List* _temp38= l; if( _temp38 == 0){ _throw(
-Null_Exception);} _temp38->tl;});}); return;}}}} int Cyc_Hashtable_hash_string(
-struct _tagged_string s){ int ans= 0; int sz=( int)({ struct _tagged_string
-_temp39= s;( unsigned int)( _temp39.last_plus_one - _temp39.curr);}); int shift=
-0;{ int i= 0; for( 0; i < sz; ++ i){ ans= ans ^({ struct _tagged_string _temp40=
-s; char* _temp42= _temp40.curr + i; if( _temp40.base == 0? 1:( _temp42 < _temp40.base?
-1: _temp42 >= _temp40.last_plus_one)){ _throw( Null_Exception);}* _temp42;}) <<
+Cyc_List_List**) GC_malloc( sizeof( struct Cyc_List_List*) * _temp1); struct
+_tagged_ptr0 _temp5={ _temp2, _temp2, _temp2 + _temp1};{ unsigned int _temp3=
+_temp1; unsigned int i; for( i= 0; i < _temp3; i ++){ _temp2[ i]= mt;}}; _temp5;});
+_temp0;});} void Cyc_Hashtable_insert( struct Cyc_Hashtable_Table* t, void* key,
+void* val){ struct _tagged_ptr0 tab= t->tab; int bucket=( int)((* t->hash)( key)
+%({ struct _tagged_ptr0 _temp6= tab;( unsigned int)( _temp6.last_plus_one -
+_temp6.curr);}));({ struct _tagged_ptr0 _temp7= tab; struct Cyc_List_List**
+_temp9= _temp7.curr + bucket; if( _temp7.base == 0? 1:( _temp9 < _temp7.base? 1:
+_temp9 >= _temp7.last_plus_one)){ _throw( Null_Exception);}* _temp9=({ struct
+Cyc_List_List* _temp10=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp10->hd=( void*)({ struct _tuple0* _temp14=( struct _tuple0*) GC_malloc(
+sizeof( struct _tuple0)); _temp14->f1= key; _temp14->f2= val; _temp14;});
+_temp10->tl=({ struct _tagged_ptr0 _temp11= tab; struct Cyc_List_List** _temp13=
+_temp11.curr + bucket; if( _temp11.base == 0? 1:( _temp13 < _temp11.base? 1:
+_temp13 >= _temp11.last_plus_one)){ _throw( Null_Exception);}* _temp13;});
+_temp10;});}); if((( int(*)( struct Cyc_List_List* x)) Cyc_List_length)(({
+struct _tagged_ptr0 _temp15= tab; struct Cyc_List_List** _temp17= _temp15.curr +
+bucket; if( _temp15.base == 0? 1:( _temp17 < _temp15.base? 1: _temp17 >= _temp15.last_plus_one)){
+_throw( Null_Exception);}* _temp17;})) > t->max_len){(( void(*)( struct Cyc_Hashtable_Table*
+t)) Cyc_Hashtable_resize)( t);}} void* Cyc_Hashtable_lookup( struct Cyc_Hashtable_Table*
+t, void* key){ struct _tagged_ptr0 tab= t->tab; struct Cyc_List_List* l=({
+struct _tagged_ptr0 _temp19= tab; struct Cyc_List_List** _temp21= _temp19.curr +(
+int)((* t->hash)( key) %({ struct _tagged_ptr0 _temp18= tab;( unsigned int)(
+_temp18.last_plus_one - _temp18.curr);})); if( _temp19.base == 0? 1:( _temp21 <
+_temp19.base? 1: _temp21 >= _temp19.last_plus_one)){ _throw( Null_Exception);}*
+_temp21;}); return(( void*(*)( int(* compare)( void*, void*), struct Cyc_List_List*
+l, void* x)) Cyc_List_assoc_cmp)( t->cmp, l, key);} void Cyc_Hashtable_remove(
+struct Cyc_Hashtable_Table* t, void* key){ struct _tagged_ptr0 tab= t->tab; int(*
+cmp)( void*, void*)= t->cmp; int bucket=( int)((* t->hash)( key) %({ struct
+_tagged_ptr0 _temp22= tab;( unsigned int)( _temp22.last_plus_one - _temp22.curr);}));
+struct Cyc_List_List* l=({ struct _tagged_ptr0 _temp23= tab; struct Cyc_List_List**
+_temp25= _temp23.curr + bucket; if( _temp23.base == 0? 1:( _temp25 < _temp23.base?
+1: _temp25 >= _temp23.last_plus_one)){ _throw( Null_Exception);}* _temp25;});
+if( l == 0){ return;} if((* cmp)( key,({ struct _tuple0* _temp27=( struct
+_tuple0*)({ struct Cyc_List_List* _temp26= l; if( _temp26 == 0){ _throw(
+Null_Exception);} _temp26->hd;}); unsigned int _temp28= 0; if( _temp28 >= 1u){
+_throw( Null_Exception);} _temp27[ _temp28];}).f1) == 0){({ struct _tagged_ptr0
+_temp29= tab; struct Cyc_List_List** _temp31= _temp29.curr + bucket; if( _temp29.base
+== 0? 1:( _temp31 < _temp29.base? 1: _temp31 >= _temp29.last_plus_one)){ _throw(
+Null_Exception);}* _temp31=({ struct Cyc_List_List* _temp32= l; if( _temp32 == 0){
+_throw( Null_Exception);} _temp32->tl;});}); return;}{ struct Cyc_List_List*
+prev= l; l=({ struct Cyc_List_List* _temp33= l; if( _temp33 == 0){ _throw(
+Null_Exception);} _temp33->tl;}); for( 0;({ struct Cyc_List_List* _temp34= l;
+if( _temp34 == 0){ _throw( Null_Exception);} _temp34->tl;}) != 0; prev= l, l=({
+struct Cyc_List_List* _temp35= l; if( _temp35 == 0){ _throw( Null_Exception);}
+_temp35->tl;})){ if((* cmp)( key,({ struct _tuple0* _temp37=( struct _tuple0*)({
+struct Cyc_List_List* _temp36= l; if( _temp36 == 0){ _throw( Null_Exception);}
+_temp36->hd;}); unsigned int _temp38= 0; if( _temp38 >= 1u){ _throw(
+Null_Exception);} _temp37[ _temp38];}).f1) == 0){({ struct Cyc_List_List*
+_temp39= prev; if( _temp39 == 0){ _throw( Null_Exception);} _temp39->tl=({
+struct Cyc_List_List* _temp40= l; if( _temp40 == 0){ _throw( Null_Exception);}
+_temp40->tl;});}); return;}}}} int Cyc_Hashtable_hash_string( struct
+_tagged_string s){ int ans= 0; int sz=( int)({ struct _tagged_string _temp41= s;(
+unsigned int)( _temp41.last_plus_one - _temp41.curr);}); int shift= 0;{ int i= 0;
+for( 0; i < sz; ++ i){ ans= ans ^({ struct _tagged_string _temp42= s; char*
+_temp44= _temp42.curr + i; if( _temp42.base == 0? 1:( _temp44 < _temp42.base? 1:
+_temp44 >= _temp42.last_plus_one)){ _throw( Null_Exception);}* _temp44;}) <<
 shift; shift += 8; if( shift == 32){ shift= 0;}}} return ans;} int Cyc_Hashtable_hash_stringptr(
 struct _tagged_string* s){ return Cyc_Hashtable_hash_string(* s);} void Cyc_Hashtable_insert_bucket(
 struct _tagged_ptr0 tab, int(* hash)( void*), struct Cyc_List_List* elems){ if(
 elems == 0){ return;}(( void(*)( struct _tagged_ptr0 tab, int(* hash)( void*),
 struct Cyc_List_List* elems)) Cyc_Hashtable_insert_bucket)( tab, hash,({ struct
-Cyc_List_List* _temp43= elems; if( _temp43 == 0){ _throw( Null_Exception);}
-_temp43->tl;}));{ void* key=({ struct _tuple0* _temp45=( struct _tuple0*)({
-struct Cyc_List_List* _temp44= elems; if( _temp44 == 0){ _throw( Null_Exception);}
-_temp44->hd;}); unsigned int _temp46= 0; if( _temp46 >= 1u){ _throw(
-Null_Exception);} _temp45[ _temp46];}).f1; void* val=({ struct _tuple0* _temp48=(
-struct _tuple0*)({ struct Cyc_List_List* _temp47= elems; if( _temp47 == 0){
-_throw( Null_Exception);} _temp47->hd;}); unsigned int _temp49= 0; if( _temp49
->= 1u){ _throw( Null_Exception);} _temp48[ _temp49];}).f2; int nidx=( int)((*
-hash)( key) %({ struct _tagged_ptr0 _temp50= tab;( unsigned int)( _temp50.last_plus_one
-- _temp50.curr);}));({ struct _tagged_ptr0 _temp51= tab; struct Cyc_List_List**
-_temp53= _temp51.curr + nidx; if( _temp51.base == 0? 1:( _temp53 < _temp51.base?
-1: _temp53 >= _temp51.last_plus_one)){ _throw( Null_Exception);}* _temp53=({
-struct Cyc_List_List* _temp54=( struct Cyc_List_List*) GC_malloc( sizeof( struct
-Cyc_List_List)); _temp54->hd=( void*)({ struct _tuple0* _temp58=( struct _tuple0*)
-GC_malloc( sizeof( struct _tuple0)); _temp58->f1= key; _temp58->f2= val; _temp58;});
-_temp54->tl=({ struct _tagged_ptr0 _temp55= tab; struct Cyc_List_List** _temp57=
-_temp55.curr + nidx; if( _temp55.base == 0? 1:( _temp57 < _temp55.base? 1:
-_temp57 >= _temp55.last_plus_one)){ _throw( Null_Exception);}* _temp57;});
-_temp54;});});}} void Cyc_Hashtable_resize( struct Cyc_Hashtable_Table* t){
+Cyc_List_List* _temp45= elems; if( _temp45 == 0){ _throw( Null_Exception);}
+_temp45->tl;}));{ void* key=({ struct _tuple0* _temp47=( struct _tuple0*)({
+struct Cyc_List_List* _temp46= elems; if( _temp46 == 0){ _throw( Null_Exception);}
+_temp46->hd;}); unsigned int _temp48= 0; if( _temp48 >= 1u){ _throw(
+Null_Exception);} _temp47[ _temp48];}).f1; void* val=({ struct _tuple0* _temp50=(
+struct _tuple0*)({ struct Cyc_List_List* _temp49= elems; if( _temp49 == 0){
+_throw( Null_Exception);} _temp49->hd;}); unsigned int _temp51= 0; if( _temp51
+>= 1u){ _throw( Null_Exception);} _temp50[ _temp51];}).f2; int nidx=( int)((*
+hash)( key) %({ struct _tagged_ptr0 _temp52= tab;( unsigned int)( _temp52.last_plus_one
+- _temp52.curr);}));({ struct _tagged_ptr0 _temp53= tab; struct Cyc_List_List**
+_temp55= _temp53.curr + nidx; if( _temp53.base == 0? 1:( _temp55 < _temp53.base?
+1: _temp55 >= _temp53.last_plus_one)){ _throw( Null_Exception);}* _temp55=({
+struct Cyc_List_List* _temp56=( struct Cyc_List_List*) GC_malloc( sizeof( struct
+Cyc_List_List)); _temp56->hd=( void*)({ struct _tuple0* _temp60=( struct _tuple0*)
+GC_malloc( sizeof( struct _tuple0)); _temp60->f1= key; _temp60->f2= val; _temp60;});
+_temp56->tl=({ struct _tagged_ptr0 _temp57= tab; struct Cyc_List_List** _temp59=
+_temp57.curr + nidx; if( _temp57.base == 0? 1:( _temp59 < _temp57.base? 1:
+_temp59 >= _temp57.last_plus_one)){ _throw( Null_Exception);}* _temp59;});
+_temp56;});});}} void Cyc_Hashtable_resize( struct Cyc_Hashtable_Table* t){
 struct _tagged_ptr0 odata= t->tab; int osize=( int)({ struct _tagged_ptr0
-_temp59= odata;( unsigned int)( _temp59.last_plus_one - _temp59.curr);}); int
+_temp61= odata;( unsigned int)( _temp61.last_plus_one - _temp61.curr);}); int
 nsize= 2 * osize + 1; struct Cyc_List_List* mt= 0; struct _tagged_ptr0 ndata=({
-unsigned int _temp60=( unsigned int) nsize; struct Cyc_List_List** _temp61=(
-struct Cyc_List_List**) GC_malloc( sizeof( struct Cyc_List_List*) * _temp60);
-unsigned int i; struct _tagged_ptr0 _temp62={ _temp61, _temp61, _temp61 +
-_temp60}; for( i= 0; i < _temp60; i ++){ _temp61[ i]= mt;} _temp62;});{ int i= 0;
-for( 0; i < osize; i ++){(( void(*)( struct _tagged_ptr0 tab, int(* hash)( void*),
-struct Cyc_List_List* elems)) Cyc_Hashtable_insert_bucket)( ndata, t->hash,({
-struct _tagged_ptr0 _temp63= odata; struct Cyc_List_List** _temp65= _temp63.curr
-+ i; if( _temp63.base == 0? 1:( _temp65 < _temp63.base? 1: _temp65 >= _temp63.last_plus_one)){
-_throw( Null_Exception);}* _temp65;}));}} t->tab= ndata; t->max_len= 2 * t->max_len;}
-void Cyc_Hashtable_iter( void(* f)( void*, void*), struct Cyc_Hashtable_Table* t){
+unsigned int _temp62=( unsigned int) nsize; struct Cyc_List_List** _temp63=(
+struct Cyc_List_List**) GC_malloc( sizeof( struct Cyc_List_List*) * _temp62);
+struct _tagged_ptr0 _temp66={ _temp63, _temp63, _temp63 + _temp62};{
+unsigned int _temp64= _temp62; unsigned int i; for( i= 0; i < _temp64; i ++){
+_temp63[ i]= mt;}}; _temp66;});{ int i= 0; for( 0; i < osize; i ++){(( void(*)(
+struct _tagged_ptr0 tab, int(* hash)( void*), struct Cyc_List_List* elems)) Cyc_Hashtable_insert_bucket)(
+ndata, t->hash,({ struct _tagged_ptr0 _temp67= odata; struct Cyc_List_List**
+_temp69= _temp67.curr + i; if( _temp67.base == 0? 1:( _temp69 < _temp67.base? 1:
+_temp69 >= _temp67.last_plus_one)){ _throw( Null_Exception);}* _temp69;}));}} t->tab=
+ndata; t->max_len= 2 * t->max_len;} void Cyc_Hashtable_iter( void(* f)( void*,
+void*), struct Cyc_Hashtable_Table* t){ struct _tagged_ptr0 odata= t->tab; int
+osize=( int)({ struct _tagged_ptr0 _temp70= odata;( unsigned int)( _temp70.last_plus_one
+- _temp70.curr);}); int i= 0; for( 0; i < osize; i ++){ struct Cyc_List_List*
+iter=({ struct _tagged_ptr0 _temp71= odata; struct Cyc_List_List** _temp73=
+_temp71.curr + i; if( _temp71.base == 0? 1:( _temp73 < _temp71.base? 1: _temp73
+>= _temp71.last_plus_one)){ _throw( Null_Exception);}* _temp73;}); for( 0; iter
+!= 0; iter=({ struct Cyc_List_List* _temp74= iter; if( _temp74 == 0){ _throw(
+Null_Exception);} _temp74->tl;})){ f(({ struct _tuple0* _temp76=( struct _tuple0*)({
+struct Cyc_List_List* _temp75= iter; if( _temp75 == 0){ _throw( Null_Exception);}
+_temp75->hd;}); unsigned int _temp77= 0; if( _temp77 >= 1u){ _throw(
+Null_Exception);} _temp76[ _temp77];}).f1,({ struct _tuple0* _temp79=( struct
+_tuple0*)({ struct Cyc_List_List* _temp78= iter; if( _temp78 == 0){ _throw(
+Null_Exception);} _temp78->hd;}); unsigned int _temp80= 0; if( _temp80 >= 1u){
+_throw( Null_Exception);} _temp79[ _temp80];}).f2);}}} void Cyc_Hashtable_print_table_map(
+struct Cyc_Hashtable_Table* t, void(* prn_key)( void*), void(* prn_val)( void*)){
 struct _tagged_ptr0 odata= t->tab; int osize=( int)({ struct _tagged_ptr0
-_temp66= odata;( unsigned int)( _temp66.last_plus_one - _temp66.curr);}); int i=
-0; for( 0; i < osize; i ++){ struct Cyc_List_List* iter=({ struct _tagged_ptr0
-_temp67= odata; struct Cyc_List_List** _temp69= _temp67.curr + i; if( _temp67.base
-== 0? 1:( _temp69 < _temp67.base? 1: _temp69 >= _temp67.last_plus_one)){ _throw(
-Null_Exception);}* _temp69;}); for( 0; iter != 0; iter=({ struct Cyc_List_List*
-_temp70= iter; if( _temp70 == 0){ _throw( Null_Exception);} _temp70->tl;})){ f(({
-struct _tuple0* _temp72=( struct _tuple0*)({ struct Cyc_List_List* _temp71= iter;
-if( _temp71 == 0){ _throw( Null_Exception);} _temp71->hd;}); unsigned int
-_temp73= 0; if( _temp73 >= 1u){ _throw( Null_Exception);} _temp72[ _temp73];}).f1,({
-struct _tuple0* _temp75=( struct _tuple0*)({ struct Cyc_List_List* _temp74= iter;
-if( _temp74 == 0){ _throw( Null_Exception);} _temp74->hd;}); unsigned int
-_temp76= 0; if( _temp76 >= 1u){ _throw( Null_Exception);} _temp75[ _temp76];}).f2);}}}
-void Cyc_Hashtable_print_table_map( struct Cyc_Hashtable_Table* t, void(*
-prn_key)( void*), void(* prn_val)( void*)){ struct _tagged_ptr0 odata= t->tab;
-int osize=( int)({ struct _tagged_ptr0 _temp77= odata;( unsigned int)( _temp77.last_plus_one
-- _temp77.curr);}); int i= 0; for( 0; i < osize; i ++){ printf("%d: ", i);{
-struct Cyc_List_List* iter=({ struct _tagged_ptr0 _temp78= odata; struct Cyc_List_List**
-_temp80= _temp78.curr + i; if( _temp78.base == 0? 1:( _temp80 < _temp78.base? 1:
-_temp80 >= _temp78.last_plus_one)){ _throw( Null_Exception);}* _temp80;}); for(
-0; iter != 0; iter=({ struct Cyc_List_List* _temp81= iter; if( _temp81 == 0){
-_throw( Null_Exception);} _temp81->tl;})){ printf("("); prn_key(({ struct
-_tuple0* _temp83=( struct _tuple0*)({ struct Cyc_List_List* _temp82= iter; if(
-_temp82 == 0){ _throw( Null_Exception);} _temp82->hd;}); unsigned int _temp84= 0;
-if( _temp84 >= 1u){ _throw( Null_Exception);} _temp83[ _temp84];}).f1); printf(",");
-prn_val(({ struct _tuple0* _temp86=( struct _tuple0*)({ struct Cyc_List_List*
-_temp85= iter; if( _temp85 == 0){ _throw( Null_Exception);} _temp85->hd;});
-unsigned int _temp87= 0; if( _temp87 >= 1u){ _throw( Null_Exception);} _temp86[
-_temp87];}).f2); printf(") ");}} printf("\n");}}
+_temp81= odata;( unsigned int)( _temp81.last_plus_one - _temp81.curr);}); int i=
+0; for( 0; i < osize; i ++){ printf("%d: ", i);{ struct Cyc_List_List* iter=({
+struct _tagged_ptr0 _temp82= odata; struct Cyc_List_List** _temp84= _temp82.curr
++ i; if( _temp82.base == 0? 1:( _temp84 < _temp82.base? 1: _temp84 >= _temp82.last_plus_one)){
+_throw( Null_Exception);}* _temp84;}); for( 0; iter != 0; iter=({ struct Cyc_List_List*
+_temp85= iter; if( _temp85 == 0){ _throw( Null_Exception);} _temp85->tl;})){
+printf("("); prn_key(({ struct _tuple0* _temp87=( struct _tuple0*)({ struct Cyc_List_List*
+_temp86= iter; if( _temp86 == 0){ _throw( Null_Exception);} _temp86->hd;});
+unsigned int _temp88= 0; if( _temp88 >= 1u){ _throw( Null_Exception);} _temp87[
+_temp88];}).f1); printf(","); prn_val(({ struct _tuple0* _temp90=( struct
+_tuple0*)({ struct Cyc_List_List* _temp89= iter; if( _temp89 == 0){ _throw(
+Null_Exception);} _temp89->hd;}); unsigned int _temp91= 0; if( _temp91 >= 1u){
+_throw( Null_Exception);} _temp90[ _temp91];}).f2); printf(") ");}} printf("\n");}}

@@ -32,6 +32,12 @@ I assume that eventually this will be fixed, but in the meantime, I suggest
 that we make a constant {ZERO} that has any stack array type [n], and
 represents the array filled with zeros.
 
+JGM:  you should be able to write:
+
+  char buf[BUFSIZE] = {for i < BUFSIZE : '\0'} now.
+
+now.  
+
 Meanwhile, I guess I'll have to heap allocate things.
 
 5/14/01:  This has a workaround (which I only realized just now):

@@ -12,7 +12,8 @@ BUG FIXES and UNSOUNDNESSES:
   hash and sign the code and interface so that we can detect tampering
   with the code or interface at link-time.
 
-* Are we treating static variables (within a fun
+* Are we treating static variables (within a fun) correctly?
+
 * we're too restrictive about typedef names -- C really treats them as
   a separate namespace, but our parser depends crucially on the lexer
   making a distinction between typedef names and other identifiers.
@@ -24,6 +25,33 @@ BUG FIXES and UNSOUNDNESSES:
 * we need to do a bounds check on enum assignments.  Also, the pattern
   matcher assumes that there are no duplicate tags for enums.
 
+* subtyping is broken w.r.t. pointer bounds -- you can cast int@{1} to
+  int@{3}.  The whole sub-typing machinery needs to be re-examined to
+  make sure that it is sound.  In particular, alignment issues are
+  a concern.
+
+* alpha-conversion issues with respect to type variables.  We should
+  keep around a list of all of the type variables used in a function
+  and ensure that they aren't duplicated (or else provide an internal
+  map from user-specified type variables to gensym'd representations.)
+
+* namespace issues:  we treat `namespace Foo {extern "C" int x;}' as if
+  x is translated as Cyc_Foo_x but it's translated as "x".  We should
+  really define both "x" and "Cyc_Foo_x" in the environment.  In addition,
+  users can spoof a Cyclone variable by writing {extern "C" int Cyc_x;}.
+
+* new "foo" and rnew(h) "foo" don't work properly -- they should allocate
+  a copy of the string in the region, no?
+
+* comprehensions like the following are broken:
+   void f() {
+     int x[10] = {for i < 10 : i};
+   }
+  the problem being that we don't translate them properly.  We really
+  have to back up the translation of the comprehension to the declaration.
+  Note that the translation works if i doesn't occur in the body of the
+  comprehension.
+  
 MISSING THINGS NEEDED TO PORT REAL CODE:
 ----------------------------------------
 * Need to port more C libraries

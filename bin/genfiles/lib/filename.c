@@ -110,27 +110,28 @@ Null_Exception);}* _temp38;}) ==':': 0; int i; int j; struct _tagged_string ans;
 int ans_sz; if( has_drive_name){ ans_sz=( int)(({ struct _tagged_string _temp39=
 filename;( unsigned int)( _temp39.last_plus_one - _temp39.curr);}) + 1); ans=({
 unsigned int _temp40=( unsigned int) ans_sz; char* _temp41=( char*)
-GC_malloc_atomic( sizeof( char) * _temp40); unsigned int k; struct
-_tagged_string _temp42={ _temp41, _temp41, _temp41 + _temp40}; for( k= 0; k <
-_temp40; k ++){ _temp41[ k]='\000';} _temp42;});({ struct _tagged_string _temp43=
-ans; char* _temp45= _temp43.curr + 0; if( _temp43.base == 0? 1:( _temp45 <
-_temp43.base? 1: _temp45 >= _temp43.last_plus_one)){ _throw( Null_Exception);}*
-_temp45=({ struct _tagged_string _temp46= ans; char* _temp48= _temp46.curr + 1;
-if( _temp46.base == 0? 1:( _temp48 < _temp46.base? 1: _temp48 >= _temp46.last_plus_one)){
-_throw( Null_Exception);}* _temp48='/';});});({ struct _tagged_string _temp49=
-ans; char* _temp51= _temp49.curr + 2; if( _temp49.base == 0? 1:( _temp51 <
-_temp49.base? 1: _temp51 >= _temp49.last_plus_one)){ _throw( Null_Exception);}*
-_temp51=({ struct _tagged_string _temp52= filename; char* _temp54= _temp52.curr
-+ 0; if( _temp52.base == 0? 1:( _temp54 < _temp52.base? 1: _temp54 >= _temp52.last_plus_one)){
-_throw( Null_Exception);}* _temp54;});}); i= 3; j= 2;} else{ ans_sz=( int)({
-struct _tagged_string _temp55= filename;( unsigned int)( _temp55.last_plus_one -
-_temp55.curr);}); ans=({ unsigned int _temp56=( unsigned int) ans_sz; char*
-_temp57=( char*) GC_malloc_atomic( sizeof( char) * _temp56); unsigned int k;
-struct _tagged_string _temp58={ _temp57, _temp57, _temp57 + _temp56}; for( k= 0;
-k < _temp56; k ++){ _temp57[ k]='\000';} _temp58;}); i= 0; j= 0;} while( i <
-ans_sz) { char c=({ struct _tagged_string _temp59= filename; char* _temp61=
-_temp59.curr +( j ++); if( _temp59.base == 0? 1:( _temp61 < _temp59.base? 1:
-_temp61 >= _temp59.last_plus_one)){ _throw( Null_Exception);}* _temp61;});({
-struct _tagged_string _temp62= ans; char* _temp64= _temp62.curr +( i ++); if(
-_temp62.base == 0? 1:( _temp64 < _temp62.base? 1: _temp64 >= _temp62.last_plus_one)){
-_throw( Null_Exception);}* _temp64= c =='\\'?'/': c;});} return ans;}
+GC_malloc_atomic( sizeof( char) * _temp40); struct _tagged_string _temp44={
+_temp41, _temp41, _temp41 + _temp40};{ unsigned int _temp42= _temp40;
+unsigned int k; for( k= 0; k < _temp42; k ++){ _temp41[ k]='\000';}}; _temp44;});({
+struct _tagged_string _temp45= ans; char* _temp47= _temp45.curr + 0; if( _temp45.base
+== 0? 1:( _temp47 < _temp45.base? 1: _temp47 >= _temp45.last_plus_one)){ _throw(
+Null_Exception);}* _temp47=({ struct _tagged_string _temp48= ans; char* _temp50=
+_temp48.curr + 1; if( _temp48.base == 0? 1:( _temp50 < _temp48.base? 1: _temp50
+>= _temp48.last_plus_one)){ _throw( Null_Exception);}* _temp50='/';});});({
+struct _tagged_string _temp51= ans; char* _temp53= _temp51.curr + 2; if( _temp51.base
+== 0? 1:( _temp53 < _temp51.base? 1: _temp53 >= _temp51.last_plus_one)){ _throw(
+Null_Exception);}* _temp53=({ struct _tagged_string _temp54= filename; char*
+_temp56= _temp54.curr + 0; if( _temp54.base == 0? 1:( _temp56 < _temp54.base? 1:
+_temp56 >= _temp54.last_plus_one)){ _throw( Null_Exception);}* _temp56;});}); i=
+3; j= 2;} else{ ans_sz=( int)({ struct _tagged_string _temp57= filename;(
+unsigned int)( _temp57.last_plus_one - _temp57.curr);}); ans=({ unsigned int
+_temp58=( unsigned int) ans_sz; char* _temp59=( char*) GC_malloc_atomic( sizeof(
+char) * _temp58); struct _tagged_string _temp62={ _temp59, _temp59, _temp59 +
+_temp58};{ unsigned int _temp60= _temp58; unsigned int k; for( k= 0; k < _temp60;
+k ++){ _temp59[ k]='\000';}}; _temp62;}); i= 0; j= 0;} while( i < ans_sz) { char
+c=({ struct _tagged_string _temp63= filename; char* _temp65= _temp63.curr +( j
+++); if( _temp63.base == 0? 1:( _temp65 < _temp63.base? 1: _temp65 >= _temp63.last_plus_one)){
+_throw( Null_Exception);}* _temp65;});({ struct _tagged_string _temp66= ans;
+char* _temp68= _temp66.curr +( i ++); if( _temp66.base == 0? 1:( _temp68 <
+_temp66.base? 1: _temp68 >= _temp66.last_plus_one)){ _throw( Null_Exception);}*
+_temp68= c =='\\'?'/': c;});} return ans;}

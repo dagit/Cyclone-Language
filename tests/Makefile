@@ -28,6 +28,9 @@ all: $(OUT_PREFIX)cyctest $(OUT_PREFIX)foo $(OUT_PREFIX)hello \
 $(OUT_PREFIX)hello: $(OUT_PREFIX)hello.o $(LIB)
 	gcc -g -o $@ $^ ../bin/gc.a $(LDFLAGS)
 
+$(OUT_PREFIX)merge_sort: $(OUT_PREFIX)merge_sort.o $(LIB)
+	gcc -g -o $@ $^ ../bin/gc.a $(LDFLAGS)
+
 $(OUT_PREFIX)test_regions: $(OUT_PREFIX)test_regions.o $(LIB)
 	gcc -g -o $@ $^ ../bin/gc.a $(LDFLAGS)
 
