@@ -99,14 +99,14 @@ extern int _throw(void* e);
 extern struct _xtunion_struct *_exn_thrown;
 
 /* Built-in Exceptions */
-extern struct _xtunion_struct ADD_PREFIX(Null_Exception_struct);
-extern struct _xtunion_struct * ADD_PREFIX(Null_Exception);
-extern struct _xtunion_struct ADD_PREFIX(Array_bounds_struct);
-extern struct _xtunion_struct * ADD_PREFIX(Array_bounds);
-extern struct _xtunion_struct ADD_PREFIX(Match_Exception_struct);
-extern struct _xtunion_struct * ADD_PREFIX(Match_Exception);
-extern struct _xtunion_struct ADD_PREFIX(Bad_alloc_struct);
-extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
+struct Cyc_Null_Exception_struct { char *tag; };
+struct Cyc_Array_bounds_struct { char *tag; };
+struct Cyc_Match_Exception_struct { char *tag; };
+struct Cyc_Bad_alloc_struct { char *tag; };
+extern char Cyc_Null_Exception[];
+extern char Cyc_Array_bounds[];
+extern char Cyc_Match_Exception[];
+extern char Cyc_Bad_alloc[];
 
 /* Built-in Run-time Checks and company */
 #ifdef __APPLE__

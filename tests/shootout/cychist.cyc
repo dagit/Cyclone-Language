@@ -255,7 +255,7 @@ void get_max_min_med(double ?points, int npoints, double *max, double *min,
  *
  */
  
-static char buffer[2000]ZEROTERM;
+static char buffer[2000]@zeroterm;
 
 int main(int argc, const char ?argv[])
 {

@@ -5,10 +5,11 @@
 int c = (int)' ';
 
 datatype exn {ParseError};
+datatype exn.ParseError parse_error = ParseError;
 
 void yyerror(string_t s) {
   printf("error: %s\n",s);
-  throw ParseError;
+  throw &parse_error;
 }
 
 int yylex() {

@@ -53,24 +53,24 @@ struct _DynRegionHandle {
 
 // FIX: makes alignment and pointer-size assumptions
 // FIX: what about -nocyc???
-char Cyc_Null_Exception_tag[] = "Cyc_Null_Exception";
-struct _xtunion_struct Cyc_Null_Exception_struct = { Cyc_Null_Exception_tag };
-struct _xtunion_struct * Cyc_Null_Exception = &Cyc_Null_Exception_struct;
-char Cyc_Array_bounds_tag[] = "Cyc_Array_bounds";
-struct _xtunion_struct Cyc_Array_bounds_struct = { Cyc_Array_bounds_tag };
-struct _xtunion_struct * Cyc_Array_bounds = &Cyc_Array_bounds_struct;
-char Cyc_Match_Exception_tag[] = "Cyc_Match_Exception";
-struct _xtunion_struct Cyc_Match_Exception_struct = { Cyc_Match_Exception_tag };
-struct _xtunion_struct * Cyc_Match_Exception = &Cyc_Match_Exception_struct;
-char Cyc_Bad_alloc_tag[] = "Cyc_Bad_alloc";
-struct _xtunion_struct Cyc_Bad_alloc_struct = { Cyc_Bad_alloc_tag };
-struct _xtunion_struct * Cyc_Bad_alloc = &Cyc_Bad_alloc_struct;
-char Cyc_Core_Free_Region_tag[] = "Cyc_Core_Free_Region";
-struct _xtunion_struct Cyc_Core_Free_Region_struct = { Cyc_Core_Free_Region_tag };
-struct _xtunion_struct * Cyc_Core_Free_Region = &Cyc_Core_Free_Region_struct;
-char Cyc_Core_Open_Region_tag[] = "Cyc_Core_Open_Region";
-struct _xtunion_struct Cyc_Core_Open_Region_struct = { Cyc_Core_Open_Region_tag };
-struct _xtunion_struct * Cyc_Core_Open_Region = &Cyc_Core_Open_Region_struct;
+char Cyc_Null_Exception[] = "Cyc_Null_Exception";
+struct _xtunion_struct Cyc_Null_Exception_struct = { Cyc_Null_Exception };
+struct _xtunion_struct * Cyc_Null_Exception_val = &Cyc_Null_Exception_struct;
+char Cyc_Array_bounds[] = "Cyc_Array_bounds";
+struct _xtunion_struct Cyc_Array_bounds_struct = { Cyc_Array_bounds };
+struct _xtunion_struct * Cyc_Array_bounds_val = &Cyc_Array_bounds_struct;
+char Cyc_Match_Exception[] = "Cyc_Match_Exception";
+struct _xtunion_struct Cyc_Match_Exception_struct = { Cyc_Match_Exception };
+struct _xtunion_struct * Cyc_Match_Exception_val = &Cyc_Match_Exception_struct;
+char Cyc_Bad_alloc[] = "Cyc_Bad_alloc";
+struct _xtunion_struct Cyc_Bad_alloc_struct = { Cyc_Bad_alloc };
+struct _xtunion_struct * Cyc_Bad_alloc_val = &Cyc_Bad_alloc_struct;
+char Cyc_Core_Free_Region[] = "Cyc_Core_Free_Region";
+struct _xtunion_struct Cyc_Core_Free_Region_struct = { Cyc_Core_Free_Region };
+struct _xtunion_struct * Cyc_Core_Free_Region_val = &Cyc_Core_Free_Region_struct;
+char Cyc_Core_Open_Region[] = "Cyc_Core_Open_Region";
+struct _xtunion_struct Cyc_Core_Open_Region_struct = { Cyc_Core_Open_Region };
+struct _xtunion_struct * Cyc_Core_Open_Region_val = &Cyc_Core_Open_Region_struct;
 
 #ifdef CYC_REGION_PROFILE
 static FILE *alloc_log = NULL;
@@ -219,13 +219,13 @@ int _throw(void* e) { // FIX: use struct _xtunion_struct *  ??
 }
 
 int _throw_null() {
-  throw(Cyc_Null_Exception);
+  throw(Cyc_Null_Exception_val);
 }
 int _throw_arraybounds() {
-  throw(Cyc_Array_bounds);
+  throw(Cyc_Array_bounds_val);
 }
 int _throw_badalloc() {
-  throw(Cyc_Bad_alloc);
+  throw(Cyc_Bad_alloc_val);
 }
 
 struct _dyneither_ptr wrap_Cstring_as_string(Cstring s, size_t len) {
@@ -286,13 +286,13 @@ Cstring string_to_Cstring(struct _dyneither_ptr s) {
   if (s.curr == NULL) return NULL;
 
   if (s.curr >= s.last_plus_one || s.curr < s.base)
-    throw(Cyc_Null_Exception); // FIX: this should be a bounds error
+    throw(Cyc_Null_Exception_val); // FIX: this should be a bounds error
   // check that there's a '\0' somewhere in the string -- if not,
   // throw an exception.
   for (str = s.last_plus_one-1; str >= contents; str--) {
     if (*str == '\0') return contents;
   }
-  throw(Cyc_Null_Exception);
+  throw(Cyc_Null_Exception_val);
   /*
   // slow path -- have to copy the string to ensure it's null terminated
   str = (char *)GC_malloc_atomic(sz+1);
@@ -622,7 +622,7 @@ struct _RegionHandle *_open_dynregion(struct _DynRegionFrame *f,
                                       struct _DynRegionHandle *h) {
   struct _RegionHandle *res = h->handle;
   if (res == NULL)
-    throw(Cyc_Core_Open_Region);
+    throw(Cyc_Core_Open_Region_val);
   h->ref_count++;
   f->x = h;
   _push_dynregion(f);
@@ -634,7 +634,7 @@ struct _RegionHandle *_open_dynregion(struct _DynRegionFrame *f,
  */
 void Cyc_Core_free_dynregion(struct _DynRegionHandle* x) {
   if (x->ref_count != 0 || x->handle == NULL) 
-    throw(Cyc_Core_Free_Region);
+    throw(Cyc_Core_Free_Region_val);
   _free_region(x->handle);
   x->handle = NULL;
 }

@@ -88,7 +88,7 @@ int main(int argc, string_t ?argv) {
       *byte_count = *byte_count + count;
       *call_count = *call_count + 1;
     } catch {
-    case Not_found:
+    case &Not_found:
       insert(table, s, new $(count,1)); break;
     }
   }

@@ -3246,6 +3246,7 @@ static stmt_t if_neq_stmt(exp_t e1,exp_t e2,stmt_t fail_stmt) {
 			 fail_stmt,
 			 skip_stmt_dl(),DL);
 }
+
 static $(env_t<`rgn>,list_t<$(qvar_t,type_t)@`rgn,`rgn>,stmt_t)
 xlate_pat(env_t<`rgn> nv, 
           region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,

@@ -146,7 +146,7 @@ void break_in_try_test() {
         break;
       }
     }
-    throw List::List_mismatch;
+    throw new List::List_mismatch;
   }
   catch {
   default:
@@ -166,7 +166,7 @@ void continue_in_try_test() {
         break;
       }
     }
-    throw List::List_mismatch;
+    throw new List::List_mismatch;
   }
   catch {
   default:
@@ -222,7 +222,7 @@ void list_test() {
                        List::map2(my_add,xx,List::rev(xx))));
   }
   catch {
-  case List_mismatch:
+  case &List_mismatch:
     fail();
     break;
   }
@@ -231,7 +231,7 @@ void list_test() {
     fail();
   }
   catch {
-  case List_mismatch:
+  case &List_mismatch:
     ok();
     break;
   }
@@ -742,16 +742,16 @@ void fn_test() {
 using PP {
 datatype term {
   Var(string_t),
-  App(datatype term,datatype term),
-  Lam(string_t,datatype term)
+  App(datatype term @,datatype term @),
+  Lam(string_t,datatype term @)
 };
-bool is_lam(datatype term t) {
+bool is_lam(datatype term @ t) {
   switch (t) {
   case &Lam(x,t1): return true;
   default: return false;
   }
 }
-doc_t pp_term(datatype term t) {
+doc_t pp_term(datatype term @ t) {
   switch (t) {
   case &Var(x):
     return text(x);
@@ -1007,10 +1007,10 @@ int main(int argc, string_t<`H> ?`H args) {
   try {
     printf("Testing return in try: ");
     return_from_try_test();
-    throw List_mismatch;
+    throw new List_mismatch;
   }
   catch {
-  case List_mismatch:
+  case &List_mismatch:
     printf("return in try found\n");
     break;
   }
@@ -1045,7 +1045,7 @@ int main(int argc, string_t<`H> ?`H args) {
     sig_test();
     scanf_test(); // commented out because sscanf is insecure
   } catch {
-  case Array_bounds:
+  case &Array_bounds:
     fflush(stdout);
     fflush(stderr);
     fprintf(stderr,"Uncaught Array_bounds!\n");
