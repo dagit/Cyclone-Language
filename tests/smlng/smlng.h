@@ -12,6 +12,20 @@ extern tunion Document {
   Text(char ?);
   Tagged(tag_t,doc_t);
 };
+extern struct Context {
+  bool B :1;
+  bool EM :1;
+  bool I :1;
+  bool S :1;
+  bool TT :1;
+  char U :2;    // [0-3]
+  char size;    // [0-9]
+  char color;   // [r_tag-w_tag]
+};
+typedef struct Context context_t;
+
+extern bool is_white(char c);
+
 #define DONT_KNOW 255
 void dump(doc_t d);
 #endif _SMLNG_H_

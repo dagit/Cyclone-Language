@@ -25,6 +25,25 @@ tunion Document {
 };
 extern doc_t get_docs(FILE @f);
 
+bool is_white(char c) {
+  switch(c) {
+  case 0x20: 
+  case 0x0D:
+  case 0x0A:
+  case 0x09: return true;
+  default: return false;
+  }
+}
+
+// does not copy the actual text
+doc_t copy_doc(doc_t d) {
+  switch(d) {
+  case &Text(str): return new Text(str);
+  case &Tagged(tag,d): return new Tagged(tag,copy_doc(d));
+  case &Seq(ds): return new Seq(new {for i<ds.size: copy_doc(ds[i])});
+  }
+}
+
 void dump(doc_t d) {
   switch (d) {
   case &Seq(ds): for (; ds.size != 0; ds++) dump(ds[0]); break;
@@ -77,7 +96,6 @@ struct Context {
   char size;    // [0-9]
   char color;   // [r_tag-w_tag]
 };
-typedef struct Context context_t;
 
 // gets rid of redundant tags in a top-down fashion
 doc_t down_opt(context_t ctxt, doc_t d) {
@@ -86,7 +104,7 @@ doc_t down_opt(context_t ctxt, doc_t d) {
     for (; ds.size != 0; ds++)
       *ds = down_opt(ctxt,*ds);
     return d;
-  case &Text(t): return d;
+  case &Text(_): return d;
   case &Tagged(tag,*d2):
     switch (tag) {
     case B_tag:
@@ -94,8 +112,8 @@ doc_t down_opt(context_t ctxt, doc_t d) {
       ctxt.B = true; 
       break;
     case EM_tag:
-      if (ctxt.S) return down_opt(ctxt,*d2);
-      ctxt.EM = !ctxt.EM;
+      if (ctxt.S) return down_opt(ctxt,*d2); 
+      ctxt.EM = !ctxt.EM; 
       break;
     case I_tag:
       if (ctxt.I) return down_opt(ctxt,*d2);
@@ -153,7 +171,7 @@ doc_t down_opt(context_t ctxt, doc_t d) {
   }
 }
 
-
+extern void validate_docs(doc_t,doc_t);
 
 int main(int argc, char ??argv) {
   //if(argc < 2) {
@@ -165,8 +183,18 @@ int main(int argc, char ??argv) {
   //time_test(argv[1]);
   
   doc_t d = get_docs(stdin);
-  context_t initctxt = Context(false, false,false, false, false, 0,DONT_KNOW,DONT_KNOW);
-  doc_t dend = down_opt(initctxt,d);
+  doc_t orig = copy_doc(d);
+  fprintf(stderr,"copy: ");
+  validate_docs(d,orig); // checks the validator (one direction)
+  //  doc_t d2 = new Text(new {for i < 3: 'a'});
+  //  validate_docs(d,d2);
+  /*  d = down_opt(Context(0,0,0,0,0,0,DONT_KNOW,DONT_KNOW),
+  	       d);
+	       fprintf(stderr,"down: ");
+  validate_docs(d,orig);
+  let $(d,_) = TagElim::up_opt(d);
+  fprintf(stderr,"up: ");
+  validate_docs(d,orig);*/
   dump(d);
   return 0;
 }

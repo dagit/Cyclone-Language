@@ -2,7 +2,7 @@
 #include "core.h"
 #include "stdio.h"
 #include "smlng.h"
-
+#include "tag_elim.h"
 namespace TagElim;
 
 // field is true if all text in the doc is guarded by an appropriate tag,
@@ -26,7 +26,6 @@ union Synth {
   struct SynthS s;
   unsigned short i;
 };
-typedef union Synth synth_t; // not a pointer
 
 // currently destructive (of doc), but could easily be made functional
 $(doc_t, synth_t) up_opt(doc_t doc) {
@@ -60,7 +59,7 @@ $(doc_t, synth_t) up_opt(doc_t doc) {
     case y_tag: case k_tag: case w_tag:
       OPT(color); break;
     case B_tag:  OPT(bold); break;
-    case EM_tag: OPT(emph); break;
+    case EM_tag: break; // this toggles! (what to do?)
     case I_tag:  OPT(ital); break;
     case S_tag:  OPT(strong); break;
     case TT_tag: OPT(tt); break;

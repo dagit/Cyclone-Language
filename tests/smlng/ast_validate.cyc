@@ -1,0 +1,157 @@
+// TO DO: pos information
+#include "core.h"
+#include "stdio.h"
+#include "smlng.h"
+
+#define UNKNOWN_SIZE  DONT_KNOW
+#define UNKNOWN_COLOR DONT_KNOW
+
+// Here we check that two doc_t are equivalent.  Notice that doing so
+// explicitly does not test the parser or printer.  I have tried to
+// write the code so that it will be useful for modifying to other
+// representations.
+using Core;
+using Stdio;
+
+// int is character position in d1 of first different character
+xtunion exn { NotEquivalent(int); };
+
+struct DocStackElt {
+  doc_t d;
+  int i; // ints are for Seq or Text positions 
+  context_t c; // for Tagged, so know how to "undo" when leave the scope
+};
+// could be optimized to do fewer doc_t pattern-matches, but we probably have
+// bigger fish to fry.
+struct OutputState<`r::R> {
+  region_t<`r> rgn;
+  context_t ctxt;
+  context_t prev_ctxt; // context when last char printed
+  char this_char; // char printed
+  int pos; // absolute position in text stream
+  struct DocStackElt ?`r doc_stack; 
+  int stack_top;
+};
+typedef struct OutputState<`r> @`r out_state_t<`r>;
+
+void next_char(out_state_t<`r> s) {
+  s->prev_ctxt = s->ctxt;
+  while(true) {
+    if(s->stack_top == -1)
+      return;
+    struct DocStackElt @`r elt = &s->doc_stack[s->stack_top];
+    let &DocStackElt(d,i,c) = elt;
+    switch(d) {
+    case &Text(str): 
+      if(i < str.size && str[i] != '\0') { // may change as string rep changes!
+	s->ctxt = c;
+	s->this_char = str[i];
+	elt->i = i+1;
+	return;
+      } else {
+	--s->stack_top;
+	continue;
+      }
+    case &Seq(ds):
+      if(i < ds.size) {
+	if(s->stack_top == s->doc_stack.size-1) 
+	  s->doc_stack = rnew(s->rgn){for j < (s->stack_top+1)*2 : 
+		    j <= s-> stack_top ? s->doc_stack[j] : s->doc_stack[0]};
+	s->doc_stack[++s->stack_top] = DocStackElt(ds[i],0,s->ctxt);
+	elt->i = i+1;
+      } else
+	--s->stack_top;
+      continue;
+    case &Tagged(tag,d):
+      if(i == 0) {
+	switch(tag) {
+	case Zero: case One: case  Two: case  Three: case  Four: case  Five: 
+	case Six: case  Seven: case  Eight: case  Nine:
+	  s->ctxt.size = (char)tag;
+	  break;
+	case r_tag: case g_tag: case b_tag: case c_tag: case  m_tag: 
+	case y_tag: case k_tag: case w_tag:
+	  s->ctxt.color = (char)tag;
+	  break;
+	case B_tag:  s->ctxt.B  = true; break;
+	case I_tag:  s->ctxt.I  = true; break;
+	case TT_tag: s->ctxt.TT = true; break;
+	case EM_tag: if(!s->ctxt.S) s->ctxt.EM = !s->ctxt.EM; break;
+	case PL_tag: s->ctxt.U = s->ctxt.S = s->ctxt.EM = s->ctxt.B = 
+		       s->ctxt.I = s->ctxt.TT = false; break;
+	case S_tag:  s->ctxt.S = true; s->ctxt.EM = false; break;
+	case U_tag:  if(s->ctxt.U < 3) ++s->ctxt.U; break;
+	}
+	if(s->stack_top == s->doc_stack.size-1) 
+	  s->doc_stack = rnew(s->rgn){for j < (s->stack_top+1)*2 : 
+		    j <= s-> stack_top ? s->doc_stack[j] : s->doc_stack[0]};
+	s->doc_stack[++s->stack_top] = DocStackElt(d,0,s->ctxt);
+	elt->i = i+1;
+      } else {
+	s->ctxt = c;
+	--s->stack_top;
+      }
+      continue;
+    }
+  }
+}
+
+#define CHECK(FIELD) if(c1.FIELD != c2.FIELD) throw new NotEquivalent(s1->pos)
+
+// would be much faster with a union and an int compare!
+void check_context(out_state_t<`r1> s1, out_state_t<`r2> s2) {
+  let c1 = s1->ctxt;
+  let c2 = s2->ctxt;
+  CHECK(B);
+  CHECK(EM);
+  CHECK(I);
+  CHECK(S);
+  CHECK(TT);
+  CHECK(U);
+  CHECK(size);
+  CHECK(color);
+}
+
+void check_space_context(out_state_t<`r1> s1, out_state_t<`r2> s2) {
+  let c1 = s1->ctxt;
+  let c2 = s2->ctxt;
+  CHECK(TT);
+  CHECK(size);
+  CHECK(U);
+  if(c1.U != 0)
+    CHECK(color);
+}
+
+#undef CHECK
+
+void validate_rec(out_state_t<`r1> s1, out_state_t<`r2> s2){
+  do {
+    // check from previous iteration
+    if(s1->this_char != s2->this_char)
+      throw new NotEquivalent(s1->pos);
+    if(is_white(s1->this_char))
+      check_space_context(s1, s2);
+    else
+      check_context(s1, s2);
+    // get
+    next_char(s1);
+    next_char(s2);
+  } while(s1->stack_top >= 0 && s2->stack_top >= 0);
+
+  if(s1->stack_top >= 0 || s2->stack_top >= 0)
+    throw new NotEquivalent(s1->pos); // one is longer than the other
+}
+
+void validate_docs(doc_t d1, doc_t d2) {
+  region rgn {
+    let newc = Context(0,0,0,0,0,0,UNKNOWN_SIZE,UNKNOWN_COLOR);
+    let stack1 = rnew(rgn) {for i < 20 : DocStackElt(d1,0,newc)};
+    let stack2 = rnew(rgn) {for i < 20 : DocStackElt(d2,0,newc)};
+    let s1 = rnew(rgn) OutputState(rgn, newc, newc, 'X', 0, stack1, 0);
+    let s2 = rnew(rgn) OutputState(rgn, newc, newc, 'X', 0, stack2, 0);
+    try validate_rec(s1,s2);
+    catch { 
+    case &NotEquivalent(i): fprintf(stderr,"NOT EQUIVALENT: %d", i); break; 
+    }
+  }
+}
