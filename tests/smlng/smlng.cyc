@@ -202,7 +202,7 @@ int main(int argc, char ??argv) {
   fprintf(stderr,"copying docs\n"); fflush(stderr);
   doc_t d = copy_doc(orig);
   fprintf(stderr,"up_opt\n"); fflush(stderr);
-  let $(d2, _) = TagElim::up_opt(d);
+  let $(d2, _) = TagElim::up_opt(b,d);
   d = d2;
   fprintf(stderr,"dumping docs\n"); fflush(stderr);
   dump(b,d);

@@ -2,6 +2,7 @@
 #define TAG_ELIM_H
 
 #include "smlng.h"
+#include "buffer.h"
 
 namespace TagElim {
 extern struct SynthS {
@@ -22,8 +23,8 @@ extern union Synth {
   unsigned short i;
 };
 typedef union Synth synth_t; // not a pointer
-extern void up_opt_test();
-extern $(doc_t, synth_t) up_opt(doc_t doc);
+  //extern void up_opt_test();
+extern $(doc_t, synth_t) up_opt(Buffer::buf_t, doc_t);
 }
 
 #endif

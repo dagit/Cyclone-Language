@@ -1,8 +1,10 @@
 #include "core.h"
 #include "stdio.h"
+#include "buffer.h"
 #include "smlng.h"
 #include "tag_elim.h"
 using Core;
+using Stdio;
 namespace TagElim;
 
 // field is true if all text in the doc is guarded by an appropriate tag,
@@ -28,27 +30,30 @@ union Synth {
 };
 
 // currently destructive (of doc), but could easily be made functional
-$(doc_t, synth_t) up_opt(doc_t doc) {
+$(doc_t, synth_t) up_opt(Buffer::buf_t b, doc_t doc) {
   switch(doc) {
   case &Seq(ds): 
     synth_t synth;
     if(ds.size == 0) {
-      synth.i = 0;
+      synth.i = ~0;
       return $(doc,synth);
     }
     synth.i = (unsigned short)~0;
     for(int i=0; i < ds.size; ++i) {
-      let $(newd, inner_synth) = up_opt(ds[i]);
+      let $(newd, inner_synth) = up_opt(b, ds[i]);
       ds[i] = newd; // destructive here
       synth.i = (short)(synth.i & inner_synth.i); // cast avoids warning
     }
     return $(doc,synth);
-  case &Text(_): 
+  case &Text(pos): 
     synth_t synth;
-    synth.i = 0;
+    //    if(Buffer::get_char(b, pos) == '\0')
+    //      synth.i = ~0;
+    //    else
+      synth.i = 0;
     return $(doc,synth);
   case &Tagged(tag,d):
-    let $(d2, synth) = up_opt(d);
+    let $(d2, synth) = up_opt(b, d);
     bool useless = false;
 #define OPT(FIELD) do { useless = synth.s.FIELD; synth.s.FIELD = true;} while(0)
     switch(tag) {
