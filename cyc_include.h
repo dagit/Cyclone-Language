@@ -107,9 +107,9 @@ extern void * GC_profile_malloc(int,char *file,int lineno);
 extern void * GC_profile_malloc_atomic(int,char *file,int lineno);
 extern void * _profile_region_malloc(struct _RegionHandle *, unsigned int,
                                      char *file,int lineno);
-#define GC_malloc(n) GC_profile_malloc(n,__FILE__,__LINE__)
-#define GC_malloc_atomic(n) GC_profile_malloc_atomic(n,__FILE__,__LINE__)
-#define _region_malloc(rh,n) _profile_region_malloc(rh,n,__FILE__,__LINE__)
+#define GC_malloc(n) GC_profile_malloc(n,__FUNCTION__,__LINE__)
+#define GC_malloc_atomic(n) GC_profile_malloc_atomic(n,__FUNCTION__,__LINE__)
+#define _region_malloc(rh,n) _profile_region_malloc(rh,n,__FUNCTION__,__LINE__)
 #endif
 
 #endif

@@ -357,6 +357,7 @@ path_info_t join_pathinfo(join_env_t<`r1,`r2> env,
   default: throw new Core::Impossible("join_pathinfo");
   }
 }
+
 flow_info_t join_flow(flow_info_t f1, flow_info_t f2) { 
   if(empty_place_set_ptr == null)
     empty_place_set_ptr = new{Set::empty(place_cmp)};

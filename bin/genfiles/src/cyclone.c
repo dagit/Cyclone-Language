@@ -402,9 +402,10 @@ struct Cyc_Absyn_Decl{ void* r; struct Cyc_Position_Segment* loc; } ; static
 const int Cyc_Absyn_ArrayElement= 0; struct Cyc_Absyn_ArrayElement_struct{ int
 tag; struct Cyc_Absyn_Exp* f1; } ; static const int Cyc_Absyn_FieldName= 1;
 struct Cyc_Absyn_FieldName_struct{ int tag; struct _tagged_string* f1; } ;
-extern unsigned char Cyc_Absyn_EmptyAnnot[ 15u]; extern unsigned char Cyc_Lexing_Error[
-10u]; struct Cyc_Lexing_Error_struct{ unsigned char* tag; struct _tagged_string
-f1; } ; struct Cyc_Lexing_lexbuf{ void(* refill_buff)( struct Cyc_Lexing_lexbuf*);
+extern unsigned char Cyc_Absyn_EmptyAnnot[ 15u]; extern void* Cyc_Absyn_file_typ_nocyc();
+extern void* Cyc_Absyn_file_typ(); extern unsigned char Cyc_Lexing_Error[ 10u];
+struct Cyc_Lexing_Error_struct{ unsigned char* tag; struct _tagged_string f1; }
+; struct Cyc_Lexing_lexbuf{ void(* refill_buff)( struct Cyc_Lexing_lexbuf*);
 void* refill_state; struct _tagged_string lex_buffer; int lex_buffer_len; int
 lex_abs_pos; int lex_start_pos; int lex_curr_pos; int lex_last_pos; int
 lex_last_action; int lex_eof_reached; } ; typedef struct Cyc_Lexing_lexbuf* Cyc_Lexing_Lexbuf;
@@ -659,12 +660,13 @@ Cyc_Stdio___sFILE* f, struct Cyc_List_List* ignore){ Cyc_Lex_lex_init();{ struct
 Cyc_List_List* _temp56= Cyc_Parse_parse_file( f); goto _LL57; _LL57: Cyc_Lex_lex_init();
 return _temp56;}} struct Cyc_List_List* Cyc_do_typecheck( struct Cyc_Tcenv_Tenv*
 te, struct Cyc_List_List* tds){ Cyc_Absynpp_expand_typedefs= !(* Cyc_noexpand);
-Cyc_add_cyc_namespace_r= Cyc_add_cyc_namespace_r? Cyc_toc_r: 0; Cyc_Tc_tc( te,
-Cyc_add_cyc_namespace_r, 1, tds); if( !(* Cyc_noshake)){ tds= Cyc_Tc_treeshake(
-te, tds);} return tds;} struct Cyc_List_List* Cyc_do_cfcheck( int ignore, struct
-Cyc_List_List* tds){ Cyc_NewControlFlow_cf_check( tds); return tds;} struct
-_tuple9{ struct Cyc_Tcenv_Tenv* f1; struct Cyc_Stdio___sFILE* f2; } ; struct Cyc_List_List*
-Cyc_do_interface( struct _tuple9* params, struct Cyc_List_List* tds){ struct Cyc_Tcenv_Tenv*
+Cyc_add_cyc_namespace_r= Cyc_add_cyc_namespace_r? Cyc_toc_r: 0; if( Cyc_add_cyc_namespace_r){
+Cyc_Absyn_file_typ();} else{ Cyc_Absyn_file_typ_nocyc();} Cyc_Tc_tc( te, Cyc_add_cyc_namespace_r,
+1, tds); if( !(* Cyc_noshake)){ tds= Cyc_Tc_treeshake( te, tds);} return tds;}
+struct Cyc_List_List* Cyc_do_cfcheck( int ignore, struct Cyc_List_List* tds){
+Cyc_NewControlFlow_cf_check( tds); return tds;} struct _tuple9{ struct Cyc_Tcenv_Tenv*
+f1; struct Cyc_Stdio___sFILE* f2; } ; struct Cyc_List_List* Cyc_do_interface(
+struct _tuple9* params, struct Cyc_List_List* tds){ struct Cyc_Tcenv_Tenv*
 _temp58=(* params).f1; goto _LL59; _LL59: { struct Cyc_Stdio___sFILE* _temp60=(*
 params).f2; goto _LL61; _LL61: { struct Cyc_Interface_I* _temp62= Cyc_Interface_extract(
 _temp58->ae); goto _LL63; _LL63: Cyc_Interface_print( _temp62, _temp60); return

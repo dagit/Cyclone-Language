@@ -382,8 +382,8 @@ static void intersect_f($(`b (@)(`b,`b), gdict_t<`a,`b,`r1,`e>,
 
 // Note: would be faster to iterate over the smaller dict.
 gdict_t<`a,`b,`r1,`e> intersect(`b (@f)(`b,`b), gdict_t<`a,`b,`r1,`e> d1, 
-                                gdict_t<`a,`b,`r2,`e> d2) {
-  //if (d1 == d2) return d1;
+                                gdict_t<`a,`b,`r1,`e> d2) {
+  if (d1 == d2) return d1;
   let env = $(f, d1, Dict::rempty(d1->r,d1->rel));
   Dict::iter_c(intersect_f, &env, d2);
   return env[2];
@@ -398,8 +398,8 @@ static void intersect_c_f($(`b (@)(`c,`b,`b), `c, gdict_t<`a,`b,`r1,`e> d1,
     
 gdict_t<`a,`b,`r1,`e> intersect_c(`b (@f)(`c,`b,`b), `c env,
                                   gdict_t<`a,`b,`r1,`e> d1, 
-                                  gdict_t<`a,`b,`r2,`e> d2) {
-  //if (d1 == d2) return d1;
+                                  gdict_t<`a,`b,`r1,`e> d2) {
+  if (d1 == d2) return d1;
   // NB: env2 is stack allocated!
   let env2 = $(f, env, d1, Dict::rempty(d1->r,d1->rel));
   Dict::iter_c(intersect_c_f, &env2, d2);

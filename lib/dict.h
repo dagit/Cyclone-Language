@@ -112,11 +112,11 @@ extern gdict_t<`a,`b,`r2,`e> union_two(`b (@f)(`b,`b),
 
 extern gdict_t<`a,`b,`r1,`e> intersect(`b (@f)(`b,`b),
                                        gdict_t<`a,`b,`r1,`e> d1, 
-                                       gdict_t<`a,`b,`r2,`e> d2);
+                                       gdict_t<`a,`b,`r1,`e> d2);
 
 extern gdict_t<`a,`b,`r1,`e> intersect_c(`b (@f)(`c,`b,`b), `c env,
                                          gdict_t<`a,`b,`r1,`e> d1, 
-                                         gdict_t<`a,`b,`r2,`e> d2);
+                                         gdict_t<`a,`b,`r1,`e> d2);
 
 extern bool forall_c(bool f(`c,`a,`b), `c env, gdict_t<`a,`b,`r,`e> d);
 

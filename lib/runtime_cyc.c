@@ -21,6 +21,10 @@ struct _xtunion_struct * Match_Exception = &_Match_Exception_struct;
 
 #ifdef CYC_REGION_PROFILE
 static FILE *alloc_log = NULL;
+extern unsigned int GC_gc_no;
+extern size_t GC_get_heap_size();
+extern size_t GC_get_free_bytes();
+extern size_t GC_get_total_bytes();
 #endif;
 
 struct _tagged_string xprintf(char *fmt, ...) {
@@ -351,6 +355,7 @@ int main(int argc, char **argv) {
   fprintf(stderr,"rgn_total_bytes: %d\n",rgn_total_bytes);
   fprintf(stderr,"heap_total_bytes: %d\n",heap_total_bytes);
   fprintf(stderr,"heap_total_atomic_bytes: %d\n",heap_total_atomic_bytes);
+  fprintf(stderr,"number of collections: %d\n",GC_gc_no);
   if (alloc_log != NULL)
     fclose(alloc_log);
 #endif
@@ -441,7 +446,8 @@ void * _profile_region_malloc(struct _RegionHandle *r, unsigned int s,
                               char *file, int lineno) {
   if (alloc_log != NULL) {
     fputs(file,alloc_log);
-    fprintf(alloc_log,":%d\t%d\n",lineno,s);
+    fprintf(alloc_log,":%d\t%d\t%d\t%d\t%d\n",lineno,s,GC_get_heap_size(),
+            GC_get_free_bytes(),GC_get_total_bytes());
   }
   return _region_malloc(r,s);
 }
@@ -450,7 +456,8 @@ void * GC_profile_malloc(int n, char *file, int lineno) {
   heap_total_bytes += n;
   if (alloc_log != NULL) {
     fputs(file,alloc_log);
-    fprintf(alloc_log,":%d\t%d\n",lineno,n);
+    fprintf(alloc_log,":%d\t%d\t%d\t%d\t%d\n",lineno,n,GC_get_heap_size(),
+            GC_get_free_bytes(),GC_get_total_bytes());
   }
   return GC_malloc(n);
 }
@@ -460,7 +467,8 @@ void * GC_profile_malloc_atomic(int n, char *file, int lineno) {
   heap_total_atomic_bytes +=n;
   if (alloc_log != NULL) {
     fputs(file,alloc_log);
-    fprintf(alloc_log,":%d\t%d\n",lineno,n);
+    fprintf(alloc_log,":%d\t%d\t%d\t%d\t%d\n",lineno,n,GC_get_heap_size(),
+            GC_get_free_bytes(),GC_get_total_bytes());
   }
   return GC_malloc_atomic(n);
 }
