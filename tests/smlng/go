@@ -41,7 +41,7 @@ fi
 cat > $INPUTFILE
 
 # optimize it
-cat $INPUTFILE | $SMLNG > $OUTPUTFILE &
+cat $INPUTFILE | $SMLNG $TLIMIT > $OUTPUTFILE &
 PID=$!
 
 # check output file to see if we've completed
@@ -58,7 +58,13 @@ while [ $i -gt 0 ]; do
       if [ $? != 0 ]; then
         cat $INPUTFILE
       else
-        cat $OUTPUTFILE
+        INSZ=`du -b $INPUTFILE | awk '{ print $1 }'`
+        OUTSZ=`du -b $OUTPUTFILE | awk '{ print $1 }'`
+        if [ "$OUTSZ" -lt "$INSZ" ]; then
+          cat $OUTPUTFILE
+        else
+          cat $INPUTFILE
+        fi
       fi
     fi
     rm -f $INPUTFILE $OUTPUTFILE
