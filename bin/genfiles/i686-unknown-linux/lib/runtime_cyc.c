@@ -333,7 +333,7 @@ struct _RegionHandle _new_region(const char *);
 static void grow_region(struct _RegionHandle *r, unsigned int s);
 
 // minimum page size for a region
-#define CYC_MIN_REGION_PAGE_SIZE 128
+#define CYC_MIN_REGION_PAGE_SIZE 20
 
 // controls the default page size for a region
 static size_t default_region_page_size = CYC_MIN_REGION_PAGE_SIZE;
@@ -478,7 +478,7 @@ void * _region_malloc(struct _RegionHandle *r, unsigned int s) {
   }
   // round s up to the nearest MIN_ALIGNMENT value
   s =  (s + MIN_ALIGNMENT - 1) & (~(MIN_ALIGNMENT - 1));
-  if (s > (r->last_plus_one - r->offset))
+  if (s > (r->last_plus_one - r->offset)) 
     grow_region(r,s);
   result = (void *)r->offset;
   r->offset = r->offset + s;

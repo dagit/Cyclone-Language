@@ -361,8 +361,10 @@ list_t<Absyn::decl_t> do_parse(FILE @ f, list_t<Absyn::decl_t> ignore) {
   return ans;
 }
 
-list_t<Absyn::decl_t> do_typecheck(Tcenv::tenv_t te,list_t<Absyn::decl_t,`H> tds){
-  Tc::tc(te, true, tds);
+list_t<Absyn::decl_t> do_typecheck($(region_t<`tc>,Tcenv::tenv_t<`tc>) @tcenv,
+                                   list_t<Absyn::decl_t,`H> tds){
+  let $(tc_rgn, te) = *tcenv;
+  Tc::tc(tc_rgn, te, true, tds);
   if (!noshake_r)
     tds = Tc::treeshake(te,tds);
   return tds;
@@ -375,7 +377,7 @@ list_t<Absyn::decl_t> do_cfcheck(bool ignore, list_t<Absyn::decl_t,`H> tds) {
 
 // do_interface [te] [if] [ifo] [decls] where [if] is the interface (cyci)
 // file, and [ifo] is the cycio file for the output
-list_t<Absyn::decl_t> do_interface($(Tcenv::tenv_t, FILE *`H, FILE @`H) @`H params, list_t<Absyn::decl_t,`H> tds) {
+list_t<Absyn::decl_t> do_interface($(Tcenv::tenv_t, FILE *`H, FILE @`H) @ params, list_t<Absyn::decl_t,`H> tds) {
   let &$(te, fi, fo) = params;
   let i1 = Interface::extract(te -> ae);
   if (fi == NULL) {
@@ -724,37 +726,40 @@ static void process_file(string_t<`H> filename) {
     return;
   }
 
-  let te = Tcenv::tc_init(); // Must declare BEFORE the goto 
-  if (parseonly_r) goto PRINTC;
+  region tc_rgn {
+    let te = Tcenv::tc_init(tc_rgn); // Must declare BEFORE the goto 
+    if (parseonly_r) goto PRINTC;
 
-  // Type checking and control-flow checking
-  tds = do_stage("type checking", do_typecheck, te, tds);
-  if (compile_failure) {
-    remove_file(preprocfile); // Can't flush warnings after removal
-    return;
-  } 
-  tds = do_stage("control-flow checking", do_cfcheck, true, tds);
-  if (compile_failure) {
-    remove_file(preprocfile); // Can't flush warnings after removal
-    return;
-  } 
+    // Type checking and control-flow checking
+    let tc_env = $(tc_rgn, te);
+    tds = do_stage("type checking", do_typecheck, &tc_env, tds);
 
-  // Interface checking
-  if (ic_r) {
-    FILE *inter_file = fopen((char @)interfacefile, "r");
-    FILE *inter_objfile = try_file_open(interfaceobjfile, "w", "interface object file");
-    if (inter_objfile == NULL) {
-      compile_failure = true;
+    if (compile_failure) {
+      remove_file(preprocfile); // Can't flush warnings after removal
       return;
+    } 
+    tds = do_stage("control-flow checking", do_cfcheck, true, tds);
+    if (compile_failure) {
+      remove_file(preprocfile); // Can't flush warnings after removal
+      return;
+    } 
+    
+    // Interface checking
+    if (ic_r) {
+      FILE *inter_file = fopen((char @)interfacefile, "r");
+      FILE *inter_objfile = try_file_open(interfaceobjfile, "w", "interface object file");
+      if (inter_objfile == NULL) {
+        compile_failure = true;
+        return;
+      }
+      Position::reset_position(interfacefile);
+      let int_env = $(te, inter_file, (FILE@)inter_objfile);
+      tds = do_stage("interface checking", do_interface, &int_env, tds);
+      if (inter_file != NULL) 
+        file_close(inter_file);
+      file_close(inter_objfile);
     }
-    Position::reset_position(interfacefile);
-    tds = do_stage("interface checking", do_interface,
-                   new $(te, inter_file, inter_objfile), tds);
-    if (inter_file != NULL) 
-      file_close(inter_file);
-    file_close(inter_objfile);
   }
-
   if (tc_r) goto PRINTC;
 
   // Translation to C

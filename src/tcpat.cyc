@@ -52,16 +52,21 @@ namespace Tcpat;
 static void resolve_pat(tenv_t te, pat_t p) {
   switch(p->r) {
   case &UnknownId_p(q):
-    try switch (lookup_ordinary(te,p->loc,q)) {
-    case &AggrRes(_):
-      p->r = Wild_p;
-      terr(p->loc,"struct tag used without arguments in pattern");
-      return;
-    case &TunionRes(tud,tuf): p->r = new Tunion_p(tud,tuf,NULL,false); return;
-    case &EnumRes(ed,ef):     p->r = new Enum_p(ed,ef); return;
-    case &AnonEnumRes(t,ef):  p->r = new AnonEnum_p(t,ef); return;
-    case &VarRes(_): break; // shadows an outer definition, but that's fine
-    } catch { case Dict::Absent: break; } // a new variable
+    try 
+      region r {
+        switch (lookup_ordinary(r,te,p->loc,q)) {
+        case &AggrRes(_):
+          p->r = Wild_p;
+          terr(p->loc,"struct tag used without arguments in pattern");
+          return;
+        case &TunionRes(tud,tuf): 
+          p->r = new Tunion_p(tud,tuf,NULL,false); return;
+        case &EnumRes(ed,ef):     p->r = new Enum_p(ed,ef); return;
+        case &AnonEnumRes(t,ef):  p->r = new AnonEnum_p(t,ef); return;
+        case &VarRes(_): break; // shadows an outer definition, but that's fine
+        }
+      } 
+    catch { case Dict::Absent: break; } // a new variable
     // Unqualified variable is a declaration, qualified is an error
     switch ((*q)[0]) {
     case Loc_n: 
@@ -73,26 +78,29 @@ static void resolve_pat(tenv_t te, pat_t p) {
     default: terr(p->loc,"qualified variable in pattern"); return;
     }
   case &UnknownCall_p(q,ps,dots):
-    try switch (lookup_ordinary(te,p->loc,q)) {
-    case &AggrRes(ad):
-      if(ad->kind == UnionA) {
-        p->r = Wild_p;
-	terr(p->loc,"cannot pattern-match a union");
-	return;
+    try 
+      region r {
+        switch (lookup_ordinary(r,te,p->loc,q)) {
+        case &AggrRes(ad):
+          if(ad->kind == UnionA) {
+            p->r = Wild_p;
+            terr(p->loc,"cannot pattern-match a union");
+            return;
+          }
+          let new_ps = NULL;
+          for(; ps != NULL; ps = ps->tl)
+            new_ps = new List(new $(NULL,ps->hd), new_ps);
+          p->r = new Aggr_p(AggrInfo(new KnownAggr(new ad),NULL),
+                            NULL,imp_rev(new_ps),dots);
+          return;
+        case &TunionRes(tud,tuf): p->r = new Tunion_p(tud,tuf,ps,dots); return;
+        case &EnumRes(_,_):
+        case &AnonEnumRes(_,_):
+          terr(p->loc,"enum tag used with arguments in pattern");
+          p->r = Wild_p;
+          return;
+        case &VarRes(_): break;
       }
-      let new_ps = NULL;
-      for(; ps != NULL; ps = ps->tl)
-	new_ps = new List(new $(NULL,ps->hd), new_ps);
-      p->r = new Aggr_p(AggrInfo(new KnownAggr(new ad),NULL),
-			NULL,imp_rev(new_ps),dots);
-      return;
-    case &TunionRes(tud,tuf): p->r = new Tunion_p(tud,tuf,ps,dots); return;
-    case &EnumRes(_,_):
-    case &AnonEnumRes(_,_):
-      terr(p->loc,"enum tag used with arguments in pattern");
-      p->r = Wild_p;
-      return;
-    case &VarRes(_): break;
     } catch {case Dict::Absent: break;}
     terr(p->loc, "%s is not a constructor in pattern",qvar2string(q));
     p->r = Wild_p;
@@ -220,7 +228,9 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
     // gotta add the tvar in too; the parser set its kind correctly
     // the kind is IntKind, so no partial-order munging, etc.
     // this checks uniqueness of new tvars (kinda kludgy)
-    add_type_vars(p->loc,te,list(tv));
+    region r2 {
+      add_type_vars(r2,p->loc,te,list(tv));
+    }
     if(res.tvars_and_bounds_opt==NULL)
       res.tvars_and_bounds_opt = new $(NULL,NULL);
     (*res.tvars_and_bounds_opt)[0] = 
@@ -382,61 +392,63 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
 
       var_tvs = imp_rev(var_tvs);
 
-      tenv_t te2 = add_type_vars(p->loc,te,exist_ts);
+      region r2 {
+        tenv_t te2 = add_type_vars(r2,p->loc,te,exist_ts);
 
-      let tenv_tvs = lookup_type_vars(te2);
-      let env = $(tenv_tvs,rgn);
-      let all_inst   = List::rmap_c(rgn,r_make_inst_var,&env,ad->tvs);
-      let exist_inst = List::rzip(rgn,rgn,ad->impl->exist_vars,var_tvs);
-      let all_typs   = List::map(snd,all_inst);
-      let exist_typs = List::map(snd,exist_inst);
-      let inst       = List::rappend(rgn,all_inst,exist_inst);
+        let tenv_tvs = lookup_type_vars(te2);
+        let env = $(tenv_tvs,rgn);
+        let all_inst   = List::rmap_c(rgn,r_make_inst_var,&env,ad->tvs);
+        let exist_inst = List::rzip(rgn,rgn,ad->impl->exist_vars,var_tvs);
+        let all_typs   = List::map(snd,all_inst);
+        let exist_typs = List::map(snd,exist_inst);
+        let inst       = List::rappend(rgn,all_inst,exist_inst);
 
-      if(exist_ts != NULL || ad->impl->rgn_po != NULL) {
-	if(res.tvars_and_bounds_opt==NULL)
-	  res.tvars_and_bounds_opt = new $(NULL,NULL);
-	(*res.tvars_and_bounds_opt)[0] = append((*res.tvars_and_bounds_opt)[0],
-						exist_ts);
-	(*res.tvars_and_bounds_opt)[1] = append((*res.tvars_and_bounds_opt)[1],
-						outlives_constraints);
-	let rpo_inst = NULL;
-	for(let rpo=ad->impl->rgn_po; rpo != NULL; rpo = rpo->tl)
-	  rpo_inst = new List(new $(rsubstitute(rgn,inst,(*rpo->hd)[0]),
-				    rsubstitute(rgn,inst,(*rpo->hd)[1])),
-			      rpo_inst);
-	rpo_inst = imp_rev(rpo_inst);
-	(*res.tvars_and_bounds_opt)[1] = append((*res.tvars_and_bounds_opt)[1],
-						rpo_inst);
-      }
+        if(exist_ts != NULL || ad->impl->rgn_po != NULL) {
+          if(res.tvars_and_bounds_opt==NULL)
+            res.tvars_and_bounds_opt = new $(NULL,NULL);
+          (*res.tvars_and_bounds_opt)[0] = 
+            append((*res.tvars_and_bounds_opt)[0],exist_ts);
+          (*res.tvars_and_bounds_opt)[1] = 
+            append((*res.tvars_and_bounds_opt)[1],outlives_constraints);
+          let rpo_inst = NULL;
+          for(let rpo=ad->impl->rgn_po; rpo != NULL; rpo = rpo->tl)
+            rpo_inst = new List(new $(rsubstitute(rgn,inst,(*rpo->hd)[0]),
+                                      rsubstitute(rgn,inst,(*rpo->hd)[1])),
+                                rpo_inst);
+          rpo_inst = imp_rev(rpo_inst);
+          (*res.tvars_and_bounds_opt)[1] = 
+            append((*res.tvars_and_bounds_opt)[1],rpo_inst);
+        }
 
-      *tsp = all_typs;
-      t = new AggrType(AggrInfo(new KnownAggr(new ad),*tsp));
-      if (dots) {
-        // fill in wild patterns for the missing fields
-        let ldps = List::length(dps);
-        let lfields = List::length(ad->impl->fields);
-        if (ldps < lfields) {
-          list_t<$(list_t<designator_t>,pat_t)@> wild_dps = NULL;
-          for (int i = 0; i < lfields - ldps; i++) 
-            wild_dps = new List(new $(NULL,wild_pat(p->loc)), wild_dps);
-          *dps_p = List::imp_append(dps,wild_dps);
-          dps = *dps_p;
-        } else if (ldps == lfields)
-          warn(p->loc,"unnecessary ... in struct pattern");
-      }
-      list_t<$(aggrfield_t,pat_t)@`rgn,`rgn> fields =
-	resolve_struct_designators(rgn,p->loc,dps,ad->impl->fields);
-      for(; fields != NULL; fields = fields->tl) {
-	let &$(field,pat)     = fields->hd;
-	let inst_fieldtyp     = rsubstitute(rgn,inst,field->type);
-	res = combine_results(res,tcPatRec(te2,pat,&inst_fieldtyp,rgn_opt));
-	// must unify here or the type we gave pat won't ever get checked
-	// against the exp we're matching against.  Even if we succeed now,
-	// we could be constraining so as to catch an error later.
-	if (!unify(pat->topt->v,inst_fieldtyp))
-	  terr(p->loc,"field %s of struct pattern expects type %s != %s",
-	       *field->name, typ2string(inst_fieldtyp), 
-	       typ2string(pat->topt->v));
+        *tsp = all_typs;
+        t = new AggrType(AggrInfo(new KnownAggr(new ad),*tsp));
+        if (dots) {
+          // fill in wild patterns for the missing fields
+          let ldps = List::length(dps);
+          let lfields = List::length(ad->impl->fields);
+          if (ldps < lfields) {
+            list_t<$(list_t<designator_t>,pat_t)@> wild_dps = NULL;
+            for (int i = 0; i < lfields - ldps; i++) 
+              wild_dps = new List(new $(NULL,wild_pat(p->loc)), wild_dps);
+            *dps_p = List::imp_append(dps,wild_dps);
+            dps = *dps_p;
+          } else if (ldps == lfields)
+            warn(p->loc,"unnecessary ... in struct pattern");
+        }
+        list_t<$(aggrfield_t,pat_t)@`rgn,`rgn> fields =
+          resolve_struct_designators(rgn,p->loc,dps,ad->impl->fields);
+        for(; fields != NULL; fields = fields->tl) {
+          let &$(field,pat)     = fields->hd;
+          let inst_fieldtyp     = rsubstitute(rgn,inst,field->type);
+          res = combine_results(res,tcPatRec(te2,pat,&inst_fieldtyp,rgn_opt));
+          // must unify here or the type we gave pat won't ever get checked
+          // against the exp we're matching against.  Even if we succeed now,
+          // we could be constraining so as to catch an error later.
+          if (!unify(pat->topt->v,inst_fieldtyp))
+            terr(p->loc,"field %s of struct pattern expects type %s != %s",
+                 *field->name, typ2string(inst_fieldtyp), 
+                 typ2string(pat->topt->v));
+        }
       }
     }
     break;

@@ -68,22 +68,26 @@ static type_t expr_err(tenv_t te,seg_t loc,type_t * topt, string_t msg,
 // the expression e with the appropriate r.
 // We must always overwrite e to prevent the compiler from diverging.
 static void resolve_unknown_id(tenv_t te, exp_t e, qvar_t q) {
-  try switch (lookup_ordinary(te,e->loc,q)) {
-  case &VarRes(b):          e->r = new Var_e(q,b); break;
-  case &EnumRes(ed,ef):     e->r = new Enum_e(q,ed,ef); break;
-  case &AnonEnumRes(t,ef):  e->r = new AnonEnum_e(q,t,ef); break;
-  case &TunionRes(tud,tuf): e->r = new Tunion_e(NULL,tud,tuf); break;
-  case &AggrRes(_):
-    terr(e->loc,"bad occurrence of type name %s",qvar2string(q));
-    e->r = new Var_e(q,Unresolved_b);
-    break;
-  } catch { 
-  case Dict::Absent:
-    // This is an error, but the message will be printed elsewhere.
-    // Here we just put the "I don't know" answer in e->r
-    e->r = new Var_e(q,Unresolved_b);
-    break;
-  }
+  try
+    region r {
+      switch (lookup_ordinary(r,te,e->loc,q)) {
+      case &VarRes(b):          e->r = new Var_e(q,b); break;
+      case &EnumRes(ed,ef):     e->r = new Enum_e(q,ed,ef); break;
+      case &AnonEnumRes(t,ef):  e->r = new AnonEnum_e(q,t,ef); break;
+      case &TunionRes(tud,tuf): e->r = new Tunion_e(NULL,tud,tuf); break;
+      case &AggrRes(_):
+        terr(e->loc,"bad occurrence of type name %s",qvar2string(q));
+        e->r = new Var_e(q,Unresolved_b);
+        break;
+      }
+    }
+  catch { 
+    case Dict::Absent:
+      // This is an error, but the message will be printed elsewhere.
+      // Here we just put the "I don't know" answer in e->r
+      e->r = new Var_e(q,Unresolved_b);
+      break;
+    }
 }
 
 static $(list_t<designator_t>,exp_t)@ make_struct_arg(exp_t e) {
@@ -96,25 +100,27 @@ static void resolve_unknown_fn(tenv_t te,exp_t e,exp_t e1,list_t<exp_t,`H> es) {
   switch (e1->r) {
   case &UnknownId_e(q):
     try {
-      switch (lookup_ordinary(te,e1->loc,q)) {
-      case &VarRes(b):        
-	e->r = new FnCall_e(e1,es,NULL); 
-	return;
-      case &TunionRes(tud,tuf):
-        if (tuf->typs == NULL)
-          // Don't allow "foo()", require "foo"
-          terr(e->loc,"%s is a constant, not a function",
-               qvar2string(tuf->name));
-        e->r = new Tunion_e(es,tud,tuf); 
-	return;
-      case &AggrRes(ad):
-	let des = List::map(make_struct_arg,es);
-	e->r = new Struct_e(ad->name,NULL,des,ad);
-	return;
-      case &AnonEnumRes(_,_):
-      case &EnumRes(_,_):
-        terr(e->loc,"%s is an enum constructor, not a function",qvar2string(q));
-        return;
+      region r {
+        switch (lookup_ordinary(r,te,e1->loc,q)) {
+        case &VarRes(b):        
+          e->r = new FnCall_e(e1,es,NULL); 
+          return;
+        case &TunionRes(tud,tuf):
+          if (tuf->typs == NULL)
+            // Don't allow "foo()", require "foo"
+            terr(e->loc,"%s is a constant, not a function",
+                 qvar2string(tuf->name));
+          e->r = new Tunion_e(es,tud,tuf); 
+          return;
+        case &AggrRes(ad):
+          let des = List::map(make_struct_arg,es);
+          e->r = new Struct_e(ad->name,NULL,des,ad);
+          return;
+        case &AnonEnumRes(_,_):
+        case &EnumRes(_,_):
+          terr(e->loc,"%s is an enum constructor, not a function",qvar2string(q));
+          return;
+        }
       }
     } catch { case Dict::Absent:
       // print out error message later when type-checking the fn call
@@ -299,8 +305,10 @@ static type_t tcVar(tenv_t te, seg_t loc, qvar_t q, binding_t b) {
 }
 
 static 
-void check_format_args(tenv_t te, exp_t fmt, opt_t<list_t<exp_t>> opt_args,
-		       list_t<type_t> type_getter(tenv_t,string_t,seg_t)) {
+void check_format_args(tenv_t<`g,`r> te, exp_t fmt, 
+                       opt_t<list_t<exp_t>> opt_args,
+		       list_t<type_t> 
+                         type_getter(tenv_t<`g,`r>,string_t,seg_t)) {
   // check the format string and get the types it requires
   list_t<type_t> desc_types;
   switch (fmt->r) {
@@ -695,7 +703,9 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t * topt,
   //   a function.  Since e2 cannot have a function type (any function
   //   types are promoted to function pointers) the types won't match.
   // As per K&R, don't promote any array types to pointer types in the lhs
-  tcExpNoPromote(enter_notreadctxt(te),NULL,e1);
+  region r {
+    tcExpNoPromote(enter_notreadctxt(r,te),NULL,e1);
+  }
   tcExp(te,&e1->topt->v,e2);
   type_t t1 = e1->topt->v;
   type_t t2 = e2->topt->v;
@@ -788,152 +798,154 @@ static struct Tunionfield *tcInjection(tenv_t te,exp_t e,type_t tu,
 }
 
 // e(es)
-static type_t tcFnCall(tenv_t te,seg_t loc,type_t * topt,exp_t e,
+static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
 		       list_t<exp_t> args,
 		       vararg_call_info_t *@vararg_call_info) {
   // if e is a vararg function then we need to declare a new local
   // region block -- we just do it always here.
   let es = args;
-  te = new_block(loc,te); // needed for regions of params
-  tcExp(te,NULL,e);
-  type_t t = compress(e->topt->v);
-  // NB: we should really unify t with an unconstrained FnType with the
-  // right arity but there may be coercions involved with the arguments
-  // and the function might actually be a vararg.
-  switch (t) {
-  case &PointerType(PtrInfo(t1,tq,PtrAtts(rgn,x,b,zt,_))):
-    // Note: rgn is irrelevant -- all code is in the heap.
-    // Nonetheless, perhaps we cast to another region, so check
-    // the capability just for fun.
-    check_rgn_accessible(te,loc,rgn);
-    // Check that the bounds on the pointer aren't 0
-    check_nonzero_bound(loc,b);
-    switch (compress(t1)) {
-    case &FnType(FnInfo{tvars,eff,res_typ,args_info,c_vararg,cyc_vararg,
-                          rgn_po,atts}): 
-      //FIX: handle tvars??
-      // unify the result type with the expected type to get better
-      // information while type-checking the arguments.
-      if (topt != NULL) unify(res_typ,*topt);
-      // check that each argument has the right type or can be coerced to it
-      while ((es != NULL) && (args_info != NULL)) {
-        exp_t e1 = es->hd;
-        type_t t2 = (*args_info->hd)[2];
-	tcExp(te, &t2, e1);
-        if (!coerce_arg(te,e1,t2)) {
-          terr(e1->loc,
-	       "actual argument has type \n\t%s\n but formal has type \n\t%s.",
-               typ2string(e1->topt->v),typ2string(t2));
-          unify(e1->topt->v,t2);
-          explain_failure();
-        }
-        es = es->tl;
-        args_info = args_info->tl;
-      }
-      // Note -- we deal with too few or too many args below.  Here, we
-      // check for a format attribute -- important to do this early on
-      // so that we get the right types for things
-      bool args_already_checked = false;
-      for (_ a = atts; a != NULL; a = a->tl) {
-        switch (a->hd) {
-        case &Format_att(ft,fmt_arg_pos,arg_start_pos):
-          try {
-            // get the format descriptor string
-            let fmt_arg = List::nth(args,fmt_arg_pos - 1);
-            // get the varargs
-            opt_t<list_t<exp_t>> fmt_args;
-            if (arg_start_pos == 0)
-              fmt_args = NULL;
-            else
-              fmt_args = new Opt(nth_tail(args,arg_start_pos - 1));
-            args_already_checked = true;
-            switch (ft) {
-            case Printf_ft:
-              check_format_args(te,fmt_arg,fmt_args,Formatstr::get_format_typs);
-              break;
-            case Scanf_ft:
-              check_format_args(te,fmt_arg,fmt_args,Formatstr::get_scanf_typs);
-              break;
-            }
-          } catch {
-          case Nth: terr(loc,"bad format arguments"); break;
+  region ter {
+    let te = new_block(ter,loc,te_orig); // needed for regions of params
+    tcExp(te,NULL,e);
+    type_t t = compress(e->topt->v);
+    // NB: we should really unify t with an unconstrained FnType with the
+    // right arity but there may be coercions involved with the arguments
+    // and the function might actually be a vararg.
+    switch (t) {
+    case &PointerType(PtrInfo(t1,tq,PtrAtts(rgn,x,b,zt,_))):
+      // Note: rgn is irrelevant -- all code is in the heap.
+      // Nonetheless, perhaps we cast to another region, so check
+      // the capability just for fun.
+      check_rgn_accessible(te,loc,rgn);
+      // Check that the bounds on the pointer aren't 0
+      check_nonzero_bound(loc,b);
+      switch (compress(t1)) {
+        case &FnType(FnInfo{tvars,eff,res_typ,args_info,c_vararg,cyc_vararg,
+                              rgn_po,atts}): 
+          //FIX: handle tvars??
+          // unify the result type with the expected type to get better
+          // information while type-checking the arguments.
+          if (topt != NULL) unify(res_typ,*topt);
+        // check that each argument has the right type or can be coerced to it
+        while ((es != NULL) && (args_info != NULL)) {
+          exp_t e1 = es->hd;
+          type_t t2 = (*args_info->hd)[2];
+          tcExp(te, &t2, e1);
+          if (!coerce_arg(te,e1,t2)) {
+            terr(e1->loc,
+                 "actual argument has type \n\t%s\n but formal has type \n\t%s.",
+                 typ2string(e1->topt->v),typ2string(t2));
+            unify(e1->topt->v,t2);
+            explain_failure();
           }
-          break;
-        default: break;
+          es = es->tl;
+          args_info = args_info->tl;
         }
-      }
-      if (args_info != NULL) terr(loc,"too few arguments for function");
-      // if we have left-over arguments, then check for varargs
-      else if (es != NULL || c_vararg || cyc_vararg != NULL) {
-	if(c_vararg)
-	  for(; es != NULL; es = es->tl)
-	    tcExp(te, NULL, es->hd);
-	else if(cyc_vararg == NULL)
-	  terr(loc, "too many arguments for function");
-	else {
-          let VarargInfo{_,_,vt,inject} = *cyc_vararg;
-          let vci = new VarargCallInfo {.num_varargs = 0, 
-                                        .injectors = NULL,
-                                        .vai = (vararg_info_t @)cyc_vararg};
-          *vararg_call_info = vci;
-
-          if (!inject) {
-            // all the rest of the arguments are the same type
-            for (; es != NULL; es = es->tl) {
-              exp_t e1 = es->hd;
-              vci->num_varargs++;
-              tcExp(te, &vt, e1);
-              if (!coerce_arg(te,e1,vt)) {
-                terr(loc,"vararg requires type %s but argument has type %s",
-                     typ2string(vt),typ2string(e1->topt->v));
-                explain_failure();
+        // Note -- we deal with too few or too many args below.  Here, we
+        // check for a format attribute -- important to do this early on
+        // so that we get the right types for things
+        bool args_already_checked = false;
+        for (_ a = atts; a != NULL; a = a->tl) {
+          switch (a->hd) {
+          case &Format_att(ft,fmt_arg_pos,arg_start_pos):
+            try {
+              // get the format descriptor string
+              let fmt_arg = List::nth(args,fmt_arg_pos - 1);
+              // get the varargs
+              opt_t<list_t<exp_t>> fmt_args;
+              if (arg_start_pos == 0)
+                fmt_args = NULL;
+              else
+                fmt_args = new Opt(nth_tail(args,arg_start_pos - 1));
+              args_already_checked = true;
+              switch (ft) {
+              case Printf_ft:
+                check_format_args(te,fmt_arg,fmt_args,Formatstr::get_format_typs);
+                break;
+              case Scanf_ft:
+                check_format_args(te,fmt_arg,fmt_args,Formatstr::get_scanf_typs);
+                break;
               }
+            } catch {
+            case Nth: terr(loc,"bad format arguments"); break;
             }
-          } else {
-            // this is trickier, we have to match up the type of the
-            // actual argument with a constructor from the [x]tunion.
-            switch (compress(vt)) {
-            case &TunionType(TunionInfo{&KnownTunion(&td),targs,tur}):
-              // unfortunately, td may not be the "latest" declaration of
-              // an xtunion, so we re-look it up in the environment.
-              let td = *lookup_tuniondecl(te,loc,td->name);
-              list_t<tunionfield_t> fields = NULL;
-              if (td->fields == NULL) 
-                terr(loc,"can't inject into %s",typ2string(vt));
-              else fields = td->fields->v;
-	      if(!unify(tur,curr_rgn(te)))
-		terr(loc,"bad region for injected varargs");
-              region rgn {
-                let inst = List::rzip(rgn,rgn,td->tvs,targs);
-                for (; es != NULL; es = es->tl) {
-                  vci->num_varargs++;
-                  exp_t e1 = es->hd;
-                  // must be careful not to type-check twice
-                  if (!args_already_checked)
-                    tcExp(te,NULL,e1); 
-                  let f = tcInjection(te,e1,vt,rgn,inst,fields);
-                  if (f != NULL)
-                    vci->injectors = 
-                      List::append(vci->injectors,
-                                   new List{(tunionfield_t)f,NULL});
+            break;
+          default: break;
+          }
+        }
+        if (args_info != NULL) terr(loc,"too few arguments for function");
+        // if we have left-over arguments, then check for varargs
+        else if (es != NULL || c_vararg || cyc_vararg != NULL) {
+          if(c_vararg)
+            for(; es != NULL; es = es->tl)
+              tcExp(te, NULL, es->hd);
+          else if(cyc_vararg == NULL)
+            terr(loc, "too many arguments for function");
+          else {
+            let VarargInfo{_,_,vt,inject} = *cyc_vararg;
+            let vci = new VarargCallInfo {.num_varargs = 0, 
+                                          .injectors = NULL,
+                                          .vai = (vararg_info_t @)cyc_vararg};
+            *vararg_call_info = vci;
+            
+            if (!inject) {
+              // all the rest of the arguments are the same type
+              for (; es != NULL; es = es->tl) {
+                exp_t e1 = es->hd;
+                vci->num_varargs++;
+                tcExp(te, &vt, e1);
+                if (!coerce_arg(te,e1,vt)) {
+                  terr(loc,"vararg requires type %s but argument has type %s",
+                       typ2string(vt),typ2string(e1->topt->v));
+                  explain_failure();
                 }
               }
-              break;
-            default: terr(loc,"bad inject vararg type"); break;
+            } else {
+              // this is trickier, we have to match up the type of the
+              // actual argument with a constructor from the [x]tunion.
+              switch (compress(vt)) {
+              case &TunionType(TunionInfo{&KnownTunion(&td),targs,tur}):
+                // unfortunately, td may not be the "latest" declaration of
+                // an xtunion, so we re-look it up in the environment.
+                let td = *lookup_tuniondecl(te,loc,td->name);
+                list_t<tunionfield_t> fields = NULL;
+                if (td->fields == NULL) 
+                  terr(loc,"can't inject into %s",typ2string(vt));
+                else fields = td->fields->v;
+                if(!unify(tur,curr_rgn(te)))
+                  terr(loc,"bad region for injected varargs");
+                region rgn {
+                  let inst = List::rzip(rgn,rgn,td->tvs,targs);
+                  for (; es != NULL; es = es->tl) {
+                    vci->num_varargs++;
+                    exp_t e1 = es->hd;
+                    // must be careful not to type-check twice
+                    if (!args_already_checked)
+                      tcExp(te,NULL,e1); 
+                    let f = tcInjection(te,e1,vt,rgn,inst,fields);
+                    if (f != NULL)
+                      vci->injectors = 
+                        List::append(vci->injectors,
+                                     new List{(tunionfield_t)f,NULL});
+                  }
+                }
+                break;
+              default: terr(loc,"bad inject vararg type"); break;
+              }
             }
           }
         }
+        // Check that the effect of the function is compatible with the current
+        // capability.  May be delayed.
+        Tcenv::check_effect_accessible(te, loc, eff->v);
+        // Check that the function's partial-order on region lifetimes 
+        // is compatible with the current region partial order. May be delayed.
+        Tcenv::check_rgn_partial_order(te, loc, rgn_po);
+        return res_typ;
+      default: return expr_err(te,loc,topt,"expected pointer to function");
       }
-      // Check that the effect of the function is compatible with the current
-      // capability.  May be delayed.
-      Tcenv::check_effect_accessible(te, loc, eff->v);
-      // Check that the function's partial-order on region lifetimes 
-      // is compatible with the current region partial order. May be delayed.
-      Tcenv::check_rgn_partial_order(te, loc, rgn_po);
-      return res_typ;
     default: return expr_err(te,loc,topt,"expected pointer to function");
     }
-  default: return expr_err(te,loc,topt,"expected pointer to function");
   }
 }
 
@@ -1047,7 +1059,9 @@ static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0,
   // as required (see p. 200, A7.1 of K&R.)
   // We use clear_notreadctxt because the pointer might escape off
   // and later be read.
-  tcExpNoInst(clear_notreadctxt(te),topt2,e);
+  region r {
+    tcExpNoInst(clear_notreadctxt(r,te),topt2,e);
+  }
 
   // first, dispense with the 
   // case where we have &e[i] and e is an array/pointer (i.e., not a tuple).
@@ -1164,19 +1178,21 @@ static type_t tcOffsetof(tenv_t te, seg_t loc, type_t * topt,
 }
 
  // *e
-static type_t tcDeref(tenv_t te, seg_t loc, type_t * topt, exp_t e) {
-  te = clear_notreadctxt(te);
-  tcExp(te,NULL,e);
-  type_t t = compress(e->topt->v);
-  switch (t) {
-  case &PointerType(PtrInfo(t2,_,PtrAtts(rt,_,b,zt,_))):
-    check_rgn_accessible(te,loc,rt);
-    check_nonzero_bound(loc, b);
-    if (!kind_leq(typ_kind(t2),MemKind))
-      terr(loc,"can't dereference abstract pointer type");
-    return t2;
-  default: 
-    return expr_err(te,loc,topt,"expecting * or @ type but found %s",typ2string(t));
+static type_t tcDeref(tenv_t te_orig, seg_t loc, type_t * topt, exp_t e) {
+  region r { 
+    let te = clear_notreadctxt(r,te_orig);
+    tcExp(te,NULL,e);
+    type_t t = compress(e->topt->v);
+    switch (t) {
+    case &PointerType(PtrInfo(t2,_,PtrAtts(rt,_,b,zt,_))):
+      check_rgn_accessible(te,loc,rt);
+      check_nonzero_bound(loc, b);
+      if (!kind_leq(typ_kind(t2),MemKind))
+        terr(loc,"can't dereference abstract pointer type");
+      return t2;
+    default: 
+      return expr_err(te,loc,topt,"expecting * or @ type but found %s",typ2string(t));
+    }
   }
 }
 
@@ -1229,7 +1245,9 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
 // e->f
 static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt, 
 			  exp_t e, field_name_t f) {
-  tcExp(clear_notreadctxt(te),NULL,e);
+  region r {
+    tcExp(clear_notreadctxt(r,te),NULL,e);
+  }
   switch (compress(e->topt->v)) {
   case &PointerType(PtrInfo(t2,_,PtrAtts(rt,_,b,zt,_))):
     check_nonzero_bound(loc, b);
@@ -1283,59 +1301,61 @@ static type_t ithTupleType(tenv_t te, seg_t loc,
   }
 }
  // FIX: look at topt
-static type_t tcSubscript(tenv_t te, seg_t loc, type_t * topt, 
+static type_t tcSubscript(tenv_t te_orig, seg_t loc, type_t * topt, 
 			  exp_t e1, exp_t e2) {
-  te = clear_notreadctxt(te);
-  tcExp(te,NULL,e1);
-  tcExp(te,NULL,e2);
-  type_t t1 = compress(e1->topt->v);
-  type_t t2 = compress(e2->topt->v);
-  if (!coerce_sint_typ(te,e2))
-    return expr_err(te,e2->loc,topt,"expecting int subscript, found %s",
-                    typ2string(t2));
-  // the subscript could be on a tuple or a pointer -- any arrays
-  // should've been coerced to pointers
-  switch (t1) {
-  case &PointerType(PtrInfo(t,tq,PtrAtts(rt,_,b,zt,_))):
-    // for zero-terminated, thin pointers we warn when doing subscripting
-    // to remind the user that this is an expensive operation.
-    if (conref_def(false,zt)) {
-      bool emit_warning = true;
-      switch (compress_conref(b)->v) {
-      case &Eq_constr(&Upper_b(e3)):
+  region r {
+    let te = clear_notreadctxt(r,te_orig);
+    tcExp(te,NULL,e1);
+    tcExp(te,NULL,e2);
+    type_t t1 = compress(e1->topt->v);
+    type_t t2 = compress(e2->topt->v);
+    if (!coerce_sint_typ(te,e2))
+      return expr_err(te,e2->loc,topt,"expecting int subscript, found %s",
+                      typ2string(t2));
+    // the subscript could be on a tuple or a pointer -- any arrays
+    // should've been coerced to pointers
+    switch (t1) {
+    case &PointerType(PtrInfo(t,tq,PtrAtts(rt,_,b,zt,_))):
+      // for zero-terminated, thin pointers we warn when doing subscripting
+      // to remind the user that this is an expensive operation.
+      if (conref_def(false,zt)) {
+        bool emit_warning = true;
+        switch (compress_conref(b)->v) {
+        case &Eq_constr(&Upper_b(e3)):
+          if (is_const_exp(te, e2)) {
+            let $(i,known) = Evexp::eval_const_uint_exp(e2);
+            if (known) {
+              let $(j,knownj) = Evexp::eval_const_uint_exp(e3);
+              if (knownj && j > i) emit_warning = false;
+            }
+          }
+          break;
+        case &Eq_constr(DynForward_b): emit_warning = false; break;
+        case &Eq_constr(DynEither_b): emit_warning = false; break;
+        default: break;
+        }
+        if (emit_warning) 
+          warn(e2->loc, "subscript on thin, zero-terminated pointer could be expensive.");
+      } else {
+        // for nozero-terminated pointers
         if (is_const_exp(te, e2)) {
           let $(i,known) = Evexp::eval_const_uint_exp(e2);
-          if (known) {
-            let $(j,knownj) = Evexp::eval_const_uint_exp(e3);
-            if (knownj && j > i) emit_warning = false;
-          }
+          if (known)
+            check_bound(loc,i,b);
+        } else {
+          // an easy warning that helps when porting C code
+          if(is_bound_one(b) && !conref_def(false,zt))
+            warn(e1->loc,"subscript applied to pointer to one object");
+          check_nonzero_bound(loc,b);
         }
-        break;
-      case &Eq_constr(DynForward_b): emit_warning = false; break;
-      case &Eq_constr(DynEither_b): emit_warning = false; break;
-      default: break;
       }
-      if (emit_warning) 
-        warn(e2->loc, "subscript on thin, zero-terminated pointer could be expensive.");
-    } else {
-      // for nozero-terminated pointers
-      if (is_const_exp(te, e2)) {
-        let $(i,known) = Evexp::eval_const_uint_exp(e2);
-        if (known)
-          check_bound(loc,i,b);
-      } else {
-        // an easy warning that helps when porting C code
-        if(is_bound_one(b) && !conref_def(false,zt))
-          warn(e1->loc,"subscript applied to pointer to one object");
-        check_nonzero_bound(loc,b);
-      }
+      check_rgn_accessible(te,loc,rt);
+      if (!kind_leq(typ_kind(t),MemKind))
+        terr(e1->loc,"can't subscript an abstract pointer");
+      return t;
+    case &TupleType(ts): return ithTupleType(te,loc,ts,e2);
+    default: return expr_err(te,loc,topt,"subscript applied to %s",typ2string(t1));
     }
-    check_rgn_accessible(te,loc,rt);
-    if (!kind_leq(typ_kind(t),MemKind))
-      terr(e1->loc,"can't subscript an abstract pointer");
-    return t;
-  case &TupleType(ts): return ithTupleType(te,loc,ts,e2);
-  default: return expr_err(te,loc,topt,"subscript applied to %s",typ2string(t1));
   }
 }
 
@@ -1450,50 +1470,54 @@ static type_t tcComprehension(tenv_t te, seg_t loc, type_t * topt,
   if (!vd->tq.real_const)
     impos("comprehension index variable is not declared const!");
   // add x to the environment as an unsigned int only if te->le is not NULL
-  if (te->le != NULL) {
-    te = Tcenv::new_block(loc,te);
-    te = add_local_var(loc, te, vd);
-  }
-  _ pinfo;
-  let topt2 = NULL;
-  let tqopt = NULL;
-  let ztopt = NULL;
-
-  if (topt != NULL)
-    switch (compress(*topt)) {
-    case &PointerType(x):
-      pinfo = x;
-      topt2 = &pinfo.elt_typ;
-      tqopt = &pinfo.elt_tq;
-      ztopt = &pinfo.ptr_atts.zero_term;
-      break;
-    case &ArrayType(ArrayInfo{*t,*tq,b,*zt,_}):
-      topt2 = t;
-      tqopt = tq;
-      ztopt = zt;
-      break;
-    default:
-      break;
+  region r {
+    tenv_t<_,`r> te2 = copy_tenv(r,te);
+    if (te2->le != NULL) {
+      te2 = Tcenv::new_block(r,loc,te2);
+      te2 = add_local_var(r, loc, te2, vd);
     }
-  // type-check the body in the new environment
-  type_t t = tcExp(te,topt2,body);
-  if (te->le == NULL) {
-    // the bound and the body must both be constant expressions at top-level
-    if (!is_const_exp(te,bound))
-      terr(bound->loc,"bound is not constant");
-    if (!is_const_exp(te,body))
-      terr(bound->loc,"body is not constant");
+    let te = te2;
+    _ pinfo;
+    let topt2 = NULL;
+    let tqopt = NULL;
+    let ztopt = NULL;
+    
+    if (topt != NULL)
+      switch (compress(*topt)) {
+      case &PointerType(x):
+        pinfo = x;
+        topt2 = &pinfo.elt_typ;
+        tqopt = &pinfo.elt_tq;
+        ztopt = &pinfo.ptr_atts.zero_term;
+        break;
+      case &ArrayType(ArrayInfo{*t,*tq,b,*zt,_}):
+        topt2 = t;
+        tqopt = tq;
+        ztopt = zt;
+        break;
+      default:
+        break;
+      }
+    // type-check the body in the new environment
+    type_t t = tcExp(te,topt2,body);
+    if (te->le == NULL) {
+      // the bound and the body must both be constant expressions at top-level
+      if (!is_const_exp(te,bound))
+        terr(bound->loc,"bound is not constant");
+      if (!is_const_exp(te,body))
+        terr(bound->loc,"body is not constant");
+    }
+    if (ztopt != NULL && conref_def(false,*ztopt)) {
+      // for zero-terminated arrays, the result is one larger due to the
+      // implicit zero.
+      let e1 = uint_exp(1,NULL); e1->topt = new Opt(uint_typ);
+      bound = add_exp(bound,e1,NULL); bound->topt = new Opt(uint_typ);
+      *is_zero_term = true;
+    }
+    // FIX:  bound may not be a constant here...
+    return array_typ(t,(tqopt == NULL) ? empty_tqual(NULL) : *tqopt, bound, 
+                     (ztopt == NULL) ? false_conref : *ztopt, NULL);
   }
-  if (ztopt != NULL && conref_def(false,*ztopt)) {
-    // for zero-terminated arrays, the result is one larger due to the
-    // implicit zero.
-    let e1 = uint_exp(1,NULL); e1->topt = new Opt(uint_typ);
-    bound = add_exp(bound,e1,NULL); bound->topt = new Opt(uint_typ);
-    *is_zero_term = true;
-  }
-  // FIX:  bound may not be a constant here...
-  return array_typ(t,(tqopt == NULL) ? empty_tqual(NULL) : *tqopt, bound, 
-                   (ztopt == NULL) ? false_conref : *ztopt, NULL);
 }
 
  //////////////////// Struct (f{e1,...,en}) ///////////////////
@@ -1837,7 +1861,9 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t ropt,
 }
 // ({ s })
 static type_t tcStmtExp(tenv_t te, seg_t loc, type_t * topt, stmt_t s) {
-  Tcstmt::tcStmt(set_encloser(te,s),s,true);
+  region r {
+    Tcstmt::tcStmt(set_encloser(r,te,s),s,true);
+  }
   // The encloser of s is not s, so reset it properly.
   NewControlFlow::set_encloser(s,get_encloser(te));
   // The type is the type of the expression that ends the statment.

@@ -53,40 +53,27 @@ static void pattern_synth(seg_t loc, tenv_t te, tcpat_result_t pat_res,
   let TcPatResult(p,vs) = pat_res;
   let tvs = (p==NULL) ? NULL : (*p)[0];
   let bds = (p==NULL) ? NULL : (*p)[1];
-  tenv_t te2 = add_type_vars(loc,te,tvs);
-  te2 = new_outlives_constraints(te2,bds);
-  if(new_block)
-    te2 = Tcenv::new_block(loc,te2);
-  let ropt = new Opt(Tcenv::curr_rgn(te2));
-  for(let vs2 = vs; vs2 != NULL; vs2 = vs2->tl) {
-    te2 = add_pat_var(loc, te2, vs2->hd);
-    vs2->hd->rgn = ropt;
+  region r {
+    tenv_t te2 = add_type_vars(r,loc,te,tvs);
+    te2 = new_outlives_constraints(r,te2,bds);
+    if(new_block)
+      te2 = Tcenv::new_block(r,loc,te2);
+    let ropt = new Opt(Tcenv::curr_rgn(te2));
+    for(let vs2 = vs; vs2 != NULL; vs2 = vs2->tl) {
+      te2 = add_pat_var(r,loc, te2, vs2->hd);
+      vs2->hd->rgn = ropt;
+    }
+    if(where_opt != NULL)
+      tcTest(te2,(exp_t)where_opt,"switch clause guard");
+
+    if(vs != NULL)
+      te2 = set_encloser(r,te2,s); // for substatements inside of s
+    tcStmt(te2,s,false); // pattern vars are in a different region from body ??
+    // The encloser of s is not s, so reset it properly.
   }
-
-  if(where_opt != NULL)
-    tcTest(te2,(exp_t)where_opt,"switch clause guard");
-
-  if(vs != NULL)
-    te2 = set_encloser(te2,s); // for substatements inside of s
-  tcStmt(te2,s,false); // pattern vars are in a different region from body ??
-  // The encloser of s is not s, so reset it properly.
   if(vs != NULL)
     NewControlFlow::set_encloser(s,get_encloser(te));
 }
-
-// Check the declarations of a forarray statement.  The declarations
-// should be of the form: 
-//    t@`r const x = y+e    or
-//    t@`r const x = y      or
-//    t@`r const x = &y[e]
-// Returns a list of the array variables used in the definitions (e.g., y)
-// so that we can check the tests involve these variables.
-$(tenv_t, list_t<qvar_t>) check_forarray_decls(tenv_t te, seg_t loc, 
-                                               list_t<vardecl_t> decls) {
-  impos("check_forarray_decls");
-  return $(te,NULL);
-}
-
 
 // new_block is a kludge because we he abstract syntax doesn't group the
 // local declarations in a block, but the region rules do.  (That is,
@@ -107,8 +94,13 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
   case &Exp_s(e): tcExp(te,NULL,e); return;
 
   case &Seq_s(s1,s2):
-    let te2 = set_next(te,new Stmt_j(s2));
-    tcStmt(te2,s1,true); // pass new_block in case of weird associativity??
+    region r {
+      let te2 = set_next(r, te,new Stmt_j(s2));
+      tcStmt(te2,s1,true); // pass new_block in case of weird associativity??
+    }
+    tcStmt(te,s2,true);
+    return;
+    /*
     // JGM: try to treat sequences as "tail-calls" to avoid a deep stack.
     // (Of course, this depends on the parser's associativity.)
     while (true)
@@ -124,6 +116,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
   seq_end:
     tcStmt(te,s2,true);
     return;
+    */
 
   case &Return_s(eopt):
     type_t t = return_typ(te);
@@ -154,7 +147,9 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
   case &While_s($(e,cont_s),s):
     decorate_stmt(te,cont_s);
     tcTest(te,e,"while loop");
-    tcStmt(set_in_loop(te,cont_s),s,true);
+    region r {
+      tcStmt(set_in_loop(r,te,cont_s),s,true);
+    }
     return;
 
   case &For_s(e1,$(e2,guard_s),$(e3,cont_s),s):
@@ -162,14 +157,18 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     decorate_stmt(te,cont_s);
     tcExp(te,NULL,e1);
     tcTest(te,e2,"for loop");
-    te = set_in_loop(te,cont_s);
-    tcStmt(te,s,true);
-    tcExp(te,NULL,e3); // ??? what does a break/continue in e3 mean ???
+    region r {
+      let te = set_in_loop(r,te,cont_s);
+      tcStmt(te,s,true);
+      tcExp(te,NULL,e3); // ??? what does a break/continue in e3 mean ???
+    }
     return;
 
   case &Do_s(s,$(e,cont_s)):
     decorate_stmt(te,cont_s);
-    tcStmt(set_in_loop(te,cont_s),s,true);
+    region r {
+      tcStmt(set_in_loop(r,te,cont_s),s,true);
+    }
     tcTest(te,e,"do loop");
     return;
 
@@ -210,10 +209,12 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
   case &Label_s(l,s): 
     // Note that we set new_block to false because we're explicitly creating
     // a new named block here.
-    tcStmt(Tcenv::new_named_block(s0->loc,add_label(te,l,s),
-                                  new Tvar(new ((string_t)aprintf("`%s",*l)),
-					   new_tvar_id(),
-                                           new Eq_kb(RgnKind))),s,false); 
+    region r {
+      tcStmt(Tcenv::new_named_block(r,s0->loc,add_label(te,l,s),
+                                    new Tvar(new ((string_t)aprintf("`%s",*l)),
+                                             new_tvar_id(),
+                                             new Eq_kb(RgnKind))),s,false); 
+    }
     return;
 
   case &Switch_s(e,scs0):
@@ -222,29 +223,31 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     // type-check the cases in reverse order, a fallthru therefore transfers
     // control to the case most recently type-checked. For the last case,
     // fallthru is not allowed.
-    te = set_in_switch(te);
-    te = clear_fallthru(te);
-    for (_ scs = List::rev(scs0); scs != NULL; scs = scs->tl) {
-      let p = scs->hd->pattern;
-      let pat_res = tcPat(te,p,&t);
-      let new_tvs = pat_res.tvars_and_bounds_opt==NULL ? NULL 
-	: (*pat_res.tvars_and_bounds_opt)[0];
-      if (!unify(p->topt->v,t)) { // allow silent_castable?
-	terr(scs->hd->loc, "switch on type %s, but case expects type %s",
-             typ2string(t), typ2string(p->topt->v));
-        explain_failure();
+    region r {
+      let te = set_in_switch(r,te);
+      te = clear_fallthru(r,te);
+      for (_ scs = List::rev(scs0); scs != NULL; scs = scs->tl) {
+        let p = scs->hd->pattern;
+        let pat_res = tcPat(te,p,&t);
+        let new_tvs = pat_res.tvars_and_bounds_opt==NULL ? NULL 
+          : (*pat_res.tvars_and_bounds_opt)[0];
+        if (!unify(p->topt->v,t)) { // allow silent_castable?
+          terr(scs->hd->loc, "switch on type %s, but case expects type %s",
+               typ2string(t), typ2string(p->topt->v));
+          explain_failure();
+        }
+        else
+          check_pat_regions(te,p);
+        scs->hd->pat_vars = new Opt(pat_res.patvars);
+        // type-checking the body will type-check any explicit fallthrus.
+        pattern_synth(scs->hd->loc, te, pat_res, scs->hd->body,
+                      scs->hd->where_clause, true);
+        if(pat_res.tvars_and_bounds_opt != NULL
+           && (*pat_res.tvars_and_bounds_opt)[1] != NULL)
+          te = clear_fallthru(r,te);
+        else
+          te = set_fallthru(r,te, new_tvs, pat_res.patvars, scs->hd);
       }
-      else
-	check_pat_regions(te,p);
-      scs->hd->pat_vars = new Opt(pat_res.patvars);
-      // type-checking the body will type-check any explicit fallthrus.
-      pattern_synth(scs->hd->loc, te, pat_res, scs->hd->body,
-		    scs->hd->where_clause, true);
-      if(pat_res.tvars_and_bounds_opt != NULL
-	 && (*pat_res.tvars_and_bounds_opt)[1] != NULL)
-	te = clear_fallthru(te);
-      else
-	te = set_fallthru(te, new_tvs, pat_res.patvars, scs->hd);
     }
     check_switch_exhaustive(s0->loc,scs0);
     return;
@@ -258,151 +261,64 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 		    s->loc)->r;
 
     // must set encloser b/c cannot goto into a handler.
-    tcStmt(set_encloser(enter_try(te),s0),s,true);
+    region r {
+      tcStmt(set_encloser(r,enter_try(r,te),s0),s,true);
+    }
 
-    // similar to Switch_s -- check the patterns in reverse order:
-    te = set_in_switch(te);
-    te = clear_fallthru(te);
-    for (let scs = List::rev(scs0); scs != NULL; scs = scs->tl) {
-      let p = scs->hd->pattern;
-      let pat_res = tcPat(te,p,&exn_typ);
-      let new_tvs = pat_res.tvars_and_bounds_opt==NULL ? NULL 
-	: (*pat_res.tvars_and_bounds_opt)[0];
-      if (!unify(p->topt->v,exn_typ))
-        terr(scs->hd->loc, "expected xtunion exn but found %s",
-             typ2string(p->topt->v));
-      else
-	check_pat_regions(te,p);
-      scs->hd->pat_vars = new Opt(pat_res.patvars);
-      // type-checking the body will type-check any explicit fallthrus
-      pattern_synth(scs->hd->loc, te, pat_res, scs->hd->body,
-		    scs->hd->where_clause, true);
-      if(pat_res.tvars_and_bounds_opt != NULL
-	 && (*pat_res.tvars_and_bounds_opt)[1] != NULL)
-	te = clear_fallthru(te);
-      else
-	te = set_fallthru(te, new_tvs, pat_res.patvars, scs->hd);
+    region r2 {
+      // similar to Switch_s -- check the patterns in reverse order:
+      let te = set_in_switch(r2,te);
+      te = clear_fallthru(r2,te);
+      for (let scs = List::rev(scs0); scs != NULL; scs = scs->tl) {
+        let p = scs->hd->pattern;
+        let pat_res = tcPat(te,p,&exn_typ);
+        let new_tvs = pat_res.tvars_and_bounds_opt==NULL ? NULL 
+          : (*pat_res.tvars_and_bounds_opt)[0];
+        if (!unify(p->topt->v,exn_typ))
+          terr(scs->hd->loc, "expected xtunion exn but found %s",
+               typ2string(p->topt->v));
+        else
+          check_pat_regions(te,p);
+        scs->hd->pat_vars = new Opt(pat_res.patvars);
+        // type-checking the body will type-check any explicit fallthrus
+        pattern_synth(scs->hd->loc, te, pat_res, scs->hd->body,
+                      scs->hd->where_clause, true);
+        if(pat_res.tvars_and_bounds_opt != NULL
+           && (*pat_res.tvars_and_bounds_opt)[1] != NULL)
+          te = clear_fallthru(r2,te);
+        else
+          te = set_fallthru(r2, te, new_tvs, pat_res.patvars, scs->hd);
+      }
     }
     check_catch_overlap(s0->loc,scs0);
     return;
 
   case &Decl_s(d,s):
     string_t unimp_msg_part;
-
-    if(new_block)
-      te = Tcenv::new_block(s0->loc,te);
-
-    switch (d->r) {
-    case &Var_d(vd):
-      let &Vardecl(sc,&$(nsl,x),tq,t,initializer,*rgn_ptr,atts,_) = vd;
-      let curr_bl = Tcenv::curr_rgn(te);
-      bool is_local;
-      switch (sc) {
-      case Static: 
-      case Extern: 
-      case ExternC: is_local = false; break;
-      case Abstract: 
-        terr(d->loc,"bad abstract scope for local variable"); 
-        fallthru;
-      case Register: 
-      case Public: is_local = true; break;
-      }
-        
-      *rgn_ptr = is_local ? new Opt(curr_bl) : new Opt(HeapRgn); // side effect
-      switch (nsl) {
-      case Loc_n: break;
-      case &Rel_n(NULL):
-        (*vd->name)[0] = Loc_n;
-        break;
-      case &Abs_n(y): throw impos("tcstmt: Abs_n declaration");
-      default:
-        terr(d->loc, "cannot declare a qualified local variable");
-        break;
-      }
-      // if it's an array or string, fill in the size on the type
-      switch (compress(t)) {
-      case &ArrayType(ArrayInfo{telt,tq,NULL,zt,ztl}) && vd->initializer != NULL:
-        switch (vd->initializer->r) {
-          case &Const_e(&String_c(s)):
-          t = vd->type = array_typ(telt,tq,uint_exp(s.size,NULL),zt,ztl);
-          break;
-	  case &Comprehension_e(_,e,_,_):
-	  // FIX: copy e here!  
-	  t = vd->type = array_typ(telt,tq,e,zt,ztl); 
-          break;
-          case &UnresolvedMem_e(_,es): fallthru(es);
-          case &Array_e(es):
-          t = vd->type = array_typ(telt,tq,uint_exp(List::length(es),NULL),
-                                   zt,ztl);
-          break;
-          default: break;
+    region decl_rgn {
+      tenv_t<_,`decl_rgn> te2;
+      if(new_block)
+        te2 = Tcenv::new_block(decl_rgn,s0->loc,te);
+      else 
+        te2 = Tcenv::copy_tenv(decl_rgn,te);
+      let te = te2;
+      switch (d->r) {
+      case &Var_d(vd):
+        let &Vardecl(sc,&$(nsl,x),tq,t,initializer,*rgn_ptr,atts,_) = vd;
+        let curr_bl = Tcenv::curr_rgn(te);
+        bool is_local;
+        switch (sc) {
+        case Static: 
+        case Extern: 
+        case ExternC: is_local = false; break;
+        case Abstract: 
+          terr(d->loc,"bad abstract scope for local variable"); 
+          fallthru;
+        case Register: 
+        case Public: is_local = true; break;
         }
-        break;
-      default: break;
-      }
-      
-      // type safety demands static variables are closed (like globals)
-      // (the error message may be confusing b/c it *looks* like tyvars
-      //  are in scope)
-      let bound_vars = (!is_local) ? NULL : lookup_type_vars(te);
-      let allow_evars = (!is_local) ? false : true;
-      check_type(s0->loc,te,bound_vars,MemKind,allow_evars,t);
-      let te2 = add_local_var(s->loc,te,vd);
-      if (sc == Extern || sc == ExternC)
-        terr(d->loc,"local extern declarations not yet supported");
-      //      if (sc == Static && !supports_default(t) && initializer == NULL)
-      //        terr(d->loc,"static local declaration requires an initializer");
-      if (initializer != NULL) {
-        tcExpInitializer(te2,&t,(exp_t)initializer);
-	// te is only used by is_const_exp for globals and function names
-	if(!is_local && !is_const_exp(te,(exp_t)initializer))
-	  terr(d->loc, "initializer needs to be a constant expression");
-        if (!coerce_assign(te2,(exp_t)initializer,t)) {
-          let varstr = *x;
-          let tstr = typ2string(t);
-          let estr = typ2string(initializer->topt->v);
-          if (varstr.size + tstr.size + estr.size + 50 < 80)
-            terr(d->loc, "%s declared with type %s but initialized with type %s.",
-               varstr, tstr, estr);
-          else if (varstr.size + tstr.size + 25 < 80 &&
-                   estr.size + 25 < 80)
-            terr(d->loc, "%s declared with type %s\n but initialized with type %s.",
-               varstr, tstr, estr);
-          else 
-            terr(d->loc, "%s declared with type \n%s\n but initialized with type \n%s.",
-               varstr, tstr, estr);
-          unify(t,initializer->topt->v);
-          explain_failure();
-        }
-      }
-      tcStmt(set_encloser(te2,s0),s,false);
-      return;
-
-    case &Let_d(p,*vds,e):
-      tcExpInitializer(te,NULL,e);
-      //FIX: can pass region if e an lvalue
-      let pat_res = tcPat(te,p,&e->topt->v);
-      *vds = new Opt(pat_res.patvars);
-      if (!unify(p->topt->v,e->topt->v)
-	  && !coerce_assign(te,e,p->topt->v)) {
-	terr(d->loc,"pattern type %s does not match definition type %s",
-             typ2string(p->topt->v),typ2string(e->topt->v));
-        unify(p->topt->v,e->topt->v);
-        explain_failure();
-      }
-      else
-	check_pat_regions(te,p);
-      check_let_pat_exhaustive(p->loc,p);
-      pattern_synth(s0->loc, te, pat_res, s, NULL, false);
-      return;
-
-    case &Letv_d(vds):
-      let curr_bl = Tcenv::curr_rgn(te);
-      let te2 = te;
-      for (; vds != NULL; vds = vds->tl) {
-        let vd = vds->hd;
-        let &Vardecl(_,&$(nsl,_),_,t,_,*rgn_ptr,_,_) = vd;
-        *rgn_ptr = new Opt(curr_bl); // side effect
+        // side effect
+        *rgn_ptr = is_local ? new Opt(curr_bl) : new Opt(HeapRgn); 
         switch (nsl) {
         case Loc_n: break;
         case &Rel_n(NULL):
@@ -413,60 +329,157 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
           terr(d->loc, "cannot declare a qualified local variable");
           break;
         }
-        check_type(s0->loc,te2,lookup_type_vars(te2),MemKind,true,t);
-        te2 = add_local_var(s->loc,te2,vd);
-      }
-      tcStmt(set_encloser(te2,s0),s,false);
-      return;
-    case &Fn_d(fd): 
-      // FIX: much of this code is the same as in Tc::tcFndecl
-      let curr_bl = Tcenv::curr_rgn(te);
-      if (fd->sc != Public)
-        terr(d->loc,"bad storage class for inner function");
-      // reject explicitly qualified name
-      switch ((*fd->name)[0]) {
-      case &Rel_n(NULL): break;
-      case &Abs_n(y): impos("tc: Abs_n in tcStmt var decl");
-      default: terr(d->loc,"explicit namespace not allowed on inner function declaration");
-      }
-      (*fd->name)[0] = Loc_n;
-      check_fndecl_valid_type(d->loc,te,fd);
-      type_t t = fndecl2typ(fd);
-      fd->attributes = transfer_fn_type_atts(t,fd->attributes);
-      // check packed and aligned don't show up
-      for (_ atts = fd->attributes; atts; atts = atts->tl)
-        switch (atts->hd) {
-        case Packed_att: case &Aligned_att(_):
-          terr(d->loc,"bad attribute %s for function",attribute2string(atts->hd));
+        // if it's an array or string, fill in the size on the type
+        switch (compress(t)) {
+        case &ArrayType(ArrayInfo{telt,tq,NULL,zt,ztl}) && vd->initializer != NULL:
+          switch (vd->initializer->r) {
+            case &Const_e(&String_c(s)):
+            t = vd->type = array_typ(telt,tq,uint_exp(s.size,NULL),zt,ztl);
+            break;
+            case &Comprehension_e(_,e,_,_):
+            // FIX: copy e here!  
+            t = vd->type = array_typ(telt,tq,e,zt,ztl); 
+            break;
+            case &UnresolvedMem_e(_,es): fallthru(es);
+            case &Array_e(es):
+            t = vd->type = array_typ(telt,tq,uint_exp(List::length(es),NULL),
+                                     zt,ztl);
+            break;
+            default: break;
+          }
           break;
         default: break;
         }
-      vardecl_t vd = new Vardecl {fd->sc, fd->name, const_tqual(NULL), 
-                                  at_typ(t,curr_bl,empty_tqual(NULL), 
-                                         false_conref),
-                                  NULL, new Opt(curr_bl), NULL, false};
-      fd->fn_vardecl = vd;
-      te = add_local_var(d->loc,te,vd);
-      let old_fenv = te->le;
-      te->le = new List(nested_fenv(d->loc,old_fenv->hd,fd),old_fenv);
-      tcStmt(te,fd->body,false);
-      check_delayed_effects(te);
-      check_delayed_constraints(te);
-      if (!all_labels_resolved(te))
-        terr(d->loc,"function has goto statements to undefined labels");
-      te->le = old_fenv;
-      tcStmt(set_encloser(te,s0),s,false);
-      return;
-    case &Namespace_d(n,tds): unimp_msg_part = "namespace"; break;
-    case &Using_d(q,tds):     unimp_msg_part = "using";     break; //FIX: allow
-    case &Aggr_d(_):          unimp_msg_part = "type";      break;
-    case &Tunion_d(_):        unimp_msg_part = "[x]tunion"; break;
-    case &Enum_d(_):          unimp_msg_part = "enum";   break;
-    case &Typedef_d(_):       unimp_msg_part = "typedef";   break;
-    case &ExternC_d(_):       unimp_msg_part = "extern \"C\""; break;
-    case &ExternCinclude_d(_,_):unimp_msg_part = "extern \"C include\""; break;
-    case Porton_d:            unimp_msg_part = "__cyclone_port_on__"; break;
-    case Portoff_d:           unimp_msg_part = "__cyclone_port_off__"; break;
+      
+        // type safety demands static variables are closed (like globals)
+        // (the error message may be confusing b/c it *looks* like tyvars
+        //  are in scope)
+        let bound_vars = (!is_local) ? NULL : lookup_type_vars(te);
+        let allow_evars = (!is_local) ? false : true;
+        check_type(s0->loc,te,bound_vars,MemKind,allow_evars,t);
+        let te2 = add_local_var(decl_rgn,s->loc,te,vd);
+        if (sc == Extern || sc == ExternC)
+          terr(d->loc,"local extern declarations not yet supported");
+        //     if (sc == Static && !supports_default(t) && initializer == NULL)
+        //     terr(d->loc,"static local declaration requires an initializer");
+        if (initializer != NULL) {
+          tcExpInitializer(te2,&t,(exp_t)initializer);
+          // te is only used by is_const_exp for globals and function names
+          if(!is_local && !is_const_exp(te,(exp_t)initializer))
+            terr(d->loc, "initializer needs to be a constant expression");
+          if (!coerce_assign(te2,(exp_t)initializer,t)) {
+            let varstr = *x;
+            let tstr = typ2string(t);
+            let estr = typ2string(initializer->topt->v);
+            if (varstr.size + tstr.size + estr.size + 50 < 80)
+              terr(d->loc, "%s declared with type %s but initialized "
+                   "with type %s.",varstr, tstr, estr);                   
+            else if (varstr.size + tstr.size + 25 < 80 &&
+                     estr.size + 25 < 80)
+              terr(d->loc, "%s declared with type %s\n but initialized "
+                   "with type %s.",varstr, tstr, estr);
+            else 
+              terr(d->loc, "%s declared with type \n%s\n but initialized "
+                   "with type \n%s.",varstr, tstr, estr);
+            unify(t,initializer->topt->v);
+            explain_failure();
+          }
+        }
+        tcStmt(set_encloser(decl_rgn,te2,s0),s,false);
+        return;
+
+      case &Let_d(p,*vds,e):
+        tcExpInitializer(te,NULL,e);
+        //FIX: can pass region if e an lvalue
+        let pat_res = tcPat(te,p,&e->topt->v);
+        *vds = new Opt(pat_res.patvars);
+        if (!unify(p->topt->v,e->topt->v)
+            && !coerce_assign(te,e,p->topt->v)) {
+          terr(d->loc,"pattern type %s does not match definition type %s",
+               typ2string(p->topt->v),typ2string(e->topt->v));
+          unify(p->topt->v,e->topt->v);
+          explain_failure();
+        }
+        else
+          check_pat_regions(te,p);
+        check_let_pat_exhaustive(p->loc,p);
+        pattern_synth(s0->loc, te, pat_res, s, NULL, false);
+        return;
+
+      case &Letv_d(vds):
+        let curr_bl = Tcenv::curr_rgn(te);
+        let te2 = te;
+        for (; vds != NULL; vds = vds->tl) {
+          let vd = vds->hd;
+          let &Vardecl(_,&$(nsl,_),_,t,_,*rgn_ptr,_,_) = vd;
+          *rgn_ptr = new Opt(curr_bl); // side effect
+          switch (nsl) {
+          case Loc_n: break;
+          case &Rel_n(NULL):
+            (*vd->name)[0] = Loc_n;
+            break;
+          case &Abs_n(y): throw impos("tcstmt: Abs_n declaration");
+          default:
+            terr(d->loc, "cannot declare a qualified local variable");
+            break;
+          }
+          check_type(s0->loc,te2,lookup_type_vars(te2),MemKind,true,t);
+          te2 = add_local_var(decl_rgn,s->loc,te2,vd);
+        }
+        tcStmt(set_encloser(decl_rgn,te2,s0),s,false);
+        return;
+      case &Fn_d(fd): 
+        // FIX: much of this code is the same as in Tc::tcFndecl
+        let curr_bl = Tcenv::curr_rgn(te);
+        if (fd->sc != Public)
+          terr(d->loc,"bad storage class for inner function");
+        // reject explicitly qualified name
+        switch ((*fd->name)[0]) {
+        case &Rel_n(NULL): break;
+        case &Abs_n(y): impos("tc: Abs_n in tcStmt var decl");
+        default: terr(d->loc,"explicit namespace not allowed on inner function declaration");
+        }
+        (*fd->name)[0] = Loc_n;
+        check_fndecl_valid_type(d->loc,te,fd);
+        type_t t = fndecl2typ(fd);
+        fd->attributes = transfer_fn_type_atts(t,fd->attributes);
+        // check packed and aligned don't show up
+        for (_ atts = fd->attributes; atts; atts = atts->tl)
+          switch (atts->hd) {
+          case Packed_att: case &Aligned_att(_):
+            terr(d->loc,"bad attribute %s for function",
+                 attribute2string(atts->hd));
+            break;
+          default: break;
+          }
+        vardecl_t vd = new Vardecl {fd->sc, fd->name, const_tqual(NULL), 
+                                    at_typ(t,curr_bl,empty_tqual(NULL), 
+                                           false_conref),
+                                    NULL, new Opt(curr_bl), NULL, false};
+        fd->fn_vardecl = vd;
+        te = add_local_var(decl_rgn,d->loc,te,vd);
+        fenv_t old_fenv = (fenv_t)te->le;
+        te->le = nested_fenv(decl_rgn,d->loc,old_fenv,fd);
+        tcStmt(te,fd->body,false);
+        check_delayed_effects(te);
+        check_delayed_constraints(te);
+        if (!all_labels_resolved(te))
+          terr(d->loc,"function has goto statements to undefined labels");
+        te->le = old_fenv;
+        tcStmt(set_encloser(decl_rgn,te,s0),s,false);
+        return;
+      case &Namespace_d(n,tds): unimp_msg_part = "namespace"; break;
+      case &Using_d(q,tds):     unimp_msg_part = "using";     break; //FIX: allow
+      case &Aggr_d(_):          unimp_msg_part = "type";      break;
+      case &Tunion_d(_):        unimp_msg_part = "[x]tunion"; break;
+      case &Enum_d(_):          unimp_msg_part = "enum";   break;
+      case &Typedef_d(_):       unimp_msg_part = "typedef";   break;
+      case &ExternC_d(_):       unimp_msg_part = "extern \"C\""; break;
+      case &ExternCinclude_d(_,_):
+        unimp_msg_part = "extern \"C include\""; break;
+      case Porton_d:            unimp_msg_part = "__cyclone_port_on__"; break;
+      case Portoff_d:           unimp_msg_part = "__cyclone_port_off__"; break;
+      }
     }
     throw impos("tcStmt: nested %s declarations unimplemented",unimp_msg_part);
 
@@ -475,18 +488,24 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     // not outside of the handler.
     s->r = new_stmt(new Seq_s(new_stmt(s->r,s->loc), skip_stmt(s->loc)),
 		    s->loc)->r;
-    if (new_block)
-      te = Tcenv::new_block(s0->loc,te);
-    let &Vardecl(_,_,_,t,_,*rgn_ptr,_,_) = vd;
-    let curr_bl = Tcenv::curr_rgn(te);
-    type_t rgn_typ = new VarType(tv);
-    *rgn_ptr = new Opt(curr_bl); // side effect
-    te = add_type_vars(s0->loc,te,new List(tv,NULL));
-    check_type(s0->loc,te,lookup_type_vars(te),BoxKind,true,t);
-    te = add_region(te, rgn_typ, resetable);
-    if (!unify(t,new RgnHandleType(rgn_typ)))
-      impos("region stmt: type of region handle is wrong!");
-    tcStmt(set_encloser(add_local_var(s->loc,enter_try(te),vd),s0),s,false);
+    region r {
+      tenv_t<_,`r> te2;
+      if (new_block)
+        te2 = Tcenv::new_block(r,s0->loc,te);
+      else 
+        te2 = Tcenv::copy_tenv(r,te);
+      let &Vardecl(_,_,_,t,_,*rgn_ptr,_,_) = vd;
+      let curr_bl = Tcenv::curr_rgn(te2);
+      type_t rgn_typ = new VarType(tv);
+      *rgn_ptr = new Opt(curr_bl); // side effect
+      te2 = add_type_vars(r,s0->loc,te2,new List(tv,NULL));
+      check_type(s0->loc,te,lookup_type_vars(te2),BoxKind,true,t);
+      te2 = add_region(r, te2, rgn_typ, resetable);
+      if (!unify(t,new RgnHandleType(rgn_typ)))
+        impos("region stmt: type of region handle is wrong!");
+      tcStmt(set_encloser(r,add_local_var(r,s->loc,enter_try(r,te2),vd),s0),s,
+             false);
+    }
     return;
   case &ResetRegion_s(e):
     // check that e is a region_t<`r> 

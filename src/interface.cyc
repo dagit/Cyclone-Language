@@ -195,7 +195,7 @@ static seen_t new_seen() {
 }
 
 /* --- functions that actually perform the check --- */
-typedef Dict::dict_t<list_t<var_t>, genv_t> aenv_t;
+typedef Dict::dict_t<list_t<var_t>, genv_t<`g>,`r> aenv_t<`g,`r>;
 
 static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, 
 			      qvar_t name, type_t t);
@@ -625,14 +625,15 @@ static void extract_f($(i_t, bool, aenv_t, seen_t) @ env_f,
   Dict::iter_c(extract_ordinarie,  &env,  ge->ordinaries);
 }
 
-static i_t gen_extract(Dict::dict_t<list_t<var_t,`H>, genv_t,`H> ae, 
+static i_t gen_extract(Dict::dict_t<list_t<var_t,`H>, genv_t> ae, 
 		       bool check_complete_defs) {
-  let env = $(skel2i(ae), check_complete_defs, ae, new_seen());
+  $(i_t,bool,aenv_t,seen_t) env = 
+    $(skel2i(ae), check_complete_defs, ae, new_seen());
   Dict::iter_c(extract_f, &env, ae);
   return env[0];
 }
 
-i_t extract(Dict::dict_t<list_t<var_t,`H>, genv_t,`H> ae) {
+i_t extract(Dict::dict_t<list_t<var_t,`H>, genv_t> ae) {
   return gen_extract(ae, true);
 }
 
@@ -1204,9 +1205,11 @@ void print(i_t i, FILE @ f) {
 i_t parse(FILE @ f) { 
   Lex::lex_init();
   let tds = Parse::parse_file(f);
-  let te  = Tcenv::tc_init();
-  Tc::tc(te, false, tds); // no "Cyc" prefix, no default initializer 
-  return gen_extract(te->ae, false); //don't check that definitions are complete
+  region r {
+    let te  = Tcenv::tc_init(r);
+    Tc::tc(r, te, false, tds); // no "Cyc" prefix, no default initializer 
+    return gen_extract(te->ae, false); //don't check that definitions are complete
+  }
 }
 
 /* ------ binary loading and saving ------ */

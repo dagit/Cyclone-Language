@@ -1802,6 +1802,16 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
                         pinfo_b.elt_tq.real_const));
     return okay;
 
+    // allow casting tunion `r1 T<t1,...,tn> to tunion `r2 T<t1,...,tn>
+    // when `r1 outlives `r2
+  case $(&TunionType(TunionInfo{&KnownTunion(&tud1),ts1,r1}),
+         &TunionType(TunionInfo{&KnownTunion(&tud2),ts2,r2})):
+    if (tud1 != tud2 || !region_outlives(te,r1,r2)) return false;
+    for (; ts1 != NULL && ts2 != NULL; ts1=ts1->tl, ts2=ts2->tl)
+      if (!unify(ts1->hd,ts2->hd)) return false;
+    if (ts1 != NULL || ts2 != NULL) return false;
+    return true;
+
   case $(&ArrayType(ArrayInfo{t1a,tq1a,e1,zt1,_}),
          &ArrayType(ArrayInfo{t2a,tq2a,e2,zt2,_})):
     bool okay;
@@ -2068,6 +2078,18 @@ static bool subtype(tenv_t te, list_t<$(type_t,type_t)@`H,`H> assume,
       }
     }
     return ptrsubtype(te, new List(new $(t1,t2),assume), t_a, t_b);
+
+    // allow tunion `r1 T<t1,...,tn> <= tunion `r2 T<t1,...,tn> when
+    // `r1 outlives `r2.
+  case $(&TunionType(TunionInfo{&KnownTunion(&tud1),ts1,r1}),
+         &TunionType(TunionInfo{&KnownTunion(&tud2),ts2,r2})):
+    if (tud1 != tud2 || !region_outlives(te,r1,r2)) return false;
+    for (; ts1 != NULL && ts2 != NULL; ts1=ts1->tl, ts2=ts2->tl)
+      if (!unify(ts1->hd,ts2->hd)) return false;
+    if (ts1 != NULL || ts2 != NULL) return false;
+    return true;
+
+
   case $(&FnType(f1), &FnType(f2)):
 
     if (f1.tvars != NULL || f2.tvars != NULL) {
@@ -2930,18 +2952,20 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       return cvtenv;
       }
       try 
-	switch(lookup_ordinary(te,loc,fname)) {
-	case &TunionRes(tud2,tuf2):
-	  tuf = tuf2;
-	  tud = tud2;
-	  if(tud->is_xtunion != is_x)
-	    terr(loc,"[x]tunion is different from type declaration %s",
-                 qvar2string(tname));
-	  break;
-	default: terr(loc,"unbound field %s in type tunion %s",
-                      qvar2string(fname), qvar2string(tname));
-          return cvtenv;
-        }
+        region r {
+	  switch(lookup_ordinary(r,te,loc,fname)) {
+          case &TunionRes(tud2,tuf2):
+            tuf = tuf2;
+            tud = tud2;
+            if(tud->is_xtunion != is_x)
+              terr(loc,"[x]tunion is different from type declaration %s",
+                   qvar2string(tname));
+            break;
+          default: terr(loc,"unbound field %s in type tunion %s",
+                        qvar2string(fname), qvar2string(tname));
+            return cvtenv;
+          }
+      }
       catch {
       case Dict::Absent:
         terr(loc,"unbound field %s in type tunion %s",

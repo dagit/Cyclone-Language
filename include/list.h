@@ -35,12 +35,14 @@ namespace List {
       every element of the list must have the same type [`a], and
       every cons cell in the list must be allocated in the same region
       [`r].  */
+
   typedef struct List<`a,`r> *`r list_t<`a,`r>;
   /** A [list_t] is a possibly-NULL pointer to a [struct List].  Most
       of the functions in namespace List operate on values of type
       [list_t] rather than [struct List].  Note that a [list_t] can be
       empty (NULL) but a [struct List] cannot. */
-  typedef struct List<`a,`r> @List_t<`a,`r>;
+
+  typedef struct List<`a,`r> @`r List_t<`a,`r>;
   /** A [List_t] is a non-NULL pointer to a [struct List].  This is
       used much less often than [list_t], however it may be useful
       when you want to emphasize that a list has at least one element.  */
@@ -55,13 +57,11 @@ namespace List {
   extern int length(list_t x);
   /** [length(x)] returns the number of elements in list [x].  */
 
-  extern `a hd(list_t<`a> x);
-  /** [hd(x)] returns the first element of list [x], if there is one,
-      and throws [Failure("hd")] if [x] is NULL. */
+  extern `a hd(List_t<`a> x);
+  /** [hd(x)] returns the first element of list [x]. */
 
-  extern list_t<`a,`r> tl(list_t<`a,`r> x);
-  /** [tl(x)] returns the tail of list [x], if there is one,
-      and throws [Failure("tl")] if [x] is NULL. */
+  extern list_t<`a,`r> tl(List_t<`a,`r> x);
+  /** [tl(x)] returns the tail of list [x]. */
 
   extern list_t<`a> copy(list_t<`a> x);
   /** [copy(x)] returns a new heap-allocated copy of list [x]. */

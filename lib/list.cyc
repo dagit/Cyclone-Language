@@ -40,13 +40,13 @@ int length(list_t x) {
 }
 
 // return the first element in a list, if any, throw Failure otherwise. 
-`a hd(list_t<`a> x) {
+`a hd(List_t<`a> x) {
   if (x == NULL) throw new Failure("hd");
   return x->hd;
 }
 
 // return the tail of a list, if any, throw Failure otherwise. 
-list_t<`a,`r> tl(list_t<`a,`r> x) {
+list_t<`a,`r> tl(List_t<`a,`r> x) {
   if (x == NULL) throw new Failure("tl");
   return x->tl;
 }

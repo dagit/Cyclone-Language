@@ -44,26 +44,30 @@ extern tunion Resolved {
   EnumRes(enumdecl_t,enumfield_t);
   AnonEnumRes(type_t,enumfield_t);
 };
-typedef tunion Resolved resolved_t;
+typedef tunion `r Resolved resolved_t<`r>;
 
 // Global environments -- what's declared in a global scope 
 // Warning: ordinaries should really be abstract so we can ensure that any
 // lookup sets the bool field to true!
 // FIX: We should tree-shake the type declarations too!
-extern struct Genv {
-  set_t<var_t>                   namespaces;
-  dict_t<var_t,aggrdecl_t@>      aggrdecls;
-  dict_t<var_t,tuniondecl_t@>    tuniondecls;
-  dict_t<var_t,enumdecl_t@>      enumdecls;
-  dict_t<var_t,typedefdecl_t>    typedefs; // indirection unneeded b/c no redeclaration
-  Dict::dict_t<var_t,$(resolved_t,bool)@> ordinaries; // bool for tree-shaking
-  list_t<list_t<var_t>>        availables; // abs. names of "using" namespaces
+extern struct Genv<`g::R> {
+  region_t<`g> grgn;
+  set_t<var_t,`g>                   namespaces;
+  Dict::dict_t<var_t,aggrdecl_t@,`g> aggrdecls;
+  Dict::dict_t<var_t,tuniondecl_t@,`g> tuniondecls;
+  Dict::dict_t<var_t,enumdecl_t@,`g>   enumdecls;
+  // no indirection b/c no redeclaration
+  Dict::dict_t<var_t,typedefdecl_t,`g> typedefs; 
+  // bool for tree-shaking
+  Dict::dict_t<var_t,$(resolved_t,bool)@`g,`g> ordinaries;
+  // abs. names of "using" namespaces 
+  list_t<list_t<var_t>,`g> availables; 
 };
-typedef struct Genv @genv_t;
+typedef struct Genv<`r> @`r genv_t<`r>;
 
 // Local function environments
-extern struct Fenv;
-typedef struct Fenv @fenv_t; 
+extern struct Fenv<`l::R>;
+typedef struct Fenv<`l> @`l fenv_t<`l>; 
 
 extern tunion Jumpee {
   NotLoop_j;
@@ -71,49 +75,53 @@ extern tunion Jumpee {
   FnEnd_j;
   Stmt_j(stmt_t);
 };
-typedef tunion Jumpee jumpee_t;
+typedef tunion `r Jumpee jumpee_t<`r>;
 
-// Type environments 
-extern struct Tenv {
-  list_t<var_t>                ns; // current namespace
-  dict_t<list_t<var_t>,genv_t> ae; // absolute environment
-  list_t<fenv_t>               le; // local environment, == null except in functions
+// Type environments -- `g is the region for global information
+// and `l is the region for local information
+extern struct Tenv<`g::R,`l::R> {
+  list_t<var_t> ns; // current namespace
+  // absolute environment
+  Dict::dict_t<list_t<var_t>,genv_t<`g>,`g> ae; 
+  struct Fenv<`l> *`l le; // local environment
 };
-typedef struct Tenv @tenv_t; 
+typedef struct Tenv<`g,`l> @`l tenv_t<`g,`l>; 
 
 extern `a env_err(string_t msg) __attribute__((noreturn));
-extern tenv_t tc_init();
-extern genv_t empty_genv();
-extern fenv_t new_fenv(seg_t,fndecl_t);
-extern fenv_t nested_fenv(seg_t,fenv_t old_fenv, fndecl_t new_fn);
+extern tenv_t<`r,`r> tc_init(region_t<`r>);
+extern genv_t<`r> empty_genv(region_t<`r>);
+extern fenv_t<`r> new_fenv(region_t<`r>,seg_t,fndecl_t);
+extern fenv_t<`r> nested_fenv(region_t<`r>,seg_t,fenv_t<`r2> old_fenv, fndecl_t new_fn : {`r2} > `r);
 
-extern tenv_t enter_ns(tenv_t, var_t);
+extern tenv_t<`r> enter_ns(region_t<`r>,tenv_t, var_t);
 
 extern list_t<var_t> resolve_namespace(tenv_t,seg_t,var_t,list_t<var_t,`H>);
-extern resolved_t        lookup_ordinary(tenv_t,seg_t,qvar_t);
+extern resolved_t<`r>    lookup_ordinary(region_t<`r>,tenv_t,seg_t,qvar_t);
 extern aggrdecl_t@       lookup_aggrdecl(tenv_t,seg_t,qvar_t);
 extern tuniondecl_t@     lookup_tuniondecl(tenv_t,seg_t,qvar_t);
-extern opt_t<tuniondecl_t@> lookup_xtuniondecl(tenv_t,seg_t,qvar_t);
+extern opt_t<tuniondecl_t@,`r> lookup_xtuniondecl(region_t<`r>,tenv_t,seg_t,qvar_t);
 extern enumdecl_t@       lookup_enumdecl(tenv_t,seg_t,qvar_t);
 extern typedefdecl_t     lookup_typedefdecl(tenv_t,seg_t,qvar_t);
 
 extern type_t  return_typ(tenv_t);
 
-extern tenv_t add_local_var(seg_t,tenv_t,vardecl_t);
-extern tenv_t add_pat_var  (seg_t,tenv_t,vardecl_t);
+extern tenv_t<`g,`r> copy_tenv(region_t<`r>,tenv_t<`g,`r2> : {`r2} > `r);
+extern tenv_t<`g,`r> add_local_var(region_t<`r>,seg_t,tenv_t<`g,`r2>,vardecl_t : {`r2} > `r);
+extern tenv_t<`g,`r> add_pat_var  (region_t<`r>,seg_t,tenv_t<`g,`r2>,vardecl_t : {`r2} > `r);
 
-extern list_t<tvar_t> lookup_type_vars(tenv_t);
-extern tenv_t         add_type_vars(seg_t,tenv_t,list_t<tvar_t>);
+extern list_t<tvar_t> lookup_type_vars(tenv_t<`r>);
+extern tenv_t<`g,`r> add_type_vars(region_t<`r>,seg_t,tenv_t<`g,`r2>,list_t<tvar_t> : {`r2} > `r);
 
-extern tenv_t set_in_loop(tenv_t te, stmt_t continue_dest);
-extern tenv_t set_in_switch(tenv_t);
-extern tenv_t set_fallthru(tenv_t te, 
-			   list_t<tvar_t,`H> new_tvs, 
-			   list_t<vardecl_t> vds,
-			   switch_clause_t clause);
-extern tenv_t clear_fallthru(tenv_t);
-extern tenv_t set_next(tenv_t, jumpee_t);
-extern tenv_t enter_try(tenv_t te);
+extern tenv_t<`g,`r> set_in_loop(region_t<`r>,tenv_t<`g,`r2> te, stmt_t continue_dest : {`r2}>`r);
+extern tenv_t<`g,`r> set_in_switch(region_t<`r>,tenv_t<`g,`r2> : {`r2} > `r);
+extern tenv_t<`g,`r> set_fallthru(region_t<`r>,
+                                  tenv_t<`g,`r2> te, 
+                                  list_t<tvar_t,`H> new_tvs, 
+                                  list_t<vardecl_t> vds,
+                                  switch_clause_t clause : {`r2} > `r);
+extern tenv_t<`g,`r> clear_fallthru(region_t<`r>,tenv_t<`g,`r2> : {`r2} > `r);
+extern tenv_t<`g,`r> set_next(region_t<`r>,tenv_t<`g,`r2>, jumpee_t<`r> : {`r2} > `r);
+extern tenv_t<`g,`r> enter_try(region_t<`r>,tenv_t<`g,`r2> te : {`r2} > `r);
 extern int    get_try_depth(tenv_t te);
 
 // used to record whether we're type-checking an expression that is doing
@@ -122,30 +130,30 @@ extern int    get_try_depth(tenv_t te);
 // &x since the result may later be read.  We need this info to determine
 // whether or not (conservatively) we're reading a union member.  If
 // so, we must enforce that the member is bits-only.
-extern tenv_t enter_notreadctxt(tenv_t te);
-extern tenv_t clear_notreadctxt(tenv_t te);
+extern tenv_t<`g,`r> enter_notreadctxt(region_t<`r>,tenv_t<`g,`r2> te : {`r2}>`r);
+extern tenv_t<`g,`r> clear_notreadctxt(region_t<`r>,tenv_t<`g,`r2> te : {`r2}>`r);
 extern bool in_notreadctxt(tenv_t te);
 
 // The next 4 all assign through their last arg
 extern void process_continue(tenv_t,stmt_t,stmt_opt_t@);
 extern void process_break   (tenv_t,stmt_t,stmt_opt_t@);
 extern void process_goto(tenv_t,stmt_t,var_t,stmt_opt_t@);
-extern $(switch_clause_t,list_t<tvar_t>,list_t<type_t>)* 
-  process_fallthru(tenv_t,stmt_t,switch_clause_t *@);
+extern $(switch_clause_t,list_t<tvar_t>,list_t<type_t>)*
+  process_fallthru(tenv_t<`g,`r>,stmt_t,switch_clause_t *@);
 
 extern stmt_t get_encloser(tenv_t);
-extern tenv_t set_encloser(tenv_t,stmt_t);
+extern tenv_t<`g,`r> set_encloser(region_t<`r>,tenv_t<`g,`r2>,stmt_t:{`r2}>`r);
 
-extern tenv_t add_label(tenv_t, var_t, stmt_t);
+extern tenv_t<`g,`r> add_label(tenv_t<`g,`r>, var_t, stmt_t);
 extern bool all_labels_resolved(tenv_t);
 
-extern tenv_t new_block(seg_t,tenv_t);
-extern tenv_t new_named_block(seg_t,tenv_t,tvar_t name);
-extern tenv_t new_outlives_constraints(tenv_t te, list_t<$(type_t,type_t)@> cs);
+extern tenv_t<`g,`r> new_block(region_t<`r>,seg_t,tenv_t<`g,`r2>:{`r2}>`r);
+extern tenv_t<`g,`r> new_named_block(region_t<`r>,seg_t,tenv_t<`g,`r2>,tvar_t name:{`r2}>`r);
+extern tenv_t<`g,`r> new_outlives_constraints(region_t<`r>, tenv_t<`g,`r2> te, list_t<$(type_t,type_t)@> cs:{`r2}>`r);
 
 extern type_t curr_rgn(tenv_t);
 
-extern tenv_t add_region(tenv_t te, type_t r, bool resetable);
+extern tenv_t<`g,`r> add_region(region_t<`r>, tenv_t<`g,`r2> te, type_t r, bool resetable : {`r2} > `r);
 // Check that the region is in the current capability
 extern void check_rgn_accessible(tenv_t,seg_t,type_t rgn);
 // Check that the region is in the current capability and is resetable
