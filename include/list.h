@@ -28,7 +28,7 @@ namespace List {
        various operations over them, following the conventions of the
        Objective Caml list library as much as possible. */
 
-  struct List<`a,`r::R>{`a hd; struct List<`a,`r> *`r tl;};
+  struct List<`a,`r::TR>{`a hd; struct List<`a,`r> *`r tl;};
   /** A [struct List] is a memory cell with a head field containing an
       element and a tail field that points to the rest of the list.
       Such a structure is traditionally called a cons cell.  Note that
