@@ -1,0 +1,14 @@
+#undef __GCC_NEW_VARARGS__
+#undef __sparc
+#undef __svr4__
+#undef __GNUC_MINOR__
+#undef __sun
+#undef sparc
+#undef __sun__
+#undef __unix
+#undef __unix__
+#undef __SVR4
+#undef sun
+#undef __GNUC__
+#undef __sparc__
+#undef unix

@@ -27,6 +27,30 @@ fi
 ###########################################################################
 # functions to find appropriate helper programs
 #
+TMPFILE=/tmp/cyconfig$$
+
+# diff_path <arch>
+#   given the architecture, outputs a suitable version of diff
+
+function diff_path {
+  DIFF="diff"
+  # make sure it's GNU diff
+  $DIFF --version > $TMPFILE 2>&1
+  grep GNU $TMPFILE
+  if [ $? != 0 ]; then
+    if [ "$TYPE" = "sun" ]; then
+      f="/usr/local/gnu/diffutils-2.6/bin/diff"
+      if [ -f "$f" ]; then
+        DIFF=$f
+      else
+        echo "Warning: could not find $f"
+        echo "  file include/arch/$1.h may be incorrect/incomplete"
+      fi
+    fi
+  fi
+  rm -f $TMPFILE
+  echo $DIFF
+}
 
 # egrep_path <arch>
 #   given the architecture, outputs a suitable version of egrep
@@ -241,6 +265,7 @@ ALL_ARCHS=`cd arch; \ls -1 | grep -v undef | grep -v CVS | awk '{printf("%s ",$1
 
 # get default load flags
 LD_FLAGS=`get_ldflags`
+DIFF=`diff_path`
 
 # write the config Makefile
 cd ..
@@ -259,6 +284,7 @@ ALL_ARCHS=${ALL_ARCHS}
 CC=${CC}
 LDFLAGS=${LD_FLAGS}
 SHELL=${CONFIGSHELL}
+DIFF=${DIFF}
 
 EOF
 cat Makefile.inc.in) > Makefile.inc

@@ -103,4 +103,4 @@ nocheck_%.$(O): %.c
 # for creating genfiles from patches
 
 %.patch: %
-	diff -rbBcN --exclude=CVS $(PATCH_ARCH) $< > $@; exit 0
+	$(DIFF) -rbBcN --exclude=CVS $(PATCH_ARCH) $< > $@; exit 0

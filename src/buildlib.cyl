@@ -1697,7 +1697,7 @@ and block_comment = parse
             type);
     fclose((FILE@)getsizefile);
     let GCC = Cstring_to_string(Ccomp);
-    let gcccmd = aprintf("%s -o %s %s",
+    let gcccmd = aprintf("%s -o %s -x c %s",
                          GCC,
                          getsizeexec,
                          getsizefilename);
