@@ -41,17 +41,14 @@ static void resolve_pat(tenv_t te, pat_t p) {
       terr(p->loc,"struct tag used without arguments in pattern");
       return;
     case &TunionRes(tud,tuf):
-      p->r = new Tunion_p(tuf->name,null,null,tud,tuf);
-      return;
-    case &XTunionRes(xtud,xtuf):
-      p->r = new XTunion_p(xtuf->name,null,null,xtud,xtuf);
+      p->r = new Tunion_p(tud,tuf,null,null);
       return;
     case &EnumRes(ed,ef):
-      p->r = new Enum_p(ef->name,ed,ef);
+      p->r = new Enum_p(ed,ef);
       return;
     case &VarRes(_): // shadows an outer definition, but that's fine
       break;
-    } catch { case &Dict::Absent: break; } // a new variable
+    } catch { case Dict::Absent: break; } // a new variable
     // Unqualified variable is a declaration, qualified is an error
     switch ((*q)[0]) {
     case Loc_n: fallthru;
@@ -72,17 +69,14 @@ static void resolve_pat(tenv_t te, pat_t p) {
       p->r = new Struct_p(sd,null,tvs,List::imp_rev(new_ps));
       return;
     case &TunionRes(tud,tuf):
-      p->r = new Tunion_p(tuf->name,tvs,ps,tud,tuf);
-      return;
-    case &XTunionRes(xtud,xtuf):
-      p->r = new XTunion_p(xtuf->name,tvs,ps,xtud,xtuf);
+      p->r = new Tunion_p(tud,tuf,tvs,ps);
       return;
     case &EnumRes(_,_):
       terr(p->loc,xprintf("bad enum constructor %s in pattern",qvar2string(q)));
       return;
     case &VarRes(_):
       break;
-    } catch {case &Dict::Absent: break;}
+    } catch {case Dict::Absent: break;}
     terr(p->loc, xprintf("%s is not a constructor in pattern",qvar2string(q)));
     return;
   case &UnknownFields_p(q,tvs,dps):
@@ -91,7 +85,7 @@ static void resolve_pat(tenv_t te, pat_t p) {
       p->r = new Struct_p(sd,null,tvs,dps);
       return;
     default: break;
-    } catch {case &Dict::Absent: break; }
+    } catch {case Dict::Absent: break; }
     terr(p->loc, xprintf("%s is not a struct name, but pattern has designators",
 			 qvar2string(q)));
     return;
@@ -154,7 +148,7 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
   case &Int_p(Signed,_):   t = num_type(topt, sint_t);  break;
   case &Char_p(_):         t = num_type(topt, uchar_t); break;
   case &Float_p(_):        t = num_type(topt, float_t); break;
-  case &Enum_p(q,ed,ef): // FIX? return numeric when topt is numeric??
+  case &Enum_p(ed,ef): // FIX? return numeric when topt is numeric??
     t = new EnumType(ed->name,ed);
     break;
   case Null_p:
@@ -188,16 +182,13 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
     let $(sub_tvs,sub_vs) = tcPatRec(te,p2,inner_topt,&ptr_rgn);
     tv_result = List::append(tv_result, sub_tvs);
     v_result  = List::append(v_result,  sub_vs);
-    // if p2's type is a tunion field or xtunion field type, then we cast
-    // the type of p = &p2 to the appropriate tunion or xtunion type, unless
+    // if p2's type is a tunion field type, then we cast
+    // the type of p = &p2 to the appropriate tunion type, unless
     // topt suggests we do otherwise.
     if(inner_topt == null) 
       switch (compress(p2->topt->v)) {
-      case &TunionFieldType(TunionFieldInfo{n,tvs,fn,tud,tufd}):
-	t = new TunionType(TunionInfo{n,tvs,ptr_rgn,tud});
-	break;
-      case &XTunionFieldType(XTunionFieldInfo{n,fn,xtud,xtufd}):
-	t = new XTunionType(XTunionInfo{n,ptr_rgn,xtud});
+      case &TunionFieldType(TunionFieldInfo{&KnownTunionfield(tud,tuf),targs}):
+	t = new TunionType(TunionInfo{new KnownTunion(tud),targs,ptr_rgn});
 	break;
       default:
 	t = new PointerType(PtrInfo{p2->topt->v, ptr_rgn, empty_conref(), 
@@ -263,7 +254,7 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
     }
     break;
 
-  case &Tunion_p(q,tvs,ps,tud,tuf): 
+  case &Tunion_p(tud,tuf,tvs,ps): 
     if(length(tvs) != length(tuf->tvs))
       terr(p->loc,"wrong number of existential type variables in pattern");
     region rgn {
@@ -275,7 +266,7 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
 	switch (compress_conref(tv->kind)->v) {
 	case &Eq_constr(BoxKind): break;
 	case &Eq_constr(k): 
-	  terr(p->loc,xprintf("tunion member %s abstracts type variable %s of kind %s != B",qvar2string(q),*tv->name,kind2string(k))); 
+	  terr(p->loc,xprintf("tunion member %s abstracts type variable %s of kind %s != B",qvar2string(tud->name),*tv->name,kind2string(k))); 
 	  break;
 	case No_constr: 
 	  tv->kind->v = new Eq_constr(BoxKind); 
@@ -298,19 +289,19 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
       let inst       = List::rappend(rgn,all_inst,exist_inst);
       // unless topt says otherwise, guess we want Tunion when there are no args
       if(tqts == null)
-	t = new TunionType(TunionInfo{tud->name->v, all_typs,
-				      new_evar(RgnKind),tud});
+	t = new TunionType(TunionInfo{new KnownTunion(tud),
+				      all_typs,
+				      new_evar(RgnKind)});
       else
-	t = new TunionFieldType(TunionFieldInfo{tud->name->v,all_typs,
-						q,tud,tuf});
-
+	t = new TunionFieldType(TunionFieldInfo{new KnownTunionfield(tud,tuf),
+						all_typs});
       if(topt != null && tqts == null)
 	switch(compress(*topt)) {
 	case &TunionFieldType(_): 
-	  t = new TunionFieldType(TunionFieldInfo{tud->name->v,all_typs,
-						  q,tud,tuf});
+	  t = new TunionFieldType(TunionFieldInfo{new KnownTunionfield(tud,tuf),
+						  all_typs});
 	  break;
-	case &TunionType(TunionInfo{_,targs,_,_}):
+	case &TunionType(TunionInfo{_,targs,_}):
 	  // these unifies could make topt cause an error
 	  let a = all_typs;
 	  for (; a != null && targs != null; a=a->tl,targs=targs->tl)
@@ -332,79 +323,19 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
 	// we could be constraining so as to catch an error later.
 	if (!unify(p2->topt->v,field_typ))
 	  terr(p2->loc, xprintf("%s expects argument type %s, not %s",
-				qvar2string(q), 
+				qvar2string(tud->name), 
 				typ2string(field_typ),
 				typ2string(p2->topt->v)));
       }
       if (ps != null)
 	terr(p->loc,xprintf("too many arguments for tunion constructor %s",
-			    qvar2string(q)));
+			    qvar2string(tud->name)));
       if (tqts != null)
 	terr(p->loc,xprintf("too few arguments for tunion constructor %s",
-			    qvar2string(q)));
+			    qvar2string(tud->name)));
     }
     break;
 
-  case &XTunion_p(q,tvs,ps,tud,tuf): 
-    // FIX: We really oughtta collapse Tunion and XTunion throughout, this
-    //      is almost all just pasted from above.
-    if(length(tvs) != length(tuf->tvs))
-      terr(p->loc,"wrong number of existential type variables in pattern");
-
-    region rgn {
-      // constrain the type variables to have box kind
-      let var_tvs = null;
-      for (_ t = tvs; t != null; t = t->tl) {
-	tvar_t tv = t->hd;
-	switch (compress_conref(tv->kind)->v) {
-	case &Eq_constr(BoxKind): break;
-	case &Eq_constr(k): 
-	  terr(p->loc,xprintf("tunion member %s abstracts type variable %s of kind %s != B",qvar2string(q),*tv->name,kind2string(k))); 
-	  break;
-	case No_constr: 
-	  tv->kind->v = new Eq_constr(BoxKind); 
-	  break;
-	case &Forward_constr(_):throw impos("forward after compress in conref");
-	}
-	// bummer the type is still going in the heap
-	var_tvs = rnew(rgn) List((type_t)(new VarType(tv)),var_tvs);
-      }
-      var_tvs = imp_rev(var_tvs);
-    
-      tv_result = List::append(tv_result, tvs);  
-      tenv_t te2 = add_type_vars(p->loc,te,tvs);
-      list_t<$(tqual_t,type_t)@> tqts = tuf->typs;
-
-      let exist_inst = List::rzip(rgn,rgn,tuf->tvs,var_tvs);
-      let exist_typs = List::map(snd,exist_inst);
-
-      t = new XTunionFieldType(XTunionFieldInfo{tud->name,q,tud,tuf});
-
-      for(; ps != null && tqts != null; ps = ps->tl, tqts = tqts->tl) {
-	let p2 = ps->hd;
-	// Note:  we don't pass in ptr_rgn here because for value-carrying
-	// constructors, the pointer's region is passed down as region_opt.
-	let field_typ = rsubstitute(rgn, exist_inst, (*tqts->hd)[1]);
-	let $(sub_tvs,sub_vs) = tcPatRec(te2,p2,&field_typ,region_opt);
-	tv_result = List::append(tv_result, sub_tvs);
-	v_result  = List::append(v_result,  sub_vs);
-	// must unify here or the type we gave pat won't ever get checked
-	// against the exp we're matching against.  Even if we succeed now,
-	// we could be constraining so as to catch an error later.
-	if (!unify(p2->topt->v,field_typ))
-	  terr(p2->loc, xprintf("%s expects argument type %s, not %s",
-				qvar2string(q), 
-				typ2string(field_typ),
-				typ2string(p2->topt->v)));
-      }
-      if (ps != null)
-	terr(p->loc,xprintf("too many arguments for xtunion constructor %s",
-			    qvar2string(q)));
-      if (tqts != null)
-	terr(p->loc,xprintf("too few arguments for xtunion constructor %s",
-			    qvar2string(q)));
-    }
-    break;
   case &UnknownId_p(_):         fallthru;
   case &UnknownCall_p(_,_,_):   fallthru;
   case &UnknownFields_p(_,_,_): t = wildtyp(); break;
@@ -433,31 +364,20 @@ void check_pat_regions(tenv_t te, pat_t p) {
     check_pat_regions(te,p2);
     switch (p->topt->v) {
     case &PointerType(PtrInfo{_,rt,_,_,_}): fallthru(rt);
-    case &TunionType(TunionInfo{_,_,rt,_}): fallthru(rt);
-    case &XTunionType(XTunionInfo{_,rt,_}): 
+    case &TunionType(TunionInfo{_,_,rt}):
       check_rgn_accessible(te,p->loc,rt);
       return;
     default: throw new Core::Impossible("check_pat_regions: bad pointer type");
     }
-  case &Tunion_p(_,_,ps,_,_): 
+  case &Tunion_p(_,_,_,ps): 
     for(; ps != null; ps = ps->tl) check_pat_regions(te,ps->hd);
     switch (p->topt->v) {
-    case &TunionType(TunionInfo{_,_,rt,_}):
+    case &TunionType(TunionInfo{_,_,rt}):
       check_rgn_accessible(te,p->loc,rt);
       return;
     case &TunionFieldType(_):
       return;
     default: throw new Core::Impossible("check_pat_regions: bad tunion type");
-    }
-  case &XTunion_p(_,_,ps,_,_):
-    for(; ps != null; ps = ps->tl) check_pat_regions(te,ps->hd);
-    switch (p->topt->v) {
-    case &XTunionType(XTunionInfo{_,rt,_}):
-      check_rgn_accessible(te,p->loc,rt);
-      return;
-    case &XTunionFieldType(_):
-      return;
-    default: throw new Core::Impossible("check_pat_regions: bad xtunion type");
     }
   case &Struct_p(_,_,_,dps):  fallthru(List::map(snd,dps));
   case &Tuple_p(ps):
@@ -618,37 +538,37 @@ static simple_pat_t compile_pat(pat_t p) {
       break;
     case &TunionType(_):
       switch(pp->r) {
-      case &Tunion_p(_,_,ps,tud,tuf):
-	int span = List::length(tud->fields->v);
-	s =con_pat(*((*tuf->name)[1]),new Opt(span),List::map(compile_pat,ps)); 
+      case &Tunion_p(tud,tuf,_,ps):
+	opt_t<int> span;
+	if(tud->is_xtunion)
+	  span = null;
+	else
+	  span = new Opt(List::length(tud->fields->v));
+	s =con_pat(*((*tuf->name)[1]),span,List::map(compile_pat,ps)); 
 	break;
-      default: s = impos("non-tunion pattern has tunion type"); break;
-      }
-      break;
-    case &XTunionType(_):
-      switch(pp->r) {
-      case &XTunion_p(_,_,ps,tud,tuf):
-	s = con_pat(*((*tuf->name)[1]),null,List::map(compile_pat,ps)); 
-	break;
-      default: s = impos("non-xtunion pattern has xtunion type"); break;
+      default: s = impos("non-[x]tunion pattern has tunion type"); break;
       }
       break;
     default: s = impos("pointer pattern does not have pointer type!"); break;
     }
     break;
 
-  case &Tunion_p(_,_,null,tud,tuf):
-    int span;
+  case &Tunion_p(tud,tuf,_,null):
+    opt_t<int> span;
     switch(compress(p->topt->v)) {
-    case &TunionType(_):      span = List::length(tud->fields->v); break;
-    case &TunionFieldType(_): span = 1; break;
+    case &TunionType(_):     
+      if(tud->is_xtunion)
+	span = null;
+      else
+	span = new Opt(List::length(tud->fields->v)); 
+      break;
+    case &TunionFieldType(_): span = new Opt(1); break;
     default: span = impos("void tunion pattern has bad type"); break;
     }
-    s =con_pat(*((*tuf->name)[1]),new Opt(span), null); 
+    s = con_pat(*((*tuf->name)[1]),span, null); 
     break;
     
-  case &Tunion_p(_,_,ps,_,_):  fallthru(ps);
-  case &XTunion_p(_,_,ps,_,_): fallthru(ps);
+  case &Tunion_p(_,_,_,ps): fallthru(ps); // ps != null
   case &Tuple_p(ps): s = tuple_pat(List::map(compile_pat,ps)); break;
 
   case &Struct_p(sd,_,_,dlps):
@@ -674,7 +594,7 @@ static simple_pat_t compile_pat(pat_t p) {
     s = tuple_pat(ps);
     break;
     
-  case &Enum_p(q,ed,ef):
+  case &Enum_p(ed,ef):
     // FIX: two different enum constructors can have the same value so we
     // might not get a duplicate warning when we should.
     int span = List::length(ed->fields);
@@ -906,13 +826,12 @@ match(simple_pat_t p, access_t obj, term_desc_t dsc,
 // implies the patterns are not exhaustive.  Note also that if
 // any rhs for a match does not show up in the decision tree, then
 // the associated pattern was redundant.
-static 
-void check_exhaust_overlap(decision_t<`rhs> d,
-                           void not_exhaust(`a),      `a env1,
-                           void rhs_appears(`b,`rhs), `b env2) {
+static void check_exhaust_overlap(decision_t<`rhs> d,
+				  void not_exhaust(`a),      `a env1,
+				  void rhs_appears(`b,`rhs), `b env2) {
   switch (d) {
-  case Tcpat::Failure:  not_exhaust(env1);   break;
-  case &Success(r):     rhs_appears(env2,r); break;
+  case Tcpat::Failure: not_exhaust(env1);   break;
+  case &Success(r):    rhs_appears(env2,r); break;
   case &IfEq(_,_,left,right):
     check_exhaust_overlap(left,  not_exhaust, env1, rhs_appears, env2);
     check_exhaust_overlap(right, not_exhaust, env1, rhs_appears, env2);
@@ -981,7 +900,7 @@ bool check_let_pat_exhaustive(seg_t loc,pat_t p) {
 // There's an implicit "re-throw on wild" pattern here, so no need
 // to check for exhaustiveness.
 static $(simple_pat_t, $(bool,seg_t)@)@ get_match2(switch_clause_t swc) {
-  simple_pat_t sp0 = compile_pat(swc->pattern);
+  simple_pat_t   sp0 = compile_pat(swc->pattern);
   $(bool,seg_t)@ rhs = new $(false,swc->pattern->loc);
   return new $(sp0, rhs);
 }

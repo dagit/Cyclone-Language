@@ -32,7 +32,7 @@ static int most_frequent_elt(int ?v) {
     Ref::ref_t<int> r;
     try r = Hashtable::lookup(frequencies, e);
     catch {
-    case &Not_found: 
+    case Not_found: 
       r = Ref::new_ref(0); 
       Hashtable::insert(frequencies, e, r);
       break;

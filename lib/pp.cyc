@@ -122,7 +122,7 @@ string nlblanks(int i) {  // a newline followed by i blanks
   try
     return *(Hashtable::lookup(bhashtbl->v,i));
   catch {
-  case &Not_found:
+  case Not_found:
     let num_tabs   = i / 8;
     let num_spaces = i % 8;
     let total = 1 + num_tabs + num_spaces;
@@ -169,7 +169,7 @@ doc_t text(string s) {
   try
     return Hashtable::lookup(t,new {s});
   catch {
-  case &Not_found:
+  case Not_found:
     doc_t d = text_doc(s);
     Hashtable::insert(t,new {s},d);
     return d;

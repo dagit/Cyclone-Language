@@ -9,7 +9,7 @@
 struct _tagged_string { char *curr; char *base; char *last_plus_one; };
 extern struct _tagged_string xprintf(char *fmt, ...);
 
-///////////////////// Exceptions
+///////////////////// Discriminated Unions
 struct _tunion_struct { int tag; };
 struct _xtunion_struct { char *tag; };
 typedef struct _xtunion_struct *exn;
@@ -29,7 +29,7 @@ struct _handler_cons {
 extern void _push_handler(struct _handler_cons *);
 extern void _npop_handler(int);
 extern void _pop_handler();
-extern void _throw(exn e);
+extern void _throw(void * e);
 
 // Allocation
 extern void *GC_malloc(int);

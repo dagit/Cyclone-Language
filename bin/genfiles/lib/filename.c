@@ -20,14 +20,13 @@ typedef struct Cyc__types_fd_set Cyc__types_fd_set; typedef char* Cyc_Cstring;
 typedef struct _tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t;
 typedef struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void*
 exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef
-struct Cyc_Core_Opt* Cyc_Core_opt_t; extern char Cyc_Core_InvalidArg_tag[ 11u];
+struct Cyc_Core_Opt* Cyc_Core_opt_t; extern char Cyc_Core_InvalidArg[ 15u];
 struct Cyc_Core_InvalidArg_struct{ char* tag; struct _tagged_string f1; } ;
-extern char Cyc_Core_Failure_tag[ 8u]; struct Cyc_Core_Failure_struct{ char* tag;
-struct _tagged_string f1; } ; extern char Cyc_Core_Impossible_tag[ 11u]; struct
-Cyc_Core_Impossible_struct{ char* tag; struct _tagged_string f1; } ; extern char
-Cyc_Core_Not_found_tag[ 10u]; struct Cyc_Core_Not_found_struct{ char* tag; } ;
-extern char Cyc_Core_Unreachable_tag[ 12u]; struct Cyc_Core_Unreachable_struct{
-char* tag; struct _tagged_string f1; } ; extern char* string_to_Cstring( struct
+extern char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{ char* tag;
+struct _tagged_string f1; } ; extern char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
+char* tag; struct _tagged_string f1; } ; extern char Cyc_Core_Not_found[ 14u];
+extern char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{ char*
+tag; struct _tagged_string f1; } ; extern char* string_to_Cstring( struct
 _tagged_string); extern char* underlying_Cstring( struct _tagged_string); extern
 struct _tagged_string Cstring_to_string( char*); extern int system( char*);
 extern struct _tagged_string Cyc_Filename_concat( struct _tagged_string, struct
@@ -38,18 +37,15 @@ struct _tagged_string); extern int Cyc_Filename_check_suffix( struct
 _tagged_string, struct _tagged_string); extern struct _tagged_string Cyc_Filename_gnuify(
 struct _tagged_string); struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl;
 } ; typedef struct Cyc_List_List* Cyc_List_glist_t; typedef struct Cyc_List_List*
-Cyc_List_list_t; typedef struct Cyc_List_List* Cyc_List_List_t; extern char Cyc_List_List_empty_tag[
-11u]; struct Cyc_List_List_empty_struct{ char* tag; } ; extern char Cyc_List_List_mismatch_tag[
-14u]; struct Cyc_List_List_mismatch_struct{ char* tag; } ; extern char Cyc_List_Nth_tag[
-4u]; struct Cyc_List_Nth_struct{ char* tag; } ; struct Cyc_Stdio___sFILE;
-typedef struct Cyc_Stdio___sFILE Cyc_Stdio_FILE; typedef int Cyc_Stdio_fpos_t;
-extern char Cyc_Stdio_FileOpenError_tag[ 14u]; struct Cyc_Stdio_FileOpenError_struct{
-char* tag; struct _tagged_string f1; } ; extern char Cyc_Stdio_FileCloseError_tag[
-15u]; struct Cyc_Stdio_FileCloseError_struct{ char* tag; } ; extern struct
-_tagged_string Cyc_String_strconcat_l( struct Cyc_List_List*); extern struct
-_tagged_string Cyc_String_substring( struct _tagged_string, int ofs,
-unsigned int n); struct _tagged_string Cyc_Filename_concat( struct
-_tagged_string s1, struct _tagged_string s2){ return Cyc_String_strconcat_l(({
+Cyc_List_list_t; typedef struct Cyc_List_List* Cyc_List_List_t; extern char Cyc_List_List_empty[
+15u]; extern char Cyc_List_List_mismatch[ 18u]; extern char Cyc_List_Nth[ 8u];
+struct Cyc_Stdio___sFILE; typedef struct Cyc_Stdio___sFILE Cyc_Stdio_FILE;
+typedef int Cyc_Stdio_fpos_t; extern char Cyc_Stdio_FileOpenError[ 18u]; struct
+Cyc_Stdio_FileOpenError_struct{ char* tag; struct _tagged_string f1; } ; extern
+char Cyc_Stdio_FileCloseError[ 19u]; extern struct _tagged_string Cyc_String_strconcat_l(
+struct Cyc_List_List*); extern struct _tagged_string Cyc_String_substring(
+struct _tagged_string, int ofs, unsigned int n); struct _tagged_string Cyc_Filename_concat(
+struct _tagged_string s1, struct _tagged_string s2){ return Cyc_String_strconcat_l(({
 struct Cyc_List_List* _temp0=( struct Cyc_List_List*) GC_malloc( sizeof( struct
 Cyc_List_List)); _temp0->hd=( void*)({ struct _tagged_string* _temp7=( struct
 _tagged_string*) GC_malloc( sizeof( struct _tagged_string)); _temp7[ 0]= s1;
@@ -68,31 +64,31 @@ filename;( unsigned int)( _temp15.last_plus_one - _temp15.curr);}) - 1); while(
 i >= 0?({ struct _tagged_string _temp8= filename; char* _temp10= _temp8.curr + i;
 if( _temp8.base == 0? 1:( _temp10 < _temp8.base? 1: _temp10 >= _temp8.last_plus_one)){
 _throw( Null_Exception);}* _temp10;}) !='.': 0) { -- i;} if( i < 0){( void)
-_throw(( struct _xtunion_struct*)({ struct Cyc_Core_InvalidArg_struct* _temp11=(
-struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
-_temp11[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp12; _temp12.tag= Cyc_Core_InvalidArg_tag;
-_temp12.f1=( struct _tagged_string)({ char* _temp13=( char*)"chop_extension";
-struct _tagged_string _temp14; _temp14.curr= _temp13; _temp14.base= _temp13;
-_temp14.last_plus_one= _temp13 + 15; _temp14;}); _temp12;}); _temp11;}));}
-return Cyc_String_substring( filename, 0,( unsigned int) i);} struct
-_tagged_string Cyc_Filename_dirname( struct _tagged_string filename){ int i=(
-int)(({ struct _tagged_string _temp21= filename;( unsigned int)( _temp21.last_plus_one
-- _temp21.curr);}) - 1); while( i >= 0?({ struct _tagged_string _temp16=
-filename; char* _temp18= _temp16.curr + i; if( _temp16.base == 0? 1:( _temp18 <
-_temp16.base? 1: _temp18 >= _temp16.last_plus_one)){ _throw( Null_Exception);}*
-_temp18;}) !='/': 0) { -- i;} if( i < 0){ return( struct _tagged_string)({ char*
-_temp19=( char*)""; struct _tagged_string _temp20; _temp20.curr= _temp19;
-_temp20.base= _temp19; _temp20.last_plus_one= _temp19 + 1; _temp20;});} return
-Cyc_String_substring( filename, 0,( unsigned int) i);} struct _tagged_string Cyc_Filename_basename(
-struct _tagged_string filename){ int i=( int)(({ struct _tagged_string _temp26=
-filename;( unsigned int)( _temp26.last_plus_one - _temp26.curr);}) - 1); while(
-i >= 0?({ struct _tagged_string _temp22= filename; char* _temp24= _temp22.curr +
-i; if( _temp22.base == 0? 1:( _temp24 < _temp22.base? 1: _temp24 >= _temp22.last_plus_one)){
-_throw( Null_Exception);}* _temp24;}) !='/': 0) { -- i;} return Cyc_String_substring(
-filename, i + 1,({ struct _tagged_string _temp25= filename;( unsigned int)(
-_temp25.last_plus_one - _temp25.curr);}) -( i + 1));} int Cyc_Filename_check_suffix(
-struct _tagged_string filename, struct _tagged_string suffix){ int i=( int)(({
-struct _tagged_string _temp34= filename;( unsigned int)( _temp34.last_plus_one -
+_throw(( void*)({ struct Cyc_Core_InvalidArg_struct* _temp11=( struct Cyc_Core_InvalidArg_struct*)
+GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp11[ 0]=({ struct
+Cyc_Core_InvalidArg_struct _temp12; _temp12.tag= Cyc_Core_InvalidArg; _temp12.f1=(
+struct _tagged_string)({ char* _temp13=( char*)"chop_extension"; struct
+_tagged_string _temp14; _temp14.curr= _temp13; _temp14.base= _temp13; _temp14.last_plus_one=
+_temp13 + 15; _temp14;}); _temp12;}); _temp11;}));} return Cyc_String_substring(
+filename, 0,( unsigned int) i);} struct _tagged_string Cyc_Filename_dirname(
+struct _tagged_string filename){ int i=( int)(({ struct _tagged_string _temp21=
+filename;( unsigned int)( _temp21.last_plus_one - _temp21.curr);}) - 1); while(
+i >= 0?({ struct _tagged_string _temp16= filename; char* _temp18= _temp16.curr +
+i; if( _temp16.base == 0? 1:( _temp18 < _temp16.base? 1: _temp18 >= _temp16.last_plus_one)){
+_throw( Null_Exception);}* _temp18;}) !='/': 0) { -- i;} if( i < 0){ return(
+struct _tagged_string)({ char* _temp19=( char*)""; struct _tagged_string _temp20;
+_temp20.curr= _temp19; _temp20.base= _temp19; _temp20.last_plus_one= _temp19 + 1;
+_temp20;});} return Cyc_String_substring( filename, 0,( unsigned int) i);}
+struct _tagged_string Cyc_Filename_basename( struct _tagged_string filename){
+int i=( int)(({ struct _tagged_string _temp26= filename;( unsigned int)( _temp26.last_plus_one
+- _temp26.curr);}) - 1); while( i >= 0?({ struct _tagged_string _temp22=
+filename; char* _temp24= _temp22.curr + i; if( _temp22.base == 0? 1:( _temp24 <
+_temp22.base? 1: _temp24 >= _temp22.last_plus_one)){ _throw( Null_Exception);}*
+_temp24;}) !='/': 0) { -- i;} return Cyc_String_substring( filename, i + 1,({
+struct _tagged_string _temp25= filename;( unsigned int)( _temp25.last_plus_one -
+_temp25.curr);}) -( i + 1));} int Cyc_Filename_check_suffix( struct
+_tagged_string filename, struct _tagged_string suffix){ int i=( int)(({ struct
+_tagged_string _temp34= filename;( unsigned int)( _temp34.last_plus_one -
 _temp34.curr);}) - 1); int j=( int)(({ struct _tagged_string _temp33= suffix;(
 unsigned int)( _temp33.last_plus_one - _temp33.curr);}) - 1); while( i >= 0? j
 >= 0: 0) { if(({ struct _tagged_string _temp27= filename; char* _temp29= _temp27.curr

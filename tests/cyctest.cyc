@@ -138,7 +138,7 @@ void break_in_try_test() {
         break;
       }
     }
-    throw new List::List_mismatch;
+    throw List::List_mismatch;
   }
   catch {
   default:
@@ -158,7 +158,7 @@ void continue_in_try_test() {
         break;
       }
     }
-    throw new List::List_mismatch;
+    throw List::List_mismatch;
   }
   catch {
   default:
@@ -214,7 +214,7 @@ void list_test() {
                        List::map2(my_add,xx,List::rev(xx))));
   }
   catch {
-  case &List_mismatch:
+  case List_mismatch:
     fail();
     break;
   }
@@ -223,7 +223,7 @@ void list_test() {
     fail();
   }
   catch {
-  case &List_mismatch:
+  case List_mismatch:
     ok();
     break;
   }
@@ -1023,10 +1023,10 @@ int main(int argc, string ? args) {
   try {
     printf("Testing return in try: ");
     return_from_try_test();
-    throw new List_mismatch;
+    throw List_mismatch;
   }
   catch {
-  case &List_mismatch:
+  case List_mismatch:
     printf("return in try found\n");
     break;
   }

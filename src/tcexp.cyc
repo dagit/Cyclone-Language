@@ -44,14 +44,13 @@ static void resolve_unknown_id(tenv_t te, exp_t e, qvar_t q) {
   try switch (lookup_ordinary(te,e->loc,q)) {
   case &VarRes(b):          e->r = new Var_e(q,b); break;
   case &EnumRes(ed,ef):     e->r = new Enum_e(q,ed,ef); break;
-  case &TunionRes(ed,ef):   e->r = new Tunion_e(null,null,null,ed,ef); break;
-  case &XTunionRes(xed,ef): e->r = new XTunion_e(null,null,xed,ef);    break;
+  case &TunionRes(tud,tuf): e->r = new Tunion_e(null,null,null,tud,tuf); break;
   case &StructRes(_):
     terr(e->loc,xprintf("bad occurrence of struct name %s",qvar2string(q)));
     e->r = new Var_e(q,Unresolved_b);
     break;
   } catch { 
-  case &Dict::Absent:
+  case Dict::Absent:
     // This is an error, but the message will be printed elsewhere.
     // Here we just put the "I don't know" answer in e->r
     e->r = new Var_e(q,Unresolved_b);
@@ -73,19 +72,13 @@ static void resolve_unknown_fn(tenv_t te, exp_t e, exp_t e1, list_t<exp_t> es) {
       case &VarRes(b):        
 	e->r = new FnCall_e(e1,es); 
 	return;
-      case &TunionRes(ed,ef):
-        if (ef->typs == null)
+      case &TunionRes(tud,tuf):
+        if (tuf->typs == null)
           // Don't allow "foo()", require "foo"
           terr(e->loc,xprintf("%s is a constant, not a function",
-                              qvar2string(ef->name)));
-        e->r = new Tunion_e(null,null,es,ed,ef); 
+                              qvar2string(tuf->name)));
+        e->r = new Tunion_e(null,null,es,tud,tuf); 
 	return;
-      case &XTunionRes(xed,ef):
-        if (ef->typs == null)
-          // Don't allow "foo()", require "foo"
-          terr(e->loc,xprintf("%s is a constant, not a function",
-                              qvar2string(ef->name)));
-        e->r = new XTunion_e(null,es,xed,ef);    
 	return;
       case &StructRes(sd):
 	let des = List::map(make_struct_arg,es);
@@ -102,7 +95,7 @@ static void resolve_unknown_fn(tenv_t te, exp_t e, exp_t e1, list_t<exp_t> es) {
         return;
       }
     } catch {
-    case &Dict::Absent:
+    case Dict::Absent:
       terr(e1->loc, xprintf("unbound identifier %s",qvar2string(q)));
       e->r = new FnCall_e(e1,es);
       return;
@@ -531,7 +524,7 @@ static void check_writable(tenv_t te, exp_t e) {
       try {
         let &$(tq,_) = List::nth(ts,i);
         if (!tq.q_const) return;
-      } catch { case &Nth: return;
+      } catch { case Nth: return;
       }
       break;
     default: break;
@@ -695,7 +688,7 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t>
   }
 }
 
-// throw e
+// throw e1
 static type_t tcThrow(tenv_t te, seg_t loc, type_t *`r topt, exp_t e) {
   tcExp(te,&exn_typ,e); 
   if (!coerce_use(te,e,exn_typ))
@@ -916,7 +909,7 @@ static type_t ithTupleType(tenv_t te,seg_t loc,list_t<$(tqual_t,type_t)@> ts,exp
   unsigned int i = Evexp::eval_const_uint_exp(index);
   try
     return (*List::nth(ts,i))[1];
-  catch { case &Nth:
+  catch { case Nth:
     return expr_err(te,loc,xprintf("index is %d but tuple has only %d fields",
 				   i, List::length(ts)));
   }
@@ -1105,7 +1098,7 @@ static type_t tcStruct(tenv_t te, seg_t loc, type_t *`r topt,
     try
       sd = *lookup_structdecl(te,loc,*tn);
     catch { 
-    case &Dict::Absent:
+    case Dict::Absent:
       terr(loc, xprintf("unbound struct name %s",qvar2string(*tn)));
       return topt != null ? *topt : VoidType;
     }
@@ -1145,31 +1138,32 @@ static type_t tcTunion(tenv_t te, seg_t loc, type_t *`r topt,
                     opt_t<list_t<type_t>> @all_ref,
                     opt_t<list_t<type_t>> @exist_ref,
                     list_t<exp_t> es,
-                    tuniondecl_t ed,
-                    tunionfield_t ef) {
+                    tuniondecl_t tud,
+                    tunionfield_t tuf) {
   region rgn {
-  let all_inst   = List::rmap_c(rgn,r_make_inst_var,rgn,ed->tvs);
-  let exist_inst = List::rmap_c(rgn,r_make_inst_var,rgn,ef->tvs);
+  let all_inst   = List::rmap_c(rgn,r_make_inst_var,rgn,tud->tvs);
+  let exist_inst = List::rmap_c(rgn,r_make_inst_var,rgn,tuf->tvs);
   let all_typs   = List::map(snd,all_inst);
   let exist_typs = List::map(snd,exist_inst);
   let inst       = List::rappend(rgn,all_inst,exist_inst);
   *all_ref   = new Opt(all_typs);
   *exist_ref = new Opt(exist_typs);
-  type_t res = new TunionFieldType(TunionFieldInfo{ed->name->v,all_typs,ef->name,
-                                                ed,ef});
+  type_t res = 
+    new TunionFieldType(TunionFieldInfo{new KnownTunionfield(tud,tuf),
+					all_typs});
   // this instantiates the type variables if we have top-down type info
   if (topt != null) {
     switch (compress(*topt)) {
     case &TunionFieldType(_): unify(*topt,res); break;
-    case &TunionType(TunionInfo{_,targs,_,_}):
+    case &TunionType(TunionInfo{_,targs,r}):
       for (_ a = all_typs; a != null && targs != null; a=a->tl,targs=targs->tl)
         unify(a->hd,targs->hd);
       // top-down, we're looking for a Tunion, not a Tunion field.
       // we can cast up here if there are no arguments to the constructor.
-      if (ef->typs == null && es == null) {
+      if (tuf->typs == null && es == null) {
         e->topt = new Opt(res);
-        res = new TunionType(TunionInfo{ed->name->v,all_typs,
-                                        new_evar(RgnKind), ed});
+        res = new TunionType(TunionInfo{new KnownTunion(tud),
+					all_typs,r});
         unchecked_cast(te, e, res);
         return res;
       }
@@ -1177,64 +1171,31 @@ static type_t tcTunion(tenv_t te, seg_t loc, type_t *`r topt,
     default: break;
     }
   }
-  list_t<$(tqual_t,type_t)@> ts = ef->typs;
+  list_t<$(tqual_t,type_t)@> ts = tuf->typs;
   for(; es != null && ts != null; es = es->tl, ts = ts->tl) {
-    exp_t e = es->hd;
+    exp_t  e = es->hd;
     type_t t = rsubstitute(rgn,inst,(*ts->hd)[1]);
     tcExpInitializer(te, &t, e);
     if (!coerce_arg(te,e,t))
       terr(e->loc,
            xprintf("tunion constructor %s expects argument of type %s "
                    "but this argument has type %s",
-                   qvar2string(ef->name),typ2string(t),
+                   qvar2string(tuf->name),typ2string(t),
                    (e->topt == null) ? (string)"?" : typ2string(e->topt->v)));
   }
   if (es != null)
     return expr_err(te,es->hd->loc,
                     xprintf("too many arguments for tunion constructor %s",
-                            qvar2string(ef->name)));
+                            qvar2string(tuf->name)));
   if (ts != null)
     return expr_err(te,
                     loc,
                     xprintf("too few arguments for tunion constructor %s",
-                            qvar2string(ef->name)));
+                            qvar2string(tuf->name)));
   return res;
   }
 }
 
-// f(es)   where f is an xtunion and is ef->name
-static type_t tcXTunion(tenv_t te, seg_t loc, type_t *`r topt,
-			opt_t<list_t<type_t>> @exist_ref,
-			list_t<exp_t> es,
-			xtuniondecl_t xd,
-			tunionfield_t ef) {
-  region rgn {
-  let exist_inst = List::rmap_c(rgn,r_make_inst_var,rgn,ef->tvs);
-  let exist_typs = List::map(snd,exist_inst);
-  let res = new XTunionFieldType(XTunionFieldInfo{xd->name,ef->name,xd,ef});
-  let ts = ef->typs;
-  *exist_ref = new Opt(exist_typs);
-  while (es != null && ts != null) {
-    exp_t  e = es->hd;
-    type_t t = rsubstitute(rgn,exist_inst,(*ts->hd)[1]);
-    tcExpInitializer(te, &t, e);
-    es = es->tl;
-    ts = ts->tl;
-    if (!coerce_arg(te,e,t))
-      terr(e->loc,xprintf("xtunion constructor %s expects argument of type %s "
-                          "but this argument has type %s",
-                          qvar2string(ef->name),
-                          typ2string(t),typ2string(e->topt->v)));
-  }
-  if (es != null)
-    terr(es->hd->loc,xprintf("too many arguments for xtunion constructor %s",
-                             qvar2string(ef->name)));
-  else if (ts != null)
-    terr(es->hd->loc,xprintf("too few arguments for xtunion constructor %s",
-                             qvar2string(ef->name)));
-  return res;
-  }
-}
 static type_t tcMalloc(tenv_t te, seg_t loc, type_t *`r topt, exp_opt_t ropt, 
                        type_t t) {
   type_t rgn = HeapRgn;
@@ -1255,11 +1216,10 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t *`r topt, exp_opt_t ropt,
   }
   check_type(loc,te,lookup_type_vars(te),MemKind,t);
   // Don't yet support existential types (to do it, add to TunionFieldInfo
-  // and XTunionFieldInfo and here generate fresh evars).
+  // and here generate fresh evars).
   switch(t) {
-  case &TunionFieldType(TunionFieldInfo(_,_,_,_,tufd)): fallthru(tufd);
-  case &XTunionFieldType(XTunionFieldInfo(_,_,_,tufd)):
-    if(tufd->tvs != null)
+  case &TunionFieldType(TunionFieldInfo(&KnownTunionfield(_,tuf),_)):
+    if(tuf->tvs != null)
       terr(loc,"malloc with existential types not yet implemented");
     break;
   default: break;
@@ -1600,10 +1560,8 @@ static void tcExpNoInst(tenv_t te, type_t *`r topt, exp_t e) {
     t = tcComprehension(te,loc,topt,vd,e1,e2); break;
   case &Struct_e(*tn,*otyps,args,*sd_opt):
     t = tcStruct(te,loc,topt,tn,otyps,args,sd_opt); break;
-  case &Tunion_e(*all_ref,*exist_ref,es,ed,ef):
-    t = tcTunion(te,loc,topt,e,all_ref,exist_ref,es,ed,ef); break;
-  case &XTunion_e(*exist_ref,es,xd,ef):
-    t = tcXTunion(te,loc,topt,exist_ref,es,xd,ef); break;
+  case &Tunion_e(*all_ref,*exist_ref,es,tud,tuf):
+    t = tcTunion(te,loc,topt,e,all_ref,exist_ref,es,tud,tuf); break;
   case &Enum_e(q,ed,ef):
     t = new EnumType(ed->name,ed); break;
   case &Malloc_e(ropt,t2):

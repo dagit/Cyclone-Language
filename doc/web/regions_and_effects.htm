@@ -46,7 +46,7 @@ memory-management idiom.&nbsp; Cyclone has three flavors of regions:</p>
     statement.&nbsp; (Typically s is a compound statement, so it looks like <font face="Courier New">region
     r { ... }</font>.)&nbsp; A <i>handle</i> for the growable region is bound to
     r.&nbsp; The lifetime of r and the lifetime of the region for which it is a
-    handle is the execution of s.&nbsp; Inside of s, we can add objects to the region, as explained below.</li>
+    handle is the execution of s.&nbsp; In s, we can add objects to the region, as explained below.</li>
 </ul>
 <p>A non-heap object lives until its region is deallocated.&nbsp; There is no
 way to free an object earlier.&nbsp; Heap objects may be garbage-collected once
@@ -54,7 +54,7 @@ they are unreachable (cannot be reached by traversing pointers) from the
 program's variables.&nbsp; Objects in live non-heap regions always appear
 reachable to the garbage collector (so everything reachable from them
 appears reachable as well).</p>
-<p>Cyclone allows dangling pointers; it prohibits <i>following</i> dangling
+<p>Cyclone prohibits <i>following</i> dangling
 pointers.&nbsp; This restriction is part of the type system: It is a
 compile-time error if a dangling pointer (a pointer into a deallocated region)
 might be followed.&nbsp; There are no run-time checks of the form, &quot;is this
@@ -84,7 +84,7 @@ pointers into other regions.</p>
     is first evaluated with i==0 and the result is put at index 0 of the array,
     then e2 is evaluated with i==1 and the result is put at index 1 of the
     array, and so on.&nbsp; </p>
-    <p><b>Note: Currently, this construct is the only way to create an object
+    <p><b>Note: Currently, this construct (and the growable-region version) is the only way to create an object
     whose size depends on run-time information.</b></p>
     <p>For example, this function returns an array containing the first n
     positive even numbers:</p>
@@ -101,21 +101,20 @@ pointers into other regions.</p>
     sizeof are keywords and t is a type.&nbsp; Notice that malloc in Cyclone is
     much more restricted than in C (where it is a library function consuming an
     int and returning a char *).&nbsp; In Cyclone, the argument currently must
-    have the form sizeof(t), i.e. you cannot say 8, even if 8 is the size of
-    some type t.&nbsp; That is why malloc cannot be used to create an array
+    have the form sizeof(t), i.e. you cannot say 8, even if 8 is the size of t.&nbsp; That is why malloc cannot be used to create an array
     whose length depends on run-time information.&nbsp; On the plus side, the
     type of malloc(sizeof(t)) is t @ (which is a subtype of t*), so there is no
-    need to cast the result of malloc.&nbsp; </li>
+    need to cast the result.&nbsp; </li>
 </ul>
 <p>For a growable region, there are three constructs analogous for those that
 implicitly use the heap: <b>rnew(r) e, rnew(r) {...}, and rmalloc(r,sizeof(t))</b>
 all allocate into the region for which r is a handle, where rnew and rmalloc are
-keywords.&nbsp; Note that core.h in the Cyclone library has a global variable
-heap_region which contains a handle for the heap region.&nbsp; As such, you can
+keywords.&nbsp; The Cyclone library has a global variable Core::heap_region which contains a handle for the heap region.&nbsp; As such, you can
 view new e as syntactic sugar for rnew(heap_region,e), and similarly for the
 other constructs.</p>
 <p>The only way to allocate an object into a stack region is via a local
-declaration.&nbsp; Cyclone does not currently support salloc.</p>
+declaration.&nbsp; Cyclone does not currently support salloc; use a growable
+region instead.</p>
 <h3><b><a name="common"></a>Common Uses</b></h3>
 <p>Although the type system associated with regions is complicated, there are a
 small number of common uses, and you can use them without understanding the general framework.&nbsp; We present these cases separately for two
@@ -237,10 +236,10 @@ run-time.&nbsp; The compiler ensures that only pointers into live regions are
 dereferenced via the following general strategy:</p>
 <ul>
   <li>Use compile-time <i>region-names</i>.&nbsp; Syntactically these are just
-    type variables, but they used differently.</li>
+    type variables, but they are used differently.</li>
   <li>Decorate each pointer type and handle type with one region-name.</li>
   <li>Decorate each program point with a (finite) set of region-names.&nbsp; We
-    call the set a program point's <i>capability</i>.</li>
+    call the set the point's <i>capability</i>.</li>
   <li>To dereference a pointer (via <font face="Courier New">*</font>, <font face="Courier New">-&gt;</font>,
     or subscript), the pointer's type's region-name must be in the program
     point's capability.&nbsp; Similarly, to use a handle for allocation, the
@@ -253,7 +252,7 @@ dereferenced via the following general strategy:</p>
 <p>The above strategy is probably too vague to make sense at this point, but it
 may help to refer back to it as we explain specific aspects of the type system.</p>
 <p>Note that in the rest of the documentation (and in common parlance) we abuse
-the word &quot;region&quot; to refer both to region-names and to the run-time
+the word &quot;region&quot; to refer both to region-names and to run-time
 collections of objects.&nbsp; Similarly, we confuse a block of declarations, its
 region-name, and the run-time space allocated for the block.&nbsp; (With loops
 and recursive functions, &quot;the space allocated&quot; for the block is really
@@ -274,7 +273,7 @@ that creates a region, as follows:</p>
 program points within a function should be distinct from each other, distinct
 from any region-names appearing in the function's prototype, and should not be
 `H.&nbsp; (So you cannot use H as a label name.)&nbsp; <i>Because the function's
-return type cannot mention a region-name for for a block or region-construct in
+return type cannot mention a region-name for a block or region-construct in
 the function, it is impossible to return a pointer to deallocated storage.</i></p>
 <p>In region r &lt;`r&gt; s and region r s, the type of r is region_t&lt;`r&gt;.&nbsp;
 In other words, the handle is decorated with the region-name for the
@@ -314,10 +313,10 @@ no &quot;subregioning&quot;, so you cannot assign between types with different
 region-names.&nbsp; For handlers, if `r is a region-name, there is at most one
 value of type region_t&lt;`r&gt; (there are 0 if `r is a block's name), so there
 is little use in creating variables of type region_t&lt;`r&gt;.</p>
-<p>Type Declarations</p>
+<p><b>Type Declarations</b></p>
 <p>A struct, typedef, tunion, or xtunion declaration may be parameterized by any
 number of region-names.&nbsp; The region names are placed in the list of type
-parameters and must be followed by &quot;::R&quot;, except for typedef
+parameters.&nbsp; They must be followed by &quot;::R&quot;, except for typedef
 declarations (where the region-name appears in the underlying type).&nbsp; As
 with other type parameters, these must be instantiated when the type constructor
 is used.&nbsp; For example, given</p>
@@ -329,27 +328,124 @@ the same region (the type of the tl field uses the same region-name `r that is
 used to instantiate the recursive instance of struct List&lt;`a,`r&gt;.&nbsp;
 However, we could instantiate `a with a pointer type that has a different
 region-name.</p>
+<p>Currently, you cannot use type inference to instantiate region-names.&nbsp;
+For example, if lst has type struct List&lt;int,`H&gt;, you can write any of the
+following:</p>
+<p style="line-height: 0"><font face="Courier New">struct List&lt;int,`H&gt;
+lst2 = lst;</font></p>
+<p style="line-height: 0"><font face="Courier New">struct List&lt;_,`H&gt; lst2
+= lst;</font></p>
+<p style="line-height: 0"><font face="Courier New">_ lst2 = lst;</font></p>
+<p>but you cannot write either of</p>
+<p style="line-height: 0"><font face="Courier New">struct List&lt;int,_&gt; lst2
+= lst;</font></p>
+<p style="line-height: 0"><font face="Courier New">struct List&lt;_,_&gt; lst2 =
+list;</font></p>
 <p>tunion and xtunion declarations must also be instantiated with an additional
 region-name.&nbsp; If an object of type tunion `r Foo turns out to be a
 value-carrying variant, then the object is treated (capability-wise) as a
 pointer with region-name `r.&nbsp; If the region-name is omitted from a use of a
 tunion declaration, it is implicitly `H.</p>
 <p><b>Function Calls</b></p>
-<p>We can now explain why function parameters that can be pointers into non-heap
-regions should be given region-names and why these region names are part of the
-(default) capability.</p>
-<p>DO ME!</p>
+<p>If a function parameter or result has type int *`r or region_t&lt;`r&gt;, the
+function is polymorphic over the region-name `r.&nbsp; That is, the caller can
+instantiate `r with any region <i>in the caller's current capability</i>. This
+instantiation is usually implicit, so the caller just calls the function and the
+compiler uses the types of the actual arguments to infer the instantiation of
+the region-names (just like it infers the instantiation of type variables).</p>
+<p>The callee is checked knowing nothing about `r except that it is in its
+capability.&nbsp; For example, it will be impossible to assign a parameter of
+type int*`r to a global variable.&nbsp; Why? Because the global would have to
+have a type that allowed it to point into any region.&nbsp; There is no such
+type because we could never safely follow such a pointer (since it could point
+into a deallocated region).</p>
 <p><b>Explicit and Default Effects</b></p>
 <p>If you are not using function pointers, you now know everything you need to
 know about Cyclone regions and memory management.&nbsp; If you are using
-function pointers and the parameters of these functions point into the heap,
-then just follow the recipe in the previous section for&nbsp; </p>
-<p>ALSO MENTION THAT IF YOU ONLY DECLARE FUNCTION POINTERS AS PARAMS, THEN NO
-PROBLEM.</p>
-<p>WE'VE BEEN LYING! DO ME!</p>
-<p>We can now see why the types of struct member function pointers look so
-strange.</p>
-<p>&nbsp;</p>
+function pointers, you still should not have a problem provided you follow this
+draconian measure: </p>
+<blockquote>
+  <p><i>Do not write down function types except in function prototypes (i.e. as
+  parameter or return types).&nbsp; In particular do not write down function
+  types for struct members, typedef definitions, or local variables.&nbsp; For
+  local variables, you can use type inference (i.e. write _ instead of the
+  function type).</i></p>
+</blockquote>
+<p>In practice, this restriction is often palatable.&nbsp; The common use of
+function pointers is as parameters, and it usually suffices for the caller to
+use just a function name as the argument.</p>
+<p>If you must write down a function type, then you have to understand that we
+have been lying about the form of function types and prototypes.&nbsp; A
+function type actual has an explicit effect, written at the end of the parameter
+list, following a semi-colon.&nbsp; For example, int f(int,int *`r); is really
+shorthand for:</p>
+<p><font face="Courier New">int f(int,int; `e+{`r});</font></p>
+An effect is part of a function's type; it has nothing to do with run-time
+values.&nbsp; In particular, the + above has nothing to do with addition.
+<p>An effect contains region-names and <i>effect-names</i>.&nbsp; Capabilities
+really include effect-names and region-names.&nbsp; A program point's capability
+includes its function's type's effect and the region-names for the enclosing
+blocks and region constructs.&nbsp; Effect-names are discussed more below.</p>
+<p>The full syntax for effects is:</p>
+<ul>
+  <li>{}, for the empty capability</li>
+  <li>{`r1,...,`rn} for the capability of region-names `r1,...`rn</li>
+  <li>`e for the capability of effect-name `e</li>
+  <li>E1 + E2 for the <i>union</i> of the effects of E1 and E2.&nbsp; The union
+    contains all the region-names and effect-names of E1 and E2.</li>
+</ul>
+<p><b>Default Effects</b></p>
+<p>When you do not put an explicit effect on a function type, the compiler puts
+one in for you as follows: It is `e+`e1+...+`em+{`r1,...,`rn} where `e is fresh,
+`r1,...,`rn are the region-names appearing in the parameter and return types,
+and `e1,...,`em are the effect-names appearing the parameter and return
+types.&nbsp; The `e1,...,`em include effect-names added for you.&nbsp; For
+example,</p>
+<p style="line-height: 0"><font face="Courier New">int f(void g(), </font></p>
+<p style="line-height: 0"><font face="Courier New">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</font><font face="Courier New">int *`r x, </font></p>
+<p style="line-height: 0"><font face="Courier New">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</font><font face="Courier New">void h(region_t&lt;`r&gt; rgn));</font></p>
+<p>is shorthand for:</p>
+<p style="line-height: 0"><font face="Courier New">int f(void g(;`e1), </font></p>
+<p style="line-height: 0"><font face="Courier New">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</font><font face="Courier New">int *`r x, </font></p>
+<p style="line-height: 0"><font face="Courier New">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</font><font face="Courier New">void h(region_t&lt;`r&gt; rgn; `e2+{`r})</font></p>
+<p style="line-height: 0"><font face="Courier New">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</font><font face="Courier New">; `e3+`e1+`e2+{`r});</font></p>
+<p>In fact, we are still leaving the binding of the region-names and
+effect-names implicit.&nbsp; By default, they are bound at the outermost level
+of the function type:</p>
+<p style="line-height: 0"><font face="Courier New">int
+f&lt;`r::R,`e1::E,`e2::E,`e3::E&gt;</font></p>
+<p style="line-height: 0"><font face="Courier New">&nbsp;&nbsp;&nbsp;&nbsp; </font><font face="Courier New">(void
+g(;`e1), </font></p>
+<p style="line-height: 0"><font face="Courier New">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</font><font face="Courier New">int *`r x, </font></p>
+<p style="line-height: 0"><font face="Courier New">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</font><font face="Courier New">void h(region_t&lt;`r&gt; rgn; `e2+{`r})</font></p>
+<p style="line-height: 0"><font face="Courier New">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</font><font face="Courier New">; `e3+`e1+`e2+{`r});</font></p>
+<p>The compiler can only infer default effects for top-level function types
+(i.e. function prototypes) and function types inside other function types.&nbsp;
+This is why <b>you cannot write down a function-pointer type, a function-type
+struct member, a function-type typedef definition, etc. without an explicit
+effect.</b></p>
+<p><b>Meaning of Effect-Names</b></p>
+<p>As described above, when functions and type declarations are parameterized by
+region-names, uses instantiate the region-names with region-names.&nbsp; (For
+example, in struct List&lt;int,`H&gt;, `H instantiates `r.)&nbsp; An effect-name
+is similarly instantiated, but with a <i>capability</i>. The same restrictions
+on type inference apply.</p>
+<p>We can now understand how to declare and use structs with function-pointer
+members.&nbsp; The example above puts explicit effects on the functions, binds
+the effect-names in the struct declaration, and instantiates the effect-names
+(to the empty capability) when using the struct declaration.</p>
+<p>Why do functions need effect-names in their capabilities?&nbsp; The short
+answer is that having different effect names for each function type ensures the
+implicit instantiation of region-names and effects will succeed for all function
+calls where it should succeed.</p>
 &nbsp;<!--msnavigation--></td></tr><!--msnavigation--></table></body>
 
 </html>

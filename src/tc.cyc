@@ -61,19 +61,19 @@ static scope_t scope_redecl_okay(scope_t s1, opt_t<`a> fields1,
 // aren't allowed (?)
 static void field_redecl_okay(tunionfield_t f1, tunionfield_t f2,
 			      list_t<$(tvar_t,type_t)@> inst, tenv_t te,
-			      string t, stringptr v) {
+			      stringptr v) {
 
   seg_t loc = f1->loc;
   // must have same name
   if (String::zstrptrcmp((*f1->name)[1],(*f2->name)[1]) != 0)
     terr(loc,xprintf("redeclaration of %s %s: field name mismatch %s != %s",
-		     t, *v, *((*f1->name)[1]),
+		     "[x]tunion", *v, *((*f1->name)[1]),
 		     *((*f2->name)[1])));
   let tvs1 = f1->tvs;
   let tvs2 = f2->tvs;
   if (List::length(tvs1) != List::length(tvs2))
     terr(loc,xprintf("redeclaration of %s %s, field %s: type parameter number "
-		     "mismatch", t, *v, *((*f1->name)[1])));
+		     "mismatch", "[x]tunion", *v, *((*f1->name)[1])));
   for (; tvs1 != null; tvs1 = tvs1->tl, tvs2 = tvs2->tl)
     inst = new List(new $(tvs2->hd,new VarType(tvs1->hd)),inst);
   // must have same number of types
@@ -81,19 +81,19 @@ static void field_redecl_okay(tunionfield_t f1, tunionfield_t f2,
   let typs2 = f2->typs;
   if (List::length(typs1) != List::length(typs2))
     terr(loc,xprintf("redeclaration of %s %s, field %s: parameter number "
-		     "mismatch", t, *v, *((*f1->name)[1])));
+		     "mismatch", "[x]tunion", *v, *((*f1->name)[1])));
   // for all types
   for (; typs1 != null; typs1 = typs1->tl, typs2 = typs2->tl) {
      // must have same qualifier
     if (!equal_tqual((*typs1->hd)[0],(*typs2->hd)[0]))
       terr(loc,xprintf("redeclaration of %s %s, field %s: parameter qualifier",
-		       t, *v, *((*f1->name)[1])));
+		       "[x]tunion", *v, *((*f1->name)[1])));
     type_t subst_t2 = substitute(inst,(*typs2->hd)[1]);
     // and be the same type FIX: (?) is unification appropriate here?
     if (!unify((*typs1->hd)[1],subst_t2))
       terr(loc,xprintf("redeclaration of %s %s, field %s: parameter type "
 		       "mismatch %s != %s",
-		       t, *v, *((*f1->name)[1]),
+		       "[x]tunion", *v, *((*f1->name)[1]),
 		       typ2string((*typs1->hd)[1]), typ2string(subst_t2)));
   }
 }
@@ -794,59 +794,71 @@ static void tcUniondecl(tenv_t te, genv_t ge, seg_t loc, uniondecl_t ud) {
 }
 
 
-static void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t ed) {
-  // reject anonymous top-level
-  if (ed->name == null) {
-    terr(loc,"anonymous tunions are not allowed");
-    return;
-  }
-  var_t        v   = (*ed->name->v)[1];
+// FIX: xtunion redeclaration must take enclosing namespaces into account.
+//      Bleach. (gotta document all these differences too)
+// FIX: We don't make the tunion abstract while checking the fields, which
+//      is busted if you use one field type as part of another
+//      (For now, nobody is going to notice.)
+static void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
+  var_t v = (*tud->name)[1];
 #ifdef DEBUG
   fprintf(stderr,"type-checking tuniondecl %s",*v);
   fflush(stderr);
 #endif
-  list_t<tvar_t> tvs = ed->tvs;
+  list_t<tvar_t> tvs = tud->tvs;
   // disallow MemKinds and set unconstrained kinds to BoxKind
   for(_ tvs2 = tvs; tvs2 != null; tvs2 = tvs2->tl) {
     conref_t<kind_t> c = compress_conref(tvs2->hd->kind);
     switch (c->v) {
     case No_constr: c->v = new Eq_constr((kind_t)BoxKind); break;
     case &Eq_constr(MemKind): 
-      terr(loc,xprintf("tunion %s attempts to abstract type "
+      terr(loc,xprintf("[x]tunion %s attempts to abstract type "
                        "variable %s of kind M",*v,*tvs2->hd->name)); break;
     default: break;
     }
   }
-  // reject explicitly qualified name
-  switch ((*ed->name->v)[0]) {
-  case &Rel_n(null): break;
-  case &Abs_n(null): break; // allowed for top-level constants
-  default:
-    terr(loc,"qualified declarations are not implemented"); // FIX
-    return;
+  // determine [x]tunion type's qualified name -- xtunion's rules are different
+  _ tud_opt;
+  if(tud->is_xtunion) {
+    try tud_opt = lookup_xtuniondecl(te,loc,tud->name);
+    catch { case Dict::Absent:
+      terr(loc,
+         xprintf("qualified xtunion declaration %s is not an existing xtunion",
+                 qvar2string(tud->name)));
+      return;
+    }
+    if(tud_opt != null)
+      tud->name = (*(tud_opt->v))->name;
+  } else {
+    switch ((*tud->name)[0]) {
+    case &Rel_n(null): (*tud->name)[0] = new Abs_n(te->ns); break;
+    case &Abs_n(_): fallthru;
+    default:
+      terr(loc,"qualified declarations are not implemented"); // FIX
+      return;
+    }
+    tud_opt = Dict::lookup_opt(ge->tuniondecls,v);
   }
-  // expand to qualified name
-  (*ed->name->v)[0] = new Abs_n(te->ns);
   // reject ill-formed type
   check_unique_tvars(loc,tvs);
 
-  // redeclarations have to be handled differently
-  // check for redeclaration
-  switch (Dict::lookup_opt(ge->tuniondecls, v)) {
+  list_t<tunionfield_t> prev_fields;
+
+  switch (tud_opt) {
   case null:
     // add the declaration to the environment, then go check the fields
-    ge->tuniondecls = Dict::insert(ge->tuniondecls, v, new ed);
-    if(ed->fields == null) {
+    ge->tuniondecls = Dict::insert(ge->tuniondecls, v, new tud);
+    if(tud->fields == null)
       return;
-    }
+    prev_fields = null;
     break;
 
-  case &Opt(edp):
-    let ed2  = *edp;
-    let tvs2 = ed2->tvs;
+  case &Opt(tudp):
+    let tud2 = *tudp;
+    let tvs2 = tud2->tvs;
     // reject if type-arity is different or kinds are different
     if(List::length(tvs) != List::length(tvs2))
-      terr(loc,xprintf("redeclaration of tunion %s "
+      terr(loc,xprintf("redeclaration of [x]tunion %s "
 		       "has a different number of type parameters", *v));
     let x1 = tvs;
     let x2 = tvs2;
@@ -856,69 +868,112 @@ static void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t ed) {
       if (c1->v == (constraint_t<kind_t>)No_constr && c1 != c2)
         c1->v = new Forward_constr(c2);
       if (conref_val(c1)  != conref_val(c2))
-        terr(loc,xprintf("redeclaration of tunion %s has a different kind "
+        terr(loc,xprintf("redeclaration of [x]tunion %s has a different kind "
                          "(%s) for type parameter %s (%s)", *v, 
                          ckind2string(c1), *x1->hd->name, ckind2string(c2)));
     }
-
     // reject if scopes are different
-    ed->sc = scope_redecl_okay(ed->sc, ed->fields, ed2->sc, ed2->fields,
-			       loc, "tunion", v);
+    tud->sc = scope_redecl_okay(tud->sc, tud->fields, tud2->sc, tud2->fields,
+				loc, "[x]tunion", v);
+    // reject if is_x is different
+    if(tud->is_xtunion != tud2->is_xtunion)
+      terr(loc,xprintf("redeclaration of tunion as xtunion or vice-versa"));
     // now things really depend on which declarations have fields
-    switch ($(ed->fields, ed2->fields)) {
+    switch ($(tud->fields, tud2->fields)) {
     case $(null,null): return;
-    case $(_,   null): *edp = ed; break; // go check the fields below
-    case $(null,_):    ed->fields = ed2->fields; ed->tvs = tvs2; return;
+    case $(null,_):    tud->fields = tud2->fields; tud->tvs = tvs2; return;
+    case $(_,   null): 
+      prev_fields = null;
+      *tudp = tud; 
+      break; // go check the fields below
     case $(_,   _):
-      // both declare fields, so they must agree (with renaming w.r.t. tyvars)
+      // NOTE: This is one of the places where xtunion is handled differently!
+      // both declare fields:
+      //   For tunion,  they must agree (with renaming w.r.t. tyvars)
+      //     and we currently don't allow field-reordering.
+      //     (Effects code-generation options!)
+      //     and implicit namespace is the tunion name's namespace
+      //   For xtunion, allow new fields 
+      //     and allow repeats in any order so long as they agree
+      //     and implicit namespace is the current namespace
       // FIX: check the kinds match up?
       list_t<$(tvar_t,type_t)@> inst = null;
       for(let tvs0 = tvs; tvs0 != null; tvs0 = tvs0->tl, tvs2 = tvs2->tl)
 	inst = new List(new $(tvs2->hd,new VarType(tvs0->hd)), inst);
       // check each field under the map
-      let f1s = ed->fields->v;
-      let f2s = ed2->fields->v;
-      // the types in f1 haven't been checked yet, which does important
-      // side effects
-
-      for (; f1s != null && f2s != null; f1s = f1s->tl, f2s = f2s->tl) {
-	(*f1s->hd->name)[0] = new Abs_n(te->ns);
-	// check f1s->hd types for the important side effects
-	list_t<tvar_t> alltvs = List::append(tvs, f1s->hd->tvs);
-	check_unique_tvars(f1s->hd->loc,alltvs);
-	for(let typs = f1s->hd->typs; typs != null; typs = typs->tl) {
-          let t = (*typs->hd)[1];
-	  check_type(f1s->hd->loc,te,alltvs,MemKind,t);
+      let f1s = tud->fields->v;
+      let f2s = tud2->fields->v;
+      // check the types in f1s (important side-effects)
+      // and expand names
+      for(let fs = f1s; fs != null; fs = fs->tl) {
+	let f = fs->hd;
+	list_t<tvar_t> alltvs = List::append(tvs, f->tvs);
+	check_unique_tvars(f->loc,alltvs);
+	for(let typs = f->typs; typs != null; typs = typs->tl)
+	  check_type(f->loc,te,alltvs,MemKind,(*typs->hd)[1]);
+	switch((*f->name)[0]) {
+	case &Rel_n(null): 
+	  if(tud->is_xtunion)
+	    (*f->name)[0] = new Abs_n(te->ns);
+	  else
+	    (*f->name)[0] = (*tud->name)[0];
+	  break;
+	case &Rel_n(_): 
+	  terr(loc,"qualified declarations are not allowed");
+	  break;
+	case &Abs_n(_): break;
+	case Loc_n:
+	  throw new Impossible("tcTuniondecl: Loc_n");
+	  break;
 	}
-	// now we can check against previous definition of field
-	field_redecl_okay(f1s->hd, f2s->hd, inst, te, "tunion", v);
       }
-      // check for field-number mismatch
-      if (f1s != null)
-	terr(loc,xprintf("redeclaration of tunion %s has extra field %s",
-			 *v, *((*f1s->hd->name)[1])));
-      if (f2s != null)
-	terr(loc,xprintf("redeclaration of tunion %s is missing field %s",
-			 *v, *((*f2s->hd->name)[1])));
-      return;
+      // check fields against previous declarations
+      if(!tud->is_xtunion) {
+	for (; f1s != null && f2s != null; f1s = f1s->tl, f2s = f2s->tl)
+	  field_redecl_okay(f1s->hd, f2s->hd, inst, te, v);
+	if (f1s != null)
+	  terr(loc,xprintf("redeclaration of tunion %s has extra field %s",
+			   *v, *((*f1s->hd->name)[1])));
+	if (f2s != null)
+	  terr(loc,xprintf("redeclaration of tunion %s is missing field %s",
+			   *v, *((*f2s->hd->name)[1])));
+	return;
+      } 
+      // it's an xtunion -- set up prev_fields
+      prev_fields = f2s;
+      break;
     }
     break;
   }
   // This is the first declaration with variants, so check the variants
   // may not be the first declaration, so must not overwrite the dict
   // entry!
-  // for the sake of recursive fields, make name abstract in body
-  let edp = Dict::lookup(ge->tuniondecls, v);
-  *edp = new Tuniondecl(ed->sc, ed->name, tvs, null);
   // check variants, rejecting ill-formed types, non-constant tags,
-  // repeated tyvars (why?), and duplicate field names
+  // repeated tyvars, and duplicate field names
   // finally, add variants
-  list_t<field_name_t> prev_fields = null;
-  for(let fs = ed->fields->v; fs != null; fs = fs->tl) {
+  for(let fs = tud->fields->v; fs != null; fs = fs->tl) {
     let f = fs->hd;
-    if (List::mem(String::zstrptrcmp,prev_fields,(*f->name)[1]))
-      terr(f->loc,xprintf("duplicate field name %s",*((*f->name)[1])));
-    prev_fields = new List((*f->name)[1],prev_fields);
+    if(tud->is_xtunion) {
+	// allow all duplicates and all orders
+	// note: assumes namespace is current one (as enforced above)
+	// FIX: As before merging of [x]tunion, we are hoisting new field's
+	//      into earlier definition.  This is WRONG b/c you cannot re-order
+	//      type definitions like that in C (we could produce illegal
+	//      code)!!!!!!!!!!
+      let prevs = prev_fields;
+      for(; prevs != null; prevs = prevs->tl)
+	if(qvar_cmp(prevs->hd->name, fs->hd->name)==0) {
+	  field_redecl_okay(prevs->hd, fs->hd, null, te, v);
+	  break;
+	}
+      if(prevs != null)
+	continue;
+    } else {
+      for(let prevs = prev_fields; prevs != null; prevs = prevs->tl)
+	if(qvar_cmp(prevs->hd->name, fs->hd->name)==0)
+	  terr(f->loc,xprintf("duplicate field name %s",*((*f->name)[1])));
+    }
+    prev_fields = new List(f,prev_fields);
     for (_ tvs = f->tvs; tvs != null; tvs = tvs->tl) {
       let tv = tvs->hd;
       let c = compress_conref(tv->kind);
@@ -927,141 +982,23 @@ static void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t ed) {
       case &Eq_constr(MemKind): 
         terr(loc,xprintf("field %s abstracts type variable of "
                          "kind M", *(*f->name)[1])); break;
-      // FIX:  should we allow existentials over regions or effects?
       default: break;
       }
     }
     list_t<tvar_t> alltvs = List::append(tvs,f->tvs);
     check_unique_tvars(loc,alltvs);
-    for (list_t<$(tqual_t,type_t)@> typs = f->typs; typs != null; typs=typs->tl) {
-      let t = (*typs->hd)[1];
-      check_type(f->loc,te,alltvs,MemKind,t);
-    }
+    for (list_t<$(tqual_t,type_t)@> typs = f->typs; typs != null; typs=typs->tl)
+      {
+	let t = (*typs->hd)[1];
+	check_type(f->loc,te,alltvs,MemKind,t);
+      }
     // FIX: check valid tquals?
     (*f->name)[0] = new Abs_n(te->ns);
+    let tudres = tud;
+    if(tud_opt != null)
+      tudres = *(tud_opt->v);
     ge->ordinaries = Dict::insert(ge->ordinaries, (*f->name)[1],
-				  new $(new TunionRes(ed,f), true));
-  }
-  // add the decl to the environment -- must be after variant-checking
-  // (where we added an abstract version)
-  ge->tuniondecls = Dict::insert(ge->tuniondecls, v, new ed);
-  // undo our clobbering with the abstract version
-  *edp = ed;
-}
-
-static void tcXTuniondecl(tenv_t te, genv_t ge, seg_t loc, xtuniondecl_t xd) {
-  var_t v = (*xd->name)[1];
-#ifdef DEBUG
-  fprintf(stderr,"type-checking xtuniondecl %s",*v);
-  fflush(stderr);
-#endif
-  opt_t<xtuniondecl_t@> xd2o;
-  try xd2o = lookup_xtuniondecl(te,loc,xd->name);
-  catch { case &Dict::Absent:
-    terr(loc,
-         xprintf("qualified xtunion declaration %s is not an existing xtunion",
-                 qvar2string(xd->name)));
-    return;
-  }
-  // expand to qualified name, if not already qualified
-  switch ((*xd->name)[0]) {
-  case Loc_n:
-    throw new Impossible("tcXTuniondecl: Loc_n");
-  case &Rel_n(null):
-    (*xd->name)[0] = new Abs_n(te->ns);
-    break;
-  case &Rel_n(_):
-    throw new Impossible("tcXTuniondecl: Rel_n non-null");
-  case &Abs_n(_):
-    throw new Impossible("tcXTuniondecl: Abs_n");
-  }
-  // if we're a new xtunion, then make a fresh "already there" xtuniondecl
-  //       and add it to the environment
-  // if we're not new, compare scopes
-  if(xd2o == null) {
-    xtuniondecl_t @ x = 
-      (xtuniondecl_t@)(new $(new XTuniondecl{.sc=xd->sc,
-                                             .name=xd->name,
-                                             .fields=null}));
-    xd2o = new Opt(x);
-    ge->xtuniondecls = Dict::insert(ge->xtuniondecls, v, x);
-  } else {
-    let x = *(xd2o->v);
-    x->sc = scope_redecl_okay(xd->sc, new Opt(0), 
-                              x->sc, new Opt(0), loc, "xtunion", v);
-  }
-  // now check that we can add each "field" by ensuring that
-  // duplicates are the same.  Note that fields are qualified by the current
-  // namespace if implicit, not the namespace of the xtunion
-  // Notice that we're "hoisting" the fields into the earlier definition,
-  // if there is one we know about.
-  xtuniondecl_t xd_result = *(xd2o->v);
-  for(list_t<tunionfield_t> fs = xd->fields; fs != null; fs = fs->tl) {
-    tunionfield_t f = fs->hd;
-    // expand field name if not explicitly qualified
-    switch ((*f->name)[0]) {
-    case &Rel_n(null): (*f->name)[0] = new Abs_n(te->ns); break;
-    case &Rel_n(_): fallthru;
-    case &Abs_n(_):
-      terr(loc,"qualified declarations are not allowed\n");
-      break;
-    case Loc_n:
-      throw new Impossible("tcXtuniondecl: Loc_n");
-      break;
-    }
-    // reject if there is an ill-formed type
-    for (_ tvs = f->tvs; tvs != null; tvs = tvs->tl) {
-      let tv = tvs->hd;
-      let c = compress_conref(tv->kind);
-      switch (c->v) {
-      case No_constr: c->v = new Eq_constr((kind_t)BoxKind); break;
-      case &Eq_constr(MemKind): 
-        terr(loc,xprintf("field %s abstracts type variable of "
-                         "kind M", *(*f->name)[1])); break;
-      // FIX: should we allow existentials over regions and effects?
-      default: break;
-      }
-    }
-    list_t<tvar_t>tvs = f->tvs;
-    check_unique_tvars(loc,tvs);
-    for(let typs = f->typs; typs != null; typs = typs->tl) {
-      let t = (*typs->hd)[1];
-      check_type(f->loc,te,tvs,MemKind,t);
-    }
-    // notice we now allow duplicates, they just have to have the same type
-    // also, we can be totally re-ordered from a different declaration
-    bool dup = false;
-    for(let prev_fs = xd_result->fields; prev_fs!=null; prev_fs = prev_fs->tl){
-      let prev = prev_fs->hd;
-      if(qvar_cmp(f->name, prev->name)==0) {
-	field_redecl_okay(prev, f, null, te, "xtunion", v);
-	// do not add the duplicate to the result:
-	dup = true;
-	break;
-      }
-    }
-    if(dup)
-      continue;
-    // no duplicate, so add to the result
-    xd_result->fields = new List(f, xd_result->fields);
-    // notice we allow adding to another namespace via qualified field
-    genv_t ge_f;
-    list_t<var_t> ns_f;
-    switch ((*f->name)[0]) {
-    case &Abs_n(y): ns_f = y; break;
-    case Loc_n: fallthru;
-    case &Rel_n(_):
-      throw new Impossible("tcXTuniondecl: Rel_n or Loc_n");
-      break;
-    }
-    try ge_f = Dict::lookup(te->ae, ns_f);
-    catch { case &Dict::Absent:
-      terr(f->loc, xprintf("bad namespace for xtunion field %s",
-			   qvar2string(f->name)));
-      return;
-    }
-    ge_f->ordinaries = Dict::insert(ge_f->ordinaries, (*f->name)[1],
-				    new $(new XTunionRes(xd_result, f), true));
+				  new $(new TunionRes(tudres,f), true));
   }
 }
 
@@ -1194,15 +1131,10 @@ static void tc_decls(tenv_t te, list_t<decl_t> ds0, bool in_externC) {
         ud->sc = ExternC;
       tcUniondecl(te,ge,loc,ud);
       break;
-    case &Tunion_d(ed):
-      if (in_externC && okay_externC(d->loc,ed->sc))
-	ed->sc = ExternC;
-      tcTuniondecl(te,ge,loc,ed);
-      break;
-    case &XTunion_d(xd):
-      if (in_externC && okay_externC(d->loc,xd->sc))
-	xd->sc = ExternC;
-      tcXTuniondecl(te,ge,loc,xd);
+    case &Tunion_d(tud):
+      if (in_externC && okay_externC(d->loc,tud->sc))
+	tud->sc = ExternC;
+      tcTuniondecl(te,ge,loc,tud);
       break;
 
     case &Enum_d(ed):

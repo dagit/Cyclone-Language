@@ -125,7 +125,7 @@ static void err(string msg, seg_t sg) {
 }
 static `a abort(string msg,seg_t sg) {
   err(msg,sg);
-  throw new Exit;
+  throw Exit;
 }
 static void warn(string msg,seg_t sg) {
   fprintf(stderr,"%s: Warning: %s\n",string_of_segment(sg),msg);
@@ -243,7 +243,6 @@ static void only_vardecl(list_t<stringptr> params,decl_t x) {
   case &Union_d(_):       decl_kind = "union declaration";      break;
   case &Tunion_d(_):      decl_kind = "tunion declaration";     break;
   case &Typedef_d(_):     decl_kind = "typedef";                break;
-  case &XTunion_d(_):     decl_kind = "xtunion declaration";    break;
   case &Enum_d(_):        decl_kind = "enum declaration";       break;
   case &Namespace_d(_,_): decl_kind = "namespace declaration";  break;
   case &Using_d(_,_):     decl_kind = "using declaration";      break;
@@ -505,12 +504,8 @@ static $(type_t,opt_t<decl_t>)
 	  break;
         case &Tunion_d(tud):
           let args = List::map(tvar2typ,tud->tvs);
-          t = new TunionType(TunionInfo(tud->name->v,args,HeapRgn,null));
-          if (tud->fields!=null) declopt = new Opt(d);
-	  break;
-        case &XTunion_d(xtud):
-          t = new XTunionType(XTunionInfo(xtud->name,HeapRgn,null));
-          if (xtud->fields != null) declopt = new Opt(d);
+          t = new TunionType(TunionInfo(new KnownTunion(tud), args, HeapRgn));
+	  if(tud->fields != null) declopt = new Opt(d);
 	  break;
         case &Union_d(ud):
           let args = List::map(tvar2typ,ud->tvs);
@@ -748,9 +743,6 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
       case &Tunion_d(tud): 
         tud->sc = s; 
         if (atts != null) err("bad attributes on tunion",loc); break;
-      case &XTunion_d(xtud) : 
-        xtud->sc = s; 
-        if (atts != null) err("bad attributes on xtunion",loc); break;
       default: err("bad declaration",loc); return null;
       }
       return new List(d,null);
@@ -760,16 +752,15 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
         let ts2 = List::map_c(typ2tvar,loc,ts);
         let sd = new Structdecl{s,new Opt((typedef_name_t)n),ts2,null,null};
         if (atts != null) err("bad attributes on struct",loc);
-        return new List(new Decl(new Struct_d(sd),loc),null);
-      case &TunionType(TunionInfo{n,ts,_,_}):
+        return new List(new_decl(new Struct_d(sd),loc),null);
+      case &TunionType(TunionInfo(&KnownTunion(tud),_,_)):
+	if(atts != null) err("bad attributes on tunion", loc);
+	return new List(new_decl(new Tunion_d(tud),loc),null);
+      case &TunionType(TunionInfo(&UnknownTunion(UnknownTunionInfo(n,isx)),ts,_)):
         let ts2 = List::map_c(typ2tvar,loc,ts);
-        let tud = tunion_decl(s,new Opt((typedef_name_t)n),ts2,null,loc);
+        let tud = tunion_decl(s, n, ts2, null, isx, loc);
         if (atts != null) err("bad attributes on tunion",loc);
         return new List(tud,null);
-      case &XTunionType(XTunionInfo{n,_,_}):
-        let xtud = new XTuniondecl{.sc=s, .name=n, .fields=null};
-        if (atts != null) err("bad attributes on xtunion",loc);
-        return new List(new Decl(new XTunion_d(xtud),loc),null);
       case &UnionType(n,ts,_):
         let ts2 = List::map_c(typ2tvar,loc,ts);
         let ud = new Uniondecl{s,new Opt((typedef_name_t)n),ts2,null,null};
@@ -800,7 +791,6 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
           sd->sc = s; sd->attributes = atts; atts = null; 
           break;
         case &Tunion_d(tud)  : tud->sc = s; break;
-        case &XTunion_d(xtud): xtud->sc = s; break;
         case &Union_d(ud)    : ud->sc = s; break;
         case &Enum_d(ed)     : ed->sc = s; break;
         default:
@@ -913,6 +903,7 @@ using Parse;
 // the union type for all productions -- for now a placeholder 
 %union {
   Okay_tok;
+  Bool_tok(bool);
   Int_tok($(sign_t,int)@);
   Char_tok(char);
   Pointer_Sort_tok(tunion Pointer_Sort);
@@ -1018,6 +1009,7 @@ using Parse;
 %type <DeclaratorExpopt_tok> struct_declarator
 %type <DeclaratorExpoptList_tok> struct_declarator_list struct_declarator_list0
 %type <AbstractDeclarator_tok> abstract_declarator direct_abstract_declarator
+%type <Bool_tok> tunion_or_xtunion
 %type <TunionField_tok> tunionfield
 %type <TunionFieldList_tok> tunionfield_list
 %type <QualSpecList_tok> specifier_qualifier_list
@@ -1532,32 +1524,33 @@ struct_declarator:
 ;
 
 tunion_specifier:
-  TUNION qual_opt_identifier type_params_opt '{' tunionfield_list '}'
+  tunion_or_xtunion qual_opt_identifier type_params_opt '{' tunionfield_list '}'
     { let ts = List::map_c(typ2tvar,LOC(@3,@3),$3);
-      $$ = ^$(new Decl_spec(tunion_decl(Public,new Opt($2),ts,new Opt($5),
-                                    LOC(@1,@6))));
+      $$ = ^$(new Decl_spec(tunion_decl(Public, $2,ts,new Opt($5), $1,
+					LOC(@1,@6))));
     }
-| TUNION qual_opt_identifier type_params_opt 
-    { $$=^$(type_spec(new TunionType(TunionInfo{$2,$3,HeapRgn,null}),LOC(@1,@3)));
+| tunion_or_xtunion qual_opt_identifier type_params_opt 
+    { 
+      $$=^$(type_spec(new TunionType(TunionInfo(new 
+		       UnknownTunion(UnknownTunionInfo($2,$1)), $3, HeapRgn)),
+		       LOC(@1,@3)));
     }
-| TUNION rgn qual_opt_identifier type_params_opt 
-    { $$=^$(type_spec(new TunionType(TunionInfo{$3,$4,$2,null}),LOC(@1,@4)));
+| tunion_or_xtunion rgn qual_opt_identifier type_params_opt 
+    { 
+      $$=^$(type_spec(new TunionType(TunionInfo(new 
+		       UnknownTunion(UnknownTunionInfo($3,$1)), $4, $2)),
+		       LOC(@1,@4)));
     }
-| TUNION qual_opt_identifier '.' qual_opt_identifier type_params_opt
-    { $$=^$(type_spec(new TunionFieldType(TunionFieldInfo{$2,$5,$4,null,null}),
-                      LOC(@1,@5))); 
-    }
-| XTUNION qual_opt_identifier '{' tunionfield_list '}'
-    { $$ = ^$(new Decl_spec(xtunion_decl(Public,$2,$4,LOC(@1,@5)))); }
-| XTUNION qual_opt_identifier 
-    { $$=^$(type_spec(new XTunionType(XTunionInfo{$2,HeapRgn,null}),LOC(@1,@2))); }
-| XTUNION rgn qual_opt_identifier 
-    { $$=^$(type_spec(new XTunionType(XTunionInfo{$3,$2,null}),LOC(@1,@3))); }
-| XTUNION qual_opt_identifier '.' qual_opt_identifier
-    { $$=^$(type_spec(new XTunionFieldType(XTunionFieldInfo{$2,$4,null,null}),
-                      LOC(@1,@4))); 
+| tunion_or_xtunion qual_opt_identifier '.' qual_opt_identifier type_params_opt
+    { $$=^$(type_spec(new TunionFieldType(TunionFieldInfo(new
+		  UnknownTunionfield(UnknownTunionFieldInfo($2,$4,$1)),$5)),
+		      LOC(@1,@5)));
     }
 ;
+
+tunion_or_xtunion:
+  TUNION  { $$=^$(false); }
+| XTUNION { $$=^$(true);  }
 
 tunionfield_list:
   tunionfield                      { $$=^$(new List($1,null)); }
@@ -2536,7 +2529,7 @@ qual_opt_identifier:
 
 void yyprint(int i, xtunion YYSTYPE v) {
   switch (v) {
-  case &Okay_tok:          fprintf(stderr,"ok");         break;
+  case Okay_tok:           fprintf(stderr,"ok");         break;
   case &Int_tok(&$(_,i2)): fprintf(stderr,"%d",i2);      break;
   case &Char_tok(c):       fprintf(stderr,"%c",c);       break;
   case &Short_tok(s):      fprintf(stderr,"%ds",(int)s); break;

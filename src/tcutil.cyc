@@ -33,7 +33,7 @@ void terr(seg_t loc, string s) {
 `a impos(string msg) {
   fprintf(stderr,"Error: %s\n",msg);
   fflush(stderr);
-  throw new TypeErr;
+  throw TypeErr;
 }
 
 static string tvar2string(tvar_t tv) {
@@ -122,26 +122,21 @@ static bool kind_leq(kind_t k1, kind_t k2) {
 // In some situations, we have to be conservative...
 kind_t typ_kind(type_t t) {
   switch (compress(t)) {
-  case &Evar(k,topt,_):       return k; 
-
-  case &VarType(tv):          return conref_val(tv->kind);
-  case VoidType:             return MemKind;
-  case &IntType(_,sz): 
-    return (sz==(size_of_t)B4) ? BoxKind : MemKind;
-  case FloatType:            return MemKind;
-  case DoubleType:           return MemKind;
-  case &FnType(_):            return MemKind;
-  case &RgnHandleType(_):     return BoxKind; 
-  case HeapRgn:              return RgnKind;
-
-  case &TunionType(_):        return BoxKind;
-  case &XTunionType(_):       return BoxKind; 
-  case &TunionFieldType(TunionFieldInfo{_,_,_,_,tuf}): fallthru(tuf);
-  case &XTunionFieldType(XTunionFieldInfo{_,_,_,tuf}):
-    if (tuf == null) 
-      impos("typ_kind: [X]TunionFieldInfo missing Tunionfield ref");
-    if (tuf->typs == null) return BoxKind;
+  case &Evar(k,topt,_):   return k; 
+  case &VarType(tv):      return conref_val(tv->kind);
+  case VoidType:          return MemKind;
+  case &IntType(_,sz):    return (sz==(size_of_t)B4) ? BoxKind : MemKind;
+  case FloatType:         return MemKind;
+  case DoubleType:        return MemKind;
+  case &FnType(_):        return MemKind;
+  case &RgnHandleType(_): return BoxKind; 
+  case HeapRgn:           return RgnKind;
+  case &TunionType(_):    return BoxKind;
+  case &TunionFieldType(TunionFieldInfo(&KnownTunionfield(_,tuf),_)):
+    if(tuf->typs == null) return BoxKind;
     else return MemKind;
+  case &TunionFieldType(TunionFieldInfo(&UnknownTunionfield(_),_)):
+    return impos("typ_kind: Unresolved TunionFieldType");
     // for structs or unions without definitions, we must be conservative
   case &StructType(_,_,null): return AnyKind;
   case &UnionType(_,_,null) : return AnyKind;
@@ -175,7 +170,7 @@ bool unify(type_t t1, type_t t2) {
     unify_it(t1,t2);
     return true;
   } catch {
-  case &Unify: return false;
+  case Unify: return false;
   }
 }
 
@@ -184,7 +179,7 @@ static void occurslist(type_t evar, list_t<type_t> ts); // mutually recursive fn
 static void occurs(type_t evar, type_t t) {
   switch (compress(t)) {
   case &Evar(_,r,_):
-    if (t == evar) throw new Unify;
+    if (t == evar) throw Unify;
     else if (r != null) occurs(evar,r->v);
     break;
   case &PointerType(pinfo): 
@@ -202,16 +197,13 @@ static void occurs(type_t evar, type_t t) {
       occurs(evar,(*args->hd)[1]);
     break;
   case &RgnHandleType(rt): occurs(evar,rt); break;
-  case &TunionType(TunionInfo{_,ts,r,_}):
+  case &TunionType(TunionInfo{_,ts,r}):
     occurs(evar,r); occurslist(evar,ts); break;
-  case &XTunionType(XTunionInfo{_,r,_}):
-    occurs(evar,r); break;
   case &TypedefType(_,ts,topt): fallthru(ts);
-  case &TunionFieldType(TunionFieldInfo{_,ts,_,_,_}): fallthru(ts);
-  case &StructType(_,ts,_):     occurslist(evar,ts); break;
+  case &TunionFieldType(TunionFieldInfo{_,ts}): fallthru(ts);
+  case &StructType(_,ts,_): occurslist(evar,ts); break;
   case &AccessEff(t0): occurs(evar,t0); break;
   case &JoinEff(ts): occurslist(evar,ts); break;
-  case &XTunionFieldType(_): break;
   default: break;
   }
 }
@@ -223,7 +215,7 @@ static void occurslist(type_t evar, list_t<type_t> ts) {
 // unify two lists of types
 static void unify_list(list_t<type_t> t1, list_t<type_t> t2) {
   try List::iter2(unify_it,t1,t2);
-  catch {case &List_mismatch: throw new Unify;}
+  catch {case List_mismatch: throw Unify;}
 }
 
 // unify two type qualifiers -- throws Unify unless they are the same
@@ -231,7 +223,7 @@ static void unify_tqual(tqual_t tq1, tqual_t tq2) {
   if ((tq1.q_const != tq2.q_const)    
       || (tq1.q_volatile != tq2.q_volatile) 
       || (tq1.q_restrict != tq2.q_restrict))
-    throw new Unify;
+    throw Unify;
 }
 
 bool equal_tqual(tqual_t tq1, tqual_t tq2) {
@@ -255,7 +247,7 @@ static void unify_it_conrefs(int cmp(`a,`a), conref_t<`a> x, conref_t<`a> y) {
     case &Forward_constr(_):
       throw impos("unify_conref: forward after compress(2)");
     case &Eq_constr(yv):
-      if (cmp(xv,yv) != 0) throw new Unify;
+      if (cmp(xv,yv) != 0) throw Unify;
       return;
     }
   }
@@ -265,7 +257,7 @@ static bool unify_conrefs(int cmp(`a,`a), conref_t<`a> x, conref_t<`a> y) {
   try {
     unify_it_conrefs(cmp,x,y);
     return true;
-  } catch { case &Unify: return false; }
+  } catch { case Unify: return false; }
 }
 
 static int boundscmp(bounds_t b1, bounds_t b2) {
@@ -560,7 +552,7 @@ void unify_it(type_t t1, type_t t2) {
         break;
       default: break;
       }
-      throw new Unify;
+      throw Unify;
     }
   default: break; 
   }
@@ -614,34 +606,20 @@ void unify_it(type_t t1, type_t t2) {
     }
     break;
 
-  case $(&TunionType(TunionInfo{n2,ts2,r2,_}),
-         &TunionType(TunionInfo{n1,ts1,r1,_})):
-    if (qvar_cmp(n1,n2) == 0) {
-      unify_it(r1,r2); 
-      unify_list(ts1,ts2);
-      return;
-    }
-    break;
-
-  case $(&XTunionType(XTunionInfo{n2,r2,_}),
-         &XTunionType(XTunionInfo{n1,r1,_})):
-    if (qvar_cmp(n1,n2) == 0) {
+  case $(&TunionType(TunionInfo(&KnownTunion(tud2),ts2,r2)),
+	 &TunionType(TunionInfo(&KnownTunion(tud1),ts1,r1))):
+    if(tud2 == tud1 || qvar_cmp(tud2->name,tud1->name) == 0) {
       unify_it(r1,r2);
-      return;
-    }
-    break;
-
-  case $(&TunionFieldType(TunionFieldInfo{n2,ts2,f2,_,_}),
-         &TunionFieldType(TunionFieldInfo{n1,ts1,f1,_,_})):
-    if (qvar_cmp(n1,n2) == 0 && qvar_cmp(f1,f2) == 0) {
       unify_list(ts1,ts2);
       return;
     }
     break;
 
-  case $(&XTunionFieldType(XTunionFieldInfo{n2,f2,_,_}),
-         &XTunionFieldType(XTunionFieldInfo{n1,f1,_,_})):
-    if (qvar_cmp(n1,n2) == 0 && qvar_cmp(f1,f2) == 0) {
+  case $(&TunionFieldType(TunionFieldInfo(&KnownTunionfield(tud2,tuf2),ts2)),
+	 &TunionFieldType(TunionFieldInfo(&KnownTunionfield(tud1,tuf1),ts1))):
+    if((tud2 == tud1 || qvar_cmp(tud2->name,tud1->name)==0)
+       && (tuf2 == tuf1 || qvar_cmp(tuf2->name, tuf1->name)==0)) {
+      unify_list(ts1,ts2);
       return;
     }
     break;
@@ -744,7 +722,7 @@ void unify_it(type_t t1, type_t t2) {
     else break;
   default: break;
   }
-  throw new Unify;
+  throw Unify;
 }
 
 bool is_arithmetic_type(type_t t) {
@@ -900,35 +878,36 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
 
   // can cast a TunionFieldType to a TunionType if the field doesn't 
   // carry values.
-  case $(&TunionFieldType(TunionFieldInfo{n1,ts1,fn1,_,tufd}),
-         &TunionType(TunionInfo{n2,ts2,r2,_})):
-    if (qvar_cmp(n1,n2) == 0 && tufd->typs == null) {
-      bool okay = true;
-      for (; ts1 != null && ts2 != null; ts1=ts1->tl, ts2=ts2->tl) {
-        if (!unify(ts1->hd,ts2->hd)) {
-          okay = false; 
-          break;
-        }
-      }
-      if (okay && ts1 == null && ts2 == null) return true;
-    }
-    return false;
+    case $(&TunionFieldType(TunionFieldInfo{&KnownTunionfield(tud1,tuf),ts1}),
+	   &TunionType(TunionInfo(&KnownTunion(tud2),ts2,_))):
+       if ((tud1 == tud2 || qvar_cmp(tud1->name,tud2->name) == 0) 
+	   && tuf->typs == null) {
+	 for (; ts1 != null && ts2 != null; ts1=ts1->tl, ts2=ts2->tl)
+	   if (!unify(ts1->hd,ts2->hd))
+	     break;
+	 if (ts1 == null && ts2 == null) 
+	   return true;
+       }
+       return false;
 
   // can cast a "tunion T.f<ts> @`r1" to a "tunion `r2 T<ts>" when 
   //   field f carries values and r1==r2 or r1=='H
-  case $(&PointerType(PtrInfo{t_a,rt_a,null_a,q_a,b_a}),&TunionType(TunionInfo{n2,ts2,r2,_})):
+  case $(&PointerType(PtrInfo{t_a,rt_a,null_a,q_a,b_a}),
+	 &TunionType(TunionInfo{&KnownTunion(tud2),ts2,r2})):
+	   //n2,ts2,r2,_})):
     switch (compress(t_a)) {
-    case &TunionFieldType(TunionFieldInfo{n1,ts1,f1,_,tufd}):
+    case &TunionFieldType(TunionFieldInfo{&KnownTunionfield(tud1,tuf1),ts1}):
+      //n1,ts1,f1,_,tufd}):
       // regions must unify or source must be `H
       if (!unify(rt_a,r2) && rt_a != HeapRgn) return false;
       // pointer must be non-null(@) -- note could allow * but would have
       // to insert a bounds check?
       if (!unify_conrefs(intcmp,null_a,new_conref(false))) return false;
       // pointer must point to one element -- note, could allow > 0
-      if (!unify_conrefs(boundscmp,b_a,new_conref(new Upper_b(uint_exp(1,null)))))
+      if (!unify_conrefs(boundscmp,b_a,new_conref(bounds_one)))
         return false;
       // field must carry values and tunion names must align
-      if (qvar_cmp(n1,n2) == 0 && tufd != null && tufd->typs != null) {
+      if (qvar_cmp(tud2->name,tud1->name)==0 && tuf1->typs != null) {
         // check type arguments
         bool okay = true;
         for (; ts1 != null && ts2 != null; ts1=ts1->tl, ts2=ts2->tl) 
@@ -943,27 +922,6 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     }
     return false;
 
-  // can cast an "xtunion T.f @`r1" to a "xtunion `r2 T" when 
-  //   field f carries values and r1==r2 or r1=='H
-  case $(&PointerType(PtrInfo{t_a,rt_a,null_a,q_a,b_a}),&XTunionType(XTunionInfo{n2,r2,_})):
-    switch (compress(t_a)) {
-    case &XTunionFieldType(XTunionFieldInfo{n1,f1,_,tufd}):
-      // regions must unify or source must be `H
-      if (!unify(rt_a,r2) && rt_a != HeapRgn) return false;
-      // pointer must be non-null(@) -- note could allow * but would have
-      // to insert a bounds check?
-      if (!unify_conrefs(intcmp,null_a,new_conref(false))) return false;
-      // pointer must point to one element -- note, could allow > 0
-      if (!unify_conrefs(boundscmp,b_a,new_conref(new Upper_b(uint_exp(1,null)))))
-        return false;
-      // xtunion names must align
-      if (qvar_cmp(n1,n2) == 0) {
-        return true;
-      }
-      break;
-    default: break;
-    }
-    return false;
   default: return unify(t1,t2);
   }
 }
@@ -1026,7 +984,7 @@ static bool any_promote(tenv_t te, exp_t e) {
 // to promote an integral type.
 // FIX: THIS IS NOT RIGHT.
 bool coerce_use(tenv_t te, exp_t e, type_t t2) {
-  type_t    t1 = compress(e->topt->v);
+  type_t t1 = compress(e->topt->v);
   if (unify(t1,t2)) 
     return true;
   // unification failed, try promoting
@@ -1456,26 +1414,22 @@ type_t rsubstitute(region_t<`r> rgn,
   case &VarType(v):
     // a tvar lookup, not a var lookup!
     try return List::assoc_cmp(tvar_cmp,inst,v);
-    catch {case &Not_found: return t;}
+    catch {case Not_found: return t;}
   case &StructType(no,ts,sd):   
     let new_ts = substs(rgn,inst,ts);
     return new_ts == ts ? t : new StructType(no,new_ts,sd);
   case &UnionType(no,ts,ud):
     let new_ts = substs(rgn,inst, ts);
     return new_ts == ts ? t : new UnionType(no,new_ts,ud);
-  case &TunionType(TunionInfo{n,ts,r,tud}):     
+  case &TunionType(TunionInfo{info,ts,r}):     
     let new_ts = substs(rgn,inst,ts);
     let new_r  = rsubstitute(rgn,inst,r);
     return (new_ts == ts && new_r == r) ? t : 
-      new TunionType(TunionInfo{n,new_ts,new_r,tud});
-  case &XTunionType(XTunionInfo{n,r,tud}):     
-    let new_r = rsubstitute(rgn,inst,r);
-    return (new_r == r) ? t : new XTunionType(XTunionInfo{n,new_r,tud});
-  case &TunionFieldType(TunionFieldInfo{n,ts,f,tud,tufd}):
+      new TunionType(TunionInfo{info,new_ts,new_r});
+  case &TunionFieldType(TunionFieldInfo{info,ts}):
     let new_ts = substs(rgn,inst,ts);
     return (new_ts == ts) ? t : 
-      new TunionFieldType(TunionFieldInfo{n,new_ts,f,tud,tufd});
-  case &XTunionFieldType(_): return t;
+      new TunionFieldType(TunionFieldInfo{info,new_ts});
   case &TypedefType(n,ts,topt): 
     let new_ts = substs(rgn,inst,ts);
     return new_ts == ts ? t : new TypedefType(n,new_ts,topt);
@@ -1600,8 +1554,8 @@ $(tvar_t,type_t)@`r r_make_inst_var(region_t<`r> rgn, tvar_t tv) {
 // This also performs the following side-effects which most of the 
 // rest of the compiler rightfully assumes have occurred:
 // * expand typedefs
-// * set pointers to declarations for StructType, UnionType, 
-//    TunionType, XTunionType, TunionFieldType, and XTunionFieldType.
+// * set pointers (or Known* variants) to declarations for 
+//   StructType, UnionType, TunionType, TunionFieldType
 // * change relative type names to absolute type names
 // * set the kind field of type variables: we use the expected kind
 //   initially, but if later constraints force a more constrained kind,
@@ -1629,7 +1583,7 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
         enumdecl_t @ed = lookup_enumdecl(te,loc,n);
         *edp = *ed;
       } catch {
-      case &Dict::Absent:
+      case Dict::Absent:
         terr(loc,xprintf("unbound type enum %s",qvar2string(n)));
         return free_vars;
       }
@@ -1637,159 +1591,91 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
     // Make relative name absolute
     *n = (ed->name)[0];
     break;
-  case &TunionType(TunionInfo{n,targs,rgn,*tudp}):
-    if (*tudp == null) {
-      try {
-        tuniondecl_t@ tud = lookup_tuniondecl(te,loc,n);
-        if (tud == null) {
-          terr(loc,xprintf("unbound type tunion %s",qvar2string(n)));
-          return free_vars;
-        }
-        *tudp = *tud;
-      } catch {
-      case &Dict::Absent:
+
+  case &TunionType(TunionInfo(*info,targs,rgn)):
+    switch(*info) {
+    case &UnknownTunion(UnknownTunionInfo(n,is_x)):
+      tuniondecl_t tud;
+      try tud = *lookup_tuniondecl(te,loc,n);// FIX: lookup_xtuniondecl needed?
+      catch { case Dict::Absent:
         terr(loc,xprintf("unbound type tunion %s",qvar2string(n)));
         return free_vars;
       }
-    }
-    tuniondecl_t tud = (tuniondecl_t)*tudp;
-    // Make relative name absolute (or replace absolute name with itself)
-    if (tud->name != null) *n = tud->name->v[0];
-    // check the region is well-formed
-    free_vars = check_valid_type(loc,te,free_vars,RgnKind,rgn);
-    // check the type arguments are well-formed
-    list_t<tvar_t> tvs = tud->tvs;
-    for (; targs != null && tvs != null; targs = targs->tl, tvs = tvs->tl) {
-      type_t t1 = targs->hd;
-      kind_t k1 = conref_val(tvs->hd->kind);
-      free_vars = check_valid_type(loc,te,free_vars,k1,t1);
-    }
-    if (targs != null)
-      terr(loc,xprintf("too many type arguments for tunion %s",
-                       qvar2string(n)));
-    if (tvs != null) 
-      terr(loc,xprintf("too few type arguments for tunion %s",
-                       qvar2string(n)));
-    break;
-  case &XTunionType(XTunionInfo{n,rgn,*xtudp}):
-    if (*xtudp == null) {
-      try {
-        opt_t<xtuniondecl_t@> xtud = lookup_xtuniondecl(te,loc,n);
-        if (xtud == null) {
-          terr(loc,xprintf("unbound type xtunion %s",qvar2string(n)));
-          return free_vars;
-        }
-        *xtudp = (struct XTuniondecl *)(*xtud->v);
-      } catch {
-      case &Dict::Absent:
-        terr(loc,xprintf("unbound type xtunion %s",qvar2string(n)));
-        return free_vars;
+      if(tud->is_xtunion != is_x)
+	terr(loc,xprintf("[x]tunion is different from type declaration %s",
+			 qvar2string(n)));
+      *info = new KnownTunion(tud);
+      fallthru(tud);
+    case &KnownTunion(tud):
+      // check the region is well-formed
+      free_vars = check_valid_type(loc,te,free_vars,RgnKind,rgn);
+      // check the type arguments are well-formed
+      list_t<tvar_t> tvs = tud->tvs;
+      for (; targs != null && tvs != null; targs = targs->tl, tvs = tvs->tl) {
+	type_t t1 = targs->hd;
+	kind_t k1 = conref_val(tvs->hd->kind);
+	free_vars = check_valid_type(loc,te,free_vars,k1,t1);
       }
+      if (targs != null)
+	terr(loc,xprintf("too many type arguments for tunion %s",
+			 qvar2string(tud->name)));
+      if (tvs != null) 
+	terr(loc,xprintf("too few type arguments for tunion %s",
+			 qvar2string(tud->name)));
+      break;
     }
-    xtuniondecl_t xtud = (xtuniondecl_t)*xtudp;
-    // Make relative name absolute (or replace absolute name with itself)
-    if (xtud->name != null) *n = (*xtud->name);
-    // check that the region is well-formed
-    free_vars = check_valid_type(loc,te,free_vars,RgnKind,rgn);
-    break;
-  case &TunionFieldType(TunionFieldInfo{n,targs,f,*tudp,*tufdp}):
-    if (*tudp == null) {
-      try {
-        tuniondecl_t@ tud = lookup_tuniondecl(te,loc,n);
-        *tudp = *tud;
-      } catch {
-      case &Dict::Absent:
-        terr(loc,xprintf("unbound type tunion %s",qvar2string(n)));
-        return free_vars;
-      }
-    }
-    if (*tufdp == null) {
-      try {
-        switch (lookup_ordinary(te,loc,f)) {
-        case &TunionRes(tud2,tufd):
-          *tufdp = tufd;
-          // the tunion declaration should match up with the field's tunion
-          if (tud2 != *tudp) {
-            terr(loc,xprintf("unbound field %s in type tunion %s",
-                             qvar2string(f), qvar2string(n)));
-            return free_vars;
-          }
-          break;
-        default: 
-          terr(loc,xprintf("unbound field %s in type tunion %s",
-                           qvar2string(f), qvar2string(n)));
-          return free_vars;
-        }
-      } catch {
-      case &Dict::Absent:
-        terr(loc,xprintf("unbound field %s in type tunion %s",
-                         qvar2string(f), qvar2string(n)));
-        return free_vars;
-      }
-    }
-    tuniondecl_t tud = (tuniondecl_t)*tudp;
-    tunionfield_t tufd = (tunionfield_t)*tufdp;
-    // Make relative names absolute
-    if (tud->name != null) *n = *tud->name->v;
-    if (tufd->name != null) *f = *tufd->name;
-    list_t<tvar_t> tvs = tud->tvs;
-    for (; targs != null && tvs != null; targs = targs->tl, tvs = tvs->tl) {
-      type_t t1 = targs->hd;
-      kind_t k1 = conref_val(tvs->hd->kind);
-      free_vars = check_valid_type(loc,te,free_vars,k1,t1);
-    }
-    if (targs != null)
-      terr(loc,xprintf("too many type arguments for tunion %s.%s",
-                       qvar2string(n),qvar2string(f)));
-    if (tvs != null) 
-      terr(loc,xprintf("too few type arguments for tunion %s.%s",
-                       qvar2string(n),qvar2string(f)));
     break;
 
-  case &XTunionFieldType(XTunionFieldInfo{n,f,*xtudp,*xtufdp}):
-    if (*xtudp == null) {
-      try {
-        opt_t<xtuniondecl_t@> xtud = lookup_xtuniondecl(te,loc,n);
-        if (xtud == null) {
-          terr(loc,xprintf("unbound type xtunion %s",qvar2string(n)));
-          return free_vars;
-        }
-        *xtudp = (struct XTuniondecl*)(*xtud->v);
-      } catch {
-      case &Dict::Absent:
-        terr(loc,xprintf("unbound type xtunion %s",qvar2string(n)));
+  case &TunionFieldType(TunionFieldInfo{*info,targs}):
+    switch(*info) {
+    case &UnknownTunionfield(UnknownTunionFieldInfo(tname,fname,is_x)):
+      tuniondecl_t  tud;
+      tunionfield_t tuf;
+      try tud = *lookup_tuniondecl(te,loc,tname);//FIX lookup_xtuniondecl needed?
+      catch { case Dict::Absent:
+        terr(loc,xprintf("unbound type tunion %s",qvar2string(tname)));
         return free_vars;
       }
-    }
-    if (*xtufdp == null) {
-      try {
-        switch (lookup_ordinary(te,loc,f)) {
-        case &XTunionRes(xtud2,xtufd):
-          *xtufdp = xtufd;
-          // the xtunion declaration should match up with the field's xtunion
-          if (xtud2 != *xtudp) {
-            terr(loc,xprintf("unbound field %s in type xtunion %s",
-                             qvar2string(f), qvar2string(n)));
+      if(tud->is_xtunion != is_x)
+	terr(loc,xprintf("[x]tunion is different from type declaration %s",
+			 qvar2string(tname)));
+      try 
+	switch(lookup_ordinary(te,loc,fname)) {
+	case &TunionRes(tud2,tuf2):
+	  tuf = tuf2;
+	  if(tud2 != tud) {
+	    terr(loc,xprintf("unbound field %s in type tunion %s",
+                             qvar2string(fname), qvar2string(tname)));
             return free_vars;
           }
-          break;
-        default: 
-          terr(loc,xprintf("unbound field %s in type xtunion %s",
-                           qvar2string(f), qvar2string(n)));
+	  break;
+	default: terr(loc,xprintf("unbound field %s in type tunion %s",
+				  qvar2string(fname), qvar2string(tname)));
           return free_vars;
         }
-      } catch {
-      case &Dict::Absent:
-        terr(loc,xprintf("unbound field %s in type xtunion %s",
-                         qvar2string(f), qvar2string(n)));
+      catch {case Dict::Absent:
+        terr(loc,xprintf("unbound field %s in type tunion %s",
+                         qvar2string(fname), qvar2string(tname)));
         return free_vars;
+      }  
+      *info = new KnownTunionfield(tud,tuf);
+      fallthru(tud,tuf);
+    case &KnownTunionfield(tud,tuf):
+      // check the type arguments are well-formed
+      list_t<tvar_t> tvs = tud->tvs;
+      for (; targs != null && tvs != null; targs = targs->tl, tvs = tvs->tl) {
+	type_t t1 = targs->hd;
+	kind_t k1 = conref_val(tvs->hd->kind);
+	free_vars = check_valid_type(loc,te,free_vars,k1,t1);
       }
+      if (targs != null)
+	terr(loc,xprintf("too many type arguments for tunion %s.%s",
+			 qvar2string(tud->name),qvar2string(tuf->name)));
+      if (tvs != null) 
+	terr(loc,xprintf("too few type arguments for tunion %s.%s",
+			 qvar2string(tud->name),qvar2string(tuf->name)));
+      break;
     }
-    xtuniondecl_t xtud = (xtuniondecl_t)*xtudp;
-    tunionfield_t xtufd = (tunionfield_t)*xtufdp;
-    // Make relative names absolute
-    if (xtud->name != null) *n = *xtud->name;
-    if (xtufd->name != null) *f = *xtufd->name;
     break;
   case &PointerType(PtrInfo{.elt_typ=t1,.rgn_typ=rgn_typ,.nullable=nullable,
                                .tq=tq,.bounds=b}):
@@ -1922,7 +1808,7 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
     }
     if(*sdp == null) {
       try *sdp = lookup_structdecl(te,loc,(qvar_t)tdnopt);
-      catch { case &Dict::Absent:
+      catch { case Dict::Absent:
 	terr(loc,xprintf("unbound type struct %s",
                          qvar2string((qvar_t)tdnopt)));
         return free_vars;
@@ -1952,7 +1838,7 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
     }
     if(*udp == null) {
       try *udp = lookup_uniondecl(te,loc,(qvar_t)tdnopt);
-      catch { case &Dict::Absent:
+      catch { case Dict::Absent:
 	terr(loc,xprintf("unbound type union %s",qvar2string((qvar_t)tdnopt)));
         return free_vars;
       }
@@ -1978,7 +1864,7 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
     // NB: since we called compress *toptp == null
     typedefdecl_t td;
     try td = lookup_typedefdecl(te,loc,tdn);
-    catch { case &Dict::Absent:
+    catch { case Dict::Absent:
       terr(loc,xprintf("unbound typedef name %s",qvar2string(tdn)));
       return free_vars;
     }
@@ -2410,7 +2296,7 @@ static bool cnst_exp(tenv_t te, bool var_okay, exp_t e) {
       default: return var_okay;
       }
     default: return var_okay;
-    } catch { case &Dict::Absent: return false; }
+    } catch { case Dict::Absent: return false; }
 
   case &Conditional_e(e1,e2,e3):
     return (cnst_exp(te,false,e1)
@@ -2436,8 +2322,7 @@ static bool cnst_exp(tenv_t te, bool var_okay, exp_t e) {
 
   case &Primop_e(p,es):     fallthru(es);
   case &Tuple_e(es):        fallthru(es);
-  case &Tunion_e(_,_,es,_,_): fallthru(es);
-  case &XTunion_e(_,es,_,_):
+  case &Tunion_e(_,_,es,_,_):
     for (; es != null; es = es->tl)
       if (!cnst_exp(te,false,es->hd))
         return false;

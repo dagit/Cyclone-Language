@@ -74,12 +74,12 @@ xtunion exn {Toc_Impossible};
 static `a unimp(string s) {
   fprintf(stderr,"%s\n",s);
   fflush(stderr);
-  throw new Toc_Unimplemented;
+  throw Toc_Unimplemented;
 }
 static `a toc_impos(string s) {
   fprintf(stderr,"%s\n",s);
   fflush(stderr);
-  throw new Toc_Impossible;
+  throw Toc_Impossible;
 }
 xtunion exn {Match_error};
 
@@ -288,30 +288,26 @@ static type_t typ_to_c_array(type_t t) {
 }
 static type_t typ_to_c(type_t t) {
   switch (t) {
-  case VoidType:              return t;
+  case VoidType:               return t;
       // FIX:  Typically this happens with throw, and void seems to be
       // the right thing to return.  But, I'm not sure.
   case &Evar(_,null,_):        return VoidType;
   case &Evar(_,&Opt{.v=t2},_): return typ_to_c(t2);
     // type variables (`a) are mapped to void*
   case &VarType(_):            return void_star_typ();
-  case &TunionType(TunionInfo{n,_,_,_}):
-    // tunion foo is mapped to foo -- see tuniondecl_to_c below
-    return new TypedefType((typedef_name_t)n, null, new Opt(void_star_typ()));
-  case &XTunionType(XTunionInfo{n,_,_}):
-    // xtunion bar is mapped to bar -- see xtuniondecl_to_c below
-    // FIX:  the actual type appears both here and in xtuniondecl_to_c,
-    // get rid of the repetition
-    return new TypedefType(n,null,
-                           new Opt(star_typ(strct(_xtunion_struct_sp),HeapRgn,
-                                            mt_tq)));
-  case &TunionFieldType(TunionFieldInfo{n,ts,fn,tud,tufd}):
-    // for fields that carry no arguments, it's an unsigned int
+  case &TunionType(TunionInfo{&KnownTunion(tud),_,_}): return void_star_typ();
+  case &TunionType(_): throw impos("unresolved TunionType");
+  case &TunionFieldType(TunionFieldInfo{&KnownTunionfield(tud,tuf),_}):
+    // for tunion fields that carry no arguments, it's an unsigned int
+    // for xtunion fields that carry no argument, it's a char *.
     // for fields that carry arguments, it's a struct _Field_struct;
-    if (tufd->typs == null) return uint_t;
-    else return strctq(collapse_qvar_tag(fn,"_struct"));
-  case &XTunionFieldType(XTunionFieldInfo{n,fn,tud,tufd}):
-    return strctq(collapse_qvar_tag(fn,"_struct"));
+    if (tuf->typs == null) 
+      if(tud->is_xtunion)
+	return star_typ(uchar_t,HeapRgn,mt_tq);
+      else
+	return uint_t;
+    else return strctq(collapse_qvar_tag(tuf->name,"_struct"));
+  case &TunionFieldType(_): throw impos("unresolved TunionFieldType");
   case &PointerType(PtrInfo{t2,_,_,tq,bnds}):
     // t2? maps to struct tagged_ptr_t2, where we define
     // struct tagged_ptr_t2 { t2 *curr; t2 *base; t2 *last_plus_one; }
@@ -411,10 +407,8 @@ static bool atomic_typ(type_t t) {
     // note even without this we'll allocate Position::seg_t with atomic.
   case &StructType(_,_,_): return false;
   case &TunionType(_):     return false;
-  case &XTunionType(_):    return false;
-  case &TunionFieldType(TunionFieldInfo{_,_,_,_,tufd}):
-    return tufd->typs == null;
-  case &XTunionFieldType(_): return false;
+  case &TunionFieldType(TunionFieldInfo{&KnownTunionfield(tud,tuf),_}):
+    return tuf->typs == null;
     // FIX: could make this true now since we only allow bits in unions,
     // but it would be an evil bug to track down if we had to deal with this.
   case &UnionType(_,_,_):  return false; 
@@ -968,7 +962,7 @@ static exp_t printf_to_c(primop_t p, opt_t<exp_t> aopt,
 //              Translation of Expressions                   //
 ///////////////////////////////////////////////////////////////
 // Should really break this into smaller functions and factor
-// out common code (e.g., Tunion and XTunion are the same.)
+// out common code
 static type_t get_c_typ(exp_t e) {
   if (e->topt == null) toc_impos("Missing type in primop ");
   return typ_to_c(e->topt->v);
@@ -1330,7 +1324,7 @@ static void exp_to_c(env_t nv, exp_t e) {
   case &Var_e(qv,b): 
     try e->r = Dict::lookup(nv->varmap,qv)->r;
     catch {
-    case &Dict::Absent:
+    case Dict::Absent:
        toc_impos(xprintf("Can't find %s in exp_to_c, Var\n", qvar2string(qv)));
        return;
     }
@@ -1956,18 +1950,18 @@ static void exp_to_c(env_t nv, exp_t e) {
     }
     break;
 
-  case &Tunion_e(_,_,null,ed,ef):
-    qvar_t qv = ef->name;
+  case &Tunion_e(_,_,null,tud,tuf):
+    qvar_t qv = tuf->name;
     // non-value-carrying constructor -- just use the constructor name
     // (see tuniondecl_to_c below)
-    if (!nv->toplevel)
+    if (tud->is_xtunion || !nv->toplevel)
       e->r = var_exp(qv,DL)->r;
     else {
       // FIX: we should get the tag from a centralized place and we
       // might as well use it everywhere.
       // we can't use the variable name at toplevel
       int tag_count = 0;
-      let fields = (ed->fields == null) ? null : ed->fields->v;
+      let fields = (tud->fields == null) ? null : tud->fields->v;
       while (qvar_cmp(qv,fields->hd->name) != 0) {
 	if (fields->hd->typs == null) tag_count++;
 	fields = fields->tl;
@@ -1975,9 +1969,9 @@ static void exp_to_c(env_t nv, exp_t e) {
       e->r = uint_exp(tag_count,DL)->r;
     }
     break;
-  case &Tunion_e(_,_,es,ed,ef):
-    let qv   = ef->name;
-    let tqts = ef->typs;
+  case &Tunion_e(_,_,es,tud,tuf):
+    let qv   = tuf->name;
+    let tqts = tuf->typs;
 
     let x = temp_var();
     let xexp = var_exp(x,DL);
@@ -1985,13 +1979,19 @@ static void exp_to_c(env_t nv, exp_t e) {
     // we have to do this differently for the toplevel
     if (nv->toplevel) {
       // {.tag = i, .f1 = e1, ... , .fn = en};
-      // FIX: we should get the tag from a centralized place and we
-      // might as well use it everywhere.
-      int tag_count = 0;
-      let fields    = (ed->fields == null) ? null : ed->fields->v;
-      while (qvar_cmp(qv,fields->hd->name) != 0) {
-	if (fields->hd->typs != null) tag_count++;
-	fields = fields->tl;
+      exp_t tag_exp;
+      if(tud->is_xtunion) {
+	tag_exp = var_exp(qv,DL);
+      } else {
+	// FIX: we should get the tag from a centralized place and we
+	// might as well use it everywhere.
+	int tag_count = 0;
+	let fields    = (tud->fields == null) ? null : tud->fields->v;
+	while (qvar_cmp(qv,fields->hd->name) != 0) {
+	  if (fields->hd->typs != null) tag_count++;
+	  fields = fields->tl;
+	}
+	tag_exp = uint_exp(tag_count,DL);
       }
       let dles = null;
       for(; es != null; es = es->tl, tqts = tqts->tl) {
@@ -2002,7 +2002,6 @@ static void exp_to_c(env_t nv, exp_t e) {
 	  cur_e = cast_exp(field_typ,cur_e,DL);
 	dles = new{List(new{$(null,cur_e)},dles)};
       }
-      exp_t tag_exp = uint_exp(tag_count,DL);
       dles = new{List(new{$(null,tag_exp)},imp_rev(dles))};
       e->r = unresolvedmem_exp(new Opt(collapse_qvar_tag(qv,"_struct")),
                                dles,DL)->r;
@@ -2012,42 +2011,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       // Due to GCC bug we can't just use a struct expression.
       let rev_assign =
 	new List(assign_stmt(structmember_exp(xexp,tag_sp,DL),
-                             var_exp(collapse_qvar_tag(qv,"_tag"),DL),DL),
-                 null);
-      for (int i = 1; es != null; es = es->tl, i++, tqts = tqts->tl) {
-	exp_t cur_e = es->hd;
-	type_t field_typ = typ_to_c((*tqts->hd)[1]);
-	exp_to_c(nv,cur_e);
-	if (is_void_star(field_typ))
-	  cur_e = cast_exp(field_typ,cur_e,DL);
-	let a = assign_stmt(structmember_exp(xexp,new {xprintf("f%d",i)},
-                                             DL),cur_e,DL);
-	rev_assign = new List(a,rev_assign);
-      }
-      let final_stmt = exp_stmt(xexp,DL);
-      let s2         = seq_stmts(imp_rev(new List(final_stmt,rev_assign)),DL);
-      e->r = stmt_exp(declare_stmt(x,strct_typ,null,s2,DL),DL)->r;
-    }
-    break;
-  case &XTunion_e(_,es,xd,ef):
-    let qv   = ef->name;
-    let tqts = ef->typs;
-    exp_t tag_exp = var_exp(collapse_qvar_tag(qv,"_tag"),DL);
-    if (nv->toplevel) {
-      // {.tag = i, .f1 = e1, ... , .fn = en};
-      list_t<$(list_t<designator_t>,exp_t)@> dles = 
-	List::map_c(add_designator,nv,es);
-      dles = new List(new $(null,tag_exp),dles);
-      e->r = unresolvedmem_exp(new Opt(collapse_qvar_tag(qv,"_struct")),
-                               dles,DL)->r;
-    } else {
-      // avoid GCC bug as in Tunion_e case
-      let x = temp_var();
-      let xexp = var_exp(x,DL);
-      let strct_typ = strctq(collapse_qvar_tag(qv,"_struct"));
-      let rev_assign =
-	new List(assign_stmt(structmember_exp(xexp,tag_sp,DL),
-                             var_exp(collapse_qvar_tag(qv,"_tag"),DL),DL),
+                             var_exp(qv,DL),DL),
                  null);
       for (int i = 1; es != null; es = es->tl, i++, tqts = tqts->tl) {
 	exp_t cur_e = es->hd;
@@ -2149,29 +2113,33 @@ xlate_pat(env_t nv, type_t t, exp_t r, exp_t path, pat_t p,
   case &Float_p(f):
     s = if_eq_goto_stmt(r, float_exp(f,DL),     succ_lab,fail_lab); break;
 
-  case &Enum_p(q,ed,ef):
-    s = if_eq_goto_stmt(r, new_exp(new Enum_e(q,ed,ef),null), 
+  case &Enum_p(ed,ef):
+    s = if_eq_goto_stmt(r, new_exp(new Enum_e(ef->name,ed,ef),null), 
                         succ_lab, fail_lab); 
     break;
 
-  case &Tunion_p(qv,ts,null,ed,ef):
+  case &Tunion_p(tud,tuf,ts,null):
     // when ps == null:  if (r == qv) goto succ_lab else goto fail_lab;
-    s = if_eq_goto_stmt(cast_exp(sint_t,r,DL), 
-                        var_exp(qv,DL), succ_lab, fail_lab);
+    // Note: This should be correct for tunion and xtunion!
+    exp_t cmp_exp = var_exp(tuf->name,DL);
+    if(!tud->is_xtunion)
+      cmp_exp = cast_exp(void_star_typ(),cmp_exp,DL);
+    s = if_eq_goto_stmt(r, cmp_exp, succ_lab, fail_lab);
     break;
 
-  case &Pointer_p(&Pat{&Tunion_p(qv,ts,ps,ed,ef),_,_}) && ps != null:
-    // when ps == p1,...,pn:
+  case &Pointer_p(&Pat{&Tunion_p(tud,tuf,ts,ps),_,_}) && ps != null:
+    // when ps is p1,...,pn:
     //   if ((unsigned int)r > max_tag && ((t)r)->tag == qv_tag)
     //      <similar to tuple and struct patterns>
     //   else goto fail_lab
+    // (no max tag check on xtunions)
     // FIX: When type is TunionField, can avoid all checks
     // It's unfortunate that we have to always check that r > max_tag.
     // If we had the decision tree information, we could avoid doing so.
     list_t<stmt_t> ss = null;
-    int cnt = List::length(ps);
-    qvar_t efstrct = collapse_qvar_tag(ef->name,"_struct");
-    exp_t rcast   = cast_exp(cstar_typ(strctq(efstrct),mt_tq),r,DL);
+    int    cnt      = List::length(ps);
+    qvar_t tufstrct = collapse_qvar_tag(tuf->name,"_struct");
+    exp_t  rcast    = cast_exp(cstar_typ(strctq(tufstrct),mt_tq),r,DL);
     for(let rps = List::rev(ps); rps != null; rps = rps->tl, cnt--) {
       let p2  = rps->hd;
       let v   = temp_var();
@@ -2195,75 +2163,39 @@ xlate_pat(env_t nv, type_t t, exp_t r, exp_t path, pat_t p,
       ss = new List(label_stmt(lab,s2,DL),ss);
       succ_lab = lab;
     }
-    unsigned int max_tag = 0;
-    for (let fs = ed->fields->v; fs != null; fs = fs->tl) {
-      let f = fs->hd;
-      if (f->typs == null) {
-        max_tag++;
-      }
-    }
-    exp_t max_tag_exp = uint_exp(max_tag,DL);
-    exp_t e3 = cast_exp(cstar_typ(strct(_tunion_struct_sp),mt_tq),
-                      r,DL);
-    exp_t e1 = structarrow_exp(e3,tag_sp,DL);
-    exp_t e5 = gt_exp(cast_exp(uint_t,r,DL), max_tag_exp, DL);
-    exp_t e  = var_exp(collapse_qvar_tag(qv,"_tag"),DL);
-    exp_t test_exp = 
-      (max_tag > 0) ? and_exp(e5,eq_exp(e1,e,DL),DL) : eq_exp(e1,e,DL);
-    s = ifthenelse_stmt(test_exp,
-                        seq_stmts(ss,DL),
-                        goto_stmt(fail_lab,DL), DL);
-    break;
-  case &Pointer_p(&Pat{&XTunion_p(qv,ts,ps,xd,xf),_,_}):
-    // similar to tunion patterns except that we cast the root to an 
-    // _xtunion_struct
-    // and compare r->tag against qv (and then the nested patterns and so
-    // forth.)  Lots of casting needed to get this to type-check.
-    // Note: There are no non-pointer variants, hence no max tag.
-    // FIX: When type is XTunionField, can avoid all checks
-    list_t<stmt_t> ss = null;
-    int cnt = List::length(ps);
-    qvar_t xfstrct = collapse_qvar_tag(xf->name,"_struct");
-    exp_t rcast = cast_exp(cstar_typ(strctq(xfstrct),mt_tq),r,DL);
-    for(let rps = List::rev(ps); rps != null; rps = rps->tl, cnt--) {
-      let p2  = rps->hd;
-      let v   = temp_var();
-      let t2  = p2->topt->v;
-      let lab = fresh_label();
-      decls = new List(new $(v,typ_to_c(t2)),decls);
-      let result = xlate_pat(nv,t2,var_exp(v,DL),
-			   structarrow_exp(rcast,new {xprintf("f%d",cnt)},
-					   DL),p2,
-			   succ_lab,fail_lab,decls);
-      nv = result[0];
-      decls = result[1];
-      let s3 = result[2];
-      let s1 = assign_stmt(var_exp(v,DL),
-                           structarrow_exp(rcast,new {xprintf("f%d",cnt)},DL),
-                           DL);
-      let s2 = seq_stmt(s1,s3,DL);
-      ss = new List(label_stmt(lab,s2,DL),ss);
-      succ_lab = lab;
-    }
-    if (ps == null) {
-      s = if_eq_goto_stmt(structarrow_exp(r,tag_sp,DL),
-			  var_exp(collapse_qvar_tag(qv,"_tag"),DL),
-			  succ_lab,
-			  fail_lab);
-    } else {
+    exp_t test_exp;
+    if(tud->is_xtunion) {
       exp_t e3 = cast_exp(cstar_typ(strct(_xtunion_struct_sp),mt_tq),
-			r,DL);
+			  r,DL);
       exp_t e2 = deref_exp(e3,DL);
-      exp_t e1 = structmember_exp(e2,tag_sp,DL);
-      exp_t e  = var_exp(collapse_qvar_tag(qv,"_tag"),DL);
+      exp_t e1 = cast_exp(void_star_typ(),structmember_exp(e2,tag_sp,DL),DL);
+      exp_t e  = var_exp(tuf->name,DL);
+      test_exp = eq_exp(e1,e,DL);
       s = ifthenelse_stmt(eq_exp(e1,e,DL),
 			  seq_stmts(ss,DL),
 			  goto_stmt(fail_lab,DL), DL);
+    } else {
+      unsigned int max_tag = 0;
+      for (let fs = tud->fields->v; fs != null; fs = fs->tl) {
+	let f = fs->hd;
+	if (f->typs == null) {
+	  max_tag++;
+	}
+      }
+      exp_t max_tag_exp = uint_exp(max_tag,DL);
+      exp_t e3 = cast_exp(cstar_typ(strct(_tunion_struct_sp),mt_tq),
+			  r,DL);
+      exp_t e1 = structarrow_exp(e3,tag_sp,DL);
+      exp_t e5 = gt_exp(cast_exp(uint_t,r,DL), max_tag_exp, DL);
+      exp_t e  = var_exp(tuf->name,DL);
+      test_exp = (max_tag>0) ? and_exp(e5,eq_exp(e1,e,DL),DL) : eq_exp(e1,e,DL);
     }
+    s = ifthenelse_stmt(test_exp,
+			seq_stmts(ss,DL),
+			goto_stmt(fail_lab,DL), DL);
     break;
 
-  case &Tunion_p(_,_,ps,_,_):  fallthru(ps);
-  case &XTunion_p(_,_,ps,_,_): fallthru(ps);
+  case &Tunion_p(_,_,_,ps): fallthru(ps); // okay for xtunion too
   case &Tuple_p(ps):
     // given the pattern $(p1,p2,...,pn)
     //    v1 = r->f1; if (matches(v1,p1)) goto L1 else goto fail_lab;
@@ -2306,7 +2238,7 @@ xlate_pat(env_t nv, type_t t, exp_t r, exp_t path, pat_t p,
           f=f2;
           break;
         default:  // FIX:  assumes one field name designator
-          throw new Match_error;
+          throw Match_error;
       }
       let v   = temp_var();
       let t2  = p2->topt->v;
@@ -2427,9 +2359,9 @@ static void xlate_switch(env_t nv, stmt_t whole_s, exp_t e, list_t<switch_clause
   var_t  end_l = fresh_label();
   // for each case, generate a test label and an entry label
   list_t<$(var_t,var_t,switch_clause_t)@> lscs = List::map(gen_label,scs);
-  list_t<stmt_t>                test_stmts = null;
-  list_t<env_t>                 nvs        = null;
-  list_t<$(qvar_t,type_t)@>        decls      = null;
+  list_t<stmt_t>            test_stmts = null;
+  list_t<env_t>             nvs        = null;
+  list_t<$(qvar_t,type_t)@> decls      = null;
   // generate the tests for each case, branching to the case's
   // label on success and to the next test on false.
   // do tests backwards so as to get vars for fallthrus
@@ -2885,189 +2817,141 @@ static void uniondecl_to_c(uniondecl_t u) {
 // tunion declarations -- tricky
 // for "tunion foo {Bar,Blah,Baz(t1,t2,t3),Baf(t4,t5)}" we generate
 //   typedef void *foo;
-//   uint Bar = 0;
-//   uint Blah = 1;
-//   int _Baz_tag = 0;
+//   static const int Bar  = 0;
+//   static const int Blah = 1;
+//   static const int Baz  = 0;
 //   struct _Baz_struct {
-//     int tag;  // always _Baz_tag
+//     int tag;  // always == Baz
 //     t1 f1;
 //     t2 f2;
 //     t3 f3;
 //   }
-//   int _Baf_tag = 1;
+//   static const int Baf = 1;
 //   struct _Baf_struct {
-//     int tag;  // always _Baf_tag
+//     int tag;  // always == Baf
 //     t4 f1;
 //     t5 f2;
 //   }
+// for xtunion, we pull a really slimy trick: By using char arrays instead
+// of ints, the uses get promoted to addresses just like we want.
 // When the tunion is "extern" then we don't generate initializers
 // for the tags (that should be done elsewhere.)
 //
-// NB: we allow any number of extern tunion declarations and we require
-// a single non-extern tunion declaration.  We will need to generate a
-// declaration for, e.g., struct _Baz_struct, only at the FIRST tunion
-// declaration we encounter -- otherwise we'd have multiple declarations
-// of the same struct in the output.  Therefore we keep track of the
-// structs we've defined so far.
-//
-static opt_t<Dict::dict_t<var_t,tuniondecl_t>> tunions_so_far = null;
-static void tuniondecl_to_c(tuniondecl_t ed) {
-  let n = ed->name->v;
+// NB: we allow any number of repeated declarations but we can only
+//     declare and initialize global variables once.  So we keep track
+//     of what we've seen so far.  And we make the globals static so that
+//     extern and what not is only a link-checker thing.  Unfortunately,
+//     the static trick doesn't work for xtunion, which uses the addresses.
+static opt_t<Set::set_t<qvar_t>> tunions_so_far = null;
+static void tuniondecl_to_c(tuniondecl_t tud) {
   if (tunions_so_far == null)
-    tunions_so_far = new Opt(Dict::empty(String::zstrptrcmp));
-  bool seen_before;
-  bool seen_defn_before;
-  let dopt = Dict::lookup_opt(tunions_so_far->v, (*n)[1]);
-  if (dopt == null) {
-    seen_before      = false;
-    seen_defn_before = false;
-    tunions_so_far->v  = Dict::insert(tunions_so_far->v,(*n)[1],ed);
-  } else {
-    seen_before = true;
-    if (dopt->v->fields == null) {
-      seen_defn_before = false;
-      tunions_so_far->v = Dict::insert(tunions_so_far->v,(*n)[1],ed);
-    } else
-      seen_defn_before = true;
-  }
+    tunions_so_far = new Opt(Set::empty(qvar_cmp));
+  let n = tud->name;
+  if(tud->fields == null)
+    return;
+  if(Set::member(tunions_so_far->v, n))
+    return;
+  tunions_so_far->v = Set::insert(tunions_so_far->v, n);
 
-  if (!seen_before) {
-    // add "typedef void *n" to the declarations
-    let tdef = new Typedefdecl{.name=n,.tvs=null,.defn=void_star_typ()};
-    result_decls = new List(new_decl(new Typedef_d(tdef),DL),result_decls);
-  }
-  if(!seen_defn_before) {
-    // counters for the tags
-    int tag_count = 0;
-    int box_count = 0;
-    for (let fields = (ed->fields == null) ? null : ed->fields->v;
-	 fields != null; fields = fields->tl) {
-      tunionfield_t f = fields->hd;
-      if (f->typs == null) {
-	// Declare an integer constant for the unboxed field
-	exp_opt_t eopt = (//(ed->sc == Extern) ? null : 
-			  signed_int_exp(tag_count++,DL));
-	let vd = static_vardecl(f->name, uint_t, eopt);
-	//	vd->sc = scope_to_c(ed->sc);
-	vd->tq = Tqual{.q_const=true, .q_volatile=false, .q_restrict=false};
-	result_decls = new List(new_decl(new Var_d(vd),DL),result_decls);
-      } else {
-	// Declare an integer constant for the tag and a struct for the field
-	exp_opt_t eopt = (//(ed->sc == Extern) ? null : 
-			  signed_int_exp(box_count++,DL));
-	let vd = static_vardecl(collapse_qvar_tag(f->name,"_tag"), sint_t, eopt);
-	//	vd->sc = scope_to_c(ed->sc);
-	vd->tq = Tqual{.q_const=true, .q_volatile=false, .q_restrict=false};
-	result_decls = new List(new_decl(new Var_d(vd),DL),result_decls);
-	// compute the fields for the struct, adding in a tag field
-        let fs = null;
-        int i  = 1;
-        for (let ts = f->typs; ts != null; ts = ts->tl, i++) {
-          let fname = (stringptr)(new xprintf("f%d",i));
-          let f = new Structfield(fname,(*ts->hd)[0],
-				  typ_to_c_array((*ts->hd)[1]),null,null);
-          fs = new List(f,fs);
-        }
-        fs = List::imp_rev(fs);
-        fs = new List(new Structfield(tag_sp,mt_tq,sint_t,null,null),fs);
-        let sd = 
-          new Structdecl{.sc = Public,
-                         .name = new Opt(collapse_qvar_tag(f->name,"_struct")),
-                         .tvs = null, 
-                         .fields = new Opt(fs), .attributes = null};
-        result_decls = new List(new_decl(new Struct_d(sd),DL),result_decls);
+  // counters for the tags
+  int tag_count = 0;
+  int box_count = 0;
+  for (let fields = tud->fields->v; fields != null; fields = fields->tl) {
+    tunionfield_t f = fields->hd;
+    if (f->typs == null) {
+      // Declare an integer constant for the unboxed field
+      exp_opt_t eopt = signed_int_exp(tag_count++,DL);
+      vardecl_t vd   = static_vardecl(f->name, sint_t, eopt);
+      vd->tq = Tqual{.q_const=true, .q_volatile=false, .q_restrict=false};
+      result_decls = new List(new_decl(new Var_d(vd),DL),result_decls);
+    } else {
+      // Declare an integer constant for the tag and a struct for the field
+      exp_opt_t eopt = signed_int_exp(box_count++,DL);
+      vardecl_t vd   = static_vardecl(f->name, sint_t, eopt);
+      vd->tq = Tqual{.q_const=true, .q_volatile=false, .q_restrict=false};
+      result_decls = new List(new_decl(new Var_d(vd),DL),result_decls);
+      // compute the fields for the struct, adding in a tag field
+      let fs = null;
+      int i  = 1;
+      for (let ts = f->typs; ts != null; ts = ts->tl, i++) {
+	let fname = (stringptr)(new xprintf("f%d",i));
+	let f = new Structfield(fname,(*ts->hd)[0],
+				typ_to_c_array((*ts->hd)[1]),null,null);
+	fs = new List(f,fs);
       }
+      fs = List::imp_rev(fs);
+      fs = new List(new Structfield(tag_sp,mt_tq,sint_t,null,null),fs);
+      let sd = 
+	new Structdecl{.sc = Public,
+		       .name = new Opt(collapse_qvar_tag(f->name,"_struct")),
+		       .tvs = null, 
+		       .fields = new Opt(fs), 
+		       .attributes = null};
+      result_decls = new List(new_decl(new Struct_d(sd),DL),result_decls);
     }
   }
 }
 
 // xtunion declarations -- similar to tunion declarations
-// For the declaration of a new xtunion, e.g.,
-//   "xtunion foo;"
-// we generate
-//   "typedef struct _xtunion_struct *foo".
-// struct _xtunion_struct is defined in cyc_include->h as
-//   "struct _xtunion_struct { char *tag; }"
 // For a declaration extending an existing xtunion, e.g.,
 //   "xtunion foo {Bar,Baz(t1,t2)}"
 // we generate
-//   char _Bar_tag[4] = "Bar";
-//   struct _Bar_struct { char *tag; };
-//   char _Baz_tag[4] = "Baz";
-//   struct _Baz_struct { char *tag; t1 f1; t2 f2; };
+//   char Bar[4] = "\0\0\0\0Bar";
+//   struct Bar_struct { char *tag; };
+//   char Baz[4] = "\0\0\0\0Baz";
+//   struct Baz_struct { char *tag; t1 f1; t2 f2; };
 // When the xtunion is extern, then we don't do initializers for the tags.
+// The 0s are a crazy trick for letting void variants not have to be boxed
+// (value variants can still follow the pointer and then their check fails)
 //
 // Thus "Baz(e1,e2)" maps to
 // ({struct _Baz_struct *t =
 //     (struct _Baz_struct*)malloc(sizeof(struct _Baz_struct));
-//   *t = (struct _Baz_struct){->tag=_Baz_tag, ->f1 = e1, ->f2 = e2};
+//   *t = (struct _Baz_struct){.tag=Baz, .f1 = e1, .f2 = e2};
 //   t;})
-//
-// We use the same trick as with tunions to avoid struct redefinitions
-// when there are multiple declarations (all but one, extern) for the
-// same xtunion field.
-//
-static opt_t<Dict::dict_t<var_t,xtuniondecl_t>> xtunions_so_far = null;
-static void xtuniondecl_to_c(xtuniondecl_t xd) {
+// FIX: Broken if there's more than one non-extern definition
+static opt_t<Set::set_t<qvar_t>> xtunion_fields_so_far = null;
+static void xtuniondecl_to_c(tuniondecl_t xd) {
+  if (xtunion_fields_so_far == null)
+    xtunion_fields_so_far = new Opt(Set::empty(qvar_cmp));
+  if(xd->fields == null)
+    return;
   let n = xd->name;
+  for (let fs = xd->fields->v; fs != null; fs = fs->tl) {
+    tunionfield_t f  = fs->hd;
+    stringptr     fn = (*f->name)[1];
+    let       sz_exp  = uint_exp((*fn).size+4,DL);
+    let       tag_typ = new ArrayType(uchar_t,mt_tq,sz_exp);
+    exp_opt_t initopt = null;
+    if (xd->sc != Extern && !Set::member(xtunion_fields_so_far->v,f->name))
+      initopt = string_exp(String::strconcat("\0\0\0\0",*fn),DL);
+    let tag_decl = new_vardecl(f->name, tag_typ, initopt);
+    tag_decl->sc = xd->sc;
+    result_decls = new List(new_decl(new Var_d(tag_decl),DL),result_decls);
+    if(Set::member(xtunion_fields_so_far->v,f->name))
+      continue;
+    xtunion_fields_so_far->v = Set::insert(xtunion_fields_so_far->v,f->name);
 
-  if (xd->fields == null) {
-    let t  = cstar_typ(strct(_xtunion_struct_sp),mt_tq);
-    let td = new Typedefdecl{.name = n, .tvs = null, .defn = t};
-    result_decls = new List(new_decl(new Typedef_d(td),DL),result_decls);
-  } else {
-    if (xtunions_so_far == null)
-      xtunions_so_far = new Opt(Dict::empty(String::zstrptrcmp));
-    for (let fs = xd->fields; fs != null; fs = fs->tl) {
-      tunionfield_t f = fs->hd;
-      stringptr fn      = (*f->name)[1];
-      let       sz_exp  = uint_exp((*fn).size,DL);
-      let       tag_typ = new ArrayType(uchar_t,mt_tq,sz_exp);
-      exp_opt_t initopt = null;
-      if (xd->sc != Extern)
-	initopt = string_exp(*fn,DL);
-      let tag_decl = new_vardecl(collapse_qvar_tag(f->name,"_tag"),
-                                 tag_typ, initopt);
-      tag_decl->sc = xd->sc;
-      result_decls = new List(new_decl(new Var_d(tag_decl),DL),result_decls);
-
-      bool seen_before;
-      bool seen_defn_before;
-      let dopt = Dict::lookup_opt(xtunions_so_far->v,fn);
-      if (dopt == null) {
-	seen_before      = false;
-	seen_defn_before = false;
-	xtunions_so_far->v = Dict::insert(xtunions_so_far->v,fn,xd);
-      } else {
-	seen_before = true;
-	if (dopt->v->fields == null) {
-	  xtunions_so_far->v = Dict::insert(xtunions_so_far->v,fn,xd);
-	  seen_defn_before = false;
-	} else
-	  seen_defn_before = true;
+    if(f->typs != null) {
+      list_t<structfield_t> fields = null;
+      int i = 1;
+      for (let tqts = f->typs; tqts != null; tqts = tqts->tl,i++) {
+	let field_n = (stringptr)(new {xprintf("f%d",i)});
+	let newf    = new Structfield(field_n,(*tqts->hd)[0],
+				      typ_to_c_array((*tqts->hd)[1]),null,null);
+	fields = new List(newf,fields);
       }
-
-      if (!seen_before) {
-        list_t<structfield_t> fields = null;
-        int i = 1;
-        for (list_t<$(tqual_t,type_t)@> ts = f->typs; ts != null; ts = ts->tl,i++) {
-	  let field_n = (stringptr)(new {xprintf("f%d",i)});
-          let newf = new Structfield(field_n,(*ts->hd)[0],
-                                     typ_to_c_array((*ts->hd)[1]),null,null);
-          fields = new List(newf,fields);
-        }
-        fields = new List(new Structfield(tag_sp,mt_tq,
-                                          cstar_typ(uchar_t,mt_tq),null,null),
-                       List::imp_rev(fields));
-        let strct_decl =
-	  new Structdecl{.sc = Public,
-                         .name = new Opt(collapse_qvar_tag(f->name,"_struct")),
-                         .tvs    = null,
-                         .fields = new Opt(fields),
-                         .attributes = null};
-        result_decls = new List(new_decl(new Struct_d(strct_decl),DL),
-				result_decls);
-      }
+      fields = new List(new Structfield(tag_sp,mt_tq,
+					cstar_typ(uchar_t,mt_tq),null,null),
+			List::imp_rev(fields));
+      let strct_decl =
+	new Structdecl{.sc = Public,
+		       .name = new Opt(collapse_qvar_tag(f->name,"_struct")),
+		       .tvs    = null,
+		       .fields = new Opt(fields),
+		       .attributes = null};
+      result_decls = new List(new_decl(new Struct_d(strct_decl),DL),
+			      result_decls);
     }
   }
 }
@@ -3171,10 +3055,10 @@ static env_t decls_to_c(env_t nv, list_t<decl_t> ds, bool top) {
       result_decls = new List(d,result_decls);
       break;
     case &Tunion_d(tud):
-      tuniondecl_to_c(tud);
-      break;
-    case &XTunion_d(xtud):
-      xtuniondecl_to_c(xtud); 
+      if(tud->is_xtunion)
+	xtuniondecl_to_c(tud);
+      else
+	tuniondecl_to_c(tud);
       break;
     case &Enum_d(ed):
       enumdecl_to_c(nv,ed);
@@ -3207,7 +3091,7 @@ static void init() {
   fresh_label_counter = 0;
   structs_so_far = null;
   tunions_so_far = null;
-  xtunions_so_far = null;
+  xtunion_fields_so_far = null;
 }
 
 // The entry point:  translate the list of Cyclone declarations to

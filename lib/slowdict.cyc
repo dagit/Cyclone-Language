@@ -78,7 +78,7 @@ hdict_t<`a,`b,`e> insert(hdict_t<`a,`b,`e> d, `a key, `b data) {
 hdict_t<`a,`b,`e> insert_new(hdict_t<`a,`b,`e> d, `a key, `b data) {
   // somewhat wasteful this way (makes two new top nodes)
   if (splay(d->reln, key, d->tree))
-    throw new Present;
+    throw Present;
   return insert(d, key, data);
 }
 
@@ -99,7 +99,7 @@ hdict_t<`a,`b,`e> singleton(int comp(`a,`a;`e),`a key,`b data) {
     case &Node(nr): return nr->v->data;
     case Leaf:     throw new Core::Impossible("Dict::lookup");
   }
-  throw new Absent;
+  throw Absent;
 }
 
 Core::opt_t<`b> lookup_opt(hdict_t<`a,`b,`e> d,`a key) {
@@ -140,7 +140,7 @@ hdict_t<`a,`b,`e> delete(hdict_t<`a,`b,`e> d,`a key) {
 hdict_t<`a,`b,`e> delete_present(hdict_t<`a,`b,`e> d,`a key) {
   let d2 = delete(d,key);
   if (d == d2)
-    throw new Absent;
+    throw Absent;
   return d2;
 }
 
@@ -263,7 +263,7 @@ hdict_t<`a,`c,`e> map_c(`c f(`d,`b), `d env, hdict_t<`a,`b,`e> d) {
 
 $(`a,`b)@ choose(hdict_t<`a,`b,`e> d) {
   switch (d->tree) {
-  case Leaf:     throw new Absent;
+  case Leaf:      throw Absent;
   case &Node(nr): return new $(nr->v->key, nr->v->data);
   }
 }

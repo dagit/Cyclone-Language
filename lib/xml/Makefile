@@ -10,9 +10,9 @@ CYCLEX=$(CYCDIR)/bin/cyclex.exe
 
 CFLAGS= -fwritable-strings -I$(CYCDIR)
 
-CYC_FLAGS=-I $(CYCDIR)/lib -tc -toc -pp #-check_null
+CYC_FLAGS=-I $(CYCDIR)/lib -tc -toc -pp
 
-LIB=$(CYCDIR)/bin/cyclib.a
+LIB=../cyclib.a
 
 SRCS=xml xmlparse_tab xmlscan xmldump
 

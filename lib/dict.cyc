@@ -54,7 +54,7 @@ bool member(hdict_t<`a,`b,`e> d, `a key) {
     else if (i > 0) t = t->right;
     else return t->key_val[1];
   }
-  throw new Absent;
+  throw Absent;
 }
 
 Core::opt_t<`b> lookup_opt(hdict_t<`a,`b,`e> d, `a key) {
@@ -116,7 +116,7 @@ hdict_t<`a,`b,`e> insert(hdict_t<`a,`b,`e> d,`a key,`b data) {
 // notice we descend twice -- we can live
 hdict_t<`a,`b,`e> insert_new(hdict_t<`a,`b,`e> d,`a key,`b data) {
   if(member(d,key))
-    throw new Absent;
+    throw Absent;
   return insert(d, key, data);
 }
 
@@ -257,7 +257,7 @@ hdict_t<`a,`c,`e> map_c(`c f(`d,`b),`d env,hdict_t<`a,`b,`e> d) {
 
 $(`a,`b)@ choose(hdict_t<`a,`b,`e> d) {
   if(d->t == null)
-    throw new Absent;
+    throw Absent;
   return new $(d->t->key_val[0], d->t->key_val[1]);
 }
 

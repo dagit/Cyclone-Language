@@ -428,29 +428,30 @@ doc_t ntyp2doc(type_t t) {
       // we cannot print its kind after the underscore for _::E doesn't parse
     }
     break;
-  case &TunionType(TunionInfo{n,ts,r,_}):
-    switch (compress(r)) {
-    case HeapRgn: 
-      s = cat3(text("tunion "),qvar2doc(n),tps2doc(ts)); break;
-    default:
-      s = cat5(text("tunion "),typ2doc(r),text(" "),qvar2doc(n),tps2doc(ts));
+  case &TunionType(TunionInfo(tu_info,ts,r)):
+    switch(tu_info) {
+    case &UnknownTunion(UnknownTunionInfo(n,is_x)): fallthru(n,is_x);
+    case &KnownTunion(&Tuniondecl(_,n,_,_,is_x)):
+      let kw = text(is_x ? "xtunion " : "tunion ");
+      switch (compress(r)) {
+      case HeapRgn: 
+	s = cat3(kw,qvar2doc(n),tps2doc(ts)); break;
+      default:
+	s = cat5(kw,typ2doc(r),text(" "),qvar2doc(n),tps2doc(ts)); break;
+      }
       break;
     }
     break;
-  case &XTunionType(XTunionInfo{n,r,_}):
-    switch (compress(r)) {
-    case HeapRgn: 
-      s = cat2(text("xtunion "),qvar2doc(n)); break;
-    default:
-      s = cat4(text("xtunion "),typ2doc(r),text(" "),qvar2doc(n)); break;
+  case &TunionFieldType(TunionFieldInfo(tuf_info,ts)):
+    switch(tuf_info) {
+    case &UnknownTunionfield(UnknownTunionFieldInfo(tname,fname,is_x)):
+      fallthru(tname,is_x,fname);
+    case &KnownTunionfield(&Tuniondecl(_,tname,_,_,is_x),
+			   &Tunionfield(fname,_,_,_)):
+      let kw = text(is_x ? "xtunion " : "tunion ");
+      s = cat4(kw, qvar2doc(tname),text("."),textptr((*fname)[1]));
+      break;
     }
-    break;
-  case &TunionFieldType(TunionFieldInfo{n,ts,fn,_,_}):
-    s = cat5(text("tunion "),qvar2doc(n),text("."),textptr((*fn)[1]),
-             tps2doc(ts));
-    break;
-  case &XTunionFieldType(XTunionFieldInfo{n,fn,_,_}):
-    s = cat4(text("xtunion "),qvar2doc(n),text("."),textptr((*fn)[1]));
     break;
   case &IntType(sn,sz):
     string sns;
@@ -666,7 +667,6 @@ int exp_prec(exp_t e) {
   case &Comprehension_e(_,_,_): fallthru;
   case &Struct_e(_,_,_,_):      fallthru;
   case &Tunion_e(_,_,_,_,_):    fallthru;
-  case &XTunion_e(_,_,_,_):     fallthru;
   case &Enum_e(_,_,_):          fallthru;
   case &Malloc_e(_,_):          return 140;
   case &UnresolvedMem_e(_,_):   return 140; // ???
@@ -814,11 +814,9 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
     s = cat2(qvar2doc(n),
              group("{","}",",",List::map(de2doc,des)));
     break;
-  case &Tunion_e(_,_,es,_,ef): fallthru(es,ef);
-  case &XTunion_e(_,es,_,ef):
+  case &Tunion_e(_,_,es,_,ef): 
     if (es == null)
-      // special case: a nullary [x]tunion constant is printed "foo" 
-      // not "foo()"
+      // special case: a nullary tunion constant is printed "foo" not "foo()"
       s = qvar2doc(ef->name);
     else
       s = cat2(qvar2doc(ef->name),
@@ -1297,17 +1295,15 @@ doc_t pat2doc(pat_t p) {
 	     tvars2doc(tvs),
              group("{","}",",",List::map(dp2doc,dps)));
     break;
-  case &Enum_p(n,_,_):
-    s = qvar2doc(n);
+  case &Enum_p(_,ef):
+    s = qvar2doc(ef->name);
     break;
-  case &Tunion_p(n,tvs,ps,_,_): fallthru(n,tvs,ps);
-  case &XTunion_p(n,tvs,ps,_,_):
+  case &Tunion_p(_,tuf,tvs,ps): 
     if (ps == null)
-      // special case: a nullary [x]tunion constant is printed "foo" not 
-      // "foo()"
-      s = qvar2doc(n);
+      // special case: a nullary tunion constant is printed "foo" not "foo()"
+      s = qvar2doc(tuf->name);
     else
-      s = cat3(qvar2doc(n),
+      s = cat3(qvar2doc(tuf->name),
                tvars2doc(tvs),
                egroup("(",")",",",List::map(pat2doc,ps)));
     break;
@@ -1426,34 +1422,23 @@ doc_t decl2doc(decl_t d) {
 	       : cat2(text(" = "),exp2doc((exp_t)initializer)),
              text(";"));
     break;
-  case &Tunion_d(tud):
-    if (tud->fields==null)
-      s = cat5(scope2doc(tud->sc),
-               text("tunion "),
-               (tud->name==null)?text(""):typedef_name2doc(tud->name->v),
-               ktvars2doc(tud->tvs),
+  case &Tunion_d(&Tuniondecl(sc,name,tvs,fields,is_xtunion)):
+    if (fields==null)
+      s = cat5(scope2doc(sc),
+               (is_xtunion ? text("xtunion") : text("tunion ")),
+               typedef_name2doc(name),
+               ktvars2doc(tvs),
                text(";"));
     else
-      s = cat8(scope2doc(tud->sc),
-               text("tunion "),
-               (tud->name==null)?text(""):typedef_name2doc(tud->name->v),
-               ktvars2doc(tud->tvs),
+      s = cat8(scope2doc(sc),
+               (is_xtunion ? text("xtunion") : text("tunion ")),
+               typedef_name2doc(name),
+               ktvars2doc(tvs),
                text(" {"),
-               nest(2,(tud->fields==null)?text(""):
-                    cat2(line_doc(),tunionfields2doc(tud->fields->v))),
+               nest(2,(fields==null)?text(""):
+                    cat2(line_doc(),tunionfields2doc(fields->v))),
                line_doc(),
                text("};"));
-    break;
-  case &XTunion_d(xtud):
-    s = cat4(scope2doc(xtud->sc),
-             text("xtunion "),
-             typedef_name2doc(xtud->name),
-             (xtud->fields==null)
-             ?text(";")
-             :cat4(text(" {"),
-                   nest(2,cat2(line_doc(),tunionfields2doc(xtud->fields))),
-                   line_doc(),
-                   text("};")));
     break;
   case &Let_d(p,_,_,e,_):
     s = cat5(text("let "),

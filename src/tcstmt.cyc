@@ -333,8 +333,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     case &Fn_d(_):            unimp_msg_part = "function";  break;
     case &Struct_d(_):        unimp_msg_part = "struct";    break;
     case &Union_d(_):         unimp_msg_part = "union";     break;
-    case &Tunion_d(_):        unimp_msg_part = "tunion";    break;
-    case &XTunion_d(_):       unimp_msg_part = "xtunion";   break;
+    case &Tunion_d(_):        unimp_msg_part = "[x]tunion"; break;
     case &Enum_d(_):          unimp_msg_part = "enum";   break;
     case &Typedef_d(_):       unimp_msg_part = "typedef";   break;
     case &ExternC_d(_):       unimp_msg_part = "extern \"C\""; break;

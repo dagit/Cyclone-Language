@@ -240,7 +240,7 @@ xtunion exn {Array_mismatch};
 // Throws Array_mismatch if the sizes of the arrays aren't the same.
 `c ?map2(`c f(`a,`b),`a ?`r1 x,`b ?`r2 y) {
   int sx = x.size;
-  if (sx != y.size) throw new Array_mismatch;
+  if (sx != y.size) throw Array_mismatch;
   return new {for i < sx : f(x[i],y[i])};
 }
 
@@ -276,13 +276,13 @@ void iter_c(void f(`b,`a),`b env,`a ?`r x) {
 // if the lengths of the arrays aren't the same.  
 void app2(`c f(`a,`b),`a ?`r1 x,`b ?`r2 y) {
   int sx = x.size;
-  if (sx != y.size) throw new Array_mismatch;
+  if (sx != y.size) throw Array_mismatch;
   for (int i=0; i < sx; i++) f(x[i],y[i]);
 }
 
 void app2_c(`d f(`a,`b,`c),`a env,`b ?`r1 x,`c ?`r2 y) {
   int sx = x.size;
-  if (sx != y.size) throw new Array_mismatch;
+  if (sx != y.size) throw Array_mismatch;
   for (int i=0; i < sx; i++) f(env,x[i],y[i]);
 } 
 
@@ -290,13 +290,13 @@ void app2_c(`d f(`a,`b,`c),`a env,`b ?`r1 x,`c ?`r2 y) {
 // if the lengths of the arrays aren't the same.  
 void iter2(void f(`a,`b),`a ?`r1 x,`b ?`r2 y) {
   int sx = x.size;
-  if (sx != y.size) throw new Array_mismatch;
+  if (sx != y.size) throw Array_mismatch;
   for (int i=0; i < sx; i++) f(x[i],y[i]);
 }
 
 void iter2_c(void f(`a,`b,`c),`a env,`b ?`r1 x,`c ?`r2 y) {
   int sx = x.size;
-  if (sx != y.size) throw new Array_mismatch;
+  if (sx != y.size) throw Array_mismatch;
   for (int i=0; i < sx; i++) f(env,x[i],y[i]);
 }
 
@@ -396,7 +396,7 @@ bool exists_c(bool pred(`a,`b),`a env,`b ?`r x) {
 // Throws Array_mismatch if the lengths are not the same.
 $(`a,`b)? zip(`a ?`r1 x,`b ?`r2 y) {
   int sx = x.size;
-  if (sx != y.size) throw new Array_mismatch;
+  if (sx != y.size) throw Array_mismatch;
 
   return new { for i < sx : $(x[i],y[i]) };
 }

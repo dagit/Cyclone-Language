@@ -144,7 +144,7 @@ FILE @ file_open(string fname, string mode) {
 }
 
 void file_close(FILE @f) {
-  if (fclose(f) != 0) throw new FileCloseError;
+  if (fclose(f) != 0) throw FileCloseError;
 }
 
 

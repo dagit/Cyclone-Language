@@ -20,55 +20,52 @@ typedef struct Cyc__types_fd_set Cyc__types_fd_set; typedef char* Cyc_Cstring;
 typedef struct _tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t;
 typedef struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void*
 exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef
-struct Cyc_Core_Opt* Cyc_Core_opt_t; extern char Cyc_Core_InvalidArg_tag[ 11u];
+struct Cyc_Core_Opt* Cyc_Core_opt_t; extern char Cyc_Core_InvalidArg[ 15u];
 struct Cyc_Core_InvalidArg_struct{ char* tag; struct _tagged_string f1; } ;
-extern char Cyc_Core_Failure_tag[ 8u]; struct Cyc_Core_Failure_struct{ char* tag;
-struct _tagged_string f1; } ; extern char Cyc_Core_Impossible_tag[ 11u]; struct
-Cyc_Core_Impossible_struct{ char* tag; struct _tagged_string f1; } ; extern char
-Cyc_Core_Not_found_tag[ 10u]; struct Cyc_Core_Not_found_struct{ char* tag; } ;
-extern char Cyc_Core_Unreachable_tag[ 12u]; struct Cyc_Core_Unreachable_struct{
-char* tag; struct _tagged_string f1; } ; extern char* string_to_Cstring( struct
+extern char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{ char* tag;
+struct _tagged_string f1; } ; extern char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
+char* tag; struct _tagged_string f1; } ; extern char Cyc_Core_Not_found[ 14u];
+extern char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{ char*
+tag; struct _tagged_string f1; } ; extern char* string_to_Cstring( struct
 _tagged_string); extern char* underlying_Cstring( struct _tagged_string); extern
 struct _tagged_string Cstring_to_string( char*); extern int system( char*);
 struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; typedef struct Cyc_List_List*
 Cyc_List_glist_t; typedef struct Cyc_List_List* Cyc_List_list_t; typedef struct
 Cyc_List_List* Cyc_List_List_t; extern int Cyc_List_length( struct Cyc_List_List*
-x); extern char Cyc_List_List_empty_tag[ 11u]; struct Cyc_List_List_empty_struct{
-char* tag; } ; extern char Cyc_List_List_mismatch_tag[ 14u]; struct Cyc_List_List_mismatch_struct{
-char* tag; } ; extern void Cyc_List_app( void*(* f)( void*), struct Cyc_List_List*
-x); extern void Cyc_List_iter( void(* f)( void*), struct Cyc_List_List* x);
-extern void Cyc_List_iter_c( void(* f)( void*, void*), void* env, struct Cyc_List_List*
+x); extern char Cyc_List_List_empty[ 15u]; extern char Cyc_List_List_mismatch[
+18u]; extern void Cyc_List_app( void*(* f)( void*), struct Cyc_List_List* x);
+extern void Cyc_List_iter( void(* f)( void*), struct Cyc_List_List* x); extern
+void Cyc_List_iter_c( void(* f)( void*, void*), void* env, struct Cyc_List_List*
 x); extern struct Cyc_List_List* Cyc_List_merge_sort( int(* less_eq)( void*,
-void*), struct Cyc_List_List* x); extern char Cyc_List_Nth_tag[ 4u]; struct Cyc_List_Nth_struct{
-char* tag; } ; struct Cyc_Set_Set; typedef struct Cyc_Set_Set* Cyc_Set_gset_t;
-typedef struct Cyc_Set_Set* Cyc_Set_hset_t; typedef struct Cyc_Set_Set* Cyc_Set_set_t;
-extern struct Cyc_Set_Set* Cyc_Set_empty( int(* comp)( void*, void*)); extern
-struct Cyc_Set_Set* Cyc_Set_singleton( int(* comp)( void*, void*), void* x);
-extern struct Cyc_Set_Set* Cyc_Set_from_list( int(* comp)( void*, void*), struct
-Cyc_List_List* x); extern struct Cyc_Set_Set* Cyc_Set_insert( struct Cyc_Set_Set*
-s, void* elt); extern struct Cyc_Set_Set* Cyc_Set_union_two( struct Cyc_Set_Set*
-s1, struct Cyc_Set_Set* s2); extern struct Cyc_Set_Set* Cyc_Set_intersect(
-struct Cyc_Set_Set* s1, struct Cyc_Set_Set* s2); extern struct Cyc_Set_Set* Cyc_Set_diff(
-struct Cyc_Set_Set* s1, struct Cyc_Set_Set* s2); extern struct Cyc_Set_Set* Cyc_Set_delete(
-struct Cyc_Set_Set* s, void* elt); extern int Cyc_Set_cardinality( struct Cyc_Set_Set*
-s); extern int Cyc_Set_is_empty( struct Cyc_Set_Set* s); extern int Cyc_Set_member(
-struct Cyc_Set_Set* s, void* elt); extern int Cyc_Set_subset( struct Cyc_Set_Set*
-s1, struct Cyc_Set_Set* s2); extern int Cyc_Set_compare( struct Cyc_Set_Set* s1,
-struct Cyc_Set_Set* s2); extern int Cyc_Set_equals( struct Cyc_Set_Set* s1,
-struct Cyc_Set_Set* s2); extern struct Cyc_List_List* Cyc_Set_elements( struct
-Cyc_Set_Set* s); extern void* Cyc_Set_fold( void*(* f)( void*, void*), struct
-Cyc_Set_Set* s, void* accum); extern void* Cyc_Set_fold_c( void*(* f)( void*,
-void*, void*), void* env, struct Cyc_Set_Set* s, void* accum); extern void Cyc_Set_app(
-void*(* f)( void*), struct Cyc_Set_Set* s); extern void Cyc_Set_iter( void(* f)(
-void*), struct Cyc_Set_Set* s); extern void Cyc_Set_iter_c( void(* f)( void*,
-void*), void* env, struct Cyc_Set_Set* s); extern char Cyc_Set_Absent_tag[ 7u];
-struct Cyc_Set_Absent_struct{ char* tag; } ; extern void* Cyc_Set_choose( struct
-Cyc_Set_Set* s); struct Cyc_Set_Set{ int(* compare)( void*, void*); int
-cardinality; struct Cyc_List_List* nodes; } ; struct Cyc_Set_Set* Cyc_Set_empty(
-int(* comp)( void*, void*)){ return({ struct Cyc_Set_Set* _temp0=( struct Cyc_Set_Set*)
-GC_malloc( sizeof( struct Cyc_Set_Set)); _temp0->compare= comp; _temp0->cardinality=
-0; _temp0->nodes= 0; _temp0;});} struct Cyc_Set_Set* Cyc_Set_singleton( int(*
-comp)( void*, void*), void* x){ return({ struct Cyc_Set_Set* _temp1=( struct Cyc_Set_Set*)
+void*), struct Cyc_List_List* x); extern char Cyc_List_Nth[ 8u]; struct Cyc_Set_Set;
+typedef struct Cyc_Set_Set* Cyc_Set_gset_t; typedef struct Cyc_Set_Set* Cyc_Set_hset_t;
+typedef struct Cyc_Set_Set* Cyc_Set_set_t; extern struct Cyc_Set_Set* Cyc_Set_empty(
+int(* comp)( void*, void*)); extern struct Cyc_Set_Set* Cyc_Set_singleton( int(*
+comp)( void*, void*), void* x); extern struct Cyc_Set_Set* Cyc_Set_from_list(
+int(* comp)( void*, void*), struct Cyc_List_List* x); extern struct Cyc_Set_Set*
+Cyc_Set_insert( struct Cyc_Set_Set* s, void* elt); extern struct Cyc_Set_Set*
+Cyc_Set_union_two( struct Cyc_Set_Set* s1, struct Cyc_Set_Set* s2); extern
+struct Cyc_Set_Set* Cyc_Set_intersect( struct Cyc_Set_Set* s1, struct Cyc_Set_Set*
+s2); extern struct Cyc_Set_Set* Cyc_Set_diff( struct Cyc_Set_Set* s1, struct Cyc_Set_Set*
+s2); extern struct Cyc_Set_Set* Cyc_Set_delete( struct Cyc_Set_Set* s, void* elt);
+extern int Cyc_Set_cardinality( struct Cyc_Set_Set* s); extern int Cyc_Set_is_empty(
+struct Cyc_Set_Set* s); extern int Cyc_Set_member( struct Cyc_Set_Set* s, void*
+elt); extern int Cyc_Set_subset( struct Cyc_Set_Set* s1, struct Cyc_Set_Set* s2);
+extern int Cyc_Set_compare( struct Cyc_Set_Set* s1, struct Cyc_Set_Set* s2);
+extern int Cyc_Set_equals( struct Cyc_Set_Set* s1, struct Cyc_Set_Set* s2);
+extern struct Cyc_List_List* Cyc_Set_elements( struct Cyc_Set_Set* s); extern
+void* Cyc_Set_fold( void*(* f)( void*, void*), struct Cyc_Set_Set* s, void*
+accum); extern void* Cyc_Set_fold_c( void*(* f)( void*, void*, void*), void* env,
+struct Cyc_Set_Set* s, void* accum); extern void Cyc_Set_app( void*(* f)( void*),
+struct Cyc_Set_Set* s); extern void Cyc_Set_iter( void(* f)( void*), struct Cyc_Set_Set*
+s); extern void Cyc_Set_iter_c( void(* f)( void*, void*), void* env, struct Cyc_Set_Set*
+s); extern char Cyc_Set_Absent[ 11u]; extern void* Cyc_Set_choose( struct Cyc_Set_Set*
+s); struct Cyc_Set_Set{ int(* compare)( void*, void*); int cardinality; struct
+Cyc_List_List* nodes; } ; struct Cyc_Set_Set* Cyc_Set_empty( int(* comp)( void*,
+void*)){ return({ struct Cyc_Set_Set* _temp0=( struct Cyc_Set_Set*) GC_malloc(
+sizeof( struct Cyc_Set_Set)); _temp0->compare= comp; _temp0->cardinality= 0;
+_temp0->nodes= 0; _temp0;});} struct Cyc_Set_Set* Cyc_Set_singleton( int(* comp)(
+void*, void*), void* x){ return({ struct Cyc_Set_Set* _temp1=( struct Cyc_Set_Set*)
 GC_malloc( sizeof( struct Cyc_Set_Set)); _temp1->compare= comp; _temp1->cardinality=
 1; _temp1->nodes=({ struct Cyc_List_List* _temp2=( struct Cyc_List_List*)
 GC_malloc( sizeof( struct Cyc_List_List)); _temp2->hd=( void*) x; _temp2->tl= 0;
@@ -273,10 +270,7 @@ diff != 0){ return diff;} x1=({ struct Cyc_List_List* _temp88= x1; if( _temp88
 _temp89= x2; if( _temp89 == 0){ _throw( Null_Exception);} _temp89->tl;});}
 return 0;}} int Cyc_Set_equals( struct Cyc_Set_Set* s1, struct Cyc_Set_Set* s2){
 return(( int(*)( struct Cyc_Set_Set* s1, struct Cyc_Set_Set* s2)) Cyc_Set_compare)(
-s1, s2) == 0;} char Cyc_Set_Absent_tag[ 7u]="Absent"; void* Cyc_Set_choose(
-struct Cyc_Set_Set* s){ if( s->nodes == 0){( void) _throw(( struct
-_xtunion_struct*)({ struct Cyc_Set_Absent_struct* _temp92=( struct Cyc_Set_Absent_struct*)
-GC_malloc( sizeof( struct Cyc_Set_Absent_struct)); _temp92[ 0]=({ struct Cyc_Set_Absent_struct
-_temp93; _temp93.tag= Cyc_Set_Absent_tag; _temp93;}); _temp92;}));} return( void*)({
-struct Cyc_List_List* _temp94= s->nodes; if( _temp94 == 0){ _throw(
-Null_Exception);} _temp94->hd;});}
+s1, s2) == 0;} char Cyc_Set_Absent[ 11u]; void* Cyc_Set_choose( struct Cyc_Set_Set*
+s){ if( s->nodes == 0){( void) _throw(( void*) Cyc_Set_Absent);} return( void*)({
+struct Cyc_List_List* _temp92= s->nodes; if( _temp92 == 0){ _throw(
+Null_Exception);} _temp92->hd;});}

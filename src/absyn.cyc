@@ -140,10 +140,12 @@ static string exn_string = "exn";
 static tunion Nmspace.Abs_n abs_null = Abs_n(null);
 static $(nmspace_t,var_t) exn_name_v = $((nmspace_t)&abs_null,&exn_string);
 qvar_t exn_name   = &exn_name_v;
-static struct XTuniondecl exn_xed_v  = XTuniondecl(Extern,&exn_name_v,null);
-xtuniondecl_t             exn_xed    = &exn_xed_v;
-static tunion Type.XTunionType exn_typ_tt = 
-  XTunionType(XTunionInfo(&exn_name_v,HeapRgn,&exn_xed_v));
+static struct Tuniondecl exn_xed_v = 
+             Tuniondecl(Extern,&exn_name_v,null,null,true);
+static tunion TunionInfoU.KnownTunion exn_tinfou = KnownTunion(&exn_xed_v);
+tuniondecl_t exn_xed = &exn_xed_v;
+static tunion Type.TunionType exn_typ_tt =
+                  TunionType(TunionInfo(&exn_tinfou,null,HeapRgn));
 type_t exn_typ = &exn_typ_tt;
 // string
 static opt_t<type_t> string_t_opt = null;
@@ -161,7 +163,7 @@ static tunion Cnst.Int_c      one_intc  = Int_c(Signed,1);
 static tunion Raw_exp.Const_e one_b_raw = Const_e(&one_intc);
 static struct Exp             one_be    = {null,&one_b_raw,null};
 static tunion Bounds.Upper_b  one_bt    = Upper_b(&one_be);
-static tunion Bounds          one_b     = &one_bt;
+tunion Bounds bounds_one = &one_bt;
 
 type_t starb_typ(type_t t, type_t r, tqual_t tq, bounds_t b) {
   return new PointerType(PtrInfo {.elt_typ = t, .rgn_typ = r,
@@ -175,13 +177,13 @@ type_t atb_typ(type_t t, type_t r, tqual_t tq, bounds_t b) {
 	 .bounds = new_conref(b)});
 }
 type_t star_typ(type_t t, type_t r, tqual_t tq) { 
-  return starb_typ(t, r, tq, one_b);
+  return starb_typ(t, r, tq, bounds_one);
 }
 type_t cstar_typ(type_t t, tqual_t tq) { 
-  return starb_typ(t, HeapRgn, tq, one_b);
+  return starb_typ(t, HeapRgn, tq, bounds_one);
 }
 type_t at_typ(type_t t, type_t r, tqual_t tq) {
-  return atb_typ(t, r, tq, one_b);
+  return atb_typ(t, r, tq, bounds_one);
 }
 type_t tagged_typ(type_t t, type_t r, tqual_t tq) {
   return 
@@ -220,6 +222,11 @@ type_t void_star_typ() {
   if (void_star_t_opt == null)
     void_star_t_opt = new Opt(star_typ(VoidType, HeapRgn, empty_tqual()));
   return void_star_t_opt->v;
+}
+opt_t<type_t> void_star_typ_opt() {
+  if (void_star_t_opt == null)
+    void_star_t_opt = new Opt(star_typ(VoidType, HeapRgn, empty_tqual()));
+  return void_star_t_opt;
 }
 
 // structs and unions
@@ -382,11 +389,9 @@ exp_t unresolvedmem_exp(opt_t<typedef_name_t> n,
   return new_exp(new UnresolvedMem_e(n,dles),loc);
 }
 ///////////////////////// Statements ///////////////////////////////
-static xtunion StmtAnnot.EmptyAnnot empty_annot_v = EmptyAnnot;
-static xtunion StmtAnnot empty_annot = &empty_annot_v;
 stmt_t new_stmt(raw_stmt_t s, seg_t loc) { 
   return new Stmt{.r=s, .loc=loc, .non_local_preds=null, .try_depth = 0,
-                     .annot=empty_annot }; }
+                     .annot=EmptyAnnot }; }
 stmt_t skip_stmt(seg_t loc) { return new_stmt(Skip_s, loc); }
 stmt_t exp_stmt(exp_t e,seg_t loc) { return new_stmt(new Exp_s(e),loc); }
 stmt_t seq_stmts(list_t<stmt_t> ss, seg_t loc) {
@@ -477,15 +482,9 @@ decl_t union_decl(scope_t s,opt_t<typedef_name_t> n,list_t<tvar_t> ts,
   return new_decl(new Union_d(new Uniondecl {.sc=s,.name=n,.tvs=ts,.fields=fs,
                                                 .attributes = atts}),loc);
 }
-decl_t tunion_decl(scope_t s,opt_t<typedef_name_t> n,list_t<tvar_t> ts,
-                   opt_t<list_t<tunionfield_t>> fs,seg_t loc) {
-  return new_decl(new Tunion_d(new Tuniondecl{.sc=s, .name=n, 
-                                                 .tvs=ts, .fields=fs}),loc);
-}
-decl_t xtunion_decl(scope_t s,typedef_name_t n,list_t<tunionfield_t> fs,
-                    seg_t loc){
- return new_decl(new XTunion_d(new XTuniondecl{.sc=s, .name=n, 
-                                                  .fields=fs}),loc);
+decl_t tunion_decl(scope_t s, typedef_name_t n, list_t<tvar_t> ts,
+		   opt_t<list_t<tunionfield_t>> fs, bool is_xtunion, seg_t loc){
+  return new_decl(new Tunion_d(new Tuniondecl(s,n,ts,fs,is_xtunion)),loc);
 }
 
 // We treat function types in argument or return position as an
@@ -495,7 +494,8 @@ decl_t xtunion_decl(scope_t s,typedef_name_t n,list_t<tunionfield_t> fs,
 //   int (@f(void (@g)()))(float)
 // We do this by constructing every function type using function_typ,
 // rather than mucking with the typechecker/unifier/etc.
-static $(opt_t<var_t>,tqual_t,type_t)@ expand_arg($(opt_t<var_t>,tqual_t,type_t)@ a) {
+static
+ $(opt_t<var_t>,tqual_t,type_t)@ expand_arg($(opt_t<var_t>,tqual_t,type_t)@ a) {
   return new $((*a)[0],(*a)[1],pointer_expand((*a)[2]));
 }
 

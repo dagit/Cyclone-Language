@@ -335,6 +335,6 @@ xtunion exn {Absent};
  * If the set is empty, throw Absent.
  */
 `a choose(gset_t<`a,`r,`e> s) {
-  if (s->nodes == null) throw new Absent;
+  if (s->nodes == null) throw Absent;
   return(s->nodes->hd);
 }

@@ -208,7 +208,7 @@ static void reset_state_mem() {
 static int get_state(set_t<transition_t> st) {
   try return Dict::lookup(state_map->v, st);
   catch {
-  case &Dict::Absent:
+  case Dict::Absent:
     state_map->v = Dict::insert(state_map->v, st, next_state_num);
     todo         = new List(new $(st, next_state_num), todo);
     return next_state_num++; // post-increment!

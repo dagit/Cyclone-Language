@@ -20,28 +20,25 @@ typedef struct Cyc__types_fd_set Cyc__types_fd_set; typedef char* Cyc_Cstring;
 typedef struct _tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t;
 typedef struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void*
 exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef
-struct Cyc_Core_Opt* Cyc_Core_opt_t; extern char Cyc_Core_InvalidArg_tag[ 11u];
+struct Cyc_Core_Opt* Cyc_Core_opt_t; extern char Cyc_Core_InvalidArg[ 15u];
 struct Cyc_Core_InvalidArg_struct{ char* tag; struct _tagged_string f1; } ;
-extern char Cyc_Core_Failure_tag[ 8u]; struct Cyc_Core_Failure_struct{ char* tag;
-struct _tagged_string f1; } ; extern char Cyc_Core_Impossible_tag[ 11u]; struct
-Cyc_Core_Impossible_struct{ char* tag; struct _tagged_string f1; } ; extern char
-Cyc_Core_Not_found_tag[ 10u]; struct Cyc_Core_Not_found_struct{ char* tag; } ;
-extern char Cyc_Core_Unreachable_tag[ 12u]; struct Cyc_Core_Unreachable_struct{
-char* tag; struct _tagged_string f1; } ; extern struct _tagged_string Cyc_Core_string_of_int(
+extern char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{ char* tag;
+struct _tagged_string f1; } ; extern char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
+char* tag; struct _tagged_string f1; } ; extern char Cyc_Core_Not_found[ 14u];
+extern char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{ char*
+tag; struct _tagged_string f1; } ; extern struct _tagged_string Cyc_Core_string_of_int(
 int); extern char* string_to_Cstring( struct _tagged_string); extern char*
 underlying_Cstring( struct _tagged_string); extern struct _tagged_string
 Cstring_to_string( char*); extern int system( char*); struct Cyc_Stdio___sFILE;
 typedef struct Cyc_Stdio___sFILE Cyc_Stdio_FILE; typedef int Cyc_Stdio_fpos_t;
-extern char Cyc_Stdio_FileOpenError_tag[ 14u]; struct Cyc_Stdio_FileOpenError_struct{
-char* tag; struct _tagged_string f1; } ; extern char Cyc_Stdio_FileCloseError_tag[
-15u]; struct Cyc_Stdio_FileCloseError_struct{ char* tag; } ; struct Cyc_List_List{
-void* hd; struct Cyc_List_List* tl; } ; typedef struct Cyc_List_List* Cyc_List_glist_t;
-typedef struct Cyc_List_List* Cyc_List_list_t; typedef struct Cyc_List_List* Cyc_List_List_t;
-extern char Cyc_List_List_empty_tag[ 11u]; struct Cyc_List_List_empty_struct{
-char* tag; } ; extern char Cyc_List_List_mismatch_tag[ 14u]; struct Cyc_List_List_mismatch_struct{
-char* tag; } ; extern char Cyc_List_Nth_tag[ 4u]; struct Cyc_List_Nth_struct{
-char* tag; } ; extern int Cyc_String_zstrcmp( struct _tagged_string, struct
-_tagged_string); extern struct _tagged_string Cyc_String_strconcat_l( struct Cyc_List_List*);
+extern char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
+char* tag; struct _tagged_string f1; } ; extern char Cyc_Stdio_FileCloseError[
+19u]; struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; typedef
+struct Cyc_List_List* Cyc_List_glist_t; typedef struct Cyc_List_List* Cyc_List_list_t;
+typedef struct Cyc_List_List* Cyc_List_List_t; extern char Cyc_List_List_empty[
+15u]; extern char Cyc_List_List_mismatch[ 18u]; extern char Cyc_List_Nth[ 8u];
+extern int Cyc_String_zstrcmp( struct _tagged_string, struct _tagged_string);
+extern struct _tagged_string Cyc_String_strconcat_l( struct Cyc_List_List*);
 extern struct _tagged_string Cyc_String_strdup( struct _tagged_string src);
 struct Cyc_Id_id; typedef struct Cyc_Id_id* Cyc_Id_Id; extern struct Cyc_Id_id*
 Cyc_Id_id_make( struct _tagged_string, int); extern struct Cyc_Id_id* Cyc_Id_id_new(

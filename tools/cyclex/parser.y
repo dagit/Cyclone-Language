@@ -161,7 +161,7 @@ regexp:
 | TIDENT { try $$=^$(Hashtable::lookup((Parser::htbl @)named_regexps,
 				       new {$1}));
 	   catch { 
-	     case &Not_found:
+	     case Not_found:
 	     yyerror(xprintf("Reference to unbound regexp name `%s'", $1));
 	     break;
 	   }

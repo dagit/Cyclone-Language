@@ -1,8 +1,7 @@
 
 // Note that since we don't have an indent program for Cyclone, using this
 // module for non-C code gives you fairly worthless stuff.  (And it hasn't
-// been tested.) Actually, we could see how badly indent bombs on Cyclone --
-// I'm guessing "very".
+// been tested.) 
 
 #include "core.h"
 #include "stdio.h"
@@ -260,35 +259,33 @@ void dumpntyp(type_t t) {
   case &Evar(k,null,i): 
     dump("%"); dumpkind(k); dump(xprintf("(%d)",i)); return;
   case &Evar(k,&Opt(t),i): dumpntyp(t); return; // shouldn't happen!
-  case &TunionType(TunionInfo{n,ts,r,_}):
-    dump("tunion ");
-    switch (Tcutil::compress(r)) {
-    case HeapRgn: break;
-    default: dumptyp(r); dump(" "); break;
+  case &TunionType(TunionInfo(tu_info,ts,r)):
+    switch(tu_info) {
+    case &UnknownTunion(UnknownTunionInfo(n,is_x)): fallthru(n,is_x);
+    case &KnownTunion(&Tuniondecl(_,n,_,_,is_x)):
+      if(is_x) dump("xtunion "); else dump("tunion ");
+      switch (Tcutil::compress(r)) {
+      case HeapRgn: break;
+      default: dumptyp(r); dump(" "); break;
+      }
+      dumpqvar(n);
+      dumptps(ts);
+      break;
     }
-    dumpqvar(n);
-    dumptps(ts);
     break;
-  case &XTunionType(XTunionInfo{n,r,_}):
-    dump("xtunion ");
-    switch (Tcutil::compress(r)) {
-    case HeapRgn: break;
-    default: dumptyp(r); dump(" "); break;
+  case &TunionFieldType(TunionFieldInfo(tuf_info,ts)):
+    switch(tuf_info) {
+    case &UnknownTunionfield(UnknownTunionFieldInfo(tname,fname,is_x)):
+      fallthru(tname,is_x,fname);
+    case &KnownTunionfield(&Tuniondecl(_,tname,_,_,is_x),
+			   &Tunionfield(fname,_,_,_)):
+      if(is_x) dump("xtunion "); else dump("tunion ");
+      dumpqvar(tname);
+      dump(".");
+      dumpqvar(fname);
+      dumptps(ts);
+      break;
     }
-    dumpqvar(n);
-    break;
-  case &TunionFieldType(TunionFieldInfo{n,ts,f,_,_}):
-    dump("tunion ");
-    dumpqvar(n);
-    dump(".");
-    dumpqvar(f);
-    dumptps(ts);
-    break;
-  case &XTunionFieldType(XTunionFieldInfo{n,f,_,_}):
-    dump("xtunion ");
-    dumpqvar(n);
-    dump(".");
-    dumpqvar(f);
     break;
   case &EnumType(n,_): dump("enum "); dumpqvar(n); return;
   case &IntType(Signed,   B1): dump("signed char");           return;
@@ -502,9 +499,8 @@ void dumpexp_prec(int inprec, exp_t e) {
     group(dumpde,des,"{","}",",");
     break;
 
-  case &Tunion_e(_,_,es,_,ef): fallthru(es,ef);
-  case &XTunion_e(_,es,_,ef):
-    dumpqvar(ef->name);
+  case &Tunion_e(_,_,es,_,tuf):
+    dumpqvar(tuf->name);
     if (es != null) group(dumpexp,es,"(",")",",");
     break;
 
@@ -675,12 +671,12 @@ void dumppat(pat_t p) {
     dumptvars(tvs);
     group(dumpdp,dps,"{","}",",");
     break;
-  case &Tunion_p(n,tvs,ps,_,_): fallthru(n,tvs,ps);
-  case &XTunion_p(n,tvs,ps,_,_):
-    dumpqvar(n); dumptvars(tvs);
+  case &Tunion_p(_,tuf,tvs,ps):
+    dumpqvar(tuf->name); 
+    dumptvars(tvs);
     if (ps != null) group(dumppat,ps,"(",")",",");
     break;
-  case &Enum_p(n,_,_): dumpqvar(n); break;
+  case &Enum_p(_,ef): dumpqvar(ef->name); break;
   }
 }
 
@@ -779,28 +775,19 @@ void dumpdecl(decl_t d) {
     }
     dump_semi();
     break;
-  case &Tunion_d(ed):
-    dumpscope(ed->sc);
-    dump("tunion ");
-    if(ed->name != null) dumpqvar(ed->name->v);
-    dumptvars(ed->tvs);
-    if(ed->fields == null)
+  case &Tunion_d(&Tuniondecl(sc,name,tvs,fields,is_xtunion)):
+    dumpscope(sc);
+    if(is_xtunion)
+      dump("xtunion ");
+    else
+      dump("tunion ");
+    dumpqvar(name);
+    dumptvars(tvs);
+    if(fields == null)
       dump_semi();
-    else {
+    else  {
       dump_char('{');
-      dumptunionfields(ed->fields->v);
-      dump_nospace("};");
-    }
-    break;
-  case &XTunion_d(xed):
-    dumpscope(xed->sc);
-    dump("xtunion ");
-    dumpqvar(xed->name);
-    if(xed->fields == null)
-      dump_semi();
-    else {
-      dump_char('{');
-      dumptunionfields(xed->fields);
+      dumptunionfields(fields->v);
       dump_nospace("};");
     }
     break;

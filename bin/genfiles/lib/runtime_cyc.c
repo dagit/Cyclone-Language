@@ -85,12 +85,12 @@ void _npop_handler(int n) {
 void _pop_handler() {
   _npop_handler(0);
 }
-void throw(exn e) {
+void throw(void* e) {
   struct _handler_cons * my_handler = _current_handler;
   _npop_handler(0);
   longjmp(my_handler->handler,(int)e);
 }
-void _throw(exn e) {
+void _throw(void* e) {
   throw(e);
 }
 
@@ -316,7 +316,7 @@ int main(int argc, char **argv) {
   int status = setjmp(top_handler.handler);
   _push_handler(&top_handler);
   if(status) {
-    fprintf(stderr,"Uncaught exception %s\n",((exn)status)->tag);
+    fprintf(stderr,"Uncaught exception %s\n",(((exn)status)->tag)+4);
     return 1;
   }
   // set standard file descriptors

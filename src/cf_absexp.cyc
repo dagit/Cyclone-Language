@@ -89,7 +89,7 @@ static void ok_address_arg(absop_t ao) {
   case &LocalOp(_):    return;
   case &MemberOp(_,_): return;
   case &MallocOp(_,_): return;
-  default: throw new BadAbsexp;
+  default: throw BadAbsexp;
   }
 }
 static void ok_member_arg(absop_t ao) {
@@ -98,7 +98,7 @@ static void ok_member_arg(absop_t ao) {
   case &MemberOp(_,_): return;
   case &MallocOp(_,_): return;
   case &DerefOp(_):    return;
-  default: throw new BadAbsexp;
+  default: throw BadAbsexp;
   }
 }
 static void ok_deref_arg(absop_t ao) {
@@ -106,13 +106,13 @@ static void ok_deref_arg(absop_t ao) {
   case &LocalOp(_):    return;
   case &MemberOp(_,_): return;
   case &DerefOp(_):    return;
-  default: throw new BadAbsexp;
+  default: throw BadAbsexp;
   }
 }
 static void ok_lvalue(absop_t ao) {
   switch(ao) {
   case UnknownOp:    fallthru; // should use UseAE, not AssignAE(UnknownOp,_)
-  case &AddressOp(_): throw new BadAbsexp;
+  case &AddressOp(_): throw BadAbsexp;
   default: return;
   }
 }
@@ -261,7 +261,7 @@ string absexp2string(absexp_t ae, int depth) {
     
   case &StmtAE(s): ans = xprintf("%s<<stmt>>",ans); break;
   case BottomAE:  ans = xprintf("%sbottom",  ans); break;
-  default: throw new BadAbsexp;
+  default: throw BadAbsexp;
   }
   return ans;
 }
@@ -280,7 +280,7 @@ void check_absexp(absexp_t ae) {
   switch(ae) {
   case BottomAE:      return;
   case SkipAE:        return;
-  case &MallocAE(&VarRoot(_),_): throw new BadAbsexp;
+  case &MallocAE(&VarRoot(_),_): throw BadAbsexp;
   case &MallocAE(_,_): return;
   case &StmtAE(s):     return;
   case &GroupAE(_,l):  
@@ -324,10 +324,10 @@ init_state_t eval_absop_l(pinfo_dict_t<local_root_t> pinfo_dict, absop_t ao) {
     switch(inner_pinfo) {
     case &LeafPI(x):   return x;
     case &TuplePI(_):  fallthru;
-    case &StructPI(_): throw new BadAbsexp; // you cannot * a tuple or struct
+    case &StructPI(_): throw BadAbsexp; // you cannot * a tuple or struct
     }
   case UnknownOp: fallthru;
-  case &AddressOp(_): throw new BadAbsexp;
+  case &AddressOp(_): throw BadAbsexp;
   }
 }
 path_info_t eval_absop_r(pinfo_dict_t<local_root_t> pinfo_dict, absop_t ao) {
@@ -340,7 +340,7 @@ path_info_t eval_absop_r(pinfo_dict_t<local_root_t> pinfo_dict, absop_t ao) {
     case $(&LeafPI(&UnknownIS(_,_)), _): return inner_pinfo;
     case $(&TuplePI(d),  &TupleF(i)):    return Dict::lookup(d, i);
     case $(&StructPI(d), &StructF(n)):   return Dict::lookup(d, n);
-    default: throw new BadAbsexp;
+    default: throw BadAbsexp;
     }
   case &DerefOp(ao2):
     let inner_pinfo = eval_absop_r(pinfo_dict,ao2);
@@ -348,7 +348,7 @@ path_info_t eval_absop_r(pinfo_dict_t<local_root_t> pinfo_dict, absop_t ao) {
     case &LeafPI(&UnknownIS(esc,ThisIL)): return mkLeafPI(Esc,NoneIL);//Esc right?
     case &LeafPI(&UnknownIS(_,_)):     return inner_pinfo;
     case &LeafPI(&MustPointTo(place)): return lookup_place(pinfo_dict, place);
-    default: throw new BadAbsexp;
+    default: throw BadAbsexp;
     }
   case UnknownOp:      return mkLeafPI(Esc,AllIL);
   case &AddressOp(ao2): return new LeafPI(eval_absop_l(pinfo_dict,ao2));

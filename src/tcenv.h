@@ -22,7 +22,6 @@ extern tunion Resolved {
   VarRes(binding_t); // includes unresolved variant
   StructRes(structdecl_t);
   TunionRes(tuniondecl_t,tunionfield_t);
-  XTunionRes(xtuniondecl_t,tunionfield_t);
   EnumRes(enumdecl_t,enumfield_t);
 };
 typedef tunion Resolved resolved_t;
@@ -36,7 +35,6 @@ extern struct Genv {
   dict_t<var_t,structdecl_t@>    structdecls;
   dict_t<var_t,uniondecl_t@>     uniondecls;
   dict_t<var_t,tuniondecl_t@>    tuniondecls;
-  dict_t<var_t,xtuniondecl_t@>   xtuniondecls;
   dict_t<var_t,enumdecl_t@>      enumdecls;
   dict_t<var_t,typedefdecl_t>    typedefs; // indirection unneeded b/c no redeclaration
   Dict::dict_t<var_t,$(resolved_t,bool)@> ordinaries; // bool for tree-shaking
@@ -83,7 +81,7 @@ extern resolved_t        lookup_ordinary(tenv_t,seg_t,qvar_t);
 extern structdecl_t@     lookup_structdecl(tenv_t,seg_t,qvar_t);
 extern uniondecl_t@      lookup_uniondecl(tenv_t,seg_t,qvar_t);
 extern tuniondecl_t@     lookup_tuniondecl(tenv_t,seg_t,qvar_t);
-extern opt_t<xtuniondecl_t@> lookup_xtuniondecl(tenv_t,seg_t,qvar_t);
+extern opt_t<tuniondecl_t@> lookup_xtuniondecl(tenv_t,seg_t,qvar_t);
 extern enumdecl_t@       lookup_enumdecl(tenv_t,seg_t,qvar_t);
 extern typedefdecl_t     lookup_typedefdecl(tenv_t,seg_t,qvar_t);
 

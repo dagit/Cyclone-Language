@@ -119,13 +119,13 @@ static int line_length = 76;
 // the error; return also the column numbers the error starts and finishes at.
 static $(string,int,int)@ get_context(seg_t seg) {
   if(seg == null)
-    throw new Nocontext;
+    throw Nocontext;
   Lineno::pos_t pos_s, pos_e;
   try {
     pos_s = Lineno::pos_of_abs(source,seg->start);
     pos_e = Lineno::pos_of_abs(source,seg->end);
   } catch {
-  default: throw new Nocontext;
+  default: throw Nocontext;
   }
   
   let &Lineno::Pos(_,sline,sl,sc) = pos_s;
@@ -182,7 +182,7 @@ void post_error(error_t e) {
       while (++i < (*x)[2]) marker_str[i] = '^';
       fprintf(stderr, "  %s\n  %s\n", (*x)[0], marker_str);
     } catch {
-    case &Nocontext: break; 
+    case Nocontext: break; 
     }
   }
   fflush(stderr);

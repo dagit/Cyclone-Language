@@ -93,7 +93,7 @@ list_t<Absyn::decl_t>
     exn_string = "Exception Core::Impossible"; 
     explain_string = s; 
     break;
-  case &Dict::Absent:  
+  case Dict::Absent:  
     exn_string = "Exception Dict::Absent"; 
     break;
   case x: 

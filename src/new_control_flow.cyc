@@ -294,8 +294,7 @@ abssyn_t abstract_exp(absenv_t env, exp_t e) {
   // These are malloc points, which allow you to do funky stuff where
   // tunion fields point to uninitialized data.  Of course, malloc is even
   // more flexible, but we're not parsing that yet.
-  case &Tunion_e(_,_,es,_,ef): fallthru(es,ef);
-  case &XTunion_e(_,es,_,ef):
+  case &Tunion_e(_,_,es,_,ef):
     assert(env.access_path == null);
     if(es == null) 
       return mkSyn_tf(mkSkipAE(), null, make_assigns(env, mkUnknownOp()));
@@ -432,8 +431,7 @@ abssyn_t abstract_exp(absenv_t env, exp_t e) {
     }
   case &Address_e(e1):
     //This might really be a malloc-and-initialize
-    //Note: This code is much like that for Tunion_e and XTunion_e 
-    //(they're mallocs)
+    //Note: This code is much like that for Tunion_e (they're mallocs)
     //malloc cases deal with access path afterwards for dark corner *&$(1,2)
     switch(e1->r) {
 
@@ -1145,10 +1143,8 @@ flow_info_t cf_analyze_stmt(analenv_t env, Absyn::stmt_t s, flow_info_t in_flow)
 // Note: This is just a space optimization.  Out of laziness, we don't
 //       traverse expressions to find nested statements (due to StmtExp_e),
 //       so the space for such annotations leaks.
-static xtunion StmtAnnot.EmptyAnnot empty_annot_v = EmptyAnnot;
-static xtunion StmtAnnot empty_annot = &empty_annot_v;
 void cf_postpass(stmt_t s) {
-  s->annot = empty_annot;
+  s->annot = EmptyAnnot;
   switch(s->r) {
   case &Seq_s(s1,s2): fallthru(s1,s2);
   case &IfThenElse_s(_,s1,s2):

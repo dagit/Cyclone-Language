@@ -89,7 +89,7 @@ void output_lexdef(string sourcename,
 	       + (tables->defaultX).size + (tables->trans).size
 	       + (tables->check).size));
   if((tables->trans).size > 0x8000)
-    throw new Table_overflow;
+    throw Table_overflow;
   copy_chunk(sourcename, ic, oc, header);
   fprintf(oc, "using Lexing {\n\n");
   output_tables(oc, tables);

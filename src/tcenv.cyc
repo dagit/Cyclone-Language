@@ -7,12 +7,11 @@
    3) union tags (after "union")
    4) structure or union members (after "." or "->")
    5) tunion tags (after "tunion")
-   6) xtunion tags (after "xtunion")
    7) labels (after "goto", before ":")
    8) typedef names (in types)
    9) ordinary identifiers (the catch-all case)
 
-   The ordinary identifiers include structure tags and tunion and xtunion
+   The ordinary identifiers include structure tags and tunion
    constructors.
 
    The environment data structures below follow from this directly.
@@ -73,26 +72,25 @@ xtunion exn {Env_error};
 `a env_err(string msg) {
   fprintf(stderr,"Error: %s\n",msg);
   fflush(stderr);
-  throw new Env_error;
+  throw Env_error;
 }
 
 /////////////////////////// Type Definitions /////////////////////////////////
 
 // Type environments
 struct Tenv {
-  list_t<var_t>                    ns; // current namespace
+  list_t<var_t>                      ns; // current namespace
   Dict::dict_t<list_t<var_t>,genv_t> ae; // absolute environment
-  opt_t<frames_t<fenv_t>>        le; // is null except in functions
+  opt_t<frames_t<fenv_t>>            le; // is null except in functions
 };
 
 // Global environments -- what's declared in a global scope
 struct Genv {
-  set_t<var_t>                    namespaces;
+  set_t<var_t>                      namespaces;
   Dict::dict_t<var_t,structdecl_t@> structdecls;
-  Dict::dict_t<var_t,uniondecl_t@> uniondecls;
+  Dict::dict_t<var_t,uniondecl_t@>  uniondecls;
   Dict::dict_t<var_t,tuniondecl_t@> tuniondecls;
-  Dict::dict_t<var_t,xtuniondecl_t@> xtuniondecls;
-  Dict::dict_t<var_t,enumdecl_t@> enumdecls;
+  Dict::dict_t<var_t,enumdecl_t@>   enumdecls;
   Dict::dict_t<var_t,typedefdecl_t> typedefs; // no indirection b/c no redeclaration
   Dict::dict_t<var_t,$(resolved_t,bool)@> ordinaries; // bool for tree-shaking
   list_t<list_t<var_t>>             availables; // abs. names of "using" namespaces
@@ -103,7 +101,6 @@ tunion Resolved {
   VarRes(binding_t); // includes unresolved variant
   StructRes(structdecl_t);
   TunionRes(tuniondecl_t,tunionfield_t);
-  XTunionRes(xtuniondecl_t,tunionfield_t);
   EnumRes(enumdecl_t,enumfield_t);
 };
 
@@ -164,9 +161,7 @@ tenv_t tc_init() {
   // In turn, we need to reset exn_typ!!
   let ge     = empty_genv();
   let top_ns = null;
-  exn_xed = new XTuniondecl(Extern, exn_name, null);
-  exn_typ = new XTunionType(XTunionInfo{exn_name, HeapRgn, exn_xed});
-  ge->xtuniondecls = Dict::insert(ge->xtuniondecls, (*exn_name)[1], &exn_xed);
+  ge->tuniondecls = Dict::insert(ge->tuniondecls, (*exn_name)[1], &exn_xed);
   let ae = Dict::insert(Dict::empty(varlist_cmp), top_ns, ge);
   return new Tenv(top_ns,ae,null);
 }
@@ -193,7 +188,7 @@ static void check_repeat(tenv_t te, seg_t loc, `a lookup(genv_t,var_t),
     try {
       lookup(ge2,v);
       Tcutil::terr(loc,xprintf("%s is ambiguous",*v));
-    } catch { case &Dict::Absent: break; }
+    } catch { case Dict::Absent: break; }
   }
   return;
 }
@@ -208,7 +203,7 @@ static `a scoped_lookup(tenv_t te,seg_t loc,`a lookup(genv_t,var_t),var_t v){
       result = lookup(ge,v);
       check_repeat(te, loc, lookup, v, ge->availables);
       return result;
-    } catch { case &Dict::Absent: break; }
+    } catch { case Dict::Absent: break; }
     // Check available namespaces
     for (let nss = ge->availables; nss != null; nss = nss->tl) {
       genv_t ge2 = Dict::lookup(te->ae,nss->hd);
@@ -216,10 +211,10 @@ static `a scoped_lookup(tenv_t te,seg_t loc,`a lookup(genv_t,var_t),var_t v){
 	result = lookup(ge2,v);
 	check_repeat(te, loc, lookup, v, nss->tl);
 	return result;
-      } catch { case &Dict::Absent: break; }
+      } catch { case Dict::Absent: break; }
     }
     if (cns == null)
-      throw new Dict::Absent;
+      throw Dict::Absent;
     // v is not defined in current namespace, look in next outer
     cns = outer_namespace(cns);
   }
@@ -271,7 +266,7 @@ list_t<var_t> resolve_namespace(tenv_t te, seg_t loc,
       return possible_results->hd;
     }
     if (cns == null)
-      throw new Dict::Absent;
+      throw Dict::Absent;
     // n is not defined in current namespace, look in next outer
     cns = outer_namespace(cns);
   }
@@ -315,9 +310,6 @@ uniondecl_t @ lookup_uniondecl(tenv_t te,seg_t loc,qvar_t q) {
     return Dict::lookup(ge->uniondecls,v);
   }
 }
-//structdecl @ lookup_structdecl_abs(tenv_t te, seg_t loc,qvar q) {
-//  return Dict::lookup(Dict::lookup(te->ae,(*q)[0])->structdecls, (*q)[1]);
-//}
 
 static tuniondecl_t @ lookup_tuniondecl_f(genv_t ge,var_t v) {
   return Dict::lookup(ge->tuniondecls,v);
@@ -337,18 +329,18 @@ tuniondecl_t @ lookup_tuniondecl(tenv_t te,seg_t loc,qvar_t q) {
   }
 }
 
-static xtuniondecl_t @ lookup_xtuniondecl_f(genv_t ge,var_t v) {
-  return Dict::lookup(ge->xtuniondecls,v);
+static tuniondecl_t @ lookup_xtuniondecl_f(genv_t ge,var_t v) {
+  return Dict::lookup(ge->tuniondecls,v);
 }
 
 // DAN: some functionality from tcXTuniondecl has moved to here.
-opt_t<xtuniondecl_t@> lookup_xtuniondecl(tenv_t te,seg_t loc,qvar_t q) {
+opt_t<tuniondecl_t@> lookup_xtuniondecl(tenv_t te,seg_t loc,qvar_t q) {
   let &$(nsl,v) = q;
   switch (nsl) {
   case &Rel_n(null):
     // unqualified name, okay to fail -- that just means we have a new xtunion
     try return new Opt(scoped_lookup(te, loc, lookup_xtuniondecl_f, v));
-    catch { case &Dict::Absent: return null; }
+    catch { case Dict::Absent: return null; }
   case Loc_n: // impossible case
     terr(loc,"lookup_xtuniondecl: impossible");
     return null;
@@ -360,20 +352,20 @@ opt_t<xtuniondecl_t@> lookup_xtuniondecl(tenv_t te,seg_t loc,qvar_t q) {
     genv_t ge;
     try ge = lookup_namespace(te,loc,x,y);
     catch {
-    case &Dict::Absent:
+    case Dict::Absent:
       Tcutil::terr(loc,"bad qualified name for xtunion");
-      throw new Dict::Absent;
+      throw Dict::Absent;
     }
-    return new Opt(Dict::lookup(ge->xtuniondecls,v));
+    return new Opt(Dict::lookup(ge->tuniondecls,v));
   case &Abs_n(y):
     genv_t ge = Dict::lookup(te->ae,y);
-    return new Opt(Dict::lookup(ge->xtuniondecls,v));
+    return new Opt(Dict::lookup(ge->tuniondecls,v));
   }
 }
 //// FIX: We probably need some of the lenience of lookup_xtuniondecl here too.
 ////     I would add it, but I think xtunions are still generally sorta busted.
 //opt_t<xtuniondecl_t@> lookup_xtuniondecl_abs(tenv te, seg_t loc,qvar q) {
-//  return &Opt(Dict::lookup(Dict::lookup(te->ae,(*q)[0])->xtuniondecls, (*q)[1]));
+//  return &Opt(Dict::lookup(Dict::lookup(te->ae,(*q)[0])->tuniondecls, (*q)[1]));
 //}
 
 static enumdecl_t @lookup_enumdecl_f(genv_t ge, var_t v) {
@@ -419,7 +411,6 @@ genv_t empty_genv() {
             .structdecls   = Dict::empty(String::zstrptrcmp),
             .uniondecls    = Dict::empty(String::zstrptrcmp),
             .tuniondecls   = Dict::empty(String::zstrptrcmp),
-            .xtuniondecls  = Dict::empty(String::zstrptrcmp),
             .enumdecls     = Dict::empty(String::zstrptrcmp),
             .typedefs      = Dict::empty(String::zstrptrcmp),
             .ordinaries    = Dict::empty(String::zstrptrcmp),
@@ -458,12 +449,12 @@ frames_t<`b> map_frames(`b g(`a), frames_t<`a> f) {
 }
 
 fenv_t get_fenv(tenv_t te) {
-  if (te->le == null) throw new Env_error;
+  if (te->le == null) throw Env_error;
   return get_visible(te->le->v);
 }
 
 tenv_t put_fenv(tenv_t te, fenv_t fe) {
-  if (te->le == null) throw new Env_error;
+  if (te->le == null) throw Env_error;
   return new Tenv(te->ns, te->ae, new Opt(put_visible(te->le->v,fe)));
 }
 
@@ -530,17 +521,17 @@ resolved_t lookup_ordinary(tenv_t te,seg_t loc,qvar_t q) {
   let &$(nsl,v) = q;
   switch (nsl) {
   case Loc_n:
-    if (te->le == null) { throw new Dict::Absent; }
+    if (te->le == null) { throw Dict::Absent; }
     else fallthru;
   case &Rel_n(null) && te->le != null:
     let fe = get_fenv(te);
     // NB a local overrides any global, without an ambiguity warning
     try return new VarRes(Dict::lookup(fe->locals,v));
-    catch {case &Dict::Absent: return lookup_ordinary_global(te,loc,q);}
+    catch {case Dict::Absent: return lookup_ordinary_global(te,loc,q);}
   default:
     try return lookup_ordinary_global(te,loc,q);    
     catch {
-    case &Dict::Absent: 
+    case Dict::Absent: 
       terr(loc,xprintf("unbound identifer: %s", Absynpp::qvar2string(q)));
       return new VarRes(Unresolved_b);
     }

@@ -47,7 +47,7 @@ static gspec_t<`e> lookup (glist_t<$(string,gspec_t<`e>,string)@`r1,`r2> l,
       return (*l->hd)[1];
     l = l->tl;
   }
-  throw new Not_found;
+  throw Not_found;
 }
 
 void usage(glist_t<$(string,gspec_t<`e>,string)@`r1,`r2> speclist, 
@@ -101,7 +101,7 @@ void parse(glist_t<$(string,gspec_t<`e>,string)@`r1,`r2> speclist,
       gspec_t<`e> action;
       try action = lookup(speclist, s);
       catch {
-      case &Not_found: stop(initpos, new Unknown(s), speclist, errmsg); return;
+      case Not_found: stop(initpos, new Unknown(s), speclist, errmsg); return;
       }
       try
 	switch (action) {

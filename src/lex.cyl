@@ -387,7 +387,7 @@ static bool is_typedef_in_namespace(List_t<var_t> ns, var_t v) {
   try {
     ldecls_t ld = Dict::lookup(lstate->v->decls,ans);
     return Set::member(ld->typedefs,v);
-  } catch { case &Dict::Absent:
+  } catch { case Dict::Absent:
     return false;
   }
 }

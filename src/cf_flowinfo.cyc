@@ -227,7 +227,7 @@ pinfo_dict_t<local_root_t> escape_these(Set::set_t<place_t> places,
     places = Set::delete(places,place);
     path_info_t place_old_pinfo;
     try place_old_pinfo = lookup_place(d,place);
-    catch { case &Dict::Absent: continue; }
+    catch { case Dict::Absent: continue; }
     let places_env = $(d,&places);
     let place_new_pinfo = pinfo_getplaces_esc(&places_env, place_old_pinfo);
     if(place_old_pinfo != place_new_pinfo) 

@@ -21,22 +21,21 @@ typedef struct _tagged_string Cyc_string; typedef struct _tagged_string Cyc_stri
 typedef struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void*
 exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef
 struct Cyc_Core_Opt* Cyc_Core_opt_t; extern struct _tagged_string Cyc_Core_new_string(
-int); extern char Cyc_Core_InvalidArg_tag[ 11u]; struct Cyc_Core_InvalidArg_struct{
-char* tag; struct _tagged_string f1; } ; extern char Cyc_Core_Failure_tag[ 8u];
+int); extern char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
+char* tag; struct _tagged_string f1; } ; extern char Cyc_Core_Failure[ 12u];
 struct Cyc_Core_Failure_struct{ char* tag; struct _tagged_string f1; } ; extern
-char Cyc_Core_Impossible_tag[ 11u]; struct Cyc_Core_Impossible_struct{ char* tag;
-struct _tagged_string f1; } ; extern char Cyc_Core_Not_found_tag[ 10u]; struct
-Cyc_Core_Not_found_struct{ char* tag; } ; extern char Cyc_Core_Unreachable_tag[
-12u]; struct Cyc_Core_Unreachable_struct{ char* tag; struct _tagged_string f1; }
-; extern char* string_to_Cstring( struct _tagged_string); extern char*
-underlying_Cstring( struct _tagged_string); extern struct _tagged_string
-Cstring_to_string( char*); extern int system( char*); struct Cyc_Stdio___sFILE;
-typedef struct Cyc_Stdio___sFILE Cyc_Stdio_FILE; typedef int Cyc_Stdio_fpos_t;
-extern char Cyc_Stdio_FileOpenError_tag[ 14u]; struct Cyc_Stdio_FileOpenError_struct{
-char* tag; struct _tagged_string f1; } ; extern char Cyc_Stdio_FileCloseError_tag[
-15u]; struct Cyc_Stdio_FileCloseError_struct{ char* tag; } ; extern int Cyc_Stdio_file_string_read(
+char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{ char* tag;
+struct _tagged_string f1; } ; extern char Cyc_Core_Not_found[ 14u]; extern char
+Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{ char* tag;
+struct _tagged_string f1; } ; extern char* string_to_Cstring( struct
+_tagged_string); extern char* underlying_Cstring( struct _tagged_string); extern
+struct _tagged_string Cstring_to_string( char*); extern int system( char*);
+struct Cyc_Stdio___sFILE; typedef struct Cyc_Stdio___sFILE Cyc_Stdio_FILE;
+typedef int Cyc_Stdio_fpos_t; extern char Cyc_Stdio_FileOpenError[ 18u]; struct
+Cyc_Stdio_FileOpenError_struct{ char* tag; struct _tagged_string f1; } ; extern
+char Cyc_Stdio_FileCloseError[ 19u]; extern int Cyc_Stdio_file_string_read(
 struct Cyc_Stdio___sFILE* fd, struct _tagged_string dest, int dest_offset, int
-max_count); extern char Cyc_Lexing_Error_tag[ 6u]; struct Cyc_Lexing_Error_struct{
+max_count); extern char Cyc_Lexing_Error[ 10u]; struct Cyc_Lexing_Error_struct{
 char* tag; struct _tagged_string f1; } ; struct Cyc_Lexing_lexbuf{ void(*
 refill_buff)( struct Cyc_Lexing_lexbuf*); void* refill_state; struct
 _tagged_string lex_buffer; int lex_buffer_len; int lex_abs_pos; int
@@ -58,17 +57,15 @@ Cyc_Lexing_lexeme_end( struct Cyc_Lexing_lexbuf*); extern int Cyc_Lexing_lex_eng
 struct Cyc_Lexing_lex_tables*, int, struct Cyc_Lexing_lexbuf*); struct Cyc_List_List{
 void* hd; struct Cyc_List_List* tl; } ; typedef struct Cyc_List_List* Cyc_List_glist_t;
 typedef struct Cyc_List_List* Cyc_List_list_t; typedef struct Cyc_List_List* Cyc_List_List_t;
-extern char Cyc_List_List_empty_tag[ 11u]; struct Cyc_List_List_empty_struct{
-char* tag; } ; extern char Cyc_List_List_mismatch_tag[ 14u]; struct Cyc_List_List_mismatch_struct{
-char* tag; } ; extern char Cyc_List_Nth_tag[ 4u]; struct Cyc_List_Nth_struct{
-char* tag; } ; extern struct _tagged_string Cyc_String_zstrncpy( struct
-_tagged_string, int, struct _tagged_string, int, unsigned int); extern struct
-_tagged_string Cyc_String_strdup( struct _tagged_string src); char Cyc_Lexing_Error_tag[
-6u]="Error"; struct Cyc_Lexing_lexbuf; struct Cyc_Lexing_function_lexbuf_state;
-struct Cyc_Lexing_lex_tables; static char _temp2[ 1u]=""; static struct
-_tagged_string Cyc_Lexing_aux_buffer=( struct _tagged_string){ _temp2, _temp2,
-_temp2 + 1u}; void Cyc_Lexing_lex_refill( struct Cyc_Lexing_lexbuf* lexbuf){ if(({
-struct _tagged_string _temp3= Cyc_Lexing_aux_buffer;( unsigned int)( _temp3.last_plus_one
+extern char Cyc_List_List_empty[ 15u]; extern char Cyc_List_List_mismatch[ 18u];
+extern char Cyc_List_Nth[ 8u]; extern struct _tagged_string Cyc_String_zstrncpy(
+struct _tagged_string, int, struct _tagged_string, int, unsigned int); extern
+struct _tagged_string Cyc_String_strdup( struct _tagged_string src); char Cyc_Lexing_Error[
+10u]; struct Cyc_Lexing_lexbuf; struct Cyc_Lexing_function_lexbuf_state; struct
+Cyc_Lexing_lex_tables; static char _temp2[ 1u]=""; static struct _tagged_string
+Cyc_Lexing_aux_buffer=( struct _tagged_string){ _temp2, _temp2, _temp2 + 1u};
+void Cyc_Lexing_lex_refill( struct Cyc_Lexing_lexbuf* lexbuf){ if(({ struct
+_tagged_string _temp3= Cyc_Lexing_aux_buffer;( unsigned int)( _temp3.last_plus_one
 - _temp3.curr);}) == 1){ Cyc_Lexing_aux_buffer= Cyc_Core_new_string( 4096);}{
 int read=((( struct Cyc_Lexing_function_lexbuf_state*) lexbuf->refill_state)->read_fun)(
 Cyc_Lexing_aux_buffer,( int)({ struct _tagged_string _temp4= Cyc_Lexing_aux_buffer;(
@@ -146,9 +143,9 @@ Null_Exception);}* _temp29;});} else{ state=({ struct _tagged_ptr0 _temp30= tbl-
 int* _temp32= _temp30.curr + state; if( _temp30.base == 0? 1:( _temp32 < _temp30.base?
 1: _temp32 >= _temp30.last_plus_one)){ _throw( Null_Exception);}* _temp32;});}
 if( state < 0){ lbuf->lex_curr_pos= lbuf->lex_last_pos; if( lbuf->lex_last_action
-== - 1){( void) _throw(( struct _xtunion_struct*)({ struct Cyc_Lexing_Error_struct*
-_temp33=( struct Cyc_Lexing_Error_struct*) GC_malloc( sizeof( struct Cyc_Lexing_Error_struct));
-_temp33[ 0]=({ struct Cyc_Lexing_Error_struct _temp34; _temp34.tag= Cyc_Lexing_Error_tag;
+== - 1){( void) _throw(( void*)({ struct Cyc_Lexing_Error_struct* _temp33=(
+struct Cyc_Lexing_Error_struct*) GC_malloc( sizeof( struct Cyc_Lexing_Error_struct));
+_temp33[ 0]=({ struct Cyc_Lexing_Error_struct _temp34; _temp34.tag= Cyc_Lexing_Error;
 _temp34.f1=( struct _tagged_string)({ char* _temp35=( char*)"empty token";
 struct _tagged_string _temp36; _temp36.curr= _temp35; _temp36.base= _temp35;
 _temp36.last_plus_one= _temp35 + 12; _temp36;}); _temp34;}); _temp33;}));} else{

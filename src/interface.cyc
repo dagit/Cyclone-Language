@@ -27,7 +27,6 @@ struct Ienv { // clone of Genv, but with only what we need
   Dict::dict_t<var_t,structdecl_t>  structdecls;
   Dict::dict_t<var_t,uniondecl_t>   uniondecls;
   Dict::dict_t<var_t,tuniondecl_t>  tuniondecls;
-  Dict::dict_t<var_t,xtuniondecl_t> xtuniondecls;
   Dict::dict_t<var_t,enumdecl_t>    enumdecls;
   Dict::dict_t<var_t,typedefdecl_t> typedefdecls;
   Dict::dict_t<var_t,vardecl_t>     vardecls;
@@ -45,7 +44,6 @@ ienv_t new_ienv() {
     Ienv{.structdecls  = Dict::empty(String::zstrptrcmp),
          .uniondecls   = Dict::empty(String::zstrptrcmp),
 	 .tuniondecls  = Dict::empty(String::zstrptrcmp),
-	 .xtuniondecls = Dict::empty(String::zstrptrcmp),
          .enumdecls    = Dict::empty(String::zstrptrcmp),
          .typedefdecls = Dict::empty(String::zstrptrcmp),
          .vardecls     = Dict::empty(String::zstrptrcmp)
@@ -124,7 +122,7 @@ static void extract_tuniondecl($(ienv_t, ienv_t) @ env, var_t x, tuniondecl_t@ d
     break;
   }
 }
-
+/*
 // we have to move the declaration of the xtunions back to their previous namespace
 // otherwise it won't parse 
 static void extract_xtuniondecl(t i, var_t x, xtuniondecl_t@ dp) {
@@ -172,7 +170,7 @@ static void extract_xtuniondecl(t i, var_t x, xtuniondecl_t@ dp) {
     break;
   }
 }
-
+*/
 static void extract_enumdecl($(ienv_t, ienv_t) @ env, var_t x, enumdecl_t@ dp) {
   let ext = (* env)[0];
   let pub = (* env)[1];
@@ -263,9 +261,7 @@ static void extract_f($(t, bool) @ env_f, list_t<var_t> ns, genv_t ge) {
   Dict::iter_c(extract_structdecl,  env, ge->structdecls);
   Dict::iter_c(extract_uniondecl,   env, ge->uniondecls);
   Dict::iter_c(extract_tuniondecl,  env, ge->tuniondecls);
-  Dict::iter_c(extract_xtuniondecl, i,   ge->xtuniondecls);
   Dict::iter_c(extract_enumdecl,    env, ge->enumdecls);
-  // we need to move the xtunions to the corresponding namespaces
   Dict::iter_c(extract_typedef,     env, ge->typedefs);
   Dict::iter_c(extract_ordinarie,   new $((*env)[0], (*env)[1], check_fun_definition), ge->ordinaries);
 }
@@ -294,7 +290,7 @@ namespace Check {
   xtunion exn{False};
   
   static void is_true(bool b) {
-    if (!b) throw new False;
+    if (!b) throw False;
   }
 
   static void box(`a x, `a y) {
@@ -360,10 +356,6 @@ namespace Check {
     //...
   }
 
-  static void xtuniondecl(xtuniondecl_t d1, xtuniondecl_t d2) {
-    //...
-  }
-
   static void enumdecl(enumdecl_t d1, enumdecl_t d2) {
     //...
   }
@@ -380,7 +372,6 @@ namespace Check {
     Dict::iter2(structdecl,  ie1 -> structdecls,  ie2 -> structdecls);
     Dict::iter2(uniondecl,   ie1 -> uniondecls,   ie2 -> uniondecls);
     Dict::iter2(tuniondecl,  ie1 -> tuniondecls,  ie2 -> tuniondecls);
-    Dict::iter2(xtuniondecl, ie1 -> xtuniondecls, ie2 -> xtuniondecls);
     Dict::iter2(enumdecl,    ie1 -> enumdecls,    ie2 -> enumdecls);
     Dict::iter2(typedefdecl, ie1 -> typedefdecls, ie2 -> typedefdecls);
     Dict::iter2(vardecl,     ie1 -> vardecls,     ie2 -> vardecls);
@@ -393,8 +384,8 @@ bool is_subinterface(t i1,t i2) {
     Dict::iter2(Check::incl_ns, i1 -> exports, i2 -> exports);
     Dict::iter2(Check::incl_ns, i2 -> imports, i1 -> imports);
   } catch {
-  case &Check::False: fallthru;
-  case &Dict::Absent: return false;
+  case Check::False: fallthru;
+  case Dict::Absent: return false;
   }
   return true;
 }
@@ -445,17 +436,6 @@ static list_t<decl_t> add_tuniondecl_header(var_t x, tuniondecl_t d, list_t<decl
   return new List(new_decl(new Tunion_d(d), null),tds);
 }
 
-static list_t<decl_t> add_xtuniondecl(var_t x, xtuniondecl_t d, list_t<decl_t> tds) {
-  return new List(new_decl(new XTunion_d(d), null),tds);
-}
-
-static list_t<decl_t> add_xtuniondecl_header(var_t x, xtuniondecl_t d, list_t<decl_t> tds) {
-  d = new *d;
-  d -> fields = null;
-  d -> sc = Extern;
-  return new List(new_decl(new XTunion_d(d), null),tds);
-}
-
 static list_t<decl_t> add_enumdecl(var_t x, enumdecl_t d, list_t<decl_t> tds) {
   return new List(new_decl(new Enum_d(d), null),tds);
 }
@@ -481,7 +461,6 @@ static void print_ns_headers(FILE @f, list_t<var_t> ns, ienv_t ie) {
   tds = Dict::fold(add_structdecl_header,  ie -> structdecls,  tds);
   tds = Dict::fold(add_uniondecl_header,   ie -> uniondecls,   tds);
   tds = Dict::fold(add_tuniondecl_header,  ie -> tuniondecls,  tds);
-  tds = Dict::fold(add_xtuniondecl_header, ie -> xtuniondecls, tds);
   tds = Dict::fold(add_enumdecl_header,    ie -> enumdecls,    tds);
 
   tds = imp_rev(tds);
@@ -509,7 +488,6 @@ static void print_ns_decls(FILE @f, list_t<var_t> ns, ienv_t ie) {
   tds = Dict::fold(add_structdecl,  ie -> structdecls,  tds);
   tds = Dict::fold(add_uniondecl,   ie -> uniondecls,   tds);
   tds = Dict::fold(add_tuniondecl,  ie -> tuniondecls,  tds);
-  tds = Dict::fold(add_xtuniondecl, ie -> xtuniondecls, tds);
   tds = Dict::fold(add_enumdecl,    ie -> enumdecls,    tds);
   tds = Dict::fold(add_var,         ie -> vardecls,     tds);
 

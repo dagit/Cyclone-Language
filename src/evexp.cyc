@@ -126,10 +126,10 @@ unsigned int szof(type_t t, seg_t loc) {
   case &Evar(BoxKind,_,_): return 4u; // Possible?
   case &Evar(_,_,_): terr(loc,"cannot apply sizeof to unknown type"); return 0u;
   case &TunionType(_):  return 4u;
-  case &XTunionType(_): return 4u;
-  case &TunionFieldType(TunionFieldInfo{_,_,_,_,tufd}): fallthru(tufd);
-  case &XTunionFieldType(XTunionFieldInfo{_,_,_,tufd}): 
-    return 4u + szof(new TupleType(tufd->typs),loc);
+  case &TunionFieldType(TunionFieldInfo{&KnownTunionfield(_,tuf),_}):
+    return 4u + szof(new TupleType(tuf->typs),loc);
+  case &TunionFieldType(_):
+    throw Tcutil::impos("unroslved tunionfield type in szof");
   case &PointerType(PtrInfo{_,_,_,_,b}):  
     switch (compress_conref(b)->v) {
     case &Eq_constr(Unknown_b): return 12u;

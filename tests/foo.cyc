@@ -9,7 +9,7 @@ xtunion exn {ParseError};
 
 void yyerror(string s) {
   printf("error: %s\n",s);
-  throw new ParseError;
+  throw ParseError;
 }
 
 int yylex() {
