@@ -68,7 +68,7 @@ bool is_pointer_type(type_t t) {
 }
 
 // true for any char [signed | unsigned | none]
-static bool is_char_type(type_t t) {
+bool is_char_type(type_t t) {
   switch (compress(t)) {
   case &AppType(&IntCon(_,Char_sz),_): return true;
   default: return false;

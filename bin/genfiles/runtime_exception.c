@@ -76,7 +76,7 @@ const char *Cyc_Core_get_exn_name(struct _xtunion_struct *x) {
   return x->tag;
 }
 
-void Cyc_Core_set_uncaught_exn_fun(int (*f())) {
+void Cyc_Core_set_uncaught_exn_fun(int f()) {
   uncaught_fun = f;
 }
 

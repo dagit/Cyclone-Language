@@ -993,6 +993,10 @@ void resolve_decl(env_t env, decl_t d) {
     break; 
 
   case &Typedef_d(td): // DJG: I think extern_c is always false at this stage
+    if (!at_toplevel(env)) {
+      err(loc,"nested type definitions are not yet supported");
+      break;
+    }
     absolutize_decl(loc,env,td->name, (td->extern_c ?  ExternC : Public));
     let &$(decl_ns,decl_name) = td->name;
 
@@ -1005,6 +1009,10 @@ void resolve_decl(env_t env, decl_t d) {
     break;
 
   case &Aggr_d(ad): 
+    if (!at_toplevel(env)) {
+      err(loc,"nested type definitions are not yet supported");
+      break;
+    }
     absolutize_decl(loc,env,ad->name,ad->sc);
     let &$(decl_ns,decl_name) = ad->name;
 
@@ -1025,6 +1033,10 @@ void resolve_decl(env_t env, decl_t d) {
     break;
 
   case &Enum_d(ed): 
+    if (!at_toplevel(env)) {
+      err(loc,"nested type definitions are not yet supported");
+      break;
+    }
     absolutize_decl(loc,env,ed->name,ed->sc);
     let &$(decl_ns,decl_name) = ed->name;
 

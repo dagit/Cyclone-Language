@@ -1,4 +1,4 @@
-static char rcsid[] = "$Id: ap.cyc,v 1.1 2004-07-06 17:49:21 gwprice Exp $";
+static char rcsid[] = "$Id: ap.cyc,v 1.2 2004-07-20 01:53:27 greg Exp $";
 #include <ctype.h>
 #include <limits.h>
 #include <stdlib.h>
@@ -61,10 +61,10 @@ static T add(T z, T x, T y) {
 	else if (x->ndigits > n) {
 		int carry = XP_add(n, z->digits, x->digits,
 			y->digits, 0);
-		z->digits[z->size-1] = XP_sum(x->ndigits - n,
+		z->digits[z->size-1] = (XPDIGIT_T)XP_sum(x->ndigits - n,
 			&z->digits[n], &x->digits[n], carry);
 	} else
-		z->digits[n] = XP_add(n, z->digits, x->digits,
+		z->digits[n] = (XPDIGIT_T)XP_add(n, z->digits, x->digits,
 			y->digits, 0);
 	return normalize(z, z->size);
 }
@@ -307,6 +307,7 @@ T AP_or (T x, T y) {
 	z = mk(x->ndigits);
 	XP_or (y->ndigits, z->digits, x->digits, y->digits);
 	for (i = y->ndigits; i < x->ndigits; i++)
+          // JGM: this seems wrong...
 		z[i] = x[i];
 	normalize (z, z->size);
 	z->sign = 1;
@@ -320,6 +321,7 @@ T AP_xor (T x, T y) {
 	z = mk(x->ndigits);
 	XP_xor (y->ndigits, z->digits, x->digits, y->digits);
 	for (i = y->ndigits; i < x->ndigits; i++)
+          // JGM: this seems wrong...
 		z[i] = x[i];
 	normalize (z, z->size);
 	z->sign = 1;
@@ -340,7 +342,7 @@ long int AP_toint(T x) {
 }
 T AP_fromstr(const char *str, int base) {
 	T z;
-	const char *p = str;
+	const char ?p = str;
 	char sign = '\0';
 	int carry;
 	assert(p);
@@ -382,7 +384,7 @@ char *AP_tostr(T x, int base) {
 	size = (8*x->ndigits)/k + 1 + 1;
 	if (x->sign == -1)
 		size++;
-	str = malloc (size * sizeof (char));
+	str = calloc (size, sizeof (char));
 	q = malloc (x->ndigits * sizeof (XPDIGIT_T));
 	memcpy(q, x->digits, x->ndigits);
 	if (x->sign == -1) {

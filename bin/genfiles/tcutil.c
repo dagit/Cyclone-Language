@@ -968,7 +968,7 @@ void*_tmp6=Cyc_Tcutil_compress(t);void*_tmp7=_tmp6;if(((struct Cyc_Absyn_Pointer
  return 1;}else{_LL3: _LL4:
  return 0;}_LL0:;}
 # 71
-static int Cyc_Tcutil_is_char_type(void*t){
+int Cyc_Tcutil_is_char_type(void*t){
 void*_tmp8=Cyc_Tcutil_compress(t);void*_tmp9=_tmp8;if(((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_tmp9)->tag == 0U){if(((struct Cyc_Absyn_IntCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_tmp9)->f1)->tag == 1U){if(((struct Cyc_Absyn_IntCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_tmp9)->f1)->f2 == Cyc_Absyn_Char_sz){_LL1: _LL2:
  return 1;}else{goto _LL3;}}else{goto _LL3;}}else{_LL3: _LL4:
  return 0;}_LL0:;}

@@ -416,7 +416,7 @@ extern void _profile_free_region(struct _RegionHandle *,
 #endif
 
 # 1 "xp.cyc"
- static char Cyc_rcsid[72U]="$Id: xp.c,v 1.1 2004-07-06 17:49:13 gwprice Exp $";
+ static char Cyc_rcsid[52U]="$Id: xp.c,v 1.2 2004-07-20 01:53:27 greg Exp $";
 # 4 "ctype.h"
 int isalnum(int);
 # 22
@@ -567,11 +567,11 @@ if(*((unsigned char*)_check_dyneither_subscript(y,sizeof(unsigned char),0))== 0)
 return 0;
 ({unsigned char _tmp2B=(unsigned char)Cyc_XP_quotient(nx,q,x,(int)((unsigned char*)y.curr)[0]);*((unsigned char*)_check_dyneither_subscript(r,sizeof(unsigned char),0))=_tmp2B;});
 if(_get_dyneither_size(r,sizeof(unsigned char))> 1)
-({struct _dyneither_ptr _tmp2C=(struct _dyneither_ptr)_dyneither_ptr_plus(r,sizeof(unsigned char),1);Cyc_memset(_tmp2C,'\000',(unsigned long)(my - 1));});}else{
+({struct _dyneither_ptr _tmp2C=_dyneither_ptr_plus((struct _dyneither_ptr)r,sizeof(char),1);Cyc_memset(_tmp2C,'\000',(unsigned long)(my - 1));});}else{
 if(m > n){
 Cyc_memset((struct _dyneither_ptr)q,'\000',(unsigned long)nx);
 ((struct _dyneither_ptr(*)(struct _dyneither_ptr d,struct _dyneither_ptr s,unsigned long,unsigned int))Cyc__memcpy)(r,(struct _dyneither_ptr)x,n / sizeof(((unsigned char*)x.curr)[0U])+ (n % sizeof(((unsigned char*)x.curr)[0U])== 0?0: 1),sizeof(((unsigned char*)x.curr)[0U]));
-({struct _dyneither_ptr _tmp2D=(struct _dyneither_ptr)_dyneither_ptr_plus(r,sizeof(unsigned char),n);Cyc_memset(_tmp2D,'\000',(unsigned long)(my - n));});}else{
+({struct _dyneither_ptr _tmp2D=_dyneither_ptr_plus((struct _dyneither_ptr)r,sizeof(char),n);Cyc_memset(_tmp2D,'\000',(unsigned long)(my - n));});}else{
 # 129
 int k;
 struct _dyneither_ptr rem=tmp;struct _dyneither_ptr dq=_dyneither_ptr_plus(_dyneither_ptr_plus(tmp,sizeof(unsigned char),n),sizeof(unsigned char),1);

@@ -4610,6 +4610,21 @@ static void stmttypes_to_c(stmt_t s) {
   }
 }
 
+static type_t decl_to_enumtype(decl_t d) {
+  switch (d->r) {
+  case &Enum_d(ed): return new AppType(new EnumCon(ed->name,ed),NULL);
+  default: impos("Toc::get_enumdecl_name");
+  }
+}
+
+static struct Decl *type2enumdecl(type_t t) {
+  switch (t) {
+  case &TypeDeclType(&{.r = &Enum_td(ed),.loc = loc},_): 
+    return new Decl{.r = new Enum_d(ed), .loc = loc};
+  default: return NULL;
+  }
+}
+
 // Translate the given declarations, producing a new list of declarations
 // and a new translation environment.  Top-level variable
 // declarations are treated differently.
@@ -4666,9 +4681,17 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds, boo
       break;
     case &Typedef_d(td):
       td->tvs  = NULL;
-      if (td->defn != NULL)
-	td->defn = typ_to_c((type_t)td->defn);
-      else {
+      if (td->defn != NULL) {
+        let tdefn = typ_to_c((type_t)td->defn);
+	td->defn = tdefn;
+        // JGM: when we're expanding typedef's, we need to add back as
+        // a declaration any enum's since they are dropped otherwise.
+        let ed = type2enumdecl(tdefn);
+        if (ed != NULL) {
+          result_decls = new List((decl_t)ed, result_decls);
+          td->defn = decl_to_enumtype(ed);
+        }
+      } else {
 	switch (td->kind->v->kind) {
 	case BoxKind: td->defn = void_star_type(); break;
 	default: td->defn = void_type; break;

@@ -75,7 +75,7 @@ void add(xarray_t<`a> xarr, `a a) {
       for (int i=1; i < xarr->num_elmts; ++i)
         newarr[i] = xarr->elmts[i];
       xarr->elmts :=: newarr;
-      ufree(newarr);
+      ufree((`a*`U)newarr);
     }
   }
   xarr->elmts[xarr->num_elmts++] = a;
@@ -183,7 +183,7 @@ void reuse(xarray_t<`a> xarr) {
   `a?`U newarr = NULL;
   newarr :=: xarr->elmts;
   xarr->num_elmts = 0;
-  ufree(newarr);
+  ufree((`a*`U)newarr);
 }
 
 void delete(xarray_t<`a> xarr, int num) {
