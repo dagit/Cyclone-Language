@@ -2594,6 +2594,8 @@ static void exp_to_c(env_t nv, exp_t e) {
         toc_impos("in-place inc/dec on @tagged union");
       }
     }
+    bool need_null_ck = is_pointer_type(old_typ) && 
+      Tcutil::is_nullable_pointer_type(old_typ) && need_null_check(e2);
     set_lhs(nv,true);
     exp_to_c(nv,e2);
     set_lhs(nv,false);
@@ -2611,14 +2613,32 @@ static void exp_to_c(env_t nv, exp_t e) {
                                      sizeoftyp_exp(typ_to_c(elt_typ),DL),
                                      signed_int_exp(change,DL)));
     } else if (is_zero_pointer_typ_elt(old_typ,&elt_typ)) {
-      // e.g, x++ becomes _zero_arr_inplace_plus_post(x,1)
-      //let fn_e = (incr == PostInc) ? _zero_arr_inplace_plus_post_e :
-      //  _zero_arr_inplace_plus_e;
-      let fnSet = (incr!=PostInc) ? &_zero_arr_inplace_plus_functionSet
-	                          : &_zero_arr_inplace_plus_post_functionSet;
-      exp_t fn_e = getFunctionRemovePointer(fnSet, e2);
-      e->r = fncall_exp_r(fn_e, list(push_address_exp(e2),
-				     signed_int_exp(1,DL)));
+      // we treat ++x specially -- this becomes
+      //   if (x != 0 && *x != 0) ++x; else _throw_arraybounds()
+      // or even
+      //   if (*x != 0) ++x; else _throw_arraybounds()
+      // if we can show x is not null.
+      if (incr != PostInc) {
+        let x = temp_var();
+        let t = cstar_typ(typ_to_c(old_typ),mt_tq);
+        let xexp = push_address_exp(e2);
+        let testexp = neq_exp(deref_exp(deref_exp(var_exp(x,DL),DL),DL),
+                              int_exp(None,0,DL),DL);
+        if (need_null_ck)
+          testexp = and_exp(neq_exp(deref_exp(var_exp(x,DL),DL),
+                                    int_exp(None,0,DL),DL),testexp,DL);
+        let s = ifthenelse_stmt(testexp,
+                  exp_stmt(pre_inc_exp(deref_exp(var_exp(x,DL),DL),DL),DL),
+                  exp_stmt(fncall_exp(_throw_arraybounds_e,NULL,DL),DL),DL);
+        s = seq_stmt(s,exp_stmt(deref_exp(var_exp(x,DL),DL),DL),DL);
+        e->r = stmt_exp(declare_stmt(x,t,xexp,s,DL),DL)->r;
+      } else {
+        // e.g, x++ becomes _zero_arr_inplace_plus_post(x,1)
+        let fnSet = &_zero_arr_inplace_plus_post_functionSet;
+        exp_t fn_e = getFunctionRemovePointer(fnSet, e2);
+        e->r = fncall_exp_r(fn_e, list(push_address_exp(e2),
+                                       signed_int_exp(1,DL)));
+      }
     } else if(elt_typ == &VoidType_val && !is_lvalue(e2)) {
       lvalue_assign(e2,NULL,incr_lvalue,incr);
       e->r = e2->r;

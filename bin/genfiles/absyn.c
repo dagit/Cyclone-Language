@@ -1138,13 +1138,13 @@ enum Cyc_Tcenv_NewStatus{Cyc_Tcenv_NoneNew  = 0U,Cyc_Tcenv_InNew  = 1U,Cyc_Tcenv
 void*Cyc_Tcutil_impos(struct _dyneither_ptr fmt,struct _dyneither_ptr ap);
 # 55
 void*Cyc_Tcutil_compress(void*t);
-# 94
-extern struct Cyc_Absyn_Kind Cyc_Tcutil_rk;
 # 96
+extern struct Cyc_Absyn_Kind Cyc_Tcutil_rk;
+# 98
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_bk;
-# 121
+# 123
 extern struct Cyc_Core_Opt Cyc_Tcutil_tmko;
-# 129
+# 131
 void*Cyc_Tcutil_kind_to_bound(struct Cyc_Absyn_Kind*k);
 # 24 "cyclone.h"
 extern int Cyc_Cyclone_tovc_r;

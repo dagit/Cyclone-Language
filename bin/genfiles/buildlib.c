@@ -999,7 +999,7 @@ void Cyc_Tc_tc(struct Cyc_Tcenv_Tenv*te,int var_default_init,struct Cyc_List_Lis
 # 38 "toc.h"
 void*Cyc_Toc_typ_to_c(void*t);
 void Cyc_Toc_finish();
-# 145 "tcutil.h"
+# 147 "tcutil.h"
 int Cyc_Tcutil_unify(void*,void*);
 # 30 "binding.h"
 void Cyc_Binding_resolve_all(struct Cyc_List_List*tds);struct Cyc_Binding_Namespace_Binding_NSDirective_struct{int tag;struct Cyc_List_List*f1;};struct Cyc_Binding_Using_Binding_NSDirective_struct{int tag;struct Cyc_List_List*f1;};struct Cyc_Binding_NSCtxt{struct Cyc_List_List*curr_ns;struct Cyc_List_List*availables;struct Cyc_Dict_Dict ns_data;};

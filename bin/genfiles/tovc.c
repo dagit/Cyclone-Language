@@ -930,7 +930,7 @@ enum Cyc_Tcenv_NewStatus{Cyc_Tcenv_NoneNew  = 0U,Cyc_Tcenv_InNew  = 1U,Cyc_Tcenv
 void Cyc_Tcutil_warn(unsigned int,struct _dyneither_ptr fmt,struct _dyneither_ptr ap);
 # 55
 void*Cyc_Tcutil_compress(void*t);
-# 172
+# 174
 void*Cyc_Tcutil_fndecl2typ(struct Cyc_Absyn_Fndecl*);struct Cyc_Hashtable_Table;
 # 38 "toc.h"
 void*Cyc_Toc_typ_to_c(void*t);

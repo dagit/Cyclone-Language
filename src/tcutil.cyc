@@ -2185,6 +2185,24 @@ bool is_pointer_type(type_t t) {
   default: return false;
   }
 }
+
+bool is_zeroterm_pointer_type(type_t t) {
+  switch (compress(t)) {
+  case &PointerType(PtrInfo{.ptr_atts = PtrAtts{.zero_term = ztl,...},...}):
+    return conref_constr(false, ztl);
+  default: return false;
+  }
+}
+
+bool is_nullable_pointer_type(type_t t) {
+  switch (compress(t)) {
+  case &PointerType(PtrInfo{.ptr_atts = PtrAtts{.nullable = nbl,...},...}):
+    return conref_constr(false, nbl);
+  default: return false;
+  }
+}
+
+
 type_t pointer_elt_type(type_t t) {
   switch (compress(t)) {
   case &PointerType(PtrInfo{.elt_typ = e,...}): return e;

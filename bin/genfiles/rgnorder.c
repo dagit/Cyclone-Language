@@ -883,11 +883,11 @@ struct Cyc_Absyn_Kind*Cyc_Tcutil_tvar_kind(struct Cyc_Absyn_Tvar*t,struct Cyc_Ab
 struct Cyc_Absyn_Kind*Cyc_Tcutil_typ_kind(void*t);
 # 55
 void*Cyc_Tcutil_compress(void*t);
-# 96
+# 98
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_bk;
-# 145
+# 147
 int Cyc_Tcutil_unify(void*,void*);
-# 287 "tcutil.h"
+# 289 "tcutil.h"
 void*Cyc_Tcutil_normalize_effect(void*e);struct Cyc_PP_Ppstate;struct Cyc_PP_Out;struct Cyc_PP_Doc;struct Cyc_Absynpp_Params{int expand_typedefs;int qvar_to_Cids;int add_cyc_prefix;int to_VC;int decls_first;int rewrite_temp_tvars;int print_all_tvars;int print_all_kinds;int print_all_effects;int print_using_stmts;int print_externC_stmts;int print_full_evars;int print_zeroterm;int generate_line_directives;int use_curr_namespace;struct Cyc_List_List*curr_namespace;};
 # 62 "absynpp.h"
 struct _dyneither_ptr Cyc_Absynpp_typ2string(void*);struct Cyc_RgnOrder_RgnPO{struct Cyc_Dict_Dict d;void*these_outlive_heap;void*these_outlive_unique;struct Cyc_Absyn_Tvar*youngest;};

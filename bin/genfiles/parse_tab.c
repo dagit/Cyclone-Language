@@ -1075,39 +1075,39 @@ enum Cyc_Tcenv_NewStatus{Cyc_Tcenv_NoneNew  = 0U,Cyc_Tcenv_InNew  = 1U,Cyc_Tcenv
 void*Cyc_Tcutil_copy_type(void*t);
 # 55
 void*Cyc_Tcutil_compress(void*t);
-# 94
+# 96
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_rk;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_ak;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_bk;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_mk;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_ek;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_ik;
-# 101
+# 103
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_trk;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_tak;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_tbk;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_tmk;
-# 106
+# 108
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_urk;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_uak;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_ubk;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_umk;
-# 111
-extern struct Cyc_Core_Opt Cyc_Tcutil_rko;
 # 113
-extern struct Cyc_Core_Opt Cyc_Tcutil_bko;
+extern struct Cyc_Core_Opt Cyc_Tcutil_rko;
 # 115
+extern struct Cyc_Core_Opt Cyc_Tcutil_bko;
+# 117
 extern struct Cyc_Core_Opt Cyc_Tcutil_iko;
-# 118
+# 120
 extern struct Cyc_Core_Opt Cyc_Tcutil_trko;
-# 128
+# 130
 struct Cyc_Core_Opt*Cyc_Tcutil_kind_to_opt(struct Cyc_Absyn_Kind*k);
 void*Cyc_Tcutil_kind_to_bound(struct Cyc_Absyn_Kind*k);
-# 290 "tcutil.h"
+# 292 "tcutil.h"
 struct Cyc_Absyn_Tvar*Cyc_Tcutil_new_tvar(void*k);
-# 354
+# 356
 int Cyc_Tcutil_is_array(void*t);
-# 358
+# 360
 void*Cyc_Tcutil_promote_array(void*t,void*rgn,int convert_tag);struct Cyc_PP_Ppstate;struct Cyc_PP_Out;struct Cyc_PP_Doc;struct Cyc_Absynpp_Params{int expand_typedefs;int qvar_to_Cids;int add_cyc_prefix;int to_VC;int decls_first;int rewrite_temp_tvars;int print_all_tvars;int print_all_kinds;int print_all_effects;int print_using_stmts;int print_externC_stmts;int print_full_evars;int print_zeroterm;int generate_line_directives;int use_curr_namespace;struct Cyc_List_List*curr_namespace;};
 # 66 "absynpp.h"
 struct _dyneither_ptr Cyc_Absynpp_cnst2string(union Cyc_Absyn_Cnst);

@@ -952,45 +952,45 @@ void*Cyc_Tcutil_compress(void*t);
 # 57
 int Cyc_Tcutil_coerce_arg(struct Cyc_Tcenv_Tenv*,struct Cyc_Absyn_Exp*,void*,int*alias_coercion);
 int Cyc_Tcutil_coerce_assign(struct Cyc_Tcenv_Tenv*,struct Cyc_Absyn_Exp*,void*);
-# 94
-extern struct Cyc_Absyn_Kind Cyc_Tcutil_rk;
 # 96
+extern struct Cyc_Absyn_Kind Cyc_Tcutil_rk;
+# 98
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_bk;
-# 101
+# 103
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_trk;
-# 104
+# 106
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_tmk;
-# 129
+# 131
 void*Cyc_Tcutil_kind_to_bound(struct Cyc_Absyn_Kind*k);
-# 143
-void Cyc_Tcutil_explain_failure();
 # 145
+void Cyc_Tcutil_explain_failure();
+# 147
 int Cyc_Tcutil_unify(void*,void*);
-# 148
+# 150
 void*Cyc_Tcutil_substitute(struct Cyc_List_List*,void*);
-# 172
+# 174
 void*Cyc_Tcutil_fndecl2typ(struct Cyc_Absyn_Fndecl*);
-# 176
+# 178
 struct _tuple13*Cyc_Tcutil_make_inst_var(struct Cyc_List_List*,struct Cyc_Absyn_Tvar*);
-# 211 "tcutil.h"
+# 213 "tcutil.h"
 void Cyc_Tcutil_check_fndecl_valid_type(unsigned int,struct Cyc_Tcenv_Tenv*,struct Cyc_Absyn_Fndecl*);
-# 219
+# 221
 void Cyc_Tcutil_check_type(unsigned int,struct Cyc_Tcenv_Tenv*,struct Cyc_List_List*bound_tvars,struct Cyc_Absyn_Kind*k,int allow_evars,int allow_abs_aggr,void*);
-# 270
+# 272
 int Cyc_Tcutil_is_noalias_path(struct Cyc_Absyn_Exp*e);
-# 275
+# 277
 int Cyc_Tcutil_is_noalias_pointer_or_aggr(void*t);
-# 292
+# 294
 int Cyc_Tcutil_new_tvar_id();
-# 309
+# 311
 int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*e);
-# 312
+# 314
 int Cyc_Tcutil_is_var_exp(struct Cyc_Absyn_Exp*e);
-# 330
+# 332
 int Cyc_Tcutil_extract_const_from_typedef(unsigned int,int declared_const,void*);
-# 334
+# 336
 struct Cyc_List_List*Cyc_Tcutil_transfer_fn_type_atts(void*t,struct Cyc_List_List*atts);
-# 351
+# 353
 struct Cyc_List_List*Cyc_Tcutil_filter_nulls(struct Cyc_List_List*l);
 # 28 "tcexp.h"
 void*Cyc_Tcexp_tcExp(struct Cyc_Tcenv_Tenv*,void**,struct Cyc_Absyn_Exp*);

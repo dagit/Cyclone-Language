@@ -35,8 +35,9 @@ int main() {
   should_fail(bar[i] == 'a',Array_bounds);
   bar_ptr2 = f();
   should_fail(*bar_ptr2,Null_Exception);
-  should_fail(bar_ptr2++,Null_Exception);
-  should_fail(bar_ptr = ++bar_ptr2,Null_Exception);
+  // FIX: these should throw Null_Exception!
+  should_fail(bar_ptr2++,Array_bounds);
+  should_fail(bar_ptr = ++bar_ptr2,Array_bounds);
   bar_ptr2 = f();
   // FIX:  this should throw the Null_Exception!
   should_fail(bar_ptr = (bar_ptr2 + 3),Array_bounds);

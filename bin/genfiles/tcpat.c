@@ -990,44 +990,44 @@ int Cyc_Tcutil_coerce_assign(struct Cyc_Tcenv_Tenv*,struct Cyc_Absyn_Exp*,void*)
 int Cyc_Tcutil_coerceable(void*);
 # 71
 int Cyc_Tcutil_subtype(struct Cyc_Tcenv_Tenv*te,struct Cyc_List_List*assume,void*t1,void*t2);
-# 95
+# 97
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_ak;
-# 104
+# 106
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_tmk;
-# 111
+# 113
 extern struct Cyc_Core_Opt Cyc_Tcutil_rko;
 extern struct Cyc_Core_Opt Cyc_Tcutil_ako;
-# 114
+# 116
 extern struct Cyc_Core_Opt Cyc_Tcutil_mko;
-# 118
+# 120
 extern struct Cyc_Core_Opt Cyc_Tcutil_trko;
-# 145
+# 147
 int Cyc_Tcutil_unify(void*,void*);
-# 148
-void*Cyc_Tcutil_substitute(struct Cyc_List_List*,void*);
 # 150
+void*Cyc_Tcutil_substitute(struct Cyc_List_List*,void*);
+# 152
 void*Cyc_Tcutil_rsubstitute(struct _RegionHandle*,struct Cyc_List_List*,void*);struct _tuple12{struct Cyc_List_List*f1;struct _RegionHandle*f2;};struct _tuple13{struct Cyc_Absyn_Tvar*f1;void*f2;};
-# 177
+# 179
 struct _tuple13*Cyc_Tcutil_r_make_inst_var(struct _tuple12*,struct Cyc_Absyn_Tvar*);
-# 219 "tcutil.h"
+# 221 "tcutil.h"
 void Cyc_Tcutil_check_type(unsigned int,struct Cyc_Tcenv_Tenv*,struct Cyc_List_List*bound_tvars,struct Cyc_Absyn_Kind*k,int allow_evars,int allow_abs_aggr,void*);
-# 222
+# 224
 void Cyc_Tcutil_check_unique_vars(struct Cyc_List_List*vs,unsigned int loc,struct _dyneither_ptr err_msg);
-# 237
+# 239
 struct Cyc_List_List*Cyc_Tcutil_resolve_aggregate_designators(struct _RegionHandle*rgn,unsigned int loc,struct Cyc_List_List*des,enum Cyc_Absyn_AggrKind,struct Cyc_List_List*fields);
-# 262
+# 264
 int Cyc_Tcutil_is_noalias_region(void*r,int must_be_unique);
-# 270
+# 272
 int Cyc_Tcutil_is_noalias_path(struct Cyc_Absyn_Exp*e);
-# 275
+# 277
 int Cyc_Tcutil_is_noalias_pointer_or_aggr(void*t);
-# 290
+# 292
 struct Cyc_Absyn_Tvar*Cyc_Tcutil_new_tvar(void*k);
-# 309
+# 311
 int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*e);
-# 354
+# 356
 int Cyc_Tcutil_is_array(void*t);
-# 358
+# 360
 void*Cyc_Tcutil_promote_array(void*t,void*rgn,int convert_tag);
 # 28 "tcexp.h"
 void*Cyc_Tcexp_tcExp(struct Cyc_Tcenv_Tenv*,void**,struct Cyc_Absyn_Exp*);struct Cyc_Tcexp_TestEnv{struct _tuple0*eq;int isTrue;};

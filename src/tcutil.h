@@ -84,6 +84,8 @@ extern bool is_integral(exp_t);
 extern bool is_numeric(exp_t);
 extern bool is_function_type(type_t t);
 extern bool is_pointer_type(type_t t);
+extern bool is_zeroterm_pointer_type(type_t t);
+extern bool is_nullable_pointer_type(type_t t);
 extern bool is_zero(exp_t e);
 extern bool is_boxed(type_t t);
 extern bool is_dyneither_ptr(type_t t);

@@ -1075,6 +1075,8 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
   case &Const_e({.Null_c = _}):
   case &Const_e({.Int_c = $(_,0)}): return $(inflow, fenv->zero);
   case &Const_e({.Int_c = $(_,_)}):
+  case &Const_e({.String_c = _}):
+  case &Const_e({.Wstring_c = _}):
   case &Var_e(&Funname_b(_)):    return $(inflow, fenv->notzeroall);
 
   case &Datatype_e(NULL,_,_): // FIX: distinguish zero/non-zero
@@ -1107,6 +1109,13 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
     let arg = List{e1,NULL};
     let $(f,_) = anal_use_ints(env,inflow,&arg);
     let $(_,lval) = anal_Lexp(env,f,false,false,e1);
+    bool iszt = Tcutil::is_zeroterm_pointer_type((type_t)e1->topt);
+    if (iszt) {
+      // pretend like this is a dereference so we get null/not-null
+      // annotations attached to e1.
+      let $(g,r) = anal_Rexp(env,false,inflow,e1);
+      anal_derefR(env,inflow,g,e1,r);
+    }
     switch($(lval,f)) {
     case $({.PlaceL = p},{.ReachableFL = $(outdict,relns)}):
       relns = reln_kill_exp(Core::heap_region,relns,e1);
@@ -1117,7 +1126,10 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
       break;
     default: break;
     }
-    return $(f,fenv->unknown_all);
+    // FIX: for non-null pointers, we know the result is non-null...?
+    if (iszt)
+      return $(f,fenv->notzeroall);
+    else return $(f,fenv->unknown_all);
 
   case &AssignOp_e(l,&_,r):
     if (copy_ctxt && Tcutil::is_noalias_pointer_or_aggr((type_t)e->topt)) {

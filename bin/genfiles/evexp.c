@@ -872,13 +872,13 @@ void Cyc_Tcutil_terr(unsigned int,struct _dyneither_ptr fmt,struct _dyneither_pt
 struct Cyc_Absyn_Kind*Cyc_Tcutil_tvar_kind(struct Cyc_Absyn_Tvar*t,struct Cyc_Absyn_Kind*def);
 # 55
 void*Cyc_Tcutil_compress(void*t);
-# 96
+# 98
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_bk;
-# 145
-int Cyc_Tcutil_unify(void*,void*);
 # 147
+int Cyc_Tcutil_unify(void*,void*);
+# 149
 int Cyc_Tcutil_typecmp(void*,void*);
-# 150
+# 152
 void*Cyc_Tcutil_rsubstitute(struct _RegionHandle*,struct Cyc_List_List*,void*);struct _tuple10{unsigned int f1;int f2;};
 # 28 "evexp.h"
 struct _tuple10 Cyc_Evexp_eval_const_uint_exp(struct Cyc_Absyn_Exp*e);

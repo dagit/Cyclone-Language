@@ -17,7 +17,7 @@ static unsigned long ht_prime_list[ht_num_primes] = {
 };
 
 struct ht_node {
-    char ?key;
+    char @key;
     int val;
     struct ht_node *next;
 };
@@ -37,18 +37,18 @@ static inline int ht_val(struct ht_node @node) {
     return(node->val);
 }
 
-static inline char ?ht_key(struct ht_node @node) {
+static inline char @ht_key(struct ht_node @node) {
     return(node->key);
 }
 
-static inline int ht_hashcode(struct ht_ht @ht, const char ?`r key) {
+static inline int ht_hashcode(struct ht_ht @ht, const char @`r key) {
     unsigned long val = 0;
-    unsigned i = 0, sz = numelts(key);
     char c;
-    for (; i < sz; ++i) {
-      c = key[i];
+    while (1) {
+      c = *key;
       if (c == 0) break;
       val = 5 * val + c;
+      ++key;
     }
     return (val % ht->size);
 }
@@ -56,22 +56,23 @@ static inline int ht_hashcode(struct ht_ht @ht, const char ?`r key) {
 static inline mstring_t mydup(buffer_t src) {
   unsigned sz = numelts(src);
   mstring_t res = (char ?)calloc(sz+1,sizeof(char));
-   memcpy(res,src,sz);
+  memcpy(res,src,sz);
   return res;
 }
 
 struct ht_node @ht_node_create(char ? key) {
-    char ?newkey;
+    char *newkey;
     struct ht_node *node;
     if ((node = (struct ht_node *)malloc(sizeof(struct ht_node))) == 0) {
 	perror("malloc ht_node");
 	exit(1);
     }
-    if ((newkey = (char ?)mydup(key)) == NULL) {
+    newkey = (char *)mydup(key);
+    if (newkey == NULL) {
 	perror("strdup newkey");
 	exit(1);
     }
-    node->key = newkey;
+    node->key = (char @)newkey;
     node->val = 0;
     node->next = (struct ht_node *)NULL;
     return(node);
@@ -133,18 +134,19 @@ void ht_destroy(struct ht_ht @ht) {
 #endif /* HT_DEBUG */
 }
 
-static inline int mystrcmp(const char ? s1, const char ? s2) {
-  unsigned sz1 = numelts(s1), sz2 = numelts(s2);
-  for (unsigned i = 0; i < sz1 && i < sz2; i++) {
-    char c1 = s1[i];
-    char c2 = s2[i];
+static inline int mystrcmp(const char @s1, const char @s2) {
+  while (1) {
+    char c1 = *s1;
+    char c2 = *s2;
     if (c1 != c2) return 1;
     if (c1 == 0) return 0;
+    else ++s1;
+    if (c2 == 0) return 0;
+    else ++s2;
   }
-  return 0;
 }
 
-inline struct ht_node *ht_find(struct ht_ht @ht, const char ? key) {
+inline struct ht_node *ht_find(struct ht_ht @ht, const char @key) {
     int hash_code = ht_hashcode(ht, key);
     struct ht_node *node = ht->tbl[hash_code];
     while (node) {
@@ -155,10 +157,11 @@ inline struct ht_node *ht_find(struct ht_ht @ht, const char ? key) {
 }
 
 inline struct ht_node @ht_find_new(struct ht_ht @ht, char ? key) {
-    int hash_code = ht_hashcode(ht, key);
+    char @k = (char @)key;
+    int hash_code = ht_hashcode(ht, k);
     struct ht_node *prev = 0, *node = ht->tbl[hash_code];
     while (node) {
-	if (mystrcmp(key, node->key) == 0) return(node);
+	if (mystrcmp(k, node->key) == 0) return(node);
 	prev = node;
 	node = node->next;
 #ifdef HT_DEBUG
