@@ -1,4 +1,5 @@
 \section{Introduction}
+
 Cyclone is a language for C programmers who want to write secure,
 robust programs.  It's a dialect of C designed to be \emph{safe}: free
 of crashes, buffer overflows, format string attacks, and so on.
@@ -12,15 +13,15 @@ There are other safe programming languages, including Java, ML, and
 Scheme.  Cyclone is novel because its syntax, types, and semantics are
 based closely on C\@.  This makes it easier to interface Cyclone with
 legacy C code, or port C programs to Cyclone.  And writing a new
-program in Cyclone ``feels'' like programming in C: Cyclone gives
-programmers the same control over data representations, memory
+program in Cyclone ``feels'' like programming in C: Cyclone tries to
+give programmers the same control over data representations, memory
 management, and performance that C has.
 
 Cyclone's combination of performance, control, and safety make it a
 good language for writing systems and security software.  Writing such
 software in Cyclone will, in turn, motivate new research into safe,
 low-level languages.  For instance, originally, all heap-allocated
-data in Cyclone was reclaimed via a conservative garbage collector.
+data in Cyclone were reclaimed via a conservative garbage collector.
 Though the garbage collector ensures safety by preventing programs
 from accessing deallocated objects, it also kept Cyclone from being
 used in latency-critical or space-sensitive applications such as
@@ -31,6 +32,18 @@ real-time control over memory management and can significantly reduce
 space overheads when compared to a conventional garbage collector.
 Furthermore, the region type system ensures the same safety properties
 as a collector: objects cannot be accessed outside of their lifetimes.
+
+This manual is meant to provide an informal introduction to Cyclone.
+We have tried to write the manual from the perspective of a C 
+programmer who wishes to either port code from C to Cyclone, or
+develop a new system using Cyclone.  Therefore, we assume a fairly
+complete understanding of C.
+
+Obviously, Cyclone is a work in progress and we expect to make
+substantial changes to the design and implementation.  Your feedback
+(and patience) are greatly appreciated.
+
+\subsection{Related Projects}
 
 You might wonder what is the difference between the Cyclone project
 and a few other projects, notably
@@ -80,7 +93,7 @@ that the pointer is still valid. In order to avoid some of these
 overheads, the Wisconsin folks apply sophisticated, automatic
 analyses.
 
-The advantage of Safe-C is that, in principle, programs can becompiled
+The advantage of Safe-C is that, in principle, programs can be compiled
 and run with no modification by the programmer. The disadvantages are
 that (a) there is still a great deal of space and time overhead for
 programs, (b) the data representations change radically. As such, the
@@ -94,18 +107,21 @@ more typing information), and they can't always write what they want.
 Our research is aimed at eliminating these drawbacks and to compare
 against the Safe-C approach.
 
-Obviously, Cyclone is a work in progress. The people involved now are
-at Cornell and AT\&T\@.  In particular, Trevor Jim and I have worked out
-most of the initial design and implementation.  Dan Grossman is
-working on version 2.0 of the system which should add support for a
-number of other features and clean up the type-checker considerably.
-Mathieu Baudet has developed the link-checker.  James Cheney, Fred
-Smith, Dave Walker, and Stephanie Weirich have contributed greatly
-through discussions, if not code.  Jeff Vinocur, Nathan Lutchansky,
-Matthew Harris, Kate Oliver, and Hubert Chao have also made many
-valuable contributions.  Many of the ideas contained within Cyclone
-are derived from our previous experience and work on the Popcorn
-safe-C language and the Typed Assembly Language project.
+\subsection{Acknowledgements}
+
+The people involved in the development of Cyclone are at Cornell and
+AT\&T\@.  Dan Grossman, Trevor Jim, and Greg Morrisett worked out the
+initial design and implementation, basing the language to some degree
+on Popcorn, a safe-C-like language that was developed at Cornell as
+part of the
+\href{http://www.cs.cornell.edu/talc}{Typed Assembly Language} (TAL)
+project.  Mathieu Baudet contributed the bulk of the code for the
+link-checker.  Matthew Harris did much of the hard work needed to
+wrap and import the necessary libraries.  Yanling Wang ported bison
+to Cyclone.  All of these people have also contributed by finding
+and fixing various bugs.  A number of other people have also helped
+to find bugs and/or contributed key design ideas including James Cheney, 
+Fred Smith, Nathan Lutchansky, Jeff Vinocur, and David Walker.  
 
 % Local Variables:
 % TeX-master: "main-screen"
