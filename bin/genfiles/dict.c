@@ -736,7 +736,7 @@ static struct Cyc_Dict_Dict*Cyc_Dict_union_f(struct _tuple6*env,void*a,void*b,st
 if(Cyc_Dict_member(*d1,a)){
 # 414
 void*_tmpA2=Cyc_Dict_lookup(*d1,a);void*old_val=_tmpA2;
-void*_tmpA3=((*env).f1)((*env).f2,a,old_val,b);void*new_val=_tmpA3;
+void*_tmpA3=(((*env).f1))((*env).f2,a,old_val,b);void*new_val=_tmpA3;
 if(new_val != old_val)
 ({struct Cyc_Dict_Dict _tmp10D=Cyc_Dict_insert(*d1,a,new_val);*d1=_tmp10D;});
 return d1;}

@@ -330,7 +330,7 @@ static void dump_noncallconv(attributes_t atts) {
     case &Stdcall_att:  
     case &Cdecl_att:    
     case &Fastcall_att: break;
-    default: dump(attribute2string(atts->hd)); break;
+    default: dump(Absynpp::attribute2string(atts->hd)); break;
     }
   dump_char(')');
 }
@@ -341,7 +341,7 @@ static void dumpatts(attributes_t atts) {
   case Gcc_c:
     dump(" __attribute__((");
     for (; atts != NULL; atts = atts->tl) {
-      dump(attribute2string(atts->hd));
+      dump(Absynpp::attribute2string(atts->hd));
       if (atts->tl != NULL) dump(",");
     }
     dump(")) ");

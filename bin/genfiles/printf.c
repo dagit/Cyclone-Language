@@ -813,7 +813,7 @@ static struct _fat_ptr Cyc_exponent(struct _fat_ptr p,int exp,int fmtch){
 # 705
 struct _fat_ptr t;
 char expbuffer[309U];({{unsigned _tmpC3=308U;unsigned i;for(i=0;i < _tmpC3;++ i){expbuffer[i]='0';}expbuffer[_tmpC3]=0;}0;});{
-struct _fat_ptr expbuf=({char*_tmp6B=(char*)expbuffer;_tag_fat(_tmp6B,sizeof(char),309U);});
+struct _fat_ptr expbuf=({char*_tmp6B=expbuffer;_tag_fat(_tmp6B,sizeof(char),309U);});
 ({struct _fat_ptr _tmp53=_fat_ptr_inplace_plus_post(& p,sizeof(char),1);char _tmp54=*((char*)_check_fat_subscript(_tmp53,sizeof(char),0U));char _tmp55=(char)fmtch;if(_get_fat_size(_tmp53,sizeof(char))== 1U &&(_tmp54 == 0 && _tmp55 != 0))_throw_arraybounds();*((char*)_tmp53.curr)=_tmp55;});
 if(exp < 0){
 exp=- exp;

@@ -195,12 +195,12 @@ static bool constrain_kinds(kindbound_t c1, kindbound_t c2) {
 // physically share the kinds so that further constraints on it are
 // propagated.  Also ensures that the tvars share the same identity.
 static list_t<tvar_t> add_free_tvar(seg_t loc,list_t<tvar_t,`H> tvs,tvar_t tv) {
-  for (_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl) {
+  for (_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl)
     if (strptrcmp(tvs2->hd->name, tv->name) == 0) {
       kindbound_t k1 = tvs2->hd->kind;
       kindbound_t k2 = tv->kind;
       if (!constrain_kinds(k1,k2))
-        err2(loc,"type variable ",tv," is used with inconsistent kinds ",
+        err2(loc,"type variable ",tv," used with inconsistent kinds ",
 	     k1," and ",k2);
       if (tv->identity == -1)
         tv->identity = tvs2->hd->identity;
@@ -208,7 +208,6 @@ static list_t<tvar_t> add_free_tvar(seg_t loc,list_t<tvar_t,`H> tvs,tvar_t tv) {
         impos2("same type variable has different identity!");
       return tvs;
     }
-  }
   tv->identity = new_tvar_id();
   return new List(tv,tvs);
 }
@@ -529,7 +528,8 @@ static cvtenv_t i_check_type_app(cvtenv_t env, kind_t expected_kind,
     }
     return env;
   case &AnonEnumCon(fs):
-    if (ts != NULL) impos2("enum applied to argument(s)");
+    if (ts != NULL) 
+      impos2("enum applied to argument(s)");
     // Note: this code is duplicated almost exactly in Tc::tcEnumdecl
     list_t<field_name_t> prev_fields = NULL;
     unsigned int tag_count = 0;
@@ -632,31 +632,28 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
 
   case &PointerType(PtrInfo(t1,*tqp,PtrAtts(rgn_type,nullable,b,zt,_))):
     // FIX: check that tqual is valid?
-    bool is_zero_terminated;
-    // note that here, we allow AnyKind types under the pointer
-    env = i_check_type(env,&tak,t1,true,true);
-    tqp->real_const = extract_const_from_typedef(env.loc,tqp->print_const,t1);
-    kind_t k;
+    kind_t rgnk;
     switch (expected_kind->aliasqual) {
-    case Aliasable: k = &rk;  break;
-    case Unique:    k = &urk; break;
-    case Top: 
-    default:        k = &trk; break;
+    case Aliasable:    rgnk = &rk;  break;
+    case Unique:       rgnk = &urk; break;
+    case Top: default: rgnk = &trk; break;
     }
-    env = i_check_type(env,k,rgn_type,true,true);
+    env = i_check_type(env,&tak,  t1,      true, true);//allow AnyKind under ptr
+    env = i_check_type(env,rgnk,  rgn_type,true, true);
+    env = i_check_type(env,&boolk,zt,      false,true);
+    env = i_check_type(env,&boolk,nullable,false,true);
+    env = i_check_type(env,&ptrbk,b,       false,allow_abs_aggr);
+
+    tqp->real_const = extract_const_from_typedef(env.loc,tqp->print_const,t1);
+
     // if zero_term is unconstrained, then set it to false unless
     // we have [signed] char */@/? {n}.
-    env = i_check_type(env,&boolk,zt,false,true);
-    env = i_check_type(env,&boolk,nullable,false,true);
     Unify::unify(zt, is_char_type(t1) ? true_type : false_type);
-    is_zero_terminated = type2bool(false,zt);
-    if (is_zero_terminated) {
-      // check that t1 admits zero as an element
-      if (!admits_zero(t1))
-        err2(loc,"cannot have a pointer to zero-terminated ",t1," elements");
-    }
+    bool is_zero_terminated = type2bool(false,zt);
+    if (is_zero_terminated  && !admits_zero(t1))
+      err2(loc,"cannot have a pointer to zero-terminated ",t1," elements");
+
     // check the bound -- unify with bounds one to force bound to zero
-    env = i_check_type(env,&ptrbk,b,false,allow_abs_aggr);
     let e = get_bounds_exp(bounds_one(),b);
     if (e != NULL) {
       let $(sz,known) = Evexp::eval_const_uint_exp(e);
@@ -711,7 +708,7 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
       warn2(loc,"zero terminated array cannot have zero elements");
     // FIX: if we have an unknown size then it might turn out to be zero!
     if (known && sz < 1 && Cyclone::tovc_r) {
-      warn2(loc,"0-element arrays are supported only with gcc -- changing to 1");
+      warn2(loc,"0-element arrays are supported only with gcc, changing to 1");
       *eptr = uint_exp(1,0);
     }
     break;
@@ -1032,10 +1029,9 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
     }
     break;
   }
-  if (!kind_leq(type_kind(t), expected_kind)) {
+  if (!kind_leq(type_kind(t), expected_kind))
     err2(loc,"type ",t," has kind ",type_kind(t),
 	 " but as used here needs kind ",expected_kind);
-  }
   return env;
 }
 
@@ -1058,9 +1054,8 @@ static cvtenv_t check_valid_type(cvtenv_t cvt, kind_t expected_kind,
         *s = new Opt(kind_env);
       else {
         // constrain to the intersection of the contexts
-        let tvs = (*s)->v;
         let result = NULL;
-        for (; tvs != NULL; tvs = tvs->tl)
+        for (let tvs = (*s)->v; tvs != NULL; tvs = tvs->tl)
           if (List::mem(fast_tvar_cmp,kind_env,tvs->hd))
             result = new List(tvs->hd,result);
         *s = new Opt(result);
@@ -1097,7 +1092,7 @@ void check_valid_toplevel_type(seg_t loc, Tcenv::tenv_t te, type_t t) {
       if (ts==NULL)
 	res = new List(fs->hd,res);
     }
-    free_tvars = List::imp_rev(res);
+    free_tvars = imp_rev(res);
   }
   // resolve the kinds of type variables.  If there's a kind that must
   // be less than Mem, make it boxed.  If there's a Top RgnKind
@@ -1173,9 +1168,9 @@ void check_type(seg_t loc, Tcenv::tenv_t te, list_t<tvar_t,`H> bound_tvars,
                 type_t t) {
   let cvt = check_valid_type(CVTEnv{loc,te,bound_tvars,false,false,NULL,NULL},
 			     expected_kind, allow_abs_aggr, t);
-  let free_tvs= remove_bound_tvars(map(fst,cvt.free_vars),bound_tvars,identity);
+  let free_tvs= remove_bound_tvars(cvt.free_vars,bound_tvars,fst);
   for (; free_tvs != NULL; free_tvs = free_tvs->tl)
-    err2(loc,"unbound type variable ",free_tvs->hd," in type ",t);
+    err2(loc,"unbound type variable ",(*free_tvs->hd)[0]," in type ",t);
   if (!allow_evars)
     check_free_evars(cvt.free_evars,t,loc);
 }

@@ -1188,7 +1188,7 @@ return 371;case 67U: _LL87: _LL88:
  return - 1;case 68U: _LL89: _LL8A:
 # 937
  return(int)Cyc_Lexing_lexeme_char(lexbuf,0);default: _LL8B: _LL8C:
-(lexbuf->refill_buff)(lexbuf);
+((lexbuf->refill_buff))(lexbuf);
 return Cyc_Lex_token_rec(lexbuf,lexstate);}_LL0:;}
 # 941
 (int)_throw((void*)({struct Cyc_Lexing_Error_exn_struct*_tmp106=_cycalloc(sizeof(*_tmp106));_tmp106->tag=Cyc_Lexing_Error,({struct _fat_ptr _tmp1A2=({const char*_tmp105="some action didn't return!";_tag_fat(_tmp105,sizeof(char),27U);});_tmp106->f1=_tmp1A2;});_tmp106;}));}
@@ -1233,7 +1233,7 @@ lexstate=Cyc_Lex_lex_engine(lexstate,lexbuf);
 ({struct _fat_ptr _tmp1A4=({const char*_tmp109="unterminated wide character";_tag_fat(_tmp109,sizeof(char),28U);});Cyc_Lex_runaway_err(_tmp1A4,lexbuf);});return 0;case 17U: _LL23: _LL24:
 # 964 "lex.cyl"
 ({struct _fat_ptr _tmp1A5=({const char*_tmp10A="bad character following backslash in wide character";_tag_fat(_tmp10A,sizeof(char),52U);});Cyc_Lex_err(_tmp1A5,lexbuf);});return 1;default: _LL25: _LL26:
-(lexbuf->refill_buff)(lexbuf);
+((lexbuf->refill_buff))(lexbuf);
 return Cyc_Lex_scan_charconst_rec(lexbuf,lexstate);}_LL0:;}
 # 968
 (int)_throw((void*)({struct Cyc_Lexing_Error_exn_struct*_tmp10C=_cycalloc(sizeof(*_tmp10C));_tmp10C->tag=Cyc_Lexing_Error,({struct _fat_ptr _tmp1A6=({const char*_tmp10B="some action didn't return!";_tag_fat(_tmp10B,sizeof(char),27U);});_tmp10C->f1=_tmp1A6;});_tmp10C;}));}
@@ -1250,7 +1250,7 @@ lexstate=Cyc_Lex_lex_engine(lexstate,lexbuf);
  return Cyc_Lex_strng_next(lexbuf);case 3U: _LL7: _LL8:
 # 973
  lexbuf->lex_curr_pos -=1;return 0;default: _LL9: _LLA:
-(lexbuf->refill_buff)(lexbuf);
+((lexbuf->refill_buff))(lexbuf);
 return Cyc_Lex_strng_next_rec(lexbuf,lexstate);}_LL0:;}
 # 977
 (int)_throw((void*)({struct Cyc_Lexing_Error_exn_struct*_tmp10F=_cycalloc(sizeof(*_tmp10F));_tmp10F->tag=Cyc_Lexing_Error,({struct _fat_ptr _tmp1A7=({const char*_tmp10E="some action didn't return!";_tag_fat(_tmp10E,sizeof(char),27U);});_tmp10F->f1=_tmp1A7;});_tmp10F;}));}
@@ -1314,7 +1314,7 @@ return 0;case 18U: _LL25: _LL26:
 # 1021 "lex.cyl"
 ({struct _fat_ptr _tmp1AC=({const char*_tmp113="bad character following backslash in string";_tag_fat(_tmp113,sizeof(char),44U);});Cyc_Lex_err(_tmp1AC,lexbuf);});
 return 1;default: _LL27: _LL28:
-(lexbuf->refill_buff)(lexbuf);
+((lexbuf->refill_buff))(lexbuf);
 return Cyc_Lex_strng_rec(lexbuf,lexstate);}_LL0:;}
 # 1026
 (int)_throw((void*)({struct Cyc_Lexing_Error_exn_struct*_tmp115=_cycalloc(sizeof(*_tmp115));_tmp115->tag=Cyc_Lexing_Error,({struct _fat_ptr _tmp1AD=({const char*_tmp114="some action didn't return!";_tag_fat(_tmp114,sizeof(char),27U);});_tmp115->f1=_tmp1AD;});_tmp115;}));}
@@ -1331,7 +1331,7 @@ lexstate=Cyc_Lex_lex_engine(lexstate,lexbuf);
  return Cyc_Lex_wstrng_next(lexbuf);case 3U: _LL7: _LL8:
 # 1035
  lexbuf->lex_curr_pos -=1;return 0;default: _LL9: _LLA:
-(lexbuf->refill_buff)(lexbuf);
+((lexbuf->refill_buff))(lexbuf);
 return Cyc_Lex_wstrng_next_rec(lexbuf,lexstate);}_LL0:;}
 # 1039
 (int)_throw((void*)({struct Cyc_Lexing_Error_exn_struct*_tmp119=_cycalloc(sizeof(*_tmp119));_tmp119->tag=Cyc_Lexing_Error,({struct _fat_ptr _tmp1AE=({const char*_tmp118="some action didn't return!";_tag_fat(_tmp118,sizeof(char),27U);});_tmp119->f1=_tmp1AE;});_tmp119;}));}
@@ -1359,7 +1359,7 @@ return 0;case 5U: _LLB: _LLC:
 # 1053 "lex.cyl"
 ({struct _fat_ptr _tmp1B1=({const char*_tmp11D="bad character following backslash in string";_tag_fat(_tmp11D,sizeof(char),44U);});Cyc_Lex_err(_tmp1B1,lexbuf);});
 return 1;default: _LLD: _LLE:
-(lexbuf->refill_buff)(lexbuf);
+((lexbuf->refill_buff))(lexbuf);
 return Cyc_Lex_wstrng_rec(lexbuf,lexstate);}_LL0:;}
 # 1058
 (int)_throw((void*)({struct Cyc_Lexing_Error_exn_struct*_tmp11F=_cycalloc(sizeof(*_tmp11F));_tmp11F->tag=Cyc_Lexing_Error,({struct _fat_ptr _tmp1B2=({const char*_tmp11E="some action didn't return!";_tag_fat(_tmp11E,sizeof(char),27U);});_tmp11F->f1=_tmp1B2;});_tmp11F;}));}
@@ -1386,7 +1386,7 @@ return 0;case 3U: _LL7: _LL8:
  Cyc_Lex_inc_linenumber();return Cyc_Lex_comment(lexbuf);case 6U: _LLD: _LLE:
 # 1068 "lex.cyl"
  return Cyc_Lex_comment(lexbuf);default: _LLF: _LL10:
-(lexbuf->refill_buff)(lexbuf);
+((lexbuf->refill_buff))(lexbuf);
 return Cyc_Lex_comment_rec(lexbuf,lexstate);}_LL0:;}
 # 1072
 (int)_throw((void*)({struct Cyc_Lexing_Error_exn_struct*_tmp123=_cycalloc(sizeof(*_tmp123));_tmp123->tag=Cyc_Lexing_Error,({struct _fat_ptr _tmp1B4=({const char*_tmp122="some action didn't return!";_tag_fat(_tmp122,sizeof(char),27U);});_tmp123->f1=_tmp1B4;});_tmp123;}));}

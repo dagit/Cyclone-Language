@@ -438,11 +438,11 @@ extern void*Cyc_Absyn_false_type;
 extern void*Cyc_Absyn_void_type;
 # 936
 struct Cyc_Absyn_Datatypedecl*Cyc_Absyn_exn_tud();
-# 965
+# 963
 void*Cyc_Absyn_fatptr_type(void*t,void*rgn,struct Cyc_Absyn_Tqual,void*zt);
-# 1074
+# 1073
 struct Cyc_Absyn_Pat*Cyc_Absyn_new_pat(void*,unsigned);
-# 1083
+# 1082
 struct Cyc_Absyn_Vardecl*Cyc_Absyn_new_vardecl(unsigned varloc,struct _tuple0*,void*,struct Cyc_Absyn_Exp*init);
 # 35 "warn.h"
 void Cyc_Warn_err(unsigned,struct _fat_ptr fmt,struct _fat_ptr);

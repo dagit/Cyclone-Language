@@ -396,9 +396,9 @@ static bool kindbound_subsumed(kindbound_t kb1, kindbound_t kb2) {
   }
 }
 
-static bool find_and_remove(list_t<type_t> @lst, kindbound_t kind) {
+static bool find_and_remove(list_t<type_t,`r> @lst, kindbound_t kind) {
   let cur = *lst;
-  list_t<type_t> prev = NULL;
+  list_t<type_t,`r> prev = NULL;
   while(cur) {
     let t = cur->hd;
     switch(t) {

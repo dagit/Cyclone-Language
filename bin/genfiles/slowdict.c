@@ -409,7 +409,7 @@ goto _LL0;}}else{_LL3: _LL4:
 void*_tmp7=d->tree;void*_stmttmp2=_tmp7;void*_tmp8=_stmttmp2;struct Cyc_Splay_noderef*_tmp9;if(((struct Cyc_Splay_Node_Splay_tree_struct*)_tmp8)->tag == 1U){_LL6: _tmp9=((struct Cyc_Splay_Node_Splay_tree_struct*)_tmp8)->f1;_LL7: {struct Cyc_Splay_noderef*nr=_tmp9;
 # 77
 struct Cyc_Splay_node*_tmpA=nr->v;struct Cyc_Splay_node*n=_tmpA;
-if((d->reln)(key,n->key)< 0){
+if(((d->reln))(key,n->key)< 0){
 newleft=n->left;
 newright=(void*)({struct Cyc_Splay_Node_Splay_tree_struct*_tmpD=_cycalloc(sizeof(*_tmpD));_tmpD->tag=1U,({struct Cyc_Splay_noderef*_tmp5C=({struct Cyc_Splay_noderef*_tmpC=_cycalloc(sizeof(*_tmpC));({struct Cyc_Splay_node*_tmp5B=({struct Cyc_Splay_node*_tmpB=_cycalloc(sizeof(*_tmpB));
 _tmpB->key=n->key,_tmpB->data=n->data,_tmpB->left=leaf,_tmpB->right=n->right;_tmpB;});

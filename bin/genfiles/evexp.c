@@ -408,11 +408,11 @@ enum Cyc_Absyn_Coercion{Cyc_Absyn_Unknown_coercion =0U,Cyc_Absyn_No_coercion =1U
 int Cyc_Absyn_qvar_cmp(struct _tuple0*,struct _tuple0*);
 # 907
 extern void*Cyc_Absyn_uint_type;
-# 984
+# 982
 struct Cyc_Absyn_Exp*Cyc_Absyn_const_exp(union Cyc_Absyn_Cnst,unsigned);
-# 1154
+# 1151
 struct _tuple0*Cyc_Absyn_binding2qvar(void*);
-# 1160
+# 1157
 unsigned Cyc_Absyn_exp_case_number(struct Cyc_Absyn_Exp*);struct Cyc_Absynpp_Params{int expand_typedefs;int qvar_to_Cids;int add_cyc_prefix;int to_VC;int decls_first;int rewrite_temp_tvars;int print_all_tvars;int print_all_kinds;int print_all_effects;int print_using_stmts;int print_externC_stmts;int print_full_evars;int print_zeroterm;int generate_line_directives;int use_curr_namespace;struct Cyc_List_List*curr_namespace;};
 # 63 "absynpp.h"
 struct _fat_ptr Cyc_Absynpp_typ2string(void*);

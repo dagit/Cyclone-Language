@@ -387,12 +387,12 @@ struct _fat_ptr Cyc_zstrncpy(struct _fat_ptr,struct _fat_ptr,unsigned long);
 struct _fat_ptr Cyc_strdup(struct _fat_ptr src);char Cyc_Lexing_Error[6U]="Error";
 # 73 "lexing.cyc"
 static char Cyc_Lexing_aux_buffer_v[1U]={'\000'};
-static struct _fat_ptr Cyc_Lexing_aux_buffer={(void*)((char*)Cyc_Lexing_aux_buffer_v),(void*)((char*)Cyc_Lexing_aux_buffer_v),(void*)((char*)Cyc_Lexing_aux_buffer_v + 1U)};
+static struct _fat_ptr Cyc_Lexing_aux_buffer={(void*)Cyc_Lexing_aux_buffer_v,(void*)Cyc_Lexing_aux_buffer_v,(void*)(Cyc_Lexing_aux_buffer_v + 1U)};
 # 76
 void Cyc_Lexing_lex_refill(struct Cyc_Lexing_lexbuf*lexbuf){
 if(_get_fat_size(Cyc_Lexing_aux_buffer,sizeof(char))== (unsigned)1)Cyc_Lexing_aux_buffer=Cyc_Core_new_string((unsigned)(4096 + 1));{
 int read=
-(((struct Cyc_Lexing_function_lexbuf_state*)lexbuf->refill_state)->read_fun)(Cyc_Lexing_aux_buffer,(int)(
+((((struct Cyc_Lexing_function_lexbuf_state*)lexbuf->refill_state)->read_fun))(Cyc_Lexing_aux_buffer,(int)(
 _get_fat_size(Cyc_Lexing_aux_buffer,sizeof(char))- (unsigned)1),((struct Cyc_Lexing_function_lexbuf_state*)lexbuf->refill_state)->read_fun_state);
 # 82
 int n=read > 0?read:(lexbuf->lex_eof_reached=1,0);

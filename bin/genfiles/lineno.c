@@ -453,7 +453,7 @@ lexstate=Cyc_Lineno_lex_engine(lexstate,lexbuf);
  return Cyc_Lineno_NEWLINE;case 2U: _LL5: _LL6:
 # 51 "lineno.cyl"
  return Cyc_Lineno_END;default: _LL7: _LL8:
-(lexbuf->refill_buff)(lexbuf);
+((lexbuf->refill_buff))(lexbuf);
 return Cyc_Lineno_token_rec(lexbuf,lexstate);}_LL0:;}
 # 55
 (int)_throw((void*)({struct Cyc_Lexing_Error_exn_struct*_tmp4=_cycalloc(sizeof(*_tmp4));_tmp4->tag=Cyc_Lexing_Error,({struct _fat_ptr _tmp21=({const char*_tmp3="some action didn't return!";_tag_fat(_tmp3,sizeof(char),27U);});_tmp4->f1=_tmp21;});_tmp4;}));}

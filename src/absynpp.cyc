@@ -25,18 +25,13 @@
 #include "absynpp.h"
 #include "cyclone.h"
 
-namespace Absynpp;
-
-
-
-
 using Cyclone;
 using Core;
 using PP;
 using Absyn;
 using List;
 using Tcutil;
-
+namespace Absynpp;
 
 // forward references
 doc_t dp2doc($(list_t<designator_t>,pat_t)@ dp);
@@ -505,6 +500,47 @@ doc_t noncallconv2doc(attributes_t atts) { // for MS only
   return cat(text(" __declspec("),
 	     group("",""," ",List::map(noncallatt2doc,atts)),
 	     text(")"));
+}
+
+string_t attribute2string(attribute_t a) {
+  switch (a) {
+  case &Regparm_att(i): return aprintf("regparm(%d)",i);
+  case &Stdcall_att: return "stdcall";
+  case &Cdecl_att: return "cdecl";
+  case &Fastcall_att: return "fastcall";
+  case &Noreturn_att: return "noreturn";
+  case &Const_att: return "const";
+  case &Aligned_att(e): 
+    if (e == NULL) return "aligned";
+    else /* return aprintf("aligned(%d)",i);*/
+      switch(Cyclone::c_compiler){
+      case Cyclone::Gcc_c: return aprintf("aligned(%s)",exp2string(e));
+      case Cyclone::Vc_c:  
+      default: return aprintf("align(%s)",exp2string(e));
+      }
+  case &Packed_att: return "packed";
+  case &Section_att(s): return aprintf("section(\"%s\")",s);
+  case &Nocommon_att: return "nocommon";
+  case &Shared_att: return "shared";
+  case &Unused_att: return "unused";
+  case &Weak_att: return "weak";
+  case &Dllimport_att: return "dllimport";
+  case &Dllexport_att: return "dllexport";
+  case &No_instrument_function_att: return "no_instrument_function";
+  case &Constructor_att: return "constructor";
+  case &Destructor_att: return "destructor";
+  case &No_check_memory_usage_att: return "no_check_memory_usage";
+  case &Format_att(Printf_ft,n,m): return aprintf("format(printf,%u,%u)",n,m);
+  case &Format_att(/*Scanf_ft*/_,n,m): 
+    return aprintf("format(scanf,%u,%u)", n,m);
+  case &Initializes_att(n): return aprintf("initializes(%d)",n);
+  case &Noliveunique_att(n): return aprintf("noliveunique(%d)",n);
+  case &Consume_att(n): return aprintf("consume(%d)",n);
+  case &Pure_att: return "pure";
+  case &Always_inline_att: return "always_inline";
+  case &Mode_att(s): return aprintf("__mode__(\"%s\")",s); 
+  case &Alias_att(s): return aprintf("alias(\"%s\")",s); 
+ }
 }
 
 doc_t att2doc(attribute_t a) { // for gcc only

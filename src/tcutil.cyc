@@ -148,10 +148,10 @@ bool is_zeroterm_pointer_type(type_t t) {
 }
 
 // side effect: possibly constrains nullable
-bool is_nullable_pointer_type(type_t t) {
+bool is_nullable_pointer_type(type_t t, bool def) {
   switch (compress(t)) {
   case &PointerType(PtrInfo{.ptr_atts = PtrAtts{.nullable = nbl,...},...}):
-    return force_type2bool(false, nbl);
+    return force_type2bool(def, nbl);
   default: return false;
   }
 }

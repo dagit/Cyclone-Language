@@ -26,9 +26,6 @@
 #include "cyclone.h"
 #include "evexp.h"
 
-namespace Absynpp {
-  extern string_t exp2string(Absyn::exp_t e);
-}
 using Core;
 using List;
 
@@ -939,47 +936,6 @@ datacon(Attribute,No_check_memory_usage_att);
 datacon(Attribute,Pure_att);
 datacon(Attribute,Always_inline_att);
 
-string_t attribute2string(attribute_t a) {
-  switch (a) {
-  case &Regparm_att(i): return aprintf("regparm(%d)",i);
-  case &Stdcall_att: return "stdcall";
-  case &Cdecl_att: return "cdecl";
-  case &Fastcall_att: return "fastcall";
-  case &Noreturn_att: return "noreturn";
-  case &Const_att: return "const";
-  case &Aligned_att(e): 
-    if (e == NULL) return "aligned";
-    else /* return aprintf("aligned(%d)",i);*/
-      switch(Cyclone::c_compiler){
-      case Cyclone::Gcc_c: return aprintf("aligned(%s)",Absynpp::exp2string(e));
-      case Cyclone::Vc_c:  
-      default: return aprintf("align(%s)",Absynpp::exp2string(e));
-      }
-  case &Packed_att: return "packed";
-  case &Section_att(s): return aprintf("section(\"%s\")",s);
-  case &Nocommon_att: return "nocommon";
-  case &Shared_att: return "shared";
-  case &Unused_att: return "unused";
-  case &Weak_att: return "weak";
-  case &Dllimport_att: return "dllimport";
-  case &Dllexport_att: return "dllexport";
-  case &No_instrument_function_att: return "no_instrument_function";
-  case &Constructor_att: return "constructor";
-  case &Destructor_att: return "destructor";
-  case &No_check_memory_usage_att: return "no_check_memory_usage";
-  case &Format_att(Printf_ft,n,m): return aprintf("format(printf,%u,%u)",n,m);
-  case &Format_att(/*Scanf_ft*/_,n,m): 
-    return aprintf("format(scanf,%u,%u)", n,m);
-  case &Initializes_att(n): return aprintf("initializes(%d)",n);
-  case &Noliveunique_att(n): return aprintf("noliveunique(%d)",n);
-  case &Consume_att(n): return aprintf("consume(%d)",n);
-  case &Pure_att: return "pure";
-  case &Always_inline_att: return "always_inline";
-  case &Mode_att(s): return aprintf("__mode__(\"%s\")",s); 
-  case &Alias_att(s): return aprintf("alias(\"%s\")",s); 
- }
-}
-
 static int attribute_case_number(attribute_t att) {
   switch(att) {
   case &Regparm_att(_): return 0;
@@ -1259,7 +1215,6 @@ bool no_side_effects_exp(exp_t e) {
     return true;
   }
 }
-
 
 datacon(Raw_decl,Porton_d);
 datacon(Raw_decl,Portoff_d);

@@ -51,38 +51,39 @@ extern struct Params {
 // used by cycdoc to suppress printing extern, etc.
 extern int print_for_cycdoc;
 
-extern void set_params(struct Params@ fs);
+void set_params(struct Params@ fs);
 
 extern struct Params cyc_params_r, cyci_params_r, c_params_r, tc_params_r;
 
-extern void decllist2file(list_t<decl_t> tdl, FILE @f);
+void decllist2file(list_t<decl_t> tdl, FILE @f);
 
-extern doc_t decl2doc(decl_t d);
+doc_t decl2doc(decl_t d);
 
-extern string_t longlong2string(unsigned long long);
-extern string_t typ2string(type_t); // doesn't rewrite temp tvars
-extern string_t typ2cstring(type_t); // doesn't rewrite temp tvars
-extern string_t kind2string(kind_t);
-extern string_t kindbound2string(kindbound_t);
-extern string_t cnst2string(cnst_t);
-extern string_t exp2string(exp_t);
-extern string_t stmt2string(stmt_t);
-extern string_t qvar2string(qvar_t);
-extern string_t decllist2string(list_t<decl_t> tdl);
-extern string_t prim2string(primop_t p);
-extern string_t pat2string(pat_t p);
-extern string_t scope2string(scope_t sc);
-extern string_t tvar2string(tvar_t);
+string_t longlong2string(unsigned long long);
+string_t typ2string(type_t); // doesn't rewrite temp tvars
+string_t typ2cstring(type_t); // doesn't rewrite temp tvars
+string_t kind2string(kind_t);
+string_t attribute2string(attribute_t);
+string_t kindbound2string(kindbound_t);
+string_t cnst2string(cnst_t);
+string_t exp2string(exp_t);
+string_t stmt2string(stmt_t);
+string_t qvar2string(qvar_t);
+string_t decllist2string(list_t<decl_t> tdl);
+string_t prim2string(primop_t p);
+string_t pat2string(pat_t p);
+string_t scope2string(scope_t sc);
+string_t tvar2string(tvar_t);
   // These are only exposed so Absyndump can use them:
-  extern bool is_anon_aggrtype(type_t t);
+  bool is_anon_aggrtype(type_t t);
   extern string_t cyc_string;
   extern stringptr_t cyc_stringptr;
-  extern int exp_prec(exp_t);
-  extern string_t char_escape(char);
-  extern string_t string_escape(string_t<`H>);
-  extern string_t prim2str(primop_t p);
-  extern bool is_declaration(stmt_t s);
-  extern $(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r>,tqual_t tq,type_t t);
+  int exp_prec(exp_t);
+  string_t char_escape(char);
+  string_t string_escape(string_t<`H>);
+  string_t prim2str(primop_t p);
+  bool is_declaration(stmt_t s);
+  $(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r>,tqual_t tq,type_t t);
   // Returns true if the declaration d shadows any of the variables in
   // the list of varsinblock.  In this case, we also return a singleton
   // list with the variable that is declared since it will be the only
@@ -91,7 +92,7 @@ extern string_t tvar2string(tvar_t);
   // We only bother to record Var_d declarations since it's only C code 
   // that we have to wrap extra braces around when a declaration shadows a 
   // previous one.
-  extern $(bool, list_t<qvar_t>) shadows(decl_t d, list_t<qvar_t,`H> varsinblock);
+  $(bool, list_t<qvar_t>) shadows(decl_t d, list_t<qvar_t,`H> varsinblock);
 }
 
 #endif

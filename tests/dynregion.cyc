@@ -51,10 +51,10 @@ int main() {
   { region h = open(key2);
     int i = d->hd + 1;
     d = rnew (h) List(i,d);
-  }
 
   for (_ l = d; l != NULL; l = l->tl)
     printf("%d ",l->hd);
+  }
   printf("\n");
   // Finally, destroy the key and the region
   free_rckey(key2);

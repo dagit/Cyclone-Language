@@ -545,7 +545,7 @@ void*_tmp99=(void*)({struct Cyc_MatchDecl_Comment_struct*_tmp9=_cycalloc(sizeof(
  return 0;case 3U: _LL7: _LL8:
 # 61 "cycdoc.cyl"
  return Cyc_token(lexbuf);default: _LL9: _LLA:
-(lexbuf->refill_buff)(lexbuf);
+((lexbuf->refill_buff))(lexbuf);
 return Cyc_token_rec(lexbuf,lexstate);}_LL0:;}
 # 65
 (int)_throw((void*)({struct Cyc_Lexing_Error_exn_struct*_tmpC=_cycalloc(sizeof(*_tmpC));_tmpC->tag=Cyc_Lexing_Error,({struct _fat_ptr _tmp9B=({const char*_tmpB="some action didn't return!";_tag_fat(_tmpB,sizeof(char),27U);});_tmpC->f1=_tmp9B;});_tmpC;}));}

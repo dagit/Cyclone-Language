@@ -48,7 +48,7 @@ bool is_boxed(type_t);           // boxed type
 // Predicates that may constrain things
 bool is_fat_ptr(type_t); // fat pointer type
 bool is_zeroterm_pointer_type(type_t); // @zeroterm pointer type
-bool is_nullable_pointer_type(type_t); // nullable pointer type
+bool is_nullable_pointer_type(type_t, bool def); // nullable pointer type
 bool is_bound_one(ptrbound_t);         
 // returns true if this is a t ? -- side effect unconstrained bounds
 bool is_fat_pointer_type(type_t);

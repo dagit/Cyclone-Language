@@ -248,8 +248,7 @@ static void tcVardecl(tenv_t te, seg_t loc, vardecl_t vd, bool check_var_init,
       // C doesn't allow these attributes on functions
       case &Aligned_att(_):
       case &Packed_att:
-        terr(loc,"bad attribute %s in function declaration",
-	     attribute2string(atts->hd));
+        Warn::err2(loc,"bad attribute ",atts->hd," in function declaration");
         break;
       default: continue;
       }
@@ -299,7 +298,7 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
     switch (atts->hd) {
     case &Packed_att:
     case &Aligned_att(_): 
-      terr(loc,"bad attribute %s for function",attribute2string(atts->hd));
+      Warn::err2(loc,"bad attribute ",atts->hd," for function");
       break;
     default: break;
     }
@@ -574,8 +573,7 @@ void tcAggrdecl(tenv_t te, seg_t loc, aggrdecl_t ad) {
     case &Packed_att: 
     case &Aligned_att(_): continue;
     default: 
-      terr(loc,"bad attribute %s in %s definition",
-           attribute2string(atts->hd), *((*q)[1]));
+      Warn::err2(loc,"bad attribute ",atts->hd," in ",q," definition");
       break;
     }
   

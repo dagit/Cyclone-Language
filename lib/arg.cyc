@@ -65,7 +65,7 @@ static datatype error {
   Wrong(string_t,string_t,string_t)  
 };
 
-static spec_t<`r1> lookup(speclist_t<`r1,`r2> l, string_t x) {
+static spec_t<`r> lookup(speclist_t<`r> l, string_t x) {
   while (l != NULL) {
     let flag = (*l->hd)[0];
     let len = strlen(flag);
