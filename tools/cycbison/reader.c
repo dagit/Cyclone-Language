@@ -726,7 +726,7 @@ parse_type_decl ()
   if(!has_been_seen(name)) {
     if(!nolinesflag)
       fprintf(fattrs, "\n#line %d \"%s\"", lineno, infile);
-    fprintf(fattrs, "\n static xtunion exn.Core::Failure yyfail_%s = Core::Failure(\"%s\");\n",name);
+    fprintf(fattrs, "\n static xtunion exn.Core::Failure yyfail_%s = Core::Failure(\"%s\");\n",name,name);
     fprintf(fattrs, "\n_ yyget_%s(xtunion YYSTYPE yy1) {switch(yy1) {case &%s(yy2): return yy2; default: throw &yyfail_%s;}}\n", name, name, name);
   }
 
