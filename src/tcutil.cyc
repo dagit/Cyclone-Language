@@ -438,6 +438,8 @@ static int boundscmp(bounds_t b1, bounds_t b2) {
 static bool equal_att(attribute_t a1, attribute_t a2) {
   if (a1 == a2) return true;
   switch ($(a1,a2)) {
+  case $(&Format_att(ft1,i1,j1), &Format_att(ft2,i2,j2)):
+    return (ft1 == ft2 && i1 == i2 && j1 == j2);
   case $(&Regparm_att(i1), &Regparm_att(i2)): fallthru(i1,i2);
   case $(&Aligned_att(i1), &Aligned_att(i2)): return i1 == i2;
   case $(&Section_att(s1), &Section_att(s2)):
@@ -2112,6 +2114,10 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     bool seen_cdecl    = false;
     bool seen_stdcall  = false;
     bool seen_fastcall = false;
+    bool seen_format = false;
+    format_type_t ft = Printf_ft;
+    int fmt_desc_arg = -1;
+    int fmt_arg_start = -1;
     for (; atts != null; atts = atts->tl) {
       if (!fntype_att(atts->hd))
 	terr(loc,aprintf("bad function type attribute %s",
@@ -2123,6 +2129,13 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
 	if(!seen_cdecl)    { seen_cdecl=true;    ++num_convs;} break;
       case Fastcall_att: 
 	if(!seen_fastcall) { seen_fastcall=true; ++num_convs;} break;
+      case &Format_att(fmttype,i,j):
+        if (!seen_format)  { 
+          seen_format = true; ft = fmttype; 
+          fmt_desc_arg = i; fmt_arg_start = j;
+        } else 
+          terr(loc,aprintf("function can't have multiple format attributes"));
+        break;
       default: break;
       }
     }
@@ -2146,10 +2159,10 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
 
     // results and arguments of functions cannot be abstract mem types
     new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,MemKind,tr);
-    for (; args != null; args = args->tl) {
+    for (_ a = args; a != null; a = a->tl) {
       // FIX: should check that variables are unique and that tquals are ok
       new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,MemKind,
-                                      (*args->hd)[2]);
+                                      (*a->hd)[2]);
     }
     // check the varargs
     if (cyc_vararg != null) {
@@ -2190,6 +2203,59 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
         default:
           terr(loc,"can't inject a non-[x]tunion type");
           break;
+        }
+      }
+    }
+    // check the format attribute is consistent
+    if (seen_format) {
+      let num_args = List::length(args);
+      if (fmt_desc_arg < 0 || fmt_desc_arg > num_args ||
+          fmt_arg_start < 0 || 
+          // when no varargs, fmt_arg_start should be 0
+          (cyc_vararg == null && fmt_arg_start != 0) ||
+          (cyc_vararg != null && fmt_arg_start != num_args + 1))
+        terr(loc,"bad format descriptor");
+      else {
+        // check that fmt_desc_arg is a string in some region
+        let $(_,_,t) = *List::nth(args, fmt_desc_arg - 1);
+        // can't use unification yet because evars aren't properly
+        // nailed down yet...
+        switch (compress(t)) {
+        case &PointerType(PtrInfo{et,_,_,_,b}):
+          switch ($(compress(et), conref_def((bounds_t)Unknown_b,b))) {
+          case $(&IntType(Unsigned,B1), Unknown_b): break;
+          default: 
+            terr(loc,"format descriptor is not a char ? type"); break;
+          }
+          break;
+        default:
+          terr(loc,"format descriptor is not a char ? type"); break;
+        }
+        if (fmt_arg_start != 0) {
+          // check the type of the varargs is either tunion PrintArg or 
+          // tunion ScanfArg according to format_type_t ft.
+          let va_type = compress(cyc_vararg->type);
+          let problem = false;
+          switch (ft) {
+          case Printf_ft:
+            switch (va_type) {
+            case &TunionType(TunionInfo(&KnownTunion(tud),_,_)):
+              problem = (qvar_cmp(tud->name,tunion_print_arg_qvar) != 0);
+              break;
+            default: problem = true; break;
+            }
+            break;
+          case Scanf_ft:
+            switch (va_type) {
+            case &TunionType(TunionInfo(&KnownTunion(tud),_,_)):
+              problem = (qvar_cmp(tud->name,tunion_scanf_arg_qvar) != 0);
+              break;
+            default: problem = true; break;
+            }
+            break;
+          }
+          if (problem)
+            terr(loc,"format attribute and vararg types don't match");
         }
       }
     }
@@ -2530,7 +2596,7 @@ void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t) {
         let s = *free_tvars->hd->name;
         if (s[0] == '?')
           // Try to give the user a clue as to what happened...
-          terr(loc,aprintf("You failed to abstract over the generated type variables. \nRemove the bound type variables or else make the effects of the type explicit\nand then abstract the free type variables properly."));
+          terr(loc,aprintf("You failed to abstract over the generated type variables. \nPlease remove the bound type variables or else make the effects of the type explicit\nand then abstract the free type variables properly. (Sorry.)"));
         else
           terr(loc,aprintf("unbound type variable %s",s));
       }

@@ -279,28 +279,36 @@ static type_t tcVar(tenv_t te, seg_t loc, qvar_t q, binding_t b) {
   }
 }
 
-static void check_format_args(tenv_t te, exp_t fmt, list_t<exp_t> args,
+static void check_format_args(tenv_t te, exp_t fmt, 
+                              opt_t<list_t<exp_t>> opt_args,
 			      list_t<type_t> type_getter(tenv_t,string_t,seg_t)) {
   // check the format string and get the types it requires
   list_t<type_t> desc_types;
   switch (fmt->r) {
-  case &Const_e(&String_c(s)): desc_types = type_getter(te,s,fmt->loc); break;
-  default: terr(fmt->loc, "expecting a literal format string"); return;
+  case &Const_e(&String_c(s)): fallthru(s);
+  case &Cast_e(_,&Exp(_,&Const_e(&String_c(s)),_)):
+    desc_types = type_getter(te,s,fmt->loc); break;
+  default: 
+    // don't have a string literal argument, so we can't check the args
+    return;
   }
-  // check that each expression has the right type
-  for (; desc_types != null && args != null; desc_types = desc_types->tl,
-	                                     args = args->tl) {
-    type_t t = desc_types->hd;
-    exp_t e = args->hd;
-    if (!coerce_arg(te,e,t))
-      terr(e->loc,aprintf("descriptor has type %s but argument has type %s",
-			  typ2string(t), typ2string(e->topt->v)));
+  if (opt_args != null) {
+    let args = opt_args->v;
+    // check that each expression has the right type
+    for (; desc_types != null && args != null; desc_types = desc_types->tl,
+           args = args->tl) {
+      type_t t = desc_types->hd;
+      exp_t e = args->hd;
+      if (!coerce_arg(te,e,t))
+        terr(e->loc,aprintf("descriptor has type %s but argument has type %s",
+                            typ2string(t), typ2string(e->topt->v)));
+    }
+    // check arity
+    if (desc_types != null)
+      terr(fmt->loc,"too few arguments");
+    if (args != null)
+      terr(args->hd->loc,"too many arguments");
   }
-  // check arity
-  if (desc_types != null)
-    terr(fmt->loc,"too few arguments");
-  if (args != null)
-    terr(args->hd->loc,"too many arguments");
 }
 static type_t tcUnPrimop(tenv_t te, seg_t loc, type_t *`r topt, primop_t p, exp_t e){
   type_t t = compress(e->topt->v);
@@ -482,6 +490,7 @@ static type_t tcPrimop(tenv_t te, seg_t loc, type_t *`r topt,
   tcExpList(te,es);
   type_t t;
   switch (p) {
+    /*
   case Printf:
     if (es == null)
       return expr_err(te,loc,"missing format string in printf");
@@ -524,8 +533,6 @@ static type_t tcPrimop(tenv_t te, seg_t loc, type_t *`r topt,
     // input string is null terminated.  The standard sscanf might
     // read past the end of the string -- a potential security breach.
     // Possible fixes: copy the string or re-implement sscanf from scratch.
-    terr(loc,"sscanf is not supported");
-    /*
     // It's sometimes helpful to allow sscanf for debugging, but
     // usually this should be commented out.
     if (es == null || es->tl == null)
@@ -535,9 +542,9 @@ static type_t tcPrimop(tenv_t te, seg_t loc, type_t *`r topt,
       terr(es->hd->loc,aprintf("expecting string found %s",
 			       typ2string(es->hd->topt->v)));
     check_scanf_args(te, es->tl->hd, es->tl->tl, Formatstr::get_scanf_typs);
-    */
     t = sint_t;
     break;
+    */    
   default:
     switch (List::length(es)) {
     case 0:  return expr_err(te,loc,"primitive operator has 0 arguments");
@@ -750,9 +757,10 @@ static struct Tunionfield *tcInjection(tenv_t te,exp_t e,type_t tu,
 }
 
 // e(es)
-static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t> es,vararg_call_info_t *@vararg_call_info){
+static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t> args,vararg_call_info_t *@vararg_call_info){
   // if e is a vararg function then we need to declare a new local
   // region block -- we just do it always here.
+  let es = args;
   te = new_block(loc,te); // needed for regions of params
   tcExp(te,null,e);
   type_t t = compress(e->topt->v);
@@ -851,6 +859,37 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t>
             default: terr(loc,"bad inject vararg type"); break;
             }
           }
+        }
+      }
+      // check for a format attribute
+      for (_ a = atts; a != null; a = a->tl) {
+        switch (a->hd) {
+        case &Format_att(ft,fmt_arg_pos,arg_start_pos):
+          try {
+            // get the format descriptor string
+            let fmt_arg = List::nth(args,fmt_arg_pos - 1);
+            // get the varargs
+            opt_t<list_t<exp_t>> fmt_args;
+            if (arg_start_pos == 0)
+              fmt_args = null;
+            else {
+              fmt_args = new Opt(nth_tail(args,arg_start_pos - 1));
+            }
+            switch (ft) {
+            case Printf_ft:
+              check_format_args(te,fmt_arg,fmt_args,
+                                Formatstr::get_format_typs);
+              break;
+            case Scanf_ft:
+              check_format_args(te,fmt_arg,fmt_args,
+                                Formatstr::get_scanf_typs);
+              break;
+            }
+          } catch {
+          case Nth: terr(loc,"bad format arguments"); break;
+          }
+          break;
+        default: break;
         }
       }
       // Check that the effect of the function is compatible with the current

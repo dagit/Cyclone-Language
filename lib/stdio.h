@@ -158,19 +158,38 @@ extern tunion PrintArg<`r::R> {
 typedef tunion `r PrintArg<`r> parg_t<`r>;
 
 // Printing functions behave as with C
-extern int fprintf(FILE @,const char ?`r fmt, ...`r1 inject parg_t<`r2>);
-extern int printf(const char ?`r fmt, ...`r1 inject parg_t<`r2>);
-extern int sprintf(char ?`r1 s, const char ?`r2 fmt, ...`r3 inject parg_t<`r4>);
+extern int fprintf(FILE @,const char ?`r fmt, ...`r1 inject parg_t<`r2>)
+  __attribute__((format(printf,2,3)))
+  ;
+extern int printf(const char ?`r fmt, ...`r1 inject parg_t<`r2>)
+  __attribute__((format(printf,1,2)))
+  ;
+extern int sprintf(char ?`r1 s, const char ?`r2 fmt, ...`r3 inject parg_t<`r4>)
+  __attribute__((format(printf,2,3)))
+  ;
 // Similar to sprintf but allocates a result of the right size
-extern char ? aprintf(const char ?`r2 fmt, ...`r3 inject parg_t<`r4>);
-extern char ?`r1 raprintf(region_t<`r1>, const char ?`r2 fmt, ...`r3 inject parg_t<`r4> ap);
+extern char ? aprintf(const char ?`r2 fmt, ...`r3 inject parg_t<`r4>)
+  __attribute__((format(printf,1,2)))
+  ;
+extern char ?`r1 raprintf(region_t<`r1>, const char ?`r2 fmt, 
+                          ...`r3 inject parg_t<`r4> ap)
+  __attribute__((format(printf,2,3)))
+  ;
 
 // Same as above but suitable for calling from a user's vararg function
-extern int vfprintf(FILE @,const char ?`r fmt, parg_t<`r2> ? `r1 ap);
-extern int vprintf(const char ?`r fmt, parg_t<`r2> ? `r1);
-extern int vsprintf(char ?`r1 s, const char ?`r2 fmt, parg_t<`r4> ? `r3);
+extern int vfprintf(FILE @,const char ?`r fmt, parg_t<`r2> ? `r1 ap)
+  __attribute__((format(printf,2,0)))
+  ;
+extern int vprintf(const char ?`r fmt, parg_t<`r2> ? `r1)
+  __attribute__((format(printf,1,0)))
+  ;
+extern int vsprintf(char ?`r1 s, const char ?`r2 fmt, parg_t<`r4> ? `r3)
+  __attribute__((format(printf,2,0)))
+  ;
 extern char ?`r1 vraprintf(region_t<`r1> r1, const char ?`r2 fmt, 
-                           parg_t<`r4> ? `r3 ap);
+                           parg_t<`r4> ? `r3 ap)
+  __attribute__((format(printf,2,0)))
+  ;
 
 //////////////////////////////////////////////////////////////
 // scanf and friends:  see scanf.cyc
@@ -188,18 +207,28 @@ extern tunion ScanfArg<`r::R> {
 typedef tunion `r2 ScanfArg<`r1> sarg_t<`r1,`r2>;
 
 // Scanning functions behave as in C...
-extern int scanf(const char ?`r1 fmt, ...`r2 inject sarg_t<`r3,`r4>);
+extern int scanf(const char ?`r1 fmt, ...`r2 inject sarg_t<`r3,`r4>)
+  __attribute__((format(scanf,1,2)))
+  ;
 extern int fscanf(FILE @ stream, const char ?`r1 fmt, 
-                     ...`r2 inject sarg_t<`r3,`r4>);
+                     ...`r2 inject sarg_t<`r3,`r4>)
+  __attribute__((format(scanf,2,3)))
+  ;
 extern int sscanf(const char ?`r src, const char ?`r1 fmt, 
-                     ...`r2 inject sarg_t<`r3,`r4>);
+                     ...`r2 inject sarg_t<`r3,`r4>)
+  __attribute__((format(scanf,2,3)))
+  ;
 
 
 // Same as above but suitable for calling from a user's vararg function
 extern int vfscanf(FILE @ stream, const char ?`r1 fmt, 
-                   sarg_t<`r3,`r4> ? `r2);
+                   sarg_t<`r3,`r4> ? `r2)
+  __attribute__((format(scanf,2,0)))
+  ;
 extern int vsscanf(const char ?`r src, const char ?`r1 fmt, 
-                   sarg_t<`r3,`r4> ? `r2);
+                   sarg_t<`r3,`r4> ? `r2)
+  __attribute__((format(scanf,2,0)))
+  ;
 
 
 

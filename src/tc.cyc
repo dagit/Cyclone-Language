@@ -53,17 +53,10 @@ static attributes_t transfer_fn_type_atts(type_t t, attributes_t atts) {
   case &FnType(FnInfo{_,_,_,_,_,_,_,*fnatts}):
     let res_atts = null;
     for (; atts != null; atts = atts->tl) {
-      switch (atts->hd) {
-      case &Regparm_att(_): fallthru;
-      case Stdcall_att:    fallthru;
-      case Cdecl_att:      fallthru;
-      case Fastcall_att:   fallthru;
-      case Noreturn_att:   fallthru;
-      case Const_att:
-        *fnatts = new List(atts->hd,*fnatts); continue;
-      default:
-        res_atts = new List(atts->hd,res_atts); continue;
-      }
+      if (fntype_att(atts->hd))
+        *fnatts = new List(atts->hd,*fnatts); 
+      else
+        res_atts = new List(atts->hd,res_atts); 
     }
     return res_atts;
   default: return impos("transfer_fn_type_atts"); 
@@ -165,6 +158,7 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc, vardecl_t vd, bool check_
       case Cdecl_att:      fallthru;
       case Fastcall_att:   fallthru;
       case Noreturn_att:   fallthru;
+      case &Format_att(_,_,_): fallthru;
       case Const_att:
         impos("tcVardecl: fn type attributes in function var decl");
         break;
@@ -233,6 +227,8 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd) {
   check_fndecl_valid_type(loc,te,fd);
   // check for redeclaration
   type_t t = fndecl2typ(fd);
+  // move any function type attributes into the function's type
+  fd->attributes = transfer_fn_type_atts(t,fd->attributes);
   // check that packed and aligned don't show up in the attributes
   for (_ atts = fd->attributes; atts != null; atts = atts->tl) {
     switch (atts->hd) {

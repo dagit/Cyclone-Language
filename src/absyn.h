@@ -123,6 +123,7 @@ namespace Absyn {
   extern tunion Designator;
   extern xtunion StmtAnnot;
   extern tunion Attribute;
+  extern tunion Format_Type;
   extern struct Structfield;
 
   typedef tunion Scope scope_t;
@@ -168,6 +169,7 @@ namespace Absyn {
   typedef struct Decl @decl_t;
   typedef tunion Designator designator_t;
   typedef xtunion StmtAnnot stmt_annot_t;
+  typedef tunion Format_Type format_type_t;
   typedef tunion Attribute attribute_t;
   typedef list_t<attribute_t> attributes_t;
   typedef struct Structfield @structfield_t;
@@ -323,6 +325,10 @@ namespace Absyn {
     TaggedArray_ps
   };
 
+  EXTERN_ABSYN tunion Format_Type {
+    Printf_ft, Scanf_ft
+  };
+
   // GCC attributes that we currently try to support:  this definitions
   // is only used for parsing and pretty-printing.  
   EXTERN_ABSYN tunion Attribute {
@@ -345,6 +351,9 @@ namespace Absyn {
     Constructor_att;
     Destructor_att;
     No_check_memory_usage_att;
+    Format_att(format_type_t, 
+               int,   // format string arg
+               int);  // first arg to type-check
   };
 
   EXTERN_ABSYN tunion Type_modifier {
@@ -370,7 +379,7 @@ namespace Absyn {
   EXTERN_ABSYN tunion Primop {
     Plus, Times, Minus, Div, Mod, Eq, Neq, Gt, Lt, Gte, Lte, Not,
     Bitnot, Bitand, Bitor, Bitxor, Bitlshift, Bitlrshift, Bitarshift,
-    Size, Printf, Fprintf, Aprintf, Scanf, Fscanf, Sscanf
+    Size
   };
 
   EXTERN_ABSYN tunion Incrementor { PreInc, PostInc, PreDec, PostDec };
@@ -686,6 +695,9 @@ namespace Absyn {
   extern tunionfield_t null_pointer_exn_tuf;
   extern tunionfield_t match_exn_tuf;
   extern type_t exn_typ;
+  // tunion PrintArg and tunion ScanfArg types
+  extern qvar_t tunion_print_arg_qvar;
+  extern qvar_t tunion_scanf_arg_qvar;
   // string (char ?)
   extern type_t string_typ(type_t rgn);
   extern type_t const_string_typ(type_t rgn);
@@ -815,9 +827,6 @@ namespace Absyn {
   extern decl_t tunion_decl(scope_t s, typedef_name_t n, list_t<tvar_t> ts,
                             opt_t<list_t<tunionfield_t>> fs, bool is_xtunion,
 			    seg_t loc);
-
-  // return true if p is printf, sprintf, fprintf, scanf, fscanf, sscanf
-  extern bool is_format_prim(primop_t p);
 
   extern type_t function_typ(list_t<tvar_t> tvs,opt_t<type_t> eff_typ,
                              type_t ret_typ, 

@@ -922,7 +922,7 @@ using Parse;
 %token NULL_kw LET THROW TRY CATCH
 %token NEW ABSTRACT FALLTHRU USING NAMESPACE TUNION XTUNION
 %token FILL CODEGEN CUT SPLICE
-%token PRINTF FPRINTF APRINTF SCANF FSCANF SSCANF MALLOC
+%token MALLOC
 %token REGION_T REGION RNEW RMALLOC
 // double and triple-character tokens
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
@@ -1018,7 +1018,7 @@ using Parse;
 %type <Exp_tok> initializer array_initializer
 %type <ExpList_tok> argument_expression_list argument_expression_list0
 %type <InitializerList_tok> initializer_list
-%type <Primop_tok> unary_operator format_primop
+%type <Primop_tok> unary_operator 
 %type <Primopopt_tok> assignment_operator
 %type <QualId_tok> QUAL_IDENTIFIER QUAL_TYPEDEF_NAME qual_opt_identifier
 %type <QualId_tok> using_action
@@ -1293,13 +1293,30 @@ attribute:
   { let s = $1;
     let str = $3;
     attribute_t a;
-    if (zstrcmp(s,"section") == 0 || zstrcmp(s,"__section__"))
+    if (zstrcmp(s,"section") == 0 || zstrcmp(s,"__section__") == 0)
       a = new Section_att(str);
     else {
       err("unrecognized attribute",LOC(@1,@1));
       a = Cdecl_att;
     }
     $$=^$(a);
+  }
+| IDENTIFIER '(' IDENTIFIER ',' INTEGER_CONSTANT ',' INTEGER_CONSTANT ')'
+  { let s = $1; 
+    let t = $3;
+    let $(_,n) = *($5);
+    let $(_,m) = *($7);
+    attribute_t a = Cdecl_att;
+    if (zstrcmp(s,"format") == 0 || zstrcmp(s,"__format__") == 0)
+      if (zstrcmp(t,"printf") == 0)
+        a = new Format_att(Printf_ft,n,m);
+      else if (zstrcmp(t,"scanf") == 0)
+        a = new Format_att(Scanf_ft,n,m);
+      else
+        err("unrecognized format type",LOC(@3,@3)); 
+    else 
+      err("unrecognized attribute",LOC(@1,@8)); 
+    $$ = ^$(a);
   }
 ;
 
@@ -2127,6 +2144,9 @@ selection_statement:
  * matching within cases. */
 /* DAN: We don't allow empty cases, but we get
  * better error messages this way, rather than just "parse error"
+ * JGM: cases with an empty statement get an implicit fallthru.
+ * Should also put in an implicit "break" for the last case but that's
+ * better done by the control-flow-checking.
  */
 switch_clauses:
   /* empty */
@@ -2136,12 +2156,14 @@ switch_clauses:
                                        null,$3,LOC(@1,@3)),
                   null));}
 | CASE pattern ':' switch_clauses
-    { $$=^$(new List(new Switch_clause($2,null,null,skip_stmt(LOC(@3,@3)),
+    { $$=^$(new List(new Switch_clause($2,null,null,
+                                       fallthru_stmt(null,LOC(@3,@3)),
                                        LOC(@1,@4)),$4)); }
 | CASE pattern ':' block_item_list switch_clauses
     { $$=^$(new List(new Switch_clause($2,null,null,$4,LOC(@1,@4)),$5)); }
 | CASE pattern AND_OP expression ':' switch_clauses
-    { $$=^$(new List(new Switch_clause($2,null,$4,skip_stmt(LOC(@5,@5)),
+    { $$=^$(new List(new Switch_clause($2,null,$4,
+                                       fallthru_stmt(null,LOC(@5,@5)),
                                        LOC(@1,@6)),$6)); }
 | CASE pattern AND_OP expression ':' block_item_list switch_clauses
     { $$=^$(new List(new Switch_clause($2,null,$4,$6,LOC(@1,@7)),$7)); }
@@ -2492,9 +2514,7 @@ unary_expression:
 | SIZEOF unary_expression        { $$=^$(sizeofexp_exp($2,LOC(@1,@2))); }
 | OFFSETOF '(' type_name ',' IDENTIFIER ')' 
    { $$=^$(offsetof_exp((*$3)[2],new $5,LOC(@1,@6))); }
-/* Cyc: throw, printf, fprintf, sprintf */
-| format_primop '(' argument_expression_list ')'
-    { $$=^$(primop_exp($1,$3,LOC(@1,@4))); }
+/* Cyc: malloc, rmalloc */
 | MALLOC '(' SIZEOF '(' specifier_qualifier_list ')' ')'
 { $$=^$(new_exp(new Malloc_e(null,speclist2typ((*$5)[1],LOC(@5,@5))),
                 LOC(@1,@7))); }
@@ -2502,15 +2522,6 @@ unary_expression:
 { $$=^$(new_exp(new Malloc_e($3,speclist2typ((*$7)[1],LOC(@7,@7))),
                 LOC(@1,@9))); }
 
-;
-
-format_primop:
-  PRINTF  { $$=^$(Printf); }
-| FPRINTF { $$=^$(Fprintf); }
-| APRINTF { $$=^$(Aprintf); }
-| SCANF   { $$=^$(Scanf); }
-| FSCANF  { $$=^$(Fscanf); }
-| SSCANF  { $$=^$(Sscanf); }
 ;
 
 unary_operator:

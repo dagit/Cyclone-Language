@@ -819,12 +819,6 @@ int exp_prec(exp_t e) {
     case Bitlrshift:     return  80; // unlike C (see grammar)
     case Bitarshift:     return  80; // doesn't actually exist (see grammar)
     case Size:           return 140; // foo.size (same as struct member)
-    case Printf:         return 130;
-    case Fprintf:        return 130;
-    case Aprintf:        return 130;
-    case Scanf:          return 130;
-    case Fscanf:         return 130;
-    case Sscanf:         return 130;
     }
   case &AssignOp_e(_,_,_):      return  20;
   case &Increment_e(_,_):       return 130;
@@ -1086,7 +1080,7 @@ doc_t primapp2doc(int inprec, primop_t p,list_t<exp_t> es) {
     let d = exp2doc_prec(inprec,es->hd);
     return cat(d,text(".size"));
 
-  } else if (!is_format_prim(p)) {
+  } else {
     list_t<doc_t> ds = List::map_c(exp2doc_prec,inprec,es);
     if (ds == null)
       throw new Failure(aprintf("Absynpp::primapp2doc: %s with no args",
@@ -1098,10 +1092,7 @@ doc_t primapp2doc(int inprec, primop_t p,list_t<exp_t> es) {
                                 string_of_doc(ps,72)));
     else
       return cat(ds->hd,text(" "),ps,text(" "),ds->tl->hd);
-  } else {
-    // printf, fprintf, aprintf, scanf, fscanf, sscanf
-    return cat(ps, text("("), exps2doc_prec(20,es), text(")"));
-  }
+  } 
 }
 
 string_t prim2str(primop_t p) {
@@ -1126,12 +1117,6 @@ string_t prim2str(primop_t p) {
   case Bitlrshift: return ">>";
   case Bitarshift: return ">>>";
   case Size: return "size";
-  case Printf: return "printf";
-  case Fprintf: return "fprintf";
-  case Aprintf: return "aprintf";
-  case Scanf: return "scanf";
-  case Fscanf: return "fscanf";
-  case Sscanf: return "sscanf";
   }
 }
 

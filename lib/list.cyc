@@ -500,6 +500,18 @@ xtunion exn {Nth};
   return(x->hd);
 }
 
+// Given [x0,x1,...,xi-1,xi,xi+1,...,xn], return [xi,xi+1,...,xn].  Raise
+// Nth if the list doesn't have enough elements.  
+glist_t<`a,`r> nth_tail(glist_t<`a,`r> x, int i) {
+  if (i < 0) throw Nth;
+  while (i != 0) {
+    if (x == null) throw Nth;
+    x = x->tl;
+    --i;
+  }
+  return x;
+}
+
 // Given a predicate on 'a values, determine whether every element in a list
 // satisfies the predicate.
 bool forall(bool pred(`a),glist_t<`a,`r> x) {

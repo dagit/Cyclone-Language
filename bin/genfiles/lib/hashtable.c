@@ -129,19 +129,19 @@ int) _get_arr_size( odata, sizeof( struct Cyc_List_List*)); int i= 0; for( 0; i
 < osize; i ++){({ int(* _temp13)( struct _tagged_arr fmt, struct _tagged_arr)=
 Cyc_Stdio_printf; struct _tagged_arr _temp17= _tag_arr("%d: ", sizeof(
 unsigned char), 5u); struct Cyc_Stdio_Int_pa_struct _temp18; _temp18.tag= Cyc_Stdio_Int_pa;
-_temp18.f1=( unsigned int) i;{ void* _temp16=( void*)& _temp18; void* _temp14[ 1u]={
-_temp16}; struct _tagged_arr _temp15={( void*) _temp14,( void*) _temp14,( void*)(
-_temp14 + 1u)}; _temp13( _temp17, _temp15);}});{ struct Cyc_List_List* iter=*((
-struct Cyc_List_List**) _check_unknown_subscript( odata, sizeof( struct Cyc_List_List*),
-i)); for( 0; iter != 0; iter=(( struct Cyc_List_List*) _check_null( iter))->tl){({
-int(* _temp19)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_printf;
-struct _tagged_arr _temp22= _tag_arr("(", sizeof( unsigned char), 2u); void*
-_temp20[ 0u]={}; struct _tagged_arr _temp21={( void*) _temp20,( void*) _temp20,(
-void*)( _temp20 + 0u)}; _temp19( _temp22, _temp21);}); prn_key(((( struct
-_tuple0*)(( struct Cyc_List_List*) _check_null( iter))->hd)[
-_check_known_subscript_notnull( 1u, 0)]).f1);({ int(* _temp23)( struct
-_tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_printf; struct _tagged_arr
-_temp26= _tag_arr(",", sizeof( unsigned char), 2u); void* _temp24[ 0u]={};
+_temp18.f1=( int)(( unsigned int) i);{ void* _temp16=( void*)& _temp18; void*
+_temp14[ 1u]={ _temp16}; struct _tagged_arr _temp15={( void*) _temp14,( void*)
+_temp14,( void*)( _temp14 + 1u)}; _temp13( _temp17, _temp15);}});{ struct Cyc_List_List*
+iter=*(( struct Cyc_List_List**) _check_unknown_subscript( odata, sizeof( struct
+Cyc_List_List*), i)); for( 0; iter != 0; iter=(( struct Cyc_List_List*)
+_check_null( iter))->tl){({ int(* _temp19)( struct _tagged_arr fmt, struct
+_tagged_arr)= Cyc_Stdio_printf; struct _tagged_arr _temp22= _tag_arr("(",
+sizeof( unsigned char), 2u); void* _temp20[ 0u]={}; struct _tagged_arr _temp21={(
+void*) _temp20,( void*) _temp20,( void*)( _temp20 + 0u)}; _temp19( _temp22,
+_temp21);}); prn_key(((( struct _tuple0*)(( struct Cyc_List_List*) _check_null(
+iter))->hd)[ _check_known_subscript_notnull( 1u, 0)]).f1);({ int(* _temp23)(
+struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_printf; struct
+_tagged_arr _temp26= _tag_arr(",", sizeof( unsigned char), 2u); void* _temp24[ 0u]={};
 struct _tagged_arr _temp25={( void*) _temp24,( void*) _temp24,( void*)( _temp24
 + 0u)}; _temp23( _temp26, _temp25);}); prn_val(((( struct _tuple0*)(( struct Cyc_List_List*)
 _check_null( iter))->hd)[ _check_known_subscript_notnull( 1u, 0)]).f2);({ int(*

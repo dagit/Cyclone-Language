@@ -651,6 +651,13 @@ check_var_or_fn_decl(scope_t sc0, type_t t0, tqual_t tq0, attributes_t atts0,
   // check attribute
   if (! same_atts(atts0, atts1)) {
     merr(loc, msg, aprintf("%s %s has different attributes", t, v));
+    fprintf(stderr,"previous attributes: ");
+    for (; atts0 != null; atts0 = atts0->tl)
+      fprintf(stderr,"%s ",attribute2string(atts0->hd));
+    fprintf(stderr,"\ncurrent attributes: ");
+    for (; atts1 != null; atts1 = atts1->tl)
+      fprintf(stderr,"%s ",attribute2string(atts1->hd));
+    fprintf(stderr,"\n");
     res = false;
   }
 

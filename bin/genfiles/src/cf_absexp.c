@@ -138,7 +138,8 @@ f1; int f2; struct Cyc_Absyn_VarargInfo* f3; struct Cyc_Core_Opt* f4; struct Cyc
 f5; } ; static const int Cyc_Absyn_NonNullable_ps= 0; struct Cyc_Absyn_NonNullable_ps_struct{
 int tag; struct Cyc_Absyn_Exp* f1; } ; static const int Cyc_Absyn_Nullable_ps= 1;
 struct Cyc_Absyn_Nullable_ps_struct{ int tag; struct Cyc_Absyn_Exp* f1; } ;
-static const int Cyc_Absyn_TaggedArray_ps= 0; static const int Cyc_Absyn_Regparm_att=
+static const int Cyc_Absyn_TaggedArray_ps= 0; static const int Cyc_Absyn_Printf_ft=
+0; static const int Cyc_Absyn_Scanf_ft= 1; static const int Cyc_Absyn_Regparm_att=
 0; struct Cyc_Absyn_Regparm_att_struct{ int tag; int f1; } ; static const int
 Cyc_Absyn_Stdcall_att= 0; static const int Cyc_Absyn_Cdecl_att= 1; static const
 int Cyc_Absyn_Fastcall_att= 2; static const int Cyc_Absyn_Noreturn_att= 3;
@@ -151,14 +152,15 @@ static const int Cyc_Absyn_Shared_att= 7; static const int Cyc_Absyn_Unused_att=
 10; static const int Cyc_Absyn_Dllexport_att= 11; static const int Cyc_Absyn_No_instrument_function_att=
 12; static const int Cyc_Absyn_Constructor_att= 13; static const int Cyc_Absyn_Destructor_att=
 14; static const int Cyc_Absyn_No_check_memory_usage_att= 15; static const int
-Cyc_Absyn_Carray_mod= 0; static const int Cyc_Absyn_ConstArray_mod= 0; struct
-Cyc_Absyn_ConstArray_mod_struct{ int tag; struct Cyc_Absyn_Exp* f1; } ; static
-const int Cyc_Absyn_Pointer_mod= 1; struct Cyc_Absyn_Pointer_mod_struct{ int tag;
-void* f1; void* f2; struct Cyc_Absyn_Tqual f3; } ; static const int Cyc_Absyn_Function_mod=
-2; struct Cyc_Absyn_Function_mod_struct{ int tag; void* f1; } ; static const int
-Cyc_Absyn_TypeParams_mod= 3; struct Cyc_Absyn_TypeParams_mod_struct{ int tag;
-struct Cyc_List_List* f1; struct Cyc_Position_Segment* f2; int f3; } ; static
-const int Cyc_Absyn_Attributes_mod= 4; struct Cyc_Absyn_Attributes_mod_struct{
+Cyc_Absyn_Format_att= 3; struct Cyc_Absyn_Format_att_struct{ int tag; void* f1;
+int f2; int f3; } ; static const int Cyc_Absyn_Carray_mod= 0; static const int
+Cyc_Absyn_ConstArray_mod= 0; struct Cyc_Absyn_ConstArray_mod_struct{ int tag;
+struct Cyc_Absyn_Exp* f1; } ; static const int Cyc_Absyn_Pointer_mod= 1; struct
+Cyc_Absyn_Pointer_mod_struct{ int tag; void* f1; void* f2; struct Cyc_Absyn_Tqual
+f3; } ; static const int Cyc_Absyn_Function_mod= 2; struct Cyc_Absyn_Function_mod_struct{
+int tag; void* f1; } ; static const int Cyc_Absyn_TypeParams_mod= 3; struct Cyc_Absyn_TypeParams_mod_struct{
+int tag; struct Cyc_List_List* f1; struct Cyc_Position_Segment* f2; int f3; } ;
+static const int Cyc_Absyn_Attributes_mod= 4; struct Cyc_Absyn_Attributes_mod_struct{
 int tag; struct Cyc_Position_Segment* f1; struct Cyc_List_List* f2; } ; static
 const int Cyc_Absyn_Char_c= 0; struct Cyc_Absyn_Char_c_struct{ int tag; void* f1;
 unsigned char f2; } ; static const int Cyc_Absyn_Short_c= 1; struct Cyc_Absyn_Short_c_struct{
@@ -177,10 +179,7 @@ Cyc_Absyn_Gte= 9; static const int Cyc_Absyn_Lte= 10; static const int Cyc_Absyn
 static const int Cyc_Absyn_Bitor= 14; static const int Cyc_Absyn_Bitxor= 15;
 static const int Cyc_Absyn_Bitlshift= 16; static const int Cyc_Absyn_Bitlrshift=
 17; static const int Cyc_Absyn_Bitarshift= 18; static const int Cyc_Absyn_Size=
-19; static const int Cyc_Absyn_Printf= 20; static const int Cyc_Absyn_Fprintf=
-21; static const int Cyc_Absyn_Aprintf= 22; static const int Cyc_Absyn_Scanf= 23;
-static const int Cyc_Absyn_Fscanf= 24; static const int Cyc_Absyn_Sscanf= 25;
-static const int Cyc_Absyn_PreInc= 0; static const int Cyc_Absyn_PostInc= 1;
+19; static const int Cyc_Absyn_PreInc= 0; static const int Cyc_Absyn_PostInc= 1;
 static const int Cyc_Absyn_PreDec= 2; static const int Cyc_Absyn_PostDec= 3;
 struct Cyc_Absyn_VarargCallInfo{ int num_varargs; struct Cyc_List_List*
 injectors; struct Cyc_Absyn_VarargInfo* vai; } ; static const int Cyc_Absyn_Const_e=
@@ -662,9 +661,9 @@ _LL225;} else{ goto _LL221;} _LL223: fs=* _temp226; goto _LL221; _LL225: fs=(
 struct _tagged_arr)({ struct _tagged_arr(* _temp230)( struct _tagged_arr fmt,
 struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp234= _tag_arr("%d",
 sizeof( unsigned char), 3u); struct Cyc_Stdio_Int_pa_struct _temp235; _temp235.tag=
-Cyc_Stdio_Int_pa; _temp235.f1=( unsigned int) _temp228;{ void* _temp233=( void*)&
-_temp235; void* _temp231[ 1u]={ _temp233}; struct _tagged_arr _temp232={( void*)
-_temp231,( void*) _temp231,( void*)( _temp231 + 1u)}; _temp230( _temp234,
+Cyc_Stdio_Int_pa; _temp235.f1=( int)(( unsigned int) _temp228);{ void* _temp233=(
+void*)& _temp235; void* _temp231[ 1u]={ _temp233}; struct _tagged_arr _temp232={(
+void*) _temp231,( void*) _temp231,( void*)( _temp231 + 1u)}; _temp230( _temp234,
 _temp232);}}); goto _LL221; _LL221:;} return( struct _tagged_arr)({ struct
 _tagged_arr(* _temp236)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp241= _tag_arr("%s.%s", sizeof( unsigned char), 6u);
@@ -678,12 +677,12 @@ _temp236( _temp241, _temp238);}}});} _LL197: return( struct _tagged_arr)({
 struct _tagged_arr(* _temp244)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp248= _tag_arr("<mpt%d>", sizeof( unsigned char), 8u);
 struct Cyc_Stdio_Int_pa_struct _temp249; _temp249.tag= Cyc_Stdio_Int_pa;
-_temp249.f1=( unsigned int) _temp208;{ void* _temp247=( void*)& _temp249; void*
-_temp245[ 1u]={ _temp247}; struct _tagged_arr _temp246={( void*) _temp245,( void*)
-_temp245,( void*)( _temp245 + 1u)}; _temp244( _temp248, _temp246);}}); _LL199:
-return( struct _tagged_arr)({ struct _tagged_arr(* _temp250)( struct _tagged_arr
-fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp254=
-_tag_arr("(*%s)", sizeof( unsigned char), 6u); struct Cyc_Stdio_String_pa_struct
+_temp249.f1=( int)(( unsigned int) _temp208);{ void* _temp247=( void*)& _temp249;
+void* _temp245[ 1u]={ _temp247}; struct _tagged_arr _temp246={( void*) _temp245,(
+void*) _temp245,( void*)( _temp245 + 1u)}; _temp244( _temp248, _temp246);}});
+_LL199: return( struct _tagged_arr)({ struct _tagged_arr(* _temp250)( struct
+_tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr
+_temp254= _tag_arr("(*%s)", sizeof( unsigned char), 6u); struct Cyc_Stdio_String_pa_struct
 _temp255; _temp255.tag= Cyc_Stdio_String_pa; _temp255.f1=( struct _tagged_arr)
 Cyc_CfAbsexp_absop2string( _temp212);{ void* _temp253=( void*)& _temp255; void*
 _temp251[ 1u]={ _temp253}; struct _tagged_arr _temp252={( void*) _temp251,( void*)
@@ -735,8 +734,8 @@ struct _tagged_arr _temp311= _tag_arr("%smalloc %i", sizeof( unsigned char), 12u
 struct Cyc_Stdio_String_pa_struct _temp313; _temp313.tag= Cyc_Stdio_String_pa;
 _temp313.f1=( struct _tagged_arr) ans;{ void* _temp309=( void*)& _temp313;
 struct Cyc_Stdio_Int_pa_struct _temp312; _temp312.tag= Cyc_Stdio_Int_pa;
-_temp312.f1=( unsigned int) _temp276;{ void* _temp310=( void*)& _temp312; void*
-_temp307[ 2u]={ _temp309, _temp310}; struct _tagged_arr _temp308={( void*)
+_temp312.f1=( int)(( unsigned int) _temp276);{ void* _temp310=( void*)& _temp312;
+void* _temp307[ 2u]={ _temp309, _temp310}; struct _tagged_arr _temp308={( void*)
 _temp307,( void*) _temp307,( void*)( _temp307 + 2u)}; _temp306( _temp311,
 _temp308);}}}); goto _LL257; _LL265: ans=({ struct _tagged_arr(* _temp314)(
 struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct

@@ -153,6 +153,9 @@ namespace List {
   // Raise Nth if the list doesn't have enough elements.  Notice that the
   // indexing is zero-based.
   extern `a nth(glist_t<`a,`r> x,int i);
+  // Given [x0,x1,...,xi-1,xi,xi+1,...,xn], return [xi,xi+1,...,xn].  Raise
+  // Nth if the list doesn't have enough elements.  
+  extern glist_t<`a,`r> nth_tail(glist_t<`a,`r> x,int i);
 
   // Given a predicate on `a values, determine whether every element in a list
   // satisfies the predicate.

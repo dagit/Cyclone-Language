@@ -95,18 +95,6 @@ tqual_t const_tqual() { return Tqual{.q_const = true,
                                         .q_volatile = false,
                                         .q_restrict = false}; }
 
-bool is_format_prim(primop_t p) {
-  switch (p) {
-  case Printf:  return true;
-  case Fprintf: return true;
-  case Aprintf: return true; 
-  case Scanf:   return true; 
-  case Fscanf:  return true; 
-  case Sscanf:  return true; 
-  default:      return false;
-  }
-}
-
 //////////////////////////// Constraints /////////////////////////
 conref_t<`a> new_conref(`a x) {
   return new Conref{.v = new Eq_constr(x)};
@@ -210,6 +198,20 @@ static tunion TunionInfoU.KnownTunion exn_tinfou = KnownTunion(&exn_tud_v);
 static tunion Type.TunionType exn_typ_tt =
                   TunionType(TunionInfo(&exn_tinfou,null,HeapRgn));
 type_t exn_typ = &exn_typ_tt;
+
+// tunion PrintArg and tunion ScanfArg qvars
+static string_t printarg_str = "PrintArg";
+static string_t scanfarg_str = "ScanfArg";
+static string_t cyc_str = "Cyc";
+static string_t stdio_str = "Stdio";
+static struct List<var_t,`H> stdio_list = {&stdio_str, null};
+static tunion Nmspace.Abs_n stdio_namespace = Abs_n(&stdio_list);
+static $(nmspace_t,var_t) tunion_print_arg_qvar_p = 
+  $((tunion Nmspace)&stdio_namespace, &printarg_str);
+static $(nmspace_t,var_t) tunion_scanf_arg_qvar_p = 
+  $((tunion Nmspace)&stdio_namespace, &scanfarg_str);
+qvar_t tunion_print_arg_qvar = &tunion_print_arg_qvar_p;
+qvar_t tunion_scanf_arg_qvar = &tunion_scanf_arg_qvar_p;
 
 // string
 static opt_t<type_t> string_t_opt = null;
@@ -698,18 +700,23 @@ string_t attribute2string(attribute_t a) {
   case Constructor_att: return "constructor";
   case Destructor_att: return "destructor";
   case No_check_memory_usage_att: return "no_check_memory_usage";
+  case &Format_att(Printf_ft,n,m): 
+    return aprintf("format(printf,%u,%u)",n,m);
+  case &Format_att(Scanf_ft,n,m):
+    return aprintf("format(scanf,%u,%u)",n,m);
   }
 }
 
 // returns true when a is an attribute for function types
 bool fntype_att(attribute_t a) {
   switch (a) {
-  case &Regparm_att(_): fallthru;
-  case Fastcall_att:   fallthru;
-  case Stdcall_att:    fallthru;
-  case Cdecl_att:      fallthru;
-  case Noreturn_att:   fallthru;
-  case Const_att:      return true;
+  case &Regparm_att(_):    fallthru;
+  case Fastcall_att:       fallthru;
+  case Stdcall_att:        fallthru;
+  case Cdecl_att:          fallthru;
+  case Noreturn_att:       fallthru;
+  case &Format_att(_,_,_): fallthru;
+  case Const_att:          return true;
   default: return false;
   }
 }

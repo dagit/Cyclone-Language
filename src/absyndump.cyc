@@ -503,27 +503,23 @@ void dumpexp_prec(int inprec, exp_t e) {
 
   case &Primop_e(p,es):
     let pstr = Absynpp::prim2str(p);
-    if(!is_format_prim(p)) {
-      switch (List::length(es)) {
-      case 1:
-	if (p == (primop_t)Size) {
-	  dumpexp_prec(myprec,es->hd);
-	  dump(".size");
-	} else {
-	  dump(pstr);
-	  dumpexp_prec(myprec,es->hd);
-	}
-	break;
-      case 2:
-	dumpexp_prec(myprec,es->hd);
-	dump(pstr);
-	dumpexp_prec(myprec,es->tl->hd);
-	break;
-      default: 
-        throw new Failure("Absyndump -- Bad number of arguments to primop");
+    switch (List::length(es)) {
+    case 1:
+      if (p == (primop_t)Size) {
+        dumpexp_prec(myprec,es->hd);
+        dump(".size");
+      } else {
+        dump(pstr);
+        dumpexp_prec(myprec,es->hd);
       }
-    } else {
-      dump(pstr); dump_nospace("("); dumpexps_prec(20,es); dump_nospace(")");
+      break;
+    case 2:
+      dumpexp_prec(myprec,es->hd);
+      dump(pstr);
+      dumpexp_prec(myprec,es->tl->hd);
+      break;
+    default: 
+      throw new Failure("Absyndump -- Bad number of arguments to primop");
     }
     break;
 

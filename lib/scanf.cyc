@@ -931,14 +931,18 @@ static int string_peekc(const char ?`r @ `r2 sptr) {
 }
 
 int vsscanf(const char ?`r src, const char ?`r1 fmt, 
-               sarg_t<`r3,`r4> ? `r2 ap) {
+               sarg_t<`r3,`r4> ? `r2 ap) 
+  __attribute__((format(scanf,2,0)))
+{
   int err = 0;
   return _IO_vfscanf(string_getc, string_ungetc, string_peekc, &src, fmt, ap,
                      &err);
 }
 
 int sscanf(const char ?`r src, const char ?`r1 fmt, 
-              ...`r2 inject sarg_t<`r3,`r4> ap) {
+              ...`r2 inject sarg_t<`r3,`r4> ap) 
+  __attribute__((format(scanf,2,3)))
+{
   return vsscanf(src, fmt, ap);
 }
 
@@ -950,17 +954,22 @@ int peekc(FILE @ stream) {
 }
 
 int vfscanf(FILE @ stream, const char ?`r1 fmt, 
-               sarg_t<`r3,`r4> ? `r2 ap) {
+               sarg_t<`r3,`r4> ? `r2 ap) 
+  __attribute__((format(scanf,2,0)))
+{
   int err = 0;
   return _IO_vfscanf(getc, ungetc, peekc, stream, fmt, ap, & err);
 }
 
 int fscanf(FILE @ stream, const char ?`r1 fmt, 
-              ...`r2 inject sarg_t<`r3,`r4> ap) {
-              
+              ...`r2 inject sarg_t<`r3,`r4> ap) 
+  __attribute__((format(scanf,2,3)))
+{
   return vfscanf(stream, fmt, ap);
 }
 
-int scanf(const char ?`r1 fmt, ...`r2 inject sarg_t<`r3,`r4> ap) {
+int scanf(const char ?`r1 fmt, ...`r2 inject sarg_t<`r3,`r4> ap) 
+  __attribute__((format(scanf,1,2)))
+{
   return vfscanf(stdin, fmt, ap);
 }

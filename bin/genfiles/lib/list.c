@@ -69,6 +69,7 @@ Cyc_List_rmerge( struct _RegionHandle*, int(* less_eq)( void*, void*), struct
 Cyc_List_List* a, struct Cyc_List_List* b); extern struct Cyc_List_List* Cyc_List_imp_merge(
 int(* less_eq)( void*, void*), struct Cyc_List_List* a, struct Cyc_List_List* b);
 extern unsigned char Cyc_List_Nth[ 8u]; extern void* Cyc_List_nth( struct Cyc_List_List*
+x, int i); extern struct Cyc_List_List* Cyc_List_nth_tail( struct Cyc_List_List*
 x, int i); extern int Cyc_List_forall( int(* pred)( void*), struct Cyc_List_List*
 x); extern int Cyc_List_forall_c( int(* pred)( void*, void*), void* env, struct
 Cyc_List_List* x); extern int Cyc_List_exists( int(* pred)( void*), struct Cyc_List_List*
@@ -323,9 +324,12 @@ unsigned char Cyc_List_Nth[ 8u]="\000\000\000\000Nth"; void* Cyc_List_nth(
 struct Cyc_List_List* x, int i){ while( i > 0? x != 0: 0) { -- i; x=(( struct
 Cyc_List_List*) _check_null( x))->tl;} if( i < 0? 1: x == 0){( int) _throw((
 void*) Cyc_List_Nth);} return( void*)(( struct Cyc_List_List*) _check_null( x))->hd;}
-int Cyc_List_forall( int(* pred)( void*), struct Cyc_List_List* x){ while( x !=
-0? pred(( void*)(( struct Cyc_List_List*) _check_null( x))->hd): 0) { x=((
-struct Cyc_List_List*) _check_null( x))->tl;} return x == 0;} int Cyc_List_forall_c(
+struct Cyc_List_List* Cyc_List_nth_tail( struct Cyc_List_List* x, int i){ if( i
+< 0){( int) _throw(( void*) Cyc_List_Nth);} while( i != 0) { if( x == 0){( int)
+_throw(( void*) Cyc_List_Nth);} x=(( struct Cyc_List_List*) _check_null( x))->tl;
+-- i;} return x;} int Cyc_List_forall( int(* pred)( void*), struct Cyc_List_List*
+x){ while( x != 0? pred(( void*)(( struct Cyc_List_List*) _check_null( x))->hd):
+0) { x=(( struct Cyc_List_List*) _check_null( x))->tl;} return x == 0;} int Cyc_List_forall_c(
 int(* pred)( void*, void*), void* env, struct Cyc_List_List* x){ while( x != 0?
 pred( env,( void*)(( struct Cyc_List_List*) _check_null( x))->hd): 0) { x=((
 struct Cyc_List_List*) _check_null( x))->tl;} return x == 0;} int Cyc_List_exists(

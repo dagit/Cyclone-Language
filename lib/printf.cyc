@@ -924,23 +924,31 @@ eformat:	if (expcnt) {
 
 
 
-int vfprintf(FILE @ f,const char ?`r fmt, parg_t<`r2> ? `r1 ap) {
+int vfprintf(FILE @ f,const char ?`r fmt, parg_t<`r2> ? `r1 ap) 
+  __attribute__((format(printf,2,0)))
+{
   int ans;
   ans = _IO_vfprintf(putc, f, fmt, ap);
   return ans;
 }  
 
-int fprintf(FILE @ f,const char ?`r fmt, ...`r1 inject parg_t<`r2> ap){
+int fprintf(FILE @ f,const char ?`r fmt, ...`r1 inject parg_t<`r2> ap)
+  __attribute__((format(printf,2,3)))
+{
   return vfprintf(f,fmt,ap);
 }
 
-int vprintf(const char ?`r fmt, parg_t<`r2> ? `r1 ap) {
+int vprintf(const char ?`r fmt, parg_t<`r2> ? `r1 ap) 
+  __attribute__((format(printf,1,0)))
+{
   int ans;
   ans = _IO_vfprintf(putc, stdout, fmt, ap);
   return ans;
 }
 
-int printf(const char ?`r fmt, ...`r1 inject parg_t<`r2> ap) {
+int printf(const char ?`r fmt, ...`r1 inject parg_t<`r2> ap) 
+  __attribute__((format(printf,1,2)))
+{
   int ans;
   ans = vprintf(fmt, ap);
   return ans;
@@ -954,7 +962,9 @@ static int putc_string(int c, char ?`r @`r2 sptr) {
   return 1;
 }
 
-int vsprintf(char ?`r1 s, const char ?`r2 fmt, parg_t<`r4> ? `r3 ap) {
+int vsprintf(char ?`r1 s, const char ?`r2 fmt, parg_t<`r4> ? `r3 ap) 
+  __attribute__((format(printf,2,0)))
+{
   int ans;
   let sptr = s;
   ans = _IO_vfprintf(putc_string, &sptr, fmt, ap);
@@ -963,8 +973,9 @@ int vsprintf(char ?`r1 s, const char ?`r2 fmt, parg_t<`r4> ? `r3 ap) {
   return ans;
 }
 
-int sprintf(char ?`r1 s, const char ?`r2 fmt, 
-               ...`r3 inject parg_t<`r4> ap) {
+int sprintf(char ?`r1 s, const char ?`r2 fmt, ...`r3 inject parg_t<`r4> ap) 
+  __attribute__((format(printf,2,3)))
+{
   return vsprintf(s, fmt, ap);
 }
 
@@ -972,7 +983,9 @@ static int putc_void(int c, int dummy) {
   return 1;
 }
 
-char ?`r1 vraprintf(region_t<`r1> r1, const char ?`r2 fmt, parg_t<`r4> ? `r3 ap) {
+char ?`r1 vraprintf(region_t<`r1> r1, const char ?`r2 fmt, parg_t<`r4> ?`r3 ap)
+  __attribute__((format(printf,2,0)))
+{
   // figure out the size of the resulting string -- add one for 0 terminator
   int size = _IO_vfprintf(putc_void, 0, fmt, ap) + 1;
   char ?`r1 s = rnew(r1) {for i < size : '\0'};
@@ -980,30 +993,16 @@ char ?`r1 vraprintf(region_t<`r1> r1, const char ?`r2 fmt, parg_t<`r4> ? `r3 ap)
   return s;
 }
 
-char ?`r1 raprintf(region_t<`r1> r1, const char ?`r2 fmt, ...`r3 inject parg_t<`r4> ap) {
+char ?`r1 raprintf(region_t<`r1> r1, const char ?`r2 fmt, 
+                   ...`r3 inject parg_t<`r4> ap) 
+  __attribute__((format(printf,2,3)))
+{
   return vraprintf(r1, fmt, ap);
 }
 
-char ? aprintf(const char ?`r2 fmt, ...`r3 inject parg_t<`r4> ap) {
+char ? aprintf(const char ?`r2 fmt, ...`r3 inject parg_t<`r4> ap) 
+  __attribute__((format(printf,1,2)))
+{
   return vraprintf(heap_region, fmt, ap);
 }
   
-/*
-int main(int argc, string_t ?argv) {
-  long x = 3;
-  my_printf("%d\n",0);
-  my_printf("%d\n",123);
-  my_printf("%d\n",-10);
-  my_printf("%x\n",31);
-  my_printf("%X\n",31);
-  my_printf("%i\n",3);
-  my_printf("%3i\n",3);
-  my_printf("%10s %s","foo","bar");
-  my_printf("%d\n",x);
-  my_printf("%f\n",3.14);
-  my_printf("%g\n",3.14);
-  my_printf("%3f\n",3.14);
-
-  return 0;
-}
-*/

@@ -325,13 +325,15 @@ static type_t typ_to_c(type_t t) {
   case &ArrayType(t2,tq,e): return new ArrayType(typ_to_c_array(t2),tq,e);
   case &FnType(FnInfo{_,_,t2,args,c_vararg,cyc_vararg,_,atts}):
     // just drop the type arguments & effect and translate the nested types
+    // also, drop any format descriptors 
     // FIX:  problem with higher-order functions?  Again C's rules are strange.
     // FIX:  dropping noreturn and const attributes b/c C is complaining.
     let new_atts = null;
     for (; atts != null; atts = atts->tl)
       switch (atts->hd) {
       case Noreturn_att: fallthru;
-      case Const_att   : continue;
+      case Const_att   : fallthru;
+      case &Format_att(_,_,_): continue;
       default: new_atts = new List(atts->hd,new_atts); break;
       }
     let new_args = List::map(arg_to_c,args);
@@ -639,150 +641,6 @@ static env_t switch_as_switch_env(env_t e, var_t next_l) {
   ans->break_lab     = null;
   ans->fallthru_info = new Opt(new $(next_l,null,Dict::empty(qvar_cmp)));
   return ans;
-}
-
-// printf_to_c(p,aopt,args,typs)
-// Translate printf functions to C;
-//   p is printf, fprintf, or aprintf
-//   aopt is &Opt(e) if p is fprintf and e is its first arg
-//   args are the remaining args, already translated
-//   typs are the types of the translated args
-//
-// Most of the work has been done in the typechecker, which inserted
-// casts on all the args.  The only remaining thing to do is handle
-// %s.  The typechecker casts the corresponding arg to char[?].
-// The C printf expects a char *.  So, we extract that from the char[?].
-// Furthermore, we have to make sure that the C printf does not
-// look past the end of the char[?].  So, we transform %s into %.*s,
-// and, if the char[?] arg is x, we turn it into x,size(x).
-//
-// A final twist: the argument might not be a variable, so we have to
-// introduce temporaries.  E.g.,
-//   printf("%d%s%d\n",g(x),f(e),y)
-// becomes
-//   ({ int t1 = g(x);
-//      string t2 = f(e);
-//      int t3 = y;
-//      printf("%d%.*s%d\n",t1,t2->sz,t2->contents,t3);
-//   })
-static exp_t printf_to_c(primop_t p, opt_t<exp_t> aopt,
-		         list_t<exp_t> args, list_t<type_t> typs) {
-  // All errors are Impossible because they should have been caught by
-  // the typechecker
-  if (args == null)
-    return toc_impos("expecting a literal format string");
-
-  string_t fmt_str;
-  // get out the literal format string
-  switch (args->hd->r) {
-  case &Const_e(&String_c(s)): fmt_str = s; break;
-  default: return toc_impos("expecting a literal format string");
-  }
-  // Check for the usual case: no %s.
-  int len = fmt_str.size;
-  int i   = 0;
-  for (i=0; i<len; i++) {
-    if (fmt_str[i] == '%') {
-      i++;
-      if (i<len && fmt_str[i] == 's') break;
-    }
-  }
-  // If no %s, don't bother to process the args
-  if (i == len) {
-    if (aopt != null) args = new List(aopt->v,args);
-    return primop_exp(p,args,DL);
-  }
-
-  // Otherwise we have %s and must process the args
-
-  args = args->tl; // strip off fmt string
-  typs = typs->tl; // and its type
-
-  // allocate all temp data structures in region r
-  stmt_t s;
-  region r {
-    glist_t<int,`r> rev_fmt    = null;   // reversed fmt to return
-    glist_t<exp_t,`r> rev_result = null; // reversed args to return,minus fmt
-    glist_t<$(qvar_t,type_t,exp_t)@`r,`r> rev_temps  = null; // reversed temps to return
-
-    for (i=0; i<len; i++) {
-      char c = fmt_str[i];
-      rev_fmt = rnew(r) List(c,rev_fmt);
-      if (c != '%') continue;
-      let x = Formatstr::parse_conversionspecification(fmt_str,i+1);
-      if (x == null) toc_impos("bad format string");
-      let &$(flags,width,precision,lenmod,c2,j) = x->v;
-      i = j-1; // Subtract 1 because for-loop ends with i++
-      if (c2 != 's') {
-        // No change in this portion of format strng; just copy conversion spec
-        rev_fmt = rrevappend(r,rflatten(r,rlist(r,flags,width,
-                                                 precision,lenmod)),
-                             rev_fmt);
-        rev_fmt = rnew(r) List(c2,rev_fmt);
-        // * width or precision consumes an argument
-        switch (width) {
-        case &List(x,null) && x=='*':
-          let temp = temp_var();
-          rev_temps  = rnew(r) List(rnew(r) $(temp,typs->hd,args->hd),
-                                    rev_temps);
-          rev_result = rnew(r) List(var_exp(temp,DL),rev_result);
-          args = args->tl;
-          typs = typs->tl;
-          break;
-        default: break;
-        }
-        switch (precision) {
-        case &List(x,&List(y,null)) && x=='.' && y=='*':
-          let temp = temp_var();
-          rev_temps  = rnew(r) List(rnew(r) $(temp,typs->hd,args->hd),
-                                    rev_temps);
-          rev_result = rnew(r) List(var_exp(temp,DL),rev_result);
-          args = args->tl;
-          typs = typs->tl;
-          break;
-        default: break;
-        }
-        if (c2 != '%') { // all but %% consume an arg and typ
-          if (args == null || typs == null)
-            toc_impos(aprintf("missing arg to %s", Absynpp::prim2string(p)));
-          let temp = temp_var();
-          rev_temps  = rnew(r) List(rnew(r) $(temp,typs->hd,args->hd),
-                                    rev_temps);
-          rev_result = rnew(r) List(var_exp(temp,DL),rev_result);
-          args = args->tl;
-          typs = typs->tl;
-        }
-      } else {
-        // %s case.  Note, tcexp currently prohibits flags, width, precision,
-        // and length modifiers for %s, so we don't handle them here;
-        // we just insert size into format and args.
-        rev_fmt = rnew(r) List('.',rev_fmt);
-        rev_fmt = rnew(r) List('*',rev_fmt);
-        rev_fmt = rnew(r) List('s',rev_fmt);
-        let temp   = temp_var();
-	let temp_e = var_exp(temp,DL);
-        rev_temps = rnew(r) List(rnew(r) $(temp,typs->hd,args->hd),rev_temps);
-	// assume sizeof(char) is 1
-        let size_exp = fncall_exp(_get_arr_size_e,
-				  list(temp_e, uint_exp(1,DL)), DL);
-        let cstring_exp = structmember_exp(temp_e,curr_sp,DL);
-        rev_result = rnew(r) List(size_exp,rev_result);
-        rev_result = rnew(r) List(cstring_exp,rev_result);
-        args = args->tl;
-        typs = typs->tl;
-      }
-    }
-    let es = new List(string_exp(String::implode(List::rev(rev_fmt)),DL),
-                      List::rev(rev_result));
-    if (aopt != null) es = new List(aopt->v,es);
-    let e = primop_exp(p,es,DL);
-    s = exp_stmt(e,DL);
-    for (; rev_temps != null; rev_temps = rev_temps->tl) {
-      s = declare_stmt((*rev_temps->hd)[0], (*rev_temps->hd)[1],
-                       (*rev_temps->hd)[2], s, DL);
-    }
-  } // region r
-  return stmt_exp(s,DL);
 }
 
 ///////////////////////////////////////////////////////////////
@@ -1210,23 +1068,6 @@ static void exp_to_c(env_t nv, exp_t e) {
 			  typ2string(typs->hd),typ2string(arg->topt->v))); 
 	return;
       }
-      break;
-    case Printf:  e->r = printf_to_c(p,null,es,typs)->r; break;
-    case Aprintf: e->r = printf_to_c(p,null,es,typs)->r; break;
-    case Fprintf:
-      if (es == null) toc_impos("fprintf without arguments");
-      e->r = printf_to_c(p,new Opt(fdconv(es->hd)),es->tl,typs->tl)->r;
-      break;
-    case Sscanf:
-      // INSECURE -- but useful for debugging.
-      // The problem is that we can't guarantee that the input string
-      // is null terminated -- sscanf could start reading past the end
-      // of the string.  This could lead to a security breach.
-      // Any sscanf expression should be rejected by the typechecker;
-      // sometimes we disable this to help debug fscanf and scanf.
-      if (es == null) toc_impos("sscanf without arguments");
-      es->hd->r = structmember_exp(new_exp(es->hd->r,es->hd->loc),
-				   curr_sp, DL)->r;
       break;
     case Plus:
       // only translation is for tagged arrays:
