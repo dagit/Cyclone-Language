@@ -22,12 +22,14 @@
 #include <ctype.h>
 #include <string.h>
 #include <position.h>
+#include <stdio.h>
 #include "absyn.h"
 #include "tcutil.h"
 #include "tcenv.h"
 #include "formatstr.h"
 using Core;
 using List;
+using Stdio;
 using Position;
 using Absyn;
 using Tcutil;

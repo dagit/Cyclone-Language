@@ -22,12 +22,14 @@
 #define ABSYN_CYC 
 #include "absyn.h"
 #include <string.h>
+#include <stdio.h>
 #include "tcutil.h"
 
 using Core;
 using List;
 using String;
 using Position;
+using Stdio;
 namespace Absyn;
 
 // return a negative, zero, or positive int according to whether the

@@ -48,40 +48,6 @@ extern size_t GC_get_free_bytes();
 extern size_t GC_get_total_bytes();
 #endif;
 
-struct _tagged_arr xprintf(char *fmt, ...) {
-  char my_buff[1];
-  va_list argp;
-  int len1;
-  int len2;
-  struct _tagged_arr result;
-
-  va_start(argp,fmt);
-  len1 = vsnprintf(my_buff,1,fmt,argp); // how much space do we need
-  va_end(argp);
-
-  // Presumably the Cyclone typechecker rules this out, but check anyway
-  if (len1 < 0) {
-    fprintf(stderr,"internal error: encoding error in xprintf\n");
-    exit(1);
-  }
-
-  // Careful: we need space for a trailing zero (???)
-  result.base     = (char *)GC_malloc_atomic(len1+1);
-  result.base[len1] = '\0';
-  result.curr     = result.base;
-  result.last_plus_one = result.base + (len1+1);
-
-  va_start(argp,fmt);
-  len2 = vsnprintf(result.curr,len1+1,fmt,argp);
-  va_end(argp);
-
-  if (len1 != len2) {
-    fprintf(stderr, "internal error: encoding error in xprintf\n");
-    exit(1);
-  }
-  return result;
-}
-
 // Need one of these per thread (we don't have threads)
 static struct _RuntimeStack *_current_handler = NULL;
 
@@ -154,6 +120,10 @@ void throw(void* e) { // FIX: use struct _xtunion_struct *  ??
 
 int _throw(void* e) { // FIX: use struct _xtunion_struct *  ??
   throw(e);
+}
+
+int _throw_null() {
+  throw(Cyc_Null_Exception);
 }
 
 

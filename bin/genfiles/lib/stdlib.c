@@ -90,36 +90,33 @@ name)));} int Cyc_Stdlib_putenv( struct _tagged_arr s){ return putenv(
 string_to_Cstring( s));} int Cyc_Stdlib_setenv( struct _tagged_arr s, struct
 _tagged_arr v, int overwrite){ return setenv( string_to_Cstring( s),
 string_to_Cstring( v), overwrite);} static void Cyc_Stdlib_check_valid_cstring(
-struct _tagged_arr s, struct _tagged_arr msg){ if( s.curr ==(( struct
-_tagged_arr) _tag_arr( 0u, 0u, 0u)).curr){( int) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct*
-_temp0=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
-_temp0[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp1; _temp1.tag= Cyc_Core_InvalidArg;
-_temp1.f1=( struct _tagged_arr)({ struct _tagged_arr _temp2= msg; xprintf("%.*s: null pointer",
-_get_arr_size( _temp2, 1u), _temp2.curr);}); _temp1;}); _temp0;}));}{ int
-found_zero= 0;{ int i=( int)( _get_arr_size( s, sizeof( unsigned char)) - 1);
-for( 0; i >= 0; i --){ if(*(( const unsigned char*) _check_unknown_subscript( s,
-sizeof( unsigned char), i)) =='\000'){ found_zero= 1; break;}}} if( ! found_zero){(
-int) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct* _temp3=( struct Cyc_Core_InvalidArg_struct*)
-GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp3[ 0]=({ struct Cyc_Core_InvalidArg_struct
-_temp4; _temp4.tag= Cyc_Core_InvalidArg; _temp4.f1=( struct _tagged_arr)({
-struct _tagged_arr _temp5= msg; xprintf("%.*s: not a C string", _get_arr_size(
-_temp5, 1u), _temp5.curr);}); _temp4;}); _temp3;}));}}} double Cyc_Stdlib_strtod(
+struct _tagged_arr s){ if( s.curr ==(( struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr){(
+int) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct* _temp0=( struct Cyc_Core_InvalidArg_struct*)
+GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp0[ 0]=({ struct Cyc_Core_InvalidArg_struct
+_temp1; _temp1.tag= Cyc_Core_InvalidArg; _temp1.f1= _tag_arr("strtox null pointer",
+sizeof( unsigned char), 20u); _temp1;}); _temp0;}));}{ int found_zero= 0;{ int i=(
+int)( _get_arr_size( s, sizeof( unsigned char)) - 1); for( 0; i >= 0; i --){ if(*((
+const unsigned char*) _check_unknown_subscript( s, sizeof( unsigned char), i))
+=='\000'){ found_zero= 1; break;}}} if( ! found_zero){( int) _throw(( void*)({
+struct Cyc_Core_InvalidArg_struct* _temp2=( struct Cyc_Core_InvalidArg_struct*)
+GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp2[ 0]=({ struct Cyc_Core_InvalidArg_struct
+_temp3; _temp3.tag= Cyc_Core_InvalidArg; _temp3.f1= _tag_arr("strtox: not a C string",
+sizeof( unsigned char), 23u); _temp3;}); _temp2;}));}}} double Cyc_Stdlib_strtod(
 struct _tagged_arr nptr, struct _tagged_arr* endptr){ Cyc_Stdlib_check_valid_cstring(
-nptr, _tag_arr("strtod", sizeof( unsigned char), 7u));{ unsigned char* c=
-underlying_Cstring( nptr); unsigned char* e= endptr == 0? 0: c; double d= strtod(
-c,( unsigned char**)& e); if( endptr != 0){ int n=( int)(( unsigned int) e -(
-unsigned int) c);*(( struct _tagged_arr*) _check_null( endptr))=
-_tagged_arr_plus( nptr, sizeof( unsigned char), n);} return d;}} int Cyc_Stdlib_strtol(
-struct _tagged_arr n, struct _tagged_arr* endptr, int base){ Cyc_Stdlib_check_valid_cstring(
-n, _tag_arr("strtol", sizeof( unsigned char), 7u));{ unsigned char* c=
-underlying_Cstring( n); unsigned char* e= endptr == 0? 0: c; int r= strtol( c,(
-unsigned char**)& e, base); if( endptr != 0){ int m=( int)(( unsigned int) e -(
-unsigned int) c);*(( struct _tagged_arr*) _check_null( endptr))=
-_tagged_arr_plus( n, sizeof( unsigned char), m);} return r;}} unsigned int Cyc_Stdlib_strtoul(
-struct _tagged_arr n, struct _tagged_arr* endptr, int base){ Cyc_Stdlib_check_valid_cstring(
-n, _tag_arr("strtoul", sizeof( unsigned char), 8u));{ unsigned char* c=
-underlying_Cstring( n); unsigned char* e= endptr == 0? 0: c; unsigned int r=
-strtoul( c,( unsigned char**)& e, base); if( endptr != 0){ int m=( int)((
-unsigned int) e -( unsigned int) c);*(( struct _tagged_arr*) _check_null( endptr))=
-_tagged_arr_plus( n, sizeof( unsigned char), m);} return r;}} void Cyc_Stdlib_unsetenv(
-struct _tagged_arr s){ unsetenv( string_to_Cstring( s));}
+nptr);{ unsigned char* c= underlying_Cstring( nptr); unsigned char* e= endptr ==
+0? 0: c; double d= strtod( c,( unsigned char**)& e); if( endptr != 0){ int n=(
+int)(( unsigned int) e -( unsigned int) c);*(( struct _tagged_arr*) _check_null(
+endptr))= _tagged_arr_plus( nptr, sizeof( unsigned char), n);} return d;}} int
+Cyc_Stdlib_strtol( struct _tagged_arr n, struct _tagged_arr* endptr, int base){
+Cyc_Stdlib_check_valid_cstring( n);{ unsigned char* c= underlying_Cstring( n);
+unsigned char* e= endptr == 0? 0: c; int r= strtol( c,( unsigned char**)& e,
+base); if( endptr != 0){ int m=( int)(( unsigned int) e -( unsigned int) c);*((
+struct _tagged_arr*) _check_null( endptr))= _tagged_arr_plus( n, sizeof(
+unsigned char), m);} return r;}} unsigned int Cyc_Stdlib_strtoul( struct
+_tagged_arr n, struct _tagged_arr* endptr, int base){ Cyc_Stdlib_check_valid_cstring(
+n);{ unsigned char* c= underlying_Cstring( n); unsigned char* e= endptr == 0? 0:
+c; unsigned int r= strtoul( c,( unsigned char**)& e, base); if( endptr != 0){
+int m=( int)(( unsigned int) e -( unsigned int) c);*(( struct _tagged_arr*)
+_check_null( endptr))= _tagged_arr_plus( n, sizeof( unsigned char), m);} return
+r;}} void Cyc_Stdlib_unsetenv( struct _tagged_arr s){ unsetenv(
+string_to_Cstring( s));}

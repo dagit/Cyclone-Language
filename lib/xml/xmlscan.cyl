@@ -32,6 +32,7 @@ using Core;
 using List;
 using XmlParse;
 using Lexing;
+using Stdio;
   
 namespace XmlScan {
 string_t token_string = null;

@@ -143,5 +143,65 @@ extern int file_string_read(FILE @fd, mstring_t dest, int dest_offset,
 			    int max_count);
 extern int file_string_write(FILE @fd, const char?`r src, int src_offset, 
 			     int max_count);
+
+//////////////////////////////////////////////////////////////
+// printf and friends:  see printf.cyc
+//////////////////////////////////////////////////////////////
+// vararg union for printf, fprintf, sprintf 
+extern tunion PrintArg<`r::R> {
+  String_pa(const char ?`r);
+  Int_pa(unsigned long);
+  Double_pa(double);
+  ShortPtr_pa(short @`r);
+  IntPtr_pa(unsigned long @`r);
+};
+typedef tunion `r PrintArg<`r> parg_t<`r>;
+
+// Printing functions behave as with C
+extern int fprintf(FILE @,const char ?`r fmt, ...`r1 inject parg_t<`r2>);
+extern int printf(const char ?`r fmt, ...`r1 inject parg_t<`r2>);
+extern int sprintf(char ?`r1 s, const char ?`r2 fmt, ...`r3 inject parg_t<`r4>);
+// Similar to sprintf but allocates a result of the right size
+extern char ? xprintf(const char ?`r2 fmt, ...`r3 inject parg_t<`r4>);
+extern char ?`r1 rxprintf(region_t<`r1>, const char ?`r2 fmt, ...`r3 inject parg_t<`r4> ap);
+
+// Same as above but suitable for calling from a user's vararg function
+extern int vfprintf(FILE @,const char ?`r fmt, parg_t<`r2> ? `r1 ap);
+extern int vprintf(const char ?`r fmt, parg_t<`r2> ? `r1);
+extern int vsprintf(char ?`r1 s, const char ?`r2 fmt, parg_t<`r4> ? `r3);
+extern char ?`r1 vrxprintf(region_t<`r1> r1, const char ?`r2 fmt, 
+                           parg_t<`r4> ? `r3 ap);
+
+//////////////////////////////////////////////////////////////
+// scanf and friends:  see scanf.cyc
+//////////////////////////////////////////////////////////////
+// vararg tunion for scanf, fscanf, sscanf, etc.
+extern tunion ScanfArg<`r::R> {
+  ShortPtr_sa(short @`r);
+  UShortPtr_sa(unsigned short @`r);
+  IntPtr_sa(int @`r);
+  UIntPtr_sa(unsigned int @`r);
+  StringPtr_sa(char ?`r);
+  DoublePtr_sa(double @`r);
+  FloatPtr_sa(float @`r);
+};
+typedef tunion `r2 ScanfArg<`r1> sarg_t<`r1,`r2>;
+
+// Scanning functions behave as in C...
+extern int scanf(const char ?`r1 fmt, ...`r2 inject sarg_t<`r3,`r4>);
+extern int fscanf(FILE @ stream, const char ?`r1 fmt, 
+                     ...`r2 inject sarg_t<`r3,`r4>);
+extern int sscanf(const char ?`r src, const char ?`r1 fmt, 
+                     ...`r2 inject sarg_t<`r3,`r4>);
+
+
+// Same as above but suitable for calling from a user's vararg function
+extern int vfscanf(FILE @ stream, const char ?`r1 fmt, 
+                   sarg_t<`r3,`r4> ? `r2);
+extern int vsscanf(const char ?`r src, const char ?`r1 fmt, 
+                   sarg_t<`r3,`r4> ? `r2);
+
+
+
 }
-#endif
+#endif // defined _STDIO_H_

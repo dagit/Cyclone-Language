@@ -24,6 +24,7 @@
 #include <list.h>
 #include <dict.h>
 #include <string.h>
+#include <stdio.h>
 #include "tcutil.h"
 #include "absynpp.h"
 
@@ -32,6 +33,7 @@ using List;
 using Absyn;
 using Tcutil;
 using String;
+using Stdio;
 using Absynpp;
 using Position;
 

@@ -35,23 +35,41 @@ struct Cyc_Dict_Dict* d, int(* f)( void*), int sz, struct Cyc_List_List*);
 extern struct Cyc_List_List* Cyc_Bitvec_to_sorted_list( struct _tagged_arr bvec,
 int sz); extern void Cyc_Bitvec_clear_all( struct _tagged_arr); extern void Cyc_Bitvec_set_all(
 struct _tagged_arr); extern int Cyc_Bitvec_all_set( struct _tagged_arr bvec, int
-sz); extern void Cyc_Bitvec_print_bvec( struct _tagged_arr bvec); int Cyc_Bitvec_get(
-struct _tagged_arr bvec, int pos){ int word= pos >> 5; int offset= pos & 31;
-return(*(( int*) _check_unknown_subscript( bvec, sizeof( int), word)) >> offset
-& 1) == 1;} void Cyc_Bitvec_set( struct _tagged_arr bvec, int pos){ int word=
-pos >> 5; int offset= pos & 31;*(( int*) _check_unknown_subscript( bvec, sizeof(
-int), word))=*(( int*) _check_unknown_subscript( bvec, sizeof( int), word)) | 1
-<< offset;} void Cyc_Bitvec_clear( struct _tagged_arr bvec, int pos){ int word=
-pos >> 5; int offset= pos & 31;*(( int*) _check_unknown_subscript( bvec, sizeof(
-int), word))=*(( int*) _check_unknown_subscript( bvec, sizeof( int), word)) & ~(
-1 << offset);} int Cyc_Bitvec_get_and_set( struct _tagged_arr bvec, int pos){
-int word= pos >> 5; int offset= pos & 31; int slot=*(( int*)
-_check_unknown_subscript( bvec, sizeof( int), word)); int ans=( slot >> offset &
-1) == 1; if( ! ans){*(( int*) _check_unknown_subscript( bvec, sizeof( int), word))=
-slot | 1 << offset;} return ans;} void Cyc_Bitvec_union_two( struct _tagged_arr
-dest, struct _tagged_arr src1, struct _tagged_arr src2){ int len=( int)
-_get_arr_size( dest, sizeof( int)); int i= 0; for( 0; i < len; ++ i){*(( int*)
-_check_unknown_subscript( dest, sizeof( int), i))=*(( int*)
+sz); extern void Cyc_Bitvec_print_bvec( struct _tagged_arr bvec); struct Cyc_Stdio___sFILE;
+extern unsigned char Cyc_Stdio_FileCloseError[ 19u]; extern unsigned char Cyc_Stdio_FileOpenError[
+18u]; struct Cyc_Stdio_FileOpenError_struct{ unsigned char* tag; struct
+_tagged_arr f1; } ; static const int Cyc_Stdio_String_pa= 0; struct Cyc_Stdio_String_pa_struct{
+int tag; struct _tagged_arr f1; } ; static const int Cyc_Stdio_Int_pa= 1; struct
+Cyc_Stdio_Int_pa_struct{ int tag; unsigned int f1; } ; static const int Cyc_Stdio_Double_pa=
+2; struct Cyc_Stdio_Double_pa_struct{ int tag; double f1; } ; static const int
+Cyc_Stdio_ShortPtr_pa= 3; struct Cyc_Stdio_ShortPtr_pa_struct{ int tag; short*
+f1; } ; static const int Cyc_Stdio_IntPtr_pa= 4; struct Cyc_Stdio_IntPtr_pa_struct{
+int tag; unsigned int* f1; } ; extern int Cyc_Stdio_printf( struct _tagged_arr
+fmt, struct _tagged_arr); static const int Cyc_Stdio_ShortPtr_sa= 0; struct Cyc_Stdio_ShortPtr_sa_struct{
+int tag; short* f1; } ; static const int Cyc_Stdio_UShortPtr_sa= 1; struct Cyc_Stdio_UShortPtr_sa_struct{
+int tag; unsigned short* f1; } ; static const int Cyc_Stdio_IntPtr_sa= 2; struct
+Cyc_Stdio_IntPtr_sa_struct{ int tag; int* f1; } ; static const int Cyc_Stdio_UIntPtr_sa=
+3; struct Cyc_Stdio_UIntPtr_sa_struct{ int tag; unsigned int* f1; } ; static
+const int Cyc_Stdio_StringPtr_sa= 4; struct Cyc_Stdio_StringPtr_sa_struct{ int
+tag; struct _tagged_arr f1; } ; static const int Cyc_Stdio_DoublePtr_sa= 5;
+struct Cyc_Stdio_DoublePtr_sa_struct{ int tag; double* f1; } ; static const int
+Cyc_Stdio_FloatPtr_sa= 6; struct Cyc_Stdio_FloatPtr_sa_struct{ int tag; float*
+f1; } ; int Cyc_Bitvec_get( struct _tagged_arr bvec, int pos){ int word= pos >>
+5; int offset= pos & 31; return(*(( int*) _check_unknown_subscript( bvec,
+sizeof( int), word)) >> offset & 1) == 1;} void Cyc_Bitvec_set( struct
+_tagged_arr bvec, int pos){ int word= pos >> 5; int offset= pos & 31;*(( int*)
+_check_unknown_subscript( bvec, sizeof( int), word))=*(( int*)
+_check_unknown_subscript( bvec, sizeof( int), word)) | 1 << offset;} void Cyc_Bitvec_clear(
+struct _tagged_arr bvec, int pos){ int word= pos >> 5; int offset= pos & 31;*((
+int*) _check_unknown_subscript( bvec, sizeof( int), word))=*(( int*)
+_check_unknown_subscript( bvec, sizeof( int), word)) & ~( 1 << offset);} int Cyc_Bitvec_get_and_set(
+struct _tagged_arr bvec, int pos){ int word= pos >> 5; int offset= pos & 31; int
+slot=*(( int*) _check_unknown_subscript( bvec, sizeof( int), word)); int ans=(
+slot >> offset & 1) == 1; if( ! ans){*(( int*) _check_unknown_subscript( bvec,
+sizeof( int), word))= slot | 1 << offset;} return ans;} void Cyc_Bitvec_union_two(
+struct _tagged_arr dest, struct _tagged_arr src1, struct _tagged_arr src2){ int
+len=( int) _get_arr_size( dest, sizeof( int)); int i= 0; for( 0; i < len; ++ i){*((
+int*) _check_unknown_subscript( dest, sizeof( int), i))=*(( int*)
 _check_unknown_subscript( src1, sizeof( int), i)) |*(( int*)
 _check_unknown_subscript( src2, sizeof( int), i));}} void Cyc_Bitvec_intersect_two(
 struct _tagged_arr dest, struct _tagged_arr src1, struct _tagged_arr src2){ int
@@ -106,4 +124,13 @@ words; i ++){ if(*(( int*) _check_unknown_subscript( bvec, sizeof( int), i)) !=
 -1){ return 0;}}}{ int i= words * 32; for( 0; i < sz; i ++){ if( ! Cyc_Bitvec_get(
 bvec, i)){ return 0;}}} return 1;} void Cyc_Bitvec_print_bvec( struct
 _tagged_arr bvec){{ int i= 0; for( 0; i < 32 * _get_arr_size( bvec, sizeof( int));
-++ i){ printf("%d", Cyc_Bitvec_get( bvec, i)? 1: 0);}} printf("\n");}
+++ i){({ int(* _temp14)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_printf;
+struct _tagged_arr _temp18= _tag_arr("%d", sizeof( unsigned char), 3u); struct
+Cyc_Stdio_Int_pa_struct _temp19; _temp19.tag= Cyc_Stdio_Int_pa; _temp19.f1=(
+unsigned int)( Cyc_Bitvec_get( bvec, i)? 1: 0);{ void* _temp17=( void*)& _temp19;
+void* _temp15[ 1u]={ _temp17}; struct _tagged_arr _temp16={( void*) _temp15,(
+void*) _temp15,( void*)( _temp15 + 1u)}; _temp14( _temp18, _temp16);}});}}({ int(*
+_temp20)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_printf; struct
+_tagged_arr _temp23= _tag_arr("\n", sizeof( unsigned char), 2u); void* _temp21[
+0u]={}; struct _tagged_arr _temp22={( void*) _temp21,( void*) _temp21,( void*)(
+_temp21 + 0u)}; _temp20( _temp23, _temp22);});}

@@ -118,8 +118,6 @@ static $(string_t,short) rw_array[] = {
   $("fill", FILL),
   $("float", FLOAT),
   $("for", FOR),
-  $("fprintf", FPRINTF),
-  $("fscanf", FSCANF),
   $("goto", GOTO),
   $("if", IF),
   $("inline", INLINE),
@@ -131,7 +129,6 @@ static $(string_t,short) rw_array[] = {
   $("new", NEW),
   $("null", NULL_kw),
   $("offsetof", OFFSETOF),
-  $("printf", PRINTF),
   $("region_t", REGION_T),
   $("region", REGION),
   $("register", REGISTER),
@@ -139,12 +136,10 @@ static $(string_t,short) rw_array[] = {
   $("return", RETURN),
   $("rmalloc", RMALLOC),
   $("rnew", RNEW),
-  $("scanf", SCANF),
   $("short", SHORT),
   $("signed", SIGNED),
   $("sizeof", SIZEOF),
   $("splice", SPLICE),
-  $("sscanf", SSCANF),
   $("static", STATIC),
   $("struct", STRUCT),
   $("switch", SWITCH),
@@ -158,8 +153,7 @@ static $(string_t,short) rw_array[] = {
   $("void", VOID),
   $("volatile", VOLATILE),
   $("while", WHILE),
-  $("xtunion", XTUNION),
-  $("xprintf", XPRINTF)
+  $("xtunion", XTUNION)
 };
 
 ///////////////////////// Trie manipulation ///////////////////////

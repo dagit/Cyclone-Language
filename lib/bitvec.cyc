@@ -28,6 +28,9 @@
 // If we ever really care about middle-end speed, maybe this should be in
 // the same module as the middle end so as to promote inlining.
 #include <bitvec.h>
+#include <stdio.h>
+
+using Stdio;
 
 namespace Bitvec {
 // POS_TO_WORD is division by 32

@@ -37,10 +37,25 @@ d); extern int Cyc_Dict_forall_intersect( int(* f)( void*, void*, void*), struct
 Cyc_Dict_Dict* d1, struct Cyc_Dict_Dict* d2); struct Cyc_Stdio___sFILE; extern
 unsigned char Cyc_Stdio_FileCloseError[ 19u]; extern unsigned char Cyc_Stdio_FileOpenError[
 18u]; struct Cyc_Stdio_FileOpenError_struct{ unsigned char* tag; struct
-_tagged_arr f1; } ; extern int Cyc_String_strcmp( struct _tagged_arr s1, struct
-_tagged_arr s2); extern int Cyc_String_zstrptrcmp( struct _tagged_arr*, struct
-_tagged_arr*); struct Cyc_Lineno_Pos{ struct _tagged_arr logical_file; struct
-_tagged_arr line; int line_no; int col; } ; extern unsigned char Cyc_Position_Exit[
+_tagged_arr f1; } ; static const int Cyc_Stdio_String_pa= 0; struct Cyc_Stdio_String_pa_struct{
+int tag; struct _tagged_arr f1; } ; static const int Cyc_Stdio_Int_pa= 1; struct
+Cyc_Stdio_Int_pa_struct{ int tag; unsigned int f1; } ; static const int Cyc_Stdio_Double_pa=
+2; struct Cyc_Stdio_Double_pa_struct{ int tag; double f1; } ; static const int
+Cyc_Stdio_ShortPtr_pa= 3; struct Cyc_Stdio_ShortPtr_pa_struct{ int tag; short*
+f1; } ; static const int Cyc_Stdio_IntPtr_pa= 4; struct Cyc_Stdio_IntPtr_pa_struct{
+int tag; unsigned int* f1; } ; static const int Cyc_Stdio_ShortPtr_sa= 0; struct
+Cyc_Stdio_ShortPtr_sa_struct{ int tag; short* f1; } ; static const int Cyc_Stdio_UShortPtr_sa=
+1; struct Cyc_Stdio_UShortPtr_sa_struct{ int tag; unsigned short* f1; } ; static
+const int Cyc_Stdio_IntPtr_sa= 2; struct Cyc_Stdio_IntPtr_sa_struct{ int tag;
+int* f1; } ; static const int Cyc_Stdio_UIntPtr_sa= 3; struct Cyc_Stdio_UIntPtr_sa_struct{
+int tag; unsigned int* f1; } ; static const int Cyc_Stdio_StringPtr_sa= 4;
+struct Cyc_Stdio_StringPtr_sa_struct{ int tag; struct _tagged_arr f1; } ; static
+const int Cyc_Stdio_DoublePtr_sa= 5; struct Cyc_Stdio_DoublePtr_sa_struct{ int
+tag; double* f1; } ; static const int Cyc_Stdio_FloatPtr_sa= 6; struct Cyc_Stdio_FloatPtr_sa_struct{
+int tag; float* f1; } ; extern int Cyc_String_strcmp( struct _tagged_arr s1,
+struct _tagged_arr s2); extern int Cyc_String_zstrptrcmp( struct _tagged_arr*,
+struct _tagged_arr*); struct Cyc_Lineno_Pos{ struct _tagged_arr logical_file;
+struct _tagged_arr line; int line_no; int col; } ; extern unsigned char Cyc_Position_Exit[
 9u]; struct Cyc_Position_Segment; static const int Cyc_Position_Lex= 0; static
 const int Cyc_Position_Parse= 1; static const int Cyc_Position_Elab= 2; struct
 Cyc_Position_Error{ struct _tagged_arr source; struct Cyc_Position_Segment* seg;

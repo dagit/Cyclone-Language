@@ -59,6 +59,7 @@ using Absyn;
 using List;
 using CfFlowInfo;
 using NewControlFlow;
+using Stdio;
 namespace CfAbsexp;
 
 xtunion exn {BadAbsexp};

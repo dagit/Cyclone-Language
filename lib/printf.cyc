@@ -1,0 +1,1009 @@
+/* 
+Copyright (C) 1993 Free Software Foundation
+
+This file is part of the GNU IO Library.  This library is free
+software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the
+Free Software Foundation; either version 2, or (at your option)
+any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this library; see the file COPYING.  If not, write to the Free
+Software Foundation, 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+As a special exception, if you link this library with files
+compiled with a GNU compiler to produce an executable, this does not cause
+the resulting executable to be covered by the GNU General Public License.
+This exception does not however invalidate any other reasons why
+the executable file might be covered by the GNU General Public License. */
+
+/*
+ * Copyright (c) 1990 Regents of the University of California.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms are permitted
+ * provided that the above copyright notice and this paragraph are
+ * duplicated in all such forms and that any documentation,
+ * advertising materials, and other materials related to such
+ * distribution and use acknowledge that the software was developed
+ * by the University of California, Berkeley.  The name of the
+ * University may not be used to endorse or promote products derived
+ * from this software without specific prior written permission.
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
+/* Modified for Cyclone use */
+#include <core.h>
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#include <stdlib.h>
+#include <math.h>
+//#include <float.h>
+
+using Core;
+using Stdio;
+using String;
+using Ctype;
+using Stdlib;
+using Math;
+namespace Stdio;
+
+// vararg union for printf, fprintf, sprintf 
+tunion PrintArg<`r::R> {
+  String_pa(const char ?`r);
+  Int_pa(unsigned long);
+  //  Float_pa(float);
+  Double_pa(double);
+  ShortPtr_pa(short @`r);
+  IntPtr_pa(unsigned long @`r);
+};
+
+static string_t parg2string(parg_t<`r> x) {
+  switch (x) {
+  case &String_pa(_): return "string";
+  case &Int_pa(_): return "int"; 
+    // case &Float_pa(_): return "float";
+  case &Double_pa(_): return "double";
+  case &ShortPtr_pa(_): return "short *";
+  case &IntPtr_pa(_): return "unsigned long *";
+  }
+}
+
+static `a badarg(string_t s) {
+  fprintf(stderr,"%s\n",s);
+  return throw new InvalidArg(s);
+}
+
+// Extract an "int" vararg.
+static int va_arg_int(parg_t<`r>?`r2 ap) {
+  switch (*ap) {
+  case &Int_pa(i): return (int)i;
+  default: return badarg("printf expected int");
+  }
+}
+
+static long va_arg_long(parg_t<`r>?`r2 ap) {
+  switch (*ap) {
+  case &Int_pa(i): return (long)i;
+  default: return badarg("printf expected int");
+  }
+}
+
+static unsigned long va_arg_ulong(parg_t<`r>?`r2 ap) {
+  switch (*ap) {
+  case &Int_pa(i): return (unsigned long)i;
+  default: return badarg("printf expected int");
+  }
+}
+
+static unsigned long va_arg_uint(parg_t<`r>?`r2 ap) {
+  switch (*ap) {
+  case &Int_pa(i): return (unsigned int)i;
+  default: return badarg("printf expected int");
+  }
+}
+
+// Extract a "double" vararg.
+static double va_arg_double(parg_t<`r>?`r2 ap) {
+  switch (*ap) {
+  case &Double_pa(d): return d;
+    // case &Float_pa(f): return (double)f;
+  default: throw badarg(xprintf("printf expected double but found %s",
+                                parg2string(*ap)));
+  }
+}
+
+// Extract a "short pointer" vararg.
+static short @`r va_arg_short_ptr(parg_t<`r>?`r2 ap) {
+  switch (*ap) {
+  case &ShortPtr_pa(p): return p;
+  default: throw badarg("printf expected short pointer"); 
+  }
+}
+
+// Extract an "int pointer" vararg.
+static unsigned long @`r va_arg_int_ptr(parg_t<`r>?`r2 ap) {
+  switch (*ap) {
+  case &IntPtr_pa(p): return p;
+  default: throw badarg("printf expected int pointer");
+  }
+}
+
+// Extract a "string" vararg.
+static const char ?`r va_arg_string(parg_t<`r>?`r2 ap) {
+  switch (*ap) {
+  case &String_pa(s): return s;
+  default: throw badarg("printf expected string");
+  }
+}
+
+
+
+
+#if defined(LIBC_SCCS) && !defined(lint)
+static char sccsid[] = "%W% (Berkeley) %G%";
+#endif /* LIBC_SCCS and not lint */
+
+/*
+ * Actual printf innards.
+ *
+ * This code is large and complicated...
+ */
+
+int __cvt_double(double number, int prec, int flags, int @`r1 signp, int fmtch, char ?`r2 startp, char ?`r2 endp);
+
+/* 11-bit exponent (VAX G floating point) is 308 decimal digits */
+#define MAXEXP          308
+/* 128 bit fraction takes up 39 decimal digits; max reasonable precision */
+#define MAXFRACT        39
+#define	BUF		(MAXEXP+MAXFRACT+1)	/* + decimal point */
+#define	DEFPREC		6
+//extern double modf (double, double*);
+
+/*
+ * Macros for converting digits to letters and vice versa
+ */
+#define	to_digit(c)	((c) - '0')
+#define is_digit(c)	((unsigned)to_digit(c) <= 9)
+#define	to_char(n)	((n) + '0')
+
+/*
+ * Flags used during conversion.
+ */
+#define	LONGINT		0x01		/* long integer */
+#define	LONGDBL		0x02		/* long double; unimplemented */
+#define	SHORTINT	0x04		/* short integer */
+#define	ALT		0x08		/* alternate form */
+#define	LADJUST		0x10		/* left adjustment */
+#define	ZEROPAD		0x20		/* zero (as opposed to blank) pad */
+#define	HEXPREFIX	0x40		/* add 0x or 0X prefix */
+
+
+enum BASE { OCT, DEC, HEX }; 
+typedef enum BASE base_t;
+
+/* Print out a string up to howmany characters using the given io closure.
+ * Returns a count of how many characters were successfully spit out.
+ */
+static int _IO_sputn(int (@ioputc)(int,`a), `a ioputc_env, const char ?`r s, 
+                     int howmany) {
+  int i = 0;
+  while (i < howmany) {
+    if (s.size == 0 || ioputc(*s,ioputc_env) == EOF) return i;
+    s++;
+    i++;
+  }
+  return i;
+}
+
+/* Print out n=howmany copies of the character c using the given io closure.
+ * Returns a count of how many characters were successfully spit out.
+ */
+static int _IO_padn(int (@ioputc)(int,`a), `a ioputc_env, char c, int howmany)
+{
+  int i = 0;
+  while (i < howmany) {
+    if (ioputc(c,ioputc_env) == EOF) return i;
+    i++;
+  }
+  return i;
+}
+
+/* like strchr but works only up to max characters */
+static const char ?`r1 memchr(const char ?`r1 s, char c, int n) {
+  int sz = s.size;
+  n = (n < sz) ? n : sz;
+  for (; n != 0; n--, s++) {
+    if (*s == c) return s;
+  }
+  return null;
+}
+
+/* Generic printf function.  ioputc and ioputc_env form a closure for doing
+ * the actual character-level printing (either to a FILE or string).  fmt0
+ * is the format string, and ap is the array of printf arguments. 
+ */
+int _IO_vfprintf (int (@ioputc)(int,`a), `a ioputc_env, 
+                  const char ?`r1 fmt0, 
+                  parg_t<`r2> ? `r3 ap)
+{
+	register const char?`r1 fmt; /* format string */
+	register int ch;	/* character from fmt */
+	register int n;		/* handy integer (short term usage) */
+        /* cp is a handy char pointer (short term usage) for a local buffer */
+	register char ?`_IO_vfprintf cp = null;	
+        /* cp2 is a handy char pointer (short term usage) for the case when
+         * the argument is a string -- that lives in a different region. */
+	register const char ?`r2 cp2 = null;
+        /* the flag use_cp2 controls whether or not we PRINT from cp or cp2 */
+        bool use_cp2; 
+	const char ?`r1 fmark;	/* for remembering a place in fmt */
+	register int flags;	/* flags as above */
+	int ret;		/* return value accumulator */
+	int width;		/* width from format (%8d), or 0 */
+	int prec;		/* precision from format (%.3d), or -1 */
+	char sign;		/* sign prefix (' ', '+', '-', or \0) */
+	int softsign = 0;	/* temporary negative sign for floats */
+	double _double;		/* double precision arguments %[eEfgG] */
+	int fpprec;		/* `extra' floating precision in [eEfgG] */
+	unsigned long _ulong;	/* integer arguments %[diouxX] */
+	int dprec;		/* a copy of prec if [diouxX], 0 otherwise */
+	int dpad;		/* extra 0 padding needed for integers */
+	int fieldsz;		/* field size expanded by sign, dpad etc */
+	/* The initialization of 'size' is to suppress a warning that
+	   'size' might be used unitialized.  It seems gcc can't
+	   quite grok this spaghetti code ... */
+	int size = 0;		/* size of converted field or string */
+        /* space for %c, %[diouxX], %[eEfgG] */
+	char buf[BUF] = {for i < BUF : '\0'};
+	char ox[2] = {'\0','\0'}; /* space for 0x hex-prefix */
+        base_t base;            /* base for [diouxX] conversion */
+	/*
+	 * BEWARE, these `goto error' on error, and PAD uses `n'.
+	 */
+#define	PRINT(ptr, len) \
+  do { if (_IO_sputn(ioputc,ioputc_env,ptr,len) != len) goto error; } while (0)
+#define PAD_SP(howmany) if (_IO_padn(ioputc,ioputc_env,' ',howmany) < (howmany)) goto error;
+#define PAD_0(howmany) if (_IO_padn(ioputc,ioputc_env,'0',howmany) < (howmany)) goto error;
+
+	/*
+	 * To extend shorts properly, we need both signed and unsigned
+	 * argument extraction methods.
+	 */
+#define	SARG() \
+	(flags&LONGINT ? va_arg_long(ap) : \
+	    flags&SHORTINT ? (long)(short)va_arg_int(ap) : \
+	    (long)va_arg_int(ap))
+#define	UARG() \
+	(flags&LONGINT ? va_arg_ulong(ap) : \
+	    flags&SHORTINT ? (unsigned long)(unsigned short)va_arg_int(ap) : \
+	    (unsigned long)va_arg_uint(ap))
+
+	fmt = fmt0;
+	ret = 0;
+
+	/*
+	 * Scan the format for conversions (`%' character).
+	 */
+	for (;;) {
+		for (fmark = fmt; (ch = *fmt) != '\0' && ch != '%'; fmt++)
+			/* void */;
+		if ((n = fmt - fmark) != 0) {
+			PRINT(fmark, n);
+			ret += n;
+		}
+		if (ch == '\0')
+			goto done;
+		fmt++;		/* skip over '%' */
+
+		flags = 0;
+		dprec = 0;
+		fpprec = 0;
+		width = 0;
+		prec = -1;
+		sign = '\0';
+
+rflag:		ch = *fmt++;
+reswitch:	use_cp2 = false;
+                switch (ch) {
+		case ' ':
+			/*
+			 * ``If the space and + flags both appear, the space
+			 * flag will be ignored.''
+			 *	-- ANSI X3J11
+			 */
+			if (!sign)
+				sign = ' ';
+			goto rflag;
+		case '#':
+			flags |= ALT;
+			goto rflag;
+		case '*':
+			/*
+			 * ``A negative field width argument is taken as a
+			 * - flag followed by a positive field width.''
+			 *	-- ANSI X3J11
+			 * They don't exclude field widths read from args.
+			 */
+                        width = va_arg_int(ap); ap++;
+			if (width >= 0)
+				goto rflag;
+			width = -width;
+			fallthru;
+		case '-':
+			flags |= LADJUST;
+			flags &= ~ZEROPAD; /* '-' disables '0' */
+			goto rflag;
+		case '+':
+			sign = '+';
+			goto rflag;
+		case '.':
+			if ((ch = *fmt++) == '*') {
+                                n = va_arg_int(ap); ap++;
+				prec = n < 0 ? -1 : n;
+				goto rflag;
+			}
+			n = 0;
+			while (is_digit(ch)) {
+				n = 10 * n + to_digit(ch);
+				ch = *fmt++;
+			}
+			prec = n < 0 ? -1 : n;
+			goto reswitch;
+		case '0':
+			/*
+			 * ``Note that 0 is taken as a flag, not as the
+			 * beginning of a field width.''
+			 *	-- ANSI X3J11
+			 */
+			if (!(flags & LADJUST))
+			    flags |= ZEROPAD; /* '-' disables '0' */
+			goto rflag;
+                case '1': fallthru;
+                case '2': fallthru;
+                case '3': fallthru;
+                case '4': fallthru;
+		case '5': fallthru;
+                case '6': fallthru;
+                case '7': fallthru;
+                case '8': fallthru;
+                case '9':
+			n = 0;
+			do {
+				n = 10 * n + to_digit(ch);
+				ch = *fmt++;
+			} while (is_digit(ch));
+			width = n;
+			goto reswitch;
+		case 'L':
+			flags |= LONGDBL;
+			goto rflag;
+		case 'h':
+			flags |= SHORTINT;
+			goto rflag;
+		case 'l':
+			flags |= LONGINT;
+			goto rflag;
+		case 'c':
+                        cp = buf;
+                        *cp = (char)va_arg_int(ap); ap++;
+			size = 1;
+			sign = '\0';
+			break;
+		case 'D':
+			flags |= LONGINT;
+			fallthru;
+		case 'd': fallthru;
+		case 'i':
+                        _ulong = SARG(); ap++;
+			if ((long)_ulong < 0) {
+				_ulong = -_ulong;
+				sign = '-';
+			}
+			base = DEC;
+			goto number;
+		case 'e': fallthru;
+		case 'E': fallthru;
+		case 'f': fallthru;
+		case 'F': fallthru;
+		case 'g': fallthru;
+		case 'G':
+                         _double = va_arg_double(ap); ap++;
+			/*
+			 * don't do unrealistic precision; just pad it with
+			 * zeroes later, so buffer size stays rational.
+			 */
+			if (prec > MAXFRACT) {
+				if ((ch != 'g' && ch != 'G') || (flags&ALT))
+					fpprec = prec - MAXFRACT;
+				prec = MAXFRACT;
+			} else if (prec == -1)
+				prec = DEFPREC;
+			/* __cvt_double may have to round up before the
+			   "start" of its buffer, i.e.
+			   ``intf("%.2f", (double)9.999);'';
+			   if the first character is still NUL, it did.
+			   softsign avoids negative 0 if _double < 0 but
+			   no significant digits will be shown. */
+			cp = buf;
+			*cp = '\0';
+			size = __cvt_double(_double, prec, flags, &softsign,
+					    ch, cp, 
+                                            (char ? _)buf + sizeof(buf));
+			if (softsign)
+				sign = '-';
+			if (*cp == '\0')
+				cp++;
+			break;
+		case 'n':
+			if (flags & LONGINT)
+				*va_arg_int_ptr(ap) = ret;
+			else if (flags & SHORTINT)
+				*va_arg_short_ptr(ap) = (short)ret;
+			else
+				*va_arg_int_ptr(ap) = ret;
+                        ap++;
+			continue;	/* no output */
+		case 'O':
+			flags |= LONGINT;
+			fallthru;
+		case 'o':
+                        _ulong = UARG(); ap++;
+			base = OCT;
+			goto nosign;
+		case 'p':
+			/*
+			 * ``The argument shall be a pointer to void.  The
+			 * value of the pointer is converted to a sequence
+			 * of printable characters, in an implementation-
+			 * defined manner.''
+			 *	-- ANSI X3J11
+			 */
+			/* NOSTRICT */
+                        _ulong = (unsigned long)va_arg_long(ap); ap++;
+			base = HEX;
+			flags |= HEXPREFIX;
+			ch = 'x';
+			goto nosign;
+		case 's':
+                        use_cp2 = true;
+                        cp2 = va_arg_string(ap); ap++;
+			if (cp2 == NULL)
+				cp2 = "(null)";
+			if (prec >= 0) {
+				/*
+				 * can't use strlen; can only look for the
+				 * NUL in the first `prec' characters, and
+				 * strlen() will go further.
+				 */
+				const char ? `r2 p = memchr(cp2, 0, prec);
+
+				if (p != NULL) {
+					size = p - cp2;
+					if (size > prec)
+						size = prec;
+				} else
+					size = prec;
+			} else
+				size = strlen(cp2);
+			sign = '\0';
+			break;
+		case 'U':
+			flags |= LONGINT;
+                        fallthru;
+		case 'u':
+                        _ulong = UARG(); ap++;
+			base = DEC;
+			goto nosign;
+		case 'X': fallthru;
+		case 'x':
+                        _ulong = UARG(); ap++;
+			base = HEX;
+			/* leading 0x/X only if non-zero */
+			if (flags & ALT && _ulong != 0)
+				flags |= HEXPREFIX;
+
+			/* unsigned conversions */
+nosign:			sign = '\0';
+			/*
+			 * ``... diouXx conversions ... if a precision is
+			 * specified, the 0 flag will be ignored.''
+			 *	-- ANSI X3J11
+			 */
+number:			if ((dprec = prec) >= 0)
+				flags &= ~ZEROPAD;
+
+			/*
+			 * ``The result of converting a zero value with an
+			 * explicit precision of zero is no characters.''
+			 *	-- ANSI X3J11
+			 */
+			cp = buf + BUF;
+			if (_ulong != 0 || prec != 0) {
+			        const char ? xdigs; /* digits for [xX] conversion */
+				/*
+				 * unsigned mod is hard, and unsigned mod
+				 * by a constant is easier than that by
+				 * a variable; hence this switch.
+				 */
+				switch (base) {
+				case OCT:
+					do {
+						*--cp = (char)to_char(_ulong & 7);
+						_ulong >>= 3;
+					} while (_ulong);
+					/* handle octal leading 0 */
+					if (flags & ALT && *cp != '0')
+						*--cp = '0';
+					break;
+
+				case DEC:
+					/* many numbers are 1 digit */
+					while (_ulong >= 10) {
+						*--cp = (char)to_char(_ulong % 10);
+						_ulong /= 10;
+					}
+					*--cp = (char)to_char(_ulong);
+					break;
+
+				case HEX:
+					if (ch == 'X')
+					    xdigs = "0123456789ABCDEF";
+					else /* ch == 'x' || ch == 'p' */
+					    xdigs = "0123456789abcdef";
+					do {
+						*--cp = xdigs[_ulong & 15];
+						_ulong >>= 4;
+					} while (_ulong);
+					break;
+                                        /*
+				default:
+					cp = dup("bug in vform: bad base");
+					goto skipsize;
+                                        */
+				}
+			}
+			size = ((char ? _)buf) + BUF - cp;
+		skipsize:
+			break;
+		default:	/* "%?" prints ?, unless ? is NUL */
+			if (ch == '\0')
+				goto done;
+			/* pretend it was %c with argument ch */
+			cp = buf;
+			*cp = (char)ch;
+			size = 1;
+			sign = '\0';
+			break;
+		}
+
+                /* The comment below is accurate except that the flag
+                 * use_cp2 controls whether or not we should use cp2
+                 * instead of cp.
+                 */
+
+		/*
+		 * All reasonable formats wind up here.  At this point,
+		 * `cp' points to a string which (if not flags&LADJUST)
+		 * should be padded out to `width' places.  If
+		 * flags&ZEROPAD, it should first be prefixed by any
+		 * sign or other prefix; otherwise, it should be blank
+		 * padded before the prefix is emitted.  After any
+		 * left-hand padding and prefixing, emit zeroes
+		 * required by a decimal [diouxX] precision, then print
+		 * the string proper, then emit zeroes required by any
+		 * leftover floating precision; finally, if LADJUST,
+		 * pad with blanks.
+		 */
+
+		/*
+		 * compute actual size, so we know how much to pad.
+		 */
+		fieldsz = size + fpprec;
+		dpad = dprec - size;
+		if (dpad < 0)
+		    dpad = 0;
+
+		if (sign)
+			fieldsz++;
+		else if (flags & HEXPREFIX)
+			fieldsz += 2;
+		fieldsz += dpad;
+
+		/* right-adjusting blank padding */
+		if ((flags & (LADJUST|ZEROPAD)) == 0)
+			PAD_SP(width - fieldsz);
+
+		/* prefix */
+		if (sign) {
+			PRINT(&sign, 1);
+		} else if (flags & HEXPREFIX) {
+			ox[0] = '0';
+			ox[1] = (char)ch;
+			PRINT(ox, 2);
+		}
+
+		/* right-adjusting zero padding */
+		if ((flags & (LADJUST|ZEROPAD)) == ZEROPAD)
+			PAD_0(width - fieldsz);
+
+		/* leading zeroes from decimal precision */
+		PAD_0(dpad);
+
+		/* the string or number proper */
+                if (use_cp2)
+                  PRINT(cp2, size);
+                else
+                  PRINT(cp, size);
+
+		/* trailing f.p. zeroes */
+		PAD_0(fpprec);
+
+		/* left-adjusting padding (always blank) */
+		if (flags & LADJUST)
+			PAD_SP(width - fieldsz);
+
+		/* finally, adjust ret */
+		ret += width > fieldsz ? width : fieldsz;
+
+	}
+done:
+	return ret;
+error:
+	return EOF;
+	/* NOTREACHED */
+}
+
+static char ?`r1 exponent(char ?`r1 p, int exp, int fmtch)
+{
+	register char ? _ t;
+	char expbuf[MAXEXP] = {for i < MAXEXP : '0'};
+
+	*p++ = (char)fmtch;
+	if (exp < 0) {
+		exp = -exp;
+		*p++ = '-';
+	}
+	else
+		*p++ = '+';
+	t = expbuf + MAXEXP;
+	if (exp > 9) {
+		do {
+			*--t = (char)to_char(exp % 10);
+		} while ((exp /= 10) > 9);
+		*--t = (char)to_char(exp);
+		for (; t < expbuf + MAXEXP; *p++ = *t++);
+	}
+	else {
+		*p++ = '0';
+		*p++ = (char)to_char(exp);
+	}
+	return (p);
+}
+
+static char ?`r1 round(double fract, int * `r2 exp,
+                       char ? `r1 start, char ? `r1 end,
+                       char ch, int @ `r3 signp)
+{
+	double tmp = 0.0;
+
+	if (fract != 0.0)
+          modf(fract * 10, &tmp);
+	else
+		tmp = to_digit(ch);
+	if (tmp > 4)
+		for (;; --end) {
+			if (*end == '.')
+				--end;
+			if (++*end <= '9')
+				break;
+			*end = '0';
+			if (end == start) {
+				if (exp) {	/* e/E; increment exponent */
+					*end = '1';
+					++*exp;
+				}
+				else {		/* f; add extra digit */
+				*--end = '1';
+				--start;
+				}
+				break;
+			}
+		}
+	/* ``"%.3f", (double)-0.0004'' gives you a negative 0. */
+	else if (*signp == '-')
+		for (;; --end) {
+			if (*end == '.')
+				--end;
+			if (*end != '0')
+				break;
+			if (end == start)
+				*signp = 0;
+		}
+	return (start);
+}
+
+int __cvt_double(double number, int prec, int flags, int @`r1 signp,
+		 int fmtch, char ?`r2 startp, char ?`r2 endp)
+{
+	register char ? _ p, ? _ t;
+	register double fract;
+	int dotrim = 0, expcnt, gformat = 0;
+	double integer = 0.0, tmp = 0.0;
+
+	expcnt = 0;
+	if (number < 0) {
+		number = -number;
+		*signp = '-';
+	} else
+		*signp = 0;
+
+	fract = modf(number, &integer);
+
+	/* get an extra slot for rounding. */
+	t = ++startp;
+
+	/*
+	 * get integer portion of number; put into the end of the buffer; the
+	 * .01 is added for modf(356.0 / 10, &integer) returning .59999999...
+	 */
+	for (p = endp - 1; p >= startp && integer != 0.0; ++expcnt) {
+		tmp = modf(integer / 10, &integer);
+		*p-- = (char)to_char((int)((tmp + .01) * 10));
+	}
+	switch (fmtch) {
+	case 'f': fallthru;
+	case 'F':
+		/* reverse integer into beginning of buffer */
+		if (expcnt)
+			for (; ++p < endp; *t++ = *p);
+		else
+			*t++ = '0';
+		/*
+		 * if precision required or alternate flag set, add in a
+		 * decimal point.
+		 */
+		if (prec || flags&ALT)
+			*t++ = '.';
+		/* if requires more precision and some fraction left */
+		if (fract != 0.0) {
+			if (prec)
+				do {
+					fract = modf(fract * 10, &tmp);
+					*t++ = (char)to_char((int)tmp);
+				} while (--prec && fract != 0.0);
+			if (fract != 0.0)
+				startp = round(fract, NULL, startp,
+				    t - 1, (char)0, signp);
+		}
+		for (; prec--; *t++ = '0');
+		break;
+	case 'e': fallthru;
+	case 'E':
+eformat:	if (expcnt) {
+			*t++ = *++p;
+			if (prec || flags&ALT)
+				*t++ = '.';
+			/* if requires more precision and some integer left */
+			for (; prec && ++p < endp; --prec)
+				*t++ = *p;
+			/*
+			 * if done precision and more of the integer component,
+			 * round using it; adjust fract so we don't re-round
+			 * later.
+			 */
+			if (!prec && ++p < endp) {
+				fract = 0;
+				startp = round((double)0, &expcnt, startp,
+				    t - 1, *p, signp);
+			}
+			/* adjust expcnt for digit in front of decimal */
+			--expcnt;
+		}
+		/* until first fractional digit, decrement exponent */
+		else if (fract != 0.0) {
+			/* adjust expcnt for digit in front of decimal */
+			for (expcnt = -1;; --expcnt) {
+				fract = modf(fract * 10, &tmp);
+				if (tmp != 0.0)
+					break;
+			}
+			*t++ = (char)to_char((int)tmp);
+			if (prec || flags&ALT)
+				*t++ = '.';
+		}
+		else {
+			*t++ = '0';
+			if (prec || flags&ALT)
+				*t++ = '.';
+		}
+		/* if requires more precision and some fraction left */
+		if (fract != 0.0) {
+			if (prec)
+				do {
+					fract = modf(fract * 10, &tmp);
+					*t++ = (char)to_char((int)tmp);
+				} while (--prec && fract != 0.0);
+			if (fract != 0.0)
+				startp = round(fract, &expcnt, startp,
+				    t - 1, (char)0, signp);
+		}
+		/* if requires more precision */
+		for (; prec--; *t++ = '0');
+
+		/* unless alternate flag, trim any g/G format trailing 0's */
+		if (gformat && !(flags&ALT)) {
+			while (t > startp && *--t == '0');
+			if (*t == '.')
+				--t;
+			++t;
+		}
+		t = exponent(t, expcnt, fmtch);
+		break;
+	case 'g': fallthru;
+	case 'G':
+		/* a precision of 0 is treated as a precision of 1. */
+		if (!prec)
+			++prec;
+		/*
+		 * ``The style used depends on the value converted; style e
+		 * will be used only if the exponent resulting from the
+		 * conversion is less than -4 or greater than the precision.''
+		 *	-- ANSI X3J11
+		 */
+		if (expcnt > prec || (!expcnt && fract != 0.0 && fract < .0001)) {
+			/*
+			 * g/G format counts "significant digits, not digits of
+			 * precision; for the e/E format, this just causes an
+			 * off-by-one problem, i.e. g/G considers the digit
+			 * before the decimal point significant and e/E doesn't
+			 * count it as precision.
+			 */
+			--prec;
+			fmtch -= 2;		/* G->E, g->e */
+			gformat = 1;
+			goto eformat;
+		}
+		/*
+		 * reverse integer into beginning of buffer,
+		 * note, decrement precision
+		 */
+		if (expcnt)
+			for (; ++p < endp; *t++ = *p, --prec);
+		else
+			*t++ = '0';
+		/*
+		 * if precision required or alternate flag set, add in a
+		 * decimal point.  If no digits yet, add in leading 0.
+		 */
+		if (prec || flags&ALT) {
+			dotrim = 1;
+			*t++ = '.';
+		}
+		else
+			dotrim = 0;
+		/* if requires more precision and some fraction left */
+		if (fract != 0.0) {
+			if (prec) {
+				/* If no integer part, don't count initial
+				 * zeros as significant digits. */
+				do {
+					fract = modf(fract * 10, &tmp);
+					*t++ = (char)to_char((int)tmp);
+				} while(tmp == 0.0 && !expcnt);
+				while (--prec && (fract != 0.0)) {
+					fract = modf(fract * 10, &tmp);
+					*t++ = (char)to_char((int)tmp);
+				}
+			}
+			if (fract != 0.0)
+				startp = round(fract, NULL, startp,
+				    t - 1, (char)0, signp);
+		}
+		/* alternate format, adds 0's for precision, else trim 0's */
+		if (flags&ALT)
+			for (; prec--; *t++ = '0');
+		else if (dotrim) {
+			while (t > startp && *--t == '0');
+			if (*t != '.')
+				++t;
+		}
+                break;
+        default: throw new Impossible("stdio::__cvt_double");
+	}
+	return (t - startp);
+}
+
+
+
+int vfprintf(FILE @ f,const char ?`r fmt, parg_t<`r2> ? `r1 ap) {
+  int ans;
+  ans = _IO_vfprintf(putc, f, fmt, ap);
+  return ans;
+}  
+
+int fprintf(FILE @ f,const char ?`r fmt, ...`r1 inject parg_t<`r2> ap){
+  return vfprintf(f,fmt,ap);
+}
+
+int vprintf(const char ?`r fmt, parg_t<`r2> ? `r1 ap) {
+  int ans;
+  ans = _IO_vfprintf(putc, stdout, fmt, ap);
+  return ans;
+}
+
+int printf(const char ?`r fmt, ...`r1 inject parg_t<`r2> ap) {
+  int ans;
+  ans = vprintf(fmt, ap);
+  return ans;
+}
+
+static int putc_string(int c, char ?`r @`r2 sptr) {
+  char ?`r s = *sptr;
+  if (s.size == 0) return EOF;
+  *s = (char)c;
+  *sptr = s+1;
+  return 1;
+}
+
+int vsprintf(char ?`r1 s, const char ?`r2 fmt, parg_t<`r4> ? `r3 ap) {
+  int ans;
+  let sptr = s;
+  ans = _IO_vfprintf(putc_string, &sptr, fmt, ap);
+  if (0 <= ans)
+    s[ans] = '\0';
+  return ans;
+}
+
+int sprintf(char ?`r1 s, const char ?`r2 fmt, 
+               ...`r3 inject parg_t<`r4> ap) {
+  return vsprintf(s, fmt, ap);
+}
+
+static int putc_void(int c, int dummy) {
+  return 1;
+}
+
+char ?`r1 vrxprintf(region_t<`r1> r1, const char ?`r2 fmt, parg_t<`r4> ? `r3 ap) {
+  // figure out the size of the resulting string -- add one for 0 terminator
+  int size = _IO_vfprintf(putc_void, 0, fmt, ap) + 1;
+  char ?`r1 s = rnew(r1) {for i < size : '\0'};
+  vsprintf(s, fmt, ap);
+  return s;
+}
+
+char ?`r1 rxprintf(region_t<`r1> r1, const char ?`r2 fmt, ...`r3 inject parg_t<`r4> ap) {
+  return vrxprintf(r1, fmt, ap);
+}
+
+char ? xprintf(const char ?`r2 fmt, ...`r3 inject parg_t<`r4> ap) {
+  return vrxprintf(heap_region, fmt, ap);
+}
+  
+/*
+int main(int argc, string_t ?argv) {
+  long x = 3;
+  my_printf("%d\n",0);
+  my_printf("%d\n",123);
+  my_printf("%d\n",-10);
+  my_printf("%x\n",31);
+  my_printf("%X\n",31);
+  my_printf("%i\n",3);
+  my_printf("%3i\n",3);
+  my_printf("%10s %s","foo","bar");
+  my_printf("%d\n",x);
+  my_printf("%f\n",3.14);
+  my_printf("%g\n",3.14);
+  my_printf("%3f\n",3.14);
+
+  return 0;
+}
+*/

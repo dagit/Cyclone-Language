@@ -58,7 +58,10 @@ void okfail(bool b) {
   if (b) ok(); else fail();
 }
 void eqstrings(string_t s1,string_t s2) {
-  okfail(0 == String::strcmp(s1,s2));
+  int i = String::strcmp(s1,s2);
+  if (i != 0)
+    fprintf(stderr,"%s != %s",s1,s2);
+  okfail(i == 0);
 }
 
 int test_list_cmp(int cmp(`a,`a),list_t<`a> x,list_t<`a> y) {
@@ -901,7 +904,6 @@ void printf_test() {
   test_end();
 }
 
-/*
 // Normally commented out because sscanf is insecure.
 // Sometimes uncommented for testing.
 void scanf_test() {
@@ -959,7 +961,6 @@ void scanf_test() {
   okfail(d == 35.3);
   test_end();
 }
-*/
 
 // check the functionality of extern "C"
 extern "C" double cos(double);

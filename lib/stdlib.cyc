@@ -79,18 +79,18 @@ namespace Stdlib {
     return Cstdlib::_setenv_r(r,s2c(s),s2c(v),overwrite);
   }
   */
-  static void check_valid_cstring(const char ?`r s, string_t msg) {
-    if (s == null) throw new InvalidArg(xprintf("%s: null pointer",msg));
+  static void check_valid_cstring(const char ?`r s) {
+    if (s == null) throw new InvalidArg("strtox null pointer");
     bool found_zero = false;
     for (int i = s.size - 1; i >= 0; i--) 
       if (s[i] == '\0') { found_zero = true; break; }
-    if (!found_zero) throw new InvalidArg(xprintf("%s: not a C string",msg));
+    if (!found_zero) throw new InvalidArg("strtox: not a C string");
   }
 
   double strtod(const char ?`r nptr, const char ?`r *`r2 endptr) {
     // need to ensure that the string has a '\0' in it before
     // handing it off to C.
-    check_valid_cstring(nptr,"strtod");
+    check_valid_cstring(nptr);
     // FIX:  TOTAL HACK ALERT
     Cstring c = underlying_Cstring(nptr); // so far so good
     Cstring e = (endptr == null) ? null : c; 
@@ -108,7 +108,7 @@ namespace Stdlib {
   long strtol(const char ?`r n, const char ?`r *`r2 endptr, int base) {
     // need to ensure that the string has a '\0' in it before
     // handing it off to C.
-    check_valid_cstring(n,"strtol");
+    check_valid_cstring(n);
     // FIX:  TOTAL HACK ALERT
     Cstring c = underlying_Cstring(n); // so far so good
     Cstring e = (endptr == null) ? null : c; 
@@ -126,7 +126,7 @@ namespace Stdlib {
   unsigned long strtoul(const char ?`r n,const char ?`r *`r2 endptr,int base){
     // need to ensure that the string has a '\0' in it before
     // handing it off to C.
-    check_valid_cstring(n,"strtoul");
+    check_valid_cstring(n);
     // FIX:  TOTAL HACK ALERT
     Cstring c = underlying_Cstring(n); // so far so good
     Cstring e = (endptr == null) ? null : c; 

@@ -1,7 +1,9 @@
 %{
 #include <core.h>    // must include both core.h and string.h
 #include <string.h>
+#include <stdio.h>
 using String;
+using Stdio;
   //#define YYDEBUG 1  // turn this on to debug the parser engine
 #define YYERROR_VERBOSE 1 // turn this on to get better error messages
 %}

@@ -64,6 +64,7 @@
 #include <list.h>
 #include <dict.h>
 #include <string.h>
+#include <stdio.h>
 #include "absyn.h"
 #include "tcutil.h"
 #include "toc.h"
@@ -71,6 +72,7 @@
 
 using Core;
 using List;
+using Stdio;
 using Absyn;
 namespace Tovc;
 

@@ -29,7 +29,6 @@ struct _tagged_string {  // delete after bootstrapping
   unsigned char *base; 
   unsigned char *last_plus_one; 
 };
-extern struct _tagged_arr xprintf(char *fmt, ...);
 
 //// Discriminated Unions
 struct _xtunion_struct { char *tag; };
@@ -73,6 +72,7 @@ extern void _push_region(struct _RegionHandle *);
 extern void _npop_handler(int);
 extern void _pop_handler();
 extern void _pop_region();
+extern int _throw_null();
 
 #ifndef _throw
 extern int _throw(void * e);
@@ -90,20 +90,20 @@ extern struct _xtunion_struct * ADD_PREFIX(Match_Exception);
 static inline 
 void * _check_null(void * ptr) {
   if(!ptr)
-    _throw(ADD_PREFIX(Null_Exception));
+    _throw_null();
   return ptr;
 }
 static inline 
 char * _check_known_subscript_null(void * ptr, unsigned bound, 
 				   unsigned elt_sz, unsigned index) {
   if(!ptr || index > bound)
-    _throw(ADD_PREFIX(Null_Exception));
+    _throw_null();
   return ((char *)ptr) + elt_sz*index;
 }
 static inline 
 unsigned _check_known_subscript_notnull(unsigned bound, unsigned index) {
   if(index > bound)
-    _throw(ADD_PREFIX(Null_Exception));
+    _throw_null();
   return index;
 }
 static inline 
@@ -114,7 +114,7 @@ char * _check_unknown_subscript(struct _tagged_arr arr,
   // by inlining, it should be able to avoid actual multiplication
   unsigned char * ans = arr.curr + elt_sz * index;
   if(!arr.base || ans < arr.base || ans >= arr.last_plus_one)
-    _throw(ADD_PREFIX(Null_Exception));
+    _throw_null();
   return ans;
 }
 static inline 
@@ -142,7 +142,7 @@ char * _untag_arr(struct _tagged_arr arr, unsigned elt_sz, unsigned num_elts) {
   //       is correct (caller checks for null if untagging to @ type)
   // base may not be null if you use t ? pointer subtraction to get 0 -- oh well
   if(arr.curr < arr.base || arr.curr + elt_sz * num_elts > arr.last_plus_one)
-    _throw(ADD_PREFIX(Null_Exception));
+    _throw_null();
   return arr.curr;
 }
 static inline 

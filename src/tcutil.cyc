@@ -1320,6 +1320,8 @@ static bool subtype(tenv_t te, list_t<$(type_t,type_t)@> assume, type_t t1, type
   t1 = compress(t1);
   t2 = compress(t2);
   switch ($(t1,t2)) {
+    // the following allows us to cast an unsigned int pointer to an int 
+    // pointer and vice versa.  This is okay because the types are isomorphic.
     case $(&PointerType(PtrInfo{t_a, rt_a, null_a, q_a, b_a}),
 	   &PointerType(PtrInfo{t_b, rt_b, null_b, q_b, b_b})):
     // if t1 is const then t2 must be const
@@ -1348,6 +1350,13 @@ static bool subtype(tenv_t te, list_t<$(type_t,type_t)@> assume, type_t t1, type
   }
 }
 
+static bool isomorphic(type_t t1, type_t t2) {
+  switch ($(compress(t1),compress(t2))) {
+  case $(&IntType(_,b1), &IntType(_, b2)): return b1 == b2;
+  default: return false;
+  }
+}
+
 // is t1* <= t2*?
 //   we flatten t1 and t2 into structurally equivalent tuple types 
 //   (and thus ignore field names, associativity of nested tuples and
@@ -1363,6 +1372,7 @@ static bool ptrsubtype(tenv_t te, list_t<$(type_t,type_t)@> assume, type_t t1, t
     let &$(tq2,t2a) = tqs2->hd;
     if (tq2.q_const && subtype(te,assume,t1a,t2a)) continue;
     else if (unify(t1a,t2a)) continue;
+    else if (isomorphic(t1a,t2a)) continue;
     else return false;
   }
   return true;

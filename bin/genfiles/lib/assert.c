@@ -20,8 +20,23 @@ struct _tagged_arr msg); struct Cyc_Stdio___sFILE; extern struct Cyc_Stdio___sFI
 Cyc_Stdio_stderr; extern int Cyc_Stdio_fputs( struct _tagged_arr, struct Cyc_Stdio___sFILE*);
 extern unsigned char Cyc_Stdio_FileCloseError[ 19u]; extern unsigned char Cyc_Stdio_FileOpenError[
 18u]; struct Cyc_Stdio_FileOpenError_struct{ unsigned char* tag; struct
-_tagged_arr f1; } ; void* Cyc_Assert_AssertFail( struct _tagged_arr mesg){ Cyc_Stdio_fputs(
-mesg, Cyc_Stdio_stderr); Cyc_Stdio_fputs( _tag_arr(" -- assertion failed\n",
+_tagged_arr f1; } ; static const int Cyc_Stdio_String_pa= 0; struct Cyc_Stdio_String_pa_struct{
+int tag; struct _tagged_arr f1; } ; static const int Cyc_Stdio_Int_pa= 1; struct
+Cyc_Stdio_Int_pa_struct{ int tag; unsigned int f1; } ; static const int Cyc_Stdio_Double_pa=
+2; struct Cyc_Stdio_Double_pa_struct{ int tag; double f1; } ; static const int
+Cyc_Stdio_ShortPtr_pa= 3; struct Cyc_Stdio_ShortPtr_pa_struct{ int tag; short*
+f1; } ; static const int Cyc_Stdio_IntPtr_pa= 4; struct Cyc_Stdio_IntPtr_pa_struct{
+int tag; unsigned int* f1; } ; static const int Cyc_Stdio_ShortPtr_sa= 0; struct
+Cyc_Stdio_ShortPtr_sa_struct{ int tag; short* f1; } ; static const int Cyc_Stdio_UShortPtr_sa=
+1; struct Cyc_Stdio_UShortPtr_sa_struct{ int tag; unsigned short* f1; } ; static
+const int Cyc_Stdio_IntPtr_sa= 2; struct Cyc_Stdio_IntPtr_sa_struct{ int tag;
+int* f1; } ; static const int Cyc_Stdio_UIntPtr_sa= 3; struct Cyc_Stdio_UIntPtr_sa_struct{
+int tag; unsigned int* f1; } ; static const int Cyc_Stdio_StringPtr_sa= 4;
+struct Cyc_Stdio_StringPtr_sa_struct{ int tag; struct _tagged_arr f1; } ; static
+const int Cyc_Stdio_DoublePtr_sa= 5; struct Cyc_Stdio_DoublePtr_sa_struct{ int
+tag; double* f1; } ; static const int Cyc_Stdio_FloatPtr_sa= 6; struct Cyc_Stdio_FloatPtr_sa_struct{
+int tag; float* f1; } ; void* Cyc_Assert_AssertFail( struct _tagged_arr mesg){
+Cyc_Stdio_fputs( mesg, Cyc_Stdio_stderr); Cyc_Stdio_fputs( _tag_arr(" -- assertion failed\n",
 sizeof( unsigned char), 22u), Cyc_Stdio_stderr); exit( - 1);( int) _throw(( void*)({
 struct Cyc_Core_Unreachable_struct* _temp0=( struct Cyc_Core_Unreachable_struct*)
 GC_malloc( sizeof( struct Cyc_Core_Unreachable_struct)); _temp0[ 0]=({ struct

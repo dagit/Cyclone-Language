@@ -714,6 +714,15 @@ static struct Tunionfield *tcInjection(tenv_t te,exp_t e,type_t tu,
                                        list_t<tunionfield_t> fs) {
   list_t<tunionfield_t> fields;
   type_t t1 = e->topt->v;
+
+  // must promote float to double, and char/short to int
+  switch (compress(t1)) {
+  case FloatType: 
+    unchecked_cast(te,e,DoubleType); t1 = DoubleType; break;
+  case &IntType(_,B1): fallthru;
+  case &IntType(_,B2): unchecked_cast(te,e,sint_t); t1 = sint_t; break;
+  default: break;
+  }
   // try to find an exact match first
   for (fields = fs; fields != null; fields = fields->tl) {
     let Tunionfield{n,tvs,typs,loc,sc} = *fields->hd;
@@ -781,7 +790,7 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t>
       }
       if (args_info != null) terr(loc,"too few arguments for function");
       // if we have left-over arguments, then check for varargs
-      else if (es != null) {
+      else if (es != null || c_vararg || cyc_vararg != null) {
 	if(c_vararg)
 	  for(; es != null; es = es->tl)
 	    tcExp(te, null, es->hd);

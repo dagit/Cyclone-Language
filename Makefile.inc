@@ -53,10 +53,12 @@ CYCLONE_LIBS:=arg\
         in\
         position\
         pp\
+	printf\
 	pwd\
         queue\
         ref\
         rope\
+	scanf\
         set\
 	signal\
         slowdict\
