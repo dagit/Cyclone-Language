@@ -5,9 +5,9 @@
 
 \subsection{Introduction}
 
-C gives programmers complete control over how memory is managed.  An
-expert programmer can exploit this to write very fast programs.
-However, bugs that creep into memory-management code can cause
+C gives programmers complete control over how memory is managed.  An expert
+programmer can exploit this to write very fast and/or space-efficient
+programs.  However, bugs that creep into memory-management code can cause
 crashes and are notoriously hard to debug.
 
 Languages like Java and ML use garbage collectors instead of leaving
@@ -32,22 +32,24 @@ of the objects in the region.  Regions are sometimes called ``arenas'' or
 
 Cyclone has five kinds of regions:
 \begin{description}
-\item[Block regions] As in C, local variables are allocated on the
+\item[Stack regions] As in C, local variables are allocated on the
   runtime stack; the stack grows when a block is entered, and it
   shrinks when the block exits.  We call the area on the stack
-  allocated for the local variables of a block the \emph{block region}
-  of the block.  A block region has a fixed size---it is just large
+  allocated for the local variables of a block the \emph{stack region}
+  of the block.  A stack region has a fixed size---it is just large
   enough to hold the locals of the block, and no more objects can be
   placed into it.  The region is deallocated when the block containing
   the declarations of the local variables finishes executing.  With
   respect to regions, the parameters of a function are considered
   locals---when a function is called, its actual parameters are placed
-  in the same block region as the variables declared at the start of
+  in the same stack region as the variables declared at the start of
   the function.
   
-\item[Growable regions] Cyclone also has \emph{growable regions},
-  which are regions that you can add objects to over time.  You create
-  a growable region in Cyclone with a statement,
+\item[Lexical regions] Cyclone also has \emph{lexical regions}, which are so
+  named because, like stack regions, their lifetime is delimited by the
+  surrounding scope.  Unlike stack regions, however, you can can add new
+  objects to a lexical region over time.  You create a lexical region in
+  Cyclone with a statement,
 \begin{alltt}
   region {\it identifier}; {\it statement}
 \end{alltt}
@@ -66,17 +68,17 @@ Cyclone has five kinds of regions:
   \rb
 \end{alltt}
 
-\item[The heap] Cyclone has a special region called the \emph{heap}.
-  There is only one heap, and it is never deallocated.  New objects
-  can be added to the heap at any time (the heap can grow).  Cyclone
-  uses a garbage collector to automatically remove objects from the
-  heap when they are no longer needed.  You can think of garbage
-  collection as an optimization that tries to keep the size of the
-  heap small.  (Alternatively, you can avoid garbage collection all
-  together by specifying the \texttt{-nogc} flag when building the
-  executable.)
+\item[The heap region] Cyclone has a special region called the
+  \emph{heap}. There is only one heap, whose type is denoted \texttt{`H},
+  and it is never deallocated.  New objects can be added to the heap at any
+  time (the heap can grow).  Cyclone uses a garbage collector to
+  automatically remove objects from the heap when they are no longer needed.
+  You can think of garbage collection as an optimization that tries to keep
+  the size of the heap small.  (Alternatively, you can avoid garbage
+  collection all together by specifying the \texttt{-nogc} flag when
+  building the executable.)
 
-\item[Dynamic regions]  Block and growable regions obey a strictly
+\item[Dynamic regions]  Stack and lexical regions obey a strictly
   last-in-first-out (LIFO) lifetime discipline.  This is often
   convenient for storing temporary data, but sometimes, the lifetime
   of data cannot be statically determined.  Such data can be allocated
@@ -91,27 +93,40 @@ Cyclone has five kinds of regions:
   dynamic regions amortize the cost of checking whether or not data
   are still live and localize failure points.  
 
-\item[The unique region] Cyclone has another special region called the
-  \emph{unique region}.  The unique region type is \texttt{`U}, meaning that
-  its pointers (so-called \emph{unique pointers}) look like,
-  e.g. \texttt{int *`U}.  The unique region is like the heap in that it can
-  grow arbitrarily, it is never deallocated \emph{en masse}, and that it
-  uses garbage collection to free unreachable memory.  In addition,
-  individual objects objects inside of the unique region can be freed
-  explicitly using \texttt{ufree}.  For freeing objects to be sound, we
-  impose restrictions on how pointers into the unique region can be used.
+\item[The unique region] All of the regions mentioned thus far only permit
+  deallocation \emph{en masse.}  Cyclone also defines the \emph{unique
+  region}, whose type is denoted \texttt{`U}, which allows objects to be
+  deallocated individually, using the function \texttt{ufree}.  For freeing
+  objects to be safe, we only allow access to objects in \texttt{`U} via
+  \emph{unique pointers}.  That is, only a single pointer may be used to
+  access the object at any given time; this trivially guarantees that if the
+  object is freed through its unique pointer, no other access to the object
+  beyond that point is possible.  Objects that become unreachable but are
+  not freed manually will be freed by the garbage collector (assuming it's
+  not removed with \texttt{-nogc}).
+
+\item[The reference-counted region] The reference-counted region, denoted
+  \texttt{`RC}, also permits freeing individual objects.  Unlike the unique
+  region, multiple pointers to a single object are permitted, the number of
+  which is tracked dynamically via a hidden reference count stored with the
+  object.  Additional pointers to an object are created explicitly via a
+  call to \texttt{alias\_refptr}, which increases the reference count.
+  Individual pointers are removed via a call to \texttt{drop\_refptr}; when
+  the last pointer is removed (i.e. the reference count is 0), the object is
+  freed.  Like the unique region, objects that become unreachable will be
+  freed by the garbage collector.
 \end{description}
 
-Objects outside of the heap and unique region live until their region is
-deallocated; there is no way to free such an object earlier.  Objects in the
-heap or unique region can be garbage collected once they are unreachable
-(i.e., they cannot be reached by traversing pointers) from the program's
-variables.  Objects in other regions always appear reachable to the garbage
-collector (so everything reachable from them appears reachable as well).
+%% Objects outside of the heap and unique region live until their region is
+%% deallocated; there is no way to free such an object earlier.  Objects in the
+%% heap or unique region can be garbage collected once they are unreachable
+%% (i.e., they cannot be reached by traversing pointers) from the program's
+%% variables.  Objects in other regions always appear reachable to the garbage
+%% collector (so everything reachable from them appears reachable as well).
 
-Cyclone forbids following dangling pointers.  This restriction is part of
+Cyclone forbids dereferencing dangling pointers.  This restriction is part of
 the type system: it's a compile-time error if a dangling pointer (a pointer
-into a deallocated region or to a deallocated object) might be followed.
+into a deallocated region or to a deallocated object) might be dereferenced.
 There are no run-time checks of the form, ``is this pointing into a live
 region?''  As explained below, each pointer type has a region and objects of
 the type may only point into that region.
@@ -227,8 +242,8 @@ you can't do something like:
 In an ideal world, the fact that \texttt{temp} was passed to \texttt{ufree}
 would signal that it is a unique pointer, rather than a heap pointer.
 
-Objects can be created in a dynamic region using the following analogous
-expressions.
+Objects within lexical and reference-counted regions can be created using
+the following analogous expressions.
 \begin{itemize}
 \item \texttt{rnew({\it identifier}) {\it expr}}
 \item \texttt{rnew({\it identifier}) {\it array-initializer}}
@@ -241,16 +256,25 @@ expressions.
 Note that \texttt{new}, \texttt{malloc}, \texttt{calloc}, 
 \texttt{rnew}, \texttt{rmalloc} and \texttt{rcalloc} are keywords.
 
-The Cyclone library has global variables \texttt{Core::heap_region} and
-\texttt{Core::unique_region} which are handles for the heap and unique
-regions, respectively.  So, for example, \texttt{new {\it expr}} can be
-replaced with \texttt{rnew(heap_region,{\it expr})}.  We also define a macro
-\texttt{unew({\it expr})} that expands to \texttt{rnew(unique_region,{\it
-expr})}.
+Here, the first argument specifies a region handle.  The Cyclone library has
+global variables \texttt{Core::heap_region}, \texttt{Core::unique_region},
+and \texttt{Core::refcnt\_region}, which are handles for the heap, unique,
+and reference-counted regions, respectively.  So, for example, \texttt{rnew
+(refcnt_region,{\it expr})} allocates memory in the reference-counted region
+which is initialized with {\it expr}.  Moreover, \texttt{new {\it expr}} can
+be replaced with \texttt{rnew(heap_region,{\it expr})}.
+%% We also define a macro
+%% \texttt{unew({\it expr})} that expands to \texttt{rnew(unique_region,{\it
+%% expr})}.
+
+To allocate an object inside a dynamic region, it must first be
+\emph{opened}, revealing its region handle.  At that point, it is treated
+just as if it were a lexical region.  The process of creating, opening, and
+freeing dynamic regions is explained more below.
 
 The only way to create an object in a stack region is declaring it as
 a local variable.  Cyclone does not currently support \texttt{salloc};
-use a growable region instead.
+use a lexical region instead.
 
 \subsection{Common Uses}
 \label{sec:common-use}
@@ -259,7 +283,8 @@ Although the type system associated with regions is complicated, there are
 some simple common idioms.  If you understand these idioms, you should be
 able to easily write programs using regions, and port many legacy C programs
 to Cyclone.  The next subsection will explain the usage patterns of unique
-pointers, since they are substantially more restrictive than other pointers.
+and reference-counted pointers, since they are substantially more
+restrictive than other pointers.
 
 Remember that every pointer points into a region, and although the
 pointer can be updated, it must always point into that same region (or
@@ -312,7 +337,7 @@ void f2(int x) {
   y = new 42;
 }
 \end{verbatim}
-because y's types is inferred to be \texttt{int * `f2} and the
+because y's type is inferred to be \texttt{int * `f2} and the
 assignment makes y point into a region that outlives \texttt{`f2}.  We
 can fix our first function by being more explicit:
 \begin{verbatim}
@@ -334,10 +359,10 @@ assumed to point into any possible region.  Hence, given
 \begin{verbatim}
 void f(int * x, int * y);
 \end{verbatim}
-we could call f with two stack pointers, a dynamic-region pointer and
+we could call f with two stack pointers, a lexical-region pointer and
 a heap-pointer, etc.  Hence this type is the ``most useful'' type from
 the caller's perspective.  But the callee's body (f) may not
-type-check with this type.  For example, x cannot be assigned to a
+type-check with this type.  For example, x cannot be assigned a
 heap pointer because we do not know that x points into the heap.  If
 this is necessary, we must give x the type \texttt{int *`H}.  Other
 times, we may not care what region x and y are in so long as they are
@@ -368,12 +393,12 @@ int *`r f(int *`r x) {return x; }
 The second one is more useful because it can be called with any
 region.
 
-In type declarations (including \texttt{typedef} for now) and
-top-level variables, omitted region annotations are assumed to point
-into the heap.  In the future, the meaning of \texttt{typedef} may
-depend on where the \texttt{typedef} is used.  In the meantime, this
-code will type-check because it is equivalent to the first function in
-the previous example:
+In type declarations (including \texttt{typedef}) and top-level variables,
+omitted region annotations are assumed to point into the heap.  In the
+future, the meaning of \texttt{typedef} may depend on where the
+\texttt{typedef} is used.  In the meantime, the following code will
+type-check because it is equivalent to the first function in the previous
+example:
 \begin{verbatim}
 typedef int * foo_t;
 foo_t f(foo_t x) { return x; }
@@ -390,9 +415,9 @@ foo_t f(foo_t x) { return x; }
 
 If you want to write a function that creates new objects in a region
 determined by the caller, your function should take a region handle as one
-of its arguments.\footnote{The following discussion does not include
-allocating into the unique region; this will be described in
-Section~\ref{sec:poly-allocate}.}  The type of a handle is
+of its arguments.\footnote{The following discussion is not quite correct when
+allocating into the unique or reference-counted region; this will be
+described in Section~\ref{sec:poly-allocate}.}  The type of a handle is
 \texttt{region_t<`r>}, where \texttt{`r} is the region information
 associated with pointers into the region.  For example, this function
 allocates a pair of integers into the region whose handle is \texttt{r}:
@@ -426,7 +451,7 @@ because they would be inferred.
 \texttt{typedef}, \texttt{struct}, and \texttt{datatype}
 declarations can all be parameterized by regions,
 just as they can be parameterized by types.  For example, here is part
-of the list library.  
+of the list library.
 \begin{verbatim}
   struct List<`a,`r>{`a hd; struct List<`a,`r> *`r tl;};
   typedef struct List<`a,`r> *`r list_t<`a,`r>;
@@ -495,35 +520,34 @@ functions would look like this:
 % causes a program not to type-check, but the gory details are discussed
 % below.
 
-\subsection{Dynamic Regions}
+\subsection{Unique Pointers}
 
-\emph{To be filled in, but see the tutorial for hints.}
+The main benefit of the regions described thus far is also their drawback:
+to free data you must free an entire region.  This implies that to amortize
+the cost of creating a region, one needs to allocate into it many times.
+Furthermore, the objects allocated in a region should be mostly in use until
+the region is freed, or else memory will be wasted in the region that is
+unused by the program.
 
-\subsection{Using Unique Pointers}
+For the cases in which neither situation holds, we can use the \emph{unique
+region}, which allows unique pointers to be freed individually.  To prevent
+dangling pointers, a static analysis ensures that objects in the unique
+region (\emph{unique objects}) can only ever be accessed through one pointer
+at any time.  At the time it is freed, this pointer is invalidated, thus
+preventing all future accesses to the object.
 
-\emph{Note:  Unique pointers are still under developement and are
-likely to change substantially by the next release.  Therefore, we
-discourage their use for now.}
-
-The main benefit of regions is also their drawback: to free data you must
-free an entire region.  This implies that to amortize the cost of creating a
-region, one needs to allocate into it many times.  Furthermore, the objects
-allocated in a region should be mostly in use until the region is freed, or
-else memory will be wasted in the region that is unused by the program.
-
-For the cases in which neither situation holds, we can use the unique region
-which allows unique pointers to be freed individually.  To prevent dangling
-pointers, a static analysis ensures that no unique pointer is aliased (i.e.,
-the object is, in fact, uniquely pointed to) at the time it is freed;
-however, we allow controlled forms of aliasing up until that point.  In
-particular, we have a primitive \texttt{alias} that allows pointers to be
-aliased within the surrounding code block, and we use syntax \texttt{{\it a}
-:=: {\it b}} to allow two unique pointers $a$ and $b$ to be atomically
-swapped.  Careful use of the swap operator allows us to store unique
-pointers in objects that are not themselves uniquely pointed to.  Finally,
-to properly deal with polymorphism, particularly when performing allocation,
-we introduce new kinds for describing regions.  In practice, all of these
-mechanisms are necessary for writing useful and reusable code.
+To ease programming with unique pointers and allow reuse of library code,
+unique pointers can be aliased temporarily within a designated lexical scope
+using a special \texttt{alias} pattern.  If this kind of aliasing is not
+sufficient, users can choose to allocate reference-counted objects; this
+idea is explained in the next subsection.  We also define syntax
+\texttt{{\it a} :=: {\it b}} to allow two unique pointers $a$ and $b$ to be
+atomically swapped.  Careful use of the swap operator allows us to store
+unique pointers in objects that are not themselves uniquely pointed to.
+Finally, to properly deal with polymorphism, particularly when performing
+allocation, we introduce new \emph{kinds} for describing regions.  In
+practice, all of these mechanisms are necessary for writing useful and
+reusable code.
 
 \subsubsection{Simple Unique Pointers}
 
@@ -532,17 +556,16 @@ any other means.  When pointers are first allocated, e.g. using
 \texttt{malloc}, they are unique.  Such pointers are allowed to be
 \emph{read through} (that is, dereferenced or indexed) but not copied, as
 the following example shows:
-\begin{alltt}
-  char c, *@fat`U buf = calloc(MAXBUF,sizeof(char));
-  int i = 0;
-  while ((c = getchar()) > 0 && !isspace(c)) \{
-    buf[i++] = c;
-  \}
-  printf("%s",buf);
+\begin{verbatim}
+  char *@fat`U buf = malloc(3*sizeof(char));
+  buf[0] = 'h';
+  buf[1] = 'i';
+  buf[2] = '\0';
+  ...
   ufree(buf);
-\end{alltt}
-This piece of code reads characters from \texttt{stdin} until a word is
-formed, and then prints that word.  Because the process of storing to the
+\end{verbatim}
+This piece of code allocates a unique buffer, and then indexes that buffer
+three times to initialize it.  Because the process of storing to the
 buffer does not copy its unique pointer, it can be safely freed.
 
 When a unique pointer is copied, e.g. when passed as a parameter to a
@@ -558,21 +581,138 @@ example that initializes a datastructure with unique pointers:
 {\small 4}  x = new 2;          // unconsumes x
 {\small 5}  p.y = x;            // consumes x
 \end{alltt}
-If an attempt was made to read through or copy x between lines 3 and 4 or
-after line 5, the flow analysis would reject the code, as in
+If an attempt was made to read through or copy \texttt{x} between lines 3
+and 4 or after line 5, the flow analysis would reject the code, as in
 \begin{alltt}
   int *`U x = new 1;  // initializes x
   p.x = x;            // consumes x
   p.y = x;            // rejected! x has been consumed already
 \end{alltt}
+When a multi-word datastructure is assigned to another one, the all of the
+unique pointers it contains are consumed.  For example:
+\begin{alltt}
+{\small 1}  struct pair \{ int *`U x; int *`U y; \} p, q;
+{\small 2}  p.x = new 1; p.y = new 2;
+{\small 3}  q = p;              // consumes p.x and p.y
+\end{alltt}
+
+By default, when a unique pointer is passed to a function, we assume that the
+function will free the pointer, store it in a data structure, or otherwise
+make it unavailable to the caller.  You can override this behavior using the
+attribute \texttt{noconsume}, which indicates that a particular argument
+should be available to the caller after the call.  For example:
+\begin{verbatim}
+void foo(int *`U x) __attribute__((noconsume(1))) {
+  *x = 1;
+}
+void bar() {
+  int *`U x = malloc(sizeof(int));
+  foo(x);
+  ufree(x);
+}
+\end{verbatim}
+Here, the \texttt{noconsume(1)} attribute in the definition of \texttt{foo}
+indicates that the first argument should not be consumed within the function
+body.  The flow analysis verifies that this is indeed the case.  As a
+result, the call to \texttt{foo} within \texttt{bar} does not consume
+\texttt{x}, so it can be freed afterwards.
+
+XXX need to talk about unique paths here.
 
 Note that if you fail to free a unique pointer, it will eventually be
 garbage collected.
 
-% XXX more to say: How it works with flattened datastructures and pattern
-% matching 
+Unique pointers have some restrictions.  In particular:
+\begin{itemize}
+\item No pointer arithmetic is allowed on unique pointers.  This ensures
+  that all unique pointers are to the beginning of the object, so that the
+  allocator is not confused when a pointer is passed to \texttt{ufree}.
+\item Take the address of a unique pointer is not allowed.  This is because
+  doing so effectively creates an alias to the original pointer that cannot
+  be easily tracked statically.
+\item Unique pointers cannot be stored within datatypes (though they can be
+  stored in tagged unions).  This is a shortcoming of the current flow
+  analysis.
+\end{itemize}
+
+\subsubsection{Pattern Matching on Unique Pointers}
+\label{sec:unique-patterns}
+
+As described in Section~\ref{sec:patterns}, Cyclone supports pattern
+matching on structured data with \texttt{let} declarations and
+\texttt{switch} statements.  Unique pointers, or structures containing
+unique pointers, can be matched against, while still ensuring that only one
+legal pointer to a unique object exists at any given time.
+
+In the simplest case, when a unique pointer to a structure is matched
+against, the matching operation is treated just like a dereference.
+Therefore, the pointer itself is \emph{not} consumed.  For example:
+\begin{verbatim}
+struct pair { int x; int y; };
+void foo() {
+  struct pair @`U p = new pair(1,2);
+  let &pair{.x=x, .y=y} = p;
+  ufree(p);
+}
+\end{verbatim}
+Here, we match against the unique pointer \texttt{p}'s two fields
+\texttt{x} and \texttt{y}.  Because we don't make a copy of \texttt{p}, but
+rather only of its fields, \texttt{p} is not consumed.  Therefore,
+\texttt{p} can be safely freed.
+
+Because each of the fields matched against is assigned to the pattern
+variables, unique paths through the original pointer are consumed by virtue
+of being assigned.  At the conclusion of the scope of the pattern, we can
+\emph{unconsume} any location whose pattern variable has not been consumed
+or assigned to, as long as the parent pointer has not been consumed or
+assigned to.  Here's an example:
+\begin{verbatim}
+struct Foo { int *`U x; int *`U y; };
+void foo(struct Foo *`U p) {
+  { let &Foo{.x=x, .y=y} = p; // consumes p->x and p->y
+    ufree(x);                 // consumes x
+  }                           // p->y is unconsumed
+  ufree(p->y);                // p->y consumed
+  ufree(p);                   // p consumed
+}
+\end{verbatim}
+The initial match against \texttt{p} consumes \texttt{p->x} and
+\texttt{p->y}, whose contents are copied to \texttt{x} and \texttt{y},
+respectively.  At the conclusion of the block, \texttt{p->y} is unconsumed
+because it did not change, whereas \texttt{p->x} is not, because \texttt{x}
+was freed within the block.
+
+Note that the following code is illegal:
+\begin{verbatim}
+void foo(struct Foo *`H p) {
+ let &Foo{.x=x, .y=y} = p; // non-unique path!
+ ...
+}
+\end{verbatim}
+To see why, notice that this is equivalent to
+\begin{verbatim}
+void foo(struct Foo *`H p) {
+ let x = p->x;
+ let y = p->y;
+ ...
+}
+\end{verbatim}
+This code is illegal because neither \texttt{p->x} nor \texttt{p->y} is a
+unique path.  We also do not allow \texttt{*} patterns to create aliases of
+the original unique pointer, for the same reason we forbid \texttt{\&}$e$
+when $e$ is a unique pointer.  Unfortunately, this means we don't provide a
+way to assign to matched-against fields.  However, in the case the
+matched-against struct, we can just do this with regular paths.  In the
+above example pattern block, we could do \texttt{p->y = new 1} or something
+like that (even within the scope of the pattern).
+
+Matching against tagged unions is essentially like matching against
+structures, as just described.  Since we do not allow unique pointers to be
+stored within datatypes, there is no change to how datatypes are matched.
 
 \subsubsection{Aliasing Unique Pointers}
+
+XXX need to modify and generalize this to talk about patterns.
 
 Programmers often write code that aliases values temporarily, e.g. by
 storing them in loop iterator variables or by passing them to functions.
@@ -808,6 +948,60 @@ We have made three key changes to the prior version of \texttt{rcopy}:
   than allocation, we would prefer to use the \texttt{alias} construct to
   allow temporary aliasing.
 \end{enumerate}
+
+\subsection{Reference-counted Pointers}
+
+Cyclone also supports reference-counted pointers, which are treated quite
+similarly to unique pointers.  Reference-counted objects are allocated in
+the reference-counted region, named \texttt{`RC}. This region has kind
+\texttt{TR}, which ensures that pointers into it cannot be aliased
+(implicitly) and cannot be freed.  We additionally define the constant
+\texttt{Core::refcount_region}, having type \texttt{region_t<`RC>}, for
+creating reference-counted pointers.  The caveat here is that when you
+allocate something in this region, an extra word will be prepended to your
+data, which contains the reference count, initialized to $1$.
+
+As with unique pointers, no pointer arithmetic is allowed, for similar
+reasons: it can occlude where the "head" of the object is, and thus make
+it impossible to find the hidden reference count.  The reference count
+can be accessed via the routine \texttt{Core::refptr_count}:
+\begin{verbatim}
+  int refptr_count(`a::TA ?`RC ptr)
+    __attribute__((noconsume(1)));
+\end{verbatim} %$ <--- for syntax highlighting
+The constant NULL is allowed to have type \texttt{`a::A ?`RC}, and its
+reference count is always 0.  The \texttt{noconsume} attribute ensures that
+the pointer is not consumed by the call.  Like unique pointers, implicit
+aliasing is not allowed.  Aliases are created explicitly using the routine
+\texttt{Core::alias_refptr}:
+\begin{verbatim}
+  `a ?`RC alias_refptr(`a::TA ?`RC ptr)
+    __attribute__((noconsume(1)));
+\end{verbatim} %$ <--- for syntax highlighting
+This routine returns a copy of its argument, which is itself not consumed.
+Furthermore, the reference count will be incremented by one.  Reference
+counts are reduced explicitly by the routine \texttt{drop_refptr}:
+\begin{verbatim}
+  void drop_refptr(`a::TA ?`RC ptr);
+\end{verbatim}
+In the case that the provided object's reference count is 1 (and is thus
+dropped to zero), the provided pointer is freed.  The flow analysis will
+consume the passed pointer (as is always the case for function arguments),
+so you won't be able to use it afterwards.  Just like unique pointers, you
+can ``forget'' reference-counted pointers without decrementing the count;
+this just means you'll never be able to free the pointer explicitly, but the
+GC will get it once it becomes unreachable.
+
+Just like unique pointers, reference-counted pointers can be stored in
+normal, aliasable datastructures, and accessed using swap (e.g. \texttt{x
+:=: y}).  Because NULL is a \texttt{a::TA ?`RC} pointer, we can always
+cheaply construct a pointer to swap in.  Also, the \texttt{alias} construct
+can work to create temporary (non-counted) aliases of a reference-counted
+pointer.
+
+\subsection{Dynamic Regions}
+
+\emph{To be filled in, but see the tutorial for hints.}
 
 \subsection{Type-Checking Regions}
 

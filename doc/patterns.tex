@@ -3,7 +3,7 @@
 
 Pattern matching provides a concise, convenient way to bind parts of
 large objects to new local variables.  Two Cyclone constructs use
-pattern matching, let declarations and switch statements.  Although
+pattern matching, \texttt{let} declarations and \texttt{switch} statements.  Although
 the latter are more common, we first explain patterns with
 \hyperlink{let_decls}{let declarations} because they have fewer
 complications.  Then we describe all the \hyperlink{pat_forms}{pattern
@@ -13,6 +13,10 @@ complications.  Then we describe all the \hyperlink{pat_forms}{pattern
 You must use patterns to access values carried by
 \hyperref[{sec:taggedunions}]{tagged unions}, including exceptions.  In
 other situations, patterns make code more readable and less verbose.
+
+Note that this section does not include rules for matching against
+  \emph{unique pointers}; this is explained in
+  Section~\ref{sec:unique-patterns}.
 
 \subsection{Let Declarations}\hypertarget{let_decls}{}
 
