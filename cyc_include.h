@@ -57,9 +57,40 @@ extern struct _xtunion_struct * Null_Exception;
 extern struct _xtunion_struct _Match_Exception_struct;
 extern struct _xtunion_struct * Match_Exception;
 
+//// Built-in Run-time Checks
+static inline void * _check_null(void * ptr) {
+  // caller casts result back to right type
+  if(!ptr)
+    _throw(Null_Exception);
+  return ptr;
+}
+static inline char * _check_unknown_subscript(struct _tagged_string arr, 
+					      unsigned elt_sz, unsigned index) {
+  // caller casts first argument and result
+  // multiplication looks inefficient, but C compiler has to insert it otherwise
+  // by inlining, it should be able to avoid actual multiplication
+  char * ans = arr.curr + elt_sz*index;
+  if(!arr.base || ans < arr.base || ans >= arr.last_plus_one)
+    _throw(Null_Exception);
+  return ans;
+}
+static inline char * _check_known_subscript_null(void * ptr, 
+						 unsigned bound,
+						 unsigned elt_sz,
+						 unsigned index) {
+  if(!ptr || index > bound)
+    _throw(Null_Exception);
+  return ((char *)ptr) + elt_sz*index;
+}
+static inline unsigned _check_known_subscript_notnull(unsigned bound,
+						      unsigned index) {
+  if(index > bound)
+    _throw(Null_Exception);
+  return index;
+}
+				  
 //// Allocation
 extern void * GC_malloc(int);
 extern void * GC_malloc_atomic(int);
-
 
 #endif

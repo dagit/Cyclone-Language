@@ -127,7 +127,7 @@ _tagged_string mode){ struct Cyc_Stdio___sFILE* f= Cyc_Stdio_fopen( fname, mode)
 if( f == 0){( void) _throw(( void*)({ struct Cyc_Stdio_FileOpenError_struct*
 _temp2=( struct Cyc_Stdio_FileOpenError_struct*) GC_malloc( sizeof( struct Cyc_Stdio_FileOpenError_struct));
 _temp2[ 0]=({ struct Cyc_Stdio_FileOpenError_struct _temp3; _temp3.tag= Cyc_Stdio_FileOpenError;
-_temp3.f1= fname; _temp3;}); _temp2;}));} return( struct Cyc_Stdio___sFILE*)({
-struct Cyc_Stdio___sFILE* _temp4= f; if( _temp4 == 0){ _throw( Null_Exception);}
-_temp4;});} void Cyc_Stdio_file_close( struct Cyc_Stdio___sFILE* f){ if( Cyc_Stdio_fclose(
-f) != 0){( void) _throw(( void*) Cyc_Stdio_FileCloseError);}}
+_temp3.f1= fname; _temp3;}); _temp2;}));} return( struct Cyc_Stdio___sFILE*)((
+struct Cyc_Stdio___sFILE*) _check_null( f));} void Cyc_Stdio_file_close( struct
+Cyc_Stdio___sFILE* f){ if( Cyc_Stdio_fclose( f) != 0){( void) _throw(( void*)
+Cyc_Stdio_FileCloseError);}}

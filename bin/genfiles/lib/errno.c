@@ -39,6 +39,5 @@ GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp0[ 0]=({ struct Cyc
 _temp1; _temp1.tag= Cyc_Core_InvalidArg; _temp1.f1=( struct _tagged_string)({
 char* _temp2=( char*)"sys_err: integer argument out of range"; struct
 _tagged_string _temp3; _temp3.curr= _temp2; _temp3.base= _temp2; _temp3.last_plus_one=
-_temp2 + 39; _temp3;}); _temp1;}); _temp0;}));} return Cstring_to_string(({ char**
-_temp4=( char**) _sys_errlist; unsigned int _temp5= i; if( _temp5 >= 135u){
-_throw( Null_Exception);} _temp4[ _temp5];}));}
+_temp2 + 39; _temp3;}); _temp1;}); _temp0;}));} return Cstring_to_string((( char**)
+_sys_errlist)[ _check_known_subscript_notnull( 135u, i)]);}

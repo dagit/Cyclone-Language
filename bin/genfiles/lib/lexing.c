@@ -108,45 +108,37 @@ _temp8.last_plus_one - _temp8.curr);}); _temp7->lex_abs_pos= 0; _temp7->lex_star
 _temp7->lex_eof_reached= 1; _temp7;});} struct _tagged_string Cyc_Lexing_lexeme(
 struct Cyc_Lexing_lexbuf* lbuf){ int len= lbuf->lex_curr_pos - lbuf->lex_start_pos;
 struct _tagged_string s= Cyc_Core_new_string( len + 1); Cyc_String_zstrncpy( s,
-0, lbuf->lex_buffer, lbuf->lex_start_pos,( unsigned int) len);({ struct
-_tagged_string _temp9= s; char* _temp11= _temp9.curr + len; if( _temp9.base == 0?
-1:( _temp11 < _temp9.base? 1: _temp11 >= _temp9.last_plus_one)){ _throw(
-Null_Exception);}* _temp11='\000';}); return s;} char Cyc_Lexing_lexeme_char(
-struct Cyc_Lexing_lexbuf* lbuf, int i){ return({ struct _tagged_string _temp12=
-lbuf->lex_buffer; char* _temp14= _temp12.curr +( lbuf->lex_start_pos + i); if(
-_temp12.base == 0? 1:( _temp14 < _temp12.base? 1: _temp14 >= _temp12.last_plus_one)){
-_throw( Null_Exception);}* _temp14;});} int Cyc_Lexing_lexeme_start( struct Cyc_Lexing_lexbuf*
-lbuf){ return lbuf->lex_abs_pos + lbuf->lex_start_pos;} int Cyc_Lexing_lexeme_end(
-struct Cyc_Lexing_lexbuf* lbuf){ return lbuf->lex_abs_pos + lbuf->lex_curr_pos;}
-int Cyc_Lexing_lex_engine( struct Cyc_Lexing_lex_tables* tbl, int start_state,
-struct Cyc_Lexing_lexbuf* lbuf){ int state; int base; int backtrk; int c; state=
-start_state; if( state >= 0){ lbuf->lex_last_pos=( lbuf->lex_start_pos= lbuf->lex_curr_pos);
-lbuf->lex_last_action= - 1;} else{ state=( - state) - 1;} while( 1) { base=({
-struct _tagged_ptr0 _temp15= tbl->lex_base; int* _temp17= _temp15.curr + state;
-if( _temp15.base == 0? 1:( _temp17 < _temp15.base? 1: _temp17 >= _temp15.last_plus_one)){
-_throw( Null_Exception);}* _temp17;}); if( base < 0){ return( - base) - 1;}
-backtrk=({ struct _tagged_ptr0 _temp18= tbl->lex_backtrk; int* _temp20= _temp18.curr
-+ state; if( _temp18.base == 0? 1:( _temp20 < _temp18.base? 1: _temp20 >=
-_temp18.last_plus_one)){ _throw( Null_Exception);}* _temp20;}); if( backtrk >= 0){
-lbuf->lex_last_pos= lbuf->lex_curr_pos; lbuf->lex_last_action= backtrk;} if(
-lbuf->lex_curr_pos >= lbuf->lex_buffer_len){ if( ! lbuf->lex_eof_reached){
-return( - state) - 1;} else{ c= 256;}} else{ c=( int)({ struct _tagged_string
-_temp21= lbuf->lex_buffer; char* _temp23= _temp21.curr +( lbuf->lex_curr_pos ++);
-if( _temp21.base == 0? 1:( _temp23 < _temp21.base? 1: _temp23 >= _temp21.last_plus_one)){
-_throw( Null_Exception);}* _temp23;}); if( c ==( char)( - 1)){ c= 256;}} if(({
-struct _tagged_ptr0 _temp24= tbl->lex_check; int* _temp26= _temp24.curr +( base
-+ c); if( _temp24.base == 0? 1:( _temp26 < _temp24.base? 1: _temp26 >= _temp24.last_plus_one)){
-_throw( Null_Exception);}* _temp26;}) == state){ state=({ struct _tagged_ptr0
-_temp27= tbl->lex_trans; int* _temp29= _temp27.curr +( base + c); if( _temp27.base
-== 0? 1:( _temp29 < _temp27.base? 1: _temp29 >= _temp27.last_plus_one)){ _throw(
-Null_Exception);}* _temp29;});} else{ state=({ struct _tagged_ptr0 _temp30= tbl->lex_default;
-int* _temp32= _temp30.curr + state; if( _temp30.base == 0? 1:( _temp32 < _temp30.base?
-1: _temp32 >= _temp30.last_plus_one)){ _throw( Null_Exception);}* _temp32;});}
-if( state < 0){ lbuf->lex_curr_pos= lbuf->lex_last_pos; if( lbuf->lex_last_action
-== - 1){( void) _throw(( void*)({ struct Cyc_Lexing_Error_struct* _temp33=(
-struct Cyc_Lexing_Error_struct*) GC_malloc( sizeof( struct Cyc_Lexing_Error_struct));
-_temp33[ 0]=({ struct Cyc_Lexing_Error_struct _temp34; _temp34.tag= Cyc_Lexing_Error;
-_temp34.f1=( struct _tagged_string)({ char* _temp35=( char*)"empty token";
-struct _tagged_string _temp36; _temp36.curr= _temp35; _temp36.base= _temp35;
-_temp36.last_plus_one= _temp35 + 12; _temp36;}); _temp34;}); _temp33;}));} else{
-return lbuf->lex_last_action;}} else{ if( c == 256){ lbuf->lex_eof_reached= 0;}}}}
+0, lbuf->lex_buffer, lbuf->lex_start_pos,( unsigned int) len);*(( char*(*)(
+struct _tagged_string, unsigned int, unsigned int)) _check_unknown_subscript)( s,
+sizeof( char), len)='\000'; return s;} char Cyc_Lexing_lexeme_char( struct Cyc_Lexing_lexbuf*
+lbuf, int i){ return*(( char*(*)( struct _tagged_string, unsigned int,
+unsigned int)) _check_unknown_subscript)( lbuf->lex_buffer, sizeof( char), lbuf->lex_start_pos
++ i);} int Cyc_Lexing_lexeme_start( struct Cyc_Lexing_lexbuf* lbuf){ return lbuf->lex_abs_pos
++ lbuf->lex_start_pos;} int Cyc_Lexing_lexeme_end( struct Cyc_Lexing_lexbuf*
+lbuf){ return lbuf->lex_abs_pos + lbuf->lex_curr_pos;} int Cyc_Lexing_lex_engine(
+struct Cyc_Lexing_lex_tables* tbl, int start_state, struct Cyc_Lexing_lexbuf*
+lbuf){ int state; int base; int backtrk; int c; state= start_state; if( state >=
+0){ lbuf->lex_last_pos=( lbuf->lex_start_pos= lbuf->lex_curr_pos); lbuf->lex_last_action=
+- 1;} else{ state=( - state) - 1;} while( 1) { base=*(( int*(*)( struct
+_tagged_ptr0, unsigned int, unsigned int)) _check_unknown_subscript)( tbl->lex_base,
+sizeof( int), state); if( base < 0){ return( - base) - 1;} backtrk=*(( int*(*)(
+struct _tagged_ptr0, unsigned int, unsigned int)) _check_unknown_subscript)( tbl->lex_backtrk,
+sizeof( int), state); if( backtrk >= 0){ lbuf->lex_last_pos= lbuf->lex_curr_pos;
+lbuf->lex_last_action= backtrk;} if( lbuf->lex_curr_pos >= lbuf->lex_buffer_len){
+if( ! lbuf->lex_eof_reached){ return( - state) - 1;} else{ c= 256;}} else{ c=(
+int)*(( char*(*)( struct _tagged_string, unsigned int, unsigned int))
+_check_unknown_subscript)( lbuf->lex_buffer, sizeof( char),( lbuf->lex_curr_pos
+++)); if( c ==( char)( - 1)){ c= 256;}} if(*(( int*(*)( struct _tagged_ptr0,
+unsigned int, unsigned int)) _check_unknown_subscript)( tbl->lex_check, sizeof(
+int), base + c) == state){ state=*(( int*(*)( struct _tagged_ptr0, unsigned int,
+unsigned int)) _check_unknown_subscript)( tbl->lex_trans, sizeof( int), base + c);}
+else{ state=*(( int*(*)( struct _tagged_ptr0, unsigned int, unsigned int))
+_check_unknown_subscript)( tbl->lex_default, sizeof( int), state);} if( state <
+0){ lbuf->lex_curr_pos= lbuf->lex_last_pos; if( lbuf->lex_last_action == - 1){(
+void) _throw(( void*)({ struct Cyc_Lexing_Error_struct* _temp9=( struct Cyc_Lexing_Error_struct*)
+GC_malloc( sizeof( struct Cyc_Lexing_Error_struct)); _temp9[ 0]=({ struct Cyc_Lexing_Error_struct
+_temp10; _temp10.tag= Cyc_Lexing_Error; _temp10.f1=( struct _tagged_string)({
+char* _temp11=( char*)"empty token"; struct _tagged_string _temp12; _temp12.curr=
+_temp11; _temp12.base= _temp11; _temp12.last_plus_one= _temp11 + 12; _temp12;});
+_temp10;}); _temp9;}));} else{ return lbuf->lex_last_action;}} else{ if( c ==
+256){ lbuf->lex_eof_reached= 0;}}}}
