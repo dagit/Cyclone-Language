@@ -1212,7 +1212,7 @@ struct Cyc_Absyn_Tvar*Cyc_Tcutil_new_tvar(void*k);
 # 372
 int Cyc_Tcutil_is_array(void*t);
 # 376
-void*Cyc_Tcutil_promote_array(void*t,void*rgn);struct Cyc_PP_Ppstate;
+void*Cyc_Tcutil_promote_array(void*t,void*rgn,int convert_tag);struct Cyc_PP_Ppstate;
 # 41 "pp.h"
 typedef struct Cyc_PP_Ppstate*Cyc_PP_ppstate_t;struct Cyc_PP_Out;
 # 43
@@ -1369,7 +1369,7 @@ return _tmp33;}
 static void*Cyc_Parse_array2ptr(void*t,int argposn){
 # 298
 return Cyc_Tcutil_is_array(t)?
-Cyc_Tcutil_promote_array(t,argposn?Cyc_Absyn_new_evar(& Cyc_Tcutil_rko,0):(void*)& Cyc_Absyn_HeapRgn_val): t;}struct _tuple18{struct _dyneither_ptr*f1;void*f2;};
+Cyc_Tcutil_promote_array(t,argposn?Cyc_Absyn_new_evar(& Cyc_Tcutil_rko,0):(void*)& Cyc_Absyn_HeapRgn_val,0): t;}struct _tuple18{struct _dyneither_ptr*f1;void*f2;};
 # 311 "parse.y"
 static struct Cyc_List_List*Cyc_Parse_get_arg_tags(struct Cyc_List_List*x){
 struct Cyc_List_List*_tmp34=0;

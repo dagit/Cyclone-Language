@@ -1236,7 +1236,7 @@ void Cyc_Tcutil_check_no_qual(unsigned int loc,void*t);
 # 372
 int Cyc_Tcutil_is_array(void*t);
 # 376
-void*Cyc_Tcutil_promote_array(void*t,void*rgn);struct _tuple15{unsigned int f1;int f2;};
+void*Cyc_Tcutil_promote_array(void*t,void*rgn,int convert_tag);struct _tuple15{unsigned int f1;int f2;};
 # 28 "evexp.h"
 struct _tuple15 Cyc_Evexp_eval_const_uint_exp(struct Cyc_Absyn_Exp*e);
 # 32
@@ -3470,7 +3470,7 @@ void*_stmttmp53=e1->r;void*_tmp55A=_stmttmp53;struct Cyc_Core_Opt*_tmp55E;struct
 void*res_typ=Cyc_Tcexp_tcExpNoPromote(_tmp551,topt,e1);
 if(!Cyc_Tcutil_is_array(res_typ)){
 const char*_tmp9A7;void*_tmp9A6;(_tmp9A6=0,((int(*)(struct _dyneither_ptr fmt,struct _dyneither_ptr ap))Cyc_Tcutil_impos)(((_tmp9A7="tcNew: comprehension returned non-array type",_tag_dyneither(_tmp9A7,sizeof(char),45))),_tag_dyneither(_tmp9A6,sizeof(void*),0)));}
-res_typ=Cyc_Tcutil_promote_array(res_typ,rgn);
+res_typ=Cyc_Tcutil_promote_array(res_typ,rgn,1);
 if(topt != 0){
 if(!Cyc_Tcutil_unify(*topt,res_typ) && Cyc_Tcutil_silent_castable(_tmp551,loc,res_typ,*topt)){
 e->topt=res_typ;
@@ -3496,7 +3496,7 @@ void*res_typ=Cyc_Tcexp_tcArray(_tmp551,e1->loc,elt_typ_opt,0,zero_term,_tmp561);
 e1->topt=res_typ;
 if(!Cyc_Tcutil_is_array(res_typ)){
 const char*_tmp9AD;void*_tmp9AC;(_tmp9AC=0,((int(*)(struct _dyneither_ptr fmt,struct _dyneither_ptr ap))Cyc_Tcutil_impos)(((_tmp9AD="tcExpNoPromote on Array_e returned non-array type",_tag_dyneither(_tmp9AD,sizeof(char),50))),_tag_dyneither(_tmp9AC,sizeof(void*),0)));}
-res_typ=Cyc_Tcutil_promote_array(res_typ,rgn);
+res_typ=Cyc_Tcutil_promote_array(res_typ,rgn,0);
 if(topt != 0){
 # 2623
 if(!Cyc_Tcutil_unify(*topt,res_typ) && Cyc_Tcutil_silent_castable(_tmp551,loc,res_typ,*topt)){
@@ -3555,7 +3555,7 @@ void*_tmp583=res_typ;_npop_handler(1);return _tmp583;};};
 void*Cyc_Tcexp_tcExp(struct Cyc_Tcenv_Tenv*te,void**topt,struct Cyc_Absyn_Exp*e){
 void*t=Cyc_Tcutil_compress(Cyc_Tcexp_tcExpNoPromote(te,topt,e));
 if(Cyc_Tcutil_is_array(t))
-e->topt=(t=Cyc_Tcutil_promote_array(t,(Cyc_Tcutil_addressof_props(te,e)).f2));
+e->topt=(t=Cyc_Tcutil_promote_array(t,(Cyc_Tcutil_addressof_props(te,e)).f2,0));
 return t;}
 # 2702
 void*Cyc_Tcexp_tcExpInitializer(struct Cyc_Tcenv_Tenv*te,void**topt,struct Cyc_Absyn_Exp*e){
@@ -3576,7 +3576,7 @@ void*_tmp590=t;_npop_handler(0);return _tmp590;}_LL2AD:;_LL2AE:
  t=Cyc_Tcutil_compress(t);
 if(Cyc_Tcutil_is_array(t)){
 # 2725
-t=Cyc_Tcutil_promote_array(t,(Cyc_Tcutil_addressof_props(te,e)).f2);
+t=Cyc_Tcutil_promote_array(t,(Cyc_Tcutil_addressof_props(te,e)).f2,0);
 Cyc_Tcutil_unchecked_cast(te,e,t,Cyc_Absyn_Other_coercion);}{
 # 2728
 void*_tmp591=t;_npop_handler(0);return _tmp591;};_LL2A2:;};

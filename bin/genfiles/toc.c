@@ -1235,7 +1235,7 @@ struct Cyc_List_List*Cyc_Tcutil_filter_nulls(struct Cyc_List_List*l);
 # 372
 int Cyc_Tcutil_is_array(void*t);
 # 376
-void*Cyc_Tcutil_promote_array(void*t,void*rgn);struct _tuple12{unsigned int f1;int f2;};
+void*Cyc_Tcutil_promote_array(void*t,void*rgn,int convert_tag);struct _tuple12{unsigned int f1;int f2;};
 # 28 "evexp.h"
 struct _tuple12 Cyc_Evexp_eval_const_uint_exp(struct Cyc_Absyn_Exp*e);
 # 32
@@ -3413,7 +3413,7 @@ e->r=_tmp4C5->r;}
 goto _LL2A9;_LL2AC:{struct Cyc_Absyn_Upper_b_Absyn_Bounds_struct*_tmp589=(struct Cyc_Absyn_Upper_b_Absyn_Bounds_struct*)_tmp584.f1;if(_tmp589->tag != 1)goto _LL2AE;else{_tmp58A=_tmp589->f1;}}{struct Cyc_Absyn_DynEither_b_Absyn_Bounds_struct*_tmp58B=(struct Cyc_Absyn_DynEither_b_Absyn_Bounds_struct*)_tmp584.f2;if(_tmp58B->tag != 0)goto _LL2AE;};_LL2AD:
 # 2851
  if(!Cyc_Evexp_c_can_eval(_tmp58A)){
-const char*_tmpC09;void*_tmpC08;(_tmpC08=0,Cyc_Tcutil_terr(e->loc,((_tmpC09="cannot perform coercion since numelts cannot be determined statically.",_tag_dyneither(_tmpC09,sizeof(char),71))),_tag_dyneither(_tmpC08,sizeof(void*),0)));}
+const char*_tmpC09;void*_tmpC08;(_tmpC08=0,Cyc_Tcutil_terr(e->loc,((_tmpC09="1 cannot perform coercion since numelts cannot be determined statically.",_tag_dyneither(_tmpC09,sizeof(char),73))),_tag_dyneither(_tmpC08,sizeof(void*),0)));}
 # 2854
 if(_tmp4C7 == Cyc_Absyn_NonNull_to_Null){
 const char*_tmpC0D;void*_tmpC0C[1];struct Cyc_String_pa_PrintArg_struct _tmpC0B;(_tmpC0B.tag=0,((_tmpC0B.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)Cyc_Absynpp_exp2string(e)),((_tmpC0C[0]=& _tmpC0B,((int(*)(struct _dyneither_ptr fmt,struct _dyneither_ptr ap))Cyc_Tcutil_impos)(((_tmpC0D="conversion mis-classified as null-check: %s",_tag_dyneither(_tmpC0D,sizeof(char),44))),_tag_dyneither(_tmpC0C,sizeof(void*),1)))))));}

@@ -989,7 +989,7 @@ void*Cyc_Tcutil_rsubstitute(struct _RegionHandle*,struct Cyc_List_List*,void*);
 # 372 "tcutil.h"
 int Cyc_Tcutil_is_array(void*t);
 # 376
-void*Cyc_Tcutil_promote_array(void*t,void*rgn);struct _tuple10{unsigned int f1;int f2;};
+void*Cyc_Tcutil_promote_array(void*t,void*rgn,int convert_tag);struct _tuple10{unsigned int f1;int f2;};
 # 28 "evexp.h"
 struct _tuple10 Cyc_Evexp_eval_const_uint_exp(struct Cyc_Absyn_Exp*e);
 # 32

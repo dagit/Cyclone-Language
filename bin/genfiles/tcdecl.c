@@ -1021,7 +1021,7 @@ int Cyc_Tcutil_same_atts(struct Cyc_List_List*,struct Cyc_List_List*);
 # 372
 int Cyc_Tcutil_is_array(void*t);
 # 376
-void*Cyc_Tcutil_promote_array(void*t,void*rgn);struct Cyc_PP_Ppstate;
+void*Cyc_Tcutil_promote_array(void*t,void*rgn,int convert_tag);struct Cyc_PP_Ppstate;
 # 41 "pp.h"
 typedef struct Cyc_PP_Ppstate*Cyc_PP_ppstate_t;struct Cyc_PP_Out;
 # 43

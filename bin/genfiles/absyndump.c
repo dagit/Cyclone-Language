@@ -1021,7 +1021,7 @@ void*Cyc_Tcutil_compress(void*t);
 # 372 "tcutil.h"
 int Cyc_Tcutil_is_array(void*t);
 # 376
-void*Cyc_Tcutil_promote_array(void*t,void*rgn);
+void*Cyc_Tcutil_promote_array(void*t,void*rgn,int convert_tag);
 # 27 "cyclone.h"
 enum Cyc_Cyclone_C_Compilers{Cyc_Cyclone_Gcc_c  = 0,Cyc_Cyclone_Vc_c  = 1};
 # 33

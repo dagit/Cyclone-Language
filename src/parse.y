@@ -296,7 +296,7 @@ static type_specifier_t long_spec(seg_t loc) {
 static type_t array2ptr(type_t t, bool argposn) {
     // FIX: don't lose zero-term location
   return Tcutil::is_array(t) ? 
-    Tcutil::promote_array(t, argposn ? new_evar(&Tcutil::rko, NULL) : &HeapRgn_val) : t;
+    Tcutil::promote_array(t, argposn ? new_evar(&Tcutil::rko, NULL) : &HeapRgn_val, false) : t;
 }
 
 // The next few functions are used when we have a function (or aggregate)

@@ -983,7 +983,7 @@ extern struct Cyc_Core_Opt Cyc_Tcutil_rko;
 # 372 "tcutil.h"
 int Cyc_Tcutil_is_array(void*t);
 # 376
-void*Cyc_Tcutil_promote_array(void*t,void*rgn);
+void*Cyc_Tcutil_promote_array(void*t,void*rgn,int convert_tag);
 # 34 "formatstr.h"
 struct Cyc_List_List*Cyc_Formatstr_get_format_typs(struct _RegionHandle*,struct Cyc_Tcenv_Tenv*,struct _dyneither_ptr,unsigned int);
 # 37

@@ -1142,7 +1142,7 @@ void Cyc_Tcutil_add_tvar_identities(struct Cyc_List_List*);
 # 372
 int Cyc_Tcutil_is_array(void*t);
 # 376
-void*Cyc_Tcutil_promote_array(void*t,void*rgn);char Cyc_Tcenv_Env_error[10]="Env_error";
+void*Cyc_Tcutil_promote_array(void*t,void*rgn,int convert_tag);char Cyc_Tcenv_Env_error[10]="Env_error";
 # 88 "tcenv.cyc"
 struct Cyc_Tcenv_Env_error_exn_struct Cyc_Tcenv_Env_error_val={Cyc_Tcenv_Env_error};
 # 90

@@ -1123,7 +1123,7 @@ int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*e);
 # 372
 int Cyc_Tcutil_is_array(void*t);
 # 376
-void*Cyc_Tcutil_promote_array(void*t,void*rgn);
+void*Cyc_Tcutil_promote_array(void*t,void*rgn,int convert_tag);
 # 32 "tcexp.h"
 void*Cyc_Tcexp_tcExp(struct Cyc_Tcenv_Tenv*,void**,struct Cyc_Absyn_Exp*);struct Cyc_Tcexp_TestEnv{struct _tuple0*eq;int isTrue;};
 # 39
@@ -1311,7 +1311,7 @@ struct Cyc_Absyn_Pat*_tmp3D9;return(_tmp3D9=_cycalloc(sizeof(*_tmp3D9)),((_tmp3D
 # 222
 static void*Cyc_Tcpat_pat_promote_array(struct Cyc_Tcenv_Tenv*te,void*t,void*rgn_opt){
 struct Cyc_Core_Opt*_tmp3DA;return Cyc_Tcutil_is_array(t)?
-Cyc_Tcutil_promote_array(t,rgn_opt == 0?Cyc_Absyn_new_evar(& Cyc_Tcutil_rko,((_tmp3DA=_cycalloc(sizeof(*_tmp3DA)),((_tmp3DA->v=Cyc_Tcenv_lookup_type_vars(te),_tmp3DA))))): rgn_opt): t;}struct _tuple17{struct Cyc_Absyn_Tqual f1;void*f2;};struct _tuple18{struct Cyc_Absyn_Aggrfield*f1;struct Cyc_Absyn_Pat*f2;};
+Cyc_Tcutil_promote_array(t,rgn_opt == 0?Cyc_Absyn_new_evar(& Cyc_Tcutil_rko,((_tmp3DA=_cycalloc(sizeof(*_tmp3DA)),((_tmp3DA->v=Cyc_Tcenv_lookup_type_vars(te),_tmp3DA))))): rgn_opt,0): t;}struct _tuple17{struct Cyc_Absyn_Tqual f1;void*f2;};struct _tuple18{struct Cyc_Absyn_Aggrfield*f1;struct Cyc_Absyn_Pat*f2;};
 # 229
 static struct Cyc_Tcpat_TcPatResult Cyc_Tcpat_tcPatRec(struct Cyc_Tcenv_Tenv*te,struct Cyc_Absyn_Pat*p,void**topt,void*rgn_pat,int allow_ref_pat,struct Cyc_Absyn_Exp*access_exp){
 # 232

@@ -4112,7 +4112,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
           // create a new region variable for the pointer
           let ptr_rgn = new_evar(NULL,NULL);
           new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,&rk,ptr_rgn,true);          
-          (*trip)[2] = promote_array(t,ptr_rgn);
+          (*trip)[2] = promote_array(t,ptr_rgn,false);
 	}
       }
 
@@ -4895,7 +4895,7 @@ bool is_zero_ptr_type(type_t t, type_t @ptr_type,
     if (conref_def(false,zt)) {
       *elt_type = elt;
       *is_dyneither = false;      
-      *ptr_type = promote_array(t,&HeapRgn_val);
+      *ptr_type = promote_array(t,&HeapRgn_val,false);
       return true;
     } else return false;
   default: return false;
@@ -5544,29 +5544,31 @@ bool is_array(type_t t)
   }
 }
 
-type_t promote_array(type_t t, type_t rgn)
+type_t promote_array(type_t t, type_t rgn, bool convert_tag)
 {
-  switch(compress(t))
-  { 
+  switch(compress(t)) { 
   case &ArrayType(ArrayInfo(et,tq,eopt,zt,ztl)):
     bounds_t b;
-    if (eopt == NULL || eopt->topt == NULL)
-    {
+    if (eopt == NULL)
       b = &DynEither_b_val;
-    }
-    else
-    {
+    else {
       exp_t bnd = (exp_t)eopt;
-      switch(compress((type_t)bnd->topt)) {
-      case &TagType(t):
-	b = new Upper_b(cast_exp(uint_typ,valueof_exp(t,0),false,No_coercion,0));
-	break;
-      default:
-	if(is_const_exp(bnd))
-	  b = new Upper_b(bnd);
-	else
-	  b = &DynEither_b_val;
+      if (convert_tag) {
+	if (bnd->topt == NULL)
+	  impos("cannot convert tag without type!");
+	switch(compress((type_t)bnd->topt)) {
+	case &TagType(t):
+	  b = new Upper_b(cast_exp(uint_typ,valueof_exp(t,0),false,No_coercion,0));
+	  break;
+	default:
+	  if(is_const_exp(bnd))
+	    b = new Upper_b(bnd);
+	  else
+	    b = &DynEither_b_val;
+	}
       }
+      else
+	b = new Upper_b(bnd);
     }
     return atb_typ(et,rgn,tq,
 		   b,

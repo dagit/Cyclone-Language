@@ -2586,7 +2586,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
       type_t res_typ = tcExpNoPromote(te,topt,e1);
       if (!is_array(res_typ))
         impos("tcNew: comprehension returned non-array type");
-      res_typ = promote_array(res_typ,rgn);
+      res_typ = promote_array(res_typ,rgn,true);
       if (topt != NULL) {
 	if (!unify(*topt,res_typ) && silent_castable(te,loc,res_typ,*topt)) {
 	  e->topt = res_typ;
@@ -2615,7 +2615,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
       e1->topt = res_typ;
       if (!is_array(res_typ))
 	impos("tcExpNoPromote on Array_e returned non-array type");
-      res_typ = promote_array(res_typ,rgn);
+      res_typ = promote_array(res_typ,rgn,false);
       if (topt != NULL) {
 	// try unifying res_typ and topt -- if that fails, then see if we
 	// can cast res_typ to topt, and insert the cast so that the code
@@ -2692,7 +2692,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
 type_t tcExp(tenv_t te, type_t * topt, exp_t e) {
   type_t t = compress(tcExpNoPromote(te, topt, e));
   if (is_array(t))
-    e->topt = t = promote_array(t,addressof_props(te,e)[1]);
+    e->topt = t = promote_array(t,addressof_props(te,e)[1],false);
   return t;
 }
 
@@ -2722,7 +2722,7 @@ type_t tcExpInitializer(tenv_t te, type_t * topt, exp_t e) {
     t = compress(t);
     if (is_array(t))
     {
-      t = promote_array(t,addressof_props(te,e)[1]);
+      t = promote_array(t,addressof_props(te,e)[1],false);
       unchecked_cast(te,e,t,Other_coercion);
     }
     return t;

@@ -1149,7 +1149,7 @@ enum Cyc_Tcenv_NewStatus{Cyc_Tcenv_NoneNew  = 0,Cyc_Tcenv_InNew  = 1,Cyc_Tcenv_I
 # 372 "tcutil.h"
 int Cyc_Tcutil_is_array(void*t);
 # 376
-void*Cyc_Tcutil_promote_array(void*t,void*rgn);
+void*Cyc_Tcutil_promote_array(void*t,void*rgn,int convert_tag);
 # 73 "cycdoc.cyl"
 static void Cyc_dump_begin(){
 # 75

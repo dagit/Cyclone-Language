@@ -373,7 +373,7 @@ bool is_array(type_t t);
 
 // If t is an array type, promote it to an at-pointer type into the
 // specified region.
-type_t promote_array(type_t t, type_t rgn);
+type_t promote_array(type_t t, type_t rgn, bool convert_tag);
 
 }
 #endif

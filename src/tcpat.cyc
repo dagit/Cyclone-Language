@@ -221,7 +221,7 @@ static pat_t wild_pat(seg_t loc) {
 // Promote an array, using an evar for the region if necessary.
 static type_t pat_promote_array(tenv_t te, type_t t, type_opt_t rgn_opt) {
   return is_array(t) ?
-    promote_array(t, (rgn_opt == NULL) ? new_evar(&Tcutil::rko,new Opt(lookup_type_vars(te))) : rgn_opt) : t;
+    promote_array(t, (rgn_opt == NULL) ? new_evar(&Tcutil::rko,new Opt(lookup_type_vars(te))) : rgn_opt,false) : t;
 }
 
 #define DL 0

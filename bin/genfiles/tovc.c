@@ -1041,7 +1041,7 @@ void*Cyc_Tcutil_fndecl2typ(struct Cyc_Absyn_Fndecl*);
 # 372 "tcutil.h"
 int Cyc_Tcutil_is_array(void*t);
 # 376
-void*Cyc_Tcutil_promote_array(void*t,void*rgn);
+void*Cyc_Tcutil_promote_array(void*t,void*rgn,int convert_tag);
 # 35 "toc.h"
 struct _tuple0*Cyc_Toc_temp_var();
 extern struct _dyneither_ptr Cyc_Toc_globals;
