@@ -3,12 +3,13 @@ include ../../Makefile.inc
 DIFF=~/src/cyclone_internal/benchmarks/bin/diff.pl
 
 CYCC = cyclone
-CFLAGS = -O3 -DTIMING -Iinclude
-CYC_FLAGS = -O3 -DTIMING -Iinclude
+OPT = -O3
+CFLAGS = $(OPT) -DTIMING -Iinclude
+CYC_FLAGS = $(OPT) -DTIMING -Iinclude
 # TO DO: only add this library for those execs that need it
 LDFLAGS = -lm -lpcre
 
-EXELANGS := gcc cyclone cyclone-port
+EXELANGS := gcc cyclone cyclone-port java-gcj
 JAVALANGS :=  java
 LANGS := $(EXELANGS) $(JAVALANGS)
 
@@ -38,13 +39,10 @@ CATN=catn$(EXE)
 NOGC_EXEFILES := $(foreach lang,cyclone cyclone-port,$(addprefix $(lang)/, $(addsuffix $(EXE),$(NOGC_BENCHMARKS)))) $(addprefix cyclone/, $(addsuffix $(EXE),$(NOGC_OPT_BENCHMARKS)))
 NOGC_EXEFILES += $(addprefix nocheck-,$(NOGC_EXEFILES))
 
-all: nocheck-cyclone nocheck-cyclone-port $(EXEFILES) $(JAVAFILES) $(NOCHECKFILES)
+all: java-gcj nocheck-cyclone nocheck-cyclone-port $(EXEFILES) $(JAVAFILES) $(NOCHECKFILES)
 
-nocheck-cyclone:
-	mkdir nocheck-cyclone
-
-nocheck-cyclone-port:
-	mkdir nocheck-cyclone-port
+java-gcj nocheck-cyclone-port nocheck-cyclone:
+	mkdir $@
 
 run: all $(CATN)
 	@(RUN=`date +"%d%b%y-%H%M"`; \
@@ -73,8 +71,17 @@ $(CYCHIST): cychist.cyc
 %.eps: %.rout makejgraph
 	cat $< | ./makejgraph | jgraph > $@
 
-foo.diff: 
-	SRCS=$(DIFF) gcc/$*.gcc cyclone/$*.cyc > $@
+%-nocheck.eps: %.rout makejgraph
+	cat $< | grep -v nocheck | ./makejgraph | jgraph > $@
+
+%-small.eps: %.rout makejgraph
+	cat $< | grep -v nocheck | grep -v except | ./makejgraph | jgraph > $@
+
+%-smaller.eps: %.rout makejgraph
+	cat $< | grep -v nocheck | grep -v except | grep -v lists | ./makejgraph | jgraph > $@
+
+#foo.diff: 
+#	SRCS=$(DIFF) gcc/$*.gcc cyclone/$*.cyc > $@
 
 %$(EXE): %.gcc
 	gcc $(CFLAGS) -o $@ -x c $^ $(LDFLAGS)
@@ -82,8 +89,17 @@ foo.diff:
 java/%.java: java-start/%.java
 	./inserttimer < $^ > $@
 
+java-gcj/%.java: java-start/%.java
+	./inserttimer < $^ > $@
+
 %.class: %.java
 	@(cd `dirname $^`; CLASSPATH=$CLASSPATH:../jakarta-oro-2.0.8.jar javac `basename $^`; echo javac $^)
+
+java-gcj/regexmatch$(EXE): java-gcj/regexmatch.java
+	@(cd java-gcj; CLASSPATH=$$CLASSPATH:../jakarta-oro-2.0.8.jar gcj $(OPT) --main=regexmatch regexmatch.java -o regexmatch ../jakarta-oro-2.0.8.o; echo gcj regexmatch.java)
+
+%$(EXE): %.java
+	@(cd `dirname $^`; FILE=`basename $^`; CLASS=`basename $*`; CLASSPATH=$$CLASSPATH:../jakarta-oro-2.0.8.jar gcj $(OPT) --main=$$CLASS -o $$CLASS $$FILE; echo gcj $$FILE)
 
 # Cyclone targets
 

@@ -18,11 +18,11 @@ pthread_cond_t control;
 int producer(int *arg);
 int consumer(int *arg);
 int count, data, consumed, produced;
-
+int n;
 
 int
 main(int argc, char ??argv) {
-    int n = ((argc == 2) ? atoi(argv[1]) : 1);
+    n = ((argc == 2) ? atoi(argv[1]) : 1);
     pthread_t t1, t2;
 
     START_TIME

@@ -2114,8 +2114,12 @@ hstub pthread_cond_wait {
   extern "C" int pthread_cond_wait (pthread_cond_t *cond, pthread_mutex_t *mutex);
 }
 hstub pthread_create {
+      // TODO: could change the type of pthread_t to be pthread_t<`a>
+      // where `a is the return type for the invocation function.
+      // Then the type of join() could be changed to properly
+      // communicate the type back to the caller.
   extern "C" int pthread_create (pthread_t @thread, const pthread_attr_t *attr,
-                                 `a (*__start_routine) (`b), `b arg);
+                                 `a (*__start_routine) (`b), `b arg: regions(`b) > `H);
 }
 hstub pthread_join {
   extern "C" int pthread_join (pthread_t thread, void **ret);
