@@ -60,7 +60,7 @@ nogc.a: nogc.o
 	ranlib $@
 
 precore_c.h: core.h $(CYCC)
-	$(CYCC) -stopafter-toc -pp -D_CYC_GENERATE_PRECORE_C_ -nocyc -noremoveunused -noexpandtypedefs -o $@ -x cyc core.h
+	$(CYCC) -I$(CYC_INC_PATH) -B$(CYC_LIB_PATH) -stopafter-toc -pp -D_CYC_GENERATE_PRECORE_C_ -nocyc -noremoveunused -noexpandtypedefs -o $@ -x cyc core.h
 
 #precore_c.h: precore.h $(CYCC)
 #	$(CYCC) -stopafter-toc -pp -D_CYC_GENERATE_PRECORE_C_ -nocyc -noremoveunused -noexpandtypedefs -o $@ -x cyc precore.h
