@@ -1263,11 +1263,13 @@ static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0,
                         type_t * topt, exp_t e) {
   let topt2 = NULL;
   let tq2 = empty_tqual(0);
+  let nullable = false;
   if (topt != NULL) {
     switch (compress(*topt)) {
-    case &PointerType(PtrInfo(*elttype,tq,PtrAtts(_,_,_,zt,_))):
+    case &PointerType(PtrInfo(*elttype,tq,PtrAtts(_,n,_,_,_))):
       topt2 = elttype;
       tq2 = tq;
+      nullable = conref_val(n);
       break;
     default: break;
     }
@@ -1326,7 +1328,9 @@ static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0,
     tq.real_const = true;
   }
   // FIX: use topt to determine if we should return a datatype type
-  type_t t = at_typ((type_t)e->topt, rgn, tq, false_conref);
+  type_t t = nullable ?
+    star_typ((type_t)e->topt, rgn, tq, false_conref) :
+    at_typ((type_t)e->topt, rgn, tq, false_conref);
   return t;
 }
 
