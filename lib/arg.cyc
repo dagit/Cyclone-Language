@@ -210,10 +210,12 @@ void parse(speclist_t<`r1,`r2> speclist,
 
   int initpos = current;
   unsigned int l = args.size;
+  // ignore any NULL that occurs at the end
+  if (args[l-1] == NULL) l = l-1;
   ++current;
   while (current < l) {
     string_t s = args[current];
-    if (s.size >= 1 && s[0] == '-') {
+    if (s != NULL && s.size >= 1 && s[0] == '-') {
       spec_t action;
       try action = lookup(speclist, s);
       catch {

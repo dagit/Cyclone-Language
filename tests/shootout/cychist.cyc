@@ -2,8 +2,7 @@
  * hist.cyc
  * 
  * Translated from the original hist.c by Greg Morrisett.  The
- * original header for the file is below.  Changes are marked
- * with a "JGM"
+ * original header for the file is below.  
  */
 
 /*
@@ -28,7 +27,6 @@
 #include <string.h>
 #include <math.h>
 
-/* JGM: added noreturn attribute to avoid warning on switch below */
 void USAGE(const char ?name) __attribute__((noreturn))
 { 
   fprintf(stderr,"usage : %s [-n num_bins | -f fraction_from_med] [-v]\n",
@@ -56,7 +54,6 @@ struct bin {
  * and the scaled Semi-Interquartile Range.
  *
  */
-/* JGM: made heapname and bins ? pointers instead of * */
 void print_stats(char ?heapname, double min, struct bin ?bins, int nbins,
                  int npoints, double var, double mean, double med, double SIQR)
 {
@@ -154,7 +151,6 @@ void print_stats(char ?heapname, double min, struct bin ?bins, int nbins,
  * semi-interquartile range.
  *
  */
-/* JGM: made bins and points ? types instead of * */
 void calc_stats(struct bin ?bins, int nbins, double ?points, int npoints,
                 double *var, double *mean, double *SIQR)
 {
@@ -198,7 +194,6 @@ void calc_stats(struct bin ?bins, int nbins, double ?points, int npoints,
  * the bin datastructures.
  *
  */
-/* JGM: made bins a ? type instead of * */
 void init_bins(struct bin ?bins, int nbins, double max, double min)
 {
   double delta = (max - min) / (double)nbins;
@@ -214,8 +209,6 @@ void init_bins(struct bin ?bins, int nbins, double max, double min)
   bins[nbins-1].max = max;
 }
 
-/* JGM: changed prototype and got rid of unnecessary casts to make
- * this compatible with Cyclone's qsort. */
 int comp_doub(const double @a, const double @b)
 {
   double ad = *a, bd = *b;
@@ -232,7 +225,6 @@ int comp_doub(const double @a, const double @b)
  * is sorted.
  *
  */
-/* JGM: made points a ? type and got rid of unnecessary casts in qsort call. */
 void get_max_min_med(double ?points, int npoints, double *max, double *min,
                      double *med)
 {
@@ -263,36 +255,27 @@ void get_max_min_med(double ?points, int npoints, double *max, double *min,
  *
  */
  
-/* JGM: had to move buffer out to toplevel because we use strtok on it.*/
 static char buffer[2000]ZEROTERM;
 
 int main(int argc, const char ?argv[])
 {
   FILE *infp = NULL;
   int nbins = 20, idx = 0;
-  /* JGM: changed from * to ? types */
   char ?heapname, ?point;
   double max, min, delta;
-  /* JGM: changed from * to ? type */
   struct bin ?bins = NULL;
   double points[MAX_POINTS];
   double var, mean, SIQR, med, bindiff = 0.005;
-  /* JGM: changed from * to ? types */
   const char ??arg;
   int verbose = 0;
 
   /* get arguments */
-  /* JGM: the original code assumed argv is zero-terminated which in
-   * Cyclone is not the case.  I rewrote the code to use argc instead
-   * of walking through argv until we found NULL. */
-  arg = argv;
-  while (argc > 1) {
-    arg++;
-    argc--;
+  arg = argv + 1;
+  while (*arg != NULL) {
     if ((*arg)[0] == '-') {
       switch((*arg)[1]) {
         case 'i':
-          arg++; argc--;
+          arg++;
 	  if (infp != NULL) fclose(infp);
 	  infp = fopen(*arg,"r");
 	  if (infp == NULL) {
@@ -303,10 +286,9 @@ int main(int argc, const char ?argv[])
 	  break;
 
         case 'n':
-          arg++; argc--;
+          arg++;
           bindiff = 0.0; /* disable runtime divvying of bin sizes */
           nbins = atoi(*arg);
-          /* JGM: changed cast from * to ? */
           bins = (struct bin ?)calloc(nbins, sizeof(struct bin));
           if (bins == NULL) {
             fprintf(stderr,"Calloc failed\n");
@@ -315,7 +297,7 @@ int main(int argc, const char ?argv[])
           break;
 
         case 'f':
-          arg++; argc--;
+          arg++;
           sscanf(*arg,"%lf",&bindiff);
           break;
 
@@ -330,6 +312,7 @@ int main(int argc, const char ?argv[])
           fprintf(stderr,"Unknown option %s\n",*arg);
           USAGE(argv[0]);
      }
+     arg++;
    }
    else
      break;
@@ -337,7 +320,6 @@ int main(int argc, const char ?argv[])
 
   if (infp == NULL) infp = stdin;
 
-  /* JGM: added header lines so I can tell what the output means */
   printf("name            mean     stddev/  median   loquart  hiquart  SIQR:\n");
   printf("                         mean\n");
 
@@ -368,7 +350,6 @@ int main(int argc, const char ?argv[])
 
       if (bins != NULL)
         free(bins);
-      /* JGM: changed ? to * */
       bins = (struct bin ?)calloc(nbins, sizeof(struct bin));
       if (bins == NULL) {
         fprintf(stderr,"Calloc failed\n");
@@ -388,7 +369,6 @@ int main(int argc, const char ?argv[])
       qhi = 3 * idx / 4;
       lowquart = points[qlow];
       hiquart = points[qhi];
-      /* JGM: made the formatting line up a little better */
       printf("%-15.15s\t%lf %lf %lf %lf %lf %lf\n",
 	     heapname, mean, stddev/mean, med, lowquart, hiquart, SIQR);
     }

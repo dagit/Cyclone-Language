@@ -407,15 +407,21 @@ int main(int argc, char **argv) {
   Cyc_stdin->file = stdin;
   Cyc_stdout->file = stdout;
   Cyc_stderr->file = stderr;
-  // convert command-line args to Cyclone strings
+  // convert command-line args to Cyclone strings -- we add an extra
+  // NULL to the end of the argv so that people can step through argv
+  // until they hit NULL.  
   {struct _tagged_argv args;
   int i, result;
   args.base = 
-    (struct _tagged_arr *)GC_malloc(argc*sizeof(struct _tagged_arr));
+    (struct _tagged_arr *)GC_malloc((argc+1)*sizeof(struct _tagged_arr));
   args.curr = args.base;
-  args.last_plus_one = args.base + argc;
+  args.last_plus_one = args.base + argc + 1;
   for(i = 0; i < argc; ++i)
     args.curr[i] = Cstring_to_string(argv[i]);
+  // plug in final NULL
+  args.curr[argc].base = 0;
+  args.curr[argc].curr = 0;
+  args.curr[argc].last_plus_one = 0;
   result = Cyc_main(argc, args);
 #ifdef CYC_REGION_PROFILE
   fprintf(stderr,"rgn_total_bytes: %d\n",rgn_total_bytes);
