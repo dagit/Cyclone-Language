@@ -554,7 +554,7 @@ void tc(tenv te, list<decl> ds0) {
     genv    ge  = Dict::lookup(te->ae,te->ns); // no longer a copy!!!
 
     switch (d->r) {
-    case Let_d(_,_,_): // FIX
+    case Let_d(_,_,_,_): // FIX
       terr(loc,"top level let-declarations are not implemented");
       break;
     case Union_d: // FIX

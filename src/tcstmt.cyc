@@ -365,7 +365,7 @@ synth tcStmt(tenv te, stmt s0) {
         te = set_unassigned(te,maybe_unassigned(esyn));
       }
       return decl_synth(te,&cons(&$(x,tq,t),null),init,s);
-    case Let_d(p,*topt_ref,e):
+    case Let_d(p,*topt_ref,e,*exhaust):
       let topt = *topt_ref;
       let esyn = tcExp(te,null,e);
       *topt_ref = e->topt; // side effect
@@ -383,7 +383,8 @@ synth tcStmt(tenv te, stmt s0) {
 	terr(d->loc,
 	     xprintf("pattern type %s does not match definition type %s",
 		     typ2string(p->topt->v),typ2string(synth_typ(esyn))));
-      check_let_pat_exhaustive(s0->loc,p);
+      if(check_let_pat_exhaustive(s0->loc,p))
+	*exhaust = true; // side effect
       return decl_synth(te,x,true,s);
     case Namespace_d(n,tds):
       terr(d->loc,"namespace is allowed at top level only");

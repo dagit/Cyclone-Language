@@ -64,9 +64,9 @@ $(list<tvar>, list<$(var,tqual,typ)@>)@ tcPat(tenv te,pat p) {
   case Float_p(s):  t = float_t; break;
   case Bool_p(b):   t = bool_t;  break;
   case Pointer_p(p2):
-    let y = tcPat(te,p2);
-    tv_result = List::append(y[0], tv_result);
-    v_result  = List::append(y[1], v_result);
+    let &$(sub_tvs,sub_vs) = tcPat(te,p2);
+    tv_result = List::append(sub_tvs, tv_result);
+    v_result  = List::append(sub_vs,  v_result);
     t = PointerType(p2->topt->v, empty_conref(), empty_tqual());
     break;
   case Reference_p(v):
@@ -78,9 +78,9 @@ $(list<tvar>, list<$(var,tqual,typ)@>)@ tcPat(tenv te,pat p) {
   case Tuple_p(ps):
     list<$(tqual,typ)@> ts = null;
     for(; ps != null; ps=ps->tl) {
-      let y = tcPat(te,ps->hd);
-      tv_result = List::append(y[0],tv_result);
-      v_result  = List::append(y[1],v_result);
+      let &$(sub_tvs,sub_vs) = tcPat(te,ps->hd);
+      tv_result = List::append(sub_tvs, tv_result);
+      v_result  = List::append(sub_vs,  v_result);
       ts = &cons(&$(empty_tqual(),ps->hd->topt->v),ts);
     }
     t = TupleType(List::imp_rev(ts));
@@ -170,9 +170,9 @@ $(list<tvar>, list<$(var,tqual,typ)@>)@ tcPat(tenv te,pat p) {
     }
     // type check the argument patterns
     for (let dps0 = dps; dps0 != null; dps0 = dps0->tl) {
-      let y = tcPat(te,dps0->hd[1]);
-      tv_result = List::append(y[0],tv_result);
-      v_result  = List::append(y[1],v_result);
+      let &$(sub_tvs,sub_vs) = tcPat(te,dps0->hd[1]);
+      tv_result = List::append(sub_tvs, tv_result);
+      v_result  = List::append(sub_vs,  v_result);
     }
     while (dps != null) {
       let ds    = dps->hd[0];
@@ -231,9 +231,9 @@ $(list<tvar>, list<$(var,tqual,typ)@>)@ tcPat(tenv te,pat p) {
     list<$(tqual,typ)@> tqts = ef->typs;
     while (ps != null && tqts != null) {
       let p2 = ps->hd;
-      let y  = tcPat(te2,p2);
-      tv_result = List::append(y[0], tv_result);
-      v_result  = List::append(y[1], v_result);
+      let &$(sub_tvs,sub_vs) = tcPat(te2,p2);
+      tv_result = List::append(sub_tvs, tv_result);
+      v_result  = List::append(sub_vs,  v_result);
       let field_typ = substitute(all_inst,tqts->hd[1]);
       if (!unify(p2->topt->v,field_typ))
         terr(p2->loc,
@@ -257,9 +257,9 @@ $(list<tvar>, list<$(var,tqual,typ)@>)@ tcPat(tenv te,pat p) {
     list<$(tqual,typ)@> tqts = ef->typs;
     while (ps != null && tqts != null) {
       let p2 = ps->hd;
-      let y = tcPat(te2,p2);
-      tv_result = List::append(y[0],tv_result);
-      v_result = List::append(y[1],v_result);
+      let &$(sub_tvs,sub_vs) = tcPat(te2,p2);
+      tv_result = List::append(sub_tvs, tv_result);
+      v_result  = List::append(sub_vs,  v_result);
       let field_typ = tqts->hd[1];
       if (!unify(p2->topt->v,field_typ))
         terr(p2->loc,
@@ -696,18 +696,13 @@ match<`rhs>(simple_pat_t p, access_t obj, term_desc_t dsc,
 // implies the patterns are not exhastive.  Note also that if
 // any rhs for a match does not show up in the decision tree, then
 // the associated pattern was redundant.
-static void check_exhaust_overlap<`rhs,`a,`b>(decision_t<`rhs> d,
-                                              void not_exhaust(`a), 
-					      `a env1,
-                                              void rhs_appears(`b,`rhs),
-                                              `b env2) {
+static 
+void check_exhaust_overlap<`rhs,`a,`b>(decision_t<`rhs> d,
+				       void not_exhaust(`a), `a env1,
+				       void rhs_appears(`b,`rhs), `b env2) {
   switch (d) {
-  case Tcpat::Failure:
-    not_exhaust(env1);
-    break;
-  case Success(r):
-    rhs_appears(env2,r);
-    break;
+  case Tcpat::Failure: not_exhaust(env1);   break;
+  case Success(r):     rhs_appears(env2,r); break;
   case IfEq(_,_,left,right):
     check_exhaust_overlap(left,  not_exhaust, env1, rhs_appears, env2);
     check_exhaust_overlap(right, not_exhaust, env1, rhs_appears, env2);
@@ -758,16 +753,19 @@ void check_switch_exhaustive(segment loc, list<switch_clause> swcs) {
 // the pattern is not exhaustive (a warning).  There's no way to get
 // something that's redundant (unless we add support for "or" patterns
 // of some sort.)
-static void not_exhaust_warn(segment loc) {
-  warn(loc,"pattern not exhaustive");
+static void not_exhaust_warn($(segment, Bool) @ pr) {
+  pr[1] = false;
+  warn(pr[0],"pattern not exhaustive");
 }
 static void dummy_fn(int i,int j) {
   return;
 }
-void check_let_pat_exhaustive(segment loc,pat p) {
+bool check_let_pat_exhaustive(segment loc,pat p) {
   let match_rules = &cons(&$(compile_pat(p),0),null);
   let dec_tree    = match_compile(match_rules);
-  check_exhaust_overlap(dec_tree, not_exhaust_warn, loc, dummy_fn, 0);
+  let exhaust_env = &$(loc,(Bool)true);
+  check_exhaust_overlap(dec_tree, not_exhaust_warn, exhaust_env, dummy_fn, 0);
+  return exhaust_env[1];
 }
 
 // Check that the patterns in a catch switch are non-overlapping.

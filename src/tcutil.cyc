@@ -788,7 +788,7 @@ static list<$(tqual,typ)@> flatten_typ(tenv te,typ t1) {
     return tqs;
   case StructType(tdnopt,ts):
     let n = tdnopt->v;
-    let sd = lookup_structdecl(te,&Position::dummy_seg,n);
+    let sd = lookup_structdecl(te,null,n);
     let inst = List::zip(sd->tvs,ts);
     if (sd->fields == null) return &cons(&$(empty_tqual(),t1),null);
     // FIX: recursively flatten here

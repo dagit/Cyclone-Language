@@ -49,7 +49,7 @@ namespace Lex {
 }
 
 #define LOC(s,e) Position::segment_of_abs(s->first_line,e->last_line)
-#define DUMMYLOC &dummy_seg
+#define DUMMYLOC null
 
 namespace Parse {
 enum Struct_or_union {
@@ -237,7 +237,7 @@ static void only_vardecl(list<string> params,decl x) {
     if (!exists_param(vd->name[1],params))
       abort(xprintf("%s is not listed as a parameter",vd->name[1]),x->loc);
     break;
-  case Let_d(_,_,_):
+  case Let_d(_,_,_,_):
     abort("let declaration appears in parameter type",x->loc);
     break;
   case Fn_d(_):

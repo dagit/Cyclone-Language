@@ -8,12 +8,13 @@ using String;
 xenum exn {Exit};
 
 /////////// Location tracking///////////
-static string source = ""; // initialized by set_ctxt
+static string source = ""; // initialized by overall control
 struct Segment { int start; int end; };
-struct Segment dummy_seg = Segment{.start=0,.end=0};
 
 segment segment_of_abs(int start, int end) { return &Segment(start,end); }
 segment segment_join(segment s1, segment s2) { 
+  if(s1 == null) return s2;
+  if(s2 == null) return s1;
   return &Segment(s1->start,s2->end); 
 }
 
@@ -23,6 +24,8 @@ string string_of_loc(int loc) {
 }
 
 string string_of_segment(segment s) {
+  if(s == null)
+    return xprintf("%s(unknown)",source);
   Lineno::Pos pos_s = Lineno::pos_of_abs(source,s->start);
   Lineno::Pos pos_e = Lineno::pos_of_abs(source,s->end);
   if (strcmp(pos_s->logical_file,pos_e->logical_file)==0)
@@ -78,6 +81,8 @@ static int line_length = 76;
 // Produce a one line string that shows the peice of the source file containing
 // the error; return also the column numbers the error starts and finishes at.
 static $(string,int,int)@ get_context(segment seg) {
+  if(seg == null)
+    throw Nocontext;
   Lineno::Pos pos_s, pos_e;
   try {
     pos_s = Lineno::pos_of_abs(source,seg->start);
@@ -141,7 +146,7 @@ void post_error(error e) {
 }
 
 //////////// Overall Control ///////////
-void reset_position(string s) { source = s; error_b = false; }
+void reset_position(string s)    { source = s; error_b = false; }
 void set_position_file(string s) { source = s; error_b = false; }
 string get_position_file() { return source; }
 

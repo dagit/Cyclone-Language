@@ -356,7 +356,7 @@ pat new_pat(raw_pat p, segment s) { return &Pat(p,null,s); }
 ////////////////////////// Declarations ///////////////////////////
 decl new_decl(raw_decl r, segment loc) { return &Decl{.r=r, .loc=loc}; }
 decl let_decl(pat p, Opt_t<typ> t_opt, exp e, segment loc) {
-  return new_decl(Let_d(p,t_opt,e),loc);
+  return new_decl(Let_d(p,t_opt,e,false),loc);
 }
 vardecl new_vardecl(qvar x, typ t, Opt_t<exp> init) {
   return &Vardecl{.sc=Public, .name=x, .tq=empty_tqual(),

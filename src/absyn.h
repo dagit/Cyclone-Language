@@ -314,7 +314,7 @@ namespace Absyn {
   EXTERN_DEFINITION enum Raw_decl {
     Var_d(vardecl);
     Fn_d(fndecl);
-    Let_d(pat,Opt_t<typ>,exp);
+    Let_d(pat,Opt_t<typ>,exp,bool); // true => exhaustive
     Struct_d(structdecl);
     Union_d;
     Enum_d(enumdecl);

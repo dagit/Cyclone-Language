@@ -1114,7 +1114,7 @@ Doc decl2doc(decl d) {
                    line_doc(),
                    text("};")));
     break;
-  case Let_d(p,_,e):
+  case Let_d(p,_,e,_):
     s = cat5(text("let "),
              pat2doc(p),
              text(" = "),
@@ -1204,7 +1204,7 @@ to_tms(tqual tq,typ t)
        &cons(Function_mod(WithTypes(args,varargs)),
              x[2]);
     if (typvars != null)
-      tms = &cons(TypeParams_mod(typvars,&Position::dummy_seg),tms);
+      tms = &cons(TypeParams_mod(typvars,null),tms);
     return &$(x[0],x[1],tms);
 
   case Evar(k,topt,i):

@@ -19,7 +19,6 @@ namespace Position {
   //////// Location Tracking /////////
   extern struct Segment;
   typedef struct Segment *segment;
-  extern struct Segment dummy_seg;
   extern segment segment_of_abs(int,int);
   extern segment segment_join(segment,segment);
   extern string string_of_loc(int);
