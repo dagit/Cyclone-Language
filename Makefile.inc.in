@@ -108,7 +108,6 @@ CYCLONE_H:=arg.h\
 	getopt.h\
 	grp.h\
 	hashtable.h\
-	id.h\
 	lexing.h\
 	lineno.h\
 	list.h\
@@ -120,7 +119,6 @@ CYCLONE_H:=arg.h\
 	netinet/tcp.h\
 	position.h\
 	pp.h\
-	precore.h\
 	pwd.h\
 	queue.h\
 	ref.h\
