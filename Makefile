@@ -423,11 +423,11 @@ endif
 # cycstubs.cyc, and cyc_setjmp.h, which are always made by buildlib no
 # matter what.  Other files are silently created by side effect.
 bin/lib/cyc-lib/$(build)/cyc_setjmp.h: bin/cyc-lib/libc.cys
-	bin/buildlib $(BTARGET) -d build/$(build)/include -setjmp > $@
+	bin/buildlib -Bbin/lib/cyc-lib -d build/$(build)/include -setjmp > $@
 
 ifneq ($(build),$(target))
 bin/lib/cyc-lib/$(target)/cyc_setjmp.h: bin/cyc-lib/libc.cys
-	bin/buildlib $(BTARGET) -d build/$(target)/include -setjmp > $@
+	bin/buildlib $(BTARGET) -Bbin/lib/cyc-lib -d build/$(target)/include -setjmp > $@
 endif
 
 #%/cstubs.c: %/cycstubs.cyc
@@ -438,10 +438,15 @@ build/$(target)/include/cstubs.c: build/$(target)/include/cycstubs.cyc
 endif
 
 # FIX: the cp moves some temp files ??
-# FIX: the headers get moved to the $(build) dir but we might want $(target)
-%/cycstubs.cyc: bin/cyc-lib/libc.cys
-	bin/buildlib $(BTARGET) -d $(@D) $<
+build/$(build)/include/cycstubs.cyc: bin/cyc-lib/libc.cys
+	bin/buildlib -Bbin/lib/cyc-lib -d $(@D) $<
 	cp $(@D)/*.h bin/lib/cyc-lib/$(build)/include
+
+ifneq ($(build),$(target))
+build/$(target)/include/cycstubs.cyc: bin/cyc-lib/libc.cys
+	bin/buildlib $(BTARGET) -Bbin/lib/cyc-lib -d $(@D) $<
+	cp $(@D)/*.h bin/lib/cyc-lib/$(target)/include
+endif
 
 build/$(build)/include/precore_c.h: \
   include/core.h \
@@ -465,8 +470,13 @@ build/$(target)/include/cstubs.$(O): build/$(target)/include/cstubs.c build/$(ta
 	$(CC) $(BTARGET) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
 endif
 
-%/cycstubs.$(O): %/cycstubs.cyc bin/cyclone$(EXE)
+build/$(build)/include/cycstubs.$(O): build/$(build)/include/cycstubs.cyc bin/cyclone$(EXE)
+	bin/cyclone$(EXE) -save-c -Iinclude -Bbin/lib/cyc-lib -c -o $@ $<
+
+ifneq ($(build),$(target))
+build/$(target)/include/cycstubs.$(O): build/$(target)/include/cycstubs.cyc bin/cyclone$(EXE)
 	bin/cyclone$(EXE) $(BTARGET) -save-c -Iinclude -Bbin/lib/cyc-lib -c -o $@ $<
+endif
 
 bin/lib/cyc-lib/$(build)/gc.a: gc/.libs/libgc.a
 	cp -p $< $@

@@ -125,6 +125,7 @@ CYCLONE_SRCS:=absyn\
          interface\
 	 tcdecl\
          port\
+         specsfile\
 	 cyclone
 
 CYCDOC_SRCS:=cycdoc\
@@ -152,6 +153,7 @@ CYCDOC_SRCS:=cycdoc\
 	absynpp
 
 BUILDLIB_SRCS:=buildlib\
+        specsfile\
 	warn\
         parse_errors\
 	lex\

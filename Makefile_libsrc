@@ -71,8 +71,8 @@ other_cfiles: cyc_setjmp.h cstubs.c cycstubs.cyc $(C_LIBS)
 
 cyc_setjmp.h cstubs.c cycstubs.cyc: libc.cys
 	-mkdir include
-	$(BUILDLIB) -d include -setjmp > cyc_setjmp.h
-	$(BUILDLIB) -d include $<
+	$(BUILDLIB) -Bbin/lib/cyc-lib -d include -setjmp > cyc_setjmp.h
+	$(BUILDLIB) -Bbin/lib/cyc-lib -d include $<
 	mv include/cstubs.c .
 	mv include/cycstubs.cyc .
 

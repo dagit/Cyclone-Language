@@ -70,6 +70,7 @@
 #include "parse.h"
 #include "tc.h"
 #include "binding.h"
+#include "specsfile.h"
 
 namespace Lex {
   extern void lex_init(bool use_cyclone_keywords);
@@ -82,11 +83,8 @@ using Absyn;
 
 // The string to invoke gcc
 // FIX: this should be taken from the cycspecs file as in cyclone.cyc
-static const char ?GCC = "gcc";
-
-// For -b flag
-static string_t target_arch = NULL;
-static string_t targetting_flags = NULL;
+static const char ?cyclone_cc = "gcc";
+static const char ?target_cflags = "";
 
 static int do_setjmp = 0;
 static int verbose = 0;
@@ -95,7 +93,7 @@ FILE *log_file = NULL;
 FILE *cstubs_file = NULL;
 FILE *cycstubs_file = NULL;
 
-int log(const char ?fmt, ... inject parg_t<`r2> ap) 
+int log(const char ?fmt, ... inject parg_t<`r2> ap)
   __attribute__((format(printf,1,2)))
 {
   if (log_file == NULL) {
@@ -216,7 +214,7 @@ and args = parse
   current_args = new List(a,current_args);
   return args(lexbuf);
 }
-| idchar+ ',' 
+| idchar+ ','
 { let a = new (string_t)substring(lexeme(lexbuf), 0,
                                   lexeme_end(lexbuf)-lexeme_start(lexbuf)-1);
   current_args = new List(a,current_args);
@@ -819,7 +817,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       scan_exp(e3,dep);
       return;
     case &And_e(e1,e2): fallthru(e1,e2);
-    case &Or_e(e1,e2): 
+    case &Or_e(e1,e2):
       scan_exp(e1,dep);
       scan_exp(e2,dep);
       return;
@@ -856,7 +854,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       switch (f->hd) {
       case &StructField(fn): add_target(fn); break;
       case &TupleIndex(_): break;
-      }        
+      }
       return;
     case &Const_e(_):
       return;
@@ -1095,10 +1093,10 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       break;
     case &Region_d(...):
       fprintf(stderr,"Error: unexpected region declaration");
-      exit(1); 
+      exit(1);
 //     case &Alias_d(...):
 //       fprintf(stderr,"Error: unexpected alias declaration");
-//       exit(1); 
+//       exit(1);
     case &Porton_d:
       fprintf(stderr,"Error: unexpected __cyclone_port_on__");
       exit(1);
@@ -1193,7 +1191,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
   }
 
   static FILE *script_file = NULL;
-  int prscript(const char ?fmt, ... inject parg_t<`r2> ap) 
+  int prscript(const char ?fmt, ... inject parg_t<`r2> ap)
     __attribute__((format(printf,1,2)))
   {
     if (script_file == NULL) {
@@ -1248,19 +1246,19 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
   static bool is_other_special(char c) {
     switch (c) {
     case '\\':
-    case '"': 
-    case ';': 
-    case '&': 
-    case '(': 
-    case ')': 
-    case '|': 
-    case '^': 
-    case '<': 
-    case '>': 
+    case '"':
+    case ';':
+    case '&':
+    case '(':
+    case ')':
+    case '|':
+    case '^':
+    case '<':
+    case '>':
     // JGM: I'm commenting this out because we shouldn't be quoting
     // arguments like -idirafter.
-    // case ' ': 
-    case '\n': 
+    // case ' ':
+    case '\n':
     case '\t': return true;
     default: return false;
     }
@@ -1363,8 +1361,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
           prscript("%s",*(l->hd));
         prscript("#include <%s>\n",filename);
         prscript("XXX\n");
-        prscript("$GCC -E -dM -o %s -x c %s && \\\n",macrosfile,cppinfile);
-        prscript("$GCC -E     -o %s -x c %s;\n",declsfile,cppinfile);
+        prscript("$GCC %s -E -dM -o %s -x c %s && \\\n",target_cflags,macrosfile,cppinfile);
+        prscript("$GCC %s -E     -o %s -x c %s;\n",target_cflags,declsfile,cppinfile);
         prscript("rm %s\n",cppinfile);
       }
       else {
@@ -1385,16 +1383,16 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
           str_sepstr(new List(new (string_t)"",
                               List::map(sh_escape_stringptr,rev(cppargs))),
                      " ");
-        char @cmd = (char @)aprintf("%s %s %s -E -dM -o %s -x c %s",
-				    GCC,targetting_flags,
+        char @cmd = (char @)aprintf("%s %s %s %s -E -dM -o %s -x c %s",
+				    cyclone_cc,Specsfile::btarget,target_cflags,
                                     cppargs_string,macrosfile,cppinfile);
         if (verbose)
           fprintf(stderr,"%s\n",cmd);
         if (!system(cmd)) {
           /* No error in creating the file of macros, so go ahead and create
              the file of declarations */
-          cmd = (char @)aprintf("%s %s %s -E -o %s -x c %s",
-				GCC,targetting_flags,
+          cmd = (char @)aprintf("%s %s %s %s -E -o %s -x c %s",
+				cyclone_cc,Specsfile::btarget,target_cflags,
                                 cppargs_string,declsfile,cppinfile);
           if (verbose)
             fprintf(stderr,"%s\n",cmd);
@@ -1434,7 +1432,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     while (slurp(l)) /* skip */;
     fclose(in_file);
     fclose((FILE @)slurp_out);
-    if (mode != FINISH) //JGM:remove(declsfile); 
+    if (mode != FINISH) //JGM:remove(declsfile);
       ;
 
     maybe = fopen(filtereddeclsfile,"r");
@@ -1489,7 +1487,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
         else if (x->fields) {
           for (let fs = x->fields->v; fs != NULL; fs = fs->tl) {
             let f = fs->hd;
-            let &$(_,v) = f->name; 
+            let &$(_,v) = f->name;
             if (Set::member(reachable_set,v)) {
               reachable_decls = new List(decl,reachable_decls);
               break; // exit for-loop
@@ -1598,10 +1596,10 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     default:
       throw new NO_SUPPORT("can't typecheck acquired declarations");
       break;
-    }    
+    }
 
     /* print them */
-    for (let $(d,n) = $(print_decls, names); 
+    for (let $(d,n) = $(print_decls, names);
 	 d != NULL && n != NULL; d = d->tl, n = n->tl) {
       let decl = d->hd;
       let name = n->hd;
@@ -1697,7 +1695,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       fprintf(stderr,"Got Invalid_argument(%s)\n",s); break;
     case &Not_found:
       fprintf(stderr,"Got Not_found\n"); break;
-    case &NO_SUPPORT(s): 
+    case &NO_SUPPORT(s):
       fprintf(stderr,"No support because %s\n",s); break;
     default:
       fprintf(stderr,"Got unknown exception\n"); break;
@@ -1750,8 +1748,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     }
     if (mode == GATHER) {
       /* This will be executed once for each specfile, but who cares */
-      let cmd = aprintf("echo | %s %s -E -dM - -o INITMACROS.h\n",
-                        GCC,targetting_flags);
+      let cmd = aprintf("echo | %s %s %s -E -dM - -o INITMACROS.h\n",
+                        cyclone_cc,Specsfile::btarget,target_cflags);
       if (verbose)
         fprintf(stderr,"%s\n",cmd);
       system((const char @)cmd);
@@ -1762,7 +1760,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     while ( (entry = spec(l)) != NULL) {
       let &$(headerfile,start_symbols,omit_symbols,
              hstubs,cstubs,cycstubs) = (_ @)entry;
-      if (process_file((const char @)headerfile,start_symbols,omit_symbols, 
+      if (process_file((const char @)headerfile,start_symbols,omit_symbols,
                        hstubs,cstubs,cycstubs))
         return 1; /* fatal error in process_file */
     }
@@ -1825,10 +1823,6 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     fprintf(stderr,"Unsupported option %s\n", s);
     badparse = true;
   }
-  static void set_target_arch(string_t<`H> s) {
-    target_arch = s;
-    targetting_flags = aprintf("-b %s",s);
-  }
 
   using Arg;
 
@@ -1857,8 +1851,11 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
                  " compiler special file cyc_setjmp.h.  Cannot be"
                  " used with -gather, -gatherscript, or specfiles."),
       	   new $("-b",false," <machine>",
-                 new String_spec(set_target_arch),
+                 new String_spec(Specsfile::set_target_arch),
                  "Set the target machine for compilation to <machine>"),
+           new $("-B",true,"<file>",
+                 new Flag_spec(Specsfile::add_cyclone_exec_path),
+                 "Add to the list of directories to search for compiler files"),
            new $("-v",false,"",
                  new Set_spec(&verbose),
                  "Verbose operation"),
@@ -1866,7 +1863,11 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
                  new Flag_spec(add_cpparg),
                  "")
            );
-    Arg::parse(options, add_spec_file, no_other, "Options:", argv);
+    // Process the -b and -B arguments
+    let otherargs = Specsfile::parse_b(options, add_spec_file, no_other, "Options:", argv);
+    // Process remaining options
+    Arg::current = 0;
+    Arg::parse(options, add_spec_file, no_other, "Options:", otherargs);
     if (badparse
         || (!do_setjmp && spec_files == NULL)
         || (do_setjmp && spec_files != NULL)
@@ -1877,6 +1878,18 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
                  "Options:");
       return 1;
     }
+    // Read the specs file and get the value for the C compiler and C flags
+    // NB: unlike cyclone.cyc we can do this after reading the otherargs,
+    // since we don't currently look in the cycspecs file for default arguments
+    // to buildlib.  This means that verbose will be set properly here.
+    let specs_file = Specsfile::find_in_arch_path("cycspecs");
+    if (verbose) fprintf(stderr,"Reading from specs file %s\n",specs_file);
+    let specs = Specsfile::read_specs(specs_file);
+    target_cflags = Specsfile::get_spec(specs,"cyclone_target_cflags");
+    if (verbose) fprintf(stderr,"Target cflags are %s\n",target_cflags);
+    cyclone_cc = Specsfile::get_spec(specs,"cyclone_cc");
+    if (!cyclone_cc) cyclone_cc = "gcc";
+    if (verbose) fprintf(stderr,"C compiler is %s\n",cyclone_cc);
 
     if (mode == GATHERSCRIPT) {
       if (verbose)
@@ -1901,7 +1914,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     if (mode == GATHERSCRIPT) {
       prscript("cd %s\n",output_dir);
       prscript("echo | $GCC %s -E -dM - -o INITMACROS.h\n",
-               targetting_flags);
+               target_cflags);
     }
 
     if (!gathering()) {
@@ -1934,7 +1947,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
                 "using Core;\n\n");
       }
     }
-            
+
 
     const char @outdir = (const char @)output_dir;
     if (do_setjmp && process_setjmp(outdir)) {
