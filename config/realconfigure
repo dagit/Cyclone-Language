@@ -129,10 +129,6 @@ function get_def_genfiles {
   case "${OS}" in
     cygwin*)
       DEF_ARCH=i686-unknown-cygwin1.3.3;;
-    solaris*)
-      DEF_ARCH=sparc-sun-solaris2.7;;
-    *bsd*)
-      DEF_ARCH=i386-unknown-openbsd2.8;;
     *)
       DEF_ARCH=i686-unknown-linux
   esac

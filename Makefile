@@ -29,15 +29,13 @@ CYC_BIN_PATH := $(CYCDIR)/bin
 CYC_LIB_PATH := $(CYCDIR)/bin/lib
 CYC_INC_PATH := $(CYCDIR)/lib
 
-all: $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/gc.a cyclone tools aprof libs 
+all: $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/gc.a cyclone \
+	$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include \
+	tools aprof libs 
 
 # FIX: a bug in buildlib forces us to use a relative path for -d
 cyclone: $(CYC_LIB_PATH)
 	$(MAKE) -C bin/genfiles install 
-	-mkdir $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include
-	tar -z -xf bin/genfiles/$(ARCH).headers.tgz -C $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include
-	bin/buildlib -d bin/lib/cyc-lib/$(ARCH)/include -finish bin/cyc-lib/libc.cys
-	find $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include -name '*.i[BC]' -exec rm \{\} \;
 
 tools:
 	$(MAKE) -C tools/bison  install 
@@ -59,10 +57,22 @@ nocheck:
 .PHONY: tools cyclone aprof libs nocheck
 
 $(CYC_LIB_PATH):
-	mkdir $(CYC_LIB_PATH)
-	mkdir $(CYC_LIB_PATH)/cyc-lib
-	mkdir $(CYC_LIB_PATH)/cyc-lib/$(ARCH)
-	cp bin/cyc-lib/cyc_include.h $(CYC_LIB_PATH)/cyc-lib
+	mkdir $@
+	mkdir $@/cyc-lib
+	mkdir $@/cyc-lib/$(ARCH)
+	cp $(CYCDIR)/bin/cyc-lib/cyc_include.h $@/cyc-lib
+
+$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include: $(CYC_LIB_PATH) \
+  $(CYCDIR)/bin/genfiles/$(ARCH).headers.tgz
+	-mkdir $@
+	tar -z -xf bin/genfiles/$(ARCH).headers.tgz -C $@
+	$(CYCDIR)/bin/buildlib -d bin/cyc-lib/$(ARCH)/include -finish $(CYCDIR)/bin/cyc-lib/libc.cys
+	find $@ -name '*.i[BC]' -exec rm \{\} \;
+
+$(CYCDIR)/bin/genfiles/$(ARCH).headers.tgz:
+	$(CYCDIR)/bin/buildlib $(CYCDIR)/bin/cyc-lib/libc.cys -gather
+	tar -z -cf $@ -C BUILDLIB.OUT .
+	$(RM) -r BUILDLIB.OUT
 
 $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/gc.a: gc/gc.a $(CYC_LIB_PATH)
 	cp -p $< $@
