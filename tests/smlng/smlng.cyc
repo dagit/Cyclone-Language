@@ -197,17 +197,17 @@ int main(int argc, char ??argv) {
   }
   start_timer(tlimit);
   buf_t b = init_buf();
-  fprintf(stderr,"getting docs\n"); fflush(stderr);
+  fprintf(stderr,"getting docs... "); fflush(stderr);
   doc_t orig = get_docs(init_context,b,stdin);
-  fprintf(stderr,"copying docs\n"); fflush(stderr);
+  fprintf(stderr,"%d\ncopying docs... ",check_time()); fflush(stderr);
   doc_t d = copy_doc(orig);
-  fprintf(stderr,"up_opt\n"); fflush(stderr);
+  fprintf(stderr,"%d\nup_opt... ",check_time()); fflush(stderr);
   let $(d2, _) = TagElim::up_opt(b,d);
   d = d2;
-  fprintf(stderr,"dumping docs\n"); fflush(stderr);
+  fprintf(stderr,"%d\ndumping docs... ",check_time()); fflush(stderr);
   dump(b,d);
   let t = check_time();
-  fprintf(stderr,"time left: %d sec out of %s sec\n",t,tlimit); fflush(stderr);
+  fprintf(stderr,"%d\ntime left: %d sec out of %s sec\n",t,t,tlimit); fflush(stderr);
   //fprintf(stderr,"validating docs\n",t); fflush(stderr);
   //validate_docs(b,d,orig);
   return 0;

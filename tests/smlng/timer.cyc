@@ -17,8 +17,8 @@ void start_timer(string_t limit) {
     fprintf(stderr,"Why did we call start_timer more than once?!?!");
   // just to be careful, maybe we've already been running for a second
   int total_secs = Stdlib::atoi(limit) - 1;
-  if(total_secs < MINIMUM_TIME)
-    fprintf(stderr,"Something is really wrong, we have less than 180 seconds");
+  if(total_secs < MINIMUM_TIME - 1)
+    fprintf(stderr,"Something is really wrong, we have less than 180 seconds\n");
   death_time = Time::time(null);
   // fprintf(stderr,"Start time: %d\n Limit: %d\n", death_time, total_secs);
   death_time += total_secs;
