@@ -33,6 +33,10 @@ extern void set_encloser(Absyn::stmt_t enclosee, Absyn::stmt_t encloser);
 
 // the entry point
 extern void cf_check(List::list_t<Absyn::decl_t> ds);
+
+// controls whether or not we warn when we lose a unique pointer --
+// costs some performance probably.
+extern bool warn_lose_unique;
 }
 
 #endif

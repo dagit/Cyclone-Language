@@ -282,6 +282,7 @@ static void set_stop_after_asmfile() {
 static void set_all_warnings() {
   Toc::warn_bounds_checks = true;
   Toc::warn_all_null_deref = true;
+  NewControlFlow::warn_lose_unique = true;
 }
 
 /* This only works enough to support cycdoc so far */
@@ -1191,6 +1192,9 @@ int main(int argc, string_t<`H> ?`H argv) {
          rnew(r)$("-b",false,"<arch>",
                rnew(r)String_spec(set_target_arch),
                "Set target architecture; implies -stopafter-toc"),
+         rnew(r)$("-Wlose-unique",false,"",
+               rnew(r)Set_spec(&NewControlFlow::warn_lose_unique),
+               "Try to warn when a unique pointer might get lost"),
          rnew(r)$("-Wall",false,"",
                rnew(r)Unit_spec(set_all_warnings),
                "Turn on all warnings"),

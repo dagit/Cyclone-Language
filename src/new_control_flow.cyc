@@ -61,6 +61,8 @@ namespace NewControlFlow;
 typedef Dict::dict_t<`a,`b> dict_t<`a,`b>;
 typedef Position::seg_t     seg_t;
 
+// flag controlling whether or not to warn when we lose unique pointers
+bool warn_lose_unique = false;
 //////////////////////////// Statement Decoration //////////////////////////
 struct CFStmtAnnot {
   stmt_t encloser; // for checking goto-scope -- no other use
@@ -166,6 +168,28 @@ static void update_tryflow(analenv_t<`r> env, flow_t<`r> new_flow) {
   }    
 }
 
+static void check_unique_root($(analenv_t<`r>,seg_t,flowdict_t<`r>)@ckenv,
+                              root_t<`r> root, absRval_t<`r> rval) {
+  let &$(env,loc,new_fd) = ckenv;
+  switch (root) {
+  case &VarRoot(vd):
+    if (!Dict::lookup_bool(new_fd,root,&rval) &&
+        Tcutil::is_noalias_pointer_or_aggr(env->fenv->r,vd->type)) {
+      switch (rval) {
+      case &Consumed(...):
+      case &UnknownR(NoneIL):
+      case &Zero: break;
+      default:
+        Tcutil::warn(loc,"unique pointer(s) reachable from %s may become unreachable.",qvar2string(vd->name));
+        break;
+      }
+      break;
+    }
+    break;
+  default: break;
+  }
+}
+
 // Sound KLUDGE: same explanation as for update_tryflow above
 // need to check for less than after the join b/c of the approximation
 // else may not terminate.
@@ -173,6 +197,17 @@ static void update_flow(analenv_t<`r> env, stmt_t s, flow_t<`r> flow) {
   let annot    = get_stmt_annot(s);
   let sflow    = get_stmt_flow(env,s);
   let new_flow = join_flow(env->fenv, env->all_changed, flow, *sflow);
+  if (warn_lose_unique) {
+    switch $(flow,new_flow) {
+    case $({.ReachableFL = $(fd,_)},{.ReachableFL = $(new_fd,_)}):
+      let ckenv = $(env,s->loc,new_fd);
+      Dict::iter_c(check_unique_root,&ckenv,fd);
+      break;
+    default: break;
+    }
+  }
+  // check for variables that might be going out of scope and have
+  // unique pointers in them.
   if(!flow_lessthan_approx(new_flow, *sflow)) {
     DEBUG_PRINT("update_flow for |%s|: flow changed\n*sflow=\n",
 		Absynpp::stmt2string(s));
@@ -1634,6 +1669,25 @@ anal_test(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
   }
 }
 
+static void check_for_unused_unique($(seg_t,analenv_t<`r>,flowdict_t<`r>)@ ckenv,
+                                    root_t<`r> root, absRval_t<`r> rval) {
+  let &$(loc,env,fd) = ckenv;
+  switch (root) {
+  case &VarRoot(vd):
+    if (Tcutil::is_noalias_pointer_or_aggr(env->fenv->r,vd->type))
+      switch (rval) {
+      case &Consumed(...):
+      case &Zero:
+      case &UnknownR(NoneIL): break;
+      default:
+        Tcutil::warn(loc,"unique pointers reachable from %s may become unreachable",qvar2string(vd->name));
+        break;
+      }
+    break;
+  default: break;
+  }
+}
+
 static void check_init_params(seg_t loc, analenv_t<`r> env, flow_t<`r> flow) {
   switch(flow) {
   case {.BottomFL = _}: return;
@@ -1642,6 +1696,10 @@ static void check_init_params(seg_t loc, analenv_t<`r> env, flow_t<`r> flow) {
       if(initlevel(env->fenv,d,lookup_place(d,inits->hd))!=AllIL)
 	Tcutil::terr(loc, "function may not initialize all the parameters "
 		     "with attribute 'initializes'");
+    if (warn_lose_unique) {
+      let check_env = $(loc,env,d);
+      Dict::iter_c(check_for_unused_unique,&check_env,d);
+    }
     return;
   }
 }
@@ -1686,6 +1744,49 @@ static flow_t<`r> anal_scs(analenv_t<`r> env,flow_t<`r> inflow,
   return BottomFL(); // not reached if last case falls through
 }
 
+// the variables defined by vd are about to go out of scope -- check
+// that there aren't hidden unique pointers in them.
+static void check_dropped_unique_vd($(analenv_t<`r>, flowdict_t<`r>, seg_t)@ vdenv, 
+                                     Absyn::vardecl_t vd) {
+  let &$(env,fd,loc) = vdenv;
+  if (Tcutil::is_noalias_pointer_or_aggr(env->fenv->r,vd->type)) {
+    // FIX: avoid allocation of var-root
+    let root = rnew(env->fenv->r) VarRoot(vd);
+    let rval = Dict::lookup(fd,root);
+    switch (rval) {
+    case &Consumed(...):
+    case &Zero:
+    case &UnknownR(NoneIL): break;
+    default:
+      Tcutil::warn(loc,"unique pointers may still exist after variable %s goes out of scope",qvar2string(vd->name));
+
+      break;
+    }
+  }
+}
+
+static void check_dropped_unique(analenv_t<`r> env, flow_t<`r> inflow, 
+                                 decl_t decl) {
+  switch (inflow) {
+  case {.ReachableFL = $(fd,_)}:
+    let vdenv = $(env,fd,decl->loc);
+    let fenv = env->fenv;
+    switch (decl->r) {
+    case &Var_d(vd):
+      check_dropped_unique_vd(&vdenv,vd);
+      break;
+    case &Let_d(_,&Core::Opt(vds),_): fallthru(vds);
+    case &Letv_d(vds):
+      List::iter_c(check_dropped_unique_vd,&vdenv,vds);
+      break;
+    default: break;
+    }
+    break;
+  default: break;
+  }
+  return;
+}
+
 static flow_t<`r> anal_stmt(analenv_t<`r> env, flow_t<`r> inflow, stmt_t s) {
   flow_t outflow;
   //DEBUG_PRINT("before statement <%s>, the flow is {",stmt2string(s));
@@ -1709,10 +1810,10 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env, flow_t<`r> inflow, stmt_t s) {
     check_init_params(s->loc,env,f);
     return BottomFL();
     
-  case &Exp_s(e): outflow = anal_Rexp(env,false,inflow,e)[0]; break;
+  case &Exp_s(e): return anal_Rexp(env,false,inflow,e)[0]; 
 
   case &Seq_s(s1,s2): 
-    outflow = anal_stmt(env, anal_stmt(env, inflow, s1), s2); break;
+    return anal_stmt(env, anal_stmt(env, inflow, s1), s2); 
 
   case &IfThenElse_s(e,s1,s2):
     let $(f1t,f1f) = anal_test(env,inflow,e);
@@ -1724,11 +1825,7 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env, flow_t<`r> inflow, stmt_t s) {
     DEBUG_PRINT("}\n");
     let ff = anal_stmt(env,f1f,s2);
     let ft = anal_stmt(env,f1t,s1);
-    outflow = join_flow(fenv, env->all_changed, ft, ff);
-    DEBUG_PRINT("after if, the flow is {");
-    DEBUG_PRINT_F(print_flow,outflow);
-    DEBUG_PRINT("}\n");
-    break;
+    return join_flow(fenv, env->all_changed, ft, ff);
 
   case &While_s($(e,cont),body):
     DEBUG_PRINT("in anal_stmt:While_s for |%s| (cont=|%s|)\n",
@@ -1739,8 +1836,7 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env, flow_t<`r> inflow, stmt_t s) {
     let $(f1t,f1f) = anal_test(env,e_inflow,e);
     let body_outflow = anal_stmt(env,f1t,body);
     update_flow(env, cont, body_outflow);
-    outflow = f1f;
-    break;
+    return f1f;
 
   case &Do_s(body,$(e,cont)):
     DEBUG_PRINT("in anal_stmt:Do_s for |%s|\n",
@@ -1750,9 +1846,7 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env, flow_t<`r> inflow, stmt_t s) {
     let e_inflow = *eflow_ptr;
     let $(f1t,f1f) = anal_test(env,e_inflow,e);
     update_flow(env, body, f1t);
-    outflow = f1f;
-    DEBUG_PRINT("done with Do_s\n");
-    break;
+    return f1f;
 
     // MWH: ok to drop these?  Seems like "null" expressions
   case &For_s(e1,$(e2,guard),$(e3,cont),body):
@@ -1765,8 +1859,7 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env, flow_t<`r> inflow, stmt_t s) {
     let e3_inflow  = *e3flow_ptr;
     let e3_outflow = anal_Rexp(env,false,e3_inflow,e3)[0];
     update_flow(env, guard, e3_outflow);
-    outflow = f2f;
-    break;
+    return f2f;
 
     // eg. of when this can happen is when destination is end of function
   case &Break_s(NULL): return BottomFL();
@@ -1806,8 +1899,7 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env, flow_t<`r> inflow, stmt_t s) {
   case &Switch_s(e,scs):
     let $(f,r) = anal_Rexp(env,true,inflow,e);
     f = use_Rval(env,e->loc,f,r);
-    outflow = anal_scs(env,f,scs);
-    break;
+    return anal_scs(env,f,scs);
     
   case &TryCatch_s(s1,scs):
     // order very important here
@@ -1831,7 +1923,7 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env, flow_t<`r> inflow, stmt_t s) {
     }
     outflow = s1_outflow; // really join with scs_outflow, but it's BottomFL
     DEBUG_PRINT("leaving anal_stmt:TryCatch_e\n");
-    break;
+    return outflow;
 
     // must handle alias declarations separate from other decls because
     // we need to reset some reachable stuff.
@@ -1870,7 +1962,10 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env, flow_t<`r> inflow, stmt_t s) {
       DEBUG_PRINT_F(print_flow,f);
       DEBUG_PRINT("}\n");
       f = anal_stmt(env,f,s1);
-      // plug old rvalue back into place
+      // plug old rvalue back into place -- actually, we plug in an
+      // approximation of the old rvalue, according to its init-level.
+      // this avoids some complications with expanded nodes that end
+      // up escaping.  
       switch (f) {
       case {.ReachableFL = $(fd,relns)}:
         fd = assign_place(fenv,s->loc,fd,env->all_changed,p,old_rval_approx);
@@ -1886,26 +1981,26 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env, flow_t<`r> inflow, stmt_t s) {
       return BottomFL();
     }
 
-  case &Decl_s(d,s): outflow = anal_stmt(env,anal_decl(env,inflow,d),s); break;
+  case &Decl_s(d,s): 
+    outflow = anal_stmt(env,anal_decl(env,inflow,d),s); 
+    if (warn_lose_unique) 
+      check_dropped_unique(env,outflow,d);
+    return outflow;
 
-  case &Label_s(_,s): outflow = anal_stmt(env,inflow,s); break;
+  case &Label_s(_,s): return anal_stmt(env,inflow,s); 
 
   case &ResetRegion_s(e):
     let $(f,r) = anal_Rexp(env,true,inflow,e);
     let f2 = use_Rval(env,e->loc,f,r);
     switch (Tcutil::compress(e->topt->v)) {
     case &RgnHandleType(r): 
-      outflow = kill_flow_region(fenv,f,r);
-      break;
+      return kill_flow_region(fenv,f,r);
     default: throw new Core::Impossible("anal_stmt -- reset_region");
     }
-    break;
-
 
   default: throw new Core::Impossible("anal_stmt -- bad stmt syntax"
                                       " or unimplemented stmt form");
   }
-  return outflow;
 }
 
 static void check_nested_fun(flow_env_t<`r>, flow_t<`r> inflow, fndecl_t fd);
@@ -1954,6 +2049,9 @@ static flow_t<`r> anal_decl(analenv_t<`r> env, flow_t<`r> inflow, decl_t decl) {
     check_nested_fun(fenv,inflow,fd);
     let t = fd->cached_typ->v;
     let vd = (vardecl_t)fd->fn_vardecl;
+    // JGM: hmmmm.  nested functions can effect local variables, so if we
+    // call one of these, then we should set all of the local variables
+    // to unknown-init-level.
     return add_vars(fenv,inflow,rnew(env->r) List(vd,NULL),fenv->unknown_all,decl->loc);
 
   case &Region_d(tv,vd,resetable,exp_opt):
