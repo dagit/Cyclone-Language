@@ -75,10 +75,8 @@ other_cfiles: cyc_setjmp.h cstubs.c cycstubs.cyc $(C_LIBS)
 
 cyc_setjmp.h cstubs.c cycstubs.cyc: libc.cys
 	-mkdir include
-	gunzip -c $(CYCDIR)/bin/genfiles/$(UPDATEARCH).headers.tgz | tar xf - -C include
-	$(CYCDIR)/bin/buildlib -d include -finish -setjmp > cyc_setjmp.h
-	$(CYCDIR)/bin/buildlib -d include -finish $<
-	find include -name '\*.i[BC]' -exec rm \{\} \;
+	$(CYCDIR)/bin/buildlib -d include -setjmp > cyc_setjmp.h
+	$(CYCDIR)/bin/buildlib -d include $<
 	mv include/cstubs.c .
 	mv include/cycstubs.cyc .
 
