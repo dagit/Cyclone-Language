@@ -1,5 +1,5 @@
 AC_INIT([[cyclone]],
-        [[0.7]],
+        [[0.8]],
         [[cyclone-bugs-l@lists.cs.cornell.edu]])
 # Look into the config subdir to find config.guess, config.sub, install-sh
 AC_CONFIG_AUX_DIR(config)

@@ -169,6 +169,8 @@ float * _zero_arr_plus_float_fn(float *orig_x, unsigned int orig_sz, int orig_i,
 double * _zero_arr_plus_double_fn(double *orig_x, unsigned int orig_sz, int orig_i,const char *filename, unsigned lineno);
 long double * _zero_arr_plus_longdouble_fn(long double *orig_x, unsigned int orig_sz, int orig_i, const char *filename, unsigned lineno);
 void * _zero_arr_plus_voidstar_fn(void **orig_x, unsigned int orig_sz, int orig_i,const char *filename,unsigned lineno);
+#endif
+
 #define _zero_arr_plus_char(x,s,i) \
   (_zero_arr_plus_char_fn(x,s,i,__FILE__,__LINE__))
 #define _zero_arr_plus_short(x,s,i) \
@@ -183,7 +185,6 @@ void * _zero_arr_plus_voidstar_fn(void **orig_x, unsigned int orig_sz, int orig_
   (_zero_arr_plus_longdouble_fn(x,s,i,__FILE__,__LINE__))
 #define _zero_arr_plus_voidstar(x,s,i) \
   (_zero_arr_plus_voidstar_fn(x,s,i,__FILE__,__LINE__))
-#endif
 
 /* Calculates the number of elements in a zero-terminated, thin array.
    If non-null, the array is guaranteed to have orig_offset elements. */
