@@ -273,7 +273,7 @@ struct _tagged_string *next_arg() {
   return arg;
 }
 
-extern int cyc_main(void);
+extern int Cyc_main(void);
 
 int main(int argc, char **argv)
 {
@@ -281,5 +281,5 @@ int main(int argc, char **argv)
   init_stdlib_io();
   cyc_argc = argc;
   cyc_argv = argv;
-  return cyc_main();
+  return Cyc_main();
 }

@@ -59,18 +59,24 @@ static $(list<designator>,exp)@ make_struct_arg(exp e) {
 static void resolve_unknown_fn(tenv te, exp e, exp e1, list<exp> es) {
   switch (e1->r) {
   case UnknownId_e(q):
-    switch (lookup_ordinary(te,e1->loc,q)) {
-    case VarRes(b):        e->r = FnCall_e(e1,es);            return;
-    case EnumRes(ed,ef):   e->r = Enum_e(null,null,es,ed,ef); return;
-    case XenumRes(xed,ef): e->r = Xenum_e(null,es,xed,ef);    return;
-    case StructRes(sd):
-      _ des = List::map(make_struct_arg,es);
-      if (sd->name != null)
-        e->r = Struct_e(sd->name->v,null,des,sd);
-      else {
-        terr(e->loc,"missing struct name");
-        e->r = Struct_e(q,null,des,sd);
+    try {
+      switch (lookup_ordinary(te,e1->loc,q)) {
+      case VarRes(b):        e->r = FnCall_e(e1,es);            return;
+      case EnumRes(ed,ef):   e->r = Enum_e(null,null,es,ed,ef); return;
+      case XenumRes(xed,ef): e->r = Xenum_e(null,es,xed,ef);    return;
+      case StructRes(sd):
+	_ des = List::map(make_struct_arg,es);
+	if (sd->name != null)
+	  e->r = Struct_e(sd->name->v,null,des,sd);
+	else {
+	  terr(e->loc,"missing struct name");
+	  e->r = Struct_e(q,null,des,sd);
+	}
+	return;
       }
+    } catch {
+    case Dict::Absent:
+      terr(e1->loc, xprintf("unbound identifier %s",qvar2string(q)));
       return;
     }
   default: e->r = FnCall_e(e1,es); return;

@@ -14,9 +14,9 @@
 struct __sFILE; // This is what gcc uses
 typedef struct __sFILE FILE;
 
-extern FILE @cyc_stdout;
-extern FILE @cyc_stdin;
-extern FILE @cyc_stderr;
+extern "C" FILE @cyc_stdout;
+extern "C" FILE @cyc_stdin;
+extern "C" FILE @cyc_stderr;
 
 typedef unsigned int uint;
 //typedef unsigned int size_t;
@@ -26,13 +26,13 @@ typedef char string[?];
 typedef int bool;
 #define false (0)
 #define true (1)
-extern Cstring string_to_Cstring(string);
-extern int system(Cstring);
+extern "C" Cstring string_to_Cstring(string);
+extern "C" int system(Cstring);
 
-extern int f_string_read  (FILE *,string,int,int);
-extern int f_string_write (FILE *,string,int,int);
-extern int f_seek         (FILE *,int);
-extern int fflush         (FILE *);
-extern int fgetc          (FILE *);
+extern "C" int f_string_read  (FILE *,string,int,int);
+extern "C" int f_string_write (FILE *,string,int,int);
+extern "C" int f_seek         (FILE *,int);
+extern "C" int fflush         (FILE *);
+extern "C" int fgetc          (FILE *);
 
 #endif

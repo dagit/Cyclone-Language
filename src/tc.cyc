@@ -599,7 +599,7 @@ static bool okay_externC(segment loc, scope sc) {
     return false;
   case Public: return true;
   case Extern:
-    warn(loc,"converting extern declaration to extern \"C\"");
+    // warn(loc,"converting extern declaration to extern \"C\"");
     return true;
   case ExternC:
     warn(loc,"nested extern \"C\" declaration");
@@ -686,7 +686,11 @@ static void tc_decls(tenv te, list<decl> ds0, bool in_externC) {
   }
 }
 
-void tc(tenv te, list<decl> ds) {
+void tc(tenv te, bool add_cyc_namespace, list<decl> ds) {
+  if (add_cyc_namespace)
+    // wrap an implicit "namespace Cyc" around the declarations
+    ds = &cons(&Decl{Namespace_d("Cyc",ds),null},null);
+
   tc_decls(te,ds,false);
 }
 

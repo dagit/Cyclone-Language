@@ -9,11 +9,11 @@
 
 // These are supplied by C; they do not appear in core.h, we want them
 // to be used only from the functions in this file.
-extern FILE   *fopen(Cstring,Cstring);
-extern int    f_close(FILE *);
-extern int    cyc_argc;
-extern void   start_args();
-extern string next_arg();
+extern "C" FILE   *fopen(Cstring,Cstring);
+extern "C" int    f_close(FILE *);
+extern "C" int    cyc_argc;
+extern "C" void   start_args();
+extern "C" string next_arg();
 namespace String {
 extern string strconcat(string,string);
 }

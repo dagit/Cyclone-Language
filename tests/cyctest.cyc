@@ -964,7 +964,7 @@ namespace MyMath {
 }
 
 
-int cyc_main() {
+int main() {
   printf("*************** CYCLONE TEST SUITE ***************\n\n");
 
   printf("EXCEPTIONS:\n");

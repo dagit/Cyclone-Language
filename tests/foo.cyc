@@ -29,6 +29,7 @@ int yylex() {
   }
 }
 
-void cyc_main() {
+int main() {
   yyparse();
+  return 0;
 }

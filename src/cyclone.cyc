@@ -37,6 +37,7 @@ static bool tc_r       = false;
 static bool toc_r      = false;
 static bool v_r        = false;
 static bool q_r        = false;
+static bool add_cyc_namespace_r = true;
 
 bool @ pp       = &pp_r;
 bool @ up       = &up_r;
@@ -46,6 +47,7 @@ bool @ tc       = &tc_r;
 bool @ toc      = &toc_r;
 bool @ v        = &v_r;
 bool @ q        = &q_r;
+bool @ add_cyc_namespace = &add_cyc_namespace_r;
 
 static string *out_file_name_opt = null;
 
@@ -108,7 +110,7 @@ void compile_file(string filename) {
   if (tds != null && *tc) try {
     Absynpp::expand_typedefs = ! *noexpand;
     Tcenv::tenv te = Tcenv::tc_init();
-    Tc::tc(te,tds);
+    Tc::tc(te, add_cyc_namespace_r, tds);
     if(! *noshake)
       tds = Tc::treeshake(te,tds);
     PRINT_STAGE("Type checking completed\n");
@@ -174,7 +176,7 @@ void compile_file(string filename) {
   return;
 }
 
-int cyc_main() {
+int main() {
 
   list<$(string,Arg::spec,string)@> options =
     &cons(&$((string)"-o",String_spec(set_out_file_name),
@@ -201,7 +203,9 @@ int cyc_main() {
              (string)"print compilation stages verbosely"),
     &cons(&$((string)"-q",Set_spec(q), 
              (string)"compile quietly"),
-          null))))))))))));
+    &cons(&$((string)"-nocyc",Clear_spec(add_cyc_namespace), 
+	     (string)"does not add implicit namespace Cyc"),
+          null)))))))))))));
 
   Lex::lex_init();
   Arg::parse(options, compile_file, "Options:");

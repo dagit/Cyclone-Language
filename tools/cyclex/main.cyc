@@ -11,7 +11,7 @@
 
 using Core;
 
-int cyc_main() {
+int main() {
   string argv[?] = std_args();
   int    arglen  = argv.size;
   if(arglen < 2 || arglen > 3) {
