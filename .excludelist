@@ -12,7 +12,6 @@ cyclone/bin/genfiles/lib
 cyclone/bin/genfiles/src
 cyclone/makedist
 cyclone/\.excludelist
-cyclone/\.version
 cyclone/Makefile.inc$
 cyclone/doc/web
 cyclone/tests/smlng/000-example.txt
