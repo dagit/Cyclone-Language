@@ -762,27 +762,16 @@ typedef struct _dyneither_ptr Cyc_buffer_t;
 typedef struct _dyneither_ptr Cyc_mbuffer_t;
 # 59
 typedef int Cyc_bool;struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};
-# 26 "/home/jgm/cyclone/include/cycboot.h"
+# 26 "cycboot.h"
 typedef unsigned long Cyc_size_t;
 # 33
 typedef unsigned short Cyc_mode_t;struct Cyc___cycFILE;
 # 49
-typedef struct Cyc___cycFILE Cyc_FILE;struct Cyc_String_pa_PrintArg_struct{int tag;
-struct _dyneither_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;
-};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};struct Cyc_LongDouble_pa_PrintArg_struct{
-int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{int tag;short*f1;};
-struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};
+typedef struct Cyc___cycFILE Cyc_FILE;struct Cyc_String_pa_PrintArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};struct Cyc_LongDouble_pa_PrintArg_struct{int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};
 # 68
-typedef void*Cyc_parg_t;struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};
-struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{
-int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned int*f1;};
-struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{
-int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};
-struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};
+typedef void*Cyc_parg_t;struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};
 # 127
-typedef void*Cyc_sarg_t;extern char Cyc_FileCloseError[15];struct Cyc_FileCloseError_exn_struct{
-char*tag;};extern char Cyc_FileOpenError[14];struct Cyc_FileOpenError_exn_struct{
-char*tag;struct _dyneither_ptr f1;};
+typedef void*Cyc_sarg_t;extern char Cyc_FileCloseError[15];struct Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[14];struct Cyc_FileOpenError_exn_struct{char*tag;struct _dyneither_ptr f1;};
 # 89 "core.h"
 typedef unsigned int Cyc_Core_sizeof_t;struct Cyc_Core_Opt{void*v;};
 # 93
@@ -812,27 +801,17 @@ int Cyc_Core_charcmp(char,char);
 # 138
 int Cyc_Core_ptrcmp(void*,void*);
 # 140
-int Cyc_Core_nptrcmp(void*,void*);extern char Cyc_Core_Invalid_argument[17];struct
-Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _dyneither_ptr f1;};extern
-char Cyc_Core_Failure[8];struct Cyc_Core_Failure_exn_struct{char*tag;struct
-_dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_exn_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_exn_struct{
-char*tag;};
+int Cyc_Core_nptrcmp(void*,void*);extern char Cyc_Core_Invalid_argument[17];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_exn_struct{char*tag;};
 # 158
-extern struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val;extern char Cyc_Core_Unreachable[
-12];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _dyneither_ptr f1;};
+extern struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val;extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _dyneither_ptr f1;};
 # 160
 extern struct _RegionHandle*Cyc_Core_heap_region;
 # 162
 extern struct _RegionHandle*Cyc_Core_unique_region;
 # 192
-struct Cyc_Core_NewRegion Cyc_Core__rnew_dynregion(struct _RegionHandle*,const char*
-file,int lineno);
+struct Cyc_Core_NewRegion Cyc_Core__rnew_dynregion(struct _RegionHandle*,const char*file,int lineno);
 # 197
-struct Cyc_Core_NewRegion Cyc_Core__new_dynregion(const char*file,int lineno);
-extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_exn_struct{char*
-tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_exn_struct{
-char*tag;};
+struct Cyc_Core_NewRegion Cyc_Core__new_dynregion(const char*file,int lineno);extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_exn_struct{char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_exn_struct{char*tag;};
 # 244 "core.h"
 inline static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz){
 # 249
@@ -846,12 +825,9 @@ if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.
 # 256
 return 0;
 # 257
-return dyn.curr;};}char Cyc_Core_Invalid_argument[17]="Invalid_argument";char Cyc_Core_SysError[
-9]="SysError";struct Cyc_Core_SysError_exn_struct{char*tag;int f1;};char Cyc_Core_Failure[
-8]="Failure";char Cyc_Core_Impossible[11]="Impossible";char Cyc_Core_Not_found[10]="Not_found";
-# 31 "/home/jgm/cyclone/lib/core.cyc"
-struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val={Cyc_Core_Not_found};
-char Cyc_Core_Unreachable[12]="Unreachable";struct Cyc_Core_Opt;
+return dyn.curr;};}char Cyc_Core_Invalid_argument[17]="Invalid_argument";char Cyc_Core_SysError[9]="SysError";struct Cyc_Core_SysError_exn_struct{char*tag;int f1;};char Cyc_Core_Failure[8]="Failure";char Cyc_Core_Impossible[11]="Impossible";char Cyc_Core_Not_found[10]="Not_found";
+# 31 "core.cyc"
+struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val={Cyc_Core_Not_found};char Cyc_Core_Unreachable[12]="Unreachable";struct Cyc_Core_Opt;
 # 34
 struct Cyc_Core_Opt*Cyc_Core_opt_map(void*(*f)(void*),struct Cyc_Core_Opt*o){
 # 35
@@ -859,18 +835,15 @@ if(o == 0)
 # 36
 return 0;{
 # 37
-struct Cyc_Core_Opt*_tmp6;return(_tmp6=_cycalloc(sizeof(*_tmp6)),((_tmp6->v=(
-void*)f((void*)o->v),_tmp6)));};}
+struct Cyc_Core_Opt*_tmp6;return(_tmp6=_cycalloc(sizeof(*_tmp6)),((_tmp6->v=(void*)f((void*)o->v),_tmp6)));};}
 # 40
 struct _dyneither_ptr Cyc_Core_new_string(unsigned int i){
 # 41
-char*_tmp8;unsigned int _tmp7;return(_tmp7=i,((_tmp8=_cyccalloc_atomic(sizeof(
-char),_tmp7),_tag_dyneither(_tmp8,sizeof(char),_tmp7))));}
+char*_tmp8;unsigned int _tmp7;return(_tmp7=i,((_tmp8=_cyccalloc_atomic(sizeof(char),_tmp7),_tag_dyneither(_tmp8,sizeof(char),_tmp7))));}
 # 44
 struct _dyneither_ptr Cyc_Core_rnew_string(struct _RegionHandle*r,unsigned int i){
 # 45
-char*_tmpA;unsigned int _tmp9;return(_tmp9=i,((_tmpA=_region_calloc(r,sizeof(
-char),_tmp9),_tag_dyneither(_tmpA,sizeof(char),_tmp9))));}
+char*_tmpA;unsigned int _tmp9;return(_tmp9=i,((_tmpA=_region_calloc(r,sizeof(char),_tmp9),_tag_dyneither(_tmpA,sizeof(char),_tmp9))));}
 # 48
 struct Cyc_Core_NewRegion Cyc_Core__new_dynregion(const char*file,int lineno){
 # 49

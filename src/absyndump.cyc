@@ -124,12 +124,13 @@ bool need_space_before() {
 }
 
 void dump(dump_string_t s) {
-  int sz = strlen(s);
-  pos += sz;
-  if (pos > 80) {
+  unsigned int sz = strlen(s);
+  // pos += sz;
+  /* if (pos > 80) {
     pos = sz;
     fputc('\n',*dump_file);
-  } else if(need_space_before())
+    } else */
+  if(need_space_before())
     fputc(' ',*dump_file);
   if(sz >= 1) {
     prev_char = s[sz-1];
@@ -139,14 +140,14 @@ void dump(dump_string_t s) {
 
 void dump_nospace(dump_string_t s) {
   int sz = strlen(s);
-  pos += sz;
+  // pos += sz;
   if(sz >= 1) {
     file_string_write(*dump_file, s, 0, sz);
     prev_char = s[sz-1];
   }
 }
 void dump_char(int c) { // no space
-  ++pos;
+  // ++pos;
   fputc(c,*dump_file);
   prev_char = (char)c;
 }
@@ -163,7 +164,7 @@ void dumploc(Position::seg_t loc) {
     fprintf(*dump_file,"\n# %d\n",d);
   else 
     fprintf(*dump_file,"\n# %d %s\n",d,f);
-  pos = 1;
+  // pos = 1;
   last_file = f;
   last_line = d;
   // dump(s);
@@ -1422,7 +1423,7 @@ void dumptqtd(tqual_t tq, type_t t, void f(`a), `a a) {
 }
 
 void dumpdecllist2file(list_t<decl_t> tdl, FILE @`H f) {
-  pos = 0;
+  //pos = 0;
   *dump_file = f;
   for(; tdl != NULL; tdl = tdl->tl)
     dumpdecl(tdl->hd);

@@ -46,6 +46,8 @@ void yyerror(string_t<`H> s) {
 
 namespace Lex {
 
+bool compile_for_boot_r = false;
+
 struct Trie<`r::R>;
 typedef struct Trie<`r> *`r trie_t<`r>;
 @tagged union TrieChildren<`r::R> {
@@ -669,11 +671,18 @@ static void process_directive(char ?line) {
   char buf[100];
   const char ?filename = "";
   if (sscanf(line, "# %d \"%s", &i, buf) == 2) {
-    filename = aprintf("\"%s",buf);
-    if (linenumber == i && pos_info != NULL && strcmp(pos_info->filename,filename) == 0) return;
-    linenumber = i;
-  } else if (sscanf(line, "# %d <%s", &i, buf) == 2) {
-    filename = aprintf("<%s", buf);
+    if (compile_for_boot_r) {
+      // cut out the path from the filename so the repository does not
+      // have the names in it.  
+      int i = strlen(buf) - 1;
+      int last_slash = -1;
+      while (i >= 0) {
+        if (buf[i] == '/') { last_slash = i; break; };
+        --i;
+      }
+      filename = aprintf("\"%s",buf + last_slash + 1);
+    } else 
+      filename = aprintf("\"%s",buf);
     if (linenumber == i && pos_info != NULL && strcmp(pos_info->filename,filename) == 0) return;
     linenumber = i;
   } else if (sscanf(line, "# %d", &i) == 1) {

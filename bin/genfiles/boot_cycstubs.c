@@ -762,18 +762,14 @@ typedef struct _dyneither_ptr Cyc_buffer_t;
 typedef struct _dyneither_ptr Cyc_mbuffer_t;
 # 59
 typedef int Cyc_bool;struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};
-# 26 "/home/jgm/cyclone/include/cycboot.h"
+# 26 "cycboot.h"
 typedef unsigned long Cyc_size_t;
 # 33
 typedef unsigned short Cyc_mode_t;
 # 38
 int Cyc_open(const char*,int,struct _dyneither_ptr);struct Cyc___cycFILE;
 # 49
-typedef struct Cyc___cycFILE Cyc_FILE;struct Cyc_String_pa_PrintArg_struct{int tag;
-struct _dyneither_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;
-};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};struct Cyc_LongDouble_pa_PrintArg_struct{
-int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{int tag;short*f1;};
-struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};
+typedef struct Cyc___cycFILE Cyc_FILE;struct Cyc_String_pa_PrintArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};struct Cyc_LongDouble_pa_PrintArg_struct{int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};
 # 68
 typedef void*Cyc_parg_t;
 # 79
@@ -791,31 +787,22 @@ int Cyc_fputc(int,struct Cyc___cycFILE*);
 # 106
 int Cyc_fputs(const char*,struct Cyc___cycFILE*);
 # 108
-unsigned long Cyc_fread(struct _dyneither_ptr,unsigned long,unsigned long,struct
-Cyc___cycFILE*);struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct
-Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{
-int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned int*f1;};
-struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{
-int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};
-struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};
+unsigned long Cyc_fread(struct _dyneither_ptr,unsigned long,unsigned long,struct Cyc___cycFILE*);struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};
 # 127
 typedef void*Cyc_sarg_t;
-# 140 "/home/jgm/cyclone/include/cycboot.h"
-unsigned long Cyc_fwrite(struct _dyneither_ptr,unsigned long,unsigned long,struct
-Cyc___cycFILE*);
+# 140 "cycboot.h"
+unsigned long Cyc_fwrite(struct _dyneither_ptr,unsigned long,unsigned long,struct Cyc___cycFILE*);
 # 142
 int Cyc_getc(struct Cyc___cycFILE*);
-# 161 "/home/jgm/cyclone/include/cycboot.h"
+# 161 "cycboot.h"
 int Cyc_putc(int,struct Cyc___cycFILE*);
-# 222 "/home/jgm/cyclone/include/cycboot.h"
+# 222 "cycboot.h"
 int Cyc_ungetc(int,struct Cyc___cycFILE*);
 # 252
 int Cyc_getw(struct Cyc___cycFILE*);
 # 255
-int Cyc_putw(int,struct Cyc___cycFILE*);extern char Cyc_FileCloseError[15];struct
-Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[14];struct
-Cyc_FileOpenError_exn_struct{char*tag;struct _dyneither_ptr f1;};
-# 271 "/home/jgm/cyclone/include/cycboot.h"
+int Cyc_putw(int,struct Cyc___cycFILE*);extern char Cyc_FileCloseError[15];struct Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[14];struct Cyc_FileOpenError_exn_struct{char*tag;struct _dyneither_ptr f1;};
+# 271 "cycboot.h"
 struct Cyc___cycFILE*Cyc_file_open(struct _dyneither_ptr,struct _dyneither_ptr);
 # 272
 void Cyc_file_close(struct Cyc___cycFILE*);
@@ -824,17 +811,9 @@ struct _dyneither_ptr Cyc_getcwd(struct _dyneither_ptr buf,unsigned long size);
 # 89 "core.h"
 typedef unsigned int Cyc_Core_sizeof_t;struct Cyc_Core_Opt{void*v;};
 # 93
-typedef struct Cyc_Core_Opt*Cyc_Core_opt_t;extern char Cyc_Core_Invalid_argument[17];
-struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _dyneither_ptr f1;};
-extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_exn_struct{char*tag;struct
-_dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_exn_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_exn_struct{
-char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_exn_struct{
-char*tag;struct _dyneither_ptr f1;};
+typedef struct Cyc_Core_Opt*Cyc_Core_opt_t;extern char Cyc_Core_Invalid_argument[17];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _dyneither_ptr f1;};
 # 162 "core.h"
-extern struct _RegionHandle*Cyc_Core_unique_region;extern char Cyc_Core_Open_Region[
-12];struct Cyc_Core_Open_Region_exn_struct{char*tag;};extern char Cyc_Core_Free_Region[
-12];struct Cyc_Core_Free_Region_exn_struct{char*tag;};
+extern struct _RegionHandle*Cyc_Core_unique_region;extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_exn_struct{char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_exn_struct{char*tag;};
 # 244 "core.h"
 inline static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz){
 # 249
@@ -849,7 +828,7 @@ if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.
 return 0;
 # 257
 return dyn.curr;};}
-# 28 "/home/jgm/cyclone/lib/boot_cycstubs.cyc"
+# 28 "boot_cycstubs.cyc"
 int open_without_mode(const char*,int);
 # 29
 int open_with_mode(const char*,int,unsigned short);
@@ -858,13 +837,11 @@ int Cyc_open(const char*s,int i,struct _dyneither_ptr ms){
 # 34
 if(_get_dyneither_size(ms,sizeof(unsigned short))>= 1)
 # 35
-return open_with_mode(s,i,*((unsigned short*)_check_dyneither_subscript(ms,
-sizeof(unsigned short),0)));else{
+return open_with_mode(s,i,*((unsigned short*)_check_dyneither_subscript(ms,sizeof(unsigned short),0)));else{
 # 37
 return open_without_mode(s,i);}}struct __abstractFILE;
 # 42
-typedef struct __abstractFILE Cyc_Cstdio___cFILE;struct Cyc___cycFILE{struct 
-__abstractFILE*file;};
+typedef struct __abstractFILE Cyc_Cstdio___cFILE;struct Cyc___cycFILE{struct __abstractFILE*file;};
 # 49
 int fclose(struct __abstractFILE*);
 # 51
@@ -900,8 +877,7 @@ struct Cyc___cycFILE*Cyc_fopen(const char*name,const char*type){
 # 82
 struct __abstractFILE*_tmp0=fopen(name,type);
 # 84
-struct Cyc___cycFILE*_tmp12;return(unsigned int)_tmp0?(_tmp12=_cycalloc(sizeof(*
-_tmp12)),((_tmp12->file=(struct __abstractFILE*)_tmp0,_tmp12))): 0;}
+struct Cyc___cycFILE*_tmp12;return(unsigned int)_tmp0?(_tmp12=_cycalloc(sizeof(*_tmp12)),((_tmp12->file=(struct __abstractFILE*)_tmp0,_tmp12))): 0;}
 # 88
 int fputc(int,struct __abstractFILE*);
 # 90
@@ -915,31 +891,23 @@ int Cyc_fputs(const char*x,struct Cyc___cycFILE*f){
 # 98
 return fputs(x,f->file);}
 # 102
-unsigned long fread(char*,unsigned long,unsigned long,struct __abstractFILE*);
-static char _tmp3[27]="fread: buffer insufficient";
+unsigned long fread(char*,unsigned long,unsigned long,struct __abstractFILE*);static char _tmp3[27]="fread: buffer insufficient";
 # 104
-static struct Cyc_Core_Failure_exn_struct Cyc___fread_failure={Cyc_Core_Failure,{
-_tmp3,_tmp3,_tmp3 + 27}};
+static struct Cyc_Core_Failure_exn_struct Cyc___fread_failure={Cyc_Core_Failure,{_tmp3,_tmp3,_tmp3 + 27}};
 # 106
-unsigned long Cyc_fread(struct _dyneither_ptr ptr,unsigned long size,unsigned long
-nmemb,struct Cyc___cycFILE*f){
+unsigned long Cyc_fread(struct _dyneither_ptr ptr,unsigned long size,unsigned long nmemb,struct Cyc___cycFILE*f){
 # 107
 if(size * nmemb > _get_dyneither_size(ptr,sizeof(char)))(int)_throw((void*)& Cyc___fread_failure);
 # 108
-return fread((char*)_check_null(_untag_dyneither_ptr(ptr,sizeof(char),1)),size,
-nmemb,f->file);}
+return fread((char*)_check_null(_untag_dyneither_ptr(ptr,sizeof(char),1)),size,nmemb,f->file);}
 # 112
-unsigned long fwrite(const char*,unsigned long,unsigned long,struct 
-__abstractFILE*);static char _tmp5[31]="fwrite called with NULL string";
+unsigned long fwrite(const char*,unsigned long,unsigned long,struct __abstractFILE*);static char _tmp5[31]="fwrite called with NULL string";
 # 114
-static struct Cyc_Core_Failure_exn_struct Cyc___fwrite_failure_1={Cyc_Core_Failure,{
-_tmp5,_tmp5,_tmp5 + 31}};static char _tmp7[28]="fwrite: buffer insufficient";
+static struct Cyc_Core_Failure_exn_struct Cyc___fwrite_failure_1={Cyc_Core_Failure,{_tmp5,_tmp5,_tmp5 + 31}};static char _tmp7[28]="fwrite: buffer insufficient";
 # 116
-static struct Cyc_Core_Failure_exn_struct Cyc___fwrite_failure_2={Cyc_Core_Failure,{
-_tmp7,_tmp7,_tmp7 + 28}};
+static struct Cyc_Core_Failure_exn_struct Cyc___fwrite_failure_2={Cyc_Core_Failure,{_tmp7,_tmp7,_tmp7 + 28}};
 # 118
-unsigned long Cyc_fwrite(struct _dyneither_ptr ptr,unsigned long size,unsigned long
-nmemb,struct Cyc___cycFILE*f){
+unsigned long Cyc_fwrite(struct _dyneither_ptr ptr,unsigned long size,unsigned long nmemb,struct Cyc___cycFILE*f){
 # 119
 if(!((unsigned int)ptr.curr))(int)_throw((void*)& Cyc___fwrite_failure_1);else{
 # 121
@@ -975,29 +943,17 @@ int putw(int,struct __abstractFILE*);
 # 157
 int Cyc_putw(int x,struct Cyc___cycFILE*f){
 # 158
-return putw(x,f->file);}char Cyc_FileCloseError[15]="FileCloseError";char Cyc_FileOpenError[
-14]="FileOpenError";struct Cyc___cycFILE*Cyc_file_open(struct _dyneither_ptr fname,
-struct _dyneither_ptr mode);static void _tmp18(struct _dyneither_ptr*fname,
-unsigned int*_tmp17,unsigned int*_tmp16,char**_tmp14){for(*_tmp17=0;*_tmp17 < *
-_tmp16;(*_tmp17)++){(*_tmp14)[*_tmp17]=((const char*)(*fname).curr)[(int)*_tmp17];}}
+return putw(x,f->file);}char Cyc_FileCloseError[15]="FileCloseError";char Cyc_FileOpenError[14]="FileOpenError";struct Cyc___cycFILE*Cyc_file_open(struct _dyneither_ptr fname,struct _dyneither_ptr mode);static void _tmp18(struct _dyneither_ptr*fname,unsigned int*_tmp17,unsigned int*_tmp16,char**_tmp14){for(*_tmp17=0;*_tmp17 < *_tmp16;(*_tmp17)++){(*_tmp14)[*_tmp17]=((const char*)(*fname).curr)[(int)*_tmp17];}}
 # 166
-struct Cyc___cycFILE*Cyc_file_open(struct _dyneither_ptr fname,struct
-_dyneither_ptr mode){
+struct Cyc___cycFILE*Cyc_file_open(struct _dyneither_ptr fname,struct _dyneither_ptr mode){
 # 167
-struct Cyc___cycFILE*f=Cyc_fopen((const char*)_untag_dyneither_ptr(fname,sizeof(
-char),1),(const char*)_untag_dyneither_ptr(mode,sizeof(char),1));
+struct Cyc___cycFILE*f=Cyc_fopen((const char*)_untag_dyneither_ptr(fname,sizeof(char),1),(const char*)_untag_dyneither_ptr(mode,sizeof(char),1));
 # 168
 if(f == 0){
 # 169
-unsigned int _tmp17;unsigned int _tmp16;struct _dyneither_ptr _tmp15;char*_tmp14;
-unsigned int _tmp13;struct _dyneither_ptr fn=(_tmp13=_get_dyneither_size(fname,
-sizeof(char)),((_tmp14=(char*)_cycalloc_atomic(_check_times(sizeof(char),_tmp13 + 
-1)),((_tmp15=_tag_dyneither(_tmp14,sizeof(char),_tmp13 + 1),((((_tmp16=_tmp13,((
-_tmp18(& fname,& _tmp17,& _tmp16,& _tmp14),_tmp14[_tmp16]=(char)0)))),_tmp15)))))));
+unsigned int _tmp17;unsigned int _tmp16;struct _dyneither_ptr _tmp15;char*_tmp14;unsigned int _tmp13;struct _dyneither_ptr fn=(_tmp13=_get_dyneither_size(fname,sizeof(char)),((_tmp14=(char*)_cycalloc_atomic(_check_times(sizeof(char),_tmp13 + 1)),((_tmp15=_tag_dyneither(_tmp14,sizeof(char),_tmp13 + 1),((((_tmp16=_tmp13,((_tmp18(& fname,& _tmp17,& _tmp16,& _tmp14),_tmp14[_tmp16]=(char)0)))),_tmp15)))))));
 # 170
-struct Cyc_FileOpenError_exn_struct _tmp1B;struct Cyc_FileOpenError_exn_struct*
-_tmp1A;(int)_throw((void*)((_tmp1A=_cycalloc(sizeof(*_tmp1A)),((_tmp1A[0]=((
-_tmp1B.tag=Cyc_FileOpenError,((_tmp1B.f1=fn,_tmp1B)))),_tmp1A)))));}
+struct Cyc_FileOpenError_exn_struct _tmp1B;struct Cyc_FileOpenError_exn_struct*_tmp1A;(int)_throw((void*)((_tmp1A=_cycalloc(sizeof(*_tmp1A)),((_tmp1A[0]=((_tmp1B.tag=Cyc_FileOpenError,((_tmp1B.f1=fn,_tmp1B)))),_tmp1A)))));}
 # 172
 return(struct Cyc___cycFILE*)f;}
 # 175
@@ -1009,15 +965,13 @@ if(Cyc_fclose(f)!= 0)(int)_throw((void*)& Cyc_FileCloseError_val);}
 # 183
 char*getcwd(char*buf,unsigned long size);static char _tmp10[29]="getcwd: invalid buf argument";
 # 185
-static struct Cyc_Core_Failure_exn_struct Cyc___getcwd_failure={Cyc_Core_Failure,{
-_tmp10,_tmp10,_tmp10 + 29}};
+static struct Cyc_Core_Failure_exn_struct Cyc___getcwd_failure={Cyc_Core_Failure,{_tmp10,_tmp10,_tmp10 + 29}};
 # 187
 struct _dyneither_ptr Cyc_getcwd(struct _dyneither_ptr buf,unsigned long size){
 # 188
 if(_get_dyneither_size(buf,sizeof(char))< size)(int)_throw((void*)& Cyc___getcwd_failure);{
 # 189
-char*_tmp11=getcwd((char*)_check_null(_untag_dyneither_ptr(buf,sizeof(char),1)),
-size);
+char*_tmp11=getcwd((char*)_check_null(_untag_dyneither_ptr(buf,sizeof(char),1)),size);
 # 190
 return(unsigned int)_tmp11?buf: _tag_dyneither(0,0,0);};}
 # 194

@@ -762,43 +762,24 @@ typedef struct _dyneither_ptr Cyc_buffer_t;
 typedef struct _dyneither_ptr Cyc_mbuffer_t;
 # 59
 typedef int Cyc_bool;struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};
-# 26 "/home/jgm/cyclone/include/cycboot.h"
+# 26 "cycboot.h"
 typedef unsigned long Cyc_size_t;
 # 33
 typedef unsigned short Cyc_mode_t;struct Cyc___cycFILE;
 # 49
-typedef struct Cyc___cycFILE Cyc_FILE;struct Cyc_String_pa_PrintArg_struct{int tag;
-struct _dyneither_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;
-};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};struct Cyc_LongDouble_pa_PrintArg_struct{
-int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{int tag;short*f1;};
-struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};
+typedef struct Cyc___cycFILE Cyc_FILE;struct Cyc_String_pa_PrintArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};struct Cyc_LongDouble_pa_PrintArg_struct{int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};
 # 68
-typedef void*Cyc_parg_t;struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};
-struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{
-int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned int*f1;};
-struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{
-int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};
-struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};
+typedef void*Cyc_parg_t;struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};
 # 127
-typedef void*Cyc_sarg_t;extern char Cyc_FileCloseError[15];struct Cyc_FileCloseError_exn_struct{
-char*tag;};extern char Cyc_FileOpenError[14];struct Cyc_FileOpenError_exn_struct{
-char*tag;struct _dyneither_ptr f1;};
+typedef void*Cyc_sarg_t;extern char Cyc_FileCloseError[15];struct Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[14];struct Cyc_FileOpenError_exn_struct{char*tag;struct _dyneither_ptr f1;};
 # 89 "core.h"
 typedef unsigned int Cyc_Core_sizeof_t;struct Cyc_Core_Opt{void*v;};
 # 93
 typedef struct Cyc_Core_Opt*Cyc_Core_opt_t;
 # 107 "core.h"
-struct _dyneither_ptr Cyc_Core_new_string(unsigned int);extern char Cyc_Core_Invalid_argument[
-17];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _dyneither_ptr f1;};
-extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_exn_struct{char*tag;struct
-_dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_exn_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_exn_struct{
-char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_exn_struct{
-char*tag;struct _dyneither_ptr f1;};
+struct _dyneither_ptr Cyc_Core_new_string(unsigned int);extern char Cyc_Core_Invalid_argument[17];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _dyneither_ptr f1;};
 # 162
-extern struct _RegionHandle*Cyc_Core_unique_region;extern char Cyc_Core_Open_Region[
-12];struct Cyc_Core_Open_Region_exn_struct{char*tag;};extern char Cyc_Core_Free_Region[
-12];struct Cyc_Core_Free_Region_exn_struct{char*tag;};
+extern struct _RegionHandle*Cyc_Core_unique_region;extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_exn_struct{char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_exn_struct{char*tag;};
 # 244 "core.h"
 inline static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz){
 # 249
@@ -813,7 +794,7 @@ if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.
 return 0;
 # 257
 return dyn.curr;};}struct Cyc_Buffer_t;
-# 46 "/home/jgm/cyclone/include/buffer.h"
+# 46 "buffer.h"
 typedef struct Cyc_Buffer_t*Cyc_Buffer_T;
 # 49
 struct Cyc_Buffer_t*Cyc_Buffer_create(unsigned int n);
@@ -828,40 +809,31 @@ void Cyc_Buffer_reset(struct Cyc_Buffer_t*);
 # 70
 void Cyc_Buffer_add_char(struct Cyc_Buffer_t*,char);
 # 72
-void Cyc_Buffer_add_substring(struct Cyc_Buffer_t*,struct _dyneither_ptr,int offset,
-int len);
-# 81 "/home/jgm/cyclone/include/buffer.h"
+void Cyc_Buffer_add_substring(struct Cyc_Buffer_t*,struct _dyneither_ptr,int offset,int len);
+# 81 "buffer.h"
 void Cyc_Buffer_add_string(struct Cyc_Buffer_t*,struct _dyneither_ptr);
 # 83
-void Cyc_Buffer_add_buffer(struct Cyc_Buffer_t*buf_dest,struct Cyc_Buffer_t*
-buf_source);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
-# 39 "/home/jgm/cyclone/include/list.h"
+void Cyc_Buffer_add_buffer(struct Cyc_Buffer_t*buf_dest,struct Cyc_Buffer_t*buf_source);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
+# 39 "list.h"
 typedef struct Cyc_List_List*Cyc_List_list_t;
-# 49 "/home/jgm/cyclone/include/list.h"
-typedef struct Cyc_List_List*Cyc_List_List_t;extern char Cyc_List_List_mismatch[14];
-struct Cyc_List_List_mismatch_exn_struct{char*tag;};extern char Cyc_List_Nth[4];
-struct Cyc_List_Nth_exn_struct{char*tag;};
-# 38 "/home/jgm/cyclone/include/string.h"
+# 49 "list.h"
+typedef struct Cyc_List_List*Cyc_List_List_t;extern char Cyc_List_List_mismatch[14];struct Cyc_List_List_mismatch_exn_struct{char*tag;};extern char Cyc_List_Nth[4];struct Cyc_List_Nth_exn_struct{char*tag;};
+# 38 "string.h"
 unsigned long Cyc_strlen(struct _dyneither_ptr s);
-# 72 "/home/jgm/cyclone/include/string.h"
-struct _dyneither_ptr Cyc_strncpy(struct _dyneither_ptr,struct _dyneither_ptr,
-unsigned long);
+# 72 "string.h"
+struct _dyneither_ptr Cyc_strncpy(struct _dyneither_ptr,struct _dyneither_ptr,unsigned long);
 # 73
-struct _dyneither_ptr Cyc_zstrncpy(struct _dyneither_ptr,struct _dyneither_ptr,
-unsigned long);
-# 107 "/home/jgm/cyclone/include/string.h"
-struct _dyneither_ptr Cyc_substring(struct _dyneither_ptr,int ofs,unsigned long n);
-struct Cyc_Buffer_t{struct _dyneither_ptr buffer;unsigned int position;unsigned int
-length;struct _dyneither_ptr initial_buffer;};
-# 49 "/home/jgm/cyclone/lib/buffer.cyc"
+struct _dyneither_ptr Cyc_zstrncpy(struct _dyneither_ptr,struct _dyneither_ptr,unsigned long);
+# 107 "string.h"
+struct _dyneither_ptr Cyc_substring(struct _dyneither_ptr,int ofs,unsigned long n);struct Cyc_Buffer_t{struct _dyneither_ptr buffer;unsigned int position;unsigned int length;struct _dyneither_ptr initial_buffer;};
+# 49 "buffer.cyc"
 struct Cyc_Buffer_t*Cyc_Buffer_create(unsigned int n){
 # 50
 if(n < 1)n=1;{
 # 51
 struct _dyneither_ptr s=Cyc_Core_new_string(n + 1);
 # 52
-struct Cyc_Buffer_t*_tmp7;return(_tmp7=_cycalloc(sizeof(*_tmp7)),((_tmp7->buffer=
-s,((_tmp7->position=0,((_tmp7->length=n,((_tmp7->initial_buffer=s,_tmp7)))))))));};}
+struct Cyc_Buffer_t*_tmp7;return(_tmp7=_cycalloc(sizeof(*_tmp7)),((_tmp7->buffer=s,((_tmp7->position=0,((_tmp7->length=n,((_tmp7->initial_buffer=s,_tmp7)))))))));};}
 # 55
 struct _dyneither_ptr Cyc_Buffer_contents(struct Cyc_Buffer_t*b){
 # 56
@@ -901,8 +873,7 @@ new_len=2 * new_len;}
 # 82
 new_buffer=Cyc_Core_new_string(new_len + 1);
 # 83
-Cyc_strncpy(_dyneither_ptr_decrease_size(new_buffer,sizeof(char),1),(struct
-_dyneither_ptr)b->buffer,b->position);
+Cyc_strncpy(_dyneither_ptr_decrease_size(new_buffer,sizeof(char),1),(struct _dyneither_ptr)b->buffer,b->position);
 # 84
 b->buffer=new_buffer;
 # 85
@@ -916,32 +887,23 @@ int pos=(int)b->position;
 # 91
 if(pos >= b->length)Cyc_Buffer_resize(b,1);
 # 92
-{char _tmpA;char _tmp9;struct _dyneither_ptr _tmp8;(_tmp8=_dyneither_ptr_plus(b->buffer,
-sizeof(char),pos),((_tmp9=*((char*)_check_dyneither_subscript(_tmp8,sizeof(char),
-0)),((_tmpA=c,((_get_dyneither_size(_tmp8,sizeof(char))== 1  && (_tmp9 == '\000'
- && _tmpA != '\000')?_throw_arraybounds(): 1,*((char*)_tmp8.curr)=_tmpA)))))));}
+{char _tmpA;char _tmp9;struct _dyneither_ptr _tmp8;(_tmp8=_dyneither_ptr_plus(b->buffer,sizeof(char),pos),((_tmp9=*((char*)_check_dyneither_subscript(_tmp8,sizeof(char),0)),((_tmpA=c,((_get_dyneither_size(_tmp8,sizeof(char))== 1  && (_tmp9 == '\000'  && _tmpA != '\000')?_throw_arraybounds(): 1,*((char*)_tmp8.curr)=_tmpA)))))));}
 # 93
 b->position=(unsigned int)(pos + 1);
 # 94
 return;}
 # 100
-void Cyc_Buffer_add_substring(struct Cyc_Buffer_t*b,struct _dyneither_ptr s,int
-offset,int len){
+void Cyc_Buffer_add_substring(struct Cyc_Buffer_t*b,struct _dyneither_ptr s,int offset,int len){
 # 101
 if((offset < 0  || len < 0) || offset + len > _get_dyneither_size(s,sizeof(char))){
 # 102
-struct Cyc_Core_Invalid_argument_exn_struct _tmp10;const char*_tmpF;struct Cyc_Core_Invalid_argument_exn_struct*
-_tmpE;(int)_throw((void*)((_tmpE=_cycalloc(sizeof(*_tmpE)),((_tmpE[0]=((_tmp10.tag=
-Cyc_Core_Invalid_argument,((_tmp10.f1=((_tmpF="Buffer::add_substring",
-_tag_dyneither(_tmpF,sizeof(char),22))),_tmp10)))),_tmpE)))));}{
+struct Cyc_Core_Invalid_argument_exn_struct _tmp10;const char*_tmpF;struct Cyc_Core_Invalid_argument_exn_struct*_tmpE;(int)_throw((void*)((_tmpE=_cycalloc(sizeof(*_tmpE)),((_tmpE[0]=((_tmp10.tag=Cyc_Core_Invalid_argument,((_tmp10.f1=((_tmpF="Buffer::add_substring",_tag_dyneither(_tmpF,sizeof(char),22))),_tmp10)))),_tmpE)))));}{
 # 103
 int new_position=(int)(b->position + len);
 # 104
 if(new_position > b->length)Cyc_Buffer_resize(b,(unsigned int)len);
 # 105
-Cyc_zstrncpy(_dyneither_ptr_decrease_size(_dyneither_ptr_plus(b->buffer,sizeof(
-char),(int)b->position),sizeof(char),1),(struct _dyneither_ptr)
-_dyneither_ptr_plus(s,sizeof(char),offset),(unsigned long)len);
+Cyc_zstrncpy(_dyneither_ptr_decrease_size(_dyneither_ptr_plus(b->buffer,sizeof(char),(int)b->position),sizeof(char),1),(struct _dyneither_ptr)_dyneither_ptr_plus(s,sizeof(char),offset),(unsigned long)len);
 # 106
 b->position=(unsigned int)new_position;
 # 107
@@ -955,9 +917,7 @@ int new_position=(int)(b->position + len);
 # 114
 if(new_position > b->length)Cyc_Buffer_resize(b,(unsigned int)len);
 # 115
-Cyc_strncpy(_dyneither_ptr_plus(_dyneither_ptr_decrease_size(b->buffer,sizeof(
-char),1),sizeof(char),(int)b->position),(struct _dyneither_ptr)s,(unsigned long)
-len);
+Cyc_strncpy(_dyneither_ptr_plus(_dyneither_ptr_decrease_size(b->buffer,sizeof(char),1),sizeof(char),(int)b->position),(struct _dyneither_ptr)s,(unsigned long)len);
 # 116
 b->position=(unsigned int)new_position;
 # 117
