@@ -12,6 +12,10 @@ extern "C include" {
     x->tl = (struct list *)0;
     return x;
   }
+  typedef enum test_enum {
+    ENUM_KEY_0=0,
+    ENUM_KEY_1,
+  } tenum_t;
 }
 cyclone_override {
   struct list<`a> { `a x; struct list<`a> *tl; };
@@ -22,7 +26,8 @@ cyclone_override {
     `env env;
   };
 }
-export { new_list }
+export { * }
+hide { GC_malloc }
 
 
 
@@ -30,6 +35,6 @@ int main() {
   struct list *x = new list{new 1,NULL};
   struct list *y = new list{new 1,NULL};
   struct list *z = new_list();
-  if (*x->x == *y->x && *x->x == z->x) return 0;
-  else return -1;
+  if (*x->x == *y->x && *x->x == z->x) return ENUM_KEY_0;
+  else return -ENUM_KEY_1;
 }

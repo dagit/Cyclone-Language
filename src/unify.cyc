@@ -461,7 +461,7 @@ static void unify_it(type_t t1, type_t t2) {
     ts_failure = $(t1,t2);
     if(bad_effect)
       fail_because("(function effects do not match)");
-    if (!same_atts(atts2,atts1))
+    if (!equiv_fn_atts(atts2,atts1))
       fail_because("(function types have different attributes)");
     if (!same_rgn_po(rpo2,rpo1))
       fail_because("(function types have different region lifetime orderings)");

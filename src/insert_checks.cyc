@@ -218,6 +218,7 @@ static void do_exp_opt(env_t nv, exp_opt_t eo) {
 
 static void do_exp(env_t nv, exp_t e) {
   switch(e->r) {
+  case &Asm_e(...):  //can do better -- check input expressions initialized
   case &Const_e(...):
   case &Var_e(...):
   case &Pragma_e(...): e->annot = &NoCheck_val; break;
@@ -418,8 +419,7 @@ static void do_exp(env_t nv, exp_t e) {
 
   case &UnresolvedMem_e(_,_):
   case &CompoundLit_e(_,_):
-  case &Valueof_e(_):
-  case &Asm_e(...): impos_loc(e->loc,"InsertChecks, unexpected exp form");
+  case &Valueof_e(_): impos_loc(e->loc,"InsertChecks, unexpected exp form");
   }
 }
 

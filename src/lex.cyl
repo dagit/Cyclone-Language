@@ -110,7 +110,7 @@ static $(nmspace_t,var_t)   token_id_pair = $(Nmspace{.Loc_n = 0},
 static char                 token_char   = '\000';
 string_t                    token_string = "";
 qvar_t                      token_qvar   = &token_id_pair;
-static $(bool,string_t<`H>) token_asm = $(false,"");
+//static $(bool,string_t<`H>) token_asm = $(false,"");
 
 static int runaway_start = 0;
 static int paren_depth = 0; // used for __asm__ parsing
@@ -137,6 +137,7 @@ static char cnst2char(cnst_t cnst, Lexbuf lb) {
 // a Cyclone keyword
 static $(string_t,short,bool) rw_array[] = {
   $("__attribute__", ATTRIBUTE, true),
+  $("__attribute", ATTRIBUTE, true),
   $("abstract", ABSTRACT, false),
   $("auto", AUTO, true),
   $("break", BREAK, true),
@@ -156,6 +157,7 @@ static $(string_t,short,bool) rw_array[] = {
   $("else", ELSE, true),
   $("enum", ENUM, true),
   $("export", EXPORT, false),
+  $("hide", HIDE, false),
   $("__extension__", EXTENSION, true),
   $("extern", EXTERN, true),
   $("fallthru", FALLTHRU, false),
@@ -165,6 +167,7 @@ static $(string_t,short,bool) rw_array[] = {
   $("if", IF, true),
   $("inline", INLINE, true),
   $("__inline__", INLINE, true),
+  $("__inline", INLINE, true),
   $("int", INT, true),
   $("let", LET, false),
   $("long", LONG, true),
@@ -212,6 +215,8 @@ static $(string_t,short,bool) rw_array[] = {
   $("void", VOID, true),
   $("volatile", VOLATILE, true),
   $("__volatile__", VOLATILE, true),
+  $("asm", ASM_TOK, true),
+  $("__asm__", ASM_TOK, true),
   $("while", WHILE, true),
 };
 
@@ -749,8 +754,8 @@ int strng_next(Lexbuf);
 int wstrng(Lexbuf);
 int wstrng_next(Lexbuf);
 int comment(Lexbuf);
-int snarf_asm(Lexbuf);
-int snarf_asm_body(Lexbuf);
+//int snarf_asm(Lexbuf);
+//int snarf_asm_body(Lexbuf);
 } // namespace Lex
 
 // for parser -- must not be prefixed
@@ -771,7 +776,7 @@ int yylex(Lexing::Lexbuf<Lexing::Function_lexbuf_state<FILE@>> lbuf,
  case QUAL_TYPEDEF_NAME:  *yylval = YYSTYPE{.QualId_tok=Lex::token_qvar}; break;
  case INTEGER_CONSTANT:   *yylval = YYSTYPE{.Int_tok=Lex::token_int};     break;
  case CHARACTER_CONSTANT: *yylval = YYSTYPE{.Char_tok=Lex::token_char};   break;
- case ASM:                *yylval = YYSTYPE{.Asm_tok=Lex::token_asm};     break;
+// case ASM:                *yylval = YYSTYPE{.Asm_tok=Lex::token_asm};     break;
  default: break;
  }
  return ans;
@@ -790,7 +795,7 @@ let cnstsuffix  = (((['u''U'])?(['l''L'])?(['l''L'])?) |
 		   ((['l''L'])?(['l''L'])?(['u''U'])?))
 
 rule token = parse
-| ("asm" | "__asm__") { return snarf_asm(lexbuf); }
+/* | ("asm" | "__asm__") { return snarf_asm(lexbuf); } */
 /* Identifiers, type names, and keywords */
 | ((firstidchar idchar*) | ('_' idchar+)) { return process_id(lexbuf); }
 /* Qualified identifiers and type names (e.g., Foo::bar) */
@@ -1065,61 +1070,6 @@ and comment = parse
 /* HACK: we're counting on there being no comments between "asm" and
    "volatile" and the first paren. */
 /* FIX: not processing newlines here! */
-and snarf_asm = parse
-  [' ' '\t' '\v' '\f' '\n' '\r']* '(' 
-  { token_asm[0] = false;
-    paren_depth = 1;
-    string_pos = 0;
-    runaway_start = lexeme_start(lexbuf);
-    while (snarf_asm_body(lexbuf)) /* skip */ ;
-    token_asm[1] = get_stored_string();
-    return ASM; 
-  }
-| [' ' '\t' '\v' '\f' '\n' '\r']+ "volatile" 
-  [' ' '\t' '\v' '\f' '\n' '\r']* '(' 
-  { token_asm[0] = true;
-    paren_depth = 1;
-    string_pos = 0;
-    runaway_start = lexeme_start(lexbuf);
-    while (snarf_asm_body(lexbuf)) /* skip */ ;
-    token_asm[1] = get_stored_string();
-    return ASM; 
-  }
-| [' ' '\t' '\v' '\f' '\n' '\r']+ "__volatile__" 
-  [' ' '\t' '\v' '\f' '\n' '\r']* '(' 
-  { token_asm[0] = true;
-    paren_depth = 1;
-    string_pos = 0;
-    runaway_start = lexeme_start(lexbuf);
-    while (snarf_asm_body(lexbuf)) /* skip */ ;
-    token_asm[1] = get_stored_string();
-    return ASM; 
-  }
-
-and snarf_asm_body = parse
-   "\"" { store_string_char('"'); 
-          expand_specials = true;
-          while (strng(lexbuf)) /* skip */ ;
-          expand_specials = false;
-          store_string_char('"');
-          return 1; }
-| "/*" { comment_depth = 1;
-         comment(lexbuf); 
-         store_string_char(' ');
-         return 1; }
-| "#"[^ '\n' '\r']*(newline) { inc_linenumber(); 
-                               store_string_char('\n'); return 1; }
-| '(' { paren_depth += 1; store_string_char('('); return 1; }
-| ')' { paren_depth -= 1; 
-        if (paren_depth == 0) return 0;
-        else {
-          store_string_char(')');
-          return 1;
-        } }
-| eof { runaway_err("unterminated asm",lexbuf); return 0; }
-| newline { inc_linenumber(); store_string_char(lexeme_char(lexbuf,0)); return 1;}
-| _ { store_string_char(lexeme_char(lexbuf,0)); return 1; }
-
 
 {
 

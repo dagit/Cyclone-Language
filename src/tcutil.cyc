@@ -547,10 +547,11 @@ exp_t deep_copy_exp(bool preserve_types, exp_t e) {
     break;
   case &StmtExp_e(_):
     throw new Core::Failure("deep_copy: statement expressions unsupported");
-  case &Tagcheck_e(e1, fn): 
-    new_e=new_exp(new Tagcheck_e(DC(pt,e1),fn),e->loc); break;
-  case &Valueof_e(t): new_e = valueof_exp(copy_type(t),e->loc); break;
-  case &Asm_e(v,s):   new_e = asm_exp(v,s,e->loc); break;
+  case &Tagcheck_e(e1, fn): new_e=new_exp(new Tagcheck_e(DC(pt,e1),fn),e->loc);
+    break;
+  case &Valueof_e(t): new_e = valueof_exp(copy_type(t),e->loc);
+    break;
+  case &Asm_e(v,t,o,i,c): new_e = asm_exp(v,t,o,i,c,e->loc); break;
   }
   // types/annotations are shared
   if (preserve_types) {
@@ -747,6 +748,21 @@ bool same_atts(attributes_t a1, attributes_t a2) {
     if (!List::exists_c(equal_att,a->hd,a2)) return false;
   for (_ a = a2; a != NULL; a = a->tl)
     if (!List::exists_c(equal_att,a->hd,a1)) return false;
+  return true;
+}
+
+bool is_regparm0_att(attribute_t a){
+  switch(a) {
+  case &Regparm_att(0): return true;
+  default: return false;
+  }
+}
+
+bool equiv_fn_atts(attributes_t a1, attributes_t a2) {
+  for (_ a = a1; a != NULL; a = a->tl)
+    if (!List::exists_c(equal_att,a->hd,a2) && !is_regparm0_att(a->hd))return false;
+  for (_ a = a2; a != NULL; a = a->tl)
+    if (!List::exists_c(equal_att,a->hd,a1)&& !is_regparm0_att(a->hd)) return false;
   return true;
 }
 

@@ -624,8 +624,11 @@ exp_t stmt_exp(stmt_t s,seg_t loc) {
 exp_t valueof_exp(type_t t, seg_t loc) {
   return new_exp(new Valueof_e(t), loc);
 }
-exp_t asm_exp(bool volatile_kw, string_t<`H> body, seg_t loc) {
-  return new_exp(new Asm_e(volatile_kw,body),loc);
+
+exp_t asm_exp(bool volatile_kw, string_t<`H> tmpl, 
+	      list_t<$(string_t<`H>, exp_t)@`H, `H> outs, list_t<$(string_t<`H>, exp_t)@`H, `H> ins, 
+	      list_t<string_t<`H>@`H, `H> clobs, seg_t loc) {
+  return new_exp(new Asm_e(volatile_kw,tmpl,outs,ins,clobs),loc);
 }
 exp_t extension_exp(exp_t e, seg_t loc) {
   return new_exp(new Extension_e(e), loc);

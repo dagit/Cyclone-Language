@@ -2821,11 +2821,10 @@ static void exp_to_c(env_t nv, exp_t e) {
     }
     break;
   case &StmtExp_e(s): stmt_to_c(nv,s);  break;
-
+  case &Asm_e(...): break;//<-- no transformation needed          toc_impos("__asm__");
   case &UnresolvedMem_e(_,_): toc_impos("UnresolvedMem");
   case &CompoundLit_e(_,_):   toc_impos("compoundlit");
   case &Valueof_e(_):         toc_impos("valueof(-)");
-  case &Asm_e(...):           toc_impos("__asm__");
   }
   if(!did_inserted_checks)
     Warn::impos_loc(e->loc,aprintf("Toc did not examine an inserted check: %s",

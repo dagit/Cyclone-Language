@@ -540,6 +540,17 @@ static void dumpoffset_field(offsetof_field_t f) {
   }
 }
 
+static void dump_asm_iolist(list_t<$(string_t, exp_t)@> iolist) {
+  while(iolist) {
+    let &$(constr, e1) = iolist->hd;
+    dump_char('"');dump_nospace(constr);dump_char('"');
+    dump_char('(');dumpexp(e1);dump_char(')');
+    iolist = iolist->tl;
+    if(iolist)
+      dump_char(',');
+  }
+}
+
 static void dumpexps_prec(int inprec, list_t<exp_t> es) {
   group_c(dumpexp_prec, inprec, es, "", "", ",");
 }
@@ -667,10 +678,34 @@ static void dumpexp_prec(int inprec, exp_t e) {
   case &Extension_e(e1):
     dump("__extension__("); dumpexp(e1); dump_char(')'); break;
 
-  case &Asm_e(vol,s):
+  case &Asm_e(vol,t,o,i,cl):
     dump("__asm__");
-    if (vol) dump("volatile");
-    dump_char('('); dump_nospace(s); dump_char(')');
+    if (vol) dump(" volatile ");
+    dump_nospace("(\""); dump_nospace(t); dump_char('"');
+    if(o) {
+      dump_char(':');
+      dump_asm_iolist(o);
+    }
+    if(i) {
+      if(!o)
+	dump_char(':');
+      dump_char(':');
+      dump_asm_iolist(i);
+    }
+    if(cl) {
+      int ncol = (i ? 2 : o ? 1 : 0);
+      for(int cols = 0;cols < 3 -ncol;cols++)
+	dump_nospace(" :");	
+      while(cl) {
+	dump_char('"');
+	dump_nospace(*cl->hd);
+	dump_char('"');
+	cl = cl->tl;
+	if(cl)
+	  dump_char(',');
+      }
+    }
+    dump_char(')');
     break;
 
   case &Tagcheck_e(e,f):
@@ -1174,13 +1209,22 @@ static void dumpdecl(decl_t d) {
     dump("using"); dumpqvar(q); dump_braced_decls(tdl); break;
   case &ExternC_d(tdl): 
     dump("extern \"C\" "); dump_braced_decls(tdl); break;
-  case &ExternCinclude_d(tdl,ovrs,exs):
+  case &ExternCinclude_d(tdl,ovrs,exs,wc):
     dump("extern \"C include\" "); dump_braced_decls(tdl);
     if (ovrs != NULL) {
       dump(" cyclone_override ");
       dump_braced_decls(ovrs);
     }
-    egroup(dumpexport, exs, " export {", "}", ",");
+    if(wc) {
+      dump(" export { * }\n");
+      let &$(_,hides) = wc;
+      if(hides) {
+	egroup(dumpqvar, hides, " hide {", "}", ",");
+      }
+    }
+    else {
+      egroup(dumpexport, exs, " export {", "}", ",");
+    }
     break;
   case &Porton_d:     dump(" __cyclone_port_on__; ");  break;
   case &Portoff_d:    dump(" __cyclone_port_off__; "); break;
@@ -1334,7 +1378,7 @@ static void dump_decl_interface(decl_t d) {
       dump_decl_interface(ds->hd);
     dump("}\n");
     break;
-  case &ExternCinclude_d(ds,ovrs,exs): 
+  case &ExternCinclude_d(ds,ovrs,exs,wc): 
     /* omit these for now
     dump("extern \"C include\" {");
     for(; ds != NULL; ds = ds->tl)

@@ -619,9 +619,11 @@ namespace Absyn {
     // be used within types, and is typically used within a valueof_t so
     // that we can move between the type and expression levels
     // (e.g., valueof_t<valueof(`i)*42 + 36>).
-    Asm_e(bool volatile_kw,string_t); // uninterpreted asm statement -- used
+    //    Asm_e(bool volatile_kw,string_t); // uninterpreted asm statement -- used
     // within extern "C include" -- the string is all of the gunk that goes
     // between the parens.
+    //                    V instr  : outvars                    : invars                     :   clobbers V
+    Asm_e(bool, string_t, list_t<$(string_t, exp_t)@>, list_t<$(string_t, exp_t)@>, list_t<string_t@>);
     Extension_e(exp_t); 
     // implements GCC's __extension__ (...) though we just pass it through.
   };
@@ -838,7 +840,7 @@ namespace Absyn {
     Namespace_d(var_t,list_t<decl_t>); // namespace Foo { ... }
     Using_d(qvar_t,list_t<decl_t>);  // using Foo { ... }
     ExternC_d(list_t<decl_t>); // extern "C" { ... }
-    ExternCinclude_d(list_t<decl_t>,list_t<decl_t>,list_t<$(seg_t,qvar_t,bool)@>);
+    ExternCinclude_d(list_t<decl_t>,list_t<decl_t>,list_t<$(seg_t,qvar_t,bool)@>,$(seg_t, list_t<qvar_t>)@);
     Porton_d;
     Portoff_d;
     Tempeston_d;
@@ -1035,7 +1037,8 @@ namespace Absyn {
   exp_t null_pointer_exn_exp(seg_t);
   exp_t array_exp(list_t<exp_t,`H>, seg_t);
   exp_t valueof_exp(type_t, seg_t);
-  exp_t asm_exp(bool volatile_kw, string_t<`H> body, seg_t);
+  exp_t asm_exp(bool, string_t<`H>,  list_t<$(string_t<`H>, exp_t)@`H, `H>, 
+		list_t<$(string_t<`H>, exp_t)@`H, `H>, list_t<string_t<`H>@`H, `H>, seg_t);
   exp_t extension_exp(exp_t, seg_t);
   exp_t unresolvedmem_exp(opt_t<typedef_name_t,`H>,
                                  list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H>,

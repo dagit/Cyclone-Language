@@ -264,6 +264,7 @@ void resolve_rgnpo(seg_t, env_t, list_t<$(type_t,type_t)@>);
 void resolve_scs(env_t,   list_t<switch_clause_t>);
 void resolve_aggrfields(seg_t, env_t, list_t<aggrfield_t>);
 void resolve_function_stuff(seg_t loc, env_t env, fn_info_t i);
+void resolve_asm_iolist(env_t, list_t<$(string_t, exp_t)@> l);
 list_t<vardecl_t> get_fun_vardecls(bool, seg_t, env_t, 
 				   list_t<$(var_opt_t,tqual_t,type_t)@>, 
 				   vararg_info_t*);
@@ -539,8 +540,18 @@ void resolve_exp(env_t env, exp_t e) {
       resolve_exp(env,(*dles->hd)[1]);
     return;
 	
-  case &Asm_e(...): 
-    err2(e->loc, "asm expressions cannot occur within Cyclone code");
+  case &Asm_e(v,t,o,i,c): 
+    resolve_asm_iolist(env, o);
+    resolve_asm_iolist(env, i);
+    break;
+  }
+}
+
+void resolve_asm_iolist(env_t env, list_t<$(string_t, exp_t)@> l) {
+  while(l) {
+    let &$(_, e) = l->hd;
+    resolve_exp(env, e);
+    l = l->tl;
   }
 }
 
@@ -884,6 +895,35 @@ void resolve_rgnpo(seg_t loc, env_t env, list_t<$(type_t,type_t)@> po) {
   }
 }
 
+//used for Dict::iter_c(f('c var_t resolved_t), 'c env, dict<var_t resolved_t 'r>)
+//adds each symbol to the export list 
+void export_all_symbols($(list_t<$(seg_t, qvar_t, bool)@>@, dict_t<var_t, resolved_t>@, env_t, $(seg_t, list_t<qvar_t>)@)@ cenv,
+			var_t name, resolved_t res) {
+  let &$(exlist_ptr, out_dict, env, &$(wcloc, hidelist)) = cenv;
+  switch(res) {
+  case &VarRes(bnd):
+    qvar_t qv = new $(Rel_n(NULL), name);
+    if(List::mem(qvar_cmp, hidelist, qv)) {
+      //      fprintf(stderr, "Skipping qvar %s because of hidelist\n", Absynpp::qvar2string(qv));
+      return;
+    }
+    absolutize_decl(wcloc,env,qv,ExternC);
+    let ex_sym = new $(wcloc, qv, false);
+    *exlist_ptr = new List(ex_sym, *exlist_ptr);
+    *out_dict = Dict::insert(*out_dict, name, res);
+    break;
+  case &EnumRes(ed, ef):
+    *out_dict = Dict::insert(*out_dict, name, res);break;
+    //the types below are exported by default ... no need to add them
+  case &AggrRes(ad): break;
+  case &AnonEnumRes(t, ef): break;
+  case &DatatypeRes(dd, df): //impos for extern C
+    err(wcloc, "Unexpected binding from extern C Include");
+    break;
+  }
+}
+
+
 // FIX: return table of used binders or something, for treeshaking, which
 //      we do post type-checking so we don't squash errors
 // Also, why not just return a flat-list (truly nuking Namespace, Using,
@@ -1111,8 +1151,8 @@ void resolve_decl(env_t env, decl_t d) {
     // and only resolved the binding if it is exported
     // I don't think types can be exported, just variables and functions
     // (for extern "C" it's like "export everything")
-  case &ExternCinclude_d(ds2,ovrs,exports): 
-    for(let exs = exports; exs != NULL; exs = exs->tl) {
+  case &ExternCinclude_d(ds2,ovrs,*exports,hides):  //<-----need to handle wc case 
+    for(let exs = *exports; exs != NULL; exs = exs->tl) {
       let &$(loc,qv,_) = exs->hd;
       absolutize_decl(loc,env,qv,ExternC);
     }
@@ -1132,13 +1172,22 @@ void resolve_decl(env_t env, decl_t d) {
     resolve_decls(env,ovrs);
     let new_dict = data->ordinaries;
     let out_dict = old_dict;
-    for (let exs = exports; exs != NULL; exs = exs->tl) {
-      let &$(loc,&$(_,v),_) = exs->hd;
-      if(!Dict::member(new_dict,v)
-	 || (Dict::member(old_dict,v) &&
-	     (Dict::lookup(old_dict,v)==Dict::lookup(new_dict,v))))
-	err2(loc, *v, " is exported but not defined");
-      out_dict = Dict::insert(out_dict,v,Dict::lookup(new_dict,v));
+    if((*hides)[0] > 0) { //wildcard case -- export all symbols in new_dict
+      if(*exports)
+	err((*hides)[0], "export wildcard expects empty export list");
+      env->in_cinclude = old;
+      Dict::iter_c(export_all_symbols, new $(exports, &out_dict, env, hides), 
+		   Dict::difference(new_dict, old_dict));
+    }
+    else {
+      for (let exs = *exports; exs != NULL; exs = exs->tl) {
+	let &$(loc,&$(_,v),_) = exs->hd;
+	if(!Dict::member(new_dict,v)
+	   || (Dict::member(old_dict,v) &&
+	       (Dict::lookup(old_dict,v)==Dict::lookup(new_dict,v))))
+	  err(loc,"%s is exported but not defined",*v);
+	out_dict = Dict::insert(out_dict,v,Dict::lookup(new_dict,v));
+      }
     }
     data->ordinaries = out_dict;
     env->in_cinclude = old;

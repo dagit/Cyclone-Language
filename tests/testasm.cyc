@@ -1,0 +1,33 @@
+#include <stdio.h>
+
+int gar(int, int) __attribute__((regparm(0))); //regparm(0) is optional
+
+struct Foo {
+  int a;
+  int b;
+};
+
+typedef struct Foo @foo_t;
+
+
+int gar(int a, int b) {
+  let asmout = a;
+  asm ( "movl $100, %0\n\t"  "movl $1000, %0" : "=r" (asmout)); 
+  return asmout+b;
+}
+
+void gronk(foo_t a) {
+  let &Foo(f1, *f2) = a;
+  asm ( "movl $100, %0" :  "=r" (*f2) : : "memory");
+}
+
+int main() {
+  let a = 18;
+  foo_t fa = new Foo(1, 2);
+  gronk(fa);
+
+  if(gar(a, 17) == 1017 &&
+     fa->b == 100)
+    return 0;
+  return -1;
+}

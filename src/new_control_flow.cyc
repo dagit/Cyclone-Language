@@ -1040,6 +1040,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
       Warn::warn(e->loc,"unknown pragma %s",p);
     return $(inflow,fenv->zero);
   
+  case &Asm_e(...):   //can do better than this -- track assigments etc.
   case &Const_e({.Null_c = _}):
   case &Const_e({.Int_c = $(_,0)}): return $(inflow, fenv->zero);
   case &Const_e({.Int_c = $(_,_)}):
@@ -1677,7 +1678,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
   case &UnresolvedMem_e(_,_):
   case &CompoundLit_e(_,_):
   case &Valueof_e(_):
-  case &Asm_e(...): Warn::impos("anal_Rexp, unexpected exp form");
+    Warn::impos("anal_Rexp, unexpected exp form");
   }
 }
 

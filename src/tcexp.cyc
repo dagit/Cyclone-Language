@@ -2820,8 +2820,9 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
     t = sint_type;
     break;
   case &Asm_e(...):
-    terr(e->loc,"asm expressions cannot occur within Cyclone code.");
-    t = wildtyp(lookup_opt_type_vars(te));
+    //ignore asm expressions for now
+    t = void_type;
+    break;
   }
   e->topt = t;
 }

@@ -1079,6 +1079,43 @@ doc_t exp2doc(exp_t e) {
   return exp2doc_prec(0,e);
 }
 
+static doc_t asm_iolist_doc_in(list_t<$(string_t<`H>, exp_t)@> o) {
+  doc_t s=nil_doc();
+  while(o) {
+    let &$(c, e) = o->hd;
+    s = cat(text("\""), text(c), text("\" ("), exp2doc(e), text(")"));
+    o = o->tl;
+    if(o) {
+      s = cat(s, text(","));
+    }
+  }
+  return s;
+}
+
+static doc_t asm_iolist_doc(list_t<$(string_t<`H>, exp_t)@> o, list_t<$(string_t<`H>, exp_t)@> i, list_t<string_t<`H>@> cl) {
+  doc_t s=nil_doc();
+  if(o) {
+    s = cat(text(": "), asm_iolist_doc_in(o));
+  }
+  if(i) {
+    if(!o)
+      s = cat(s, text(": : "), asm_iolist_doc_in(i));
+    else
+      s = cat(s, text(" : "), asm_iolist_doc_in(i));
+  }
+  if(cl) {
+    int ncol = (i ? 2 : o ? 1 : 0);
+    s = cat(s, ncol == 0 ? text(": : :") : ncol == 1 ? text(" : : ") : text(" : "));
+    while(cl != NULL) {
+      s = cat(s, text("\""), text(*cl->hd), text("\""));
+      cl=cl->tl;
+      if(cl)
+	s =cat(s, text(", "));
+    }
+  }
+  return s;
+}
+
 doc_t exp2doc_prec(int inprec, exp_t e) {
   int myprec = exp_prec(e);
   doc_t s;
@@ -1143,11 +1180,11 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
   case &Extension_e(e):  
     s = cat(text("__extension__("),exp2doc(e),text(")")); break;
   case &Valueof_e(t): s = cat(text("valueof("), typ2doc(t), text(")")); break;
-  case &Asm_e(vol,body):
+  case &Asm_e(vol,t,o,i,cl):
     if (vol)
-      s = cat(text("__asm__"),text(" volatile ("),text(body),text(")"));
+      s = cat(text("__asm__"),text(" volatile ("),text("\""),text(t),text("\""),asm_iolist_doc(o,i,cl),text(")"));
     else
-      s = cat(text("__asm__("),text(body),text(")"));
+      s = cat(text("__asm__("),text("\""),text(t),text("\""),asm_iolist_doc(o,i,cl),text(")"));
     break;
   case &Tagcheck_e(e,f):
     s = cat(text("tagcheck("), exp2doc(e), text("."), textptr(f), text(")"));
@@ -1859,7 +1896,7 @@ doc_t decl2doc(decl_t d) {
               rb(),
               text(" */"));
     break;
-  case &ExternCinclude_d(tdl,ovrs,exs):
+  case &ExternCinclude_d(tdl,ovrs,exs,wc):
     if (print_externC_stmts) {
       doc_t exs_doc;
       doc_t ovrs_doc;

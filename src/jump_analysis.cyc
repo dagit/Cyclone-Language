@@ -104,6 +104,7 @@ static void anal_exp(senv_t env, exp_t e) { // only care about nested StmtExp_e
   switch (e->r) {
   case &StmtExp_e(s): anal_stmt(add_encloser(s,env),s); break;
 
+  case &Asm_e(...): 
   case &Const_e(...):
   case &Sizeoftype_e(_):
   case &Sizeofexp_e(_):  // ignore the expression!
@@ -159,7 +160,6 @@ static void anal_exp(senv_t env, exp_t e) { // only care about nested StmtExp_e
     break;
 
   case &UnresolvedMem_e(...): Warn::impos("jump_anaysis found UnresolvedMem_e");
-  case &Asm_e(...): Warn::impos("jump_analysis found Asm_e");
   }
 }
 static void anal_scs(senv_t env, list_t<switch_clause_t> scs) {

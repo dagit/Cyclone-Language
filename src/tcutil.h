@@ -264,6 +264,10 @@ bool is_temp_tvar(tvar_t);
 
 // are the lists of attributes the same?  doesn't require the same order
 bool same_atts(attributes_t, attributes_t);
+// are the lists of attributes equivalent? regparm(0) is optional, since this is the gcc default
+// but if the attribute -mregparm=n is used to override the default then this is not sound
+// places in the linux kernel are lax with this attribute; need this to compile some headers
+bool equiv_fn_atts(attributes_t a1, attributes_t a2);
 
 // returns true iff e is an expression that can be evaluated at compile time
 bool is_const_exp(exp_t);

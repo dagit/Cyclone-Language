@@ -4,6 +4,7 @@ include ../Makefile.inc
 # Override these variables, as well as CYCFLAGS, to test different
 #   compilers/libraries (probably because you are bootstrapping the compiler) 
 # (see targets test, test_bin, and test_src in parent directory's Makefile)
+
 CYCBISON=cycbison$(EXE)
 ifndef devel
 CYCC=cyclone$(EXE)
@@ -12,7 +13,7 @@ CYCC=../build/boot/cyclone$(EXE)
 CYCFLAGS=-I../lib -I../include -B../build/boot -pp -save-c -g
 endif
 
-EXES := $(addsuffix $(EXE), cyctest foo hello test_regions histogram test_getopt zeroterm structarray flatlist md5 unique_patterns dynregion refcnt_test require streambufftest scheme cinclude patterns)
+EXES := $(addsuffix $(EXE), cyctest foo hello test_regions histogram test_getopt zeroterm structarray flatlist md5 unique_patterns dynregion refcnt_test require streambufftest scheme cinclude testasm patterns)
 
 ifeq ($(HAVE_PTHREAD),yes)
 EXES += $(addsuffix $(EXE),testexn)
@@ -67,6 +68,7 @@ all: $(EXES) failtest
 	./patterns
 	./refcnt_test -q
 	./cinclude
+	./testasm
 ifeq ($(HAVE_PTHREAD),yes)
 	./testexn
 endif
@@ -120,7 +122,7 @@ endif
 	$(CYCC) $(CYCFLAGS) $(LDFLAGS) -o $@ $^
 
 clean:
-	$(RM) $(addsuffix .[oc], hello bytes cyctest foo histogram test_getopt typeref test_regions unique_test zeroterm structarray flatlist md5 require streambufftest streambuff refcnt_test dynregion md5driver scheme unique_patterns cinclude testexn)
+	$(RM) $(addsuffix .[oc], hello bytes cyctest foo histogram test_getopt typeref test_regions unique_test zeroterm structarray flatlist md5 require streambufftest streambuff refcnt_test dynregion md5driver scheme unique_patterns cinclude testasm testexn)
 	$(RM) foo_tab.* unsafe_cast.o pcredemo.o pcredemo.c pcredemo md5driver.o
 	$(RM) $(EXES) fail1.tmp fail2.tmp fail3.tmp fail4.tmp
 	$(RM) *~ *.exe *.output *.stackdump

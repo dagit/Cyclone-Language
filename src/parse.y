@@ -1053,7 +1053,7 @@ using Parse;
 %token IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN ENUM TYPEOF
 %token BUILTIN_VA_LIST EXTENSION
 // Cyc:  CYCLONE additional keywords
-%token NULL_kw LET THROW TRY CATCH EXPORT OVERRIDE
+%token NULL_kw LET THROW TRY CATCH EXPORT OVERRIDE HIDE
 %token NEW ABSTRACT FALLTHRU USING NAMESPACE DATATYPE
 %token MALLOC RMALLOC RMALLOC_INLINE CALLOC RCALLOC SWAP
 %token REGION_T TAG_T REGION RNEW REGIONS 
@@ -1078,8 +1078,8 @@ using Parse;
 %token TYPE_VAR TYPEDEF_NAME QUAL_IDENTIFIER QUAL_TYPEDEF_NAME 
 // Cyc: added __attribute__ keyword
 %token ATTRIBUTE
-// Cyc: added ASM "token" -- completely uninterpreted text.  See lex.cyl
-%token ASM
+// Cyc: removed ASM "token" -- completely uninterpreted text.  See lex.cyl
+%token ASM_TOK 
 // specify tagged union constructors for types of semantic values that 
 // the lexer must produce.  The other constructors are generated implicitly.
 %union <`yy::R> {
@@ -1172,11 +1172,19 @@ using Parse;
 %type <type_opt_t> optional_effect 
 %type <list_t<$(type_t,type_t)@`H,`H>> optional_rgn_order rgn_order
 %type <booltype_t> zeroterm_qual_opt
-%type <list_t<$(Position::seg_t,qvar_t,bool)@`H,`H>> export_list export_list_opt export_list_values
+%type <list_t<$(Position::seg_t,qvar_t,bool)@`H,`H>> export_list_values
+%type <$(list_t<$(Position::seg_t,qvar_t,bool)@`H,`H>, seg_t)@`H> export_list export_list_opt
+%type <list_t<qvar_t,`H>> hide_list_opt hide_list_values
 %type <pointer_qual_t<`yy>> pointer_qual
 %type <pointer_quals_t<`yy>> pointer_quals
-%type <$(bool,string_t<`H>)> ASM
 %type <exp_opt_t> requires_clause_opt ensures_clause_opt
+%type <raw_exp_t> asm_expr
+%type <bool> volatile_opt
+%type <$(list_t<$(string_t<`H>, exp_t)@`H, `H>, list_t<$(string_t<`H>, exp_t)@`H, `H>, list_t<string_t<`H>@`H, `H>)@`H> asm_out_opt
+%type <$(list_t<$(string_t<`H>, exp_t)@`H, `H>, list_t<string_t<`H>@`H, `H>)@`H> asm_in_opt
+%type <list_t<string_t<`H>@`H, `H>> asm_clobber_opt asm_clobber_list
+%type <list_t<$(string_t<`H>, exp_t)@`H, `H>> asm_outlist asm_inlist
+%type <$(string_t<`H>, exp_t)@`H> asm_io_elt
 /* start production */
 %start prog
 %%
@@ -1205,21 +1213,28 @@ translation_unit:
     }
 | namespace_action '{' translation_unit unnamespace_action translation_unit
     { $$=^$(new List(new Decl(new Namespace_d(new $1,$3),LOC(@1,@4)),$5)); }
-| extern_c_action '{' translation_unit end_extern_c override_opt export_list_opt translation_unit
+| extern_c_action '{' translation_unit end_extern_c override_opt export_list_opt hide_list_opt translation_unit
     { let is_c_include = $1;
       list_t<decl_t> cycdecls = $5;
-      list_t<$(seg_t,qvar_t,bool)@> exs = $6;
+      let &$(exs, wc) = $6;
+      let hides = $7;
+      if(exs != NULL && hides != NULL) {
+	Warn::err(LOC(@1,@2), "hide list can only be used with export { * }, or no export block");
+      }
+      if(hides && !wc) {
+	wc = SLOC(@7);
+      }
       if (!is_c_include) {
 	if (exs != NULL || cycdecls != NULL) {
 	  Warn::err(LOC(@1,@2),"expecting \"C include\"");
-	  $$=^$(new List(new Decl(new ExternCinclude_d($3,cycdecls,exs),LOC(@1,@6)),$7));
+	  $$=^$(new List(new Decl(new ExternCinclude_d($3,cycdecls,exs,new $(wc, hides)),LOC(@1,@6)),$8));
 	}
 	else {
-	  $$=^$(new List(new Decl(new ExternC_d($3),LOC(@1,@6)),$7));
+	  $$=^$(new List(new Decl(new ExternC_d($3),LOC(@1,@6)),$8));
 	}
       }
       else {
-        $$=^$(new List(new Decl(new ExternCinclude_d($3,cycdecls,exs),LOC(@1,@6)),$7));
+        $$=^$(new List(new Decl(new ExternCinclude_d($3,cycdecls,exs,new $(wc, hides)),LOC(@1,@6)),$8));
       }
     }
 | PORTON ';' translation_unit
@@ -1262,14 +1277,27 @@ end_extern_c:
   '}'  { Lex::leave_extern_c(); }
 ;
 
+hide_list_opt: 
+            {$$ = ^$(NULL); }
+| HIDE '{' hide_list_values '}' {$$ = $!3;}
+;
+
+hide_list_values:
+  struct_union_name { $$=^$(new List($1,NULL)); }
+| struct_union_name ';' { $$=^$(new List($1,NULL)); }
+| struct_union_name ',' hide_list_values
+  { $$=^$(new List($1,$3));}
+;
+
 export_list_opt: 
-              { $$ = ^$(NULL); }
+              { $$ = ^$(new $(NULL, 0)); }
 | export_list { $$ = $!1; }
 ;
 
 export_list: 
-  EXPORT '{' export_list_values '}' { $$= $!3; }
-| EXPORT '{' '}' { $$=^$(NULL); }
+EXPORT '{' export_list_values '}' { $$= ^$(new $($3, 0)); } //<------- HERE
+| EXPORT '{' '}' { $$=^$(new $(NULL, 0)); }
+| EXPORT '{' '*' '}' { $$=^$(new $(NULL, SLOC(@1))); }
 ;    
 
 export_list_values:
@@ -3034,10 +3062,66 @@ unary_expression:
 | VALUEOF '(' type_name ')'
    { let t = type_name_to_type($3,SLOC(@3));
      $$=^$(valueof_exp(t, LOC(@1,@4))); }
-| ASM
-   { let $(v,s) = $1;
-     $$=^$(asm_exp(v,s,SLOC(@1))); }
+| ASM_TOK  asm_expr 
+   { $$=^$(new_exp($2, SLOC(@1))); }
 | EXTENSION unary_expression { $$=^$(extension_exp($2,LOC(@1,@3))); }
+;
+
+asm_expr:
+  volatile_opt '(' STRING asm_out_opt ')' 
+{    let &$(outlist, inlist, clobbers) = $4;
+ $$ = ^$(new Asm_e($1, $3, outlist, inlist, clobbers)); }
+;
+
+volatile_opt:
+           { $$ = ^$(false); }
+| VOLATILE { $$ = ^$(true); }
+;
+
+asm_out_opt:
+{$$ = ^$(new $(NULL, NULL, NULL));}
+| ':' asm_in_opt 
+{  let &$(inlist, clobbers) = $2;
+ $$ = ^$(new $(NULL, inlist, clobbers)); }
+| ':' asm_outlist asm_in_opt 
+{  let &$(inlist, clobbers) = $3;
+   $$ = ^$(new $(List::imp_rev($2), inlist, clobbers));}
+;
+
+asm_outlist:
+  asm_io_elt { $$ = ^$(new List($1, NULL)); }
+| asm_outlist ',' asm_io_elt {$$ = ^$(new List($3, $1)); }//reversed
+;
+
+asm_in_opt:
+{$$ = ^$(new $(NULL, NULL));}
+| ':' asm_clobber_opt
+{  $$ = ^$(new $(NULL, $2)); }
+| ':' asm_inlist asm_clobber_opt 
+{ $$ = ^$(new $(List::imp_rev($2), $3)); }
+;
+
+asm_inlist:
+  asm_io_elt {$$ = ^$(new List($1, NULL)); }
+| asm_inlist ',' asm_io_elt {$$ = ^$(new List($3, $1));} //reversed
+;
+
+asm_io_elt:
+  STRING '(' expression ')' 
+{ let pf_exp = $3;
+ $$ = ^$(new $($1, $3)); }
+;
+
+//contains only register names ... interpreted
+asm_clobber_opt:
+{$$ = ^$(NULL);}
+| ':' {$$ = ^$(NULL);}
+| ':' asm_clobber_list {$$ = ^$(List::imp_rev($2));}
+;
+ 
+asm_clobber_list:
+  STRING {  $$ = ^$(new List(new $1, NULL)); }
+| asm_clobber_list ',' STRING { $$ = ^$(new List(new $3, $1)); }
 ;
 
 unary_operator:
