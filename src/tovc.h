@@ -24,6 +24,7 @@
 
 namespace Tovc {
 
+extern int elim_array_initializers;
 extern List::list_t<Absyn::decl_t> tovc(List::list_t<Absyn::decl_t> decls);
 
 }

@@ -35,8 +35,9 @@
 
 // FIX: we could probably use "const" in lots of places where we're not.
 
-// Note: Do NOT use unresolvedmem_exp except at top-level or you will break
-//  the Tovc module
+// Note: unresolvedmem_exp should only be used (1) to build arrays; or
+// (2) to build other things (structs etc.) at top level only; Tovc relies on this.
+
 
 #include <core.h>
 #include <stdio.h>
@@ -120,13 +121,18 @@ MAKE_STRING(_RegionHandle);
 MAKE_STRING(_DynRegionHandle);
 MAKE_STRING(_DynRegionFrame);
 
-// some pre-allocated qvars -- use foo_e for exp that is var "foo"
+/* Some pre-allocated qvars -- use foo_e for exp that is var "foo".
+   NB we must record all of these so that tovc knows about them;
+   this is done by initializing the external variable globals in the
+   function init(), below. */
+stringptr_t ?globals = NULL;
 #define MAKE_VAR(str)\
   static string_t              str##_str = #str;\
   static $(nmspace_t, var_t)   str##_pr  = $(Loc_n,&str##_str);\
   static tunion Raw_exp.Var_e  str##_re  = Var_e(&str##_pr,Unresolved_b);\
   static struct Exp            str##_ev  = Exp{NULL,&str##_re,NULL,EmptyAnnot};\
   static exp_t                 str##_e   = &str##_ev
+
 
 MAKE_VAR(_throw);
 MAKE_VAR(setjmp);
@@ -4189,6 +4195,68 @@ static void init() {
   xtunion_fields_so_far = NULL;
   total_bounds_checks = 0;
   bounds_checks_eliminated = 0;
+  globals = new {
+    &_throw_str,
+    &setjmp_str,
+    &_push_handler_str,
+    &_pop_handler_str,
+    &_exn_thrown_str,
+    &_npop_handler_str,
+    &_check_null_str, 
+    &_check_known_subscript_null_str,
+    &_check_known_subscript_notnull_str,
+    // &_check_unknown_subscript_str,
+    &_check_dynforward_subscript_str,
+    &_check_dyneither_subscript_str,
+    // &_tagged_arr_str,
+    &_dynforward_ptr_str,
+    &_dyneither_ptr_str,
+    // &_tag_arr_str,
+    &_tag_dynforward_str,
+    &_tag_dyneither_str,
+    // &_init_tag_arr_str,
+    &_init_dynforward_ptr_str,
+    &_init_dyneither_ptr_str,
+    // &_untag_arr_str,
+    &_untag_dynforward_ptr_str,
+    &_untag_dyneither_ptr_str,
+    // &_get_arr_size_str,
+    &_get_dynforward_size_str,
+    &_get_dyneither_size_str,
+    &_get_zero_arr_size_str, // NOT SURE WHETHER WE NEED BOTH?
+    // &_tagged_arr_plus_str,
+    &_dynforward_ptr_plus_str,
+    &_dyneither_ptr_plus_str,
+    &_zero_arr_plus_str,     // NOT SURE WHETHER WE NEED BOTH?
+    // &_tagged_arr_inplace_plus_str,
+    &_dynforward_ptr_inplace_plus_str,
+    &_dyneither_ptr_inplace_plus_str,
+    &_zero_arr_inplace_plus_str, // NOT SURE WHETHER WE NEED BOTH?
+    // &_tagged_arr_inplace_plus_post_str,
+    &_dynforward_ptr_inplace_plus_post_str,
+    &_dyneither_ptr_inplace_plus_post_str,
+    &_dynforward_to_dyneither_str,
+    &_dyneither_to_dynforward_str,
+    &_zero_arr_inplace_plus_post_str, // NOT SURE WHETHER WE NEED BOTH?
+    &_cycalloc_str,
+    &_cyccalloc_str,
+    &_cycalloc_atomic_str,
+    &_cyccalloc_atomic_str,
+    &_region_malloc_str,
+    &_region_calloc_str,
+    &_check_times_str,
+    &_new_region_str,
+    &_push_region_str,
+    &_pop_region_str,
+    &_open_dynregion_str,
+    &_push_dynregion_str,
+    &_pop_dynregion_str,
+    &_reset_region_str,
+    &_throw_arraybounds_str,
+    // &_tagged_ptr_decrease_size_str,
+    &_dynforward_ptr_decrease_size_str,
+    &_dyneither_ptr_decrease_size_str
+  };
 }
 
 // The entry point:  translate the list of Cyclone declarations to

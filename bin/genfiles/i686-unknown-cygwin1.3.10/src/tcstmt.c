@@ -1109,8 +1109,8 @@ _tmp46};Cyc_Tcutil_terr(s0->loc,({const char*_tmp44="returns value of type %s bu
 _tag_dynforward(_tmp44,sizeof(char),_get_zero_arr_size(_tmp44,41));}),
 _tag_dynforward(_tmp43,sizeof(void*),2));}}});Cyc_Tcutil_explain_failure();}if(
 Cyc_Tcutil_is_unique_pointer(t) && !Cyc_Tcutil_is_unique_path(e))({void*_tmp47[0]={};
-Cyc_Tcutil_terr(e->loc,({const char*_tmp48="Cannot consume non-unique paths; do swap instead";
-_tag_dynforward(_tmp48,sizeof(char),_get_zero_arr_size(_tmp48,49));}),
+Cyc_Tcutil_terr(e->loc,({const char*_tmp48="Cannot consume paths; do swap instead";
+_tag_dynforward(_tmp48,sizeof(char),_get_zero_arr_size(_tmp48,38));}),
 _tag_dynforward(_tmp47,sizeof(void*),0));});}return;}_LL9: if(_tmpB <= (void*)1)
 goto _LLB;if(*((int*)_tmpB)!= 3)goto _LLB;_tmp10=((struct Cyc_Absyn_IfThenElse_s_struct*)
 _tmpB)->f1;_tmp11=((struct Cyc_Absyn_IfThenElse_s_struct*)_tmpB)->f2;_tmp12=((
@@ -1177,8 +1177,8 @@ _tag_dynforward(_tmp58,sizeof(char),_get_zero_arr_size(_tmp58,63));}),
 _tag_dynforward(_tmp57,sizeof(void*),2));}}});Cyc_Tcutil_explain_failure();}if(
 Cyc_Tcutil_is_unique_pointer((void*)_tmp56->hd) && !Cyc_Tcutil_is_unique_path((
 struct Cyc_Absyn_Exp*)_tmp2A->hd))({void*_tmp5B[0]={};Cyc_Tcutil_terr(((struct Cyc_Absyn_Exp*)
-_tmp2A->hd)->loc,({const char*_tmp5C="Cannot consume non-unique paths; do swap instead";
-_tag_dynforward(_tmp5C,sizeof(char),_get_zero_arr_size(_tmp5C,49));}),
+_tmp2A->hd)->loc,({const char*_tmp5C="Cannot consume paths; do swap instead";
+_tag_dynforward(_tmp5C,sizeof(char),_get_zero_arr_size(_tmp5C,38));}),
 _tag_dynforward(_tmp5B,sizeof(void*),0));});}if(_tmp2A != 0)({void*_tmp5D[0]={};
 Cyc_Tcutil_terr(s0->loc,({const char*_tmp5E="too many arguments to explicit fallthru";
 _tag_dynforward(_tmp5E,sizeof(char),_get_zero_arr_size(_tmp5E,40));}),
@@ -1204,8 +1204,8 @@ _tmp64;});_tmp63;}));_tmp62;})),_tmp2E,0);;_pop_region(r);}return;_LL1B: if(_tmp
 _tmpB)->f1;_tmp30=((struct Cyc_Absyn_Switch_s_struct*)_tmpB)->f2;_LL1C: Cyc_Tcexp_tcExp(
 te,0,_tmp2F);{void*_tmp69=(void*)((struct Cyc_Core_Opt*)_check_null(_tmp2F->topt))->v;
 if(Cyc_Tcutil_is_unique_pointer(_tmp69) && !Cyc_Tcutil_is_unique_path(_tmp2F))({
-void*_tmp6A[0]={};Cyc_Tcutil_terr(_tmp2F->loc,({const char*_tmp6B="Cannot consume non-unique paths; do swap instead";
-_tag_dynforward(_tmp6B,sizeof(char),_get_zero_arr_size(_tmp6B,49));}),
+void*_tmp6A[0]={};Cyc_Tcutil_terr(_tmp2F->loc,({const char*_tmp6B="Cannot consume paths; do swap instead";
+_tag_dynforward(_tmp6B,sizeof(char),_get_zero_arr_size(_tmp6B,38));}),
 _tag_dynforward(_tmp6A,sizeof(void*),0));});{struct _RegionHandle _tmp6C=
 _new_region("r");struct _RegionHandle*r=& _tmp6C;_push_region(r);{struct Cyc_Tcenv_Tenv*
 _tmp6D=Cyc_Tcenv_set_in_switch(r,te);_tmp6D=Cyc_Tcenv_clear_fallthru(r,_tmp6D);{

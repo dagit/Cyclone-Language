@@ -1703,8 +1703,8 @@ _tmp148);}Cyc_Absyndump_dump(({const char*_tmp18B=")";_tag_dynforward(_tmp18B,
 sizeof(char),_get_zero_arr_size(_tmp18B,2));}));}goto _LLDE;_LL13F: if(*((int*)
 _tmpE8)!= 36)goto _LL141;_tmp149=((struct Cyc_Absyn_Swap_e_struct*)_tmpE8)->f1;
 _tmp14A=((struct Cyc_Absyn_Swap_e_struct*)_tmpE8)->f2;_LL140: Cyc_Absyndump_dump(({
-const char*_tmp18C="swap(";_tag_dynforward(_tmp18C,sizeof(char),
-_get_zero_arr_size(_tmp18C,6));}));Cyc_Absyndump_dumpexp_prec(myprec,_tmp149);
+const char*_tmp18C="cycswap(";_tag_dynforward(_tmp18C,sizeof(char),
+_get_zero_arr_size(_tmp18C,9));}));Cyc_Absyndump_dumpexp_prec(myprec,_tmp149);
 Cyc_Absyndump_dump_char((int)',');Cyc_Absyndump_dumpexp_prec(myprec,_tmp14A);Cyc_Absyndump_dump_char((
 int)')');goto _LLDE;_LL141: if(*((int*)_tmpE8)!= 37)goto _LL143;_tmp14B=((struct Cyc_Absyn_UnresolvedMem_e_struct*)
 _tmpE8)->f1;_tmp14C=((struct Cyc_Absyn_UnresolvedMem_e_struct*)_tmpE8)->f2;_LL142:((

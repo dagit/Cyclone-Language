@@ -65,6 +65,7 @@ static bool ic_r       = false;
 static bool toc_r      = false;
 static bool stop_after_objectfile_r = false;
 static bool stop_after_asmfile_r = false;
+static bool elim_se_r    = false;
 static bool tovc_r     = false;
 static bool v_r        = false;
 static bool save_temps_r = false;
@@ -197,6 +198,11 @@ static void set_nocppprecomp() {
 static void set_lineno() {
   generate_line_directives_r = true;
   set_save_temps();
+}
+
+static void set_tovc() {
+  elim_se_r = true;
+  tovc_r = true;
 }
 
 static void set_inline_functions() {
@@ -398,6 +404,7 @@ list_t<Absyn::decl_t> do_translate(bool ignore, list_t<Absyn::decl_t> tds) {
   return Toc::toc(tds);
 }
 list_t<Absyn::decl_t> do_tovc(bool ignore, list_t<Absyn::decl_t> tds) {
+  Tovc::elim_array_initializers = tovc_r;
   return Tovc::tovc(tds);
 }
 
@@ -775,7 +782,11 @@ static void process_file(string_t<`H> filename) {
     Tcutil::flush_warnings();
   remove_file(preprocfile);
   if (compile_failure) return;
-  if (tovc_r) tds = do_stage("post-pass to VC", do_tovc, true, tds);
+  if (tovc_r || elim_se_r)
+    // FIX: the tovc functions should be renamed, some things
+    // (lifting out statement expressions) are useful even if
+    // we aren't using VC
+    tds = do_stage("post-pass to VC", do_tovc, true, tds);
   if (compile_failure) return;
 
   // jcheney: we should make a (empty) .c file even if the .cyc file produced no decls
@@ -965,8 +976,11 @@ int main(int argc, string_t<`H> ?`H argv) {
          new $("-up",false,"",
                new Clear_spec(&pp_r),
                "Ugly print"),
+         new $("-elim-statement-expressions",false,"",
+               new Set_spec(&elim_se_r),
+               "Avoid statement expressions in C output"),
          new $("-tovc",false,"",
-               new Set_spec(&tovc_r),
+               new Unit_spec(set_tovc),
                "Avoid gcc extensions in C output"),
          new $("-save-temps",false,"",
                new Unit_spec(set_save_temps),
