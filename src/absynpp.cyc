@@ -622,6 +622,7 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
     }
     switch(compress(rgn)) {
     case &HeapRgn: break;
+    case &Evar(_,_,_,_) && print_for_cycdoc: break;
     default: ptr = cat(ptr,typ2doc(rgn),text(" "));
     }
     ptr = cat(ptr,tqual2doc(tq2));

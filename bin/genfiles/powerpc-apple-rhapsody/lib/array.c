@@ -757,18 +757,20 @@ struct _dyneither_ptr f2;};struct _tuple1 Cyc_Array_split(struct _dyneither_ptr 
 Cyc_Array_memq(struct _dyneither_ptr l,void*x);int Cyc_Array_mem(int(*cmp)(void*,
 void*),struct _dyneither_ptr l,void*x);struct _dyneither_ptr Cyc_Array_extract(
 struct _dyneither_ptr x,int start,int*len_opt);void Cyc_Array_qsort(int(*less_eq)(
+void**,void**),struct _dyneither_ptr arr,int len);void Cyc_Array_qsort(int(*less_eq)(
 void**,void**),struct _dyneither_ptr arr,int len){int base_ofs=0;void*temp;int sp[40];
 int sp_ofs;int i;int j;int limit_ofs;if((base_ofs < 0  || base_ofs + len > 
-_get_dyneither_size(arr,sizeof(void*))) || len < 0)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
-_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0[0]=({struct Cyc_Core_Invalid_argument_struct
-_tmp1;_tmp1.tag=Cyc_Core_Invalid_argument;_tmp1.f1=({const char*_tmp2="Array::qsort";
-_tag_dyneither(_tmp2,sizeof(char),13);});_tmp1;});_tmp0;}));limit_ofs=base_ofs + 
-len;sp_ofs=0;for(0;1;0){if(limit_ofs - base_ofs > 3){temp=*((void**)
-_check_dyneither_subscript(arr,sizeof(void*),(limit_ofs - base_ofs)/ 2 + base_ofs));*((
-void**)_check_dyneither_subscript(arr,sizeof(void*),(limit_ofs - base_ofs)/ 2 + 
-base_ofs))=*((void**)_check_dyneither_subscript(arr,sizeof(void*),base_ofs));*((
-void**)_check_dyneither_subscript(arr,sizeof(void*),base_ofs))=temp;i=base_ofs + 
-1;j=limit_ofs - 1;if(less_eq((void**)_untag_dyneither_ptr(_dyneither_ptr_plus(arr,
+_get_dyneither_size(arr,sizeof(void*))) || len < 0){struct Cyc_Core_Invalid_argument_struct
+_tmp39;const char*_tmp38;struct Cyc_Core_Invalid_argument_struct*_tmp37;(int)
+_throw((void*)((_tmp37=_cycalloc(sizeof(*_tmp37)),((_tmp37[0]=((_tmp39.tag=Cyc_Core_Invalid_argument,((
+_tmp39.f1=((_tmp38="Array::qsort",_tag_dyneither(_tmp38,sizeof(char),13))),
+_tmp39)))),_tmp37)))));}limit_ofs=base_ofs + len;sp_ofs=0;for(0;1;0){if(limit_ofs
+- base_ofs > 3){temp=*((void**)_check_dyneither_subscript(arr,sizeof(void*),(
+limit_ofs - base_ofs)/ 2 + base_ofs));*((void**)_check_dyneither_subscript(arr,
+sizeof(void*),(limit_ofs - base_ofs)/ 2 + base_ofs))=*((void**)
+_check_dyneither_subscript(arr,sizeof(void*),base_ofs));*((void**)
+_check_dyneither_subscript(arr,sizeof(void*),base_ofs))=temp;i=base_ofs + 1;j=
+limit_ofs - 1;if(less_eq((void**)_untag_dyneither_ptr(_dyneither_ptr_plus(arr,
 sizeof(void*),i),sizeof(void*),1),(void**)_untag_dyneither_ptr(
 _dyneither_ptr_plus(arr,sizeof(void*),j),sizeof(void*),1))> 0){temp=*((void**)
 _check_dyneither_subscript(arr,sizeof(void*),i));*((void**)
@@ -814,19 +816,23 @@ _check_dyneither_subscript(arr,sizeof(void*),j + 1));*((void**)
 _check_dyneither_subscript(arr,sizeof(void*),j + 1))=temp;if(j == base_ofs)break;}}
 if(sp_ofs != 0){sp_ofs -=2;base_ofs=sp[_check_known_subscript_notnull(40,sp_ofs)];
 limit_ofs=sp[_check_known_subscript_notnull(40,sp_ofs + 1)];}else{break;}}}}void
-Cyc_Array_msort(int(*less_eq)(void**,void**),struct _dyneither_ptr arr,int len){if(
-len > _get_dyneither_size(arr,sizeof(void*)) || len < 0)(int)_throw((void*)({
-struct Cyc_Core_Invalid_argument_struct*_tmp3=_cycalloc(sizeof(*_tmp3));_tmp3[0]=({
-struct Cyc_Core_Invalid_argument_struct _tmp4;_tmp4.tag=Cyc_Core_Invalid_argument;
-_tmp4.f1=({const char*_tmp5="Array::msort";_tag_dyneither(_tmp5,sizeof(char),13);});
-_tmp4;});_tmp3;}));{struct _dyneither_ptr from=({unsigned int _tmp6=(unsigned int)
-len;void**_tmp7=(void**)_cycalloc(_check_times(sizeof(void*),_tmp6));struct
-_dyneither_ptr _tmp9=_tag_dyneither(_tmp7,sizeof(void*),_tmp6);{unsigned int _tmp8=
-_tmp6;unsigned int i;for(i=0;i < _tmp8;i ++){_tmp7[i]=*((void**)
-_check_dyneither_subscript(arr,sizeof(void*),0));}}_tmp9;});struct _dyneither_ptr
-to=arr;struct _dyneither_ptr swap;int swapped=0;int stepsize;int start;int lstart;int
-lend;int rstart;int rend;int dest;for(stepsize=1;stepsize < len;stepsize=stepsize * 2){
-swap=from;from=to;to=swap;dest=0;for(start=0;start < len;start=start + stepsize * 2){
+Cyc_Array_msort(int(*less_eq)(void**,void**),struct _dyneither_ptr arr,int len);
+static void _tmp45(struct _dyneither_ptr*arr,unsigned int*_tmp44,unsigned int*
+_tmp43,void***_tmp41){for(*_tmp44=0;*_tmp44 < *_tmp43;(*_tmp44)++){(*_tmp41)[*
+_tmp44]=*((void**)_check_dyneither_subscript(*arr,sizeof(void*),0));}}void Cyc_Array_msort(
+int(*less_eq)(void**,void**),struct _dyneither_ptr arr,int len){if(len > 
+_get_dyneither_size(arr,sizeof(void*)) || len < 0){struct Cyc_Core_Invalid_argument_struct
+_tmp3F;const char*_tmp3E;struct Cyc_Core_Invalid_argument_struct*_tmp3D;(int)
+_throw((void*)((_tmp3D=_cycalloc(sizeof(*_tmp3D)),((_tmp3D[0]=((_tmp3F.tag=Cyc_Core_Invalid_argument,((
+_tmp3F.f1=((_tmp3E="Array::msort",_tag_dyneither(_tmp3E,sizeof(char),13))),
+_tmp3F)))),_tmp3D)))));}{unsigned int _tmp44;unsigned int _tmp43;struct
+_dyneither_ptr _tmp42;void**_tmp41;unsigned int _tmp40;struct _dyneither_ptr from=(
+_tmp40=(unsigned int)len,((_tmp41=(void**)_cycalloc(_check_times(sizeof(void*),
+_tmp40)),((_tmp42=_tag_dyneither(_tmp41,sizeof(void*),_tmp40),((((_tmp43=_tmp40,
+_tmp45(& arr,& _tmp44,& _tmp43,& _tmp41))),_tmp42)))))));struct _dyneither_ptr to=arr;
+struct _dyneither_ptr swap;int swapped=0;int stepsize;int start;int lstart;int lend;int
+rstart;int rend;int dest;for(stepsize=1;stepsize < len;stepsize=stepsize * 2){swap=
+from;from=to;to=swap;dest=0;for(start=0;start < len;start=start + stepsize * 2){
 lstart=start;rstart=start + stepsize < len?start + stepsize: len;lend=rstart;rend=
 start + stepsize * 2 < len?start + stepsize * 2: len;while(lstart < lend  && rstart < 
 rend){if(less_eq((void**)_untag_dyneither_ptr(_dyneither_ptr_plus(from,sizeof(
@@ -842,139 +848,195 @@ void**)_check_dyneither_subscript(to,sizeof(void*),dest ++))=*((void**)
 _check_dyneither_subscript(from,sizeof(void*),rstart ++));}}}if(swapped){int i=0;
 for(0;i < len;++ i){*((void**)_check_dyneither_subscript(from,sizeof(void*),i))=*((
 void**)_check_dyneither_subscript(to,sizeof(void*),i));}}};}struct _dyneither_ptr
-Cyc_Array_from_list(struct Cyc_List_List*x){return Cyc_List_to_array(x);}struct Cyc_List_List*
-Cyc_Array_to_list(struct _dyneither_ptr x){return Cyc_List_from_array(x);}struct
+Cyc_Array_from_list(struct Cyc_List_List*x);struct _dyneither_ptr Cyc_Array_from_list(
+struct Cyc_List_List*x){return Cyc_List_to_array(x);}struct Cyc_List_List*Cyc_Array_to_list(
+struct _dyneither_ptr x);struct Cyc_List_List*Cyc_Array_to_list(struct
+_dyneither_ptr x){return Cyc_List_from_array(x);}struct _dyneither_ptr Cyc_Array_copy(
+struct _dyneither_ptr x);static void _tmp4B(struct _dyneither_ptr*x,unsigned int*
+_tmp4A,unsigned int*_tmp49,void***_tmp47){for(*_tmp4A=0;*_tmp4A < *_tmp49;(*
+_tmp4A)++){(*_tmp47)[*_tmp4A]=((void**)(*x).curr)[(int)*_tmp4A];}}struct
 _dyneither_ptr Cyc_Array_copy(struct _dyneither_ptr x){int sx=(int)
-_get_dyneither_size(x,sizeof(void*));return({unsigned int _tmpA=(unsigned int)sx;
-void**_tmpB=(void**)_cycalloc(_check_times(sizeof(void*),_tmpA));struct
-_dyneither_ptr _tmpD=_tag_dyneither(_tmpB,sizeof(void*),_tmpA);{unsigned int _tmpC=
-_tmpA;unsigned int i;for(i=0;i < _tmpC;i ++){_tmpB[i]=((void**)x.curr)[(int)i];}}
-_tmpD;});}struct _dyneither_ptr Cyc_Array_map(void*(*f)(void*),struct
-_dyneither_ptr x){int sx=(int)_get_dyneither_size(x,sizeof(void*));return({
-unsigned int _tmpE=(unsigned int)sx;void**_tmpF=(void**)_cycalloc(_check_times(
-sizeof(void*),_tmpE));struct _dyneither_ptr _tmp11=_tag_dyneither(_tmpF,sizeof(
-void*),_tmpE);{unsigned int _tmp10=_tmpE;unsigned int i;for(i=0;i < _tmp10;i ++){
-_tmpF[i]=f(((void**)x.curr)[(int)i]);}}_tmp11;});}struct _dyneither_ptr Cyc_Array_map_c(
+_get_dyneither_size(x,sizeof(void*));unsigned int _tmp4A;unsigned int _tmp49;
+struct _dyneither_ptr _tmp48;void**_tmp47;unsigned int _tmp46;return(_tmp46=(
+unsigned int)sx,((_tmp47=(void**)_cycalloc(_check_times(sizeof(void*),_tmp46)),((
+_tmp48=_tag_dyneither(_tmp47,sizeof(void*),_tmp46),((((_tmp49=_tmp46,_tmp4B(& x,&
+_tmp4A,& _tmp49,& _tmp47))),_tmp48)))))));}struct _dyneither_ptr Cyc_Array_map(void*(*
+f)(void*),struct _dyneither_ptr x);static void _tmp51(struct _dyneither_ptr*x,void*(**
+f)(void*),unsigned int*_tmp50,unsigned int*_tmp4F,void***_tmp4D){for(*_tmp50=0;*
+_tmp50 < *_tmp4F;(*_tmp50)++){(*_tmp4D)[*_tmp50]=(*f)(((void**)(*x).curr)[(int)*
+_tmp50]);}}struct _dyneither_ptr Cyc_Array_map(void*(*f)(void*),struct
+_dyneither_ptr x){int sx=(int)_get_dyneither_size(x,sizeof(void*));unsigned int
+_tmp50;unsigned int _tmp4F;struct _dyneither_ptr _tmp4E;void**_tmp4D;unsigned int
+_tmp4C;return(_tmp4C=(unsigned int)sx,((_tmp4D=(void**)_cycalloc(_check_times(
+sizeof(void*),_tmp4C)),((_tmp4E=_tag_dyneither(_tmp4D,sizeof(void*),_tmp4C),((((
+_tmp4F=_tmp4C,_tmp51(& x,& f,& _tmp50,& _tmp4F,& _tmp4D))),_tmp4E)))))));}struct
+_dyneither_ptr Cyc_Array_map_c(void*(*f)(void*,void*),void*env,struct
+_dyneither_ptr x);static void _tmp57(struct _dyneither_ptr*x,void*(**f)(void*,void*),
+void**env,unsigned int*_tmp56,unsigned int*_tmp55,void***_tmp53){for(*_tmp56=0;*
+_tmp56 < *_tmp55;(*_tmp56)++){(*_tmp53)[*_tmp56]=(*f)(*env,((void**)(*x).curr)[(
+int)*_tmp56]);}}struct _dyneither_ptr Cyc_Array_map_c(void*(*f)(void*,void*),void*
+env,struct _dyneither_ptr x){int sx=(int)_get_dyneither_size(x,sizeof(void*));
+unsigned int _tmp56;unsigned int _tmp55;struct _dyneither_ptr _tmp54;void**_tmp53;
+unsigned int _tmp52;return(_tmp52=(unsigned int)sx,((_tmp53=(void**)_cycalloc(
+_check_times(sizeof(void*),_tmp52)),((_tmp54=_tag_dyneither(_tmp53,sizeof(void*),
+_tmp52),((((_tmp55=_tmp52,_tmp57(& x,& f,& env,& _tmp56,& _tmp55,& _tmp53))),_tmp54)))))));}
+void Cyc_Array_imp_map(void*(*f)(void*),struct _dyneither_ptr x);void Cyc_Array_imp_map(
+void*(*f)(void*),struct _dyneither_ptr x){int sx=(int)_get_dyneither_size(x,sizeof(
+void*));int i=0;for(0;i < sx;++ i){*((void**)_check_dyneither_subscript(x,sizeof(
+void*),i))=f(*((void**)_check_dyneither_subscript(x,sizeof(void*),i)));}}void Cyc_Array_imp_map_c(
+void*(*f)(void*,void*),void*env,struct _dyneither_ptr x);void Cyc_Array_imp_map_c(
 void*(*f)(void*,void*),void*env,struct _dyneither_ptr x){int sx=(int)
-_get_dyneither_size(x,sizeof(void*));return({unsigned int _tmp12=(unsigned int)sx;
-void**_tmp13=(void**)_cycalloc(_check_times(sizeof(void*),_tmp12));struct
-_dyneither_ptr _tmp15=_tag_dyneither(_tmp13,sizeof(void*),_tmp12);{unsigned int
-_tmp14=_tmp12;unsigned int i;for(i=0;i < _tmp14;i ++){_tmp13[i]=f(env,((void**)x.curr)[(
-int)i]);}}_tmp15;});}void Cyc_Array_imp_map(void*(*f)(void*),struct _dyneither_ptr
-x){int sx=(int)_get_dyneither_size(x,sizeof(void*));int i=0;for(0;i < sx;++ i){*((
-void**)_check_dyneither_subscript(x,sizeof(void*),i))=f(*((void**)
-_check_dyneither_subscript(x,sizeof(void*),i)));}}void Cyc_Array_imp_map_c(void*(*
-f)(void*,void*),void*env,struct _dyneither_ptr x){int sx=(int)_get_dyneither_size(x,
-sizeof(void*));int i=0;for(0;i < sx;++ i){*((void**)_check_dyneither_subscript(x,
-sizeof(void*),i))=f(env,*((void**)_check_dyneither_subscript(x,sizeof(void*),i)));}}
-char Cyc_Array_Array_mismatch[15]="Array_mismatch";static struct Cyc_Array_Array_mismatch_struct
-Cyc_Array_Array_mismatch_val={Cyc_Array_Array_mismatch};struct _dyneither_ptr Cyc_Array_map2(
-void*(*f)(void*,void*),struct _dyneither_ptr x,struct _dyneither_ptr y){int sx=(int)
-_get_dyneither_size(x,sizeof(void*));if(sx != _get_dyneither_size(y,sizeof(void*)))(
-int)_throw((void*)& Cyc_Array_Array_mismatch_val);return({unsigned int _tmp17=(
-unsigned int)sx;void**_tmp18=(void**)_cycalloc(_check_times(sizeof(void*),_tmp17));
-struct _dyneither_ptr _tmp1A=_tag_dyneither(_tmp18,sizeof(void*),_tmp17);{
-unsigned int _tmp19=_tmp17;unsigned int i;for(i=0;i < _tmp19;i ++){_tmp18[i]=f(((
-void**)x.curr)[(int)i],*((void**)_check_dyneither_subscript(y,sizeof(void*),(int)
-i)));}}_tmp1A;});}void Cyc_Array_app(void*(*f)(void*),struct _dyneither_ptr x){int
-sx=(int)_get_dyneither_size(x,sizeof(void*));int i=0;for(0;i < sx;++ i){f(*((void**)
-_check_dyneither_subscript(x,sizeof(void*),i)));}}void Cyc_Array_app_c(void*(*f)(
-void*,void*),void*env,struct _dyneither_ptr x){int sx=(int)_get_dyneither_size(x,
-sizeof(void*));int i=0;for(0;i < sx;++ i){f(env,*((void**)
-_check_dyneither_subscript(x,sizeof(void*),i)));}}void Cyc_Array_iter(void(*f)(
-void*),struct _dyneither_ptr x){int sx=(int)_get_dyneither_size(x,sizeof(void*));
+_get_dyneither_size(x,sizeof(void*));int i=0;for(0;i < sx;++ i){*((void**)
+_check_dyneither_subscript(x,sizeof(void*),i))=f(env,*((void**)
+_check_dyneither_subscript(x,sizeof(void*),i)));}}char Cyc_Array_Array_mismatch[
+15]="Array_mismatch";static struct Cyc_Array_Array_mismatch_struct Cyc_Array_Array_mismatch_val={
+Cyc_Array_Array_mismatch};struct _dyneither_ptr Cyc_Array_map2(void*(*f)(void*,
+void*),struct _dyneither_ptr x,struct _dyneither_ptr y);static void _tmp5D(struct
+_dyneither_ptr*y,struct _dyneither_ptr*x,void*(**f)(void*,void*),unsigned int*
+_tmp5C,unsigned int*_tmp5B,void***_tmp59){for(*_tmp5C=0;*_tmp5C < *_tmp5B;(*
+_tmp5C)++){(*_tmp59)[*_tmp5C]=(*f)(((void**)(*x).curr)[(int)*_tmp5C],*((void**)
+_check_dyneither_subscript(*y,sizeof(void*),(int)*_tmp5C)));}}struct
+_dyneither_ptr Cyc_Array_map2(void*(*f)(void*,void*),struct _dyneither_ptr x,struct
+_dyneither_ptr y){int sx=(int)_get_dyneither_size(x,sizeof(void*));if(sx != 
+_get_dyneither_size(y,sizeof(void*)))(int)_throw((void*)& Cyc_Array_Array_mismatch_val);{
+unsigned int _tmp5C;unsigned int _tmp5B;struct _dyneither_ptr _tmp5A;void**_tmp59;
+unsigned int _tmp58;return(_tmp58=(unsigned int)sx,((_tmp59=(void**)_cycalloc(
+_check_times(sizeof(void*),_tmp58)),((_tmp5A=_tag_dyneither(_tmp59,sizeof(void*),
+_tmp58),((((_tmp5B=_tmp58,_tmp5D(& y,& x,& f,& _tmp5C,& _tmp5B,& _tmp59))),_tmp5A)))))));};}
+void Cyc_Array_app(void*(*f)(void*),struct _dyneither_ptr x);void Cyc_Array_app(void*(*
+f)(void*),struct _dyneither_ptr x){int sx=(int)_get_dyneither_size(x,sizeof(void*));
 int i=0;for(0;i < sx;++ i){f(*((void**)_check_dyneither_subscript(x,sizeof(void*),i)));}}
-void Cyc_Array_iter_c(void(*f)(void*,void*),void*env,struct _dyneither_ptr x){int sx=(
+void Cyc_Array_app_c(void*(*f)(void*,void*),void*env,struct _dyneither_ptr x);void
+Cyc_Array_app_c(void*(*f)(void*,void*),void*env,struct _dyneither_ptr x){int sx=(
 int)_get_dyneither_size(x,sizeof(void*));int i=0;for(0;i < sx;++ i){f(env,*((void**)
+_check_dyneither_subscript(x,sizeof(void*),i)));}}void Cyc_Array_iter(void(*f)(
+void*),struct _dyneither_ptr x);void Cyc_Array_iter(void(*f)(void*),struct
+_dyneither_ptr x){int sx=(int)_get_dyneither_size(x,sizeof(void*));int i=0;for(0;i < 
+sx;++ i){f(*((void**)_check_dyneither_subscript(x,sizeof(void*),i)));}}void Cyc_Array_iter_c(
+void(*f)(void*,void*),void*env,struct _dyneither_ptr x);void Cyc_Array_iter_c(void(*
+f)(void*,void*),void*env,struct _dyneither_ptr x){int sx=(int)_get_dyneither_size(x,
+sizeof(void*));int i=0;for(0;i < sx;++ i){f(env,*((void**)
 _check_dyneither_subscript(x,sizeof(void*),i)));}}void Cyc_Array_app2(void*(*f)(
-void*,void*),struct _dyneither_ptr x,struct _dyneither_ptr y){int sx=(int)
+void*,void*),struct _dyneither_ptr x,struct _dyneither_ptr y);void Cyc_Array_app2(
+void*(*f)(void*,void*),struct _dyneither_ptr x,struct _dyneither_ptr y){int sx=(int)
 _get_dyneither_size(x,sizeof(void*));if(sx != _get_dyneither_size(y,sizeof(void*)))(
 int)_throw((void*)& Cyc_Array_Array_mismatch_val);{int i=0;for(0;i < sx;++ i){f(*((
 void**)_check_dyneither_subscript(x,sizeof(void*),i)),*((void**)
 _check_dyneither_subscript(y,sizeof(void*),i)));}};}void Cyc_Array_app2_c(void*(*
-f)(void*,void*,void*),void*env,struct _dyneither_ptr x,struct _dyneither_ptr y){int
-sx=(int)_get_dyneither_size(x,sizeof(void*));if(sx != _get_dyneither_size(y,
-sizeof(void*)))(int)_throw((void*)& Cyc_Array_Array_mismatch_val);{int i=0;for(0;i
-< sx;++ i){f(env,*((void**)_check_dyneither_subscript(x,sizeof(void*),i)),*((void**)
-_check_dyneither_subscript(y,sizeof(void*),i)));}};}void Cyc_Array_iter2(void(*f)(
-void*,void*),struct _dyneither_ptr x,struct _dyneither_ptr y){int sx=(int)
+f)(void*,void*,void*),void*env,struct _dyneither_ptr x,struct _dyneither_ptr y);void
+Cyc_Array_app2_c(void*(*f)(void*,void*,void*),void*env,struct _dyneither_ptr x,
+struct _dyneither_ptr y){int sx=(int)_get_dyneither_size(x,sizeof(void*));if(sx != 
+_get_dyneither_size(y,sizeof(void*)))(int)_throw((void*)& Cyc_Array_Array_mismatch_val);{
+int i=0;for(0;i < sx;++ i){f(env,*((void**)_check_dyneither_subscript(x,sizeof(void*),
+i)),*((void**)_check_dyneither_subscript(y,sizeof(void*),i)));}};}void Cyc_Array_iter2(
+void(*f)(void*,void*),struct _dyneither_ptr x,struct _dyneither_ptr y);void Cyc_Array_iter2(
+void(*f)(void*,void*),struct _dyneither_ptr x,struct _dyneither_ptr y){int sx=(int)
 _get_dyneither_size(x,sizeof(void*));if(sx != _get_dyneither_size(y,sizeof(void*)))(
 int)_throw((void*)& Cyc_Array_Array_mismatch_val);{int i=0;for(0;i < sx;++ i){f(*((
 void**)_check_dyneither_subscript(x,sizeof(void*),i)),*((void**)
 _check_dyneither_subscript(y,sizeof(void*),i)));}};}void Cyc_Array_iter2_c(void(*
-f)(void*,void*,void*),void*env,struct _dyneither_ptr x,struct _dyneither_ptr y){int
-sx=(int)_get_dyneither_size(x,sizeof(void*));if(sx != _get_dyneither_size(y,
-sizeof(void*)))(int)_throw((void*)& Cyc_Array_Array_mismatch_val);{int i=0;for(0;i
-< sx;++ i){f(env,*((void**)_check_dyneither_subscript(x,sizeof(void*),i)),*((void**)
-_check_dyneither_subscript(y,sizeof(void*),i)));}};}void*Cyc_Array_fold_left(
+f)(void*,void*,void*),void*env,struct _dyneither_ptr x,struct _dyneither_ptr y);void
+Cyc_Array_iter2_c(void(*f)(void*,void*,void*),void*env,struct _dyneither_ptr x,
+struct _dyneither_ptr y){int sx=(int)_get_dyneither_size(x,sizeof(void*));if(sx != 
+_get_dyneither_size(y,sizeof(void*)))(int)_throw((void*)& Cyc_Array_Array_mismatch_val);{
+int i=0;for(0;i < sx;++ i){f(env,*((void**)_check_dyneither_subscript(x,sizeof(void*),
+i)),*((void**)_check_dyneither_subscript(y,sizeof(void*),i)));}};}void*Cyc_Array_fold_left(
+void*(*f)(void*,void*),void*accum,struct _dyneither_ptr x);void*Cyc_Array_fold_left(
 void*(*f)(void*,void*),void*accum,struct _dyneither_ptr x){int sx=(int)
 _get_dyneither_size(x,sizeof(void*));{int i=0;for(0;i < sx;++ i){accum=f(accum,*((
 void**)_check_dyneither_subscript(x,sizeof(void*),i)));}}return accum;}void*Cyc_Array_fold_left_c(
+void*(*f)(void*,void*,void*),void*env,void*accum,struct _dyneither_ptr x);void*Cyc_Array_fold_left_c(
 void*(*f)(void*,void*,void*),void*env,void*accum,struct _dyneither_ptr x){int sx=(
 int)_get_dyneither_size(x,sizeof(void*));{int i=0;for(0;i < sx;++ i){accum=f(env,
 accum,*((void**)_check_dyneither_subscript(x,sizeof(void*),i)));}}return accum;}
 void*Cyc_Array_fold_right(void*(*f)(void*,void*),struct _dyneither_ptr x,void*
-accum){{int i=(int)(_get_dyneither_size(x,sizeof(void*))- 1);for(0;i >= 0;-- i){
+accum);void*Cyc_Array_fold_right(void*(*f)(void*,void*),struct _dyneither_ptr x,
+void*accum){{int i=(int)(_get_dyneither_size(x,sizeof(void*))- 1);for(0;i >= 0;-- i){
 accum=f(*((void**)_check_dyneither_subscript(x,sizeof(void*),i)),accum);}}return
 accum;}void*Cyc_Array_fold_right_c(void*(*f)(void*,void*,void*),void*env,struct
-_dyneither_ptr x,void*accum){{int i=(int)(_get_dyneither_size(x,sizeof(void*))- 1);
-for(0;i >= 0;-- i){accum=f(env,*((void**)_check_dyneither_subscript(x,sizeof(void*),
-i)),accum);}}return accum;}struct _dyneither_ptr Cyc_Array_rev_copy(struct
-_dyneither_ptr x){int sx=(int)_get_dyneither_size(x,sizeof(void*));int n=sx - 1;
-return({unsigned int _tmp1B=(unsigned int)sx;void**_tmp1C=(void**)_cycalloc(
-_check_times(sizeof(void*),_tmp1B));struct _dyneither_ptr _tmp1E=_tag_dyneither(
-_tmp1C,sizeof(void*),_tmp1B);{unsigned int _tmp1D=_tmp1B;unsigned int i;for(i=0;i < 
-_tmp1D;i ++){_tmp1C[i]=*((void**)_check_dyneither_subscript(x,sizeof(void*),(int)(
-n - i)));}}_tmp1E;});}void Cyc_Array_imp_rev(struct _dyneither_ptr x){void*temp;int i=
-0;int j=(int)(_get_dyneither_size(x,sizeof(void*))- 1);while(i < j){temp=*((void**)
+_dyneither_ptr x,void*accum);void*Cyc_Array_fold_right_c(void*(*f)(void*,void*,
+void*),void*env,struct _dyneither_ptr x,void*accum){{int i=(int)(
+_get_dyneither_size(x,sizeof(void*))- 1);for(0;i >= 0;-- i){accum=f(env,*((void**)
+_check_dyneither_subscript(x,sizeof(void*),i)),accum);}}return accum;}struct
+_dyneither_ptr Cyc_Array_rev_copy(struct _dyneither_ptr x);static void _tmp63(struct
+_dyneither_ptr*x,int*n,unsigned int*_tmp62,unsigned int*_tmp61,void***_tmp5F){
+for(*_tmp62=0;*_tmp62 < *_tmp61;(*_tmp62)++){(*_tmp5F)[*_tmp62]=*((void**)
+_check_dyneither_subscript(*x,sizeof(void*),(int)(*n - *_tmp62)));}}struct
+_dyneither_ptr Cyc_Array_rev_copy(struct _dyneither_ptr x){int sx=(int)
+_get_dyneither_size(x,sizeof(void*));int n=sx - 1;unsigned int _tmp62;unsigned int
+_tmp61;struct _dyneither_ptr _tmp60;void**_tmp5F;unsigned int _tmp5E;return(_tmp5E=(
+unsigned int)sx,((_tmp5F=(void**)_cycalloc(_check_times(sizeof(void*),_tmp5E)),((
+_tmp60=_tag_dyneither(_tmp5F,sizeof(void*),_tmp5E),((((_tmp61=_tmp5E,_tmp63(& x,&
+n,& _tmp62,& _tmp61,& _tmp5F))),_tmp60)))))));}void Cyc_Array_imp_rev(struct
+_dyneither_ptr x);void Cyc_Array_imp_rev(struct _dyneither_ptr x){void*temp;int i=0;
+int j=(int)(_get_dyneither_size(x,sizeof(void*))- 1);while(i < j){temp=*((void**)
 _check_dyneither_subscript(x,sizeof(void*),i));*((void**)
 _check_dyneither_subscript(x,sizeof(void*),i))=*((void**)
 _check_dyneither_subscript(x,sizeof(void*),j));*((void**)
 _check_dyneither_subscript(x,sizeof(void*),j))=temp;++ i;-- j;}}int Cyc_Array_forall(
-int(*pred)(void*),struct _dyneither_ptr x){int sx=(int)_get_dyneither_size(x,
-sizeof(void*));{int i=0;for(0;i < sx;++ i){if(!pred(*((void**)
-_check_dyneither_subscript(x,sizeof(void*),i))))return 0;}}return 1;}int Cyc_Array_forall_c(
-int(*pred)(void*,void*),void*env,struct _dyneither_ptr x){int sx=(int)
-_get_dyneither_size(x,sizeof(void*));{int i=0;for(0;i < sx;++ i){if(!pred(env,*((
-void**)_check_dyneither_subscript(x,sizeof(void*),i))))return 0;}}return 1;}int Cyc_Array_exists(
-int(*pred)(void*),struct _dyneither_ptr x){int sx=(int)_get_dyneither_size(x,
-sizeof(void*));{int i=0;for(0;i < sx;++ i){if(pred(*((void**)
+int(*pred)(void*),struct _dyneither_ptr x);int Cyc_Array_forall(int(*pred)(void*),
+struct _dyneither_ptr x){int sx=(int)_get_dyneither_size(x,sizeof(void*));{int i=0;
+for(0;i < sx;++ i){if(!pred(*((void**)_check_dyneither_subscript(x,sizeof(void*),i))))
+return 0;}}return 1;}int Cyc_Array_forall_c(int(*pred)(void*,void*),void*env,struct
+_dyneither_ptr x);int Cyc_Array_forall_c(int(*pred)(void*,void*),void*env,struct
+_dyneither_ptr x){int sx=(int)_get_dyneither_size(x,sizeof(void*));{int i=0;for(0;i
+< sx;++ i){if(!pred(env,*((void**)_check_dyneither_subscript(x,sizeof(void*),i))))
+return 0;}}return 1;}int Cyc_Array_exists(int(*pred)(void*),struct _dyneither_ptr x);
+int Cyc_Array_exists(int(*pred)(void*),struct _dyneither_ptr x){int sx=(int)
+_get_dyneither_size(x,sizeof(void*));{int i=0;for(0;i < sx;++ i){if(pred(*((void**)
 _check_dyneither_subscript(x,sizeof(void*),i))))return 1;}}return 0;}int Cyc_Array_exists_c(
+int(*pred)(void*,void*),void*env,struct _dyneither_ptr x);int Cyc_Array_exists_c(
 int(*pred)(void*,void*),void*env,struct _dyneither_ptr x){int sx=(int)
 _get_dyneither_size(x,sizeof(void*));{int i=0;for(0;i < sx;++ i){if(pred(env,*((
 void**)_check_dyneither_subscript(x,sizeof(void*),i))))return 1;}}return 0;}struct
-_dyneither_ptr Cyc_Array_zip(struct _dyneither_ptr x,struct _dyneither_ptr y){int sx=(
-int)_get_dyneither_size(x,sizeof(void*));if(sx != _get_dyneither_size(y,sizeof(
-void*)))(int)_throw((void*)& Cyc_Array_Array_mismatch_val);return({unsigned int
-_tmp1F=(unsigned int)sx;struct _tuple0*_tmp20=(struct _tuple0*)_cycalloc(
-_check_times(sizeof(struct _tuple0),_tmp1F));struct _dyneither_ptr _tmp23=
-_tag_dyneither(_tmp20,sizeof(struct _tuple0),_tmp1F);{unsigned int _tmp21=_tmp1F;
-unsigned int i;for(i=0;i < _tmp21;i ++){_tmp20[i]=({struct _tuple0 _tmp22;_tmp22.f1=((
-void**)x.curr)[(int)i];_tmp22.f2=*((void**)_check_dyneither_subscript(y,sizeof(
-void*),(int)i));_tmp22;});}}_tmp23;});}struct _tuple1 Cyc_Array_split(struct
-_dyneither_ptr x){int sx=(int)_get_dyneither_size(x,sizeof(struct _tuple0));return({
-struct _tuple1 _tmp24;_tmp24.f1=({unsigned int _tmp29=(unsigned int)sx;void**_tmp2A=(
-void**)_cycalloc(_check_times(sizeof(void*),_tmp29));struct _dyneither_ptr _tmp2C=
-_tag_dyneither(_tmp2A,sizeof(void*),_tmp29);{unsigned int _tmp2B=_tmp29;
-unsigned int i;for(i=0;i < _tmp2B;i ++){_tmp2A[i]=(((struct _tuple0*)x.curr)[(int)i]).f1;}}
-_tmp2C;});_tmp24.f2=({unsigned int _tmp25=(unsigned int)sx;void**_tmp26=(void**)
-_cycalloc(_check_times(sizeof(void*),_tmp25));struct _dyneither_ptr _tmp28=
-_tag_dyneither(_tmp26,sizeof(void*),_tmp25);{unsigned int _tmp27=_tmp25;
-unsigned int i;for(i=0;i < _tmp27;i ++){_tmp26[i]=(((struct _tuple0*)x.curr)[(int)i]).f2;}}
-_tmp28;});_tmp24;});}int Cyc_Array_memq(struct _dyneither_ptr l,void*x){int s=(int)
-_get_dyneither_size(l,sizeof(void*));{int i=0;for(0;i < s;++ i){if(*((void**)
+_dyneither_ptr Cyc_Array_zip(struct _dyneither_ptr x,struct _dyneither_ptr y);static
+void _tmp6A(struct _dyneither_ptr*y,struct _dyneither_ptr*x,unsigned int*_tmp69,
+unsigned int*_tmp68,struct _tuple0**_tmp66){for(*_tmp69=0;*_tmp69 < *_tmp68;(*
+_tmp69)++){struct _tuple0 _tmp64;(*_tmp66)[*_tmp69]=((_tmp64.f1=((void**)(*x).curr)[(
+int)*_tmp69],((_tmp64.f2=*((void**)_check_dyneither_subscript(*y,sizeof(void*),(
+int)*_tmp69)),_tmp64))));}}struct _dyneither_ptr Cyc_Array_zip(struct
+_dyneither_ptr x,struct _dyneither_ptr y){int sx=(int)_get_dyneither_size(x,sizeof(
+void*));if(sx != _get_dyneither_size(y,sizeof(void*)))(int)_throw((void*)& Cyc_Array_Array_mismatch_val);{
+unsigned int _tmp69;unsigned int _tmp68;struct _dyneither_ptr _tmp67;struct _tuple0*
+_tmp66;unsigned int _tmp65;return(_tmp65=(unsigned int)sx,((_tmp66=(struct _tuple0*)
+_cycalloc(_check_times(sizeof(struct _tuple0),_tmp65)),((_tmp67=_tag_dyneither(
+_tmp66,sizeof(struct _tuple0),_tmp65),((((_tmp68=_tmp65,_tmp6A(& y,& x,& _tmp69,&
+_tmp68,& _tmp66))),_tmp67)))))));};}struct _tuple1 Cyc_Array_split(struct
+_dyneither_ptr x);static void _tmp70(struct _dyneither_ptr*x,unsigned int*_tmp6F,
+unsigned int*_tmp6E,void***_tmp6C){for(*_tmp6F=0;*_tmp6F < *_tmp6E;(*_tmp6F)++){(*
+_tmp6C)[*_tmp6F]=(((struct _tuple0*)(*x).curr)[(int)*_tmp6F]).f1;}}static void
+_tmp76(struct _dyneither_ptr*x,unsigned int*_tmp75,unsigned int*_tmp74,void***
+_tmp72){for(*_tmp75=0;*_tmp75 < *_tmp74;(*_tmp75)++){(*_tmp72)[*_tmp75]=(((struct
+_tuple0*)(*x).curr)[(int)*_tmp75]).f2;}}struct _tuple1 Cyc_Array_split(struct
+_dyneither_ptr x){int sx=(int)_get_dyneither_size(x,sizeof(struct _tuple0));
+unsigned int _tmp81;void**_tmp80;struct _dyneither_ptr _tmp7F;unsigned int _tmp7E;
+unsigned int _tmp7D;unsigned int _tmp7C;void**_tmp7B;struct _dyneither_ptr _tmp7A;
+unsigned int _tmp79;unsigned int _tmp78;struct _tuple1 _tmp77;return(_tmp77.f1=((
+_tmp7C=(unsigned int)sx,((_tmp7B=(void**)_cycalloc(_check_times(sizeof(void*),
+_tmp7C)),((_tmp7A=_tag_dyneither(_tmp7B,sizeof(void*),_tmp7C),((((_tmp79=_tmp7C,
+_tmp70(& x,& _tmp78,& _tmp79,& _tmp7B))),_tmp7A)))))))),((_tmp77.f2=((_tmp81=(
+unsigned int)sx,((_tmp80=(void**)_cycalloc(_check_times(sizeof(void*),_tmp81)),((
+_tmp7F=_tag_dyneither(_tmp80,sizeof(void*),_tmp81),((((_tmp7E=_tmp81,_tmp76(& x,&
+_tmp7D,& _tmp7E,& _tmp80))),_tmp7F)))))))),_tmp77)));}int Cyc_Array_memq(struct
+_dyneither_ptr l,void*x);int Cyc_Array_memq(struct _dyneither_ptr l,void*x){int s=(
+int)_get_dyneither_size(l,sizeof(void*));{int i=0;for(0;i < s;++ i){if(*((void**)
 _check_dyneither_subscript(l,sizeof(void*),i))== x)return 1;}}return 0;}int Cyc_Array_mem(
-int(*compare)(void*,void*),struct _dyneither_ptr l,void*x){int s=(int)
+int(*compare)(void*,void*),struct _dyneither_ptr l,void*x);int Cyc_Array_mem(int(*
+compare)(void*,void*),struct _dyneither_ptr l,void*x){int s=(int)
 _get_dyneither_size(l,sizeof(void*));{int i=0;for(0;i < s;++ i){if(0 == compare(*((
 void**)_check_dyneither_subscript(l,sizeof(void*),i)),x))return 1;}}return 0;}
-struct _dyneither_ptr Cyc_Array_extract(struct _dyneither_ptr x,int start,int*n_opt){
-int sx=(int)_get_dyneither_size(x,sizeof(void*));int n=n_opt == 0?sx - start:*n_opt;
-if((start < 0  || n <= 0) || start + (n_opt == 0?0: n)> sx)(int)_throw((void*)({struct
-Cyc_Core_Invalid_argument_struct*_tmp2D=_cycalloc(sizeof(*_tmp2D));_tmp2D[0]=({
-struct Cyc_Core_Invalid_argument_struct _tmp2E;_tmp2E.tag=Cyc_Core_Invalid_argument;
-_tmp2E.f1=({const char*_tmp2F="Array::extract";_tag_dyneither(_tmp2F,sizeof(char),
-15);});_tmp2E;});_tmp2D;}));return({unsigned int _tmp30=(unsigned int)n;void**
-_tmp31=(void**)_cycalloc(_check_times(sizeof(void*),_tmp30));struct
-_dyneither_ptr _tmp33=_tag_dyneither(_tmp31,sizeof(void*),_tmp30);{unsigned int
-_tmp32=_tmp30;unsigned int i;for(i=0;i < _tmp32;i ++){_tmp31[i]=*((void**)
-_check_dyneither_subscript(x,sizeof(void*),(int)(start + i)));}}_tmp33;});}
+struct _dyneither_ptr Cyc_Array_extract(struct _dyneither_ptr x,int start,int*n_opt);
+static void _tmp8D(struct _dyneither_ptr*x,int*start,unsigned int*_tmp8C,
+unsigned int*_tmp8B,void***_tmp89){for(*_tmp8C=0;*_tmp8C < *_tmp8B;(*_tmp8C)++){(*
+_tmp89)[*_tmp8C]=*((void**)_check_dyneither_subscript(*x,sizeof(void*),(int)(*
+start + *_tmp8C)));}}struct _dyneither_ptr Cyc_Array_extract(struct _dyneither_ptr x,
+int start,int*n_opt){int sx=(int)_get_dyneither_size(x,sizeof(void*));int n=n_opt == 
+0?sx - start:*n_opt;if((start < 0  || n <= 0) || start + (n_opt == 0?0: n)> sx){struct
+Cyc_Core_Invalid_argument_struct _tmp87;const char*_tmp86;struct Cyc_Core_Invalid_argument_struct*
+_tmp85;(int)_throw((void*)((_tmp85=_cycalloc(sizeof(*_tmp85)),((_tmp85[0]=((
+_tmp87.tag=Cyc_Core_Invalid_argument,((_tmp87.f1=((_tmp86="Array::extract",
+_tag_dyneither(_tmp86,sizeof(char),15))),_tmp87)))),_tmp85)))));}{unsigned int
+_tmp8C;unsigned int _tmp8B;struct _dyneither_ptr _tmp8A;void**_tmp89;unsigned int
+_tmp88;return(_tmp88=(unsigned int)n,((_tmp89=(void**)_cycalloc(_check_times(
+sizeof(void*),_tmp88)),((_tmp8A=_tag_dyneither(_tmp89,sizeof(void*),_tmp88),((((
+_tmp8B=_tmp88,_tmp8D(& x,& start,& _tmp8C,& _tmp8B,& _tmp89))),_tmp8A)))))));};}

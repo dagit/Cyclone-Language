@@ -737,8 +737,10 @@ void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[14];struct 
 char*tag;};extern char Cyc_List_Nth[4];struct Cyc_List_Nth_struct{char*tag;};struct
 _dyneither_ptr Cyc_strcpy(struct _dyneither_ptr dest,struct _dyneither_ptr src);
 struct Cyc_Cstdio___abstractFILE*tmpfile();char*tmpnam(char*);struct Cyc___cycFILE*
-Cyc_tmpfile(){struct Cyc_Cstdio___abstractFILE*cf=tmpfile();return Cyc_fromCfile(
-cf);}struct _dyneither_ptr Cyc_tmpnam(struct _dyneither_ptr s){char*name=tmpnam(0);
-return(unsigned int)s.curr?Cyc_strcpy(s,(struct _dyneither_ptr)({char*_tmp0=name;
-_tag_dyneither(_tmp0,sizeof(char),_get_zero_arr_size_char(_tmp0,1));})):({char*
-_tmp1=name;_tag_dyneither(_tmp1,sizeof(char),_get_zero_arr_size_char(_tmp1,1));});}
+Cyc_tmpfile();struct Cyc___cycFILE*Cyc_tmpfile(){struct Cyc_Cstdio___abstractFILE*
+cf=tmpfile();return Cyc_fromCfile(cf);}struct _dyneither_ptr Cyc_tmpnam(struct
+_dyneither_ptr s);struct _dyneither_ptr Cyc_tmpnam(struct _dyneither_ptr s){char*name=
+tmpnam(0);char*_tmp3;char*_tmp2;return(unsigned int)s.curr?Cyc_strcpy(s,(struct
+_dyneither_ptr)((_tmp3=name,_tag_dyneither(_tmp3,sizeof(char),
+_get_zero_arr_size_char(_tmp3,1))))):((_tmp2=name,_tag_dyneither(_tmp2,sizeof(
+char),_get_zero_arr_size_char(_tmp2,1))));}

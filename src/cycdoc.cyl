@@ -413,6 +413,7 @@ rule token "$(int,comment_t)*" = parse
        produce TeX output */
     PP::tex_output = true;
     /* Set this so the absyn printer does not print out extern, etc. */
+    Absynpp::set_params(&Absynpp::tc_params_r);
     Absynpp::print_for_cycdoc = true;
 
     for (let l = rev(cycdoc_files); l != NULL; l = l->tl) {

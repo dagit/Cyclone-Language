@@ -735,10 +735,12 @@ int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int tag;struct _dyneither_ptr f1
 extern char Cyc_FileCloseError[15];struct Cyc_FileCloseError_struct{char*tag;};
 extern char Cyc_FileOpenError[14];struct Cyc_FileOpenError_struct{char*tag;struct
 _dyneither_ptr f1;};void*Cyc___assert_fail(struct _dyneither_ptr assertion,struct
-_dyneither_ptr file,unsigned int line){({struct Cyc_String_pa_struct _tmp4;_tmp4.tag=
-0;_tmp4.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)assertion);({struct Cyc_Int_pa_struct
-_tmp3;_tmp3.tag=1;_tmp3.f1=line;({struct Cyc_String_pa_struct _tmp2;_tmp2.tag=0;
-_tmp2.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)file);({void*_tmp0[3]={&
-_tmp2,& _tmp3,& _tmp4};Cyc_fprintf(Cyc_stderr,({const char*_tmp1="%s:%u: Assertion `%s' failed.\n";
-_tag_dyneither(_tmp1,sizeof(char),31);}),_tag_dyneither(_tmp0,sizeof(void*),3));});});});});
+_dyneither_ptr file,unsigned int line);void*Cyc___assert_fail(struct _dyneither_ptr
+assertion,struct _dyneither_ptr file,unsigned int line){{const char*_tmpA;void*_tmp9[
+3];struct Cyc_String_pa_struct _tmp8;struct Cyc_Int_pa_struct _tmp7;struct Cyc_String_pa_struct
+_tmp6;(_tmp6.tag=0,((_tmp6.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)
+assertion),((_tmp7.tag=1,((_tmp7.f1=line,((_tmp8.tag=0,((_tmp8.f1=(struct
+_dyneither_ptr)((struct _dyneither_ptr)file),((_tmp9[0]=& _tmp8,((_tmp9[1]=& _tmp7,((
+_tmp9[2]=& _tmp6,Cyc_fprintf(Cyc_stderr,((_tmpA="%s:%u: Assertion `%s' failed.\n",
+_tag_dyneither(_tmpA,sizeof(char),31))),_tag_dyneither(_tmp9,sizeof(void*),3)))))))))))))))))));}
 Cyc_fflush((struct Cyc___cycFILE*)Cyc_stderr);exit(- 1);}

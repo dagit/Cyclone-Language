@@ -718,8 +718,11 @@ _dyneither_ptr __argv,struct _dyneither_ptr __shortopts,struct _dyneither_ptr
 __longopts,int*__longind);int Cyc__getopt_internal(int __argc,struct _dyneither_ptr
 __argv,struct _dyneither_ptr __shortopts,struct _dyneither_ptr __longopts,int*
 __longind,int __long_only);int Cyc_getopt_long(int argc,struct _dyneither_ptr argv,
-struct _dyneither_ptr options,struct _dyneither_ptr long_options,int*opt_index){
-return Cyc__getopt_internal(argc,argv,options,long_options,opt_index,0);}int Cyc_getopt_long_only(
-int argc,struct _dyneither_ptr argv,struct _dyneither_ptr options,struct
-_dyneither_ptr long_options,int*opt_index){return Cyc__getopt_internal(argc,argv,
-options,long_options,opt_index,1);}
+struct _dyneither_ptr options,struct _dyneither_ptr long_options,int*opt_index);int
+Cyc_getopt_long(int argc,struct _dyneither_ptr argv,struct _dyneither_ptr options,
+struct _dyneither_ptr long_options,int*opt_index){return Cyc__getopt_internal(argc,
+argv,options,long_options,opt_index,0);}int Cyc_getopt_long_only(int argc,struct
+_dyneither_ptr argv,struct _dyneither_ptr options,struct _dyneither_ptr long_options,
+int*opt_index);int Cyc_getopt_long_only(int argc,struct _dyneither_ptr argv,struct
+_dyneither_ptr options,struct _dyneither_ptr long_options,int*opt_index){return Cyc__getopt_internal(
+argc,argv,options,long_options,opt_index,1);}
