@@ -38,7 +38,7 @@ LIBR:=$(CYC_LIB_PATH)/$(OUT_PREFIX)$(CYCLIB)
 
 CYC_SRCS := $(addsuffix .cyc, $(CYCLONE_SRCS))
 
-all: $(OUT_PREFIX)$(CYCCOMP)
+all: $(OUT_PREFIX)$(CYCCOMP) cycdoc$(EXE)
 
 # Note: although cyclone now automatically adds CYCLIB to the command
 # line when calling gcc, we leave in an explicit $(LIBR) below so that
@@ -57,7 +57,7 @@ cycdoc$(EXE): cycdoc.$(O) lex.$(O) parse_tab.$(O) absyn.$(O) \
  tcutil.$(O) tcenv.$(O) tcexp.$(O) tcstmt.$(O) tcpat.$(O) \
  new_control_flow.$(O) cf_absexp.$(O) cf_flowinfo.$(O) \
  formatstr.$(O) evexp.$(O) absynpp.$(O)
-	$(CYCC) -B$(CYC_LIB_PATH) -o $@ $^ $(LDFLAGS)
+	$(CYCC) -v -B$(CYC_LIB_PATH) -o $@ $^ $(LDFLAGS)
 
 cycdoc.cyc: cycdoc.cyl
 	$(CYCLEX) $< $@
@@ -124,7 +124,7 @@ clean_prefix:
 clean:
 	$(RM) $(addprefix *, $(C_SRCS) $(O_SRCS) $(CYCCOMP))
 	$(RM) $(addprefix *, lex.cyc parse_tab.cyc parse_tab.h)
-	$(RM) cycdoc cycdoc.exe cycdoc.cyc
+	$(RM) cycdoc cycdoc.exe cycdoc.cyc cycdoc.$(O) cycdoc.c
 	$(RM) *~ *.output *.stackdump *.d amon.out .target* install_path.c
 
 # Produce dependencies
@@ -144,6 +144,7 @@ ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),clean_prefix)
 ifndef $(TARGET)
 -include $(addprefix $(OUT_PREFIX), $(addsuffix .d, $(CYCLONE_SRCS)))
+-include cycdoc.d
 endif
 endif
 endif

@@ -16,7 +16,7 @@
    write to the Free Software Foundation, Inc., 59 Temple Place, Suite
    330, Boston, MA 02111-1307 USA. */
 
-{ 
+{
 #include <core.h>
 #include <stdio.h>
 #include <lexing.h>
@@ -32,11 +32,11 @@ namespace Lineno;
 }
 
 let newline = ('\n' | '\r' | "\r\n")
-  
-rule token = parse 
+
+rule token = parse
   "#" [^ '\n' '\r']* newline { return LINEDEF; }
 | [^ '\n' '\r']* newline     { return NEWLINE; }
-| [^ '\n' '\r']* eof         { return END;     }
+| [^ '\n' '\r']* eof         { return END; }
 
 {
 
@@ -70,7 +70,7 @@ static opt_t<$(mstring_t,int)@> parse_linedef(mstring_t line) {
   } catch {
   default:
     return NULL;
-  }      
+  }
 }
 
 int place_cmp($(int,pos_t)@ place1, $(int,pos_t)@ place2) {
@@ -88,31 +88,32 @@ void poss_of_abss(string_t filename, List::list_t<$(int,pos_t)@,`H> places) {
 
     mstring_t this_line;
     int eol, next;
-    while(places != NULL) {
+    while (places != NULL) {
       while (true) {
 	next      = token(lbuf);
 	eol       = lexeme_end(lbuf);
+        /* NOTE: eol is the index of the first char on the NEXT line */
 	this_line = lexeme(lbuf); // FIX: expensive string copy
-	if (eol >= (*places->hd)[0]) 
+	if (eol > (*places->hd)[0])
 	  break;
-	
+
 	switch (next) {
 	case END:     throw new Failure("Lineno: Invalid file position");
 	case NEWLINE: ++line; break;
-	case LINEDEF: 
+	case LINEDEF:
 	  opt_t<$(mstring_t,int)@> fno = parse_linedef(this_line);
 	  if (fno == NULL) {
 	    ++line;
 	    fprintf(stderr, "Unknown directive: %s\n", this_line);
 	  } else {
-	    source_file = (*fno->v)[0]; 
+	    source_file = (*fno->v)[0];
 	    line        = (*fno->v)[1];
 	  }
 	  break;
 	default: throw new Failure("Lineno: Impossible");
 	}
       }
-      while(places != NULL && eol >= (*places->hd)[0]) {
+      while (places != NULL && eol > (*places->hd)[0]) {
 	let p = (*places->hd)[1];
 	p->logical_file = strdup(source_file);
 	p->line         = this_line;

@@ -157,8 +157,8 @@ f); struct _tagged_arr source_file= filename; int line= 1; struct _tagged_arr
 this_line; int eol; int next; while( places !=  0) { while( 1) { next=(( int(*)(
 struct Cyc_Lexing_lexbuf* lexbuf)) Cyc_Lineno_token)( lbuf); eol=(( int(*)(
 struct Cyc_Lexing_lexbuf*)) Cyc_Lexing_lexeme_end)( lbuf); this_line=(( struct
-_tagged_arr(*)( struct Cyc_Lexing_lexbuf*)) Cyc_Lexing_lexeme)( lbuf); if( eol
->= (*(( struct _tuple1*)(( struct Cyc_List_List*) _check_null( places))->hd)).f1){
+_tagged_arr(*)( struct Cyc_Lexing_lexbuf*)) Cyc_Lexing_lexeme)( lbuf); if( eol > (*((
+struct _tuple1*)(( struct Cyc_List_List*) _check_null( places))->hd)).f1){
 break;} switch( next){ case 3: _LL30:( int) _throw(( void*)({ struct Cyc_Core_Failure_struct*
 _temp32=( struct Cyc_Core_Failure_struct*) GC_malloc( sizeof( struct Cyc_Core_Failure_struct));
 _temp32[ 0]=({ struct Cyc_Core_Failure_struct _temp33; _temp33.tag= Cyc_Core_Failure;
@@ -175,7 +175,7 @@ break;} default: _LL35:( int) _throw(( void*)({ struct Cyc_Core_Failure_struct*
 _temp39=( struct Cyc_Core_Failure_struct*) GC_malloc( sizeof( struct Cyc_Core_Failure_struct));
 _temp39[ 0]=({ struct Cyc_Core_Failure_struct _temp40; _temp40.tag= Cyc_Core_Failure;
 _temp40.f1= _tag_arr("Lineno: Impossible", sizeof( unsigned char), 19u); _temp40;});
-_temp39;}));}} while( places !=  0? eol >= (*(( struct _tuple1*)(( struct Cyc_List_List*)
+_temp39;}));}} while( places !=  0? eol > (*(( struct _tuple1*)(( struct Cyc_List_List*)
 _check_null( places))->hd)).f1: 0) { struct Cyc_Lineno_Pos* _temp41=(*(( struct
 _tuple1*)(( struct Cyc_List_List*) _check_null( places))->hd)).f2; _temp41->logical_file=(
 struct _tagged_arr) Cyc_std_strdup( source_file); _temp41->line= this_line;
