@@ -329,7 +329,8 @@ void check_format_args(tenv_t<`g,`r> te, exp_t fmt,
       let args = opt_args->v;
       for (; args != NULL; args = args->tl) {
         tcExp(te,NULL,args->hd);
-	if (is_unique_pointer(args->hd->topt->v) && !is_unique_path(args->hd))
+	if (is_noalias_pointer(args->hd->topt->v,false) &&
+	    !is_noalias_path(args->hd,false))
 	  terr(args->hd->loc, UNIQUE_ERR_MSG);
       }
     }
@@ -348,7 +349,7 @@ void check_format_args(tenv_t<`g,`r> te, exp_t fmt,
              typ2string(t), typ2string(e->topt->v));
         explain_failure();
       }
-      if (is_unique_pointer(t) && !is_unique_path(e))
+      if (is_noalias_pointer(t,false) && !is_noalias_path(e,false))
 	terr(args->hd->loc,UNIQUE_ERR_MSG);
     }
     // check arity
@@ -419,8 +420,8 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
   case &PointerType(PtrInfo(et,tq,PtrAtts(r,n,b,zt,_))):
     if (!kind_leq(typ_kind(et),MemKind))
       terr(e1->loc,"can't perform arithmetic on abstract pointer type");
-    if (is_unique_pointer(t1))
-      terr(e1->loc,"can't perform arithmetic on unique pointer type");
+    if (is_noalias_pointer(t1,false))
+      terr(e1->loc,"can't perform arithmetic on non-aliasing pointer type");
     if (!coerce_sint_typ(te, e2))
       terr(e2->loc,"expecting int but found %s",typ2string(t2));
     b = compress_conref(b);
@@ -477,8 +478,8 @@ static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
         terr(e1->loc,"can't subtract from forward-only ? pointer");
       if (!kind_leq(typ_kind(t1_elt),MemKind))
         terr(e1->loc,"can't perform arithmetic on abstract pointer type");
-      if (is_unique_pointer(t1))
-	terr(e1->loc,"can't perform arithmetic on unique pointer type");
+      if (is_noalias_pointer(t1,false))
+	terr(e1->loc,"can't perform arithmetic on non-aliasing pointer type");
       if (!coerce_sint_typ(te, e2)) {
 	terr(e2->loc,"expecting either %s or int but found %s",
              typ2string(t1),typ2string(t2));
@@ -673,8 +674,8 @@ static type_t tcIncrement(tenv_t te, seg_t loc, type_t * topt,
         (is_zero_pointer_typ_elt(t,&telt) && (i == PreInc || i == PostInc))) {
       if (!kind_leq(typ_kind(telt),MemKind))
         terr(e->loc,"can't perform arithmetic on abstract pointer type");
-      if (is_unique_pointer(t))
-        terr(e->loc,"can't perform arithmetic on unique pointer type");
+      if (is_noalias_pointer(t,false))
+        terr(e->loc,"can't perform arithmetic on non-aliasing pointer type");
       if (forward_only && (i == PreDec || i == PostDec))
         terr(e->loc,"can't subtract from forward-only ? pointer");
     } else 
@@ -742,7 +743,7 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t * topt,
     return expr_err(te,loc,topt,"assignment to non-lvalue");
   check_writable(te, e1);
   if (po == NULL) {
-    if (is_unique_pointer(t2) && !is_unique_path(e2))
+    if (is_noalias_pointer(t2,false) && !is_noalias_path(e2,false))
       terr(e2->loc,UNIQUE_ERR_MSG);
     if (!coerce_assign(te,e2,t1)) {
       let result = expr_err(te,loc,topt,"type mismatch: %s != %s",
@@ -859,7 +860,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
             unify(e1->topt->v,t2);
             explain_failure();
           }
-	  if (is_unique_pointer(t2) && !is_unique_path(e1))
+	  if (is_noalias_pointer(t2,false) && !is_noalias_path(e1,false))
 	    terr(e1->loc,UNIQUE_ERR_MSG);
           es = es->tl;
           args_info = args_info->tl;
@@ -924,7 +925,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
                        typ2string(vt),typ2string(e1->topt->v));
                   explain_failure();
                 }
-		if (is_unique_pointer(vt) && !is_unique_path(e1))
+		if (is_noalias_pointer(vt,false) && !is_noalias_path(e1,false))
 		  terr(e1->loc,UNIQUE_ERR_MSG);
               }
             } else {
@@ -949,8 +950,8 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
                     // must be careful not to type-check twice
                     if (!args_already_checked) {
                       tcExp(te,NULL,e1); 
-		      if (is_unique_pointer(e1->topt->v) && 
-			  !is_unique_path(e1))
+		      if (is_noalias_pointer(e1->topt->v,false) && 
+			  !is_noalias_path(e1,false))
 			terr(e1->loc,UNIQUE_ERR_MSG);
 		    }
                     let f = tcInjection(te,e1,vt,rgn,inst,fields);
@@ -2118,7 +2119,7 @@ type_t tcExpInitializer(tenv_t te, type_t * topt, exp_t e) {
   type_t t = tcExpNoPromote(te, topt, e);
   // expression initializers are copied, and therefore consumed,
   // so check for uniqueness
-  if (is_unique_pointer(t) && !is_unique_path(e)) {
+  if (is_noalias_pointer(t,false) && !is_noalias_path(e,false)) {
     fprintf(stderr,"topt=%s, e->topt->v=%s, e=%s\n",
 	    topt == NULL ? "NULL" : Absynpp::typ2string(*topt),
 	    Absynpp::typ2string(e->topt->v),

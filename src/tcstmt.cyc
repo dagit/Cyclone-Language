@@ -63,7 +63,7 @@ static void pattern_synth(seg_t loc, tenv_t te, tcpat_result_t pat_res,
   let bds = (p==NULL) ? NULL : (*p)[1];
   region r {
     tenv_t te2 = add_type_vars(r,loc,te,tvs);
-    te2 = new_outlives_constraints(r,te2,bds);
+    te2 = new_outlives_constraints(r,te2,bds,loc);
     if(new_block)
       te2 = Tcenv::new_block(r,loc,te2);
     let ropt = new Opt(Tcenv::curr_rgn(te2));
@@ -149,7 +149,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
              typ2string(e->topt->v), typ2string(t));
         explain_failure();
       }
-      if (is_unique_pointer(t) && !is_unique_path(e))
+      if (is_noalias_pointer(t,false) && !is_noalias_path(e,false))
 	terr(e->loc,UNIQUE_ERR_MSG);
     }
     return;
@@ -213,7 +213,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
              typ2string(es->hd->topt->v), typ2string(ts->hd));
         explain_failure();
       }
-      if (is_unique_pointer(ts->hd) && !is_unique_path(es->hd))
+      if (is_noalias_pointer(ts->hd,false) &&
+	  !is_noalias_path(es->hd,false))
 	terr(es->hd->loc,UNIQUE_ERR_MSG);
     }
     if (es != NULL)
@@ -239,7 +240,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
   case &Switch_s(e,scs0):
     tcExp(te,NULL,e);
     let t = e->topt->v;
-    if (is_unique_pointer(t) && !is_unique_path(e))
+    if (is_noalias_pointer(t,false) && !is_noalias_path(e,false))
       terr(e->loc,UNIQUE_ERR_MSG);
     // type-check the cases in reverse order, a fallthru therefore transfers
     // control to the case most recently type-checked. For the last case,

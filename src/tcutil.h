@@ -213,12 +213,14 @@ extern bool is_zero_ptr_deref(exp_t e1, type_t @ptr_type,
 			      bool @is_dyneither,
 			      type_t @elt_type);
 
-// returns true if this a unique pointer, e.g. *`U, ?`U etc.
-extern bool is_unique_pointer(type_t t);
+// returns true if this a non-aliasable pointer, e.g. *`U, *`r::TR, etc.
+extern bool is_noalias_pointer(type_t t, bool must_be_unique);
+#define is_unique_pointer(t) is_noalias_pointer(t,true)
 
-// returns true if this expression only deferences unique pointers
+// returns true if this expression only deferences non-aliasable pointers
 #define NO_PATHS
-extern bool is_unique_path(exp_t e);
+extern bool is_noalias_path(exp_t e, bool must_be_unique);
+#define is_unique_path(e) is_noalias_path(e,true)
 
 // if exp is of array type, cast it to an appropriate pointer type --
 // assumes the expression has already been type-checked and that t is

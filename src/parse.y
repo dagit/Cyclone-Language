@@ -1834,10 +1834,12 @@ optional_rgn_order:
 rgn_order:
   atomic_effect '>' TYPE_VAR
 { $$ = ^$(new List(new $(new JoinEff($1),
-			 id2type($3,Tcutil::kind_to_bound(RgnKind))),NULL)); }
+			 id2type($3,new Less_kb(NULL,TopRgnKind))),
+		   NULL)); }
 | atomic_effect '>' TYPE_VAR ',' rgn_order 
 { $$ = ^$(new List(new $(new JoinEff($1),
-			 id2type($3,Tcutil::kind_to_bound(RgnKind))),$5)); }
+			 id2type($3,new Less_kb(NULL,TopRgnKind))),
+		   $5)); }
 ;
 
 optional_inject:
@@ -1869,11 +1871,11 @@ atomic_effect:
 /* CYC:  new */
 region_set:
   type_var
-  { set_vartyp_kind($1,RgnKind,false);
+  { set_vartyp_kind($1,TopRgnKind,true);
     $$=^$(new List(new AccessEff($1),NULL)); 
   }
 | type_var ',' region_set
-  { set_vartyp_kind($1,RgnKind,false);
+  { set_vartyp_kind($1,TopRgnKind,true);
     $$=^$(new List(new AccessEff($1),$3)); 
   }
 ;

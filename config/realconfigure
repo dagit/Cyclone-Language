@@ -265,7 +265,7 @@ chkdir "libraries" $libdir
 chkdir "include files" $incdir
 
 # figure out all supported architectures by checking for config files
-ALL_ARCHS=`cd arch; \ls -1 | grep -v undef | grep -v CVS | awk '{printf("%s ",$1);}'`
+ALL_ARCHS=`cd ../bin/lib/cyc-lib/; \ls -1 | grep -v cyc_include.h | grep -v CVS | awk '{printf("%s ",$1);}'`
 
 # get default load flags
 get_ldflags

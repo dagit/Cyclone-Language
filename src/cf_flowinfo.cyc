@@ -75,6 +75,9 @@ string_t place_err_string(place_t place) {
   }  
 }
 
+#define CONSUME_ERR2 "May consume non-aliased pointer %s more than once"
+#define CONSUME_ERR1 (CONSUME_ERR2 " (cf. %s)")
+
 static void unique_err(place_t place,
 		       string_t err_msg1, string_t err_msg2,
 		       Position::seg_t consumed_loc,
@@ -94,8 +97,7 @@ static Position::seg_t combine_consume_f(bool isErr,
 					 Position::seg_t loc1,
 					 Position::seg_t loc2) {
   if (isErr)
-    unique_err(place, "May consume unique pointer %s more than once (cf. %s)",
-	       "May consume unique pointer %s more than once", loc1, loc2);
+    unique_err(place, CONSUME_ERR1, CONSUME_ERR2, loc1, loc2);
   return loc1;
 }
 
@@ -1462,9 +1464,7 @@ static void consume_f($(place_set_t<`r> @,
   DEBUG_PRINT("  to consumed\n");
   if (update_place_set(consume, place, loc)) {
     let consume_loc = Dict::lookup(*consume,place);
-    unique_err(place, "May consume unique pointer %s more than once (cf. %s)",
-	       "May consume unique pointer %s more than once",
-	       consume_loc, loc);
+    unique_err(place, CONSUME_ERR1, CONSUME_ERR2, consume_loc, loc);
   }
 }
 

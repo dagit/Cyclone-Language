@@ -401,6 +401,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
 	type_t vartype = new VarType(tv);
 	var_tvs = rnew(rgn) List((type_t)(vartype),var_tvs);
 	// if unpacking a region var, must add it to the po
+	// FIX: allow adding existentials of TR kind?
 	if(k2 == RgnKind) {
           outlives_constraints = new List(new $(empty_effect,vartype),outlives_constraints);
 	}

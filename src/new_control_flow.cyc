@@ -597,9 +597,9 @@ static consume_t<`r> consume_assignment(analenv_t<`r> env,
 					flowdict_t<`r> outdict,
 					exp_t e) {
   let fenv = env->fenv;
-  // add lhs to consume list if it's unique and not a path
-  if (Tcutil::is_unique_pointer(e->topt->v) &&
-      Tcutil::is_unique_path(e)) {
+  // add lhs to consume list if it's unique and is a unique path
+  if (Tcutil::is_noalias_pointer(e->topt->v,false) &&
+      Tcutil::is_noalias_path(e,false)) {
     DEBUG_PRINT("  assign lhs; adding |%s| to may_consume\n",
 		Absynpp::exp2string(l));
     cinfo.may_consume = List::rmerge(fenv->r,place_cmp,
@@ -700,7 +700,7 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
     // will only be an error in the event the list is actually
     // consumed.
     DEBUG_PRINT("in Rexp:Var_e for |%s|\n",Absynpp::exp2string(e));
-    if (Tcutil::is_unique_pointer(vd->type)) {
+    if (Tcutil::is_noalias_pointer(vd->type,false)) {
       DEBUG_PRINT("  adding to may_consume\n");
       let root  = rnew(fenv->r) VarRoot(vd);
       let place = rnew(fenv->r) Place(root,NULL);

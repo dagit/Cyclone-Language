@@ -35,6 +35,9 @@ using Absyn;
 using Tcutil;
 namespace RgnOrder;
 
+static bool valid_constraint(type_t eff, type_t rgn);
+static type_t filter_effect(type_t eff, kind_t k);
+
 // Encodes partial order for region lifetimes
 struct RgnInfo {
   type_t these_outlive; // EffKind
@@ -43,15 +46,64 @@ struct RgnInfo {
 struct RgnPO<`r::R> {
   Dict::dict_t<tvar_t, struct RgnInfo@`r,`r> d;
   type_t these_outlive_heap; // EffKind
+  type_t these_outlive_unique; // EffKind
   tvar_t youngest_unresettable; // fact: there always is one
 };
+
+// makes sure that for all regions r in [eff], kind(r) <= kind([rgn]);
+// also allows regions(`a) to outlive only regions having R kind
+static bool valid_constraint(type_t eff, type_t rgn) {
+  let rkind = typ_kind(rgn);
+  switch (compress(eff)) {
+  case &JoinEff(es):
+    for (; es != NULL; es = es->tl) 
+      if (!valid_constraint(es->hd, rgn)) return false;
+    return true;
+    // FIX: do I need to worry about how the effect might be instantiated?
+  case &Evar(_,_,_,_):
+  case &VarType(_): return true;
+  case &RgnsEff(t): 
+    // Only allow regions(`a) to outlive R kinded vars
+//     fprintf(stderr,"checking regions(`a) > %s\n",Absynpp::typ2string(rgn));
+    if (rkind == RgnKind) return true; else return false;
+  case &AccessEff(r): return kind_leq(typ_kind(r),rkind);
+  default:
+    impos("bad effect |%s| passed to add_outlives_constraint",
+	  Absynpp::typ2string(eff));
+  }
+}
+
+// removes all elements from the effect having kind k
+static type_t filter_effect(type_t eff, kind_t k) {
+  let e = compress(eff);
+  switch (e) {
+  case &JoinEff(es):
+    _ effs = NULL;
+    for (; es != NULL; es = es->tl) {
+      let e2 = filter_effect(es->hd,k);
+      if (e2 != VoidType) effs = new List(e2,effs);
+    }
+    return new JoinEff(List::imp_rev(effs));
+  case &Evar(_,_,_,_):
+  case &RgnsEff(_): return e;
+  case &AccessEff(t): if (typ_kind(t) != k) return e; else return VoidType;
+  default: impos("bad effect passed to filter_effect");
+  }
+}
 
 // adds constraint: [eff] outlives [rgn]
 // Note: Evars get constrained to HeapRgn!
 // Note: assumes not resettable and all regions of RgnKind
 rgn_po_t<`r> add_outlives_constraint(region_t<`r> r, rgn_po_t<`r> po, 
-                                     type_t eff, type_t rgn) {
+                                     type_t eff, type_t rgn,
+				     Position::seg_t loc) {
   let ans = rnew(r) *po;
+  // first check that this is a valid constraint
+  if (!valid_constraint(eff,rgn)) {
+    terr(loc,"Invalid region ordering constraint; kind mismatch");
+    return ans;
+  }
+  // now add it to the PO
   switch(compress(rgn)) {
   case &VarType(tv):
     let d = po->d;
@@ -67,6 +119,10 @@ rgn_po_t<`r> add_outlives_constraint(region_t<`r> r, rgn_po_t<`r> po,
     fallthru;
   case HeapRgn:
     ans->these_outlive_heap = new JoinEff(list(eff,po->these_outlive_heap));
+    return ans;
+  case UniqueRgn:
+    ans->these_outlive_unique =
+      new JoinEff(list(eff,po->these_outlive_unique));
     return ans;
   default: impos("RgnOrder::add_outlives_constraint passed a bad region");
   }
@@ -93,17 +149,30 @@ rgn_po_t<`r> initial_fn_po(region_t<`r> r,
     switch(tvar_kind(tvs2->hd)) {
     case RgnKind: 
     case UniqueRgnKind: 
-      d = Dict::insert(d,tvs2->hd,rnew (r) RgnInfo(empty_effect,false)); break;
     case TopRgnKind: 
-      Tcutil::terr(loc,"initial_fn_po: tvar %s has TopRgnKind",
-		   *tvs2->hd->name); break;
+//       fprintf(stderr,"  Adding tvar %s to dict\n",
+// 	      Absynpp::typ2string(new VarType(tvs2->hd)));
+      d = Dict::insert(d,tvs2->hd,rnew (r) RgnInfo(empty_effect,false)); break;
+      break;
     default: break;
     }
+  // need to filter any TR or UR kind variables from effect, since
+  // they are not <= the fst_rgn, which has R kind;
+  // assumes that fst_rgn has R kind
+  if (!valid_constraint(effect,new VarType(fst_rgn))) {
+//     fprintf(stderr,"filtering effect\n");
+    effect = filter_effect(effect,TopRgnKind);
+    effect = filter_effect(effect,UniqueRgnKind);
+  }
+//   fprintf(stderr,"  Relating %s <= effect %s\n",
+// 	  Absynpp::typ2string(new VarType(fst_rgn)),
+// 	  Absynpp::typ2string(effect));	  
   d = Dict::insert(d, fst_rgn, rnew(r) RgnInfo(effect,false));
   // add in the explicit partial order -- no longer detects cycles
-  let ans = rnew(r) RgnPO(d,empty_effect,fst_rgn);
+  let ans = rnew(r) RgnPO(d,empty_effect,empty_effect,fst_rgn);
   for(; po != NULL; po = po->tl)
-    ans = add_outlives_constraint(r, ans, (*po->hd)[0], (*po->hd)[1]);
+    ans = add_outlives_constraint(r, ans, (*po->hd)[0], (*po->hd)[1], loc);
+//   print_region_po(ans);
   return ans;
 }
 
@@ -112,6 +181,7 @@ bool is_region_resetable(rgn_po_t po, Absyn::tvar_t r) {
   return Dict::lookup(po->d,r)->resetable;
 }
 
+// is regions(`rgns_of_var) in eff?
 static bool contains_rgnseff(tvar_t rgns_of_var, type_t eff) {
   switch(normalize_effect(compress(eff))) {
   case &RgnsEff(t): 
@@ -130,8 +200,8 @@ static bool contains_rgnseff(tvar_t rgns_of_var, type_t eff) {
 
 static struct OutlivesEnv<`r::R> {
   region_t<`r> r;
-  list_t<tvar_t,`r> seen;
-  list_t<tvar_t,`r> todo;
+  list_t<tvar_t,`r> seen; // region vars that we have already considered
+  list_t<tvar_t,`r> todo; // region vars that outlive vars already considered 
 };
  
 static void add_to_search(struct OutlivesEnv @ env, type_t eff) {
@@ -154,8 +224,16 @@ static void add_to_search(struct OutlivesEnv @ env, type_t eff) {
 static struct OutlivesEnv<`r> 
 initial_env(region_t<`r> listrgn, rgn_po_t po, type_t rgn) {
   let ans = OutlivesEnv(listrgn,NULL,NULL);
-  add_to_search(&ans,po->these_outlive_heap);
-  switch(compress(rgn)) {
+  type_t r = compress(rgn);
+  switch (typ_kind(r)) {
+  case RgnKind: add_to_search(&ans,po->these_outlive_heap); break;
+  case UniqueRgnKind:  add_to_search(&ans,po->these_outlive_unique); break;
+  case TopRgnKind:
+    add_to_search(&ans,po->these_outlive_heap);
+    add_to_search(&ans,po->these_outlive_unique); break;
+  default: impos("RgnOrder: rgn not of correct kind");
+  }
+  switch(r) {
   case &VarType(tv): 
     ans.seen = rnew(listrgn) List(tv,ans.seen);
     ans.todo = rnew(listrgn) List(tv,ans.todo);
@@ -170,19 +248,36 @@ static bool atomic_effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
   region listrgn { // FIX: make a small initial size
   switch(compress(eff)) {
   case &AccessEff(vt):
+    // does `vt outlive `rgn ?
     switch(compress(vt)) {
     case UniqueRgn: return true;
     case HeapRgn:
-      if (compress(rgn) != UniqueRgn)
+      // The heap outlives all regions except the unique region
+      //   and regions with UR kind
+      switch (compress(rgn)) {
+      case UniqueRgn: return false;
+      case &VarType(tv):
+	if (tvar_kind(tv) == UniqueRgnKind) return false;
+	fallthru;
+      default:
 	return true;
-      else return false;
+      }
     case &VarType(tv):
+      // To determine if tv outlives rgn, we generate the transitive
+      // set of variables (env.todo) that outlive rgn.  If during this
+      // process we discover tv is in this set, we return true; if we
+      // reach a fixed-point, then we return false.  We start by
+      // building the set to include rgn and all those variables that
+      // outlive the heap.
       let env = initial_env(listrgn,po,rgn);
       while(env.todo != NULL) {
 	let next = env.todo->hd;
 	env.todo = env.todo->tl;
-	if(tvar_cmp(next,tv)==0) // found it in po
+	if(tvar_cmp(next,tv)==0)
 	  return true;
+	// didn't find it; add all variables that outlive this variable
+	// to the env.todo list, unless they appear in env.seen list
+	// (meaning we already tried them or will try them).
 	if(Dict::member(po->d,next)) {
 	  add_to_search(&env,Dict::lookup(po->d,next)->these_outlive);
 	} else impos("RgnOrder: type variable not in dict");
@@ -192,10 +287,20 @@ static bool atomic_effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
     }
   case &RgnsEff(vt):
     switch(compress(vt)) {
+    // does regions(`tv) outlive `rgn?
     case &VarType(tv):
+      // This is similar to the VarType case, above, except that we
+      // check that for each variable `r in todo, whether regions(`tv)
+      // outlives it.  This isn't really used now, since we don't allow
+      // regions(`a) to outlive something of non-R kind at the moment.
       let env = initial_env(listrgn,po,rgn);
-      if(contains_rgnseff(tv,po->these_outlive_heap))
-	return true;
+      let k = typ_kind(rgn);
+      if (k == RgnKind || k == TopRgnKind)
+	if(contains_rgnseff(tv,po->these_outlive_heap))
+	  return true;
+      if (k == UniqueRgnKind || k == TopRgnKind)
+	if(contains_rgnseff(tv,po->these_outlive_unique))
+	  return true;
       while(env.todo != NULL) {
 	let next = env.todo->hd;
 	env.todo = env.todo->tl;
@@ -332,5 +437,7 @@ void print_region_po(rgn_po_t po) {
     }
     fprintf(stderr,"  these outlive heap: %s\n",
 	    Absynpp::typ2string(po->these_outlive_heap));
+    fprintf(stderr,"  these outlive unique: %s\n",
+	    Absynpp::typ2string(po->these_outlive_unique));
   }
 }

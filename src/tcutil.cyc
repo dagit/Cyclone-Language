@@ -1994,7 +1994,7 @@ static kindbound_t@ kind_to_b(kind_t k) {
   static kindbound_t tb = &tb_v;
   static kindbound_t eb = &eb_v;
   static kindbound_t ib = &ib_v;
-  
+
   switch (k) {
   case AnyKind: return &ab;
   case MemKind: return &mb;
@@ -3374,9 +3374,6 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       case &Eq_kb(MemKind):
 	terr(loc,"function attempts to abstract Mem type variable %s",
 	     *b->hd->name); break;
-      case &Eq_kb(TopRgnKind):
-	terr(loc,"function attempts to abstract TopRegion type variable %s",
-	     *b->hd->name); break;
       default: break;
       }
     }
@@ -3461,9 +3458,8 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       //       actually, allow circularities, but forbid effect variables
       for (_ rpo = rgn_po; rpo != NULL; rpo = rpo->tl) {
         let &$(r1,r2) = rpo->hd;
-        // don't allow non-intuitionistic regions in partial orders
         new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,EffKind,r1,true);
-        new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,RgnKind,r2,true);
+        new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,TopRgnKind,r2,true);
       }
       // finally, the effect -- usually inferred
       if (*eff != NULL)
@@ -3478,13 +3474,12 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
           let $(tv,put_in_eff) = *tvs->hd;
           if (!put_in_eff) continue; // skip variables that shouldn't go in effs
           switch (compress_kb(tv->kind)) {
-          case &Eq_kb(TopRgnKind): impos("TopRgnKind in toplevel effect!\n");
-            // Coerce TopRgnKind to RgnKind
+            // Coerce TopRgnKind to RgnKind if an upper bound
           case &Less_kb(*f,TopRgnKind):
             fallthru(f,RgnKind); // MWH: is this premature?
           case &Less_kb(*f,r) && ((r==RgnKind) || (r==UniqueRgnKind)):
             *f = kind_to_bound_opt(r); fallthru(r);
-          case &Eq_kb(r) && ((r==RgnKind) || (r==UniqueRgnKind)):
+          case &Eq_kb(r) && (r==RgnKind || r==UniqueRgnKind || r==TopRgnKind):
             effect = new List(new AccessEff(new VarType(tv)),effect); break;
           case &Less_kb(_,IntKind):
           case &Eq_kb(IntKind): break;
@@ -3504,7 +3499,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
           let $(tv,put_in_eff) = *ts->hd;
           if (!put_in_eff) continue; // skip variables that shouldn't go in effs
           switch (typ_kind(tv)) {
-          case TopRgnKind: // should get constrained below
+          case TopRgnKind:
           case UniqueRgnKind:
           case RgnKind: effect = new List(new AccessEff(tv), effect); break;
           case EffKind: effect = new List(tv,                effect); break;
@@ -3517,8 +3512,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       // Warn if afterwards any kind is still unconstrained and set it to 
       // BoxKind. In addition, drive any MemKind or AnyKind bounded type
       // variables to BoxKind to ensure that we don't abstract a MemKind
-      // variable.  Finally, drive TopRgnKind variables to RgnKind so we
-      // don't abstract them either.
+      // variable.
       if (*btvs != NULL)
         for(list_t<tvar_t> bs = *btvs; bs != NULL; bs = bs->tl)
           switch (compress_kb(bs->hd->kind)) {
@@ -3532,8 +3526,6 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
           case &Less_kb(*f,k):       *f = kind_to_bound_opt(k); break;
           case &Eq_kb(MemKind):
             terr(loc,"functions can't abstract M types"); break;
-          case &Eq_kb(TopRgnKind):
-            terr(loc,"functions can't abstract TR types"); break;
           default: break;
           }
       // remove the bound vars from the kind environment and the list of free vars
@@ -3683,7 +3675,8 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     cvtenv = i_check_valid_type(loc,te,cvtenv,RgnKind,t3,true); 
     break;
   case &AccessEff(t2):
-    cvtenv = i_check_valid_type(loc,te,cvtenv,RgnKind,t2,true); break;
+    // should this be TopRgnKind in general?  Think so ...
+    cvtenv = i_check_valid_type(loc,te,cvtenv,TopRgnKind,t2,true); break;
   case &RgnsEff(t2):
     cvtenv = i_check_valid_type(loc,te,cvtenv,AnyKind,t2,true); break;
   case &JoinEff(ts):
@@ -4115,33 +4108,39 @@ bool is_tagged_pointer_typ(type_t t, bool @is_forward_only) {
   return is_tagged_pointer_typ_elt(t, &ignore, is_forward_only);
 }
 
-static bool is_unique_region(type_t r) {
+/**************************************************************/
+/* Routines for dealing with unique and non-aliasing pointers */
+/**************************************************************/
+
+static bool is_noalias_region(type_t r, bool must_be_unique) {
   switch (compress(r)) {
   case UniqueRgn: return true;
-  case &VarType(tv): return tvar_kind(tv) == UniqueRgnKind;
+  case &VarType(tv):
+    return tvar_kind(tv) == UniqueRgnKind ||
+           (!must_be_unique && tvar_kind(tv) == TopRgnKind);
   default: return false;
   }
 }
 
-bool is_unique_pointer(type_t t) {
+bool is_noalias_pointer(type_t t, bool must_be_unique) {
   switch (compress(t)) {
   case &PointerType(PtrInfo(_,_,PtrAtts(r,_,_,_,_))):
-    return is_unique_region(r);
+    return is_noalias_region(r,must_be_unique);
   default: return false;
   }
 }
 
-static bool is_unique_field(type_t t, field_name_t f) {
+static bool is_noalias_field(type_t t, field_name_t f, bool must_be_unique) {
   switch (t) {
   case &AggrType(AggrInfo(KnownAggr(&ad),ts)):
     let finfo = lookup_decl_field(ad,f);
     switch (finfo) {
-    case NULL: Tcutil::impos("is_unique_field: missing field");
+    case NULL: Tcutil::impos("is_noalias_field: missing field");
     case &Aggrfield(_,_,t,_,_):
-      return is_unique_pointer(t);
+      return is_noalias_pointer(t,must_be_unique);
     }
   default:
-    Tcutil::impos("is_unique_field: invalid type");
+    Tcutil::impos("is_noalias_field: invalid type");
   }
 }
 
@@ -4149,7 +4148,7 @@ static bool is_unique_field(type_t t, field_name_t f) {
 // returns true if the path [e] is entirely unique.  I.e. **x is unique
 // if x has type (e.g.) int *`U*`U*`U x but not if it has type (e.g.)
 // int *`U*`H*`U x
-bool is_unique_path_aux(exp_t e, bool ignore_leaf) {
+static bool is_noalias_path_aux(exp_t e,bool must_be_unique,bool ignore_leaf) {
   switch (e->r) {
   case &Increment_e(_,_):
   case &And_e(_,_):
@@ -4183,18 +4182,19 @@ bool is_unique_path_aux(exp_t e, bool ignore_leaf) {
   case &Var_e(_,&Local_b(_)):
   case &Var_e(_,&Pat_b(_)):
   case &Var_e(_,&Param_b(_)):
-    return ignore_leaf || is_unique_pointer(e->topt->v);
+    return ignore_leaf || is_noalias_pointer(e->topt->v,must_be_unique);
   case &Conditional_e(_,e1,_): fallthru(e1);
   case &SeqExp_e(_,e1): fallthru(e1);
-  case &AssignOp_e(e1,_,_): return is_unique_path_aux(e1,ignore_leaf);
+  case &AssignOp_e(e1,_,_):
+    return is_noalias_path_aux(e1,must_be_unique,ignore_leaf);
   case &FnCall_e(e1,_,_):
     switch (compress(e1->topt->v)) {
     case &FnType(FnInfo(_,_,rt,_,_,_,_,_)):
-      return ignore_leaf || is_unique_pointer(rt);
+      return ignore_leaf || is_noalias_pointer(rt,must_be_unique);
     case &PointerType(PtrInfo(t,_,_)):
       switch (compress(t)) {
       case &FnType(FnInfo(_,_,rt,_,_,_,_,_)):
-	return ignore_leaf || is_unique_pointer(rt);
+	return ignore_leaf || is_noalias_pointer(rt,must_be_unique);
       default: break;
       }
       fallthru;
@@ -4202,34 +4202,35 @@ bool is_unique_path_aux(exp_t e, bool ignore_leaf) {
 			   typ2string(e1->topt->v));
     }
   case &Cast_e(t,e1,_,_):
-    return is_unique_pointer(t) && is_unique_path_aux(e1,true);
+    return is_noalias_pointer(t,must_be_unique) &&
+           is_noalias_path_aux(e1,must_be_unique,true);
   case &Deref_e(e1):
-    return (ignore_leaf || is_unique_pointer(e->topt->v)) && 
-      is_unique_path_aux(e1, false);
+    return (ignore_leaf || is_noalias_pointer(e->topt->v, must_be_unique)) && 
+           is_noalias_path_aux(e1, must_be_unique, false);
   case &AggrArrow_e(e1,f):
     switch (compress(e1->topt->v)) {
     case &PointerType(PtrInfo(t2,_,_)): 
-      return (ignore_leaf || is_unique_field(t2,f)) &&
-	is_unique_path_aux(e1,false);
-    default: Tcutil::impos("is_unique_path_aux: -> on non-pointer");
+      return (ignore_leaf || is_noalias_field(t2,f,must_be_unique)) &&
+	     is_noalias_path_aux(e1,must_be_unique,false);
+    default: Tcutil::impos("is_noalias_path_aux: -> on non-pointer");
     }
     return false;
   case &AggrMember_e(e1,f):
-    return ignore_leaf || is_unique_field(e1->topt->v,f);
+    return ignore_leaf || is_noalias_field(e1->topt->v,f,must_be_unique);
   case &Subscript_e(e1,e2):
     switch (compress(e1->topt->v)) {
     case &PointerType(PtrInfo(t,_,_)):
-      return ignore_leaf || is_unique_pointer(t);
+      return ignore_leaf || is_noalias_pointer(t,must_be_unique);
     case &TupleType(ts): 
       let $(i,known) = Evexp::eval_const_uint_exp(e2);
-      if(!known) Tcutil::impos("is_unique_path_aux: non-constant subscript");
+      if(!known) Tcutil::impos("is_noalias_path_aux: non-constant subscript");
       try {
 	let t = (*List::nth(ts,i))[1];
-	return ignore_leaf || is_unique_pointer(t);
+	return ignore_leaf || is_noalias_pointer(t,must_be_unique);
       } catch { case Nth:
-	return Tcutil::impos("is_unique_path_aux: out-of-bounds subscript");
+	return Tcutil::impos("is_noalias_path_aux: out-of-bounds subscript");
       }
-    default: Tcutil::impos("is_unique_path_aux: subscript on non-pointer/tuple");
+    default: Tcutil::impos("is_noalias_path_aux: subscript on non-pointer/tuple");
     }
   case &StmtExp_e(s):
     // keep looking for the final expression of the statement,
@@ -4238,11 +4239,11 @@ bool is_unique_path_aux(exp_t e, bool ignore_leaf) {
       switch(s->r) {
       case &Seq_s(s1,s2): s = s2; break;
       case &Decl_s(d,s1): s = s1; break;
-      case &Exp_s(e): return is_unique_path_aux(e,ignore_leaf);
-      default: Tcutil::impos("is_unique_stmt_exp: ill-formed StmtExp");
+      case &Exp_s(e): return is_noalias_path_aux(e,ignore_leaf,must_be_unique);
+      default: Tcutil::impos("is_noalias_stmt_exp: ill-formed StmtExp");
       }
     }
-  default: Tcutil::impos("Called is_unique_path_aux with bogus exp |%s|\n",
+  default: Tcutil::impos("Called is_noalias_path_aux with bogus exp |%s|\n",
 			 exp2string(e));
   }  
 }
@@ -4250,7 +4251,7 @@ bool is_unique_path_aux(exp_t e, bool ignore_leaf) {
 // the real version of this is above; this version makes sure that e
 // is *NOT* a path but is a unique pointer.  This forces unique
 // pointers in structures to be swapped.
-static bool is_unique_path_aux(exp_t e, bool ignore_leaf) {
+static bool is_noalias_path_aux(exp_t e,bool ignore_leaf,bool must_be_unique) {
   switch (e->r) {
   case &Increment_e(_,_):
   case &And_e(_,_):
@@ -4290,18 +4291,19 @@ static bool is_unique_path_aux(exp_t e, bool ignore_leaf) {
   case &Var_e(_,&Local_b(_)):
   case &Var_e(_,&Pat_b(_)):
   case &Var_e(_,&Param_b(_)):
-    return ignore_leaf || is_unique_pointer(e->topt->v);
+    return ignore_leaf || is_noalias_pointer(e->topt->v,must_be_unique);
   case &Conditional_e(_,e1,_): fallthru(e1);
   case &SeqExp_e(_,e1): fallthru(e1);
-  case &AssignOp_e(e1,_,_): return is_unique_path_aux(e1,ignore_leaf);
+  case &AssignOp_e(e1,_,_):
+    return is_noalias_path_aux(e1,ignore_leaf,must_be_unique);
   case &FnCall_e(e1,_,_):
     switch (compress(e1->topt->v)) {
     case &FnType(FnInfo(_,_,rt,_,_,_,_,_)):
-      return ignore_leaf || is_unique_pointer(rt);
+      return ignore_leaf || is_noalias_pointer(rt,must_be_unique);
     case &PointerType(PtrInfo(t,_,_)):
       switch (compress(t)) {
       case &FnType(FnInfo(_,_,rt,_,_,_,_,_)):
-	return ignore_leaf || is_unique_pointer(rt);
+	return ignore_leaf || is_noalias_pointer(rt,must_be_unique);
       default: break;
       }
       fallthru;
@@ -4309,7 +4311,8 @@ static bool is_unique_path_aux(exp_t e, bool ignore_leaf) {
 			   typ2string(e1->topt->v));
     }
   case &Cast_e(t,e1,_,_): 
-    return is_unique_pointer(t) && is_unique_path_aux(e1,true);
+    return is_noalias_pointer(t,must_be_unique) &&
+           is_noalias_path_aux(e1,true,must_be_unique);
   case &StmtExp_e(s):
     // keep looking for the final expression of the statement,
     //   and recurse into that to find the unique path
@@ -4317,16 +4320,18 @@ static bool is_unique_path_aux(exp_t e, bool ignore_leaf) {
       switch(s->r) {
       case &Seq_s(s1,s2): s = s2; break;
       case &Decl_s(d,s1): s = s1; break;
-      case &Exp_s(e): return is_unique_path_aux(e,ignore_leaf);
-      default: Tcutil::impos("is_unique_stmt_exp: ill-formed StmtExp");
+      case &Exp_s(e): return is_noalias_path_aux(e,ignore_leaf,must_be_unique);
+      default: Tcutil::impos("is_noalias_stmt_exp: ill-formed StmtExp");
       }
     }
-  default: Tcutil::impos("Called is_unique_path_aux with bogus exp |%s|\n",
+  default: Tcutil::impos("Called is_noalias_path_aux with bogus exp |%s|\n",
 			 exp2string(e));
   }
 }
 #endif
-bool is_unique_path(exp_t e) { return is_unique_path_aux(e,false); }
+bool is_noalias_path(exp_t e,bool must_be_unique) {
+  return is_noalias_path_aux(e,false,must_be_unique);
+}
 
 // used by address of.  
 // Ensure e is an lvalue or function designator.
