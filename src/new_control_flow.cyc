@@ -2662,6 +2662,24 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env,
     DEBUG_PRINT("}\n");
     return inflow;
 
+    // have to deal with region open's here since we need to unconsume
+    // the key.
+  case &Decl_s(&Decl{.r = &Region_d(_,vd,_,open_exp_opt),.loc=loc},s1) &&
+    open_exp_opt != NULL:
+    let $(f,r) = anal_Rexp(env,true,inflow,open_exp_opt);
+    let vds = List(vd,NULL);
+    f = add_vars(fenv, inflow,&vds,fenv->unknown_all,loc,false);
+    f = anal_stmt(env,f,s1,rval_opt);
+    switch $(r,f) {
+    case $(&NamedLocation(vd,rv),{.ReachableFL = $(indict,relns)}): 
+      // behave as if we're assigning rv to vd to re-initialize it
+      let vdplace = rnew(env->r) Place(rnew(env->r) VarRoot(vd),NULL);
+      let outdict = assign_place(fenv,loc,indict,env->all_changed,vdplace,rv);
+      break;
+    default: break;
+    }
+    return f;
+
     // MWH: made obsolete by alias patterns
 //   case &Decl_s(&Decl{.r = &Alias_d(tv,vd), ...},s1):
 //     // similar to the copy situation at the top of anal_Rexp
@@ -2798,7 +2816,9 @@ static flow_t<`r> anal_decl(analenv_t<`r> env, flow_t<`r> inflow, decl_t decl) {
     // to unknown-init-level.
     return add_vars(fenv,inflow,rnew(env->r) List(vd,NULL),fenv->unknown_all,decl->loc,false);
 
-  case &Region_d(tv,vd,resetable):
+  case &Region_d(tv,vd,resetable,open_exp_opt):
+    if (open_exp_opt != NULL)
+      throw new Core::Impossible("found open expression in declaration!");
     let vds = List(vd,NULL);
     return add_vars(fenv, inflow,&vds,fenv->unknown_all,decl->loc,false);
 

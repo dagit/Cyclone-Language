@@ -864,8 +864,9 @@ namespace Absyn {
           opt_t<list_t<$(vardecl_t *,exp_opt_t)@>>, // set by type-checker, used downstream
           exp_t);
     Letv_d(list_t<vardecl_t>); // multi-let
-    Region_d(tvar_t,vardecl_t,bool); // region declaration
-    // region<`r> h;  or  region [resetable] <`r> h;   
+    Region_d(tvar_t,vardecl_t,bool,exp_opt_t); // region declaration
+    // region<`r> h;  or  region [resetable] <`r> h;   or
+    // region<`r> h = open(k);  
     // When bool is true, resetable.  
     Aggr_d(aggrdecl_t);    // [struct|union] Foo { ... }
     Datatype_d(datatypedecl_t);    // datatype Bar { ... }
@@ -1098,7 +1099,7 @@ namespace Absyn {
   extern decl_t new_decl(raw_decl_t r, seg_t loc);
   extern decl_t let_decl(pat_t p, exp_t e, seg_t loc);
   extern decl_t letv_decl(list_t<vardecl_t,`H>, seg_t loc);
-  extern decl_t region_decl(tvar_t,vardecl_t,bool,seg_t); 
+  extern decl_t region_decl(tvar_t,vardecl_t,bool,exp_opt_t open_exp, seg_t); 
   extern decl_t alias_decl(tvar_t,vardecl_t,exp_t,seg_t);
   extern vardecl_t new_vardecl(qvar_t x, type_t t, exp_opt_t init);
   extern vardecl_t static_vardecl(qvar_t x, type_t t, exp_opt_t init);

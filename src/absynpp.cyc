@@ -1812,12 +1812,14 @@ doc_t decl2doc(decl_t d) {
   case &Var_d(vd):
     s = vardecl2doc(vd);
     break;
-  case &Region_d(tv,vd,resetable):
+  case &Region_d(tv,vd,resetable,open_exp_opt):
     s = cat(text("region"),
             text("<"),
             tvar2doc(tv),
             text(">" ),
             qvar2doc(vd->name),
+            (open_exp_opt ? cat(text(" = open("),exp2doc(open_exp_opt),
+                                text(")")) : nil_doc()),
             (resetable ? text(" @resetable") : nil_doc()),
             text(";"));
     break;

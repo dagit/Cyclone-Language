@@ -1334,6 +1334,7 @@ declaration:
 /* region <`r> h;  and region <`r> h @resetable; */
 | resetable_qual_opt REGION '<' TYPE_VAR '>' IDENTIFIER ';'
   { let four = $4;
+    // FIX: need to check for `RC as well?  Should factor these out?
     if (zstrcmp(four,"`H") == 0)
       err(aprintf("bad occurrence of heap region"),SLOC(@4));
     if (zstrcmp(four,"`U") == 0)
@@ -1341,7 +1342,7 @@ declaration:
     tvar_t tv = new Tvar(new four,-1,Tcutil::kind_to_bound(&Tcutil::rk));
     type_t t  = new VarType(tv);
     vardecl_t vd = new_vardecl(new $(Loc_n,new $6),new RgnHandleType(t),NULL);
-    $$ = ^$(new List(region_decl(tv,vd,$1,LOC(@1,@7)),NULL));
+    $$ = ^$(new List(region_decl(tv,vd,$1,NULL,LOC(@1,@7)),NULL));
   }
 /* region h; */
 | resetable_qual_opt REGION IDENTIFIER ';'
@@ -1356,7 +1357,20 @@ declaration:
     type_t t = new VarType(tv);
     vardecl_t vd = new_vardecl(new $(Loc_n,new three),new RgnHandleType(t),NULL);
 
-    $$ = ^$(new List(region_decl(tv,vd,one,LOC(@1,@5)),NULL));
+    $$ = ^$(new List(region_decl(tv,vd,one,NULL,LOC(@1,@5)),NULL));
+  }
+/* region h = open(k); */
+| resetable_qual_opt REGION IDENTIFIER '=' IDENTIFIER '(' expression ')' ';'
+  { let three = $3;
+    let five = $5;
+    let seven = $7;
+    if (strcmp(five,"open") != 0) err("expecting `open'",SLOC(@4));
+    tvar_t tv = new Tvar(new (string_t)aprintf("`%s",three), -1,
+			 Tcutil::kind_to_bound(&Tcutil::rk));
+    type_t t = new VarType(tv);
+    vardecl_t vd = new_vardecl(new $(Loc_n,new three),new RgnHandleType(t),NULL);
+
+    $$ = ^$(new List(region_decl(tv,vd,false,seven,LOC(@1,@5)),NULL));
   }
 ;
 

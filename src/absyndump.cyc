@@ -1321,9 +1321,14 @@ void dumpdecl(decl_t d) {
     dumpids(vds);
     dump_semi();
     break;
-  case &Region_d(tv,vd,resetable):
+  case &Region_d(tv,vd,resetable,open_exp_opt):
     dump("region"); 
     dump("<"); dumptvar(tv); dump("> "); dumpqvar(vd->name);
+    if (open_exp_opt) {
+      dump(" = open(");
+      dumpexp(open_exp_opt);
+      dump(")");
+    }
     if (resetable) dump("@resetable");
     dump_semi();
     break;
