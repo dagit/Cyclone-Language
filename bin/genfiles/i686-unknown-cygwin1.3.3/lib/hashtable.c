@@ -271,18 +271,18 @@ extern int Cyc_Hashtable_hash_stringptr( struct _tagged_arr* p); extern void Cyc
 void(* f)( void*, void*), struct Cyc_Hashtable_Table* t); extern void Cyc_Hashtable_iter_c(
 void(* f)( void*, void*, void*), struct Cyc_Hashtable_Table* t, void* env);
 extern void Cyc_Hashtable_print_table_map( struct Cyc_Hashtable_Table* t, void(*
-prn_key)( void*), void(* prn_val)( void*)); struct Cyc_Std___sFILE; extern
-unsigned char Cyc_Std_FileCloseError[ 19u]; extern unsigned char Cyc_Std_FileOpenError[
-18u]; struct Cyc_Std_FileOpenError_struct{ unsigned char* tag; struct
-_tagged_arr f1; } ; static const int Cyc_Std_String_pa= 0; struct Cyc_Std_String_pa_struct{
-int tag; struct _tagged_arr f1; } ; static const int Cyc_Std_Int_pa= 1; struct
-Cyc_Std_Int_pa_struct{ int tag; unsigned int f1; } ; static const int Cyc_Std_Double_pa=
-2; struct Cyc_Std_Double_pa_struct{ int tag; double f1; } ; static const int Cyc_Std_ShortPtr_pa=
-3; struct Cyc_Std_ShortPtr_pa_struct{ int tag; short* f1; } ; static const int
-Cyc_Std_IntPtr_pa= 4; struct Cyc_Std_IntPtr_pa_struct{ int tag; unsigned int* f1;
-} ; extern int Cyc_Std_printf( struct _tagged_arr fmt, struct _tagged_arr);
-static const int Cyc_Std_ShortPtr_sa= 0; struct Cyc_Std_ShortPtr_sa_struct{ int
-tag; short* f1; } ; static const int Cyc_Std_UShortPtr_sa= 1; struct Cyc_Std_UShortPtr_sa_struct{
+prn_key)( void*), void(* prn_val)( void*)); struct Cyc_Cstdio___sFILE; struct
+Cyc_Std___sFILE; extern unsigned char Cyc_Std_FileCloseError[ 19u]; extern
+unsigned char Cyc_Std_FileOpenError[ 18u]; struct Cyc_Std_FileOpenError_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; static const int Cyc_Std_String_pa=
+0; struct Cyc_Std_String_pa_struct{ int tag; struct _tagged_arr f1; } ; static
+const int Cyc_Std_Int_pa= 1; struct Cyc_Std_Int_pa_struct{ int tag; unsigned int
+f1; } ; static const int Cyc_Std_Double_pa= 2; struct Cyc_Std_Double_pa_struct{
+int tag; double f1; } ; static const int Cyc_Std_ShortPtr_pa= 3; struct Cyc_Std_ShortPtr_pa_struct{
+int tag; short* f1; } ; static const int Cyc_Std_IntPtr_pa= 4; struct Cyc_Std_IntPtr_pa_struct{
+int tag; unsigned int* f1; } ; extern int Cyc_Std_printf( struct _tagged_arr fmt,
+struct _tagged_arr); static const int Cyc_Std_ShortPtr_sa= 0; struct Cyc_Std_ShortPtr_sa_struct{
+int tag; short* f1; } ; static const int Cyc_Std_UShortPtr_sa= 1; struct Cyc_Std_UShortPtr_sa_struct{
 int tag; unsigned short* f1; } ; static const int Cyc_Std_IntPtr_sa= 2; struct
 Cyc_Std_IntPtr_sa_struct{ int tag; int* f1; } ; static const int Cyc_Std_UIntPtr_sa=
 3; struct Cyc_Std_UIntPtr_sa_struct{ int tag; unsigned int* f1; } ; static const

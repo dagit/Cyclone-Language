@@ -721,7 +721,7 @@ namespace Cstr {
     `a*`r memmove(`a::A*`r, const `a*, size_t n);
     int memcmp(const void*, const void*, size_t n);
     char *`r memchr(const char *`r, char c, size_t n);
-    char *`r memset(char *`r, char c, size_t n);
+    void *`r memset(void *`r, int c, size_t n);
     void bcopy (const `a::A*src, `a *dest, size_t n);
     void bzero(`a::A*s, size_t n);
     Cstring GC_realloc(char *`H, size_t n);
@@ -780,7 +780,7 @@ char?`r mmemchr(char ?`r s, char c, size_t n) {
 char ?`r memset(char ?`r s, char c, size_t n) {
   if (s == NULL || n > s.size)
     throw new Invalid_argument("Std::memset");
-  Cstr::memset((char *)s, c, n);
+  Cstr::memset((void *)((char *)s), c, n);
   return s;
 }
  

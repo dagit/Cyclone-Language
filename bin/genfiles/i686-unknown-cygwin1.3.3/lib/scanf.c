@@ -275,11 +275,11 @@ unsigned int* __seed); extern int grantpt( int __fd); extern int unlockpt( int
 __fd); extern double Cyc_Std_atof( struct _tagged_arr); extern int Cyc_Std_strtol(
 struct _tagged_arr n, struct _tagged_arr* end, int base); extern unsigned int
 Cyc_Std_strtoul( struct _tagged_arr n, struct _tagged_arr* end, int base);
-struct Cyc_Std___sFILE; extern struct Cyc_Std___sFILE* Cyc_Std_stdin; extern int
-Cyc_Std_fgetc( struct Cyc_Std___sFILE* __stream); extern int Cyc_Std_getc(
-struct Cyc_Std___sFILE* __stream); extern int Cyc_Std_ungetc( int __c, struct
-Cyc_Std___sFILE* __stream); extern unsigned char Cyc_Std_FileCloseError[ 19u];
-extern unsigned char Cyc_Std_FileOpenError[ 18u]; struct Cyc_Std_FileOpenError_struct{
+struct Cyc_Cstdio___sFILE; struct Cyc_Std___sFILE; extern struct Cyc_Std___sFILE*
+Cyc_Std_stdin; extern int Cyc_Std_fgetc( struct Cyc_Std___sFILE* __stream);
+extern int Cyc_Std_getc( struct Cyc_Std___sFILE* __stream); extern int Cyc_Std_ungetc(
+int __c, struct Cyc_Std___sFILE* __stream); extern unsigned char Cyc_Std_FileCloseError[
+19u]; extern unsigned char Cyc_Std_FileOpenError[ 18u]; struct Cyc_Std_FileOpenError_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; static const int Cyc_Std_String_pa=
 0; struct Cyc_Std_String_pa_struct{ int tag; struct _tagged_arr f1; } ; static
 const int Cyc_Std_Int_pa= 1; struct Cyc_Std_Int_pa_struct{ int tag; unsigned int

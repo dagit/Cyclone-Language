@@ -16,7 +16,7 @@
    write to the Free Software Foundation, Inc., 59 Temple Place, Suite
    330, Boston, MA 02111-1307 USA. */
 
-#include <stdio.h>
+#include <stdlib.h>
 
 #ifdef CYC_REGION_PROFILE
 #undef GC_malloc

@@ -279,36 +279,37 @@ int tag; void(* f1)( struct _tagged_arr); } ; static const int Cyc_Arg_Int_spec=
 int Cyc_Arg_Rest_spec= 7; struct Cyc_Arg_Rest_spec_struct{ int tag; void(* f1)(
 struct _tagged_arr); } ; extern void Cyc_Arg_parse( struct Cyc_List_List* specs,
 void(* anonfun)( struct _tagged_arr), struct _tagged_arr errmsg, struct
-_tagged_arr args); struct Cyc_Std___sFILE; extern struct Cyc_Std___sFILE* Cyc_Std_stdout;
-extern struct Cyc_Std___sFILE* Cyc_Std_stderr; extern int Cyc_Std_remove( struct
-_tagged_arr); extern int Cyc_Std_fclose( struct Cyc_Std___sFILE*); extern int
-Cyc_Std_fflush( struct Cyc_Std___sFILE*); extern struct Cyc_Std___sFILE* Cyc_Std_fopen(
-struct _tagged_arr __filename, struct _tagged_arr __modes); extern unsigned int
-Cyc_Std_fread( struct _tagged_arr __ptr, unsigned int __size, unsigned int __n,
-struct Cyc_Std___sFILE* __stream); extern unsigned int Cyc_Std_fwrite( struct
+_tagged_arr args); struct Cyc_Cstdio___sFILE; struct Cyc_Std___sFILE; extern
+struct Cyc_Std___sFILE* Cyc_Std_stdout; extern struct Cyc_Std___sFILE* Cyc_Std_stderr;
+extern int Cyc_Std_remove( struct _tagged_arr); extern int Cyc_Std_fclose(
+struct Cyc_Std___sFILE*); extern int Cyc_Std_fflush( struct Cyc_Std___sFILE*);
+extern struct Cyc_Std___sFILE* Cyc_Std_fopen( struct _tagged_arr __filename,
+struct _tagged_arr __modes); extern unsigned int Cyc_Std_fread( struct
 _tagged_arr __ptr, unsigned int __size, unsigned int __n, struct Cyc_Std___sFILE*
-__s); extern int Cyc_Std_feof( struct Cyc_Std___sFILE* __stream); extern
-unsigned char Cyc_Std_FileCloseError[ 19u]; extern unsigned char Cyc_Std_FileOpenError[
-18u]; struct Cyc_Std_FileOpenError_struct{ unsigned char* tag; struct
-_tagged_arr f1; } ; extern struct Cyc_Std___sFILE* Cyc_Std_file_open( struct
-_tagged_arr fname, struct _tagged_arr mode); extern void Cyc_Std_file_close(
-struct Cyc_Std___sFILE*); static const int Cyc_Std_String_pa= 0; struct Cyc_Std_String_pa_struct{
-int tag; struct _tagged_arr f1; } ; static const int Cyc_Std_Int_pa= 1; struct
-Cyc_Std_Int_pa_struct{ int tag; unsigned int f1; } ; static const int Cyc_Std_Double_pa=
-2; struct Cyc_Std_Double_pa_struct{ int tag; double f1; } ; static const int Cyc_Std_ShortPtr_pa=
-3; struct Cyc_Std_ShortPtr_pa_struct{ int tag; short* f1; } ; static const int
-Cyc_Std_IntPtr_pa= 4; struct Cyc_Std_IntPtr_pa_struct{ int tag; unsigned int* f1;
-} ; extern int Cyc_Std_fprintf( struct Cyc_Std___sFILE*, struct _tagged_arr fmt,
-struct _tagged_arr); extern int Cyc_Std_printf( struct _tagged_arr fmt, struct
-_tagged_arr); extern struct _tagged_arr Cyc_Std_aprintf( struct _tagged_arr fmt,
-struct _tagged_arr); static const int Cyc_Std_ShortPtr_sa= 0; struct Cyc_Std_ShortPtr_sa_struct{
-int tag; short* f1; } ; static const int Cyc_Std_UShortPtr_sa= 1; struct Cyc_Std_UShortPtr_sa_struct{
-int tag; unsigned short* f1; } ; static const int Cyc_Std_IntPtr_sa= 2; struct
-Cyc_Std_IntPtr_sa_struct{ int tag; int* f1; } ; static const int Cyc_Std_UIntPtr_sa=
-3; struct Cyc_Std_UIntPtr_sa_struct{ int tag; unsigned int* f1; } ; static const
-int Cyc_Std_StringPtr_sa= 4; struct Cyc_Std_StringPtr_sa_struct{ int tag; struct
-_tagged_arr f1; } ; static const int Cyc_Std_DoublePtr_sa= 5; struct Cyc_Std_DoublePtr_sa_struct{
-int tag; double* f1; } ; static const int Cyc_Std_FloatPtr_sa= 6; struct Cyc_Std_FloatPtr_sa_struct{
+__stream); extern unsigned int Cyc_Std_fwrite( struct _tagged_arr __ptr,
+unsigned int __size, unsigned int __n, struct Cyc_Std___sFILE* __s); extern int
+Cyc_Std_feof( struct Cyc_Std___sFILE* __stream); extern unsigned char Cyc_Std_FileCloseError[
+19u]; extern unsigned char Cyc_Std_FileOpenError[ 18u]; struct Cyc_Std_FileOpenError_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern struct Cyc_Std___sFILE*
+Cyc_Std_file_open( struct _tagged_arr fname, struct _tagged_arr mode); extern
+void Cyc_Std_file_close( struct Cyc_Std___sFILE*); static const int Cyc_Std_String_pa=
+0; struct Cyc_Std_String_pa_struct{ int tag; struct _tagged_arr f1; } ; static
+const int Cyc_Std_Int_pa= 1; struct Cyc_Std_Int_pa_struct{ int tag; unsigned int
+f1; } ; static const int Cyc_Std_Double_pa= 2; struct Cyc_Std_Double_pa_struct{
+int tag; double f1; } ; static const int Cyc_Std_ShortPtr_pa= 3; struct Cyc_Std_ShortPtr_pa_struct{
+int tag; short* f1; } ; static const int Cyc_Std_IntPtr_pa= 4; struct Cyc_Std_IntPtr_pa_struct{
+int tag; unsigned int* f1; } ; extern int Cyc_Std_fprintf( struct Cyc_Std___sFILE*,
+struct _tagged_arr fmt, struct _tagged_arr); extern int Cyc_Std_printf( struct
+_tagged_arr fmt, struct _tagged_arr); extern struct _tagged_arr Cyc_Std_aprintf(
+struct _tagged_arr fmt, struct _tagged_arr); static const int Cyc_Std_ShortPtr_sa=
+0; struct Cyc_Std_ShortPtr_sa_struct{ int tag; short* f1; } ; static const int
+Cyc_Std_UShortPtr_sa= 1; struct Cyc_Std_UShortPtr_sa_struct{ int tag;
+unsigned short* f1; } ; static const int Cyc_Std_IntPtr_sa= 2; struct Cyc_Std_IntPtr_sa_struct{
+int tag; int* f1; } ; static const int Cyc_Std_UIntPtr_sa= 3; struct Cyc_Std_UIntPtr_sa_struct{
+int tag; unsigned int* f1; } ; static const int Cyc_Std_StringPtr_sa= 4; struct
+Cyc_Std_StringPtr_sa_struct{ int tag; struct _tagged_arr f1; } ; static const
+int Cyc_Std_DoublePtr_sa= 5; struct Cyc_Std_DoublePtr_sa_struct{ int tag; double*
+f1; } ; static const int Cyc_Std_FloatPtr_sa= 6; struct Cyc_Std_FloatPtr_sa_struct{
 int tag; float* f1; } ; extern unsigned char Cyc_Array_Array_mismatch[ 19u];
 struct Cyc_Std__Div{ int quot; int rem; } ; struct Cyc_Std__Ldiv{ int quot; int
 rem; } ; extern int abs( int __x); extern int atexit( void(* __func)()); extern
@@ -810,8 +811,8 @@ get)( void*), struct Cyc_List_List* la, struct Cyc_List_List* linfo); extern
 struct Cyc_Interface_I* Cyc_Interface_parse( struct Cyc_Std___sFILE*); extern
 void Cyc_Interface_save( struct Cyc_Interface_I*, struct Cyc_Std___sFILE*);
 extern struct Cyc_Interface_I* Cyc_Interface_load( struct Cyc_Std___sFILE*);
-static unsigned char _temp0[ 6u]="0.1.2"; static struct _tagged_arr Cyc_version={
-_temp0, _temp0, _temp0 +  6u}; extern void Cyc_Lex_lex_init(); static int Cyc_pp_r=
+static unsigned char _temp0[ 4u]="0.2"; static struct _tagged_arr Cyc_version={
+_temp0, _temp0, _temp0 +  4u}; extern void Cyc_Lex_lex_init(); static int Cyc_pp_r=
 0; static int Cyc_noexpand_r= 0; static int Cyc_noshake_r= 0; static int Cyc_stop_after_cpp_r=
 0; static int Cyc_parseonly_r= 0; static int Cyc_tc_r= 0; static int Cyc_ic_r= 0;
 static int Cyc_toc_r= 0; static int Cyc_stop_after_objectfile_r= 0; static int

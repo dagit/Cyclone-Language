@@ -1,35 +1,35 @@
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c i386-unknown-bsdi3.1/lib/execinfo.c
-*** i686-unknown-linux/lib/execinfo.c	Mon Nov 12 20:10:58 2001
---- i386-unknown-bsdi3.1/lib/execinfo.c	Mon Nov 19 11:52:40 2001
+*** i686-unknown-linux/lib/execinfo.c	Tue Nov 20 15:30:58 2001
+--- i386-unknown-bsdi3.1/lib/execinfo.c	Tue Nov 20 16:04:30 2001
 ***************
 *** 258,380 ****
   extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
   extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); int Cyc_Execinfo_backtrace(
-  struct _tagged_arr, int); int Cyc_Execinfo_bt(); struct Cyc_Std___sFILE; extern
-! struct Cyc_Std___sFILE* Cyc_Std_stdout; extern int Cyc_Std_fclose( struct Cyc_Std___sFILE*);
-! extern int Cyc_Std_fflush( struct Cyc_Std___sFILE*); extern int Cyc_Std_getc(
-! struct Cyc_Std___sFILE* __stream); extern int Cyc_Std_putc( int __c, struct Cyc_Std___sFILE*
-! __stream); extern struct Cyc_Std___sFILE* Cyc_Std_fdopen( int __fd, struct
-! _tagged_arr __modes); extern unsigned char Cyc_Std_FileCloseError[ 19u]; extern
-! unsigned char Cyc_Std_FileOpenError[ 18u]; struct Cyc_Std_FileOpenError_struct{
-! unsigned char* tag; struct _tagged_arr f1; } ; static const int Cyc_Std_String_pa=
-! 0; struct Cyc_Std_String_pa_struct{ int tag; struct _tagged_arr f1; } ; static
-! const int Cyc_Std_Int_pa= 1; struct Cyc_Std_Int_pa_struct{ int tag; unsigned int
-! f1; } ; static const int Cyc_Std_Double_pa= 2; struct Cyc_Std_Double_pa_struct{
-! int tag; double f1; } ; static const int Cyc_Std_ShortPtr_pa= 3; struct Cyc_Std_ShortPtr_pa_struct{
-! int tag; short* f1; } ; static const int Cyc_Std_IntPtr_pa= 4; struct Cyc_Std_IntPtr_pa_struct{
-! int tag; unsigned int* f1; } ; extern int Cyc_Std_fprintf( struct Cyc_Std___sFILE*,
-! struct _tagged_arr fmt, struct _tagged_arr); extern int Cyc_Std_printf( struct
-! _tagged_arr fmt, struct _tagged_arr); extern struct _tagged_arr Cyc_Std_aprintf(
-! struct _tagged_arr fmt, struct _tagged_arr); static const int Cyc_Std_ShortPtr_sa=
-! 0; struct Cyc_Std_ShortPtr_sa_struct{ int tag; short* f1; } ; static const int
-! Cyc_Std_UShortPtr_sa= 1; struct Cyc_Std_UShortPtr_sa_struct{ int tag;
-! unsigned short* f1; } ; static const int Cyc_Std_IntPtr_sa= 2; struct Cyc_Std_IntPtr_sa_struct{
-! int tag; int* f1; } ; static const int Cyc_Std_UIntPtr_sa= 3; struct Cyc_Std_UIntPtr_sa_struct{
-! int tag; unsigned int* f1; } ; static const int Cyc_Std_StringPtr_sa= 4; struct
-! Cyc_Std_StringPtr_sa_struct{ int tag; struct _tagged_arr f1; } ; static const
-! int Cyc_Std_DoublePtr_sa= 5; struct Cyc_Std_DoublePtr_sa_struct{ int tag; double*
-! f1; } ; static const int Cyc_Std_FloatPtr_sa= 6; struct Cyc_Std_FloatPtr_sa_struct{
+  struct _tagged_arr, int); int Cyc_Execinfo_bt(); struct Cyc_Cstdio___sFILE;
+! struct Cyc_Std___sFILE; extern struct Cyc_Std___sFILE* Cyc_Std_stdout; extern
+! int Cyc_Std_fclose( struct Cyc_Std___sFILE*); extern int Cyc_Std_fflush( struct
+! Cyc_Std___sFILE*); extern int Cyc_Std_getc( struct Cyc_Std___sFILE* __stream);
+! extern int Cyc_Std_putc( int __c, struct Cyc_Std___sFILE* __stream); extern
+! struct Cyc_Std___sFILE* Cyc_Std_fdopen( int __fd, struct _tagged_arr __modes);
+! extern unsigned char Cyc_Std_FileCloseError[ 19u]; extern unsigned char Cyc_Std_FileOpenError[
+! 18u]; struct Cyc_Std_FileOpenError_struct{ unsigned char* tag; struct
+! _tagged_arr f1; } ; static const int Cyc_Std_String_pa= 0; struct Cyc_Std_String_pa_struct{
+! int tag; struct _tagged_arr f1; } ; static const int Cyc_Std_Int_pa= 1; struct
+! Cyc_Std_Int_pa_struct{ int tag; unsigned int f1; } ; static const int Cyc_Std_Double_pa=
+! 2; struct Cyc_Std_Double_pa_struct{ int tag; double f1; } ; static const int Cyc_Std_ShortPtr_pa=
+! 3; struct Cyc_Std_ShortPtr_pa_struct{ int tag; short* f1; } ; static const int
+! Cyc_Std_IntPtr_pa= 4; struct Cyc_Std_IntPtr_pa_struct{ int tag; unsigned int* f1;
+! } ; extern int Cyc_Std_fprintf( struct Cyc_Std___sFILE*, struct _tagged_arr fmt,
+! struct _tagged_arr); extern int Cyc_Std_printf( struct _tagged_arr fmt, struct
+! _tagged_arr); extern struct _tagged_arr Cyc_Std_aprintf( struct _tagged_arr fmt,
+! struct _tagged_arr); static const int Cyc_Std_ShortPtr_sa= 0; struct Cyc_Std_ShortPtr_sa_struct{
+! int tag; short* f1; } ; static const int Cyc_Std_UShortPtr_sa= 1; struct Cyc_Std_UShortPtr_sa_struct{
+! int tag; unsigned short* f1; } ; static const int Cyc_Std_IntPtr_sa= 2; struct
+! Cyc_Std_IntPtr_sa_struct{ int tag; int* f1; } ; static const int Cyc_Std_UIntPtr_sa=
+! 3; struct Cyc_Std_UIntPtr_sa_struct{ int tag; unsigned int* f1; } ; static const
+! int Cyc_Std_StringPtr_sa= 4; struct Cyc_Std_StringPtr_sa_struct{ int tag; struct
+! _tagged_arr f1; } ; static const int Cyc_Std_DoublePtr_sa= 5; struct Cyc_Std_DoublePtr_sa_struct{
+! int tag; double* f1; } ; static const int Cyc_Std_FloatPtr_sa= 6; struct Cyc_Std_FloatPtr_sa_struct{
   int tag; float* f1; } ; struct Cyc_Std_timeval{ int tv_sec; int tv_usec; } ;
   struct Cyc_Std_timezone{ int tz_minuteswest; int tz_dsttime; } ; extern int
   gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone* __z); struct
@@ -126,26 +126,27 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c i386-unknown-bsdi3.1
 ! Cyc_Std_putc( d, Cyc_Std_stdout);} Cyc_Std_putc(( int)'\n', Cyc_Std_stdout);}}
 ! Cyc_Std_fclose( r); Cyc_Std_fclose( w); kill( pid, 15); waitpid( pid, 0, 0);
 ! return 0;}}}
---- 258,299 ----
+--- 258,300 ----
   extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
   extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); int Cyc_Execinfo_backtrace(
-  struct _tagged_arr, int); int Cyc_Execinfo_bt(); struct Cyc_Std___sFILE; extern
-! unsigned char Cyc_Std_FileCloseError[ 19u]; extern unsigned char Cyc_Std_FileOpenError[
-! 18u]; struct Cyc_Std_FileOpenError_struct{ unsigned char* tag; struct
-! _tagged_arr f1; } ; static const int Cyc_Std_String_pa= 0; struct Cyc_Std_String_pa_struct{
-! int tag; struct _tagged_arr f1; } ; static const int Cyc_Std_Int_pa= 1; struct
-! Cyc_Std_Int_pa_struct{ int tag; unsigned int f1; } ; static const int Cyc_Std_Double_pa=
-! 2; struct Cyc_Std_Double_pa_struct{ int tag; double f1; } ; static const int Cyc_Std_ShortPtr_pa=
-! 3; struct Cyc_Std_ShortPtr_pa_struct{ int tag; short* f1; } ; static const int
-! Cyc_Std_IntPtr_pa= 4; struct Cyc_Std_IntPtr_pa_struct{ int tag; unsigned int* f1;
-! } ; static const int Cyc_Std_ShortPtr_sa= 0; struct Cyc_Std_ShortPtr_sa_struct{
-! int tag; short* f1; } ; static const int Cyc_Std_UShortPtr_sa= 1; struct Cyc_Std_UShortPtr_sa_struct{
-! int tag; unsigned short* f1; } ; static const int Cyc_Std_IntPtr_sa= 2; struct
-! Cyc_Std_IntPtr_sa_struct{ int tag; int* f1; } ; static const int Cyc_Std_UIntPtr_sa=
-! 3; struct Cyc_Std_UIntPtr_sa_struct{ int tag; unsigned int* f1; } ; static const
-! int Cyc_Std_StringPtr_sa= 4; struct Cyc_Std_StringPtr_sa_struct{ int tag; struct
-! _tagged_arr f1; } ; static const int Cyc_Std_DoublePtr_sa= 5; struct Cyc_Std_DoublePtr_sa_struct{
-! int tag; double* f1; } ; static const int Cyc_Std_FloatPtr_sa= 6; struct Cyc_Std_FloatPtr_sa_struct{
+  struct _tagged_arr, int); int Cyc_Execinfo_bt(); struct Cyc_Cstdio___sFILE;
+! struct Cyc_Std___sFILE; extern unsigned char Cyc_Std_FileCloseError[ 19u];
+! extern unsigned char Cyc_Std_FileOpenError[ 18u]; struct Cyc_Std_FileOpenError_struct{
+! unsigned char* tag; struct _tagged_arr f1; } ; static const int Cyc_Std_String_pa=
+! 0; struct Cyc_Std_String_pa_struct{ int tag; struct _tagged_arr f1; } ; static
+! const int Cyc_Std_Int_pa= 1; struct Cyc_Std_Int_pa_struct{ int tag; unsigned int
+! f1; } ; static const int Cyc_Std_Double_pa= 2; struct Cyc_Std_Double_pa_struct{
+! int tag; double f1; } ; static const int Cyc_Std_ShortPtr_pa= 3; struct Cyc_Std_ShortPtr_pa_struct{
+! int tag; short* f1; } ; static const int Cyc_Std_IntPtr_pa= 4; struct Cyc_Std_IntPtr_pa_struct{
+! int tag; unsigned int* f1; } ; static const int Cyc_Std_ShortPtr_sa= 0; struct
+! Cyc_Std_ShortPtr_sa_struct{ int tag; short* f1; } ; static const int Cyc_Std_UShortPtr_sa=
+! 1; struct Cyc_Std_UShortPtr_sa_struct{ int tag; unsigned short* f1; } ; static
+! const int Cyc_Std_IntPtr_sa= 2; struct Cyc_Std_IntPtr_sa_struct{ int tag; int*
+! f1; } ; static const int Cyc_Std_UIntPtr_sa= 3; struct Cyc_Std_UIntPtr_sa_struct{
+! int tag; unsigned int* f1; } ; static const int Cyc_Std_StringPtr_sa= 4; struct
+! Cyc_Std_StringPtr_sa_struct{ int tag; struct _tagged_arr f1; } ; static const
+! int Cyc_Std_DoublePtr_sa= 5; struct Cyc_Std_DoublePtr_sa_struct{ int tag; double*
+! f1; } ; static const int Cyc_Std_FloatPtr_sa= 6; struct Cyc_Std_FloatPtr_sa_struct{
   int tag; float* f1; } ; struct Cyc_Std_timeval{ int tv_sec; int tv_usec; } ;
   struct Cyc_Std_timezone{ int tz_minuteswest; int tz_dsttime; } ; extern int
   gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone* __z); struct
@@ -170,8 +171,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c i386-unknown-bsdi3.1
 ! sizeof( unsigned char), 42u); _temp1;}); _temp0;})); return 0;} int Cyc_Execinfo_bt(){
 ! return 1;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c i386-unknown-bsdi3.1/lib/getopt.c
-*** i686-unknown-linux/lib/getopt.c	Mon Nov 12 20:10:58 2001
---- i386-unknown-bsdi3.1/lib/getopt.c	Mon Nov 19 11:52:41 2001
+*** i686-unknown-linux/lib/getopt.c	Tue Nov 20 15:30:58 2001
+--- i386-unknown-bsdi3.1/lib/getopt.c	Tue Nov 20 16:04:30 2001
 ***************
 *** 290,302 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -198,8 +199,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c i386-unknown-bsdi3.1/l
   int Cyc_Std__getopt_internal( int __argc, struct _tagged_arr __argv, struct
   _tagged_arr __shortopts, struct _tagged_arr __longopts, int* __longind, int
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/in.c i386-unknown-bsdi3.1/lib/in.c
-*** i686-unknown-linux/lib/in.c	Mon Nov 12 20:10:58 2001
---- i386-unknown-bsdi3.1/lib/in.c	Mon Nov 19 11:52:41 2001
+*** i686-unknown-linux/lib/in.c	Mon Nov 19 16:33:46 2001
+--- i386-unknown-bsdi3.1/lib/in.c	Tue Nov 20 16:04:30 2001
 ***************
 *** 262,275 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -228,8 +229,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/in.c i386-unknown-bsdi3.1/lib/i
   2; struct Cyc_Std_SA_socklenptr_struct{ int tag; unsigned int* f1; } ; static
   const int Cyc_Std_SA_socklen= 3; struct Cyc_Std_SA_socklen_struct{ int tag;
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/inet.c i386-unknown-bsdi3.1/lib/inet.c
-*** i686-unknown-linux/lib/inet.c	Mon Nov 12 20:10:58 2001
---- i386-unknown-bsdi3.1/lib/inet.c	Mon Nov 19 11:52:41 2001
+*** i686-unknown-linux/lib/inet.c	Mon Nov 19 16:33:46 2001
+--- i386-unknown-bsdi3.1/lib/inet.c	Tue Nov 20 16:04:30 2001
 ***************
 *** 262,275 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -258,8 +259,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/inet.c i386-unknown-bsdi3.1/lib
   2; struct Cyc_Std_SA_socklenptr_struct{ int tag; unsigned int* f1; } ; static
   const int Cyc_Std_SA_socklen= 3; struct Cyc_Std_SA_socklen_struct{ int tag;
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/netdb.c i386-unknown-bsdi3.1/lib/netdb.c
-*** i686-unknown-linux/lib/netdb.c	Mon Nov 12 20:10:58 2001
---- i386-unknown-bsdi3.1/lib/netdb.c	Mon Nov 19 11:52:41 2001
+*** i686-unknown-linux/lib/netdb.c	Mon Nov 19 16:33:46 2001
+--- i386-unknown-bsdi3.1/lib/netdb.c	Tue Nov 20 16:04:30 2001
 ***************
 *** 262,275 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -288,8 +289,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/netdb.c i386-unknown-bsdi3.1/li
   2; struct Cyc_Std_SA_socklenptr_struct{ int tag; unsigned int* f1; } ; static
   const int Cyc_Std_SA_socklen= 3; struct Cyc_Std_SA_socklen_struct{ int tag;
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/socket.c i386-unknown-bsdi3.1/lib/socket.c
-*** i686-unknown-linux/lib/socket.c	Mon Nov 12 20:11:00 2001
---- i386-unknown-bsdi3.1/lib/socket.c	Mon Nov 19 11:52:41 2001
+*** i686-unknown-linux/lib/socket.c	Mon Nov 19 16:33:46 2001
+--- i386-unknown-bsdi3.1/lib/socket.c	Tue Nov 20 16:04:30 2001
 ***************
 *** 262,275 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -318,8 +319,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/socket.c i386-unknown-bsdi3.1/l
   2; struct Cyc_Std_SA_socklenptr_struct{ int tag; unsigned int* f1; } ; static
   const int Cyc_Std_SA_socklen= 3; struct Cyc_Std_SA_socklen_struct{ int tag;
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/stat.c i386-unknown-bsdi3.1/lib/stat.c
-*** i686-unknown-linux/lib/stat.c	Mon Nov 12 20:11:00 2001
---- i386-unknown-bsdi3.1/lib/stat.c	Mon Nov 19 11:52:41 2001
+*** i686-unknown-linux/lib/stat.c	Mon Nov 19 16:33:46 2001
+--- i386-unknown-bsdi3.1/lib/stat.c	Tue Nov 20 16:04:30 2001
 ***************
 *** 261,272 ****
   tm_wday; int tm_yday; int tm_isdst; } ; extern void tzset(); extern int time(
@@ -346,8 +347,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/stat.c i386-unknown-bsdi3.1/lib
   fd, struct Cyc_Std_stat_t* buf); extern int Cyc_Std_lstat( struct _tagged_arr
   filename, struct Cyc_Std_stat_t* buf); extern unsigned int umask( unsigned int
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/time.c i386-unknown-bsdi3.1/lib/time.c
-*** i686-unknown-linux/lib/time.c	Mon Nov 12 20:11:00 2001
---- i386-unknown-bsdi3.1/lib/time.c	Mon Nov 19 11:52:41 2001
+*** i686-unknown-linux/lib/time.c	Mon Nov 19 16:33:46 2001
+--- i386-unknown-bsdi3.1/lib/time.c	Tue Nov 20 16:04:30 2001
 ***************
 *** 272,291 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -388,8 +389,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/time.c i386-unknown-bsdi3.1/lib
   const int* timep){ return wrap_Cstring_as_string( ctime( timep), - 1);}
   unsigned int Cyc_Std_strftime( struct _tagged_arr s, unsigned int maxsize,
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/unistd.c i386-unknown-bsdi3.1/lib/unistd.c
-*** i686-unknown-linux/lib/unistd.c	Mon Nov 12 20:11:00 2001
---- i386-unknown-bsdi3.1/lib/unistd.c	Mon Nov 19 11:52:41 2001
+*** i686-unknown-linux/lib/unistd.c	Mon Nov 19 16:33:46 2001
+--- i386-unknown-bsdi3.1/lib/unistd.c	Tue Nov 20 16:04:30 2001
 ***************
 *** 262,305 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -477,10 +478,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/unistd.c i386-unknown-bsdi3.1/l
   extern int symlink( unsigned char* path1, unsigned char* path2); extern int
   truncate( unsigned char*, int); extern int write( int fd, unsigned char* buf,
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c i386-unknown-bsdi3.1/src/buildlib.c
-*** i686-unknown-linux/src/buildlib.c	Mon Nov 12 20:10:58 2001
---- i386-unknown-bsdi3.1/src/buildlib.c	Mon Nov 19 11:52:41 2001
+*** i686-unknown-linux/src/buildlib.c	Tue Nov 20 15:30:58 2001
+--- i386-unknown-bsdi3.1/src/buildlib.c	Tue Nov 20 16:04:30 2001
 ***************
-*** 347,375 ****
+*** 348,376 ****
   tm_isdst; } ; extern void tzset(); extern int time( int* t); extern struct Cyc_Std_tm*
   gmtime( const int* timep); extern struct Cyc_Std_tm* localtime( const int* timep);
   extern int timezone; extern int daylight; struct Cyc_Std_stat_t{
@@ -510,7 +511,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c i386-unknown-bsdi3.1
   has_arg; int* flag; int val; } ; extern unsigned int alarm( unsigned int seconds);
   extern int close( int); extern void _exit( int); extern int getpid(); extern int
   getppid(); extern int fork(); extern int fchdir( int); extern int fchown( int,
---- 347,369 ----
+--- 348,370 ----
   tm_isdst; } ; extern void tzset(); extern int time( int* t); extern struct Cyc_Std_tm*
   gmtime( const int* timep); extern struct Cyc_Std_tm* localtime( const int* timep);
   extern int timezone; extern int daylight; struct Cyc_Std_stat_t{

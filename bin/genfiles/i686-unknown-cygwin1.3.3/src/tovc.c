@@ -270,8 +270,8 @@ k); extern struct Cyc_Dict_Dict* Cyc_Dict_insert( struct Cyc_Dict_Dict* d, void*
 k, void* v); extern void* Cyc_Dict_lookup( struct Cyc_Dict_Dict* d, void* k);
 extern struct Cyc_Dict_Dict* Cyc_Dict_rdelete_same( struct Cyc_Dict_Dict*, void*);
 extern int Cyc_Std_zstrptrcmp( struct _tagged_arr*, struct _tagged_arr*); struct
-Cyc_Std___sFILE; extern unsigned char Cyc_Std_FileCloseError[ 19u]; extern
-unsigned char Cyc_Std_FileOpenError[ 18u]; struct Cyc_Std_FileOpenError_struct{
+Cyc_Cstdio___sFILE; struct Cyc_Std___sFILE; extern unsigned char Cyc_Std_FileCloseError[
+19u]; extern unsigned char Cyc_Std_FileOpenError[ 18u]; struct Cyc_Std_FileOpenError_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; static const int Cyc_Std_String_pa=
 0; struct Cyc_Std_String_pa_struct{ int tag; struct _tagged_arr f1; } ; static
 const int Cyc_Std_Int_pa= 1; struct Cyc_Std_Int_pa_struct{ int tag; unsigned int

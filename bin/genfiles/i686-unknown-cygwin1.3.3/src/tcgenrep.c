@@ -651,8 +651,8 @@ Cyc_Position_Segment*); extern struct Cyc_Absyn_Exp* Cyc_Absyn_unresolvedmem_exp
 struct Cyc_Core_Opt*, struct Cyc_List_List*, struct Cyc_Position_Segment*);
 extern struct Cyc_Absyn_Decl* Cyc_Absyn_new_decl( void* r, struct Cyc_Position_Segment*
 loc); extern struct Cyc_Absyn_Vardecl* Cyc_Absyn_new_vardecl( struct _tuple3* x,
-void* t, struct Cyc_Absyn_Exp* init); struct Cyc_Std___sFILE; extern
-unsigned char Cyc_Std_FileCloseError[ 19u]; extern unsigned char Cyc_Std_FileOpenError[
+void* t, struct Cyc_Absyn_Exp* init); struct Cyc_Cstdio___sFILE; struct Cyc_Std___sFILE;
+extern unsigned char Cyc_Std_FileCloseError[ 19u]; extern unsigned char Cyc_Std_FileOpenError[
 18u]; struct Cyc_Std_FileOpenError_struct{ unsigned char* tag; struct
 _tagged_arr f1; } ; static const int Cyc_Std_String_pa= 0; struct Cyc_Std_String_pa_struct{
 int tag; struct _tagged_arr f1; } ; static const int Cyc_Std_Int_pa= 1; struct

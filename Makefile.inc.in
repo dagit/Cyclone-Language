@@ -67,6 +67,7 @@ CYCLONE_LIBS:=arg\
         string\
         socket\
         time\
+	tmp\
         typerep\
 	unistd\
 	utime\

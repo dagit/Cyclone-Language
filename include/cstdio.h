@@ -26,6 +26,12 @@
 #ifndef _STDIO_H_
 #define _STDIO_H_
 #include <core.h>
+
+namespace Cstdio {
+extern "C" {
+extern struct __sFILE;
+}}
+
 namespace Std {
 using Core;
 
@@ -33,6 +39,8 @@ using Core;
    implementation in runtime_cyc.c */
 extern struct __sFILE;  
 typedef struct __sFILE FILE;
+
+extern FILE *`H fromCfile(struct Cstdio::__sFILE *`H cf);
 
 /* Standard streams.  */
 extern FILE @stdout;
