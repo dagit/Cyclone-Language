@@ -197,8 +197,15 @@ endif
 # Always use the original compiler to avoid circularities
 # Note: In most cases, it would be correct to share .d files
 # Note: depends on cstubs.c so header files get built first
-%.d: %.cyc cstubs.c
-	$(CYCDIR)/bin/$(CYCCOMP) -M -MG $(CYCFLAGS) -B$(CYCDIR)/bin/lib/cyc-lib $< > $@
+# Note: the hairy stuff with sed is so that the dependency target
+#       is the .c file rather than the default .o file produced by -M.
+#       I'd prefer to use -MT but am having trouble.
+# Note: depends on parse_tab.cyc because it really depends on parse_tab.h
+#       Without it some dependency generation fails; possibly a -MG bug in gcc
+%.d: %.cyc cstubs.c parse_tab.cyc
+	$(CYCDIR)/bin/$(CYCCOMP) -M -MG $(CYCFLAGS) -B$(CYCDIR)/bin/lib/cyc-lib $< > $@d
+	sed -e 's/\.o:/\.c:/' $@d > $@
+	$(RM) $@d
 
 ifndef NODEPS
 -include $(addsuffix .d, $(CYCLONE_BOOT_LIBS) $(CYCLONE_LIBS) $(CYCLONE_SRCS) cycdoc buildlib)
