@@ -29,8 +29,7 @@ datatype exn.Present Present_val = Present;
 
 static enum Color { R, B };
 
-// JGM: we need to put the kinds in explicitly here to avoid a warning
-abstract struct T<`a::B,`b::B,`r::R> {
+abstract struct T<`a,`b,`r> {
   enum Color color;
   struct T<`a,`b,`r> const *`r const left;
   struct T<`a,`b,`r> const *`r const right;
@@ -58,11 +57,11 @@ dict_t<`a,`b,`r> rshare(region_t<`r> r, dict_t<`a,`b,`r2> d : {`r2} > `r) {
   return Dict{d.rel, r, t2};
 }
 
-bool is_empty(dict_t<`a,`b,`r> d) {
+bool is_empty(dict_t d) {
   return d.t == NULL;
 }
 
-bool member(dict_t<`a,`b,`r> d, `a key) {
+bool member(dict_t<`a> d, `a key) {
   let rel = d.rel;
   let t   = d.t;
   while(t != NULL) {
@@ -74,8 +73,7 @@ bool member(dict_t<`a,`b,`r> d, `a key) {
   return false;
 }
 
-
-`b lookup(dict_t<`a,`b,`r> d, `a key) {
+`b lookup(dict_t<`a,`b> d, `a key) {
   let rel = d.rel;
   let t   = d.t;
   while(t != NULL) {
@@ -87,7 +85,7 @@ bool member(dict_t<`a,`b,`r> d, `a key) {
   throw &Absent_val;
 }
 
-`b lookup_other(dict_t<`a,`b,`r> d, int cmp(`c,`a), `c key) {
+`b lookup_other(dict_t<`a,`b> d, int cmp(`c,`a), `c key) {
   let t = d.t;
   while (t != NULL) {
     let i = cmp(key,t->key_val[0]);
@@ -110,7 +108,7 @@ bool member(dict_t<`a,`b,`r> d, `a key) {
   return NULL;
 }
 
-bool lookup_bool(dict_t<`a,`b,`r2> d, `a key, `b @`r ans_place) {
+bool lookup_bool(dict_t<`a,`b> d, `a key, `b @ ans_place) {
   let rel = d.rel;
   let t   = d.t;
   while(t != NULL) {
@@ -157,8 +155,7 @@ ins(region_t<`r> r, int rel(`a,`a), $(`a,`b) key_val, tree<`a,`b,`r> t) {
 dict_t<`a,`b,`r> insert(dict_t<`a,`b,`r> d,`a key,`b data) {
   let ans = ins(d.r, d.rel, $(key,data), d.t);
   ans->color = B;
-  let res = Dict(d.rel, d.r, ans);
-  return res;
+  return Dict(d.rel, d.r, ans);
 }
 
 // notice we descend twice -- we can live
@@ -386,7 +383,7 @@ static bool forall_tree_c(bool f(`c,`a,`b),`c env,struct T<`a,`b,`r> const @`r t
     && (right == NULL || forall_tree_c(f,env,right));
 }
 
-bool forall_c(bool f(`c,`a,`b), `c env, dict_t<`a,`b,`r> d) {
+bool forall_c(bool f(`c,`a,`b), `c env, dict_t<`a,`b> d) {
   let t = d.t;
   if(t == NULL)
     return true;
@@ -475,16 +472,15 @@ static List::list_t<$(`a,`b)@`r,`r>
   return rnew(r) List::List(rnew(r) $(k,v),accum);
 }
 
-List::list_t<$(`a,`b)@`r,`r> rto_list(region_t<`r> r,dict_t<`a,`b,`r2> d){
+List::list_t<$(`a,`b)@`r,`r> rto_list(region_t<`r> r,dict_t<`a,`b> d){
   return fold_c(to_list_f, r, d, NULL);
 }
-List::list_t<$(`a,`b)@> to_list(dict_t<`a,`b,`r2> d){
+List::list_t<$(`a,`b)@> to_list(dict_t<`a,`b> d){
   return rto_list(Core::heap_region,d);
 }
 
-static dict_t<`a,`b,`r>@`r4 
-filter_f($(bool (@`r5)(`a,`b), region_t<`r>)@`r3 env,
-         `a x, `b y, dict_t<`a,`b,`r>@`r4 acc) {
+static dict_t<`a,`b,`r>@`r2 filter_f($(bool (@)(`a,`b), region_t<`r>)@ env,
+				     `a x, `b y, dict_t<`a,`b,`r>@`r2 acc) {
   let &$(f,r) = env;
   if (f(x,y)) {
     *acc = insert(*acc,x,y);
@@ -492,8 +488,7 @@ filter_f($(bool (@`r5)(`a,`b), region_t<`r>)@`r3 env,
   return acc;
 }
 
-dict_t<`a,`b,`r2> rfilter(region_t<`r2> r2, bool f(`a, `b), 
-                          dict_t<`a,`b,`r1> d) {
+dict_t<`a,`b,`r2> rfilter(region_t<`r2> r2, bool f(`a, `b), dict_t<`a,`b> d) {
   let env = $(f, r2);
   let res = rempty(r2,d.rel);
   return *(fold_c(filter_f, &env, d, &res));
@@ -504,15 +499,14 @@ dict_t<`a,`b,`r2> rfilter(region_t<`r2> r2, bool f(`a, `b),
   return fold_c(ff,&env,d,rempty(r2,d.rel));
   */
 }
-dict_t<`a,`b> filter(bool f(`a, `b), dict_t<`a,`b,`r1> d) {
+dict_t<`a,`b> filter(bool f(`a, `b), dict_t<`a,`b> d) {
   return rfilter(Core::heap_region, f, d);
 }
 
 
-static dict_t<`a,`b,`r2>@`r4
-filter_c_f($(bool (@) (`c, `a, `b), `c,
-             region_t<`r2>) @ env,
-           `a x, `b y, dict_t<`a,`b,`r2>@`r4 acc){
+static dict_t<`a,`b,`r2>@`r filter_c_f($(bool (@) (`c, `a, `b), `c,
+					 region_t<`r2>) @ env,
+				       `a x, `b y, dict_t<`a,`b,`r2>@`r acc){
   let &$(f, f_env, r2) = env;
   if (f(f_env, x, y)) 
     *acc = insert(*acc, x, y);
@@ -520,36 +514,35 @@ filter_c_f($(bool (@) (`c, `a, `b), `c,
 }
 
 dict_t<`a,`b,`r2> rfilter_c(region_t<`r2> r2, bool f (`c, `a, `b), 
-			    `c f_env, dict_t<`a,`b,`r1> d) {
+			    `c f_env, dict_t<`a,`b> d) {
   let env = $(f, f_env,r2);
   let res = rempty(r2,d.rel);
   return *fold_c(filter_c_f, &env, d, &res);
 }
 dict_t<`a,`b> filter_c(bool f (`c, `a, `b), 
-                           `c f_env, dict_t<`a,`b,`r1> d) {
+                           `c f_env, dict_t<`a,`b> d) {
   return rfilter_c(Core::heap_region, f, f_env, d);
 }
 
 
-static bool difference_f(dict_t<`a,`b,`r> @ d, `a x, `b y) {
+static bool difference_f(dict_t<`a,`b> @ d, `a x, `b y) {
   return !member(*d, x);
 }
 
-dict_t<`a,`b,`r2> rdifference(region_t<`r2> r2, dict_t<`a,`b,`r1> d1, 
-                                  dict_t<`a,`b,`r3> d2) {
+dict_t<`a,`b,`r> rdifference(region_t<`r> r2, dict_t<`a,`b> d1, 
+			     dict_t<`a,`b> d2) {
   return rfilter_c(r2, difference_f, &d2, d1);
 }
-dict_t<`a,`b> difference(dict_t<`a,`b,`r1> d1, 
-                             dict_t<`a,`b,`r3> d2) {
+dict_t<`a,`b> difference(dict_t<`a,`b> d1, dict_t<`a,`b> d2) {
   return rdifference(Core::heap_region, d1, d2);
 }
 
-static bool delete_f($(int (@`H)(`a,`a), `a) @ `r env, `a x, `b y) {
+static bool delete_f($(int (@`H)(`a,`a), `a)@ env, `a x, `b y) {
   let &$(rel, x0) = env;
   return (rel(x0, x) != 0);
 }
 
-dict_t<`a,`b,`r2> rdelete(region_t<`r2> r2,dict_t<`a,`b,`r1> d, `a x) {
+dict_t<`a,`b,`r> rdelete(region_t<`r> r2,dict_t<`a,`b> d, `a x) {
   if (!member(d,x)) return rcopy(r2,d);
   let env = $(d.rel, x);
   return rfilter_c(r2, delete_f, &env, d);
@@ -561,7 +554,7 @@ dict_t<`a,`b,`r> rdelete_same(dict_t<`a,`b,`r> d, `a x) {
   return rfilter_c(d.r, delete_f, &env, d);
 }
 
-dict_t<`a,`b> delete(dict_t<`a,`b,`r1> d, `a x) {
+dict_t<`a,`b> delete(dict_t<`a,`b> d, `a x) {
   return rdelete(Core::heap_region, d, x);
 }
 
@@ -604,14 +597,14 @@ Iter::iter_t<$(`a,`b),`bd> make_iter(region_t<`r1> rgn,
 // yet polymorphic.  Furthermore, this will only work if the nested
 // marshallers are monomorphic.
 
-`c marshal(region_t<`r> rgn,
+`c marshal(region_t rgn,
 	   `c env,
 	   `c (write_key<`a,`c,`r1::R>)(`c, FILE @`r1, `a),
 	   `c (write_val<`b,`c,`r1::R>)(`c, FILE @`r1, `b),
 	   FILE @ fp,
 	   dict_t<`a,`b> dict)
 {
-  List::list_t<$(`a,`b)@`r,`r> dict_list = rto_list(rgn, dict);
+  List::list_t<$(`a,`b)@> dict_list = rto_list(rgn, dict);
   int len = List::length(dict_list);
   // JGMFIX
   // if(fwrite( (char?)(int?)&len, sizeof(int), 1, fp) < 1) {
@@ -634,9 +627,8 @@ dict_t<`a,`b> unmarshal(region_t<`r> rgn,
 {
   dict_t<`a,`b,`H> dict = empty(cmp);
   int len = getw(fp);
-  if (len == -1) {
+  if (len == -1)
     throw new Core::Failure("Dict::unmarshal: list length is -1");
-  }
   for (int i = 0; i<len; i++) {
     `a key = read_key(env,fp);
     `b val = read_val(env,fp);

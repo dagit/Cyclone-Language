@@ -359,7 +359,6 @@ list_t<`a> append(list_t<`a> x,list_t<`a,`H> y) {
   return rappend(heap_region,x,y);
 }
 
-
 // Modify x so that y is appended to it -- if x is empty, return y else
 // return the modified list x.
 list_t<`a,`r> imp_append(list_t<`a::TB,`r> x,list_t<`a,`r> y) {
@@ -710,9 +709,6 @@ bool mem(int cmp(`a,`a), list_t<`a> l, `a x) {
   return false;
 }
 
-// now defined in Core
-// exn Not_found;
-
 // Given an association list [(k1,d1),...,(kn,dn)] and a key x,
 // return the first di such that ki = x.  Uses physical equality.
 // Throws Not_found if no such ki exists.
@@ -800,14 +796,8 @@ Core::opt_t<`a> check_unique(int cmp(`a,`a),list_t<`a> x) {
 
 // makes a new array with index i being the ith element of the list
 `a ?`r2 rto_array(region_t<`r2> r2, list_t<`a> x) {
-  int s;
-  `a ?`r2 arr;
-
-  s = length(x);
-  arr = rnew(r2) {for i < s : ({let v = x->hd; x=x->tl; v;})};
-  //for (int i = 0; i < s; ++i, x = x->tl)
-  //  arr[i] = x->hd;
-  return arr;
+  int s = length(x);
+  return rnew(r2) {for i < s : ({let v = x->hd; x=x->tl; v;})};
 }
 
 `a ?`H to_array(list_t<`a> x) {
@@ -840,9 +830,8 @@ list_t<`a> tabulate(int n, `a f(int)) {
 
 list_t<`a,`r> rtabulate_c(region_t<`r> r, int n, `a f(`b,int), `b env) {
   list_t res = NULL;
-  for (int i = 0; i < n; ++i) {
+  for (int i = 0; i < n; ++i)
     res = rnew(r) List(f(env,i),res);
-  }
   return imp_rev(res);
 }
 
@@ -869,8 +858,7 @@ int list_cmp(int cmp(`a,`b), list_t<`a> l1, list_t<`b> l2) {
 // idem
 bool list_prefix(int cmp(`a,`b), list_t<`a> l1, list_t<`b> l2) {
   for (; l1 != NULL && l2 != NULL; l1 = l1->tl, l2 = l2->tl) {
-    /* The casts are needed here else the lists are forced into the
-       same region. */
+    // The casts are needed here else the lists are forced into the same region.
     if ((unsigned int)l1 == (unsigned int)l2)
       return true;
     let i = cmp(l1->hd,l2->hd);

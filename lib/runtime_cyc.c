@@ -58,7 +58,7 @@ static struct _fat_ptr Cstring_to_string(Cstring s) {
 }
 
 // argc is redundant
-struct _tagged_argv { 
+struct _fat_argv { 
   struct _fat_ptr *base;
   struct _fat_ptr *curr;
   struct _fat_ptr *last_plus_one;
@@ -72,7 +72,7 @@ struct Cyc___cycFILE { // must match defn in boot_cstubs.c and boot_cycstubs.cyc
   *Cyc_stdout = &Cyc_stdout_v,
   *Cyc_stderr = &Cyc_stderr_v;
 
-extern int Cyc_main(int argc, struct _fat_ptr argv);
+extern int Cyc_main(int argc, struct _fat_argv argv);
 extern char *_set_top_handler(); // defined in runtime_exception.c
 
 /* #ifdef _HAVE_PTHREAD_ */
@@ -105,24 +105,15 @@ int main(int argc, char **argv) {
   Cyc_stderr->file = stderr;
   // convert command-line args to Cyclone strings -- we add an extra
   // NULL to the end of the argv so that people can step through argv
-  // until they hit NULL.  
-  {struct _tagged_argv args;
-  struct _fat_ptr args_p;
+  // until they hit NULL. (Calling calloc with argc+1 takes care of this.)
+  {struct _fat_argv args;
   int i, result;
-  args.curr = 
-    (struct _fat_ptr *)GC_malloc((argc+1)*sizeof(struct _fat_ptr));
+  args.curr = (struct _fat_ptr *)GC_calloc(argc+1,sizeof(struct _fat_ptr));
   args.base = args.curr;
   args.last_plus_one = args.curr + argc + 1;
   for(i = 0; i < argc; ++i)
     args.curr[i] = Cstring_to_string(argv[i]);
-  // plug in final NULL
-  args.curr[argc].base = 0;
-  args.curr[argc].curr = 0;
-  args.curr[argc].last_plus_one = 0;
-  args_p.curr = (unsigned char *)args.curr;
-  args_p.base = args_p.curr;
-  args_p.last_plus_one = (unsigned char *)args.last_plus_one;
-  result = Cyc_main(argc, args_p);
+  result = Cyc_main(argc, args);
   _fini_regions();
   return result;
   }

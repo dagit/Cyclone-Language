@@ -929,10 +929,8 @@ void CYCALLOCPROFILE_GC_add_to_heap(void *p,unsigned long bytes) {
 }
 void CYCALLOCPROFILE_mark(const char *s) {
 #ifdef CYC_REGION_PROFILE
-  if (alloc_log != NULL) {
-    fprintf(alloc_log,"%u @\t@\tmark\t%s\n",
-            clock(),s);
-  }
+  if (alloc_log != NULL)
+    fprintf(alloc_log,"%u @\t@\tmark\t%s\n", clock(), s);
 #endif
 }
 

@@ -113,20 +113,20 @@ void Cyc_Core_set_uncaught_exn_fun(int f()) {
   uncaught_fun = f;
 }
 
-#define SET_HANDLER(_handler)							\
-  int status = 0;								\
-  if (setjmp(_handler->handler)) status = 1;					\
-  if (status) {									\
-    char *exn_name;								\
-    struct _xtunion_struct *exn_thrown = Cyc_Core_get_exn_thrown();             \
-    const char *exn_filename = Cyc_Core_get_exn_filename();                     \
-    int exn_lineno = Cyc_Core_get_exn_lineno();                                 \
-    exn_name = exn_thrown->tag;						        \
-    errprintf("Uncaught exception %s thrown from around %s:%d\n",exn_name,	\
-	      exn_filename,exn_lineno);					        \
-    return exn_name;								\
-  }										\
-  _push_handler(_handler);							\
+#define SET_HANDLER(_handler)						\
+  int status = 0;							\
+  if (setjmp(_handler->handler)) status = 1;				\
+  if (status) {								\
+    char *exn_name;							\
+    struct _xtunion_struct *exn_thrown = Cyc_Core_get_exn_thrown();     \
+    const char *exn_filename = Cyc_Core_get_exn_filename();             \
+    int exn_lineno = Cyc_Core_get_exn_lineno();                         \
+    exn_name = exn_thrown->tag;						\
+    errprintf("Uncaught exception %s thrown from around %s:%d\n",exn_name,\
+	      exn_filename,exn_lineno);					  \
+    return exn_name;							  \
+  }									  \
+  _push_handler(_handler);						  \
   return NULL;
 
 

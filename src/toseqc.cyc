@@ -36,27 +36,27 @@ enum SideEffect { Const, NoEffect, ExnEffect, AnyEffect };
 // NoEffect refers to pure expressions, ExnEffect refers to functions that
 // could throw exceptions but are otherwise pure; AnyEffect is everything else.
 
-static string_t eff_to_string(enum SideEffect e) {
-  switch (e) {
-  case Const: return "Const";
-  case NoEffect: return "NoEffect";
-  case ExnEffect: return "ExnEffect";
-  default: return "AnyEffect";
-  }
-}
+// static string_t eff_to_string(enum SideEffect e) {
+//   switch (e) {
+//   case Const: return "Const";
+//   case NoEffect: return "NoEffect";
+//   case ExnEffect: return "ExnEffect";
+//   default: return "AnyEffect";
+//   }
+// }
 
-static enum SideEffect join_side_effect(enum SideEffect e1, enum SideEffect e2) {
+static enum SideEffect join_side_effect(enum SideEffect e1, enum SideEffect e2){
   switch ($(e1,e2)) {
-  case $(AnyEffect,_): return AnyEffect;
+  case $(AnyEffect,_): 
   case $(_,AnyEffect): return AnyEffect;
     // Two ExnEffects mean that order matters, so we promote to AnyEffect
   case $(ExnEffect,ExnEffect): return AnyEffect;
-  case $(ExnEffect,_): return ExnEffect;
+  case $(ExnEffect,_): 
   case $(_,ExnEffect): return ExnEffect;
-  case $(NoEffect,_): return NoEffect;
+  case $(NoEffect,_): 
   case $(_,NoEffect): return NoEffect;
   case $(Const,Const): return Const;
-  default: Tcutil::impos("join_side_effect");
+  default: Warn::impos("join_side_effect");
   }
 }
 
@@ -81,12 +81,12 @@ static string_t exn_effect_funs[] = {
   "_region_malloc"
 };
 static enum SideEffect fun_effect(string_t fn) {
-  for (int i = 0; i<numelts(pure_funs); i++) {
-    if (!strcmp(pure_funs[i],fn)) return NoEffect;
-  }
-  for (int i = 0; i<numelts(exn_effect_funs); i++) {
-    if (!strcmp(exn_effect_funs[i],fn)) return ExnEffect;
-  }
+  for (int i = 0; i<numelts(pure_funs); i++)
+    if (!strcmp(pure_funs[i],fn)) 
+      return NoEffect;
+  for (int i = 0; i<numelts(exn_effect_funs); i++)
+    if (!strcmp(exn_effect_funs[i],fn)) 
+      return ExnEffect;
   return AnyEffect;
 }
 
@@ -161,8 +161,7 @@ static enum SideEffect exp_effect(exp_t e) {
   case &Increment_e(e1,_):
     return exp_effect(e1);
 
-  case &StmtExp_e(s):
-    return stmt_effect(s);
+  case &StmtExp_e(s): return stmt_effect(s);
 
   case &Pragma_e(...): bad_form = "Pragma_e"; break;
   case &Throw_e(...): bad_form = "Throw_e"; break;
@@ -184,16 +183,13 @@ static enum SideEffect exp_effect(exp_t e) {
 	      bad_form, Absynpp::exp2string(e));
 }
 static enum SideEffect stmt_effect(stmt_t s) {
-  // This is just the recursive descent; we are not under a StmtExp.
   enum SideEffect res = Const;
   while(true) {
     switch (s->r) {
-    case &Skip_s: return res;
+    case &Skip_s:   return res;
     case &Exp_s(e): return join_side_effect(res,exp_effect(e));
 
-    case &Label_s(_,s2):
-      s = s2;
-      continue;
+    case &Label_s(_,s2): s = s2; continue;
     case &Seq_s(s1,s2):
       res = join_side_effect(res,stmt_effect(s1));
       s = s2;
@@ -302,17 +298,13 @@ static stmt_opt_t exps_to_seqc(exp_t e, list_t<exp_t> es) {
 static void exp_to_seqc(exp_t e) {
   string_t bad_form = "";
   switch (e->r) {
-  case &Const_e(_): return;
+  case &Const_e(_):
   case &Var_e(_): return;
 
-  case &FnCall_e(e1,es,...):  fallthru(new List(e1,es));
-  case &Primop_e(_, es):
-    exps_to_seqc(e,es);
-    return;
+  case &FnCall_e(e1,es,...): fallthru(new List(e1,es));
+  case &Primop_e(_,es):      exps_to_seqc(e,es); return;
+  case &Subscript_e(e1,e2):  exps_to_seqc(e,list(e1,e2)); return;
 
-  case &Subscript_e(e1,e2):   
-    exps_to_seqc(e,list(e1,e2));
-    return;
   case &AssignOp_e(e1, p, e2):
     if(p==NULL)
       switch (e1->r) {
@@ -323,12 +315,10 @@ static void exp_to_seqc(exp_t e) {
     exps_to_seqc(e,list(e2,e1));
     return;
 
-  case &Conditional_e(e1,e2,e3):
-    exp_to_seqc(e3);          fallthru(e1,e2);
-  case &And_e(e1,e2):         fallthru(e1,e2);
-  case &Or_e(e1,e2):          fallthru(e1,e2);
-  case &SeqExp_e(e1,e2):
-    exp_to_seqc(e2);          fallthru(e1);
+  case &Conditional_e(e1,e2,e3): exp_to_seqc(e3); fallthru(e1,e2);
+  case &And_e(e1,e2):    fallthru(e1,e2);
+  case &Or_e(e1,e2):     fallthru(e1,e2);
+  case &SeqExp_e(e1,e2): exp_to_seqc(e2); fallthru(e1);
 
   case &Extension_e(e1):      fallthru(e1);
   case &NoInstantiate_e(e1):  fallthru(e1);
@@ -339,9 +329,7 @@ static void exp_to_seqc(exp_t e) {
   case &Deref_e(e1):          fallthru(e1);
   case &AggrMember_e(e1,...): fallthru(e1); 
   case &AggrArrow_e(e1,...):  fallthru(e1);
-  case &Increment_e(e1,_):
-    exp_to_seqc(e1);
-    return;
+  case &Increment_e(e1,_):    exp_to_seqc(e1); return;
 
   case &Sizeoftype_e(_):  
   case &Offsetof_e(_,_): 
@@ -353,9 +341,7 @@ static void exp_to_seqc(exp_t e) {
     exps_to_seqc(e,es);
     return;
 
-  case &StmtExp_e(s):
-    stmt_to_seqc(s);
-    return;
+  case &StmtExp_e(s): stmt_to_seqc(s); return;
 
   case &Asm_e(...): return;
 
@@ -369,7 +355,6 @@ static void exp_to_seqc(exp_t e) {
   case &ComprehensionNoinit_e(...): bad_form = "ComprehensionNoinit_e"; break;
   case &Aggregate_e(...): bad_form = "Aggregate_e"; break;
   case &AnonStruct_e(...): bad_form = "AnonStruct_e"; break;
-//   case &AnonEnum_e(...): bad_form = "AnonEnum_e"; break;
   case &Datatype_e(...): bad_form = "Datatype_e"; break;
   case &Malloc_e(...): bad_form = "Malloc_e"; break;
   case &Swap_e(...): bad_form = "Swap_e"; break;
@@ -388,13 +373,11 @@ static void stmt_to_seqc(stmt_t s) {
     case &Break_s:    
     case &Continue_s: 
     case &Goto_s(_):   return;
-    case &Label_s(_,s2):
-      s = s2;
-      continue;
+    case &Label_s(_,s2): s = s2; continue;
     case &Return_s(eopt):
       if (eopt == NULL)
 	return;
-      fallthru((exp_t)eopt);
+      fallthru(eopt);
     case &Exp_s(e):
       exp_to_seqc(e);
       // Compress out extra indirection if we create a statement expression
@@ -405,15 +388,14 @@ static void stmt_to_seqc(stmt_t s) {
 //       default: break;
 //       }
       return;
+    case &IfThenElse_s(e,s1,s2):
+      exp_to_seqc(e);
+      fallthru(s1,s2);
     case &Seq_s(s1,s2):
       stmt_to_seqc(s1);
       s = s2;
       continue;
-    case &IfThenElse_s(e,s1,s2):
-      exp_to_seqc(e);
-      stmt_to_seqc(s1);
-      s = s2;
-      continue;
+    case &Do_s(s2,$(e,_)): fallthru(e,s2);
     case &While_s($(e,_),s2):
       exp_to_seqc(e);
       s = s2;
@@ -422,10 +404,6 @@ static void stmt_to_seqc(stmt_t s) {
       exp_to_seqc(e1);
       exp_to_seqc(e2);
       exp_to_seqc(e3);
-      s = s2;
-      continue;
-    case &Do_s(s2,$(e,_)):
-      exp_to_seqc(e);
       s = s2;
       continue;
     case &Switch_s(e,scs,_):
@@ -503,9 +481,7 @@ list_t<decl_t> toseqc(list_t<decl_t,`H> ds) {
   for (; old_ds != NULL; old_ds = old_ds->tl) {
     let next_d = old_ds->hd;
     switch (next_d->r) {
-    case &Fn_d(fd):
-      stmt_to_seqc(fd->body);
-      break;
+    case &Fn_d(fd): stmt_to_seqc(fd->body); break;
     case &Var_d(_):         
     case &Let_d(...): 
     case &Letv_d(_):        
@@ -513,19 +489,16 @@ list_t<decl_t> toseqc(list_t<decl_t,`H> ds) {
     case &Aggr_d(_):
     case &Datatype_d(_):
     case &Enum_d(_):        
-    case &Typedef_d(_):
-      break;
-    case &Namespace_d(_,ds2): fallthru(ds2);
-    case &Using_d(_,ds2):     fallthru(ds2);
-    case &ExternC_d(ds2):     fallthru(ds2);
-    case &ExternCinclude_d(ds2,...):
+    case &Typedef_d(_): break;
+    case &Namespace_d(...):
+    case &Using_d(...):
+    case &ExternC_d(_):
+    case &ExternCinclude_d(...):
     case &Porton_d:
     case &Portoff_d: 
     case &Tempeston_d:
-    case &Tempestoff_d:
-      Warn::impos("nested translation unit after translation to C");
+    case &Tempestoff_d: Warn::impos("unexpected toplevel decl in toseqc");
     }
   }
   return ds;
 }
-

@@ -1568,9 +1568,8 @@ copy_action(symbol_list *rule, int stack_offset)
    * bounds-check on each dereference of these arrays.  
    */
   if (stack_offset > 0) {
-    fprintf((FILE @)faction, "struct Yystacktype @{%d}yyyyvsp = "
-            "(_ @{%d})(yyvs+(yyvsp_offset - %d));\n",
-            stack_offset,stack_offset,stack_offset - 1);
+    fprintf((FILE @)faction, "yyyyvsp=yyget_yyyyvsp(yyvs,yyvsp_offset,%d);\n",
+            stack_offset - 1);
   }
   if (!nolinesflag)
     fprintf((FILE @)faction, "#line %d \"%s\"\n", lineno, infile);
@@ -1899,6 +1898,7 @@ readgram()
   symbol_list *`H crule;/* points to first symbol_list of current rule.  */
 			/* its symbol is the lhs of the rule.   */
   symbol_list *`H crule1;  /* points to the symbol_list preceding crule.  */
+  int maxrulelength = 0; /* DJG: maximum of any rule so far */
 
   p1 = NULL;
 
@@ -2064,6 +2064,8 @@ readgram()
 		  xactions++;	/* JF */
 		}
 	      rulelength++;
+	      if(rulelength > maxrulelength) /* DJG */
+		maxrulelength = rulelength;
 	    }	/* end of  read rhs of rule */
 
 	  /* Put an empty link in the list to mark the end of this rule  */
@@ -2113,7 +2115,7 @@ readgram()
 	    warn("empty rule for typed nonterminal, and no action");
 	  if (t == SEMICOLON)
 	    t = lex();
-	}    
+	}
 #if 0
   /* these things can appear as alternatives to rules.  */
 /* NO, they cannot.
@@ -2158,6 +2160,8 @@ readgram()
 	  t = lex();
 	}
     }
+  /* DJG */
+  fprintf((FILE @)fattrs, "\n#define YYMAXRULELENGTH %d\n", maxrulelength);
 
   /* grammar has been read.  Do some checking */
 

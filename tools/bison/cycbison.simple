@@ -140,6 +140,13 @@ struct Yystacktype YYSTYPEVARS {
 #endif
 };
 
+/* DJG */
+static struct Yystacktype YYSTYPEVARS @{YYMAXRULELENGTH}`yyr
+yyget_yyyyvsp(struct Yystacktype YYSTYPEVARS ?`yyr yyvs, 
+	      int yyvsp_offset, int rulelen) {
+  return (_@{YYMAXRULELENGTH}`yyr)(yyvs + (yyvsp_offset - rulelen));
+}
+
 /* If type variables (e.g., regions) are used with YYSTYPE this
    will already be set.
 */
@@ -172,6 +179,7 @@ region yyregion; {
   struct Yystacktype ? yyvs = 
     rnew(yyregion) {for i < YYINITDEPTH : Yystacktype(yylval)}; 
 #endif
+  struct Yystacktype @{YYMAXRULELENGTH }yyyyvsp;
 #define YYPOPSTACK   (yyvsp_offset--, yyssp_offset--)
 
   int yystacksize = YYINITDEPTH;
@@ -207,7 +215,7 @@ yynewstate:
 
   yyss[++yyssp_offset] = (short)yystate;
 
-  if (yyssp_offset >= (yystacksize-1)) { 
+  if (yyssp_offset >= (yystacksize-1) - YYMAXRULELENGTH) { 
     // grow the stacks
     if (yystacksize >= YYMAXDEPTH) {
       yyerror("parser stack overflow",yystate,yychar);
@@ -366,7 +374,6 @@ yyreduce:
       fprintf(stderr," -> %s\n",yytname[yyr1[yyn]]);
     }
 #endif
-
 $    /* the action file gets copied in place of this dollarsign */
  default:
     break;

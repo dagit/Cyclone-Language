@@ -401,9 +401,9 @@ struct Cyc_Dict_Dict Cyc_Dict_insert(struct Cyc_Dict_Dict d,void*k,void*v);
 void*Cyc_Dict_lookup(struct Cyc_Dict_Dict d,void*k);
 # 122 "dict.h"
 void**Cyc_Dict_lookup_opt(struct Cyc_Dict_Dict d,void*k);
-# 235
+# 233
 struct Cyc_List_List*Cyc_Dict_to_list(struct Cyc_Dict_Dict d);
-# 274
+# 270
 struct Cyc_Dict_Dict Cyc_Dict_delete(struct Cyc_Dict_Dict,void*);
 # 46 "graph.h"
 void Cyc_Graph_print(struct Cyc___cycFILE*f,struct Cyc_Dict_Dict g,void(*nodeprint)(struct Cyc___cycFILE*,void*));

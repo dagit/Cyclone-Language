@@ -110,7 +110,7 @@ extern dict_t<`a,`b,`r> rsingleton(region_t<`r>,
 extern `b lookup(dict_t<`a,`b> d,`a k);
 /** [lookup(d,k)] returns a pointer to the value associated with 
     key [k] in [d], or throws [Absent] if [k] is not mapped to any value. */
-extern `b lookup_other(dict_t<`a,`b,`r> d, int cmp(`c,`a), `c k);
+extern `b lookup_other(dict_t<`a,`b> d, int cmp(`c,`a), `c k);
 /** [lookup_other(d,cmp,k)] returns a pointer to the value associated with 
     key [k] in [d], or throws [Absent] if [k] is not mapped to any value. 
     The comparison function associated with the dictionary is ignored and
@@ -178,9 +178,7 @@ extern dict_t<`a,`c> map(`c f(`b),dict_t<`a,`b> d);
     dictionary with the results as values: for every binding of a key
     [k] to a value [v] in [d], the result binds [k] to [f(v)].  The
     returned dictionary is allocated on the heap.  */
-extern dict_t<`a,`c,`r> rmap(region_t<`r>,
-                             `c f(`b),
-                             dict_t<`a,`b> d);
+extern dict_t<`a,`c,`r> rmap(region_t<`r>, `c f(`b), dict_t<`a,`b> d);
 /** [rmap(r,f,d)] is like [map(f,d)], except the resulting dictionary
     is allocated in the region with handle [r]. */
 extern dict_t<`a,`c> map_c(`c f(`d,`b),`d env,dict_t<`a,`b> d);
@@ -243,12 +241,10 @@ extern dict_t<`a,`b> filter(bool f(`a,`b), dict_t<`a,`b> d);
 /** [filter(f,d)] returns a dictionary that has a binding of [k] to
     [v] for every binding of [k] to [v] in [d] such that [f(k,v)]
     returns true.  The resulting dictionary is allocated on the heap. */
-extern dict_t<`a,`b,`r> rfilter(region_t<`r>,
-                                bool f(`a,`b), dict_t<`a,`b> d);
+extern dict_t<`a,`b,`r> rfilter(region_t<`r>, bool f(`a,`b), dict_t<`a,`b> d);
 /** [rfilter(r,f,d)] is like [filter(f,d)], except that the resulting
     dictionary is allocated in the region with handle [r]. */
-extern dict_t<`a,`b> filter_c(bool f(`c,`a,`b), `c env,
-                              dict_t<`a,`b> d);
+extern dict_t<`a,`b> filter_c(bool f(`c,`a,`b), `c env, dict_t<`a,`b> d);
 /** [filter_c(f,env,d)] is like [filter(f,d)] except that [f] takes a
     closure [env] as its first argument. */
 extern dict_t<`a,`b,`r> rfilter_c(region_t<`r>,
