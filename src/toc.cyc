@@ -678,12 +678,12 @@ static $(tqual_t,type_t)@ typ_to_c_f($(tqual_t,type_t)@ x) {
 // 1. as the argument of cast
 // We can do either in the following circumstances:
 // 1. as the parameter of a function
-// The function typ_to_c_array leaves them alone, while typ_to_c
+// The function typ_to_c_array changes them, while typ_to_c
 // changes them to pointers.
 static type_t typ_to_c_array(type_t t) {
   switch(compress(t)) {
   case &ArrayType(ArrayInfo{t2,tq,x,zt,ztl}): // FIX: do we handle tq correctly?
-    return array_typ(typ_to_c_array(t2),tq,x,false_conref,ztl);
+    return cstar_typ(typ_to_c_array(t2),tq);
   case &Evar(_,t2,_,_) && t2 != NULL: return typ_to_c_array((type_t)t2);
   default: return typ_to_c(t);
   }
@@ -761,7 +761,7 @@ static type_t typ_to_c(type_t t) {
   case &PointerType(PtrInfo(t2,tq,PtrAtts(_,_,bnds,_,_))):
     // t2? maps to struct dyneither_ptr.
     // t2* and t2@ map to t2*.  Regions and zero-term are irrelevant.
-    t2 = typ_to_c_array(t2);
+    t2 = typ_to_c(t2);
     switch (conref_def((bounds_t)&DynEither_b_val,bnds)) {
     case &DynEither_b: return dyneither_ptr_typ;
     default: return star_typ(t2,&HeapRgn_val,tq,false_conref);
@@ -769,7 +769,7 @@ static type_t typ_to_c(type_t t) {
   case &IntType(_,_):
   case &FloatType(_): return t;
   case &ArrayType(ArrayInfo{t2,tq,e,_,ztl}):
-    return array_typ(typ_to_c_array(t2),tq,e,false_conref,ztl);
+    return array_typ(typ_to_c(t2),tq,e,false_conref,ztl);
   case &FnType(FnInfo{_,_,tq2,t2,args,c_vararg,cyc_vararg,_,atts}):
     // just drop the type arguments & effect and translate the nested types
     // also, drop any format descriptors
@@ -825,9 +825,9 @@ static type_t typ_to_c(type_t t) {
       // to avoid looping, make sure the instantiation of the last
       // type is not still abstract.  If it is, we can just return
       // the struct type.
-      // region r;
-      // let t = rsubstitute(r,rzip(r,r,ad->tvs,ts),last_type);
-      // if (is_abstract_type(t)) return aggrdecl_type(ad->name,strctq);
+      region r;
+      let t = rsubstitute(r,rzip(r,r,ad->tvs,ts),last_type);
+      if (is_abstract_type(t)) return aggrdecl_type(ad->name,strctq);
       return add_struct_type(ad->name,ad->tvs,
                              List::map(typ_to_c,ts),ad->impl->fields);
     }
@@ -840,7 +840,7 @@ static type_t typ_to_c(type_t t) {
         return new TypedefType(tdn,NULL,td,NULL);
       else return t;
     // just drop the type arguments and translate the nested types
-    else return new TypedefType(tdn,NULL,td,typ_to_c_array((type_t)topt));
+    else return new TypedefType(tdn,NULL,td,typ_to_c((type_t)topt));
   case &TagType(_): return uint_typ; // must be unsigned!
   case &RgnHandleType(t): return rgn_typ();
   case &DynRgnType(_,_): return dyn_rgn_typ();
@@ -851,8 +851,12 @@ static type_t typ_to_c(type_t t) {
   case &RefCntRgn:
   case &AccessEff(_):
   case &JoinEff(_):
-  case &RgnsEff(_):
-  case &ValueofType(_): return void_star_typ();
+  case &RgnsEff(_): return void_star_typ();
+    // FIX: when we instantiate a struct parameterized by `i::I with
+    // valueof_t(42), then we want the 42 to get propagated to any arrays
+    // that might occur within.  So, for now, we don't do any translation.
+    // This will bite me somewhere else...
+  case &ValueofType(e): return t;
   case &TypeDeclType(&{.r = &Aggr_td(ad),...},_):
     aggrdecl_to_c(ad,true);
     if (ad->kind==UnionA)
@@ -2983,9 +2987,9 @@ DynCast:
     }
     break;
   case &Sizeofexp_e(e1): exp_to_c(nv,e1); break;
-  case &Sizeoftyp_e(t):  e->r = new Sizeoftyp_e(typ_to_c_array(t));  break;
+  case &Sizeoftyp_e(t):  e->r = new Sizeoftyp_e(typ_to_c(t));  break;
   case &Offsetof_e(t,&StructField(n)):
-    e->r = new Offsetof_e(typ_to_c_array(t),new StructField(n)); break;
+    e->r = new Offsetof_e(typ_to_c(t),new StructField(n)); break;
   case &Offsetof_e(t,&TupleIndex(n)):
     switch(compress(t)) {
     case &AggrType(AggrInfo(info,_)):
@@ -2995,16 +2999,16 @@ DynCast:
       fallthru(ad->impl->fields);
     case &AnonAggrType(_,fields):
       let nth_field = List::nth(fields,n);
-      e->r = new Offsetof_e(typ_to_c_array(t),new StructField(nth_field->name));
+      e->r = new Offsetof_e(typ_to_c(t),new StructField(nth_field->name));
       break;
     case &TupleType(_):
-      e->r = new Offsetof_e(typ_to_c_array(t),new StructField(fieldname(n+1)));
+      e->r = new Offsetof_e(typ_to_c(t),new StructField(fieldname(n+1)));
       break;
     case &DatatypeFieldType(_):
       if(n == 0)
-	e->r = new Offsetof_e(typ_to_c_array(t),new StructField(tag_sp));
+	e->r = new Offsetof_e(typ_to_c(t),new StructField(tag_sp));
       else
-	e->r = new Offsetof_e(typ_to_c_array(t),new StructField(fieldname(n)));
+	e->r = new Offsetof_e(typ_to_c(t),new StructField(fieldname(n)));
       break;
     default: toc_impos("impossible type for offsetof tuple index");
     }
@@ -3104,7 +3108,7 @@ DynCast:
       break;
     case &DynEither_b:
       // ((ta1 *)_check_unknown_subscript(e1, sizeof(ta1), 0))->f
-      type_t ta1 = typ_to_c_array(ta);
+      type_t ta1 = typ_to_c(ta);
       e1->r = cast_it_r(cstar_typ(ta1,tq),
                         fncall_exp(_check_dyneither_subscript_e,
                                    list(new_exp(e1->r,DL),
@@ -3192,7 +3196,7 @@ DynCast:
         }
 	break;
       case &DynEither_b:
-	type_t ta1 = typ_to_c_array(ta);
+	type_t ta1 = typ_to_c(ta);
         if (in_bnds) {
           // there's no need for a null-check here either because
           // a NULL ? pointer has size 0
@@ -3562,9 +3566,23 @@ xlate_pat(env_t<`rgn> nv,
   stmt_t s; // the test statement
   switch (p->r) {
   case &Var_p(&Vardecl(_,x,_,_,_,_,_,_),p2):
-    // in essence, x = r; but achieved through the varmap
-    return xlate_pat(add_varmap(rgn,nv,x,r),
-                     rgn, t, r, path, p2, fail_stmt, decls);
+    // when x is an array, we have to treat this like a reference pattern
+    switch (compress((type_t)p2->topt)) {
+    case &ArrayType(ArrayInfo{et,tq,ne,zt,ztl}):
+      let v = temp_var();
+      decls = rnew(rgn) List(rnew(rgn) $(v,cstar_typ(typ_to_c_array(et),mt_tq)),decls);
+      nv    = add_varmap(rgn,nv,x,var_exp(v,DL));
+      // cast is needed to avoid a C warning when pointing to a polymorphic field
+      s     = assign_stmt(var_exp(v,DL),
+                          cast_it(cstar_typ(typ_to_c_array(et),mt_tq),path),DL);
+      let result = xlate_pat(nv,rgn,t,r,path,p2,fail_stmt,decls);
+      result[2] = seq_stmt(s,result[2],DL);
+      return result;
+    default:
+      // in essence, x = r; but achieved through the varmap
+      return xlate_pat(add_varmap(rgn,nv,x,r),
+                       rgn, t, r, path, p2, fail_stmt, decls);
+    }
   case &TagInt_p(_,&Vardecl(_,x,_,_,_,_,_,_)): // type translation erases tvar
     // in essence, x = r; but achieved through the varmap
     nv = add_varmap(rgn,nv,x,r);
@@ -3573,11 +3591,11 @@ xlate_pat(env_t<`rgn> nv,
   case &Reference_p(vd,p2):
     // v = path
     let v = temp_var();
-    decls = rnew(rgn) List(rnew(rgn) $(v,cstar_typ(typ_to_c(t),mt_tq)),decls);
+    decls = rnew(rgn) List(rnew(rgn) $(v,cstar_typ(typ_to_c_array(t),mt_tq)),decls);
     nv    = add_varmap(rgn,nv,vd->name,var_exp(v,DL));
     // cast is needed to avoid a C warning when pointing to a polymorphic field
     s     = assign_stmt(var_exp(v,DL),
-			cast_it(cstar_typ(typ_to_c(t),mt_tq),
+			cast_it(cstar_typ(typ_to_c_array(t),mt_tq),
                                 push_address_exp(path)),DL);
     let result = xlate_pat(nv,rgn,t,r,path,p2,fail_stmt,decls);
     result[2] = seq_stmt(s,result[2],DL);
@@ -3615,7 +3633,7 @@ xlate_pat(env_t<`rgn> nv,
       let tuf_typ = (*tuf_tqts->hd)[1];
       let v   = temp_var();
       let t2  = (type_t)p2->topt;
-      let t2c = typ_to_c(t2);
+      let t2c = typ_to_c_array(t2);
       let arrow_exp = aggrarrow_exp(var_exp(temp,DL), fieldname(cnt), DL);
       if(is_void_star_or_boxed_tvar(typ_to_c(tuf_typ)))
 	arrow_exp = cast_it(t2c, arrow_exp);
@@ -3658,7 +3676,7 @@ xlate_pat(env_t<`rgn> nv,
 	continue;
       let v   = temp_var();
       let t2  = (type_t)p2->topt;
-      decls = rnew(rgn) List(rnew(rgn) $(v,typ_to_c(t2)),decls);
+      decls = rnew(rgn) List(rnew(rgn) $(v,typ_to_c_array(t2)),decls);
       let result = xlate_pat(nv,rgn,t2,var_exp(v,DL),
                              aggrmember_exp(path,fieldname(cnt),DL),
 			     p2,fail_stmt,decls);
@@ -3685,7 +3703,7 @@ xlate_pat(env_t<`rgn> nv,
       }
       let v = temp_var();
       let t2 = (type_t)pat->topt;
-      let t2c = typ_to_c(t2);
+      let t2c = typ_to_c_array(t2);
       decls = rnew(rgn) List(rnew(rgn) $(v,t2c),decls);
       let pexp = aggrmember_exp(aggrmember_exp(path,f,DL),val_sp,DL);
       let memexp = aggrmember_exp(aggrmember_exp(r,f,DL),val_sp,DL);
@@ -3715,7 +3733,7 @@ xlate_pat(env_t<`rgn> nv,
         }
         let v   = temp_var();
         let t2  = (type_t)p2->topt;
-        let t2c = typ_to_c(t2);
+        let t2c = typ_to_c_array(t2);
         decls = rnew(rgn) List(rnew(rgn) $(v,t2c),decls);
         let result = xlate_pat(nv,rgn,t2,var_exp(v,DL),
                                aggrmember_exp(path,f,DL),p2,fail_stmt,decls);
@@ -3735,7 +3753,7 @@ xlate_pat(env_t<`rgn> nv,
     // if (r == 0) goto fail_lab; v = *r; match(v,p2);
     let v = temp_var();
     let t2 = (type_t)p2->topt;
-    decls = rnew(rgn) List(rnew(rgn) $(v,typ_to_c(t2)),decls);
+    decls = rnew(rgn) List(rnew(rgn) $(v,typ_to_c_array(t2)),decls);
     let result = xlate_pat(nv,rgn,t2,var_exp(v,DL),deref_exp(path,DL),p2,
 			   fail_stmt,decls);
     nv = result[0];
@@ -4043,7 +4061,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
         //for (; vds != NULL; vds = vds->tl) {
         //  let vd = vds->hd;
         //  let c_name = vd->name;
-        //  vd->type = typ_to_c_array(vd->type);
+        //  vd->type = typ_to_c(vd->type);
         //  nv2 = add_varmap(nv2,c_name,varb_exp(c_name,new Local_b(vd),DL));
         //}
         //stmt_to_c(nv2,s1);
@@ -4336,12 +4354,20 @@ static void aggrdecl_to_c(aggrdecl_t ad, bool add_to_decls) {
         // JGM: I'm trying to get rid of warnings when we assign "const"
         // locations...
         let old_field = fields->hd;
-        if (fields->tl == NULL && kind_leq(&ak,typ_kind(old_field->type)))
-          // must skip over the last member if it's abstract
-          continue;
+        let old_type = old_field->type;
+        if (fields->tl == NULL && kind_leq(&ak,typ_kind(old_type))) {
+          // skip over the last member if it's abstract but not an array.
+          // for arrays, we just pretend like the array size is non-existent.
+          switch (old_type) {
+          case &ArrayType(ArrayInfo{et,tq,_,zt,ztl}):
+            old_type = new ArrayType(ArrayInfo(et,tq,NULL,zt,ztl));
+            break;
+          default: continue;
+          }
+        }
         let new_field = new Aggrfield{.name = old_field->name,
                                       .tq = mt_tq,
-                                      .type = typ_to_c_array(old_field->type),
+                                      .type = typ_to_c(old_type),
                                       .width = old_field->width,
                                       .attributes = old_field->attributes};
         // If this is a tagged union, rewrite the member type from T
@@ -4411,7 +4437,7 @@ static void datatypedecl_to_c(datatypedecl_t tud) {
     for (let ts = f->typs; ts != NULL; ts = ts->tl, i++) {
       let fname = fieldname(i);
       let f = new Aggrfield(fname,(*ts->hd)[0],
-                            typ_to_c_array((*ts->hd)[1]),NULL,NULL);
+                            typ_to_c((*ts->hd)[1]),NULL,NULL);
       fs = new List(f,fs);
     }
     fs = new List(new Aggrfield(tag_sp,mt_tq,sint_typ,NULL,NULL),
@@ -4471,7 +4497,7 @@ static void xdatatypedecl_to_c(datatypedecl_t xd) {
         for (let tqts = f->typs; tqts != NULL; tqts = tqts->tl,i++) {
           let field_n = new ((string_t)aprintf("f%d",i));
           let newf = new Aggrfield(field_n,(*tqts->hd)[0],
-                                   typ_to_c_array((*tqts->hd)[1]),NULL,NULL);
+                                   typ_to_c((*tqts->hd)[1]),NULL,NULL);
           fields = new List(newf,fields);
         }
         fields = new List(new Aggrfield(tag_sp,mt_tq,
@@ -4511,7 +4537,7 @@ static void enumdecl_to_c(enumdecl_t ed) {
 // environment, so we make the caller pass us an environment.
 static void local_decl_to_c(env_t body_nv,env_t init_nv,vardecl_t vd,stmt_t s) {
   type_t old_typ = vd->type;
-  vd->type = typ_to_c_array(old_typ);
+  vd->type = typ_to_c(old_typ);
   // Fat pointers can't be declared with "register" scope
   if (vd->sc == Register && is_tagged_pointer_typ(old_typ))
     vd->sc = Public;
@@ -4663,7 +4689,7 @@ static void decltypes_to_c(decl_t d) {
         if (f->tag != NULL) exptypes_to_c((exp_t)f->tag);
       }
     break;
-  case &Typedef_d(td): td->defn = typ_to_c_array((type_t)td->defn); break;
+  case &Typedef_d(td): td->defn = typ_to_c((type_t)td->defn); break;
   case &Let_d(_,_,_):
   case &Letv_d(_):
   case &Datatype_d(_):
@@ -4735,7 +4761,7 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds, boo
       nv = add_varmap(r,nv,vd->name,varb_exp(c_name,new Global_b(vd),DL));
       vd->name = c_name;
       vd->sc   = scope_to_c(vd->sc);
-      vd->type = typ_to_c_array(vd->type);
+      vd->type = typ_to_c(vd->type);
       result_decls = new List(d,result_decls);
       break;
     case &Fn_d(fd):
@@ -4774,7 +4800,7 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds, boo
       td->name = td->name;
       td->tvs  = NULL;
       if (td->defn != NULL)
-        td->defn = typ_to_c_array((type_t)td->defn);
+        td->defn = typ_to_c((type_t)td->defn);
       else {
         switch (td->kind->v->kind) {
         case BoxKind: td->defn = void_star_typ(); break;

@@ -541,11 +541,12 @@ kind_t typ_kind(type_t t) {
       // instantiated with a ground type.
       region temp;
       let inst = NULL;
-      // filter out type vars that aren't abstract in in the instantiation
+      // filter out type vars that aren't abstract or int in in the instantiation
       for (; tvs != NULL; tvs=tvs->tl, ts=ts->tl) {
         let tv = tvs->hd;
         let t = ts->hd;
         switch (tvar_kind(tv,&bk)) {
+        case &{.kind = IntKind, ...}:
         case &{.kind = AnyKind, ...}:
           inst = rnew(temp) List(rnew(temp) $(tv,t), inst); break;
         default: break;
@@ -556,7 +557,8 @@ kind_t typ_kind(type_t t) {
         k = typ_kind(last_type);
       }
       if (k == &ak || k == &tak) return k;
-    }
+    } else if (k == &ak || k == &tak)
+      return k;
     return &mk;
   case &AnonAggrType(_,_): return &mk;
   case &PointerType(pinfo):
@@ -576,8 +578,9 @@ kind_t typ_kind(type_t t) {
     }
   case &ValueofType(_): return &ik;
   case &TagType(_): return &bk;
-  // Arrays are always of memkind
-  case &ArrayType(_):
+  case &ArrayType(ArrayInfo{_,_,num_elts,_,_}):
+    if (num_elts == NULL || is_const_exp(num_elts)) return &mk;
+    return &ak;
   case &TupleType(_): return &mk;
   case &TypedefType(_,_,td,_):
     if (td == NULL || td->kind == NULL)
@@ -3061,7 +3064,12 @@ static exp_t rsubsexp(region_t<`r> r, list_t<$(tvar_t,type_t)@`r,`r> inst,
   case &Valueof_e(t):
     let new_t = rsubstitute(r,inst,t);
     if (new_t == t) return e;
-    return copye(e, new Valueof_e(new_t));
+    // reduce valueof(valueof_t(e)) to e
+    switch (compress(new_t)) {
+    case &ValueofType(e): return e;
+    default:
+      return copye(e, new Valueof_e(new_t));
+    }
   default:
     return impos("non-type-level-expression in Tcutil::rsubsexp");
   }
@@ -3091,7 +3099,9 @@ type_t rsubstitute(region_t<`r> rgn,
     return (new_ts == ts) ? t : new TypedefType(n,new_ts,td,topt);
   case &ArrayType(ArrayInfo{t1,tq,e,zt,ztl}):
     let new_t1 = rsubstitute(rgn,inst,t1);
-    return new_t1 == t1 ? t : new ArrayType(ArrayInfo{new_t1,tq,e,zt,ztl});
+    let new_e = (e == NULL) ? NULL : rsubsexp(rgn,inst,e);
+    return (new_t1 == t1 && new_e == e) ? t : 
+      new ArrayType(ArrayInfo{new_t1,tq,new_e,zt,ztl});
   case &PointerType(PtrInfo(t1,tq,PtrAtts(r,n,b,zt,_))):
     let new_t1 = rsubstitute(rgn,inst,t1);
     let new_r  = rsubstitute(rgn,inst,r);
@@ -3385,7 +3395,7 @@ void check_bitfield(seg_t loc, tenv_t te, type_t field_typ,
                     exp_opt_t width, stringptr_t fn) {
   if (width != NULL) {
     unsigned int w = 0;
-    if (!is_const_exp(te,(exp_t)width))
+    if (!is_const_exp((exp_t)width))
       terr(loc,"bitfield %s does not have constant width",*fn);
     else {
       let $(i,known) = Evexp::eval_const_uint_exp((exp_t)width);
@@ -3617,7 +3627,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
 
         if (f->tag == NULL)
           f->tag = uint_exp(tag_count, f->loc);
-        else if (!Tcutil::is_const_exp(te,(exp_t)f->tag))
+        else if (!Tcutil::is_const_exp((exp_t)f->tag))
           terr(loc,"enum field %s: expression is not constant",*(*f->name)[1]);
 
         unsigned int t1 = Evexp::eval_const_uint_exp((exp_t)f->tag)[0];
@@ -3908,8 +3918,10 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     if (!coerce_uint_typ(te,(exp_t)e))
       terr(loc,"array bounds expression is not an unsigned int");
     cvtenv = i_check_valid_type_level_exp(e,te,cvtenv);
-    if (!is_const_exp(te,(exp_t)e))
+    /*
+    if (!is_const_exp((exp_t)e))
       terr(loc,"array bounds expression is not constant");
+    */
     let $(sz,known) = Evexp::eval_const_uint_exp((exp_t)e);
     // FIX: if we have an unknown size then it might not be zero-terminated!
     if (is_zero_terminated && known && sz < 1)
@@ -5198,7 +5210,7 @@ bool bits_only(type_t t) {
 // RENAME
 // Actually need to distinguish two kinds of constant expressions, as in ANSI C
 // This is now sort of for top-level expressions
-static bool cnst_exp(tenv_t te, bool var_okay, exp_t e) {
+static bool cnst_exp(bool var_okay, exp_t e) {
   switch (e->r) {
   case &Const_e(_):
   case &Sizeoftyp_e(_):
@@ -5232,28 +5244,28 @@ static bool cnst_exp(tenv_t te, bool var_okay, exp_t e) {
     }
 
   case &Conditional_e(e1,e2,e3):
-    return (cnst_exp(te,false,e1)
-            && cnst_exp(te,false,e2)
-            && cnst_exp(te,false,e3));
+    return (cnst_exp(false,e1)
+            && cnst_exp(false,e2)
+            && cnst_exp(false,e3));
   case &SeqExp_e(e1,e2):
-    return (cnst_exp(te,false,e1) && cnst_exp(te,false,e2));
+    return (cnst_exp(false,e1) && cnst_exp(false,e2));
   case &NoInstantiate_e(e2): fallthru(e2);
   case &Instantiate_e(e2,_):
-    return cnst_exp(te,var_okay,e2);
+    return cnst_exp(var_okay,e2);
   case &Cast_e(t,e2,_,No_coercion):
-    return cnst_exp(te,var_okay,e2);
+    return cnst_exp(var_okay,e2);
   case &Cast_e(t,e2,_,_):
     // Fix: We cannot allow casts w/ run-time effect b/c C will complain!
-    return cnst_exp(te,var_okay,e2);
+    return cnst_exp(var_okay,e2);
   case &Address_e(e2):
-    return cnst_exp(te,true,e2);
+    return cnst_exp(true,e2);
   case &Comprehension_e(_,e1,e2,_):
-    return cnst_exp(te,false,e1) && cnst_exp(te,false,e2);
+    return cnst_exp(false,e1) && cnst_exp(false,e2);
   case &Array_e(des): fallthru(des);
   case &AnonStruct_e(_,des): fallthru(des);
   case &Aggregate_e(_,_,des,_):
     for (; des != NULL; des = des->tl)
-      if (!cnst_exp(te,false,(*des->hd)[1]))
+      if (!cnst_exp(false,(*des->hd)[1]))
         return false;
     return true;
 
@@ -5261,15 +5273,15 @@ static bool cnst_exp(tenv_t te, bool var_okay, exp_t e) {
   case &Tuple_e(es):    fallthru(es);
   case &Datatype_e(es,_,_):
     for (; es != NULL; es = es->tl)
-      if (!cnst_exp(te,false,es->hd))
+      if (!cnst_exp(false,es->hd))
         return false;
     return true;
   default: return false;
   }
 }
 
-bool is_const_exp(tenv_t te, exp_t e) {
-  return cnst_exp(te,false,e);
+bool is_const_exp(exp_t e) {
+  return cnst_exp(false,e);
 }
 
 static bool fields_support_default(list_t<tvar_t> tvs, list_t<type_t> ts,

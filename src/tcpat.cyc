@@ -152,7 +152,7 @@ static void resolve_pat(tenv_t te, type_t *topt, pat_t p) {
     return;
   case &Exp_p(e):
     Tcexp::tcExp(te,NULL,e);
-    if (!is_const_exp(te,e)) {
+    if (!is_const_exp(e)) {
       terr(p->loc,"non-constant expression in case pattern");
       p->r = &Wild_p_val;
     }
@@ -184,6 +184,7 @@ static type_t num_type(type_t * topt, type_t numt) {
   }
   return numt;
 }
+
 static void set_vd(vardecl_t vd, list_t<vardecl_t>@ v_result_ptr, type_t t){
   vd->type = t;
   vd->tq   = empty_tqual(0);
@@ -209,7 +210,17 @@ static pat_t wild_pat(seg_t loc) {
   return new Pat { .loc = loc, .topt = NULL, .r = &Wild_p_val };
 }
 
-static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
+static type_t promote_array(tenv_t te, type_t t, type_opt_t rgn_opt) {
+  switch (compress(t)) {
+  case &ArrayType(ArrayInfo(et,tq,n,zt,ztl)):
+    type_t rgn = (rgn_opt == NULL) ? new_evar(&Tcutil::rko,new Opt(lookup_type_vars(te))) : rgn_opt;
+    return atb_typ(et,rgn,tq,new Upper_b((exp_t)n),zt);
+  default: return t;
+  }
+}
+
+static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt, 
+                               type_opt_t rgn_pat, bool allow_ref_pat) {
   resolve_pat(te,topt,p);
   type_t t;
   tcpat_result_t res = TcPatResult(NULL,NULL);
@@ -218,19 +229,32 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
   switch (p->r) {
 
   case &Wild_p:       
-    t = any_type(lookup_type_vars(te),topt);
+    if (topt != NULL)
+      t = *topt;
+    else 
+      t = any_type(lookup_type_vars(te),topt);
     break;
   case &Var_p(vd,p2):
-    res = tcPatRec(te,p2,topt,rgn_opt);
+    res = tcPatRec(te,p2,topt,rgn_pat,allow_ref_pat);
     t = (type_t)p2->topt;
-    if (!kind_leq(typ_kind(t),&tmk))
-      terr(p->loc, "pattern would point to an abstract member");
-    set_vd(vd, &res.patvars, t);
+    // We allow arrays as long as the rgn_pat is defined, since
+    // you can't update them (i.e., the whole array).  
+    switch (compress(t)) {
+    case &ArrayType(_): 
+      if (rgn_pat == NULL || !allow_ref_pat)
+        terr(p->loc, "array reference would point into unknown/unallowed region");
+      break;
+    default:
+      if (!kind_leq(typ_kind(t),&tmk))
+        terr(p->loc, "pattern would point to an abstract member");
+      break;
+    }
+    set_vd(vd, &res.patvars, promote_array(te,t,rgn_pat));
     break;
   case &Reference_p(vd,p2):
-    res = tcPatRec(te,p2,topt,rgn_opt);
+    res = tcPatRec(te,p2,topt,rgn_pat,allow_ref_pat);
     t = (type_t)p2->topt;
-    if(rgn_opt == NULL) {
+    if(!allow_ref_pat || rgn_pat == NULL) {
       terr(p->loc, "* pattern would point into an unknown/unallowed region");
       break;
     }
@@ -238,7 +262,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
       impos("* pattern cannot take the address of an alias-free path");
     set_vd(vd, &res.patvars, 
 	   new PointerType(PtrInfo(t,empty_tqual(0),
-				   PtrAtts(*rgn_opt,false_conref,
+				   PtrAtts(rgn_pat,false_conref,
 					   empty_conref(),empty_conref(),
                                            NULL))));
     break;
@@ -305,7 +329,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
     // we put in an unconstrained region.  Then the client calls
     // check_pat_regions after unifying against the type they're destructuring.
     type_t ptr_rgn = new_evar(&trko,lookup_opt_type_vars(te));
-    res = combine_results(res,tcPatRec(te,p2,inner_topt,&ptr_rgn));
+    res = combine_results(res,tcPatRec(te,p2,inner_topt,ptr_rgn,true));
     // if p2 is a datatype field pattern (e.g., datatype F.C), then unless 
     // topt says otherwise, we make the type datatype F@.  We also change
     // p2's type from a datatype field to a datatype so that the match
@@ -376,7 +400,7 @@ DONT_PROMOTE:
 	inner_topt = &(*topt_ts->hd)[1];
 	topt_ts    = topt_ts->tl;
       }
-      res = combine_results(res,tcPatRec(te,ps->hd,inner_topt,rgn_opt));
+      res = combine_results(res,tcPatRec(te,ps->hd,inner_topt,rgn_pat,allow_ref_pat));
       pat_ts = new List(new $(empty_tqual(0),(type_t)ps->hd->topt),pat_ts);
     }
     t = new TupleType(List::imp_rev(pat_ts));
@@ -391,8 +415,13 @@ DONT_PROMOTE:
       break;
     }
     // don't allow reference patterns for existentials or tagged unions -- see Dan's ESOP paper
-    if (exist_ts != NULL || (ad->kind == UnionA && ad->impl->tagged))
-      rgn_opt = NULL;
+    if (ad->kind == UnionA && ad->impl->tagged)
+      allow_ref_pat = false;
+    if (exist_ts != NULL) {
+      // we can allow a reference as long as the whole structure is abstract
+      if (topt == NULL || typ_kind(*topt) != &ak)
+        allow_ref_pat = false;
+    }
     region<`rgn> rgn; {
       // constrain type variables to have at least the kind they were abstracted over
       let var_tvs = NULL;
@@ -491,7 +520,8 @@ DONT_PROMOTE:
         for(; fields != NULL; fields = fields->tl) {
           let &$(field,pat)     = fields->hd;
           let inst_fieldtyp     = rsubstitute(rgn,inst,field->type);
-          res = combine_results(res,tcPatRec(te2,pat,&inst_fieldtyp,rgn_opt));
+          //inst_fieldtyp = promote_array(te,inst_fieldtyp,rgn_pat);
+          res = combine_results(res,tcPatRec(te2,pat,&inst_fieldtyp,rgn_pat,allow_ref_pat));
           // must unify here or the type we gave pat won't ever get checked
           // against the exp we're matching against.  Even if we succeed now,
           // we could be constraining so as to catch an error later.
@@ -532,9 +562,9 @@ DONT_PROMOTE:
       for(; ps != NULL && tqts != NULL; ps = ps->tl, tqts = tqts->tl) {
 	let p2 = ps->hd;
 	// Note:  we don't pass in ptr_rgn here because for value-carrying
-	// constructors, the pointer's region is passed down as rgn_opt.
+	// constructors, the pointer's region is passed down as rgn_pat.
 	let field_typ = rsubstitute(rgn, inst, (*tqts->hd)[1]);
-	res = combine_results(res,tcPatRec(te,p2,&field_typ,rgn_opt));
+	res = combine_results(res,tcPatRec(te,p2,&field_typ,rgn_pat,allow_ref_pat));
 	// must unify here or the type we gave pat won't ever get checked
 	// against the exp we're matching against.  Even if we succeed now,
 	// we could be constraining so as to catch an error later.
@@ -565,7 +595,7 @@ DONT_PROMOTE:
 }
 
 tcpat_result_t tcPat(tenv_t te, pat_t  p, type_t @ topt) {
-  let ans = tcPatRec(te,p,topt,NULL);
+  let ans = tcPatRec(te,p,topt,NULL,false);
   // caller will check tvar uniqueness when adding to environment
   TEMP_RGN(te, r) {
     check_unique_vars(List::rmap(r, get_name, ans.patvars), p->loc,
@@ -604,6 +634,9 @@ void check_pat_regions(tenv_t te, pat_t p) {
     fallthru(ps);
   case &Tuple_p(ps,_):
     for(; ps != NULL; ps = ps->tl) check_pat_regions(te,ps->hd);
+    return;
+  case &Reference_p(_,p): fallthru(p);
+  case &Var_p(_,p):       check_pat_regions(te,p);
     return;
   default: return;
   }

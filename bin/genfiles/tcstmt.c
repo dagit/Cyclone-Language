@@ -1174,7 +1174,7 @@ int Cyc_Tcutil_is_noalias_pointer_or_aggr(struct _RegionHandle*,void*t);
 # 292
 int Cyc_Tcutil_new_tvar_id();
 # 309
-int Cyc_Tcutil_is_const_exp(struct Cyc_Tcenv_Tenv*te,struct Cyc_Absyn_Exp*e);
+int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*e);
 # 327
 int Cyc_Tcutil_extract_const_from_typedef(unsigned int,int declared_const,void*);
 # 331
@@ -1742,7 +1742,7 @@ if(_tmpD7 != 0){
 # 460
 Cyc_Tcexp_tcExpInitializer(_tmp101,(void**)& _tmpD6,(struct Cyc_Absyn_Exp*)_tmpD7);
 # 462
-if(!is_local  && !Cyc_Tcutil_is_const_exp(_tmpAA,(struct Cyc_Absyn_Exp*)_tmpD7)){
+if(!is_local  && !Cyc_Tcutil_is_const_exp((struct Cyc_Absyn_Exp*)_tmpD7)){
 # 463
 const char*_tmp1D9;void*_tmp1D8;(_tmp1D8=0,Cyc_Tcutil_terr(_tmp4F->loc,((_tmp1D9="initializer needs to be a constant expression",_tag_dyneither(_tmp1D9,sizeof(char),46))),_tag_dyneither(_tmp1D8,sizeof(void*),0)));}
 # 464

@@ -283,15 +283,15 @@ static aggrdict_t<`r> substitute_aggrfields_to_aggrdict(flow_env_t<`r> fenv,
                                                         absRval_t<`r> leafval){
   region temp;
   // zip up tvs and targs, but filter out any type parameters that aren't 
-  // types (e.g., regions) so as to avoid having to substitute.
+  // types (e.g., regions) so as to avoid having to substitute.  Note that
+  // we do have to deal with integer kinded types due to arrays.
   list_t<$(tvar_t,type_t)@`temp,`temp> inst = NULL;
   for (; tvs != NULL; tvs = tvs->tl, targs = targs->tl) {
     let tv = tvs->hd;
     let t = targs->hd;
     switch (Tcutil::tvar_kind(tv,&Tcutil::bk)) {
     case &{.kind = RgnKind, ...}:
-    case &{.kind = EffKind, ...}:
-    case &{.kind = IntKind, ...}: continue;
+    case &{.kind = EffKind, ...}: continue;
     default: break;
     }
     inst = rnew(temp) List(rnew(temp) $(tv,t), inst);

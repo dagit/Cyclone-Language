@@ -1537,7 +1537,12 @@ static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt,
       }
       let t3_kind = typ_kind(t3);
       if (kind_leq(&ak,t3_kind)) {
-        return expr_err(te,loc,topt,"cannot get member %s since its type is abstract",*f);
+        // we can get out arrays...they'll be promoted to pointers
+        switch (compress(t3)) {
+        case &ArrayType(_): break;
+        default:
+          return expr_err(te,loc,topt,"cannot get member %s since its type is abstract",*f);
+        }
       }
       if (ad->kind == UnionA && !ad->impl->tagged && !in_notreadctxt(te) && !bits_only(t3))
         return expr_err(te,loc,topt,"cannot read union member %s since it is not `bits-only'",*f);
@@ -1600,7 +1605,7 @@ static type_t tcSubscript(tenv_t te_orig, seg_t loc, type_t * topt,
         bool emit_warning = true;
         switch (conref_def((bounds_t)&DynEither_b_val,b)) {
         case &Upper_b(e3):
-          if (is_const_exp(te, e2)) {
+          if (is_const_exp(e2)) {
             let $(i,known) = Evexp::eval_const_uint_exp(e2);
             if (known) {
               let $(j,knownj) = Evexp::eval_const_uint_exp(e3);
@@ -1614,7 +1619,7 @@ static type_t tcSubscript(tenv_t te_orig, seg_t loc, type_t * topt,
           warn(e2->loc, "subscript on thin, zero-terminated pointer could be expensive.");
       } else {
         // for nozero-terminated pointers
-        if (is_const_exp(te, e2)) {
+        if (is_const_exp(e2)) {
           let $(i,known) = Evexp::eval_const_uint_exp(e2);
           if (known)
             check_bound(loc,i,b);
@@ -1782,9 +1787,9 @@ static type_t tcComprehension(tenv_t te, seg_t loc, type_t * topt,
     type_t t = tcExp(te,topt2,body);
     if (te->le == NULL) {
       // the bound and the body must both be constant expressions at top-level
-      if (!is_const_exp(te,bound))
+      if (!is_const_exp(bound))
         terr(bound->loc,"bound is not constant");
-      if (!is_const_exp(te,body))
+      if (!is_const_exp(body))
         terr(bound->loc,"body is not constant");
     }
     if (ztopt != NULL && conref_def(false,*ztopt)) {
@@ -2360,7 +2365,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
         b = new Upper_b(cast_exp(uint_typ,valueof_exp(t,0),false,No_coercion,0));
         break;
       default:
-	if(is_const_exp(te,bnd))
+	if(is_const_exp(bnd))
 	  b = new Upper_b(bnd);
 	else
 	  b = &DynEither_b_val;

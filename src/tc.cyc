@@ -201,7 +201,7 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
         explain_failure();
       }
       // reject non-constant initializers
-      if (!Tcutil::is_const_exp(te,e))
+      if (!Tcutil::is_const_exp(e))
         terr(loc,"initializer is not a constant expression");
     }
   } else {
@@ -891,7 +891,7 @@ void tcEnumdecl(tenv_t te, genv_t ge, seg_t loc, enumdecl_t ed) {
 	++tag_count;
       }
       // allow non-const exprs for now; will be caught below
-      else if (Tcutil::is_const_exp(te,(exp_t)f->tag)) {
+      else if (Tcutil::is_const_exp((exp_t)f->tag)) {
 	let $(t1,known) = Evexp::eval_const_uint_exp((exp_t)f->tag);
 	if(known) tag_count = t1+1;
       }
@@ -923,7 +923,7 @@ void tcEnumdecl(tenv_t te, genv_t ge, seg_t loc, enumdecl_t ed) {
     for (_ fs = ed->fields->v; fs != NULL; fs = fs->tl) {
       let f = fs->hd;
       Tcexp::tcExp(te,NULL,(exp_t)f->tag); // substitute if poss
-      if (!Tcutil::is_const_exp(te,(exp_t)f->tag))
+      if (!Tcutil::is_const_exp((exp_t)f->tag))
 	terr(loc,"enum %s, field %s: expression is not constant",
              *v,*(*f->name)[1]);
     }

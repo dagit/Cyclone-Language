@@ -1168,7 +1168,7 @@ void Cyc_Tcutil_add_tvar_identities(struct Cyc_List_List*);
 # 306
 int Cyc_Tcutil_bits_only(void*t);
 # 309
-int Cyc_Tcutil_is_const_exp(struct Cyc_Tcenv_Tenv*te,struct Cyc_Absyn_Exp*e);
+int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*e);
 # 316
 int Cyc_Tcutil_supports_default(void*);
 # 327
@@ -1394,7 +1394,7 @@ Cyc_Absynpp_typ2string(_tmp62)),((_tmp2FA.tag=0,((_tmp2FA.f1=(struct _dyneither_
 # 201
 Cyc_Tcutil_explain_failure();}
 # 204
-if(!Cyc_Tcutil_is_const_exp(te,_tmp61)){
+if(!Cyc_Tcutil_is_const_exp(_tmp61)){
 # 205
 const char*_tmp300;void*_tmp2FF;(_tmp2FF=0,Cyc_Tcutil_terr(loc,((_tmp300="initializer is not a constant expression",_tag_dyneither(_tmp300,sizeof(char),41))),_tag_dyneither(_tmp2FF,sizeof(void*),0)));}}}else{
 # 209
@@ -2156,7 +2156,7 @@ _tmp21B->tag=(struct Cyc_Absyn_Exp*)Cyc_Absyn_uint_exp(tag_count,_tmp21B->loc);
 # 891
 ++ tag_count;}else{
 # 894
-if(Cyc_Tcutil_is_const_exp(te,(struct Cyc_Absyn_Exp*)_check_null(_tmp21B->tag))){
+if(Cyc_Tcutil_is_const_exp((struct Cyc_Absyn_Exp*)_check_null(_tmp21B->tag))){
 # 895
 unsigned int _tmp224;int _tmp225;struct _tuple11 _tmp223=Cyc_Evexp_eval_const_uint_exp((struct Cyc_Absyn_Exp*)_check_null(_tmp21B->tag));_tmp224=_tmp223.f1;_tmp225=_tmp223.f2;
 # 896
@@ -2202,7 +2202,7 @@ struct Cyc_Absyn_Enumfield*_tmp234=(struct Cyc_Absyn_Enumfield*)fs->hd;
 # 925
 Cyc_Tcexp_tcExp(te,0,(struct Cyc_Absyn_Exp*)_check_null(_tmp234->tag));
 # 926
-if(!Cyc_Tcutil_is_const_exp(te,(struct Cyc_Absyn_Exp*)_check_null(_tmp234->tag))){
+if(!Cyc_Tcutil_is_const_exp((struct Cyc_Absyn_Exp*)_check_null(_tmp234->tag))){
 # 927
 const char*_tmp40D;void*_tmp40C[2];struct Cyc_String_pa_PrintArg_struct _tmp40B;struct Cyc_String_pa_PrintArg_struct _tmp40A;(_tmp40A.tag=0,((_tmp40A.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)*(*_tmp234->name).f2),((_tmp40B.tag=0,((_tmp40B.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)*v),((_tmp40C[0]=& _tmp40B,((_tmp40C[1]=& _tmp40A,Cyc_Tcutil_terr(loc,((_tmp40D="enum %s, field %s: expression is not constant",_tag_dyneither(_tmp40D,sizeof(char),46))),_tag_dyneither(_tmp40C,sizeof(void*),2)))))))))))));}}}}
 # 932

@@ -306,7 +306,7 @@ extern bool same_atts(attributes_t, attributes_t);
 extern bool bits_only(type_t t);
 
 // returns true iff e is an expression that can be evaluated at compile time
-extern bool is_const_exp(tenv_t te, exp_t e);
+extern bool is_const_exp(exp_t e);
 
 // like Core::snd, but first argument is a tqual_t (not a BoxKind)
 extern type_t snd_tqt($(tqual_t,type_t)@`r);

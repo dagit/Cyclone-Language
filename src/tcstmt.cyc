@@ -459,7 +459,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         if (initializer != NULL) {
           tcExpInitializer(te2,&t,(exp_t)initializer);
           // te is only used by is_const_exp for globals and function names
-          if(!is_local && !is_const_exp(te,(exp_t)initializer))
+          if(!is_local && !is_const_exp((exp_t)initializer))
             terr(d->loc, "initializer needs to be a constant expression");
           if (!coerce_assign(te2,(exp_t)initializer,t)) {
             let varstr = *x;
