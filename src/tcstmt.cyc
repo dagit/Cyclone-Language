@@ -42,7 +42,7 @@ static synth remove_local_vars(tenv te, list<vardecl> x, synth ssyn) {
 // used to type-check Let_d, switch clauses, and catch clauses
 static synth pattern_synth(segment loc, tenv te, list<tvar> tvs, 
 			   list<vardecl> x, stmt s, Opt_t<exp> where_opt,
-			   bool s_in_switch) {
+			   bool s_in_switch, bool last_case) {
   tenv te2 = add_type_vars(loc,te,tvs);
   for(; x != null; x = x->tl)
     te2 = add_pat_var(loc, te2, x->hd);
@@ -56,7 +56,7 @@ static synth pattern_synth(segment loc, tenv te, list<tvar> tvs,
     te2 = layer_synth(te2,esyn);
   }
   if(s_in_switch)
-    te2 = set_in_switch(te2);
+    te2 = set_in_switch(te2, last_case);
   return remove_local_vars(te,x,tcStmt(te2,s));
 }
 
@@ -68,14 +68,13 @@ synth tcStmt(tenv te, stmt s0) {
   case Exp_s(e): return tcExp(te,null,e);
 
   case Seq_s(s1,s2):
-    let te1 = clear_fallthru(te);
-    let ssyn1 = tcStmt(te1,s1);
+    let ssyn1 = tcStmt(te,s1);
     // JGM: try to treat sequences as "tail-calls" to avoid a deep stack.
     bool still_working = true;
     while (still_working) {
       switch (s2->r) {
       case Seq_s(s3,s4):
-	ssyn1 = seq_synth(ssyn1,tcStmt(layer_synth(te1,ssyn1),s3));
+	ssyn1 = seq_synth(ssyn1,tcStmt(layer_synth(te,ssyn1),s3));
 	s2 = s4;
 	continue;
       default:
@@ -86,7 +85,6 @@ synth tcStmt(tenv te, stmt s0) {
     return seq_synth(ssyn1,tcStmt(layer_synth(te,ssyn1),s2));
 
   case Return_s(eopt):
-    te = clear_fallthru(te);
     typ t = return_typ(te);
     if (eopt == null) {
       switch (t) {
@@ -110,7 +108,6 @@ synth tcStmt(tenv te, stmt s0) {
     return empty_synth(te);
 
   case IfThenElse_s(e,s1,s2):
-    te = clear_fallthru(te);
     let esyn = tcExp(te,&Opt(bool_t),e);
     if (!coerce_to_bool(te,e))
       terr(e->loc,xprintf("test of if statement has type %s instead of bool",
@@ -121,12 +118,11 @@ synth tcStmt(tenv te, stmt s0) {
     return join_synth(seq_synth(esyn,ssyn1),seq_synth(esyn,ssyn2));
 
   case While_s(e,s):
-    let te2  = clear_fallthru(te);
-    let esyn = tcExp(te2,&Opt(bool_t),e);
-    if (!coerce_to_bool(te2,e))
+    let esyn = tcExp(te,&Opt(bool_t),e);
+    if (!coerce_to_bool(te,e))
       terr(e->loc,xprintf("test of while loop has type %s instead of bool",
                           typ2string(synth_typ(esyn))));
-    let $(true_te,_) = bool_layer_synth(te2,esyn);
+    let $(true_te,_) = bool_layer_synth(te,esyn);
     let ssyn = tcStmt(set_in_loop(true_te),s);
     return loop_synth(esyn,ssyn);
 
@@ -148,7 +144,6 @@ synth tcStmt(tenv te, stmt s0) {
     return forward_jump_synth(te);
 
   case For_s(e1,e2,e3,s):
-    te = clear_fallthru(te);
     let esyn1 = tcExp(te,null,e1);
     te = layer_synth(te,esyn1);
     let esyn2 = tcExp(te,&Opt(bool_t),e2);
@@ -163,113 +158,68 @@ synth tcStmt(tenv te, stmt s0) {
     return seq_synth(esyn1,loop_synth(esyn2,esyn3));
 
   case Switch_s(e,scs0):
-    te = clear_fallthru(te);
     let esyn = tcExp(te,null,e);
     let t    = synth_typ(esyn);
     te = layer_synth(te,esyn);
+    // type-check the cases in reverse order, a fallthru therefore transfers
+    // control to the case most recently type-checked. For the last case,
+    // we inherit the fallthru from above (i.e. from an outer switch).
+
     synth swsyn = (scs0 == null) ? esyn : empty_synth(te);
-    for (let scs = scs0; scs != null; scs = scs->tl) {
-      let p = scs->hd->pattern;
-      let &$(new_tvs,x) = tcPat(te,p);
+    bool last_case = true;
+    for (let scs = List::rev(scs0); scs != null; scs = scs->tl) {
+      let p       = scs->hd->pattern;
+      let pat_typ = tcPat(te,p);
+      let &$(new_tvs,x) = pat_typ;
       if (!unify(p->topt->v,t))
 	terr(scs->hd->loc,xprintf("switch on type %s, but case expects type %s",
 				  typ2string(t), typ2string(p->topt->v)));
-      let ssyn = pattern_synth(scs->hd->loc, te, new_tvs, x,
-			       scs->hd->body, scs->hd->where_clause, true);
+      let pvs = null;
+      for(let y=x; y!=null; y=y->tl) 
+	pvs = &cons(y->hd->name, pvs);
+      scs->hd->pat_vars = &Opt(List::imp_rev(pvs));
+      // type-checking the body will type-check any explicit fallthrus.
+      let ssyn = pattern_synth(scs->hd->loc, te, new_tvs, x, scs->hd->body, 
+			       scs->hd->where_clause, true, last_case);
       if (synth_may_implicit_fallthru(ssyn))
 	terr(scs->hd->body->loc,
 	     "switch case must not implicitly fall through to next case");
-      if (!synth_may_explicit_fallthru(ssyn)) {
-	swsyn = join_synth(swsyn,ssyn);
-      } else {
-	// FIX: binders must be explictly instantiated
-	// we need to record only the forward jump info in swsyn
-	swsyn = join_synth(swsyn,drop_fallthru_synth(ssyn));
-
-	// check that the bound type variables and pattern variables are
-	// the same in the next pattern (if any).
-	if (scs->tl == null) 
-	  terr(scs->hd->body->loc,"last case of switch does a fallthru");
-	else {
-	  let p2 = scs->tl->hd->pattern;
-	  let &$(new_tvs2,x2) = tcPat(te,p);
-	  for (; new_tvs != null && new_tvs2 != null; new_tvs = new_tvs->tl,
-		 new_tvs2 = new_tvs2->tl) {
-	    if (String::strcmp(new_tvs->hd,new_tvs2->hd) != 0) {
-	      terr(p2->loc,"case fallthru: bound type variable mismatch");
-	      break;
-	    }
-	  }
-	  if (new_tvs != null || new_tvs2 != null)
-	    terr(p2->loc,"case fallthru: bound type variable mismatch");
-	  for (; x != null && x2 != null; x = x->tl, x2 = x2->tl) {
-	    let &Vardecl(_,&$(_,v1),q1,t1,_,_) = x->hd;
-	    let &Vardecl(_,&$(_,v2),q2,t2,_,_) = x2->hd;
-	    if (String::strcmp(v1,v2) != 0 
-		|| !equal_tqual(q1,q2)
-		|| unify(t1,t2)) {
-	      terr(p2->loc,"case fallthru: bound pattern variable mismatch");
-	      break;
-	    }
-	  }
-	  if (x != null || x2 != null)
-	    terr(p2->loc,"case fallthru: bound pattern variable mismatch");
-	}
-      }
-    }
+      // FIX: Jump stuff is broken here, but it's leaving this pass soon anyway.
+      swsyn = join_synth(swsyn, ssyn);
+      te    = set_fallthru_typ(te, pat_typ);
+      last_case = false;
+    } 
     check_switch_exhaustive(s0->loc,scs0);
     return seq_synth(esyn,switch_bottom(swsyn));
 
   case TryCatch_s(s,scs0):
-    let te1   = clear_fallthru(te);
-    let ssyn1 = tcStmt(te1,s);
+    let ssyn1 = tcStmt(te,s);
 
+    // similar to Switch_s -- check the patterns in reverse order:
     synth swsyn = empty_synth(te);
-
-    for (let scs = scs0; scs != null; scs = scs->tl) {
-      let p = scs->hd->pattern;
-      let &$(new_tvs,x) = tcPat(te1,p);
+    bool last_case = true;
+    for (let scs = List::rev(scs0); scs != null; scs = scs->tl) {
+      let p       = scs->hd->pattern;
+      let pat_typ = tcPat(te,p);
+      let &$(new_tvs,x) = pat_typ;
       if (!unify(p->topt->v,exn_t))
         terr(scs->hd->loc, xprintf("expected xenum exn but found %s",
 				   typ2string(p->topt->v)));
-      let ssyn = pattern_synth(scs->hd->loc, te, new_tvs, x,
-			       scs->hd->body, scs->hd->where_clause, true);
+      let pvs = null;
+      for(let y=x; y!=null; y=y->tl) 
+	pvs = &cons(y->hd->name, pvs);
+      scs->hd->pat_vars = &Opt(List::imp_rev(pvs));
+      // type-checking the body will type-check any explicit fallthrus
+      let ssyn = pattern_synth(scs->hd->loc, te, new_tvs, x, scs->hd->body, 
+			       scs->hd->where_clause, true, last_case);
       if (synth_may_implicit_fallthru(ssyn))
 	terr(scs->hd->body->loc,
 	     "catch case must not implicitly fall through to next case");
-      if (!synth_may_explicit_fallthru(ssyn)) {
-	swsyn = join_synth(swsyn,ssyn);
-      } else {
-	// FIX: binders must be explicitly instantiated
-	swsyn = join_synth(swsyn,drop_fallthru_synth(ssyn));
-	if (scs->tl == null) 
-	  terr(scs->hd->body->loc,"last case of catch does a fallthru");
-	else {
-	  let p2 = scs->tl->hd->pattern;
-	  let &$(new_tvs2,x2) = tcPat(te1,p);
-	  for (; new_tvs != null && new_tvs2 != null; new_tvs = new_tvs->tl,
-		 new_tvs2 = new_tvs2->tl) 
-	    if (String::strcmp(new_tvs->hd,new_tvs2->hd) != 0) {
-	      terr(p2->loc,"case fallthru: bound type variable mismatch");
-	      break;
-	    }
-	  if (new_tvs != null || new_tvs2 != null)
-	    terr(p2->loc,"case fallthru: bound type variable mismatch");
-	  for (; x != null && x2 != null; x = x->tl, x2 = x2->tl) {
-	    let &Vardecl(_,&$(_,v1),q1,t1,_,_) = x->hd;
-	    let &Vardecl(_,&$(_,v2),q2,t2,_,_) = x2->hd;
-	    if (String::strcmp(v1,v2) != 0 
-		|| !equal_tqual(q1,q2) 
-		|| unify(t1,t2)) {
-	      terr(p2->loc,"case fallthru: bound pattern variable mismatch");
-	      break;
-	    }
-	  }
-	  if (x != null || x2 != null)
-	    terr(p2->loc,"case fallthru: bound pattern variable mismatch");
-	}
-      }
-    }
+      // FIX: Jump stuff is broken here, but it's leaving this pass soon anyway.
+      swsyn = join_synth(swsyn, ssyn);
+      te    = set_fallthru_typ(te, pat_typ);
+      last_case = false;
+    } 
     check_catch_overlap(s0->loc,scs0);
     return join_synth(ssyn1,switch_bottom(swsyn));
 
@@ -294,16 +244,28 @@ synth tcStmt(tenv te, stmt s0) {
   case With(q): return tcWith(te,s0->loc,s0,q);
 */
 
-  case Fallthru_s(el):
-    if (!is_ok_fallthru(te)) {
-      terr(s0->loc,"bad explicit fallthru");
+  case Fallthru_s(es):
+    switch(get_fallthru_typ(te)) {
+    case null:
+      terr(s0->loc,"fallthru not in a non-last case");
       return skip_synth(te);
-    } else if(el != null) {
-      // FIX: do this case!
-      terr(s0->loc,"binding fallthrus unimplemented");
-      return skip_synth(te);
+    case &$(tvs,ts):
+      list<$(var,typ)@> instantiation = List::map(make_inst_var,tvs);
+      ts = List::map_c(substitute,instantiation,ts);
+      for(; ts != null && es != null; ts = ts->tl, es = es->tl) {
+	te = layer_synth(te, tcExp(te, null, es->hd));
+	if(!coerce_arg(te,es->hd,ts->hd))
+	  terr(s0->loc, xprintf("fallthru argument has type %s "
+				"but pattern variable has type %s",
+				typ2string(es->hd->topt->v),
+				typ2string(ts->hd)));
+      }
+      if(es != null)
+	terr(s0->loc, "too many arguments to explicit fallthru");
+      else if (ts != null)
+	terr(s0->loc, "too few arguments to explicit fallthru");
+      return fallthru_synth(te); 
     }
-    return fallthru_synth(te);
 
   case Decl_s(d,s):
     switch (d->r) {
@@ -341,7 +303,7 @@ synth tcStmt(tenv te, stmt s0) {
 		     typ2string(p->topt->v),typ2string(synth_typ(esyn))));
       if(check_let_pat_exhaustive(s0->loc,p))
 	*exhaust = true; // side effect
-      return pattern_synth(s0->loc, te, null, x, s, null, false);
+      return pattern_synth(s0->loc, te, null, x, s, null, false, true);
 
     case Namespace_d(n,tds):
       terr(d->loc,"namespace is allowed at top level only");
@@ -413,7 +375,6 @@ synth tcStmt(tenv te, stmt s0) {
 */
 
   case Do_s(s,e):
-    te = clear_fallthru(te);
     let ssyn = tcStmt(set_in_loop(te),s);
     let te2  = layer_synth(te,ssyn);
     let esyn = tcExp(te2,&Opt(bool_t),e);

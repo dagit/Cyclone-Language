@@ -237,12 +237,13 @@ static void tcFndecl(tenv te, genv ge, segment loc, fndecl fd) {
   //      while we're dealing with top-level stuff (though it's not too hard
   //      to undo that assumption)
   te->le = &Opt(Outermost(&Fenv{ // FIX: deal with varargs
-                           .labels     = null,
-			   .locals     = Dict::empty(String::strcmp),
-			   .ok         = default_ok_ctrl,
-			   .uv         = Set::empty(String::strcmp),
-			   .return_typ = fd->ret_type,
-			   .type_vars  = fd->tvs // FIX: check unique
+                           .labels       = null,
+			   .locals       = Dict::empty(String::strcmp),
+			   .ok           = default_ok_ctrl,
+			   .uv           = Set::empty(String::strcmp),
+			   .return_typ   = fd->ret_type,
+			   .type_vars    = fd->tvs, // FIX: check unique
+			   .fallthru_typ = null
                           }));
   for (let args = fd->args; args != null; args = args->tl) 
     te = add_param_var(loc,te,args->hd); // add_param_var is functional!

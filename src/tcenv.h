@@ -50,6 +50,9 @@ extern struct Fenv {
   Set<var>            uv; // maybe-unassigned variables
   typ                 return_typ;
   list<tvar>          type_vars; // type variables that can occur free
+  // for type-checking a fallthru -- null means fallthru not allowed,
+  // Opt(null) means fallthru must have 0 arguments.
+  $(list<tvar>,list<typ>) * fallthru_typ;
 };
 typedef struct Fenv @fenv; 
 
@@ -70,11 +73,12 @@ extern struct Tenv {
 typedef struct Tenv @tenv;
 
 extern tenv set_in_loop(tenv);
-extern tenv set_in_switch(tenv);
-extern tenv clear_fallthru(tenv);
+extern tenv set_in_switch(tenv,bool);
 extern bool is_ok_continue(tenv);
 extern bool is_ok_break(tenv);
-extern bool is_ok_fallthru(tenv);
+
+extern $(list<tvar>,list<typ>)* get_fallthru_typ(tenv);
+extern tenv set_fallthru_typ(tenv, $(list<tvar>,list<vardecl>) *);
 
 extern ok_ctrl_t default_ok_ctrl;
  
@@ -162,8 +166,6 @@ extern synth fallthru_synth(tenv te);
 extern synth add_var_synth(Set<var> v, synth s);
 // remove v from the fall-through edge of the synth (if any)
 extern synth initialize_var_synth(synth s, var v);
-// remove all of the variables on the fall-through edge
-extern synth drop_fallthru_synth(synth s);
 // set of variables unassigned on fallthru edge
 extern Set<var> maybe_unassigned(synth);
 // set of variables unassigned on "true"/"false" branches respectively

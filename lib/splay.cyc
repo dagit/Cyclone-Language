@@ -122,7 +122,7 @@ static void lift<`a,`b>(list<$(enum direction,struct noderef<`a,`b> @)@> dnl) {
 // maybe want a splay_c too, but dict doesn't need it and that's the immediate
 // concern
 bool splay<`a,`b>(int reln(`a,`a), `a reln_first_arg, enum tree<`a,`b> tree) {
-  let path = null;
+  list<$(enum direction, struct noderef<`a,`b>@)@> path = null;
   while(true) {
     switch (tree) {
     case Node(nr):

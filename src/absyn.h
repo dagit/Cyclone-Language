@@ -254,10 +254,11 @@ namespace Absyn {
   };
 
   EXTERN_DEFINITION struct Switch_clause {
-    pat        pattern;
-    Opt_t<exp> where_clause;
-    stmt       body;
-    segment    loc;
+    pat              pattern;
+    Opt_t<list<qvar>> pat_vars; // set by type-checker, used by translation to C
+    Opt_t<exp>       where_clause;
+    stmt             body;
+    segment          loc;
   };
 
   // only local and pat cases need to worry about shadowing
@@ -388,7 +389,7 @@ namespace Absyn {
   extern typ file_t();
   // pointers
   extern typ nullableptr_t(typ t, tqual tq);
-  extern typ void_star_t();
+  extern typ void_star_typ();
   extern typ pureptr_t(typ t, tqual tq);
   // structs
   extern typ strct(var name);

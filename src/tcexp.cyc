@@ -785,7 +785,7 @@ static synth tcStructMember(tenv te, segment loc, Opt_t<typ> topt,
   }
 }
 
-/* e->f */
+// e->f 
 static synth tcStructArrow(tenv te, segment loc, Opt_t<typ> topt, 
 			   exp e, field_name f) {
   synth esyn = tcExp(te,null,e);
@@ -794,7 +794,7 @@ static synth tcStructArrow(tenv te, segment loc, Opt_t<typ> topt,
   case PointerType(t2,_,_):
     switch (compress(t2)) {
     case StructType(nopt,ts):
-      let n = nopt->v; // FIX: is this guaranteed non-null?
+      let n  = nopt->v; // FIX: is this guaranteed non-null?
       let sd = lookup_structdecl(te,loc,n);
       let finfo_opt = lookup_struct_field(sd,f);
       if (finfo_opt == null) {
@@ -805,9 +805,8 @@ static synth tcStructArrow(tenv te, segment loc, Opt_t<typ> topt,
       let t3 = substitute(inst,finfo_opt->v[1]);
       return synth_set_typ(esyn,t3);
     default:
-      return expr_err(te,loc,
-                      xprintf("expecting struct pointer, found %s pointer",
-                              typ2string(t)));
+      return expr_err(te,loc, xprintf("expecting struct pointer, found %s", 
+				      typ2string(t)));
     }
   default:
       return expr_err(te,loc,xprintf("expecting struct pointer, found %s",
@@ -815,8 +814,8 @@ static synth tcStructArrow(tenv te, segment loc, Opt_t<typ> topt,
   }
 }
 
-/* e1[e2] */
-static synth tcSubscript(tenv te, segment loc, Opt_t<typ> topt, exp e1, exp e2) {
+// e1[e2] 
+static synth tcSubscript(tenv te, segment loc, Opt_t<typ> topt, exp e1, exp e2){
   let list_result = tcExpList(te,&cons(e1,&cons(e2,null)));
   typ res;
   typ t1 = compress(e1->topt->v);
@@ -1253,7 +1252,6 @@ bool is_const_exp(tenv te, exp e) {
 // we do not instantiate the type quantifiers.  Otherwise if e has a
 // poly-type, we instantiate the quantifiers. 
 synth tcExp(tenv te, Opt_t<typ> topt, exp e) {
-  te = clear_fallthru(te);
   synth esyn;
   switch (e->r) {
   case NoInstantiate_e(e2):

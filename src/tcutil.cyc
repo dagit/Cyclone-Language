@@ -674,7 +674,7 @@ bool silent_castable(tenv te, segment loc, typ t1, typ t2) {
   }
 }
 
-/* coerce e to have type t -- used in function call */
+// coerce e to have type t -- used in function call and explicit fallthru
 bool coerce_arg(tenv te, exp e, typ t2) {
   typ t1 = compress(e->topt->v);
   // see if types immediately match
@@ -1221,9 +1221,8 @@ exp default_initializer(tenv te, typ t, segment loc) {
 */
 
   default:
-    terr(loc,
-         xprintf("declaration of type %s requires initializer",
-                 typ2string(t)));
+    terr(loc, xprintf("declaration of type %s requires initializer",
+		      typ2string(t)));
     break;
   }
   return e;

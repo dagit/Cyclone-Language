@@ -1,0 +1,31 @@
+
+char f1(char c) {
+  switch(c) {
+  case 'D': fallthru;
+  case 'A': fallthru();
+  case 'N': return '!';
+  default:  return c;
+  }
+}
+
+enum Foo { Bar, Baz(int) };
+
+int f2(enum Foo y) {
+  int z = 3; // definite assignment will be smarter later
+  switch(y) {
+  case Bar:    fallthru(7);
+  case Baz(x): z = x; break;
+  }
+  return z;
+}
+
+enum Quux { Pair1(int,int), Pair2(int,int) };
+
+bool b = true;
+
+int f3(enum Quux q) {
+  switch(q) {
+  case Pair1(x,y): if (b) fallthru(y,x); return 0;
+  case Pair2(x,y): return x-y;
+  }
+}

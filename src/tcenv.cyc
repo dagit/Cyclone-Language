@@ -137,6 +137,9 @@ struct Fenv {
   Set<var>              uv; 
   typ                   return_typ;
   list<tvar>            type_vars; // type variables that can occur free
+  // for type-checking a fallthru -- null means fallthru not allowed,
+  // Opt(&$(_,null)) means fallthru must have 0 arguments.
+  $(list<tvar>,list<typ>) * fallthru_typ; 
 };
 
 // Models the nesting of the RTCG constructs 
@@ -372,8 +375,7 @@ tenv add_local_var(segment loc, tenv te, vardecl vd) {
 		   Dict::insert(fe->locals,v,Local_b(vd)),
                    fe->ok,
                    uv,
-                   fe->return_typ,
-		   fe->type_vars);
+                   fe->return_typ, fe->type_vars, fe->fallthru_typ);
   return put_fenv(te,fe2);
 }
 // assume uniqueness has been checked elsewhere, never uninitialized
@@ -382,10 +384,8 @@ tenv add_param_var(segment loc, tenv te, $(var,tqual,typ)@ trip) {
   fenv fe  = get_fenv(te);
   fenv fe2 = &Fenv(fe->labels,
 		   Dict::insert(fe->locals,trip[0],Param_b(trip)),
-                   fe->ok,
-                   fe->uv,
-                   fe->return_typ,
-		   fe->type_vars);
+                   fe->ok, fe->uv, fe->return_typ, fe->type_vars, 
+		   fe->fallthru_typ);
   return put_fenv(te,fe2);
 }
 // assume uniqueness has been checked elsewhere, never uninitialized
@@ -397,10 +397,8 @@ tenv add_pat_var(segment loc, tenv te, vardecl vd) {
     vd->shadow = ++shadow_ctr;
   fenv fe2 = &Fenv(fe->labels,
 		   Dict::insert(fe->locals,v,Pat_b(vd)),
-                   fe->ok,
-                   fe->uv,
-                   fe->return_typ,
-		   fe->type_vars);
+                   fe->ok, fe->uv, fe->return_typ, fe->type_vars,
+		   fe->fallthru_typ);
   return put_fenv(te,fe2);
 }
 
@@ -427,12 +425,9 @@ tenv add_type_vars(segment loc,tenv te,list<tvar> tvs) {
   list<tvar> new_tvs = List::append(tvs,lookup_type_vars(te));
   Tcutil::check_unique_tvars(loc,new_tvs);
   fenv fe = get_fenv(te);
-  fenv fe2 = &Fenv(fe->labels,
-		   fe->locals,
-		   fe->ok,
-		   fe->uv,
-		   fe->return_typ,
-		   new_tvs);
+  fenv fe2 = &Fenv(fe->labels, fe->locals, fe->ok, fe->uv, fe->return_typ,
+		   new_tvs,
+		   fe->fallthru_typ);
   return put_fenv(te,fe2);
 }
 
@@ -561,8 +556,8 @@ synth skip_synth(tenv te) { return standard_synth(te, VoidType); }
 synth empty_synth(tenv te) {
   let j = empty_var_set->v;
   let u = Always(j);
-  return &Synth{.type = wildtyp(),.control = empty_ctrl,
-                .norm_unas = u,.jump_unas = j};
+  return &Synth{.type = wildtyp(), .control = empty_ctrl,
+                .norm_unas = u,    .jump_unas = j};
 }
 
 // synth we get upon a break, goto, or throw -- forward jump with no
@@ -651,18 +646,12 @@ synth loop_synth(synth e, synth s) {
 		.norm_unas = Always(nu), .jump_unas = ju};
 }
 
-// an explicit fallthru -- similar to skip but ctrl indicates explicit fallthru
+// an explicit fallthru -- similar to forward jump
 synth fallthru_synth(tenv te) {
   return &Synth{.type      = VoidType, 
 		.control   = fallthru_ctrl,
-		.norm_unas = Always(get_unassigned(te)),
-		.jump_unas = empty_var_set->v};
-}
-
-// remove all of the variables on the fall-through edge
-synth drop_fallthru_synth(synth s) {
-  s->norm_unas = empty_unassigned->v;
-  return s;
+ 	        .norm_unas = empty_unassigned->v,
+  	        .jump_unas = get_unassigned(te)};
 }
 
 // add the set v to both edges of the synth
@@ -683,8 +672,9 @@ synth initialize_var_synth(synth s, var v) {
 tenv set_unassigned(tenv te, Set<var> un) {
   if (te->le == null) return te;
   fenv fe = get_fenv(te);
-  fenv fe2 = &Fenv(fe->labels,fe->locals,fe->ok,un,
-                   fe->return_typ,fe->type_vars);
+  fenv fe2 = &Fenv(fe->labels, fe->locals, fe->ok,
+		   un,
+                   fe->return_typ, fe->type_vars, fe->fallthru_typ);
   return put_fenv(te,fe2);
 }
 
@@ -698,53 +688,55 @@ bool is_ok_break(tenv te) {
   fenv fe = get_fenv(te);
   return (fe->ok->OK_switch_break || fe->ok->OK_loop_break);
 }
-bool is_ok_fallthru(tenv te) {
-  if (te->le == null) return false;
+
+$(list<tvar>,list<typ>)* get_fallthru_typ(tenv te) {
   fenv fe = get_fenv(te);
-  return fe->ok->OK_fallthru;
+  if(!fe->ok->OK_fallthru)
+    return null;
+  return fe->fallthru_typ; // to be careful, we could copy
 }
+tenv set_fallthru_typ(tenv te, $(list<tvar>,list<vardecl>) * ft_binding) {
+  if(te->le == null) env_err("Tcenv: unexpected set_fallthru_typ");
+  let ft_typ = null;
+  for(let vds = ft_binding[1]; vds!=null; vds=vds->tl)
+    ft_typ = &cons(vds->hd->type,ft_typ);
+  ft_typ = List::imp_rev(ft_typ);
+  fenv fe  = get_fenv(te);
+  fenv fe2 = &Fenv(fe->labels, fe->locals, fe->ok,
+		   fe->uv, fe->return_typ, fe->type_vars,
+		   &$(ft_binding[0],ft_typ));
+  return put_fenv(te,fe2);
+}
+
 tenv set_in_loop(tenv te) {
   if (te->le == null) env_err("Tcenv: unexpected set_in_loop");
   fenv fe = get_fenv(te);
   ok_ctrl_t c2 = &Ok_ctrl{.OK_continue=true,.OK_loop_break=true,
 			.OK_switch_break=false,.OK_fallthru=false};
-  fenv fe2 = &Fenv(fe->labels,fe->locals,c2,fe->uv,fe->return_typ,
-		   fe->type_vars);
+  fenv fe2 = &Fenv(fe->labels,fe->locals,
+		   c2,
+		   fe->uv, fe->return_typ, fe->type_vars, fe->fallthru_typ);
   return put_fenv(te,fe2);
 }
-tenv set_in_switch(tenv te) {
+tenv set_in_switch(tenv te, bool last_case) {
   if (te->le == null) env_err("Tcenv: unexpected set_in_switch");
   fenv fe = get_fenv(te);
-  ok_ctrl_t c1 = fe->ok;
-  ok_ctrl_t c2 = &Ok_ctrl{.OK_continue=c1->OK_continue,
+  ok_ctrl_t c2 = &Ok_ctrl{.OK_continue=fe->ok->OK_continue,
 			  .OK_loop_break=false,
 			  .OK_switch_break=true,
-			  .OK_fallthru=true};
-  fenv fe2 = &Fenv(fe->labels,fe->locals,c2,fe->uv,fe->return_typ,
-                   fe->type_vars);
+			  .OK_fallthru=!last_case};
+  fenv fe2 = &Fenv(fe->labels, fe->locals,
+		   c2,
+		   fe->uv, fe->return_typ, fe->type_vars, fe->fallthru_typ);
   return put_fenv(te,fe2);
 }
-tenv clear_fallthru(tenv te) {
-  if (te->le == null) return te;
-  fenv fe = get_fenv(te);
-  ok_ctrl_t c1 = fe->ok;
-  // avoid allocating a new env unless the state really changes
-  if (fe->ok->OK_fallthru) {
-    ok_ctrl_t c2 = &Ok_ctrl{.OK_continue=c1->OK_continue,
-			    .OK_loop_break=c1->OK_loop_break,
-			    .OK_switch_break=c1->OK_switch_break,
-			    .OK_fallthru=false};
-    fenv fe2 = &Fenv(fe->labels,fe->locals,c2,fe->uv,fe->return_typ,
-		     fe->type_vars);
-    return put_fenv(te,fe2);
-  } else
-    return te;
-}
+
 tenv add_label(tenv te,var v) {
   if (te->le == null) env_err("Tcenv: unexpected add_label");
   fenv fe  = get_fenv(te);
-  fenv fe2 = &Fenv(&cons(v,fe->labels),fe->locals,fe->ok,
-                   fe->uv,fe->return_typ,fe->type_vars);
+  fenv fe2 = &Fenv(&cons(v,fe->labels),
+		   fe->locals, fe->ok, fe->uv, fe->return_typ, fe->type_vars,
+		   fe->fallthru_typ);
   return put_fenv(te,fe2);
 }
 typ return_typ(tenv te) {

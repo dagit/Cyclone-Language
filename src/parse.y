@@ -1762,19 +1762,19 @@ switch_clauses:
   /* empty */
     { $$=^$(null); }
 | DEFAULT ':' block_item_list
-    { $$=^$(&cons(&Switch_clause(new_pat(Wild_p,LOC(@1,@1)),
+    { $$=^$(&cons(&Switch_clause(new_pat(Wild_p,LOC(@1,@1)),null,
                                  null,$3,LOC(@1,@3)),
                   null));}
 | CASE pattern ':' switch_clauses
-    { $$=^$(&cons(&Switch_clause($2,null,skip_stmt(LOC(@3,@3)),
+    { $$=^$(&cons(&Switch_clause($2,null,null,skip_stmt(LOC(@3,@3)),
                                  LOC(@1,@4)),$4)); }
 | CASE pattern ':' block_item_list switch_clauses
-    { $$=^$(&cons(&Switch_clause($2,null,$4,LOC(@1,@4)),$5)); }
+    { $$=^$(&cons(&Switch_clause($2,null,null,$4,LOC(@1,@4)),$5)); }
 | CASE pattern WHERE expression ':' switch_clauses
-    { $$=^$(&cons(&Switch_clause($2,&Opt($4),skip_stmt(LOC(@5,@5)),
+    { $$=^$(&cons(&Switch_clause($2,null,&Opt($4),skip_stmt(LOC(@5,@5)),
                                  LOC(@1,@6)),$6)); }
 | CASE pattern WHERE expression ':' block_item_list switch_clauses
-    { $$=^$(&cons(&Switch_clause($2,&Opt($4),$6,LOC(@1,@7)),$7)); }
+    { $$=^$(&cons(&Switch_clause($2,null,&Opt($4),$6,LOC(@1,@7)),$7)); }
 ;
 
 iteration_statement:
@@ -1840,6 +1840,8 @@ jump_statement:
     { $$=^$(return_stmt(&Opt($2),LOC(@1,@2)));}
 /* Cyc:  explicit fallthru for switches */
 | FALLTHRU ';'
+    { $$=^$(fallthru_stmt(null,LOC(@1,@1)));}
+| FALLTHRU '(' ')' ';'
     { $$=^$(fallthru_stmt(null,LOC(@1,@1)));}
 | FALLTHRU '(' argument_expression_list ')' ';'
     { $$=^$(fallthru_stmt($3,LOC(@1,@1)));}

@@ -134,7 +134,7 @@ typ nullableptr_t(typ t, tqual tq) {
   return PointerType(t,new_conref((Bool)true),tq);
 }
 static Opt_t<typ> void_star_t_opt = null;
-typ void_star_t() {
+typ void_star_typ() {
   if (void_star_t_opt == null) {
     void_star_t_opt = &Opt(nullableptr_t(void_t, empty_tqual()));
   }
