@@ -696,12 +696,19 @@ static relns_t<`r> add_subscript_reln(region_t<`r> rgn,
 static flow_t<`r> restore_noconsume_arg(analenv_t<`r> env,
 					flow_t<`r> inflow,
 					exp_t exp,
-					Position::seg_t loc) { 
+					Position::seg_t loc,
+					absRval_t<`r> old_rval) { 
   let $(_,lval) = anal_Lexp(env,inflow,true,true,exp);
   switch $(inflow,lval) {
   case $({.ReachableFL = $(fd,relns)},{.PlaceL = p}):
     let new_rval = typ_to_absrval(env->fenv,(type_t)exp->topt,
 				  false,env->fenv->unknown_all);
+    switch (old_rval) {
+    case &NamedLocation(vd,_):
+      new_rval = rnew (env->fenv->r) NamedLocation(vd,new_rval);
+      break;
+    default: break;
+    }
     DEBUG_PRINT("unconsuming noconsume(_) arg %s, inflow {",exp2string(exp));
     DEBUG_PRINT_F(print_flow,inflow);
     fd=assign_place(env->fenv,loc,fd,env->all_changed,p,new_rval);
@@ -1169,7 +1176,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
 	  outflow = use_Rval(env,es->hd->loc,outflow,rvals->hd);
 	  if (List::memq(noconsume_params,i) && 
 	      Tcutil::is_noalias_pointer((type_t)es->hd->topt,false))
-	    outflow = restore_noconsume_arg(env,outflow,es->hd,es->hd->loc);
+	    outflow = restore_noconsume_arg(env,outflow,es->hd,es->hd->loc,rvals->hd);
 	}
       }
       // if the called function doesn't return, we get BottomFL out
