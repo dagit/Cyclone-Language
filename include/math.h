@@ -4,45 +4,38 @@
 #define  _MATH_H_
 namespace Math {
 extern "C" {
-#ifndef _PARAMS
-#define _PARAMS(x) x
-#endif
-
-#ifndef EXFUN
-#define EXFUN(f,x) f x
-#endif
 
 /* Reentrant ANSI C functions.  */
 
 #ifndef __math_68881
-double atan _PARAMS((double));
-double cos _PARAMS((double));
-double sin _PARAMS((double));
-double tan _PARAMS((double));
-double tanh _PARAMS((double));
-double frexp _PARAMS((double, int *`r));
-double modf _PARAMS((double, double *`r));
-double ceil _PARAMS((double));
-double fabs _PARAMS((double));
-double floor _PARAMS((double));
+double atan (double);
+double cos (double);
+double sin (double);
+double tan (double);
+double tanh (double);
+double frexp (double, int *`r);
+double modf (double, double *`r);
+double ceil (double);
+double fabs (double);
+double floor (double);
 #endif /* ! defined (__math_68881) */
 
 /* Non reentrant ANSI C functions.  */
 
 #ifndef _REENT_ONLY
 #ifndef __math_6881
-double acos _PARAMS((double));
-double asin _PARAMS((double));
-double atan2 _PARAMS((double, double));
-double cosh _PARAMS((double));
-double sinh _PARAMS((double));
-double exp _PARAMS((double));
-double ldexp _PARAMS((double, int));
-double log _PARAMS((double));
-double log10 _PARAMS((double));
-double pow _PARAMS((double, double));
-double sqrt _PARAMS((double));
-double fmod _PARAMS((double, double));
+double acos (double);
+double asin (double);
+double atan2 (double, double);
+double cosh (double);
+double sinh (double);
+double exp (double);
+double ldexp (double, int);
+double log (double);
+double log10 (double);
+double pow (double, double);
+double sqrt (double);
+double fmod (double, double);
 #endif /* ! defined (__math_68881) */
 #endif /* ! defined (_REENT_ONLY) */
 
@@ -50,119 +43,119 @@ double fmod _PARAMS((double, double));
 
 /* Non ANSI double precision functions.  */
 
-double infinity _PARAMS(());
-double nan _PARAMS(());
-int isnan _PARAMS((double));
-int isinf _PARAMS((double));
-int finite _PARAMS((double));
-double copysign _PARAMS((double, double));
-int ilogb _PARAMS((double));
+double infinity ();
+double nan ();
+int isnan (double);
+int isinf (double);
+int finite (double);
+double copysign (double, double);
+int ilogb (double);
 
-double asinh _PARAMS((double));
-double cbrt _PARAMS((double));
-double nextafter _PARAMS((double, double));
-double rint _PARAMS((double));
-double scalbn _PARAMS((double, int));
+double asinh (double);
+double cbrt (double);
+double nextafter (double, double);
+double rint (double);
+double scalbn (double, int);
 
 #ifndef __math_68881
-double log1p _PARAMS((double));
-double expm1 _PARAMS((double));
+double log1p (double);
+double expm1 (double);
 #endif /* ! defined (__math_68881) */
 
 #ifndef _REENT_ONLY
-double acosh _PARAMS((double));
-double atanh _PARAMS((double));
-double remainder _PARAMS((double, double));
-double gamma _PARAMS((double));
-double gamma_r _PARAMS((double, int *`r));
-double lgamma _PARAMS((double));
-double lgamma_r _PARAMS((double, int *`r));
-double erf _PARAMS((double));
-double erfc _PARAMS((double));
-double y0 _PARAMS((double));
-double y1 _PARAMS((double));
-double yn _PARAMS((int, double));
-double j0 _PARAMS((double));
-double j1 _PARAMS((double));
-double jn _PARAMS((int, double));
+double acosh (double);
+double atanh (double);
+double remainder (double, double);
+double gamma (double);
+double gamma_r (double, int *`r);
+double lgamma (double);
+double lgamma_r (double, int *`r);
+double erf (double);
+double erfc (double);
+double y0 (double);
+double y1 (double);
+double yn (int, double);
+double j0 (double);
+double j1 (double);
+double jn (int, double);
 #define log2(x) (log (x) / M_LOG2_E)
 
 #ifndef __math_68881
-double hypot _PARAMS((double, double));
+double hypot (double, double);
 #endif
 
 double cabs();
-double drem _PARAMS((double, double));
+double drem (double, double);
 
 #endif /* ! defined (_REENT_ONLY) */
 
 /* Single precision versions of ANSI functions.  */
 
-float atanf _PARAMS((float));
-float cosf _PARAMS((float));
-float sinf _PARAMS((float));
-float tanf _PARAMS((float));
-float tanhf _PARAMS((float));
-float frexpf _PARAMS((float, int *`r));
-float modff _PARAMS((float, float *`r));
-float ceilf _PARAMS((float));
-float fabsf _PARAMS((float));
-float floorf _PARAMS((float));
+float atanf (float);
+float cosf (float);
+float sinf (float);
+float tanf (float);
+float tanhf (float);
+float frexpf (float, int *`r);
+float modff (float, float *`r);
+float ceilf (float);
+float fabsf (float);
+float floorf (float);
 
 #ifndef _REENT_ONLY
-float acosf _PARAMS((float));
-float asinf _PARAMS((float));
-float atan2f _PARAMS((float, float));
-float coshf _PARAMS((float));
-float sinhf _PARAMS((float));
-float expf _PARAMS((float));
-float ldexpf _PARAMS((float, int));
-float logf _PARAMS((float));
-float log10f _PARAMS((float));
-float powf _PARAMS((float, float));
-float sqrtf _PARAMS((float));
-float fmodf _PARAMS((float, float));
+float acosf (float);
+float asinf (float);
+float atan2f (float, float);
+float coshf (float);
+float sinhf (float);
+float expf (float);
+float ldexpf (float, int);
+float logf (float);
+float log10f (float);
+float powf (float, float);
+float sqrtf (float);
+float fmodf (float, float);
 #endif /* ! defined (_REENT_ONLY) */
 
 /* Other single precision functions.  */
 
-float infinityf _PARAMS(());
-float nanf _PARAMS(());
-int isnanf _PARAMS((float));
-int isinff _PARAMS((float));
-int finitef _PARAMS((float));
-float copysignf _PARAMS((float, float));
-int ilogbf _PARAMS((float));
+float infinityf ();
+float nanf ();
+int isnanf (float);
+int isinff (float);
+int finitef (float);
+float copysignf (float, float);
+int ilogbf (float);
 
-float asinhf _PARAMS((float));
-float cbrtf _PARAMS((float));
-float nextafterf _PARAMS((float, float));
-float rintf _PARAMS((float));
-float scalbnf _PARAMS((float, int));
-float log1pf _PARAMS((float));
-float expm1f _PARAMS((float));
+float asinhf (float);
+float cbrtf (float);
+float nextafterf (float, float);
+float rintf (float);
+float scalbnf (float, int);
+float log1pf (float);
+float expm1f (float);
 
 #ifndef _REENT_ONLY
-float acoshf _PARAMS((float));
-float atanhf _PARAMS((float));
-float remainderf _PARAMS((float, float));
-float gammaf _PARAMS((float));
-float gammaf_r _PARAMS((float, int *`r));
-float lgammaf _PARAMS((float));
-float lgammaf_r _PARAMS((float, int *`r));
-float erff _PARAMS((float));
-float erfcf _PARAMS((float));
-float y0f _PARAMS((float));
-float y1f _PARAMS((float));
-float ynf _PARAMS((int, float));
-float j0f _PARAMS((float));
-float j1f _PARAMS((float));
-float jnf _PARAMS((int, float));
+float acoshf (float);
+float atanhf (float);
+float remainderf (float, float);
+float gammaf (float);
+float gammaf_r (float, int *`r);
+float lgammaf (float);
+float lgammaf_r (float, int *`r);
+float erff (float);
+float erfcf (float);
+float y0f (float);
+float y1f (float);
+float ynf (int, float);
+float j0f (float);
+float j1f (float);
+float jnf (int, float);
 #define log2f(x) (logf (x) / (float) M_LOG2_E)
-float hypotf _PARAMS((float, float));
+float hypotf (float, float);
 
 float cabsf();
-float dremf _PARAMS((float, float));
+float dremf (float, float);
 
 #endif /* ! defined (_REENT_ONLY) */
 
@@ -182,7 +175,7 @@ struct __exception
   int err;
 };
 
-int matherr _PARAMS((struct __exception *`r e));
+int matherr (struct __exception *`r e);
 
 /* Values for the type field of struct exception.  */
 
@@ -245,30 +238,30 @@ const _LIB_VERSION_TYPE _LIB_VERSION;
 /* These functions are in assembler, they really do take floats. This
    can only be used with a real ANSI compiler */
 
-float EXFUN(fast_sinf,(float));
-float EXFUN(fast_cosf,(float));
-float EXFUN(fast_tanf,(float));
-
-float EXFUN(fast_asinf,(float));
-float EXFUN(fast_acosf,(float));
-float EXFUN(fast_atanf,(float));
-
-float EXFUN(fast_sinhf,(float));
-float EXFUN(fast_coshf,(float));
-float EXFUN(fast_tanhf,(float));
-
-float EXFUN(fast_asinhf,(float));
-float EXFUN(fast_acoshf,(float));
-float EXFUN(fast_atanhf,(float));
-
-float EXFUN(fast_absf,(float));
-float EXFUN(fast_sqrtf,(float));
-float EXFUN(fast_exp2f,(float));
-float EXFUN(fast_exp10f,(float));
-float EXFUN(fast_expef,(float));
-float EXFUN(fast_log10f,(float));
-float EXFUN(fast_log2f,(float));
-float EXFUN(fast_logef,(float));
+float fast_sinf(float);
+float fast_cosf(float);
+float fast_tanf(float);
+      
+float fast_asinf(float);
+float fast_acosf(float);
+float fast_atanf(float);
+      
+float fast_sinhf(float);
+float fast_coshf(float);
+float fast_tanhf(float);
+      
+float fast_asinhf(float);
+float fast_acoshf(float);
+float fast_atanhf(float);
+      
+float fast_absf(float);
+float fast_sqrtf(float);
+float fast_exp2f(float);
+float fast_exp10f(float);
+float fast_expef(float);
+float fast_log10f(float);
+float fast_log2f(float);
+float fast_logef(float);
 #define	sinf(x)		fast_sinf(x)
 #define	cosf(x)		fast_cosf(x)
 #define	tanf(x)		fast_tanf(x)

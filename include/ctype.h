@@ -1,25 +1,42 @@
+/* This file is part of the Cyclone Library.
+   Copyright (C) 2001 Greg Morrisett, AT&T
+
+   This library is free software; you can redistribute it and/or it
+   under the terms of the GNU Lesser General Public License as
+   published by the Free Software Foundation; either version 2.1 of
+   the License, or (at your option) any later version.
+
+   This library is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
+
+   You should have received a copy of the GNU Lesser General Public
+   License along with this library; see the file COPYING.LIB.  If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place, Suite
+   330, Boston, MA 02111-1307 USA. */
+
 #ifndef _CTYPE_H_
 #define _CTYPE_H_
-#include <config.h>
 namespace Ctype {
 extern "C" {
-int __cdecl isalnum(int);
-int __cdecl isalpha(int);
-int __cdecl iscntrl(int);
-int __cdecl isdigit(int);
-int __cdecl isgraph(int);
-int __cdecl islower(int);
-int __cdecl isprint(int);
-int __cdecl ispunct(int);
-int __cdecl isspace(int);
-int __cdecl isupper(int);
-int __cdecl isxdigit(int);
-int __cdecl tolower(int);
-int __cdecl toupper(int);
-int __cdecl isascii(int);
-int __cdecl toascii(int);
-int __cdecl _tolower(int);
-int __cdecl _toupper(int);
+int isalnum(int);
+int isalpha(int);
+int isascii(int);
+int iscntrl(int);
+int isdigit(int);
+int isgraph(int);
+int islower(int);
+int isprint(int);
+int ispunct(int);
+int isspace(int);
+int isupper(int);
+int isxdigit(int);
+int toascii(int);
+int tolower(int);
+int toupper(int);
+int _tolower(int);
+int _toupper(int);
 }
 }
-#endif /* _CTYPE_H_ */
+#endif

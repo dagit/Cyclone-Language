@@ -15,36 +15,27 @@ string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring
 struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
 extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, int); extern
 struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int system(
-unsigned char*); extern int* __errno(); extern int isalnum( int)
- __attribute__(( cdecl )) ; extern int isalpha( int)  __attribute__(( cdecl )) ;
-extern int iscntrl( int)  __attribute__(( cdecl )) ; extern int isdigit( int)
- __attribute__(( cdecl )) ; extern int isgraph( int)  __attribute__(( cdecl )) ;
-extern int islower( int)  __attribute__(( cdecl )) ; extern int isprint( int)
- __attribute__(( cdecl )) ; extern int ispunct( int)  __attribute__(( cdecl )) ;
-extern int isspace( int)  __attribute__(( cdecl )) ; extern int isupper( int)
- __attribute__(( cdecl )) ; extern int isxdigit( int)  __attribute__(( cdecl )) ;
-extern int tolower( int)  __attribute__(( cdecl )) ; extern int toupper( int)
- __attribute__(( cdecl )) ; extern int isascii( int)  __attribute__(( cdecl )) ;
-extern int toascii( int)  __attribute__(( cdecl )) ; extern int _tolower( int)
- __attribute__(( cdecl )) ; extern int _toupper( int)  __attribute__(( cdecl )) ;
-struct Cyc_Stdlib__Div{ int quot; int rem; } ; struct Cyc_Stdlib__Ldiv{ int quot;
-int rem; } ; extern int abs( int __x)  __attribute__(( cdecl )) ; extern int
-atexit( void(* __func)())  __attribute__(( cdecl )) ; extern struct Cyc_Stdlib__Div
-div( int __numer, int __denom)  __attribute__(( cdecl )) ; extern struct Cyc_Stdlib__Ldiv
-ldiv( int __numer, int __denom)  __attribute__(( cdecl )) ; extern int random()
- __attribute__(( cdecl )) ; extern void srandom( unsigned int __seed)
- __attribute__(( cdecl )) ; extern int rand()  __attribute__(( cdecl )) ; extern
-void srand( unsigned int __seed)  __attribute__(( cdecl )) ; extern int rand_r(
-unsigned int* __seed)  __attribute__(( cdecl )) ; extern int grantpt( int __fd)
- __attribute__(( cdecl )) ; extern int unlockpt( int __fd)  __attribute__((
-cdecl )) ; extern double Cyc_Stdlib_atof( struct _tagged_arr); extern int Cyc_Stdlib_strtol(
-struct _tagged_arr n, struct _tagged_arr* end, int base); extern unsigned int
-Cyc_Stdlib_strtoul( struct _tagged_arr n, struct _tagged_arr* end, int base);
-struct Cyc_Stdio___sFILE; extern struct Cyc_Stdio___sFILE* Cyc_Stdio_stdin;
-extern int Cyc_Stdio_fgetc( struct Cyc_Stdio___sFILE* __stream); extern int Cyc_Stdio_getc(
-struct Cyc_Stdio___sFILE* __stream); extern int Cyc_Stdio_ungetc( int __c,
-struct Cyc_Stdio___sFILE* __stream); extern unsigned char Cyc_Stdio_FileCloseError[
-19u]; extern unsigned char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
+unsigned char*); extern int* __errno(); extern int isalnum( int); extern int
+isalpha( int); extern int isascii( int); extern int iscntrl( int); extern int
+isdigit( int); extern int isgraph( int); extern int islower( int); extern int
+isprint( int); extern int ispunct( int); extern int isspace( int); extern int
+isupper( int); extern int isxdigit( int); extern int toascii( int); extern int
+tolower( int); extern int toupper( int); extern int _tolower( int); extern int
+_toupper( int); struct Cyc_Stdlib__Div{ int quot; int rem; } ; struct Cyc_Stdlib__Ldiv{
+int quot; int rem; } ; extern int abs( int __x); extern int atexit( void(*
+__func)()); extern struct Cyc_Stdlib__Div div( int __numer, int __denom); extern
+struct Cyc_Stdlib__Ldiv ldiv( int __numer, int __denom); extern int random();
+extern void srandom( unsigned int __seed); extern int rand(); extern void srand(
+unsigned int __seed); extern int rand_r( unsigned int* __seed); extern int
+grantpt( int __fd); extern int unlockpt( int __fd); extern double Cyc_Stdlib_atof(
+struct _tagged_arr); extern int Cyc_Stdlib_strtol( struct _tagged_arr n, struct
+_tagged_arr* end, int base); extern unsigned int Cyc_Stdlib_strtoul( struct
+_tagged_arr n, struct _tagged_arr* end, int base); struct Cyc_Stdio___sFILE;
+extern struct Cyc_Stdio___sFILE* Cyc_Stdio_stdin; extern int Cyc_Stdio_fgetc(
+struct Cyc_Stdio___sFILE* __stream); extern int Cyc_Stdio_getc( struct Cyc_Stdio___sFILE*
+__stream); extern int Cyc_Stdio_ungetc( int __c, struct Cyc_Stdio___sFILE*
+__stream); extern unsigned char Cyc_Stdio_FileCloseError[ 19u]; extern
+unsigned char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; static const int Cyc_Stdio_String_pa=
 0; struct Cyc_Stdio_String_pa_struct{ int tag; struct _tagged_arr f1; } ; static
 const int Cyc_Stdio_Int_pa= 1; struct Cyc_Stdio_Int_pa_struct{ int tag;

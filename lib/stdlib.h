@@ -26,9 +26,6 @@
 #ifndef _STDLIB_H
 #define	_STDLIB_H	1
 
-/* Get __cdecl */
-#include <config.h>
-
 /* Get size_t from <stddef.h> */
 #include <stddef.h>
 
@@ -70,41 +67,41 @@ extern int __mb_cur_max;
 
 
 /* Return the absolute value of X.  */
-extern int __cdecl abs (int __x);
+extern int abs (int __x);
 
 /* Register a function to be called when `exit' is called.  */
-extern int __cdecl atexit (void (*__func) (void));
+extern int atexit (void (*__func) (void));
 
 /* Return the `div_t' or `ldiv_t' representation
    of the value of NUMER over DENOM. */
 /* GCC may have built-ins for these someday.  */
-extern div_t __cdecl div (int __numer, int __denom);
-extern ldiv_t __cdecl ldiv (long int __numer, long int __denom);
+extern div_t div (int __numer, int __denom);
+extern ldiv_t ldiv (long int __numer, long int __denom);
 
 /* These are the functions that actually do things.  The `random', `srandom',
    `initstate' and `setstate' functions are those from BSD Unices.
    The `rand' and `srand' functions are required by the ANSI standard.
    We provide both interfaces to the same random number generator.  */
 /* Return a random long integer between 0 and RAND_MAX inclusive.  */
-extern long int __cdecl random (void);
+extern long int random (void);
 
 /* Seed the random number generator with the given number.  */
-extern void __cdecl srandom (unsigned int __seed);
+extern void srandom (unsigned int __seed);
 
 /* Return a random integer between 0 and RAND_MAX inclusive.  */
-extern int __cdecl rand (void);
+extern int rand (void);
 /* Seed the random number generator with the given number.  */
-extern void __cdecl srand (unsigned int __seed);
+extern void srand (unsigned int __seed);
 /* Reentrant interface according to POSIX.1.  */
-extern int __cdecl rand_r (unsigned int *__seed);
+extern int rand_r (unsigned int *__seed);
 
   // THE NEXT TWO FUNCTIONS MIGHT NEED TO BE COMMENTED OUT IN LINUX
 /* Chown the slave to the calling user.  */
-extern int __cdecl grantpt (int __fd);
+extern int grantpt (int __fd);
 
 /* Release an internal lock so the slave can be opened.
    Call after grantpt().  */
-extern int __cdecl unlockpt (int __fd);
+extern int unlockpt (int __fd);
 }
 
 /* Convert a string to a floating-point number.  */

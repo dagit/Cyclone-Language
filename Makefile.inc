@@ -121,12 +121,10 @@ CYCLONE_H:=arg.h\
 	machine/types.h\
 	math.h\
 	precore.h\
-	reent.h\
 	signal.h\
 	stddef.h\
 	sys/features.h\
 	sys/mman.h\
-	sys/reent.h\
 	sys/resource.h\
 	sys/stat.h\
 	sys/types.h\

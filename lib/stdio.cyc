@@ -1,3 +1,24 @@
+/* This file is part of the Cyclone Library.
+   Copyright (C) 2001 Greg Morrisett, AT&T
+
+   This library is free software; you can redistribute it and/or it
+   under the terms of the GNU Lesser General Public License as
+   published by the Free Software Foundation; either version 2.1 of
+   the License, or (at your option) any later version.
+
+   This library is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
+
+   You should have received a copy of the GNU Lesser General Public
+   License along with this library; see the file COPYING.LIB.  If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place, Suite
+   330, Boston, MA 02111-1307 USA. */
+
+/* Some definitions taken from the GNU C Library, released under LGPL:
+   Copyright (C) 1991-1999, 2000 Free Software Foundation, Inc. */
+
 #include <core.h>
 #include <stdio.h>
 #include <string.h> // for strcpy
@@ -8,43 +29,44 @@ using Stdio;
 extern "C" {
 extern struct __sFILE;
 typedef struct Cstdio::__sFILE __sFILE;
-int	remove(Cstring);
-int	rename(Cstring, Cstring);
+int remove(Cstring);
+int rename(Cstring, Cstring);
 __sFILE *tmpfile();
 Cstring	tmpnam(Cstring);
-int	fclose(__sFILE @`r);
-int	fflush(__sFILE *`r);
-__sFILE *freopen(Cstring, Cstring, __sFILE @`r);
-int	setvbuf(__sFILE @`r, Cstring, int, size_t);
-int	fgetc(__sFILE @`r);
-Cstring fgets(Cstring, int, __sFILE @`r);
-int	fputc(int, __sFILE @`r);
-int	fputs(Cstring, __sFILE @`r);
-int	getc(__sFILE @`r);
-Cstring gets(Cstring);
-int	putc(int, __sFILE @`r);
-int	puts(Cstring);
-int	ungetc(int, __sFILE @`r);
-size_t	fread(Cstring,size_t _size,size_t _n,__sFILE @`r);
-size_t	fwrite(Cstring,size_t _size,size_t _n,__sFILE @`r);
-int	fgetpos(__sFILE @`r1, fpos_t @`r2);
-int	fseek(__sFILE @`r1, long, int);
-int	fsetpos(__sFILE @`r1, fpos_t @`r2);
-long	ftell(__sFILE @`r);
-void	rewind(__sFILE @`r);
-void	clearerr(__sFILE @`r);
-int	feof(__sFILE @`r);
-int	ferror(__sFILE @`r);
-void    perror(Cstring);
-__sFILE *	fopen(Cstring _name, Cstring _type);
-__sFILE *	fdopen(int, Cstring);
-int	fileno(__sFILE @`r);
-int	getw(__sFILE @`r);
-  //int	pclose(__sFILE @);
+int fclose(__sFILE @`r);
+int fflush(__sFILE *`r);
+__sFILE *fopen (Cstring __filename, Cstring __modes);
+__sFILE *freopen(Cstring __filename, Cstring __modes, __sFILE @__stream);
+__sFILE *fdopen (int __fd, Cstring __modes);
+int setvbuf (__sFILE @ __stream, Cstring __buf, int __modes, size_t __n);
+  //NB: cygwin uses int as last arg of setbuffer, not size_t
+void setbuffer (__sFILE @__stream, Cstring __buf, size_t __size);
+void setlinebuf (__sFILE @__stream);
+int fgetc(__sFILE @__stream);
+int getc(__sFILE @__stream);
+int fputc(int __c, __sFILE @__stream);
+int putc(int __c, __sFILE @__stream);
+int getw(__sFILE @__stream);
+int putw(int __w, __sFILE @__stream);
+Cstring fgets(Cstring __s, int __n, __sFILE @__stream);
+Cstring gets(Cstring __s);
+int fputs(Cstring __s, __sFILE @__stream);
+int puts(Cstring __s);
+int ungetc(int __c, __sFILE @__stream);
+size_t fread(Cstring __ptr,size_t __size,size_t __n,__sFILE @__stream);
+size_t fwrite(Cstring __ptr,size_t __size,size_t __n,__sFILE @__s);
+int fseek(__sFILE @__stream, long __off, int __whence);
+long ftell(__sFILE @__stream);
+void rewind(__sFILE @__stream);
+int fgetpos(__sFILE @__stream, fpos_t @__pos);
+int fsetpos(__sFILE @__stream, fpos_t @__pos);
+void clearerr(__sFILE @__stream);
+int feof(__sFILE @__stream);
+int ferror(__sFILE @__stream);
+void perror(Cstring __s);
+int fileno(__sFILE @__stream);
   //__sFILE *  popen(Cstring, Cstring);
-int	putw(int, __sFILE @`r);
-void    setbuffer(__sFILE @`r, Cstring, int);
-int	setlinebuf(__sFILE @`r);
+  //int	pclose(__sFILE @);
 #define s2c(x) (string_to_Cstring(x))
 }}
 

@@ -35,40 +35,35 @@ struct Cyc_Stdio_StringPtr_sa_struct{ int tag; struct _tagged_arr f1; } ; static
 const int Cyc_Stdio_DoublePtr_sa= 5; struct Cyc_Stdio_DoublePtr_sa_struct{ int
 tag; double* f1; } ; static const int Cyc_Stdio_FloatPtr_sa= 6; struct Cyc_Stdio_FloatPtr_sa_struct{
 int tag; float* f1; } ; struct Cyc_Stdlib__Div{ int quot; int rem; } ; struct
-Cyc_Stdlib__Ldiv{ int quot; int rem; } ; extern int abs( int __x)
- __attribute__(( cdecl )) ; extern int atexit( void(* __func)())
- __attribute__(( cdecl )) ; extern struct Cyc_Stdlib__Div div( int __numer, int
-__denom)  __attribute__(( cdecl )) ; extern struct Cyc_Stdlib__Ldiv ldiv( int
-__numer, int __denom)  __attribute__(( cdecl )) ; extern int random()
- __attribute__(( cdecl )) ; extern void srandom( unsigned int __seed)
- __attribute__(( cdecl )) ; extern int rand()  __attribute__(( cdecl )) ; extern
-void srand( unsigned int __seed)  __attribute__(( cdecl )) ; extern int rand_r(
-unsigned int* __seed)  __attribute__(( cdecl )) ; extern int grantpt( int __fd)
- __attribute__(( cdecl )) ; extern int unlockpt( int __fd)  __attribute__((
-cdecl )) ; extern int wait( int* status); extern int waitpid( int pid, int*
-status, int options); struct Cyc_Getopt_option{ struct _tagged_arr name; int
-has_arg; int* flag; int val; } ; extern unsigned int alarm( unsigned int seconds);
-extern int close( int); extern int getpid(); extern int getppid(); extern int
-fork(); extern int fchdir( int); extern int dup( int); extern int dup2( int, int);
-extern unsigned short getuid(); extern int setuid( unsigned short uid); extern
-unsigned short geteuid(); extern int seteuid( unsigned short euid); extern
-unsigned short getgid(); extern int setgid( unsigned short gid); extern
-unsigned short getegid(); extern int setegid( unsigned short egid); extern int
-select( int n, struct Cyc__types_fd_set* readfds, struct Cyc__types_fd_set*
-writefds, struct Cyc__types_fd_set* exceptfds, struct Cyc_timeval* timeout);
-extern int pipe( int* filedes); extern int lseek( int filedes, int offset, int
-whence); int Cyc_Unistd_chdir( struct _tagged_arr); struct _tagged_arr Cyc_Unistd_getcwd(
-struct _tagged_arr buf, int size); int Cyc_Unistd_execl( struct _tagged_arr path,
-struct _tagged_arr arg0, struct _tagged_arr argv); int Cyc_Unistd_execlp( struct
-_tagged_arr file, struct _tagged_arr arg0, struct _tagged_arr argv); int Cyc_Unistd_execve(
-struct _tagged_arr filename, struct _tagged_arr argv, struct _tagged_arr envp);
-int Cyc_Unistd_read( int fd, struct _tagged_arr buf, int count); int Cyc_Unistd_write(
-int fd, struct _tagged_arr buf, int count); int Cyc_Unistd_unlink( struct
-_tagged_arr pathname); void(* Cyc_Signal_signal( int sig, void(* func)( int)))(
-int); extern int raise( int sig); extern int kill( int, int); int Cyc_Execinfo_backtrace(
-struct _tagged_arr array, int size){( int) _throw(( void*)({ struct Cyc_Core_Failure_struct*
-_temp0=( struct Cyc_Core_Failure_struct*) GC_malloc( sizeof( struct Cyc_Core_Failure_struct));
-_temp0[ 0]=({ struct Cyc_Core_Failure_struct _temp1; _temp1.tag= Cyc_Core_Failure;
-_temp1.f1= _tag_arr("backtrace: unsupported except under Linux", sizeof(
-unsigned char), 42u); _temp1;}); _temp0;})); return 0;} int Cyc_Execinfo_bt(){
+Cyc_Stdlib__Ldiv{ int quot; int rem; } ; extern int abs( int __x); extern int
+atexit( void(* __func)()); extern struct Cyc_Stdlib__Div div( int __numer, int
+__denom); extern struct Cyc_Stdlib__Ldiv ldiv( int __numer, int __denom); extern
+int random(); extern void srandom( unsigned int __seed); extern int rand();
+extern void srand( unsigned int __seed); extern int rand_r( unsigned int* __seed);
+extern int grantpt( int __fd); extern int unlockpt( int __fd); extern int wait(
+int* status); extern int waitpid( int pid, int* status, int options); struct Cyc_Getopt_option{
+struct _tagged_arr name; int has_arg; int* flag; int val; } ; extern
+unsigned int alarm( unsigned int seconds); extern int close( int); extern int
+getpid(); extern int getppid(); extern int fork(); extern int fchdir( int);
+extern int dup( int); extern int dup2( int, int); extern unsigned short getuid();
+extern int setuid( unsigned short uid); extern unsigned short geteuid(); extern
+int seteuid( unsigned short euid); extern unsigned short getgid(); extern int
+setgid( unsigned short gid); extern unsigned short getegid(); extern int setegid(
+unsigned short egid); extern int select( int n, struct Cyc__types_fd_set*
+readfds, struct Cyc__types_fd_set* writefds, struct Cyc__types_fd_set* exceptfds,
+struct Cyc_timeval* timeout); extern int pipe( int* filedes); extern int lseek(
+int filedes, int offset, int whence); int Cyc_Unistd_chdir( struct _tagged_arr);
+struct _tagged_arr Cyc_Unistd_getcwd( struct _tagged_arr buf, int size); int Cyc_Unistd_execl(
+struct _tagged_arr path, struct _tagged_arr arg0, struct _tagged_arr argv); int
+Cyc_Unistd_execlp( struct _tagged_arr file, struct _tagged_arr arg0, struct
+_tagged_arr argv); int Cyc_Unistd_execve( struct _tagged_arr filename, struct
+_tagged_arr argv, struct _tagged_arr envp); int Cyc_Unistd_read( int fd, struct
+_tagged_arr buf, int count); int Cyc_Unistd_write( int fd, struct _tagged_arr
+buf, int count); int Cyc_Unistd_unlink( struct _tagged_arr pathname); void(* Cyc_Signal_signal(
+int sig, void(* func)( int)))( int); extern int raise( int sig); extern int kill(
+int, int); int Cyc_Execinfo_backtrace( struct _tagged_arr array, int size){( int)
+_throw(( void*)({ struct Cyc_Core_Failure_struct* _temp0=( struct Cyc_Core_Failure_struct*)
+GC_malloc( sizeof( struct Cyc_Core_Failure_struct)); _temp0[ 0]=({ struct Cyc_Core_Failure_struct
+_temp1; _temp1.tag= Cyc_Core_Failure; _temp1.f1= _tag_arr("backtrace: unsupported except under Linux",
+sizeof( unsigned char), 42u); _temp1;}); _temp0;})); return 0;} int Cyc_Execinfo_bt(){
 return 1;}

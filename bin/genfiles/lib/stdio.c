@@ -76,30 +76,34 @@ extern int remove( unsigned char*); extern int rename( unsigned char*,
 unsigned char*); extern struct Cyc_Cstdio___sFILE* tmpfile(); extern
 unsigned char* tmpnam( unsigned char*); extern int fclose( struct Cyc_Cstdio___sFILE*);
 extern int fflush( struct Cyc_Cstdio___sFILE*); extern struct Cyc_Cstdio___sFILE*
-freopen( unsigned char*, unsigned char*, struct Cyc_Cstdio___sFILE*); extern int
-setvbuf( struct Cyc_Cstdio___sFILE*, unsigned char*, int, int); extern int fgetc(
-struct Cyc_Cstdio___sFILE*); extern unsigned char* fgets( unsigned char*, int,
-struct Cyc_Cstdio___sFILE*); extern int fputc( int, struct Cyc_Cstdio___sFILE*);
-extern int fputs( unsigned char*, struct Cyc_Cstdio___sFILE*); extern int getc(
-struct Cyc_Cstdio___sFILE*); extern unsigned char* gets( unsigned char*); extern
-int putc( int, struct Cyc_Cstdio___sFILE*); extern int puts( unsigned char*);
-extern int ungetc( int, struct Cyc_Cstdio___sFILE*); extern int fread(
-unsigned char*, int _size, int _n, struct Cyc_Cstdio___sFILE*); extern int
-fwrite( unsigned char*, int _size, int _n, struct Cyc_Cstdio___sFILE*); extern
-int fgetpos( struct Cyc_Cstdio___sFILE*, int*); extern int fseek( struct Cyc_Cstdio___sFILE*,
-int, int); extern int fsetpos( struct Cyc_Cstdio___sFILE*, int*); extern int
-ftell( struct Cyc_Cstdio___sFILE*); extern void rewind( struct Cyc_Cstdio___sFILE*);
-extern void clearerr( struct Cyc_Cstdio___sFILE*); extern int feof( struct Cyc_Cstdio___sFILE*);
-extern int ferror( struct Cyc_Cstdio___sFILE*); extern void perror(
-unsigned char*); extern struct Cyc_Cstdio___sFILE* fopen( unsigned char* _name,
-unsigned char* _type); extern struct Cyc_Cstdio___sFILE* fdopen( int,
-unsigned char*); extern int fileno( struct Cyc_Cstdio___sFILE*); extern int getw(
-struct Cyc_Cstdio___sFILE*); extern int putw( int, struct Cyc_Cstdio___sFILE*);
-extern void setbuffer( struct Cyc_Cstdio___sFILE*, unsigned char*, int); extern
-int setlinebuf( struct Cyc_Cstdio___sFILE*); struct Cyc_Stdio___sFILE{ struct
-Cyc_Cstdio___sFILE* file; } ; int Cyc_Stdio_remove( struct _tagged_arr filename){
-return remove( string_to_Cstring( filename));} int Cyc_Stdio_rename( struct
-_tagged_arr old_filename, struct _tagged_arr new_filename){ return rename(
+fopen( unsigned char* __filename, unsigned char* __modes); extern struct Cyc_Cstdio___sFILE*
+freopen( unsigned char* __filename, unsigned char* __modes, struct Cyc_Cstdio___sFILE*
+__stream); extern struct Cyc_Cstdio___sFILE* fdopen( int __fd, unsigned char*
+__modes); extern int setvbuf( struct Cyc_Cstdio___sFILE* __stream, unsigned char*
+__buf, int __modes, int __n); extern void setbuffer( struct Cyc_Cstdio___sFILE*
+__stream, unsigned char* __buf, int __size); extern void setlinebuf( struct Cyc_Cstdio___sFILE*
+__stream); extern int fgetc( struct Cyc_Cstdio___sFILE* __stream); extern int
+getc( struct Cyc_Cstdio___sFILE* __stream); extern int fputc( int __c, struct
+Cyc_Cstdio___sFILE* __stream); extern int putc( int __c, struct Cyc_Cstdio___sFILE*
+__stream); extern int getw( struct Cyc_Cstdio___sFILE* __stream); extern int
+putw( int __w, struct Cyc_Cstdio___sFILE* __stream); extern unsigned char* fgets(
+unsigned char* __s, int __n, struct Cyc_Cstdio___sFILE* __stream); extern
+unsigned char* gets( unsigned char* __s); extern int fputs( unsigned char* __s,
+struct Cyc_Cstdio___sFILE* __stream); extern int puts( unsigned char* __s);
+extern int ungetc( int __c, struct Cyc_Cstdio___sFILE* __stream); extern int
+fread( unsigned char* __ptr, int __size, int __n, struct Cyc_Cstdio___sFILE*
+__stream); extern int fwrite( unsigned char* __ptr, int __size, int __n, struct
+Cyc_Cstdio___sFILE* __s); extern int fseek( struct Cyc_Cstdio___sFILE* __stream,
+int __off, int __whence); extern int ftell( struct Cyc_Cstdio___sFILE* __stream);
+extern void rewind( struct Cyc_Cstdio___sFILE* __stream); extern int fgetpos(
+struct Cyc_Cstdio___sFILE* __stream, int* __pos); extern int fsetpos( struct Cyc_Cstdio___sFILE*
+__stream, int* __pos); extern void clearerr( struct Cyc_Cstdio___sFILE* __stream);
+extern int feof( struct Cyc_Cstdio___sFILE* __stream); extern int ferror( struct
+Cyc_Cstdio___sFILE* __stream); extern void perror( unsigned char* __s); extern
+int fileno( struct Cyc_Cstdio___sFILE* __stream); struct Cyc_Stdio___sFILE{
+struct Cyc_Cstdio___sFILE* file; } ; int Cyc_Stdio_remove( struct _tagged_arr
+filename){ return remove( string_to_Cstring( filename));} int Cyc_Stdio_rename(
+struct _tagged_arr old_filename, struct _tagged_arr new_filename){ return rename(
 string_to_Cstring( old_filename), string_to_Cstring( new_filename));} struct Cyc_Stdio___sFILE*
 Cyc_Stdio_tmpfile(){ struct Cyc_Cstdio___sFILE* cf= tmpfile(); return(
 unsigned int) cf?({ struct Cyc_Stdio___sFILE* _temp0=( struct Cyc_Stdio___sFILE*)

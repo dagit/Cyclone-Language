@@ -49,34 +49,24 @@ tag; double* f1; } ; static const int Cyc_Stdio_FloatPtr_sa= 6; struct Cyc_Stdio
 int tag; float* f1; } ; struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl;
 } ; extern unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
 18u]; extern unsigned char Cyc_List_Nth[ 8u]; extern int Cyc_String_strlen(
-struct _tagged_arr s); extern int isalnum( int)  __attribute__(( cdecl )) ;
-extern int isalpha( int)  __attribute__(( cdecl )) ; extern int iscntrl( int)
- __attribute__(( cdecl )) ; extern int isdigit( int)  __attribute__(( cdecl )) ;
-extern int isgraph( int)  __attribute__(( cdecl )) ; extern int islower( int)
- __attribute__(( cdecl )) ; extern int isprint( int)  __attribute__(( cdecl )) ;
-extern int ispunct( int)  __attribute__(( cdecl )) ; extern int isspace( int)
- __attribute__(( cdecl )) ; extern int isupper( int)  __attribute__(( cdecl )) ;
-extern int isxdigit( int)  __attribute__(( cdecl )) ; extern int tolower( int)
- __attribute__(( cdecl )) ; extern int toupper( int)  __attribute__(( cdecl )) ;
-extern int isascii( int)  __attribute__(( cdecl )) ; extern int toascii( int)
- __attribute__(( cdecl )) ; extern int _tolower( int)  __attribute__(( cdecl )) ;
-extern int _toupper( int)  __attribute__(( cdecl )) ; struct Cyc_Stdlib__Div{
-int quot; int rem; } ; struct Cyc_Stdlib__Ldiv{ int quot; int rem; } ; extern
-int abs( int __x)  __attribute__(( cdecl )) ; extern int atexit( void(* __func)())
- __attribute__(( cdecl )) ; extern struct Cyc_Stdlib__Div div( int __numer, int
-__denom)  __attribute__(( cdecl )) ; extern struct Cyc_Stdlib__Ldiv ldiv( int
-__numer, int __denom)  __attribute__(( cdecl )) ; extern int random()
- __attribute__(( cdecl )) ; extern void srandom( unsigned int __seed)
- __attribute__(( cdecl )) ; extern int rand()  __attribute__(( cdecl )) ; extern
-void srand( unsigned int __seed)  __attribute__(( cdecl )) ; extern int rand_r(
-unsigned int* __seed)  __attribute__(( cdecl )) ; extern int grantpt( int __fd)
- __attribute__(( cdecl )) ; extern int unlockpt( int __fd)  __attribute__((
-cdecl )) ; extern double atan( double); extern double cos( double); extern
-double sin( double); extern double tan( double); extern double tanh( double);
-extern double frexp( double, int*); extern double modf( double, double*); extern
-double ceil( double); extern double fabs( double); extern double floor( double);
-extern double acos( double); extern double asin( double); extern double atan2(
-double, double); extern double cosh( double); extern double sinh( double);
+struct _tagged_arr s); extern int isalnum( int); extern int isalpha( int);
+extern int isascii( int); extern int iscntrl( int); extern int isdigit( int);
+extern int isgraph( int); extern int islower( int); extern int isprint( int);
+extern int ispunct( int); extern int isspace( int); extern int isupper( int);
+extern int isxdigit( int); extern int toascii( int); extern int tolower( int);
+extern int toupper( int); extern int _tolower( int); extern int _toupper( int);
+struct Cyc_Stdlib__Div{ int quot; int rem; } ; struct Cyc_Stdlib__Ldiv{ int quot;
+int rem; } ; extern int abs( int __x); extern int atexit( void(* __func)());
+extern struct Cyc_Stdlib__Div div( int __numer, int __denom); extern struct Cyc_Stdlib__Ldiv
+ldiv( int __numer, int __denom); extern int random(); extern void srandom(
+unsigned int __seed); extern int rand(); extern void srand( unsigned int __seed);
+extern int rand_r( unsigned int* __seed); extern int grantpt( int __fd); extern
+int unlockpt( int __fd); extern double atan( double); extern double cos( double);
+extern double sin( double); extern double tan( double); extern double tanh(
+double); extern double frexp( double, int*); extern double modf( double, double*);
+extern double ceil( double); extern double fabs( double); extern double floor(
+double); extern double acos( double); extern double asin( double); extern double
+atan2( double, double); extern double cosh( double); extern double sinh( double);
 extern double exp( double); extern double ldexp( double, int); extern double log(
 double); extern double log10( double); extern double pow( double, double);
 extern double sqrt( double); extern double fmod( double, double); extern double
