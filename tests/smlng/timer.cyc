@@ -25,7 +25,7 @@ void start_timer(string_t limit) {
 }
 
 // return how many seconds we have left
-unsigned int check_time() {
+time_t check_time() {
   // shouldn't have to do it this way -- something is messed up in the .h files
   time_t current_time = Time::time(NULL);
   return death_time - current_time;

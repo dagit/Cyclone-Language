@@ -23,7 +23,7 @@
 #ifndef _SYS_SOCKET_H
 #define _SYS_SOCKET_H
 
-#include <sys/types.h> // for socklen_t
+typedef unsigned int socklen_t;
 
 #define SOL_SOCKET 1
 

@@ -45,7 +45,7 @@ namespace Buffer {
 //   concatenated pairwise). *) 
 extern struct t;
 typedef struct t @T;
-extern T create(uint n);
+extern T create(unsigned int n);
 //     (* [create n] returns a fresh buffer, initially empty.
 //         The [n] parameter is the initial size of the internal string
 //         that holds the buffer contents.  That string is automatically

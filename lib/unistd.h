@@ -24,7 +24,8 @@
 
 #include <core.h>
 #include <sys/types.h>
-#include <getopt.h> // Since ordinary getopt() belongs in unistd.h
+#include <sys/time.h>  // for struct timeval
+#include <getopt.h>    // Since ordinary getopt() belongs in unistd.h
 // This means you need "using Getopt" if you're "using Unistd"
 
 namespace Unistd {
@@ -53,8 +54,6 @@ namespace Unistd {
     uid_t geteuid(void); int seteuid(uid_t euid);
     gid_t getgid(void);  int setgid(gid_t gid);
     gid_t getegid(void); int setegid(gid_t egid);
-    int select(int n, fd_set *readfds, fd_set *writefds,
-               fd_set *exceptfds, struct timeval *timeout);
     int pipe(int @{2}`r filedes);
     off_t lseek(int filedes, off_t offset, int whence);
   }

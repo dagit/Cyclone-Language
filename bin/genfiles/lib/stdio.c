@@ -1,10 +1,5 @@
- struct Cyc_timeval{ int tv_sec; int tv_usec; } ; struct Cyc_timespec{
-unsigned int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec
-it_interval; struct Cyc_timespec it_value; } ; struct Cyc__types_fd_set{ int
-fds_bits[ 2u]; } ; struct Cyc_dirent{ int d_ino; int d_off; unsigned short
-d_reclen; unsigned char d_type; unsigned char d_name[ 256u]; } ; extern void
-exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; extern
-unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
+ extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ;
+extern unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
 12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
 } ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
@@ -13,8 +8,8 @@ unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Not
 unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char*
 string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring(
 struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
-extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, int); extern
-struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int system(
+extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
+extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int system(
 unsigned char*); struct Cyc_Stdio___sFILE; extern int Cyc_Stdio_remove( struct
 _tagged_arr); extern int Cyc_Stdio_rename( struct _tagged_arr, struct
 _tagged_arr); extern struct Cyc_Stdio___sFILE* Cyc_Stdio_tmpfile(); extern
@@ -25,30 +20,31 @@ struct _tagged_arr __modes); extern struct Cyc_Stdio___sFILE* Cyc_Stdio_freopen(
 struct _tagged_arr, struct _tagged_arr, struct Cyc_Stdio___sFILE*); extern void
 Cyc_Stdio_setbuf( struct Cyc_Stdio___sFILE* __stream, struct _tagged_arr __buf);
 extern int Cyc_Stdio_setvbuf( struct Cyc_Stdio___sFILE* __stream, struct
-_tagged_arr __buf, int __modes, int __n); extern int Cyc_Stdio_fgetc( struct Cyc_Stdio___sFILE*
-__stream); extern int Cyc_Stdio_getc( struct Cyc_Stdio___sFILE* __stream);
-extern struct _tagged_arr Cyc_Stdio_fgets( struct _tagged_arr __s, int __n,
-struct Cyc_Stdio___sFILE* __stream); extern int Cyc_Stdio_fputc( int __c, struct
-Cyc_Stdio___sFILE* __stream); extern int Cyc_Stdio_putc( int __c, struct Cyc_Stdio___sFILE*
-__stream); extern int Cyc_Stdio_fputs( struct _tagged_arr __s, struct Cyc_Stdio___sFILE*
-__stream); extern int Cyc_Stdio_puts( struct _tagged_arr __s); extern int Cyc_Stdio_ungetc(
-int __c, struct Cyc_Stdio___sFILE* __stream); extern int Cyc_Stdio_fread( struct
-_tagged_arr __ptr, int __size, int __n, struct Cyc_Stdio___sFILE* __stream);
-extern int Cyc_Stdio_fwrite( struct _tagged_arr __ptr, int __size, int __n,
-struct Cyc_Stdio___sFILE* __s); extern int Cyc_Stdio_fseek( struct Cyc_Stdio___sFILE*
-__stream, int __off, int __whence); extern int Cyc_Stdio_ftell( struct Cyc_Stdio___sFILE*
-__stream); extern void Cyc_Stdio_rewind( struct Cyc_Stdio___sFILE* __stream);
-extern int Cyc_Stdio_fgetpos( struct Cyc_Stdio___sFILE* __stream, int* __pos);
-extern int Cyc_Stdio_fsetpos( struct Cyc_Stdio___sFILE* __stream, int* __pos);
-extern void Cyc_Stdio_clearerr( struct Cyc_Stdio___sFILE* __stream); extern int
-Cyc_Stdio_feof( struct Cyc_Stdio___sFILE* __stream); extern int Cyc_Stdio_ferror(
+_tagged_arr __buf, int __modes, unsigned int __n); extern int Cyc_Stdio_fgetc(
+struct Cyc_Stdio___sFILE* __stream); extern int Cyc_Stdio_getc( struct Cyc_Stdio___sFILE*
+__stream); extern struct _tagged_arr Cyc_Stdio_fgets( struct _tagged_arr __s,
+int __n, struct Cyc_Stdio___sFILE* __stream); extern int Cyc_Stdio_fputc( int
+__c, struct Cyc_Stdio___sFILE* __stream); extern int Cyc_Stdio_putc( int __c,
+struct Cyc_Stdio___sFILE* __stream); extern int Cyc_Stdio_fputs( struct
+_tagged_arr __s, struct Cyc_Stdio___sFILE* __stream); extern int Cyc_Stdio_puts(
+struct _tagged_arr __s); extern int Cyc_Stdio_ungetc( int __c, struct Cyc_Stdio___sFILE*
+__stream); extern unsigned int Cyc_Stdio_fread( struct _tagged_arr __ptr,
+unsigned int __size, unsigned int __n, struct Cyc_Stdio___sFILE* __stream);
+extern unsigned int Cyc_Stdio_fwrite( struct _tagged_arr __ptr, unsigned int
+__size, unsigned int __n, struct Cyc_Stdio___sFILE* __s); extern int Cyc_Stdio_fseek(
+struct Cyc_Stdio___sFILE* __stream, int __off, int __whence); extern int Cyc_Stdio_ftell(
+struct Cyc_Stdio___sFILE* __stream); extern void Cyc_Stdio_rewind( struct Cyc_Stdio___sFILE*
+__stream); extern int Cyc_Stdio_fgetpos( struct Cyc_Stdio___sFILE* __stream, int*
+__pos); extern int Cyc_Stdio_fsetpos( struct Cyc_Stdio___sFILE* __stream, int*
+__pos); extern void Cyc_Stdio_clearerr( struct Cyc_Stdio___sFILE* __stream);
+extern int Cyc_Stdio_feof( struct Cyc_Stdio___sFILE* __stream); extern int Cyc_Stdio_ferror(
 struct Cyc_Stdio___sFILE* __stream); extern void Cyc_Stdio_perror( struct
 _tagged_arr __s); extern struct Cyc_Stdio___sFILE* Cyc_Stdio_fdopen( int __fd,
 struct _tagged_arr __modes); extern int Cyc_Stdio_fileno( struct Cyc_Stdio___sFILE*
 __stream); extern int Cyc_Stdio_getw( struct Cyc_Stdio___sFILE* __stream);
 extern int Cyc_Stdio_putw( int __w, struct Cyc_Stdio___sFILE* __stream); extern
 void Cyc_Stdio_setbuffer( struct Cyc_Stdio___sFILE* __stream, struct _tagged_arr
-__buf, int __size); extern void Cyc_Stdio_setlinebuf( struct Cyc_Stdio___sFILE*
+__buf, unsigned int __size); extern void Cyc_Stdio_setlinebuf( struct Cyc_Stdio___sFILE*
 __stream); extern unsigned char Cyc_Stdio_FileCloseError[ 19u]; extern
 unsigned char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; extern struct Cyc_Stdio___sFILE*
@@ -80,64 +76,64 @@ fopen( unsigned char* __filename, unsigned char* __modes); extern struct Cyc_Cst
 freopen( unsigned char* __filename, unsigned char* __modes, struct Cyc_Cstdio___sFILE*
 __stream); extern struct Cyc_Cstdio___sFILE* fdopen( int __fd, unsigned char*
 __modes); extern int setvbuf( struct Cyc_Cstdio___sFILE* __stream, unsigned char*
-__buf, int __modes, int __n); extern void setbuffer( struct Cyc_Cstdio___sFILE*
-__stream, unsigned char* __buf, int __size); extern void setlinebuf( struct Cyc_Cstdio___sFILE*
-__stream); extern int fgetc( struct Cyc_Cstdio___sFILE* __stream); extern int
-getc( struct Cyc_Cstdio___sFILE* __stream); extern int fputc( int __c, struct
-Cyc_Cstdio___sFILE* __stream); extern int putc( int __c, struct Cyc_Cstdio___sFILE*
-__stream); extern int getw( struct Cyc_Cstdio___sFILE* __stream); extern int
-putw( int __w, struct Cyc_Cstdio___sFILE* __stream); extern unsigned char* fgets(
-unsigned char* __s, int __n, struct Cyc_Cstdio___sFILE* __stream); extern
-unsigned char* gets( unsigned char* __s); extern int fputs( unsigned char* __s,
-struct Cyc_Cstdio___sFILE* __stream); extern int puts( unsigned char* __s);
-extern int ungetc( int __c, struct Cyc_Cstdio___sFILE* __stream); extern int
-fread( unsigned char* __ptr, int __size, int __n, struct Cyc_Cstdio___sFILE*
-__stream); extern int fwrite( unsigned char* __ptr, int __size, int __n, struct
-Cyc_Cstdio___sFILE* __s); extern int fseek( struct Cyc_Cstdio___sFILE* __stream,
-int __off, int __whence); extern int ftell( struct Cyc_Cstdio___sFILE* __stream);
-extern void rewind( struct Cyc_Cstdio___sFILE* __stream); extern int fgetpos(
-struct Cyc_Cstdio___sFILE* __stream, int* __pos); extern int fsetpos( struct Cyc_Cstdio___sFILE*
-__stream, int* __pos); extern void clearerr( struct Cyc_Cstdio___sFILE* __stream);
-extern int feof( struct Cyc_Cstdio___sFILE* __stream); extern int ferror( struct
-Cyc_Cstdio___sFILE* __stream); extern void perror( unsigned char* __s); extern
-int fileno( struct Cyc_Cstdio___sFILE* __stream); struct Cyc_Stdio___sFILE{
-struct Cyc_Cstdio___sFILE* file; } ; int Cyc_Stdio_remove( struct _tagged_arr
-filename){ return remove( string_to_Cstring( filename));} int Cyc_Stdio_rename(
-struct _tagged_arr old_filename, struct _tagged_arr new_filename){ return rename(
-string_to_Cstring( old_filename), string_to_Cstring( new_filename));} struct Cyc_Stdio___sFILE*
-Cyc_Stdio_tmpfile(){ struct Cyc_Cstdio___sFILE* cf= tmpfile(); return(
-unsigned int) cf?({ struct Cyc_Stdio___sFILE* _temp0=( struct Cyc_Stdio___sFILE*)
-GC_malloc( sizeof( struct Cyc_Stdio___sFILE)); _temp0->file= cf; _temp0;}): 0;}
-struct _tagged_arr Cyc_Stdio_tmpnam( struct _tagged_arr s){ struct _tagged_arr
-name= Cstring_to_string( tmpnam( 0)); return( unsigned int) s.curr? Cyc_String_strcpy(
-s,( struct _tagged_arr) name): name;} int Cyc_Stdio_fclose( struct Cyc_Stdio___sFILE*
-f){ int r= fclose(( struct Cyc_Cstdio___sFILE*) _check_null( f->file)); if( r == 
-0){ f->file= 0;} return r;} int Cyc_Stdio_fflush( struct Cyc_Stdio___sFILE* f){
-return( unsigned int) f? fflush((( struct Cyc_Stdio___sFILE*) _check_null( f))->file):
-fflush( 0);} struct Cyc_Stdio___sFILE* Cyc_Stdio_freopen( struct _tagged_arr x,
-struct _tagged_arr y, struct Cyc_Stdio___sFILE* f){ struct Cyc_Cstdio___sFILE*
-cf= freopen( string_to_Cstring( x), string_to_Cstring( y),( struct Cyc_Cstdio___sFILE*)
-_check_null( f->file)); return( unsigned int) cf?({ struct Cyc_Stdio___sFILE*
-_temp1=( struct Cyc_Stdio___sFILE*) GC_malloc( sizeof( struct Cyc_Stdio___sFILE));
-_temp1->file= cf; _temp1;}): 0;} void Cyc_Stdio_setbuf( struct Cyc_Stdio___sFILE*
-f, struct _tagged_arr buf){ Cyc_Stdio_setvbuf( f, buf,( unsigned int) buf.curr?
-0: 2, 1024);} void Cyc_Stdio_setbuffer( struct Cyc_Stdio___sFILE* f, struct
-_tagged_arr buf, int size){ Cyc_Stdio_setvbuf( f, buf,( unsigned int) buf.curr?
-0: 2, size);} void Cyc_Stdio_setlinebuf( struct Cyc_Stdio___sFILE* f){ Cyc_Stdio_setvbuf(
-f, _tag_arr( 0u, 0u, 0u), 1, 0);} int Cyc_Stdio_setvbuf( struct Cyc_Stdio___sFILE*
-f, struct _tagged_arr buf, int mode, int size){ if( _get_arr_size( buf, sizeof(
-unsigned char)) <  size){( int) _throw(( void*)({ struct Cyc_Core_Failure_struct*
-_temp2=( struct Cyc_Core_Failure_struct*) GC_malloc( sizeof( struct Cyc_Core_Failure_struct));
-_temp2[ 0]=({ struct Cyc_Core_Failure_struct _temp3; _temp3.tag= Cyc_Core_Failure;
-_temp3.f1= _tag_arr("setvbuf: buffer insufficient", sizeof( unsigned char), 29u);
-_temp3;}); _temp2;}));} return setvbuf(( struct Cyc_Cstdio___sFILE*) _check_null(
-f->file), underlying_Cstring(( struct _tagged_arr) buf), mode, size);} int Cyc_Stdio_fgetc(
-struct Cyc_Stdio___sFILE* f){ return fgetc(( struct Cyc_Cstdio___sFILE*)
-_check_null( f->file));} struct _tagged_arr Cyc_Stdio_fgets( struct _tagged_arr
-s, int n, struct Cyc_Stdio___sFILE* f){ unsigned char* result; unsigned char*
-buffer= underlying_Cstring(( struct _tagged_arr) s); unsigned int len=
-_get_arr_size( s, sizeof( unsigned char)); n=( int)( len <  n? len:(
-unsigned int) n); result= fgets( buffer, n,( struct Cyc_Cstdio___sFILE*)
+__buf, int __modes, unsigned int __n); extern void setbuffer( struct Cyc_Cstdio___sFILE*
+__stream, unsigned char* __buf, unsigned int __size); extern void setlinebuf(
+struct Cyc_Cstdio___sFILE* __stream); extern int fgetc( struct Cyc_Cstdio___sFILE*
+__stream); extern int getc( struct Cyc_Cstdio___sFILE* __stream); extern int
+fputc( int __c, struct Cyc_Cstdio___sFILE* __stream); extern int putc( int __c,
+struct Cyc_Cstdio___sFILE* __stream); extern int getw( struct Cyc_Cstdio___sFILE*
+__stream); extern int putw( int __w, struct Cyc_Cstdio___sFILE* __stream);
+extern unsigned char* fgets( unsigned char* __s, int __n, struct Cyc_Cstdio___sFILE*
+__stream); extern unsigned char* gets( unsigned char* __s); extern int fputs(
+unsigned char* __s, struct Cyc_Cstdio___sFILE* __stream); extern int puts(
+unsigned char* __s); extern int ungetc( int __c, struct Cyc_Cstdio___sFILE*
+__stream); extern unsigned int fread( unsigned char* __ptr, unsigned int __size,
+unsigned int __n, struct Cyc_Cstdio___sFILE* __stream); extern unsigned int
+fwrite( unsigned char* __ptr, unsigned int __size, unsigned int __n, struct Cyc_Cstdio___sFILE*
+__s); extern int fseek( struct Cyc_Cstdio___sFILE* __stream, int __off, int
+__whence); extern int ftell( struct Cyc_Cstdio___sFILE* __stream); extern void
+rewind( struct Cyc_Cstdio___sFILE* __stream); extern int fgetpos( struct Cyc_Cstdio___sFILE*
+__stream, int* __pos); extern int fsetpos( struct Cyc_Cstdio___sFILE* __stream,
+int* __pos); extern void clearerr( struct Cyc_Cstdio___sFILE* __stream); extern
+int feof( struct Cyc_Cstdio___sFILE* __stream); extern int ferror( struct Cyc_Cstdio___sFILE*
+__stream); extern void perror( unsigned char* __s); extern int fileno( struct
+Cyc_Cstdio___sFILE* __stream); struct Cyc_Stdio___sFILE{ struct Cyc_Cstdio___sFILE*
+file; } ; int Cyc_Stdio_remove( struct _tagged_arr filename){ return remove(
+string_to_Cstring( filename));} int Cyc_Stdio_rename( struct _tagged_arr
+old_filename, struct _tagged_arr new_filename){ return rename( string_to_Cstring(
+old_filename), string_to_Cstring( new_filename));} struct Cyc_Stdio___sFILE* Cyc_Stdio_tmpfile(){
+struct Cyc_Cstdio___sFILE* cf= tmpfile(); return( unsigned int) cf?({ struct Cyc_Stdio___sFILE*
+_temp0=( struct Cyc_Stdio___sFILE*) GC_malloc( sizeof( struct Cyc_Stdio___sFILE));
+_temp0->file= cf; _temp0;}): 0;} struct _tagged_arr Cyc_Stdio_tmpnam( struct
+_tagged_arr s){ struct _tagged_arr name= Cstring_to_string( tmpnam( 0)); return(
+unsigned int) s.curr? Cyc_String_strcpy( s,( struct _tagged_arr) name): name;}
+int Cyc_Stdio_fclose( struct Cyc_Stdio___sFILE* f){ int r= fclose(( struct Cyc_Cstdio___sFILE*)
+_check_null( f->file)); if( r ==  0){ f->file= 0;} return r;} int Cyc_Stdio_fflush(
+struct Cyc_Stdio___sFILE* f){ return( unsigned int) f? fflush((( struct Cyc_Stdio___sFILE*)
+_check_null( f))->file): fflush( 0);} struct Cyc_Stdio___sFILE* Cyc_Stdio_freopen(
+struct _tagged_arr x, struct _tagged_arr y, struct Cyc_Stdio___sFILE* f){ struct
+Cyc_Cstdio___sFILE* cf= freopen( string_to_Cstring( x), string_to_Cstring( y),(
+struct Cyc_Cstdio___sFILE*) _check_null( f->file)); return( unsigned int) cf?({
+struct Cyc_Stdio___sFILE* _temp1=( struct Cyc_Stdio___sFILE*) GC_malloc( sizeof(
+struct Cyc_Stdio___sFILE)); _temp1->file= cf; _temp1;}): 0;} void Cyc_Stdio_setbuf(
+struct Cyc_Stdio___sFILE* f, struct _tagged_arr buf){ Cyc_Stdio_setvbuf( f, buf,(
+unsigned int) buf.curr? 0: 2, 1024);} void Cyc_Stdio_setbuffer( struct Cyc_Stdio___sFILE*
+f, struct _tagged_arr buf, unsigned int size){ Cyc_Stdio_setvbuf( f, buf,(
+unsigned int) buf.curr? 0: 2, size);} void Cyc_Stdio_setlinebuf( struct Cyc_Stdio___sFILE*
+f){ Cyc_Stdio_setvbuf( f, _tag_arr( 0u, 0u, 0u), 1, 0);} int Cyc_Stdio_setvbuf(
+struct Cyc_Stdio___sFILE* f, struct _tagged_arr buf, int mode, unsigned int size){
+if( _get_arr_size( buf, sizeof( unsigned char)) <  size){( int) _throw(( void*)({
+struct Cyc_Core_Failure_struct* _temp2=( struct Cyc_Core_Failure_struct*)
+GC_malloc( sizeof( struct Cyc_Core_Failure_struct)); _temp2[ 0]=({ struct Cyc_Core_Failure_struct
+_temp3; _temp3.tag= Cyc_Core_Failure; _temp3.f1= _tag_arr("setvbuf: buffer insufficient",
+sizeof( unsigned char), 29u); _temp3;}); _temp2;}));} return setvbuf(( struct
+Cyc_Cstdio___sFILE*) _check_null( f->file), underlying_Cstring(( struct
+_tagged_arr) buf), mode, size);} int Cyc_Stdio_fgetc( struct Cyc_Stdio___sFILE*
+f){ return fgetc(( struct Cyc_Cstdio___sFILE*) _check_null( f->file));} struct
+_tagged_arr Cyc_Stdio_fgets( struct _tagged_arr s, int n, struct Cyc_Stdio___sFILE*
+f){ unsigned char* result; unsigned char* buffer= underlying_Cstring(( struct
+_tagged_arr) s); unsigned int len= _get_arr_size( s, sizeof( unsigned char)); n=(
+int)( len <  n? len:( unsigned int) n); result= fgets( buffer, n,( struct Cyc_Cstdio___sFILE*)
 _check_null( f->file)); if( result ==  0){ return _tag_arr( 0u, 0u, 0u);} else{
 return s;}} int Cyc_Stdio_fputc( int i, struct Cyc_Stdio___sFILE* f){ return
 fputc( i,( struct Cyc_Cstdio___sFILE*) _check_null( f->file));} int Cyc_Stdio_fputs(
@@ -148,17 +144,18 @@ _check_null( f->file));} int Cyc_Stdio_putc( int i, struct Cyc_Stdio___sFILE* f)
 return putc( i,( struct Cyc_Cstdio___sFILE*) _check_null( f->file));} int Cyc_Stdio_puts(
 struct _tagged_arr s){ return puts( string_to_Cstring( s));} int Cyc_Stdio_ungetc(
 int i, struct Cyc_Stdio___sFILE* f){ return ungetc( i,( struct Cyc_Cstdio___sFILE*)
-_check_null( f->file));} int Cyc_Stdio_fread( struct _tagged_arr ptr, int size,
-int nmemb, struct Cyc_Stdio___sFILE* f){ if( size *  nmemb >  _get_arr_size( ptr,
-sizeof( unsigned char))){( int) _throw(( void*)({ struct Cyc_Core_Failure_struct*
-_temp4=( struct Cyc_Core_Failure_struct*) GC_malloc( sizeof( struct Cyc_Core_Failure_struct));
-_temp4[ 0]=({ struct Cyc_Core_Failure_struct _temp5; _temp5.tag= Cyc_Core_Failure;
-_temp5.f1= _tag_arr("fread: buffer insufficient", sizeof( unsigned char), 27u);
-_temp5;}); _temp4;}));} return fread( underlying_Cstring(( struct _tagged_arr)
-ptr), size, nmemb,( struct Cyc_Cstdio___sFILE*) _check_null( f->file));} int Cyc_Stdio_fwrite(
-struct _tagged_arr ptr, int size, int nmemb, struct Cyc_Stdio___sFILE* f){ if(
-size *  nmemb >  _get_arr_size( ptr, sizeof( unsigned char))){( int) _throw((
-void*)({ struct Cyc_Core_Failure_struct* _temp6=( struct Cyc_Core_Failure_struct*)
+_check_null( f->file));} unsigned int Cyc_Stdio_fread( struct _tagged_arr ptr,
+unsigned int size, unsigned int nmemb, struct Cyc_Stdio___sFILE* f){ if( size * 
+nmemb >  _get_arr_size( ptr, sizeof( unsigned char))){( int) _throw(( void*)({
+struct Cyc_Core_Failure_struct* _temp4=( struct Cyc_Core_Failure_struct*)
+GC_malloc( sizeof( struct Cyc_Core_Failure_struct)); _temp4[ 0]=({ struct Cyc_Core_Failure_struct
+_temp5; _temp5.tag= Cyc_Core_Failure; _temp5.f1= _tag_arr("fread: buffer insufficient",
+sizeof( unsigned char), 27u); _temp5;}); _temp4;}));} return fread(
+underlying_Cstring(( struct _tagged_arr) ptr), size, nmemb,( struct Cyc_Cstdio___sFILE*)
+_check_null( f->file));} unsigned int Cyc_Stdio_fwrite( struct _tagged_arr ptr,
+unsigned int size, unsigned int nmemb, struct Cyc_Stdio___sFILE* f){ if( size * 
+nmemb >  _get_arr_size( ptr, sizeof( unsigned char))){( int) _throw(( void*)({
+struct Cyc_Core_Failure_struct* _temp6=( struct Cyc_Core_Failure_struct*)
 GC_malloc( sizeof( struct Cyc_Core_Failure_struct)); _temp6[ 0]=({ struct Cyc_Core_Failure_struct
 _temp7; _temp7.tag= Cyc_Core_Failure; _temp7.f1= _tag_arr("fwrite: buffer insufficient",
 sizeof( unsigned char), 28u); _temp7;}); _temp6;}));} return fwrite(

@@ -1,10 +1,5 @@
- struct Cyc_timeval{ int tv_sec; int tv_usec; } ; struct Cyc_timespec{
-unsigned int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec
-it_interval; struct Cyc_timespec it_value; } ; struct Cyc__types_fd_set{ int
-fds_bits[ 2u]; } ; struct Cyc_dirent{ int d_ino; int d_off; unsigned short
-d_reclen; unsigned char d_type; unsigned char d_name[ 256u]; } ; extern void
-exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; extern
-unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
+ extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ;
+extern unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
 12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
 } ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
@@ -14,7 +9,7 @@ unsigned char* tag; struct _tagged_arr f1; } ; extern struct _RegionHandle* Cyc_
 extern unsigned char* string_to_Cstring( struct _tagged_arr); extern
 unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
 _tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
-wrap_Cstring_as_string( unsigned char*, int); extern struct _tagged_arr
+wrap_Cstring_as_string( unsigned char*, unsigned int); extern struct _tagged_arr
 ntCsl_to_ntsl( unsigned char**); extern int system( unsigned char*); struct Cyc_List_List{
 void* hd; struct Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_empty[
 15u]; extern unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char
@@ -130,19 +125,19 @@ _check_null( _temp19))->right;} else{* ans_place=((( struct Cyc_Dict_T*)
 _check_null( _temp19))->key_val).f2; return 1;}}} return 0;} struct _tuple1{
 void* f1; struct Cyc_Dict_T* f2; struct Cyc_Dict_T* f3; struct _tuple0 f4; } ;
 static struct Cyc_Dict_T* Cyc_Dict_balance( struct _RegionHandle* r, struct
-_tuple1 quad_t){ struct _tuple1 _temp21= quad_t; struct _tuple0 _temp33; struct
-Cyc_Dict_T* _temp35; struct Cyc_Dict_T* _temp37; struct Cyc_Dict_T _temp39;
-struct _tuple0 _temp40; struct Cyc_Dict_T* _temp42; struct Cyc_Dict_T* _temp44;
-struct Cyc_Dict_T _temp46; struct _tuple0 _temp47; struct Cyc_Dict_T* _temp49;
-struct Cyc_Dict_T* _temp51; void* _temp53; void* _temp55; void* _temp57; struct
-_tuple0 _temp59; struct Cyc_Dict_T* _temp61; struct Cyc_Dict_T* _temp63; struct
-Cyc_Dict_T _temp65; struct _tuple0 _temp66; struct Cyc_Dict_T* _temp68; struct
-Cyc_Dict_T _temp70; struct _tuple0 _temp71; struct Cyc_Dict_T* _temp73; struct
-Cyc_Dict_T* _temp75; void* _temp77; struct Cyc_Dict_T* _temp79; void* _temp81;
-void* _temp83; struct _tuple0 _temp85; struct Cyc_Dict_T* _temp87; struct Cyc_Dict_T
-_temp89; struct _tuple0 _temp90; struct Cyc_Dict_T* _temp92; struct Cyc_Dict_T*
-_temp94; struct Cyc_Dict_T _temp96; struct _tuple0 _temp97; struct Cyc_Dict_T*
-_temp99; struct Cyc_Dict_T* _temp101; void* _temp103; void* _temp105; struct Cyc_Dict_T*
+_tuple1 quad){ struct _tuple1 _temp21= quad; struct _tuple0 _temp33; struct Cyc_Dict_T*
+_temp35; struct Cyc_Dict_T* _temp37; struct Cyc_Dict_T _temp39; struct _tuple0
+_temp40; struct Cyc_Dict_T* _temp42; struct Cyc_Dict_T* _temp44; struct Cyc_Dict_T
+_temp46; struct _tuple0 _temp47; struct Cyc_Dict_T* _temp49; struct Cyc_Dict_T*
+_temp51; void* _temp53; void* _temp55; void* _temp57; struct _tuple0 _temp59;
+struct Cyc_Dict_T* _temp61; struct Cyc_Dict_T* _temp63; struct Cyc_Dict_T
+_temp65; struct _tuple0 _temp66; struct Cyc_Dict_T* _temp68; struct Cyc_Dict_T
+_temp70; struct _tuple0 _temp71; struct Cyc_Dict_T* _temp73; struct Cyc_Dict_T*
+_temp75; void* _temp77; struct Cyc_Dict_T* _temp79; void* _temp81; void* _temp83;
+struct _tuple0 _temp85; struct Cyc_Dict_T* _temp87; struct Cyc_Dict_T _temp89;
+struct _tuple0 _temp90; struct Cyc_Dict_T* _temp92; struct Cyc_Dict_T* _temp94;
+struct Cyc_Dict_T _temp96; struct _tuple0 _temp97; struct Cyc_Dict_T* _temp99;
+struct Cyc_Dict_T* _temp101; void* _temp103; void* _temp105; struct Cyc_Dict_T*
 _temp107; void* _temp109; struct _tuple0 _temp111; struct Cyc_Dict_T* _temp113;
 struct Cyc_Dict_T _temp115; struct _tuple0 _temp116; struct Cyc_Dict_T* _temp118;
 struct Cyc_Dict_T _temp120; struct _tuple0 _temp121; struct Cyc_Dict_T* _temp123;

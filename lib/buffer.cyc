@@ -41,12 +41,12 @@ using Stdio; // for size_t
 
 abstract struct t
 { mstring_t buffer;
-  uint position;
-  uint length;
+  unsigned int position;
+  unsigned int length;
   mstring_t initial_buffer;
 };
 
-T create (uint n) {
+T create (unsigned int n) {
   if (n < 1) n=1;
   mstring_t s = new_string(n);
   return new t(s, 0, n, s);
@@ -72,7 +72,7 @@ void reset (T b) {
   return;
 }
 
-static void resize(T b, uint more) {
+static void resize(T b, unsigned int more) {
   size_t len = b->length;
   size_t new_len = len;
   mstring_t new_buffer;

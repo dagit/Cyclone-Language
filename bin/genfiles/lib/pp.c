@@ -1,10 +1,5 @@
- struct Cyc_timeval{ int tv_sec; int tv_usec; } ; struct Cyc_timespec{
-unsigned int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec
-it_interval; struct Cyc_timespec it_value; } ; struct Cyc__types_fd_set{ int
-fds_bits[ 2u]; } ; struct Cyc_dirent{ int d_ino; int d_off; unsigned short
-d_reclen; unsigned char d_type; unsigned char d_name[ 256u]; } ; extern void
-exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; extern
-struct _tagged_arr Cyc_Core_new_string( int); extern void* Cyc_Core_identity(
+ extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ;
+extern struct _tagged_arr Cyc_Core_new_string( int); extern void* Cyc_Core_identity(
 void*); extern int Cyc_Core_intcmp( int, int); extern unsigned char Cyc_Core_InvalidArg[
 15u]; struct Cyc_Core_InvalidArg_struct{ unsigned char* tag; struct _tagged_arr
 f1; } ; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
@@ -15,7 +10,7 @@ f1; } ; extern unsigned char Cyc_Core_Not_found[ 14u]; extern unsigned char Cyc_
 f1; } ; extern unsigned char* string_to_Cstring( struct _tagged_arr); extern
 unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
 _tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
-wrap_Cstring_as_string( unsigned char*, int); extern struct _tagged_arr
+wrap_Cstring_as_string( unsigned char*, unsigned int); extern struct _tagged_arr
 ntCsl_to_ntsl( unsigned char**); extern int system( unsigned char*); struct Cyc_Stdio___sFILE;
 extern unsigned char Cyc_Stdio_FileCloseError[ 19u]; extern unsigned char Cyc_Stdio_FileOpenError[
 18u]; struct Cyc_Stdio_FileOpenError_struct{ unsigned char* tag; struct
@@ -38,35 +33,35 @@ tag; double* f1; } ; static const int Cyc_Stdio_FloatPtr_sa= 6; struct Cyc_Stdio
 int tag; float* f1; } ; struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl;
 } ; extern int Cyc_List_length( struct Cyc_List_List* x); extern unsigned char
 Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[ 18u];
-extern unsigned char Cyc_List_Nth[ 8u]; extern int Cyc_String_strlen( struct
-_tagged_arr s); extern int Cyc_String_zstrptrcmp( struct _tagged_arr*, struct
-_tagged_arr*); extern struct _tagged_arr Cyc_String_str_sepstr( struct Cyc_List_List*,
-struct _tagged_arr); struct Cyc_Hashtable_Table; extern struct Cyc_Hashtable_Table*
-Cyc_Hashtable_create( int sz, int(* cmp)( void*, void*), int(* hash)( void*));
-extern void Cyc_Hashtable_insert( struct Cyc_Hashtable_Table* t, void* key, void*
-val); extern void* Cyc_Hashtable_lookup( struct Cyc_Hashtable_Table* t, void*
-key); extern int Cyc_Hashtable_hash_stringptr( struct _tagged_arr* s); static
-const int Cyc_Fn_Fun= 0; struct Cyc_Fn_Fun_struct{ int tag; void*(* f1)( void*,
-void*); void* f2; } ; extern void* Cyc_Fn_make_fn( void*(* f)( void*, void*),
-void* x); extern void* Cyc_Fn_fp2fn( void*(* f)( void*)); extern void* Cyc_Fn_apply(
-void* f, void* x); struct Cyc_PP_Ppstate; struct Cyc_PP_Out; struct Cyc_PP_Doc;
-extern void Cyc_PP_file_of_doc( struct Cyc_PP_Doc* d, int w, struct Cyc_Stdio___sFILE*
-f); extern struct _tagged_arr Cyc_PP_string_of_doc( struct Cyc_PP_Doc* d, int w);
-struct _tuple0{ struct _tagged_arr f1; struct Cyc_List_List* f2; } ; extern
-struct _tuple0* Cyc_PP_string_and_links( struct Cyc_PP_Doc* d, int w); extern
-struct Cyc_PP_Doc* Cyc_PP_nil_doc(); extern struct Cyc_PP_Doc* Cyc_PP_blank_doc();
-extern struct Cyc_PP_Doc* Cyc_PP_line_doc(); extern struct Cyc_PP_Doc* Cyc_PP_oline_doc();
-extern struct Cyc_PP_Doc* Cyc_PP_text( struct _tagged_arr s); extern struct Cyc_PP_Doc*
-Cyc_PP_textptr( struct _tagged_arr* s); extern struct Cyc_PP_Doc* Cyc_PP_hyperlink(
-struct _tagged_arr shrt, struct _tagged_arr full); extern struct Cyc_PP_Doc* Cyc_PP_nest(
-int k, struct Cyc_PP_Doc* d); extern struct Cyc_PP_Doc* Cyc_PP_cat( struct
-_tagged_arr); extern struct Cyc_PP_Doc* Cyc_PP_cats( struct Cyc_List_List*
-doclist); extern struct Cyc_PP_Doc* Cyc_PP_cats_arr( struct _tagged_arr docs);
-extern struct Cyc_PP_Doc* Cyc_PP_doc_union( struct Cyc_PP_Doc* d, struct Cyc_PP_Doc*
-d2); extern struct Cyc_PP_Doc* Cyc_PP_tab( struct Cyc_PP_Doc* d); extern struct
-Cyc_PP_Doc* Cyc_PP_ppseq( struct Cyc_PP_Doc*(* pp)( void*), struct _tagged_arr
-sep, struct Cyc_List_List* l0); extern struct Cyc_PP_Doc* Cyc_PP_seq( struct
-_tagged_arr sep, struct Cyc_List_List* l0); extern struct Cyc_PP_Doc* Cyc_PP_ppseql(
+extern unsigned char Cyc_List_Nth[ 8u]; extern unsigned int Cyc_String_strlen(
+struct _tagged_arr s); extern int Cyc_String_zstrptrcmp( struct _tagged_arr*,
+struct _tagged_arr*); extern struct _tagged_arr Cyc_String_str_sepstr( struct
+Cyc_List_List*, struct _tagged_arr); struct Cyc_Hashtable_Table; extern struct
+Cyc_Hashtable_Table* Cyc_Hashtable_create( int sz, int(* cmp)( void*, void*),
+int(* hash)( void*)); extern void Cyc_Hashtable_insert( struct Cyc_Hashtable_Table*
+t, void* key, void* val); extern void* Cyc_Hashtable_lookup( struct Cyc_Hashtable_Table*
+t, void* key); extern int Cyc_Hashtable_hash_stringptr( struct _tagged_arr* s);
+static const int Cyc_Fn_Fun= 0; struct Cyc_Fn_Fun_struct{ int tag; void*(* f1)(
+void*, void*); void* f2; } ; extern void* Cyc_Fn_make_fn( void*(* f)( void*,
+void*), void* x); extern void* Cyc_Fn_fp2fn( void*(* f)( void*)); extern void*
+Cyc_Fn_apply( void* f, void* x); struct Cyc_PP_Ppstate; struct Cyc_PP_Out;
+struct Cyc_PP_Doc; extern void Cyc_PP_file_of_doc( struct Cyc_PP_Doc* d, int w,
+struct Cyc_Stdio___sFILE* f); extern struct _tagged_arr Cyc_PP_string_of_doc(
+struct Cyc_PP_Doc* d, int w); struct _tuple0{ struct _tagged_arr f1; struct Cyc_List_List*
+f2; } ; extern struct _tuple0* Cyc_PP_string_and_links( struct Cyc_PP_Doc* d,
+int w); extern struct Cyc_PP_Doc* Cyc_PP_nil_doc(); extern struct Cyc_PP_Doc*
+Cyc_PP_blank_doc(); extern struct Cyc_PP_Doc* Cyc_PP_line_doc(); extern struct
+Cyc_PP_Doc* Cyc_PP_oline_doc(); extern struct Cyc_PP_Doc* Cyc_PP_text( struct
+_tagged_arr s); extern struct Cyc_PP_Doc* Cyc_PP_textptr( struct _tagged_arr* s);
+extern struct Cyc_PP_Doc* Cyc_PP_hyperlink( struct _tagged_arr shrt, struct
+_tagged_arr full); extern struct Cyc_PP_Doc* Cyc_PP_nest( int k, struct Cyc_PP_Doc*
+d); extern struct Cyc_PP_Doc* Cyc_PP_cat( struct _tagged_arr); extern struct Cyc_PP_Doc*
+Cyc_PP_cats( struct Cyc_List_List* doclist); extern struct Cyc_PP_Doc* Cyc_PP_cats_arr(
+struct _tagged_arr docs); extern struct Cyc_PP_Doc* Cyc_PP_doc_union( struct Cyc_PP_Doc*
+d, struct Cyc_PP_Doc* d2); extern struct Cyc_PP_Doc* Cyc_PP_tab( struct Cyc_PP_Doc*
+d); extern struct Cyc_PP_Doc* Cyc_PP_ppseq( struct Cyc_PP_Doc*(* pp)( void*),
+struct _tagged_arr sep, struct Cyc_List_List* l0); extern struct Cyc_PP_Doc* Cyc_PP_seq(
+struct _tagged_arr sep, struct Cyc_List_List* l0); extern struct Cyc_PP_Doc* Cyc_PP_ppseql(
 struct Cyc_PP_Doc*(* pp)( void*), struct _tagged_arr sep, struct Cyc_List_List*
 l0); extern struct Cyc_PP_Doc* Cyc_PP_seql( struct _tagged_arr sep, struct Cyc_List_List*
 l0); extern struct Cyc_PP_Doc* Cyc_PP_group( struct _tagged_arr start, struct
@@ -180,16 +175,16 @@ _temp64[ 0]=({ struct Cyc_PP_Single_struct _temp65; _temp65.tag= Cyc_PP_Single;
 _temp65.f1=( void*)({ struct _tagged_arr* _temp66=( struct _tagged_arr*)
 GC_malloc( sizeof( struct _tagged_arr) *  1); _temp66[ 0]= _temp59; _temp66;});
 _temp65;}); _temp64;})); _temp63->links=( void*)(( void*) Cyc_PP_Empty); _temp63;});}
-static struct Cyc_PP_Doc* Cyc_PP_text_doc( struct _tagged_arr s){ int slen= Cyc_String_strlen(
-s); return({ struct Cyc_PP_Doc* _temp67=( struct Cyc_PP_Doc*) GC_malloc( sizeof(
-struct Cyc_PP_Doc)); _temp67->mwo= slen; _temp67->mw= Cyc_PP_infinity; _temp67->f=(
-void*)(( void*(*)( struct Cyc_PP_Out*(* f)( struct _tuple1*, struct Cyc_PP_Ppstate*),
-struct _tuple1* x)) Cyc_Fn_make_fn)( Cyc_PP_text_doc_f,({ struct _tuple1*
-_temp68=( struct _tuple1*) GC_malloc( sizeof( struct _tuple1)); _temp68->f1=
-slen; _temp68->f2= s; _temp68;})); _temp67;});} struct Cyc_PP_Doc* Cyc_PP_text(
-struct _tagged_arr s){ struct Cyc_Hashtable_Table* t; if( Cyc_PP_str_hashtbl == 
-0){ t=(( struct Cyc_Hashtable_Table*(*)( int sz, int(* cmp)( struct _tagged_arr*,
-struct _tagged_arr*), int(* hash)( struct _tagged_arr*))) Cyc_Hashtable_create)(
+static struct Cyc_PP_Doc* Cyc_PP_text_doc( struct _tagged_arr s){ int slen=( int)
+Cyc_String_strlen( s); return({ struct Cyc_PP_Doc* _temp67=( struct Cyc_PP_Doc*)
+GC_malloc( sizeof( struct Cyc_PP_Doc)); _temp67->mwo= slen; _temp67->mw= Cyc_PP_infinity;
+_temp67->f=( void*)(( void*(*)( struct Cyc_PP_Out*(* f)( struct _tuple1*, struct
+Cyc_PP_Ppstate*), struct _tuple1* x)) Cyc_Fn_make_fn)( Cyc_PP_text_doc_f,({
+struct _tuple1* _temp68=( struct _tuple1*) GC_malloc( sizeof( struct _tuple1));
+_temp68->f1= slen; _temp68->f2= s; _temp68;})); _temp67;});} struct Cyc_PP_Doc*
+Cyc_PP_text( struct _tagged_arr s){ struct Cyc_Hashtable_Table* t; if( Cyc_PP_str_hashtbl
+==  0){ t=(( struct Cyc_Hashtable_Table*(*)( int sz, int(* cmp)( struct
+_tagged_arr*, struct _tagged_arr*), int(* hash)( struct _tagged_arr*))) Cyc_Hashtable_create)(
 101, Cyc_String_zstrptrcmp, Cyc_Hashtable_hash_stringptr); Cyc_PP_str_hashtbl=({
 struct Cyc_Core_Opt* _temp69=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
 Cyc_Core_Opt)); _temp69->v=( void*) t; _temp69;});} else{ t=( struct Cyc_Hashtable_Table*)((
@@ -238,9 +233,9 @@ _temp96.f1=( void*)({ struct _tuple3* _temp97=( struct _tuple3*) GC_malloc(
 sizeof( struct _tuple3)); _temp97->f1= st->cl; _temp97->f2= st->cc; _temp97->f3=
 _temp92; _temp97->f4= _temp88; _temp97;}); _temp96;}); _temp95;})); _temp94;});}
 struct Cyc_PP_Doc* Cyc_PP_hyperlink( struct _tagged_arr shrt, struct _tagged_arr
-full){ int slen= Cyc_String_strlen( shrt); return({ struct Cyc_PP_Doc* _temp101=(
-struct Cyc_PP_Doc*) GC_malloc( sizeof( struct Cyc_PP_Doc)); _temp101->mwo= slen;
-_temp101->mw= Cyc_PP_infinity; _temp101->f=( void*)(( void*(*)( struct Cyc_PP_Out*(*
+full){ int slen=( int) Cyc_String_strlen( shrt); return({ struct Cyc_PP_Doc*
+_temp101=( struct Cyc_PP_Doc*) GC_malloc( sizeof( struct Cyc_PP_Doc)); _temp101->mwo=
+slen; _temp101->mw= Cyc_PP_infinity; _temp101->f=( void*)(( void*(*)( struct Cyc_PP_Out*(*
 f)( struct _tuple2*, struct Cyc_PP_Ppstate*), struct _tuple2* x)) Cyc_Fn_make_fn)(
 Cyc_PP_hyperlink_f,({ struct _tuple2* _temp102=( struct _tuple2*) GC_malloc(
 sizeof( struct _tuple2)); _temp102->f1= slen; _temp102->f2= shrt; _temp102->f3=

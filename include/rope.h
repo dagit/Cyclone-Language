@@ -30,7 +30,7 @@ extern mstring_t to_string(rope_t);
 extern rope_t concat(rope_t,rope_t);
 extern rope_t concata(rope_t ?`H);
 extern rope_t concatl(List::list_t<rope_t>);
-extern uint length(rope_t);
+extern unsigned int length(rope_t);
 extern int cmp(rope_t,rope_t);
 }
 #endif

@@ -1,14 +1,9 @@
- struct Cyc_timeval{ int tv_sec; int tv_usec; } ; struct Cyc_timespec{
-unsigned int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec
-it_interval; struct Cyc_timespec it_value; } ; struct Cyc__types_fd_set{ int
-fds_bits[ 2u]; } ; struct Cyc_dirent{ int d_ino; int d_off; unsigned short
-d_reclen; unsigned char d_type; unsigned char d_name[ 256u]; } ; struct Cyc_Fcntl_flock{
-short l_type; int l_start; short l_whence; int l_len; int l_pid; } ; static
-const int Cyc_Fcntl_Long= 0; struct Cyc_Fcntl_Long_struct{ int tag; int f1; } ;
-static const int Cyc_Fcntl_Flock= 1; struct Cyc_Fcntl_Flock_struct{ int tag;
-struct Cyc_Fcntl_flock* f1; } ; extern int Cyc_Fcntl_fcntl( int fd, int cmd,
-struct _tagged_arr argv); extern void exit( int); extern void* abort(); struct
-Cyc_Core_Opt{ void* v; } ; extern unsigned char Cyc_Core_InvalidArg[ 15u];
+ struct Cyc_Fcntl_flock{ short l_type; int l_start; short l_whence; int l_len;
+int l_pid; } ; static const int Cyc_Fcntl_Long= 0; struct Cyc_Fcntl_Long_struct{
+int tag; int f1; } ; static const int Cyc_Fcntl_Flock= 1; struct Cyc_Fcntl_Flock_struct{
+int tag; struct Cyc_Fcntl_flock* f1; } ; extern int Cyc_Fcntl_fcntl( int fd, int
+cmd, struct _tagged_arr argv); extern void exit( int); extern void* abort();
+struct Cyc_Core_Opt{ void* v; } ; extern unsigned char Cyc_Core_InvalidArg[ 15u];
 struct Cyc_Core_InvalidArg_struct{ unsigned char* tag; struct _tagged_arr f1; }
 ; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Impossible[
@@ -18,7 +13,7 @@ f1; } ; extern unsigned char Cyc_Core_Not_found[ 14u]; extern unsigned char Cyc_
 f1; } ; extern unsigned char* string_to_Cstring( struct _tagged_arr); extern
 unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
 _tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
-wrap_Cstring_as_string( unsigned char*, int); extern struct _tagged_arr
+wrap_Cstring_as_string( unsigned char*, unsigned int); extern struct _tagged_arr
 ntCsl_to_ntsl( unsigned char**); extern int system( unsigned char*); extern int
 fcntl( int fd, int cmd); extern int fcntl_with_arg( int fd, int cmd, int arg);
 extern int fcntl_with_lock( int fd, int cmd, struct Cyc_Fcntl_flock* lock); int

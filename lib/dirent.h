@@ -19,9 +19,17 @@
 #ifndef _DIRENT_H
 #define _DIRENT_H
 
-#include <sys/types.h>
+#include <sys/types.h> // for ino_t
 
 namespace Dirent {
+  // Fortunately this is the same in cygwin and glibc
+  struct dirent {
+    long d_ino;
+    off_t d_off;
+    unsigned short d_reclen;
+    unsigned char d_type;
+    char d_name[256];
+  };
   typedef void DIR;
   DIR *opendir(string_t name);
   extern "C" struct dirent *readdir(DIR *dir);

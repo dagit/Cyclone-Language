@@ -1,10 +1,5 @@
- struct Cyc_timeval{ int tv_sec; int tv_usec; } ; struct Cyc_timespec{
-unsigned int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec
-it_interval; struct Cyc_timespec it_value; } ; struct Cyc__types_fd_set{ int
-fds_bits[ 2u]; } ; struct Cyc_dirent{ int d_ino; int d_off; unsigned short
-d_reclen; unsigned char d_type; unsigned char d_name[ 256u]; } ; extern void
-exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; extern
-unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
+ extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ;
+extern unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
 12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
 } ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
@@ -14,7 +9,7 @@ unsigned char* tag; struct _tagged_arr f1; } ; extern struct _RegionHandle* Cyc_
 extern unsigned char* string_to_Cstring( struct _tagged_arr); extern
 unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
 _tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
-wrap_Cstring_as_string( unsigned char*, int); extern struct _tagged_arr
+wrap_Cstring_as_string( unsigned char*, unsigned int); extern struct _tagged_arr
 ntCsl_to_ntsl( unsigned char**); extern int system( unsigned char*); struct Cyc_Stdio___sFILE;
 extern struct Cyc_Stdio___sFILE* Cyc_Stdio_stdout; extern int Cyc_Stdio_putc(
 int __c, struct Cyc_Stdio___sFILE* __stream); extern unsigned char Cyc_Stdio_FileCloseError[
@@ -47,7 +42,7 @@ const int Cyc_Stdio_DoublePtr_sa= 5; struct Cyc_Stdio_DoublePtr_sa_struct{ int
 tag; double* f1; } ; static const int Cyc_Stdio_FloatPtr_sa= 6; struct Cyc_Stdio_FloatPtr_sa_struct{
 int tag; float* f1; } ; struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl;
 } ; extern unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
-18u]; extern unsigned char Cyc_List_Nth[ 8u]; extern int Cyc_String_strlen(
+18u]; extern unsigned char Cyc_List_Nth[ 8u]; extern unsigned int Cyc_String_strlen(
 struct _tagged_arr s); extern int isalnum( int); extern int isalpha( int);
 extern int isascii( int); extern int iscntrl( int); extern int isdigit( int);
 extern int isgraph( int); extern int islower( int); extern int isprint( int);
@@ -262,7 +257,7 @@ struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr){ cp2= _tag_arr("(NULL)",
 sizeof( unsigned char), 7u);} if( prec >=  0){ struct _tagged_arr p= Cyc_Stdio_memchr(
 cp2,'\000', prec); if( p.curr != (( struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr){
 size=( p.curr -  cp2.curr) /  sizeof( unsigned char); if( size >  prec){ size=
-prec;}} else{ size= prec;}} else{ size= Cyc_String_strlen( cp2);} sign='\000';
+prec;}} else{ size= prec;}} else{ size=( int) Cyc_String_strlen( cp2);} sign='\000';
 break; case 'U': _LL114: flags |= 1; goto _LL115; case 'u': _LL115: _ulong=
 flags &  1? Cyc_Stdio_va_arg_ulong( ap):( flags &  4?( unsigned int)((
 unsigned short) Cyc_Stdio_va_arg_int( ap)):( unsigned int) Cyc_Stdio_va_arg_uint(

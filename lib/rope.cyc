@@ -44,18 +44,18 @@ rope_t concatl(List::list_t<rope_t> l) {
     ({rope_t r = l->hd; l = l->tl; r;})}));
 }
 
-uint length(rope_t r) {
+unsigned int length(rope_t r) {
   switch (r->v) {
-  case &String_rope(ss): return (uint)String::strlen(ss);
+  case &String_rope(ss): return (unsigned int)String::strlen(ss);
   case &Array_rope(rs):
-    uint total = 0, sz = rs.size;
-    for (uint i = 0; i < sz; i++)
+    unsigned int total = 0, sz = rs.size;
+    for (unsigned int i = 0; i < sz; i++)
       total += length(rs[i]);
     return total;
   }
 }
 
-static uint flatten_it(mstring_t s, uint i, rope_t r) {
+static unsigned int flatten_it(mstring_t s, unsigned int i, rope_t r) {
   switch (r->v) {
   case &String_rope(ss):
     let len = String::strlen(ss);

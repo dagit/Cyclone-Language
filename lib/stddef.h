@@ -19,10 +19,7 @@
 #ifndef _STDDEF_H
 #define _STDDEF_H
 
-#ifndef _SIZET
-#define _SIZET
-typedef long size_t;
-#endif
+typedef unsigned int 		size_t;
 
 /* This file is missing:
    NULL (because we handle this specially in Cyclone)

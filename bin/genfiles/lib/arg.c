@@ -1,10 +1,5 @@
- struct Cyc_timeval{ int tv_sec; int tv_usec; } ; struct Cyc_timespec{
-unsigned int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec
-it_interval; struct Cyc_timespec it_value; } ; struct Cyc__types_fd_set{ int
-fds_bits[ 2u]; } ; struct Cyc_dirent{ int d_ino; int d_off; unsigned short
-d_reclen; unsigned char d_type; unsigned char d_name[ 256u]; } ; extern void
-exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; extern
-unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
+ extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ;
+extern unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
 12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
 } ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
@@ -14,7 +9,7 @@ unsigned char* tag; struct _tagged_arr f1; } ; extern int Cyc_Core_int_of_string
 struct _tagged_arr); extern unsigned char* string_to_Cstring( struct _tagged_arr);
 extern unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
 _tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
-wrap_Cstring_as_string( unsigned char*, int); extern struct _tagged_arr
+wrap_Cstring_as_string( unsigned char*, unsigned int); extern struct _tagged_arr
 ntCsl_to_ntsl( unsigned char**); extern int system( unsigned char*); struct Cyc_Stdio___sFILE;
 extern struct Cyc_Stdio___sFILE* Cyc_Stdio_stderr; extern unsigned char Cyc_Stdio_FileCloseError[
 19u]; extern unsigned char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
@@ -36,10 +31,10 @@ const int Cyc_Stdio_DoublePtr_sa= 5; struct Cyc_Stdio_DoublePtr_sa_struct{ int
 tag; double* f1; } ; static const int Cyc_Stdio_FloatPtr_sa= 6; struct Cyc_Stdio_FloatPtr_sa_struct{
 int tag; float* f1; } ; struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl;
 } ; extern unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
-18u]; extern unsigned char Cyc_List_Nth[ 8u]; extern int Cyc_String_strlen(
+18u]; extern unsigned char Cyc_List_Nth[ 8u]; extern unsigned int Cyc_String_strlen(
 struct _tagged_arr s); extern int Cyc_String_strcmp( struct _tagged_arr s1,
 struct _tagged_arr s2); extern int Cyc_String_strncmp( struct _tagged_arr s1,
-struct _tagged_arr s2, int len); extern struct _tagged_arr Cyc_String_strconcat(
+struct _tagged_arr s2, unsigned int len); extern struct _tagged_arr Cyc_String_strconcat(
 struct _tagged_arr, struct _tagged_arr); extern unsigned char Cyc_Arg_Bad[ 8u];
 struct Cyc_Arg_Bad_struct{ unsigned char* tag; struct _tagged_arr f1; } ; extern
 unsigned char Cyc_Arg_Error[ 10u]; static const int Cyc_Arg_Unit_spec= 0; struct
@@ -79,7 +74,7 @@ _tagged_arr f1; struct _tagged_arr f2; struct _tagged_arr f3; } ; struct _tuple0
 struct _tagged_arr f1; int f2; struct _tagged_arr f3; void* f4; struct
 _tagged_arr f5; } ; static void* Cyc_Arg_lookup( struct Cyc_List_List* l, struct
 _tagged_arr x){ while( l !=  0) { struct _tagged_arr _temp0=(*(( struct _tuple0*)((
-struct Cyc_List_List*) _check_null( l))->hd)).f1; int _temp1= Cyc_String_strlen(
+struct Cyc_List_List*) _check_null( l))->hd)).f1; unsigned int _temp1= Cyc_String_strlen(
 _temp0); if( _temp1 >  0?(*(( struct _tuple0*)(( struct Cyc_List_List*)
 _check_null( l))->hd)).f2: 0){ if( Cyc_String_strncmp( x,(*(( struct _tuple0*)((
 struct Cyc_List_List*) _check_null( l))->hd)).f1, _temp1) ==  0){ return(*((
@@ -90,13 +85,13 @@ _check_null( l))->hd)).f4;}} l=(( struct Cyc_List_List*) _check_null( l))->tl;}(
 int) _throw(( void*) Cyc_Core_Not_found);} static struct _tagged_arr Cyc_Arg_Justify_break_line(
 struct Cyc_Buffer_t* b, int howmuch, struct _tagged_arr s){ if( s.curr == ((
 struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr){ return( struct _tagged_arr)
-_tag_arr( 0u, 0u, 0u);} if( howmuch <  0){ howmuch= 0;}{ int _temp2= Cyc_String_strlen(
-s); if( howmuch >  _temp2){ Cyc_Buffer_add_string( b, s); return( struct
-_tagged_arr) _tag_arr( 0u, 0u, 0u);}{ int i; for( i= howmuch -  1; i >=  0? !
-isspace(( int)*(( const unsigned char*) _check_unknown_subscript( s, sizeof(
-unsigned char), i))): 0; i --){;} if( i <  0){ for( i= howmuch? howmuch -  1: 0;(
-i <  _temp2?( int)*(( const unsigned char*) _check_unknown_subscript( s, sizeof(
-unsigned char), i)): 0)? ! isspace(( int)*(( const unsigned char*)
+_tag_arr( 0u, 0u, 0u);} if( howmuch <  0){ howmuch= 0;}{ unsigned int _temp2=
+Cyc_String_strlen( s); if( howmuch >  _temp2){ Cyc_Buffer_add_string( b, s);
+return( struct _tagged_arr) _tag_arr( 0u, 0u, 0u);}{ int i; for( i= howmuch -  1;
+i >=  0? ! isspace(( int)*(( const unsigned char*) _check_unknown_subscript( s,
+sizeof( unsigned char), i))): 0; i --){;} if( i <  0){ for( i= howmuch? howmuch
+-  1: 0;( i <  _temp2?( int)*(( const unsigned char*) _check_unknown_subscript(
+s, sizeof( unsigned char), i)): 0)? ! isspace(( int)*(( const unsigned char*)
 _check_unknown_subscript( s, sizeof( unsigned char), i))): 0; i ++){;}} Cyc_Buffer_add_substring(
 b, s, 0, i);{ struct _tagged_arr whatsleft=( struct _tagged_arr) _tag_arr( 0u, 0u,
 0u); for( 0;( i <  _temp2?( int)*(( const unsigned char*)
@@ -114,20 +109,19 @@ unsigned int)( indent +  1); unsigned char* _temp9=( unsigned char*)
 GC_malloc_atomic( sizeof( unsigned char) *  _temp8); struct _tagged_arr _temp11=
 _tag_arr( _temp9, sizeof( unsigned char),( unsigned int)( indent +  1));{
 unsigned int _temp10= _temp8; unsigned int i; for( i= 0; i <  _temp10; i ++){
-_temp9[ i]= i ==  0?'\n':' ';}}; _temp11;}); int _temp3= Cyc_String_strlen( item);
-struct _tagged_arr itemsep; if( Cyc_String_strlen( desc) >  0){ if( _temp3 +  1
->  indent){ itemsep= indentstr;} else{ itemsep=({ unsigned int _temp4=(
-unsigned int)( indent -  _temp3); unsigned char* _temp5=( unsigned char*)
+_temp9[ i]= i ==  0?'\n':' ';}}; _temp11;}); unsigned int _temp3= Cyc_String_strlen(
+item); struct _tagged_arr itemsep; if( Cyc_String_strlen( desc) >  0){ if(
+_temp3 +  1 >  indent){ itemsep= indentstr;} else{ itemsep=({ unsigned int
+_temp4= indent -  _temp3; unsigned char* _temp5=( unsigned char*)
 GC_malloc_atomic( sizeof( unsigned char) *  _temp4); struct _tagged_arr _temp7=
-_tag_arr( _temp5, sizeof( unsigned char),( unsigned int)( indent -  _temp3));{
-unsigned int _temp6= _temp4; unsigned int i; for( i= 0; i <  _temp6; i ++){
-_temp5[ i]=' ';}}; _temp7;});}} else{ return;} Cyc_Buffer_add_string( b, itemsep);
-while( desc.curr != (( struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr) { desc=
-Cyc_Arg_Justify_break_line( b, margin -  indent, desc); if( desc.curr != ((
-struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr){ Cyc_Buffer_add_string( b,
-indentstr);} else{ Cyc_Buffer_add_string( b, _tag_arr("\n", sizeof(
-unsigned char), 2u));}} return;}} void Cyc_Arg_usage( struct Cyc_List_List*
-speclist, struct _tagged_arr errmsg){({ struct Cyc_Stdio_String_pa_struct
+_tag_arr( _temp5, sizeof( unsigned char), indent -  _temp3);{ unsigned int
+_temp6= _temp4; unsigned int i; for( i= 0; i <  _temp6; i ++){ _temp5[ i]=' ';}};
+_temp7;});}} else{ return;} Cyc_Buffer_add_string( b, itemsep); while( desc.curr
+!= (( struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr) { desc= Cyc_Arg_Justify_break_line(
+b, margin -  indent, desc); if( desc.curr != (( struct _tagged_arr) _tag_arr( 0u,
+0u, 0u)).curr){ Cyc_Buffer_add_string( b, indentstr);} else{ Cyc_Buffer_add_string(
+b, _tag_arr("\n", sizeof( unsigned char), 2u));}} return;}} void Cyc_Arg_usage(
+struct Cyc_List_List* speclist, struct _tagged_arr errmsg){({ struct Cyc_Stdio_String_pa_struct
 _temp13; _temp13.tag= Cyc_Stdio_String_pa; _temp13.f1=( struct _tagged_arr)
 errmsg;{ void* _temp12[ 1u]={& _temp13}; Cyc_Stdio_fprintf( Cyc_Stdio_stderr,
 _tag_arr("%s\n", sizeof( unsigned char), 4u), _tag_arr( _temp12, sizeof( void*),

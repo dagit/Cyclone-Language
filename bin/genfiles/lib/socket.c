@@ -1,10 +1,5 @@
- struct Cyc_timeval{ int tv_sec; int tv_usec; } ; struct Cyc_timespec{
-unsigned int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec
-it_interval; struct Cyc_timespec it_value; } ; struct Cyc__types_fd_set{ int
-fds_bits[ 2u]; } ; struct Cyc_dirent{ int d_ino; int d_off; unsigned short
-d_reclen; unsigned char d_type; unsigned char d_name[ 256u]; } ; extern void
-exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; extern
-unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
+ extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ;
+extern unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
 12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
 } ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
@@ -13,8 +8,8 @@ unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Not
 unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char*
 string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring(
 struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
-extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, int); extern
-struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int system(
+extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
+extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int system(
 unsigned char*); extern int socket( int domain, int type, int protocol); extern
 int Cyc_Socket_bind( int fd, void* addr); extern int Cyc_Socket_connect( int fd,
 void* addr); extern int Cyc_Socket_setsockopt( int fd, int level, int optname,
@@ -27,7 +22,7 @@ sin_zero[ 8u]; } ; extern unsigned char Cyc_Inet_sockaddr_in[ 16u]; struct Cyc_I
 unsigned char* tag; struct Cyc_Inet_sockaddr_in f1; } ; extern unsigned int
 htonl( unsigned int); extern unsigned short htons( unsigned short); extern
 unsigned int ntohl( unsigned int); extern unsigned short ntohs( unsigned short);
-extern int* __errno_location(); extern int bind( int fd, const struct Cyc_Inet_sockaddr_in*
+extern int* __errno(); extern int bind( int fd, const struct Cyc_Inet_sockaddr_in*
 addr, unsigned int len); extern int connect( int fd, const struct Cyc_Inet_sockaddr_in*
 addr, unsigned int len); extern int accept( int fd, struct Cyc_Inet_sockaddr_in*
 addr, unsigned int* len); extern struct Cyc_Inet_sockaddr_in*
@@ -54,11 +49,11 @@ struct _tuple1 _temp17= Cyc_Csocket_sa2Csa( addr); _LL22: _temp21= _temp17.f1;
 goto _LL20; _LL20: _temp19= _temp17.f2; goto _LL18; _LL18: return connect( fd,(
 const struct Cyc_Inet_sockaddr_in*) _temp21, _temp19);} int Cyc_Socket_setsockopt(
 int fd, int level, int optname, struct _tagged_arr optval, unsigned int optlen){*
-__errno_location()= 92; return - 1;} struct _tuple0 Cyc_Socket_accept( int fd){
-struct Cyc_Inet_sockaddr_in Caddr=({ struct Cyc_Inet_sockaddr_in _temp24;
-_temp24.sin_family= 0; _temp24.sin_port= 0; _temp24.sin_addr=({ struct Cyc_Inet_in_addr
-_temp26; _temp26.s_addr= 0; _temp26;});{ unsigned int _temp25= 8u; unsigned int
-i; for( i= 0; i <  _temp25; i ++){( _temp24.sin_zero)[ i]='\000';}} _temp24;});
+__errno()= 109; return - 1;} struct _tuple0 Cyc_Socket_accept( int fd){ struct
+Cyc_Inet_sockaddr_in Caddr=({ struct Cyc_Inet_sockaddr_in _temp24; _temp24.sin_family=
+0; _temp24.sin_port= 0; _temp24.sin_addr=({ struct Cyc_Inet_in_addr _temp26;
+_temp26.s_addr= 0; _temp26;});{ unsigned int _temp25= 8u; unsigned int i; for( i=
+0; i <  _temp25; i ++){( _temp24.sin_zero)[ i]='\000';}} _temp24;});
 unsigned int len= sizeof( struct Cyc_Inet_sockaddr_in); int result= accept( fd,(
 struct Cyc_Inet_sockaddr_in*)& Caddr,( unsigned int*)& len); return({ struct
 _tuple0 _temp23; _temp23.f1= result; _temp23.f2= Cyc_Csocket_Csa2sa(( const

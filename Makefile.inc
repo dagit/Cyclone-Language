@@ -112,12 +112,13 @@ CYCLONE_H:=arg.h\
         stdlib.h\
         string.h\
         strings.h\
+        sys/select.h\
         sys/socket.h\
+        sys/time.h\
         time.h\
         xarray.h\
         config.h\
 	ctype.h\
-	machine/types.h\
 	math.h\
 	precore.h\
 	signal.h\
