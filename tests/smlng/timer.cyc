@@ -1,0 +1,42 @@
+
+#include "time.h"
+#include "stdio.h"
+#include "stdlib.h"
+#include "timer.h"
+using Stdio;
+
+#define MINIMUM_TIME 180
+
+// a global that is how many seconds we have left -- is that fine enough
+// granularity? IS TIME_T in SECONDS???!!!???!!!
+time_t death_time = 0;
+
+// should be called right away in main
+void start_timer(string_t limit) {
+  if(death_time != 0)
+    fprintf(stderr,"Why did we call start_timer more than once?!?!");
+  // just to be careful, maybe we've already been running for a second
+  int total_secs = Stdlib::atoi(limit) - 1;
+  if(total_secs < MINIMUM_TIME)
+    fprintf(stderr,"Something is really wrong, we have less than 180 seconds");
+  death_time = Time::time(null);
+  fprintf(stderr,"Start time: %d\n Limit: %d\n", death_time, total_secs);
+  death_time += total_secs;
+}
+
+// return how many seconds we have left
+unsigned int check_time() {
+  // shouldn't have to do it this way -- something is messed up in the .h files
+  time_t current_time = Time::time(null);
+  return death_time - current_time;
+}
+
+int g = 0;
+void time_test(string_t s) {
+  for(int k=0; k < 100; ++k) {
+    fprintf(stderr,"\nTime left: %d", check_time());
+    for(int i=0; i < 1000000; ++i)
+      for(int j=0; j < 1000; ++j)
+	++g;
+  }
+}
