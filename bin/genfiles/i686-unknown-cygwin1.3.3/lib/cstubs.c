@@ -32,14 +32,14 @@
 
 extern void exit(int);
 
-struct Cyc_Std___sFILE {
-  FILE *file; // Mirror any changes in stdio.cyc
+struct Cyc_Std___cycFILE {
+  FILE *file; // Mirror any changes in cycstubs.cyc
 } Cyc_Std_stdin_v, Cyc_Std_stdout_v, Cyc_Std_stderr_v,
   *Cyc_Std_stdin = &Cyc_Std_stdin_v,
   *Cyc_Std_stdout = &Cyc_Std_stdout_v,
   *Cyc_Std_stderr = &Cyc_Std_stderr_v;
 
-FILE *_sfile_to_file(struct Cyc_Std___sFILE *sf) {
+FILE *_sfile_to_file(struct Cyc_Std___cycFILE *sf) {
   if(!sf) {
     fprintf(stderr,"Attempt to access null file descriptor.\n");
     exit(255);
@@ -48,7 +48,7 @@ FILE *_sfile_to_file(struct Cyc_Std___sFILE *sf) {
     throw(Cyc_Null_Exception); // FIX:  should be more descriptive?
   return sf->file;
 }
-FILE *sfile_to_file(struct Cyc_Std___sFILE *sf) {
+FILE *sfile_to_file(struct Cyc_Std___cycFILE *sf) {
   if(!sf) {
     fprintf(stderr,"Attempt to access null file descriptor.\n");
     exit(255);
@@ -58,7 +58,7 @@ FILE *sfile_to_file(struct Cyc_Std___sFILE *sf) {
   return sf->file;
 }
 
-int Cyc_Std_file_string_read(struct Cyc_Std___sFILE *sf, 
+int Cyc_Std_file_string_read(struct Cyc_Std___cycFILE *sf, 
                                struct _tagged_arr dest,
                                int dest_offset, int max_count) {
   unsigned char *new_curr = dest.curr + dest_offset;
@@ -72,7 +72,7 @@ int Cyc_Std_file_string_read(struct Cyc_Std___sFILE *sf,
   }
   return fread(new_curr, 1, max_count, fd);
 }
-int Cyc_Std_file_string_write(struct Cyc_Std___sFILE *sf, 
+int Cyc_Std_file_string_write(struct Cyc_Std___cycFILE *sf, 
                                 struct _tagged_arr src,
                                 int src_offset, int max_count) {
   size_t sz = src.last_plus_one - src.curr;

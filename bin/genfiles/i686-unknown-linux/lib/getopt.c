@@ -256,30 +256,31 @@ unsigned char*tag;struct _tagged_arr f1;};extern unsigned char Cyc_Core_Impossib
 15];struct Cyc_Core_Impossible_struct{unsigned char*tag;struct _tagged_arr f1;};
 extern unsigned char Cyc_Core_Not_found[14];extern unsigned char Cyc_Core_Unreachable[
 16];struct Cyc_Core_Unreachable_struct{unsigned char*tag;struct _tagged_arr f1;};
-struct Cyc_Cstdio___sFILE;struct Cyc_Std___sFILE;extern struct Cyc_Std___sFILE*Cyc_Std_stderr;
-extern unsigned char Cyc_Std_FileCloseError[19];extern unsigned char Cyc_Std_FileOpenError[
-18];struct Cyc_Std_FileOpenError_struct{unsigned char*tag;struct _tagged_arr f1;};
-struct Cyc_Std_String_pa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{
-int tag;unsigned int f1;};struct Cyc_Std_Double_pa_struct{int tag;double f1;};struct
-Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{int
-tag;unsigned int*f1;};extern int Cyc_Std_fprintf(struct Cyc_Std___sFILE*,struct
-_tagged_arr fmt,struct _tagged_arr);struct Cyc_Std_ShortPtr_sa_struct{int tag;short*
-f1;};struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{
-int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct
-Cyc_Std_StringPtr_sa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{
-int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};struct Cyc_List_List{
-void*hd;struct Cyc_List_List*tl;};extern unsigned char Cyc_List_List_mismatch[18];
-extern unsigned char Cyc_List_Nth[8];extern unsigned char Cyc_Array_Array_mismatch[
-19];struct Cyc_Std__Div{int quot;int rem;};struct Cyc_Std__Ldiv{int quot;int rem;};
-extern struct _tagged_arr Cyc_Std_getenv(struct _tagged_arr);struct Cyc_Std_timeval{
-int tv_sec;int tv_usec;};struct Cyc_Std_timezone{int tz_minuteswest;int tz_dsttime;};
-struct Cyc_Std_itimerval{struct Cyc_Std_timeval it_interval;struct Cyc_Std_timeval
-it_value;};typedef struct {unsigned int __val[64];}Cyc_Std___sigset_t;typedef Cyc_Std___sigset_t
-Cyc_Std_sigset_t;struct Cyc_Std_timespec{int tv_sec;int tv_nsec;};struct Cyc_Std_timeval;
-struct Cyc_Std___fd_set{int __fds_bits[32];};extern struct _tagged_arr Cyc_Std_optarg;
-extern int Cyc_Std_optind;extern int Cyc_Std_opterr;extern int Cyc_Std_optopt;struct
-Cyc_Std_option{struct _tagged_arr name;int has_arg;int*flag;int val;};extern int Cyc_Std_getopt(
-int __argc,struct _tagged_arr __argv,struct _tagged_arr __shortopts);extern int Cyc_Std__getopt_internal(
+struct Cyc_Cstdio___abstractFILE;struct Cyc_Std___cycFILE;extern struct Cyc_Std___cycFILE*
+Cyc_Std_stderr;extern unsigned char Cyc_Std_FileCloseError[19];extern unsigned char
+Cyc_Std_FileOpenError[18];struct Cyc_Std_FileOpenError_struct{unsigned char*tag;
+struct _tagged_arr f1;};struct Cyc_Std_String_pa_struct{int tag;struct _tagged_arr f1;
+};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;};struct Cyc_Std_Double_pa_struct{
+int tag;double f1;};struct Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{
+int tag;unsigned int*f1;};extern int Cyc_Std_fprintf(struct Cyc_Std___cycFILE*,
+struct _tagged_arr fmt,struct _tagged_arr);struct Cyc_Std_ShortPtr_sa_struct{int tag;
+short*f1;};struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct
+Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{int tag;
+unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{int tag;struct _tagged_arr f1;}
+;struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{
+int tag;float*f1;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern
+unsigned char Cyc_List_List_mismatch[18];extern unsigned char Cyc_List_Nth[8];
+extern unsigned char Cyc_Array_Array_mismatch[19];struct Cyc_Std__Div{int quot;int
+rem;};struct Cyc_Std__Ldiv{int quot;int rem;};extern struct _tagged_arr Cyc_Std_getenv(
+struct _tagged_arr);struct Cyc_Std_timeval{int tv_sec;int tv_usec;};struct Cyc_Std_timezone{
+int tz_minuteswest;int tz_dsttime;};struct Cyc_Std_itimerval{struct Cyc_Std_timeval
+it_interval;struct Cyc_Std_timeval it_value;};typedef struct {unsigned int __val[64];
+}Cyc_Std___sigset_t;typedef Cyc_Std___sigset_t Cyc_Std_sigset_t;struct Cyc_Std_timespec{
+int tv_sec;int tv_nsec;};struct Cyc_Std_timeval;struct Cyc_Std___fd_set{int
+__fds_bits[32];};extern struct _tagged_arr Cyc_Std_optarg;extern int Cyc_Std_optind;
+extern int Cyc_Std_opterr;extern int Cyc_Std_optopt;struct Cyc_Std_option{struct
+_tagged_arr name;int has_arg;int*flag;int val;};extern int Cyc_Std_getopt(int __argc,
+struct _tagged_arr __argv,struct _tagged_arr __shortopts);extern int Cyc_Std__getopt_internal(
 int __argc,struct _tagged_arr __argv,struct _tagged_arr __shortopts,struct _tagged_arr
 __longopts,int*__longind,int __long_only);int Cyc_Std_access(struct _tagged_arr,int);
 int Cyc_Std_chdir(struct _tagged_arr);int Cyc_Std_chown(struct _tagged_arr,

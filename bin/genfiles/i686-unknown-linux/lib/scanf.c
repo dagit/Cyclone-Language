@@ -262,29 +262,30 @@ unsigned char Cyc_List_Nth[8];extern unsigned char Cyc_Array_Array_mismatch[19];
 struct Cyc_Std__Div{int quot;int rem;};struct Cyc_Std__Ldiv{int quot;int rem;};extern
 double Cyc_Std_atof(struct _tagged_arr);extern int Cyc_Std_strtol(struct _tagged_arr n,
 struct _tagged_arr*end,int base);extern unsigned int Cyc_Std_strtoul(struct
-_tagged_arr n,struct _tagged_arr*end,int base);struct Cyc_Cstdio___sFILE;struct Cyc_Std___sFILE;
-extern struct Cyc_Std___sFILE*Cyc_Std_stdin;extern int Cyc_Std_fgetc(struct Cyc_Std___sFILE*
-__stream);extern int Cyc_Std_getc(struct Cyc_Std___sFILE*__stream);extern int Cyc_Std_ungetc(
-int __c,struct Cyc_Std___sFILE*__stream);extern unsigned char Cyc_Std_FileCloseError[
-19];extern unsigned char Cyc_Std_FileOpenError[18];struct Cyc_Std_FileOpenError_struct{
-unsigned char*tag;struct _tagged_arr f1;};struct Cyc_Std_String_pa_struct{int tag;
-struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;};struct
-Cyc_Std_Double_pa_struct{int tag;double f1;};struct Cyc_Std_ShortPtr_pa_struct{int
-tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{int tag;unsigned int*f1;};struct Cyc_Std_ShortPtr_sa_struct{
-int tag;short*f1;};struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};
-struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{
-int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{int tag;struct
-_tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{
-int tag;float*f1;};extern int Cyc_Std_scanf(struct _tagged_arr fmt,struct _tagged_arr);
-extern int Cyc_Std_fscanf(struct Cyc_Std___sFILE*stream,struct _tagged_arr fmt,struct
-_tagged_arr);extern int Cyc_Std_sscanf(struct _tagged_arr src,struct _tagged_arr fmt,
-struct _tagged_arr);extern int Cyc_Std_vfscanf(struct Cyc_Std___sFILE*stream,struct
-_tagged_arr fmt,struct _tagged_arr);extern int Cyc_Std_vsscanf(struct _tagged_arr src,
-struct _tagged_arr fmt,struct _tagged_arr);static struct _tagged_arr Cyc_Std___sccl(
-struct _tagged_arr tab,struct _tagged_arr fmt);static short*Cyc_Std_va_arg_short_ptr(
-void*a){void*_tmp0=a;short*_tmp1;unsigned short*_tmp2;_LL1: if(*((int*)_tmp0)== 0){
-_LL7: _tmp1=((struct Cyc_Std_ShortPtr_sa_struct*)_tmp0)->f1;goto _LL2;}else{goto
-_LL3;}_LL3: if(*((int*)_tmp0)== 1){_LL8: _tmp2=((struct Cyc_Std_UShortPtr_sa_struct*)
+_tagged_arr n,struct _tagged_arr*end,int base);struct Cyc_Cstdio___abstractFILE;
+struct Cyc_Std___cycFILE;extern struct Cyc_Std___cycFILE*Cyc_Std_stdin;extern int Cyc_Std_fgetc(
+struct Cyc_Std___cycFILE*__stream);extern int Cyc_Std_getc(struct Cyc_Std___cycFILE*
+__stream);extern int Cyc_Std_ungetc(int __c,struct Cyc_Std___cycFILE*__stream);
+extern unsigned char Cyc_Std_FileCloseError[19];extern unsigned char Cyc_Std_FileOpenError[
+18];struct Cyc_Std_FileOpenError_struct{unsigned char*tag;struct _tagged_arr f1;};
+struct Cyc_Std_String_pa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{
+int tag;unsigned int f1;};struct Cyc_Std_Double_pa_struct{int tag;double f1;};struct
+Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{int
+tag;unsigned int*f1;};struct Cyc_Std_ShortPtr_sa_struct{int tag;short*f1;};struct
+Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{
+int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct
+Cyc_Std_StringPtr_sa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{
+int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};extern int
+Cyc_Std_scanf(struct _tagged_arr fmt,struct _tagged_arr);extern int Cyc_Std_fscanf(
+struct Cyc_Std___cycFILE*stream,struct _tagged_arr fmt,struct _tagged_arr);extern int
+Cyc_Std_sscanf(struct _tagged_arr src,struct _tagged_arr fmt,struct _tagged_arr);
+extern int Cyc_Std_vfscanf(struct Cyc_Std___cycFILE*stream,struct _tagged_arr fmt,
+struct _tagged_arr);extern int Cyc_Std_vsscanf(struct _tagged_arr src,struct
+_tagged_arr fmt,struct _tagged_arr);static struct _tagged_arr Cyc_Std___sccl(struct
+_tagged_arr tab,struct _tagged_arr fmt);static short*Cyc_Std_va_arg_short_ptr(void*a){
+void*_tmp0=a;short*_tmp1;unsigned short*_tmp2;_LL1: if(*((int*)_tmp0)== 0){_LL7:
+_tmp1=((struct Cyc_Std_ShortPtr_sa_struct*)_tmp0)->f1;goto _LL2;}else{goto _LL3;}
+_LL3: if(*((int*)_tmp0)== 1){_LL8: _tmp2=((struct Cyc_Std_UShortPtr_sa_struct*)
 _tmp0)->f1;goto _LL4;}else{goto _LL5;}_LL5: goto _LL6;_LL2: return _tmp1;_LL4: return(
 short*)_tmp2;_LL6:(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
 _tmp3=_cycalloc(sizeof(*_tmp3));_tmp3[0]=({struct Cyc_Core_Invalid_argument_struct
@@ -497,12 +498,13 @@ _tagged_arr*),struct _tagged_arr*fp,struct _tagged_arr fmt0,struct _tagged_arr a
 errp))Cyc_Std__IO_vfscanf)(Cyc_Std_string_getc,Cyc_Std_string_ungetc,Cyc_Std_string_peekc,&
 src,fmt,ap,(int*)& err);}int Cyc_Std_sscanf(struct _tagged_arr src,struct _tagged_arr
 fmt,struct _tagged_arr ap){return Cyc_Std_vsscanf(src,fmt,ap);}int Cyc_Std_peekc(
-struct Cyc_Std___sFILE*stream){int c=Cyc_Std_fgetc(stream);Cyc_Std_ungetc(c,stream);
-return c;}int Cyc_Std_vfscanf(struct Cyc_Std___sFILE*stream,struct _tagged_arr fmt,
-struct _tagged_arr ap){int err=0;return((int(*)(int(*_IO_getc)(struct Cyc_Std___sFILE*),
-int(*_IO_ungetc)(int,struct Cyc_Std___sFILE*),int(*_IO_peekc)(struct Cyc_Std___sFILE*),
-struct Cyc_Std___sFILE*fp,struct _tagged_arr fmt0,struct _tagged_arr ap,int*errp))Cyc_Std__IO_vfscanf)(
-Cyc_Std_getc,Cyc_Std_ungetc,Cyc_Std_peekc,stream,fmt,ap,(int*)& err);}int Cyc_Std_fscanf(
-struct Cyc_Std___sFILE*stream,struct _tagged_arr fmt,struct _tagged_arr ap){return Cyc_Std_vfscanf(
+struct Cyc_Std___cycFILE*stream){int c=Cyc_Std_fgetc(stream);Cyc_Std_ungetc(c,
+stream);return c;}int Cyc_Std_vfscanf(struct Cyc_Std___cycFILE*stream,struct
+_tagged_arr fmt,struct _tagged_arr ap){int err=0;return((int(*)(int(*_IO_getc)(
+struct Cyc_Std___cycFILE*),int(*_IO_ungetc)(int,struct Cyc_Std___cycFILE*),int(*
+_IO_peekc)(struct Cyc_Std___cycFILE*),struct Cyc_Std___cycFILE*fp,struct
+_tagged_arr fmt0,struct _tagged_arr ap,int*errp))Cyc_Std__IO_vfscanf)(Cyc_Std_getc,
+Cyc_Std_ungetc,Cyc_Std_peekc,stream,fmt,ap,(int*)& err);}int Cyc_Std_fscanf(struct
+Cyc_Std___cycFILE*stream,struct _tagged_arr fmt,struct _tagged_arr ap){return Cyc_Std_vfscanf(
 stream,fmt,ap);}int Cyc_Std_scanf(struct _tagged_arr fmt,struct _tagged_arr ap){
 return Cyc_Std_vfscanf(Cyc_Std_stdin,fmt,ap);}

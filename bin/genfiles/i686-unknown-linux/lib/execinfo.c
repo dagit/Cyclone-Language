@@ -256,18 +256,18 @@ unsigned char*tag;struct _tagged_arr f1;};extern unsigned char Cyc_Core_Impossib
 15];struct Cyc_Core_Impossible_struct{unsigned char*tag;struct _tagged_arr f1;};
 extern unsigned char Cyc_Core_Not_found[14];extern unsigned char Cyc_Core_Unreachable[
 16];struct Cyc_Core_Unreachable_struct{unsigned char*tag;struct _tagged_arr f1;};
-int Cyc_Execinfo_backtrace(struct _tagged_arr,int);int Cyc_Execinfo_bt();struct Cyc_Cstdio___sFILE;
-struct Cyc_Std___sFILE;extern struct Cyc_Std___sFILE*Cyc_Std_stdout;extern int Cyc_Std_fclose(
-struct Cyc_Std___sFILE*);extern int Cyc_Std_fflush(struct Cyc_Std___sFILE*);extern
-int Cyc_Std_getc(struct Cyc_Std___sFILE*__stream);extern int Cyc_Std_putc(int __c,
-struct Cyc_Std___sFILE*__stream);extern struct Cyc_Std___sFILE*Cyc_Std_fdopen(int
-__fd,struct _tagged_arr __modes);extern unsigned char Cyc_Std_FileCloseError[19];
+int Cyc_Execinfo_backtrace(struct _tagged_arr,int);int Cyc_Execinfo_bt();struct Cyc_Cstdio___abstractFILE;
+struct Cyc_Std___cycFILE;extern struct Cyc_Std___cycFILE*Cyc_Std_stdout;extern int
+Cyc_Std_fclose(struct Cyc_Std___cycFILE*);extern int Cyc_Std_fflush(struct Cyc_Std___cycFILE*);
+extern int Cyc_Std_getc(struct Cyc_Std___cycFILE*__stream);extern int Cyc_Std_putc(
+int __c,struct Cyc_Std___cycFILE*__stream);extern struct Cyc_Std___cycFILE*Cyc_Std_fdopen(
+int __fd,struct _tagged_arr __modes);extern unsigned char Cyc_Std_FileCloseError[19];
 extern unsigned char Cyc_Std_FileOpenError[18];struct Cyc_Std_FileOpenError_struct{
 unsigned char*tag;struct _tagged_arr f1;};struct Cyc_Std_String_pa_struct{int tag;
 struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;};struct
 Cyc_Std_Double_pa_struct{int tag;double f1;};struct Cyc_Std_ShortPtr_pa_struct{int
 tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{int tag;unsigned int*f1;};extern int
-Cyc_Std_fprintf(struct Cyc_Std___sFILE*,struct _tagged_arr fmt,struct _tagged_arr);
+Cyc_Std_fprintf(struct Cyc_Std___cycFILE*,struct _tagged_arr fmt,struct _tagged_arr);
 extern int Cyc_Std_printf(struct _tagged_arr fmt,struct _tagged_arr);extern struct
 _tagged_arr Cyc_Std_aprintf(struct _tagged_arr fmt,struct _tagged_arr);struct Cyc_Std_ShortPtr_sa_struct{
 int tag;short*f1;};struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};
@@ -317,16 +317,16 @@ _tag_arr("--functions",sizeof(unsigned char),12);Cyc_Std_execlp(_tag_arr("addr2l
 sizeof(unsigned char),10),_tag_arr("addr2line",sizeof(unsigned char),10),
 _tag_arr(_tmp2,sizeof(struct _tagged_arr),4));});return 1;}else{if(pid < 0){close(
 tochild[0]);close(tochild[1]);close(fromchild[0]);close(fromchild[1]);return 1;}}{
-struct Cyc_Std___sFILE*w=({struct Cyc_Std___sFILE*f=Cyc_Std_fdopen(tochild[1],
+struct Cyc_Std___cycFILE*w=({struct Cyc_Std___cycFILE*f=Cyc_Std_fdopen(tochild[1],
 _tag_arr("w",sizeof(unsigned char),2));if(!((unsigned int)f)){return 1;}(struct
-Cyc_Std___sFILE*)_check_null(f);});struct Cyc_Std___sFILE*r=({struct Cyc_Std___sFILE*
+Cyc_Std___cycFILE*)_check_null(f);});struct Cyc_Std___cycFILE*r=({struct Cyc_Std___cycFILE*
 f=Cyc_Std_fdopen(fromchild[0],_tag_arr("r",sizeof(unsigned char),2));if(!((
-unsigned int)f)){Cyc_Std_fclose(w);return 1;}(struct Cyc_Std___sFILE*)_check_null(
-f);});int n=Cyc_Execinfo_backtrace(_tag_arr(bt,sizeof(int),20),(int)20);{int c=0;
-for(0;c < n;c ++){({struct Cyc_Std_Int_pa_struct _tmp6;_tmp6.tag=1;_tmp6.f1=(
+unsigned int)f)){Cyc_Std_fclose(w);return 1;}(struct Cyc_Std___cycFILE*)
+_check_null(f);});int n=Cyc_Execinfo_backtrace(_tag_arr(bt,sizeof(int),20),(int)
+20);{int c=0;for(0;c < n;c ++){({struct Cyc_Std_Int_pa_struct _tmp6;_tmp6.tag=1;_tmp6.f1=(
 unsigned int)bt[c];{void*_tmp5[1]={& _tmp6};Cyc_Std_fprintf(w,_tag_arr("%#x\n",
 sizeof(unsigned char),5),_tag_arr(_tmp5,sizeof(void*),1));}});}}Cyc_Std_fflush((
-struct Cyc_Std___sFILE*)w);({void*_tmp7[0]={};Cyc_Std_printf(_tag_arr("Backtrace:\n  Function          Location\n  ----------------  --------------------------------\n",
+struct Cyc_Std___cycFILE*)w);({void*_tmp7[0]={};Cyc_Std_printf(_tag_arr("Backtrace:\n  Function          Location\n  ----------------  --------------------------------\n",
 sizeof(unsigned char),94),_tag_arr(_tmp7,sizeof(void*),0));});{int c=0;for(0;c < n;
 c ++){int d;int pos=0;({void*_tmp8[0]={};Cyc_Std_printf(_tag_arr("  ",sizeof(
 unsigned char),3),_tag_arr(_tmp8,sizeof(void*),0));});while((d=Cyc_Std_getc(r))

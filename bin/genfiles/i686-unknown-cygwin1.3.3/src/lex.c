@@ -257,7 +257,7 @@ unsigned char*tag;struct _tagged_arr f1;};extern unsigned char Cyc_Core_Impossib
 15];struct Cyc_Core_Impossible_struct{unsigned char*tag;struct _tagged_arr f1;};
 extern unsigned char Cyc_Core_Not_found[14];extern unsigned char Cyc_Core_Unreachable[
 16];struct Cyc_Core_Unreachable_struct{unsigned char*tag;struct _tagged_arr f1;};
-struct Cyc_Cstdio___sFILE;struct Cyc_Std___sFILE;extern unsigned char Cyc_Std_FileCloseError[
+struct Cyc_Cstdio___abstractFILE;struct Cyc_Std___cycFILE;extern unsigned char Cyc_Std_FileCloseError[
 19];extern unsigned char Cyc_Std_FileOpenError[18];struct Cyc_Std_FileOpenError_struct{
 unsigned char*tag;struct _tagged_arr f1;};struct Cyc_Std_String_pa_struct{int tag;
 struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;};struct

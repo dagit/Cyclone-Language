@@ -257,20 +257,21 @@ struct Cyc_Core_Failure_struct{unsigned char*tag;struct _tagged_arr f1;};extern
 unsigned char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 unsigned char*tag;struct _tagged_arr f1;};extern unsigned char Cyc_Core_Not_found[14];
 extern unsigned char Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{
-unsigned char*tag;struct _tagged_arr f1;};struct Cyc_Cstdio___sFILE;struct Cyc_Std___sFILE;
-extern unsigned char Cyc_Std_FileCloseError[19];extern unsigned char Cyc_Std_FileOpenError[
-18];struct Cyc_Std_FileOpenError_struct{unsigned char*tag;struct _tagged_arr f1;};
-struct Cyc_Std_String_pa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{
-int tag;unsigned int f1;};struct Cyc_Std_Double_pa_struct{int tag;double f1;};struct
-Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{int
-tag;unsigned int*f1;};extern int Cyc_Std_fprintf(struct Cyc_Std___sFILE*,struct
-_tagged_arr fmt,struct _tagged_arr);struct Cyc_Std_ShortPtr_sa_struct{int tag;short*
-f1;};struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{
-int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct
-Cyc_Std_StringPtr_sa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{
-int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};struct Cyc_List_List{
-void*hd;struct Cyc_List_List*tl;};extern int Cyc_List_length(struct Cyc_List_List*x);
-extern unsigned char Cyc_List_List_mismatch[18];extern unsigned char Cyc_List_Nth[8];
+unsigned char*tag;struct _tagged_arr f1;};struct Cyc_Cstdio___abstractFILE;struct
+Cyc_Std___cycFILE;extern unsigned char Cyc_Std_FileCloseError[19];extern
+unsigned char Cyc_Std_FileOpenError[18];struct Cyc_Std_FileOpenError_struct{
+unsigned char*tag;struct _tagged_arr f1;};struct Cyc_Std_String_pa_struct{int tag;
+struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;};struct
+Cyc_Std_Double_pa_struct{int tag;double f1;};struct Cyc_Std_ShortPtr_pa_struct{int
+tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{int tag;unsigned int*f1;};extern int
+Cyc_Std_fprintf(struct Cyc_Std___cycFILE*,struct _tagged_arr fmt,struct _tagged_arr);
+struct Cyc_Std_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_Std_UShortPtr_sa_struct{
+int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct
+Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{
+int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;
+};struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};struct Cyc_List_List{void*hd;
+struct Cyc_List_List*tl;};extern int Cyc_List_length(struct Cyc_List_List*x);extern
+unsigned char Cyc_List_List_mismatch[18];extern unsigned char Cyc_List_Nth[8];
 extern unsigned int Cyc_Std_strlen(struct _tagged_arr s);extern int Cyc_Std_zstrptrcmp(
 struct _tagged_arr*,struct _tagged_arr*);extern struct _tagged_arr Cyc_Std_str_sepstr(
 struct Cyc_List_List*,struct _tagged_arr);struct Cyc_Hashtable_Table;extern struct
@@ -281,9 +282,9 @@ extern int Cyc_Hashtable_hash_stringptr(struct _tagged_arr*p);struct Cyc_Fn_Fun_
 int tag;void*(*f1)(void*,void*);void*f2;};extern void*Cyc_Fn_make_fn(void*(*f)(
 void*,void*),void*x);extern void*Cyc_Fn_fp2fn(void*(*f)(void*));extern void*Cyc_Fn_apply(
 void*f,void*x);struct Cyc_PP_Ppstate;struct Cyc_PP_Out;struct Cyc_PP_Doc;extern void
-Cyc_PP_file_of_doc(struct Cyc_PP_Doc*d,int w,struct Cyc_Std___sFILE*f);extern struct
-_tagged_arr Cyc_PP_string_of_doc(struct Cyc_PP_Doc*d,int w);struct _tuple0{struct
-_tagged_arr f1;struct Cyc_List_List*f2;};extern struct _tuple0*Cyc_PP_string_and_links(
+Cyc_PP_file_of_doc(struct Cyc_PP_Doc*d,int w,struct Cyc_Std___cycFILE*f);extern
+struct _tagged_arr Cyc_PP_string_of_doc(struct Cyc_PP_Doc*d,int w);struct _tuple0{
+struct _tagged_arr f1;struct Cyc_List_List*f2;};extern struct _tuple0*Cyc_PP_string_and_links(
 struct Cyc_PP_Doc*d,int w);extern struct Cyc_PP_Doc*Cyc_PP_nil_doc();extern struct Cyc_PP_Doc*
 Cyc_PP_blank_doc();extern struct Cyc_PP_Doc*Cyc_PP_line_doc();extern struct Cyc_PP_Doc*
 Cyc_PP_oline_doc();extern struct Cyc_PP_Doc*Cyc_PP_text(struct _tagged_arr s);extern
@@ -323,7 +324,7 @@ _tmp3;_tmp6->tl=l;_tmp6;});_LL6: return Cyc_PP_list_of_alist_f(_tmp5,Cyc_PP_list
 _tmp4,l));_LL0:;}struct Cyc_List_List*Cyc_PP_list_of_alist(void*x){return Cyc_PP_list_of_alist_f(
 x,0);}struct Cyc_PP_Ppstate{int ci;int cc;int cl;int pw;int epw;};struct Cyc_PP_Out{int
 newcc;int newcl;void*ppout;void*links;};struct Cyc_PP_Doc{int mwo;int mw;void*f;};
-static void Cyc_PP_dump_out(struct Cyc_Std___sFILE*f,void*al){struct Cyc_Xarray_Xarray*
+static void Cyc_PP_dump_out(struct Cyc_Std___cycFILE*f,void*al){struct Cyc_Xarray_Xarray*
 _tmp7=Cyc_Xarray_create(16,al);Cyc_Xarray_add(_tmp7,al);{int last=0;while(last >= 
 0){void*_tmp8=Cyc_Xarray_get(_tmp7,last);struct _tagged_arr*_tmp9;void*_tmpA;void*
 _tmpB;_LLB: if((int)_tmp8 == 0){goto _LLC;}else{goto _LLD;}_LLD: if((unsigned int)
@@ -337,7 +338,7 @@ f,_tag_arr("%s",sizeof(unsigned char),3),_tag_arr(_tmpC,sizeof(void*),1));}});
 goto _LLA;_LL10: Cyc_Xarray_set(_tmp7,last,_tmpA);if(last == Cyc_Xarray_length(
 _tmp7)- 1){Cyc_Xarray_add(_tmp7,_tmpB);}else{Cyc_Xarray_set(_tmp7,last + 1,_tmpB);}
 ++ last;goto _LLA;_LLA:;}}}void Cyc_PP_file_of_doc(struct Cyc_PP_Doc*d,int w,struct
-Cyc_Std___sFILE*f){struct Cyc_PP_Out*o=((struct Cyc_PP_Out*(*)(void*f,struct Cyc_PP_Ppstate*
+Cyc_Std___cycFILE*f){struct Cyc_PP_Out*o=((struct Cyc_PP_Out*(*)(void*f,struct Cyc_PP_Ppstate*
 x))Cyc_Fn_apply)((void*)d->f,({struct Cyc_PP_Ppstate*_tmpE=_cycalloc_atomic(
 sizeof(*_tmpE));_tmpE->ci=0;_tmpE->cc=0;_tmpE->cl=1;_tmpE->pw=w;_tmpE->epw=w;
 _tmpE;}));Cyc_PP_dump_out(f,(void*)o->ppout);}struct _tagged_arr Cyc_PP_string_of_doc(

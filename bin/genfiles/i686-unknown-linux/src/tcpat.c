@@ -466,8 +466,8 @@ extern void*Cyc_Absyn_compress_kb(void*);extern void*Cyc_Absyn_new_evar(struct C
 k,struct Cyc_Core_Opt*tenv);extern void*Cyc_Absyn_wildtyp(struct Cyc_Core_Opt*);
 extern void*Cyc_Absyn_uchar_t;extern void*Cyc_Absyn_uint_t;extern void*Cyc_Absyn_sint_t;
 extern void*Cyc_Absyn_float_typ;extern struct Cyc_Absyn_Vardecl*Cyc_Absyn_new_vardecl(
-struct _tuple1*x,void*t,struct Cyc_Absyn_Exp*init);struct Cyc_Cstdio___sFILE;struct
-Cyc_Std___sFILE;extern unsigned char Cyc_Std_FileCloseError[19];extern
+struct _tuple1*x,void*t,struct Cyc_Absyn_Exp*init);struct Cyc_Cstdio___abstractFILE;
+struct Cyc_Std___cycFILE;extern unsigned char Cyc_Std_FileCloseError[19];extern
 unsigned char Cyc_Std_FileOpenError[18];struct Cyc_Std_FileOpenError_struct{
 unsigned char*tag;struct _tagged_arr f1;};struct Cyc_Std_String_pa_struct{int tag;
 struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;};struct

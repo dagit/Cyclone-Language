@@ -346,7 +346,7 @@ void stack_trace() {
 }  
 
 // These are defined in cstubs.c
-extern struct Cyc_Std___sFILE {
+extern struct Cyc_Std___cycFILE {
   FILE *file;
 } *Cyc_Std_stdin, *Cyc_Std_stdout, *Cyc_Std_stderr;
 

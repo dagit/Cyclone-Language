@@ -272,7 +272,7 @@ _tagged_arr l);extern struct _tagged_arr Cyc_Typerep_get_tagname(unsigned int ta
 struct _tagged_arr l);extern struct _tagged_arr Cyc_Typerep_get_tagname2(unsigned int
 tag,struct _tagged_arr l);extern struct _tuple4 Cyc_Typerep_get_xtunionbranch(struct
 _tagged_arr tag,struct _tagged_arr l);unsigned int Cyc_Typerep_size_type(void*rep);
-struct Cyc_Cstdio___sFILE;struct Cyc_Std___sFILE;extern unsigned char Cyc_Std_FileCloseError[
+struct Cyc_Cstdio___abstractFILE;struct Cyc_Std___cycFILE;extern unsigned char Cyc_Std_FileCloseError[
 19];extern unsigned char Cyc_Std_FileOpenError[18];struct Cyc_Std_FileOpenError_struct{
 unsigned char*tag;struct _tagged_arr f1;};struct Cyc_Std_String_pa_struct{int tag;
 struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;};struct

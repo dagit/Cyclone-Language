@@ -617,8 +617,8 @@ f2;};struct Cyc_Typerep_XTUnion_struct{int tag;struct _tagged_arr f1;struct
 _tagged_arr f2;};struct Cyc_Typerep_Union_struct{int tag;struct _tagged_arr*f1;
 struct _tagged_arr f2;};unsigned int Cyc_Typerep_size_type(void*rep);extern void*Cyc_decls_rep;
 extern struct Cyc_Typerep_Struct_struct Cyc_struct_Position_Segment_rep;extern int
-Cyc_Std_zstrptrcmp(struct _tagged_arr*,struct _tagged_arr*);struct Cyc_Cstdio___sFILE;
-struct Cyc_Std___sFILE;extern unsigned char Cyc_Std_FileCloseError[19];extern
+Cyc_Std_zstrptrcmp(struct _tagged_arr*,struct _tagged_arr*);struct Cyc_Cstdio___abstractFILE;
+struct Cyc_Std___cycFILE;extern unsigned char Cyc_Std_FileCloseError[19];extern
 unsigned char Cyc_Std_FileOpenError[18];struct Cyc_Std_FileOpenError_struct{
 unsigned char*tag;struct _tagged_arr f1;};struct Cyc_Std_String_pa_struct{int tag;
 struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;};struct

@@ -5,7 +5,7 @@ using Core;
 
 namespace Cstdio {
 extern "C" {
-struct Cstdio::__sFILE *tmpfile();
+struct Cstdio::__abstractFILE *tmpfile();
 Cstring	tmpnam(Cstring);
 #define s2c(x) (string_to_Cstring(x))
 //  #define static_c2s(x) (Cstring_to_string(x))
@@ -15,7 +15,7 @@ Cstring	tmpnam(Cstring);
 namespace Std;
 
 FILE *tmpfile() {
-  struct Cstdio::__sFILE *cf = Cstdio::tmpfile();
+  struct Cstdio::__abstractFILE *cf = Cstdio::tmpfile();
   return fromCfile(cf);
 }
 

@@ -229,44 +229,44 @@ int chmod(string_t pathname, mode_t mode) {
 
 namespace Cstdio {
 extern "C" {
-extern struct __sFILE;
-typedef struct Cstdio::__sFILE __sFILE;
+extern struct __abstractFILE;
+typedef struct Cstdio::__abstractFILE __cFILE;
 int remove(Cstring);
 int rename(Cstring, Cstring);
-int fclose(__sFILE @`r);
-int fflush(__sFILE *`r);
-__sFILE *fopen (Cstring __filename, Cstring __modes);
-__sFILE *freopen(Cstring __filename, Cstring __modes, __sFILE @__stream);
-__sFILE *fdopen (int __fd, Cstring __modes);
-int setvbuf (__sFILE @ __stream, Cstring __buf, int __modes, size_t __n);
+int fclose(__cFILE @`r);
+int fflush(__cFILE *`r);
+__cFILE *fopen (Cstring __filename, Cstring __modes);
+__cFILE *freopen(Cstring __filename, Cstring __modes, __cFILE @__stream);
+__cFILE *fdopen (int __fd, Cstring __modes);
+int setvbuf (__cFILE @ __stream, Cstring __buf, int __modes, size_t __n);
   //NB: cygwin uses int as last arg of setbuffer, not size_t
-void setbuffer (__sFILE @__stream, Cstring __buf, size_t __size);
-void setlinebuf (__sFILE @__stream);
-int fgetc(__sFILE @__stream);
-int getc(__sFILE @__stream);
-int fputc(int __c, __sFILE @__stream);
-int putc(int __c, __sFILE @__stream);
-int getw(__sFILE @__stream);
-int putw(int __w, __sFILE @__stream);
-Cstring fgets(Cstring __s, int __n, __sFILE @__stream);
+void setbuffer (__cFILE @__stream, Cstring __buf, size_t __size);
+void setlinebuf (__cFILE @__stream);
+int fgetc(__cFILE @__stream);
+int getc(__cFILE @__stream);
+int fputc(int __c, __cFILE @__stream);
+int putc(int __c, __cFILE @__stream);
+int getw(__cFILE @__stream);
+int putw(int __w, __cFILE @__stream);
+Cstring fgets(Cstring __s, int __n, __cFILE @__stream);
 Cstring gets(Cstring __s);
-int fputs(Cstring __s, __sFILE @__stream);
+int fputs(Cstring __s, __cFILE @__stream);
 int puts(Cstring __s);
-int ungetc(int __c, __sFILE @__stream);
-size_t fread(Cstring __ptr,size_t __size,size_t __n,__sFILE @__stream);
-size_t fwrite(Cstring __ptr,size_t __size,size_t __n,__sFILE @__s);
-int fseek(__sFILE @__stream, long __off, int __whence);
-long ftell(__sFILE @__stream);
-void rewind(__sFILE @__stream);
-int fgetpos(__sFILE @__stream, fpos_t @__pos);
-int fsetpos(__sFILE @__stream, fpos_t @__pos);
-void clearerr(__sFILE @__stream);
-int feof(__sFILE @__stream);
-int ferror(__sFILE @__stream);
+int ungetc(int __c, __cFILE @__stream);
+size_t fread(Cstring __ptr,size_t __size,size_t __n,__cFILE @__stream);
+size_t fwrite(Cstring __ptr,size_t __size,size_t __n,__cFILE @__s);
+int fseek(__cFILE @__stream, long __off, int __whence);
+long ftell(__cFILE @__stream);
+void rewind(__cFILE @__stream);
+int fgetpos(__cFILE @__stream, fpos_t @__pos);
+int fsetpos(__cFILE @__stream, fpos_t @__pos);
+void clearerr(__cFILE @__stream);
+int feof(__cFILE @__stream);
+int ferror(__cFILE @__stream);
 void perror(Cstring __s);
-int fileno(__sFILE @__stream);
-__sFILE *popen(Cstring, Cstring);
-int pclose(__sFILE @__stream);
+int fileno(__cFILE @__stream);
+__cFILE *popen(Cstring, Cstring);
+int pclose(__cFILE @__stream);
 #define s2c(x) (string_to_Cstring(x))
 //  #define static_c2s(x) (Cstring_to_string(x))
 #define static_c2s(x) (wrap_Cstring_as_string(x,-1))
@@ -274,12 +274,12 @@ int pclose(__sFILE @__stream);
 
 namespace Std {
 
-abstract struct __sFILE {
-  Cstdio::__sFILE *file; // Mirror any changes in runtime_cyc.c
+abstract struct __cycFILE {
+  Cstdio::__cFILE *file; // Mirror any changes in cstubs.c
 };
 
-FILE*`H fromCfile(Cstdio::__sFILE *`H cf) {
-  return cf ? new __sFILE(cf) : NULL;
+FILE*`H fromCfile(Cstdio::__cFILE *`H cf) {
+  return cf ? new __cycFILE(cf) : NULL;
 }
 
 int remove(const char ?`r filename) {
@@ -291,7 +291,7 @@ int rename(const char ?`r1 old_filename, const char ?`r2 new_filename) {
 }
 
 int fclose(FILE @`r f) {
-  int r = Cstdio::fclose((Cstdio::__sFILE @) f->file);
+  int r = Cstdio::fclose((Cstdio::__cFILE @) f->file);
   if (r == 0) {
     f->file = NULL;
   }
@@ -304,9 +304,9 @@ int fflush(FILE *`r f) {
 }
 
 FILE *freopen(const char ?`r1 x, const char ?`r2 y, FILE @`r3 f) {
-  Cstdio::__sFILE *cf = Cstdio::freopen(s2c(x), s2c(y),
-                                        (Cstdio::__sFILE @) f->file);
-  return cf ? new __sFILE(cf) : NULL;
+  Cstdio::__cFILE *cf = Cstdio::freopen(s2c(x), s2c(y),
+                                               (Cstdio::__cFILE @) f->file);
+  return cf ? new __cycFILE(cf) : NULL;
 }
 
 void setbuf(FILE @`r1 f, char ?`r2 buf) {
@@ -324,19 +324,19 @@ void setlinebuf(FILE @`r f) {
 int setvbuf(FILE @`r1 f, char ?`r2 buf, int mode, size_t size) {
   if (buf.size < size)
     throw new Failure("setvbuf: buffer insufficient");
-  return Cstdio::setvbuf((Cstdio::__sFILE @) f->file,
+  return Cstdio::setvbuf((Cstdio::__cFILE @) f->file,
                          underlying_Cstring(buf),
                          mode, size);
 }
 
-int fgetc(FILE @`r f) { return Cstdio::fgetc((Cstdio::__sFILE @) f->file); }
+int fgetc(FILE @`r f) { return Cstdio::fgetc((Cstdio::__cFILE @) f->file); }
 
 char ?`r fgets(char ?`r s, int n, FILE @`r2 f) {
   Cstring result;
   Cstring buffer = underlying_Cstring(s); 
   unsigned int len = s.size;
   n = (len < n) ? len : n;
-  result = Cstdio::fgets(buffer, n, (Cstdio::__sFILE @) f->file);
+  result = Cstdio::fgets(buffer, n, (Cstdio::__cFILE @) f->file);
   if (result == NULL) 
     return NULL;
   else 
@@ -344,88 +344,88 @@ char ?`r fgets(char ?`r s, int n, FILE @`r2 f) {
 }
 
 int fputc(int i, FILE @`r f) {
-  return Cstdio::fputc(i, (Cstdio::__sFILE @) f->file);
+  return Cstdio::fputc(i, (Cstdio::__cFILE @) f->file);
 }
 
 int fputs(const char ?`r1 s, FILE @`r2 f) {
-  return Cstdio::fputs(s2c(s), (Cstdio::__sFILE @) f->file);
+  return Cstdio::fputs(s2c(s), (Cstdio::__cFILE @) f->file);
 }
 
-int getc(FILE @`r f) { return Cstdio::getc((Cstdio::__sFILE @) f->file); }
+int getc(FILE @`r f) { return Cstdio::getc((Cstdio::__cFILE @) f->file); }
 
 int putc(int i, FILE @`r f) {
-  return Cstdio::putc(i, (Cstdio::__sFILE @) f->file);
+  return Cstdio::putc(i, (Cstdio::__cFILE @) f->file);
 }
 
 int puts(const char ?`r s) { return Cstdio::puts(s2c(s)); }
 
 int ungetc(int i, FILE @`r f) {
-  return Cstdio::ungetc(i,(Cstdio::__sFILE @) f->file);
+  return Cstdio::ungetc(i,(Cstdio::__cFILE @) f->file);
 }
 
 size_t fread(char ?`r1 ptr, size_t size, size_t nmemb, FILE @`r2 f) {
   if (size * nmemb > ptr.size)
     throw new Failure("fread: buffer insufficient");
   return Cstdio::fread(underlying_Cstring(ptr), size, nmemb,
-                       (Cstdio::__sFILE @) f->file);
+                       (Cstdio::__cFILE @) f->file);
 }
 
 size_t fwrite(const char ?`r1 ptr, size_t size, size_t nmemb, FILE @`r2 f) {
   if (size * nmemb > ptr.size)
     throw new Failure("fwrite: buffer insufficient");
   return Cstdio::fwrite(underlying_Cstring(ptr), size, nmemb,
-                        (Cstdio::__sFILE @) f->file);
+                        (Cstdio::__cFILE @) f->file);
 }
 
 int fgetpos(FILE @`r1 f, fpos_t @`r2 x) {
-  return Cstdio::fgetpos((Cstdio::__sFILE @) f->file,x);
+  return Cstdio::fgetpos((Cstdio::__cFILE @) f->file,x);
 }
 
 int fseek(FILE @`r f, long offset, int whence) {
-  return Cstdio::fseek((Cstdio::__sFILE @) f->file,offset,whence);
+  return Cstdio::fseek((Cstdio::__cFILE @) f->file,offset,whence);
 }
 
 int fsetpos(FILE @`r f, fpos_t @`r2 x) {
-  return Cstdio::fsetpos((Cstdio::__sFILE @) f->file,x);
+  return Cstdio::fsetpos((Cstdio::__cFILE @) f->file,x);
 }
 
-long ftell(FILE @`r f) { return Cstdio::ftell((Cstdio::__sFILE @) f->file); }
+long ftell(FILE @`r f) { return Cstdio::ftell((Cstdio::__cFILE @) f->file); }
 
-void rewind(FILE @`r f) { Cstdio::rewind((Cstdio::__sFILE @) f->file); }
+void rewind(FILE @`r f) { Cstdio::rewind((Cstdio::__cFILE @) f->file); }
 
-void clearerr(FILE @`r f) { Cstdio::clearerr((Cstdio::__sFILE @) f->file); }
+void clearerr(FILE @`r f) { Cstdio::clearerr((Cstdio::__cFILE @) f->file); }
 
-int feof(FILE @`r f) { return Cstdio::feof((Cstdio::__sFILE @) f->file); }
+int feof(FILE @`r f) { return Cstdio::feof((Cstdio::__cFILE @) f->file); }
 
 int ferror(FILE @`r f) {
-  return Cstdio::ferror((Cstdio::__sFILE @) f->file);
+  return Cstdio::ferror((Cstdio::__cFILE @) f->file);
 }
 
 void perror(const char ?`r s) { Cstdio::perror(s2c(s)); }
 
 FILE *fopen(const char ?`r1 name, const char ?`r2 type) {
-  Cstdio::__sFILE *cf = Cstdio::fopen(s2c(name), s2c(type));
-  return cf ? new __sFILE(cf) : NULL;
+  Cstdio::__cFILE *cf = Cstdio::fopen(s2c(name), s2c(type));
+  return cf ? new __cycFILE(cf) : NULL;
 }
 
 FILE *fdopen(int i, const char ?`r1 s) {
-  Cstdio::__sFILE *cf = Cstdio::fdopen(i,s2c(s));
-  return cf ? new __sFILE(cf) : NULL;
+  Cstdio::__cFILE *cf = Cstdio::fdopen(i,s2c(s));
+  return cf ? new __cycFILE(cf) : NULL;
 }
 
-int fileno(FILE @`r f) { return Cstdio::fileno((Cstdio::__sFILE @) f->file); }
+int fileno(FILE @`r f) { return Cstdio::fileno((Cstdio::__cFILE @) f->file); }
 
-int getw(FILE @`r f) { return Cstdio::getw((Cstdio::__sFILE @) f->file); }
+int getw(FILE @`r f) { return Cstdio::getw((Cstdio::__cFILE @) f->file); }
 
-int pclose(FILE @`r f) { return Cstdio::pclose((Cstdio::__sFILE @) f->file); }
+int pclose(FILE @`r f) { return Cstdio::pclose((Cstdio::__cFILE @) f->file); }
 
 FILE *popen(const char ? s, const char ? m) {
-  Cstdio::__sFILE *cf = Cstdio::popen(s2c(s),s2c(m));
-  return (cf ? new __sFILE(cf) : NULL);
+  Cstdio::__cFILE *cf = Cstdio::popen(s2c(s),s2c(m));
+  return (cf ? new __cycFILE(cf) : NULL);
 }
 
 int putw(int i, FILE @`r f) {
-  return Cstdio::putw(i,(Cstdio::__sFILE @) f->file);
+  return Cstdio::putw(i,(Cstdio::__cFILE @) f->file);
 }
 
 xtunion exn { 

@@ -262,7 +262,7 @@ tl;};extern unsigned char Cyc_List_List_mismatch[18];extern unsigned char Cyc_Li
 line_no;int col;};extern unsigned char Cyc_Position_Exit[9];struct Cyc_Position_Segment;
 struct Cyc_Position_Error{struct _tagged_arr source;struct Cyc_Position_Segment*seg;
 void*kind;struct _tagged_arr desc;};extern unsigned char Cyc_Position_Nocontext[14];
-struct Cyc_Cstdio___sFILE;struct Cyc_Std___sFILE;extern unsigned char Cyc_Std_FileCloseError[
+struct Cyc_Cstdio___abstractFILE;struct Cyc_Std___cycFILE;extern unsigned char Cyc_Std_FileCloseError[
 19];extern unsigned char Cyc_Std_FileOpenError[18];struct Cyc_Std_FileOpenError_struct{
 unsigned char*tag;struct _tagged_arr f1;};struct Cyc_Std_String_pa_struct{int tag;
 struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;};struct

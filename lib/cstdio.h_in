@@ -27,18 +27,16 @@
 
 namespace Cstdio {
 extern "C" {
-extern struct __sFILE;
+extern struct __abstractFILE;
 }}
 
 namespace Std {
 using Core;
 
-/* The name __sFILE is derived from Cygwin but we have our own
-   implementation in runtime_cyc.c */
-extern struct __sFILE;  
-typedef struct __sFILE FILE;
+extern struct __cycFILE;  
+typedef struct __cycFILE FILE;
 
-extern FILE *`H fromCfile(struct Cstdio::__sFILE *`H cf);
+extern FILE *`H fromCfile(struct Cstdio::__abstractFILE *`H cf);
 
 /* Standard streams.  */
 extern FILE @stdout;

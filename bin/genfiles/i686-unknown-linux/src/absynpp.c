@@ -256,22 +256,23 @@ struct Cyc_Core_Failure_struct{unsigned char*tag;struct _tagged_arr f1;};extern
 unsigned char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 unsigned char*tag;struct _tagged_arr f1;};extern unsigned char Cyc_Core_Not_found[14];
 extern unsigned char Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{
-unsigned char*tag;struct _tagged_arr f1;};struct Cyc_Cstdio___sFILE;struct Cyc_Std___sFILE;
-extern unsigned char Cyc_Std_FileCloseError[19];extern unsigned char Cyc_Std_FileOpenError[
-18];struct Cyc_Std_FileOpenError_struct{unsigned char*tag;struct _tagged_arr f1;};
-struct Cyc_Std_String_pa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{
-int tag;unsigned int f1;};struct Cyc_Std_Double_pa_struct{int tag;double f1;};struct
-Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{int
-tag;unsigned int*f1;};extern int Cyc_Std_fprintf(struct Cyc_Std___sFILE*,struct
-_tagged_arr fmt,struct _tagged_arr);extern struct _tagged_arr Cyc_Std_aprintf(struct
-_tagged_arr fmt,struct _tagged_arr);struct Cyc_Std_ShortPtr_sa_struct{int tag;short*
-f1;};struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{
-int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct
-Cyc_Std_StringPtr_sa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{
-int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};struct Cyc_List_List{
-void*hd;struct Cyc_List_List*tl;};extern struct Cyc_List_List*Cyc_List_map(void*(*f)(
-void*),struct Cyc_List_List*x);extern struct Cyc_List_List*Cyc_List_map_c(void*(*f)(
-void*,void*),void*env,struct Cyc_List_List*x);extern unsigned char Cyc_List_List_mismatch[
+unsigned char*tag;struct _tagged_arr f1;};struct Cyc_Cstdio___abstractFILE;struct
+Cyc_Std___cycFILE;extern unsigned char Cyc_Std_FileCloseError[19];extern
+unsigned char Cyc_Std_FileOpenError[18];struct Cyc_Std_FileOpenError_struct{
+unsigned char*tag;struct _tagged_arr f1;};struct Cyc_Std_String_pa_struct{int tag;
+struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;};struct
+Cyc_Std_Double_pa_struct{int tag;double f1;};struct Cyc_Std_ShortPtr_pa_struct{int
+tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{int tag;unsigned int*f1;};extern int
+Cyc_Std_fprintf(struct Cyc_Std___cycFILE*,struct _tagged_arr fmt,struct _tagged_arr);
+extern struct _tagged_arr Cyc_Std_aprintf(struct _tagged_arr fmt,struct _tagged_arr);
+struct Cyc_Std_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_Std_UShortPtr_sa_struct{
+int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct
+Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{
+int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;
+};struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};struct Cyc_List_List{void*hd;
+struct Cyc_List_List*tl;};extern struct Cyc_List_List*Cyc_List_map(void*(*f)(void*),
+struct Cyc_List_List*x);extern struct Cyc_List_List*Cyc_List_map_c(void*(*f)(void*,
+void*),void*env,struct Cyc_List_List*x);extern unsigned char Cyc_List_List_mismatch[
 18];extern void Cyc_List_iter(void(*f)(void*),struct Cyc_List_List*x);extern struct
 Cyc_List_List*Cyc_List_imp_rev(struct Cyc_List_List*x);extern struct Cyc_List_List*
 Cyc_List_append(struct Cyc_List_List*x,struct Cyc_List_List*y);extern struct Cyc_List_List*
@@ -280,7 +281,7 @@ unsigned char Cyc_List_Nth[8];extern int Cyc_List_exists(int(*pred)(void*),struc
 Cyc_List_List*x);extern int Cyc_List_list_cmp(int(*cmp)(void*,void*),struct Cyc_List_List*
 l1,struct Cyc_List_List*l2);extern int Cyc_List_list_prefix(int(*cmp)(void*,void*),
 struct Cyc_List_List*l1,struct Cyc_List_List*l2);struct Cyc_PP_Ppstate;struct Cyc_PP_Out;
-struct Cyc_PP_Doc;extern void Cyc_PP_file_of_doc(struct Cyc_PP_Doc*d,int w,struct Cyc_Std___sFILE*
+struct Cyc_PP_Doc;extern void Cyc_PP_file_of_doc(struct Cyc_PP_Doc*d,int w,struct Cyc_Std___cycFILE*
 f);extern struct _tagged_arr Cyc_PP_string_of_doc(struct Cyc_PP_Doc*d,int w);extern
 struct Cyc_PP_Doc*Cyc_PP_nil_doc();extern struct Cyc_PP_Doc*Cyc_PP_line_doc();
 extern struct Cyc_PP_Doc*Cyc_PP_text(struct _tagged_arr s);extern struct Cyc_PP_Doc*
@@ -509,7 +510,7 @@ curr_namespace;};extern void Cyc_Absynpp_set_params(struct Cyc_Absynpp_Params*fs
 extern struct Cyc_Absynpp_Params Cyc_Absynpp_cyc_params_r;extern struct Cyc_Absynpp_Params
 Cyc_Absynpp_cyci_params_r;extern struct Cyc_Absynpp_Params Cyc_Absynpp_c_params_r;
 extern struct Cyc_Absynpp_Params Cyc_Absynpp_tc_params_r;extern void Cyc_Absynpp_decllist2file(
-struct Cyc_List_List*tdl,struct Cyc_Std___sFILE*f);extern struct Cyc_PP_Doc*Cyc_Absynpp_decl2doc(
+struct Cyc_List_List*tdl,struct Cyc_Std___cycFILE*f);extern struct Cyc_PP_Doc*Cyc_Absynpp_decl2doc(
 struct Cyc_Absyn_Decl*d);extern struct _tagged_arr Cyc_Absynpp_typ2string(void*);
 extern struct _tagged_arr Cyc_Absynpp_typ2cstring(void*);extern struct _tagged_arr Cyc_Absynpp_kind2string(
 void*);extern struct _tagged_arr Cyc_Absynpp_kindbound2string(void*);extern struct
@@ -2351,8 +2352,8 @@ sizeof(struct Cyc_PP_Doc*),4));});}struct Cyc_PP_Doc*Cyc_Absynpp_tunionfields2do
 struct Cyc_List_List*fields){return((struct Cyc_PP_Doc*(*)(struct Cyc_PP_Doc*(*pp)(
 struct Cyc_Absyn_Tunionfield*),struct _tagged_arr sep,struct Cyc_List_List*l))Cyc_PP_ppseql)(
 Cyc_Absynpp_tunionfield2doc,_tag_arr(",",sizeof(unsigned char),2),fields);}void
-Cyc_Absynpp_decllist2file(struct Cyc_List_List*tdl,struct Cyc_Std___sFILE*f){for(0;
-tdl != 0;tdl=tdl->tl){Cyc_PP_file_of_doc(Cyc_Absynpp_decl2doc((struct Cyc_Absyn_Decl*)
+Cyc_Absynpp_decllist2file(struct Cyc_List_List*tdl,struct Cyc_Std___cycFILE*f){
+for(0;tdl != 0;tdl=tdl->tl){Cyc_PP_file_of_doc(Cyc_Absynpp_decl2doc((struct Cyc_Absyn_Decl*)
 tdl->hd),72,f);({void*_tmp28E[0]={};Cyc_Std_fprintf(f,_tag_arr("\n",sizeof(
 unsigned char),2),_tag_arr(_tmp28E,sizeof(void*),0));});}}struct _tagged_arr Cyc_Absynpp_decllist2string(
 struct Cyc_List_List*tdl){return Cyc_PP_string_of_doc(Cyc_PP_seql(_tag_arr("",

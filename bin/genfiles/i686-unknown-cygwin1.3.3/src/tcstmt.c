@@ -451,7 +451,7 @@ struct Cyc_Position_Segment*loc);extern struct Cyc_Absyn_Stmt*Cyc_Absyn_seq_stmt
 struct Cyc_Absyn_Stmt*s1,struct Cyc_Absyn_Stmt*s2,struct Cyc_Position_Segment*loc);
 extern struct Cyc_Absyn_Stmt*Cyc_Absyn_switch_stmt(struct Cyc_Absyn_Exp*e,struct Cyc_List_List*,
 struct Cyc_Position_Segment*loc);extern struct Cyc_Absyn_Pat*Cyc_Absyn_new_pat(void*
-p,struct Cyc_Position_Segment*s);struct Cyc_Cstdio___sFILE;struct Cyc_Std___sFILE;
+p,struct Cyc_Position_Segment*s);struct Cyc_Cstdio___abstractFILE;struct Cyc_Std___cycFILE;
 extern unsigned char Cyc_Std_FileCloseError[19];extern unsigned char Cyc_Std_FileOpenError[
 18];struct Cyc_Std_FileOpenError_struct{unsigned char*tag;struct _tagged_arr f1;};
 struct Cyc_Std_String_pa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{

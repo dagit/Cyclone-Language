@@ -476,7 +476,7 @@ Cyc_Absyn_lookup_struct_field(struct Cyc_Absyn_Structdecl*,struct _tagged_arr*);
 extern struct Cyc_Absyn_Structfield*Cyc_Absyn_lookup_union_field(struct Cyc_Absyn_Uniondecl*,
 struct _tagged_arr*);extern int Cyc_Std_strcmp(struct _tagged_arr s1,struct
 _tagged_arr s2);extern int Cyc_Std_zstrcmp(struct _tagged_arr,struct _tagged_arr);
-struct Cyc_Cstdio___sFILE;struct Cyc_Std___sFILE;extern unsigned char Cyc_Std_FileCloseError[
+struct Cyc_Cstdio___abstractFILE;struct Cyc_Std___cycFILE;extern unsigned char Cyc_Std_FileCloseError[
 19];extern unsigned char Cyc_Std_FileOpenError[18];struct Cyc_Std_FileOpenError_struct{
 unsigned char*tag;struct _tagged_arr f1;};struct Cyc_Std_String_pa_struct{int tag;
 struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;};struct

@@ -269,7 +269,7 @@ struct _tagged_arr*p);extern void Cyc_Hashtable_iter(void(*f)(void*,void*),struc
 Cyc_Hashtable_Table*t);extern void Cyc_Hashtable_iter_c(void(*f)(void*,void*,void*),
 struct Cyc_Hashtable_Table*t,void*env);extern void Cyc_Hashtable_print_table_map(
 struct Cyc_Hashtable_Table*t,void(*prn_key)(void*),void(*prn_val)(void*));struct
-Cyc_Cstdio___sFILE;struct Cyc_Std___sFILE;extern unsigned char Cyc_Std_FileCloseError[
+Cyc_Cstdio___abstractFILE;struct Cyc_Std___cycFILE;extern unsigned char Cyc_Std_FileCloseError[
 19];extern unsigned char Cyc_Std_FileOpenError[18];struct Cyc_Std_FileOpenError_struct{
 unsigned char*tag;struct _tagged_arr f1;};struct Cyc_Std_String_pa_struct{int tag;
 struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;};struct

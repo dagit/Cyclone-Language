@@ -256,15 +256,16 @@ struct Cyc_Core_Failure_struct{unsigned char*tag;struct _tagged_arr f1;};extern
 unsigned char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 unsigned char*tag;struct _tagged_arr f1;};extern unsigned char Cyc_Core_Not_found[14];
 extern unsigned char Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{
-unsigned char*tag;struct _tagged_arr f1;};struct Cyc_Cstdio___sFILE;struct Cyc_Std___sFILE;
-extern unsigned char Cyc_Std_FileCloseError[19];extern unsigned char Cyc_Std_FileOpenError[
-18];struct Cyc_Std_FileOpenError_struct{unsigned char*tag;struct _tagged_arr f1;};
-extern int Cyc_Std_file_string_read(struct Cyc_Std___sFILE*fd,struct _tagged_arr dest,
-int dest_offset,int max_count);struct Cyc_Std_String_pa_struct{int tag;struct
-_tagged_arr f1;};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;};struct Cyc_Std_Double_pa_struct{
-int tag;double f1;};struct Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{
-int tag;unsigned int*f1;};struct Cyc_Std_ShortPtr_sa_struct{int tag;short*f1;};
-struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{
+unsigned char*tag;struct _tagged_arr f1;};struct Cyc_Cstdio___abstractFILE;struct
+Cyc_Std___cycFILE;extern unsigned char Cyc_Std_FileCloseError[19];extern
+unsigned char Cyc_Std_FileOpenError[18];struct Cyc_Std_FileOpenError_struct{
+unsigned char*tag;struct _tagged_arr f1;};extern int Cyc_Std_file_string_read(struct
+Cyc_Std___cycFILE*fd,struct _tagged_arr dest,int dest_offset,int max_count);struct
+Cyc_Std_String_pa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{
+int tag;unsigned int f1;};struct Cyc_Std_Double_pa_struct{int tag;double f1;};struct
+Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{int
+tag;unsigned int*f1;};struct Cyc_Std_ShortPtr_sa_struct{int tag;short*f1;};struct
+Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{
 int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct
 Cyc_Std_StringPtr_sa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{
 int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};extern
@@ -277,7 +278,7 @@ _tagged_arr,int,void*);void*read_fun_state;};struct Cyc_Lexing_lex_tables{struct
 _tagged_arr lex_base;struct _tagged_arr lex_backtrk;struct _tagged_arr lex_default;
 struct _tagged_arr lex_trans;struct _tagged_arr lex_check;};extern struct Cyc_Lexing_lexbuf*
 Cyc_Lexing_from_function(int(*read_fun)(struct _tagged_arr,int,void*),void*);
-extern struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_file(struct Cyc_Std___sFILE*);
+extern struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_file(struct Cyc_Std___cycFILE*);
 extern struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_string(struct _tagged_arr);extern
 struct _tagged_arr Cyc_Lexing_lexeme(struct Cyc_Lexing_lexbuf*);extern unsigned char
 Cyc_Lexing_lexeme_char(struct Cyc_Lexing_lexbuf*,int);extern int Cyc_Lexing_lexeme_start(
@@ -317,10 +318,10 @@ read_fun;_tmp1->read_fun_state=(void*)read_fun_state;_tmp1;});_tmp0->lex_buffer=
 Cyc_Core_new_string(8192);_tmp0->lex_buffer_len=8192;_tmp0->lex_abs_pos=- 8192;
 _tmp0->lex_start_pos=8192;_tmp0->lex_curr_pos=8192;_tmp0->lex_last_pos=8192;
 _tmp0->lex_last_action=0;_tmp0->lex_eof_reached=0;_tmp0;});}int Cyc_Lexing_read_from_file(
-struct _tagged_arr aux,int n,struct Cyc_Std___sFILE*f){return Cyc_Std_file_string_read(
-f,aux,0,n);}struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_file(struct Cyc_Std___sFILE*f){
-return((struct Cyc_Lexing_lexbuf*(*)(int(*read_fun)(struct _tagged_arr,int,struct
-Cyc_Std___sFILE*),struct Cyc_Std___sFILE*read_fun_state))Cyc_Lexing_from_function)(
+struct _tagged_arr aux,int n,struct Cyc_Std___cycFILE*f){return Cyc_Std_file_string_read(
+f,aux,0,n);}struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_file(struct Cyc_Std___cycFILE*
+f){return((struct Cyc_Lexing_lexbuf*(*)(int(*read_fun)(struct _tagged_arr,int,
+struct Cyc_Std___cycFILE*),struct Cyc_Std___cycFILE*read_fun_state))Cyc_Lexing_from_function)(
 Cyc_Lexing_read_from_file,f);}static void Cyc_Lexing_set_eof(struct Cyc_Lexing_lexbuf*
 lbuf){lbuf->lex_eof_reached=1;}struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_string(
 struct _tagged_arr s){return({struct Cyc_Lexing_lexbuf*_tmp2=_cycalloc(sizeof(*
