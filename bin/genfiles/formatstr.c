@@ -777,20 +777,6 @@ extern void _profile_free_region(struct _RegionHandle *,
 #endif
 #endif
 
-/* the next two routines swap [x] and [y]; not thread safe! */
-static _INLINE void _swap_word(void *x, void *y) {
-  unsigned long *lx = (unsigned long *)x, *ly = (unsigned long *)y, tmp;
-  tmp = *lx;
-  *lx = *ly;
-  *ly = tmp;
-}
-static _INLINE void _swap_dyneither(struct _dyneither_ptr *x, 
-				   struct _dyneither_ptr *y) {
-  struct _dyneither_ptr tmp = *x;
-  *x = *y;
-  *y = tmp;
-}
-
 # 35 "core.h"
  typedef char*Cyc_Cstring;
 typedef char*Cyc_CstringNN;
@@ -856,7 +842,7 @@ typedef struct Cyc_List_List*Cyc_List_List_t;extern char Cyc_List_List_mismatch[
 struct Cyc_List_List*Cyc_List_imp_rev(struct Cyc_List_List*x);extern char Cyc_List_Nth[4];struct Cyc_List_Nth_exn_struct{char*tag;};
 # 38 "string.h"
 unsigned long Cyc_strlen(struct _dyneither_ptr s);
-# 134 "string.h"
+# 135 "string.h"
 struct _dyneither_ptr Cyc_implode(struct Cyc_List_List*c);
 # 33 "position.h"
 typedef unsigned int Cyc_Position_seg_t;struct Cyc_Position_Error;

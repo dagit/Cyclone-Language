@@ -777,20 +777,6 @@ extern void _profile_free_region(struct _RegionHandle *,
 #endif
 #endif
 
-/* the next two routines swap [x] and [y]; not thread safe! */
-static _INLINE void _swap_word(void *x, void *y) {
-  unsigned long *lx = (unsigned long *)x, *ly = (unsigned long *)y, tmp;
-  tmp = *lx;
-  *lx = *ly;
-  *ly = tmp;
-}
-static _INLINE void _swap_dyneither(struct _dyneither_ptr *x, 
-				   struct _dyneither_ptr *y) {
-  struct _dyneither_ptr tmp = *x;
-  *x = *y;
-  *y = tmp;
-}
-
 # 35 "core.h"
  typedef char*Cyc_Cstring;
 typedef char*Cyc_CstringNN;
@@ -875,9 +861,9 @@ typedef struct Cyc_List_List*Cyc_List_List_t;extern char Cyc_List_List_mismatch[
 struct Cyc_List_List*Cyc_List_merge_sort(int(*cmp)(void*,void*),struct Cyc_List_List*x);extern char Cyc_List_Nth[4];struct Cyc_List_Nth_exn_struct{char*tag;};
 # 38 "string.h"
 unsigned long Cyc_strlen(struct _dyneither_ptr s);
-# 102 "string.h"
+# 103 "string.h"
 struct _dyneither_ptr Cyc_strdup(struct _dyneither_ptr src);
-# 107
+# 108
 struct _dyneither_ptr Cyc_substring(struct _dyneither_ptr,int ofs,unsigned long n);struct Cyc_Lineno_Pos{struct _dyneither_ptr logical_file;struct _dyneither_ptr line;int line_no;int col;};
 # 32 "lineno.h"
 typedef struct Cyc_Lineno_Pos*Cyc_Lineno_pos_t;

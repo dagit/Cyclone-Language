@@ -777,20 +777,6 @@ extern void _profile_free_region(struct _RegionHandle *,
 #endif
 #endif
 
-/* the next two routines swap [x] and [y]; not thread safe! */
-static _INLINE void _swap_word(void *x, void *y) {
-  unsigned long *lx = (unsigned long *)x, *ly = (unsigned long *)y, tmp;
-  tmp = *lx;
-  *lx = *ly;
-  *ly = tmp;
-}
-static _INLINE void _swap_dyneither(struct _dyneither_ptr *x, 
-				   struct _dyneither_ptr *y) {
-  struct _dyneither_ptr tmp = *x;
-  *x = *y;
-  *y = tmp;
-}
-
 # 35 "core.h"
  typedef char*Cyc_Cstring;
 typedef char*Cyc_CstringNN;
@@ -877,7 +863,7 @@ typedef struct Cyc_List_List*Cyc_List_list_t;
 typedef struct Cyc_List_List*Cyc_List_List_t;extern char Cyc_List_List_mismatch[14];struct Cyc_List_List_mismatch_exn_struct{char*tag;};extern char Cyc_List_Nth[4];struct Cyc_List_Nth_exn_struct{char*tag;};
 # 73 "string.h"
 struct _dyneither_ptr Cyc_zstrncpy(struct _dyneither_ptr,struct _dyneither_ptr,unsigned long);
-# 102 "string.h"
+# 103 "string.h"
 struct _dyneither_ptr Cyc_strdup(struct _dyneither_ptr src);char Cyc_Lexing_Error[6]="Error";struct Cyc_Lexing_lexbuf;struct Cyc_Lexing_function_lexbuf_state;struct Cyc_Lexing_lex_tables;
 # 78 "lexing.cyc"
 static char Cyc_Lexing_aux_buffer_v[1]={'\000'};

@@ -356,7 +356,22 @@ mstring_t strdup(buffer_t src) {
   return rstrdup(heap_region, src);
 }
 
-mstring_t<`r> rexpand(region_t<`r> r,buffer_t s, size_t sz) {
+mbuffer_t<`r> rrealloc(region_t<`r::TR> r,mbuffer_t s, size_t sz) {
+  mbuffer_t temp;
+  size_t slen;
+
+  slen = numelts(s);
+  sz = (sz>slen)?sz:slen;
+  temp = rcalloc (r,sz, sizeof(char));
+
+  { let alias <`x>char ? @nozeroterm`x dst = temp;
+    strncpy((char ? @nozeroterm)dst,s,slen);
+  }
+
+  return temp;
+}
+
+mstring_t<`r> rexpand(region_t<`r::TR> r,buffer_t s, size_t sz) {
   mstring_t temp;
   size_t slen;
 
@@ -364,7 +379,9 @@ mstring_t<`r> rexpand(region_t<`r> r,buffer_t s, size_t sz) {
   sz = (sz>slen)?sz:slen;
   temp = rnew_string(r,sz);
 
-  strncpy((char ? @nozeroterm)temp,s,slen);
+  { let alias <`x>char ? @nozeroterm`x dst = temp;
+    strncpy((char ? @nozeroterm)dst,s,slen);
+  }
 
   if (slen != numelts(s))
     temp[slen] = '\000';
@@ -376,7 +393,7 @@ mstring_t expand(buffer_t s, size_t sz) {
   return rexpand(heap_region,s,sz);
 }
 
-mstring_t<`r> rrealloc_str(region_t<`r> r, mstring_t<`r> str, size_t sz)
+mstring_t<`r> rrealloc_str(region_t<`r::TR> r, mstring_t<`r> str, size_t sz)
 {
   size_t maxsizeP = numelts(str);
 
@@ -387,7 +404,8 @@ mstring_t<`r> rrealloc_str(region_t<`r> r, mstring_t<`r> str, size_t sz)
   }
   else if (sz > maxsizeP) {
     maxsizeP = (maxsizeP * 2 > sz * 5 / 4)?(maxsizeP * 2):(sz * 5 / 4);
-    str = rexpand(r, str, maxsizeP);
+    let alias <`x>char ? @nozeroterm`x dst = str;
+    dst = rexpand(r, dst, maxsizeP);
   }
 
   return str;
