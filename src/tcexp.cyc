@@ -249,7 +249,9 @@ static typ tcVar<`r>(tenv te, segment loc, typ *`r topt, qvar q, exp e) {
     case Local_b(vd):
       typ t = vd->type;
       fallthru(t);
-    case Param_b(&$(_,_,t)): return t;
+    case Param_b(&$(_,_,t)):
+      (*q)[0] = Loc_n;
+      return t;
     }
   case StructRes(_):  throw impos("StructRes in tcVar");
   case EnumRes(_,_):  throw impos("EnumRes in tcVar");

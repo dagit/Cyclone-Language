@@ -143,20 +143,32 @@ static $(var,tqual,typ)@
 make_struct_field(segment loc,$(qvar,tqual,typ,list<tvar>)@ field) {
   if ((*field)[3] != null)
     err("bad type params in struct field",loc);
-  _ qid = (*field)[0];
-  if ((*qid)[0] != null)
-    err("struct field cannot be qualified with a module name",loc);
+  let qid = (*field)[0];
+  switch ((*qid)[0]) {
+  case Rel_n(null): break;
+  case Abs_n(null): break;
+  case Loc_n: break;
+  default:
+    err("struct field cannot be qualified with a module name",loc);    
+    break;
+  }
   return &$((*qid)[1],(*field)[1],(*field)[2]);
 }
 
 static $(Opt_t<var>,tqual,typ)@ 
 make_param(segment loc, $(Opt_t<qvar>,tqual,typ,list<tvar>)@ field){
   let &$(qv_opt,tq,t,tvs) = field;
-  _ idopt = null;
+  let idopt = null;
   if (qv_opt != null) {
     idopt = &Opt((*qv_opt->v)[1]);
-    if ((*qv_opt->v)[0] != null)
+    switch ((*qv_opt->v)[0]) {
+    case Rel_n(null): break;
+    case Abs_n(null): break;
+    case Loc_n: break;
+    default:
       err("parameter cannot be qualified with a module name",loc);
+      break;
+    }
   }
   if (tvs != null)
     abort("parameter should have no type parameters",loc);
@@ -197,8 +209,14 @@ static void only_vardecl(list<stringptr> params,decl x) {
   case Var_d(vd):
     if (vd->initializer != null)
       abort("initializers are not allowed in parameter declarations",x->loc);
-    if ((*vd->name)[0] != null)
+    switch ((*vd->name)[0]) {
+    case Loc_n: break;
+    case Rel_n(null): break;
+    case Abs_n(null): break;
+    default:
       err("module names not allowed on parameter declarations",x->loc);
+      break;
+    }
     // for sanity-checking of old-style parameter declarations
     bool found = false;
     for(; params != null; params = params->tl)
@@ -234,8 +252,14 @@ static $(Opt_t<var>,tqual,typ)@ get_param_type($(list<decl>,segment)@ env,
     return(abort(xprintf("missing type for parameter %s",*x),loc));
   switch (tdl->hd->r) {
   case Var_d(vd):
-    if ((*vd->name)[0] != null)
+    switch ((*vd->name)[0]) {
+    case Loc_n: break;
+    case Rel_n(null): break;
+    case Abs_n(null): break;
+    default:
       err("module name not allowed on parameter",loc);
+      break;
+    }
     if (zstrptrcmp((*vd->name)[1],x)==0)
       // Fix: cast needed here
       return &$((Opt_t<var>)&Opt((*vd->name)[1]),vd->tq,vd->type);
@@ -496,8 +520,8 @@ static $(typ,Opt_t<decl>) collapse_type_specifiers(list<type_specifier_t> ts,
 static list<$(qvar,tqual,typ,list<tvar>)@> apply_tmss(tqual tq, typ t,
 						      list<declarator_t> ds) {
   if (ds==null) return null;
-  _ d = ds->hd;
-  _ q = d->id;
+  let d = ds->hd;
+  let q = d->id;
   $(tqual,typ,list<tvar>) p = apply_tms(tq,t,d->tms);
   return &cons(&$(q,p[0],p[1],p[2]),apply_tmss(tq,t,ds->tl));
 }
@@ -631,7 +655,7 @@ static list<decl> make_declarations(decl_spec_t ds,
 
   /* Collapse the type specifiers to get the base type and any
    * optional nested declarations */
-  _ ts_info = collapse_type_specifiers(tss,loc);
+  let ts_info = collapse_type_specifiers(tss,loc);
   if (declarators == null) {
     /* here we have a type declaration -- either a struct, union,
        enum, or xenum as in: "struct Foo { ... };" */
@@ -648,17 +672,17 @@ static list<decl> make_declarations(decl_spec_t ds,
     } else {
       switch (t) {
       case StructType(n,ts,_):
-        _ ts2 = List::map_c(typ2tvar,loc,ts);
-        _ sd  = &Structdecl{.sc = s,.name = &Opt((typedef_name_t)n),
-			    .tvs = ts2,.fields = null};
+        let ts2 = List::map_c(typ2tvar,loc,ts);
+        let sd  = &Structdecl{.sc = s,.name = &Opt((typedef_name_t)n),
+                              .tvs = ts2,.fields = null};
         return &cons(&Decl(Struct_d(sd),loc),null);
       case EnumType(n,ts,_):
-        _ ts2 = List::map_c(typ2tvar,loc,ts);
-        _ ed  = &Enumdecl{.sc = s, .name = &Opt((typedef_name_t)n), 
-			  .tvs = ts2, .fields = null};
+        let ts2 = List::map_c(typ2tvar,loc,ts);
+        let ed  = &Enumdecl{.sc = s, .name = &Opt((typedef_name_t)n), 
+                            .tvs = ts2, .fields = null};
         return &cons(&Decl(Enum_d(ed),loc),null);
       case XenumType(n,_):
-        _ ed = &Xenumdecl{.sc=s, .name=n, .fields=null};
+        let ed = &Xenumdecl{.sc=s, .name=n, .fields=null};
         return &cons(&Decl(Xenum_d(ed),loc),null);
       case UnionType:
         /* FIX: TEMPORARY SO WE CAN TEST THE PARSER */
@@ -669,7 +693,7 @@ static list<decl> make_declarations(decl_spec_t ds,
   } else {
     /* declarators != null */
     typ t      = ts_info[0];
-    _   fields = apply_tmss(tq,t,declarators);
+    let fields = apply_tmss(tq,t,declarators);
     if (istypedef) {
       /* we can have a nested struct, union, enum, or xenum
          declaration within the typedef as in:
@@ -695,17 +719,17 @@ static list<decl> make_declarations(decl_spec_t ds,
       if (ts_info[1] != null)
         unimp2("nested type declaration within declarator",loc);
       list<decl> decls = null;
-      for (_ ds = fields; ds != null; ds = ds->tl, exprs = exprs->tl) {
+      for (let ds = fields; ds != null; ds = ds->tl, exprs = exprs->tl) {
 	let &$(x,tq2,t2,tvs2) = ds->hd;
         if (tvs2 != null)
           warn("bad type params, ignoring",loc);
         if (exprs == null)
           abort("unexpected null in parse!",loc);
-        _ eopt = exprs->hd;
-        _ vd   = new_vardecl(x, t2, eopt);
+        let eopt = exprs->hd;
+        let vd   = new_vardecl(x, t2, eopt);
 	vd->tq = tq2;
 	vd->sc = s;
-        _ d = &Decl(Var_d(vd),loc);
+        let d = &Decl(Var_d(vd),loc);
         decls = &cons(d,decls);
       }
       return List::imp_rev(decls);
@@ -1054,7 +1078,7 @@ struct_or_union_specifier:
 /* Cyc:  type_params_opt are added */
 | struct_or_union qual_opt_identifier type_params_opt
   '{' struct_declaration_list '}'
-    { _ ts = List::map_c(typ2tvar,LOC(@3,@3),$3);
+    { let ts = List::map_c(typ2tvar,LOC(@3,@3),$3);
       decl d;
       switch ($1) {
       case Struct_su:
@@ -1070,7 +1094,7 @@ struct_or_union_specifier:
 // Hack to allow struct/union names and typedef names to overlap
 | struct_or_union QUAL_TYPEDEF_NAME type_params_opt
   '{' struct_declaration_list '}'
-    { _ ts = List::map_c(typ2tvar,LOC(@3,@3),$3);
+    { let ts = List::map_c(typ2tvar,LOC(@3,@3),$3);
       decl d;
       switch ($1) {
       case Struct_su:
@@ -1167,12 +1191,12 @@ struct_declaration:
        * and then convert this to a list of struct fields: (1) id,
        * (2) tqual, (3) type. */
       tqual tq = (*$1)[0];
-      _ tss = (*$1)[1];
-      _ ts_info = collapse_type_specifiers(tss,LOC(@1,@1));
+      let tss = (*$1)[1];
+      let ts_info = collapse_type_specifiers(tss,LOC(@1,@1));
       if (ts_info[1] != null)
         warn("struct declaration contains nested type declaration",LOC(@1,@1));
-      _ t = ts_info[0];
-      _ info = apply_tmss(tq,t,$2);
+      let t = ts_info[0];
+      let info = apply_tmss(tq,t,$2);
       $$=^$(List::map_c(make_struct_field,LOC(@1,@2),info));
     }
 ;
@@ -1207,7 +1231,7 @@ struct_declarator:
     { /* FIX: TEMPORARY TO TEST PARSING */
       unimp2("bit fields",LOC(@1,@2));
       // Fix: cast needed
-      $$=^$(&Declarator(&$(null,new {""}),null)); }
+      $$=^$(&Declarator(&$(Rel_n(null),new {""}),null)); }
 | declarator ':' constant_expression
     { unimp2("bit fields",LOC(@1,@2));
       $$=$!1; }
@@ -1220,7 +1244,7 @@ enum_specifier:
     }
 /* Cyc: added type params */
 | ENUM qual_opt_identifier type_params_opt '{' enumerator_list '}'
-    { _ ts = List::map_c(typ2tvar,LOC(@3,@3),$3);
+    { let ts = List::map_c(typ2tvar,LOC(@3,@3),$3);
       $$ = ^$(Decl_spec(enum_decl(Public,&Opt($2),ts,&Opt($5),LOC(@1,@6))));
     }
 | ENUM qual_opt_identifier type_params_opt
@@ -1245,8 +1269,8 @@ enumerator:
     { $$=^$(&Enumfield($1,$3,null,null,LOC(@1,@3))); }
 /* Cyc: value-carrying enumerators */
 | qual_opt_identifier type_params_opt '(' parameter_list ')'
-    { _ typs = List::map_c(get_tqual_typ,LOC(@4,@4),List::imp_rev($4));
-      _ tvs  = List::map_c(typ2tvar,LOC(@2,@2),$2);
+    { let typs = List::map_c(get_tqual_typ,LOC(@4,@4),List::imp_rev($4));
+      let tvs  = List::map_c(typ2tvar,LOC(@2,@2),$2);
       $$=^$(&Enumfield($1,null,tvs,typs,LOC(@1,@5))); }
 
 declarator:
@@ -1281,13 +1305,13 @@ direct_declarator:
 				     $1->tms))); }
 /* Cyc: added type parameters */
 | direct_declarator '<' type_name_list '>'
-    { _ ts = List::map_c(typ2tvar,LOC(@2,@4),List::imp_rev($3));
+    { let ts = List::map_c(typ2tvar,LOC(@2,@4),List::imp_rev($3));
       $$=^$(&Declarator($1->id,&cons(TypeParams_mod(ts,LOC(@1,@4)),$1->tms)));
     }
 | direct_declarator '<' type_name_list RIGHT_OP
     { /* RIGHT_OP is >>, we've seen one char too much, step back */
       lbuf->v->lex_curr_pos -= 1;
-      _ ts = List::map_c(typ2tvar,LOC(@2,@4),List::imp_rev($3));
+      let ts = List::map_c(typ2tvar,LOC(@2,@4),List::imp_rev($3));
       $$=^$(&Declarator($1->id,&cons(TypeParams_mod(ts,LOC(@1,@4)),$1->tms)));
     }
 ;
@@ -1353,40 +1377,46 @@ parameter_list:
 /* TODO: differs from grammar in K&R */
 parameter_declaration:
   specifier_qualifier_list declarator
-    { _ tss = (*$1)[1];
-      _ ts_info = collapse_type_specifiers(tss,LOC(@1,@1));
+    { let tss = (*$1)[1];
+      let ts_info = collapse_type_specifiers(tss,LOC(@1,@1));
       if (ts_info[1] != null)
         warn("parameter contains nested type declaration",LOC(@1,@1));
-      _ t = ts_info[0];
-      _ tq = (*$1)[0];
-      _ tms = $2->tms;
-      _ t_info = apply_tms(tq,t,tms);
+      let t = ts_info[0];
+      let tq = (*$1)[0];
+      let tms = $2->tms;
+      let t_info = apply_tms(tq,t,tms);
       if (t_info[2] != null)
         err("parameter with bad type params",LOC(@2,@2));
-      _ q = $2->id;
-      if ((*q)[0] != null)
+      let q = $2->id;
+      switch ((*q)[0]) {
+      case Loc_n: break;
+      case Rel_n(null): break;
+      case Abs_n(null): break;
+      default:
         err("parameter cannot be qualified with a module name",LOC(@1,@1));
-      _ idopt = (Opt_t<var>)&Opt((*q)[1]);
+        break;
+      }
+      let idopt = (Opt_t<var>)&Opt((*q)[1]);
       $$=^$(&$(idopt,t_info[0],t_info[1]));
     }
 | specifier_qualifier_list
-    { _ tss = (*$1)[1];
-      _ ts_info = collapse_type_specifiers(tss,LOC(@1,@1));
+    { let tss = (*$1)[1];
+      let ts_info = collapse_type_specifiers(tss,LOC(@1,@1));
       if (ts_info[1] != null)
         warn("nested type declaration, ignoring",LOC(@1,@1));
-      _ t = ts_info[0];
-      _ tq = (*$1)[0];
+      let t = ts_info[0];
+      let tq = (*$1)[0];
       $$=^$(&$(null,tq,t));
     }
 | specifier_qualifier_list abstract_declarator
-    { _ tss = (*$1)[1];
-      _ ts_info = collapse_type_specifiers(tss,LOC(@1,@1));
+    { let tss = (*$1)[1];
+      let ts_info = collapse_type_specifiers(tss,LOC(@1,@1));
       if (ts_info[1] != null)
         warn("nested type declaration, ignoring",LOC(@1,@1));
-      _ t = ts_info[0];
-      _ tq = (*$1)[0];
-      _ tms = $2->tms;
-      _ t_info = apply_tms(tq,t,tms);
+      let t = ts_info[0];
+      let tq = (*$1)[0];
+      let tms = $2->tms;
+      let t_info = apply_tms(tq,t,tms);
       if (t_info[2] != null)
         // Ex: int (@)<`a>
         warn("bad type params, ignoring",LOC(@2,@2));
@@ -1453,23 +1483,23 @@ designator:
 
 type_name:
   specifier_qualifier_list
-    { _ tss = (*$1)[1];
-      _ ts_info = collapse_type_specifiers(tss,LOC(@1,@1));
+    { let tss = (*$1)[1];
+      let ts_info = collapse_type_specifiers(tss,LOC(@1,@1));
       if (ts_info[1] != null)
         warn("nested type declaration, ignoring",LOC(@1,@1));
-      _ t = ts_info[0];
-      _ tq = (*$1)[0];
+      let t = ts_info[0];
+      let tq = (*$1)[0];
       $$=^$(&$(null,tq,t));
     }
 | specifier_qualifier_list abstract_declarator
-    { _ tss = (*$1)[1];
-      _ ts_info = collapse_type_specifiers(tss,LOC(@1,@1));
+    { let tss = (*$1)[1];
+      let ts_info = collapse_type_specifiers(tss,LOC(@1,@1));
       if (ts_info[1] != null)
         warn("nested type declaration, ignoring",LOC(@1,@1));
-      _ t = ts_info[0];
-      _ tq = (*$1)[0];
-      _ tms = $2->tms;
-      _ t_info = apply_tms(tq,t,tms);
+      let t = ts_info[0];
+      let tq = (*$1)[0];
+      let tms = $2->tms;
+      let t_info = apply_tms(tq,t,tms);
       if (t_info[2] != null)
         // Ex: int (@)<`a>
         warn("bad type params, ignoring",LOC(@2,@2));
@@ -1671,27 +1701,27 @@ iteration_statement:
     { $$=^$(for_stmt($3,$5,$7,
 		     $9,LOC(@1,@9))); }
 | FOR '(' declaration ';' ')' statement
-    { _ decls = $3;
-      _ s = for_stmt(false_exp(DUMMYLOC),true_exp(DUMMYLOC),false_exp(DUMMYLOC),
+    { let decls = $3;
+      let s = for_stmt(false_exp(DUMMYLOC),true_exp(DUMMYLOC),false_exp(DUMMYLOC),
 		     $6,LOC(@1,@6));
       $$=^$(flatten_declarations(decls,s));
     }
 | FOR '(' declaration expression ';' ')' statement
-    { _ decls = $3;
-      _ s     = for_stmt(false_exp(DUMMYLOC),$4,false_exp(DUMMYLOC),
-			 $7,LOC(@1,@7));
+    { let decls = $3;
+      let s     = for_stmt(false_exp(DUMMYLOC),$4,false_exp(DUMMYLOC),
+                           $7,LOC(@1,@7));
       $$=^$(flatten_declarations(decls,s));
     }
 | FOR '(' declaration ';' expression ')' statement
-    { _ decls = $3;
-      _ s     = for_stmt(false_exp(DUMMYLOC),true_exp(DUMMYLOC),$5,
-			 $7,LOC(@1,@7));
+    { let decls = $3;
+      let s     = for_stmt(false_exp(DUMMYLOC),true_exp(DUMMYLOC),$5,
+                           $7,LOC(@1,@7));
       $$=^$(flatten_declarations(decls,s));
     }
 | FOR '(' declaration expression ';' expression ')' statement
-    { _ decls = $3;
-      _ s     = for_stmt(false_exp(DUMMYLOC),$4,$6,
-			 $8,LOC(@1,@8));
+    { let decls = $3;
+      let s     = for_stmt(false_exp(DUMMYLOC),$4,$6,
+                           $8,LOC(@1,@8));
       $$=^$(flatten_declarations(decls,s));
     }
 ;
@@ -1746,7 +1776,7 @@ pattern:
 | '&' pattern
     {$$=^$(new_pat(Pointer_p($2),LOC(@1,@2)));}
 | '*' IDENTIFIER
-    {$$=^$(new_pat(Reference_p(new_vardecl(&$(null,new {$2}),
+    {$$=^$(new_pat(Reference_p(new_vardecl(&$(Loc_n,new {$2}),
 					   VoidType,null)),
 		   LOC(@1,@2)));}
 ;
@@ -1988,8 +2018,14 @@ postfix_expression:
 // Hack to allow typedef names and field names to overlap
 | postfix_expression '.' QUAL_TYPEDEF_NAME
     { qvar q = $3;
-      if ((*q)[0] != null)
-	err("struct field name is qualified",LOC(@3,@3));
+      switch ((*q)[0]) {
+      case Loc_n: break;
+      case Rel_n(null): break;
+      case Abs_n(null): break;
+      default:
+        err("struct field name is qualified",LOC(@3,@3));
+        break;
+      }
       $$=^$(structmember_exp($1,(*q)[1],LOC(@1,@3)));
     }
 | postfix_expression PTR_OP IDENTIFIER
@@ -1997,8 +2033,14 @@ postfix_expression:
 // Hack to allow typedef names and field names to overlap
 | postfix_expression PTR_OP QUAL_TYPEDEF_NAME
     { qvar q = $3;
-      if ((*q)[0] != null)
-	err("struct field is qualified with module name",LOC(@3,@3));
+      switch ((*q)[0]) {
+      case Loc_n: break;
+      case Rel_n(null): break;
+      case Abs_n(null): break;
+      default:
+        err("struct field is qualified with module name",LOC(@3,@3));
+        break;
+      }
       $$=^$(structarrow_exp($1,(*q)[1],LOC(@1,@3)));
     }
 | postfix_expression INC_OP
@@ -2020,7 +2062,8 @@ postfix_expression:
     { $$=^$(new_exp(Array_e(true,List::imp_rev($3)),LOC(@1,@4))); }
   /* array comprehension */
 | NEW '{' FOR IDENTIFIER '<' expression ':' expression '}'
-    { $$=^$(new_exp(Comprehension_e(new_vardecl(&$(null,new {$4}), uint_t,
+    { $$=^$(new_exp(Comprehension_e(new_vardecl(&$(Loc_n,new {$4}),
+                                                uint_t,
 						uint_exp(0,LOC(@4,@4))),
 				    $6, $8),LOC(@1,@9))); }
 | NEW STRING
@@ -2080,7 +2123,7 @@ constant:
 ;
 
 qual_opt_identifier:
-  IDENTIFIER      { $$=^$(&$(null,new {$1})); }
+  IDENTIFIER      { $$=^$(&$(Rel_n(null),new {$1})); }
 | QUAL_IDENTIFIER { $$=$!1; }
 ;
 
@@ -2095,7 +2138,13 @@ void yyprint(int i, xenum YYSTYPE v) {
   case String_tok(s):          fprintf(stderr,"\"%s\"",s); break;
   case StringOpt_tok(null):    fprintf(stderr,"null");     break;
   case StringOpt_tok(&Opt(s)): fprintf(stderr,"\"%s\"",*s); break;
-  case QualId_tok(&$(prefix,v2)):
+  case QualId_tok(&$(p,v2)):
+    let prefix = null;
+    switch (p) {
+    case Rel_n(x): prefix = x; break;
+    case Abs_n(x): prefix = x; break;
+    case Loc_n: break;
+    }
     for (; prefix != null; prefix = prefix->tl)
       fprintf(stderr,"%s::",*(prefix->hd));
     fprintf(stderr,"%s::",*v2);

@@ -98,12 +98,14 @@ void egroup<`a>(void f(`a), list<`a> l,
 // is this backwards for nested namespaces? Consistent either way, but
 // should do the right thing!
 void dumpqvar(qvar v) {
-  if((*v)[0] == null) {
-    dump_str((*v)[1]);
-    return;
+  let nsl = null;
+  switch ((*v)[0]) {
+  case Loc_n:       fallthru;
+  case Rel_n(null): fallthru;
+  case Abs_n(null): dump_str((*v)[1]); return;
+  case Rel_n(x):    fallthru(x);
+  case Abs_n(x):    nsl = x; break;
   }
-
-  let nsl = (*v)[0];
   dump_str(nsl->hd);
   for(nsl = nsl->tl; nsl != null; nsl = nsl->tl) {
     if(Absynpp::qvar_to_Cids) dump_nospace("_");

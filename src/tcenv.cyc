@@ -93,7 +93,7 @@ struct Genv {
   Dict::Dict<var,xenumdecl@>  xenumdecls;
   Dict::Dict<var,typedefdecl> typedefs; // no indirection b/c no redeclaration
   Dict::Dict<var,$(resolved_t,bool)@> ordinaries; // bool for tree-shaking
-  list<list<var>>             availables; // "using" namespaces
+  list<list<var>>             availables; // abs. names of "using" namespaces
 };
 
 // Used to tell what an ordinary identifer refers to
@@ -158,8 +158,8 @@ tenv tc_init() {
   // Set up initial environment so that xenum exn is defined
   // Note: Absyn::exn_xed must be fresh for each file b/c fields gets mutated!!
   // In turn, we need to reset exn_typ!!
-  genv_t ge      = empty_genv();
-  let    top_ns  = null;
+  let ge     = empty_genv();
+  let top_ns = null;
   exn_xed = new {Xenumdecl(Extern, exn_name, null)};
   exn_typ = XenumType(exn_name, &exn_xed);
   ge->xenumdecls = Dict::insert(ge->xenumdecls, (*exn_name)[1], &exn_xed);
@@ -168,8 +168,9 @@ tenv tc_init() {
 }
 
 // Lookup a namespace relative to the current namespace
-static genv_t lookup_namespace(tenv te, segment loc, list<var> ns) {
-  return Dict::lookup(te->ae, resolve_namespace(te,loc,ns));
+static genv_t lookup_namespace(tenv te, segment loc,
+                               var n, list<var> ns) {
+  return Dict::lookup(te->ae, resolve_namespace(te,loc,n,ns));
 }
 
 // lookup functions
@@ -187,7 +188,7 @@ static void check_repeat<`a>(tenv_t te, seg_t loc, `a lookup(genv_t,var),
     genv_t ge2 = Dict::lookup(te->ae,nss->hd);
     try {
       lookup(ge2,v);
-      Tcutil::terr(loc,xprintf("%s is ambiguous-",*v));
+      Tcutil::terr(loc,xprintf("%s is ambiguous",*v));
     } catch { case Dict::Absent: break; }
   }
   return;
@@ -227,39 +228,73 @@ static resolved_t lookup_ordinary_global_f(genv_t ge,var v) {
 }
 static resolved_t lookup_ordinary_global(tenv te,segment loc,qvar q) {
   let &$(nsl,v) = q;
-  try {
-    if (nsl == null)
+//  if (!String::strcmp(*v,"Failure")) {
+//    fprintf(stderr,"Looking up %s\n",Absynpp::qvar2string(q));
+//    fprintf(stderr,"Current namespace: %s\n",
+//            String::str_sepstr(te->ns,"::"));
+//    fprintf(stderr,"Available namespaces:\n");
+//    for (let nss = Dict::lookup(te->ae,te->ns)->availables; nss != null; nss = nss->tl) {
+//      fprintf(stderr,"%s\n",
+//              String::str_sepstr(nss->hd,"::"));
+//    }
+//    fprintf(stderr,"Defined namespaces:\n");
+//    for (let vs = Set::elements(Dict::lookup(te->ae,te->ns)->namespaces); vs != null; vs = vs->tl) {
+//      fprintf(stderr,"%s\n",*vs->hd);
+//    }
+//    fflush(stderr);
+//  }
+  try
+    switch (nsl) {
+    case Loc_n: fallthru;
+    case Rel_n(null):
       return scoped_lookup(te, loc, lookup_ordinary_global_f, v);
-    return lookup_ordinary_global_f(lookup_namespace(te,loc,nsl),v);
-  } catch { case Dict::Absent:
-    return VarRes(Unresolved_b); }
+    case Rel_n(&cons(x,y)):
+      //      fprintf(stderr,"Looking up namespace %s\n",
+      //              String::str_sepstr(&cons(x,y),"::"));
+      let ge = lookup_namespace(te,loc,x,y);
+      //      fprintf(stderr,"Got it -- looking up var %s\n",*v);
+      let x = lookup_ordinary_global_f(ge,v); 
+      //      fprintf(stderr,"Got it\n");
+      //      fflush(stderr);
+      return x;
+    case Abs_n(y):
+      return lookup_ordinary_global_f(Dict::lookup(te->ae,y),v);
+    }
+  catch {
+  case Dict::Absent:
+    return VarRes(Unresolved_b);
+  }
 }
 
-list<var> resolve_namespace(tenv te, segment loc, list<var> ns) {
-  if (ns == null)
-    // null means the current namespace
-    return te->ns;
-  list<var> cns = te->ns; // current namespace
-  list<list<var>> result = null;
+// Return the absolute name of relative namespace &cons(n,ns)
+list<var> resolve_namespace(tenv te, segment loc,
+                            var n, list<var> ns) {
+  let cns = te->ns; // current namespace
+  let possible_results = null;
   while (true) {
-    genv_t ge = Dict::lookup(te->ae,cns);
+    let ge = Dict::lookup(te->ae,cns);
     // Check namespaces that have been made available
     for (let nss = ge->availables; nss != null; nss = nss->tl) {
       genv_t ge2 = Dict::lookup(te->ae,nss->hd);
-      if (Set::member(ge2->namespaces, ns->hd))
-        result = &cons(List::append(cns,ns),result);
+      if (Set::member(ge2->namespaces, n))
+        possible_results = &cons(List::append(cns,&cons(n,ns)),
+                                 possible_results);
     }
     // Check current namespace
-    if (Set::member(ge->namespaces, ns->hd))
-      result = &cons(List::append(cns,ns),result);
-    if (result != null) {
-      if (result->tl != null)
-        Tcutil::terr(loc,xprintf("%s is ambiguous_",*(ns->hd)));
-      return result->hd;
+    if (Set::member(ge->namespaces, n))
+      possible_results = &cons(List::append(cns,&cons(n,ns)),
+                               possible_results);
+    // Is this right? We check for ambiguity between the current namespace
+    // and used namespaces in the current scope, but not outer namespaces.
+    // Seems inconsistent.
+    if (possible_results != null) {
+      if (possible_results->tl != null)
+        Tcutil::terr(loc,xprintf("%s is ambiguous",*(n)));
+      return possible_results->hd;
     }
     if (cns == null)
       throw Dict::Absent;
-    // ns->hd is not defined in current namespace, look in next outer
+    // n is not defined in current namespace, look in next outer
     cns = outer_namespace(cns);
   }
 }
@@ -272,28 +307,42 @@ static structdecl @ lookup_structdecl_f(genv_t ge,var v) {
 }
 structdecl @ lookup_structdecl(tenv te,segment loc,qvar q) {
   let &$(nsl,v) = q;
-  if (nsl == null)
+  switch (nsl) {
+  case Loc_n: fallthru;
+  case Rel_n(null):
     return scoped_lookup(te, loc, lookup_structdecl_f, v);
-  genv_t ge = lookup_namespace(te,loc,nsl);
-  return Dict::lookup(ge->structdecls,v);
+  case Abs_n(y):
+    let ge = Dict::lookup(te->ae,y);
+    return Dict::lookup(ge->structdecls,v);
+  case Rel_n(&cons(x,y)):
+    let ge = lookup_namespace(te,loc,x,y);
+    return Dict::lookup(ge->structdecls,v);
+  }
 }
-structdecl @ lookup_structdecl_abs(tenv te, segment loc,qvar q) {
-  return Dict::lookup(Dict::lookup(te->ae,(*q)[0])->structdecls, (*q)[1]);
-}
+//structdecl @ lookup_structdecl_abs(tenv te, segment loc,qvar q) {
+//  return Dict::lookup(Dict::lookup(te->ae,(*q)[0])->structdecls, (*q)[1]);
+//}
 
 static enumdecl @ lookup_enumdecl_f(genv_t ge,var v) {
   return Dict::lookup(ge->enumdecls,v);
 }
 enumdecl @ lookup_enumdecl(tenv te,segment loc,qvar q) {
   let &$(nsl,v) = q;
-  if (nsl == null)
+  switch (nsl) {
+  case Loc_n: fallthru;
+  case Rel_n(null):
     return scoped_lookup(te, loc, lookup_enumdecl_f, v);
-  genv_t ge = lookup_namespace(te,loc,nsl);
-  return Dict::lookup(ge->enumdecls,v);
+  case Rel_n(&cons(x,y)):
+    let ge = lookup_namespace(te,loc,x,y);
+    return Dict::lookup(ge->enumdecls,v);
+  case Abs_n(y):
+    let ge = Dict::lookup(te->ae,y);
+    return Dict::lookup(ge->enumdecls,v);
+  }
 }
-enumdecl @ lookup_enumdecl_abs(tenv te, segment loc,qvar q) {
-  return Dict::lookup(Dict::lookup(te->ae,(*q)[0])->enumdecls, (*q)[1]);
-}
+//enumdecl @ lookup_enumdecl_abs(tenv te, segment loc,qvar q) {
+//  return Dict::lookup(Dict::lookup(te->ae,(*q)[0])->enumdecls, (*q)[1]);
+//}
 
 static xenumdecl @ lookup_xenumdecl_f(genv_t ge,var v) {
   return Dict::lookup(ge->xenumdecls,v);
@@ -302,37 +351,54 @@ static xenumdecl @ lookup_xenumdecl_f(genv_t ge,var v) {
 // DAN: some functionality from tcXenumdecl has moved to here.
 Opt_t<xenumdecl@> lookup_xenumdecl(tenv te,segment loc,qvar q) {
   let &$(nsl,v) = q;
-  if (nsl == null)
+  switch (nsl) {
+  case Rel_n(null):
     // unqualified name, okay to fail -- that just means we have a new xenum
     try return &Opt(scoped_lookup(te, loc, lookup_xenumdecl_f, v));
     catch { case Dict::Absent: return null; }
-  // qualified name, it's an error if the namespace is bad or the
-  // xenum doesn't already exist.  In either case, we'll raise
-  // Dict::Absent, so we give a more descriptive message for the
-  // former.
-  genv_t ge;
-  try ge = lookup_namespace(te,loc,nsl);
-  catch { case Dict::Absent:
-    Tcutil::terr(loc,"bad qualified name for xenum");
-    throw Dict::Absent;
+  case Loc_n: // impossible case
+    terr(loc,"lookup_xenumdecl: impossible");
+    return null;
+  case Rel_n(&cons(x,y)):
+    // qualified name, it's an error if the namespace is bad or the
+    // xenum doesn't already exist.  In either case, we'll raise
+    // Dict::Absent, so we give a more descriptive message for the
+    // former.
+    genv_t ge;
+    try ge = lookup_namespace(te,loc,x,y);
+    catch {
+    case Dict::Absent:
+      Tcutil::terr(loc,"bad qualified name for xenum");
+      throw Dict::Absent;
+    }
+    return &Opt(Dict::lookup(ge->xenumdecls,v));
+  case Abs_n(y):
+    genv_t ge = Dict::lookup(te->ae,y);
+    return &Opt(Dict::lookup(ge->xenumdecls,v));
   }
-  return &Opt(Dict::lookup(ge->xenumdecls,v));
 }
-// FIX: We probably need some of the lenience of lookup_xenumdecl here too.
-//      I would add it, but I think xenums are still generally sorta busted.
-Opt_t<xenumdecl@> lookup_xenumdecl_abs(tenv te, segment loc,qvar q) {
-  return &Opt(Dict::lookup(Dict::lookup(te->ae,(*q)[0])->xenumdecls, (*q)[1]));
-}
+//// FIX: We probably need some of the lenience of lookup_xenumdecl here too.
+////      I would add it, but I think xenums are still generally sorta busted.
+//Opt_t<xenumdecl@> lookup_xenumdecl_abs(tenv te, segment loc,qvar q) {
+//  return &Opt(Dict::lookup(Dict::lookup(te->ae,(*q)[0])->xenumdecls, (*q)[1]));
+//}
 
 static typedefdecl lookup_typedefdecl_f(genv_t ge,var v) {
   return Dict::lookup(ge->typedefs,v);
 }
 typedefdecl lookup_typedefdecl(tenv te, segment loc, qvar q) {
   let &$(nsl,v) = q;
-  if (nsl == null)
+  switch (nsl) {
+  case Loc_n: fallthru;
+  case Rel_n(null):
     return scoped_lookup(te, loc, lookup_typedefdecl_f, v);
-  genv_t ge = lookup_namespace(te,loc,nsl);
-  return Dict::lookup(ge->typedefs,v);
+  case Rel_n(&cons(x,y)):
+    let ge = lookup_namespace(te,loc,x,y);
+    return Dict::lookup(ge->typedefs,v);
+  case Abs_n(y):
+    let ge = Dict::lookup(te->ae,y);
+    return Dict::lookup(ge->typedefs,v);
+  }
 }
 
 genv_t empty_genv() {
@@ -427,6 +493,14 @@ tenv add_local_var(segment loc, tenv te, vardecl vd) {
   if(te->le == null) env_err("Tcenv: unexpected add_local_var");
   let fe = copy_fenv_old_ctrl(get_fenv(te));
   let v  = (*vd->name)[1];
+  switch ((*vd->name)[0]) {
+  case Loc_n: break;
+  default:
+    // This is a fail-safe.
+    // Maybe we should just clobber with Loc_n?
+    throw Impossible("add_local_var: called with Rel_n");
+    break;
+  }
   if(Dict::member(fe->locals,v))
     vd->shadow = ++shadow_ctr;
   fe->locals = Dict::insert(fe->locals,v,Local_b(vd));
@@ -446,11 +520,27 @@ tenv add_pat_var(segment loc, tenv te, vardecl vd) {
 
 resolved_t lookup_ordinary(tenv te,segment loc,qvar q) {
   let &$(nsl,v) = q;
-  if (nsl != null || te->le == null)
-    return lookup_ordinary_global(te,loc,q);
-  let fe = get_fenv(te);
-  try return VarRes(Dict::lookup(fe->locals,v));
-  catch {case Dict::Absent: return lookup_ordinary_global(te,loc,q);}
+//  if (!String::strcmp(*v,"Failure")) {
+//    fprintf(stderr,"lookup_ordinary on Failure\n"); fflush(stderr);
+//  }
+  _ r;
+  switch (nsl) {
+  case Loc_n:
+    if (te->le == null) { throw Dict::Absent; break; }
+    else fallthru;
+  case Rel_n(null) && te->le != null:
+    let fe = get_fenv(te);
+    try r = VarRes(Dict::lookup(fe->locals,v));
+    catch {case Dict::Absent: r = lookup_ordinary_global(te,loc,q); break;}
+    break;
+  default:
+    r = lookup_ordinary_global(te,loc,q);    
+    break;
+  }
+//  if (!String::strcmp(*v,"Failure")) {
+//    fprintf(stderr,"lookup_ordinary DONE\n"); fflush(stderr);
+//  }
+  return r;
 }
 
 void process_continue(tenv te, stmt s, stmt_opt @sopt) {

@@ -31,9 +31,22 @@ int varlist_cmp(list<var> vs1, list<var> vs2) {
   return zstrlist_cmp(vs1,vs2);
 }
 int qvar_cmp(qvar q1, qvar q2) {
-  int i = zstrlist_cmp((*q1)[0],(*q2)[0]);
-  if (i != 0) return i;
-  else return zstrptrcmp((*q1)[1],(*q2)[1]);
+  let n1 = (*q1)[0];
+  let n2 = (*q2)[0];
+  switch ($(n1,n2)) {
+  case $(Loc_n,    Loc_n):     break;
+  case $(Rel_n(x1),Rel_n(x2)): fallthru(x1,x2);
+  case $(Abs_n(x1),Abs_n(x2)):
+    int i = zstrlist_cmp(x1,x2);
+    if (i != 0) return i;
+    break;
+  // we arbitrarily decide that Loc_n < Rel_n < Abs_n
+  case $(Loc_n,_): return -1;
+  case $(_,Loc_n): return 1;
+  case $(Rel_n(_),_): return -1;
+  case $(_,Rel_n(_)): return 1;
+  }
+  return zstrptrcmp((*q1)[1],(*q2)[1]);
 }
 // WARNING: Ignores the kinds.
 int tvar_cmp(tvar tv1, tvar tv2) {
@@ -93,8 +106,8 @@ typ float_t  = FloatType;
 typ double_t = DoubleType;
 // exceptions
 static string exn_string = "exn";
-static $(list<var>,var) exn_name_v = $(null,&exn_string);
-$(list<var>,var) @      exn_name   = &exn_name_v;
+static $(enum Nmspace,var) exn_name_v = $(Abs_n(null),&exn_string);
+qvar exn_name   = &exn_name_v;
 static struct Xenumdecl exn_xed_v  = Xenumdecl(Extern,&exn_name_v,null);
 xenumdecl               exn_xed    = &exn_xed_v;
 typ                     exn_typ    = XenumType(&exn_name_v,&exn_xed);
@@ -152,7 +165,7 @@ typ file_typ() {
   if (file_t_opt == null) {
     // struct Cyc::Stdio::__sFILE *
     typedef_name_t file_t_name = 
-      new {$((list<var>)&cons(cyc,&cons(st,null)), sf)};
+      new {$(Abs_n((list<var>)&cons(cyc,&cons(st,null))), sf)};
     structdecl sd = &Structdecl(Abstract,&Opt(file_t_name),null, null);
     typ file_struct_typ = StructType(file_t_name, null, new {sd});
     file_t_opt = &Opt(at_typ(file_struct_typ, HeapRgnType, empty_tqual()));
@@ -172,7 +185,7 @@ typ void_star_typ() {
 //          the structdecl field.  Beware using them anywhere else!
 // (Probably we should require setting the third field even in Toc.)
 typ strct(var name) {
-  return StructType(new {$(null,name)},null,null);
+  return StructType(new {$(Abs_n(null),name)},null,null);
 }
 typ strctq(qvar name) {
   return StructType(name,null,null);
@@ -290,7 +303,7 @@ exp stmt_exp(stmt s,segment loc) { return new_exp(StmtExp_e(s), loc); }
 static string ne_str = "Null_Exception";
 static stringptr ne = &ne_str;
 exp null_pointer_exn_exp(segment loc) { 
-  return var_exp(&$(null,ne), loc); 
+  return var_exp(&$(Abs_n(null),ne), loc); 
 }
 exp array_exp(bool heap_allocate, list<exp> es, segment loc) {
   let dles = null;

@@ -54,7 +54,7 @@ static int comment_depth = 0;
 // These needn't be set by lex_init -- they're set while finding a token.
 static $(sign,int)      token_int_pair = $(Signed,0);
 static string           bogus_string   = "*bogus*";
-static $(list<var>,var) token_id_pair  = $(null,&bogus_string);
+static $(enum Nmspace,var) token_id_pair  = $(Abs_n(null),&bogus_string);
 
 static char             token_char     = '\000';
 static string           token_string   = "";
@@ -149,7 +149,7 @@ static int str_index(string buff, int offset, int len) {
 	++i;
 	ch = ((int)buff[i]) - 48; // see width of trie above
       }
-      _ newstr = new_string(len+1);
+      let newstr = new_string(len+1);
       String::zstrncpy(newstr,0,buff,offset,len);
       int ans = Xarray::add_ind((Xarray::Xarray<stringptr>)symbols, 
 				new {newstr});
@@ -164,7 +164,7 @@ static int str_index(string buff, int offset, int len) {
   }
   // build string if necessary and return
   if(t->shared_str == -1) {
-    _ newstr = new_string(len+1);
+    let newstr = new_string(len+1);
     String::zstrncpy(newstr,0,buff,offset,len);
     int ans = Xarray::add_ind((Xarray::Xarray<stringptr>)symbols, 
 			      new {newstr});
@@ -322,13 +322,13 @@ typedef struct Lstate @lstate_t;
 static Opt_t<lstate_t> lstate = null;
 
 static void typedef_init() {
-  _ init_lvis   = &Lvis{.current_namespace=null,
-			.imported_namespaces=null};
-  _ init_lstack = &cons(init_lvis, null);
-  _ init_decls  = Dict::insert(Dict::empty(varlist_cmp),
-			       null,
-			       &Ldecls{.typedefs=Set::empty(zstrptrcmp),
-			      	       .namespaces=Set::empty(zstrptrcmp)});
+  let init_lvis   = &Lvis{.current_namespace=null,
+                          .imported_namespaces=null};
+  let init_lstack = &cons(init_lvis, null);
+  let init_decls  = Dict::insert(Dict::empty(varlist_cmp),
+                                 null,
+                                 &Ldecls{.typedefs=Set::empty(zstrptrcmp),
+                                         .namespaces=Set::empty(zstrptrcmp)});
   lstate = &Opt(&Lstate{.lstack=init_lstack,
                         .decls=init_decls});
 }
@@ -428,13 +428,22 @@ void enter_namespace(var s) {
 void leave_namespace() {
   // we never leave the outermost namespace, so the cast is okay
   lstate->v->lstack = (List<lvis>)lstate->v->lstack->tl;
-
   recompute_typedefs();
 }
 void enter_using(qvar q) {
-  _ ns       = (List<stringptr>)List::append((*q)[0],&cons((*q)[1],null));
-  _ ans      = get_absolute_namespace(ns);
-  _ imported = lstate->v->lstack->hd->imported_namespaces;
+  _ ns;
+  switch ((*q)[0]) {
+  case Loc_n:
+    ns = (List<stringptr>)&cons((*q)[1],null);
+    break;
+  case Rel_n(y): fallthru(y);
+  case Abs_n(y):
+    ns = (List<stringptr>)List::append(y,&cons((*q)[1],null));
+    break;
+  }
+
+  let ans      = get_absolute_namespace(ns);
+  let imported = lstate->v->lstack->hd->imported_namespaces;
 
   lstate->v->lstack->hd->imported_namespaces = &cons(ans,imported);
   
@@ -442,7 +451,7 @@ void enter_using(qvar q) {
   recompute_typedefs();
 }
 void leave_using() {
-  _ imported = lstate->v->lstack->hd->imported_namespaces;
+  let imported = lstate->v->lstack->hd->imported_namespaces;
   lstate->v->lstack->hd->imported_namespaces = imported->tl;
 
   // some typedefs may no longer be visible
@@ -451,11 +460,11 @@ void leave_using() {
 
 void register_typedef(qvar q) {
   // FIX: we assume that q is not in fact qualified
-  _ current = lstate->v->lstack->hd->current_namespace;
-  _ ds      = lstate->v->decls;
-  _ ld      = Dict::lookup(ds,current);
-  _ new_ld  = &Ldecls{.typedefs   = Set::insert(ld->typedefs,(*q)[1]),
-		      .namespaces = ld->namespaces};
+  let current = lstate->v->lstack->hd->current_namespace;
+  let ds      = lstate->v->decls;
+  let ld      = Dict::lookup(ds,current);
+  let new_ld  = &Ldecls{.typedefs   = Set::insert(ld->typedefs,(*q)[1]),
+                        .namespaces = ld->namespaces};
   lstate->v->decls = Dict::insert(ds,current,new_ld);
 
   // FIX: We're really assuming it's unqualified here -- else need to
@@ -474,7 +483,7 @@ static short process_id<`a>(Lexbuf<`a> lbuf) {
 
   // maybe it's a typedef
   if (is_typedef(null,s)) {
-    token_qvar = &$(null,s);
+    token_qvar = &$(Rel_n(null),s);
     return QUAL_TYPEDEF_NAME;
   }
 
@@ -505,7 +514,7 @@ static short process_qual_id<`a>(Lexbuf<`a> lbuf) {
     throw Impossible("bad namespace");
   var       v  = rev_vs->hd;
   list<var> vs = List::imp_rev(rev_vs->tl);
-  token_qvar = &$(vs,v);
+  token_qvar = &$(Rel_n(vs),v);
   if (is_typedef(vs,v))
     return QUAL_TYPEDEF_NAME;
   else 
@@ -731,7 +740,7 @@ void lex_init() {
   num_kws       = rw_array.size;
   kw_nums       = new {for i < num_kws : 0};
   for (int i=0; i < num_kws; ++i) {
-    _ str = rw_array[i][0];
+    let str = rw_array[i][0];
     str_index(str, 0, String::strlen(str));
     kw_nums[i] = rw_array[i][1];
   }

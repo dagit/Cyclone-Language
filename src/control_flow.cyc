@@ -47,7 +47,7 @@ typedef Set<vardecl> flow_info_t;
 
 static struct Tqual     bogus_tqual     = Tqual(false,false,false);
 static string           empty_string    = "";
-static $(list<var>,var) bogus_qvar      = $(null,&empty_string);
+static $(enum Nmspace,var) bogus_qvar   = $(Abs_n(null),&empty_string);
 static struct Vardecl   bogus_vardecl_v = Vardecl(Public, &bogus_qvar,
 						  &bogus_tqual, VoidType, null,
 						  0, 0);

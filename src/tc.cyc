@@ -201,12 +201,15 @@ static void tcVardecl(tenv te, genv_t ge, segment loc, vardecl vd) {
   scope sc = vd->sc;
 
   // reject explicitly qualified name
-  if((*vd->name)[0] != null) {
+  switch ((*vd->name)[0]) {
+  case Rel_n(null): break;
+  case Abs_n(null): break; // allowed for top-level constants
+  default:
     terr(loc,"qualified declarations are not implemented"); // FIX
     return;
   }
   // expand to qualified name
-  (*vd->name)[0] = te->ns;
+  (*vd->name)[0] = Abs_n(te->ns);
   // reject ill-formed type
   check_valid_type(loc,te,null,t);
   // check for redeclaration
@@ -264,12 +267,16 @@ static void tcFndecl(tenv te, genv_t ge, segment loc, fndecl fd) {
   scope sc = fd->sc;
 
   // reject explicitly qualified name
-  if((*fd->name)[0] != null) {
+  switch ((*fd->name)[0]) {
+  case Rel_n(null): break;
+  case Abs_n(y):
+    throw Impossible("tc: Abs_n in tcFndecl");
+  default:
     terr(loc,"qualified declarations are not implemented"); // FIX
     return;
   }
   // expand to qualified name
-  (*fd->name)[0] = te->ns;
+  (*fd->name)[0] = Abs_n(te->ns);
   // reject ill-formed type
   check_fndecl_valid_type(loc,te,fd);
   // check for redeclaration
@@ -293,7 +300,10 @@ static void tcFndecl(tenv te, genv_t ge, segment loc, fndecl fd) {
 static void tcTypedefdecl(tenv te, genv_t ge, segment loc, typedefdecl td) {
   var v = (*td->name)[1];
   // reject explicitly qualified name
-  if ((*td->name)[0] != null) {
+  switch ((*td->name)[0]) {
+  case Rel_n(null): break;
+  case Abs_n(null): break; // allowed for top-level constants
+  default:
     terr(loc,"qualified declarations are not implemented"); // FIX
     return;
   }
@@ -303,7 +313,7 @@ static void tcTypedefdecl(tenv te, genv_t ge, segment loc, typedefdecl td) {
     return;
   }
   // expand to qualified name
-  (*td->name)[0] = te->ns;
+  (*td->name)[0] = Abs_n(te->ns);
   // reject ill-formed type
   check_unique_tvars(loc,td->tvs);
   check_valid_type(loc,te,td->tvs,td->defn);
@@ -323,12 +333,15 @@ static void tcStructdecl(tenv te, genv_t ge, segment loc, structdecl sd) {
   var        v   = (*sd->name->v)[1];
   list<tvar> tvs = sd->tvs;
   // reject explicitly qualified name
-  if ((*sd->name->v)[0] != null) {
+  switch ((*sd->name->v)[0]) {
+  case Rel_n(null): break;
+  case Abs_n(null): break; // allowed for top-level constants
+  default:
     terr(loc,"qualified declarations are not implemented"); // FIX
     return;
   }
   // expand to qualified name
-  (*sd->name->v)[0] = te->ns;
+  (*sd->name->v)[0] = Abs_n(te->ns);
   // reject ill-formed type
   check_unique_tvars(loc,tvs);
 
@@ -435,12 +448,15 @@ static void tcEnumdecl(tenv te, genv_t ge, segment loc, enumdecl ed) {
   var        v   = (*ed->name->v)[1];
   list<tvar> tvs = ed->tvs;
   // reject explicitly qualified name
-  if ((*ed->name->v)[0] != null) {
+  switch ((*ed->name->v)[0]) {
+  case Rel_n(null): break;
+  case Abs_n(null): break; // allowed for top-level constants
+  default:
     terr(loc,"qualified declarations are not implemented"); // FIX
     return;
   }
   // expand to qualified name
-  (*ed->name->v)[0] = te->ns;
+  (*ed->name->v)[0] = Abs_n(te->ns);
   // reject ill-formed type
   check_unique_tvars(loc,tvs);
 
@@ -487,7 +503,7 @@ static void tcEnumdecl(tenv te, genv_t ge, segment loc, enumdecl ed) {
       // side effects
 
       for (; f1s != null && f2s != null; f1s = f1s->tl, f2s = f2s->tl) {
-	(*f1s->hd->name)[0] = te->ns;
+	(*f1s->hd->name)[0] = Abs_n(te->ns);
 	// check f1s->hd types for the important side effects
 	list<tvar> alltvs = List::append(tvs, f1s->hd->tvs);
 	check_unique_tvars(f1s->hd->loc,alltvs);
@@ -533,7 +549,7 @@ static void tcEnumdecl(tenv te, genv_t ge, segment loc, enumdecl ed) {
       check_valid_type(f->loc,te,alltvs,t);
     }
     // FIX: check valid tquals?
-    (*f->name)[0] = te->ns;
+    (*f->name)[0] = Abs_n(te->ns);
     ge->ordinaries = Dict::insert(ge->ordinaries, (*f->name)[1],
 				  &$(EnumRes(ed,f), true));
   }
@@ -550,13 +566,23 @@ static void tcXenumdecl(tenv te, genv_t ge, segment loc, xenumdecl xd) {
   Opt_t<xenumdecl@> xd2o;
   try xd2o = lookup_xenumdecl(te,loc,xd->name);
   catch { case Dict::Absent:
-    terr(loc, xprintf("qualified xenum declaration %s is not an existing xenum",
-		      qvar2string(xd->name)));
+    terr(loc,
+         xprintf("qualified xenum declaration %s is not an existing xenum",
+                 qvar2string(xd->name)));
     return;
   }
   // expand to qualified name, if not already qualified
-  if((*xd->name)[0] == null)
-    (*xd->name)[0] = te->ns;
+  switch ((*xd->name)[0]) {
+  case Loc_n:
+    throw Impossible("tcXenumdecl: Loc_n");
+  case Rel_n(null):
+    (*xd->name)[0] = Abs_n(te->ns);
+    break;
+  case Rel_n(_):
+    throw Impossible("tcXenumdecl: Rel_n non-null");
+  case Abs_n(_):
+    throw Impossible("tcXenumdecl: Abs_n");
+  }
   // if we're a new xenum, then make a fresh "already there" xenumdecl
   //       and add it to the environment
   // if we're not new, compare scopes
@@ -579,8 +605,16 @@ static void tcXenumdecl(tenv te, genv_t ge, segment loc, xenumdecl xd) {
   for(list<enumfield> fs = xd->fields; fs != null; fs = fs->tl) {
     enumfield f = fs->hd;
     // expand field name if not explicitly qualified
-    if((*f->name)[0] == null)
-      (*f->name)[0] = te->ns;
+    switch ((*f->name)[0]) {
+    case Rel_n(null): (*f->name)[0] = Abs_n(te->ns); break;
+    case Rel_n(_): fallthru;
+    case Abs_n(_):
+      terr(loc,"qualified declarations are not allowed\n");
+      break;
+    case Loc_n:
+      throw Impossible("tcXenumdecl: Loc_n");
+      break;
+    }
     // reject if there is an ill-formed type
     list<tvar>tvs = f->tvs;
     check_unique_tvars(loc,tvs);
@@ -606,7 +640,15 @@ static void tcXenumdecl(tenv te, genv_t ge, segment loc, xenumdecl xd) {
     xd_result->fields = &cons(f, xd_result->fields);
     // notice we allow adding to another namespace via qualified field
     genv_t ge_f;
-    try ge_f = Dict::lookup(te->ae, (*f->name)[0]);
+    list<var> ns_f;
+    switch ((*f->name)[0]) {
+    case Abs_n(y): ns_f = y; break;
+    case Loc_n: fallthru;
+    case Rel_n(_):
+      throw Impossible("tcXenumdecl: Rel_n or Loc_n");
+      break;
+    }
+    try ge_f = Dict::lookup(te->ae, ns_f);
     catch { case Dict::Absent:
       terr(f->loc, xprintf("bad namespace for xenum field %s",
 			   qvar2string(f->name)));
@@ -701,7 +743,18 @@ static void tc_decls(tenv te, list<decl> ds0, bool in_externC) {
 
     case Using_d(&$(nsl,v),ds2):
       // DAN: We're more imperative here too.
-      let ns2 = resolve_namespace(te,loc,List::append(nsl,&cons(v,null)));
+      var       first;
+      list<var> rest;
+      switch (nsl) {
+      case Loc_n: fallthru;
+      case Rel_n(null): fallthru;
+      case Abs_n(null):
+        first = v; rest = null; break;
+      case Rel_n(&cons(x,y)): fallthru(x,y);
+      case Abs_n(&cons(x,y)):
+        first = x; rest = List::append(y,&cons(v,null)); break;
+      }
+      let ns2 = resolve_namespace(te,loc,first,rest);
       ge->availables = &cons(ns2,ge->availables);
       tc_decls(te,ds2,in_externC);
       ge->availables = ge->availables->tl;
@@ -735,7 +788,13 @@ static bool vardecl_needed(tenv te, decl d) {
     if(vd->sc != Extern)
       return true;
     let &$(nsl,name) = vd->name;
-    let ge = Dict::lookup(te->ae,nsl);
+    list<var> ns;
+    switch (nsl) {
+    case Loc_n:    ns = null; break;
+    case Rel_n(y): ns = y; break;
+    case Abs_n(y): ns = y; break;
+    }
+    let ge = Dict::lookup(te->ae,ns);
     return (*Dict::lookup(ge->ordinaries,name))[1];
   case Using_d(_,*ds2p): fallthru(ds2p);
   case Namespace_d(_,*ds2p):

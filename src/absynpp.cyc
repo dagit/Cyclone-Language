@@ -386,13 +386,19 @@ $(Opt_t<var>,tqual,typ)@ arg_mk_opt($(var,tqual,typ)@ arg) {
 Doc var2doc(var v) { return text(*v); }
 
 Doc qvar2doc(qvar q) {
-  if((*q)[0] == null)
-    return var2doc((*q)[1]);
+  let prefix = null;
+  switch ((*q)[0]) {
+  case Loc_n:       fallthru;
+  case Rel_n(null): fallthru;
+  case Abs_n(null): return var2doc((*q)[1]);
+  case Rel_n(x):    fallthru(x);
+  case Abs_n(x):    prefix = x; break;
+  }
   if (qvar_to_Cids) {
-    return text(String::str_sepstr(List::append((*q)[0],
+    return text(String::str_sepstr(List::append(prefix,
 						&cons((*q)[1],null)),"_"));
   } else {
-    return cat2(egroup("","::","::",List::map(var2doc,(*q)[0])),
+    return cat2(egroup("","::","::",List::map(var2doc,prefix)),
 		var2doc((*q)[1]));
   }
 }

@@ -189,9 +189,14 @@ $(list<tvar>, list<vardecl>)@ tcPat<`p>(tenv_t te,pat p, typ *`p region_opt) {
       p->r = Xenum_p(ef->name,null,null,xed,ef);
       return tcPat(te,p,region_opt);
     default: // LocalRes, GlobalRes, UnknownRes
-      if ((*q)[0] == null) {
+      switch ((*q)[0]) {
+      case Rel_n(null):
+        (*q)[0] = Loc_n;        
         p->r = Var_p(new_vardecl(q,VoidType,null));
         return tcPat(te,p,region_opt); // sets the vardecl's fields correctly
+      default:
+        terr(p->loc,"qualified variable in pattern");
+        break;
       }
       terr(p->loc,
            xprintf("unresolved identifier %s in pattern",qvar2string(q)));
@@ -202,7 +207,7 @@ $(list<tvar>, list<vardecl>)@ tcPat<`p>(tenv_t te,pat p, typ *`p region_opt) {
   case UnknownCall_p(q,tvs,ps):
     switch (lookup_ordinary(te,p->loc,q)) {
     case StructRes(sd):
-      _ x = List::map(null_designator, ps);
+      let x = List::map(null_designator, ps);
       p->r = Struct_p(sd,null,tvs,x);
       return tcPat(te,p,region_opt);
     case EnumRes(ed,ef):
@@ -574,7 +579,7 @@ static term_desc_t build_desc<`a,`b>(context_t ctxt, term_desc_t dsc,
   case $(null,_):    return impos("build_desc: ctxt and work don't match");
   case $(_,   null): return impos("build_desc: ctxt and work don't match");
   case $(&cons{.hd=&$(c,args), .tl=rest}, &cons{.hd=&$(_,_,dargs), .tl=work2}):
-    _ td = Pos(c, List::append(List::rev(args), &cons(dsc,dargs)));
+    let td = Pos(c, List::append(List::rev(args), &cons(dsc,dargs)));
     return build_desc(rest, td, work2);
   } 
 }
@@ -614,7 +619,7 @@ static decision_t<`rhs> and_match<`rhs>(context_t ctx, work_stack work,
     let &cons(pat1,patr) = (_@)(pats);
     let &cons(obj1,objr) = (_@)(objs);
     let &cons(dsc1,dscr) = (_@)(dscs);
-    _ wf = &$(patr, objr, dscr);
+    let wf = &$(patr, objr, dscr);
     return match(pat1,obj1,dsc1,ctx,&cons(wf,workr),right_hand_side,rules);
   } 
 }
@@ -627,7 +632,7 @@ static list<term_desc_t> getdargs(con_t pcon, term_desc_t dsc) {
     // So return Neg{} for each argument, reflecting that no information
     // is known about the arguments.
     term_desc_t any = Neg(empty_con_set());
-    _ res = null;
+    let res = null;
     for (int i = 0; i < pcon->arity; ++i)
       res = &cons(any,res);
     return res;
@@ -655,18 +660,18 @@ match<`rhs>(simple_pat_t p, access_t obj, term_desc_t dsc,
   case Con(pcon, pargs):
     switch (static_match(pcon, dsc)) {
     case Yes:
-      _ ctx2       = &cons(&$(pcon,null), ctx);
-      _ work_frame = &$(pargs, getoargs(pcon, obj), getdargs(pcon, dsc));
-      _ work2      = &cons(work_frame, work);
+      let ctx2       = &cons(&$(pcon,null), ctx);
+      let work_frame = &$(pargs, getoargs(pcon, obj), getdargs(pcon, dsc));
+      let work2      = &cons(work_frame, work);
       return and_match(ctx2, work2, right_hand_side, rules);
     case No:
       return or_match(build_desc(ctx, dsc, work), rules);
     case Maybe:
-      _ ctx2       = &cons(&$(pcon,null), ctx);
-      _ work_frame = &$(pargs, getoargs(pcon, obj), getdargs(pcon, dsc));
-      _ work2      = &cons(work_frame, work);
-      _ s          = and_match(ctx2, work2, right_hand_side, rules);
-      _ f          = or_match(build_desc(ctx, add_neg(dsc,pcon), work), rules);
+      let ctx2       = &cons(&$(pcon,null), ctx);
+      let work_frame = &$(pargs, getoargs(pcon, obj), getdargs(pcon, dsc));
+      let work2      = &cons(work_frame, work);
+      let s          = and_match(ctx2, work2, right_hand_side, rules);
+      let f          = or_match(build_desc(ctx, add_neg(dsc,pcon), work), rules);
       return IfEq(obj, pcon, s, f);
     }
   }
@@ -718,8 +723,8 @@ void check_switch_exhaustive(seg_t loc, list<switch_clause> swcs) {
   // We represent patterns without where clauses as (simple_pat,_).
   // This way, if we have the same pattern repeated, we get exhuastiveness
   // right as long as one of the copies does not have a where-clause.
-  _ match_rules = List::map_c(get_match,(int @)&$(0),swcs);
-  _ dec_tree    = match_compile(match_rules);
+  let match_rules = List::map_c(get_match,(int @)&$(0),swcs);
+  let dec_tree    = match_compile(match_rules);
   check_exhaust_overlap(dec_tree, not_exhaust_err, loc, rule_occurs, 0);
   for (; match_rules != null; match_rules = match_rules->tl) {
     let &$(b,loc) = (*match_rules->hd)[1];
@@ -740,9 +745,9 @@ static void dummy_fn(int i,int j) {
   return;
 }
 bool check_let_pat_exhaustive(seg_t loc,pat p) {
-  _ match_rules = &cons(&$(compile_pat(p),0),null);
-  _ dec_tree    = match_compile(match_rules);
-  _ exhaust_env = &$(loc,true);
+  let match_rules = &cons(&$(compile_pat(p),0),null);
+  let dec_tree    = match_compile(match_rules);
+  let exhaust_env = &$(loc,true);
   check_exhaust_overlap(dec_tree, not_exhaust_warn, exhaust_env, dummy_fn, 0);
   return (*exhaust_env)[1];
 }
@@ -760,11 +765,11 @@ static void not_exhaust_err2(segment loc) {
 }
 void check_catch_overlap(seg_t loc, list<switch_clause> swcs) {
   // We ignore where clauses here because catch's need not be exhaustive.
-  _ match_rules = List::map(get_match2,swcs);
-  _ dec_tree    = match_compile(match_rules);
+  let match_rules = List::map(get_match2,swcs);
+  let dec_tree    = match_compile(match_rules);
   check_exhaust_overlap(dec_tree, not_exhaust_err2, loc, rule_occurs, 0);
   for (; match_rules != null; match_rules = match_rules->tl) {
-    _ pair = (*match_rules->hd)[1];
+    let pair = (*match_rules->hd)[1];
     if (!(*pair)[0])
       terr((*pair)[1],"redundant pattern");
   }

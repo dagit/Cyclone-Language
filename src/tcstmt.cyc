@@ -238,8 +238,17 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
       let &Vardecl(sc,&$(nsl,x),tq,t,initializer,_,*block_ptr) = vd;
       let curr_bl = Tcenv::curr_block(te);
       *block_ptr = curr_bl; // side effect
-      if (nsl != null)
-        terr(d->loc, "local variables cannot be qualified");
+      switch (nsl) {
+      case Loc_n: break;
+      case Rel_n(null):
+        (*vd->name)[0] = Loc_n;
+        break;
+      case Abs_n(y):
+        throw impos("tcstmt: Abs_n declaration");
+      default:
+        terr(d->loc, "cannot declare a qualified local variable");
+        break;
+      }
       check_valid_type(s0->loc,te,lookup_type_vars(te),t);
       if (initializer != null) {
 	// special case -- fill in the size for t[] arrays

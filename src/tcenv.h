@@ -37,7 +37,7 @@ extern struct Genv {
   Dict<var,xenumdecl@>   xenumdecls;
   Dict<var,typedefdecl>  typedefs; // indirection unneeded b/c no redeclaration
   Dict::Dict<var,$(resolved_t,bool)@> ordinaries; // bool for tree-shaking
-  list<list<var>>        availables; // "using" namespaces
+  list<list<var>>        availables; // abs. names of "using" namespaces
 };
 typedef struct Genv @genv_t;
 
@@ -76,15 +76,15 @@ extern fenv_t new_fenv(fndecl);
 
 extern tenv_t enter_ns(tenv_t, var);
 
-extern list<var>         resolve_namespace(tenv_t,seg_t,list<var>);
+extern list<var>         resolve_namespace(tenv_t,seg_t,var,list<var>);
 extern resolved_t        lookup_ordinary(tenv_t,seg_t,qvar);
 extern structdecl@       lookup_structdecl(tenv_t,seg_t,qvar);
 extern enumdecl@         lookup_enumdecl(tenv_t,seg_t,qvar);
 extern Opt_t<xenumdecl@> lookup_xenumdecl(tenv_t,seg_t,qvar);
 extern typedefdecl       lookup_typedefdecl(tenv_t,seg_t,qvar);
-extern structdecl@       lookup_structdecl_abs(tenv_t,seg_t,qvar);
-extern enumdecl@         lookup_enumdecl_abs(tenv_t,seg_t,qvar);
-extern Opt_t<xenumdecl@> lookup_xenumdecl_abs(tenv_t,seg_t,qvar);
+  //extern structdecl@       lookup_structdecl_abs(tenv_t,seg_t,qvar);
+  //extern enumdecl@         lookup_enumdecl_abs(tenv_t,seg_t,qvar);
+  //extern Opt_t<xenumdecl@> lookup_xenumdecl_abs(tenv_t,seg_t,qvar);
 
 extern typ  return_typ(tenv_t);
 

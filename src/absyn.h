@@ -36,7 +36,8 @@ namespace Absyn {
   typedef stringptr field_name;
   typedef stringptr var;
   typedef stringptr tvarname_t;
-  typedef $(List::list<var>,var) @qvar, *qvar_opt_t;
+  extern enum Nmspace;
+  typedef $(enum Nmspace,var) @qvar, *qvar_opt_t;
   typedef qvar typedef_name_t;
   typedef qvar_opt_t typedef_name_opt_t;
   
@@ -113,6 +114,11 @@ namespace Absyn {
   typedef enum Designator designator;
   typedef xenum StmtAnnot stmt_annot_t;
 
+  EXTERN_DEFINITION enum Nmspace {
+    Loc_n,                  // Local name
+    Rel_n(List::list<var>), // Relative name
+    Abs_n(List::list<var>)  // Absolute name
+  };
   EXTERN_DEFINITION enum Scope { Static, Abstract, Public, Extern, ExternC };
   EXTERN_DEFINITION struct Tqual { 
     bool q_const; bool q_volatile; bool q_restrict; 
@@ -447,7 +453,7 @@ namespace Absyn {
   // float, double
   extern typ float_t, double_t;
   // exception name and type
-  extern $(list<var>,var) @ exn_name;
+  extern qvar exn_name;
   extern xenumdecl exn_xed;
   extern typ exn_typ;
   // string (char[?])
