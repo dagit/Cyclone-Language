@@ -85,5 +85,10 @@ int main(int argc, char ??argv) {
     }
   }
   printf("Files are equivalent\n");
+  printf("%7d chars in %s\n",N1::input_pos,argv[1]);
+  printf("%7d chars in %s\n",
+         N2::input_pos,
+         (argc<3)?(string_t)"stdin":argv[2]);
+  printf("%.3f compression ratio\n",((double)N2::input_pos)/((double)N1::input_pos));
   return 0;
 }
