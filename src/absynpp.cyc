@@ -354,7 +354,10 @@ string_t kind2string(kind_t k) {
 string_t kindbound2string(kindbound_t c) {
   switch (compress_kb(c)) {
   case &Eq_kb(k): return kind2string(k);
-  case &Unknown_kb(_): return "?";
+  case &Unknown_kb(_):
+    if (PP::tex_output)
+      return "{?}"; // protect against following ` in TeX
+    else return "?";
   case &Less_kb(_,k): return kind2string(k);
   }
 }
@@ -460,6 +463,47 @@ bool next_is_pointer(list_t<type_modifier_t> tms) {
 
 extern doc_t ntyp2doc(type_t t);
 
+
+static struct Doc *cache_question = NULL;
+static doc_t question() {
+  if (!cache_question) {
+    if (PP::tex_output) 
+      cache_question = text("{?}"); // protect against following ` in TeX
+    else cache_question = text("?");
+  }
+  return (doc_t)cache_question;
+}
+static struct Doc *cache_lb = NULL;
+static doc_t lb() {
+  if (!cache_lb) {
+    if (PP::tex_output) 
+      cache_lb = text("{\\lb}");
+    else cache_lb = text("{");
+  }
+  return (doc_t)cache_lb;
+}
+static struct Doc *cache_rb = NULL;
+static doc_t rb() {
+  if (!cache_rb) {
+    if (PP::tex_output) 
+      cache_rb = text("{\\rb}");
+    else cache_rb = text("}");
+  }
+  return (doc_t)cache_rb;
+}
+static struct Doc *cache_dollar = NULL;
+static doc_t dollar() {
+  if (!cache_dollar) {
+    if (PP::tex_output) 
+      cache_dollar = text("\\$");
+    else cache_dollar = text("$");
+  }
+  return (doc_t)cache_dollar;
+}
+doc_t group_braces(string_t<`H> sep, list_t<doc_t,`H> ss) {
+  return cat(lb(), seq(sep,ss), rb());
+}
+
 doc_t dtms2doc(doc_t d,list_t<type_modifier_t> tms) {
   if (tms==NULL) return d;
   doc_t rest = dtms2doc(d,tms->tl);
@@ -506,16 +550,18 @@ doc_t dtms2doc(doc_t d,list_t<type_modifier_t> tms) {
       if (pr[0] == 1 && pr[1])
 	ptr = text("*");
       else
-	ptr = cat(text("*"),text("{"),exp2doc(e),text("}"));
+	ptr = cat(text("*"),lb(),exp2doc(e),rb());
       break;
     case &NonNullable_ps(e):
       $(unsigned int,bool) pr = Evexp::eval_const_uint_exp(e);
       if (pr[0] == 1 && pr[1])
 	ptr = text("@");
       else
-	ptr = cat(text("@"),text("{"),exp2doc(e),text("}"));
+	ptr = cat(text("@"),lb(),exp2doc(e),rb());
       break;
-    case TaggedArray_ps: ptr = text("?"); break;
+    case TaggedArray_ps:
+      ptr = question();
+      break;
     }
     switch (compress(rgn)) {
     case HeapRgn: return cat(ptr,rest);
@@ -554,7 +600,7 @@ doc_t eff2doc(type_t t) {
   if (rgions == NULL && effects != NULL) {
     return group("","","+",effects);
   } else {
-    let doc1 = group("{","}",",",rgions);
+    let doc1 = group_braces(",",rgions);
     return group("","","+",List::imp_append(effects,new List(doc1,NULL)));
   }
 }
@@ -592,7 +638,7 @@ doc_t ntyp2doc(type_t t) {
 		text(aprintf("%d",i)),
 		(!print_full_evars || tvs == NULL) ?
 		text("") : tvars2doc(tvs->v),
-		text(")::"),k == NULL ? text("?") : kind2doc(k->v));
+		text(")::"),k == NULL ? question() : kind2doc(k->v));
       }
     }
     break;
@@ -666,19 +712,19 @@ doc_t ntyp2doc(type_t t) {
       s = text("double");
     break;
   case &TupleType(ts):
-    s = cat(text("$"),args2doc(ts));
+    s = cat(dollar(),args2doc(ts));
     break;
   case &AggrType(AggrInfo(info,ts)):
     let $(k,n) = aggr_kinded_name(info);
     s = cat(aggr_kind2doc(k), qvar2doc(n), tps2doc(ts));
     break;
   case &AnonAggrType(k,fs):
-    s = cat(aggr_kind2doc(k), text("{"),
+    s = cat(aggr_kind2doc(k), lb(),
             nest(2, aggrfields2doc(fs)),
-            text("}"));
+            rb());
     break;
   case &AnonEnumType(fs):
-    s = cat(text("enum {"),nest(2, enumfields2doc(fs)), text("}"));
+    s = cat(text("enum "),lb(),nest(2, enumfields2doc(fs)), rb());
     break;
   case &EnumType(n,_):
     s = cat(text("enum "),qvar2doc(n)); break;
@@ -764,7 +810,7 @@ $(opt_t<var_t>,tqual_t,type_t)@ arg_mk_opt($(var_t,tqual_t,type_t)@ arg) {
 
 doc_t var2doc(var_t v) { return text(*v); }
 
-doc_t qvar2doc(qvar_t q) {
+string_t qvar2string(qvar_t q) {
   let prefix = NULL;
   let match;
   switch ((*q)[0]) {
@@ -780,38 +826,56 @@ doc_t qvar2doc(qvar_t q) {
     break;
   }
   if (qvar_to_Cids) {
-    return text(str_sepstr(List::append(prefix,
-						new List((*q)[1],NULL)),"_"));
+    return str_sepstr(List::append(prefix,
+                                   new List((*q)[1],NULL)),"_");
   } else {
-    // don't print the prefix it matches the current namespaces
+    // don't print the prefix if it matches the current namespaces
     if (match)
-      return var2doc((*q)[1]);
+      return *((*q)[1]);
     else
-      return text(str_sepstr(List::append(prefix,
-						  new List((*q)[1],NULL)),"::"));
+      return str_sepstr(List::append(prefix,
+                                     new List((*q)[1],NULL)),"::");
   }
 }
 
-doc_t typedef_name2doc(qvar_t v) {
-  // behave as qvar2doc when translating to C
-  if (qvar_to_Cids) return qvar2doc(v);
+doc_t qvar2doc(qvar_t q) {
+  return text(qvar2string(q));
+}
+
+doc_t qvar2bolddoc(qvar_t q) {
+  if (PP::tex_output)
+    return cat(text("\\textbf{"),text(qvar2string(q)),rb());
+  else return text(qvar2string(q));
+}
+
+string_t typedef_name2string(qvar_t v) {
+  // behave as qvar2string when translating to C
+  if (qvar_to_Cids) return qvar2string(v);
 
   // otherwise we should not print the complete namespace here (it won't reparse)
   if (use_curr_namespace) {
     switch ((*v)[0]) {
     case Loc_n: fallthru;
-    case &Rel_n(NULL): return var2doc((*v)[1]);
+    case &Rel_n(NULL): return *((*v)[1]);
     case &Abs_n(l):
       if (list_cmp(strptrcmp, l, curr_namespace) == 0) {
-	return var2doc((*v)[1]);
+	return *((*v)[1]);
       } else {
 	fallthru;
       }
-    default: return cat(text("/* bad namespace : */ "), qvar2doc(v));
+    default: return strconcat("/* bad namespace : */ ", qvar2string(v));
     }
   } else {
-    return var2doc((*v)[1]);
+    return *((*v)[1]);
   }
+}
+doc_t typedef_name2doc(qvar_t v) {
+  return text(typedef_name2string(v));
+}
+doc_t typedef_name2bolddoc(qvar_t v) {
+  if (PP::tex_output)
+    return cat(text("\\textbf{"),text(typedef_name2string(v)),rb());
+  else return text(typedef_name2string(v));
 }
 
 doc_t typ2doc(type_t t) {
@@ -1004,7 +1068,8 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
             text("]"));
     break;
   case &Tuple_e(es):
-    s = cat(text("$("),
+    s = cat(dollar(),
+            text("("),
             exps2doc_prec(20,es),
             text(")"));
     break;
@@ -1012,28 +1077,29 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
     s = cat(text("("),
             typ2doc((*vat)[2]), // OK to ignore qualifiers??
             text(")"),
-            group("{","}",",",List::map(de2doc,des)));
+            group_braces(",",List::map(de2doc,des)));
     break;
   case &Array_e(des):
-    s = group("{","}",",",List::map(de2doc,des));
+    s = group_braces(",",List::map(de2doc,des));
     break;
   case &Comprehension_e(vd,e1,e2):
-    s = cat(text("{for "),
+    s = cat(lb(),
+            text("for "),
             text(*((*vd->name)[1])),
             text(" < "),
             exp2doc(e1),
             text(" : "),
             exp2doc(e2),
-            text("}"));
+            rb());
     break;
   case &Struct_e(n,ts,des,_):
     let des_doc = List::map(de2doc,des);
     s = cat(qvar2doc(n),
-            group("{","}",",",
+            group_braces(",",
 		  (ts != NULL ? new List(tps2doc(ts), des_doc) : des_doc)));
     break;
   case &AnonStruct_e(_,des):
-    s = group("{","}",",",List::map(de2doc,des));
+    s = group_braces(",",List::map(de2doc,des));
     break;
   case &Tunion_e(es,_,tuf):
     if (es == NULL)
@@ -1077,12 +1143,12 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
     break;
   case &UnresolvedMem_e(n,des):
     // Currently n is always NULL from the parser
-    s = group("{","}",",",List::map(de2doc,des));
+    s = group_braces(",",List::map(de2doc,des));
     break;
   case &StmtExp_e(s2):
-    s = cat(text("({ "),
+    s = cat(text("("),lb(),blank_doc(),
             nest(2,stmt2doc(s2)),
-            text(" })"));
+            blank_doc(),rb(),text(")"));
     break;
   case &Codegen_e(fd):
     s = cat(text("codegen("),
@@ -1201,23 +1267,24 @@ doc_t stmt2doc(stmt_t st) {
   case &Seq_s(s1,s2):
     if (decls_first) {
       if (is_declaration(s1))
-	s = cat(text("{ "),
+	s = cat(lb(),
+                blank_doc(),
                 nest(2,stmt2doc(s1)),
                 line_doc(),
-                text("}"),
+                rb(),
                 line_doc(),
                 is_declaration(s2)? // for gcc compatibility
-                cat(text("{ "),
+                cat(lb(), blank_doc(),
                     nest(2,stmt2doc(s2)),
-                    text("}"),
+                    rb(),
                     line_doc())
                 : stmt2doc(s2));
       else if (is_declaration(s2)) // for gcc compatibility
 	s = cat(stmt2doc(s1),
                 line_doc(),
-                text("{ "),
+                lb(), blank_doc(),
                 nest(2,stmt2doc(s2)),
-                text("}"),
+                rb(),
                 line_doc());
       else
 	s = ppseql(stmt2doc,"",new List(s1,new List(s2,NULL)));
@@ -1241,25 +1308,28 @@ doc_t stmt2doc(stmt_t st) {
     }
     s = cat(text("if ("),
             exp2doc(e),
-            text(") {"),
+            text(") "),
+            lb(),
             nest(2,cat(line_doc(),stmt2doc(s1))),
             line_doc(),
-            text("}"),
+            rb(),
             print_else ?
             cat(line_doc(),
-                text("else {"),
+                text("else "),
+                lb(),
                 nest(2,cat(line_doc(),stmt2doc(s2))),
                 line_doc(),
-                text("}"))
+                rb())
             : nil_doc());
     break;
   case &While_s($(e,_),s1):
     s = cat(text("while ("),
             exp2doc(e),
-            text(") {"),
+            text(") "),
+            lb(),
             nest(2,cat(line_doc(),stmt2doc(s1))),
             line_doc(),
-            text("}"));
+            rb());
     break;
   case &Break_s(_):    s = text("break;"); break;
   case &Continue_s(_): s = text("continue;"); break;
@@ -1271,10 +1341,11 @@ doc_t stmt2doc(stmt_t st) {
             exp2doc(e2),
             text("; "),
             exp2doc(e3),
-            text(") {"),
+            text(") "),
+            lb(),
             nest(2,cat(line_doc(),stmt2doc(s1))),
             line_doc(),
-            text("}"));
+            rb());
     break;
   case &ForArray_s(ForArrayInfo{d,$(e1,_),$(e2,_),s1}):
     s = cat(text("forarray("),
@@ -1282,28 +1353,31 @@ doc_t stmt2doc(stmt_t st) {
             exp2doc(e1),
             text("; "),
             exp2doc(e2),
-            text(") {"),
+            text(") "),
+            lb(),
             nest(2,cat(line_doc(),stmt2doc(s1))),
             line_doc(),
-            text("}"));
+            rb());
     break;
   case &Switch_s(e,ss):
     s = cat(text("switch ("),
             exp2doc(e),
-            text(") {"),
+            text(") "),
+            lb(),
             line_doc(),
             switchclauses2doc(ss),
             line_doc(),
-            text("}"));
+            rb());
     break;
   case &SwitchC_s(e,ss):
     s = cat(text("switch \"C\" ("),
 	    exp2doc(e),
-	    text(") {"),
+	    text(") "),
+            lb(),
 	    line_doc(),
 	    switchCclauses2doc(ss),
 	    line_doc(),
-	    text("}"));
+	    rb());
     break;
   case &Fallthru_s(NULL,_): s = text("fallthru;"); break;
   case &Fallthru_s(es,_):
@@ -1324,33 +1398,39 @@ doc_t stmt2doc(stmt_t st) {
   case &Label_s(x,s1):
     if (decls_first && is_declaration(s1)) {
       s = cat(textptr(x),
-              text(": {"),
+              text(": "),
+              lb(),
               line_doc(),
               nest(2,stmt2doc(s1)),
               line_doc(),
-              text("}"));
+              rb());
     } else
       s = cat(textptr(x),text(": "),stmt2doc(s1));
     break;
   case &Do_s(s1,$(e,_)):
-    s = cat(text("do {"),
+    s = cat(text("do "),
+            lb(),
             line_doc(),
             nest(2,stmt2doc(s1)),
             line_doc(),
-            text("} while ("),
+            rb(),
+            text(" while ("),
             exp2doc(e),
             text(");"));
     break;
   case &TryCatch_s(s1,ss):
-    s = cat(text("try {"),
+    s = cat(text("try "),
+            lb(),
             line_doc(),
             nest(2,stmt2doc(s1)),
             line_doc(),
-            text("} catch {"),
+            rb(),
+            text(" catch "),
+            lb(),
             line_doc(),
             nest(2,switchclauses2doc(ss)),
             line_doc(),
-            text("}"));
+            rb());
     break;
   case &Region_s(tv,vd,resetable,s1):
     s = cat(text("region"),
@@ -1359,11 +1439,11 @@ doc_t stmt2doc(stmt_t st) {
             textptr(get_name(tv)),
             text(">" ),
             qvar2doc(vd->name),
-            text("{"),
+            lb(),
             line_doc(),
             nest(2,stmt2doc(s1)),
             line_doc(),
-            text("}"));
+            rb());
     break;
   case &ResetRegion_s(e):
     s = cat(text("reset_region("),exp2doc(e),text(");"));
@@ -1386,7 +1466,8 @@ doc_t pat2doc(pat_t p) {
   case &Float_p(x): s = text(x); break;
   case &Var_p(vd):  s = qvar2doc(vd->name); break;
   case &Tuple_p(ts):
-    s = cat(text("$("),
+    s = cat(dollar(),
+            text("("),
             ppseq(pat2doc,",",ts),
             text(")"));
     break;
@@ -1404,9 +1485,9 @@ doc_t pat2doc(pat_t p) {
     break;
   case &Aggr_p(AggrInfo(info,_),exists,dps):
     let $(_,n) = aggr_kinded_name(info);
-    s = cat(qvar2doc(n), text("{"),
+    s = cat(qvar2doc(n), lb(),
 	    egroup("[","]",",",List::map(textptr,List::map(get_name,exists))),
-	    group("","}",",",List::map(dp2doc,dps)));
+	    group_braces(",",List::map(dp2doc,dps)));
     break;
   case &Enum_p(_,ef): fallthru(ef);
   case &AnonEnum_p(_,ef):     s = qvar2doc(ef->name);  break;
@@ -1531,10 +1612,10 @@ doc_t decl2doc(decl_t d) {
     doc_t namedoc   = typedef_name2doc(fd->name);
     doc_t tqtddoc   = tqtd2doc(Tqual(false,false,false), t,
 			       new Opt(cat(beforenamedoc,namedoc)));
-    doc_t bodydoc   = cat(text(" {"),
+    doc_t bodydoc   = cat(blank_doc(),lb(),
 			  nest(2,cat(line_doc(),stmt2doc(fd->body))),
 			  line_doc(),
-			  text("}"));
+			  rb());
     s = cat(inlinedoc,scopedoc,tqtddoc,bodydoc);
     if(to_VC)
       s = cat(attsdoc,s);
@@ -1551,13 +1632,13 @@ doc_t decl2doc(decl_t d) {
       s = cat(scope2doc(ad->sc),
 	      aggr_kind2doc(ad->kind),
 	      qvar2doc(ad->name),
-              text(" {"),
+              blank_doc(),lb(),
               ktvars2doc(ad->impl->exist_vars),
               (ad->impl->rgn_po==NULL ? nil_doc() : 
 	       cat(text(":"),rgnpo2doc(ad->impl->rgn_po))),
 	      nest(2, cat(line_doc(),aggrfields2doc(ad->impl->fields))),
 	      line_doc(),
-              text("}"),
+              rb(),
               atts2doc(ad->attributes),
               text(";"));
     break;
@@ -1576,10 +1657,11 @@ doc_t decl2doc(decl_t d) {
               (is_xtunion ? text("xtunion ") : text("tunion ")),
               (is_xtunion ? qvar2doc(name) : typedef_name2doc(name)),
               ktvars2doc(tvs),
-              text(" {"),
+              blank_doc(),lb(),
               nest(2, cat(line_doc(),tunionfields2doc(fields->v))),
               line_doc(),
-              text("};"));
+              rb(),
+              text(";"));
     break;
   case &Let_d(p,_,e):
     s = cat(text("let "),
@@ -1601,10 +1683,11 @@ doc_t decl2doc(decl_t d) {
       s = cat(scope2doc(sc),
               text("enum "),
               qvar2doc(n),
-              text(" {"),
+              blank_doc(),lb(),
               nest(2, cat(line_doc(),enumfields2doc(fields->v))),
               line_doc(),
-              text("};"));
+              rb(),
+              text(";"));
     break;
   case &Typedef_d(td):
     type_t t;
@@ -1623,44 +1706,53 @@ doc_t decl2doc(decl_t d) {
     if (use_curr_namespace) curr_namespace_add(v);
     s = cat(text("namespace "),
             textptr(v),
-            text(" {"),
+            blank_doc(),lb(),
             line_doc(),
             ppseql(decl2doc,"",tdl),
             line_doc(),
-            text("}"));
+            rb());
     if (use_curr_namespace) curr_namespace_drop();
     break;
   case &Using_d(q,tdl):
     if (print_using_stmts)
       s = cat(text("using "),
               qvar2doc(q),
-              text(" {"),
+              blank_doc(),lb(),
               line_doc(),
               ppseql(decl2doc,"",tdl),
               line_doc(),
-              text("}"));
+              rb());
     else
       s = cat(text("/* using "),
               qvar2doc(q),
-              text(" { */"),
+              blank_doc(),
+              lb(),
+              text(" */"),
               line_doc(),
               ppseql(decl2doc,"",tdl),
               line_doc(),
-              text("/* } */"));
+              text("/* "),
+              rb(),
+              text(" */"));
     break;
   case &ExternC_d(tdl):
     if (print_externC_stmts)
-      s = cat(text("extern \"C\" {"),
+      s = cat(text("extern \"C\" "),
+              lb(),
               line_doc(),
               ppseql(decl2doc,"",tdl),
               line_doc(),
-              text("}"));
+              rb());
     else
-      s = cat(text("/* extern \"C\" { */"),
+      s = cat(text("/* extern \"C\" "),
+              lb(),
+              text(" */"),
               line_doc(),
               ppseql(decl2doc,"",tdl),
               line_doc(),
-              text("/* } */"));
+              text("/* "),
+              rb(),
+              text(" */"));
     break;
   }
   return s;
@@ -1853,7 +1945,7 @@ string_t decllist2string(list_t<decl_t> tdl) {
 string_t exp2string(exp_t e)     {return string_of_doc(exp2doc(e),  PP_WIDTH);}
 string_t stmt2string(stmt_t s)   {return string_of_doc(stmt2doc(s), PP_WIDTH);}
 string_t typ2string(type_t t)    {return string_of_doc(typ2doc(t),  PP_WIDTH);}
-string_t qvar2string(qvar_t v)   {return string_of_doc(qvar2doc(v), PP_WIDTH);}
+//string_t qvar2string(qvar_t v)   {return string_of_doc(qvar2doc(v), PP_WIDTH);}
 string_t typ2cstring(type_t t) {
   bool old_qvar_to_Cids = qvar_to_Cids;
   bool old_add_cyc_prefix = add_cyc_prefix;

@@ -132,6 +132,8 @@ $(string_t,list_t<$(int,int,int,string_t)@>) @string_and_links(doc_t d, int w) {
 
 static opt_t<table_t<int,stringptr_t>> bhashtbl = NULL;
 
+int tex_output = false;
+
 string_t nlblanks(int i) {  // a newline followed by i blanks
   if (bhashtbl == NULL)
     bhashtbl = new Opt(Hashtable::create(61,intcmp,identity));
@@ -140,17 +142,32 @@ string_t nlblanks(int i) {  // a newline followed by i blanks
     return *(Hashtable::lookup(bhashtbl->v,i));
   catch {
   case Not_found:
-    let num_tabs   = i / 8;
-    let num_spaces = i % 8;
-    let total = 1 + num_tabs + num_spaces;
-    mstring_t nlb = new_string(total);
-    nlb[0] = '\n';
-    for (int j = 0; j < num_tabs; j++)
-      nlb[j+1] = '\t';
-    for (int j = 0; j < num_spaces; j++)
-      nlb[j+1+num_tabs] = ' ';
-    Hashtable::insert(bhashtbl->v,i,new {(string_t)nlb});
-    return nlb;
+    if (!tex_output) {
+      let num_tabs   = i / 8;
+      let num_spaces = i % 8;
+      let total = 1 + num_tabs + num_spaces;
+      mstring_t nlb = new_string(total);
+      nlb[0] = '\n';
+      for (int j = 0; j < num_tabs; j++)
+        nlb[j+1] = '\t';
+      for (int j = 0; j < num_spaces; j++)
+        nlb[j+1+num_tabs] = ' ';
+      Hashtable::insert(bhashtbl->v,i,new {(string_t)nlb});
+      return nlb;
+    }
+    else {
+      /* Use tildes instead of spaces, and \\ for newline,
+         if we are producing output for TeX */
+      let total = 3 + i;
+      mstring_t nlb = new_string(total);
+      nlb[0] = '\\';
+      nlb[1] = '\\';
+      nlb[2] = '\n';
+      for (int j = 3; j < total; j++)
+        nlb[j] = '~';
+      Hashtable::insert(bhashtbl->v,i,new {(string_t)nlb});
+      return nlb;
+    }
   }
 }
 

@@ -37,6 +37,7 @@ namespace PP {
 using Core;
 using Std;
 using List;
+extern int tex_output;
 extern struct Ppstate;
 typedef struct Ppstate @ppstate_t;
 extern struct Out;
