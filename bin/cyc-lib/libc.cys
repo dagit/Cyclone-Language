@@ -1768,7 +1768,7 @@ epilogue {
   // the case, then we are in trouble.
   struct hostent {
     char *h_name;
-    char **h_aliases;
+    char **ZEROTERM h_aliases;
 #if defined(__CYGWIN32__) || defined(__CYGWIN__)
       short h_addrtype;
       short h_length; // always 4
@@ -4563,7 +4563,6 @@ epilogue nanosleep {
 epilogue strftime {
   extern size_t strftime(char ?, size_t, const char ?, const struct tm @);
 }
-// FIX: see if these should be NULL-terminated
 cycstub strftime {
   namespace Ctime {
     extern "C" size_t strftime(char *, size_t, const char *,
@@ -4913,6 +4912,12 @@ epilogue {
   // and cyclone complains that the expression (foo) of field bar is not
   // a constant.
 }
+epilogue {
+// Under Linux, crypt doesn't always get included here for some reason
+#ifdef __linux__
+  extern "C" char *crypt (const char @__key, const char @__salt);
+#endif
+}
 epilogue access {
   extern "C" int access(const char @,int);
 }
@@ -4976,12 +4981,6 @@ epilogue execle {
 epilogue execlp {
   extern int execlp(const char @, const char @`r, ... const char *`r);
 }
-cycstub execvp {
-  namespace Cunistd {
-    // needed by execlp, so out of order
-    extern "C" int execvp(const char @ file, const char **argv);
-  }
-}
 cycstub execlp {
   static xtunion exn.Failure __execlp_failure =
     Failure("execlp arg list not NULL-terminated");
@@ -4989,11 +4988,12 @@ cycstub execlp {
     if (argv[argv.size - 1] != NULL) throw &__execlp_failure;
     // We allocate 1+argv.size because we need to prepend arg0
     // FIX: can region-allocate ...
-    const char *`r ?newargs = new {for i < argv.size : (const char *`r)NULL};
+    const char *`r @ZEROTERM newargs = 
+      new {for i < argv.size : (const char *`r)NULL};
     newargs[0] = arg0;
-    for (int i = 0; i < argv.size; i++)
+    for (int i = 0; i < argv.size-1; i++)
       newargs[i+1] = argv[i];
-    return Cunistd::execvp(path, (const char **) newargs);
+    return execvp(path, newargs);
   }
 }
 epilogue execv {
@@ -5008,7 +5008,8 @@ cycstub execv {
 epilogue execve {
   // FIX: what did I lose by removing the const from this spec?
   //  extern int execve(const char ?, const char ? const ?, const char ? const ?);
-    extern "C" int execve(char @ path, char @ *argv, char @ *envp);
+    extern "C" int execve(const char @ path, 
+			  char **ZEROTERM argv, char **ZEROTERM envp);
 //    extern int execve(const char ?, char ? const ?, char ? const ?);
 }
 cycstub execve {
@@ -5034,8 +5035,7 @@ cycstub execve {
 //    }
 }
 epilogue execvp {
-  // Not supported yet
-  // extern int execvp(const char *, char *const []);
+  extern "C" int execvp(const char @ file, const char **ZEROTERM argv);
 }
 epilogue _exit {
   extern "C" void _exit(int);
@@ -5095,7 +5095,6 @@ epilogue gethostid {
   extern "C" long gethostid(void);
 }
 epilogue gethostname {
-  // FIX: add stuff for initialization
   extern int gethostname(char ?NOZEROTERM, size_t);
 }
 cycstub gethostname {
