@@ -137,10 +137,9 @@ extern char Cyc_Bad_alloc[];
 
 #ifdef NO_CYC_BOUNDS_CHECKS
 #define _check_known_subscript_null(ptr,bound,elt_sz,index)\
-   ((char *)ptr) + (elt_sz)*(index))
-#define _check_known_subscript_notnull(bound,index) (index)
-#define _check_known_subscript_notnullX(bound,index)\
-   ((char *)ptr) + (elt_sz)*(index))
+   (((char *)ptr) + (elt_sz)*(index))
+#define _check_known_subscript_notnull(ptr,bound,elt_sz,index)\
+   (((char *)ptr) + (elt_sz)*(index))
 
 #define _zero_arr_plus_char_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
 #define _zero_arr_plus_short_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
@@ -516,16 +515,16 @@ enum Cyc_Lineno_token_val Cyc_Lineno_token(struct Cyc_Lexing_lexbuf*lexbuf){retu
 static struct Cyc_Core_Opt*Cyc_Lineno_parse_linedef(struct _dyneither_ptr line){
 struct _handler_cons _tmp5;_push_handler(& _tmp5);{int _tmp7=0;if(setjmp(_tmp5.handler))_tmp7=1;if(!_tmp7){
 {int i=0;
-while((unsigned int)i < _get_dyneither_size(line,sizeof(char)) && ((int)*((char*)_check_dyneither_subscript(line,sizeof(char),i))< (int)'0'  || (int)*((char*)_check_dyneither_subscript(line,sizeof(char),i))> (int)'9')){++ i;}{
+while((unsigned int)i < _get_dyneither_size(line,sizeof(char)) && ((int)((char*)line.curr)[i]< (int)'0'  || (int)((char*)line.curr)[i]> (int)'9')){++ i;}{
 int j=i;
-while(((unsigned int)j < _get_dyneither_size(line,sizeof(char)) && (int)*((char*)_check_dyneither_subscript(line,sizeof(char),j))>= (int)'0') && (int)*((char*)_check_dyneither_subscript(line,sizeof(char),j))<= (int)'9'){++ j;}
+while(((unsigned int)j < _get_dyneither_size(line,sizeof(char)) && (int)((char*)line.curr)[j]>= (int)'0') && (int)((char*)line.curr)[j]<= (int)'9'){++ j;}
 if((unsigned int)i == _get_dyneither_size(line,sizeof(char))){struct Cyc_Core_Opt*_tmp8=0;_npop_handler(0U);return _tmp8;}{
 int number=0;
 if(({struct Cyc_IntPtr_sa_ScanfArg_struct _tmpB=({struct Cyc_IntPtr_sa_ScanfArg_struct _tmp1F;_tmp1F.tag=2U,_tmp1F.f1=& number;_tmp1F;});void*_tmp9[1U];_tmp9[0]=& _tmpB;({struct _dyneither_ptr _tmp24=(struct _dyneither_ptr)Cyc_substring((struct _dyneither_ptr)line,i,(unsigned long)(j - i));struct _dyneither_ptr _tmp23=({const char*_tmpA="%d";_tag_dyneither(_tmpA,sizeof(char),3U);});Cyc_sscanf(_tmp24,_tmp23,_tag_dyneither(_tmp9,sizeof(void*),1U));});})!= 1){
 struct Cyc_Core_Opt*_tmpC=0;_npop_handler(0U);return _tmpC;}
-while((unsigned int)j < _get_dyneither_size(line,sizeof(char)) && (int)*((char*)_check_dyneither_subscript(line,sizeof(char),j))!= (int)'"'){++ j;}{
+while((unsigned int)j < _get_dyneither_size(line,sizeof(char)) && (int)((char*)line.curr)[j]!= (int)'"'){++ j;}{
 int k=++ j;
-while((unsigned int)k < _get_dyneither_size(line,sizeof(char)) && (int)*((char*)_check_dyneither_subscript(line,sizeof(char),k))!= (int)'"'){++ k;}
+while((unsigned int)k < _get_dyneither_size(line,sizeof(char)) && (int)((char*)line.curr)[k]!= (int)'"'){++ k;}
 if((unsigned int)j == _get_dyneither_size(line,sizeof(char)) || (unsigned int)k == _get_dyneither_size(line,sizeof(char))){struct Cyc_Core_Opt*_tmpD=0;_npop_handler(0U);return _tmpD;}{
 struct _dyneither_ptr fname=Cyc_substring((struct _dyneither_ptr)line,j,(unsigned long)(k - j));
 struct Cyc_Core_Opt*_tmp10=({struct Cyc_Core_Opt*_tmpF=_cycalloc(sizeof(*_tmpF));({struct _tuple0*_tmp25=({struct _tuple0*_tmpE=_cycalloc(sizeof(*_tmpE));_tmpE->f1=fname,_tmpE->f2=number;_tmpE;});_tmpF->v=_tmp25;});_tmpF;});_npop_handler(0U);return _tmp10;};};};};}

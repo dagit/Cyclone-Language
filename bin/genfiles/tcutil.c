@@ -137,10 +137,9 @@ extern char Cyc_Bad_alloc[];
 
 #ifdef NO_CYC_BOUNDS_CHECKS
 #define _check_known_subscript_null(ptr,bound,elt_sz,index)\
-   ((char *)ptr) + (elt_sz)*(index))
-#define _check_known_subscript_notnull(bound,index) (index)
-#define _check_known_subscript_notnullX(bound,index)\
-   ((char *)ptr) + (elt_sz)*(index))
+   (((char *)ptr) + (elt_sz)*(index))
+#define _check_known_subscript_notnull(ptr,bound,elt_sz,index)\
+   (((char *)ptr) + (elt_sz)*(index))
 
 #define _zero_arr_plus_char_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
 #define _zero_arr_plus_short_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
@@ -2872,7 +2871,7 @@ unsigned long _tmp3FE=Cyc_strlen((struct _dyneither_ptr)_tmp3FF);
 int i=0;
 if(_tmp3FE >= (unsigned long)2  && (int)*((const char*)_check_dyneither_subscript(_tmp3FF,sizeof(char),0))== (int)'\\'){
 if((int)*((const char*)_check_dyneither_subscript(_tmp3FF,sizeof(char),1))== (int)'0')i=2;else{
-if(((int)*((const char*)_check_dyneither_subscript(_tmp3FF,sizeof(char),1))== (int)'x'  && _tmp3FE >= (unsigned long)3) && (int)*((const char*)_check_dyneither_subscript(_tmp3FF,sizeof(char),2))== (int)'0')i=3;else{
+if(((int)((const char*)_tmp3FF.curr)[1]== (int)'x'  && _tmp3FE >= (unsigned long)3) && (int)*((const char*)_check_dyneither_subscript(_tmp3FF,sizeof(char),2))== (int)'0')i=3;else{
 return 0;}}
 for(0;(unsigned long)i < _tmp3FE;++ i){
 if((int)*((const char*)_check_dyneither_subscript(_tmp3FF,sizeof(char),i))!= (int)'0')return 0;}

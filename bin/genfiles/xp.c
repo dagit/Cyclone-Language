@@ -137,10 +137,9 @@ extern char Cyc_Bad_alloc[];
 
 #ifdef NO_CYC_BOUNDS_CHECKS
 #define _check_known_subscript_null(ptr,bound,elt_sz,index)\
-   ((char *)ptr) + (elt_sz)*(index))
-#define _check_known_subscript_notnull(bound,index) (index)
-#define _check_known_subscript_notnullX(bound,index)\
-   ((char *)ptr) + (elt_sz)*(index))
+   (((char *)ptr) + (elt_sz)*(index))
+#define _check_known_subscript_notnull(ptr,bound,elt_sz,index)\
+   (((char *)ptr) + (elt_sz)*(index))
 
 #define _zero_arr_plus_char_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
 #define _zero_arr_plus_short_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
@@ -567,7 +566,7 @@ m=Cyc_XP_length(m,y);
 if(m == 1){
 if((int)*((unsigned char*)_check_dyneither_subscript(y,sizeof(unsigned char),0))== 0)
 return 0;
-({unsigned char _tmp29=(unsigned char)Cyc_XP_quotient(nx,q,x,(int)*((unsigned char*)_check_dyneither_subscript(y,sizeof(unsigned char),0)));*((unsigned char*)_check_dyneither_subscript(r,sizeof(unsigned char),0))=_tmp29;});
+({unsigned char _tmp29=(unsigned char)Cyc_XP_quotient(nx,q,x,(int)((unsigned char*)y.curr)[0]);*((unsigned char*)_check_dyneither_subscript(r,sizeof(unsigned char),0))=_tmp29;});
 if(_get_dyneither_size(r,sizeof(unsigned char))> (unsigned int)1)
 ({struct _dyneither_ptr _tmp2A=_dyneither_ptr_plus((struct _dyneither_ptr)r,sizeof(char),1);Cyc_memset(_tmp2A,'\000',(unsigned long)(my - 1));});}else{
 if(m > n){
@@ -599,7 +598,7 @@ for(i=m;i > 0;-- i){
 if(({int _tmp32=(int)*((unsigned char*)_check_dyneither_subscript(rem,sizeof(unsigned char),i + k));_tmp32 != (int)*((unsigned char*)_check_dyneither_subscript(dq,sizeof(unsigned char),i));}))
 break;}
 if(({int _tmp33=(int)*((unsigned char*)_check_dyneither_subscript(rem,sizeof(unsigned char),i + k));_tmp33 < (int)*((unsigned char*)_check_dyneither_subscript(dq,sizeof(unsigned char),i));}))
-({unsigned char _tmp34=(unsigned char)Cyc_XP_product(m,dq,y,-- qk);*((unsigned char*)_check_dyneither_subscript(dq,sizeof(unsigned char),m))=_tmp34;});}
+({unsigned char _tmp34=(unsigned char)Cyc_XP_product(m,dq,y,-- qk);((unsigned char*)dq.curr)[m]=_tmp34;});}
 # 154
 *((unsigned char*)_check_dyneither_subscript(q,sizeof(unsigned char),k))=(unsigned char)qk;{
 # 156

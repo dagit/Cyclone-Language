@@ -137,10 +137,9 @@ extern char Cyc_Bad_alloc[];
 
 #ifdef NO_CYC_BOUNDS_CHECKS
 #define _check_known_subscript_null(ptr,bound,elt_sz,index)\
-   ((char *)ptr) + (elt_sz)*(index))
-#define _check_known_subscript_notnull(bound,index) (index)
-#define _check_known_subscript_notnullX(bound,index)\
-   ((char *)ptr) + (elt_sz)*(index))
+   (((char *)ptr) + (elt_sz)*(index))
+#define _check_known_subscript_notnull(ptr,bound,elt_sz,index)\
+   (((char *)ptr) + (elt_sz)*(index))
 
 #define _zero_arr_plus_char_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
 #define _zero_arr_plus_short_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
@@ -473,7 +472,7 @@ if(j >= 0)return 0;else{
 return 1;}}
 # 75
 struct _dyneither_ptr Cyc_Filename_gnuify(struct _dyneither_ptr filename){
-int has_drive_name=_get_dyneither_size(filename,sizeof(char))> (unsigned int)1  && (int)*((const char*)_check_dyneither_subscript(filename,sizeof(char),1))== (int)':';
+int has_drive_name=_get_dyneither_size(filename,sizeof(char))> (unsigned int)1  && (int)((const char*)filename.curr)[1]== (int)':';
 int i;int j;
 struct _dyneither_ptr ans;
 int ans_sz;

@@ -137,10 +137,9 @@ extern char Cyc_Bad_alloc[];
 
 #ifdef NO_CYC_BOUNDS_CHECKS
 #define _check_known_subscript_null(ptr,bound,elt_sz,index)\
-   ((char *)ptr) + (elt_sz)*(index))
-#define _check_known_subscript_notnull(bound,index) (index)
-#define _check_known_subscript_notnullX(bound,index)\
-   ((char *)ptr) + (elt_sz)*(index))
+   (((char *)ptr) + (elt_sz)*(index))
+#define _check_known_subscript_notnull(ptr,bound,elt_sz,index)\
+   (((char *)ptr) + (elt_sz)*(index))
 
 #define _zero_arr_plus_char_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
 #define _zero_arr_plus_short_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
@@ -880,7 +879,7 @@ while(ind != -1){
 const struct Cyc_Dict_T*_tmpA8=*((const struct Cyc_Dict_T**)_check_dyneither_subscript(queue,sizeof(const struct Cyc_Dict_T*),ind --));const struct Cyc_Dict_T*_tmpA9=_tmpA8;const struct Cyc_Dict_T*_tmpAF;const struct Cyc_Dict_T*_tmpAE;void*_tmpAD;void*_tmpAC;_LL1: _tmpAF=_tmpA9->left;_tmpAE=_tmpA9->right;_tmpAD=(_tmpA9->key_val).f1;_tmpAC=(_tmpA9->key_val).f2;_LL2:;
 if((unsigned int)(ind + 2)>= _get_dyneither_size(queue,sizeof(const struct Cyc_Dict_T*)))
 queue=({unsigned int _tmpAB=_get_dyneither_size(queue,sizeof(const struct Cyc_Dict_T*))* (unsigned int)2;const struct Cyc_Dict_T**_tmpAA=({struct _RegionHandle*_tmp111=temp;_region_malloc(_tmp111,_check_times(_tmpAB,sizeof(const struct Cyc_Dict_T*)));});({{unsigned int _tmpE4=_get_dyneither_size(queue,sizeof(const struct Cyc_Dict_T*))* (unsigned int)2;unsigned int i;for(i=0;i < _tmpE4;++ i){
-i < _get_dyneither_size(queue,sizeof(const struct Cyc_Dict_T*))?_tmpAA[i]=*((const struct Cyc_Dict_T**)_check_dyneither_subscript(queue,sizeof(const struct Cyc_Dict_T*),(int)i)):(_tmpAA[i]=_tmpA6);}}0;});_tag_dyneither(_tmpAA,sizeof(const struct Cyc_Dict_T*),_tmpAB);});
+i < _get_dyneither_size(queue,sizeof(const struct Cyc_Dict_T*))?_tmpAA[i]=((const struct Cyc_Dict_T**)queue.curr)[(int)i]:(_tmpAA[i]=_tmpA6);}}0;});_tag_dyneither(_tmpAA,sizeof(const struct Cyc_Dict_T*),_tmpAB);});
 if(_tmpAF != (const struct Cyc_Dict_T*)0)*((const struct Cyc_Dict_T**)_check_dyneither_subscript(queue,sizeof(const struct Cyc_Dict_T*),++ ind))=_tmpAF;
 if(_tmpAE != (const struct Cyc_Dict_T*)0)*((const struct Cyc_Dict_T**)_check_dyneither_subscript(queue,sizeof(const struct Cyc_Dict_T*),++ ind))=_tmpAE;
 if(Cyc_Dict_member(d1,_tmpAD))

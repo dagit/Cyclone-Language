@@ -137,10 +137,9 @@ extern char Cyc_Bad_alloc[];
 
 #ifdef NO_CYC_BOUNDS_CHECKS
 #define _check_known_subscript_null(ptr,bound,elt_sz,index)\
-   ((char *)ptr) + (elt_sz)*(index))
-#define _check_known_subscript_notnull(bound,index) (index)
-#define _check_known_subscript_notnullX(bound,index)\
-   ((char *)ptr) + (elt_sz)*(index))
+   (((char *)ptr) + (elt_sz)*(index))
+#define _check_known_subscript_notnull(ptr,bound,elt_sz,index)\
+   (((char *)ptr) + (elt_sz)*(index))
 
 #define _zero_arr_plus_char_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
 #define _zero_arr_plus_short_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
@@ -566,7 +565,7 @@ int did_assign=0;
 struct Cyc_List_List*dles=0;
 unsigned int _tmpB=_get_dyneither_size(_tmp35,sizeof(char));
 {unsigned int i=0U;for(0;i < _tmpB;++ i){
-struct Cyc_Absyn_Exp*_tmpC=Cyc_Absyn_char_exp(*((const char*)_check_dyneither_subscript(_tmp35,sizeof(char),(int)i)),0U);
+struct Cyc_Absyn_Exp*_tmpC=Cyc_Absyn_char_exp(((const char*)_tmp35.curr)[(int)i],0U);
 _tmpC->topt=Cyc_Absyn_char_type;
 dles=({struct Cyc_List_List*_tmpE=_cycalloc(sizeof(*_tmpE));({struct _tuple10*_tmp94=({struct _tuple10*_tmpD=_cycalloc(sizeof(*_tmpD));_tmpD->f1=0,_tmpD->f2=_tmpC;_tmpD;});_tmpE->hd=_tmp94;}),_tmpE->tl=dles;_tmpE;});}}
 # 114

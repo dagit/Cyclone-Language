@@ -1255,14 +1255,28 @@ static bool ptr_use_to_c(env_t nv, exp_t ptr, absyn_annot_t annot,
   case &PointerType(PtrInfo{ta,tq,PtrAtts(_,_,b,zt,_)}):
     switch(annot) {
     case &InsertChecks::NoCheck: 
-      if(!get_bounds_exp(bounds_one(),b))
-	ptr->r = cast_it_r(cstar_type(typ_to_c(ta),tq),
-			   member_exp(new_exp(ptr->r,DL),curr_sp,DL));
+      if(!get_bounds_exp(bounds_one(),b)) {
+        // must make sure to update the type on any modified expression
+        // so that toseq knows how to deal with it.
+        let newt = cstar_type(typ_to_c(ta),tq);
+	ptr->r = cast_it_r(newt,member_exp(new_exp(ptr->r,DL),curr_sp,DL));
+        ptr->topt = newt;
+      }
       ans = false; 
       break;
     case &InsertChecks::NullOnly:
-      if(!get_bounds_exp(bounds_one(),b))
-	fallthru; // FIX: add a way to just null-check a fat-pointer
+      if(!get_bounds_exp(bounds_one(),b)) {
+        // rewrite e to be e.curr
+        let newt = cstar_type(typ_to_c(ta),tq);
+	ptr->r = cast_it_r(newt,member_exp(new_exp(ptr->r,DL),curr_sp,DL));
+        ptr->topt = newt;
+        // if we have x[e] where x is a fat pointer and have proven that
+        // no bounds check is needed, then it must be that e is unsigned-< 
+        // numelts(x).  In turn, this implies that numelts(x) >= 0 which
+        // implies x is not NULL.  (See insert_checks.)  
+        if (index != NULL)
+          toc_impos("subscript of ? with no bounds check but need null check");
+      }
       // ((t *)_check_null(e))
       ptr->r=cast_it_r(new_typ,fncall_exp_dl(_check_null_e,new_exp(ptr->r,0)));
       ans = false;
@@ -1271,12 +1285,14 @@ static bool ptr_use_to_c(env_t nv, exp_t ptr, absyn_annot_t annot,
     case &InsertChecks::FatBound:
       // ((ta1 *)_check_dyneither_subscript(e1, sizeof(ta1), ind))
       type_t ta1 = typ_to_c(ta);
+      type_t newt = cstar_type(ta1,tq);
       exp_t  ind = index ? index : uint_exp(0,DL);
-      ptr->r = cast_it_r(cstar_type(ta1,tq),
+      ptr->r = cast_it_r(newt,
 			fncall_exp_dl(_check_dyneither_subscript_e,
 				      new_exp(ptr->r,DL),
 				      sizeoftype_exp(ta1,DL),
 				      ind));
+      ptr->topt = newt;
       ans = true;
       break;
     case &InsertChecks::NullAndThinBound(bd): 

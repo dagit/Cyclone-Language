@@ -137,10 +137,9 @@ extern char Cyc_Bad_alloc[];
 
 #ifdef NO_CYC_BOUNDS_CHECKS
 #define _check_known_subscript_null(ptr,bound,elt_sz,index)\
-   ((char *)ptr) + (elt_sz)*(index))
-#define _check_known_subscript_notnull(bound,index) (index)
-#define _check_known_subscript_notnullX(bound,index)\
-   ((char *)ptr) + (elt_sz)*(index))
+   (((char *)ptr) + (elt_sz)*(index))
+#define _check_known_subscript_notnull(ptr,bound,elt_sz,index)\
+   (((char *)ptr) + (elt_sz)*(index))
 
 #define _zero_arr_plus_char_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
 #define _zero_arr_plus_short_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
@@ -558,7 +557,7 @@ return _tag_dyneither(0,0,0);}
 inline static const unsigned long Cyc_my_strlen(struct _dyneither_ptr s){
 unsigned int sz=_get_dyneither_size(s,sizeof(char));
 unsigned int i=0U;
-while(i < sz  && (int)*((const char*)_check_dyneither_subscript(s,sizeof(char),(int)i))!= 0){++ i;}
+while(i < sz  && (int)((const char*)s.curr)[(int)i]!= 0){++ i;}
 return i;}
 # 278
 int Cyc__IO_vfprintf(int(*ioputc)(int,void*),void*ioputc_env,struct _dyneither_ptr fmt0,struct _dyneither_ptr ap){
@@ -603,7 +602,7 @@ for(0;1;0){
 # 351
 fmark=fmt;{
 unsigned int fmt_sz=_get_dyneither_size(fmt,sizeof(char));
-for(n=0;((unsigned int)n < fmt_sz  && (ch=(int)*((const char*)_check_dyneither_subscript(fmt,sizeof(char),n)))!= (int)'\000') && ch != (int)'%';++ n){
+for(n=0;((unsigned int)n < fmt_sz  && (ch=(int)((const char*)fmt.curr)[n])!= (int)'\000') && ch != (int)'%';++ n){
 ;}
 fmt=_dyneither_ptr_plus(fmt,sizeof(char),n);
 # 357

@@ -137,10 +137,9 @@ extern char Cyc_Bad_alloc[];
 
 #ifdef NO_CYC_BOUNDS_CHECKS
 #define _check_known_subscript_null(ptr,bound,elt_sz,index)\
-   ((char *)ptr) + (elt_sz)*(index))
-#define _check_known_subscript_notnull(bound,index) (index)
-#define _check_known_subscript_notnullX(bound,index)\
-   ((char *)ptr) + (elt_sz)*(index))
+   (((char *)ptr) + (elt_sz)*(index))
+#define _check_known_subscript_notnull(ptr,bound,elt_sz,index)\
+   (((char *)ptr) + (elt_sz)*(index))
 
 #define _zero_arr_plus_char_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
 #define _zero_arr_plus_short_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
@@ -603,7 +602,7 @@ return x->tl;}
 struct Cyc_List_List*Cyc_List_rlist(struct _RegionHandle*r,struct _dyneither_ptr argv){
 struct Cyc_List_List*result=0;
 {unsigned int i=_get_dyneither_size(argv,sizeof(void*))- (unsigned int)1;for(0;i < _get_dyneither_size(argv,sizeof(void*));-- i){
-result=({struct Cyc_List_List*_tmp0=_region_malloc(r,sizeof(*_tmp0));_tmp0->hd=*((void**)_check_dyneither_subscript(argv,sizeof(void*),(int)i)),_tmp0->tl=result;_tmp0;});}}
+result=({struct Cyc_List_List*_tmp0=_region_malloc(r,sizeof(*_tmp0));_tmp0->hd=((void**)argv.curr)[(int)i],_tmp0->tl=result;_tmp0;});}}
 return result;}
 # 63
 struct Cyc_List_List*Cyc_List_list(struct _dyneither_ptr argv){

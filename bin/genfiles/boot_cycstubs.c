@@ -137,10 +137,9 @@ extern char Cyc_Bad_alloc[];
 
 #ifdef NO_CYC_BOUNDS_CHECKS
 #define _check_known_subscript_null(ptr,bound,elt_sz,index)\
-   ((char *)ptr) + (elt_sz)*(index))
-#define _check_known_subscript_notnull(bound,index) (index)
-#define _check_known_subscript_notnullX(bound,index)\
-   ((char *)ptr) + (elt_sz)*(index))
+   (((char *)ptr) + (elt_sz)*(index))
+#define _check_known_subscript_notnull(ptr,bound,elt_sz,index)\
+   (((char *)ptr) + (elt_sz)*(index))
 
 #define _zero_arr_plus_char_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
 #define _zero_arr_plus_short_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
@@ -463,7 +462,7 @@ int open_with_mode(const char*,int,unsigned short);
 int Cyc_open(const char*s,int i,struct _dyneither_ptr ms){
 # 34
 if(_get_dyneither_size(ms,sizeof(unsigned short))>= (unsigned int)1)
-return open_with_mode(s,i,*((unsigned short*)_check_dyneither_subscript(ms,sizeof(unsigned short),0)));else{
+return open_with_mode(s,i,((unsigned short*)ms.curr)[0]);else{
 # 37
 return open_without_mode(s,i);}}struct __abstractFILE;struct Cyc___cycFILE{struct __abstractFILE*file;};
 # 49

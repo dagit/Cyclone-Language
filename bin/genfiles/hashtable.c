@@ -137,10 +137,9 @@ extern char Cyc_Bad_alloc[];
 
 #ifdef NO_CYC_BOUNDS_CHECKS
 #define _check_known_subscript_null(ptr,bound,elt_sz,index)\
-   ((char *)ptr) + (elt_sz)*(index))
-#define _check_known_subscript_notnull(bound,index) (index)
-#define _check_known_subscript_notnullX(bound,index)\
-   ((char *)ptr) + (elt_sz)*(index))
+   (((char *)ptr) + (elt_sz)*(index))
+#define _check_known_subscript_notnull(ptr,bound,elt_sz,index)\
+   (((char *)ptr) + (elt_sz)*(index))
 
 #define _zero_arr_plus_char_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
 #define _zero_arr_plus_short_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
@@ -467,18 +466,18 @@ return Cyc_Hashtable_rcreate(Cyc_Core_heap_region,sz,cmp,hash);}struct _tuple0{v
 void Cyc_Hashtable_insert(struct Cyc_Hashtable_Table*t,void*key,void*val){
 struct _dyneither_ptr tab=t->tab;
 int bucket=(int)({unsigned int _tmp26=(unsigned int)(t->hash)(key);_tmp26 % _get_dyneither_size(tab,sizeof(struct Cyc_List_List*));});
-({struct Cyc_List_List*_tmp28=({struct Cyc_List_List*_tmp3=_region_malloc(t->r,sizeof(*_tmp3));({struct _tuple0*_tmp27=({struct _tuple0*_tmp2=_region_malloc(t->r,sizeof(*_tmp2));_tmp2->f1=key,_tmp2->f2=val;_tmp2;});_tmp3->hd=_tmp27;}),_tmp3->tl=*((struct Cyc_List_List**)_check_dyneither_subscript(tab,sizeof(struct Cyc_List_List*),bucket));_tmp3;});*((struct Cyc_List_List**)_check_dyneither_subscript(tab,sizeof(struct Cyc_List_List*),bucket))=_tmp28;});
-if(({int _tmp29=((int(*)(struct Cyc_List_List*x))Cyc_List_length)(*((struct Cyc_List_List**)_check_dyneither_subscript(tab,sizeof(struct Cyc_List_List*),bucket)));_tmp29 > t->max_len;}))
+({struct Cyc_List_List*_tmp28=({struct Cyc_List_List*_tmp3=_region_malloc(t->r,sizeof(*_tmp3));({struct _tuple0*_tmp27=({struct _tuple0*_tmp2=_region_malloc(t->r,sizeof(*_tmp2));_tmp2->f1=key,_tmp2->f2=val;_tmp2;});_tmp3->hd=_tmp27;}),_tmp3->tl=*((struct Cyc_List_List**)_check_dyneither_subscript(tab,sizeof(struct Cyc_List_List*),bucket));_tmp3;});((struct Cyc_List_List**)tab.curr)[bucket]=_tmp28;});
+if(({int _tmp29=((int(*)(struct Cyc_List_List*x))Cyc_List_length)(((struct Cyc_List_List**)tab.curr)[bucket]);_tmp29 > t->max_len;}))
 Cyc_Hashtable_resize(t);}
 # 57
 void*Cyc_Hashtable_lookup(struct Cyc_Hashtable_Table*t,void*key){
 struct _dyneither_ptr tab=t->tab;
-struct Cyc_List_List*l=*((struct Cyc_List_List**)({typeof(tab )_tmp2B=tab;_check_dyneither_subscript(_tmp2B,sizeof(struct Cyc_List_List*),(int)({unsigned int _tmp2A=(unsigned int)(t->hash)(key);_tmp2A % _get_dyneither_size(tab,sizeof(struct Cyc_List_List*));}));}));
+struct Cyc_List_List*l=({struct Cyc_List_List**_tmp2B=(struct Cyc_List_List**)tab.curr;_tmp2B[(int)({unsigned int _tmp2A=(unsigned int)(t->hash)(key);_tmp2A % _get_dyneither_size(tab,sizeof(struct Cyc_List_List*));})];});
 return Cyc_List_assoc_cmp(t->cmp,l,key);}
 # 63
 void**Cyc_Hashtable_lookup_opt(struct Cyc_Hashtable_Table*t,void*key){
 struct _dyneither_ptr _tmp4=t->tab;
-struct Cyc_List_List*_tmp5=*((struct Cyc_List_List**)({typeof(_tmp4 )_tmp2D=_tmp4;_check_dyneither_subscript(_tmp2D,sizeof(struct Cyc_List_List*),(int)({unsigned int _tmp2C=(unsigned int)(t->hash)(key);_tmp2C % _get_dyneither_size(_tmp4,sizeof(struct Cyc_List_List*));}));}));
+struct Cyc_List_List*_tmp5=({struct Cyc_List_List**_tmp2D=(struct Cyc_List_List**)_tmp4.curr;_tmp2D[(int)({unsigned int _tmp2C=(unsigned int)(t->hash)(key);_tmp2C % _get_dyneither_size(_tmp4,sizeof(struct Cyc_List_List*));})];});
 int(*_tmp6)(void*,void*)=t->cmp;
 for(0;_tmp5 != 0;_tmp5=_tmp5->tl){
 struct _tuple0*_tmp7=(struct _tuple0*)_tmp5->hd;struct _tuple0*_tmp8=_tmp7;void*_tmpA;void**_tmp9;_LL1: _tmpA=_tmp8->f1;_tmp9=(void**)& _tmp8->f2;_LL2:;
@@ -488,7 +487,7 @@ return 0;}
 # 74
 int Cyc_Hashtable_try_lookup(struct Cyc_Hashtable_Table*t,void*key,void**data){
 struct _dyneither_ptr _tmpB=t->tab;
-struct Cyc_List_List*_tmpC=*((struct Cyc_List_List**)({typeof(_tmpB )_tmp2F=_tmpB;_check_dyneither_subscript(_tmp2F,sizeof(struct Cyc_List_List*),(int)({unsigned int _tmp2E=(unsigned int)(t->hash)(key);_tmp2E % _get_dyneither_size(_tmpB,sizeof(struct Cyc_List_List*));}));}));
+struct Cyc_List_List*_tmpC=({struct Cyc_List_List**_tmp2F=(struct Cyc_List_List**)_tmpB.curr;_tmp2F[(int)({unsigned int _tmp2E=(unsigned int)(t->hash)(key);_tmp2E % _get_dyneither_size(_tmpB,sizeof(struct Cyc_List_List*));})];});
 int(*_tmpD)(void*,void*)=t->cmp;
 for(0;_tmpC != 0;_tmpC=_tmpC->tl){
 struct _tuple0 _tmpE=*((struct _tuple0*)_tmpC->hd);struct _tuple0 _tmpF=_tmpE;void*_tmp11;void*_tmp10;_LL1: _tmp11=_tmpF.f1;_tmp10=_tmpF.f2;_LL2:;
@@ -506,7 +505,7 @@ int bucket=(int)({unsigned int _tmp30=(unsigned int)(t->hash)(key);_tmp30 % _get
 struct Cyc_List_List*_tmp14=*((struct Cyc_List_List**)_check_dyneither_subscript(_tmp12,sizeof(struct Cyc_List_List*),bucket));
 if(_tmp14 == 0)return;
 if(_tmp13(key,(((struct _tuple0*)_tmp14->hd)[0]).f1)== 0){
-*((struct Cyc_List_List**)_check_dyneither_subscript(_tmp12,sizeof(struct Cyc_List_List*),bucket))=_tmp14->tl;
+((struct Cyc_List_List**)_tmp12.curr)[bucket]=_tmp14->tl;
 return;}{
 # 100
 struct Cyc_List_List*_tmp15=_tmp14->tl;for(0;((struct Cyc_List_List*)_check_null(_tmp14))->tl != 0;(_tmp14=_tmp14->tl,_tmp15=_tmp15->tl)){
@@ -538,7 +537,7 @@ Cyc_Hashtable_insert_bucket(r,tab,hash,elems->tl);{
 void*key=(((struct _tuple0*)elems->hd)[0]).f1;
 void*val=(((struct _tuple0*)elems->hd)[0]).f2;
 int nidx=(int)({unsigned int _tmp31=(unsigned int)hash(key);_tmp31 % _get_dyneither_size(tab,sizeof(struct Cyc_List_List*));});
-({struct Cyc_List_List*_tmp33=({struct Cyc_List_List*_tmp17=_region_malloc(r,sizeof(*_tmp17));({struct _tuple0*_tmp32=({struct _tuple0*_tmp16=_region_malloc(r,sizeof(*_tmp16));_tmp16->f1=key,_tmp16->f2=val;_tmp16;});_tmp17->hd=_tmp32;}),_tmp17->tl=*((struct Cyc_List_List**)_check_dyneither_subscript(tab,sizeof(struct Cyc_List_List*),nidx));_tmp17;});*((struct Cyc_List_List**)_check_dyneither_subscript(tab,sizeof(struct Cyc_List_List*),nidx))=_tmp33;});};}
+({struct Cyc_List_List*_tmp33=({struct Cyc_List_List*_tmp17=_region_malloc(r,sizeof(*_tmp17));({struct _tuple0*_tmp32=({struct _tuple0*_tmp16=_region_malloc(r,sizeof(*_tmp16));_tmp16->f1=key,_tmp16->f2=val;_tmp16;});_tmp17->hd=_tmp32;}),_tmp17->tl=*((struct Cyc_List_List**)_check_dyneither_subscript(tab,sizeof(struct Cyc_List_List*),nidx));_tmp17;});((struct Cyc_List_List**)tab.curr)[nidx]=_tmp33;});};}
 # 138
 void Cyc_Hashtable_resize(struct Cyc_Hashtable_Table*t){
 struct _dyneither_ptr odata=t->tab;
