@@ -1548,7 +1548,7 @@ _tmp31=_tmp31->tl;}
 (int)_throw((void*)& Cyc_Core_Not_found_val);}
 # 760
 static int Cyc_List_ptrequal(void*x,void*y){
-return x == y;}
+return !(x == y);}
 # 767
 struct Cyc_List_List*Cyc_List_delete(struct Cyc_List_List*l,void*x){
 return Cyc_List_delete_cmp(Cyc_List_ptrequal,l,x);}

@@ -1023,6 +1023,6 @@ xarr->num_elmts -=num;}
 void Cyc_Xarray_remove(struct Cyc_Xarray_Xarray*xarr,int i){
 if(i < 0  || i > xarr->num_elmts - 1){
 struct Cyc_Core_Invalid_argument_exn_struct _tmpAA;const char*_tmpA9;struct Cyc_Core_Invalid_argument_exn_struct*_tmpA8;(int)_throw((void*)((_tmpA8=_cycalloc(sizeof(*_tmpA8)),((_tmpA8[0]=((_tmpAA.tag=Cyc_Core_Invalid_argument,((_tmpAA.f1=((_tmpA9="xarray index out of bounds",_tag_dyneither(_tmpA9,sizeof(char),27))),_tmpAA)))),_tmpA8)))));}
-{int j=i;for(0;j < xarr->num_elmts - 2;++ j){
+{int j=i;for(0;j < xarr->num_elmts - 1;++ j){
 *((void**)_check_dyneither_subscript(xarr->elmts,sizeof(void*),j))=*((void**)_check_dyneither_subscript(xarr->elmts,sizeof(void*),j + 1));}}
 -- xarr->num_elmts;}

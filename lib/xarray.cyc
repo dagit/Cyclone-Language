@@ -195,7 +195,7 @@ void delete(xarray_t<`a> xarr, int num) {
 void remove(xarray_t<`a> xarr, int i) {
   if (i < 0 || i > xarr->num_elmts-1)
     throw new Invalid_argument("xarray index out of bounds");
-  for(int j = i; j < xarr->num_elmts-2; j++)
+  for(int j = i; j < xarr->num_elmts-1; j++)
     xarr->elmts[j] = xarr->elmts[j+1];
   xarr->num_elmts--;
 }

@@ -771,6 +771,7 @@ structures, as just described.  Since we do not allow unique pointers to be
 stored within datatypes, there is no change to how datatypes are matched.
 
 \subsubsection{Aliasing Unique Pointers}
+\label{sec:alias-pats}
 
 Programmers often write code that aliases values temporarily, e.g. by
 storing them in loop iterator variables or by passing them to functions.
@@ -827,37 +828,44 @@ To prevent this, we only allow ``deep'' aliasing when the aliased pointers
 are immutable.  For example, if we have a list structure whose tail pointers
 are \texttt{const}, call it \texttt{clist\_t}, we rule out the above code
 because the assignment to \texttt{x->tl} would be forbidden.  Here is an
-example implementation of the \texttt{length} function using deep aliasing:
+example implementation of a \texttt{length} function that is amenable to
+deep aliasing:
 \begin{alltt}
-  int length(list\_t<int,`U> l) \{
-    let alias <`r>clist\_t<int,`r> x = l;
+  int length(clist\_t<`a,`r> l) \{
     int len = 0;
-    while (x != NULL) \{
+    while (l != NULL) \{
       len++;
-      x = x->tl;
+      l = l->tl;
     \}
     return len;
   \}
+
+  int foo() \{
+    list\_t<int,`U> l = new List(1,new List(2,NULL));
+    let alias <`r>clist\_t<int,`r> x = l;
+    return length(x);
+  \}
 \end{alltt}
-Note that this function is not that useful, since it will consume the list
-\texttt{l}.  Instead, we would rather that the function itself take a
-\texttt{clist\_t} pointer, and have the caller perform the alias, so that
-the unique list could be unconsumed after calling \texttt{length}.
+Here, the \texttt{length} function works on constant lists, and the
+\texttt{foo} function aliases a unique, mutable list \texttt{l} to call
+\texttt{length}.
 
-XXX more alias examples from paper?
-
-XXX stuff on alias inference.
-
-%% In general, the problem of deep aliasing has its root cause in reference
-%% types and subtyping (XXX cite?).  In particular, we have that $\rho_U
-%% \preceq \rho$ and therefore that $\mathtt{int\ *}\rho_U \; \preceq \;
-%% \mathtt{int\ *}\rho$.  However, it is not sound to assert $\mathtt{int\
-%% *}\rho_U \mathtt{*}\rho' \; \preceq \; \mathtt{int\ *}\rho\mathtt{*}\rho'$.
-%% This becomes sound when the nested pointer is made immutable, i.e.
-%% $\mathtt{const\ int\ *}\rho_U \mathtt{*}\rho' \; \preceq \; \mathtt{const\
-%% int\ *}\rho\mathtt{*}\rho'$.  Because we cast the deep alias problem as a
-%% subtyping problem, we can reuse Cyclone's subtyping rules to check for
-%% soundness.
+For improved programmer convenience, the Cyclone
+typechecker optimistically inserts \texttt{alias} blocks around
+function-call arguments that are unique pointers when the
+formal-parameter type is polymorphic in the pointer's region.  If this
+modified call does not type-check, we remove the inserted \texttt{alias}.
+For example, the \texttt{alias} pattern in the \texttt{foo} function above
+could be inferred, so we could instead write:
+\begin{alltt}
+  int foo() \{
+    list\_t<int,`U> l = new List(1,new List(2,NULL));
+    return length(l);
+  \}
+\end{alltt}
+Right now, \texttt{alias} inference in Cyclone is fairly primitive, but
+could be extended to more contexts.  We plan to improve this feature in
+future releases.
 
 \subsubsection{Polymorphism}
 \label{sec:poly-allocate}
@@ -890,13 +898,13 @@ unique region for \texttt{rgn}, we can free one of these aliases (e.g. the
 pointer via the first element of the pair), but then dereference the other
 (i.e. via the second pair element).
 
-To prevent this behavior, we have to classify the two different kinds of
-regions that we support: aliasable regions, whose pointers can be freely
-aliased, and unique regions, whose pointers cannot be aliased but can be
-freed.  To do this, we define \emph{kinds} R for aliasable regions and UR for
-unique ones.  We can then classify a polymorphic region variable with the
-proper kind.  This allows us to change the \texttt{make\_pair} function as
-follows:
+To prevent this behavior, we have to classify the different kinds of regions
+that we support: aliasable regions, whose pointers can be freely aliased,
+and unique regions, whose pointers cannot be aliased, and can form part of
+unique paths.  To do this, we define \emph{kinds} R for aliasable regions
+and UR for unique ones.  We can then classify a polymorphic region variable
+with the proper kind.  This allows us to change the \texttt{make\_pair}
+function as follows:
 \begin{alltt}
   $(int @`r, int @`r) make\_pair(region\_t<`r::R> rgn) \{
     int @x = rnew (rgn) 1;
@@ -904,18 +912,19 @@ follows:
   \}
 \end{alltt}
 Now we have specified specifically that \texttt{`r} must be an aliasable
-region (in fact, when not specified, this is the default).  As such, the
-illegal code above will not typecheck because we are attempting to
-instantiate a unique region (having kind UR) for an aliasable one, which is
-disallowed.
+region (in fact, when not specified, this is the default for function
+parameters).  As such, the illegal code above will not typecheck because we
+are attempting to instantiate a unique region (having kind UR) for an
+aliasable one, which is disallowed.
 
 For generality, we introduce a third region kind TR (which stands for ``top
 region''); TR is a ``super-kind'' of R and UR, meaning that types having TR
 kind can be used in places expecting types of R or UR kind.  This also means
-that pointers into a TR-kinded region can neither be aliased nor freed,
-since we might instantiate either the unique region (whose pointers cannot
-be aliased) or an aliasable region (whose pointers cannot be freed) in place
-of the TR-kinded variable.
+that we cannot allow pointers into a TR-kinded region to be aliased, nor can
+we assume they do not have aliases (and so they cannot safely form part of a
+unique path).  This is because we might instantiate either the unique region
+(whose pointers cannot be aliased) or an aliasable region (whose pointers
+might be aliased) in place of the TR-kinded variable.
 
 We can now generalize the \texttt{rcopy} example above:
 \begin{verbatim}
@@ -938,7 +947,10 @@ We have made three key changes to the prior version of \texttt{rcopy}:
 \begin{enumerate}
 \item The definition of \texttt{List} has been generalized so that its
   \texttt{`r} region variable now has kind TR.  This implies that lists can
-  point into any region, whether unique or aliasable.
+  point into any region, whether unique or aliasable.  Actually, we need not
+  include the ::TR kind annotation on region type variables in typedefs;
+  this is the default (since it allows instantation of any region
+  parameter).
 \item The region handle \texttt{r2} now has kind TR, rather than the default
   R.  This means that we can pass in any region handle, and thus copy a list
   into any kind of region.
@@ -956,7 +968,39 @@ We have made three key changes to the prior version of \texttt{rcopy}:
   allow temporary aliasing.
 \end{enumerate}
 
-XXX talk about region polymorphism with kinds TB, UB, etc.
+In addition to needing polymorphism for region allocation, for the same
+reasons we need polymorphism for arbitrary values which might be pointers
+into either unique or aliasable regions.  For example, consider the
+following code analogous to the \texttt{make\_pair} function above:
+\begin{verbatim}
+  $(`a,`a) pair(`a x) \{
+    return $(x,x);
+  \}
+\end{verbatim}
+Now consider what happens if we call \texttt{pair} with a unique pointer:
+\begin{verbatim}
+  int @`U p = new 1;
+  $(int @`U,int @`U) pair = pair(p);
+  ufree(pair[0]);
+  int x = pair[1]; // error! dereferences freed pointer
+\end{verbatim}%$ <-- help syntax highlighting
+Again, the problem is that we have not restricted the kinds of things that
+can be used to instantiate polymorphic variables.  We extend our solution
+for region kinds, above, to all of Cyclone's kinds.  For example, Cyclone's
+``box-kind'' B, which classifies word-sized values, must be extended so that
+B refers to aliasable word-sized values, while UB refers to non-aliasable
+word-sized values, and TB is the super-kind of both.  A similar extension
+occurs for kind M (memory-kinds, having arbitrary size), and kind A
+(any-kinds, for abstract, arbitrary-sized data).  With this, we can fix the
+\texttt{pair} function to be:
+\begin{verbatim}
+  $(`a,`a) pair(`a::B x) \{
+    return $(x,x);
+  \}
+\end{verbatim}
+This would prevent the call to \texttt{pair(p)} in the code snippet above.
+Actually, as with regions, aliasable kinds are the default, so the
+\texttt{::B} can be elided.
 
 \subsection{Reference-counted Pointers}
 
@@ -964,11 +1008,13 @@ Cyclone also supports reference-counted pointers, which are treated quite
 similarly to unique pointers.  Reference-counted objects are allocated in
 the reference-counted region, named \texttt{`RC}. This region has kind
 \texttt{TR}, which ensures that pointers into it cannot be aliased
-(implicitly) and cannot be freed.  We additionally define the constant
-\texttt{Core::refcount_region}, having type \texttt{region_t<`RC>}, for
-creating reference-counted pointers.  The caveat here is that when you
-allocate something in this region, an extra word will be prepended to your
-data, which contains the reference count, initialized to $1$.
+implicitly, but aliases might exist, meaning they cannot form part of unique
+paths.  Similarly, reference-counted pointers have kind \texttt{TB}.  We
+define the constant \texttt{Core::refcount_region}, having type
+\texttt{region_t<`RC>}, for creating reference-counted pointers.  The caveat
+here is that when you allocate something in this region, an extra word will
+be prepended to your data, which contains the reference count, initialized
+to $1$.
 
 As with unique pointers, no pointer arithmetic is allowed, for similar
 reasons: it can occlude where the "head" of the object is, and thus make
@@ -1003,10 +1049,17 @@ GC will get it once it becomes unreachable.
 
 Just like unique pointers, reference-counted pointers can be stored in
 normal, aliasable datastructures, and accessed using swap (e.g. \texttt{x
-:=: y}).  Because NULL is a \texttt{a::TA ?`RC} pointer, we can always
-cheaply construct a pointer to swap in.  Also, the \texttt{alias} construct
-can work to create temporary (non-counted) aliases of a reference-counted
-pointer.
+:=: y}).  Because NULL is a \verb+a::TA ?`RC+ pointer, we can always
+cheaply construct a pointer to swap in.  Also, \texttt{alias} pattern
+variables can work to create temporary (non-counted) aliases of a
+reference-counted pointer.
+
+A good example of the use of unique pointers and reference-counted pointers
+is in the Cyclone distribution's \texttt{tests} directory---the file
+\texttt{streambuff.cyc}.  This is an implementation of a packet manipulation
+library with a representation for packets (called \texttt{streambuff\_t}'s)
+that is similar to Linux's \texttt{skbuff\_t}'s.  It uses a combination of
+unique header structures and reference-counted data structures.
 
 \subsection{Dynamic Regions}
 
@@ -1022,7 +1075,7 @@ grants access to the region.  At run-time, a key can be presented to a
 special \texttt{open} primitive, described later, that grants lexical access
 to the region.
         
-The operation \emph{new\_ukey()} creates a fresh dynamic region and returns
+The operation \texttt{new\_ukey()} creates a fresh dynamic region and returns
 a unique key for the region; \texttt{new\_rckey()} creates a fresh dynamic
 region and returns a ref-counted key for the region.  The operations
 \texttt{free\_ukey()} and \texttt{free\_rckey()} are used to destroy unique
@@ -1168,7 +1221,7 @@ to register a finalizer.  This is on our To-do list.
 \subsection{Type-Checking Regions}
 
 Because of recursive functions, there can be any number of live
-regions at run time.  The compiler the following general strategy to
+regions at run time.  The compiler uses the following general strategy to
 ensure that only pointers into live regions are dereferenced:
 
 \begin{itemize}
@@ -1209,16 +1262,19 @@ program point that creates a region, as follows:
 \begin{itemize}
 \item If a block (blocks create stack regions) has label \texttt{L},
   then the region-name for the block is \texttt{`L}.
-\item If a block has no label, the compiler makes up a unique
+\item If a block has no label, the compiler makes up a fresh
   region-name for the block.
 \item In region \texttt{r <`foo> s}, the region-name for the construct
   is \texttt{`foo}.
 \item In region \texttt{r s}, the region-name for the construct is
   \texttt{`r}.
+\item In region \texttt{h = open(k) s}, the region-name for the construct is
+  \texttt{`r}, assuming \texttt{k} has type \texttt{region\_key\_t<`r,_>}
+  (where \texttt{_} is some other region name of no consequence).
 \end{itemize}
 
 The region name for the heap is \texttt{`H}, the region name for the unique
-region in \texttt{`U}, and the region name for the reference counted region
+region in \texttt{`U}, and the region name for the reference-counted region
 is \texttt{`RC}.  Region names associated with program points within a
 function should be distinct from each other, distinct from any region names
 appearing in the function's prototype, and should not be \texttt{`H},
@@ -1227,11 +1283,12 @@ name, for example.)  Because the function's return type cannot mention a
 region name for a block or region-construct in the function, it is
 impossible to return a pointer to deallocated storage.
 
-In region \texttt{r <`r> s} and region \texttt{r s}, the type of
-\texttt{r} is \texttt{region_t<`r>}.  In other words, the handle is
-decorated with the region name for the construct.  Pointer types'
-region names are explicit, although you generally rely on inference to
-put in the correct one for you.
+In region \texttt{r <`r> s}, region \texttt{r s}, and region \texttt{r =
+open(k) s} the type of \texttt{r} is \texttt{region_t<`r>} (assuming, that
+\texttt{k} has type \texttt{region\_key\_t<`r,_>}). In other words, the
+handle is decorated with the region name for the construct.  Pointer types'
+region names are explicit, although you generally rely on inference to put
+in the correct one for you.
 
 \subsubsection{Capabilities}
 
@@ -1259,8 +1316,6 @@ check fail.
 
 \subsubsection{Assignment and Outlives}
 
-XXX fix this up to discuss unique regions, ref-counted regions, etc.
-
 A pointer type's region name is part of the type.  If \texttt{e1} and
 \texttt{e2} are pointers, then \texttt{e1 = e2} is well-typed only if
 the region name for \texttt{e2}'s type ``outlives'' the region name
@@ -1270,8 +1325,11 @@ corresponding to the other region name.  The rules for outlives are as
 follows:
 \begin{itemize}
 \item Every region outlives itself.
-\item \texttt{`U} outlives \texttt{`H} which outlives every other region
-name.
+\item \texttt{`U} outlives \texttt{`H}, and every region name of UR or R
+  kind.
+\item \texttt{`RC} outlives \texttt{`H}, and every region name of TR or R
+  kind.
+\item \texttt{`H} outlives every region name of R kind.
 \item Region names for inner blocks outlive region names for outer
 blocks.
 \item For regions in function prototypes, you can provide explicit
@@ -1283,41 +1341,44 @@ This says that \texttt{`r1} outlives \texttt{`r2} and \texttt{`r2}
 outlives \texttt{`r3}.  The body will be checked under these
 assumptions.  Calls to \texttt{f} will type-check only if the compiler
 knows that the region names of the actual arguments obey the outlives
-assumptions.  There are some restrictions on specifying outlives
-relationships when considering possibly-unique region names, but these
-rarely come up in practice.
+assumptions.
+
+There are some restrictions on specifying outlives relationships when
+considering region names of UR or TR kind, though these rarely come up in
+practice.  In particular:
+\begin{itemize}
+\item Region names of R kind can only outlive region names R kind.
+\item Region names of UR kind can only outlive region names R kind or UR kind.
+\item Region names of TR kind can only outlive region names R kind or TR kind.
+\end{itemize}
 \end{itemize}
 
-For handlers, if \texttt{`r} is a region name, there is at most one
+For handles, if \texttt{`r} is a region name, there is at most one
 value of type \texttt{region_t<`r>} (there are 0 if \texttt{`r} is a
 block's name), so there is little use in creating variables of type
 \texttt{region_t<`r>}.
 
 \subsubsection{Type Declarations}
 
-A \texttt{struct}, \texttt{typedef}, or \texttt{datatype}
-declaration may be parameterized by any number of region names.  The region
-names are placed in the list of type parameters.  They must be followed by
-their kind -- i.e. either ``\texttt{::R}'', ``\texttt{::UR}'', or
-``\texttt{::TR}'' -- except for \texttt{typedef} declarations (where the
-region name appears in the underlying type).  For example, given
+A \texttt{struct}, \texttt{typedef}, or \texttt{datatype} declaration may be
+parameterized by any number of region names.  The region names are placed in
+the list of type parameters.  They may be followed by their kind;
+i.e. either ``\texttt{::R}'', ``\texttt{::UR}'', or ``\texttt{::TR}''.  If
+no region kind is provided, \texttt{TR} is the default.  In \texttt{typedef}
+declarations, region names that appear as parameters inherit their kind from
+the the specification of that region name in the underlying type.  For
+example, given
 \begin{verbatim}
-  struct List<`a,`r::TR>{`a hd; struct List<`a,`r> *`r tl;};
+  struct List<`a,`r>{`a hd; struct List<`a,`r> *`r tl;};
 \end{verbatim}
-the type \texttt{struct List<int,`H>} is for a list of ints in the heap.
-Notice that all of the ``cons cells'' of the \texttt{List} will be in
-the same region (the type of the \texttt{tl} field uses the same
-region name \texttt{`r} that is used to instantiate the recursive
-instance of \texttt{struct List<`a,`r>}).  However, we could instantiate
-\texttt{`a} with a pointer type that has a different region name, as long as
-that region has kind R.
-
-\texttt{datatype} declarations must also be
-instantiated with an additional region name.  An object of type
-\texttt{datatype `r Foo}
-is treated (capability-wise) as a pointer with region name
-\texttt{`r}.  If the region name is omitted from a use of a
-\texttt{datatype} declaration, it is implicitly \texttt{`H}.
+the type \texttt{struct List<int,`H>} is for a list of ints in the heap,
+while the type \texttt{struct List<int,`U>} is for a list of ints in the
+unique region.  Notice that all of the ``cons cells'' of the \texttt{List}
+will be in the same region (the type of the \texttt{tl} field uses the same
+region name \texttt{`r} that is used to instantiate the recursive instance
+of \texttt{struct List<`a,`r>}).  However, we could instantiate \texttt{`a}
+with a pointer type that has a different region name, as long as that region
+has kind R.
 
 \subsubsection{Function Calls}
 
@@ -1345,7 +1406,7 @@ If you are not using existential types, you now know everything you
 need to know about Cyclone regions and memory management.  Even if you
 are using these types and functions over them (such as the closure
 library in the Cyclone library), you probably don't need to know much more
-than ``provide a region that the hiddent types outlive''.
+than ``provide a region that the hidden types outlive''.
 
 The problem with existential types is that when you ``unpack'' the
 type, you no longer know that the regions into which the fields point

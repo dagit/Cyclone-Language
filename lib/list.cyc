@@ -758,7 +758,7 @@ list_t<`a,`r::R> delete_cmp(int cmp(`a,`a), list_t<`a,`r::R> l, `a x) {
 }
 
 static int ptrequal(`a x, `a y) {
-  return (x == y);
+  return !(x == y);
 }
 // Given a list [x1,x2,...xn] and a key y, removes the first
 // occurence x1 in the list, if x1 == y.  Uses side effects,
