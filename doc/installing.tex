@@ -17,19 +17,21 @@ with another C compiler.
 The file cyclone.zip (or cyclone.tar.gz) contains all of the files
 that you need to build and install the system.  Unzip the files into a
 directory; if you are installing Cyclone on a Windows system, we
-suggest you choose \texttt{c:/cyclone}.  Once you've created the
-directory, enter it and type ``\texttt{make}.''  This will create
-executables for the Cyclone compiler (\texttt{cyclone} in Unix
-systems, or \texttt{cyclone.exe} in Windows systems) and some
-utilities in the \texttt{bin} subdirectory.
+suggest you choose \texttt{c:/cyclone}.  In any case, in these
+instructions we'll use \textit{cycdir} to refer to the directory.
 
-To use the Cyclone compiler, you should add the \texttt{bin}
-subdirectory to your \texttt{PATH}.  In addition, if you have not
-installed Cyclone in \texttt{c:/cyclone}, you must set the environment
-variable \texttt{CYCLONE_INCLUDE_PATH} to
+Next, add \textit{cycdir}\texttt{/bin} to your \texttt{PATH}.  In
+addition, if \textit{cycdir} is not \texttt{c:/cyclone}, you must set
+the environment variable \texttt{CYCLONE_INCLUDE_PATH} to
 \textit{cycdir}\texttt{/include}, and the variable
-\texttt{CYCLONE_EXEC_PREFIX} to \textit{cycdir}\texttt{/bin/cyc-lib},
-where \textit{cycdir} is the directory where you installed Cyclone.
+\texttt{CYCLONE_EXEC_PREFIX} to \textit{cycdir}\texttt{/bin/cyc-lib}.
+
+Finally, enter the directory (\texttt{cd} \textit{cycdir}) and type
+``\texttt{make}.''  This will create executables for the Cyclone
+compiler (\texttt{cyclone} in Unix systems, or \texttt{cyclone.exe} in
+Windows systems) and some utilities in the \texttt{bin} subdirectory.
+
+You should now be able to compile Cyclone programs.
 
 \subsection*{Bootstrapping}
 

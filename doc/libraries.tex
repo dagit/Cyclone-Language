@@ -2,6 +2,7 @@
 %HEVEA \newcommand{\parbox}[3][x]{#3}
 \newcommand{\code}[1]{\texttt{#1}}
 \newcommand{\var}[1]{\texttt{#1}}
+\newcommand{\vvar}[1]{{\tt\textbf{\textit{#1}}}}
 \newcommand{\defunlabel}[1]{%
   \parbox[b]{\labelwidth}{\makebox[0pt][l]{#1}\\}}
 \newenvironment{defun}[2]{%
@@ -9,50 +10,227 @@
     \renewcommand{\makelabel}{\defunlabel}%
     \index{#1@\texttt{#1}}%
   \item[\textbf{\texttt{#1}}\texttt{#2}]}{\end{list}}
+\newenvironment{defun2}[3]{%
+  \begin{list}{}{}%
+    \renewcommand{\makelabel}{\defunlabel}%
+    \index{#2@\texttt{#2()}}%
+  \item[{\tt {#1}~\textbf{#2}{#3}}]}{\end{list}}
+\newenvironment{deexn}[2]{%
+  \begin{list}{}{}%
+    \renewcommand{\makelabel}{\defunlabel}%
+    \index{#1@\texttt{#1}}%
+  \item[{\tt xtunion exn~\lb~extern~\textbf{#1}{#2}~\rb}]}{\end{list}}
 %%% \newenvironment{defun}[2]{\noindent\index{#1@\texttt{#1}}
 %%%   \textbf{\texttt{#1}}\texttt{#2}\begin{quote}}{\end{quote}}
 \newcommand{\tindex}[1]{}
 \newcommand{\exindex}[1]{}
 
 \subsection{Array}
-
-Namespace \code{Array} implements some sorting routines on arrays.
-
-\subsubsection*{Header}
 \begin{verbatim}
 #include <array.h>
 using Array;
 \end{verbatim}
 
-\subsubsection*{Functions}
-\begin{verbatim}
-void qsort(int comp(`a,`a), `a ?x, int ofs, int len);
-void msort(int comp(`a,`a), `a ?x, int ofs, int len);
-\end{verbatim}
+\subsubsection*{Exceptions}
 
-\subsubsection*{Use}
+\begin{deexn}{Array_mismatch}{}
+  Thrown when two arrays don't have the same size.
+\end{deexn}
 
-\begin{defun}{qsort}{(comp,x,ofs,len)}
-  Does an in-place sort of a segment of array \var{x}, starting at the
-  element with index \var{ofs}, and continuing for \var{len} elements.
-  The function \var{comp} should return an integer less than, equal
+
+\subsubsection*{Basic operations}
+
+\begin{defun2}{`a ?}{copy}{(`a::B {?}`r \vvar{x});}
+  Return a fresh copy of the array \vvar{x}, allocated on the heap.
+\end{defun2}
+
+\begin{defun2}{`a ?}{extract}{(`a::B {?}`r1 \vvar{x},int \vvar{start},int *`r2 \vvar{n_opt});}
+  Create a new array on the heap, with elements extracted from the
+  array \vvar{x}, beginning with element \vvar{start}.  If
+  \vvar{n_opt} is \texttt{null}, all of the elements from \vvar{start}
+  to the end of \vvar{x} are extracted; if \vvar{n_opt} points to an
+  integer $n$, then $n$ elements are extracted.  If $n\leq 0$ or there
+  are less than $n$ elements in \vvar{x} starting at \vvar{start},
+  then \texttt{Core::InvalidArg("Array::extract")} is thrown.
+\end{defun2}
+
+\subsubsection*{Iteration and mapping}
+
+\begin{defun2}{`b ?}{map}{(`b \vvar{f}(`a),`a {?}`r \vvar{x});}
+  Heap-allocate an array whose elements are obtained by applying the
+  function \vvar{f} to each element of \vvar{x} in turn.
+\end{defun2}
+
+\begin{defun2}{`b ?}{map_c}{(`b \vvar{f}(`c,`a),`c \vvar{env},`a {?}`r \vvar{x});}
+  A version of \code{map} where the function \vvar{f} requires an
+  environment.
+\end{defun2}
+
+\begin{defun2}{void}{imp_map}{(`a \vvar{f}(`a),`a {?}`r \vvar{x});}
+  An imperative version of \code{map}: each element of \vvar{x} is
+  replaced with the result of applying \vvar{f} to the element.
+\end{defun2}
+
+\begin{defun2}{void}{imp_map_c}{(`a \vvar{f}(`b,`a),`b \vvar{env},`a {?}`r \vvar{x});}
+  A version of \code{imp_map} where the function \vvar{f} requires an
+  environment.
+\end{defun2}
+
+\begin{defun2}{`c ?}{map2}{(`c \vvar{f}(`a,`b),`a {?}`r1 \vvar{x},`b {?}`r2 \vvar{y});}
+  If \vvar{x} and \vvar{y} both have size $n$, then \code{map2}
+  heap-allocates a new array where the $i^{\rm th}$ element, for $i$
+  between 0 and $n$, is \code{f(x[$i$],y[$i$])}.
+    
+  \code{Array_mismatch} is thrown if \vvar{x} and \vvar{y} don't have
+  the same size.
+\end{defun2}
+
+\begin{defun2}{void}{app}{(`b \vvar{f}(`a),`a {?}`r \vvar{x});}
+  Apply \vvar{f} to each element of \vvar{x} in turn.  Note, the
+  function \vvar{f} has return type \code{`b}; this is the difference
+  between \code{app} and \code{iter}.
+\end{defun2}
+
+\begin{defun2}{void}{app_c}{(`c \vvar{f}(`a,`b),`a \vvar{env},`b {?}`r \vvar{x});}
+  A version of \code{app} where the function requires an environment.
+\end{defun2}
+
+\begin{defun2}{void}{iter}{(void \vvar{f}(`a),`a {?}`r \vvar{x});}
+  Apply \vvar{f} to each element of \vvar{x} in turn.  Note, the
+  function \vvar{f} has return type \texttt{void}; this is the
+  difference between \code{iter} and \code{app}.
+\end{defun2}
+
+\begin{defun2}{void}{iter_c}{(void \vvar{f}(`b,`a),`b \vvar{env},`a {?}`r \vvar{x});}
+  A version of \code{iter} where the function requires an environment.
+\end{defun2}
+
+
+\begin{defun2}{void}{app2}{(`c \vvar{f}(`a,`b),`a {?}`r1 \vvar{x},`b {?}`r2 \vvar{y});}
+  A version of \code{app} in which the function is applied to two arrays.
+\end{defun2}
+
+
+\begin{defun2}{void}{app2_c}{(`d \vvar{f}(`a,`b,`c),`a \vvar{env},`b {?}`r1 \vvar{x},`c {?}`r2 \vvar{y});}
+  A version of \code{app2} where the function requires an environment.
+\end{defun2}
+
+
+\begin{defun2}{void}{iter2}{(void \vvar{f}(`a,`b),`a {?}`r1 \vvar{x},`b {?}`r2 \vvar{y});}
+  A version of \code{iter} in which the function is applied to two arrays.
+\end{defun2}
+
+
+\begin{defun2}{void}{iter2_c}{(void \vvar{f}(`a,`b,`c),`a \vvar{env},`b {?}`r1 \vvar{x},`c {?}`r2 \vvar{y});}
+  A version of \code{iter2} where the function requires an environment.
+\end{defun2}
+
+
+\subsubsection*{Fold}
+
+\begin{defun2}{`a}{fold_left}{(`a \vvar{f}(`a,`b),`a \vvar{accum},`b {?}`r \vvar{x});}
+  If \vvar{x} is an array \texttt{\lb$x_1$,$x_2$,\ldots,$x_n$\rb},
+  return \texttt{\vvar{f}(\ldots\vvar{f}(\vvar{f}(\vvar{a},$x_1$),$x_2$),\ldots, $x_n$)\ldots)}.
+\end{defun2}
+
+\begin{defun2}{`a}{fold_left_c}{(`a \vvar{f}(`c,`a,`b),`c \vvar{env},`a \vvar{accum},`b {?}`r \vvar{x});}
+  A version of \code{fold_left} where the function \vvar{f} takes an
+  environment.
+\end{defun2}
+
+\begin{defun2}{`b}{fold_right}{(`b \vvar{f}(`a,`b),`a {?}`r \vvar{x},`b \vvar{accum});}
+  If \vvar{x} is an array \texttt{\lb$x_1$,$x_2$,\ldots,$x_n$\rb},
+  return \texttt{\vvar{f}($x_1$, \vvar{f}($x_2$, \ldots, \vvar{f}($x_n$,\vvar{a})\ldots))}.
+\end{defun2}
+\begin{defun2}{`b}{fold_right_c}{(`b \vvar{f}(`c,`a,`b),`c \vvar{env},`a {?}`r \vvar{x},`b \vvar{accum});}
+  A version of \code{fold_right} where the function \vvar{f} takes an
+  environment.
+\end{defun2}
+
+\subsubsection*{Reversing}
+
+\begin{defun2}{`a ?}{rev_copy}{(`a::B {?}`r \vvar{x});}
+  Return a copy of an array in reverse.
+\end{defun2}
+
+\begin{defun2}{void}{imp_rev}{(`a::B {?}`r \vvar{x});}
+  Imperatively reverse an array.
+\end{defun2}
+
+\subsubsection*{Predicates}
+
+\begin{defun2}{bool}{forall}{(bool \vvar{pred}(`a),`a {?}`r \vvar{x});}
+  Given a predicate on 'a values, determine whether every element in
+  an array satisfies the predicate.
+\end{defun2}
+
+\begin{defun2}{bool}{forall_c}{(bool \vvar{pred}(`a,`b),`a \vvar{env},`b {?}`r \vvar{x});}
+  A version of \code{forall} where the predicate takes an environment.
+\end{defun2}
+
+\begin{defun2}{bool}{memq}{(`a {?}`r \vvar{l}, `a \vvar{x});}
+  Determine whether \vvar{x} is an element of array \vvar{l}, using
+  physical equality (\texttt{==}) for comparison.
+\end{defun2}
+
+\begin{defun2}{bool}{mem}{(int \vvar{cmp}(`a,`a), `a {?}`r \vvar{l}, `a \vvar{x});}
+  Determine whether \vvar{x} is an element of array \vvar{l},
+  using the function \vvar{cmp} for comparison.
+\end{defun2}
+
+\begin{defun2}{bool}{exists}{(bool \vvar{pred}(`a),`a {?}`r \vvar{x});}
+  Given a predicate on 'a values, determine whether there exists an
+  element in the array that satisfies the predicate.
+\end{defun2}
+\begin{defun2}{bool}{exists_c}{(bool \vvar{pred}(`a,`b),`a \vvar{env},`b {?}`r \vvar{x});}
+\end{defun2}
+
+\subsubsection*{Arrays and Lists}
+
+\begin{defun2}{`a ?}{from_list}{(List::glist_t<`a,`r> \vvar{x});}
+  Build a heap-allocated array from the list \vvar{x}; the elements
+  of the array are the elements of \vvar{x}.
+\end{defun2}
+
+\begin{defun2}{List::list_t<`a>}{to_list}{(`a {?}`r \vvar{x});}
+  Build a heap-allocated list from the array \vvar{x}; the elements of
+  the list are the elements of \vvar{x}.
+\end{defun2}
+
+\subsubsection*{Arrays of Pairs, Pairs of Arrays}
+
+\begin{defun2}{\$(`a,`b) ?}{zip}{(`a {?}`r1 \vvar{x},`b {?}`r2 \vvar{y});}
+  Given [|x1,...,xn|] and [|y1,...,yn|], return [|(x1,y1),...,(xn,yn)|].  
+  Throws Array_mismatch if the lengths are not the same.
+\end{defun2}
+
+\begin{defun2}{\$(`a?,`b?)}{split}{(\$(`a,`b) {?}`r \vvar{x});}
+  Given [|(x1,y1),...,(xn,yn)|], return ([|x1,...,xn|],[|y1,...,yn|]) 
+\end{defun2}
+
+\subsubsection*{Sorting}
+
+\begin{defun2}{void}{qsort}{(int \vvar{cmp}(`a,`a), `a ?\vvar{x}, int \vvar{ofs}, int \vvar{len});}
+  Does an in-place sort of a segment of array \vvar{x}, starting at the
+  element with index \vvar{ofs}, and continuing for \vvar{len} elements.
+  The function \vvar{cmp} should return an integer less than, equal
   to, or greater than 0 if its first argument is less than, equal to,
   or greater than its second argument, respectively.  \code{qsort}
-  throws \code{Core::InvalidArg("Array::qsort")} if \var{len} is
-  negative or \var{ofs} and \var{len} specify a segment outside the
-  bounds of \var{x}.
-\end{defun}
+  throws \code{Core::InvalidArg("Array::qsort")} if \vvar{len} is
+  negative or \vvar{ofs} and \vvar{len} specify a segment outside the
+  bounds of \vvar{x}.
+\end{defun2}
 
-\begin{defun}{msort}{(comp,x,ofs,len)}
-  Does an in-place sort of a segment of array \var{x}, starting at the
-  element with index \var{ofs}, and continuing for \var{len} elements.
-  The function \var{comp} should return an integer less than, equal
+\begin{defun2}{void}{msort}{(int \vvar{cmp}(`a,`a), `a ?\vvar{x}, int \vvar{ofs}, int \vvar{len});}
+  Does an in-place sort of a segment of array \vvar{x}, starting at the
+  element with index \vvar{ofs}, and continuing for \vvar{len} elements.
+  The function \vvar{cmp} should return an integer less than, equal
   to, or greater than 0 if its first argument is less than, equal to,
   or greater than its second argument, respectively.  \code{msort}
-  throws \code{Core::InvalidArg("Array::msort")} if \var{len} is
-  negative or \var{ofs} and \var{len} specify a segment outside the
-  bounds of \var{x}.
-\end{defun}
+  throws \code{Core::InvalidArg("Array::msort")} if \vvar{len} is
+  negative or \vvar{ofs} and \vvar{len} specify a segment outside the
+  bounds of \vvar{x}.
+\end{defun2}
 
 \subsection{Bitvec}
 
@@ -545,21 +723,21 @@ typically thrown when a key is not expected, but is present.
 
 \subsubsection*{Functions}
 \begin{verbatim}
-Dict<`a,`b> empty<`a,`b>(int comp(`a,`a));
-Dict<`a,`b> singleton<`a,`b>(int comp(`a,`a),`a key,`b data);
+Dict<`a,`b> empty<`a,`b>(int cmp(`a,`a));
+Dict<`a,`b> singleton<`a,`b>(int cmp(`a,`a),`a key,`b data);
 \end{verbatim}
 
 \subsubsection*{Use}
-\begin{defun}{empty}{(comp)}
-Creates a new dictionary.  The function \var{comp} takes two keys as
+\begin{defun}{empty}{(cmp)}
+Creates a new dictionary.  The function \var{cmp} takes two keys as
 arguments, and it should return an integer less than, equal to, or
 greater than 0 according to whether its first argument is less than,
 equal to, or greater than the second, respectively.
 \end{defun}
 
-\begin{defun}{singleton}{(comp,key,data)}
+\begin{defun}{singleton}{(cmp,key,data)}
 Creates a new dictionary with a single entry, mapping \var{key} to
-\var{data}.  The function \var{comp} should be a comparison function for
+\var{data}.  The function \var{cmp} should be a comparison function for
 keys, as described for \code{empty} above.
 \end{defun}
 
@@ -815,7 +993,7 @@ typedef struct Table<`a,`b,`e1,`e2> @\textbf{table_t}<`a,`b,`e1,`e2>;
 
 \begin{alltt}
 table_t<`a,`b,`e1,`e2> \textbf{create}(int sz,
-                              int comp(`a,`a;`e1),
+                              int cmp(`a,`a;`e1),
                               int hash(`a;`e2));
 void                   \textbf{insert}(table_t<`a,`b,`e1,`e2> t, `a key, `b val);
 `b                     \textbf{lookup}(table_t<`a,`b,`e1,`e2> t, `a key);
@@ -831,14 +1009,14 @@ void                   \textbf{print_table_map}(table_t<`a,`b,`e1,`e2> t,
 
 \subsubsection*{Use}
 
-\begin{defun}{create}{(sz,comp,hash)}
-Builds a new, empty hash table with initial size \var{sz}.  \var{comp}
+\begin{defun}{create}{(sz,cmp,hash)}
+Builds a new, empty hash table with initial size \var{sz}.  \var{cmp}
 should be a comparison function that returns an integer less than, equal
 to, or greater than 0 according to whether its first argument is less
 than, equal to, or greater than its second argument.  \code{hash} should
-be a hash function on the keys of the hash table.  \code{comp} and
+be a hash function on the keys of the hash table.  \code{cmp} and
 \code{hash} should satisfy the following property: if
-\code{comp(\var{x},\var{y})} is 0, then \code{hash(\var{x}) ==
+\code{cmp(\var{x},\var{y})} is 0, then \code{hash(\var{x}) ==
 hash(\var{y})}.
 \end{defun}
 
@@ -1301,7 +1479,7 @@ of lists.
 \subsubsection*{Functions}
 \begin{verbatim}
 `b   assoc(glist_t<$(`a,`b)@`r1,`r2> l,`a x);
-`b   assoc_cmp(int compare(`a,`a), glist_t<$(`a,`b)@`r1,`r2> l,`a x);
+`b   assoc_cmp(int cmp(`a,`a), glist_t<$(`a,`b)@`r1,`r2> l,`a x);
 bool mem_assoc(glist_t<$(`a,`b)@`r1,`r2> l,`a x);
 \end{verbatim} %$ <-- this dollar comment fixes up font highlighting
 
@@ -1314,8 +1492,8 @@ throws \code{Core::Not_found} if no such value exists.  It uses
 \code{==} to compare \var{x} to the keys in \var{l}.
 \end{defun}
 
-\begin{defun}{assoc_cmp}{(compare,l,x)}
-A variant of assoc that uses the supplied \var{compare} function instead
+\begin{defun}{assoc_cmp}{(cmp,l,x)}
+A variant of assoc that uses the supplied \var{cmp} function instead
 of \code{==}.
 \end{defun}
 
@@ -1900,27 +2078,27 @@ xenum exn {Absent};
 
 \subsubsection*{Functions}
 \begin{verbatim}
-Set<`a> empty<`a>(int comp(`a,`a));
-Set<`a> singleton<`a>(int comp(`a,`a),`a x);
-Set<`a> from_list<`a>(int comp(`a,`a),list<`a> x);
+Set<`a> empty<`a>(int cmp(`a,`a));
+Set<`a> singleton<`a>(int cmp(`a,`a),`a x);
+Set<`a> from_list<`a>(int cmp(`a,`a),list<`a> x);
 \end{verbatim}
 
 \subsubsection*{Use}
 
-Each set creation function requires an comparison function \var{comp}
+Each set creation function requires an comparison function \var{cmp}
 which should return an integer less than, equal to, or greater than 0,
 according to whether its first argument is less than, equal to, or
 greater than its second argument.
 
-\begin{defun}{empty}{(comp)}
+\begin{defun}{empty}{(cmp)}
 Allocates and returns a new empty set.
 \end{defun}
 
-\begin{defun}{singleton}{(comp,x)}
+\begin{defun}{singleton}{(cmp,x)}
 Allocates and returns a new set containing the single element \var{x}.
 \end{defun}
 
-\begin{defun}{from_list}{(comp,l)}
+\begin{defun}{from_list}{(cmp,l)}
 Allocates and returns a new set with the same elements as the list
 \var{l}.
 \end{defun}
