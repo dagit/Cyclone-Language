@@ -8,6 +8,8 @@ CYC_BIN_PATH=$(CYCDIR)/bin
 
 CFLAGS=-include $(CYC_LIB_PATH)/include/cyc_include.h
 
+# general targets
+
 install: install_lib install_comp
 
 install_lib: $(ARCH)/lib/$(CYCLIB) $(ARCH)/lib/nogc.a
@@ -16,6 +18,8 @@ install_a: $(ARCH)/lib/libcyc_a.a
 	cp $^ $(CYC_LIB_PATH)
 install_comp: $(ARCH)/src/cyclone$(EXE)
 	cp $^ $(CYC_BIN_PATH)
+
+# architecture-specific targets
 
 $(ARCH)/lib/$(CYCLIB): $(addprefix $(ARCH)/lib/, $(O_LIBS) $(RUNTIME).o)
 	-rm -f $@
@@ -41,9 +45,16 @@ clean_arch:
 	rm -f $(addprefix $(ARCH)/src/, $(O_SRCS) cyclone$(EXE) install_path.*)
 
 clean:
-	for arch in $(ALL_ARCHS); \
-	do $(MAKE) clean_arch ARCH=$$arch; \
+	for arch in $(ALL_ARCHS); do \
+	if [ -d "$$arch" ]; then $(MAKE) clean_arch ARCH=$$arch; fi; \
 	done
+
+# general rules
 
 a_%.o: %.c
 	$(CC) -c -o $@ -DCYC_REGION_PROFILE $(CFLAGS) $<
+
+# for creating genfiles from patches
+
+%.patch: %
+	diff -rbBcN $(PATCH_ARCH) $< > $@; exit 0

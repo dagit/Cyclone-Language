@@ -49,7 +49,7 @@ ifdef MS
 #FIX: Ignore fewer flags.
 	cl /Fe$@ $(CYC_LIB_PATH)/snprintf.obj $^ $(CYCDIR)/bin/cyc-lib/gc.lib
 else
-	$(CYCC) $(G_FLAG) $(PG_FLAG) $(LC_FLAG) -B$(CYC_LIB_PATH) -o $@ $^ $(LDFLAGS)
+	$(CYCC) $(G_FLAG) $(PG_FLAG) $(LC_FLAG) -B$(CYC_LIB_PATH) -B$(CYCDIR)/bin/cyc-lib -o $@ $^ $(LDFLAGS)
 endif
 	$(RM) install_path.c install_path.$(O)
 
@@ -57,7 +57,7 @@ cycdoc$(EXE): cycdoc.$(O) lex.$(O) parse_tab.$(O) absyn.$(O) \
  tcutil.$(O) tcenv.$(O) tcexp.$(O) tcstmt.$(O) tcpat.$(O) \
  new_control_flow.$(O) cf_absexp.$(O) cf_flowinfo.$(O) \
  formatstr.$(O) evexp.$(O) absynpp.$(O)
-	$(CYCC) -v -B$(CYC_LIB_PATH) -o $@ $^ $(LDFLAGS)
+	$(CYCC) -v -B$(CYC_LIB_PATH) -B$(CYCDIR)/bin/cyc-lib -o $@ $^ $(LDFLAGS)
 
 cycdoc.cyc: cycdoc.cyl
 	$(CYCLEX) $< $@
@@ -69,8 +69,8 @@ install_path.c:
 
 cyclone.$(O): version.h
 version.h: ../.version
-	@(echo -n "static string_t version = \""; \
-	  echo `cat $<` "\";") > $@
+	@(version=`cat $<`; \
+	  echo "static string_t version = \"$$version\";") > $@
 
 # For machine-generated we need special targets (the .cyc is prefixed)
 $(OUT_PREFIX)lex.o : $(OUT_PREFIX)lex.cyc $(CYCC) $(CYCINC_H)

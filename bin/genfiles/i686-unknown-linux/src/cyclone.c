@@ -552,8 +552,8 @@ get)( void*), struct Cyc_List_List* la, struct Cyc_List_List* linfo); extern
 struct Cyc_Interface_I* Cyc_Interface_parse( struct Cyc_Std___sFILE*); extern
 void Cyc_Interface_save( struct Cyc_Interface_I*, struct Cyc_Std___sFILE*);
 extern struct Cyc_Interface_I* Cyc_Interface_load( struct Cyc_Std___sFILE*);
-static unsigned char _temp0[ 5u]="0.1 "; static struct _tagged_arr Cyc_version={
-_temp0, _temp0, _temp0 +  5u}; extern void Cyc_Lex_lex_init(); static int Cyc_pp_r=
+static unsigned char _temp0[ 4u]="0.1"; static struct _tagged_arr Cyc_version={
+_temp0, _temp0, _temp0 +  4u}; extern void Cyc_Lex_lex_init(); static int Cyc_pp_r=
 0; static int Cyc_noexpand_r= 0; static int Cyc_noshake_r= 0; static int Cyc_stop_after_cpp_r=
 0; static int Cyc_parseonly_r= 0; static int Cyc_tc_r= 0; static int Cyc_ic_r= 0;
 static int Cyc_toc_r= 0; static int Cyc_stop_after_objectfile_r= 0; static int

@@ -132,10 +132,12 @@ ifndef TARGET
 SRCDIR:=src
 LIBDIR:=lib
 ARCHDIR:=bin/genfiles/$(ARCH)
+UPDATEARCH:=$(ARCH)
 else
 SRCDIR:=$(TARGET)
 LIBDIR:=$(TARGET)
 ARCHDIR:=bin/genfiles/$(TARGET)
+UPDATEARCH:=$(TARGET)
 endif
 update: 
 	@for i in $(C_SRCS); do (cmp -s $(SRCDIR)/$$i $(ARCHDIR)/src/$$i || (echo UPDATING $(SRCDIR)/$$i; cp $(SRCDIR)/$$i $(ARCHDIR)/src/$$i)) done
@@ -151,14 +153,28 @@ endif
 
 # This will compile (C files) and update for all supported architectures
 #   and then compile and install for all supported architectures
+#   We need to extract all directories from their patches before doing
+#   this; then we can restore them.
 update_all_archs: 
-	@for arch in $(ALL_ARCHS); do\
+	cd bin/genfiles; for arch in $(ALL_ARCHS); do\
+	   ./extract_patch $(PATCH_ARCH) $$arch;\
+	done; cd ../..;
+	for arch in $(ALL_ARCHS); do\
 	  if [ "$$arch" != "$(ARCH)" ]; then\
 	    if [ ! -d "$$arch" ]; then mkdir $$arch; fi;\
             $(MAKE) -C lib TARGET=$$arch $$arch;\
 	    $(MAKE) -C src TARGET=$$arch $$arch;\
 	    $(MAKE) update TARGET=$$arch;\
+	  else\
+	    $(MAKE) cyclone_src;\
+	    $(MAKE) update;\
 	  fi;\
+	done
+	cd bin/genfiles; for arch in $(ALL_ARCHS); do\
+	   if [ -f "$$arch.patch" ]; then\
+	     $(MAKE) $$arch.patch && \
+	     $(RM) -rf $$arch;\
+	   fi;\
 	done
 
 # affected by CYCC and OUT_PREFIX
@@ -185,8 +201,10 @@ clean_nogc:
 	$(MAKE) clean -C lib
 	$(MAKE) clean -C tests
 	@for arch in $(ALL_ARCHS); do\
+	    if [ -d "../$$arch" ]; then\
 	    $(MAKE) clean_prefix -C src OUT_PREFIX=../$$arch/;\
 	    $(MAKE) clean_prefix -C lib OUT_PREFIX=../$$arch/;\
+	    fi;\
 	done
 	$(RM) bin/cyc-lib/libcyc.a bin/cyc-lib/libcyc_a.a
 	$(MAKE) clean -C bin/genfiles
