@@ -415,7 +415,7 @@ static $(typ,Opt_t<decl>)@
 collapse_type_specifiers (list<type_specifier_t> ts, segment loc) {
 
   /* flags that record what we've seen in the qualifiers */
-  Opt_t<bool> signopt = null;      /* true->signed, false->unsigned */
+  Opt_t<Bool> signopt = null;      /* true->signed, false->unsigned */
   Opt_t<typ> topt = null;        /* the underlying type (if any) */
   Opt_t<decl> declopt = null;      /* any hidden declarations */
   bool is_short = false;         /* short or Short */
@@ -438,13 +438,13 @@ collapse_type_specifiers (list<type_specifier_t> ts, segment loc) {
       last_loc = loc2;
       if (signopt != null) err(msg4,loc2);
       if (topt != null) err("signed qualifier must come before type",loc2);
-      signopt = &Opt(true);
+      signopt = &Opt((Bool)true);
       break;
     case Unsigned_spec(loc2):
       last_loc = loc2;
       if (signopt != null) err(msg4,loc2);
       if (topt != null) err("signed qualifier must come before type",loc2);
-      signopt = &Opt(false);
+      signopt = &Opt((Bool)false);
       break;
     case Short_spec(loc2,box):
       last_loc = loc2;
@@ -614,7 +614,7 @@ apply_tms(tqual tq,typ t,list<type_modifier> tms)
 		   "in declarator",loc));
     }
     case Pointer_mod(nullable,tq2): {
-      return apply_tms(tq2,PointerType(t,new_conref(nullable),tq),
+      return apply_tms(tq2,PointerType(t,new_conref((Bool)nullable),tq),
 		       tms->tl);
     }
   }

@@ -131,7 +131,7 @@ namespace Absyn {
     VarType(tvar);
     EnumType(Opt_t<typedef_name>,list<typ>);
     XenumType(typedef_name);
-    PointerType(typ,conref<bool>,tqual);
+    PointerType(typ,conref<Bool>,tqual);
     IntType(sign,size_of,boxed);
     FloatType(boxed);
     DoubleType(boxed);

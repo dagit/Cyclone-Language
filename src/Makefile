@@ -9,14 +9,15 @@ include ../Makefile.inc
 # an absolute path)
 CYCC=../bin/$(CYCCOMP)
 
-CYCLEX=../bin/cyclex.exe
+#CYCLEX=../bin/cyclex.exe
+CYCLEX=../bin/cycocamllex.exe
 CYCBISON=../bin/cycbison.exe
 
 # Override this prefix to check the compiler on itself w/o clobbering files
 OUT_PREFIX=
 
 #CFLAGS=-g -fwritable-strings -I.. 
-CFLAGS=-O2 -fwritable-strings -I.. 
+CFLAGS=-O -fwritable-strings -I.. 
 
 CYC_SRCS=$(addsuffix .cyc, $(CYCLONE_SRCS))
 
@@ -32,12 +33,12 @@ $(OUT_PREFIX)$(CYCCOMP): $(addprefix $(OUT_PREFIX), $(O_SRCS)) $(LIB)
 
 # For machine-generated we need special targets (the .cyc is prefixed)
 $(OUT_PREFIX)lex.c : $(OUT_PREFIX)lex.cyc
-	$(CYCC) $(CYC_FLAGS) -o $@ $^ 
+	$(CYCC) $(CYC_FLAGS) $^ > $@ 
 $(OUT_PREFIX)lex.cyc : lex.cyl
 	$(CYCLEX) $< $@
 
 $(OUT_PREFIX)parse_tab.c: $(OUT_PREFIX)parse_tab.cyc
-	$(CYCC) $(CYC_FLAGS) -o $@ $< 
+	$(CYCC) $(CYC_FLAGS) $< > $@ 
 $(OUT_PREFIX)parse_tab.cyc: parse.y
 	$(CYCBISON) -v -d $< -o $@
 $(OUT_PREFIX)parse_tab.h: parse.y

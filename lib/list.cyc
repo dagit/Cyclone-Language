@@ -18,7 +18,7 @@ namespace List;
 int length<`a>(list<`a> x) {
   int i = 0;
 
-  while (x) {
+  while (x != null) {
     ++i;
     x = x->tl;
   }
@@ -33,13 +33,13 @@ xenum exn {List_empty};
 
 // return the first element in a list, if any, throw List_empty otherwise. 
 `a hd<`a>(list<`a> x) {
-  if (!x) throw List_empty;
+  if (x == null) throw List_empty;
   return x->hd;
 }
 
 // return the tail of a list, if any, throw List_empty otherwise. 
 list<`a> tl<`a>(list<`a> x) {
-  if (!x) throw List_empty;
+  if (x == null) throw List_empty;
   return x->tl;
 }
 
@@ -47,7 +47,7 @@ list<`a> tl<`a>(list<`a> x) {
 list<`a> copy<`a>(list<`a> x) {
   list<`a> result, prev;
 
-  if (!x) return null;
+  if (x == null) return null;
   result = &cons{.hd=x->hd,.tl=null};
   prev = result;
   for (x=x->tl; x != null; x=x->tl) {

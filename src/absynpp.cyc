@@ -86,7 +86,7 @@ bool special(string s){
   return false;
 }
 
-string escape(bool in_string,Char c) {
+string escape(Bool in_string,Char c) {
   switch ((char)c) {
   case '\a': return("\\a");
   case '\b': return("\\b");
@@ -117,7 +117,7 @@ string char_escape(Char c) {
 string string_escape(string s) {
   if (special(s))
     // Inefficient but I'm having trouble linking in the buffer stuff
-    return String::strconcat_l(List::map_c(escape, true,
+    return String::strconcat_l(List::map_c(escape, (Bool)true,
 					   String::explode(s)));
   else 
     return s;

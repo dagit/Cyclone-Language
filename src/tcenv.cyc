@@ -433,7 +433,7 @@ bool process_continue(tenv te, stmt s) {
     switch (s->r) {
     case Continue_s(*so): *so = &Opt(s2); return true;
     default: 
-      return env_err("Tcenv: process_continue given a non-continue");
+      return (Bool)env_err("Tcenv: process_continue given a non-continue");
     }
   }
 }
@@ -447,7 +447,7 @@ bool process_break(tenv te, stmt s) {
     s2->non_local_preds = &cons(s,s2->non_local_preds);
     switch (s->r) {
     case Break_s(*so): *so = &Opt(s2); return true;
-    default: return env_err("Tcenv: process_continue given a non-break");
+    default: return (Bool)env_err("Tcenv: process_continue given a non-break");
     }
   }
 }

@@ -232,7 +232,7 @@ static bool unify_conrefs<`a>(int cmp(`a,`a), conref<`a> x, conref<`a> y) {
   }
 }
 
-static int cmp_bool(bool x,bool y) {
+static int cmp_bool(Bool x,Bool y) {
   if (x == y) return 0;
   if (x == false) return -1;
   return 1;

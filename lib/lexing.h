@@ -47,7 +47,7 @@ extern Lexbuf<Function_lexbuf_state<`b>>
   from_function<`b>(int read_fun(string,int,`b), `b);
 
 extern Lexbuf<Function_lexbuf_state<FILE@>> from_file(FILE@);
-extern Lexbuf<bool> from_string(string);
+extern Lexbuf<Bool> from_string(string);
 
 extern string lexeme      <`a>(Lexbuf<`a>);
 extern char   lexeme_char <`a>(Lexbuf<`a>, int);

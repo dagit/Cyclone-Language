@@ -52,7 +52,7 @@ $(list<tvar>, list<vardecl>)@ tcPat(tenv te,pat p) {
     t = wildtyp();
     break;
   case Null_p:
-    t = PointerType(wildtyp(), new_conref(true), empty_tqual());
+    t = PointerType(wildtyp(), new_conref((Bool)true), empty_tqual());
     break;
   case Int_p(s,i):
     // FIX: take i into account?
@@ -69,7 +69,7 @@ $(list<tvar>, list<vardecl>)@ tcPat(tenv te,pat p) {
   case Reference_p(vd):
     warn(p->loc,"* pattern used, may be unsafe");
     t = wildtyp();
-    vd->type = PointerType(t,new_conref(false),empty_tqual());
+    vd->type = PointerType(t,new_conref((Bool)false),empty_tqual());
     vd->tq   = empty_tqual();
     v_result = &cons(vd,v_result);
     break;
@@ -422,7 +422,7 @@ static simple_pat_t compile_pat(pat p) {
 	  n->v = y->v; 
 	  continue;
 	case No_constr:
-          n->v = Eq_constr(false);
+          n->v = Eq_constr((Bool)false);
           is_nullable   = false;
           still_working = false;  // EXIT LOOP
           break;
