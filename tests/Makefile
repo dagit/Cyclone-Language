@@ -13,7 +13,7 @@ CYCFLAGS=-I../lib -I../include -B../build/boot -pp -save-c -g  #--vcgen
 endif
 HAVE_PTHREAD=no
 # test asm doesn't work for me on cygwin
-EXES := $(addsuffix $(EXE), cyctest foo hello test_regions test_currgn histogram test_getopt zeroterm flatlist md5 unique_patterns dynregion cinclude  multimethod  testasm testaqualsuccess structarray scheme patterns refcnt_test rc require)
+EXES := $(addsuffix $(EXE), cyctest foo hello test_regions test_currgn histogram test_getopt zeroterm flatlist md5 unique_patterns dynregion cinclude  multimethod  testasm testaqualsuccess structarray scheme scheme-2 patterns refcnt_test rc require)
  # testbget testsexp)
 #these are broken
 #streambuff.cyc is broken badly ... it is unsound to pattern match on existentials with `RC inside them, wait until restrict
@@ -68,6 +68,7 @@ all: $(EXES) failtest streambufftest.o
 	./unique_patterns
 	./dynregion
 	./scheme
+	./scheme-2 --gc-messages
 	./patterns
 	./refcnt_test -q
 	./cinclude
@@ -125,6 +126,9 @@ streambufftest.o: streambufftest.cyc
 testbget: ../lib/bget.c ../lib/bget.h testbget.c
 	gcc -I../lib ../lib/bget.c testbget.c -lm -o testbget
 
+scheme-2: scheme-2.cyc
+	$(CYCC) $(CYCFLAGS) $^ -nogc -lm -o $@ 
+
 ifeq ($(HAVE_PTHREAD),yes)
 testexn$(EXE): testexn.cyc
 	$(CYCC) $(CYCFLAGS) $(LDFLAGS) -o $@ $^ -lpthread
@@ -139,7 +143,7 @@ endif
 	$(CYCC) $(CYCFLAGS) $(LDFLAGS) -o $@ $^
 
 clean:
-	$(RM) $(addsuffix .[oc], hello bytes cyctest foo histogram test_getopt typeref test_regions test_currgn unique_test zeroterm structarray flatlist md5 require streambufftest streambuff refcnt_test dynregion md5driver scheme unique_patterns cinclude testasm testexn multimethod testaqualsuccess)
+	$(RM) $(addsuffix .[oc], hello bytes cyctest foo histogram test_getopt typeref test_regions test_currgn unique_test zeroterm structarray flatlist md5 require streambufftest streambuff refcnt_test dynregion md5driver scheme scheme-2 unique_patterns cinclude testasm testexn multimethod testaqualsuccess)
 # testsexp)
 	$(RM) foo_tab.* unsafe_cast.o pcredemo.o pcredemo.c pcredemo md5driver.o 
 	$(RM) $(EXES) fail1.tmp fail2.tmp fail3.tmp fail4.tmp taf.tmp tad.tmp
