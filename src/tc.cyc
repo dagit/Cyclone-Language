@@ -790,13 +790,11 @@ static void tc_decls(tenv_t te, list_t<decl_t,`H> ds0, bool in_externC, bool che
   typerep_dict_t dict = empty_typerep_dict();
   
   for (let ds = ds0; ds != NULL; last = ds, ds = ds->tl) {
-    decl_t    d   = ds->hd;
-    seg_t loc = d->loc;
+    decl_t d   = ds->hd;
+    seg_t  loc = d->loc;
 
     switch (d->r) {
-    case &Let_d(_,_,_,_,_): // FIX
-      terr(loc,"top level let-declarations are not implemented");
-      break;
+    case &Let_d(_,_,_,_,_): 
     case &Letv_d(_): // FIX
       terr(loc,"top level let-declarations are not implemented");
       break;
@@ -894,8 +892,8 @@ static void tc_decls(tenv_t te, list_t<decl_t,`H> ds0, bool in_externC, bool che
       var_t first;
       list_t<var_t> rest;
       switch (nsl) {
-      case Loc_n:       fallthru;
-      case &Rel_n(NULL): fallthru;
+      case Loc_n:       
+      case &Rel_n(NULL):
       case &Abs_n(NULL):
         first = v; rest = NULL; break;
       case &Rel_n(&List(x,y)): fallthru(x,y);
@@ -971,8 +969,7 @@ static bool treeshake_remove_f(Set::set_t<var_t> set, var_t x, _ y) {
 
 static void treeshake_remove(list_t<var_t> ns, 
 			     $(genv_t, Set::set_t<var_t>) @ nsenv) {
-  let ge = (*nsenv)[0];
-  let set = (*nsenv)[1];
+  let &$(ge,set) = nsenv;
   ge->ordinaries = Dict::filter_c(treeshake_remove_f, set, ge->ordinaries);
 }
 			     			     
@@ -983,8 +980,6 @@ static $(genv_t, Set::set_t<var_t>)@ treeshake_make_env_f(genv_t ge) {
 list_t<decl_t> treeshake(tenv_t te, list_t<decl_t> ds) {
   let env = Dict::map(treeshake_make_env_f, te->ae);
   let ds1 = treeshake_f(env, ds);
-  
   Dict::iter(treeshake_remove, env); // update the global environment
-
   return ds1;
 }

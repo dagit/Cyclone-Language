@@ -18,7 +18,14 @@
    Suite 330, Boston, MA 02111-1307, USA. */
 
 // TO DO: Get patterns right rather than require fully initialized
-//        At very least, special case let x = e !!!
+//        At very least, special case let x = e !!
+
+// TO DO: complain about dereference of definitely NULL -- cannot do this
+// until we've reached a fixpoint!!!
+
+// KLUDGE: For unions, we just merge all fields, so you can read
+// longer after writing shorter, but because they're bits, safety is
+// not compromised.
 
 // The previous pass (type-checking) sets up:
 // * decorating all stmts with their correct non_local_preds
@@ -26,19 +33,6 @@
 // * setting all the encloser fields (note the list ends with a self-loop,
 //   not a NULL!
 // (The latter two activities are performed via calls to set_encloser.)
-
-// We now do three passes here:
-// * First we:
-//    * check that gotos don't jump into scope
-//    * collect all the Vardecls and malloc points for the function
-//      (and use this to compute all paths, and a mapping from local paths
-//       to the leaves)
-//    * translate each top-level exp to an absexp_t and decorate the stmt's
-//      with the absexp_t's.
-// * Then we iterate to make sure memory is written before it is read.
-//   Another thing to do during this pass would be NULL-check elimination
-//   and/or warning.
-// * Last we free space by replacing all the statment annotations.
 
 #include <core.h>
 #include <list.h>
@@ -49,47 +43,26 @@
 #include "absyn.h"
 #include "tcutil.h"
 #include "evexp.h"
-
 #include "cf_flowinfo.h"
-#include "cf_absexp.h"
 #include "new_control_flow.h"
 
 // for debugging
 #include "absynpp.h"
 #include <stdio.h>
 
-using Core;
 using List;
 using Absyn;
 using CfFlowInfo;
-using CfAbsexp;
 namespace NewControlFlow;
 
 typedef Dict::dict_t<`a,`b> dict_t<`a,`b>;
+typedef Position::seg_t     seg_t;
 
 //////////////////////////// Statement Decoration //////////////////////////
-
-// What the absexps field means for different statement variants:
-// (It's a consistent "left to right" reading of the contained expressions.)
-// * Exp: list has length 1, abstraction of exp.
-// * Return: if eopt != NULL, list has length 1, abstraction of exp.
-// * If, While, Do: list has length 2: abstraction of when-true/when-false,
-//                  each including use of guard
-// * For(e1,e2,e3): list has length 4:
-//                    abstraction of e1, e2 when-true, e2 when-false,
-//                    abstraction of e3
-// * Fallthru(es): list has length 1, unordered of abstraction of es
-// * Decl: if there's an initializer expression, list is its abstraction
-// * Switch: list has odd length >= 1, abstraction of guard, then abstractions
-//      of any where_clause's when-true when-false in the order of the cases
-// * TryCatch: abstractions of any where_clause's when-true when-false 
-//              in the order of the cases
-// * else list is NULL
 struct CFStmtAnnot {
-  stmt_t           encloser; // for checking goto-scope -- no other use
-  int              visited;  // for detecting need to iterate
-  flow_info_t      flow;     // flow to merge in when we check again
-  list_t<absexp_t> absexps;  // meaning explained above
+  stmt_t encloser; // for checking goto-scope -- no other use
+  int    visited;  // for detecting need to iterate
+  flow_t flow;     // flow to merge in when we check again
 };
 typedef struct CFStmtAnnot cf_stmt_annot_t;
 xtunion StmtAnnot { CFAnnot(cf_stmt_annot_t); };
@@ -97,518 +70,38 @@ xtunion StmtAnnot { CFAnnot(cf_stmt_annot_t); };
 // to be used by the type-checking pass to get things set up for us
 // must be called on EVERY stmt in the abstract syntax (even the dummy ones)
 void set_encloser(stmt_t enclosee, stmt_t encloser) {
-  enclosee->annot = new CFAnnot(CFStmtAnnot(encloser, 0, BottomFL, NULL));
+  enclosee->annot = new CFAnnot(CFStmtAnnot(encloser, 0, BottomFL));
 }
 static cf_stmt_annot_t @ get_stmt_annot(stmt_t s) {
   switch(s->annot) {
   case &CFAnnot(*x): return x;
-  default: throw new Impossible("ControlFlow -- wrong stmt annotation");
-  }
-}
-static void cf_set_absexps(stmt_t s, list_t<absexp_t,`H> ael) {
-  get_stmt_annot(s)->absexps = ael;
-}
-
-///////////////////////// Translation Environment /////////////////////////
-// could just make globals (so prepass wouldn't be re-entrant -- who cares?)
-static struct AbsEnv {
-  pinfo_dict_t<local_root_t> all_roots; // all path_info leaves are Uninit
-};
-typedef struct AbsEnv @ absenv_t;
-static struct AbsSyn {
-  absexp_t when_true_exp;
-  absexp_t when_false_exp;
-  absop_t  absop;
-};
-typedef struct AbsSyn abssyn_t; // NOT a pointer!
-
-static void add_var_root(absenv_t env, vardecl_t vd) {
-  env->all_roots = Dict::insert_new(env->all_roots,
-				    new VarRoot(vd),
-				    typ_to_unesc_none_pinfo(vd->type));
-}
-// Note: The type is the type of the object, not the pointer to the object.
-static void add_malloc_root(absenv_t env, exp_t e, type_t t) {
-  env->all_roots = Dict::insert_new(env->all_roots,
-				    new MallocPt(e),
-				    typ_to_unesc_none_pinfo(t));
-}
-static absexp_t meet_absexp(abssyn_t syn) {
-  if(syn.when_true_exp == syn.when_false_exp)
-    return syn.when_true_exp;
-  return mkGroupAE(OneofG, syn.when_true_exp, syn.when_false_exp);
-}
-
-///////////////////////// Expression Translation //////////////////////////
-
-abssyn_t abstract_exp(absenv_t env, exp_t  e);
-void     cf_prepass  (absenv_t env, stmt_t s); 
-
-static absexp_t use_exp(absenv_t env, exp_t e) {
-  let syn = abstract_exp(env,e);
-  return mkGroupAE(OrderedG, meet_absexp(syn), mkUseAE(syn.absop));
-}
-
-// To be used when each element of es is used, and the result is unknown. 
-// FIX: es need to be used before all es evaluate, but don't need to escape
-//      until afterwards (think about function call, eg. f(x, y=x=e)).
-//      We're sound but too restrictive as is (nobody will care I bet)
-// FIX: for primops, they're ints, so no need to escape.  More generally,
-//      don't need to escape when the "destination" type is int.
-static abssyn_t use_exp_unordered(absenv_t env, list_t<exp_t,`H> es) {
-  let aexp = mkGroupAE_l(UnorderedG, List::map_c(use_exp, env, es));
-  return AbsSyn(aexp,aexp,mkUnknownOp());
-}
-
-// Used by the Malloc_e and New_e cases (caller adds malloc root)
-// Note: we admit that the evaluation of rgn_exp happens before the evaluation
-// of init_exp.
-// Note: We don't bother to "use" rgn_exp b/c we know its initialized.
-abssyn_t abstract_malloc(absenv_t env, exp_t outer_e,
-			 exp_opt_t rgn_exp, exp_opt_t init_exp) {
-  let malloc_op = mkMallocOp(outer_e);
-  absexp_t ans_aexp = mkSkipAE();
-  if(init_exp != NULL) {
-    let init_syn = abstract_exp(env, (exp_t)init_exp);
-    ans_aexp = mkGroupAE(OrderedG, meet_absexp(init_syn),
-			 mkAssignAE(malloc_op, init_syn.absop));
-  }
-  ans_aexp = mkGroupAE(OrderedG, mkMallocAE(outer_e), ans_aexp);
-  if(rgn_exp != NULL)
-    ans_aexp = 
-      mkGroupAE(OrderedG, meet_absexp(abstract_exp(env, (exp_t)rgn_exp)), 
-		ans_aexp);
-  // Cute: the result of a malloc is not false (we raise an exception)
-  return AbsSyn(ans_aexp, mkBottomAE(), mkAddressOp(malloc_op));
-}
-
-abssyn_t abstract_exp(absenv_t env, exp_t e) {
-  switch(e->r) {
-
-    // C doesn't allow "memory-kind casts", which is good because then
-    // we'd have to translate the dictionary domains and that's a pain.
-    // But it SHOULD BE THE CASE that the source and destination types
-    // are both "leaf types", so there is no problem.
-  case &Cast_e(_,e1):        fallthru(e1);
-  case &NoInstantiate_e(e1): fallthru(e1);
-  case &Instantiate_e(e1,_): return abstract_exp(env, e1);
-
-  // these things are fully initialized non-lvalues that "jump one way"
-  case &Const_e(Null_c):
-  case &Const_e(&Int_c(Signed,0)):
-    return AbsSyn(mkBottomAE(), mkSkipAE(),   mkUnknownOp());
-  case &Const_e(&Int_c(Signed,1)): 
-    return AbsSyn(mkSkipAE(),   mkBottomAE(), mkUnknownOp());
-
-  // these things are fully initialized non-lvalues that could be true or false
-  case &Const_e(_): 
-  case &Sizeofexp_e(_): // note the exp is NOT evaluated
-  case &Sizeoftyp_e(_):  
-  case &Offsetof_e(_,_): 
-  case &Gentyp_e(_,_):  
-  case &Enum_e(_,_,_): // FIX : distinguish tags that are/aren't 0
-  case &AnonEnum_e(_,_,_): // FIX : distinguish tags that are/aren't 0
-  case &Var_e(_,&Funname_b(_)):
-    // globals are lvalues, but are escaped and fully initializaed
-  case &Var_e(_,&Global_b(_)):
-    return AbsSyn(mkSkipAE(), mkSkipAE(), mkUnknownOp());
-
-  case &Var_e(_,&Param_b(vd)): fallthru(vd);
-  case &Var_e(_,&Local_b(vd)): fallthru(vd);
-  case &Var_e(_,&Pat_b(vd)): return AbsSyn(mkSkipAE(),mkSkipAE(),mkLocalOp(vd));
-
-    // There is no result lhs (= associates to the right).
-    // Note that because we make the absop be the left-hand-side, we could
-    // in theory lose precision on nested assignments, eg. x = y = z
-    // where z points to a known place but y has escaped.  I bet nobody notices
-    // and if they do, they can be told the rule and rewrite it y = x = z,
-    // which is the right thing to do if y has escaped.
-  case &AssignOp_e(e1,NULL,e2):
-    let syn1 = abstract_exp(env, e1);
-    let syn2 = abstract_exp(env, e2);
-    let aexp = 
-      mkGroupAE(OrderedG, 
-		mkGroupAE(UnorderedG, meet_absexp(syn1), meet_absexp(syn2)),
-		mkAssignAE(syn1.absop, syn2.absop));
-    return AbsSyn(aexp,aexp,syn1.absop);
-
-  // FIX: do init qualifier (callee can't muck with aliases in that case)
-  case &FnCall_e(e1,es,_): return use_exp_unordered(env, new List(e1,es));
-  case &AssignOp_e(e1,_,e2): fallthru(new List(e1, new List(e2, NULL)));
-  case &Primop_e(_,es): return use_exp_unordered(env, es);
-
-  case &Address_e(e1):
-    // If this is really a malloc-and-initialize, do something totally different
-    switch(e1->r) {
-    case &Struct_e(_,_,_,_): 
-    case &Tuple_e(_): 
-      add_malloc_root(env, e, e1->topt->v);
-      return abstract_malloc(env, e, NULL, e1);
-    default:
-      let syn1 = abstract_exp(env,e1);
-      let aexp = meet_absexp(syn1);
-      return AbsSyn(aexp,aexp,mkAddressOp(syn1.absop));
-    }
-
-  case &Subscript_e(e1,e2):
-    switch(Tcutil::compress(e1->topt->v)) {
-
-    case &TupleType(_): // we track aggregate paths through tuples
-      // we know e2 is a constant int, but if the type-checker ever gets
-      // more lenient, then we need to call abstract_exp(env,e2)!!!
-      let syn1 = abstract_exp(env,e1);
-      let aexp = meet_absexp(syn1);
-      let field = fieldname(Evexp::eval_const_uint_exp(e2));
-      return AbsSyn(aexp,aexp,mkMemberOp(syn1.absop,field));
-      
-    default: 
-      // FIX: add special-case: treat x[0] just like *x (instead of using
-      //      e1, make a DerefOp)
-
-      // initialized arrays have initialized elements and things assigned
-      // to elements are "used".
-      return use_exp_unordered(env, new List(e1, new List(e2,NULL)));
-    }
-
-  case &Deref_e(e1):
-    let syn1 = abstract_exp(env,e1);
-    let aexp = meet_absexp(syn1); // don't just meet when we do null-checks
-    absop_t absop; 
-    switch(Tcutil::compress(e1->topt->v)) {
-    case &PointerType(PtrInfo(t2,_,_,_,bd)):
-      if(Tcutil::is_bound_one(bd))
-	absop = mkDerefOp(syn1.absop);
-      else {
-	aexp  = mkGroupAE(OrderedG, aexp, mkUseAE(syn1.absop));
-	absop = mkUnknownOp();
-      }
-      break;
-    default: throw new Impossible("NewControlFlow: bad type in Deref");
-    }    
-    return AbsSyn(aexp,aexp,absop);
-
-    // KLUDGE: Our treatment of UNIONS does not require all memory to
-    // be written before its read (because different variants can have
-    // different size and alignment), but so long as unions are only bits,
-    // memory safety is not compromised.
-  case &StructArrow_e(e1,fname):
-    let syn1 = abstract_exp(env,e1);
-    let aexp = meet_absexp(syn1); // don't just meet when we do null-checks
-    absop_t absop; 
-    switch(Tcutil::compress(e1->topt->v)) {
-    case &PointerType(PtrInfo(t2,_,_,_,bd)):
-      if(Tcutil::is_bound_one(bd)) {
-	switch(Tcutil::compress(t2)) {
-	case &UnionType(_,_,_):
-	case &AnonUnionType(_): absop = mkDerefOp(syn1.absop); break;
-	default: absop = mkMemberOp(mkDerefOp(syn1.absop),fname);
-	}
-      } else {
-	aexp  = mkGroupAE(OrderedG, aexp, mkUseAE(syn1.absop));
-	absop = mkUnknownOp();
-      }
-      break;
-    default: throw new Impossible("NewControlFlow: bad type in StructArrow");
-    }    
-    return AbsSyn(aexp,aexp,absop);
-
-    // same KLUDGE as in previous case
-  case &StructMember_e(e1,fname):
-    let syn1 = abstract_exp(env,e1);
-    let aexp = meet_absexp(syn1);
-    absop_t absop;
-    switch(Tcutil::compress(e1->topt->v)) {
-    case &AnonUnionType(_): 
-    case &UnionType(_,_,_): absop = syn1.absop; break;
-    default: absop = mkMemberOp(syn1.absop,fname);
-    }
-    return AbsSyn(aexp,aexp,absop);
-
-  case &New_e(eopt,e1):
-    add_malloc_root(env, e, e1->topt->v);
-    return abstract_malloc(env, e, eopt, e1);
-
-  case &Malloc_e(eopt,t):
-    add_malloc_root(env, e, t);
-    return abstract_malloc(env, e, eopt, NULL);
-
-  case &Tunion_e(_,_,es,_,_): 
-    // FIX: can distinguish zero/non-zero tags
-    if(es == NULL)
-      return AbsSyn(mkSkipAE(),mkSkipAE(),mkUnknownOp());
-    fallthru(es);
-
-  case &Tuple_e(es): 
-    list_t<absexp_t> arg_aexps = NULL;
-    dict_t<field_name_t,absop_t> absop_dict = Dict::empty(Std::zstrptrcmp);
-    for(int j=0; es != NULL; es = es->tl, ++j) {
-      let syn = abstract_exp(env,es->hd);
-      arg_aexps = new List(meet_absexp(syn), arg_aexps);
-      absop_dict = Dict::insert(absop_dict, fieldname(j), syn.absop);
-    }
-    let aexp = mkGroupAE_l(UnorderedG, arg_aexps);
-    return AbsSyn(aexp,aexp,mkDictOp(absop_dict));
-
-  case &AnonStruct_e(_,des): fallthru(des);
-  case &Struct_e(_,_,des,_): 
-    // multiple designators are a pain (and I don't think they parse anyway)
-    list_t<absexp_t> arg_aexps = NULL;
-    dict_t<field_name_t,absop_t> absop_dict = Dict::empty(Std::zstrptrcmp);
-    for(; des != NULL; des = des->tl) {
-      let syn = abstract_exp(env,(*des->hd)[1]);
-      arg_aexps = new List(meet_absexp(syn), arg_aexps);
-      for(_ ds = (*des->hd)[0]; ds != NULL; ds = ds->tl)
-	switch (ds->hd) {
-	case &ArrayElement(_): throw new Impossible("bad struct designator");
-	case &FieldName(f): absop_dict = Dict::insert(absop_dict, f, syn.absop);
-	}
-    }
-    let aexp = mkGroupAE_l(UnorderedG, arg_aexps);
-    return AbsSyn(aexp,aexp,mkDictOp(absop_dict));
-
-  // We don't track through arrays, so all array elements must be 
-  // fully initialized.  Hence the result is fully initialized.
-  case &Array_e(l): return use_exp_unordered(env, map(snd,l));
-    
-  case &Increment_e(e1,_): 
-    // Note: Since e1 is either an int or a tagged array, "using" it won't
-    // cause any additional loss of precision.
-    return use_exp_unordered(env, new List(e1,NULL));
-
-  case &Throw_e(e1): 
-    let aexp = mkGroupAE(OrderedG, use_exp(env,e1), mkBottomAE());
-    return AbsSyn(aexp,aexp,mkUnknownOp());
-
-    // Here's where we greatly simplify by being a tiny bit more conservative,
-    // by always returning UnknownOp.
-    // FIX: don't escape on the "int cases", which includes guards and
-    //      null-checks (and always on e1?? -- depends on type of && and ||)
-    // Note: I think gcc supports ? : as a left-hand-side but we don't.
-  case &Conditional_e(e1,e2,e3):
-    let syn1 = abstract_exp(env,e1);
-    let syn2 = abstract_exp(env,e2);
-    let syn3 = abstract_exp(env,e3);
-    let use_1true_aexp = 
-      mkGroupAE(OrderedG, syn1.when_true_exp,  mkUseAE(syn1.absop));
-    let use_1false_aexp =
-      mkGroupAE(OrderedG, syn1.when_false_exp, mkUseAE(syn1.absop));
-    let use2 = mkUseAE(syn2.absop);
-    let use3 = mkUseAE(syn3.absop);
-    let true_aexp = 
-      mkGroupAE(OneofG, 
-		mkGroupAE(OrderedG, use_1true_aexp,  
-			  mkGroupAE(OrderedG, syn2.when_true_exp,  use2)),
-		mkGroupAE(OrderedG, use_1false_aexp, 
-			  mkGroupAE(OrderedG, syn3.when_true_exp,  use3)));
-    let false_aexp = 
-      mkGroupAE(OneofG, 
-		mkGroupAE(OrderedG, use_1true_aexp,  
-			  mkGroupAE(OrderedG, syn2.when_false_exp, use2)),
-		mkGroupAE(OrderedG, use_1false_aexp, 
-			  mkGroupAE(OrderedG, syn3.when_false_exp, use3)));
-    return AbsSyn(true_aexp, false_aexp, mkUnknownOp());
-
-  // Technically we're being too conservative here because we could
-  // have different when_true/when_false on the last expression.
-  // Given that that's a pain to deal with, it would take rather
-  // convoluted code to matter, lots of such code could be written
-  // with SeqExp_e, I won't bother.
-  case &StmtExp_e(s):
-    cf_prepass(env,s);
-    // The strange part is we need to use the last expression
-    // so we re-do the last statement in order to get this right. 
-    let last_s = s;
-    while(true)
-      switch(last_s->r) {
-      case &Seq_s(s1,s2): last_s = s2; continue;
-      case &Decl_s(d,s1): last_s = s1; continue;
-      case &Exp_s(e):     
-	let absop = abstract_exp(env,e).absop;
-	let aexp = mkStmtAE(s);
-	return AbsSyn(aexp,aexp,absop);
-      default: throw new Impossible("abstract_exp: ill-formed StmtExp");
-      }
-
-  case &SeqExp_e(e1,e2): // note: it's fine for e1 to be uninitialized
-    let syn1  = abstract_exp(env,e1);
-    let syn2  = abstract_exp(env,e2);
-    let aexp1 = meet_absexp(syn1);
-    return AbsSyn(mkGroupAE(OrderedG, aexp1, syn2.when_true_exp),
-		  mkGroupAE(OrderedG, aexp1, syn2.when_false_exp),
-		  syn2.absop);
-
-    // Note: the second exp might never get executed
-    // Note: array elements must be fully initialized
-    // Note: e1 must be initialized
-    // Note: hoisting the vardecls would be inefficient if there were a ton
-    // of them (only need to hoist out to the beginning of the absexp, but
-    // that's a pain, so we hoist them to the whole function)
-    // (This hoisting is only for the analysis and is for sorta obscure reasons)
-  case &Comprehension_e(vd,e1,e2):
-    add_var_root(env,vd);
-    let syn1 = abstract_exp(env,e1);
-    let syn2 = abstract_exp(env,e2);
-    let aexp = mkComprehensionAE(vd,
-				 syn1.when_true_exp,
-				 syn1.when_false_exp,
-				 syn1.absop,
-				 meet_absexp(syn2),
-				 syn2.absop);
-    return AbsSyn(aexp,aexp,mkUnknownOp());
-
-  case &Var_e(_,Unresolved_b): 
-  case &UnknownId_e(_):        
-  case &UnknownCall_e(_,_):    
-  case &UnresolvedMem_e(_,_):  
-  case &CompoundLit_e(_,_):    
-  case &Codegen_e(_):          
-  case &Fill_e(_): throw new Impossible("abstract_exp, unexpected exp form");
-  }
-}
-
-// FIX: no need for escape points-to b/c guards are treated as ints
-static $(absexp_t,absexp_t) abstract_guard(absenv_t env, exp_t e) {
-  let syn = abstract_exp(env,e);
-  let use = mkUseAE(syn.absop);
-  if(syn.when_true_exp == syn.when_false_exp) {
-    let aexp = mkGroupAE(OrderedG, syn.when_true_exp, use);
-    return $(aexp,aexp);
-  }
-  return $(mkGroupAE(OrderedG, syn.when_true_exp,  use),
-	   mkGroupAE(OrderedG, syn.when_false_exp, use));
-}
-
-
-list_t<absexp_t> cf_prepass_scs(absenv_t env, list_t<switch_clause_t> scs) {
-  let ans = NULL;
-  for(; scs != NULL; scs = scs->tl) {
-    let &Switch_clause(_,vds_opt,wherec,body,_) = scs->hd;
-    if(vds_opt == NULL)
-      throw new Impossible("switch clause vds not set");
-    for(_ vds = vds_opt->v; vds != NULL; vds = vds->tl)
-      add_var_root(env,vds->hd);
-    if(wherec != NULL) {
-      let $(when_true,when_false) = abstract_guard(env,(exp_t)wherec);
-      ans = new List(when_true,new List(when_false,ans));
-    }
-    cf_prepass(env,body);
-  }
-  return imp_rev(ans);
-}
-
-void cf_prepass(absenv_t env, stmt_t s) {
-  switch(s->r) {
-  case Skip_s: return;
-  case &Exp_s(e): // e need not be initialized
-    cf_set_absexps(s,new List(meet_absexp(abstract_exp(env,e)),NULL)); 
-    return;
-  case &Seq_s(s1,s2): 
-    cf_prepass(env,s1); 
-    cf_prepass(env,s2);
-    return;
-    // FIX: When we have init qualifier, use all init parameters on return.
-  case &Return_s(NULL): return;
-  case &Return_s(e): // e must be initialized
-    cf_set_absexps(s,new List(use_exp(env,(exp_t)e),NULL)); 
-    return;
-  case &IfThenElse_s(e,s1,s2):
-    let $(when_true,when_false) = abstract_guard(env,e);
-    cf_set_absexps(s,new List(when_true,new List(when_false,NULL)));
-    cf_prepass(env,s1);
-    cf_prepass(env,s2);
-    return;
-  case &Do_s(s1,$(e,cont)): fallthru(e,cont,s1); //order irrelevant in this pass
-  case &While_s($(e,cont),s1):
-    let $(when_true,when_false) = abstract_guard(env,e);
-    cf_set_absexps(s,new List(when_true,new List(when_false,NULL)));
-    cf_prepass(env,s1);
-    return;
-  case &Break_s(_):    
-  case &Continue_s(_): return;
-  case &Goto_s(_,NULL): throw new Impossible("cf_prepass: goto w/o dest");
-  case &Goto_s(_,dest): 
-    // check we don't jump into scope -- this is totally orthogonal to 
-    // the rest of control-flow checking, so we get it out of the way
-    let my_encloser   = get_stmt_annot(s)->encloser;
-    let dest_encloser = get_stmt_annot((stmt_t)dest)->encloser;
-    while(dest_encloser != my_encloser) {
-      let next_encloser = get_stmt_annot(my_encloser)->encloser;
-      if(next_encloser == my_encloser) { // function body is own encloser
-	Tcutil::terr(s->loc, "goto enters local scope or exception handler");
-	break;
-      }
-      my_encloser = next_encloser;
-    } 
-    return;
-  case &For_s(e1,$(e2,guard),$(e3,cont),s1): //e1,e3 need not be init
-    let ae1 = meet_absexp(abstract_exp(env,e1));
-    let $(when_true,when_false) = abstract_guard(env,e2);
-    let ae3 = meet_absexp(abstract_exp(env,e3));
-    cf_set_absexps(s, list(ae1, when_true, when_false, ae3));
-    cf_prepass(env,s1);
-    return;
-  case &Switch_s(e,scs): // e must be init (FIX: interpret patterns)
-    cf_set_absexps(s, new List(use_exp(env,e), cf_prepass_scs(env,scs)));
-    return;
-
-  case &Fallthru_s(es,_): // FIX: interpret patterns
-    cf_set_absexps(s, new List(meet_absexp(use_exp_unordered(env,es)), NULL));
-    return;
-
-  case &Decl_s(&Decl(&Var_d(vd),_),s1):
-    add_var_root(env,vd);
-    if(vd->initializer != NULL) {
-      let syn = abstract_exp(env,(exp_t)vd->initializer);
-      let aexp = mkGroupAE(OrderedG, meet_absexp(syn),
-			   mkAssignAE(mkLocalOp(vd), syn.absop));
-      cf_set_absexps(s, new List(aexp, NULL));
-    }
-    cf_prepass(env,s1);
-    return;
-  case &Decl_s(&Decl(&Let_d(_,&Opt(vds),_,e,_),_),s1):
-    // FIX: interpret patterns
-    // FIX: in short term, need to special-case let x = e !!!
-    for(; vds != NULL; vds = vds->tl)
-      add_var_root(env,vds->hd);
-    cf_set_absexps(s, new List(use_exp(env,e), NULL));
-    cf_prepass(env,s1);
-    return;
-  case &Decl_s(&Decl(&Letv_d(vds),_),s1):
-    for(; vds != NULL; vds = vds->tl)
-      add_var_root(env,vds->hd);
-    cf_prepass(env,s1);
-    return;
-  case &Label_s(_,s1): 
-    cf_prepass(env,s1); 
-    return;
-  case &TryCatch_s(s1,scs):
-    cf_prepass(env,s1);
-    cf_set_absexps(s,cf_prepass_scs(env,scs));
-    return;
-  case &Region_s(tv,vd,body):
-    add_var_root(env,vd);
-    cf_prepass(env,body);
-    return;
-  case &Decl_s(_,_):    
-  case &SwitchC_s(_,_): 
-  case &Cut_s(_):       
-  case &Splice_s(_): throw new Impossible("cf_prepass: bad stmt form");
+  default: throw new Core::Impossible("ControlFlow -- wrong stmt annotation");
   }
 }
 
 ///////////////////////////// Analysis ///////////////////////////////
 
-// Global control variables -- to be re-entrant, we'd need to replace this
-// with a shared variable in the environment passed to cf_check_stmt
-static bool iterate_cf_check = false;
-static int  iteration_num    = 0;
+// FIX: Add some memoization for commonly used absRVal_t values, eg.
+// fully initialized and fully uninitialized structs.  Also for root_t value.
+// FIX: Assigning a pointer to an int shouldn't cause anything to escape.
 
+// Note: w/o passing down whether we're in a "pointer context", we'll 
+// unnecessarily escape points-to on branches of conditional expressions.
+// Note: for *(e1 ? e2 : e3) we're requiring e2 and e3 to be all-init.
 struct AnalEnv {
-  pinfo_dict_t<local_root_t> roots; // the "uninit leaves" versions
-  bool        in_try;  // an optimization for the common case
-  flow_info_t tryflow; // updated by UseAE and AssignAE, used by TryCatch_s
-  place_set_t * all_changed; // NULL for not in unorderd so don't bother
+  bool          iterate_again; // set to true when a visited flow is updated
+  int           iteration_num; // update annotations with this on each visit
+  bool          in_try;      // an optimization for the common case
+  flow_t        tryflow;     // updated by any flow change while in a try-block.
+  place_set_t * all_changed; // NULL for "not in unorderd so don't bother"
 };
+typedef struct AnalEnv @ analenv_t;
+
+static flow_t              anal_stmt(analenv_t, flow_t, stmt_t);
+static flow_t              anal_decl(analenv_t, flow_t, decl_t);
+static $(flow_t,absLval_t) anal_Lexp(analenv_t, flow_t, exp_t);//takes all exps!
+static $(flow_t,absRval_t) anal_Rexp(analenv_t, flow_t, exp_t);
+static $(flow_t,flow_t)    anal_test(analenv_t, flow_t, exp_t);
 
 // Sound KLUDGE: The changed should go on the destination, but it's easier
 // to put it on the source and nobody is ever going to notice the difference
@@ -616,7 +109,7 @@ struct AnalEnv {
 // context to an outer one, I think).  The fix is to keep all the changed
 // lists in the env and find the right one for the dest (by following
 // enclosers somehow), but again, it is a really strange thing.
-void update_tryflow(analenv_t env, flow_info_t new_flow) {
+static void update_tryflow(analenv_t env, flow_t new_flow) {
   if(env->in_try)
     env->tryflow = join_flow(env->all_changed, new_flow, env->tryflow);
 }
@@ -624,95 +117,669 @@ void update_tryflow(analenv_t env, flow_info_t new_flow) {
 // Sound KLUDGE: same explanation as for update_tryflow above
 // need to check for less than after the join b/c of the approximation
 // else may not terminate.
-static void update_flow(analenv_t env, stmt_t s, flow_info_t flow) { 
-  let annot = get_stmt_annot(s);
+static void update_flow(analenv_t env, stmt_t s, flow_t flow) { 
+  let annot    = get_stmt_annot(s);
   let new_flow = join_flow(env->all_changed, flow, annot->flow);
   if(!flow_lessthan_approx(new_flow, annot->flow)) {
     annot->flow = new_flow;
-    if(annot->visited == iteration_num)
-      iterate_cf_check = true;
+    if(annot->visited == env->iteration_num)
+      env->iterate_again = true;
   }
 }
 
-static cf_stmt_annot_t@ pre_stmt_check(analenv_t env, flow_info_t in_flow, 
-				       stmt_t s) {
+static flow_t add_vars(flow_t inflow,list_t<vardecl_t> vds,absRval_t leafval) {
+  switch(inflow) {
+  case BottomFL: return BottomFL;
+  case &ReachableFL(d): 
+    for(; vds != NULL; vds = vds->tl) {
+      let root = new VarRoot(vds->hd);
+      // FIX: use typ_to_absrval or something
+      d = Dict::insert(d,root,typ_to_absrval(vds->hd->type,leafval));
+    }
+    return new ReachableFL(d);
+  }
+}
+
+static flow_t use_Rval(analenv_t env, seg_t loc, flow_t inflow, absRval_t r){
+  switch(inflow) {
+  case BottomFL: return BottomFL;
+  case &ReachableFL(d):
+    if(initlevel(d,r) != AllIL)
+      Tcutil::terr(loc,"expression may not be fully initialized");
+    let ans_d = escape_deref(d, env->all_changed, r);
+    if(d == ans_d) return inflow;
+    let ans = new ReachableFL(ans_d);
+    update_tryflow(env, ans);
+    return ans;
+  }
+}
+
+// FIX: avoid all the list allocation?
+static $(flow_t,list_t<absRval_t>) anal_unordered_Rexps(analenv_t env,
+							flow_t inflow,
+							list_t<exp_t> es) {
+  if(es == NULL)
+    return $(inflow, NULL);
+  if(es->tl == NULL) {
+    let $(f,r) = anal_Rexp(env,inflow,es->hd);
+    return $(f, new List(r,NULL));
+  }
+  place_set_t * outer_all_changed = env->all_changed;
+  place_set_t this_all_changed; // keep separate b/c we iterate
+  flow_t old_inflow;
+  flow_t outflow;
+  list_t<absRval_t> rvals;
+  do { // unnecessarily recomputes rvals each time
+    this_all_changed = mt_place_set();
+    // wouldn't need to peel off the head if we had a TopFL
+    env->all_changed = new mt_place_set();
+    let $(f,r) = anal_Rexp(env,inflow,es->hd);
+    outflow = f;
+    rvals = new List(r,NULL);
+    this_all_changed = Set::union_two(this_all_changed, *env->all_changed);
+    
+    for(_ es2 = es->tl; es2 != NULL; es2 = es2->tl) {
+      env->all_changed = new mt_place_set();
+      let $(f,r) = anal_Rexp(env,inflow,es2->hd);
+      rvals = new List(r,rvals);
+      outflow = after_flow(&this_all_changed, outflow, f, 
+			   this_all_changed, *env->all_changed);
+      this_all_changed = Set::union_two(this_all_changed, *env->all_changed);
+    }
+    // need to check for less than after the join b/c of the approximation
+    // else may not terminate.
+    old_inflow = inflow;
+    inflow = join_flow(outer_all_changed,inflow,outflow);
+  } while(!flow_lessthan_approx(inflow,old_inflow));
+  if(outer_all_changed == NULL)
+    env->all_changed = NULL;
+  else
+    env->all_changed = new Set::union_two(*outer_all_changed, this_all_changed);
+  update_tryflow(env,outflow);
+  return $(outflow,imp_rev(rvals));
+}
+
+// though the name doesn't indicate it, this is fine for the size primop too
+// the point is we don't read through pointers, so nothing escapes.
+static $(flow_t,absRval_t) anal_use_ints(analenv_t env, flow_t inflow,
+					 list_t<exp_t> es) {
+  let $(afterflow, rvals) = anal_unordered_Rexps(env,inflow,es);
+  switch(afterflow) {
+  case &ReachableFL(d): 
+    for(; rvals != NULL; rvals = rvals->tl, es = es->tl)
+      if(initlevel(d,rvals->hd)==NoneIL)
+	Tcutil::terr(es->hd->loc, "expression may not be initialized");
+    break;
+  case BottomFL: break;
+  }
+  return $(afterflow, unknown_all);
+}
+
+// we can get the lval this way only because f and the flow returned
+// by anal_Lexp will not differ w.r.t. must-point-to information.
+// i.e. we should be called with the inflow the caller used as an *argument*
+// to anal_Rexp
+// Also: the result of anal_Rexp on e MUST be Unknown, not Esc!
+static flow_t notzero(analenv_t env, flow_t inflow, flow_t outflow,
+		      exp_t e, initlevel_t il) {
+  switch(outflow) {
+  case BottomFL: return outflow;
+  case &ReachableFL(d):
+    switch(anal_Lexp(env,inflow,e)[1]) {
+    case UnknownL: return outflow;
+    case &PlaceL(p): // okay b/c p can't be escaped (it's Unknown) 
+      absRval_t nzval = il==AllIL ? NotZeroAll : NotZeroThis;
+      return new ReachableFL(assign_place(e->loc,d,env->all_changed,p,nzval));
+    }
+  }
+}
+// same comments as for previous function
+static $(flow_t,flow_t) splitzero(analenv_t env, flow_t inflow, flow_t outflow,
+				  exp_t e, initlevel_t il) {
+  switch(outflow) {
+  case BottomFL: return $(outflow,outflow);
+  case &ReachableFL(d):
+    switch(anal_Lexp(env,inflow,e)[1]) {
+    case UnknownL: return $(outflow,outflow);
+    case &PlaceL(p): // okay b/c p can't be escaped (it's Unknown) 
+      absRval_t nzval = il==AllIL ? NotZeroAll : NotZeroThis;
+      return 
+	$(new ReachableFL(assign_place(e->loc,d,env->all_changed,p,nzval)),
+	  new ReachableFL(assign_place(e->loc,d,env->all_changed,p,Zero)));
+    }
+  }
+}
+
+// Note: correct for e1 an array b/c r won't be AddressOf??
+// FIX: Important place to memoize type_to_absrval calls (b/c StructArrow
+//      calls this.)
+static $(flow_t,absRval_t) anal_derefR(analenv_t env, flow_t inflow,
+				       flow_t f, exp_t e, absRval_t r) {
+  switch(Tcutil::compress(e->topt->v)) {
+  case &PointerType(PtrInfo(elttype,_,_,_,bd)):
+    switch(f) {
+    case BottomFL: return $(f,typ_to_absrval(elttype,unknown_all));
+    case &ReachableFL(outdict):
+      // else cannot be known: FIX: determine notzero as appropriate
+      if(Tcutil::is_bound_one(bd))
+	switch(r) {
+	case &AddressOf(p): return $(f,lookup_place(outdict,p));
+	   // may not be at fixpoint
+	case Zero: return $(BottomFL,typ_to_absrval(elttype,unknown_all));
+	case &UnknownR(il): f = notzero(env,inflow,f,e,il); break;
+	default: break;
+	}
+      switch(initlevel(outdict,r)) {
+      case NoneIL:
+	Tcutil::terr(e->loc,"dereference of possibly uninitialized pointer");
+	fallthru;
+      case AllIL:  return $(f,typ_to_absrval(elttype,unknown_all));
+      case ThisIL: return $(f,typ_to_absrval(elttype,unknown_none));
+      }
+    }
+  default: throw new Core::Impossible("right deref of non-pointer-type");
+  }
+}
+
+// Note: must deal with try-flow in all "base" cases!!!
+static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
+  // Note: It is sound to return on BottomFL only because there is no way to
+  //       jump into an expression (we reject goto into a StmtExp).
+  flowdict_t d;
+  switch(inflow) {
+  case BottomFL: return $(BottomFL, unknown_all); // absRval_t irrelvent
+  case &ReachableFL(d2): d = d2;
+  }
+  switch(e->r) {
+    // C doesn't allow "memory-kind casts", which is good because then
+    // we'd have to translate the dictionary domains and that's a pain.
+    // In essence, we're assuming the result absRval_t is not Aggregate.
+  case &Cast_e(_,e1):        fallthru(e1);
+  case &NoInstantiate_e(e1): fallthru(e1);
+  case &Instantiate_e(e1,_): return anal_Rexp(env,inflow,e1);
+
+  case &Const_e(Null_c):
+  case &Const_e(&Int_c(Signed,0)): return $(inflow, Zero);
+  case &Const_e(&Int_c(Signed,_)): 
+  case &Var_e(_,&Funname_b(_)):    return $(inflow, NotZeroAll);
+
+  case &Tunion_e(_,_,NULL,_,_): // FIX: distinguish zero/non-zero
+  case &Const_e(_): 
+  case &Sizeofexp_e(_): // note: the exp is NOT evaluated
+  case &Sizeoftyp_e(_):  
+  case &Offsetof_e(_,_): // FIX: ?? (first field guaranteed zero?) 
+  case &Gentyp_e(_,_):  // FIX: distinguish zero/non-zero enum tags
+  case &AnonEnum_e(_,_,_): // FIX : distinguish tags that are/aren't 0
+  case &Enum_e(_,_,_): return $(inflow, unknown_all);
+
+  case &Var_e(_,&Global_b(_)): // globals are init and may be aggregates
+    return $(inflow, typ_to_absrval(e->topt->v, unknown_all));
+
+    // FIX: avoid allocation of VarRoot
+    // Note: if Esc we return that even though it isn't an absRval.  That's
+    //       okay b/c assign_place_inner does the right thing
+  case &Var_e(_,&Param_b(vd)): fallthru(vd);
+  case &Var_e(_,&Local_b(vd)): fallthru(vd);
+  case &Var_e(_,&Pat_b(vd)): return $(inflow, Dict::lookup(d, new VarRoot(vd)));
+
+    // Note: none of the primops cause things to escape or do a dereference!
+    //       and they all return initialized ints of unknown value.
+  case &Primop_e(_,es):     return anal_use_ints(env,inflow,es);
+  case &Increment_e(e,_):   return anal_use_ints(env,inflow,list(e));
+  case &AssignOp_e(l,&_,r): return anal_use_ints(env,inflow,list(l,r));
+  
+  case &AssignOp_e(e1,NULL,e2): // really annoying we don't have e1 before e2!
+    let outer_all_changed = env->all_changed;
+    while(true) { // local iteration
+      env->all_changed  = new mt_place_set();
+      let $(left_out, lval) = anal_Lexp(env,inflow,e1);
+      let left_changed      = *env->all_changed;
+      env->all_changed      = new mt_place_set();
+      let $(right_out,rval) = anal_Rexp(env,inflow,e2);
+      let right_changed     = *env->all_changed;
+      let outflow = after_flow(&left_changed, left_out,right_out,
+			       left_changed, right_changed);
+      let new_inflow = join_flow(outer_all_changed,inflow,outflow);
+      if(flow_lessthan_approx(new_inflow,inflow)) {
+	if(outer_all_changed == NULL)
+	  env->all_changed = NULL;
+	else
+	  *env->all_changed = Set::union_two(*outer_all_changed,
+			      Set::union_two(left_changed, right_changed));
+	// now actually do the assignment!
+	switch(outflow) {
+	case BottomFL: return $(BottomFL,rval);
+	case &ReachableFL(outdict):
+	  switch(lval) {
+	  case &PlaceL(p): 
+	    outdict = assign_place(e->loc,outdict,env->all_changed,p,rval);
+	    outflow = new ReachableFL(outdict);
+	    update_tryflow(env, outflow);
+	    return $(outflow, rval);
+	  case UnknownL: return $(use_Rval(env,e2->loc,outflow,rval), rval);
+	  }
+	}
+      }
+      inflow = new_inflow;
+    }
+
+  case &SeqExp_e(e1,e2): return anal_Rexp(env, anal_Rexp(env,inflow,e1)[0], e2);
+
+  case &Throw_e(e1):
+    let $(f,r) = anal_Rexp(env,inflow,e1);
+    use_Rval(env,e1->loc,f,r); // result irrelevant so long as initialized
+    return $(BottomFL,typ_to_absrval(e->topt->v,unknown_all));
+
+  case &FnCall_e(e1,es,_): 
+    es = new List(e1,es); // FIX: avoid allocation
+    let $(outflow,rvals) = anal_unordered_Rexps(env,inflow,es);
+    // for strange reasons, use_Rval is fine for the function pointer
+    for(; rvals != NULL; rvals = rvals->tl, es = es->tl)
+      outflow = use_Rval(env,es->hd->loc,outflow,rvals->hd);
+    return $(outflow,typ_to_absrval(e->topt->v,unknown_all));
+
+  case &Malloc_e(eopt,t):
+    root_t    root      = new MallocPt(e);
+    place_t   place     = new Place(root,NULL);
+    absRval_t rval      = new AddressOf(place);
+    absRval_t place_val = typ_to_absrval(t,unknown_none);
+    if(env->all_changed != NULL)
+      *(env->all_changed) = Set::insert(*(env->all_changed),place);
+    if(eopt!=NULL)
+      switch(anal_Rexp(env,inflow,(exp_t)eopt)[0]) {
+      case BottomFL: return $(BottomFL,rval);
+      case &ReachableFL(d2): 
+	return $(new ReachableFL(Dict::insert(d2,root,place_val)), rval);
+      }
+    return $(new ReachableFL(Dict::insert(d,root,place_val)), rval);
+
+  case &New_e(eopt,e):
+    root_t    root      = new MallocPt(e);
+    place_t   place     = new Place(root,NULL);
+    absRval_t rval      = new AddressOf(place);
+    if(env->all_changed != NULL)
+      *(env->all_changed) = Set::insert(*(env->all_changed),place);
+    flow_t    outflow;
+    absRval_t place_val;
+    if(eopt!=NULL) {
+      let $(f,rvals) = anal_unordered_Rexps(env,inflow,list((exp_t)eopt,e));
+      outflow   = f;
+      place_val = rvals->tl->hd;
+    } else {
+      let $(f,r) = anal_Rexp(env,inflow,e);
+      outflow   = f;
+      place_val = r;
+    }
+    switch(outflow) {
+    case BottomFL: return $(outflow,rval);
+    case &ReachableFL(d2):
+      return $(new ReachableFL(Dict::insert(d2,root,place_val)), rval);
+    }
+    
+  case &Address_e(e1): // FIX: support & as a malloc-and-initialize???
+    let $(f,l) = anal_Lexp(env,inflow,e1);
+    switch(l) {
+    case UnknownL:   return $(f, NotZeroAll);
+    case &PlaceL(p): return $(f, new AddressOf(p));
+    }
+
+  case &Deref_e(e1): 
+    let $(f,r) = anal_Rexp(env,inflow,e1);
+    return anal_derefR(env,inflow,f,e1,r);
+
+    // KLUDGE: unions (see comment at top of file)
+  case &StructMember_e(e1,field):
+    let $(f,r) = anal_Rexp(env,inflow,e1);
+    switch(Tcutil::compress(e1->topt->v)) {
+    case &AnonUnionType(_):
+    case &UnionType(_,_,_): return $(f,r); // just drop the field
+    default: break;
+    }
+    switch(r) {
+    case &Aggregate(rdict): return $(f,Dict::lookup(rdict,field));
+    default: throw new Core::Impossible("anal_Rexp: StructMember");
+    }
+    
+  case &StructArrow_e(e1,field): // composition of * and ., of course
+    let $(f1,r1) = anal_Rexp(env,inflow,e1);
+    let $(f2,r2) = anal_derefR(env,inflow,f1,e1,r1);
+    switch(Tcutil::compress(e1->topt->v)) {
+    case &AnonUnionType(_):
+    case &UnionType(_,_,_): return $(f2,r2); // just drop the field
+    default: break;
+    }
+    switch(r2) {
+    case &Aggregate(rdict): return $(f2,Dict::lookup(rdict,field));
+    default: throw new Core::Impossible("anal_Rexp: StructArrow");
+    }  
+      
+  case &Conditional_e(e1,e2,e3): 
+    // if e2 and e3 are the same rval, we're conservative.  Who cares.
+    let $(f1t,f1f) = anal_test(env,inflow,e1);
+    let $(f2, r2)  = anal_Rexp(env,f1t,   e2);
+    let $(f3, r3)  = anal_Rexp(env,f1f,   e3);
+    return $(join_flow(env->all_changed,
+		       use_Rval(env,e2->loc,f2,r2),
+		       use_Rval(env,e3->loc,f3,r3)),
+	     unknown_all);
+
+  case &Subscript_e(e1,e2): // FIX: avoid list allocation
+    let $(f,rvals) = anal_unordered_Rexps(env,inflow,list(e1,e2));
+    switch(f) {
+    case &ReachableFL(d2):
+      if(initlevel(d2,rvals->tl->hd)==NoneIL)
+	Tcutil::terr(e2->loc, "expression may not be initialized");
+      break;
+    default: break;
+    }
+    switch(Tcutil::compress(e1->topt->v)) {
+    case &TupleType(_):
+      switch(rvals->hd) {
+      case &Aggregate(rdict): 
+	return $(f,Dict::lookup(rdict,
+				fieldname(Evexp::eval_const_uint_exp(e2))));
+      default: throw new Core::Impossible("anal_Rexp: Subscript");
+      }
+    default: break;
+    }
+    return anal_derefR(env,inflow,f,e1,rvals->hd);
+
+  case &Tunion_e(_,_,es,_,_): fallthru(es); // NULL case handled above
+  case &Tuple_e(es):
+    let $(f,rvals) = anal_unordered_Rexps(env,inflow,es);
+    aggrdict_t aggrdict = Dict::empty(zstrptrcmp);
+    for(int i=0; rvals != NULL; rvals = rvals->tl, ++i)
+      aggrdict = Dict::insert(aggrdict, fieldname(i), rvals->hd);
+    return $(f, new Aggregate(aggrdict));
+
+  case &AnonStruct_e(_,des): fallthru(des);
+  case &Struct_e(_,_,des,_): // FIX: avoid more allocation
+    let $(f,rvals) = anal_unordered_Rexps(env,inflow,map(Core::snd,des));
+    aggrdict_t aggrdict = Dict::empty(zstrptrcmp);
+    for(int i=0; rvals != NULL; rvals = rvals->tl, des = des->tl, ++i)
+      for(_ ds = (*des->hd)[0]; ds != NULL; ds = ds->tl)
+	switch (ds->hd) {
+	case &ArrayElement(_): throw new Core::Impossible("anal_Rexp:Struct_e");
+	case &FieldName(fld): aggrdict = Dict::insert(aggrdict, fld, rvals->hd);
+	}
+    return $(f, new Aggregate(aggrdict));
+
+  case &Array_e(dles): // FIX: avoid allocation
+    let es = map(Core::snd,dles);
+    let $(outflow,rvals) = anal_unordered_Rexps(env,inflow,es);
+    for(; rvals != NULL; rvals = rvals->tl, es = es->tl)
+      outflow = use_Rval(env,es->hd->loc,outflow,rvals->hd);
+    return $(outflow,typ_to_absrval(e->topt->v,unknown_all));
+
+  case &Comprehension_e(vd,e1,e2): 
+    let $(f1,r1) = anal_Rexp(env,inflow,e1);
+    switch(f1) {
+    case BottomFL: return $(f1,unknown_all);
+    case &ReachableFL(d1):
+      if(initlevel(d1,r1)==NoneIL)
+	Tcutil::terr(e1->loc, "expression may not be initialized");
+      switch(r1) {
+      case Zero: return $(f1,unknown_all); // e2 executed 0 times
+      case NotZeroThis:
+      case NotZeroAll:
+      case &AddressOf(_): // e2 executed at least once
+	let l = List(vd,NULL);
+	f1 = add_vars(f1,&l,unknown_all);
+	let $(f2,r2) = anal_Rexp(env,f1,e2);
+	switch(f2) {
+	case BottomFL: return $(f2,unknown_all);
+	case &ReachableFL(d2):
+	  if(initlevel(d2,r2) != AllIL) {
+	    Tcutil::terr(e1->loc, "expression may not be initialized");
+	    return $(BottomFL,unknown_all);
+	  }
+	}
+	f1 = f2;
+	fallthru;
+      default: // e2 executed any number of times, including 0
+	while(true) {
+	  let l = List(vd,NULL);
+	  f1 = add_vars(f1,&l,unknown_all);
+	  let $(f2,r2) = anal_Rexp(env,f1,e2);
+	  switch(f2) {
+	  case BottomFL: break;
+	  case &ReachableFL(d2):
+	    if(initlevel(d2,r2) != AllIL) {
+	      Tcutil::terr(e1->loc, "expression may not be initialized");
+	      return $(BottomFL, unknown_all);
+	    }
+	  }
+	  let newflow = join_flow(env->all_changed,f1,f2);
+	  if(flow_lessthan_approx(newflow,f1))
+	    break;
+	  f1 = newflow;
+	}
+	return $(f1,unknown_all);
+      }
+    }
+  case &StmtExp_e(s): 
+    // We need the absRval_t from the last expression --
+    // that's why we traverse the statement ourselves.
+    // make sure we do everything just like anal_stmt does!
+    while(true)
+      switch(s->r) {
+      case &Seq_s(s1,s2): 
+	inflow = anal_stmt(env,inflow,s1);
+	s = s2;
+	continue;
+      case &Decl_s(d,s1): 
+	inflow = anal_decl(env,inflow,d);
+	s = s1;
+	continue;
+      case &Exp_s(e): return anal_Rexp(env,inflow,e);
+      default: throw new Core::Impossible("analyze_Rexp: ill-formed StmtExp");
+      }
+
+  case &Var_e(_,Unresolved_b): 
+  case &UnknownId_e(_):        
+  case &UnknownCall_e(_,_):    
+  case &UnresolvedMem_e(_,_):  
+  case &CompoundLit_e(_,_):    
+  case &Codegen_e(_):          
+  case &Fill_e(_): throw new Core::Impossible("anal_Rexp, unexpected exp form");
+  }
+}
+
+static $(flow_t,absLval_t) anal_derefL(analenv_t env, flow_t inflow, flow_t f, 
+				       exp_t e, absRval_t r, 
+				       list_t<field_name_t,`H> flds) {
+  switch(Tcutil::compress(e->topt->v)) {
+  case &PointerType(PtrInfo(elttype,_,_,_,bd)):
+    switch(f) {
+    case BottomFL: return $(f,UnknownL);
+    case &ReachableFL(outdict):
+      // else cannot be known: FIX: determine notzero as appropriate
+      if(Tcutil::is_bound_one(bd))
+	switch(r) {
+	case &AddressOf(&Place(root,flds2)): 
+	  return $(f, new PlaceL(new Place(root, append(flds2,flds))));
+	case Zero: return $(BottomFL,UnknownL); // may not be at fixpoint
+	case &UnknownR(il): f = notzero(env,inflow,f,e,il); break;
+	default: break;
+	}
+      if(initlevel(outdict,r)==NoneIL)
+	Tcutil::terr(e->loc,"dereference of possibly uninitialized pointer");
+      return $(f,UnknownL);
+    }
+  default: throw new Core::Impossible("left deref of non-pointer-type");
+  }
+}
+
+// Note: we except all exps, just returning UnknownL for non-lvalues b/c of
+// how code like notzero and splitzero use this function, but no reason
+// in these cases to track any effects.
+// Note: As with anal_Rexp, it's okay to return immediately on BottomFL.
+static $(flow_t,absLval_t) anal_Lexp_rec(analenv_t env, flow_t inflow, 
+					 exp_t e, list_t<field_name_t,`H> flds){
+  flowdict_t d;
+  switch(inflow) {
+  case BottomFL: return $(BottomFL, UnknownL); // absLval_t irrelvent
+  case &ReachableFL(d2): d = d2;
+  }
+  switch(e->r) {
+  case &Cast_e(_,e1):        fallthru(e1);
+  case &NoInstantiate_e(e1): fallthru(e1);
+  case &Instantiate_e(e1,_): return anal_Lexp_rec(env,inflow,e1,flds);
+
+  case &Var_e(_,&Param_b(vd)): fallthru(vd);
+  case &Var_e(_,&Local_b(vd)): fallthru(vd);
+  case &Var_e(_,&Pat_b(vd)):
+    return $(inflow, new PlaceL(new Place(new VarRoot(vd), flds)));
+
+  case &StructArrow_e(e1,f):
+    switch(Tcutil::compress(e1->topt->v)) {
+    case &AnonUnionType(_): // just drop the field
+    case &UnionType(_,_,_): break;
+    default: flds = new List(f,flds);
+    }
+    fallthru(e1);
+  case &Deref_e(e1): 
+    let $(f,r) = anal_Rexp(env,inflow,e1);
+    return anal_derefL(env,inflow,f,e1,r,flds);
+
+  case &Subscript_e(e1,e2): // assumes that tuple-projection implies e2 is pure
+    switch(Tcutil::compress(e1->topt->v)) {
+    case &TupleType(_):
+      let fld = fieldname(Evexp::eval_const_uint_exp(e2));
+      return anal_Lexp_rec(env,inflow,e1,new List(fld,flds));
+    default: break;
+    }
+    let $(f,rvals) = anal_unordered_Rexps(env,inflow,list(e1,e2));
+    switch(f) {
+    case &ReachableFL(d2):
+      if(initlevel(d2,rvals->tl->hd)==NoneIL)
+	Tcutil::terr(e2->loc, "expression may not be initialized");
+      break;
+    default: break;
+    }
+    return anal_derefL(env,inflow,f,e1,rvals->hd,flds);
+
+  case &StructMember_e(e1,fld): 
+    switch(Tcutil::compress(e1->topt->v)) {
+    case &AnonUnionType(_): // just drop the field
+    case &UnionType(_,_,_): break;
+    default: flds = new List(fld,flds);
+    }
+    return anal_Lexp_rec(env,inflow,e1,flds); 
+
+  default: return $(BottomFL, UnknownL); // see comment before function
+  }
+}
+
+static $(flow_t,absLval_t) anal_Lexp(analenv_t env, flow_t inflow, exp_t e) {
+  return anal_Lexp_rec(env,inflow,e,NULL);
+}
+
+// FIX: ?? there are more primops and the "not-zero" cases to add if we care.
+//      also we can statically determined stupid tests like NotZero == Zero
+static $(flow_t,flow_t) anal_test(analenv_t env, flow_t inflow, exp_t e) {
+  switch(e->r) {
+  case &Conditional_e(e1,e2,e3):
+    // if e2 and e3 are the same rval, we're conservative.  Who cares.
+    let $(f1t,f1f) = anal_test(env,inflow,e1);
+    let $(f2t,f2f) = anal_test(env,f1t,   e2);
+    let $(f3t,f3f) = anal_test(env,f1f,   e3);
+    return $(join_flow(env->all_changed, f2t, f3t),
+	     join_flow(env->all_changed, f2f, f3f));
+  case &Primop_e(Not,&List(e1,NULL)):          
+    let $(f1,f2) = anal_test(env,inflow,e1);
+    return $(f2,f1);
+  case &Primop_e(Eq,es):
+    let $(f,rvals) = anal_unordered_Rexps(env,inflow,es);
+    switch(f) {
+    case BottomFL: return $(f,f);
+    case &ReachableFL(d):
+      let r1 = rvals->hd;
+      let r2 = rvals->tl->hd;
+      if(initlevel(d,r1)==NoneIL)
+	Tcutil::terr(es->hd->loc,"expression may not be initialized");
+      if(initlevel(d,r2)==NoneIL)
+	Tcutil::terr(es->tl->hd->loc,"expression may not be initialized");
+      switch($(r1,r2)) {
+      case $(&UnknownR(il),Zero): // f is correct for both args b/c unordered
+	let $(f1,f2) = splitzero(env,f,f,es->hd,il);
+	return $(f2,f1);
+      case $(Zero,&UnknownR(il)):
+	let $(f1,f2) = splitzero(env,f,f,es->tl->hd,il);
+	return $(f2,f1);
+      default: return $(f,f);
+      }
+    }
+  case &Primop_e(Neq,es): 
+    let $(f,rvals) = anal_unordered_Rexps(env,inflow,es);
+    switch(f) {
+    case BottomFL: return $(f,f);
+    case &ReachableFL(d):
+      let r1 = rvals->hd;
+      let r2 = rvals->tl->hd;
+      if(initlevel(d,r1)==NoneIL)
+	Tcutil::terr(es->hd->loc,"expression may not be initialized");
+      if(initlevel(d,r2)==NoneIL)
+	Tcutil::terr(es->tl->hd->loc,"expression may not be initialized");
+      switch($(r1,r2)) {
+      case $(&UnknownR(il),Zero): // f is correct for both args b/c unordered
+	return splitzero(env,f,f,es->hd,il);
+      case $(Zero,&UnknownR(il)):
+	return splitzero(env,f,f,es->tl->hd,il);
+      default: return $(f,f);
+      }
+    }
+  default: break;
+  }
+  let $(f,r) = anal_Rexp(env,inflow,e);
+  switch(f) {
+  case BottomFL: return $(f,f);
+  case &ReachableFL(d):
+    switch(r) {
+    case Zero: return $(BottomFL,f);
+    case NotZeroThis:
+    case NotZeroAll:
+    case &AddressOf(_): return $(f,BottomFL);
+    case &UnknownR(NoneIL):
+    case &Esc(NoneIL): 	
+      Tcutil::terr(e->loc,"expression may not be initialized");
+      return $(BottomFL,BottomFL);
+    case &UnknownR(il): return splitzero(env,inflow,f,e,il);
+    case &Esc(_):       return $(f,f);
+    case &Aggregate(_): throw new Core::Impossible("anal_test");
+    }
+  }
+}
+
+static cf_stmt_annot_t@ pre_stmt_check(analenv_t env, flow_t inflow, stmt_t s){
   let annot = get_stmt_annot(s);
-  // merge in the flow we're passed with flow from non-local preds and 
-  // earlier iterations
-  annot->flow = join_flow(env->all_changed, in_flow, annot->flow);
+  // join inflow with flow from non-local preds and earlier iterations
+  annot->flow = join_flow(env->all_changed, inflow, annot->flow);
   // keep the iteration count right
   ++annot->visited;
-  assert(annot->visited == iteration_num);
+  assert(annot->visited == env->iteration_num);
   return annot;
 }
 
-static flow_info_t add_init_vars_flow(analenv_t env, flow_info_t flow,
-				      list_t<vardecl_t,`r> vds) {
-  switch(flow) {
-  case BottomFL:   return BottomFL;
-  case &InitsFL(d): 
-    for(; vds != NULL; vds = vds->tl) {
-      let root  = new VarRoot(vds->hd);
-      let pinfo = assign_unknown_dict(AllIL, Dict::lookup(env->roots, root));
-      d = Dict::insert(d, root, pinfo);
-    }
-    return new InitsFL(d);
-  }
-}
-
-// To do: share VarRoot's to avoid re-allocation
-static flow_info_t add_vardecls_flow(analenv_t env, flow_info_t flow,
-				     list_t<vardecl_t,`r> vds) {
-  switch(flow) {
-  case BottomFL: return BottomFL;
-  case &InitsFL(d): 
-    for(; vds != NULL; vds = vds->tl) {
-      let root = new VarRoot(vds->hd);
-      d = Dict::insert(d, root, Dict::lookup(env->roots, root));
-    }
-    return new InitsFL(d);
-  }
-}
-
-static $(flow_info_t,flow_info_t) 
-cf_evalguard(analenv_t env, Position::seg_t loc, list_t<absexp_t> aes,
-	     flow_info_t in_flow) {
-  if(aes->hd == aes->tl->hd) { // optimize for common case
-    let out_flow = eval_absexp(env, loc, aes->hd, in_flow);
-    return $(out_flow,out_flow);
-  }
-  return $(eval_absexp(env, loc, aes->hd,     in_flow),
-	   eval_absexp(env, loc, aes->tl->hd, in_flow));
-}
-
-// for now, pat_vars are initialized FIX WHEN WE INTERPRET PATTERNS
-// also some unnecessary allocation here 
-static flow_info_t cf_analyze_switch_clauses(analenv_t env,
-					     list_t<switch_clause_t> scs, 
-					     list_t<absexp_t> aes, 
-					     flow_info_t in_flow) {
+// For now, PATTERN VARS ARE INITIALIZED
+static flow_t anal_scs(analenv_t env,flow_t inflow,list_t<switch_clause_t> scs){
   for(; scs != NULL; scs = scs->tl) {
     let &Switch_clause(_,vds_opt,where_opt,body,_) = scs->hd;
-    let body_inflow = add_vardecls_flow(env, in_flow, vds_opt->v);
-    // for now immediately initialize them -- more allocation and 
-    // WRONG WHEN WE INTERPRET PATTERNS
-    body_inflow = add_init_vars_flow(env, body_inflow, vds_opt->v);
-
-    flow_info_t body_outflow;
+    flow_t clause_inflow = add_vars(inflow,vds_opt->v,unknown_all); 
+    flow_t clause_outflow;
     if(where_opt != NULL) {
-      let $(true_flow,false_flow) =
-	cf_evalguard(env, ((exp_t)where_opt)->loc, aes,  body_inflow);
-      aes     = aes->tl->tl;
-      in_flow = false_flow;
-      body_outflow = cf_analyze_stmt(env, body, true_flow);
+      let $(true_flow,false_flow) = 
+	anal_test(env,clause_inflow,(exp_t)where_opt);
+      inflow = false_flow; // affects remaining clauses
+      clause_outflow = anal_stmt(env,true_flow,body);
     } else
-      body_outflow = cf_analyze_stmt(env, body, body_inflow);
-    switch(body_outflow) {
+      clause_outflow = anal_stmt(env,clause_inflow,body);
+    switch(clause_outflow) {
     case BottomFL: break;
-    default: 
+    default:
       // no need for a break/fallthru for the last case
       if(scs->tl == NULL)
-	return body_outflow;
+	return clause_outflow;
       else {
 	// if the next case has pattern variables, we need an explicit fallthru
 	// else just issue a warning
@@ -721,7 +788,7 @@ static flow_info_t cf_analyze_switch_clauses(analenv_t env,
 	else 
 	  Tcutil::warn(body->loc, "switch clause may implicitly fallthru");
 	// in any case, we must update the flow there!
-	update_flow(env, scs->tl->hd->body, body_outflow);
+	update_flow(env, scs->tl->hd->body, clause_outflow);
       }
       break;
     }
@@ -729,122 +796,153 @@ static flow_info_t cf_analyze_switch_clauses(analenv_t env,
   return BottomFL; // not reached if last case falls through
 }
 
-flow_info_t cf_analyze_stmt(analenv_t env, stmt_t s, flow_info_t in_flow) {
-  let annot = pre_stmt_check(env,in_flow,s);
-  in_flow = annot->flow;
-  let aes = annot->absexps;
+static flow_t anal_stmt(analenv_t env, flow_t inflow, stmt_t s) {
+  let annot = pre_stmt_check(env,inflow,s);
+  inflow = annot->flow;
 
   switch(s->r) {
-  case Skip_s: return in_flow;
+  case Skip_s: return inflow;
     // FIX: when have init parameters, check they're init by "using" them here
   case &Return_s(NULL): return BottomFL;
   case &Return_s(e):    
-    eval_absexp(env, e->loc, aes->hd, in_flow); 
+    let $(f,r) = anal_Rexp(env,inflow,(exp_t)e);
+    use_Rval(env,e->loc,f,r);
     return BottomFL;
     
-  case &Exp_s(e): return eval_absexp(env, e->loc, aes->hd, in_flow);
+  case &Exp_s(e): return anal_Rexp(env,inflow,e)[0];
 
-  case &Seq_s(s1,s2):
-    return cf_analyze_stmt(env, s2, cf_analyze_stmt(env, s1, in_flow));
+  case &Seq_s(s1,s2): return anal_stmt(env, anal_stmt(env, inflow, s1), s2);
 
   case &IfThenElse_s(e,s1,s2):
-    let $(true_flow,false_flow) = cf_evalguard(env, e->loc, aes, in_flow);
+    let $(f1t,f1f) = anal_test(env,inflow,e);
     return join_flow(env->all_changed,
-		     cf_analyze_stmt(env, s1, true_flow),
-		     cf_analyze_stmt(env, s2, false_flow));
+		     anal_stmt(env,f1t,s1),
+		     anal_stmt(env,f1f,s2));
+
   case &While_s($(e,cont),body):
-    let e_inflow = pre_stmt_check(env,in_flow,cont)->flow;
-    let $(true_flow,false_flow) = cf_evalguard(env, e->loc, aes, e_inflow);
-    let body_outflow = cf_analyze_stmt(env, body, true_flow);
+    let e_inflow = pre_stmt_check(env,inflow,cont)->flow;
+    let $(f1t,f1f) = anal_test(env,e_inflow,e);
+    let body_outflow = anal_stmt(env,f1t,body);
     update_flow(env, cont, body_outflow);
-    return false_flow;
+    return f1f;
   case &Do_s(body,$(e,cont)):
-    let body_outflow = cf_analyze_stmt(env, body, in_flow);
+    let body_outflow = anal_stmt(env,inflow,body);
     let e_inflow = pre_stmt_check(env,body_outflow,cont)->flow;
-    let $(true_flow,false_flow) = cf_evalguard(env, e->loc, aes, e_inflow);
-    update_flow(env, body, true_flow);
-    return false_flow;
+    let $(f1t,f1f) = anal_test(env,e_inflow,e);
+    update_flow(env, body, f1t);
+    return f1f;
   case &For_s(e1,$(e2,guard),$(e3,cont),body):
-    let e1_outflow = eval_absexp(env, e1->loc, aes->hd, in_flow);
+    let e1_outflow = anal_Rexp(env,inflow,e1)[0];
     let e2_inflow  = pre_stmt_check(env,e1_outflow,guard)->flow;
-    let $(true_flow,false_flow) = cf_evalguard(env,e2->loc,aes->tl,e2_inflow);
-    let body_outflow = cf_analyze_stmt(env, body, true_flow);
+    let $(f2t,f2f) = anal_test(env,e2_inflow,e2);
+    let body_outflow = anal_stmt(env,f2t,body);
     let e3_inflow  = pre_stmt_check(env,body_outflow,cont)->flow;
-    let e3_outflow = eval_absexp(env, e3->loc, aes->tl->tl->tl->hd, e3_inflow);
+    let e3_outflow = anal_Rexp(env,e3_inflow,e3)[0];
     update_flow(env, guard, e3_outflow);
-    return false_flow;
+    return f2f;
 
     // eg. of when this can happen is when destination is end of function
   case &Break_s(NULL): return BottomFL;
-  case &Fallthru_s(es,&destclause):
-    // The gunk is because the next case's binding vars are still in scope!
+  case &Fallthru_s(es,&destclause): 
+    let $(f,rvals) = anal_unordered_Rexps(env,inflow,es);
     // FIX: WHEN WE INTERPRET PATTERNS
-    let out_flow = eval_absexp(env, s->loc, aes->hd, in_flow);
-    let ftvars = destclause->pat_vars->v;
-    out_flow = add_vardecls_flow(env, out_flow, ftvars);
-    out_flow = add_init_vars_flow(env, out_flow, ftvars);
-    update_flow(env, (stmt_t)(destclause->body), out_flow);
+    for(; rvals != NULL; rvals = rvals->tl, es = es->tl)
+      f = use_Rval(env,es->hd->loc,f,rvals->hd);
+    // The gunk is because the next case's binding vars are still in scope!
+    f = add_vars(f,destclause->pat_vars->v,unknown_all);
+    update_flow(env, (stmt_t)(destclause->body), f);
     return BottomFL;
   case &Break_s(dest):    fallthru(dest);
   case &Continue_s(dest): fallthru(dest);
   case &Goto_s(_,dest):
-    update_flow(env, (stmt_t)dest, in_flow);
+    // check we don't jump into scope -- this is totally orthogonal to 
+    // the rest of control-flow checking, so we only do it the first iteration
+    if(env->iteration_num==1) {
+      let my_encloser   = annot->encloser;
+      let dest_encloser = get_stmt_annot((stmt_t)dest)->encloser;
+      while(dest_encloser != my_encloser) {
+	let next_encloser = get_stmt_annot(my_encloser)->encloser;
+	if(next_encloser == my_encloser) { // function body is own encloser
+	  Tcutil::terr(s->loc, "goto enters local scope or exception handler");
+	  break;
+	}
+	my_encloser = next_encloser;
+      }
+    } 
+    // now just update the dest's flow
+    update_flow(env, (stmt_t)dest, inflow);
     return BottomFL;
 
   case &Switch_s(e,scs):
-    return cf_analyze_switch_clauses(env, scs, aes->tl,
-				     eval_absexp(env,e->loc,aes->hd,in_flow));
+    let $(f,r) = anal_Rexp(env,inflow,e);
+    f = use_Rval(env,e->loc,f,r);
+    return anal_scs(env,f,scs);
     
-  case &TryCatch_s(s,scs):
+  case &TryCatch_s(s1,scs):
     // order very important here
-    let &AnalEnv(_,old_in_try,old_tryflow,_) = env;
+    bool   old_in_try  = env->in_try;
+    flow_t old_tryflow = env->tryflow;
     env->in_try  = true;
-    env->tryflow = in_flow;
-    let s_outflow  = cf_analyze_stmt(env, s, in_flow); 
-    let scs_inflow = env->tryflow;
+    env->tryflow = inflow;
+    flow_t s1_outflow = anal_stmt(env,inflow,s1);
+    flow_t scs_inflow = env->tryflow;
     env->in_try  = old_in_try;
     env->tryflow = old_tryflow;
     // sound KLUDGE (see update_tryflow)
-    update_tryflow(env, scs_inflow);
-    let scs_outflow = cf_analyze_switch_clauses(env, scs, aes, scs_inflow);
-    return join_flow(env->all_changed, s_outflow, scs_outflow);
+    update_tryflow(env,scs_inflow); // necessary?
+    flow_t scs_outflow = anal_scs(env,scs_inflow,scs);
+    switch(scs_outflow) {
+    case BottomFL: break;
+    default: Tcutil::terr(s->loc, "last catch clause may implicitly fallthru");
+    }
+    return s1_outflow; // really join with scs_outflow, but it's BottomFL;
 
+  case &Decl_s(d,s): return anal_stmt(env,anal_decl(env,inflow,d),s);
+
+  case &Label_s(_,s): return anal_stmt(env,inflow,s);
+
+  case &Region_s(tv,vd,s):
+    let vds = List(vd,NULL);
+    inflow = add_vars(inflow,&vds,unknown_all);
+    return anal_stmt(env,inflow,s);
+
+  default: throw new Core::Impossible("anal_stmt -- bad stmt syntax"
+                                      " or unimplemented stmt form");
+  }
+}
+
+
+static flow_t anal_decl(analenv_t env, flow_t inflow, decl_t decl) {
+  switch(decl->r) {
     // Note: We don't need to add initialized vars as changed things
     //       because they won't escape to unordered siblings???
     
-    // for var, add to dict as uninitialized before ae
-    //   translation arleady does the initialization assignment!!
-  case &Decl_s(&Decl(&Var_d(vd),_),s):
-    let l = List(vd,NULL);
-    let e_flow = add_vardecls_flow(env, in_flow, &l);
+  case &Var_d(vd):
+    let vds = List(vd,NULL);
+    inflow = add_vars(inflow,&vds,unknown_none);
     let e = vd->initializer;
-    if(e != NULL)
-      e_flow = eval_absexp(env, ((exp_t)e)->loc, aes->hd, e_flow);
-    return cf_analyze_stmt(env, s, e_flow);
+    if(e==NULL)
+      return inflow;
+    let $(f,r) = anal_Rexp(env,inflow,(exp_t)e);
+    switch(f) {
+    case BottomFL: return BottomFL;
+    case &ReachableFL(outdict):
+      outdict = assign_place(decl->loc,outdict,env->all_changed,
+			     new Place(new VarRoot(vd),NULL), r);
+      let outflow = new ReachableFL(outdict);
+      update_tryflow(env,outflow);
+      return outflow;
+    }
 
-    // for pat, add to dict as uninitialized before ae and then initialize
-    //   after ae, translation assigns e to Unknown!
-    // FIX WHEN WE INTERPRET PATTERNS!!!
-  case &Decl_s(&Decl(&Let_d(_,&Opt(vds),_,e,_),_),s):
-    let body_inflow =
-      eval_absexp(env, e->loc, aes->hd, add_vardecls_flow(env, in_flow, vds));
-    // THIS PART GOES AWAY WHEN WE INTERPRET PATTERNS
-    body_inflow = add_init_vars_flow(env, body_inflow, vds);
-    return cf_analyze_stmt(env, s, body_inflow);
+    // FIX WHEN WE INTERPRET PATTERNS!!! SPECIAL-CASE VAR-PATTERN?
+  case &Let_d(_,&Core::Opt(vds),_,e,_):
+    let $(f,r) = anal_Rexp(env,inflow,e);
+    f = use_Rval(env,e->loc,f,r);
+    return add_vars(f,vds,unknown_all);
 
-  case &Decl_s(&Decl(&Letv_d(vds),_),s):
-    return cf_analyze_stmt(env, s, add_vardecls_flow(env, in_flow, vds));
+  case &Letv_d(vds): return add_vars(inflow,vds,unknown_none);
 
-  case &Label_s(_,s): return cf_analyze_stmt(env,s,in_flow);
-
-  case &Region_s(tv,vd,s):
-    let vds = new List{vd,NULL};
-    let body_inflow = add_vardecls_flow(env, in_flow, vds);
-    body_inflow = add_init_vars_flow(env, body_inflow, vds);
-    return cf_analyze_stmt(env, s, body_inflow);
-
-  default: throw new Core::Impossible("cf_analyze_stmt -- bad stmt syntax"
-                                      " or unimplemented stmt form");
+  default: throw new Core::Impossible("anal_decl: unexpected decl variant");
   }
 }
 
@@ -853,82 +951,62 @@ flow_info_t cf_analyze_stmt(analenv_t env, stmt_t s, flow_info_t in_flow) {
 // Note: This is just a space optimization.  Out of laziness, we don't
 //       traverse expressions to find nested statements (due to StmtExp_e),
 //       so the space for such annotations leaks.
-void cf_postpass(stmt_t s) {
+static void postpass(stmt_t s) {
   s->annot = EmptyAnnot;
   switch(s->r) {
-  case &Seq_s(s1,s2): fallthru(s1,s2);
-  case &IfThenElse_s(_,s1,s2):
-    cf_postpass(s1);
-    cf_postpass(s2);
-    return;
-  case &For_s(_,$(_,s2),$(_,s3),s1): 
-    cf_postpass(s3); 
-    fallthru(s1,s2);
-  case &While_s($(_,s2),s1): fallthru(s1,s2);
-  case &Do_s(s1,$(_,s2)): 
-    cf_postpass(s2);
-    fallthru(s1);
+  case &For_s(_,$(_,s2),$(_,s3),s1): postpass(s3); fallthru(s1,s2);
+
+  case &Seq_s(s1,s2):          fallthru(s1,s2);
+  case &While_s($(_,s2),s1):   fallthru(s1,s2);
+  case &Do_s(s1,$(_,s2)):      fallthru(s1,s2);
+  case &IfThenElse_s(_,s1,s2): postpass(s1); fallthru(s2);
+
   case &Region_s(_,_,s1): fallthru(s1);
-  case &Label_s(_,s1): fallthru(s1);
-  case &Decl_s(_,s1):    
-    cf_postpass(s1);
-    return;
-  case &TryCatch_s(s1,scs):
-    cf_postpass(s1);
-    fallthru(scs);
+  case &Label_s(_,s1):    fallthru(s1);
+  case &Decl_s(_,s1):     postpass(s1); return;
+
+  case &TryCatch_s(s1,scs): postpass(s1); fallthru(scs);
   case &Switch_s(_,scs):
     for(; scs != NULL; scs = scs->tl)
-      cf_postpass(scs->hd->body);
+      postpass(scs->hd->body);
     return;
-  default:
-    return;
+  default: return;
   }
 }
 
 //////////////////////////// Top-level ////////////////////////////////
-void cf_check_fun(fndecl_t fd) {
-  //  fprintf(Stdio::stderr,"%s",*(*fd->name)[1]);
-  absenv_t absenv = new AbsEnv(Dict::empty(local_root_cmp));
-  let arg_vds = fd->param_vardecls->v;
-  for(_ vds = arg_vds; vds != NULL; vds = vds->tl)
-    add_var_root(absenv, vds->hd);
-  cf_prepass(absenv,fd->body);
 
-  // TO DO: account for init qualifier (add ThisIL for those params and
-  //        check them on return and on fall off void)
-  let analenv = new AnalEnv(absenv->all_roots, false, BottomFL, NULL);
-  flow_info_t in_flow = new InitsFL(Dict::empty(local_root_cmp));
-  in_flow = add_init_vars_flow(analenv, in_flow, arg_vds);
-
-  flow_info_t out_flow = in_flow;
-  iteration_num    = 0;
-  iterate_cf_check = true;
-  while(iterate_cf_check) {
-    //    printf("\n");
-    ++iteration_num;
-    iterate_cf_check = false;
-    out_flow = cf_analyze_stmt(analenv, fd->body, in_flow);
+// TO DO: account for init qualifier (add ThisIL for those params and
+//        check them on return and on fall off void)
+static void check_fun(fndecl_t fd) {
+  //  fprintf(stderr," %s ",*(*fd->name)[1]);
+  flow_t inflow = add_vars(new ReachableFL(Dict::empty(root_cmp)),
+			   fd->param_vardecls->v,
+			   unknown_all);
+  analenv_t env = new AnalEnv(true,0,false,inflow,NULL);
+  flow_t outflow = inflow;
+  while(env->iterate_again) {
+    ++(env->iteration_num);
+    env->iterate_again = false;
+    outflow = anal_stmt(env, inflow, fd->body);
   }
 
-  switch(out_flow) {
+  switch(outflow) {
   case BottomFL: break;
   default: 
     if(fd->ret_type != VoidType)
-      Tcutil::terr(fd->body->loc, 
-		   "function may complete without returning a value");
-    break;
+      Tcutil::terr(fd->body->loc, "function may not return a value");
   }
-  cf_postpass(fd->body);
+  postpass(fd->body);
 }
 
 void cf_check(list_t<decl_t> ds) {
-  for(; ds != NULL; ds = ds->tl) {
+  for(; ds != NULL; ds = ds->tl)
     switch(ds->hd->r) {
-    case &Fn_d(fd):           cf_check_fun(fd); break;
+    case &Fn_d(fd):	      check_fun(fd); break;
     case &ExternC_d(ds2):     fallthru(ds2);
     case &Using_d(_,ds2):     fallthru(ds2);
     case &Namespace_d(_,ds2): cf_check(ds2); break;
     default: break;
     }
-  }
 }

@@ -44,21 +44,23 @@ set_derives()
   register shorts ?delts;
 
   dset = NEW2P(nvars, shorts *) - ntokens;
+  
   delts = new{for _temp_<nrules+1:shorts_tag{NULL, 0u}};
   
   p = delts;
+  
   for (i = nrules; i > 0; i--)
     {
       lhs = rlhs[i];
       if (lhs >= 0)
 	{
-       	  p->next = dset[lhs];
-          p->value = (short)i;
+	  p->next = dset[lhs];
+	  p->value = (short)i;
 	  dset[lhs] = (shorts *)p;
 	  p++;
 	}
     }
-
+  
   derives = NEW2P(nvars, short ?) - ntokens;
   q = NEW2(nvars + nrules, short);
 

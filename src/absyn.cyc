@@ -740,10 +740,10 @@ stringptr_t fieldname(int i) {
   return field_names[i];
 }
 
-  void print_decls(list_t<decl_t> decls) {
-    Marshal::print_type(decls_rep,&decls);
-      printf("\n");
-  }
+void print_decls(list_t<decl_t> decls) {
+  Marshal::print_type(decls_rep,&decls);
+  printf("\n");
+}
   
 }
 

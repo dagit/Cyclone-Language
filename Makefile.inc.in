@@ -172,7 +172,6 @@ CYCLONE_SRCS:=absyn\
          toc\
          tovc\
          cf_flowinfo\
-         cf_absexp\
          new_control_flow\
          interface\
 	 tcdecl\
@@ -191,7 +190,6 @@ CYCDOC_SRCS:=cycdoc\
 	tcdecl\
 	tcgenrep\
 	new_control_flow\
-	cf_absexp\
 	cf_flowinfo\
 	formatstr\
 	evexp\

@@ -23,6 +23,7 @@
 #include <list.h>
 #include <set.h>
 #include <dict.h>
+#include <position.h>
 #include "absyn.h"
 
 // Note: Okasaki's dictionaries may be the wrong thing here because
@@ -39,39 +40,37 @@
 
 namespace CfFlowInfo {
 
-extern tunion LocalRoot;
-extern struct Place<`r::R>;
-extern tunion Escaped;
-extern tunion InitLevel;
-extern struct InitState;
-extern tunion PathInfo;
-extern tunion FlowInfo;
-typedef tunion LocalRoot local_root_t;
-typedef struct Place<`r1> @`r2 place_t<`r1,`r2>;
-typedef tunion Escaped escaped_t;
-typedef tunion InitLevel init_level_t;
-typedef struct InitState init_state_t;
-typedef tunion PathInfo path_info_t;
-typedef Dict::dict_t<`a,path_info_t,`H> pinfo_dict_t<`a>;
-typedef tunion FlowInfo flow_info_t;
 // Do not ever mutate any data structures built from these -- they share a lot!
-EXTERN_CFFLOW tunion LocalRoot {
+EXTERN_CFFLOW tunion Root {
   VarRoot(Absyn::vardecl_t);
   MallocPt(Absyn::exp_t); // misnamed when do other analyses??
 };
-EXTERN_CFFLOW struct Place<`r1::R> {
-  local_root_t root;
-  List::list_t<Absyn::field_name_t,`r1> fields;
+typedef tunion Root root_t;
+
+EXTERN_CFFLOW struct Place<`r::R> {
+  root_t root;
+  List::list_t<Absyn::field_name_t,`r> fields;
 };
-EXTERN_CFFLOW tunion Escaped { Esc, Unesc };
-EXTERN_CFFLOW tunion InitLevel { NoneIL, ThisIL, AllIL, MustPointTo(place_t) };
-EXTERN_CFFLOW struct InitState {
-  escaped_t esc;
-  init_level_t level; // cannot be MustPointTo if esc is Esc
-};
-EXTERN_CFFLOW tunion PathInfo {
-  LeafPI(init_state_t);
-  DictPI(pinfo_dict_t<Absyn::field_name_t>); // for all record-like types
+typedef struct Place<`r1> @`r2 place_t<`r1,`r2>;
+
+EXTERN_CFFLOW tunion InitLevel { NoneIL, ThisIL, AllIL };
+typedef tunion InitLevel initlevel_t;
+
+EXTERN_CFFLOW tunion AbsLVal { PlaceL(place_t); UnknownL; };
+typedef tunion AbsLVal absLval_t;
+
+EXTERN_CFFLOW tunion AbsRVal;
+typedef tunion AbsRVal absRval_t;
+typedef Dict::dict_t<root_t,             absRval_t> flowdict_t;
+typedef Dict::dict_t<Absyn::field_name_t,absRval_t> aggrdict_t;
+EXTERN_CFFLOW tunion AbsRVal {
+  Zero;
+  NotZeroAll;
+  NotZeroThis;
+  UnknownR(initlevel_t);
+  Esc(initlevel_t); // as an rval means same thing as UnknownR!!
+  AddressOf(place_t);
+  Aggregate(aggrdict_t);
 };
 // Note: It would be correct to make the domain of the pinfo_dict_t
 //       constant (all local roots in the function), but it easy to argue
@@ -83,35 +82,35 @@ EXTERN_CFFLOW tunion PathInfo {
 // join takes the intersection of the dictionaries.
 EXTERN_CFFLOW tunion FlowInfo {
   BottomFL;
-  InitsFL(pinfo_dict_t<local_root_t>);
+  ReachableFL(flowdict_t);
 };
+typedef tunion FlowInfo flow_t;
 
 typedef Set::set_t<place_t> place_set_t;
 extern place_set_t mt_place_set();
 
-extern path_info_t mkLeafPI(escaped_t esc, init_level_t il);
+extern absRval_t unknown_none;
+extern absRval_t unknown_this;
+extern absRval_t unknown_all;
 
-extern int local_root_cmp(local_root_t, local_root_t);
+extern int root_cmp(root_t, root_t);
 extern int place_cmp(place_t, place_t);
-extern path_info_t typ_to_unesc_none_pinfo(Absyn::type_t t);
-extern path_info_t lookup_place(pinfo_dict_t<local_root_t> d, place_t place);
-extern pinfo_dict_t<local_root_t> insert_place(pinfo_dict_t<local_root_t> d, 
-					       place_t place, 
-					       path_info_t pinfo);
 
-extern bool isAllInit(pinfo_dict_t<local_root_t> pinfo_dict, path_info_t pinfo);
+extern absRval_t typ_to_absrval(Absyn::type_t t, absRval_t leafval);
 
-extern pinfo_dict_t<local_root_t> 
-escape_pointsto(path_info_t pinfo,
-		pinfo_dict_t<local_root_t> d,
-		place_set_t * all_changed);
-extern path_info_t assign_unknown_dict(init_level_t, path_info_t);
+extern initlevel_t initlevel   (flowdict_t d, absRval_t r);
+extern absRval_t   lookup_place(flowdict_t d, place_t place);
+extern bool        is_unescaped(flowdict_t d, place_t place);
+extern bool flow_lessthan_approx(flow_t f1, flow_t f2);
 
-extern flow_info_t join_flow(place_set_t*,flow_info_t,flow_info_t);
-
-extern flow_info_t after_flow(place_set_t*,flow_info_t,flow_info_t,
-			      place_set_t,place_set_t);
-
-extern bool flow_lessthan_approx(flow_info_t f1, flow_info_t f2);
+  // all of the following throw EscNotInit as appropriate
+  // the field list in the thrown place_t might be empty even if it shouldn't be
+extern flowdict_t escape_deref(flowdict_t d, place_set_t * all_changed,
+			       absRval_t r);
+extern flowdict_t assign_place(Position::seg_t loc, flowdict_t d,
+			       place_set_t * all_changed, place_t<`H,`H> place,
+			       absRval_t r);
+extern flow_t join_flow(place_set_t*,flow_t,flow_t); 
+extern flow_t after_flow(place_set_t*,flow_t,flow_t,place_set_t,place_set_t);
 }
 #endif

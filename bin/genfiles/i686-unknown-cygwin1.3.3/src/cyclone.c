@@ -745,27 +745,28 @@ extern struct Cyc_Tcenv_Tenv* Cyc_Tcenv_tc_init(); extern unsigned char Cyc_Tcut
 te, int var_default_init, struct Cyc_List_List* ds); extern struct Cyc_List_List*
 Cyc_Tc_treeshake( struct Cyc_Tcenv_Tenv* te, struct Cyc_List_List*); extern
 struct Cyc_List_List* Cyc_Toc_toc( struct Cyc_List_List* ds); extern struct Cyc_List_List*
-Cyc_Tovc_tovc( struct Cyc_List_List* decls); struct Cyc_CfFlowInfo_Place; struct
-Cyc_CfFlowInfo_InitState; static const int Cyc_CfFlowInfo_VarRoot= 0; struct Cyc_CfFlowInfo_VarRoot_struct{
-int tag; struct Cyc_Absyn_Vardecl* f1; } ; static const int Cyc_CfFlowInfo_MallocPt=
-1; struct Cyc_CfFlowInfo_MallocPt_struct{ int tag; struct Cyc_Absyn_Exp* f1; } ;
-struct Cyc_CfFlowInfo_Place{ void* root; struct Cyc_List_List* fields; } ;
-static const int Cyc_CfFlowInfo_Esc= 0; static const int Cyc_CfFlowInfo_Unesc= 1;
-static const int Cyc_CfFlowInfo_NoneIL= 0; static const int Cyc_CfFlowInfo_ThisIL=
-1; static const int Cyc_CfFlowInfo_AllIL= 2; static const int Cyc_CfFlowInfo_MustPointTo=
-0; struct Cyc_CfFlowInfo_MustPointTo_struct{ int tag; struct Cyc_CfFlowInfo_Place*
-f1; } ; struct Cyc_CfFlowInfo_InitState{ void* esc; void* level; } ; static
-const int Cyc_CfFlowInfo_LeafPI= 0; struct Cyc_CfFlowInfo_LeafPI_struct{ int tag;
-struct Cyc_CfFlowInfo_InitState f1; } ; static const int Cyc_CfFlowInfo_DictPI=
-1; struct Cyc_CfFlowInfo_DictPI_struct{ int tag; struct Cyc_Dict_Dict* f1; } ;
-static const int Cyc_CfFlowInfo_BottomFL= 0; static const int Cyc_CfFlowInfo_InitsFL=
-0; struct Cyc_CfFlowInfo_InitsFL_struct{ int tag; struct Cyc_Dict_Dict* f1; } ;
-struct Cyc_NewControlFlow_AnalEnv{ struct Cyc_Dict_Dict* roots; int in_try; void*
-tryflow; struct Cyc_Set_Set** all_changed; } ; extern void Cyc_NewControlFlow_cf_check(
-struct Cyc_List_List* ds); struct Cyc_Interface_I; extern struct Cyc_Interface_I*
-Cyc_Interface_empty(); extern struct Cyc_Interface_I* Cyc_Interface_final();
-extern struct Cyc_Interface_I* Cyc_Interface_extract( struct Cyc_Dict_Dict* ae);
-struct _tuple8{ struct _tagged_arr f1; struct _tagged_arr f2; } ; extern int Cyc_Interface_is_subinterface(
+Cyc_Tovc_tovc( struct Cyc_List_List* decls); static const int Cyc_CfFlowInfo_VarRoot=
+0; struct Cyc_CfFlowInfo_VarRoot_struct{ int tag; struct Cyc_Absyn_Vardecl* f1;
+} ; static const int Cyc_CfFlowInfo_MallocPt= 1; struct Cyc_CfFlowInfo_MallocPt_struct{
+int tag; struct Cyc_Absyn_Exp* f1; } ; struct Cyc_CfFlowInfo_Place{ void* root;
+struct Cyc_List_List* fields; } ; static const int Cyc_CfFlowInfo_NoneIL= 0;
+static const int Cyc_CfFlowInfo_ThisIL= 1; static const int Cyc_CfFlowInfo_AllIL=
+2; static const int Cyc_CfFlowInfo_PlaceL= 0; struct Cyc_CfFlowInfo_PlaceL_struct{
+int tag; struct Cyc_CfFlowInfo_Place* f1; } ; static const int Cyc_CfFlowInfo_UnknownL=
+0; static const int Cyc_CfFlowInfo_Zero= 0; static const int Cyc_CfFlowInfo_NotZeroAll=
+1; static const int Cyc_CfFlowInfo_NotZeroThis= 2; static const int Cyc_CfFlowInfo_UnknownR=
+0; struct Cyc_CfFlowInfo_UnknownR_struct{ int tag; void* f1; } ; static const
+int Cyc_CfFlowInfo_Esc= 1; struct Cyc_CfFlowInfo_Esc_struct{ int tag; void* f1;
+} ; static const int Cyc_CfFlowInfo_AddressOf= 2; struct Cyc_CfFlowInfo_AddressOf_struct{
+int tag; struct Cyc_CfFlowInfo_Place* f1; } ; static const int Cyc_CfFlowInfo_Aggregate=
+3; struct Cyc_CfFlowInfo_Aggregate_struct{ int tag; struct Cyc_Dict_Dict* f1; }
+; static const int Cyc_CfFlowInfo_BottomFL= 0; static const int Cyc_CfFlowInfo_ReachableFL=
+0; struct Cyc_CfFlowInfo_ReachableFL_struct{ int tag; struct Cyc_Dict_Dict* f1;
+} ; extern void Cyc_NewControlFlow_cf_check( struct Cyc_List_List* ds); struct
+Cyc_Interface_I; extern struct Cyc_Interface_I* Cyc_Interface_empty(); extern
+struct Cyc_Interface_I* Cyc_Interface_final(); extern struct Cyc_Interface_I*
+Cyc_Interface_extract( struct Cyc_Dict_Dict* ae); struct _tuple8{ struct
+_tagged_arr f1; struct _tagged_arr f2; } ; extern int Cyc_Interface_is_subinterface(
 struct Cyc_Interface_I* i1, struct Cyc_Interface_I* i2, struct _tuple8* info);
 extern struct Cyc_Interface_I* Cyc_Interface_get_and_merge_list( struct Cyc_Interface_I*(*
 get)( void*), struct Cyc_List_List* la, struct Cyc_List_List* linfo); extern

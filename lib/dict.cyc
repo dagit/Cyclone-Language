@@ -390,14 +390,18 @@ bool forall_intersect(bool f(`a,`b,`b), dict_t<`a,`b> d1, dict_t<`a,`b> d2) {
   return forall_c(forall_intersect_f, &env, d1);
 }
 
-// TO DO: Add the env version for union_two.
 static dict_t<`a,`b,`r2> union_f($(`b (@f)(`c,`a,`b,`b),`c)@ env, `a a, `b b, 
                                      dict_t<`a,`b,`r2> d1)
 {
-  if(Dict::member(d1,a))
-    return Dict::insert(d1, a, (*env)[0]((*env)[1], a, Dict::lookup(d1, a), b));
-  else
-    return Dict::insert(d1, a, b);
+  if(Dict::member(d1,a)) {
+    // optimize same-for-same case
+    let old_val = Dict::lookup(d1,a);
+    let new_val = (*env)[0]((*env)[1], a, old_val, b);
+    if(new_val != old_val)
+      return Dict::insert(d1, a, new_val);
+    return d1;
+  } 
+  return Dict::insert(d1, a, b);
 }
 
 dict_t<`a,`b,`r1> union_two_c(`b (@f)(`c,`a,`b,`b), `c env, 

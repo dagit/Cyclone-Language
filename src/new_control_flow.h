@@ -28,27 +28,11 @@
 
 namespace NewControlFlow {
 
-using List;
-using CfFlowInfo;
-
 // to be used by the type-checking pass to get things set up for us
 extern void set_encloser(Absyn::stmt_t enclosee, Absyn::stmt_t encloser);
 
-extern struct AnalEnv {
-  pinfo_dict_t<local_root_t> roots; // the "uninit leaves" versions
-  bool        in_try;  // an optimization for the common case
-  flow_info_t tryflow; // updated by UseAE and AssignAE, used by TryCatch_s
-  place_set_t * all_changed; // NULL for not in unorderd so don't bother
-};
-typedef struct AnalEnv @ analenv_t;
-
-  // used by CFAbsexp::eval_absexp
-extern void update_tryflow(analenv_t env, flow_info_t new_flow);
-
-extern flow_info_t cf_analyze_stmt(analenv_t, Absyn::stmt_t, flow_info_t);
-
-// The entry point (the stuff above is just for cf_absexp, which is going away)
-extern void cf_check(list_t<Absyn::decl_t> ds);
+// the entry point
+extern void cf_check(List::list_t<Absyn::decl_t> ds);
 }
 
 #endif

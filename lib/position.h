@@ -46,10 +46,10 @@ namespace Position {
   extern tunion Error_kind { Lex, Parse, Elab };
   typedef tunion Error_kind error_kind_t;
   extern struct Error {
-    string_t       source;
+    string_t     source;
     seg_t        seg;
     error_kind_t kind;
-    string_t       desc;
+    string_t     desc;
   };
   typedef struct Error @error_t;
   extern error_t mk_err_lex(seg_t,string_t<`H>);

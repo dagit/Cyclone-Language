@@ -5,6 +5,8 @@ BUG FIXES and UNSOUNDNESSES:
 * there's a bug in control-flow checking of catch-phrases.  If you leave
   the "break" off of a case, then it re-raises the exception.
 
+* not inserting defaults for types in xtunion variant types?
+
 * we allow enum constructors to shadow other enum constructors even though
   C doesn't.  
 
