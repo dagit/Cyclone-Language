@@ -4,11 +4,10 @@
 using Core;
 using Stdio;
 
-// "main" is always called cyc_main in Cyclone
 int main() {
   // Get the command line arguments as an array of strings.
   // The first string is the name of the program.
-  string args[?] = std_args();  
+  string ?args = std_args();  
 
   if (args.size <= 1) 
     throw Failure("missing name!");

@@ -30,11 +30,11 @@ Project<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     <a href="#Tuples">Tuples</a><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    <a href="#Non-null Pointers:">Non-Null Pointers</a><br>
+    <a href="#Pointers:">Pointers</a><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     <a href="#Exceptions">Exceptions</a><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    <a href="#Variable Sized Arrays">Variable-Sized Arrays</a><br>
+    <a href="#Creating Arrays">Creating Arrays</a><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     <a href="#Subtyping">Subtyping and Coercions</a><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -63,13 +63,12 @@ Cyclone is intended to be a type-safe variant of C.&nbsp; The primary goals
 of Cyclone are to:
 </p>
 <ol>
-  <li><b>Be type safe</b> --- at a minimum, this should include support for
-    memory safety, and ideally, much more.&nbsp; As with languages such as 
-    ML or Java, modern typing features such as polymorphism, subtyping, 
-    abstract data types, etc. should all be supported so that programs may 
-    be easily assembled and debugged.&nbsp; Ideally, the type system should 
-    support static detection and elimination of as many errors as possible, 
-    falling back on dynamic checks only when necessary.</li>
+  <li><b>Not crash</b> --- ideally, there should be no way to write a
+    Cyclone program that causes a core dump (i.e., segmentation fault or
+    bus error, blue screen of death, etc.)
+    To achieve this, Cyclone uses a combination of static type checking,
+    extended static checking, dynamic checking, and specially prepared 
+    libraries.</li>
 
   <li><b>Support as much of C as possible</b> --- Cyclone should share as much
     with C as possible, including syntax, static semantics, data
@@ -88,7 +87,7 @@ matter.&nbsp; For instance, no one suggests building a run-time system
 in these languages.  
 Furthermore, today's implementations of 
 these languages make it relatively difficult to
-interface with legacy code written in C or to incrementally move program units
+interface with legacy code written in C, or to incrementally move program units
 from C to the safe setting.&nbsp; The goals of Cyclone are aimed at making it
 easier to build systems software without sacrificing safety or
 control.&nbsp;&nbsp;
@@ -97,12 +96,15 @@ control.&nbsp;&nbsp;
 <p>
 Of course, the two goals above are in direct conflict and thus we also see
 Cyclone as a driver for new research into safe, low-level languages.&nbsp; For
-instance, right now, all heap-allocated memory is reclaimed via (conservative)
+instance, right now, Cyclone supports a fairly rich form of stack allocation
+based on the Tofte-Talpin region type system.  This ensures that you never
+try to access a stack-allocated object outside of the lifetime of the object.
+However, all heap-allocated memory in Cyclone is reclaimed via (conservative)
 garbage collection.&nbsp; This is type safe, but prevents systems programmers
 from using Cyclone for latency-critical or space-sensitive applications.&nbsp;
 One of the big research goals of Cyclone is to introduce new typing
 abstractions, such as linear types or regions, that support programmer control
-over memory management without sacrificing safety.
+over heap memory management without sacrificing safety.
 </p>
 
 <p>
@@ -140,7 +142,8 @@ guarantee provided by the ESC system.  And in addition, one gets
 the extra (really amazing) bug-finding power of ESC.  However,
 as we argued above, many systems programming tasks cannot be
 coded in languages such as Java (or Modula-3) or at least can't
-be coded efficiently.  
+be coded efficiently.  In addition, it is difficult to move legacy
+code written in C to these environments.
 </p>
 <p>
 Consequently, we see the ESC and LCLint projects as complimentary
@@ -290,6 +293,8 @@ compiling it (just as with C).&nbsp;&nbsp;</p>
   <li>-noexpandtypedefs:&nbsp; do not expand type-defs during pretty-printing</li>
   <li>-q:&nbsp; quiet (do not print &quot;Compiling file: foo.....&quot; progress indicator; prints nothing unless error)</li>
   <li>-v:&nbsp; verbose (replace the progress indicator with verbose listing of each stage) -- this overrides -q</li>
+  <li>-noremoveunused: don't remove extern variables that aren't used</li>
+  <li>-nocyc: don't add the implicit Cyc:: namespace to the generated code</li>
 </ul>
 <p>We expect to put a more realistic front-end driver on Cyclone so that it will
 look just like a C compiler (and transparently invoke GCC for you.)&nbsp; Note
@@ -299,18 +304,21 @@ to C requires the -toc flag.&nbsp;&nbsp;</p>
 <p>The output of Cyclone includes the file &quot;cyc_include.h&quot; in the
 top-level directory, so make sure it's accessible when you invoke GCC on the
 resulting code.&nbsp;&nbsp;</p>
+
 <hr>
 <h2><a name="Hello World">Hello World</a></h2>
 <p>As a simple example of Cyclone, here is the canonical &quot;Hello&quot; world
 program:</p>
-<pre>  <font color="#008000">#include</font> &quot;<font color="#0000FF">core.h</font>&quot;  </pre>
+<pre>  <font color="#008000">#include</font> &quot;<font color="#0000FF">core.h</font>&quot;  
+  <font color="#008000">#include</font> &quot;<font color="#0000FF">stdio.h</font>&quot;  </pre>
 <pre>  <b>using</b> Core;
+  <b>using</b> Stdio;
+
   
-  <font color="#FF0000"><i>// &quot;main&quot; is always called cyc_main in Cyclone</i></font>
-  void <b>cyc_main</b>() {
+  int <b>main</b>() {
     <font color="#FF0000"><i>// Get the command line arguments as an array of strings.
     // The first string is the name of the program.</i></font>
-    string args[?] = std_args();  
+    string ?args = std_args();  
    
     <i><font color="#FF0000">// if there was no argument to the program, raise an error.</font></i>
     <b>if</b> (args.size &lt;= 1) 
@@ -319,49 +327,77 @@ program:</p>
       <b>printf</b>(&quot;<font color="#0000FF">Hello, %s.\n</font>&quot;,args[1]);
   }
   </pre>
-<p>There are a few things to note about the example:&nbsp; First, Cyclone uses
-the C-Preprocessor, hence the #include line.&nbsp; The file core.h can be found
-in the lib/ directory and includes a number of core definitions that just about
-any Cyclone compilation unit will need.&nbsp; The declaration &quot;using
-Core;&quot; opens up the Core namespace to make the operations in Core
-immediately available to the following code.&nbsp; The declaration &quot;void
-cyc_main() { ... }&quot; declares the &quot;main&quot; function for the Cyclone
-program, which takes no arguments and returns no result.&nbsp; Note that
-failures in Cyclone are signalled using exceptions instead of returning error
-codes.</p>
-<p>The first line of the cyc_main function declares a variable &quot;args&quot;
-to be a variable-sized array of strings.&nbsp; The declaration also initializes
-args by calling the function std_args() which is part of the Core
-namespace.&nbsp; After initializing args, the function checks to see if the size
-(in terms of the number of elements in the array) of args is less than or equal
-to 1.&nbsp; If so, a failure is signalled by throwing the Failure exception
-(with an argument string reading &quot;missing name!&quot;).&nbsp; Otherwise,
-the program prints to standard output &quot;Hello &lt;name&gt;&quot; where
-&lt;name&gt; is the first argument to the program.&nbsp;&nbsp;</p>
-<p>The file tests/hello.cyc contains the code above.&nbsp; If you change into
-the tests directory, then you can compile the file to C by typing:</p>
-<pre>  cyclone -I ../lib -tc -toc -pp hello.cyc &gt; hello.c</pre>
-<p>(This assumes that you have the bin directory on your path.)&nbsp; This
-should produce the file hello.c.&nbsp; You can look at the C code to see what it
-looks like.&nbsp; Most of it is definitions that are imported from core.h.&nbsp;
-The part that corresponds to the Cyclone code will be found at the bottom. The
-code is pretty similar to the Cyclone code except that you can see that there is
-extra gunk that corresponds to an array bounds check, and extra gunk to deal
-with the variable-sized arrays, etc.</p>
-<p>After generating hello.c, you can use GCC to compile it to an
-executable.&nbsp; To do so, you need to make sure that the file cyc_include.h is
-accessible, and to link against the cyclib.a and gclib.a libraries.&nbsp; Here's
-an example of this:</p>
-<pre>  gcc -I .. -o hello.exe hello.c ..\bin\cyclib.a ..\bin\gc.a</pre>
+
+<p>There are a few things to note about the example:&nbsp; First,
+Cyclone uses the C-Preprocessor, hence the #include lines.&nbsp; The
+file core.h can be found in the lib/ directory and includes a number
+of core definitions that just about any Cyclone compilation unit will
+need.&nbsp; The stdio.h file is a port of the C standard library
+version of stdio and in this case, is needed to support the printf.
+The declaration &quot;using Core;&quot; opens up the Core
+namespace to make the operations in Core immediately available to the
+following code.&nbsp; Similarly, opening Stdio makes those definitions
+in Stdio available.  The declaration &quot;int main() {
+... }&quot; declares the &quot;main&quot; function for the Cyclone
+program, which takes no arguments and returns an integer result.&nbsp; 
+
+<p>The first line of the main function
+declares a variable &quot;args&quot; to be a checked pointer to
+an array of strings (written &quot;string ?&quot;.)  
+The &quot;?&quot; type constructor is similar to 
+&quot;*&quot;
+in C in that it supports subscripting, dereferencing, pointer
+arithmetic, etc.  However, all dereferences are checked to ensure
+that the current pointer value is in range.  The representation
+of a &quot;?&quot; pointers is different from normal pointers, as
+extra information is needed to support the bounds check.  
+
+<p>
+The declaration on the first line also initializes args by calling the
+function std_args() which is part of the Core namespace.&nbsp; After
+initializing args, the function checks to see if the size (in terms of
+the number of elements in the array) of args is less than or equal to
+1.&nbsp; If so, a failure is signalled by throwing the Failure
+exception (with an argument string reading &quot;missing
+name!&quot;).&nbsp; Otherwise, the program prints to standard output
+&quot;Hello &lt;name&gt;&quot; where &lt;name&gt; is the first
+argument to the program.&nbsp;&nbsp;</p> 
+
+<p>The file tests/hello.cyc
+contains the code above.&nbsp; If you change into the tests directory,
+then you can compile the file to C by typing:</p> 
+
+<pre> cyclone -I ../lib -tc -toc -pp hello.cyc &gt; hello.c</pre> 
+
+<p>(This assumes that you have the bin directory on your path.)&nbsp;
+This should produce the file hello.c.&nbsp; You can look at the C code
+to see what it looks like.&nbsp; Most of it is definitions that are
+imported from core.h.&nbsp; The part that corresponds to the Cyclone
+code will be found at the bottom. The code is pretty similar to the
+Cyclone code except that you can see that there is extra gunk that
+corresponds to an array bounds check, and extra gunk to deal with the
+checked pointers, etc.</p>
+
+<p>After generating hello.c, you can use GCC to
+compile it to an executable.&nbsp; To do so, you need to make sure
+that the file cyc_include.h is accessible, and to link against the
+cyclib.a and gclib.a libraries.&nbsp; Here's an example of this:</p>
+
+<pre> gcc -I .. -o hello.exe hello.c ..\bin\cyclib.a ..\bin\gc.a</pre>
+
 <p>This will produce an executable program hello.exe.&nbsp; Typing
-&quot;hello&quot; under Win32 (&quot;hello.exe&quot; resp. under Unix) will
-yield &quot;Uncaught exception Core_Failure&quot;.&nbsp; Typing &quot;hello
-Fred&quot; will yield &quot;Hello, Fred.&quot;&nbsp;&nbsp;</p>
-<p>To write real, standalone Cyclone applications, your best best is to follow the
-Makefile examples in the directories.&nbsp; For instance, the Makefile in tests/
-builds an application cyctest.exe which we've used during development to test
-various features. At a minimum, you'll need to link against the cyclib.a and
-gc.a libraries in the bin/ directory.&nbsp;&nbsp;</p>
+&quot;hello&quot; under Win32 (&quot;hello.exe&quot; resp. under Unix)
+will yield &quot;Uncaught exception Core_Failure&quot;.&nbsp; Typing
+&quot;hello Fred&quot; will yield &quot;Hello,
+Fred.&quot;&nbsp;&nbsp;</p> 
+
+<p>To write real, standalone Cyclone applications, your best bet is
+to follow the Makefile examples in the directories.&nbsp; For
+instance, the Makefile in tests/ builds an application cyctest.exe
+which we've used during development to test various features. At a
+minimum, you'll need to link against the cyclib.a and gc.a libraries
+in the bin/ directory.&nbsp;&nbsp;</p>
+
 <hr>
 <h2><a name="Quick Guide to Cyclone">Quick Overview of the Language</a></h2>
 <p>C programmers should find it fairly easy to get up to speed in Cyclone.&nbsp;
@@ -389,9 +425,10 @@ local-type inference.&nbsp; These features are necessary to type-check or port a
 number of (potentially) unsafe C idioms, usually involving &quot;void*&quot; or
 the like.&nbsp; Similarly, datatypes can be used to code around many of the uses
 for C's union types -- another potential source of unsoundness.&nbsp; Cyclone
-also adds new support for variable length arrays and ensures that all array
-indices are in bounds.&nbsp; Again, these features are aimed at making it easy
-to port C code to Cyclone.</p>
+also adds new support for checked pointer arithmetic and ensures that all 
+pointer accesses are to valid objects.&nbsp; Again, these features are 
+aimed at making it easy to port C code to Cyclone.</p>
+
 <p>In what follows, we give a brief overview of these added
 features.&nbsp;&nbsp;</p>
 <hr>
@@ -469,29 +506,76 @@ the tuple is true (it is) and if so, increments the first component in the tuple
 expressions are written $(<i>exp1,...,expn</i>), and extracting the ith
 component of a tuple is written using subscript notation <i>exp[i-1]</i>.&nbsp;
 Note that, consistent with the rest of C, the members start with 0, not 1.&nbsp;
-Also note that when you have a pointer to a tuple (e.g., $(int,char,bool) *x),
-then you can continue to access the fields using the subscript notation.</p>
+</p>
+
 <p>Unlike structs, tuple types are treated equivalent as long as they are
 structurally equivalent.&nbsp; As in C, struct types are equivalent only if they
 have the same <i>tag</i> or name.&nbsp; (Note that in C, all struct declarations
 have a tag, even if the compiler has to gensym one.)&nbsp;&nbsp;</p>
 <hr>
-<h4><a name="Non-null Pointers:">Non-null Pointers:</a></h4>
-<p>In Cyclone, when a variable has a pointer type (e.g., int *x), then you can't
-be sure at compile time whether or not the pointer is null.&nbsp; To avoid
-memory safety problems, the compiler and/or runtime system checks each time you
-dereference a pointer to ensure that it is not null.&nbsp; If it is null, then
-an exception (NullPointer???) is raised.&nbsp; Thus, when reading or writing
-code, you're never sure whether or not you'll get a NullPointer exception.&nbsp;
-Java has a similar problem.&nbsp;&nbsp;</p>
-<p>Thus, Cyclone provides a different pointer type @.&nbsp; When x has type int@
-(as opposed to int*), then we know that x is not null.&nbsp; Consequently, there
-is no overhead for dereferencing x, nor is there the potential for raising an
-exception.&nbsp;&nbsp;</p>
-<p>You can cast a @ pointer to a * pointer with no overhead, assuming the things
-that point to are the same type.&nbsp; You can also cast a * pointer to a @
-pointer, but this induces a run-time check.&nbsp; If the pointer is null, then
-the (NullPointer???) exception is raised.</p>
+<h4><a name="Pointers:">Pointers:</a></h4>
+<p>There are three different pointer types in Cyclone, written
+&quot;t*&quot;, &quot;t@&quot;, and &quot;t?&quot;.  Actually,
+pointers are quite a bit more complicated than this, but these
+are the pointer types that you'll most likely use the most.
+
+<p>A value of type
+t* is a possibly null pointer to a value of type t.  When
+these values are dereferenced, a null-check is performed and an exception
+is raised if the value is actually null.  To ensure statically that
+a pointer cannot be null, you can use the type t@ instead.
+Dereferencing these pointers requires no run-time overhead and will
+not raise an exception. Pointer arithmetic and subscripting (except for 0)
+are not supported for values of type t* or t@
+(but see below). Both kinds of pointers are represented the same way
+as C pointers.</p>
+
+<p>In general, one can write &quot;t*{e}&quot; to describe a pointer to
+an array of t values with e elements, where e is a constant expression.
+For instance, the following code is permissible:</p>
+
+<pre>
+int x[5] = {0,1,2,3,4};
+int *{5}p = x;
+</pre>
+
+<p>Here, we've said that p is a (possibly null) pointer to an array of
+five integers.  When a pointer has type t*{e}, then it
+is permissible to use subscripts in the range 0 to e-1 to access the
+elements of p.  Note that t* is short hand for
+t*{1} (and similarly t@ is short hand for t@{1}).
+
+<p>A value of type t? is a checked pointer to a (possibly empty)
+array of values of type t.  Unlike * or @ pointers, checked pointers
+support arbitrary pointer arithmetic (following the rules of C), 
+arbitrary integer subscripts, etc.  However, each access is checked to
+ensure that the pointer is within the bounds of the original underlying
+array.  </p>
+
+<p>Values of type t*{e} or t@{e} or t[e] can be cast to type t? to support
+pointer arithmetic.  Furthermore, values of type t? can be cast to
+type t*{e} or t@{e}, but this requires a run-time check to ensure
+that the corresponding array slice is in bounds.  </p>
+
+<p>Obviously, checked pointers require more information that * or @
+pointers, so that we can determine whether the access is in bounds.
+Consequently, checked pointers are larger than normal pointers.
+(The current implementation uses three words for each checked pointer.)
+However, one rarely needs checked pointers unless you're performing
+lots of pointer arithmetic.  In subsequent releases, we hope to
+support checked but untagged representations for these pointers
+using technology from dependent type theory.  
+</p>
+
+<p>Finally, we should note that in fact all pointers in Cyclone
+point into a <i>region</i>.  By default, if you don't mention a
+region, then the pointer points into the disgtinguished heap
+region (written `H).  Pointers to stack-allocated objects
+live in regions that are private to the enclosing scope.  
+More on this later...
+</p>
+
+
 <hr>
 <h4><a name="Exceptions">Exceptions</a>:</h4>
 <p>Cyclone provides exceptions, <code>throw</code>, and <code>
@@ -520,52 +604,31 @@ to catch an exception:</p>
     <b>printf</b>(&quot;<font color="#0000FF">no exception raised.\n</font>&quot;);
   }</pre>
 <hr>
-<h4><a name="Variable Sized Arrays">Variable Sized Arrays</a>:</h4>
-<p>C purposefully confuses arrays and pointers.&nbsp; Cyclone does not, in large
-part for type-safety reasons.&nbsp; All array accesses are guaranteed to be in
-bounds.&nbsp; To support arrays of variable size, Cyclone provides the
-&quot;[?]&quot; array type.&nbsp; For example, string is defined using the
-following typedef:</p>
-<pre>  <b>typedef </b>string char[?];</pre>
-<p>For representation purposes, a char[?] array is represented as a pointer to
-a struct of the form {const unsigned int size; char[size] *elts;} but of course,
-you can't really write this in C.&nbsp; The point is that there is an extra
-level of indirection in order to support dynamically tracking the size of the
-array.&nbsp; This allows the compiler to insert array bounds checks as
-needed.&nbsp;&nbsp;</p>
-<p>Cyclone also has normal C arrays (e.g., char[]) and constant-sized arrays
-(e.g., char[3+4] == char[7]), but these are all treated differently.&nbsp; In
-particular, you can't perform subscript or update on a char[] array within
-Cyclone.&nbsp; You may, however, pass the array off to a C function (which had
-better make sure that the accesses are in bounds.)&nbsp; An array char[7]
-doesn't need the size information as it is apparent statically.&nbsp; You can
-cast [?] arrays to [] arrays with no overhead (this just extracts the underlying
-array) and this is useful for calling a C function that was written expecting
-the untagged array.&nbsp; You can also cast a [?] array to a [7] array, but this
-incurs a check that the size of the [?] array is actually 7.&nbsp; You can cast
-a [7] array to a [?] array -- this simply adds the size and a level of
-indirection.&nbsp; Finally, you can cast a [7] array to a [] array, again so
-that you can call C code.</p>
-<p>To allocate and initialize an array, you can use the array comprehension
-notation.&nbsp; The following code demonstrates this:</p>
-<pre>  int evens[?] = <b>new</b> {<b>for</b> i &lt; n : 2*i};</pre>
-<p>The above declares evens to be an int[?] array and initializes it to an array
-of size n, where element i has value 2*i in the array.&nbsp; If the upper bound
-is a constant expression, then the type of the array will be [c] where c is a
-constant.&nbsp; Otherwise, it will be a [?] array.&nbsp; Of course, you can cast
-the constant-sized array to a variable-sized array.</p>
-<p>Note that all arrays in Cyclone are heap allocated (not stack
-allocated).&nbsp;&nbsp;Also note that string literals are treated
-as either char[n] arrays or char[?] arrays depending upon context.
-If the string literal is of the form "foo", then its size is 4,
-due to the implicit trailing "\000" character (and thus its type will be char[4]).
+<h4><a name="Creating Arrays">Creating Arrays</a>:</h4>
 
-</p>
-<p>In the future, we hope to add support for DML-style dependent types so that
-arrays need not carry size information and so that bounds checks can be
-statically verified.&nbsp; In addition, we hope to add support for regions or
-linear types so that arrays can be stack allocated (or managed manually in some
-other fashion.)</p>
+<p>There are about four ways to create arrays in Cyclone.  One
+can always declare an array and provide an initializer as in C.
+For instance:</p>
+<pre>
+  int foo[8] = {1,2,3,4,5,6,7,8};
+  char s[4] = &quot;bar&quot;;
+</pre>
+<p>are both examples from C for creating arrays.  Note that Cyclone
+follows C's conventions here, so that if you declare arrays as above
+within a function, then the lifetime of the array coincides with the
+activation record of the enclosing scope.  In other words, such arrays
+will be stack allocated.</p>
+
+<p>To create heap-allocated arrays (or strings) within a Cyclone
+function, you should either use &quot;new&quot; operator with
+either an array initializer or an array comprehension.  The
+following code demonstrates this:</p>
+<pre> 
+  int *{8}foo = new {1,2,3,4,5,6,7,8}; <font color="#FF0000"><i>// foo is a pointer to a heap-allocated array</i></font>
+  char ?s = new "bar"; <font color="#FF0000"><i>// s is a checked pointer to a heap-allocated string</i></font>
+  int @{100}evens = <b>new</b> {<b>for</b> i &lt; 100 : 2*i}; <font color="#FF0000"><i>// a non-null pointer to the first 100 even numbers</i></font>
+</pre>
+
 <hr>
 <h4><a name="Subtyping">Subtyping</a>:</h4>
 <p>Cyclone supports &quot;extension on the right&quot; and &quot;covariant depth
@@ -1129,9 +1192,6 @@ are not yet supported)
   <i>direct-declarator</i> <code>(</code> <i>parameter-type-list</i> <code>)</code><br>
   <i>direct-declarator</i> <code>(</code> <i>identifier-list<sub>opt</sub></i> <code>)</code><br>
 <font color=red>
-  <i>direct-declarator</i> <code>[</code> <code>?</code> <code>]</code>
-  &nbsp;&nbsp;&nbsp;<font color="#008000">// variable-length arrays</font>
-  <br>
   <i>direct-declarator</i> <code><</code> <i>type-name-list</i> <code>></code><br>
 </font>
 </ul>

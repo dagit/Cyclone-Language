@@ -1,14 +1,26 @@
 Todo now:
 
+* need to add support for explicit malloc and initialization.
+
+* need to add GCC-style attributes for functions, structs, variables, etc.
+
+* nested functions (closures -- with RTCG approach to get calling convention
+  right.)
+
+* get rid of boxed primitive types -- we don't use them and you can
+  always roll your own, so we should nuke them.  
+
+* need explicit kind syntax and someway to explicitly name a stack
+  region.
+
+* we should support not having to explicitly abstract type variables
+  in functions, prototypes, structs, etc.  
+
 * when we have a pattern:
 
   case PointerType(PtrInfo{*elttype,_,_,_,_}):
 
   then elttype isn't compiled correctly
-
-* now that we have ? pointer syntax, we really ought to distinguish
-  between pointers and arrays, as in C.  This is mostly a top-level
-  thing because we need to allow top-level arrays in constant expressions.
 
 * if we write:
 
@@ -19,26 +31,19 @@ Todo now:
 
 * "sizeof e" doesn't do the right thing.
 
-* we don't verify that cyc_main has the right type
+* we don't verify that main has the right type -- this should probably
+  be done by link-checking...
 
 * get rid of null, replace with 0 (requires clever overloading)
-
-* I'd like to re-code the type-checker so that it pushes information
-  down as well as up (more like the local type inference described by
-  Pierce.)  This will allow us to, for instance, avoid having to cast
-  string literals when we write:
-
-    list<string> x = &Cons{.hd="foo",.tl=null};
-
-* We need to fix & (and * patterns) so that they are sound.  I believe
-  now that Dan has the goto and fallthru stuff working correctly, this
-  is the only major unsoundness in the system.
 
 * We need to re-do the pattern match compilation -- we should take
   advantage of the decision tree built during type-checking.
 
 * We should add unions in, and allow them when the different variants
   don't contain pointers or abstract types.
+
+* Are we treating static variables (within a function) correctly w.r.t.
+  definite assignment?  
 
 * We should add anonymous structs.
 
@@ -79,18 +84,12 @@ Todo now:
   unsigned so that's a really big number and likely, malloc is returning
   null which we're not checking for when we allocate...)
 
-* multi-dimensional arrays?
-
 * default array initializers, at top level and local, e.g., int x[4];
 
 * functions should not be allowed as fields of enums or tuples, e.g.,
     $(int (int),bool) x;
     enum foo { Bar(int (int)) };
   Anyway the translation fails to go through gcc
-
-* Consider this:     foo?"a":"bc"   won't typecheck because the arms
-  are char[2] and char[3] which don't match.  Maybe we should promote
-  to string in this case?
 
 * multi-level initializers, e.g., {{0,1},{2,3}}
 

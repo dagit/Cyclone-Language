@@ -67,7 +67,7 @@ int list_cmp<`a>(int cmp(`a,`a),list<`a> x,list<`a> y) {
   return list_cmp(cmp,x->tl,y->tl);
 }
 
-int array_cmp<`a>(int cmp(`a,`a),`a x[?],`a y[?]) {
+int array_cmp<`a>(int cmp(`a,`a),`a ?x,`a ?y) {
   int sx = x.size;
   int sy = y.size;
   if (sx > sy) return 1;
@@ -95,7 +95,7 @@ void pr_list(list<int> x) {
   printf("]\n");
 }
 
-void pr_array(int x[?]) {
+void pr_array(int ?x) {
   printf("[|");
   Array::iter(pr_int,x);
   printf("|]\n");
@@ -194,7 +194,7 @@ void list_test() {
   okfail(0==list_cmp(int_cmp,x,xplus));
 
   // FIX:  casts are required for typechecking.  Should string constants
-  // have type char[?] or char[sz] ??
+  // have type char? or char[sz] ??
   let slist = &cons(allocstr("hello"),&cons(allocstr("world"),null));
   let rlist = List::rev(slist);
   okfail(0==list_cmp(String::strptrcmp,slist,List::rev(rlist)));
@@ -229,7 +229,7 @@ void list_test() {
 void array_test() {
   // could definitely use more tests
   test_begin("Array");
-  uint x[?] = new { for i < 6 : 2*i }; // Note, not int x[?]
+  uint ?x = new { for i < 6 : 2*i }; // Note, not int ?x
   for (int i=0; i<6; i++)
     okfail(x[i]==2*i);
   for (int i=0; i<6; i+=2) {
@@ -241,22 +241,22 @@ void array_test() {
     okfail(x[i] == 2*(i+1));
     okfail(x[i+1] == 2*i);
   }
-  int z1[?] = new { for i < 10 : (int)(10-i) }; // 10 to 1
-  int z2[?] = Array::copy(z1);
+  int ?z1 = new { for i < 10 : (int)(10-i) }; // 10 to 1
+  int ?z2 = Array::copy(z1);
   Array::imp_rev(z2);
-  int z3[?] = Array::rev_copy(Array::rev_copy(z1));
+  int ?z3 = Array::rev_copy(Array::rev_copy(z1));
   // z2 is sorted, z1 and z3 are backwards
   okfail(0==array_cmp(int_cmp,z1,z3));
   Array::qsort(int_cmp,z1,0,10);
   okfail(0==array_cmp(int_cmp,z1,z2));
   Array::msort(int_cmp,z3,0,10);
   okfail(0==array_cmp(int_cmp,z3,z2));
-  int z4[?] = Array::map(add2,Array::extract(z2,2,&Core::Opt(4)));
+  int ?z4 = Array::map(add2,Array::extract(z2,2,&Core::Opt(4)));
   Array::imp_map(add2,z4);
   okfail(0==array_cmp(int_cmp,z4,Array::extract(z2,6,null)));
-  $(int,int) z5[?] = new {for i < 10 : $((int)(i),(int)(i)) };
+  $(int,int) ?z5 = new {for i < 10 : $((int)(i),(int)(i)) };
   okfail(10==z5.size);
-  $(int [?],int [?]) pair = Array::split(z5);
+  $(int ?,int ?) pair = Array::split(z5);
   okfail(0==array_cmp(int_cmp,pair[0],pair[1]));
   test_end();
 }
@@ -445,7 +445,7 @@ void string_test() {
   okfail(String::strcmp(String::substring("hello",2,2),"ll")==0);
   okfail(String::strcmp(String::replace_suffix("hello.world","world","bar"),
                         "hello.bar")==0);
-  // FIX:  polymorphism requires the cast char[sz]->char[?]
+  // FIX:  polymorphism requires the cast char[sz]->char?
   okfail(String::strcmp(String::strconcat_l(&cons(allocstr("hello "),
                                                   &cons(allocstr("world"),null))),
                         "hello world")==0);
@@ -699,7 +699,7 @@ static int addn(int env, int arg) {
 }
 
 static int addpair($(int,int)@ x) {
-  return x[0] + x[1];
+  return (*x)[0] + (*x)[1];
 }
 
 void fn_test() {
