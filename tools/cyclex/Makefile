@@ -6,16 +6,18 @@
 # make all boot update.  But don't do the update until you're sure things
 # look good!
 
-include ../../Makefile.inc
+CYCDIR = ../..
+
+include $(CYCDIR)/Makefile.inc
 
 PROG=cyclex$(EXE)
-BINDIR=../../bin
+BINDIR=$(CYCDIR)/bin
 
-CYCC=../../bin/cyclone$(EXE)
-CYCBISON=../../bin/cycbison$(EXE)
+CYCC=$(CYCDIR)/bin/cyclone$(EXE)
+CYCBISON=$(CYCDIR)/bin/cycbison$(EXE)
 
-LC_FLAG=
-CYC_FLAGS= $(LC_FLAG)
+LC_FLAG =
+CYC_FLAGS = -I$(CYCDIR)/include -B$(BINDIR)/cyc-lib $(LC_FLAG)
 
 SRCS=syntax parser_tab lexer lexgen compact output main
 
@@ -29,7 +31,7 @@ $(BINDIR)/$(PROG): $(PROG)
 all: $(PROG)
 
 $(PROG): $(O_SRCS)
-	$(CYCC) $(LC_FLAG) -g -o $@ $^ $(LDFLAGS)
+	$(CYCC) -B$(BINDIR)/cyc-lib $(LC_FLAG) -g -o $@ $^ $(LDFLAGS)
 
 boot:
 	-rm -f lexer.cyc
