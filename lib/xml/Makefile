@@ -38,15 +38,13 @@ test: xmlecho$(EXE)
 libxml.a: $(OBJS)
 	-rm -f $@
 	ar rc $@ $^
-	@echo Trying ranlib, if not found, probably ok to ignore error messages
-	-ranlib $@
+	$(RANLIB) $@
 
 libxml_a.a: $(A_OBJS)
 	-echo $(A_OBJS)
 	-rm -f $@
 	ar rc $@ $^
-	@echo Trying ranlib, if not found, probably ok to ignore error messages
-	-ranlib $@
+	$(RANLIB) $@
 
 csrc: $(CSRCS)
 

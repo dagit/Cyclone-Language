@@ -2,8 +2,6 @@ Todo list:
 
 CONFIGURATION BUGS:
 ------------------
-* add a --prefix path to the configure script (this is a gnu convention)
-
 * someone suggests that make check should be added, following gnu
   conventions
 

@@ -18,11 +18,6 @@ case "$build_os" in
   ;;
 esac
 
-LDFLAGS=
-if [[ "$build_vendor" = "sun" ]]; then
-  LDFLAGS="-lnsl -lsocket -lresolv"
-fi
-
 # Starting with autoconf 2.53 abs_srcdir is already defined,
 # however, I am running 2.52 so I do it from scratch.
 # Note: under Cygwin, pwd can return a path name containing a colon.
@@ -41,11 +36,26 @@ AC_SUBST(abs_srcdir)
 
 # Figure out compiler characteristics
 AC_PROG_CC
-# Handle apple cc specially
+# Special cases
 if [[ "$build_vendor" = "apple" ]]; then
-  CC="gcc -no-cpp-precomp -Wno-long-double"
+  CC="$CC -no-cpp-precomp -Wno-long-double"
+fi
+if [[ "$build_cpu" = "i686" ]]; then
+  CC="$CC -march=i686"
+fi
+if [[ "$build_vendor" = "sun" ]]; then
+  LDFLAGS="-lnsl -lsocket -lresolv"
 fi
 
+# Cyclone assumes sizeof(int) == sizeof(void *)
+AC_CHECK_SIZEOF(int)
+AC_CHECK_SIZEOF(void *)
+if [[ "$ac_cv_sizeof_int" != "$ac_cv_sizeof_void_p" ]]; then
+  echo "ERROR: cannot build because sizeof(int) == $ac_cv_sizeof_int != sizeof(void *) == $ac_cv_sizeof_void_p"
+  exit
+fi
+
+# The rest...
 AC_SET_MAKE
 AC_PROG_RANLIB
 AC_CONFIG_FILES(Makefile.inc)
