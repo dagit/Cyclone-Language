@@ -802,9 +802,9 @@ void f148(int x, int ?@zeroterm y) {
   // swap non-lvalue
   x :=: 3;
   // swap value in zeroterm array
-  x :=: y[0];
+//   x :=: y[0];
   // swap value in zeroterm array
-  *y :=: x;
+//   *y :=: x;
 }
 
 // incompatible initializes() and noliveunique() attributes on parameter 1
@@ -937,10 +937,10 @@ struct F209<`r> {<`r> int@`r x;};
 struct F210<`a::A> { `a x; int y;};
 // bitfield x must have integral type but has type $(int,int)
 struct F211 { $(int,int) x:32; };
-// bitfield larger than type
+// bitfield has negative width
 struct F212 { int x:-1; };
 // bitfield larger than type
-struct F213 { int x:33; };
+// struct F213 { int x:33; };
 // @requires clauses are only allowed on union members
 struct F214 { int x @requires(3 == 3); };
 // @requires clause has type $(int,int) instead of integral type

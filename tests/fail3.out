@@ -10,7 +10,7 @@ fail3.cyc:57: function may not return a value
 fail3.cyc:61: function may not return a value
 fail3.cyc:66: `noreturn' function might return
 fail3.cyc:69: `noreturn' function might (implicitly) return
-fail3.cyc:74: last catch clause may implicitly fallthru
+fail3.cyc:76: switch clause may implicitly fallthru
 fail3.cyc:92: `noreturn' function might return
 fail3.cyc:95: `noreturn' function might return
 fail3.cyc:100: switch clause may implicitly fallthru
@@ -25,5 +25,7 @@ fail3.cyc:150: aliased pattern expression not an l-value: rnew(Core::unique_regi
 fail3.cyc:155: cannot track alias-free pointers through multiple assignments
 fail3.cyc:160: expression attempts to copy a consumed alias-free value
 fail3.cyc:168: expression attempts to copy a consumed alias-free value
+fail3.cyc:177: cannot swap value into zeroterm array not known to be 0
+fail3.cyc:179: cannot swap value into zeroterm array not known to be 0
 
 COMPILATION FAILED!

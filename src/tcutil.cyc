@@ -3728,6 +3728,8 @@ void check_bitfield(seg_t loc, tenv_t te, type_t field_typ,
       let $(i,known) = Evexp::eval_const_uint_exp((exp_t)width);
       if(!known)
 	warn(loc,"cannot evaluate bitfield width at compile time");
+      if ((int)i < 0)
+	terr(loc,"bitfield has negative width");
       w = i;
     }
     switch (compress(field_typ)) {

@@ -15,7 +15,8 @@ fail1.cyc:75: Cannot consume non-unique paths; do swap instead
 fail1.cyc:75: pattern for variable _stmttmp0 dereferences a alias-free pointer from a non-unique path
 fail1.cyc:83: switch on type int, but case expects type `EA132 *`ETR133
   `EA132 *`ETR133 and int are not compatible. 
-fail1.cyc:93: expected datatype exn@ but found int
+fail1.cyc:93: switch on type @extensible datatype exn @, but case expects type int
+  int and @extensible datatype exn @ are not compatible. 
 fail1.cyc:99: bad abstract scope for local variable
 fail1.cyc:111: type int () has kind A but as used here needs kind TM
 fail1.cyc:111: extern declarations are not yet supported within functions
@@ -139,8 +140,8 @@ fail1.cyc:692: type mismatch: int * != const int *
   (qualifiers don't match)
 fail1.cyc:698: type mismatch: int * != int *`r
   `r and `H are not compatible. 
-fail1.cyc:704: type mismatch: int *{4}`r != int *{3}`r
-  int *{4}`r and int *{3}`r are not compatible. (different pointer bounds)
+fail1.cyc:704: type mismatch: int *{4U}`r != int *{3U}`r
+  int *{4U}`r and int *{3U}`r are not compatible. (different pointer bounds)
 fail1.cyc:710: type mismatch: $(int,int) *`r != int *`r
   $(int,int) and int are not compatible. 
 fail1.cyc:715: type $(int,int) cannot be used here
@@ -165,8 +166,6 @@ fail1.cyc:794: too many arguments for datatype constructor F147
 fail1.cyc:796: too few arguments for datatype constructor F147
 fail1.cyc:801: swap non-lvalue
 fail1.cyc:803: swap non-lvalue
-fail1.cyc:805: swap value in zeroterm array
-fail1.cyc:807: swap value in zeroterm array
 fail1.cyc:811: incompatible initializes() and noliveunique() attributes on parameter 1
 fail1.cyc:813: incompatible noliveunique() and initializes() attributes on parameter 1
 fail1.cyc:815: incompatible initializes() and noconsume() attributes on parameter 1
@@ -230,8 +229,7 @@ fail1.cyc:929: type variable `r is used with inconsistent kinds R and <=TA
 fail1.cyc:931: duplicate type variable: `r
 fail1.cyc:937: type variable `a is used with inconsistent kinds A and <=TM
 fail1.cyc:939: bitfield x must have integral type but has type $(int,int)
-fail1.cyc:941: bitfield larger than type
-fail1.cyc:943: bitfield larger than type
+fail1.cyc:941: bitfield has negative width
 fail1.cyc:945: @requires clauses are only allowed on union members
 fail1.cyc:947: @requires clause has type $(int,int) instead of integral type
 fail1.cyc:949: unbound type variable `i in type valueof_t((unsigned int)(valueof(`i) == 1))

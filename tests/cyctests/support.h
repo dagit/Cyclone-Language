@@ -24,6 +24,7 @@ contained.
 #include <array.h>
 #include <arg.h>
 #include <errno.h>
+#include <sys/types.h>
 #include <signal.h>
 
 using List;

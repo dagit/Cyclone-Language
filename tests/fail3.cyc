@@ -167,3 +167,14 @@ void a28(uptr x) {
   // attempts to copy a consumed value
   uptrfree(x);
 }
+
+////////////////////////
+//// ZEROTERM TESTS ////
+////////////////////////
+
+void a29(int x, int ?@zeroterm y) {
+  // swap non-zero value in zeroterm array
+  x :=: y[0];
+  // swap non-zero value in zeroterm array
+  *y :=: x;
+}
