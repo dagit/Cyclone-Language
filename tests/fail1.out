@@ -12,6 +12,7 @@ fail1.cyc:52: fallthru argument has type int but pattern variable has type int *
 fail1.cyc:60: too many arguments in explicit fallthru
 fail1.cyc:68: too few arguments in explicit fallthru
 fail1.cyc:75: Cannot consume non-unique paths; do swap instead
+fail1.cyc:75: Pattern for variable _stmttmp0 dereferences a unique pointer from a non-unique path
 fail1.cyc:83: switch on type int, but case expects type `EA130 *`ETR131
   `EA130 *`ETR131 and int are not compatible. 
 fail1.cyc:93: expected datatype exn@ but found int

@@ -333,7 +333,14 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     if (!is_var_exp(e)) {
       let v = stmt_temp_var();
       let s1 = new_stmt(s0->r,s0->loc);
-      let s2 = declare_stmt(v,new_evar(NULL,NULL),e,s1,s0->loc);
+      let d = let_decl(new_pat(new Var_p(new_vardecl(v,
+						     new_evar(NULL,NULL),
+						     NULL),
+					 new_pat(&Wild_p_val,e->loc)),
+			       e->loc),
+		       e, s0->loc);
+      let s2 = decl_stmt(d,s1,s0->loc);
+//       let s2 = declare_stmt(v,new_evar(NULL,NULL),e,s1,s0->loc);
       s0->r = s2->r;
       *exp = var_exp(v,e->loc);
       tcStmt(te,s0,new_block);
@@ -548,7 +555,14 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	  if (!is_var_exp(e)) {
 	    let v = stmt_temp_var();
 	    let s1 = new_stmt(s0->r,s0->loc);
-	    let s2 = declare_stmt(v,new_evar(NULL,NULL),e,s1,s0->loc);
+	    let d = let_decl(new_pat(new Var_p(new_vardecl(v,
+							   new_evar(NULL,NULL),
+							   NULL),
+					       new_pat(&Wild_p_val,e->loc)),
+				     e->loc),
+			     e, s0->loc);
+	    let s2 = decl_stmt(d,s1,s0->loc);
+// 	    let s2 = declare_stmt(v,new_evar(NULL,NULL),e,s1,s0->loc);
 	    s0->r = s2->r;
 	    *exp = var_exp(v,e->loc);
 	    tcStmt(te,s0,new_block);

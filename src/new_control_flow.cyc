@@ -484,6 +484,29 @@ anal_use_ints(analenv_t<`r> env, flow_t<`r> inflow,
   }
 }
 
+// XXX make this function look up in the flow dictionary whether or not
+// the given place is consumed.  If so, we need to consume the given
+// rval, using the same iteration #, etc.  Should be called by notzero
+// and splitzero.
+static absRval_t<`r> consume_zero_rval(analenv_t<`r> env,
+				       flowdict_t<`r> new_dict,
+				       place_t<`r,`r> p,
+				       exp_t e,
+				       absRval_t<`r> new_rval) {
+  // see if the rval was consumed in the output flow.  If so
+  // we need to consume it before making the assignment.
+  bool needs_unconsume = false;
+  let old_rval = lookup_place(new_dict,p);
+  if (is_unique_consumed(e,env->iteration_num,old_rval,&needs_unconsume))
+    throw new Core::Impossible("consume_zero_ral");
+  // if needs unconsume, we consume the new_rval
+  else if (needs_unconsume)
+    return make_unique_consumed(env->fenv,(type_t)e->topt,e,env->iteration_num,
+				new_rval);
+  else
+    return new_rval;
+}
+
 // Called from anal_deref* when anal_Rexp([inflow],[e]) yields
 // $(UnknownR([il]),[outflow]) where [il] > NoneIL.  Used to generate
 // a new lval for that expression and assign to it a new rval that is
@@ -514,6 +537,8 @@ notzero(analenv_t<`r> env, flow_t<`r> inflow, flow_t<`r> outflow,
       absRval_t nzval = il==AllIL ? env->fenv->notzeroall : env->fenv->notzerothis;
       if (locname != NULL)
 	nzval = rnew (env->fenv->r) NamedLocation(locname,nzval);
+      // if this was consumed in the old dictionary, consume it here too
+      nzval = consume_zero_rval(env,d,p,e,nzval);
       let outflow = ReachableFL(assign_place(env->fenv,e->loc,d,env->all_changed,
 					     p,nzval),relns);
       DEBUG_PRINT("outflow=\n");
@@ -542,6 +567,8 @@ splitzero(analenv_t<`r> env, flow_t<`r> inflow, flow_t<`r> outflow,
 	nzval = rnew (env->fenv->r) NamedLocation(locname,nzval);
 	zval = rnew (env->fenv->r) NamedLocation(locname,zval);
       }
+      nzval = consume_zero_rval(env,d,p,e,nzval);
+      zval = consume_zero_rval(env,d,p,e,zval);
       return
         $(ReachableFL(assign_place(env->fenv,e->loc,d,env->all_changed,
                                    p,nzval),relns),
