@@ -130,7 +130,7 @@ absRval_t i_typ_to_absrval(bool allow_zeroterm,
 	  d = Dict::insert(d, n, i_typ_to_absrval(false, t2,leafval));
       }
       return new Aggregate(d);
-    case &ArrayType(ArrayInfo{et,_,_,zeroterm}):
+    case &ArrayType(ArrayInfo{et,_,_,zeroterm}) && conref_def(false,zeroterm):
       // special case for zero-terminated arrays of bits-only things -- 
       // here, we initialize them at translation by putting a 0 in at
       // the end.
