@@ -1,265 +1,37 @@
-#!/bin/bash
-# Architecture-specific configuration.
-# 
-# usage: configure
+#!/bin/sh
 #
-# TODO:
-#   locate bash on the system (for Cornell Suns it's /usr/local/gnu/bin/bash)
-#     if bash cannot be found, use ksh instead.
-#   better job of finding egrep
-#
+# Starts things off in a platform-independent way by using sh.  Gets the
+# top-level directory and then starts with the realconfigure script in config.
 
-# get the root directory of the source tree
-CYCDIR=`pwd`
-
-# figure out the architecture
-PATCH_ARCH=i686-unknown-linux
-ARCH=`config/config.guess`
-TARGET=`echo ${ARCH} | awk -F'-' '{ print $1 }'`
-TYPE=`echo ${ARCH} | awk -F'-' '{ print $2 }'`
-OS=`echo ${ARCH} | awk -F'-' '{ print $3 }'`
-
-###########################################################################
-# functions to find appropriate helper programs
-#
-
-# egrep_path <arch>
-#   given the architecture, outputs a suitable version of egrep
-
-function egrep_path {
-  EGREP="egrep"
-  if [ "$TYPE" = "sun" ]; then
-    f="/usr/xpg4/bin/egrep"
-    if [ -f "$f" ]; then
-      EGREP=$f
-    else
-      echo "Warning: could not find $f"
-      echo "  file include/arch/$1.h may be incorrect/incomplete"
-    fi
-  fi
-  echo $EGREP
-}
-
-# finds a suitable version of cc, along with special flags
-#   if it can't find gcc, it uses cc (which, if not symlinked to gcc,
-#   will fail)
-#
-function get_cc {
-  for comp in gcc cc; do
-    CC=`which $comp 2> /dev/null`
-    if [ -n "$CC" -a -x "$CC" ]; then
-      CC=$comp
-      break
-    fi
-  done
-  if [ -n "$CC" ]; then
-    echo $CC
-  else
-    echo "Could not find gcc on this system"
-    exit 1
-  fi
-}
-
-# sets up default Cyclone compile flags
-#
-function get_cflags {
-  CFLAGS=
-  if [ "$TYPE" = "apple" ]; then
-    CFLAGS=-no-cpp-precomp
-  fi
-  echo $CFLAGS
-}
-
-# sets up default Cyclone load flags
-#
-function get_ldflags {
-  LDFLAGS=
-  if [ "$TYPE" = "sun" ]; then
-    LDFLAGS="-lnsl -lsocket"
-  fi
-  echo $LDFLAGS
-}
-
-# when setting up a new architecture, figures out the default
-#   set up genfiles to use
-#
-function get_def_genfiles {
-  mkdir ${CYCDIR}/bin/genfiles/${ARCH}
-  case "${OS}" in
-    cygwin*)
-      DEF_ARCH=i686-unknown-cygwin1.3.2;;
-    solaris*)
-      DEF_ARCH=sparc-sun-solaris2.7;;
-    *bsd*)
-      DEF_ARCH=i386-unknown-openbsd2.8;;
-    *)
-      DEF_ARCH=i686-unknown-linux
-  esac
-  echo "Using the genfiles from ${DEF_ARCH}" 
-  bin/genfiles/extract_patch ${PATCH_ARCH} ${DEF_ARCH}
-  cp -r ${CYCDIR}/bin/genfiles/${DEF_ARCH}/* ${CYCDIR}/bin/genfiles/${ARCH}
-  CVS_files=`find ${CYCDIR}/bin/genfiles/${ARCH} -name CVS`
-  if [ -n "$CVS_files" ]; then
-    \rm -rf $CVS_files
-  fi
-  if [ -f "${CYCDIR}/bin/genfiles/${PATCH_ARCH}.patch" ]; then
-    \rm -rf ${CYCDIR}/bin/genfiles/${PATCH_ARCH}
-  fi
-}
-
-###########################################################################
-#  incdir="$CYCDIR/include"
-#  libdir="$CYCDIR/bin/cyc-lib"
-#  bindir=
-
-incdir="/usr/include/cyclone"
-libdir="/usr/local/lib/cyclone"
-bindir="/usr/local/bin"
-
-# arguments
-#
 while [ $# != 0 ]; do
   case "$1" in
-    -bindir) # set the directory to store the binaries
+    -sh) # set the shell to use
         shift
         if [ $# = 0 ]; then 
-	  echo "-bindir must specify a directory"; exit 1; fi
-        bindir=$1
-        shift
-    ;;
-    -libdir) # set the library directory
-        shift
-        if [ $# = 0 ]; then 
-	  echo "-libdir must specify a directory"; exit 1; fi
-        libdir=$1
-        shift
-    ;;
-    -incdir) # set the include directory
-        shift
-        if [ $# = 0 ]; then 
-	  echo "-incdir must specify a directory"; exit 1; fi
-        incdir=$1
-        shift
-    ;;
-    -prefix) # set directories to prefix/bin prefix/lib/cyclone ...
-        shift
-        if [ $# = 0 ]; then 
-	  echo "-prefix must specify a directory prefix"; exit 1; fi
-	prefix=$1
-        shift
-    ;;
-    *) # bad option
-        echo "usage: $0 [-incdir dir] [-bindir dir] [-libdir dir] [-prefix pre]";
-        exit 1
-    ;;
+	  echo "-sh must specify a directory"; exit 1; fi
+        SHELL=$1
+        shift;;
+    *) break;;
   esac
 done
 
-if [ -n "$prefix" ]; then
-  bindir="$prefix/bin"
-  libdir="$prefix/lib/cyclone"
+# user didn't specify the shell; try to find it
+if [ -z "$SHELL" ]; then
+  for sh in bash ksh; do
+    SHELL=`which $sh`
+    if [ -n "$SHELL" ]; then
+      break
+    fi
+  done
 fi
 
-# start configuring things
-cd config
-
-# function to cleanup if we can't port the arch
-function cleanup {
-  \rm -f ${CYCDIR}/lib/arch/${ARCH}.h ${CYCDIR}/include/arch/${ARCH}.h ${CYCDIR}/config/arch/${ARCH}*
-  \rm -rf ${CYCDIR}/bin/genfiles/${ARCH}
+if [ -z "$SHELL" ]; then
+  echo "Could not locate bash or ksh on your system."
+  echo "Please invoke configure with -sh <bash> where <bash> is the"
+  echo "absolute location of bash on your machine."
   exit 1
-}
-
-# figure out cc to use
-CC=`get_cc`
-
-# see if we have #defines for this architecture
-if [ ! -f "arch/${ARCH}" ]; then
-  echo "This architecture is currently unsupported.  Set it up (y/n)?"
-  read resp
-  if [ "$resp" = "y" ]; then
-    echo | ${CC} -E -dM - > arch/$ARCH
-    if [ $? != 0 ]; then
-      echo "error creating arch #define file"
-      cleanup
-    fi
-    awk '{ printf("#undef %s\n",$2); }' arch/$ARCH > arch/$ARCH.undef
-    if [ $? != 0 ]; then
-      echo "error creating arch #undef file"
-      cleanup
-    fi
-    echo "Creating architecture-specific include file"
-    EGREP=`egrep_path ${ARCH}`
-    export EGREP
-    export CC
-    ./arch_include > ${CYCDIR}/lib/arch/${ARCH}.h
-    cp ${CYCDIR}/lib/arch/${ARCH}.h ${CYCDIR}/include/arch/${ARCH}.h
-    if [ $? != 0 ]; then
-      echo "  failed.  Try altering the version of egrep used by"
-      echo "  the script config/arch_include."
-      cleanup
-    fi
-    if [ -d "${CYCDIR}/bin/genfiles/${ARCH}" ]; then
-      echo "Warning: genfiles directory for ${ARCH} exists"
-    else
-      get_def_genfiles;
-    fi
-  else
-    echo "aborting."
-    exit 1
-  fi
-else
-  # make sure all of the needed configuration files are here
-  if [ -f "arch/${ARCH}.undef" -a -f "../lib/arch/${ARCH}.h" -a -f "../include/arch/${ARCH}.h" ]; then
-    echo "Supported architecture ${ARCH}"
-    cd ../bin/genfiles; ./extract_patch ${PATCH_ARCH} ${ARCH}; cd -
-    if [ ! -d "${CYCDIR}/bin/genfiles/${ARCH}" ]; then
-      echo "Warning: genfiles directory for ${ARCH} not present"
-      get_def_genfiles;
-    fi
-  else
-    echo "Error---missing configuration files for ${ARCH}; rerun configure"
-    cleanup
-  fi
 fi
 
-# set up the installation paths
-function chkdir {
-  echo -n "  $1=$2"
-  if [ ! -d "$2" ]; then
-    echo " (will create)"
-  else
-    echo
-  fi
-}
-echo "Will install into"
-chkdir "binaries" $bindir
-chkdir "libraries" $libdir
-chkdir "include files" $incdir
+export SHELL
 
-# figure out all supported architectures by checking for config files
-ALL_ARCHS=`cd arch; \ls -1 | grep -v undef | grep -v CVS | awk '{printf("%s ",$1);}'`
-
-# get default compile and load flags
-CFLAGS=`get_cflags`
-LD_FLAGS=`get_ldflags`
-
-# write the config Makefile
-cd ..
-(cat <<EOF
-# -*- Makefile -*-
-# THIS FILE IS AUTOMATICALLY GENERATED BY configure FROM Makefine.inc.in
-
-# architecture specific defines
-CYCDIR=${CYCDIR}
-ARCH=${ARCH}
-INC_INSTALL=${incdir}
-BIN_INSTALL=${bindir}
-LIB_INSTALL=${libdir}
-ALL_ARCHS=${ALL_ARCHS}
-CC=${CC}
-CFLAGS=${CFLAGS}
-NET_LD_FLAGS=${LD_FLAGS}
-
-EOF
-cat Makefile.inc.in) > Makefile.inc
+$SHELL config/realconfigure $*

@@ -311,6 +311,7 @@ int Cyc_Std_file_string_write(struct Cyc_Std___sFILE *sf,
 // pointer to the body of the union.  We'd return the size of the body
 // if we could, but that information isn't available at runtime.
 
+#include <sys/types.h>
 #include <sys/socket.h>
 struct sa_xtunion {
   unsigned char *tag;

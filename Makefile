@@ -59,9 +59,9 @@ uninstall: inc_uninstall lib_uninstall bin_uninstall
 
 ifdef INC_INSTALL
 inc_install:
-	config/cyc_install include/* $(INC_INSTALL)
+	$(SHELL) config/cyc_install include/* $(INC_INSTALL)
 inc_uninstall:
-	config/cyc_install -u $(INC_INSTALL)
+	$(SHELL) config/cyc_install -u $(INC_INSTALL)
 else
 inc_install:
 	@(echo "no include directory specified"; exit 1)
@@ -71,9 +71,9 @@ endif
 
 ifdef BIN_INSTALL
 bin_install:
-	config/cyc_install bin/cyclone$(EXE) bin/cycbison$(EXE) bin/cyclex$(EXE) $(BIN_INSTALL)
+	$(SHELL) config/cyc_install bin/cyclone$(EXE) bin/cycbison$(EXE) bin/cyclex$(EXE) $(BIN_INSTALL)
 bin_uninstall:
-	config/cyc_install -u $(BIN_INSTALL)
+	$(SHELL) config/cyc_install -u $(BIN_INSTALL)
 else
 bin_install:
 	@(echo "no bin directory specified"; exit 1)
@@ -83,9 +83,9 @@ endif
 
 ifdef LIB_INSTALL
 lib_install:
-	config/cyc_install bin/cyc-lib/* $(LIB_INSTALL)
+	$(SHELL) config/cyc_install bin/cyc-lib/* $(LIB_INSTALL)
 lib_uninstall:
-	config/cyc_install -u $(LIB_INSTALL)
+	$(SHELL) config/cyc_install -u $(LIB_INSTALL)
 else
 lib_install:
 	@(echo "no lib directory specified"; exit 1)

@@ -1,4 +1,3 @@
-#!/bin/bash
 # Installs files into the given directory; has same command-line semantics
 # as cp -r, except:
 # 1) if the target directory doesn't exist, it creates it

@@ -6,24 +6,17 @@ To build Cyclone, do
 make
 make install
 
-To get off the ground, you need GNU make and bash; bash is assumed to
-be in the /bin directory.  If GNU make is not the default make on 
+To get off the ground, you need GNU make and bash; if bash is not
+installed, ksh can be used instead. If GNU make is not the default make on 
 your system, if might be installed as "gmake" so just type gmake 
-instead of make if things don't work.  If you have bash installed 
-somewhere other than /bin, then edit the configure script and the 
-config/cyc_install scripts so that their first lines point to the 
-location of bash.  For example, if bash were stored in 
-/usr/local/bin/bash, you would change
+instead of make if things don't work.  If you have bash or ksh installed 
+somewhere that is not in your PATH, invoke configure with the -sh option, 
+e.g.
 
-#!/bin/bash
+./configure -sh /usr/local/gnu/bin/bash
 
-to 
-
-#!/usr/local/bin/bash
-
-in those two files.  If you do not have bash installed on your system,
-you can use ksh (i.e., change #!/bin/bash to #!/bin/ksh).  Ultimately,
-we will automate this mess so that you don't have to worry about it.
+if bash were installed in /usr/local/gnu/bin/bash.  The configure script
+will prompt you to do this if it can't find bash or ksh.
 
 By default, binaries will be stored into /usr/local/bin, libraries into
 /usr/local/lib/cyclone, and include files into /usr/include/cyclone.  If
