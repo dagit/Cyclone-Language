@@ -1,0 +1,70 @@
+/************************************************/
+/*  hanoi.c, Version 1.0, 18 Sep 1992  --- AAA  */
+/*           Version 1.1, 06 Jul 1993  --- AAA  */
+/*           Added print out for all disks      */
+/*           Version 1.2, 28 May 1994  --- AAA  */
+/*           Calculate average Moves/25usec     */
+/*           Version 1.2, 27 Oct 1994  --- AAA  */
+/*           Only avg for RunTime > 0.1 sec     */
+/************************************************/
+
+/**************************************************/
+/* Adapted from the MUSBUS test suite.            */
+/* hanoi.c, V3.5 87/08/06 08:11:14 kenj           */
+/**************************************************/
+
+/* timing stuff ripped out */
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#define other(i,j) (6-(i+j))
+
+int num[4];
+long count;
+
+void mov(int n,int f,int t)
+{
+   int o;
+   if(n == 1) 
+   {
+	num[f]--;
+	num[t]++;
+	count++;
+	return;
+   }
+   o = other(f,t);
+   mov(n-1,f,o);
+   mov(1,f,t);
+   mov(n-1,o,t);
+   return;
+}
+
+int main(int argc, char* argv[])
+{
+	int disk;
+	int max = 30;
+	
+	if(argc > 1)
+	 max = atoi(argv[1]);
+
+	printf("Disks     Moves\n");
+
+	for(disk = 1; disk <= max; disk++)
+	{
+	 num[0] = 0;
+	 num[1] = disk;
+	 num[2] = 0;
+	 num[3] = 0;
+	 count  = 0;
+
+	 mov(disk,1,3);
+	 
+	 printf("%3d  %10ld\n",disk,count);
+	 
+	}
+	
+	return(0);
+}
+
+/*-------- End hanoi.c Program, Say Good Night Jackie! (1992) ----------*/
