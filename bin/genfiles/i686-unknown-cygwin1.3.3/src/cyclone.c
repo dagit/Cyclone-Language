@@ -1294,8 +1294,8 @@ _tmpE9;});_tmpE8->f5=_tag_arr("Print compilation stages verbosely",sizeof(char),
 35);_tmpE8;});((struct Cyc_List_List*(*)(struct _tagged_arr))Cyc_List_list)(
 _tag_arr(_tmpE7,sizeof(struct _tuple11*),49));});Cyc_Arg_parse(options,Cyc_add_other,
 _tag_arr("Options:",sizeof(char),9),argv);if(Cyc_cyclone_files == 0?Cyc_ccargs == 
-0: 0){({void*_tmpAD[0]={};Cyc_Std_fprintf(Cyc_Std_stderr,_tag_arr("missing file",
-sizeof(char),13),_tag_arr(_tmpAD,sizeof(void*),0));});exit(1);}{struct
+0: 0){({void*_tmpAD[0]={};Cyc_Std_fprintf(Cyc_Std_stderr,_tag_arr("missing file\n",
+sizeof(char),14),_tag_arr(_tmpAD,sizeof(void*),0));});exit(1);}{struct
 _tagged_arr cyclone_exec_prefix=(struct _tagged_arr)Cyc_Std_getenv(_tag_arr("CYCLONE_EXEC_PREFIX",
 sizeof(char),20));if(cyclone_exec_prefix.curr != ((struct _tagged_arr)_tag_arr(0,0,
 0)).curr)Cyc_cyclone_exec_path=({struct Cyc_List_List*_tmpAE=_cycalloc(sizeof(*
@@ -1340,11 +1340,11 @@ gc_filename=_tag_arr("gc.a",sizeof(char),5);{struct _tagged_arr _tmpB6=Cyc_nogc_
 Cyc_do_find(Cyc_cyclone_exec_path,nogc_filename): Cyc_do_find(Cyc_cyclone_exec_path,
 gc_filename);struct _tagged_arr _tmpB7=Cyc_do_find(Cyc_cyclone_exec_path,
 runtime_filename);stdlib=0;stdlib_string=(struct _tagged_arr)({struct Cyc_Std_String_pa_struct
-_tmpBB;_tmpBB.tag=0;_tmpBB.f1=(struct _tagged_arr)_tmpB7;{struct Cyc_Std_String_pa_struct
-_tmpBA;_tmpBA.tag=0;_tmpBA.f1=(struct _tagged_arr)_tmpB6;{struct Cyc_Std_String_pa_struct
-_tmpB9;_tmpB9.tag=0;_tmpB9.f1=(struct _tagged_arr)libcyc_flag;{void*_tmpB8[3]={&
-_tmpB9,& _tmpBA,& _tmpBB};Cyc_Std_aprintf(_tag_arr(" %s %s %s",sizeof(char),10),
-_tag_arr(_tmpB8,sizeof(void*),3));}}}});}}if(Cyc_ic_r){struct _handler_cons _tmpBC;
+_tmpBB;_tmpBB.tag=0;_tmpBB.f1=(struct _tagged_arr)_tmpB6;{struct Cyc_Std_String_pa_struct
+_tmpBA;_tmpBA.tag=0;_tmpBA.f1=(struct _tagged_arr)libcyc_flag;{struct Cyc_Std_String_pa_struct
+_tmpB9;_tmpB9.tag=0;_tmpB9.f1=(struct _tagged_arr)_tmpB7;{void*_tmpB8[3]={& _tmpB9,&
+_tmpBA,& _tmpBB};Cyc_Std_aprintf(_tag_arr(" %s %s %s",sizeof(char),10),_tag_arr(
+_tmpB8,sizeof(void*),3));}}}});}}if(Cyc_ic_r){struct _handler_cons _tmpBC;
 _push_handler(& _tmpBC);{int _tmpBE=0;if(setjmp(_tmpBC.handler))_tmpBE=1;if(!
 _tmpBE){Cyc_ccargs=((struct Cyc_List_List*(*)(int(*f)(struct _tagged_arr*),struct
 Cyc_List_List*x))Cyc_List_filter)(Cyc_is_cfile,Cyc_ccargs);Cyc_libargs=((struct

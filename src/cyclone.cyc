@@ -105,7 +105,7 @@ static void print_version() {
   printf("Compiled for architecture: %s CC=\"%s\"\n", 
 	 Cstring_to_string(Carch), Cstring_to_string(Ccomp));
   printf("Standard library directory: %s\n",Cstring_to_string(Cdef_lib_path));
-  printf("Standard include directory: %s\n", Cstring_to_string(Cdef_inc_path));
+  printf("Standard include directory: %s\n",Cstring_to_string(Cdef_inc_path));
   exit(0);
 }
   
@@ -935,7 +935,7 @@ int main(int argc, string_t<`H> ?`H argv) {
   Arg::parse(options, add_other, "Options:", argv);
 
   if (cyclone_files == NULL && ccargs == NULL) {
-    fprintf(stderr,"missing file");
+    fprintf(stderr,"missing file\n");
     exit(1);
   }
   
@@ -1021,7 +1021,7 @@ int main(int argc, string_t<`H> ?`H argv) {
     // FIX: temporarily removed from interface check below
     //stdlib = list(new libcyc_flag);
     stdlib = NULL;
-    stdlib_string = aprintf(" %s %s %s", libcyc_flag, gc, runtime);
+    stdlib_string = aprintf(" %s %s %s", runtime, libcyc_flag, gc);
   }
 
   if (ic_r) try {
