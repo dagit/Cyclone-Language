@@ -31,7 +31,6 @@
 (***********************************************************************/
 
 #include <buffer.h>
-#include <cycboot.h> // for size_t
 #include <string.h>
 
 namespace Buffer;
@@ -40,20 +39,51 @@ using Core;
 //(* Extensible buffers *)
 
 abstract struct t
-{ mstring_t buffer;
+{ mstring_t<`U> buffer;
   unsigned int position;
   unsigned int length;
-  mstring_t initial_buffer;
+  mstring_t<`U> initial_buffer;
 };
 
 T create (unsigned int n) {
-  if (n < 1) n=1;
-  mstring_t s = new_string(n+1);
-  return new t(s, 0, n, s);
+  if (n > 0) {
+    mstring_t<`U> s = calloc(n+1,sizeof(char));
+    return new t(s, 0, n, NULL);
+  } else {
+    return new t(NULL, 0, 0, NULL);
+  }
 }
 
 mstring_t contents(T b) {
-  return (substring( b->buffer, 0, b->position));
+  let buf = NULL;
+  buf :=: b->buffer;
+  if (buf == NULL)
+    return NULL;
+  let res = substring( buf, 0, b->position);
+  buf :=: b->buffer;
+  return res;
+}
+
+mstring_t<`U> extract(T b) {
+  let buf = NULL;
+  buf :=: b->buffer;
+  buf[b->position] = '\0';
+  b->position = 0;
+  b->length = 0;
+  return buf;
+}
+
+bool restore(T b, mstring_t<`U> buf) __attribute__((consume(2))) {
+  int len = strlen(buf);
+  buf :=: b->buffer;
+  if (buf != NULL) {
+    buf :=: b->buffer;
+    Core::ufree((char *@nozeroterm`U)buf);
+    return false;
+  }
+  b->position = 0;
+  b->length = len;
+  return true;
 }
 
 size_t length (T b) {
@@ -62,26 +92,36 @@ size_t length (T b) {
 
 void clear (T b) {
    b->position = 0;
-   return;
 }
 
 void reset (T b) {
   b->position = 0;
-  b->buffer = b->initial_buffer;
-  b->length = numelts(b->buffer) - 1;
+  if (b->initial_buffer != NULL) {
+    let buf = NULL;
+    b->initial_buffer :=: buf;
+    b->length = numelts(buf) - 1;
+    b->buffer :=: buf;
+    Core::ufree((char *@nozeroterm `U)buf);
+  }
   return;
 }
 
 static void resize(T b, unsigned int more) {
   size_t len = b->length;
-  size_t new_len = len;
-  mstring_t new_buffer;
+  size_t new_len = len == 0 ? 1 : len;
+  mstring_t<`U> new_buffer;
   while (b->position + more > new_len) {
     new_len = 2 * new_len;
   }
-  new_buffer = new_string(new_len + 1);
-  strncpy((char ? @nozeroterm )new_buffer, b->buffer, b->position);
-  b->buffer = new_buffer;
+  new_buffer = calloc(new_len + 1,sizeof(char));
+  if (b->length != 0) {
+    let alias<`r>char ?`r x = new_buffer;
+    strncpy((char ? @nozeroterm )x, b->buffer, b->position);
+  }
+  if (b->initial_buffer == NULL)
+    b->initial_buffer :=: b->buffer;    
+  b->buffer :=: new_buffer;
+  Core::ufree((char *@nozeroterm `U)new_buffer);
   b->length = new_len;
   return;
 }
@@ -102,7 +142,12 @@ void add_substring(T b, string_t s, int offset, int len) {
     throw new Invalid_argument("Buffer::add_substring");
   int new_position = b->position + len;
   if (new_position > b->length) resize (b, len);
-  zstrncpy((char ? @nozeroterm )(b->buffer + b->position), s + offset, len);
+  let buf = NULL;
+  buf :=: b->buffer;
+  { let alias <`r>char ?`r x = buf;
+    zstrncpy((char ? @nozeroterm )(x + b->position), s + offset, len);
+  }
+  buf :=: b->buffer;
   b->position = new_position;
   return;
 }
@@ -112,7 +157,12 @@ void add_string (T b, string_t s) {
   int len = strlen(s);
   int new_position = b->position + len;
   if (new_position > b->length) resize(b, len);
-  strncpy((char ? @nozeroterm )b->buffer + b->position, s, len);
+  let buf = NULL;
+  buf :=: b->buffer;
+  { let alias <`r>char ?`r x = buf;
+    strncpy((char ? @nozeroterm )x + b->position, s, len);
+  }
+  buf :=: b->buffer;
   b->position = new_position;
   return;
 }

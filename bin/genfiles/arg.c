@@ -447,9 +447,9 @@ void Cyc_Arg_parse(struct Cyc_List_List*specs,void(*anonfun)(struct _dyneither_p
 struct Cyc_Buffer_t*Cyc_Buffer_create(unsigned int n);
 # 58
 struct _dyneither_ptr Cyc_Buffer_contents(struct Cyc_Buffer_t*);
-# 73
+# 83
 void Cyc_Buffer_add_substring(struct Cyc_Buffer_t*,struct _dyneither_ptr,int offset,int len);
-# 82 "buffer.h"
+# 92 "buffer.h"
 void Cyc_Buffer_add_string(struct Cyc_Buffer_t*,struct _dyneither_ptr);
 # 29 "assert.h"
 void*Cyc___assert_fail(struct _dyneither_ptr assertion,struct _dyneither_ptr file,unsigned int line);char Cyc_Arg_Bad[4U]="Bad";char Cyc_Arg_Error[6U]="Error";struct Cyc_Arg_Prefix_Arg_Flag_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_Arg_Exact_Arg_Flag_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_Arg_Unknown_Arg_error_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_Arg_Missing_Arg_error_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_Arg_Message_Arg_error_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_Arg_Wrong_Arg_error_struct{int tag;struct _dyneither_ptr f1;struct _dyneither_ptr f2;struct _dyneither_ptr f3;};struct _tuple0{struct _dyneither_ptr f1;int f2;struct _dyneither_ptr f3;void*f4;struct _dyneither_ptr f5;};

@@ -34,7 +34,7 @@
 #ifndef _BUFFER_H_
 #define _BUFFER_H_
 #include <core.h> // for string_t, mstring_t
-#include <cycboot.h> // for size_t
+#include <cycboot.h>
 
 namespace Buffer {
 
@@ -58,6 +58,16 @@ extern T create(unsigned int n);
 extern mstring_t contents(T);
   /** [contents(b)] heap allocates and returns a string whose contents
       are the contents of buffer [b]. */
+extern mstring_t<`U> extract(T);
+  /** [extract(b)] is like [contents(b)] except that returns a unique
+      pointer to the internal array itself, adding a zero terminator
+      at the current position.  This avoids making a copy.  However,
+      the buffer [b] is unusable until this array is restored. */
+extern bool restore(T,mstring_t<`U>) __attribute__((consume(2)));
+  /** [restore(b,s)] restores the string [s] to be the internal array
+      of buffer [b].  If [b] already has valid contents, the operation
+      fails and [b] is freed, returning false.  Otherwise, true is
+      returned. */
 extern size_t length(T);
   /** [length(b)] returns the number of characters in buffer [b]. */
 extern void clear(T);
@@ -67,7 +77,7 @@ extern void reset(T);
   /** [reset(b)] sets the number of characters in [b] to zero, and
       sets the internal storage to the initial string.  This means
       that any storage used to grow the buffer since the last create
-      or reset can be reclaimed by the garbage collector. */
+      or reset can be freed. */
 extern void add_char(T,char);
   /** [add_char(b,c)] appends character [c] to the end of [b]. */
 extern void add_substring(T,string_t,int offset,int len);

@@ -541,9 +541,9 @@ void Cyc_Arg_parse(struct Cyc_List_List*specs,void(*anonfun)(struct _dyneither_p
 struct Cyc_Buffer_t*Cyc_Buffer_create(unsigned int n);
 # 58
 struct _dyneither_ptr Cyc_Buffer_contents(struct Cyc_Buffer_t*);
-# 71
+# 81
 void Cyc_Buffer_add_char(struct Cyc_Buffer_t*,char);
-# 82 "buffer.h"
+# 92 "buffer.h"
 void Cyc_Buffer_add_string(struct Cyc_Buffer_t*,struct _dyneither_ptr);struct Cyc_PP_Ppstate;struct Cyc_PP_Out;struct Cyc_PP_Doc;
 # 28 "position.h"
 void Cyc_Position_reset_position(struct _dyneither_ptr);struct Cyc_Position_Error;struct Cyc_Relations_Reln;struct _union_Nmspace_Rel_n{int tag;struct Cyc_List_List*val;};struct _union_Nmspace_Abs_n{int tag;struct Cyc_List_List*val;};struct _union_Nmspace_C_n{int tag;struct Cyc_List_List*val;};struct _union_Nmspace_Loc_n{int tag;int val;};union Cyc_Absyn_Nmspace{struct _union_Nmspace_Rel_n Rel_n;struct _union_Nmspace_Abs_n Abs_n;struct _union_Nmspace_C_n C_n;struct _union_Nmspace_Loc_n Loc_n;};
