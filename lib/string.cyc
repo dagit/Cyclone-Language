@@ -39,10 +39,9 @@ extern "C" Cstring strerror(int errnum);
 size_t strlen(buffer_t s) {
   size_t i;
   unsigned int sz = numelts(s);
-  for (i = 0; i < sz; i++) {
+  for (i = 0; i < sz; i++)
     if (s[i] == '\000')
       return i;
-  }
   return i;
 }
 
@@ -53,31 +52,22 @@ int strcmp(buffer_t s1, buffer_t s2) {
   if (s1 == s2)
     return 0;
   int i = 0;
-  unsigned int sz1 = numelts(s1);
-  unsigned int sz2 = numelts(s2);
-  unsigned int minsz = (sz1 < sz2) ? sz1 : sz2;
+  unsigned sz1 = numelts(s1);
+  unsigned sz2 = numelts(s2);
+  unsigned minsz = (sz1 < sz2) ? sz1 : sz2;
   assert(minsz <= numelts(s1) && minsz <= numelts(s2));
-  while (i < minsz) {
+  for(; i < minsz; ++i) {
     char c1 = s1[i];
     char c2 = s2[i];
-    if (c1 == '\000') {
-      if (c2 == '\000') return 0;
-      else return -1;
-    } else if (c2 == '\000') return 1;
-    else {
-      int diff = c1 - c2;
-      if (diff != 0) return diff;
-    }
-    ++i;
+    if (c1 == '\000')
+      return (c2 == '\000') ? 0 : -1;
+    if (c2 == '\000') return 1;
+    int diff = c1 - c2;
+    if (diff != 0) return diff;
   }
   if (sz1 == sz2) return 0;
-  if (minsz < sz2) {
-    if (s2[i] == '\000') return 0;
-    else return -1;
-  } else {
-    if (s1[i] == '\000') return 0;
-    else return 1;
-  }
+  if (sz1 < sz2)  return (s2[i] == '\000') ? 0 : -1;
+  return (s1[i] == '\000') ? 0 : 1;
 }
 
 int strptrcmp(stringptr_t s1, stringptr_t s2) {
@@ -147,15 +137,14 @@ int zstrncmp(buffer_t s1, buffer_t s2,size_t n) {
   for (int i=0; i < bound; i++) {
     if (s1[i] < s2[i])
       return(-1);
-    else if (s2[i] < s1[i])
+    if (s2[i] < s1[i])
       return(1);
   }
   if (min_size <= bound)
     return(0);
   if (s1size < s2size)
     return(-1);
-  else 
-    return(1);
+  return(1);
 }
 
 // like zstrcmp but operates on pointers -- useful for hashtables

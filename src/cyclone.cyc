@@ -28,6 +28,7 @@
 #include "tc.h"
 #include "toc.h"
 #include "remove_aggregates.h"
+#include "remove_labels.h"
 #include "toseqc.h"
 #include "tovc.h"
 #include "new_control_flow.h"
@@ -383,16 +384,6 @@ FILE *try_file_open(string_t filename, string_t mode, string_t msg_part) {
   }
 }
 
-void endtime(struct timeval *start) {
-  struct timeval end;
-  gettimeofday(&end,NULL);
-  end.tv_sec -= start->tv_sec;
-  end.tv_usec -= start->tv_usec;
-  if (end.tv_usec < 0)
-    end.tv_usec += 1000000;
-  if (v_r) fprintf(stderr,"(%d.%06d secs)\n",end.tv_sec,end.tv_usec);
-}
-
 $(datatype exn @,const char*,int)* uncaught_exn = NULL;
 
 extern "C" void CYCALLOCPROFILE_mark(const char *s);
@@ -400,12 +391,14 @@ extern "C" void CYCALLOCPROFILE_mark(const char *s);
 `b do_stage(string_t stage_name, list_t<Absyn::decl_t,`H> tds,
 	    `b f(`a, list_t<Absyn::decl_t,`H>), `a env, `b onfail) {
   CYCALLOCPROFILE_mark(stage_name);
-  struct timeval start;
-  gettimeofday(&start,NULL);
+  struct timeval start, end;
+  if(v_r)
+    gettimeofday(&start,NULL);
 
-  let ans = onfail;
+  let ans;
   try ans = f(env,tds);
   catch { case x:
+    ans = onfail;
     if (Position::error_p())
       break;
     compile_failure = true;
@@ -420,9 +413,16 @@ extern "C" void CYCALLOCPROFILE_mark(const char *s);
     fflush(stderr);
   } else if (v_r) {
     fprintf(stderr,"%s completed ",stage_name);
+    gettimeofday(&end,NULL);
+    end.tv_sec  -= start.tv_sec;
+    end.tv_usec -= start.tv_usec;
+    if (end.tv_usec < 0) {
+      end.tv_usec += 1000000;
+      --end.tv_sec;
+    }
+    fprintf(stderr,"(%d.%06d secs)\n",end.tv_sec,end.tv_usec);
     fflush(stderr);
   }
-  endtime(&start);
   return ans;
 }
 
@@ -506,6 +506,9 @@ do_translate(table_t<Absyn::fndecl_t,table_t<Absyn::stmt_t,int>> pops,
 }
 list_t<Absyn::decl_t> do_removeaggrs(bool ignore,list_t<Absyn::decl_t,`H> tds) {
   return RemoveAggrs::remove_aggrs(tds);
+}
+list_t<Absyn::decl_t> do_removelabs(bool ignore,list_t<Absyn::decl_t,`H> tds) {
+  return RemoveLabels::remove_unused_labels(tds);
 }
 
 list_t<Absyn::decl_t> do_toseqc(bool ignore, list_t<Absyn::decl_t,`H> tds) {
@@ -870,7 +873,9 @@ static void process_file(string_t<`H> filename) {
   // Removal of aggregates (necessary for comprehensions and to avoid GCC bug)
   if(!compile_failure && Flags::stop_after_pass >= Flags::AggregateRemoval)
     tds = do_stage("aggregate removal",tds,do_removeaggrs,true,tds);
-
+  // Removal of unused labels (optional optimization good b/c of patterns)
+  if(!compile_failure && Flags::stop_after_pass >= Flags::LabelRemoval)
+    tds = do_stage("unused label removal",tds,do_removelabs,true,tds);
   // Translation to left-to-right evaluation order
   if(!compile_failure && toseqc_r && Flags::stop_after_pass >= Flags::EvalOrder)
     tds = do_stage("post-pass to L-to-R evaluation order", tds, do_toseqc, 

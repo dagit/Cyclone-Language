@@ -95,26 +95,24 @@ namespace Parse {
   // Flag that's turned on when processing tempest code instead of cyclone.
   // We interpreter "*" as a fat pointer there and intend for regions to
   // default to the heap (along with some other trickery).
-  bool parsing_tempest = false;
+  bool parsing_tempest = false; // FLAG
 
   // flattened lists
-  struct FlatList<`a::A,`r::R> { struct FlatList<`a,`r> *`r tl; `a hd; };
+  struct FlatList<`a::A,`r> { struct FlatList<`a,`r> *`r tl; `a hd; };
   typedef struct FlatList<`a,`r> *`r flat_list_t<`a,`r>;
   // imperatively reverse a flattened list
   flat_list_t<`a,`r> flat_imp_rev(flat_list_t<`a,`r> x) {
     if (x == NULL) return x;
-    else {
-      flat_list_t<`a,`r> first  = x;
-      flat_list_t<`a,`r> second = x->tl;
-      x->tl = NULL;
-      while (second != NULL) {
-        flat_list_t<`a,`r> temp = second->tl;
-        second->tl = first;
-        first = second;
-        second = temp;
-      } 
-      return first;
-    }
+    flat_list_t first  = x;
+    flat_list_t second = x->tl;
+    x->tl = NULL;
+    while (second != NULL) {
+      flat_list_t temp = second->tl;
+      second->tl = first;
+      first = second;
+      second = temp;
+    } 
+    return first;
   }
 
 datatype exn {Exit};
@@ -133,12 +131,13 @@ struct Type_specifier {
 typedef struct Type_specifier type_specifier_t;
 
 enum Storage_class {
- Typedef_sc, Extern_sc, ExternC_sc, Static_sc, Auto_sc, Register_sc, Abstract_sc
+  Typedef_sc, Extern_sc, ExternC_sc, Static_sc, Auto_sc, Register_sc, Abstract_sc,
+  None_sc
 };
 typedef enum Storage_class storage_class_t;
 
 struct Declaration_spec {
-  storage_class_t*         sc;
+  storage_class_t          sc;
   tqual_t                  tq;
   type_specifier_t         type_specs;
   bool                     is_inline;
@@ -146,7 +145,7 @@ struct Declaration_spec {
 };
 typedef struct Declaration_spec decl_spec_t;
 
-struct Declarator<`yy::R> {
+struct Declarator<`yy> {
   qvar_t                  id;
   seg_t                   varloc;
   list_t<type_modifier_t<`yy>,`yy> tms;
@@ -168,10 +167,9 @@ datatype Pointer_qual {
 typedef datatype Pointer_qual @`r pointer_qual_t<`r>;
 typedef list_t<pointer_qual_t<`r>,`r> pointer_quals_t<`r>;
 
-static void
-  decl_split(region_t<`r> r,declarator_list_t<`yy> ds,
-             declarators_t<`r,`yy>@ decls,
-             list_t<exp_opt_t,`r>@ es) {
+static void decl_split(region_t<`r> r,declarator_list_t<`yy> ds,
+		       declarators_t<`r,`yy>@ decls,
+		       list_t<exp_opt_t,`r>@ es) {
   declarators_t<`r,`yy> declarators = NULL;
   list_t<exp_opt_t,`r>  exprs       = NULL;
   for (; ds != NULL; ds = ds->tl) {
@@ -183,7 +181,7 @@ static void
   *decls = flat_imp_rev(declarators);
 }
 
-struct Abstractdeclarator<`yy::R> {
+struct Abstractdeclarator<`yy> {
   list_t<type_modifier_t<`yy>,`yy> tms;
 };
 typedef struct Abstractdeclarator<`yy> abstractdeclarator_t<`yy>;
@@ -315,7 +313,7 @@ static type_t array2ptr(type_t t, bool argposn) {
 // are given tag_t's
 static list_t<$(var_t,type_t)@> get_arg_tags(list_t<$(var_opt_t,tqual_t,type_t) @>x) {
   let res = NULL;
-  for (; x != NULL; x = x->tl) {
+  for (; x != NULL; x = x->tl)
     switch (x->hd) {
     case &$(v,_,&AppType(&TagCon,&List{i,NULL})) && v != NULL: 
       switch (i) {
@@ -336,20 +334,18 @@ static list_t<$(var_t,type_t)@> get_arg_tags(list_t<$(var_opt_t,tqual_t,type_t) 
       break;
     default: break;
     }
-  }
   return res;
 }
 
 // same as above, but for a list of aggregate fields
 static list_t<$(var_t,type_t)@> get_aggrfield_tags(list_t<aggrfield_t> x) {
   let res = NULL;
-  for (; x != NULL; x = x->tl) {
+  for (; x != NULL; x = x->tl)
     switch (x->hd->type) {
     case &AppType(&TagCon,&List{i,NULL}):
       res = new List(new $(x->hd->name,i), res); break;
     default: break;
     }
-  }
   return res;
 }
 
@@ -374,9 +370,8 @@ static type_t substitute_tags(list_t<$(var_t,type_t)@> tags, type_t t) {
   switch (t) {
   case &ArrayType(ArrayInfo{et,tq,nelts,zt,ztloc}):
     exp_opt_t nelts2 = nelts;
-    if (nelts != 0) {
+    if (nelts != 0)
       nelts2 = substitute_tags_exp(tags,nelts);
-    }
     let et2 = substitute_tags(tags,et);
     if (nelts != nelts2 || et != et2)
       return array_type(et2,tq,nelts2,zt,ztloc);
@@ -395,10 +390,7 @@ static type_t substitute_tags(list_t<$(var_t,type_t)@> tags, type_t t) {
     let e2 = substitute_tags_exp(tags,e);
     if (e2 != e) return valueof_type(e2);
     break;
-
-  default: 
-    // FIX: should go into other types too
-    break;
+  default: break; // FIX: should go into other types too
   }
   return t;
 }
@@ -438,24 +430,15 @@ static type_t id2type(string_t<`H> s, kindbound_t k) {
   return var_type(new Tvar(new s,-1,k));
 }
 
-static bool tvar_ok(string_t<`H> s,string_t<`H> @err) {
-  if (zstrcmp(s,"`H") == 0) {
-    *err = "bad occurrence of heap region";
-    return false;
-  }
-  if (zstrcmp(s,"`U") == 0) {
-    *err = "bad occurrence of unique region";
-    return false;
-  }
-  if (zstrcmp(s,"`RC") == 0) {
-    *err = "bad occurrence of refcounted region";
-    return false;
-  }
-  if (zstrcmp(s,CurRgn::curr_rgn_name) == 0) {
-    *err = "bad occurrence of \"current\" region";
-    return false;
-  }
-  return true;
+static void tvar_ok(string_t<`H> s,seg_t loc) {
+  if (zstrcmp(s,"`H") == 0)
+    Warn::err(loc,"bad occurrence of heap region");
+  if (zstrcmp(s,"`U") == 0)
+    Warn::err(loc,"bad occurrence of unique region");
+  if (zstrcmp(s,"`RC") == 0)
+    Warn::err(loc, "bad occurrence of refcounted region");
+  if (zstrcmp(s,CurRgn::curr_rgn_name) == 0)
+    Warn::err(loc,"bad occurrence of \"current\" region");
 }
 
 // convert a list of types to a list of typevars -- the parser can't
@@ -487,11 +470,8 @@ static void set_vartyp_kind(type_t t, kind_t k, bool leq) {
 static list_t<type_modifier_t<`yy>,`yy> 
   oldstyle2newstyle(region_t<`yy> yy,
                     list_t<type_modifier_t<`yy>,`yy> tms,
-                    list_t<decl_t> tds, 
+                    List_t<decl_t> tds, 
                     seg_t loc) {
-  // Not an old-style function
-  if (tds==NULL) return tms;
-
   // If no function is found, or the function is not innermost, then
   // this is not a function definition; it is an error.  But, we
   // return silently.  The error will be caught by make_function below.
@@ -515,7 +495,7 @@ static list_t<type_modifier_t<`yy>,`yy>
 	// replace each parameter with the right typed version
 	list_t<$(var_opt_t,tqual_t,type_t)@> rev_new_params = NULL;
 	for(; ids != NULL; ids = ids->tl) {
-	  let tds2 = tds;
+	  list_t tds2 = tds;
 	  for(; tds2 != NULL; tds2 = tds2->tl) {
 	    let x = tds2->hd;
 	    switch(x->r) {
@@ -526,9 +506,8 @@ static list_t<type_modifier_t<`yy>,`yy>
 		parse_abort(x->loc, "initializer found in parameter declaration");
 	      if(is_qvar_qualified(vd->name))
 		parse_abort(x->loc, "namespaces forbidden in parameter declarations");
-	      rev_new_params =
-		new List(new $((*vd->name)[1], vd->tq, vd->type), 
-			 rev_new_params);
+	      rev_new_params = new List(new $((*vd->name)[1], vd->tq, vd->type),
+					rev_new_params);
 	      goto L;
 	    default: parse_abort(x->loc, "nonvariable declaration in parameter type");
 	    }
@@ -569,22 +548,20 @@ static fndecl_t make_function(region_t<`yy> yy,
     tq  = dso->tq;
     is_inline = dso->is_inline;
     atts = dso->attributes;
-    // Examine storage class; like C, we allow both static and extern
-    if (dso->sc != NULL)
-      switch (*dso->sc) {
-      case Extern_sc: sc = Extern; break;
-      case Static_sc: sc = Static; break;
-      default: Warn::err(loc,"bad storage class on function"); break;
-      }
+    // Examine storage class; like C, we allow static and extern
+    switch (dso->sc) {
+    case None_sc: break;
+    case Extern_sc: sc = Extern; break;
+    case Static_sc: sc = Static; break;
+    default: Warn::err(loc,"bad storage class on function"); break;
+    }
   }
   let t = collapse_type_specifiers(tss,loc);
   let $(fn_tqual,fn_type,x,out_atts) = apply_tms(tq,t,atts,d.tms);
   // what to do with the left-over attributes out_atts?  I'm just
   // going to append them to the function declaration and let the
   // type-checker deal with it.
-  if (x != NULL)
-    // Example:   `a f<`b><`a>(`a x) {...}
-    // Here info[2] will be the list `b.
+  if (x != NULL) // Example:   `a f<`b><`a>(`a x) {...}
     Warn::warn(loc,"bad type params, ignoring");
   
   switch (fn_type) { // fn_type had better be a FnType
@@ -597,21 +574,16 @@ static fndecl_t make_function(region_t<`yy> yy,
     // We don't fill in the cached type here because we may need
     // to figure out the bound type variables and the effect.
     i.attributes=append(i.attributes,out_atts);
-    return new Fndecl {.sc=sc,.is_inline=is_inline,.name=d.id,.body=body,
-		       .i=i,
+    return new Fndecl {.sc=sc,.is_inline=is_inline,.name=d.id,.body=body, .i=i,
 		       .cached_type=NULL,.param_vardecls=NULL,.fn_vardecl=NULL,
-			.orig_scope=sc};
+		       .orig_scope=sc};
   default: parse_abort(loc,"declarator is not a function prototype");
   }
 }
 
 static string_t msg1 = 
   "at most one type may appear within a type specifier \n\t(missing ';' or ','?)";
-static string_t msg2 =
-  "const or volatile may appear only once within a type specifier \n\t(missing ';' or ','?)";
-static string_t msg3 = 
-  "type specifier includes more than one declaration \n\t(missing ';' or ','?)";
-static string_t msg4 = 
+static string_t msg2 = 
   "sign specifier may appear only once within a type specifier \n\t(missing ';' or ','?)";
 
 // Given two partial type-specifiers, combine their information
@@ -622,18 +594,18 @@ static type_specifier_t combine_specifiers(seg_t loc,
                                            type_specifier_t s1,
                                            type_specifier_t s2) {
   if (s1.Signed_spec && s2.Signed_spec)
-    Warn::warn(loc,msg4);
+    Warn::warn(loc,msg2);
   s1.Signed_spec |= s2.Signed_spec;
   if (s1.Unsigned_spec && s2.Unsigned_spec)
-    Warn::warn(loc,msg4);
+    Warn::warn(loc,msg2);
   s1.Unsigned_spec |= s2.Unsigned_spec;
   if (s1.Short_spec && s2.Short_spec)
-    Warn::warn(loc,msg4);
+    Warn::warn(loc,"too many occurrences of short in specifiers");
   s1.Short_spec |= s2.Short_spec;
   if ((s1.Long_Long_spec && s2.Long_Long_spec) ||
       (s1.Long_Long_spec && s2.Long_spec) ||
       (s2.Long_Long_spec && s1.Long_spec))
-    Warn::warn(loc,msg4);
+    Warn::warn(loc,"too many occurrences of long in specifiers");
   s1.Long_Long_spec = 
     (s1.Long_Long_spec || s2.Long_Long_spec || (s1.Long_spec && s2.Long_spec));
   s1.Long_spec = !s1.Long_Long_spec && (s1.Long_spec || s2.Long_spec);
@@ -655,43 +627,45 @@ static type_t collapse_type_specifiers(type_specifier_t ts, seg_t loc) {
   bool      seen_size = ts.Short_spec || ts.Long_spec || ts.Long_Long_spec;
   type_t    t         = seen_type ? ts.Type_spec : void_type;
   size_of_t sz        = Int_sz; 
-  sign_t    sgn  = Signed;
+  sign_t    sgn       = Signed;
 
-  if (ts.Signed_spec && ts.Unsigned_spec)
-    Warn::err(loc,msg4);
-  if (ts.Unsigned_spec) sgn = Unsigned;
-  if ((ts.Short_spec && (ts.Long_spec || ts.Long_Long_spec)) ||
-      (ts.Long_spec && ts.Long_Long_spec))
-    Warn::err(loc,msg4);
-  if (ts.Short_spec) sz = Short_sz;
-  if (ts.Long_spec) sz = Long_sz;
-  if (ts.Long_Long_spec) sz = LongLong_sz;
-
+  if(seen_size || seen_sign) { // optimization: avoid these for non-ints
+    if (ts.Signed_spec && ts.Unsigned_spec)
+      Warn::err(loc,msg2);
+    if (ts.Unsigned_spec) sgn = Unsigned;
+    if ((ts.Short_spec && (ts.Long_spec || ts.Long_Long_spec)) ||
+	(ts.Long_spec && ts.Long_Long_spec))
+      Warn::err(loc,msg2);
+    if (ts.Short_spec) sz = Short_sz;
+    if (ts.Long_spec) sz = Long_sz;
+    if (ts.Long_Long_spec) sz = LongLong_sz;
+  }
   // it's okay to not have an explicit type as long as we have some
   // combination of signed, unsigned, short, long, or longlong
   if (!seen_type) {
     if(!seen_sign && !seen_size) 
       Warn::warn(loc,"missing type within specifier");
-    t = int_type(sgn,sz);
-  } else {
+    return int_type(sgn,sz);
+  } 
+  switch (t) {
+  case &AppType(&IntCon(sgn2,sz2),_):
+    if (seen_sign && sgn2 != sgn) {
+      sgn2 = sgn;
+      t = int_type(sgn,sz2);
+    }
+    if(seen_size && sz2 != sz)
+      t = int_type(sgn2,sz);
+    break;
+  case &AppType(&FloatCon(_),_): 
+    if(seen_size) // hack: if we've seen "long" then sz will be long_double_type
+      t = long_double_type; 
+    break;
+  default: 
     if(seen_sign)
-      switch (t) {
-      case &AppType(&IntCon(sgn2,sz2),_):
-        if (sgn2 != sgn)
-          t = int_type(sgn,sz2);
-        break;
-      default: Warn::err(loc,"sign specification on non-integral type"); break;
-      }
+      Warn::err(loc,"sign specification on non-integral type"); 
     if(seen_size)
-      switch (t) {
-      case &AppType(&IntCon(sgn2,sz2),_):
-        if (sz2 != sz)
-          t = int_type(sgn2,sz);
-        break;
-        // hack -- if we've seen "long" then sz will be long_double_type
-      case &AppType(&FloatCon(_),_): t = long_double_type; break;
-      default: Warn::err(loc,"size qualifier on non-integral type"); break;
-      }
+      Warn::err(loc,"size qualifier on non-integral type");
+    break;
   }
   return t;
 }
@@ -728,12 +702,11 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
       list_t<tvar_t> typvars = NULL;
       // function type attributes seen thus far get put in the function type
       attributes_t fn_atts = NULL, new_atts = NULL;
-      for (_ as = atts; as != NULL; as = as->tl) {
+      for (_ as = atts; as != NULL; as = as->tl)
 	if (Atts::fntype_att(as->hd))
 	  fn_atts = new List(as->hd,fn_atts);
 	else
 	  new_atts = new List(as->hd,new_atts);
-      }
       // functions consume type parameters
       if (tms->tl != NULL)
 	switch (tms->tl->hd) {
@@ -849,8 +822,7 @@ static stmt_t flatten_declarations(list_t<decl_t> ds, stmt_t s){
 // involved function and thus I expect a number of subtle errors.
 static list_t<decl_t> make_declarations(decl_spec_t ds,
 					declarator_list_t ids,
-                                        seg_t tqual_loc,
-					seg_t loc) {
+                                        seg_t tqual_loc, seg_t loc) {
  region mkrgn;
  let Declaration_spec(_,tq,tss,_,atts) = ds;
  if (tq.loc == 0) tq.loc = tqual_loc;
@@ -859,17 +831,16 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
 
  scope_t s = Public;
  bool istypedef = false;
- if (ds.sc != NULL)
-   switch (*ds.sc) {
-   case Typedef_sc:  istypedef = true; break;
-   case Extern_sc:   s = Extern;   break;
-   case ExternC_sc:  s = ExternC;  break;
-   case Static_sc:   s = Static;   break;
-   case Auto_sc:     s = Public;   break;
-   case Register_sc: s = Flags::no_register ? Public : Register;   break;
-   case Abstract_sc: 
-   default: s = Abstract; break;
-   }
+ switch (ds.sc) {
+ case Typedef_sc:  istypedef = true; break;
+ case Extern_sc:   s = Extern;   break;
+ case ExternC_sc:  s = ExternC;  break;
+ case Static_sc:   s = Static;   break;
+ case Auto_sc:     s = Public;   break;
+ case Register_sc: s = Flags::no_register ? Public : Register;   break;
+ case Abstract_sc: s = Abstract; break;
+ default: break;
+ }
 
  // separate the declarators from their initializers
  // FIX: should abstract this out, but the code generator produces
@@ -928,37 +899,35 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
      return new List(new Decl(new Enum_d(ed),loc),NULL);
    default: Warn::err(loc,"missing declarator"); return NULL;
    }
- } else {
-   // declarators != NULL
-   let fields = apply_tmss(mkrgn,tq,base_type,declarators,atts);
-   if (istypedef) {
-     // we can have a nested struct, union, or datatype
-     // declaration within the typedef as in:
-     // typedef struct Foo {...} t;
-     if (!exps_empty)
-      Warn::err(loc,"initializer in typedef declaration");
-     list_t<decl_t> decls = List::map_c(v_typ_to_typedef,loc,fields);
-     return decls;
-   } else {
-     // here, we have a bunch of variable declarations
-     list_t<decl_t> decls = NULL;
-     for (let ds = fields; ds != NULL; ds = ds->tl, exprs = exprs->tl) {
-       let &$(varloc,x,tq2,t2,tvs2,atts2) = ds->hd;
-       if (tvs2 != NULL)
-	 Warn::warn(loc,"bad type params, ignoring");
-       if (exprs == NULL)
-	 parse_abort(loc,"unexpected NULL in parse!");
-       let eopt = exprs->hd;
-       let vd   = new_vardecl(varloc,x, t2, eopt);
-       vd->tq = tq2;
-       vd->sc = s;
-       vd->attributes = atts2;
-       let d = new Decl(new Var_d(vd),loc);
-       decls = new List(d,decls);
-     }
-     return List::imp_rev(decls);
-   }
  }
+ // declarators != NULL
+ let fields = apply_tmss(mkrgn,tq,base_type,declarators,atts);
+ if (istypedef) {
+   // we can have a nested struct, union, or datatype
+   // declaration within the typedef as in:
+   // typedef struct Foo {...} t;
+   if (!exps_empty)
+     Warn::err(loc,"initializer in typedef declaration");
+   list_t<decl_t> decls = List::map_c(v_typ_to_typedef,loc,fields);
+   return decls;
+ } 
+ // here, we have a bunch of variable declarations
+ list_t<decl_t> decls = NULL;
+ for (let ds = fields; ds != NULL; ds = ds->tl, exprs = exprs->tl) {
+   let &$(varloc,x,tq2,t2,tvs2,atts2) = ds->hd;
+   if (tvs2 != NULL)
+     Warn::warn(loc,"bad type params, ignoring");
+   if (exprs == NULL)
+     parse_abort(loc,"unexpected NULL in parse!");
+   let eopt = exprs->hd;
+   let vd   = new_vardecl(varloc,x, t2, eopt);
+   vd->tq = tq2;
+   vd->sc = s;
+   vd->attributes = atts2;
+   let d = new Decl(new Var_d(vd),loc);
+   decls = new List(d,decls);
+ }
+ return List::imp_rev(decls);
 }
 
 // extract an integer from an expression
@@ -990,7 +959,7 @@ static unsigned int cnst2uint(seg_t loc, cnst_t x) {
     unsigned long long y = x;
     if (y > 0xffffffff) 
       Warn::err(loc,"integer constant too large");
-    return (unsigned int)x;
+    return (unsigned)x;
   default:
     Warn::err(loc,"expected integer constant but found %s",Absynpp::cnst2string(x));
     return 0;
@@ -1076,7 +1045,7 @@ using Parse;
 %type <string_t<`H>> FLOATING_CONSTANT namespace_action
 %type <string_t<`H>> IDENTIFIER TYPEDEF_NAME TYPE_VAR
 %type <string_t<`H>> STRING WSTRING WCHARACTER_CONSTANT field_name
-%type <$(Position::seg_t,booltype_t, ptrbound_t)@`H> pointer_null_and_bound
+%type <$(seg_t,booltype_t, ptrbound_t)@`H> pointer_null_and_bound
 %type <ptrbound_t> pointer_bound
 %type <list_t<offsetof_field_t,`H>> field_expression
 %type <exp_t> primary_expression postfix_expression unary_expression
@@ -1116,7 +1085,7 @@ using Parse;
 %type <decl_spec_t> declaration_specifiers
 %type <$(declarator_t<`yy>,exp_opt_t)> init_declarator
 %type <declarator_list_t<`yy>> init_declarator_list init_declarator_list0
-%type <storage_class_t@`H> storage_class_specifier
+%type <storage_class_t> storage_class_specifier
 %type <type_specifier_t> type_specifier type_specifier_notypedef enum_specifier
 %type <type_specifier_t> struct_or_union_specifier datatype_specifier
 %type <aggr_kind_t> struct_or_union
@@ -1150,8 +1119,8 @@ using Parse;
 %type <type_opt_t> optional_effect 
 %type <list_t<$(type_t,type_t)@`H,`H>> optional_rgn_order rgn_order
 %type <booltype_t> zeroterm_qual_opt
-%type <list_t<$(Position::seg_t,qvar_t,bool)@`H,`H>> export_list_values
-%type <$(list_t<$(Position::seg_t,qvar_t,bool)@`H,`H>, seg_t)@`H> export_list export_list_opt
+%type <list_t<$(seg_t,qvar_t,bool)@`H,`H>> export_list_values
+%type <$(list_t<$(seg_t,qvar_t,bool)@`H,`H>, seg_t)@`H> export_list export_list_opt
 %type <list_t<qvar_t,`H>> hide_list_opt hide_list_values
 %type <pointer_qual_t<`yy>> pointer_qual
 %type <pointer_quals_t<`yy>> pointer_quals
@@ -1373,8 +1342,7 @@ declaration:
 /* region <`r> h;  */
 | REGION '<' TYPE_VAR '>' IDENTIFIER ';'
   { let three = $3;
-    string_t err = "";
-    if (!tvar_ok(three,&err)) Warn::err(SLOC(@3),err);
+    tvar_ok(three,SLOC(@3));
     tvar_t tv = new Tvar(new three,-1,Kinds::kind_to_bound(&Kinds::rk));
     type_t t  = var_type(tv);
     vardecl_t vd = new_vardecl(SLOC(@5), new $(Loc_n,new $5),rgn_handle_type(t),NULL);
@@ -1421,7 +1389,7 @@ declaration_specifiers:
                              empty_spec(0),false,NULL)); }
 | storage_class_specifier declaration_specifiers
     { let two = $2;
-      if (two.sc != NULL)
+      if (two.sc != None_sc)
         Warn::warn(LOC(@1,@2),
                      "Only one storage class is allowed in a declaration (missing ';' or ','?)");
       $$=^$(Declaration_spec($1,two.tq,two.type_specs,
@@ -1433,7 +1401,7 @@ declaration_specifiers:
       $$=$!2; 
     }
 | type_specifier
-    { $$=^$(Declaration_spec(NULL,empty_tqual(SLOC(@1)),
+    { $$=^$(Declaration_spec(None_sc,empty_tqual(SLOC(@1)),
                              $1,false,NULL)); }
 | type_specifier declaration_specifiers
     { let two = $2;
@@ -1443,7 +1411,7 @@ declaration_specifiers:
                            two.attributes));
     }
 | type_qualifier
-    { $$=^$(Declaration_spec(NULL,$1,empty_spec(0),false,NULL)); }
+    { $$=^$(Declaration_spec(None_sc,$1,empty_spec(0),false,NULL)); }
 | type_qualifier declaration_specifiers
     { let two = $2;
       $$=^$(Declaration_spec(two.sc,combine_tqual($1,two.tq),
@@ -1451,7 +1419,7 @@ declaration_specifiers:
                              two.attributes));
     }
 | INLINE
-    { $$=^$(Declaration_spec(NULL,empty_tqual(SLOC(@1)),
+    { $$=^$(Declaration_spec(None_sc,empty_tqual(SLOC(@1)),
                              empty_spec(0),true,NULL)); }
 | INLINE declaration_specifiers
     { let two = $2;
@@ -1459,7 +1427,7 @@ declaration_specifiers:
                              two.attributes));
     }
 | attributes
-    { $$=^$(Declaration_spec(NULL,empty_tqual(SLOC(@1)),
+    { $$=^$(Declaration_spec(None_sc,empty_tqual(SLOC(@1)),
                              empty_spec(0),false,$1)); }
 | attributes declaration_specifiers
     { let two = $2;
@@ -1469,25 +1437,18 @@ declaration_specifiers:
 ;
 
 storage_class_specifier:
-   AUTO      { static storage_class_t auto_sc = Auto_sc;
-              $$=^$(&auto_sc); }
-| REGISTER   { static storage_class_t register_sc = Register_sc;
-              $$=^$(&register_sc); }
-| STATIC    { static storage_class_t static_sc = Static_sc;
-              $$=^$(&static_sc); }
-| EXTERN    { static storage_class_t extern_sc = Extern_sc;
-              $$=^$(&extern_sc); }
+  AUTO      { $$=^$(Auto_sc); }
+| REGISTER  { $$=^$(Register_sc); }
+| STATIC    { $$=^$(Static_sc); }
+| EXTERN    { $$=^$(Extern_sc); }
 | EXTERN STRING
-  { static storage_class_t externC_sc = ExternC_sc;
-    if (strcmp($2,"C") != 0)
+  { if (strcmp($2,"C") != 0)
       Warn::err(LOC(@1,@2),"only extern or extern \"C\" is allowed");
-    $$ = ^$(&externC_sc);
+    $$ = ^$(ExternC_sc);
   }
-| TYPEDEF   { static storage_class_t typedef_sc = Typedef_sc;
-              $$=^$(&typedef_sc); }
+| TYPEDEF   { $$=^$(Typedef_sc); }
 /* Cyc:  abstract specifier */
-| ABSTRACT  { static storage_class_t abstract_sc = Abstract_sc;
-              $$=^$(&abstract_sc); }
+| ABSTRACT  { $$=^$(Abstract_sc); }
 ;
 
 /* Cyc: added GCC attributes */
@@ -1635,8 +1596,7 @@ type_specifier_notypedef:
 | '_' COLON_COLON kind 
   { $$=^$(type_spec(new_evar(Kinds::kind_to_opt($3),NULL),LOC(@1,@3))); }
 | '$' '(' parameter_list ')'
-    { $$=^$(type_spec(new TupleType(List::map_c(get_tqual_typ,
-                                                SLOC(@3),List::imp_rev($3))),
+    { $$=^$(type_spec(new TupleType(map_c(get_tqual_typ,SLOC(@3),imp_rev($3))),
                       LOC(@1,@4))); }
 | REGION_T '<' any_type_name right_angle
     { $$=^$(type_spec(rgn_handle_type($3),LOC(@1,@4))); }
@@ -1649,7 +1609,6 @@ type_specifier_notypedef:
   { $$=^$(type_spec(tag_type(new_evar(&Kinds::iko, NULL)),SLOC(@1))); }
 | VALUEOF_T '(' expression ')'
   { $$=^$(type_spec(valueof_type($3),LOC(@1,@4))); }
-
 ;
 
 /* Cyc: new */
@@ -2184,18 +2143,6 @@ atomic_effect:
 ;
 
 /* CYC:  new */
-/*
-region_set:
-  type_var
-  { set_vartyp_kind($1,&Kinds::trk,true);
-    $$=^$(new List(new AccessEff($1),NULL)); 
-  }
-| type_var ',' region_set
-  { set_vartyp_kind($1,&Kinds::trk,true);
-    $$=^$(new List(new AccessEff($1),$3)); 
-  }
-;
-*/
 region_set:
   type_name
 { $$ = ^$(new List(access_eff(type_name_to_type($1,SLOC(@1))),NULL)); }
@@ -2726,8 +2673,7 @@ pattern:
     { if (strcmp($1,"alias") != 0) 
         Warn::err(SLOC(@2),"expecting `alias'");
       let location = LOC(@1,@6);
-      string_t err = "";
-      if (!tvar_ok($3,&err)) Warn::err(location,err);
+      tvar_ok($3,location);
       tvar_t tv = new Tvar(new $3,-1,new Eq_kb(&Kinds::rk));
       vardecl_t vd = new_vardecl(SLOC(@1),new $(Loc_n, new $6),
 				 type_name_to_type($5,SLOC(@5)),NULL);
@@ -2737,8 +2683,7 @@ pattern:
     { if (strcmp($1,"alias") != 0) 
         Warn::err(SLOC(@2),"expecting `alias'");
       let location = LOC(@1,@6);
-      string_t err = "";
-      if (!tvar_ok($3,&err)) Warn::err(location,err);
+      tvar_ok($3,location);
       tvar_t tv = new Tvar(new $3,-1,new Eq_kb(&Kinds::rk));
       vardecl_t vd = new_vardecl(SLOC(@1),new $(Loc_n, new $6),
 				 type_name_to_type($5,SLOC(@5)),NULL);

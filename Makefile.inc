@@ -143,6 +143,7 @@ CYCLONE_SRCS:=absyn\
 	 insert_checks\
          toc\
 	 remove_aggregates\
+	 remove_labels\
          toseqc\
          tovc\
          interface\

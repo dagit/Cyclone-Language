@@ -107,10 +107,8 @@ static $(nmspace_t,var_t) token_id_pair = $(Nmspace{.Loc_n = 0}, &bogus_string);
 static char               token_char    = '\000';
 string_t                  token_string  = "";
 qvar_t                    token_qvar    = &token_id_pair;
-//static $(bool,string_t<`H>) token_asm = $(false,"");
 
 static int runaway_start = 0;
-static int paren_depth = 0; // used for __asm__ parsing
 
 static void err(string_t<`H> msg, Lexbuf lb) {
   seg_t s = lexeme_start(lb);
@@ -130,8 +128,7 @@ static char cnst2char(cnst_t cnst, Lexbuf lb) {
 }
 
 // ************************** RESERVED WORDS **************************
-// bool is true when the keyword is a GCC keyword as opposed to 
-// a Cyclone keyword
+// bool is true when the keyword is a GCC keyword, not just a Cyclone keyword
 static $(string_t,short,bool) rw_array[] = {
   $("__attribute__", ATTRIBUTE, true),
   $("__attribute", ATTRIBUTE, true),
@@ -225,6 +222,46 @@ static int num_keywords(bool include_cyclone_keywords) {
   return sum;
 }
 
+////  Qualifiers (with lexbuf hack) /////////////
+/* HACK: If we see @taggedfoo then this should be lexed as '@' 'taggedfoo', not
+ * '@tagged' 'foo' -- so we back up the lexer */
+static int do_possible_qualifier(Lexbuf lexbuf) {
+  buffer_t b = lexbuf->lex_buffer + lexbuf->lex_start_pos + 1;
+  unsigned len = lexbuf->lex_curr_pos - (lexbuf->lex_start_pos + 1);
+  switch(b[0]) {
+  case 't':
+    if(len == 6 && strncmp(b,"tagged",6)==0) return TAGGED_QUAL;
+    if(len == 4 && strncmp(b,"thin",4)==0)   return THIN_QUAL;
+    break;
+  case 'n':
+    if(len == 7 && strncmp(b,"notnull",7)==0) return NOTNULL_QUAL;
+    if(len == 7 && strncmp(b,"numelts",7)==0) return NUMELTS_QUAL;
+    if(len == 8 && strncmp(b,"nullable",8)==0) return NULLABLE_QUAL;
+    if(len == 10 && strncmp(b,"nozeroterm",10)==0) return NOZEROTERM_QUAL;
+    break;
+  case 'z':
+    if(len == 8 && strncmp(b,"zeroterm",8)==0) return ZEROTERM_QUAL;
+    break;
+  case 'e':
+    if(len == 7 && strncmp(b,"ensures",7)==0) return ENSURES_QUAL;
+    if(len == 10 && strncmp(b,"extensible",10)==0) return EXTENSIBLE_QUAL;
+    break;
+  case 'r':
+    if(len == 8 && strncmp(b,"requires",8)==0) return REQUIRES_QUAL;
+    if(len == 6 && strncmp(b,"region",6)==0) return REGION_QUAL;
+    break;
+  case 'f':
+    if(len == 3 && strncmp(b,"fat",3)==0) return FAT_QUAL;
+    break;
+  case 'a':
+    if(len == 6 && strncmp(b,"assert",6)==0) return ASSERT_QUAL;
+    break;
+  default: break;
+ }
+  lexbuf->lex_curr_pos = lexbuf->lex_start_pos + 1; // HACK
+  return '@';
+}
+
 ///////////////////////// Trie manipulation ///////////////////////
 static trie_t<`d> empty_trie(region_t<`d> d, int dummy) {
   return rnew(d) Trie(Zero(),false);
@@ -243,7 +280,7 @@ static trie_t<`r> trie_lookup(region_t<`r> r, trie_t<`r> t,
   buff = buff + offset;
   if(!(len < numelts(buff)))
     Warn::impos("array bounds in trie_lookup");
-  while(i < len) {
+  while(i < len) 
     switch(t->children) {
     case {.Many = arr}:
       // walk down one level
@@ -276,7 +313,6 @@ static trie_t<`r> trie_lookup(region_t<`r> r, trie_t<`r> t,
       }
       return t;
     }
-  }
   return t;
 }
 
@@ -395,7 +431,7 @@ static cnst_t intconst(Lexbuf lbuf, int start, int end, int base) {
       size = LongLong_sz;
     }
     if (size == Int_sz)
-      res = Cnst{.Int_c = $(sn,(unsigned int)n)};
+      res = Cnst{.Int_c = $(sn,(unsigned)n)};
     else
       res = Cnst{.LongLong_c = $(sn,n)};
   } else {
@@ -514,7 +550,7 @@ static bool is_typedef_body(region_t<`d> d,
     }
   return t->shared_str;
 }
-static bool is_typedef(List::list_t<var_t,`H> ns, var_t v) {
+static bool is_typedef(list_t<var_t,`H> ns, var_t v) {
   if (ns != NULL)
     return is_typedef_in_namespace((List_t<var_t,`H>)ns,v);
   // all unqualified typedefs must be in the trie 
@@ -675,7 +711,6 @@ static void inc_linenumber() {
   p->linenumpos :=: linenums;
 }
 
-// we've seen
 static void process_directive(char ?line) {
   int i;
   char buf[100];
@@ -684,16 +719,18 @@ static void process_directive(char ?line) {
     if (Flags::compile_for_boot) {
       // cut out the path from the filename so the repository does not
       // have the names in it.  
-      int i = strlen(buf) - 1;
       int last_slash = -1;
-      while (i >= 0) {
-        if (buf[i] == '/') { last_slash = i; break; };
-        --i;
-      }
+      for (int i = strlen(buf) - 1; i >= 0; --i)
+        if (buf[i] == '/') { 
+	  last_slash = i; 
+	  break; 
+	}
       filename = aprintf("\"%s",buf + last_slash + 1);
     } else 
       filename = aprintf("\"%s",buf);
-    if (linenumber == i && pos_info != NULL && strcmp(pos_info->filename,filename) == 0) return;
+    if (linenumber == i && pos_info != NULL 
+	&& strcmp(pos_info->filename,filename) == 0) 
+      return;
     linenumber = i;
   } else if (sscanf(line, "# %d", &i) == 1) {
     if (linenumber == i) return;
@@ -714,8 +751,8 @@ $(const char ?, unsigned int) xlate_pos(seg_t char_offset) {
     if (char_offset < first_char_offset && p->next != NULL) continue;
     // we've found the right pinfo array, but we have to find the lineno now
     // use a binary search...
-    unsigned int base = 0;
-    unsigned int size = p->linenumpos_offset;
+    unsigned base = 0;
+    unsigned size = p->linenumpos_offset;
     while (size > 1) {
       int half = size / 2;
       int mid = base + half;
@@ -739,8 +776,6 @@ int strng_next(Lexbuf);
 int wstrng(Lexbuf);
 int wstrng_next(Lexbuf);
 int comment(Lexbuf);
-//int snarf_asm(Lexbuf);
-//int snarf_asm_body(Lexbuf);
 } // namespace Lex
 
 // for parser -- must not be prefixed
@@ -761,7 +796,6 @@ int yylex(Lexing::Lexbuf<Lexing::Function_lexbuf_state<FILE@>> lbuf,
  case QUAL_TYPEDEF_NAME:  *yylval = YYSTYPE{.QualId_tok=Lex::token_qvar}; break;
  case INTEGER_CONSTANT:   *yylval = YYSTYPE{.Int_tok=Lex::token_int};     break;
  case CHARACTER_CONSTANT: *yylval = YYSTYPE{.Char_tok=Lex::token_char};   break;
-// case ASM:                *yylval = YYSTYPE{.Asm_tok=Lex::token_asm};     break;
  default: break;
  }
  return ans;
@@ -774,13 +808,11 @@ namespace Lex;
 let newline     = ('\n' | '\r' | "\r\n")
 let notnewline  = [^ '\n' '\r']
 let idchar      = ['A'-'Z''a'-'z''0'-'9''_'] 
-let notidchar   = [^'A'-'Z''a'-'z''0'-'9''_'] 
 let firstidchar = ['A'-'Z''a'-'z']
 let cnstsuffix  = (((['u''U'])?(['l''L'])?(['l''L'])?) |
 		   ((['l''L'])?(['l''L'])?(['u''U'])?))
 
 rule token = parse
-/* | ("asm" | "__asm__") { return snarf_asm(lexbuf); } */
 /* Identifiers, type names, and keywords */
 | ((firstidchar idchar*) | ('_' idchar+)) { return process_id(lexbuf); }
 /* Qualified identifiers and type names (e.g., Foo::bar) */
@@ -791,23 +823,9 @@ rule token = parse
    { token_string = *(get_symbol(str_index_lbuf(lexbuf))); 
      return TYPE_VAR; }
 /* Cyclone qualifiers (e.g., @zeroterm, @tagged, etc.) */
-/* HACK: If we see @taggedfoo then this should be lexed as '@' 'taggedfoo', not
- * '@tagged' 'foo' -- so we find a notidchar and back up the lexer */
-/* FIX: with more aggressive back-up, we can get these 
-   string-constants out of the lexer */
-| "@tagged"notidchar      { --lexbuf->lex_curr_pos; return TAGGED_QUAL; }
-| "@notnull"notidchar     { --lexbuf->lex_curr_pos; return NOTNULL_QUAL; }
-| "@zeroterm"notidchar    { --lexbuf->lex_curr_pos; return ZEROTERM_QUAL; }
-| "@nozeroterm"notidchar  { --lexbuf->lex_curr_pos; return NOZEROTERM_QUAL; }
-| "@extensible"notidchar  { --lexbuf->lex_curr_pos; return EXTENSIBLE_QUAL; }
-| "@region"notidchar      { --lexbuf->lex_curr_pos; return REGION_QUAL; }
-| "@numelts"notidchar     { --lexbuf->lex_curr_pos; return NUMELTS_QUAL; }
-| "@thin"notidchar        { --lexbuf->lex_curr_pos; return THIN_QUAL; }
-| "@fat"notidchar         { --lexbuf->lex_curr_pos; return FAT_QUAL; }
-| "@nullable"notidchar    { --lexbuf->lex_curr_pos; return NULLABLE_QUAL; }
-| "@requires"notidchar    { --lexbuf->lex_curr_pos; return REQUIRES_QUAL; }
-| "@ensures"notidchar     { --lexbuf->lex_curr_pos; return ENSURES_QUAL; }
-| "@assert"notidchar      { --lexbuf->lex_curr_pos; return ASSERT_QUAL; }
+/* HACK: If we see @taggedfoo then this should be lexed as '@' 'taggedfoo' */
+| '@'((firstidchar idchar*) | ('_' idchar+)) 
+   { return do_possible_qualifier(lexbuf); }
 /* Integer constants */
 | '0'['x''X']['0'-'9''a'-'f''A'-'F']+ cnstsuffix
       { token_int = intconst(lexbuf,2,0,16);
@@ -855,7 +873,6 @@ rule token = parse
 | "->" { return PTR_OP; }
 | "..." { return ELLIPSIS; }
 | "::" { return COLON_COLON; }
-/* swap operation */
 | ":=:" { return SWAP; }
 /* comments, directives, whitespace, etc. */
 | "#" notnewline* newline
@@ -871,7 +888,7 @@ rule token = parse
   { string_pos = 0; 
     runaway_start = lexeme_start(lexbuf);
     while (strng(lexbuf))
-      /* skip */;
+      ; /* skip */
     token_string = get_stored_string();
     return STRING; }
 /* wide string constants */
@@ -879,7 +896,7 @@ rule token = parse
   { string_pos = 0; 
     runaway_start = lexeme_start(lexbuf);
     while (wstrng(lexbuf))
-      /* skip */;
+      ; /* skip */
     token_string = get_stored_string();
     return WSTRING; }
 /* wide character constants */
@@ -1039,8 +1056,7 @@ and wstrng = parse
 		      return 1; }
 and comment = parse
    "/*"             { ++comment_depth; return comment(lexbuf); }
- | "*/"             { --comment_depth; 
-		      if (comment_depth > 0) 
+ | "*/"             { if (--comment_depth > 0) 
 			return comment(lexbuf);
 		      return 0; /* return value ignored */
 		    }
@@ -1051,10 +1067,6 @@ and comment = parse
  | '/'              { return comment(lexbuf); }
  | newline          { inc_linenumber(); return comment(lexbuf); }
  | [^ '\n' '\r' '/' '*']+  { return comment(lexbuf); }
-
-/* HACK: we're counting on there being no comments between "asm" and
-   "volatile" and the first paren. */
-/* FIX: not processing newlines here! */
 
 {
 
