@@ -841,21 +841,21 @@ Cyc_List_List)); _temp24->hd=( void*)({ struct _tagged_arr* _temp25=( struct
 _tagged_arr*) _cycalloc( sizeof( struct _tagged_arr)); _temp25[ 0]= _temp23;
 _temp25;}); _temp24->tl= Cyc_cyclone_lib_path; _temp24;});}} static struct Cyc_List_List*
 Cyc_libargs= 0; static void Cyc_add_libarg( struct _tagged_arr s){ if( Cyc_Std_strcmp(
-s, _tag_arr("-lm", sizeof( unsigned char), 4u)) ==  0){ Cyc_libargs=({ struct
-Cyc_List_List* _temp26=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
-_temp26->hd=( void*)({ struct _tagged_arr* _temp27=( struct _tagged_arr*)
-_cycalloc( sizeof( struct _tagged_arr)); _temp27[ 0]= s; _temp27;}); _temp26->tl=
-Cyc_libargs; _temp26;});} else{ Cyc_add_ccarg( s);}} static void Cyc_set_save_temps(){
-Cyc_save_temps_r= 1; Cyc_add_ccarg( _tag_arr("-save-temps", sizeof(
-unsigned char), 12u));} static int Cyc_produce_dependencies= 0; static void Cyc_set_produce_dependencies(){
-Cyc_stop_after_cpp_r= 1; Cyc_produce_dependencies= 1; Cyc_add_cpparg( _tag_arr("-M",
-sizeof( unsigned char), 3u));} static struct _tagged_arr* Cyc_dependencies_target=
-0; static void Cyc_set_dependencies_target( struct _tagged_arr s){ Cyc_dependencies_target=({
-struct _tagged_arr* _temp28=( struct _tagged_arr*) _cycalloc( sizeof( struct
-_tagged_arr)); _temp28[ 0]= s; _temp28;});} static void Cyc_set_stop_after_objectfile(){
-Cyc_stop_after_objectfile_r= 1; Cyc_add_ccarg( _tag_arr("-c", sizeof(
-unsigned char), 3u));} static void Cyc_set_nocppprecomp(){ Cyc_add_cpparg(
-_tag_arr("-no-cpp-precomp", sizeof( unsigned char), 16u)); Cyc_add_ccarg(
+s, _tag_arr("-lxml", sizeof( unsigned char), 6u)) ==  0){ Cyc_add_ccarg( s);}
+else{ Cyc_libargs=({ struct Cyc_List_List* _temp26=( struct Cyc_List_List*)
+_cycalloc( sizeof( struct Cyc_List_List)); _temp26->hd=( void*)({ struct
+_tagged_arr* _temp27=( struct _tagged_arr*) _cycalloc( sizeof( struct
+_tagged_arr)); _temp27[ 0]= s; _temp27;}); _temp26->tl= Cyc_libargs; _temp26;});}}
+static void Cyc_set_save_temps(){ Cyc_save_temps_r= 1; Cyc_add_ccarg( _tag_arr("-save-temps",
+sizeof( unsigned char), 12u));} static int Cyc_produce_dependencies= 0; static
+void Cyc_set_produce_dependencies(){ Cyc_stop_after_cpp_r= 1; Cyc_produce_dependencies=
+1; Cyc_add_cpparg( _tag_arr("-M", sizeof( unsigned char), 3u));} static struct
+_tagged_arr* Cyc_dependencies_target= 0; static void Cyc_set_dependencies_target(
+struct _tagged_arr s){ Cyc_dependencies_target=({ struct _tagged_arr* _temp28=(
+struct _tagged_arr*) _cycalloc( sizeof( struct _tagged_arr)); _temp28[ 0]= s;
+_temp28;});} static void Cyc_set_stop_after_objectfile(){ Cyc_stop_after_objectfile_r=
+1; Cyc_add_ccarg( _tag_arr("-c", sizeof( unsigned char), 3u));} static void Cyc_set_nocppprecomp(){
+Cyc_add_cpparg( _tag_arr("-no-cpp-precomp", sizeof( unsigned char), 16u)); Cyc_add_ccarg(
 _tag_arr("-no-cpp-precomp", sizeof( unsigned char), 16u));} static void Cyc_set_nocyc(){
 Cyc_add_cyc_namespace_r= 0; Cyc_add_ccarg( _tag_arr("-DNO_CYC_PREFIX", sizeof(
 unsigned char), 16u));} static void Cyc_set_pa(){ Cyc_pa_r= 1; Cyc_add_ccarg(

@@ -107,6 +107,8 @@ static int ncmp(string_t s1, size_t len1,
     if ((retc = f(s1[i],s2[i])) != 0)
       return retc;
   }
+  if (len1 < n || len2 < n)
+    return ((int)len1)-((int)len2);
   return(0);
 }
 
@@ -541,10 +543,10 @@ string_t<`r> strstr(string_t<`r> haystack, string_t needle) {
 }
 
 mstring_t<`r> mstrstr(mstring_t<`r> haystack, string_t needle) {
-  if (!haystack || !needle) throw new Invalid_argument("Std::strstr");
+  if (!haystack || !needle) throw new Invalid_argument("Std::mstrstr");
   if (*needle == '\0') return haystack;
 
-  int len = int_strleno(needle, "Std::strstr");
+  int len = int_strleno(needle, "Std::mstrstr");
   for (mstring_t<`r> start = haystack;
        (start = mstrchr(start, *needle)) != NULL;
        start = mstrchr(start+1, *needle))

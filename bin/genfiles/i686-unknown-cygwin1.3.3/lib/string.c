@@ -317,12 +317,13 @@ min_len= len1 >  len2? len2: len1; unsigned int bound= min_len >  n? n: min_len;
 int i= 0; for( 0; i <  bound; i ++){ int retc; if(( retc= f(*(( const
 unsigned char*) _check_unknown_subscript( s1, sizeof( unsigned char), i)),*((
 const unsigned char*) _check_unknown_subscript( s2, sizeof( unsigned char), i))))
-!=  0){ return retc;}}} return 0;}} int Cyc_Std_strncmp( struct _tagged_arr s1,
-struct _tagged_arr s2, unsigned int n){ unsigned int len1= Cyc_Std_int_strleno(
-s1, _tag_arr("Std::strncmp", sizeof( unsigned char), 13u)); unsigned int len2=
-Cyc_Std_int_strleno( s2, _tag_arr("Std::strncmp", sizeof( unsigned char), 13u));
-return Cyc_Std_ncmp( s1, len1, s2, len2, n, Cyc_Std_case_cmp);} int Cyc_Std_zstrcmp(
-struct _tagged_arr a, struct _tagged_arr b){ if( a.curr ==  b.curr){ return 0;}{
+!=  0){ return retc;}}} if( len1 <  n? 1: len2 <  n){ return( int) len1 - ( int)
+len2;} return 0;}} int Cyc_Std_strncmp( struct _tagged_arr s1, struct
+_tagged_arr s2, unsigned int n){ unsigned int len1= Cyc_Std_int_strleno( s1,
+_tag_arr("Std::strncmp", sizeof( unsigned char), 13u)); unsigned int len2= Cyc_Std_int_strleno(
+s2, _tag_arr("Std::strncmp", sizeof( unsigned char), 13u)); return Cyc_Std_ncmp(
+s1, len1, s2, len2, n, Cyc_Std_case_cmp);} int Cyc_Std_zstrcmp( struct
+_tagged_arr a, struct _tagged_arr b){ if( a.curr ==  b.curr){ return 0;}{
 unsigned int as= _get_arr_size( a, sizeof( unsigned char)); unsigned int bs=
 _get_arr_size( b, sizeof( unsigned char)); unsigned int min_length= as <  bs? as:
 bs; int i= - 1; while( ++ i <  min_length) { int diff=( int)*(( const
@@ -560,12 +561,12 @@ _tagged_arr haystack, struct _tagged_arr needle){ if( !(( unsigned int) haystack
 1: !(( unsigned int) needle.curr)){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
 _temp31=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct
 Cyc_Core_Invalid_argument_struct)); _temp31[ 0]=({ struct Cyc_Core_Invalid_argument_struct
-_temp32; _temp32.tag= Cyc_Core_Invalid_argument; _temp32.f1= _tag_arr("Std::strstr",
-sizeof( unsigned char), 12u); _temp32;}); _temp31;}));} if(*(( const
+_temp32; _temp32.tag= Cyc_Core_Invalid_argument; _temp32.f1= _tag_arr("Std::mstrstr",
+sizeof( unsigned char), 13u); _temp32;}); _temp31;}));} if(*(( const
 unsigned char*) _check_unknown_subscript( needle, sizeof( unsigned char), 0u))
 == '\000'){ return haystack;}{ int len=( int) Cyc_Std_int_strleno( needle,
-_tag_arr("Std::strstr", sizeof( unsigned char), 12u));{ struct _tagged_arr start=
-haystack; for( 0;( start= Cyc_Std_mstrchr( start,*(( const unsigned char*)
+_tag_arr("Std::mstrstr", sizeof( unsigned char), 13u));{ struct _tagged_arr
+start= haystack; for( 0;( start= Cyc_Std_mstrchr( start,*(( const unsigned char*)
 _check_unknown_subscript( needle, sizeof( unsigned char), 0u)))).curr != (
 _tag_arr( 0u, 0u, 0u)).curr; start= Cyc_Std_mstrchr( _tagged_arr_plus( start,
 sizeof( unsigned char), 1),*(( const unsigned char*) _check_unknown_subscript(

@@ -134,9 +134,10 @@ static void add_cyclone_lib_path(string_t s) {
 // so that we can force libcyc.a to appear first.
 static list_t<stringptr_t> libargs = NULL;
 static void add_libarg(string_t<`H> s) {
-  if (strcmp(s,"-lm") == 0)
+  if (strcmp(s,"-lxml") == 0)
+    add_ccarg(s);
+  else
     libargs = new List(new s,libargs);
-  else add_ccarg(s);
 }
 
 static void set_save_temps() {

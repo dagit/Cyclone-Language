@@ -1,18 +1,27 @@
+#include <core.h>
 #include <sys/socket.h>
 
 namespace Std;
 
 namespace Csocket {
   extern "C" {
-    struct sockaddr;
     /* Later we'll add, e.g., accept_in6, bind_in6, etc. */
+    int accept(int, const struct sockaddr @, socklen_t @);
     int accept_in(int, const struct sockaddr_in @, socklen_t @);
+    int bind(int, const struct sockaddr @, socklen_t);
     int bind_in(int, const struct sockaddr_in @, socklen_t);
+    int connect(int, const struct sockaddr @, socklen_t);
     int connect_in(int, const struct sockaddr_in @, socklen_t);
+    int getpeername(int, const struct sockaddr @, socklen_t @);
     int getpeername_in(int, const struct sockaddr_in @, socklen_t @);
+    int getsockname(int, const struct sockaddr @, socklen_t @);
     int getsockname_in(int, const struct sockaddr_in @, socklen_t @);
+    ssize_t recvfrom(int, char ?, size_t, int,
+                        const struct sockaddr @, socklen_t @);
     ssize_t recvfrom_in(int, char ?, size_t, int,
                         const struct sockaddr_in @, socklen_t @);
+    ssize_t sendto(int, const char ?, size_t, int,
+                      const struct sockaddr @, socklen_t);
     ssize_t sendto_in(int, const char ?, size_t, int,
                       const struct sockaddr_in @, socklen_t);
 
@@ -27,69 +36,83 @@ namespace Csocket {
   }  
 }
 
-xtunion exn { SocketError };
+xtunion exn { SocketError(string_t); };
 
 int accept(int fd, ... inject SA ap) {
-  if (ap.size != 2) throw SocketError;
+  if (ap.size != 2) throw new SocketError("accept---need 2 args");
   switch ($(ap[0],ap[1])) {
   case $(&SA_sockaddr_in(x),&SA_socklenptr(y)):
     return Csocket::accept_in(fd,x,y);
-  default: throw SocketError;
+  case $(&SA_sockaddr(x),&SA_socklenptr(y)):
+    return Csocket::accept(fd,x,y);
+  default: throw new SocketError("accept---bad args");
   }
 }
 
 int bind(int fd, ... inject SA ap) {
-  if (ap.size != 2) throw SocketError;
+  if (ap.size != 2) throw new SocketError("bind---need 2 args");
   switch ($(ap[0],ap[1])) {
   case $(&SA_sockaddr_in(x),&SA_socklen(y)):
     return Csocket::bind_in(fd,x,y);
-  default: throw SocketError;
+  case $(&SA_sockaddr(x),&SA_socklen(y)):
+    return Csocket::bind(fd,x,y);
+  default: throw new SocketError("bind---bad args");
   }
 }
 
 int connect(int fd, ... inject SA ap) {
-  if (ap.size != 2) throw SocketError;
+  if (ap.size != 2) throw new SocketError("connect---need 2 args");
   switch ($(ap[0],ap[1])) {
   case $(&SA_sockaddr_in(x),&SA_socklen(y)):
     return Csocket::connect_in(fd,x,y);
-  default: throw SocketError;
+  case $(&SA_sockaddr(x),&SA_socklen(y)):
+    return Csocket::connect(fd,x,y);
+  default: throw new SocketError("connect---bad args");
   }
 }
 
 int getpeername(int fd, ... inject SA ap) {
-  if (ap.size != 2) throw SocketError;
+  if (ap.size != 2) throw new SocketError("getpeername---need 2 args");
   switch ($(ap[0],ap[1])) {
   case $(&SA_sockaddr_in(x),&SA_socklenptr(y)):
     return Csocket::getpeername_in(fd,x,y);
-  default: throw SocketError;
+  case $(&SA_sockaddr(x),&SA_socklenptr(y)):
+    return Csocket::getpeername(fd,x,y);
+  default: throw new SocketError("getpeername---bad args");
   }
 }
 
 int getsockname(int fd, ... inject SA ap) {
-  if (ap.size != 2) throw SocketError;
+  if (ap.size != 2) throw new SocketError("getsockname---need 2 args");
   switch ($(ap[0],ap[1])) {
   case $(&SA_sockaddr_in(x),&SA_socklenptr(y)):
     return Csocket::getsockname_in(fd,x,y);
-  default: throw SocketError;
+  case $(&SA_sockaddr(x),&SA_socklenptr(y)):
+    return Csocket::getsockname(fd,x,y);
+  default: throw new SocketError("getsockname---bad args");
   }
 }
 
 ssize_t recvfrom(int fd, char ?buf, size_t n, int flags, ... inject SA ap) {
-  if (ap.size != 2) throw SocketError;
+  if (ap.size != 2) throw new SocketError("recvfrom---need 2 args");
   switch ($(ap[0],ap[1])) {
   case $(&SA_sockaddr_in(x),&SA_socklenptr(y)):
     return Csocket::recvfrom_in(fd,buf,n,flags,x,y);
-  default: throw SocketError;
+  case $(&SA_sockaddr(x),&SA_socklenptr(y)):
+    return Csocket::recvfrom(fd,buf,n,flags,x,y);
+  default: throw new SocketError("recvfrom---bad args");
   }
 }
 
 ssize_t sendto(int fd, const char ?buf, size_t n, int flags,
                ... inject SA ap) {
-  if (ap.size != 2) throw SocketError;
+  if (ap.size != 2) throw new SocketError("sendto---need 2 args");
   switch ($(ap[0],ap[1])) {
   case $(&SA_sockaddr_in(x),&SA_socklen(y)):
     return Csocket::sendto_in(fd,buf,n,flags,x,y);
-  default: throw SocketError;
+  case $(&SA_sockaddr(x),&SA_socklen(y)):
+    return Csocket::sendto(fd,buf,n,flags,x,y);
+  default: throw new SocketError("sendto---bad args");
   }
 }
 
@@ -102,23 +125,23 @@ ssize_t recv(int fd, char ?buf, size_t n, int flags) {
 }
 
 int getsockopt(int fd, int level, int optname, ... inject SO ap) {
-  if (ap.size != 2) throw SocketError;
+  if (ap.size != 2) throw new SocketError("getsockopt---need 2 args");
   switch ($(ap[0],ap[1])) {
   case $(&SO_int(x),&SO_socklenptr(y)):
     return Csocket::getsockopt_int(fd,level,optname,x,y);
   case $(&SO_timeval(x),&SO_socklenptr(y)):
     return Csocket::getsockopt_timeval(fd,level,optname,x,y);
-  default: throw SocketError;
+  default: throw new SocketError("getsockopt---bad args");
   }
 }
 
 int setsockopt(int fd, int level, int optname, ... inject SO ap) {
-  if (ap.size != 2) throw SocketError;
+  if (ap.size != 2) throw new SocketError("setsockopt---need 2 args");
   switch ($(ap[0],ap[1])) {
   case $(&SO_int(x),&SO_socklen(y)):
     return Csocket::setsockopt_int(fd,level,optname,x,y);
   case $(&SO_timeval(x),&SO_socklen(y)):
     return Csocket::setsockopt_timeval(fd,level,optname,x,y);
-  default: throw SocketError;
+  default: throw new SocketError("setsockopt---bad args");
   }
 }

@@ -1,6 +1,6 @@
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c powerpc-apple-rhapsody/lib/execinfo.c
-*** i686-unknown-linux/lib/execinfo.c	Fri Nov  2 19:26:51 2001
---- powerpc-apple-rhapsody/lib/execinfo.c	Sun Nov  4 21:03:05 2001
+*** i686-unknown-linux/lib/execinfo.c	Fri Nov  2 09:57:18 2001
+--- powerpc-apple-rhapsody/lib/execinfo.c	Mon Nov  5 10:07:48 2001
 ***************
 *** 230,259 ****
   extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
@@ -148,8 +148,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c powerpc-apple-rhapso
 ! unsigned char), 42u); _temp1;}); _temp0;})); return 0;} int Cyc_Execinfo_bt(){
 ! return 1;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/stat.c powerpc-apple-rhapsody/lib/stat.c
-*** i686-unknown-linux/lib/stat.c	Thu Nov  1 13:07:23 2001
---- powerpc-apple-rhapsody/lib/stat.c	Sun Nov  4 21:03:05 2001
+*** i686-unknown-linux/lib/stat.c	Thu Nov  1 12:13:00 2001
+--- powerpc-apple-rhapsody/lib/stat.c	Mon Nov  5 10:07:48 2001
 ***************
 *** 233,244 ****
   tm_wday; int tm_yday; int tm_isdst; } ; extern void tzset(); extern int time(
@@ -176,8 +176,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/stat.c powerpc-apple-rhapsody/l
   fd, struct Cyc_Std_stat_t* buf); extern int Cyc_Std_lstat( struct _tagged_arr
   filename, struct Cyc_Std_stat_t* buf); extern unsigned int umask( unsigned int
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapsody/src/buildlib.c
-*** i686-unknown-linux/src/buildlib.c	Sun Nov  4 20:53:17 2001
---- powerpc-apple-rhapsody/src/buildlib.c	Sun Nov  4 21:03:05 2001
+*** i686-unknown-linux/src/buildlib.c	Sun Nov  4 21:13:20 2001
+--- powerpc-apple-rhapsody/src/buildlib.c	Mon Nov  5 10:07:48 2001
 ***************
 *** 318,395 ****
   tm_isdst; } ; extern void tzset(); extern int time( int* t); extern struct Cyc_Std_tm*
