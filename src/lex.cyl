@@ -4,7 +4,7 @@
 #include "lexing.h"
 #include "set.h"
 #include "string.h"
-#include "hashtable.h"
+#include "xarray.h"
 #include "parse.h"
 #include "position.h"
 #include "dict.h"
@@ -27,7 +27,6 @@ namespace Lex {
 
 /************************** RESERVED WORDS **************************/
 
-static Opt_t<Hashtable::Table<string,Short>> rw = null;
   // Fix: having to cast is a pain
 static $(string,short) rw_array[64] = {
   $((string)"Bool", (short)BOXED_BOOL),
@@ -96,9 +95,8 @@ static $(string,short) rw_array[64] = {
   $((string)"xprintf", (short)XPRINTF)
 };
 
-extern void typedef_init();
 
-// WARNING: Because we now intern identifiers -- you better never mutate them!!!
+// WARNING: Because we now intern identifiers, you better never mutate them!!!
 
 // Should probably put this trie thing in the library
 static struct Trie;
@@ -107,61 +105,73 @@ typedef trie_t trie_child_v_t[75]; // enough room for Cyclone ids and `
 typedef trie_child_v_t * trie_child_t;
 static struct Trie {
   trie_child_t  children;   // null means none
-  Opt_t<string> shared_str; // path implies contents
+  int           shared_str; // index into symbols -- -1 means not there
 };
 
-static struct Trie all_ids_v = Trie(null,null);
-static trie_t      all_ids   = &all_ids_v;
+static struct Trie                     ids_trie_v = Trie(null,-1);
+static trie_t                          ids_trie   = &ids_trie_v;
+static struct Xarray::xarray<string> * symbols    = null;
+static int                             num_kws    = 0;
+static int                             kw_nums[?] = {};
 
-static string share_str(string buff, int offset, int len) {
+static int str_index(string buff, int offset, int len) {
   int    i    = offset;
   int    last = offset + len - 1;
-  trie_t t    = all_ids;
+  trie_t t    = ids_trie;
   while(i <= last) {
     int ch = ((int)buff[i]) - 48; // see width of trie above
     if(t->children == null) {
       // new string, extend the trie and return
       while(i <= last) {
 	t->children = (trie_child_t) &$((new { for i < 75 : null }));
-	(*(t->children))[ch] = &Trie(null,null);
+	(*(t->children))[ch] = &Trie(null,-1);
 	t = (*(t->children))[ch];
 	++i;
 	ch = ((int)buff[i]) - 48; // see width of trie above
       }
       let newstr = new_string(len+1);
-      t->shared_str = &Opt(String::zstrncpy(newstr,0,buff,offset,len));
-      return newstr;
+      String::zstrncpy(newstr,0,buff,offset,len);
+      int ans = Xarray::add_ind((Xarray::Xarray<string>)symbols, newstr);
+      t->shared_str = ans;
+      return ans;
     }
     // walk down one level
     if((*(t->children))[ch] == null)
-      (*(t->children))[ch] = &Trie(null,null);
+      (*(t->children))[ch] = &Trie(null,-1);
     t = (*(t->children))[ch];
     ++i;
   }
   // build string if necessary and return
-  if(t->shared_str == null) {
+  if(t->shared_str == -1) {
     let newstr = new_string(len+1);
-    t->shared_str = &Opt(String::zstrncpy(newstr,0,buff,offset,len));
+    String::zstrncpy(newstr,0,buff,offset,len);
+    int ans = Xarray::add_ind((Xarray::Xarray<string>)symbols, newstr);
+    t->shared_str = ans;
+    return ans;
   }
-  return t->shared_str->v;
+  return t->shared_str;
 }
 
-static string share_str_lbuf<`a>(Lexbuf<`a> lbuf) {
-  return share_str(lbuf->lex_buffer, 
+static int str_index_lbuf<`a>(Lexbuf<`a> lbuf) {
+  return str_index(lbuf->lex_buffer, 
 		   lbuf->lex_start_pos,
 		   lbuf->lex_curr_pos - lbuf->lex_start_pos);
 }
-  // Now that we're sharing strings, should be able to do pointer compare
-  // for the reserved word lookup!  But unfortunately, we can't subtract
-  // pointers, so we're stuck with zstrmp. :-(
+
+static string get_symbol(int symbol_num) {
+  return Xarray::get((Xarray::Xarray<string>)symbols, symbol_num);
+}
+
+extern void typedef_init();
+
 void lex_init() {
-  Hashtable::Table<string,Short> rwt = 
-     Hashtable::create(101, zstrcmp, Hashtable::hash_string);
-  rw = &Opt(rwt);
-  for (int i=0; i < size(rw_array); ++i) {
+  symbols = Xarray::create(101,(string)"");
+  num_kws = size(rw_array);
+  kw_nums = new {for i < num_kws : 0};
+  for (int i=0; i < num_kws; ++i) {
     let str = rw_array[i][0];
-    Hashtable::insert(rwt, str, (Short)rw_array[i][1]);
-    share_str(str, 0, String::strlen(str));
+    str_index(str, 0, String::strlen(str));
+    kw_nums[i] = rw_array[i][1];
   }
   typedef_init();
 }
@@ -425,23 +435,26 @@ void register_typedef(qvar q) {
 // This kludge won't be necessary to avoid allocation after we have stack
 // pointers.
 static $(List::list<var>,var) kludge_qvar = $(null,(string)"");
-static short process_id(string s) {
-  try
-    return (short)(Hashtable::lookup(rw->v, s));
-  catch {
-  case Not_found: 
-    kludge_qvar[1] = s;
-    if (is_typedef(&kludge_qvar)) {
-      token_qvar = &$(null,s);
-      return (short)QUAL_TYPEDEF_NAME;
-    } else {
-      token_string = s;
-      return (short)IDENTIFIER;
-    }
+static short process_id<`a>(Lexbuf<`a> lbuf) {
+  int symbol_num = str_index_lbuf(lbuf);
+
+  // maybe it's a keyword
+  if(symbol_num < num_kws)
+    return (short)kw_nums[symbol_num];
+
+  string s = get_symbol(symbol_num);
+  kludge_qvar[1] = s;
+  // maybe it's a typedef
+  if (is_typedef(&kludge_qvar)) {
+    token_qvar = &$(null,s);
+    return (short)QUAL_TYPEDEF_NAME;
   }
+ 
+  // alas, it's an identifier
+  token_string = s;
+  return (short)IDENTIFIER;
 }
 
-  // FIX: share these strings too!
 static short process_qual_id<`a>(Lexbuf<`a> lbuf) {
   int    i     = lbuf->lex_start_pos;
   int    end   = lbuf->lex_curr_pos;
@@ -456,13 +469,13 @@ static short process_qual_id<`a>(Lexbuf<`a> lbuf) {
     if (start == i) // no progress -- first char is ':'
       throw Impossible("bad namespace");
     int vlen = i - start;
-    var v    = share_str(s, start, vlen);
+    var v    = get_symbol(str_index(s, start, vlen));
     rev_vs = &cons(v,rev_vs);
     i += 2;
   }
   if (rev_vs == null)
     throw Impossible("bad namespace");
-  var v = rev_vs->hd;
+  var       v  = rev_vs->hd;
   list<var> vs = List::imp_rev(rev_vs->tl);
   token_qvar = &$(vs,v);
   if (is_typedef(token_qvar))
@@ -505,16 +518,16 @@ let newline = ('\n' | '\r' | "\r\n")
 rule token = parse
 /* Identifiers, type names, and keywords */
   ['A'-'Z''a'-'z']['A'-'Z''a'-'z''0'-'9''_']*
-{ return process_id(share_str_lbuf(lexbuf)); }
+{ return process_id(lexbuf); }
 | ['_']['A'-'Z''a'-'z''0'-'9''_']+
-{ return process_id (share_str_lbuf(lexbuf)); }
+{ return process_id (lexbuf); }
 /* Qualified identifiers and type names (e.g., Foo::bar) */
 | (['A'-'Z''a'-'z''_']['A'-'Z''a'-'z''0'-'9''_']*':'':')+
   ['A'-'Z''a'-'z''_']['A'-'Z''a'-'z''0'-'9''_']*
       { return process_qual_id(lexbuf); }
 /* Type variables */
 | '`'['A'-'Z''a'-'z''0'-'9''_']+
-      { token_string = share_str_lbuf(lexbuf); 
+   { token_string = get_symbol(str_index_lbuf(lexbuf)); 
       return TYPE_VAR; }
 /* Integer constants */
 | '0'['x''X']['0'-'9''a'-'f''A'-'F']+((['u''U']['l''L']?)|(['l''L']['u''U']?))?
