@@ -127,9 +127,7 @@ typedef long long int _IO_ssize_t;
 
 #define u_long unsigned long
 
-static const char ?`r2 __sccl (char ?`r tab, const char ?`r2 fmt);
-
-typedef u_long (*strtoulfn<`r,`r2,`e>)(const char ? `r, char ? `r * `r2, int; {`r,`r2}+`e);
+static const char ?`r __sccl (char @{256} NOZEROTERM tab, const char ?`r fmt);
 
 tunion ScanfArg<`r::R> {
   ShortPtr_sa(short @`r);
@@ -144,7 +142,7 @@ tunion ScanfArg<`r::R> {
 static short @`r va_arg_short_ptr(sarg_t<`r,`r2> a) {
   switch (a) {
   case &ShortPtr_sa(p): return p;
-  case &UShortPtr_sa(p): return (short @`r) p;
+  case &UShortPtr_sa(p): return (short @) p;
   default: throw new Invalid_argument("scan expects short pointer");
   }
 }
@@ -152,7 +150,7 @@ static short @`r va_arg_short_ptr(sarg_t<`r,`r2> a) {
 static int @`r va_arg_int_ptr(sarg_t<`r,`r2> a) {
   switch (a) {
   case &IntPtr_sa(p): return p;
-  case &UIntPtr_sa(p): return (int @`r)p;
+  case &UIntPtr_sa(p): return (int @)p;
   default: throw new Invalid_argument("scan expects int pointer");
   }
 }  
@@ -188,28 +186,26 @@ _IO_vfscanf (_IO_getc, _IO_ungetc, _IO_peekc, fp, fmt0, ap, errp)
      int _IO_ungetc(int, `a);
      int _IO_peekc(`a);
      `a fp;
-     const char ? `r1 fmt0;
-     sarg_t<`r2,`r5> ? `r3 ap;
-     int *`r4 errp;
+     const char ? fmt0;
+     sarg_t ? ap;
+     int * errp;
 {
-	const char ? `r1 fmt = fmt0;
+	const char ? fmt = fmt0;
 	int c;		/* character from format, or conversion */
 	_IO_ssize_t width;	/* field width, or 0 */
-	char ? _ p = NULL; /* points into all kinds of strings */
+	char ? p = NULL; /* points into all kinds of strings */
 	int n;		/* handy integer */
 	int flags = 0;	/* flags as defined above */
         /* saves original value of p when necessary */
-	char ? _ p0 = NULL;
+	char ? p0 = NULL;
         int nassigned;		/* number of fields assigned */
 	int nread;		/* number of characters consumed from fp */
 	/* Assignments to base and ccfn are just to suppress warnings from gcc.*/
 	int base = 0;		/* base argument to strtol/strtoul */
-	// now defined above
-        // typedef u_long (*strtoulfn) __P((const char*, char**, int));
         bool use_strtoul = false; /* flag controlling whether to use strtol
                                    * (false) or strtoul (true) */
 	/* conversion function (strtol/strtoul) */
-	char ccltab[256 + 1] = {for i < 256 : '0'};	
+	char ccltab[256]NOZEROTERM;
         /* character class table for %[...] */
 	char buf[BUF+1] = {for i < BUF: '0'};
         /* buffer for numeric conversions */
@@ -684,7 +680,7 @@ literal:
                                 ap++;
 				nassigned++;
 			}
-			nread += p - (char ? _)buf;
+			nread += p - (char ?)buf;
 			break;
 
 		case CT_FLOAT:
@@ -774,7 +770,7 @@ literal:
                                 ap++;
 				nassigned++;
 			}
-			nread += p - (char ? _)buf;
+			nread += p - (char ?)buf;
 			break;
                 default:
                   throw new Impossible("scanf3");
@@ -802,10 +798,10 @@ done:
  * closing `]'.  The table has a 1 wherever characters should be
  * considered part of the scanset.
  */
-static const char ?`r2
+static const char ? `r
 __sccl (tab, fmt)
-     char ? `r tab;
-     const char ? `r2 fmt;
+     char @{256} NOZEROTERM tab;
+     const char ? `r fmt;
 {
 	int c, n, v;
 
@@ -896,68 +892,62 @@ doswitch:
 
 // These string_xxx functions are used to implement a "file descriptor"
 // interface for the generic scanf function above.  
-static int string_getc(const char ?`r @`r2 sptr) {
+static int string_getc(const char ? @ sptr) {
   char c;
-  const char ?`r s = *sptr;
+  const char ? s = *sptr;
   if (s == NULL || s.size == 0 || (c = s[0]) == '\0') return EOF;
   *sptr = s+1;
   return c;
 }
 
-static int string_ungetc(int ignore, const char ?`r @`r2 sptr) {
+static int string_ungetc(int ignore, const char ? @ sptr) {
   *sptr = (*sptr) - 1;
   // FIX:  should return EOF if we rewind too far.
   return 0;
 }
 
-static int string_peekc(const char ?`r @ `r2 sptr) {
+static int string_peekc(const char ? @ sptr) {
   char c;
-  const char ?`r s = *sptr;
+  const char ? s = *sptr;
   if (s == NULL || s.size == 0 || (c = s[0]) == '\0') return EOF;
   return c;
 }
 
-int vsscanf(const char ?`r src, const char ?`r1 fmt, 
-               sarg_t<`r3,`r4> ? `r2 ap) 
+int vsscanf(const char ? src, const char ? fmt, sarg_t ? ap) 
   __attribute__((format(scanf,2,0)))
 {
   int err = 0;
-  int (@`H sgc)(const char ?`r @ `vsscanf) = string_getc;
-  //return _IO_vfscanf(sgc, string_ungetc, string_peekc, &src, fmt, ap,&err);
   return _IO_vfscanf(string_getc, string_ungetc, string_peekc, &src, fmt, ap,&err);
                      
 }
 
-int sscanf(const char ?`r src, const char ?`r1 fmt, 
-              ... inject sarg_t<`r3,`r4> ap) 
+int sscanf(const char ? src, const char ? fmt, ... inject sarg_t ap) 
   __attribute__((format(scanf,2,3)))
 {
   return vsscanf(src, fmt, ap);
 }
 
 
-int peekc(FILE @`r stream) {
+int peekc(FILE @ stream) {
   int c = fgetc(stream);
   ungetc(c, stream);
   return c;
 }
 
-int vfscanf(FILE @`r5 stream, const char ?`r1 fmt, 
-               sarg_t<`r3,`r4> ? `r2 ap) 
+int vfscanf(FILE @ stream, const char ? fmt, sarg_t ? ap) 
   __attribute__((format(scanf,2,0)))
 {
   int err = 0;
   return _IO_vfscanf(getc, ungetc, peekc, stream, fmt, ap, & err);
 }
 
-int fscanf(FILE @`r5 stream, const char ?`r1 fmt, 
-              ... inject sarg_t<`r3,`r4> ap) 
+int fscanf(FILE @ stream, const char ? fmt, ... inject sarg_t ap) 
   __attribute__((format(scanf,2,3)))
 {
   return vfscanf(stream, fmt, ap);
 }
 
-int scanf(const char ?`r1 fmt, ... inject sarg_t<`r3,`r4> ap) 
+int scanf(const char ? fmt, ... inject sarg_t ap) 
   __attribute__((format(scanf,1,2)))
 {
   return vfscanf(stdin, fmt, ap);

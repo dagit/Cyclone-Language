@@ -89,7 +89,7 @@ tunion PrintArg<`r::R> {
   IntPtr_pa(unsigned long @`r);
 };
 
-static string_t parg2string(parg_t<`r> x) {
+static string_t parg2string(parg_t x) {
   switch (x) {
   case &String_pa(_): return "string";
   case &Int_pa(_): return "int"; 
@@ -105,28 +105,28 @@ static `a badarg(string_t<`H> s) {
 }
 
 // Extract an "int" vararg.
-static int va_arg_int(parg_t<`r>?`r2 ap) {
+static int va_arg_int(parg_t? ap) {
   switch (*ap) {
   case &Int_pa(i): return (int)i;
   default: return badarg("printf expected int");
   }
 }
 
-static long va_arg_long(parg_t<`r>?`r2 ap) {
+static long va_arg_long(parg_t? ap) {
   switch (*ap) {
   case &Int_pa(i): return (long)i;
   default: return badarg("printf expected int");
   }
 }
 
-static unsigned long va_arg_ulong(parg_t<`r>?`r2 ap) {
+static unsigned long va_arg_ulong(parg_t? ap) {
   switch (*ap) {
   case &Int_pa(i): return (unsigned long)i;
   default: return badarg("printf expected int");
   }
 }
 
-static unsigned long va_arg_uint(parg_t<`r>?`r2 ap) {
+static unsigned long va_arg_uint(parg_t? ap) {
   switch (*ap) {
   case &Int_pa(i): return (unsigned int)i;
   default: return badarg("printf expected int");
@@ -134,7 +134,7 @@ static unsigned long va_arg_uint(parg_t<`r>?`r2 ap) {
 }
 
 // Extract a "double" vararg.
-static double va_arg_double(parg_t<`r>?`r2 ap) {
+static double va_arg_double(parg_t? ap) {
   switch (*ap) {
   case &Double_pa(d): return d;
     // case &Float_pa(f): return (double)f;
@@ -144,7 +144,7 @@ static double va_arg_double(parg_t<`r>?`r2 ap) {
 }
 
 // Extract a "short pointer" vararg.
-static short @`r va_arg_short_ptr(parg_t<`r>?`r2 ap) {
+static short @`r va_arg_short_ptr(parg_t<`r>? ap) {
   switch (*ap) {
   case &ShortPtr_pa(p): return p;
   default: throw badarg("printf expected short pointer"); 
@@ -152,7 +152,7 @@ static short @`r va_arg_short_ptr(parg_t<`r>?`r2 ap) {
 }
 
 // Extract an "int pointer" vararg.
-static unsigned long @`r va_arg_int_ptr(parg_t<`r>?`r2 ap) {
+static unsigned long @`r va_arg_int_ptr(parg_t<`r>? ap) {
   switch (*ap) {
   case &IntPtr_pa(p): return p;
   default: throw badarg("printf expected int pointer");
@@ -160,15 +160,12 @@ static unsigned long @`r va_arg_int_ptr(parg_t<`r>?`r2 ap) {
 }
 
 // Extract a "string" vararg.
-static const char ?`r va_arg_string(parg_t<`r>?`r2 ap) {
+static const char ?`r va_arg_string(parg_t<`r>? ap) {
   switch (*ap) {
   case &String_pa(s): return s;
   default: throw badarg("printf expected string");
   }
 }
-
-
-
 
 #if defined(LIBC_SCCS) && !defined(lint)
 static char sccsid[] = "%W% (Berkeley) %G%";
@@ -180,7 +177,7 @@ static char sccsid[] = "%W% (Berkeley) %G%";
  * This code is large and complicated...
  */
 
-int __cvt_double(double number, int prec, int flags, int @`r1 signp, int fmtch, char ?`r2 startp, char ?`r2 endp);
+int __cvt_double(double number, int prec, int flags, int @ signp, int fmtch, char ?`r startp, char ?`r endp);
 
 /* 11-bit exponent (VAX G floating point) is 308 decimal digits */
 #define MAXEXP          308
@@ -215,7 +212,7 @@ typedef enum BASE base_t;
 /* Print out a string up to howmany characters using the given io closure.
  * Returns a count of how many characters were successfully spit out.
  */
-static int _IO_sputn(int (@ioputc)(int,`a), `a ioputc_env, const char ?`r s, 
+static int _IO_sputn(int (@ioputc)(int,`a), `a ioputc_env, const char ? s, 
                      int howmany) {
   int i = 0;
   while (i < howmany) {
@@ -240,7 +237,7 @@ static int _IO_padn(int (@ioputc)(int,`a), `a ioputc_env, char c, int howmany)
 }
 
 /* like strchr but works only up to max characters */
-static const char ?`r1 my_memchr(const char ?`r1 s, char c, int n) {
+static const char ?`r my_memchr(const char ?`r s, char c, int n) {
   int sz = s.size;
   n = (n < sz) ? n : sz;
   for (; n != 0; n--, s++) {
@@ -254,20 +251,20 @@ static const char ?`r1 my_memchr(const char ?`r1 s, char c, int n) {
  * is the format string, and ap is the array of printf arguments. 
  */
 int _IO_vfprintf (int (@ioputc)(int,`a), `a ioputc_env, 
-                  const char ?`r1 fmt0, 
-                  parg_t<`r2> ? `r3 ap)
+                  const char ? fmt0, 
+                  parg_t ? ap)
 {
-	register const char?`r1 fmt; /* format string */
+	register const char? fmt; /* format string */
 	register int ch;	/* character from fmt */
 	register int n;		/* handy integer (short term usage) */
         /* cp is a handy char pointer (short term usage) for a local buffer */
-	register char ?`_IO_vfprintf cp = NULL;	
+	register char ? cp = NULL;	
         /* cp2 is a handy char pointer (short term usage) for the case when
          * the argument is a string -- that lives in a different region. */
-	register const char ?`r2 cp2 = NULL;
+	register const char ? cp2 = NULL;
         /* the flag use_cp2 controls whether or not we PRINT from cp or cp2 */
         bool use_cp2; 
-	const char ?`r1 fmark;	/* for remembering a place in fmt */
+	const char ? fmark;	/* for remembering a place in fmt */
 	register int flags;	/* flags as above */
 	int ret;		/* return value accumulator */
 	int width;		/* width from format (%8d), or 0 */
@@ -455,7 +452,7 @@ reswitch:	use_cp2 = false;
 			*cp = '\0';
 			size = __cvt_double(_double, prec, flags, &softsign,
 					    ch, cp, 
-                                            (char ? _)buf + sizeof(buf));
+                                            (char ?)buf + sizeof(buf));
 			if (softsign)
 				sign = '-';
 			if (*cp == '\0')
@@ -502,7 +499,7 @@ reswitch:	use_cp2 = false;
 				 * NUL in the first `prec' characters, and
 				 * strlen() will go further.
 				 */
-				const char ? `r2 p = my_memchr(cp2, 0, prec);
+				const char ? p = my_memchr(cp2, 0, prec);
 
 				if (p != NULL) {
 					size = p - cp2;
@@ -588,7 +585,7 @@ number:			if ((dprec = prec) >= 0)
                                         */
 				}
 			}
-			size = ((char ? _)buf) + BUF - cp;
+			size = ((char ?)buf) + BUF - cp;
 		skipsize:
 			break;
 		default:	/* "%?" prints ?, unless ? is NUL */
@@ -680,11 +677,10 @@ error:
 	/* NOTREACHED */
 }
 
-static char ?`r1 exponent(char ?`r1 p, int exp, int fmtch)
+static char ?`r exponent(char ?`r p, int exp, int fmtch)
 {
-	register char ? _ t;
+	register char ? t;
 	char expbuf[MAXEXP+1] = {for i < MAXEXP : '0'};
-
 	*p++ = (char)fmtch;
 	if (exp < 0) {
 		exp = -exp;
@@ -707,9 +703,9 @@ static char ?`r1 exponent(char ?`r1 p, int exp, int fmtch)
 	return (p);
 }
 
-static char ?`r1 round(double fract, int * `r2 exp,
-                       char ? `r1 start, char ? `r1 end,
-                       char ch, int @ `r3 signp)
+static char ?`r round(double fract, int * exp,
+                       char ? `r start, char ? `r end,
+                       char ch, int @ signp)
 {
 	double tmp = 0.0;
 
@@ -749,10 +745,10 @@ static char ?`r1 round(double fract, int * `r2 exp,
 	return (start);
 }
 
-int __cvt_double(double number, int prec, int flags, int @`r1 signp,
-		 int fmtch, char ?`r2 startp, char ?`r2 endp)
+int __cvt_double(double number, int prec, int flags, int @ signp,
+		 int fmtch, char ?`r startp, char ?`r endp)
 {
-	register char ? _ p, ? _ t;
+	register char ? p, ? t;
 	register double fract;
 	int dotrim = 0, expcnt, gformat = 0;
 	double integer = 0.0, tmp = 0.0;
@@ -938,7 +934,7 @@ eformat:	if (expcnt) {
 }
 
 
-int vfprintf(FILE @`r3 f ,const char ?`r fmt, parg_t<`r2> ? `r1 ap) 
+int vfprintf(FILE @ f ,const char ? fmt, parg_t ? ap) 
   __attribute__((format(printf,2,0)))
 {
   int ans;
@@ -946,14 +942,14 @@ int vfprintf(FILE @`r3 f ,const char ?`r fmt, parg_t<`r2> ? `r1 ap)
   return ans;
 }  
 
-int fprintf(FILE @`r3 f,const char ?`r fmt, ... inject parg_t<`r2> ap)
+int fprintf(FILE @ f,const char ? fmt, ... inject parg_t ap)
 //FIX: commented out because types have changed
   __attribute__((format(printf,2,3)))
 {
   return vfprintf(f,fmt,ap);
 }
 
-int vprintf(const char ?`r fmt, parg_t<`r2> ? `r1 ap) 
+int vprintf(const char ? fmt, parg_t ? ap) 
   __attribute__((format(printf,1,0)))
 {
   int ans;
@@ -961,7 +957,7 @@ int vprintf(const char ?`r fmt, parg_t<`r2> ? `r1 ap)
   return ans;
 }
 
-int printf(const char ?`r fmt, ... inject parg_t<`r2> ap) 
+int printf(const char ? fmt, ... inject parg_t ap) 
   __attribute__((format(printf,1,2)))
 {
   int ans;
@@ -969,9 +965,9 @@ int printf(const char ?`r fmt, ... inject parg_t<`r2> ap)
   return ans;
 }
 
-static int putc_string(int c, $(char ?`r @`r2,size_t @`r3)@`r4 sptr_n) {
+static int putc_string(int c, $(char ? @,size_t @)@ sptr_n) {
   let &$(sptr,nptr) = sptr_n;
-  char ?`r s = *sptr;
+  char ? s = *sptr;
   size_t n = *nptr;
   if ((s.size == 0) || (n == 0)) return EOF;
   *s = (char)c;
@@ -980,8 +976,7 @@ static int putc_string(int c, $(char ?`r @`r2,size_t @`r3)@`r4 sptr_n) {
   return 1;
 }
 
-int vsnprintf(char ?`r1 s, size_t n, const char ?`r2 fmt, 
-	      parg_t<`r4> ? `r3 ap) 
+int vsnprintf(char ? s, size_t n, const char ? fmt, parg_t ? ap) 
   __attribute__((format(printf,3,0)))
 {
   int ans;
@@ -994,20 +989,19 @@ int vsnprintf(char ?`r1 s, size_t n, const char ?`r2 fmt,
   return ans;
 }
 
-int snprintf(char ?`r1 s, size_t n, 
-	     const char ?`r2 fmt, ... inject parg_t<`r4> ap) 
+int snprintf(char ? s, size_t n, const char ? fmt, ... inject parg_t ap) 
   __attribute__((format(printf,3,4)))
 {
   return vsnprintf(s, n, fmt, ap);
 }
 
-int vsprintf(char ?`r1 s, const char ?`r2 fmt, parg_t<`r4> ? `r3 ap) 
+int vsprintf(char ? s, const char ? fmt, parg_t ? ap) 
   __attribute__((format(printf,2,0)))
 {
   return vsnprintf(s,s.size,fmt,ap);
 }
 
-int sprintf(char ?`r1 s, const char ?`r2 fmt, ... inject parg_t<`r4> ap) 
+int sprintf(char ? s, const char ? fmt, ... inject parg_t ap) 
   __attribute__((format(printf,2,3)))
 {
   return vsnprintf(s, s.size, fmt, ap);
@@ -1017,24 +1011,23 @@ static int putc_void(int c, int dummy) {
   return 1;
 }
 
-char ?`r1 vrprintf(region_t<`r1> r1, const char ?`r2 fmt, parg_t<`r4> ?`r3 ap)
+char ?`r vrprintf(region_t<`r> r1, const char ? fmt, parg_t ? ap)
   __attribute__((format(printf,2,0)))
 {
   // figure out the size of the resulting string -- add one for 0 terminator
   int size = _IO_vfprintf(putc_void, 0, fmt, ap) + 1;
-  char ?`r1 s = rnew(r1) {for i < size : '\0'};
+  char ?`r s = rnew(r1) {for i < size : '\0'};
   vsprintf(s, fmt, ap);
   return s;
 }
 
-char ?`r1 rprintf(region_t<`r1> r1, const char ?`r2 fmt, 
-                   ... inject parg_t<`r4> ap) 
+char ?`r rprintf(region_t<`r> r1, const char ? fmt, ... inject parg_t ap) 
   __attribute__((format(printf,2,3)))
 {
   return vrprintf(r1, fmt, ap);
 }
 
-char ? aprintf(const char ?`r2 fmt, ... inject parg_t<`r4> ap) 
+char ? aprintf(const char ? fmt, ... inject parg_t ap) 
   __attribute__((format(printf,1,2)))
 {
   return vrprintf(heap_region, fmt, ap);

@@ -405,7 +405,7 @@ list_t<Absyn::decl_t> do_print(FILE @ out_file, list_t<Absyn::decl_t,`H> tds) {
   let cyc_include_fnotnull = (FILE@)cyc_include_f;
   size_t n_read = 1024;
   size_t n_written;
-  char buf[1024] = { for i < 1024 : 0 }; // init to avoid warning
+  char buf[1024+1] = { for i < 1024 : 0 }; // init to avoid warning
   while (n_read == 1024) {
     n_read = fread(buf,1,1024,cyc_include_fnotnull);
     if (n_read != 1024 && !(feof(cyc_include_fnotnull))) {
