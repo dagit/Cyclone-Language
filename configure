@@ -47,7 +47,7 @@ function egrep_path {
 function get_cc {
   for comp in gcc cc; do
     CC=`which $comp 2> /dev/null`
-    if [ -n "$CC" ]; then
+    if [ -n "$CC" -a -x "$CC" ]; then
       CC=$comp
       break
     fi
