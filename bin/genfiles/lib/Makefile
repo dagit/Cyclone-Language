@@ -10,8 +10,7 @@ all: $(CYCLIB)
 
 $(CYCLIB): $(O_LIBS) $(RUNTIME).o
 	-rm -f $@
-	ar qc $@ $^
-	ranlib $@
+	ar qcs $@ $^
 
 clean:
 	rm -f $(O_LIBS) $(RUNTIME).o $(CYCLIB) *~

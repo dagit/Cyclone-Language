@@ -173,8 +173,6 @@ Cstring underlying_Cstring(string s) {
   return str;
 }
 
-extern int system(Cstring);
-
 static void check_fd(FILE *fd) {
   if(!fd) {
     fprintf(stderr,"Attempt to access null file descriptor.\n");
