@@ -792,15 +792,15 @@ static struct JoinEnv<`r::R,`r2::R> {
 };
 typedef struct JoinEnv<`r1,`r2> @`r3 joinenv_t<`r1,`r2,`r3>;
 static enum WhoIsChanged { Neither, One, Two }; // if both changed, take join
-static struct AfterEnv<`r::R,`r2::R> {
-  struct JoinEnv<`r,`r2> joinenv;
-  place_set_t<`r2> chg1; // should region-allocate!
-  place_set_t<`r2> chg2; // should region-allocate!
-  place_t<`r2,`r2> curr_place; // a pain to stack-allocate, but should!
-  list_t<int,`r2> @`r last_field_cell;
+static struct AfterEnv<`r::R> {
+  struct JoinEnv<`r,`r> joinenv;
+  place_set_t<`r> chg1; // should region-allocate!
+  place_set_t<`r> chg2; // should region-allocate!
+  place_t<`r,`r> curr_place; // a pain to stack-allocate, but should!
+  list_t<int,`r> @`r last_field_cell;
   enum WhoIsChanged changed;
 };
-typedef struct AfterEnv<`r1,`r3> @`r2 afterenv_t<`r1,`r2,`r3>;
+typedef struct AfterEnv<`r1> @`r2 afterenv_t<`r1,`r2>;
 
 static bool absRval_lessthan_approx(`a ignore, absRval_t<`r> r1, absRval_t<`r> r2);
 
@@ -1010,8 +1010,8 @@ join_flow_and_rval(flow_env_t<`r> fenv,
   }
 }
 
-static absRval_t<`r> after_absRval_d(afterenv_t<`r1,`r2,`r>,int,absRval_t<`r>,absRval_t<`r>);
-static absRval_t<`r> after_absRval(afterenv_t<`r1,`r2,`r> env, absRval_t<`r> r1, absRval_t<`r> r2) {
+static absRval_t<`r> after_absRval_d(afterenv_t<`r,`r2>,int,absRval_t<`r>,absRval_t<`r>);
+static absRval_t<`r> after_absRval(afterenv_t<`r,`r2> env, absRval_t<`r> r1, absRval_t<`r> r2) {
   bool changed1 = env->changed == One || Dict::member(env->chg1,env->curr_place);
   bool changed2 = env->changed == Two || Dict::member(env->chg2,env->curr_place);
   if(changed1 && changed2) 
@@ -1072,12 +1072,14 @@ static absRval_t<`r> after_absRval(afterenv_t<`r1,`r2,`r> env, absRval_t<`r> r1,
   }
 }
 static absRval_t<`r> 
-after_absRval_d(afterenv_t<`r1,`r2,`r> env, int key, 
+after_absRval_d(afterenv_t<`r,`r2> env, int key, 
                 absRval_t<`r> r1, absRval_t<`r> r2) {
   if(r1 == r2) return r1;
   let old_last_field = env->last_field_cell; 
   let old_changed    = env->changed;
   *env->last_field_cell = rnew(env->joinenv.fenv->r) List(key,NULL);
+//     `r2                 `r1  `r        `r
+// env -> .last_field_cell -> * -> [hd,tl -> ...]
   env->last_field_cell  = &(*env->last_field_cell)->tl;
   let ans = after_absRval(env,r1,r2);
   env->last_field_cell        = old_last_field;
@@ -1085,7 +1087,7 @@ after_absRval_d(afterenv_t<`r1,`r2,`r> env, int key,
   env->changed                = old_changed;
   return ans;
 }
-static absRval_t<`r> after_root(afterenv_t<`r1,`r2,`r> env, root_t<`r> root,
+static absRval_t<`r> after_root(afterenv_t<`r,`r2> env, root_t<`r> root,
                                 absRval_t<`r> r1, absRval_t<`r> r2) {
   if(r1 == r2) return r1;
   *env->curr_place     = Place(root,NULL);

@@ -4745,7 +4745,7 @@ bool is_tagged_pointer_typ(type_t t) {
 
 // warning: not just a predicate; side-effects VarTypes to be of non-unique
 //   flavor if they are not yet set
-static bool is_noalias_region(type_t r, bool must_be_unique) {
+bool is_noalias_region(type_t r, bool must_be_unique) {
   switch (compress(r)) {
   case &UniqueRgn: return true;
   case &VarType(tv):
@@ -4950,12 +4950,12 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
     switch (compress(e1->topt->v)) {
     case &AnonAggrType(_,fs):
       let finfo = lookup_field(fs,f);
-      if(finfo != NULL && finfo->width != NULL)
+      if(finfo != NULL && finfo->width == NULL)
 	return $(finfo->tq.real_const, addressof_props(te,e1)[1]);
       return bogus_ans;
     case &AggrType(AggrInfo({.KnownAggr = &ad},_)):
       let finfo = lookup_decl_field(ad,f);
-      if(finfo != NULL && finfo->width != NULL)
+      if(finfo != NULL && finfo->width == NULL)
 	return $(finfo->tq.real_const, addressof_props(te,e1)[1]);
       return bogus_ans;
     default: return bogus_ans;
@@ -4976,7 +4976,7 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
 	finfo = lookup_decl_field(ad,f); break;
       default: return bogus_ans;
       }
-      if(finfo != NULL && finfo->width != NULL)
+      if(finfo != NULL && finfo->width == NULL)
 	return $(finfo->tq.real_const, r);
       return bogus_ans;
     default: return bogus_ans;

@@ -1273,6 +1273,9 @@ static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0,
 
   // we've got an address-of
   let $(is_const,rgn) = addressof_props(te,e);
+  if (is_noalias_region(rgn,false))
+    terr(e->loc,"& would manufacture an alias to an alias-free pointer");
+
   tqual_t tq = empty_tqual(NULL);
   if(is_const) {
     tq.print_const = true;
@@ -1702,7 +1705,6 @@ static type_t tcComprehension(tenv_t te, seg_t loc, type_t * topt,
       te2 = add_local_var(r, loc, te2, vd);
     }
     let te = te2;
-    _ pinfo;
     let topt2 = NULL;
     let tqopt = NULL;
     let ztopt = NULL;
@@ -1710,15 +1712,14 @@ static type_t tcComprehension(tenv_t te, seg_t loc, type_t * topt,
     if (topt != NULL)
       switch (compress(*topt)) {
       case &PointerType(x):
-        pinfo = x;
-        topt2 = &pinfo.elt_typ;
-        tqopt = &pinfo.elt_tq;
-        ztopt = &pinfo.ptr_atts.zero_term;
+        topt2 = rnew (r) x.elt_typ;
+        tqopt = rnew (r) x.elt_tq;
+        ztopt = rnew (r) x.ptr_atts.zero_term;
         break;
-      case &ArrayType(ArrayInfo{*t,*tq,b,*zt,_}):
-        topt2 = t;
-        tqopt = tq;
-        ztopt = zt;
+      case &ArrayType(ArrayInfo{t,tq,b,zt,_}):
+        topt2 = rnew (r) t;
+        tqopt = rnew (r) tq;
+        ztopt = rnew (r) zt;
         break;
       default:
         break;

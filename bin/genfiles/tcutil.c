@@ -1211,19 +1211,19 @@ enum Cyc_Absyn_AggrKind,struct Cyc_List_List*fields);int Cyc_Tcutil_is_tagged_po
 void*);int Cyc_Tcutil_is_tagged_pointer_typ_elt(void*t,void**elt_typ_dest);int Cyc_Tcutil_is_zero_pointer_typ_elt(
 void*t,void**elt_typ_dest);int Cyc_Tcutil_is_zero_ptr_type(void*t,void**ptr_type,
 int*is_dyneither,void**elt_type);int Cyc_Tcutil_is_zero_ptr_deref(struct Cyc_Absyn_Exp*
-e1,void**ptr_type,int*is_dyneither,void**elt_type);int Cyc_Tcutil_is_noalias_pointer(
-void*t);int Cyc_Tcutil_is_noalias_path(struct _RegionHandle*,struct Cyc_Absyn_Exp*e);
-int Cyc_Tcutil_is_noalias_pointer_or_aggr(struct _RegionHandle*,void*t);void*Cyc_Tcutil_array_to_ptr(
-struct Cyc_Tcenv_Tenv*,void*t,struct Cyc_Absyn_Exp*e);struct _tuple17{int f1;void*f2;
-};struct _tuple17 Cyc_Tcutil_addressof_props(struct Cyc_Tcenv_Tenv*te,struct Cyc_Absyn_Exp*
-e);void*Cyc_Tcutil_normalize_effect(void*e);struct Cyc_Absyn_Tvar*Cyc_Tcutil_new_tvar(
-void*k);int Cyc_Tcutil_new_tvar_id();void Cyc_Tcutil_add_tvar_identity(struct Cyc_Absyn_Tvar*);
-void Cyc_Tcutil_add_tvar_identities(struct Cyc_List_List*);int Cyc_Tcutil_is_temp_tvar(
-struct Cyc_Absyn_Tvar*);void Cyc_Tcutil_rewrite_temp_tvar(struct Cyc_Absyn_Tvar*);
-int Cyc_Tcutil_same_atts(struct Cyc_List_List*,struct Cyc_List_List*);int Cyc_Tcutil_bits_only(
-void*t);int Cyc_Tcutil_is_const_exp(struct Cyc_Tcenv_Tenv*te,struct Cyc_Absyn_Exp*e);
-void*Cyc_Tcutil_snd_tqt(struct _tuple11*);int Cyc_Tcutil_supports_default(void*);
-int Cyc_Tcutil_admits_zero(void*t);int Cyc_Tcutil_is_noreturn(void*);int Cyc_Tcutil_extract_const_from_typedef(
+e1,void**ptr_type,int*is_dyneither,void**elt_type);int Cyc_Tcutil_is_noalias_region(
+void*r,int must_be_unique);int Cyc_Tcutil_is_noalias_pointer(void*t);int Cyc_Tcutil_is_noalias_path(
+struct _RegionHandle*,struct Cyc_Absyn_Exp*e);int Cyc_Tcutil_is_noalias_pointer_or_aggr(
+struct _RegionHandle*,void*t);void*Cyc_Tcutil_array_to_ptr(struct Cyc_Tcenv_Tenv*,
+void*t,struct Cyc_Absyn_Exp*e);struct _tuple17{int f1;void*f2;};struct _tuple17 Cyc_Tcutil_addressof_props(
+struct Cyc_Tcenv_Tenv*te,struct Cyc_Absyn_Exp*e);void*Cyc_Tcutil_normalize_effect(
+void*e);struct Cyc_Absyn_Tvar*Cyc_Tcutil_new_tvar(void*k);int Cyc_Tcutil_new_tvar_id();
+void Cyc_Tcutil_add_tvar_identity(struct Cyc_Absyn_Tvar*);void Cyc_Tcutil_add_tvar_identities(
+struct Cyc_List_List*);int Cyc_Tcutil_is_temp_tvar(struct Cyc_Absyn_Tvar*);void Cyc_Tcutil_rewrite_temp_tvar(
+struct Cyc_Absyn_Tvar*);int Cyc_Tcutil_same_atts(struct Cyc_List_List*,struct Cyc_List_List*);
+int Cyc_Tcutil_bits_only(void*t);int Cyc_Tcutil_is_const_exp(struct Cyc_Tcenv_Tenv*
+te,struct Cyc_Absyn_Exp*e);void*Cyc_Tcutil_snd_tqt(struct _tuple11*);int Cyc_Tcutil_supports_default(
+void*);int Cyc_Tcutil_admits_zero(void*t);int Cyc_Tcutil_is_noreturn(void*);int Cyc_Tcutil_extract_const_from_typedef(
 struct Cyc_Position_Segment*,int declared_const,void*);struct Cyc_List_List*Cyc_Tcutil_transfer_fn_type_atts(
 void*t,struct Cyc_List_List*atts);int Cyc_Tcutil_rgn_of_pointer(void*t,void**rgn);
 void Cyc_Tcutil_check_no_qual(struct Cyc_Position_Segment*loc,void*t);void*Cyc_Tcexp_tcExp(
@@ -6378,7 +6378,7 @@ _dyneither_ptr ap))Cyc_Tcutil_impos)(((_tmp15F9="found bad lhs in is_zero_ptr_de
 _tag_dyneither(_tmp15F9,sizeof(char),39))),_tag_dyneither(_tmp15F8,sizeof(void*),
 1)))))));}_LL707:;}int Cyc_Tcutil_is_tagged_pointer_typ(void*t){void*ignore=(void*)&
 Cyc_Absyn_VoidType_val;return Cyc_Tcutil_is_tagged_pointer_typ_elt(t,& ignore);}
-static int Cyc_Tcutil_is_noalias_region(void*r,int must_be_unique){void*_tmpEC8=Cyc_Tcutil_compress(
+int Cyc_Tcutil_is_noalias_region(void*r,int must_be_unique){void*_tmpEC8=Cyc_Tcutil_compress(
 r);struct Cyc_Absyn_Tvar*_tmpECB;_LL71B: {struct Cyc_Absyn_UniqueRgn_struct*
 _tmpEC9=(struct Cyc_Absyn_UniqueRgn_struct*)_tmpEC8;if(_tmpEC9->tag != 22)goto
 _LL71D;}_LL71C: return 1;_LL71D: {struct Cyc_Absyn_VarType_struct*_tmpECA=(struct
@@ -6606,14 +6606,14 @@ _tmpF80;union Cyc_Absyn_AggrInfoU _tmpF81;struct Cyc_Absyn_Aggrdecl**_tmpF82;str
 Cyc_Absyn_Aggrdecl*_tmpF83;_LL7A4: {struct Cyc_Absyn_AnonAggrType_struct*_tmpF7D=(
 struct Cyc_Absyn_AnonAggrType_struct*)_tmpF7C;if(_tmpF7D->tag != 13)goto _LL7A6;
 else{_tmpF7E=_tmpF7D->f2;}}_LL7A5: {struct Cyc_Absyn_Aggrfield*_tmpF84=Cyc_Absyn_lookup_field(
-_tmpF7E,_tmpF5D);if(_tmpF84 != 0  && _tmpF84->width != 0){struct _tuple17 _tmp1623;
+_tmpF7E,_tmpF5D);if(_tmpF84 != 0  && _tmpF84->width == 0){struct _tuple17 _tmp1623;
 return(_tmp1623.f1=(_tmpF84->tq).real_const,((_tmp1623.f2=(Cyc_Tcutil_addressof_props(
 te,_tmpF5C)).f2,_tmp1623)));}return bogus_ans;}_LL7A6: {struct Cyc_Absyn_AggrType_struct*
 _tmpF7F=(struct Cyc_Absyn_AggrType_struct*)_tmpF7C;if(_tmpF7F->tag != 12)goto
 _LL7A8;else{_tmpF80=_tmpF7F->f1;_tmpF81=_tmpF80.aggr_info;if((_tmpF81.KnownAggr).tag
 != 2)goto _LL7A8;_tmpF82=(struct Cyc_Absyn_Aggrdecl**)(_tmpF81.KnownAggr).val;
 _tmpF83=*_tmpF82;}}_LL7A7: {struct Cyc_Absyn_Aggrfield*_tmpF86=Cyc_Absyn_lookup_decl_field(
-_tmpF83,_tmpF5D);if(_tmpF86 != 0  && _tmpF86->width != 0){struct _tuple17 _tmp1624;
+_tmpF83,_tmpF5D);if(_tmpF86 != 0  && _tmpF86->width == 0){struct _tuple17 _tmp1624;
 return(_tmp1624.f1=(_tmpF86->tq).real_const,((_tmp1624.f2=(Cyc_Tcutil_addressof_props(
 te,_tmpF5C)).f2,_tmp1624)));}return bogus_ans;}_LL7A8:;_LL7A9: return bogus_ans;
 _LL7A3:;};_LL784: {struct Cyc_Absyn_AggrArrow_e_struct*_tmpF5F=(struct Cyc_Absyn_AggrArrow_e_struct*)
@@ -6634,7 +6634,7 @@ _tmpF8E;if(_tmpF91->tag != 12)goto _LL7B4;else{_tmpF92=_tmpF91->f1;_tmpF93=_tmpF
 if((_tmpF93.KnownAggr).tag != 2)goto _LL7B4;_tmpF94=(struct Cyc_Absyn_Aggrdecl**)(
 _tmpF93.KnownAggr).val;_tmpF95=*_tmpF94;}}_LL7B3: finfo=Cyc_Absyn_lookup_decl_field(
 _tmpF95,_tmpF61);goto _LL7AF;_LL7B4:;_LL7B5: return bogus_ans;_LL7AF:;}if(finfo != 0
- && finfo->width != 0){struct _tuple17 _tmp1625;return(_tmp1625.f1=(finfo->tq).real_const,((
+ && finfo->width == 0){struct _tuple17 _tmp1625;return(_tmp1625.f1=(finfo->tq).real_const,((
 _tmp1625.f2=_tmpF8D,_tmp1625)));}return bogus_ans;}_LL7AD:;_LL7AE: return bogus_ans;
 _LL7AA:;};_LL786: {struct Cyc_Absyn_Deref_e_struct*_tmpF63=(struct Cyc_Absyn_Deref_e_struct*)
 _tmpF57;if(_tmpF63->tag != 21)goto _LL788;else{_tmpF64=_tmpF63->f1;}}_LL787: {void*

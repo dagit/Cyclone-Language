@@ -249,6 +249,9 @@ extern bool is_zero_ptr_deref(exp_t e1, type_t @ptr_type,
 			      bool @is_dyneither, type_t @elt_type);
 			      
 
+// returns true if this a non-aliasable region, e.g. `U, `r::TR, etc.
+extern bool is_noalias_region(type_t r, bool must_be_unique);
+
 // returns true if this a non-aliasable pointer, e.g. *`U, *`r::TR, etc.
 extern bool is_noalias_pointer(type_t t);
 
