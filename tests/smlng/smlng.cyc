@@ -188,7 +188,25 @@ doc_t down_opt(context_t ctxt, doc_t d) {
       if (ctxt.S) {is_change = true; return down_opt(ctxt,*d2);} 
       switch(*d2){
       case &Tagged(tag_in_EM,*d3):
-        if (tag_in_EM==EM_tag) return down_opt(ctxt, *d3);
+        if (tag_in_EM==EM_tag){
+          is_change = true;
+          return down_opt(ctxt, *d3);
+        }
+        break;
+      case &Seq(ds):
+        switch(ds->hd){
+        case &Tagged(tag_in_EM,*d3):
+          if (tag_in_EM==EM_tag){
+            is_change = true;
+            ds->hd = down_opt(ctxt,*d3);
+            let tail_doc = down_opt(ctxt,new Tagged(EM_tag, new Seq(ds->tl)));
+            ds->tl = new List::List(tail_doc,null);
+            return new Seq(ds);
+          }
+          break;
+        default:
+          break;
+        }
         break;
       default:
         break;
@@ -357,6 +375,7 @@ int main(int argc, char ??argv) {
       d = TagElim::under_elim(d)[0];
             // down_opt must precede up_opt 
       fprintf(stderr,"%d\ndown_opt...", check_time()); fflush(stderr);
+      d = remove_Mt(d);
       d = down_opt(init_context,d);
       is_change = true;
       round_num = 0;
