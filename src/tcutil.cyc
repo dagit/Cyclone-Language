@@ -5139,13 +5139,17 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
     switch (compress((type_t)e1->topt)) {
     case &AnonAggrType(_,fs):
       let finfo = lookup_field(fs,f);
-      if(finfo != NULL && finfo->width == NULL)
-	return $(finfo->tq.real_const, addressof_props(te,e1)[1]);
+      if(finfo != NULL && finfo->width == NULL) {
+        let $(c,t) = addressof_props(te,e1);
+	return $(finfo->tq.real_const || c, t);
+      }
       return bogus_ans;
     case &AggrType(AggrInfo({.KnownAggr = &ad},_)):
       let finfo = lookup_decl_field(ad,f);
-      if(finfo != NULL && finfo->width == NULL)
-	return $(finfo->tq.real_const, addressof_props(te,e1)[1]);
+      if(finfo != NULL && finfo->width == NULL) {
+        let $(c,t) = addressof_props(te,e1);
+	return $(finfo->tq.real_const || c, t);
+      }
       return bogus_ans;
     default: return bogus_ans;
     }

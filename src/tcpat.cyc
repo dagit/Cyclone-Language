@@ -61,8 +61,12 @@ static void resolve_pat(tenv_t te, type_t *topt, pat_t p) {
           return;
         case &DatatypeRes(tud,tuf): 
           p->r = new Datatype_p(tud,tuf,NULL,false); return;
-        case &EnumRes(ed,ef):     p->r = new Enum_p(ed,ef); return;
-        case &AnonEnumRes(t,ef):  p->r = new AnonEnum_p(t,ef); return;
+        case &EnumRes(ed,ef):     
+          p->r = new Enum_p(ed,ef); 
+          return;
+        case &AnonEnumRes(t,ef):  
+          p->r = new AnonEnum_p(t,ef); 
+          return;
         case &VarRes(_): break; // shadows an outer definition, but that's fine
         }
       } 
@@ -179,7 +183,8 @@ static type_t num_type(type_t * topt, type_t numt) {
     return *topt;
   // now allow enum to be cast up too
   switch(compress(numt)) {
-  case &EnumType(_,_): if(topt != NULL) return *topt; break;
+  case &EnumType(...): fallthru;
+  case &AnonEnumType(...): if(topt != NULL) return *topt; break;
   default: break;
   }
   return numt;
@@ -289,7 +294,9 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
   case &Int_p(Signed,_):   t = num_type(topt, sint_typ);  break;
   case &Char_p(_):         t = num_type(topt, char_typ);  break;
   case &Float_p(_,i):      t = num_type(topt, float_typ(i)); break;
-  case &Enum_p(ed,_):      t = num_type(topt, new EnumType(ed->name,ed)); break;
+  case &Enum_p(ed,_):      
+    t = num_type(topt, new EnumType(ed->name,ed)); 
+    break;
   case &AnonEnum_p(tenum,_): t = num_type(topt, tenum); break;
   case &Null_p:
     if(topt != NULL)
@@ -872,8 +879,17 @@ static simple_pat_t<`r> compile_pat(region_t<`r> r, pat_t p) {
   case &Enum_p(ed,ef):
     // FIX: two different enum constructors can have the same value so we
     // might not get a duplicate warning when we should.
-    int span = List::length(ed->fields->v);
-    s = con_pat(r, *((*ef->name)[1]), rnew(r) span, NULL, p);
+    switch (compress((type_t)p->topt)) {
+    case &IntType(...): 
+      // When it's an integer, we have to pretend like there's an infinite
+      // span...
+      s = con_pat(r, *((*ef->name)[1]), NULL, NULL, p);
+      break;
+    default:
+      int span = List::length(ed->fields->v);
+      s = con_pat(r, *((*ef->name)[1]), rnew(r) span, NULL, p);
+      break;
+    }
     break;
   case &AnonEnum_p(tenum,ef):
     // FIX: I had to put `H in here.  The problem must be that we type-check
@@ -886,10 +902,18 @@ static simple_pat_t<`r> compile_pat(region_t<`r> r, pat_t p) {
     };
     // FIX: two different enum constructors can have the same value so we
     // might not get a duplicate warning when we should.
-    int span = List::length(fields);
-    s = con_pat(r,*((*ef->name)[1]), rnew(r) span, NULL, p);
+    switch (compress((type_t)p->topt)) {
+    case &IntType(...): 
+      // When it's an integer, we have to pretend like there's an infinite
+      // span to avoid errors for redundant patterns.
+      s = con_pat(r, *((*ef->name)[1]), NULL, NULL, p);
+      break;
+    default:
+      int span = List::length(fields);
+      s = con_pat(r,*((*ef->name)[1]), rnew(r) span, NULL, p);
+      break;
+    }
     break;
-
   case &UnknownId_p(_):     
   case &UnknownCall_p(_,_,_): 
   case &Aggr_p(_,_,_,_):      
