@@ -115,13 +115,12 @@ cycdoc$(EXE): $(addsuffix .$(O), $(CYCDOC_SRCS))
 buildlib$(EXE): $(addsuffix .$(O), $(BUILDLIB_SRCS)) install_path.$(O)
 	$(CYCC) $(OTHER_CYCFLAGS) -v -compile-for-boot -L. -B. -B$(CYCDIR)/bin/lib/cyc-lib -o $@ $^ $(LDFLAGS)
 
-install_path.c: $(CYCDIR)/.version $(CYCDIR)/Makefile.inc
+install_path.c: $(CYCDIR)/Makefile.inc
 	 (echo "char *Carch = \"$(ARCH)\";"; \
 	  echo "char *Cdef_inc_path = \"$(INC_INSTALL)\";"; \
 	  echo "char *Cdef_lib_path = \"$(LIB_INSTALL)\";"; \
 	  echo "char *Ccomp = \"$(CC)\";"; \
-	  version=`cat $<`; \
-	  echo "char *Cversion = \"$$version\";") > $@
+	  echo "char *Cversion = \"$(VERSION)\";") > $@
 
 $(CYCLIB): $(O_LIBS) $(O_BOOT_LIBS) cstubs.$(O) cycstubs.$(O)
 ifdef MS

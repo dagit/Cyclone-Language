@@ -19,6 +19,7 @@
 # There is now a build/boot/cyclone.exe that you can use/move as you wish.
 
 include Makefile.inc
+
 export CYCDIR CC CYCFLAGS UPDATEARCH
 
 ifndef ARCH
@@ -32,6 +33,10 @@ CYC_INC_PATH := $(CYCDIR)/lib
 CYC_INCLUDE_H := $(CYC_LIB_PATH)/cyc-lib/cyc_include.h
 
 all: cyclone tools libs 
+
+# Print version to standard output -- used by makedist
+version:
+	@echo $(VERSION)
 
 cyclone: \
 	$(CYC_INCLUDE_H) \
@@ -131,15 +136,23 @@ $(CYC_LIB_PATH)/$(CYCBOOTLIB): \
 
 # probably unnecessary
 bin/genfiles/$(ARCH)/lib/%.$(O): bin/genfiles/$(ARCH)/lib/%.c
-	$(CC) -c -o $@ $< $(LDFLAGS)
+	$(CC) -c -o $@ $(CFLAGS) $<
 
-bin/genfiles/$(ARCH)/src/install_path.c: $(CYCDIR)/.version $(CYCDIR)/Makefile.inc
+bin/genfiles/$(ARCH)/lib/%_a.$(O): bin/genfiles/$(ARCH)/lib/%.c
+	$(CC) -c -o $@ -DCYC_REGION_PROFILE $(CFLAGS) $<
+
+bin/genfiles/$(ARCH)/lib/%_g.$(O): bin/genfiles/$(ARCH)/lib/%.c
+	$(CC) -c -o $@ -pg $(CFLAGS) $<
+
+bin/genfiles/$(ARCH)/lib/%_nocheck.$(O): bin/genfiles/$(ARCH)/lib/%.c
+	$(CC) -c -o $@ -DNO_CYC_NULL_CHECKS -DNO_CYC_BOUNDS_CHECKS $(CFLAGS) $<
+
+bin/genfiles/$(ARCH)/src/install_path.c: $(CYCDIR)/Makefile.inc
 	 (echo "char *Cdef_inc_path = \"$(INC_INSTALL)\";"; \
 	  echo "char *Carch = \"$(ARCH)\";"; \
 	  echo "char *Cdef_lib_path = \"$(LIB_INSTALL)\";"; \
 	  echo "char *Ccomp = \"$(CC)\";"; \
-	  version=`cat $<`; \
-	  echo "char *Cversion = \"$$version\";") > $@
+	  echo "char *Cversion = \"$(VERSION)\";") > $@
 
 $(CYC_LIB_PATH)/$(CYCLIB): $(CYC_INCLUDE_H)
 $(CYC_LIB_PATH)/$(CYCLIB): $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cyc_setjmp.h

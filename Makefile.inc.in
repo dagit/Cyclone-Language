@@ -1,5 +1,7 @@
 # -*- Makefile -*-
 
+VERSION = 0.4
+
 # Assume with Windows
 
 O := o

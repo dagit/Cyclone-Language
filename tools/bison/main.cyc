@@ -39,9 +39,16 @@ extern void output(), done(int);
 
 /* VMS complained about using `int'.  */
 
+extern "C" void GC_blacklist_warn_clear();
+
 int
 main(int argc, char ?`H ?`H argv)
 {
+  /* Don't print garbage collector warnings about allocations of 
+     blacklisted blocks.  This turns up on OS X and possibly other
+     BSD systems (??) */
+  GC_blacklist_warn_clear();
+
   program_name = argv[0];
   failure = 0;
   lineno = 0;

@@ -1,3 +1,8 @@
+# doc/Makefile
+
+# read this just to get VERSION
+include ../Makefile.inc
+
 CYCDOC=../bin/cycdoc
 INPUTS= advanced.tex \
 	aprof.tex \
@@ -33,9 +38,8 @@ letter: main-letter.pdf
 a4: main-a4.pdf
 
 tarball: online-manual letter
-	@(VERSION=`cat ../.version`; \
-	  tar cvf cyclone-$VERSION-docs.tar online-manual main-letter.pdf
-	  gzip cyclone-$VERSION-docs.tar)
+	tar cvf cyclone-$(VERSION)-docs.tar online-manual main-letter.pdf
+	gzip cyclone-$(VERSION)-docs.tar
 
 online-manual: main-screen.html
 	$(RM) -r online-manual

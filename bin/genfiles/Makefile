@@ -104,13 +104,12 @@ $(ARCH)/src/buildlib$(EXE): \
   $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/gc.a
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-$(ARCH)/src/install_path.c: $(CYCDIR)/.version $(CYCDIR)/Makefile.inc
+$(ARCH)/src/install_path.c: $(CYCDIR)/Makefile.inc
 	 (echo "char *Cdef_inc_path = \"$(INC_INSTALL)\";"; \
 	  echo "char *Carch = \"$(ARCH)\";"; \
 	  echo "char *Cdef_lib_path = \"$(LIB_INSTALL)\";"; \
 	  echo "char *Ccomp = \"$(CC)\";"; \
-	  version=`cat $<`; \
-	  echo "char *Cversion = \"$$version\";") > $@
+	  echo "char *Cversion = \"$(VERSION)\";") > $@
 
 clean_arch:
 	$(RM) $(addprefix $(ARCH)/lib/, $(CYCLIB) $(CYCBOOTLIB) libcyc_nocheck.a libcyc_a.a $(O_LIBS) $(A_LIBS) $(NOCHECK_LIBS) $(O_BOOT_LIBS) $(A_BOOT_LIBS) $(NOCHECK_BOOT_LIBS) nogc.[oa] a_nogc.$(O) nogc_a.a a_cstubs.$(O) cstubs.$(O) $(RUNTIME).$(O) a_$(RUNTIME).$(O) nocheck_$(RUNTIME).$(O))
