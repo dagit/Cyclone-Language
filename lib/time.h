@@ -23,7 +23,7 @@ namespace Time {
     int tm_isdst;
   };
 
-  extern "C" time_t time(time_t *t);
+  extern "C" time_t time(time_t *`r t);
   extern mstring_t asctime(const struct tm *_tblock);
   extern mstring_t ctime(const time_t *_time);
   extern size_t strftime(string_t _s, size_t _maxsize, string_t _fmt, 

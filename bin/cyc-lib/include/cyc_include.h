@@ -96,13 +96,13 @@ void * _check_null(void * ptr) {
 static inline 
 char * _check_known_subscript_null(void * ptr, unsigned bound, 
 				   unsigned elt_sz, unsigned index) {
-  if(!ptr || index > bound)
+  if(!ptr || index >= bound)
     _throw_null();
   return ((char *)ptr) + elt_sz*index;
 }
 static inline 
 unsigned _check_known_subscript_notnull(unsigned bound, unsigned index) {
-  if(index > bound)
+  if(index >= bound)
     _throw_null();
   return index;
 }
