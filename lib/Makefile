@@ -34,6 +34,7 @@ endif
 LC_FLAG =
 
 CYC_FLAGS := -I. -B. -save-c $(LC_FLAG) $(PROF_RGN_FLAG) $(TOC_FLAG)
+#CYC_FLAGS := -I. -save-c $(LC_FLAG) $(PROF_RGN_FLAG) $(TOC_FLAG)
 
 all: $(OUT_PREFIX)$(CYCLIB) xml/libxml.a
 

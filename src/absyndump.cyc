@@ -877,6 +877,7 @@ static void dumpids(list_t<vardecl_t> vds) {
 void dumpdecl(decl_t d) {
   switch(d->r) {
   case &Fn_d(fd):
+    //    fprintf(stderr,"%s",*(*fd->name)[1]); fflush(stdout);
     if(to_VC)
       dumpatts(fd->attributes);
     if(fd->is_inline) 

@@ -4,9 +4,9 @@ BUG FIXES and UNSOUNDNESSES:
 ----------------------------
 * FIX all of the FIX things.
 
-* what to do with free evars at the top-level or within type definitions?
+* Type-checker must disallow x -= y where x and y are pointers.
 
-* Provide offsetof as a primitive, as in C.
+* what to do with free evars at the top-level or within type definitions?
 
 * We rely on C to catch incomplete types, such as 
   struct X {

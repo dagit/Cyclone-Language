@@ -2,21 +2,19 @@
 Cyc_timespec it_interval; struct Cyc_timespec it_value; } ; struct Cyc__types_fd_set{
 int fds_bits[ 2u]; } ; extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{
 void* v; } ; extern unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
-unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_Failure[
-12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_string
-f1; } ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
-unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_Not_found[
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
+12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
+} ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Not_found[
 14u]; extern unsigned char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{
-unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char*
-string_to_Cstring( struct _tagged_string); extern unsigned char*
-underlying_Cstring( struct _tagged_string); extern struct _tagged_string
-Cstring_to_string( unsigned char*); struct _tagged_ptr0{ struct _tagged_string*
-curr; struct _tagged_string* base; struct _tagged_string* last_plus_one; } ;
-extern struct _tagged_ptr0 ntCsl_to_ntsl( unsigned char**); extern int system(
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char*
+string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring(
+struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
+extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int system(
 unsigned char*); extern int* __errno(); struct Cyc_Stdio___sFILE; extern struct
 Cyc_Stdio___sFILE* Cyc_Stdio_stderr; extern unsigned char Cyc_Stdio_FileCloseError[
 19u]; extern unsigned char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
-unsigned char* tag; struct _tagged_string f1; } ; struct Cyc_Time_tm{ int tm_sec;
+unsigned char* tag; struct _tagged_arr f1; } ; struct Cyc_Time_tm{ int tm_sec;
 int tm_min; int tm_hour; int tm_mday; int tm_mon; int tm_year; int tm_wday; int
 tm_yday; int tm_isdst; } ; extern unsigned int clock()  __attribute__(( cdecl
 )) ; extern double difftime( int _time2, int _time1)  __attribute__(( cdecl )) ;
@@ -67,328 +65,251 @@ __numer, int __denom)  __attribute__(( cdecl )) ; extern int rand()
  __attribute__(( cdecl )) ; extern int random()  __attribute__(( cdecl )) ;
 extern int srandom( unsigned int __seed)  __attribute__(( cdecl )) ; extern int
 grantpt( int)  __attribute__(( cdecl )) ; extern int unlockpt( int)
- __attribute__(( cdecl )) ; extern struct _tagged_string Cyc_Stdlib_getenv(
-struct _tagged_string); extern struct _tagged_string Cyc_Getopt_optarg; extern
-int Cyc_Getopt_optind; extern int Cyc_Getopt_opterr; extern int Cyc_Getopt_optopt;
-struct Cyc_Getopt_option{ struct _tagged_string name; int has_arg; int* flag;
-int val; } ; extern int Cyc_Getopt_getopt( int argc, struct _tagged_ptr0 argv,
-struct _tagged_string shortopts); struct _tagged_ptr1{ struct Cyc_Getopt_option*
-curr; struct Cyc_Getopt_option* base; struct Cyc_Getopt_option* last_plus_one; }
-; extern int Cyc_Getopt__getopt_internal( int argc, struct _tagged_ptr0 argv,
-struct _tagged_string shortopts, struct _tagged_ptr1 longopts, int* longind, int
-long_only); struct _tagged_string Cyc_Getopt_optarg={ 0, 0, 0}; int Cyc_Getopt_optind=
-0; static struct _tagged_string Cyc_Getopt_nextchar; int Cyc_Getopt_opterr= 1;
-int Cyc_Getopt_optopt=( int)'?'; enum  Cyc_Getopt_ordering_tag{ Cyc_Getopt_REQUIRE_ORDER
- =  0u, Cyc_Getopt_PERMUTE  =  1u, Cyc_Getopt_RETURN_IN_ORDER  =  2u}; static
-enum  Cyc_Getopt_ordering_tag Cyc_Getopt_ordering; static struct _tagged_string
-Cyc_Getopt_posixly_correct; struct Cyc_List_List{ void* hd; struct Cyc_List_List*
-tl; } ; extern unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
-18u]; extern unsigned char Cyc_List_Nth[ 8u]; extern unsigned int Cyc_String_strlen(
-struct _tagged_string s); extern int Cyc_String_strcmp( struct _tagged_string s1,
-struct _tagged_string s2); extern int Cyc_String_strncmp( struct _tagged_string
-s1, struct _tagged_string s2, unsigned int len); extern struct _tagged_string
-Cyc_String_strchr( struct _tagged_string s, unsigned char c); static int Cyc_Getopt_first_nonopt;
-static int Cyc_Getopt_last_nonopt; static struct _tagged_string Cyc_Getopt_nonoption_flags;
-static int Cyc_Getopt_nonoption_flags_len; static void Cyc_Getopt_exchange(
-struct _tagged_ptr0); static void Cyc_Getopt_exchange( struct _tagged_ptr0 argv){
-int bottom= Cyc_Getopt_first_nonopt; int middle= Cyc_Getopt_last_nonopt; int top=
-Cyc_Getopt_optind; struct _tagged_string tem; while( top > middle? middle >
-bottom: 0) { if( top - middle > middle - bottom){ int len= middle - bottom; int
-i; for( i= 0; i < len; i ++){ tem=*(( struct _tagged_string*(*)( struct
-_tagged_ptr0, unsigned int, unsigned int)) _check_unknown_subscript)( argv,
-sizeof( struct _tagged_string), bottom + i);*(( struct _tagged_string*(*)(
-struct _tagged_ptr0, unsigned int, unsigned int)) _check_unknown_subscript)(
-argv, sizeof( struct _tagged_string), bottom + i)=*(( struct _tagged_string*(*)(
-struct _tagged_ptr0, unsigned int, unsigned int)) _check_unknown_subscript)(
-argv, sizeof( struct _tagged_string),( top -( middle - bottom)) + i);*(( struct
-_tagged_string*(*)( struct _tagged_ptr0, unsigned int, unsigned int))
-_check_unknown_subscript)( argv, sizeof( struct _tagged_string),( top -( middle
-- bottom)) + i)= tem;} top -= len;} else{ int len= top - middle; int i; for( i=
-0; i < len; i ++){ tem=*(( struct _tagged_string*(*)( struct _tagged_ptr0,
-unsigned int, unsigned int)) _check_unknown_subscript)( argv, sizeof( struct
-_tagged_string), bottom + i);*(( struct _tagged_string*(*)( struct _tagged_ptr0,
-unsigned int, unsigned int)) _check_unknown_subscript)( argv, sizeof( struct
-_tagged_string), bottom + i)=*(( struct _tagged_string*(*)( struct _tagged_ptr0,
-unsigned int, unsigned int)) _check_unknown_subscript)( argv, sizeof( struct
-_tagged_string), middle + i);*(( struct _tagged_string*(*)( struct _tagged_ptr0,
-unsigned int, unsigned int)) _check_unknown_subscript)( argv, sizeof( struct
-_tagged_string), middle + i)= tem;} bottom += len;}} Cyc_Getopt_first_nonopt +=
-Cyc_Getopt_optind - Cyc_Getopt_last_nonopt; Cyc_Getopt_last_nonopt= Cyc_Getopt_optind;}
-static struct _tagged_string Cyc_Getopt__getopt_initialize( struct
-_tagged_string); static struct _tagged_string Cyc_Getopt__getopt_initialize(
-struct _tagged_string optstring){ Cyc_Getopt_first_nonopt=( Cyc_Getopt_last_nonopt=(
-Cyc_Getopt_optind= 1)); Cyc_Getopt_nextchar=({ struct _tagged_string _temp0={ 0,
-0, 0}; _temp0;}); Cyc_Getopt_posixly_correct= Cyc_Stdlib_getenv(({ unsigned char*
-_temp1=( unsigned char*)"POSIXLY_CORRECT"; struct _tagged_string _temp2; _temp2.curr=
-_temp1; _temp2.base= _temp1; _temp2.last_plus_one= _temp1 + 16; _temp2;})); if(*((
-const unsigned char*(*)( struct _tagged_string, unsigned int, unsigned int))
-_check_unknown_subscript)( optstring, sizeof( unsigned char), 0) =='-'){ Cyc_Getopt_ordering=
-Cyc_Getopt_RETURN_IN_ORDER;({ struct _tagged_string* _temp3=& optstring; ++
-_temp3->curr;* _temp3;});} else{ if(*(( const unsigned char*(*)( struct
-_tagged_string, unsigned int, unsigned int)) _check_unknown_subscript)(
-optstring, sizeof( unsigned char), 0) =='+'){ Cyc_Getopt_ordering= Cyc_Getopt_REQUIRE_ORDER;({
-struct _tagged_string* _temp4=& optstring; ++ _temp4->curr;* _temp4;});} else{
-if( Cyc_Getopt_posixly_correct.curr !=({ struct _tagged_string _temp5={ 0, 0, 0};
-_temp5;}).curr){ Cyc_Getopt_ordering= Cyc_Getopt_REQUIRE_ORDER;} else{ Cyc_Getopt_ordering=
-Cyc_Getopt_PERMUTE;}}} if( Cyc_Getopt_posixly_correct.curr ==({ struct
-_tagged_string _temp6={ 0, 0, 0}; _temp6;}).curr){ struct _tagged_string var;
+ __attribute__(( cdecl )) ; extern struct _tagged_arr Cyc_Stdlib_getenv( struct
+_tagged_arr); extern struct _tagged_arr Cyc_Getopt_optarg; extern int Cyc_Getopt_optind;
+extern int Cyc_Getopt_opterr; extern int Cyc_Getopt_optopt; struct Cyc_Getopt_option{
+struct _tagged_arr name; int has_arg; int* flag; int val; } ; extern int Cyc_Getopt_getopt(
+int argc, struct _tagged_arr argv, struct _tagged_arr shortopts); extern int Cyc_Getopt__getopt_internal(
+int argc, struct _tagged_arr argv, struct _tagged_arr shortopts, struct
+_tagged_arr longopts, int* longind, int long_only); struct _tagged_arr Cyc_Getopt_optarg={
+0u, 0u, 0u + 0u}; int Cyc_Getopt_optind= 0; static struct _tagged_arr Cyc_Getopt_nextchar;
+int Cyc_Getopt_opterr= 1; int Cyc_Getopt_optopt=( int)'?'; enum  Cyc_Getopt_ordering_tag{
+Cyc_Getopt_REQUIRE_ORDER  =  0u, Cyc_Getopt_PERMUTE  =  1u, Cyc_Getopt_RETURN_IN_ORDER
+ =  2u}; static enum  Cyc_Getopt_ordering_tag Cyc_Getopt_ordering; static struct
+_tagged_arr Cyc_Getopt_posixly_correct; struct Cyc_List_List{ void* hd; struct
+Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_empty[ 15u]; extern
+unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char Cyc_List_Nth[ 8u];
+extern unsigned int Cyc_String_strlen( struct _tagged_arr s); extern int Cyc_String_strcmp(
+struct _tagged_arr s1, struct _tagged_arr s2); extern int Cyc_String_strncmp(
+struct _tagged_arr s1, struct _tagged_arr s2, unsigned int len); extern struct
+_tagged_arr Cyc_String_strchr( struct _tagged_arr s, unsigned char c); static
+int Cyc_Getopt_first_nonopt; static int Cyc_Getopt_last_nonopt; static struct
+_tagged_arr Cyc_Getopt_nonoption_flags; static int Cyc_Getopt_nonoption_flags_len;
+static void Cyc_Getopt_exchange( struct _tagged_arr); static void Cyc_Getopt_exchange(
+struct _tagged_arr argv){ int bottom= Cyc_Getopt_first_nonopt; int middle= Cyc_Getopt_last_nonopt;
+int top= Cyc_Getopt_optind; struct _tagged_arr tem; while( top > middle? middle
+> bottom: 0) { if( top - middle > middle - bottom){ int len= middle - bottom;
+int i; for( i= 0; i < len; i ++){ tem=*(( struct _tagged_arr*)
+_check_unknown_subscript( argv, sizeof( struct _tagged_arr), bottom + i));*((
+struct _tagged_arr*) _check_unknown_subscript( argv, sizeof( struct _tagged_arr),
+bottom + i))=*(( struct _tagged_arr*) _check_unknown_subscript( argv, sizeof(
+struct _tagged_arr),( top -( middle - bottom)) + i));*(( struct _tagged_arr*)
+_check_unknown_subscript( argv, sizeof( struct _tagged_arr),( top -( middle -
+bottom)) + i))= tem;} top -= len;} else{ int len= top - middle; int i; for( i= 0;
+i < len; i ++){ tem=*(( struct _tagged_arr*) _check_unknown_subscript( argv,
+sizeof( struct _tagged_arr), bottom + i));*(( struct _tagged_arr*)
+_check_unknown_subscript( argv, sizeof( struct _tagged_arr), bottom + i))=*((
+struct _tagged_arr*) _check_unknown_subscript( argv, sizeof( struct _tagged_arr),
+middle + i));*(( struct _tagged_arr*) _check_unknown_subscript( argv, sizeof(
+struct _tagged_arr), middle + i))= tem;} bottom += len;}} Cyc_Getopt_first_nonopt
++= Cyc_Getopt_optind - Cyc_Getopt_last_nonopt; Cyc_Getopt_last_nonopt= Cyc_Getopt_optind;}
+static struct _tagged_arr Cyc_Getopt__getopt_initialize( struct _tagged_arr);
+static struct _tagged_arr Cyc_Getopt__getopt_initialize( struct _tagged_arr
+optstring){ Cyc_Getopt_first_nonopt=( Cyc_Getopt_last_nonopt=( Cyc_Getopt_optind=
+1)); Cyc_Getopt_nextchar= _tag_arr( 0u, sizeof( unsigned char), 0u); Cyc_Getopt_posixly_correct=
+Cyc_Stdlib_getenv( _tag_arr("POSIXLY_CORRECT", sizeof( unsigned char), 16u));
+if(*(( const unsigned char*) _check_unknown_subscript( optstring, sizeof(
+unsigned char), 0)) =='-'){ Cyc_Getopt_ordering= Cyc_Getopt_RETURN_IN_ORDER;
+_tagged_arr_inplace_plus(& optstring, sizeof( unsigned char), 1);} else{ if(*((
+const unsigned char*) _check_unknown_subscript( optstring, sizeof( unsigned char),
+0)) =='+'){ Cyc_Getopt_ordering= Cyc_Getopt_REQUIRE_ORDER;
+_tagged_arr_inplace_plus(& optstring, sizeof( unsigned char), 1);} else{ if( Cyc_Getopt_posixly_correct.curr
+!=( _tag_arr( 0u, sizeof( unsigned char), 0u)).curr){ Cyc_Getopt_ordering= Cyc_Getopt_REQUIRE_ORDER;}
+else{ Cyc_Getopt_ordering= Cyc_Getopt_PERMUTE;}}} if( Cyc_Getopt_posixly_correct.curr
+==( _tag_arr( 0u, sizeof( unsigned char), 0u)).curr){ struct _tagged_arr var;
 var= xprintf("_%d_GNU_nonoption_argv_flags_", 10); Cyc_Getopt_nonoption_flags=
-Cyc_Stdlib_getenv(( struct _tagged_string) var); if( Cyc_Getopt_nonoption_flags.curr
-==({ struct _tagged_string _temp7={ 0, 0, 0}; _temp7;}).curr){ Cyc_Getopt_nonoption_flags_len=
+Cyc_Stdlib_getenv(( struct _tagged_arr) var); if( Cyc_Getopt_nonoption_flags.curr
+==( _tag_arr( 0u, sizeof( unsigned char), 0u)).curr){ Cyc_Getopt_nonoption_flags_len=
 0;} else{ Cyc_Getopt_nonoption_flags_len=( int) Cyc_String_strlen(( struct
-_tagged_string) Cyc_Getopt_nonoption_flags);}} return optstring;} int Cyc_Getopt__getopt_internal(
-int argc, struct _tagged_ptr0 argv, struct _tagged_string optstring, struct
-_tagged_ptr1 longopts, int* longind, int long_only){ Cyc_Getopt_optarg=({ struct
-_tagged_string _temp8={ 0, 0, 0}; _temp8;}); if( Cyc_Getopt_optind == 0){
-optstring= Cyc_Getopt__getopt_initialize( optstring); Cyc_Getopt_optind= 1;} if(
-Cyc_Getopt_nextchar.curr ==({ struct _tagged_string _temp9={ 0, 0, 0}; _temp9;}).curr?
-1:({ struct _tagged_string _temp10= Cyc_Getopt_nextchar; unsigned char* _temp11=
-_temp10.curr; if( _temp10.base == 0? 1:( _temp11 < _temp10.base? 1: _temp11 >=
-_temp10.last_plus_one)){ _throw( Cyc_Null_Exception);}* _temp11;}) =='\000'){
+_tagged_arr) Cyc_Getopt_nonoption_flags);}} return optstring;} int Cyc_Getopt__getopt_internal(
+int argc, struct _tagged_arr argv, struct _tagged_arr optstring, struct
+_tagged_arr longopts, int* longind, int long_only){ Cyc_Getopt_optarg= _tag_arr(
+0u, sizeof( unsigned char), 0u); if( Cyc_Getopt_optind == 0){ optstring= Cyc_Getopt__getopt_initialize(
+optstring); Cyc_Getopt_optind= 1;} if( Cyc_Getopt_nextchar.curr ==( _tag_arr( 0u,
+sizeof( unsigned char), 0u)).curr? 1:*(( unsigned char*)
+_check_unknown_subscript( Cyc_Getopt_nextchar, sizeof( unsigned char), 0u)) =='\000'){
 if( Cyc_Getopt_last_nonopt > Cyc_Getopt_optind){ Cyc_Getopt_last_nonopt= Cyc_Getopt_optind;}
 if( Cyc_Getopt_first_nonopt > Cyc_Getopt_optind){ Cyc_Getopt_first_nonopt= Cyc_Getopt_optind;}
 if( Cyc_Getopt_ordering == Cyc_Getopt_PERMUTE){ if( Cyc_Getopt_first_nonopt !=
 Cyc_Getopt_last_nonopt? Cyc_Getopt_last_nonopt != Cyc_Getopt_optind: 0){ Cyc_Getopt_exchange((
-struct _tagged_ptr0) argv);} else{ if( Cyc_Getopt_last_nonopt != Cyc_Getopt_optind){
+struct _tagged_arr) argv);} else{ if( Cyc_Getopt_last_nonopt != Cyc_Getopt_optind){
 Cyc_Getopt_first_nonopt= Cyc_Getopt_optind;}} while( Cyc_Getopt_optind < argc?(*((
-unsigned char*(*)( struct _tagged_string, unsigned int, unsigned int))
-_check_unknown_subscript)(*(( struct _tagged_string*(*)( struct _tagged_ptr0,
-unsigned int, unsigned int)) _check_unknown_subscript)( argv, sizeof( struct
-_tagged_string), Cyc_Getopt_optind), sizeof( unsigned char), 0) !='-'? 1:*((
-unsigned char*(*)( struct _tagged_string, unsigned int, unsigned int))
-_check_unknown_subscript)(*(( struct _tagged_string*(*)( struct _tagged_ptr0,
-unsigned int, unsigned int)) _check_unknown_subscript)( argv, sizeof( struct
-_tagged_string), Cyc_Getopt_optind), sizeof( unsigned char), 1) =='\000')? 1:(
-Cyc_Getopt_optind < Cyc_Getopt_nonoption_flags_len?*(( unsigned char*(*)( struct
-_tagged_string, unsigned int, unsigned int)) _check_unknown_subscript)( Cyc_Getopt_nonoption_flags,
-sizeof( unsigned char), Cyc_Getopt_optind) =='1': 0): 0) { Cyc_Getopt_optind ++;}
-Cyc_Getopt_last_nonopt= Cyc_Getopt_optind;} if( Cyc_Getopt_optind != argc? ! Cyc_String_strcmp((
-struct _tagged_string)*(( struct _tagged_string*(*)( struct _tagged_ptr0,
-unsigned int, unsigned int)) _check_unknown_subscript)( argv, sizeof( struct
-_tagged_string), Cyc_Getopt_optind),({ unsigned char* _temp12=( unsigned char*)"--";
-struct _tagged_string _temp13; _temp13.curr= _temp12; _temp13.base= _temp12;
-_temp13.last_plus_one= _temp12 + 3; _temp13;})): 0){ Cyc_Getopt_optind ++; if(
-Cyc_Getopt_first_nonopt != Cyc_Getopt_last_nonopt? Cyc_Getopt_last_nonopt != Cyc_Getopt_optind:
-0){ Cyc_Getopt_exchange(( struct _tagged_ptr0) argv);} else{ if( Cyc_Getopt_first_nonopt
-== Cyc_Getopt_last_nonopt){ Cyc_Getopt_first_nonopt= Cyc_Getopt_optind;}} Cyc_Getopt_last_nonopt=
-argc; Cyc_Getopt_optind= argc;} if( Cyc_Getopt_optind == argc){ if( Cyc_Getopt_first_nonopt
-!= Cyc_Getopt_last_nonopt){ Cyc_Getopt_optind= Cyc_Getopt_first_nonopt;} return
-- 1;} if((*(( unsigned char*(*)( struct _tagged_string, unsigned int,
-unsigned int)) _check_unknown_subscript)(*(( struct _tagged_string*(*)( struct
-_tagged_ptr0, unsigned int, unsigned int)) _check_unknown_subscript)( argv,
-sizeof( struct _tagged_string), Cyc_Getopt_optind), sizeof( unsigned char), 0)
-!='-'? 1:*(( unsigned char*(*)( struct _tagged_string, unsigned int,
-unsigned int)) _check_unknown_subscript)(*(( struct _tagged_string*(*)( struct
-_tagged_ptr0, unsigned int, unsigned int)) _check_unknown_subscript)( argv,
-sizeof( struct _tagged_string), Cyc_Getopt_optind), sizeof( unsigned char), 1)
-=='\000')? 1:( Cyc_Getopt_optind < Cyc_Getopt_nonoption_flags_len?*((
-unsigned char*(*)( struct _tagged_string, unsigned int, unsigned int))
-_check_unknown_subscript)( Cyc_Getopt_nonoption_flags, sizeof( unsigned char),
-Cyc_Getopt_optind) =='1': 0)){ if( Cyc_Getopt_ordering == Cyc_Getopt_REQUIRE_ORDER){
-return - 1;} Cyc_Getopt_optarg=*(( struct _tagged_string*(*)( struct
-_tagged_ptr0, unsigned int, unsigned int)) _check_unknown_subscript)( argv,
-sizeof( struct _tagged_string), Cyc_Getopt_optind ++); return 1;} Cyc_Getopt_nextchar=({
-struct _tagged_string _temp16=({ struct _tagged_string _temp14=*(( struct
-_tagged_string*(*)( struct _tagged_ptr0, unsigned int, unsigned int))
-_check_unknown_subscript)( argv, sizeof( struct _tagged_string), Cyc_Getopt_optind);
-_temp14.curr += 1; _temp14;}); _temp16.curr +=( longopts.curr !=(( struct
-_tagged_ptr1)({ struct _tagged_ptr1 _temp15={ 0, 0, 0}; _temp15;})).curr?*((
-unsigned char*(*)( struct _tagged_string, unsigned int, unsigned int))
-_check_unknown_subscript)(*(( struct _tagged_string*(*)( struct _tagged_ptr0,
-unsigned int, unsigned int)) _check_unknown_subscript)( argv, sizeof( struct
-_tagged_string), Cyc_Getopt_optind), sizeof( unsigned char), 1) =='-': 0)? 1: 0;
-_temp16;});} if( longopts.curr !=(( struct _tagged_ptr1)({ struct _tagged_ptr1
-_temp17={ 0, 0, 0}; _temp17;})).curr?*(( unsigned char*(*)( struct
-_tagged_string, unsigned int, unsigned int)) _check_unknown_subscript)(*((
-struct _tagged_string*(*)( struct _tagged_ptr0, unsigned int, unsigned int))
-_check_unknown_subscript)( argv, sizeof( struct _tagged_string), Cyc_Getopt_optind),
-sizeof( unsigned char), 1) =='-'? 1:( long_only?( int)*(( unsigned char*(*)(
-struct _tagged_string, unsigned int, unsigned int)) _check_unknown_subscript)(*((
-struct _tagged_string*(*)( struct _tagged_ptr0, unsigned int, unsigned int))
-_check_unknown_subscript)( argv, sizeof( struct _tagged_string), Cyc_Getopt_optind),
-sizeof( unsigned char), 2)? 1: !(( unsigned int)( Cyc_String_strchr( optstring,*((
-unsigned char*(*)( struct _tagged_string, unsigned int, unsigned int))
-_check_unknown_subscript)(*(( struct _tagged_string*(*)( struct _tagged_ptr0,
-unsigned int, unsigned int)) _check_unknown_subscript)( argv, sizeof( struct
-_tagged_string), Cyc_Getopt_optind), sizeof( unsigned char), 1))).curr): 0): 0){
-struct _tagged_string nameend; struct _tagged_ptr1 p; struct _tagged_ptr1 pfound=(
-struct _tagged_ptr1)({ struct _tagged_ptr1 _temp51={ 0, 0, 0}; _temp51;}); int
-exact= 0; int ambig= 0; int indfound= 0; int option_index; for( nameend= Cyc_Getopt_nextchar;(
-int)({ struct _tagged_string _temp18= nameend; unsigned char* _temp19= _temp18.curr;
-if( _temp18.base == 0? 1:( _temp19 < _temp18.base? 1: _temp19 >= _temp18.last_plus_one)){
-_throw( Cyc_Null_Exception);}* _temp19;})?({ struct _tagged_string _temp20=
-nameend; unsigned char* _temp21= _temp20.curr; if( _temp20.base == 0? 1:(
-_temp21 < _temp20.base? 1: _temp21 >= _temp20.last_plus_one)){ _throw( Cyc_Null_Exception);}*
-_temp21;}) !='=': 0;({ struct _tagged_string* _temp22=& nameend; struct
-_tagged_string _temp23=* _temp22; _temp22->curr ++; _temp23;})){;} for(( p=
-longopts, option_index= 0);( unsigned int)(((( const struct Cyc_Getopt_option*(*)(
-struct _tagged_ptr1, unsigned int, unsigned int)) _check_unknown_subscript)( p,
-sizeof( struct Cyc_Getopt_option), 0u))->name).curr;(({ struct _tagged_ptr1*
-_temp24=& p; struct _tagged_ptr1 _temp25=* _temp24; _temp24->curr ++; _temp25;}),
-option_index ++)){ if( ! Cyc_String_strncmp(((( const struct Cyc_Getopt_option*(*)(
-struct _tagged_ptr1, unsigned int, unsigned int)) _check_unknown_subscript)( p,
-sizeof( struct Cyc_Getopt_option), 0u))->name,( struct _tagged_string) Cyc_Getopt_nextchar,(
-unsigned int)( nameend.curr - Cyc_Getopt_nextchar.curr))){ if( nameend.curr -
-Cyc_Getopt_nextchar.curr == Cyc_String_strlen(((( const struct Cyc_Getopt_option*(*)(
-struct _tagged_ptr1, unsigned int, unsigned int)) _check_unknown_subscript)( p,
-sizeof( struct Cyc_Getopt_option), 0u))->name)){ pfound= p; indfound=
-option_index; exact= 1; break;} else{ if( pfound.curr ==(( struct _tagged_ptr1)({
-struct _tagged_ptr1 _temp26={ 0, 0, 0}; _temp26;})).curr){ pfound= p; indfound=
-option_index;} else{ ambig= 1;}}}} if( ambig? ! exact: 0){ if( Cyc_Getopt_opterr){({
-struct _tagged_string _temp27=( struct _tagged_string)*(( struct _tagged_string*(*)(
-struct _tagged_ptr0, unsigned int, unsigned int)) _check_unknown_subscript)(
-argv, sizeof( struct _tagged_string), 0); struct _tagged_string _temp28=( struct
-_tagged_string)*(( struct _tagged_string*(*)( struct _tagged_ptr0, unsigned int,
-unsigned int)) _check_unknown_subscript)( argv, sizeof( struct _tagged_string),
-Cyc_Getopt_optind); fprintf( sfile_to_file( Cyc_Stdio_stderr),"%.*s: option `%.*s' is ambiguous\n",
-_temp27.last_plus_one - _temp27.curr, _temp27.curr, _temp28.last_plus_one -
-_temp28.curr, _temp28.curr);});} Cyc_Getopt_nextchar.curr +=( int) Cyc_String_strlen((
-struct _tagged_string) Cyc_Getopt_nextchar); Cyc_Getopt_optind ++; Cyc_Getopt_optopt=
-0; return( int)'?';} if( pfound.curr !=(( struct _tagged_ptr1)({ struct
-_tagged_ptr1 _temp29={ 0, 0, 0}; _temp29;})).curr){ option_index= indfound; Cyc_Getopt_optind
-++; if(( int)({ struct _tagged_string _temp30= nameend; unsigned char* _temp31=
-_temp30.curr; if( _temp30.base == 0? 1:( _temp31 < _temp30.base? 1: _temp31 >=
-_temp30.last_plus_one)){ _throw( Cyc_Null_Exception);}* _temp31;})){ if((((
-const struct Cyc_Getopt_option*(*)( struct _tagged_ptr1, unsigned int,
-unsigned int)) _check_unknown_subscript)( pfound, sizeof( struct Cyc_Getopt_option),
-0u))->has_arg){ Cyc_Getopt_optarg=({ struct _tagged_string _temp32= nameend;
-_temp32.curr += 1; _temp32;});} else{ if( Cyc_Getopt_opterr){ if(*((
-unsigned char*(*)( struct _tagged_string, unsigned int, unsigned int))
-_check_unknown_subscript)(*(( struct _tagged_string*(*)( struct _tagged_ptr0,
-unsigned int, unsigned int)) _check_unknown_subscript)( argv, sizeof( struct
-_tagged_string), Cyc_Getopt_optind - 1), sizeof( unsigned char), 1) =='-'){({
-struct _tagged_string _temp33=( struct _tagged_string)*(( struct _tagged_string*(*)(
-struct _tagged_ptr0, unsigned int, unsigned int)) _check_unknown_subscript)(
-argv, sizeof( struct _tagged_string), 0); struct _tagged_string _temp34=(((
-const struct Cyc_Getopt_option*(*)( struct _tagged_ptr1, unsigned int,
-unsigned int)) _check_unknown_subscript)( pfound, sizeof( struct Cyc_Getopt_option),
-0u))->name; fprintf( sfile_to_file( Cyc_Stdio_stderr),"%.*s: option `--%.*s' doesn't allow an argument\n",
-_temp33.last_plus_one - _temp33.curr, _temp33.curr, _temp34.last_plus_one -
-_temp34.curr, _temp34.curr);});} else{({ struct _tagged_string _temp35=( struct
-_tagged_string)*(( struct _tagged_string*(*)( struct _tagged_ptr0, unsigned int,
-unsigned int)) _check_unknown_subscript)( argv, sizeof( struct _tagged_string),
-0); int _temp36=( int)*(( unsigned char*(*)( struct _tagged_string, unsigned int,
-unsigned int)) _check_unknown_subscript)(*(( struct _tagged_string*(*)( struct
-_tagged_ptr0, unsigned int, unsigned int)) _check_unknown_subscript)( argv,
-sizeof( struct _tagged_string), Cyc_Getopt_optind - 1), sizeof( unsigned char),
-0); struct _tagged_string _temp37=((( const struct Cyc_Getopt_option*(*)( struct
-_tagged_ptr1, unsigned int, unsigned int)) _check_unknown_subscript)( pfound,
-sizeof( struct Cyc_Getopt_option), 0u))->name; fprintf( sfile_to_file( Cyc_Stdio_stderr),"%.*s: option `%c%.*s' doesn't allow an argument\n",
-_temp35.last_plus_one - _temp35.curr, _temp35.curr, _temp36, _temp37.last_plus_one
-- _temp37.curr, _temp37.curr);});}} Cyc_Getopt_nextchar.curr +=( int) Cyc_String_strlen((
-struct _tagged_string) Cyc_Getopt_nextchar); Cyc_Getopt_optopt=((( const struct
-Cyc_Getopt_option*(*)( struct _tagged_ptr1, unsigned int, unsigned int))
-_check_unknown_subscript)( pfound, sizeof( struct Cyc_Getopt_option), 0u))->val;
-return( int)'?';}} else{ if(((( const struct Cyc_Getopt_option*(*)( struct
-_tagged_ptr1, unsigned int, unsigned int)) _check_unknown_subscript)( pfound,
-sizeof( struct Cyc_Getopt_option), 0u))->has_arg == 1){ if( Cyc_Getopt_optind <
-argc){ Cyc_Getopt_optarg=*(( struct _tagged_string*(*)( struct _tagged_ptr0,
-unsigned int, unsigned int)) _check_unknown_subscript)( argv, sizeof( struct
-_tagged_string), Cyc_Getopt_optind ++);} else{ if( Cyc_Getopt_opterr){({ struct
-_tagged_string _temp38=( struct _tagged_string)*(( struct _tagged_string*(*)(
-struct _tagged_ptr0, unsigned int, unsigned int)) _check_unknown_subscript)(
-argv, sizeof( struct _tagged_string), 0); struct _tagged_string _temp39=( struct
-_tagged_string)*(( struct _tagged_string*(*)( struct _tagged_ptr0, unsigned int,
-unsigned int)) _check_unknown_subscript)( argv, sizeof( struct _tagged_string),
-Cyc_Getopt_optind - 1); fprintf( sfile_to_file( Cyc_Stdio_stderr),"%.*s: option `%.*s' requires an argument\n",
-_temp38.last_plus_one - _temp38.curr, _temp38.curr, _temp39.last_plus_one -
-_temp39.curr, _temp39.curr);});} Cyc_Getopt_nextchar.curr +=( int) Cyc_String_strlen((
-struct _tagged_string) Cyc_Getopt_nextchar); Cyc_Getopt_optopt=((( const struct
-Cyc_Getopt_option*(*)( struct _tagged_ptr1, unsigned int, unsigned int))
-_check_unknown_subscript)( pfound, sizeof( struct Cyc_Getopt_option), 0u))->val;
-return( int)(*(( const unsigned char*(*)( struct _tagged_string, unsigned int,
-unsigned int)) _check_unknown_subscript)( optstring, sizeof( unsigned char), 0)
-==':'?':':'?');}}} Cyc_Getopt_nextchar.curr +=( int) Cyc_String_strlen(( struct
-_tagged_string) Cyc_Getopt_nextchar); if( longind != 0){*(( int*) _check_null(
-longind))= option_index;} if(( unsigned int)((( const struct Cyc_Getopt_option*(*)(
-struct _tagged_ptr1, unsigned int, unsigned int)) _check_unknown_subscript)(
-pfound, sizeof( struct Cyc_Getopt_option), 0u))->flag){*(( int*) _check_null((((
-const struct Cyc_Getopt_option*(*)( struct _tagged_ptr1, unsigned int,
-unsigned int)) _check_unknown_subscript)( pfound, sizeof( struct Cyc_Getopt_option),
-0u))->flag))=((( const struct Cyc_Getopt_option*(*)( struct _tagged_ptr1,
-unsigned int, unsigned int)) _check_unknown_subscript)( pfound, sizeof( struct
-Cyc_Getopt_option), 0u))->val; return 0;} return((( const struct Cyc_Getopt_option*(*)(
-struct _tagged_ptr1, unsigned int, unsigned int)) _check_unknown_subscript)(
+unsigned char*) _check_unknown_subscript(*(( struct _tagged_arr*)
+_check_unknown_subscript( argv, sizeof( struct _tagged_arr), Cyc_Getopt_optind)),
+sizeof( unsigned char), 0)) !='-'? 1:*(( unsigned char*)
+_check_unknown_subscript(*(( struct _tagged_arr*) _check_unknown_subscript( argv,
+sizeof( struct _tagged_arr), Cyc_Getopt_optind)), sizeof( unsigned char), 1)) =='\000')?
+1:( Cyc_Getopt_optind < Cyc_Getopt_nonoption_flags_len?*(( unsigned char*)
+_check_unknown_subscript( Cyc_Getopt_nonoption_flags, sizeof( unsigned char),
+Cyc_Getopt_optind)) =='1': 0): 0) { Cyc_Getopt_optind ++;} Cyc_Getopt_last_nonopt=
+Cyc_Getopt_optind;} if( Cyc_Getopt_optind != argc? ! Cyc_String_strcmp(( struct
+_tagged_arr)*(( struct _tagged_arr*) _check_unknown_subscript( argv, sizeof(
+struct _tagged_arr), Cyc_Getopt_optind)), _tag_arr("--", sizeof( unsigned char),
+3u)): 0){ Cyc_Getopt_optind ++; if( Cyc_Getopt_first_nonopt != Cyc_Getopt_last_nonopt?
+Cyc_Getopt_last_nonopt != Cyc_Getopt_optind: 0){ Cyc_Getopt_exchange(( struct
+_tagged_arr) argv);} else{ if( Cyc_Getopt_first_nonopt == Cyc_Getopt_last_nonopt){
+Cyc_Getopt_first_nonopt= Cyc_Getopt_optind;}} Cyc_Getopt_last_nonopt= argc; Cyc_Getopt_optind=
+argc;} if( Cyc_Getopt_optind == argc){ if( Cyc_Getopt_first_nonopt != Cyc_Getopt_last_nonopt){
+Cyc_Getopt_optind= Cyc_Getopt_first_nonopt;} return - 1;} if((*(( unsigned char*)
+_check_unknown_subscript(*(( struct _tagged_arr*) _check_unknown_subscript( argv,
+sizeof( struct _tagged_arr), Cyc_Getopt_optind)), sizeof( unsigned char), 0)) !='-'?
+1:*(( unsigned char*) _check_unknown_subscript(*(( struct _tagged_arr*)
+_check_unknown_subscript( argv, sizeof( struct _tagged_arr), Cyc_Getopt_optind)),
+sizeof( unsigned char), 1)) =='\000')? 1:( Cyc_Getopt_optind < Cyc_Getopt_nonoption_flags_len?*((
+unsigned char*) _check_unknown_subscript( Cyc_Getopt_nonoption_flags, sizeof(
+unsigned char), Cyc_Getopt_optind)) =='1': 0)){ if( Cyc_Getopt_ordering == Cyc_Getopt_REQUIRE_ORDER){
+return - 1;} Cyc_Getopt_optarg=*(( struct _tagged_arr*) _check_unknown_subscript(
+argv, sizeof( struct _tagged_arr), Cyc_Getopt_optind ++)); return 1;} Cyc_Getopt_nextchar=
+_tagged_arr_plus( _tagged_arr_plus(*(( struct _tagged_arr*)
+_check_unknown_subscript( argv, sizeof( struct _tagged_arr), Cyc_Getopt_optind)),
+sizeof( unsigned char), 1), sizeof( unsigned char),( longopts.curr !=(( struct
+_tagged_arr) _tag_arr( 0u, sizeof( struct Cyc_Getopt_option), 0u)).curr?*((
+unsigned char*) _check_unknown_subscript(*(( struct _tagged_arr*)
+_check_unknown_subscript( argv, sizeof( struct _tagged_arr), Cyc_Getopt_optind)),
+sizeof( unsigned char), 1)) =='-': 0)? 1: 0);} if( longopts.curr !=(( struct
+_tagged_arr) _tag_arr( 0u, sizeof( struct Cyc_Getopt_option), 0u)).curr?*((
+unsigned char*) _check_unknown_subscript(*(( struct _tagged_arr*)
+_check_unknown_subscript( argv, sizeof( struct _tagged_arr), Cyc_Getopt_optind)),
+sizeof( unsigned char), 1)) =='-'? 1:( long_only?( int)*(( unsigned char*)
+_check_unknown_subscript(*(( struct _tagged_arr*) _check_unknown_subscript( argv,
+sizeof( struct _tagged_arr), Cyc_Getopt_optind)), sizeof( unsigned char), 2))? 1:
+!(( unsigned int)( Cyc_String_strchr( optstring,*(( unsigned char*)
+_check_unknown_subscript(*(( struct _tagged_arr*) _check_unknown_subscript( argv,
+sizeof( struct _tagged_arr), Cyc_Getopt_optind)), sizeof( unsigned char), 1)))).curr):
+0): 0){ struct _tagged_arr nameend; struct _tagged_arr p; struct _tagged_arr
+pfound=( struct _tagged_arr) _tag_arr( 0u, sizeof( struct Cyc_Getopt_option), 0u);
+int exact= 0; int ambig= 0; int indfound= 0; int option_index; for( nameend= Cyc_Getopt_nextchar;(
+int)*(( unsigned char*) _check_unknown_subscript( nameend, sizeof( unsigned char),
+0u))?*(( unsigned char*) _check_unknown_subscript( nameend, sizeof(
+unsigned char), 0u)) !='=': 0; _tagged_arr_inplace_plus_post(& nameend, sizeof(
+unsigned char), 1)){;} for(( p= longopts, option_index= 0);( unsigned int)(((
+const struct Cyc_Getopt_option*) _check_unknown_subscript( p, sizeof( struct Cyc_Getopt_option),
+0u))->name).curr;( _tagged_arr_inplace_plus_post(& p, sizeof( struct Cyc_Getopt_option),
+1), option_index ++)){ if( ! Cyc_String_strncmp((( const struct Cyc_Getopt_option*)
+_check_unknown_subscript( p, sizeof( struct Cyc_Getopt_option), 0u))->name,(
+struct _tagged_arr) Cyc_Getopt_nextchar,( unsigned int)( nameend.curr - Cyc_Getopt_nextchar.curr))){
+if( nameend.curr - Cyc_Getopt_nextchar.curr == Cyc_String_strlen((( const struct
+Cyc_Getopt_option*) _check_unknown_subscript( p, sizeof( struct Cyc_Getopt_option),
+0u))->name)){ pfound= p; indfound= option_index; exact= 1; break;} else{ if(
+pfound.curr ==(( struct _tagged_arr) _tag_arr( 0u, sizeof( struct Cyc_Getopt_option),
+0u)).curr){ pfound= p; indfound= option_index;} else{ ambig= 1;}}}} if( ambig? !
+exact: 0){ if( Cyc_Getopt_opterr){({ struct _tagged_arr _temp0=( struct
+_tagged_arr)*(( struct _tagged_arr*) _check_unknown_subscript( argv, sizeof(
+struct _tagged_arr), 0)); struct _tagged_arr _temp1=( struct _tagged_arr)*((
+struct _tagged_arr*) _check_unknown_subscript( argv, sizeof( struct _tagged_arr),
+Cyc_Getopt_optind)); fprintf( _sfile_to_file( Cyc_Stdio_stderr),"%.*s: option `%.*s' is ambiguous\n",
+_temp0.last_plus_one - _temp0.curr, _temp0.curr, _temp1.last_plus_one - _temp1.curr,
+_temp1.curr);});} _tagged_arr_inplace_plus(& Cyc_Getopt_nextchar, sizeof(
+unsigned char),( int) Cyc_String_strlen(( struct _tagged_arr) Cyc_Getopt_nextchar));
+Cyc_Getopt_optind ++; Cyc_Getopt_optopt= 0; return( int)'?';} if( pfound.curr !=((
+struct _tagged_arr) _tag_arr( 0u, sizeof( struct Cyc_Getopt_option), 0u)).curr){
+option_index= indfound; Cyc_Getopt_optind ++; if(( int)*(( unsigned char*)
+_check_unknown_subscript( nameend, sizeof( unsigned char), 0u))){ if((( const
+struct Cyc_Getopt_option*) _check_unknown_subscript( pfound, sizeof( struct Cyc_Getopt_option),
+0u))->has_arg){ Cyc_Getopt_optarg= _tagged_arr_plus( nameend, sizeof(
+unsigned char), 1);} else{ if( Cyc_Getopt_opterr){ if(*(( unsigned char*)
+_check_unknown_subscript(*(( struct _tagged_arr*) _check_unknown_subscript( argv,
+sizeof( struct _tagged_arr), Cyc_Getopt_optind - 1)), sizeof( unsigned char), 1))
+=='-'){({ struct _tagged_arr _temp2=( struct _tagged_arr)*(( struct _tagged_arr*)
+_check_unknown_subscript( argv, sizeof( struct _tagged_arr), 0)); struct
+_tagged_arr _temp3=(( const struct Cyc_Getopt_option*) _check_unknown_subscript(
+pfound, sizeof( struct Cyc_Getopt_option), 0u))->name; fprintf( _sfile_to_file(
+Cyc_Stdio_stderr),"%.*s: option `--%.*s' doesn't allow an argument\n", _temp2.last_plus_one
+- _temp2.curr, _temp2.curr, _temp3.last_plus_one - _temp3.curr, _temp3.curr);});}
+else{({ struct _tagged_arr _temp4=( struct _tagged_arr)*(( struct _tagged_arr*)
+_check_unknown_subscript( argv, sizeof( struct _tagged_arr), 0)); int _temp5=(
+int)*(( unsigned char*) _check_unknown_subscript(*(( struct _tagged_arr*)
+_check_unknown_subscript( argv, sizeof( struct _tagged_arr), Cyc_Getopt_optind -
+1)), sizeof( unsigned char), 0)); struct _tagged_arr _temp6=(( const struct Cyc_Getopt_option*)
+_check_unknown_subscript( pfound, sizeof( struct Cyc_Getopt_option), 0u))->name;
+fprintf( _sfile_to_file( Cyc_Stdio_stderr),"%.*s: option `%c%.*s' doesn't allow an argument\n",
+_temp4.last_plus_one - _temp4.curr, _temp4.curr, _temp5, _temp6.last_plus_one -
+_temp6.curr, _temp6.curr);});}} _tagged_arr_inplace_plus(& Cyc_Getopt_nextchar,
+sizeof( unsigned char),( int) Cyc_String_strlen(( struct _tagged_arr) Cyc_Getopt_nextchar));
+Cyc_Getopt_optopt=(( const struct Cyc_Getopt_option*) _check_unknown_subscript(
+pfound, sizeof( struct Cyc_Getopt_option), 0u))->val; return( int)'?';}} else{
+if((( const struct Cyc_Getopt_option*) _check_unknown_subscript( pfound, sizeof(
+struct Cyc_Getopt_option), 0u))->has_arg == 1){ if( Cyc_Getopt_optind < argc){
+Cyc_Getopt_optarg=*(( struct _tagged_arr*) _check_unknown_subscript( argv,
+sizeof( struct _tagged_arr), Cyc_Getopt_optind ++));} else{ if( Cyc_Getopt_opterr){({
+struct _tagged_arr _temp7=( struct _tagged_arr)*(( struct _tagged_arr*)
+_check_unknown_subscript( argv, sizeof( struct _tagged_arr), 0)); struct
+_tagged_arr _temp8=( struct _tagged_arr)*(( struct _tagged_arr*)
+_check_unknown_subscript( argv, sizeof( struct _tagged_arr), Cyc_Getopt_optind -
+1)); fprintf( _sfile_to_file( Cyc_Stdio_stderr),"%.*s: option `%.*s' requires an argument\n",
+_temp7.last_plus_one - _temp7.curr, _temp7.curr, _temp8.last_plus_one - _temp8.curr,
+_temp8.curr);});} _tagged_arr_inplace_plus(& Cyc_Getopt_nextchar, sizeof(
+unsigned char),( int) Cyc_String_strlen(( struct _tagged_arr) Cyc_Getopt_nextchar));
+Cyc_Getopt_optopt=(( const struct Cyc_Getopt_option*) _check_unknown_subscript(
+pfound, sizeof( struct Cyc_Getopt_option), 0u))->val; return( int)(*(( const
+unsigned char*) _check_unknown_subscript( optstring, sizeof( unsigned char), 0))
+==':'?':':'?');}}} _tagged_arr_inplace_plus(& Cyc_Getopt_nextchar, sizeof(
+unsigned char),( int) Cyc_String_strlen(( struct _tagged_arr) Cyc_Getopt_nextchar));
+if( longind != 0){*(( int*) _check_null( longind))= option_index;} if((
+unsigned int)(( const struct Cyc_Getopt_option*) _check_unknown_subscript(
+pfound, sizeof( struct Cyc_Getopt_option), 0u))->flag){*(( int*) _check_null(((
+const struct Cyc_Getopt_option*) _check_unknown_subscript( pfound, sizeof(
+struct Cyc_Getopt_option), 0u))->flag))=(( const struct Cyc_Getopt_option*)
+_check_unknown_subscript( pfound, sizeof( struct Cyc_Getopt_option), 0u))->val;
+return 0;} return(( const struct Cyc_Getopt_option*) _check_unknown_subscript(
 pfound, sizeof( struct Cyc_Getopt_option), 0u))->val;} if(( ! long_only? 1:*((
-unsigned char*(*)( struct _tagged_string, unsigned int, unsigned int))
-_check_unknown_subscript)(*(( struct _tagged_string*(*)( struct _tagged_ptr0,
-unsigned int, unsigned int)) _check_unknown_subscript)( argv, sizeof( struct
-_tagged_string), Cyc_Getopt_optind), sizeof( unsigned char), 1) =='-')? 1:( Cyc_String_strchr(
-optstring,({ struct _tagged_string _temp40= Cyc_Getopt_nextchar; unsigned char*
-_temp41= _temp40.curr; if( _temp40.base == 0? 1:( _temp41 < _temp40.base? 1:
-_temp41 >= _temp40.last_plus_one)){ _throw( Cyc_Null_Exception);}* _temp41;}))).curr
-==(( struct _tagged_string)({ struct _tagged_string _temp42={ 0, 0, 0}; _temp42;})).curr){
-if( Cyc_Getopt_opterr){ if(*(( unsigned char*(*)( struct _tagged_string,
-unsigned int, unsigned int)) _check_unknown_subscript)(*(( struct _tagged_string*(*)(
-struct _tagged_ptr0, unsigned int, unsigned int)) _check_unknown_subscript)(
-argv, sizeof( struct _tagged_string), Cyc_Getopt_optind), sizeof( unsigned char),
-1) =='-'){({ struct _tagged_string _temp43=( struct _tagged_string)*(( struct
-_tagged_string*(*)( struct _tagged_ptr0, unsigned int, unsigned int))
-_check_unknown_subscript)( argv, sizeof( struct _tagged_string), 0); struct
-_tagged_string _temp44=( struct _tagged_string) Cyc_Getopt_nextchar; fprintf(
-sfile_to_file( Cyc_Stdio_stderr),"%.*s: unrecognized option `--%.*s'\n", _temp43.last_plus_one
-- _temp43.curr, _temp43.curr, _temp44.last_plus_one - _temp44.curr, _temp44.curr);});}
-else{({ struct _tagged_string _temp45=( struct _tagged_string)*(( struct
-_tagged_string*(*)( struct _tagged_ptr0, unsigned int, unsigned int))
-_check_unknown_subscript)( argv, sizeof( struct _tagged_string), 0); int _temp46=(
-int)*(( unsigned char*(*)( struct _tagged_string, unsigned int, unsigned int))
-_check_unknown_subscript)(*(( struct _tagged_string*(*)( struct _tagged_ptr0,
-unsigned int, unsigned int)) _check_unknown_subscript)( argv, sizeof( struct
-_tagged_string), Cyc_Getopt_optind), sizeof( unsigned char), 0); struct
-_tagged_string _temp47=( struct _tagged_string) Cyc_Getopt_nextchar; fprintf(
-sfile_to_file( Cyc_Stdio_stderr),"%.*s: unrecognized option `%c%.*s'\n", _temp45.last_plus_one
-- _temp45.curr, _temp45.curr, _temp46, _temp47.last_plus_one - _temp47.curr,
-_temp47.curr);});}} Cyc_Getopt_nextchar=({ unsigned char* _temp49=({
-unsigned char* _temp48=( unsigned char*) GC_malloc_atomic( sizeof( unsigned char));
-_temp48[ 0]='\000'; _temp48;}); struct _tagged_string _temp50; _temp50.curr=
-_temp49; _temp50.base= _temp49; _temp50.last_plus_one= _temp49 + 1; _temp50;});
-Cyc_Getopt_optind ++; Cyc_Getopt_optopt= 0; return( int)'?';}}{ unsigned char c=({
-struct _tagged_string _temp70=({ struct _tagged_string* _temp68=& Cyc_Getopt_nextchar;
-struct _tagged_string _temp69=* _temp68; _temp68->curr ++; _temp69;});
-unsigned char* _temp71= _temp70.curr; if( _temp70.base == 0? 1:( _temp71 <
-_temp70.base? 1: _temp71 >= _temp70.last_plus_one)){ _throw( Cyc_Null_Exception);}*
-_temp71;}); struct _tagged_string temp= Cyc_String_strchr( optstring, c); if(({
-struct _tagged_string _temp52= Cyc_Getopt_nextchar; unsigned char* _temp53=
-_temp52.curr; if( _temp52.base == 0? 1:( _temp53 < _temp52.base? 1: _temp53 >=
-_temp52.last_plus_one)){ _throw( Cyc_Null_Exception);}* _temp53;}) =='\000'){ ++
-Cyc_Getopt_optind;} if( temp.curr ==(( struct _tagged_string)({ struct
-_tagged_string _temp54={ 0, 0, 0}; _temp54;})).curr? 1: c ==':'){ if( Cyc_Getopt_opterr){
-if(( unsigned int) Cyc_Getopt_posixly_correct.curr){({ struct _tagged_string
-_temp55=( struct _tagged_string)*(( struct _tagged_string*(*)( struct
-_tagged_ptr0, unsigned int, unsigned int)) _check_unknown_subscript)( argv,
-sizeof( struct _tagged_string), 0); int _temp56=( int) c; fprintf( sfile_to_file(
-Cyc_Stdio_stderr),"%.*s: illegal option -- %c\n", _temp55.last_plus_one -
-_temp55.curr, _temp55.curr, _temp56);});} else{({ struct _tagged_string _temp57=(
-struct _tagged_string)*(( struct _tagged_string*(*)( struct _tagged_ptr0,
-unsigned int, unsigned int)) _check_unknown_subscript)( argv, sizeof( struct
-_tagged_string), 0); int _temp58=( int) c; fprintf( sfile_to_file( Cyc_Stdio_stderr),"%.*s: invalid option -- %c\n",
-_temp57.last_plus_one - _temp57.curr, _temp57.curr, _temp58);});}} Cyc_Getopt_optopt=(
-int) c; return( int)'?';} if(*(( const unsigned char*(*)( struct _tagged_string,
-unsigned int, unsigned int)) _check_unknown_subscript)( temp, sizeof(
-unsigned char), 1) ==':'){ if(*(( const unsigned char*(*)( struct _tagged_string,
-unsigned int, unsigned int)) _check_unknown_subscript)( temp, sizeof(
-unsigned char), 2) ==':'){ if(({ struct _tagged_string _temp59= Cyc_Getopt_nextchar;
-unsigned char* _temp60= _temp59.curr; if( _temp59.base == 0? 1:( _temp60 <
-_temp59.base? 1: _temp60 >= _temp59.last_plus_one)){ _throw( Cyc_Null_Exception);}*
-_temp60;}) !='\000'){ Cyc_Getopt_optarg= Cyc_Getopt_nextchar; Cyc_Getopt_optind
-++;} else{ Cyc_Getopt_optarg=({ struct _tagged_string _temp61={ 0, 0, 0};
-_temp61;});} Cyc_Getopt_nextchar=({ struct _tagged_string _temp62={ 0, 0, 0};
-_temp62;});} else{ if(({ struct _tagged_string _temp63= Cyc_Getopt_nextchar;
-unsigned char* _temp64= _temp63.curr; if( _temp63.base == 0? 1:( _temp64 <
-_temp63.base? 1: _temp64 >= _temp63.last_plus_one)){ _throw( Cyc_Null_Exception);}*
-_temp64;}) !='\000'){ Cyc_Getopt_optarg= Cyc_Getopt_nextchar; Cyc_Getopt_optind
-++;} else{ if( Cyc_Getopt_optind == argc){ if( Cyc_Getopt_opterr){({ struct
-_tagged_string _temp65=( struct _tagged_string)*(( struct _tagged_string*(*)(
-struct _tagged_ptr0, unsigned int, unsigned int)) _check_unknown_subscript)(
-argv, sizeof( struct _tagged_string), 0); int _temp66=( int) c; fprintf(
-sfile_to_file( Cyc_Stdio_stderr),"%.*s: option requires an argument -- %c\n",
-_temp65.last_plus_one - _temp65.curr, _temp65.curr, _temp66);});} Cyc_Getopt_optopt=(
-int) c; if(*(( const unsigned char*(*)( struct _tagged_string, unsigned int,
-unsigned int)) _check_unknown_subscript)( optstring, sizeof( unsigned char), 0)
-==':'){ c=':';} else{ c='?';}} else{ Cyc_Getopt_optarg=*(( struct _tagged_string*(*)(
-struct _tagged_ptr0, unsigned int, unsigned int)) _check_unknown_subscript)(
-argv, sizeof( struct _tagged_string), Cyc_Getopt_optind ++);}} Cyc_Getopt_nextchar=({
-struct _tagged_string _temp67={ 0, 0, 0}; _temp67;});}} return( int) c;}} int
-Cyc_Getopt_getopt( int argc, struct _tagged_ptr0 argv, struct _tagged_string
-optstring){ return Cyc_Getopt__getopt_internal( argc, argv, optstring,( struct
-_tagged_ptr1)({ struct _tagged_ptr1 _temp72={ 0, 0, 0}; _temp72;}),( int*) 0, 0);}
+unsigned char*) _check_unknown_subscript(*(( struct _tagged_arr*)
+_check_unknown_subscript( argv, sizeof( struct _tagged_arr), Cyc_Getopt_optind)),
+sizeof( unsigned char), 1)) =='-')? 1:( Cyc_String_strchr( optstring,*((
+unsigned char*) _check_unknown_subscript( Cyc_Getopt_nextchar, sizeof(
+unsigned char), 0u)))).curr ==(( struct _tagged_arr) _tag_arr( 0u, sizeof(
+unsigned char), 0u)).curr){ if( Cyc_Getopt_opterr){ if(*(( unsigned char*)
+_check_unknown_subscript(*(( struct _tagged_arr*) _check_unknown_subscript( argv,
+sizeof( struct _tagged_arr), Cyc_Getopt_optind)), sizeof( unsigned char), 1)) =='-'){({
+struct _tagged_arr _temp9=( struct _tagged_arr)*(( struct _tagged_arr*)
+_check_unknown_subscript( argv, sizeof( struct _tagged_arr), 0)); struct
+_tagged_arr _temp10=( struct _tagged_arr) Cyc_Getopt_nextchar; fprintf(
+_sfile_to_file( Cyc_Stdio_stderr),"%.*s: unrecognized option `--%.*s'\n", _temp9.last_plus_one
+- _temp9.curr, _temp9.curr, _temp10.last_plus_one - _temp10.curr, _temp10.curr);});}
+else{({ struct _tagged_arr _temp11=( struct _tagged_arr)*(( struct _tagged_arr*)
+_check_unknown_subscript( argv, sizeof( struct _tagged_arr), 0)); int _temp12=(
+int)*(( unsigned char*) _check_unknown_subscript(*(( struct _tagged_arr*)
+_check_unknown_subscript( argv, sizeof( struct _tagged_arr), Cyc_Getopt_optind)),
+sizeof( unsigned char), 0)); struct _tagged_arr _temp13=( struct _tagged_arr)
+Cyc_Getopt_nextchar; fprintf( _sfile_to_file( Cyc_Stdio_stderr),"%.*s: unrecognized option `%c%.*s'\n",
+_temp11.last_plus_one - _temp11.curr, _temp11.curr, _temp12, _temp13.last_plus_one
+- _temp13.curr, _temp13.curr);});}} Cyc_Getopt_nextchar= _tag_arr(({
+unsigned char* _temp14=( unsigned char*) GC_malloc_atomic( sizeof( unsigned char));
+_temp14[ 0]='\000'; _temp14;}), sizeof( unsigned char), 1u); Cyc_Getopt_optind
+++; Cyc_Getopt_optopt= 0; return( int)'?';}}{ unsigned char c=*(( unsigned char*)
+_check_unknown_subscript( _tagged_arr_inplace_plus_post(& Cyc_Getopt_nextchar,
+sizeof( unsigned char), 1), sizeof( unsigned char), 0u)); struct _tagged_arr
+temp= Cyc_String_strchr( optstring, c); if(*(( unsigned char*)
+_check_unknown_subscript( Cyc_Getopt_nextchar, sizeof( unsigned char), 0u)) =='\000'){
+++ Cyc_Getopt_optind;} if( temp.curr ==(( struct _tagged_arr) _tag_arr( 0u,
+sizeof( unsigned char), 0u)).curr? 1: c ==':'){ if( Cyc_Getopt_opterr){ if((
+unsigned int) Cyc_Getopt_posixly_correct.curr){({ struct _tagged_arr _temp15=(
+struct _tagged_arr)*(( struct _tagged_arr*) _check_unknown_subscript( argv,
+sizeof( struct _tagged_arr), 0)); int _temp16=( int) c; fprintf( _sfile_to_file(
+Cyc_Stdio_stderr),"%.*s: illegal option -- %c\n", _temp15.last_plus_one -
+_temp15.curr, _temp15.curr, _temp16);});} else{({ struct _tagged_arr _temp17=(
+struct _tagged_arr)*(( struct _tagged_arr*) _check_unknown_subscript( argv,
+sizeof( struct _tagged_arr), 0)); int _temp18=( int) c; fprintf( _sfile_to_file(
+Cyc_Stdio_stderr),"%.*s: invalid option -- %c\n", _temp17.last_plus_one -
+_temp17.curr, _temp17.curr, _temp18);});}} Cyc_Getopt_optopt=( int) c; return(
+int)'?';} if(*(( const unsigned char*) _check_unknown_subscript( temp, sizeof(
+unsigned char), 1)) ==':'){ if(*(( const unsigned char*)
+_check_unknown_subscript( temp, sizeof( unsigned char), 2)) ==':'){ if(*((
+unsigned char*) _check_unknown_subscript( Cyc_Getopt_nextchar, sizeof(
+unsigned char), 0u)) !='\000'){ Cyc_Getopt_optarg= Cyc_Getopt_nextchar; Cyc_Getopt_optind
+++;} else{ Cyc_Getopt_optarg= _tag_arr( 0u, sizeof( unsigned char), 0u);} Cyc_Getopt_nextchar=
+_tag_arr( 0u, sizeof( unsigned char), 0u);} else{ if(*(( unsigned char*)
+_check_unknown_subscript( Cyc_Getopt_nextchar, sizeof( unsigned char), 0u)) !='\000'){
+Cyc_Getopt_optarg= Cyc_Getopt_nextchar; Cyc_Getopt_optind ++;} else{ if( Cyc_Getopt_optind
+== argc){ if( Cyc_Getopt_opterr){({ struct _tagged_arr _temp19=( struct
+_tagged_arr)*(( struct _tagged_arr*) _check_unknown_subscript( argv, sizeof(
+struct _tagged_arr), 0)); int _temp20=( int) c; fprintf( _sfile_to_file( Cyc_Stdio_stderr),"%.*s: option requires an argument -- %c\n",
+_temp19.last_plus_one - _temp19.curr, _temp19.curr, _temp20);});} Cyc_Getopt_optopt=(
+int) c; if(*(( const unsigned char*) _check_unknown_subscript( optstring,
+sizeof( unsigned char), 0)) ==':'){ c=':';} else{ c='?';}} else{ Cyc_Getopt_optarg=*((
+struct _tagged_arr*) _check_unknown_subscript( argv, sizeof( struct _tagged_arr),
+Cyc_Getopt_optind ++));}} Cyc_Getopt_nextchar= _tag_arr( 0u, sizeof(
+unsigned char), 0u);}} return( int) c;}} int Cyc_Getopt_getopt( int argc, struct
+_tagged_arr argv, struct _tagged_arr optstring){ return Cyc_Getopt__getopt_internal(
+argc, argv, optstring,( struct _tagged_arr) _tag_arr( 0u, sizeof( struct Cyc_Getopt_option),
+0u),( int*) 0, 0);}

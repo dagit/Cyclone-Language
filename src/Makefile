@@ -32,6 +32,7 @@ endif
 LC_FLAG =
 
 CYC_FLAGS := -I$(CYCDIR)/lib -B$(CYCDIR)/lib -save-c $(LC_FLAG) $(TOC_FLAG) $(PROF_RGN_FLAG)
+#CYC_FLAGS := -I$(CYCDIR)/lib -save-c $(LC_FLAG) $(TOC_FLAG) $(PROF_RGN_FLAG)
 
 LIBR:=$(CYCDIR)/lib/$(OUT_PREFIX)$(CYCLIB)
 

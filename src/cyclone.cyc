@@ -469,7 +469,6 @@ void process_file(string_t filename) {
  PRINTC:
   if (tds != null) {
     FILE *out_file;
-
     if (parseonly_r || tc_r)
       if (output_file != null)
         out_file = try_file_open(*output_file,"w","output file");
@@ -644,12 +643,13 @@ int main(int argc, string_t ? argv) {
   let is_not_executable =
     stop_after_asmfile_r ||
     stop_after_objectfile_r ||
-    Filename::check_suffix(*output_file, ".a") ||
-    Filename::check_suffix(*output_file, ".lib"); // FIX: is that right ?
+    (output_file != null && Filename::check_suffix(*output_file, ".a")) ||
+    (output_file != null && Filename::check_suffix(*output_file, ".lib")); 
   if (is_not_executable) {
     stdlib = null;
     stdlib_string = (string_t)"";
   } else {
+
     let cyclib = do_find(cyclone_exec_prefix_path,"cyclib.a");
     let gc = do_find(cyclone_exec_prefix_path,"gc.a");
 

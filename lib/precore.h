@@ -10,7 +10,6 @@
 #endif 
 
 typedef char *{0} Cstring;
-// a boxed and tagged string: struct {unsigned int sz; Cstring *contents;}@
 typedef const char ? string_t;
 typedef char ? mstring_t;
 

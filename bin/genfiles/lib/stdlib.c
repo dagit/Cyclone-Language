@@ -2,17 +2,15 @@
 Cyc_timespec it_interval; struct Cyc_timespec it_value; } ; struct Cyc__types_fd_set{
 int fds_bits[ 2u]; } ; extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{
 void* v; } ; extern unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
-unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_Failure[
-12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_string
-f1; } ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
-unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_Not_found[
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
+12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
+} ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Not_found[
 14u]; extern unsigned char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{
-unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char*
-string_to_Cstring( struct _tagged_string); extern unsigned char*
-underlying_Cstring( struct _tagged_string); extern struct _tagged_string
-Cstring_to_string( unsigned char*); struct _tagged_ptr0{ struct _tagged_string*
-curr; struct _tagged_string* base; struct _tagged_string* last_plus_one; } ;
-extern struct _tagged_ptr0 ntCsl_to_ntsl( unsigned char**); extern int system(
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char*
+string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring(
+struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
+extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int system(
 unsigned char*); extern int* __errno(); struct Cyc_Time_tm{ int tm_sec; int
 tm_min; int tm_hour; int tm_mday; int tm_mon; int tm_year; int tm_wday; int
 tm_yday; int tm_isdst; } ; extern unsigned int clock()  __attribute__(( cdecl
@@ -64,14 +62,14 @@ __numer, int __denom)  __attribute__(( cdecl )) ; extern int rand()
  __attribute__(( cdecl )) ; extern int random()  __attribute__(( cdecl )) ;
 extern int srandom( unsigned int __seed)  __attribute__(( cdecl )) ; extern int
 grantpt( int)  __attribute__(( cdecl )) ; extern int unlockpt( int)
- __attribute__(( cdecl )) ; extern double Cyc_Stdlib_atof( struct _tagged_string);
-extern int Cyc_Stdlib_atoi( struct _tagged_string); extern int Cyc_Stdlib_atol(
-struct _tagged_string); extern struct _tagged_string Cyc_Stdlib_getenv( struct
-_tagged_string); extern double atof( unsigned char* _nptr)  __attribute__((
-cdecl )) ; extern int atoi( unsigned char* _nptr)  __attribute__(( cdecl )) ;
-extern int atol( unsigned char* _nptr)  __attribute__(( cdecl )) ; extern
-unsigned char* getenv( unsigned char* __string)  __attribute__(( cdecl )) ;
-extern unsigned char* _getenv_r( struct Cyc__reent*, unsigned char* __string)
+ __attribute__(( cdecl )) ; extern double Cyc_Stdlib_atof( struct _tagged_arr);
+extern int Cyc_Stdlib_atoi( struct _tagged_arr); extern int Cyc_Stdlib_atol(
+struct _tagged_arr); extern struct _tagged_arr Cyc_Stdlib_getenv( struct
+_tagged_arr); extern double atof( unsigned char* _nptr)  __attribute__(( cdecl
+)) ; extern int atoi( unsigned char* _nptr)  __attribute__(( cdecl )) ; extern
+int atol( unsigned char* _nptr)  __attribute__(( cdecl )) ; extern unsigned char*
+getenv( unsigned char* __string)  __attribute__(( cdecl )) ; extern
+unsigned char* _getenv_r( struct Cyc__reent*, unsigned char* __string)
  __attribute__(( cdecl )) ; extern unsigned char* _findenv( unsigned char*, int*)
  __attribute__(( cdecl )) ; extern unsigned char* _findenv_r( struct Cyc__reent*,
 unsigned char*, int*)  __attribute__(( cdecl )) ; extern int putenv(
@@ -83,12 +81,12 @@ unsigned char* __string, unsigned char* __value, int __overwrite)
  __attribute__(( cdecl )) ; extern void unsetenv( unsigned char* __string)
  __attribute__(( cdecl )) ; extern void _unsetenv_r( struct Cyc__reent*,
 unsigned char* __string)  __attribute__(( cdecl )) ; double Cyc_Stdlib_atof(
-struct _tagged_string _nptr){ return atof( string_to_Cstring( _nptr));} int Cyc_Stdlib_atoi(
-struct _tagged_string _nptr){ return atoi( string_to_Cstring( _nptr));} int Cyc_Stdlib_atol(
-struct _tagged_string _nptr){ return atol( string_to_Cstring( _nptr));} struct
-_tagged_string Cyc_Stdlib_getenv( struct _tagged_string name){ return
+struct _tagged_arr _nptr){ return atof( string_to_Cstring( _nptr));} int Cyc_Stdlib_atoi(
+struct _tagged_arr _nptr){ return atoi( string_to_Cstring( _nptr));} int Cyc_Stdlib_atol(
+struct _tagged_arr _nptr){ return atol( string_to_Cstring( _nptr));} struct
+_tagged_arr Cyc_Stdlib_getenv( struct _tagged_arr name){ return
 Cstring_to_string( getenv( string_to_Cstring( name)));} int Cyc_Stdlib_putenv(
-struct _tagged_string s){ return putenv( string_to_Cstring( s));} int Cyc_Stdlib_setenv(
-struct _tagged_string s, struct _tagged_string v, int overwrite){ return setenv(
+struct _tagged_arr s){ return putenv( string_to_Cstring( s));} int Cyc_Stdlib_setenv(
+struct _tagged_arr s, struct _tagged_arr v, int overwrite){ return setenv(
 string_to_Cstring( s), string_to_Cstring( v), overwrite);} void Cyc_Stdlib_unsetenv(
-struct _tagged_string s){ unsetenv( string_to_Cstring( s));}
+struct _tagged_arr s){ unsetenv( string_to_Cstring( s));}

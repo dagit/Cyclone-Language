@@ -5,13 +5,25 @@
 #ifndef _CYC_INCLUDE_H_
 #define _CYC_INCLUDE_H_
 
-//// Strings
-struct _tagged_string { 
+#include <setjmp.h>
+
+#ifndef offsetof
+// should be size_t, but int is fine.
+#define offsetof(t,n) ((int)(&(((t *)0)->n)))
+#endif
+
+//// Tagged arrays
+struct _tagged_arr { 
   unsigned char *curr; 
   unsigned char *base; 
   unsigned char *last_plus_one; 
 };
-extern struct _tagged_string xprintf(char *fmt, ...);
+struct _tagged_string {  // delete after bootstrapping
+  unsigned char *curr; 
+  unsigned char *base; 
+  unsigned char *last_plus_one; 
+};
+extern struct _tagged_arr xprintf(char *fmt, ...);
 
 //// Discriminated Unions
 struct _xtunion_struct { char *tag; };
@@ -46,7 +58,6 @@ extern void * _region_malloc(struct _RegionHandle *, unsigned int);
 extern void   _free_region(struct _RegionHandle *);
 
 //// Exceptions 
-#include <setjmp.h>
 struct _handler_cons {
   struct _RuntimeStack s;
   jmp_buf handler;
@@ -57,7 +68,7 @@ extern void _npop_handler(int);
 extern void _pop_handler();
 extern void _pop_region();
 
-extern void _throw(void * e);
+extern int _throw(void * e);
 
 extern struct _xtunion_struct *_exn_thrown;
 
@@ -67,36 +78,88 @@ extern struct _xtunion_struct * Cyc_Null_Exception;
 extern struct _xtunion_struct Cyc_Match_Exception_struct;
 extern struct _xtunion_struct * Cyc_Match_Exception;
 
-//// Built-in Run-time Checks
-static inline void * _check_null(void * ptr) {
-  // caller casts result back to right type
+//// Built-in Run-time Checks and company
+static inline 
+void * _check_null(void * ptr) {
   if(!ptr)
     _throw(Cyc_Null_Exception);
   return ptr;
 }
-static inline char * _check_unknown_subscript(struct _tagged_string arr, 
-					      unsigned elt_sz, unsigned index) {
-  // caller casts first argument and result
-  // multiplication looks inefficient, but C compiler has to insert it otherwise
-  // by inlining, it should be able to avoid actual multiplication
-  unsigned char * ans = arr.curr + elt_sz*index;
-  if(!arr.base || ans < arr.base || ans >= arr.last_plus_one)
-    _throw(Cyc_Null_Exception);
-  return ans;
-}
-static inline char * _check_known_subscript_null(void * ptr, 
-						 unsigned bound,
-						 unsigned elt_sz,
-						 unsigned index) {
+static inline 
+char * _check_known_subscript_null(void * ptr, unsigned bound, 
+				   unsigned elt_sz, unsigned index) {
   if(!ptr || index > bound)
     _throw(Cyc_Null_Exception);
   return ((char *)ptr) + elt_sz*index;
 }
-static inline unsigned _check_known_subscript_notnull(unsigned bound,
-						      unsigned index) {
+static inline 
+unsigned _check_known_subscript_notnull(unsigned bound, unsigned index) {
   if(index > bound)
     _throw(Cyc_Null_Exception);
   return index;
+}
+static inline 
+char * _check_unknown_subscript(struct _tagged_arr arr,
+				unsigned elt_sz, unsigned index) {
+  // caller casts first argument and result
+  // multiplication looks inefficient, but C compiler has to insert it otherwise
+  // by inlining, it should be able to avoid actual multiplication
+  unsigned char * ans = arr.curr + elt_sz * index;
+  if(!arr.base || ans < arr.base || ans >= arr.last_plus_one)
+    _throw(Cyc_Null_Exception);
+  return ans;
+}
+static inline 
+struct _tagged_arr _tag_arr(const void * curr, 
+			    unsigned elt_sz, unsigned num_elts) {
+  // beware the gcc bug, can happen with *temp = _tag_arr(...) in weird places!
+  struct _tagged_arr ans;
+  ans.base = (void *)curr;
+  ans.curr = (void *)curr;
+  ans.last_plus_one = ((char *)curr) + elt_sz * num_elts;
+  return ans;
+}
+static inline
+struct _tagged_arr * _init_tag_arr(struct _tagged_arr * arr_ptr, void * arr, 
+				   unsigned elt_sz, unsigned num_elts) {
+  // we use this to (hopefully) avoid the gcc bug
+  arr_ptr->base = arr_ptr->curr = arr;
+  arr_ptr->last_plus_one = ((char *)arr) + elt_sz * num_elts;
+  return arr_ptr;
+}
+
+static inline
+char * _untag_arr(struct _tagged_arr arr, unsigned elt_sz, unsigned num_elts) {
+  // Note: if arr is "null" base and curr should both be null, so this
+  //       is correct (caller checks for null if untagging to @ type)
+  // base may not be null if you use t ? pointer subtraction to get 0 -- oh well
+  if(arr.curr < arr.base || arr.curr + elt_sz * num_elts >= arr.last_plus_one)
+    _throw(Cyc_Null_Exception);
+  return arr.curr;
+}
+static inline 
+unsigned _get_arr_size(struct _tagged_arr arr, unsigned elt_sz) {
+  return (arr.last_plus_one - arr.curr) / elt_sz;
+}
+static inline
+struct _tagged_arr _tagged_arr_plus(struct _tagged_arr arr, unsigned elt_sz,
+				    int change) {
+  struct _tagged_arr ans = arr;
+  ans.curr += ((int)elt_sz)*change;
+  return ans;
+}
+static inline
+struct _tagged_arr _tagged_arr_inplace_plus(struct _tagged_arr * arr_ptr,
+					    unsigned elt_sz, int change) {
+  arr_ptr->curr += ((int)elt_sz)*change;
+  return *arr_ptr;
+}
+static inline
+struct _tagged_arr _tagged_arr_inplace_plus_post(struct _tagged_arr * arr_ptr,
+						 unsigned elt_sz, int change) {
+  struct _tagged_arr ans = *arr_ptr;
+  arr_ptr->curr += ((int)elt_sz)*change;
+  return ans;
 }
 				  
 //// Allocation

@@ -29,12 +29,12 @@ extern size_t GC_get_free_bytes();
 extern size_t GC_get_total_bytes();
 #endif;
 
-struct _tagged_string xprintf(char *fmt, ...) {
+struct _tagged_arr xprintf(char *fmt, ...) {
   char my_buff[1];
   va_list argp;
   int len1;
   int len2;
-  struct _tagged_string result;
+  struct _tagged_arr result;
 
   va_start(argp,fmt);
   len1 = vsnprintf(my_buff,1,fmt,argp); // how much space do we need
@@ -133,7 +133,7 @@ void throw(void* e) { // FIX: use struct _xtunion_struct *  ??
   longjmp(my_handler->handler,1);
 }
 
-void _throw(void* e) { // FIX: use struct _xtunion_struct *  ??
+int _throw(void* e) { // FIX: use struct _xtunion_struct *  ??
   throw(e);
 }
 
@@ -142,8 +142,8 @@ void _throw(void* e) { // FIX: use struct _xtunion_struct *  ??
 // from the Cyclone include file precore.h.
 #include "precore_c.h"
 
-struct _tagged_string Cstring_to_string(Cstring s) {
-  struct _tagged_string str;
+struct _tagged_arr Cstring_to_string(Cstring s) {
+  struct _tagged_arr str;
   if (s == NULL) {
     str.base = str.curr = str.last_plus_one = NULL;
   }
@@ -165,7 +165,7 @@ struct _tagged_string Cstring_to_string(Cstring s) {
   return str;
 }
 
-Cstring string_to_Cstring(struct _tagged_string s) {
+Cstring string_to_Cstring(struct _tagged_arr s) {
   int i;
   char *contents = s.curr;
   size_t sz = s.last_plus_one - s.curr;
@@ -188,9 +188,11 @@ Cstring string_to_Cstring(struct _tagged_string s) {
 
 // Copy a null-terminated list of Cstrings to a tagged,
 // null-terminated list of strings.  (The return type is misleading.)
-struct _tagged_string ntCsl_to_ntsl(Cstring *ntCsl) {
+// can put back in after bootstrapping
+
+struct _tagged_arr ntCsl_to_ntsl(Cstring *ntCsl) {
   int i, numstrs = 0;
-  struct _tagged_string result;
+  struct _tagged_arr result;
   Cstring *ptr;
 
   for (ptr = ntCsl; *ptr; numstrs++); // not safe!
@@ -209,15 +211,15 @@ struct _tagged_string ntCsl_to_ntsl(Cstring *ntCsl) {
 // Convert a "@pointer to a null-terminated list of pointers" to a
 // "?pointer to a null-terminated list of pointers".  We don't list
 // this function in core.h because "pointers to what" might change.
-struct _tagged_string pntlp_toCyc(void **in) {
-  struct _tagged_string result;
+struct _tagged_arr pntlp_toCyc(void **in) {
+  struct _tagged_arr result;
   result.curr = result.base = result.last_plus_one = (char*)in;
   while (*(result.last_plus_one++));
   return result;
 }
 
 // FIX:  this isn't really needed since you can cast char[?] to char[]
-Cstring underlying_Cstring(struct _tagged_string s) {
+Cstring underlying_Cstring(struct _tagged_arr s) {
   char *str=s.curr;
 
   if (s.curr == NULL) return NULL;
@@ -235,6 +237,15 @@ struct Cyc_Stdio___sFILE {
   *Cyc_Stdio_stdout = &Cyc_Stdio_stdout_v,
   *Cyc_Stdio_stderr = &Cyc_Stdio_stderr_v;
 
+FILE *_sfile_to_file(struct Cyc_Stdio___sFILE *sf) {
+  if(!sf) {
+    fprintf(stderr,"Attempt to access null file descriptor.\n");
+    exit(255);
+  }
+  if(!sf->file)
+    throw(Cyc_Null_Exception); // FIX:  should be more descriptive?
+  return sf->file;
+}
 FILE *sfile_to_file(struct Cyc_Stdio___sFILE *sf) {
   if(!sf) {
     fprintf(stderr,"Attempt to access null file descriptor.\n");
@@ -244,12 +255,13 @@ FILE *sfile_to_file(struct Cyc_Stdio___sFILE *sf) {
     throw(Cyc_Null_Exception); // FIX:  should be more descriptive?
   return sf->file;
 }
+
 int Cyc_Stdio_file_string_read(struct Cyc_Stdio___sFILE *sf, 
-                               struct _tagged_string dest,
+                               struct _tagged_arr dest,
                                int dest_offset, int max_count) {
   unsigned char *new_curr = dest.curr + dest_offset;
   size_t sz = dest.last_plus_one - new_curr;
-  FILE *fd = sfile_to_file(sf);
+  FILE *fd = _sfile_to_file(sf);
   if (new_curr < dest.base || new_curr >= dest.last_plus_one)
     throw(Cyc_Null_Exception);
   if(dest_offset + max_count > sz) {
@@ -259,11 +271,11 @@ int Cyc_Stdio_file_string_read(struct Cyc_Stdio___sFILE *sf,
   return fread(new_curr, 1, max_count, fd);
 }
 int Cyc_Stdio_file_string_write(struct Cyc_Stdio___sFILE *sf, 
-                                struct _tagged_string src,
+                                struct _tagged_arr src,
                                 int src_offset, int max_count) {
   size_t sz = src.last_plus_one - src.curr;
   unsigned char *new_curr = src.curr + src_offset;
-  FILE *fd = sfile_to_file(sf);
+  FILE *fd = _sfile_to_file(sf);
   if (new_curr < src.base || new_curr >= src.last_plus_one)
     throw(Cyc_Null_Exception);
   if(src_offset + max_count > sz) {
@@ -340,9 +352,9 @@ extern void _free_region(struct _RegionHandle *r) {
 
 // argc is redundant
 struct _tagged_argv { 
-  struct _tagged_string *curr;
-  struct _tagged_string *base;
-  struct _tagged_string *last_plus_one;
+  struct _tagged_arr *curr;
+  struct _tagged_arr *base;
+  struct _tagged_arr *last_plus_one;
 };
 
 // some debugging routines
@@ -397,7 +409,7 @@ int main(int argc, char **argv) {
   {struct _tagged_argv args;
   int i, result;
   args.base = 
-    (struct _tagged_string *)GC_malloc(argc*sizeof(struct _tagged_string));
+    (struct _tagged_arr *)GC_malloc(argc*sizeof(struct _tagged_arr));
   args.curr = args.base;
   args.last_plus_one = args.base + argc;
   for(i = 0; i < argc; ++i)

@@ -2,19 +2,17 @@
 Cyc_timespec it_interval; struct Cyc_timespec it_value; } ; struct Cyc__types_fd_set{
 int fds_bits[ 2u]; } ; extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{
 void* v; } ; extern unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
-unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_Failure[
-12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_string
-f1; } ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
-unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_Not_found[
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
+12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
+} ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Not_found[
 14u]; extern unsigned char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{
-unsigned char* tag; struct _tagged_string f1; } ; extern struct _RegionHandle*
-Cyc_Core_heap_region; extern unsigned char* string_to_Cstring( struct
-_tagged_string); extern unsigned char* underlying_Cstring( struct _tagged_string);
-extern struct _tagged_string Cstring_to_string( unsigned char*); struct
-_tagged_ptr0{ struct _tagged_string* curr; struct _tagged_string* base; struct
-_tagged_string* last_plus_one; } ; extern struct _tagged_ptr0 ntCsl_to_ntsl(
-unsigned char**); extern int system( unsigned char*); extern int* __errno();
-struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; extern
+unsigned char* tag; struct _tagged_arr f1; } ; extern struct _RegionHandle* Cyc_Core_heap_region;
+extern unsigned char* string_to_Cstring( struct _tagged_arr); extern
+unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
+_tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
+ntCsl_to_ntsl( unsigned char**); extern int system( unsigned char*); extern int*
+__errno(); struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; extern
 unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
 18u]; extern unsigned char Cyc_List_Nth[ 8u]; struct Cyc_Dict_Dict; extern
 unsigned char Cyc_Dict_Present[ 12u]; extern unsigned char Cyc_Dict_Absent[ 11u];
@@ -106,7 +104,7 @@ _LL13; _LL13: while( _temp12 != 0) { int _temp14= _temp10( key,((( struct Cyc_Di
 _check_null( _temp12))->key_val).f1); goto _LL15; _LL15: if( _temp14 < 0){
 _temp12=(( struct Cyc_Dict_T*) _check_null( _temp12))->left;} else{ if( _temp14
 > 0){ _temp12=(( struct Cyc_Dict_T*) _check_null( _temp12))->right;} else{
-return((( struct Cyc_Dict_T*) _check_null( _temp12))->key_val).f2;}}}( void)
+return((( struct Cyc_Dict_T*) _check_null( _temp12))->key_val).f2;}}}( int)
 _throw(( void*) Cyc_Dict_Absent);}} struct Cyc_Core_Opt* Cyc_Dict_lookup_opt(
 struct Cyc_Dict_Dict* d, void* key){ int(* _temp16)( void*, void*)= d->rel; goto
 _LL17; _LL17: { struct Cyc_Dict_T* _temp18= d->t; goto _LL19; _LL19: while(
@@ -270,7 +268,7 @@ void*)(( void*) Cyc_Dict_B)); return({ struct Cyc_Dict_Dict* _temp197=( struct
 Cyc_Dict_Dict*) _region_malloc( d->r, sizeof( struct Cyc_Dict_Dict)); _temp197->rel=
 d->rel; _temp197->r= d->r; _temp197->t= _temp195; _temp197;});} struct Cyc_Dict_Dict*
 Cyc_Dict_insert_new( struct Cyc_Dict_Dict* d, void* key, void* data){ if((( int(*)(
-struct Cyc_Dict_Dict* d, void* key)) Cyc_Dict_member)( d, key)){( void) _throw((
+struct Cyc_Dict_Dict* d, void* key)) Cyc_Dict_member)( d, key)){( int) _throw((
 void*) Cyc_Dict_Absent);} return(( struct Cyc_Dict_Dict*(*)( struct Cyc_Dict_Dict*
 d, void* key, void* data)) Cyc_Dict_insert)( d, key, data);} struct Cyc_Dict_Dict*
 Cyc_Dict_inserts( struct Cyc_Dict_Dict* d, struct Cyc_List_List* kds){ for( 0;
@@ -477,7 +475,7 @@ _temp375;});} struct Cyc_Dict_Dict* Cyc_Dict_map_c( void*(* f)( void*, void*),
 void* env, struct Cyc_Dict_Dict* d){ return(( struct Cyc_Dict_Dict*(*)( struct
 _RegionHandle* r, void*(* f)( void*, void*), void* env, struct Cyc_Dict_Dict* d))
 Cyc_Dict_rmap_c)( Cyc_Core_heap_region, f, env, d);} struct _tuple0* Cyc_Dict_rchoose(
-struct _RegionHandle* r, struct Cyc_Dict_Dict* d){ if( d->t == 0){( void) _throw((
+struct _RegionHandle* r, struct Cyc_Dict_Dict* d){ if( d->t == 0){( int) _throw((
 void*) Cyc_Dict_Absent);} return({ struct _tuple0* _temp376=( struct _tuple0*)
 _region_malloc( r, sizeof( struct _tuple0)); _temp376->f1=((( struct Cyc_Dict_T*)
 _check_null( d->t))->key_val).f1; _temp376->f2=((( struct Cyc_Dict_T*)

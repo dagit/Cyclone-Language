@@ -2,17 +2,15 @@
 Cyc_timespec it_interval; struct Cyc_timespec it_value; } ; struct Cyc__types_fd_set{
 int fds_bits[ 2u]; } ; extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{
 void* v; } ; extern unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
-unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_Failure[
-12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_string
-f1; } ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
-unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_Not_found[
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
+12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
+} ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Not_found[
 14u]; extern unsigned char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{
-unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char*
-string_to_Cstring( struct _tagged_string); extern unsigned char*
-underlying_Cstring( struct _tagged_string); extern struct _tagged_string
-Cstring_to_string( unsigned char*); struct _tagged_ptr0{ struct _tagged_string*
-curr; struct _tagged_string* base; struct _tagged_string* last_plus_one; } ;
-extern struct _tagged_ptr0 ntCsl_to_ntsl( unsigned char**); extern int system(
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char*
+string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring(
+struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
+extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int system(
 unsigned char*); extern int* __errno(); struct Cyc_List_List{ void* hd; struct
 Cyc_List_List* tl; } ; extern int Cyc_List_length( struct Cyc_List_List* x);
 extern unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
@@ -34,11 +32,11 @@ struct Cyc_List_List* _temp1=( struct Cyc_List_List*) GC_malloc( sizeof( struct
 Cyc_List_List)); _temp1->hd=( void*) x; _temp1->tl= 0; _temp1;}); if( q->front
 == 0){ q->front= cell; q->rear= cell;} else{(( struct Cyc_List_List*)
 _check_null( q->rear))->tl= cell; q->rear= cell;}} void* Cyc_Queue_take( struct
-Cyc_Queue_Queue* q){ if( q->front == 0){( void) _throw(( void*) Cyc_Queue_Empty);}
+Cyc_Queue_Queue* q){ if( q->front == 0){( int) _throw(( void*) Cyc_Queue_Empty);}
 else{ void* _temp2=( void*)(( struct Cyc_List_List*) _check_null( q->front))->hd;
 goto _LL3; _LL3: q->front=(( struct Cyc_List_List*) _check_null( q->front))->tl;
 if( q->front == 0){ q->rear= 0;} return _temp2;}} void* Cyc_Queue_peek( struct
-Cyc_Queue_Queue* q){ if( q->front == 0){( void) _throw(( void*) Cyc_Queue_Empty);}
+Cyc_Queue_Queue* q){ if( q->front == 0){( int) _throw(( void*) Cyc_Queue_Empty);}
 else{ return( void*)(( struct Cyc_List_List*) _check_null( q->front))->hd;}}
 void Cyc_Queue_clear( struct Cyc_Queue_Queue* q){ q->front= 0; q->rear= 0;} int
 Cyc_Queue_length( struct Cyc_Queue_Queue* q){ return(( int(*)( struct Cyc_List_List*

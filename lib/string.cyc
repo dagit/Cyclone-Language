@@ -221,7 +221,7 @@ char ?`r rstrconcat_l(region_t<`r> r,glist_t<const char ?`r1@`r2,`r3>strs)
       end = end->tl;
     } 
     lens = lens->tl;                      // remove junk/temporary 0
-    ans = rnew_string(r,total_len);
+    ans = rnew_string(r,total_len+1);
     size_t i = 0;
     while (strs != null) {
       let next    = *(strs->hd);

@@ -2,37 +2,35 @@
 Cyc_timespec it_interval; struct Cyc_timespec it_value; } ; struct Cyc__types_fd_set{
 int fds_bits[ 2u]; } ; extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{
 void* v; } ; extern unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
-unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_Failure[
-12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_string
-f1; } ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
-unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_Not_found[
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
+12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
+} ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Not_found[
 14u]; extern unsigned char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{
-unsigned char* tag; struct _tagged_string f1; } ; extern struct _RegionHandle*
-Cyc_Core_heap_region; extern unsigned char* string_to_Cstring( struct
-_tagged_string); extern unsigned char* underlying_Cstring( struct _tagged_string);
-extern struct _tagged_string Cstring_to_string( unsigned char*); struct
-_tagged_ptr0{ struct _tagged_string* curr; struct _tagged_string* base; struct
-_tagged_string* last_plus_one; } ; extern struct _tagged_ptr0 ntCsl_to_ntsl(
-unsigned char**); extern int system( unsigned char*); extern int* __errno();
-struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; extern int Cyc_List_length(
-struct Cyc_List_List* x); extern unsigned char Cyc_List_List_empty[ 15u]; extern
-unsigned char Cyc_List_List_mismatch[ 18u]; extern void Cyc_List_app( void*(* f)(
-void*), struct Cyc_List_List* x); extern void Cyc_List_iter( void(* f)( void*),
-struct Cyc_List_List* x); extern void Cyc_List_iter_c( void(* f)( void*, void*),
-void* env, struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_merge_sort(
-int(* less_eq)( void*, void*), struct Cyc_List_List* x); extern unsigned char
-Cyc_List_Nth[ 8u]; struct Cyc_Set_Set; extern struct Cyc_Set_Set* Cyc_Set_empty(
-int(* comp)( void*, void*)); extern struct Cyc_Set_Set* Cyc_Set_rempty( struct
-_RegionHandle* rgn, int(* comp)( void*, void*)); extern struct Cyc_Set_Set* Cyc_Set_singleton(
-int(* comp)( void*, void*), void* x); extern struct Cyc_Set_Set* Cyc_Set_from_list(
-int(* comp)( void*, void*), struct Cyc_List_List* x); extern struct Cyc_Set_Set*
-Cyc_Set_insert( struct Cyc_Set_Set* s, void* elt); extern struct Cyc_Set_Set*
-Cyc_Set_rinsert( struct _RegionHandle* rgn, struct Cyc_Set_Set* s, void* elt);
-extern struct Cyc_Set_Set* Cyc_Set_union_two( struct Cyc_Set_Set* s1, struct Cyc_Set_Set*
-s2); extern struct Cyc_Set_Set* Cyc_Set_intersect( struct Cyc_Set_Set* s1,
-struct Cyc_Set_Set* s2); extern struct Cyc_Set_Set* Cyc_Set_diff( struct Cyc_Set_Set*
-s1, struct Cyc_Set_Set* s2); extern struct Cyc_Set_Set* Cyc_Set_delete( struct
-Cyc_Set_Set* s, void* elt); extern int Cyc_Set_cardinality( struct Cyc_Set_Set*
+unsigned char* tag; struct _tagged_arr f1; } ; extern struct _RegionHandle* Cyc_Core_heap_region;
+extern unsigned char* string_to_Cstring( struct _tagged_arr); extern
+unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
+_tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
+ntCsl_to_ntsl( unsigned char**); extern int system( unsigned char*); extern int*
+__errno(); struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; extern
+int Cyc_List_length( struct Cyc_List_List* x); extern unsigned char Cyc_List_List_empty[
+15u]; extern unsigned char Cyc_List_List_mismatch[ 18u]; extern void Cyc_List_app(
+void*(* f)( void*), struct Cyc_List_List* x); extern void Cyc_List_iter( void(*
+f)( void*), struct Cyc_List_List* x); extern void Cyc_List_iter_c( void(* f)(
+void*, void*), void* env, struct Cyc_List_List* x); extern struct Cyc_List_List*
+Cyc_List_merge_sort( int(* less_eq)( void*, void*), struct Cyc_List_List* x);
+extern unsigned char Cyc_List_Nth[ 8u]; struct Cyc_Set_Set; extern struct Cyc_Set_Set*
+Cyc_Set_empty( int(* comp)( void*, void*)); extern struct Cyc_Set_Set* Cyc_Set_rempty(
+struct _RegionHandle* rgn, int(* comp)( void*, void*)); extern struct Cyc_Set_Set*
+Cyc_Set_singleton( int(* comp)( void*, void*), void* x); extern struct Cyc_Set_Set*
+Cyc_Set_from_list( int(* comp)( void*, void*), struct Cyc_List_List* x); extern
+struct Cyc_Set_Set* Cyc_Set_insert( struct Cyc_Set_Set* s, void* elt); extern
+struct Cyc_Set_Set* Cyc_Set_rinsert( struct _RegionHandle* rgn, struct Cyc_Set_Set*
+s, void* elt); extern struct Cyc_Set_Set* Cyc_Set_union_two( struct Cyc_Set_Set*
+s1, struct Cyc_Set_Set* s2); extern struct Cyc_Set_Set* Cyc_Set_intersect(
+struct Cyc_Set_Set* s1, struct Cyc_Set_Set* s2); extern struct Cyc_Set_Set* Cyc_Set_diff(
+struct Cyc_Set_Set* s1, struct Cyc_Set_Set* s2); extern struct Cyc_Set_Set* Cyc_Set_delete(
+struct Cyc_Set_Set* s, void* elt); extern int Cyc_Set_cardinality( struct Cyc_Set_Set*
 s); extern int Cyc_Set_is_empty( struct Cyc_Set_Set* s); extern int Cyc_Set_member(
 struct Cyc_Set_Set* s, void* elt); extern int Cyc_Set_subset( struct Cyc_Set_Set*
 s1, struct Cyc_Set_Set* s2); extern int Cyc_Set_compare( struct Cyc_Set_Set* s1,
@@ -221,5 +219,5 @@ x2=(( struct Cyc_List_List*) _check_null( x2))->tl;} return 0;}} int Cyc_Set_equ
 struct Cyc_Set_Set* s1, struct Cyc_Set_Set* s2){ return(( int(*)( struct Cyc_Set_Set*
 s1, struct Cyc_Set_Set* s2)) Cyc_Set_compare)( s1, s2) == 0;} unsigned char Cyc_Set_Absent[
 11u]="\000\000\000\000Absent"; void* Cyc_Set_choose( struct Cyc_Set_Set* s){ if(
-s->nodes == 0){( void) _throw(( void*) Cyc_Set_Absent);} return( void*)(( struct
+s->nodes == 0){( int) _throw(( void*) Cyc_Set_Absent);} return( void*)(( struct
 Cyc_List_List*) _check_null( s->nodes))->hd;}
