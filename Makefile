@@ -70,7 +70,7 @@ $(BL)/cyc-lib/%/nogc_pthread.a: build/%/pthread/nogc.a
 
 gc_pthread:
 	cp -r gc $@
-	(cd $@; make clean; ./configure --enable-threads=pthreads --enable-shared=no --enable-cplusplus=no)
+	(cd $@; $(MAKE) clean; ./configure --enable-threads=pthreads --enable-shared=no --enable-cplusplus=no)
 
 .PRECIOUS: gc_pthread gc_pthread/.libs/libgc.a
 
@@ -142,99 +142,99 @@ $(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base CFLAGS="-D_HAVE_PTHREAD_ $(CFLAGS)" 
 endef
 
 $(BB)/libcycboot.a:
-	$(rmake)
+	+$(rmake)
 
 $(BB)/aprof/libcycboot.a:
-	$(rmake-aprof)
+	+$(rmake-aprof)
 
 $(BB)/gprof/libcycboot.a:
-	$(rmake-gprof)
+	+$(rmake-gprof)
 
 $(BB)/nocheck/libcycboot.a:
-	$(rmake-nocheck)
+	+$(rmake-nocheck)
 
 LIBCYC_PREREQS=bin/buildlib$(EXE) $(BL)/cyc-lib/$(build)/cycspecs bin/cyclone$(EXE) $(BL)/cyc-lib/cyc_include.h $(BL)/cyc-lib/$(build)/cyc_setjmp.h
 
 # NB: as a side-effect this creates the include directory
 $(BB)/libcyc.a: $(LIBCYC_PREREQS)
-	$(rmake)
+	+$(rmake)
 	for i in `(cd $(BB)/include; find * -type d)`;\
 	  do mkdir -p $(BL)/cyc-lib/$(build)/include/$$i; done
 	for i in `(cd $(BB)/include; find * -name '*.h')`;\
 	  do cp $(BB)/include/$$i $(BL)/cyc-lib/$(build)/include/$$i; done
 
 $(BB)/aprof/libcyc.a: $(LIBCYC_PREREQS)
-	$(rmake-aprof)
+	+$(rmake-aprof)
 
 $(BB)/gprof/libcyc.a: $(LIBCYC_PREREQS)
-	$(rmake-gprof)
+	+$(rmake-gprof)
 
 $(BB)/nocheck/libcyc.a: $(LIBCYC_PREREQS)
-	$(rmake-nocheck)
+	+$(rmake-nocheck)
 
 $(BB)/libxml.a: tools
-	$(rmake)
+	+$(rmake)
 
 $(BB)/aprof/libxml.a: tools
-	$(rmake-aprof)
+	+$(rmake-aprof)
 
 $(BB)/gprof/libxml.a: tools
-	$(rmake-gprof)
+	+$(rmake-gprof)
 
 $(BB)/nocheck/libxml.a: tools
-	$(rmake-nocheck)
+	+$(rmake-nocheck)
 
 $(BB)/nogc.a:
-	$(rmake)
+	+$(rmake)
 
 $(BB)/aprof/nogc.a:
-	$(rmake-aprof)
+	+$(rmake-aprof)
 
 $(BB)/gprof/nogc.a:
-	$(rmake-gprof)
+	+$(rmake-gprof)
 
 $(BB)/nocheck/nogc.a:
-	$(rmake-nocheck)
+	+$(rmake-nocheck)
 
 ifeq ($(HAVE_PTHREAD),yes)
 $(BB)/pthread/nogc.a:
-	$(rmake-pthread)
+	+$(rmake-pthread)
 endif
 
 $(BB)/runtime_cyc.a:
-	$(rmake)
+	+$(rmake)
 
 $(BB)/aprof/runtime_cyc.a:
-	$(rmake-aprof)
+	+$(rmake-aprof)
 
 $(BB)/gprof/runtime_cyc.a:
-	$(rmake-gprof)
+	+$(rmake-gprof)
 
 $(BB)/nocheck/runtime_cyc.a:
-	$(rmake-nocheck)
+	+$(rmake-nocheck)
 
 ifeq ($(HAVE_PTHREAD),yes)
 $(BB)/pthread/runtime_cyc.a:
-	$(rmake-pthread)
+	+$(rmake-pthread)
 endif
 
 $(BB)/cyclone$(EXE): $(BL)/cyc-lib/$(build)/gc.a
-	$(rmake)
+	+$(rmake)
 
 $(BB)/aprof/cyclone$(EXE): $(BL)/cyc-lib/$(build)/gc.a
-	$(rmake-aprof)
+	+$(rmake-aprof)
 
 $(BB)/gprof/cyclone$(EXE): $(BL)/cyc-lib/$(build)/gc.a
-	$(rmake-gprof)
+	+$(rmake-gprof)
 
 $(BB)/nocheck/cyclone$(EXE): $(BL)/cyc-lib/$(build)/gc.a
-	$(rmake-nocheck)
+	+$(rmake-nocheck)
 
 $(BB)/cycdoc$(EXE): $(BL)/cyc-lib/$(build)/gc.a
-	$(rmake)
+	+$(rmake)
 
 $(BB)/buildlib$(EXE): $(BL)/cyc-lib/$(build)/gc.a
-	$(rmake)
+	+$(rmake)
 
 # Directory structure of the installed library.  (During boot,
 # this is built in bin/lib ($(BL)).)
@@ -418,80 +418,80 @@ $(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base CC="$(TARGET_CC)" CFLAGS="-D_HAVE_PT
 endef
 
 $(BT)/libcycboot.a:
-	$(rmake-target)
+	+$(rmake-target)
 
 $(BT)/aprof/libcycboot.a:
-	$(rmake-target-aprof)
+	+$(rmake-target-aprof)
 
 $(BT)/gprof/libcycboot.a:
-	$(rmake-target-gprof)
+	+$(rmake-target-gprof)
 
 $(BT)/nocheck/libcycboot.a:
-	$(rmake-target-nocheck)
+	+$(rmake-target-nocheck)
 
 LIBCYC_TARGET_PREREQS=bin/buildlib$(EXE) $(BL)/cyc-lib/$(target)/cycspecs bin/cyclone$(EXE) $(BL)/cyc-lib/cyc_include.h $(BL)/cyc-lib/$(target)/cyc_setjmp.h
 
 # NB: as a side-effect this creates the include directory
 $(BT)/libcyc.a: $(LIBCYC_TARGET_PREREQS)
-	$(rmake-target)
+	+$(rmake-target)
 	for i in `(cd $(BT)/include; find * -type d)`;\
 	  do mkdir -p $(BL)/cyc-lib/$(target)/include/$$i; done
 	for i in `(cd $(BT)/include; find * -name '*.h')`;\
 	  do cp $(BT)/include/$$i $(BL)/cyc-lib/$(target)/include/$$i; done
 
 $(BT)/aprof/libcyc.a: $(LIBCYC_TARGET_PREREQS)
-	$(rmake-target-aprof)
+	+$(rmake-target-aprof)
 
 $(BT)/gprof/libcyc.a: $(LIBCYC_TARGET_PREREQS)
-	$(rmake-target-gprof)
+	+$(rmake-target-gprof)
 
 $(BT)/nocheck/libcyc.a: $(LIBCYC_TARGET_PREREQS)
-	$(rmake-target-nocheck)
+	+$(rmake-target-nocheck)
 
 $(BT)/libxml.a: tools
-	$(rmake-target)
+	+$(rmake-target)
 
 $(BT)/aprof/libxml.a: tools
-	$(rmake-target-aprof)
+	+$(rmake-target-aprof)
 
 $(BT)/gprof/libxml.a: tools
-	$(rmake-target-gprof)
+	+$(rmake-target-gprof)
 
 $(BT)/nocheck/libxml.a: tools
-	$(rmake-target-nocheck)
+	+$(rmake-target-nocheck)
 
 $(BT)/nogc.a:
-	$(rmake-target)
+	+$(rmake-target)
 
 $(BT)/aprof/nogc.a:
-	$(rmake-target-aprof)
+	+$(rmake-target-aprof)
 
 $(BT)/gprof/nogc.a:
-	$(rmake-target-gprof)
+	+$(rmake-target-gprof)
 
 $(BT)/nocheck/nogc.a:
-	$(rmake-target-nocheck)
+	+$(rmake-target-nocheck)
 
 ifeq ($(HAVE_PTHREAD),yes)
 $(BT)/pthread/nogc.a:
-	$(rmake-target-pthread)
+	+$(rmake-target-pthread)
 endif
 
 $(BT)/runtime_cyc.a:
-	$(rmake-target)
+	+$(rmake-target)
 
 $(BT)/aprof/runtime_cyc.a:
-	$(rmake-target-aprof)
+	+$(rmake-target-aprof)
 
 $(BT)/gprof/runtime_cyc.a:
-	$(rmake-target-gprof)
+	+$(rmake-target-gprof)
 
 $(BT)/nocheck/runtime_cyc.a:
-	$(rmake-target-nocheck)
+	+$(rmake-target-nocheck)
 
 ifeq ($(HAVE_PTHREAD),yes)
 $(BT)/pthread/runtime_cyc.a:
-	$(rmake-target-pthread)
+	+$(rmake-target-pthread)
 endif
 
 directories::
