@@ -1245,12 +1245,14 @@ _temp637); _LL641: if(( unsigned int) _temp639 >  4u?*(( int*) _temp639) ==  Cyc
 0){ goto _LL642;} else{ goto _LL643;} _LL643: if(( unsigned int) _temp639 >  4u?*((
 int*) _temp639) ==  Cyc_Absyn_UnionType: 0){ goto _LL644;} else{ goto _LL645;}
 _LL645: goto _LL646; _LL642: goto _LL644; _LL644: return({ struct _tuple0
-_temp647; _temp647.f1= _temp627; _temp647.f2= _temp625; _temp647;}); _LL646:
-goto _LL640; _LL640:;} goto _LL630; _LL634:( int) _throw(( void*)({ struct Cyc_Core_Impossible_struct*
-_temp648=( struct Cyc_Core_Impossible_struct*) _cycalloc( sizeof( struct Cyc_Core_Impossible_struct));
-_temp648[ 0]=({ struct Cyc_Core_Impossible_struct _temp649; _temp649.tag= Cyc_Core_Impossible;
-_temp649.f1= _tag_arr("anal_Rexp: StructArrow ptr", sizeof( unsigned char), 27u);
-_temp649;}); _temp648;})); _LL630:;}{ void* _temp650= _temp625; struct Cyc_Dict_Dict*
+_temp647; _temp647.f1= _temp627; _temp647.f2= Cyc_CfFlowInfo_typ_to_absrval((
+void*)(( struct Cyc_Core_Opt*) _check_null( e->topt))->v, Cyc_CfFlowInfo_unknown_all);
+_temp647;}); _LL646: goto _LL640; _LL640:;} goto _LL630; _LL634:( int) _throw((
+void*)({ struct Cyc_Core_Impossible_struct* _temp648=( struct Cyc_Core_Impossible_struct*)
+_cycalloc( sizeof( struct Cyc_Core_Impossible_struct)); _temp648[ 0]=({ struct
+Cyc_Core_Impossible_struct _temp649; _temp649.tag= Cyc_Core_Impossible; _temp649.f1=
+_tag_arr("anal_Rexp: StructArrow ptr", sizeof( unsigned char), 27u); _temp649;});
+_temp648;})); _LL630:;}{ void* _temp650= _temp625; struct Cyc_Dict_Dict*
 _temp656; _LL652: if(( unsigned int) _temp650 >  3u?*(( int*) _temp650) ==  Cyc_CfFlowInfo_Aggregate:
 0){ _LL657: _temp656=(( struct Cyc_CfFlowInfo_Aggregate_struct*) _temp650)->f1;
 goto _LL653;} else{ goto _LL654;} _LL654: goto _LL655; _LL653: return({ struct

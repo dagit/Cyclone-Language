@@ -486,7 +486,8 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     case &PointerType(PtrInfo(t2,_,_,_,_)):
       switch(Tcutil::compress(t2)) {
       case &AnonUnionType(_):
-      case &UnionType(_,_,_): return $(f2,r2); // just drop the field
+      case &UnionType(_,_,_): 
+	return $(f2,typ_to_absrval(e->topt->v,unknown_all)); 
       default: break;
       }
       break;
