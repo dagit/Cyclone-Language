@@ -36,6 +36,11 @@ namespace Std {
 #define RLIMIT_NPROC 6
 #define RLIMIT_NOFILE 7
 #define RLIMIT_MEMLOCK 8
+#ifndef __USE_FILE_OFFSET64
+# define RLIM_INFINITY ((unsigned long int)(~0UL))
+#else
+# define RLIM_INFINITY 0xffffffffffffffffuLL
+#endif
 
   typedef unsigned long rlim_t;
 

@@ -31,7 +31,8 @@ namespace Cgrp {
     struct Cgroup *getgrnam(const Cstring name);
     struct Cgroup *getgrgid(gid_t gid);
     int initgroups(Cstring user, gid_t group);
-  }
+    int setgroups(size_t n, const gid_t * groups);
+}
 #define s2c(x) (string_to_Cstring(x))
 #define c2s(x) (Cstring_to_string(x))
 }
@@ -58,4 +59,8 @@ struct group *getgrgid(gid_t gid) {
 
 int initgroups(string_t user, gid_t group) {
   return Cgrp::initgroups(s2c(user), group);
+}
+
+int setgroups(const gid_t? groups) {
+  return Cgrp::setgroups(groups.size,(const gid_t*)groups);
 }

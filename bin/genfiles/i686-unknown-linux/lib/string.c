@@ -248,9 +248,11 @@ int Cyc_Std_strncmp( struct _tagged_arr s1, struct _tagged_arr s2, unsigned int
 len); extern int Cyc_Std_zstrcmp( struct _tagged_arr, struct _tagged_arr);
 extern int Cyc_Std_zstrncmp( struct _tagged_arr s1, struct _tagged_arr s2,
 unsigned int n); extern int Cyc_Std_zstrptrcmp( struct _tagged_arr*, struct
-_tagged_arr*); extern struct _tagged_arr Cyc_Std_strcat( struct _tagged_arr dest,
-struct _tagged_arr src); extern struct _tagged_arr Cyc_Std_strconcat( struct
-_tagged_arr, struct _tagged_arr); extern struct _tagged_arr Cyc_Std_rstrconcat(
+_tagged_arr*); extern int Cyc_Std_strcasecmp( struct _tagged_arr, struct
+_tagged_arr); extern int Cyc_Std_strncasecmp( struct _tagged_arr s1, struct
+_tagged_arr s2, unsigned int len); extern struct _tagged_arr Cyc_Std_strcat(
+struct _tagged_arr dest, struct _tagged_arr src); extern struct _tagged_arr Cyc_Std_strconcat(
+struct _tagged_arr, struct _tagged_arr); extern struct _tagged_arr Cyc_Std_rstrconcat(
 struct _RegionHandle*, struct _tagged_arr, struct _tagged_arr); extern struct
 _tagged_arr Cyc_Std_strconcat_l( struct Cyc_List_List*); extern struct
 _tagged_arr Cyc_Std_rstrconcat_l( struct _RegionHandle*, struct Cyc_List_List*);

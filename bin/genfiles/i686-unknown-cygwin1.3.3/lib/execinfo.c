@@ -251,22 +251,22 @@ int Cyc_Std_DoublePtr_sa= 5; struct Cyc_Std_DoublePtr_sa_struct{ int tag; double
 f1; } ; static const int Cyc_Std_FloatPtr_sa= 6; struct Cyc_Std_FloatPtr_sa_struct{
 int tag; float* f1; } ; struct Cyc_Std_timeval{ int tv_sec; int tv_usec; } ;
 struct Cyc_Std_timezone{ int tz_minuteswest; int tz_dsttime; } ; extern int
-gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone* __z); extern
-int select( int n, struct Cyc_Std__types_fd_set* readfds, struct Cyc_Std__types_fd_set*
-writefds, struct Cyc_Std__types_fd_set* exceptfds, struct Cyc_Std_timeval*
-timeout); struct Cyc_Std_rlimit{ unsigned int rlim_cur; unsigned int rlim_max; }
-; struct Cyc_Std_rusage{ struct Cyc_Std_timeval ru_utime; struct Cyc_Std_timeval
-ru_stime; int ru_maxrss; int ru_ixrss; int ru_idrss; int ru_isrss; int ru_minflt;
-int ru_majflt; int ru_nswap; int ru_inblock; int ru_oublock; int ru_msgsnd; int
-ru_msgrcv; int ru_nsignals; int ru_nvcsw; int ru_nivcsw; } ; extern int
-getrlimit( int resource, struct Cyc_Std_rlimit* rlim); extern int setrlimit( int
-resource, const struct Cyc_Std_rlimit* rlim); extern int getrusage( int who,
-struct Cyc_Std_rusage* rusage); extern int wait( int* status); extern int
-waitpid( int pid, int* status, int options); extern int wait3( int* status, int
-options, struct Cyc_Std_rusage* rusage); void(* Cyc_Std_signal( int sig, void(*
-func)( int)))( int); extern int raise( int sig); extern int kill( int, int); int
-Cyc_Execinfo_backtrace( struct _tagged_arr array, int size){( int) _throw(( void*)({
-struct Cyc_Core_Failure_struct* _temp0=( struct Cyc_Core_Failure_struct*)
+gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone* __z); struct
+Cyc_Std_timespec{ int tv_sec; int tv_nsec; } ; struct Cyc_Std_timeval; extern
+int select( int, struct Cyc_Std__types_fd_set*, struct Cyc_Std__types_fd_set*,
+struct Cyc_Std__types_fd_set*, struct Cyc_Std_timeval*); struct Cyc_Std_rlimit{
+unsigned int rlim_cur; unsigned int rlim_max; } ; struct Cyc_Std_rusage{ struct
+Cyc_Std_timeval ru_utime; struct Cyc_Std_timeval ru_stime; int ru_maxrss; int
+ru_ixrss; int ru_idrss; int ru_isrss; int ru_minflt; int ru_majflt; int ru_nswap;
+int ru_inblock; int ru_oublock; int ru_msgsnd; int ru_msgrcv; int ru_nsignals;
+int ru_nvcsw; int ru_nivcsw; } ; extern int getrlimit( int resource, struct Cyc_Std_rlimit*
+rlim); extern int setrlimit( int resource, const struct Cyc_Std_rlimit* rlim);
+extern int getrusage( int who, struct Cyc_Std_rusage* rusage); extern int wait(
+int* status); extern int waitpid( int pid, int* status, int options); extern int
+wait3( int* status, int options, struct Cyc_Std_rusage* rusage); void(* Cyc_Std_signal(
+int sig, void(* func)( int)))( int); extern int raise( int sig); extern int kill(
+int, int); int Cyc_Execinfo_backtrace( struct _tagged_arr array, int size){( int)
+_throw(( void*)({ struct Cyc_Core_Failure_struct* _temp0=( struct Cyc_Core_Failure_struct*)
 _cycalloc( sizeof( struct Cyc_Core_Failure_struct)); _temp0[ 0]=({ struct Cyc_Core_Failure_struct
 _temp1; _temp1.tag= Cyc_Core_Failure; _temp1.f1= _tag_arr("backtrace: unsupported except under Linux",
 sizeof( unsigned char), 42u); _temp1;}); _temp0;})); return 0;} int Cyc_Execinfo_bt(){

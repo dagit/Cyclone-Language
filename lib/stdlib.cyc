@@ -114,7 +114,7 @@ namespace Std {
     return r;
   }
 
-  void qsort<`a,`r::R>(`a ?`r tab, size_t nmemb, size_t szmemb, 
+  void qsort<`a::B,`r::R>(`a ?`r tab, size_t nmemb, size_t szmemb, 
 		       Array::cmpfn_t<`a,`r,`r> compfn) {
     Array::qsort(compfn, tab, nmemb);
   }

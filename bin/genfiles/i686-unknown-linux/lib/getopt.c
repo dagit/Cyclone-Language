@@ -261,8 +261,11 @@ unsigned int* __seed); extern int grantpt( int __fd); extern int unlockpt( int
 __fd); extern struct _tagged_arr Cyc_Std_getenv( struct _tagged_arr); struct Cyc_Std_timeval{
 int tv_sec; int tv_usec; } ; struct Cyc_Std_timezone{ int tz_minuteswest; int
 tz_dsttime; } ; extern int gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone*
-__z); extern struct _tagged_arr Cyc_Std_optarg; extern int Cyc_Std_optind;
-extern int Cyc_Std_opterr; extern int Cyc_Std_optopt; struct Cyc_Std_option{
+__z); struct Cyc_Std_timespec{ int tv_sec; int tv_nsec; } ; struct Cyc_Std_timeval;
+struct Cyc_Std___fd_set{ int __fds_bits[ 32u]; } ; extern int select( int,
+struct Cyc_Std___fd_set*, struct Cyc_Std___fd_set*, struct Cyc_Std___fd_set*,
+struct Cyc_Std_timeval*); extern struct _tagged_arr Cyc_Std_optarg; extern int
+Cyc_Std_optind; extern int Cyc_Std_opterr; extern int Cyc_Std_optopt; struct Cyc_Std_option{
 struct _tagged_arr name; int has_arg; int* flag; int val; } ; extern int Cyc_Std_getopt(
 int __argc, struct _tagged_arr __argv, struct _tagged_arr __shortopts); extern
 int Cyc_Std__getopt_internal( int __argc, struct _tagged_arr __argv, struct
@@ -271,13 +274,14 @@ __long_only); extern unsigned int alarm( unsigned int seconds); extern int close
 int); extern void _exit( int); extern int getpid(); extern int getppid(); extern
 int fork(); extern int fchdir( int); extern int fchown( int, unsigned int,
 unsigned int); extern int fsync( int); extern int ftruncate( int, int); extern
-int dup( int); extern int dup2( int, int); extern unsigned int getuid(); extern
-int setuid( unsigned int uid); extern unsigned int geteuid(); extern int seteuid(
-unsigned int euid); extern unsigned int getgid(); extern int setgid(
-unsigned int gid); extern unsigned int getegid(); extern int setegid(
-unsigned int egid); extern int nice( int); extern int pause(); extern int pipe(
-int* filedes); extern int lseek( int filedes, int offset, int whence); extern
-unsigned int sleep( unsigned int); extern int isatty( int); int Cyc_Std_access(
+int dup( int); extern int dup2( int, int); extern int setsid(); extern int
+getsid( int pid); extern unsigned int getuid(); extern int setuid( unsigned int
+uid); extern unsigned int geteuid(); extern int seteuid( unsigned int euid);
+extern unsigned int getgid(); extern int setgid( unsigned int gid); extern
+unsigned int getegid(); extern int setegid( unsigned int egid); extern int nice(
+int); extern int pause(); extern int pipe( int* filedes); extern int lseek( int
+filedes, int offset, int whence); extern unsigned int sleep( unsigned int);
+extern int isatty( int); extern int daemon( int nochdir, int noclose); int Cyc_Std_access(
 struct _tagged_arr, int); int Cyc_Std_chdir( struct _tagged_arr); int Cyc_Std_chown(
 struct _tagged_arr, unsigned int, unsigned int); struct _tagged_arr Cyc_Std_getcwd(
 struct _tagged_arr buf, unsigned int size); int Cyc_Std_execl( struct

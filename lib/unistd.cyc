@@ -132,7 +132,7 @@ int truncate(string_t path, off_t length) {
 ssize_t write(int fd, string_t buf, size_t count) {
   if (count > buf.size)
     throw new Failure("write: called with count > buf.size");
-  return Cunistd::write(fd, string_to_Cstring(buf), count);
+  return Cunistd::write(fd, underlying_Cstring(buf), count);
 }
 
 int unlink(string_t pathname) {

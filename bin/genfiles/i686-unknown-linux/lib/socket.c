@@ -233,8 +233,11 @@ extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
 extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_timeval{
 int tv_sec; int tv_usec; } ; struct Cyc_Std_timezone{ int tz_minuteswest; int
 tz_dsttime; } ; extern int gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone*
-__z); struct Cyc_Std_sockaddr_in; struct Cyc_Std_sockaddr{ unsigned short
-sa_family; unsigned char sa_data[ 14u]; } ; static const int Cyc_Std_SA_sockaddr_in=
+__z); struct Cyc_Std_timespec{ int tv_sec; int tv_nsec; } ; struct Cyc_Std_timeval;
+struct Cyc_Std___fd_set{ int __fds_bits[ 32u]; } ; extern int select( int,
+struct Cyc_Std___fd_set*, struct Cyc_Std___fd_set*, struct Cyc_Std___fd_set*,
+struct Cyc_Std_timeval*); struct Cyc_Std_sockaddr_in; struct Cyc_Std_sockaddr{
+unsigned short sa_family; unsigned char sa_data[ 14u]; } ; static const int Cyc_Std_SA_sockaddr_in=
 0; struct Cyc_Std_SA_sockaddr_in_struct{ int tag; struct Cyc_Std_sockaddr_in* f1;
 } ; static const int Cyc_Std_SA_sockaddr= 1; struct Cyc_Std_SA_sockaddr_struct{
 int tag; struct Cyc_Std_sockaddr* f1; } ; static const int Cyc_Std_SA_socklenptr=

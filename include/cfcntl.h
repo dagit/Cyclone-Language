@@ -38,6 +38,9 @@
 #ifdef __CYGWIN__
 #define O_NDELAY    O_NONBLOCK
 #endif
+#ifdef __linux__
+#define O_NDELAY    O_NONBLOCK
+#endif
 #define O_SYNC     010000
 
 #define F_DUPFD 0

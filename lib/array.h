@@ -29,7 +29,7 @@ namespace Array {
 
 typedef int (@cmpfn_t<`a,`r1::R,`r2::R>)(`a @`r1, `a @`r2);
 
-extern void qsort<`a,`r::R>(cmpfn_t<`a,`r,`r>, `a ?`r x, int len);
+extern void qsort<`a::B,`r::R>(cmpfn_t<`a,`r,`r>, `a ?`r x, int len);
   /** [qsort(cmp,x,len)] sorts the first [len] elements of array [x]
       into ascending order (according to the comparison function
       [cmp]) by the QuickSort algorithm.  [cmp(a,b)] should return a
@@ -39,7 +39,7 @@ extern void qsort<`a,`r::R>(cmpfn_t<`a,`r,`r>, `a ?`r x, int len);
       negative or specifies a segment outside the bounds of [x].
 
       [qsort] is not a stable sort. */
-extern void msort(cmpfn_t<`a,`H,`H>, `a ?`H x, int len);
+extern void msort(cmpfn_t<`a::B,`H,`H>, `a ?`H x, int len);
   /** [msort(cmp,x,len)] sorts the first [len] elements of array [x]
       into ascending order (according to the comparison function
       [cmp]), by the MergeSort algorithm.  [msort] throws

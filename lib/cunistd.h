@@ -59,6 +59,8 @@ namespace Std {
     int ftruncate(int, off_t);
     int dup(int);
     int dup2(int, int);
+    pid_t setsid(void);
+    pid_t getsid(pid_t pid);
     uid_t getuid(void);  int setuid(uid_t uid);
     uid_t geteuid(void); int seteuid(uid_t euid);
     gid_t getgid(void);  int setgid(gid_t gid);
@@ -69,6 +71,7 @@ namespace Std {
     off_t lseek(int filedes, off_t offset, int whence);
     unsigned sleep(unsigned);
     int isatty(int);
+    int daemon(int nochdir, int noclose);
 }
 
   int access(string_t,int);
