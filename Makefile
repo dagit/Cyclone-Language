@@ -31,7 +31,7 @@ CYC_INC_PATH := $(CYCDIR)/lib
 
 all: $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/gc.a cyclone tools aprof libs 
 
-cyclone: include/cstdio.h include/csignal.h
+cyclone: include/cstdio.h include/csignal.h $(CYC_LIB_PATH)
 	$(MAKE) -C bin/genfiles install 
 tools:
 	$(MAKE) -C tools/bison  install 
@@ -279,12 +279,12 @@ test_bin:
 	$(MAKE) -C tests\
          CYCC=$(CYCDIR)/bin/cyclone$(EXE)\
          CYCBISON=$(CYCDIR)/bin/cycbison$(EXE)\
-         CYCFLAGS="-g -save-c -pp -I$(CYCDIR)/include -B$(CYCDIR)/bin/cyc-lib"
+         CYCFLAGS="-L$(CYCDIR)/bin/lib -g -save-c -pp -I$(CYCDIR)/include -B$(CYCDIR)/bin/lib/cyc-lib/$(ARCH)"
 test_boot:
 	$(MAKE) -C tests\
          CYCC=$(CYCDIR)/build/boot/cyclone$(EXE)\
          CYCBISON=$(CYCDIR)/bin/cycbison$(EXE)\
-         CYCFLAGS="-L$(CYCDIR)/build/boot -g -save-c -pp -I$(CYCDIR)/include -B$(CYCDIR)/bin/cyc-lib"
+         CYCFLAGS="-L$(CYCDIR)/build/boot -g -save-c -pp -I$(CYCDIR)/include -B$(CYCDIR)/bin/lib/cyc-lib/$(ARCH)"
 
 clean_test:
 	$(MAKE) -C tests clean
