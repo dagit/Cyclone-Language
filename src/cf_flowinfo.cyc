@@ -1448,9 +1448,15 @@ flow_t<`r> kill_flow_region(flow_env_t<`r> fenv, flow_t<`r> f, type_t rgn) {
   }
 }
 
-static void consume_f($(place_set_t<`r> @, Position::seg_t) @env, 
+static void consume_f($(place_set_t<`r> @,
+			flowdict_t<`r>, 
+			Position::seg_t) @env, 
 		      place_t<`r,`r> place) {
-  let &$(consume, loc) = env;
+  let &$(consume, fd, loc) = env;
+  /* if we know that the place to consume is NULL, don't bother to consume it */
+  absRval_t<`r> rval = Zero;
+  if (Dict::lookup_bool(fd,place->root,&rval) && rval == Zero)
+    return;
   DEBUG_PRINT("  adding ");
   DEBUG_PRINT_F(print_place,place);
   DEBUG_PRINT("  to consumed\n");
@@ -1470,7 +1476,7 @@ flow_t<`r> consume_unique_rvals(Position::seg_t loc, flow_t<`r> f) {
   case ReachableFL(fd,relns,cinfo):
     if (cinfo.may_consume == NULL) return f;
     let x = cinfo.consumed;
-    let env = $(&x,loc);
+    let env = $(&x,fd,loc);
     List::iter_c(consume_f,&env,cinfo.may_consume);
     return ReachableFL(fd,relns,ConsumeInfo(x,NULL));
   }

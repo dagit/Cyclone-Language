@@ -781,7 +781,7 @@ static type_t dummy_fntype(type_t eff) {
 }
 
 // Returns true if the region r is in the effect e or else r is the
-// heap region.  If constrain is true, this might cause region or
+// heap or unique region.  If constrain is true, this might cause region or
 // effect evars to become constrained.
 bool region_in_effect(bool constrain, type_t r, type_t e) {
   r = compress(r);
@@ -3834,9 +3834,6 @@ void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t) {
         }
     }
   }
-  // make sure this is not a toplevel unique pointer
-  if (is_unique_pointer(t))
-    terr(loc,"unique pointers not permitted at the toplevel");
 //    fprintf(stderr,"Finished checking toplevel type %s\n",typ2string(t));
 }
 
@@ -4158,7 +4155,8 @@ bool is_unique_path_aux(exp_t e, bool ignore_leaf) {
   case &And_e(_,_):
   case &Or_e(_,_):
   case &Throw_e(_):
-  case &Address_e(_): // address of a `U pointer is not unique
+  case &Address_e(_):
+    // address of a `U pointer is not unique
   case &Sizeoftyp_e(_):
   case &Sizeofexp_e(_):
   case &Offsetof_e(_,_):
@@ -4169,16 +4167,23 @@ bool is_unique_path_aux(exp_t e, bool ignore_leaf) {
   case &Struct_e(_,_,_,_):
   case &AnonStruct_e(_,_):
   case &Array_e(_):
-  case &Tunion_e(_,_,_): // never allow unique tunions (for now)
+  case &Tunion_e(_,_,_):
+    // never allow unique tunions (for now)
   case &Enum_e(_,_,_):
   case &AnonEnum_e(_,_,_):
-  case &Swap_e(_,_): // has void type
+  case &Swap_e(_,_):
+    // has void type
+  case &Var_e(_,&Global_b(_)): 
+    // accessing anything via a global is never a unique path
   case &Primop_e(_,_): return false;
 
   case &Const_e(_):
   case &Malloc_e(_):
   case &New_e(_,_):
-  case &Var_e(_,_): return ignore_leaf || is_unique_pointer(e->topt->v);
+  case &Var_e(_,&Local_b(_)):
+  case &Var_e(_,&Pat_b(_)):
+  case &Var_e(_,&Param_b(_)):
+    return ignore_leaf || is_unique_pointer(e->topt->v);
   case &Conditional_e(_,e1,_): fallthru(e1);
   case &SeqExp_e(_,e1): fallthru(e1);
   case &AssignOp_e(e1,_,_): return is_unique_path_aux(e1,ignore_leaf);
@@ -4262,12 +4267,16 @@ static bool is_unique_path_aux(exp_t e, bool ignore_leaf) {
   case &Struct_e(_,_,_,_):
   case &AnonStruct_e(_,_):
   case &Array_e(_):
-  case &Tunion_e(_,_,_): // never allow unique tunions (for now)
+  case &Tunion_e(_,_,_):
+    // never allow unique tunions (for now)
   case &Enum_e(_,_,_):
   case &AnonEnum_e(_,_,_):
-  case &Swap_e(_,_): // has void type
+  case &Swap_e(_,_):
+    // has void type
+  case &Var_e(_,&Global_b(_)): 
+    // accessing anything via a global is never a unique path
 
-  // These next four are allowed above ... 
+  // These next four are allowed in the real version above ...
   case &AggrArrow_e(_,_): 
   case &AggrMember_e(_,_):
   case &Subscript_e(_,_):
@@ -4278,7 +4287,10 @@ static bool is_unique_path_aux(exp_t e, bool ignore_leaf) {
   case &Const_e(_):
   case &Malloc_e(_):
   case &New_e(_,_):
-  case &Var_e(_,_): return ignore_leaf || is_unique_pointer(e->topt->v);
+  case &Var_e(_,&Local_b(_)):
+  case &Var_e(_,&Pat_b(_)):
+  case &Var_e(_,&Param_b(_)):
+    return ignore_leaf || is_unique_pointer(e->topt->v);
   case &Conditional_e(_,e1,_): fallthru(e1);
   case &SeqExp_e(_,e1): fallthru(e1);
   case &AssignOp_e(e1,_,_): return is_unique_path_aux(e1,ignore_leaf);
