@@ -382,15 +382,14 @@ qvar_t uniquergn_qvar() {
   return (qvar_t)q;
 }
 exp_t uniquergn_exp() {
-  static exp_opt_t e = NULL;
-  if(e==NULL) {
-    let t = rgn_handle_type(unique_rgn_type);
-    e = new Exp{.topt = t, .loc = 0, .annot = &EmptyAnnot_val, .r = 
-		new Var_e(new Global_b(new Vardecl(Extern, uniquergn_qvar(),
-						   0, empty_tqual(0), t, 
-						   NULL, NULL, NULL, false, false)))};
-  }
-  return (exp_t)e;
+  let t = rgn_handle_type(unique_rgn_type);
+  // FIX: this won't share with the original Core unique_region definition!
+  return new Exp{.topt = t, .loc = 0, .annot = &EmptyAnnot_val, .r = 
+                    new Var_e(new Global_b(new Vardecl(Extern, 
+                                                       uniquergn_qvar(),
+                                                       0, empty_tqual(0), t, 
+                                                       NULL, NULL, NULL, 
+                                                       false, false)))};
 }
 
 // pointers
