@@ -226,7 +226,9 @@ void compile_file(string filename) {
   } else {
     Tcutil::flush_warnings();
   }
-  file_close(f);
+  // I believe this duplicate file_close is the cause of the segfault -- Jeff
+  // FIX: However, trying to close a file twice should not cause a segfault
+  // file_close(f);
   Stdio::remove(preprocfile);
   if (out_file_name_opt != null) file_close(out_file);
   return;
