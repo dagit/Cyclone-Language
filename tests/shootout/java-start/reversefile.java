@@ -1,4 +1,4 @@
-// $Id: reversefile.java,v 1.1 2004-09-06 19:33:45 mwh Exp $
+// $Id: reversefile.java,v 1.2 2004-10-09 17:15:47 mwh Exp $
 // http://www.bagley.org/~doug/shootout/
 // from Stephen Darnell
 
@@ -8,8 +8,23 @@ public class reversefile {
     final static int BUFF_SIZE = 4096;
 
     public static void main( String[] args ) {
+	if (args.length == 2) {
+	    InputStream in;
+	    String inFile = args[1];
+	    try {
+	        in = new FileInputStream(inFile);
+	    } catch (IOException e) {
+		System.err.println(e);
+		return;
+	    }
+	    go(in);
+	}
+	//@NOWARM
 	//@START
-	InputStream in = System.in;
+	go(System.in);
+	//@END
+    }
+    static void go(InputStream in) {
 
 	byte[] buff = new byte[BUFF_SIZE];
 	byte[] obuff = new byte[BUFF_SIZE];
@@ -48,6 +63,5 @@ public class reversefile {
 	}
 	catch(IOException ex) {
 	}
-	//@END
     }
 }

@@ -1791,9 +1791,11 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
 
     /* Dump out the Cyclone stubs */
     out_file = (FILE @)cycstubs_file;
-    /* Always include the header, to make sure it has no errors */
-    fprintf(out_file, "#include <%s>\n\n", filename);
     if (cycstubs != NULL) {
+      /* Always include the header, to make sure it has no errors */
+      /* MWH: not always including it, to avoid creating unwanted
+	 dependencies to non-standard libraries (i.e. pthreads) */
+      fprintf(out_file, "#include <%s>\n\n", filename);
       out_file = (FILE @)cycstubs_file;
       for (let x = cycstubs; x != NULL; x = x->tl) {
         let &$(symbol,text) = x->hd;

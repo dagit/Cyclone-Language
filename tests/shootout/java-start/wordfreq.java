@@ -1,4 +1,4 @@
-// $Id: wordfreq.java,v 1.2 2004-09-07 20:33:28 mwh Exp $
+// $Id: wordfreq.java,v 1.3 2004-10-09 17:15:47 mwh Exp $
 // http://www.bagley.org/~doug/shootout/
 // Collection class code is from my friend Phil Chu, Thanks Phil!
 
@@ -13,8 +13,21 @@ class Counter {
 public class wordfreq {
 
     public static void main(String[] args) {
+	Reader r;
+	if (args.length == 2) {
+	    String inFile = args[1];
+	    try {
+		r = new BufferedReader(new FileReader(inFile));
+	    } catch (IOException e) {
+		System.err.println(e);
+		return;
+	    }
+	    wf(r);
+	}
+	//@NOWARM
 	//@START
-	wf();
+	r = new BufferedReader(new InputStreamReader(System.in));
+	wf(r);
 	//@END
     }
 
@@ -27,10 +40,9 @@ public class wordfreq {
         return new String(buf);
     }
   
-    public static void wf() {
+    public static void wf(Reader r) {
         HashMap map = new HashMap();
         try {
-            Reader r = new BufferedReader(new InputStreamReader(System.in));
             StreamTokenizer st = new StreamTokenizer(r);
             st.lowerCaseMode(true);
             st.whitespaceChars( 0, 64 );

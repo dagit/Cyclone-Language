@@ -1,4 +1,4 @@
-// $Id: wc.java,v 1.1 2004-09-06 19:33:45 mwh Exp $
+// $Id: wc.java,v 1.2 2004-10-09 17:15:47 mwh Exp $
 // http://www.bagley.org/~doug/shootout/
 // with help from Dirus@programmer.net
 
@@ -13,8 +13,7 @@ import java.text.*;
 // Christopher J. Van Wyk.
 
 public class wc {
-    public static void main(String[] args) {
-	//@START
+    static void go(InputStream is) {
         int nl = 0, nw = 0, nc = 0;
 
         try {
@@ -22,7 +21,7 @@ public class wc {
             boolean inword = false;
             int length;
 
-            while ((length = System.in.read(buff)) != -1) {
+            while ((length = is.read(buff)) != -1) {
                 nc += length;
                 for(int i = 0; i < length; i++) {
                     char c = (char)buff[i];
@@ -43,6 +42,22 @@ public class wc {
         System.out.println(Integer.toString(nl) + " " +
                            Integer.toString(nw) + " " +
                            Integer.toString(nc));
+    }
+    public static void main(String[] args) {
+	InputStream is;
+	if (args.length == 2) {
+	    String inFile = args[1];
+	    try {
+		is = new FileInputStream(inFile);
+	    } catch (IOException e) {
+		System.err.println(e);
+		return;
+	    }
+	    go(is);
+	}
+	//@NOWARM
+	//@START
+	go(System.in);
 	//@END
     }
 }

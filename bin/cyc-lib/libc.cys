@@ -2118,8 +2118,18 @@ hstub pthread_create {
       // where `a is the return type for the invocation function.
       // Then the type of join() could be changed to properly
       // communicate the type back to the caller.
-  extern "C" int pthread_create (pthread_t @thread, const pthread_attr_t *attr,
-                                 `a (*__start_routine) (`b), `b arg: regions(`b) > `H);
+  namespace Cpthread {
+    extern "C" int pthread_cycfun_wrap($(`a (*__start_routine) (`b),
+				       `b arg) @`H);
+    extern "C" int pthread_create (pthread_t @thread, const pthread_attr_t *attr,
+				   `a (*__start_routine) (`b), `b arg);
+  }
+  static int pthread_create (pthread_t @thread, const pthread_attr_t *attr,
+		      `a (@`H cycfun) (`b), `b arg: regions(`b) > `H) {
+    // FIX: heap allocation
+    return Cpthread::pthread_create(thread,attr,
+				    Cpthread::pthread_cycfun_wrap,new $(cycfun,arg));
+  }
 }
 hstub pthread_join {
   extern "C" int pthread_join (pthread_t thread, void **ret);
@@ -2127,9 +2137,43 @@ hstub pthread_join {
 hstub pthread_yield {
   extern "C" int pthread_yield(void);
 }
+cstub pthread_create {
+#include <stdio.h>
+extern void _pop_handler();
+extern void _push_handler(struct _handler_cons *h);
+extern struct _xtunion_struct *Cyc_Core_get_exn_thrown(void);
+extern const char *Cyc_Core_get_exn_filename(void);
+extern int Cyc_Core_get_exn_lineno();
+static struct __pair {
+  void * (*cycf)(void *);
+  void *arg;
+};
+void *pthread_cycfun_wrap(struct __pair *arg) {
+  struct _handler_cons h;
+  void *res = 0;
+  int status = 0;
+  char *exn_name = NULL;
+  void *(*cycf)(void *) = arg->cycf;
+  void *cycarg = arg->arg;
+  GC_free(arg);
+  _push_handler(&h);
+  if (setjmp(h.handler)) status = 1;
+  if (!status) {
+     res = cycf (cycarg);
+     _pop_handler();
+   } else {
+     struct _xtunion_struct *exn_thrown = Cyc_Core_get_exn_thrown();
+     const char *exn_filename = Cyc_Core_get_exn_filename();
+     int exn_lineno = Cyc_Core_get_exn_lineno();
+     exn_name = exn_thrown->tag;
+     fprintf(stderr,"Uncaught exception %s thrown from thread around %s:%d\n",exn_name,
+	     exn_filename,exn_lineno);
+  }
+  return res;
+}
+}
 ;
 
-// Defines a structure containing a char *
 pwd.h:
 cpp {
 #ifdef __linux__
@@ -4096,6 +4140,8 @@ hstub {
   datatype exn { extern SocketError };
 }
 cycstub {
+  // MWH: for sockaddr_in
+  #include <netinet/in.h>
   datatype exn { SocketError };
   datatype exn.SocketError SocketError_val = SocketError;
 }

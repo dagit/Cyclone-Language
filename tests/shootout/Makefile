@@ -9,7 +9,8 @@ CYC_FLAGS = $(OPT) -DTIMING -Iinclude
 # TO DO: only add this library for those execs that need it
 LDFLAGS = -lm -lpcre
 
-EXELANGS := gcc cyclone cyclone-port java-gcj
+#EXELANGS := gcc cyclone cyclone-port java-gcj
+EXELANGS := gcc cyclone
 JAVALANGS :=  java
 LANGS := $(EXELANGS) $(JAVALANGS)
 
@@ -39,12 +40,14 @@ CATN=catn$(EXE)
 NOGC_EXEFILES := $(foreach lang,cyclone cyclone-port,$(addprefix $(lang)/, $(addsuffix $(EXE),$(NOGC_BENCHMARKS)))) $(addprefix cyclone/, $(addsuffix $(EXE),$(NOGC_OPT_BENCHMARKS)))
 NOGC_EXEFILES += $(addprefix nocheck-,$(NOGC_EXEFILES))
 
+cuj: java-gcj $(EXEFILES) $(JAVAFILES)
+
 all: java-gcj nocheck-cyclone nocheck-cyclone-port $(EXEFILES) $(JAVAFILES) $(NOCHECKFILES)
 
 java-gcj nocheck-cyclone-port nocheck-cyclone:
 	mkdir $@
 
-run: all $(CATN)
+run: cuj $(CATN)
 	@(RUN=`date +"%d%b%y-%H%M"`; \
 	LANGS="$(LANGS)" BENCHMARKS="$(BENCHMARKS)" ./runtests $(N) > run-$$RUN.rout)
 
@@ -87,7 +90,7 @@ $(CYCHIST): cychist.cyc
 	gcc $(CFLAGS) -o $@ -x c $^ $(LDFLAGS)
 
 java/%.java: java-start/%.java
-	./inserttimer < $^ > $@
+	./inserttimer --warmup < $^ > $@
 
 java-gcj/%.java: java-start/%.java
 	./inserttimer < $^ > $@

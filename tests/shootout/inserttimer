@@ -1,10 +1,52 @@
-#!/usr/bin/awk -f
+#!/bin/sh
 #
 # Inserts code for doing timing in a .java file
 
-/@START/  { print "long endMS, startMS = System.currentTimeMillis();"; next }
-/@END/    { print "endMS = System.currentTimeMillis() - startMS;";
-	    print "double diff = (endMS / 1000) + ((endMS \% 1000) * 0.001);";
-	    print "System.err.println(diff);"; next }
-		    { print }
-# /@END/    { printf("endMS = System.currentTimeMillis() - startMS;\nSystem.err.println((endMS / 1000) + \".\" + ((endMS \% 1000) * .001));\n"); next }
+function usage {
+    cat <<XXX
+usage: $0 [--warmup]
+  provide the .java file on stdin
+  produces .java file on stdout
+  --warmup indicates whether to do a warmup run without timing
+XXX
+    exit 1
+}
+
+while [ $# != 0 ]; do
+    case "$1" in
+	"--warmup")
+	    do_warmup=yes
+	    shift
+	    ;;
+	*)
+	    usage
+	    ;;
+    esac
+done 
+
+if [ "${do_warmup}" = "yes" ]; then
+
+cat - | awk \
+'BEGIN { dowarm = 1; }
+ /@NOWARM/  { dowarm = 0; next }
+ /@START/  { if (dowarm) { print "boolean print = false; while (true) { long endMS, startMS = System.currentTimeMillis();"; }
+	     else print "long endMS, startMS = System.currentTimeMillis();";
+              next }
+ /@END/    { print "endMS = System.currentTimeMillis() - startMS;";
+	     print "double diff = (endMS / 1000) + ((endMS \% 1000) * 0.001);";
+             if (dowarm) {
+	       print "if (print) { System.err.println(diff); break; } else print = true; }\n"; }
+             else print "System.err.println(diff);";
+             next }
+	   { print }'
+
+else
+
+cat - | awk \
+'/@START/  { print "long endMS, startMS = System.currentTimeMillis();"; next }
+ /@END/    { print "endMS = System.currentTimeMillis() - startMS;";
+	     print "double diff = (endMS / 1000) + ((endMS \% 1000) * 0.001);";
+	     print "System.err.println(diff);"; next }
+	   { print }'
+
+fi

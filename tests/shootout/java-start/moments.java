@@ -1,4 +1,4 @@
-// $Id: moments.java,v 1.2 2004-09-07 20:33:26 mwh Exp $
+// $Id: moments.java,v 1.3 2004-10-09 17:15:47 mwh Exp $
 // http://www.bagley.org/~doug/shootout/
 
 import java.io.*;
@@ -8,7 +8,24 @@ import java.lang.Math;
 
 public class moments {
     public static void main(String[] args) {
+	BufferedReader in;
+	if (args.length == 2) {
+	    String inFile = args[1];
+	    try {
+	        in = new BufferedReader(new FileReader(inFile));
+	    } catch (IOException e) {
+		System.err.println(e);
+		return;
+	    }
+	    go(in);
+	}
+	//@NOWARM
 	//@START
+	in = new BufferedReader(new InputStreamReader(System.in));
+	go(in);
+	//@END
+    }
+    static void go (BufferedReader in) {
 	String line;
 	Vector nums = new Vector();
 	double num, sum = 0.0;
@@ -23,7 +40,6 @@ public class moments {
 	int i, n, mid = 0;
 
         try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
             while ((line = in.readLine()) != null) {
 		num = Double.parseDouble(line);
 		sum += num;
@@ -73,7 +89,5 @@ public class moments {
 	System.out.println("variance:           " + nf.format(variance));
 	System.out.println("skew:               " + nf.format(skew));
 	System.out.println("kurtosis:           " + nf.format(kurtosis));
-
-	//@END
     }
 }

@@ -98,7 +98,7 @@ int main(int argc, char **argv) {
 /*     do_exit("Failed pthread_once", status); */
 /* #endif */
   // install outermost exception handler
-  if (_set_top_handler() != NULL) return 1;
+  _set_top_handler();
   // set standard file descriptors
   Cyc_stdin->file  = stdin;
   Cyc_stdout->file = stdout;

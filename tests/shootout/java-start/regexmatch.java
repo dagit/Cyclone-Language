@@ -1,4 +1,4 @@
-// $Id: regexmatch.java,v 1.3 2004-09-08 03:39:43 mwh Exp $
+// $Id: regexmatch.java,v 1.4 2004-10-09 17:15:47 mwh Exp $
 // http://www.bagley.org/~doug/shootout/
 
 import java.io.*;
@@ -9,14 +9,32 @@ import org.apache.oro.text.regex.*;
 
 public class regexmatch {
 
-    public static void main(String args[])
+    public static void main(String args[]) 
+	throws IOException, MalformedPatternException {
+	int n = Integer.parseInt(args[0]);
+	BufferedReader in;
+	if (args.length == 2) {
+	    String inFile = args[1];
+	    try {
+	        in = new BufferedReader(new FileReader(inFile));
+	    } catch (IOException e) {
+		System.err.println(e);
+		return;
+	    }
+	    go(in,n);
+	}
+	//@NOWARM
+	//@START
+	in = new BufferedReader(new InputStreamReader(System.in));
+	go(in,n);
+	//@END
+    }
+
+    static void go(BufferedReader in, int n)
 	throws IOException, MalformedPatternException {
 
-	int n = Integer.parseInt(args[0]);
-	//@START
 	LinkedList lines = new LinkedList();
 	try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 	    String line;
 	    while ((line = in.readLine()) != null) {
 		lines.addLast(line);
@@ -75,6 +93,5 @@ public class regexmatch {
 		}
 	    }
 	}
-	//@END
     }
 }

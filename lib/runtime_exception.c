@@ -113,31 +113,26 @@ void Cyc_Core_set_uncaught_exn_fun(int f()) {
   uncaught_fun = f;
 }
 
-#define SET_HANDLER(_handler)						\
-  int status = 0;							\
-  if (setjmp(_handler->handler)) status = 1;				\
-  if (status) {								\
-    char *exn_name;							\
-    struct _xtunion_struct *exn_thrown = Cyc_Core_get_exn_thrown();     \
-    const char *exn_filename = Cyc_Core_get_exn_filename();             \
-    int exn_lineno = Cyc_Core_get_exn_lineno();                         \
-    exn_name = exn_thrown->tag;						\
-    errprintf("Uncaught exception %s thrown from around %s:%d\n",exn_name,\
-	      exn_filename,exn_lineno);					  \
-    return exn_name;							  \
-  }									  \
-  _push_handler(_handler);						  \
-  return NULL;
-
-
-// Used by C code to call Cyclone code
-char *_set_catchall_handler(struct _handler_cons *handler) {
-  SET_HANDLER(handler)
-}
-
 // Called by main to set the topmost exception handler
-char *_set_top_handler() {
-  SET_HANDLER((&top_handler))
+void _set_top_handler() {
+  // We can't put these on the stack since they be blown away on 
+  // the initial return from this function.
+  static int status = 0;
+  static char *exn_name;
+  static struct _xtunion_struct *exn_thrown;
+  static const char *exn_filename;
+  static int exn_lineno;
+
+  if (setjmp(top_handler.handler)) status = 1;
+  if (status) {
+    exn_thrown = Cyc_Core_get_exn_thrown();
+    exn_filename = Cyc_Core_get_exn_filename();
+    exn_lineno = Cyc_Core_get_exn_lineno();
+    exn_name = exn_thrown->tag;
+    errquit("Uncaught exception %s thrown from around %s:%d\n",exn_name,
+	    exn_filename,exn_lineno);
+  }
+  _push_handler(&top_handler);
 }
 
 void* _throw_fn(void* e, const char *filename, unsigned lineno) {
