@@ -34,6 +34,18 @@ struct timezone {
 
 extern "C" int gettimeofday(struct timeval @__p,struct timezone *__z);
 
+struct itimerval {
+  struct timeval it_interval;
+  struct timeval it_value;
+};
+
+#define ITIMER_VIRTUAL 1 
+#define ITIMER_REAL 0 
+#define ITIMER_PROF 2 
+
+  extern "C" int getitimer(int, struct itimerval @);
+  extern "C" int setitimer(int, const struct itimerval @, struct itimerval *);
+
 }
 
 #ifdef __CYGWIN__
