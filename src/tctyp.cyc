@@ -82,7 +82,6 @@ static free_evars_t<`r> add_free_evar(region_t<`r> r,
 
 // will shadow other variables
 static list_t<tvar_t> add_bound_tvar(list_t<tvar_t,`H> tvs, tvar_t tv) {
-  // sanity
   if (tv->identity == -1)
     impos("bound tvar id for %s is NULL", tvar2string(tv));
   return new List(tv,tvs);
@@ -93,13 +92,13 @@ static list_t<tvar_t,`r> remove_bound_tvars(region_t<`r> rgn,
   list_t<tvar_t,`r> r = NULL;
   for (; tvs != NULL; tvs = tvs->tl) {
     bool present = false;
-    for (_ b = btvs; b != NULL; b = b->tl) {
+    for (_ b = btvs; b != NULL; b = b->tl)
       if (tvs->hd->identity == b->hd->identity) {
         present = true;
         break;
       }
-    }
-    if (!present) r = rnew(rgn) List(tvs->hd,r);
+    if (!present) 
+      r = rnew(rgn) List(tvs->hd,r);
   }
   r = imp_rev(r);
   return r;
@@ -111,13 +110,13 @@ static free_tvars_t<`r> remove_bound_tvars_bool(region_t<`r> r,
   for (; tvs != NULL; tvs = tvs->tl) {
     let $(tv,b) = *tvs->hd;
     bool present = false;
-    for (_ b = btvs; b != NULL; b = b->tl) {
+    for (_ b = btvs; b != NULL; b = b->tl)
       if (tv->identity == b->hd->identity) {
         present = true;
         break;
       }
-    }
-    if (!present) res = rnew(r) List(tvs->hd,res);
+    if (!present) 
+      res = rnew(r) List(tvs->hd,res);
   }
   res = imp_rev(res);
   return res;
@@ -221,17 +220,14 @@ static list_t<tvar_t> add_free_tvar(seg_t loc,
 // This assumes the identities and kinds are set, and simply adds
 // the tvar if it's not already present.
 static list_t<tvar_t> fast_add_free_tvar(list_t<tvar_t,`H> tvs, tvar_t tv) {
-  // sanity
   if (tv->identity == -1)
     impos("fast_add_free_tvar: bad identity in tv");
   for (_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl) {
-    // sanity
     let tv2 = tvs2->hd;
     if (tv2->identity == -1)
       impos("fast_add_free_tvar: bad identity in tvs2");
-    if (tv2->identity == tv->identity) {
+    if (tv2->identity == tv->identity)
       return tvs;
-    }
   }
   return new List{tv,tvs};
 }
@@ -242,12 +238,9 @@ static list_t<tvar_t> fast_add_free_tvar(list_t<tvar_t,`H> tvs, tvar_t tv) {
 static free_tvars_t<`r> fast_add_free_tvar_bool(region_t<`r> r,
 						free_tvars_t<`r> tvs, 
 						tvar_t tv, bool b) {
-
-  // sanity
   if (tv->identity == -1)
     impos("fast_add_free_tvar_bool: bad identity in tv");
   for (_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl) {
-    // sanity
     let &$(tv2,*b2) = tvs2->hd;
     if (tv2->identity == -1)
       impos("fast_add_free_tvar_bool: bad identity in tvs2");
@@ -589,16 +582,18 @@ i_check_valid_type_app(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
   case &RefCntCon: case &UniqueCon: case &HeapCon:
   case &FalseCon: case &TrueCon: case &FatCon:
   case &BuiltinCon(...): 
-    if (ts != NULL) impos("%s applied to argument(s)",
-                          typ2string(new AppType(c,ts)));
+    if (ts != NULL) 
+      impos("%s applied to argument(s)", typ2string(new AppType(c,ts)));
     break;
   case &JoinCon: 
     for (; ts != NULL; ts = ts->tl)
       cvtenv = i_check_valid_type(loc,te,cvtenv,&ek,ts->hd,true,true);
     break;
   case &TagCon:
-    if (length(ts) != 1) impos("tag_t applied to wrong number of arguments");
-    cvtenv = i_check_valid_type(loc,te,cvtenv,&ik,ts->hd,false,true); break;
+    if (length(ts) != 1) 
+      impos("tag_t applied to wrong number of arguments");
+    cvtenv = i_check_valid_type(loc,te,cvtenv,&ik,ts->hd,false,true); 
+    break;
   case &EnumCon(n,*edp):
     if (ts != NULL) impos("enum applied to argument(s)");
     if (*edp == NULL || (*edp)->fields == NULL)
@@ -723,7 +718,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     // enter it in the environment, and then check an instantiation
     // of that type.
   case &TypeDeclType(&{.r = td,...},*topt):
-    type_t new_t = copy_type(compress(t));
+    type_t new_typ = copy_type(compress(t));
     switch (td) {
     case &Aggr_td(ad):
       if (te->in_extern_c_include)
@@ -736,8 +731,8 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     case &Datatype_td(dd):
       Tc::tcDatatypedecl(te,loc,dd); break;
     }
-    *topt = new new_t;
-    return i_check_valid_type(loc,te,cvtenv,expected_kind,new_t,put_in_effect,
+    *topt = new new_typ;
+    return i_check_valid_type(loc,te,cvtenv,expected_kind,new_typ,put_in_effect,
                               allow_abs_aggr);
 
   case &PointerType(PtrInfo(t1,*tqp,PtrAtts(rgn_type,nullable,b,zt,_))):
@@ -1091,7 +1086,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
           }
 	}
       // remove the bound vars from the kind environment and the list of free vars
-      cvtenv.kind_env = remove_bound_tvars(Core::heap_region,new_cvtenv.kind_env,*btvs);
+      cvtenv.kind_env = remove_bound_tvars(heap_region,new_cvtenv.kind_env,*btvs);
       new_cvtenv.free_vars = remove_bound_tvars_bool(new_cvtenv.r,new_cvtenv.free_vars,*btvs);
       // add the free vars in to the set of all free vars
       for (_ tvs = new_cvtenv.free_vars; tvs != NULL; tvs = tvs->tl) {
@@ -1252,10 +1247,8 @@ static cvtenv_t<`r> check_valid_type(seg_t loc, tenv_t te,
   let kind_env = cvt.kind_env;
   cvt = i_check_valid_type(loc,te,cvt,expected_kind,t,true,allow_abs_aggr);
 
-  for (_ vs = cvt.free_vars; vs != NULL; vs = vs->tl) {
-    let $(v,_) = *vs->hd;
-    cvt.kind_env = fast_add_free_tvar(kind_env,v);
-  }
+  for (_ vs = cvt.free_vars; vs != NULL; vs = vs->tl)
+    cvt.kind_env = fast_add_free_tvar(kind_env,(*vs->hd)[0]);
 
   // run through the evars and constrain them so that when unified,
   // the resulting type can only have type variables drawn from the
@@ -1327,7 +1320,7 @@ void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t) {
     case &Less_kb(*f,&Kind(RgnKind,Top)):
       *f = kind_to_bound_opt(&rk); break;
     case &Less_kb(*f,k):
-      *f = kind_to_bound_opt(k);       break;
+      *f = kind_to_bound_opt(k); break;
     case &Eq_kb(&Kind(MemKind,a)):
       terr(loc,"type variable %s cannot have kind %s",
 	   tvar2string(x->hd), kind2string(new Kind(MemKind,a)));
@@ -1372,7 +1365,6 @@ void check_fndecl_valid_type(seg_t loc,tenv_t te,fndecl_t fd) {
     break;
   default: impos("check_fndecl_valid_type: not a FnType");
   }
-  region r;
   check_unique_vars(map(fst_fdarg,fd->i.args), loc,
 		    "function declaration has repeated parameter");
   // cache the type on the declaration so we don't have to recompute it
@@ -1381,11 +1373,8 @@ void check_fndecl_valid_type(seg_t loc,tenv_t te,fndecl_t fd) {
 
 // Same as check_valid_type except that we ensure the free type variables
 // are drawn from the given set of bound type variables.
-void check_type(seg_t loc, tenv_t te,
-                list_t<tvar_t,`H> bound_tvars,
-                kind_t expected_kind, 
-                bool allow_evars, 
-                bool allow_abs_aggr,
+void check_type(seg_t loc, tenv_t te, list_t<tvar_t,`H> bound_tvars,
+                kind_t expected_kind, bool allow_evars, bool allow_abs_aggr,
                 type_t t) {
   let cvt = check_valid_type(loc, te,
 			     CVTEnv{heap_region, bound_tvars, false, false,
@@ -1394,10 +1383,8 @@ void check_type(seg_t loc, tenv_t te,
   let free_tvars = remove_bound_tvars(heap_region,map(fst,cvt.free_vars),
 				      bound_tvars);
   let free_evars = map(fst,cvt.free_evars);
-  for (_ fs = free_tvars; fs != NULL; fs = fs->tl) {
-    let ftvn = fs->hd->name;
-    terr(loc,"unbound type variable %s in type %s",*ftvn,typ2string(t));
-  }
+  for (_ fs = free_tvars; fs != NULL; fs = fs->tl)
+    terr(loc,"unbound type variable %s in type %s",*fs->hd->name,typ2string(t));
   if (!allow_evars)
     check_free_evars(free_evars,t,loc);
 }

@@ -612,19 +612,19 @@ int Cyc_Tcutil_is_noalias_path(struct Cyc_Absyn_Exp*);
 int Cyc_Tcutil_is_noalias_pointer_or_aggr(void*);struct _tuple14{int f1;void*f2;};
 # 250
 struct _tuple14 Cyc_Tcutil_addressof_props(struct Cyc_Absyn_Exp*);
-# 271
+# 269
 int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*);
-# 285
+# 283
 void Cyc_Tcutil_check_no_qual(unsigned,void*);
-# 296
+# 294
 void*Cyc_Tcutil_promote_array(void*t,void*rgn,int convert_tag);
-# 299
+# 297
 int Cyc_Tcutil_zeroable_type(void*);
-# 303
+# 301
 int Cyc_Tcutil_force_type2bool(int desired,void*);
-# 306
+# 304
 void*Cyc_Tcutil_any_bool(struct Cyc_List_List*);
-# 308
+# 306
 void*Cyc_Tcutil_any_bounds(struct Cyc_List_List*);struct _tuple15{unsigned f1;int f2;};
 # 28 "evexp.h"
 struct _tuple15 Cyc_Evexp_eval_const_uint_exp(struct Cyc_Absyn_Exp*e);
@@ -679,7 +679,7 @@ struct Cyc_List_List*Cyc_Formatstr_get_format_types(struct Cyc_Tcenv_Tenv*,struc
 struct Cyc_List_List*Cyc_Formatstr_get_scanf_types(struct Cyc_Tcenv_Tenv*,struct _fat_ptr,int isCproto,unsigned);
 # 31 "tc.h"
 extern int Cyc_Tc_aggressive_warn;
-# 62 "tctyp.h"
+# 44 "tctyp.h"
 void Cyc_Tctyp_check_type(unsigned,struct Cyc_Tcenv_Tenv*,struct Cyc_List_List*bound_tvars,struct Cyc_Absyn_Kind*k,int allow_evars,int allow_abs_aggr,void*);
 # 28 "tcexp.h"
 void*Cyc_Tcexp_tcExp(struct Cyc_Tcenv_Tenv*,void**,struct Cyc_Absyn_Exp*);

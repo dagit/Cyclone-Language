@@ -23,43 +23,25 @@
 
 namespace Tctyp {
 using Absyn;
-using Tcenv;
 
-// Checks that a type is well-formed and lives in kind k.  The input
-// list of type variables is used to constrain the kinds and identities
-// of the free type variables in the type.  Returns the list of free
-// type variables in the type.
-//
-// This also performs the following side-effects which most of the 
-// rest of the compiler rightfully assumes have occurred:
-// * expand typedefs
-// * set pointers to declarations for StructType, DatatypeType
-// * change relative type names to absolute type names
-// * set the kind field of type variables: we use the expected kind
-//   initially, but if later constraints force a more constrained kind,
-//   then we move to the more constrained kind.  
-// * add default effects for function types -- the default effect
-//   causes a fresh EffKind type variable e to be generated, and
-//   consists of e and any free effect or region variables within
-//   the function type.
-// * ensures that for any free evar in the type, it can only be 
-//   constrained with types whose free variables are contained in the
-//   set of free variables returned.
-  // extern list_t<tvar_t> check_valid_type(seg_t,tenv_t,list_t<tvar_t>,kind_t k,type_t);
-// Similar to the above except that (a) there are no bound type variables,
-// (b) for function types, we bind the free type variables, (c) the expected
-// kind defaults to MemKind.
-void check_valid_toplevel_type(seg_t,tenv_t,type_t);
-// Special cased for function declarations
-void check_fndecl_valid_type(seg_t,tenv_t,fndecl_t);
-// Same as check_valid_type but ensures that the resulting free variables
-// are compatible with a set of bound type variables.  Note that this
+  // typecheck a type, performing side-effectds which subsequent compilation
+  // may assume:
+  // * expand typedefs
+  // * set pointers to type declarations for aggregate types
+  // * set the kind field of type variables
+  // * add default effects for function types 
+
+void check_valid_toplevel_type(seg_t,Tcenv::tenv_t,type_t);
+void check_fndecl_valid_type(seg_t,Tcenv::tenv_t,fndecl_t);
+
+  // DJG: not sure how out of date this next comment is
+// Ensures that the resulting free variables
+// are compatible with a set of bound type variables.  This has
 // the side effect of constraining the kinds of the bound type variables.
 // In addition, if allow_evars is true, then the evars in the type are
 // unconstrained.  Otherwise, we set all region evars to the heap and
-// all effect evars to the empty set, and signal an error for a free type
-// evar.
-void check_type(seg_t, tenv_t, List::list_t<tvar_t,`H> bound_tvars, kind_t k,
-		bool allow_evars, bool allow_abs_aggr, type_t);
+// all effect evars to the empty set, and signal an error for a free type evar.
+void check_type(seg_t, Tcenv::tenv_t, List::list_t<tvar_t,`H> bound_tvars, 
+		kind_t k, bool allow_evars, bool allow_abs_aggr, type_t);
 }
 #endif

@@ -1983,6 +1983,13 @@ bubble_attributes(region_t<`r> r,type_modifier_t<`r> atts,
   } else return rnew(r) List(atts,tms);
 }
 
+static void rewrite_temp_tvar(tvar_t t){ // change t->name from "#xxx" to "`xxx"
+  if (! is_temp_tvar(t)) return;
+  let s = strconcat("`", *(t -> name));
+  s[1] = 't';
+  t -> name = new{(string_t)s};
+}
+
 
 // Conversion between alternate forms of types
 $(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r> r,

@@ -29,7 +29,6 @@
 #include <string.h>
 #include <dict.h>
 #include <set.h>
-#include "absynpp.h"
 #include "warn.h"
 #include "binding.h"
 #include "cifc.h"
@@ -95,7 +94,7 @@ namespace_name_t resolve_rel_ns(seg_t loc, nsctxt_t<`a> ctxt,
 	return fullname;
       break;
     }
-  err(loc,"namespace %s not found",str_sepstr(rel_ns,"::"));
+  err2(loc,"namespace ", str_sepstr(rel_ns,"::"), " not found");
   throw new BindingError;
 }
 // no need to absolutize because we replace bound occurrence with reference
@@ -283,9 +282,7 @@ void absolutize_decl(seg_t loc, env_t env, qvar_t qv, scope_t sc) {
     if(!at_toplevel(env))
       fallthru;
     break; // happens with extensible datatypes
-  default: 
-    err(loc,"qualified names in declarations unimplemented (%s)",
-	Absynpp::qvar2string(qv));
+  default: err2(loc,"qualified names in declarations unimplemented (", qv, ")");
   }
 }
 // This is a kludge because we find unbound type names (e.g., a struct name)
@@ -319,7 +316,7 @@ void check_warn_override(seg_t loc, env_t env, qvar_t q) {
     case &EnumRes(...):
     case &AnonEnumRes(...): hides_what = "enum tag"; break;
     }
-    warn(loc,"declaration hides %s",hides_what);
+    warn2(loc,"declaration hides ",hides_what);
     return;
   } catch { case &BindingError: return; }
 }
@@ -383,13 +380,10 @@ void resolve_exp(env_t env, exp_t e) {
       case &DatatypeRes(tud,tuf): e->r = new Datatype_e(NULL,tud,tuf); return;
       case &EnumRes(ed,ef):       e->r = new Enum_e(ed,ef); return;
       case &AnonEnumRes(t,ef):    e->r = new AnonEnum_e(t,ef); return;
-      case &AggrRes(ad): 
-	err(e->loc,"bad occurrence of type name %s", Absynpp::qvar2string(q));
-	return;
-	}
-      catch { case &BindingError:
-         err(e->loc,"undeclared identifier %s", Absynpp::qvar2string(q));
-	 return;
+      case &AggrRes(ad): err2(e->loc,"bad occurrence of type name ", q); return;
+      }
+      catch { 
+      case &BindingError: err2(e->loc,"undeclared identifier ", q); return;
       }
     default: return; // only happens if we re-run this pass?
     }
@@ -414,18 +408,14 @@ void resolve_exp(env_t env, exp_t e) {
 	  case &DatatypeRes(tud,tuf):
 	    if (tuf->typs == NULL)
 	      // Don't allow "foo()", require "foo"
-	      err(e->loc,"%s is a constant, not a function",
-		  Absynpp::qvar2string(tuf->name));
+	      err2(e->loc,tuf->name," is a constant, not a function");
 	    e->r = new Datatype_e(es,tud,tuf);
 	    return;
 	  case &AnonEnumRes(...):
 	  case &EnumRes(...):
-	    err(e->loc,"%s is an enum constructor, not a function",
-		Absynpp::qvar2string(q));
-	    return;
-	  } catch { case &BindingError:
-	    err(e->loc,"undeclared identifier %s", Absynpp::qvar2string(q));
-	    return;
+	    err2(e->loc, q," is an enum constructor, not a function"); return;
+	  } catch { 
+	  case &BindingError: err2(e->loc,"undeclared identifier ",q); return;
 	  }
 	default: return; // only happens if we re-run this pass?
 	}
@@ -440,7 +430,7 @@ void resolve_exp(env_t env, exp_t e) {
       *tn = (*adopt)->name;
       return;
     } catch { case &BindingError:
-      err(e->loc,"unbound struct/union name %s", Absynpp::qvar2string(*tn));
+      err2(e->loc,"unbound struct/union name ", *tn);
       return;
     }
 
@@ -550,7 +540,7 @@ void resolve_exp(env_t env, exp_t e) {
     return;
 	
   case &Asm_e(...): 
-    err(e->loc, "asm expressions cannot occur within Cyclone code");
+    err2(e->loc, "asm expressions cannot occur within Cyclone code");
   }
 }
 
@@ -597,7 +587,7 @@ list_t<vardecl_t> get_fun_vardecls(bool need_va_name,
     let VarargInfo(v,tq,t,i) = *vai;
     if(v==NULL) {
       if(need_va_name)
-	err(loc,"missing name for vararg");
+	err2(loc,"missing name for vararg");
     } else {
       // HeapRegion is wrong -- changed by type-checker!
       let typ = fatptr_type(t, heap_rgn_type, tq, false_type);
@@ -664,10 +654,8 @@ void resolve_type(seg_t loc, env_t env, type_t t) {
 	case &DatatypeRes(tud,tuf):
 	  let tud2 = resolve_lookup(loc,env->ns,qvd,lookup_datatypedecl)->hd;
 	  if(qvar_cmp(tud->name,tud2->name) != 0) {
-	    err(loc,"%s is a variant of %s, not %s (shadowing not yet implemented properly)",
-		Absynpp::qvar2string(tuf->name),
-		Absynpp::qvar2string(tud2->name),
-		Absynpp::qvar2string(tud->name));
+	    err2(loc, tuf->name, " is a variant of ", tud2->name, " not ",
+		 tud->name, " (shadowing not yet implemented properly)");
 	    return;
 	  }
 	  *info = UnknownDatatypefield(UnknownDatatypeFieldInfo(tud->name,
@@ -676,8 +664,7 @@ void resolve_type(seg_t loc, env_t env, type_t t) {
 	default: break;
 	}
       catch {case &BindingError: break; }
-      err(loc,"%s is not a datatype field", Absynpp::qvar2string(qvf));
-      return;
+      err2(loc, qvf, " is not a datatype field"); return;
     case {.KnownDatatypefield=_}: return;
     }
 
@@ -689,10 +676,10 @@ void resolve_type(seg_t loc, env_t env, type_t t) {
       try {
 	let ad = resolve_lookup(loc,env->ns,qv,lookup_aggrdecl);
 	if(ad->kind != ak)
-	  err(loc,"struct vs. union mismatch with earlier declaration");
+	  err2(loc,"struct vs. union mismatch with earlier declaration");
 	if(ak==UnionA && bo != NULL && ad->impl != NULL // ???
 	   && ad->impl->tagged != bo->v)
-	  err(loc,"@tagged mismatch with earlier declaration");
+	  err2(loc,"@tagged mismatch with earlier declaration");
 	*info = UnknownAggr(ak,ad->name,bo);
 	return;
       } catch {case &BindingError: 
@@ -718,7 +705,7 @@ void resolve_type(seg_t loc, env_t env, type_t t) {
       *tdn = td->name;
       return;
     } catch {case &BindingError: break; }
-    err(loc,"unbound typdef name %s",Absynpp::qvar2string(*tdn));
+    err2(loc,"unbound typdef name ",*tdn);
     return;
 
   case &TypeDeclType(td,*to): 
@@ -808,8 +795,7 @@ void resolve_pat(env_t env, pat_t p) { // must not be at top-level
     try switch(lookup_ordinary(loc,env,qv)) {
     case &VarRes(_): break; // legal shadowing, same as BindingError
     case &AggrRes(_):
-      err(loc,"struct tag used without arguments in pattern");
-      return;
+      err2(loc,"struct tag used without arguments in pattern"); return;
     case &DatatypeRes(tud,tuf):
       p->r = new Datatype_p(tud,tuf,NULL,false); return;
     case &EnumRes(ed,ef):
@@ -837,10 +823,9 @@ void resolve_pat(env_t env, pat_t p) { // must not be at top-level
       p->r = new Datatype_p(tud,tuf,ps,dots); return;
     case &EnumRes(_,_):
     case &AnonEnumRes(_,_):
-      err(loc,"enum tag used with arguments in pattern"); return;
+      err2(loc,"enum tag used with arguments in pattern"); return;
     } catch { case &BindingError: break; }
-    err(loc, "%s is not a constructor in pattern", Absynpp::qvar2string(qv));
-    return;
+    err2(loc, qv, " is not a constructor in pattern"); return;
 
   case &Aggr_p(&{.UnknownAggr= $(_,n,_)} , exist_ts, dps, dots):
     for(let dps2=dps; dps2 != NULL; dps2 = dps2->tl)
@@ -849,8 +834,7 @@ void resolve_pat(env_t env, pat_t p) { // must not be at top-level
       let ad = resolve_lookup(loc,env->ns,n,lookup_aggrdecl);
       p->r = new Aggr_p(new KnownAggr(new ad), exist_ts, dps, dots);
     } catch { case &BindingError: 
-       err(loc, "non-aggregate name has designator patterns");
-       return;
+       err2(loc, "non-aggregate name has designator patterns"); return;
     }
     return;
 
@@ -965,7 +949,7 @@ void resolve_decl(env_t env, decl_t d) {
 
   case &Let_d(p,_,exp,_): // leave it to tcpat mess to set vds field
     if(at_toplevel(env)) {
-      err(loc,"let not allowed at top-level");
+      err2(loc,"let not allowed at top-level");
       break;
     }
     resolve_exp(env,exp);
@@ -985,7 +969,7 @@ void resolve_decl(env_t env, decl_t d) {
 
   case &Typedef_d(td): // DJG: I think extern_c is always false at this stage
     if (!at_toplevel(env)) {
-      err(loc,"nested type definitions are not yet supported");
+      err2(loc,"nested type definitions are not yet supported");
       break;
     }
     absolutize_decl(loc,env,td->name, (td->extern_c ?  ExternC : Public));
@@ -1001,7 +985,7 @@ void resolve_decl(env_t env, decl_t d) {
 
   case &Aggr_d(ad): 
     if (!at_toplevel(env)) {
-      err(loc,"nested type definitions are not yet supported");
+      err2(loc,"nested type definitions are not yet supported");
       break;
     }
     absolutize_decl(loc,env,ad->name,ad->sc);
@@ -1025,7 +1009,7 @@ void resolve_decl(env_t env, decl_t d) {
 
   case &Enum_d(ed): 
     if (!at_toplevel(env)) {
-      err(loc,"nested type definitions are not yet supported");
+      err2(loc,"nested type definitions are not yet supported");
       break;
     }
     absolutize_decl(loc,env,ed->name,ed->sc);
@@ -1093,7 +1077,7 @@ void resolve_decl(env_t env, decl_t d) {
 	    (*f->name)[0] = (*tud->name)[0];
 	  break;
 	case {.Rel_n = _}:
-	  err(f->loc,"qualified datatype field declaratations are not allowed");
+	  err2(f->loc,"qualified datatype field declaratations not allowed");
 	  return;
 	case {.Abs_n = _}: break;
 	default: impos("datatype field Loc_n or C_n");
@@ -1137,7 +1121,7 @@ void resolve_decl(env_t env, decl_t d) {
     // reasons, it's impossible to have namespace, using, or nested exports
     // inside an extern "C include"
     if(!at_toplevel(env)) {
-      err(loc,"extern \"C include\" not at toplevel");
+      err2(loc,"extern \"C include\" not at toplevel");
       break;
     }
     let data = Dict::lookup(env->ns->ns_data,env->ns->curr_ns);
@@ -1153,7 +1137,7 @@ void resolve_decl(env_t env, decl_t d) {
       if(!Dict::member(new_dict,v)
 	 || (Dict::member(old_dict,v) &&
 	     (Dict::lookup(old_dict,v)==Dict::lookup(new_dict,v))))
-	err(loc,"%s is exported but not defined",*v);
+	err2(loc, *v, " is exported but not defined");
       out_dict = Dict::insert(out_dict,v,Dict::lookup(new_dict,v));
     }
     data->ordinaries = out_dict;
@@ -1166,8 +1150,7 @@ void resolve_decl(env_t env, decl_t d) {
   case &Porton_d: // let Tc warn for now
   case &Portoff_d: 
   case &Tempeston_d:
-  case &Tempestoff_d:
-    break;
+  case &Tempestoff_d: break;
   }
 }
 

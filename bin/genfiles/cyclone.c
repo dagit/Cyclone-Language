@@ -561,8 +561,8 @@ struct Cyc_Interface_I*Cyc_Interface_parse(struct Cyc___cycFILE*);
 void Cyc_Interface_save(struct Cyc_Interface_I*,struct Cyc___cycFILE*);
 # 84
 struct Cyc_Interface_I*Cyc_Interface_load(struct Cyc___cycFILE*);
-# 30 "warn.h"
-void Cyc_Warn_flush_warnings();
+# 31 "warn.h"
+void Cyc_Warn_flush_warnings();struct Cyc_Warn_String_Warn_Warg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Warn_Exp_Warn_Warg_struct{int tag;struct Cyc_Absyn_Exp*f1;};struct Cyc_Warn_Typ_Warn_Warg_struct{int tag;void*f1;};struct Cyc_Warn_Qvar_Warn_Warg_struct{int tag;struct _tuple0*f1;};
 # 29 "specsfile.h"
 struct _fat_ptr Cyc_Specsfile_target_arch;
 void Cyc_Specsfile_set_target_arch(struct _fat_ptr s);

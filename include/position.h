@@ -52,7 +52,7 @@ namespace Position {
   // Line number translation //
   // Returns a string which can be inserted into the output c file
   // to indicate where the code came from in the original cyclone file
-  extern string_t get_line_directive(seg_t loc);
+  extern string_t get_line_directive(seg_t);
 }
 
 

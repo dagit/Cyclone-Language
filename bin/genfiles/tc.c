@@ -496,17 +496,17 @@ int Cyc_Tcutil_is_noalias_pointer(void*t,int must_be_unique);
 int Cyc_Tcutil_is_noalias_pointer_or_aggr(void*);
 # 261
 void Cyc_Tcutil_add_tvar_identities(struct Cyc_List_List*);
-# 271
+# 269
 int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*);
-# 278
+# 276
 int Cyc_Tcutil_extract_const_from_typedef(unsigned,int declared_const,void*);
-# 282
+# 280
 struct Cyc_List_List*Cyc_Tcutil_transfer_fn_type_atts(void*,struct Cyc_List_List*);
-# 299
+# 297
 int Cyc_Tcutil_zeroable_type(void*);
-# 303
+# 301
 int Cyc_Tcutil_force_type2bool(int desired,void*);
-# 306
+# 304
 void*Cyc_Tcutil_any_bool(struct Cyc_List_List*);struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);};struct Cyc_Dict_T;struct Cyc_Dict_Dict{int(*rel)(void*,void*);struct _RegionHandle*r;const struct Cyc_Dict_T*t;};extern char Cyc_Dict_Present[8U];struct Cyc_Dict_Present_exn_struct{char*tag;};extern char Cyc_Dict_Absent[7U];struct Cyc_Dict_Absent_exn_struct{char*tag;};
 # 83 "dict.h"
 int Cyc_Dict_member(struct Cyc_Dict_Dict d,void*k);
@@ -532,11 +532,10 @@ struct Cyc_RgnOrder_RgnPO*Cyc_Tcenv_curr_rgnpo(struct Cyc_Tcenv_Tenv*);
 # 151
 void Cyc_Tcenv_check_delayed_effects(struct Cyc_Tcenv_Tenv*);
 void Cyc_Tcenv_check_delayed_constraints(struct Cyc_Tcenv_Tenv*);
-# 52 "tctyp.h"
+# 34 "tctyp.h"
 void Cyc_Tctyp_check_valid_toplevel_type(unsigned,struct Cyc_Tcenv_Tenv*,void*);
-# 54
 void Cyc_Tctyp_check_fndecl_valid_type(unsigned,struct Cyc_Tcenv_Tenv*,struct Cyc_Absyn_Fndecl*);
-# 62
+# 44 "tctyp.h"
 void Cyc_Tctyp_check_type(unsigned,struct Cyc_Tcenv_Tenv*,struct Cyc_List_List*bound_tvars,struct Cyc_Absyn_Kind*k,int allow_evars,int allow_abs_aggr,void*);
 # 28 "tcexp.h"
 void*Cyc_Tcexp_tcExp(struct Cyc_Tcenv_Tenv*,void**,struct Cyc_Absyn_Exp*);

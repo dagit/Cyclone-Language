@@ -247,7 +247,7 @@ static void anal_stmt(senv_t env, stmt_t s) {
   case &Label_s(lab,s1): 
     try { 
       Hashtable::lookup(env.fenv->labels,lab);
-      Warn::err(s->loc,"repated label");
+      Warn::err2(s->loc,"repated label");
     } catch { case &Core::Not_found: break; }
     Hashtable::insert(env.fenv->labels,lab,s);
     anal_stmt(env,s1);
@@ -341,11 +341,11 @@ static void anal_fd(jump_anal_res_t tables, fndecl_t fd) {
 		 .enclosers=src_enclose}= Hashtable::lookup(stmt_info,src_stmt);
       switch (dest) {
       case &NotLoop_j: 
-	Warn::err(src_stmt->loc,"jump has no target"); 
+	Warn::err2(src_stmt->loc,"jump has no target"); 
 	break;
       case &CaseEnd_j: 
-	Warn::err(src_stmt->loc,
-		  "break causes outer switch to implicitly fallthru"); 
+	Warn::err2(src_stmt->loc,
+		   "break causes outer switch to implicitly fallthru"); 
 	break;
       case &FnEnd_j: 
 	Hashtable::insert(succ_table,src_stmt,NULL);
@@ -359,7 +359,7 @@ static void anal_fd(jump_anal_res_t tables, fndecl_t fd) {
 	try dest_stmt = Hashtable::lookup(fenv->labels, lab);
 	catch { 
 	case &Core::Not_found: 
-	  Warn::err(src_stmt->loc, "label %s undefined", *lab); 
+	  Warn::err2(src_stmt->loc, "label ", *lab, " undefined"); 
 	  goto L;
 	}
 	let &SaveEnv{.enclosers=dest_enclose,...} =
@@ -370,8 +370,8 @@ static void anal_fd(jump_anal_res_t tables, fndecl_t fd) {
 	    if(src_enclose->hd == dest_scope)
 	      break;
 	  if(src_enclose==NULL) {
-	    Warn::err(src_stmt->loc, 
-		      "goto enters local scope or exception handler");
+	    Warn::err2(src_stmt->loc, 
+		       "goto enters local scope or exception handler");
 	    break;
 	  }
 	}
