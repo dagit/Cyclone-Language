@@ -313,7 +313,6 @@ static type_t typ_to_c(type_t t) {
     // just drop the type arguments & effect and translate the nested types
     // FIX:  problem with higher-order functions?  Again C's rules are strange.
     // FIX:  dropping noreturn and const attributes b/c C is complaining.
-    // (Dan needs them in MSVC...)
     let new_atts = atts;
     let new_atts = null;
     for (; atts != null; atts = atts->tl)
@@ -506,8 +505,7 @@ static exp_t make_toplevel_tagged_arr(type_t t, exp_t sz, exp_t e) {
   if (is_string) {
     qvar_t    x      = temp_var();
     type_t    vd_typ = new ArrayType(uchar_t,mt_tq,sz);
-    vardecl_t vd     
-      = static_vardecl(x,vd_typ,e);
+    vardecl_t vd     = static_vardecl(x,vd_typ,e);
     result_decls = new List(new_decl(new Var_d(vd),DL),result_decls);
     xexp = var_exp(x,DL);
   } else 
@@ -536,9 +534,6 @@ static exp_t make_toplevel_tagged_arr(type_t t, exp_t sz, exp_t e) {
 // where the ith element of fallthru_info->v[1] is qvi
 // and varmap' is fallthru_info->v[2]
 // (We also have to pop handlers as explained above.)
-//
-// Note that the varmap has to take into account the shadow number
-// from bindings -- hence the domain of the map is qvar*int.
 static struct Env {
   opt_t<var_t> break_lab;
   opt_t<var_t> continue_lab;
@@ -2377,9 +2372,10 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
   }
 }
 
+// forward declarations
 static stmt_t letdecl_to_c(env_t nv, pat_t p, opt_t<type_t> topt, exp_t e,
-			 bool exhaust, stmt_t s); // forward declaration
-static env_t decls_to_c(env_t nv, list_t<decl_t> ds, bool top);
+			   bool exhaust, stmt_t s);
+static void local_decl_to_c(env_t body_nv,env_t init_nv,vardecl_t vd,stmt_t s);
 
 ///////////////////////////////////////////////////////////////
 //              Translation of Statements                    //
@@ -2479,30 +2475,32 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       // (not at the top-level) specially because these have to return 
       // "statements".  See letdecl_to_c and decls_to_c below.
       switch (d->r) {
+      case &Var_d(vd):
+	let nv2 = add_varmap(nv,vd->name,varb_exp(vd->name,new Local_b(vd),DL));
+	local_decl_to_c(nv2, nv2, vd, s1);
+	break;
       case &Let_d(p,_,topt,e,exhaust):
-        // Handle the special case where the pattern is a 
-        // variable just like a variable declaration
-	/* JGM: this isn't valid because of the following bad code:
-	 *   int *i = new 3;
-	 *   let i = i;
-        let var_case = false;
-        struct Vardecl *vdopt = null;
+        // Handle the special case where the pattern is a variable just like
+	// a variable declaration, except variable's scope does NOT include e
         switch (p->r) {
         case &Var_p(vd):
-          var_case = true;
-          vdopt = vd;
+	  qvar_t old_name = vd->name;
+	  qvar_t new_name = temp_var();
+	  vd->name = new_name;
           vd->initializer = e;
           d->r = new Var_d(vd);
+	  let nv2 = 
+	    add_varmap(nv,old_name,varb_exp(new_name,new Local_b(vd),DL));
+	  local_decl_to_c(nv2, nv, vd, s1);
           break;
-        default: break;
+        default: 
+	  // we treat let declarations specially because they may need
+	  // statements in addition to declarations, so we splice them in
+	  // as a statement.  Other declarations only produce declarations.
+	  s->r = letdecl_to_c(nv, p, topt, e, exhaust, s1)->r;
+	  break;
         }
-        if (var_case) fallthru((vardecl_t)vdopt);
-	*/
-	// we treat let declarations specially because they may need
-	// statements in addition to declarations, so we splice them in
-	// as a statement.  Other declarations only produce declarations.
-	s->r = letdecl_to_c(nv, p, topt, e, exhaust, s1)->r;
-        break;
+	break;
       case &Letv_d(vds):
         //let nv2 = nv;
         //for (; vds != null; vds = vds->tl) {
@@ -2525,25 +2523,6 @@ static void stmt_to_c(env_t nv, stmt_t s) {
           s->r = decl_stmt(d2,new_stmt(s->r,DL),DL)->r;
         }
         stmt_to_c(nv,s);
-        break;
-      case &Var_d(vd):
-        let c_name = vd->name;
-        vd->type = typ_to_c_array(vd->type);
-        let nv2 = add_varmap(nv,c_name,varb_exp(c_name,new Local_b(vd),DL));
-        stmt_to_c(nv2,s1);
-        if (vd->initializer != null) {
-          exp_t init = (exp_t)vd->initializer;
-          switch (init->r) {
-          case &Comprehension_e(vd2,e1,e2):
-            vd->initializer = null;
-            s1->r = init_comprehension(nv, var_exp(c_name, DL), vd2, e1, e2,
-                                       new_stmt(s1->r,DL), false)->r;
-            break;
-          default:
-            exp_to_c(nv, init);
-            break;
-          }
-        }
         break;
       default:
         impos("bad nested declaration within function");
@@ -2939,6 +2918,26 @@ static void enumdecl_to_c(env_t nv,enumdecl_t ed) {
       }
 }
 
+// we've decided let x = e and t x = e have different rules on e's
+// environment, so we make the caller pass us an environment.
+static void local_decl_to_c(env_t body_nv,env_t init_nv,vardecl_t vd,stmt_t s) {
+  vd->type = typ_to_c_array(vd->type);
+  stmt_to_c(body_nv,s);
+  if(vd->initializer != null) {
+    exp_t init = (exp_t)vd->initializer;
+    switch(init->r) {
+    case &Comprehension_e(vd2,e1,e2):
+      vd->initializer = null;
+      s->r = init_comprehension(init_nv, var_exp(vd->name, DL), vd2, e1, e2,
+				new_stmt(s->r,DL), false)->r;
+      break;
+    default:
+      exp_to_c(init_nv, init);
+      break;
+    }
+  }
+}
+
 // let declarations -- tricky
 // Unlike other declarations, lets need to execute statements and
 // so return a statement.  (See stmt_to_c, case for Decl above.)
@@ -2979,12 +2978,10 @@ static stmt_t letdecl_to_c(env_t nv, pat_t p, opt_t<type_t> topt, exp_t e,
 // and a new translation environment.  All source-level variables should
 // be entered in the varmap of the env.  Note that top-level variable
 // declarations are treated differently.
-//
-// FIX:  the translation of top-level variable declarations needs to be
-// fixed to make expressions "constant" initializers for C (e.g.,
-// constructor expressions, new structs, etc.)
 static env_t decls_to_c(env_t nv, list_t<decl_t> ds, bool top) {
   for (; ds != null; ds = ds->tl) {
+    if (!nv->toplevel)
+      impos("decls_to_c: not at toplevel!");
     decl_t d = ds->hd;
     switch (d->r) {
     case &Var_d(vd):
@@ -2994,8 +2991,6 @@ static env_t decls_to_c(env_t nv, list_t<decl_t> ds, bool top) {
 	c_name = new $(rel_ns,(*c_name)[1]);
       if (vd->initializer != null)
 	exp_to_c(nv, (exp_t)vd->initializer);
-      if (!nv->toplevel)
-        impos("decls_to_c: not at toplevel!");
       nv = add_varmap(nv,vd->name,varb_exp(c_name,new Global_b(vd),DL));
       vd->name = c_name;
       vd->sc   = scope_to_c(vd->sc);
@@ -3003,8 +2998,8 @@ static env_t decls_to_c(env_t nv, list_t<decl_t> ds, bool top) {
       result_decls = new List(d,result_decls);
       break;
     case &Fn_d(fd):
-      // extern C declarations are not placed in a namespace
       let c_name = fd->name;
+      // strip any namespace from an extern C declaration
       if (fd->sc == ExternC)
 	c_name = new $(rel_ns,(*c_name)[1]);
       nv = add_varmap(nv,fd->name,var_exp(c_name,DL));
@@ -3012,13 +3007,9 @@ static env_t decls_to_c(env_t nv, list_t<decl_t> ds, bool top) {
       fndecl_to_c(nv, fd);
       result_decls = new List(d,result_decls);
       break;
-    case &Let_d(_,_,_,_,_):
-      // this is handled in stmt_to_c
-      toc_impos("letdecl");
-      break;
+    case &Let_d(_,_,_,_,_): fallthru;
     case &Letv_d(_):
-      // this is handled in stmt_to_c
-      toc_impos("letdecl");
+      toc_impos("letdecl at toplevel");
       break;
     case &Struct_d(sd):
       structdecl_to_c(sd);

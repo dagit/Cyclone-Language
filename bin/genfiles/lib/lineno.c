@@ -149,20 +149,19 @@ _temp34[ 0]=({ struct Cyc_Core_Failure_struct _temp35; _temp35.tag= Cyc_Core_Fai
 _temp35.f1= _tag_arr("Lineno: Impossible", sizeof( unsigned char), 19u); _temp35;});
 _temp34;}));}} while( places != 0? eol >=(*(( struct _tuple1*)(( struct Cyc_List_List*)
 _check_null( places))->hd)).f1: 0) { struct Cyc_Lineno_Pos* _temp36=(*(( struct
-_tuple1*)(( struct Cyc_List_List*) _check_null( places))->hd)).f2; goto _LL37;
-_LL37: _temp36->logical_file= source_file; _temp36->line= this_line; _temp36->line_no=
-line; _temp36->col= Cyc_String_strlen(( struct _tagged_arr) this_line) -( eol -(*((
-struct _tuple1*)(( struct Cyc_List_List*) _check_null( places))->hd)).f1);
-places=(( struct Cyc_List_List*) _check_null( places))->tl;} ++ line;}};
-_pop_handler();} else{ void* _temp24=( void*) _exn_thrown; void* _temp39=
-_temp24; _LL41: goto _LL42; _LL43: goto _LL44; _LL42: Cyc_Stdio_file_close( f);(
-int) _throw( _temp39); _LL44:( void) _throw( _temp39); _LL40:;}}} Cyc_Stdio_file_close(
-f); return;}} struct Cyc_Lineno_Pos* Cyc_Lineno_pos_of_abs( struct _tagged_arr
-filename, int abs){ struct Cyc_Lineno_Pos* ans=({ struct Cyc_Lineno_Pos* _temp47=(
-struct Cyc_Lineno_Pos*) GC_malloc( sizeof( struct Cyc_Lineno_Pos)); _temp47->logical_file=
-_tag_arr("", sizeof( unsigned char), 1u); _temp47->line= Cyc_Core_new_string( 0);
-_temp47->line_no= 0; _temp47->col= 0; _temp47;}); Cyc_Lineno_poss_of_abss(
-filename,({ struct Cyc_List_List* _temp45=( struct Cyc_List_List*) GC_malloc(
-sizeof( struct Cyc_List_List)); _temp45->hd=( void*)({ struct _tuple1* _temp46=(
-struct _tuple1*) GC_malloc( sizeof( struct _tuple1)); _temp46->f1= abs; _temp46->f2=
-ans; _temp46;}); _temp45->tl= 0; _temp45;})); return ans;}
+_tuple1*)(( struct Cyc_List_List*) _check_null( places))->hd)).f2; _temp36->logical_file=
+source_file; _temp36->line= this_line; _temp36->line_no= line; _temp36->col= Cyc_String_strlen((
+struct _tagged_arr) this_line) -( eol -(*(( struct _tuple1*)(( struct Cyc_List_List*)
+_check_null( places))->hd)).f1); places=(( struct Cyc_List_List*) _check_null(
+places))->tl;} ++ line;}}; _pop_handler();} else{ void* _temp24=( void*)
+_exn_thrown; void* _temp38= _temp24; _LL40: goto _LL41; _LL42: goto _LL43; _LL41:
+Cyc_Stdio_file_close( f);( int) _throw( _temp38); _LL43:( void) _throw( _temp38);
+_LL39:;}}} Cyc_Stdio_file_close( f); return;}} struct Cyc_Lineno_Pos* Cyc_Lineno_pos_of_abs(
+struct _tagged_arr filename, int abs){ struct Cyc_Lineno_Pos* ans=({ struct Cyc_Lineno_Pos*
+_temp46=( struct Cyc_Lineno_Pos*) GC_malloc( sizeof( struct Cyc_Lineno_Pos));
+_temp46->logical_file= _tag_arr("", sizeof( unsigned char), 1u); _temp46->line=
+Cyc_Core_new_string( 0); _temp46->line_no= 0; _temp46->col= 0; _temp46;}); Cyc_Lineno_poss_of_abss(
+filename,({ struct Cyc_List_List* _temp44=( struct Cyc_List_List*) GC_malloc(
+sizeof( struct Cyc_List_List)); _temp44->hd=( void*)({ struct _tuple1* _temp45=(
+struct _tuple1*) GC_malloc( sizeof( struct _tuple1)); _temp45->f1= abs; _temp45->f2=
+ans; _temp45;}); _temp44->tl= 0; _temp44;})); return ans;}
