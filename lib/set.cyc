@@ -97,6 +97,10 @@ Set<`a> insert<`a>(Set<`a> s,`a elt) {
 Set<`a> union_two<`a>(Set<`a> s1,Set<`a> s2) {
   if(s1 == s2)
     return s1;
+  if(s1->cardinality == 0)
+    return s2;
+  if(s2->cardinality == 0)
+    return s1;
 
   list<`a> nodes = null;
   int cardinality = 0;
@@ -217,12 +221,19 @@ void iter_c<`a,`c>(void f(`c,`a),`c env,Set<`a> s) {
 
 
 /* return the intersection of two sets */
+// could try to prevent more allocation with subset checks
 Set<`a> intersect<`a>(Set<`a> s1,Set<`a> s2) {
+  if(s1 == s2) 
+    return s1;
   int (@comp)(`a,`a) = s1->compare;
   list<`a> x1 = s1->nodes;
   list<`a> x2 = s2->nodes;
   list<`a> result=null,prev=null;
   int card = 0;
+  if(x1 == null)
+    return s1;
+  if(x2 == null)
+    return s2;
 
   while (x1 != null && x2 != null) {
     int i = comp(x1->hd,x2->hd);

@@ -860,7 +860,7 @@ Doc stmt2doc(stmt st) {
   case Break_s(_):    s = text("break;"); break;
   case Continue_s(_): s = text("continue;"); break;
   case Goto_s(x,_):   s = text(xprintf("goto %s;",x)); break;
-  case For_s(e1,e2,$(e3,_),s1):
+  case For_s(e1,$(e2,_),$(e3,_),s1):
     s = cat10(text("for("),
 	      exp2doc(e1),
 	      text("; "),
@@ -1056,7 +1056,7 @@ Doc decl2doc(decl d) {
                line_doc(),
                text("};"));
     break;
-  case Var_d(&Vardecl(sc,name,tq,type,initializer,shadow_depth)):
+  case Var_d(&Vardecl(sc,name,tq,type,initializer,shadow_depth,_)):
     Doc sn = qvar2doc(name);
     if(shadow_depth > 0)
       sn = cat2(sn, text(xprintf("%d",shadow_depth)));

@@ -99,51 +99,42 @@ cnst eval_const_exp(exp e) {
   return cn;
 }
 
-
-// FIX: (see below)
 static unsigned int szof(typ t) {
   switch (Tcutil::compress(t)) {
-  case VoidType: return 0u;
+  case VoidType:   return 0u;
   case VarType(_): return 4u;
   case Evar(k,_,_): 
     if (k == BoxKind) return 4u; else return Tcutil::impos("szof evar");
   case EnumType(_,_): return 4u;
-  case XenumType(_): return 4u;
-  case PointerType(_,_,_): return 4u;
-  case IntType(_,sz,bx):
-    if (bx == Boxed) return 4u;
-    else 
-      switch (sz) {
-      case B1: return 1u;
-      case B2: return 2u;
-      case B4: return 4u;
-      case B8: return 8u;
-      }
-  case BoolType(bx): return (bx == Boxed) ? 4u : 1u;
-  case FloatType(_): return 4u;
-  case DoubleType(bx): return (bx == Boxed) ? 4u : 8u;
-  case ArrayType(t2,_,ak):
-    switch (ak) {
-    case TaggedArray: return 4u;
-    case FixedArray(e): 
-      // FIX: might need to insert padding to ensure alignment
-      return szof(t2) * eval_const_uint_exp(e);
-    case UntaggedArray: return Tcutil::impos("szof []");
-    }
+  case XenumType(_):  return 4u;
+  case PointerType(_,_,_):    return 4u;
+  case IntType(_,_, Boxed):   return 4u;
+  case IntType(_,B1,Unboxed): return 1u;
+  case IntType(_,B2,Unboxed): return 1u;
+  case IntType(_,B4,Unboxed): return 1u;
+  case IntType(_,B8,Unboxed): return 1u;
+  case BoolType(Boxed):       return 4u;
+  case BoolType(Unboxed):     return 1u;
+  case FloatType(_):          return 4u;
+  case DoubleType(Boxed):     return 4u;
+  case DoubleType(Unboxed):   return 8u;
+  case ArrayType(_,_,TaggedArray):    return 4u;
+  case ArrayType(t2,_,FixedArray(e)): //FIX: insert padding for alignment
+		                      return szof(t2) * eval_const_uint_exp(e);
+  case ArrayType(_,_,UntaggedArray):  return Tcutil::impos("szof []");
   case FnType(_,_,_,_): return 4u;
   case TupleType(tqs):
     // FIX: we need to insert padding to ensure alignment
     unsigned int s = 0;
-    for (; tqs != null; tqs = tqs->tl) {
+    for (; tqs != null; tqs = tqs->tl)
       s += szof(tqs->hd[1]);
-    }
     return s;
   case StructType(tdnopt,ts):
     // FIX: we need the environment to calculate
     // FIX: we need to insert padding to ensure alignment
-    return Tcutil::impos("szof on structtype");
+                           return Tcutil::impos("szof on structtype");
   case TypedefType(_,_,_): return Tcutil::impos("szof typedeftype");
-  case UnionType: return Tcutil::impos("szof uniontype");
+  case UnionType:          return Tcutil::impos("szof uniontype");
   }
 }
 

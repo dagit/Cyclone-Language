@@ -15,6 +15,7 @@
 #include "tcutil.h"
 #include "evexp.h"
 #include "tcstmt.h"
+#include "control_flow.h"
 #include "tcexp.h"
 
 namespace Tcexp;
@@ -147,8 +148,9 @@ static synth tcConst(tenv te, segment loc, Opt_t<typ> topt, cnst c) {
   case Char_c(sn,_):     t = (sn == Unsigned) ? uchar_t  : schar_t;  break;
   case Short_c(sn,_):    t = (sn == Unsigned) ? ushort_t : sshort_t; break;
     // FIX: take i into account
-  case Int_c(sn,i):      t = (sn == Unsigned) ? uint_t   : sint_t;   break;
+  case Int_c(sn,_):      t = (sn == Unsigned) ? uint_t   : sint_t;   break;
   case LongLong_c(sn,_): t = (sn == Unsigned) ? ulong_t  : slong_t;  break;
+    // FIX: for Bool_c, should return a Boolean Synth
   case Bool_c(_)  : t = bool_t;  break;
   case Float_c(_) : t = float_t; break;
   case String_c(s):
@@ -167,7 +169,6 @@ static synth tcConst(tenv te, segment loc, Opt_t<typ> topt, cnst c) {
 }
 
 // variables 
-// FIX: lvalues must not be Funname_b (probably check somewhere else)
 static synth tcVar(tenv te, segment loc, Opt_t<typ> topt, qvar q, exp e) {
   // FIX: update vd through e to have the correct binding
   switch (lookup_ordinary(te,loc,q)) {
@@ -1149,7 +1150,9 @@ static Opt_t<typ> find_stmt_typ(stmt s) {
   }
 }
 static synth tcStmtExp(tenv te, segment loc, Opt_t<typ> topt, stmt s) {
-  let ssyn  = tcStmt(te,s);
+  let ssyn  = tcStmt(set_encloser(te,s),s);
+  // The encloser of s is not s, so reset it properly.
+  ControlFlow::set_encloser(s,get_encloser(te));
   let topt2 = find_stmt_typ(s);
   if (topt2 == null) 
     return expr_err(te,loc,"cannot determine type of statement expression");

@@ -25,6 +25,10 @@ extern void warn(segment, string);
 extern void flush_warnings();
 extern void err_noloc(string);
 
+// set by by Tcenv::tc_init, just to cut down on allocation and calls
+// to Set::empty.
+extern Core::Opt_t<Set<var>> empty_var_set;
+
 // returns the type of a function declaration
 extern typ fd_type(fndecl fd); 
 

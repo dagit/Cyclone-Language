@@ -161,6 +161,8 @@ extern $(Set<var>,Set<var>) maybe_unassigned_bool(synth);
 
 extern Set<var> get_unassigned(tenv);
 extern tenv     set_unassigned(tenv, Set<var>);
+extern stmt     get_encloser(tenv);
+extern tenv     set_encloser(tenv,stmt);
 extern tenv     add_label(tenv, var, stmt);
 extern bool     all_labels_resolved(tenv);
 extern typ      return_typ(tenv);

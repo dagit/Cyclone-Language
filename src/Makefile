@@ -57,18 +57,19 @@ clean:
 	rm -f *~ *.output *.stackdump 
 
 # We do not bother to include library dependencies, but we could.
-ABSYN_H     = absyn.h
-PARSE_TAB_H = parse_tab.h
-PARSE_H     = parse.h     $(ABSYN_H) $(PARSE_TAB_H)
-ABSYNPP_H   = absynpp.h   $(ABSYN_H)
-TCENV_H     = tcenv.h     $(ABSYN_H)
-TCUTIL_H    = tcutil.h    $(TCENV_H)
-TCSTMT_H    = tcstmt.h    $(ABSYN_H) $(TCENV_H)
-TCPAT_H     = tcpat.h     $(ABSYN_H) $(TCENV_H)
-EVEXP_H     = evexp.h     $(ABSYN_H)
-TCEXP_H     = tcexp.h     $(ABSYN_H) $(TCENV_H) $(EXEXP_H)
-TC_H        = tc.h        $(ABSYN_H) $(TCENV_H)
-TOC_H       = toc.h       $(ABSYN_H)
+ABSYN_H        = absyn.h
+PARSE_TAB_H    = parse_tab.h
+PARSE_H        = parse.h        $(ABSYN_H) $(PARSE_TAB_H)
+ABSYNPP_H      = absynpp.h      $(ABSYN_H)
+TCENV_H        = tcenv.h        $(ABSYN_H)
+TCUTIL_H       = tcutil.h       $(TCENV_H)
+TCSTMT_H       = tcstmt.h       $(ABSYN_H) $(TCENV_H)
+TCPAT_H        = tcpat.h        $(ABSYN_H) $(TCENV_H)
+EVEXP_H        = evexp.h        $(ABSYN_H)
+TCEXP_H        = tcexp.h        $(ABSYN_H) $(TCENV_H) $(EXEXP_H)
+TC_H           = tc.h           $(ABSYN_H) $(TCENV_H)
+CONTROL_FLOW_H = control_flow.h $(ABSYN_H)
+TOC_H          = toc.h          $(ABSYN_H)
 
 $(OUT_PREFIX)absyn.c: $(ABSYN_H)
 $(OUT_PREFIX)parse_tab.c: $(ABSYN_H)
@@ -76,12 +77,13 @@ $(OUT_PREFIX)lex.c:
 $(OUT_PREFIX)absynpp.c: $(ABSYNPP_H) $(ABSYN_H)
 $(OUT_PREFIX)tcenv.c: $(TCENV_H) $(ABSYN_H) $(TCUTIL_H) $(ABSYNPP_H)
 $(OUT_PREFIX)tcutil.c: $(TCUTIL_H) $(ABSYN_H) $(ABSYNPP_H) $(TCENV_H) $(EVEXP_H)
-$(OUT_PREFIX)tcstmt.c: $(TCSTMT_H) $(ABSYN_H) $(ABSYNPP_H) $(TCUTIL_H) $(TCENV_H) $(TCEXP_H) $(TCPAT_H)
+$(OUT_PREFIX)tcstmt.c: $(TCSTMT_H) $(ABSYN_H) $(ABSYNPP_H) $(TCUTIL_H) $(TCENV_H) $(TCEXP_H) $(TCPAT_H) $(CONTROL_FLOW_H)
 $(OUT_PREFIX)tcpat.c: $(TCPAT_H) $(ABSYN_H) $(ABSYNPP_H) $(TCUTIL_H) $(TCENV_H) $(TCEXP_H) $(TCSTMT_H)
-$(OUT_PREFIX)tcexp.c: $(TCEXP_H) $(ABSYN_H) $(ABSYNPP_H) $(TCENV_H) $(TCUTIL_H) $(EVEXP_H) $(TCSTMT_H)
+$(OUT_PREFIX)tcexp.c: $(TCEXP_H) $(ABSYN_H) $(ABSYNPP_H) $(TCENV_H) $(TCUTIL_H) $(EVEXP_H) $(TCSTMT_H) $(CONTROL_FLOW_H)
 $(OUT_PREFIX)evexp.c: $(EVEXP_H) $(ABSYN_H) $(ABSYNPP_H) $(TCUTIL_H)
 $(OUT_PREFIX)tc.c: $(TC_H) $(ABSYN_H) $(ABSYNPP_H) $(TCUTIL_H) $(TCENV_H) $(TCEXP_H) $(TCSTMT_H) $(EVEXP_H)
+$(OUT_PREFIX)control_flow.c: $(ABSYN_H) $(ABSYNPP_H) $(TCUTIL_H) $(CONTROL_FLOW_H)
 $(OUT_PREFIX)toc.c: $(TOC_H) $(ABSYN_H) $(TCUTIL_H) $(EVEXP_H) $(ABSYNPP_H)
-$(OUT_PREFIX)cyclone.c: $(ABSYN_H) $(ABSYNPP_H) $(TCUTIL_H) $(TCENV_H) $(TC_H) $(TOC_H)
+$(OUT_PREFIX)cyclone.c: $(ABSYN_H) $(ABSYNPP_H) $(TCUTIL_H) $(TCENV_H) $(TC_H) $(CONTROL_FLOW_H) $(TOC_H)
 
 

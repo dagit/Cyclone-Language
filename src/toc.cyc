@@ -1674,7 +1674,7 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
   case UnknownId_p(_):         s = toc_impos("unknownid");     break;
   case UnknownCall_p(_,_,_):   s = toc_impos("unknowncall");   break;
   case UnknownFields_p(_,_,_): s = toc_impos("unknownfields"); break;
-  case Var_p(&Vardecl(_,x,_,_,_,_)):
+  case Var_p(&Vardecl(_,x,_,_,_,_,_)):
     // in essence, x = r; but achieved through the varmap
     nv = add_varmap(nv,x,r);
     s  = goto_stmt(succ_lab,DL);
@@ -1780,7 +1780,7 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
       let lab = fresh_label();
       decls = &cons(&$(v,typ_to_c(t2)),decls);
       let result = xlate_pat(nv,t2,var_exp(v,DL),
-			     structmember_exp(rcast,xprintf("f%d",cnt),DL),p2,
+			     structarrow_exp(rcast,xprintf("f%d",cnt),DL),p2,
 			     succ_lab,fail_lab,decls);
       nv    = result[0];
       decls = result[1];
@@ -1990,7 +1990,7 @@ static void stmt_to_c(env nv, stmt s) {
       }
       return;
     case Goto_s(_,_): return; 
-    case For_s(e1,e2,$(e3,_),s2): 
+    case For_s(e1,$(e2,_),$(e3,_),s2): 
       // FIX:  should e3 be translated in nv?
       exp_to_c(nv,e1); exp_to_c(nv,e2); exp_to_c(nv,e3); 
       stmt_to_c(loop_env(nv),s2);
@@ -2255,24 +2255,17 @@ static list<decl> enumdecl_to_c(enumdecl ed, list<decl> res) {
       // Declare an integer constant for the unboxed field
       let eopt = (ed->sc == Extern) ? null : 
 	        &Opt(cast_exp(t,signed_int_exp(tag_count++,DL),DL));
-      let vd = &Vardecl{.sc = scope_to_c(ed->sc),
-                        .name = collapse_qvar(f->name),
-                        .tq = &Tqual{.q_const = true, .q_volatile = false,
-				     .q_restrict = false},
-                        .type = t,
-                        .initializer = eopt,
-                        .shadow = 0};
+      let vd = new_vardecl(collapse_qvar(f->name), t, eopt);
+      vd->sc = scope_to_c(ed->sc);
+      vd->tq = &Tqual{.q_const=true, .q_volatile=false, .q_restrict=false};
       res = &cons(new_decl(Var_d(vd),DL),res);
     } else {
       // Declare an integer constant for the tag and a struct for the field
       let eopt = (ed->sc == Extern) ? null :
                &Opt(signed_int_exp(box_count++,DL));
-      let vd = &Vardecl{.sc = scope_to_c(ed->sc),
-			.name = collapse_qvar_tag(f->name,"_tag"),
-			.tq = &Tqual{.q_const = true, .q_volatile = false,
-				     .q_restrict = false},
-                        .type = sint_t, .initializer = eopt,
-                        .shadow = -1};
+      let vd = new_vardecl(collapse_qvar_tag(f->name,"_tag"), sint_t, eopt);
+      vd->sc = scope_to_c(ed->sc);
+      vd->tq = &Tqual{.q_const=true, .q_volatile=false, .q_restrict=false};
       res = &cons(new_decl(Var_d(vd),DL),res);
       // compute the fields for the struct, adding in a tag field
       if (!seen_defn_before) {
@@ -2340,18 +2333,16 @@ static list<decl> xenumdecl_to_c(xenumdecl xd, list<decl> res) {
       Opt_t<exp> initopt = null;
       if (xd->sc != Extern) 
 	initopt = &Opt(string_exp(fn,DL));
-      let tag_decl = &Vardecl{.sc = xd->sc, 
-			      .name = collapse_qvar_tag(f->name,"_tag"),
-			      .tq = empty_tqual(), .type = tag_typ,
-			      .initializer = initopt,
-			      .shadow = 0};
+      let tag_decl = new_vardecl(collapse_qvar_tag(f->name,"_tag"),
+				 tag_typ, initopt);
+      tag_decl->sc = xd->sc;
       res = &cons(new_decl(Var_d(tag_decl),DL),res);
 
       bool seen_before;
       bool seen_defn_before;
       let dopt = Dict::lookup_opt(xenums_so_far->v,fn);
       if (dopt == null) {
-	seen_before = false;
+	seen_before      = false;
 	seen_defn_before = false;
 	xenums_so_far->v = Dict::insert(xenums_so_far->v,fn,xd);
       } else {
@@ -2374,9 +2365,10 @@ static list<decl> xenumdecl_to_c(xenumdecl xd, list<decl> res) {
                          nullableptr_t(uchar_t,empty_tqual())),
         List::rev(fields));
         let strct_decl = 
-	  &Structdecl{.sc = Public,
-		      .name = &Opt(collapse_qvar_tag(f->name,"_struct")),
-		      .tvs = null, .fields = &Opt(fields)};
+	  &Structdecl{.sc     = Public,
+		      .name   = &Opt(collapse_qvar_tag(f->name,"_struct")),
+		      .tvs    = null, 
+		      .fields = &Opt(fields)};
         res = &cons(new_decl(Struct_d(strct_decl),DL),res);
       }
     }

@@ -788,8 +788,9 @@ make_declarations(Opt_t<decl_spec_t> dso,list<$(declarator_t,Opt_t<exp>)@> ids,
           abort("unexpected null in parse!",loc);
         let eopt = exprs->hd;
         exprs = exprs->tl;
-        let vd = &Vardecl {.sc = s, .name = x, .tq = tq2, .type = t2,
-			   .initializer = eopt, .shadow = 0};
+        let vd = new_vardecl(x, t2, eopt);
+	vd->tq = tq2;
+	vd->sc = s;
         let d = &Decl(Var_d(vd),loc);
         decls = &cons(d,decls);
       }

@@ -204,8 +204,8 @@ static void tcVardecl(tenv te, genv ge, segment loc, vardecl vd) {
 }
 
 static void tcFndecl(tenv te, genv ge, segment loc, fndecl fd) {
-  var v    = fd->name[1];
-  typ t    = fndecl2typ(fd);
+  var   v  = fd->name[1];
+  typ   t  = fndecl2typ(fd);
   scope sc = fd->sc;
 
   // reject explicitly qualified name
@@ -461,7 +461,7 @@ static void tcXenumdecl(tenv te, genv ge, segment loc, xenumdecl xd) {
   // expand to qualified name, if not already qualified
   if(xd->name[0] == null)
     xd->name[0] = te->ns;
-  // if we're a new xenum, then make a fresh "alredy there" xenumdecl
+  // if we're a new xenum, then make a fresh "already there" xenumdecl
   //       and add it to the environment
   // if we're not new, compare scopes
   if(xd2o == null) {
@@ -472,7 +472,7 @@ static void tcXenumdecl(tenv te, genv ge, segment loc, xenumdecl xd) {
 				    loc, "xenum", v);
   // now check that we can add each "field" by ensuring that 
   // duplicates are the same.  Note that fields are qualified by the current
-  // namespce if implicit, not the namespace of the xenum
+  // namespace if implicit, not the namespace of the xenum
   // Notice that we're "hoisting" the fields into the earlier definition,
   // if there is one we know about.
   xenumdecl xd_result = xd2o->v;

@@ -34,6 +34,7 @@ CYCLONE_SRCS=absyn\
          tcexp\
          evexp\
          tc\
+	 control_flow\
          toc\
          cyclone
 

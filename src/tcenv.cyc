@@ -64,6 +64,7 @@ using Set;
 using Dict;
 using Position;
 using Absyn;
+using Tcutil;
 
 xenum exn {Env_error};
 
@@ -143,6 +144,7 @@ struct Fenv {
   struct SharedFenv @   shared;
   list<tvar>            type_vars; // type variables that can occur free
   Dict<var,binding_t>   locals;    // binding will be Param_b, Local_b, or Pat_b
+  stmt                  encloser;  // nearest stmt with a binder or a try
   ctrl_env_t            ctrl_env;
 
     // maybe-unassigned variables -- going away from this pass soon
@@ -150,9 +152,7 @@ struct Fenv {
 };
 
 //////////////////////// Top-level Environment Manipulation //////////////////
-
 static Opt_t<unassigned_t> empty_unassigned = null;
-static Opt_t<Set<var>>     empty_var_set    = null;
 
 tenv tc_init() {
   // Initialize globals
@@ -389,7 +389,7 @@ tenv add_type_vars(segment loc,tenv te,list<tvar> tvs) {
   let fe  = get_fenv(te);
   let fe2 = &Fenv(fe->shared,
 		  new_tvs,
-		  fe->locals, fe->ctrl_env, fe->uv);
+		  fe->locals, fe->encloser, fe->ctrl_env, fe->uv);
   return put_fenv(te,fe2);
 }
 
@@ -407,7 +407,7 @@ tenv add_local_var(segment loc, tenv te, vardecl vd) {
     uv = Set::insert(uv,v);
   let fe2 = &Fenv(fe->shared, fe->type_vars,
 		  Dict::insert(fe->locals,v,Local_b(vd)),
-		  fe->ctrl_env, fe->uv);
+		  fe->encloser, fe->ctrl_env, fe->uv);
   return put_fenv(te,fe2);
 }
 
@@ -420,7 +420,7 @@ tenv add_pat_var(segment loc, tenv te, vardecl vd) {
     vd->shadow = ++shadow_ctr;
   fenv fe2 = &Fenv(fe->shared, fe->type_vars,
 		   Dict::insert(fe->locals,v,Pat_b(vd)),
-                   fe->ctrl_env, fe->uv);
+                   fe->encloser, fe->ctrl_env, fe->uv);
   return put_fenv(te,fe2);
 }
 
@@ -506,7 +506,7 @@ tenv set_fallthru(tenv te, $(list<tvar>,list<vardecl>) * pat_typ, stmt body) {
   ft_typ = List::imp_rev(ft_typ);
   let fe  = get_fenv(te);
   let c   = fe->ctrl_env;
-  let fe2 = &Fenv(fe->shared, fe->type_vars, fe->locals,
+  let fe2 = &Fenv(fe->shared, fe->type_vars, fe->locals, fe->encloser,
 		  &CtrlEnv(c->continue_stmt, c->break_stmt,
 			   &$(body,pat_typ[0],ft_typ),
 			   c->next_stmt),
@@ -519,7 +519,7 @@ tenv clear_fallthru(tenv te) {
   if(te->le == null) env_err("Tcenv: unexpected clear_fallthru");
   let fe  = get_fenv(te);
   let c   = fe->ctrl_env;
-  let fe2 = &Fenv(fe->shared, fe->type_vars, fe->locals,
+  let fe2 = &Fenv(fe->shared, fe->type_vars, fe->locals, fe->encloser,
 		  &CtrlEnv(c->continue_stmt, c->break_stmt,
 			   null,
 			   c->next_stmt),
@@ -530,7 +530,7 @@ tenv clear_fallthru(tenv te) {
 tenv set_in_loop(tenv te, stmt continue_dest) {
   if (te->le == null) env_err("Tcenv: unexpected set_in_loop");
   let fe  = get_fenv(te);
-  let fe2 = &Fenv(fe->shared, fe->type_vars, fe->locals,
+  let fe2 = &Fenv(fe->shared, fe->type_vars, fe->locals, fe->encloser,
 		  &CtrlEnv(Stmt_j(continue_dest),
 			   fe->ctrl_env->next_stmt, // break goes to next
 			   fe->ctrl_env->fallthru_stmt,
@@ -544,7 +544,7 @@ tenv set_in_loop(tenv te, stmt continue_dest) {
 tenv set_in_switch(tenv te) {
   if (te->le == null) env_err("Tcenv: unexpected set_in_switch");
   let fe  = get_fenv(te);
-  let fe2 = &Fenv(fe->shared, fe->type_vars, fe->locals,
+  let fe2 = &Fenv(fe->shared, fe->type_vars, fe->locals, fe->encloser,
 		  &CtrlEnv(fe->ctrl_env->continue_stmt,
 			   fe->ctrl_env->next_stmt, // break goes to next
 			   fe->ctrl_env->fallthru_stmt,
@@ -555,7 +555,7 @@ tenv set_in_switch(tenv te) {
 
 tenv set_next(tenv te, jumpee_t j) {
   let fe  = get_fenv(te);
-  let fe2 = &Fenv(fe->shared, fe->type_vars, fe->locals,
+  let fe2 = &Fenv(fe->shared, fe->type_vars, fe->locals, fe->encloser,
 		  &CtrlEnv(fe->ctrl_env->continue_stmt,
 			   fe->ctrl_env->break_stmt, 
 			   fe->ctrl_env->fallthru_stmt,
@@ -599,8 +599,24 @@ Set<var> get_unassigned(tenv te) {
 tenv set_unassigned(tenv te, Set<var> un) {
   if (te->le == null) return te;
   let fe  = get_fenv(te);
-  let fe2 = &Fenv(fe->shared, fe->type_vars, fe->locals, fe->ctrl_env,
+  let fe2 = &Fenv(fe->shared, fe->type_vars, fe->locals, fe->encloser,
+		  fe->ctrl_env,
 		  un);
+  return put_fenv(te,fe2);
+}
+
+stmt get_encloser(tenv te) {
+  if (te->le == null) env_err("Tcenv: unexpected get_encloser");
+  let fe = get_fenv(te);
+  return fe->encloser;
+}
+
+tenv set_encloser(tenv te, stmt s) {
+  if (te->le == null) env_err("Tcenv: unexpected set_encloser");
+  let fe  = get_fenv(te);
+  let fe2 = &Fenv(fe->shared, fe->type_vars, fe->locals, 
+		  s,
+		  fe->ctrl_env, fe->uv);
   return put_fenv(te,fe2);
 }
 
@@ -613,6 +629,7 @@ fenv new_fenv(fndecl fd) {
 					    Dict::empty(String::zstrcmp)),
  	       .type_vars     = fd->tvs, // assumed unique
 	       .locals        = locals,  // assumed unique
+	       .encloser      = fd->body, // careful -- self loop at top!!!
 	       .ctrl_env      = &CtrlEnv(NotAllowed_j,
 					 NotAllowed_j,
 					 null,

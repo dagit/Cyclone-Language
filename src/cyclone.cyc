@@ -14,6 +14,7 @@
 #include "tcutil.h"
 #include "tcenv.h"
 #include "tc.h"
+#include "control_flow.h"
 #include "toc.h"
 
 namespace Lex {
@@ -93,6 +94,9 @@ void compile_file(string filename) {
     Tc::tc(Tcenv::tc_init(),tds);
     fprintf(cyc_stderr,"Type checking completed\n");
     fflush(cyc_stderr);
+    ControlFlow::cf_check(tds);
+    fprintf(cyc_stderr,"Control-flow checking completed\n");
+    fflush(cyc_stderr);
   } catch {
   case Tcutil::TypeErr: 
     fprintf(cyc_stderr,"Type error!\n");
@@ -100,6 +104,10 @@ void compile_file(string filename) {
     break;
   case Dict::Absent:
     fprintf(cyc_stderr,"Dict::Absent occurred during type checking!\n");
+    compile_failure=true;
+    break;
+  case Impossible(s):
+    fprintf(cyc_stderr,"Impossible: %s\n", s);
     compile_failure=true;
     break;
   }

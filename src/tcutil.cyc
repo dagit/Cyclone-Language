@@ -58,6 +58,10 @@ void flush_warnings() {
   }
 }
 
+// set by by Tcenv::tc_init, just to cut down on allocation and calls
+// to Set::empty.
+Opt_t<Set<var>> empty_var_set = null;
+
 //  void warn(segment sg, string msg) {
 //    fprintf(cyc_stderr,"%s: Warning: %s\n",Position::string_of_segment(sg),msg);
 //    fflush(cyc_stderr);

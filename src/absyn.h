@@ -72,6 +72,7 @@ namespace Absyn {
   extern enum Raw_decl;
   extern struct Decl;
   extern enum Designator;
+  extern xenum StmtAnnot;
 
   typedef enum Scope scope;
   typedef struct Tqual @tqual;
@@ -106,6 +107,7 @@ namespace Absyn {
   typedef enum Raw_decl raw_decl;
   typedef struct Decl @decl;
   typedef enum Designator designator;
+  typedef xenum StmtAnnot stmt_annot_t;
 
   EXTERN_DEFINITION enum Scope { Static, Abstract, Public, Extern };
   EXTERN_DEFINITION struct Tqual { 
@@ -230,7 +232,7 @@ namespace Absyn {
     Break_s(Opt_t<stmt>);    // stmt is dest, set by type-checking
     Continue_s(Opt_t<stmt>); // stmt is dest, set by type-checking
     Goto_s(var,Opt_t<stmt>); // stmt is dest, set by type-checking
-    For_s(exp,exp,$(exp,stmt),stmt); 
+    For_s(exp,$(exp,stmt),$(exp,stmt),stmt); 
     Switch_s(exp,list<switch_clause>); 
     Fallthru_s(list<exp>,Opt_t<stmt>); // stmt is dest, set by type-checking
     Decl_s(decl,stmt);
@@ -242,9 +244,10 @@ namespace Absyn {
   };
 
   EXTERN_DEFINITION struct Stmt {
-    raw_stmt   r;
-    segment    loc;
-    list<stmt> non_local_preds; // set by type-checking
+    raw_stmt     r;
+    segment      loc;
+    list<stmt>   non_local_preds; // set by type-checking
+    stmt_annot_t annot;
   };
 
   EXTERN_DEFINITION enum Raw_pat {
@@ -297,7 +300,8 @@ namespace Absyn {
     tqual      tq;
     typ        type;
     Opt_t<exp> initializer; // ignored for pattern variables
-    int        shadow; // 0 => doesn't shadow non-global, else unique int
+    int        shadow; // FIX: NOT USED PROPERLY RIGHT NOW!!!
+    int        unique_id;
   };
 
   EXTERN_DEFINITION struct Fndecl {
@@ -367,6 +371,13 @@ namespace Absyn {
     ArrayElement(exp);
     FieldName(var);
   };
+
+  // Doing this with xenum is the "right" architecture, but it's probably
+  // too slow to do dataflow analysis while constantly doing string compares
+  // on qualified tags.  So we'll probably change this back to an enum
+  // and analyses will just have to modify this definition here rather than
+  // in their own modules.
+  EXTERN_DEFINITION xenum StmtAnnot { EmptyAnnot; };
 
   // compare variables 
   extern int qvar_cmp(qvar, qvar);
