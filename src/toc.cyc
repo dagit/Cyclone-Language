@@ -205,7 +205,7 @@ static bool is_zero(exp_t e) {
 // return true if t is a nullable pointer type i.e., *
 static bool is_nullable(type_t t) {
   switch (compress(t)) {
-  case &PointerType(PtrInfo{_,_,b,_,_,_}): return conref_def(false,b);
+  case &PointerType(PtrInfo(_,_,PtrAtts(_,n,_,_))): return conref_def(false,n);
   default: toc_impos("is_nullable");
   }
 }
@@ -351,7 +351,7 @@ static type_t typ_to_c(type_t t) {
       else return uint_typ;
     else return strctq(collapse_qvar_tag(tuf->name,"_struct"));
   case &TunionFieldType(_): toc_impos("unresolved TunionFieldType");
-  case &PointerType(PtrInfo{t2,_,_,tq,bnds,_}):
+  case &PointerType(PtrInfo(t2,tq,PtrAtts(_,_,bnds,_))):
     // t2? maps to struct tagged_arr.
     // t2* and t2@ map to t2*.  Regions and zero-term are irrelevant.
     t2 = typ_to_c_array(t2);
@@ -408,7 +408,7 @@ static type_t typ_to_c(type_t t) {
     if (topt == NULL) 
       return new TypedefType(tdn,NULL,td,NULL);
     // just drop the type arguments and translate the nested types
-    else return new TypedefType(tdn,NULL,td,new Opt(typ_to_c_array(topt->v)));
+    else return new TypedefType(tdn,NULL,td,new typ_to_c_array(*topt));
   case &SizeofType(_): return uint_typ;
   case &TagType(_): return sint_typ;
   case &RgnHandleType(t):
@@ -486,7 +486,7 @@ static bool atomic_typ(type_t t) {
 
 static bool is_void_star(type_t t) {
   switch (compress(t)) {
-  case &PointerType(PtrInfo{t2,_,_,_,_,_}):
+  case &PointerType(PtrInfo{t2,_,_}):
     switch (compress(t2)) {
     case VoidType: return true;
     default:       return false;
@@ -520,7 +520,7 @@ static bool is_poly_project(exp_t e) {
   case &AggrMember_e(e1,f): return is_poly_field(e1->topt->v,f);
   case &AggrArrow_e(e1,f):
     switch (compress(e1->topt->v)) {
-    case &PointerType(PtrInfo{t,_,_,_,_,_}): return is_poly_field(t,f);
+    case &PointerType(PtrInfo{t,_,_}): return is_poly_field(t,f);
     default: toc_impos("is_poly_project:  bad type %s",typ2string(e1->topt->v));
     }
   default: return false;
@@ -729,12 +729,13 @@ static CfFlowInfo::relns_t get_relns(exp_t e) { // e must be pre-translation!
 static bool check_const_array(unsigned i, type_t t) {
   //fprintf(stderr,"checking const array %d and %s\n",i,typ2string(t));
   switch (compress(t)) {
-  case &PointerType(PtrInfo{_,_,_,_,b,zt}):
+  case &PointerType(PtrInfo(_,_,PtrAtts(_,_,b,zt))):
     switch (conref_def(bounds_one,b)) {
     case Unknown_b: return false;
     case &Upper_b(e):
       let $(j,known) = Evexp::eval_const_uint_exp(e);
       return known && i <= j;
+    case &AbsUpper_b(_): unimp("check_const_array: AbsUpper_b");
     }
   case &ArrayType(ArrayInfo{_,_,e,_}):
     if (e == NULL) return false;
@@ -796,8 +797,8 @@ static bool check_bounds(CfFlowInfo::relns_t relns, exp_t a, exp_t i) {
   fprintf(stderr,"]\n");
 #endif
   switch (a->r) {
-  case &Var_e(_,&Pat_b(x)): fallthru(x);
-  case &Var_e(_,&Local_b(x)): fallthru(x);
+  case &Var_e(_,&Pat_b(x)):    fallthru(x);
+  case &Var_e(_,&Local_b(x)):  fallthru(x);
   case &Var_e(_,&Global_b(x)): fallthru(x);
   case &Var_e(_,&Param_b(x)):
     if (x->escapes) return false; // no point in looking for escaping vars
@@ -814,8 +815,8 @@ static bool check_bounds(CfFlowInfo::relns_t relns, exp_t a, exp_t i) {
       // we have x[e1 % e2]
       // if e2 is x.size or z such that z <= x.size then it's okay
       return check_leq_size(relns, x, e2);
-    case &Var_e(_,&Pat_b(y)): fallthru(y);
-    case &Var_e(_,&Local_b(y)): fallthru(y);
+    case &Var_e(_,&Pat_b(y)):    fallthru(y);
+    case &Var_e(_,&Local_b(y)):  fallthru(y);
     case &Var_e(_,&Global_b(y)): fallthru(y);
     case &Var_e(_,&Param_b(y)):
       if (y->escapes) return false;
@@ -835,11 +836,13 @@ static bool check_bounds(CfFlowInfo::relns_t relns, exp_t a, exp_t i) {
                 switch (r->rop) {
                 case &CfFlowInfo::LessEqSize(w): fallthru(w);
                 case &CfFlowInfo::LessSize(w):
-                  if (x == w) return true; else break;
+                  if (x == w) return true; 
+		  break;
                 case &CfFlowInfo::EqualConst(c): 
                   return check_const_array(c,x->type);
                 case &CfFlowInfo::LessVar(w):
-                  if (check_leq_size_var(relns, x, w)) return true; else break;
+                  if (check_leq_size_var(relns, x, w)) return true; 
+		  break;
                 default: break;
                 }
             }
@@ -1237,7 +1240,7 @@ static struct PtrInfo get_ptr_type(type_t t) {
 static bool is_zero_ptr_type(type_t t, type_t @ptr_type, 
                              bool @is_fat, type_t @elt_type) {
   switch (compress(t)) {
-  case &PointerType(PtrInfo{elt,_,_,_,bnds,zt}):
+  case &PointerType(PtrInfo{elt,_,PtrAtts(_,_,bnds,zt)}):
     if (conref_def(false,zt)) {
       *ptr_type = t;
       *elt_type = elt;
@@ -1251,9 +1254,11 @@ static bool is_zero_ptr_type(type_t t, type_t @ptr_type,
     if (conref_def(false,zt)) {
       *elt_type = elt;
       *is_fat = false;
-      *ptr_type = new PointerType(PtrInfo{elt,HeapRgn,new_conref(false),tq, 
-                                          new_conref(new Upper_b((exp_t)n)),
-                                          zt});
+      *ptr_type = 
+	new PointerType(PtrInfo(elt,tq, 
+				PtrAtts(HeapRgn,false_conref,
+					new_conref(new Upper_b((exp_t)n)),
+					zt)));
       return true;
     } else return false;
   default: return false;
@@ -1445,7 +1450,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       case &ArrayType(ArrayInfo{_,_,e2,_}): 
         // FIX: copy the expression e2 here.
         e->r = e2->r;  break;
-      case &PointerType(PtrInfo{elt_typ,_,nbl,_,bound,zt}):
+      case &PointerType(PtrInfo(elt_typ,_,PtrAtts(_,nbl,bound,zt))):
 	switch(conref_def(bounds_one,bound)) {
 	case Unknown_b: // retrieve (last_plus_one - curr) via runtime call
 	  e->r = fncall_exp(_get_arr_size_e,
@@ -1462,6 +1467,8 @@ static void exp_to_c(env_t nv, exp_t e) {
           } else {
             e->r = e2->r; break; // compile-time evaluation
           }
+	  break;
+	case &AbsUpper_b(_): unimp("toc: size of AbsUpper_b");
 	}
 	break;
       default: 
@@ -1474,7 +1481,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       //   _tag_arr_plus(e1,sizeof(elt_typ),e2)
       // FIX: allow arithmetic on t ? types at top-level!
       switch (compress(old_typs->hd)) {
-      case &PointerType(PtrInfo{elt_typ,_,_,_,b,zt}):
+      case &PointerType(PtrInfo(elt_typ,_,PtrAtts(_,_,b,zt))):
         switch (conref_def(bounds_one,b)) {
         case Unknown_b:
           exp_t e1 = es->hd;
@@ -1490,6 +1497,7 @@ static void exp_to_c(env_t nv, exp_t e) {
             e->r = fncall_exp(_zero_arr_plus_e,list(e1,esz,e2),DL)->r;
           }
           break;
+	case &AbsUpper_b(_): unimp("toc: plus on AbsUpper_b");
         }
         break;
       default:
@@ -1799,12 +1807,12 @@ static void exp_to_c(env_t nv, exp_t e) {
     // a few Cyclone casts are translated into C effects other than casts:
     switch ($(compress(old_t2),compress(new_typ))) {
     case $(&PointerType(p1),&PointerType(p2)):
-      let n1 = conref_def(false,p1.nullable);
-      let n2 = conref_def(false,p2.nullable);
-      let b1 = conref_def(bounds_one,p1.bounds);
-      let b2 = conref_def(bounds_one,p2.bounds);
-      let zt1 = conref_def(false,p1.zero_term);
-      let zt2 = conref_def(false,p2.zero_term);
+      let n1 = conref_def(false,p1.ptr_atts.nullable);
+      let n2 = conref_def(false,p2.ptr_atts.nullable);
+      let b1 = conref_def(bounds_one,p1.ptr_atts.bounds);
+      let b2 = conref_def(bounds_one,p2.ptr_atts.bounds);
+      let zt1 = conref_def(false,p1.ptr_atts.zero_term);
+      let zt2 = conref_def(false,p2.ptr_atts.zero_term);
       switch($(b1,b2)) {
       case $(&Upper_b(b1), &Upper_b(b2)):
 	if(n1 && !n2) {
@@ -1823,7 +1831,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       case $(&Upper_b(e2), Unknown_b):
 	if(nv->toplevel) {
 	  // can't use a function at top-level and don't want macros
-          if (zt1 && !p2.tq.q_const && !zt2) {
+          if (zt1 && !p2.elt_tq.q_const && !zt2) {
             // If p2 is not zero-terminated and not const, then we subtract
             // one from the size so that no one can write the last location.
             e2 = prim2_exp(Minus,e2,uint_exp(1,DL),DL);
@@ -1839,7 +1847,7 @@ static void exp_to_c(env_t nv, exp_t e) {
             let x = temp_var();
             let x_exp = var_exp(x,DL);
             let arg3 = fncall_exp(_get_zero_arr_size_e,list(x_exp,e2),DL);
-            if (!zt2 && !p2.tq.q_const) {
+            if (!zt2 && !p2.elt_tq.q_const) {
               // If p2 is not zero-terminated and not const, then we subtract
               // one from the size so that no one can write the last location.
               arg3 = prim2_exp(Minus,arg3,uint_exp(1,DL),DL);
@@ -1886,17 +1894,20 @@ static void exp_to_c(env_t nv, exp_t e) {
       case $(Unknown_b, Unknown_b):
         // If p1 is zero-terminated and p2 is not, then p2 had better
         // be const or else we have to decrement its size by 1.
-        if (zt1 && !zt2 && !p2.tq.q_const) {
+        if (zt1 && !zt2 && !p2.elt_tq.q_const) {
           if (nv->toplevel)
             unimp("can't coerce a ?ZEROTERM to a non-const ?NOZEROTERM at toplevel");
           e->r = fncall_exp(_tagged_ptr_decrease_size_e,
                             list(e1,sizeoftyp_exp(typ_to_c(p1.elt_typ),DL),
                                  uint_exp(1,DL)),DL)->r;
         }
+	break;
+      case $(&AbsUpper_b(_),_):
+      case $(_,&AbsUpper_b(_)): unimp("toc, cast, AbsUpper_b");
       }
       break;
     case $(&PointerType(p1), &IntType(_,_)):
-      switch(conref_def(bounds_one,p1.bounds)) {
+      switch(conref_def(bounds_one,p1.ptr_atts.bounds)) {
       case Unknown_b: // cast t? to int -- cast curr field to int
 	e1->r = aggrmember_exp(new_exp(e1->r,e1->loc),curr_sp,DL)->r; break;
       default: break;
@@ -1945,7 +1956,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       let s = init_array(nv, xexp, dles0, exp_stmt(xexp,DL));
       type_t old_elt_typ;
       switch (compress(old_typ)) {
-      case &PointerType(PtrInfo{et,_,_,tq,_,zt}):
+      case &PointerType(PtrInfo{et,tq,PtrAtts(_,_,_,zt)}):
 	old_elt_typ = et; break;
       default:
 	old_elt_typ =
@@ -1979,7 +1990,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       //    b; })
       bool is_tagged_ptr = false;
       switch (compress(old_typ)) {
-      case &PointerType(PtrInfo{et,_,_,tq,b,zt}):
+      case &PointerType(PtrInfo{et,tq,PtrAtts(_,_,b,zt)}):
         is_tagged_ptr = (conref_def(bounds_one,b) == Unknown_b);
         break;
       default: toc_impos("exp_to_c: comprehension not an array type");
@@ -2069,8 +2080,8 @@ static void exp_to_c(env_t nv, exp_t e) {
       switch(e1->r) {
       case &Cast_e(t2,e2):
 	switch($(compress(t2),compress(e2->topt->v))) {
-	case $(&PointerType(PtrInfo{arr_typ,_,_,_,bc,_}),
-	       &PointerType(PtrInfo{_,_,_,_,be,_})):
+	case $(&PointerType(PtrInfo{arr_typ,_,PtrAtts(_,_,bc,_)}),
+	       &PointerType(PtrInfo{_,_,PtrAtts(_,_,be,_)})):
 	  switch($(conref_def(bounds_one,bc),conref_def(bounds_one,be))) {
 	  case $(Unknown_b,&Upper_b(arr_sz)):
 	    exp_to_c(nv,e2);
@@ -2132,20 +2143,21 @@ static void exp_to_c(env_t nv, exp_t e) {
   case &Deref_e(e1):
     let e1_typ = compress(e1->topt->v);
     switch (e1_typ) {
-    case &PointerType(PtrInfo{t2,rgn,cr,tq,b,zt}):
+    case &PointerType(PtrInfo{t2,tq,PtrAtts(rgn,cr,b,zt)}):
       switch (conref_def(bounds_one,b)) {
       case &Upper_b(_):
 	bool do_null_check = need_null_check(e1);
 	exp_to_c(nv,e1);
-        if (do_null_check) {
-          e1 = fncall_exp(_check_null_e,new List(e1,NULL),DL);
-        }
+        if (do_null_check)
+	  // *((t *)_check_null(e))
+          e1->r = cast_exp(typ_to_c(e1_typ),
+			   fncall_exp(_check_null_e,
+				      new List(copy_exp(e1),NULL),DL),
+			   DL)->r;
         // Note that a null check is sufficient for zero-terminated arrays
         // too, because we guarantee that there's something to read here,
         // even if it's just a 0.  Note that writes are handled specially
         // by the AssignOp_e case.  
-        // *((t *)_check_null(e))
-        e->r = deref_exp(cast_exp(typ_to_c(e1_typ),e1,DL),DL)->r;
 	break;
       case Unknown_b:
 	// do it as e1[0], could share all the 0's but who cares
@@ -2154,6 +2166,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	e->r = subscript_exp(e1, ind_e, DL)->r;
 	exp_to_c(nv,e);
 	break;
+      case &AbsUpper_b(_): unimp("exp_to_c: deref w/ AbsUpper_b");
       }
       break;
     default: toc_impos("exp_to_c: Deref: non-pointer");
@@ -2169,7 +2182,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     bool do_null_check = need_null_check(e1);
     exp_to_c(nv, e1);
     bool is_poly = is_poly_project(e); // decide before mutating e
-    let PtrInfo{ta,rgn,bcr,tq,b,zt} = get_ptr_type(e1typ);
+    let PtrInfo{ta,tq,PtrAtts(rgn,bcr,b,zt)} = get_ptr_type(e1typ);
     switch (conref_def(bounds_one,b)) {
     case &Upper_b(esz):
       // the type-checker should've ensured the size is at least 1
@@ -2204,6 +2217,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 				       uint_exp(0,DL)),
 				  DL),DL)->r;
       break;
+    case &AbsUpper_b(_): unimp("exp_to_c: AggrArrow w/ AbsUpper_b");
     }
     if(is_poly)
       e->r = array_to_ptr_cast(typ_to_c(e->topt->v),new_exp(e->r,DL),DL)->r;
@@ -2224,7 +2238,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	impos("unknown tuple subscript in translation to C");
       e->r = aggrmember_exp(e1,fieldname(i+1),DL)->r;
       break;
-    case &PointerType(PtrInfo{ta,rgn,bcr,tq,b,zt}):
+    case &PointerType(PtrInfo{ta,tq,PtrAtts(rgn,bcr,b,zt)}):
       let relns = get_relns(e1);
       let in_bnds = check_bounds(relns,e1,e2);
       if(warn_bounds_checks && !in_bnds) 
@@ -2278,6 +2292,10 @@ static void exp_to_c(env_t nv, exp_t e) {
                                                     e2),DL),DL),
                            DL)->r;
         }
+	break;
+      case &AbsUpper_b(_): 
+	if(!in_bnds)
+	  Tcutil::terr(e->loc,"can't determine that subscript is in-bounds");
 	break;
       }
       break;

@@ -341,7 +341,7 @@ void dumpatts(attributes_t atts) {
 bool next_is_pointer(list_t<type_modifier_t> tms) {
   if (tms==NULL) return false;
   switch (tms->hd) {
-  case &Pointer_mod(_,_,_): return true;
+  case &Pointer_mod(_,_): return true;
   default: return false;
   }
 }
@@ -461,7 +461,7 @@ void dumpntyp(type_t t) {
     dumpaggr_kind(k); dump_char('{'); dumpaggrfields(fs); dump_char('}');return;
   case &EnumType(n,_):    dump("enum "); dumpqvar(n); return;
   case &AnonEnumType(fs): dump("enum {"); dumpenumfields(fs); dump("}"); return;
-  case &TypedefType(n,ts,_,topt):  dumpqvar(n), dumptps(ts); return;
+  case &TypedefType(n,ts,_,_):  dumpqvar(n), dumptps(ts); return;
   case &SizeofType(t): dump("sizeof_t<"); dumpntyp(t); dump(">"); return;
   case &RgnHandleType(rgn): dumprgn(rgn); return;
   case &TypeInt(i): dump(aprintf("`%d",i)); return;
@@ -1167,40 +1167,34 @@ void dumptms(list_t<type_modifier_t> tms, void f(`a), `a a) {
     return;
   }
   switch(tms->hd) {
-    // FIX?? What about tq2?
-  case &Pointer_mod(&Nullable_ps(ue,zt),  HeapRgn,  tq2):
-    dump_char('*'); 
-    dump_upperbound(ue); 
-    if (conref_def(false,zt)) dump("ZEROTERM");
-    dumptms(tms->tl,f,a); return;
-  case &Pointer_mod(&NonNullable_ps(ue,zt), HeapRgn,  tq2):
-    dump_char('@'); dump_upperbound(ue); 
-    if (conref_def(false,zt)) dump("ZEROTERM");
-    dumptms(tms->tl,f,a); return;
-  case &Pointer_mod(&TaggedArray_ps(zt), HeapRgn,  tq2):
-    dump_char('?'); 
-    if (conref_def(false,zt)) dump("ZEROTERM");
-    dumptms(tms->tl,f,a); return;
-  case &Pointer_mod(&Nullable_ps(ue,zt),  &VarType(tv), tq2):
-    dump_char('*'); dump_upperbound(ue); 
-    if (conref_def(false,zt)) dump("ZEROTERM");
-    dump_str(tv->name);
-    dumptms(tms->tl,f,a); return;
-  case &Pointer_mod(&NonNullable_ps(ue,zt), &VarType(tv), tq2):
-    dump_char('@'); dump_upperbound(ue);
-    if (conref_def(false,zt)) dump("ZEROTERM");
-    dump_str(tv->name); dumptms(tms->tl,f,a); return;
-  case &Pointer_mod(&TaggedArray_ps(zt), &VarType(tv), tq2):
-    dump_char('?'); 
-    if (conref_def(false,zt)) dump("ZEROTERM");
-    dump_str(tv->name); dumptms(tms->tl,f,a); return;
-  case &Pointer_mod(_,_,_): throw new Impossible("dumptms: bad Pointer_mod");
+    // FIX: doesn't invert zeroterm default when elt type is char!! (never did)
+    // FIX? What about attributes that we parse before tq2??
+  case &Pointer_mod(PtrAtts(rgn,nullable,bd,zt),tq2):
+    switch(conref_def(bounds_one,bd)) {
+    case Unknown_b: dump_char('?'); break;
+    case &Upper_b(e):
+      dump_char(conref_def(true,nullable) ? '*' : '@');
+      dump_upperbound(e);
+      break;
+    case &AbsUpper_b(t): 
+      dump_char(conref_def(true,nullable) ? '*' : '@');
+      dump_char('{'); dumptyp(t); dump_char('}');
+    }
+    if(conref_def(false,zt)) dump("ZEROTERM");
+    switch(Tcutil::compress(rgn)) {
+    case HeapRgn: break;
+    case &VarType(tv): dump_str(tv->name); break;
+    default: Tcutil::impos("dumptms: bad rgn type in Pointer_mod");
+    }
+    dumptq(tq2); // rare
+    dumptms(tms->tl,f,a);
+    return;
 
   default:
     bool next_is_pointer = false;
     if(tms->tl != NULL)
       switch (tms->tl->hd) {
-      case &Pointer_mod(_,_,_): next_is_pointer = true; break;
+      case &Pointer_mod(_,_): next_is_pointer = true; break;
       default: break;
       }
     if(next_is_pointer)
@@ -1224,7 +1218,7 @@ void dumptms(list_t<type_modifier_t> tms, void f(`a), `a a) {
     case &TypeParams_mod(ts,loc,print_kinds): 
       if (print_kinds) dumpkindedtvars(ts); else dumptvars(ts); break;
     case &Attributes_mod(_,atts): dumpatts(atts); break;
-    case &Pointer_mod(nullable,tq2,_): throw new Impossible("dumptms");
+    case &Pointer_mod(_,_): Tcutil::impos("dumptms");
     }
     return;
   }

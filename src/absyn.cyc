@@ -100,17 +100,28 @@ tqual_t combine_tqual(tqual_t x,tqual_t y) {
 tqual_t empty_tqual() { return Tqual(false,false,false); }
 tqual_t const_tqual() { return Tqual(true, false,false); }
 
+// a static &Upper_b(&Exp(NULL,&Const_e(&Int_c(Unsigned,1)),NULL))
+static tunion Cnst.Int_c      one_intc  = Int_c(Unsigned,1);
+static tunion Raw_exp.Const_e one_b_raw = Const_e(&one_intc);
+struct Exp exp_unsigned_one_v = {NULL,&one_b_raw,NULL,EmptyAnnot};
+exp_t exp_unsigned_one = &exp_unsigned_one_v;
+static tunion Bounds.Upper_b one_bt = Upper_b(&exp_unsigned_one_v);
+tunion Bounds bounds_one = &one_bt;
+
 //////////////////////////// Constraints /////////////////////////
 conref_t<`a> new_conref(`a x) { return new Conref{.v = new Eq_constr(x)};}
 conref_t<`a> empty_conref()   { return new Conref{.v = No_constr};}
 
-// just to avoid some unnecessary allocation:
-static tunion Constraint.Eq_constr<bool> true_constraint  = Eq_constr(true);
-static tunion Constraint.Eq_constr<bool> false_constraint = Eq_constr(false);
-struct Conref<bool> true_conref_v  = Conref(&true_constraint);
-struct Conref<bool> false_conref_v = Conref(&false_constraint);
-conref_t<bool> true_conref  = &true_conref_v;
-conref_t<bool> false_conref = &false_conref_v;
+#define MAKE_EQ_CONSTR(str,type,val)\
+  static tunion Constraint.Eq_constr<type> str##_constraint = Eq_constr(val);\
+  static struct Conref<type> str##_v = Conref(&str##_constraint);\
+  conref_t<type> str = &str##_v
+
+MAKE_EQ_CONSTR(true_conref,bool,true);
+MAKE_EQ_CONSTR(false_conref,bool,false);
+MAKE_EQ_CONSTR(bounds_one_conref,bounds_t,&one_bt);
+MAKE_EQ_CONSTR(bounds_unknown_conref,bounds_t,Unknown_b);
+#undef MAKE_EQ_CONSTR
 
 // compress a conref
 conref_t<`a> compress_conref(conref_t<`a> x) {
@@ -162,13 +173,13 @@ kind_t force_kb(kindbound_t kb) {
 
 //////////////////////////// Types ///////////////////////////////
 // unsigned types
-static tunion Type.IntType char_tt     = IntType(None,B1);
+static tunion Type.IntType char_tt      = IntType(None,B1);
 static tunion Type.IntType uchar_tt     = IntType(Unsigned,B1);
 static tunion Type.IntType ushort_tt    = IntType(Unsigned,B2);
 static tunion Type.IntType uint_tt      = IntType(Unsigned,B4);
 static tunion Type.IntType ulong_tt     = IntType(Unsigned,B4);
 static tunion Type.IntType ulonglong_tt = IntType(Unsigned,B8);
-type_t char_typ     = &char_tt;
+type_t char_typ      = &char_tt;
 type_t uchar_typ     = &uchar_tt;
 type_t ushort_typ    = &ushort_tt;
 type_t uint_typ      = &uint_tt;
@@ -237,68 +248,67 @@ qvar_t tunion_print_arg_qvar = &tunion_print_arg_qvar_p;
 qvar_t tunion_scanf_arg_qvar = &tunion_scanf_arg_qvar_p;
 
 // string
-static opt_t<type_t> string_t_opt = NULL;
+static type_t* string_t_opt = NULL;
 type_t string_typ(type_t rgn) {
   if (rgn != HeapRgn)
     return starb_typ(char_typ,rgn,empty_tqual(),Unknown_b,true_conref);
-  else {
-    if (string_t_opt == NULL) {
-      type_t t = starb_typ(char_typ,HeapRgn,empty_tqual(),Unknown_b,true_conref);
-      string_t_opt = new Opt(t);
-    }
-    return string_t_opt->v;
+  if (string_t_opt == NULL) {
+    type_t t = starb_typ(char_typ,HeapRgn,empty_tqual(),Unknown_b,true_conref);
+    string_t_opt = new t;
   }
+  return *string_t_opt;
 }
-static opt_t<type_t> const_string_t_opt = NULL;
+static type_t* const_string_t_opt = NULL;
 type_t const_string_typ(type_t rgn) {
   if (rgn != HeapRgn)
     return starb_typ(char_typ,rgn,const_tqual(),Unknown_b,true_conref);
-  else {
-    if (const_string_t_opt == NULL) {
-      type_t t = starb_typ(char_typ,HeapRgn,const_tqual(),Unknown_b,true_conref);
-      const_string_t_opt = new Opt(t);
-    }
-    return const_string_t_opt->v;
+  if (const_string_t_opt == NULL) {
+    type_t t = starb_typ(char_typ,HeapRgn,const_tqual(),Unknown_b,true_conref);
+    const_string_t_opt = new t;
   }
+  return *const_string_t_opt;
 }
 // pointers
 
-// a static &Upper_b(&Exp(NULL,&Const_e(&Int_c(Unsigned,1)),NULL))
-static tunion Cnst.Int_c      one_intc  = Int_c(Unsigned,1);
-static tunion Raw_exp.Const_e one_b_raw = Const_e(&one_intc);
-struct Exp exp_unsigned_one_v = {NULL,&one_b_raw,NULL,EmptyAnnot};
-exp_t exp_unsigned_one = &exp_unsigned_one_v;
-static tunion Bounds.Upper_b one_bt = Upper_b(&exp_unsigned_one_v);
-tunion Bounds bounds_one = &one_bt;
-
 type_t starb_typ(type_t t, type_t r, tqual_t tq, bounds_t b, 
                  conref_t<bool> zeroterm) {
-  return new PointerType(PtrInfo {.elt_typ = t, .rgn_typ = r,
-                                  .nullable = true_conref, .tq = tq, 
-                                  .bounds = new_conref(b),
-                                  .zero_term = zeroterm});
+  return new PointerType(PtrInfo {.elt_typ = t, .elt_tq = tq,
+				  PtrAtts{.rgn = r, .nullable = true_conref, 
+					  .bounds = new_conref(b),
+					  .zero_term = zeroterm}});
 }
 type_t atb_typ(type_t t, type_t r, tqual_t tq, bounds_t b,
-               conref_t<bool> zeroterm) {
-  return new PointerType(PtrInfo {.elt_typ = t, .rgn_typ = r, 
-				  .nullable = false_conref, .tq = tq, 
-				  .bounds = new_conref(b),
-                                  .zero_term = zeroterm});
+	       conref_t<bool> zeroterm) {
+  return new PointerType(PtrInfo {.elt_typ = t, .elt_tq = tq,
+				  PtrAtts{.rgn = r, .nullable = false_conref, 
+					  .bounds = new_conref(b),
+					  .zero_term = zeroterm}});
 }
+
 type_t star_typ(type_t t, type_t r, tqual_t tq, conref_t<bool> zeroterm) { 
-  return starb_typ(t, r, tq, bounds_one, zeroterm);
+  return new PointerType(PtrInfo {.elt_typ = t, .elt_tq = tq,
+				  PtrAtts{.rgn = r, .nullable = true_conref, 
+					  .bounds = bounds_one_conref,
+					  .zero_term = zeroterm}});
 }
 type_t cstar_typ(type_t t, tqual_t tq) { 
-  return starb_typ(t, HeapRgn, tq, bounds_one, false_conref);
+  return new PointerType(PtrInfo {.elt_typ = t, .elt_tq = tq,
+				  PtrAtts{.rgn = HeapRgn, 
+					  .nullable = true_conref, 
+					  .bounds = bounds_one_conref,
+					  .zero_term = false_conref}});
 }
 type_t at_typ(type_t t, type_t r, tqual_t tq, conref_t<bool> zeroterm) {
-  return atb_typ(t, r, tq, bounds_one, zeroterm);
+  return new PointerType(PtrInfo {.elt_typ = t, .elt_tq = tq,
+				  PtrAtts{.rgn = r, .nullable = false_conref, 
+					  .bounds = bounds_one_conref,
+					  .zero_term = zeroterm}});
 }
 type_t tagged_typ(type_t t, type_t r, tqual_t tq, conref_t<bool> zeroterm) {
-  return new PointerType(PtrInfo {.elt_typ = t, .rgn_typ = r, 
-				     .nullable = true_conref, .tq = tq,
-				     .bounds = new_conref(Unknown_b),
-                                     .zero_term = zeroterm});
+  return new PointerType(PtrInfo {.elt_typ = t, .elt_tq = tq,
+				  PtrAtts{.rgn = r, .nullable = true_conref, 
+					  .bounds = bounds_unknown_conref,
+					  .zero_term = zeroterm}});
 }
 
 type_t array_typ(type_t elt_type, tqual_t tq, exp_opt_t num_elts, 
@@ -306,9 +316,8 @@ type_t array_typ(type_t elt_type, tqual_t tq, exp_opt_t num_elts,
   return new ArrayType(ArrayInfo{elt_type,tq,num_elts,zero_term});
 }
 
-
 // FILE
-static opt_t<type_t> file_t_opt = NULL;
+static type_t* file_t_opt = NULL;
 
 // Maybe someday we'll allow FILE objects to live somewhere other than
 // in the heap (by making the runtime interface more flexible).  
@@ -321,21 +330,16 @@ type_t file_typ() {
     typedef_name_t file_t_name = new $((tunion Nmspace)&std_namespace, sf);
     aggrdecl_t sd = new Aggrdecl(StructA,Abstract,file_t_name,NULL,NULL,NULL);
     type_t file_struct_typ = new AggrType(AggrInfo(new KnownAggr(new sd),NULL));
-    file_t_opt = new Opt(at_typ(file_struct_typ, HeapRgn, empty_tqual(), false_conref));
+    file_t_opt = new at_typ(file_struct_typ,HeapRgn,empty_tqual(),false_conref);
   }
-  return file_t_opt->v;
+  return *file_t_opt;
 }
 
-static opt_t<type_t> void_star_t_opt = NULL;
+static type_t* void_star_t_opt = NULL;
 type_t void_star_typ() {
   if (void_star_t_opt == NULL)
-    void_star_t_opt = new Opt(star_typ(VoidType, HeapRgn, empty_tqual(),false_conref));
-  return void_star_t_opt->v;
-}
-opt_t<type_t> void_star_typ_opt() {
-  if (void_star_t_opt == NULL)
-    void_star_t_opt = new Opt(star_typ(VoidType, HeapRgn, empty_tqual(),false_conref));
-  return void_star_t_opt;
+    void_star_t_opt = new star_typ(VoidType,HeapRgn,empty_tqual(),false_conref);
+  return *void_star_t_opt;
 }
 static tunion Type.JoinEff empty_eff = JoinEff(NULL);
 type_t empty_effect = &empty_eff;
@@ -652,7 +656,6 @@ type_t pointer_expand(type_t t) {
 }
 
 // These are the lvalues of C:
-//
 //    exp      where
 //    ---------------------------
 //    name     name is a variable -- and not a function name or array!

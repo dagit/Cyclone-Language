@@ -469,7 +469,7 @@ doc_t atts2doc(attributes_t atts) {
 bool next_is_pointer(list_t<type_modifier_t> tms) {
   if (tms==NULL) return false;
   switch (tms->hd) {
-  case &Pointer_mod(_,_,_): return true;
+  case &Pointer_mod(_,_): return true;
   case &Attributes_mod(_,_): 
     if(!to_VC) return false;
     // KLUDGE for VC calling conventions
@@ -561,50 +561,35 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
       return cat(rest, ktvars2doc(ts));
     else
       return cat(rest, tvars2doc(ts));
-    // FIX?? What about tq2?
-  case &Pointer_mod(ps, rgn, tq2):
-    _ ptr;
-    switch (ps) {
-    case &Nullable_ps(e,zeroterm):
-      $(unsigned int,bool) pr = Evexp::eval_const_uint_exp(e);
-      if (pr[0] == 1 && pr[1])
-	ptr = text("*");
-      else
-	ptr = cat(text("*"),lb(),exp2doc(e),rb());
-      if (print_zeroterm) {
-        if (!is_char_ptr && conref_def(false,zeroterm)) 
-          ptr = cat(ptr,text("ZEROTERM "));
-        else if (is_char_ptr && !conref_def(false,zeroterm))
-          ptr = cat(ptr,text("NOZEROTERM "));
-      }
+
+    // FIX? What about attributes that we parse before tq2??
+  case &Pointer_mod(PtrAtts(rgn,nullable,bd,zt),tq2):
+    doc_t ptr;
+    switch(conref_def(bounds_one,bd)) {
+    case Unknown_b: ptr = question(); break;
+    case &Upper_b(e):
+      ptr = text(conref_def(true,nullable) ? "*" : "@");
+      let $(val,known) = Evexp::eval_const_uint_exp(e);
+      if(!known || val != 1)
+	ptr = cat(ptr,lb(),exp2doc(e),rb());
       break;
-    case &NonNullable_ps(e,zeroterm):
-      $(unsigned int,bool) pr = Evexp::eval_const_uint_exp(e);
-      if (pr[0] == 1 && pr[1])
-	ptr = text("@");
-      else
-	ptr = cat(text("@"),lb(),exp2doc(e),rb());
-      if (print_zeroterm) {
-        if (!is_char_ptr && conref_def(false,zeroterm)) 
-          ptr = cat(ptr,text("ZEROTERM "));
-        else if (is_char_ptr && !conref_def(false,zeroterm))
-          ptr = cat(ptr,text("NOZEROTERM "));
-      }
-      break;
-    case &TaggedArray_ps(zeroterm): 
-      ptr = question();
-      if (print_zeroterm) {
-        if (!is_char_ptr && conref_def(false,zeroterm)) 
-          ptr = cat(ptr,text("ZEROTERM "));
-        else if (is_char_ptr && !conref_def(false,zeroterm))
-          ptr = cat(ptr,text("NOZEROTERM "));
-      }
+    case &AbsUpper_b(t): 
+      ptr = text(conref_def(true,nullable) ? "*" : "@");
+      ptr = cat(ptr,lb(),typ2doc(t),rb());
       break;
     }
-    switch (compress(rgn)) {
-    case HeapRgn: return cat(ptr,rest);
-    default: return cat(ptr,typ2doc(rgn),text(" "),rest);
+    if (print_zeroterm) {
+      if (!is_char_ptr && conref_def(false,zt)) 
+	ptr = cat(ptr,text("ZEROTERM "));
+      else if (is_char_ptr && !conref_def(false,zt))
+	ptr = cat(ptr,text("NOZEROTERM "));
     }
+    switch(compress(rgn)) {
+    case HeapRgn: break;
+    default: ptr = cat(ptr,typ2doc(rgn),text(" "));
+    }
+    ptr = cat(ptr,tqual2doc(tq2));
+    return cat(ptr,rest);
   }
 }
 
@@ -762,14 +747,12 @@ doc_t ntyp2doc(type_t t) {
             rb());
     break;
   case &AnonEnumType(fs):
-    s = cat(text("enum "),lb(),nest(2, enumfields2doc(fs)), rb());
-    break;
+    s = cat(text("enum "),lb(),nest(2, enumfields2doc(fs)), rb()); break;
   case &EnumType(n,_):
     s = cat(text("enum "),qvar2doc(n)); break;
   case &SizeofType(t):
-    s = cat(text("sizeof_t<"),typ2doc(t),text(">"));
-    break;
-  case &TypedefType(n,ts,kopt,topt):
+    s = cat(text("sizeof_t<"),typ2doc(t),text(">")); break;
+  case &TypedefType(n,ts,kopt,_):
     // NB: we could print out the expanded typedef by following the topt
     // pointer (when non-NULL).
     // TJ: NO, the way to do that is to expand typedefs in to_tms -- see
@@ -778,25 +761,18 @@ doc_t ntyp2doc(type_t t) {
     s = cat(qvar2doc(n),tps2doc(ts));
     break;
   case &RgnHandleType(t):
-    s = cat(text("region_t<"),rgn2doc(t),text(">"));
-    break;
+    s = cat(text("region_t<"),rgn2doc(t),text(">")); break;
   case &TypeInt(t):
-    s = text(aprintf("`%d",t));
-    break;
+    s = text(aprintf("`%d",t)); break;
   case &TagType(t):
-    s = cat(text("tag_t<"),typ2doc(t),text(">"));
-    break;
+    s = cat(text("tag_t<"),typ2doc(t),text(">")); break;
   case HeapRgn:
-    s = rgn2doc(t);
-    break;
+    s = rgn2doc(t); break;
   case &RgnsEff(t):
-    s = cat(text("regions("),typ2doc(t),text(")"));
-    break;
+    s = cat(text("regions("),typ2doc(t),text(")")); break;
   case &AccessEff(_):
-    fallthru;
   case &JoinEff(_):
-    s = eff2doc(t);
-    break;
+    s = eff2doc(t); break;
   }
   return s;
 }
@@ -1825,16 +1801,17 @@ bool exists_temp_tvar_in_effect(type_t t) {
   }
 }
 
-/* This is used in deciding whether to expand a typedef -- we don't
-   expand a typedef of an anonymous function even if expand_typedefs
-   is true, because we end up with anonymous structs in, e.g.,
-   function parameters where gcc does not like them. */
+// This is used in deciding whether to expand a typedef -- we don't
+// expand a typedef of an anonymous function even if expand_typedefs
+// is true, because we end up with anonymous structs in, e.g.,
+// function parameters where gcc does not like them.
+// FIX?: what about AnonEnumType
 bool is_anon_aggrtype(type_t t) {
   switch (t) {
   case &AnonAggrType(_,_): return true;
-  case &TypedefType(_,_,_,&Opt(x)):
-    /* This won't loop if the types come from a .cyc file,
-       because typedefs in Cyclone (or C) can't be recursive */
+  case &TypedefType(_,_,_,&x):
+    // This won't loop if the types come from a .cyc file,
+    // because typedefs in Cyclone (or C) can't be recursive
     return is_anon_aggrtype(x);
   default: return false;
   }
@@ -1853,23 +1830,9 @@ $(tqual_t,type_t,list_t<type_modifier_t>) to_tms(tqual_t tq,type_t t) {
       tm = new ConstArray_mod((exp_t)e,zeroterm);
     return $(tq3, t3, new List(tm,tml3));
 
-  case &PointerType(PtrInfo(t2,rgntyp,nullable,tq2,b,zeroterm)):
+  case &PointerType(PtrInfo(t2,tq2,ptratts)):
     let $(tq3,t3,tml3) = to_tms(tq2,t2);
-    tunion Pointer_Sort ps;
-    switch ($(compress_conref(nullable)->v,compress_conref(b)->v)) {
-    case $(&Eq_constr(true), &Eq_constr(&Upper_b(e))):
-      ps = new Nullable_ps(e,zeroterm); break;
-    case $(&Eq_constr(false), &Eq_constr(&Upper_b(e))):
-      ps = new NonNullable_ps(e,zeroterm); break;
-    case $(_, &Eq_constr(Unknown_b)):
-      ps = new TaggedArray_ps(zeroterm); break;
-    default:
-      // We need to print out something...
-      // Dan: but this is impossible, isn't it??
-      ps = new TaggedArray_ps(false_conref); break;
-      // ps = impos("bad pointer type in Absynpp::to_tms"); break;
-    }
-    type_modifier_t tm = new Pointer_mod(ps,rgntyp,tq);
+    type_modifier_t tm = new Pointer_mod(ptratts,tq);
     return $(tq3, t3, new List(tm,tml3));
 
   case &FnType(FnInfo{typvars,effopt,t2,args,c_varargs,cyc_varargs,
@@ -1929,10 +1892,10 @@ $(tqual_t,type_t,list_t<type_modifier_t>) to_tms(tqual_t tq,type_t t) {
       return to_tms(tq,topt->v);
 
   case &TypedefType(n,ts,_,topt):
-    if (topt == NULL || !expand_typedefs || is_anon_aggrtype(topt->v))
+    if (topt == NULL || !expand_typedefs || is_anon_aggrtype(*topt))
       return $(tq,t,NULL);
     else
-      return to_tms(tq,topt->v);
+      return to_tms(tq,*topt);
 
   default: return $(tq,t,NULL);
   }
@@ -1942,11 +1905,11 @@ static bool is_char_ptr(type_t t) {
   // want to avoid compressing here when possible
   switch (t) {
   case &Evar(_,&Opt(def),_,_): return is_char_ptr(def);
-  case &PointerType(PtrInfo{elt_typ,_,_,_,_,_}):
+  case &PointerType(PtrInfo{elt_typ,_,_}):
   L:
     switch (elt_typ) {
     case &Evar(_,&Opt(t),_,_): elt_typ = t; goto L;
-    case &TypedefType(_,_,_,&Opt(t)): elt_typ = t; goto L;
+    case &TypedefType(_,_,_,&t): elt_typ = t; goto L;
     case &IntType(_,B1): return true;
     default: return false;
     }
@@ -2022,4 +1985,3 @@ string_t typ2cstring(type_t t) {
 string_t prim2string(primop_t p) {return string_of_doc(prim2doc(p), PP_WIDTH);}
 string_t pat2string(pat_t p)     {return string_of_doc(pat2doc(p),  PP_WIDTH);}
 string_t scope2string(scope_t sc){return string_of_doc(scope2doc(sc),PP_WIDTH);}
-

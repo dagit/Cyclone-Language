@@ -181,8 +181,9 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
       break;
     }
     set_vd(vd, &res.patvars, 
-	   new PointerType(PtrInfo(t,*rgn_opt,false_conref,empty_tqual(),
-                                   empty_conref(),empty_conref())));
+	   new PointerType(PtrInfo(t,empty_tqual(),
+				   PtrAtts(*rgn_opt,false_conref,
+					   empty_conref(),empty_conref()))));
     break;
 
   case &Int_p(Unsigned,_): t = num_type(topt, uint_typ);  break;
@@ -199,10 +200,10 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
       default: break;
       }
     let tenv_tvs = lookup_type_vars(te);
-    t = new PointerType(PtrInfo(new_evar(&ak,new Opt(tenv_tvs)),
-                                new_evar(&rk,new Opt(tenv_tvs)),
-				true_conref,empty_tqual(),
-                                empty_conref(),empty_conref()));
+    t = new PointerType(PtrInfo(new_evar(&ak,new Opt(tenv_tvs)),empty_tqual(),
+				PtrAtts(new_evar(&rk,new Opt(tenv_tvs)),
+					true_conref,
+					empty_conref(),empty_conref())));
     break;
 
   case &Pointer_p(p2):
@@ -213,7 +214,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
     let    inner_topt = NULL;
     if(topt != NULL)
       switch(compress(*topt)) {
-      case &PointerType(PtrInfo(elt_typ,_,_,_,_,_)): 
+      case &PointerType(PtrInfo(elt_typ,_,_)): 
 	inner_typ  = elt_typ; 
 	inner_topt = &inner_typ;
 	break;
@@ -233,15 +234,15 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
 	t = new TunionType(TunionInfo{new KnownTunion(new tud),targs,ptr_rgn});
 	break;
       default:
-	t = new PointerType(PtrInfo{p2->topt->v, ptr_rgn, empty_conref(), 
-				    empty_tqual(), empty_conref(),
-                                    empty_conref()});
+	t = new PointerType(PtrInfo(p2->topt->v, empty_tqual(),
+				    PtrAtts(ptr_rgn, empty_conref(), 
+					    empty_conref(), empty_conref())));
 	break;
       }
     else 
-      t = new PointerType(PtrInfo(p2->topt->v, ptr_rgn, empty_conref(), 
-				  empty_tqual(), empty_conref(),
-                                  empty_conref()));
+      t = new PointerType(PtrInfo(p2->topt->v, empty_tqual(),
+				  PtrAtts(ptr_rgn, empty_conref(), 
+					  empty_conref(), empty_conref())));
     break;
 
   case &Tuple_p(ps):
@@ -437,7 +438,7 @@ void check_pat_regions(tenv_t te, pat_t p) {
   case &Pointer_p(p2):
     check_pat_regions(te,p2);
     switch (p->topt->v) {
-    case &PointerType(PtrInfo{_,rt,_,_,_,_}): fallthru(rt);
+    case &PointerType(PtrInfo(_,_,PtrAtts(rt,_,_,_))): fallthru(rt);
     case &TunionType(TunionInfo{_,_,rt}):
       check_rgn_accessible(te,p->loc,rt);
       return;
@@ -590,7 +591,7 @@ static simple_pat_t compile_pat(pat_t p) {
   case &Reference_p(_): s = Any; break;
   case &Pointer_p(pp):
     switch (compress(p->topt->v)) {
-    case &PointerType(PtrInfo{_,_,n,_,_,_}):
+    case &PointerType(PtrInfo(_,_,PtrAtts(_,n,_,_))):
       bool is_nullable = false;
       bool still_working = true;
       while (still_working) {

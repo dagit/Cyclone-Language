@@ -442,9 +442,9 @@ bool same_relop(reln_op_t r1,reln_op_t r2) {
   if (r1 == r2) return true;
   switch ($(r1,r2)) {
   case $(&EqualConst(c1),&EqualConst(c2)): return c1 == c2;
-  case $(&LessVar(v1),&LessVar(v2)):  return v1 == v2;
-  case $(&LessSize(v1),&LessSize(v2)): return v1 == v2;
-  case $(&LessConst(c1),&LessConst(c2)): return c1 == c2;
+  case $(&LessVar(v1),   &LessVar(v2)):    return v1 == v2;
+  case $(&LessSize(v1),  &LessSize(v2)):   return v1 == v2;
+  case $(&LessConst(c1), &LessConst(c2)):  return c1 == c2;
   case $(&LessEqSize(v1),&LessEqSize(v2)): return v1 == v2;
   default: return false;
   }
@@ -729,8 +729,8 @@ relns_t reln_assign_var(relns_t r, vardecl_t v, exp_t e) {
     case &Primop_e(Size, &List(e3,_)):
       switch (e3->r) {
       case &Var_e(_,&Global_b(v2)): fallthru(v2);
-      case &Var_e(_,&Local_b(v2)): fallthru(v2);
-      case &Var_e(_,&Param_b(v2)): fallthru(v2);
+      case &Var_e(_,&Local_b(v2)):  fallthru(v2);
+      case &Var_e(_,&Param_b(v2)):  fallthru(v2);
       case &Var_e(_,&Pat_b(v2)):
         if (v2->escapes) return r;
         return new List(new Reln(v,new LessSize(v2)),r);
@@ -743,8 +743,8 @@ relns_t reln_assign_var(relns_t r, vardecl_t v, exp_t e) {
   case &Primop_e(Size,&List(e2,_)):
     switch (e2->r) {
     case &Var_e(_,&Global_b(v2)): fallthru(v2);
-    case &Var_e(_,&Local_b(v2)): fallthru(v2);
-    case &Var_e(_,&Param_b(v2)): fallthru(v2);
+    case &Var_e(_,&Local_b(v2)):  fallthru(v2);
+    case &Var_e(_,&Param_b(v2)):  fallthru(v2);
     case &Var_e(_,&Pat_b(v2)):
       if (v2->escapes) return r;
       return new List(new Reln(v,new LessEqSize(v2)),r);
@@ -774,11 +774,10 @@ void print_reln(reln_t r) {
   fprintf(stderr,"%s",qvar2string(r->vd->name));
   switch (r->rop) {
   case &EqualConst(c): fprintf(stderr,"==%d",c); break;
-  case &LessVar(vd): fprintf(stderr,"<%s",qvar2string(vd->name)); break;
-  case &LessSize(vd): fprintf(stderr,"<%s.size",qvar2string(vd->name)); break;
-  case &LessConst(c): fprintf(stderr,"<%d",c); break;
-  case &LessEqSize(vd): 
-    fprintf(stderr,"<=%s.size",qvar2string(vd->name)); break;
+  case &LessVar(vd):   fprintf(stderr,"<%s",qvar2string(vd->name)); break;
+  case &LessSize(vd):  fprintf(stderr,"<%s.size",qvar2string(vd->name)); break;
+  case &LessConst(c):  fprintf(stderr,"<%d",c); break;
+  case &LessEqSize(vd): fprintf(stderr,"<=%s.size",qvar2string(vd->name));break;
   }
 }
 
@@ -799,17 +798,17 @@ void print_relns(relns_t r) {
 // that we can allocate stuff in the region.  
 static bool contains_region(tvar_t rgn, type_t t) {
   switch (Tcutil::compress(t)) {
-  case VoidType:         fallthru; // these cases can't contain rgn
-  case &IntType(_,_):    fallthru;
-  case FloatType:        fallthru;
-  case &DoubleType(_):   fallthru;
-  case &EnumType(_,_):   fallthru;
-  case &AnonEnumType(_): fallthru;
-  case &SizeofType(_):   fallthru;
-  case &TagType(_):      fallthru;
-  case &TypeInt(_):      fallthru;
-  case HeapRgn:          fallthru;
-  case &Evar(_,_,_,_):   return false; // because of compress above
+  case VoidType: // these cases can't contain rgn
+  case &IntType(_,_):    
+  case FloatType:        
+  case &DoubleType(_):   
+  case &EnumType(_,_):   
+  case &AnonEnumType(_): 
+  case &SizeofType(_):   
+  case &TagType(_):      
+  case &TypeInt(_):      
+  case HeapRgn:          
+  case &Evar(_,_,_,_): return false; // because of compress above
   case &VarType(tv): return tvar_cmp(tv,rgn) == 0;
     // for parameterized types, we just look to see if rgn shows up 
     // in the parameters -- this is overly aggressive since the regions
@@ -827,7 +826,7 @@ static bool contains_region(tvar_t rgn, type_t t) {
   case &TunionFieldType(TunionFieldInfo{_,targs}): fallthru(targs);
   case &JoinEff(targs): 
     return List::exists_c(contains_region,rgn,targs);
-  case &PointerType(PtrInfo{t2,r,_,_,_,_}):
+  case &PointerType(PtrInfo{t2,_,PtrAtts(r,_,_,_)}):
     return contains_region(rgn,r) || contains_region(rgn,t2);
   case &FnType(_): return false;
   case &TupleType(tqs):

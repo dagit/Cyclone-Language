@@ -319,7 +319,7 @@ _tagged_arr pw_dir;struct _tagged_arr pw_shell;};struct Cyc_passwd*Cyc_getpwnam(
 struct _tagged_arr name);struct Cyc_passwd*Cyc_getpwuid(unsigned short uid);struct
 Cyc_Cpwd_Cpasswd{char*pw_name;char*pw_passwd;unsigned short pw_uid;unsigned short
 pw_gid;char*pw_gecos;char*pw_dir;char*pw_shell;};struct Cyc_Cpwd_Cpasswd*getpwnam(
-char*name);struct Cyc_Cpwd_Cpasswd*getpwuid(unsigned short uid);struct Cyc_passwd*
+char*const name);struct Cyc_Cpwd_Cpasswd*getpwuid(unsigned short uid);struct Cyc_passwd*
 Cyc_getpwnam(struct _tagged_arr name){struct Cyc_Cpwd_Cpasswd*src=getpwnam(
 string_to_Cstring(name));struct Cyc_passwd*_tmp0=(unsigned int)src?({struct Cyc_passwd*
 _tmp1=_cycalloc(sizeof(*_tmp1));_tmp1->pw_name=(struct _tagged_arr)

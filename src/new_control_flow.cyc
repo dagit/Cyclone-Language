@@ -272,7 +272,7 @@ static $(flow_t,flow_t) splitzero(analenv_t env, flow_t inflow, flow_t outflow,
 static $(flow_t,absRval_t) anal_derefR(analenv_t env, flow_t inflow,
 				       flow_t f, exp_t e, absRval_t r) {
   switch(Tcutil::compress(e->topt->v)) {
-  case &PointerType(PtrInfo(elttype,_,_,_,bd,zt)):
+  case &PointerType(PtrInfo(elttype,_,PtrAtts(_,_,bd,zt))):
     switch(f) {
     case BottomFL: return $(f,typ_to_absrval(elttype,unknown_all));
     case &ReachableFL(outdict,relns):
@@ -466,7 +466,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     // we just just "use" each argument except for the "initializes" attribute
     list_t<int> init_params = NULL;
     switch(Tcutil::compress(e1->topt->v)) {
-    case &PointerType(PtrInfo(t,_,_,_,_,_)):
+    case &PointerType(PtrInfo(t,_,_)):
       switch(Tcutil::compress(t)) {
       case &FnType(FnInfo(_,_,_,_,_,_,_,atts)):
 	for(; atts != NULL; atts = atts->tl)
@@ -498,7 +498,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
 	  switch(rvals->hd) {
 	  case &AddressOf(p): 
 	    switch(Tcutil::compress(es->hd->topt->v)) {
-	    case &PointerType(PtrInfo(t,_,_,_,_,_)):
+	    case &PointerType(PtrInfo(t,_,_)):
 	      ans_d = assign_place(es->hd->loc, ans_d, env->all_changed,
 				   p, typ_to_absrval(t,esc_all));
 	      break;
@@ -590,7 +590,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     let $(f1,r1) = anal_Rexp(env,inflow,e1);
     let $(f2,r2) = anal_derefR(env,inflow,f1,e1,r1);
     switch(Tcutil::compress(e1->topt->v)) {
-    case &PointerType(PtrInfo{t2,_,_,_,_,_}):
+    case &PointerType(PtrInfo{t2,_,_}):
       if(is_union_type(t2))
 	return $(f2,typ_to_absrval(e->topt->v,unknown_all)); 
       break;
@@ -784,7 +784,7 @@ static $(flow_t,absLval_t) anal_derefL(analenv_t env, flow_t inflow, flow_t f,
 				       exp_t e, absRval_t r, 
 				       list_t<field_name_t,`H> flds) {
   switch(Tcutil::compress(e->topt->v)) {
-  case &PointerType(PtrInfo{elttype,_,_,_,bd,zt}):
+  case &PointerType(PtrInfo{elttype,_,PtrAtts(_,_,bd,zt)}):
     switch(f) {
     case BottomFL: return $(f,UnknownL);
     case &ReachableFL(outdict,relns):
@@ -887,7 +887,7 @@ static $(flow_t,absLval_t) anal_Lexp(analenv_t env, flow_t inflow, exp_t e) {
 }
 
 // FIX: ?? there are more primops and the "not-zero" cases to add if we care.
-//      also we can statically determined stupid tests like NotZero == Zero
+//      also we can statically determine stupid tests like NotZero == Zero
 static $(flow_t,flow_t) anal_test(analenv_t env, flow_t inflow, exp_t e) {
   switch(e->r) {
   case &Conditional_e(e1,e2,e3):
@@ -902,7 +902,7 @@ static $(flow_t,flow_t) anal_test(analenv_t env, flow_t inflow, exp_t e) {
   case &Primop_e(Not,&List(e1,NULL)):          
     let $(f1,f2) = anal_test(env,inflow,e1);
     return $(f2,f1);
-  case &Primop_e(Eq,es):
+  case &Primop_e(p,es) && p==Eq || p==Neq || p==Lt || p==Lte:
     let $(f,rvals) = anal_unordered_Rexps(env,inflow,es);
     switch(f) {
     case BottomFL: return $(f,f);
@@ -913,128 +913,100 @@ static $(flow_t,flow_t) anal_test(analenv_t env, flow_t inflow, exp_t e) {
 	Tcutil::terr(es->hd->loc,"expression may not be initialized");
       if(initlevel(d,r2)==NoneIL)
 	Tcutil::terr(es->tl->hd->loc,"expression may not be initialized");
-      switch($(r1,r2)) {
-      case $(&UnknownR(il),Zero): // f is correct for both args b/c unordered
-	let $(f1,f2) = splitzero(env,f,f,es->hd,il);
-	return $(f2,f1);
-      case $(Zero,&UnknownR(il)):
-	let $(f1,f2) = splitzero(env,f,f,es->tl->hd,il);
-	return $(f2,f1);
-      default: return $(f,f);
-      }
-    }
-  case &Primop_e(Neq,es): 
-    let $(f,rvals) = anal_unordered_Rexps(env,inflow,es);
-    switch(f) {
-    case BottomFL: return $(f,f);
-    case &ReachableFL(d,relns):
-      let r1 = rvals->hd;
-      let r2 = rvals->tl->hd;
-      if(initlevel(d,r1)==NoneIL)
-	Tcutil::terr(es->hd->loc,"expression may not be initialized");
-      if(initlevel(d,r2)==NoneIL)
-	Tcutil::terr(es->tl->hd->loc,"expression may not be initialized");
-      switch($(r1,r2)) {
-      case $(&UnknownR(il),Zero): // f is correct for both args b/c unordered
-	return splitzero(env,f,f,es->hd,il);
-      case $(Zero,&UnknownR(il)):
-	return splitzero(env,f,f,es->tl->hd,il);
-      default: return $(f,f);
-      }
-    }
-  // this case tracks most of the inequalities we need for bounds-checking
-  case &Primop_e(Lt,es):
-    let $(f,rvals) = anal_unordered_Rexps(env,inflow,es);
-    switch (f) {
-    case BottomFL: return $(f,f);
-    case &ReachableFL(d,relns):
-      let r1 = rvals->hd;
-      let r2 = rvals->tl->hd;
-      if(initlevel(d,r1)==NoneIL)
-	Tcutil::terr(es->hd->loc,"expression may not be initialized");
-      if(initlevel(d,r2)==NoneIL)
-	Tcutil::terr(es->tl->hd->loc,"expression may not be initialized");
-      let e1 = es->hd;
-      let e2 = es->tl->hd;
-      switch (e1->r) {
-      // Note: global arrays are the only thing that don't "escape"
-      case &Var_e(_,&Global_b(v1)) && !v1->escapes: fallthru(v1);
-      case &Var_e(_,&Local_b(v1)) && !v1->escapes: fallthru(v1);
-      case &Var_e(_,&Pat_b(v1)) && !v1->escapes: fallthru(v1);
-      case &Var_e(_,&Param_b(v1)) && !v1->escapes:
-        switch (e2->r) {
-        case &Var_e(_,&Global_b(v2)) && !v2->escapes: fallthru(v2);
-        case &Var_e(_,&Local_b(v2)) && !v2->escapes: fallthru(v2);
-        case &Var_e(_,&Pat_b(v2)) && !v2->escapes: fallthru(v2);
-        case &Var_e(_,&Param_b(v2)) && !v2->escapes:
-          // check that v1 or v2 is unsigned to ensure this is an
-          // unsigned comparison
-          switch ($(Tcutil::compress(v1->type),Tcutil::compress(v2->type))) {
-          case $(&IntType(Unsigned,B4),_): break;
-          case $(_,&IntType(Unsigned,B4)): break;
-          default: return $(f,f);
-          }
-          let relns_true = new List(new Reln(v1,new LessVar(v2)),relns);
-          return $(new ReachableFL(d,relns_true), f);
-        case &Const_e(&Int_c(_,i)): 
-          switch ($(Tcutil::compress(v1->type),Tcutil::compress(e2->topt->v))){
-          case $(&IntType(Unsigned,B4),_): break;
-          case $(_,&IntType(Unsigned,B4)): break;
-          default: return $(f,f);
-          }
-          let relns_true = new List(new Reln(v1,new LessConst(i)),relns);
-          return $(new ReachableFL(d,relns_true), f);
-        case &Primop_e(Size,&List(e3,_)):
-          switch (e3->r) {
-          case &Var_e(_,&Global_b(v2)) && !v2->escapes: fallthru(v2);
-          case &Var_e(_,&Local_b(v2)) && !v2->escapes: fallthru(v2);
-          case &Var_e(_,&Pat_b(v2)) && !v2->escapes: fallthru(v2);
-          case &Var_e(_,&Param_b(v2)) && !v2->escapes:
-            // size is always unsigned
-            let relns_true = new List(new Reln(v1,new LessSize(v2)),relns);
-            return $(new ReachableFL(d,relns_true), f);
-          default: return $(f,f);
-          }
-        default: return $(f,f);
-        }
-      default: return $(f,f);
-      }
-    }
-  // this case checks for i <= x.size
-  case &Primop_e(Lte,es):
-    let $(f,rvals) = anal_unordered_Rexps(env,inflow,es);
-    switch (f) {
-    case BottomFL: return $(f,f);
-    case &ReachableFL(d,relns):
-      let r1 = rvals->hd;
-      let r2 = rvals->tl->hd;
-      if(initlevel(d,r1)==NoneIL)
-	Tcutil::terr(es->hd->loc,"expression may not be initialized");
-      if(initlevel(d,r2)==NoneIL)
-	Tcutil::terr(es->tl->hd->loc,"expression may not be initialized");
-      let e1 = es->hd;
-      let e2 = es->tl->hd;
-      switch (e1->r) {
-      // Note: global arrays are the only thing that don't "escape"
-      case &Var_e(_,&Global_b(v1)) && !v1->escapes: fallthru(v1);
-      case &Var_e(_,&Local_b(v1)) && !v1->escapes: fallthru(v1);
-      case &Var_e(_,&Pat_b(v1)) && !v1->escapes: fallthru(v1);
-      case &Var_e(_,&Param_b(v1)) && !v1->escapes:
-        switch (e2->r) {
-        case &Primop_e(Size,&List(e3,_)):
-          switch (e3->r) {
-          case &Var_e(_,&Global_b(v2)) && !v2->escapes: fallthru(v2);
-          case &Var_e(_,&Local_b(v2)) && !v2->escapes: fallthru(v2);
-          case &Var_e(_,&Pat_b(v2)) && !v2->escapes: fallthru(v2);
-          case &Var_e(_,&Param_b(v2)) && !v2->escapes:
-            // size is always unsigned
-            let relns_true = new List(new Reln(v1,new LessEqSize(v2)),relns);
-            return $(new ReachableFL(d,relns_true), f);
-          default: return $(f,f);
-          }
-        default: return $(f,f);
-        }
-      default: return $(f,f);
+      switch(p) {
+      case Eq: 
+	switch($(r1,r2)) {
+	case $(&UnknownR(il),Zero): // f is correct for both args b/c unordered
+	  let $(f1,f2) = splitzero(env,f,f,es->hd,il);
+	  return $(f2,f1);
+	case $(Zero,&UnknownR(il)):
+	  let $(f1,f2) = splitzero(env,f,f,es->tl->hd,il);
+	  return $(f2,f1);
+	default: return $(f,f);
+	}
+      case Neq:
+	switch($(r1,r2)) {
+	case $(&UnknownR(il),Zero): // f is correct for both args b/c unordered
+	  return splitzero(env,f,f,es->hd,il);
+	case $(Zero,&UnknownR(il)):
+	  return splitzero(env,f,f,es->tl->hd,il);
+	default: return $(f,f);
+	}
+      case Lt:
+	// this case tracks most of the inequalities we need for bounds-checking
+	let e1 = es->hd;
+	let e2 = es->tl->hd;
+	switch (e1->r) {
+	  // Note: global arrays are the only thing that don't "escape"
+	case &Var_e(_,&Global_b(v1)) && !v1->escapes: fallthru(v1);
+	case &Var_e(_,&Local_b(v1))  && !v1->escapes: fallthru(v1);
+	case &Var_e(_,&Pat_b(v1))    && !v1->escapes: fallthru(v1);
+	case &Var_e(_,&Param_b(v1))  && !v1->escapes:
+	  switch (e2->r) {
+	  case &Var_e(_,&Global_b(v2)) && !v2->escapes: fallthru(v2);
+	  case &Var_e(_,&Local_b(v2))  && !v2->escapes: fallthru(v2);
+	  case &Var_e(_,&Pat_b(v2))    && !v2->escapes: fallthru(v2);
+	  case &Var_e(_,&Param_b(v2))  && !v2->escapes:
+	    // check that v1 or v2 is unsigned to ensure this is an
+	    // unsigned comparison
+	    switch ($(Tcutil::compress(v1->type),Tcutil::compress(v2->type))) {
+	    case $(&IntType(Unsigned,B4),_): break;
+	    case $(_,&IntType(Unsigned,B4)): break;
+	    default: return $(f,f);
+	    }
+	    let relns_true = new List(new Reln(v1,new LessVar(v2)),relns);
+	    return $(new ReachableFL(d,relns_true), f);
+	  case &Const_e(&Int_c(_,i)): 
+	    switch($(Tcutil::compress(v1->type),Tcutil::compress(e2->topt->v))){
+	    case $(&IntType(Unsigned,B4),_): break;
+	    case $(_,&IntType(Unsigned,B4)): break;
+	    default: return $(f,f);
+	    }
+	    let relns_true = new List(new Reln(v1,new LessConst(i)),relns);
+	    return $(new ReachableFL(d,relns_true), f);
+	  case &Primop_e(Size,&List(e3,_)):
+	    switch (e3->r) {
+	    case &Var_e(_,&Global_b(v2)) && !v2->escapes: fallthru(v2);
+	    case &Var_e(_,&Local_b(v2))  && !v2->escapes: fallthru(v2);
+	    case &Var_e(_,&Pat_b(v2))    && !v2->escapes: fallthru(v2);
+	    case &Var_e(_,&Param_b(v2))  && !v2->escapes:
+	      // size is always unsigned
+	      let relns_true = new List(new Reln(v1,new LessSize(v2)),relns);
+	      return $(new ReachableFL(d,relns_true), f);
+	    default: return $(f,f);
+	    }
+	  default: return $(f,f);
+	  }
+	default: return $(f,f);
+	}
+	
+	// this case checks for i <= x.size
+      case Lte:
+	let e1 = es->hd;
+	let e2 = es->tl->hd;
+	switch (e1->r) {
+	  // Note: global arrays are the only thing that don't "escape"
+	case &Var_e(_,&Global_b(v1)) && !v1->escapes: fallthru(v1);
+	case &Var_e(_,&Local_b(v1))  && !v1->escapes: fallthru(v1);
+	case &Var_e(_,&Pat_b(v1))    && !v1->escapes: fallthru(v1);
+	case &Var_e(_,&Param_b(v1))  && !v1->escapes:
+	  switch (e2->r) {
+	  case &Primop_e(Size,&List(e3,_)):
+	    switch (e3->r) {
+	    case &Var_e(_,&Global_b(v2)) && !v2->escapes: fallthru(v2);
+	    case &Var_e(_,&Local_b(v2))  && !v2->escapes: fallthru(v2);
+	    case &Var_e(_,&Pat_b(v2))    && !v2->escapes: fallthru(v2);
+	    case &Var_e(_,&Param_b(v2))  && !v2->escapes:
+	      // size is always unsigned
+	      let relns_true = new List(new Reln(v1,new LessEqSize(v2)),relns);
+	      return $(new ReachableFL(d,relns_true), f);
+	    default: return $(f,f);
+	    }
+	  default: return $(f,f);
+	  }
+	default: return $(f,f);
+	}
+      default: Tcutil::impos("bad primop guard in new_control_flow:anal_test");
       }
     }
   default: break;
@@ -1343,7 +1315,7 @@ static void check_fun(fndecl_t fd) {
 	}
 	let vd = List::nth(fd->param_vardecls->v,j-1);
 	switch(Tcutil::compress(vd->type)) {
-	case &PointerType(PtrInfo(t,_,nullable,_,bd,zt)):
+	case &PointerType(PtrInfo(t,_,PtrAtts(_,nullable,bd,zt))):
 	  if(conref_val(nullable))
 	    Tcutil::terr(loc, "initializes attribute not allowed on "
 			 "nullable pointers");

@@ -319,7 +319,7 @@ Cyc_group*Cyc_getgrnam(struct _tagged_arr name);struct Cyc_group*Cyc_getgrgid(
 unsigned short uid);int Cyc_initgroups(struct _tagged_arr user,unsigned short group);
 int Cyc_setgroups(struct _tagged_arr groups);struct Cyc_Cgrp_Cgroup{char*gr_name;
 char*gr_passwd;unsigned short gr_gid;char**gr_mem;};struct Cyc_Cgrp_Cgroup*
-getgrnam(char*name);struct Cyc_Cgrp_Cgroup*getgrgid(unsigned short gid);int
+getgrnam(char*const name);struct Cyc_Cgrp_Cgroup*getgrgid(unsigned short gid);int
 initgroups(char*user,unsigned short group);int setgroups(unsigned int n,const
 unsigned short*groups);struct Cyc_group*Cyc_getgrnam(struct _tagged_arr name){
 struct Cyc_Cgrp_Cgroup*src=getgrnam(string_to_Cstring(name));return(unsigned int)

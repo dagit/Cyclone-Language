@@ -52,7 +52,7 @@
 // Note that translation to C willfully violates B3 and B4, but that's okay.
 // The translation to C also eliminates all things like type variables.
 
-// A cute hack to avoid defining the abstract syntax twice.
+// A cute hack to avoid defining the abstract syntax twice:
 #ifdef ABSYN_CYC
 #define EXTERN_ABSYN
 #else
@@ -86,8 +86,8 @@ namespace Absyn {
   typedef qvar_opt_t typedef_name_opt_t; 
 
   // forward declarations
-  extern struct Conref<`a>;
-  extern tunion Constraint<`a>;
+  EXTERN_ABSYN struct Conref<`a>;
+  EXTERN_ABSYN tunion Constraint<`a>;
 
   // typedefs -- in general, we define foo_t to be struct Foo@ or tunion Foo.
   typedef tunion Scope scope_t;
@@ -101,6 +101,7 @@ namespace Absyn {
   typedef struct Conref<`a> @conref_t<`a>;
   typedef tunion Constraint<`a> constraint_t<`a>;
   typedef tunion Bounds bounds_t;
+  typedef struct PtrAtts ptr_atts_t;
   typedef struct PtrInfo ptr_info_t;
   typedef struct VarargInfo vararg_info_t;
   typedef struct FnInfo fn_info_t;
@@ -166,13 +167,12 @@ namespace Absyn {
   // Used to classify types.  
   EXTERN_ABSYN tunion Kind { 
     // BoxKind <= MemKind <= AnyKind
-    AnyKind,      // kind of all types, including abstract structs
-    MemKind,      // same as AnyType but excludes abstract structs
-    BoxKind,      // same as MemKind but excludes types whose 
-                  //   values do not go in general-purpose registers
-    RgnKind,      // regions
-    EffKind,      // effects
-    IntKind      // constant ints
+    AnyKind, // kind of all types, including abstract structs
+    MemKind, // excludes abstract structs
+    BoxKind, // excludes types whose values dont go in general-purpose registers
+    RgnKind, // regions
+    EffKind, // effects
+    IntKind  // constant ints
   };
 
   // signed or unsigned qualifiers on integral types
@@ -210,16 +210,21 @@ namespace Absyn {
   EXTERN_ABSYN tunion Bounds {
     Unknown_b;      // t?
     Upper_b(exp_t); // t*{x:x>=0 && x < e} and t@{x:x>=0 && x < e}
+    AbsUpper_b(type_t); // abstract bound -- type has IntKind
+  };
+
+  EXTERN_ABSYN struct PtrAtts {
+    rgntype_t          rgn;       // region of value to which pointer points
+    conref_t<bool>     nullable;  // type admits NULL (* vs. @)
+    conref_t<bounds_t> bounds;    // legal bounds for pointer indexing
+    conref_t<bool>     zero_term; // true => zero terminated array
   };
 
   // information about a pointer type
   EXTERN_ABSYN struct PtrInfo {
-    type_t             elt_typ;   // type of value to which pointer points
-    rgntype_t          rgn_typ;   // region of value to which pointer points
-    conref_t<bool>     nullable;  // * or @
-    tqual_t            tq;        // determines whether the elts are const
-    conref_t<bounds_t> bounds;    // legal bounds for pointer indexing
-    conref_t<bool>     zero_term; // true => zero terminated array
+    type_t     elt_typ;  // type of value to which pointer points
+    tqual_t    elt_tq;   // qualifier **for elements**
+    ptr_atts_t ptr_atts;
   };
 
   // information about vararg functions
@@ -320,19 +325,18 @@ namespace Absyn {
     DoubleType(bool); // MemKind.  when bool is true, long double
     ArrayType(array_info_t);// MemKind
     FnType(fn_info_t); // MemKind
+    // We treat anonymous structs, unions, and enums slightly differently
+    // than C.  In particular, we treat structurally equivalent types as
+    // equal.  C requires a name for each type and uses by-name equivalence.
     TupleType(list_t<$(tqual_t,type_t)@>); // MemKind
     AggrType(aggr_info_t); // MemKind (named structs and unions)
     AnonAggrType(aggr_kind_t,list_t<aggrfield_t>); // MemKind
     EnumType(typedef_name_t,struct Enumdecl *); // MemKind
     AnonEnumType(list_t<enumfield_t>); // MemKind
     SizeofType(type_t); // AnyKind -> BoxKind
-    // We treat anonymous structs, unions, and enums slightly differently
-    // than C.  In particular, we treat structurally equivalent types as
-    // equal, whereas C requires a name for each type and uses by-name
-    // equivalence only.
     RgnHandleType(type_t);   // a handle for allocating in a region.  BoxKind
-    // An abbreviation -- the opt_t<typ> contains the definition if any
-    TypedefType(typedef_name_t,list_t<type_t>,struct Typedefdecl *,opt_t<type_t>);
+    // An abbreviation -- the type_t* contains the definition iff any
+    TypedefType(typedef_name_t,list_t<type_t>,struct Typedefdecl *,type_t*);
     TagType(type_t);         // tag_t<t>.  IntKind -> BoxKind.
     TypeInt(int);            // `i, i a const int.  IntKind
     HeapRgn;                 // The heap region.  RgnKind 
@@ -349,14 +353,6 @@ namespace Absyn {
               vararg_info_t *,                         // cyc_varargs
               opt_t<type_t>,                           // effect
               list_t<$(type_t,type_t)@>);              // region partial order
-  };
-
-  // used when parsing/pretty-printing pointers.  The conref_t<bool>s
-  // determine whether or not the array/pointer is zero-terminated.
-  EXTERN_ABSYN tunion Pointer_Sort {
-    NonNullable_ps(exp_t,conref_t<bool>), // exp is upper bound
-    Nullable_ps(exp_t,conref_t<bool>),    // exp is upper bound
-    TaggedArray_ps(conref_t<bool>)        // true->zero terminated
   };
 
   // Used in attributes below.
@@ -394,10 +390,9 @@ namespace Absyn {
 
   // Type modifiers are used for parsing/pretty-printing
   EXTERN_ABSYN tunion Type_modifier {
-    Carray_mod(conref_t<bool>); // [], conref controls zero-termination
+    Carray_mod(conref_t<bool>); // [], conref controls zero-term
     ConstArray_mod(exp_t,conref_t<bool>); // [c], conref controls zero-term
-    // for Pointer_mod, the typ has RgnKind, default is RgnType(HeapRgn)
-    Pointer_mod(tunion Pointer_Sort,type_t,tqual_t); 
+    Pointer_mod(ptr_atts_t,tqual_t); // qualifer for the point (**not** elts)
     Function_mod(funcparams_t);
     TypeParams_mod(list_t<tvar_t>,seg_t,bool);// when bool is true, print kinds
     Attributes_mod(seg_t,attributes_t);
@@ -606,12 +601,12 @@ namespace Absyn {
 
   // only local and pat cases need to worry about shadowing
   EXTERN_ABSYN tunion Binding {
-    Unresolved_b;       // don't know -- error or uninitialized
+    Unresolved_b;        // don't know -- error or uninitialized
     Global_b(vardecl_t); // global variable
-    Funname_b(fndecl_t);// good distinction between functions and function ptrs
-    Param_b(vardecl_t); // local function parameter
-    Local_b(vardecl_t); // local variable
-    Pat_b(vardecl_t); // pattern variable.  may use a specialized type later
+    Funname_b(fndecl_t); // distinction between functions and function ptrs
+    Param_b(vardecl_t);  // local function parameter
+    Local_b(vardecl_t);  // local variable
+    Pat_b(vardecl_t);    // pattern variable
   };
 
   // Variable declarations.
@@ -771,6 +766,8 @@ namespace Absyn {
   extern `a conref_def(`a, conref_t<`a> x);
   extern conref_t<bool> true_conref;
   extern conref_t<bool> false_conref;
+  extern conref_t<bounds_t> bounds_one_conref;
+  extern conref_t<bounds_t> bounds_unknown_conref;
 
   extern kindbound_t compress_kb(kindbound_t);
   extern kind_t force_kb(kindbound_t kb);
@@ -806,7 +803,7 @@ namespace Absyn {
   extern type_t file_typ();
   // pointers
   extern exp_t exp_unsigned_one; // good for sharing
-  extern tunion Bounds bounds_one; // Upper(1) (good for sharing)
+  extern bounds_t bounds_one; // Upper_b(1) (good for sharing)
   // t *{e}`r
   extern type_t starb_typ(type_t t, type_t rgn, tqual_t tq, bounds_t b,
                           conref_t<bool> zero_term);
@@ -826,7 +823,6 @@ namespace Absyn {
                            conref_t<bool> zero_term);
   // void*
   extern type_t void_star_typ();
-  extern opt_t<type_t> void_star_typ_opt();
   // structs
   extern type_t strct(var_t  name);
   extern type_t strctq(qvar_t name);

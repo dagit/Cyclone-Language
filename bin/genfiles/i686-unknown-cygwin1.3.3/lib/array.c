@@ -546,8 +546,8 @@ int(*compare)(void*,void*),struct _tagged_arr l,void*x){int s=(int)_get_arr_size
 sizeof(void*));{int i=0;for(0;i < s;i ++){if(0 == compare(*((void**)
 _check_unknown_subscript(l,sizeof(void*),i)),x))return 1;}}return 0;}struct
 _tagged_arr Cyc_Array_extract(struct _tagged_arr x,int start,int*n_opt){int sx=(int)
-_get_arr_size(x,sizeof(void*));int n=n_opt == 0?sx - start:*((int*)n_opt);if((start
-< 0?1: n <= 0)?1: start + (n_opt == 0?0: n)> sx)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
+_get_arr_size(x,sizeof(void*));int n=n_opt == 0?sx - start:*n_opt;if((start < 0?1: n
+<= 0)?1: start + (n_opt == 0?0: n)> sx)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
 _tmp2C=_cycalloc(sizeof(*_tmp2C));_tmp2C[0]=({struct Cyc_Core_Invalid_argument_struct
 _tmp2D;_tmp2D.tag=Cyc_Core_Invalid_argument;_tmp2D.f1=({const char*_tmp2E="Array::extract";
 _tag_arr(_tmp2E,sizeof(char),_get_zero_arr_size(_tmp2E,15));});_tmp2D;});_tmp2C;}));

@@ -676,7 +676,7 @@ bool mem(int cmp(`a,`a), list_t<`a> l, `a x) {
 
 `b assoc_cmp(int cmp(`a,`c),list_t<$(`a,`b)@> l,`c x) {
   while (l != NULL) {
-    if (cmp(l->hd[0][0],x) == 0) return(l->hd[0][1]);
+    if (cmp((*l->hd)[0],x) == 0) return (*l->hd)[1];
     l = l->tl;
   }
   throw Core::Not_found;
@@ -780,9 +780,8 @@ list_t<`a> tabulate_c(int n, `a f(`b,int), `b env) {
 
 int list_cmp(int cmp(`a,`b), list_t<`a> l1, list_t<`b> l2) {
   for (; l1 != NULL && l2 != NULL; l1 = l1->tl, l2 = l2->tl) {
-    /* The casts are needed here else the lists are forced into the
-       same region. */
-    if ((unsigned int)l1 == (unsigned int)l2)
+    // The casts are needed here else the lists are forced into the same region.
+    if ((unsigned)l1 == (unsigned)l2)
       return 0;
     let i = cmp(l1->hd,l2->hd);
     if (i != 0)
@@ -809,15 +808,15 @@ bool list_prefix(int cmp(`a,`b), list_t<`a> l1, list_t<`b> l2) {
   return (l1 == NULL);
 }
 
-list_t<`a,`r2> rfilter_c(region_t<`r2> r2, bool f(`b,`a), `b env, list_t<`a> l){
+list_t<`a,`r> rfilter_c(region_t<`r> r, bool f(`b,`a), `b env, list_t<`a> l){
   if (l == NULL)
     return NULL;
   // First elt is purposefully junk!
-  list_t<`a,`r2> result = rnew(r2) List(l->hd,NULL); 
-  list_t<`a,`r2> end = result; // pointer to last cons cell
+  list_t<`a> result = rnew(r) List(l->hd,NULL); 
+  list_t<`a> end = result; // pointer to last cons cell
   for (;l != NULL;l=l->tl) {
     if (f(env,l->hd)) {
-      end->tl = rnew(r2) List(l->hd,NULL);
+      end->tl = rnew(r) List(l->hd,NULL);
       end = end->tl;
     }
   }
@@ -828,15 +827,15 @@ list_t<`a> filter_c(bool f(`b,`a), `b env, list_t<`a> l) {
   return rfilter_c(heap_region, f, env, l);
 }
 
-list_t<`a,`r2> rfilter(region_t<`r2> r2, bool f(`a), list_t<`a> l) {
+list_t<`a,`r> rfilter(region_t<`r> r, bool f(`a), list_t<`a> l) {
   if (l == NULL)
     return NULL;
   // First elt is purposefully junk!
-  list_t<`a,`r2> result = rnew(r2) List(l->hd,NULL); 
-  list_t<`a,`r2> end = result; // pointer to last cons cell
+  list_t<`a> result = rnew(r) List(l->hd,NULL); 
+  list_t<`a> end = result; // pointer to last cons cell
   for (;l != NULL;l=l->tl) {
     if (f(l->hd)) {
-      end->tl = rnew(r2) List(l->hd,NULL);
+      end->tl = rnew(r) List(l->hd,NULL);
       end = end->tl;
     }
   }

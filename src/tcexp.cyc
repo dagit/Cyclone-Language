@@ -173,12 +173,9 @@ void tcTest(tenv_t te, exp_t e, string_t msg_part) {
 static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t c, exp_t e){
   type_t t;
   switch (c) {
-  case &Char_c(Signed,_):     
-    t = schar_typ;  break;
-  case &Char_c(Unsigned,_):     
-    t = uchar_typ;  break;
-  case &Char_c(None,_):     
-    t = char_typ;  break;
+  case &Char_c(Signed,_):   t = schar_typ; break;
+  case &Char_c(Unsigned,_): t = uchar_typ; break;
+  case &Char_c(None,_):     t = char_typ;  break;
   case &Short_c(sn,_):    
     t = (sn == Unsigned) ? ushort_typ : sshort_typ; break;
   case &LongLong_c(sn,_): 
@@ -212,15 +209,16 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t c, exp_t e){
         // we're treating 0 as if it's NULL
         e->r = new Const_e(Null_c);
         let tenv_tvs = lookup_type_vars(te);
-        t = new PointerType(PtrInfo{new_evar(&ak,new Opt(tenv_tvs)), 
-                                    new_evar(&rk,new Opt(tenv_tvs)), 
-                                    true_conref, empty_tqual(),
-                                    empty_conref(), empty_conref()});
+        t = new PointerType(PtrInfo(new_evar(&ak,new Opt(tenv_tvs)), 
+				    empty_tqual(),
+				    PtrAtts(new_evar(&rk,new Opt(tenv_tvs)), 
+					    true_conref,
+					    empty_conref(), empty_conref())));
         break;
       case &TagType(t1): 
 	let t2 = new TypeInt(i);
 	if(!unify(t1,t2)) {
-	  terr(loc, "expecting %s but found %s", typ2string(t1), typ2string(t2));
+	  terr(loc, "expecting %s but found %s",typ2string(t1),typ2string(t2));
 	  explain_failure();
 	}
 	t = new TagType(t2);
@@ -268,10 +266,10 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t c, exp_t e){
   case Null_c:
     let tenv_tvs = lookup_type_vars(te);
     // FIX: take advantage of topt
-    t = new PointerType(PtrInfo(new_evar(&ak,new Opt(tenv_tvs)), 
-                                new_evar(&rk,new Opt(tenv_tvs)), 
-                                true_conref,
-                                empty_tqual(),empty_conref(),empty_conref()));
+    t = new PointerType(PtrInfo(new_evar(&ak,new Opt(tenv_tvs)), empty_tqual(),
+				PtrAtts(new_evar(&rk,new Opt(tenv_tvs)), 
+					true_conref,
+					empty_conref(),empty_conref())));
     break;
   }
   return t;
@@ -350,8 +348,14 @@ static type_t tcUnPrimop(tenv_t te, seg_t loc, type_t * topt,
     return e->topt->v;
   case Size:
     switch (t) {
-    case &ArrayType(_): 
-    case &PointerType(_): break;
+    case &ArrayType(_): break;
+    case &PointerType(PtrInfo(_,_,PtrAtts(_,_,b,_))): 
+      switch(compress_conref(b)->v) {
+      case &Eq_constr(Unknown_b):
+      case &Eq_constr(&Upper_b(_)): break;
+      default: terr(loc,"can't apply size to pointer/array of abstract length");
+      }
+      break;
     default:
       terr(loc,"size requires pointer or array type, not %s",typ2string(t));
     }
@@ -381,7 +385,7 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
   type_t t1 = compress(e1->topt->v);
   type_t t2 = compress(e2->topt->v);
   switch (t1) {
-  case &PointerType(PtrInfo{et,r,n,tq,b,zt}):
+  case &PointerType(PtrInfo(et,tq,PtrAtts(r,n,b,zt))):
     if (!kind_leq(typ_kind(et),MemKind))
       terr(e1->loc,"can't perform arithmetic on abstract pointer type");
     if (!coerce_sint_typ(te, e2))
@@ -391,8 +395,7 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
     case &Eq_constr(Unknown_b): return t1;
     case &Eq_constr(&Upper_b(ub)):
       // if we have a zero-terminated array, warn that this could
-      // be expensive, since coercing to a fat pointer involves 
-      // a loop.  
+      // be expensive, since coercing to a fat pointer involves a loop.  
       if (conref_def(false,zt)) 
         warn(e1->loc, "pointer arithmetic on thin, zero-terminated pointer may be expensive.");
       // we have to allow pointer arithmetic that might go out of bounds
@@ -401,10 +404,15 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
       //   *((buf + 11) - 10)
       // This should not generate an exception.  So the best we can do
       // is coerce e1 to a ? type.
-      let new_t1 = new PointerType(PtrInfo{et,r,true_conref,
-                                           tq,new_conref(Unknown_b),zt});
+      let new_t1 = new PointerType(PtrInfo(et,tq,
+					   PtrAtts(r,true_conref,
+						   bounds_unknown_conref,zt)));
       unchecked_cast(te, e1, new_t1);
       return new_t1;
+    case &Eq_constr(&AbsUpper_b(_)):
+      terr(e1->loc, "pointer arithmetic not allowed on pointers with "
+	   "abstract bounds");
+      return t1;
     default: b->v = new Eq_constr(Unknown_b); return t1;
     }
   default: return tcArithBinop(te, e1, e2, is_numeric);
@@ -467,8 +475,8 @@ static type_t tcAnyBinop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
   // support comparisons on pointers
   else {
     switch ($(compress(t1), compress(t2))) {
-    case $(&PointerType(PtrInfo{t1a,_,_,_,_,_}),
-	   &PointerType(PtrInfo{t2a,_,_,_,_,_})):
+    case $(&PointerType(PtrInfo{t1a,_,_}),
+	   &PointerType(PtrInfo{t2a,_,_})):
       if (unify(t1a,t2a)) return sint_typ; break;
     default: break;
     }
@@ -542,7 +550,7 @@ static void check_writable(tenv_t te, exp_t e) {
   case &Var_e(_,&Global_b(vd)): if (!vd->tq.q_const) return; break;
   case &Subscript_e(e1,e2):
     switch (compress(e1->topt->v)) {
-    case &PointerType(PtrInfo{_,_,_,tq,_,_}): fallthru(tq);
+    case &PointerType(PtrInfo{_,tq,_}): fallthru(tq);
     case &ArrayType(ArrayInfo{_,tq,_,_}): if (!tq.q_const) return; break;
     case &TupleType(ts):
       let $(i,known) = Evexp::eval_const_uint_exp(e2);
@@ -574,7 +582,7 @@ static void check_writable(tenv_t te, exp_t e) {
     break;
   case &AggrArrow_e(e1,f):
     switch (compress(e1->topt->v)) {
-    case &PointerType(PtrInfo{elt_typ,_,_,_,_,_}):
+    case &PointerType(PtrInfo{elt_typ,_,_}):
       switch (compress(elt_typ)) {
       case &AggrType(AggrInfo(&KnownAggr(adp),_)):
 	struct Aggrfield *sf = 
@@ -593,7 +601,7 @@ static void check_writable(tenv_t te, exp_t e) {
     break;
   case &Deref_e(e1):
     switch (compress(e1->topt->v)) {
-    case &PointerType(PtrInfo{_,_,_,tq,_,_}): fallthru(tq);
+    case &PointerType(PtrInfo{_,tq,_}): fallthru(tq);
     case &ArrayType(ArrayInfo{_,tq,_,_}): if (!tq.q_const) return; break;
     default: break;
     }
@@ -757,7 +765,7 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t * topt,exp_t e,
   // right arity but there may be coercions involved with the arguments
   // and the function might actually be a vararg.
   switch (t) {
-  case &PointerType(PtrInfo{t1,rgn,x,tq,b,zt}):
+  case &PointerType(PtrInfo(t1,tq,PtrAtts(rgn,x,b,zt))):
     // Note: rgn is irrelevant -- all code is in the heap.
     // Nonetheless, perhaps we cast to another region, so check
     // the capability just for fun.
@@ -772,7 +780,6 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t * topt,exp_t e,
       // information while type-checking the arguments.
       if (topt != NULL) unify(res_typ,*topt);
       // check that each argument has the right type or can be coerced to it
-      // FIX: need to deal with NULL!!!
       while ((es != NULL) && (args_info != NULL)) {
         exp_t e1 = es->hd;
         type_t t2 = (*args_info->hd)[2];
@@ -909,7 +916,7 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t * topt,
   e->topt->v = pointer_expand(e->topt->v);
   type_t t1 = compress(e->topt->v);
   switch (t1) {
-  case &PointerType(PtrInfo{t0,rt,x,tq,b,zt}):
+  case &PointerType(PtrInfo(t0,tq,PtrAtts(rt,x,b,zt))):
     switch (compress(t0)) {
     case &FnType(FnInfo{tvars,eff,rtyp,args,c_varargs,cyc_varargs,rpo,atts}):
       list_t<$(tvar_t,type_t)@> instantiation = NULL;
@@ -925,7 +932,7 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t * topt,
         substitute(instantiation,
                    new FnType(FnInfo{tvars,eff,rtyp,args,c_varargs,
                                      cyc_varargs,rpo,atts}));
-      return new PointerType(PtrInfo{new_fn_typ,rt,x,tq,b,zt});
+      return new PointerType(PtrInfo(new_fn_typ,tq,PtrAtts(rt,x,b,zt)));
     default: break;
     }
     break;
@@ -961,7 +968,7 @@ static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0,
   let tq2 = empty_tqual();
   if (topt != NULL) {
     switch (compress(*topt)) {
-    case &PointerType(PtrInfo{elttype,_,_,tq,_,zt}):
+    case &PointerType(PtrInfo(elttype,tq,PtrAtts(_,_,_,zt))):
       //FIX: this allocation is needed because *elttype is compiled incorrectly!
       topt2 = new elttype;
       tq2 = tq;
@@ -987,7 +994,7 @@ static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0,
     let ptr_maker = at_typ;
     if(topt != NULL)
       switch (compress(*topt)) {
-      case &PointerType(PtrInfo{_,_,n,_,_,zt}): 
+      case &PointerType(PtrInfo(_,_,PtrAtts(_,n,_,_))): 
 	if(conref_val(n))
 	  ptr_maker = star_typ; 
 	break;
@@ -1102,7 +1109,7 @@ static type_t tcDeref(tenv_t te, seg_t loc, type_t * topt, exp_t e) {
   tcExp(te,NULL,e);
   type_t t = compress(e->topt->v);
   switch (t) {
-  case &PointerType(PtrInfo{t2,rt,_,_,b,zt}):
+  case &PointerType(PtrInfo(t2,_,PtrAtts(rt,_,b,zt))):
     check_rgn_accessible(te,loc,rt);
     check_nonzero_bound(loc, b);
     if (!kind_leq(typ_kind(t2),MemKind))
@@ -1139,8 +1146,8 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
     if (finfo == NULL)
       return expr_err(te,loc,"type has no %s field",*f);
     return finfo->type;
-  case &ArrayType(_) && (strcmp(*f,"size") == 0):
-  case &PointerType(_)   && (strcmp(*f,"size") == 0):
+  case &ArrayType(_)   && (strcmp(*f,"size") == 0):
+  case &PointerType(_) && (strcmp(*f,"size") == 0):
     outer_e->r = new Primop_e(Size,new List(e,NULL));
     return uint_typ;
   default:
@@ -1148,8 +1155,8 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
       return expr_err(te,loc,"expecting struct, union, or array, found %s",
                       typ2string(e->topt->v));
     else
-       return expr_err(te,loc,"expecting struct or union, found %s",
-                       typ2string(e->topt->v));
+      return expr_err(te,loc,"expecting struct or union, found %s",
+		      typ2string(e->topt->v));
   }
 }
 
@@ -1158,7 +1165,7 @@ static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt,
 			  exp_t e, field_name_t f) {
   tcExp(te,NULL,e);
   switch (compress(e->topt->v)) {
-  case &PointerType(PtrInfo{t2,rt,_,_,b,zt}):
+  case &PointerType(PtrInfo(t2,_,PtrAtts(rt,_,b,zt))):
     check_nonzero_bound(loc, b);
     switch (compress(t2)) {
     case &AggrType(AggrInfo(&KnownAggr(&ad),ts)):
@@ -1216,7 +1223,7 @@ static type_t tcSubscript(tenv_t te, seg_t loc, type_t * topt,
   // the subscript could be on a tuple or a pointer -- any arrays
   // should've been coerced to pointers
   switch (t1) {
-  case &PointerType(PtrInfo{t,rt,_,tq,b,zt}):
+  case &PointerType(PtrInfo(t,tq,PtrAtts(rt,_,b,zt))):
     // for zero-terminated, thin pointers we warn when doing subscripting
     // to remind the user that this is an expensive operation.
     if (conref_def(false,zt)) {
@@ -1384,8 +1391,8 @@ static type_t tcComprehension(tenv_t te, seg_t loc, type_t * topt,
     case &PointerType(x):
       pinfo = x;
       topt2 = &pinfo.elt_typ;
-      tqopt = &pinfo.tq;
-      ztopt = &pinfo.zero_term;
+      tqopt = &pinfo.elt_tq;
+      ztopt = &pinfo.ptr_atts.zero_term;
       break;
     case &ArrayType(ArrayInfo{*t,*tq,b,*zt}):
       topt2 = t;
@@ -1461,7 +1468,7 @@ static type_t tcStruct(tenv_t te, seg_t loc, type_t * topt,
   let user_ex_ts = *ts;
   let ex_ts = exist_typs;
   while(user_ex_ts != NULL && ex_ts != NULL) {
-    // FIX: allow region kinds and effect kinds?
+    // FIX: allow other kinds
     check_type(loc,te,lookup_type_vars(te),AnyKind,true,user_ex_ts->hd);
     unify(user_ex_ts->hd,ex_ts->hd);
     user_ex_ts = user_ex_ts->tl;
@@ -1589,7 +1596,7 @@ static bool zeroable_type(type_t t) {
   case &VarType(_): 
   case &TunionType(_):
   case &TunionFieldType(_): return false;
-  case &PointerType(PtrInfo{_,_,n,_,_,_}):
+  case &PointerType(PtrInfo(_,_,PtrAtts(_,n,_,_))):
     return (conref_def(true,n));
   case &IntType(_,_):
   case FloatType:
@@ -1635,7 +1642,7 @@ static void check_malloc_type(bool allow_zero, seg_t loc,
   // try unifying t with the topt info to get better results
   if (topt != NULL) {
     switch (compress(*topt)) {
-    case &PointerType(PtrInfo{elt_typ,_,_,_,_,_}): 
+    case &PointerType(PtrInfo(elt_typ,_,_)): 
       unify(elt_typ,t);
       if (bits_only(t) || (allow_zero && zeroable_type(t))) return;
       break;
@@ -1736,7 +1743,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t ropt,
   let zero_term = false_conref;
   if(topt != NULL)
     switch (compress(*topt)) {
-    case &PointerType(PtrInfo{_,_,n,_,_,zt}): 
+    case &PointerType(PtrInfo(_,_,PtrAtts(_,n,_,zt))): 
       zero_term = zt;
       if(conref_val(n))
 	ptr_maker = star_typ; 
@@ -1808,8 +1815,8 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
       bounds_t b = (is_const_exp(te,bnd)) ? 
         ((bounds_t)(new Upper_b(bnd))) : Unknown_b;
       type_t res_typ = 
-        new PointerType(PtrInfo{et_arr,rgn,empty_conref(),tq_arr,
-                                new_conref(b),zt});
+        new PointerType(PtrInfo(et_arr,tq_arr,
+				PtrAtts(rgn,empty_conref(),new_conref(b),zt)));
       if (topt != NULL) {
         if (!unify(*topt,res_typ) && silent_castable(te,loc,res_typ,*topt)) {
           e->topt = new Opt(res_typ);
@@ -1828,7 +1835,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     bool zero_term = false;
     if (topt != NULL) {
       switch (compress(*topt)) {
-      case &PointerType(PtrInfo{*elt_typ,_,_,tq,_,zt}):
+      case &PointerType(PtrInfo(*elt_typ,tq,PtrAtts(_,_,_,zt))):
         // tcArray only needs the element type, so the bound is bogus
         elt_typ_opt = elt_typ;
         zero_term = conref_def(false,zt);
@@ -1841,9 +1848,11 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     type_t res_typ;
     switch (compress(t_array)) {
     case &ArrayType(ArrayInfo{et,tq,sz,zt}): 
-      res_typ = new PointerType(PtrInfo{et,rgn,empty_conref(),tq,
-                                        new_conref(new Upper_b((exp_t)sz)),
-                                        zt});
+      res_typ = 
+	new PointerType(PtrInfo(et,tq,
+				PtrAtts(rgn,empty_conref(),
+					new_conref(new Upper_b((exp_t)sz)),
+                                        zt)));
       if (topt != NULL) {
         // try unifying res_typ and topt -- if that fails, then see if we
         // can cast res_typ to topt, and insert the cast so that the code
@@ -1873,7 +1882,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     type_t *topt2 = NULL;
     if (topt != NULL) {
       switch (compress(*topt)) {
-      case &PointerType(PtrInfo{*elttype,_,tq,_,_,_}):
+      case &PointerType(PtrInfo(*elttype,tq,_)):
         topt2 = elttype; break;
       case &TunionType(_):
         // Note, we're lying here in the sense that we should pass down
@@ -1885,10 +1894,10 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     }
     type_t telt = tcExp(te,topt2,e1);
     type_t res_typ =
-      new PointerType(PtrInfo{telt,rgn,empty_conref(),
-                              empty_tqual(),
-                              new_conref(new Upper_b(uint_exp(1,NULL))),
-                              false_conref});
+      new PointerType(PtrInfo(telt,empty_tqual(),
+			      PtrAtts(rgn,empty_conref(),
+				      bounds_one_conref,
+				      false_conref)));
     if (topt != NULL) {
       if (!unify(*topt,res_typ) && silent_castable(te,loc,res_typ,*topt)) {
         e->topt = new Opt(res_typ);
@@ -1960,7 +1969,7 @@ static type_t tcExpNoPromote(tenv_t te, type_t * topt, exp_t e) {
     e->topt->v = pointer_expand(e->topt->v);
     // implicitly instantiate the expression if it has a polymorphic type
     switch (compress(e->topt->v)) {
-    case &PointerType(PtrInfo{t,rt,x,tq,b,zt}):
+    case &PointerType(PtrInfo(t,tq,PtrAtts(rt,x,b,zt))):
       switch (compress(t)) {
       case &FnType(FnInfo{tvs,eff,rtyp,args,c_varargs,cyc_varargs,rpo,atts}):
 	if (tvs != NULL)    // then, instantiate if necessary
@@ -1973,8 +1982,8 @@ static type_t tcExpNoPromote(tenv_t te, type_t * topt, exp_t e) {
 				     new FnType(FnInfo{NULL,eff,rtyp,args,
 						       c_varargs,cyc_varargs,
                                                        rpo,atts}));
-	   type_t new_typ = new PointerType(PtrInfo{ftyp,rt,x,tq,b,zt});
-	   exp_t  inner   = copy_exp(e);
+	   let new_typ = new PointerType(PtrInfo(ftyp,tq,PtrAtts(rt,x,b,zt)));
+	   let inner   = copy_exp(e);
 	   e->r    = new Instantiate_e(inner,ts);
 	   e->topt = new Opt(new_typ);
 	  }

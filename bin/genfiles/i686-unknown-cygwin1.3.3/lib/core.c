@@ -335,7 +335,6 @@ Cyc_Core_true_f(void*x){return 1;}int Cyc_Core_false_f(void*x){return 0;}int Cyc
 int a,int b){return a - b;}int Cyc_Core_charcmp(char a,char b){return(int)a - (int)b;}
 int Cyc_Core_nptrcmp(void*a,void*b){if(a == b)return 0;if(a > b)return 1;return - 1;}
 int Cyc_Core_ptrcmp(void*a,void*b){if(a == b)return 0;if(a > b)return 1;return - 1;}
-void*Cyc_Core_fst(struct _tuple0*pair){return(*((struct _tuple0*)pair)).f1;}void*
-Cyc_Core_snd(struct _tuple0*pair){return(*((struct _tuple0*)pair)).f2;}void*Cyc_Core_third(
-struct _tuple1*triple){return(*((struct _tuple1*)triple)).f3;}void*Cyc_Core_identity(
-void*x){return x;}
+void*Cyc_Core_fst(struct _tuple0*pair){return(*pair).f1;}void*Cyc_Core_snd(struct
+_tuple0*pair){return(*pair).f2;}void*Cyc_Core_third(struct _tuple1*triple){return(*
+triple).f3;}void*Cyc_Core_identity(void*x){return x;}

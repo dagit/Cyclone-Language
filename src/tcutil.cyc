@@ -149,7 +149,12 @@ type_t compress(type_t t) {
   switch (t) {
   case &Evar(_,NULL,_,_): 
   case &TypedefType(_,_,_,NULL): return t;
-  case &TypedefType(_,_,_,*topt_ref): fallthru(topt_ref);
+  case &TypedefType(_,_,_,*topt_ref): // TRICKY
+    type_t t2 = compress(**topt_ref);
+    // only modify if something changed to avoid allocation
+    if (t2 != **topt_ref)
+      *topt_ref = new t2;
+    return t2;
   case &Evar(_,*t2opt_ref,_,_): // TRICKY
     type_t t2 = compress((*t2opt_ref)->v);
     // only modify if something changed to avoid allocation
@@ -214,14 +219,14 @@ type_t copy_type(type_t t) {
                                        copy_type(rgn)});
   case &TunionFieldType(TunionFieldInfo{fi,targs}):
     return new TunionFieldType(TunionFieldInfo{fi,copy_types(targs)});
-  case &PointerType(PtrInfo{elt,rgn,nbl,tq,bs,zt}):
+  case &PointerType(PtrInfo(elt,tq,PtrAtts(rgn,nbl,bs,zt))):
     let elt2 = copy_type(elt);
     let rgn2 = copy_type(rgn);
     let nbl2 = copy_conref(nbl);
     let tq2 = tq;
     let bs2 = copy_conref(bs);
     let zt2 = copy_conref(zt);
-    return new PointerType(PtrInfo{elt2,rgn2,nbl2,tq2,bs2,zt2});
+    return new PointerType(PtrInfo(elt2,tq2,PtrAtts(rgn2,nbl2,bs2,zt2)));
   case &IntType(sn,sz): return new IntType(sn,sz); // copy necessary???
   case FloatType: return t;
   case &DoubleType(b): return new DoubleType(b); // copy necessarry???
@@ -256,7 +261,7 @@ type_t copy_type(type_t t) {
   case &TypeInt(n): return new TypeInt(n);
   case &TagType(t): return new TagType(copy_type(t));
   case &RgnHandleType(t): return new RgnHandleType(copy_type(t));
-  case &TypedefType(tdn,ts,td,_): 
+  case &TypedefType(tdn,ts,td,_):
     return new TypedefType(tdn,copy_types(ts),td,NULL);
   case HeapRgn: return t;
   case &AccessEff(t): return new AccessEff(copy_type(t));
@@ -323,13 +328,12 @@ kind_t typ_kind(type_t t) {
   case &EnumType(_,ed): 
     if (ed->fields == NULL) return AnyKind; else return MemKind;
   case &PointerType(pinfo):
-    switch (compress_conref(pinfo.bounds)->v) {
+    switch (compress_conref(pinfo.ptr_atts.bounds)->v) {
+    case No_constr: // be conservative, in case later constrained with Unknown_b
     case &Eq_constr(Unknown_b): return MemKind;
-    case &Eq_constr(&Upper_b(_)): return BoxKind;
-    case No_constr: return MemKind; 
-      // be conservative -- this may later be constrained with an Unknown_b
-    case &Forward_constr(_):
-      impos("typ_kind: forward constraint in ptr bounds");
+    case &Eq_constr(&Upper_b(_)): 
+    case &Eq_constr(&AbsUpper_b(_)): return BoxKind;
+    case &Forward_constr(_): impos("typ_kind: forward constr in ptr bounds");
     }
   case &SizeofType(_): return BoxKind;
   case &TypeInt(_): return IntKind;
@@ -392,7 +396,13 @@ static void occurs(type_t evar,region_t<`r> r,list_t<tvar_t,`r> env,type_t t) {
     }
     break;
   case &PointerType(pinfo): 
-    occurs(evar,r,env,pinfo.elt_typ); occurs(evar,r,env,pinfo.rgn_typ); break;
+    occurs(evar,r,env,pinfo.elt_typ); 
+    occurs(evar,r,env,pinfo.ptr_atts.rgn); 
+    switch(compress_conref(pinfo.ptr_atts.bounds)->v) {
+    case &Eq_constr(&AbsUpper_b(s)): occurs(evar,r,env,s); break;
+    default: break;
+    }
+    break;
   case &ArrayType(ArrayInfo{t2,_,_,_}): occurs(evar,r,env,t2); break;
   case &FnType(FnInfo{tvs,eff,rt,args,c_varargs,cyc_varargs,rgn_po,atts}): 
     env = List::rappend(r,tvs,env);
@@ -414,16 +424,17 @@ static void occurs(type_t evar,region_t<`r> r,list_t<tvar_t,`r> env,type_t t) {
     break;
   case &TunionType(TunionInfo{_,ts,rg}):
     occurs(evar,r,env,rg); occurslist(evar,r,env,ts); break;
-  case &TypedefType(_,ts,_,topt): fallthru(ts);
+  case &TypedefType(_,ts,_,_): fallthru(ts);
   case &TunionFieldType(TunionFieldInfo{_,ts}): fallthru(ts);
   case &AggrType(AggrInfo(_,ts)): occurslist(evar,r,env,ts); break;
   case &AnonAggrType(_,fs):
     for (; fs != NULL; fs = fs->tl)
       occurs(evar, r, env, fs->hd->type);
     break;
-  case &RgnHandleType(rt): fallthru(rt);
+  case &TagType(t0): fallthru(t0);
   case &SizeofType(t0): fallthru(t0);
   case &AccessEff(t0): fallthru(t0);
+  case &RgnHandleType(t0): fallthru(t0);
   case &RgnsEff(t0): occurs(evar,r,env,t0); break;
   case &JoinEff(ts): occurslist(evar,r,env,ts); break;
   default: break;
@@ -467,18 +478,18 @@ static void unify_it_conrefs(int cmp(`a,`a), conref_t<`a> x, conref_t<`a> y,
   if (x == y) return;
   switch (x->v) {
   case No_constr: x->v = new Forward_constr(y); return;
-  case &Forward_constr(_): impos("unify_conref: forward after compress");
   case &Eq_constr(xv):
     switch (y->v) {
     case No_constr: y->v = x->v; return;
-    case &Forward_constr(_): impos("unify_conref: forward after compress(2)");
     case &Eq_constr(yv):
       if (cmp(xv,yv) != 0) {
         failure_reason = reason;
         throw Unify;
       }
       return;
+    case &Forward_constr(_): impos("unify_conref: forward after compress(2)");
     }
+  case &Forward_constr(_): impos("unify_conref: forward after compress");
   }
 }
 
@@ -495,6 +506,12 @@ static int boundscmp(bounds_t b1, bounds_t b2) {
   case $(Unknown_b,_): return -1;
   case $(_,Unknown_b): return 1;
   case $(&Upper_b(e1),&Upper_b(e2)): return Evexp::const_exp_cmp(e1,e2);
+  case $(&Upper_b(_),&AbsUpper_b(_)): return -1;
+  case $(&AbsUpper_b(_),&Upper_b(_)): return 1;
+  case $(&AbsUpper_b(t1),&AbsUpper_b(t2)): 
+    if(unify(t1,t2))
+      return 0;
+    return typecmp(t1,t2);
   }
 }
 
@@ -562,10 +579,11 @@ static type_t rgns_of_field(aggrfield_t af) {
 }
 
 static $(tvar_t,type_t)@ region_free_subst(tvar_t tv) {
-  type_t t; // FIX: IntKind
+  type_t t;
   switch (tvar_kind(tv)) {
   case RgnKind: t = HeapRgn;      break;
   case EffKind: t = empty_effect; break;
+  case IntKind: t = new TypeInt(0); break; // FIX: avoid allocation
   default:      t = sint_typ;     break; // lives in every kind
   }
   return new $(tv,t);
@@ -596,7 +614,8 @@ static type_t rgns_of(type_t t) {
   case &TunionType(TunionInfo{_,targs,r}):
     list_t<type_t> ts = new List(new AccessEff(r), map(rgns_of,targs));
     return normalize_effect(new JoinEff(ts));
-  case &PointerType(PtrInfo{et,r,_,_,_,_}):
+  case &PointerType(PtrInfo(et,_,PtrAtts(r,_,_,_))):
+    // ignoring a sizeof(int*`r) in the bounds -- nobody will notice
     return normalize_effect(new JoinEff(list(new AccessEff(r),rgns_of(et))));
   case &ArrayType(ArrayInfo{et,_,_,_}):
     return normalize_effect(rgns_of(et));
@@ -984,11 +1003,11 @@ void unify_it(type_t t1, type_t t2) {
         // can't unify with a pointer type where we don't know whether or
         // not it's a ? pointer vs. a * or @ pointer.  
       case &PointerType(pinfo) && kind1->v == BoxKind:
-        let c = compress_conref(pinfo.bounds);
+        let c = compress_conref(pinfo.ptr_atts.bounds);
         switch (c->v) {
         case No_constr:
           // set the pointer to be a * or @ to an array of size 1
-          c->v = new Eq_constr((bounds_t)(new Upper_b(signed_int_exp(1,NULL))));
+          c->v = new Eq_constr(bounds_one);
           *ref1_ref = new Opt(t2);
           return;
         default: break;
@@ -1093,12 +1112,8 @@ void unify_it(type_t t1, type_t t2) {
     failure_reason = "(different tunion field types)";
     break;
 
-  case $(&PointerType(PtrInfo{.elt_typ=t2a,.rgn_typ=rgn2,
-                              .nullable=null2a,.tq=tqual2a,.bounds=b2,
-                              .zero_term=zt2}),
-	 &PointerType(PtrInfo{.elt_typ=t1a,.rgn_typ=rgn1,
-                              .nullable=null1a,.tq=tqual1a,.bounds=b1,
-                              .zero_term=zt1})):
+    case $(&PointerType(PtrInfo(t2a,tqual2a,PtrAtts(rgn2,null2a,b2,zt2))),
+	   &PointerType(PtrInfo(t1a,tqual1a,PtrAtts(rgn1,null1a,b1,zt1)))):
     unify_it(t1a,t2a);
     unify_it(rgn2,rgn1); // the whole reason regions are "types"
     t1_failure = t1;
@@ -1106,8 +1121,7 @@ void unify_it(type_t t1, type_t t2) {
     unify_it_conrefs(intcmp,zt1,zt2,"(not both zero terminated)");
     unify_tqual(tqual1a,tqual2a);
     unify_it_conrefs(boundscmp,b1,b2,"(different pointer bounds)");
-    // There's no need to force the nullable's to be the same when
-    // the bounds are ?.
+    // Don't force the nullable's to be the same when the bounds are ?.
     switch (compress_conref(b1)->v) {
     case &Eq_constr(Unknown_b): return;
     default: break;
@@ -1172,8 +1186,8 @@ void unify_it(type_t t1, type_t t2) {
       break;
     }
     if (inst != NULL) {
-      unify_it(new FnType(FnInfo{NULL,eff1,rt1,args1,c_vararg1,cyc_vararg1,
-                                   rpo1,atts1}),
+      unify_it(new FnType(FnInfo{NULL,eff1,rt1,args1,c_vararg1,
+				   cyc_vararg1,rpo1,atts1}),
 	       rsubstitute(rgn, inst,
                            new FnType(FnInfo{NULL,eff2,rt2,args2,c_vararg2,
 					       cyc_vararg2,rpo2,atts2})));
@@ -1403,8 +1417,6 @@ int typecmp(type_t t1, type_t t2) {
   case $(&Evar(_,_,_,_),&Evar(_,_,_,_)): 
     impos("typecmp: can only compare closed types");
     
-  case $(VoidType,VoidType): return 0;
-
   case $(&VarType(tv2),&VarType(tv1)):
     // identities should be resolved
     return intcmp(*tv1->identity,*tv2->identity);
@@ -1441,13 +1453,8 @@ int typecmp(type_t t1, type_t t2) {
     if(qc2 != 0) return qc2;
     return list_cmp(typecmp,ts1,ts2);
 
-
-  case $(&PointerType(PtrInfo{.elt_typ=t2a,.rgn_typ=rgn2,
-                              .nullable=null2a,.tq=tqual2a,.bounds=b2,
-                              .zero_term=zt2}),
-	 &PointerType(PtrInfo{.elt_typ=t1a,.rgn_typ=rgn1,
-                              .nullable=null1a,.tq=tqual1a,.bounds=b1,
-                              .zero_term=zt1})):
+  case $(&PointerType(PtrInfo(t2a,tqual2a,PtrAtts(rgn2,null2a,b2,zt2))),
+	 &PointerType(PtrInfo(t1a,tqual1a,PtrAtts(rgn1,null1a,b1,zt1)))):
     let etc = typecmp(t1a,t2a);
     if(etc != 0) return etc;
     let rc = typecmp(rgn1,rgn2);
@@ -1465,8 +1472,8 @@ int typecmp(type_t t1, type_t t2) {
     return conrefs_cmp(intcmp,null1a,null2a);
 
   case $(&IntType(sn2,sz2), &IntType(sn1,sz1)):
-    if (sn1 != sn2) return intcmp((unsigned int)sn1,(unsigned int)sn2);
-    if(sz1 != sz2) return intcmp((unsigned int)sz1,(unsigned int) sz2);
+    if(sn1 != sn2) return intcmp((unsigned int)sn1,(unsigned int)sn2);
+    if(sz1 != sz2) return intcmp((unsigned int)sz1,(unsigned int)sz2);
     return 0;
 
   case $(FloatType, FloatType):  return 0;
@@ -1502,17 +1509,15 @@ int typecmp(type_t t1, type_t t2) {
       else return 1;
     return list_cmp(aggrfield_cmp,fs1,fs2);
   
-  case $(HeapRgn, HeapRgn): return 0; 
-  case $(&RgnHandleType(rt1),&RgnHandleType(rt2)):
-    return typecmp(rt1,rt2);
+  case $(&RgnHandleType(rt1),&RgnHandleType(rt2)): return typecmp(rt1,rt2);
   case $(&SizeofType(s1),&SizeofType(s2)): return typecmp(s1,s2);
   case $(&TagType(s1),&TagType(s2)): return typecmp(s1,s2);
   case $(&TypeInt(n),&TypeInt(m)): return intcmp(n,m);
-  case $(&JoinEff(_), _)  : 
-  case $(_, &JoinEff(_))  : 
+  case $(&JoinEff(_), _): 
+  case $(_, &JoinEff(_)): 
   case $(&AccessEff(_), _): 
-  case $(&RgnsEff(_), _)  : 
-  case $(_, &RgnsEff(_))  : 
+  case $(&RgnsEff(_), _): 
+  case $(_, &RgnsEff(_)): 
   case $(_, &AccessEff(_)): impos("typecmp: effects not handled");
   default: impos("Unmatched case in typecmp");
   }
@@ -1639,54 +1644,78 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
   case $(&PointerType(pinfo_a), &PointerType(pinfo_b)):
     bool okay = true;
     // can coerce @ to *
-    if (!unify_conrefs(intcmp,pinfo_a.nullable,pinfo_b.nullable)) {
-      switch(compress_conref(pinfo_a.nullable)->v) {
+    if (!unify_conrefs(intcmp,
+		       pinfo_a.ptr_atts.nullable,
+		       pinfo_b.ptr_atts.nullable))
+      switch(compress_conref(pinfo_a.ptr_atts.nullable)->v) {
       case &Eq_constr(b): okay = !b; break;
       default: impos("silent_castable conref not eq");
       }
-    }
     // can coerce *{e} to ? and *{e1} to *{e2} when e2 <= e1
-    if (!unify_conrefs(boundscmp,pinfo_a.bounds,pinfo_b.bounds)) {
-      switch ($(compress_conref(pinfo_a.bounds)->v, 
-		compress_conref(pinfo_b.bounds)->v)) {
-      case $(&Eq_constr(&Upper_b(_)),&Eq_constr(Unknown_b)): 
-	// Can cast to ? regardless of nullable
-	okay = true; break;
-	// JGM:  the following would be legal, but perhaps we don't
-	// want to allow it to make porting easier -- I'm afraid
-	// that writing t *x = y, where y is an array will go through
-	// too easily...
-	// DAN: okay, so make it a warning...
-      case $(&Eq_constr(&Upper_b(e1)),&Eq_constr(&Upper_b(e2))):
-	okay = okay && Evexp::lte_const_exp(e2,e1);
-        // no need to warn for zero-terminated arrays -- they can get back
-        // again (usually).
-        if (!conref_def(false,pinfo_b.zero_term))
-          warn(loc, "implicit cast to shorter array");
+    if (!unify_conrefs(boundscmp,
+		       pinfo_a.ptr_atts.bounds,
+		       pinfo_b.ptr_atts.bounds))
+      switch ($(compress_conref(pinfo_a.ptr_atts.bounds)->v, 
+		compress_conref(pinfo_b.ptr_atts.bounds)->v)) {
+      case $(&Eq_constr(b1), &Eq_constr(b2)):
+	switch ($(b1,b2)) {
+	case $(&Upper_b(_), Unknown_b): // okay regardless of nullable
+	case $(Unknown_b,   Unknown_b): okay = true;  break;
+
+	case $(&Upper_b(e1),&Upper_b(e2)):
+	  okay = okay && Evexp::lte_const_exp(e2,e1);
+	  // no need to warn for zero-terminated arrays -- they can get back
+	  // again (usually).
+	  // warn so *x = y where y is an array doesn't port too easily
+	  if (!conref_def(false,pinfo_b.ptr_atts.zero_term))
+	    warn(loc, "implicit cast to shorter array");
+	  break;
+	case $(Unknown_b, &Upper_b(e2)):
+	  // when zero-terminated can silently cast from ? to *{1}/@{1}
+	  if (conref_def(false,pinfo_a.ptr_atts.zero_term)
+	      && is_bound_one(pinfo_b.ptr_atts.bounds))
+	    break;
+	  okay = false;
+	  break;
+
+	  // for AbsUpper_b, we allow only known-to-be-less-than things
+	  // else we disallow everything (no flow-sensitive inequalities here)
+	case $(&AbsUpper_b(t1), &AbsUpper_b(t2)):
+	  if(!unify(t1,t2))
+	    switch ($(compress(t1),compress(t2))) {
+	    case $(&TypeInt(n1), &TypeInt(n2)): if(n1 > n2) okay = false; break;
+	    default: okay = false; break;
+	    }
+	  break;
+	case $(&Upper_b(e1), &AbsUpper_b(t2)):
+	  let $(i,known) = Evexp::eval_const_uint_exp(e1);
+	  if(!known) { okay = false; break; }
+	  switch (compress(t2)) {
+	  case &TypeInt(n2): if(i > n2) okay = false; break;
+	  default: okay = false; break;
+	  }
+	  break;
+	case $(&AbsUpper_b(_),_):
+	case $(_,&AbsUpper_b(_)): okay = false; break;
+	}
 	break;
-      case $(&Eq_constr(Unknown_b), &Eq_constr(&Upper_b(_))):
-        // when zero-terminated can cast from ? to */@
-        if (!conref_def(false,pinfo_a.zero_term))
-          okay = false;
-        break;
-      case $(&Eq_constr(Unknown_b),&Eq_constr(Unknown_b)):
-	// Can cast ? to ? regardless of nullable
-	okay = true; break;
-      default:
-	okay = false; break;
+      case $(No_constr, _): okay = false; break;
+      default: impos("silent_castable conrefs didn't unify");
       }
-    }
     // element types have to be compatible
     okay = okay && unify(pinfo_a.elt_typ,pinfo_b.elt_typ);
     // first region must outlive the second
-    okay = okay && (unify(pinfo_a.rgn_typ,pinfo_b.rgn_typ) || 
-                    region_outlives(te,pinfo_a.rgn_typ,pinfo_b.rgn_typ));
+    okay = 
+      okay && (unify(pinfo_a.ptr_atts.rgn,pinfo_b.ptr_atts.rgn) || 
+	       region_outlives(te,pinfo_a.ptr_atts.rgn,pinfo_b.ptr_atts.rgn));
     // can only move from non-const to const or stay same
-    okay = okay && (!pinfo_a.tq.q_const || pinfo_b.tq.q_const);
+    okay = okay && (!pinfo_a.elt_tq.q_const || pinfo_b.elt_tq.q_const);
     // must preserve zero-termination or second pointer must be const
-    okay = okay && (unify_conrefs(intcmp,pinfo_a.zero_term,pinfo_b.zero_term) 
-                    || (conref_def(true,pinfo_a.zero_term) && 
-                        pinfo_b.tq.q_const));
+    okay = okay && (unify_conrefs(intcmp,
+				  pinfo_a.ptr_atts.zero_term,
+				  pinfo_b.ptr_atts.zero_term) 
+                    || (conref_def(true,pinfo_a.ptr_atts.zero_term) && 
+                        pinfo_b.elt_tq.q_const));
     return okay;
 
   case $(&ArrayType(ArrayInfo{t1a,tq1a,e1,zt1}),
@@ -1713,7 +1742,7 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
 
   // can cast a "tunion T.f<ts> @`r1" to a "tunion `r2 T<ts>" when 
   //   field f carries values and r1==r2 or r1 outlives r2
-  case $(&PointerType(PtrInfo{t_a,rt_a,null_a,q_a,b_a,zt1}),
+  case $(&PointerType(PtrInfo(t_a,q_a,PtrAtts(rt_a,null_a,b_a,zt1))),
 	 &TunionType(TunionInfo{&KnownTunion(&tud2),ts2,r2})):
 	   //n2,ts2,r2,_})):
     switch (compress(t_a)) {
@@ -1726,7 +1755,7 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
       // to insert a bounds check?
       if (!unify_conrefs(intcmp,null_a,false_conref)) return false;
       // pointer must point to one element -- note, could allow > 0
-      if (!unify_conrefs(boundscmp,b_a,new_conref(bounds_one)))
+      if (!unify_conrefs(boundscmp,b_a,bounds_one_conref))
         return false;
       // don't allow zero-terminated pointer
       if (!unify_conrefs(intcmp,zt1,false_conref)) return false;
@@ -1762,9 +1791,9 @@ bool is_pointer_type(type_t t) {
 
 bool is_zero(exp_t e) {
   switch (e->r) {
-  case &Const_e(&Int_c(_,0)): return true;
-  case &Const_e(&Char_c(_,0)): return true;
-  case &Const_e(&Short_c(_,0)): return true;
+  case &Const_e(&Int_c(_,0)): 
+  case &Const_e(&Char_c(_,0)): 
+  case &Const_e(&Short_c(_,0)): 
   case &Const_e(&LongLong_c(_,0)): return true;
   case &Cast_e(t,e2): return is_zero(e2) && admits_zero(t);
   default: return false;
@@ -1783,37 +1812,24 @@ bool zero_to_null(tenv_t te, type_t t2, exp_t e1) {
     e1->r = new Const_e(Null_c);
     let tenv_tvs = lookup_type_vars(te);
     let t1 = new PointerType(PtrInfo(new_evar(&ak,new Opt(tenv_tvs)), 
-                                     new_evar(&rk,new Opt(tenv_tvs)), 
-                                     true_conref,
-                                     empty_tqual(), empty_conref(), 
-                                     empty_conref()));
+				     empty_tqual(),
+				     PtrAtts(new_evar(&rk,new Opt(tenv_tvs)), 
+					     true_conref, 
+					     empty_conref(), 
+					     empty_conref())));
     e1->topt->v = t1;
-    return (coerce_arg(te, e1, t2));
+    return coerce_arg(te, e1, t2);
   }
   return false;
 }
 
-static bool is_sizeof_type(type_t t1) {
-  switch (compress(t1)) {
-  case &SizeofType(_): return true;
-  default: return false;
-  }
-}
-static bool is_tag_type(type_t t1) {
-  switch (compress(t1)) {
-  case &TagType(_): return true;
-  default: return false;
-  }
-}
 // coerce e to have type t -- used in function call and explicit fallthru
 bool coerce_arg(tenv_t te, exp_t e, type_t t2) {
   type_t t1 = compress(e->topt->v);
   // see if types immediately match
   if (unify(t1,t2)) return true;
   // try arithmetic conversions
-  if ((is_arithmetic_type(t1) && is_arithmetic_type(t2)) ||
-      (is_sizeof_type(t1) && is_arithmetic_type(t2)) ||
-      (is_tag_type(t1) && is_arithmetic_type(t2)) ) {
+  if (is_arithmetic_type(t2) && is_arithmetic_type(t1)) {
     // issue a warning if we lose precision
     if (will_lose_precision(t1,t2))
       warn(e->loc,"integral size mismatch; %s -> %s conversion supplied", 
@@ -1900,8 +1916,8 @@ static bool subtype(tenv_t te, list_t<$(type_t,type_t)@`H,`H> assume,
   switch ($(t1,t2)) {
     // the following allows us to cast an unsigned int pointer to an int 
     // pointer and vice versa.  This is okay because the types are isomorphic.
-    case $(&PointerType(PtrInfo{t_a, rt_a, null_a, q_a, b_a, zt_a}),
-	   &PointerType(PtrInfo{t_b, rt_b, null_b, q_b, b_b, zt_b})):
+    case $(&PointerType(PtrInfo(t_a, q_a, PtrAtts(rt_a, null_a, b_a, zt_a))),
+	   &PointerType(PtrInfo(t_b, q_b, PtrAtts(rt_b, null_b, b_b, zt_b)))):
     // if t1 is const then t2 must be const
     if (q_a.q_const && !q_b.q_const) 
       return false;
@@ -1974,6 +1990,8 @@ bool castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     return true;
   t1 = compress(t1);
   t2 = compress(t2);
+  if(t2==VoidType)
+    return true;
   switch (t2) {
   // we can cast t1 to an int if t1 is a boxed type.
   case &IntType(_,B4):
@@ -1982,7 +2000,7 @@ bool castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
   default: break;
   }
   switch (t1) {
-  case &PointerType(PtrInfo{t_a,rt_a,null_a,q_a,b_a,zt_a}):
+  case &PointerType(PtrInfo(t_a,q_a,PtrAtts(rt_a,null_a,b_a,zt_a))):
     // can cast t* to t@ and vice versa.  
     // can cast a non-const pointer to a const pointer.  
     // can cast a pointer in region r1 to a pointer in region r2 as
@@ -1990,29 +2008,33 @@ bool castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     // can cast a "bits-only" pointer to a char pointer ?NOZEROTERM
     // can cast a zero-terminated pointer to a non-zero terminated pointer
     switch (t2) {
-    case &PointerType(PtrInfo{t_b,rt_b,null_b,q_b,b_b,zt_b}):
+    case &PointerType(PtrInfo(t_b,q_b,PtrAtts(rt_b,null_b,b_b,zt_b))):
       let assump = new List(new $(t1,t2),NULL);
       let ptrsub =
 	ptrsubtype(te,assump,t_a,t_b) && (!q_a.q_const || q_b.q_const);
+      t1_failure = t1;
+      t2_failure = t2;
       bool zeroterm_ok = unify_conrefs(intcmp,zt_a,zt_b) || !conref_val(zt_b);
       let bitcase = ptrsub ? false : (bits_only(t_a) && is_char_type(t_b)
                                       && !conref_def(false,zt_b) 
                                       && (q_b.q_const || !q_a.q_const));
       bool bounds_ok = unify_conrefs(boundscmp,b_a,b_b);
-      if (!bounds_ok && !bitcase) {
+      if (!bounds_ok && !bitcase)
 	switch ($(conref_val(b_a),conref_val(b_b))) {
 	  // We allow casts of any form as long as we can't statically
-	  // tell that the bounds will be violated.
+	  // tell that the bounds will be violated 
+	  // and there aren't abstract bounds
 	case $(&Upper_b(e_a),&Upper_b(e_b)): 
 	  if(Evexp::lte_const_exp(e_b,e_a))
 	    bounds_ok = true;
 	  break;
+	case $(&AbsUpper_b(_),_):
+	case $(_,&AbsUpper_b(_)): bounds_ok = false; break;
 	default: bounds_ok = true; break;
 	}
-      }
+
       return bounds_ok && zeroterm_ok && (ptrsub || bitcase) && 
         (unify(rt_a,rt_b) || region_outlives(te,rt_a,rt_b));
-    case VoidType: return true;
     default: break;
     }
     return false;
@@ -2041,8 +2063,7 @@ bool castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     fallthru;
   case &IntType(_,_): 
   case FloatType :  
-  case &DoubleType(_): return coerceable(t2) || t2 == VoidType;
-  case VoidType:   return t2 == VoidType;
+  case &DoubleType(_): return coerceable(t2);
   default: return false;
   }
 }
@@ -2249,12 +2270,21 @@ type_t rsubstitute(region_t<`r> rgn,
   case &ArrayType(ArrayInfo{t1,tq,e,zt}):     
     let new_t1 = rsubstitute(rgn,inst,t1);
     return new_t1 == t1 ? t : new ArrayType(ArrayInfo{new_t1,tq,e,zt});
-  case &PointerType(PtrInfo{t1,r,n,tq,b,zt}): 
+  case &PointerType(PtrInfo(t1,tq,PtrAtts(r,n,b,zt))): 
     let new_t1 = rsubstitute(rgn,inst,t1);
     let new_r  = rsubstitute(rgn,inst,r);
-    if(new_t1 == t1 && new_r == r)
+    let new_b  = b;
+    switch(compress_conref(b)->v) {
+    case &Eq_constr(&AbsUpper_b(tb)): 
+      let new_tb = rsubstitute(rgn,inst,tb);
+      if(tb != new_tb)
+	new_b = new_conref(new AbsUpper_b(new_tb));
+      break;
+    default: break;
+    }
+    if(new_t1 == t1 && new_r == r && new_b == b)
       return t;
-    return new PointerType(PtrInfo(new_t1,new_r,n,tq,b,zt));
+    return new PointerType(PtrInfo(new_t1,tq,PtrAtts(new_r,n,new_b,zt)));
   case &FnType(FnInfo{vs,eff,rtyp,args,c_varargs,cyc_varargs,rgn_po,atts}):
     for (let p = vs; p != NULL; p = p->tl)
       inst = rnew(rgn) List(rnew(rgn) $(p->hd,new VarType(p->hd)),inst);
@@ -2524,7 +2554,7 @@ typedef struct CVTEnv cvtenv_t;
 // as is the case for function types (see below).
 //
 // This also performs the following side-effects which most of the 
-// rest of the compiler rightfully assumes have occurred:
+// rest of the compiler rightly assumes have occurred:
 // * expand typedefs
 // * set pointers (or Known* variants) to declarations for 
 //   StructType, UnionType, TunionType, TunionFieldType
@@ -2623,7 +2653,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
         tudp = lookup_tuniondecl(te,loc,n);
         // give an error here if targs is non-empty
         if (targs != NULL) {
-          terr(loc,"please declare parameterized %s %s before using",
+          terr(loc,"declare parameterized %s %s before using",
                (is_x ? (buffer_t)"xtunion" : "tunion"), qvar2string(n));
           return cvtenv;
         }        
@@ -2712,9 +2742,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       break;
     }
     break;
-  case &PointerType(PtrInfo{.elt_typ=t1,.rgn_typ=rgn_typ,
-			    .nullable=nullable,.tq=tq,
-                            .bounds=b,.zero_term=zt}):
+  case &PointerType(PtrInfo(t1,tq,PtrAtts(rgn_typ,nullable,b,zt))):
     // FIX: check that tqual is valid?
     bool is_zero_terminated;
     // note that here, we allow AnyKind types under the pointer
@@ -2746,9 +2774,11 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       is_zero_terminated = false;
       break;
     }
-    // check that any bound is a constant expression
+    // check the bound
     switch (compress_conref(b)->v) {
-    case &Eq_constr(&Upper_b(e)): 
+    case No_constr:
+    case &Eq_constr(Unknown_b): break;
+    case &Eq_constr(&Upper_b(e)): // must be a constant expression
       Tcexp::tcExp(te,NULL,e);
       if (!coerce_uint_typ(te,e))
         terr(loc,"pointer bounds expression is not an unsigned int");
@@ -2756,16 +2786,15 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       if (is_zero_terminated && (!known || sz < 1))
         terr(loc,"zero-terminated pointer cannot point to empty sequence");
       break;
-    default: break;
+    case &Eq_constr(&AbsUpper_b(tb)):
+      cvtenv = i_check_valid_type(loc,te,cvtenv,IntKind,tb); break;
+    case &Forward_constr(_): impos("forward constraint");
     }
     break;
-  case &SizeofType(t1):
-    cvtenv = i_check_valid_type(loc,te,cvtenv,AnyKind,t1);
-    break;
   case &TagType(t1):
-    cvtenv = i_check_valid_type(loc,te,cvtenv,IntKind,t1);
-    break;
-  case &TypeInt(_):
+    cvtenv = i_check_valid_type(loc,te,cvtenv,IntKind,t1); break;
+  case &SizeofType(t1):
+    cvtenv = i_check_valid_type(loc,te,cvtenv,AnyKind,t1); break;
   case &IntType(_,_): 
   case FloatType:    
   case &DoubleType(_): break; 
@@ -2910,7 +2939,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
         let $(_,_,t) = *List::nth(args, fmt_desc_arg - 1);
         //can't use unification because evars aren't properly nailed down yet...
         switch (compress(t)) {
-        case &PointerType(PtrInfo{et,_,_,_,b,zt}):
+        case &PointerType(PtrInfo(et,_,PtrAtts(_,_,b,zt))):
           // FIX:  zero-termination?
           switch ($(compress(et), conref_def((bounds_t)Unknown_b,b))) {
           case $(&IntType(None,B1), Unknown_b): break;
@@ -2960,6 +2989,8 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
           *f = new Opt(new Eq_kb(RgnKind)); fallthru;
         case &Eq_kb(RgnKind):
           effect = new List(new AccessEff(new VarType(tvs->hd)),effect); break;
+	case &Less_kb(_,IntKind):
+	case &Eq_kb(IntKind): break;
         case &Less_kb(*f,EffKind):
           *f = new Opt(new Eq_kb(EffKind)); fallthru;
         case &Eq_kb(EffKind):
@@ -2975,6 +3006,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
         switch (typ_kind(ts->hd)) {
         case RgnKind: effect = new List(new AccessEff(ts->hd), effect); break;
         case EffKind: effect = new List(ts->hd,                effect); break;
+	case IntKind: break;
         default:      effect = new List(new RgnsEff(ts->hd),   effect); break;
         }
       *eff = new Opt(new JoinEff(effect)); // used to reverse list (twice)
@@ -3118,9 +3150,10 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     }
     if (td->defn != NULL) {
       type_t new_typ = substitute(inst,td->defn->v);
-      *toptp = new Opt(new_typ);
+      *toptp = new new_typ;
     }
     break;
+  case &TypeInt(_):
   case HeapRgn: break;
   case &RgnHandleType(t2): fallthru(t2);
   case &AccessEff(t2):
@@ -3212,8 +3245,8 @@ void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t) {
       terr(loc,"unbound type variable %s",*free_tvars->hd->name);
     // we can constrain the region evars to HeapRgn and the 
     // effect evars to the empty effect, but we're out of luck
-    // for the type variables.
-    if (free_evars != NULL) {
+    // for the type and int variables.
+    if (free_evars != NULL)
       for (; free_evars != NULL; free_evars = free_evars->tl) {
         type_t e = free_evars->hd;
         switch (typ_kind(e)) {
@@ -3230,7 +3263,6 @@ void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t) {
         }
       }
     }
-  }
 }
     
 // Check that the function declaration has a valid type:  all
@@ -3397,7 +3429,7 @@ resolve_struct_designators(region_t<`r> rgn, seg_t loc,
 
 bool is_tagged_pointer_typ_elt(type_t t, type_t@ elt_typ_dest) {
   switch (compress(t)) {
-  case &PointerType(PtrInfo{elt_typ,_,_,_,b,_}):
+  case &PointerType(PtrInfo(elt_typ,_,PtrAtts(_,_,b,_))):
     let b = compress_conref(b);
     switch (compress_conref(b)->v) {
     case &Eq_constr(Unknown_b): 
@@ -3415,7 +3447,7 @@ bool is_tagged_pointer_typ_elt(type_t t, type_t@ elt_typ_dest) {
 
 bool is_zero_pointer_typ_elt(type_t t, type_t@ elt_typ_dest) {
   switch (compress(t)) {
-  case &PointerType(PtrInfo{elt_typ,_,_,_,_,zt}):
+  case &PointerType(PtrInfo(elt_typ,_,PtrAtts(_,_,_,zt))):
     *elt_typ_dest = elt_typ;
     return conref_def(false,zt);
   default: return false;
@@ -3488,7 +3520,7 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
     // must check that f isn't a bitfield. DAN: why?  JGM: because
     // you can't get a pointer to a bitfield in C.
     switch (compress(e1->topt->v)) {
-    case &PointerType(PtrInfo{t1,r,_,_,_,_}): 
+    case &PointerType(PtrInfo(t1,_,PtrAtts(r,_,_,_))): 
       struct Aggrfield * finfo;
       switch (compress(t1)) {
       case &AnonAggrType(_,fs): 
@@ -3505,7 +3537,7 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
   case &Deref_e(e1):
     // we have a boxed thing, so the region is in the pointer-type.
     switch (compress(e1->topt->v)) {
-    case &PointerType(PtrInfo{_,r,_,tq,_,_}): 
+    case &PointerType(PtrInfo(_,tq,PtrAtts(r,_,_,_))): 
       return $(tq.q_const, r); // FIX: is tq set correctly?
     default: return bogus_ans;
     }
@@ -3524,7 +3556,7 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
       if(finfo != NULL)
 	return $((*finfo)[0].q_const, addressof_props(te,e1)[1]);
       return bogus_ans;
-    case &PointerType(PtrInfo{t2,r,_,tq,b,_}): 
+    case &PointerType(PtrInfo(_,tq,PtrAtts(r,_,_,_))): 
       return $(tq.q_const,r);
     case &ArrayType(ArrayInfo{_,tq,_,_}): 
       // Actually, this should be impossible since we've surely
@@ -3568,10 +3600,12 @@ void check_bound(seg_t loc, unsigned int i, conref_t<bounds_t> b) {
     if(known && j <= i)
       terr(loc, "dereference is out of bounds: %d <= %d", j, i);
     return;
-  default:
+  case &Eq_constr(&AbsUpper_b(_)): return; // control-flows problem
+  case No_constr:
     // constrain the bounds to be i+1
     b->v = new Eq_constr((bounds_t)(new Upper_b(uint_exp(i+1,NULL))));
     return;
+  default: impos("check_bound -- bad compressed conref");
   }
 }
 
@@ -3702,10 +3736,10 @@ bool supports_default(type_t t) {
   case FloatType: 
   case &DoubleType(_): return true;
 
-  case &PointerType(PtrInfo{_,_,nullable,_,bounds,_}):
+  case &PointerType(PtrInfo(_,_,PtrAtts(_,nullable,bounds,_))):
     switch (compress_conref(bounds)->v) {
     case &Eq_constr(Unknown_b): return true;
-    case &Eq_constr(&Upper_b(_)):
+    case &Eq_constr(_):
       switch (compress_conref(nullable)->v) {
       case &Eq_constr(b): return b;
       default: return false;
@@ -3752,13 +3786,13 @@ bool admits_zero(type_t t) {
   case &IntType(_,_): 
   case FloatType: 
   case &DoubleType(_): return true;
-  case &PointerType(PtrInfo{_,_,nullable,_,bounds,_}):
+  case &PointerType(PtrInfo(_,_,PtrAtts(_,nullable,bounds,_))):
     switch (compress_conref(bounds)->v) {
       // for now, we're not allowing fat pointers to be in zero-terminated
       // arrays.  They cause way too many problems in the translation and
       // are of dubious use (I hope.)
     case &Eq_constr(Unknown_b): return false; 
-    case &Eq_constr(&Upper_b(_)):
+    case &Eq_constr(_):
       switch (compress_conref(nullable)->v) {
       case &Eq_constr(b): return b;
       default: return false;
@@ -3771,7 +3805,7 @@ bool admits_zero(type_t t) {
 
 bool is_noreturn(type_t t) {
   switch (compress(t)) {
-  case &PointerType(PtrInfo{elt,_,_,_,_,_}): return is_noreturn(elt);
+  case &PointerType(PtrInfo(elt,_,_)): return is_noreturn(elt);
   case &FnType(FnInfo{_,_,_,_,_,_,_,atts}):
     for (; atts != NULL; atts = atts->tl)
       switch (atts->hd) {

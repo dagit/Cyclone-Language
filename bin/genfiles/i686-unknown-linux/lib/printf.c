@@ -477,13 +477,13 @@ _tagged_arr_plus(({char*_tmp2A=buf;_tag_arr(_tmp2A,sizeof(char),
 _get_zero_arr_size(_tmp2A,349));}),sizeof(char),(int)(sizeof(buf)- 1)));if(
 softsign)sign='-';if(*((char*)_check_unknown_subscript(cp,sizeof(char),0))== '\000')
 _tagged_arr_inplace_plus_post(& cp,sizeof(char),1);break;case 'n': _LL50: if(flags & 
-1)*((unsigned int*)Cyc_va_arg_int_ptr(ap))=(unsigned int)ret;else{if(flags & 4)*((
-short*)Cyc_va_arg_short_ptr(ap))=(short)ret;else{*((unsigned int*)Cyc_va_arg_int_ptr(
-ap))=(unsigned int)ret;}}_tagged_arr_inplace_plus_post(& ap,sizeof(void*),1);
-continue;case 'O': _LL51: flags |=1;goto _LL52;case 'o': _LL52: _ulong=flags & 1?Cyc_va_arg_ulong(
-ap):(flags & 4?(unsigned int)((unsigned short)Cyc_va_arg_int(ap)):(unsigned int)
-Cyc_va_arg_uint(ap));_tagged_arr_inplace_plus_post(& ap,sizeof(void*),1);base=Cyc_OCT;
-goto nosign;case 'p': _LL53: _ulong=(unsigned int)Cyc_va_arg_long(ap);
+1)*Cyc_va_arg_int_ptr(ap)=(unsigned int)ret;else{if(flags & 4)*Cyc_va_arg_short_ptr(
+ap)=(short)ret;else{*Cyc_va_arg_int_ptr(ap)=(unsigned int)ret;}}
+_tagged_arr_inplace_plus_post(& ap,sizeof(void*),1);continue;case 'O': _LL51: flags |=
+1;goto _LL52;case 'o': _LL52: _ulong=flags & 1?Cyc_va_arg_ulong(ap):(flags & 4?(
+unsigned int)((unsigned short)Cyc_va_arg_int(ap)):(unsigned int)Cyc_va_arg_uint(
+ap));_tagged_arr_inplace_plus_post(& ap,sizeof(void*),1);base=Cyc_OCT;goto nosign;
+case 'p': _LL53: _ulong=(unsigned int)Cyc_va_arg_long(ap);
 _tagged_arr_inplace_plus_post(& ap,sizeof(void*),1);base=Cyc_HEX;flags |=64;ch=(
 int)'x';goto nosign;case 's': _LL54: {struct _tagged_arr b=Cyc_va_arg_string(ap);
 _tagged_arr_inplace_plus_post(& ap,sizeof(void*),1);which_cp=3;cp3=b;if(prec >= 0){
@@ -618,24 +618,24 @@ sizeof(char),0));char _tmp71='0';if(_get_arr_size(_tmp6F,sizeof(char))== 1?_tmp7
 if(end.curr == start.curr){if((unsigned int)exp){({struct _tagged_arr _tmp72=end;
 char _tmp73=*((char*)_check_unknown_subscript(_tmp72,sizeof(char),0));char _tmp74='1';
 if(_get_arr_size(_tmp72,sizeof(char))== 1?_tmp73 == '\000'?_tmp74 != '\000': 0: 0)
-_throw_arraybounds();*((char*)_tmp72.curr)=_tmp74;});++(*((int*)exp));}else{({
-struct _tagged_arr _tmp75=_tagged_arr_inplace_plus(& end,sizeof(char),-1);char
-_tmp76=*((char*)_check_unknown_subscript(_tmp75,sizeof(char),0));char _tmp77='1';
-if(_get_arr_size(_tmp75,sizeof(char))== 1?_tmp76 == '\000'?_tmp77 != '\000': 0: 0)
+_throw_arraybounds();*((char*)_tmp72.curr)=_tmp74;});++(*exp);}else{({struct
+_tagged_arr _tmp75=_tagged_arr_inplace_plus(& end,sizeof(char),-1);char _tmp76=*((
+char*)_check_unknown_subscript(_tmp75,sizeof(char),0));char _tmp77='1';if(
+_get_arr_size(_tmp75,sizeof(char))== 1?_tmp76 == '\000'?_tmp77 != '\000': 0: 0)
 _throw_arraybounds();*((char*)_tmp75.curr)=_tmp77;});_tagged_arr_inplace_plus(&
-start,sizeof(char),-1);}break;}}else{if(*((int*)signp)== '-')for(0;1;
+start,sizeof(char),-1);}break;}}else{if(*signp == '-')for(0;1;
 _tagged_arr_inplace_plus(& end,sizeof(char),-1)){if(*((char*)
 _check_unknown_subscript(end,sizeof(char),0))== '.')_tagged_arr_inplace_plus(&
 end,sizeof(char),-1);if(*((char*)_check_unknown_subscript(end,sizeof(char),0))!= '0')
-break;if(end.curr == start.curr)*((int*)signp)=0;}}return start;}int Cyc___cvt_double(
+break;if(end.curr == start.curr)*signp=0;}}return start;}int Cyc___cvt_double(
 double number,int prec,int flags,int*signp,int fmtch,struct _tagged_arr startp,struct
 _tagged_arr endp){struct _tagged_arr p;struct _tagged_arr t;register double fract;int
 dotrim=0;int expcnt;int gformat=0;double integer=(double)0.0;double tmp=(double)0.0;
-expcnt=0;if(number < 0){number=- number;*((int*)signp)=(int)'-';}else{*((int*)
-signp)=0;}fract=modf(number,& integer);t=_tagged_arr_inplace_plus(& startp,sizeof(
-char),1);for(p=_tagged_arr_plus(endp,sizeof(char),- 1);p.curr >= startp.curr?
-integer != 0.0: 0;++ expcnt){tmp=modf(integer / 10,& integer);({struct _tagged_arr
-_tmp78=_tagged_arr_inplace_plus_post(& p,sizeof(char),-1);char _tmp79=*((char*)
+expcnt=0;if(number < 0){number=- number;*signp=(int)'-';}else{*signp=0;}fract=modf(
+number,& integer);t=_tagged_arr_inplace_plus(& startp,sizeof(char),1);for(p=
+_tagged_arr_plus(endp,sizeof(char),- 1);p.curr >= startp.curr?integer != 0.0: 0;++
+expcnt){tmp=modf(integer / 10,& integer);({struct _tagged_arr _tmp78=
+_tagged_arr_inplace_plus_post(& p,sizeof(char),-1);char _tmp79=*((char*)
 _check_unknown_subscript(_tmp78,sizeof(char),0));char _tmp7A=(char)((int)((tmp + 
 .01)* 10)+ '0');if(_get_arr_size(_tmp78,sizeof(char))== 1?_tmp79 == '\000'?_tmp7A
 != '\000': 0: 0)_throw_arraybounds();*((char*)_tmp78.curr)=_tmp7A;});}switch(fmtch){
@@ -764,14 +764,13 @@ int Cyc_printf(struct _tagged_arr fmt,struct _tagged_arr ap){int ans;ans=Cyc_vpr
 fmt,ap);return ans;}struct _tuple0{struct _tagged_arr*f1;unsigned int*f2;};static
 int Cyc_putc_string(int c,struct _tuple0*sptr_n){struct _tuple0 _tmpBB;struct
 _tagged_arr*_tmpBC;unsigned int*_tmpBD;struct _tuple0*_tmpBA=sptr_n;_tmpBB=*
-_tmpBA;_tmpBC=_tmpBB.f1;_tmpBD=_tmpBB.f2;{struct _tagged_arr s=*((struct
-_tagged_arr*)_tmpBC);unsigned int n=*((unsigned int*)_tmpBD);if(_get_arr_size(s,
-sizeof(char))== 0?1: n == 0)return - 1;({struct _tagged_arr _tmpBE=s;char _tmpBF=*((
-char*)_check_unknown_subscript(_tmpBE,sizeof(char),0));char _tmpC0=(char)c;if(
-_get_arr_size(_tmpBE,sizeof(char))== 1?_tmpBF == '\000'?_tmpC0 != '\000': 0: 0)
-_throw_arraybounds();*((char*)_tmpBE.curr)=_tmpC0;});*((struct _tagged_arr*)
-_tmpBC)=_tagged_arr_plus(s,sizeof(char),1);*((unsigned int*)_tmpBD)=n - 1;return 1;}}
-int Cyc_vsnprintf(struct _tagged_arr s,unsigned int n,struct _tagged_arr fmt,struct
+_tmpBA;_tmpBC=_tmpBB.f1;_tmpBD=_tmpBB.f2;{struct _tagged_arr s=*_tmpBC;
+unsigned int n=*_tmpBD;if(_get_arr_size(s,sizeof(char))== 0?1: n == 0)return - 1;({
+struct _tagged_arr _tmpBE=s;char _tmpBF=*((char*)_check_unknown_subscript(_tmpBE,
+sizeof(char),0));char _tmpC0=(char)c;if(_get_arr_size(_tmpBE,sizeof(char))== 1?
+_tmpBF == '\000'?_tmpC0 != '\000': 0: 0)_throw_arraybounds();*((char*)_tmpBE.curr)=
+_tmpC0;});*_tmpBC=_tagged_arr_plus(s,sizeof(char),1);*_tmpBD=n - 1;return 1;}}int
+Cyc_vsnprintf(struct _tagged_arr s,unsigned int n,struct _tagged_arr fmt,struct
 _tagged_arr ap){int ans;struct _tagged_arr _tmpC1=s;unsigned int _tmpC2=n;struct
 _tuple0 _tmpC3=({struct _tuple0 _tmpC7;_tmpC7.f1=& _tmpC1;_tmpC7.f2=& _tmpC2;_tmpC7;});
 ans=((int(*)(int(*ioputc)(int,struct _tuple0*),struct _tuple0*ioputc_env,struct

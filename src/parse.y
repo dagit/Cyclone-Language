@@ -574,7 +574,7 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
       abort(loc,"function declaration without parameter types");
     }
   }
-  case &TypeParams_mod(ts,loc,_): {
+  case &TypeParams_mod(ts,loc,_):
     // If we are the last type modifier, this could be the list of
     // type parameters to a typedef:
     // typedef struct foo<`a,int> foo_t<`a>
@@ -585,19 +585,8 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
     // Function (see last case).
     abort(loc, "type parameters must appear before function arguments "
 	  "in declarator");
-  }
-  case &Pointer_mod(ps,rgntyp,tq2): {
-    switch (ps) {
-    case &NonNullable_ps(ue,zeroterm):
-      return apply_tms(tq2,atb_typ(t,rgntyp,tq,
-				   new Upper_b(ue),zeroterm),atts,tms->tl);
-    case &Nullable_ps(ue,zeroterm):
-      return apply_tms(tq2,starb_typ(t,rgntyp,tq,
-				     new Upper_b(ue),zeroterm),atts,tms->tl);
-    case &TaggedArray_ps(zeroterm):
-      return apply_tms(tq2,tagged_typ(t,rgntyp,tq,zeroterm),atts,tms->tl);
-    }
-  }
+  case &Pointer_mod(ptratts,tq2):
+    return apply_tms(tq2,new PointerType(PtrInfo(t,tq,ptratts)),atts,tms->tl);
   case &Attributes_mod(loc,atts2):
     // FIX: get this in line with GCC
     // attributes get attached to function types -- I doubt that this
@@ -814,14 +803,6 @@ static kind_t id_to_kind(string_t s, seg_t loc) {
   return BoxKind;
 }
 
-// Turn an optional list of attributes into an Attribute_mod
-static list_t<type_modifier_t> attopt_to_tms(seg_t loc,
-                                             attributes_t atts,
-                                             list_t<type_modifier_t,`H> tms) {
-  if (atts == NULL) return tms;
-  else return new List {new Attributes_mod(loc,atts),tms};
-}
-
 } // end namespace Parse
 using Parse;
 %}
@@ -914,7 +895,8 @@ using Parse;
 %type <char> CHARACTER_CONSTANT
 %type <string_t> FLOATING_CONSTANT namespace_action
 %type <string_t> IDENTIFIER TYPEDEF_NAME TYPE_VAR STRING field_name
-%type <tunion Pointer_Sort> pointer_char
+%type <$(conref_t<bool>,conref_t<bounds_t>)@> pointer_null_and_bound
+%type <conref_t<bounds_t>> pointer_bound
 %type <exp_t> primary_expression postfix_expression unary_expression
 %type <exp_t> cast_expression constant multiplicative_expression
 %type <exp_t> additive_expression shift_expression relational_expression
@@ -950,10 +932,10 @@ using Parse;
 %type <type_specifier_t> type_specifier enum_specifier
 %type <type_specifier_t> struct_or_union_specifier tunion_specifier
 %type <aggr_kind_t> struct_or_union
-%type <tqual_t> type_qualifier type_qualifier_list
+%type <tqual_t> type_qualifier tqual_list
 %type <list_t<aggrfield_t>> struct_declaration_list struct_declaration
 %type <list_t<list_t<aggrfield_t>>> struct_declaration_list0
-%type <list_t<type_modifier_t>> pointer
+%type <list_t<type_modifier_t>> pointer one_pointer
 %type <declarator_t> declarator direct_declarator
 %type <$(declarator_t,exp_opt_t)@> struct_declarator
 %type <list_t<$(declarator_t,exp_opt_t)@>> struct_declarator_list struct_declarator_list0
@@ -972,7 +954,7 @@ using Parse;
 %type <list_t<designator_t>> designation designator_list
 %type <designator_t> designator
 %type <kind_t> kind
-%type <type_t> any_type_name type_var rgn_opt rgn
+%type <type_t> any_type_name type_var rgn_opt
 %type <list_t<attribute_t>> attributes_opt attributes attribute_list
 %type <attribute_t> attribute
 %type <enumfield_t> enum_field
@@ -1157,7 +1139,7 @@ attributes_opt:
 
 attributes:
   ATTRIBUTE '(' '(' attribute_list ')' ')'
-  { $$=^$($4); }
+  { $$=$!4; }
 ;
 
 attribute_list:
@@ -1459,28 +1441,22 @@ struct_declarator:
     { $$=^$(new $($1,(exp_opt_t)$3)); }
 ;
 
+// FIX: hack to have rgn_opt in 1st and 3rd cases
 tunion_specifier:
-  tunion_or_xtunion qual_opt_identifier type_params_opt '{' tunionfield_list '}'
-    { let ts = List::map_c(typ2tvar,LOC(@3,@3),$3);
-      $$ = ^$(new Decl_spec(tunion_decl(Public, $2,ts,new Opt($5), $1,
-					LOC(@1,@6))));
+  tunion_or_xtunion rgn_opt qual_opt_identifier type_params_opt '{' tunionfield_list '}'
+    { let ts = List::map_c(typ2tvar,LOC(@4,@4),$4);
+      $$ = ^$(new Decl_spec(tunion_decl(Public, $3,ts,new Opt($6), $1,
+					LOC(@1,@7))));
     }
-| tunion_or_xtunion rgn qual_opt_identifier type_params_opt
+| tunion_or_xtunion rgn_opt qual_opt_identifier type_params_opt
     {
       $$=^$(type_spec(new TunionType(TunionInfo(new
                                                 UnknownTunion(UnknownTunionInfo($3,$1)), $4, $2)), LOC(@1,@4)));
     }
-| tunion_or_xtunion qual_opt_identifier type_params_opt
-    {
-      let rgn = new_evar(new Opt(RgnKind), NULL);
-      $$=^$(type_spec(new TunionType(TunionInfo(new
-			UnknownTunion(UnknownTunionInfo($2,$1)), $3, rgn)),
-		       LOC(@1,@3)));
-    }
-| tunion_or_xtunion qual_opt_identifier '.' qual_opt_identifier type_params_opt
+| tunion_or_xtunion rgn_opt qual_opt_identifier '.' qual_opt_identifier type_params_opt
     { $$=^$(type_spec(new TunionFieldType(TunionFieldInfo(new
-		  UnknownTunionfield(UnknownTunionFieldInfo($2,$4,$1)),$5)),
-		      LOC(@1,@5)));
+		  UnknownTunionfield(UnknownTunionFieldInfo($3,$5,$1)),$6)),
+		      LOC(@1,@6)));
     }
 ;
 
@@ -1555,59 +1531,45 @@ direct_declarator:
   { $$=^$(new Declarator(exn_name,NULL)); }
 ;
 
-zeroterm_qual_opt:
-/* empty */ { $$ = ^$(empty_conref()); }
-| ZEROTERM_kw { $$ = ^$(true_conref); }
-| NOZEROTERM_kw { $$ = ^$(false_conref); }
-;
-
 /* CYC: region annotations allowed, as is zero-termination qualifier */
 pointer:
-  pointer_char rgn_opt attributes_opt
-    { $$=^$(new List(new Pointer_mod($1,$2,empty_tqual()),
-		     attopt_to_tms(LOC(@3,@3),$3,NULL))); }
-| pointer_char rgn_opt attributes_opt type_qualifier_list
-    { $$=^$(new List(new Pointer_mod($1,$2,$4),
-                     attopt_to_tms(LOC(@3,@3),$3,NULL))); }
-| pointer_char rgn_opt attributes_opt pointer
-    { $$=^$(new List(new Pointer_mod($1,$2,empty_tqual()),
-                     attopt_to_tms(LOC(@3,@3),$3,$4))); }
-| pointer_char rgn_opt attributes_opt type_qualifier_list pointer
-    { $$=^$(new List(new Pointer_mod($1,$2,$4),
-                     attopt_to_tms(LOC(@3,@3),$3,$5))); }
-;
+  one_pointer { $$ = $!1; }
+| one_pointer pointer { $$ = ^$(imp_append($1,$2)); }
 
-pointer_char:
-  '*' zeroterm_qual_opt { $$=^$(new Nullable_ps(exp_unsigned_one,$2)); }
-/* CYC: pointers that cannot be NULL */
-| '@' zeroterm_qual_opt { $$=^$(new NonNullable_ps(exp_unsigned_one,$2)); }
-/* possibly NULL, with array bound given by the expresion */
-| '*' '{' assignment_expression '}' zeroterm_qual_opt 
-  {$$=^$(new Nullable_ps($3,$5));}
-/* not NULL, with array bound given by the expresion */
-| '@' '{' assignment_expression '}' zeroterm_qual_opt 
-  {$$=^$(new NonNullable_ps($3,$5));}
-/* tagged pointer -- bounds maintained dynamically */
-| '?' zeroterm_qual_opt { $$=^$(new TaggedArray_ps($2)); }
+one_pointer:
+  pointer_null_and_bound zeroterm_qual_opt rgn_opt attributes_opt tqual_list
+  { list_t<type_modifier_t> ans = NULL;
+    if($4 != NULL)
+      ans = new List(new Attributes_mod(LOC(@4,@4),$4), ans);
+    ans = new List(new Pointer_mod(PtrAtts($3,(*$1)[0],(*$1)[1],$2),$5), ans);
+    $$ = ^$(ans);
+  }
+
+pointer_null_and_bound:
+  '*' pointer_bound { $$=^$(new $(true_conref,  $2)); }
+| '@' pointer_bound { $$=^$(new $(false_conref, $2)); }
+| '?' { $$=^$(new $(true_conref,  bounds_unknown_conref));  }
+
+pointer_bound:
+/* empty */ { $$=^$(bounds_one_conref); }
+| '{' assignment_expression '}' { $$=^$(new_conref(new Upper_b($2))); }
+| '{' any_type_name         '}' { $$=^$(new_conref(new AbsUpper_b($2))); }
+
+zeroterm_qual_opt:
+/* empty */     { $$ = ^$(empty_conref()); }
+| ZEROTERM_kw   { $$ = ^$(true_conref);    }
+| NOZEROTERM_kw { $$ = ^$(false_conref);   }
+;
 
 rgn_opt:
-    /* empty */ { $$ = ^$(new_evar(new Opt(RgnKind),NULL)); }
-| rgn { $$ = $!1; }
+/* empty */ { $$ = ^$(new_evar(new Opt(RgnKind),NULL)); }
+| type_var  { set_vartyp_kind($1,RgnKind); $$ = $!1; }
+| '_'       { $$ = ^$(new_evar(new Opt(RgnKind),NULL)); }
 ;
 
-rgn:
-  type_var
-  { set_vartyp_kind($1,RgnKind);
-    $$ = $!1; 
-  }
-| '_' { $$ = ^$(new_evar(new Opt(RgnKind),NULL)); }
-;
-
-type_qualifier_list:
-  type_qualifier
-    { $$ = $!1; }
-| type_qualifier_list type_qualifier
-    { $$ = ^$(combine_tqual($1,$2)); }
+tqual_list:
+/* empty */ { $$ = ^$(empty_tqual()); }
+| type_qualifier tqual_list { $$ = ^$(combine_tqual($1,$2)); }
 ;
 
 parameter_type_list:
@@ -1786,10 +1748,8 @@ designation:
 
 /* NB: returns list in reverse order */
 designator_list:
-  designator
-    { $$=^$(new List($1,NULL)); }
-| designator_list designator
-    { $$=^$(new List($2,$1)); }
+  designator                 { $$=^$(new List($1,NULL)); }
+| designator_list designator { $$=^$(new List($2,$1));   }
 ;
 
 designator:
@@ -1799,17 +1759,15 @@ designator:
 
 type_name:
   specifier_qualifier_list
-    { let t  = speclist2typ((*$1)[1], LOC(@1,@1));
-      let atts = (*$1)[2];
+    { let &$(tq,tss,atts) = $1;
+      let t = speclist2typ(tss, LOC(@1,@1));
       if (atts != NULL)
         Tcutil::warn(LOC(@1,@1),"ignoring attributes in type");
-      let tq = (*$1)[0];
       $$=^$(new $(NULL,tq,t));
     }
 | specifier_qualifier_list abstract_declarator
-    { let t   = speclist2typ((*$1)[1], LOC(@1,@1));
-      let atts = (*$1)[2];
-      let tq  = (*$1)[0];
+    { let &$(tq,tss,atts) = $1;
+      let t = speclist2typ(tss, LOC(@1,@1));
       let tms = $2->tms;
       let t_info = apply_tms(tq,t,atts,tms);
       if (t_info[2] != NULL)
@@ -2225,8 +2183,7 @@ conditional_expression:
 ;
 
 constant_expression:
-  conditional_expression
-    { $$=$!1; }
+  conditional_expression { $$=$!1; }
 ;
 logical_or_expression:
   logical_and_expression
@@ -2323,12 +2280,10 @@ unary_expression:
 | SIZEOF unary_expression        { $$=^$(sizeofexp_exp($2,LOC(@1,@2))); }
 | OFFSETOF '(' type_name ',' field_name ')' 
    { $$=^$(offsetof_exp((*$3)[2],new StructField(new $5),LOC(@1,@6))); }
-/* jcheney: offsetof for tuple types */
 /* not checking sign here...*/
 | OFFSETOF '(' type_name ',' INTEGER_CONSTANT ')' 
    { $$=^$(offsetof_exp((*$3)[2],new TupleIndex((*$5)[1]), LOC(@1,@6))); }
 /* Cyc: __gen for generic, type-based marshallers */
-//| GEN '(' type_name ')'      { $$=^$(gentyp_exp((*$3)[2],LOC(@1,@4))); }
 | GEN type_params_opt '(' type_name ')'      
    { let loc = LOC(@1,@5);
      let tvs = List::map_c(typ2tvar,loc,$2);

@@ -985,7 +985,7 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
     
   case &PointerType(pt): // ptr_info_t
     //printf("Pointer type: %s (%x)\n", typ2string(pt.elt_typ),pt.elt_typ);
-    switch(conref_val(pt.bounds)) {
+    switch(conref_val(pt.ptr_atts.bounds)) {
     case &Upper_b(e):
       let varname = toplevel_name(new_gen_id("rep"));
       // fwd_decl = extern tunion Typestruct.Tuple `varname`;
@@ -1031,6 +1031,8 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
 			 address_exp(unknownid_exp(varname,loc),loc),
 			 list(base_info),NULL);
       break;
+    case &AbsUpper_b(_): 
+      Tcutil::impos("tcgenregp: no support for abstract array bounds");
     }
     break;
   case &ArrayType(ArrayInfo{arrtype,tq,e,zt}):
@@ -1072,16 +1074,14 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
       Tcutil::impos("gen(): can't gen for abstract typedef");
     // lookup rep for definition
     // throws away current "info"
-    let &$(dict2,info2) = lookupRep(te,dict,loc,def->v);
+    let &$(dict2,info2) = lookupRep(te,dict,loc,*def);
     dict = insert(dict2,type,info2);
     break;
 
   case VoidType: 
-    Tcutil::terr(loc,"found void in gen() expression");
-    break;
+    Tcutil::terr(loc,"found void in gen() expression"); break;
   case &Evar(_,_,_,_):
-    Tcutil::terr(loc,"found evar in gen() expression");
-    break;
+    Tcutil::terr(loc,"found evar in gen() expression"); break;
   case &VarType(tvar):
     Tcutil::terr(loc,"found tyvar in gen() expression");
     /*      // string_t name = `*tvar->name`;
@@ -1100,16 +1100,14 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
 	    NULL,NULL);
     */
     break;
-    Tcutil::terr(loc,"found variable type in gen() expression");
-    break;
   case &FnType(fi): 
     Tcutil::terr(loc,"found function type in gen() expression");
     break;
     // conceivably we might have to marshal these somehow... how?
-  case &RgnHandleType(_): fallthru;
-  case HeapRgn:           fallthru;
-  case &AccessEff(_):     fallthru;
-  case &JoinEff(_):       fallthru;
+  case &RgnHandleType(_): 
+  case HeapRgn:           
+  case &AccessEff(_):     
+  case &JoinEff(_):
   case &RgnsEff(_):       
     Tcutil::terr(loc,"gen(): unhandled region, handle or effect type");
     break;

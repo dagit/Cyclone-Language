@@ -323,11 +323,9 @@ bool okay_szofarg(type_t t) {
 
   case &TunionFieldType(_): return false;
 
-  case &PointerType(PtrInfo{_,_,_,_,b,_}):  // ???
-    switch (compress_conref(b)->v) {
-    case &Eq_constr(_): return true;
-    default: return false;
-    }
+    // okay? (used to require constrained bound)
+  case &PointerType(_): return true;
+
   case &SizeofType(_):
   case &TagType(_):
   case &IntType(_,_): 

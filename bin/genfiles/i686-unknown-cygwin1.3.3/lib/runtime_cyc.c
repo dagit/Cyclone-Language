@@ -148,6 +148,7 @@ int backtrace(int *array, int size) { return 0; }
 
 extern int Cyc_Execinfo_bt(void);
 static struct _handler_cons top_handler;
+static int in_backtrace = 0; // avoid infinite exception chain
 void throw(void* e) { // FIX: use struct _xtunion_struct *  ??
   struct _handler_cons *my_handler;
   while (_current_handler->tag != 0)
@@ -158,8 +159,10 @@ void throw(void* e) { // FIX: use struct _xtunion_struct *  ??
 #ifdef __linux__
   /* bt only works in linux, and gives a circular dependence in os x,
      so we need to compile this conditionally */
-  if (my_handler->handler == top_handler.handler)
+  if (my_handler->handler == top_handler.handler && !in_backtrace) {
+    in_backtrace = 1;
     Cyc_Execinfo_bt();
+  }
 #endif
   longjmp(my_handler->handler,1);
 }
