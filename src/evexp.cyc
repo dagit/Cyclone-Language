@@ -61,6 +61,7 @@ $(unsigned int,bool) eval_const_uint_exp(exp_t e) {
     if (y != 0xffffffff && y != 0x00000000)
       return $(0,false);
     else return $((unsigned int)x,true);
+  case {.Float_c = _}: return $(0,true);
   default:          terr(e->loc,"expecting unsigned int"); return $(0,true);
   }
 }
@@ -73,6 +74,7 @@ static $(bool,bool) eval_const_bool_exp(exp_t e) {
   case {.Int_c = $(_,b)}:       return $(b != 0, true);
   case {.LongLong_c = $(_,b)}:  return $(b != 0, true);
   case {.Null_c = _}:           return $(false,  false);
+  case {.Float_c = _}:return $(0,true);
   default: terr(e->loc,"expecting bool"); return $(false, false);
   }
 }
