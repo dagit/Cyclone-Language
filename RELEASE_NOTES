@@ -1,0 +1,149 @@
+This file explains some of the changes since the last release of Cyclone
+(version 0.2 dated 20 November 2001.)
+
+* In order to provide better library coverage, we had to cut back
+  on the number of platforms that we support directly.  In particular,
+  we now only provide support for linux x86, cygwin, and Mac OS X.
+  Other architectures might or might not work.  To port to a new
+  architecture requires more work -- see the INSTALL file for details.
+
+* Introduction of the buildlib tool to simplify interface to C
+  and to provide a portable way to extract Cyclone header files
+  and wrappers for a C library.  This tool is used to build all
+  of the system-dependent libraries (e.g., stdio).  See the
+  documentation for details.
+
+* Worked around a bug in GCC that prevented us from building on
+  Mac OS X.  The problem involves nested statement expressions
+  ({S;e}) which we use heavily.  The temporary fix is to use
+  inlined functions for certaion operations instead of macro's
+  which expand to these.  Unfortunately, the macro's produced
+  much better code since GCC doesn't do certain optimizations
+  after inlining.  So, as a result, only certain files are 
+  compiled with the inlined functions (the ones that were causing
+  the problems.)
+
+* Data structures that are "bits-only" (i.e., consisting of ints,
+  chars, floats, etc. but not pointers or zero-terminated arrays)
+  need not be initialized.
+
+* Much more complete library coverage.  After installing, look
+  in lib/cyc-lib/<architecture>/include to see what is and isn't
+  there.  Read the buildlib documentation for details on how to
+  add new library functions.  
+
+* 0 can be used in place of NULL (except within patterns).
+
+* Added long double support.
+
+* Support for anonymous structions, unions, etc.  
+
+* Added sizeof_t<T> which is the type of sizeof(e) when e has type T.
+  Useful for specifying prototypes on things like memmove, memcpy,
+  memset, bzero, etc.
+
+* Added support for malloc/calloc for more than one object.  You can
+  use malloc for "bits-only" arrays, and calloc to allocate arrays
+  of any type that supports 0 as a value, including * and ? types.
+
+* Can cast bits only types to char? types.  
+
+* Added an option --lineno that emits line-number information in the
+  generated C code.  Helps when using gdb to debug Cyclone code but
+  doesn't work all that well yet and takes a long time to compile
+  and generates large files.
+
+* Added a Cyclonized version of flex.
+
+* Flags --nochecks, -nonullchecks, and --noboundschecks can be used
+  to turn off bounds checks.  
+
+* We eliminate an array bounds check on a subscript of the form x[i]
+  where x and i are local variables that do not escape, and the 
+  subscript is dominated by a test of the form i < x.size or
+  i < y and y <= x.size.  You can use assert to force checks to move
+  outside of loops too.  See the string library for examples.
+
+* Fewer warnings about dereferencing a possibly-NULL pointer when
+  you've already checked that it's not NULL.
+
+* You can leave the return type off of a function and it defaults
+  to int.  
+
+* We now only warn if you fail to return a "bits-only" type instead
+  of generating an error.
+
+* We support the "noreturn" attribute which is useful for giving
+  the control-flow analysis more accuracy.  
+
+* We warn when main() has a bad type.
+
+* Removed existential types from tunions and instead added them
+  to structs.  
+
+* Added support for abstract typedef's.  You can write:
+  typedef _ t;  and t is treated as an abstract type (of Box kind).
+
+* Added support for "resetable" dynamic regions.  (Need to update
+  the documentation to show how to use them.)  Here's an example:
+
+    region [resetable] r {
+       ... allocate data in r ...
+       reset_region(r); // frees all data in r and kills 
+                        // all variables that might point into r
+       ... allocate new data in r ...
+    }
+
+* Added support for initializing something through a procedure
+  call.  For instance, given the prototype:
+
+    void f(int @x) __attribute__((initializes(1)));
+
+  you can call f with a pointer to something that is not yet
+  initialized and conclude that after the call, it is initialized.
+
+* Added preliminary support for "tag types" which will allow you
+  to connect the size of an array to an integer value.  More
+  support forthcoming along with documentation.
+
+* Added preliminary support for type representations.  More
+  support forthcoming along with documentation.
+
+* Added support for outlives bounds for quantified regions.  See
+  the fn library for an example and the PLDI paper for details.
+
+* Added support for zero-terminated arrays and pointers.  For
+  instance, char *ZEROTERM is a pointer to a zero-terminated
+  sequence of characters (i.e., a C string).  You can do some
+  limited subscripting and pointer arithmetic on such pointers,
+  but it's expensive.  It's much better to convert the value
+  to a char ?ZEROTERM and then manipulate it.  This is likely
+  to be the most confusing a difficult change to deal with.
+  See the documentation for more examples and the limitations
+  of these pointers.  Finally, note that char pointers by
+  default are assumed to be ZEROTERM.  If you mean for them
+  to not be ZEROTERM, then you need to write NOZEROTERM 
+  explicitly (e.g., char ?NOZEROTERM).
+
+* More flexible parsing of GCC-style attributes.
+
+* Improved error reporting as best we could.
+
+* Use GCC-style locations when reporting an error (e.g., file:lineno)
+  instead of also including the character offset in the line.  You can
+  get the more detailed location information by using the
+  -detailedlocation flag.
+
+* Support all casts to void now.
+
+* Use -maarch=i686 when compiling on an x86 to avoid having GCC
+  using movsl to copy structs (i.e., ? types).  Much improved
+  performance.
+
+* The argv passed to Cyclone's main now includes a NULL temrinator.
+  Thus, argc = argv.size + 1.
+
+
+
+
+
