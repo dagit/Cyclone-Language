@@ -448,7 +448,9 @@ abssyn_t abstract_exp(absenv_t env, exp_t e) {
     return abstract_malloc(env, e, eopt, null);
 
   case &Deref_e(e1):
-    // only complication is cancelling out *& or * new.
+    if(Tcutil::is_tagged_pointer_typ(e1->topt->v))
+      return use_exp_unordered(env, new List(e1,null), use_it_list());
+    // only other complication is cancelling out *& or * new.
     switch(env.access_path) {
     case &List(&Exp(_,&Address_e(_),_),tl): 
       env.access_path = tl; 
@@ -464,6 +466,8 @@ abssyn_t abstract_exp(absenv_t env, exp_t e) {
     // Similarly, you can only assign fully initialized things to them
     // and those things escape, so we return no lvalues.
   case &StructArrow_e(e1,_): 
+    if(Tcutil::is_tagged_pointer_typ(e1->topt->v))
+      return use_exp_unordered(env, new List(e1,null), use_it_list());
     switch(Tcutil::compress(e1->topt->v)) {
     case &PointerType(PtrInfo{t2,_,_,_,_}):
       switch(Tcutil::compress(t2)) {
