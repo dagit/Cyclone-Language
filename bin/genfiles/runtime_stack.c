@@ -22,7 +22,7 @@
 
 #ifdef HAVE_THREADS
 static tlocal_key_t _current_frame_key;
-#else
+#elif !defined(USE_CYC_TLS)
 static struct _RuntimeStack *_current_frame = NULL;
 #endif
 
@@ -37,6 +37,12 @@ void _init_stack() {
 struct _RuntimeStack *get_current_frame() {
 #ifdef HAVE_THREADS
   return (struct _RuntimeStack *)get_tlocal(_current_frame_key); 
+#elif defined(USE_CYC_TLS)
+  tls_record_t *rec = cyc_runtime_lookup_tls_record();
+  if(rec) 
+    return rec->current_frame;
+  errquit("cyc_runtime module failed to return thread local slot -- fatal");
+  return 0;   
 #else
   return _current_frame;
 #endif
@@ -45,6 +51,12 @@ struct _RuntimeStack *get_current_frame() {
 void set_current_frame(struct _RuntimeStack *frame) {
 #ifdef HAVE_THREADS
   put_tlocal(_current_frame_key, frame);
+#elif defined(USE_CYC_TLS)
+  tls_record_t *rec = cyc_runtime_lookup_tls_record();
+  if(rec) 
+    rec->current_frame = frame;
+  else
+    errquit("cyc_runtime module failed to return thread local slot -- fatal");
 #else
   _current_frame = frame;
 #endif

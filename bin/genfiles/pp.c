@@ -368,45 +368,45 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #endif
  struct Cyc_Core_Opt{void*v;};
 # 95 "core.h"
-struct _fat_ptr Cyc_Core_new_string(unsigned);
+extern struct _fat_ptr Cyc_Core_new_string(unsigned);
 # 117
-void*Cyc_Core_identity(void*);
+extern void*Cyc_Core_identity(void*);
 # 119
-int Cyc_Core_intcmp(int,int);extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12U];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _fat_ptr f1;};
+extern int Cyc_Core_intcmp(int,int);extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12U];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _fat_ptr f1;};
 # 168
 extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned nelts;};struct Cyc___cycFILE;struct Cyc_String_pa_PrintArg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};struct Cyc_LongDouble_pa_PrintArg_struct{int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};
 # 100 "cycboot.h"
-int Cyc_fprintf(struct Cyc___cycFILE*,struct _fat_ptr,struct _fat_ptr);struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _fat_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _fat_ptr f1;};extern char Cyc_FileCloseError[15U];struct Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[14U];struct Cyc_FileOpenError_exn_struct{char*tag;struct _fat_ptr f1;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
+extern int Cyc_fprintf(struct Cyc___cycFILE*,struct _fat_ptr,struct _fat_ptr);struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _fat_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _fat_ptr f1;};extern char Cyc_FileCloseError[15U];struct Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[14U];struct Cyc_FileOpenError_exn_struct{char*tag;struct _fat_ptr f1;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
 # 61 "list.h"
-int Cyc_List_length(struct Cyc_List_List*x);extern char Cyc_List_List_mismatch[14U];struct Cyc_List_List_mismatch_exn_struct{char*tag;};extern char Cyc_List_Nth[4U];struct Cyc_List_Nth_exn_struct{char*tag;};
+extern int Cyc_List_length(struct Cyc_List_List*x);extern char Cyc_List_List_mismatch[14U];struct Cyc_List_List_mismatch_exn_struct{char*tag;};extern char Cyc_List_Nth[4U];struct Cyc_List_Nth_exn_struct{char*tag;};
 # 38 "string.h"
-unsigned long Cyc_strlen(struct _fat_ptr s);
+extern unsigned long Cyc_strlen(struct _fat_ptr s);
 # 54 "string.h"
-int Cyc_zstrptrcmp(struct _fat_ptr*,struct _fat_ptr*);
+extern int Cyc_zstrptrcmp(struct _fat_ptr*,struct _fat_ptr*);
 # 66
-struct _fat_ptr Cyc_str_sepstr(struct Cyc_List_List*,struct _fat_ptr);struct Cyc_Hashtable_Table;
+extern struct _fat_ptr Cyc_str_sepstr(struct Cyc_List_List*,struct _fat_ptr);struct Cyc_Hashtable_Table;
 # 39 "hashtable.h"
-struct Cyc_Hashtable_Table*Cyc_Hashtable_create(int sz,int(*cmp)(void*,void*),int(*hash)(void*));
+extern struct Cyc_Hashtable_Table*Cyc_Hashtable_create(int sz,int(*cmp)(void*,void*),int(*hash)(void*));
 # 50
-void Cyc_Hashtable_insert(struct Cyc_Hashtable_Table*t,void*key,void*val);
+extern void Cyc_Hashtable_insert(struct Cyc_Hashtable_Table*t,void*key,void*val);
 # 52
-void*Cyc_Hashtable_lookup(struct Cyc_Hashtable_Table*t,void*key);
+extern void*Cyc_Hashtable_lookup(struct Cyc_Hashtable_Table*t,void*key);
 # 86
-int Cyc_Hashtable_hash_stringptr(struct _fat_ptr*p);struct Cyc_Fn_Function{void*(*f)(void*,void*);void*env;};
+extern int Cyc_Hashtable_hash_stringptr(struct _fat_ptr*p);struct Cyc_Fn_Function{void*(*f)(void*,void*);void*env;};
 # 48 "fn.h"
-struct Cyc_Fn_Function*Cyc_Fn_make_fn(void*(*f)(void*,void*),void*x);
+extern struct Cyc_Fn_Function*Cyc_Fn_make_fn(void*(*f)(void*,void*),void*x);
 # 51
-struct Cyc_Fn_Function*Cyc_Fn_fp2fn(void*(*f)(void*));
+extern struct Cyc_Fn_Function*Cyc_Fn_fp2fn(void*(*f)(void*));
 # 54
-void*Cyc_Fn_apply(struct Cyc_Fn_Function*f,void*x);
+extern void*Cyc_Fn_apply(struct Cyc_Fn_Function*f,void*x);
 # 39 "pp.h"
 extern int Cyc_PP_tex_output;struct Cyc_PP_Ppstate;struct Cyc_PP_Out;struct Cyc_PP_Doc;
 # 67 "pp.h"
-struct Cyc_PP_Doc*Cyc_PP_nil_doc();
+struct Cyc_PP_Doc*Cyc_PP_nil_doc (void);
 # 72
-struct Cyc_PP_Doc*Cyc_PP_line_doc();
+struct Cyc_PP_Doc*Cyc_PP_line_doc (void);
 # 74
-struct Cyc_PP_Doc*Cyc_PP_oline_doc();
+struct Cyc_PP_Doc*Cyc_PP_oline_doc (void);
 # 78
 struct Cyc_PP_Doc*Cyc_PP_text(struct _fat_ptr s);
 # 94
@@ -422,17 +422,17 @@ struct Cyc_PP_Doc*Cyc_PP_seq(struct _fat_ptr sep,struct Cyc_List_List*l);
 # 117
 struct Cyc_PP_Doc*Cyc_PP_seql(struct _fat_ptr sep,struct Cyc_List_List*l0);struct Cyc_Xarray_Xarray{struct _fat_ptr elmts;int num_elmts;};
 # 40 "xarray.h"
-int Cyc_Xarray_length(struct Cyc_Xarray_Xarray*);
+extern int Cyc_Xarray_length(struct Cyc_Xarray_Xarray*);
 # 42
-void*Cyc_Xarray_get(struct Cyc_Xarray_Xarray*,int);
+extern void*Cyc_Xarray_get(struct Cyc_Xarray_Xarray*,int);
 # 45
-void Cyc_Xarray_set(struct Cyc_Xarray_Xarray*,int,void*);
+extern void Cyc_Xarray_set(struct Cyc_Xarray_Xarray*,int,void*);
 # 48
-struct Cyc_Xarray_Xarray*Cyc_Xarray_create(int,void*);
+extern struct Cyc_Xarray_Xarray*Cyc_Xarray_create(int,void*);
 # 66
-void Cyc_Xarray_add(struct Cyc_Xarray_Xarray*,void*);
+extern void Cyc_Xarray_add(struct Cyc_Xarray_Xarray*,void*);
 # 121
-void Cyc_Xarray_reuse(struct Cyc_Xarray_Xarray*xarr);struct Cyc_PP_Empty_PP_Alist_struct{int tag;int f1;};struct Cyc_PP_Single_PP_Alist_struct{int tag;void*f1;};struct Cyc_PP_Append_PP_Alist_struct{int tag;void*f1;void*f2;};
+extern void Cyc_Xarray_reuse(struct Cyc_Xarray_Xarray*xarr);struct Cyc_PP_Empty_PP_Alist_struct{int tag;int f1;};struct Cyc_PP_Single_PP_Alist_struct{int tag;void*f1;};struct Cyc_PP_Append_PP_Alist_struct{int tag;void*f1;void*f2;};
 # 51 "pp.cyc"
 struct Cyc_PP_Empty_PP_Alist_struct Cyc_PP_Empty_stringptr={0U,0};
 struct Cyc_PP_Empty_PP_Alist_struct Cyc_PP_Empty_link={0U,0};struct _tuple0{void*f1;void*f2;};
@@ -590,12 +590,12 @@ struct Cyc_Core_Opt*Cyc_PP_nil_doc_opt=0;
 struct Cyc_Core_Opt*Cyc_PP_blank_doc_opt=0;
 struct Cyc_Core_Opt*Cyc_PP_line_doc_opt=0;
 # 257
-struct Cyc_PP_Doc*Cyc_PP_nil_doc(){
+struct Cyc_PP_Doc*Cyc_PP_nil_doc (void){
 if(Cyc_PP_nil_doc_opt == 0)
 Cyc_PP_nil_doc_opt=({struct Cyc_Core_Opt*_tmp5B=_cycalloc(sizeof(*_tmp5B));({struct Cyc_PP_Doc*_tmpBB=Cyc_PP_text(({const char*_tmp5A="";_tag_fat(_tmp5A,sizeof(char),1U);}));_tmp5B->v=_tmpBB;});_tmp5B;});
 return(struct Cyc_PP_Doc*)((struct Cyc_Core_Opt*)_check_null(Cyc_PP_nil_doc_opt))->v;}
 # 264
-struct Cyc_PP_Doc*Cyc_PP_blank_doc(){
+struct Cyc_PP_Doc*Cyc_PP_blank_doc (void){
 if(Cyc_PP_blank_doc_opt == 0)
 Cyc_PP_blank_doc_opt=({struct Cyc_Core_Opt*_tmp5D=_cycalloc(sizeof(*_tmp5D));({struct Cyc_PP_Doc*_tmpBC=Cyc_PP_text(({const char*_tmp5C="";_tag_fat(_tmp5C,sizeof(char),1U);}));_tmp5D->v=_tmpBC;});_tmp5D;});
 return(struct Cyc_PP_Doc*)((struct Cyc_Core_Opt*)_check_null(Cyc_PP_blank_doc_opt))->v;}struct _tuple3{int f1;struct _fat_ptr f2;struct _fat_ptr f3;};struct _tuple4{int f1;int f2;int f3;struct _fat_ptr f4;};
@@ -618,7 +618,7 @@ return({struct Cyc_PP_Out*_tmp6D=_cycalloc(sizeof(*_tmp6D));_tmp6D->newcc=st->ci
 # 288
 void*_tmpC4=(void*)({struct Cyc_PP_Single_PP_Alist_struct*_tmp6C=_cycalloc(sizeof(*_tmp6C));_tmp6C->tag=1U,({struct _fat_ptr*_tmpC3=({unsigned _tmp6B=1;struct _fat_ptr*_tmp6A=_cycalloc(_check_times(_tmp6B,sizeof(struct _fat_ptr)));({struct _fat_ptr _tmpC2=Cyc_PP_nlblanks(st->ci);_tmp6A[0]=_tmpC2;});_tmp6A;});_tmp6C->f1=_tmpC3;});_tmp6C;});_tmp6D->ppout=_tmpC4;}),_tmp6D->links=(void*)& Cyc_PP_Empty_link;_tmp6D;});}
 # 291
-struct Cyc_PP_Doc*Cyc_PP_line_doc(){
+struct Cyc_PP_Doc*Cyc_PP_line_doc (void){
 if(Cyc_PP_line_doc_opt == 0)
 Cyc_PP_line_doc_opt=({struct Cyc_Core_Opt*_tmp6F=_cycalloc(sizeof(*_tmp6F));({struct Cyc_PP_Doc*_tmpC6=({struct Cyc_PP_Doc*_tmp6E=_cycalloc(sizeof(*_tmp6E));_tmp6E->mwo=0,_tmp6E->mw=0,({struct Cyc_Fn_Function*_tmpC5=((struct Cyc_Fn_Function*(*)(struct Cyc_PP_Out*(*f)(struct Cyc_PP_Ppstate*)))Cyc_Fn_fp2fn)(Cyc_PP_line_f);_tmp6E->f=_tmpC5;});_tmp6E;});_tmp6F->v=_tmpC6;});_tmp6F;});
 return(struct Cyc_PP_Doc*)((struct Cyc_Core_Opt*)_check_null(Cyc_PP_line_doc_opt))->v;}struct _tuple5{int f1;struct Cyc_PP_Doc*f2;};
@@ -760,7 +760,7 @@ return({struct Cyc_PP_Doc*_tmp91=_cycalloc(sizeof(*_tmp91));({int _tmpD3=Cyc_PP_
 int _tmpD2=Cyc_PP_min(d->mw,d2->mw);_tmp91->mw=_tmpD2;}),({
 struct Cyc_Fn_Function*_tmpD1=((struct Cyc_Fn_Function*(*)(struct Cyc_PP_Out*(*f)(struct _tuple6*,struct Cyc_PP_Ppstate*),struct _tuple6*x))Cyc_Fn_make_fn)(Cyc_PP_doc_union_f,({struct _tuple6*_tmp90=_cycalloc(sizeof(*_tmp90));_tmp90->f1=d,_tmp90->f2=d2;_tmp90;}));_tmp91->f=_tmpD1;});_tmp91;});}
 # 449
-struct Cyc_PP_Doc*Cyc_PP_oline_doc(){
+struct Cyc_PP_Doc*Cyc_PP_oline_doc (void){
 return({struct Cyc_PP_Doc*_tmpD4=Cyc_PP_nil_doc();Cyc_PP_doc_union(_tmpD4,Cyc_PP_line_doc());});}
 # 453
 static struct Cyc_PP_Out*Cyc_PP_tab_f(struct Cyc_PP_Doc*d,struct Cyc_PP_Ppstate*st){

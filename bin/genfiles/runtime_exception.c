@@ -39,7 +39,7 @@ struct _xtunion_struct * Cyc_Bad_alloc_val = &Cyc_Bad_alloc_struct;
 static tlocal_key_t _exn_thrown_key;
 static tlocal_key_t _exn_filename_key;
 static tlocal_key_t _exn_lineno_key;
-#else
+#elif !defined(USE_CYC_TLS)
 static const char *_exn_filename = "?";
 static int _exn_lineno = 0; // MWH: should be unsigned? Must match core.h
 static struct _xtunion_struct *_exn_thrown = NULL;
@@ -86,6 +86,13 @@ static int in_uncaught_fun = 0; // avoid infinite exception chain
 struct _xtunion_struct* Cyc_Core_get_exn_thrown() {
 #ifdef HAVE_THREADS
   return (struct _xtunion_struct*)get_tlocal(_exn_thrown_key);
+#elif defined(USE_CYC_TLS)
+  tls_record_t *rec = cyc_runtime_lookup_tls_record();
+  if(rec) {
+    return rec->exn_thrown;
+  }
+  errquit("cyc_runtime module failed to return thread local slot -- fatal");
+  return 0;
 #else
   return _exn_thrown;
 #endif
@@ -94,6 +101,13 @@ struct _xtunion_struct* Cyc_Core_get_exn_thrown() {
 const char *Cyc_Core_get_exn_filename() {
 #ifdef HAVE_THREADS
   return (const char*)get_tlocal(_exn_filename_key);
+#elif defined(USE_CYC_TLS)
+  tls_record_t *rec = cyc_runtime_lookup_tls_record();
+  if(rec) {
+    return rec->exn_filename;
+  }
+  errquit("cyc_runtime module failed to return thread local slot -- fatal");
+  return 0;
 #else
   return _exn_filename;
 #endif
@@ -101,6 +115,13 @@ const char *Cyc_Core_get_exn_filename() {
 int Cyc_Core_get_exn_lineno() {
 #ifdef HAVE_THREADS
   return (int)get_tlocal(_exn_lineno_key);
+#elif defined(USE_CYC_TLS)
+  tls_record_t *rec = cyc_runtime_lookup_tls_record();
+  if(rec) {
+    return rec->exn_lineno;
+  }
+  errquit("cyc_runtime module failed to return thread local slot -- fatal");
+  return 0;
 #else
   return _exn_lineno;
 #endif
@@ -145,6 +166,15 @@ void* _throw_fn(void* e, const char *filename, unsigned lineno) {
   put_tlocal(_exn_thrown_key, e);
   put_tlocal(_exn_filename_key, filename);
   put_tlocal(_exn_lineno_key, (void *)lineno);
+#elif defined(USE_CYC_TLS)
+  tls_record_t *rec = cyc_runtime_lookup_tls_record();
+  if(!rec) { 
+    errquit("cyc_runtime module failed to return thread local slot -- fatal");
+    return 0;
+  }
+  rec->exn_thrown = e;
+  rec->exn_filename = filename;
+  rec->exn_lineno = lineno;
 #else
   _exn_thrown = e; 
   _exn_filename = filename;

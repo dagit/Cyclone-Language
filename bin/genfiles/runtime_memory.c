@@ -60,6 +60,19 @@ void *GC_calloc(unsigned int n, unsigned int t) {
   return (void *)GC_malloc(n*t);
 }
 
+
+#if(defined(__linux__) && defined(__KERNEL__)) 
+extern void* cyc_krealloc(void*, size_t, size_t);
+#endif
+
+void *GC_realloc_hint(void *x, size_t old_size, size_t new_size) {
+#if (defined(__linux__) && defined(__KERNEL__))
+  return cyc_krealloc(x, old_size, new_size);
+#else 
+  return GC_realloc(x, new_size);
+#endif
+}
+
 void *GC_calloc_atomic(unsigned int n, unsigned int t) {
   unsigned int p = n*t;
   // the collector does not zero things when you call malloc atomic...
@@ -945,11 +958,15 @@ extern void GC_default_warn_proc(char *msg, GC_word arg);
 extern GC_warn_proc GC_set_warn_proc(GC_warn_proc p);
 
 static void GC_noblacklist_warn_proc(char *msg, GC_word arg) {
+#if(defined(__linux__) && defined(__KERNEL__)) 
+  return;
+#else 
   if (!msg) return;
   if (!strncmp(msg,"Needed to allocate blacklisted block",
                strlen("Needed to allocate blacklisted block")))
     return;
   GC_default_warn_proc(msg,arg);
+#endif
 }
 
 /* Use these in Cyclone programs */

@@ -23,6 +23,22 @@
 #undef GC_malloc_atomic
 #undef GC_free
 #undef GC_size
+
+#elif (defined(__linux__) && defined(__KERNEL__))
+
+#include <linux/kernel.h>
+#include <linux/mm.h>
+#include <linux/string.h>
+
+extern void *kmalloc(size_t, int);
+extern void kfree(const void *);
+
+#define calloc cyc_kcalloc
+#define realloc cyc_krealloc
+#define free kfree
+//forward decls
+static void* cyc_kcalloc(size_t s, int mult);
+void* cyc_krealloc(void *ptr, size_t oldsize, size_t newsize);
 #endif
 
 /****************************************************************************/
@@ -75,7 +91,7 @@ GC_register_finalizer_no_order (GC_PTR obj, GC_finalization_proc fn, GC_PTR cd,
    At the moment, only allow this for Linux & Apple, though in principle it
    should work in general. */
 
-#if (defined(__linux__) || defined(__APPLE__))
+#if ((defined(__linux__) && !defined(__KERNEL__))|| defined(__APPLE__))
 
 #ifdef CYC_REGION_PROFILE
 #include <unistd.h>
@@ -162,7 +178,11 @@ void *GC_malloc_atomic(int x) {
 
 void *GC_realloc(void *x, size_t n) {
   size_t sz = malloc_sizeb(x,0);
+#if (defined(__linux__) && defined(__KERNEL__))  
+  void *p = (void *)realloc(x,sz,n);
+#else
   void *p = (void *)realloc(x,n);
+#endif
   total_bytes_allocd = total_bytes_allocd + (malloc_sizeb(p,n)-sz);
   return p;
 }
@@ -170,6 +190,32 @@ void *GC_realloc(void *x, size_t n) {
 void GC_free(void *x) {
   free(x);
 }
+
+#if (defined(__linux__) && defined(__KERNEL__))
+static void* cyc_kcalloc(size_t s, int mult) {
+  int alloc_size = s*mult;
+  void *res =kmalloc(alloc_size, GFP_KERNEL); //look at multiple allocation modes
+  memset(res, '\0', alloc_size);
+  return res;
+}
+
+void* cyc_krealloc(void *ptr, size_t oldsize, size_t newsize) {
+  if(!ptr) 
+    return kmalloc(newsize, GFP_KERNEL);
+  if(!newsize) {
+    kfree(ptr);
+    return 0; //? 
+  }
+  void *res = kmalloc(newsize, GFP_KERNEL);
+  memcpy(res, ptr, oldsize);
+  kfree(ptr);
+  total_bytes_allocd = total_bytes_allocd + newsize - oldsize;
+  malloc_sizeb(p, newsize);
+}
+
+#endif
+
+
 
 #else /* defined(GEEKOS) */
 

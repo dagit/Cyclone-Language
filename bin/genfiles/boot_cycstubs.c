@@ -374,8 +374,8 @@ int Cyc_fclose(struct Cyc___cycFILE*);
 # 98
 struct Cyc___cycFILE*Cyc_fopen(const char*,const char*);struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _fat_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _fat_ptr f1;};extern char Cyc_FileCloseError[15U];struct Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[14U];struct Cyc_FileOpenError_exn_struct{char*tag;struct _fat_ptr f1;};
 # 28 "boot_cycstubs.cyc"
-int open_without_mode(const char*,int);
-int open_with_mode(const char*,int,unsigned short);
+extern int open_without_mode(const char*,int);
+extern int open_with_mode(const char*,int,unsigned short);
 # 31
 int Cyc_open(const char*s,int i,struct _fat_ptr ms){
 # 34
@@ -384,46 +384,46 @@ return open_with_mode(s,i,((unsigned short*)ms.curr)[0]);else{
 # 37
 return open_without_mode(s,i);}}struct __abstractFILE;struct Cyc___cycFILE{struct __abstractFILE*file;};
 # 49
-int fclose(struct __abstractFILE*);
+extern int fclose(struct __abstractFILE*);
 # 51
 int Cyc_fclose(struct Cyc___cycFILE*f){
 return fclose(f->file);}
 # 56
-int feof(struct __abstractFILE*);
+extern int feof(struct __abstractFILE*);
 # 58
 int Cyc_feof(struct Cyc___cycFILE*f){
 return feof(f->file);}
 # 63
-int fflush(struct __abstractFILE*);
+extern int fflush(struct __abstractFILE*);
 # 65
 int Cyc_fflush(struct Cyc___cycFILE*f){
 if((unsigned)f)
 return fflush(f->file);else{
 return fflush(0);}}
 # 72
-int fgetc(struct __abstractFILE*);
+extern int fgetc(struct __abstractFILE*);
 # 74
 int Cyc_fgetc(struct Cyc___cycFILE*f){
 return fgetc(f->file);}
 # 79
-struct __abstractFILE*fopen(const char*,const char*);
+extern struct __abstractFILE*fopen(const char*,const char*);
 # 81
 struct Cyc___cycFILE*Cyc_fopen(const char*name,const char*type){
 struct __abstractFILE*_tmp0=fopen(name,type);struct __abstractFILE*cf=_tmp0;
 # 84
 return(unsigned)cf?({struct Cyc___cycFILE*_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1->file=cf;_tmp1;}): 0;}
 # 88
-int fputc(int,struct __abstractFILE*);
+extern int fputc(int,struct __abstractFILE*);
 # 90
 int Cyc_fputc(int x,struct Cyc___cycFILE*f){
 return fputc(x,f->file);}
 # 95
-int fputs(const char*,struct __abstractFILE*);
+extern int fputs(const char*,struct __abstractFILE*);
 # 97
 int Cyc_fputs(const char*x,struct Cyc___cycFILE*f){
 return fputs(x,f->file);}
 # 102
-unsigned long fread(char*,unsigned long,unsigned long,struct __abstractFILE*);static char _tmp2[27U]="fread: buffer insufficient";
+extern unsigned long fread(char*,unsigned long,unsigned long,struct __abstractFILE*);static char _tmp2[27U]="fread: buffer insufficient";
 # 104
 static struct Cyc_Core_Failure_exn_struct Cyc___fread_failure={Cyc_Core_Failure,{_tmp2,_tmp2,_tmp2 + 27U}};
 # 106
@@ -431,7 +431,7 @@ unsigned long Cyc_fread(struct _fat_ptr ptr,unsigned long size,unsigned long nme
 if(size * nmemb > _get_fat_size(ptr,sizeof(char)))(int)_throw((void*)& Cyc___fread_failure);
 return fread((char*)_untag_fat_ptr(ptr,sizeof(char),1U),size,nmemb,f->file);}
 # 112
-unsigned long fwrite(const char*,unsigned long,unsigned long,struct __abstractFILE*);static char _tmp3[31U]="fwrite called with NULL string";
+extern unsigned long fwrite(const char*,unsigned long,unsigned long,struct __abstractFILE*);static char _tmp3[31U]="fwrite called with NULL string";
 # 114
 static struct Cyc_Core_Failure_exn_struct Cyc___fwrite_failure_1={Cyc_Core_Failure,{_tmp3,_tmp3,_tmp3 + 31U}};static char _tmp4[28U]="fwrite: buffer insufficient";
 # 116
@@ -443,27 +443,27 @@ if(!((unsigned)ptr.curr))(int)_throw((void*)& Cyc___fwrite_failure_1);else{
 if(size * nmemb > _get_fat_size(ptr,sizeof(char)))(int)_throw((void*)& Cyc___fwrite_failure_2);
 return fwrite((const char*)_untag_fat_ptr(ptr,sizeof(char),1U),size,nmemb,f->file);}}
 # 127
-int getc(struct __abstractFILE*);
+extern int getc(struct __abstractFILE*);
 # 129
 int Cyc_getc(struct Cyc___cycFILE*f){
 return getc(f->file);}
 # 134
-int putc(int,struct __abstractFILE*);
+extern int putc(int,struct __abstractFILE*);
 # 136
 int Cyc_putc(int x,struct Cyc___cycFILE*f){
 return putc(x,f->file);}
 # 141
-int ungetc(int,struct __abstractFILE*);
+extern int ungetc(int,struct __abstractFILE*);
 # 143
 int Cyc_ungetc(int x,struct Cyc___cycFILE*f){
 return ungetc(x,f->file);}
 # 148
-int getw(struct __abstractFILE*);
+extern int getw(struct __abstractFILE*);
 # 150
 int Cyc_getw(struct Cyc___cycFILE*f){
 return getw(f->file);}
 # 155
-int putw(int,struct __abstractFILE*);
+extern int putw(int,struct __abstractFILE*);
 # 157
 int Cyc_putw(int x,struct Cyc___cycFILE*f){
 return putw(x,f->file);}char Cyc_FileCloseError[15U]="FileCloseError";char Cyc_FileOpenError[14U]="FileOpenError";
@@ -480,7 +480,7 @@ struct Cyc_FileCloseError_exn_struct Cyc_FileCloseError_val={Cyc_FileCloseError}
 void Cyc_file_close(struct Cyc___cycFILE*f){
 if(Cyc_fclose(f)!= 0)(int)_throw((void*)& Cyc_FileCloseError_val);}
 # 183
-char*getcwd(char*buf,unsigned long size);static char _tmp8[29U]="getcwd: invalid buf argument";
+extern char*getcwd(char*buf,unsigned long size);static char _tmp8[29U]="getcwd: invalid buf argument";
 # 185
 static struct Cyc_Core_Failure_exn_struct Cyc___getcwd_failure={Cyc_Core_Failure,{_tmp8,_tmp8,_tmp8 + 29U}};
 # 187
@@ -489,5 +489,5 @@ if(_get_fat_size(buf,sizeof(char))< size)(int)_throw((void*)& Cyc___getcwd_failu
 char*_tmp9=getcwd((char*)_untag_fat_ptr(buf,sizeof(char),1U),size);char*response=_tmp9;
 return(unsigned)response?buf: _tag_fat(0,0,0);}}
 # 194
-int Cyc_Execinfo_bt(){
+int Cyc_Execinfo_bt (void){
 return 1;}
