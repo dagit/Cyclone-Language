@@ -45,6 +45,7 @@ cyclone:
 tools:
 	$(MAKE) install -C tools/bison
 	$(MAKE) install -C tools/cyclex
+	$(MAKE) install -C tools/aprof
 #	$(MAKE) install -C tools/cycocamllex
 .PHONY: tools
 

@@ -3,18 +3,25 @@ CYCDIR = ../..
 
 include $(CYCDIR)/Makefile.inc
 
+PROG=cyclex$(EXE)
+BINDIR=$(CYCDIR)/bin
+
 CYCC = $(CYCDIR)/bin/cyclone$(EXE)
 
-CYCCFLAGS = -I$(CYCDIR)/include -B$(CYCDIR)/bin/cyc-lib
+CYC_FLAGS += -I$(CYCDIR)/include -B$(CYCDIR)/bin/cyc-lib
 
-aprof$(EXE): aprof.o
-	$(CYCC) $(CYCCFLAGS) -o $@ $<
+$(PROG): aprof.o
+	$(CYCC) $(CYCCFLAGS) -o $@ $< -lm
 
-install: aprof$(EXE) $(CYCC)
-	cp $< $(CYCDIR)/bin
+all: $(PROG)
+
+install: all $(BINDIR)/$(PROG)
+
+$(BINDIR)/$(PROG): $(PROG)
+	cp $(PROG) $(BINDIR)
 
 clean:
-	$(RM) aprof$(EXE) *.o
+	$(RM) aprof aprof.exe *.o
 
 %.o: %.cyc $(CYCC)
-	$(CYCC) $(CYCCFLAGS) -c $<
+	$(CYCC) $(CYC_FLAGS) -c $<

@@ -15,9 +15,9 @@ void* hd; struct Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_empty
 Cyc_List_Nth[ 8u]; extern struct _tagged_arr Cyc_List_to_array( struct Cyc_List_List*
 x); extern struct Cyc_List_List* Cyc_List_from_array( struct _tagged_arr arr);
 extern void Cyc_Array_qsort( int(* less_eq)( void*, void*), struct _tagged_arr x,
-int ofs, int len); extern void Cyc_Array_msort( int(* less_eq)( void*, void*),
-struct _tagged_arr x, int ofs, int len); extern struct _tagged_arr Cyc_Array_from_list(
-struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_Array_to_list( struct
+int len); extern void Cyc_Array_msort( int(* less_eq)( void*, void*), struct
+_tagged_arr x, int len); extern struct _tagged_arr Cyc_Array_from_list( struct
+Cyc_List_List* x); extern struct Cyc_List_List* Cyc_Array_to_list( struct
 _tagged_arr x); extern struct _tagged_arr Cyc_Array_copy( struct _tagged_arr x);
 extern struct _tagged_arr Cyc_Array_map( void*(* f)( void*), struct _tagged_arr
 x); extern struct _tagged_arr Cyc_Array_map_c( void*(* f)( void*, void*), void*
@@ -54,8 +54,8 @@ compare)( void*, void*), struct _tagged_arr l, void* x); extern struct
 _tagged_arr Cyc_Array_extract( struct _tagged_arr x, int start, int* n_opt);
 static int Cyc_Array_sp[ 40u]={ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; void
-Cyc_Array_qsort( int(* less_eq)( void*, void*), struct _tagged_arr arr, int
-base_ofs, int len){ void* temp; int sp_ofs; int i; int j; int limit_ofs; if((
+Cyc_Array_qsort( int(* less_eq)( void*, void*), struct _tagged_arr arr, int len){
+int base_ofs= 0; void* temp; int sp_ofs; int i; int j; int limit_ofs; if((
 base_ofs <  0? 1: base_ofs +  len >  _get_arr_size( arr, sizeof( void*)))? 1:
 len <  0){( int) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct* _temp0=(
 struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
@@ -112,18 +112,17 @@ _check_unknown_subscript( arr, sizeof( void*), j +  1))= temp; if( j ==
 base_ofs){ break;}}} if( sp_ofs !=  0){ sp_ofs -= 2; base_ofs= Cyc_Array_sp[
 _check_known_subscript_notnull( 40u, sp_ofs)]; limit_ofs= Cyc_Array_sp[
 _check_known_subscript_notnull( 40u, sp_ofs +  1)];} else{ break;}}}} void Cyc_Array_msort(
-int(* less_eq)( void*, void*), struct _tagged_arr arr, int base_ofs, int len){
-if(( base_ofs <  0? 1: base_ofs +  len >  _get_arr_size( arr, sizeof( void*)))?
-1: len <  0){( int) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct* _temp2=(
-struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
-_temp2[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp3; _temp3.tag= Cyc_Core_InvalidArg;
-_temp3.f1= _tag_arr("Array::msort", sizeof( unsigned char), 13u); _temp3;});
-_temp2;}));}{ struct _tagged_arr from=({ unsigned int _temp4=( unsigned int) len;
-void** _temp5=( void**) GC_malloc( sizeof( void*) *  _temp4); struct _tagged_arr
-_temp7= _tag_arr( _temp5, sizeof( void*),( unsigned int) len);{ unsigned int
-_temp6= _temp4; unsigned int i; for( i= 0; i <  _temp6; i ++){ _temp5[ i]=*((
-void**) _check_unknown_subscript( arr, sizeof( void*), 0));}}; _temp7;}); struct
-_tagged_arr to= _tagged_arr_plus( arr, sizeof( void*), base_ofs); struct
+int(* less_eq)( void*, void*), struct _tagged_arr arr, int len){ if( len > 
+_get_arr_size( arr, sizeof( void*))? 1: len <  0){( int) _throw(( void*)({
+struct Cyc_Core_InvalidArg_struct* _temp2=( struct Cyc_Core_InvalidArg_struct*)
+GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp2[ 0]=({ struct Cyc_Core_InvalidArg_struct
+_temp3; _temp3.tag= Cyc_Core_InvalidArg; _temp3.f1= _tag_arr("Array::msort",
+sizeof( unsigned char), 13u); _temp3;}); _temp2;}));}{ struct _tagged_arr from=({
+unsigned int _temp4=( unsigned int) len; void** _temp5=( void**) GC_malloc(
+sizeof( void*) *  _temp4); struct _tagged_arr _temp7= _tag_arr( _temp5, sizeof(
+void*),( unsigned int) len);{ unsigned int _temp6= _temp4; unsigned int i; for(
+i= 0; i <  _temp6; i ++){ _temp5[ i]=*(( void**) _check_unknown_subscript( arr,
+sizeof( void*), 0));}}; _temp7;}); struct _tagged_arr to= arr; struct
 _tagged_arr swap; int swapped= 0; int stepsize; int start; int lstart; int lend;
 int rstart; int rend; int dest; for( stepsize= 1; stepsize <  len; stepsize=
 stepsize *  2){ swap= from; from= to; to= swap; dest= 0; for( start= 0; start < 

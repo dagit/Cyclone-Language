@@ -26,14 +26,14 @@ namespace Array {
 
 // Sorting functions (quicksort and mergesort)
 // Input is a comparison function, the array to be sorted (in place),
-// starting offset, and number of elements from that point to sort.
+// and number of elements from that point to sort.
 // The advantage of quicksort is speed (presumed -- feel free to 
 // benchmark), however it is not a stable sort.  Mergesort, as 
 // implemented here, is stable.
 
-extern void qsort(int less_eq(`a,`a), `a ?x, int ofs, int len);
+extern void qsort(int less_eq(`a,`a), `a ?x, int len);
 
-extern void msort(int less_eq(`a,`a), `a ?`H x, int ofs, int len);
+extern void msort(int less_eq(`a,`a), `a ?`H x, int len);
 
 
 //////// Below are bunches of stuff mimicking the List library

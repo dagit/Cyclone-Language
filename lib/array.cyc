@@ -64,8 +64,10 @@ namespace Array;
 static int sp[40] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
-void qsort(int less_eq(`a,`a),`a ?arr,int base_ofs, int len)
+void qsort(int less_eq(`a,`a),`a ?arr, int len)
 {
+  int base_ofs = 0;  // FIX: this used to be an arg; need to get rid of it completely, but it's assigned to
+
   `a temp;
   // int sp[40]; // FIX: complains not initialized
   int sp_ofs;           /* stack and stack pointer        */
@@ -142,13 +144,13 @@ void qsort(int less_eq(`a,`a),`a ?arr,int base_ofs, int len)
 #define PUT(a) to[dest++] = from[a++]
 
 
-void msort(int less_eq(`a,`a),`a ?`H arr,int base_ofs, int len) {
+void msort(int less_eq(`a,`a), `a ?`H arr, int len) {
 
-  if (base_ofs < 0 || base_ofs + len > arr.size || len < 0)
+  if (len > arr.size || len < 0)
     throw new Core::InvalidArg("Array::msort");
 
   `a ?from = new {for i < len : arr[0]}; // fill with `a junk
-  `a ?to   = arr+base_ofs;
+  `a ?to   = arr;
   `a ?swap;
 
   bool swapped = false;

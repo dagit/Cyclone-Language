@@ -24,8 +24,6 @@
 #include <array.h>
 
 using Core;
-using Stdio;
-using String;
 using Hashtable;
 
 
@@ -49,10 +47,10 @@ void inccount(stringptr_t pos, $(int,int) @totals) {
   count++;
 }
 
-$(stringptr_t,int,int)@ ?results = null;
+$(stringptr_t<`H,`H>,int,int)@ ?results = NULL;
 
 int index = 0;
-void add(stringptr_t pos, $(int,int) @totals) {
+void add(stringptr_t<`H,`H> pos, $(int,int) @totals) {
   results[index++] = new $(pos,(*totals)[0],(*totals)[1]);
 }
 
@@ -124,20 +122,20 @@ int main(int argc, string_t ?argv) {
   } else {
     f = (FILE @)fopen(argv[1],"r");
   }
-  table_t<stringptr_t,$(int,int)@,{},{}> table =
+  table_t<stringptr_t<`H,`H>,$(int,int)@> table =
       create(101, strptrcmp, hash_stringptr);
 
   // get the program point
   while (gettoken(f)) {
     if (strcmp(buf,"----") == 0) break;
-    string_t @s = new ((string_t)String::strdup(buf));
+    stringptr_t<`H,`H> s = new ((string_t)strdup(buf));
     // get the allocation amount
     if (!gettoken(f)) {
       fprintf(stderr,"missing allocation amount for %s\n",*s); return -1;
     }
     int count;
     try {
-      count = to_int(buf,null);
+      count = to_int(buf,NULL);
     } catch {
     default: fprintf(stderr,"bad integer %s\n",buf); return -1;
     }
@@ -157,26 +155,26 @@ int main(int argc, string_t ?argv) {
     }
   }
 //   snarfline(f); gettoken(f);
-//   region_count = to_int(buf,null);
+//   region_count = to_int(buf,NULL);
 //   snarfline(f); gettoken(f);
-//   free_count = to_int(buf,null);
+//   free_count = to_int(buf,NULL);
 //   snarfline(f); gettoken(f);
-//   region_bytes = to_int(buf,null);
+//   region_bytes = to_int(buf,NULL);
 //   snarfline(f); gettoken(f);
-//   region_allocs = to_int(buf,null);
+//   region_allocs = to_int(buf,NULL);
 //   snarfline(f); gettoken(f);
-//   heap_bytes = to_int(buf,null);
+//   heap_bytes = to_int(buf,NULL);
 //   snarfline(f); gettoken(f);
-//   heap_allocs = to_int(buf,null);
+//   heap_allocs = to_int(buf,NULL);
 //   snarfline(f); gettoken(f);
-//   heapatomic_bytes = to_int(buf,null);
+//   heapatomic_bytes = to_int(buf,NULL);
 //   snarfline(f); gettoken(f);
-//   heapatomic_allocs = to_int(buf,null);
+//   heapatomic_allocs = to_int(buf,NULL);
 
   iter(inccount, table);
-  results = new {for i < count : new $(new "",0,0)};
+  results = new {for i < count : new $((stringptr_t)(new ""),0,0)};
   iter(add, table);
-  Array::qsort(cmp,results,0,results.size);
+  Array::qsort(cmp,results,results.size);
   print_results();
 
   return 0;

@@ -58,7 +58,7 @@ main() {
     }
 
     //ANNOYING: qsort won't work here because of size of doubles
-    qsort(compare_doubles, nums, 0, n);
+    qsort(compare_doubles, nums, n);
     mid = (n/2);
     median = n % 2 ? nums[mid] : (nums[mid] + nums[mid-1])/2;
 

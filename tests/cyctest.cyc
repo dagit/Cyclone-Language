@@ -253,9 +253,9 @@ void array_test() {
   int ?z3 = Array::rev_copy(Array::rev_copy(z1));
   // z2 is sorted, z1 and z3 are backwards
   okfail(0==array_cmp(int_cmp,z1,z3));
-  Array::qsort(int_cmp,z1,0,10);
+  Array::qsort(int_cmp,z1,10);
   okfail(0==array_cmp(int_cmp,z1,z2));
-  Array::msort(int_cmp,z3,0,10);
+  Array::msort(int_cmp,z3,10);
   okfail(0==array_cmp(int_cmp,z3,z2));
   int x = 4;
   int ?z4 = Array::map(add2,Array::extract(z2,2,&x));
