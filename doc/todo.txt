@@ -106,10 +106,6 @@ MISSING THINGS NEEDED TO PORT REAL CODE:
   the issue that our casts may include computation.  We should
   have a way to check to see if a cast doesn't do any computation.
 
-* stdio.h currently defines EOF as type char, not int, so the real
-  char at that position is shadowed.  Is there any problem with making
-  this change?
-
 * Lots of headers currently define NULL in lots of incompatible ways.
 
 * runtime_cyc.c still defines check_fd and f_seek, which we never use

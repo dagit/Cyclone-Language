@@ -207,12 +207,6 @@ FILE *sfile_to_file(struct Cyc_Stdio___sFILE *sf) {
     throw(Null_Exception); // FIX:  should be more descriptive?
   return sf->file;
 }
-static void check_fd(FILE *fd) {
-  if(!fd) {
-    fprintf(stderr,"Attempt to access null file descriptor.\n");
-    exit(255);
-  }
-}
 int Cyc_Stdio_file_string_read(struct Cyc_Stdio___sFILE *sf, 
                                struct _tagged_string dest,
                                int dest_offset, int max_count) {
@@ -240,15 +234,6 @@ int Cyc_Stdio_file_string_write(struct Cyc_Stdio___sFILE *sf,
     exit(255);
   } 
   return fwrite(new_curr, 1, max_count, fd);
-}
-// FIX: Make more C-like.
-int f_seek(FILE *fd, int offset) {
-  check_fd(fd);
-  if(fseek(fd, (long int) offset, SEEK_SET)) {
-    fprintf(stderr, "file seek failed, offset %d.\n", offset);
-    exit(255);
-  }
-  return 0;
 }
 
 ///////////////////////////////////////////////

@@ -39,8 +39,8 @@ bool gettoken(FILE @f) {
   int c;
   skip_whitespace(f);
   c = getc(f);
-  if (c == EOF || c == -1) return false;
-  while (c != EOF && c != -1 && c != ' ' && c != '\t' && c != '\n') {
+  if (c == EOF) return false;
+  while (c != EOF && c != ' ' && c != '\t' && c != '\n') {
     buf[i++] = (char)c;
     c = getc(f);
   }
@@ -51,7 +51,7 @@ bool gettoken(FILE @f) {
 
 void snarfline(FILE @f) {
   int c = getc(f);
-  while (c != '\n' && c != EOF && c != -1) c = getc(f);
+  while (c != '\n' && c != EOF) c = getc(f);
   ungetc(c,f);
 }
 

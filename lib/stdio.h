@@ -53,7 +53,7 @@ typedef long fpos_t;
 #endif
 
 #define	BUFSIZ	1024
-#define	EOF	((char)(-1))
+#define	EOF	(-1)
 
 #define	FOPEN_MAX	20	// must be <= OPEN_MAX <sys/syslimits.h> 
 #define	FILENAME_MAX	1024	// must be <= PATH_MAX <sys/syslimits.h> 

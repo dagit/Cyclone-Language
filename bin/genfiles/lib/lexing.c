@@ -109,12 +109,12 @@ if( backtrk >= 0){ lbuf->lex_last_pos= lbuf->lex_curr_pos; lbuf->lex_last_action
 backtrk;} if( lbuf->lex_curr_pos >= lbuf->lex_buffer_len){ if( ! lbuf->lex_eof_reached){
 return( - state) - 1;} else{ c= 256;}} else{ c=( int)*(( unsigned char*(*)(
 struct _tagged_string, unsigned int, unsigned int)) _check_unknown_subscript)(
-lbuf->lex_buffer, sizeof( unsigned char), lbuf->lex_curr_pos ++); if( c ==(
-unsigned char)( - 1)){ c= 256;}} if(*(( int*(*)( struct _tagged_ptr0,
-unsigned int, unsigned int)) _check_unknown_subscript)( tbl->lex_check, sizeof(
-int), base + c) == state){ state=*(( int*(*)( struct _tagged_ptr0, unsigned int,
-unsigned int)) _check_unknown_subscript)( tbl->lex_trans, sizeof( int), base + c);}
-else{ state=*(( int*(*)( struct _tagged_ptr0, unsigned int, unsigned int))
+lbuf->lex_buffer, sizeof( unsigned char), lbuf->lex_curr_pos ++); if( c == - 1){
+c= 256;}} if(*(( int*(*)( struct _tagged_ptr0, unsigned int, unsigned int))
+_check_unknown_subscript)( tbl->lex_check, sizeof( int), base + c) == state){
+state=*(( int*(*)( struct _tagged_ptr0, unsigned int, unsigned int))
+_check_unknown_subscript)( tbl->lex_trans, sizeof( int), base + c);} else{ state=*((
+int*(*)( struct _tagged_ptr0, unsigned int, unsigned int))
 _check_unknown_subscript)( tbl->lex_default, sizeof( int), state);} if( state <
 0){ lbuf->lex_curr_pos= lbuf->lex_last_pos; if( lbuf->lex_last_action == - 1){(
 void) _throw(( void*)({ struct Cyc_Lexing_Error_struct* _temp8=( struct Cyc_Lexing_Error_struct*)
