@@ -20,7 +20,7 @@
  *
  */
 
-/* $Id: boa_grammar.y,v 1.2 2001-10-01 20:56:46 tjim Exp $*/
+/* $Id: boa_grammar.y,v 1.3 2001-10-03 21:19:08 tjim Exp $*/
 
 #include <string.h>
 #include <stdio.h>
@@ -48,7 +48,7 @@ char mime_type[256];            /* global to inherit */
   sval(char ?);
   ival(int);
   cval(struct ccommand *);
-};
+}
 
 /* boa.conf tokens  -- added by MSH */
 %type <cval> STMT_NO_ARGS STMT_ONE_ARG STMT_TWO_ARGS

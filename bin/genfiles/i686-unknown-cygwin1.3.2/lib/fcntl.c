@@ -230,30 +230,29 @@ struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*
 extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
 extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_flock{
 short l_type; int l_start; short l_whence; int l_len; int l_pid; } ; static
-const int Cyc_Std_Long= 0; struct Cyc_Std_Long_struct{ int tag; int f1; } ;
-static const int Cyc_Std_Flock= 1; struct Cyc_Std_Flock_struct{ int tag; struct
-Cyc_Std_flock* f1; } ; extern int Cyc_Std_fcntl( int fd, int cmd, struct
-_tagged_arr); extern int Cyc_Std_open( struct _tagged_arr, int, struct
-_tagged_arr); extern int Cyc_Std_creat( struct _tagged_arr, int); extern int
-fcntl( int fd, int cmd); extern int fcntl_with_arg( int fd, int cmd, int arg);
-extern int fcntl_with_lock( int fd, int cmd, struct Cyc_Std_flock* lock); extern
-int creat( unsigned char*, int); extern int open_without_mode( unsigned char*,
-int); extern int open_with_mode( unsigned char*, int, int); int Cyc_Std_fcntl(
-int fd, int cmd, struct _tagged_arr argv){ if( _get_arr_size( argv, sizeof( void*))
-==  0){ return fcntl( fd, cmd);} else{ if( _get_arr_size( argv, sizeof( void*))
-!=  1){( int) _throw(( void*)({ struct Cyc_Core_Failure_struct* _temp0=( struct
-Cyc_Core_Failure_struct*) _cycalloc( sizeof( struct Cyc_Core_Failure_struct));
-_temp0[ 0]=({ struct Cyc_Core_Failure_struct _temp1; _temp1.tag= Cyc_Core_Failure;
-_temp1.f1= _tag_arr("fcntl: too many args", sizeof( unsigned char), 21u); _temp1;});
-_temp0;}));} else{ void* _temp2=*(( void**) _check_unknown_subscript( argv,
-sizeof( void*), 0)); int _temp8; struct Cyc_Std_flock* _temp10; _LL4: if(*(( int*)
-_temp2) ==  Cyc_Std_Long){ _LL9: _temp8=(( struct Cyc_Std_Long_struct*) _temp2)->f1;
-goto _LL5;} else{ goto _LL6;} _LL6: if(*(( int*) _temp2) ==  Cyc_Std_Flock){
-_LL11: _temp10=(( struct Cyc_Std_Flock_struct*) _temp2)->f1; goto _LL7;} else{
-goto _LL3;} _LL5: return fcntl_with_arg( fd, cmd, _temp8); _LL7: return
-fcntl_with_lock( fd, cmd, _temp10); _LL3:;}}} int Cyc_Std_creat( struct
-_tagged_arr s, int m){ return creat( string_to_Cstring( s), m);} int Cyc_Std_open(
-struct _tagged_arr s, int i, struct _tagged_arr ms){ if( _get_arr_size( ms,
-sizeof( int)) >=  1){ return open_with_mode( string_to_Cstring( s), i,*(( int*)
-_check_unknown_subscript( ms, sizeof( int), 0)));} else{ return
-open_without_mode( string_to_Cstring( s), i);}}
+const int Cyc_Std_Flock= 0; struct Cyc_Std_Flock_struct{ int tag; struct Cyc_Std_flock*
+f1; } ; static const int Cyc_Std_Long= 1; struct Cyc_Std_Long_struct{ int tag;
+int f1; } ; extern int Cyc_Std_fcntl( int fd, int cmd, struct _tagged_arr);
+extern int Cyc_Std_open( struct _tagged_arr, int, struct _tagged_arr); extern
+int Cyc_Std_creat( struct _tagged_arr, int); extern int fcntl( int fd, int cmd);
+extern int fcntl_with_arg( int fd, int cmd, int arg); extern int fcntl_with_lock(
+int fd, int cmd, struct Cyc_Std_flock* lock); extern int creat( unsigned char*,
+int); extern int open_without_mode( unsigned char*, int); extern int
+open_with_mode( unsigned char*, int, int); int Cyc_Std_fcntl( int fd, int cmd,
+struct _tagged_arr argv){ if( _get_arr_size( argv, sizeof( void*)) ==  0){
+return fcntl( fd, cmd);} else{ if( _get_arr_size( argv, sizeof( void*)) !=  1){(
+int) _throw(( void*)({ struct Cyc_Core_Failure_struct* _temp0=( struct Cyc_Core_Failure_struct*)
+_cycalloc( sizeof( struct Cyc_Core_Failure_struct)); _temp0[ 0]=({ struct Cyc_Core_Failure_struct
+_temp1; _temp1.tag= Cyc_Core_Failure; _temp1.f1= _tag_arr("fcntl: too many args",
+sizeof( unsigned char), 21u); _temp1;}); _temp0;}));} else{ void* _temp2=*((
+void**) _check_unknown_subscript( argv, sizeof( void*), 0)); int _temp8; struct
+Cyc_Std_flock* _temp10; _LL4: if(*(( int*) _temp2) ==  Cyc_Std_Long){ _LL9:
+_temp8=(( struct Cyc_Std_Long_struct*) _temp2)->f1; goto _LL5;} else{ goto _LL6;}
+_LL6: if(*(( int*) _temp2) ==  Cyc_Std_Flock){ _LL11: _temp10=(( struct Cyc_Std_Flock_struct*)
+_temp2)->f1; goto _LL7;} else{ goto _LL3;} _LL5: return fcntl_with_arg( fd, cmd,
+_temp8); _LL7: return fcntl_with_lock( fd, cmd,( struct Cyc_Std_flock*) _temp10);
+_LL3:;}}} int Cyc_Std_creat( struct _tagged_arr s, int m){ return creat(
+string_to_Cstring( s), m);} int Cyc_Std_open( struct _tagged_arr s, int i,
+struct _tagged_arr ms){ if( _get_arr_size( ms, sizeof( int)) >=  1){ return
+open_with_mode( string_to_Cstring( s), i,*(( int*) _check_unknown_subscript( ms,
+sizeof( int), 0)));} else{ return open_without_mode( string_to_Cstring( s), i);}}

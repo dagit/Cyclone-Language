@@ -54,8 +54,8 @@ namespace Std {
   };
 
   tunion FcntlArg<`r::R> {
+    Flock(struct flock @`r);
     Long(long);
-    Flock(struct flock *`r);
   };
   typedef tunion `r FcntlArg<`r> fcntlarg_t<`r>;
 

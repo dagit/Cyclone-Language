@@ -21,7 +21,7 @@
  *
  */
 
-/* $Id: boa.cyc,v 1.3 2001-10-03 16:57:42 tjim Exp $*/
+/* $Id: boa.cyc,v 1.4 2001-10-03 21:19:08 tjim Exp $*/
 
 #include "boa.h"
 #include <sys/resource.h>       /* setrlimit */
@@ -98,7 +98,7 @@ int main(int argc, char ?`H?argv)
     }
 
     /* server socket is nonblocking */
-    if (fcntl(server_s, F_SETFL, new Long(NOBLOCK)) == -1) {
+    if (fcntl(server_s, F_SETFL, NOBLOCK) == -1) {
         log_error_mesg(__FILE__, __LINE__,
                        "fcntl: unable to set server socket to nonblocking");
         exit(errno);
@@ -133,7 +133,7 @@ int main(int argc, char ?`H?argv)
     /* close server socket on exec
      * so cgi's can't write to it */
 
-    if (fcntl(server_s, F_SETFD, new Long(1)) == -1) {
+    if (fcntl(server_s, F_SETFD, 1) == -1) {
         log_error_mesg(__FILE__, __LINE__,
                        "can't set close-on-exec on server socket!");
         exit(errno);
@@ -256,7 +256,7 @@ int main(int argc, char ?`H?argv)
         if (!request_ready) {
             if (select(OPEN_MAX, &block_read_fdset,
                        &block_write_fdset, NULL,
-                       (request_block ? &req_timeout : NULL)) == -1) {
+                       (request_block ? (struct timeval *)&req_timeout : NULL)) == -1) {
                 /* what is the appropriate thing to do here on EBADF */
                 if (errno == EINTR)
                     continue;   /* while(1) */
