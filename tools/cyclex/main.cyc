@@ -13,7 +13,12 @@
 
 using Core;
 
+extern "C" void GC_blacklist_warn_clear();
 int main(int argc, string_t ? argv) {
+  /* Don't print garbage collector warnings about allocations of 
+     blacklisted blocks.  This turns up on OS X and possibly other
+     BSD systems (??) */
+  GC_blacklist_warn_clear();
   if(argc < 2 || argc > 3) {
     fprintf(stderr, "Usage: cyclex <input file> [<output file>]");
     return 1;

@@ -15,19 +15,22 @@
 # NOTES
 # The cpp command string is supposed to look like the desired
 # command-line arguments to cpp.  The output of gcc -dM is a sequence
-# of #defines.  We use sed to transform this into a sequence of
-# -Dname=value flags.  We also escape special characters; the special
-# characters of gcc spec files seem to be undocumented, but at least
-# space, tab, and backslashes have to be escaped with backslashes.
-# (This is in case the special characters appear in the macro values,
-# e.g., inside a string.)  We don't have to escape newline because gcc
-# -dM emits each #define on a single line.  The awk script at the end
-# adds some boilerplate that makes the output a specs file, and puts
-# all the -D flags on one line.  NB: there are two literal tabs in the
-# last sed command which must remain literal tabs!!
+# of #defines.  Since gcc -dM typically adds bogus spaces at the ends
+# of lines, we use sed to remove them first.  Then we transform the
+# #defines into a sequence of -Dname=value flags.  Then we escape
+# special characters; the special characters of gcc spec files seem to
+# be undocumented, but at least space, tab, and backslashes have to be
+# escaped with backslashes.  (This is in case the special characters
+# appear in the macro values, e.g., inside a string.)  We don't have
+# to escape newline because gcc -dM emits each #define on a single
+# line.  The awk script at the end adds some boilerplate that makes
+# the output a specs file, and puts all the -D flags on one line.  NB:
+# there are two literal tabs in the last sed command which must remain
+# literal tabs!!
 
 echo |\
 gcc - -E -dM |\
+sed -e 's/ *$//' |\
 sed -e 's/#define /-D/' |\
 sed -e 's/ /=/' |\
 sed -e 's/\\/\\\\/g' |\
