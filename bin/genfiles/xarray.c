@@ -158,13 +158,7 @@ extern char Cyc_Bad_alloc[];
   if (!_cks_ptr) _throw_null(); \
   if (_cks_index >= _cks_bound) _throw_arraybounds(); \
   (_cks_ptr) + _cks_elt_sz*_cks_index; })
-
-#define _check_known_subscript_notnull(bound,index) ({ \
-  unsigned _cksnn_bound = (bound); \
-  unsigned _cksnn_index = (index); \
-  if (_cksnn_index >= _cksnn_bound) _throw_arraybounds(); \
-  _cksnn_index; })
-#define _check_known_subscript_nullX(ptr,bound,elt_sz,index) ({ \
+#define _check_known_subscript_notnull(ptr,bound,elt_sz,index) ({ \
   char*_cks_ptr = (char*)(ptr); \
   unsigned _cks_bound = (bound); \
   unsigned _cks_elt_sz = (elt_sz); \
@@ -564,7 +558,7 @@ struct Cyc_Xarray_Xarray*Cyc_Xarray_rfrom_array(struct _RegionHandle*r,struct _d
 if(_get_dyneither_size(arr,sizeof(void*))== 0)
 return Cyc_Xarray_rcreate_empty(r);{
 struct Cyc_Xarray_Xarray*ans=({struct Cyc_Xarray_Xarray*_tmp18=_region_malloc(r,sizeof(*_tmp18));({
-struct _dyneither_ptr _tmp3D=({unsigned int _tmp17=_get_dyneither_size(arr,sizeof(void*));void**_tmp16=({struct _RegionHandle*_tmp3C=Cyc_Core_unique_region;_region_malloc(_tmp3C,_check_times(_tmp17,sizeof(void*)));});({{unsigned int _tmp2C=_get_dyneither_size(arr,sizeof(void*));unsigned int i;for(i=0;i < _tmp2C;++ i){_tmp16[i]=((void**)arr.curr)[(int)i];}}0;});_tag_dyneither(_tmp16,sizeof(void*),_tmp17);});_tmp18->elmts=_tmp3D;}),_tmp18->num_elmts=(int)
+struct _dyneither_ptr _tmp3D=({unsigned int _tmp17=_get_dyneither_size(arr,sizeof(void*));void**_tmp16=({struct _RegionHandle*_tmp3C=Cyc_Core_unique_region;_region_malloc(_tmp3C,_check_times(_tmp17,sizeof(void*)));});({{unsigned int _tmp2C=_get_dyneither_size(arr,sizeof(void*));unsigned int i;for(i=0;i < _tmp2C;++ i){_tmp16[i]=*((void**)_check_dyneither_subscript(arr,sizeof(void*),(int)i));}}0;});_tag_dyneither(_tmp16,sizeof(void*),_tmp17);});_tmp18->elmts=_tmp3D;}),_tmp18->num_elmts=(int)
 _get_dyneither_size(arr,sizeof(void*));_tmp18;});
 return ans;};}
 # 109

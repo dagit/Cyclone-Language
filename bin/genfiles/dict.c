@@ -158,13 +158,7 @@ extern char Cyc_Bad_alloc[];
   if (!_cks_ptr) _throw_null(); \
   if (_cks_index >= _cks_bound) _throw_arraybounds(); \
   (_cks_ptr) + _cks_elt_sz*_cks_index; })
-
-#define _check_known_subscript_notnull(bound,index) ({ \
-  unsigned _cksnn_bound = (bound); \
-  unsigned _cksnn_index = (index); \
-  if (_cksnn_index >= _cksnn_bound) _throw_arraybounds(); \
-  _cksnn_index; })
-#define _check_known_subscript_nullX(ptr,bound,elt_sz,index) ({ \
+#define _check_known_subscript_notnull(ptr,bound,elt_sz,index) ({ \
   char*_cks_ptr = (char*)(ptr); \
   unsigned _cks_bound = (bound); \
   unsigned _cks_elt_sz = (elt_sz); \
@@ -896,7 +890,7 @@ while(ind != - 1){
 const struct Cyc_Dict_T*_tmpA8=*((const struct Cyc_Dict_T**)_check_dyneither_subscript(queue,sizeof(const struct Cyc_Dict_T*),ind --));const struct Cyc_Dict_T*_tmpA9=_tmpA8;const struct Cyc_Dict_T*_tmpAF;const struct Cyc_Dict_T*_tmpAE;void*_tmpAD;void*_tmpAC;_LL1: _tmpAF=_tmpA9->left;_tmpAE=_tmpA9->right;_tmpAD=(_tmpA9->key_val).f1;_tmpAC=(_tmpA9->key_val).f2;_LL2:;
 if(ind + 2 >= _get_dyneither_size(queue,sizeof(const struct Cyc_Dict_T*)))
 ({struct _dyneither_ptr _tmp119=({unsigned int _tmpAB=_get_dyneither_size(queue,sizeof(const struct Cyc_Dict_T*))* 2;const struct Cyc_Dict_T**_tmpAA=({struct _RegionHandle*_tmp118=temp;_region_malloc(_tmp118,_check_times(_tmpAB,sizeof(const struct Cyc_Dict_T*)));});({{unsigned int _tmpE4=_get_dyneither_size(queue,sizeof(const struct Cyc_Dict_T*))* 2;unsigned int i;for(i=0;i < _tmpE4;++ i){
-i < _get_dyneither_size(queue,sizeof(const struct Cyc_Dict_T*))?_tmpAA[i]=((const struct Cyc_Dict_T**)queue.curr)[(int)i]:(_tmpAA[i]=_tmpA6);}}0;});_tag_dyneither(_tmpAA,sizeof(const struct Cyc_Dict_T*),_tmpAB);});
+i < _get_dyneither_size(queue,sizeof(const struct Cyc_Dict_T*))?_tmpAA[i]=*((const struct Cyc_Dict_T**)_check_dyneither_subscript(queue,sizeof(const struct Cyc_Dict_T*),(int)i)):(_tmpAA[i]=_tmpA6);}}0;});_tag_dyneither(_tmpAA,sizeof(const struct Cyc_Dict_T*),_tmpAB);});
 # 452
 queue=_tmp119;});
 # 454

@@ -158,13 +158,7 @@ extern char Cyc_Bad_alloc[];
   if (!_cks_ptr) _throw_null(); \
   if (_cks_index >= _cks_bound) _throw_arraybounds(); \
   (_cks_ptr) + _cks_elt_sz*_cks_index; })
-
-#define _check_known_subscript_notnull(bound,index) ({ \
-  unsigned _cksnn_bound = (bound); \
-  unsigned _cksnn_index = (index); \
-  if (_cksnn_index >= _cksnn_bound) _throw_arraybounds(); \
-  _cksnn_index; })
-#define _check_known_subscript_nullX(ptr,bound,elt_sz,index) ({ \
+#define _check_known_subscript_notnull(ptr,bound,elt_sz,index) ({ \
   char*_cks_ptr = (char*)(ptr); \
   unsigned _cks_bound = (bound); \
   unsigned _cks_elt_sz = (elt_sz); \
@@ -953,7 +947,7 @@ if(Cyc_assume_gcc_flag)
 Cyc_add_ccarg(s);else{
 # 375
 {int i=0;for(0;i < 10U;++ i){
-if(!Cyc_strcmp((struct _dyneither_ptr)(known_gcc_flags[_check_known_subscript_notnull(10U,i)]).flag,(struct _dyneither_ptr)s)){
+if(!Cyc_strcmp((struct _dyneither_ptr)(*((struct _tuple21*)_check_known_subscript_notnull(known_gcc_flags,10U,sizeof(struct _tuple21),i))).flag,(struct _dyneither_ptr)s)){
 Cyc_add_ccarg(s);
 Cyc_gcc_optarg=(known_gcc_flags[i]).optargs;
 break;}}}
@@ -1628,7 +1622,7 @@ int Cyc_main(int argc,struct _dyneither_ptr argv){
 struct _dyneither_ptr optstring=({const char*_tmp27F="Options:";_tag_dyneither(_tmp27F,sizeof(char),9U);});
 # 1248
 {int i=1;for(0;i < 75U;++ i){
-(Cyc_global_options[_check_known_subscript_notnull(75U,i - 1)])->tl=Cyc_global_options[i];}}{
+(*((struct Cyc_List_List**)_check_known_subscript_notnull(Cyc_global_options,75U,sizeof(struct Cyc_List_List*),i - 1)))->tl=Cyc_global_options[i];}}{
 # 1251
 struct Cyc_List_List*options=Cyc_global_options[0];
 # 1253

@@ -158,13 +158,7 @@ extern char Cyc_Bad_alloc[];
   if (!_cks_ptr) _throw_null(); \
   if (_cks_index >= _cks_bound) _throw_arraybounds(); \
   (_cks_ptr) + _cks_elt_sz*_cks_index; })
-
-#define _check_known_subscript_notnull(bound,index) ({ \
-  unsigned _cksnn_bound = (bound); \
-  unsigned _cksnn_index = (index); \
-  if (_cksnn_index >= _cksnn_bound) _throw_arraybounds(); \
-  _cksnn_index; })
-#define _check_known_subscript_nullX(ptr,bound,elt_sz,index) ({ \
+#define _check_known_subscript_notnull(ptr,bound,elt_sz,index) ({ \
   char*_cks_ptr = (char*)(ptr); \
   unsigned _cks_bound = (bound); \
   unsigned _cks_elt_sz = (elt_sz); \
@@ -715,7 +709,7 @@ width=(long long)4294967295U;
 if(flags & 8){
 n=0;{
 int c=_IO_peekc(fp);
-while((int)ccltab[_check_known_subscript_notnull(256U,(int)((char)c))]){
+while((int)*((char*)_check_known_subscript_notnull(ccltab,256U,sizeof(char),(int)((char)c)))){
 ++ n;
 _IO_getc(fp);
 if(-- width == 0)
@@ -732,7 +726,7 @@ goto match_failure;};}else{
 struct _dyneither_ptr p4=(struct _dyneither_ptr)Cyc_va_arg_string_ptr(*((void**)_check_dyneither_subscript(ap,sizeof(void*),0U)));_dyneither_ptr_inplace_plus(& ap,sizeof(void*),1);{
 struct _dyneither_ptr p5=p4;
 int c=_IO_peekc(fp);
-while((int)ccltab[_check_known_subscript_notnull(256U,(int)((char)c))]){
+while((int)*((char*)_check_known_subscript_notnull(ccltab,256U,sizeof(char),(int)((char)c)))){
 if(_get_dyneither_size(p5,sizeof(char))== 0)goto eof_failure;
 *((char*)_check_dyneither_subscript(p5,sizeof(char),0U))=(char)c;
 _dyneither_ptr_inplace_plus(& p5,sizeof(char),1);
@@ -812,12 +806,12 @@ goto ok;case 49U: _LL57: _LL58:
 # 586
  goto _LL5A;case 50U: _LL59: _LL5A: goto _LL5C;case 51U: _LL5B: _LL5C: goto _LL5E;case 52U: _LL5D: _LL5E: goto _LL60;case 53U: _LL5F: _LL60:
  goto _LL62;case 54U: _LL61: _LL62: goto _LL64;case 55U: _LL63: _LL64:
- base=(int)basefix[_check_known_subscript_notnull(17U,base)];
+ base=(int)*((short*)_check_known_subscript_notnull(basefix,17U,sizeof(short),base));
 flags &=~((64 | 256)| 128);
 goto ok;case 56U: _LL65: _LL66:
 # 593
  goto _LL68;case 57U: _LL67: _LL68:
- base=(int)basefix[_check_known_subscript_notnull(17U,base)];
+ base=(int)*((short*)_check_known_subscript_notnull(basefix,17U,sizeof(short),base));
 if(base <= 8)
 goto _LL54;
 flags &=~((64 | 256)| 128);
@@ -997,13 +991,13 @@ c=(int)*((const char*)_check_dyneither_subscript(_dyneither_ptr_inplace_plus_pos
 v=0;}
 # 817
 for(n=0;n < 256;++ n){
-tab[_check_known_subscript_notnull(256U,n)]=(char)v;}
+*((char*)_check_known_subscript_notnull(tab,256U,sizeof(char),n))=(char)v;}
 if(c == 0)
 return _dyneither_ptr_plus(fmt,sizeof(char),- 1);
 # 829 "scanf.cyc"
 v=1 - v;
 for(0;1;0){
-tab[_check_known_subscript_notnull(256U,c)]=(char)v;
+*((char*)_check_known_subscript_notnull(tab,256U,sizeof(char),c))=(char)v;
 doswitch:
  n=(int)*((const char*)_check_dyneither_subscript(_dyneither_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0U));{
 int _tmp35=n;switch(_tmp35){case 0U: _LL1: _LL2:
@@ -1017,7 +1011,7 @@ goto _LL0;}
 # 863
 _dyneither_ptr_inplace_plus(& fmt,sizeof(char),1);
 do{
-tab[_check_known_subscript_notnull(256U,++ c)]=(char)v;}while(c < n);
+*((char*)_check_known_subscript_notnull(tab,256U,sizeof(char),++ c))=(char)v;}while(c < n);
 # 873
 goto doswitch;
 # 881

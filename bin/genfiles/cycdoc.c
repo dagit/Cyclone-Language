@@ -158,13 +158,7 @@ extern char Cyc_Bad_alloc[];
   if (!_cks_ptr) _throw_null(); \
   if (_cks_index >= _cks_bound) _throw_arraybounds(); \
   (_cks_ptr) + _cks_elt_sz*_cks_index; })
-
-#define _check_known_subscript_notnull(bound,index) ({ \
-  unsigned _cksnn_bound = (bound); \
-  unsigned _cksnn_index = (index); \
-  if (_cksnn_index >= _cksnn_bound) _throw_arraybounds(); \
-  _cksnn_index; })
-#define _check_known_subscript_nullX(ptr,bound,elt_sz,index) ({ \
+#define _check_known_subscript_notnull(ptr,bound,elt_sz,index) ({ \
   char*_cks_ptr = (char*)(ptr); \
   unsigned _cks_bound = (bound); \
   unsigned _cks_elt_sz = (elt_sz); \
@@ -575,7 +569,7 @@ lbuf->lex_last_action=- 1;}else{
 state=(- state)- 1;}
 # 64
 while(1){
-base=Cyc_lex_base[_check_known_subscript_notnull(15U,state)];
+base=*((const int*)_check_known_subscript_notnull(Cyc_lex_base,15U,sizeof(int),state));
 if(base < 0)return(- base)- 1;
 backtrk=Cyc_lex_backtrk[state];
 if(backtrk >= 0){
@@ -591,8 +585,8 @@ c=256;}}else{
 c=(int)*((char*)_check_dyneither_subscript(lbuf->lex_buffer,sizeof(char),lbuf->lex_curr_pos ++));
 if(c == - 1)c=256;}
 # 81
-if(Cyc_lex_check[_check_known_subscript_notnull(266U,base + c)]== state)
-state=Cyc_lex_trans[_check_known_subscript_notnull(266U,base + c)];else{
+if(*((const int*)_check_known_subscript_notnull(Cyc_lex_check,266U,sizeof(int),base + c))== state)
+state=*((const int*)_check_known_subscript_notnull(Cyc_lex_trans,266U,sizeof(int),base + c));else{
 # 84
 state=Cyc_lex_default[state];}
 if(state < 0){

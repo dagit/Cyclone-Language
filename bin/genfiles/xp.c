@@ -158,13 +158,7 @@ extern char Cyc_Bad_alloc[];
   if (!_cks_ptr) _throw_null(); \
   if (_cks_index >= _cks_bound) _throw_arraybounds(); \
   (_cks_ptr) + _cks_elt_sz*_cks_index; })
-
-#define _check_known_subscript_notnull(bound,index) ({ \
-  unsigned _cksnn_bound = (bound); \
-  unsigned _cksnn_index = (index); \
-  if (_cksnn_index >= _cksnn_bound) _throw_arraybounds(); \
-  _cksnn_index; })
-#define _check_known_subscript_nullX(ptr,bound,elt_sz,index) ({ \
+#define _check_known_subscript_notnull(ptr,bound,elt_sz,index) ({ \
   char*_cks_ptr = (char*)(ptr); \
   unsigned _cks_bound = (bound); \
   unsigned _cks_elt_sz = (elt_sz); \
@@ -436,7 +430,7 @@ extern void _profile_free_region(struct _RegionHandle *,
 #endif
 
 # 1 "xp.cyc"
- static char Cyc_rcsid[49U]="$Id: xp.c,v 1.7 2004-07-28 16:47:13 djg Exp $";
+ static char Cyc_rcsid[49U]="$Id: xp.c,v 1.8 2004-07-28 17:44:31 djg Exp $";
 # 4 "ctype.h"
 int isalnum(int);
 # 22
@@ -585,7 +579,7 @@ int nx=n;int my=m;
 if(m == 1){
 if(*((unsigned char*)_check_dyneither_subscript(y,sizeof(unsigned char),0))== 0)
 return 0;
-({unsigned char _tmp2B=(unsigned char)Cyc_XP_quotient(nx,q,x,(int)((unsigned char*)y.curr)[0]);*((unsigned char*)_check_dyneither_subscript(r,sizeof(unsigned char),0))=_tmp2B;});
+({unsigned char _tmp2B=(unsigned char)Cyc_XP_quotient(nx,q,x,(int)*((unsigned char*)_check_dyneither_subscript(y,sizeof(unsigned char),0)));*((unsigned char*)_check_dyneither_subscript(r,sizeof(unsigned char),0))=_tmp2B;});
 if(_get_dyneither_size(r,sizeof(unsigned char))> 1)
 ({struct _dyneither_ptr _tmp2C=_dyneither_ptr_plus((struct _dyneither_ptr)r,sizeof(char),1);Cyc_memset(_tmp2C,'\000',(unsigned long)(my - 1));});}else{
 if(m > n){
@@ -617,7 +611,7 @@ for(i=m;i > 0;-- i){
 if(({unsigned char _tmp34=*((unsigned char*)_check_dyneither_subscript(rem,sizeof(unsigned char),i + k));_tmp34 != *((unsigned char*)_check_dyneither_subscript(dq,sizeof(unsigned char),i));}))
 break;}
 if(({unsigned char _tmp35=*((unsigned char*)_check_dyneither_subscript(rem,sizeof(unsigned char),i + k));_tmp35 < *((unsigned char*)_check_dyneither_subscript(dq,sizeof(unsigned char),i));}))
-({unsigned char _tmp36=(unsigned char)Cyc_XP_product(m,dq,y,-- qk);((unsigned char*)dq.curr)[m]=_tmp36;});}
+({unsigned char _tmp36=(unsigned char)Cyc_XP_product(m,dq,y,-- qk);*((unsigned char*)_check_dyneither_subscript(dq,sizeof(unsigned char),m))=_tmp36;});}
 # 155
 *((unsigned char*)_check_dyneither_subscript(q,sizeof(unsigned char),k))=(unsigned char)qk;{
 # 157
@@ -715,13 +709,13 @@ const char*p=str;
 base >= 2  && base <= 36?0:({struct _dyneither_ptr _tmp49=({const char*_tmpB="base >= 2 && base <= 36";_tag_dyneither(_tmpB,sizeof(char),24U);});((int(*)(struct _dyneither_ptr assertion,struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(_tmp49,({const char*_tmpC="xp.cyc";_tag_dyneither(_tmpC,sizeof(char),7U);}),252U);});
 while((int)*((const char*)_check_null(p)) &&  isspace((int)*p)){
 ({const char**_tmpD=& p;if(*(*_tmpD)!= 0)++(*_tmpD);else{_throw_arraybounds();}*_tmpD;});}
-if(((int)*p  &&  isalnum((int)*p)) && Cyc_map[_check_known_subscript_notnull(75U,*p - '0')]< base){
+if(((int)*p  &&  isalnum((int)*p)) && *((char*)_check_known_subscript_notnull(Cyc_map,75U,sizeof(char),*p - '0'))< base){
 int carry;
-for(0;((int)*((const char*)_check_null(p)) &&  isalnum((int)*p)) && Cyc_map[_check_known_subscript_notnull(75U,*p - '0')]< base;({const char**_tmpE=& p;if(*(*_tmpE)!= 0)++(*_tmpE);else{_throw_arraybounds();}*_tmpE;})){
+for(0;((int)*((const char*)_check_null(p)) &&  isalnum((int)*p)) && *((char*)_check_known_subscript_notnull(Cyc_map,75U,sizeof(char),*p - '0'))< base;({const char**_tmpE=& p;if(*(*_tmpE)!= 0)++(*_tmpE);else{_throw_arraybounds();}*_tmpE;})){
 ({int _tmp4A=Cyc_XP_product(n,z,z,base);carry=_tmp4A;});
 if(carry)
 break;
-Cyc_XP_sum(n,z,z,(int)Cyc_map[_check_known_subscript_notnull(75U,*p - '0')]);}
+Cyc_XP_sum(n,z,z,(int)*((char*)_check_known_subscript_notnull(Cyc_map,75U,sizeof(char),*p - '0')));}
 # 263
 return carry;}else{
 # 265

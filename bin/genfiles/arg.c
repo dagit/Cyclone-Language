@@ -158,13 +158,7 @@ extern char Cyc_Bad_alloc[];
   if (!_cks_ptr) _throw_null(); \
   if (_cks_index >= _cks_bound) _throw_arraybounds(); \
   (_cks_ptr) + _cks_elt_sz*_cks_index; })
-
-#define _check_known_subscript_notnull(bound,index) ({ \
-  unsigned _cksnn_bound = (bound); \
-  unsigned _cksnn_index = (index); \
-  if (_cksnn_index >= _cksnn_bound) _throw_arraybounds(); \
-  _cksnn_index; })
-#define _check_known_subscript_nullX(ptr,bound,elt_sz,index) ({ \
+#define _check_known_subscript_notnull(ptr,bound,elt_sz,index) ({ \
   char*_cks_ptr = (char*)(ptr); \
   unsigned _cks_bound = (bound); \
   unsigned _cks_elt_sz = (elt_sz); \
@@ -498,14 +492,14 @@ for(i=howmuch - 1;i >= 0  && ! isspace((int)*((const char*)_check_dyneither_subs
 ;}
 # 105
 if(i < 0)
-for(i=howmuch?howmuch - 1: 0;(i < _tmp3  && (int)((const char*)s.curr)[i]) && ! isspace((int)((const char*)s.curr)[i]);++ i){
+for(i=howmuch?howmuch - 1: 0;(i < _tmp3  && (int)((const char*)s.curr)[i]) && ! isspace((int)*((const char*)_check_dyneither_subscript(s,sizeof(char),i)));++ i){
 ;}
 # 111
 Cyc_Buffer_add_substring(b,s,0,i);{
 # 114
 struct _dyneither_ptr whatsleft=_tag_dyneither(0,0,0);
 # 116
-for(0;(i < _tmp3  && (int)((const char*)s.curr)[i]) &&  isspace((int)((const char*)s.curr)[i]);++ i){
+for(0;(i < _tmp3  && (int)((const char*)s.curr)[i]) &&  isspace((int)*((const char*)_check_dyneither_subscript(s,sizeof(char),i)));++ i){
 ;}
 if(i < _tmp3  && (int)((const char*)s.curr)[i])({struct _dyneither_ptr _tmp69=_dyneither_ptr_plus(s,sizeof(char),i);whatsleft=_tmp69;});
 return whatsleft;};};};}
@@ -593,7 +587,7 @@ if(({char*_tmp80=(char*)((struct _dyneither_ptr*)_check_dyneither_subscript(Cyc_
 ++ Cyc_Arg_current;
 while(Cyc_Arg_current < l){
 struct _dyneither_ptr s=*((struct _dyneither_ptr*)_check_dyneither_subscript(Cyc_Arg_args,sizeof(struct _dyneither_ptr),Cyc_Arg_current));
-if((({char*_tmp81=(char*)s.curr;_tmp81 != (char*)(_tag_dyneither(0,0,0)).curr;}) && _get_dyneither_size(s,sizeof(char))>= 1) && ((const char*)s.curr)[0]== '-'){
+if((({char*_tmp81=(char*)s.curr;_tmp81 != (char*)(_tag_dyneither(0,0,0)).curr;}) && _get_dyneither_size(s,sizeof(char))>= 1) && *((const char*)_check_dyneither_subscript(s,sizeof(char),0))== '-'){
 void*action;
 {struct _handler_cons _tmp34;_push_handler(& _tmp34);{int _tmp36=0;if(setjmp(_tmp34.handler))_tmp36=1;if(!_tmp36){({void*_tmp82=Cyc_Arg_lookup(speclist,s);action=_tmp82;});;_pop_handler();}else{void*_tmp35=(void*)_exn_thrown;void*_tmp37=_tmp35;void*_tmp39;if(((struct Cyc_Core_Not_found_exn_struct*)_tmp37)->tag == Cyc_Core_Not_found){_LL1: _LL2:
 # 224

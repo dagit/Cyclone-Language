@@ -158,13 +158,7 @@ extern char Cyc_Bad_alloc[];
   if (!_cks_ptr) _throw_null(); \
   if (_cks_index >= _cks_bound) _throw_arraybounds(); \
   (_cks_ptr) + _cks_elt_sz*_cks_index; })
-
-#define _check_known_subscript_notnull(bound,index) ({ \
-  unsigned _cksnn_bound = (bound); \
-  unsigned _cksnn_index = (index); \
-  if (_cksnn_index >= _cksnn_bound) _throw_arraybounds(); \
-  _cksnn_index; })
-#define _check_known_subscript_nullX(ptr,bound,elt_sz,index) ({ \
+#define _check_known_subscript_notnull(ptr,bound,elt_sz,index) ({ \
   char*_cks_ptr = (char*)(ptr); \
   unsigned _cks_bound = (bound); \
   unsigned _cks_elt_sz = (elt_sz); \
@@ -572,7 +566,7 @@ return _tag_dyneither(0,0,0);}
 inline static const unsigned long Cyc_my_strlen(struct _dyneither_ptr s){
 unsigned int sz=_get_dyneither_size(s,sizeof(char));
 unsigned int i=0U;
-while(i < sz  && ((const char*)s.curr)[(int)i]!= 0){++ i;}
+while(i < sz  && *((const char*)_check_dyneither_subscript(s,sizeof(char),(int)i))!= 0){++ i;}
 return i;}
 # 278
 int Cyc__IO_vfprintf(int(*ioputc)(int,void*),void*ioputc_env,struct _dyneither_ptr fmt0,struct _dyneither_ptr ap){
@@ -617,7 +611,7 @@ for(0;1;0){
 # 351
 fmark=fmt;{
 unsigned int fmt_sz=_get_dyneither_size(fmt,sizeof(char));
-for(n=0;(n < fmt_sz  && (ch=(int)((const char*)fmt.curr)[n])!= '\000') && ch != '%';++ n){
+for(n=0;(n < fmt_sz  && (ch=(int)*((const char*)_check_dyneither_subscript(fmt,sizeof(char),n)))!= '\000') && ch != '%';++ n){
 ;}
 ({struct _dyneither_ptr _tmpC7=_dyneither_ptr_plus(fmt,sizeof(char),n);fmt=_tmpC7;});
 # 357

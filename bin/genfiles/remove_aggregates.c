@@ -158,13 +158,7 @@ extern char Cyc_Bad_alloc[];
   if (!_cks_ptr) _throw_null(); \
   if (_cks_index >= _cks_bound) _throw_arraybounds(); \
   (_cks_ptr) + _cks_elt_sz*_cks_index; })
-
-#define _check_known_subscript_notnull(bound,index) ({ \
-  unsigned _cksnn_bound = (bound); \
-  unsigned _cksnn_index = (index); \
-  if (_cksnn_index >= _cksnn_bound) _throw_arraybounds(); \
-  _cksnn_index; })
-#define _check_known_subscript_nullX(ptr,bound,elt_sz,index) ({ \
+#define _check_known_subscript_notnull(ptr,bound,elt_sz,index) ({ \
   char*_cks_ptr = (char*)(ptr); \
   unsigned _cks_bound = (bound); \
   unsigned _cks_elt_sz = (elt_sz); \
@@ -583,7 +577,7 @@ int did_assign=0;
 struct Cyc_List_List*dles=0;
 unsigned int _tmpB=_get_dyneither_size(_tmp35,sizeof(char));
 {unsigned int i=0U;for(0;i < _tmpB;++ i){
-struct Cyc_Absyn_Exp*_tmpC=Cyc_Absyn_char_exp(((const char*)_tmp35.curr)[(int)i],0U);
+struct Cyc_Absyn_Exp*_tmpC=Cyc_Absyn_char_exp(*((const char*)_check_dyneither_subscript(_tmp35,sizeof(char),(int)i)),0U);
 _tmpC->topt=Cyc_Absyn_char_type;
 ({struct Cyc_List_List*_tmp95=({struct Cyc_List_List*_tmpE=_cycalloc(sizeof(*_tmpE));({struct _tuple10*_tmp94=({struct _tuple10*_tmpD=_cycalloc(sizeof(*_tmpD));_tmpD->f1=0,_tmpD->f2=_tmpC;_tmpD;});_tmpE->hd=_tmp94;}),_tmpE->tl=dles;_tmpE;});dles=_tmp95;});}}
 # 114

@@ -158,13 +158,7 @@ extern char Cyc_Bad_alloc[];
   if (!_cks_ptr) _throw_null(); \
   if (_cks_index >= _cks_bound) _throw_arraybounds(); \
   (_cks_ptr) + _cks_elt_sz*_cks_index; })
-
-#define _check_known_subscript_notnull(bound,index) ({ \
-  unsigned _cksnn_bound = (bound); \
-  unsigned _cksnn_index = (index); \
-  if (_cksnn_index >= _cksnn_bound) _throw_arraybounds(); \
-  _cksnn_index; })
-#define _check_known_subscript_nullX(ptr,bound,elt_sz,index) ({ \
+#define _check_known_subscript_notnull(ptr,bound,elt_sz,index) ({ \
   char*_cks_ptr = (char*)(ptr); \
   unsigned _cks_bound = (bound); \
   unsigned _cks_elt_sz = (elt_sz); \
@@ -484,7 +478,7 @@ lbuf->lex_last_action=- 1;}else{
 state=(- state)- 1;}
 # 53
 while(1){
-base=Cyc_Lineno_lex_base[_check_known_subscript_notnull(10U,state)];
+base=*((const int*)_check_known_subscript_notnull(Cyc_Lineno_lex_base,10U,sizeof(int),state));
 if(base < 0)return(- base)- 1;
 backtrk=Cyc_Lineno_lex_backtrk[state];
 if(backtrk >= 0){
@@ -500,8 +494,8 @@ c=256;}}else{
 c=(int)*((char*)_check_dyneither_subscript(lbuf->lex_buffer,sizeof(char),lbuf->lex_curr_pos ++));
 if(c == - 1)c=256;}
 # 70
-if(Cyc_Lineno_lex_check[_check_known_subscript_notnull(273U,base + c)]== state)
-state=Cyc_Lineno_lex_trans[_check_known_subscript_notnull(273U,base + c)];else{
+if(*((const int*)_check_known_subscript_notnull(Cyc_Lineno_lex_check,273U,sizeof(int),base + c))== state)
+state=*((const int*)_check_known_subscript_notnull(Cyc_Lineno_lex_trans,273U,sizeof(int),base + c));else{
 # 73
 state=Cyc_Lineno_lex_default[state];}
 if(state < 0){
@@ -532,16 +526,16 @@ enum Cyc_Lineno_token_val Cyc_Lineno_token(struct Cyc_Lexing_lexbuf*lexbuf){retu
 static struct Cyc_Core_Opt*Cyc_Lineno_parse_linedef(struct _dyneither_ptr line){
 struct _handler_cons _tmp5;_push_handler(& _tmp5);{int _tmp7=0;if(setjmp(_tmp5.handler))_tmp7=1;if(!_tmp7){
 {int i=0;
-while(i < _get_dyneither_size(line,sizeof(char)) && (((char*)line.curr)[i]< '0'  || ((char*)line.curr)[i]> '9')){++ i;}{
+while(i < _get_dyneither_size(line,sizeof(char)) && (*((char*)_check_dyneither_subscript(line,sizeof(char),i))< '0'  || *((char*)_check_dyneither_subscript(line,sizeof(char),i))> '9')){++ i;}{
 int j=i;
-while((j < _get_dyneither_size(line,sizeof(char)) && ((char*)line.curr)[j]>= '0') && ((char*)line.curr)[j]<= '9'){++ j;}
+while((j < _get_dyneither_size(line,sizeof(char)) && *((char*)_check_dyneither_subscript(line,sizeof(char),j))>= '0') && *((char*)_check_dyneither_subscript(line,sizeof(char),j))<= '9'){++ j;}
 if(i == _get_dyneither_size(line,sizeof(char))){struct Cyc_Core_Opt*_tmp8=0;_npop_handler(0U);return _tmp8;}{
 int number=0;
 if(({struct Cyc_IntPtr_sa_ScanfArg_struct _tmpB=({struct Cyc_IntPtr_sa_ScanfArg_struct _tmp1F;_tmp1F.tag=2U,_tmp1F.f1=& number;_tmp1F;});void*_tmp9[1U];_tmp9[0]=& _tmpB;({struct _dyneither_ptr _tmp25=(struct _dyneither_ptr)Cyc_substring((struct _dyneither_ptr)line,i,(unsigned long)(j - i));struct _dyneither_ptr _tmp24=({const char*_tmpA="%d";_tag_dyneither(_tmpA,sizeof(char),3U);});Cyc_sscanf(_tmp25,_tmp24,_tag_dyneither(_tmp9,sizeof(void*),1U));});})!= 1){
 struct Cyc_Core_Opt*_tmpC=0;_npop_handler(0U);return _tmpC;}
-while(j < _get_dyneither_size(line,sizeof(char)) && ((char*)line.curr)[j]!= '"'){++ j;}{
+while(j < _get_dyneither_size(line,sizeof(char)) && *((char*)_check_dyneither_subscript(line,sizeof(char),j))!= '"'){++ j;}{
 int k=++ j;
-while(k < _get_dyneither_size(line,sizeof(char)) && ((char*)line.curr)[k]!= '"'){++ k;}
+while(k < _get_dyneither_size(line,sizeof(char)) && *((char*)_check_dyneither_subscript(line,sizeof(char),k))!= '"'){++ k;}
 if(j == _get_dyneither_size(line,sizeof(char)) || k == _get_dyneither_size(line,sizeof(char))){struct Cyc_Core_Opt*_tmpD=0;_npop_handler(0U);return _tmpD;}{
 struct _dyneither_ptr fname=Cyc_substring((struct _dyneither_ptr)line,j,(unsigned long)(k - j));
 struct Cyc_Core_Opt*_tmp10=({struct Cyc_Core_Opt*_tmpF=_cycalloc(sizeof(*_tmpF));({struct _tuple0*_tmp26=({struct _tuple0*_tmpE=_cycalloc(sizeof(*_tmpE));_tmpE->f1=fname,_tmpE->f2=number;_tmpE;});_tmpF->v=_tmp26;});_tmpF;});_npop_handler(0U);return _tmp10;};};};};}

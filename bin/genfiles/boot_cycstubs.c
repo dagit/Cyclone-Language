@@ -158,13 +158,7 @@ extern char Cyc_Bad_alloc[];
   if (!_cks_ptr) _throw_null(); \
   if (_cks_index >= _cks_bound) _throw_arraybounds(); \
   (_cks_ptr) + _cks_elt_sz*_cks_index; })
-
-#define _check_known_subscript_notnull(bound,index) ({ \
-  unsigned _cksnn_bound = (bound); \
-  unsigned _cksnn_index = (index); \
-  if (_cksnn_index >= _cksnn_bound) _throw_arraybounds(); \
-  _cksnn_index; })
-#define _check_known_subscript_nullX(ptr,bound,elt_sz,index) ({ \
+#define _check_known_subscript_notnull(ptr,bound,elt_sz,index) ({ \
   char*_cks_ptr = (char*)(ptr); \
   unsigned _cks_bound = (bound); \
   unsigned _cks_elt_sz = (elt_sz); \
@@ -479,7 +473,7 @@ int open_with_mode(const char*,int,unsigned short);
 int Cyc_open(const char*s,int i,struct _dyneither_ptr ms){
 # 34
 if(_get_dyneither_size(ms,sizeof(unsigned short))>= 1)
-return open_with_mode(s,i,((unsigned short*)ms.curr)[0]);else{
+return open_with_mode(s,i,*((unsigned short*)_check_dyneither_subscript(ms,sizeof(unsigned short),0)));else{
 # 37
 return open_without_mode(s,i);}}struct  __abstractFILE;struct Cyc___cycFILE{struct  __abstractFILE*file;};
 # 49
@@ -570,7 +564,7 @@ return putw(x,f->file);}char Cyc_FileCloseError[15U]="FileCloseError";char Cyc_F
 struct Cyc___cycFILE*Cyc_file_open(struct _dyneither_ptr fname,struct _dyneither_ptr mode){
 struct Cyc___cycFILE*f=({const char*_tmpB=(const char*)_check_null(_untag_dyneither_ptr(fname,sizeof(char),1U));Cyc_fopen(_tmpB,(const char*)_check_null(_untag_dyneither_ptr(mode,sizeof(char),1U)));});
 if(f == 0){
-struct _dyneither_ptr fn=({unsigned int _tmp7=_get_dyneither_size(fname,sizeof(char))+ 1U;char*_tmp6=_cycalloc_atomic(_check_times(_tmp7,sizeof(char)));({{unsigned int _tmpA=_get_dyneither_size(fname,sizeof(char));unsigned int i;for(i=0;i < _tmpA;++ i){_tmp6[i]=((const char*)fname.curr)[(int)i];}_tmp6[_tmpA]=0;}0;});_tag_dyneither(_tmp6,sizeof(char),_tmp7);});
+struct _dyneither_ptr fn=({unsigned int _tmp7=_get_dyneither_size(fname,sizeof(char))+ 1U;char*_tmp6=_cycalloc_atomic(_check_times(_tmp7,sizeof(char)));({{unsigned int _tmpA=_get_dyneither_size(fname,sizeof(char));unsigned int i;for(i=0;i < _tmpA;++ i){_tmp6[i]=*((const char*)_check_dyneither_subscript(fname,sizeof(char),(int)i));}_tmp6[_tmpA]=0;}0;});_tag_dyneither(_tmp6,sizeof(char),_tmp7);});
 (int)_throw((void*)({struct Cyc_FileOpenError_exn_struct*_tmp5=_cycalloc(sizeof(*_tmp5));_tmp5->tag=Cyc_FileOpenError,_tmp5->f1=fn;_tmp5;}));}
 # 172
 return f;}
