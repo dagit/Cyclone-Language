@@ -3,7 +3,7 @@ CYCDIR = ../..
 
 include $(CYCDIR)/Makefile.inc
 
-PROG=cyclex$(EXE)
+PROG=aprof$(EXE)
 BINDIR=$(CYCDIR)/bin
 
 CYCC = $(CYCDIR)/bin/cyclone$(EXE)
