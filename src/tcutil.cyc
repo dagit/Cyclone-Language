@@ -833,10 +833,9 @@ bool subset_effect(bool may_constrain_evars, type_t e1, type_t e2) {
     // any unification first and only if this fails do we actually
     // go in and try to unify something.  It's not clear whether it's
     // best to just pin the region to HeapRgn or try to unify it with
-    // some region already in the effect e2.  I'm opting for doing the
-    // latter first, and then the former.
+    // some region already in the effect e2.  We used to try the latter, then
+    // the former.  Now we just pick the former.
     return (region_in_effect(false,r,e2) 
-	    || region_in_effect(true,r,e2) 
 	    || (may_constrain_evars && unify(r,HeapRgn)));
   case &VarType(v): return variable_in_effect(may_constrain_evars,v,e2);
   case &RgnsEff(t):

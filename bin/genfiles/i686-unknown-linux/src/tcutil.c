@@ -1411,14 +1411,13 @@ struct Cyc_Absyn_JoinEff_struct*)_tmp1E6)->f1;_LL1A0: for(0;_tmp1E7 != 0;_tmp1E7
 _tmp1E7->tl){if(!Cyc_Tcutil_subset_effect(may_constrain_evars,(void*)_tmp1E7->hd,
 e2))return 0;}return 1;_LL1A1: if(_tmp1E6 <= (void*)3?1:*((int*)_tmp1E6)!= 19)goto
 _LL1A3;_tmp1E8=(void*)((struct Cyc_Absyn_AccessEff_struct*)_tmp1E6)->f1;_LL1A2:
-return(Cyc_Tcutil_region_in_effect(0,_tmp1E8,e2)?1: Cyc_Tcutil_region_in_effect(1,
-_tmp1E8,e2))?1:(may_constrain_evars?Cyc_Tcutil_unify(_tmp1E8,(void*)2): 0);_LL1A3:
-if(_tmp1E6 <= (void*)3?1:*((int*)_tmp1E6)!= 1)goto _LL1A5;_tmp1E9=((struct Cyc_Absyn_VarType_struct*)
-_tmp1E6)->f1;_LL1A4: return Cyc_Tcutil_variable_in_effect(may_constrain_evars,
-_tmp1E9,e2);_LL1A5: if(_tmp1E6 <= (void*)3?1:*((int*)_tmp1E6)!= 21)goto _LL1A7;
-_tmp1EA=(void*)((struct Cyc_Absyn_RgnsEff_struct*)_tmp1E6)->f1;_LL1A6: {void*
-_tmp1EE=Cyc_Tcutil_rgns_of(_tmp1EA);void*_tmp1EF;_LL1AC: if(_tmp1EE <= (void*)3?1:*((
-int*)_tmp1EE)!= 21)goto _LL1AE;_tmp1EF=(void*)((struct Cyc_Absyn_RgnsEff_struct*)
+return Cyc_Tcutil_region_in_effect(0,_tmp1E8,e2)?1:(may_constrain_evars?Cyc_Tcutil_unify(
+_tmp1E8,(void*)2): 0);_LL1A3: if(_tmp1E6 <= (void*)3?1:*((int*)_tmp1E6)!= 1)goto
+_LL1A5;_tmp1E9=((struct Cyc_Absyn_VarType_struct*)_tmp1E6)->f1;_LL1A4: return Cyc_Tcutil_variable_in_effect(
+may_constrain_evars,_tmp1E9,e2);_LL1A5: if(_tmp1E6 <= (void*)3?1:*((int*)_tmp1E6)
+!= 21)goto _LL1A7;_tmp1EA=(void*)((struct Cyc_Absyn_RgnsEff_struct*)_tmp1E6)->f1;
+_LL1A6: {void*_tmp1EE=Cyc_Tcutil_rgns_of(_tmp1EA);void*_tmp1EF;_LL1AC: if(_tmp1EE
+<= (void*)3?1:*((int*)_tmp1EE)!= 21)goto _LL1AE;_tmp1EF=(void*)((struct Cyc_Absyn_RgnsEff_struct*)
 _tmp1EE)->f1;_LL1AD: return Cyc_Tcutil_type_in_effect(may_constrain_evars,_tmp1EF,
 e2)?1:(may_constrain_evars?Cyc_Tcutil_unify(_tmp1EF,Cyc_Absyn_sint_typ): 0);
 _LL1AE:;_LL1AF: return Cyc_Tcutil_subset_effect(may_constrain_evars,_tmp1EE,e2);
