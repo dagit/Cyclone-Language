@@ -27,7 +27,6 @@
 // only read bits out, safety is not compromised.
 
 // The previous pass (type-checking) sets up:
-// * decorating all stmts with their correct non_local_preds
 // * decorating each stmt with CFAnnot
 // * setting all the encloser fields (note the list ends with a self-loop,
 //   not a NULL!
@@ -95,6 +94,8 @@ void set_encloser(stmt_t enclosee, stmt_t encloser) {
 // unnecessarily escape points-to on branches of conditional expressions.
 // Note: for *(e1 ? e2 : e3) we're requiring e2 and e3 to be all-init.
 struct AnalEnv<`r::R> {
+  JumpAnalysis::jump_anal_res_t all_tables;
+  Hashtable::table_t<stmt_t,stmt_opt_t>     succ_table;
   region_t<`r>  r;
   flow_env_t<`r> fenv;
   bool          iterate_again; // set to true when a visited flow is updated
@@ -2613,25 +2614,6 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env,
   switch(s->r) {
   case &Skip_s: return inflow;
     
-  case &Break_s(NULL): 
-    // eg. of when this can happen is when destination is end of function
-    // this is only okay when the return type of the function is void.  
-    switch (inflow) {
-    case {.ReachableFL = _}:
-      switch (Tcutil::compress(env->return_type)) {
-      case &VoidType: break;
-      case &FloatType(_):
-      case &IntType(...):
-        Tcutil::warn(s->loc,"break may cause function not to return a value");
-        break;
-      default:
-        Tcutil::terr(s->loc,"break may cause function not to return a value");
-        break;
-      }
-      break;
-    default: break;
-    }
-    fallthru;
   case &Return_s(NULL):
     if (env->noreturn)
       aerr(s->loc,"`noreturn' function might return");
@@ -2726,10 +2708,39 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env,
       update_flow(env, (stmt_t)(destclause->body), f);
       return BottomFL();
     }
-  case &Break_s(dest):    fallthru(dest);
-  case &Continue_s(dest): fallthru(dest);
-  case &Goto_s(_,dest):
+
+  case &Break_s: 
+    // eg. of when this can happen is when destination is end of function
+    // this is only okay when the return type of the function is void.  
+    if(Hashtable::lookup(env->succ_table,s)==NULL) {
+      switch (inflow) {
+      case {.ReachableFL = _}:
+	switch (Tcutil::compress(env->return_type)) {
+	case &VoidType: break;
+	case &FloatType(_):
+	case &IntType(...):
+	  Tcutil::warn(s->loc,"break may cause function not to return a value");
+	  break;
+	default:
+	  Tcutil::terr(s->loc,"break may cause function not to return a value");
+	  break;
+	}
+	break;
+      default: break;
+      }
+      if (env->noreturn)
+	aerr(s->loc,"`noreturn' function might return");
+      check_init_params(s->loc,env,inflow);
+      unconsume_params(env,env->noconsume_params,NULL,false,inflow,s->loc);
+      return BottomFL();
+    }
+    fallthru;
+  case &Continue_s: fallthru;
+  case &Goto_s(_):
     //  just update the dest's flow
+    let dest = Hashtable::lookup(env->succ_table,s);
+    if(dest==NULL)
+      Tcutil::terr(s->loc,"jump has no target (should be impossible)");
     inflow = unconsume_pat_vars(env,inflow,(stmt_t)dest);
     DEBUG_PRINT("in Rexp:Break/Continue/Goto; updating flow\n");
     update_flow(env, (stmt_t)dest, inflow);
@@ -2876,7 +2887,8 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env,
   }
 }
 
-static void check_nested_fun(flow_env_t<`r>, flow_t<`r> inflow, fndecl_t fd);
+static void check_nested_fun(JumpAnalysis::jump_anal_res_t tables,
+			     flow_env_t<`r>, flow_t<`r> inflow, fndecl_t fd);
 
 // NOTE: only ever called from anal_stmt; the missing cases are handled there
 static flow_t<`r> anal_decl(analenv_t<`r> env, flow_t<`r> inflow, decl_t decl) {
@@ -2901,7 +2913,7 @@ static flow_t<`r> anal_decl(analenv_t<`r> env, flow_t<`r> inflow, decl_t decl) {
     return add_vars(fenv,inflow,vds,fenv->unknown_none,decl->loc,false);
 
   case &Fn_d(fd):
-    check_nested_fun(fenv,inflow,fd);
+    check_nested_fun(env->all_tables,fenv,inflow,fd);
     type_t t = (type_t)fd->cached_typ;
     let vd = (vardecl_t)fd->fn_vardecl;
     // JGM: hmmmm.  nested functions can effect local variables, so if we
@@ -2924,11 +2936,11 @@ static flow_t<`r> anal_decl(analenv_t<`r> env, flow_t<`r> inflow, decl_t decl) {
 
 // TO DO: account for init qualifier (add ThisIL for those params and
 //        check them on return and on fall off void)
-static void check_fun(fndecl_t fd) {
+static void check_fun(JumpAnalysis::jump_anal_res_t tables, fndecl_t fd) {
   try {
     region frgn; {
       flow_env_t<`frgn> fenv = new_flow_env(frgn);
-      check_nested_fun(fenv,ReachableFL(fenv->mt_flowdict,NULL),fd);
+      check_nested_fun(tables,fenv,ReachableFL(fenv->mt_flowdict,NULL),fd);
     }
   } catch {
     // this can happen due to cascading errors -- but be sure we found
@@ -2956,8 +2968,8 @@ static reln_op_t translate_rop(list_t<vardecl_t> vds, reln_op_t r) {
   }
 }
 
-static void check_nested_fun(flow_env_t<`r> fenv,
-                             flow_t<`r> inflow, fndecl_t fd) {
+static void check_nested_fun(JumpAnalysis::jump_anal_res_t tables,
+			  flow_env_t<`r> fenv, flow_t<`r> inflow, fndecl_t fd) {
   //fprintf(stderr,"checking %s of type %s\n",*(*fd->name)[1],
   //        Absynpp::typ2string(Tcutil::fndecl2typ(fd)));
   let frgn = fenv->r;
@@ -3026,7 +3038,12 @@ static void check_nested_fun(flow_env_t<`r> fenv,
   bool      noreturn = Tcutil::is_noreturn(Tcutil::fndecl2typ(fd));
   Hashtable::table_t<stmt_t,flow_t@`r,`r> flow_table =
     Hashtable::rcreate(frgn, 33, Core::ptrcmp, hash_ptr);
-  analenv_t env = rnew(frgn) AnalEnv(frgn,fenv,true,0,false,inflow,NULL,noreturn,fd->ret_type,NULL,param_roots,noconsume_roots,flow_table,fd->ensures_relns);
+  analenv_t env = 
+    rnew(frgn) AnalEnv(tables,
+		       Hashtable::lookup(tables->succ_tables,fd),
+		       frgn,fenv,true,0,false,inflow,NULL,noreturn,fd->ret_type,
+		       NULL,param_roots,noconsume_roots,
+		       flow_table,fd->ensures_relns);
   flow_t    outflow  = inflow;
   while(env->iterate_again && !anal_error) {
     ++(env->iteration_num);
@@ -3058,14 +3075,14 @@ static void check_nested_fun(flow_env_t<`r> fenv,
   }
 }
 
-void cf_check(list_t<decl_t> ds) {
+void cf_check(JumpAnalysis::jump_anal_res_t tables, list_t<decl_t> ds) {
   for(; ds != NULL; ds = ds->tl) {
     anal_error = false;
     switch(ds->hd->r) {
-    case &Fn_d(fd):	      check_fun(fd); break;
+    case &Fn_d(fd):	      check_fun(tables,fd); break;
     case &ExternC_d(ds2):     fallthru(ds2);
     case &Using_d(_,ds2):     fallthru(ds2);
-    case &Namespace_d(_,ds2): cf_check(ds2); break;
+    case &Namespace_d(_,ds2): cf_check(tables,ds2); break;
     case &ExternCinclude_d(_,_): break;
     default: break;
     }

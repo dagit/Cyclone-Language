@@ -183,11 +183,8 @@ extern tenv_t<`g,`r> enter_lhs(region_t<`r>,tenv_t<`g,`r2> te : {`r2}>`r);
 extern tenv_t<`g,`r> clear_lhs(region_t<`r>,tenv_t<`g,`r2> te : {`r2}>`r);
 extern bool in_lhs(tenv_t te);
 
-// The next 4 all assign through their last arg
-extern void process_continue(tenv_t,stmt_t,stmt_opt_t@);
-extern void process_break   (tenv_t,stmt_t,stmt_opt_t@);
-extern void process_goto(tenv_t,stmt_t,var_t,stmt_opt_t@);
-
+extern void process_goto(tenv_t,stmt_t,var_t);
+// assigns through its last arg
 extern $(switch_clause_t,list_t<tvar_t>,clist_t<type_t,`r>)const*`r const
 process_fallthru(tenv_t<`g,`r>,stmt_t,switch_clause_t *@);
                                      

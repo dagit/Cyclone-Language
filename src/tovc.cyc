@@ -266,15 +266,15 @@ static void box_free_vars_stmt(boxingenv_t<`r,`r2> env, stmt_t s) {
   while(true)
     switch (s->r) {
     case &Skip_s: return;        
-    case &Break_s(_): 
+    case &Break_s: 
       Tcutil::warn(s->loc,"break in eliminated statement expression");   
       return;
-    case &Continue_s(_): 
+    case &Continue_s: 
       Tcutil::warn(s->loc,"continue in eliminated statement expression");   
       // FIX: reject if goto is to a different function (a pain to detect)
       //  (Similarly a label that has gotos from different functions)
       return;
-    case &Goto_s(_,_):   
+    case &Goto_s(_):   
       Tcutil::warn(s->loc,"goto in eliminated statement expression");   
       return;
     case &Label_s(_,s2):
@@ -596,9 +596,9 @@ static void stmt_to_vc(toexpenv_t<`r> env, stmt_t s) {
     env.encloser = s;
     switch (s->r) {
     case &Skip_s:         
-    case &Break_s(_):    
-    case &Continue_s(_): 
-    case &Goto_s(_,_):   return;
+    case &Break_s:    
+    case &Continue_s: 
+    case &Goto_s(_):   return;
     case &Label_s(_,s2):
       s = s2;
       continue;

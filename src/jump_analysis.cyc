@@ -206,6 +206,7 @@ static void anal_stmt(senv_t env, stmt_t s) {
     anal_exp(env,e);
     let env_body = env;
     env_body.continue_stmt = new Stmt_j(cont_s);
+    env_body.next_stmt     = env_body.continue_stmt;
     env_body.break_stmt    = env.next_stmt;
     anal_stmt(env_body,s);
     break;
@@ -217,6 +218,7 @@ static void anal_stmt(senv_t env, stmt_t s) {
     // not sure what break/continue in e3 means; we use env_body
     let env_body = env;
     env_body.continue_stmt = new Stmt_j(cont_s);
+    env_body.next_stmt     = env_body.continue_stmt;
     env_body.break_stmt    = env.next_stmt;
     anal_stmt(env_body,s);
     anal_exp(env_body,e3);
@@ -225,18 +227,19 @@ static void anal_stmt(senv_t env, stmt_t s) {
     Hashtable::insert(env.fenv->stmt_info, cont_s, new env.save_env);
     let env_body = env;
     env_body.continue_stmt = new Stmt_j(cont_s);
+    env_body.next_stmt     = env_body.continue_stmt;
     env_body.break_stmt    = env.next_stmt;
     anal_stmt(env_body,s);
     anal_exp(env,e);
     break;
 
-  case &Break_s(_): 
+  case &Break_s: 
     env.fenv->jumpers = new List(new $(s,env.break_stmt),env.fenv->jumpers); 
     break;
-  case &Continue_s(_): 
+  case &Continue_s: 
     env.fenv->jumpers = new List(new $(s,env.continue_stmt),env.fenv->jumpers); 
     break;
-  case &Goto_s(lab,_):
+  case &Goto_s(lab):
     env.fenv->jumpers = new List(new $(s,new Lab_j(lab)), env.fenv->jumpers);
     break;
 
@@ -318,7 +321,7 @@ static void anal_fd(jump_anal_res_t tables, fndecl_t fd) {
   anal_stmt(senv,fd->body);
 
   table_t<stmt_t,int>            pop_table  = make_ptr_table();
-  table_t<stmt_t,list_t<stmt_t>> pred_table = make_ptr_table();
+  //  table_t<stmt_t,list_t<stmt_t>> pred_table = make_ptr_table();
   table_t<stmt_t,stmt_opt_t>     succ_table = make_ptr_table();
 
   let stmt_info = fenv->stmt_info;
@@ -367,14 +370,14 @@ static void anal_fd(jump_anal_res_t tables, fndecl_t fd) {
 	  Hashtable::lookup(stmt_info, dest_stmt);
         Hashtable::insert(pop_table,  src_stmt, src_depth - dest_depth);
 	Hashtable::insert(succ_table, src_stmt, dest_stmt);
-	let l = NULL;
-	Hashtable::try_lookup(pred_table, dest_stmt, &l);
-	Hashtable::insert(pred_table, dest_stmt, new List(src_stmt,l));
+// 	let l = NULL;
+// 	Hashtable::try_lookup(pred_table, dest_stmt, &l);
+// 	Hashtable::insert(pred_table, dest_stmt, new List(src_stmt,l));
 	break; 
       }
   }
  L: Hashtable::insert(tables->pop_tables, fd,pop_table);
-    Hashtable::insert(tables->pred_tables,fd,pred_table);
+  //    Hashtable::insert(tables->pred_tables,fd,pred_table);
     Hashtable::insert(tables->succ_tables,fd,succ_table);
 }
 
@@ -403,7 +406,7 @@ static void jump_analysis_iter(jump_anal_res_t tables, list_t<decl_t,`H> tds) {
 
 jump_anal_res_t jump_analysis(list_t<decl_t,`H> tds) {
   let tables = new Jump_Anal_Result{.pop_tables  = make_ptr_table(), 
-				    .pred_tables = make_ptr_table(),
+				    // .pred_tables = make_ptr_table(),
 				    .succ_tables = make_ptr_table()};
   jump_analysis_iter(tables,tds);
   return tables;

@@ -24,6 +24,7 @@
 #include <set.h>
 #include <dict.h>
 #include "absyn.h"
+#include "jump_analysis.h"
 #include "cf_flowinfo.h"
 
 namespace NewControlFlow {
@@ -32,7 +33,8 @@ namespace NewControlFlow {
 extern void set_encloser(Absyn::stmt_t enclosee, Absyn::stmt_t encloser);
 
 // the entry point
-extern void cf_check(List::list_t<Absyn::decl_t> ds);
+extern void cf_check(JumpAnalysis::jump_anal_res_t tables,
+		     List::list_t<Absyn::decl_t> ds);
 
 // controls whether or not we warn when we lose a unique pointer --
 // costs some performance probably.

@@ -726,9 +726,11 @@ exp_t unresolvedmem_exp(opt_t<typedef_name_t,`H> n,
 }
 ///////////////////////// Statements ///////////////////////////////
 stmt_t new_stmt(raw_stmt_t s, seg_t loc) { 
-  return new Stmt{.r=s, .loc=loc, .non_local_preds=NULL,.annot=&EmptyAnnot_val};
+  return new Stmt{.r=s, .loc=loc, .annot=&EmptyAnnot_val};
 }
-datatype Raw_stmt.Skip_s Skip_s_val = Skip_s;
+datatype Raw_stmt.Skip_s     Skip_s_val     = Skip_s;
+datatype Raw_stmt.Break_s    Break_s_val    = Break_s;
+datatype Raw_stmt.Continue_s Continue_s_val = Continue_s;
 stmt_t skip_stmt(seg_t loc) { return new_stmt(&Skip_s_val, loc); }
 stmt_t exp_stmt(exp_t e,seg_t loc) { return new_stmt(new Exp_s(e),loc); }
 stmt_t seq_stmts(list_t<stmt_t> ss, seg_t loc) {
@@ -745,8 +747,8 @@ stmt_t ifthenelse_stmt(exp_t e,stmt_t s1,stmt_t s2,seg_t loc) {
 stmt_t while_stmt(exp_t e,stmt_t s,seg_t loc) { 
   return new_stmt(new While_s($(e,skip_stmt(e->loc)),s), loc);
 }
-stmt_t break_stmt   (seg_t loc) { return new_stmt(new Break_s(NULL), loc); }
-stmt_t continue_stmt(seg_t loc) { return new_stmt(new Continue_s(NULL), loc); }
+stmt_t break_stmt   (seg_t loc) { return new_stmt(&Break_s_val, loc); }
+stmt_t continue_stmt(seg_t loc) { return new_stmt(&Continue_s_val, loc); }
 stmt_t for_stmt(exp_t e1,exp_t e2,exp_t e3,stmt_t s,seg_t loc) {
   return new_stmt(new For_s(e1,$(e2,skip_stmt(e3->loc)),
                             $(e3,skip_stmt(e3->loc)),s),
@@ -782,7 +784,7 @@ stmt_t trycatch_stmt(stmt_t s, list_t<switch_clause_t,`H> scs, seg_t loc) {
   return new_stmt(new TryCatch_s(s,scs,NULL), loc);
 }
 stmt_t goto_stmt(var_t lab, seg_t loc) {
-  return new_stmt(new Goto_s(lab,NULL), loc);
+  return new_stmt(new Goto_s(lab), loc);
 }
 stmt_t assign_stmt(exp_t e1, exp_t e2, seg_t loc) {
   return exp_stmt(assign_exp(e1,e2,loc),loc);

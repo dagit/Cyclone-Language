@@ -981,9 +981,9 @@ void dumpstmt(stmt_t s,bool expstmt) {
     dumpstmt(s1,false);
     dump_char('}');
     break;
-  case &Break_s(_):    dump("break;");    break;
-  case &Continue_s(_): dump("continue;"); break;
-  case &Goto_s(x,_):   dump("goto"); dump_str(x); dump_semi(); break;
+  case &Break_s:    dump("break;");    break;
+  case &Continue_s: dump("continue;"); break;
+  case &Goto_s(x):  dump("goto"); dump_str(x); dump_semi(); break;
 
   case &For_s(e1,$(e2,_),$(e3,_),s1):
     dump("for("); dumpexp(e1);dump_semi(); dumpexp(e2);dump_semi(); dumpexp(e3);

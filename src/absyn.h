@@ -698,9 +698,9 @@ namespace Absyn {
     Return_s(exp_opt_t); // return; and return e;
     IfThenElse_s(exp_t,stmt_t,stmt_t); // if (e) then s1 else s2;
     While_s($(exp_t,stmt_t),stmt_t); // while (e) s;
-    Break_s(stmt_opt_t);    // stmt is dest, set by type-checking
-    Continue_s(stmt_opt_t); // stmt is dest, set by type-checking
-    Goto_s(var_t,stmt_opt_t); // stmt is dest, set by type-checking
+    Break_s;
+    Continue_s;
+    Goto_s(var_t);
     For_s(exp_t,$(exp_t,stmt_t),$(exp_t,stmt_t),stmt_t); 
     // switch statement
     Switch_s(exp_t,list_t<switch_clause_t>, Tcpat::decision_opt_t);  
@@ -718,8 +718,6 @@ namespace Absyn {
   EXTERN_ABSYN struct Stmt {
     raw_stmt_t     r;               // raw statement
     seg_t          loc;             // location in source code
-    list_t<stmt_t> non_local_preds; // set by type-checking, should go in the
-                                    // appropriate CFStmtAnnot, not here!
     absyn_annot_t  annot;           // used by analysis
   };
 

@@ -150,10 +150,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     return;
 
   case &Seq_s(s1,s2):
-    TEMP_RGN(te, r) {
-      let te2 = set_next(r, te,new Stmt_j(s2));
-      tcStmt(te2,s1,true); // pass new_block in case of weird associativity??
-    }
+    tcStmt(te,s1,true); // pass new_block in case of weird associativity??
     tcStmt(te,s2,true);
     return;
     /*
@@ -255,9 +252,9 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 
     // In the next 4 cases, the function call assigns through sopt
     // We leave the work to Tcenv b/c it has all the control information
-  case &Break_s(*sopt):    process_break(te,s0,sopt);    return;
-  case &Continue_s(*sopt): process_continue(te,s0,sopt); return;
-  case &Goto_s(l,*sopt):   process_goto(te,s0,l,sopt);   return;
+  case &Break_s:    
+  case &Continue_s: return;
+  case &Goto_s(l):  process_goto(te,s0,l);   return;
 
   case &Fallthru_s(es,*clauseopt):
     let trip_opt = process_fallthru(te,s0,clauseopt);

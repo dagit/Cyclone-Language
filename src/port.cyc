@@ -1519,9 +1519,9 @@ static void gen_stmt(cenv_t env, stmt_t s) {
     leq(gen_exp(env,e),arith_ct());
     gen_stmt(env,s);
     return;
-  case &Break_s(_):
-  case &Continue_s(_):
-  case &Goto_s(_,_): return;
+  case &Break_s:
+  case &Continue_s:
+  case &Goto_s(_): return;
   case &For_s(e1,$(e2,_),$(e3,_),s):
     gen_exp(env,e1);
     leq(gen_exp(env,e2),arith_ct());

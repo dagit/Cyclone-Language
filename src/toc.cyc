@@ -364,8 +364,8 @@ static raw_exp_t unresolvedmem_exp_r(opt_t<typedef_name_t,`H> tdopt,
 {
   return new UnresolvedMem_e(tdopt,ds);
 }
-static raw_stmt_t goto_stmt_r(var_t v, stmt_opt_t s) {
-  return new Goto_s(v,s);
+static raw_stmt_t goto_stmt_r(var_t v) {
+  return new Goto_s(v);
 }
 static datatype Raw_exp.Const_e zero_exp = Const_e(Cnst{.Int_c= $(Signed,0)});
 
@@ -4512,19 +4512,19 @@ static void stmt_to_c(env_t nv, stmt_t s) {
         stmt_to_c(loop_env(temp,nv),s2);
       }
       return;
-    case &Break_s(_): 
+    case &Break_s: 
       let &Env{.break_lab=b,...} = nv;
       if (b != NULL)
-	s->r = goto_stmt_r(*b,NULL);
+	s->r = goto_stmt_r(*b);
       // reset handler
       do_npop_before(get_npop(s),s);
       return;
-    case &Continue_s(_):
+    case &Continue_s:
       let &Env{.continue_lab=c,...} = nv;
       if (c != NULL)
-	s->r = goto_stmt_r(*c,NULL);
+	s->r = goto_stmt_r(*c);
       fallthru;
-    case &Goto_s(_,_):
+    case &Goto_s(_):
       // reset handler (note: earlier checks prevent jump into handler)
       do_npop_before(get_npop(s), s);
       return;
@@ -5305,8 +5305,8 @@ static void stmttypes_to_c(stmt_t s) {
   case &Do_s(s,$(e,_)): stmttypes_to_c(s); exptypes_to_c(e); break;
   case &Label_s(_,s): stmttypes_to_c(s); break;
   case &Skip_s:
-  case &Break_s(_):
-  case &Continue_s(_):
+  case &Break_s:
+  case &Continue_s:
   case &Goto_s(...): 
     break;
   case &Fallthru_s(...): 

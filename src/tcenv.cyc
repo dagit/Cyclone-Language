@@ -139,34 +139,13 @@ datatype Resolved {
   AnonEnumRes(type_t,enumfield_t);
 };
 
-datatype Jumpee {
-  NotLoop_j;
-  CaseEnd_j;
-  FnEnd_j;
-  Stmt_j(stmt_t);
-};
-datacon(Jumpee,NotLoop_j);
-datacon(Jumpee,CaseEnd_j);
-datacon(Jumpee,FnEnd_j);
-
-
 typedef $(switch_clause_t, list_t<tvar_t>, clist_t<type_t,`r>) const *`r
 ftclause_t<`r>;
 
 static struct CtrlEnv<`r::R> {
-  region_t<`r> ctrl_rgn;
-  jumpee_t<`r> continue_stmt;
-  jumpee_t<`r> break_stmt;
-             // NULL => not allowed
   ftclause_t<`r> fallthru_clause;
-  jumpee_t<`r> next_stmt; // needed to calculate break_stmt
-  // The next_stmt field needs to be correct only when we might enter
-  // a loop or switch. (i.e. when we call set_in_loop or set_in_switch)
 };
 typedef struct CtrlEnv<`r> @`r2 ctrl_env_t<`r,`r2>;
-// Region notes:  we need to allocate the fallthru_clause occasionally hence
-// the need for the ctrl_rgn.  We have to use clist to get the right subtyping.
-
 // This part is shared throughout type-checking of a function.
 // Hence mutations are seen by all subsequent type-checking, which is easier
 // than threading labels which must be function-wide unique anyway.
@@ -554,9 +533,9 @@ static fenv_t<`l> copy_fenv_new_ctrl(region_t<`l> l, fenv_t<`l2> f : {`l2}>`l)
   let Fenv{<`f,`c> shared,type_vars,region_order,locals,encloser,ctrl_env,
               capability,curr_rgn,flags,_} = *f;
   // WARNING: fallthru_clause shared with old
-  let CtrlEnv{cr,c_stmt,b_stmt,fallthru_clause,n_stmt} = *ctrl_env;
+  let CtrlEnv{fallthru_clause} = *ctrl_env;
   let new_ctrl_env =
-    rnew(l) CtrlEnv{cr,c_stmt,b_stmt,fallthru_clause,n_stmt};
+    rnew(l) CtrlEnv{fallthru_clause};
   return rnew(l) Fenv{shared,type_vars,region_order,(bnds_t<`l>)locals,
                       encloser,new_ctrl_env,capability,curr_rgn,
                       flags,l};
@@ -797,58 +776,7 @@ resolved_t<`r> lookup_ordinary(region_t<`r> r, tenv_t te,seg_t loc,qvar_t q,bool
   }
 }
 
-void process_continue(tenv_t te, stmt_t s, stmt_opt_t @sopt) {
-  let &Fenv{<`f,`c> .ctrl_env = ctrl_env, ...} =
-    get_fenv(te,"process_continue");
-  switch (ctrl_env->continue_stmt) {
-  case &Stmt_j(s2):
-    s2->non_local_preds = new List(s,s2->non_local_preds);
-    *sopt = s2;
-    return;
-  case &NotLoop_j: terr(s->loc, "continue not in a loop"); return;
-  case &CaseEnd_j:
-  case &FnEnd_j:   env_err("bad continue destination");
-  }
-}
-void process_break(tenv_t te, stmt_t s, stmt_opt_t @sopt) {
-  let &Fenv{<`f,`c> .ctrl_env = ctrl_env, .shared = shared, ...} =
-    get_fenv(te,"process_break");
-  switch (ctrl_env->break_stmt) {
-  case &Stmt_j(s2):
-    s2->non_local_preds = new List(s,s2->non_local_preds);
-    *sopt = s2;
-    return;
-  case &NotLoop_j:
-    terr(s->loc, "break not in a loop or switch");
-    return;
-  case &FnEnd_j:
-    // JGM: we now check for this in the control-flow analysis so you
-    // can ignore the following comment.
-    //// Note doing this here is more conservative than in control-flow.
-    //// Eg: while(true) if(false) break; else return 0;
-    //// But it's a pain to do in control flow because there is no stmt dest
-    /*
-    switch (Tcutil::compress(shared->return_typ)) {
-    case &VoidType: break;
-    case &FloatType(_):
-    case &IntType(_,_):
-      Tcutil::warn(s->loc,"break may cause function not to return a value");
-      break;
-    default:
-      Tcutil::terr(s->loc,"break may cause function not to return a value");
-      break;
-    }
-    */
-    return;
-  case &CaseEnd_j:
-    // FIX:  should really deal with this in the flow analysis for greater
-    // precision...
-    // Analogous comment to previous case applies.
-    terr(s->loc, "break causes outer switch clause to implicitly fallthru");
-    return;
-  }
-}
-void process_goto(tenv_t te, stmt_t s, var_t l, stmt_opt_t @sopt) {
+void process_goto(tenv_t te, stmt_t s, var_t l) {
   let &Fenv{<`f,`c> .shared = shared, ...} = get_fenv(te,"process_goto");
   stmt_t* sopt2 = Dict::lookup_opt(shared->seen_labels,l);
   if(sopt2 == NULL) {
@@ -859,11 +787,7 @@ void process_goto(tenv_t te, stmt_t s, var_t l, stmt_opt_t @sopt) {
       slopt = rnew(frgn) NULL;
     list_t<stmt_t,`H> new_needed = new List(s,*slopt);
     shared->needed_labels = Dict::insert(needed,l,new_needed);
-  } else {
-    stmt_t s = *sopt2;
-    s->non_local_preds = new List(s, s->non_local_preds);
-    *sopt = s;
-  }
+  } 
 }
 
 // do not stop setting clauseopt -- JumpAnalysis needs it!
@@ -872,8 +796,6 @@ process_fallthru(tenv_t<`g,`r> te,stmt_t s, switch_clause_t *@ clauseopt){
   let &Fenv{<`f,`c> .ctrl_env=ctrl_env,...} = get_fenv(te,"process_fallthru");
   let ans = ($(_,_,clist_t<_,`r>)const *`r)ctrl_env->fallthru_clause;
   if(ans != NULL) {
-    (*ans)[0]->body->non_local_preds =
-      new List(s, (*ans)[0]->body->non_local_preds);
     *clauseopt = new (*ans)[0];
   }
   return ans;
@@ -886,14 +808,13 @@ tenv_t<`g,`r> set_fallthru(region_t<`r> r, tenv_t<`g,`r2> te,
   let &Fenv{<`f,`c> shared,type_vars,region_order,locals,encloser,ctrl_env,
               capability,curr_rgn,flags,_} =
     get_fenv(te,"set_fallthru");
-  let &CtrlEnv{cr,c_stmt,b_stmt,fc,n_stmt} = ctrl_env;
+  let &CtrlEnv{fc} = ctrl_env;
   list_t<type_t,`c> ft_typ = NULL;
   for(; vds!=NULL; vds=vds->tl)
-    ft_typ = rnew(cr) List(vds->hd->type,ft_typ);
+    ft_typ = new List(vds->hd->type,ft_typ);
   let cft_typ = (mclist_t<_,`c>)List::imp_rev(ft_typ);
   let new_ctrl_env =
-    rnew(r) CtrlEnv{cr,c_stmt,b_stmt,rnew(cr) $(clause,new_tvs,cft_typ),
-		    n_stmt};
+    rnew(r) CtrlEnv{new $(clause,new_tvs,cft_typ)};
   let new_fe = rnew(r) Fenv{shared,type_vars,region_order,
                             (bnds_t<`r>)locals,
                             encloser,new_ctrl_env,capability,curr_rgn,
@@ -914,11 +835,7 @@ tenv_t<`g,`r> set_in_loop(region_t<`r> r, tenv_t<`g,`r2> te,
             capability,curr_rgn,flags,_} =
     get_fenv(te,"set_in_loop");
   ctrl_env_t<`r,`r> new_cenv =
-    rnew(r) CtrlEnv{.ctrl_rgn = r,
-                    .continue_stmt = rnew(r) Stmt_j(continue_dest),
-                    .break_stmt = ctrl_env->next_stmt,
-                    .next_stmt = rnew(r) Stmt_j(continue_dest),
-                    .fallthru_clause = ctrl_env->fallthru_clause};
+    rnew(r) CtrlEnv{.fallthru_clause = ctrl_env->fallthru_clause};
   fenv_t<`r> new_fenv =
     rnew(r) Fenv{shared,type_vars,region_order,(bnds_t<`r>)locals,
                    encloser,new_cenv,capability,curr_rgn,flags,r};
@@ -927,30 +844,11 @@ tenv_t<`g,`r> set_in_loop(region_t<`r> r, tenv_t<`g,`r2> te,
 
 // each non-last case must also call set_fallthru, here we just
 // change the break destination
+// FIX: a no-op now that jump_analysis exists
 tenv_t<`g,`r> set_in_switch(region_t<`r> r, tenv_t<`g,`r2> te : {`r2}>`r) {
   fenv_t fe  = copy_fenv_new_ctrl(r,get_fenv(te,"set_in_switch"));
   let &Fenv{<`f,`c> .ctrl_env = ctrl_env,...} = fe;
-  ctrl_env->break_stmt = ctrl_env->next_stmt; // break goes to next
-  ctrl_env->next_stmt  = &CaseEnd_j_val; // prevent nested break to fallthru
   return put_fenv(r,te,fe);
-}
-
-tenv_t<`g,`r> set_next(region_t<`r> r, tenv_t<`g,`r2> te, jumpee_t<`r> j
-                       : {`r2} > `r) {
-  let Fenv{<`f,`c> shared,type_vars,region_order,locals,encloser,ctrl_env,
-              capability,curr_rgn,flags,_} =
-    *get_fenv(te,"set_next");
-  ctrl_env_t<`r,`r> new_cenv =
-    rnew(r) CtrlEnv{.ctrl_rgn = r,
-                    .continue_stmt = ctrl_env->continue_stmt,
-                    .break_stmt = ctrl_env->break_stmt,
-                    .next_stmt = j,
-                    .fallthru_clause =
-		    (ftclause_t<`r>)ctrl_env->fallthru_clause};
-  fenv_t<`r> new_fenv =
-    rnew(r) Fenv{shared,type_vars,region_order,(bnds_t<`r>)locals,
-		 encloser,new_cenv,capability,curr_rgn,flags,r};
-  return put_fenv(r,te,new_fenv);
 }
 
 tenv_t<`g,`r> add_label(tenv_t<`g,`r> te, var_t v, stmt_t s) {
@@ -960,14 +858,6 @@ tenv_t<`g,`r> add_label(tenv_t<`g,`r> te, var_t v, stmt_t s) {
   region_t<`f> frgn = shared->frgn;
   if(sl_opt != NULL) {
     shared->needed_labels = Dict::rdelete(frgn, needed, v);
-    // backpatching
-    let sl = *sl_opt;
-    s->non_local_preds = sl;
-    for(; sl != NULL; sl = sl->tl)
-      switch (sl->hd->r) {
-      case &Goto_s(_,*so): *so = s; break;
-      default: env_err("Tcenv: add_label backpatching of non-goto"); break;
-      }
   }
   if(Dict::member(shared->seen_labels, v))
     Tcutil::terr(s->loc, "Repeated label: %s", *v);
@@ -1306,7 +1196,7 @@ fenv_t<`r> new_fenv(region_t<`r> r, seg_t loc, fndecl_t fd) {
          .region_order = rgn_po,
          .locals      = locals,  // assumed unique
          .encloser    = fd->body, // careful -- self loop at top!!!
-         .ctrl_env    = rnew(r) CtrlEnv(r, &NotLoop_j_val, &NotLoop_j_val, NULL, &FnEnd_j_val),
+         .ctrl_env    = rnew(r) CtrlEnv(NULL),
          .capability  = new JoinEff(new List(new AccessEff(param_rgn),
                                              new List((type_t)fd->effect,NULL))),
          .curr_rgn    = param_rgn,
@@ -1353,7 +1243,7 @@ fenv_t<`r> bogus_fenv(region_t<`r> r, type_t ret_type,
          .region_order = rgn_po,
          .locals      = locals,  // assumed unique
          .encloser    = skip_stmt(0),
-         .ctrl_env    = rnew(r) CtrlEnv(r, &NotLoop_j_val, &NotLoop_j_val, NULL, &FnEnd_j_val),
+         .ctrl_env    = rnew(r) CtrlEnv(NULL),
          .capability  = new JoinEff(new List(new AccessEff(param_rgn),NULL)),
          .curr_rgn    = param_rgn,
 	 .flags       = FenvFlags{false,false,false,false},
@@ -1428,7 +1318,7 @@ fenv_t<`r> nested_fenv(seg_t loc, fenv_t<`r> old_fenv, fndecl_t fd) {
          .region_order = rgn_po,
          .locals      = locals,  // assumed unique
          .encloser    = fd->body, // careful -- self loop at top!!!
-         .ctrl_env    = rnew(r) CtrlEnv(r, &NotLoop_j_val, &NotLoop_j_val, NULL, &FnEnd_j_val),
+         .ctrl_env    = rnew(r) CtrlEnv(NULL),
          .capability  = new JoinEff(new List(new AccessEff(param_rgn),
                                              new List((type_t)fd->effect,NULL))),
          .curr_rgn    = param_rgn,

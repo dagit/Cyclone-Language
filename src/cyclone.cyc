@@ -623,12 +623,13 @@ list_t<Absyn::decl_t> do_typecheck($(region_t<`tc>,Tcenv::tenv_t<`tc>) @tcenv,
 }
 
 JumpAnalysis::jump_anal_res_t do_jumpanalysis(bool ignore, 
-						 list_t<Absyn::decl_t,`H> tds) {
+					      list_t<Absyn::decl_t,`H> tds) {
   return JumpAnalysis::jump_analysis(tds);
 }
 
-list_t<Absyn::decl_t> do_cfcheck(bool ignore, list_t<Absyn::decl_t,`H> tds) {
-  NewControlFlow::cf_check(tds);
+list_t<Absyn::decl_t> do_cfcheck(JumpAnalysis::jump_anal_res_t tables,
+				 list_t<Absyn::decl_t,`H> tds) {
+  NewControlFlow::cf_check(tables,tds);
   return tds;
 }
 
@@ -1033,7 +1034,7 @@ static void process_file(string_t<`H> filename) {
     } 
     
     if (tc_r) goto PRINTC;
-    tds = do_stage("control-flow checking", do_cfcheck, true, tds);
+    tds = do_stage("control-flow checking", do_cfcheck, jump_tables, tds);
     if (compile_failure) {
       remove_file(preprocfile); // Can't flush warnings after removal
       return;
