@@ -52,6 +52,11 @@
 #include "absynpp.h"
 #include <cycboot.h>
 
+//#undef DEBUG_PRINT
+//#undef DEUB_PRINT_F
+//#define DEBUG_PRINT(arg...) fprintf(stderr,##arg)
+//#define DEBUG_PRINT_F(f,arg...) f ## (##arg)
+
 using List;
 using Absyn;
 using Relations;
@@ -2668,13 +2673,14 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env,
     open_exp_opt != NULL:
     let $(f,r) = anal_Rexp(env,true,inflow,open_exp_opt);
     let vds = List(vd,NULL);
-    f = add_vars(fenv, inflow,&vds,fenv->unknown_all,loc,false);
+    f = add_vars(fenv,f,&vds,fenv->unknown_all,loc,false);
     f = anal_stmt(env,f,s1,rval_opt);
     switch $(r,f) {
     case $(&NamedLocation(vd,rv),{.ReachableFL = $(indict,relns)}): 
       // behave as if we're assigning rv to vd to re-initialize it
       let vdplace = rnew(env->r) Place(rnew(env->r) VarRoot(vd),NULL);
       let outdict = assign_place(fenv,loc,indict,env->all_changed,vdplace,rv);
+      f = ReachableFL(outdict,relns);
       break;
     default: break;
     }
