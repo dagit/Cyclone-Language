@@ -13,8 +13,37 @@ CONFIGURATION BUGS:
 
 BUG FIXES and UNSOUNDNESSES:
 ----------------------------
+* Variables do not shadow typedef's properly.  For instance:
+
+  typedef int foo;
+
+  int f(foo foo) {
+    return foo;
+  }
+
+  fails to compile because the "return foo" is lexed not as an
+  identifier, but a typedef name.  We need to modify the parser and
+  lexer so that, upon entry of a scope, we shadow any typedefs
+  appropriately.
+
+* We need to modify the compiler to support local definitions for
+  types and extern identifiers.  
+
+* long int and int are treated as if they are the same when they are
+  not.  When we make this distinction, we should probably introduce a
+  new type, int_psize which is guaranteed to have the size and alignment
+  constraints of a pointer.  We should also change the Sizeof tunion to
+  use symbolic sizes instead of B1, B2, etc.  Finally, int_psize should
+  have BoxKind and, depending upon the architecture, int and long
+  *could* have BoxKind or MemKind.  We ought to have a flag on the
+  compiler that lets one treat them both as MemKind so that one can
+  easily write 64 bit code.
+
+* There are too many conflicts in the parser (18 shift-reduce, 4 reduce-
+  reduce.)  Someone should really clean this up.
+
 * C code from void f() { let x = NULL; } doesn't compile b/c we
-underconstrain the constant NULL and the unused type of x differently.
+  underconstrain the constant NULL and the unused type of x differently.
 
 * There are at least two problems with the new treatment of [r]malloc and
   [r]calloc.  First, we need to check that the things we are allocating
@@ -25,6 +54,12 @@ underconstrain the constant NULL and the unused type of x differently.
   reproduce it right now.  
 
 * not inserting defaults for types in xtunion variant types?
+
+* long long, short, float, and double constants (including 12s, 3l, etc.)
+
+* wide characters and strings
+
+* attributes on enums? (e.g., packed)
 
 * we allow enum constructors to shadow other enum constructors even though
   C doesn't.  
@@ -37,9 +72,6 @@ underconstrain the constant NULL and the unused type of x differently.
 * name mangling needs to be dealt with
 
 * FIX all of the FIX things.
-
-* can't cast char?? to const char? const ? (or whatever it is.)  I think
-  in general we're not tracking all of the qualifiers where we need to...
 
 * add F-bounded polymorphism or at least make it possible to abstract
   qualifiers.  The string library isn't polymorphic enough because in
@@ -64,13 +96,15 @@ underconstrain the constant NULL and the unused type of x differently.
    void g();
    g();
   }
-We complain that g isn't initialized.  We should complain that
-function declarations are only allowed at top-level.
+
+  We complain that g isn't initialized.  We should complain that
+  function declarations are only allowed at top-level.
 
 * Should break out initializers and lvalues so that the syntax is
-respected properly (e.g., shouldn't be casting lvalues).  
+  respected properly (e.g., shouldn't be casting lvalues).  
 
 * Should change code generator so it doesn't rely upon GCC extensions.
+  Ideally, we should be able to emit ANSI-C code.
 
 * Implementation of polymorphism assumes sizeof(void *) == sizeof(int).
   Implementations of exceptions and backtrace() assume sizeof(void *)
@@ -83,10 +117,6 @@ respected properly (e.g., shouldn't be casting lvalues).
   also check that main has the right type.  We should have the compiler
   hash and sign the code and interface so that we can detect tampering
   with the code or interface at link-time.
-
-* we're too restrictive about typedef names -- C allows typedef names
-  to be shadowed by identifiers (or other typedefs).  Our lexer
-  doesn't have quite the right infrastructure for this.
 
 * we need to do a bounds check on enum assignments.  Also, the pattern
   matcher assumes that there are no duplicate tags for enums.
@@ -103,6 +133,10 @@ respected properly (e.g., shouldn't be casting lvalues).
 * cyclone -Dfoo=bar baz.c
   does not pass the macro definition to the .c file; macro definitions
   are only passed to .cyc files.
+
+* we don't allow casts in "constant" expressions so as to avoid
+  the issue that our casts may include computation.  We should
+  have a way to check to see if a cast doesn't do any computation.
 
 MISSING THINGS NEEDED TO PORT REAL CODE:
 ----------------------------------------
@@ -125,36 +159,26 @@ MISSING THINGS NEEDED TO PORT REAL CODE:
   - add the remaining thread primitives; i.e. port some/all of the POSIX
     threads interface.
 
+* We should augment the abstract syntax and the parser so that we can
+  read any GCC code, including things like asm.  This will make extern
+  "C include" more useful.
+
 * argv should really have the type char* argv[argc].
 
 * need to port more C libraries
 
-* should have some "intern C" or "unsafe_C" where we can escape
-  out to C when needed.  This will allow us to not have to write
-  separate files with C code in them.
+* extern "C include" should have the ability to re-declare a C type
+  definition with a more refined Cyclone definition.  The compiler
+  should warn if the re-declaration isn't compatiable with the C
+  definition at the representation level.  
 
 * need to be able to use inject on a single argument, not just on
   varargs.  This is important for args that are void * for example.
 
-* nested type declarations? nested exception declarations? nested using?
-
-* long long, short, float, and double constants (including 12s, 3l, etc.)
-
 * add some way to forward varargs -- easiest would be to cast a vararg
   function to one with an explicit array.
 
-* wide characters and strings
-
-* attributes on enums? (e.g., packed)
-
-* we don't allow casts in "constant" expressions so as to avoid
-  the issue that our casts may include computation.  We should
-  have a way to check to see if a cast doesn't do any computation.
-
 * add setjmp and longjmp somehow.
-
-* should allow general constant expressions in switch -- something
-  that's hard to do with our parser and patterns.
 
 THINGS NEEDED TO SIMPLIFY PORTING:
 ----------------------------------
@@ -205,15 +229,15 @@ THINGS THAT WOULD BE NICE OR THAT HAVE SEX APPEAL:
 * ought to be able to treat the arguments to a tunion constructor as a tuple
   in a pattern...
 
-* qualifiers for arguments to [x]tunion constructors?  on tuples?
+* should support "..." in struct patterns?
 
-* cut, fill, codegen, splice
+* qualifiers for arguments to [x]tunion constructors?  on tuples?
 
 * Support qualified identifier declarations (instead of just uses).
 
 * as patterns.  views and abstract patterns.  
 
-* string append operator (++)?
+* string append operator (++)?  string patterns?  regexp patterns?
 
 * we should leverage the effect stuff to do exception analysis.
 
@@ -242,6 +266,4 @@ MISCELLANEOUS
 
 * translation to C with -noexpandtypedefs hasn't been tested in forever.
 
-* perhaps there should be an option to get a NULL check for * types
-  when doing -> ?  That is, why do we give one for *e but not e->f?
 
