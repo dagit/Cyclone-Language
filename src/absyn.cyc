@@ -253,6 +253,16 @@ type_t int_type(sign_t sn, size_of_t sz) {
   }
 }
 
+type_t complex_type(type_t t) {
+  // check that this is in fact either an integral or floating-point
+  // type.
+  switch (compress(t)) {
+  case &AppType(&IntCon(...),_):
+  case &AppType(&FloatCon(...),_): return new AppType(new ComplexCon,list(t));
+  default: Warn::impos2("bad complex type ",t);
+  }
+}
+
 type_t thin_bounds_exp(exp_t e) {
   return thin_bounds_type(valueof_type(e));
 }

@@ -318,6 +318,7 @@ namespace Absyn {
     VoidCon;// MemKind
     IntCon(sign_t,size_of_t); // char, short, int.  MemKind unless B4
     FloatCon(int);  // MemKind.  0=>float, 1=>double, _=>long double
+    ComplexCon; // complex ranges over intcon and floatcons only.
     RgnHandleCon; // region_t<`r> (handle for allocating).  RgnKind -> BoxKind
     TagCon;     // tag_t<t>.  IntKind -> BoxKind.
     HeapCon;    // The heap region.  RgnKind 
@@ -875,6 +876,8 @@ namespace Absyn {
   // float, double, long double, wchar_t
   extern type_t float_type, double_type, long_double_type, wchar_type();
   type_t gen_float_type(unsigned);
+  // complex types
+  extern type_t complex_type(type_t);
   // regions
   extern rgntype_t heap_rgn_type, unique_rgn_type, refcnt_rgn_type;
   // empty effect

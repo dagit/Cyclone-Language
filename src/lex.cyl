@@ -140,6 +140,8 @@ static $(string_t,short,bool) rw_array[] = {
   $("case", CASE, true),
   $("catch", CATCH,true),
   $("char", CHAR, true),
+  $("_Complex", COMPLEX, true),
+  $("__complex__", COMPLEX, true),
   $("const", CONST, true),
   $("__const__", CONST, true),
   $("continue", CONTINUE, true),

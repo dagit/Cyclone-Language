@@ -831,6 +831,9 @@ doc_t ntyp2doc(type_t t) {
     default: s = text("long double"); break;
     }
     break;
+  case &AppType(&ComplexCon,ts):
+    s = cat(text("_Complex "),ntyp2doc(ts->hd));
+    break;
   case &TupleType(ts): s = cat(dollar(),args2doc(ts)); break;
   case &AppType(&AggrCon(info),ts):
     let $(k,n) = aggr_kinded_name(info);

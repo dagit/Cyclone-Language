@@ -784,6 +784,7 @@ type_t typ_to_c(type_t t) {
   case &AppType(&TagCon,_):          return uint_type; // must be unsigned!
   case &AppType(&RgnHandleCon,_):    return rgn_type();
   case &AppType(&BuiltinCon(...),_): return t;
+  case &AppType(&ComplexCon,_)     : return t;
   // these types get translated when we instantiate aggregates with
   // abstract members -- we just translate them to void* to save pain.
   case &AppType(_,_): return void_star_type();

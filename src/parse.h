@@ -37,6 +37,7 @@ using List {
     bool Short_spec      : 1;
     bool Long_spec       : 1;
     bool Long_Long_spec  : 1;
+    bool Complex_spec    : 1;
     bool Valid_type_spec : 1;
     type_t Type_spec;
     seg_t loc;

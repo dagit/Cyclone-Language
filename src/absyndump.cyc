@@ -438,6 +438,7 @@ static void dumpntyp(type_t t) {
 	break;
       }
       return;
+    case &ComplexCon: dump("_Complex "); dumpntyp(ts->hd); return;
     case &IntCon(None,     Int_sz):
     case &IntCon(Signed,   Int_sz):   dump("int");            return;
     case &IntCon(None,     Long_sz):

@@ -1016,6 +1016,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       case &IntCon(_,_):
       case &BuiltinCon(...):
       case &FloatCon(_):
+      case &ComplexCon:
       case &AnonEnumCon(_):
         return;
       case &AggrCon(info):

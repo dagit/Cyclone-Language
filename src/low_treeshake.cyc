@@ -54,6 +54,7 @@ static void build_tables_type(env_t env, type_t t) {
     break;
   case &AppType(&EnumCon(n,_),NULL): 
     Set::imp_insert(env->enum_keepers,n); break;
+  case &AppType(&ComplexCon,_):
   case &AppType(_,NULL): break;
 
   case &Evar(_,topt,_,_):        fallthru(topt);
@@ -73,7 +74,7 @@ static void build_tables_type(env_t env, type_t t) {
 
   case &TypeofType(e): build_tables_exp(env,e); break;
 
-  default: Warn::impos2("LowTreeshake: unexpected type",t);
+  default: Warn::impos2("LowTreeshake: unexpected type ",t);
   }
 }
 

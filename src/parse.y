@@ -123,6 +123,7 @@ struct Type_specifier {
   bool Short_spec       : 1;
   bool Long_spec        : 1;
   bool Long_Long_spec   : 1;
+  bool Complex_spec     : 1;
   bool Valid_type_spec  : 1;
   type_t Type_spec;
   seg_t loc;
@@ -239,6 +240,7 @@ static type_specifier_t empty_spec(seg_t loc) {
                         .Short_spec = false,
                         .Long_spec = false,
                         .Long_Long_spec = false,
+                        .Complex_spec = false,
                         .Valid_type_spec = false,
                         .Type_spec = sint_type,
                         .loc = loc};
@@ -268,6 +270,11 @@ static type_specifier_t short_spec(seg_t loc) {
 static type_specifier_t long_spec(seg_t loc) {
   let s = empty_spec(loc);
   s.Long_spec = true;
+  return s;
+}
+static type_specifier_t complex_spec(seg_t loc) {
+  let s = empty_spec(loc);
+  s.Complex_spec = true;
   return s;
 }
 
@@ -576,6 +583,9 @@ static type_specifier_t combine_specifiers(seg_t loc,
   if (s1.Short_spec && s2.Short_spec)
     Warn::warn(loc,"too many occurrences of short in specifiers");
   s1.Short_spec |= s2.Short_spec;
+  if (s1.Complex_spec && s2.Complex_spec)
+    Warn::warn(loc,"too many occurrences of _Complex or __complex__ in specifiers");
+  s1.Complex_spec |= s2.Complex_spec;
   if ((s1.Long_Long_spec && s2.Long_Long_spec) ||
       (s1.Long_Long_spec && s2.Long_spec) ||
       (s2.Long_Long_spec && s1.Long_spec))
@@ -615,11 +625,16 @@ static type_t collapse_type_specifiers(type_specifier_t ts, seg_t loc) {
     if (ts.Long_Long_spec) sz = LongLong_sz;
   }
   // it's okay to not have an explicit type as long as we have some
-  // combination of signed, unsigned, short, long, or longlong
+  // combination of signed, unsigned, short, long, longlong, or complex
   if (!seen_type) {
-    if(!seen_sign && !seen_size) 
+    if(!seen_sign && !seen_size) {
+      if (ts.Complex_spec)
+        return complex_type(double_type);
       Warn::warn(loc,"missing type within specifier");
-    return int_type(sgn,sz);
+    }
+    if (ts.Complex_spec)
+      return complex_type(int_type(sgn,sz));
+    else return int_type(sgn,sz);
   } 
   switch (t) {
   case &AppType(&IntCon(sgn2,sz2),_):
@@ -629,10 +644,14 @@ static type_t collapse_type_specifiers(type_specifier_t ts, seg_t loc) {
     }
     if(seen_size && sz2 != sz)
       t = int_type(sgn2,sz);
+    if (ts.Complex_spec)
+      t = complex_type(t);
     break;
   case &AppType(&FloatCon(_),_): 
     if(seen_size) // hack: if we've seen "long" then sz will be long_double_type
       t = long_double_type; 
+    if (ts.Complex_spec)
+      t = complex_type(t);
     break;
   default: 
     if(seen_sign)
@@ -996,7 +1015,7 @@ using Parse;
 %token DOUBLE SIGNED UNSIGNED CONST VOLATILE RESTRICT
 %token STRUCT UNION CASE DEFAULT INLINE SIZEOF OFFSETOF
 %token IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN ENUM TYPEOF
-%token BUILTIN_VA_LIST EXTENSION
+%token BUILTIN_VA_LIST EXTENSION COMPLEX
 // Cyc:  CYCLONE additional keywords
 %token NULL_kw LET THROW TRY CATCH EXPORT OVERRIDE HIDE
 %token NEW ABSTRACT FALLTHRU USING NAMESPACE DATATYPE
@@ -1464,6 +1483,7 @@ type_specifier_notypedef:
 | DOUBLE    { $$=^$(type_spec(double_type,SLOC(@1))); }
 | SIGNED    { $$=^$(signed_spec(SLOC(@1))); }
 | UNSIGNED  { $$=^$(unsigned_spec(SLOC(@1))); }
+| COMPLEX   { $$=^$(complex_spec(SLOC(@1))); }
 | enum_specifier            { $$=$!1; }
 | struct_or_union_specifier { $$=$!1; }
 /* GCC extension */

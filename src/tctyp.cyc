@@ -473,6 +473,10 @@ static cvtenv_t i_check_type_app(cvtenv_t env, kind_t expected_kind,
     if (ts != NULL) 
       impos2(new AppType(c,ts)," applied to argument(s)");
     return env;
+  case &ComplexCon: // the front-end only builds well-formed complex's
+    for (; ts != NULL; ts = ts->tl)
+      env = i_check_type(env,&Kinds::mk,ts->hd,true,true);
+    return env;
   case &JoinCon: 
     for (; ts != NULL; ts = ts->tl)
       env = i_check_type(env,&Kinds::ek,ts->hd,true,true);

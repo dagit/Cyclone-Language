@@ -619,6 +619,7 @@ bool okay_szofarg(type_t t) {
     case &TagCon:
     case &IntCon(_,_):
     case &FloatCon(_): 
+    case &ComplexCon:
     case &BuiltinCon(...):
     case &EnumCon(_,_):
     case &RgnHandleCon: 
