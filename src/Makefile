@@ -16,8 +16,8 @@ CYCINC_H := $(CYC_LIB_PATH)/include/cyc_include.h
 OUT_PREFIX=
 
 ifdef PROFILE_REGIONS
-APROF_FLAG:=-pa -v
-LDFLAGS=-pa -v
+APROF_FLAG:=-pa
+LDFLAGS=-pa
 else
 APROF_FLAG:= 
 endif

@@ -20,6 +20,7 @@
 #include <core.h>
 #include <string.h>
 #include <hashtable.h>
+#include <list.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <array.h>
@@ -30,10 +31,13 @@ using Hashtable;
 
 char buf[80];
 
-int count = 0;
-int total_bytes = 0;
-int total_calls = 0;
-// int region_count = 0;
+List::list_t<$(stringptr_t<`H,`H>,
+	       $(table_t<stringptr_t<`H,`H>,$(int,int)@>,int)@,
+	       int,int,int)@> totals = NULL;
+List::list_t<$(stringptr_t<`H,`H>,
+	       $(table_t<stringptr_t<`H,`H>,$(int,int)@>,int)@,
+	       int,int,int)@> collated_totals = NULL;
+int region_count = 0;
 // int free_count = 0;
 // int region_bytes = 0;
 // int region_allocs = 0;
@@ -42,19 +46,29 @@ int total_calls = 0;
 // int heapatomic_bytes = 0;
 // int heapatomic_allocs = 0;
 
-void inccount(stringptr_t pos, $(int,int) @totals) {
-  total_bytes += (*totals)[0];
-  total_calls += (*totals)[1];
-  count++;
+void inctotal(stringptr_t pos, $(int,int) @rtotals) 
+{
+  totals->hd[0][2] += (*rtotals)[0]; 
+  totals->hd[0][3] += (*rtotals)[1];
+  totals->hd[0][4]++;
 }
 
-$(stringptr_t<`H,`H>,int,int)@ ?results = NULL;
-
-int index = 0;
-void add(stringptr_t<`H,`H> pos, $(int,int) @totals) {
-  results[index++] = new $(pos,(*totals)[0],(*totals)[1]);
+void inccount(stringptr_t<`H,`H> rname, 
+	      table_t<stringptr_t<`H,`H>,$(int,int)@`H> tab)
+{
+  let rtotals = new $(rname,new $(tab,0),0,0,0);
+  totals = new List::List(rtotals,totals);
+  iter(inctotal,tab);
+  region_count++;
 }
 
+void add(stringptr_t<`H,`H> pos, $(int,int) @totals, 
+	 $($(stringptr_t<`H,`H>,int,int) @?,int) @closure) {
+  let &$(results,*index) = closure;
+  results[(*index)++] = new $(pos,(*totals)[0],(*totals)[1]);
+}
+
+/* sort by total bytes allocated */
 int cmp($(stringptr_t,int,int) @@x,$(stringptr_t,int,int) @@y) {
   let left =  (**x)[1];
   let right = (**y)[1];
@@ -63,7 +77,25 @@ int cmp($(stringptr_t,int,int) @@x,$(stringptr_t,int,int) @@y) {
   return 0;
 }
 
-void print_results() {
+/* sort by total bytes allocated, per region */
+int listcmp($(stringptr_t<`H,`H>,
+	      $(table_t<stringptr_t<`H,`H>,$(int,int)@`r>,int)@`r3,
+	      int,int,int)@`r2 left,
+	    $(stringptr_t<`H,`H>,
+	      $(table_t<stringptr_t<`H,`H>,$(int,int)@`r>,int)@`r3,
+	      int,int,int)@`r2 right)
+{
+  let &$(_,_,tcl,_,_) = left;
+  let &$(_,_,tcr,_,_) = right;
+  if (tcl > tcr) return -1;
+  if (tcl < tcr) return 1;
+  return 0;
+}
+
+void print_results(stringptr_t rgn_name, int num_rgns, int count,
+		   $(stringptr_t<`H,`H>,int,int) @?results,
+		   int total_bytes, int total_calls) 
+{
 //   printf("region_count:\t %8d\n",region_count);
 //   printf("free_count:\t %8d\n",free_count);
 //   printf("region_bytes:\t %8d\n",region_bytes);
@@ -74,10 +106,11 @@ void print_results() {
 //   printf("heapatomic_allocs:\t %8d\n",heapatomic_allocs);
 //   printf("\n");
 
+  printf("\n%s (created %d times):\n",*rgn_name,num_rgns);
   printf("   Bytes     %%    Calls     %%\n");
   printf("-----------------------------\n");
   for (int i = 0; i < count; i++) {
-    let &$(pos,byte_count,call_count) = results[i];
+    let $(pos,byte_count,call_count) = results[i][0];
     printf("%8d  %4.1f %8d  %4.1f  %s\n",
            byte_count, 100.0 * byte_count / (double) total_bytes,
            call_count, 100.0 * call_count / (double) total_calls,
@@ -110,12 +143,118 @@ bool gettoken(FILE @f) {
   return true;
 }  
 
-void snarfline(FILE @f) {
-  int c = getc(f);
-  while (c != '\n' && c != EOF) c = getc(f);
-  ungetc(c,f);
+int snarfline(FILE @f) {
+  try {
+    int c = getc(f);
+    while (c != '\n' && c != EOF) c = getc(f);
+    if (c == EOF) return false;
+    else { ungetc(c,f); return true; }
+  } catch {
+  default: fprintf(stderr,"snarfline failed\n"); break;
+  }
+  return false;
 }
 
+bool remove_from_table(table_t<`a,`b> tab, `a x) {
+  try {
+    lookup(tab,x);
+    Hashtable::remove(tab,x);
+    return true;
+  } catch {
+  default: return false;
+  }
+}
+
+void count_one(_ k, _ v, int @cnt) {
+  (*cnt)++;
+}
+
+int count_table(table_t<`a,`b> tab) {
+  int count = 0;
+  iter_c(count_one,tab,&count);
+  return count;
+}
+
+bool is_empty(table_t<`a,`b> tab) {
+  if (count_table(tab) != 0)
+    return false;
+  else 
+    return true;
+}
+	       
+void update_table(stringptr_t<`H,`H> pos, $(int,int)@`H stats, 
+		  $(table_t<stringptr_t<`H,`H>, $(int,int)@`H>,int @)@ t)
+{
+  let &$(tab,count) = t;
+  try {
+    let &$(*byte_count,*call_count) = lookup(tab, pos);
+    *byte_count = *byte_count + stats[0][0];
+    *call_count = *call_count + stats[0][1];
+  } catch {
+  case Not_found:
+    insert(tab, pos, stats); 
+    (*count)++;
+    break;
+  }
+}
+
+void print_strptrs(stringptr_t<`H,`H> s,_ x) {
+  fprintf(stderr,"%s, ",*s);
+}
+
+void
+collate_dyn_region(stringptr_t<`H,`H> createloc,
+		   table_t<stringptr_t<`H,`H>,bool> dynregions)
+{
+  int total_bytes = 0, total_calls = 0, total_count = 0;
+  table_t<stringptr_t<`H,`H>,$(int,int)@`H> *tab = NULL;
+  List::list_t<$(stringptr_t<`H,`H>,$(table_t<stringptr_t<`H,`H>,
+		 $(int,int)@`H>,int)@`H,int,int,int)@`H> curr, last;
+  int rgn_cnt = count_table(dynregions);
+  for (curr = totals, last = NULL; 
+       curr != NULL; curr = curr->tl) {
+    /* this is in our list; add entries to our table */
+    if (remove_from_table(dynregions,curr->hd[0][0])) {
+      /* new table, just copy the old one */
+      if (tab == NULL) {
+	tab = new curr->hd[0][1][0][0];
+	total_count += curr->hd[0][4];
+      }
+      /* merge it */
+      else {
+	int cnt = 0;
+	let closure = new $(*tab,&cnt);
+	$(table_t<stringptr_t<`H,`H>,$(int,int)@>,int)@ x = curr->hd[0][1];
+	iter_c(update_table, x[0][0], closure);
+	total_count += cnt;
+      }
+      total_bytes += curr->hd[0][2];
+      total_calls += curr->hd[0][3];
+      /* remove the element from the totals list */
+      if (last == NULL)
+	totals = curr->tl;
+      else
+	last = curr->tl;
+    }
+    /* move up our pointer to the last valid element in the list */
+    else
+      last = curr;
+  }
+  /* print out the regions for which there was no allocation */
+  if (!is_empty(dynregions)) {
+    fprintf(stderr,"No allocation events for dyn regions @%s\n",*createloc);
+    iter(print_strptrs,dynregions);
+    fprintf(stderr,"\n");
+  }
+  /* no allocation events for this region */
+  if (tab == NULL)
+    tab = new (create(101, strptrcmp, hash_stringptr));
+  collated_totals = new List::List
+    (new $(createloc,new $(*tab,rgn_cnt),total_bytes,total_calls,total_count), 
+     collated_totals);
+}
+
+#define UPDATE_FREQ_PERCENT 2
 int main(int argc, string_t ?argv) {
   FILE @f;
   if (argc < 2) {
@@ -123,44 +262,156 @@ int main(int argc, string_t ?argv) {
   } else {
     f = (FILE @)fopen(argv[1],"r");
   }
-  table_t<stringptr_t<`H,`H>,$(int,int)@> table =
-      create(101, strptrcmp, hash_stringptr);
+  fseek(f,0,SEEK_END);
+  int filesz = ftell(f);
+  fseek(f,0,SEEK_SET);
+  int seg = filesz / (100/UPDATE_FREQ_PERCENT);
+  int ticks = 0;
+  for (int i = 0; i<(100/UPDATE_FREQ_PERCENT); i++)
+    fprintf(stderr,"=");
+  fprintf(stderr,"\n");
+
+  /* We want a table of tables, where each "sub-table"
+     contains the total allocation calls and bytes for each
+     callsite (for the region in question). */
+
+  table_t<stringptr_t<`H,`H>,
+    table_t<stringptr_t<`H,`H>,$(int,int)@`H>> regiontable =
+    create(101, strptrcmp, hash_stringptr);
+
+  /* create table to correlate locations with region names */
+  table_t<stringptr_t<`H,`H>,table_t<stringptr_t<`H,`H>,bool>> loctab =
+    create(101, strptrcmp, hash_stringptr);
+
+  /* create tables for the heap */
+  table_t<stringptr_t<`H,`H>,$(int,int)@`H> table =
+    create(101, strptrcmp, hash_stringptr);
+  insert(regiontable, new "heap", table);
+  table_t<stringptr_t<`H,`H>,bool> tab = 
+    create(101, strptrcmp, hash_stringptr);
+  insert(tab,new "heap",true);
+  insert(loctab,new "heap",tab);
 
   // get the program point
   while (gettoken(f)) {
     if (strcmp(buf,"----") == 0) break;
+    int cur_loc = ftell(f);
+    if ((cur_loc - (ticks*seg)) >= seg) {
+      fprintf(stderr,".");
+      ticks++;
+    }
+
     stringptr_t<`H,`H> s = new ((string_t)strdup(buf));
-    // get the allocation amount
+
+    // get the region name
     if (!gettoken(f)) {
-      fprintf(stderr,"missing allocation amount for %s\n",*s); return -1;
+      fprintf(stderr,"missing region name for %s\n",*s); return -1;
     }
-    int count;
-    try {
-      count = atoi(buf);
-    } catch {
-    default: fprintf(stderr,"bad integer %s\n",buf); return -1;
+    stringptr_t<`H,`H> rname = new ((string_t)strdup(buf));
+
+    // get the event
+    if (!gettoken(f)) {
+      fprintf(stderr,"missing allocation amount/action for %s\n",*s); 
+      return -1;
     }
-    // skip the rest of the info on the line
-    try {
+
+    /***********************/
+    /* CREATE REGION event */
+    /***********************/
+    if (!strcmp(buf,"create")) {
       snarfline(f);
-    } catch {
-    default: fprintf(stderr,"snarfline failed\n"); break;
+      /* at mapping to location correlation table */
+      try {
+	let names = lookup(loctab,s);
+	/* we've created a region at this location before,
+	   so let's correlate this dynamic region with all those
+	   past ones created at this spot. */
+	insert(names,rname,true);
+      } catch {
+      case Not_found:
+	/* first time; add initial correlation. */
+	table_t<stringptr_t<`H,`H>,bool> tab = 
+	  create(101, strptrcmp, hash_stringptr);
+	insert(tab,rname,true);
+	insert(loctab,s,tab);
+	continue;
+      }
     }
-    try {
-      let &$(*byte_count,*call_count) = lookup(table, s);
-      *byte_count = *byte_count + count;
-      *call_count = *call_count + 1;
-    } catch {
-    case Not_found:
-      insert(table, s, new $(count,1)); break;
+
+    /*********************/
+    /* FREE REGION event */
+    /*********************/
+    else if  (!strcmp(buf,"free")) {
+      continue;
+    }
+
+    /********************************/
+    /* ALLOCATE INTO A REGION event */
+    /********************************/
+    else {
+      // get the allocation amount
+      int count;
+      try {
+	count = atoi(buf);
+      } catch {
+      default: fprintf(stderr,"bad integer %s\n",buf); return -1;
+      }
+      snarfline(f);
+      // update the region table with this event
+      try {
+	let table = lookup(regiontable,rname);
+	try {
+	  let &$(*byte_count,*call_count) = lookup(table, s);
+	  *byte_count = *byte_count + count;
+	  *call_count = *call_count + 1;
+	} catch {
+	case Not_found:
+	  insert(table, s, new $(count,1)); break;
+	}
+      } catch {
+	case Not_found:
+	  /* first time we've seen this (dynamic) region;
+	     add it to the region table.  Should have only
+	     one entry per region. */
+	  table_t<stringptr_t<`H,`H>,$(int,int)@`H> table =
+	    create(101, strptrcmp, hash_stringptr);
+	  insert(regiontable, rname, table); break;
+      }
     }
   }
+  fprintf(stderr,"\n");
 
-  iter(inccount, table);
-  results = new {for i < count : new $((stringptr_t)(new ""),0,0)};
-  iter(add, table);
-  Array::qsort(cmp,results,results.size);
-  print_results();
+  /* Now we can collate and print the results */
+
+  /* Create a list, one element per region, that totals the
+     entire bytes and calls allocated for each dynamic region. */
+  iter(inccount, regiontable);
+
+  /* Now we further compress the list to merge events that are
+     associated with the same call site. */
+//    collated_totals = totals;
+  iter(collate_dyn_region, loctab);
+
+  /* Sort the list */
+  totals = List::rimp_merge_sort(listcmp,collated_totals);
+
+  /* Collate the results per region */
+  for (List::list_t<$(stringptr_t<`H,`H>,$(table_t<stringptr_t<`H,`H>,
+		      $(int,int)@`H>,int)@`H, int,int,int)@`H> x = totals; 
+      x != NULL; x = x->tl) {
+   /* create an array to hold the total calls and bytes per site */
+   int num = x->hd[0][4];
+   $(stringptr_t<`H,`H>,int,int)@`H ?results = 
+     new {for i < num : new $((stringptr_t)(new ""),0,0)};
+   let closure = new $(results,0);
+   let tab = x->hd[0][1][0][0];
+   iter_c(add, tab, closure);
+   /* sort it by total allocation size */
+   Array::qsort(cmp,results,results.size);
+   /* print it out */
+   print_results(x->hd[0][0],x->hd[0][1][0][1],
+		 num,results,x->hd[0][2],x->hd[0][3]);
+  }
 
   return 0;
 }

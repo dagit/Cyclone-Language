@@ -725,11 +725,23 @@ static int region_get_total_bytes(struct _RegionHandle *r) {
 
 struct _RegionHandle _profile_new_region(const char *rgn_name, 
 					 char *file, int lineno) {
+  int len;
+  char *buf;
+  static int cnt = 0;
+
+  len = strlen(rgn_name)+10;
+  buf = GC_malloc_atomic(len);
+  if(!buf)
+    _throw_badalloc;
+  else
+    snprintf(buf,len,"%d-%s\n",cnt++,rgn_name);
+
   if (alloc_log != NULL) {
     fputs(file,alloc_log);
-    fprintf(alloc_log,":%d\t%s\tcreate\n",lineno,rgn_name);
+    fprintf(alloc_log,":%d\t%s\tcreate\n",lineno,buf);
   }
-  return _new_region(rgn_name);
+
+  return _new_region(buf);
 }
 
 void _profile_free_region(struct _RegionHandle *r, char *file, int lineno) {
