@@ -22,15 +22,17 @@ struct foo<`r::TR> {
 
 int main() {
   /* basic usage */
-  int *`RC p = rcnew 3;
-  let $(p1,p2) = alias_refptr(p);
-  printf("a1=%d, a2=%d\n",*p1,*p2);
+  int *`RC p1 = rcnew 3;
+  printf("p1=%d (cnt=%d)\n",*p1,refptr_count(p1));
+  let p2 = alias_refptr(p1);
+  printf("p1=%d (cnt=%d), p2=%d (cnt=%d)\n",
+	 *p1,refptr_count(p1),*p2,refptr_count(p2));
   drop_refptr(p1);
-  printf("a2=%d\n",*p2);
+  printf("p2=%d (cnt=%d)\n",*p2,refptr_count(p2));
   drop_refptr(p2);
 
   /* consuming stuff */
-  p = rcnew 3;
+  int *`RC p = rcnew 3;
   let q = p;
 //   let n = *p; // no good
 

@@ -98,6 +98,7 @@ struct AnalEnv<`r::R> {
   place_set_t<`r>*`r all_changed;// NULL for "not in unorderd so don't bother"
   bool          noreturn;    // true when function is "noreturn"
   list_t<place_t<`r,`r>,`r> param_roots;
+  // XXX add nonconsume_roots
   Hashtable::table_t<stmt_t,flow_t<`r>@`r,`r> flow_table;
 };
 typedef struct AnalEnv<`r> @`r analenv_t<`r>;
@@ -256,6 +257,46 @@ static flow_t<`r> use_Rval(analenv_t<`r> env, seg_t loc, flow_t<`r> inflow, absR
 }
 
 static void check_nounique(analenv_t<`r> env, seg_t loc, type_t t, absRval_t<`r> r) {
+  switch $(Tcutil::compress(t),r) {
+  case $(_,&UnknownR(NoneIL)): return;
+  case $(_,&Zero): return;
+  case $(_,&Consumed(...)): return;
+  case $(&DatatypeFieldType(DatatypeFieldInfo({.KnownDatatypefield=$(_,tuf)},_)),&Aggregate(_,ad)):
+    if(tuf->typs == NULL)
+      return;
+    fallthru(tuf->typs,ad);
+  case $(&TupleType(tqts),&Aggregate(_,ad)):
+    unsigned sz = List::length(tqts);
+    for (int i = 0; i < sz; i++) {
+      check_nounique(env,loc,(*tqts->hd)[1],ad[i]);
+    }
+    return;
+  case $(&AggrType(AggrInfo(info,targs)),&Aggregate(_,d)):
+    // fix -- not right for unions?
+    let ad = get_known_aggrdecl(info);
+    if(ad->impl==NULL) return;
+    let fs = ad->impl->fields;
+    region temp;
+    let inst = List::rzip(temp,temp,ad->tvs,targs);
+    for (int i = 0; i < numelts(d); i++, fs = fs->tl) {
+      type_t t = fs->hd->type;
+      if (inst != NULL) t = Tcutil::rsubstitute(temp,inst,t);
+      check_nounique(env,loc,t,d[i]);
+    }
+    return;
+  case $(&AnonAggrType(k,fs),&Aggregate(_,d)):
+    // fix -- not right for unions?
+    for (int i = 0; i < numelts(d); i++, fs = fs->tl)
+      check_nounique(env,loc,fs->hd->type,d[i]);
+    return;
+  case $(&PointerType(_),_) && Tcutil::is_noalias_pointer(t):
+    Tcutil::warn(loc,"argument may still contain unique pointers");
+    return;
+  default: return;
+  }
+}
+
+static void check_unique(analenv_t<`r> env, seg_t loc, type_t t, absRval_t<`r> r) {
   switch $(Tcutil::compress(t),r) {
   case $(_,&UnknownR(NoneIL)): return;
   case $(_,&Zero): return;
@@ -935,15 +976,22 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
       // we just just "use" each arg except for the "initializes" attribute
       list_t<int> init_params = NULL;
       list_t<int> nolive_unique_params = NULL;
+      list_t<int> noconsume_params = NULL;
       switch(Tcutil::compress((type_t)e1->topt)) {
       case &PointerType(PtrInfo(t,_,_)):
         switch(Tcutil::compress(t)) {
         case &FnType(FnInfo(_,_,_,_,_,_,_,_,atts)):
           for(; atts != NULL; atts = atts->tl)
+	    // These attributes are assumed to be disjoint
             switch(atts->hd) {
-            case &Initializes_att(i): init_params=rnew(temp) List(i,init_params); break;
+            case &Initializes_att(i):
+	      init_params=rnew(temp) List(i,init_params); break;
             case &Noliveunique_att(i):
               nolive_unique_params = rnew(temp) List(i,nolive_unique_params);
+              break;
+            case &Noconsume_att(i):
+	      DEBUG_PRINT("found noconsume arg %d\n",i);
+              noconsume_params = rnew(temp) List(i,noconsume_params);
               break;
             default: break;
             }
@@ -954,48 +1002,70 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
       default: Tcutil::impos("anal_Rexp: bad function type");
       }
       for(int i=1; rvals != NULL; rvals = rvals->tl, es = es->tl, ++i) {
-        if(!List::memq(init_params,i) && !List::memq(nolive_unique_params,i)) {
-          outflow = use_Rval(env,es->hd->loc,outflow,rvals->hd);
-          continue;
-        }
-        if (List::memq(nolive_unique_params,i)) {
-          DEBUG_PRINT("using unique argument, inflow is {\n");
+	if (List::memq(init_params,i)) {
+	  switch(fst_outflow) {
+	  case {.BottomFL = _}: break;
+	  case {.ReachableFL = $(fst_d,_)}:
+	    if(initlevel(env->fenv,fst_d,rvals->hd)==NoneIL)
+	      Tcutil::terr(es->hd->loc,"expression may not be initialized");
+	    switch(outflow) {
+	    case {.BottomFL = _}: break;
+	    case {.ReachableFL = $(d,relns)}:
+	      // do the escape, but then set to esc_all (i.e. initialized)
+	      // in outflow
+	      let ans_d = escape_deref(fenv, d, env->all_changed, rvals->hd);
+	      switch(rvals->hd) {
+	      case &AddressOf(p):
+		switch(Tcutil::compress((type_t)es->hd->topt)) {
+		case &PointerType(PtrInfo(t,_,_)):
+		  ans_d = assign_place(fenv, es->hd->loc, ans_d,
+				       env->all_changed,
+				       p, typ_to_absrval(fenv,t,false,
+							 fenv->esc_all));
+		  break;
+		default: Tcutil::impos("anal_Rexp:bad type for initialized arg");
+		}
+		break;
+	      default: break;
+	      }
+	      outflow = ReachableFL(ans_d,relns);
+	      break;
+	    }
+	    break;
+	  }
+	}
+        else if (List::memq(nolive_unique_params,i)) {
+          DEBUG_PRINT("using unique argument %d, inflow is {\n",i);
           DEBUG_PRINT_F(print_flow,outflow);
           outflow = use_nounique_Rval(env,es->hd->loc,(type_t)es->hd->topt,
                                       outflow,rvals->hd);
           DEBUG_PRINT("}\n and outflow is {\n");
           DEBUG_PRINT_F(print_flow,outflow);
           DEBUG_PRINT("}\n");
-          continue;
         }
-        switch(fst_outflow) {
-        case {.BottomFL = _}: break;
-        case {.ReachableFL = $(fst_d,_)}:
-          if(initlevel(env->fenv,fst_d,rvals->hd)==NoneIL)
-            Tcutil::terr(es->hd->loc,"expression may not be initialized");
-          switch(outflow) {
-          case {.BottomFL = _}: break;
-          case {.ReachableFL = $(d,relns)}:
-            // do the escape, but then set to esc_all in outflow
-            let ans_d = escape_deref(fenv, d, env->all_changed, rvals->hd);
-            switch(rvals->hd) {
-            case &AddressOf(p):
-              switch(Tcutil::compress((type_t)es->hd->topt)) {
-              case &PointerType(PtrInfo(t,_,_)):
-                ans_d = assign_place(fenv, es->hd->loc, ans_d,
-                                     env->all_changed,
-                                     p, typ_to_absrval(fenv,t,false,fenv->esc_all));
-                break;
-              default: Tcutil::impos("anal_Rexp:bad type for initialized arg");
-              }
-              break;
-            default: break;
-            }
-            outflow = ReachableFL(ans_d,relns);
-            break;
-          }
-          break;
-        }
+	else {
+	  outflow = use_Rval(env,es->hd->loc,outflow,rvals->hd);
+	  if (List::memq(noconsume_params,i)) {
+	    // for a no-consume argument, we want to unconsume the rval.
+	    let $(_,lval) = anal_Lexp(env,outflow,true,es->hd);
+	    switch $(outflow,lval) {
+	    case $({.ReachableFL = $(fd,relns)},{.PlaceL = p}):
+	      let new_rval = make_unique_unconsumed(fenv,rvals->hd);
+	      DEBUG_PRINT("noconsume att(%d): inflow is {\n",i);
+	      DEBUG_PRINT_F(print_flow,outflow);
+	      fd=assign_place(fenv,es->hd->loc,fd,env->all_changed,p,new_rval);
+	      outflow = ReachableFL(fd,relns);
+	      DEBUG_PRINT("}\n and outflow is {\n");
+	      DEBUG_PRINT_F(print_flow,outflow);
+	      DEBUG_PRINT("}\n");
+	      break;
+	    case $({.BottomFL = _}, _): continue;
+	    default:
+	      Tcutil::terr(es->hd->loc,
+			   "noconsume() parameters must be l-values");
+	    }
+	  }
+	}
       }
       // if the called function doesn't return, we get BottomFL out
       if (Tcutil::is_noreturn((type_t)e1->topt))
@@ -1458,14 +1528,14 @@ static $(flow_t<`r>,absLval_t<`r>)
       switch $(f,lval) {
       case $({.ReachableFL = $(fd,r)},{.PlaceL = p}):
         let rval = lookup_place(fd,p);
-        DEBUG_PRINT("expanding unique %s found place ",exp2string(e1));
-        DEBUG_PRINT_F(print_place,p);
-        DEBUG_PRINT(" with rval ");
-        DEBUG_PRINT_F(print_absrval,rval);
-        DEBUG_PRINT("\n");
         switch (rval) {
         case &AddressOf(...): return anal_derefL(env,f,e1,f,rval,flds);
         default:
+	  DEBUG_PRINT("expanding unique %s found place ",exp2string(e1));
+	  DEBUG_PRINT_F(print_place,p);
+	  DEBUG_PRINT(" with rval ");
+	  DEBUG_PRINT_F(print_absrval,rval);
+	  DEBUG_PRINT("\n");
           initlevel_t il = initlevel(fenv,fd,rval);
           absRval_t leaf = (il == AllIL) ? fenv->unknown_all : fenv->unknown_none;
           absRval_t new_rval = typ_to_absrval(fenv,Tcutil::pointer_elt_type((type_t)e1->topt),false,leaf);
@@ -1883,6 +1953,7 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env, flow_t<`r> inflow, stmt_t s) {
     if (env->noreturn)
       Tcutil::terr(s->loc,"`noreturn' function might return");
     check_init_params(s->loc,env,inflow);
+    // XXX check for noconsume params as well
     return BottomFL();
   case &Return_s(e):
     if (env->noreturn)
@@ -2270,6 +2341,21 @@ static void check_nested_fun(flow_env_t<`r> fenv,
 	default: Tcutil::terr(loc, "initializes attribute on non-pointer");
 	}
 	break;
+      case &Noconsume_att(i):
+        unsigned j = i;
+        if (j > List::length(fd->param_vardecls->v)) {
+          Tcutil::terr(loc,"noconsume attribute exceeds number of parameters");
+          continue;
+        }
+        let vd = List::nth(fd->param_vardecls->v,j-1);
+        type_t t = Tcutil::compress(vd->type);
+        if (!Tcutil::is_noalias_pointer(t)) {
+          Tcutil::terr(loc,"noconsume attribute requires unique pointer type");
+          continue;
+        }
+	// XXX other restrictions?  E.g. not on arrays or fat pointers?
+	Tcutil::terr(loc,"noconsume attribute not yet supported on fn defs");
+	continue;
       default: break;
       }
     inflow = ReachableFL(d,relns);

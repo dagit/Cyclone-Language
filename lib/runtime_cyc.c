@@ -431,30 +431,18 @@ static int *get_refcnt(struct _dyneither_ptr ptr) {
   }
 }
 
-struct _count_ret{
-  int cnt;
-  struct _dyneither_ptr f2;
-};
-
-struct _count_ret Cyc_Core_refptr_count(struct _dyneither_ptr ptr) {
-  struct _count_ret res = { 0, ptr };
+int Cyc_Core_refptr_count(struct _dyneither_ptr ptr) {
   int *cnt = get_refcnt(ptr);
-  if (cnt != NULL) { res.cnt = *cnt; }
-  return res;
+  if (cnt != NULL) return *cnt;
+  else return 0;
 }
 
-struct _alias_ret{
-  struct _dyneither_ptr f1;
-  struct _dyneither_ptr f2;
-};
-
-struct _alias_ret Cyc_Core_alias_refptr(struct _dyneither_ptr ptr) {
-  struct _alias_ret res = { ptr, ptr };
+struct _dyneither_ptr Cyc_Core_alias_refptr(struct _dyneither_ptr ptr) {
   int *cnt = get_refcnt(ptr);
   if (cnt != NULL) *cnt = *cnt + 1;
 /*   fprintf(stderr,"refptr=%x, cnt=%x, updated *cnt=%d\n",ptr.base,cnt, */
 /* 	  cnt != NULL ? *cnt : 0); */
-  return res;
+  return ptr;
 }
 
 void Cyc_Core_drop_refptr(struct _dyneither_ptr ptr) {

@@ -1524,6 +1524,8 @@ attribute:
       a = new Initializes_att(n);
     } else if(zstrcmp(s,"noliveunique")==0 || zstrcmp(s,"__noliveunique__")==0){
       a = new Noliveunique_att(n);
+    } else if(zstrcmp(s,"noconsume")==0 || zstrcmp(s,"__noconsume__")==0){
+      a = new Noconsume_att(n);
     } else {
       err("unrecognized attribute",SLOC(@1));
       a = &Cdecl_att_val;
