@@ -31,6 +31,9 @@ $(BL)/libcycboot_nocheck.a: $(BB)/nocheck/libcycboot.a
 $(BL)/libcyc.a: $(BB)/libcyc.a
 	cp -p $< $@
 
+$(BL)/libcyc_g.a: $(BB)/gdb/libcyc.a
+	cp -p $< $@
+
 $(BL)/libcyc_a.a: $(BB)/aprof/libcyc.a
 	cp -p $< $@
 
@@ -84,6 +87,9 @@ endif
 $(BL)/cyc-lib/%/runtime_cyc.a: build/%/runtime_cyc.a
 	cp -p $< $@
 
+$(BL)/cyc-lib/%/runtime_cyc_g.a: build/%/gdb/runtime_cyc.a
+	cp -p $< $@
+
 $(BL)/cyc-lib/%/runtime_cyc_a.a: build/%/aprof/runtime_cyc.a
 	cp -p $< $@
 
@@ -119,6 +125,11 @@ bin/buildlib$(EXE): $(BB)/buildlib$(EXE)
 define rmake
 @mkdir -p $(@D)
 $(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base $(@F)
+endef
+
+define rmake-gdb
+@mkdir -p $(@D)
+$(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base CFLAGS="-g $(CFLAGS)" CYCFLAGS="-g $(CYCFLAGS)" $(@F)
 endef
 
 define rmake-aprof
@@ -163,6 +174,9 @@ $(BB)/libcyc.a: $(LIBCYC_PREREQS)
 	for i in `(cd $(BB)/include; find * -name '*.h')`;\
 	  do cp $(BB)/include/$$i $(BL)/cyc-lib/$(build)/include/$$i; done
 
+$(BB)/gdb/libcyc.a: $(LIBCYC_PREREQS)
+	+$(rmake-gdb)
+
 $(BB)/aprof/libcyc.a: $(LIBCYC_PREREQS)
 	+$(rmake-aprof)
 
@@ -203,6 +217,9 @@ endif
 
 $(BB)/runtime_cyc.a:
 	+$(rmake)
+
+$(BB)/gdb/runtime_cyc.a:
+	+$(rmake-gdb)
 
 $(BB)/aprof/runtime_cyc.a:
 	+$(rmake-aprof)
