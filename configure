@@ -133,6 +133,3 @@ ALL_ARCHS=${ALL_ARCHS}
 
 EOF
 cat Makefile.inc.in) > Makefile.inc
-
-# combine it with Makefile.inc.in
-# cat config/Makefile Makefile.inc.in > Makefile.inc

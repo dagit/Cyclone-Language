@@ -1,0 +1,49 @@
+#!/bin/bash
+# This script creates a patch, that when applied to the OCaml 3.01 lex tool
+# will produce the cyclex code.
+#
+# usage: qdist ocamllexdir [patchfile]
+
+if [ $# != 2 ]; then
+  if [ $# = 1 ]; then
+    patchfile=ocamllex2cyclex.patch
+  else
+    echo usage: $0 ocamllexdir [patchfile]
+    exit 1
+  fi
+else
+  patchfile=$2
+fi
+
+lexdir=$1
+
+tmpcycdir=/tmp/cyclex
+tmpcamldir=/tmp/lex
+
+# create the temporary directories
+#
+for dir in $tmpcycdir $tmpcamldir; do
+if [ -d "$dir" ]; then
+  echo "temporary directory $dir exists; may I remove it (y/n) ?"
+  read resp
+  if [ "$resp" = "y" ]; then
+    \rm -rf $dir
+  fi
+fi
+mkdir -p $dir
+done
+
+# copy the cyclex files, minus CVS and qdist, and the Ocaml files
+#
+files=`find . -type f -print | grep -v CVS | grep -v qdist | grep -v ocamllex2cyclex.patch`
+cp $files $tmpcycdir
+cp -r $lexdir/* $tmpcamldir
+
+# make the patch
+#
+(cd /tmp;
+ diff -rbBcN `basename $tmpcamldir` `basename $tmpcycdir`) > $patchfile
+
+# clear the temporary directories
+#
+rm -rf $tmpcamldir $tmpcycdir

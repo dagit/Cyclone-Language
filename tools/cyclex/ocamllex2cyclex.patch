@@ -1,0 +1,3418 @@
+diff -rbBcN lex/LICENSE cyclex/LICENSE
+*** lex/LICENSE	Wed Dec 31 19:00:00 1969
+--- cyclex/LICENSE	Tue Aug 21 16:09:42 2001
+***************
+*** 0 ****
+--- 1,107 ----
++ 
++ Ported Ocamllex, part of the OCaml 3.01 distribution (see
++ http://caml.inria.fr), to Cyclone and changed it to produce Cyclone.  These
++ changes are provided as a patch to the original OCaml sources, as required
++ by the Q public license which governs the distribution of OCaml source
++ code.  This license is included below.
++ 
++ ----------------------------------------------------------------------------
++   
++ The Q Public License Version 1.0
++ 
++ Copyright (C) 1999 Trolltech AS, Norway.
++ Everyone is permitted to copy and distribute this license document. 
++ 
++ The intent of this license is to establish freedom to share and change the
++ software regulated by this license under the open source model.
++ 
++ This license applies to any software containing a notice placed by the
++ copyright holder saying that it may be distributed under the terms of the Q
++ Public License version 1.0. Such software is herein referred to as the
++ Software. This license covers modification and distribution of the Software,
++ use of third-party application programs based on the Software, and
++ development of free software which uses the Software.
++ 
++ Granted Rights
++ 
++ 1. You are granted the non-exclusive rights set forth in this license
++    provided you agree to and comply with any and all conditions in this
++    license. Whole or partial distribution of the Software, or software items
++    that link with the Software, in any form signifies acceptance of this
++    license.
++ 
++ 2. You may copy and distribute the Software in unmodified form provided that
++    the entire package, including - but not restricted to - copyright,
++    trademark notices and disclaimers, as released by the initial developer
++    of the Software, is distributed.
++ 
++ 3. You may make modifications to the Software and distribute your
++    modifications, in a form that is separate from the Software, such as
++    patches. The following restrictions apply to modifications:
++ 
++    a. Modifications must not alter or remove any copyright notices in the
++    Software.
++ 
++    b. When modifications to the Software are released under this license, a
++    non-exclusive royalty-free right is granted to the initial developer of
++    the Software to distribute your modification in future versions of the
++    Software provided such versions remain available under these terms in
++    addition to any other license(s) of the initial developer.
++ 
++ 4. You may distribute machine-executable forms of the Software or
++    machine-executable forms of modified versions of the Software, provided
++    that you meet these restrictions:
++ 
++    a. You must include this license document in the distribution.
++ 
++    b. You must ensure that all recipients of the machine-executable forms
++    are also able to receive the complete machine-readable source code to the
++    distributed Software, including all modifications, without any charge
++    beyond the costs of data transfer, and place prominent notices in the
++    distribution explaining this.
++ 
++    c. You must ensure that all modifications included in the
++    machine-executable forms are available under the terms of this license.
++ 
++ 5. You may use the original or modified versions of the Software to compile,
++    link and run application programs legally developed by you or by others.
++ 
++ 6. You may develop application programs, reusable components and other
++    software items that link with the original or modified versions of the
++    Software. These items, when distributed, are subject to the following
++    requirements:
++ 
++    a. You must ensure that all recipients of machine-executable forms of
++    these items are also able to receive and use the complete
++    machine-readable source code to the items without any charge beyond the
++    costs of data transfer.
++ 
++    b. You must explicitly license all recipients of your items to use and
++    re-distribute original and modified versions of the items in both
++    machine-executable and source code forms. The recipients must be able to
++    do so without any charges whatsoever, and they must be able to
++    re-distribute to anyone they choose.
++ 
++    c. If the items are not available to the general public, and the initial
++    developer of the Software requests a copy of the items, then you must
++    supply one.
++ 
++ Limitations of Liability
++ 
++ In no event shall the initial developers or copyright holders be liable for
++ any damages whatsoever, including - but not restricted to - lost revenue or
++ profits or other direct, indirect, special, incidental or consequential
++ damages, even if they have been advised of the possibility of such damages,
++ except to the extent invariable law, if any, provides otherwise.
++ 
++ No Warranty
++ 
++ The Software and this license document are provided AS IS with NO WARRANTY
++ OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS
++ FOR A PARTICULAR PURPOSE.
++ 
++ Choice of Law
++ 
++ This license is governed by the Laws of Norway. Disputes shall be settled by
++ Oslo City Court.
++  
+diff -rbBcN lex/Makefile cyclex/Makefile
+*** lex/Makefile	Tue Aug 21 16:09:42 2001
+--- cyclex/Makefile	Tue Aug 21 16:09:42 2001
+***************
+*** 1,73 ****
+- #########################################################################
+- #                                                                       #
+- #                            Objective Caml                             #
+- #                                                                       #
+- #            Xavier Leroy, projet Cristal, INRIA Rocquencourt           #
+- #                                                                       #
+- #   Copyright 1999 Institut National de Recherche en Informatique et    #
+- #   en Automatique.  All rights reserved.  This file is distributed     #
+- #   under the terms of the Q Public License version 1.0.                #
+- #                                                                       #
+- #########################################################################
+  
+! # $Id: ocamllex2cyclex.patch,v 1.1 2001-08-21 20:16:19 mhicks Exp $
+  
+! # The lexer generator
+  
+! CAMLC=../boot/ocamlrun ../boot/ocamlc -I ../boot
+! CAMLOPT=../boot/ocamlrun ../ocamlopt -I ../stdlib
+! COMPFLAGS=
+! LINKFLAGS=
+! CAMLYACC=../boot/ocamlyacc
+! YACCFLAGS=
+! CAMLLEX=../boot/ocamlrun ../boot/ocamllex
+! CAMLDEP=../boot/ocamlrun ../tools/ocamldep
+! DEPFLAGS=
+  
+! OBJS=parser.cmo lexer.cmo lexgen.cmo compact.cmo output.cmo main.cmo
+  
+! all: ocamllex
+! allopt: ocamllex.opt
+  
+! ocamllex: $(OBJS)
+! 	$(CAMLC) $(LINKFLAGS) -o ocamllex $(OBJS)
+  
+! ocamllex.opt: $(OBJS:.cmo=.cmx)
+! 	$(CAMLOPT) -o ocamllex.opt $(OBJS:.cmo=.cmx)
+  
+! clean::
+! 	rm -f ocamllex ocamllex.opt
+! 	rm -f *.cmo *.cmi
+  
+! parser.ml parser.mli: parser.mly
+! 	$(CAMLYACC) $(YACCFLAGS) parser.mly
+  
+! clean::
+! 	rm -f parser.ml parser.mli
+  
+! beforedepend:: parser.ml parser.mli
+  
+! lexer.ml: lexer.mll
+! 	$(CAMLLEX) lexer.mll
+  
+! clean::
+! 	rm -f lexer.ml
+  
+! beforedepend:: lexer.ml
+  
+! .SUFFIXES:
+! .SUFFIXES: .ml .cmo .mli .cmi .cmx
+  
+- .ml.cmo:
+- 	$(CAMLC) -c $(COMPFLAGS) $<
+  
+! .mli.cmi:
+! 	$(CAMLC) -c $(COMPFLAGS) $<
+  
+! .ml.cmx:
+! 	$(CAMLOPT) -c $(COMPFLAGS) $<
+  
+! depend: beforedepend
+! 	$(CAMLDEP) *.mli *.ml > .depend
+  
+! include .depend
+--- 1,71 ----
+  
+! # The only difference between initial building and bootstrapping is how
+! # we get lexer.cyc.  For the initial build we copy it from the genfiles
+! # subdirectory.  For bootstrapping, we create it from lexer.cyl.
+! # So a full "update to next version sequence" would look like:
+! # make all boot update.  But don't do the update until you're sure things
+! # look good!
+  
+! CYCDIR = ../..
+  
+! include $(CYCDIR)/Makefile.inc
+  
+! PROG=cyclex$(EXE)
+! BINDIR=$(CYCDIR)/bin
+  
+! CYCC=$(CYCDIR)/bin/cyclone$(EXE)
+! CYCBISON=$(CYCDIR)/bin/cycbison$(EXE)
+  
+! LC_FLAG =
+! CYC_FLAGS += -I$(CYCDIR)/include -B$(BINDIR)/cyc-lib $(LC_FLAG)
+  
+! SRCS=syntax parser_tab lexer lexgen compact output main
+  
+! O_SRCS=$(addsuffix .o, $(SRCS))
+  
+! install: all $(BINDIR)/$(PROG)
+  
+! $(BINDIR)/$(PROG): $(PROG)
+! 	cp $(PROG) $(BINDIR)
+  
+! all: $(PROG)
+  
+! $(PROG): $(O_SRCS) $(BINDIR)/cyc-lib/$(CYCLIB)
+! 	$(CYCC) -B$(BINDIR)/cyc-lib $(LC_FLAG) -g -o $@ $(O_SRCS) $(LDFLAGS)
+  
+! boot:
+! 	-rm -f lexer.cyc
+! 	make $(PROG) BOOTSTRAP=X
+  
+! diff:
+! 	diff lexer.cyc genfiles/lexer.cyc
+  
+! # careful -- this overwrites the cyclone file needed to bootstrap!
+! update: all genfiles/lexer.cyc
+  
+  
+! parser_tab.cyc: parser.y $(CYCBISON)
+! 	$(CYCBISON) -v -d $< -o $@
+! parser_tab.h: parser.y $(CYCBISON)
+! 	$(CYCBISON) -v -d $< -o parser_tab.cyc
+  
+! ifdef BOOTSTRAP
+! lexer.cyc: lexer.cyl $(PROG)
+! 	./$(PROG) $< $@
+  
+! genfiles/lexer.cyc: lexer.cyc
+! 	cp lexer.cyc genfiles/lexer.cyc
+! else
+! lexer.cyc: genfiles/lexer.cyc
+! 	cp $< $@
+! endif
+  
+! %.o: %.cyc $(CYCC)
+! 	$(CYCC) $(CYC_FLAGS) -c $< 
+! 
+! clean:
+! 	rm -f *.o *.c lexer.cyc parser_tab.cyc parser_tab.h *.output *.stackdump
+! 	rm -f $(PROG) cyclex
+! 
+! lexer.cyc: parser_tab.h
+! parser_tab.c: parser.y
+diff -rbBcN lex/Makefile.Mac cyclex/Makefile.Mac
+*** lex/Makefile.Mac	Tue Aug 21 16:09:42 2001
+--- cyclex/Makefile.Mac	Wed Dec 31 19:00:00 1969
+***************
+*** 1,63 ****
+- #########################################################################
+- #                                                                       #
+- #                            Objective Caml                             #
+- #                                                                       #
+- #            Damien Doligez, projet Para, INRIA Rocquencourt            #
+- #                                                                       #
+- #   Copyright 1999 Institut National de Recherche en Informatique et    #
+- #   en Automatique.  All rights reserved.  This file is distributed     #
+- #   under the terms of the Q Public License version 1.0.                #
+- #                                                                       #
+- #########################################################################
+- 
+- # $Id: ocamllex2cyclex.patch,v 1.1 2001-08-21 20:16:19 mhicks Exp $
+- 
+- # The lexer generator
+- 
+- CAMLC = ::boot:ocamlrun ::boot:ocamlc -I ::boot:
+- COMPFLAGS =
+- LINKFLAGS =
+- CAMLYACC = ::boot:ocamlyacc
+- YACCFLAGS =
+- CAMLLEX = ::boot:ocamlrun ::boot:ocamllex
+- CAMLDEP = ::boot:ocamlrun ::tools:ocamldep
+- DEPFLAGS =
+- 
+- OBJS = parser.cmo lexer.cmo lexgen.cmo compact.cmo output.cmo main.cmo
+- 
+- all Ä ocamllex
+- 
+- ocamllex Ä {OBJS}
+-     {CAMLC} {LINKFLAGS} -o ocamllex {OBJS}
+- 
+- clean ÄÄ
+-     delete -i ocamllex
+-     delete -i Å.cm[io] || set status 0
+- 
+- parser.mli Ä parser.ml
+-     echo -n
+- 
+- parser.ml Ä parser.mly
+-     {CAMLYACC} {YACCFLAGS} parser.mly
+- 
+- clean ÄÄ
+-     delete -i parser.ml parser.mli
+- 
+- beforedepend ÄÄ parser.ml parser.mli
+- 
+- lexer.ml Ä lexer.mll
+-     {CAMLLEX} lexer.mll
+- 
+- clean ÄÄ
+-     delete -i lexer.ml
+- 
+- beforedepend ÄÄ lexer.ml
+- 
+- .cmo Ä .ml
+-     {CAMLC} -c {COMPFLAGS} {default}.ml
+- 
+- .cmi Ä .mli
+-     {CAMLC} -c {COMPFLAGS} {default}.mli
+- 
+- depend Ä beforedepend
+-     {CAMLDEP} Å.mli Å.ml > Makefile.Mac.depend
+--- 0 ----
+diff -rbBcN lex/Makefile.Mac.depend cyclex/Makefile.Mac.depend
+*** lex/Makefile.Mac.depend	Tue Aug 21 16:09:42 2001
+--- cyclex/Makefile.Mac.depend	Wed Dec 31 19:00:00 1969
+***************
+*** 1,17 ****
+- compact.cmiÄ lexgen.cmi 
+- lexer.cmiÄ parser.cmi 
+- lexgen.cmiÄ syntax.cmi 
+- output.cmiÄ compact.cmi lexgen.cmi syntax.cmi 
+- parser.cmiÄ syntax.cmi 
+- compact.cmoÄ lexgen.cmi compact.cmi 
+- compact.cmxÄ lexgen.cmx compact.cmi 
+- lexer.cmoÄ parser.cmi syntax.cmi lexer.cmi 
+- lexer.cmxÄ parser.cmx syntax.cmi lexer.cmi 
+- lexgen.cmoÄ syntax.cmi lexgen.cmi 
+- lexgen.cmxÄ syntax.cmi lexgen.cmi 
+- main.cmoÄ compact.cmi lexer.cmi lexgen.cmi output.cmi parser.cmi syntax.cmi 
+- main.cmxÄ compact.cmx lexer.cmx lexgen.cmx output.cmx parser.cmx syntax.cmi 
+- output.cmoÄ compact.cmi lexgen.cmi syntax.cmi output.cmi 
+- output.cmxÄ compact.cmx lexgen.cmx syntax.cmi output.cmi 
+- parser.cmoÄ syntax.cmi parser.cmi 
+- parser.cmxÄ syntax.cmi parser.cmi 
+--- 0 ----
+diff -rbBcN lex/Makefile.nt cyclex/Makefile.nt
+*** lex/Makefile.nt	Tue Aug 21 16:09:42 2001
+--- cyclex/Makefile.nt	Wed Dec 31 19:00:00 1969
+***************
+*** 1,73 ****
+- #########################################################################
+- #                                                                       #
+- #                            Objective Caml                             #
+- #                                                                       #
+- #            Xavier Leroy, projet Cristal, INRIA Rocquencourt           #
+- #                                                                       #
+- #   Copyright 1999 Institut National de Recherche en Informatique et    #
+- #   en Automatique.  All rights reserved.  This file is distributed     #
+- #   under the terms of the Q Public License version 1.0.                #
+- #                                                                       #
+- #########################################################################
+- 
+- # $Id: ocamllex2cyclex.patch,v 1.1 2001-08-21 20:16:19 mhicks Exp $
+- 
+- # The lexer generator
+- 
+- CAMLC=..\boot\ocamlrun ..\boot\ocamlc -I ..\boot
+- CAMLOPT=..\boot\ocamlrun ..\ocamlopt -I ..\stdlib
+- COMPFLAGS=
+- LINKFLAGS=
+- CAMLYACC=..\boot\ocamlyacc
+- YACCFLAGS=
+- CAMLLEX=..\boot\ocamlrun ..\boot\ocamllex
+- CAMLDEP=..\boot\ocamlrun ..\tools\ocamldep
+- DEPFLAGS=
+- 
+- OBJS=parser.cmo lexer.cmo lexgen.cmo compact.cmo output.cmo main.cmo
+- 
+- all: ocamllex
+- allopt: ocamllex.opt
+- 
+- ocamllex: $(OBJS)
+- 	$(CAMLC) $(LINKFLAGS) -o ocamllex $(OBJS)
+- 
+- ocamllex.opt: $(OBJS:.cmo=.cmx)
+- 	$(CAMLOPT) -o ocamllex.opt $(OBJS:.cmo=.cmx)
+- 
+- clean::
+- 	rm -f ocamllex ocamllex.opt
+- 	rm -f *.cmo *.cmi
+- 
+- parser.ml parser.mli: parser.mly
+- 	$(CAMLYACC) $(YACCFLAGS) parser.mly
+- 
+- clean::
+- 	rm -f parser.ml parser.mli
+- 
+- beforedepend:: parser.ml parser.mli
+- 
+- lexer.ml: lexer.mll
+- 	$(CAMLLEX) lexer.mll
+- 
+- clean::
+- 	rm -f lexer.ml
+- 
+- beforedepend:: lexer.ml
+- 
+- .SUFFIXES:
+- .SUFFIXES: .ml .cmo .mli .cmi .cmx
+- 
+- .ml.cmo:
+- 	$(CAMLC) -c $(COMPFLAGS) $<
+- 
+- .mli.cmi:
+- 	$(CAMLC) -c $(COMPFLAGS) $<
+- 
+- .ml.cmx:
+- 	$(CAMLOPT) -c $(COMPFLAGS) $<
+- 
+- depend: beforedepend
+- 	$(CAMLDEP) *.mli *.ml > .depend
+- 
+- !include .depend
+--- 0 ----
+diff -rbBcN lex/README cyclex/README
+*** lex/README	Wed Dec 31 19:00:00 1969
+--- cyclex/README	Tue Aug 21 16:09:42 2001
+***************
+*** 0 ****
+--- 1,23 ----
++ Cyclex was ported from ocamllex, part of the OCaml 3.01 distribution (see
++ http://caml.inria.fr).  The changes to the OCaml source are provided as a
++ patch, ocamllex2cyclex.patch, to the original OCaml 3.01 sources, as
++ required by the Q public license which governs the distribution of OCaml
++ source code.  This license is included in the file LICENSE.
++ 
++ To create the contents of this directory from the OCaml sources, do the
++ following (assuming the ocaml-3.01 source is installed in directory CAMLDIR,
++ and that cyclone is installed in directory CYCDIR):
++ 
++ cp -r CAMLDIR/lex /tmp/lex
++ cp ocamllex2cyclex.patch /tmp
++ cd /tmp/lex
++ patch -p1 < ../ocamllex2cyclex.patch
++ mkdir genfiles
++ mv lexer.cyc genfiles
++ cd ..
++ mv lex CYCDIR/tools/cyclex
++ rm -f ocamllex2cyclex.patch
++ 
++ ---------------
++ August 23, 2001
++ 
+diff -rbBcN lex/compact.cyc cyclex/compact.cyc
+*** lex/compact.cyc	Wed Dec 31 19:00:00 1969
+--- cyclex/compact.cyc	Tue Aug 21 16:09:42 2001
+***************
+*** 0 ****
+--- 1,140 ----
++ 
++ #include "core.h"
++ #include "list.h"
++ #include "ref.h"
++ #include "hashtable.h"
++ 
++ #include "lexgen.h"
++ #include "compact.h"
++ 
++ using Core;
++ using List;
++ using Lexgen;
++ 
++ namespace Compact;
++ 
++ struct Lex_tables {
++   int ?base;     // perform/shift
++   int ?backtrk;  // No_remember / Remember
++   int ?defaultX; // Default transition
++   int ?trans;    // Transitions (compacted)
++   int ?check;    // Check (compacted)
++ };
++ 
++ // Determine the integer occurring most frequently in an array
++ static int most_frequent_elt(int ?v) {
++   Hashtable::table_t<int,Ref::ref_t<int>> frequencies = 
++      Hashtable::create(17, intcmp, identity);
++   int max_freq  = 0;
++   int most_freq = 0;
++   for(int i=0; i < v.size; ++i) {
++     int      e = v[i];
++     Ref::ref_t<int> r;
++     try r = Hashtable::lookup(frequencies, e);
++     catch {
++     case Not_found: 
++       r = Ref::new_ref(0); 
++       Hashtable::insert(frequencies, e, r);
++       break;
++     }
++     int f = Ref::get(r) + 1;
++     Ref::set(r, f);
++     if(f > max_freq) {
++       max_freq  = f;
++       most_freq = e;
++     }
++   }
++   return most_freq;
++ }
++ 
++ // Transform an array into a list of (position, non-default element)
++ 
++ static list_t<$(int,int)@> non_default_elements(int def, int ?v) {
++   list_t<$(int,int)@> ans = NULL;
++   for(int i=v.size-1; i >= 0; --i) {
++     int e = v[i];
++     if(e != def)
++       ans = new List(new $(i,e), ans);
++   }
++   return ans;
++ }
++ 
++ // Compact the transition and check arrays (initialized in compact_tables)??
++ static int ?trans = NULL;
++ static int ?check = NULL;
++ static int last_used = 0;
++ 
++ static void grow_transitions() {
++   int ?old_trans = trans;
++   int ?old_check = check;
++   int n = old_trans.size;
++   trans = new {for i < 2*n : i < last_used ? old_trans[i] : 0};
++   check = new {for i < 2*n : i < last_used ? old_check[i] : -1};
++ }
++ 
++ static int pack_from(list_t<$(int,int)@> nondef, int b); // forward declaration
++ 
++ static int try_pack(list_t<$(int,int)@> nondef, list_t<$(int,int)@> rem, int b) {
++   switch (rem) {
++   case NULL: return b;
++   case &List{.hd= &$(pos,v), .tl= rem2}:
++     if(check[b+pos] == -1)
++       return try_pack(nondef, rem2, b);
++     else
++       return pack_from(nondef,b+1);
++   }
++ }
++ 
++ static int pack_from(list_t<$(int,int)@> nondef, int b) {
++   while(b+257 > trans.size)
++     grow_transitions();
++   return try_pack(nondef, nondef, b);
++ }
++ 
++ static $(int,int)@ pack_moves(int state_num, automata_move_t ?moves) {
++   int ?moves_v = new {for i < 257 : 
++ 		       ({int x; 
++ 		       switch(moves[i]) { 
++ 		       case Backtrack: x = -1; break;
++ 		       case &Goto(n):   x = n;  break;
++ 		       }
++ 		       x;
++ 		       })};
++   int               def    = most_frequent_elt(moves_v);
++   list_t<$(int,int)@> nondef = non_default_elements(def, moves_v);
++   int               base   = pack_from(nondef,0);
++ 
++   for(; nondef != NULL; nondef = nondef->tl) {
++     let &$(pos,v) = nondef->hd;
++     trans[base+pos] = v;
++     check[base+pos] = state_num;
++   }
++   if(base + 257 > last_used)
++     last_used = base + 257;
++   return new $(base, def);
++ }
++ 
++ lex_tables_t compact_tables(Lexgen::automata_t ?state_v) {
++   trans = new {for i < 1024 : 0};
++   check = new {for i < 1024 : -1};
++   int n = state_v.size;
++   int ?base     = new {for i < n : 0};
++   int ?backtrk  = new {for i < n : -1};
++   int ?defaultX = new {for i < n : 0};
++   for(int i = 0; i < n; ++i)
++     switch (state_v[i]) {
++     case &Perform(m): base[i] = -(m+1); break;
++     case &Shift(trans,move):
++       switch (trans) {
++       case No_remember: break;
++       case &Remember(m): backtrk[i] = m; break;
++       }
++       let &$(b,d) = pack_moves(i,move);
++       base[i]     = b;
++       defaultX[i] = d;
++       break;
++     }
++   return new Lex_tables(base, backtrk, defaultX, 
++                         new {for i < last_used : trans[i]},
++                         new {for i < last_used : check[i]});
++ }
+diff -rbBcN lex/compact.h cyclex/compact.h
+*** lex/compact.h	Wed Dec 31 19:00:00 1969
+--- cyclex/compact.h	Tue Aug 21 16:09:42 2001
+***************
+*** 0 ****
+--- 1,21 ----
++ #ifndef COMPACT_H
++ #define COMPACT_H
++ 
++ #include "lexgen.h"
++ 
++ namespace Compact {
++ 
++ extern struct Lex_tables {
++   int ?base;     // perform/shift
++   int ?backtrk;  // No_remember / Remember
++   int ?defaultX; // Default transition
++   int ?trans;    // Transitions (compacted)
++   int ?check;    // Check (compacted)
++ };
++ typedef struct Lex_tables @ lex_tables_t;
++ 
++ extern lex_tables_t compact_tables(Lexgen::automata_t ?);
++ 
++ }
++ 
++ #endif
+diff -rbBcN lex/compact.ml cyclex/compact.ml
+*** lex/compact.ml	Tue Aug 21 16:09:42 2001
+--- cyclex/compact.ml	Wed Dec 31 19:00:00 1969
+***************
+*** 1,121 ****
+- (***********************************************************************)
+- (*                                                                     *)
+- (*                           Objective Caml                            *)
+- (*                                                                     *)
+- (*            Xavier Leroy, projet Cristal, INRIA Rocquencourt         *)
+- (*                                                                     *)
+- (*  Copyright 1996 Institut National de Recherche en Informatique et   *)
+- (*  en Automatique.  All rights reserved.  This file is distributed    *)
+- (*  under the terms of the Q Public License version 1.0.               *)
+- (*                                                                     *)
+- (***********************************************************************)
+- 
+- (* $Id: ocamllex2cyclex.patch,v 1.1 2001-08-21 20:16:19 mhicks Exp $ *)
+- 
+- (* Compaction of an automata *)
+- 
+- open Lexgen
+- 
+- (* Determine the integer occurring most frequently in an array *)
+- 
+- let most_frequent_elt v =
+-   let frequencies = Hashtbl.create 17 in
+-   let max_freq = ref 0 in
+-   let most_freq = ref (v.(0)) in
+-   for i = 0 to Array.length v - 1 do
+-     let e = v.(i) in
+-     let r =
+-       try
+-         Hashtbl.find frequencies e
+-       with Not_found ->
+-         let r = ref 1 in Hashtbl.add frequencies e r; r in
+-     incr r;
+-     if !r > !max_freq then begin max_freq := !r; most_freq := e end
+-   done;
+-   !most_freq
+- 
+- (* Transform an array into a list of (position, non-default element) *)
+- 
+- let non_default_elements def v =
+-   let rec nondef i =
+-     if i >= Array.length v then [] else begin
+-       let e = v.(i) in
+-       if e = def then nondef(i+1) else (i, e) :: nondef(i+1)
+-     end in
+-   nondef 0
+- 
+- (* Compact the transition and check arrays *)
+- 
+- let trans = ref(Array.create 1024 0)
+- and check = ref(Array.create 1024 (-1))
+- and last_used = ref 0
+- 
+- let grow_transitions () =
+-   let old_trans = !trans
+-   and old_check = !check in
+-   let n = Array.length old_trans in
+-   trans := Array.create (2*n) 0;
+-   Array.blit old_trans 0 !trans 0 !last_used;
+-   check := Array.create (2*n) (-1);
+-   Array.blit old_check 0 !check 0 !last_used
+- 
+- let pack_moves state_num move_t =
+-   let move_v = Array.create 257 0 in
+-   for i = 0 to 256 do
+-     move_v.(i) <-
+-       (match move_t.(i) with
+-         Backtrack -> -1
+-       | Goto n -> n)
+-   done;
+-   let default = most_frequent_elt move_v in
+-   let nondef = non_default_elements default move_v in
+-   let rec pack_from b =
+-     while b + 257 > Array.length !trans do grow_transitions() done;
+-     let rec try_pack = function
+-       [] -> b
+-     | (pos, v) :: rem ->
+-         if !check.(b + pos) = -1 then try_pack rem else pack_from (b+1) in
+-     try_pack nondef in
+-   let base = pack_from 0 in
+-   List.iter
+-     (fun (pos, v) ->
+-       !trans.(base + pos) <- v;
+-       !check.(base + pos) <- state_num)
+-     nondef;
+-   if base + 257 > !last_used then last_used := base + 257;
+-   (base, default)
+- 
+- (* Build the tables *)
+- 
+- type lex_tables =
+-   { tbl_base: int array;                 (* Perform / Shift *)
+-     tbl_backtrk: int array;              (* No_remember / Remember *)
+-     tbl_default: int array;              (* Default transition *)
+-     tbl_trans: int array;                (* Transitions (compacted) *)
+-     tbl_check: int array }               (* Check (compacted) *)
+- 
+- let compact_tables state_v =
+-   let n = Array.length state_v in
+-   let base = Array.create n 0
+-   and backtrk = Array.create n (-1)
+-   and default = Array.create n 0 in
+-   for i = 0 to n - 1 do
+-     match state_v.(i) with
+-       Perform n ->
+-         base.(i) <- -(n+1)
+-     | Shift(trans, move) ->
+-         begin match trans with
+-           No_remember -> ()
+-         | Remember n -> backtrk.(i) <- n
+-         end;
+-         let (b, d) = pack_moves i move in
+-         base.(i) <- b;
+-         default.(i) <- d
+-   done;
+-   { tbl_base = base;
+-     tbl_backtrk = backtrk;
+-     tbl_default = default;
+-     tbl_trans = Array.sub !trans 0 !last_used;
+-     tbl_check = Array.sub !check 0 !last_used }
+- 
+- 
+--- 0 ----
+diff -rbBcN lex/compact.mli cyclex/compact.mli
+*** lex/compact.mli	Tue Aug 21 16:09:42 2001
+--- cyclex/compact.mli	Wed Dec 31 19:00:00 1969
+***************
+*** 1,24 ****
+- (***********************************************************************)
+- (*                                                                     *)
+- (*                           Objective Caml                            *)
+- (*                                                                     *)
+- (*            Xavier Leroy, projet Cristal, INRIA Rocquencourt         *)
+- (*                                                                     *)
+- (*  Copyright 1996 Institut National de Recherche en Informatique et   *)
+- (*  en Automatique.  All rights reserved.  This file is distributed    *)
+- (*  under the terms of the Q Public License version 1.0.               *)
+- (*                                                                     *)
+- (***********************************************************************)
+- 
+- (* $Id: ocamllex2cyclex.patch,v 1.1 2001-08-21 20:16:19 mhicks Exp $ *)
+- 
+- (* Compaction of an automata *)
+- 
+- type lex_tables =
+-   { tbl_base: int array;                 (* Perform / Shift *)
+-     tbl_backtrk: int array;              (* No_remember / Remember *)
+-     tbl_default: int array;              (* Default transition *)
+-     tbl_trans: int array;                (* Transitions (compacted) *)
+-     tbl_check: int array }               (* Check (compacted) *)
+- 
+- val compact_tables: Lexgen.automata array -> lex_tables
+--- 0 ----
+diff -rbBcN lex/lexer.cyc cyclex/lexer.cyc
+*** lex/lexer.cyc	Wed Dec 31 19:00:00 1969
+--- cyclex/lexer.cyc	Tue Aug 21 16:09:42 2001
+***************
+*** 0 ****
+--- 1,433 ----
++ #line 1 "lexer.cyl"
++  
++ 
++ // Port of ocamllex to Cyclone, with enormous debt to INRIA:
++ /* 
++ (***********************************************************************)
++ (*                                                                     *)
++ (*                           Objective Caml                            *)
++ (*                                                                     *)
++ (*            Xavier Leroy, projet Cristal, INRIA Rocquencourt         *)
++ (*                                                                     *)
++ (*  Copyright 1996 Institut National de Recherche en Informatique et   *) 
++ (*  en Automatique.  All rights reserved.  This file is distributed    *)
++ (*  under the terms of the Q Public License version 1.0.               *)
++ (*                                                                     *)
++ (***********************************************************************)
++ */
++ 
++   // FIX: We do not have the luxury of tail-call optimization but we act
++   // as though we do! 
++ 
++ #include "core.h"
++ #include "stdio.h"
++ #include "string.h"
++ #include "lexing.h"
++ 
++ #include "syntax.h"
++ #include "parser.h"
++ 
++ using Core;
++ using Lexing;
++ using Parser;
++ 
++ namespace Lexer {
++ int line_num       = 1;
++ int line_start_pos = 0;
++ }
++ 
++ void yyerror(string_t<`H> s) {
++   fprintf(stderr, "%s, line:%d", s, Lexer::line_num);
++   fflush(stderr);
++   throw new Parser_error(s);
++ }
++ 
++ namespace Lexer {
++ 
++ xtunion exn { Lexical_error(string_t,int,int); };
++ 
++ static string_t          token_string = "";
++ static int                     token_char   = (int)'D';
++ static struct Syntax::Location dummy_loc    = {0,0,0,0};
++ static Syntax::location_t      token_action = &dummy_loc;
++ 
++ static int brace_depth   = 0;
++ static int comment_depth = 0;
++ 
++ static char string_buff_v[38];
++ static mstring_t string_buff  = (mstring_t)string_buff_v;
++ static int    string_index = 0;
++ 
++   //typedef int lexfun_t <`a>(Lexing::Lexbuf<`a>;{});
++ 
++ #define SHRINK_THRESHOLD 16384
++ void reset_string_buffer() {
++   if(string_buff.size > SHRINK_THRESHOLD)
++     string_buff = (mstring_t)string_buff_v;
++   string_index = 0;
++ }
++ 
++ void store_string_char(char c) {
++   if(string_index >= string_buff.size) {
++     mstring_t new_buff = new_string(string_buff.size*2);
++     strncpy(string_buff, new_buff, string_buff.size);
++     string_buff = new_buff;
++   }
++   string_buff[string_index++] = c;
++ }
++ 
++ mstring_t get_stored_string() {
++   return substring(string_buff,0,string_index);
++ }
++ 
++ char char_for_backslash(char c) {
++   switch (c) {
++   case 'a': return '\a';
++   case 'b': return '\b';
++   case 'f': return '\f';
++   case 'n': return '\n';
++   case 'r': return '\r';
++   case 't': return '\t';
++   case 'v': return '\v';
++   default:  return c;
++   }
++ }
++ 
++ // FIX: Maybe the Cyclone version should interpret things in octal instead
++ //      of decimal.  If so, change this code and all existing lexers.
++ char char_for_octal_code(Lexbuf<`a> lbuf, int i) {
++   return (char)(64 * (((int) lexeme_char(lbuf,i))   - '0') +
++ 		 8 * (((int) lexeme_char(lbuf,i+1)) - '0') +
++ 		     (((int) lexeme_char(lbuf,i+2)) - '0'));
++ }
++ 
++ static int handle_lexical_error(int fn(Lexing::Lexbuf<`a>), 
++                                 Lexbuf<`a>lbuf) {
++   int line = line_num;
++   int column = lexeme_start(lbuf) - line_start_pos;
++   try return fn(lbuf);
++   catch { case &Lexical_error(msg,_,_): throw new Lexical_error(msg,line,column); }
++ }
++ 
++ // Forward declarations of lexing functions
++   //extern lexfun_t lexmain, action, strng, comment;
++ extern int lexmain(Lexing::Lexbuf<`a>);
++ extern int action(Lexing::Lexbuf<`a>);
++ extern int strng(Lexing::Lexbuf<`a>);
++ extern int comment(Lexing::Lexbuf<`a>);
++ 
++ 
++ } // namespace Lexer
++ 
++ // for parser -- must not be prefixed 
++ int yylex() {
++   int ans = Lexer::lexmain(lbuf->v);
++   switch (ans) {
++   case TIDENT:  yylval = new String_tok(Lexer::token_string);   break;
++   case TSTRING: yylval = new String_tok(Lexer::token_string);   break;
++   case TCHAR:   yylval = new Char_tok((char)Lexer::token_char); break;
++   case TACTION: yylval = new Location_tok(Lexer::token_action); break;
++   default: break;
++   }
++   return ans;
++ }
++ 
++ namespace Lexer;
++ 
++ using Lexing {
++ 
++ const int lex_base[] = {0,10,4,12,-10,-9,-3,53,1,8,-8,-1,-2,13,-4,88,14,98,106,16,-7,-6,-5,-6,-1,157,162,24,-3,173,181,153,-9,-3,33,16,-1,-2,21,231,23,189,242,25,264,-23,164,-2,-5,52,-18,-19,-15,-17,-21,84,-10,-16,345,-13,-14,-20,-12,-9,-11,-22,429,89,265,90,282,300,91,169};
++ const int lex_backtrk[] = {-1,-1,-1,-1,-1,-1,-1,9,9,9,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,6,-1,1,-1,-1,-1,9,-1,-1,10,10,-1,-1,-1,-1,-1,-1,-1,-1,9,-1,0,-1,-1,22,-1,-1,-1,-1,-1,22,-1,-1,3,-1,-1,-1,-1,-1,-1,-1,3,-1,-1,-1,-1,-1,-1,0};
++ const int lex_default[] = {45,31,20,4,0,0,0,13,-1,-1,0,0,0,-1,0,-1,-1,-1,-1,-1,0,0,0,0,0,-1,-1,-1,0,-1,-1,44,0,0,38,-1,0,0,-1,-1,-1,-1,-1,-1,44,0,-1,0,0,67,0,0,0,0,0,-1,0,0,-1,0,0,0,0,0,0,0,-1,-1,-1,-1,-1,-1,-1,-1};
++ const int lex_trans[] = {0,0,0,0,0,0,0,0,0,46,47,0,46,46,23,0,0,0,0,0,32,0,5,0,0,0,0,0,0,0,0,0,46,27,48,0,27,27,24,49,50,51,52,53,33,54,6,55,12,34,11,7,22,21,8,20,27,35,20,9,14,56,22,57,21,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,59,14,60,61,62,25,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,63,64,39,28,16,21,20,10,0,0,36,0,37,17,17,17,17,17,17,17,17,68,15,18,18,18,18,18,18,18,18,19,19,19,19,19,19,19,19,0,-1,0,0,26,27,0,26,26,26,27,73,26,26,73,73,73,0,16,73,73,0,0,0,16,-1,0,26,0,28,-1,0,26,0,73,0,16,0,-1,73,16,0,16,29,29,29,29,29,29,29,29,0,0,0,0,0,0,0,28,30,30,30,30,30,30,30,30,14,14,14,14,14,14,14,14,42,42,42,42,42,42,42,42,0,0,0,0,28,0,0,0,0,28,28,65,0,0,28,22,0,0,0,0,0,10,28,10,0,40,28,0,28,-1,28,-1,0,-1,41,41,41,41,41,41,41,41,0,0,-1,43,43,43,43,43,43,43,43,-1,0,0,0,0,-1,69,0,0,0,-1,-1,0,-1,0,70,70,70,70,70,70,70,70,0,0,40,0,0,0,0,69,40,71,71,71,71,71,71,71,71,0,0,0,40,0,0,0,40,0,40,72,72,72,72,72,72,72,72,0,69,0,0,0,0,69,69,0,0,0,69,0,0,0,0,0,0,0,69,0,0,0,69,0,69,0,69,66,0,0,-1,0,-1,0,0,0,66,66,66,66,66,66,66,66,66,66,0,0,0,0,0,0,-1,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,0,0,0,0,66,0,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,0,0,0,0,0,0,0,0,66,66,66,66,66,66,66,66,66,66,0,0,0,0,0,0,0,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,-1,0,0,0,66,0,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
++ const int lex_check[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,0,0,-1,0,0,2,-1,-1,-1,-1,-1,1,-1,3,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,27,0,-1,27,27,2,0,0,0,0,0,1,0,3,0,8,1,9,3,13,16,3,19,27,1,35,3,38,0,40,0,43,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,34,55,15,67,69,72,-1,-1,1,-1,1,15,15,15,15,15,15,15,15,49,7,17,17,17,17,17,17,17,17,18,18,18,18,18,18,18,18,-1,31,-1,-1,25,25,-1,25,25,26,26,46,26,26,46,46,73,-1,15,73,73,-1,-1,-1,15,31,-1,25,-1,25,31,-1,26,-1,46,-1,15,-1,31,73,15,-1,15,25,25,25,25,25,25,25,25,-1,-1,-1,-1,-1,-1,-1,25,29,29,29,29,29,29,29,29,30,30,30,30,30,30,30,30,41,41,41,41,41,41,41,41,-1,-1,-1,-1,25,-1,-1,-1,-1,25,25,0,-1,-1,25,2,-1,-1,-1,-1,-1,1,25,3,-1,39,25,-1,25,44,25,31,-1,31,39,39,39,39,39,39,39,39,-1,-1,34,42,42,42,42,42,42,42,42,44,-1,-1,-1,-1,44,68,-1,-1,-1,49,7,-1,44,-1,68,68,68,68,68,68,68,68,-1,-1,39,-1,-1,-1,-1,68,39,70,70,70,70,70,70,70,70,-1,-1,-1,39,-1,-1,-1,39,-1,39,71,71,71,71,71,71,71,71,-1,68,-1,-1,-1,-1,68,68,-1,-1,-1,68,-1,-1,-1,-1,-1,-1,-1,68,-1,-1,-1,68,-1,68,-1,68,58,-1,-1,44,-1,44,-1,-1,-1,58,58,58,58,58,58,58,58,58,58,-1,-1,-1,-1,-1,-1,31,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,-1,-1,-1,-1,58,-1,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,66,-1,-1,-1,-1,-1,-1,-1,-1,66,66,66,66,66,66,66,66,66,66,-1,-1,-1,-1,-1,-1,-1,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,44,-1,-1,-1,66,-1,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
++      int lex_engine(int start_state, Lexbuf<`a> lbuf) {
++ 
++        int state, base, backtrk;
++        int c;
++        state = start_state;
++ 
++        if (state >= 0) {
++ 	 lbuf->lex_last_pos = lbuf->lex_start_pos = lbuf->lex_curr_pos;
++ 	 lbuf->lex_last_action = -1;
++        } else {
++ 	 state = -state-1;
++        }
++        while (true) {
++ 	 base = lex_base[state];
++ 	 if (base < 0) return -base-1;
++ 	 backtrk = lex_backtrk[state];
++ 	 if (backtrk >= 0) {
++ 	   lbuf->lex_last_pos    = lbuf->lex_curr_pos;
++ 	   lbuf->lex_last_action = backtrk;
++ 	 }
++ 	 if (lbuf->lex_curr_pos >= lbuf->lex_buffer_len) {
++ 	   if (!lbuf->lex_eof_reached)
++ 	     return -state-1;
++ 	   else
++ 	     c = 256;
++ 	 } else {
++ 	   c = (int) (lbuf->lex_buffer[lbuf->lex_curr_pos++]);
++ 	   if (c==EOF) c=256;
++ 	 }
++ 	 if (lex_check[base+c]==state)
++ 	   state = lex_trans[base+c];
++ 	 else
++ 	   state = lex_default[state];
++ 	 if (state < 0) {
++ 	   lbuf->lex_curr_pos = lbuf->lex_last_pos;
++ 	   if (lbuf->lex_last_action == -1)
++ 	     throw new Error("empty token");
++ 	   else {
++ 	     return lbuf->lex_last_action;
++ 	   }
++ 	 } else {
++ 	   if (c == 256) lbuf->lex_eof_reached = false;
++ 	 }
++        }
++   }
++ int lexmain_rec(Lexbuf<`a> lexbuf, int lexstate) {
++   lexstate = lex_engine(lexstate,lexbuf);
++   switch (lexstate) {
++ 
++ case 0: 
++ #line 140 "lexer.cyl"
++                           return lexmain(lexbuf); 
++ case 1: 
++ #line 141 "lexer.cyl"
++          line_start_pos = lexeme_end(lexbuf);
++          ++line_num;
++          return lexmain(lexbuf); 
++ case 2: 
++ #line 144 "lexer.cyl"
++          comment_depth = 1;
++          handle_lexical_error(comment,lexbuf); 
++          return lexmain(lexbuf); 
++ case 3: 
++ #line 148 "lexer.cyl"
++     mstring_t s = lexeme(lexbuf);
++     if     (strcmp(s,"rule")  == 0) return TRULE;
++     else if(strcmp(s,"parse") == 0) return TPARSE;
++     else if(strcmp(s,"and")   == 0) return TAND;
++     else if(strcmp(s,"eof")   == 0) return TEOF;
++     else if(strcmp(s,"let")   == 0) return TLET;
++     else { token_string = s; return TIDENT; }
++   
++ case 4: 
++ #line 156 "lexer.cyl"
++         reset_string_buffer();
++         handle_lexical_error(strng, lexbuf);
++ 	token_string = get_stored_string();
++ 	return TSTRING;
++       
++ case 5: 
++ #line 162 "lexer.cyl"
++       token_char = (int)lexeme_char(lexbuf,1); 
++       return TCHAR; 
++ case 6: 
++ #line 165 "lexer.cyl"
++       token_char = (int)char_for_backslash(lexeme_char(lexbuf,2)); 
++       return TCHAR; 
++ case 7: 
++ #line 168 "lexer.cyl"
++       token_char = (int)char_for_octal_code(lexbuf,2);
++       return TCHAR; 
++ case 8: 
++ #line 171 "lexer.cyl"
++       
++      int n1 = lexeme_end(lexbuf);
++      int l1 = line_num;
++      int s1 = line_start_pos;
++      brace_depth = 1;
++      int n2 = handle_lexical_error(action,lexbuf);
++      token_action = new Syntax::Location(n1,n2,l1,n1-s1);
++      return TACTION;
++    
++ case 9: 
++ #line 180 "lexer.cyl"
++         return TEQUAL; 
++ case 10: 
++ #line 181 "lexer.cyl"
++         return TOR; 
++ case 11: 
++ #line 182 "lexer.cyl"
++         return TUNDERSCORE; 
++ case 12: 
++ #line 183 "lexer.cyl"
++         return TLBRACKET; 
++ case 13: 
++ #line 184 "lexer.cyl"
++         return TRBRACKET; 
++ case 14: 
++ #line 185 "lexer.cyl"
++         return TSTAR; 
++ case 15: 
++ #line 186 "lexer.cyl"
++         return TMAYBE; 
++ case 16: 
++ #line 187 "lexer.cyl"
++         return TPLUS; 
++ case 17: 
++ #line 188 "lexer.cyl"
++         return TLPAREN; 
++ case 18: 
++ #line 189 "lexer.cyl"
++         return TRPAREN; 
++ case 19: 
++ #line 190 "lexer.cyl"
++         return TCARET; 
++ case 20: 
++ #line 191 "lexer.cyl"
++         return TDASH; 
++ case 21: 
++ #line 192 "lexer.cyl"
++         return -1; 
++ case 22: 
++ #line 193 "lexer.cyl"
++       throw new Lexical_error(aprintf("illegal character %s", lexeme(lexbuf)),
++ 			      line_num, 
++ 			      lexeme_start(lexbuf) - line_start_pos);  default: lexbuf->refill_buff(lexbuf); return lexmain_rec(lexbuf,lexstate);
++   }
++  throw new Error("some action didn't return!");
++ }
++ int lexmain(Lexbuf<`a> lexbuf) { return lexmain_rec(lexbuf,0); }
++ int action_rec(Lexbuf<`a> lexbuf, int lexstate) {
++   lexstate = lex_engine(lexstate,lexbuf);
++   switch (lexstate) {
++ 
++ case 0: 
++ #line 198 "lexer.cyl"
++         ++brace_depth; return action(lexbuf); 
++ case 1: 
++ #line 199 "lexer.cyl"
++         --brace_depth; 
++         if(brace_depth == 0) return lexeme_start(lexbuf);
++ 	else return action(lexbuf); 
++ case 2: 
++ #line 202 "lexer.cyl"
++         reset_string_buffer();
++         strng(lexbuf);
++         reset_string_buffer();
++         return action(lexbuf);
++       
++ case 3: 
++ #line 208 "lexer.cyl"
++       return action(lexbuf); 
++ case 4: 
++ #line 210 "lexer.cyl"
++       return action(lexbuf); 
++ case 5: 
++ #line 212 "lexer.cyl"
++       return action(lexbuf); 
++ case 6: 
++ #line 213 "lexer.cyl"
++          comment_depth = 1; /* FIX: Add // style too! */
++          comment(lexbuf); 
++          return action(lexbuf);
++        
++ case 7: 
++ #line 217 "lexer.cyl"
++          throw new Lexical_error("unterminated action", 0, 0); 
++ case 8: 
++ #line 218 "lexer.cyl"
++          line_start_pos = lexeme_end(lexbuf);
++          ++line_num;
++          return action(lexbuf);
++        
++ case 9: 
++ #line 222 "lexer.cyl"
++                                     return action(lexbuf); 
++ case 10: 
++ #line 223 "lexer.cyl"
++       return action(lexbuf);  default: lexbuf->refill_buff(lexbuf); return action_rec(lexbuf,lexstate);
++   }
++  throw new Error("some action didn't return!");
++ }
++ int action(Lexbuf<`a> lexbuf) { return action_rec(lexbuf,1); }
++ int strng_rec(Lexbuf<`a> lexbuf, int lexstate) {
++   lexstate = lex_engine(lexstate,lexbuf);
++   switch (lexstate) {
++ 
++ case 0: 
++ #line 226 "lexer.cyl"
++         return 0; /* ignored */ 
++ case 1: 
++ #line 228 "lexer.cyl"
++     line_start_pos = lexeme_end(lexbuf);
++     ++line_num;
++     return strng(lexbuf);
++   
++ case 2: 
++ #line 233 "lexer.cyl"
++     store_string_char(char_for_backslash(lexeme_char(lexbuf,1)));
++     return strng(lexbuf); 
++ case 3: 
++ #line 236 "lexer.cyl"
++     store_string_char(char_for_octal_code(lexbuf,1)); 
++     return strng(lexbuf); 
++ case 4: 
++ #line 239 "lexer.cyl"
++     throw new Lexical_error("unterminated string", 0, 0); 
++ case 5: 
++ #line 241 "lexer.cyl"
++     store_string_char('\n'); 
++     line_start_pos = lexeme_end(lexbuf);
++     ++line_num;
++     return strng(lexbuf);
++   
++ case 6: 
++ #line 246 "lexer.cyl"
++       store_string_char(lexeme_char(lexbuf,0)); return strng(lexbuf);  default: lexbuf->refill_buff(lexbuf); return strng_rec(lexbuf,lexstate);
++   }
++  throw new Error("some action didn't return!");
++ }
++ int strng(Lexbuf<`a> lexbuf) { return strng_rec(lexbuf,2); }
++ int comment_rec(Lexbuf<`a> lexbuf, int lexstate) {
++   lexstate = lex_engine(lexstate,lexbuf);
++   switch (lexstate) {
++ 
++ case 0: 
++ #line 249 "lexer.cyl"
++          ++comment_depth; return comment(lexbuf); /* should we nest? */ 
++ case 1: 
++ #line 250 "lexer.cyl"
++          --comment_depth; return ((comment_depth == 0) ? 0 : comment(lexbuf)); 
++ case 2: 
++ #line 251 "lexer.cyl"
++          reset_string_buffer();
++          strng(lexbuf);
++          reset_string_buffer();
++          return comment(lexbuf);
++        
++ case 3: 
++ #line 256 "lexer.cyl"
++                                             return comment(lexbuf); 
++ case 4: 
++ #line 257 "lexer.cyl"
++                                             return comment(lexbuf); 
++ case 5: 
++ #line 258 "lexer.cyl"
++                                             return comment(lexbuf); 
++ case 6: 
++ #line 259 "lexer.cyl"
++                                             return comment(lexbuf); 
++ case 7: 
++ #line 260 "lexer.cyl"
++         throw new Lexical_error("unterminated comment", 0, 0); 
++ case 8: 
++ #line 261 "lexer.cyl"
++          line_start_pos = lexeme_end(lexbuf);
++          ++line_num;
++          return comment(lexbuf);
++        
++ case 9: 
++ #line 265 "lexer.cyl"
++       return comment(lexbuf);  default: lexbuf->refill_buff(lexbuf); return comment_rec(lexbuf,lexstate);
++   }
++  throw new Error("some action didn't return!");
++ }
++ int comment(Lexbuf<`a> lexbuf) { return comment_rec(lexbuf,3); }
++ 
++ }
++ #line 267 "lexer.cyl"
++  
+diff -rbBcN lex/lexer.cyl cyclex/lexer.cyl
+*** lex/lexer.cyl	Wed Dec 31 19:00:00 1969
+--- cyclex/lexer.cyl	Tue Aug 21 16:09:42 2001
+***************
+*** 0 ****
+--- 1,267 ----
++ {
++ 
++ // Port of ocamllex to Cyclone, with enormous debt to INRIA:
++ /* 
++ (***********************************************************************)
++ (*                                                                     *)
++ (*                           Objective Caml                            *)
++ (*                                                                     *)
++ (*            Xavier Leroy, projet Cristal, INRIA Rocquencourt         *)
++ (*                                                                     *)
++ (*  Copyright 1996 Institut National de Recherche en Informatique et   *) 
++ (*  en Automatique.  All rights reserved.  This file is distributed    *)
++ (*  under the terms of the Q Public License version 1.0.               *)
++ (*                                                                     *)
++ (***********************************************************************)
++ */
++ 
++   // FIX: We do not have the luxury of tail-call optimization but we act
++   // as though we do! 
++ 
++ #include "core.h"
++ #include "stdio.h"
++ #include "string.h"
++ #include "lexing.h"
++ 
++ #include "syntax.h"
++ #include "parser.h"
++ 
++ using Core;
++ using Lexing;
++ using Parser;
++ 
++ namespace Lexer {
++ int line_num       = 1;
++ int line_start_pos = 0;
++ }
++ 
++ void yyerror(string_t<`H> s) {
++   fprintf(stderr, "%s, line:%d", s, Lexer::line_num);
++   fflush(stderr);
++   throw new Parser_error(s);
++ }
++ 
++ namespace Lexer {
++ 
++ xtunion exn { Lexical_error(string_t,int,int); };
++ 
++ static string_t          token_string = "";
++ static int                     token_char   = (int)'D';
++ static struct Syntax::Location dummy_loc    = {0,0,0,0};
++ static Syntax::location_t      token_action = &dummy_loc;
++ 
++ static int brace_depth   = 0;
++ static int comment_depth = 0;
++ 
++ static char string_buff_v[38];
++ static mstring_t string_buff  = (mstring_t)string_buff_v;
++ static int    string_index = 0;
++ 
++   //typedef int lexfun_t <`a>(Lexing::Lexbuf<`a>;{});
++ 
++ #define SHRINK_THRESHOLD 16384
++ void reset_string_buffer() {
++   if(string_buff.size > SHRINK_THRESHOLD)
++     string_buff = (mstring_t)string_buff_v;
++   string_index = 0;
++ }
++ 
++ void store_string_char(char c) {
++   if(string_index >= string_buff.size) {
++     mstring_t new_buff = new_string(string_buff.size*2);
++     strncpy(string_buff, new_buff, string_buff.size);
++     string_buff = new_buff;
++   }
++   string_buff[string_index++] = c;
++ }
++ 
++ mstring_t get_stored_string() {
++   return substring(string_buff,0,string_index);
++ }
++ 
++ char char_for_backslash(char c) {
++   switch (c) {
++   case 'a': return '\a';
++   case 'b': return '\b';
++   case 'f': return '\f';
++   case 'n': return '\n';
++   case 'r': return '\r';
++   case 't': return '\t';
++   case 'v': return '\v';
++   default:  return c;
++   }
++ }
++ 
++ // FIX: Maybe the Cyclone version should interpret things in octal instead
++ //      of decimal.  If so, change this code and all existing lexers.
++ char char_for_octal_code(Lexbuf<`a> lbuf, int i) {
++   return (char)(64 * (((int) lexeme_char(lbuf,i))   - '0') +
++ 		 8 * (((int) lexeme_char(lbuf,i+1)) - '0') +
++ 		     (((int) lexeme_char(lbuf,i+2)) - '0'));
++ }
++ 
++ static int handle_lexical_error(int fn(Lexing::Lexbuf<`a>), 
++                                 Lexbuf<`a>lbuf) {
++   int line = line_num;
++   int column = lexeme_start(lbuf) - line_start_pos;
++   try return fn(lbuf);
++   catch { case &Lexical_error(msg,_,_): throw new Lexical_error(msg,line,column); }
++ }
++ 
++ // Forward declarations of lexing functions
++   //extern lexfun_t lexmain, action, strng, comment;
++ extern int lexmain(Lexing::Lexbuf<`a>);
++ extern int action(Lexing::Lexbuf<`a>);
++ extern int strng(Lexing::Lexbuf<`a>);
++ extern int comment(Lexing::Lexbuf<`a>);
++ 
++ 
++ } // namespace Lexer
++ 
++ // for parser -- must not be prefixed 
++ int yylex() {
++   int ans = Lexer::lexmain(lbuf->v);
++   switch (ans) {
++   case TIDENT:  yylval = new String_tok(Lexer::token_string);   break;
++   case TSTRING: yylval = new String_tok(Lexer::token_string);   break;
++   case TCHAR:   yylval = new Char_tok((char)Lexer::token_char); break;
++   case TACTION: yylval = new Location_tok(Lexer::token_action); break;
++   default: break;
++   }
++   return ans;
++ }
++ 
++ namespace Lexer;
++ 
++ }
++ 
++ rule lexmain = parse
++   [' ' '\r' '\t' '\f']+ { return lexmain(lexbuf); }
++ | '\n' { line_start_pos = lexeme_end(lexbuf);
++          ++line_num;
++          return lexmain(lexbuf); }
++ | "/*" { comment_depth = 1;
++          handle_lexical_error(comment,lexbuf); 
++          return lexmain(lexbuf); }
++ | ['A'-'Z' 'a'-'z'] ['A'-'Z' 'a'-'z' '\'' '_' '0'-'9'] *
++   { mstring_t s = lexeme(lexbuf);
++     if     (strcmp(s,"rule")  == 0) return TRULE;
++     else if(strcmp(s,"parse") == 0) return TPARSE;
++     else if(strcmp(s,"and")   == 0) return TAND;
++     else if(strcmp(s,"eof")   == 0) return TEOF;
++     else if(strcmp(s,"let")   == 0) return TLET;
++     else { token_string = s; return TIDENT; }
++   }
++ | '"' { reset_string_buffer();
++         handle_lexical_error(strng, lexbuf);
++ 	token_string = get_stored_string();
++ 	return TSTRING;
++       }
++ | "'" [^ '\\'] "'" 
++     { token_char = (int)lexeme_char(lexbuf,1); 
++       return TCHAR; }
++ | "'" '\\' ['a' 'b' 'f' 'n' 'r' 't' 'v' '\\' '\'' '?'] "'" 
++     { token_char = (int)char_for_backslash(lexeme_char(lexbuf,2)); 
++       return TCHAR; }
++ | "'" '\\' ['0'-'7'] ['0'-'7'] ['0'-'7'] "'" 
++     { token_char = (int)char_for_octal_code(lexbuf,2);
++       return TCHAR; }
++ | '{'
++     { 
++      int n1 = lexeme_end(lexbuf);
++      int l1 = line_num;
++      int s1 = line_start_pos;
++      brace_depth = 1;
++      int n2 = handle_lexical_error(action,lexbuf);
++      token_action = new Syntax::Location(n1,n2,l1,n1-s1);
++      return TACTION;
++    }
++ | '=' { return TEQUAL; }
++ | '|' { return TOR; }
++ | '_' { return TUNDERSCORE; }
++ | '[' { return TLBRACKET; }
++ | ']' { return TRBRACKET; }
++ | '*' { return TSTAR; }
++ | '?' { return TMAYBE; }
++ | '+' { return TPLUS; }
++ | '(' { return TLPAREN; }
++ | ')' { return TRPAREN; }
++ | '^' { return TCARET; }
++ | '-' { return TDASH; }
++ | eof { return -1; }
++ | _ { throw new Lexical_error(aprintf("illegal character %s", lexeme(lexbuf)),
++ 			      line_num, 
++ 			      lexeme_start(lexbuf) - line_start_pos); }
++ 
++ and action = parse
++   '{' { ++brace_depth; return action(lexbuf); }
++ | '}' { --brace_depth; 
++         if(brace_depth == 0) return lexeme_start(lexbuf);
++ 	else return action(lexbuf); }
++ | '"' { reset_string_buffer();
++         strng(lexbuf);
++         reset_string_buffer();
++         return action(lexbuf);
++       }
++ | "'" [^ '\\'] "'" 
++     { return action(lexbuf); }
++ | "'" '\\' ['\\' '\'' 'n' 't' 'b' 'r'] "'" 
++     { return action(lexbuf); }
++ | "'" '\\' ['0'-'7'] ['0'-'7'] ['0'-'7'] "'" 
++     { return action(lexbuf); }
++ | "/*" { comment_depth = 1; /* FIX: Add // style too! */
++          comment(lexbuf); 
++          return action(lexbuf);
++        }
++ | eof  { throw new Lexical_error("unterminated action", 0, 0); }
++ | '\n' { line_start_pos = lexeme_end(lexbuf);
++          ++line_num;
++          return action(lexbuf);
++        }
++ | [^ '{' '}' '"' '\'' '/' '\n'] + { return action(lexbuf); }
++ | _ { return action(lexbuf); }
++ 
++ and strng = parse
++   '"' { return 0; /* ignored */ }
++ | '\\' [' ' '\r' '\t' '\f'] * '\n' [' ' '\r' '\t' '\f'] *
++   { line_start_pos = lexeme_end(lexbuf);
++     ++line_num;
++     return strng(lexbuf);
++   }
++ | '\\' ['a' 'b' 'f' 'n' 'r' 't' 'v' '\\' '"' '?'] 
++   { store_string_char(char_for_backslash(lexeme_char(lexbuf,1)));
++     return strng(lexbuf); }
++ | '\\' ['0'-'7'] ['0'-'7'] ['0'-'7'] 
++   { store_string_char(char_for_octal_code(lexbuf,1)); 
++     return strng(lexbuf); }
++ | eof
++   { throw new Lexical_error("unterminated string", 0, 0); }
++ | '\n'
++   { store_string_char('\n'); 
++     line_start_pos = lexeme_end(lexbuf);
++     ++line_num;
++     return strng(lexbuf);
++   }
++ | _ { store_string_char(lexeme_char(lexbuf,0)); return strng(lexbuf); }
++ 
++ and comment = parse
++   "/*" { ++comment_depth; return comment(lexbuf); /* should we nest? */ }
++ | "*/" { --comment_depth; return ((comment_depth == 0) ? 0 : comment(lexbuf)); }
++ | '"'  { reset_string_buffer();
++          strng(lexbuf);
++          reset_string_buffer();
++          return comment(lexbuf);
++        }
++ | "''"                                    { return comment(lexbuf); }
++ | "'" [^ '\\' '\''] "'"                   { return comment(lexbuf); }
++ | "'\\" ['\\' '\'' 'n' 't' 'b' 'r'] "'"   { return comment(lexbuf); }
++ | "'\\" ['0'-'7'] ['0'-'7'] ['0'-'7'] "'" { return comment(lexbuf); }
++ | eof { throw new Lexical_error("unterminated comment", 0, 0); }
++ | '\n' { line_start_pos = lexeme_end(lexbuf);
++          ++line_num;
++          return comment(lexbuf);
++        }
++ | _ { return comment(lexbuf); }
++ 
++ {
++ }
+diff -rbBcN lex/lexer.h cyclex/lexer.h
+*** lex/lexer.h	Wed Dec 31 19:00:00 1969
+--- cyclex/lexer.h	Tue Aug 21 16:09:42 2001
+***************
+*** 0 ****
+--- 1,26 ----
++ #ifndef LEXER_H
++ #define LEXER_H
++ 
++ #include "core.h"
++ #include "cstdio.h"
++ //#include "cstring.h"
++ #include "lexing.h"
++ 
++ #include "syntax.h"
++ #include "parser.h"
++ 
++ using Core {
++ using std {
++ using Lexing {
++ using Parser {
++ namespace Lexer {
++ 
++ extern xtunion exn { extern Lexical_error(string_t,int,int); };
++ 
++ extern int lexmain(Lexing::Lexbuf<`a>);
++ extern int line_num;
++ extern int line_start_pos;
++ } // namespace Lexer
++ }}}}
++ 
++ #endif
+diff -rbBcN lex/lexer.mli cyclex/lexer.mli
+*** lex/lexer.mli	Tue Aug 21 16:09:42 2001
+--- cyclex/lexer.mli	Wed Dec 31 19:00:00 1969
+***************
+*** 1,20 ****
+- (***********************************************************************)
+- (*                                                                     *)
+- (*                           Objective Caml                            *)
+- (*                                                                     *)
+- (*            Xavier Leroy, projet Cristal, INRIA Rocquencourt         *)
+- (*                                                                     *)
+- (*  Copyright 1996 Institut National de Recherche en Informatique et   *)
+- (*  en Automatique.  All rights reserved.  This file is distributed    *)
+- (*  under the terms of the Q Public License version 1.0.               *)
+- (*                                                                     *)
+- (***********************************************************************)
+- 
+- (* $Id: ocamllex2cyclex.patch,v 1.1 2001-08-21 20:16:19 mhicks Exp $ *)
+- 
+- val main: Lexing.lexbuf -> Parser.token
+- 
+- exception Lexical_error of string * int * int
+- 
+- val line_num: int ref
+- val line_start_pos: int ref
+--- 0 ----
+diff -rbBcN lex/lexer.mll cyclex/lexer.mll
+*** lex/lexer.mll	Tue Aug 21 16:09:42 2001
+--- cyclex/lexer.mll	Wed Dec 31 19:00:00 1969
+***************
+*** 1,208 ****
+- (***********************************************************************)
+- (*                                                                     *)
+- (*                           Objective Caml                            *)
+- (*                                                                     *)
+- (*            Xavier Leroy, projet Cristal, INRIA Rocquencourt         *)
+- (*                                                                     *)
+- (*  Copyright 1996 Institut National de Recherche en Informatique et   *)
+- (*  en Automatique.  All rights reserved.  This file is distributed    *)
+- (*  under the terms of the Q Public License version 1.0.               *)
+- (*                                                                     *)
+- (***********************************************************************)
+- 
+- (* $Id: ocamllex2cyclex.patch,v 1.1 2001-08-21 20:16:19 mhicks Exp $ *)
+- 
+- (* The lexical analyzer for lexer definitions. Bootstrapped! *)
+- 
+- {
+- open Syntax
+- open Parser
+- 
+- (* Auxiliaries for the lexical analyzer *)
+- 
+- let brace_depth = ref 0
+- and comment_depth = ref 0
+- 
+- exception Lexical_error of string * int * int
+- 
+- let initial_string_buffer = String.create 256
+- let string_buff = ref initial_string_buffer
+- let string_index = ref 0
+- 
+- let reset_string_buffer () =
+-   string_buff := initial_string_buffer;
+-   string_index := 0
+- 
+- let store_string_char c =
+-   if !string_index >= String.length !string_buff then begin
+-     let new_buff = String.create (String.length !string_buff * 2) in
+-     String.blit !string_buff 0 new_buff 0 (String.length !string_buff);
+-     string_buff := new_buff
+-   end;
+-   !string_buff.[!string_index] <- c;
+-   incr string_index
+- 
+- let get_stored_string () =
+-   String.sub !string_buff 0 !string_index
+- 
+- let char_for_backslash = function
+-     'n' -> '\n'
+-   | 't' -> '\t'
+-   | 'b' -> '\b'
+-   | 'r' -> '\r'
+-   | c   -> c
+- 
+- let char_for_decimal_code lexbuf i =
+-   Char.chr(100 * (Char.code(Lexing.lexeme_char lexbuf i) - 48) +
+-                10 * (Char.code(Lexing.lexeme_char lexbuf (i+1)) - 48) +
+-                     (Char.code(Lexing.lexeme_char lexbuf (i+2)) - 48))
+- 
+- let line_num = ref 1
+- let line_start_pos = ref 0
+- 
+- let handle_lexical_error fn lexbuf =
+-   let line = !line_num
+-   and column = Lexing.lexeme_start lexbuf - !line_start_pos in
+-   try
+-     fn lexbuf
+-   with Lexical_error(msg, _, _) ->
+-     raise(Lexical_error(msg, line, column))
+- }
+- 
+- rule main = parse
+-     [' ' '\013' '\009' '\012' ] + 
+-     { main lexbuf }
+-   | '\010'
+-     { line_start_pos := Lexing.lexeme_end lexbuf;
+-       incr line_num;
+-       main lexbuf }
+-   | "(*" 
+-     { comment_depth := 1;
+-       handle_lexical_error comment lexbuf;
+-       main lexbuf }
+-   | ['A'-'Z' 'a'-'z'] ['A'-'Z' 'a'-'z' '\'' '_' '0'-'9'] *
+-     { match Lexing.lexeme lexbuf with
+-         "rule" -> Trule
+-       | "parse" -> Tparse
+-       | "and" -> Tand
+-       | "eof" -> Teof
+-       | "let" -> Tlet
+-       | s -> Tident s }
+-   | '"' 
+-     { reset_string_buffer();
+-       handle_lexical_error string lexbuf;
+-       Tstring(get_stored_string()) }
+-   | "'" [^ '\\'] "'" 
+-     { Tchar(Char.code(Lexing.lexeme_char lexbuf 1)) }
+-   | "'" '\\' ['\\' '\'' 'n' 't' 'b' 'r'] "'" 
+-     { Tchar(Char.code(char_for_backslash (Lexing.lexeme_char lexbuf 2))) }
+-   | "'" '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] "'" 
+-     { Tchar(Char.code(char_for_decimal_code lexbuf 2)) }
+-   | '{' 
+-     { let n1 = Lexing.lexeme_end lexbuf
+-       and l1 = !line_num
+-       and s1 = !line_start_pos in
+-       brace_depth := 1;
+-       let n2 = handle_lexical_error action lexbuf in
+-       Taction({start_pos = n1; end_pos = n2;
+-                start_line = l1; start_col = n1 - s1}) }
+-   | '='  { Tequal }
+-   | '|'  { Tor }
+-   | '_'  { Tunderscore }
+-   | '['  { Tlbracket }
+-   | ']'  { Trbracket }
+-   | '*'  { Tstar }
+-   | '?'  { Tmaybe }
+-   | '+'  { Tplus }
+-   | '('  { Tlparen }
+-   | ')'  { Trparen }
+-   | '^'  { Tcaret }
+-   | '-'  { Tdash }
+-   | eof  { Tend }
+-   | _
+-     { raise(Lexical_error
+-              ("illegal character " ^ String.escaped(Lexing.lexeme lexbuf),
+-               !line_num, Lexing.lexeme_start lexbuf - !line_start_pos)) }
+- 
+- and action = parse
+-     '{' 
+-     { incr brace_depth;
+-       action lexbuf }
+-   | '}' 
+-     { decr brace_depth;
+-       if !brace_depth = 0 then Lexing.lexeme_start lexbuf else action lexbuf }
+-   | '"' 
+-     { reset_string_buffer();
+-       string lexbuf;
+-       reset_string_buffer();
+-       action lexbuf }
+-   | "'" [^ '\\'] "'" 
+-     { action lexbuf }
+-   | "'" '\\' ['\\' '\'' 'n' 't' 'b' 'r'] "'" 
+-     { action lexbuf }
+-   | "'" '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] "'" 
+-     { action lexbuf }
+-   | "(*" 
+-     { comment_depth := 1;
+-       comment lexbuf;
+-       action lexbuf }
+-   | eof 
+-     { raise (Lexical_error("unterminated action", 0, 0)) }
+-   | '\010'
+-     { line_start_pos := Lexing.lexeme_end lexbuf;
+-       incr line_num;
+-       action lexbuf }
+-   | _ 
+-     { action lexbuf }
+-       
+- and string = parse
+-     '"' 
+-     { () }
+-   | '\\' [' ' '\013' '\009' '\012'] * '\010' [' ' '\013' '\009' '\012'] *
+-     { line_start_pos := Lexing.lexeme_end lexbuf;
+-       incr line_num;
+-       string lexbuf }
+-   | '\\' ['\\' '"' 'n' 't' 'b' 'r'] 
+-     { store_string_char(char_for_backslash(Lexing.lexeme_char lexbuf 1));
+-       string lexbuf }
+-   | '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] 
+-     { store_string_char(char_for_decimal_code lexbuf 1);
+-       string lexbuf }
+-   | eof 
+-     { raise(Lexical_error("unterminated string", 0, 0)) }
+-   | '\010'
+-     { store_string_char '\010';
+-       line_start_pos := Lexing.lexeme_end lexbuf;
+-       incr line_num;
+-       string lexbuf }
+-   | _ 
+-     { store_string_char(Lexing.lexeme_char lexbuf 0);
+-       string lexbuf }
+- 
+- and comment = parse
+-     "(*" 
+-     { incr comment_depth; comment lexbuf }
+-   | "*)" 
+-     { decr comment_depth;
+-       if !comment_depth = 0 then () else comment lexbuf }
+-   | '"' 
+-     { reset_string_buffer();
+-       string lexbuf;
+-       reset_string_buffer();
+-       comment lexbuf }
+-   | "''"
+-       { comment lexbuf }
+-   | "'" [^ '\\' '\''] "'"
+-       { comment lexbuf }
+-   | "'\\" ['\\' '\'' 'n' 't' 'b' 'r'] "'"
+-       { comment lexbuf }
+-   | "'\\" ['0'-'9'] ['0'-'9'] ['0'-'9'] "'"
+-       { comment lexbuf }
+-   | eof 
+-     { raise(Lexical_error("unterminated comment", 0, 0)) }
+-   | '\010'
+-     { line_start_pos := Lexing.lexeme_end lexbuf;
+-       incr line_num;
+-       comment lexbuf }
+-   | _ 
+-     { comment lexbuf }
+--- 0 ----
+diff -rbBcN lex/lexgen.cyc cyclex/lexgen.cyc
+*** lex/lexgen.cyc	Wed Dec 31 19:00:00 1969
+--- cyclex/lexgen.cyc	Tue Aug 21 16:09:42 2001
+***************
+*** 0 ****
+--- 1,287 ----
++ 
++ #include "core.h"
++ #include "list.h"
++ #include "dict.h"
++ #include "set.h"
++ 
++ #include "syntax.h"
++ 
++ #define LEXGEN_CYC
++ #include "lexgen.h"
++ 
++ using Core;
++ using List;
++ using Dict;
++ using Set;
++ using Syntax;
++ 
++ namespace Lexgen;
++ 
++ // Deep abstract for regular expressions
++ static tunion Regexp {
++   Empty;
++   Chars(int);
++   Action(int);
++   Seq(tunion Regexp, tunion Regexp);
++   Alt(tunion Regexp, tunion Regexp);
++   Star(tunion Regexp);
++ };
++ typedef tunion Regexp regexp_t;
++ 
++ static struct Lexer_entry {
++   string_t                   name;
++   string_t                   type;
++   regexp_t                   regexp;
++   list_t<$(int,location_t)@> actions;
++ };
++ typedef struct Lexer_entry @ lexer_entry_t;
++ 
++ // From shallow to deep syntax
++ static list_t<list_t<int>>          chars         = NULL;
++ static int                      chars_count   = 0;
++ static list_t<$(int,location_t)@> actions       = NULL;
++ static int                      actions_count = 0;
++ 
++ static regexp_t encode_regexp(regular_expression_t r) {
++   switch (r) {
++   case Epsilon:            return Empty;
++   case &Characters(cl): 
++     chars = new List(cl,chars); return new Chars(chars_count++);
++   case &Sequence(r1,r2):    
++     return new Seq(encode_regexp(r1), encode_regexp(r2));
++   case &Alternative(r1,r2): 
++     return new Alt(encode_regexp(r1), encode_regexp(r2));
++   case &Repetition(r1):     
++     return new Star(encode_regexp(r1));
++   }
++ }
++ 
++ static regexp_t encode_casedef(list_t<acase_t> casedef) {
++   regexp_t ans = Empty;
++   for(; casedef != NULL; casedef = casedef->tl) {
++     let &$(expr,act) = casedef->hd;
++     actions = new List(new $(actions_count, act), actions);
++     ans = new Alt(ans, new Seq(encode_regexp(expr), 
++                                new Action(actions_count)));
++     ++actions_count;
++   }
++   return ans;
++ }
++ 
++ static 
++ $(list_t<int>?, list_t<lexer_entry_t>)@ encode_lexdef(lexer_definition_t def) {
++   chars       = NULL;
++   chars_count = 0;
++   list_t<lexer_entry_t> entry_list_rev = NULL;
++   for(let entries = def->entrypoints; entries!=NULL; entries=entries->tl) {
++     let &$(entry_name, entry_type, casedef) = entries->hd;
++     actions       = NULL;
++     actions_count = 0;
++     let re = encode_casedef(casedef); // mutates actions
++     entry_list_rev = new List(new Lexer_entry(entry_name,
++ 					      entry_type,
++ 					      re,
++ 					      rev(actions)),
++                               entry_list_rev);
++   }
++   list_t<int> ?chr = to_array(rev(chars));
++   chars   = NULL;
++   actions = NULL;
++   return new $(chr, imp_rev(entry_list_rev));
++ }
++ 
++ // generate an NFA from a regular expression (dragon book, chapter 3)
++ 
++ static tunion transition { OnChars(int); ToAction(int); };
++ typedef tunion transition transition_t;
++ 
++ static int transition_cmp(transition_t t1, transition_t t2) {
++   switch ($(t1,t2)) {
++   case $(&OnChars(_),   &ToAction(_)):  return 1;
++   case $(&ToAction(_),  &OnChars(_)):   return -1;
++   case $(&OnChars(i1),  &OnChars(i2)):  return i1-i2;
++   case $(&ToAction(i1), &ToAction(i2)): return i1-i2;  
++   }
++ }
++ 
++ static bool nullable(regexp_t r) {
++   switch (r) {
++   case Empty:      return true;
++   case &Chars(_):   return false;
++   case &Action(_):  return false;
++   case &Seq(r1,r2): return nullable(r1) && nullable(r2);
++   case &Alt(r1,r2): return nullable(r1) || nullable(r2);
++   case &Star(_):    return true;
++   }
++ }
++ 
++ static set_t<transition_t> firstpos(regexp_t r) {
++   switch (r) {
++   case Empty:       return Set::empty(transition_cmp);
++   case &Chars(pos):  return Set::insert(Set::empty(transition_cmp),new OnChars(pos));
++   case &Action(act): return Set::insert(Set::empty(transition_cmp),new ToAction(act));
++   case &Seq(r1,r2):  if(nullable(r1)) 
++                       return Set::union_two(firstpos(r1),firstpos(r2));
++                     else
++ 		      return firstpos(r1);
++   case &Alt(r1,r2):  return Set::union_two(firstpos(r1),firstpos(r2));
++   case &Star(r1):    return firstpos(r1);
++   }
++ }
++ 
++ static set_t<transition_t> lastpos(regexp_t r) {
++   switch (r) {
++   case Empty:       return Set::empty(transition_cmp);
++   case &Chars(pos):  return Set::insert(Set::empty(transition_cmp),new OnChars(pos));
++   case &Action(act): return Set::insert(Set::empty(transition_cmp),new ToAction(act));
++   case &Seq(r1,r2):  if(nullable(r2)) 
++                       return Set::union_two(lastpos(r1),lastpos(r2));
++                     else
++ 		      return lastpos(r2);
++   case &Alt(r1,r2):  return Set::union_two(lastpos(r1),lastpos(r2));
++   case &Star(r1):    return lastpos(r1);
++   }
++ }
++ 
++ static 
++ void fill_pos($(set_t<transition_t,`H> ?`H, set_t<transition_t,`H>)@`H env, transition_t t) {
++   let &$(v, first) = env;
++   switch (t) {
++   case &OnChars(pos): v[pos] = Set::union_two(v[pos], first); break;
++   case &ToAction(_):  break;
++   }
++ }
++ 
++ static void fill_it(regexp_t r, set_t<transition_t,`H> ?`H v) {
++   switch (r) {
++   case &Seq(r1,r2): 
++     fill_it(r1,v);
++     fill_it(r2,v);
++     Set::iter_c(fill_pos, new $(v,firstpos(r2)), lastpos(r1));
++     break;
++   case &Alt(r1,r2):
++     fill_it(r1,v);
++     fill_it(r2,v);
++     break;
++   case &Star(r1):
++     fill_it(r1,v);
++     Set::iter_c(fill_pos, new $(v,firstpos(r1)), lastpos(r1));
++     break;
++   default:
++     break;
++   }
++ }
++ 
++ static set_t<transition_t> ?followpos(int sz, list_t<lexer_entry_t> entry_list) {
++   set_t<transition_t> ?v = new {for i < sz : Set::empty(transition_cmp)};
++   for(; entry_list != NULL; entry_list = entry_list->tl) 
++     fill_it(entry_list->hd->regexp, v);
++   return v;
++ }
++ 
++ // Ocaml uses MAX_INT, but this should be large enough
++ #define NO_ACTION (1 << 29)
++ 
++ static $(int,list_t<int>)@ split_trans(transition_t      trans, 
++ 				     $(int,list_t<int,`H>)@`H act_pos_set) {
++   let &$(act, pos_set) = act_pos_set;
++   switch (trans) {
++   case &OnChars(pos):   
++     list_t<int> l = new List(pos,pos_set); return new $(act, l);
++   case &ToAction(act1): 
++     return (act1 < act) ? (new $(act1,pos_set)) : act_pos_set;
++   }
++ }
++ 
++ static $(int, list_t<int>)@ split_trans_set(set_t<transition_t,`H> trans_set) {
++   return Set::fold(split_trans, trans_set, new $(NO_ACTION,NULL));
++ }
++ 
++ // The Ocaml I'm porting from isn't functional (re-entrant) here either:
++ // (It doesn't look too hard to pass the state around functionally.)
++ static opt_t<dict_t<set_t<transition_t>, int>> state_map      = NULL;
++ static list_t<$(set_t<transition_t>,int)@>     todo           = NULL;
++ static int                                 next_state_num = 0;
++ 
++ static void reset_state_mem() {
++   state_map      = new Opt(Dict::empty(Set::compare));
++   todo           = NULL;
++   next_state_num = 0;
++ }
++ 
++ static int get_state(set_t<transition_t,`H> st) {
++   try return Dict::lookup(state_map->v, st);
++   catch {
++   case Dict::Absent:
++     state_map->v = Dict::insert(state_map->v, st, next_state_num);
++     todo         = new List(new $(st, next_state_num), todo);
++     return next_state_num++; // post-increment!
++   }
++ }
++ 
++ static automata_move_t goto_state(set_t<transition_t,`H> st) {
++   if(Set::is_empty(st))
++     return Backtrack;
++   else
++     return new Goto(get_state(st));
++ }
++ 
++ static automata_move_t ?transition_from(list_t<int>         ?chars,
++ 					set_t<transition_t,`H> ?follow,
++ 					list_t<int>         pos_set) {
++   set_t<transition_t> ?tr    = new {for i < 257 : Set::empty(transition_cmp)};
++   automata_move_t   ?shift = new {for i < 257 : (automata_move_t)Backtrack};
++   for(; pos_set != NULL; pos_set = pos_set->tl) {
++     int pos = pos_set->hd;
++     for(list_t<int> cs_pos = chars[pos]; cs_pos != NULL; cs_pos = cs_pos->tl) {
++       int c = cs_pos->hd;
++       tr[c] = Set::union_two(tr[c], follow[pos]);
++     }
++   }
++   for(int i=0; i <= 256; ++i)
++     shift[i] = goto_state(tr[i]);
++   return shift;
++ }
++ 
++ static automata_t translate_state(list_t<int>         ?chars, 
++ 				  set_t<transition_t,`H> ?follow, 
++ 				  set_t<transition_t,`H> state) {
++   switch (split_trans_set(state)) {
++   case &$(n,NULL): return new Perform(n);
++   case &$(n,ps):   return new Shift((n == NO_ACTION ? 
++                                      ((automata_trans_t)No_remember) : 
++                                      (new Remember(n))),
++                                     transition_from(chars, follow, ps));
++   }
++ }
++ 
++ $(list_t<automata_entry_t>,automata_t?)@ 
++ make_dfa(Syntax::lexer_definition_t lexdef) {
++   let &$(chars, entry_list) = encode_lexdef(lexdef);
++   set_t<transition_t> ?follow = followpos(chars.size, entry_list);
++   reset_state_mem();
++   list_t<automata_entry_t> initial_states = NULL;
++   for(; entry_list != NULL; entry_list = entry_list->tl) {
++     let le = entry_list->hd;
++     initial_states = new List(new Automata_entry{le->name,
++ 						 le->type,
++ 						 get_state(firstpos(le->regexp)),
++ 						 le->actions},
++ 			      initial_states);
++   }
++   initial_states = List::imp_rev(initial_states);
++   list_t<$(automata_t,int)@> states = NULL;
++   while(todo != NULL) {
++     let &$(st,i) = todo->hd;
++     todo = todo->tl;
++     states = new List(new $(translate_state(chars, follow, st), i), states);
++   }
++   states = List::imp_rev(states);
++   let actions = new {for i < next_state_num : (automata_t)(new Perform(0))};
++   for(; states != NULL; states = states->tl) {
++     let &$(act,i) = states->hd;
++     actions[i] = act;
++   }
++   reset_state_mem();
++   return new $(initial_states, actions);
++ }
+diff -rbBcN lex/lexgen.h cyclex/lexgen.h
+*** lex/lexgen.h	Wed Dec 31 19:00:00 1969
+--- cyclex/lexgen.h	Tue Aug 21 16:09:42 2001
+***************
+*** 0 ****
+--- 1,49 ----
++ #ifndef LEXGEN_H
++ #define LEXGEN_H
++ 
++ #include "core.h"
++ #include "list.h"
++ #include "syntax.h"
++ 
++ #ifdef LEXGEN_CYC
++ #define LEXGEN_EXTERN_DEFINITION
++ #else
++ #define LEXGEN_EXTERN_DEFINITION extern
++ #endif
++ 
++ using Core {
++ using List {
++ namespace Lexgen {
++ 
++ // Representation of automata
++ LEXGEN_EXTERN_DEFINITION tunion Automata_trans {
++   No_remember;
++   Remember(int);
++ };
++ typedef tunion Automata_trans automata_trans_t;
++ 
++ LEXGEN_EXTERN_DEFINITION tunion Automata_move {
++   Backtrack;
++   Goto(int);
++ };
++ typedef tunion Automata_move automata_move_t;
++ 
++ LEXGEN_EXTERN_DEFINITION tunion Automata { 
++   Perform(int); 
++   Shift(automata_trans_t, automata_move_t?);
++ };
++ typedef tunion Automata automata_t;
++ 
++ LEXGEN_EXTERN_DEFINITION struct Automata_entry {
++   string_t                           name;
++   string_t                           type;
++   int                                initial_state;
++   list_t<$(int,Syntax::location_t)@> actions;
++ };
++ typedef struct Automata_entry @ automata_entry_t;
++ 
++ extern 
++ $(list_t<automata_entry_t>,automata_t?)@ make_dfa(Syntax::lexer_definition_t);
++ 
++ }}}
++ #endif
+diff -rbBcN lex/lexgen.ml cyclex/lexgen.ml
+*** lex/lexgen.ml	Tue Aug 21 16:09:42 2001
+--- cyclex/lexgen.ml	Wed Dec 31 19:00:00 1969
+***************
+*** 1,242 ****
+- (***********************************************************************)
+- (*                                                                     *)
+- (*                           Objective Caml                            *)
+- (*                                                                     *)
+- (*            Xavier Leroy, projet Cristal, INRIA Rocquencourt         *)
+- (*                                                                     *)
+- (*  Copyright 1996 Institut National de Recherche en Informatique et   *)
+- (*  en Automatique.  All rights reserved.  This file is distributed    *)
+- (*  under the terms of the Q Public License version 1.0.               *)
+- (*                                                                     *)
+- (***********************************************************************)
+- 
+- (* $Id: ocamllex2cyclex.patch,v 1.1 2001-08-21 20:16:19 mhicks Exp $ *)
+- 
+- (* Compiling a lexer definition *)
+- 
+- open Syntax
+- 
+- (* Deep abstract syntax for regular expressions *)
+- 
+- type regexp =
+-     Empty
+-   | Chars of int
+-   | Action of int
+-   | Seq of regexp * regexp
+-   | Alt of regexp * regexp
+-   | Star of regexp
+- 
+- type lexer_entry =
+-   { lex_name: string;
+-     lex_regexp: regexp;
+-     lex_actions: (int * location) list }
+-     
+- (* Representation of automata *)
+- 
+- type automata =
+-     Perform of int
+-   | Shift of automata_trans * automata_move array
+- and automata_trans =
+-     No_remember
+-   | Remember of int
+- and automata_move =
+-     Backtrack
+-   | Goto of int
+- 
+- (* Representation of entry points *)
+- 
+- type automata_entry =
+-   { auto_name: string;
+-     auto_initial_state: int;
+-     auto_actions: (int * location) list }
+-     
+- (* From shallow to deep syntax *)
+- 
+- let chars = ref ([] : int list list)
+- let chars_count = ref 0
+- let actions = ref ([] : (int * location) list)
+- let actions_count = ref 0
+- 
+- let rec encode_regexp = function
+-     Epsilon -> Empty
+-   | Characters cl ->
+-       let n = !chars_count in
+-       chars := cl :: !chars;
+-       incr chars_count;
+-       Chars(n)
+-   | Sequence(r1,r2) ->
+-       Seq(encode_regexp r1, encode_regexp r2)
+-   | Alternative(r1,r2) ->
+-       Alt(encode_regexp r1, encode_regexp r2)
+-   | Repetition r ->
+-       Star (encode_regexp r)
+- 
+- let encode_casedef casedef =
+-   List.fold_left
+-    (fun reg (expr, act) ->
+-      let act_num = !actions_count in
+-      incr actions_count;
+-      actions := (act_num, act) :: !actions;
+-      Alt(reg, Seq(encode_regexp expr, Action act_num)))
+-    Empty
+-    casedef
+- 
+- let encode_lexdef def =
+-   chars := [];
+-   chars_count := 0;
+-   let entry_list =
+-     List.map
+-       (fun (entry_name, casedef) ->
+-         actions := [];
+-         actions_count := 0;
+-         let re = encode_casedef casedef in
+-         { lex_name = entry_name;
+-           lex_regexp = re;
+-           lex_actions = List.rev !actions })
+-       def.entrypoints in
+-   let chr = Array.of_list (List.rev !chars) in
+-   chars := [];
+-   actions := [];
+-   (chr, entry_list)
+- 
+- (* To generate directly a NFA from a regular expression.
+-    Confer Aho-Sethi-Ullman, dragon book, chap. 3 *)
+- 
+- type transition =
+-     OnChars of int
+-   | ToAction of int
+- 
+- module TransSet =
+-   Set.Make(struct type t = transition let compare = compare end)
+- 
+- let rec nullable = function
+-     Empty      -> true
+-   | Chars _    -> false
+-   | Action _   -> false
+-   | Seq(r1,r2) -> nullable r1 && nullable r2
+-   | Alt(r1,r2) -> nullable r1 || nullable r2
+-   | Star r     -> true
+- 
+- let rec firstpos = function
+-     Empty      -> TransSet.empty
+-   | Chars pos  -> TransSet.add (OnChars pos) TransSet.empty
+-   | Action act -> TransSet.add (ToAction act) TransSet.empty
+-   | Seq(r1,r2) -> if nullable r1
+-                   then TransSet.union (firstpos r1) (firstpos r2)
+-                   else firstpos r1
+-   | Alt(r1,r2) -> TransSet.union (firstpos r1) (firstpos r2)
+-   | Star r     -> firstpos r
+- 
+- let rec lastpos = function
+-     Empty      -> TransSet.empty
+-   | Chars pos  -> TransSet.add (OnChars pos) TransSet.empty
+-   | Action act -> TransSet.add (ToAction act) TransSet.empty
+-   | Seq(r1,r2) -> if nullable r2
+-                   then TransSet.union (lastpos r1) (lastpos r2)
+-                   else lastpos r2
+-   | Alt(r1,r2) -> TransSet.union (lastpos r1) (lastpos r2)
+-   | Star r     -> lastpos r
+- 
+- let followpos size entry_list =
+-   let v = Array.create size TransSet.empty in
+-   let fill_pos first = function
+-       OnChars pos -> v.(pos) <- TransSet.union first v.(pos)
+-     | ToAction _  -> () in
+-   let rec fill = function
+-       Seq(r1,r2) ->
+-         fill r1; fill r2;
+-         TransSet.iter (fill_pos (firstpos r2)) (lastpos r1)
+-     | Alt(r1,r2) ->
+-         fill r1; fill r2
+-     | Star r ->
+-         fill r;
+-         TransSet.iter (fill_pos (firstpos r)) (lastpos r)
+-     | _ -> () in
+-   List.iter (fun entry -> fill entry.lex_regexp) entry_list;
+-   v
+- 
+- let no_action = max_int
+- 
+- let split_trans_set trans_set =
+-   TransSet.fold
+-     (fun trans (act, pos_set as act_pos_set) ->
+-       match trans with
+-         OnChars pos -> (act, pos :: pos_set)
+-       | ToAction act1 -> if act1 < act then (act1, pos_set) else act_pos_set)
+-     trans_set
+-     (no_action, [])
+- 
+- module StateMap =
+-   Map.Make(struct type t = TransSet.t let compare = TransSet.compare end)
+- 
+- let state_map = ref (StateMap.empty : int StateMap.t)
+- let todo = (Stack.create() : (TransSet.t * int) Stack.t)
+- let next_state_num = ref 0
+- 
+- let reset_state_mem () =
+-   state_map := StateMap.empty;
+-   Stack.clear todo;
+-   next_state_num := 0
+- 
+- let get_state st = 
+-   try
+-     StateMap.find st !state_map
+-   with Not_found ->
+-     let num = !next_state_num in
+-     incr next_state_num;
+-     state_map := StateMap.add st num !state_map;
+-     Stack.push (st, num) todo;
+-     num
+- 
+- let map_on_all_states f =
+-   let res = ref [] in
+-   begin try
+-     while true do
+-       let (st, i) = Stack.pop todo in
+-       let r = f st in
+-       res := (r, i) :: !res
+-     done
+-   with Stack.Empty -> ()
+-   end;
+-   !res
+- 
+- let goto_state st =
+-   if TransSet.is_empty st then Backtrack else Goto (get_state st)
+- 
+- let transition_from chars follow pos_set = 
+-   let tr = Array.create 257 TransSet.empty in
+-   let shift = Array.create 257 Backtrack in
+-     List.iter
+-       (fun pos ->
+-         List.iter
+-           (fun c ->
+-              tr.(c) <- TransSet.union tr.(c) follow.(pos))
+-           chars.(pos))
+-       pos_set;
+-     for i = 0 to 256 do
+-       shift.(i) <- goto_state tr.(i)
+-     done;
+-     shift
+- 
+- let translate_state chars follow state =
+-   match split_trans_set state with
+-     (n, []) -> Perform n
+-   | (n, ps) -> Shift((if n = no_action then No_remember else Remember n),
+-                      transition_from chars follow ps)
+- 
+- let make_dfa lexdef =
+-   let (chars, entry_list) = encode_lexdef lexdef in
+-   let follow = followpos (Array.length chars) entry_list in
+-   reset_state_mem();
+-   let initial_states =
+-     List.map
+-       (fun le ->
+-         { auto_name = le.lex_name;
+-           auto_initial_state = get_state(firstpos le.lex_regexp);
+-           auto_actions = le.lex_actions })
+-       entry_list in
+-   let states = map_on_all_states (translate_state chars follow) in
+-   let actions = Array.create !next_state_num (Perform 0) in
+-   List.iter (fun (act, i) -> actions.(i) <- act) states;
+-   reset_state_mem();
+-   (initial_states, actions)
+--- 0 ----
+diff -rbBcN lex/lexgen.mli cyclex/lexgen.mli
+*** lex/lexgen.mli	Tue Aug 21 16:09:42 2001
+--- cyclex/lexgen.mli	Wed Dec 31 19:00:00 1969
+***************
+*** 1,36 ****
+- (***********************************************************************)
+- (*                                                                     *)
+- (*                           Objective Caml                            *)
+- (*                                                                     *)
+- (*            Xavier Leroy, projet Cristal, INRIA Rocquencourt         *)
+- (*                                                                     *)
+- (*  Copyright 1996 Institut National de Recherche en Informatique et   *)
+- (*  en Automatique.  All rights reserved.  This file is distributed    *)
+- (*  under the terms of the Q Public License version 1.0.               *)
+- (*                                                                     *)
+- (***********************************************************************)
+- 
+- (* $Id: ocamllex2cyclex.patch,v 1.1 2001-08-21 20:16:19 mhicks Exp $ *)
+- 
+- (* Representation of automata *)
+- 
+- type automata =
+-     Perform of int
+-   | Shift of automata_trans * automata_move array
+- and automata_trans =
+-     No_remember
+-   | Remember of int
+- and automata_move =
+-     Backtrack
+-   | Goto of int
+- 
+- (* Representation of entry points *)
+- 
+- type automata_entry =
+-   { auto_name: string;
+-     auto_initial_state: int;
+-     auto_actions: (int * Syntax.location) list }
+- 
+- (* The entry point *)
+- 
+- val make_dfa: Syntax.lexer_definition -> automata_entry list * automata array
+--- 0 ----
+diff -rbBcN lex/main.cyc cyclex/main.cyc
+*** lex/main.cyc	Wed Dec 31 19:00:00 1969
+--- cyclex/main.cyc	Tue Aug 21 16:09:42 2001
+***************
+*** 0 ****
+--- 1,81 ----
++ #include "core.h"
++ #include "stdio.h"
++ #include "filename.h"
++ #include "string.h"
++ 
++ 
++ #include "syntax.h"
++ #include "parser.h"
++ #include "lexer.h"
++ #include "lexgen.h"
++ #include "compact.h"
++ #include "output.h"
++ 
++ using Core;
++ 
++ int main(int argc, string_t ? argv) {
++   if(argc < 2 || argc > 3) {
++     fprintf(stderr, "Usage: cycocamllex <input file> [<output file>]");
++     return 1;
++   }
++   string_t source_name = argv[1];
++   string_t dest_name;
++   if(argc==3)
++     dest_name = argv[2];
++   else if (Filename::check_suffix(source_name,".cyl"))
++     dest_name = strconcat(Filename::chop_extension(source_name),
++ 				  ".cyc");
++   else
++     dest_name = strconcat(source_name, ".cyc");
++ 
++   FILE @ ic;
++   FILE @ oc; 
++   try {
++     ic = file_open(source_name, "rb"); // very important for fseek!
++     oc = file_open(dest_name,   "w");
++   } catch {
++   default: 
++     fprintf(stderr, "trouble opening files");
++     // FIX: remove dest file
++     // jcheney: fixed this
++ 
++     remove(dest_name);
++     return 1;
++   }
++   // FIX: catch errors!!!
++   // jcheney: working on this
++   try {
++     Syntax::lexer_definition_t def = Parser::parse_file(ic);
++     let &$(entries, transitions) = Lexgen::make_dfa(def);
++     let tables = Compact::compact_tables(transitions);
++     Output::output_lexdef(source_name, ic, oc,
++ 			  def->header, tables, entries, def->trailer);
++   } catch {
++     // FIX: catch other exceptions, handle common default behavior 
++     // appropriately
++     // jcheney:working on this
++     // jcheney: in this case, can't give exact character position since
++     // don't have access to lexbuf so can't get Lexing::lexeme_start(lbuf)
++     case &Parser::Parser_error(s): 
++       fprintf(stderr,"File \"%s\", line %d: syntax error.\n",
++ 	      source_name, Lexer::line_num);
++       break;
++     case &Lexer::Lexical_error(msg,line,col):
++       fprintf(stderr,"File \"%s\", line %d, character %d: %s.\n",
++ 	      source_name,line,col,msg);
++       break;
++     case Output::Table_overflow:
++       fprintf(stderr,"File \"%s\":\ntransition table overflow, automaton is too big\n",
++ 	      source_name);
++       break;
++     case exn:
++       fprintf(stderr, "error in parsing, generation, compaction, or output");
++       remove(dest_name);
++       throw exn;
++       return 1;
++   }  
++   return 0;
++ }
++ 
++ 
++ 
+diff -rbBcN lex/main.ml cyclex/main.ml
+*** lex/main.ml	Tue Aug 21 16:09:42 2001
+--- cyclex/main.ml	Wed Dec 31 19:00:00 1969
+***************
+*** 1,67 ****
+- (***********************************************************************)
+- (*                                                                     *)
+- (*                           Objective Caml                            *)
+- (*                                                                     *)
+- (*            Xavier Leroy, projet Cristal, INRIA Rocquencourt         *)
+- (*                                                                     *)
+- (*  Copyright 1996 Institut National de Recherche en Informatique et   *)
+- (*  en Automatique.  All rights reserved.  This file is distributed    *)
+- (*  under the terms of the Q Public License version 1.0.               *)
+- (*                                                                     *)
+- (***********************************************************************)
+- 
+- (* $Id: ocamllex2cyclex.patch,v 1.1 2001-08-21 20:16:19 mhicks Exp $ *)
+- 
+- (* The lexer generator. Command-line parsing. *)
+- 
+- open Syntax
+- open Lexgen
+- open Output
+- 
+- let main () =
+-   if Array.length Sys.argv != 2 then begin
+-     prerr_endline "Usage: ocamllex <input file>";
+-     exit 2
+-   end;
+-   let source_name = Sys.argv.(1) in
+-   let dest_name =
+-     if Filename.check_suffix source_name ".mll" then
+-       Filename.chop_suffix source_name ".mll" ^ ".ml"
+-     else
+-       source_name ^ ".ml" in
+-   let ic = open_in_bin source_name in
+-   let oc = open_out dest_name in
+-   let lexbuf = Lexing.from_channel ic in
+-   try
+-     let def = Parser.lexer_definition Lexer.main lexbuf in
+-     let (entries, transitions) = Lexgen.make_dfa def in
+-     let tables = Compact.compact_tables transitions in
+-     Output.output_lexdef source_name ic oc
+-                          def.header tables entries def.trailer;
+-     close_in ic;
+-     close_out oc
+-   with exn ->
+-     close_in ic;
+-     close_out oc;
+-     Sys.remove dest_name;
+-     begin match exn with
+-       Parsing.Parse_error ->
+-         Printf.fprintf stderr
+-           "File \"%s\", line %d, character %d: syntax error.\n"
+-           source_name !Lexer.line_num
+-           (Lexing.lexeme_start lexbuf - !Lexer.line_start_pos)
+-     | Lexer.Lexical_error(msg, line, col) ->
+-         Printf.fprintf stderr
+-           "File \"%s\", line %d, character %d: %s.\n"
+-           source_name line col msg
+-     | Output.Table_overflow ->
+-         Printf.fprintf stderr
+-           "File \"%s\":\ntransition table overflow, automaton is too big\n"
+-           source_name
+-     | _ ->
+-         raise exn
+-     end;
+-     exit 3
+- 
+- let _ = Printexc.catch main (); exit 0
+- 
+--- 0 ----
+diff -rbBcN lex/output.cyc cyclex/output.cyc
+*** lex/output.cyc	Wed Dec 31 19:00:00 1969
+--- cyclex/output.cyc	Tue Aug 21 16:09:42 2001
+***************
+*** 0 ****
+--- 1,158 ----
++ 
++ #include "core.h"
++ #include "output.h"
++ #include "stdio.h"
++ 
++ namespace Output;
++ 
++ static mstring_t copy_buffer = NULL; // initialized in output_lexdef
++ 
++ /*void copy_chars(FILE @ ic, FILE @ oc, int start, int stop) {
++   int n = stop - start;
++   while(n > 0) {
++     int m = f_string_read(ic, copy_buffer, 0, (n < 1024 ? n : 1024));
++     f_string_write(oc, copy_buffer, 0, m);
++     n -= m;
++   }
++   }*/
++ void copy_chars(FILE @ ic, FILE @oc, int start, int stop) {
++   for(int i = start; i < stop; ++i) {
++     char c = (char)fgetc(ic);
++     if(c != '\r')
++       fprintf(oc, "%c", c);
++   }
++ }
++ 
++ void copy_chunk(string_t sourcename, FILE @ ic, FILE @ oc, Syntax::location_t loc){
++   if(loc->start_pos < loc->end_pos) {
++     fprintf(oc, "#line %d \"%s\"\n", loc->start_line, sourcename);
++     for(int i=1; i <= loc->start_col; ++i)
++       fprintf(oc, "%c", ' ');
++     fseek(ic, loc->start_pos, SEEK_SET);
++     copy_chars(ic, oc, loc->start_pos, loc->end_pos);
++   }
++ }
++ 
++ void output_array(FILE @ oc, int ?v) { // Doesn't work for really short arrays?
++   fprintf(oc, "{");
++   for(int i=0; i < v.size-1; ++i)
++     fprintf(oc, "%d,", v[i]);
++   fprintf(oc, "%d}", v[v.size-1]);
++ }
++ 
++ void output_tables(FILE @oc, Compact::lex_tables_t tbl) {
++   fprintf(oc, "const int lex_base[] = ");       output_array(oc, tbl->base);
++   fprintf(oc, ";\nconst int lex_backtrk[] = "); output_array(oc, tbl->backtrk);
++   fprintf(oc, ";\nconst int lex_default[] = "); output_array(oc, tbl->defaultX);
++   fprintf(oc, ";\nconst int lex_trans[] = ");   output_array(oc, tbl->trans);
++   fprintf(oc, ";\nconst int lex_check[] = ");   output_array(oc, tbl->check);
++   fprintf(oc, ";\n");
++   // we make a new engine every time for cheaper array-bounds checks:
++   fprintf(oc,
++ "     int lex_engine(int start_state, Lexbuf<`a> lbuf) {\n"
++ "\n"
++ "       int state, base, backtrk;\n"
++ "       int c;\n"
++ "       state = start_state;\n"
++ "\n"
++ "       if (state >= 0) {\n"
++ 	 // First entry 
++ "	 lbuf->lex_last_pos = lbuf->lex_start_pos = lbuf->lex_curr_pos;\n"
++ "	 lbuf->lex_last_action = -1;\n"
++ "       } else {\n"
++ 	 // Reentry after refill 
++ "	 state = -state-1;\n"
++ "       }\n"
++ "       while (true) {\n"
++ "	 base = lex_base[state];\n"
++ "	 if (base < 0) return -base-1;\n"
++ 	 // See if it's a backtrack point 
++ "	 backtrk = lex_backtrk[state];\n"
++ "	 if (backtrk >= 0) {\n"
++ "	   lbuf->lex_last_pos    = lbuf->lex_curr_pos;\n"
++ "	   lbuf->lex_last_action = backtrk;\n"
++ "	 }\n"
++ 	 // See if we need a refill 
++ "	 if (lbuf->lex_curr_pos >= lbuf->lex_buffer_len) {\n"
++ "	   if (!lbuf->lex_eof_reached)\n"
++ "	     return -state-1;\n"
++ "	   else\n"
++ "	     c = 256;\n"
++ "	 } else {\n"
++ 	   // Read next input char 
++ "	   c = (int) (lbuf->lex_buffer[lbuf->lex_curr_pos++]);\n"
++ "	   if (c==EOF) c=256;\n"
++ "	 }\n"
++ 	 // Determine next state 
++ "	 if (lex_check[base+c]==state)\n"
++ "	   state = lex_trans[base+c];\n"
++ "	 else\n"
++ "	   state = lex_default[state];\n"
++ 	 // If no transition on this char, return to last backtrack point 
++ "	 if (state < 0) {\n"
++ "	   lbuf->lex_curr_pos = lbuf->lex_last_pos;\n"
++ "	   if (lbuf->lex_last_action == -1)\n"
++ "	     throw new Error(\"empty token\");\n"
++ "	   else {\n"
++ "	     return lbuf->lex_last_action;\n"
++ "	   }\n"
++ "	 } else {\n"
++ 	   // Erase the EOF condition only if the EOF pseudo-character was
++ 	   // consumed by the automaton (i.e., there was no backtrack above)
++ "	   if (c == 256) lbuf->lex_eof_reached = false;\n"
++ "	 }\n"
++ "       }\n"
++ "  }\n"
++ 	  );
++ }
++ 
++ void output_entry(string_t sourcename, FILE @ ic, FILE @ oc, 
++ 		  Lexgen::automata_entry_t e) {
++   fprintf(oc, "%s %s_rec(Lexbuf<`a> lexbuf, int lexstate) {\n",
++ 	  (e->type)?e->type:"int",
++ 	  e->name);
++   // save new state, then switch on it, so default case can use it.
++   // (int switch can't get the value being switched on??)
++   fprintf(oc, "  lexstate = lex_engine(lexstate,lexbuf);\n");
++   fprintf(oc, "  switch (lexstate) {\n");
++   for(let actions=e->actions; actions!=NULL; actions=actions->tl) {
++     let &$(num,loc) = actions->hd;
++     fprintf(oc, "\ncase %d: \n", num);
++     copy_chunk(sourcename, ic, oc, loc);
++   }
++   fprintf(oc,
++     " default: lexbuf->refill_buff(lexbuf); return %s_rec(lexbuf,lexstate);\n",
++ 	  e->name);
++   fprintf(oc, "  }\n throw new Error(\"some action didn't return!\");\n}\n");
++   fprintf(oc, "%s %s(Lexbuf<`a> lexbuf) { return %s_rec(lexbuf,%d); }\n",
++ 	  (e->type)?e->type:"int",
++           e->name, e->name, e->initial_state);
++ }
++ 
++ xtunion exn { Table_overflow };
++ 
++ void output_lexdef(string_t sourcename, 
++ 		   FILE @ ic, 
++ 		   FILE @ oc,
++ 		   Syntax::location_t    header,
++ 		   Compact::lex_tables_t tables,
++ 		   List::list_t<Lexgen::automata_entry_t> entry_points,
++ 		   Syntax::location_t    trailer) {
++   copy_buffer = Core::new_string(1024);
++   fprintf(stderr, "%d states, %d transitions, table size %d bytes\n",
++ 	  tables->base.size,
++ 	  tables->trans.size,
++ 	  2 * ((tables->base).size + (tables->backtrk).size
++ 	       + (tables->defaultX).size + (tables->trans).size
++ 	       + (tables->check).size));
++   if((tables->trans).size > 0x8000)
++     throw Table_overflow;
++   copy_chunk(sourcename, ic, oc, header);
++   fprintf(oc, "using Lexing {\n\n");
++   output_tables(oc, tables);
++   for(; entry_points != NULL; entry_points = entry_points->tl)
++     output_entry(sourcename, ic, oc, entry_points->hd);
++   fprintf(oc, "\n}\n");
++   copy_chunk(sourcename, ic, oc, trailer);
++ }
++ 
+diff -rbBcN lex/output.h cyclex/output.h
+*** lex/output.h	Wed Dec 31 19:00:00 1969
+--- cyclex/output.h	Tue Aug 21 16:09:42 2001
+***************
+*** 0 ****
+--- 1,25 ----
++ #ifndef OUTPUT_H
++ #define OUTPUT_H
++ 
++ #include "core.h"
++ #include "cstdio.h"
++ #include "list.h"
++ #include "syntax.h"
++ #include "lexgen.h"
++ #include "compact.h"
++ 
++ namespace Output {
++ using std;
++ 
++ extern void output_lexdef(string_t sourcename, 
++ 			  FILE @ infile, 
++ 			  FILE @ outfile,
++ 			  Syntax::location_t    header,
++ 			  Compact::lex_tables_t tables,
++ 			  List::list_t<Lexgen::automata_entry_t> entry_points,
++ 			  Syntax::location_t    trailer);
++ 
++ extern xtunion exn { extern Table_overflow };
++ 
++ }
++ #endif
+diff -rbBcN lex/output.ml cyclex/output.ml
+*** lex/output.ml	Tue Aug 21 16:09:42 2001
+--- cyclex/output.ml	Wed Dec 31 19:00:00 1969
+***************
+*** 1,124 ****
+- (***********************************************************************)
+- (*                                                                     *)
+- (*                           Objective Caml                            *)
+- (*                                                                     *)
+- (*            Xavier Leroy, projet Cristal, INRIA Rocquencourt         *)
+- (*                                                                     *)
+- (*  Copyright 1996 Institut National de Recherche en Informatique et   *)
+- (*  en Automatique.  All rights reserved.  This file is distributed    *)
+- (*  under the terms of the Q Public License version 1.0.               *)
+- (*                                                                     *)
+- (***********************************************************************)
+- 
+- (* $Id: ocamllex2cyclex.patch,v 1.1 2001-08-21 20:16:19 mhicks Exp $ *)
+- 
+- (* Output the DFA tables and its entry points *)
+- 
+- open Printf
+- open Syntax
+- open Lexgen
+- open Compact
+- 
+- (* To copy the ML code fragments *)
+- 
+- let copy_buffer = String.create 1024
+- 
+- let copy_chars_unix ic oc start stop =
+-   let n = ref (stop - start) in
+-   while !n > 0 do
+-     let m = input ic copy_buffer 0 (min !n 1024) in
+-     output oc copy_buffer 0 m;
+-     n := !n - m
+-   done
+- 
+- let copy_chars_win32 ic oc start stop =
+-   for i = start to stop - 1 do
+-     let c = input_char ic in
+-     if c <> '\r' then output_char oc c
+-   done
+- 
+- let copy_chars =
+-   match Sys.os_type with
+-     "Win32" | "Cygwin" -> copy_chars_win32
+-   | _       -> copy_chars_unix
+- 
+- let copy_chunk sourcefile ic oc loc =
+-   if loc.start_pos < loc.end_pos then begin
+-     fprintf oc "# %d \"%s\"\n" loc.start_line sourcefile;
+-     for i = 1 to loc.start_col do output_char oc ' ' done;
+-     seek_in ic loc.start_pos;
+-     copy_chars ic oc loc.start_pos loc.end_pos
+-   end
+- 
+- (* To output an array of short ints, encoded as a string *)
+- 
+- let output_byte oc b =
+-   output_char oc '\\';
+-   output_char oc (Char.chr(48 + b / 100));
+-   output_char oc (Char.chr(48 + (b / 10) mod 10));
+-   output_char oc (Char.chr(48 + b mod 10))
+- 
+- let output_array oc v =
+-   output_string oc "   \"";
+-   for i = 0 to Array.length v - 1 do
+-     output_byte oc (v.(i) land 0xFF);
+-     output_byte oc ((v.(i) asr 8) land 0xFF);
+-     if i land 7 = 7 then output_string oc "\\\n    "
+-   done;
+-   output_string oc "\""
+- 
+- (* Output the tables *)
+- 
+- let output_tables oc tbl =
+-   output_string oc "let lex_tables = {\n";
+-   fprintf oc "  Lexing.lex_base = \n%a;\n" output_array tbl.tbl_base;
+-   fprintf oc "  Lexing.lex_backtrk = \n%a;\n" output_array tbl.tbl_backtrk;
+-   fprintf oc "  Lexing.lex_default = \n%a;\n" output_array tbl.tbl_default;
+-   fprintf oc "  Lexing.lex_trans = \n%a;\n" output_array tbl.tbl_trans;
+-   fprintf oc "  Lexing.lex_check = \n%a\n" output_array tbl.tbl_check;
+-   output_string oc "}\n\n"
+- 
+- (* Output the entries *)
+- 
+- let output_entry sourcefile ic oc e =
+-   fprintf oc "%s lexbuf = __ocaml_lex_%s_rec lexbuf %d\n"
+-           e.auto_name e.auto_name e.auto_initial_state;
+-   fprintf oc "and __ocaml_lex_%s_rec lexbuf state =\n" e.auto_name;
+-   fprintf oc "  match Lexing.engine lex_tables state lexbuf with\n    ";
+-   let first = ref true in
+-   List.iter
+-     (fun (num, loc) ->
+-       if !first then first := false else fprintf oc "  | ";
+-       fprintf oc "%d -> (\n" num;
+-       copy_chunk sourcefile ic oc loc;
+-       fprintf oc ")\n")
+-     e.auto_actions;
+-   fprintf oc "  | n -> lexbuf.Lexing.refill_buff lexbuf; \
+-                                 __ocaml_lex_%s_rec lexbuf n\n\n"
+-           e.auto_name
+- 
+- (* Main output function *)
+- 
+- exception Table_overflow
+- 
+- let output_lexdef sourcefile ic oc header tables entry_points trailer =
+-   Printf.printf "%d states, %d transitions, table size %d bytes\n"
+-     (Array.length tables.tbl_base)
+-     (Array.length tables.tbl_trans)
+-     (2 * (Array.length tables.tbl_base + Array.length tables.tbl_backtrk +
+-           Array.length tables.tbl_default + Array.length tables.tbl_trans +
+-           Array.length tables.tbl_check));
+-   flush stdout;
+-   if Array.length tables.tbl_trans > 0x8000 then raise Table_overflow;
+-   copy_chunk sourcefile ic oc header;
+-   output_tables oc tables;
+-   begin match entry_points with
+-     [] -> ()
+-   | entry1 :: entries ->
+-       output_string oc "let rec "; output_entry sourcefile ic oc entry1;
+-       List.iter
+-         (fun e -> output_string oc "and "; output_entry sourcefile ic oc e)
+-         entries;
+-       output_string oc ";;\n\n";
+-   end;
+-   copy_chunk sourcefile ic oc trailer
+--- 0 ----
+diff -rbBcN lex/output.mli cyclex/output.mli
+*** lex/output.mli	Tue Aug 21 16:09:42 2001
+--- cyclex/output.mli	Wed Dec 31 19:00:00 1969
+***************
+*** 1,25 ****
+- (***********************************************************************)
+- (*                                                                     *)
+- (*                           Objective Caml                            *)
+- (*                                                                     *)
+- (*            Xavier Leroy, projet Cristal, INRIA Rocquencourt         *)
+- (*                                                                     *)
+- (*  Copyright 1996 Institut National de Recherche en Informatique et   *)
+- (*  en Automatique.  All rights reserved.  This file is distributed    *)
+- (*  under the terms of the Q Public License version 1.0.               *)
+- (*                                                                     *)
+- (***********************************************************************)
+- 
+- (* $Id: ocamllex2cyclex.patch,v 1.1 2001-08-21 20:16:19 mhicks Exp $ *)
+- 
+- (* Output the DFA tables and its entry points *)
+- 
+- val output_lexdef:
+-       string -> in_channel -> out_channel ->
+-       Syntax.location ->
+-       Compact.lex_tables ->
+-       Lexgen.automata_entry list ->
+-       Syntax.location ->
+-       unit
+- 
+- exception Table_overflow
+--- 0 ----
+diff -rbBcN lex/parser.h cyclex/parser.h
+*** lex/parser.h	Wed Dec 31 19:00:00 1969
+--- cyclex/parser.h	Tue Aug 21 16:09:42 2001
+***************
+*** 0 ****
+--- 1,23 ----
++ #ifndef PARSER_H
++ #define PARSER_H
++ 
++ #include "core.h"
++ #include "stdio.h"
++ #include "list.h"
++ #include "lexing.h"
++ #include "syntax.h"
++ 
++ using Core {
++ using std {
++ using List {
++ using Lexing {
++ using Syntax {
++ namespace Parser {
++ extern lexer_definition_t parse_file(FILE @f);
++ extern opt_t<Lexbuf<Function_lexbuf_state<FILE@>>> lbuf;
++ extern xtunion exn {extern Parser_error(string_t)};
++ }
++ #include "parser_tab.h"
++ }}}}}
++ 
++ #endif
+diff -rbBcN lex/parser.mly cyclex/parser.mly
+*** lex/parser.mly	Tue Aug 21 16:09:42 2001
+--- cyclex/parser.mly	Wed Dec 31 19:00:00 1969
+***************
+*** 1,157 ****
+- /***********************************************************************/
+- /*                                                                     */
+- /*                           Objective Caml                            */
+- /*                                                                     */
+- /*            Xavier Leroy, projet Cristal, INRIA Rocquencourt         */
+- /*                                                                     */
+- /*  Copyright 1996 Institut National de Recherche en Informatique et   */
+- /*  en Automatique.  All rights reserved.  This file is distributed    */
+- /*  under the terms of the Q Public License version 1.0.               */
+- /*                                                                     */
+- /***********************************************************************/
+- 
+- /* $Id: ocamllex2cyclex.patch,v 1.1 2001-08-21 20:16:19 mhicks Exp $ */
+- 
+- /* The grammar for lexer definitions */
+- 
+- %{
+- open Syntax
+- 
+- (* Auxiliaries for the parser. *)
+- 
+- let named_regexps =
+-   (Hashtbl.create 13 : (string, regular_expression) Hashtbl.t)
+- 
+- let regexp_for_string s =
+-   let rec re_string n =
+-     if n >= String.length s then Epsilon
+-     else if succ n = String.length s then Characters([Char.code (s.[n])])
+-     else Sequence(Characters([Char.code (s.[n])]), re_string (succ n))
+-   in re_string 0
+- 
+- let char_class c1 c2 =
+-   let rec cl n =
+-     if n > c2 then [] else n :: cl(succ n)
+-   in cl c1
+- 
+- let all_chars = char_class 0 255
+- 
+- let rec subtract l1 l2 =
+-   match l1 with
+-     [] -> []
+-   | a::r -> if List.mem a l2 then subtract r l2 else a :: subtract r l2
+- %}
+- 
+- %token <string> Tident
+- %token <int> Tchar
+- %token <string> Tstring
+- %token <Syntax.location> Taction
+- %token Trule Tparse Tand Tequal Tend Tor Tunderscore Teof Tlbracket Trbracket
+- %token Tstar Tmaybe Tplus Tlparen Trparen Tcaret Tdash Tlet
+- 
+- %left Tor
+- %left CONCAT
+- %nonassoc Tmaybe
+- %left Tstar
+- %left Tplus
+- 
+- %start lexer_definition
+- %type <Syntax.lexer_definition> lexer_definition
+- 
+- %%
+- 
+- lexer_definition:
+-     header named_regexps Trule definition other_definitions header Tend
+-         { {header = $1;
+-            entrypoints = $4 :: List.rev $5;
+-            trailer = $6} }
+- ;
+- header:
+-     Taction
+-         { $1 }
+-   | /*epsilon*/
+-         { { start_pos = 0; end_pos = 0; start_line = 1; start_col = 0 } }
+- ;
+- named_regexps:
+-     named_regexps Tlet Tident Tequal regexp
+-         { Hashtbl.add named_regexps $3 $5 }
+-   | /*epsilon*/
+-         { () }
+- ;
+- other_definitions:
+-     other_definitions Tand definition
+-         { $3::$1 }
+-   | /*epsilon*/
+-         { [] }
+- ;
+- definition:
+-     Tident Tequal entry
+-         { ($1,$3) }
+- ;
+- entry:
+-     Tparse case rest_of_entry
+-         { $2::List.rev $3 }
+-   | Tparse rest_of_entry
+-         { List.rev $2 }
+- ;
+- rest_of_entry:
+-     rest_of_entry Tor case
+-         { $3::$1 }
+-   |
+-         { [] }
+- ;
+- case:
+-     regexp Taction
+-         { ($1,$2) }
+- ;
+- regexp:
+-     Tunderscore
+-         { Characters all_chars }
+-   | Teof
+-         { Characters [256] }
+-   | Tchar
+-         { Characters [$1] }
+-   | Tstring
+-         { regexp_for_string $1 }
+-   | Tlbracket char_class Trbracket
+-         { Characters $2 }
+-   | regexp Tstar
+-         { Repetition $1 }
+-   | regexp Tmaybe
+-         { Alternative($1, Epsilon) }
+-   | regexp Tplus
+-         { Sequence($1, Repetition $1) }
+-   | regexp Tor regexp
+-         { Alternative($1,$3) }
+-   | regexp regexp %prec CONCAT
+-         { Sequence($1,$2) }
+-   | Tlparen regexp Trparen
+-         { $2 }
+-   | Tident
+-         { try
+-             Hashtbl.find named_regexps $1
+-           with Not_found ->
+-             prerr_string "Reference to unbound regexp name `";
+-             prerr_string $1;
+-             prerr_string "' at char ";
+-             prerr_int (Parsing.symbol_start());
+-             prerr_newline();
+-             exit 2 }
+- ;
+- char_class:
+-     Tcaret char_class1
+-         { subtract all_chars $2 }
+-   | char_class1
+-         { $1 }
+- ;
+- char_class1:
+-     Tchar Tdash Tchar
+-         { char_class $1 $3 }
+-   | Tchar
+-         { [$1] }
+-   | char_class1 char_class1 %prec CONCAT
+-         { $1 @ $2 }
+- ;
+- 
+- %%
+- 
+--- 0 ----
+diff -rbBcN lex/parser.y cyclex/parser.y
+*** lex/parser.y	Wed Dec 31 19:00:00 1969
+--- cyclex/parser.y	Tue Aug 21 16:09:42 2001
+***************
+*** 0 ****
+--- 1,191 ----
++ 
++ %{
++ #define YYDEBUG 0
++ 
++ #include "core.h"
++ #include "stdio.h"
++ #include "list.h"
++ #include "hashtable.h"
++ #include "lexing.h"
++ #include "string.h"
++ 
++ #include "syntax.h"
++ 
++ using Core;
++ using List;
++ 
++ using Syntax;
++ 
++ namespace Lexer {
++   extern int lexmain(Lexing::Lexbuf<`a>);
++   extern xtunion exn { extern Lexical_error(string_t,int,int) };
++   extern int line_num;
++   extern int line_start_pos;
++ }
++ 
++ namespace Parser {
++ 
++ opt_t<Lexing::Lexbuf<Lexing::Function_lexbuf_state<FILE@>>> lbuf = NULL;
++ 
++ xtunion exn {Parser_error(string_t)};
++ typedef struct Hashtable::Table<stringptr_t,regular_expression_t> htbl;
++   // must be initialized!
++ htbl * named_regexps = NULL;
++ lexer_definition_t parse_result = NULL;
++ 
++ regular_expression_t regexp_for_string(string_t s) {
++   int len = strlen(s);
++   if(len == 0)
++     return Epsilon;
++   regular_expression_t ans = new Characters(new List((int)(s[len-1]), NULL));
++   for(int n = len - 2; n >= 0; --n)
++     ans = new Sequence(new Characters(new List((int)(s[n]), NULL)), ans);
++   return ans;
++ }
++ 
++ list_t<int> char_class(int c1, int c2) {
++   list_t<int> ans = NULL;
++   for(int n = c2; n >= c1; --n)
++     ans = new List(n,ans);
++   return ans;
++ }
++ 
++ static list_t<int> all_chars_s = NULL;
++ static list_t<int> all_chars() {  
++   if(all_chars_s == NULL)
++     all_chars_s = char_class(0,255);
++   return all_chars_s;
++ }
++ 
++ static list_t<int> subtract(list_t<int> l1, list_t<int> l2) {
++   list_t<int> rev_ans = NULL;
++   for(; l1 != NULL; l1 = l1->tl)
++     if(!memq(l2, l1->hd))
++       rev_ans = new List(l1->hd, rev_ans);
++   return imp_rev(rev_ans);
++ }
++ 
++ } // end namespace Parser
++ 
++ using Parser;
++ %}
++ 
++ %token TIDENT TCHAR TSTRING TACTION
++ %token TRULE TPARSE TAND TEQUAL TOR TUNDERSCORE TEOF TLBRACKET TRBRACKET
++ %token TSTAR TMAYBE TPLUS TLPAREN TRPAREN TCARET TDASH TLET
++ 
++ %left TOR
++ %left CONCAT
++ %nonassoc TMAYBE
++ %left TSTAR
++ %left TPLUS
++ 
++ %start lexer_definition
++ 
++ %union {
++   Lexer_definition_tok(lexer_definition_t);
++   Location_tok(location_t);
++   Int_tok(int);
++   Entrypoint_List_tok(list_t<entrypoint_t>);
++   Entrypoint_tok(entrypoint_t);
++   Acase_List_tok(list_t<acase_t>);
++   Acase_tok(acase_t);
++   Regexp_tok(regular_expression_t);
++   Char_tok(char);
++   String_tok(string_t);
++   Charclass_tok(list_t<int>);
++ }
++ 
++ %type <Lexer_definition_tok> lexer_definition
++ %type <Location_tok> header TACTION
++ %type <Int_tok> named_regexps
++ %type <Entrypoint_List_tok> other_definitions
++ %type <Entrypoint_tok> definition
++ %type <Acase_List_tok> entry rest_of_entry
++ %type <Acase_tok> acase
++ %type <Regexp_tok> regexp
++ %type <Char_tok> TCHAR
++ %type <String_tok> TSTRING TIDENT
++ %type <Charclass_tok> char_class char_class1
++ 
++ %%
++ 
++ lexer_definition: 
++   header named_regexps TRULE definition other_definitions header
++ { lexer_definition_t ans = new Lexer_definition($1, new List($4,rev($5)), $6);
++   $$=^$(ans);
++   parse_result = ans;
++ }
++ 
++ header:
++   TACTION     { $$=$!1; }
++ | /* empty */ { $$=^$(new Location(0,0,1,0)); }
++ 
++ named_regexps:
++   named_regexps TLET TIDENT TEQUAL regexp 
++     { Hashtable::insert((Parser::htbl @)named_regexps, 
++                         new {(string_t)$3}, $5); 
++       $$=^$(0); }
++ | /* empty */ { $$=^$(0); }
++ 
++ other_definitions:
++   other_definitions TAND definition 
++      { $$=^$(new List($3,$1)); }
++ | /* empty */ { $$=^$(NULL); }
++ 
++ definition: TIDENT TEQUAL entry { $$=^$(new $($1,(string_t)NULL,$3)); }
++ | TIDENT TSTRING TEQUAL entry { $$=^$(new $($1,$2,$4)); }
++ 
++ entry:
++   TPARSE acase rest_of_entry { $$=^$(new List($2,rev($3))); }
++ | TPARSE rest_of_entry       { $$=^$(rev($2)); }
++ 
++ rest_of_entry:
++   rest_of_entry TOR acase { $$=^$(new List($3,$1)); }
++ | /* empty */ { $$=^$(NULL); }
++ 
++ acase: regexp TACTION { $$=^$(new $($1,$2)); }
++ 
++ regexp:
++   TUNDERSCORE { $$=^$(new Characters(all_chars())); }
++ | TEOF        { /* FIX: may change to -1 like C library? */ 
++                 $$=^$(new Characters(new List(256,NULL))); }
++ | TCHAR       { $$=^$(new Characters(new List((int)($1),NULL))); }
++ | TSTRING     { $$=^$(regexp_for_string($1)); }
++ | TLBRACKET char_class TRBRACKET { $$=^$(new Characters($2)); }
++ | regexp TSTAR      { $$=^$(new Repetition($1)); }
++ | regexp TMAYBE     { $$=^$(new Alternative($1,Epsilon)); }
++ | regexp TPLUS      { $$=^$(new Sequence($1, new Repetition($1))); }
++ | regexp TOR regexp { $$=^$(new Alternative($1,$3)); }
++ | regexp regexp %prec CONCAT { $$=^$(new Sequence($1,$2)); }
++ | TLPAREN regexp TRPAREN { $$=^$($2); }
++ | TIDENT { try $$=^$(Hashtable::lookup((Parser::htbl @)named_regexps,
++ 				       new {(string_t)$1}));
++ 	   catch { 
++ 	     case Not_found:
++ 	     yyerror(aprintf("Reference to unbound regexp name `%s'", $1));
++ 	     break;
++ 	   }
++          }
++ 
++ char_class:
++   TCARET char_class1 { $$=^$(subtract(all_chars(),$2)); }
++ | char_class1        { $$=$!1; }
++ 
++ char_class1:
++   TCHAR TDASH TCHAR                    { $$=^$(char_class($1,$3)); }
++ | TCHAR                                { $$=^$(new List((int)($1),NULL)); }
++ | char_class1 char_class1 %prec CONCAT { $$=^$(append($1,$2)); }
++ 
++ %%
++ 
++ namespace Parser {
++ lexer_definition_t parse_file(FILE @`H f) {
++   named_regexps = Hashtable::create(13, strptrcmp, 
++ 				    Hashtable::hash_stringptr);
++   parse_result = NULL;
++   lbuf = new Opt(Lexing::from_file(f));
++   yyparse();
++   return parse_result;
++ }
++ }
+diff -rbBcN lex/syntax.cyc cyclex/syntax.cyc
+*** lex/syntax.cyc	Wed Dec 31 19:00:00 1969
+--- cyclex/syntax.cyc	Tue Aug 21 16:09:42 2001
+***************
+*** 0 ****
+--- 1,3 ----
++ 
++ #define SYNTAX_CYC
++ #include "syntax.h"
+diff -rbBcN lex/syntax.h cyclex/syntax.h
+*** lex/syntax.h	Wed Dec 31 19:00:00 1969
+--- cyclex/syntax.h	Tue Aug 21 16:09:42 2001
+***************
+*** 0 ****
+--- 1,44 ----
++ #ifndef SYNTAX_H
++ #define SYNTAX_H
++ 
++ #ifdef SYNTAX_CYC
++ #define SYNTAX_EXTERN_DEFINITION
++ #else
++ #define SYNTAX_EXTERN_DEFINITION extern
++ #endif
++ 
++ #include "list.h"
++ 
++ namespace Syntax {
++ using List {
++   
++ SYNTAX_EXTERN_DEFINITION struct Location {
++   int start_pos;
++   int end_pos;
++   int start_line;
++   int start_col;
++ };
++ typedef struct Location @ location_t;
++ 
++ SYNTAX_EXTERN_DEFINITION tunion Regular_expression {
++   Epsilon;
++   Characters(list_t<int>);
++   Sequence(tunion Regular_expression, tunion Regular_expression);
++   Alternative(tunion Regular_expression, tunion Regular_expression);
++   Repetition(tunion Regular_expression);
++ };
++ typedef tunion Regular_expression regular_expression_t;
++ 
++ typedef $(regular_expression_t,location_t) @ acase_t;
++ typedef $(string_t,string_t,list_t<acase_t>) @ entrypoint_t;
++ 
++ SYNTAX_EXTERN_DEFINITION struct Lexer_definition {
++   location_t         header;
++   list_t<entrypoint_t> entrypoints;
++   location_t         trailer;
++ };
++ typedef struct Lexer_definition * lexer_definition_t;
++ 
++ }}
++ 
++ #endif
+diff -rbBcN lex/syntax.mli cyclex/syntax.mli
+*** lex/syntax.mli	Tue Aug 21 16:09:42 2001
+--- cyclex/syntax.mli	Wed Dec 31 19:00:00 1969
+***************
+*** 1,33 ****
+- (***********************************************************************)
+- (*                                                                     *)
+- (*                           Objective Caml                            *)
+- (*                                                                     *)
+- (*            Xavier Leroy, projet Cristal, INRIA Rocquencourt         *)
+- (*                                                                     *)
+- (*  Copyright 1996 Institut National de Recherche en Informatique et   *)
+- (*  en Automatique.  All rights reserved.  This file is distributed    *)
+- (*  under the terms of the Q Public License version 1.0.               *)
+- (*                                                                     *)
+- (***********************************************************************)
+- 
+- (* $Id: ocamllex2cyclex.patch,v 1.1 2001-08-21 20:16:19 mhicks Exp $ *)
+- 
+- (* The shallow abstract syntax *)
+- 
+- type location =
+-     { start_pos: int;
+-       end_pos: int;
+-       start_line: int;
+-       start_col: int }
+- 
+- type regular_expression =
+-     Epsilon
+-   | Characters of int list
+-   | Sequence of regular_expression * regular_expression
+-   | Alternative of regular_expression * regular_expression
+-   | Repetition of regular_expression
+- 
+- type lexer_definition =
+-     { header: location;
+-       entrypoints: (string * (regular_expression * location) list) list;
+-       trailer: location }
+--- 0 ----

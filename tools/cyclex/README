@@ -1,0 +1,23 @@
+Cyclex was ported from ocamllex, part of the OCaml 3.01 distribution (see
+http://caml.inria.fr).  The changes to the OCaml source are provided as a
+patch, ocamllex2cyclex.patch, to the original OCaml 3.01 sources, as
+required by the Q public license which governs the distribution of OCaml
+source code.  This license is included in the file LICENSE.
+
+To create the contents of this directory from the OCaml sources, do the
+following (assuming the ocaml-3.01 source is installed in directory CAMLDIR,
+and that cyclone is installed in directory CYCDIR):
+
+cp -r CAMLDIR/lex /tmp/lex
+cp ocamllex2cyclex.patch /tmp
+cd /tmp/lex
+patch -p1 < ../ocamllex2cyclex.patch
+mkdir genfiles
+mv lexer.cyc genfiles
+cd ..
+mv lex CYCDIR/tools/cyclex
+rm -f ocamllex2cyclex.patch
+
+---------------
+August 23, 2001
+
