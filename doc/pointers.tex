@@ -263,8 +263,8 @@ when the number is not known at compile-time.
 
 \paragraph{Syntax and Semantics} The type \texttt{t ?} describes such pointers
 to objects of type \texttt{t}.  Such types may be assigned
-\texttt{NULL}.  They may regions, which as with other
-pointer types, is the region into which the pointer points and omitted
+\texttt{NULL}.  They may be annotated with a region, which (as with other
+pointer types) is the region into which the pointer points.  Omitted
 region annotations are filled in by the compiler.  Clearly,
 explicit bounds information makes no sense for these types.  If
 \texttt{e} has type \texttt{t ?}, then

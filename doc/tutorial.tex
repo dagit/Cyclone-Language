@@ -104,19 +104,19 @@ Cyclone:
 \begin{itemize}
 \item You can't cast an integer to a pointer.  Cyclone prevents this
   because it would let you overwrite arbitrary memory locations.  In
-  fact, you can't use \texttt{(void *)0} (C's typical definition of
-  \texttt{NULL}) as a pointer in Cyclone.  Instead, Cyclone provides
-  \texttt{NULL} as a keyword.
+  fact, you can't use \texttt{(void *)0} as a pointer in Cyclone, even
+  though this is how C typically defines \texttt{NULL}.  Instead,
+  Cyclone provides \texttt{NULL} as a keyword.
 \item You can't do pointer arithmetic on a \texttt{*} pointer.
   Pointer arithmetic in C can take a pointer out of bounds, so that
   when the pointer is eventually dereferenced, it corrupts memory or
-  causes a crash.  (Note, however, that pointer arithmetic is possible
-  using \texttt{?}\ pointers instead.)
+  causes a crash.  (However, pointer arithmetic is possible
+  using \texttt{?}\ pointers.)
 \item There is one other way to crash a C program using pointers: you
   can dereference the null pointer or try to update the null location.
   Cyclone prevents this by inserting a null check whenever you
   dereference a \texttt{*} pointer (that is, whenever you use the
-  \texttt{*}, \texttt{->}, or subscript operation on a pointer)
+  \texttt{*}, \texttt{->}, or subscript operation on a pointer.)
 \end{itemize}
 
 These are drastic differences from C, particularly the restriction on
@@ -249,7 +249,7 @@ Indeed, both pointer kinds always have length information and
 when you write ``\texttt{int *}'' this is just short-hand for
 ``\texttt{int *\{1\}}''.
 
-We try to explain pointers in much more detail in
+We explain pointers in more detail in
 \hyperref[{sec:pointers}]{Section~\ref{sec:pointers}}.
 
 \subsection{Regions}

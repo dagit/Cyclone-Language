@@ -44,7 +44,6 @@ gen-libdoc.tex: \
   ../include/filename.h \
   ../include/fn.h \
   ../include/hashtable.h \
-  ../include/id.h \
   ../include/list.h \
   ../include/pp.h \
   ../include/queue.h \
