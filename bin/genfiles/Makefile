@@ -1,5 +1,7 @@
 include ../../Makefile.inc
 
+G_LIBS := $(addprefix g_, $(O_LIBS))
+
 OLDCFLAGS := $(CFLAGS)
 CFLAGS += -O3
 
@@ -37,6 +39,16 @@ $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/nogc_a.a: $(ARCH)/lib/nogc_a.a
 $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/$(RUNTIME)_a.$(O): $(ARCH)/lib/$(RUNTIME)_a.$(O)
 	cp -p $< $@
 
+install_pg: $(ARCH) $(CYC_LIB_PATH)/libcyc_pg.a \
+  $(addprefix $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/, nogc_pg.a $(RUNTIME)_pg.$(O))
+
+$(CYC_LIB_PATH)/libcyc_pg.a: $(ARCH)/lib/libcyc_pg.a
+	cp $< $@
+$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/nogc_pg.a: $(ARCH)/lib/nogc_pg.a
+	cp -p $< $@
+$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/$(RUNTIME)_pg.$(O): $(ARCH)/lib/$(RUNTIME)_pg.$(O)
+	cp -p $< $@
+
 install_nocheck: $(ARCH) $(CYC_LIB_PATH)/libcyc_nocheck.a\
   $(addprefix $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/, nogc_nocheck.a $(RUNTIME).$(O))
 
@@ -67,13 +79,22 @@ $(ARCH)/lib/libcyc_a.a: $(addprefix $(ARCH)/lib/, $(A_LIBS) a_cstubs.$(O))
 $(ARCH)/lib/libcyc_nocheck.a: $(addprefix $(ARCH)/lib/, $(NOCHECK_LIBS) cstubs.$(O))
 	$(create_lib)
 
+$(ARCH)/lib/libcyc_pg.a: $(addprefix $(ARCH)/lib/, $(G_LIBS) a_cstubs.$(O))
+	$(create_lib)
+
 $(ARCH)/lib/nogc.a: $(ARCH)/lib/nogc.$(O)
 	$(create_lib)
 
 $(ARCH)/lib/nogc_a.a: $(ARCH)/lib/a_nogc.$(O)
 	$(create_lib)
 
+$(ARCH)/lib/nogc_pg.a: $(ARCH)/lib/g_nogc.$(O)
+	$(create_lib)
+
 $(ARCH)/lib/$(RUNTIME)_a.$(O): $(ARCH)/lib/a_$(RUNTIME).$(O)
+	cp $< $@
+
+$(ARCH)/lib/$(RUNTIME)_pg.$(O): $(ARCH)/lib/g_$(RUNTIME).$(O)
 	cp $< $@
 
 $(ARCH)/src/cyclone$(EXE): $(addprefix $(ARCH)/src/, $(O_SRCS) install_path.$(O)) $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/$(RUNTIME).$(O) $(CYC_LIB_PATH)/$(CYCLIB) $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/gc.a
@@ -109,6 +130,9 @@ $(ARCH)/src/%.$(O): $(ARCH)/src/%.c
 
 a_%.$(O): %.c
 	$(CC) -c -o $@ -DCYC_REGION_PROFILE $(CFLAGS) $<
+
+g_%.$(O): %.c
+	$(CC) -c -o $@ -pg $(CFLAGS) $<
 
 nocheck_%.$(O): %.c
 	$(CC) -c -o $@ -DNO_CYC_NULL_CHECKS -DNO_CYC_BOUNDS_CHECKS $(CFLAGS) $<

@@ -46,6 +46,8 @@ tools:
 aprof:
 	$(MAKE) -C bin/genfiles install_a 
 	$(MAKE) -C tools/aprof  install 
+gprof:
+	$(MAKE) -C bin/genfiles install_pg 
 libs:
 ifndef NO_XML_LIB
 	$(MAKE) -C lib/xml install 
@@ -286,9 +288,12 @@ clean_test:
 # To do: a much safer and less kludgy way to clean build!
 # To do: a way to clean individual directories in build.
 clean_build:
-	mv build/CVS .build_CVS
-	$(RM) -rf build/*
-	mv .build_CVS build/CVS
+	mv build/CVS .build_CVS; \
+	EXITC=$$?; \
+	$(RM) -rf build/*; \
+	if [ "$$EXITC" = 0 ]; then \
+	mv .build_CVS build/CVS; \
+	fi
 
 clean_nogc: clean_test clean_build
 	$(MAKE) -C tools/bison  clean

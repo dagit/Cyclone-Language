@@ -65,6 +65,7 @@ static bool save_temps_r = false;
 static bool save_c_r   = false;
 static bool nogc_r     = false;
 static bool pa_r       = false;
+static bool pg_r       = false;
 static bool nocheck_r  = false;
 static bool add_cyc_namespace_r = true;
 static bool generate_line_directives_r = false;
@@ -200,6 +201,11 @@ static void set_nocyc() {
 static void set_pa() {
   pa_r = true;
   add_ccarg("-DCYC_REGION_PROFILE");
+}
+
+static void set_pg() {
+  pg_r = true;
+  add_ccarg("-pg");
 }
 
 static void set_stop_after_asmfile() {
@@ -491,11 +497,11 @@ static string_t *find(list_t<stringptr_t> dirs, string_t file) {
 static string_t do_find(list_t<stringptr_t> dirs, string_t file) {
   let f = find(dirs, file);
   if (f == NULL) {
-    fprintf(stderr,"Error: can't find internal compiler file %s in path %s\n", 
-	    file, sprint_list(dirs));
     compile_failure = true;
     remove_cfiles();
-    exit(1);
+    throw new Core::Failure
+      (aprintf("Error: can't find internal compiler file %s in path %s\n", 
+	       file, sprint_list(dirs)));
   }
   return *f;
 }
@@ -868,7 +874,7 @@ int main(int argc, string_t<`H> ?`H argv) {
                new Flag_spec(add_ccarg),
                "Compile for profiling with prof"),
          new $("-pg",false,"",
-               new Flag_spec(add_ccarg),
+               new Unit_spec(set_pg),
                "Compile for profiling with gprof"),
          new $("-pa",false,"",
                new Unit_spec(set_pa),
@@ -1031,8 +1037,7 @@ int main(int argc, string_t<`H> ?`H argv) {
     stdlib_string = (string_t)"";
   } else {
 
-    // FIX: -pg should get different versions of the libraries?
-    //      What about -g?
+    // FIX: -g should get different versions of the libraries?
     string_t libcyc_flag;
     string_t nogc_filename;
     string_t runtime_filename;
@@ -1045,13 +1050,17 @@ int main(int argc, string_t<`H> ?`H argv) {
       libcyc_flag = "-lcyc_nocheck";
       nogc_filename = "nogc_nocheck.a";
       runtime_filename = "runtime_cyc.o";
+    } else if(pg_r) {
+      libcyc_flag = "-lcyc_pg";
+      runtime_filename = "runtime_cyc_pg.a";
+      nogc_filename = "nogc_pg.a";
     } else {
       libcyc_flag = "-lcyc";
       nogc_filename = "nogc.a";
       runtime_filename = "runtime_cyc.o";
     }
     gc_filename = "gc.a";
- 
+
     let gc = (nogc_r ?
               do_find(cyclone_arch_path,nogc_filename):
               do_find(cyclone_arch_path,gc_filename));
