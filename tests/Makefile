@@ -12,7 +12,7 @@ CYCC=../build/boot/cyclone$(EXE)
 CYCFLAGS=-I../lib -I../include -B../build/boot -pp -save-c
 endif
 
-all: $(addsuffix $(EXE), cyctest foo hello test_regions histogram finger test_getopt)
+all: $(addsuffix $(EXE), cyctest foo hello test_regions histogram test_getopt)
 	./test_regions
 	./cyctest
 	./foo < foo_input
@@ -42,9 +42,6 @@ foo_tab.h : foo.y
 
 histogram$(EXE): histogram.o
 	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
-
-finger$(EXE): finger.o
-	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS) $(NET_LD_FLAGS)
 
 test_getopt$(EXE): test_getopt.o
 	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
@@ -79,9 +76,9 @@ genrep_test$(EXE):  genrep_test.o muttrep.o
 	$(CYCC) $(CYCFLAGS) $(LDFLAGS) -o $@ $^
 
 clean:
-	$(RM) $(addsuffix .[oc], genrep_test genrep_read genrep_write hello bytes cyctest foo histogram finger test_getopt typeref typerep_test test_regions)\
+	$(RM) $(addsuffix .[oc], genrep_test genrep_read genrep_write hello bytes cyctest foo histogram test_getopt typeref typerep_test test_regions)\
 	$(RM) foo_tab.* unsafe_cast.o
-	$(RM) hello cyctest foo histogram merge_sort finger test_getopt
+	$(RM) hello cyctest foo histogram merge_sort test_getopt
 	$(RM) test_regions genrep_write genrep_read genrep_test rep
 	$(RM) typerep_test
 	$(RM) *~ *.exe *.output *.stackdump
@@ -91,3 +88,4 @@ clean:
 	$(MAKE) clean -C shootout
 	$(MAKE) clean -C smlng
 #	$(MAKE) clean -C tpop
+#	$(MAKE) clean -C misc
