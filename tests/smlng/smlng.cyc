@@ -4,6 +4,7 @@ using Core;
 using Stdio;
 #include "smlng.h"
 #include "tag_elim.h"
+#include "timer.h"
 
 string_t start_tags[] = {
   "<0>", "<1>", "<2>", "<3>", "<4>", "<5>", "<6>", "<7>", "<8>", "<9>",
@@ -11,7 +12,7 @@ string_t start_tags[] = {
   "<b>", "<c>", "<m>", "<y>", "<k>", "<w>"
 };
 string_t end_tags[] = {
-  "</0>", "</1>", "/<2>", "</3>", "</4>", "</5>", "</6>", "</7>", "</8>", 
+  "</0>", "</1>", "</2>", "</3>", "</4>", "</5>", "</6>", "</7>", "</8>", 
   "</9>", "</B>", "</EM>", "</I>", "</PL>", "</S>", "</TT>", "</U>", "</r>", 
   "</g>", "</b>", "</c>", "</m>", "</y>", "</k>", "</w>"
 };
@@ -154,7 +155,13 @@ doc_t down_opt(context_t ctxt, doc_t d) {
 
 
 int main(int argc, char ??argv) {
+  if(argc < 2) {
+    fprintf(stderr, "pass a time limit on the command-line");
+    return 1;
+  }
   TagElim::up_opt_test();
+  start_timer(argv[1]);
+  //time_test(argv[1]);
   printf("hello\n");
   return 0;
 }

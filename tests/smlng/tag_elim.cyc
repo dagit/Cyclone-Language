@@ -33,9 +33,11 @@ $(doc_t, synth_t) up_opt(doc_t doc) {
   switch(doc) {
   case &Seq(ds): 
     synth_t synth;
-    synth.i = 0;
-    if(ds.size == 0)
+    if(ds.size == 0) {
+      synth.i = 0;
       return $(doc,synth);
+    }
+    synth.i = (unsigned short)~0;
     for(int i=0; i < ds.size; ++i) {
       let $(newd, inner_synth) = up_opt(ds[i]);
       ds[i] = newd; // destructive here
@@ -66,7 +68,7 @@ $(doc_t, synth_t) up_opt(doc_t doc) {
       OPT(plain);
       int color = synth.s.color;
       int sz    = synth.s.sz;
-      synth.i = (unsigned short)~0; // cast avoids warning
+      synth.i = (unsigned short)~0; 
       synth.s.color = color;
       synth.s.sz    = sz;
       break;
@@ -99,11 +101,13 @@ void up_opt_test1(doc_t d) {
 }
 
 void up_opt_test() {
-  unsigned char ? s = new {for i < 3: 'a'};
+  unsigned char ? s = new {'a','b','c'};
   doc_t d1 = new Tagged(U_tag, new Tagged(PL_tag, new Text(s)));
   doc_t d2 = new Tagged(r_tag, new Tagged(w_tag, d1));
   doc_t d3 = new Seq(new {d2,d1,d2});
+  doc_t d4 = new Tagged(U_tag,new Tagged(b_tag,d3));
   up_opt_test1(d1);
   up_opt_test1(d2);
   up_opt_test1(d3);
+  up_opt_test1(d4);
 }

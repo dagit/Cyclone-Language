@@ -17,14 +17,14 @@ CYCBISON=../../bin/cycbison$(EXE)
 OUT_PREFIX=
 
 LC_FLAG=
-CYC_FLAGS= $(LC_FLAG) -I../../lib -B../../lib -g -pp -save-c
+CYC_FLAGS= $(LC_FLAG) -I../../lib -B../../lib -g
 
 LIB=../../bin/cyc-lib/$(OUT_PREFIX)$(CYCLIB)
 
 all: $(CYCC) $(LIB) \
   smlng$(EXE) generate$(EXE)
 
-smlng$(EXE): smlng.o tag_elim.o
+smlng$(EXE): smlng.o tag_elim.o timer.o
 	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
 #	gcc -g -o $@ $^ ../bin/gc.a $(LDFLAGS)
 
@@ -38,5 +38,5 @@ $(OUT_PREFIX)%.o : %.cyc $(CYCC)
 smlng.cyc: smlng.h
 
 clean:
-	rm -f smlng.o smlng.c tag_elim.o tag_elim.c
+	rm -f smlng.o smlng.c tag_elim.o tag_elim.c timer.o timer.c
 	rm -f *~ *.exe *.output *.stackdump
