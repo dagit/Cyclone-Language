@@ -1,0 +1,49 @@
+namespace Foo {
+void f16() {
+  // cannot declare a qualified local variable
+  int Foo::x = 3;
+}
+}
+void f29() {
+  // explicit namespace not allowed on inner function declaration
+  void Foo::f30() { return; }
+  return;
+}
+
+// qualified datatypefield declarations are not allowed (Foo::C230)
+datatype F230 { Foo::C230 };
+void f40() {
+  // undeclared identifier x
+  int y = x();
+}
+datatype f41 { F41 };
+void f41() {
+  // F41 is a constant, not a function
+  datatype f41.F41 x = F41();
+}
+enum f42 { F42 };
+void f42() {
+  // F42 is an enum constructor, not a function
+  F42();
+}
+void f43() {
+  // undeclared identifier x
+  x;
+}
+void f102() {
+  // unbound struct/union name F102
+  new F102{.x = 3};
+}
+void f121() {
+  // asm expressions cannot occur within Cyclone code.
+  asm("stuff");
+}
+struct F122 { int x; };
+void f122() {
+  // bad occurrence of type name F122
+  F122;
+}
+void f88(datatype F88.F88 y) {
+  // unbound field F88 in type datatype F88
+  let z = &y;
+}
