@@ -2257,26 +2257,25 @@ qual_opt_identifier:
 %%
 
 
- void yyprint(int i, xenum YYSTYPE v) {
-   switch (v) {
-   case Okay_tok: fprintf(cyc_stderr,"ok"); break;
-   case Int_tok(&$(_,i2)): fprintf(cyc_stderr,"%d",i2); break;
-   case Char_tok(c): fprintf(cyc_stderr,"%c",c); break;
-   case Short_tok(s): fprintf(cyc_stderr,"%ds",(int)s); break;
-   case Bool_tok(b):
-     fprintf(cyc_stderr,"%s",b ? (string)"true" : (string)"false"); break;
-   case String_tok(s): fprintf(cyc_stderr,"\"%s\"",s); break;
-   case StringOpt_tok(null): fprintf(cyc_stderr,"null"); break;
-   case StringOpt_tok(&Opt{.v=s}): fprintf(cyc_stderr,"\"%s\"",s); break;
-   case Float_tok(f): fprintf(cyc_stderr,"%s",f); break;
-   case QualId_tok(&$(prefix,v2)):
-     for (; prefix != null; prefix = prefix->tl) {
-       fprintf(cyc_stderr,"%s::",prefix->hd);
-     }
-     fprintf(cyc_stderr,"%s::",v2);
-     break;
-   default: fprintf(cyc_stderr,"?"); break;
-   }
+void yyprint(int i, xenum YYSTYPE v) {
+  switch (v) {
+  case Okay_tok:          fprintf(cyc_stderr,"ok");         break;
+  case Int_tok(&$(_,i2)): fprintf(cyc_stderr,"%d",i2);      break;
+  case Char_tok(c):       fprintf(cyc_stderr,"%c",c);       break;
+  case Short_tok(s):      fprintf(cyc_stderr,"%ds",(int)s); break;
+  case Bool_tok(b):       fprintf(cyc_stderr,"%s",
+				  b ? (string)"true" : (string)"false"); break;
+  case String_tok(s):          fprintf(cyc_stderr,"\"%s\"",s); break;
+  case StringOpt_tok(null):    fprintf(cyc_stderr,"null");     break;
+  case StringOpt_tok(&Opt(s)): fprintf(cyc_stderr,"\"%s\"",s); break;
+  case Float_tok(f):           fprintf(cyc_stderr,"%s",f);     break;
+  case QualId_tok(&$(prefix,v2)):
+    for (; prefix != null; prefix = prefix->tl)
+      fprintf(cyc_stderr,"%s::",prefix->hd);
+    fprintf(cyc_stderr,"%s::",v2);
+    break;
+  default: fprintf(cyc_stderr,"?"); break;
+  }
  }
 
 namespace Parse{

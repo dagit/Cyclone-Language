@@ -115,7 +115,8 @@ string string_escape(string s) {
     // Inefficient but I'm having trouble linking in the buffer stuff
     return String::strconcat_l(List::map_c(escape, (Bool)true,
 					   String::explode(s)));
-  else return s;
+  else 
+    return s;
 }
 
 Doc tqual2doc(tqual tq) {
@@ -123,7 +124,7 @@ Doc tqual2doc(tqual tq) {
 
   if (tq->q_restrict) l = &cons((string)"restrict",l);
   if (tq->q_volatile) l = &cons((string)"volatile",l);
-  if (tq->q_const) l = &cons((string)"const",l);
+  if (tq->q_const)    l = &cons((string)"const",   l);
   return egroup(""," "," ",List::map(text,l));
 }
 
@@ -216,8 +217,8 @@ Doc ntyp2doc(typ t) {
   Doc s;
   switch (t) {
     // The first three cases never turn up in normalized types.
-  case ArrayType(_,_,_): return text("[[[array]]]"); //nil_doc();
-  case FnType(_,_,_,_): return nil_doc();
+  case ArrayType(_,_,_):   return text("[[[array]]]"); //nil_doc();
+  case FnType(_,_,_,_):    return nil_doc();
   case PointerType(_,_,_): return nil_doc();
     // The remaining cases are possible.
   case VoidType: s = text("void"); break;
@@ -249,31 +250,25 @@ Doc ntyp2doc(typ t) {
     string ts;
     bool b2 = boxed2bool(b);
     switch (sn) {
-    case Signed: sns = ""; break;
+    case Signed:   sns = "";          break;
     case Unsigned: sns = "unsigned "; break;
     }
     switch (sz) {
     case B1: 
       switch (sn) {
-      case Signed: sns = "signed "; break;
-      case Unsigned: sns = ""; break;
+      case Signed:   sns = "signed "; break;
+      case Unsigned: sns = "";        break;
       }
       ts = b2 ? "Char" : "char";
       break;
-    case B2:
-      ts = b2 ? "Short" : "short";
-      break;
-    case B4:
-      ts = b2 ? "Int" : "int";
-      break;
-    case B8:
-      ts = b2 ? "Long Long" : "long long";
-      break;
+    case B2: ts = b2 ? "Short"     : "short";     break;
+    case B4: ts = b2 ? "Int"       : "int";       break;
+    case B8: ts = b2 ? "Long Long" : "long long"; break;
     }
     s = text(xprintf("%s%s",sns,ts));
     break;
-  case BoolType(b): s = text(boxed2bool(b) ? "Bool" : "bool"); break;
-  case FloatType(b): s = text(boxed2bool(b) ? "Float" : "float"); break;
+  case BoolType(b):   s = text(boxed2bool(b) ? "Bool"   : "bool");   break;
+  case FloatType(b):  s = text(boxed2bool(b) ? "Float"  : "float");  break;
   case DoubleType(b): s = text(boxed2bool(b) ? "Double" : "double"); break;
   case TupleType(ts):
     s = cat2(text("$"),args2doc(ts));
@@ -283,7 +278,7 @@ Doc ntyp2doc(typ t) {
       s = cat2(text("struct "),tps2doc(ts));
     else
       s = cat3(text("struct "),
-               (n==null)?nil_doc():qvar2doc(n->v),
+               (n==null) ? nil_doc() : qvar2doc(n->v),
                tps2doc(ts));
     break;
   case TypedefType(n,ts,topt):
@@ -333,7 +328,7 @@ Doc qvar2doc(qvar q) {
 
 bool boxed2bool(boxed b) {
   switch (b) {
-  case Boxed: return true;
+  case Boxed:   return true;
   case Unboxed: return false;
   }
 }
@@ -418,8 +413,6 @@ Doc exp2doc_prec(int inprec, exp e) {
   Doc s; 
   switch (e->r) {
   case Const_e(c): s = cnst2doc(c); break;
-    // FIX:
-    //  case Var_e(x,null): throw Failure("var reference without pointer to binder");
   case Var_e(x,Local_b(vd)):
     s = qvar2doc(x);
     if(vd->shadow > 0)
@@ -430,9 +423,7 @@ Doc exp2doc_prec(int inprec, exp e) {
     if(vd->shadow > 0)
       s = cat2(s,text(xprintf("%d",vd->shadow)));
     break;
-  case Var_e(x,_):
-    s = qvar2doc(x);
-    break;
+  case Var_e(x,_):     s = qvar2doc(x); break;
   case UnknownId_e(x): s = qvar2doc(x); break;
   case Primop_e(p,es): s = primapp2doc(myprec,p,es); break;
   case AssignOp_e(e1,popt,e2): 
@@ -1238,10 +1229,9 @@ Doc tuple2doc(typ t) {
 }
 
 Doc enumfield2doc(enumfield f) {
-  return
-    cat3(qvar2doc(f->name),
-         (f->tag==null)?nil_doc():cat2(text("="),exp2doc(f->tag->v)),
-         (f->typs==null)?nil_doc():args2doc(f->typs));
+  return cat3(qvar2doc(f->name),
+	      (f->tag==null)?nil_doc():cat2(text("="),exp2doc(f->tag->v)),
+	      (f->typs==null)?nil_doc():args2doc(f->typs));
 }
 
 Doc enumfields2doc(list<enumfield> fields) {
@@ -1256,29 +1246,16 @@ Doc enumfields2doc(list<enumfield> fields) {
 void decllist2file(list<decl> tdl, FILE @f) {
   for (; tdl != null; tdl = tdl->tl) {
     file_of_doc(decl2doc(tdl->hd),PP_WIDTH,f);
-    fprintf(f,"\n"); fflush(f);
+    fprintf(f,"\n"); 
   }
 }
 
 string decllist2string(list<decl> tdl) {
   return string_of_doc(seql("",List::map(decl2doc,tdl)),PP_WIDTH);
 }
-string exp2string(exp e) { 
-  return string_of_doc(exp2doc(e),PP_WIDTH);
-}
-string stmt2string(stmt s) { 
-  return string_of_doc(stmt2doc(s),PP_WIDTH);
-}
-string typ2string(typ t) { 
-  return string_of_doc(typ2doc(t),PP_WIDTH);
-}
-string qvar2string(qvar v) {
-  return string_of_doc(qvar2doc(v),PP_WIDTH);
-}
-string prim2string(primop p) { 
-  return string_of_doc(prim2doc(p),PP_WIDTH);
-}
-
-string pat2string(pat p) {
-  return string_of_doc(pat2doc(p),PP_WIDTH);
-}
+string exp2string(exp e)     {return string_of_doc(exp2doc(e),  PP_WIDTH);}
+string stmt2string(stmt s)   {return string_of_doc(stmt2doc(s), PP_WIDTH);}
+string typ2string(typ t)     {return string_of_doc(typ2doc(t),  PP_WIDTH);}
+string qvar2string(qvar v)   {return string_of_doc(qvar2doc(v), PP_WIDTH);}
+string prim2string(primop p) {return string_of_doc(prim2doc(p), PP_WIDTH);}
+string pat2string(pat p)     {return string_of_doc(pat2doc(p),  PP_WIDTH);}

@@ -946,9 +946,8 @@ void unchecked_cast(tenv te, exp e, typ t) {
 /* for comparison operators, we do not unbox Double and Long Long, but
    rather do a pointer comparison.  However, we issue a warning. */
 bool comparison_promote(tenv te, exp e) {
-  typ old_t = compress(e->topt->v);
   typ t;
-  switch (old_t) {
+  switch (compress(e->topt->v)) {
   case IntType(sn,sz,b):
     switch (sz) {
     case B1:  t = sint_t; break; // convert to unboxed, signed int
@@ -986,9 +985,9 @@ bool comparison_promote(tenv te, exp e) {
    Note that unsigned char or unsigned short will be promoted to
    signed int.  Otherwise, the sign is preserved. */
 bool arithmetic_promote(tenv te, exp e) {
-  typ old_t = compress(e->topt->v);
+  typ old_typ = compress(e->topt->v);
   typ t;
-  switch (old_t) {
+  switch (old_typ) {
   case IntType(sn,sz,b):
     switch (sz) {
     case B1:  t = sint_t; break; // convert to unboxed, signed int
@@ -1001,13 +1000,13 @@ bool arithmetic_promote(tenv te, exp e) {
       break;
     }
     break;
-  case FloatType(b):  t = float_t; break; // make unboxed
+  case FloatType(b):  t = float_t;  break; // make unboxed
   case DoubleType(b): t = double_t; break; // make unboxed
-  case EnumType(_,_):   t = sint_t; break;   // convert to unboxed, signed int
+  case EnumType(_,_): t = sint_t;   break; // convert to unboxed, signed int
   case Evar(_,_,_):
     t = sint_t;
-    if (!unify(old_t,t))
-      if (!unify(old_t,sInt_t))
+    if (!unify(old_typ,t))
+      if (!unify(old_typ,sInt_t))
 	return false;
     break;
   default:

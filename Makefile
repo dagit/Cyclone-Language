@@ -38,11 +38,8 @@ tools:
 .PHONY: tools
 
 bin/gc.a:
-ifdef WINDIR
-	ln bin/gc.windows $@
-else
-	ln bin/gc.libc6 $@
-endif
+	$(MAKE) -C gc gc.a CC=gcc
+	ln gc/gc.a $@
 
 # These targets build off the Cyclone source files, 
 # but do not replace anything in bin
@@ -88,6 +85,8 @@ clean:
 	$(MAKE) clean -C lib
 	$(MAKE) clean -C bin/genfiles
 	$(MAKE) clean -C tests
+	$(MAKE) clean -C gc
+	rm -f gc/*.exe
 	rm -f bin/cyclone.exe 
 	rm -f bin/$(CYCLIB)
 	rm -f bin/$(RUNTIME).o

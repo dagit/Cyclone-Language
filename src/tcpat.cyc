@@ -693,7 +693,7 @@ match<`rhs>(simple_pat_t p, access_t obj, term_desc_t dsc,
 
 // Given a decision tree, call not_exhaust for each Failure node
 // and call rhs_appears for each Success node.  Note that Failure
-// implies the patterns are not exhastive.  Note also that if
+// implies the patterns are not exhaustive.  Note also that if
 // any rhs for a match does not show up in the decision tree, then
 // the associated pattern was redundant.
 static 
