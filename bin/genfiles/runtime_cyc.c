@@ -104,9 +104,10 @@ void *GC_calloc_atomic(unsigned int n, unsigned int t) {
   return res;
 }
 
+// Need one per thread
 static struct _RuntimeStack *_current_handler = NULL;
 
-// Need one per thread
+// The exception that was thrown
 struct _xtunion_struct *_exn_thrown = NULL;
 
 // create a new handler, put it on the stack, and return it so its
@@ -193,7 +194,9 @@ void _pop_dynregion() {
 extern int Cyc_Execinfo_bt(void);
 static struct _handler_cons top_handler;
 static int in_backtrace = 0; // avoid infinite exception chain
-void throw(void* e) { // FIX: use struct _xtunion_struct *  ??
+static const char *_exn_filename = "?";
+static unsigned _exn_lineno = 0;
+int _throw_fn(void* e, const char *filename, unsigned lineno) {// FIX: use struct _xtunion_struct *  ??
   struct _handler_cons *my_handler;
   while (_current_handler->tag != 0) {
     if (_current_handler->tag == 1)
@@ -204,6 +207,8 @@ void throw(void* e) { // FIX: use struct _xtunion_struct *  ??
   my_handler = (struct _handler_cons *)_current_handler;
   _pop_handler();
   _exn_thrown = e;
+  _exn_filename = filename;
+  _exn_lineno = lineno;
 #ifdef __linux__
   /* bt only works in linux, and gives a circular dependence in os x,
      so we need to compile this conditionally */
@@ -215,21 +220,22 @@ void throw(void* e) { // FIX: use struct _xtunion_struct *  ??
   longjmp(my_handler->handler,1);
 }
 
-int _throw(void* e) { // FIX: use struct _xtunion_struct *  ??
-  throw(e);
-}
+#ifdef throw
+#undef throw
+#endif
+int throw(void *e) { _throw_fn(e,"?",0); }
 
-int _throw_null() {
-  throw(Cyc_Null_Exception_val);
+int _throw_null_fn(const char *filename, unsigned lineno) {
+  _throw_fn(Cyc_Null_Exception_val,filename,lineno);
 }
-int _throw_arraybounds() {
-  throw(Cyc_Array_bounds_val);
+int _throw_arraybounds_fn(const char *filename, unsigned lineno) {
+  _throw_fn(Cyc_Array_bounds_val,filename,lineno);
 }
-int _throw_badalloc() {
-  throw(Cyc_Bad_alloc_val);
+int _throw_badalloc_fn(const char *filename, unsigned lineno) {
+  _throw_fn(Cyc_Bad_alloc_val,filename,lineno);
 }
-int _throw_match() {
-  throw(Cyc_Match_Exception_val);
+int _throw_match_fn(const char *filename, unsigned lineno) {
+  _throw_fn(Cyc_Match_Exception_val,filename,lineno);
 }
 
 struct _dyneither_ptr wrap_Cstring_as_string(Cstring s, size_t len) {
@@ -290,13 +296,13 @@ Cstring string_to_Cstring(struct _dyneither_ptr s) {
   if (s.curr == NULL) return NULL;
 
   if (s.curr >= s.last_plus_one || s.curr < s.base)
-    throw(Cyc_Null_Exception_val); // FIX: this should be a bounds error
+    _throw_arraybounds(); 
   // check that there's a '\0' somewhere in the string -- if not,
   // throw an exception.
   for (str = s.last_plus_one-1; str >= contents; str--) {
     if (*str == '\0') return contents;
   }
-  throw(Cyc_Null_Exception_val);
+  _throw_null();
   /*
   // slow path -- have to copy the string to ensure it's null terminated
   str = (char *)GC_malloc_atomic(sz+1);
@@ -361,7 +367,7 @@ Cstring underlying_Cstring(struct _tagged_arr s) {
 
   // FIX:  should throw exception?  
   if (s.curr < s.base || s.curr >= s.last_plus_one)
-    throw(Cyc_Null_Exception);
+    _throw_fn(Cyc_Null_Exception);
   return str;
 }
 */
@@ -550,7 +556,8 @@ int main(int argc, char **argv) {
   if (status) {
     char *exn_name;
     exn_name = _exn_thrown->tag;
-    fprintf(stderr,"Uncaught exception %s\n",exn_name);
+    fprintf(stderr,"Uncaught exception %s thrown from around %s:%d\n",exn_name,
+            _exn_filename,_exn_lineno);
     return 1;
   }
   // set standard file descriptors
@@ -608,7 +615,7 @@ static void grow_region(struct _RegionHandle *r, unsigned int s) {
   p = GC_calloc(sizeof(struct _RegionPage) + next_size,1);
   if (!p) {
     fprintf(stderr,"grow_region failure");
-    _throw_badalloc;
+    _throw_badalloc();
   }
   p->next = r->curr;
 #ifdef CYC_REGION_PROFILE
@@ -659,7 +666,7 @@ void * _region_malloc(struct _RegionHandle *r, unsigned int s) {
   if (r == Cyc_Core_unique_region || r == Cyc_Core_heap_region) {
     result = GC_malloc(s);
     if(!result)
-      _throw_badalloc;
+      _throw_badalloc();
 #ifdef CYC_REGION_PROFILE
     {
       unsigned int actual_size = GC_size(result);
@@ -677,7 +684,7 @@ void * _region_malloc(struct _RegionHandle *r, unsigned int s) {
     // FIX: probably need to keep it double-word aligned!
     result = GC_malloc(s+sizeof(int));
     if(!result)
-      _throw_badalloc;
+      _throw_badalloc();
     *(int *)result = 1;
 #ifdef CYC_REGION_PROFILE
     refcnt_total_bytes += GC_size(result);
@@ -719,7 +726,7 @@ void * _region_calloc(struct _RegionHandle *r, unsigned int n, unsigned int t)
     // allocate in the heap
     result = GC_calloc(n,t);
     if(!result)
-      _throw_badalloc;
+      _throw_badalloc();
 #ifdef CYC_REGION_PROFILE
     {
       unsigned int actual_size = GC_size(result);
@@ -734,7 +741,7 @@ void * _region_calloc(struct _RegionHandle *r, unsigned int n, unsigned int t)
     // allocate in the heap + 1 word for the refcount
     result = GC_calloc(n*t+sizeof(int),1);
     if(!result)
-      _throw_badalloc;
+      _throw_badalloc();
     *(int *)result = 1;
 #ifdef CYC_REGION_PROFILE
     refcnt_total_bytes += GC_size(result);
@@ -773,7 +780,7 @@ struct _RegionHandle *_open_dynregion(struct _DynRegionFrame *f,
                                       struct _DynRegionHandle *h) {
   struct _RegionHandle *res = h->handle;
   if (res == NULL)
-    throw(Cyc_Core_Open_Region_val);
+    _throw_fn(Cyc_Core_Open_Region_val,__FILE__,__LINE__);
   h->ref_count++;
   f->x = h;
   _push_dynregion(f);
@@ -785,7 +792,7 @@ struct _RegionHandle *_open_dynregion(struct _DynRegionFrame *f,
  */
 void Cyc_Core_free_dynregion(struct _DynRegionHandle* x) {
   if (x->ref_count != 0 || x->handle == NULL) 
-    throw(Cyc_Core_Free_Region_val);
+    _throw_fn(Cyc_Core_Free_Region_val,__FILE__,__LINE__);
 #ifdef CYC_REGION_PROFILE
   _profile_free_region(x->handle,NULL,NULL,0);
 #else
@@ -999,7 +1006,7 @@ struct _RegionHandle _profile_new_region(const char *rgn_name,
   len = strlen(rgn_name)+10;
   buf = GC_malloc_atomic(len);
   if(!buf)
-    _throw_badalloc;
+    _throw_badalloc();
   else
     snprintf(buf,len,"%d-%s",cnt++,rgn_name);
 

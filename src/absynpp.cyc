@@ -218,7 +218,7 @@ struct Params c_params_r =
     .print_externC_stmts = false,
     .print_full_evars = false,
     .print_zeroterm = false,
-    .generate_line_directives = false,
+    .generate_line_directives = true,
     .use_curr_namespace = false,
     .curr_namespace = NULL
   };

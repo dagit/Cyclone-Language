@@ -31,6 +31,10 @@
 #include "tcutil.h"
 #include "cyclone.h"
 
+namespace Lex {
+  extern $(const char ?, unsigned int) xlate_pos(Position::seg_t);
+}
+
 using Cyclone;
 using Core;
 using List;
@@ -148,10 +152,21 @@ void dump_char(int c) { // no space
 }
 
 void dumploc(Position::seg_t loc) {
+  static const char ?last_file = "";
+  static unsigned last_line = 0;
   if(loc == 0) return;
   if(!generate_line_directives) return;
-  let s = Position::get_line_directive(loc);
-  dump(s);
+  //let s = Position::get_line_directive(loc);
+  let $(f,d) = Lex::xlate_pos(loc);
+  if (f == NULL || ((f == last_file) && (d == last_line))) return;
+  if (f == last_file)
+    fprintf(*dump_file,"\n# %d\n",d);
+  else 
+    fprintf(*dump_file,"\n# %d %s\n",d,f);
+  pos = 1;
+  last_file = f;
+  last_line = d;
+  // dump(s);
 }
 
 // this needs to take a boxed type b/c it's used to instantiate `a
@@ -661,33 +676,47 @@ void dumpexp_prec(int inprec, exp_t e) {
   case &Increment_e(e2,PostDec): dumpexp_prec(myprec,e2); dump("--"); break;
 
   case &Conditional_e(e1,e2,e3):
+    dumploc(e->loc);
     dumpexp_prec(myprec,e1);
     dump_char('?'); dumpexp_prec(0,e2);
     dump_char(':'); dumpexp_prec(myprec,e3);
     break;
 
   case &And_e(e1,e2):
+    dumploc(e->loc);
     dumpexp_prec(myprec,e1); dump(" && "); dumpexp_prec(myprec,e2); break;
 
   case &Or_e(e1,e2):
+    dumploc(e->loc);
     dumpexp_prec(myprec,e1); dump(" || "); dumpexp_prec(myprec,e2); break;
 
   case &SeqExp_e(e1,e2):
     // DAN: put in parens because in initializers , doesn't mean SeqExp and
     // our recursive descent doesn't know if we're in an initializer.
+    dumploc(e->loc);
     dump_char('(');
     dumpexp_prec(myprec,e1); dump_char(','); dumpexp_prec(myprec,e2); 
     dump_char(')');
     break;
 
   case &FnCall_e(e1,es,...):
+    dumploc(e->loc);
     dumpexp_prec(myprec,e1);
     dump_nospace("(");
+    // JGM: can't dump locations inside macro arguments, so we turn
+    // this off if the location of the function call (or the function
+    // itself) is 0.
+    bool old_generate_line_directives = generate_line_directives;
+    generate_line_directives = 
+      old_generate_line_directives && !(e->loc == 0) && !(e1->loc == 0);
     dumpexps_prec(20,es);
     dump_nospace(")");
+    generate_line_directives = old_generate_line_directives;
     break;
 
-  case &Throw_e(e1): dump("throw"); dumpexp_prec(myprec,e1); break;
+  case &Throw_e(e1): 
+    dumploc(e->loc);
+    dump("throw"); dumpexp_prec(myprec,e1); break;
 
   case &NoInstantiate_e(e1): fallthru(e1);
   case &Instantiate_e(e1,_): dumpexp_prec(inprec,e1); break;
@@ -789,6 +818,7 @@ void dumpexp_prec(int inprec, exp_t e) {
   case &AnonEnum_e(q,_,_): dumpqvar(q); break;
 
   case &Malloc_e(MallocInfo{is_calloc,ropt,topt,e,_}):
+    dumploc(e->loc);
     if (is_calloc) {
       if (ropt != NULL) {
         dump("rcalloc(");
@@ -844,7 +874,7 @@ void dumpexp(exp_t e) {
 void dumpswitchclauses(list_t<switch_clause_t> scs) {
   for(; scs != NULL; scs = scs->tl) {
     let c = scs->hd;
-    if(c->where_clause == NULL && c->pattern->r == (raw_pat_t)&Wild_p_val)
+    if(c->where_clause == NULL && c->pattern->r == (raw_pat_t)&Wild_p_val) 
       dump("default:");
     else {
       dump("case");
@@ -860,10 +890,10 @@ void dumpswitchclauses(list_t<switch_clause_t> scs) {
 }
 
 void dumpstmt(stmt_t s,bool expstmt) {
-  //  dumploc(s->loc);
+  dumploc(s->loc);
   switch(s->r) {
   case &Skip_s:   dump_semi(); break;
-  case &Exp_s(e): dumploc(s->loc); dumpexp(e); dump_semi(); break;
+  case &Exp_s(e): dumpexp(e); dump_semi(); break;
     // FIX:  gcc only allows declarations to be used at the beginning
     // of blocks, so we force some explicit blocks to be written below.
     // It is verbose for Cyclone; maybe it should be controlled by a flag.
@@ -880,10 +910,10 @@ void dumpstmt(stmt_t s,bool expstmt) {
     } else
       dumpstmt(s2,expstmt);
     break;
-  case &Return_s(NULL): dumploc(s->loc); dump("return;"); break;
-  case &Return_s(e): dumploc(s->loc); dump("return"); dumpexp((exp_t)e); dump_semi(); break;
+  case &Return_s(NULL): dump("return;"); break;
+  case &Return_s(e): dump("return"); dumpexp((exp_t)e); dump_semi(); break;
   case &IfThenElse_s(e,s1,s2):
-    dumploc(s->loc); dump("if("); dumpexp(e); 
+    dump("if("); dumpexp(e); 
     switch(s1->r) {
     case &Seq_s(_,_):
     case &Decl_s(_,_): 
@@ -897,20 +927,20 @@ void dumpstmt(stmt_t s,bool expstmt) {
     }
     break;
   case &While_s($(e,_),s1):
-    dumploc(s->loc); dump("while("); dumpexp(e); dump_nospace("){");
+    dump("while("); dumpexp(e); dump_nospace("){");
     dumpstmt(s1,false);
     dump_char('}');
     break;
-  case &Break_s(_):    dumploc(s->loc); dump("break;");    break;
-  case &Continue_s(_): dumploc(s->loc); dump("continue;"); break;
-  case &Goto_s(x,_):   dumploc(s->loc); dump("goto"); dump_str(x); dump_semi(); break;
+  case &Break_s(_):    dump("break;");    break;
+  case &Continue_s(_): dump("continue;"); break;
+  case &Goto_s(x,_):   dump("goto"); dump_str(x); dump_semi(); break;
 
   case &For_s(e1,$(e2,_),$(e3,_),s1):
-    dumploc(s->loc); dump("for("); dumpexp(e1);dump_semi(); dumpexp(e2);dump_semi(); dumpexp(e3);
+    dump("for("); dumpexp(e1);dump_semi(); dumpexp(e2);dump_semi(); dumpexp(e3);
     dump_nospace("){"); dumpstmt(s1,false); dump_char('}');
     break;
   case &Switch_s(e,ss):
-    dumploc(s->loc); dump("switch("); dumpexp(e); dump_nospace("){");
+    dump("switch("); dumpexp(e); dump_nospace("){");
     dumpswitchclauses(ss);
     dump_char('}');
     break;
@@ -932,7 +962,7 @@ void dumpstmt(stmt_t s,bool expstmt) {
     break;
 
   case &Do_s(s1,$(e,_)):
-    dumploc(s->loc); dump("do{"); dumpstmt(s1,false); 
+    dump("do{"); dumpstmt(s1,false); 
     dump_nospace("}while("); dumpexp(e); dump_nospace(");");
     break;
 
@@ -941,13 +971,13 @@ void dumpstmt(stmt_t s,bool expstmt) {
     dump("fallthru("); dumpexps_prec(20,es); dump_nospace(");"); break;
 
   case &TryCatch_s(s1,ss):
-    dumploc(s->loc); dump("try"); dumpstmt(s1,false); 
+    dump("try"); dumpstmt(s1,false); 
     dump("catch{");
     dumpswitchclauses(ss); dump_char('}');
     break;
 
   case &ResetRegion_s(e):
-    dumploc(s->loc); dump("reset_region("); dumpexp(e); dump(");");
+    dump("reset_region("); dumpexp(e); dump(");");
     break;
 
   }
@@ -1083,7 +1113,6 @@ static void dumpids(list_t<vardecl_t> vds) {
 
 void dumpvardecl(vardecl_t vd,Position::seg_t loc) {
   let &Vardecl{sc,name,tq,type,initializer,_,atts,_} = vd;
-  dumploc(loc);
   switch(c_compiler){
   case Gcc_c:
     // hack to avoid writing so many useless externs:
@@ -1177,12 +1206,12 @@ static void dump_datatypedecl(datatypedecl_t dd) {
 }
 
 void dumpdecl(decl_t d) {
+  dumploc(d->loc);
   switch(d->r) {
   case &Var_d(vd):
     dumpvardecl(vd,d->loc);
     break;
   case &Fn_d(fd):
-    dumploc(d->loc);
     //    fprintf(stderr,"%s",*(*fd->name)[1]); fflush(stdout);
     switch(c_compiler) {
     case Vc_c: dumpatts(fd->attributes); break;

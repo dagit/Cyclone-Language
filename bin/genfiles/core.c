@@ -83,11 +83,16 @@ extern void _pop_handler();
 extern void _pop_region();
 
 #ifndef _throw
-extern int _throw_null();
-extern int _throw_arraybounds();
-extern int _throw_badalloc();
-extern int _throw_match();
-extern int _throw(void* e);
+extern int _throw_null_fn(const char *filename, unsigned lineno);
+extern int _throw_arraybounds_fn(const char *filename, unsigned lineno);
+extern int _throw_badalloc_fn(const char *filename, unsigned lineno);
+extern int _throw_match_fn(const char *filename, unsigned lineno);
+extern int _throw_fn(void* e, const char *filename, unsigned lineno);
+#define _throw_null() (_throw_null_fn(__FILE__,__LINE__))
+#define _throw_arraybounds() (_throw_arraybounds_fn(__FILE__,__LINE__))
+#define _throw_badalloc() (_throw_badalloc_fn(__FILE__,__LINE__))
+#define _throw_match() (_throw_match_fn(__FILE__,__LINE__))
+#define _throw(e) (_throw_fn((e),__FILE__,__LINE__))
 #endif
 
 extern struct _xtunion_struct *_exn_thrown;
@@ -129,11 +134,12 @@ extern char Cyc_Bad_alloc[];
 #else
 #ifdef _INLINE_FUNCTIONS
 static _INLINE void *
-_check_null(const void *ptr) {
+_check_null_fn(const void *ptr, const char *filename, unsigned lineno) {
   void*_check_null_temp = (void*)(ptr);
-  if (!_check_null_temp) _throw_null();
+  if (!_check_null_temp) _throw_null_fn(filename,lineno);
   return _check_null_temp;
 }
+#define _check_null(p) (_check_null_fn((p),__FILE__,__LINE__))
 #else
 #define _check_null(ptr) \
   ({ void*_check_null_temp = (void*)(ptr); \
@@ -148,15 +154,16 @@ _check_null(const void *ptr) {
 #else
 #ifdef _INLINE_FUNCTIONS
 static _INLINE char *
-_check_known_subscript_null(void *ptr, unsigned bound, unsigned elt_sz, unsigned index) {
+_check_known_subscript_null_fn(void *ptr, unsigned bound, unsigned elt_sz, unsigned index, const char *filename, unsigned lineno) {
   void*_cks_ptr = (void*)(ptr);
   unsigned _cks_bound = (bound);
   unsigned _cks_elt_sz = (elt_sz);
   unsigned _cks_index = (index);
-  if (!_cks_ptr) _throw_null();
-  if (_cks_index >= _cks_bound) _throw_arraybounds();
+  if (!_cks_ptr) _throw_null_fn(filename,lineno);
+  if (_cks_index >= _cks_bound) _throw_arraybounds_fn(filename,lineno);
   return ((char *)_cks_ptr) + _cks_elt_sz*_cks_index;
 }
+#define _check_known_subscript_null(p,b,e) (_check_known_subscript_null_fn(p,b,e,__FILE__,__LINE__))
 #else
 #define _check_known_subscript_null(ptr,bound,elt_sz,index) ({ \
   void*_cks_ptr = (void*)(ptr); \
@@ -174,12 +181,13 @@ _check_known_subscript_null(void *ptr, unsigned bound, unsigned elt_sz, unsigned
 #else
 #ifdef _INLINE_FUNCTIONS
 static _INLINE unsigned
-_check_known_subscript_notnull(unsigned bound,unsigned index) { 
+_check_known_subscript_notnull_fn(unsigned bound,unsigned index,const char *filename,unsigned lineno) { 
   unsigned _cksnn_bound = (bound); 
   unsigned _cksnn_index = (index); 
-  if (_cksnn_index >= _cksnn_bound) _throw_arraybounds(); 
+  if (_cksnn_index >= _cksnn_bound) _throw_arraybounds_fn(filename,lineno); 
   return _cksnn_index;
 }
+#define _check_known_subscript_notnull(b,i) (_check_known_subscript_notnull_fn(b,i,__FILE__,__LINE__))
 #else
 #define _check_known_subscript_notnull(bound,index) ({ \
   unsigned _cksnn_bound = (bound); \
@@ -192,78 +200,93 @@ _check_known_subscript_notnull(unsigned bound,unsigned index) {
 /* Add i to zero-terminated pointer x.  Checks for x being null and
    ensures that x[0..i-1] are not 0. */
 #ifdef NO_CYC_BOUNDS_CHECK
-#define _zero_arr_plus_char(orig_x,orig_sz,orig_i) ((orig_x)+(orig_i))
-#define _zero_arr_plus_short(orig_x,orig_sz,orig_i) ((orig_x)+(orig_i))
-#define _zero_arr_plus_int(orig_x,orig_sz,orig_i) ((orig_x)+(orig_i))
-#define _zero_arr_plus_float(orig_x,orig_sz,orig_i) ((orig_x)+(orig_i))
-#define _zero_arr_plus_double(orig_x,orig_sz,orig_i) ((orig_x)+(orig_i))
-#define _zero_arr_plus_longdouble(orig_x,orig_sz,orig_i) ((orig_x)+(orig_i))
-#define _zero_arr_plus_voidstar(orig_x,orig_sz,orig_i) ((orig_x)+(orig_i))
+#define _zero_arr_plus_char_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
+#define _zero_arr_plus_short_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
+#define _zero_arr_plus_int_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
+#define _zero_arr_plus_float_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
+#define _zero_arr_plus_double_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
+#define _zero_arr_plus_longdouble_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
+#define _zero_arr_plus_voidstar_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
 #else
 static _INLINE char *
-_zero_arr_plus_char(char *orig_x, int orig_sz, int orig_i) {
+_zero_arr_plus_char_fn(char *orig_x, int orig_sz, int orig_i,const char *filename, unsigned lineno) {
   unsigned int _czs_temp;
-  if ((orig_x) == 0) _throw_null();
-  if (orig_i < 0) _throw_arraybounds();
+  if ((orig_x) == 0) _throw_null_fn(filename,lineno);
+  if (orig_i < 0) _throw_arraybounds_fn(filename,lineno);
   for (_czs_temp=orig_sz; _czs_temp < orig_i; _czs_temp++)
-    if (orig_x[_czs_temp] == 0) _throw_arraybounds();
+    if (orig_x[_czs_temp] == 0) _throw_arraybounds_fn(filename,lineno);
   return orig_x + orig_i;
 }
 static _INLINE short *
-_zero_arr_plus_short(short *orig_x, int orig_sz, int orig_i) {
+_zero_arr_plus_short_fn(short *orig_x, int orig_sz, int orig_i,const char *filename, unsigned lineno) {
   unsigned int _czs_temp;
-  if ((orig_x) == 0) _throw_null();
-  if (orig_i < 0) _throw_arraybounds();
+  if ((orig_x) == 0) _throw_null_fn(filename,lineno);
+  if (orig_i < 0) _throw_arraybounds_fn(filename,lineno);
   for (_czs_temp=orig_sz; _czs_temp < orig_i; _czs_temp++)
-    if (orig_x[_czs_temp] == 0) _throw_arraybounds();
+    if (orig_x[_czs_temp] == 0) _throw_arraybounds_fn(filename,lineno);
   return orig_x + orig_i;
 }
 static _INLINE int *
-_zero_arr_plus_int(int *orig_x, int orig_sz, int orig_i) {
+_zero_arr_plus_int_fn(int *orig_x, int orig_sz, int orig_i, const char *filename, unsigned lineno) {
   unsigned int _czs_temp;
-  if ((orig_x) == 0) _throw_null();
-  if (orig_i < 0) _throw_arraybounds();
+  if ((orig_x) == 0) _throw_null_fn(filename,lineno);
+  if (orig_i < 0) _throw_arraybounds_fn(filename,lineno);
   for (_czs_temp=orig_sz; _czs_temp < orig_i; _czs_temp++)
-    if (orig_x[_czs_temp] == 0) _throw_arraybounds();
+    if (orig_x[_czs_temp] == 0) _throw_arraybounds_fn(filename,lineno);
   return orig_x + orig_i;
 }
 static _INLINE float *
-_zero_arr_plus_float(float *orig_x, int orig_sz, int orig_i) {
+_zero_arr_plus_float_fn(float *orig_x, int orig_sz, int orig_i,const char *filename, unsigned lineno) {
   unsigned int _czs_temp;
-  if ((orig_x) == 0) _throw_null();
-  if (orig_i < 0) _throw_arraybounds();
+  if ((orig_x) == 0) _throw_null_fn(filename,lineno);
+  if (orig_i < 0) _throw_arraybounds_fn(filename,lineno);
   for (_czs_temp=orig_sz; _czs_temp < orig_i; _czs_temp++)
-    if (orig_x[_czs_temp] == 0) _throw_arraybounds();
+    if (orig_x[_czs_temp] == 0) _throw_arraybounds_fn(filename,lineno);
   return orig_x + orig_i;
 }
 static _INLINE double *
-_zero_arr_plus_double(double *orig_x, int orig_sz, int orig_i) {
+_zero_arr_plus_double_fn(double *orig_x, int orig_sz, int orig_i,const char *filename, unsigned lineno) {
   unsigned int _czs_temp;
-  if ((orig_x) == 0) _throw_null();
-  if (orig_i < 0) _throw_arraybounds();
+  if ((orig_x) == 0) _throw_null_fn(filename,lineno);
+  if (orig_i < 0) _throw_arraybounds_fn(filename,lineno);
   for (_czs_temp=orig_sz; _czs_temp < orig_i; _czs_temp++)
-    if (orig_x[_czs_temp] == 0) _throw_arraybounds();
+    if (orig_x[_czs_temp] == 0) _throw_arraybounds_fn(filename,lineno);
   return orig_x + orig_i;
 }
 static _INLINE long double *
-_zero_arr_plus_longdouble(long double *orig_x, int orig_sz, int orig_i) {
+_zero_arr_plus_longdouble_fn(long double *orig_x, int orig_sz, int orig_i, const char *filename, unsigned lineno) {
   unsigned int _czs_temp;
-  if ((orig_x) == 0) _throw_null();
-  if (orig_i < 0) _throw_arraybounds();
+  if ((orig_x) == 0) _throw_null_fn(filename,lineno);
+  if (orig_i < 0) _throw_arraybounds_fn(filename,lineno);
   for (_czs_temp=orig_sz; _czs_temp < orig_i; _czs_temp++)
-    if (orig_x[_czs_temp] == 0) _throw_arraybounds();
+    if (orig_x[_czs_temp] == 0) _throw_arraybounds_fn(filename,lineno);
   return orig_x + orig_i;
 }
 static _INLINE void *
-_zero_arr_plus_voidstar(void **orig_x, int orig_sz, int orig_i) {
+_zero_arr_plus_voidstar_fn(void **orig_x, int orig_sz, int orig_i,const char *filename,unsigned lineno) {
   unsigned int _czs_temp;
-  if ((orig_x) == 0) _throw_null();
-  if (orig_i < 0) _throw_arraybounds();
+  if ((orig_x) == 0) _throw_null_fn(filename,lineno);
+  if (orig_i < 0) _throw_arraybounds_fn(filename,lineno);
   for (_czs_temp=orig_sz; _czs_temp < orig_i; _czs_temp++)
-    if (orig_x[_czs_temp] == 0) _throw_arraybounds();
+    if (orig_x[_czs_temp] == 0) _throw_arraybounds_fn(filename,lineno);
   return orig_x + orig_i;
 }
 #endif
+
+#define _zero_arr_plus_char(x,s,i) \
+  (_zero_arr_plus_char_fn(x,s,i,__FILE__,__LINE__))
+#define _zero_arr_plus_short(x,s,i) \
+  (_zero_arr_plus_short_fn(x,s,i,__FILE__,__LINE__))
+#define _zero_arr_plus_int(x,s,i) \
+  (_zero_arr_plus_int_fn(x,s,i,__FILE__,__LINE__))
+#define _zero_arr_plus_float(x,s,i) \
+  (_zero_arr_plus_float_fn(x,s,i,__FILE__,__LINE__))
+#define _zero_arr_plus_double(x,s,i) \
+  (_zero_arr_plus_double_fn(x,s,i,__FILE__,__LINE__))
+#define _zero_arr_plus_longdouble(x,s,i) \
+  (_zero_arr_plus_longdouble_fn(x,s,i,__FILE__,__LINE__))
+#define _zero_arr_plus_voidstar(x,s,i) \
+  (_zero_arr_plus_voidstar_fn(x,s,i,__FILE__,__LINE__))
 
 
 /* Calculates the number of elements in a zero-terminated, thin array.
@@ -348,93 +371,107 @@ _get_zero_arr_size_voidstar(const void **orig_x, unsigned int orig_offset) {
 
 
 /* Does in-place addition of a zero-terminated pointer (x += e and ++x).  
-   Note that this expands to call _zero_arr_plus. */
+   Note that this expands to call _zero_arr_plus_<type>_fn. */
 static _INLINE void 
-_zero_arr_inplace_plus_char(char **x, int orig_i) {
-  *x = _zero_arr_plus_char(*x,1,orig_i);
+_zero_arr_inplace_plus_char_fn(char **x, int orig_i,const char *filename,unsigned lineno) {
+  *x = _zero_arr_plus_char_fn(*x,1,orig_i,filename,lineno);
 }
+#define _zero_arr_inplace_plus_char(x,i) \
+  _zero_arr_inplace_plus_char_fn(x,i,__FILE__,__LINE__)
 static _INLINE void 
-_zero_arr_inplace_plus_short(short **x, int orig_i) {
-  *x = _zero_arr_plus_short(*x,1,orig_i);
+_zero_arr_inplace_plus_short_fn(short **x, int orig_i,const char *filename,unsigned lineno) {
+  *x = _zero_arr_plus_short_fn(*x,1,orig_i,filename,lineno);
 }
+#define _zero_arr_inplace_plus_short(x,i) \
+  _zero_arr_inplace_plus_short_fn(x,i,__FILE__,__LINE__)
 static _INLINE void 
-_zero_arr_inplace_plus_int(int **x, int orig_i) {
-  *x = _zero_arr_plus_int(*x,1,orig_i);
+_zero_arr_inplace_plus_int(int **x, int orig_i,const char *filename,unsigned lineno) {
+  *x = _zero_arr_plus_int_fn(*x,1,orig_i,filename,lineno);
 }
+#define _zero_arr_inplace_plus_int(x,i) \
+  _zero_arr_inplace_plus_int_fn(x,i,__FILE__,__LINE__)
 static _INLINE void 
-_zero_arr_inplace_plus_float(float **x, int orig_i) {
-  *x = _zero_arr_plus_float(*x,1,orig_i);
+_zero_arr_inplace_plus_float_fn(float **x, int orig_i,const char *filename,unsigned lineno) {
+  *x = _zero_arr_plus_float_fn(*x,1,orig_i,filename,lineno);
 }
+#define _zero_arr_inplace_plus_float(x,i) \
+  _zero_arr_inplace_plus_float_fn(x,i,__FILE__,__LINE__)
 static _INLINE void 
-_zero_arr_inplace_plus_double(double **x, int orig_i) {
-  *x = _zero_arr_plus_double(*x,1,orig_i);
+_zero_arr_inplace_plus_double_fn(double **x, int orig_i,const char *filename,unsigned lineno) {
+  *x = _zero_arr_plus_double_fn(*x,1,orig_i,filename,lineno);
 }
+#define _zero_arr_inplace_plus_double(x,i) \
+  _zero_arr_inplace_plus_double_fn(x,i,__FILE__,__LINE__)
 static _INLINE void 
-_zero_arr_inplace_plus_longdouble(long double **x, int orig_i) {
-  *x = _zero_arr_plus_longdouble(*x,1,orig_i);
+_zero_arr_inplace_plus_longdouble_fn(long double **x, int orig_i,const char *filename,unsigned lineno) {
+  *x = _zero_arr_plus_longdouble_fn(*x,1,orig_i,filename,lineno);
 }
+#define _zero_arr_inplace_plus_longdouble(x,i) \
+  _zero_arr_inplace_plus_longdouble_fn(x,i,__FILE__,__LINE__)
 static _INLINE void 
-_zero_arr_inplace_plus_voidstar(void ***x, int orig_i) {
-  *x = _zero_arr_plus_voidstar(*x,1,orig_i);
+_zero_arr_inplace_plus_voidstar_fn(void ***x, int orig_i,const char *filename,unsigned lineno) {
+  *x = _zero_arr_plus_voidstar_fn(*x,1,orig_i,filename,lineno);
 }
+#define _zero_arr_inplace_plus_voidstar(x,i) \
+  _zero_arr_inplace_plus_voidstar_fn(x,i,__FILE__,__LINE__)
 
 /* Does in-place increment of a zero-terminated pointer (e.g., x++). */
 static _INLINE char *
-_zero_arr_inplace_plus_post_char_fn(char **x, int orig_i){
+_zero_arr_inplace_plus_post_char_fn(char **x, int orig_i,const char *filename,unsigned lineno){
   char * _zap_res = *x;
-  *x = _zero_arr_plus_char(_zap_res,1,orig_i);
+  *x = _zero_arr_plus_char_fn(_zap_res,1,orig_i,filename,lineno);
   return _zap_res;
 }
 #define _zero_arr_inplace_plus_post_char(x,i) \
-  _zero_arr_inplace_plus_post_char_fn((char **)(x),(i))
+  _zero_arr_inplace_plus_post_char_fn((char **)(x),(i),__FILE__,__LINE__)
 static _INLINE short *
-_zero_arr_inplace_plus_post_short_fn(short **x, int orig_i){
+_zero_arr_inplace_plus_post_short_fn(short **x, int orig_i,const char *filename,unsigned lineno){
   short * _zap_res = *x;
-  *x = _zero_arr_plus_short(_zap_res,1,orig_i);
+  *x = _zero_arr_plus_short_fn(_zap_res,1,orig_i,filename,lineno);
   return _zap_res;
 }
 #define _zero_arr_inplace_plus_post_short(x,i) \
-  _zero_arr_inplace_plus_post_short_fn((short **)(x),(i))
+  _zero_arr_inplace_plus_post_short_fn((short **)(x),(i),__FILE__,__LINE__)
 static _INLINE int *
-_zero_arr_inplace_plus_post_int_fn(int **x, int orig_i){
+_zero_arr_inplace_plus_post_int_fn(int **x, int orig_i,const char *filename, unsigned lineno){
   int * _zap_res = *x;
-  *x = _zero_arr_plus_int(_zap_res,1,orig_i);
+  *x = _zero_arr_plus_int_fn(_zap_res,1,orig_i,filename,lineno);
   return _zap_res;
 }
 #define _zero_arr_inplace_plus_post_int(x,i) \
-  _zero_arr_inplace_plus_post_int_fn((int **)(x),(i))
+  _zero_arr_inplace_plus_post_int_fn((int **)(x),(i),__FILE__,__LINE__)
 static _INLINE float *
-_zero_arr_inplace_plus_post_float_fn(float **x, int orig_i){
+_zero_arr_inplace_plus_post_float_fn(float **x, int orig_i,const char *filename, unsigned lineno){
   float * _zap_res = *x;
-  *x = _zero_arr_plus_float(_zap_res,1,orig_i);
+  *x = _zero_arr_plus_float_fn(_zap_res,1,orig_i,filename,lineno);
   return _zap_res;
 }
 #define _zero_arr_inplace_plus_post_float(x,i) \
-  _zero_arr_inplace_plus_post_float_fn((float **)(x),(i))
+  _zero_arr_inplace_plus_post_float_fn((float **)(x),(i),__FILE__,__LINE__)
 static _INLINE double *
-_zero_arr_inplace_plus_post_double_fn(double **x, int orig_i){
+_zero_arr_inplace_plus_post_double_fn(double **x, int orig_i,const char *filename,unsigned lineno){
   double * _zap_res = *x;
-  *x = _zero_arr_plus_double(_zap_res,1,orig_i);
+  *x = _zero_arr_plus_double_fn(_zap_res,1,orig_i,filename,lineno);
   return _zap_res;
 }
 #define _zero_arr_inplace_plus_post_double(x,i) \
-  _zero_arr_inplace_plus_post_double_fn((double **)(x),(i))
+  _zero_arr_inplace_plus_post_double_fn((double **)(x),(i),__FILE__,__LINE__)
 static _INLINE long double *
-_zero_arr_inplace_plus_post_longdouble_fn(long double **x, int orig_i){
+_zero_arr_inplace_plus_post_longdouble_fn(long double **x, int orig_i,const char *filename,unsigned lineno){
   long double * _zap_res = *x;
-  *x = _zero_arr_plus_longdouble(_zap_res,1,orig_i);
+  *x = _zero_arr_plus_longdouble_fn(_zap_res,1,orig_i,filename,lineno);
   return _zap_res;
 }
 #define _zero_arr_inplace_plus_post_longdouble(x,i) \
-  _zero_arr_inplace_plus_post_longdouble_fn((long double **)(x),(i))
+  _zero_arr_inplace_plus_post_longdouble_fn((long double **)(x),(i),__FILE__,__LINE__)
 static _INLINE void **
-_zero_arr_inplace_plus_post_voidstar_fn(void ***x, int orig_i){
+_zero_arr_inplace_plus_post_voidstar_fn(void ***x, int orig_i,const char *filename,unsigned lineno){
   void ** _zap_res = *x;
-  *x = _zero_arr_plus_voidstar(_zap_res,1,orig_i);
+  *x = _zero_arr_plus_voidstar_fn(_zap_res,1,orig_i,filename,lineno);
   return _zap_res;
 }
 #define _zero_arr_inplace_plus_post_voidstar(x,i) \
-  _zero_arr_inplace_plus_post_voidstar_fn((void***)(x),(i))
+  _zero_arr_inplace_plus_post_voidstar_fn((void***)(x),(i),__FILE__,__LINE__)
 
 /* functions for dealing with dynamically sized pointers */
 #ifdef NO_CYC_BOUNDS_CHECKS
@@ -458,16 +495,18 @@ _check_dyneither_subscript(struct _dyneither_ptr arr,unsigned elt_sz,unsigned in
 #else
 #ifdef _INLINE_FUNCTIONS
 static _INLINE unsigned char *
-_check_dyneither_subscript(struct _dyneither_ptr arr,unsigned elt_sz,unsigned index) {
+_check_dyneither_subscript_fn(struct _dyneither_ptr arr,unsigned elt_sz,unsigned index,const char *filename, unsigned lineno) {
   struct _dyneither_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
   unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
   /* JGM: not needed! if (!_cus_arr.base) _throw_null(); */ 
   if (_cus_ans < _cus_arr.base || _cus_ans >= _cus_arr.last_plus_one)
-    _throw_arraybounds();
+    _throw_arraybounds_fn(filename,lineno);
   return _cus_ans;
 }
+#define _check_dyneither_subscript(a,s,i) \
+  _check_dyneither_subscript(a,s,i,__FILE__,__LINE__)
 #else
 #define _check_dyneither_subscript(arr,elt_sz,index) ({ \
   struct _dyneither_ptr _cus_arr = (arr); \
@@ -521,14 +560,17 @@ _init_dyneither_ptr(struct _dyneither_ptr *arr_ptr,
 #else
 #ifdef _INLINE_FUNCTIONS
 static _INLINE unsigned char *
-_untag_dyneither_ptr(struct _dyneither_ptr arr, 
-                     unsigned elt_sz,unsigned num_elts) {
+_untag_dyneither_ptr_fn(struct _dyneither_ptr arr, 
+                        unsigned elt_sz,unsigned num_elts,
+                        const char *filename, unsigned lineno) {
   struct _dyneither_ptr _arr = (arr);
   unsigned char *_curr = _arr.curr;
   if (_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one)
-    _throw_arraybounds();
+    _throw_arraybounds_fn(filename,lineno);
   return _curr;
 }
+#define _untag_dyneither_ptr(a,s,e) \
+  _untag_dyneither_ptr_fn(a,s,e,__FILE__,__LINE__)
 #else
 #define _untag_dyneither_ptr(arr,elt_sz,num_elts) ({ \
   struct _dyneither_ptr _arr = (arr); \
@@ -616,11 +658,13 @@ _dyneither_ptr _dyneither_ptr_decrease_size(struct _dyneither_ptr x,
 }
 
 /* Allocation */
+
 extern void* GC_malloc(int);
 extern void* GC_malloc_atomic(int);
 extern void* GC_calloc(unsigned,unsigned);
 extern void* GC_calloc_atomic(unsigned,unsigned);
 
+/* FIX?  Not sure if we want to pass filename and lineno in here... */
 static _INLINE void* _cycalloc(int n) {
   void * ans = (void *)GC_malloc(n);
   if(!ans)
@@ -695,69 +739,185 @@ static _INLINE void _swap_dyneither(struct _dyneither_ptr *x,
   *x = *y;
   *y = tmp;
 }
- typedef char*Cyc_Cstring;typedef char*Cyc_CstringNN;typedef struct _dyneither_ptr Cyc_string_t;
-typedef struct _dyneither_ptr Cyc_mstring_t;typedef struct _dyneither_ptr*Cyc_stringptr_t;
-typedef struct _dyneither_ptr*Cyc_mstringptr_t;typedef char*Cyc_Cbuffer_t;typedef
-char*Cyc_CbufferNN_t;typedef struct _dyneither_ptr Cyc_buffer_t;typedef struct
-_dyneither_ptr Cyc_mbuffer_t;typedef int Cyc_bool;struct Cyc_Core_NewRegion{struct
-_DynRegionHandle*dynregion;};typedef unsigned long Cyc_size_t;typedef
-unsigned short Cyc_mode_t;struct Cyc___cycFILE;typedef struct Cyc___cycFILE Cyc_FILE;
-struct Cyc_String_pa_PrintArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{
-int tag;unsigned long f1;};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};
-struct Cyc_LongDouble_pa_PrintArg_struct{int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{
-int tag;short*f1;};struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};
+
+# 35 "core.h"
+ typedef char*Cyc_Cstring;
+# 36
+typedef char*Cyc_CstringNN;
+# 37
+typedef struct _dyneither_ptr Cyc_string_t;
+# 40
+typedef struct _dyneither_ptr Cyc_mstring_t;
+# 43
+typedef struct _dyneither_ptr*Cyc_stringptr_t;
+# 47
+typedef struct _dyneither_ptr*Cyc_mstringptr_t;
+# 50
+typedef char*Cyc_Cbuffer_t;
+# 52
+typedef char*Cyc_CbufferNN_t;
+# 54
+typedef struct _dyneither_ptr Cyc_buffer_t;
+# 56
+typedef struct _dyneither_ptr Cyc_mbuffer_t;
+# 59
+typedef int Cyc_bool;struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};
+# 26 "/home/jgm/cyclone/include/cycboot.h"
+typedef unsigned long Cyc_size_t;
+# 33
+typedef unsigned short Cyc_mode_t;struct Cyc___cycFILE;
+# 49
+typedef struct Cyc___cycFILE Cyc_FILE;struct Cyc_String_pa_PrintArg_struct{int tag;
+struct _dyneither_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;
+};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};struct Cyc_LongDouble_pa_PrintArg_struct{
+int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{int tag;short*f1;};
+struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};
+# 68
 typedef void*Cyc_parg_t;struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};
 struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{
 int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned int*f1;};
 struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{
 int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};
-struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};typedef void*
-Cyc_sarg_t;extern char Cyc_FileCloseError[15];struct Cyc_FileCloseError_exn_struct{
+struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};
+# 127
+typedef void*Cyc_sarg_t;extern char Cyc_FileCloseError[15];struct Cyc_FileCloseError_exn_struct{
 char*tag;};extern char Cyc_FileOpenError[14];struct Cyc_FileOpenError_exn_struct{
-char*tag;struct _dyneither_ptr f1;};typedef unsigned int Cyc_Core_sizeof_t;struct Cyc_Core_Opt{
-void*v;};typedef struct Cyc_Core_Opt*Cyc_Core_opt_t;struct Cyc_Core_Opt*Cyc_Core_opt_map(
-void*(*f)(void*),struct Cyc_Core_Opt*x);struct _dyneither_ptr Cyc_Core_new_string(
-unsigned int);struct _dyneither_ptr Cyc_Core_rnew_string(struct _RegionHandle*,
-unsigned int);int Cyc_Core_true_f(void*);int Cyc_Core_false_f(void*);struct _tuple0{
-void*f1;void*f2;};void*Cyc_Core_fst(struct _tuple0*);void*Cyc_Core_snd(struct
-_tuple0*);struct _tuple1{void*f1;void*f2;void*f3;};void*Cyc_Core_third(struct
-_tuple1*);void*Cyc_Core_identity(void*);int Cyc_Core_intcmp(int,int);int Cyc_Core_charcmp(
-char,char);int Cyc_Core_ptrcmp(void*,void*);int Cyc_Core_nptrcmp(void*,void*);
-extern char Cyc_Core_Invalid_argument[17];struct Cyc_Core_Invalid_argument_exn_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_exn_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_exn_struct{
+char*tag;struct _dyneither_ptr f1;};
+# 89 "core.h"
+typedef unsigned int Cyc_Core_sizeof_t;struct Cyc_Core_Opt{void*v;};
+# 93
+typedef struct Cyc_Core_Opt*Cyc_Core_opt_t;
+# 103 "core.h"
+struct Cyc_Core_Opt*Cyc_Core_opt_map(void*(*f)(void*),struct Cyc_Core_Opt*x);
+# 107
+struct _dyneither_ptr Cyc_Core_new_string(unsigned int);
+# 111
+struct _dyneither_ptr Cyc_Core_rnew_string(struct _RegionHandle*,unsigned int);
+# 115
+int Cyc_Core_true_f(void*);
+# 118
+int Cyc_Core_false_f(void*);struct _tuple0{void*f1;void*f2;};
+# 120
+void*Cyc_Core_fst(struct _tuple0*);
+# 123
+void*Cyc_Core_snd(struct _tuple0*);struct _tuple1{void*f1;void*f2;void*f3;};
+# 126
+void*Cyc_Core_third(struct _tuple1*);
+# 129
+void*Cyc_Core_identity(void*);
+# 131
+int Cyc_Core_intcmp(int,int);
+# 136
+int Cyc_Core_charcmp(char,char);
+# 138
+int Cyc_Core_ptrcmp(void*,void*);
+# 140
+int Cyc_Core_nptrcmp(void*,void*);extern char Cyc_Core_Invalid_argument[17];struct
+Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _dyneither_ptr f1;};extern
+char Cyc_Core_Failure[8];struct Cyc_Core_Failure_exn_struct{char*tag;struct
+_dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_exn_struct{
 char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_exn_struct{
-char*tag;};extern struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val;
-extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_exn_struct{char*
-tag;struct _dyneither_ptr f1;};extern struct _RegionHandle*Cyc_Core_heap_region;
-extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_NewRegion Cyc_Core__rnew_dynregion(
-struct _RegionHandle*,const char*file,int lineno);struct Cyc_Core_NewRegion Cyc_Core__new_dynregion(
-const char*file,int lineno);extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_exn_struct{
-char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_exn_struct{
-char*tag;};inline static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,
-unsigned int sz){if(bd >> 20  || sz >> 12)return 0;{unsigned char*ptrbd=dyn.curr + bd * 
-sz;if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)
-return 0;return dyn.curr;};}char Cyc_Core_Invalid_argument[17]="Invalid_argument";
-char Cyc_Core_SysError[9]="SysError";struct Cyc_Core_SysError_exn_struct{char*tag;
-int f1;};char Cyc_Core_Failure[8]="Failure";char Cyc_Core_Impossible[11]="Impossible";
-char Cyc_Core_Not_found[10]="Not_found";struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val={
-Cyc_Core_Not_found};char Cyc_Core_Unreachable[12]="Unreachable";struct Cyc_Core_Opt;
-struct Cyc_Core_Opt*Cyc_Core_opt_map(void*(*f)(void*),struct Cyc_Core_Opt*o){if(o
-== 0)return 0;{struct Cyc_Core_Opt*_tmp6;return(_tmp6=_cycalloc(sizeof(*_tmp6)),((
-_tmp6->v=(void*)f((void*)o->v),_tmp6)));};}struct _dyneither_ptr Cyc_Core_new_string(
-unsigned int i){char*_tmp8;unsigned int _tmp7;return(_tmp7=i,((_tmp8=
-_cyccalloc_atomic(sizeof(char),_tmp7),_tag_dyneither(_tmp8,sizeof(char),_tmp7))));}
+char*tag;};
+# 158
+extern struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val;extern char Cyc_Core_Unreachable[
+12];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _dyneither_ptr f1;};
+# 160
+extern struct _RegionHandle*Cyc_Core_heap_region;
+# 162
+extern struct _RegionHandle*Cyc_Core_unique_region;
+# 192
+struct Cyc_Core_NewRegion Cyc_Core__rnew_dynregion(struct _RegionHandle*,const char*
+file,int lineno);
+# 197
+struct Cyc_Core_NewRegion Cyc_Core__new_dynregion(const char*file,int lineno);
+extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_exn_struct{char*
+tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_exn_struct{
+char*tag;};
+# 244 "core.h"
+inline static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz){
+# 249
+if(bd >> 20  || sz >> 12)
+# 250
+return 0;{
+# 251
+unsigned char*ptrbd=dyn.curr + bd * sz;
+# 252
+if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)
+# 256
+return 0;
+# 257
+return dyn.curr;};}char Cyc_Core_Invalid_argument[17]="Invalid_argument";char Cyc_Core_SysError[
+9]="SysError";struct Cyc_Core_SysError_exn_struct{char*tag;int f1;};char Cyc_Core_Failure[
+8]="Failure";char Cyc_Core_Impossible[11]="Impossible";char Cyc_Core_Not_found[10]="Not_found";
+# 31 "/home/jgm/cyclone/lib/core.cyc"
+struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val={Cyc_Core_Not_found};
+char Cyc_Core_Unreachable[12]="Unreachable";struct Cyc_Core_Opt;
+# 34
+struct Cyc_Core_Opt*Cyc_Core_opt_map(void*(*f)(void*),struct Cyc_Core_Opt*o){
+# 35
+if(o == 0)
+# 36
+return 0;{
+# 37
+struct Cyc_Core_Opt*_tmp6;return(_tmp6=_cycalloc(sizeof(*_tmp6)),((_tmp6->v=(
+void*)f((void*)o->v),_tmp6)));};}
+# 40
+struct _dyneither_ptr Cyc_Core_new_string(unsigned int i){
+# 41
+char*_tmp8;unsigned int _tmp7;return(_tmp7=i,((_tmp8=_cyccalloc_atomic(sizeof(
+char),_tmp7),_tag_dyneither(_tmp8,sizeof(char),_tmp7))));}
+# 44
 struct _dyneither_ptr Cyc_Core_rnew_string(struct _RegionHandle*r,unsigned int i){
-char*_tmpA;unsigned int _tmp9;return(_tmp9=i,((_tmpA=_region_calloc(r,sizeof(char),
-_tmp9),_tag_dyneither(_tmpA,sizeof(char),_tmp9))));}struct Cyc_Core_NewRegion Cyc_Core__new_dynregion(
-const char*file,int lineno){return Cyc_Core__rnew_dynregion(Cyc_Core_heap_region,
-file,lineno);}int Cyc_Core_true_f(void*x){return 1;}int Cyc_Core_false_f(void*x){
-return 0;}int Cyc_Core_intcmp(int a,int b){return a - b;}int Cyc_Core_charcmp(char a,
-char b){return(int)a - (int)b;}int Cyc_Core_nptrcmp(void*a,void*b){if(a == b)return 0;
-if(a > b)return 1;return - 1;}int Cyc_Core_ptrcmp(void*a,void*b){if(a == b)return 0;if(
-a > b)return 1;return - 1;}void*Cyc_Core_fst(struct _tuple0*pair){return(*pair).f1;}
-void*Cyc_Core_snd(struct _tuple0*pair){return(*pair).f2;}void*Cyc_Core_third(
-struct _tuple1*triple){return(*triple).f3;}void*Cyc_Core_identity(void*x){return x;}
-struct _dyneither_ptr Cyc_Core_mkfat(void*arr,unsigned int s,unsigned int n){struct
-_dyneither_ptr res;res.curr=arr;res.base=arr;res.last_plus_one=arr + s * n;return
-res;}
+# 45
+char*_tmpA;unsigned int _tmp9;return(_tmp9=i,((_tmpA=_region_calloc(r,sizeof(
+char),_tmp9),_tag_dyneither(_tmpA,sizeof(char),_tmp9))));}
+# 48
+struct Cyc_Core_NewRegion Cyc_Core__new_dynregion(const char*file,int lineno){
+# 49
+return Cyc_Core__rnew_dynregion(Cyc_Core_heap_region,file,lineno);}
+# 52
+int Cyc_Core_true_f(void*x){return 1;}
+# 53
+int Cyc_Core_false_f(void*x){return 0;}
+# 55
+int Cyc_Core_intcmp(int a,int b){return a - b;}
+# 56
+int Cyc_Core_charcmp(char a,char b){return(int)a - (int)b;}
+# 57
+int Cyc_Core_nptrcmp(void*a,void*b){
+# 58
+if(a == b)return 0;
+# 59
+if(a > b)return 1;
+# 60
+return - 1;}
+# 62
+int Cyc_Core_ptrcmp(void*a,void*b){
+# 63
+if(a == b)return 0;
+# 64
+if(a > b)return 1;
+# 65
+return - 1;}
+# 68
+void*Cyc_Core_fst(struct _tuple0*pair){return(*pair).f1;}
+# 69
+void*Cyc_Core_snd(struct _tuple0*pair){return(*pair).f2;}
+# 70
+void*Cyc_Core_third(struct _tuple1*triple){return(*triple).f3;}
+# 72
+void*Cyc_Core_identity(void*x){
+# 73
+return x;}
+# 79
+struct _dyneither_ptr Cyc_Core_mkfat(void*arr,unsigned int s,unsigned int n){
+# 80
+struct _dyneither_ptr res;
+# 81
+res.curr=arr;
+# 82
+res.base=arr;
+# 83
+res.last_plus_one=arr + s * n;
+# 84
+return res;}

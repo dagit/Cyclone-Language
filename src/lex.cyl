@@ -608,11 +608,120 @@ static short process_qual_id(Lexbuf<`a> lbuf) {
   return QUAL_IDENTIFIER;
 }
 
+// Tracking source files and line numbers
+
+// One for each # nnn <file> that occurs in the source
+struct PosInfo<`r> {
+  struct PosInfo<`r>*`r next;  
+  unsigned int starting_line;           // nnn
+  const char ?`r filename;     // <file>
+  seg_t ?`U linenumpos;        // one entry for each line, holding seg_t
+  unsigned int linenumpos_offset; // next spot for inserting 
+};
+typedef struct PosInfo<`r>@`r pinfo_t<`r>;
+typedef struct PosInfo<`r>*`r pinfo_opt_t<`r>;
+// List of position info's in reverse order
+static pinfo_opt_t pos_info = NULL;
+// Current line number
+static int linenumber = 1;
+
+// when we see a new # nnn <file> directive, we create a new filepos entry
+static pinfo_t<`r> rnew_filepos(region_t<`r> r,
+                                const char ?`H filename, 
+                                unsigned int starting_line, 
+                                pinfo_opt_t<`r> next) {
+  seg_t ?`U linenumpos = rcalloc(Core::unique_region, 20, sizeof(seg_t));
+  linenumpos[0] = yylloc.first_line;
+  return rnew(r) PosInfo{.next = next, .starting_line = starting_line,
+                         .filename = filename,
+                         .linenumpos = linenumpos,
+                         .linenumpos_offset = 1};
+}
+
+// when we see a newline, we add it into the current filepos entry
+static void inc_linenumber() {
+  if (pos_info == NULL) throw new Impossible("empty position info!");
+  pinfo_t p = (pinfo_t)pos_info;
+  seg_t ?`U linenums = NULL;
+  p->linenumpos :=: linenums;
+  unsigned offset = p->linenumpos_offset;
+  unsigned n = numelts(linenums);
+  // check for enough space to insert the position
+  if (offset >= n) {
+    // have to grow the array -- double it and copy over old array
+    seg_t ?`U newlinenums = rcalloc(Core::unique_region,n*2,sizeof(seg_t));
+    for (unsigned i = 0; i < n; i++)
+      newlinenums[i] = linenums[i];
+    linenums :=: newlinenums;
+    // free old array of positions
+    Core::ufree(newlinenums);
+  }
+  // plug in the current position for this line number
+  linenums[offset] = yylloc.first_line;
+  p->linenumpos_offset = offset + 1;
+  linenumber++;
+  p->linenumpos :=: linenums;
+}
+
+// we've seen
+static void process_directive(char ?line) {
+  int i;
+  char buf[100];
+  const char ?filename = "";
+  if (sscanf(line, "# %d \"%s", &i, buf) == 2) {
+    filename = aprintf("\"%s",buf);
+    if (linenumber == i && pos_info != NULL && strcmp(pos_info->filename,filename) == 0) return;
+    linenumber = i;
+  } else if (sscanf(line, "# %d <%s", &i, buf) == 2) {
+    filename = aprintf("<%s", buf);
+    if (linenumber == i && pos_info != NULL && strcmp(pos_info->filename,filename) == 0) return;
+    linenumber = i;
+  } else if (sscanf(line, "# %d", &i) == 1) {
+    if (linenumber == i) return;
+    linenumber = i;
+    if (pos_info != NULL) filename = pos_info->filename;
+  } else {
+    linenumber++; // we don't understand it, so skip over it
+    return;
+  }
+  pos_info = rnew_filepos(Core::heap_region, filename, 
+                          linenumber, pos_info);
+}
+
+// translate an absolute character offset to a file and line number
+// given position information.  If it's an invalid offset (e.g. 0)
+// return $(NULL,0).
+$(const char ?, unsigned int) xlate_pos(seg_t char_offset) {
+  for (pinfo_opt_t p = pos_info; p != NULL; p = p->next) {
+    seg_t first_char_offset = p->linenumpos[0];
+    if (char_offset < first_char_offset && p->next != NULL) continue;
+    // we've found the right pinfo array, but we have to find the lineno now
+    // use a binary search...
+    unsigned int base = 0;
+    unsigned int size = p->linenumpos_offset;
+    while (size > 1) {
+      int half = size / 2;
+      int mid = base + half;
+      if (char_offset > p->linenumpos[mid]) {
+        base = base + half;
+        size = size - half;
+      } else {
+        size = half;
+      }
+    }
+    return $(p->filename, p->starting_line + base);
+  }
+  return $(NULL,0);
+}
+
+
 // Forward declarations of lexing functions 
 int token(Lexbuf<`a>);
 int scan_charconst(Lexbuf<`a>);
 int strng(Lexbuf<`a>);
+int strng_next(Lexbuf<`a>);
 int wstrng(Lexbuf<`a>);
+int wstrng_next(Lexbuf<`a>);
 int comment(Lexbuf<`a>);
 int cyc_qual(Lexbuf<`a>);
 int snarf_asm(Lexbuf<`a>);
@@ -731,10 +840,12 @@ rule token = parse
 | "::" { return COLON_COLON; }
 /* swap operation */
 | ":=:" { return SWAP; }
-/* comments */
-| "#"[^ '\n' '\r']*(newline)      { return  token(lexbuf); }
-| [' ' '\t' '\v' '\f' '\n' '\r']+ { return  token(lexbuf); }
-| "//"[^'\n' '\r']* newline       { return  token(lexbuf); }
+/* comments, directives, whitespace, etc. */
+| "#"[^ '\n' '\r']*(newline)      
+  { process_directive(lexeme(lexbuf)); return token(lexbuf); }
+| [' ' '\t' '\v' '\f']+           { return token(lexbuf); }
+| newline                         { inc_linenumber(); return token(lexbuf); }
+| "//"[^'\n' '\r']* newline       { inc_linenumber(); return token(lexbuf); }
 | "/*"  { comment_depth = 1; 
 	  runaway_start = lexeme_start(lexbuf); 
 	  comment(lexbuf); 
@@ -856,16 +967,23 @@ and scan_charconst = parse
   | [^ '\\' '\'' '\n']
            { store_string_char(lexeme_char(lexbuf,0)); return 1; }
   | newline
-           { runaway_err("wide character ends in newline",lexbuf); return 0; }
+           { inc_linenumber(); runaway_err("wide character ends in newline",lexbuf); return 0; }
   | eof    { runaway_err("unterminated wide character",lexbuf); return 0; }
   | _      { err("bad character following backslash in wide character",lexbuf); return 1; }
 
+/* return true when we see another string literal following, and
+ * false otherwise, skipping over whitespace. */
+and strng_next = parse
+  "\"" { return 1; }  /* saw a next string literal */
+| newline { inc_linenumber(); return strng_next(lexbuf); } /* skip whitespace */
+| [' ' '\t'] { return strng_next(lexbuf); } /* skip whitespace */
+/* HACK:  we've already snarfed the next character -- backup the lexer */
+| _ { /* backup */ lexbuf->lex_curr_pos -= 1; return 0; } 
+
 and strng = parse
-    "\"" [' ''\n''\r''\t']* "\""
-  /* concatenate adjacent strings */
-                    { return 1; }
-  | "\""            { return 0; }
-  | "\\" newline    { return 1; }
+    /* end of string -- but maybe an adjacent literal -- see strng_next */
+    "\""            { return strng_next(lexbuf); }
+  | "\\" newline    { inc_linenumber(); return 1; }
   | "\\a"           { store_string_char('\a'); return 1; }
   | "\\b"           { store_string_char('\b'); return 1; }
   | "\\f"           { store_string_char('\f'); return 1; }
@@ -891,7 +1009,8 @@ and strng = parse
                     { /* for efficiency, should have a while loop here */
                       store_string_char (lexeme_char(lexbuf,0));
 		      return 1; }
-  | newline         { runaway_err("string ends in newline",lexbuf);
+  | newline         { inc_linenumber(); 
+                      runaway_err("string ends in newline",lexbuf);
                       return 0;
                     }
   | eof             { runaway_err("unterminated string",lexbuf);
@@ -899,14 +1018,22 @@ and strng = parse
                     }
   | _               { err("bad character following backslash in string",lexbuf);
 		      return 1; }
-and wstrng = parse
-    "\"" [' ''\n''\r''\t']* "L\""
+
+/* return true when we see another wide string literal following, and
+ * false otherwise, skipping over whitespace. */
+and wstrng_next = parse
   /* Store the character sequence "\" L\"" instead of just concatenating
      the following string.  This is because concatenating might change
      the interpretation of a multibyte sequence -- we are not
      interpreting the sequence here, we leave that to the C compiler. */
-                    { store_string("\" L\""); return 1; }
-  | "\""            { return 0; }
+  "L\"" { store_string("\" L\""); return 1; }  
+| newline { inc_linenumber(); return wstrng_next(lexbuf); } /* skip whitespace */
+| [' ' '\t'] { return wstrng_next(lexbuf); } /* skip whitespace */
+/* HACK:  we've already snarfed the next character -- backup the lexer */
+| _ { /* backup */ lexbuf->lex_curr_pos -= 1; return 0; } 
+
+and wstrng = parse
+    "\""            { return wstrng_next(lexbuf); }
   | "\\a"           { store_string("\\a"); return 1; }
   | "\\b"           { store_string("\\b"); return 1; }
   | "\\f"           { store_string("\\f"); return 1; }
@@ -932,7 +1059,8 @@ and wstrng = parse
                     { /* for efficiency, should have a while loop here */
                       store_string_char (lexeme_char(lexbuf,0));
 		      return 1; }
-  | newline         { runaway_err("string ends in newline",lexbuf);
+  | newline         { inc_linenumber();
+                      runaway_err("string ends in newline",lexbuf);
                       return 0;
                     }
   | eof             { runaway_err("unterminated string",lexbuf);
@@ -952,10 +1080,12 @@ and comment = parse
                     }
  | '*'              { return comment(lexbuf); }
  | '/'              { return comment(lexbuf); }
- | [^ '/' '*']+     { return comment(lexbuf); }
+ | newline          { inc_linenumber(); return comment(lexbuf); }
+ | [^ '\n' '\r' '/' '*']+     { return comment(lexbuf); }
 
 /* HACK: we're counting on there being no comments between "asm" and
    "volatile" and the first paren. */
+/* FIX: not processing newlines here! */
 and snarf_asm = parse
   [' ' '\t' '\v' '\f' '\n' '\r']* '(' 
   { token_asm[0] = false;
@@ -986,7 +1116,8 @@ and snarf_asm_body = parse
          comment(lexbuf); 
          store_string_char(' ');
          return 1; }
-| "#"[^ '\n' '\r']*(newline) { store_string_char('\n'); return 1; }
+| "#"[^ '\n' '\r']*(newline) { inc_linenumber(); 
+                               store_string_char('\n'); return 1; }
 | '(' { paren_depth += 1; store_string_char('('); return 1; }
 | ')' { paren_depth -= 1; 
         if (paren_depth == 0) return 0;
@@ -995,10 +1126,20 @@ and snarf_asm_body = parse
           return 1;
         } }
 | eof { runaway_err("unterminated asm",lexbuf); return 0; }
+| newline { inc_linenumber(); store_string_char(lexeme_char(lexbuf,0)); return 1;}
 | _ { store_string_char(lexeme_char(lexbuf,0)); return 1; }
 
 
 {
+
+// reset the position information -- this is done separately 
+// because lex_init() gets called as soon as we're done lexing
+// to free up its other data structures.  We need to hang on to
+// the position information so that if we dump, it's there.
+void pos_init() {
+  linenumber = 1;
+  pos_info = NULL;
+}
 
 void lex_init(bool include_cyclone_keywords) {
   // free any dynamic regions allocated first

@@ -42,6 +42,7 @@ namespace Port {
   extern void port(List::list_t<Absyn::decl_t>);
 }
 namespace Lex {
+  extern void pos_init();
   extern void lex_init(bool use_cyclone_keywords);
 }
 namespace Toc {
@@ -77,7 +78,7 @@ static bool pa_r       = false;
 static bool pg_r       = false;
 static bool nocheck_r  = false;
 static bool add_cyc_namespace_r = true;
-static bool generate_line_directives_r = false;
+static bool generate_line_directives_r = true;
 static bool print_full_evars_r = false;
 static bool print_all_tvars_r = false;
 static bool print_all_kinds_r = false;
@@ -234,8 +235,8 @@ static void set_nocppprecomp() {
   add_ccarg("-no-cpp-precomp");
 }
 
-static void set_lineno() {
-  generate_line_directives_r = true;
+static void clear_lineno() {
+  generate_line_directives_r = false;
   set_save_temps();
 }
 static void set_inline_functions() {
@@ -561,6 +562,7 @@ list_t<Absyn::decl_t>
 
 list_t<Absyn::decl_t> do_parse(FILE @ f, list_t<Absyn::decl_t> ignore) {
   Lex::lex_init(true); // must forget typedefs, may as well flush symbols too
+  Lex::pos_init();
   let ans = Parse::parse_file(f);
   Lex::lex_init(true); // garbage collect those big tries
   return ans;
@@ -1253,9 +1255,9 @@ int main(int argc, string_t<`H> ?`H argv) {
          rnew(r)$("-save-c",false,"",
                rnew(r)Set_spec(&save_c_r),
                "Don't delete temporary C files"),
-         rnew(r)$("--lineno",false,"",
-               rnew(r)Unit_spec(set_lineno),
-               "Generate line numbers for debugging"),
+         rnew(r)$("--nolineno",false,"",
+               rnew(r)Unit_spec(clear_lineno),
+               "Don't generate line numbers for debugging (automatic with -pp)"),
          rnew(r)$("--nochecks",false,"",
                rnew(r)Unit_spec(set_nochecks),
                "Disable bounds/null checks"),
