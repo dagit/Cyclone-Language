@@ -96,6 +96,9 @@ $(doc_t, synth_t) up_opt(Buffer::buf_t b, doc_t doc) {
 	}
 	split_tags = new List(split_tag,split_tags);
       }
+
+      synth.i = synth.i & inner_synth.i;
+
       if(split_tags != null) { //subtle: won't happen on first loop iteration
 	// IN PLACE sequence splitting
 	let next = ds->tl;
@@ -103,7 +106,7 @@ $(doc_t, synth_t) up_opt(Buffer::buf_t b, doc_t doc) {
 	doc_t d = new Seq(prev);
 	for(; split_tags != null; split_tags = split_tags->tl)
 	  d = new Tagged(split_tags->hd, d);
-	if(prev == *dsp)
+	if(prev == *dsp) 
 	  *dsp = prevprev = prev = new List(d,next);
 	else {
 	  prev = new List(d,next);
@@ -113,13 +116,13 @@ $(doc_t, synth_t) up_opt(Buffer::buf_t b, doc_t doc) {
 	  prevprev = *dsp; // comment this line if use imp_append!
 	}
 	ds = next;
+	prev_synth = synth;
       } else {
 	prevprev = prev;
 	prev = ds;
 	ds = ds->tl;
+	prev_synth = inner_synth;
       }
-      synth.i = synth.i & inner_synth.i;
-      prev_synth = inner_synth;
     }
     return $(doc,synth);
   case &Text(pos): 

@@ -282,9 +282,9 @@ int main(int argc, char ??argv) {
     while(is_change && check_time() > 2) {
       is_change = false;
       fprintf(stderr,"%d\nup_opt...", check_time()); fflush(stderr);
-      let $(d2, _) = TagElim::up_opt(b,d);
+      d = TagElim::up_opt(b,d)[0];
       fprintf(stderr,"%d\ndown_opt...", check_time()); fflush(stderr);
-      d = down_opt(init_context,d2);
+      d = down_opt(init_context,d);
       ++round_num;
     }
     if(round_num > 1 && check_time() > 5) {
