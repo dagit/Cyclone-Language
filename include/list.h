@@ -257,6 +257,18 @@ namespace List {
   /** [rzip(r1,r2,x,y)] is like [zip(x,y)], except that the list
       returned is allocated in the region with handle [r1], and the
       pairs of that list are allocated in the region with handle [r2].  */
+  extern list_t<$(`a,`b,`c)@`H,`H> zip3(list_t<`a> x,list_t<`b> y, list_t<`c> z);
+  /** If [x] has elements [x1] through [xn], and [y] has elements [y1]
+      through [yn], and [z] has elements [z1]
+      through [zn], then [zip3(x,yz)] returns a new heap-allocated array
+      with elements [\&\$(x1,y1,z1)] through [\&\$(xn,yn,zn)].  If [x] and
+      [y] don't have the same number of elements, [List_mismatch] is
+      thrown. */
+  extern list_t<$(`a,`b,`c)@`r2,`r1> rzip3(region_t<`r1> r1, region_t<`r2> r2,
+                                       list_t<`a> x, list_t<`b> y, list_t<`c> z);
+  /** [rzip3(r1,r2,x,y)] is like [zip3(x,y)], except that the list
+      returned is allocated in the region with handle [r1], and the
+      pairs of that list are allocated in the region with handle [r2].  */
 
   extern $(list_t<`a>,list_t<`b>) split(list_t<$(`a,`b)@> x);
   /** If [x] has elements [\&\$(a1,b1)] through [\&\$(an,bn)], then

@@ -59,7 +59,6 @@ namespace Tcgenrep;
   */
 
 
-
 typedef struct RepInfo {
   list_t<decl_t> decls;
   exp_opt_t exp; 
@@ -182,6 +181,7 @@ static string_t double_str = "Double";
 static string_t thinptr_str = "ThinPtr";
 static string_t fatptr_str = "FatPtr";
 static string_t tuple_str = "Tuple";
+static string_t struct_str = "Struct";
 static string_t tunion_str = "TUnion";
 static string_t xtunion_str = "XTUnion";
 static string_t union_str = "Union";
@@ -256,6 +256,10 @@ static exp_t cnst_string_cls(seg_t seg,var_t s) {
   return const_exp((tunion Cnst)(new String_c(*s)),seg);
 }
 
+static exp_t cnst_qvar_string_cls(seg_t seg,qvar_t s) {
+  return const_exp((tunion Cnst)(new String_c(*(*s)[1])),seg);
+}
+
 
 static exp_t cnst_int(int i,seg_t seg) {
   return const_exp((tunion Cnst)(new Int_c(Signed,i)),seg);
@@ -325,6 +329,10 @@ static exp_t tuple2_exp_cls(seg_t loc, $(exp_t,exp_t)@ es) {
   let &$(e1,e2) = es;
   return tuple_exp(list(e1,e2),loc);
 }
+static exp_t tuple3_exp_cls(seg_t loc, $(exp_t,exp_t,exp_t)@ es) {
+  let &$(e1,e2,e3) = es;
+  return tuple_exp(list(e1,e2,e3),loc);
+}
 static string_t null_str = "NULL";
 
 static exp_t list_exp(list_t<exp_t,`H> l, seg_t loc) {
@@ -387,6 +395,15 @@ static type_t select_structfield_type(structfield_t sf) {
   if(has_bitfield(sf)) // indicating a bit-field 
     Tcutil::impos("gen(): mixed struct bitfields and union bitfields not handled");
   return sf->type;
+}
+
+static $(field_name_t,type_t)@ select_structfield_nmtype(structfield_t sf) {
+  // check safety
+  if(strcmp(*(sf->name),"") == 0)
+    Tcutil::impos("gen(): anonymous (padding) structfield not handled yet");
+  if(has_bitfield(sf)) // indicating a bit-field 
+    Tcutil::impos("gen(): mixed struct bitfields and union bitfields not handled");
+  return new $(sf->name,sf->type);
 }
 
 // trickiness: fwd_decls only used if creating a new ri, ignroed if updateing existing
@@ -490,10 +507,27 @@ array_decls(type_t type, list_t<exp_t,`H> exps, seg_t loc) {
 static type_t 
 check_tunionfield_and_get_type(tunionfield_t tuf) {
   if(tuf->tvs != NULL) {
-    Tcutil::impos("gen(): tunionfield type varaibles not handled");
+    Tcutil::impos("gen(): tunionfield type variables not handled");
   }
   // preserves tquals of original tunion...
   return new TupleType(List::imp_append(List::list(new $(tq_none,uint_t)),tuf->typs));
+}
+static qvar_t
+check_tunionfield_and_get_name(tunionfield_t tuf) {
+  if(tuf->tvs != NULL) {
+    Tcutil::impos("gen(): tunionfield type variables not handled");
+  }
+  // preserves tquals of original tunion...
+  return tuf->name;
+}
+
+static $(qvar_t,type_t)@
+check_tunionfield_and_get_nmtype(tunionfield_t tuf) {
+  if(tuf->tvs != NULL) {
+    Tcutil::impos("gen(): tunionfield type variables not handled");
+  }
+  // preserves tquals of original tunion...
+  return new $(tuf->name,new TupleType(List::imp_append(List::list(new $(tq_none,uint_t)),tuf->typs)));
 }
 static $(var_t,type_t)@
 check_xtunionfield_and_get_name_type(tunionfield_t tuf) {
@@ -508,6 +542,9 @@ check_xtunionfield_and_get_name_type(tunionfield_t tuf) {
 
 static bool filter_empty_tunionfield(tunionfield_t tuf) {
   return (tuf->typs != NULL);
+}
+static bool filter_nonempty_tunionfield(tunionfield_t tuf) {
+  return (tuf->typs == NULL);
 }
 
 static var_t get_tunionfield_name(tunionfield_t tuf) {
@@ -659,24 +696,94 @@ buildRepTuple(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, qvar_t var
 		     ris,
 		     NULL);
 }
-
 static dict_t<type_t,repinfo_t,`H>
-buildRepUnion(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, qvar_t varname, scope_t sc, type_t type, list_t<type_t> types)
+buildRepStruct(opt_t<typedef_name_t> sname, tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, qvar_t varname, scope_t sc, type_t type, list_t<$(field_name_t,type_t)@> nmtypes)
 {
+  let sizeof_tuple = sizeoftyp_exp(type,loc);
   // use closures here to apply partially evaluated lookuprep
   let env = new $(te,loc);
   let carry = new $(dict,NULL);
+  let $(names,types) = List::split(nmtypes);
   // this should really be a fold, producing the typeris list and the dict.
   // that way, the dicts will be merged right in the end
   let &$(dict2,ris) = List::fold_right_c(lookupRepsCls,env,types,carry);
   dict = dict2;
+  let indices = List::tabulate(List::length(types),identity);
+  let offsetofs = List::map_c(make_offsetof_exp,new $(type,loc),indices);
+  let nmexps = List::map_c(cnst_string_cls,loc,names);
   let riexps = List::map_c(get_and_cast_ri_exp,loc,ris);
-  let &$(decls,arrexp) = array_decls(tunion_typ(typerep_name(&typestruct_str)),riexps,loc);
+  let tuplelist = List::map_c(tuple3_exp_cls,loc,List::zip3(offsetofs,nmexps,riexps));
+
+  // construct the (globally unique) type of components of the tuple array
+  // FIX: Make this not duplicate so much run time data.
+
+  type_t tuple_type = tuple_typ(list(uint_t,const_string_typ(HeapRgn),tunion_typ(typerep_name(&typestruct_str))));
+
+  let &$(tupledecls,arrexp) = array_decls(tuple_type,tuplelist,loc);
+  // name
+  exp_t name;
+  if(sname == NULL) {
+    name = null_exp(loc);
+  } else {
+    // string_t gen_nameNN = "`*name`";
+    let namename = new_gen_id("name");
+    let dname = gen_decl(namename,const_string_typ(HeapRgn),cnst_string(*(*sname->v)[1],loc),loc);
+    // add dname to decls
+    tupledecls = new List{dname,tupledecls};
+    // assign name exp
+    name = address_exp(unknownid_exp(toplevel_name(namename),loc),loc);
+  }
+  // generate a declaration
+  let d2 = tunion_constructor_decl(typerep_name(&typestruct_str),
+				   typerep_name(&struct_str), 
+				   varname,
+				   list(name,sizeof_tuple,
+					arrexp),
+				   sc,
+				   loc);
+  let decls = imp_append(tupledecls,list(d2));
+  
+  return update_info(dict,type,decls,
+		     address_exp(unknownid_exp(varname,loc),loc),
+		     ris,
+		     NULL);
+}
+
+static dict_t<type_t,repinfo_t,`H>
+buildRepUnion(opt_t<typedef_name_t> uname, tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, qvar_t varname, scope_t sc, type_t type, list_t<$(field_name_t,type_t)@> nmtypes)
+{
+  // use closures here to apply partially evaluated lookuprep
+  let env = new $(te,loc);
+  let carry = new $(dict,NULL);
+  let $(names,types) = List::split(nmtypes);
+  // this should really be a fold, producing the typeris list and the dict.
+  // that way, the dicts will be merged right in the end
+  let &$(dict2,ris) = List::fold_right_c(lookupRepsCls,env,types,carry);
+  dict = dict2;
+  let nmexps = List::map_c(cnst_string_cls,loc,names);
+  let riexps = List::map_c(get_and_cast_ri_exp,loc,ris);
+  let nmriexps = List::map_c(tuple2_exp_cls,loc,List::zip(nmexps, riexps));
+  let tuple_type = tuple_typ(list(const_string_typ(HeapRgn),tunion_typ(typerep_name(&typestruct_str))));
+  let &$(decls,arrexp) = array_decls(tuple_type,nmriexps,loc);
+  // make name expression: null for now (FIX)
+  // name
+  exp_t name;
+  if(uname == NULL) {
+    name = null_exp(loc);
+  } else {
+    // string_t gen_nameNN = "`*name`";
+    let namename = new_gen_id("name");
+    let dname = gen_decl(namename,const_string_typ(HeapRgn),cnst_string(*(*uname->v)[1],loc),loc);
+    // add dname to decls
+    decls = new List{dname,decls};
+    // assign name exp
+    name = address_exp(unknownid_exp(toplevel_name(namename),loc),loc);
+  }
   // generate a declaration
   let d2 = tunion_constructor_decl(typerep_name(&typestruct_str),
 				   typerep_name(&union_str), 
 				   varname,
-				   list(arrexp),
+				   list(name,arrexp),
 				   sc,
 				   loc);
   return update_info(dict,type,imp_append(decls,list(d2)),
@@ -687,31 +794,47 @@ buildRepUnion(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, qvar_t var
 
 // builds Typestruct.Tunion for given set of types
 static dict_t<type_t,repinfo_t,`H>
-buildRepTunion(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, qvar_t varname, scope_t sc, type_t type, list_t<type_t> types){
+buildRepTunion(qvar_t tname, tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, qvar_t varname, scope_t sc, type_t type, list_t<qvar_t> tonames, list_t<$(qvar_t,type_t)@> nmtypes){
+  
+  // first, build the tagonly list.
+  let tagints = List::tabulate(List::length(tonames), identity);
+  let totags = List::map_c(cnst_int_cls,loc,tagints);
+  let nmexps = List::map_c(cnst_qvar_string_cls,loc,tonames);
+  let tagnmexps = List::zip(totags, nmexps);
+  let tuplelist1 = List::map_c(tuple2_exp_cls,loc,tagnmexps);
+  let tuple_type1 = tuple_typ(list(uint_t, const_string_typ(HeapRgn)));
+  let &$(tupledecls1,arrexp1) = array_decls(tuple_type1,tuplelist1,loc);
+
+  // then build the tag+data list.
   let env = new $(te,loc);
   let carry = new $(dict,NULL);
+  let $(names,types) = List::split(nmtypes);
   // fetch (building if necessary) repinfos for all component types
   let &$(dict2,ris) = List::fold_right_c(lookupRepsCls,env,types,carry);
   dict = dict2;
   // build tag list of appropriate length
   let tagints = List::tabulate(List::length(ris),identity);
   let tags = List::map_c(cnst_int_cls,loc,tagints);
+  // build list of name exps
+  let nmexps = List::map_c(cnst_qvar_string_cls, loc, names);
   // build list of tunion case types
   let riexps = List::map_c(get_and_cast_ri_exp,loc,ris);
   // pair these with tags 
-  let tagriexps = List::zip(tags,riexps);
-  let tuplelist = List::map_c(tuple2_exp_cls,loc,tagriexps);
+  let tagnmriexps = List::zip3(tags,nmexps,riexps);
+  let tuplelist2 = List::map_c(tuple3_exp_cls,loc,tagnmriexps);
   // build the type of elements of Tunion array
-  type_t tuple_type = tuple_typ(list(uint_t,tunion_typ(typerep_name(&typestruct_str))));
-  let &$(tupledecls,arrexp) = array_decls(tuple_type,tuplelist,loc);
+  type_t tuple_type2 = tuple_typ(list(uint_t,const_string_typ(HeapRgn),tunion_typ(typerep_name(&typestruct_str))));
+  let &$(tupledecls2,arrexp2) = array_decls(tuple_type2,tuplelist2,loc);
+  // build name expression
+  let name = cnst_string(*(*tname)[1],loc); // ignore namespace for now
   // generate a declaration
   let d2 = tunion_constructor_decl(typerep_name(&typestruct_str),
 				   typerep_name(&tunion_str), 
 				   varname,
-				   list(arrexp),
+				   list(name,arrexp1,arrexp2),
 				   sc,
 				   loc);
-  return update_info(dict,type,imp_append(tupledecls,list(d2)),
+  return update_info(dict,type,imp_append(tupledecls1,imp_append(tupledecls2,list(d2))),
 		     address_exp(unknownid_exp(varname,loc),loc),
 		     ris,
 		     NULL);
@@ -719,7 +842,7 @@ buildRepTunion(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, qvar_t va
 }
 // builds Typestruct.XTunion for given set of types
 static dict_t<type_t,repinfo_t,`H>
-buildRepXTunion(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, qvar_t varname, scope_t sc, type_t type, list_t<$(var_t,type_t)@> nametypes){
+buildRepXTunion(qvar_t xname, tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, qvar_t varname, scope_t sc, type_t type, list_t<$(var_t,type_t)@> nametypes){
   let $(names,types) = List::split(nametypes);
   let env = new $(te,loc);
   let carry = new $(dict,NULL);
@@ -738,11 +861,13 @@ buildRepXTunion(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, qvar_t v
   type_t tuple_type = tuple_typ(list(name_type,
 				     tunion_typ(typerep_name(&typestruct_str))));
   let &$(tupledecls,arrexp) = array_decls(tuple_type,tuplelist,loc);
+  // build name (ignoring namespace for now)
+  let name = cnst_string(*(*xname)[1],loc); // ignore namespace for now
   // generate a declaration
   let d2 = tunion_constructor_decl(typerep_name(&typestruct_str),
 				   typerep_name(&xtunion_str), 
 				   varname,
-				   list(arrexp),
+				   list(name,arrexp),
 				   sc,
 				   loc);
   return update_info(dict,type,imp_append(tupledecls,list(d2)),
@@ -779,14 +904,15 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
   }
   
   switch (Tcutil::compress(monomorphize_type(type))) {
-  case &IntType(_,sz):
+  case &IntType(sn,sz):
     
-    // tunion Typestruct.Int rep = Int(32);
+    // tunion Typestruct.Int rep = Int(sn,sz);
     let varname = toplevel_name(new_gen_id("rep"));
     let d1 = tunion_constructor_decl(typerep_name(&typestruct_str),
 				     typerep_name(&int_str), 
 				     varname,
-				     list(cnst_int(size_of2int(sz),loc)),
+				     list(cnst_int(sn==Signed?1:0,loc),
+					  cnst_int(size_of2int(sz),loc)),
 				     Static,
 				     loc);     
     dict = update_info(dict,
@@ -926,7 +1052,7 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
       //string_t s = strconcat(qvar2cstring((qvar_t)name),"_struct_typerep");
       //let varname = new $((*name)[0],new make_type_cstring(type));
       let varname = toplevel_name(new make_type_cstring(type));
-      let fwd_decl = new Opt{.v=gen_vardecl(varname,tunionfield_typ(typerep_name(&typestruct_str),typerep_name(&tuple_str)),NULL,Extern,loc)};
+      let fwd_decl = new Opt{.v=gen_vardecl(varname,tunionfield_typ(typerep_name(&typestruct_str),typerep_name(&struct_str)),NULL,Extern,loc)};
       //printf("adding externdecl for %s\n",qvar2string(varname));
       dict = make_fwd_decl_info(dict,
 				type,
@@ -954,10 +1080,10 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
       //let varname = new $((*name)[0],new make_type_cstring(type));
       let varname = toplevel_name(new make_type_cstring(type));
       // fwd_decl = extern tunion Typestruct.Tuple `varname`;
-      let fwd_decl = new Opt{.v=gen_vardecl(varname,tunionfield_typ(typerep_name(&typestruct_str),typerep_name(&tuple_str)),NULL,Extern,loc)};
+      let fwd_decl = new Opt{.v=gen_vardecl(varname,tunionfield_typ(typerep_name(&typestruct_str),typerep_name(&struct_str)),NULL,Extern,loc)};
       dict = make_fwd_decl_info(dict,type,address_exp(unknownid_exp(varname,loc),loc),fwd_decl,false);
-      let types = List::map(select_structfield_type,stdecl->fields->v);
-      dict = buildRepTuple(te,dict,loc,varname,Public,type,types);
+      let nmtypes = List::map(select_structfield_nmtype,stdecl->fields->v);
+      dict = buildRepStruct(stdecl->name,te,dict,loc,varname,Public,type,nmtypes);
     }
 	
   
@@ -973,9 +1099,9 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
       let &$(dict2,base_info) = lookupRep(te,dict,loc,base_type);
       dict = insert(dict2,type,base_info);
     } else {
-      let types = List::map(select_structfield_type,fields);
+      let nmtypes = List::map(select_structfield_nmtype,fields);
       let varname = toplevel_name(new_gen_id("rep"));
-      dict = buildRepTuple(te,dict,loc,varname,Static,type,types);
+      dict = buildRepStruct(NULL,te,dict,loc,varname,Static,type,nmtypes);
     }
     break;
 
@@ -1039,9 +1165,11 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
       dict = make_fwd_decl_info(dict,type,address_exp(unknownid_exp(varname,loc),loc),fwd_decl,false);
       let fields = tudecl->fields->v;
       let nonemptyfields = List::filter(filter_empty_tunionfield,fields);
-      let types = List::map(check_tunionfield_and_get_type,nonemptyfields);
+      let emptyfields = List::filter(filter_nonempty_tunionfield,fields);
+      let nmtypes = List::map(check_tunionfield_and_get_nmtype,nonemptyfields);
+      let tonames = List::map(check_tunionfield_and_get_name,emptyfields);
       // this builds absyn for Typestruct.Tunion with appropriate entries
-      dict = buildRepTunion(te,dict,loc,varname,Public,type,types);
+      dict = buildRepTunion(tudecl->name,te,dict,loc,varname,Public,type,tonames,nmtypes);
     }
     else {
       // build fwd decl in case of recursion
@@ -1053,7 +1181,7 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
       let nonemptyfields = List::filter(filter_empty_tunionfield,fields);
       let types = List::map(check_xtunionfield_and_get_name_type,nonemptyfields);
       // this builds absyn for Typestruct.Tunion with appropriate entries
-      dict = buildRepXTunion(te,dict,loc,varname,Public,type,types);
+      dict = buildRepXTunion(tudecl->name,te,dict,loc,varname,Public,type,types);
       //Tcutil::impos("gen(): xtunions not yet handled");
     }
       break;
@@ -1100,29 +1228,30 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
       break;
       //Tcutil::impos("gen(): union fields must be present by now");
     }
-    let types = List::map(select_structfield_type,udecl->fields->v);
+    let nmtypes = List::map(select_structfield_nmtype,udecl->fields->v);
 
     let varname = toplevel_name(new make_type_cstring(type));
-    dict = buildRepUnion(te,dict,loc,varname,Public,type,types);
+    dict = buildRepUnion(udecl->name,te,dict,loc,varname,Public,type,nmtypes);
     break;
       
   case &AnonUnionType(fields): // MemKind
     // Almost identical to Struct case.
     // Filter structfield list of stdecl to form like that in tuple case
     // Wrinkle: anonymous padding bytes (would like to omit, but safe to include)
-    let types = List::map(select_structfield_type,fields);
+    let nmtypes = List::map(select_structfield_nmtype,fields);
     let varname = toplevel_name(new_gen_id("rep"));
-    dict = buildRepUnion(te,dict,loc,varname,Static,type,types);
+    dict = buildRepUnion(NULL,te,dict,loc,varname,Static,type,nmtypes);
     break;
 
   case &EnumType(_,_): 
   case &AnonEnumType(_): 
-    // tunion Typestruct.Int rep = Int(32);
+    // tunion Typestruct.Int rep = Int(sn=false,32);
     let varname = toplevel_name(new_gen_id("rep"));
     let d1 = tunion_constructor_decl(typerep_name(&typestruct_str),
 				     typerep_name(&int_str), 
 				     varname,
-				     list(cnst_int(32,loc)),
+				     list(cnst_int(0,loc), // false (unsigned)
+					  cnst_int(32,loc)),
 				     Static,
 				     loc);     
     dict = update_info(dict,

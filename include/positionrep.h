@@ -22,7 +22,7 @@
 #include <typerep.h>
 using Typerep;
 // Type representation //
-extern tunion Typestruct.Tuple struct_Position_Segment_rep;
+extern tunion Typestruct.Struct struct_Position_Segment_rep;
 extern typestruct_t position_rep;
 
 #endif

@@ -8,8 +8,8 @@ CYCBISON=cycbison$(EXE)
 ifndef devel
 CYCC=cyclone$(EXE)
 else
-CYCC=../src/cyclone$(EXE)
-CYCFLAGS=-I../lib -B../lib
+CYCC=../build/boot/cyclone$(EXE)
+CYCFLAGS=-I../include -B../build/boot
 endif
 
 all: $(addsuffix $(EXE), cyctest foo hello test_regions histogram finger test_getopt)

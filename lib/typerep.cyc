@@ -32,14 +32,15 @@ using Dict;
 
 namespace Typerep;
 
-// assuming typ is a tuple, chop off the first item and return a new tuple.
-typestruct_t<`r> tuple_tl(typestruct_t<`r> typ) {
+// assuming typ is a tuple ( of at least 2 elements), chop off the first item and return a new tuple, and the offset of where it starts relative to the old tuple
+$(int,typestruct_t<`r>) tuple_tl(typestruct_t<`r> typ) {
   switch(typ) {
   case &Tuple(sz,l):
-    int sz1 = size_type((*l[0])[1]);
-    let m = new {for i < l.size-1: new $((*l[i+1])[0] - sz1, (*l[i+1])[1])};
-    return new Tuple(sz-sz1,m);
-  default: return typ;
+    if(l.size < 2) fallthru;
+    int pos1 = (*l[1])[0];
+    let m = new {for i < l.size-1: new $((*l[i+1])[0] - pos1, (*l[i+1])[1])};
+    return $(pos1,new Tuple(sz-pos1,m));
+  default: throw new Core::Failure("tuple_tl: expected tuple of size >= 2");
   }
 }
 
@@ -48,27 +49,54 @@ typestruct_t<`r> tuple_tl(typestruct_t<`r> typ) {
    look up the tag in the list and return the corresponding type
    (assumed to be a tuple) */
 // FIX: currently includes the leading tag, this is wasteful
-tunion `r Typestruct
+$(int,tunion `r Typestruct)
 get_unionbranch(unsigned int tag,
-		$(unsigned int,tunion `r Typestruct)@ ? l)
+		$(unsigned int,string_t<`H>,tunion `r Typestruct)@ ? l)
 {
   //fprintf(stderr,"looking for tag %d\n",tag);
   for (int i = 0; i < l.size; i++) {
-    let $(btag,typ) = *(l[i]);
+    let $(btag,_,typ) = *(l[i]);
     //fprintf(stderr,"  checking tag %d\n",btag);
     if (btag == tag)
       return tuple_tl(typ);
   }
-//    fprintf(stderr,"didn't find it\n");
+  //printf(stderr,"didn't find it\n");
   throw new Core::Failure("Could not find tag in TUnion");
 }
-
+string_t<`H>
+get_tagname(unsigned int tag,
+		$(unsigned int,string_t<`H>)@ ? l)
+{
+  //fprintf(stderr,"looking for tag %d\n",tag);
+  for (int i = 0; i < l.size; i++) {
+    let $(btag,nm) = *(l[i]);
+    //fprintf(stderr,"  checking tag %d\n",btag);
+    if (btag == tag)
+      return nm;
+  }
+  //fprintf(stderr,"didn't find it\n");
+  throw new Core::Failure("Could not find name in TUnion");
+}
+string_t<`H>
+get_tagname2(unsigned int tag,
+		$(unsigned int,string_t<`H>,typestruct_t<`r>)@ ? l)
+{
+  //fprintf(stderr,"looking for tag %d\n",tag);
+  for (int i = 0; i < l.size; i++) {
+    let $(btag,nm,_) = *(l[i]);
+    //fprintf(stderr,"  checking tag %d\n",btag);
+    if (btag == tag)
+      return nm;
+  }
+  //fprintf(stderr,"didn't find it\n");
+  throw new Core::Failure("Could not find name in TUnion");
+}
 
 /*-------------------------------------------------------------------------*/
 /* given a tag and a list of typereps, each assumed to be a TUnionField,
    look up the tag in the list and return the corresponding type
    (assumed to be a tuple) */
-tunion `r Typestruct
+$(int,tunion `r Typestruct)
 get_xtunionbranch(string_t<`H> tag,
 		$(string_t<`H>,tunion `r Typestruct)@ ? l)
 {
@@ -89,31 +117,35 @@ unsigned int
 size_type(typestruct_t rep) 
 {
   switch (rep) {
-  case &Int(szbits): return (szbits>>3);
+  case &Int(sn,szbits): return (szbits>>3);
   case Float: return sizeof(float);
   case Double: return sizeof(double);
   case &ThinPtr(_,_): return sizeof(void *);
   case &FatPtr(_): return sizeof(void ?);
+  case &Struct(_,szb,_): return szb;
   case &Tuple(szb,_): return szb;
-  case &TUnion(_): return sizeof(void *);
-  case &XTUnion(_): return sizeof(void *);
-  case &Union(tss): 
+  case &TUnion(_,_,_): return sizeof(void *);
+  case &XTUnion(_,_): return sizeof(void *);
+  case &Union(_,nmtss): 
     int max = 0;
-    for(int i = 0; i < tss.size; i++) {
-      let sz = size_type(*tss[i]);
+    for(int i = 0; i < nmtss.size; i++) {
+      let &$(nm,ts) = nmtss[i];
+      let sz = size_type(ts);
       max = (max < sz)? sz : max;
     }
     return max;
-  case &Var(_): return sizeof(void*); // everything of mem kind has same size as void*
-  case &Forall(_,rep): return size_type(*rep);
-  case &App(rep,_): return size_type(rep);
+    //case &Var(_): return sizeof(void*); // everything of mem kind has same size as void*
+    //case &Forall(_,rep): return size_type(*rep);
+    //case &App(rep,_): return size_type(rep);
 
     //  default: throw new Core::Failure("Unhandled case in size_type");
   }
 }
 
 
-
+string_t anon_or_name(string_t<`H>* name) {
+  return name==NULL?"(anon)":*name;
+}
 
 /*-------------------------------------------------------------------------*/
 /* Pretty-prints a typestruct for debugging purposes */
@@ -121,12 +153,12 @@ void
 print_typestruct(typestruct_t rep) 
 {
   switch (rep) {
-  case &Var(name):
-    printf("Var(%s)",*name);
+    /*case &Var(name):
+    printf("Var(%d)",name);
     break;
-
-  case &Int(sz):
-    printf("Int(%d)",sz);
+    */
+  case &Int(sn,sz):
+    printf("Int(%s,%d)",sn?(string_t)"signed":(string_t)"unsigned",sz);
     break;
 
   case Float:
@@ -149,6 +181,18 @@ print_typestruct(typestruct_t rep)
     printf(")");
     break;
 
+  case &Struct(name,sz,l):
+    printf("Struct(%s,%d,[",anon_or_name(name),sz);
+    for (int i = 0; i < l.size; i++) {
+      let $(ofs,nm,typ) = *(l[i]);
+      printf ("$(%d,%s,",ofs,nm);
+      print_typestruct(typ);
+      printf (")%c", (i != (l.size-1) ? ',' : ' '));
+    }
+    printf(" ]");
+    break;
+    
+
   case &Tuple(sz,l):
     printf("Tuple(%d,[",sz);
     for (int i = 0; i < l.size; i++) {
@@ -160,18 +204,24 @@ print_typestruct(typestruct_t rep)
     printf(" ]");
     break;
 
-  case &TUnion(l):
-    printf("TUnion(");
+  case &TUnion(name,t,l):
+    printf("TUnion(%s,[",name);
+    for(int i = 0; i < t.size; i++) {
+      let $(tag,nm) = *(t[i]);
+      printf("$(%d,%s)%c",tag,nm,(i != (t.size-1) ? ',' : ' '));
+    }
+    printf("],[");
     for (int i = 0; i < l.size; i++) {
-      let $(tag,typ) = *(l[i]);
-      printf ("$(%d,",tag);
+      let $(tag,nm,typ) = *(l[i]);
+      printf ("$(%d,%s,",tag,nm);
       print_typestruct(typ);
       printf (")%c", (i != (l.size-1) ? ',' : ' '));
     }    
-    printf(" )");
+    printf("] )");
     break;
-  case &XTUnion(l):
-    printf("XTUnion(");
+
+  case &XTUnion(name,l):
+    printf("XTUnion(%s,",name);
     for (int i = 0; i < l.size; i++) {
       let $(tag,typ) = *(l[i]);
       printf ("$(%s,",tag+4);
@@ -180,15 +230,17 @@ print_typestruct(typestruct_t rep)
     }    
     printf(" )");
     break;
- case &Union(l):
-   printf("Union(");
+ case &Union(name,l):
+   printf("Union(%s,",anon_or_name(name));
    for (int i = 0; i < l.size; i++) {
-      print_typestruct(*l[i]);
-      printf ("%c", (i != (l.size-1) ? ',' : ' '));
+     let $(nm,ts) = *(l[i]);
+     printf("$(%s,",nm);
+     print_typestruct(ts);
+     printf (")%c", (i != (l.size-1) ? ',' : ' '));
     }   
    printf(")");
    break;
- case &Forall(names,ts):
+   /* case &Forall(names,ts):
    printf("Forall([");
    for(int i = 0; i < names.size; i++) {
      printf(*names[i]);
@@ -207,7 +259,7 @@ print_typestruct(typestruct_t rep)
      printf ("%c", (i != (params.size-1) ? ',' : ' '));
    }
    printf("])");
-   break;
+   break;*/
   }
 
 }
@@ -219,11 +271,11 @@ void
 xmlize_typestruct(typestruct_t rep) 
 {
   switch (rep) {
-  case &Var(name):
+    /*  case &Var(name):
     printf("<Var name=\"%s\"/>",*name);
-    break;
-  case &Int(sz):
-    printf("<Int sz=\"%d\"/>",sz);
+    break;*/
+  case &Int(sn,sz):
+    printf("<Int sn=%d sz=\"%d\"/>",sn,sz);
     break;
 
   case Float:
@@ -246,6 +298,17 @@ xmlize_typestruct(typestruct_t rep)
     printf("</FatPtr>");
     break;
 
+  case &Struct(name,sz,l):
+    printf("<Struct name=\"%s\" sz=\"%d\">",anon_or_name(name),sz);
+    for (int i = 0; i < l.size; i++) {
+      let $(ofs,nm,typ) = *(l[i]);
+      printf ("<Component ofs=\"%d\" nm=\"%s\">",ofs,nm);
+      xmlize_typestruct(typ);
+      printf ("</Component>");
+    }
+    printf("</Tuple>");
+    break;
+
   case &Tuple(sz,l):
     printf("<Tuple sz=\"%d\">",sz);
     for (int i = 0; i < l.size; i++) {
@@ -256,19 +319,23 @@ xmlize_typestruct(typestruct_t rep)
     }
     printf("</Tuple>");
     break;
-
-  case &TUnion(l):
-    printf("<TUnion>");
+  
+  case &TUnion(name,t,l):
+    printf("<TUnion name=\"%s\">",name);
+    for (int i = 0; i < t.size; i++) {
+      let $(tag,nm) = *(t[i]);
+      printf("<Tag tag=\"%d\" nm=\"%s\"/>",tag,nm);
+    }
     for (int i = 0; i < l.size; i++) {
-      let $(tag,typ) = *(l[i]);
-      printf ("<Tag tag=\"%d\">",tag);
+      let $(tag,nm,typ) = *(l[i]);
+      printf ("<Tag tag=\"%d\" nm=\"%s\">",tag,nm);
       xmlize_typestruct(typ);
       printf ("</Tag>");
     }    
     printf("</Tunion>");
     break;
-  case &XTUnion(l):
-    printf("<XTUnion>");
+  case &XTUnion(name,l):
+    printf("<XTUnion name=\"%s\">",name);
     for (int i = 0; i < l.size; i++) {
       let $(tag,typ) = *(l[i]);
       printf ("<Tag tag=\"%s\">",tag+4);
@@ -277,38 +344,40 @@ xmlize_typestruct(typestruct_t rep)
     }    
     printf("</XTunion>");
     break;
- case &Union(l):
-   printf("<Union>");
+ case &Union(name,l):
+   printf("<Union name=\"%s\">",anon_or_name(name));
    for (int i = 0; i < l.size; i++) {
-      printf ("<Case>");
-      xmlize_typestruct(*l[i]);
+     let $(nm,ts) = *(l[i]);
+      printf ("<Case nm=\"%s\">",nm);
+      xmlize_typestruct(ts);
       printf ("</Case>");
     }   
    printf("</Union>");
    break;
- case &Forall(names,ts):
-   printf("<Forall vars=\"");
-   for(int i = 0; i < names.size; i++) {
-     if(i != 0) printf(", ");
-     printf(*names[i]);
-   }
-   printf("\">");
-   xmlize_typestruct(*ts);
+
+   /* case &Forall(names,ts):
+      printf("<Forall vars=\"");
+      for(int i = 0; i < names.size; i++) {
+      if(i != 0) printf(", ");
+      printf(*names[i]);
+      }
+      printf("\">");
+      xmlize_typestruct(*ts);
    printf("</Forall>");
    break;
- case &App(ts,params):
+   case &App(ts,params):
    printf("<App>");
    xmlize_typestruct(ts);
    for(int i = 0; i < params.size; i++) {
      if(i != 0) printf(", ");
      xmlize_typestruct(params[i]);
-   }
-   printf("</App>");
-   break;
-  }
+     }
+     printf("</App>");
+     break;*/
 }
-
-
+}
+ 
+/*
 static typestruct_t<`H>
 normalize_env(dict_t<name_t,typestruct_t<`H>,`H> env,
 	      typestruct_t<`H> ts) {
@@ -389,7 +458,7 @@ int name_order(name_t s1, name_t s2) {
 typestruct_t<`H> normalize(typestruct_t<`H> ts) {
   return normalize_env(Dict::empty(name_order),ts);
 }			  
-
+*/
 /*
 $(addr_set_t,int) genreic_cmp_base(typestruct_t rep, 
 				   addr_set_t base, 

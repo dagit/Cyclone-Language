@@ -557,6 +557,36 @@ list_t<$(`a,`b)@`H,`H> zip(list_t<`a> x,list_t<`b> y) {
   return rzip(heap_region, heap_region, x, y);
 }
 
+list_t<$(`a,`b,`c)@`r4,`r3> rzip3(region_t<`r3> r3, region_t<`r4> r4,
+                               list_t<`a> x, list_t<`b> y, list_t<`c> z) {
+  list_t<$(`a,`b,`c)@`r4,`r3> result, prev;
+  
+  if (x == NULL && y == NULL && z == NULL) return NULL;
+  if (x == NULL || y == NULL || z == NULL) throw List_mismatch;
+
+  result = rnew(r3) List(rnew(r4) $(x->hd,y->hd,z->hd),NULL);
+  prev = result;
+
+  x = x->tl;
+  y = y->tl;
+  z = z->tl;
+
+  while (x != NULL && y != NULL && z!= NULL) {
+    prev->tl = rnew(r3) List(rnew(r4) $(x->hd,y->hd,z->hd),NULL);
+    prev = prev->tl;
+    x = x->tl;
+    y = y->tl;
+    z = z->tl;
+  }
+  if (x != NULL || y != NULL ||z != NULL) throw List_mismatch;
+  return(result);
+}
+
+list_t<$(`a,`b,`c)@`H,`H> zip3(list_t<`a> x,list_t<`b> y,list_t<`c> z) {
+  return rzip3(heap_region, heap_region, x, y, z);
+}
+
+
 // Given [(x1,y1),...,(xn,yn)], return ([x1,...,xn],[y1,...,yn]) 
 $(list_t<`a,`r3>,list_t<`b,`r4>) rsplit(region_t<`r3> r3, region_t<`r4> r4,
                                           list_t<$(`a,`b)@> x) {

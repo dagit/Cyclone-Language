@@ -35,49 +35,62 @@ using Core;
 #define gen(t) __gen(t)
 
 namespace Typerep {
-typedef stringptr_t<`H,`H> name_t;
+typedef unsigned int var_t;
 
 EXTERN_TYPEREP tunion Typestruct {
-  /** [Var(name) indicated a type parameter variable [name] **/
-  Var(name_t);
-  /** [Int(sz)] indicates integer types having [sz] bits **/
-  Int(unsigned int);
+  /** [Var(name)] indicates a type parameter variable [name] **/
+  //Var(var_t);
+  /** [Int(sn, sz)] indicates integer types with sign [sn] having [sz] bits **/
+  Int(bool, unsigned int);
   /** [Float] indicates a float type **/
   Float;
-  /** [Double] indicates a float type **/
+  /** [Double] indicates a double type **/
   Double;
   /** [ThinPtr(sz,typ)] a pointer to buffer of [typ] values of length [sz] **/
   ThinPtr(unsigned int,tunion Typestruct);
   /** [FatPtr(typ)] a fat pointer to a buffer of [typ] values **/
   FatPtr(tunion Typestruct);
+  /** [Struct(name,szb,(ofs_1,nm_1,typ_1)::...)] represents a struct type 
+      named [*name] ([name==NULL] if the struct is anonymous).  
+      The data is a buffer of values, one per
+      element in the array.  The value at index i has name [nm_i], type [typ_i] and
+      is at offset [ofs_i].  The total size is [szb] bytes. 
+  **/
+  Struct(string_t<`H>*, unsigned int, $(unsigned int, string_t<`H>, tunion Typestruct)@?);
   /** [Tuple(szb,(ofs_1,typ_1)::...)] is a buffer of values, one per
       element in the array.  The value at index i has type [typ_i] and
       is at offset [ofs_i].  The total size is [szb] bytes. 
   **/
   Tuple(unsigned int, $(unsigned int,tunion Typestruct)@?);
-  /** [TUnion(fields)] is a tunion type, where each element of
+  /** [TUnion(name,tagonly,fields)] is a tunion type [name], where each element of
+      the array [tagonly] is a pair [(tag,tagname)] of a tag-only tag value [tag]
+      and its name [tagname], and 
+      the array [fields] is a triple [(tag,tagname,ts)] of a tag value [tag], 
+      its name [tagname], 
+      and a Typestruct [ts] representing the type of the tagged data.
+      Tag-only fields are not included in the array (since
+      we can just check the tunion pointer to see if it's tag-only).
+  **/
+  TUnion(string_t<`H>,$(unsigned int,string_t<`H>)@?,
+			$(unsigned int, string_t<`H>,tunion Typestruct)@?);
+  /** [name, XTUnion(fields)] is an xtunion type [name], where each element of
       the array [fields] is a pair [(tag,ts)] of a tag value [tag]
       and a Typestruct [ts] representing the type of the tagged data.
       Tag-only fields are not included in the array (since
-      we can just check the tunion pointer to see if it's a tag).
+      we can just check the xtunion pointer to see if it's tag-only).
   **/
-  TUnion($(unsigned int, tunion Typestruct)@?);
-  /** [XTUnion(fields)] is an xtunion type, where each element of
-      the array [fields] is a pair [(tag,ts)] of a tag value [tag]
-      and a Typestruct [ts] representing the type of the tagged data.
-      Tag-only fields are not included in the array (since
-      we can just check the xtunion pointer to see if it's a tag).
-  **/
-  XTUnion($(string_t<`H>, tunion Typestruct)@?);
-  /** [Union(fields)] is a union type, where each element of
-      the array [fields] is a Typestruct represnting the data
+  XTUnion(string_t<`H>,$(string_t<`H>, tunion Typestruct)@?);
+  /** [Union(name,fields)] is a union type [*name] ([name == NULL] if 
+      anonymous), where each element of
+      the array [fields] is a pair [(name,ts)] where [name] is the 
+      union field name and ts is a Typestruct represnting the data
       for a possible case of the union.
   **/
-  Union(tunion Typestruct@?);
+  Union(string_t<`H>*,$(string_t<`H>,tunion Typestruct)@?);
   /** [Forall(vars, ts)] is a polymorphic type wrapper.
       The string array [vars] lists the variables bound by this forall in [ts].
   **/
-  Forall(name_t?,tunion Typestruct@);
+  //  Forall(var_t?,tunion Typestruct@);
   /** [App(ts,ts_params)] describes an instantiation of a polymorphic
       type.  Typestruct [ts] must be a [Forall(vars,ts2)].  The [ts_params]
       represent the instantiations of the type variables bound inside [ts2].
@@ -85,19 +98,25 @@ EXTERN_TYPEREP tunion Typestruct {
       in the arrays; [ts_param[i]] binds to [vars[i]] (and the arrays must 
       have the same length)
    **/
-  App(tunion Typestruct, tunion Typestruct?);
+  //  App(tunion Typestruct, tunion Typestruct?);
 };
   
   typedef tunion `r Typestruct typestruct_t<`r>;
   
   extern void print_typestruct(typestruct_t rep);
   extern void xmlize_typestruct(typestruct_t rep);
-  extern typestruct_t<`H> normalize(typestruct_t<`H> ts);
+  //  extern typestruct_t<`H> normalize(typestruct_t<`H> ts);
   
- extern typestruct_t<`r>
+  extern $(int,typestruct_t<`r>)
   get_unionbranch(unsigned int tag,
-		  $(unsigned int,typestruct_t<`r>)@ ? l);
-  extern typestruct_t<`r>
+		  $(unsigned int,string_t<`H>,typestruct_t<`r>)@ ? l);
+  extern string_t<`H>
+  get_tagname(unsigned int tag,
+		  $(unsigned int,string_t<`H>)@ ? l);
+  extern string_t<`H>
+  get_tagname2(unsigned int tag,
+		  $(unsigned int,string_t<`H>,typestruct_t<`r>)@ ? l);
+  extern $(int,typestruct_t<`r>)
   get_xtunionbranch(string_t<`H> tag,
 		    $(string_t<`H>,typestruct_t<`r>)@ ? l);
   unsigned int size_type(typestruct_t rep);

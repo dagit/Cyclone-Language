@@ -14,8 +14,9 @@ using Position;
 #define TEST
 #define SHARING
 #define CYCLE
-#define READ
+//#define READ
 #define PRINT
+//#define PRINTTYPE
 //#define WRITE
 typedef union Bar {
   int x;
@@ -244,6 +245,10 @@ void do_print(tunion  Typestruct rep, `a::A@ val) {
   print_type(rep,val);
   printf("\n");
 }
+void do_printtype(tunion  Typestruct rep) {
+  print_typestruct(rep);
+  printf("\n");
+}
 
 void do_write(tunion Typestruct rep, `a::A@ val) {
   write_type(rep,stdout,val);
@@ -258,6 +263,9 @@ void do_read(tunion Typestruct rep, `a::A@ val) {
   printf("\n\n");
 }
 void do_all(tunion Typestruct rep, `a::A@ val) {
+#ifdef PRINTTYPE
+  do_printtype(rep);
+#endif
 #ifdef PRINT
   do_print(rep,val);
 #endif

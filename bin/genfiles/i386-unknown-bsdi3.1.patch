@@ -1,6 +1,6 @@
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c i386-unknown-bsdi3.1/lib/cycstubs.c
-*** i686-unknown-linux/lib/cycstubs.c	Thu Dec 13 15:12:58 2001
---- i386-unknown-bsdi3.1/lib/cycstubs.c	Thu Dec 13 15:14:02 2001
+*** i686-unknown-linux/lib/cycstubs.c	Thu Dec 13 17:38:57 2001
+--- i386-unknown-bsdi3.1/lib/cycstubs.c	Thu Dec 13 18:27:50 2001
 ***************
 *** 292,304 ****
   _check_unknown_subscript(ms,sizeof(unsigned int),0)));}else{return
@@ -57,8 +57,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c i386-unknown-bsdi3.1
   struct Cyc_Std_stat_t*buf);extern int lstat(unsigned char*filename,struct Cyc_Std_stat_t*
   buf);extern int mkdir(unsigned char*pathname,unsigned int mode);extern int chmod(
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c i386-unknown-bsdi3.1/lib/execinfo.c
-*** i686-unknown-linux/lib/execinfo.c	Thu Dec 13 15:12:58 2001
---- i386-unknown-bsdi3.1/lib/execinfo.c	Thu Dec 13 15:14:02 2001
+*** i686-unknown-linux/lib/execinfo.c	Thu Dec 13 17:38:57 2001
+--- i386-unknown-bsdi3.1/lib/execinfo.c	Thu Dec 13 18:27:50 2001
 ***************
 *** 260,340 ****
   extern unsigned char Cyc_Core_Not_found[14];extern unsigned char Cyc_Core_Unreachable[
@@ -170,8 +170,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c i386-unknown-bsdi3.1
 ! sizeof(unsigned char),42);_tmp1;});_tmp0;}));return 0;}int Cyc_Execinfo_bt(){
 ! return 1;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c i386-unknown-bsdi3.1/lib/getopt.c
-*** i686-unknown-linux/lib/getopt.c	Thu Dec 13 15:12:58 2001
---- i386-unknown-bsdi3.1/lib/getopt.c	Thu Dec 13 15:14:02 2001
+*** i686-unknown-linux/lib/getopt.c	Thu Dec 13 17:38:57 2001
+--- i386-unknown-bsdi3.1/lib/getopt.c	Thu Dec 13 18:27:50 2001
 ***************
 *** 277,288 ****
   extern struct _tagged_arr Cyc_Std_getenv(struct _tagged_arr);struct Cyc_Std_timeval{
@@ -198,8 +198,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c i386-unknown-bsdi3.1/l
   __longopts,int*__longind,int __long_only);int Cyc_Std_access(struct _tagged_arr,int);
   int Cyc_Std_chdir(struct _tagged_arr);int Cyc_Std_chown(struct _tagged_arr,
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c i386-unknown-bsdi3.1/src/buildlib.c
-*** i686-unknown-linux/src/buildlib.c	Thu Dec 13 15:12:56 2001
---- i386-unknown-bsdi3.1/src/buildlib.c	Thu Dec 13 15:14:00 2001
+*** i686-unknown-linux/src/buildlib.c	Thu Dec 13 17:39:00 2001
+--- i386-unknown-bsdi3.1/src/buildlib.c	Thu Dec 13 18:27:50 2001
 ***************
 *** 328,354 ****
   extern void Cyc_Buffer_add_char(struct Cyc_Buffer_t*,unsigned char);extern void Cyc_Buffer_add_string(
