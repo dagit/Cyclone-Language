@@ -87,7 +87,7 @@ extern tunion PrintArg<`r::R> {
   IntPtr_pa(unsigned long @`r);
 };
 typedef tunion `r PrintArg<`r> parg_t<`r>;
-printf(const char ?`r fmt, ... inject parg_t<`r2>);
+printf(const char ? fmt, ... inject parg_t);
 \end{verbatim}
 
 The special syntax ``\texttt{inject}'' is the syntactic distinction

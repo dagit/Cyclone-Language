@@ -536,7 +536,7 @@ blocks.
 \item For regions in function prototypes, you can provide explicit
 ``outlives'' as in this example:
 \begin{verbatim}
-void f(int *`r1*`r2 x,int *`r3 y; `r2 < `r1, `r3 < `r2);
+void f(int *`r1*`r2 x,int *`r3 y; {`r2} > `r1, {`r3} > `r2);
 \end{verbatim}
 This says that \texttt{`r1} outlives \texttt{`r2} and \texttt{`r2}
 outlives \texttt{`r3}.  The body will be checked under these
@@ -599,24 +599,22 @@ such a pointer (since it could point into a deallocated region).
 If you are not using existential types, you now know everything you
 need to know about Cyclone regions and memory management.  Even if you
 are using these types and functions over them (such as the closure
-library in the Cyclone library), you probably don't need to know more
-than ``ignore those funny type variables of kind E''.
+library in the Cyclone library), you probably don't need to know much more
+than ``provide a region that the hiddent types outlive''.
 
 The problem with existential types is that when you ``unpack'' the
 type, you no longer know that the regions into which the fields point
 are allocated.  We are sound because the corresponding region names
 are not in the capability, but this makes the fields unusable.  To
 make them usable, we do not hide the capability needed to use them.
-Instead, we use an \emph{effect variable} that is not existentially
-bound.  An effect variable stands for a capability, that is, a set of
-region names.
+Instead, we use a \emph{region bound} that is not existentially
+bound.  
 
 If the contents of existential packages contain only heap pointers,
-this effect variable is unnecessary; it can just be the ``empty
-effect''.  
+then \texttt{`H} is a fine choice for a region bound.
 
-We will provide more documentation for existential packages that
-contain region pointers in the near future.
+These issues are discussed in
+\hyperref[sec:advanced]{Section~\ref{sec:advanced}.}
 
 % If you must write down a function type, then you have to understand
 % that we have been lying about the form of function types and

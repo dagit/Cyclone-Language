@@ -1596,7 +1596,7 @@ actually \texttt{int}.
 It's also possible to code up ``first-class'' abstract data types
 using \texttt{struct}s with \emph{existentially quantified type
   variables}.  Existential types are described in
-\hyperref[{sec:taggedunions}]{Section~\ref{sec:taggedunions}}.
+\hyperref[{sec:advanced}]{Section~\ref{sec:advanced}}.
 
 % In particular, pattern matching one of these constructors
 % requires you to introduce explicit type variables into which the
@@ -1657,13 +1657,14 @@ Here is a list of the major restrictions:
   You can use \texttt{calloc} to allocate arrays of (possibly NULL)
   pointers (e.g., \texttt{calloc(sizeof(char*),34)}).  
 
-\item Cyclone performs a static analysis to ensure that every variable
-  and every \texttt{struct} field is initialized before it is used. This
+\item Cyclone performs a static analysis to ensure that every
+  non-numeric (i.e., pointer) variable
+  and \texttt{struct} field is initialized before it is used. This
   prevents a random stack value from being used improperly. The
   analysis is somewhat conservative so you may need to initialize
-  things earlier than you would do in C\@. For instance, currently,
-  Cyclone does not support initializing a struct in a procedure
-  separate from the one that does the allocation.
+  things earlier than you would do in C\@.  There is only limited
+  support for initializing memory in a procedure separate from the one
+  that does the allocation.
 
 \item Cyclone does not permit \texttt{goto}s from one scope into
   another. C warns against this practice, as it can cause crashes;

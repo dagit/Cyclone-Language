@@ -16,9 +16,10 @@ object pointed to, pointer types indicate:
 \begin{itemize}
 \item \hyperlink{pointer_null}{Whether a value of the type may be
     \texttt{NULL}}
-\item \hyperlink{pointer_bound}{The number of objects pointed to}
+\item \hyperlink{pointer_bound}{The (minimum) number of objects pointed to}
 \item \hyperlink{pointer_region}{The region into which the pointer
     points}
+\item Whether the pointed-to memory is zero-terminated (to be documented).
 \end{itemize}
 
 For example, the type \verb|int *{7}`H| is for possibly-null
@@ -87,8 +88,8 @@ effect.
 Safety demands that if \texttt{x} may be \texttt{NULL}, then \texttt{*e},
 \texttt{e.f}, \texttt{e->f}, and \texttt{e[e2]} are translated such that we
 first check that \texttt{e} is not \texttt{NULL}.  \texttt{e} is only
-evaluated once.  The only way to guarantee there is no check at
-run-time is to use \texttt{@} instead of \texttt{*}.  For example, the
+evaluated once.  To guarantee there is no check at
+run-time, use \texttt{@} instead of \texttt{*}.  For example, the
 function on the left performs one check whereas the one on the right
 performs three (both throw \texttt{Null_Exception} if passed
 \texttt{NULL}):
@@ -100,6 +101,18 @@ performs three (both throw \texttt{Null_Exception} if passed
   }
 \end{verbatim}
 
+However, a dataflow analysis eliminates many redundant null-checks.
+C's under-specified order-of-evaluation can reduce the effectiveness
+of the analysis, as in the example on the right above.  But in the
+current implementation, the following example has only one check:
+\begin{verbatim}
+int sum3(int *{3} x) {
+  int ans = x[0];
+  ans += x[1];
+  ans += x[2];
+  return ans;
+}
+\end{verbatim}
 
 Note that \texttt{\&e->f} and \texttt{\&e[e2]} check (if necessary) that
 \texttt{e} is not \texttt{NULL} even though these constructs do not read
@@ -108,12 +121,10 @@ through \texttt{e}.
 \paragraph{Future}
 
 \begin{itemize}
-\item We may use dataflow information to avoid spurious warning about
-  implicit casts from \texttt{t*} to \texttt{t@} and to avoid
-  inserting unnecessary checks.  However, the analysis is
-  non-trivial (due to the address-of operator, unstructured control
-  flow, and undefined evaluation order), and the C compiler may be
-  able to eliminate unnecessary checks for us.
+\item We already use a dataflow analysis to avoid inserting provably
+  unnecessary null-checks.  However, this analysis does not suppress
+  spurious warnings about implicit casts from \texttt{t*} even when it
+  knows the cast cannot fail.  Instead, it just produces faster code.
 \item For debugging purposes, we may have \texttt{Null_Exception}
   carry source-position information.
 \end{itemize}
@@ -157,18 +168,11 @@ In the future, the bounds information on a pointer will not have to be
 a compile-time constant.  For example, you will be able to write
 
 \begin{verbatim}
-  void f(int n) {}
-    int *{n} arr = new {for i < n : 37};
+  void f(tag_t<`n> n) {}
+    int *{`n} arr = new {for i < n : 37};
     ...
   }
 \end{verbatim}
-
-This addition is non-trivial because, in terms of the above example,
-the variable n may be mutated later in the function.  In general,
-we are developing a general system where the sizes of pointer bounds
-may be expressed in terms of expressions, yet the compiler can always
-insert the correct bounds check or verify that the check is
-unnecessary.
 
 Currently, pointer arithmetic is only allowed on types of the form
 \texttt{t?}.  Soon we will allow adding a compile-time constant \texttt{c}
@@ -249,14 +253,13 @@ which a pointer points.  For stack regions there is no region object
 at run-time \emph{per se}, just the stack space for the objects.  As
 is normal with region-based systems, Cyclone does not prevent dangling
 pointers.  Rather, it prevents \emph{dereferencing} dangling pointers.
-But this is a subtle point.
+But this point is subtle.
 
 \subsection*{\hypertarget{pointer_unknown}{Pointers to an Unknown
     Number of Objects---The \texttt{t ?} Types}}
 
 So far, we have not provided a way to point to a number of objects
 when the number is not known at compile-time.
-
 
 \paragraph{Syntax and Semantics} The type \texttt{t ?} describes such pointers
 to objects of type \texttt{t}.  Such types may be assigned

@@ -18,7 +18,8 @@ Inspired by Java's rules for separate declaration and initialization
 of local variables, Cyclone has a well-defined, sound system for
 checking that memory is written before it is used.  The rules are more
 complicated than in Java because we support pointers to uninitialized
-memory, as is necessary for \texttt{malloc}.
+memory, as is necessary for \texttt{malloc}, and because C's
+order-of-evaluation is not completely specified.
 
 Here we begin with idioms that the analysis does and does not permit.
 With a basic sense of the idea, we expect programmers can generally
@@ -36,20 +37,24 @@ initialized.  (Java does not allow separate allocation and
 initialization of object fields.  Rather, it inserts null or 0 for
 you.)
 
+Finally, we do allow uninitialized numeric values to be accessed.
+Doing so is dangerous and error-prone, but does not compromise type
+safety, so we allow it.
+
 The following code is accepted:
 \begin{verbatim}
   extern int maybe();
   int f() {
-    int x, y, z;
+    int *x, *y, *z;
     if(maybe())
-      x = 3;
+      x = new 3;
     else
-      x = 4;
+      x = new 4;
     while(1) {
       y = x;
       break;
     }
-    if(z = maybe() && q = maybe())
+    if(z = new maybe() && maybe() && q = new maybe())
       return q;
     else
       return z;
@@ -65,12 +70,14 @@ or not 0.
 
 The following code is safe, but is not accepted:
 \begin{verbatim}
+  extern int maybe();
   int f() {
-    int x = 1;
-    int y;
-    if(x) 
+    int * x = new 1;
+    int * y;
+    int b = maybe();
+    if(b) 
       y = 2;
-    if(x)
+    if(b)
      return y;
    return 0;
   }
@@ -86,15 +93,15 @@ following code is accepted:
 \begin{verbatim}
   extern int maybe();
   int f() {
-    int x;
-    int z;
-    int *_ y;
+    int * x;
+    int * z;
+    int ** y;
     if(maybe()) {
-      x = 3;
+      x = new 3;
       y = &x;
     } else {
       y = &z;
-      z = 3;
+      z = new 3;
     }
     return *y;
   }
@@ -112,16 +119,16 @@ However, this code is rejected even though it is safe:
 \begin{verbatim}
   extern int maybe();
   int f() {
-    int x;
-    int z;
-    int *_ y;
+    int * x;
+    int * z;
+    int ** y;
     if(maybe()) {
       y = &x;
     } else {
       y = &z;
     }
-    x = 3;
-    z = 3;
+    x = new 3;
+    z = new 3;
     return *y;
   }
 \end{verbatim}
@@ -145,26 +152,16 @@ necessary in Cyclone):
   }
 \end{verbatim}
 
-In the near future, we will support another compelling use.  By adding
-an ``initializes'' qualifier for function parameters, you will be able
-to pass a pointer to uninitialized memory to a function that
-initializes it.  We need the qualifier to ensure both that the
-function actually does initialization and that the function does not
-read through its parameter before initialization.  Here is an example:
-\begin{verbatim}
-  void initInt(initializes int @ ip);
-  int f() {
-    int x;
-    return *initInt(&x);
-  }
-\end{verbatim}
+There is limited support for passing a pointer to uninitialized memory
+to a function that initializes it.  See
+\hyperref[sec:advanced]{Section~\ref{sec:advanced}.}
 
 Certain expression forms require their arguments to be fully
 initialized (that is, everything reachable from the expression must be
 initialized) even though the memory is not all immediately used.
-These forms are casts, the expression in ``\texttt{let p = e},'' the
-argument to \texttt{switch}, and any access of a \texttt{union} field.  We
-plan to relax these restrictions in the future.
+These forms are the expression in ``\texttt{let p = e}'' and the
+argument to \texttt{switch}.  We hope to relax these restrictions in
+the future.
 
 You should now know enough to program effectively in Cyclone without
 immediately initializing all memory.  For those wanting a more
@@ -177,7 +174,7 @@ For each local variable and for each program point that allocates
 memory, the analysis tracks information about each field.  We call
 each such field a place. For example, in this code:
 \begin{verbatim}
-  struct B { int x; $(int,int) y;}; 
+  struct B { int * x; $(int*,int*) y;}; 
   void f() {
     struct B b;
     struct B @ bp = malloc(sizeof(B));
@@ -190,7 +187,7 @@ the places are \texttt{b.x}, \texttt{b.y[0]}, \texttt{b.y[1]}, \texttt{bp},
 that does allocation).  An initialization state can be ``\emph{must
   point to P}'' where P is a path.  For example, after the second
 declaration above, we have ``\texttt{bp} must point to \texttt{<1>}.''  An
-ensuing assignment of the form ``\texttt{bp->x = 3}'' would therefore
+ensuing assignment of the form ``\texttt{bp->x = new 3}'' would therefore
 change the initialization state of \texttt{<1>.x}.  If there is not a
 unique path to which a place definitely points, then we keep track of
 the place's \emph{initialization level} and \emph{escapedness}.  A
@@ -216,14 +213,14 @@ Note that our choice of tracking ``must point to'' instead of ``must
 alias'' forces us to reject some safe programs, such as this one:
 \begin{verbatim}
   int f() {
-    int x, int y;
-    int @_ p1, @_ p2;
+    int * x, int *y;
+    int *@p1, *@p2;
     if(maybe())
      p1 = &x;
     else
      p1 = &y;
     p2 = p1;
-    *p2 = 7;
+    *p2 = new 7;
     return *p1;
   }
 \end{verbatim}

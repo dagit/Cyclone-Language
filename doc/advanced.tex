@@ -1,0 +1,239 @@
+\section{Advanced Features}
+\label{sec:advanced}
+
+The features in this section are largely independent of the rest of
+Cyclone.  It is probably safe to skip them when first learning the
+language, but it is valuable to learn them at some point because they
+add significant expressiveness to the language.
+
+\subsection{Existential Types}
+
+The implementation of a \texttt{struct} type can have
+\emph{existentially bound type variables} (as well as region
+variables, tag variables, and so on).  Here is a useless example:
+\begin{verbatim}
+  struct T { <`a> `a f1; `a f2; };
+\end{verbatim}
+Values of type \texttt{struct T} have two fields with the same (boxed)
+type, but there is no way to determine what the type is.  Different
+values can use different types.  To create
+such a value, expressions of any appropriate type suffice:
+\begin{verbatim}
+  struct T x = T{new 3, new 4};
+\end{verbatim}
+Optionally, you can explicitly give the type being used for
+\texttt{`a}:
+\begin{verbatim}
+  struct T x = T{<int@> new 3, new 4};
+\end{verbatim}
+As with other lists of type variables, multiple existentially bound
+types should be comma-separated.
+
+Once a value of an existential variant is created, there is no way to
+determine the types at which it was used.  For example,
+\texttt{T("hi","mom")} and \texttt{T(8,3)} both have type
+\texttt{struct T}.
+
+The only way to read fields of a \texttt{struct} with existentially
+bound type variables is pattern matching.  That is, the
+field-projection operators (\texttt{.} and \texttt{->}) will
+\emph{not} type-check.  The pattern must give names to the correct
+number of type variables.
+Continuing our useless example, we can write:
+\begin{verbatim}
+  void f(struct T t) {
+    let T{<`b> x,y} = t;
+    x = y;
+  }
+\end{verbatim}
+We can now see why the example is useless; there is really nothing
+interesting that \texttt{f} can do with the fields of \texttt{t}.  In
+other words, given \texttt{T("hi","mom")}, no code will ever be
+able to use the strings \texttt{"hi"} or \texttt{"mom"}. In any case,
+the scope of the type \texttt{`b} is the same as the scope of the
+variables \texttt{x} and \texttt{y}.  There is one more restriction:
+For subtle reasons, you cannot use a reference pattern (such as
+\texttt{*x}) for a field of a \texttt{struct} that has existentially
+bound type variables.
+
+Useful examples invariably use function pointers.  For a realistic
+library, see fn.cyc in the distribution.  Here is a smaller (and
+sillier) example; see the following two sections for an
+explanation of why the \texttt{regions(`a) > `r} stuff is necessary.
+\begin{verbatim}
+  int f1(int x, int y) { return x+y; }
+  int f2(string x, int y) {printf("%s",x); return y; }
+  struct T<`r::R> {<`a> : regions(`a) > `r 
+    `a f1; 
+    int f(`a, int); 
+  };
+  void g(bool b) {
+    struct T<`H> t;
+    if(b)
+      t = Foo(37,f1);
+    else
+      t = Foo("hi",f2);
+    let T{<`b> arg,fun} = t;
+    `b x = arg;
+    int (*f)(`b,int) = fun;
+    f(arg,19);
+  }
+\end{verbatim}
+
+We could replace the last three lines with \texttt{fun(arg)}---the
+compiler would figure out all the types for us.  Similarly, the
+explicit types above are for sake of explanation; in practice, we tend
+to rely heavily on type inference when using these advanced typing
+constructs.
+
+\subsection{The Truth About Effects, Capabilities, and Region Bounds}
+
+An \emph{effect} or \emph{capability} is a set of (compile-time)
+region names.  We use \emph{effect} to refer to the region names that
+must be ``live'' for some expression to type-check and
+\emph{capability} to refer to the region names that are ``live'' at
+some program point.  A \emph{region bound} indicates that all the
+regions in a set outlive one particular region.  Each program point
+has a set of ``known region bounds''.  
+
+The intuition is that a program point's capability and region bounds
+must imply that an expression's effect describes live regions, else
+the expression does not type-check.  As we'll see, default effects for
+functions were carefully designed so that most Cyclone code runs no
+risk of such an ``effect check'' ever failing.  But using existential
+types effectively requires a more complete understanding of the
+system, though perhaps not as complete as this section presents.
+
+The form of effects or capabilities is described as follows:
+\begin{itemize}
+\item \texttt{\{\}} is the empty set.  At most the heap region
+  is accessed by an expression having this effect.
+\item \texttt{\{`r\}} is the set containing exactly the region name
+  \texttt{`r}.
+\item \texttt{e1 + e2} is the set containing the effects e1 and e2.
+  That is, we write \texttt{+} for set-union.
+\item \texttt{regions(t)}, where \texttt{t} is a type is the set
+  containing all of the region names contained in \texttt{t} and
+  \texttt{regions(`a)} for all type variables \texttt{`a} contained in
+  \texttt{t}.
+\end{itemize}
+The description of \texttt{regions(t)} appears circular, but in fact
+if we gave the definition for each form of types, it would not be.
+The point is that \texttt{regions(`a)} is an ``atomic effect'' in the
+sense that it stands for a set of regions that cannot be further
+decomposed without knowing \texttt{`a}.  The primary uses of
+\texttt{regions(t)} are descibed below.
+
+The form of a region bound is \texttt{e > r} where \texttt{e} is an
+effect and \texttt{r} is a region name.
+
+We now describe the capability at each program point.  On function
+entry, the capability is the function's effect (typically the regions
+of the parameters and result, but fully described below).  In
+a local block or a dynamic-region statement, the capability is the
+capability of the enclosing context plus the block/statement's region
+name.
+
+The known region bounds at a program point are described similarly:
+On function entry, the bounds are the function prototype's explicit
+bounds (typically none, but fully described below).  In a local block
+or a dynamic-region statement, we add \texttt{e > `r} where \texttt{e}
+is the capability of the enclosing context and \texttt{`r} is the
+block/statement's region name.  That is, we add that the set of region names
+for the enclosing context describes only regions that will outlive the
+region described by \texttt{`r}.  (As usual, the compiler generates
+\texttt{`r} in the common case that none is explicitly provided.)
+There is one exception: when a dynamic region is declared
+\texttt{resettable}, no bound is introduced.
+
+We can now describe an expression's effect: If it reads or writes to
+memory described by a region name \texttt{`r}, then the effect
+contains \texttt{\{`r\}}.  If it calls a function with effect
+\texttt{e}, then the effect conatins \texttt{e}.  Every function
+(type) has an effect, but programmers almost never write down an
+explicit effect.  To do so, one puts ``\texttt{; e}'' at the end of
+the parameter list, wehre \texttt{e} is an effect.  For example, we
+could write:
+\begin{verbatim}
+`a id(`a x; {}) { return x; }
+\end{verbatim}
+because the function does not access any memory.
+
+If a function takes parameters of types \texttt{t1,\dots,tn} and
+returns a value of type \texttt{t}, the default effect is simply
+\texttt{regions(t1)+\dots+regions(tn)+regions(t)}.  In English, the
+default assumption is that a function may dereference any pointers it
+is passed, so the corresponding regions must be live.  In our example
+above, the default effect would have been \texttt{regions(`a)}.  If
+the caller had instantiated \texttt{`a} with \texttt{int*`r}, then
+with the default effect, the type-checker would require \texttt{`r} to
+be live, but with the explicit effect \texttt{\{\}} it would not.
+However, dangling pointers can be created only when using existential
+types, so the difference is rarely noticed.
+
+By default, a function (type) has no region bounds.  That is, the
+function does not assume any ``outlives'' relationships among the
+regions it accesses.  Adding explicit outlives relationships enables
+more subtyping in the callee and more stringent requirements at the
+call site (namely that the relationship holds).
+
+We can describe when a capability \texttt{e} and a set of region
+bounds \texttt{b} imply an effect, although your intuition probably
+suffices.  A ``normalized effect'' is either \texttt{\{\}} or unions
+of ``atomic effects'', where an atomic effect is either
+\texttt{\{`r\}} or \texttt{regions(`a)}.  For any effect \texttt{e1},
+we can easily compute an equivalent normalized effect \texttt{e2}.
+Now, \texttt{e} and \texttt{b} imply \texttt{e1} if they imply every
+\texttt{\{`r\}} and \texttt{regions(`a)} in \texttt{e2}.  To imply
+\texttt{\{`r\}} (or \texttt{regions(`a)}), we need \texttt{\{`r\}} (or
+\texttt{regions(`a)}) to be in (a normalized effect of) \texttt{e}) or
+for \texttt{b} to contain some \texttt{e3 > `r2} such that \texttt{e}
+and \texttt{b} imply \texttt{`r2} and \texttt{e3} and \texttt{b} imply
+\texttt{\{`r\}} (or \texttt{regions(`a)}).  Or something like that.
+
+All of these complications are unnecessary except for existential
+types, to which we now return.  Explicit bounds are usually necessary
+to make values of existential types usable.  To see why, consider the
+example from the previous section, with the \texttt{struct}
+declaration changed to remove the explicit bound:
+\begin{verbatim}  
+struct T<`r::R> {<`a> : regions(`a) > `r 
+  `a f1; 
+  int f(`a, int); 
+};
+\end{verbatim}
+(So the declaration of \texttt{t} should just have type \texttt{struct
+  T}.)  Now the function call \texttt{f(arg,19)} at the end of
+\texttt{g} will not type-check because the (default) effect for
+\texttt{f} includes \texttt{regions(`b)}, which cannot be established
+at the call site.  But with the bound, we know that
+  \texttt{regions(`b) > `H}, which is sufficient to prove the call
+  won't read through any dangling pointers.
+
+\subsection{Interprocedural Memory Initialization}
+
+We currently have limited support for functions that initialize
+parameters.  if you have an @{1} parameter (pointing into any region),
+you can use an attribute __attribute__((initializes(1))) (where it's
+the first parameter, use a different number otherwise) to indicate
+that the function initializes through the parameter.
+        
+Obviously, this affects the definite-assignment analysis for the
+callee and the call-site.  In the callee, we know the parameter is
+initialized, but not what it points to.  The memory pointed to must be
+initialized before returning.  Care must be taken to reject this code:
+\begin{verbatim}
+void f(int @@x) __attribute__((initializes(1))) { 
+  x = new (new 0); 
+  return x; 
+}
+\end{verbatim}
+        
+Two common idioms not yet supported are: 
+\begin{enumerate}
+\item The parameter is
+initialized only if the return value satisfies some predicate; for
+example, it is 0.
+\item The caller can pass NULL, meaning do not initialize through this
+  parameter.
+\end{enumerate}
