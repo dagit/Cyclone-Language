@@ -58,28 +58,68 @@ grantpt( int)  __attribute__(( cdecl )) ; extern int unlockpt( int)
  __attribute__(( cdecl )) ; extern double Cyc_Stdlib_atof( struct _tagged_arr);
 extern int Cyc_Stdlib_atoi( struct _tagged_arr); extern int Cyc_Stdlib_atol(
 struct _tagged_arr); extern struct _tagged_arr Cyc_Stdlib_getenv( struct
-_tagged_arr); extern double atof( unsigned char* _nptr)  __attribute__(( cdecl
-)) ; extern int atoi( unsigned char* _nptr)  __attribute__(( cdecl )) ; extern
-int atol( unsigned char* _nptr)  __attribute__(( cdecl )) ; extern unsigned char*
-getenv( unsigned char* __string)  __attribute__(( cdecl )) ; extern
-unsigned char* _getenv_r( struct Cyc__reent*, unsigned char* __string)
- __attribute__(( cdecl )) ; extern unsigned char* _findenv( unsigned char*, int*)
- __attribute__(( cdecl )) ; extern unsigned char* _findenv_r( struct Cyc__reent*,
-unsigned char*, int*)  __attribute__(( cdecl )) ; extern int putenv(
-unsigned char* __string)  __attribute__(( cdecl )) ; extern int _putenv_r(
-struct Cyc__reent*, unsigned char* __string)  __attribute__(( cdecl )) ; extern
-int setenv( unsigned char* __string, unsigned char* __value, int __overwrite)
+_tagged_arr); extern double Cyc_Stdlib_strtod( struct _tagged_arr n, struct
+_tagged_arr* end); extern int Cyc_Stdlib_strtol( struct _tagged_arr n, struct
+_tagged_arr* end, int base); extern unsigned int Cyc_Stdlib_strtoul( struct
+_tagged_arr n, struct _tagged_arr* end, int base); extern double atof(
+unsigned char* _nptr)  __attribute__(( cdecl )) ; extern int atoi( unsigned char*
+_nptr)  __attribute__(( cdecl )) ; extern int atol( unsigned char* _nptr)
+ __attribute__(( cdecl )) ; extern unsigned char* getenv( unsigned char*
+__string)  __attribute__(( cdecl )) ; extern unsigned char* _getenv_r( struct
+Cyc__reent*, unsigned char* __string)  __attribute__(( cdecl )) ; extern
+unsigned char* _findenv( unsigned char*, int*)  __attribute__(( cdecl )) ;
+extern unsigned char* _findenv_r( struct Cyc__reent*, unsigned char*, int*)
+ __attribute__(( cdecl )) ; extern int putenv( unsigned char* __string)
+ __attribute__(( cdecl )) ; extern int _putenv_r( struct Cyc__reent*,
+unsigned char* __string)  __attribute__(( cdecl )) ; extern int setenv(
+unsigned char* __string, unsigned char* __value, int __overwrite)
  __attribute__(( cdecl )) ; extern int _setenv_r( struct Cyc__reent*,
 unsigned char* __string, unsigned char* __value, int __overwrite)
- __attribute__(( cdecl )) ; extern void unsetenv( unsigned char* __string)
- __attribute__(( cdecl )) ; extern void _unsetenv_r( struct Cyc__reent*,
-unsigned char* __string)  __attribute__(( cdecl )) ; double Cyc_Stdlib_atof(
-struct _tagged_arr _nptr){ return atof( string_to_Cstring( _nptr));} int Cyc_Stdlib_atoi(
-struct _tagged_arr _nptr){ return atoi( string_to_Cstring( _nptr));} int Cyc_Stdlib_atol(
-struct _tagged_arr _nptr){ return atol( string_to_Cstring( _nptr));} struct
-_tagged_arr Cyc_Stdlib_getenv( struct _tagged_arr name){ return
-Cstring_to_string( getenv( string_to_Cstring( name)));} int Cyc_Stdlib_putenv(
-struct _tagged_arr s){ return putenv( string_to_Cstring( s));} int Cyc_Stdlib_setenv(
-struct _tagged_arr s, struct _tagged_arr v, int overwrite){ return setenv(
-string_to_Cstring( s), string_to_Cstring( v), overwrite);} void Cyc_Stdlib_unsetenv(
+ __attribute__(( cdecl )) ; extern double strtod( unsigned char*, unsigned char**)
+ __attribute__(( cdecl )) ; extern int strtol( unsigned char*, unsigned char**,
+int base)  __attribute__(( cdecl )) ; extern unsigned int strtoul( unsigned char*,
+unsigned char**, int base)  __attribute__(( cdecl )) ; extern void unsetenv(
+unsigned char* __string)  __attribute__(( cdecl )) ; extern void _unsetenv_r(
+struct Cyc__reent*, unsigned char* __string)  __attribute__(( cdecl )) ; double
+Cyc_Stdlib_atof( struct _tagged_arr _nptr){ return atof( string_to_Cstring(
+_nptr));} int Cyc_Stdlib_atoi( struct _tagged_arr _nptr){ return atoi(
+string_to_Cstring( _nptr));} int Cyc_Stdlib_atol( struct _tagged_arr _nptr){
+return atol( string_to_Cstring( _nptr));} struct _tagged_arr Cyc_Stdlib_getenv(
+struct _tagged_arr name){ return Cstring_to_string( getenv( string_to_Cstring(
+name)));} int Cyc_Stdlib_putenv( struct _tagged_arr s){ return putenv(
+string_to_Cstring( s));} int Cyc_Stdlib_setenv( struct _tagged_arr s, struct
+_tagged_arr v, int overwrite){ return setenv( string_to_Cstring( s),
+string_to_Cstring( v), overwrite);} static void Cyc_Stdlib_check_valid_cstring(
+struct _tagged_arr s, struct _tagged_arr msg){ if( s.curr ==(( struct
+_tagged_arr) _tag_arr( 0u, 0u, 0u)).curr){( int) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct*
+_temp0=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
+_temp0[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp1; _temp1.tag= Cyc_Core_InvalidArg;
+_temp1.f1=( struct _tagged_arr)({ struct _tagged_arr _temp2= msg; xprintf("%.*s: null pointer",
+_get_arr_size( _temp2, 1u), _temp2.curr);}); _temp1;}); _temp0;}));}{ int
+found_zero= 0;{ int i=( int)( _get_arr_size( s, sizeof( unsigned char)) - 1);
+for( 0; i >= 0; i --){ if(*(( const unsigned char*) _check_unknown_subscript( s,
+sizeof( unsigned char), i)) =='\000'){ found_zero= 1; break;}}} if( ! found_zero){(
+int) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct* _temp3=( struct Cyc_Core_InvalidArg_struct*)
+GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp3[ 0]=({ struct Cyc_Core_InvalidArg_struct
+_temp4; _temp4.tag= Cyc_Core_InvalidArg; _temp4.f1=( struct _tagged_arr)({
+struct _tagged_arr _temp5= msg; xprintf("%.*s: not a C string", _get_arr_size(
+_temp5, 1u), _temp5.curr);}); _temp4;}); _temp3;}));}}} double Cyc_Stdlib_strtod(
+struct _tagged_arr nptr, struct _tagged_arr* endptr){ Cyc_Stdlib_check_valid_cstring(
+nptr, _tag_arr("strtod", sizeof( unsigned char), 7u));{ unsigned char* c=
+underlying_Cstring( nptr); unsigned char* e= endptr == 0? 0: c; double d= strtod(
+c,( unsigned char**)& e); if( endptr != 0){ int n=( int)(( unsigned int) e -(
+unsigned int) c);*(( struct _tagged_arr*) _check_null( endptr))=
+_tagged_arr_plus( nptr, sizeof( unsigned char), n);} return d;}} int Cyc_Stdlib_strtol(
+struct _tagged_arr n, struct _tagged_arr* endptr, int base){ Cyc_Stdlib_check_valid_cstring(
+n, _tag_arr("strtol", sizeof( unsigned char), 7u));{ unsigned char* c=
+underlying_Cstring( n); unsigned char* e= endptr == 0? 0: c; int r= strtol( c,(
+unsigned char**)& e, base); if( endptr != 0){ int m=( int)(( unsigned int) e -(
+unsigned int) c);*(( struct _tagged_arr*) _check_null( endptr))=
+_tagged_arr_plus( n, sizeof( unsigned char), m);} return r;}} unsigned int Cyc_Stdlib_strtoul(
+struct _tagged_arr n, struct _tagged_arr* endptr, int base){ Cyc_Stdlib_check_valid_cstring(
+n, _tag_arr("strtoul", sizeof( unsigned char), 8u));{ unsigned char* c=
+underlying_Cstring( n); unsigned char* e= endptr == 0? 0: c; unsigned int r=
+strtoul( c,( unsigned char**)& e, base); if( endptr != 0){ int m=( int)((
+unsigned int) e -( unsigned int) c);*(( struct _tagged_arr*) _check_null( endptr))=
+_tagged_arr_plus( n, sizeof( unsigned char), m);} return r;}} void Cyc_Stdlib_unsetenv(
 struct _tagged_arr s){ unsetenv( string_to_Cstring( s));}

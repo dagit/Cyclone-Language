@@ -19,6 +19,9 @@ namespace Cstdlib {
     int	_EXFUN(_putenv_r,(struct _reent @, const Cstring __string));
     int	_EXFUN(setenv,(const Cstring __string, const Cstring __value, int __overwrite));
     int	_EXFUN(_setenv_r,(struct _reent @, const Cstring __string, const Cstring __value, int __overwrite));
+    double _EXFUN(strtod,(Cstring, Cstring *`r));
+    long _EXFUN(strtol,(Cstring, Cstring *`r, int base));
+    unsigned long _EXFUN(strtoul,(Cstring, Cstring *`r, int base));
 #ifdef __CYGWIN__
     void _EXFUN(unsetenv,(const Cstring __string));
     void _EXFUN(_unsetenv_r,(struct _reent @, const Cstring __string));
@@ -30,7 +33,7 @@ namespace Cstdlib {
 
 using Core;
 namespace Stdlib {
-  double atof(string_t _nptr) {
+  double atof(const char ?`r _nptr) {
     return Cstdlib::atof(s2c(_nptr));
   }
 #ifndef __STRICT_ANSI__
@@ -40,10 +43,10 @@ namespace Stdlib {
   }
 */
 #endif __STRICT_ANSI__
-  int atoi(string_t _nptr) {
+  int atoi(const char ?`r _nptr) {
     return Cstdlib::atoi(s2c(_nptr));
   }
-  long atol(string_t _nptr) {
+  long atol(const char ?`r _nptr) {
     return Cstdlib::atol(s2c(_nptr));
   }
   mstring_t getenv(string_t name) {
@@ -76,6 +79,68 @@ namespace Stdlib {
     return Cstdlib::_setenv_r(r,s2c(s),s2c(v),overwrite);
   }
   */
+  static void check_valid_cstring(const char ?`r s, string_t msg) {
+    if (s == null) throw new InvalidArg(xprintf("%s: null pointer",msg));
+    bool found_zero = false;
+    for (int i = s.size - 1; i >= 0; i--) 
+      if (s[i] == '\0') { found_zero = true; break; }
+    if (!found_zero) throw new InvalidArg(xprintf("%s: not a C string",msg));
+  }
+
+  double strtod(const char ?`r nptr, const char ?`r *`r2 endptr) {
+    // need to ensure that the string has a '\0' in it before
+    // handing it off to C.
+    check_valid_cstring(nptr,"strtod");
+    // FIX:  TOTAL HACK ALERT
+    Cstring c = underlying_Cstring(nptr); // so far so good
+    Cstring e = (endptr == null) ? null : c; 
+    double d = Cstdlib::strtod(c, &e); 
+    if (endptr != null) { 
+      // need to adjust the endptr -- the best we can do is calculate
+      // the diff between e and c.  And our pointer arithmetic doesn't
+      // support subtraction on * types.  So I'm casting to unsigned int.
+      int n = (unsigned int)e - (unsigned int)c;
+      *endptr = nptr + n;
+    }
+    return d;
+  }
+
+  long strtol(const char ?`r n, const char ?`r *`r2 endptr, int base) {
+    // need to ensure that the string has a '\0' in it before
+    // handing it off to C.
+    check_valid_cstring(n,"strtol");
+    // FIX:  TOTAL HACK ALERT
+    Cstring c = underlying_Cstring(n); // so far so good
+    Cstring e = (endptr == null) ? null : c; 
+    long r = Cstdlib::strtol(c, &e, base); 
+    if (endptr != null) { 
+      // need to adjust the end -- the best we can do is calculate
+      // the diff between e and c.  And our pointer arithmetic doesn't
+      // support subtraction on * types.  So I'm casting to unsigned int.
+      int m = (unsigned int)e - (unsigned int)c;
+      *endptr = n + m;
+    }
+    return r;
+  }
+
+  unsigned long strtoul(const char ?`r n,const char ?`r *`r2 endptr,int base){
+    // need to ensure that the string has a '\0' in it before
+    // handing it off to C.
+    check_valid_cstring(n,"strtoul");
+    // FIX:  TOTAL HACK ALERT
+    Cstring c = underlying_Cstring(n); // so far so good
+    Cstring e = (endptr == null) ? null : c; 
+    unsigned long r = Cstdlib::strtoul(c, &e, base); 
+    if (endptr != null) { 
+      // need to adjust the end -- the best we can do is calculate
+      // the diff between e and c.  And our pointer arithmetic doesn't
+      // support subtraction on * types.  So I'm casting to unsigned int.
+      int m = (unsigned int)e - (unsigned int)c;
+      *endptr = n + m;
+    }
+    return r;
+  }
+
 #ifdef __CYGWIN__
   void unsetenv(string_t s) {
     Cstdlib::unsetenv(s2c(s));

@@ -180,13 +180,17 @@ int	_EXFUN(_system_r,(struct _reent *, const char *));
 _VOID	_EXFUN(__eprintf,(const char *, const char *, unsigned int, const char *));
 */
 }
-extern double atof(string_t);
+extern double atof(const char ?`r);
 /*
 extern float atoff(string);
 */
-extern int atoi(string_t);
-extern long atol(string_t);
+extern int atoi(const char ?`r);
+extern long atol(const char ?`r);
 extern mstring_t getenv(string_t);
+extern double strtod(const char ?`r n, const char ?`r *`r2 end);
+extern long strtol(const char ?`r n, const char ?`r *`r2 end, int base);
+extern unsigned long strtoul(const char ?`r n,const char ?`r *`r2 end, int base);
+
 /*
 extern string _getenv_r(struct _reent @,string);
 */

@@ -55,10 +55,10 @@ extern mstring_t string_of_uint(unsigned int);
 extern mstring_t string_of_char(char);
 extern region_t<`H> heap_region;
 // copies the string, making sure there's a zero at the end
-extern "C" Cstring string_to_Cstring(string_t);
+extern "C" Cstring string_to_Cstring(const char ?`r);
 // extracts the underlying char[] from the char[?] -- returns null
 // when the string is empty
-extern "C" Cstring underlying_Cstring(string_t);
+extern "C" Cstring underlying_Cstring(const char ?`r);
 extern "C" mstring_t Cstring_to_string(Cstring);
 extern "C" mstring_t wrap_Cstring_as_string(Cstring, size_t);
 extern "C" mstring_t ?ntCsl_to_ntsl(Cstring @);
