@@ -120,12 +120,12 @@ static void resolve_pat(tenv_t te, pat_t p) {
 static var_t get_name(vardecl_t vd) {
   return (*vd->name)[1];
 }
-static type_t any_type(list_t<tvar_t,`H> s, type_t *`r topt) {
+static type_t any_type(list_t<tvar_t,`H> s, type_t * topt) {
   if(topt != NULL)
     return *topt;
   return new_evar(&mk,new Opt(s));
 }
-static type_t num_type(type_t *`r topt, type_t numt) {
+static type_t num_type(type_t * topt, type_t numt) {
   // by setting to whatever topt is, unification will succeed.  Because
   // comparison between any two num types succeeds, this is fine (but kludgey)
   // FIX:? Allow *topt to be an Enum ?
@@ -138,7 +138,7 @@ static type_t num_type(type_t *`r topt, type_t numt) {
   }
   return numt;
 }
-static void set_vd(vardecl_t vd, list_t<vardecl_t>@`r v_result_ptr, type_t t){
+static void set_vd(vardecl_t vd, list_t<vardecl_t>@ v_result_ptr, type_t t){
   vd->type = t;
   vd->tq   = empty_tqual();
   *v_result_ptr = new List(vd,*v_result_ptr);
@@ -186,10 +186,25 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
 					   empty_conref(),empty_conref()))));
     break;
 
+  case &TagInt_p(tv,vd): 
+    // parser set the type b/c it's trivially known, but we need the var
+    // in the result
+    set_vd(vd, &res.patvars, vd->type);
+    // gotta add the tvar in too; the parser set its kind correctly
+    // the kind is IntKind, so no partial-order munging, etc.
+    // this checks uniqueness of new tvars (kinda kludgy)
+    add_type_vars(p->loc,te,list(tv));
+    if(res.tvars_and_bounds_opt==NULL)
+      res.tvars_and_bounds_opt = new $(NULL,NULL);
+    (*res.tvars_and_bounds_opt)[0] = 
+      new List(tv,(*res.tvars_and_bounds_opt)[0]);
+    t = uint_typ; // this is what we match against
+    break;
+
   case &Int_p(Unsigned,_): t = num_type(topt, uint_typ);  break;
   case &Int_p(None,_):
   case &Int_p(Signed,_):   t = num_type(topt, sint_typ);  break;
-  case &Char_p(_):         t = num_type(topt, char_typ); break;
+  case &Char_p(_):         t = num_type(topt, char_typ);  break;
   case &Float_p(_):        t = num_type(topt, float_typ); break;
   case &Enum_p(ed,_):      t = num_type(topt, new EnumType(ed->name,ed)); break;
   case &AnonEnum_p(tenum,_): t = num_type(topt, tenum); break;
@@ -582,8 +597,9 @@ static simple_pat_t con_pat(string_t<`H> con_name, opt_t<int,`H> span,
 static simple_pat_t compile_pat(pat_t p) {
   simple_pat_t s;
   switch (p->r) {
-  case Wild_p:          s = Any; break;
-  case &Var_p(_):       s = Any; break;
+  case Wild_p:          
+  case &Var_p(_):       
+  case &TagInt_p(_,_):  s = Any; break;
   case Null_p:          s = null_pat(); break;
   case &Int_p(sn,i):    s = int_pat(i); break;
   case &Char_p(c):      s = char_pat(c); break;

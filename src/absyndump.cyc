@@ -907,6 +907,8 @@ void dumppat(pat_t p) {
   case &Tuple_p(ts):     group(dumppat,ts,"$(",")",","); break;
   case &Pointer_p(p2):   dump("&"); dumppat(p2); break;
   case &Reference_p(vd): dump("*"); dumpqvar(vd->name); break;
+  case &TagInt_p(tv,vd): 
+    dumpqvar(vd->name); dump_char('<'); dumptvar(tv); dump_char('>'); break;
   case &UnknownId_p(q):  dumpqvar(q); break;
   case &UnknownCall_p(q,ps): dumpqvar(q); group(dumppat,ps,"(",")",","); break;
   case &Aggr_p(AggrInfo(info,_),exists,dps):

@@ -69,7 +69,6 @@ list_t<`a> list(... `a argv) {
   return result;
 }
 
-
 // return a fresh copy of the list (same as map of the identity) 
 list_t<`a,`r2> rcopy(region_t<`r2> r2, list_t<`a> x) {
   list_t result, prev;
@@ -107,7 +106,6 @@ list_t<`b> map(`b f(`a),list_t<`a> x) {
   return rmap(heap_region, f, x);
 }
 
-
 // Apply a function to each element in a list, returning a new list. 
 list_t<`b,`r2> rmap_c(region_t<`r2> r2,`b f(`c,`a),`c env,list_t<`a> x) {
   list_t result, prev;
@@ -133,7 +131,7 @@ xtunion exn {List_mismatch};
 // to each pair of elements (in order) and collect the results in a new list.
 // Throws List_mismatch if the sizes of the lists aren't the same.
 list_t<`c,`r3> rmap2(region_t<`r3> r3,`c f(`a,`b),
-                      list_t<`a> x,list_t<`b> y) {
+		     list_t<`a> x,list_t<`b> y) {
   list_t result, prev;
 
   if (x == NULL && y == NULL) return NULL;
@@ -392,8 +390,7 @@ list_t<`a,`r> imp_merge(int less_eq(`a,`a), list_t<`a,`r> a, list_t<`a,`r> b){
 }
 
 // Imperative version of merge-sort (see below)
-list_t<`a,`r> rimp_merge_sort(int less_eq(`a,`a), list_t<`a,`r> x) 
-{
+list_t<`a,`r> rimp_merge_sort(int less_eq(`a,`a), list_t<`a,`r> x) {
   if (x == NULL || x->tl == NULL) return x;
 
   // split into two lists
@@ -420,17 +417,15 @@ list_t<`a,`r> rimp_merge_sort(int less_eq(`a,`a), list_t<`a,`r> x)
 // the list sorted by less_eq.  Uses a merge sort.  The less_eq
 // function should return 0 if the elements are equal, i < 0 if
 // the first is less than the second, and i > 0 otherwise.
-list_t<`a,`r2> rmerge_sort(region_t<`r2> r2, int less_eq(`a,`a), 
-                            list_t<`a> x)
-{
+list_t<`a,`r2> rmerge_sort(region_t<`r2> r2, int less_eq(`a,`a), list_t<`a> x) {
   return rimp_merge_sort(less_eq, rcopy(r2, x));
 }
 
 
 list_t<`a,`r3> rmerge(region_t<`r3> r3,
-                       int less_eq(`a,`a),
-                       list_t<`a> a,
-                       list_t<`a> b) {
+		      int less_eq(`a,`a),
+		      list_t<`a> a,
+		      list_t<`a> b) {
   list_t c,d;
 
   // Dan bug fix: now works on empty lists by special-casing it first:
@@ -509,7 +504,7 @@ list_t<`a,`r> nth_tail(list_t<`a,`r> x, int i) {
 // Given a predicate on 'a values, determine whether every element in a list
 // satisfies the predicate.
 bool forall(bool pred(`a),list_t<`a> x) {
-  while (x != NULL && pred(x->hd)) x=x->tl; // modified by Dan
+  while (x != NULL && pred(x->hd)) x=x->tl;
   return(x == NULL);
 }
 bool forall_c(bool pred(`a,`b),`a env,list_t<`b> x) {
@@ -520,11 +515,11 @@ bool forall_c(bool pred(`a,`b),`a env,list_t<`b> x) {
 // Given a predicate on 'a values, determine whether there exists an element
 // in the list that satisfies the predicate.
 bool exists(bool pred(`a),list_t<`a> x) {
-  while (x != NULL && (!pred(x->hd))) x=x->tl; // modified by Dan
+  while (x != NULL && (!pred(x->hd))) x=x->tl;
   return(x != NULL);
 }
 bool exists_c(bool pred(`a,`b),`a env,list_t<`b> x) {
-  while (x != NULL && (!pred(env,x->hd))) x=x->tl; // modified by Dan
+  while (x != NULL && (!pred(env,x->hd))) x=x->tl;
   return(x != NULL);
 }
 

@@ -489,22 +489,26 @@ _get_zero_arr_size(_tmp2,29));});_tmp1;});_tmp0;}));return backtrace((int*)
 _check_null(_untag_arr(array,sizeof(int),1)),size);}int Cyc_Execinfo_bt(){int bt[
 20];{unsigned int _tmp10=20;unsigned int i;for(i=0;i < _tmp10;i ++){bt[i]=0;}}{int
 tochild[2]={0,0};int fromchild[2]={0,0};int pid;int self_pid;if(pipe(tochild)?1:
-pipe(fromchild))return 1;self_pid=getpid();if((pid=fork())== 0){if(dup2(tochild[0],
-0)== - 1?1: dup2(fromchild[1],1)== - 1)return 1;({const char*_tmp3[4];_tmp3[3]=(const
-char*)0;_tmp3[2]=(const char*)_check_null(_untag_arr(({struct Cyc_Int_pa_struct
+pipe(fromchild))return 1;self_pid=getpid();if((pid=fork())== 0){if(dup2(tochild[
+_check_known_subscript_notnull(2,0)],0)== - 1?1: dup2(fromchild[
+_check_known_subscript_notnull(2,1)],1)== - 1)return 1;({const char*_tmp3[4];_tmp3[
+3]=(const char*)0;_tmp3[2]=(const char*)_check_null(_untag_arr(({struct Cyc_Int_pa_struct
 _tmp6;_tmp6.tag=1;_tmp6.f1=(unsigned int)self_pid;{void*_tmp4[1]={& _tmp6};Cyc_aprintf(({
 const char*_tmp5="/proc/%d/exe";_tag_arr(_tmp5,sizeof(char),_get_zero_arr_size(
 _tmp5,13));}),_tag_arr(_tmp4,sizeof(void*),1));}}),sizeof(char),1));_tmp3[1]=(
 const char*)"-e";_tmp3[0]=(const char*)"--functions";Cyc_execlp((const char*)"addr2line",(
 const char*)"addr2line",_tag_arr(_tmp3,sizeof(const char*),4));});return 1;}else{
-if(pid < 0){close(tochild[0]);close(tochild[1]);close(fromchild[0]);close(
-fromchild[1]);return 1;}}{struct Cyc___cycFILE*w=({struct Cyc___cycFILE*f=Cyc_fdopen(
-tochild[1],(const char*)"w");if(!((unsigned int)f))return 1;(struct Cyc___cycFILE*)
-_check_null(f);});struct Cyc___cycFILE*r=({struct Cyc___cycFILE*f=Cyc_fdopen(
-fromchild[0],(const char*)"r");if(!((unsigned int)f)){Cyc_fclose(w);return 1;}(
-struct Cyc___cycFILE*)_check_null(f);});int n=Cyc_Execinfo_backtrace(_tag_arr(bt,
-sizeof(int),20),(int)20);{int c=0;for(0;c < n;c ++){({struct Cyc_Int_pa_struct _tmp9;
-_tmp9.tag=1;_tmp9.f1=(unsigned int)bt[_check_known_subscript_notnull(20,c)];{
+if(pid < 0){close(tochild[_check_known_subscript_notnull(2,0)]);close(tochild[
+_check_known_subscript_notnull(2,1)]);close(fromchild[
+_check_known_subscript_notnull(2,0)]);close(fromchild[
+_check_known_subscript_notnull(2,1)]);return 1;}}{struct Cyc___cycFILE*w=({struct
+Cyc___cycFILE*f=Cyc_fdopen(tochild[_check_known_subscript_notnull(2,1)],(const
+char*)"w");if(!((unsigned int)f))return 1;(struct Cyc___cycFILE*)_check_null(f);});
+struct Cyc___cycFILE*r=({struct Cyc___cycFILE*f=Cyc_fdopen(fromchild[
+_check_known_subscript_notnull(2,0)],(const char*)"r");if(!((unsigned int)f)){Cyc_fclose(
+w);return 1;}(struct Cyc___cycFILE*)_check_null(f);});int n=Cyc_Execinfo_backtrace(
+_tag_arr(bt,sizeof(int),20),(int)20);{int c=0;for(0;c < n;c ++){({struct Cyc_Int_pa_struct
+_tmp9;_tmp9.tag=1;_tmp9.f1=(unsigned int)bt[_check_known_subscript_notnull(20,c)];{
 void*_tmp7[1]={& _tmp9};Cyc_fprintf(w,({const char*_tmp8="%#x\n";_tag_arr(_tmp8,
 sizeof(char),_get_zero_arr_size(_tmp8,5));}),_tag_arr(_tmp7,sizeof(void*),1));}});}}
 Cyc_fflush((struct Cyc___cycFILE*)w);({void*_tmpA[0]={};Cyc_printf(({const char*

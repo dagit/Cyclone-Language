@@ -2161,6 +2161,12 @@ pattern:
     { $$=^$(new_pat(new Reference_p(new_vardecl(new $(Loc_n, new $2),
 						VoidType,NULL)),
 		    LOC(@1,@2))); }
+| IDENTIFIER '<' TYPE_VAR '>' 
+   { let tag = id2type($3,new Eq_kb(IntKind));
+     $$=^$(new_pat(new TagInt_p(typ2tvar(LOC(@3,@3),tag),
+				new_vardecl(new $(Loc_n,new $1),
+					    new TagType(tag),NULL)),
+		   LOC(@1,@4))); }
 ;
 
 tuple_pattern_list:

@@ -504,31 +504,33 @@ _tag_arr(_tmp3,sizeof(char),_get_zero_arr_size(_tmp3,14));}),({const char*_tmp4=
 _tag_arr(_tmp4,sizeof(char),_get_zero_arr_size(_tmp4,8));}),94);if(howmuch > 
 _tmp2){Cyc_Buffer_add_string(b,s);return(struct _tagged_arr)_tag_arr(0,0,0);}{int
 i;for(i=howmuch - 1;i >= 0?!isspace((int)*((const char*)_check_unknown_subscript(s,
-sizeof(char),i))): 0;i --){;}if(i < 0)for(i=howmuch?howmuch - 1: 0;(i < _tmp2?(int)((
-const char*)s.curr)[i]: 0)?!isspace((int)((const char*)s.curr)[i]): 0;i ++){;}Cyc_Buffer_add_substring(
+sizeof(char),i))): 0;i --){;}if(i < 0)for(i=howmuch?howmuch - 1: 0;(i < _tmp2?(int)*((
+const char*)_check_unknown_subscript(s,sizeof(char),i)): 0)?!isspace((int)*((const
+char*)_check_unknown_subscript(s,sizeof(char),i))): 0;i ++){;}Cyc_Buffer_add_substring(
 b,s,0,i);{struct _tagged_arr whatsleft=(struct _tagged_arr)_tag_arr(0,0,0);for(0;(i
-< _tmp2?(int)((const char*)s.curr)[i]: 0)?isspace((int)((const char*)s.curr)[i]): 0;
-i ++){;}if(i < _tmp2?(int)((const char*)s.curr)[i]: 0)whatsleft=_tagged_arr_plus(s,
-sizeof(char),i);return whatsleft;}}}}void Cyc_Arg_Justify_justify_b(struct Cyc_Buffer_t*
-b,int indent,int margin,struct _tagged_arr item,struct _tagged_arr desc){if(item.curr
-!= ((struct _tagged_arr)_tag_arr(0,0,0)).curr)Cyc_Buffer_add_string(b,item);if(
-desc.curr == ((struct _tagged_arr)_tag_arr(0,0,0)).curr)return;if(indent < 0)indent=
-0;if(margin < 0)margin=0;{struct _tagged_arr indentstr=({unsigned int _tmp11=(
-unsigned int)(indent + 2);char*_tmp12=(char*)_cycalloc_atomic(_check_times(
-sizeof(char),_tmp11 + 1));struct _tagged_arr _tmp14=_tag_arr(_tmp12,sizeof(char),
-_tmp11 + 1);{unsigned int _tmp13=_tmp11;unsigned int i;for(i=0;i < _tmp13;i ++){
-_tmp12[i]='\000';}_tmp12[_tmp13]=(char)0;}_tmp14;});{unsigned int i=0;for(0;i < 
-indent + 1;i ++){({struct _tagged_arr _tmp5=_tagged_arr_plus(indentstr,sizeof(char),(
-int)i);char _tmp6=*((char*)_check_unknown_subscript(_tmp5,sizeof(char),0));char
-_tmp7=i == 0?'\n':' ';if(_get_arr_size(_tmp5,sizeof(char))== 1?_tmp6 == '\000'?
-_tmp7 != '\000': 0: 0)_throw_arraybounds();*((char*)_tmp5.curr)=_tmp7;});}}{
-unsigned int _tmp8=Cyc_strlen((struct _tagged_arr)item);struct _tagged_arr itemsep;
-if(Cyc_strlen((struct _tagged_arr)desc)> 0){if(_tmp8 + 1 > indent)itemsep=indentstr;
-else{struct _tagged_arr temp=({unsigned int _tmpC=(indent - _tmp8)+ 1;char*_tmpD=(
-char*)_cycalloc_atomic(_check_times(sizeof(char),_tmpC + 1));struct _tagged_arr
-_tmpF=_tag_arr(_tmpD,sizeof(char),_tmpC + 1);{unsigned int _tmpE=_tmpC;
-unsigned int i;for(i=0;i < _tmpE;i ++){_tmpD[i]='\000';}_tmpD[_tmpE]=(char)0;}_tmpF;});{
-unsigned int i=0;for(0;i < indent - _tmp8;i ++){({struct _tagged_arr _tmp9=
+< _tmp2?(int)*((const char*)_check_unknown_subscript(s,sizeof(char),i)): 0)?
+isspace((int)*((const char*)_check_unknown_subscript(s,sizeof(char),i))): 0;i ++){;}
+if(i < _tmp2?(int)*((const char*)_check_unknown_subscript(s,sizeof(char),i)): 0)
+whatsleft=_tagged_arr_plus(s,sizeof(char),i);return whatsleft;}}}}void Cyc_Arg_Justify_justify_b(
+struct Cyc_Buffer_t*b,int indent,int margin,struct _tagged_arr item,struct _tagged_arr
+desc){if(item.curr != ((struct _tagged_arr)_tag_arr(0,0,0)).curr)Cyc_Buffer_add_string(
+b,item);if(desc.curr == ((struct _tagged_arr)_tag_arr(0,0,0)).curr)return;if(
+indent < 0)indent=0;if(margin < 0)margin=0;{struct _tagged_arr indentstr=({
+unsigned int _tmp11=(unsigned int)(indent + 2);char*_tmp12=(char*)_cycalloc_atomic(
+_check_times(sizeof(char),_tmp11 + 1));struct _tagged_arr _tmp14=_tag_arr(_tmp12,
+sizeof(char),_tmp11 + 1);{unsigned int _tmp13=_tmp11;unsigned int i;for(i=0;i < 
+_tmp13;i ++){_tmp12[i]='\000';}_tmp12[_tmp13]=(char)0;}_tmp14;});{unsigned int i=0;
+for(0;i < indent + 1;i ++){({struct _tagged_arr _tmp5=_tagged_arr_plus(indentstr,
+sizeof(char),(int)i);char _tmp6=*((char*)_check_unknown_subscript(_tmp5,sizeof(
+char),0));char _tmp7=i == 0?'\n':' ';if(_get_arr_size(_tmp5,sizeof(char))== 1?
+_tmp6 == '\000'?_tmp7 != '\000': 0: 0)_throw_arraybounds();*((char*)_tmp5.curr)=
+_tmp7;});}}{unsigned int _tmp8=Cyc_strlen((struct _tagged_arr)item);struct
+_tagged_arr itemsep;if(Cyc_strlen((struct _tagged_arr)desc)> 0){if(_tmp8 + 1 > 
+indent)itemsep=indentstr;else{struct _tagged_arr temp=({unsigned int _tmpC=(indent - 
+_tmp8)+ 1;char*_tmpD=(char*)_cycalloc_atomic(_check_times(sizeof(char),_tmpC + 1));
+struct _tagged_arr _tmpF=_tag_arr(_tmpD,sizeof(char),_tmpC + 1);{unsigned int _tmpE=
+_tmpC;unsigned int i;for(i=0;i < _tmpE;i ++){_tmpD[i]='\000';}_tmpD[_tmpE]=(char)0;}
+_tmpF;});{unsigned int i=0;for(0;i < indent - _tmp8;i ++){({struct _tagged_arr _tmp9=
 _tagged_arr_plus(temp,sizeof(char),(int)i);char _tmpA=*((char*)
 _check_unknown_subscript(_tmp9,sizeof(char),0));char _tmpB=' ';if(_get_arr_size(
 _tmp9,sizeof(char))== 1?_tmpA == '\000'?_tmpB != '\000': 0: 0)_throw_arraybounds();*((

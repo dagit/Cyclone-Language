@@ -1355,13 +1355,6 @@ static type_t tcArray(tenv_t te,seg_t loc,type_t * elt_topt, bool zero_term,
       }
   }
   
-  //if (topt != NULL) {
-  // if (!unify(*topt,res_t2) && silent_castable(te,loc,res_t2,*topt)) {
-  //    e->topt = &Opt(res_t2);
-  //    unchecked_cast(te, e, *topt);
-  //    res_t2 = *topt;
-  //}
-  //}
   return res_t2;
 }
 
@@ -1370,9 +1363,13 @@ static type_t tcComprehension(tenv_t te, seg_t loc, type_t * topt,
                               vardecl_t vd, exp_t bound, exp_t body,
                               bool @is_zero_term) {
   tcExp(te,NULL,bound);
-  if (!coerce_uint_typ(te,bound))
-    terr(bound->loc,"expecting unsigned int, found %s",
-	 typ2string(bound->topt->v));
+  switch(compress(bound->topt->v)) {
+  case &TagType(_): break;
+  default:
+    if (!coerce_uint_typ(te,bound))
+      terr(bound->loc,"expecting unsigned int, found %s",
+	   typ2string(bound->topt->v));
+  }
   // double-check that the index variable x is declared const
   if (!vd->tq.q_const)
     impos("comprehension index variable is not declared const!");
@@ -1812,8 +1809,15 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     switch (compress(t_arr)) {
     case &ArrayType(ArrayInfo{et_arr,tq_arr,bndopt,zt}):
       exp_t bnd = (exp_t)bndopt;
-      bounds_t b = (is_const_exp(te,bnd)) ? 
-        ((bounds_t)(new Upper_b(bnd))) : Unknown_b;
+      bounds_t b;
+      switch(compress(bnd->topt->v)) {
+      case &TagType(t): b = new AbsUpper_b(t); break;
+      default:
+	if(is_const_exp(te,bnd))
+	  b = new Upper_b(bnd);
+	else
+	  b = Unknown_b;
+      }
       type_t res_typ = 
         new PointerType(PtrInfo(et_arr,tq_arr,
 				PtrAtts(rgn,empty_conref(),new_conref(b),zt)));

@@ -1484,11 +1484,11 @@ doc_t pat2doc(pat_t p) {
   case &Char_p(ch): s = text(aprintf("'%s'",char_escape(ch))); break;
   case &Float_p(x): s = text(x); break;
   case &Var_p(vd):  s = qvar2doc(vd->name); break;
+  case &TagInt_p(tv,vd):
+    s = cat(qvar2doc(vd->name), text("<"), textptr(get_name(tv)), text(">"));
+    break;
   case &Tuple_p(ts):
-    s = cat(dollar(),
-            text("("),
-            ppseq(pat2doc,",",ts),
-            text(")"));
+    s = cat(dollar(), text("("), ppseq(pat2doc,",",ts), text(")"));
     break;
   case &Pointer_p(p2):
     s = cat(text("&"),pat2doc(p2));

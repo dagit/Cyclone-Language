@@ -527,18 +527,21 @@ void*Cyc_Lineno_token(struct Cyc_Lexing_lexbuf*lexbuf){return Cyc_Lineno_token_r
 lexbuf,0);}struct Cyc_Lineno_Pos;struct _tuple0{struct _tagged_arr f1;int f2;};static
 struct Cyc_Core_Opt*Cyc_Lineno_parse_linedef(struct _tagged_arr line){struct
 _handler_cons _tmp6;_push_handler(& _tmp6);{int _tmp8=0;if(setjmp(_tmp6.handler))
-_tmp8=1;if(!_tmp8){{int i=0;while(i < _get_arr_size(line,sizeof(char))?((char*)
-line.curr)[i]< '0'?1:((char*)line.curr)[i]> '9': 0){++ i;}{int j=i;while((j < 
-_get_arr_size(line,sizeof(char))?((char*)line.curr)[j]>= '0': 0)?((char*)line.curr)[
-j]<= '9': 0){++ j;}if(i == _get_arr_size(line,sizeof(char))){struct Cyc_Core_Opt*
-_tmp9=0;_npop_handler(0);return _tmp9;}{int number=0;if(({struct Cyc_IntPtr_sa_struct
-_tmpC;_tmpC.tag=2;_tmpC.f1=& number;{void*_tmpA[1]={& _tmpC};Cyc_sscanf((struct
+_tmp8=1;if(!_tmp8){{int i=0;while(i < _get_arr_size(line,sizeof(char))?*((char*)
+_check_unknown_subscript(line,sizeof(char),i))< '0'?1:*((char*)
+_check_unknown_subscript(line,sizeof(char),i))> '9': 0){++ i;}{int j=i;while((j < 
+_get_arr_size(line,sizeof(char))?*((char*)_check_unknown_subscript(line,sizeof(
+char),j))>= '0': 0)?*((char*)_check_unknown_subscript(line,sizeof(char),j))<= '9':
+0){++ j;}if(i == _get_arr_size(line,sizeof(char))){struct Cyc_Core_Opt*_tmp9=0;
+_npop_handler(0);return _tmp9;}{int number=0;if(({struct Cyc_IntPtr_sa_struct _tmpC;
+_tmpC.tag=2;_tmpC.f1=& number;{void*_tmpA[1]={& _tmpC};Cyc_sscanf((struct
 _tagged_arr)Cyc_substring((struct _tagged_arr)line,i,(unsigned int)(j - i)),({
 const char*_tmpB="%d";_tag_arr(_tmpB,sizeof(char),_get_zero_arr_size(_tmpB,3));}),
 _tag_arr(_tmpA,sizeof(void*),1));}})!= 1){struct Cyc_Core_Opt*_tmpD=0;
-_npop_handler(0);return _tmpD;}while(j < _get_arr_size(line,sizeof(char))?((char*)
-line.curr)[j]!= '"': 0){++ j;}{int k=++ j;while(k < _get_arr_size(line,sizeof(char))?((
-char*)line.curr)[k]!= '"': 0){++ k;}if(j == _get_arr_size(line,sizeof(char))?1: k == 
+_npop_handler(0);return _tmpD;}while(j < _get_arr_size(line,sizeof(char))?*((char*)
+_check_unknown_subscript(line,sizeof(char),j))!= '"': 0){++ j;}{int k=++ j;while(k < 
+_get_arr_size(line,sizeof(char))?*((char*)_check_unknown_subscript(line,sizeof(
+char),k))!= '"': 0){++ k;}if(j == _get_arr_size(line,sizeof(char))?1: k == 
 _get_arr_size(line,sizeof(char))){struct Cyc_Core_Opt*_tmpE=0;_npop_handler(0);
 return _tmpE;}{struct _tagged_arr fname=Cyc_substring((struct _tagged_arr)line,j,(
 unsigned int)(k - j));struct Cyc_Core_Opt*_tmp11=({struct Cyc_Core_Opt*_tmpF=

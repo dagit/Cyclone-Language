@@ -707,51 +707,51 @@ const char*)_untag_arr(mode,sizeof(char),1));if(f == 0){struct _tagged_arr fn=({
 unsigned int _tmp3A=_get_arr_size(fname,sizeof(char));char*_tmp3B=(char*)
 _cycalloc_atomic(_check_times(sizeof(char),_tmp3A + 1));struct _tagged_arr _tmp3D=
 _tag_arr(_tmp3B,sizeof(char),_tmp3A + 1);{unsigned int _tmp3C=_tmp3A;unsigned int i;
-for(i=0;i < _tmp3C;i ++){_tmp3B[i]=((const char*)fname.curr)[(int)i];}_tmp3B[_tmp3C]=(
-char)0;}_tmp3D;});(int)_throw((void*)({struct Cyc_FileOpenError_struct*_tmp38=
-_cycalloc(sizeof(*_tmp38));_tmp38[0]=({struct Cyc_FileOpenError_struct _tmp39;
-_tmp39.tag=Cyc_FileOpenError;_tmp39.f1=fn;_tmp39;});_tmp38;}));}return(struct Cyc___cycFILE*)
-_check_null(f);}void Cyc_file_close(struct Cyc___cycFILE*f){if(Cyc_fclose(f)!= 0)(
-int)_throw((void*)Cyc_FileCloseError);}typedef struct{int quot;int rem;}Cyc_div_t;
-typedef struct{int quot;int rem;}Cyc_ldiv_t;void*abort();void exit(int);void Cyc_free(
-struct _tagged_arr);void Cyc_qsort(struct _tagged_arr,unsigned int,unsigned int,int(*)(
-const void*,const void*));void Cyc_free(struct _tagged_arr ptr){;}void qsort(void*,
-unsigned int,unsigned int,int(*)(const void*,const void*));static char _tmp3F[23]="qsort called with NULL";
-static struct Cyc_Core_Failure_struct Cyc___qsort_failure_1={Cyc_Core_Failure,{
-_tmp3F,_tmp3F,_tmp3F + 23}};static char _tmp41[42]="qsort called with insufficient array size";
-static struct Cyc_Core_Failure_struct Cyc___qsort_failure_2={Cyc_Core_Failure,{
-_tmp41,_tmp41,_tmp41 + 42}};void Cyc_qsort(struct _tagged_arr tab,unsigned int nmemb,
-unsigned int szmemb,int(*compar)(const void*,const void*)){if(!((unsigned int)tab.curr))(
-int)_throw((void*)& Cyc___qsort_failure_1);if(_get_arr_size(tab,sizeof(void))< 
-nmemb)(int)_throw((void*)& Cyc___qsort_failure_2);qsort((void*)_untag_arr(tab,
-sizeof(void),1),nmemb,(unsigned int)szmemb,compar);}struct Cyc_ipc_perm{int __key;
-unsigned int uid;unsigned int gid;unsigned int cuid;unsigned int cgid;unsigned short
-mode;unsigned short __pad1;unsigned short __seq;unsigned short __pad2;unsigned int
-__unused1;unsigned int __unused2;};struct _tagged_arr Cyc_mmap(struct _tagged_arr,
-unsigned int length,int prot,int flags,int fd,int offset);int Cyc_munmap(struct
-_tagged_arr start,unsigned int length);char*__stub_mmap(char*start,unsigned int
-length,int prot,int flags,int fd,int offset);int munmap(const char*start,unsigned int
-length);static char _tmp43[42]="mmap called with illegal start/prot/flags";static
-struct Cyc_Core_Failure_struct Cyc___mmap_failure={Cyc_Core_Failure,{_tmp43,_tmp43,
-_tmp43 + 42}};struct _tagged_arr Cyc_mmap(struct _tagged_arr ignored,unsigned int
-length,int prot,int flags,int fd,int offset){if((ignored.curr == (_tag_arr(0,0,0)).curr?
-prot == 1: 0)?flags == 2?1: flags == 1: 0)return(struct _tagged_arr)
-wrap_Cbuffer_as_buffer(__stub_mmap(0,length,prot,flags,fd,offset),length);else{(
-int)_throw((void*)& Cyc___mmap_failure);}}int Cyc_munmap(struct _tagged_arr start,
-unsigned int length){return munmap((const char*)_check_null(_untag_arr(start,
-sizeof(char),1)),length);}struct Cyc_timeval{int tv_sec;int tv_usec;};struct Cyc_rlimit{
-unsigned int rlim_cur;unsigned int rlim_max;};enum Cyc___rusage_who{Cyc_RUSAGE_SELF
- = 0,Cyc_RUSAGE_CHILDREN  = -1,Cyc_RUSAGE_BOTH  = -2};struct Cyc_rusage{struct Cyc_timeval
-ru_utime;struct Cyc_timeval ru_stime;int ru_maxrss;int ru_ixrss;int ru_idrss;int
-ru_isrss;int ru_minflt;int ru_majflt;int ru_nswap;int ru_inblock;int ru_oublock;int
-ru_msgsnd;int ru_msgrcv;int ru_nsignals;int ru_nvcsw;int ru_nivcsw;};enum Cyc___priority_which{
-Cyc_PRIO_PROCESS  = 0,Cyc_PRIO_PGRP  = 1,Cyc_PRIO_USER  = 2};struct Cyc_timespec{int
-tv_sec;int tv_nsec;};typedef struct{int __fds_bits[1024 / (8 * sizeof(int))];}Cyc_fd_set;
-int select(int,Cyc_fd_set*,Cyc_fd_set*,Cyc_fd_set*,struct Cyc_timeval*);void Cyc_FD_CLR(
-int,Cyc_fd_set*);int Cyc_FD_ISSET(int,Cyc_fd_set*);void Cyc_FD_SET(int,Cyc_fd_set*);
-void Cyc_FD_ZERO(Cyc_fd_set*);void __stub_FD_CLR(int,Cyc_fd_set*);int
-__stub_FD_ISSET(int,Cyc_fd_set*);void __stub_FD_SET(int,Cyc_fd_set*);void
-__stub_FD_ZERO(Cyc_fd_set*);void Cyc_FD_CLR(int a,Cyc_fd_set*b){return
+for(i=0;i < _tmp3C;i ++){_tmp3B[i]=*((const char*)_check_unknown_subscript(fname,
+sizeof(char),(int)i));}_tmp3B[_tmp3C]=(char)0;}_tmp3D;});(int)_throw((void*)({
+struct Cyc_FileOpenError_struct*_tmp38=_cycalloc(sizeof(*_tmp38));_tmp38[0]=({
+struct Cyc_FileOpenError_struct _tmp39;_tmp39.tag=Cyc_FileOpenError;_tmp39.f1=fn;
+_tmp39;});_tmp38;}));}return(struct Cyc___cycFILE*)_check_null(f);}void Cyc_file_close(
+struct Cyc___cycFILE*f){if(Cyc_fclose(f)!= 0)(int)_throw((void*)Cyc_FileCloseError);}
+typedef struct{int quot;int rem;}Cyc_div_t;typedef struct{int quot;int rem;}Cyc_ldiv_t;
+void*abort();void exit(int);void Cyc_free(struct _tagged_arr);void Cyc_qsort(struct
+_tagged_arr,unsigned int,unsigned int,int(*)(const void*,const void*));void Cyc_free(
+struct _tagged_arr ptr){;}void qsort(void*,unsigned int,unsigned int,int(*)(const
+void*,const void*));static char _tmp3F[23]="qsort called with NULL";static struct Cyc_Core_Failure_struct
+Cyc___qsort_failure_1={Cyc_Core_Failure,{_tmp3F,_tmp3F,_tmp3F + 23}};static char
+_tmp41[42]="qsort called with insufficient array size";static struct Cyc_Core_Failure_struct
+Cyc___qsort_failure_2={Cyc_Core_Failure,{_tmp41,_tmp41,_tmp41 + 42}};void Cyc_qsort(
+struct _tagged_arr tab,unsigned int nmemb,unsigned int szmemb,int(*compar)(const void*,
+const void*)){if(!((unsigned int)tab.curr))(int)_throw((void*)& Cyc___qsort_failure_1);
+if(_get_arr_size(tab,sizeof(void))< nmemb)(int)_throw((void*)& Cyc___qsort_failure_2);
+qsort((void*)_untag_arr(tab,sizeof(void),1),nmemb,(unsigned int)szmemb,compar);}
+struct Cyc_ipc_perm{int __key;unsigned int uid;unsigned int gid;unsigned int cuid;
+unsigned int cgid;unsigned short mode;unsigned short __pad1;unsigned short __seq;
+unsigned short __pad2;unsigned int __unused1;unsigned int __unused2;};struct
+_tagged_arr Cyc_mmap(struct _tagged_arr,unsigned int length,int prot,int flags,int fd,
+int offset);int Cyc_munmap(struct _tagged_arr start,unsigned int length);char*
+__stub_mmap(char*start,unsigned int length,int prot,int flags,int fd,int offset);int
+munmap(const char*start,unsigned int length);static char _tmp43[42]="mmap called with illegal start/prot/flags";
+static struct Cyc_Core_Failure_struct Cyc___mmap_failure={Cyc_Core_Failure,{_tmp43,
+_tmp43,_tmp43 + 42}};struct _tagged_arr Cyc_mmap(struct _tagged_arr ignored,
+unsigned int length,int prot,int flags,int fd,int offset){if((ignored.curr == (
+_tag_arr(0,0,0)).curr?prot == 1: 0)?flags == 2?1: flags == 1: 0)return(struct
+_tagged_arr)wrap_Cbuffer_as_buffer(__stub_mmap(0,length,prot,flags,fd,offset),
+length);else{(int)_throw((void*)& Cyc___mmap_failure);}}int Cyc_munmap(struct
+_tagged_arr start,unsigned int length){return munmap((const char*)_check_null(
+_untag_arr(start,sizeof(char),1)),length);}struct Cyc_timeval{int tv_sec;int
+tv_usec;};struct Cyc_rlimit{unsigned int rlim_cur;unsigned int rlim_max;};enum Cyc___rusage_who{
+Cyc_RUSAGE_SELF  = 0,Cyc_RUSAGE_CHILDREN  = -1,Cyc_RUSAGE_BOTH  = -2};struct Cyc_rusage{
+struct Cyc_timeval ru_utime;struct Cyc_timeval ru_stime;int ru_maxrss;int ru_ixrss;int
+ru_idrss;int ru_isrss;int ru_minflt;int ru_majflt;int ru_nswap;int ru_inblock;int
+ru_oublock;int ru_msgsnd;int ru_msgrcv;int ru_nsignals;int ru_nvcsw;int ru_nivcsw;};
+enum Cyc___priority_which{Cyc_PRIO_PROCESS  = 0,Cyc_PRIO_PGRP  = 1,Cyc_PRIO_USER
+ = 2};struct Cyc_timespec{int tv_sec;int tv_nsec;};typedef struct{int __fds_bits[1024
+/ (8 * sizeof(int))];}Cyc_fd_set;int select(int,Cyc_fd_set*,Cyc_fd_set*,Cyc_fd_set*,
+struct Cyc_timeval*);void Cyc_FD_CLR(int,Cyc_fd_set*);int Cyc_FD_ISSET(int,Cyc_fd_set*);
+void Cyc_FD_SET(int,Cyc_fd_set*);void Cyc_FD_ZERO(Cyc_fd_set*);void __stub_FD_CLR(
+int,Cyc_fd_set*);int __stub_FD_ISSET(int,Cyc_fd_set*);void __stub_FD_SET(int,Cyc_fd_set*);
+void __stub_FD_ZERO(Cyc_fd_set*);void Cyc_FD_CLR(int a,Cyc_fd_set*b){return
 __stub_FD_CLR(a,b);}int Cyc_FD_ISSET(int a,Cyc_fd_set*b){return __stub_FD_ISSET(a,b);}
 void Cyc_FD_SET(int a,Cyc_fd_set*b){return __stub_FD_SET(a,b);}void Cyc_FD_ZERO(Cyc_fd_set*
 a){return __stub_FD_ZERO(a);}enum Cyc___socket_type{Cyc_SOCK_STREAM  = 1,Cyc_SOCK_DGRAM

@@ -562,15 +562,16 @@ namespace Absyn {
   EXTERN_ABSYN tunion Raw_pat {
     Wild_p; // _ 
     Var_p(vardecl_t); // x. only name field is right until tcPat is called
+    Reference_p(vardecl_t);// *p. only name field is right until tcPat is called
+    TagInt_p(tvar_t,vardecl_t);// i<`i> (unpack an int)
+    Tuple_p(list_t<pat_t>); // $(p1,...,pn)
+    Pointer_p(pat_t); // &p
+    Aggr_p(aggr_info_t,list_t<tvar_t>,list_t<$(list_t<designator_t>,pat_t)@>);
+    Tunion_p(tuniondecl_t, tunionfield_t, list_t<pat_t>);
     Null_p; // NULL
     Int_p(sign_t,int); // 3
     Char_p(char);      // 'a'
     Float_p(string_t); // 3.1415
-    Tuple_p(list_t<pat_t>); // $(p1,...,pn)
-    Pointer_p(pat_t); // &p
-    Reference_p(vardecl_t);// *p. only name field is right until tcPat is called
-    Aggr_p(aggr_info_t,list_t<tvar_t>,list_t<$(list_t<designator_t>,pat_t)@>);
-    Tunion_p(tuniondecl_t, tunionfield_t, list_t<pat_t>);
     Enum_p(enumdecl_t,enumfield_t);
     AnonEnum_p(type_t,enumfield_t);
     UnknownId_p(qvar_t); // resolved by tcpat

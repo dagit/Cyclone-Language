@@ -655,28 +655,28 @@ const char*)_untag_arr(mode,sizeof(char),1));if(f == 0){struct _tagged_arr fn=({
 unsigned int _tmp33=_get_arr_size(fname,sizeof(char));char*_tmp34=(char*)
 _cycalloc_atomic(_check_times(sizeof(char),_tmp33 + 1));struct _tagged_arr _tmp36=
 _tag_arr(_tmp34,sizeof(char),_tmp33 + 1);{unsigned int _tmp35=_tmp33;unsigned int i;
-for(i=0;i < _tmp35;i ++){_tmp34[i]=((const char*)fname.curr)[(int)i];}_tmp34[_tmp35]=(
-char)0;}_tmp36;});(int)_throw((void*)({struct Cyc_FileOpenError_struct*_tmp31=
-_cycalloc(sizeof(*_tmp31));_tmp31[0]=({struct Cyc_FileOpenError_struct _tmp32;
-_tmp32.tag=Cyc_FileOpenError;_tmp32.f1=fn;_tmp32;});_tmp31;}));}return(struct Cyc___cycFILE*)
-_check_null(f);}void Cyc_file_close(struct Cyc___cycFILE*f){if(Cyc_fclose(f)!= 0)(
-int)_throw((void*)Cyc_FileCloseError);}typedef struct{int quot;int rem;}Cyc_div_t;
-typedef struct{int quot;int rem;}Cyc_ldiv_t;void*abort();void exit(int);void Cyc_free(
-struct _tagged_arr);void Cyc_qsort(struct _tagged_arr,unsigned int,unsigned int,int(*)(
-const void*,const void*));void Cyc_free(struct _tagged_arr ptr){;}void qsort(void*,
-unsigned int,unsigned int,int(*)(const void*,const void*));static char _tmp38[23]="qsort called with NULL";
-static struct Cyc_Core_Failure_struct Cyc___qsort_failure_1={Cyc_Core_Failure,{
-_tmp38,_tmp38,_tmp38 + 23}};static char _tmp3A[42]="qsort called with insufficient array size";
-static struct Cyc_Core_Failure_struct Cyc___qsort_failure_2={Cyc_Core_Failure,{
-_tmp3A,_tmp3A,_tmp3A + 42}};void Cyc_qsort(struct _tagged_arr tab,unsigned int nmemb,
-unsigned int szmemb,int(*compar)(const void*,const void*)){if(!((unsigned int)tab.curr))(
-int)_throw((void*)& Cyc___qsort_failure_1);if(_get_arr_size(tab,sizeof(void))< 
-nmemb)(int)_throw((void*)& Cyc___qsort_failure_2);qsort((void*)_untag_arr(tab,
-sizeof(void),1),nmemb,(unsigned int)szmemb,compar);}struct _tagged_arr Cyc_mmap(
-struct _tagged_arr,unsigned int length,int prot,int flags,int fd,int offset);int Cyc_munmap(
-struct _tagged_arr start,unsigned int length);char*__stub_mmap(char*start,
-unsigned int length,int prot,int flags,int fd,int offset);int munmap(const char*start,
-unsigned int length);static char _tmp3C[42]="mmap called with illegal start/prot/flags";
+for(i=0;i < _tmp35;i ++){_tmp34[i]=*((const char*)_check_unknown_subscript(fname,
+sizeof(char),(int)i));}_tmp34[_tmp35]=(char)0;}_tmp36;});(int)_throw((void*)({
+struct Cyc_FileOpenError_struct*_tmp31=_cycalloc(sizeof(*_tmp31));_tmp31[0]=({
+struct Cyc_FileOpenError_struct _tmp32;_tmp32.tag=Cyc_FileOpenError;_tmp32.f1=fn;
+_tmp32;});_tmp31;}));}return(struct Cyc___cycFILE*)_check_null(f);}void Cyc_file_close(
+struct Cyc___cycFILE*f){if(Cyc_fclose(f)!= 0)(int)_throw((void*)Cyc_FileCloseError);}
+typedef struct{int quot;int rem;}Cyc_div_t;typedef struct{int quot;int rem;}Cyc_ldiv_t;
+void*abort();void exit(int);void Cyc_free(struct _tagged_arr);void Cyc_qsort(struct
+_tagged_arr,unsigned int,unsigned int,int(*)(const void*,const void*));void Cyc_free(
+struct _tagged_arr ptr){;}void qsort(void*,unsigned int,unsigned int,int(*)(const
+void*,const void*));static char _tmp38[23]="qsort called with NULL";static struct Cyc_Core_Failure_struct
+Cyc___qsort_failure_1={Cyc_Core_Failure,{_tmp38,_tmp38,_tmp38 + 23}};static char
+_tmp3A[42]="qsort called with insufficient array size";static struct Cyc_Core_Failure_struct
+Cyc___qsort_failure_2={Cyc_Core_Failure,{_tmp3A,_tmp3A,_tmp3A + 42}};void Cyc_qsort(
+struct _tagged_arr tab,unsigned int nmemb,unsigned int szmemb,int(*compar)(const void*,
+const void*)){if(!((unsigned int)tab.curr))(int)_throw((void*)& Cyc___qsort_failure_1);
+if(_get_arr_size(tab,sizeof(void))< nmemb)(int)_throw((void*)& Cyc___qsort_failure_2);
+qsort((void*)_untag_arr(tab,sizeof(void),1),nmemb,(unsigned int)szmemb,compar);}
+struct _tagged_arr Cyc_mmap(struct _tagged_arr,unsigned int length,int prot,int flags,
+int fd,int offset);int Cyc_munmap(struct _tagged_arr start,unsigned int length);char*
+__stub_mmap(char*start,unsigned int length,int prot,int flags,int fd,int offset);int
+munmap(const char*start,unsigned int length);static char _tmp3C[42]="mmap called with illegal start/prot/flags";
 static struct Cyc_Core_Failure_struct Cyc___mmap_failure={Cyc_Core_Failure,{_tmp3C,
 _tmp3C,_tmp3C + 42}};struct _tagged_arr Cyc_mmap(struct _tagged_arr ignored,
 unsigned int length,int prot,int flags,int fd,int offset){if((ignored.curr == (

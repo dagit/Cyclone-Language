@@ -248,7 +248,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       let pat_res = tcPat(te,p,&t);
       let new_tvs = pat_res.tvars_and_bounds_opt==NULL ? NULL 
 	: (*pat_res.tvars_and_bounds_opt)[0];
-      if (!unify(p->topt->v,t)) {
+      if (!unify(p->topt->v,t)) { // allow silent_castable?
 	terr(scs->hd->loc, "switch on type %s, but case expects type %s",
              typ2string(t), typ2string(p->topt->v));
         explain_failure();
@@ -425,7 +425,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       //FIX: can pass region if e an lvalue
       let pat_res = tcPat(te,p,&e->topt->v);
       *vds = new Opt(pat_res.patvars);
-      if (!unify(p->topt->v,e->topt->v)) {
+      if (!unify(p->topt->v,e->topt->v)) { // allow silent_castable?
 	terr(d->loc,"pattern type %s does not match definition type %s",
              typ2string(p->topt->v),typ2string(e->topt->v));
         unify(p->topt->v,e->topt->v);
