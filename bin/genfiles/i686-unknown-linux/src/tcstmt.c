@@ -230,18 +230,18 @@ struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*
 extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
 extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_List_List{
 void* hd; struct Cyc_List_List* tl; } ; extern int Cyc_List_length( struct Cyc_List_List*
-x); extern unsigned char Cyc_List_List_empty[ 15u]; extern struct Cyc_List_List*
-Cyc_List_map_c( void*(* f)( void*, void*), void* env, struct Cyc_List_List* x);
-extern unsigned char Cyc_List_List_mismatch[ 18u]; extern struct Cyc_List_List*
-Cyc_List_rev( struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_imp_rev(
-struct Cyc_List_List* x); extern unsigned char Cyc_List_Nth[ 8u]; struct Cyc_Lineno_Pos{
-struct _tagged_arr logical_file; struct _tagged_arr line; int line_no; int col;
-} ; extern unsigned char Cyc_Position_Exit[ 9u]; struct Cyc_Position_Segment;
-static const int Cyc_Position_Lex= 0; static const int Cyc_Position_Parse= 1;
-static const int Cyc_Position_Elab= 2; struct Cyc_Position_Error{ struct
-_tagged_arr source; struct Cyc_Position_Segment* seg; void* kind; struct
-_tagged_arr desc; } ; extern unsigned char Cyc_Position_Nocontext[ 14u]; struct
-_tuple0{ void* f1; struct _tagged_arr* f2; } ; struct Cyc_Absyn_Tvar; struct Cyc_Absyn_Tqual;
+x); extern struct Cyc_List_List* Cyc_List_map_c( void*(* f)( void*, void*), void*
+env, struct Cyc_List_List* x); extern unsigned char Cyc_List_List_mismatch[ 18u];
+extern struct Cyc_List_List* Cyc_List_rev( struct Cyc_List_List* x); extern
+struct Cyc_List_List* Cyc_List_imp_rev( struct Cyc_List_List* x); extern
+unsigned char Cyc_List_Nth[ 8u]; struct Cyc_Lineno_Pos{ struct _tagged_arr
+logical_file; struct _tagged_arr line; int line_no; int col; } ; extern
+unsigned char Cyc_Position_Exit[ 9u]; struct Cyc_Position_Segment; static const
+int Cyc_Position_Lex= 0; static const int Cyc_Position_Parse= 1; static const
+int Cyc_Position_Elab= 2; struct Cyc_Position_Error{ struct _tagged_arr source;
+struct Cyc_Position_Segment* seg; void* kind; struct _tagged_arr desc; } ;
+extern unsigned char Cyc_Position_Nocontext[ 14u]; struct _tuple0{ void* f1;
+struct _tagged_arr* f2; } ; struct Cyc_Absyn_Tvar; struct Cyc_Absyn_Tqual;
 struct Cyc_Absyn_Conref; struct Cyc_Absyn_PtrInfo; struct Cyc_Absyn_VarargInfo;
 struct Cyc_Absyn_FnInfo; struct Cyc_Absyn_TunionInfo; struct Cyc_Absyn_TunionFieldInfo;
 struct Cyc_Absyn_VarargCallInfo; struct Cyc_Absyn_Exp; struct Cyc_Absyn_Stmt;

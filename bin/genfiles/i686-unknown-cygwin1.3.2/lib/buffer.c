@@ -238,14 +238,13 @@ unsigned char); extern void Cyc_Buffer_add_substring( struct Cyc_Buffer_t*,
 struct _tagged_arr, int offset, int len); extern void Cyc_Buffer_add_string(
 struct Cyc_Buffer_t*, struct _tagged_arr); extern void Cyc_Buffer_add_buffer(
 struct Cyc_Buffer_t* buf_dest, struct Cyc_Buffer_t* buf_source); struct Cyc_List_List{
-void* hd; struct Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_empty[
-15u]; extern unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char
-Cyc_List_Nth[ 8u]; extern unsigned int Cyc_Std_strlen( struct _tagged_arr s);
-extern struct _tagged_arr Cyc_Std_strncpy( struct _tagged_arr, struct
-_tagged_arr, unsigned int); extern struct _tagged_arr Cyc_Std_zstrncpy( struct
-_tagged_arr, struct _tagged_arr, unsigned int); extern struct _tagged_arr Cyc_Std_substring(
-struct _tagged_arr, int ofs, unsigned int n); struct Cyc_Buffer_t{ struct
-_tagged_arr buffer; unsigned int position; unsigned int length; struct
+void* hd; struct Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_mismatch[
+18u]; extern unsigned char Cyc_List_Nth[ 8u]; extern unsigned int Cyc_Std_strlen(
+struct _tagged_arr s); extern struct _tagged_arr Cyc_Std_strncpy( struct
+_tagged_arr, struct _tagged_arr, unsigned int); extern struct _tagged_arr Cyc_Std_zstrncpy(
+struct _tagged_arr, struct _tagged_arr, unsigned int); extern struct _tagged_arr
+Cyc_Std_substring( struct _tagged_arr, int ofs, unsigned int n); struct Cyc_Buffer_t{
+struct _tagged_arr buffer; unsigned int position; unsigned int length; struct
 _tagged_arr initial_buffer; } ; struct Cyc_Buffer_t* Cyc_Buffer_create(
 unsigned int n){ if( n <  1){ n= 1;}{ struct _tagged_arr s= Cyc_Core_new_string((
 int) n); return({ struct Cyc_Buffer_t* _temp0=( struct Cyc_Buffer_t*) _cycalloc(

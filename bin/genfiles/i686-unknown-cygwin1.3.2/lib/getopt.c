@@ -278,23 +278,22 @@ _tagged_arr argv, struct _tagged_arr envp); int Cyc_Std_read( int fd, struct
 _tagged_arr buf, unsigned int count); int Cyc_Std_write( int fd, struct
 _tagged_arr buf, unsigned int count); int Cyc_Std_unlink( struct _tagged_arr
 pathname); struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; extern
-unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
-18u]; extern unsigned char Cyc_List_Nth[ 8u]; extern unsigned int Cyc_Std_strlen(
-struct _tagged_arr s); extern int Cyc_Std_strcmp( struct _tagged_arr s1, struct
-_tagged_arr s2); extern int Cyc_Std_strncmp( struct _tagged_arr s1, struct
-_tagged_arr s2, unsigned int len); extern struct _tagged_arr Cyc_Std_strchr(
-struct _tagged_arr s, unsigned char c); struct _tagged_arr Cyc_Std_optarg; int
-Cyc_Std_optind= 1; int Cyc_Std___getopt_initialized; static struct _tagged_arr
-Cyc_Std_nextchar; int Cyc_Std_opterr= 1; int Cyc_Std_optopt=( int)'?'; enum  Cyc_Std_ordering_tag{
-Cyc_Std_REQUIRE_ORDER  =  0u, Cyc_Std_PERMUTE  =  1u, Cyc_Std_RETURN_IN_ORDER
- =  2u}; static enum  Cyc_Std_ordering_tag Cyc_Std_ordering; static struct
-_tagged_arr Cyc_Std_posixly_correct; static int Cyc_Std_first_nonopt; static int
-Cyc_Std_last_nonopt; static int Cyc_Std_nonoption_flags_max_len; static int Cyc_Std_nonoption_flags_len;
-static int Cyc_Std_original_argc; static int Cyc_Std_original_argv; static void
- __attribute__(( unused ))  Cyc_Std_store_args_and_env( int argc, struct
-_tagged_arr argv){ Cyc_Std_original_argc= argc; Cyc_Std_original_argv=( int)
-argv.curr;} static void Cyc_Std_exchange( struct _tagged_arr argv){ int bottom=
-Cyc_Std_first_nonopt; int middle= Cyc_Std_last_nonopt; int top= Cyc_Std_optind;
+unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char Cyc_List_Nth[ 8u];
+extern unsigned int Cyc_Std_strlen( struct _tagged_arr s); extern int Cyc_Std_strcmp(
+struct _tagged_arr s1, struct _tagged_arr s2); extern int Cyc_Std_strncmp(
+struct _tagged_arr s1, struct _tagged_arr s2, unsigned int len); extern struct
+_tagged_arr Cyc_Std_strchr( struct _tagged_arr s, unsigned char c); struct
+_tagged_arr Cyc_Std_optarg; int Cyc_Std_optind= 1; int Cyc_Std___getopt_initialized;
+static struct _tagged_arr Cyc_Std_nextchar; int Cyc_Std_opterr= 1; int Cyc_Std_optopt=(
+int)'?'; enum  Cyc_Std_ordering_tag{ Cyc_Std_REQUIRE_ORDER  =  0u, Cyc_Std_PERMUTE
+ =  1u, Cyc_Std_RETURN_IN_ORDER  =  2u}; static enum  Cyc_Std_ordering_tag Cyc_Std_ordering;
+static struct _tagged_arr Cyc_Std_posixly_correct; static int Cyc_Std_first_nonopt;
+static int Cyc_Std_last_nonopt; static int Cyc_Std_nonoption_flags_max_len;
+static int Cyc_Std_nonoption_flags_len; static int Cyc_Std_original_argc; static
+int Cyc_Std_original_argv; static void  __attribute__(( unused ))  Cyc_Std_store_args_and_env(
+int argc, struct _tagged_arr argv){ Cyc_Std_original_argc= argc; Cyc_Std_original_argv=(
+int) argv.curr;} static void Cyc_Std_exchange( struct _tagged_arr argv){ int
+bottom= Cyc_Std_first_nonopt; int middle= Cyc_Std_last_nonopt; int top= Cyc_Std_optind;
 struct _tagged_arr tem; while( top >  middle? middle >  bottom: 0) { if( top - 
 middle >  middle -  bottom){ int len= middle -  bottom; int i; for( i= 0; i < 
 len; i ++){ tem=*(( struct _tagged_arr*) _check_unknown_subscript( argv, sizeof(

@@ -728,12 +728,12 @@ static int addpair($(int,int)@ x) {
 
 void fn_test() {
   test_begin("Fn");
-  fn<int,int,{}> inc = make_fn(addn,1);
-  fn<int,int,{}> dec = make_fn(addn,-1);
-  fn<int,int,{}> blah = compose(inc,dec);
-  fn<$(int,int)@,int,{}> addp = fp2fn(addpair);
-  fn<int,fn<int,int,{}>,{}> addc = curry(addp);
-  fn<$(int,int)@,int,{}> addu = uncurry(addc);
+  fn_t<int,int,{}> inc = make_fn(addn,1);
+  fn_t<int,int,{}> dec = make_fn(addn,-1);
+  fn_t<int,int,{}> blah = compose(inc,dec);
+  fn_t<$(int,int)@,int,{}> addp = fp2fn(addpair);
+  fn_t<int,fn_t<int,int,{}>,{}> addc = curry(addp);
+  fn_t<$(int,int)@,int,{}> addu = uncurry(addc);
   okfail(apply(inc,0) == 1);
   okfail(apply(dec,0) == -1);
   okfail(apply(blah,0) == 0);

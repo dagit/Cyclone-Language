@@ -39,41 +39,41 @@ extern tunion Function<`arg,`res,`eff::E> {
   Fun<`env>(`res (@)(`env,`arg;`eff), `env)
 };
 
-typedef tunion Function<`arg,`res,`eff> fn<`arg,`res,`eff>;
-  /** A value of type [fn<`arg,`res,`eff>] is a function and its
+typedef tunion Function<`arg,`res,`eff> fn_t<`arg,`res,`eff>;
+  /** A value of type [fn_t<`arg,`res,`eff>] is a function and its
       closure; [`arg] is the argument type of the function, [`res] is
       the result type, and [`eff] is the effect. */
 
-extern fn<`arg,`res,`e1> make_fn(`res f(`env,`arg;`e1), `env x; `e2);
+extern fn_t<`arg,`res,`e1> make_fn(`res f(`env,`arg;`e1), `env x; `e2);
   /** [make_fn(f,env)] builds a closure out of a function and an
       environment. */
 
-extern fn<`arg,`res,`e1> fp2fn(`res f(`arg;`e1));
+extern fn_t<`arg,`res,`e1> fp2fn(`res f(`arg;`e1));
   /** [fp2fn(f)] converts a function pointer to a closure. */
 
-extern `res apply(fn<`arg,`res,`eff> f, `arg x; `eff);
+extern `res apply(fn_t<`arg,`res,`eff> f, `arg x; `eff);
   /** [apply(f,x)] applies closure [f] to argument [x] (taking care of
       the hidden environment in the process). */
 
-extern fn<`a,`c,`e1+`e2> compose<`a,`b,`c,`e1,`e2,`e3>(fn<`a,`b,`e1> g,
-                                                       fn<`b,`c,`e2> f;
-                                                       `e1+`e2+`e3);
+extern fn_t<`a,`c,`e1+`e2> compose<`a,`b,`c,`e1,`e2,`e3>(fn_t<`a,`b,`e1> g,
+                                                         fn_t<`b,`c,`e2> f;
+                                                         `e1+`e2+`e3);
   /** [compose(g,f)] returns the composition of closures [f] and [g];
       [apply(compose(g,f),x)] has the same effect as
       [apply(f,apply(g,x))]. */
 
-extern fn<`a,fn<`b,`c,`e1>,`e1+`e2> curry(fn<$(`a,`b)@`H,`c,`e1> f);
+extern fn_t<`a,fn_t<`b,`c,`e1>,`e1+`e2> curry(fn_t<$(`a,`b)@`H,`c,`e1> f);
   /** [curry(f)] curries a closure that takes a pair as argument: if
       [x] points to a pair [\$(x1,x2)], then [apply(f,x)] has the same
       effect as [apply(apply(curry(f),x1),x2)].  */
 
-extern fn<$(`a,`b)@,`c,`e1+`e2> uncurry(fn<`a,fn<`b,`c,`e1>,`e2> f);
+extern fn_t<$(`a,`b)@,`c,`e1+`e2> uncurry(fn_t<`a,fn_t<`b,`c,`e1>,`e2> f);
   /** [uncurry(f)] converts a closure that takes two arguments in
       sequence into a closure that takes the two arguments as a pair:
       if [x] points to a pair [\$(x1,x2)], then [apply(uncurry(f),x)]
       has the same effect as [apply(apply(f,x1),x2)]. */
 
-extern List::list_t<`b> map_fn(fn<`a,`b,`e> f,List::list_t<`a> x);
+extern List::list_t<`b> map_fn(fn_t<`a,`b,`e> f,List::list_t<`a> x);
   /** [map_fn(f,x)] maps the closure [f] on the list [x]: if [x] has
       elements [x1] through [xn], then [map_fn(f,x)] returns a new
       heap-allocated list with elements [apply(f,x1)] through

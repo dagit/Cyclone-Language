@@ -230,12 +230,11 @@ struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*
 extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
 extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_List_List{
 void* hd; struct Cyc_List_List* tl; } ; extern int Cyc_List_length( struct Cyc_List_List*
-x); extern unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
-18u]; extern unsigned char Cyc_List_Nth[ 8u]; extern void* Cyc_List_assoc_cmp(
-int(* cmp)( void*, void*), struct Cyc_List_List* l, void* k); struct Cyc_Hashtable_Table;
-extern struct Cyc_Hashtable_Table* Cyc_Hashtable_create( int sz, int(* cmp)(
-void*, void*), int(* hash)( void*)); extern void Cyc_Hashtable_insert( struct
-Cyc_Hashtable_Table* t, void* key, void* val); extern void* Cyc_Hashtable_lookup(
+x); extern unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char Cyc_List_Nth[
+8u]; extern void* Cyc_List_assoc_cmp( int(* cmp)( void*, void*), struct Cyc_List_List*
+l, void* k); struct Cyc_Hashtable_Table; extern struct Cyc_Hashtable_Table* Cyc_Hashtable_create(
+int sz, int(* cmp)( void*, void*), int(* hash)( void*)); extern void Cyc_Hashtable_insert(
+struct Cyc_Hashtable_Table* t, void* key, void* val); extern void* Cyc_Hashtable_lookup(
 struct Cyc_Hashtable_Table* t, void* key); extern void Cyc_Hashtable_resize(
 struct Cyc_Hashtable_Table* t); extern void Cyc_Hashtable_remove( struct Cyc_Hashtable_Table*
 t, void* key); extern int Cyc_Hashtable_hash_string( struct _tagged_arr s);

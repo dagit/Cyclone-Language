@@ -249,14 +249,13 @@ Cyc_Std_StringPtr_sa_struct{ int tag; struct _tagged_arr f1; } ; static const
 int Cyc_Std_DoublePtr_sa= 5; struct Cyc_Std_DoublePtr_sa_struct{ int tag; double*
 f1; } ; static const int Cyc_Std_FloatPtr_sa= 6; struct Cyc_Std_FloatPtr_sa_struct{
 int tag; float* f1; } ; struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl;
-} ; extern unsigned char Cyc_List_List_empty[ 15u]; extern struct Cyc_List_List*
-Cyc_List_map( void*(* f)( void*), struct Cyc_List_List* x); extern unsigned char
-Cyc_List_List_mismatch[ 18u]; extern struct Cyc_List_List* Cyc_List_imp_rev(
-struct Cyc_List_List* x); extern unsigned char Cyc_List_Nth[ 8u]; struct Cyc_Lineno_Pos{
-struct _tagged_arr logical_file; struct _tagged_arr line; int line_no; int col;
-} ; extern unsigned char Cyc_Position_Exit[ 9u]; struct Cyc_Position_Segment;
-static const int Cyc_Position_Lex= 0; static const int Cyc_Position_Parse= 1;
-static const int Cyc_Position_Elab= 2; struct Cyc_Position_Error{ struct
+} ; extern struct Cyc_List_List* Cyc_List_map( void*(* f)( void*), struct Cyc_List_List*
+x); extern unsigned char Cyc_List_List_mismatch[ 18u]; extern struct Cyc_List_List*
+Cyc_List_imp_rev( struct Cyc_List_List* x); extern unsigned char Cyc_List_Nth[ 8u];
+struct Cyc_Lineno_Pos{ struct _tagged_arr logical_file; struct _tagged_arr line;
+int line_no; int col; } ; extern unsigned char Cyc_Position_Exit[ 9u]; struct
+Cyc_Position_Segment; static const int Cyc_Position_Lex= 0; static const int Cyc_Position_Parse=
+1; static const int Cyc_Position_Elab= 2; struct Cyc_Position_Error{ struct
 _tagged_arr source; struct Cyc_Position_Segment* seg; void* kind; struct
 _tagged_arr desc; } ; extern unsigned char Cyc_Position_Nocontext[ 14u]; struct
 _tuple0{ void* f1; struct _tagged_arr* f2; } ; struct Cyc_Absyn_Tvar; struct Cyc_Absyn_Tqual;

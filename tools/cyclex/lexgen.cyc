@@ -204,7 +204,7 @@ static list_t<$(set_t<transition_t>,int)@>     todo           = NULL;
 static int                                 next_state_num = 0;
 
 static void reset_state_mem() {
-  state_map      = new Opt(Dict::empty(Set::compare));
+  state_map      = new Opt(Dict::empty(Set::setcmp));
   todo           = NULL;
   next_state_num = 0;
 }

@@ -230,21 +230,21 @@ struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*
 extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
 extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_List_List{
 void* hd; struct Cyc_List_List* tl; } ; extern int Cyc_List_length( struct Cyc_List_List*
-x); extern unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
-18u]; extern struct Cyc_List_List* Cyc_List_append( struct Cyc_List_List* x,
-struct Cyc_List_List* y); extern unsigned char Cyc_List_Nth[ 8u]; extern int Cyc_List_mem(
-int(* compare)( void*, void*), struct Cyc_List_List* l, void* x); extern struct
-Cyc_List_List* Cyc_List_filter_c( int(* f)( void*, void*), void* env, struct Cyc_List_List*
-x); extern int Cyc_Std_strcmp( struct _tagged_arr s1, struct _tagged_arr s2);
-extern int Cyc_Std_strptrcmp( struct _tagged_arr* s1, struct _tagged_arr* s2);
-extern int Cyc_Std_zstrptrcmp( struct _tagged_arr*, struct _tagged_arr*); struct
-Cyc_Lineno_Pos{ struct _tagged_arr logical_file; struct _tagged_arr line; int
-line_no; int col; } ; extern unsigned char Cyc_Position_Exit[ 9u]; struct Cyc_Position_Segment;
-static const int Cyc_Position_Lex= 0; static const int Cyc_Position_Parse= 1;
-static const int Cyc_Position_Elab= 2; struct Cyc_Position_Error{ struct
-_tagged_arr source; struct Cyc_Position_Segment* seg; void* kind; struct
-_tagged_arr desc; } ; extern unsigned char Cyc_Position_Nocontext[ 14u]; struct
-_tuple0{ void* f1; struct _tagged_arr* f2; } ; struct Cyc_Absyn_Tvar; struct Cyc_Absyn_Tqual;
+x); extern unsigned char Cyc_List_List_mismatch[ 18u]; extern struct Cyc_List_List*
+Cyc_List_append( struct Cyc_List_List* x, struct Cyc_List_List* y); extern
+unsigned char Cyc_List_Nth[ 8u]; extern int Cyc_List_mem( int(* compare)( void*,
+void*), struct Cyc_List_List* l, void* x); extern struct Cyc_List_List* Cyc_List_filter_c(
+int(* f)( void*, void*), void* env, struct Cyc_List_List* x); extern int Cyc_Std_strcmp(
+struct _tagged_arr s1, struct _tagged_arr s2); extern int Cyc_Std_strptrcmp(
+struct _tagged_arr* s1, struct _tagged_arr* s2); extern int Cyc_Std_zstrptrcmp(
+struct _tagged_arr*, struct _tagged_arr*); struct Cyc_Lineno_Pos{ struct
+_tagged_arr logical_file; struct _tagged_arr line; int line_no; int col; } ;
+extern unsigned char Cyc_Position_Exit[ 9u]; struct Cyc_Position_Segment; static
+const int Cyc_Position_Lex= 0; static const int Cyc_Position_Parse= 1; static
+const int Cyc_Position_Elab= 2; struct Cyc_Position_Error{ struct _tagged_arr
+source; struct Cyc_Position_Segment* seg; void* kind; struct _tagged_arr desc; }
+; extern unsigned char Cyc_Position_Nocontext[ 14u]; struct _tuple0{ void* f1;
+struct _tagged_arr* f2; } ; struct Cyc_Absyn_Tvar; struct Cyc_Absyn_Tqual;
 struct Cyc_Absyn_Conref; struct Cyc_Absyn_PtrInfo; struct Cyc_Absyn_VarargInfo;
 struct Cyc_Absyn_FnInfo; struct Cyc_Absyn_TunionInfo; struct Cyc_Absyn_TunionFieldInfo;
 struct Cyc_Absyn_VarargCallInfo; struct Cyc_Absyn_Exp; struct Cyc_Absyn_Stmt;
@@ -574,7 +574,7 @@ struct Cyc_List_List* curr_namespace; } ; extern void Cyc_Absynpp_set_params(
 struct Cyc_Absynpp_Params* fs); extern struct Cyc_Absynpp_Params Cyc_Absynpp_tc_params_r;
 extern struct _tagged_arr Cyc_Absynpp_typ2string( void*); extern struct
 _tagged_arr Cyc_Absynpp_qvar2string( struct _tuple0*); struct Cyc_Set_Set;
-extern struct Cyc_Set_Set* Cyc_Set_empty( int(* comp)( void*, void*)); extern
+extern struct Cyc_Set_Set* Cyc_Set_empty( int(* cmp)( void*, void*)); extern
 struct Cyc_Set_Set* Cyc_Set_insert( struct Cyc_Set_Set* s, void* elt); extern
 int Cyc_Set_member( struct Cyc_Set_Set* s, void* elt); extern unsigned char Cyc_Set_Absent[
 11u]; struct Cyc_Dict_Dict; extern unsigned char Cyc_Dict_Present[ 12u]; extern
@@ -1566,7 +1566,7 @@ int(*)( struct Cyc_Set_Set* set, struct _tagged_arr* x, struct _tuple3* y)) Cyc_
 _temp760, _temp759->ordinaries);} static struct _tuple6* Cyc_Tc_treeshake_make_env_f(
 struct Cyc_Tcenv_Genv* ge){ return({ struct _tuple6* _temp761=( struct _tuple6*)
 _cycalloc( sizeof( struct _tuple6)); _temp761->f1= ge; _temp761->f2=(( struct
-Cyc_Set_Set*(*)( int(* comp)( struct _tagged_arr*, struct _tagged_arr*))) Cyc_Set_empty)(
+Cyc_Set_Set*(*)( int(* cmp)( struct _tagged_arr*, struct _tagged_arr*))) Cyc_Set_empty)(
 Cyc_Std_strptrcmp); _temp761;});} struct Cyc_List_List* Cyc_Tc_treeshake( struct
 Cyc_Tcenv_Tenv* te, struct Cyc_List_List* ds){ struct Cyc_Dict_Dict* _temp762=((
 struct Cyc_Dict_Dict*(*)( struct _tuple6*(* f)( struct Cyc_Tcenv_Genv*), struct

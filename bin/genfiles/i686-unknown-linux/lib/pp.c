@@ -250,36 +250,35 @@ int Cyc_Std_DoublePtr_sa= 5; struct Cyc_Std_DoublePtr_sa_struct{ int tag; double
 f1; } ; static const int Cyc_Std_FloatPtr_sa= 6; struct Cyc_Std_FloatPtr_sa_struct{
 int tag; float* f1; } ; struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl;
 } ; extern int Cyc_List_length( struct Cyc_List_List* x); extern unsigned char
-Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[ 18u];
-extern unsigned char Cyc_List_Nth[ 8u]; extern unsigned int Cyc_Std_strlen(
-struct _tagged_arr s); extern int Cyc_Std_zstrptrcmp( struct _tagged_arr*,
-struct _tagged_arr*); extern struct _tagged_arr Cyc_Std_str_sepstr( struct Cyc_List_List*,
-struct _tagged_arr); struct Cyc_Hashtable_Table; extern struct Cyc_Hashtable_Table*
-Cyc_Hashtable_create( int sz, int(* cmp)( void*, void*), int(* hash)( void*));
-extern void Cyc_Hashtable_insert( struct Cyc_Hashtable_Table* t, void* key, void*
-val); extern void* Cyc_Hashtable_lookup( struct Cyc_Hashtable_Table* t, void*
-key); extern int Cyc_Hashtable_hash_stringptr( struct _tagged_arr* p); static
-const int Cyc_Fn_Fun= 0; struct Cyc_Fn_Fun_struct{ int tag; void*(* f1)( void*,
-void*); void* f2; } ; extern void* Cyc_Fn_make_fn( void*(* f)( void*, void*),
-void* x); extern void* Cyc_Fn_fp2fn( void*(* f)( void*)); extern void* Cyc_Fn_apply(
-void* f, void* x); struct Cyc_PP_Ppstate; struct Cyc_PP_Out; struct Cyc_PP_Doc;
-extern void Cyc_PP_file_of_doc( struct Cyc_PP_Doc* d, int w, struct Cyc_Std___sFILE*
-f); extern struct _tagged_arr Cyc_PP_string_of_doc( struct Cyc_PP_Doc* d, int w);
-struct _tuple0{ struct _tagged_arr f1; struct Cyc_List_List* f2; } ; extern
-struct _tuple0* Cyc_PP_string_and_links( struct Cyc_PP_Doc* d, int w); extern
-struct Cyc_PP_Doc* Cyc_PP_nil_doc(); extern struct Cyc_PP_Doc* Cyc_PP_blank_doc();
-extern struct Cyc_PP_Doc* Cyc_PP_line_doc(); extern struct Cyc_PP_Doc* Cyc_PP_oline_doc();
-extern struct Cyc_PP_Doc* Cyc_PP_text( struct _tagged_arr s); extern struct Cyc_PP_Doc*
-Cyc_PP_textptr( struct _tagged_arr* p); extern struct Cyc_PP_Doc* Cyc_PP_hyperlink(
-struct _tagged_arr shrt, struct _tagged_arr full); extern struct Cyc_PP_Doc* Cyc_PP_nest(
-int k, struct Cyc_PP_Doc* d); extern struct Cyc_PP_Doc* Cyc_PP_cat( struct
-_tagged_arr); extern struct Cyc_PP_Doc* Cyc_PP_cats( struct Cyc_List_List*
-doclist); extern struct Cyc_PP_Doc* Cyc_PP_cats_arr( struct _tagged_arr docs);
-extern struct Cyc_PP_Doc* Cyc_PP_doc_union( struct Cyc_PP_Doc* d1, struct Cyc_PP_Doc*
-d2); extern struct Cyc_PP_Doc* Cyc_PP_tab( struct Cyc_PP_Doc* d); extern struct
-Cyc_PP_Doc* Cyc_PP_seq( struct _tagged_arr sep, struct Cyc_List_List* l); extern
-struct Cyc_PP_Doc* Cyc_PP_ppseq( struct Cyc_PP_Doc*(* pp)( void*), struct
-_tagged_arr sep, struct Cyc_List_List* l); extern struct Cyc_PP_Doc* Cyc_PP_seql(
+Cyc_List_List_mismatch[ 18u]; extern unsigned char Cyc_List_Nth[ 8u]; extern
+unsigned int Cyc_Std_strlen( struct _tagged_arr s); extern int Cyc_Std_zstrptrcmp(
+struct _tagged_arr*, struct _tagged_arr*); extern struct _tagged_arr Cyc_Std_str_sepstr(
+struct Cyc_List_List*, struct _tagged_arr); struct Cyc_Hashtable_Table; extern
+struct Cyc_Hashtable_Table* Cyc_Hashtable_create( int sz, int(* cmp)( void*,
+void*), int(* hash)( void*)); extern void Cyc_Hashtable_insert( struct Cyc_Hashtable_Table*
+t, void* key, void* val); extern void* Cyc_Hashtable_lookup( struct Cyc_Hashtable_Table*
+t, void* key); extern int Cyc_Hashtable_hash_stringptr( struct _tagged_arr* p);
+static const int Cyc_Fn_Fun= 0; struct Cyc_Fn_Fun_struct{ int tag; void*(* f1)(
+void*, void*); void* f2; } ; extern void* Cyc_Fn_make_fn( void*(* f)( void*,
+void*), void* x); extern void* Cyc_Fn_fp2fn( void*(* f)( void*)); extern void*
+Cyc_Fn_apply( void* f, void* x); struct Cyc_PP_Ppstate; struct Cyc_PP_Out;
+struct Cyc_PP_Doc; extern void Cyc_PP_file_of_doc( struct Cyc_PP_Doc* d, int w,
+struct Cyc_Std___sFILE* f); extern struct _tagged_arr Cyc_PP_string_of_doc(
+struct Cyc_PP_Doc* d, int w); struct _tuple0{ struct _tagged_arr f1; struct Cyc_List_List*
+f2; } ; extern struct _tuple0* Cyc_PP_string_and_links( struct Cyc_PP_Doc* d,
+int w); extern struct Cyc_PP_Doc* Cyc_PP_nil_doc(); extern struct Cyc_PP_Doc*
+Cyc_PP_blank_doc(); extern struct Cyc_PP_Doc* Cyc_PP_line_doc(); extern struct
+Cyc_PP_Doc* Cyc_PP_oline_doc(); extern struct Cyc_PP_Doc* Cyc_PP_text( struct
+_tagged_arr s); extern struct Cyc_PP_Doc* Cyc_PP_textptr( struct _tagged_arr* p);
+extern struct Cyc_PP_Doc* Cyc_PP_hyperlink( struct _tagged_arr shrt, struct
+_tagged_arr full); extern struct Cyc_PP_Doc* Cyc_PP_nest( int k, struct Cyc_PP_Doc*
+d); extern struct Cyc_PP_Doc* Cyc_PP_cat( struct _tagged_arr); extern struct Cyc_PP_Doc*
+Cyc_PP_cats( struct Cyc_List_List* doclist); extern struct Cyc_PP_Doc* Cyc_PP_cats_arr(
+struct _tagged_arr docs); extern struct Cyc_PP_Doc* Cyc_PP_doc_union( struct Cyc_PP_Doc*
+d1, struct Cyc_PP_Doc* d2); extern struct Cyc_PP_Doc* Cyc_PP_tab( struct Cyc_PP_Doc*
+d); extern struct Cyc_PP_Doc* Cyc_PP_seq( struct _tagged_arr sep, struct Cyc_List_List*
+l); extern struct Cyc_PP_Doc* Cyc_PP_ppseq( struct Cyc_PP_Doc*(* pp)( void*),
+struct _tagged_arr sep, struct Cyc_List_List* l); extern struct Cyc_PP_Doc* Cyc_PP_seql(
 struct _tagged_arr sep, struct Cyc_List_List* l0); extern struct Cyc_PP_Doc* Cyc_PP_ppseql(
 struct Cyc_PP_Doc*(* pp)( void*), struct _tagged_arr sep, struct Cyc_List_List*
 l); extern struct Cyc_PP_Doc* Cyc_PP_group( struct _tagged_arr start, struct

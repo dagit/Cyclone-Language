@@ -262,14 +262,13 @@ struct _tagged_arr lex_check; } ; extern struct Cyc_Lexing_lexbuf* Cyc_Lexing_fr
 struct Cyc_Std___sFILE*); extern struct _tagged_arr Cyc_Lexing_lexeme( struct
 Cyc_Lexing_lexbuf*); extern int Cyc_Lexing_lexeme_end( struct Cyc_Lexing_lexbuf*);
 struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; extern
-unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
-18u]; extern struct Cyc_List_List* Cyc_List_merge_sort( int(* cmp)( void*, void*),
-struct Cyc_List_List* x); extern unsigned char Cyc_List_Nth[ 8u]; extern
-unsigned int Cyc_Std_strlen( struct _tagged_arr s); extern struct _tagged_arr
-Cyc_Std_strdup( struct _tagged_arr src); extern struct _tagged_arr Cyc_Std_substring(
-struct _tagged_arr, int ofs, unsigned int n); struct Cyc_Lineno_Pos{ struct
-_tagged_arr logical_file; struct _tagged_arr line; int line_no; int col; } ;
-extern struct Cyc_Lineno_Pos* Cyc_Lineno_pos_of_abs( struct _tagged_arr, int);
+unsigned char Cyc_List_List_mismatch[ 18u]; extern struct Cyc_List_List* Cyc_List_merge_sort(
+int(* cmp)( void*, void*), struct Cyc_List_List* x); extern unsigned char Cyc_List_Nth[
+8u]; extern unsigned int Cyc_Std_strlen( struct _tagged_arr s); extern struct
+_tagged_arr Cyc_Std_strdup( struct _tagged_arr src); extern struct _tagged_arr
+Cyc_Std_substring( struct _tagged_arr, int ofs, unsigned int n); struct Cyc_Lineno_Pos{
+struct _tagged_arr logical_file; struct _tagged_arr line; int line_no; int col;
+} ; extern struct Cyc_Lineno_Pos* Cyc_Lineno_pos_of_abs( struct _tagged_arr, int);
 extern void Cyc_Lineno_poss_of_abss( struct _tagged_arr filename, struct Cyc_List_List*
 places); static const int Cyc_Lineno_NEWLINE= 0; static const int Cyc_Lineno_LINEDEF=
 1; static const int Cyc_Lineno_END= 2; const int Cyc_Lineno_lex_base[ 8u]=(

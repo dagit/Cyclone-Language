@@ -264,10 +264,10 @@ struct _tagged_arr); extern struct _tagged_arr Cyc_Lexing_lexeme( struct Cyc_Lex
 extern unsigned char Cyc_Lexing_lexeme_char( struct Cyc_Lexing_lexbuf*, int);
 extern int Cyc_Lexing_lexeme_start( struct Cyc_Lexing_lexbuf*); extern int Cyc_Lexing_lexeme_end(
 struct Cyc_Lexing_lexbuf*); struct Cyc_List_List{ void* hd; struct Cyc_List_List*
-tl; } ; extern unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
-18u]; extern unsigned char Cyc_List_Nth[ 8u]; extern struct _tagged_arr Cyc_Std_zstrncpy(
-struct _tagged_arr, struct _tagged_arr, unsigned int); extern struct _tagged_arr
-Cyc_Std_strdup( struct _tagged_arr src); unsigned char Cyc_Lexing_Error[ 10u]="\000\000\000\000Error";
+tl; } ; extern unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char
+Cyc_List_Nth[ 8u]; extern struct _tagged_arr Cyc_Std_zstrncpy( struct
+_tagged_arr, struct _tagged_arr, unsigned int); extern struct _tagged_arr Cyc_Std_strdup(
+struct _tagged_arr src); unsigned char Cyc_Lexing_Error[ 10u]="\000\000\000\000Error";
 struct Cyc_Lexing_lexbuf; struct Cyc_Lexing_function_lexbuf_state; struct Cyc_Lexing_lex_tables;
 static unsigned char Cyc_Lexing_aux_buffer_v[ 1u]={'\000'}; static struct
 _tagged_arr Cyc_Lexing_aux_buffer={( void*)(( unsigned char*) Cyc_Lexing_aux_buffer_v),(

@@ -229,14 +229,13 @@ string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring
 struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
 extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
 extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_List_List{
-void* hd; struct Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_empty[
-15u]; extern unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char
-Cyc_List_Nth[ 8u]; extern struct _tagged_arr Cyc_List_to_array( struct Cyc_List_List*
-x); extern struct Cyc_List_List* Cyc_List_from_array( struct _tagged_arr arr);
-extern void Cyc_Array_qsort( int(* cmp)( void*, void*), struct _tagged_arr x,
-int len); extern void Cyc_Array_msort( int(* cmp)( void*, void*), struct
-_tagged_arr x, int len); extern struct _tagged_arr Cyc_Array_from_list( struct
-Cyc_List_List* l); extern struct Cyc_List_List* Cyc_Array_to_list( struct
+void* hd; struct Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_mismatch[
+18u]; extern unsigned char Cyc_List_Nth[ 8u]; extern struct _tagged_arr Cyc_List_to_array(
+struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_from_array(
+struct _tagged_arr arr); extern void Cyc_Array_qsort( int(* cmp)( void*, void*),
+struct _tagged_arr x, int len); extern void Cyc_Array_msort( int(* cmp)( void*,
+void*), struct _tagged_arr x, int len); extern struct _tagged_arr Cyc_Array_from_list(
+struct Cyc_List_List* l); extern struct Cyc_List_List* Cyc_Array_to_list( struct
 _tagged_arr x); extern struct _tagged_arr Cyc_Array_copy( struct _tagged_arr x);
 extern struct _tagged_arr Cyc_Array_map( void*(* f)( void*), struct _tagged_arr
 x); extern struct _tagged_arr Cyc_Array_map_c( void*(* f)( void*, void*), void*

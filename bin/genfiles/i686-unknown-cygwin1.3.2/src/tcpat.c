@@ -231,35 +231,35 @@ struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*
 extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
 extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_List_List{
 void* hd; struct Cyc_List_List* tl; } ; extern int Cyc_List_length( struct Cyc_List_List*
-x); extern unsigned char Cyc_List_List_empty[ 15u]; extern struct Cyc_List_List*
-Cyc_List_map( void*(* f)( void*), struct Cyc_List_List* x); extern struct Cyc_List_List*
-Cyc_List_rmap( struct _RegionHandle*, void*(* f)( void*), struct Cyc_List_List*
-x); extern struct Cyc_List_List* Cyc_List_map_c( void*(* f)( void*, void*), void*
-env, struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_rmap_c(
-struct _RegionHandle*, void*(* f)( void*, void*), void* env, struct Cyc_List_List*
-x); extern unsigned char Cyc_List_List_mismatch[ 18u]; extern struct Cyc_List_List*
-Cyc_List_rev( struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_imp_rev(
-struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_append( struct
-Cyc_List_List* x, struct Cyc_List_List* y); extern struct Cyc_List_List* Cyc_List_rappend(
-struct _RegionHandle*, struct Cyc_List_List* x, struct Cyc_List_List* y); extern
-unsigned char Cyc_List_Nth[ 8u]; extern struct Cyc_List_List* Cyc_List_rzip(
-struct _RegionHandle* r1, struct _RegionHandle* r2, struct Cyc_List_List* x,
-struct Cyc_List_List* y); extern struct Cyc_List_List* Cyc_List_tabulate_c( int
-n, void*(* f)( void*, int), void* env); struct Cyc_Dict_Dict; extern
-unsigned char Cyc_Dict_Present[ 12u]; extern unsigned char Cyc_Dict_Absent[ 11u];
-struct Cyc_Set_Set; extern struct Cyc_Set_Set* Cyc_Set_empty( int(* comp)( void*,
-void*)); extern struct Cyc_Set_Set* Cyc_Set_insert( struct Cyc_Set_Set* s, void*
-elt); extern int Cyc_Set_cardinality( struct Cyc_Set_Set* s); extern int Cyc_Set_member(
-struct Cyc_Set_Set* s, void* elt); extern unsigned char Cyc_Set_Absent[ 11u];
-extern int Cyc_Std_strcmp( struct _tagged_arr s1, struct _tagged_arr s2); extern
-int Cyc_Std_zstrcmp( struct _tagged_arr, struct _tagged_arr); extern int Cyc_Std_zstrptrcmp(
-struct _tagged_arr*, struct _tagged_arr*); struct Cyc_Lineno_Pos{ struct
-_tagged_arr logical_file; struct _tagged_arr line; int line_no; int col; } ;
-extern unsigned char Cyc_Position_Exit[ 9u]; struct Cyc_Position_Segment; static
-const int Cyc_Position_Lex= 0; static const int Cyc_Position_Parse= 1; static
-const int Cyc_Position_Elab= 2; struct Cyc_Position_Error{ struct _tagged_arr
-source; struct Cyc_Position_Segment* seg; void* kind; struct _tagged_arr desc; }
-; extern unsigned char Cyc_Position_Nocontext[ 14u]; struct _tuple1{ void* f1;
+x); extern struct Cyc_List_List* Cyc_List_map( void*(* f)( void*), struct Cyc_List_List*
+x); extern struct Cyc_List_List* Cyc_List_rmap( struct _RegionHandle*, void*(* f)(
+void*), struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_map_c(
+void*(* f)( void*, void*), void* env, struct Cyc_List_List* x); extern struct
+Cyc_List_List* Cyc_List_rmap_c( struct _RegionHandle*, void*(* f)( void*, void*),
+void* env, struct Cyc_List_List* x); extern unsigned char Cyc_List_List_mismatch[
+18u]; extern struct Cyc_List_List* Cyc_List_rev( struct Cyc_List_List* x);
+extern struct Cyc_List_List* Cyc_List_imp_rev( struct Cyc_List_List* x); extern
+struct Cyc_List_List* Cyc_List_append( struct Cyc_List_List* x, struct Cyc_List_List*
+y); extern struct Cyc_List_List* Cyc_List_rappend( struct _RegionHandle*, struct
+Cyc_List_List* x, struct Cyc_List_List* y); extern unsigned char Cyc_List_Nth[ 8u];
+extern struct Cyc_List_List* Cyc_List_rzip( struct _RegionHandle* r1, struct
+_RegionHandle* r2, struct Cyc_List_List* x, struct Cyc_List_List* y); extern
+struct Cyc_List_List* Cyc_List_tabulate_c( int n, void*(* f)( void*, int), void*
+env); struct Cyc_Dict_Dict; extern unsigned char Cyc_Dict_Present[ 12u]; extern
+unsigned char Cyc_Dict_Absent[ 11u]; struct Cyc_Set_Set; extern struct Cyc_Set_Set*
+Cyc_Set_empty( int(* cmp)( void*, void*)); extern struct Cyc_Set_Set* Cyc_Set_insert(
+struct Cyc_Set_Set* s, void* elt); extern int Cyc_Set_cardinality( struct Cyc_Set_Set*
+s); extern int Cyc_Set_member( struct Cyc_Set_Set* s, void* elt); extern
+unsigned char Cyc_Set_Absent[ 11u]; extern int Cyc_Std_strcmp( struct
+_tagged_arr s1, struct _tagged_arr s2); extern int Cyc_Std_zstrcmp( struct
+_tagged_arr, struct _tagged_arr); extern int Cyc_Std_zstrptrcmp( struct
+_tagged_arr*, struct _tagged_arr*); struct Cyc_Lineno_Pos{ struct _tagged_arr
+logical_file; struct _tagged_arr line; int line_no; int col; } ; extern
+unsigned char Cyc_Position_Exit[ 9u]; struct Cyc_Position_Segment; static const
+int Cyc_Position_Lex= 0; static const int Cyc_Position_Parse= 1; static const
+int Cyc_Position_Elab= 2; struct Cyc_Position_Error{ struct _tagged_arr source;
+struct Cyc_Position_Segment* seg; void* kind; struct _tagged_arr desc; } ;
+extern unsigned char Cyc_Position_Nocontext[ 14u]; struct _tuple1{ void* f1;
 struct _tagged_arr* f2; } ; struct Cyc_Absyn_Tvar; struct Cyc_Absyn_Tqual;
 struct Cyc_Absyn_Conref; struct Cyc_Absyn_PtrInfo; struct Cyc_Absyn_VarargInfo;
 struct Cyc_Absyn_FnInfo; struct Cyc_Absyn_TunionInfo; struct Cyc_Absyn_TunionFieldInfo;
@@ -1193,7 +1193,7 @@ else{ goto _LL474;} _LL474: if(*(( int*) _temp470) ==  Cyc_Tcpat_Int_v){ _LL477:
 _temp476=(( struct Cyc_Tcpat_Int_v_struct*) _temp470)->f1; goto _LL475;} else{
 goto _LL471;} _LL473: return 1; _LL475: return _temp460 -  _temp476; _LL471:;}
 _LL453:;} static struct Cyc_Set_Set* Cyc_Tcpat_empty_con_set(){ return(( struct
-Cyc_Set_Set*(*)( int(* comp)( struct Cyc_Tcpat_Con_s*, struct Cyc_Tcpat_Con_s*)))
+Cyc_Set_Set*(*)( int(* cmp)( struct Cyc_Tcpat_Con_s*, struct Cyc_Tcpat_Con_s*)))
 Cyc_Set_empty)( Cyc_Tcpat_compare_con);} static struct Cyc_Core_Opt Cyc_Tcpat_one_opt={(
 void*) 1}; static struct Cyc_Core_Opt Cyc_Tcpat_two_opt={( void*) 2}; static
 struct Cyc_Core_Opt* Cyc_Tcpat_one_opt_ptr=( struct Cyc_Core_Opt*)& Cyc_Tcpat_one_opt;

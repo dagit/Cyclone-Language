@@ -249,26 +249,26 @@ int Cyc_Std_DoublePtr_sa= 5; struct Cyc_Std_DoublePtr_sa_struct{ int tag; double
 f1; } ; static const int Cyc_Std_FloatPtr_sa= 6; struct Cyc_Std_FloatPtr_sa_struct{
 int tag; float* f1; } ; extern int Cyc_Std_sscanf( struct _tagged_arr src,
 struct _tagged_arr fmt, struct _tagged_arr); struct Cyc_List_List{ void* hd;
-struct Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_empty[ 15u];
-extern unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char Cyc_List_Nth[
-8u]; extern unsigned int Cyc_Std_strlen( struct _tagged_arr s); extern int Cyc_Std_strcmp(
-struct _tagged_arr s1, struct _tagged_arr s2); extern int Cyc_Std_strncmp(
-struct _tagged_arr s1, struct _tagged_arr s2, unsigned int len); extern struct
-_tagged_arr Cyc_Std_strconcat( struct _tagged_arr, struct _tagged_arr); extern
-unsigned char Cyc_Arg_Bad[ 8u]; struct Cyc_Arg_Bad_struct{ unsigned char* tag;
-struct _tagged_arr f1; } ; extern unsigned char Cyc_Arg_Error[ 10u]; static
-const int Cyc_Arg_Unit_spec= 0; struct Cyc_Arg_Unit_spec_struct{ int tag; void(*
-f1)(); } ; static const int Cyc_Arg_Flag_spec= 1; struct Cyc_Arg_Flag_spec_struct{
-int tag; void(* f1)( struct _tagged_arr); } ; static const int Cyc_Arg_FlagString_spec=
-2; struct Cyc_Arg_FlagString_spec_struct{ int tag; void(* f1)( struct
-_tagged_arr, struct _tagged_arr); } ; static const int Cyc_Arg_Set_spec= 3;
-struct Cyc_Arg_Set_spec_struct{ int tag; int* f1; } ; static const int Cyc_Arg_Clear_spec=
-4; struct Cyc_Arg_Clear_spec_struct{ int tag; int* f1; } ; static const int Cyc_Arg_String_spec=
-5; struct Cyc_Arg_String_spec_struct{ int tag; void(* f1)( struct _tagged_arr);
-} ; static const int Cyc_Arg_Int_spec= 6; struct Cyc_Arg_Int_spec_struct{ int
-tag; void(* f1)( int); } ; static const int Cyc_Arg_Rest_spec= 7; struct Cyc_Arg_Rest_spec_struct{
-int tag; void(* f1)( struct _tagged_arr); } ; extern void Cyc_Arg_usage( struct
-Cyc_List_List*, struct _tagged_arr); extern int Cyc_Arg_current; extern void Cyc_Arg_parse(
+struct Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_mismatch[ 18u];
+extern unsigned char Cyc_List_Nth[ 8u]; extern unsigned int Cyc_Std_strlen(
+struct _tagged_arr s); extern int Cyc_Std_strcmp( struct _tagged_arr s1, struct
+_tagged_arr s2); extern int Cyc_Std_strncmp( struct _tagged_arr s1, struct
+_tagged_arr s2, unsigned int len); extern struct _tagged_arr Cyc_Std_strconcat(
+struct _tagged_arr, struct _tagged_arr); extern unsigned char Cyc_Arg_Bad[ 8u];
+struct Cyc_Arg_Bad_struct{ unsigned char* tag; struct _tagged_arr f1; } ; extern
+unsigned char Cyc_Arg_Error[ 10u]; static const int Cyc_Arg_Unit_spec= 0; struct
+Cyc_Arg_Unit_spec_struct{ int tag; void(* f1)(); } ; static const int Cyc_Arg_Flag_spec=
+1; struct Cyc_Arg_Flag_spec_struct{ int tag; void(* f1)( struct _tagged_arr); }
+; static const int Cyc_Arg_FlagString_spec= 2; struct Cyc_Arg_FlagString_spec_struct{
+int tag; void(* f1)( struct _tagged_arr, struct _tagged_arr); } ; static const
+int Cyc_Arg_Set_spec= 3; struct Cyc_Arg_Set_spec_struct{ int tag; int* f1; } ;
+static const int Cyc_Arg_Clear_spec= 4; struct Cyc_Arg_Clear_spec_struct{ int
+tag; int* f1; } ; static const int Cyc_Arg_String_spec= 5; struct Cyc_Arg_String_spec_struct{
+int tag; void(* f1)( struct _tagged_arr); } ; static const int Cyc_Arg_Int_spec=
+6; struct Cyc_Arg_Int_spec_struct{ int tag; void(* f1)( int); } ; static const
+int Cyc_Arg_Rest_spec= 7; struct Cyc_Arg_Rest_spec_struct{ int tag; void(* f1)(
+struct _tagged_arr); } ; extern void Cyc_Arg_usage( struct Cyc_List_List*,
+struct _tagged_arr); extern int Cyc_Arg_current; extern void Cyc_Arg_parse(
 struct Cyc_List_List* specs, void(* anonfun)( struct _tagged_arr), struct
 _tagged_arr errmsg, struct _tagged_arr args); struct Cyc_Buffer_t; extern struct
 Cyc_Buffer_t* Cyc_Buffer_create( unsigned int n); extern struct _tagged_arr Cyc_Buffer_contents(

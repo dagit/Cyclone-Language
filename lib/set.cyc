@@ -30,7 +30,7 @@ using List;
  * always maintained in sorted order with no duplicates.
  */
 abstract struct Set<`a,`r::R> {
-  int (@compare)(`a,`a);
+  int (@cmp)(`a,`a);
   int cardinality;
   list_t<`a,`r> nodes;
 };
@@ -57,9 +57,9 @@ bool is_empty(set_t s) {
 }
 
 /* Return true if element is present, false otherwise */
-static bool member_b(int compare(`a,`a),list_t<`a> n,`a elt) {
+static bool member_b(int cmp(`a,`a),list_t<`a> n,`a elt) {
   while (n != NULL) {
-    int i = compare(elt,n->hd);
+    int i = cmp(elt,n->hd);
     if (i == 0) return(true);
     else if (i < 0) return(false);
     else n = n->tl;
@@ -68,7 +68,7 @@ static bool member_b(int compare(`a,`a),list_t<`a> n,`a elt) {
 }
 
 bool member(set_t<`a> s,`a elt) {
-  return(member_b(s->compare,s->nodes,elt));
+  return(member_b(s->cmp,s->nodes,elt));
 }
 
 /* Internal function to insert an elt into a sorted list of nodes,
@@ -76,19 +76,19 @@ bool member(set_t<`a> s,`a elt) {
  * Assumes elt is not in the list.
  */
 static list_t<`a,`r> insert_b(region_t<`r> rgn,
-                              int compare(`a,`a),list_t<`a,`r> n,`a elt) {
+                              int cmp(`a,`a),list_t<`a,`r> n,`a elt) {
 
   if (n == NULL)
     return rnew(rgn) List(elt,NULL);
   else {
-    int i = compare(elt,n->hd);
+    int i = cmp(elt,n->hd);
     if (i < 0) 
       return rnew(rgn) List(elt,n);
     else {
       list_t<`a,`r> result = rnew(rgn) List(n->hd,NULL);
       list_t<`a,`r> prev = result;
       n = n->tl;
-      while (n != NULL && (i = compare(n->hd,elt)) < 0) {
+      while (n != NULL && (i = cmp(n->hd,elt)) < 0) {
 	prev->tl = rnew(rgn) List(n->hd,NULL);
 	prev = prev->tl;
 	n = n->tl;
@@ -102,13 +102,13 @@ static list_t<`a,`r> insert_b(region_t<`r> rgn,
 /* Inserts an elt into a set. */
 set_t<`a> insert(set_t<`a,`H> s,`a elt) {
   if (member(s,elt)) return(s);
-  else return new Set(s->compare,s->cardinality+1,
-                      insert_b(Core::heap_region,s->compare,s->nodes,elt));
+  else return new Set(s->cmp,s->cardinality+1,
+                      insert_b(Core::heap_region,s->cmp,s->nodes,elt));
 }
 set_t<`a,`r> rinsert(region_t<`r> rgn, set_t<`a,`r> s, `a elt) {
   if (member(s,elt)) return s;
-  else return rnew(rgn) Set(s->compare,s->cardinality+1,
-			    insert_b(rgn,s->compare,s->nodes,elt));
+  else return rnew(rgn) Set(s->cmp,s->cardinality+1,
+			    insert_b(rgn,s->cmp,s->nodes,elt));
 }
 
 /* Unions two sets by merging the nodes */
@@ -122,7 +122,7 @@ set_t<`a> union_two(set_t<`a,`H> s1,set_t<`a,`H> s2) {
 
   list_t<`a> nodes = NULL;
   int cardinality = 0;
-  int (@comp)(`a,`a) = s1->compare;
+  int (@comp)(`a,`a) = s1->cmp;
 
   list_t<`a> x1 = s1->nodes;
   list_t<`a> x2 = s2->nodes;
@@ -178,13 +178,13 @@ set_t<`a> union_two(set_t<`a,`H> s1,set_t<`a,`H> s2) {
 /* Internal function used to delete an elt from a list of nodes --
  * assumes the elt is in the list exactly once and that the nodes are sorted.
  */
-static list_t<`a> delete_b(int compare(`a,`a),list_t<`a,`H> n,`a elt) {
-  if (compare(n->hd,elt) == 0) return(n->tl);
+static list_t<`a> delete_b(int cmp(`a,`a),list_t<`a,`H> n,`a elt) {
+  if (cmp(n->hd,elt) == 0) return(n->tl);
 
   list_t<`a> result = new List(n->hd,NULL);
   list_t<`a> prev = result;
   n = n->tl;
-  while (n != NULL && (compare(n->hd,elt) != 0)) {
+  while (n != NULL && (cmp(n->hd,elt) != 0)) {
     prev->tl = new List(n->hd,NULL);
     prev = prev->tl;
     n = n->tl;
@@ -196,8 +196,8 @@ static list_t<`a> delete_b(int compare(`a,`a),list_t<`a,`H> n,`a elt) {
 /* Delete a elt/pair from the set if present. */
 set_t<`a> delete(set_t<`a,`H> s,`a elt) {
   if (member(s,elt)) 
-    return new Set(s->compare,s->cardinality - 1,
-                   delete_b(s->compare,s->nodes,elt));
+    return new Set(s->cmp,s->cardinality - 1,
+                   delete_b(s->cmp,s->nodes,elt));
   else return(s);
 }
 
@@ -246,7 +246,7 @@ void iter_c(void f(`c,`a),`c env,set_t<`a> s) {
 set_t<`a> intersect(set_t<`a,`H> s1,set_t<`a,`H> s2) {
   if(s1 == s2) 
     return s1;
-  int (@comp)(`a,`a) = s1->compare;
+  int (@comp)(`a,`a) = s1->cmp;
   list_t<`a> x1 = s1->nodes;
   list_t<`a> x2 = s2->nodes;
   list_t<`a> result=NULL,prev=NULL;
@@ -289,7 +289,7 @@ set_t<`a> from_list(int comp(`a,`a),list_t<`a,`r> x) {
 }
 
 bool subset(set_t<`a> s1,set_t<`a> s2) {
-  int (@comp)(`a,`a) = s1->compare;
+  int (@comp)(`a,`a) = s1->cmp;
   list_t<`a> x1 = s1->nodes;
   list_t<`a> x2 = s2->nodes;
 
@@ -308,7 +308,7 @@ bool subset(set_t<`a> s1,set_t<`a> s2) {
 }
 
 set_t<`a> diff(set_t<`a,`H> s1,set_t<`a,`H> s2) {
-  int (@comp)(`a,`a) = s1->compare;
+  int (@comp)(`a,`a) = s1->cmp;
   list_t<`a> x1 = s1->nodes;
   list_t<`a> x2 = s2->nodes;
   int card = s1->cardinality;
@@ -327,16 +327,16 @@ set_t<`a> diff(set_t<`a,`H> s1,set_t<`a,`H> s2) {
   return new Set(comp,card,x1);
 }
 
-int compare(set_t<`a> s1,set_t<`a> s2) {
+int setcmp(set_t<`a> s1,set_t<`a> s2) {
   // type-checker doesn't allow us to compare because the types aren't the same
   // if (s1 == s2) return 0; 
   if (s1->cardinality != s2->cardinality) return s1->cardinality-s2->cardinality;
 
   list_t<`a> x1 = s1->nodes;
   list_t<`a> x2 = s2->nodes;
-  int (@comp)(`a,`a) = s1->compare;
+  int (@cmp)(`a,`a) = s1->cmp;
   while (x1 != NULL) {
-    int diff = comp(x1->hd,x2->hd);
+    int diff = cmp(x1->hd,x2->hd);
     if (diff != 0) return diff;
     x1 = x1->tl;
     x2 = x2->tl;
@@ -345,7 +345,7 @@ int compare(set_t<`a> s1,set_t<`a> s2) {
 }
 
 bool equals(set_t<`a> s1, set_t<`a> s2) {
-  return compare(s1,s2) == 0;
+  return setcmp(s1,s2) == 0;
 }
     
 xtunion exn {Absent};

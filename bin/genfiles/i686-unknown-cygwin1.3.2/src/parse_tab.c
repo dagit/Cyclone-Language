@@ -258,13 +258,12 @@ int, void*); void* read_fun_state; } ; struct Cyc_Lexing_lex_tables{ struct
 _tagged_arr lex_base; struct _tagged_arr lex_backtrk; struct _tagged_arr
 lex_default; struct _tagged_arr lex_trans; struct _tagged_arr lex_check; } ;
 extern struct Cyc_Lexing_lexbuf* Cyc_Lexing_from_file( struct Cyc_Std___sFILE*);
-struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; extern
-unsigned char Cyc_List_List_empty[ 15u]; extern struct Cyc_List_List* Cyc_List_map(
-void*(* f)( void*), struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_map_c(
-void*(* f)( void*, void*), void* env, struct Cyc_List_List* x); extern
-unsigned char Cyc_List_List_mismatch[ 18u]; extern void Cyc_List_iter( void(* f)(
-void*), struct Cyc_List_List* x); extern void Cyc_List_iter_c( void(* f)( void*,
-void*), void* env, struct Cyc_List_List* x); extern void* Cyc_List_fold_right(
+struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; extern struct Cyc_List_List*
+Cyc_List_map( void*(* f)( void*), struct Cyc_List_List* x); extern struct Cyc_List_List*
+Cyc_List_map_c( void*(* f)( void*, void*), void* env, struct Cyc_List_List* x);
+extern unsigned char Cyc_List_List_mismatch[ 18u]; extern void Cyc_List_iter(
+void(* f)( void*), struct Cyc_List_List* x); extern void Cyc_List_iter_c( void(*
+f)( void*, void*), void* env, struct Cyc_List_List* x); extern void* Cyc_List_fold_right(
 void*(* f)( void*, void*), struct Cyc_List_List* x, void* accum); extern struct
 Cyc_List_List* Cyc_List_imp_rev( struct Cyc_List_List* x); extern struct Cyc_List_List*
 Cyc_List_append( struct Cyc_List_List* x, struct Cyc_List_List* y); extern

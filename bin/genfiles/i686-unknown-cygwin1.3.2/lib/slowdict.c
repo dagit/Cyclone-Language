@@ -229,13 +229,12 @@ string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring
 struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
 extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
 extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_List_List{
-void* hd; struct Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_empty[
-15u]; extern unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char
-Cyc_List_Nth[ 8u]; struct Cyc_Splay_node; struct Cyc_Splay_noderef{ struct Cyc_Splay_node*
-v; } ; static const int Cyc_Splay_Leaf= 0; static const int Cyc_Splay_Node= 0;
-struct Cyc_Splay_Node_struct{ int tag; struct Cyc_Splay_noderef* f1; } ; struct
-Cyc_Splay_node{ void* key; void* data; void* left; void* right; } ; extern int
-Cyc_Splay_splay( int(* f)( void*, void*), void*, void*); struct Cyc_SlowDict_Dict;
+void* hd; struct Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_mismatch[
+18u]; extern unsigned char Cyc_List_Nth[ 8u]; struct Cyc_Splay_node; struct Cyc_Splay_noderef{
+struct Cyc_Splay_node* v; } ; static const int Cyc_Splay_Leaf= 0; static const
+int Cyc_Splay_Node= 0; struct Cyc_Splay_Node_struct{ int tag; struct Cyc_Splay_noderef*
+f1; } ; struct Cyc_Splay_node{ void* key; void* data; void* left; void* right; }
+; extern int Cyc_Splay_splay( int(* f)( void*, void*), void*, void*); struct Cyc_SlowDict_Dict;
 extern unsigned char Cyc_SlowDict_Present[ 12u]; extern unsigned char Cyc_SlowDict_Absent[
 11u]; extern struct Cyc_SlowDict_Dict* Cyc_SlowDict_empty( int(* cmp)( void*,
 void*)); extern int Cyc_SlowDict_is_empty( struct Cyc_SlowDict_Dict* d); extern

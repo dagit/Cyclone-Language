@@ -230,20 +230,20 @@ unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
 _tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
 wrap_Cstring_as_string( unsigned char*, unsigned int); extern struct _tagged_arr
 ntCsl_to_ntsl( unsigned char**); struct Cyc_List_List{ void* hd; struct Cyc_List_List*
-tl; } ; extern unsigned char Cyc_List_List_empty[ 15u]; extern struct Cyc_List_List*
-Cyc_List_rcopy( struct _RegionHandle*, struct Cyc_List_List* x); extern
-unsigned char Cyc_List_List_mismatch[ 18u]; extern struct Cyc_List_List* Cyc_List_imp_rev(
-struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_append( struct
-Cyc_List_List* x, struct Cyc_List_List* y); extern unsigned char Cyc_List_Nth[ 8u];
-struct Cyc_Dict_Dict; extern unsigned char Cyc_Dict_Present[ 12u]; extern
-unsigned char Cyc_Dict_Absent[ 11u]; extern struct Cyc_Dict_Dict* Cyc_Dict_rempty(
-struct _RegionHandle*, int(* cmp)( void*, void*)); extern int Cyc_Dict_member(
-struct Cyc_Dict_Dict* d, void* k); extern struct Cyc_Dict_Dict* Cyc_Dict_insert(
-struct Cyc_Dict_Dict* d, void* k, void* v); extern void* Cyc_Dict_lookup( struct
-Cyc_Dict_Dict* d, void* k); extern struct Cyc_Dict_Dict* Cyc_Dict_rdelete_same(
-struct Cyc_Dict_Dict*, void*); extern int Cyc_Std_zstrptrcmp( struct _tagged_arr*,
-struct _tagged_arr*); struct Cyc_Std___sFILE; extern unsigned char Cyc_Std_FileCloseError[
-19u]; extern unsigned char Cyc_Std_FileOpenError[ 18u]; struct Cyc_Std_FileOpenError_struct{
+tl; } ; extern struct Cyc_List_List* Cyc_List_rcopy( struct _RegionHandle*,
+struct Cyc_List_List* x); extern unsigned char Cyc_List_List_mismatch[ 18u];
+extern struct Cyc_List_List* Cyc_List_imp_rev( struct Cyc_List_List* x); extern
+struct Cyc_List_List* Cyc_List_append( struct Cyc_List_List* x, struct Cyc_List_List*
+y); extern unsigned char Cyc_List_Nth[ 8u]; struct Cyc_Dict_Dict; extern
+unsigned char Cyc_Dict_Present[ 12u]; extern unsigned char Cyc_Dict_Absent[ 11u];
+extern struct Cyc_Dict_Dict* Cyc_Dict_rempty( struct _RegionHandle*, int(* cmp)(
+void*, void*)); extern int Cyc_Dict_member( struct Cyc_Dict_Dict* d, void* k);
+extern struct Cyc_Dict_Dict* Cyc_Dict_insert( struct Cyc_Dict_Dict* d, void* k,
+void* v); extern void* Cyc_Dict_lookup( struct Cyc_Dict_Dict* d, void* k);
+extern struct Cyc_Dict_Dict* Cyc_Dict_rdelete_same( struct Cyc_Dict_Dict*, void*);
+extern int Cyc_Std_zstrptrcmp( struct _tagged_arr*, struct _tagged_arr*); struct
+Cyc_Std___sFILE; extern unsigned char Cyc_Std_FileCloseError[ 19u]; extern
+unsigned char Cyc_Std_FileOpenError[ 18u]; struct Cyc_Std_FileOpenError_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; static const int Cyc_Std_String_pa=
 0; struct Cyc_Std_String_pa_struct{ int tag; struct _tagged_arr f1; } ; static
 const int Cyc_Std_Int_pa= 1; struct Cyc_Std_Int_pa_struct{ int tag; unsigned int
@@ -594,7 +594,7 @@ Cyc_Position_Segment* loc); extern struct Cyc_Absyn_Stmt* Cyc_Absyn_declare_stmt
 struct _tuple0*, void*, struct Cyc_Absyn_Exp* init, struct Cyc_Absyn_Stmt*,
 struct Cyc_Position_Segment* loc); extern struct Cyc_Absyn_Decl* Cyc_Absyn_new_decl(
 void* r, struct Cyc_Position_Segment* loc); struct Cyc_Set_Set; extern struct
-Cyc_Set_Set* Cyc_Set_rempty( struct _RegionHandle* r, int(* comp)( void*, void*));
+Cyc_Set_Set* Cyc_Set_rempty( struct _RegionHandle* r, int(* cmp)( void*, void*));
 extern struct Cyc_Set_Set* Cyc_Set_rinsert( struct _RegionHandle* r, struct Cyc_Set_Set*
 s, void* elt); extern struct Cyc_List_List* Cyc_Set_elements( struct Cyc_Set_Set*
 s); extern unsigned char Cyc_Set_Absent[ 11u]; static const int Cyc_Tcenv_VarRes=
@@ -806,7 +806,7 @@ _tag_arr("bad stmt after xlation to C", sizeof( unsigned char), 28u); _temp202;}
 _temp201;})); _LL113:;}} struct _tuple4{ struct _tagged_arr* f1; struct Cyc_Absyn_Tqual
 f2; void* f3; } ; static struct Cyc_Absyn_Exp* Cyc_Tovc_stmt_to_fun( struct Cyc_Tovc_ToExpEnv
 env, struct Cyc_Absyn_Stmt* s, void* rettype){ struct Cyc_Set_Set* freevars=((
-struct Cyc_Set_Set*(*)( struct _RegionHandle* r, int(* comp)( struct Cyc_Absyn_Vardecl*,
+struct Cyc_Set_Set*(*)( struct _RegionHandle* r, int(* cmp)( struct Cyc_Absyn_Vardecl*,
 struct Cyc_Absyn_Vardecl*))) Cyc_Set_rempty)( env.rgn,( int(*)( struct Cyc_Absyn_Vardecl*,
 struct Cyc_Absyn_Vardecl*)) Cyc_Core_ptrcmp); struct Cyc_Tovc_BoxingEnv _temp203=({
 struct Cyc_Tovc_BoxingEnv _temp222; _temp222.rgn= env.rgn; _temp222.all_locals=

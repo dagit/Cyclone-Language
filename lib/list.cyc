@@ -39,21 +39,15 @@ int length(list_t x) {
   return i;
 }
 
-// thrown when some function expects a non-empty list 
-// Note that there's no need to declare a type with the exception.
-// If we wanted List_empty to carry an int value, we would write:
-// exception int List_empty;
-xtunion exn {List_empty};
-
-// return the first element in a list, if any, throw List_empty otherwise. 
+// return the first element in a list, if any, throw Failure otherwise. 
 `a hd(list_t<`a> x) {
-  if (x == NULL) throw List_empty;
+  if (x == NULL) throw new Failure("hd");
   return x->hd;
 }
 
-// return the tail of a list, if any, throw List_empty otherwise. 
+// return the tail of a list, if any, throw Failure otherwise. 
 list_t<`a,`r> tl(list_t<`a,`r> x) {
-  if (x == NULL) throw List_empty;
+  if (x == NULL) throw new Failure("tl");
   return x->tl;
 }
 
@@ -287,7 +281,7 @@ list_t<`a> revappend(list_t<`a> x,list_t<`a,`H> y) {
 // Return the reverse of a list. 
 list_t<`a,`r2> rrev(region_t<`r2> r2, list_t<`a> x) {
   // avoid allocation for length-one lists
-  if(x==NULL) // || x->tl==NULL)
+  if (x==NULL) // || x->tl==NULL)
     return NULL;
   return(rrevappend(r2,x,NULL));
 }
@@ -341,7 +335,7 @@ list_t<`a,`r> imp_append(list_t<`a,`r> x,list_t<`a,`r> y) {
 
   if (x == NULL) return y;
   if (y == NULL) return x;
-  for(z = x; z->tl != NULL; z = z->tl) 
+  for (z = x; z->tl != NULL; z = z->tl) 
     // skip
     ;
   z->tl = y;
@@ -628,9 +622,9 @@ bool memq(list_t<`a> l, `a x) {
   return(false);
 }
 
-bool mem(int compare(`a,`a), list_t<`a> l, `a x) {
+bool mem(int cmp(`a,`a), list_t<`a> l, `a x) {
   while (l != NULL) {
-    if (compare(l->hd,x)==0) return true;
+    if (cmp(l->hd,x)==0) return true;
     l = l->tl;
   }
   return false;
@@ -650,9 +644,9 @@ bool mem(int compare(`a,`a), list_t<`a> l, `a x) {
   throw Core::Not_found;
 }
 
-`b assoc_cmp(int compare(`a,`a),list_t<$(`a,`b)@> l,`a x) {
+`b assoc_cmp(int cmp(`a,`a),list_t<$(`a,`b)@> l,`a x) {
   while (l != NULL) {
-    if (compare(x,l->hd[0][0]) == 0) return(l->hd[0][1]);
+    if (cmp(x,l->hd[0][0]) == 0) return(l->hd[0][1]);
     l = l->tl;
   }
   throw Core::Not_found;
@@ -671,10 +665,10 @@ bool mem_assoc(list_t<$(`a,`b)@> l,`a x) {
 // checks that a list of elements is unique -- assumes they're sorted
 // returns an element that is duplicated if one exists, otherwise returns
 // NULL.
-Core::opt_t<`a> check_unique(int compare(`a,`a),list_t<`a> x) {
+Core::opt_t<`a> check_unique(int cmp(`a,`a),list_t<`a> x) {
   while (x != NULL) {
     if (x->tl != NULL) 
-      if (compare(x->hd,x->tl->hd) == 0) return new Core::Opt(x->hd);
+      if (cmp(x->hd,x->tl->hd) == 0) return new Core::Opt(x->hd);
     x = x->tl;
   }
   return NULL;
@@ -687,7 +681,7 @@ Core::opt_t<`a> check_unique(int compare(`a,`a),list_t<`a> x) {
 
   s = length(x);
   arr = rnew(r2) {for i < s : x->hd};
-  for(int i = 0; i < s; ++i, x = x->tl)
+  for (int i = 0; i < s; ++i, x = x->tl)
     arr[i] = x->hd;
   return arr;
 }
@@ -699,7 +693,7 @@ Core::opt_t<`a> check_unique(int compare(`a,`a),list_t<`a> x) {
 // makes a new list with ith element arr[i]
 list_t<`a,`r2> rfrom_array(region_t<`r2> r2, `a ? arr) {
   list_t<`a,`r2> ans = NULL;
-  for(int i = arr.size-1; i >= 0; --i)
+  for (int i = arr.size-1; i >= 0; --i)
     ans = rnew(r2) List(arr[i],ans);
   return ans;
 }
@@ -732,29 +726,32 @@ list_t<`a> tabulate_c(int n, `a f(`b,int), `b env) {
   return rtabulate_c(heap_region, n, f, env);
 }
 
-// Short-circuits on pointer-equal lists, hence need to have same region. :-(
-int list_cmp(int cmp(`a,`a), list_t<`a,`r1> l1, list_t<`a,`r1> l2) {
-  for(; l1 != NULL && l2 != NULL; l1 = l1->tl, l2 = l2->tl) {
-    if(l1 == l2)
+int list_cmp(int cmp(`a,`a), list_t<`a> l1, list_t<`a> l2) {
+  for (; l1 != NULL && l2 != NULL; l1 = l1->tl, l2 = l2->tl) {
+    /* The casts are needed here else the lists are forced into the
+       same region. */
+    if ((unsigned int)l1 == (unsigned int)l2)
       return 0;
     let i = cmp(l1->hd,l2->hd);
-    if(i != 0)
+    if (i != 0)
       return i;
   }
-  if(l1 != NULL)
+  if (l1 != NULL)
     return 1;
-  if(l2 != NULL)
+  if (l2 != NULL)
     return -1;
   return 0;
 }
 
 // idem
-bool list_prefix(int cmp(`a,`a), list_t<`a,`r1> l1, list_t<`a,`r1> l2) {
-  for(; l1 != NULL && l2 != NULL; l1 = l1->tl, l2 = l2->tl) {
-    if(l1 == l2)
+bool list_prefix(int cmp(`a,`a), list_t<`a> l1, list_t<`a> l2) {
+  for (; l1 != NULL && l2 != NULL; l1 = l1->tl, l2 = l2->tl) {
+    /* The casts are needed here else the lists are forced into the
+       same region. */
+    if ((unsigned int)l1 == (unsigned int)l2)
       return true;
     let i = cmp(l1->hd,l2->hd);
-    if(i != 0)
+    if (i != 0)
       return false;
   }
   return (l1 == NULL);
@@ -762,13 +759,13 @@ bool list_prefix(int cmp(`a,`a), list_t<`a,`r1> l1, list_t<`a,`r1> l2) {
 
 list_t<`a,`r2> rfilter_c(region_t<`r2> r2, bool f(`b,`a), 
                           `b env, list_t<`a> l) {
-  if(l == NULL)
+  if (l == NULL)
     return NULL;
   // First elt is purposefully junk!
   list_t<`a,`r2> result = rnew(r2) List(l->hd,NULL); 
   list_t<`a,`r2> end = result; // pointer to last cons cell
-  for(;l != NULL;l=l->tl) {
-    if(f(env,l->hd)) {
+  for (;l != NULL;l=l->tl) {
+    if (f(env,l->hd)) {
       end->tl = rnew(r2) List(l->hd,NULL);
       end = end->tl;
     }
@@ -781,13 +778,13 @@ list_t<`a> filter_c(bool f(`b,`a), `b env, list_t<`a> l) {
 }
 
 list_t<`a,`r2> rfilter(region_t<`r2> r2, bool f(`a), list_t<`a> l) {
-  if(l == NULL)
+  if (l == NULL)
     return NULL;
   // First elt is purposefully junk!
   list_t<`a,`r2> result = rnew(r2) List(l->hd,NULL); 
   list_t<`a,`r2> end = result; // pointer to last cons cell
-  for(;l != NULL;l=l->tl) {
-    if(f(l->hd)) {
+  for (;l != NULL;l=l->tl) {
+    if (f(l->hd)) {
       end->tl = rnew(r2) List(l->hd,NULL);
       end = end->tl;
     }

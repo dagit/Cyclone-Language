@@ -231,25 +231,24 @@ _tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
 wrap_Cstring_as_string( unsigned char*, unsigned int); extern struct _tagged_arr
 ntCsl_to_ntsl( unsigned char**); struct Cyc_List_List{ void* hd; struct Cyc_List_List*
 tl; } ; extern int Cyc_List_length( struct Cyc_List_List* x); extern
-unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
-18u]; extern unsigned char Cyc_List_Nth[ 8u]; struct Cyc_Rope_Rope_node; extern
-struct Cyc_Rope_Rope_node* Cyc_Rope_from_string( struct _tagged_arr); extern
-struct _tagged_arr Cyc_Rope_to_string( struct Cyc_Rope_Rope_node*); extern
-struct Cyc_Rope_Rope_node* Cyc_Rope_concat( struct Cyc_Rope_Rope_node*, struct
-Cyc_Rope_Rope_node*); extern struct Cyc_Rope_Rope_node* Cyc_Rope_concata( struct
-_tagged_arr); extern struct Cyc_Rope_Rope_node* Cyc_Rope_concatl( struct Cyc_List_List*);
-extern unsigned int Cyc_Rope_length( struct Cyc_Rope_Rope_node*); extern int Cyc_Rope_cmp(
-struct Cyc_Rope_Rope_node*, struct Cyc_Rope_Rope_node*); extern unsigned int Cyc_Std_strlen(
-struct _tagged_arr s); extern int Cyc_Std_strcmp( struct _tagged_arr s1, struct
-_tagged_arr s2); extern struct _tagged_arr Cyc_Std_strncpy( struct _tagged_arr,
-struct _tagged_arr, unsigned int); static const int Cyc_Rope_String_rope= 0;
-struct Cyc_Rope_String_rope_struct{ int tag; struct _tagged_arr f1; } ; static
-const int Cyc_Rope_Array_rope= 1; struct Cyc_Rope_Array_rope_struct{ int tag;
-struct _tagged_arr f1; } ; struct Cyc_Rope_Rope_node{ void* v; } ; struct Cyc_Rope_Rope_node*
-Cyc_Rope_from_string( struct _tagged_arr s){ return({ struct Cyc_Rope_Rope_node*
-_temp0=( struct Cyc_Rope_Rope_node*) _cycalloc( sizeof( struct Cyc_Rope_Rope_node));
-_temp0->v=( void*)(( void*)({ struct Cyc_Rope_String_rope_struct* _temp1=(
-struct Cyc_Rope_String_rope_struct*) _cycalloc( sizeof( struct Cyc_Rope_String_rope_struct));
+unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char Cyc_List_Nth[ 8u];
+struct Cyc_Rope_Rope_node; extern struct Cyc_Rope_Rope_node* Cyc_Rope_from_string(
+struct _tagged_arr); extern struct _tagged_arr Cyc_Rope_to_string( struct Cyc_Rope_Rope_node*);
+extern struct Cyc_Rope_Rope_node* Cyc_Rope_concat( struct Cyc_Rope_Rope_node*,
+struct Cyc_Rope_Rope_node*); extern struct Cyc_Rope_Rope_node* Cyc_Rope_concata(
+struct _tagged_arr); extern struct Cyc_Rope_Rope_node* Cyc_Rope_concatl( struct
+Cyc_List_List*); extern unsigned int Cyc_Rope_length( struct Cyc_Rope_Rope_node*);
+extern int Cyc_Rope_cmp( struct Cyc_Rope_Rope_node*, struct Cyc_Rope_Rope_node*);
+extern unsigned int Cyc_Std_strlen( struct _tagged_arr s); extern int Cyc_Std_strcmp(
+struct _tagged_arr s1, struct _tagged_arr s2); extern struct _tagged_arr Cyc_Std_strncpy(
+struct _tagged_arr, struct _tagged_arr, unsigned int); static const int Cyc_Rope_String_rope=
+0; struct Cyc_Rope_String_rope_struct{ int tag; struct _tagged_arr f1; } ;
+static const int Cyc_Rope_Array_rope= 1; struct Cyc_Rope_Array_rope_struct{ int
+tag; struct _tagged_arr f1; } ; struct Cyc_Rope_Rope_node{ void* v; } ; struct
+Cyc_Rope_Rope_node* Cyc_Rope_from_string( struct _tagged_arr s){ return({ struct
+Cyc_Rope_Rope_node* _temp0=( struct Cyc_Rope_Rope_node*) _cycalloc( sizeof(
+struct Cyc_Rope_Rope_node)); _temp0->v=( void*)(( void*)({ struct Cyc_Rope_String_rope_struct*
+_temp1=( struct Cyc_Rope_String_rope_struct*) _cycalloc( sizeof( struct Cyc_Rope_String_rope_struct));
 _temp1[ 0]=({ struct Cyc_Rope_String_rope_struct _temp2; _temp2.tag= Cyc_Rope_String_rope;
 _temp2.f1= s; _temp2;}); _temp1;})); _temp0;});} struct Cyc_Rope_Rope_node* Cyc_Rope_concat(
 struct Cyc_Rope_Rope_node* r1, struct Cyc_Rope_Rope_node* r2){ return({ struct

@@ -281,15 +281,15 @@ int Cyc_Std_StringPtr_sa= 4; struct Cyc_Std_StringPtr_sa_struct{ int tag; struct
 _tagged_arr f1; } ; static const int Cyc_Std_DoublePtr_sa= 5; struct Cyc_Std_DoublePtr_sa_struct{
 int tag; double* f1; } ; static const int Cyc_Std_FloatPtr_sa= 6; struct Cyc_Std_FloatPtr_sa_struct{
 int tag; float* f1; } ; struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl;
-} ; extern unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
-18u]; extern unsigned char Cyc_List_Nth[ 8u]; extern struct _tagged_arr Cyc_Std_strcpy(
-struct _tagged_arr dest, struct _tagged_arr src); struct Cyc_Cstdio___sFILE;
-extern int remove( unsigned char*); extern int rename( unsigned char*,
-unsigned char*); extern struct Cyc_Cstdio___sFILE* tmpfile(); extern
-unsigned char* tmpnam( unsigned char*); extern int fclose( struct Cyc_Cstdio___sFILE*);
-extern int fflush( struct Cyc_Cstdio___sFILE*); extern struct Cyc_Cstdio___sFILE*
-fopen( unsigned char* __filename, unsigned char* __modes); extern struct Cyc_Cstdio___sFILE*
-freopen( unsigned char* __filename, unsigned char* __modes, struct Cyc_Cstdio___sFILE*
+} ; extern unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char Cyc_List_Nth[
+8u]; extern struct _tagged_arr Cyc_Std_strcpy( struct _tagged_arr dest, struct
+_tagged_arr src); struct Cyc_Cstdio___sFILE; extern int remove( unsigned char*);
+extern int rename( unsigned char*, unsigned char*); extern struct Cyc_Cstdio___sFILE*
+tmpfile(); extern unsigned char* tmpnam( unsigned char*); extern int fclose(
+struct Cyc_Cstdio___sFILE*); extern int fflush( struct Cyc_Cstdio___sFILE*);
+extern struct Cyc_Cstdio___sFILE* fopen( unsigned char* __filename,
+unsigned char* __modes); extern struct Cyc_Cstdio___sFILE* freopen(
+unsigned char* __filename, unsigned char* __modes, struct Cyc_Cstdio___sFILE*
 __stream); extern struct Cyc_Cstdio___sFILE* fdopen( int __fd, unsigned char*
 __modes); extern int setvbuf( struct Cyc_Cstdio___sFILE* __stream, unsigned char*
 __buf, int __modes, unsigned int __n); extern void setbuffer( struct Cyc_Cstdio___sFILE*

@@ -45,17 +45,17 @@ typedef struct Set<`a,`r> @`r set_t<`a,`r>;
        first argument is less than, equal to, or greater than its
        second argument. */
 
-extern set_t<`a> empty(int comp(`a,`a));
-  /** [empty(comp)] creates an empty set given comparison function
-      [comp].  The set is heap-allocated. */
-extern set_t<`a,`r> rempty(region_t<`r> r, int comp(`a,`a));
-  /** [rempty(r,comp)] creates an empty set in the region with handle
+extern set_t<`a> empty(int cmp(`a,`a));
+  /** [empty(cmp)] creates an empty set given comparison function
+      [cmp].  The set is heap-allocated. */
+extern set_t<`a,`r> rempty(region_t<`r> r, int cmp(`a,`a));
+  /** [rempty(r,cmp)] creates an empty set in the region with handle
       [r]. */
-extern set_t<`a> singleton(int comp(`a,`a),`a x);
-  /** [singleton(comp,x)] creates a set on the heap with a single
+extern set_t<`a> singleton(int cmp(`a,`a),`a x);
+  /** [singleton(cmp,x)] creates a set on the heap with a single
       element, [x]. */
-extern set_t<`a> from_list(int comp(`a,`a),list_t<`a> l);
-  /** [from_list(comp,l)] creates a set on the heap; the elements of
+extern set_t<`a> from_list(int cmp(`a,`a),list_t<`a> l);
+  /** [from_list(cmp,l)] creates a set on the heap; the elements of
       the set are the elements of the list [l]. */
 
 extern set_t<`a> insert(set_t<`a,`H> s,`a elt);
@@ -90,8 +90,8 @@ extern bool member(set_t<`a> s,`a elt);
 extern bool subset(set_t<`a> s1,set_t<`a> s2);
   /** [subset(s1,s2)] returns true if [s1] is a subset of [s2], and
       returns false otherwise. */
-extern int  compare(set_t<`a> s1,set_t<`a> s2);
-  /** [compare(s1,s2)] returns a number less than, equal to, or
+extern int  setcmp(set_t<`a> s1,set_t<`a> s2);
+  /** [setcmp(s1,s2)] returns a number less than, equal to, or
       greater than 0 according to whether [s1] is less than, equal to,
       or greater than [s2] in the subset order. */
 extern bool equals (set_t<`a> s1,set_t<`a> s2);
