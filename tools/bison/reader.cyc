@@ -1604,7 +1604,7 @@ gensym()
 {
   register bucket *sym;
 
-  token_buffer = aprintf("@%d", ++gensym_count);
+  sprintf(token_buffer, "@%d", ++gensym_count);
   sym = getsym(token_buffer);
   sym->class = SNTERM;
   sym->value = (short)nvars++;
