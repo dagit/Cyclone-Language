@@ -152,6 +152,37 @@ static int str_index_lbuf<`a>(Lexbuf<`a> lbuf) {
 		   lbuf->lex_curr_pos - lbuf->lex_start_pos);
 }
 
+
+// For this one, co-domain is boolean, true means a typedef, false means not
+static struct Trie typedefs_trie_v = Trie(null,false);
+static trie_t      typedefs_trie   = &typedefs_trie_v;
+
+static void insert_typedef(string s) {
+  int    len = s.size - 1;
+  trie_t t   = typedefs_trie;
+  for(int i=0; i < len; ++i) {
+    int ch = ((int)s[i]) - 48;
+    if(t->children == null) {
+      while(i < len) {
+	t->children = (trie_child_t) &$((new { for i < 75 : null }));
+	(*(t->children))[ch] = &Trie(null,0);
+	t = (*(t->children))[ch];
+	++i;
+	ch = ((int)s[i]) - 48; // see width of trie above
+      }
+      t->shared_str = true;
+      return;
+    }
+    // walk down one level
+    if((*(t->children))[ch] == null)
+      (*(t->children))[ch] = &Trie(null,false);
+    t = (*(t->children))[ch];
+  }
+  t->shared_str = true;
+  return;
+}
+
+
 static string get_symbol(int symbol_num) {
   return Xarray::get((Xarray::Xarray<string>)symbols, symbol_num);
 }
@@ -281,7 +312,7 @@ static struct Ldecls {
   Set::Set<var> typedefs;
   Set::Set<var> namespaces;
 };
-typedef struct Ldecls @ldecls;
+typedef struct Ldecls @ldecls_t;
 
 static struct Lvis {  // the King lives!
   // records the namespaces whose declarations are visible in a scope
@@ -293,8 +324,8 @@ typedef struct Lvis @lvis;
 static struct Lstate {
   // lstack is the current nested scope structure,
   // decls is the global declaration mapping
-  List<lvis>                   lstack; // invariant: never null -- in the type!
-  Dict::Dict<list<var>,ldecls> decls;
+  List<lvis>                     lstack; 
+  Dict::Dict<list<var>,ldecls_t> decls;
 };
 typedef struct Lstate @lstate_t;
 
@@ -328,7 +359,7 @@ static list<var> get_absolute_namespace(List<var> ns) {
     for (list<list<var>> x = 
 	   &cons(lv->current_namespace,lv->imported_namespaces);
          x != null; x = x->tl) {
-      ldecls ld = Dict::lookup(lstate->v->decls,x->hd);
+      ldecls_t ld = Dict::lookup(lstate->v->decls,x->hd);
       // ... for namespace n
       if (Set::member(ld->namespaces,n))
         // OK, we know ns refers to x.hd+ns
@@ -339,10 +370,28 @@ static list<var> get_absolute_namespace(List<var> ns) {
   return null; // FIX: can we return something better here? Do we have
                // to give up and raise an exception?
 }
+
+static void recompute_typedefs() {
+  // Drop the old trie on the floor.
+  typedefs_trie = &Trie(null,false);
+  
+  // For each enclosing scope, get the visible namespaces and add all
+  // of their typedefs
+  for (list<lvis> ls = lstate->v->lstack; ls != null; ls = ls->tl) {
+    lvis lv = ls->hd; 
+    list<list<var>> x = &cons(lv->current_namespace, lv->imported_namespaces);
+    for (; x != null; x = x->tl) {
+      ldecls_t ld = Dict::lookup(lstate->v->decls,x->hd);
+      Set::iter(insert_typedef,ld->typedefs);
+    }
+  }
+}
+
+// This can stay the slow way because most identifiers are not qualified.
 static bool is_typedef_in_namespace(List<var> ns, var v) {
   list<var> ans = get_absolute_namespace(ns);
   try {
-    ldecls ld = Dict::lookup(lstate->v->decls,ans);
+    ldecls_t ld = Dict::lookup(lstate->v->decls,ans);
     return Set::member(ld->typedefs,v);
   } catch {
   case Dict::Absent:
@@ -354,20 +403,21 @@ static bool is_typedef(qvar q) {
   if (q[0] != null) {
     return is_typedef_in_namespace(q[0],q[1]);
   }
-  // For each enclosing scope...
-  for (list<lvis> ls = lstate->v->lstack; ls != null; ls = ls->tl) {
-    lvis lv = ls->hd; // ... see what namespaces are visible
-    // ... and look in each such visible namespace
-    for (list<list<var>> x = &cons(lv->current_namespace,
-				   lv->imported_namespaces);
-         x != null; x = x->tl) {
-      ldecls ld = Dict::lookup(lstate->v->decls,x->hd);
-      // ... for typedef q[1]
-      if (Set::member(ld->typedefs,q[1])) return true;
-    }
-  }
-  return false;
+  // all unqualified typedefs must be in the trie 
+  // look ma -- fast lookup
+  string s   = q[1];
+  int    len = s.size - 1;
+  trie_t t   = typedefs_trie;
+  for(int i = 0; i < len; ++i)
+    if(t == null || t->children == null)
+      return false;
+    else
+      t = (*(t->children))[((int)s[i])-48];
+  if(t == null)
+    return false;
+  return t->shared_str;
 }
+
 void enter_namespace(var s) {
   //  lex_sanitycheck();
   list<var> ns = lstate->v->lstack->hd->current_namespace;
@@ -379,7 +429,7 @@ void enter_namespace(var s) {
   // If this is the first time the new namespace has been encountered,
   // make sure it is bound in the old namespace, and add an empty
   // environment for the new namespace
-  ldecls ld = Dict::lookup(lstate->v->decls,ns);
+  ldecls_t ld = Dict::lookup(lstate->v->decls,ns);
   if (!Set::member(ld->namespaces,s)) {
     lstate->v->decls = Dict::insert(lstate->v->decls,
 				    ns,
@@ -393,10 +443,13 @@ void enter_namespace(var s) {
 					    .namespaces = Set::empty(zstrcmp)});
 
   }
+  recompute_typedefs();
 }
 void leave_namespace() {
   //  lex_sanitycheck();
   lstate->v->lstack = lstate->v->lstack->tl;
+
+  recompute_typedefs();
 }
 void enter_using(qvar q) {
   //  lex_sanitycheck();
@@ -406,6 +459,9 @@ void enter_using(qvar q) {
   let imported = lstate->v->lstack->hd->imported_namespaces;
 
   lstate->v->lstack->hd->imported_namespaces = &cons(ans,imported);
+  
+  // some more typedefs may be visible
+  recompute_typedefs();
 }
 void leave_using() {
   //  lex_sanitycheck();
@@ -413,7 +469,13 @@ void leave_using() {
   let imported = lstate->v->lstack->hd->imported_namespaces;
 
   lstate->v->lstack->hd->imported_namespaces = imported->tl;
+
+  // some typedefs may no longer be visible
+  recompute_typedefs();
 }
+
+// Make faster -- put in dictionary like now, but also must add to the current
+// trie.
 void register_typedef(qvar q) {
   // FIX: we assume that q is not in fact qualified
   //  lex_sanitycheck();
@@ -424,6 +486,10 @@ void register_typedef(qvar q) {
   let new_ld = &Ldecls{.typedefs   = Set::insert(ld->typedefs,q[1]),
 		       .namespaces = ld->namespaces};
   lstate->v->decls = Dict::insert(ds,current,new_ld);
+
+  // FIX: We're really assuming it's unqualified here -- else need to
+  //      decide if the namespace-list is a visible one
+  insert_typedef(q[1]);
 }
 
 // This kludge won't be necessary to avoid allocation after we have stack
@@ -443,7 +509,7 @@ static short process_id<`a>(Lexbuf<`a> lbuf) {
     token_qvar = &$(null,s);
     return (short)QUAL_TYPEDEF_NAME;
   }
- 
+
   // alas, it's an identifier
   token_string = s;
   return (short)IDENTIFIER;

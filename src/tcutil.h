@@ -75,7 +75,7 @@ extern void check_valid_type(segment,tenv,list<tvar>,typ);
 // Special cased for function declarations
 extern void check_fndecl_valid_type(segment,tenv,fndecl);
 
-extern Set<var> repeated_vars(list<var>);
+extern void check_unique_vars(list<var> vs, segment loc, string err_msg);
 extern void check_unique_tvars(segment,list<tvar>);
 
 extern xenum exn {MissingField};

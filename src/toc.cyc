@@ -26,10 +26,13 @@
 // or broken pieces.
 
 // MAJOR TODO LIST:
-//  goto
 //  pull out common things better
 
 // FIX: we could probably use "const" in lots of places where we're not.
+
+// Note: we generate lots of struct and enum types that don't have pointers
+//       back to the corresponding decls.  The printer doesn't follow these
+//       pointers, else we need to set them.
 
 #include "absyn.h"
 
@@ -74,7 +77,7 @@ static `a toc_impos<`a>(string s) {
 static bool is_nullable(typ t) {
   if (!check_for_null) return false;
   switch (compress(t)) {
-  case PointerType(_,b,_):
+  case PointerType(_,_,b,_):
     switch (compress_conref(b)->v) {
     case Eq_constr(b2): return b2;
     default:            return false;
@@ -183,19 +186,20 @@ static typ typ_to_c(typ t) {
   case Evar(_,&Opt{.v=t2},_): return typ_to_c(t2);
     // type variables (`a) are mapped to void*
   case VarType(_):            return void_star_typ();
-  case EnumType(tdnopt,ts):
+  case EnumType(tdnopt,ts,_):
     if (tdnopt == null) unimp("anonymous enum");
     // enum foo is mapped to foo -- see enumdecl_to_c below
     return TypedefType(collapse_qvar(tdnopt->v),null, &Opt(void_star_typ()));
-  case XenumType(tdn):
+  case XenumType(tdn,_):
     // xenum bar is mapped to bar -- see xenumdecl_to_c below
     // FIX:  the actual type appears both here and in xenumdecl_to_c,
     // get rid of the repetition
     return TypedefType(collapse_qvar(tdn),null,
-                     &Opt(nullableptr_t(strct("_xenum_struct"),empty_tqual())));
-  case PointerType(t2,b,tq):
+		       &Opt(nullableptr_typ(strct("_xenum_struct"),
+					    empty_tqual())));
+  case PointerType(t2,_,b,tq):
     // we map t@ to t*
-    return PointerType(typ_to_c(t2),new_conref(true),tq);
+    return PointerType(typ_to_c(t2),HeapRgn,new_conref(true),tq);
   // We assume that these are suitably defined already in an appropriate
   // include file -- especially the boxed versions and the bools.
   case IntType(sn,B8,Boxed): return longlong_typ; 
@@ -211,10 +215,10 @@ static typ typ_to_c(typ t) {
     case TaggedArray:
       // returns the name of a struct type for the array
       let n = add_tagged_array_type(t2,tq);
-      return nullableptr_t(strct(n),empty_tqual());
+      return nullableptr_typ(strct(n),empty_tqual());
       // FIX:  fixed-size arrays aren't quite right... C's rules for
       // when you can and can't use these types are strange.
-    default: return nullableptr_t(t2,tq);
+    default: return nullableptr_typ(t2,tq);
     }
   case FnType(_,t2,args,vararg):
     // just drop the type arguments and translate the nested types
@@ -227,7 +231,7 @@ static typ typ_to_c(typ t) {
     tqs = List::map(typ_to_c_f,tqs);
     let n = add_tuple_type(tqs);
     return strct(n);
-  case StructType(tdnopt,ts):
+  case StructType(tdnopt,ts,_):
     if (tdnopt == null) unimp("anonymous struct");
     // just drop the type arguments and translate the nested types
     return strctq(collapse_qvar(tdnopt->v));
@@ -235,6 +239,9 @@ static typ typ_to_c(typ t) {
     if (topt == null) return toc_impos("Toc::typ_to_c: unresolved TypedefType");
     // just drop the type arguments and translate the nested types
     return TypedefType(collapse_qvar(tdn),null, &Opt(typ_to_c(topt->v)));
+  case RgnHandleType(r):
+    // FIX?
+    return void_star_typ();
   case UnionType: 
     return toc_impos("uniontype");
   }
@@ -255,14 +262,14 @@ typ top_typ_to_c(typ t) {
 // an expression and location, so we can omit a cast if possible.
 static exp array_to_ptr(typ t,exp e,segment l) {
   switch (t) {
-  case ArrayType(t2,tq,ak): return cast_exp(nullableptr_t(t2,tq),e,l);
+  case ArrayType(t2,tq,ak): return cast_exp(nullableptr_typ(t2,tq),e,l);
   default:                  return e;
   }
 }
 // The same, but the cast is forced.
 static exp array_to_ptr_cast(typ t,exp e,segment l) {
   switch (t) {
-  case ArrayType(t2,tq,ak): return cast_exp(nullableptr_t(t2,tq),e,l);
+  case ArrayType(t2,tq,ak): return cast_exp(nullableptr_typ(t2,tq),e,l);
   default:                  return cast_exp(t,e,l);
   }
 }
@@ -285,11 +292,15 @@ static bool atomic_typ(typ t) {
       if (!atomic_typ(tqs->hd[1])) return false;
     return true;
   // FIX -- really need the struct and enum definitions
-  case StructType(_,_): return false;
-  case EnumType(_,_): return false;
-  case XenumType(_): return false;
+    // have them now, really need to compute in terms of the instantiation
+    // to be as aggressive as possible.
+    // note even without this we'll allocation Position::segment with atomic.
+  case StructType(_,_,_): return false;
+  case EnumType(_,_,_):   return false;
+  case XenumType(_,_):    return false;
   case UnionType: return false;
-  case PointerType(_,_,_): return false;
+  case PointerType(_,_,_,_): return false;
+  case RgnHandleType(_): return false;
   default: 
     toc_impos(xprintf("atomic_typ:  bad type %s",typ2string(t)));
     return false;
@@ -378,7 +389,7 @@ static list<conv> conversion(typ t1, typ t2) {
   case $(_, DoubleType(Boxed)):   return &cons(BoxDouble,  null);
 
     // insert null checks if such a thing is turned on
-  case $(PointerType(_,_,_),PointerType(_,_,_)):
+  case $(PointerType(_,_,_,_),PointerType(_,_,_,_)):
     if(is_nullable(t1) && !is_nullable(t2))
       return &cons(NullCheck(t2),null);
     else
@@ -437,11 +448,11 @@ static exp box_float_conv(bool toplevel, exp e) {
   //    x; })
   qvar x = temp_var();
   qvar y = temp_var();
-  exp init_y = cast_exp(nullableptr_t(float_t,empty_tqual()),
+  exp init_y = cast_exp(nullableptr_typ(float_t,empty_tqual()),
 			address_exp(var_exp(x,DL),DL),DL);
   stmt s = seq_stmt(assign_stmt(deref_exp(var_exp(y,DL),DL),e,DL),
 		    exp_stmt(var_exp(x,DL),DL),DL);
-  s = declare_stmt(y,nullableptr_t(float_t,empty_tqual()),&Opt(init_y),s,DL);
+  s = declare_stmt(y,nullableptr_typ(float_t,empty_tqual()),&Opt(init_y),s,DL);
   return stmt_exp(declare_stmt(x,Float_t,null,s,DL),DL);
 }
 
@@ -456,11 +467,11 @@ static exp unbox_float_conv(bool toplevel, exp e) {
   //    x; })
   qvar x = temp_var();
   qvar y = temp_var();
-  exp init_y = cast_exp(nullableptr_t(Float_t,empty_tqual()),
+  exp init_y = cast_exp(nullableptr_typ(Float_t,empty_tqual()),
 			address_exp(var_exp(x,DL),DL),DL);
   stmt s = seq_stmt(assign_stmt(deref_exp(var_exp(y,DL),DL),e,DL),
 		    exp_stmt(var_exp(x,DL),DL),DL);
-  s = declare_stmt(y,nullableptr_t(Float_t,empty_tqual()),&Opt(init_y),s,DL);
+  s = declare_stmt(y,nullableptr_typ(Float_t,empty_tqual()),&Opt(init_y),s,DL);
   return stmt_exp(declare_stmt(x,float_t,null,s,DL),DL);
 }
 
@@ -525,7 +536,7 @@ static exp tag_fixedarray_conv(bool toplevel,typ t, exp sz, exp e) {
   typ strt_typ;
   typ elt_typ;
   switch (compress(t)) {
-  case PointerType(elt,_,_):
+  case PointerType(elt,_,_,_):
     // FIX:  what about tqual ??
     elt_typ = elt;
     let n = add_tagged_array_type(elt,empty_tqual());
@@ -534,7 +545,7 @@ static exp tag_fixedarray_conv(bool toplevel,typ t, exp sz, exp e) {
   default: 
     return toc_impos("tag_fixedarray_conv: not a pointer");
   }
-  typ pstrt_typ = nullableptr_t(strt_typ,empty_tqual());
+  typ pstrt_typ = nullableptr_typ(strt_typ,empty_tqual());
   if (toplevel) {
     // t a[sz] = e;
     // struct tagged_array b = {sz, a};
@@ -895,7 +906,7 @@ static exp make_struct(qvar x, typ struct_typ, stmt s,
   Opt_t<exp> eo;
   typ        t;
   if(pointer) {
-    t  = nullableptr_t(struct_typ, empty_tqual());
+    t  = nullableptr_typ(struct_typ, empty_tqual());
     let se = sizeof_exp(struct_typ,DL);
     eo = &Opt(cast_exp(t, is_atomic ? malloc_atomic(se) : malloc_ptr(se), DL));
   } else {
@@ -1157,7 +1168,7 @@ static void exp_to_c(env nv, exp e) {
   case Deref_e(e1): 
     exp_to_c(nv, e1);
     switch (compress(e1->topt->v)) {
-    case PointerType(t2,cr,tq):
+    case PointerType(t2,rgn,cr,tq):
       bool nullable = is_nullable(e1->topt->v);
       if (nullable) {
 	// ({t x=e1; if (x == null) throw(NullPointer); *x;})
@@ -1209,7 +1220,7 @@ static void exp_to_c(env nv, exp e) {
       unsigned int i = eval_const_uint_exp(e2)+1;
       e->r = structmember_exp(e1,xprintf("f%d",i),DL)->r;
       break;
-    case PointerType(t,bcr,tq): 
+    case PointerType(t,rgn,bcr,tq): 
       // The type checker ensures that this must be a pointer to a tuple
       string fname = xprintf("f%d",eval_const_uint_exp(e2)+1);
       bool nullable = is_nullable(e1->topt->v);
@@ -1238,12 +1249,12 @@ static void exp_to_c(env nv, exp e) {
 	qvar a = temp_var();
 	let ta1 = typ_to_c(ta);
 	let n = add_tagged_array_type(ta1,q);
-	typ tx = nullableptr_t(strct(n),empty_tqual());
-	typ ta2 = nullableptr_t(ta1,q);
-	exp e5 = structarrow_exp(var_exp(x,DL),"sz",DL);
-	exp e3 = prim2_exp(Gte, var_exp(i,DL), e5, DL);
+	typ tx  = nullableptr_typ(strct(n),empty_tqual());
+	typ ta2 = nullableptr_typ(ta1,q);
+	exp e5  = structarrow_exp(var_exp(x,DL),"sz",DL);
+	exp e3  = prim2_exp(Gte, var_exp(i,DL), e5, DL);
 	exp a_init = cast_exp(ta2,structarrow_exp(var_exp(x,DL),
-						 "contents",DL),DL);
+						  "contents",DL),DL);
 	// FIX:  should throw array out of bounds exception
 	exp  e4 = newthrow_exp(null_pointer_exn_exp(DL));
 	stmt s5 = exp_stmt(e4,DL);
@@ -1260,7 +1271,7 @@ static void exp_to_c(env nv, exp e) {
 	qvar i = temp_var();
 	qvar a = temp_var();
 	let ta1 = typ_to_c(ta);
-	typ ta2 = nullableptr_t(ta1,q);
+	typ ta2 = nullableptr_typ(ta1,q);
 	exp e3 = prim2_exp(Gte, var_exp(i,DL), uint_exp(sz,DL), DL);
 	exp a_init = cast_exp(ta2,structarrow_exp(e3,"contents",DL),DL);
 	// FIX:  should throw array out of bounds exception
@@ -1367,7 +1378,7 @@ static void exp_to_c(env nv, exp e) {
         break;
       }
       typ elt_typ=typ_to_c(old_elt_typ);
-      let ptr_typ = nullableptr_t(elt_typ,empty_tqual());
+      let ptr_typ = nullableptr_typ(elt_typ,empty_tqual());
       let e2 = times_exp(sizeof_exp(elt_typ,DL),
                          signed_int_exp(List::length(dles0),DL),DL);
       let e1 = malloc_exp(old_elt_typ,e2);
@@ -1398,7 +1409,7 @@ static void exp_to_c(env nv, exp e) {
     }
     typ old_elt_typ = e2->topt->v;
     typ elt_typ = typ_to_c(old_elt_typ);
-    typ ptr_t = nullableptr_t(elt_typ,empty_tqual());
+    typ ptr_typ = nullableptr_typ(elt_typ,empty_tqual());
     exp_to_c(nv,e1);
     env nv2 = add_varmap(nv,x1,varb_exp(x1,Local_b(vd),DL));
     exp_to_c(nv2,e2);
@@ -1412,20 +1423,20 @@ static void exp_to_c(env nv, exp e) {
 						var_exp(x1,DL),DL),e2,DL),DL);
     list<$(qvar,typ,Opt_t<exp>)@> decls =
       &cons(&$(max,uint_t,(Opt_t<exp>)&Opt(e1)),null);
-    exp ainit = cast_exp(ptr_t,malloc_exp(old_elt_typ,
-					  times_exp(sizeof_exp(elt_typ,DL),
-						    var_exp(max,DL),DL)),DL);
-    decls = &cons(&$(a,ptr_t,(Opt_t<exp>)&Opt(ainit)),decls);
+    exp ainit = cast_exp(ptr_typ,malloc_exp(old_elt_typ,
+					    times_exp(sizeof_exp(elt_typ,DL),
+						      var_exp(max,DL),DL)),DL);
+    decls = &cons(&$(a,ptr_typ,(Opt_t<exp>)&Opt(ainit)),decls);
     decls = &cons(&$(x1,uint_t,null),decls);
     if (is_tagged_array) {
       let b = temp_var();
       let t = typ_to_c(old_typ);
-      typ strt_t;
+      typ strt_typ;
       switch (compress(t)) { 
-      case PointerType(st,_,_): strt_t = st; break;
-      default: strt_t = toc_impos("comprehension: not a pointer"); break;
+      case PointerType(st,_,_,_): strt_typ = st; break;
+      default: strt_typ = toc_impos("comprehension: not a pointer"); break;
       }
-      let binit = &Opt(cast_exp(t,malloc_ptr(sizeof_exp(strt_t,DL)),DL));
+      let binit = &Opt(cast_exp(t,malloc_ptr(sizeof_exp(strt_typ,DL)),DL));
       decls = &cons(&$(b,t,(Opt_t<exp>)binit),decls);
       s = seq_stmt(assign_stmt(structarrow_exp(var_exp(b,DL),"sz",DL),
 			       var_exp(max,DL),DL),s,DL);
@@ -1476,7 +1487,7 @@ static void exp_to_c(env nv, exp e) {
       let x = temp_var();
       let xexp = var_exp(x,DL);
       let strct_typ = strctq(collapse_qvar_tag(qv,"_struct"));
-      let pstrct_typ = nullableptr_t(strct_typ,empty_tqual());
+      let pstrct_typ = nullableptr_typ(strct_typ,empty_tqual());
       // we have to do this differently for the toplevel
       if (nv->toplevel) {
 	// struct qv_tag x = {->tag = i, ->f1 = e1, ... ,->fn = en};
@@ -1531,7 +1542,7 @@ static void exp_to_c(env nv, exp e) {
 //       let x = temp_var();
 //       let xexp = var_exp(x,DL);
 //       let strct_t = strct(collapse_qvar_tag(qv,"_struct")[1]);
-//       let pstrct_t = nullableptr_t(strct_t,empty_tqual());
+//       let pstrct_t = nullableptr_typ(strct_t,empty_tqual());
 //       let e2 = sizeof_exp(strct_t,DL);
 //       let e1 = cast_exp(pstrct_t,malloc_exp(e2),DL);
 //       let dles = null;
@@ -1555,7 +1566,7 @@ static void exp_to_c(env nv, exp e) {
     let x = temp_var();
     let xexp = var_exp(x,DL);
     let strct_typ = strctq(collapse_qvar_tag(qv,"_struct"));
-    let pstrct_typ = nullableptr_t(strct_typ,empty_tqual());
+    let pstrct_typ = nullableptr_typ(strct_typ,empty_tqual());
     exp tag_exp = var_exp(collapse_qvar_tag(qv,"_tag"),DL);
     if (nv->toplevel) {
       // struct qv_tag x = {->tag = i, ->f1 = e1, ... , ->fn = en};
@@ -1711,7 +1722,7 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
   case Reference_p(vd):
     // v = path; goto succ_lab
     let v = temp_var();
-    decls = &cons(&$(v,nullableptr_t(typ_to_c(t),empty_tqual())),decls);
+    decls = &cons(&$(v,nullableptr_typ(typ_to_c(t),empty_tqual())),decls);
     nv    = add_varmap(nv,vd->name,var_exp(v,DL));
     s     = seq_stmt(assign_stmt(var_exp(v,DL),address_exp(path,DL),DL),
 		     goto_stmt(succ_lab,DL),DL);
@@ -1759,7 +1770,7 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
     list<stmt> ss = null;
     int cnt = List::length(ps);
     qvar efstrct = collapse_qvar_tag(ef->name,"_struct");
-    exp rcast   = cast_exp(nullableptr_t(strctq(efstrct),empty_tqual()),r,DL);
+    exp rcast   = cast_exp(nullableptr_typ(strctq(efstrct),empty_tqual()),r,DL);
     for(let rps = List::rev(ps); rps != null; rps = rps->tl, cnt--) {
       let p2  = rps->hd;
       let v   = temp_var();
@@ -1791,7 +1802,7 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
 	}
       }
       exp max_tag_exp = uint_exp(max_tag,DL);
-      exp e3 = cast_exp(nullableptr_t(strct("_enum_struct"),empty_tqual()),
+      exp e3 = cast_exp(nullableptr_typ(strct("_enum_struct"),empty_tqual()),
 			r,DL);
       exp e1 = structarrow_exp(e3,"tag",DL);
       exp e5 = gt_exp(cast_exp(void_star_typ(),r,DL),
@@ -1817,7 +1828,7 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
     list<stmt> ss = null;
     int cnt = List::length(ps);
     qvar xfstrct = collapse_qvar_tag(xf->name,"_struct");
-    exp rcast = cast_exp(nullableptr_t(strctq(xfstrct),empty_tqual()),r,DL);
+    exp rcast = cast_exp(nullableptr_typ(strctq(xfstrct),empty_tqual()),r,DL);
     for(let rps = List::rev(ps); rps != null; rps = rps->tl, cnt--) {
       let p2  = rps->hd;
       let v   = temp_var();
@@ -1842,7 +1853,7 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
                           goto_stmt(succ_lab,DL), 
 			  goto_stmt(fail_lab,DL), DL);
     } else {
-      exp e3 = cast_exp(nullableptr_t(strct("_xenum_struct"),empty_tqual()),
+      exp e3 = cast_exp(nullableptr_typ(strct("_xenum_struct"),empty_tqual()),
 			r,DL);
       exp e2 = deref_exp(e3,DL);
       exp e1 = structmember_exp(e2,"tag",DL);
@@ -2156,12 +2167,12 @@ static void stmt_to_c(env nv, stmt s) {
       let e_exp = var_exp(e,DL);
       // e_exp needs a typ because it'll go through exp_to_c;
       // as well, it must be in varmap
-      let e_typ = typ_to_c(exn_t);
+      let e_typ = typ_to_c(exn_typ);
       e_exp->topt = &Opt(e_typ);
       nv = add_varmap(nv,e,e_exp);
       let h     = temp_var();
       let h_exp = var_exp(h,DL);
-      let h_typ = nullableptr_t(strct("_handler_cons"),empty_tqual());
+      let h_typ = nullableptr_typ(strct("_handler_cons"),empty_tqual());
       let setjmp_exp      = var_exp(&$(null,(string)"setjmp"),DL);
       let pushhandler_exp = var_exp(&$(null,(string)"_push_handler"),DL);
       let pophandler_exp  = var_exp(&$(null,(string)"_pop_handler"),DL);
@@ -2173,9 +2184,9 @@ static void stmt_to_c(env nv, stmt s) {
       // add a default case which re-throws the exception
       let x    = temp_var();
       let xexp = var_exp(x,DL);
-      xexp->topt = &Opt(exn_t);
-      let p = &Pat{.r=Var_p(new_vardecl(x,exn_t,null)),
-		   .topt=&Opt(exn_t), 
+      xexp->topt = &Opt(exn_typ);
+      let p = &Pat{.r=Var_p(new_vardecl(x,exn_typ,null)),
+		   .topt=&Opt(exn_typ), 
 		   .loc=DL};
       let te = throw_exp(xexp,DL);
       te->topt = &Opt(VoidType);
@@ -2403,7 +2414,7 @@ static list<decl> xenumdecl_to_c(xenumdecl xd, list<decl> res) {
   let n = collapse_qvar(xd->name);
 
   if (xd->fields == null) {
-    let t = nullableptr_t(strct("_xenum_struct"),empty_tqual());
+    let t  = nullableptr_typ(strct("_xenum_struct"),empty_tqual());
     let td = &Typedefdecl{.name = n, .tvs = null, .defn = t};
     res = &cons(new_decl(Typedef_d(td),DL),res);
   } else {
@@ -2447,7 +2458,7 @@ static list<decl> xenumdecl_to_c(xenumdecl xd, list<decl> res) {
           fields = &cons(newf,fields);
         }
         fields = &cons(&$((string)"tag",empty_tqual(),
-                         nullableptr_t(uchar_t,empty_tqual())),
+			  nullableptr_typ(uchar_t,empty_tqual())),
         List::rev(fields));
         let strct_decl = 
 	  &Structdecl{.sc     = Public,
@@ -2591,7 +2602,9 @@ list<decl> toc(list<decl> ds) {
   for (let ts = tagged_array_types; ts != null; ts = ts->tl) {
     let &$(x,t) = ts->hd;
     let f1 = &$((string)"sz", empty_tqual(), uint_t);
-    let f2 = &$((string)"contents",empty_tqual(),nullableptr_t(t,empty_tqual()));
+    let f2 = &$((string)"contents",
+		empty_tqual(),
+		nullableptr_typ(t,empty_tqual()));
     let fs = &cons(f1,&cons(f2,null));
     let sd = &Structdecl{.sc = Public, .name = &Opt(&$(null,x)), .tvs = null,
                          .fields = &Opt((list<$(string,tqual,typ)@>)fs)};

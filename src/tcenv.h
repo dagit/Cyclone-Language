@@ -28,13 +28,13 @@ typedef enum Resolved resolved_t;
 
 // Global environments -- what's declared in a global scope 
 extern struct Genv {
-  Set<var>              namespaces;
-  Dict<var,structdecl>  structdecls;
-  Dict<var,enumdecl>    enumdecls;
-  Dict<var,xenumdecl>   xenumdecls;
-  Dict<var,typedefdecl> typedefs;
-  Dict<var,resolved_t>  ordinaries;
-  list<list<var>>       availables; // "using" namespaces
+  Set<var>               namespaces;
+  Dict<var,structdecl@>  structdecls;
+  Dict<var,enumdecl@>    enumdecls;
+  Dict<var,xenumdecl@>   xenumdecls;
+  Dict<var,typedefdecl>  typedefs; // indirection unneeded b/c no redeclaration
+  Dict<var,resolved_t>   ordinaries;
+  list<list<var>>        availables; // "using" namespaces
 };
 typedef struct Genv @genv;
 
@@ -42,8 +42,9 @@ typedef struct Genv @genv;
 extern struct Fenv;
 typedef struct Fenv @fenv; 
 
-extern enum Jumpee { 
-  NotAllowed_j;
+extern enum Jumpee {
+  NotLoop_j;
+  CaseEnd_j;
   FnEnd_j;
   Stmt_j(stmt);
 };
@@ -85,9 +86,12 @@ extern genv genv_concat(genv, genv);
 extern list<var>   resolve_namespace(tenv,segment,list<var>);
 extern genv        lookup_namespace(tenv,segment,list<var>);
 extern resolved_t  lookup_ordinary(tenv,segment,qvar);
-extern structdecl  lookup_structdecl(tenv,segment,qvar);
-extern enumdecl    lookup_enumdecl(tenv,segment,qvar);
-extern Opt_t<xenumdecl> lookup_xenumdecl(tenv,segment,qvar);
+extern structdecl@       lookup_structdecl(tenv,segment,qvar);
+extern enumdecl@         lookup_enumdecl(tenv,segment,qvar);
+extern Opt_t<xenumdecl@> lookup_xenumdecl(tenv,segment,qvar);
+extern structdecl@       lookup_structdecl_abs(tenv,segment,qvar);
+extern enumdecl@         lookup_enumdecl_abs(tenv,segment,qvar);
+extern Opt_t<xenumdecl@> lookup_xenumdecl_abs(tenv,segment,qvar);
 extern typedefdecl lookup_typedefdecl(tenv,segment,qvar);
 extern list<tvar>  lookup_type_vars(tenv);
 

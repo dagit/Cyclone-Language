@@ -200,7 +200,7 @@ Doc args2doc(list<$(tqual,typ)@> ts) {
 bool next_is_pointer(list<type_modifier> tms) {
   if (tms==null) return false;
   switch (tms->hd) {
-  case Pointer_mod(_,_): return true;
+  case Pointer_mod(_,_,_): return true;
   default: return false;
   }
 }
@@ -230,9 +230,12 @@ Doc dtms2doc(Doc d,list<type_modifier> tms) {
   case TypeParams_mod(ts,loc):
     if (next_is_pointer(tms->tl)) rest = p_rest;
     return cat2(rest, tvars2doc(ts));
-  case Pointer_mod(nullable,tq2):
-    return 
-      cat2(nullable ? text("*") : text("@"), rest);
+    // FIX?? What about tq2?
+  case Pointer_mod(true, HeapRgn,  tq2): return cat2(text("*"), rest);
+  case Pointer_mod(false,HeapRgn,  tq2): return cat2(text("@"), rest);
+  case Pointer_mod(true, VarRgn(r),tq2): return cat3(text("*"), text(r), rest);
+  case Pointer_mod(false,VarRgn(r),tq2): return cat3(text("@"), text(r), rest);
+  case Pointer_mod(_,_,_): throw Core::Impossible("dtms2doc: non-1 true");
   }
 }
 
@@ -243,7 +246,7 @@ Doc ntyp2doc(typ t) {
     // The first three cases never turn up in normalized types.
   case ArrayType(_,_,_):   return text("[[[array]]]"); //nil_doc();
   case FnType(_,_,_,_):    return nil_doc();
-  case PointerType(_,_,_): return nil_doc();
+  case PointerType(_,_,_,_): return nil_doc();
     // The remaining cases are possible.
   case VoidType: s = text("void"); break;
   case Evar(k,topt,i):
@@ -257,7 +260,7 @@ Doc ntyp2doc(typ t) {
                   text(")"));
     break;
   case VarType(v): s = text(v); break;
-  case EnumType(n,ts):
+  case EnumType(n,ts,_):
     if (n == null)
       s = cat2(text("enum "),
                tps2doc(ts));
@@ -266,7 +269,7 @@ Doc ntyp2doc(typ t) {
                (n==null)?nil_doc():qvar2doc(n->v),
                tps2doc(ts));
     break;
-  case XenumType(n):
+  case XenumType(n,_):
     s = cat2(text("xenum "),qvar2doc(n));
     break;
   case IntType(sn,sz,b):
@@ -296,7 +299,7 @@ Doc ntyp2doc(typ t) {
   case TupleType(ts):
     s = cat2(text("$"),args2doc(ts));
     break;
-  case StructType(n,ts):
+  case StructType(n,ts,_):
     if (n == null)
       s = cat2(text("struct "),tps2doc(ts));
     else
@@ -311,6 +314,9 @@ Doc ntyp2doc(typ t) {
     // for example the EVar case in to_tms.  The problem is that topt->v is
     // not going to be "normalized" (i.e., come out of to_tms).
     s = cat2(qvar2doc(n),tps2doc(ts));
+    break;
+  case RgnHandleType(rgn):
+    s = text("<<REGION HANDLE UNIMPLEMENTED>>");
     break;
   case UnionType:
     s = text("union {/* unimplemented */}");
@@ -1195,23 +1201,21 @@ $(tqual,typ,list<type_modifier>)@ to_tms(tqual tq,typ t) {
     case TaggedArray:   tm = Array_mod;         break;
     case FixedArray(e): tm = ConstArray_mod(e); break;
     }
-    // FIX: can we get rid of the cast?
-    return &$(tq3,t3, (list<type_modifier>)&cons(tm,tml3)); 
+    return &$(tq3, t3, (list<type_modifier>)&cons(tm,tml3)); 
 
-  case PointerType(t2,nullable,tq2):
+  case PointerType(t2,rgn,nullable,tq2):
     let &$(tq3,t3,tml3) = to_tms(tq2,t2);
     bool nl = false;
     bool still_working = true;
     while (still_working) {
       switch (nullable->v) {
-      case Forward_constr(y): nullable = y; continue;
-      case Eq_constr(x1): nl = (bool)x1; still_working = false; break;
-      case No_constr: nl = false; still_working = false; break;
+      case Forward_constr(y): nullable = y;  break;
+      case Eq_constr(x1):     nl = (bool)x1; still_working = false; break;
+      case No_constr:         nl = false;    still_working = false; break;
       }
     }
-    type_modifier tm = Pointer_mod(nl,tq);
-    // FIX: can we get rid of the cast?
-    return &$(tq3,t3, (list<type_modifier>)&cons(tm,tml3)); 
+    type_modifier tm = Pointer_mod(nl,rgn,tq);
+    return &$(tq3, t3, (list<type_modifier>)&cons(tm,tml3)); 
 
   case FnType(typvars,t2,args,varargs):
     // discard tq because you can't qualify a function
@@ -1233,8 +1237,7 @@ $(tqual,typ,list<type_modifier>)@ to_tms(tqual tq,typ t) {
     else
       return to_tms(tq,topt->v);
 
-  default:
-    return &$(tq,t,null);
+  default: return &$(tq,t,null);
   }
 }
 
@@ -1258,13 +1261,6 @@ Doc structfield2doc($(field_name,tqual,typ)@ f) {
 
 Doc structfields2doc(list<$(field_name,tqual,typ)@> fields) {
   return ppseql(structfield2doc,"",fields);
-}
-
-Doc tuple2doc(typ t) {
-  switch (t) {
-  case TupleType(ts): return args2doc(ts);
-  default:            return typ2doc(t); // FIX: This is an unexpected case
-  }
 }
 
 Doc enumfield2doc(enumfield f) {

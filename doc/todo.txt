@@ -8,11 +8,6 @@ Todo now:
 
 * get rid of null, replace with 0 (requires clever overloading)
 
-* Top of the list: figure out why compiling the compiler with the
-  latest gcc from cygwin on -g causes a seg fault, whereas compiling
-  with -O[2] does not.  (Note that this problem does not occur with at
-  least one earlier version of gcc.)
-
 * I'd like to re-code the type-checker so that it pushes information
   down as well as up (more like the local type inference described by
   Pierce.)  This will allow us to, for instance, avoid having to cast
@@ -46,17 +41,12 @@ Todo now:
 
 * Remove synth stuff to clean up typechecker
 
->>>>>>> 1.4
 * ought to be able to treat the arguments to an enum constructor as a tuple
   in a pattern...
 
 * need to start putting user's guide together.
 
-<<<<<<< todo.txt
-* should port bison and lex
-=======
 * lots of places where we're not sure what to do with the type qualifiers
->>>>>>> 1.4
 
 * should hack the popcorn front-end to spit out cyclone (or a close
   approximation thereof.)

@@ -95,18 +95,19 @@ static kind typ_kind(typ t) {
   case VoidType:           return mem_k;
   case Evar(k,topt,_):     return k;
   case VarType(_):         return box_k;
-  case EnumType(_,_):      return box_k;
-  case XenumType(_):       return box_k;
-  case PointerType(_,_,_): return box_k;
+  case EnumType(_,_,_):    return box_k;
+  case XenumType(_,_):     return box_k;
+  case PointerType(_,_,_,_): return box_k;
   case IntType(_,sz,bx):   return (sz == B4 || bx == Boxed) ? box_k : reg_k;
   case FloatType(bx):      return (bx == Boxed)             ? box_k : reg_k;
   case DoubleType(bx):     return (bx == Boxed)             ? box_k : reg_k;
   case ArrayType(_,_,ak):  return (ak == TaggedArray)       ? box_k : mem_k;
   case FnType(_,_,_,_):    return mem_k;
   case TupleType(_):       return mem_k;
-  case StructType(_,_):    return mem_k;
+  case StructType(_,_,_):  return mem_k;
   case TypedefType(_,_,topt): 
     return impos(xprintf("typ_kind: typedef found: %s", typ2string(t)));
+  case RgnHandleType(_):   return box_k;
   case UnionType: return impos("union type");
   }
 }
@@ -140,9 +141,9 @@ static void occurs(typ evar, typ t) {
     if (t == evar) throw Unify;
     else if (r != null) occurs(evar,r->v);
     break;
-  case EnumType(_,ts):      occurslist(evar,ts); break;
-  case PointerType(t2,_,_): occurs(evar,t2);     break;
-  case ArrayType(t2,_,_):   occurs(evar,t2);     break;
+  case EnumType(_,ts,_):      occurslist(evar,ts); break;
+  case PointerType(t2,_,_,_): occurs(evar,t2);     break;
+  case ArrayType(t2,_,_):     occurs(evar,t2);     break;
   case FnType(tvs,rt,args,varargs): // FIX: OK to ignore binding of type vars?
     occurs(evar,rt);
     for(; args != null; args = args->tl)
@@ -152,7 +153,7 @@ static void occurs(typ evar, typ t) {
     for(; args != null; args = args->tl)
       occurs(evar,args->hd[1]);
     break;
-  case StructType(_,ts):       occurslist(evar,ts); break;
+  case StructType(_,ts,_):     occurslist(evar,ts); break;
   case TypedefType(_,ts,topt): occurslist(evar,ts); break;
   default: break;
   }
@@ -284,10 +285,8 @@ void unify_it(typ t1, typ t2) {
     if(String::zstrcmp(x,y) == 0) return;
     break;
 
-  case $(StructType(nopt2,ts2), StructType(nopt1,ts1)): 
-    fallthru(nopt2,ts2,nopt1,ts1);       
-
-  case $(EnumType(nopt2,ts2),   EnumType(nopt1,ts1)):
+  case $(StructType(nopt2,ts2,sd2), StructType(nopt1,ts1,sd1)): 
+    // FIX: equivalent and more efficient to pointer-compare sds
     if ((nopt1 != null && nopt2 != null
 	 && qvar_cmp(nopt1->v,nopt2->v) == 0) 
 	|| (nopt1 == null && nopt2 == null)) {
@@ -296,11 +295,24 @@ void unify_it(typ t1, typ t2) {
     }
     break;
 
-  case $(XenumType(n2),XenumType(n1)):
+  case $(EnumType(nopt2,ts2,ed2), EnumType(nopt1,ts1,ed1)):
+    // FIX: equivalent and more efficient to pointer-compare eds
+    if ((nopt1 != null && nopt2 != null
+	 && qvar_cmp(nopt1->v,nopt2->v) == 0) 
+	|| (nopt1 == null && nopt2 == null)) {
+      unify_list(ts1,ts2);
+      return;
+    }
+    break;
+
+  case $(XenumType(n2,xed2),XenumType(n1,xed1)):
+    // FIX: equivalent and more efficient to pointer-compare xeds
     if(qvar_cmp(n1,n2)==0) return;
     break;
 
-  case $(PointerType(t2a,null2a,tqual2a),PointerType(t1a,null1a,tqual1a)):
+  case $(PointerType(t2a,rgn2,null2a,tqual2a),
+	 PointerType(t1a,rgn1,null1a,tqual1a)):
+	   // FIX: look at regions!
     unify_it(t1a,t2a);
     unify_tqual(tqual1a,tqual2a);
     unify_it_conrefs(cmp_bool,null1a,null2a);
@@ -455,7 +467,7 @@ bool coerce_list(tenv te, typ t, list<exp> es) {
 bool coerce_to_bool(tenv te, exp e) {
   if (!coerce_sint_typ(te,e)) {
     switch (compress(e->topt->v)) {
-    case PointerType(_,cr,_): unchecked_cast(te,e,uint_t); break;
+    case PointerType(_,_,_,_): unchecked_cast(te,e,uint_t); break;
     default: return false;
     }
   }
@@ -516,7 +528,8 @@ bool silent_castable(tenv te, segment loc, typ t1, typ t2) {
   t2 = compress(t2);
   switch ($(t1,t2)) {
  
-  case $(PointerType(t_a,null_a,q_a),PointerType(t_b,null_b,q_b)):
+    // FIX: look at regions!
+  case $(PointerType(t_a,_,null_a,q_a),PointerType(t_b,_,null_b,q_b)):
     // can cast t@ to t* but not vice versa.  can cast a non-const pointer
     // to a const pointer.  
     bool okay = true;
@@ -653,9 +666,9 @@ static list<$(tqual,typ)@> flatten_typ(tenv te,typ t1) {
   switch (t1) {
   case VoidType:       return null;
   case TupleType(tqs): return tqs; // FIX: recursively flatten here
-  case StructType(tdnopt,ts):
-    let n = tdnopt->v;
-    let sd = lookup_structdecl(te,null,n);
+  case StructType(tdnopt,ts,sdp):
+    let sd   = *sdp;
+    let n    = tdnopt->v;
     let inst = List::zip(sd->tvs,ts);
     if (sd->fields == null) return &cons(&$(empty_tqual(),t1),null);
     // FIX: recursively flatten here
@@ -675,7 +688,8 @@ static bool subtype(tenv te, list<$(typ,typ)@> assume, typ t1, typ t2) {
   t1 = compress(t1);
   t2 = compress(t2);
   switch ($(t1,t2)) {
-  case $(PointerType(t_a,null_a,q_a), PointerType(t_b,null_b,q_b)):
+    // FIX: look at regions!
+  case $(PointerType(t_a,_,null_a,q_a), PointerType(t_b,_,null_b,q_b)):
     // if t1 is const then t2 must be const
     if (q_a->q_const && !q_b->q_const) 
       return false;
@@ -715,15 +729,15 @@ bool castable(tenv te, segment loc, typ t1, typ t2) {
   if(unify(t1,t2))
     return true;
   switch (t1) {
-  case EnumType(name_opt,ts):
+  case EnumType(name_opt,ts,ed):
     // can cast an enum to an int -- extracts the tag
-    let ed = lookup_enumdecl(te,loc,name_opt->v);
     return (coerceable(t2));
-  case PointerType(t_a,null_a,q_a):
+    // FIX: look at regions!
+  case PointerType(t_a,_,null_a,q_a):
     // can cast t* to t@ and vice versa.  can cast a non-cost pointer
     // to a const pointer.  can cast a t pointer to a t[],t[1], or t[?]
     switch (t2) {
-    case PointerType(t_b,null_b,q_b):
+    case PointerType(t_b,_,null_b,q_b):
       let assump = &cons(&$(t1,t2),null);
       return (ptrsubtype(te,assump,t_a,t_b) && (!q_a->q_const || q_b->q_const));
     case ArrayType(t_b,q_b,ak):
@@ -821,9 +835,9 @@ bool arithmetic_promote(tenv te, exp e) {
       break;
     }
     break;
-  case FloatType(b):  t = float_t;  break; // make unboxed
-  case DoubleType(b): t = double_t; break; // make unboxed
-  case EnumType(_,_): t = sint_t;   break; // convert to unboxed, signed int
+  case FloatType(b):    t = float_t;  break; // make unboxed
+  case DoubleType(b):   t = double_t; break; // make unboxed
+  case EnumType(_,_,_): t = sint_t;   break; // convert to unboxed, signed int
   case Evar(_,_,_):
     t = sint_t;
     if (!unify(old_typ,t))
@@ -854,7 +868,7 @@ bool integral_promote(tenv te, exp e) {
     case B8: t = (sn == Unsigned) ? ulong_t : slong_t; break; // make unboxed
     }
     break;
-  case EnumType(_,_):
+  case EnumType(_,_,_):
     t = sint_t;
     break; // convert to unboxed, signed int
   case Evar(_,_,_):
@@ -922,11 +936,11 @@ typ substitute(list<$(var,typ)@> inst, typ t) {
   case VarType(v):
     try return List::assoc_cmp(String::zstrcmp,inst,v);
     catch {case Not_found: return t;}
-  case StructType(no,ts):      return StructType(no,substs(inst,ts));
-  case EnumType(no,ts):        return EnumType(no,substs(inst,ts));
+  case StructType(no,ts,sd):   return StructType(no,substs(inst,ts),sd);
+  case EnumType(no,ts,ed):     return EnumType(no,substs(inst,ts),ed);
   case TypedefType(n,ts,topt): return TypedefType(n,substs(inst,ts),topt);
   case ArrayType(t1,tq,eopt):  return ArrayType(substitute(inst,t1),tq,eopt);
-  case PointerType(t1,n,tq):   return PointerType(substitute(inst,t1),n,tq);
+  case PointerType(t1,r,n,tq): return PointerType(substitute(inst,t1),r,n,tq);
   case FnType(vs,rtyp,args,varargs):
     for (let p = vs; p != null; p = p->tl)
       inst = &cons(&$(p->hd,VarType(p->hd)),inst);
@@ -942,12 +956,16 @@ typ substitute(list<$(var,typ)@> inst, typ t) {
   case Evar(_,r,_):
     if (r != null) return(substitute(inst,r->v));
     else return t;
-  case VoidType: return t;
-  case XenumType(_): return t;
+  case VoidType:       return t;
+  case XenumType(_,_): return t;
   case IntType(_,_,_): return t;
-  case FloatType(_): return t;
-  case DoubleType(_): return t;
-  case UnionType: return t;
+  case FloatType(_):   return t;
+  case DoubleType(_):  return t;
+  case RgnHandleType(_): return t; 
+    // Note this substitution is not for region variables, we'll have
+    // to do that too!
+
+  case UnionType:      return t;
   }
 }
 static list<typ> substs(list<$(var,typ)@> inst, list<typ> ts) {
@@ -958,7 +976,7 @@ exp default_initializer(tenv te, typ t, segment loc) {
   exp e = new_exp(Const_e(Null_c),loc);
 
   switch (compress(t)) {
-  case PointerType(_,_,_):
+  case PointerType(_,_,_,_):
     break;
   case IntType(sg,sz,bx):
     if (bx == Boxed)
@@ -1065,8 +1083,16 @@ $(var,typ)@ make_inst_var(var v) {
 }
 
 // Check that the type is valid assuming that the free type variables
-// are drawn from the given list.  As a side-effect, expand any
-// typedefs, and change relative type names to absolute type names.
+// are drawn from the given list.  Perform the following side-effects,
+// which most of the compiler rightfully assumes have occurred:
+// * expand typedefs
+// * set pointers to declarations for StructType, EnumType, and XenumType
+// * change relative type names to absolute type names
+// Some acrobatics are necessary b/c of typedef.  Names are absolute when
+// declaration pointers are non-null.  We need to know the difference to do
+// the right lookup.  Why do we have to do a lookup when we already have
+// a declaration pointer?  Because we can have more information than when
+// the typedef's definition was last encountered.  
 void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
   switch (compress(t)) {
   case VoidType:       break;
@@ -1075,21 +1101,21 @@ void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
     if (!List::mem(String::zstrcmp,bound_vars,tv)) 
       terr(loc,xprintf("unbound type variable %s",tv));
     break;
-  case EnumType(tdnopt,targs):
+  case EnumType(tdnopt,targs,*edp):
     if (tdnopt == null) {
       terr(loc,"missing enum name");
       return;
     }
     let tdn = tdnopt->v;
-    enumdecl ed;
-    try
-      ed = lookup_enumdecl(te,loc,tdn);
-    catch {
-    case Dict::Absent: 
-      terr(loc,xprintf("unbound type enum %s",qvar2string(tdn)));
+    if(*edp == null) {
+      try *edp = lookup_enumdecl(te,loc,tdn);
+      catch { case Dict::Absent: 
+	terr(loc,xprintf("unbound type enum %s",qvar2string(tdn)));
       return;
-    }
-    // Make relative name absolute
+      }
+    } 
+    enumdecl ed = **edp;
+    // Make relative name absolute (or replace absolute name with itself)
     if (ed->name != null) // sanity check
       tdn[0] = ed->name->v[0];
     int lvs   = List::length(ed->tvs);
@@ -1104,29 +1130,40 @@ void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
       if (typ_kind(t1) != box_k) 
 	terr(loc,xprintf("type %s is not a boxed type",typ2string(t1)));
     }
+    // maybe we know more about the fields than we did 
     break;
-  case XenumType(tdn):
-    try {
-      let xed = lookup_xenumdecl(te,loc,tdn);
-      if(xed == null) {
+  case XenumType(tdn,*xedp):
+    if(*xedp == null) {
+      try { 
+	Opt_t<xenumdecl@> xed = lookup_xenumdecl(te,loc,tdn);
+	if(xed == null) {
+	  terr(loc,xprintf("unbound xenum %s",qvar2string(tdn)));
+	  return;
+	}
+	*xedp = xed->v;
+      } catch { case Dict::Absent:
 	terr(loc,xprintf("unbound xenum %s",qvar2string(tdn)));
-	break;
+        return;
       }
-      // Make relative name absolute
-      tdn[0] = xed->v->name[0];
-    } catch {
-    case Dict::Absent:
-      terr(loc,xprintf("unbound xenum %s",qvar2string(tdn)));
+    }
+    xenumdecl xed = **xedp;
+    // Make relative name absolute (or replace absolute name with itself)
+    tdn[0] = xed->name[0];
+    break;
+  case PointerType(t1,rgn,nullable,tq):
+    // FIX: check that tqual is valid?
+    check_valid_type(loc,te,bound_vars,t1);
+    switch (rgn) {
+    case HeapRgn:   break;
+    case VarRgn(r): 
+      if (!List::mem(String::zstrcmp,bound_vars,r)) 
+	terr(loc,xprintf("unbound region variable %s",r));
       break;
     }
     break;
-  case PointerType(t1,nullable,tq):
-    // FIX: check that tqual is valid?
-    check_valid_type(loc,te,bound_vars,t1);
-    break;
   case IntType(_,_,_): break; // skip
-  case FloatType(_): break; // skip
-  case DoubleType(_): break; // skip
+  case FloatType(_):   break; // skip
+  case DoubleType(_):  break; // skip
   case ArrayType(t1,tq,ak):
     // FIX: check that tqual is valid?
     check_valid_type(loc,te,bound_vars,t1);
@@ -1145,8 +1182,7 @@ void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
     list<tvar> new_bound_vars = List::append(btvs,bound_vars);
     check_valid_type(loc,te,new_bound_vars,tr);
     for (; args != null; args = args->tl) {
-      // FIX: should check that variables are unique that tquals are
-      // okay
+      // FIX: should check that variables are unique and that tquals are okay
       check_valid_type(loc,te,new_bound_vars,args->hd[2]);
     }
     break;
@@ -1156,90 +1192,84 @@ void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
       check_valid_type(loc,te,bound_vars,tq_ts->hd[1]);
     }
     break;
-  case StructType(tdnopt,targs):
-    if (tdnopt == null) 
+  case StructType(tdnopt,targs,*sdp):
+    if (tdnopt == null) {
       terr(loc,"missing struct name");
-    else {
-      let tdn = tdnopt->v;
-      try {
-	structdecl sd = lookup_structdecl(te,loc,tdn);
-        // Make relative name absolute
-        if (sd->name != null) // sanity check
-          tdn[0] = sd->name->v[0];
-	int lvs = List::length(sd->tvs);
-	int largs = List::length(targs);
-	if (lvs != largs) 
-	  terr(loc,
-               xprintf("struct %s expects %d type arguments but was given %d",
-                       qvar2string(tdn),lvs,largs));
-	// check that each of the type arguments is well-formed and a box type
-	for (; targs != null; targs = targs->tl) {
-	  typ t1 = targs->hd;
-	  check_valid_type(loc,te,bound_vars,t1);
-	  if (typ_kind(t1) != box_k)
-	    terr(loc,xprintf("type %s is not a boxed type",typ2string(t1)));
-	}
-      } catch {
-      case Dict::Absent:
+      return;
+    }
+    let tdn = tdnopt->v;
+    if(*sdp == null) {
+      try *sdp = lookup_structdecl(te,loc,tdn);
+      catch { case Dict::Absent:
 	terr(loc,xprintf("unbound type struct %s",qvar2string(tdn)));
-        break;
+        return;
       }
+    }
+    structdecl sd = **sdp;
+    // Make relative name absolute (or replace absolute name with itself)
+    if (sd->name != null) // sanity check
+      tdn[0] = sd->name->v[0];
+    int lvs   = List::length(sd->tvs);
+    int largs = List::length(targs);
+    if (lvs != largs) 
+      terr(loc,xprintf("struct %s expects %d type arguments but was given %d",
+		       qvar2string(tdn),lvs,largs));
+    // check that each of the type arguments is well-formed and a box type
+    for (; targs != null; targs = targs->tl) {
+      typ t1 = targs->hd;
+      check_valid_type(loc,te,bound_vars,t1);
+      if (typ_kind(t1) != box_k)
+	terr(loc,xprintf("type %s is not a boxed type",typ2string(t1)));
     }
     break;
-  case TypedefType(tdn,targs,*topt_ref):
-    // NB: since we called compress *topt_ref == null
-    try {
-      typedefdecl td = lookup_typedefdecl(te,loc,tdn);
-      tdn[0] = td->name[0]; // Make relative name absolute
-      for (list<typ> ts = targs; ts != null; ts = ts->tl) {
-	check_valid_type(loc,te,bound_vars,ts->hd);
-	if (typ_kind(ts->hd) != box_k)
-	  terr(loc,xprintf("type %s is not a boxed type",typ2string(ts->hd)));
-      }
-      list<$(var,typ)@> inst = List::zip(td->tvs,targs);
-      typ new_t = substitute(inst,td->defn);
-      // TJ: I think we don't need this.  Presumably the typedefdecl
-      // has been validated before entry into the environment; if
-      // that's so and the type arguments are valid and boxed, the
-      // result of the substitution should be valid as well.  Note, if
-      // we DO need this we have to change something, because the type
-      // names in the typedefdecl are absolute, but check_valid_type
-      // assumes they are relative and changes them to absolute.
-      //
-      // check_valid_type(loc,te,bound_vars,new_t);
-      *topt_ref = &Opt(new_t);
-    } catch {
-    case Dict::Absent:
+  case TypedefType(tdn,targs,*toptp):
+    // NB: since we called compress *toptp == null
+    typedefdecl td;
+    try td = lookup_typedefdecl(te,loc,tdn);
+    catch { case Dict::Absent:
       terr(loc,xprintf("unbound typedef name %s",qvar2string(tdn)));
-      break;
-    case List::List_mismatch:
+      return;
+    }
+    // Make relative name absolute (or replace absolute name with itself)
+    tdn[0] = td->name[0];
+    
+    for (list<typ> ts = targs; ts != null; ts = ts->tl) {
+      check_valid_type(loc,te,bound_vars,ts->hd);
+      if (typ_kind(ts->hd) != box_k)
+	terr(loc,xprintf("type %s is not a boxed type",typ2string(ts->hd)));
+    }
+    list<$(var,typ)@> inst;
+    try inst = List::zip(td->tvs,targs);
+    catch { case List::List_mismatch:
       terr(loc,xprintf("typedef %s expects a different number of arguments",
 		       qvar2string(tdn)));
-      break;
+      return;
     }
+    typ new_typ = substitute(inst,td->defn);
+    *toptp = &Opt(new_typ);
+    break;
+  case RgnHandleType(HeapRgn): break;
+  case RgnHandleType(VarRgn(r)): 
+    // FIX: need to know what region vars are bound (just in tenv?)
+    terr(loc,"region handles unsupported");
     break;
   case UnionType:
     terr(loc,"union type unsupported");
     break;
-  } // end switch
+  } 
 }
 
-Set<var> repeated_vars(list<var> vs) {
-  Set<var> seen     = Set::empty(String::zstrcmp);
-  Set<var> repeated = Set::empty(String::zstrcmp);
-  for (; vs != null; vs = vs->tl) {
-    if (Set::member(seen,vs->hd))
-      repeated = Set::insert(repeated,vs->hd);      
-    else 
-      seen = Set::insert(seen,vs->hd);
-  }
-  return repeated;
+// Note: we expect lists to be very short.  Otherwise, a hashtable would
+// be a better choice.
+void check_unique_vars(list<var> vs, segment loc, string msg) {
+  for(; vs != null; vs = vs->tl)
+    for(let vs2 = vs->tl; vs2 != null; vs2 = vs2->tl)
+      if(String::zstrcmp(vs->hd, vs2->hd)== 0)
+	terr(loc, msg);
 }
 
 void check_unique_tvars(segment loc, list<tvar> tvs) {
-  let repeated = repeated_vars(tvs);
-  if(!Set::is_empty(repeated))
-    terr(loc,xprintf("duplicate type variable %s",Set::choose(repeated)));
+  check_unique_vars(tvs, loc, "duplicate type variable");
 }
 
 // remove the field name f from a list of fields -- return the field

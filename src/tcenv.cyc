@@ -85,13 +85,13 @@ struct Tenv {
 
 // Global environments -- what's declared in a global scope 
 struct Genv {
-  Set<var>              namespaces;
-  Dict<var,structdecl>  structdecls;
-  Dict<var,enumdecl>    enumdecls;
-  Dict<var,xenumdecl>   xenumdecls;
-  Dict<var,typedefdecl> typedefs;
-  Dict<var,resolved_t>  ordinaries;
-  list<list<var>>       availables; // "using" namespaces
+  Set<var>               namespaces;
+  Dict<var,structdecl@>  structdecls;
+  Dict<var,enumdecl@>    enumdecls;
+  Dict<var,xenumdecl@>   xenumdecls;
+  Dict<var,typedefdecl>  typedefs; // indirection unneeded b/c no redeclaration
+  Dict<var,resolved_t>   ordinaries;
+  list<list<var>>        availables; // "using" namespaces
 };
 
 // Used to tell what an ordinary identifer refers to 
@@ -156,11 +156,9 @@ tenv tc_init() {
   empty_var_set    = &Opt(Set::empty(String::zstrcmp));
 
   // Set up initial environment so that xenum exn is defined
-  string exn_v  = "exn";
-  let    xed    = &Xenumdecl{.sc=Extern, .name=&$(null,exn_v), .fields=null};
   let    ge     = empty_genv();
   let    top_ns = null;
-  ge->xenumdecls = Dict::insert(ge->xenumdecls, exn_v, xed);
+  ge->xenumdecls = Dict::insert(ge->xenumdecls, exn_name[1], &$(exn_xed));
   let ae = Dict::insert(Dict::empty(varlist_cmp), top_ns, ge);
   return &Tenv(top_ns,ae,null);
 }
@@ -254,34 +252,43 @@ list<var> resolve_namespace(tenv te, segment loc, list<var> ns) {
   }
 }
 
-static structdecl lookup_structdecl_f(genv ge,var v) {
+// The absolute versions aren't being used right now, but it's
+// important to think about whether they are correct in certain contexts.
+
+static structdecl @ lookup_structdecl_f(genv ge,var v) {
   return Dict::lookup(ge->structdecls,v);
 }
-structdecl lookup_structdecl(tenv te,segment loc,qvar q) {
+structdecl @ lookup_structdecl(tenv te,segment loc,qvar q) {
   let &$(nsl,v) = q;
   if (nsl == null)
     return scoped_lookup(te, loc, lookup_structdecl_f, v)[1];
   genv ge = lookup_namespace(te,loc,nsl);
   return Dict::lookup(ge->structdecls,v);
 }
+structdecl @ lookup_structdecl_abs(tenv te, segment loc,qvar q) {
+  return Dict::lookup(Dict::lookup(te->ae,q[0])->structdecls, q[1]);
+}
 
-static enumdecl lookup_enumdecl_f(genv ge,var v) {
+static enumdecl @ lookup_enumdecl_f(genv ge,var v) {
   return Dict::lookup(ge->enumdecls,v);
 }
-enumdecl lookup_enumdecl(tenv te,segment loc,qvar q) {
+enumdecl @ lookup_enumdecl(tenv te,segment loc,qvar q) {
   let &$(nsl,v) = q;
   if (nsl == null)
     return scoped_lookup(te, loc, lookup_enumdecl_f, v)[1];
   genv ge = lookup_namespace(te,loc,nsl);
   return Dict::lookup(ge->enumdecls,v);
 }
+enumdecl @ lookup_enumdecl_abs(tenv te, segment loc,qvar q) {
+  return Dict::lookup(Dict::lookup(te->ae,q[0])->enumdecls, q[1]);
+}
 
-static xenumdecl lookup_xenumdecl_f(genv ge,var v) {
+static xenumdecl @ lookup_xenumdecl_f(genv ge,var v) {
   return Dict::lookup(ge->xenumdecls,v);
 }
 
 // DAN: some functionality from tcXenumdecl has moved to here.
-Opt_t<xenumdecl> lookup_xenumdecl(tenv te,segment loc,qvar q) {
+Opt_t<xenumdecl@> lookup_xenumdecl(tenv te,segment loc,qvar q) {
   let &$(nsl,v) = q;
   if (nsl == null)
     // unqualified name, okay to fail -- that just means we have a new xenum
@@ -293,14 +300,17 @@ Opt_t<xenumdecl> lookup_xenumdecl(tenv te,segment loc,qvar q) {
   // former.
   genv ge;
   try ge = lookup_namespace(te,loc,nsl);
-  catch { 
-  case Dict::Absent: 
+  catch { case Dict::Absent: 
     Tcutil::terr(loc,"bad qualified name for xenum"); 
     throw Dict::Absent();
   }
   return &Opt(Dict::lookup(ge->xenumdecls,v));
 }
-
+// FIX: We probably need some of the lenience of lookup_xenumdecl here too.
+//      I would add it, but I think xenums are still generally sorta busted.
+Opt_t<xenumdecl@> lookup_xenumdecl_abs(tenv te, segment loc,qvar q) {
+  return &Opt(Dict::lookup(Dict::lookup(te->ae,q[0])->xenumdecls, q[1]));
+}
 
 static typedefdecl lookup_typedefdecl_f(genv ge,var v) {
   return Dict::lookup(ge->typedefs,v);

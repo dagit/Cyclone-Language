@@ -48,6 +48,7 @@ namespace Absyn {
   extern enum Box;
   extern struct Conref<`a>;
   extern enum Constraint<`a>;
+  extern enum Rgn;
   extern enum Typ;
   extern enum Funcparams;
   extern enum Type_modifier;
@@ -83,6 +84,7 @@ namespace Absyn {
   typedef enum Box boxed;
   typedef struct Conref<`a> @conref<`a>;
   typedef enum Constraint<`a> constraint<`a>;
+  typedef enum Rgn rgn_t;
   typedef enum Typ typ;
   typedef enum Funcparams funcparams;
   typedef enum Type_modifier type_modifier;
@@ -114,32 +116,51 @@ namespace Absyn {
     bool q_const; bool q_volatile; bool q_restrict; 
   };
   EXTERN_DEFINITION enum Size_of { B1, B2, B4, B8 };
+  // FIX: Add BoxPackableKind and MemPackableKind and a way to express the
+  //      former in the concrete syntax.  (Without tyvars of MemKind,
+  //      the latter may be recomputable -- just see if all the constituents
+  //      are packable.)
+  //      (So note that BoxKind and Memkind imply unpackable.)
+  // Note we don't have RgnKind because we disambiguate the meaning of type
+  // variables and store region variables separately in the type environment.
   EXTERN_DEFINITION enum Kind { BoxKind, RegKind, MemKind };
   EXTERN_DEFINITION enum Array_kind { 
     UntaggedArray, TaggedArray, FixedArray(exp) 
   };
   EXTERN_DEFINITION enum Sign { Signed, Unsigned };
-  EXTERN_DEFINITION enum Box { Boxed, Unboxed };
+  EXTERN_DEFINITION enum Box  { Boxed, Unboxed };
   EXTERN_DEFINITION struct Conref<`a> { constraint<`a> v; };
   EXTERN_DEFINITION enum Constraint<`a> { 
     Eq_constr(`a), Forward_constr(conref<`a>), No_constr 
   };
+  // Note: In block f, `f becomes a tvar, so block names must not conflict
+  //       with tyvars.  Another approach is to add a third variant to Rgn
+  //       for these induced region variables.
+  EXTERN_DEFINITION enum Rgn { HeapRgn, VarRgn(tvar) };
 
+  // Note: The last fields of EnumType, XenumType, StructType and TypedefType
+  // are all set by check_valid_type which most of the compiler assumes
+  // has been called.  Doing so avoids the need for some code to have and use
+  // a type-name environment just like variable-binding fields avoid the need
+  // for some code to have a variable environment.
+  // FIX: Change a lot of the abstract-syntaxes options to nullable pointers.
+  //      For example, the last field of TypedefType
   EXTERN_DEFINITION enum Typ {
     VoidType;
     Evar(kind,Opt_t<typ>,int);
     VarType(tvar);
-    EnumType(Opt_t<typedef_name>,list<typ>);
-    XenumType(typedef_name);
-    PointerType(typ,conref<bool>,tqual);
+    EnumType(Opt_t<typedef_name>,list<typ>,struct Enumdecl @*);
+    XenumType(typedef_name,struct Xenumdecl @*);
+    PointerType(typ,rgn_t,conref<bool>,tqual);
     IntType(sign,size_of,boxed);
     FloatType(boxed);
     DoubleType(boxed);
     ArrayType(typ,tqual,array_kind);
     FnType(list<tvar>,typ,list<$(Opt_t<var>,tqual,typ)@>,bool);
     TupleType(list<$(tqual,typ)@>);
-    StructType(Opt_t<typedef_name>,list<typ>);
+    StructType(Opt_t<typedef_name>,list<typ>,struct Structdecl @*);
     TypedefType(typedef_name,list<typ>,Opt_t<typ>);
+    RgnHandleType(rgn_t); // a singleton type, for deep allocation
     UnionType;
   };
 
@@ -152,7 +173,7 @@ namespace Absyn {
     Carray_mod; 
     Array_mod; 
     ConstArray_mod(exp);
-    Pointer_mod(bool,tqual); 
+    Pointer_mod(bool,rgn_t,tqual); // default rgn_t is Heap
     Function_mod(funcparams);
     TypeParams_mod(list<tvar>,segment);
   };
@@ -169,8 +190,8 @@ namespace Absyn {
 
   EXTERN_DEFINITION enum Primop {
     Plus, Times, Minus, Div, Mod, Eq, Neq, Gt, Lt, Gte, Lte, Not,
-      Bitnot, Bitand, Bitor, Bitxor, Bitlshift, Bitlrshift, Bitarshift,
-      Size, Printf, Fprintf, Xprintf
+    Bitnot, Bitand, Bitor, Bitxor, Bitlshift, Bitlrshift, Bitarshift,
+    Size, Printf, Fprintf, Xprintf
   };
 
   EXTERN_DEFINITION enum Incrementor { PreInc, PostInc, PreDec, PostDec };
@@ -402,16 +423,18 @@ namespace Absyn {
   extern typ sChar_t, sShort_t, sInt_t, sLong_t;
   // boxed float, double
   extern typ Float_t, Double_t;
-  // exception type
-  extern typ exn_t;
+  // exception name and type
+  extern $(list<var>,var) @ exn_name;
+  extern xenumdecl exn_xed;
+  extern typ exn_typ;
   // string (char[?])
   extern typ string_typ();
   // FILE
   extern typ file_typ();
   // pointers
-  extern typ nullableptr_t(typ t, tqual tq);
+  extern typ nullableptr_typ(typ t, tqual tq);
+  extern typ nonnullableptr_typ(typ t, tqual tq);
   extern typ void_star_typ();
-  extern typ pureptr_t(typ t, tqual tq);
   // structs
   extern typ strct(var  name);
   extern typ strctq(qvar name);

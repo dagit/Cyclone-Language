@@ -486,16 +486,16 @@ collapse_type_specifiers (list<type_specifier_t> ts, segment loc) {
         switch (d->r) {
         case Struct_d(sd):
           let args = List::map(tvar2typ,sd->tvs);
-          topt = &Opt(StructType(sd->name,args));
+          topt = &Opt(StructType(sd->name,args,null));
           if (sd->fields!=null) declopt = &Opt(d);
 	  break;
         case Enum_d(ed):
           let args = List::map(tvar2typ,ed->tvs);
-          topt = &Opt(EnumType(ed->name,args));
+          topt = &Opt(EnumType(ed->name,args,null));
           if (ed->fields!=null) declopt = &Opt(d);
 	  break;
         case Xenum_d(xed):
-          topt = &Opt(XenumType(xed->name));
+          topt = &Opt(XenumType(xed->name,null));
           if (xed->fields != null) declopt = &Opt(d);
 	  break;
         case Union_d:
@@ -613,8 +613,8 @@ apply_tms(tqual tq,typ t,list<type_modifier> tms)
       return(abort("type parameters must appear before function arguments "
 		   "in declarator",loc));
     }
-    case Pointer_mod(nullable,tq2): {
-      return apply_tms(tq2,PointerType(t,new_conref(nullable),tq),
+    case Pointer_mod(nullable,rgn,tq2): {
+      return apply_tms(tq2,PointerType(t,rgn,new_conref(nullable),tq),
 		       tms->tl);
     }
   }
@@ -651,23 +651,23 @@ static stmt flatten_declarations(list<decl> ds, stmt s){
    `a, const, etc.), and a list of declarators and initializers,
    produce a list of top-level declarations.  By far, this is the most
    involved function and thus I expect a number of subtle errors. */
-static list<decl>
-make_declarations(Opt_t<decl_spec_t> dso,list<$(declarator_t,Opt_t<exp>)@> ids,
-                  segment loc) {
-  list<type_specifier_t> tss = null;
-  Opt_t<scope> scopeopt = null; /* Extern, Static, Auto, Register, Abstract */
-  bool istypedef = false;       /* Typedef */
-  tqual tq = empty_tqual();
+static list<decl> make_declarations(Opt_t<decl_spec_t> dso,
+				    list<$(declarator_t,Opt_t<exp>)@> ids,
+				    segment loc) {
+  list<type_specifier_t> tss       = null;
+  Opt_t<scope>           scopeopt  = null; 
+  bool                   istypedef = false;       
+  tqual                  tq        = empty_tqual();
 
   if (dso != null) {
     tss = dso->v->type_specs;
-    tq = dso->v->tq;
+    tq  = dso->v->tq;
 
     if (dso->v->is_inline)
       err("inline is only allowed on function definitions",loc);
 
-    /* figure out the scope and what kind of declaration applies
-       to each declarator. */
+    // figure out the scope and what kind of declaration applies
+    // to each declarator.
     if (dso->v->sc != null)
       switch (dso->v->sc->v) {
       case Typedef_sc:
@@ -699,9 +699,9 @@ make_declarations(Opt_t<decl_spec_t> dso,list<$(declarator_t,Opt_t<exp>)@> ids,
   }
   scope s = (scopeopt == null ? Public : scopeopt->v);
 
-  /* separate the declarators from their initializers */
+  // separate the declarators from their initializers
   let $(declarators, exprs) = List::split(ids);
-  /* check to see if there are no initializers -- useful later on */
+  // check to see if there are no initializers -- useful later on
   bool exps_empty = true;
   for (list<Opt_t<exp>> es = exprs; es != null; es = es->tl)
     if (es->hd != null) {
@@ -732,15 +732,15 @@ make_declarations(Opt_t<decl_spec_t> dso,list<$(declarator_t,Opt_t<exp>)@> ids,
       return &cons(d,null);
     } else {
       switch (t) {
-      case StructType(n,ts):
+      case StructType(n,ts,_):
         let ts2 = List::map_c(typ2tvar,loc,ts);
         let sd  = &Structdecl{.sc = s, .name = n, .tvs = ts2, .fields = null};
         return &cons(&Decl(Struct_d(sd),loc),null);
-      case EnumType(n,ts):
+      case EnumType(n,ts,_):
         let ts2 = List::map_c(typ2tvar,loc,ts);
         let ed  = &Enumdecl{.sc = s, .name = n, .tvs = ts2, .fields = null};
         return &cons(&Decl(Enum_d(ed),loc),null);
-      case XenumType(n):
+      case XenumType(n,_):
         let ed = &Xenumdecl{.sc=s, .name=n, .fields=null};
         return &cons(&Decl(Xenum_d(ed),loc),null);
       case UnionType:
@@ -804,11 +804,9 @@ make_declarations(Opt_t<decl_spec_t> dso,list<$(declarator_t,Opt_t<exp>)@> ids,
    the typedef with the lexer.  */
 /* TJ: the tqual should make it into the typedef as well,
    e.g., typedef const int CI; */
-static decl
-v_typ_to_typedef(segment loc, $(qvar,tqual,typ,list<tvar>)@ t) {
-
+static decl v_typ_to_typedef(segment loc, $(qvar,tqual,typ,list<tvar>)@ t) {
   qvar x = t[0];
-  /* tell the lexer that x is a typedef identifier */
+  // tell the lexer that x is a typedef identifier
   Lex::register_typedef(x);
   let td = &Typedefdecl {.name = x, .tvs = t[3], .defn = t[2]};
   return new_decl(Typedef_d(td),loc);
@@ -881,6 +879,7 @@ using Parse;
   Designator_tok(designator);
   DesignatorList_tok(list<designator>);
   TypeModifierList_tok(list<type_modifier>);
+  Rgn_tok(rgn_t);
   InitializerList_tok(list<$(list<designator>,exp)@>);
   FieldPattern_tok($(list<designator>,pat)@);
   FieldPatternList_tok(list<$(list<designator>,pat)@>);
@@ -931,6 +930,7 @@ using Parse;
 %type <StructFieldDeclList_tok> struct_declaration_list struct_declaration
 %type <StructFieldDeclListList_tok> struct_declaration_list0
 %type <TypeModifierList_tok> pointer
+%type <Rgn_tok> rgn
 %type <Declarator_tok> declarator direct_declarator struct_declarator
 %type <DeclaratorList_tok> struct_declarator_list struct_declarator_list0
 %type <AbstractDeclarator_tok> abstract_declarator direct_abstract_declarator
@@ -1196,7 +1196,7 @@ struct_or_union_specifier:
 | struct_or_union qual_opt_identifier type_params_opt
     { switch ($1) {
       case Struct_su:
-        $$=^$(type_spec(StructType(&Opt($2),$3),LOC(@1,@3)));
+        $$=^$(type_spec(StructType(&Opt($2),$3,null),LOC(@1,@3)));
 	break;
       case Union_su:
         unimp2("unions",LOC(@1,@3));
@@ -1208,7 +1208,7 @@ struct_or_union_specifier:
 | struct_or_union QUAL_TYPEDEF_NAME type_params_opt
     { switch ($1) {
       case Struct_su:
-        $$=^$(type_spec(StructType(&Opt($2),$3),LOC(@1,@3)));
+        $$=^$(type_spec(StructType(&Opt($2),$3,null),LOC(@1,@3)));
 	break;
       case Union_su:
         unimp2("unions",LOC(@1,@3));
@@ -1340,14 +1340,14 @@ enum_specifier:
       $$ = ^$(Decl_spec(d));
     }
 | ENUM qual_opt_identifier type_params_opt
-    { $$=^$(type_spec(EnumType(&Opt($2),$3),LOC(@1,@3)));
+    { $$=^$(type_spec(EnumType(&Opt($2),$3,null),LOC(@1,@3)));
     }
 | XENUM qual_opt_identifier '{' enumerator_list '}'
     { decl d  = xenum_decl(Public,$2,$4,LOC(@1,@5));
       $$ = ^$(Decl_spec(d));
     }
 | XENUM qual_opt_identifier
-    { $$=^$(type_spec(XenumType($2),LOC(@1,@2)));
+    { $$=^$(type_spec(XenumType($2,null),LOC(@1,@2)));
     }
 ;
 
@@ -1416,24 +1416,32 @@ direct_declarator:
     }
 ;
 
+/* CYC: region annotations allowed */
 pointer:
-  '*'
-    { $$=^$(&cons(Pointer_mod(true,empty_tqual()),null)); }
-| '*' type_qualifier_list
-    { $$=^$(&cons(Pointer_mod(true,$2),null)); }
-| '*' pointer
-    { $$=^$(&cons(Pointer_mod(true,empty_tqual()),$2)); }
-| '*' type_qualifier_list pointer
-    { $$=^$(&cons(Pointer_mod(true,$2),$3)); }
-| '@'
-    { $$=^$(&cons(Pointer_mod(false,empty_tqual()),null)); }
-| '@' type_qualifier_list
-    { $$=^$(&cons(Pointer_mod(false,$2),null)); }
-| '@' pointer
-    { $$=^$(&cons(Pointer_mod(false,empty_tqual()),$2)); }
-| '@' type_qualifier_list pointer
-    { $$=^$(&cons(Pointer_mod(false,$2),$3)); }
+  '*' rgn
+    { $$=^$(&cons(Pointer_mod(true,$2,empty_tqual()),null)); }
+| '*' rgn type_qualifier_list
+    { $$=^$(&cons(Pointer_mod(true,$2,$3),null)); }
+| '*' rgn pointer
+    { $$=^$(&cons(Pointer_mod(true,$2,empty_tqual()),$3)); }
+| '*' rgn type_qualifier_list pointer
+    { $$=^$(&cons(Pointer_mod(true,$2,$3),$4)); }
+/* CYC: pointers that cannot be null */
+| '@' rgn
+    { $$=^$(&cons(Pointer_mod(false,$2,empty_tqual()),null)); }
+| '@' rgn type_qualifier_list
+    { $$=^$(&cons(Pointer_mod(false,$2,$3),null)); }
+| '@' rgn pointer
+    { $$=^$(&cons(Pointer_mod(false,$2,empty_tqual()),$3)); }
+| '@' rgn type_qualifier_list pointer
+    { $$=^$(&cons(Pointer_mod(false,$2,$3),$4)); }
 ;
+
+rgn:
+    /* empty */
+  { $$ = ^$(HeapRgn); }
+| TYPE_VAR
+  { $$ = ^$(VarRgn($1)); }
 
 type_qualifier_list:
   type_qualifier

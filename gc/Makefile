@@ -233,7 +233,7 @@ CURSES= -lcurses -ltermlib
 # The following is irrelevant on most systems.  But a few
 # versions of make otherwise fork the shell specified in
 # the SHELL environment variable.
-SHELL= /bin/sh
+#SHELL= /bin/sh
 
 SPECIALCFLAGS = -I$(srcdir)/include
 # Alternative flags to the C compiler for mach_dep.c.

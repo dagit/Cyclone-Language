@@ -93,16 +93,19 @@ typ uShort_t = IntType(Unsigned,B2,Boxed);
 typ uInt_t = IntType(Unsigned,B4,Boxed);
 typ uLong_t = IntType(Unsigned,B8,Boxed);
 // boxed, signed types
-typ sChar_t = IntType(Signed,B1,Boxed);
+typ sChar_t  = IntType(Signed,B1,Boxed);
 typ sShort_t = IntType(Signed,B2,Boxed);
-typ sInt_t = IntType(Signed,B4,Boxed);
-typ sLong_t = IntType(Signed,B8,Boxed);
+typ sInt_t   = IntType(Signed,B4,Boxed);
+typ sLong_t  = IntType(Signed,B8,Boxed);
 // boxed float, double
-typ Float_t = FloatType(Boxed);
+typ Float_t  = FloatType(Boxed);
 typ Double_t = DoubleType(Boxed);
 // exceptions
-static $(list<var>,var) exn_pair = $(null,(string)"exn");
-typ exn_t = XenumType(&exn_pair);
+static $(list<var>,var) exn_name_v = $(null,(string)"exn");
+$(list<var>,var) @      exn_name   = &exn_name_v;
+static struct Xenumdecl exn_xed_v  = Xenumdecl(Extern,&exn_name_v,null);
+xenumdecl               exn_xed    = &exn_xed_v;
+typ                     exn_typ    = XenumType(&exn_name_v,&exn_xed);
 // string
 static Opt_t<typ> string_t_opt = null;
 typ string_typ() {
@@ -115,37 +118,50 @@ typ string_typ() {
 }
 // FILE
 static Opt_t<typ> file_t_opt = null;
+
+// Maybe someday we'll allow FILE objects to live somewhere other than
+// in the heap (by making the runtime interface more flexible).  
+// If so, we'll need a rgn_t argument.
 typ file_typ() {
   if (file_t_opt == null) {
-    typedef_name file_t_name = &$(null,(string)"__sFILE");
-    typ file_struct_t = StructType(&Opt(file_t_name),null);
-    file_t_opt = &Opt(PointerType(file_struct_t,
+    typedef_name file_t_name     = &$(null,(string)"__sFILE");
+    structdecl   sd              = &Structdecl(Abstract,&Opt(file_t_name),
+					       null, null);
+    typ          file_struct_typ = StructType(&Opt(file_t_name),null,&$(sd));
+    file_t_opt = &Opt(PointerType(file_struct_typ,
+				  HeapRgn,
 				  new_conref(false),
 				  empty_tqual()));
   }
   return file_t_opt->v;
 }
 // pointers
-typ nullableptr_t(typ t, tqual tq) {
-  return PointerType(t,new_conref(true),tq);
+
+// FIX: add versions that take rgn_t arguments ?
+typ nullableptr_typ(typ t, tqual tq) {
+  return PointerType(t,HeapRgn,new_conref(true),tq);
 }
+typ nonnullableptr_typ(typ t, tqual tq) {
+  return PointerType(t,HeapRgn,new_conref(false),tq);
+}
+
 static Opt_t<typ> void_star_t_opt = null;
 typ void_star_typ() {
   if (void_star_t_opt == null) {
-    void_star_t_opt = &Opt(nullableptr_t(VoidType, empty_tqual()));
+    void_star_t_opt = &Opt(nullableptr_typ(VoidType, empty_tqual()));
   }
   return void_star_t_opt->v;
 }
-typ pureptr_t(typ t, tqual tq) {
-  return PointerType(t,new_conref(false),tq);
-}
 
 // structs
+// WARNING: currently only Toc calls these, so we don't need to set
+//          the structdecl field.  Beware using them anywhere else!
+// (Probably we should require setting the third field even in Toc.)
 typ strct(var name) {
-  return StructType(&Opt(&$(null,name)),null);
+  return StructType(&Opt(&$(null,name)),null,null);
 }
 typ strctq(qvar name) {
-  return StructType(&Opt(name),null);
+  return StructType(&Opt(name),null,null);
 }
 
 ///////////////////////// Expressions //////////////////////////////
@@ -379,45 +395,17 @@ typ pointer_expand(typ t) {
   //  switch (compress(t)) {
   switch (t) {
   case FnType(_,_,_,_):
-    return pureptr_t(t,empty_tqual());
+    return nonnullableptr_typ(t,empty_tqual());
 // Disabled for now because it is incompatible with C
 //  case ArrayType*(_,_,ak): 
 //    return
-//      (ak == TaggedArray) ? t : pureptr_t(t,empty_tqual());
+//      (ak == TaggedArray) ? t : nonnullableptr_typ(t,empty_tqual());
 //  case TypedefType*(n,_,_): 
 //    return impos(sprintf("pointer_expand: typedef %s", qvar2string(n)));
   default:
     return t;
   }
 }
-//// Inverse of pointer_expand, used in pretty-printer
-//typ pointer_abbrev(typ t) { 
-//  switch (compress(t)) {
-//  case PointerType*(t2,b,tq): // FIX:  what about tq?
-//    switch (compress_conref(b).v) {
-//    case Eq(b):
-//      if (b) return t; // pointer is *
-//      // otherwise, @
-//      switch (t2) {
-//      case FnType(_):
-//        // t (@)(argtyps) -->  t (argtyps)
-//        return t2;
-//// Disabled for now because it is incompatible with C
-////      case ArrayType*(_,_,ak):
-////        // t (@)[]   --> t[]
-////        // t (@)[sz] --> t[sz]
-////        // t (@)[?]  --> t (@)[?]
-////        return (ak == TaggedArray) ? t : t2;
-//      case TypedefType*(n,_,_): 
-//        return impos(sprintf("pointer_abbrev: typedef %s", qvar2string(n)));
-//      default: return t;
-//      }
-//    default: return t;
-//    }
-//  default: return t;
-//  }
-//}
-
 
 // According to Harbison and Steele these are the lvalues of C:
 //
@@ -431,7 +419,6 @@ typ pointer_expand(typ t) {
 //    *e
 //
 // (We may have more in Cyclone...)
-//
 
 // must be called after the expression is type-checked.
 bool is_lvalue(exp e) {
@@ -442,7 +429,7 @@ bool is_lvalue(exp e) {
   case StructMember_e(e1,f):  return is_lvalue(e1);
   case StructArrow_e(e1,f):   return true;
   case Deref_e(e1):           return true;
-    //  case Instantiate*(e1,_): return is_lvalue(e1);
+    //  case Instantiate(e1,_): return is_lvalue(e1);
     //  case NoInstantiate(e1): return is_lvalue(e1);
   default:                    return false;
   }

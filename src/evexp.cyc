@@ -15,6 +15,7 @@ using Absyn;
 using List;
 using Position;
 using Absynpp;
+using Tcutil;
 
 void exp_err(segment loc, string msg) {
   Position::post_error(Position::mk_err_elab(loc, 
@@ -26,7 +27,7 @@ extern cnst promote_const(cnst cn);
 extern cnst eval_const_exp(exp e);
 extern cnst eval_const_unprimop(primop p,exp e);
 extern cnst eval_const_binprimop(primop p,exp e1,exp e2);
-extern cnst eval_sizeof(typ t);
+extern cnst eval_sizeof(typ t, segment loc);
 
 unsigned int eval_const_uint_exp(exp e) {
   switch (promote_const(eval_const_exp(e))) {
@@ -83,7 +84,7 @@ cnst eval_const_exp(exp e) {
       cn = eval_const_binprimop(p,es->hd,es->tl->hd);
     break;
   case Sizeof_e(t):
-    cn = eval_sizeof(t);
+    cn = eval_sizeof(t,e->loc);
     break;
   case Cast_e(t,e2):
     // FIX: this needs to be generalized
@@ -116,15 +117,18 @@ cnst eval_const_exp(exp e) {
   return cn;
 }
 
-static unsigned int szof(typ t) {
+// called by tcSizeof (which ignores result) and eval_szof.
+// Note in the latter case, this code really needs to be in sync with the
+// type translation to C.
+unsigned int szof(typ t, segment loc) {
   switch (Tcutil::compress(t)) {
-  case VoidType:   return 0u;
-  case VarType(_): return 4u;
-  case Evar(k,_,_): 
-    if (k == BoxKind) return 4u; else return Tcutil::impos("szof evar");
-  case EnumType(_,_): return 4u;
-  case XenumType(_):  return 4u;
-  case PointerType(_,_,_):    return 4u;
+  case VoidType:   terr(loc,"cannot apply sizeof to void type"); return 0u;
+  case VarType(_):        return 4u;
+  case Evar(BoxKind,_,_): return 4u; // Possible?
+  case Evar(_,_,_): terr(loc,"cannot apply sizeof to unknown type"); return 0u;
+  case EnumType(_,_,_):  return 4u;
+  case XenumType(_,_):   return 4u;
+  case PointerType(_,_,_,_):  return 4u;
   case IntType(_,_, Boxed):   return 4u;
   case IntType(_,B1,Unboxed): return 1u;
   case IntType(_,B2,Unboxed): return 1u;
@@ -134,17 +138,21 @@ static unsigned int szof(typ t) {
   case DoubleType(Boxed):     return 4u;
   case DoubleType(Unboxed):   return 8u;
   case ArrayType(_,_,TaggedArray):    return 4u;
-  case ArrayType(t2,_,FixedArray(e)): //FIX: insert padding for alignment
-		                      return szof(t2) * eval_const_uint_exp(e);
-  case ArrayType(_,_,UntaggedArray):  return Tcutil::impos("szof []");
+  case ArrayType(t2,_,FixedArray(e)): 
+    // FIX: insert padding for alignment
+    return szof(t2,loc) * eval_const_uint_exp(e);
+  case ArrayType(_,_,UntaggedArray):  
+    terr(loc,"cannot apply sizeof to untagged array type");
+    return 0u;
   case FnType(_,_,_,_): return 4u;
   case TupleType(tqs):
     // FIX: we need to insert padding to ensure alignment
     unsigned int s = 0;
     for (; tqs != null; tqs = tqs->tl)
-      s += szof(tqs->hd[1]);
+      s += szof(tqs->hd[1],loc);
     return s;
-  case StructType(tdnopt,ts):
+  case RgnHandleType(_): return 4u;
+  case StructType(tdnopt,ts,sd):
     // FIX: we need the environment to calculate
     // FIX: we need to insert padding to ensure alignment
                            return Tcutil::impos("szof on structtype");
@@ -153,8 +161,8 @@ static unsigned int szof(typ t) {
   }
 }
 
-cnst eval_sizeof(typ t) {
-  return Int_c(Unsigned,(int)szof(t));
+cnst eval_sizeof(typ t,segment loc) {
+  return Int_c(Unsigned,(int)szof(t,loc));
 }
 
 bool is_arith_const(cnst cn) {

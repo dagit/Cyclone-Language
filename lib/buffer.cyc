@@ -18,7 +18,6 @@ using Core;
 
 //(* Extensible buffers *)
 
-/*abstract*/
 abstract struct t
 { string buffer;
   uint position;

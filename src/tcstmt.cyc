@@ -210,7 +210,7 @@ synth tcStmt(tenv te, stmt s0) {
       let p       = scs->hd->pattern;
       let pat_typ = tcPat(te,p);
       let &$(new_tvs,x) = pat_typ;
-      if (!unify(p->topt->v,exn_t))
+      if (!unify(p->topt->v,exn_typ))
         terr(scs->hd->loc, xprintf("expected xenum exn but found %s",
 				   typ2string(p->topt->v)));
       let pvs = null;
