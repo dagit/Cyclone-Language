@@ -437,7 +437,7 @@ return Cyc_Hashtable_rcreate(Cyc_Core_heap_region,sz,cmp,hash);}struct _tuple0{v
 void Cyc_Hashtable_insert(struct Cyc_Hashtable_Table*t,void*key,void*val){
 struct _fat_ptr tab=t->tab;
 int bucket=(int)({unsigned _Tmp0=(unsigned)t->hash(key);_Tmp0 % _get_fat_size(tab,sizeof(struct Cyc_List_List*));});
-({struct Cyc_List_List*_Tmp0=({struct Cyc_List_List*_Tmp1=_region_malloc(t->r,0U,sizeof(struct Cyc_List_List));({struct _tuple0*_Tmp2=({struct _tuple0*_Tmp3=_region_malloc(t->r,0U,sizeof(struct _tuple0));_Tmp3->f0=key,_Tmp3->f1=val;_Tmp3;});_Tmp1->hd=_Tmp2;}),_Tmp1->tl=((struct Cyc_List_List**)tab.curr)[bucket];_Tmp1;});*((struct Cyc_List_List**)_check_fat_subscript(tab,sizeof(struct Cyc_List_List*),bucket))=_Tmp0;});
+({struct Cyc_List_List*_Tmp0=({struct Cyc_List_List*_Tmp1=_region_malloc(t->r,0U,sizeof(struct Cyc_List_List));({struct _tuple0*_Tmp2=({struct _tuple0*_Tmp3=_region_malloc(t->r,0U,sizeof(struct _tuple0));_Tmp3->f0=key,_Tmp3->f1=val;_Tmp3;});_Tmp1->hd=_Tmp2;}),_Tmp1->tl=*((struct Cyc_List_List**)_check_fat_subscript(tab,sizeof(struct Cyc_List_List*),bucket));_Tmp1;});((struct Cyc_List_List**)tab.curr)[bucket]=_Tmp0;});
 if(({int _Tmp0=Cyc_List_length(((struct Cyc_List_List**)tab.curr)[bucket]);_Tmp0 > t->max_len;}))
 Cyc_Hashtable_resize(t);}
 # 55
@@ -518,7 +518,7 @@ Cyc_Hashtable_insert_bucket(r,tab,hash,elems->tl);{
 void*key=((struct _tuple0*)elems->hd)[0].f0;
 void*val=((struct _tuple0*)elems->hd)[0].f1;
 int nidx=(int)({unsigned _Tmp0=(unsigned)hash(key);_Tmp0 % _get_fat_size(tab,sizeof(struct Cyc_List_List*));});
-({struct Cyc_List_List*_Tmp0=({struct Cyc_List_List*_Tmp1=_region_malloc(r,0U,sizeof(struct Cyc_List_List));({struct _tuple0*_Tmp2=({struct _tuple0*_Tmp3=_region_malloc(r,0U,sizeof(struct _tuple0));_Tmp3->f0=key,_Tmp3->f1=val;_Tmp3;});_Tmp1->hd=_Tmp2;}),_Tmp1->tl=((struct Cyc_List_List**)tab.curr)[nidx];_Tmp1;});*((struct Cyc_List_List**)_check_fat_subscript(tab,sizeof(struct Cyc_List_List*),nidx))=_Tmp0;});}}
+({struct Cyc_List_List*_Tmp0=({struct Cyc_List_List*_Tmp1=_region_malloc(r,0U,sizeof(struct Cyc_List_List));({struct _tuple0*_Tmp2=({struct _tuple0*_Tmp3=_region_malloc(r,0U,sizeof(struct _tuple0));_Tmp3->f0=key,_Tmp3->f1=val;_Tmp3;});_Tmp1->hd=_Tmp2;}),_Tmp1->tl=*((struct Cyc_List_List**)_check_fat_subscript(tab,sizeof(struct Cyc_List_List*),nidx));_Tmp1;});((struct Cyc_List_List**)tab.curr)[nidx]=_Tmp0;});}}
 # 151
 void Cyc_Hashtable_resize(struct Cyc_Hashtable_Table*t){
 struct _fat_ptr odata=t->tab;

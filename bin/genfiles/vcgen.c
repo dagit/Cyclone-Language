@@ -1251,8 +1251,8 @@ aout=({void*_Tmp10=aout;Cyc_AssnDef_and(_Tmp10,Cyc_AssnDef_ult(t1,t2));});
 return({struct _tuple13 _Tmp10;_Tmp10.f0=t,_Tmp10.f1=aout;_Tmp10;});}}}}}else{
 ({(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;})(_tag_fat("vcgen: bad primop",sizeof(char),18U),_tag_fat(0U,sizeof(void*),0));}case 4: _Tmp8=((struct Cyc_Absyn_AssignOp_e_Absyn_Raw_exp_struct*)_Tmp0)->f1;_Tmp6=((struct Cyc_Absyn_AssignOp_e_Absyn_Raw_exp_struct*)_Tmp0)->f2;_Tmp5=((struct Cyc_Absyn_AssignOp_e_Absyn_Raw_exp_struct*)_Tmp0)->f3;{struct Cyc_Absyn_Exp*e1=_Tmp8;struct Cyc_Core_Opt*popt=_Tmp6;struct Cyc_Absyn_Exp*e2=_Tmp5;
 # 1100
-struct _tuple13 _TmpA=Cyc_Vcgen_vcgen_lexp(env,e1,ain);void*_TmpB;void*_TmpC;_TmpC=_TmpA.f0;_TmpB=_TmpA.f1;{void*lt=_TmpC;void*a1=_TmpB;
-struct _tuple13 _TmpD=Cyc_Vcgen_vcgen_rexp_nodebug(env,e2,a1);void*_TmpE;void*_TmpF;_TmpF=_TmpD.f0;_TmpE=_TmpD.f1;{void*t2=_TmpF;void*a2=_TmpE;
+struct _tuple13 _TmpA=Cyc_Vcgen_vcgen_rexp_nodebug(env,e2,ain);void*_TmpB;void*_TmpC;_TmpC=_TmpA.f0;_TmpB=_TmpA.f1;{void*t2=_TmpC;void*a1=_TmpB;
+struct _tuple13 _TmpD=Cyc_Vcgen_vcgen_lexp(env,e1,a1);void*_TmpE;void*_TmpF;_TmpF=_TmpD.f0;_TmpE=_TmpD.f1;{void*lt=_TmpF;void*a2=_TmpE;
 if(popt!=0){
 void*t1=Cyc_Vcgen_deref_lterm(env,lt,a2);
 if(t1==0 || t2==0)

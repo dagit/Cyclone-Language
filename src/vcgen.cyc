@@ -1097,8 +1097,8 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
     return $(t, aout);
   case &Absyn::Primop_e(_,_): Warn::impos("vcgen: bad primop");
   case &Absyn::AssignOp_e(e1,popt,e2):
-    let $(lt,a1) = vcgen_lexp(env,e1,ain);
-    let $(t2,a2) = vcgen_rexp(env,e2,a1);
+    let $(t2,a1) = vcgen_rexp(env,e2,ain);
+    let $(lt,a2) = vcgen_lexp(env,e1,a1);
     if (popt != NULL) {
       let t1 = deref_lterm(env,lt,a2);
       if (t1 == NULL || t2 == NULL) 
