@@ -1,4 +1,23 @@
 
+  #include <arpa/inet.h>
+#if defined(__CYGWIN32__) || defined(__CYGWIN__)
+  /* These types are not defined under Cygwin for some reason */
+  typedef unsigned short uint16_t;
+  typedef unsigned long uint32_t;
+#endif
+  uint32_t __stub_htonl(uint32_t x) {
+    return htonl(x);
+  }
+  uint16_t __stub_htons(uint16_t x) {
+    return htons(x);
+  }
+  uint32_t __stub_ntohl(uint32_t x) {
+    return ntohl(x);
+  }
+  uint16_t __stub_ntohs(uint16_t x) {
+    return ntohs(x);
+  }
+
   /* OS X needs sys/types.h before dirent.h */
   #include <sys/types.h>
   #include <dirent.h>

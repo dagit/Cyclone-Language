@@ -314,13 +314,21 @@ _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_
 char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
 16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};struct
 _tagged_arr wrap_Cbuffer_as_buffer(char*,unsigned int);struct Cyc_in_addr{
-unsigned int s_addr;};struct Cyc_dirent{int d_version;int __d_reserved[2];int d_fd;
-unsigned int d_ino;char d_name[256];};struct Cyc___cycDIR;int Cyc_closedir(struct Cyc___cycDIR*);
-struct Cyc___cycDIR*Cyc_opendir(const char*);struct Cyc_dirent*Cyc_readdir(struct
-Cyc___cycDIR*);void Cyc_rewinddir(struct Cyc___cycDIR*);void Cyc_seekdir(struct Cyc___cycDIR*,
-int);int Cyc_telldir(struct Cyc___cycDIR*);struct Cyc_Cdirent___abstractDIR;struct
-Cyc___cycDIR{struct Cyc_Cdirent___abstractDIR*dir;};int closedir(struct Cyc_Cdirent___abstractDIR*
-d);int Cyc_closedir(struct Cyc___cycDIR*d){return closedir(d->dir);}struct Cyc_Cdirent___abstractDIR*
+unsigned int s_addr;};unsigned int Cyc_htonl(unsigned int x);unsigned short Cyc_htons(
+unsigned short x);unsigned int Cyc_ntohl(unsigned int x);unsigned short Cyc_ntohs(
+unsigned short x);unsigned int __stub_htonl(unsigned int x);unsigned short
+__stub_htons(unsigned short x);unsigned int __stub_ntohl(unsigned int x);
+unsigned short __stub_ntohs(unsigned short x);unsigned int Cyc_htonl(unsigned int x){
+return __stub_htonl(x);}unsigned short Cyc_htons(unsigned short x){return
+__stub_htons(x);}unsigned int Cyc_ntohl(unsigned int x){return __stub_ntohl(x);}
+unsigned short Cyc_ntohs(unsigned short x){return __stub_ntohs(x);}struct Cyc_dirent{
+int d_version;int __d_reserved[2];int d_fd;unsigned int d_ino;char d_name[256];};
+struct Cyc___cycDIR;int Cyc_closedir(struct Cyc___cycDIR*);struct Cyc___cycDIR*Cyc_opendir(
+const char*);struct Cyc_dirent*Cyc_readdir(struct Cyc___cycDIR*);void Cyc_rewinddir(
+struct Cyc___cycDIR*);void Cyc_seekdir(struct Cyc___cycDIR*,int);int Cyc_telldir(
+struct Cyc___cycDIR*);struct Cyc_Cdirent___abstractDIR;struct Cyc___cycDIR{struct
+Cyc_Cdirent___abstractDIR*dir;};int closedir(struct Cyc_Cdirent___abstractDIR*d);
+int Cyc_closedir(struct Cyc___cycDIR*d){return closedir(d->dir);}struct Cyc_Cdirent___abstractDIR*
 opendir(const char*);static char _tmp1[32]="opendir called with NULL string";static
 struct Cyc_Core_Failure_struct Cyc___opendir_failure={Cyc_Core_Failure,{_tmp1,
 _tmp1,_tmp1 + 32}};struct Cyc___cycDIR*Cyc_opendir(const char*f){struct Cyc_Cdirent___abstractDIR*
