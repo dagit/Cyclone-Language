@@ -58,7 +58,9 @@ static list_t<doc_t> work_list = null;
 
 // currently destructive (of doc), but could easily be made functional
 $(doc_t, synth_t) up_opt_rec(doc_t doc) {
+#ifdef CHECK_STACK
   if(!check_stack()) {
+    fprintf(stderr,"\nstack-overflow -- up_opt, recovering");
     work_list = new List(doc,work_list);
     synth_t synth;
     synth.i = 0;
@@ -66,7 +68,7 @@ $(doc_t, synth_t) up_opt_rec(doc_t doc) {
     synth.s.colors = ~0;
     return $(doc,synth);
   }
-    
+#endif    
   switch(doc) {
   case &Seq(*dsp): 
     let ds = *dsp;
@@ -230,7 +232,6 @@ $(doc_t, synth_t) up_opt_rec(doc_t doc) {
 }
 
 $(doc_t, synth_t) up_opt(doc_t doc) {
-  
   let ans = up_opt_rec(doc);
   while(work_list != null) {
     fprintf(stderr,"?");
@@ -270,7 +271,14 @@ struct ShuffleSynth {
   bool sz: 1;
 };
 
-$(doc_t,shuffle_synth_t) up_shuffle(doc_t d) {
+$(doc_t,shuffle_synth_t) up_shuffle_rec(doc_t d) {
+#ifdef CHECK_STACK
+  if(!check_stack()) {
+    fprintf(stderr,"\nstack-overflow -- up_shuffle, recovering");
+    work_list = new List(d,work_list);
+    return $(d,ShuffleSynth(0,0));
+  }
+#endif    
   switch(d) {
   case &Tagged(tag, *d2):
     bool is_color = false;
@@ -291,7 +299,7 @@ $(doc_t,shuffle_synth_t) up_shuffle(doc_t d) {
     case &Text(_): return $(d,ShuffleSynth(is_color,is_size));
     case &Spc(_): return $(d,ShuffleSynth(is_color,is_size));
     case &Tagged(_,_):
-      let pr = up_shuffle(*d2);
+      let pr = up_shuffle_rec(*d2);
       *d2 = pr[0];
       return $(d,ShuffleSynth(is_color | pr[1].color,
 			      is_size  | pr[1].sz));
@@ -305,7 +313,7 @@ $(doc_t,shuffle_synth_t) up_shuffle(doc_t d) {
       let ds2 = ds;
       for(; ds2 != null; ds2 = ds2->tl) {
 	++start_from_back;
-	let pr = up_shuffle(ds2->hd);
+	let pr = up_shuffle_rec(ds2->hd);
 	ds2->hd = pr[0];
 	if(pr[1].color && is_color)
 	  ++num_from_front;
@@ -317,7 +325,7 @@ $(doc_t,shuffle_synth_t) up_shuffle(doc_t d) {
       if(ds2 != null)
 	ds2 = ds2->tl;
       for(; ds2 != null; ds2 = ds2->tl) {
-	let pr = up_shuffle(ds2->hd);
+	let pr = up_shuffle_rec(ds2->hd);
 	ds2->hd = pr[0];
 	if(pr[1].color && is_color)
 	  ++num_from_back;
@@ -369,10 +377,21 @@ $(doc_t,shuffle_synth_t) up_shuffle(doc_t d) {
   case &Seq(ds): 
     flatten_top_seq(d);
     for(; ds != null; ds = ds->tl)
-      ds->hd = up_shuffle(ds->hd)[0];
+      ds->hd = up_shuffle_rec(ds->hd)[0];
     return $(d,ShuffleSynth(0,0));
 
   }
+}
+
+$(doc_t,shuffle_synth_t) up_shuffle(doc_t d) {
+  let ans = up_shuffle_rec(d);
+  while(work_list != null) {
+    fprintf(stderr,"\nstack-overflow: up_shuffle, recovering");
+    doc_t next = work_list->hd;
+    work_list = work_list->tl;
+    up_shuffle_rec(next);
+  }
+  return ans;
 }
         
 // This should also be run after useless things are eliminated, though I'm
@@ -387,6 +406,9 @@ struct UnderSynth {
   unsigned char all_plain; // a boolean -- means ulevel is irrelevant
 };
 
+// it's subtle -- but we don't need to check for stack overflow here
+// because we'll only recur as far as under_elim did (and our stack frame
+// is smaller)
 doc_t nuke_under(doc_t doc, int ulevel) {
   switch(doc) {
   case &Text(_): 
@@ -413,12 +435,19 @@ doc_t nuke_under(doc_t doc, int ulevel) {
   }
 }
 
-$(doc_t,under_synth_t) under_elim(doc_t doc) {
+$(doc_t,under_synth_t) under_elim_rec(doc_t doc) {
+#ifdef CHECK_STACK
+  if(!check_stack()) {
+    fprintf(stderr,"\nstack-overflow -- under_elim, recovering");
+    work_list = new List(doc,work_list);
+    return $(doc,UnderSynth(0,false));
+  }
+#endif    
   switch(doc) {
   case &Text(_): return $(doc,UnderSynth(0,false));
   case &Spc(_): return $(doc,UnderSynth(0,false));
   case &Tagged(tag,*dp):
-    let $(d,synth) = under_elim(*dp);
+    let $(d,synth) = under_elim_rec(*dp);
     *dp = d;
     if(tag == PL_tag)
       return $(doc,UnderSynth(0,true));
@@ -436,13 +465,13 @@ $(doc_t,under_synth_t) under_elim(doc_t doc) {
     if(ds == null)
       return $(Mt,UnderSynth(0,true)); // okay to set all_plain?!?!
     else if(ds->tl == null)
-      return under_elim(ds->hd);
+      return under_elim_rec(ds->hd);
     under_synth_t synth = UnderSynth(0,false);
     under_synth_t prev_synth = synth;
     list_t<doc_t> prev     = ds; // won't get used b/c of prev_synth
     list_t<doc_t> prevprev = ds; // won't get used b/c of prev_synth
     while(ds != null) {
-      let $(newd, inner_synth) = under_elim(ds->hd);
+      let $(newd, inner_synth) = under_elim_rec(ds->hd);
       ds->hd = newd; // destructive here
 
       synth.ulevel = synth.ulevel < inner_synth.ulevel ? 
@@ -495,6 +524,17 @@ $(doc_t,under_synth_t) under_elim(doc_t doc) {
   }    
 }
 
+$(doc_t,under_synth_t) under_elim(doc_t d) {
+  let ans = under_elim_rec(d);
+  while(work_list != null) {
+    fprintf(stderr,"\nstack-overflow: up_shuffle, recovering");
+    doc_t next = work_list->hd;
+    work_list = work_list->tl;
+    under_elim_rec(next);
+  }
+  return ans;
+}
+
 // Here we find regions suitable for passing to the dynamic programming code.
 // We should try harder to extend these regions, but for now we'll at 
 // leat be able to nail code that only has sizes or colors.  We can try
@@ -508,7 +548,14 @@ struct DynSynth {
 
 // probably need to avoid calling dynamic_size/color for very small trivial
 // problems.
-$(doc_t,dyn_synth_t) dynamic_regions(doc_t doc, bool shift, int win_size) {
+$(doc_t,dyn_synth_t) dynamic_regions_rec(doc_t doc, bool shift, int win_size) {
+#ifdef CHECK_STACK
+  if(!check_stack()) {
+    fprintf(stderr,"\nstack-overflow -- dynamic_regions, recovering");
+    work_list = new List(doc,work_list);
+    return $(doc,DynSynth(0,0,false,false));
+  }
+#endif    
   switch(doc) {
   case Mt: fallthru;
   case &Spc(_): fallthru;
@@ -525,7 +572,7 @@ $(doc_t,dyn_synth_t) dynamic_regions(doc_t doc, bool shift, int win_size) {
     list_t<doc_t> prev_start_colors = null; // not prev at beginning 
     while(ds != null) {
       //      fprintf(stderr,"\nA %d %d ", only_sizes, only_colors);
-      let $(newd, inner_synth) = dynamic_regions(ds->hd,shift,win_size);
+      let $(newd, inner_synth) = dynamic_regions_rec(ds->hd,shift,win_size);
       ds->hd = newd; // destructive here
       synth.only_sizes     &= inner_synth.only_sizes;
       synth.only_colors    &= inner_synth.only_colors;
@@ -603,7 +650,7 @@ $(doc_t,dyn_synth_t) dynamic_regions(doc_t doc, bool shift, int win_size) {
 	
   case &Tagged(tag,*d):
     let $(d2,DynSynth(num_sz,num_col,sz,col)) = 
-      dynamic_regions(*d,shift,win_size);
+      dynamic_regions_rec(*d,shift,win_size);
     *d = d2;
     switch(tag) {
       // try harder here -- we should be able to say true for size and
@@ -628,4 +675,15 @@ $(doc_t,dyn_synth_t) dynamic_regions(doc_t doc, bool shift, int win_size) {
       return $(doc,DynSynth(0,0,false,false));
     }
   }
+}
+
+$(doc_t,dyn_synth_t) dynamic_regions(doc_t d, bool shift, int win_size) {
+  let ans = dynamic_regions_rec(d,shift,win_size);
+  while(work_list != null) {
+    fprintf(stderr,"\nstack-overflow: up_shuffle, recovering");
+    doc_t next = work_list->hd;
+    work_list = work_list->tl;
+    dynamic_regions_rec(next,shift,win_size);
+  }
+  return ans;
 }

@@ -29,12 +29,13 @@ We were also concerned about stack overflow (if the 5MB of input
 consists of completely nested tags), so we are actually gving you TWO
 SUBMISSIONS.  One assumes there is sufficient room to make a recursive
 function call (with a reasonable size activation record) for each
-nested tag in the input.  The other is careful not to make more than a
-safe number of recursive calls (10000).  By using auxiliary
-work-stacks and other techniques, it is still able to do the
-optimizations, but it is clumsier and we'd rather not use it.  (We had
-trouble getting a consisting and useful answer from getrlimit on the
-Linux machines we had available.)
+nested tag in the input.  The other is careful not to use more than
+8Mb of stack space.  By using auxiliary work-stacks and other
+techniques, it is still able to do the optimizations, but it is
+clumsier, slower, and we'd rather not use it.  (We had trouble getting
+a consisting and useful answer from getrlimit on the Linux machines we
+had available.  If 8Mb is too large, we need to change a constant in
+our code.)
 
 Our optimizations are fairly straightforward.  We eliminate whitespace
 during parsing.  We then alternate between a bottom-up optimizer and a

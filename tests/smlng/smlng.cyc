@@ -23,8 +23,14 @@ using TagElim;
 unsigned int stack_limit = 0; 
 bool check_stack() {
   unsigned int x=0; 
-  int current_stack_address = (unsigned int)&x; 
-  return stack_limit - current_stack_address > 10000;
+  unsigned int current_stack_address = (unsigned int)&x;
+  //  fprintf(stderr,"\n%u %u %u", current_stack_address, stack_limit,
+  //	  current_stack_address - stack_limit);
+#ifdef UP_STACK
+  return ((stack_limit - current_stack_address) > 10000);
+#else
+  return ((current_stack_address - stack_limit) > 10000);
+#endif
 }
 
 bool is_change = true;
@@ -141,6 +147,7 @@ void dump_rec(buf_t b, doc_t d) {
   }
 }
 
+// not stack safe
 int doc_size(buf_t b,doc_t d) {
   int sum = 0;
   switch (d) {
@@ -160,6 +167,7 @@ int doc_size(buf_t b,doc_t d) {
   return sum;
 }
 
+// not stack safe
 unsigned int num_texts(doc_t d) {
   unsigned int sum = 0;
   switch (d) {
@@ -176,6 +184,7 @@ unsigned int num_texts(doc_t d) {
   }
   return sum;
 }
+// not stack safe 
 unsigned int num_tags(doc_t d) {
   switch (d) {
   case &Seq(ds):
@@ -229,10 +238,13 @@ static list_t<doc_t> down_workstack = null;
 
 //getting rid of Mt branches
 doc_t remove_Mt_rec(doc_t d){
+#ifdef CHECK_STACK 
   if(!check_stack()) {
+    fprintf(stderr,"\nstack-overflow -- mtrec, recovering");
     down_workstack = new List(d,down_workstack);
     return d;
   }
+#endif
   switch(d){
   case &Seq(ds):
     let oldds = ds;
@@ -255,7 +267,6 @@ doc_t remove_Mt_rec(doc_t d){
 doc_t remove_Mt(doc_t d) {
   doc_t ans = remove_Mt_rec(d);
   while(down_workstack != null) {
-    fprintf(stderr,"!");
     doc_t next = down_workstack->hd;
     down_workstack = down_workstack->tl;
     remove_Mt_rec(next);
@@ -266,27 +277,34 @@ doc_t remove_Mt(doc_t d) {
 // These are for testing w/o having the write stack check!
 
 // gets rid of redundant tags in a top-down fashion
-doc_t down_opt(context_t ctxt, doc_t d) {
+doc_t down_opt_rec(context_t ctxt, doc_t d) {
+#ifdef CHECK_STACK 
+  if(!check_stack()) {
+    fprintf(stderr,"\nstack-overflow -- down_opt, recovering");
+    down_workstack = new List(d,down_workstack);
+    return d;
+  }
+#endif
   switch (d) {
   case &Seq(ds):
     for (; ds!=null; ds=ds->tl)
-      ds->hd = down_opt(ctxt,ds->hd);
+      ds->hd = down_opt_rec(ctxt,ds->hd);
     return d;
   case &Text(_): return d;
   case &Spc(_):  return d;
   case &Tagged(tag,*d2):
     switch (tag) {
     case B_tag:
-      if (ctxt.B) {is_change = true; return down_opt(ctxt,*d2);}
+      if (ctxt.B) {is_change = true; return down_opt_rec(ctxt,*d2);}
       ctxt.B = true; 
       break;
     case EM_tag:
-      if (ctxt.S) {is_change = true; return down_opt(ctxt,*d2);} 
+      if (ctxt.S) {is_change = true; return down_opt_rec(ctxt,*d2);} 
       switch(*d2){
       case &Tagged(tag_in_EM,*d3):
         if (tag_in_EM==EM_tag){
           is_change = true;
-          return down_opt(ctxt, *d3);
+          return down_opt_rec(ctxt, *d3);
         }
         break;
       case &Seq(ds):
@@ -294,8 +312,8 @@ doc_t down_opt(context_t ctxt, doc_t d) {
         case &Tagged(tag_in_EM,*d3):
           if (tag_in_EM==EM_tag){
             is_change = true;
-            ds->hd = down_opt(ctxt,*d3);
-            let tail_doc = down_opt(ctxt,new Tagged(EM_tag, new Seq(ds->tl)));
+            ds->hd = down_opt_rec(ctxt,*d3);
+            let tail_doc = down_opt_rec(ctxt,new Tagged(EM_tag, new Seq(ds->tl)));
             ds->tl = new List::List(tail_doc,null);
             return new Seq(ds);
           }
@@ -314,8 +332,8 @@ doc_t down_opt(context_t ctxt, doc_t d) {
               if (tag_in_EM==EM_tag){
                 is_change = true;
                 previous->tl = null;
-                let head_docs = down_opt(ctxt,new Tagged(EM_tag,new Seq(ds)));
-                let last_doc = down_opt(ctxt, *d3);
+                let head_docs = down_opt_rec(ctxt,new Tagged(EM_tag,new Seq(ds)));
+                let last_doc = down_opt_rec(ctxt, *d3);
                 ds = new List::List(head_docs,new List::List(last_doc,null));
                 return new Seq(ds);
               }
@@ -333,29 +351,29 @@ doc_t down_opt(context_t ctxt, doc_t d) {
       ctxt.EM = !ctxt.EM; 
       break;
     case I_tag:
-      if (ctxt.I) {is_change = true; return down_opt(ctxt,*d2);}
+      if (ctxt.I) {is_change = true; return down_opt_rec(ctxt,*d2);}
       ctxt.I = true;
       break;
     case PL_tag:
       // PL clears the U, B, EM, I, S, and TT attributes
       if (ctxt.U == 0 && !ctxt.B && !ctxt.EM && !ctxt.I && !ctxt.S && !ctxt.TT){
 	is_change = true;
-        return down_opt(ctxt,*d2);
+        return down_opt_rec(ctxt,*d2);
       }
       ctxt.U = 0; ctxt.B = false; ctxt.EM = false; ctxt.I = false;
       ctxt.S = false; ctxt.TT = false;
       break;
     case S_tag:
-      if (ctxt.S) {is_change=true; return down_opt(ctxt,*d2);}
+      if (ctxt.S) {is_change=true; return down_opt_rec(ctxt,*d2);}
       ctxt.S = true;
       ctxt.EM = false; // S hides the EM attribute
       break;
     case TT_tag:
-      if (ctxt.TT) {is_change=true; return down_opt(ctxt,*d2);}
+      if (ctxt.TT) {is_change=true; return down_opt_rec(ctxt,*d2);}
       ctxt.TT = true;
       break;
     case U_tag:
-      if (ctxt.U == 3){is_change=true; return down_opt(ctxt,*d2);}
+      if (ctxt.U == 3){is_change=true; return down_opt_rec(ctxt,*d2);}
       ctxt.U++;
       break;
     case Zero:
@@ -370,7 +388,7 @@ doc_t down_opt(context_t ctxt, doc_t d) {
     case Nine:
       char sz = (char)tag;
       if (ctxt.size == sz) {
-	is_change=true; return down_opt(ctxt,*d2);
+	is_change=true; return down_opt_rec(ctxt,*d2);
       }
       ctxt.size = sz;
       break;
@@ -384,15 +402,26 @@ doc_t down_opt(context_t ctxt, doc_t d) {
     case w_tag:
       char color = (char)tag;
       if (ctxt.color == color) 
-	{is_change=true; return down_opt(ctxt,*d2);}
+	{is_change=true; return down_opt_rec(ctxt,*d2);}
       ctxt.color = color;
       break;
     default: throw new Impossible("down_opt");
     }
-    *d2 = down_opt(ctxt,*d2);
+    *d2 = down_opt_rec(ctxt,*d2);
     return d;
   case Mt: return Mt;
   }
+}
+
+doc_t down_opt(context_t ctxt, doc_t d) {
+  doc_t ans = down_opt_rec(ctxt,d);
+  while(down_workstack != null) {
+    fprintf(stderr,"#");
+    doc_t next = down_workstack->hd;
+    down_workstack = down_workstack->tl;
+    down_opt_rec(init_context,next);
+  }
+  return ans;
 }
 
 // Queues for fast append
@@ -446,8 +475,13 @@ int main(int argc, char ??argv) {
   string_t tlimit = "182";
   FILE @f = stdin;
 
+  // let's give ourselves 7Mb
   int x = 0;
-  stack_limit = ((unsigned int)&x) - (1 << 23);
+#ifdef UP_STACK
+  stack_limit = ((unsigned int)&x) + ((1 << 23) - (1 << 20));
+#else
+  stack_limit = ((unsigned int)&x) - ((1 << 23) - (1 << 20));
+#endif
 
   if (argc <= 1) {
     tlimit = Stdlib::getenv("TLIMIT");
@@ -524,7 +558,6 @@ int main(int argc, char ??argv) {
     // toggle the shift -- don't bother
     //shift_window = !shift_window;
 
-    // FIX: pass window size and shift_window
     // run the optimization
     int start_time = check_time();
     let $(d2,DynSynth(num_sz,num_col,sz,col)) = 

@@ -17,7 +17,15 @@ CYCBISON=../../bin/cycbison$(EXE)
 OUT_PREFIX=
 
 LC_FLAG=
+ifdef CHECK_STACK
+ifdef UP_STACK
+CYC_FLAGS= $(LC_FLAG) -save-c -pp -g -DCHECK_STACK -DUP_STACK
+else
+CYC_FLAGS= $(LC_FLAG) -save-c -pp -O2 -DCHECK_STACK
+endif
+else
 CYC_FLAGS= $(LC_FLAG) -save-c -pp -O2
+endif
 #CYC_FLAGS= $(LC_FLAG) -save-c -pp -I../../lib -B../../lib -g
 
 LIB=../../bin/cyc-lib/$(OUT_PREFIX)$(CYCLIB)
