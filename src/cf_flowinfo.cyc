@@ -79,7 +79,7 @@ string_t place_err_string(place_t place) {
       return Absynpp::qvar2string(vd->name);
     else
       return aprintf("reachable from %s", Absynpp::qvar2string(vd->name));
-  default: Tcutil::impos("error locations not for VarRoots");
+  default: Warn::impos("error locations not for VarRoots");
   }
 }
 
@@ -95,7 +95,7 @@ int get_field_index_fs(list_t<aggrfield_t> fs, field_name_t f) {
 }
 
 int get_field_index(type_t t, field_name_t f) {
-  switch (Tcutil::compress(t)) {
+  switch (compress(t)) {
   case &AppType(&AggrCon(info),_):
     let fs = get_known_aggrdecl(info)->impl->fields;
     fallthru(fs);
@@ -233,7 +233,7 @@ static absRval_t i_typ_to_absrval(flow_env_t fenv,
   // we treat bits-only unions as always initialized
   if (is_nontagged_nonrequire_union_type(t)) return fenv->unknown_all;
 
-  switch(Tcutil::compress(t)) {
+  switch(compress(t)) {
   case &AppType(&DatatypeFieldCon({.KnownDatatypefield=$(_,tuf)}),_):
     if(tuf->typs == NULL)
       return leafval;
@@ -345,7 +345,7 @@ absRval_t make_unique_unconsumed(flow_env_t fenv, absRval_t r) {
 // The invariant here is that for aggregates and named locations, the
 // abstract r-values pointed to are made Consumed.
 absRval_t make_unique_consumed(flow_env_t fenv, type_t t, exp_t consumer, int iteration, absRval_t r) {
-  switch $(Tcutil::compress(t),r) {
+  switch $(compress(t),r) {
   case $(_,&NamedLocation(s,r2)):
     let r3 = make_unique_consumed(fenv,t,consumer,iteration,r2);
     if (r3 != r2) return new NamedLocation(s,r3);

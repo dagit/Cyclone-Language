@@ -896,6 +896,9 @@ namespace Absyn {
   kindbound_t compress_kb(kindbound_t);
   kind_t force_kb(kindbound_t);
   ////////////////////////////// Types //////////////////////////////
+
+  type_t compress(type_t);
+
   // converts a type of kind BoolKind to true or false.  If the type
   // is not yet constrained, then leaves it unconstrained and returns
   // def as the result.
@@ -1156,13 +1159,6 @@ namespace Absyn {
   // call Warn::impos if list is not length 1 or holds an ArrayElement
   var_t designatorlist_to_fieldname(list_t<designator_t>);
 
-  // returns an integer corresponding to the top-level constructor
-  unsigned int exp_case_number(exp_t);
-
-  // used to control whether we're compiling or porting c code
-  extern bool porting_c_code;
-  // used to control whether we generate region-allocating code or not
-  extern bool no_regions;
   }
 
 #endif

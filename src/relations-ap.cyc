@@ -34,7 +34,7 @@ namespace Relations;
 reln_op_t RConst(unsigned int i)        { return RelnOp{.RConst = i};   }
 reln_op_t RVar(Absyn::vardecl_t v)      { return RelnOp{.RVar = v};     }
 reln_op_t RNumelts(Absyn::vardecl_t v)  { return RelnOp{.RNumelts = v}; }
-reln_op_t RType(Absyn::type_t t) { return RelnOp{.RType = Tcutil::compress(t)};}
+reln_op_t RType(Absyn::type_t t) { return RelnOp{.RType = Absyn::compress(t)};}
 reln_op_t RParam(unsigned int i) { return RelnOp{.RParam = i};}
 reln_op_t RParamNumelts(unsigned int i) { return RelnOp{.RParamNumelts = i}; }
 reln_op_t RReturn() { return RelnOp{.RReturn = 0}; }
@@ -201,7 +201,7 @@ bool exp2relnop(Absyn::exp_t e, reln_op_t @p) {
   // FIX: some constants were showing up here without types!
  RETRY:
   if (e->topt != NULL) {
-    switch (Tcutil::compress((Absyn::type_t)e->topt)) {
+    switch (Absyn::compress((Absyn::type_t)e->topt)) {
     case &Absyn::AppType(&Absyn::TagCon,&List{t,_}):
       *p = RType(t); return true;
       break;
@@ -231,7 +231,7 @@ bool exp2relnop(Absyn::exp_t e, reln_op_t @p) {
     }
     break;
   case &Absyn::Valueof_e(t):
-    switch (Tcutil::compress(t)) {
+    switch (Absyn::compress(t)) {
     case &Absyn::ValueofType(type_exp):
       e = type_exp;
       goto RETRY;
@@ -392,7 +392,7 @@ void print_relns(FILE@f, relns_t r) {
 static reln_op_t reduce_relnop(reln_op_t rop) {
   switch (rop) {
   case {.RType = t}:
-    switch (Tcutil::compress(t)) {
+    switch (Absyn::compress(t)) {
     case &Absyn::ValueofType(e):
       reln_op_t rop2 = rop;
       if (exp2relnop(e,&rop2)) return rop2;
@@ -401,7 +401,7 @@ static reln_op_t reduce_relnop(reln_op_t rop) {
     }
     break;
   case {.RNumelts = v}:
-    switch (Tcutil::compress(v->type)) {
+    switch (Absyn::compress(v->type)) {
     case &Absyn::PointerType(Absyn::PtrInfo{_,_,Absyn::PtrAtts{.bounds = b,...}}):
       // major subtlety!  the vardecl's type might have been translated
       // to C in which case the bound is not accurate...
@@ -595,7 +595,7 @@ relns_t<`r> exp2relns(region_t<`r> r, Absyn::exp_t e) {
   switch (e->r) {
   case &Cast_e(t,e,...):
     // if t is an unsigned int or int we don't care
-    switch(Tcutil::compress(t)) {
+    switch(Absyn::compress(t)) {
     case &AppType(&IntCon(_,Int_sz),_): return exp2relns(r,e);
     default: break;
     }

@@ -1,4 +1,4 @@
-/* Eliminate GCC specific forms from abstract syntax.
+/* Header file for the top module (nothing to export)
    Copyright (C) 2001 Dan Grossman.
    This file is part of the Cyclone compiler.
 
@@ -20,15 +20,5 @@
 #define _CYCLONE_H_
 namespace Cyclone {
 
-  // true if the generated c code should be ansi
-  extern bool tovc_r;
-
-  enum C_Compilers {
-    Gcc_c,  // gcc (default)
-    Vc_c    // visual c 
-  };
-
-  // used to tell how attributes, 64 bit integers, etc. should be generate
-  extern enum C_Compilers c_compiler;
 }
 #endif

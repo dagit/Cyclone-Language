@@ -105,10 +105,12 @@ CYCLONE_H:=ap.h\
 	sys/ioctl.h\
 	xarray.h\
 	xp.h\
-	warn.h
+	warn.h\
+        flags.h
 
 CYCLONE_SRCS:=absyn\
 	 warn\
+         flags\
          parse_tab\
          parse_errors\
          lex\
@@ -149,6 +151,7 @@ CYCLONE_SRCS:=absyn\
 
 CYCDOC_SRCS:=cycdoc\
 	warn\
+        flags\
         parse_errors\
 	lex\
 	parse_tab\
@@ -183,6 +186,7 @@ CYCDOC_SRCS:=cycdoc\
 BUILDLIB_SRCS:=buildlib\
         specsfile\
 	warn\
+        flags\
         parse_errors\
 	lex\
 	parse_tab\
@@ -214,7 +218,7 @@ BUILDLIB_SRCS:=buildlib\
         toc\
 	absyn
 
-NOOPT_SRCS:=parse_tab parse_tab_a parse_tab_pg
+NOOPT_SRCS:= #parse_tab parse_tab_a parse_tab_pg
 
 # Add XML library .h files to CYCLONE_H
 ifndef NO_XML_LIB

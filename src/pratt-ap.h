@@ -60,24 +60,24 @@ namespace Pratt {
   // constructors for nodes
   extern union Node zero_node;
   typedef union Node node_t;
-  extern node_t NVar(vardecl_t);
-  extern node_t NType(type_t);
-  extern node_t NNumelts(vardecl_t);
-  extern node_t NParam(unsigned);
-  extern node_t NParamNumelts(unsigned);
-  extern node_t NReturn();
+  node_t NVar(vardecl_t);
+  node_t NType(type_t);
+  node_t NNumelts(vardecl_t);
+  node_t NParam(unsigned);
+  node_t NParamNumelts(unsigned);
+  node_t NReturn();
 
   // keep graphs abstract -- we're likely to want to change the rep.
   struct Graph;
   typedef struct Graph graph_t;
-  extern void print_graph(graph_t *);
+  void print_graph(graph_t *);
 
   // create an empty graph
-  extern struct Graph @empty_graph();
-  extern graph_t@ copy_graph(graph_t@);
+  struct Graph @empty_graph();
+  graph_t@ copy_graph(graph_t@);
   // Add a constraint that i - j <= a.  Returns the new graph if it is
   // consistent, otherwise returns null.  
   // This is an *imperative* update, so the old graph is destroyed.
-  extern graph_t*`r add_edge(graph_t @`r G, node_t i, node_t j, AP_T a) ;
+  graph_t*`r add_edge(graph_t @`r G, node_t i, node_t j, AP_T a) ;
 }
 #endif

@@ -377,13 +377,13 @@ extern struct _RegionHandle*Cyc_Core_heap_region;
 extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};
 # 310 "core.h"
 extern struct _fat_ptr Cyc_Core_mkfat(void*arr,unsigned s,unsigned n);struct Cyc_Core_ThinRes{void*arr;unsigned nelts;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
-# 61 "list.h"
+# 61 "/tmp/cyclone/include/list.h"
 extern int Cyc_List_length(struct Cyc_List_List*x);extern char Cyc_List_List_mismatch[14U];struct Cyc_List_List_mismatch_exn_struct{char*tag;};extern char Cyc_List_Nth[4U];struct Cyc_List_Nth_exn_struct{char*tag;};struct Cyc___cycFILE;struct Cyc_String_pa_PrintArg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};struct Cyc_LongDouble_pa_PrintArg_struct{int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _fat_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _fat_ptr f1;};extern char Cyc_FileCloseError[15U];struct Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[14U];struct Cyc_FileOpenError_exn_struct{char*tag;struct _fat_ptr f1;};
-# 310 "cycboot.h"
+# 310 "/tmp/cyclone/include/cycboot.h"
 extern int toupper(int);struct Cyc_timeval{long tv_sec;long tv_usec;};
-# 38 "string.h"
+# 38 "/tmp/cyclone/include/string.h"
 unsigned long Cyc_strlen(struct _fat_ptr s);
-# 49 "string.h"
+# 49 "/tmp/cyclone/include/string.h"
 int Cyc_strcmp(struct _fat_ptr s1,struct _fat_ptr s2);
 # 51
 int Cyc_strncmp(struct _fat_ptr s1,struct _fat_ptr s2,unsigned long len);
@@ -396,7 +396,7 @@ struct _fat_ptr Cyc_rstrconcat_l(struct _RegionHandle*,struct Cyc_List_List*);
 struct _fat_ptr Cyc_rstr_sepstr(struct _RegionHandle*,struct Cyc_List_List*,struct _fat_ptr);
 # 72
 struct _fat_ptr Cyc_strncpy(struct _fat_ptr,struct _fat_ptr,unsigned long);
-# 100 "string.h"
+# 100 "/tmp/cyclone/include/string.h"
 struct _fat_ptr Cyc_rexpand(struct _RegionHandle*,struct _fat_ptr s,unsigned long sz);
 # 102
 struct _fat_ptr Cyc_cond_rrealloc_str(struct _RegionHandle*r,struct _fat_ptr str,unsigned long sz);
@@ -414,9 +414,9 @@ struct _fat_ptr Cyc_mstrpbrk(struct _fat_ptr s,struct _fat_ptr accept);
 unsigned long Cyc_strspn(struct _fat_ptr s,struct _fat_ptr accept);
 # 135
 struct Cyc_List_List*Cyc_rexplode(struct _RegionHandle*,struct _fat_ptr s);
-# 29 "assert.h"
+# 29 "/tmp/cyclone/include/assert.h"
 extern void*Cyc___assert_fail(struct _fat_ptr assertion,struct _fat_ptr file,unsigned line);
-# 39 "string.cyc"
+# 39 "/tmp/cyclone/lib/string.cyc"
 unsigned long Cyc_strlen(struct _fat_ptr s){
 unsigned long i;
 unsigned sz=_get_fat_size(s,sizeof(char));

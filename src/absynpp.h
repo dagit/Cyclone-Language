@@ -49,7 +49,7 @@ extern struct Params {
 };
 
 // used by cycdoc to suppress printing extern, etc.
-extern int print_for_cycdoc;
+  extern int print_for_cycdoc; // FLAG
 
 void set_params(struct Params@ fs);
 

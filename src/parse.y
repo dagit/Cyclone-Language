@@ -56,6 +56,7 @@ extern void yyprint(int i, union YYSTYPE<`yy> v);
 #include <lexing.h>
 #include <string.h>
 #include "warn.h"
+#include "flags.h"
 #include "tcutil.h"
 #include "attributes.h"
 #include "currgn.h"
@@ -68,13 +69,13 @@ using Absyn;
 // These functions are called by the parser to communicate typedefs
 // to the lexer, so the lexer can distinguish typedefs from identifiers.
 namespace Lex {
-  extern void register_typedef(qvar_t s);
-  extern void enter_namespace(var_t);
-  extern void leave_namespace();
-  extern void enter_using(qvar_t);
-  extern void leave_using();
-  extern void enter_extern_c();
-  extern void leave_extern_c();
+  void register_typedef(qvar_t s);
+  void enter_namespace(var_t);
+  void leave_namespace();
+  void enter_using(qvar_t);
+  void leave_using();
+  void enter_extern_c();
+  void leave_extern_c();
   extern qvar_t token_qvar;
   extern string_t token_string;
 }
@@ -114,9 +115,6 @@ namespace Parse {
       return first;
     }
   }
-
-  // if true, parse register storage class as public
-bool no_register = false;
 
 datatype exn {Exit};
 
@@ -430,14 +428,13 @@ static bool is_typeparam(type_modifier_t tm) {
 static type_t id2type(string_t<`H> s, kindbound_t k) {
   if (zstrcmp(s,"`H") == 0)
     return heap_rgn_type;
-  else if (zstrcmp(s,"`U") == 0)
+  if (zstrcmp(s,"`U") == 0)
     return unique_rgn_type;
-  else if (zstrcmp(s,"`RC") == 0)
+  if (zstrcmp(s,"`RC") == 0)
     return refcnt_rgn_type;
-  else if (zstrcmp(s,CurRgn::curr_rgn_name) == 0)
+  if (zstrcmp(s,CurRgn::curr_rgn_name) == 0)
     return CurRgn::curr_rgn_type();
-  else
-    return var_type(new Tvar(new s,-1,k));
+  return var_type(new Tvar(new s,-1,k));
 }
 
 static bool tvar_ok(string_t<`H> s,string_t<`H> @err) {
@@ -473,12 +470,11 @@ static tvar_t typ2tvar(seg_t loc, type_t t) {
 
 // if tvar's kind is unconstrained, set it to k
 static void set_vartyp_kind(type_t t, kind_t k, bool leq) {
-  switch(Tcutil::compress(t)) {
+  switch(compress(t)) {
   case &VarType(&Tvar(_,_,*cptr)): 
     switch(compress_kb(*cptr)) {
     case &Unknown_kb(_): 
-      if (!leq) *cptr = Tcutil::kind_to_bound(k);
-      else *cptr = new Less_kb(NULL,k);
+      *cptr = leq ? new Less_kb(NULL,k) : Tcutil::kind_to_bound(k);
       return;
     default: return;
     }
@@ -710,11 +706,8 @@ static list_t<$(seg_t, qvar_t,tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
   let $(tq2,new_typ,tvs,atts) = apply_tms(tq,t,shared_atts,d.tms);
   // NB: we copy the type here to avoid sharing definitions
   // but we avoid the copy when ds->tl is NULL
-  if (ds->tl == NULL) 
-    return rnew(r) List(rnew(r) $(varloc,q,tq2,new_typ,tvs,atts),NULL);
-  else
-    return rnew(r) List(rnew(r) $(varloc,q,tq2,new_typ,tvs,atts),
-                    apply_tmss(r,tq,Tcutil::copy_type(t),ds->tl,shared_atts));
+  let tl = (ds->tl == NULL) ? NULL : apply_tmss(r,tq,Tcutil::copy_type(t),ds->tl,shared_atts);
+  return rnew(r) List(rnew(r) $(varloc,q,tq2,new_typ,tvs,atts),tl);
 }
 
 static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
@@ -741,7 +734,7 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
 	  new_atts = new List(as->hd,new_atts);
       }
       // functions consume type parameters
-      if (tms->tl != NULL) {
+      if (tms->tl != NULL)
 	switch (tms->tl->hd) {
 	case &TypeParams_mod(ts,_,_):
 	  typvars = ts;
@@ -749,7 +742,6 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
 	  break;
 	default: break;
 	}
-      }
       // special case where the parameters are void, e.g., int f(void)
       if (!c_vararg && cyc_vararg == NULL // not vararg function
 	  && args2 != NULL      // not empty arg list
@@ -828,10 +820,9 @@ static decl_t v_typ_to_typedef(seg_t loc, $(seg_t,qvar_t,tqual_t,type_t,list_t<t
   opt_t<kind_t> kind;
   type_opt_t type;
   switch (typ) {
-  case &Evar(kopt,_,_,_): 
+  case &Evar(kopt,...): 
     type = NULL;
-    if (kopt == NULL) kind = &Tcutil::bko;
-    else kind = kopt;
+    kind = (kopt==NULL) ? &Tcutil::bko : kopt;
     break;
   default: kind = NULL; type = typ; break;
   }
@@ -874,7 +865,7 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
    case ExternC_sc:  s = ExternC;  break;
    case Static_sc:   s = Static;   break;
    case Auto_sc:     s = Public;   break;
-   case Register_sc: s = no_register ? Public : Register;   break;
+   case Register_sc: s = Flags::no_register ? Public : Register;   break;
    case Abstract_sc: 
    default: s = Abstract; break;
    }
@@ -970,7 +961,7 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
 }
 
 // Convert an identifier to a kind
-static kind_t id_to_kind(string_t s, seg_t loc) {
+static kind_t id_to_kind(string_t<`H> s, seg_t loc) {
   if(strlen(s)==1 || strlen(s)==2)
     switch (s[0]) {
     case 'A': return &Tcutil::ak;
@@ -999,7 +990,7 @@ static kind_t id_to_kind(string_t s, seg_t loc) {
       break;
     default:  break;
   }
-  Warn::err(loc,"bad kind: %s; strlen=%d",s,strlen(s));
+  Warn::err2(loc,"bad kind: ",s," strlen=",s,strlen(s));
   return &Tcutil::bk;
 }
 
@@ -1699,7 +1690,7 @@ kind:
 ;
 
 type_qualifier:
-  CONST    { seg_t loc = (Absyn::porting_c_code) ? SLOC(@1) : 0; 
+  CONST    { seg_t loc = (Flags::porting_c_code) ? SLOC(@1) : 0; 
              $$=^$(Tqual(true,false,false,true,loc)); }
 | VOLATILE { $$=^$(Tqual(false,true,false,false,0)); }
 | RESTRICT { $$=^$(Tqual(false,false,true,false,0)); }
@@ -2092,9 +2083,8 @@ one_pointer:
     // don't put location info on every pointer -- too expensive
     ptrloc_t ptrloc = NULL;
     let $(ploc,nullable,bound) = *$1;
-    if (Absyn::porting_c_code)
-      ptrloc = new PtrLoc{.ptr_loc=ploc,.rgn_loc=SLOC(@3),
-                          .zt_loc=SLOC(@2)};
+    if (Flags::porting_c_code)
+      ptrloc = new PtrLoc{.ptr_loc=ploc,.rgn_loc=SLOC(@3),.zt_loc=SLOC(@2)};
     let $(nullable,bound,zeroterm,rgn_opt) = collapse_pointer_quals(ploc,nullable,bound,$3,$2);
     ans = rnew(yyr) List(rnew(yyr) Pointer_mod(PtrAtts(rgn_opt,nullable,bound,zeroterm,ptrloc),$5), ans);
     $$ = ^$(ans);
@@ -3264,7 +3254,7 @@ string_t token2string(int token) {
     return "end-of-file";
   if (token == IDENTIFIER)
     return Lex::token_string;
-  else if (token == QUAL_IDENTIFIER)
+  if (token == QUAL_IDENTIFIER)
     return Absynpp::qvar2string(Lex::token_qvar);
   int z = YYTRANSLATE(token);
   if ((unsigned)z < numelts(yytname))

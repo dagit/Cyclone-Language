@@ -71,6 +71,5 @@ namespace Warn {
   `a   impos2(... inject warg_t) __attribute__((noreturn));
   `a   vimpos_loc2(Position::seg_t,warg_t ?) __attribute__((noreturn));
   `a   impos_loc2(Position::seg_t,... inject warg_t) __attribute__((noreturn));
-  // DO ME: impos! (then use this in tovc)
 }
 #endif

@@ -21,20 +21,12 @@
 #define ABSYN_CYC 
 #include "absyn.h"
 #include "warn.h"
+#include "flags.h"
 #include <string.h>
 #include "tcutil.h"
-#include "cyclone.h"
 #include "evexp.h"
-
 using Core;
 using List;
-
-//FJS -- hack this in here until we create a file such as flags.cyc
-namespace Cyclone{ 
-  bool tovc_r = false;
-
-  enum C_Compilers c_compiler = Gcc_c;
-}
 
 namespace Absyn;
 
@@ -458,6 +450,33 @@ type_t strctq(qvar_t name) {
 type_t unionq_type(qvar_t name) {
   return aggr_type(UnknownAggr(UnionA,name,NULL), NULL);
 }
+
+// compress out any evars or typedefs or type declarations
+type_t compress(type_t t) {
+  switch (t) {
+  case &Evar(_,NULL,_,_):
+  case &TypedefType(_,_,_,NULL): return t;
+  case &TypedefType(_,_,_,*topt_ref): fallthru(topt_ref);
+  case &Evar(_,*t2opt_ref,_,_): // TRICKY
+    type_t ta = (type_t)(*t2opt_ref);
+    type_t t2 = compress(ta);
+    if (t2 != ta)
+      *t2opt_ref = t2;
+    return t2;
+  case &ValueofType(e):
+    Evexp::eval_const_uint_exp(e);
+    switch (e->r) {
+    case &Valueof_e(t2): return compress(t2);
+    default: return t;
+    }
+  case &TypeofType(e):
+    let t2 = e->topt;
+    return (t2 != NULL) ? t2 : t;
+  case &TypeDeclType(_,&t): return compress(t);
+  default: return t;
+  }
+}
+
 ///////////////////////// Constants //////////////////////////////
 cnst_t Char_c(sign_t sn,char c)          { return Cnst{.Char_c     = $(sn,c)}; }
 cnst_t Wchar_c(string_t<`H> s)           { return Cnst{.Wchar_c    = s};       }
@@ -824,7 +843,7 @@ type_t function_type(list_t<tvar_t,`H> tvs, type_opt_t eff_type,
 // MWH: use RgnKind here rather than TopRgnKind for fresh evars;
 //   function pointers can't be unique at the moment
 type_t pointer_expand(type_t t,bool fresh_evar) {
-  switch (Tcutil::compress(t)) {
+  switch (compress(t)) {
   case &FnType(_): return at_type(t,
                                   fresh_evar ? 
                                   new_evar(new Opt(&Tcutil::rk), NULL) 
@@ -850,7 +869,7 @@ bool is_lvalue(exp_t e) {
   case &Var_e(&Funname_b(_)): return false;
   case &Var_e(&Global_b(vd)): fallthru(vd);
   case &Var_e(&Local_b(vd)):
-    switch (Tcutil::compress(vd->type)) {
+    switch (compress(vd->type)) {
     case &ArrayType(_): return false;
     default: return true; 
     }
@@ -957,12 +976,12 @@ $(aggr_kind_t,qvar_t) aggr_kinded_name(union AggrInfo info) {
 }
 aggrdecl_t get_known_aggrdecl(union AggrInfo info) {
   switch(info) {
-  case {.UnknownAggr = _ }: Warn::impos("unchecked aggrdecl");
+  case {.UnknownAggr = _ }: Warn::impos2("unchecked aggrdecl");
   case {.KnownAggr = &ad}: return ad;
   }
 }
 bool is_nontagged_nonrequire_union_type(type_t t) {
-  switch(Tcutil::compress(t)) {
+  switch(compress(t)) {
   case &AnonAggrType(UnionA,fs):     
     if (fs == NULL) return true;
     return (fs->hd->requires_clause == NULL);
@@ -982,7 +1001,7 @@ bool is_nontagged_nonrequire_union_type(type_t t) {
   }
 }
 bool is_require_union_type(type_t t) {
-  switch(Tcutil::compress(t)) {
+  switch(compress(t)) {
   case &AnonAggrType(UnionA,fs):     
     if (fs == NULL) return false;
     return (fs->hd->requires_clause != NULL);
@@ -1015,68 +1034,18 @@ qvar_t binding2qvar(binding_t b) {
 
 var_t designatorlist_to_fieldname(list_t<designator_t> ds) {
   if(ds==NULL || ds->tl != NULL)
-    Warn::impos("designator list not of length 1");
+    Warn::impos2("designator list not of length 1");
   switch(ds->hd) {
   case &FieldName(f):    return f;
-  case &ArrayElement(_): Warn::impos("array designator in struct");
+  case &ArrayElement(_): Warn::impos2("array designator in struct");
   }
 }
 
 bool type2bool(bool def, type_t t) {
-  switch (Tcutil::compress(t)) {
+  switch (compress(t)) {
   case &AppType(&TrueCon,_): return true;
   case &AppType(&FalseCon,_): return false;
   default: return def;
-  }
-}
-
-// to make comparison easier to write, returns a unique integer
-// corresponding to the constructor used.
-unsigned int exp_case_number(exp_t e) {
-  switch (e->r) {
-  case &Const_e(...):        return 0; 
-  case &Var_e(...):          return 1;
-  case &Pragma_e(...):       return 2;
-  case &Primop_e(...):       return 3;
-  case &AssignOp_e(...):     return 4;
-  case &Increment_e(...):    return 5;
-  case &Conditional_e(...):  return 6;
-  case &And_e(...):          return 7;
-  case &Or_e(...):           return 8;
-  case &SeqExp_e(...):       return 9;
-  case &FnCall_e(...):       return 10;
-  case &Throw_e(...):        return 11;
-  case &NoInstantiate_e(...):return 12;
-  case &Instantiate_e(...):  return 13;
-  case &Cast_e(...):         return 14;
-  case &Address_e(...):      return 15;
-  case &New_e(...):          return 16;
-  case &Sizeoftype_e(...):   return 17;
-  case &Sizeofexp_e(...):    return 18;
-  case &Offsetof_e(...):     return 19;
-  case &Deref_e(...):        return 20;
-  case &AggrMember_e(...):   return 21;
-  case &AggrArrow_e(...):    return 22;
-  case &Subscript_e(...):    return 23;
-  case &Tuple_e(...):        return 24;
-  case &CompoundLit_e(...):  return 25;
-  case &Array_e(...):        return 26;
-  case &Comprehension_e(...):return 27;
-  case &ComprehensionNoinit_e(...): return 28;
-  case &Aggregate_e(...):    return 29;
-  case &AnonStruct_e(...):   return 30;
-  case &Datatype_e(...):     return 31;
-  case &Enum_e(...):         return 32;
-  case &AnonEnum_e(...):     return 33;
-  case &Malloc_e(...):       return 34;
-  case &Swap_e(...):         return 35;
-  case &UnresolvedMem_e(...):return 36;
-  case &StmtExp_e(...):      return 37;
-  case &Tagcheck_e(...):     return 38;
-  case &Valueof_e(...):      return 39;
-  case &Asm_e(...):          return 40;
-  case &Extension_e(...):    return 41;
-  case &Assert_e(...):       return 42;
   }
 }
 
@@ -1152,5 +1121,3 @@ datacon(Raw_decl,Portoff_d);
 datacon(Raw_decl,Tempeston_d);
 datacon(Raw_decl,Tempestoff_d);
 
-bool porting_c_code = false;
-bool no_regions = false;

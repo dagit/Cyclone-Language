@@ -61,6 +61,7 @@
 #include <string.h>
 #include "absynpp.h" // For debugging
 #include "tcutil.h"
+#include "warn.h"
 #include "toc.h"
 #include "tovc.h"
 
@@ -261,21 +262,21 @@ static void box_free_vars_stmt(boxingenv_t env, stmt_t s) {
     switch (s->r) {
     case &Skip_s: return;        
     case &Break_s: 
-      Tcutil::warn(s->loc,"break in eliminated statement expression");   
+      Warn::warn(s->loc,"break in eliminated statement expression");   
       return;
     case &Continue_s: 
-      Tcutil::warn(s->loc,"continue in eliminated statement expression");   
+      Warn::warn(s->loc,"continue in eliminated statement expression");   
       // FIX: reject if goto is to a different function (a pain to detect)
       //  (Similarly a label that has gotos from different functions)
       return;
     case &Goto_s(_):   
-      Tcutil::warn(s->loc,"goto in eliminated statement expression");   
+      Warn::warn(s->loc,"goto in eliminated statement expression");   
       return;
     case &Label_s(_,s2):
       s = s2;
       continue;
     case &Return_s(*eopt):
-      Tcutil::warn(s->loc,"return in eliminated statement expression");   
+      Warn::warn(s->loc,"return in eliminated statement expression");   
       // FIX: reject this -- it won't be in the right function.
       if (*eopt != NULL) {
 	let ei = box_free_vars_exp(env,(exp_t)*eopt);
@@ -647,7 +648,7 @@ static void stmt_to_vc(toexpenv_t<`r> env, stmt_t s) {
           // might not have int constants as elements.  (Technically, 
           // it's a C++ and gcc extension.  Who knew?)
           // FIX: ignores designators (assumes sorted already)
-          switch (Tcutil::compress(vd->type)) {
+          switch (compress(vd->type)) {
           case &ArrayType(_):
             if (vd->initializer != NULL)
               switch (vd->initializer->r) {
@@ -681,7 +682,7 @@ static void stmt_to_vc(toexpenv_t<`r> env, stmt_t s) {
       default: break;
       }
       fallthru;
-    default: throw new Impossible("bad stmt after xlation to C");
+    default: Warn::impos2("bad stmt after xlation to C");
     }
   }
 }
@@ -720,7 +721,6 @@ list_t<decl_t> tovc(list_t<decl_t> old_ds) {
                                         Tcutil::fndecl2type(fd), NULL, NULL, 
 					fd->i.attributes, false,(fd->body!=NULL)};
             new_ds = new List(new_decl(new Var_d(vd),DL),new_ds);
-            // fprintf(Stdio::stderr,"%s",*(*fd->name)[1]); Stdio::fflush(Stdio::stdout);
             new_ds = append(*gen_ds,new_ds);
           }
         }
@@ -733,9 +733,7 @@ list_t<decl_t> tovc(list_t<decl_t> old_ds) {
     case &Aggr_d(_):
     case &Datatype_d(_):
     case &Enum_d(_):        
-    case &Typedef_d(_):
-      new_ds = new List(next_d, new_ds);
-      break;
+    case &Typedef_d(_): new_ds = new List(next_d, new_ds); break;
     case &Namespace_d(_,ds2): fallthru(ds2);
     case &Using_d(_,ds2):     fallthru(ds2);
     case &ExternC_d(ds2):     fallthru(ds2);
@@ -744,7 +742,7 @@ list_t<decl_t> tovc(list_t<decl_t> old_ds) {
     case &Portoff_d:
     case &Tempeston_d:
     case &Tempestoff_d:
-      throw new Impossible("nested translation unit after translation to C");
+      Warn::impos2("nested translation unit after translation to C");
     }
   }
   return imp_rev(new_ds);

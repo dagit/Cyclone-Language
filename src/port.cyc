@@ -1170,7 +1170,7 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
     }
     let orig_fat = (get_bounds_exp(fat_bound_type,b) == NULL);
     bool orig_zt;
-    switch (Tcutil::compress(zt)) {
+    switch (compress(zt)) {
     case &Evar(...): orig_zt = is_char(env,et); break;
     default: orig_zt = force_type2bool(false,zt); break;
     }
@@ -1222,7 +1222,7 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
     // Similar to the pointer case.
     let cet = type_to_ctype(env,et);
     bool orig_zt;
-    switch (Tcutil::compress(zt)) {
+    switch (compress(zt)) {
     case &Evar(...): orig_zt = false; break;
     default: orig_zt = force_type2bool(false,zt); break;
     }
@@ -1238,7 +1238,7 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
       let czv = var();
       register_zeroterm_cvars(env, czv, orig_zt ? zterm_ct() : nozterm_ct(), ztloc);
       // Trust the user if they explicitly wrote ZEROTERM or NOZEROTERM
-      switch (Tcutil::compress(zt)) {
+      switch (compress(zt)) {
       case &Evar(...): break;
       default:
         unify_ct(czv, force_type2bool(false,zt) ? zterm_ct() : nozterm_ct());

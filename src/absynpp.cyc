@@ -22,10 +22,8 @@
 #include "evexp.h"
 #include "tcutil.h"
 #include "warn.h"
+#include "flags.h"
 #include "absynpp.h"
-#include "cyclone.h"
-
-using Cyclone;
 using Core;
 using PP;
 using Absyn;
@@ -516,9 +514,9 @@ string_t attribute2string(attribute_t a) {
   case &Aligned_att(e): 
     if (e == NULL) return "aligned";
     else /* return aprintf("aligned(%d)",i);*/
-      switch(Cyclone::c_compiler){
-      case Cyclone::Gcc_c: return aprintf("aligned(%s)",exp2string(e));
-      case Cyclone::Vc_c:  
+      switch(Flags::c_compiler){
+      case Flags::Gcc_c: return aprintf("aligned(%s)",exp2string(e));
+      case Flags::Vc_c:  
       default: return aprintf("align(%s)",exp2string(e));
       }
   case &Packed_att: return "packed";
@@ -552,8 +550,8 @@ doc_t att2doc(attribute_t a) { // for gcc only
 
 doc_t atts2doc(attributes_t atts) {
   if (atts == NULL) return nil_doc();
-  switch(c_compiler) {
-  case Vc_c:  return noncallconv2doc(atts);
+  switch(Flags::c_compiler) {
+  case Flags::Vc_c:  return noncallconv2doc(atts);
   default:
     return(cat(text(" __attribute__"),
                         group("((","))",",",List::map(att2doc,atts))));
@@ -565,8 +563,8 @@ bool next_is_pointer(list_t<type_modifier_t> tms) {
   switch (tms->hd) {
   case &Pointer_mod(_,_): return true;
   case &Attributes_mod(_,_):
-    switch(c_compiler){
-    case Gcc_c: return false;
+    switch(Flags::c_compiler){
+    case Flags::Gcc_c: return false;
     default:   return next_is_pointer(tms->tl);
     }
   default: return false;
@@ -665,8 +663,8 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
       return cat(rest,group("(",")",",",List::map(textptr,sl)));
     }
   case &Attributes_mod(_, atts):
-    switch(c_compiler){
-    case Gcc_c:
+    switch(Flags::c_compiler){
+    case Flags::Gcc_c:
       if (next_is_pointer(tms->tl)) 
 	rest = p_rest;
       return cat(rest, atts2doc(atts));
@@ -689,7 +687,7 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
     doc_t ztd = mt;
     doc_t rgd = mt;
     doc_t tqd = tqual2doc(tq2);
-    switch (Tcutil::compress(bd)) {
+    switch (compress(bd)) {
     case &AppType(&FatCon,_): ptr = question(); break;
     case &AppType(&ThinCon,&List{targ,_}):
       switch (compress(targ)) {
@@ -840,9 +838,9 @@ doc_t ntyp2doc(type_t t) {
     case Long_sz:  ts = "long";   break;
     case LongLong_sz:
     default:
-      switch(c_compiler) {
-      case Gcc_c: ts = "long long"; break;
-      default:    ts = "__int64";   break;
+      switch(Flags::c_compiler) {
+      case Flags::Gcc_c: ts = "long long"; break;
+      default:           ts = "__int64";   break;
       }
       break;
     }
@@ -1701,8 +1699,8 @@ doc_t vardecl2doc(vardecl_t vd) {
   doc_t sn = typedef_name2bolddoc(name);
   doc_t attsdoc   = atts2doc(atts);
   doc_t beforenamedoc;
-  switch(c_compiler){
-  case Gcc_c: beforenamedoc = attsdoc; break;
+  switch(Flags::c_compiler){
+  case Flags::Gcc_c: beforenamedoc = attsdoc; break;
   default:
     switch(compress(type)) {
     case &FnType(FnInfo{.attributes = atts2,...}):
@@ -1714,9 +1712,9 @@ doc_t vardecl2doc(vardecl_t vd) {
   }
 
   doc_t tmp_doc;
-  switch(c_compiler){
-  case Gcc_c: tmp_doc = nil_doc(); break;
-  default:  tmp_doc = attsdoc;   break;
+  switch(Flags::c_compiler){
+  case Flags::Gcc_c: tmp_doc = nil_doc(); break;
+  default:           tmp_doc = attsdoc;   break;
   }
   s = cat(/*(to_VC ? attsdoc : nil_doc()),*/
           tmp_doc,
@@ -1800,7 +1798,7 @@ doc_t decl2doc(decl_t d) {
     type_info.attributes = NULL;
     type_t t = new FnType(type_info);
     if(fd->cached_type != NULL)
-      switch(Tcutil::compress((type_t)fd->cached_type)) {
+      switch(compress((type_t)fd->cached_type)) {
       case &FnType(i): 
 	fd->i.attributes = append(fd->i.attributes,i.attributes); break;
       default: Warn::impos("function has non-function type");
@@ -1808,17 +1806,17 @@ doc_t decl2doc(decl_t d) {
     doc_t attsdoc   = atts2doc(fd->i.attributes);
     doc_t inlinedoc;
     if(fd->is_inline)
-      switch(c_compiler) {
-      case Gcc_c:  inlinedoc = text("inline ");    break;
-      default:   inlinedoc = text("__inline ");  break;
+      switch(Flags::c_compiler) {
+      case Flags::Gcc_c:  inlinedoc = text("inline ");    break;
+      default:            inlinedoc = text("__inline ");  break;
       }
     else
       inlinedoc = nil_doc();
     doc_t scopedoc  = scope2doc(fd->sc);
     doc_t beforenamedoc;
-    switch(c_compiler){
-    case Gcc_c: beforenamedoc = attsdoc; break;
-    default:  beforenamedoc = callconv2doc(fd->i.attributes); break;
+    switch(Flags::c_compiler){
+    case Flags::Gcc_c: beforenamedoc = attsdoc; break;
+    default:           beforenamedoc = callconv2doc(fd->i.attributes); break;
     }
     doc_t namedoc   = typedef_name2doc(fd->name);
     doc_t tqtddoc   = tqtd2doc(empty_tqual(0), t,
@@ -1834,8 +1832,8 @@ doc_t decl2doc(decl_t d) {
 			  rb());
     s = cat(inlinedoc,scopedoc,tqtddoc,bodydoc);
 
-    switch(c_compiler){
-    case Vc_c:  s = cat(attsdoc,s); break;
+    switch(Flags::c_compiler){
+    case Flags::Vc_c:  s = cat(attsdoc,s); break;
     default: break;
     }
 
@@ -2006,7 +2004,7 @@ doc_t scope2doc(scope_t sc) {
 
 // needed to detect default effect
 bool exists_temp_tvar_in_effect(type_t t) {
-  switch (Tcutil::compress(t)) {
+  switch (compress(t)) {
   case &VarType(tv): return is_temp_tvar(tv);
   case &AppType(&JoinCon,l):  return exists(exists_temp_tvar_in_effect, l);
   default: return false;
@@ -2100,8 +2098,8 @@ $(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r> r,
     //     on the caller to move them to the right place. KLUDGE! FIX!
     //     (I doubt this is right in all cases.)
 
-    switch(c_compiler){
-    case Gcc_c:
+    switch(Flags::c_compiler){
+    case Flags::Gcc_c:
       if (fn_atts != NULL){
         // if the return type is a function pointer, then we have to
         // move the attributes past that function modifier and so forth
@@ -2195,25 +2193,23 @@ doc_t aggrfield2doc(aggrfield_t f) {
   else 
     requires_doc = nil_doc();
 
-  switch(c_compiler){
-  case Gcc_c:
+  switch(Flags::c_compiler){
+  case Flags::Gcc_c:
     // NB: can't have both where and width
     if (f->width != NULL)
       return cat(tqtd2doc(f->tq, f->type, new Opt(textptr(f->name))),
                  text(":"), exp2doc((exp_t)f->width),
                  atts2doc(f->attributes), text(";"));
-    else
-      return cat(tqtd2doc(f->tq, f->type, new Opt(textptr(f->name))),
-                 atts2doc(f->attributes), requires_doc, text(";"));
+    return cat(tqtd2doc(f->tq, f->type, new Opt(textptr(f->name))),
+	       atts2doc(f->attributes), requires_doc, text(";"));
   default:
     if (f->width != NULL)
       return cat(atts2doc(f->attributes),
                  tqtd2doc(f->tq, f->type, new Opt(textptr(f->name))),
                  text(":"), exp2doc((exp_t)f->width),text(";"));
-    else
-      return cat(atts2doc(f->attributes),
-                 tqtd2doc(f->tq, f->type, new Opt(textptr(f->name))),
-                 requires_doc, text(";"));
+    return cat(atts2doc(f->attributes),
+	       tqtd2doc(f->tq, f->type, new Opt(textptr(f->name))),
+	       requires_doc, text(";"));
 \
   }
 }

@@ -1,204 +1,260 @@
-# architecture specific defines
-CYCDIR=/home/mharris/cyclone
-ARCH=i686-unknown-linux
-INC_INSTALL=/home/mharris/cyclone/include
-BIN_INSTALL=
-LIB_INSTALL=/home/mharris/cyclone/bin/cyc-lib
-ALL_ARCHS=i686-unknown-cygwin1.3.2 i686-unknown-linux 
-
-# -*- Makefile -*-
-
+# Makefile.inc.  Generated from Makefile.inc.in by configure.
+VERSION=0.8.2
+build=i686-pc-linux-gnu
+target=i686-pc-linux-gnu
 CC=gcc
+CFLAGS=-march=i686
+TARGET_CC=gcc -b i686-pc-linux-gnu
+TARGET_CFLAGS=-march=i686
+CYCDIR=/tmp/cyclone
+prefix=/homes/gws/djg
+exec_prefix=${prefix}
+INC_INSTALL=${prefix}/include/cyclone
+BIN_INSTALL=${exec_prefix}/bin
+LIB_INSTALL=${exec_prefix}/lib/cyclone
 
-# Assume with Windows
+RANLIB=ranlib
+TARGET_RANLIB=ranlib
+TARGET_AR=ar
+EXE=
+O=o
+LDFLAGS=
+SIZEOF_WCHAR_T=4
+WCHAR_T_UNSIGNED=0
 
-O := o
-A := a
-EXE := .exe
+HAVE_PTHREAD=yes
 
+SHELL=/bin/sh
+A=a
 # What we do when using VC++
 ifdef MS
-  O := obj
-  A := lib
+  O=obj
+  A=lib
 endif
 
-# If there's no sign of a Cygwin environment, it's unix
-ifndef MS
-  ifndef CYGWIN
-    ifneq ($(OS),Windows_NT)
-      ifneq ($(OSTYPE),cygwin)
-        O := o
-        A := a
-        EXE :=
-      endif
-    endif
-  endif
-endif
-
-
-CYCLONE_LIBS:=arg\
-	inet\
-        array\
+# needed for booting
+CYCLONE_BOOT_LIBS:=ap\
+        apq\
+        arg\
         assert\
-        bitvec\
         buffer\
         core\
         dict\
-	dirent\
-	execinfo\
-	fcntl\
         filename\
         fn\
-        getopt\
-        getopt1\
-	grp\
+        graph\
         hashtable\
-        id\
+	iter\
         lexing\
         lineno\
         list\
-	mman\
-        netdb\
-        in\
         position\
         pp\
 	printf\
-	pwd\
-        queue\
-        ref\
-        rope\
 	scanf\
         set\
-	signal\
         slowdict\
-        splay\
-	stat\
-	stdio\
-        stdlib\
         string\
-        socket\
-        time\
-	unistd\
-        xarray
+        xarray\
+        xp
 
-CYCLONE_H:=$(wildcard arch/*.h)\
+# other bits of the standard library
+CYCLONE_LIBS:=array\
+        bitvec\
+	execinfo\
+        getopt\
+        getopt1\
+        queue\
+        rope\
+        splay\
+	tmp
+
+CYCLONE_H:=ap.h\
+        apq.h\
 	arg.h\
-	arpa/cinet.h\
-	arpa/inet.h\
 	array.h\
 	assert.h\
+	binding.h\
 	bitvec.h\
 	buffer.h\
-	cassert.h\
-	cctype.h\
-	cdirent.h\
-	cerrno.h\
-	cfcntl.h\
-	cgetopt.h\
-	cgrp.h\
-	cmath.h\
-	cnetdb.h\
+        callgraph.h\
 	core.h\
-	cpwd.h\
-	csignal.h\
-	cstddef.h\
-	cstdio.h\
-	cstdlib.h\
-	cstring.h\
-	cstrings.h\
-	ctime.h\
-	ctype.h\
-	cunistd.h\
+	currgn.h\
+	crypt.h\
 	dict.h\
-	dirent.h\
-	errno.h\
 	execinfo.h\
-	fcntl.h\
 	filename.h\
 	fn.h\
+	gc_ifc.h\
 	getopt.h\
-	grp.h\
 	hashtable.h\
-	id.h\
+	iter.h\
 	lexing.h\
 	lineno.h\
 	list.h\
-	math.h\
-	netdb.h\
-	netinet/cin.h\
-	netinet/ctcp.h\
-	netinet/in.h\
-	netinet/tcp.h\
 	position.h\
 	pp.h\
-	precore.h\
-	pwd.h\
 	queue.h\
-	ref.h\
 	rope.h\
 	set.h\
-	signal.h\
-	signal.h\
 	slowdict.h\
 	splay.h\
-	stddef.h\
-	stdio.h\
-	stdlib.h\
 	string.h\
 	strings.h\
-	sys/cmman.h\
-	sys/cresource.h\
-	sys/cselect.h\
-	sys/csocket.h\
-	sys/cstat.h\
-	sys/ctime.h\
-	sys/ctypes.h\
-	sys/cwait.h\
-	sys/mman.h\
-	sys/resource.h\
-	sys/select.h\
-	sys/socket.h\
-	sys/stat.h\
-	sys/time.h\
-	sys/types.h\
-	sys/wait.h\
-	time.h\
-	unistd.h\
-	xarray.h
+	sys/cioctl.h\
+	sys/ioctl.h\
+	xarray.h\
+	xp.h\
+	warn.h\
+        flags.h
 
 CYCLONE_SRCS:=absyn\
+	 warn\
+         flags\
          parse_tab\
+         parse_errors\
          lex\
          absynpp\
 	 absyndump\
+	 rgnorder\
          tcenv\
+	 unify\
+	 attributes\
          tcutil\
+         tctyp\
+         relations-ap\
          tcstmt\
          tcpat\
          tcexp\
 	 formatstr\
          evexp\
+         callgraph\
          tc\
-         toc\
-         tovc\
+	 currgn\
+         binding\
+         pratt-ap\
+         jump_analysis\
          cf_flowinfo\
-         cf_absexp\
          new_control_flow\
+         vcgen\
+	 insert_checks\
+         toc\
+	 remove_aggregates\
+         toseqc\
+         tovc\
          interface\
+	 cifc\
 	 tcdecl\
+         port\
+         specsfile\
 	 cyclone
 
-# Makefiles assume this is only one file, but they could be changed.
-RUNTIME:=runtime_cyc
+CYCDOC_SRCS:=cycdoc\
+	warn\
+        flags\
+        parse_errors\
+	lex\
+	parse_tab\
+	absyn\
+	unify\
+        attributes\
+	tcutil\
+	tctyp\
+	rgnorder\
+        relations-ap\
+	tcenv\
+	tcexp\
+	currgn\
+        binding\
+	tcstmt\
+	tcpat\
+        callgraph\
+        tc\
+	toc\
+	cifc\
+	tcdecl\
+        pratt-ap\
+        jump_analysis\
+	new_control_flow\
+        vcgen\
+	insert_checks\
+	cf_flowinfo\
+	formatstr\
+	evexp\
+	absynpp
+
+BUILDLIB_SRCS:=buildlib\
+        specsfile\
+	warn\
+        flags\
+        parse_errors\
+	lex\
+	parse_tab\
+	unify\
+        attributes\
+	tcutil\
+	tctyp\
+	absynpp\
+        relations-ap\
+        callgraph\
+	tc\
+	cifc\
+	tcdecl\
+	tcexp\
+	currgn\
+        binding\
+	tcstmt\
+	formatstr\
+	evexp\
+	rgnorder\
+	tcenv\
+	tcpat\
+        pratt-ap\
+        jump_analysis\
+	new_control_flow\
+        vcgen\
+	insert_checks\
+	cf_flowinfo\
+        toc\
+	absyn
+
+NOOPT_SRCS:= #parse_tab parse_tab_a parse_tab_pg
+
+# Add XML library .h files to CYCLONE_H
+ifndef NO_XML_LIB
+CYCLONE_H := $(CYCLONE_H) xml/xml.h xml/xmldump.h xml/xmlparse.h
+endif
+
+# Files for the runtime system
+RUNTIME:=runtime_cyc \
+	runtime_stack \
+	runtime_exception \
+	runtime_zeroterm \
+	runtime_memory
 
 CYCLIB:=libcyc.$(A)
+CYCBOOTLIB:=libcycboot.$(A)
 CYCCOMP:=cyclone$(EXE)
 
 C_SRCS:=$(addsuffix .c, $(CYCLONE_SRCS))
+C_BOOT_LIBS:=$(addsuffix .c, $(CYCLONE_BOOT_LIBS))
 C_LIBS:=$(addsuffix .c, $(CYCLONE_LIBS))
 O_SRCS:=$(addsuffix .$(O), $(CYCLONE_SRCS))
+O_BOOT_LIBS:=$(addsuffix .$(O), $(CYCLONE_BOOT_LIBS))
 O_LIBS:=$(addsuffix .$(O), $(CYCLONE_LIBS))
+A_SRCS:=$(addsuffix _a.$(O), $(CYCLONE_SRCS))
+A_BOOT_LIBS:=$(addsuffix _a.$(O), $(CYCLONE_BOOT_LIBS))
+A_LIBS:=$(addsuffix _a.$(O), $(CYCLONE_LIBS))
+PG_SRCS:=$(addsuffix _pg.$(O), $(CYCLONE_SRCS))
+PG_BOOT_LIBS:=$(addsuffix _pg.$(O), $(CYCLONE_BOOT_LIBS))
+PG_LIBS:=$(addsuffix _pg.$(O), $(CYCLONE_LIBS))
+NOCHECK_BOOT_LIBS:=$(addsuffix _nocheck.$(O), $(CYCLONE_BOOT_LIBS))
+NOCHECK_LIBS:=$(addsuffix _nocheck.$(O), $(CYCLONE_LIBS))
 C_RUNTIME:=$(addsuffix .c, $(RUNTIME))
+O_RUNTIME:=$(addsuffix .$(O), $(RUNTIME))
+A_RUNTIME:=$(addsuffix _a.$(O), $(RUNTIME))
+PG_RUNTIME:=$(addsuffix _pg.$(O), $(RUNTIME))
+O_NOOPT_SRCS:=$(addsuffix .$(O),$(NOOPT_SRCS))
+OPTFLAG:=-O
 
-CYC_FLAGS:=-D_PLATFORM_INCLUDES_="\"arch/$(ARCH).h\""
-LDFLAGS:=-lm
+UPDATE_SRCS:=$(addsuffix .c, $(CYCLONE_SRCS) cycdoc buildlib)

@@ -373,7 +373,7 @@ extern struct _RegionHandle*Cyc_Core_heap_region;
 extern struct _RegionHandle*Cyc_Core_unique_region;
 # 180
 extern void Cyc_Core_ufree(void*ptr);struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned nelts;};struct Cyc_Xarray_Xarray{struct _fat_ptr elmts;int num_elmts;};
-# 40 "xarray.h"
+# 40 "/tmp/cyclone/include/xarray.h"
 int Cyc_Xarray_length(struct Cyc_Xarray_Xarray*);
 # 51
 struct Cyc_Xarray_Xarray*Cyc_Xarray_rcreate(struct _RegionHandle*,int,void*);
@@ -393,7 +393,7 @@ struct Cyc_Xarray_Xarray*Cyc_Xarray_rappend(struct _RegionHandle*,struct Cyc_Xar
 struct Cyc_Xarray_Xarray*Cyc_Xarray_rmap(struct _RegionHandle*,void*(*f)(void*),struct Cyc_Xarray_Xarray*);
 # 117
 struct Cyc_Xarray_Xarray*Cyc_Xarray_rmap_c(struct _RegionHandle*,void*(*f)(void*,void*),void*,struct Cyc_Xarray_Xarray*);
-# 25 "xarray.cyc"
+# 25 "/tmp/cyclone/lib/xarray.cyc"
 int Cyc_Xarray_length(struct Cyc_Xarray_Xarray*xarr){
 return xarr->num_elmts;}
 # 29

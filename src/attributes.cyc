@@ -28,7 +28,7 @@ namespace Atts;
 // returns true when a function type or pointer to a function includes
 // the noreturn attribute.
 bool is_noreturn_fn_type(type_t t) {
-  switch (Tcutil::compress(t)) {
+  switch (compress(t)) {
   case &PointerType(PtrInfo(elt,_,_)): return is_noreturn_fn_type(elt);
   case &FnType(FnInfo{.attributes = atts,...}):
     for (; atts != NULL; atts = atts->tl)
@@ -71,7 +71,7 @@ bool equiv_fn_atts(attributes_t a1, attributes_t a2) {
 // Transfer any function type attributes from the given list to the
 // function type.
 attributes_t transfer_fn_type_atts(type_t t, attributes_t atts) {
-  switch (Tcutil::compress(t)) {
+  switch (compress(t)) {
   case &FnType(FnInfo{.attributes = *fnatts,...}):
     let res_atts = NULL;
     for (; atts != NULL; atts = atts->tl)
@@ -102,7 +102,7 @@ void fnTypeAttsOK(seg_t loc, type_t t) {
   $(list_t<int>,string_t) init_params          = $(NULL,"initializes");
   $(list_t<int>,string_t) nolive_unique_params = $(NULL,"noliveunique");
   $(list_t<int>,string_t) consume_params       = $(NULL,"consume");
-  switch (Tcutil::compress(t)) {
+  switch (compress(t)) {
   case &FnType(FnInfo{.attributes=atts,.args=args,...}):
     int nargs = List::length(args);
     for ( ; atts != NULL; atts = atts->tl) {
@@ -113,7 +113,7 @@ void fnTypeAttsOK(seg_t loc, type_t t) {
 	fnTypeAttsOverlap(loc,i,init_params,nolive_unique_params);
 	fnTypeAttsOverlap(loc,i,init_params,consume_params);
 	string_t s = "initializes attribute allowed only on";
-	switch(Tcutil::compress((*List::nth(args,i-1))[2])) {
+	switch(compress((*List::nth(args,i-1))[2])) {
 	case &PointerType(PtrInfo(_,_,PtrAtts(_,nullable,bd,zt,_))):
 	  if(Tcutil::force_type2bool(false,nullable))
 	    Warn::err2(loc,s," non-null pointers");
@@ -202,8 +202,7 @@ static int attribute_case_number(attribute_t att) {
 int attribute_cmp(attribute_t att1, attribute_t att2) {
   switch($(att1,att2)) {
   case $(&Regparm_att(i1),&Regparm_att(i2)): fallthru(i1,i2);
-  case $(&Initializes_att(i1), &Initializes_att(i2)): 
-    return Core::intcmp(i1,i2);
+  case $(&Initializes_att(i1),&Initializes_att(i2)): return Core::intcmp(i1,i2);
   case $(&Aligned_att(e1),&Aligned_att(e2)): 
     if (e1 == e2) return 0;
     if (e1 == NULL) return -1;
@@ -211,7 +210,7 @@ int attribute_cmp(attribute_t att1, attribute_t att2) {
     return Evexp::exp_cmp(e1,e2);
   case $(&Section_att(s1),&Section_att(s2)): return strcmp(s1,s2);
   case $(&Format_att(ft1,i1,j1),&Format_att(ft2,i2,j2)):
-    let ftc = Core::intcmp((unsigned int)ft1, (unsigned int)ft2);
+    let ftc = Core::intcmp((unsigned)ft1, (unsigned)ft2);
     if(ftc != 0) return ftc;
     let ic = Core::intcmp(i1,i2);
     if(ic != 0) return ic;

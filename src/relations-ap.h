@@ -92,41 +92,41 @@ relns_t<`r> add_relation(region_t<`r> rgn,
 // replacing its rop in the duplicated version with the rop for
 // [e_new].  Used when deep-copying an expression after the flow
 // analysis (i.e. during code generation)
-extern relns_t<`r> duplicate_relation(region_t<`r> rgn,
-				      Absyn::exp_t e_old, Absyn::exp_t e_new,
-				      relns_t<`r> relns);
+relns_t<`r> duplicate_relation(region_t<`r>,
+			       Absyn::exp_t e_old, Absyn::exp_t e_new,
+			       relns_t<`r> relns);
 
 // Update relations with x being overwritten by e
-extern relns_t<`r> reln_assign_var(region_t<`r>, relns_t<`r>, 
-                                   Absyn::vardecl_t, Absyn::exp_t);
+relns_t<`r> reln_assign_var(region_t<`r>, relns_t<`r>, 
+			    Absyn::vardecl_t, Absyn::exp_t);
 // Update relations with e1 being overwritten by e2
-extern relns_t<`r> reln_assign_exp(region_t<`r>, relns_t<`r>, 
-                                   Absyn::exp_t, Absyn::exp_t);
+relns_t<`r> reln_assign_exp(region_t<`r>, relns_t<`r>, 
+			    Absyn::exp_t, Absyn::exp_t);
 // Update relations with x being overwritten by some unknown value
-extern relns_t<`r> reln_kill_var(region_t<`r>,relns_t<`r>, Absyn::vardecl_t);
+relns_t<`r> reln_kill_var(region_t<`r>,relns_t<`r>, Absyn::vardecl_t);
 // Update relations with e being overwritten by some unknown value
-extern relns_t<`r> reln_kill_exp(region_t<`r>,relns_t<`r>, Absyn::exp_t);
+relns_t<`r> reln_kill_exp(region_t<`r>,relns_t<`r>, Absyn::exp_t);
 // Copy relations from region `r to region `r2
-extern relns_t<`r2> copy_relns(region_t<`r2>, relns_t<`r>);
+relns_t<`r2> copy_relns(region_t<`r2>, relns_t<`r>);
 // Returns true iff the relations are syntactically the same
-extern bool same_relns(relns_t, relns_t);
+bool same_relns(relns_t, relns_t);
 // Return true if everything true in r1s appears in r2s
-extern bool relns_approx(relns_t<`r> r2s, relns_t<`r> r1s);
+bool relns_approx(relns_t<`r> r2s, relns_t<`r> r1s);
 // Return the set of relations that occur in both lists of relations
-extern relns_t<`r> join_relns(region_t<`r> r, relns_t<`r>, relns_t<`r>);
+relns_t<`r> join_relns(region_t<`r> r, relns_t<`r>, relns_t<`r>);
 // Prints relations
-extern void print_relns(FILE@,relns_t);
+void print_relns(FILE@,relns_t);
 // Converts relation stuff to strings
-extern string_t reln2string(reln_t r);
-extern string_t rop2string(reln_op_t r);
-extern string_t relation2string(relation_t r);
-extern string_t relns2string(relns_t r);
+string_t reln2string(reln_t r);
+string_t rop2string(reln_op_t r);
+string_t relation2string(relation_t r);
+string_t relns2string(relns_t r);
 // returns true if the relations are consistent -- typical use
 // is to check a relation you want to be true (e.g., i < numelts(x))
 // under the current set of relations R.  To do so, you add the
 // negation numelts(x) <= i and check to see if the resulting system
 // is inconsistent.  If not, then you know that the desired relation holds.
-extern bool consistent_relations(relns_t rlns);
+bool consistent_relations(relns_t rlns);
 
 bool check_logical_implication(relns_t<`H> r1, relns_t<`H> r2);
 }

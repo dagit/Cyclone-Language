@@ -25,7 +25,6 @@
 #include "absyndump.h"
 #include "binding.h"
 #include "currgn.h"
-#include "tcutil.h"
 #include "tc.h"
 #include "toc.h"
 #include "remove_aggregates.h"
@@ -36,18 +35,18 @@
 #include "insert_checks.h"
 #include "interface.h"
 #include "warn.h"
+#include "flags.h"
 #include "specsfile.h"
 #include "cyclone.h"
 namespace Port {
-  extern void port(List::list_t<Absyn::decl_t>);
+  void port(List::list_t<Absyn::decl_t>);
 }
 namespace ParseErrors {
-  extern bool print_state_and_token;
+  extern bool print_state_and_token; // FLAG
 }
 namespace Lex {
-  extern bool compile_for_boot_r;
-  extern void pos_init();
-  extern void lex_init(bool use_cyclone_keywords);
+  void pos_init();
+  void lex_init(bool use_cyclone_keywords);
 }
 
 using Cyclone;
@@ -56,9 +55,8 @@ using List;
 using Arg;
 typedef Hashtable::table_t<`a,`b> table_t<`a,`b>;
 
-static bool pp_r       = false;
-bool noexpand_r = false;
-static bool noshake_r  = false;
+static bool pp_r       = false; // FLAGS ALL HERE (care about static?)
+static bool noshake_r  = false; 
 static bool stop_after_cpp_r = false;
 static bool parseonly_r = false;
 static bool tc_r       = false;
@@ -100,18 +98,18 @@ static void add_ccarg(string_t<`H> s) {
 // defaults to gcc
 void set_c_compiler(string_t<`H> s){
   if (strcmp(s,"vc") == 0) {
-    c_compiler = Vc_c;
+    Flags::c_compiler = Flags::Vc_c;
     add_ccarg("-DVC_C");
   }
   else if (strcmp(s,"gcc") == 0) {
-    c_compiler = Gcc_c;
+    Flags::c_compiler = Flags::Gcc_c;
     add_ccarg("-DGCC_C");
   }
   // else invalid compiler -- warn? throw exception?
 }
 
 void set_port_c_code() {
-  Absyn::porting_c_code = true;
+  Flags::porting_c_code = true;
   Position::max_errors = 65535; // allow a lot of errors
   save_c_r = true; // save temp files
   parseonly_r = true; // stop after parsing
@@ -258,7 +256,7 @@ static void set_elim_se() {
   set_inline_functions();
 }
 static void set_tovc() {
-  tovc_r = true;
+  Flags::tovc_r = true;
   add_ccarg("-DCYC_ANSI_OUTPUT");
   set_elim_se();
 }
@@ -302,8 +300,8 @@ static void set_all_warnings() {
   InsertChecks::warn_bounds_checks = true;
   InsertChecks::warn_all_null_deref = true;
   NewControlFlow::warn_lose_unique = true;
-  Tcutil::warn_alias_coerce = true;
-  Tcutil::warn_region_coerce = true;
+  Flags::warn_alias_coerce = true;
+  Flags::warn_region_coerce = true;
   Tc::aggressive_warn = true;
   Binding::warn_override = true;
 }
@@ -313,8 +311,7 @@ enum inputtype {
   DEFAULTINPUT,
   CYCLONEFILE
 };
-typedef enum inputtype inputtype_t;
-static inputtype_t intype = DEFAULTINPUT;
+static enum inputtype intype = DEFAULTINPUT;
 static void set_inputtype(string_t s) {
   if (strcmp(s,"cyc") == 0)
     intype = CYCLONEFILE;
@@ -459,14 +456,9 @@ extern "C" void CYCALLOCPROFILE_mark(const char *s);
     on_fail(failenv);
     fprintf(stderr,"\nCOMPILATION FAILED!\n");
     fflush(stderr);
-    endtime(&start);
-    return ans;
-  }
-  else if (v_r) {
+  } else if (v_r) {
     fprintf(stderr,"%s completed ",stage_name);
     fflush(stderr);
-    endtime(&start);
-    return ans;
   }
   endtime(&start);
   return ans;
@@ -567,7 +559,7 @@ list_t<Absyn::decl_t> do_toseqc(bool ignore, list_t<Absyn::decl_t,`H> tds) {
   return Toseqc::toseqc(tds);
 }
 list_t<Absyn::decl_t> do_tovc(bool ignore, list_t<Absyn::decl_t> tds) {
-  Tovc::elim_array_initializers = tovc_r;
+  Tovc::elim_array_initializers = Flags::tovc_r;
   return Tovc::tovc(tds);
 }
 
@@ -640,8 +632,8 @@ list_t<Absyn::decl_t> do_print($(FILE@`H,mstring_t<`H>) @env,
 			       list_t<Absyn::decl_t,`H> tds) {
   let &$(out_file,cfile) = env;
     let params_r = tc_r ? Absynpp::cyc_params_r : Absynpp::c_params_r;
-  params_r.expand_typedefs = ! noexpand_r;
-  params_r.to_VC = tovc_r;
+  params_r.expand_typedefs = ! Flags::noexpand_r;
+  params_r.to_VC = Flags::tovc_r;
   params_r.add_cyc_prefix = add_cyc_namespace_r;
   params_r.generate_line_directives = generate_line_directives_r;
   params_r.print_full_evars = print_full_evars_r;
@@ -655,7 +647,7 @@ list_t<Absyn::decl_t> do_print($(FILE@`H,mstring_t<`H>) @env,
   // Copy cyc_setjmp.h and cyc_include.h to out_file.
   if (!parseonly_r && !tc_r && !cf_r) {
     if (!nocyc_setjmp_r) {
-      if (Lex::compile_for_boot_r)
+      if (Flags::compile_for_boot)
         fprintf(out_file,"#include <setjmp.h>\n");
       else if (copy_internal_file(cyc_setjmp,out_file)) return tds;
     }
@@ -874,7 +866,7 @@ static void process_file(string_t<`H> filename) {
 		 remove_fileptr, preprocfileptr);
   if(compile_failure) return;
 
-  if (Absyn::porting_c_code) {
+  if (Flags::porting_c_code) {
     Port::port(tds);
     return;
   }
@@ -970,7 +962,7 @@ static void process_file(string_t<`H> filename) {
   if (compile_failure) return;
  
  // removal of gcc extensions (tovc is an antiquated name)
-  if (tovc_r || elim_se_r)
+  if (Flags::tovc_r || elim_se_r)
     tds = do_stage("post-pass to VC", tds, do_tovc, true, ignore, true);
   if (compile_failure) return;
 
@@ -1003,9 +995,8 @@ static string_t final_str = "<final>";
 static stringptr_t final_strptr = &final_str;
 
 static interface_t read_cycio(string_t<`H> @ n) {
-  if (n == final_strptr) {
+  if (n == final_strptr)
     return Interface::final();
-  }
   string_t basename;
   try basename = Filename::chop_extension(*n);
   catch { case &Invalid_argument(_): basename = *n; break;}
@@ -1038,7 +1029,7 @@ using Arg {
   typedef $(string_t flag, bool isprefix, string_t argdesc, spec_t spec,
             string_t description) option_t;
 
-  extern void print_options();
+  void print_options();
 
 #define make_option(opt,flag,isprefix,argdesc,spec,spec_arg,description) \
   datatype Spec.spec opt##_spec = spec(spec_arg); \
@@ -1182,7 +1173,7 @@ using Arg {
               Set_spec,&noshake_r,
               "Don't remove externed variables that aren't used");
   make_option(opt46,"-noexpandtypedefs",false,"",
-              Set_spec,&noexpand_r,
+              Set_spec,&Flags::noexpand_r,
               "Don't expand typedefs in pretty printing");
   make_option(opt47,"-printalltvars",false,"",
               Set_spec,&print_all_tvars_r,
@@ -1200,7 +1191,7 @@ using Arg {
               Set_spec,&nocyc_setjmp_r,
               "Do not use compiler special file cyc_setjmp.h");
   make_option(opt52,"-compile-for-boot",false,"",
-              Set_spec,&Lex::compile_for_boot_r,
+              Set_spec,&Flags::compile_for_boot,
               "Compile using the special boot library instead of the standard library");
   make_option(opt53,"-CI",false," <file>",
               String_spec,set_cyc_include,
@@ -1212,13 +1203,13 @@ using Arg {
               Set_spec,&InsertChecks::warn_all_null_deref,
               "Warn when any null check can't be eliminated");
   make_option(opt56,"-warnaliascoercion", false, "",
-              Set_spec,&Tcutil::warn_alias_coerce,
+              Set_spec,&Flags::warn_alias_coerce,
               "Warn when any alias coercion is inserted");
   make_option(opt57,"-warnregioncoerce", false, "",
-              Set_spec,&Tcutil::warn_region_coerce,
+              Set_spec,&Flags::warn_region_coerce,
               "Warn when any region coercion is inserted");
   make_option(opt58,"-noregister", false, "",
-              Set_spec,&Parse::no_register,
+              Set_spec,&Flags::no_register,
               "Treat register storage class as public");
   make_option(opt59,"-detailedlocation", false, "",
               Clear_spec,&Position::use_gcc_style_location,
@@ -1227,7 +1218,7 @@ using Arg {
               Unit_spec,set_port_c_code,
               "Suggest how to port C code to Cyclone");
   make_option(opt61,"-noregions", false, "",
-              Set_spec,&Absyn::no_regions,
+              Set_spec,&Flags::no_regions,
               "Generate code that doesn't use regions");
   make_option(opt62,"-iprefix",false,"<prefix>",
               String_spec,add_iprefix,
@@ -1289,22 +1280,20 @@ using Arg {
   };
 
   void print_options() {
-    Arg::usage(global_options[0],"<program.cyc>");
+    usage(global_options[0],"<program.cyc>");
   }
 }
 
 int main(int argc, string_t<`H> ?`H argv) {
-  /* Don't print garbage collector warnings about allocations of
-     blacklisted blocks.  This turns up on OS X and possibly other BSD
-     systems (??) */
+  // Don't print garbage collector warnings about allocations of blacklisted
+  // blocks.  This turns up on OS X and possibly other BSD systems (??)
   GC_blacklist_warn_clear();
 
-  /* parse the command-line arguments */
+  // parse the command-line arguments
   string_t optstring = "Options:";
   // initialize the global options list tails
-  for (int i = 1; i < numelts(global_options); i++) {
+  for (int i = 1; i < numelts(global_options); i++)
     global_options[i-1]->tl = global_options[i];
-  }
   Arg::speclist_t<`H,`H> options = global_options[0];
   // Process the -b and -B arguments
   let otherargs = Specsfile::parse_b(options, add_other, add_other_flag, optstring, argv);
@@ -1348,8 +1337,7 @@ int main(int argc, string_t<`H> ?`H argv) {
     // compiler error, cpp0: too many filenames.
     let dash_E = (produce_dependencies ? "" : " -E");
     set_cpp(aprintf("%s %s -w -x c%s -specs %s",
-                    cyclone_cc,
-                    target_cflags, dash_E, specs_file));
+                    cyclone_cc, target_cflags, dash_E, specs_file));
   }
   if (cyclone_files == NULL && ccargs == NULL) {
     fprintf(stderr,"missing file\n");
@@ -1365,16 +1353,15 @@ int main(int argc, string_t<`H> ?`H argv) {
   if (!stop_after_cpp_r && strlen(cyc_include) == 0)
     cyc_include = find_in_exec_path("cyc_include.h");
 
-  /* Process each .cyc file */
+  // Process each .cyc file
   try {
     for (let l = rev(cyclone_files); l != NULL; l = l->tl) {
       process_file(*(l->hd));
       if (compile_failure) return 1;
     }
-  } catch {
-  case x:
+  } catch {case x:
     if (compile_failure) return 1;
-    else Core::rethrow(x);
+    Core::rethrow(x);
   }
 
   if (stop_after_cpp_r || parseonly_r || tc_r || toc_r) return 0;
@@ -1426,7 +1413,7 @@ int main(int argc, string_t<`H> ?`H argv) {
       libcyc_flag = "-lcyc_pg";
       runtime_filename = "runtime_cyc_pg.a";
       nogc_filename = "nogc_pg.a";
-    } else if(Lex::compile_for_boot_r) {
+    } else if(Flags::compile_for_boot) {
       // FIX: all the above cases should take compile_for_boot into account
       libcyc_flag = "-lcycboot";
       nogc_filename = "nogc.a";
@@ -1451,16 +1438,14 @@ int main(int argc, string_t<`H> ?`H argv) {
     // FIX: temporarily removed from interface check below
     stdlib = NULL;     //stdlib = list(new libcyc_flag);
     stdlib_string = aprintf(" %s %s %s ", libcyc_flag, runtime, gc);
-    
   }
 
   if (ic_r) try {
     ccargs = filter(is_cfile, ccargs);
     libargs = filter(is_cfile, libargs);
     let lf = append(stdlib, append(ccargs, libargs));
-    if (! is_not_executable) {
+    if (! is_not_executable)
       lf = new List(final_strptr, lf);
-    }
 
     let i = Interface::get_and_merge_list(read_cycio, lf, lf);
     if (i == NULL) {

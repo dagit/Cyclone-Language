@@ -298,7 +298,7 @@ static void check_union_requires(seg_t loc, type_t t, field_name_t f, flow_t inf
   switch (inflow) {
   case {.BottomFL = _}: return;
   case {.ReachableFL = $(_,relns)}:
-    switch (Tcutil::compress(t)) {
+    switch (compress(t)) {
     case &AppType(&AggrCon(ainfo),ts):
       let ad = get_known_aggrdecl(ainfo);
       let field = lookup_decl_field(ad,f);
@@ -349,7 +349,7 @@ static flow_t use_Rval(analenv_t env, seg_t loc, flow_t inflow, absRval_t r){
 }
 
 static void check_nounique(analenv_t env, seg_t loc, type_t t, absRval_t r) {
-  switch $(Tcutil::compress(t),r) {
+  switch $(compress(t),r) {
   case $(_,&UnknownR(NoneIL)): return;
   case $(_,&Zero): return;
   case $(_,&Consumed(...)): return;
@@ -573,7 +573,7 @@ static $(flow_t,absRval_t) anal_derefR(analenv_t env, flow_t inflow,
 				       flow_t f, exp_t e, absRval_t r,
                                        exp_opt_t index) {
 
-  switch(Tcutil::compress((type_t)e->topt)) {
+  switch(compress((type_t)e->topt)) {
   case &PointerType(PtrInfo(elttype,_,PtrAtts(_,_,bd,_,_))):
     switch(f) {
     case {.BottomFL = _}:
@@ -860,7 +860,7 @@ static bool is_local_var_rooted_path(Absyn::exp_t e, bool cast_ok) {
   case &AggrArrow_e(e,...):
     return is_local_var_rooted_path(e,cast_ok);
   case &Subscript_e(e,...):
-    switch (Tcutil::compress((type_t)e->topt)) {
+    switch (compress((type_t)e->topt)) {
     case &TupleType(...): return is_local_var_rooted_path(e,cast_ok);
     default: return false;
     }
@@ -1179,9 +1179,9 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
     list_t<int> consume_params = NULL;
     relns_t requires;
     relns_t ensures;
-    switch(Tcutil::compress((type_t)e1->topt)) {
+    switch(compress((type_t)e1->topt)) {
     case &PointerType(PtrInfo(t,_,_)):
-      switch(Tcutil::compress(t)) {
+      switch(compress(t)) {
       case &FnType(FnInfo{.attributes = atts, .requires_relns = req, .ensures_relns = ens, ...}):
 	requires = req;
 	ensures = ens;
@@ -1195,7 +1195,6 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
 	    consume_params = new List(i,consume_params);
 	    break;
 	  case &Consume_att(i):
-	    DEBUG_PRINT("found consume arg %d\n",i);
 	    consume_params = new List(i,consume_params);
 	    break;
 	  default: break;
@@ -1222,7 +1221,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
 	    let ans_d = escape_deref(fenv, d, rvals->hd);
 	    switch(rvals->hd) {
 	    case &AddressOf(p):
-	      switch(Tcutil::compress((type_t)es->hd->topt)) {
+	      switch(compress((type_t)es->hd->topt)) {
 	      case &PointerType(PtrInfo(t,_,_)):
 		ans_d = assign_place(fenv, es->hd->loc, ans_d,
 				     p, typ_to_absrval(fenv,t,false,
@@ -1460,7 +1459,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
     let $(f2,r2) = anal_derefR(env,inflow,f1,e1,r1,NULL);
     DEBUG_PRINT("\nf2 flow is ");
     DEBUG_PRINT_F(print_flow,f2);
-    switch(Tcutil::compress((type_t)e1->topt)) {
+    switch(compress((type_t)e1->topt)) {
     case &PointerType(PtrInfo{t2,_,_}):
       if(is_nontagged_nonrequire_union_type(t2)) {
         // allow a bits-only union to be treated as initialized
@@ -1519,7 +1518,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
       break;
     default: break;
     }
-    switch(Tcutil::compress((type_t)e1->topt)) {
+    switch(compress((type_t)e1->topt)) {
     case &TupleType(tqts):
       let $(r,_) = unname_rval(rvals->hd);
       switch(r) {
@@ -1551,7 +1550,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
 
  case &AnonStruct_e(_,des):
    list_t<Absyn::aggrfield_t> fs;
-   switch (Tcutil::compress((type_t)e->topt)) {
+   switch (compress((type_t)e->topt)) {
    case &AnonAggrType(_,f): fs = f; break;
    default: Warn::impos("anal_Rexp:anon struct has bad type");
    }
@@ -1702,7 +1701,7 @@ static $(flow_t,absLval_t) anal_derefL(analenv_t env,
 				       path_t path) {
 //   DEBUG_PRINT("In anal_derefL for %s\n",exp2string(e));
   let fenv = env->fenv;
-  switch(Tcutil::compress((type_t)e->topt)) {
+  switch(compress((type_t)e->topt)) {
   case &PointerType(PtrInfo{_,_,PtrAtts(_,_,bd,_,_)}):
     switch(f) {
     case {.BottomFL = _}: return $(f,UnknownL());
@@ -1819,7 +1818,7 @@ static $(flow_t,absLval_t) anal_Lexp_rec(analenv_t env, flow_t inflow,
   case &Var_e(&Global_b(vd)): return $(inflow,UnknownL());
 
   case &AggrArrow_e(e1,f,...):
-    switch(Tcutil::compress((type_t)e1->topt)) {
+    switch(compress((type_t)e1->topt)) {
     case &PointerType(PtrInfo{t2,_,_}):
       if(!is_nontagged_nonrequire_union_type(t2)) {
         check_union_requires(e1->loc,t2,f,inflow);
@@ -1830,7 +1829,7 @@ static $(flow_t,absLval_t) anal_Lexp_rec(analenv_t env, flow_t inflow,
     }
     fallthru(e1);
   case &Deref_e(e1):
-    DEBUG_PRINT("anal_Lexp: found deref of |%s:%s|\n",exp2string(e1),typ2string(Tcutil::compress(e1->topt)));
+    DEBUG_PRINT("anal_Lexp: found deref of |%s:%s|\n",exp2string(e1),typ2string(compress(e1->topt)));
     // should this be e1->topt?  It is for the old stuff ...
     if (Tcutil::is_noalias_pointer((type_t)e1->topt,true)) {
       DEBUG_PRINT("acquiring Lexp for %s\n",exp2string(e1));
@@ -1902,7 +1901,7 @@ static $(flow_t,absLval_t) anal_Lexp_rec(analenv_t env, flow_t inflow,
     return anal_derefL(env,inflow,e1,f,r,passthrough_consumes,false,path);
   case &Subscript_e(e1,e2):
     // assumes that tuple-projection implies e2 is pure and is evaluable
-    switch(Tcutil::compress((type_t)e1->topt)) {
+    switch(compress((type_t)e1->topt)) {
     case &TupleType(_):
       let fld = Evexp::eval_const_uint_exp(e2)[0];
       return anal_Lexp_rec(env,inflow,expand_unique,passthrough_consumes,e1,
@@ -2043,8 +2042,8 @@ static $(flow_t,flow_t) anal_primop_test(analenv_t env, flow_t inflow,
     // it always used to either check for unsigned or require numelts(x),
     // which is unsigned
     switch($(p,
-             Tcutil::compress((type_t)e1->topt),
-	     Tcutil::compress((type_t)e2->topt))) {
+             compress((type_t)e1->topt),
+	     compress((type_t)e2->topt))) {
     case $(Eq,_,_):
     case $(Neq,_,_):
     case $(_,&AppType(&IntCon(Unsigned,_),_),_):
@@ -2965,7 +2964,7 @@ static void check_nested_fun(JumpAnalysis::jump_anal_res_t tables,
   // NOTE: for reasons Dan doesn't understand, the attributes, are not
   // on the fndecl, only on the type.
   _ atts;
-  switch(Tcutil::compress((type_t)fd->cached_type)) {
+  switch(compress((type_t)fd->cached_type)) {
   case &FnType(FnInfo{.attributes = as,...}): atts = as; break;
   default: Tcutil::impos("check_fun: non-function type cached with fndecl_t");
   }
@@ -2977,7 +2976,7 @@ static void check_nested_fun(JumpAnalysis::jump_anal_res_t tables,
     case &Noliveunique_att(i):
       exp_t bogus_exp = signed_int_exp(-1,0);
       let vd = List::nth(fd->param_vardecls->v,i-1);
-      type_t t = Tcutil::compress(vd->type);
+      type_t t = compress(vd->type);
       type_t elttype = Tcutil::pointer_elt_type(t);
       let rval =
         make_unique_consumed(fenv,elttype,bogus_exp,-1,

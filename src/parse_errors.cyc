@@ -1,13 +1,14 @@
 #include <core.h>
 #include <cycboot.h>
 #include <warn.h>
+#define ALL_PARSE_H
 #include "parse.h"
 
 namespace ParseErrors {
   // when set, we just print out the state and token for a parse
   // error and then exit immediately.  Used for generating the
   // message table.
-  bool print_state_and_token = false;
+  bool print_state_and_token = false; // FLAG
 
   struct ParseState { int state; int token; const char ?msg; };
 

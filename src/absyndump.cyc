@@ -20,15 +20,13 @@
 #include <string.h>
 #include "absynpp.h"
 #include "evexp.h"
-#include "tcutil.h"
 #include "warn.h"
-#include "cyclone.h"
+#include "flags.h"
 #include "toc.h"
 namespace Lex {
   extern $(const char ?, unsigned int) xlate_pos(Position::seg_t);
 }
 
-using Cyclone;
 using Core;
 using List;
 using Absyn;
@@ -338,8 +336,8 @@ static void dump_noncallconv(attributes_t atts) {
 
 static void dumpatts(attributes_t atts) {
   if (atts == NULL) return;
-  switch(c_compiler){
-  case Gcc_c:
+  switch(Flags::c_compiler){
+  case Flags::Gcc_c:
     dump(" __attribute__((");
     for (; atts != NULL; atts = atts->tl) {
       dump(Absynpp::attribute2string(atts->hd));
@@ -360,7 +358,7 @@ static void dumprgn(type_t t) {
 static $(list_t<type_t>, list_t<type_t>) effects_split(type_t t) {
   list_t<type_t> rgions  = NULL;
   list_t<type_t> effects = NULL;
-  switch (Tcutil::compress(t)) {
+  switch (compress(t)) {
   case &AppType(&AccessCon,&List(r,_)): rgions = new List(r,rgions); break;
   case &AppType(&JoinCon,ts):
     for (; ts != NULL; ts = ts->tl) {
@@ -447,9 +445,9 @@ static void dumpntyp(type_t t) {
     case &IntCon(Unsigned, LongLong_sz): dump("unsigned"); fallthru;
     case &IntCon(None,   LongLong_sz):
     case &IntCon(Signed, LongLong_sz): 
-      switch(c_compiler) {
-      case Gcc_c: dump("long long"); return;
-      default:    dump("__int64");   return;
+      switch(Flags::c_compiler) {
+      case Flags::Gcc_c: dump("long long"); return;
+      default:           dump("__int64");   return;
       }
     case &FloatCon(i): 
       switch(i) {
@@ -476,7 +474,7 @@ static void dumpntyp(type_t t) {
     case &FalseCon:  dump("@false"); return;
     case &ThinCon:   dump("@thin");  return;
     case &FatCon:    dump("@fat");   return;
-    default: Warn::impos("bad type constructor");
+    default: Warn::impos2("bad type constructor");
     }
   }
 }
@@ -1013,8 +1011,8 @@ static void dumpenumfields(list_t<enumfield_t> fields) {
 static void dumpaggrfields(list_t<aggrfield_t> fields) {
   for(; fields != NULL; fields = fields->tl) {
     let &Aggrfield{name,tq,type,width,atts,req} = fields->hd;
-    switch(c_compiler){
-    case Gcc_c: dumptqtd(tq,type,dump_str,name); dumpatts(atts); break;
+    switch(Flags::c_compiler){
+    case Flags::Gcc_c: dumptqtd(tq,type,dump_str,name); dumpatts(atts); break;
     default:    dumpatts(atts); dumptqtd(tq,type,dump_str,name); break;
     }
     if (req) {
@@ -1072,11 +1070,11 @@ static bool is_char_ptr(type_t t) {
 
 static void dumpvardecl(vardecl_t vd,Position::seg_t loc,bool do_semi) {
   let &Vardecl{sc,name,varloc,tq,type,initializer,_,atts,_,is_proto} = vd;
-  switch(c_compiler){
-  case Gcc_c:
+  switch(Flags::c_compiler){
+  case Flags::Gcc_c:
     // hack to avoid writing so many useless externs:
     if(sc == Extern && qvar_to_Cids)
-      switch(Tcutil::compress(type)) {
+      switch(compress(type)) {
       case &FnType(_): 
 	if(!is_proto) //finer grained control -- write extern only if not a proto, makes -Wall happier
 	  dumpscope(sc);
@@ -1170,13 +1168,13 @@ static void dumpdecl(decl_t d) {
   dumploc(d->loc);
   switch(d->r) {
   case &Fn_d(fd):
-    switch(c_compiler) {
-    case Vc_c: dumpatts(fd->i.attributes); break;
+    switch(Flags::c_compiler) {
+    case Flags::Vc_c: dumpatts(fd->i.attributes); break;
     default: break;
     }
     if(fd->is_inline) 
-      switch(c_compiler){
-      case Vc_c: dump("__inline"); break;
+      switch(Flags::c_compiler){
+      case Flags::Vc_c: dump("__inline"); break;
       default:   dump("inline");   break;
       }
     dumpscope(fd->sc);
@@ -1185,14 +1183,14 @@ static void dumpdecl(decl_t d) {
     type_info.attributes = NULL;
     type_t t = new FnType(type_info);
     if(fd->cached_type != NULL)
-      switch(Tcutil::compress((type_t)fd->cached_type)) {
+      switch(compress((type_t)fd->cached_type)) {
       case &FnType(i):
 	fd->i.attributes = append(fd->i.attributes,i.attributes); break;
       default: Warn::impos("function has non-function type");
       }
 
-    switch(c_compiler){
-    case Gcc_c: dumptqtd(empty_tqual(0), t, dump_atts_qvar,fd); break;
+    switch(Flags::c_compiler){
+    case Flags::Gcc_c: dumptqtd(empty_tqual(0), t, dump_atts_qvar,fd); break;
     default:    dumptqtd(empty_tqual(0), t, dump_callconv_fdqvar,fd); break;  
     }
     dump_char('{');
@@ -1272,7 +1270,7 @@ static void dumptms(bool is_char_ptr, list_t<type_modifier_t> tms,
     // FIX: doesn't invert zeroterm default when elt type is char!! (never did)
     // FIX? What about attributes that we parse before tq2??
   case &Pointer_mod(PtrAtts(rgn,nullable,bd,zt,_),tq2):
-    switch(Tcutil::compress(bd)) {
+    switch(compress(bd)) {
     case &AppType(&FatCon,_): dump_char('?'); break;
     case &AppType(&ThinCon,&List{&ValueofType(e),_}):
       dump_char(type2bool(true,nullable)? '*' : '@'); dump_upperbound(e); break;
@@ -1281,12 +1279,12 @@ static void dumptms(bool is_char_ptr, list_t<type_modifier_t> tms,
     }
     if(!qvar_to_Cids && !is_char_ptr && type2bool(false,zt)) dump("@zeroterm");
     if(!qvar_to_Cids && is_char_ptr && !type2bool(false,zt)) dump("@nozeroterm");
-    switch(Tcutil::compress(rgn)) {
+    switch(compress(rgn)) {
     case &AppType(&HeapCon,_):   if (!qvar_to_Cids) dump("`H"); break;
     case &AppType(&UniqueCon,_): dump("`U");  break;
     case &AppType(&RefCntCon,_): dump("`RC"); break;
     case &VarType(tv): dumptvar(tv); break;
-    case &Evar(_,NULL,_,_): dumpntyp(Tcutil::compress(rgn)); break;
+    case &Evar(_,NULL,_,_): dumpntyp(compress(rgn)); break;
     case &TypedefType(...): dump("@region("); dumptyp(rgn); dump(")"); break;
     default: Warn::impos("dumptms: bad rgn type in Pointer_mod");
     }
@@ -1351,9 +1349,13 @@ static void dump_decl_interface(decl_t d) {
     if (vd->sc == Static) return;
     exp_opt_t init = vd->initializer;
     vd->initializer = NULL;
-    if ((vd->sc == Public) || 
-	(Tcutil::is_function_type(vd->type) && !vd->is_proto))
+    if(vd->sc==Public)
       dump("extern ");
+    else if(!vd->is_proto)
+      switch(compress(vd->type)) {
+      case &FnType(_): dump("extern "); break;
+      default: break;
+      }
     dumpvardecl(vd,d->loc,true);
     dump("\n");
     vd->initializer = init;

@@ -23,9 +23,9 @@
 
 // not re-entrant.
 namespace Absyndump {
-extern void set_params(struct Absynpp::Params @ `r fs);
-extern void dumpdecllist2file(List::list_t<Absyn::decl_t> tdl, FILE @`H f);
-extern void dump_interface(List::list_t<Absyn::decl_t> ds, FILE @`H f);
+void set_params(struct Absynpp::Params @ `r fs);
+void dumpdecllist2file(List::list_t<Absyn::decl_t> tdl, FILE @`H f);
+void dump_interface(List::list_t<Absyn::decl_t> ds, FILE @`H f);
 }
 
 #endif

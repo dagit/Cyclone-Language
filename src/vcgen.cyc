@@ -137,7 +137,7 @@ string_t term2string(term_t t) {
     return aprintf("%s(%s)",Absynpp::prim2string(p),term2string(t));
   case &Cast(tp,tm):
     return aprintf("(%s)%s",Absynpp::typ2string(tp),term2string(t));
-  default: Tcutil::impos("term2string primop args");
+  default: Warn::impos("term2string primop args");
   }
 }
 
@@ -286,7 +286,7 @@ static string_t a2string(assn_t a, int prec, int@ size) {
     case SLte: ps = "S<="; break;
     case ULt: ps = "U<"; break;
     case ULte: ps = "U<="; break;
-    default: Tcutil::impos("assn2string primop");
+    default: Warn::impos("assn2string primop");
     }
     return aprintf("%s%s%s",term2string(t1),ps,term2string(t2));
   case &Or(a1,a2): 
@@ -547,7 +547,7 @@ static assn_t not(assn_t a) {
     case SLte: return sgt(t1,t2);
     case ULt : return ugte(t1,t2);
     case ULte: return ugt(t1,t2);
-    default: Tcutil::impos("Vcgen::invert: non-primop");
+    default: Warn::impos("Vcgen::invert: non-primop");
     }
   case &Subst(...): return not(reduce(a));
   case &Kill(...): return not(reduce(a));
@@ -1297,7 +1297,7 @@ static assn_t do_assign(env_t env, assn_t a, term_opt_t tgt, term_opt_t src) {
     }
     // Finally, add in tgt == src.
     return and(a,eq(tgt,src));
-  default: Tcutil::impos("vcgen do_assign");
+  default: Warn::impos("vcgen do_assign");
   }
 }
 
@@ -1650,7 +1650,7 @@ static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
     // we could handle this.
     let $(t,a) = vcgen_rexp(env,e,ain);
     return vcgen_switch(env,scs,a);
-  case &Absyn::Fallthru_s(_,NULL): Tcutil::impos("vcgen fallthru");
+  case &Absyn::Fallthru_s(_,NULL): Warn::impos("vcgen fallthru");
   case &Absyn::Fallthru_s(es,&dest):
     // Also a forward jump so we can do an or.
     let $(ts,a) = vcgen_rexps_always(env,es,ain);
@@ -1762,8 +1762,8 @@ static assn_t vcgen_local_decl(env_t env, decl_t d, assn_t a) {
 // determine whether a comparing these two expressions is an 
 // unsigned or a signed comparison.
 static bool unsigned_comparison(exp_t e1, exp_t e2) {
-  let t1 = Tcutil::compress((type_t)e1->topt);
-  let t2 = Tcutil::compress((type_t)e2->topt);
+  let t1 = Absyn::compress((type_t)e1->topt);
+  let t2 = Absyn::compress((type_t)e2->topt);
   switch $(t1,t2) {
   case $(&Absyn::AppType(&Absyn::IntCon(Absyn::Unsigned,_),_),_): return true;
   case $(_,&Absyn::AppType(&Absyn::IntCon(Absyn::Unsigned,_),_)): return true;
@@ -1878,7 +1878,7 @@ static vardecl_t bind2vardecl(Absyn::binding_t b) {
   switch (b) {
   case &Absyn::Global_b(vd): return vd;
   case &Absyn::Funname_b(fd): return (vardecl_t)fd->fn_vardecl;
-  case &Absyn::Unresolved_b(...): Tcutil::impos("vcgen bind2vardecl");
+  case &Absyn::Unresolved_b(...): Warn::impos("vcgen bind2vardecl");
   case &Absyn::Param_b(vd): return vd;
   case &Absyn::Local_b(vd): return vd;
   case &Absyn::Pat_b(vd): return vd;
@@ -1988,7 +1988,7 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
       res = t1;
       if (t1 != NULL) assn = primop(Absyn::Minus,list((term_t)t1,one()));
       break;
-    default: Tcutil::impos("vcgen vcgen_rexp increment_e");
+    default: Warn::impos("vcgen vcgen_rexp increment_e");
     }
     let a = do_assign(env,a1,lt,assn);
     return $(res,a);
@@ -2063,7 +2063,7 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
       // vice versa.  We might be able to get away with 
       // dropping other casts (e.g., char->int) but we'll be
       // conservative now.
-      switch $(Tcutil::compress(tp),Tcutil::compress((type_t)e->topt)) {
+      switch $(Absyn::compress(tp),Absyn::compress((type_t)e->topt)) {
       case $(&Absyn::AppType(&Absyn::IntCon(u1,s1),_),&Absyn::AppType(&Absyn::IntCon(u2,s2),_)):
         if (s1 == s2) return $(t,a);
         break;
@@ -2103,7 +2103,7 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
   case &Absyn::Subscript_e(e1,e2): 
     let $(t1,a1) = vcgen_rexp(env,e1,ain);
     let $(t2,a2) = vcgen_rexp(env,e2,a1);
-    switch (Tcutil::compress((type_t)e1->topt)) {
+    switch (Absyn::compress((type_t)e1->topt)) {
     case &Absyn::TupleType(_): break;
     default:
       if (t1 != NULL) {

@@ -20,6 +20,7 @@
 #include <string.h>
 #include "absynpp.h"
 #include "warn.h"
+#include "flags.h"
 #include "evexp.h"
 #include "unify.h"
 #include "relations-ap.h"
@@ -279,10 +280,6 @@ bool is_bits_only_type(type_t t) {
   }
 }
 
-// flag to control whether or not we print a warning when implicitly casting
-// a pointer from one region into another due to outlives constraints.
-bool warn_region_coerce = false;
-
 void terr(seg_t loc, string_t fmt, ... inject parg_t ap)
   __attribute__((format(printf,2,3))) {
   Warn::verr(loc,fmt,ap);
@@ -299,32 +296,6 @@ void warn(seg_t sg, string_t fmt, ... inject parg_t ap)
 //fast type-variable comparison -- can only be used when a tvar has an identity.
 int fast_tvar_cmp(tvar_t tv1, tvar_t tv2) {
   return (tv1->identity - tv2->identity);
-}
-
-// compress out any evars or typedefs or type declarations
-type_t compress(type_t t) {
-  switch (t) {
-  case &Evar(_,NULL,_,_):
-  case &TypedefType(_,_,_,NULL): return t;
-  case &TypedefType(_,_,_,*topt_ref): fallthru(topt_ref);
-  case &Evar(_,*t2opt_ref,_,_): // TRICKY
-    type_t ta = (type_t)(*t2opt_ref);
-    type_t t2 = compress(ta);
-    if (t2 != ta)
-      *t2opt_ref = t2;
-    return t2;
-  case &ValueofType(e):
-    Evexp::eval_const_uint_exp(e);
-    switch (e->r) {
-    case &Valueof_e(t2): return compress(t2);
-    default: return t;
-    }
-  case &TypeofType(e):
-    let t2 = e->topt;
-    return (t2 != NULL) ? t2 : t;
-  case &TypeDeclType(_,&t): return compress(t);
-  default: return t;
-  }
 }
 
 // does a deep copy of a type to avoid sharing type variables.
@@ -1573,7 +1544,7 @@ bool silent_castable(RgnOrder::rgn_po_opt_t po,seg_t loc,type_t t1,type_t t2) {
       if (!RgnOrder::rgn_outlives_rgn(po,pinfo_a.ptr_atts.rgn,
 				      pinfo_b.ptr_atts.rgn))
 	return false;
-      if (warn_region_coerce)
+      if (Flags::warn_region_coerce)
 	Warn::warn2(loc, "implicit cast from region ", pinfo_a.ptr_atts.rgn,
 		    " to region ", pinfo_b.ptr_atts.rgn);
     }
@@ -1654,8 +1625,7 @@ bool is_zero(exp_t e) {
   case &Const_e({.Char_c = $(_,0)}):
   case &Const_e({.Short_c = $(_,0)}):
   case &Const_e({.LongLong_c = $(_,0)}):
-  case &Pragma_e(...):
-    return true;
+  case &Pragma_e(...):   return true;
   case &Const_e({.Wchar_c = s}):
     let l = strlen(s);
     int i = 0;
@@ -1771,8 +1741,6 @@ bool zero_to_null(type_t t2, exp_t e1) {
   }
 }
 
-bool warn_alias_coerce = false;
-
 // returns a pair by doing the following
 // (1) gensym's a variable name and creates an expression with that variable
 // (2) generates an alias statement that defines that variable as aliasing
@@ -1854,7 +1822,7 @@ bool coerce_arg(RgnOrder::rgn_po_opt_t po, exp_t e, type_t t2,
   // check if we can do an alias coercion; if so, make sure it otherwise
   // typechecks before performing the coercion (for better error reporting).
   if (can_insert_alias(e,t1,t2,e->loc)) {
-    if (warn_alias_coerce)
+    if (Flags::warn_alias_coerce)
       Warn::warn2(e->loc,"implicit alias coercion for ",e,":",t1," to ",t2);
     if(alias_coercion != NULL)
       *alias_coercion = true;

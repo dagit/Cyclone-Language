@@ -103,7 +103,6 @@ bool kind_eq(kind_t,kind_t);
 type_t fd_type(fndecl_t); 
 kind_t tvar_kind(tvar_t,kind_t def);
 kind_t type_kind(type_t);
-type_t compress(type_t);
 void unchecked_cast(exp_t, type_t, coercion_t);
 bool coerce_uint_type(exp_t);
 bool coerce_sint_type(exp_t);
@@ -124,11 +123,6 @@ bool zero_to_null(type_t, exp_t);
 
 // used to alias the given expression, assumed to have non-Aliasable type
 $(decl_t,exp_t) insert_alias(exp_t e, type_t e_typ);
-// prints a warning when an alias coercion is inserted
-extern bool warn_alias_coerce;
-// flag to control whether or not we print a warning when implicitly casting
-// a pointer from one region into another due to outlives constraints.
-extern bool warn_region_coerce;
 
 // useful kinds
 extern struct Kind rk; // shareable region kind

@@ -23,12 +23,10 @@
 #include "evexp.h"
 #include "tcexp.h"
 #include "tc.h"
-#include "cyclone.h"
 #include "relations-ap.h"
 #include "warn.h"
+#include "flags.h"
 #include "tctyp.h"
-#include "absynpp.h"
-
 using List;
 using Core;
 using Warn; // put Warn first so Absyn shadows
@@ -701,7 +699,7 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
     if (is_zero_terminated && known && sz < 1)
       warn2(loc,"zero terminated array cannot have zero elements");
     // FIX: if we have an unknown size then it might turn out to be zero!
-    if (known && sz < 1 && Cyclone::tovc_r) {
+    if (known && sz < 1 && Flags::tovc_r) {
       warn2(loc,"0-element arrays are supported only with gcc, changing to 1");
       *eptr = uint_exp(1,0);
     }

@@ -80,7 +80,6 @@ CYCLONE_H:=ap.h\
         callgraph.h\
 	core.h\
 	crypt.h\
-	currgn.h\
 	dict.h\
 	execinfo.h\
 	filename.h\
@@ -125,7 +124,6 @@ CYCLONE_SRCS:=absyn\
          evexp\
          callgraph\
          tc\
-	 currgn\	 
          binding\
          pratt-ap\
          jump_analysis\
@@ -155,7 +153,6 @@ CYCDOC_SRCS:=cycdoc\
         relations\
 	tcenv\
 	tcexp\
-	currgn\
         binding\
 	tcstmt\
 	tcpat\
@@ -188,7 +185,6 @@ BUILDLIB_SRCS:=buildlib\
 	cifc\
 	tcdecl\
 	tcexp\
-	currgn\
         binding\
 	tcstmt\
 	formatstr\

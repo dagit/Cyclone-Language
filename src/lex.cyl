@@ -25,6 +25,7 @@
 #include <set.h>
 #include <string.h>
 #include <xarray.h>
+#define ALL_PARSE_H
 #include "parse.h"
 #include <dict.h>
 #include "tcutil.h"
@@ -36,7 +37,7 @@ using Lexing;
 using Parse;
 using Absyn;
 
-extern void yyerror(string_t<`H> s, int state, int token);
+void yyerror(string_t<`H> s, int state, int token);
 
 namespace Lex {
 
@@ -77,8 +78,8 @@ static int    num_kws  = 0;
 struct KeyWordInfo { int token_index; bool is_c_keyword; };
 static struct KeyWordInfo ?  kw_nums  = NULL;
 
-bool compile_for_boot_r = false;
-bool expand_specials = false;
+bool compile_for_boot_r = false; // FLAG
+bool expand_specials = false; // FLAG
 // state for recording whether or not we're parsing C code
 static bool in_extern_c = false;
 static list_t<bool,`U> prev_extern_c = NULL;

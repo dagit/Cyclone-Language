@@ -19,16 +19,15 @@
 #ifndef _PARSE_H_
 #define _PARSE_H_
 #include "absyn.h"
-#include <lexing.h>
 using Core {
-using Absyn {
-using List {
-using Lexing {
 namespace Parse {
-  extern list_t<decl_t> parse_file(FILE @f);
-  extern bool no_register;
+  List::list_t<Absyn::decl_t> parse_file(FILE @f);
   extern datatype exn {extern Exit};
 }
+  string_t token2string(int token);
+#ifdef ALL_PARSE_H
+using Absyn {
+using List {
   struct FlatList<`a::A,`r> { struct FlatList<`a,`r> *`r tl; `a hd; };
   typedef struct FlatList<`a,`r> *`r flat_list_t<`a,`r>;
   extern struct Type_specifier {
@@ -43,8 +42,8 @@ namespace Parse {
   };
   typedef struct Type_specifier type_specifier_t;
   struct Declarator<`yy::R> {
-    qvar_t                  id;
-    List::list_t<type_modifier_t<`yy>,`yy> tms;
+    qvar_t id;
+    list_t<type_modifier_t<`yy>,`yy> tms;
   };
   typedef struct Declarator<`yy> declarator_t<`yy>;
   typedef flat_list_t<$(declarator_t<`yy>,exp_opt_t),`yy> declarator_list_t<`yy>;
@@ -79,8 +78,8 @@ namespace Parse {
   };
   typedef datatype Pointer_qual @`r pointer_qual_t<`r>;
   typedef list_t<pointer_qual_t<`r>,`r> pointer_quals_t<`r>;
-  extern string_t token2string(int token);
-
 #include "parse_tab.h"
-}}}}
+}}
+#endif 
+}
 #endif

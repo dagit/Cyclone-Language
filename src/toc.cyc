@@ -39,6 +39,7 @@
 #include <dict.h>
 #include <xarray.h>
 #include "warn.h"
+#include "flags.h"
 #include "unify.h"
 #include "tcutil.h"
 #include "attributes.h"
@@ -46,16 +47,10 @@
 #include "insert_checks.h"
 #include "toc.h"
 #include "tcpat.h"
-
 using Core;
 using List;
 using Absyn;
 using Tcutil;
-
-// Note: expansion of typedefs is done in Absynpp::to_tms, but here we
-//  trim out typedefs that won't be used
-extern bool noexpand_r; // in cyclone.cyc
-
 namespace Toc;
 
 // used for creation of all abstract syntax node locations created here
@@ -2346,7 +2341,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     if(vse != NULL)
       mexp = add_exp(mexp,vse,DL);
     
-    if(rgnopt == NULL || no_regions)
+    if(rgnopt == NULL || Flags::no_regions)
       mexp = malloc_exp(elt_typ,mexp);
     else {
       exp_to_c(nv,rgnopt);
@@ -2762,14 +2757,14 @@ static void exp_to_c(env_t nv, exp_t e) {
       num_elts2 = var_exp(x,DL);
     }
     if (is_calloc) {
-      if (rgnopt != NULL && !no_regions) {
+      if (rgnopt != NULL && !Flags::no_regions) {
 	exp_to_c(nv,rgnopt);
 	pexp = fncall_exp_dl(_region_calloc_e, 
 			     rgnopt, sizeoftype_exp(t_c,DL), num_elts2);
       } else
 	pexp = calloc_exp(*topt,sizeoftype_exp(t_c,DL), num_elts2);
     } else {
-      if (rgnopt != NULL && !no_regions) {
+      if (rgnopt != NULL && !Flags::no_regions) {
 	exp_to_c(nv,rgnopt);
 	if (inline_call)
 	  pexp = rmalloc_inline_exp(rgnopt, num_elts2);
@@ -3609,7 +3604,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
         exp_t  x_exp  = var_exp(x_var, DL);
 
 	stmt_to_c(nv,body);
-        if (no_regions) {
+        if (Flags::no_regions) {
           s->r = declare_stmt(x_var, rh_struct_ptr_typ,
                               uint_exp(0,DL), body, DL)->r;
         } else if (open_exp_opt) { 
@@ -4306,7 +4301,7 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds,
       // for non-anonymous-aggregates, this is wasteful b/c the printer
       // will skip any use of the typedef
       // DJG: anonymous aggregates are now hoisted
-      if(noexpand_r)
+      if(Flags::noexpand_r)
 	result_decls = new List(d,result_decls);
       break;
     case &Porton_d:

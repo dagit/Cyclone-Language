@@ -371,15 +371,15 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 extern struct _RegionHandle*Cyc_Core_heap_region;
 # 173
 extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned nelts;};
-# 41 "cycboot.h"
+# 41 "/tmp/cyclone/include/cycboot.h"
 extern double modf(double,double*);struct Cyc___cycFILE;
 # 51
 extern struct Cyc___cycFILE*Cyc_stdout;struct Cyc_String_pa_PrintArg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};struct Cyc_LongDouble_pa_PrintArg_struct{int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};
 # 73
 struct _fat_ptr Cyc_aprintf(struct _fat_ptr,struct _fat_ptr);struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _fat_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _fat_ptr f1;};
-# 161 "cycboot.h"
+# 161 "/tmp/cyclone/include/cycboot.h"
 extern int Cyc_putc(int,struct Cyc___cycFILE*);
-# 224 "cycboot.h"
+# 224 "/tmp/cyclone/include/cycboot.h"
 int Cyc_vfprintf(struct Cyc___cycFILE*,struct _fat_ptr,struct _fat_ptr);
 # 228
 int Cyc_vprintf(struct _fat_ptr,struct _fat_ptr);
@@ -389,9 +389,9 @@ struct _fat_ptr Cyc_vrprintf(struct _RegionHandle*,struct _fat_ptr,struct _fat_p
 int Cyc_vsnprintf(struct _fat_ptr,unsigned long,struct _fat_ptr,struct _fat_ptr);
 # 243
 int Cyc_vsprintf(struct _fat_ptr,struct _fat_ptr,struct _fat_ptr);extern char Cyc_FileCloseError[15U];struct Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[14U];struct Cyc_FileOpenError_exn_struct{char*tag;struct _fat_ptr f1;};struct Cyc_timeval{long tv_sec;long tv_usec;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[14U];struct Cyc_List_List_mismatch_exn_struct{char*tag;};extern char Cyc_List_Nth[4U];struct Cyc_List_Nth_exn_struct{char*tag;};
-# 104 "string.h"
+# 104 "/tmp/cyclone/include/string.h"
 extern struct _fat_ptr Cyc_strdup(struct _fat_ptr src);
-# 87 "printf.cyc"
+# 87 "/tmp/cyclone/lib/printf.cyc"
 static struct _fat_ptr Cyc_parg2string(void*x){
 void*_tmp0=x;switch(*((int*)_tmp0)){case 0U: _LL1: _LL2:
  return({const char*_tmp1="string";_tag_fat(_tmp1,sizeof(char),7U);});case 1U: _LL3: _LL4:
@@ -446,9 +446,9 @@ static const struct _fat_ptr Cyc_va_arg_string(struct _fat_ptr ap){
 void*_tmp27=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));void*_stmttmp7=_tmp27;void*_tmp28=_stmttmp7;struct _fat_ptr _tmp29;if(((struct Cyc_String_pa_PrintArg_struct*)_tmp28)->tag == 0U){_LL1: _tmp29=((struct Cyc_String_pa_PrintArg_struct*)_tmp28)->f1;_LL2: {struct _fat_ptr s=_tmp29;
 return s;}}else{_LL3: _LL4:
 (int)_throw(((void*(*)(struct _fat_ptr s))Cyc_badarg)(({const char*_tmp2A="printf expected string";_tag_fat(_tmp2A,sizeof(char),23U);})));}_LL0:;}
-# 177 "printf.cyc"
+# 177 "/tmp/cyclone/lib/printf.cyc"
 int Cyc___cvt_double(double number,int prec,int flags,int*signp,int fmtch,struct _fat_ptr startp,struct _fat_ptr endp);
-# 206 "printf.cyc"
+# 206 "/tmp/cyclone/lib/printf.cyc"
 enum Cyc_BASE{Cyc_OCT =0U,Cyc_DEC =1U,Cyc_HEX =2U};
 # 212
 inline static int Cyc__IO_sputn(int(*ioputc)(int,void*),void*ioputc_env,struct _fat_ptr s,int howmany){
@@ -537,7 +537,7 @@ int size=0;
 char buf[349U];({{unsigned _tmpC2=348U;unsigned i;for(i=0;i < _tmpC2;++ i){buf[i]='\000';}buf[_tmpC2]=0;}0;});{
 char ox[2U];ox[0]='\000',ox[1]='\000';{
 enum Cyc_BASE base;
-# 342 "printf.cyc"
+# 342 "/tmp/cyclone/lib/printf.cyc"
 fmt=fmt0;
 ret=0;
 # 348
@@ -676,7 +676,7 @@ goto _LL40;case 111U: _LL3F: _LL40:
  _ulong=flags & 1?Cyc_va_arg_ulong(ap):(flags & 4?(unsigned long)((unsigned short)Cyc_va_arg_int(ap)): Cyc_va_arg_uint(ap));_fat_ptr_inplace_plus(& ap,sizeof(void*),1);
 base=0U;
 goto nosign;case 112U: _LL41: _LL42:
-# 517 "printf.cyc"
+# 517 "/tmp/cyclone/lib/printf.cyc"
  _ulong=(unsigned long)Cyc_va_arg_long(ap);_fat_ptr_inplace_plus(& ap,sizeof(void*),1);
 base=2U;
 flags |=64;
@@ -762,7 +762,7 @@ cp=({char*_tmp4A=buf;_tag_fat(_tmp4A,sizeof(char),349U);});
 size=1;
 sign='\000';
 goto _LL0;}_LL0:;}
-# 645 "printf.cyc"
+# 645 "/tmp/cyclone/lib/printf.cyc"
 fieldsz=size + fpprec;
 dpad=dprec - size;
 if(dpad < 0)
