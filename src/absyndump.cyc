@@ -1281,6 +1281,7 @@ void dumptms(list_t<type_modifier_t> tms, void f(`a), `a a) {
     if(conref_def(false,zt)) dump("@zeroterm");
     switch(Tcutil::compress(rgn)) {
     case HeapRgn: break;
+    case UniqueRgn: dump("`U"); break;
     case &VarType(tv): dump_str(tv->name); break;
     case &Evar(_,NULL,_,_): dumpntyp(Tcutil::compress(rgn)); break;
     default: Tcutil::impos("dumptms: bad rgn type in Pointer_mod");

@@ -1596,6 +1596,22 @@ static void lvalue_assign_stmt(stmt_t s,list_t<field_name_t> fs,
   }
 }
 
+// we want to take the address of e but it may no longer be a valid
+// lhs, due to a cast or null-check or whatever.
+static exp_t push_address_exp(exp_t e) {
+  switch (e->r) {
+  case &Cast_e(*t,*e1,_,_):
+    *e1 = push_address_exp(*e1);
+    *t = cstar_typ(*t,mt_tq);
+    return e;
+  case &Deref_e(e1):
+    return e1;
+  default:
+    if (is_lvalue(e)) return address_exp(e,DL);
+    toc_impos("can't take & of %s",exp2string(e));
+  }
+}
+
 // similar to map_c but flips order of arguments
 static list_t<`b,`r2> rmap_2c(region_t<`r2> r2,`b f(`a,`c),`c env,
                                list_t<`a,`r1> x) {
@@ -1847,7 +1863,7 @@ static raw_exp_t tagged_union_assignop(exp_t e1, type_t e1_cyc_type,
     s2 = ifthenelse_stmt(test_exp,throw_match_stmt(),skip_stmt_dl(),DL);
   }
   stmt_t s1 = declare_stmt(temp,cstar_typ(member_type,mt_tq),
-                           address_exp(e1,DL),seq_stmt(s2,s3,DL),DL);
+                           push_address_exp(e1),seq_stmt(s2,s3,DL),DL);
   return stmt_exp_r(s1);
 }
 
@@ -2038,7 +2054,7 @@ static void exp_to_c(env_t nv, exp_t e) {
         _dyneither_ptr_inplace_plus_post_e : _dyneither_ptr_inplace_plus_e;
       if (incr == PreDec || incr == PostDec) 
         change = -1;
-      e->r = fncall_exp_r(fn_e, list(address_exp(e2,DL),
+      e->r = fncall_exp_r(fn_e, list(push_address_exp(e2),
                                      sizeoftyp_exp(typ_to_c(elt_typ),DL),
                                      signed_int_exp(change,DL)));
     } else if (is_zero_pointer_typ_elt(old_typ,&elt_typ)) {
@@ -2150,7 +2166,7 @@ static void exp_to_c(env_t nv, exp_t e) {
         done = true;
         // FIX: Is e1 definitely still an lvalue? Probably not!!
         let fn_e = _dyneither_ptr_inplace_plus_e;
-        e->r = fncall_exp_r(fn_e,list(address_exp(e1,DL),
+        e->r = fncall_exp_r(fn_e,list(push_address_exp(e1),
                                       sizeoftyp_exp(typ_to_c(elt_typ),DL),
                                       change));
       } else if (is_zero_pointer_typ_elt(old_typ,&elt_typ)) {
@@ -3172,12 +3188,6 @@ DynCast:
     else
       swap_fn = _swap_word_e;
 
-    // some sanity checks for now
-    if (!is_lvalue(e1))
-      toc_impos("Swap_e: %s is not an l-value\n",Absynpp::exp2string(e1));
-    if (!is_lvalue(e2))
-      toc_impos("Swap_e: %s is not an l-value\n",Absynpp::exp2string(e2));
-
     // turn each expression into a declaration + initializer
     // followed by a call to the swap primtive
 //     type_t vtyp = at_typ(e1_old_typ,HeapRgn /* XXX */,
@@ -3191,8 +3201,10 @@ DynCast:
     // will dereference and swap the given lhs's.
     exp_to_c(nv,e1);
     exp_to_c(nv,e2);
-    e->r = fncall_exp_r(swap_fn,list(address_exp(e1,DL),
-				     address_exp(e2,DL)));
+
+    // we may have to push the address operation in to get a valid lhs
+    e->r = fncall_exp_r(swap_fn,list(push_address_exp(e1),push_address_exp(e2)));
+
     break;
   case &Tagcheck_e(e1,f):
     // e1.f.tag == f_tag
@@ -3273,7 +3285,7 @@ xlate_pat(env_t<`rgn> nv,
     // cast is needed to avoid a C warning when pointing to a polymorphic field
     s     = assign_stmt(var_exp(v,DL),
 			cast_it(cstar_typ(typ_to_c(t),mt_tq),
-                                address_exp(path,DL)),DL);
+                                push_address_exp(path)),DL);
     let result = xlate_pat(nv,rgn,t,r,path,p2,tag_fail_stmt,fail_stmt,decls);
     result[2] = seq_stmt(s,result[2],DL);
     return result;

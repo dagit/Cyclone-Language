@@ -1227,11 +1227,11 @@ _tuple0 _tmpB3;struct _dyneither_ptr*_tmpB4;unsigned long*_tmpB5;struct _tuple0*
 _tmpB2=sptr_n;_tmpB3=*_tmpB2;_tmpB4=_tmpB3.f1;_tmpB5=_tmpB3.f2;{struct
 _dyneither_ptr s=*_tmpB4;unsigned long n=*_tmpB5;if(n == 0)return - 1;*((char*)
 _check_dyneither_subscript(s,sizeof(char),0))=(char)c;
-_dyneither_ptr_inplace_plus(&(*_tmpB4),sizeof(char),1);*_tmpB5=n - 1;return 1;}}
-int Cyc_vsnprintf(struct _dyneither_ptr s,unsigned long n,struct _dyneither_ptr fmt,
-struct _dyneither_ptr ap);int Cyc_vsnprintf(struct _dyneither_ptr s,unsigned long n,
-struct _dyneither_ptr fmt,struct _dyneither_ptr ap){int ans;struct _dyneither_ptr
-_tmpB6=s;unsigned long _tmpB7=n;struct _tuple0 _tmp162;struct _tuple0 _tmpB8=(_tmp162.f1=&
+_dyneither_ptr_inplace_plus(_tmpB4,sizeof(char),1);*_tmpB5=n - 1;return 1;}}int Cyc_vsnprintf(
+struct _dyneither_ptr s,unsigned long n,struct _dyneither_ptr fmt,struct
+_dyneither_ptr ap);int Cyc_vsnprintf(struct _dyneither_ptr s,unsigned long n,struct
+_dyneither_ptr fmt,struct _dyneither_ptr ap){int ans;struct _dyneither_ptr _tmpB6=s;
+unsigned long _tmpB7=n;struct _tuple0 _tmp162;struct _tuple0 _tmpB8=(_tmp162.f1=&
 _tmpB6,((_tmp162.f2=& _tmpB7,_tmp162)));ans=((int(*)(int(*ioputc)(int,struct
 _tuple0*),struct _tuple0*ioputc_env,struct _dyneither_ptr fmt0,struct _dyneither_ptr
 ap))Cyc__IO_vfprintf)(Cyc_putc_string,& _tmpB8,fmt,ap);if(0 <= ans)*((char*)

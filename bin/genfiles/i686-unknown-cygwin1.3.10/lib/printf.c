@@ -1177,7 +1177,7 @@ static int Cyc_putc_string(int c,struct _tuple0*sptr_n){struct _tuple0 _tmpB3;st
 _dyneither_ptr*_tmpB4;unsigned int*_tmpB5;struct _tuple0*_tmpB2=sptr_n;_tmpB3=*
 _tmpB2;_tmpB4=_tmpB3.f1;_tmpB5=_tmpB3.f2;{struct _dyneither_ptr s=*_tmpB4;
 unsigned int n=*_tmpB5;if(n == 0)return - 1;*((char*)_check_dyneither_subscript(s,
-sizeof(char),0))=(char)c;_dyneither_ptr_inplace_plus(&(*_tmpB4),sizeof(char),1);*
+sizeof(char),0))=(char)c;_dyneither_ptr_inplace_plus(_tmpB4,sizeof(char),1);*
 _tmpB5=n - 1;return 1;}}int Cyc_vsnprintf(struct _dyneither_ptr s,unsigned int n,
 struct _dyneither_ptr fmt,struct _dyneither_ptr ap){int ans;struct _dyneither_ptr
 _tmpB6=s;unsigned int _tmpB7=n;struct _tuple0 _tmpB8=({struct _tuple0 _tmpB9;_tmpB9.f1=&

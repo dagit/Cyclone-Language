@@ -3167,13 +3167,13 @@ if(*((int*)_tmp4B6)!= 14)goto _LL2CA;_tmp4D6=((struct Cyc_Absyn_Instantiate_e_st
 _tmp4B6)->f1;_tmp4D7=((struct Cyc_Absyn_Instantiate_e_struct*)_tmp4B6)->f2;_LL2C9:
 t=Cyc_Tcexp_tcInstantiate(te,loc,topt,_tmp4D6,_tmp4D7);goto _LL2A9;_LL2CA: if(*((
 int*)_tmp4B6)!= 15)goto _LL2CC;_tmp4D8=(void*)((struct Cyc_Absyn_Cast_e_struct*)
-_tmp4B6)->f1;_tmp4D9=((struct Cyc_Absyn_Cast_e_struct*)_tmp4B6)->f2;_tmp4DA=(void*)((
-struct Cyc_Absyn_Cast_e_struct*)_tmp4B6)->f4;_tmp4DB=(void**)&((void*)((struct Cyc_Absyn_Cast_e_struct*)
-_tmp4B6)->f4);_LL2CB: t=Cyc_Tcexp_tcCast(te,loc,topt,_tmp4D8,_tmp4D9,(void**)
-_tmp4DB);goto _LL2A9;_LL2CC: if(*((int*)_tmp4B6)!= 16)goto _LL2CE;_tmp4DC=((struct
-Cyc_Absyn_Address_e_struct*)_tmp4B6)->f1;_LL2CD: t=Cyc_Tcexp_tcAddress(te,loc,e,
-topt,_tmp4DC);goto _LL2A9;_LL2CE: if(*((int*)_tmp4B6)!= 17)goto _LL2D0;_tmp4DD=((
-struct Cyc_Absyn_New_e_struct*)_tmp4B6)->f1;_tmp4DE=((struct Cyc_Absyn_New_e_struct*)
+_tmp4B6)->f1;_tmp4D9=((struct Cyc_Absyn_Cast_e_struct*)_tmp4B6)->f2;_tmp4DA=(void**)&((
+struct Cyc_Absyn_Cast_e_struct*)_tmp4B6)->f4;_tmp4DB=(void**)((void**)&((struct
+Cyc_Absyn_Cast_e_struct*)_tmp4B6)->f4);_LL2CB: t=Cyc_Tcexp_tcCast(te,loc,topt,
+_tmp4D8,_tmp4D9,(void**)_tmp4DB);goto _LL2A9;_LL2CC: if(*((int*)_tmp4B6)!= 16)goto
+_LL2CE;_tmp4DC=((struct Cyc_Absyn_Address_e_struct*)_tmp4B6)->f1;_LL2CD: t=Cyc_Tcexp_tcAddress(
+te,loc,e,topt,_tmp4DC);goto _LL2A9;_LL2CE: if(*((int*)_tmp4B6)!= 17)goto _LL2D0;
+_tmp4DD=((struct Cyc_Absyn_New_e_struct*)_tmp4B6)->f1;_tmp4DE=((struct Cyc_Absyn_New_e_struct*)
 _tmp4B6)->f2;_LL2CF: t=Cyc_Tcexp_tcNew(te,loc,topt,_tmp4DD,e,_tmp4DE);goto _LL2A9;
 _LL2D0: if(*((int*)_tmp4B6)!= 19)goto _LL2D2;_tmp4DF=((struct Cyc_Absyn_Sizeofexp_e_struct*)
 _tmp4B6)->f1;_LL2D1: {void*_tmp51F=Cyc_Tcexp_tcExpNoPromote(te,0,_tmp4DF);t=Cyc_Tcexp_tcSizeof(

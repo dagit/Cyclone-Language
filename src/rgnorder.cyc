@@ -33,8 +33,11 @@
 using List;
 using Absyn;
 using Tcutil;
+using Absynpp;
 namespace RgnOrder;
-
+static string_t tvar2string(tvar_t t) {
+  return *t->name;
+}
 static bool valid_constraint(type_t eff, type_t rgn);
 static type_t filter_effect(type_t eff, kind_t k);
 
@@ -165,7 +168,10 @@ rgn_po_t<`r> initial_fn_po(region_t<`r> r,
   // assumes that fst_rgn has R kind
   if (!valid_constraint(effect,new VarType(fst_rgn))) {
 //     fprintf(stderr,"filtering effect\n");
-    effect = filter_effect(effect,TopRgnKind);
+    // JGM:  I'm *not* filtering the TR vars -- they can't be freed
+    // so they must outlive the region of the function, no?
+
+    //    effect = filter_effect(effect,TopRgnKind);
     effect = filter_effect(effect,UniqueRgnKind);
   }
 //   fprintf(stderr,"  Relating %s <= effect %s\n",
@@ -273,16 +279,25 @@ static bool atomic_effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
       // reach a fixed-point, then we return false.  We start by
       // building the set to include rgn and all those variables that
       // outlive the heap.
+      //fprintf(stderr,"seeing if %s outlives %s\n",tvar2string(tv),typ2string(rgn));
       let env = initial_env(listrgn,po,rgn);
       while(env.todo != NULL) {
 	let next = env.todo->hd;
 	env.todo = env.todo->tl;
-	if(tvar_cmp(next,tv)==0)
+        //fprintf(stderr,"found %s\n",tvar2string(next));
+
+	if(tvar_cmp(next,tv)==0) {
+          //fprintf(stderr,"that's what we needed\n");
 	  return true;
+        }
+
 	// didn't find it; add all variables that outlive this variable
 	// to the env.todo list, unless they appear in env.seen list
 	// (meaning we already tried them or will try them).
 	if(Dict::member(po->d,next)) {
+          //fprintf(stderr,"adding %s outlives: %s\n",tvar2string(next),
+          //        typ2string(Dict::lookup(po->d,next)->these_outlive));
+
 	  add_to_search(&env,Dict::lookup(po->d,next)->these_outlive);
 	} else impos("RgnOrder: type variable not in dict");
       }

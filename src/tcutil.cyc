@@ -2055,10 +2055,10 @@ static list_t<$(tqual_t,type_t)@`r,`r> flatten_typ(region_t<`r> r,
   case &TupleType(tqs): 
     return rmap_c(r,rcopy_tqt,r,tqs);// FIX: recursively flatten here
   case &AggrType(AggrInfo({.KnownAggr = &ad},ts)):
-    // FIX: to strict with existentials and constraints??
+    // FIX: too strict with existentials and constraints??
     if(ad->kind==UnionA || ad->impl==NULL 
        || ad->impl->exist_vars != NULL || ad->impl->rgn_po != NULL) 
-      return rnew(r) List(rnew(r) $(empty_tqual(NULL),t1),NULL);
+      return rnew(r) List(rnew(r) $(const_tqual(NULL),t1),NULL);
     let inst = List::rzip(r,r,ad->tvs,ts);
     // FIX: recursively flatten here (if alignment allows??)
     $(list_t<_,`r>,region_t<`r>) env = $(inst,r);
@@ -2067,13 +2067,7 @@ static list_t<$(tqual_t,type_t)@`r,`r> flatten_typ(region_t<`r> r,
     // FIX: recursively flatten here (if alignment allows??)
     $(list_t<_,`r>,region_t<`r>) env = $(NULL,r);
     return List::rmap_c(r,flatten_typ_f,&env,fs);
-  case &FnType(fi):
-    // NOTE: we consider function types to be qualified with "const" here
-    // because you can't get a function value, only a pointer to a function
-    // so there's no way to update the value.  This is crucial to achieve
-    // subtyping on functions.
-    return rnew(r) List(rnew(r) $(const_tqual(NULL),t1),NULL);
-  default: return rnew(r) List(rnew(r) $(empty_tqual(NULL),t1),NULL);
+  default: return rnew(r) List(rnew(r) $(const_tqual(NULL),t1),NULL);
   }
 }
 
@@ -2128,7 +2122,7 @@ static bool subtype(tenv_t te, list_t<$(type_t,type_t)@`H,`H> assume,
         && !conref_def(false,zt_a) && conref_def(false,zt_b))
       return false;
     // rt_a must outlive rt_b
-    if (!unify(rt_a,rt_b) && !region_outlives(te,rt_a,rt_b))
+    if (!unify(rt_a,rt_b) && !region_outlives(te,rt_a,rt_b)) 
       return false;
     // need to check that the bounds match up
     if (!unify_conrefs(unify_it_bounds,b_a,b_b)) {
