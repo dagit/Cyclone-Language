@@ -2307,6 +2307,18 @@ static void stmt_to_c(env nv, stmt s) {
     case Decl_s(d,s1):
       switch (d->r) {
       case Let_d(p,topt,e,exhaust):
+        // Handle the special case where the pattern is a 
+        // variable just like a variable declaration
+        let var_case = false;
+        switch (p->r) {
+        case Var_p(vd):
+          var_case = true;
+          vd->initializer = e;
+          d->r = Var_d(vd);
+          break;
+        default: break;
+        }
+        if (var_case) fallthru;
 	// we treat let declarations specially because they may need
 	// statements in addition to declarations, so we splice them in
 	// as a statement.  Other declarations only produce declarations.
