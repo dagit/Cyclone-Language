@@ -503,7 +503,7 @@ _check_dyneither_subscript(struct _dyneither_ptr arr,unsigned elt_sz,unsigned in
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
   unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
-  if (!_cus_arr.base) _throw_null();
+  /* JGM: not needed! if (!_cus_arr.base) _throw_null(); */ 
   if (_cus_ans < _cus_arr.base || _cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
@@ -514,7 +514,7 @@ _check_dyneither_subscript(struct _dyneither_ptr arr,unsigned elt_sz,unsigned in
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
   unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
-  if (!_cus_arr.base) _throw_null(); \
+  /* JGM: not needed! if (!_cus_arr.base) _throw_null();*/ \
   if (_cus_ans < _cus_arr.base || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
@@ -787,42 +787,37 @@ src1,sizeof(int)) && len <= _get_dyneither_size(src2,sizeof(int))?0:((int(*)(
 struct _dyneither_ptr assertion,struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(({
 const char*_tmp0="len <= numelts(src1) && len <= numelts(src2)";_tag_dyneither(
 _tmp0,sizeof(char),45);}),({const char*_tmp1="bitvec.cyc";_tag_dyneither(_tmp1,
-sizeof(char),11);}),71);{int i=0;for(0;i < len;++ i){((int*)dest.curr)[i]=*((int*)
-_check_dyneither_subscript(src1,sizeof(int),i))| *((int*)
-_check_dyneither_subscript(src2,sizeof(int),i));}}}void Cyc_Bitvec_intersect_two(
-struct _dyneither_ptr dest,struct _dyneither_ptr src1,struct _dyneither_ptr src2){
+sizeof(char),11);}),71);{int i=0;for(0;i < len;++ i){((int*)dest.curr)[i]=((int*)
+src1.curr)[i]| ((int*)src2.curr)[i];}}}void Cyc_Bitvec_intersect_two(struct
+_dyneither_ptr dest,struct _dyneither_ptr src1,struct _dyneither_ptr src2){
 unsigned int len=_get_dyneither_size(dest,sizeof(int));len <= _get_dyneither_size(
 src1,sizeof(int)) && len <= _get_dyneither_size(src2,sizeof(int))?0:((int(*)(
 struct _dyneither_ptr assertion,struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(({
 const char*_tmp2="len <= numelts(src1) && len <= numelts(src2)";_tag_dyneither(
 _tmp2,sizeof(char),45);}),({const char*_tmp3="bitvec.cyc";_tag_dyneither(_tmp3,
-sizeof(char),11);}),78);{int i=0;for(0;i < len;++ i){((int*)dest.curr)[i]=*((int*)
-_check_dyneither_subscript(src1,sizeof(int),i))& *((int*)
-_check_dyneither_subscript(src2,sizeof(int),i));}}}void Cyc_Bitvec_diff_two(
-struct _dyneither_ptr dest,struct _dyneither_ptr src1,struct _dyneither_ptr src2){
+sizeof(char),11);}),78);{int i=0;for(0;i < len;++ i){((int*)dest.curr)[i]=((int*)
+src1.curr)[i]& ((int*)src2.curr)[i];}}}void Cyc_Bitvec_diff_two(struct
+_dyneither_ptr dest,struct _dyneither_ptr src1,struct _dyneither_ptr src2){
 unsigned int len=_get_dyneither_size(dest,sizeof(int));len <= _get_dyneither_size(
 src1,sizeof(int)) && len <= _get_dyneither_size(src2,sizeof(int))?0:((int(*)(
 struct _dyneither_ptr assertion,struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(({
 const char*_tmp4="len <= numelts(src1) && len <= numelts(src2)";_tag_dyneither(
 _tmp4,sizeof(char),45);}),({const char*_tmp5="bitvec.cyc";_tag_dyneither(_tmp5,
-sizeof(char),11);}),85);{int i=0;for(0;i < len;++ i){((int*)dest.curr)[i]=*((int*)
-_check_dyneither_subscript(src1,sizeof(int),i))& ~(*((int*)
-_check_dyneither_subscript(src2,sizeof(int),i)));}}}int Cyc_Bitvec_compare_two(
-struct _dyneither_ptr src1,struct _dyneither_ptr src2){unsigned int len=
-_get_dyneither_size(src1,sizeof(int));len <= _get_dyneither_size(src2,sizeof(int))?
-0:((int(*)(struct _dyneither_ptr assertion,struct _dyneither_ptr file,unsigned int
-line))Cyc___assert_fail)(({const char*_tmp6="len <= numelts(src2)";_tag_dyneither(
-_tmp6,sizeof(char),21);}),({const char*_tmp7="bitvec.cyc";_tag_dyneither(_tmp7,
-sizeof(char),11);}),92);{int i=0;for(0;i < len;++ i){if(*((int*)
-_check_dyneither_subscript(src1,sizeof(int),i))!= *((int*)
-_check_dyneither_subscript(src2,sizeof(int),i)))return 0;}}return 1;}struct
-_dyneither_ptr Cyc_Bitvec_new_empty(int sz){struct _dyneither_ptr ans=({unsigned int
-_tmp8=(unsigned int)(sz / 32 + 1);int*_tmp9=(int*)_cycalloc_atomic(_check_times(
-sizeof(int),_tmp8));struct _dyneither_ptr _tmpB=_tag_dyneither(_tmp9,sizeof(int),
-_tmp8);{unsigned int _tmpA=_tmp8;unsigned int i;for(i=0;i < _tmpA;i ++){_tmp9[i]=0;}}
-_tmpB;});return ans;}struct _dyneither_ptr Cyc_Bitvec_new_full(int sz){struct
-_dyneither_ptr ans=({unsigned int _tmpC=(unsigned int)(sz / 32 + 1);int*_tmpD=(int*)
-_cycalloc_atomic(_check_times(sizeof(int),_tmpC));struct _dyneither_ptr _tmpF=
+sizeof(char),11);}),85);{int i=0;for(0;i < len;++ i){((int*)dest.curr)[i]=((int*)
+src1.curr)[i]& ~((int*)src2.curr)[i];}}}int Cyc_Bitvec_compare_two(struct
+_dyneither_ptr src1,struct _dyneither_ptr src2){unsigned int len=_get_dyneither_size(
+src1,sizeof(int));len <= _get_dyneither_size(src2,sizeof(int))?0:((int(*)(struct
+_dyneither_ptr assertion,struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(({
+const char*_tmp6="len <= numelts(src2)";_tag_dyneither(_tmp6,sizeof(char),21);}),({
+const char*_tmp7="bitvec.cyc";_tag_dyneither(_tmp7,sizeof(char),11);}),92);{int i=
+0;for(0;i < len;++ i){if(((int*)src1.curr)[i]!= ((int*)src2.curr)[i])return 0;}}
+return 1;}struct _dyneither_ptr Cyc_Bitvec_new_empty(int sz){struct _dyneither_ptr ans=({
+unsigned int _tmp8=(unsigned int)(sz / 32 + 1);int*_tmp9=(int*)_cycalloc_atomic(
+_check_times(sizeof(int),_tmp8));struct _dyneither_ptr _tmpB=_tag_dyneither(_tmp9,
+sizeof(int),_tmp8);{unsigned int _tmpA=_tmp8;unsigned int i;for(i=0;i < _tmpA;i ++){
+_tmp9[i]=0;}}_tmpB;});return ans;}struct _dyneither_ptr Cyc_Bitvec_new_full(int sz){
+struct _dyneither_ptr ans=({unsigned int _tmpC=(unsigned int)(sz / 32 + 1);int*_tmpD=(
+int*)_cycalloc_atomic(_check_times(sizeof(int),_tmpC));struct _dyneither_ptr _tmpF=
 _tag_dyneither(_tmpD,sizeof(int),_tmpC);{unsigned int _tmpE=_tmpC;unsigned int i;
 for(i=0;i < _tmpE;i ++){_tmpD[i]=-1;}}_tmpF;});return ans;}struct _dyneither_ptr Cyc_Bitvec_new_copy(
 struct _dyneither_ptr old){struct _dyneither_ptr copy=Cyc_Bitvec_new_empty((int)

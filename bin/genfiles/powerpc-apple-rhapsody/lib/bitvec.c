@@ -487,7 +487,7 @@ _check_dyneither_subscript(struct _dyneither_ptr arr,unsigned elt_sz,unsigned in
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
   unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
-  if (!_cus_arr.base) _throw_null();
+  /* JGM: not needed! if (!_cus_arr.base) _throw_null(); */ 
   if (_cus_ans < _cus_arr.base || _cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
@@ -498,7 +498,7 @@ _check_dyneither_subscript(struct _dyneither_ptr arr,unsigned elt_sz,unsigned in
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
   unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
-  if (!_cus_arr.base) _throw_null(); \
+  /* JGM: not needed! if (!_cus_arr.base) _throw_null();*/ \
   if (_cus_ans < _cus_arr.base || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
@@ -772,87 +772,82 @@ char*_tmp1E;const char*_tmp1D;len <= _get_dyneither_size(src1,sizeof(int)) && le
 <= _get_dyneither_size(src2,sizeof(int))?0:((int(*)(struct _dyneither_ptr
 assertion,struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(((_tmp1D="len <= numelts(src1) && len <= numelts(src2)",
 _tag_dyneither(_tmp1D,sizeof(char),45))),((_tmp1E="bitvec.cyc",_tag_dyneither(
-_tmp1E,sizeof(char),11))),71);}{int i=0;for(0;i < len;++ i){((int*)dest.curr)[i]=*((
-int*)_check_dyneither_subscript(src1,sizeof(int),i))| *((int*)
-_check_dyneither_subscript(src2,sizeof(int),i));}}}void Cyc_Bitvec_intersect_two(
-struct _dyneither_ptr dest,struct _dyneither_ptr src1,struct _dyneither_ptr src2);void
-Cyc_Bitvec_intersect_two(struct _dyneither_ptr dest,struct _dyneither_ptr src1,
-struct _dyneither_ptr src2){unsigned int len=_get_dyneither_size(dest,sizeof(int));{
-const char*_tmp20;const char*_tmp1F;len <= _get_dyneither_size(src1,sizeof(int))
- && len <= _get_dyneither_size(src2,sizeof(int))?0:((int(*)(struct _dyneither_ptr
-assertion,struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(((_tmp1F="len <= numelts(src1) && len <= numelts(src2)",
-_tag_dyneither(_tmp1F,sizeof(char),45))),((_tmp20="bitvec.cyc",_tag_dyneither(
-_tmp20,sizeof(char),11))),78);}{int i=0;for(0;i < len;++ i){((int*)dest.curr)[i]=*((
-int*)_check_dyneither_subscript(src1,sizeof(int),i))& *((int*)
-_check_dyneither_subscript(src2,sizeof(int),i));}}}void Cyc_Bitvec_diff_two(
-struct _dyneither_ptr dest,struct _dyneither_ptr src1,struct _dyneither_ptr src2);void
-Cyc_Bitvec_diff_two(struct _dyneither_ptr dest,struct _dyneither_ptr src1,struct
-_dyneither_ptr src2){unsigned int len=_get_dyneither_size(dest,sizeof(int));{const
-char*_tmp22;const char*_tmp21;len <= _get_dyneither_size(src1,sizeof(int)) && len
-<= _get_dyneither_size(src2,sizeof(int))?0:((int(*)(struct _dyneither_ptr
-assertion,struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(((_tmp21="len <= numelts(src1) && len <= numelts(src2)",
-_tag_dyneither(_tmp21,sizeof(char),45))),((_tmp22="bitvec.cyc",_tag_dyneither(
-_tmp22,sizeof(char),11))),85);}{int i=0;for(0;i < len;++ i){((int*)dest.curr)[i]=*((
-int*)_check_dyneither_subscript(src1,sizeof(int),i))& ~(*((int*)
-_check_dyneither_subscript(src2,sizeof(int),i)));}}}int Cyc_Bitvec_compare_two(
-struct _dyneither_ptr src1,struct _dyneither_ptr src2);int Cyc_Bitvec_compare_two(
-struct _dyneither_ptr src1,struct _dyneither_ptr src2){unsigned int len=
-_get_dyneither_size(src1,sizeof(int));{const char*_tmp24;const char*_tmp23;len <= 
+_tmp1E,sizeof(char),11))),71);}{int i=0;for(0;i < len;++ i){((int*)dest.curr)[i]=((
+int*)src1.curr)[i]| ((int*)src2.curr)[i];}}}void Cyc_Bitvec_intersect_two(struct
+_dyneither_ptr dest,struct _dyneither_ptr src1,struct _dyneither_ptr src2);void Cyc_Bitvec_intersect_two(
+struct _dyneither_ptr dest,struct _dyneither_ptr src1,struct _dyneither_ptr src2){
+unsigned int len=_get_dyneither_size(dest,sizeof(int));{const char*_tmp20;const
+char*_tmp1F;len <= _get_dyneither_size(src1,sizeof(int)) && len <= 
 _get_dyneither_size(src2,sizeof(int))?0:((int(*)(struct _dyneither_ptr assertion,
-struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(((_tmp23="len <= numelts(src2)",
+struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(((_tmp1F="len <= numelts(src1) && len <= numelts(src2)",
+_tag_dyneither(_tmp1F,sizeof(char),45))),((_tmp20="bitvec.cyc",_tag_dyneither(
+_tmp20,sizeof(char),11))),78);}{int i=0;for(0;i < len;++ i){((int*)dest.curr)[i]=((
+int*)src1.curr)[i]& ((int*)src2.curr)[i];}}}void Cyc_Bitvec_diff_two(struct
+_dyneither_ptr dest,struct _dyneither_ptr src1,struct _dyneither_ptr src2);void Cyc_Bitvec_diff_two(
+struct _dyneither_ptr dest,struct _dyneither_ptr src1,struct _dyneither_ptr src2){
+unsigned int len=_get_dyneither_size(dest,sizeof(int));{const char*_tmp22;const
+char*_tmp21;len <= _get_dyneither_size(src1,sizeof(int)) && len <= 
+_get_dyneither_size(src2,sizeof(int))?0:((int(*)(struct _dyneither_ptr assertion,
+struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(((_tmp21="len <= numelts(src1) && len <= numelts(src2)",
+_tag_dyneither(_tmp21,sizeof(char),45))),((_tmp22="bitvec.cyc",_tag_dyneither(
+_tmp22,sizeof(char),11))),85);}{int i=0;for(0;i < len;++ i){((int*)dest.curr)[i]=((
+int*)src1.curr)[i]& ~((int*)src2.curr)[i];}}}int Cyc_Bitvec_compare_two(struct
+_dyneither_ptr src1,struct _dyneither_ptr src2);int Cyc_Bitvec_compare_two(struct
+_dyneither_ptr src1,struct _dyneither_ptr src2){unsigned int len=_get_dyneither_size(
+src1,sizeof(int));{const char*_tmp24;const char*_tmp23;len <= _get_dyneither_size(
+src2,sizeof(int))?0:((int(*)(struct _dyneither_ptr assertion,struct _dyneither_ptr
+file,unsigned int line))Cyc___assert_fail)(((_tmp23="len <= numelts(src2)",
 _tag_dyneither(_tmp23,sizeof(char),21))),((_tmp24="bitvec.cyc",_tag_dyneither(
-_tmp24,sizeof(char),11))),92);}{int i=0;for(0;i < len;++ i){if(*((int*)
-_check_dyneither_subscript(src1,sizeof(int),i))!= *((int*)
-_check_dyneither_subscript(src2,sizeof(int),i)))return 0;}}return 1;}struct
-_dyneither_ptr Cyc_Bitvec_new_empty(int sz);static void _tmp2A(unsigned int*_tmp29,
-unsigned int*_tmp28,int**_tmp26){for(*_tmp29=0;*_tmp29 < *_tmp28;(*_tmp29)++){(*
-_tmp26)[*_tmp29]=0;}}struct _dyneither_ptr Cyc_Bitvec_new_empty(int sz){
-unsigned int _tmp29;unsigned int _tmp28;struct _dyneither_ptr _tmp27;int*_tmp26;
-unsigned int _tmp25;struct _dyneither_ptr ans=(_tmp25=(unsigned int)(sz / 32 + 1),((
-_tmp26=(int*)_cycalloc_atomic(_check_times(sizeof(int),_tmp25)),((_tmp27=
-_tag_dyneither(_tmp26,sizeof(int),_tmp25),((((_tmp28=_tmp25,_tmp2A(& _tmp29,&
-_tmp28,& _tmp26))),_tmp27)))))));return ans;}struct _dyneither_ptr Cyc_Bitvec_new_full(
-int sz);static void _tmp30(unsigned int*_tmp2F,unsigned int*_tmp2E,int**_tmp2C){
-for(*_tmp2F=0;*_tmp2F < *_tmp2E;(*_tmp2F)++){(*_tmp2C)[*_tmp2F]=-1;}}struct
-_dyneither_ptr Cyc_Bitvec_new_full(int sz){unsigned int _tmp2F;unsigned int _tmp2E;
-struct _dyneither_ptr _tmp2D;int*_tmp2C;unsigned int _tmp2B;struct _dyneither_ptr ans=(
-_tmp2B=(unsigned int)(sz / 32 + 1),((_tmp2C=(int*)_cycalloc_atomic(_check_times(
-sizeof(int),_tmp2B)),((_tmp2D=_tag_dyneither(_tmp2C,sizeof(int),_tmp2B),((((
-_tmp2E=_tmp2B,_tmp30(& _tmp2F,& _tmp2E,& _tmp2C))),_tmp2D)))))));return ans;}struct
-_dyneither_ptr Cyc_Bitvec_new_copy(struct _dyneither_ptr old);struct _dyneither_ptr
-Cyc_Bitvec_new_copy(struct _dyneither_ptr old){struct _dyneither_ptr copy=Cyc_Bitvec_new_empty((
-int)_get_dyneither_size(old,sizeof(int)));Cyc_Bitvec_union_two(copy,copy,old);
-return copy;}struct _dyneither_ptr Cyc_Bitvec_from_list(struct Cyc_Dict_Dict d,int(*f)(
-void*),int sz,struct Cyc_List_List*l);static void _tmp36(unsigned int*_tmp35,
-unsigned int*_tmp34,int**_tmp32){for(*_tmp35=0;*_tmp35 < *_tmp34;(*_tmp35)++){(*
-_tmp32)[*_tmp35]=0;}}struct _dyneither_ptr Cyc_Bitvec_from_list(struct Cyc_Dict_Dict
-d,int(*f)(void*),int sz,struct Cyc_List_List*l){unsigned int _tmp35;unsigned int
-_tmp34;struct _dyneither_ptr _tmp33;int*_tmp32;unsigned int _tmp31;struct
-_dyneither_ptr ans=(_tmp31=(unsigned int)(sz % 32 + 1),((_tmp32=(int*)
-_cycalloc_atomic(_check_times(sizeof(int),_tmp31)),((_tmp33=_tag_dyneither(
-_tmp32,sizeof(int),_tmp31),((((_tmp34=_tmp31,_tmp36(& _tmp35,& _tmp34,& _tmp32))),
-_tmp33)))))));for(0;l != 0;l=l->tl){Cyc_Bitvec_set(ans,f(Cyc_Dict_lookup(d,(void*)
-l->hd)));}return ans;}struct Cyc_List_List*Cyc_Bitvec_to_sorted_list(struct
-_dyneither_ptr bvec,int sz);struct Cyc_List_List*Cyc_Bitvec_to_sorted_list(struct
-_dyneither_ptr bvec,int sz){struct Cyc_List_List*ans=0;{int pos=sz - 1;for(0;pos >= 0;
-0){int word=pos >> 5;int bits=*((int*)_check_dyneither_subscript(bvec,sizeof(int),
-word));int offset=pos & 31;for(0;offset >= 0;(-- offset,-- pos)){if((bits >> offset & 1)
-== 1){struct Cyc_List_List _tmp39;struct Cyc_List_List*_tmp38;ans=((_tmp38=
-_cycalloc(sizeof(struct Cyc_List_List)* 1),((_tmp38[0]=((_tmp39.hd=(void*)pos,((
-_tmp39.tl=ans,_tmp39)))),_tmp38))));}}}}return ans;}void Cyc_Bitvec_clear_all(
-struct _dyneither_ptr bvec);void Cyc_Bitvec_clear_all(struct _dyneither_ptr bvec){
-unsigned int len=_get_dyneither_size(bvec,sizeof(int));int i=0;for(0;i < len;++ i){((
-int*)bvec.curr)[i]=0;}}void Cyc_Bitvec_set_all(struct _dyneither_ptr bvec);void Cyc_Bitvec_set_all(
+_tmp24,sizeof(char),11))),92);}{int i=0;for(0;i < len;++ i){if(((int*)src1.curr)[i]
+!= ((int*)src2.curr)[i])return 0;}}return 1;}struct _dyneither_ptr Cyc_Bitvec_new_empty(
+int sz);static void _tmp2A(unsigned int*_tmp29,unsigned int*_tmp28,int**_tmp26){
+for(*_tmp29=0;*_tmp29 < *_tmp28;(*_tmp29)++){(*_tmp26)[*_tmp29]=0;}}struct
+_dyneither_ptr Cyc_Bitvec_new_empty(int sz){unsigned int _tmp29;unsigned int _tmp28;
+struct _dyneither_ptr _tmp27;int*_tmp26;unsigned int _tmp25;struct _dyneither_ptr ans=(
+_tmp25=(unsigned int)(sz / 32 + 1),((_tmp26=(int*)_cycalloc_atomic(_check_times(
+sizeof(int),_tmp25)),((_tmp27=_tag_dyneither(_tmp26,sizeof(int),_tmp25),((((
+_tmp28=_tmp25,_tmp2A(& _tmp29,& _tmp28,& _tmp26))),_tmp27)))))));return ans;}struct
+_dyneither_ptr Cyc_Bitvec_new_full(int sz);static void _tmp30(unsigned int*_tmp2F,
+unsigned int*_tmp2E,int**_tmp2C){for(*_tmp2F=0;*_tmp2F < *_tmp2E;(*_tmp2F)++){(*
+_tmp2C)[*_tmp2F]=-1;}}struct _dyneither_ptr Cyc_Bitvec_new_full(int sz){
+unsigned int _tmp2F;unsigned int _tmp2E;struct _dyneither_ptr _tmp2D;int*_tmp2C;
+unsigned int _tmp2B;struct _dyneither_ptr ans=(_tmp2B=(unsigned int)(sz / 32 + 1),((
+_tmp2C=(int*)_cycalloc_atomic(_check_times(sizeof(int),_tmp2B)),((_tmp2D=
+_tag_dyneither(_tmp2C,sizeof(int),_tmp2B),((((_tmp2E=_tmp2B,_tmp30(& _tmp2F,&
+_tmp2E,& _tmp2C))),_tmp2D)))))));return ans;}struct _dyneither_ptr Cyc_Bitvec_new_copy(
+struct _dyneither_ptr old);struct _dyneither_ptr Cyc_Bitvec_new_copy(struct
+_dyneither_ptr old){struct _dyneither_ptr copy=Cyc_Bitvec_new_empty((int)
+_get_dyneither_size(old,sizeof(int)));Cyc_Bitvec_union_two(copy,copy,old);return
+copy;}struct _dyneither_ptr Cyc_Bitvec_from_list(struct Cyc_Dict_Dict d,int(*f)(void*),
+int sz,struct Cyc_List_List*l);static void _tmp36(unsigned int*_tmp35,unsigned int*
+_tmp34,int**_tmp32){for(*_tmp35=0;*_tmp35 < *_tmp34;(*_tmp35)++){(*_tmp32)[*
+_tmp35]=0;}}struct _dyneither_ptr Cyc_Bitvec_from_list(struct Cyc_Dict_Dict d,int(*f)(
+void*),int sz,struct Cyc_List_List*l){unsigned int _tmp35;unsigned int _tmp34;struct
+_dyneither_ptr _tmp33;int*_tmp32;unsigned int _tmp31;struct _dyneither_ptr ans=(
+_tmp31=(unsigned int)(sz % 32 + 1),((_tmp32=(int*)_cycalloc_atomic(_check_times(
+sizeof(int),_tmp31)),((_tmp33=_tag_dyneither(_tmp32,sizeof(int),_tmp31),((((
+_tmp34=_tmp31,_tmp36(& _tmp35,& _tmp34,& _tmp32))),_tmp33)))))));for(0;l != 0;l=l->tl){
+Cyc_Bitvec_set(ans,f(Cyc_Dict_lookup(d,(void*)l->hd)));}return ans;}struct Cyc_List_List*
+Cyc_Bitvec_to_sorted_list(struct _dyneither_ptr bvec,int sz);struct Cyc_List_List*
+Cyc_Bitvec_to_sorted_list(struct _dyneither_ptr bvec,int sz){struct Cyc_List_List*
+ans=0;{int pos=sz - 1;for(0;pos >= 0;0){int word=pos >> 5;int bits=*((int*)
+_check_dyneither_subscript(bvec,sizeof(int),word));int offset=pos & 31;for(0;
+offset >= 0;(-- offset,-- pos)){if((bits >> offset & 1)== 1){struct Cyc_List_List
+_tmp39;struct Cyc_List_List*_tmp38;ans=((_tmp38=_cycalloc(sizeof(struct Cyc_List_List)
+* 1),((_tmp38[0]=((_tmp39.hd=(void*)pos,((_tmp39.tl=ans,_tmp39)))),_tmp38))));}}}}
+return ans;}void Cyc_Bitvec_clear_all(struct _dyneither_ptr bvec);void Cyc_Bitvec_clear_all(
 struct _dyneither_ptr bvec){unsigned int len=_get_dyneither_size(bvec,sizeof(int));
-int i=0;for(0;i < len;++ i){((int*)bvec.curr)[i]=-1;}}int Cyc_Bitvec_all_set(struct
-_dyneither_ptr bvec,int sz);int Cyc_Bitvec_all_set(struct _dyneither_ptr bvec,int sz){
-int words=sz >> 5;{const char*_tmp3B;const char*_tmp3A;words < _get_dyneither_size(
-bvec,sizeof(int))?0:((int(*)(struct _dyneither_ptr assertion,struct _dyneither_ptr
-file,unsigned int line))Cyc___assert_fail)(((_tmp3A="words < numelts(bvec)",
-_tag_dyneither(_tmp3A,sizeof(char),22))),((_tmp3B="bitvec.cyc",_tag_dyneither(
-_tmp3B,sizeof(char),11))),149);}{int i=0;for(0;i < words;++ i){if(*((int*)
-_check_dyneither_subscript(bvec,sizeof(int),i))!= -1)return 0;}}{int i=words * 32;
-for(0;i < sz;++ i){if(!Cyc_Bitvec_get(bvec,i))return 0;}}return 1;}void Cyc_Bitvec_print_bvec(
+int i=0;for(0;i < len;++ i){((int*)bvec.curr)[i]=0;}}void Cyc_Bitvec_set_all(struct
+_dyneither_ptr bvec);void Cyc_Bitvec_set_all(struct _dyneither_ptr bvec){
+unsigned int len=_get_dyneither_size(bvec,sizeof(int));int i=0;for(0;i < len;++ i){((
+int*)bvec.curr)[i]=-1;}}int Cyc_Bitvec_all_set(struct _dyneither_ptr bvec,int sz);
+int Cyc_Bitvec_all_set(struct _dyneither_ptr bvec,int sz){int words=sz >> 5;{const char*
+_tmp3B;const char*_tmp3A;words < _get_dyneither_size(bvec,sizeof(int))?0:((int(*)(
+struct _dyneither_ptr assertion,struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(((
+_tmp3A="words < numelts(bvec)",_tag_dyneither(_tmp3A,sizeof(char),22))),((_tmp3B="bitvec.cyc",
+_tag_dyneither(_tmp3B,sizeof(char),11))),149);}{int i=0;for(0;i < words;++ i){if(*((
+int*)_check_dyneither_subscript(bvec,sizeof(int),i))!= -1)return 0;}}{int i=words * 
+32;for(0;i < sz;++ i){if(!Cyc_Bitvec_get(bvec,i))return 0;}}return 1;}void Cyc_Bitvec_print_bvec(
 struct _dyneither_ptr bvec);void Cyc_Bitvec_print_bvec(struct _dyneither_ptr bvec){{
 int i=0;for(0;i < 32 * _get_dyneither_size(bvec,sizeof(int));++ i){const char*_tmp3F;
 void*_tmp3E[1];struct Cyc_Int_pa_struct _tmp3D;(_tmp3D.tag=1,((_tmp3D.f1=(

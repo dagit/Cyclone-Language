@@ -487,7 +487,7 @@ _check_dyneither_subscript(struct _dyneither_ptr arr,unsigned elt_sz,unsigned in
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
   unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
-  if (!_cus_arr.base) _throw_null();
+  /* JGM: not needed! if (!_cus_arr.base) _throw_null(); */ 
   if (_cus_ans < _cus_arr.base || _cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
@@ -498,7 +498,7 @@ _check_dyneither_subscript(struct _dyneither_ptr arr,unsigned elt_sz,unsigned in
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
   unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
-  if (!_cus_arr.base) _throw_null(); \
+  /* JGM: not needed! if (!_cus_arr.base) _throw_null();*/ \
   if (_cus_ans < _cus_arr.base || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
@@ -1343,14 +1343,13 @@ _tmp3A,_tmp3B9))))));}if(c == - 1)goto CLEANUP_AND_RETURN;}CLEANUP_AND_RETURN: C
 struct Cyc___cycFILE*)spec_file);return _tmp3A;}struct _dyneither_ptr Cyc_split_specs(
 struct _dyneither_ptr cmdline);static void _tmp3C6(struct _dyneither_ptr*_tmp5B,
 unsigned int*_tmp3C5,unsigned int*_tmp3C4,struct _dyneither_ptr**_tmp3C2){for(*
-_tmp3C5=0;*_tmp3C5 < *_tmp3C4;(*_tmp3C5)++){(*_tmp3C2)[*_tmp3C5]=*(*((struct
-_dyneither_ptr**)_check_dyneither_subscript(*_tmp5B,sizeof(struct _dyneither_ptr*),(
-int)*_tmp3C5)));}}struct _dyneither_ptr Cyc_split_specs(struct _dyneither_ptr
-cmdline){if(cmdline.curr == ((struct _dyneither_ptr)_tag_dyneither(0,0,0)).curr)
-return _tag_dyneither(0,0,0);{unsigned long _tmp55=Cyc_strlen((struct
-_dyneither_ptr)cmdline);struct Cyc_List_List*_tmp56=0;char buf[4096];int i=0;int j=0;
-if(_tmp55 > 4096)goto DONE;while(1){while(1){if(i >= _tmp55)goto DONE;if(*((const
-char*)_check_dyneither_subscript(cmdline,sizeof(char),i))== 0)goto DONE;if(!
+_tmp3C5=0;*_tmp3C5 < *_tmp3C4;(*_tmp3C5)++){(*_tmp3C2)[*_tmp3C5]=*((struct
+_dyneither_ptr**)(*_tmp5B).curr)[(int)*_tmp3C5];}}struct _dyneither_ptr Cyc_split_specs(
+struct _dyneither_ptr cmdline){if(cmdline.curr == ((struct _dyneither_ptr)
+_tag_dyneither(0,0,0)).curr)return _tag_dyneither(0,0,0);{unsigned long _tmp55=Cyc_strlen((
+struct _dyneither_ptr)cmdline);struct Cyc_List_List*_tmp56=0;char buf[4096];int i=0;
+int j=0;if(_tmp55 > 4096)goto DONE;while(1){while(1){if(i >= _tmp55)goto DONE;if(*((
+const char*)_check_dyneither_subscript(cmdline,sizeof(char),i))== 0)goto DONE;if(!
 isspace((int)*((const char*)_check_dyneither_subscript(cmdline,sizeof(char),i))))
 break;++ i;}j=0;while(1){if(i >= _tmp55)break;if(*((const char*)
 _check_dyneither_subscript(cmdline,sizeof(char),i))== 0)break;if(isspace((int)*((

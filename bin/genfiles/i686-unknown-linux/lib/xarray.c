@@ -503,7 +503,7 @@ _check_dyneither_subscript(struct _dyneither_ptr arr,unsigned elt_sz,unsigned in
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
   unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
-  if (!_cus_arr.base) _throw_null();
+  /* JGM: not needed! if (!_cus_arr.base) _throw_null(); */ 
   if (_cus_ans < _cus_arr.base || _cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
@@ -514,7 +514,7 @@ _check_dyneither_subscript(struct _dyneither_ptr arr,unsigned elt_sz,unsigned in
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
   unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
-  if (!_cus_arr.base) _throw_null(); \
+  /* JGM: not needed! if (!_cus_arr.base) _throw_null();*/ \
   if (_cus_ans < _cus_arr.base || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
@@ -826,11 +826,10 @@ sizeof(*_tmp1F));_tmp1F->r=r;_tmp1F->elmts=({unsigned int _tmp20=
 _get_dyneither_size(arr,sizeof(void*));void**_tmp21=(void**)_region_malloc(r,
 _check_times(sizeof(void*),_tmp20));struct _dyneither_ptr _tmp23=_tag_dyneither(
 _tmp21,sizeof(void*),_tmp20);{unsigned int _tmp22=_tmp20;unsigned int i;for(i=0;i < 
-_tmp22;i ++){_tmp21[i]=*((void**)_check_dyneither_subscript(arr,sizeof(void*),(
-int)i));}}_tmp23;});_tmp1F->num_elmts=(int)_get_dyneither_size(arr,sizeof(void*));
-_tmp1F;});return ans;}}struct Cyc_Xarray_Xarray*Cyc_Xarray_from_array(struct
-_dyneither_ptr arr){return Cyc_Xarray_rfrom_array(Cyc_Core_heap_region,arr);}
-struct Cyc_Xarray_Xarray*Cyc_Xarray_rappend(struct _RegionHandle*r,struct Cyc_Xarray_Xarray*
+_tmp22;i ++){_tmp21[i]=((void**)arr.curr)[(int)i];}}_tmp23;});_tmp1F->num_elmts=(
+int)_get_dyneither_size(arr,sizeof(void*));_tmp1F;});return ans;}}struct Cyc_Xarray_Xarray*
+Cyc_Xarray_from_array(struct _dyneither_ptr arr){return Cyc_Xarray_rfrom_array(Cyc_Core_heap_region,
+arr);}struct Cyc_Xarray_Xarray*Cyc_Xarray_rappend(struct _RegionHandle*r,struct Cyc_Xarray_Xarray*
 xarr1,struct Cyc_Xarray_Xarray*xarr2){int newsz=(int)(_get_dyneither_size(xarr1->elmts,
 sizeof(void*))+ _get_dyneither_size(xarr2->elmts,sizeof(void*)));if(newsz == 0)
 return Cyc_Xarray_rcreate_empty(r);{void*init=_get_dyneither_size(xarr1->elmts,

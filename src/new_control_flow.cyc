@@ -55,6 +55,7 @@
 using List;
 using Absyn;
 using CfFlowInfo;
+using Absynpp;
 namespace NewControlFlow;
 
 typedef Dict::dict_t<`a,`b> dict_t<`a,`b>;
@@ -485,6 +486,7 @@ static xtunion AbsynAnnot.UnknownZ mt_unknownz_v = UnknownZ(NULL);
 static $(flow_t<`r>,absRval_t<`r>) 
   anal_derefR(analenv_t<`r> env, flow_t<`r> inflow,
               flow_t<`r> f, exp_t e, absRval_t<`r> r) {
+
   switch(Tcutil::compress(e->topt->v)) {
   case &PointerType(PtrInfo(elttype,_,PtrAtts(_,_,bd,zt,_))):
     switch(f) {
@@ -492,7 +494,7 @@ static $(flow_t<`r>,absRval_t<`r>)
       return $(f,typ_to_absrval(env->fenv,elttype,env->fenv->unknown_all));
     case ReachableFL(outdict,relns,_):
       // else cannot be known: FIX: determine notzero as appropriate
-      if(Tcutil::is_bound_one(bd))
+      if(Tcutil::is_bound_one(bd)) {
 	switch(r) {
 	case NotZeroAll: 
 	case NotZeroThis: 
@@ -547,22 +549,16 @@ static $(flow_t<`r>,absRval_t<`r>)
           }
           break;
 	}
-      else
+      } else {
         switch (e->annot) {
         case &UnknownZ(relns2):
           if (!same_relns(relns,relns2)) fallthru;
           break;
         default:
-          switch (e->r) {
-          case &Subscript_e(_,_):
-            e->annot = new UnknownZ(copy_relns(Core::heap_region,relns)); // FIX: too conservative?
-            break;
-          default:
-            e->annot = &mt_unknownz_v;
-            break;
-          }
+          e->annot = new UnknownZ(copy_relns(Core::heap_region,relns)); // FIX: too conservative?
           break;
         }
+      }
       switch(initlevel(outdict,r)) {
       case NoneIL:
 	Tcutil::terr(e->loc,"dereference of possibly uninitialized pointer");

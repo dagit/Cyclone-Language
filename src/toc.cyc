@@ -2608,8 +2608,6 @@ DynCast:
     break;
   case &Subscript_e(e1,e2):
     let e1_typ = compress(e1->topt->v);
-    //fprintf(stderr,"subscript %s:",exp2string(e));
-    //CfFlowInfo::print_relns(relns); fprintf(stderr,"\n");
     // e1 could be a tuple or an array of various sorts
     switch (e1_typ) {
     case &TupleType(ts):
@@ -2623,6 +2621,9 @@ DynCast:
       break;
     case &PointerType(PtrInfo{ta,tq,PtrAtts(rgn,bcr,b,zt,_)}):
       let relns = get_relns(e1);
+      //fprintf(stderr,"subscript %s: relns:",exp2string(e));
+      //CfFlowInfo::print_relns(relns); fprintf(stderr,"\n");
+
       bool in_bnds = false;
       switch (conref_def(bounds_one,b)) {
       default:

@@ -503,7 +503,7 @@ _check_dyneither_subscript(struct _dyneither_ptr arr,unsigned elt_sz,unsigned in
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
   unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
-  if (!_cus_arr.base) _throw_null();
+  /* JGM: not needed! if (!_cus_arr.base) _throw_null(); */ 
   if (_cus_ans < _cus_arr.base || _cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
@@ -514,7 +514,7 @@ _check_dyneither_subscript(struct _dyneither_ptr arr,unsigned elt_sz,unsigned in
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
   unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
-  if (!_cus_arr.base) _throw_null(); \
+  /* JGM: not needed! if (!_cus_arr.base) _throw_null();*/ \
   if (_cus_ans < _cus_arr.base || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
@@ -794,17 +794,16 @@ const char*_tmp4="arg.cyc";_tag_dyneither(_tmp4,sizeof(char),8);}),94);if(howmuc
 > _tmp2){Cyc_Buffer_add_string(b,s);return(struct _dyneither_ptr)_tag_dyneither(0,
 0,0);}{int i;for(i=howmuch - 1;i >= 0  && !isspace((int)*((const char*)
 _check_dyneither_subscript(s,sizeof(char),i)));-- i){;}if(i < 0)for(i=howmuch?
-howmuch - 1: 0;(i < _tmp2  && (int)((const char*)s.curr)[i]) && !isspace((int)*((
-const char*)_check_dyneither_subscript(s,sizeof(char),i)));++ i){;}Cyc_Buffer_add_substring(
-b,s,0,i);{struct _dyneither_ptr whatsleft=(struct _dyneither_ptr)_tag_dyneither(0,0,
-0);for(0;(i < _tmp2  && (int)((const char*)s.curr)[i]) && isspace((int)*((const char*)
-_check_dyneither_subscript(s,sizeof(char),i)));++ i){;}if(i < _tmp2  && (int)((
-const char*)s.curr)[i])whatsleft=_dyneither_ptr_plus(s,sizeof(char),i);return
-whatsleft;}}}}void Cyc_Arg_Justify_justify_b(struct Cyc_Buffer_t*b,int indent,int
-margin,struct _dyneither_ptr item,struct _dyneither_ptr desc){if(item.curr != ((
-struct _dyneither_ptr)_tag_dyneither(0,0,0)).curr)Cyc_Buffer_add_string(b,item);
-if(desc.curr == ((struct _dyneither_ptr)_tag_dyneither(0,0,0)).curr)return;if(
-indent < 0)indent=0;if(margin < 0)margin=0;{struct _dyneither_ptr indentstr=({
+howmuch - 1: 0;(i < _tmp2  && (int)((const char*)s.curr)[i]) && !isspace((int)((const
+char*)s.curr)[i]);++ i){;}Cyc_Buffer_add_substring(b,s,0,i);{struct _dyneither_ptr
+whatsleft=(struct _dyneither_ptr)_tag_dyneither(0,0,0);for(0;(i < _tmp2  && (int)((
+const char*)s.curr)[i]) && isspace((int)((const char*)s.curr)[i]);++ i){;}if(i < 
+_tmp2  && (int)((const char*)s.curr)[i])whatsleft=_dyneither_ptr_plus(s,sizeof(
+char),i);return whatsleft;}}}}void Cyc_Arg_Justify_justify_b(struct Cyc_Buffer_t*b,
+int indent,int margin,struct _dyneither_ptr item,struct _dyneither_ptr desc){if(item.curr
+!= ((struct _dyneither_ptr)_tag_dyneither(0,0,0)).curr)Cyc_Buffer_add_string(b,
+item);if(desc.curr == ((struct _dyneither_ptr)_tag_dyneither(0,0,0)).curr)return;
+if(indent < 0)indent=0;if(margin < 0)margin=0;{struct _dyneither_ptr indentstr=({
 unsigned int _tmp11=(unsigned int)(indent + 2);char*_tmp12=(char*)_cycalloc_atomic(
 _check_times(sizeof(char),_tmp11 + 1));struct _dyneither_ptr _tmp14=_tag_dyneither(
 _tmp12,sizeof(char),_tmp11 + 1);{unsigned int _tmp13=_tmp11;unsigned int i;for(i=0;

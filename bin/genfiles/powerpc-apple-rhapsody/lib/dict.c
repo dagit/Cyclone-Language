@@ -487,7 +487,7 @@ _check_dyneither_subscript(struct _dyneither_ptr arr,unsigned elt_sz,unsigned in
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
   unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
-  if (!_cus_arr.base) _throw_null();
+  /* JGM: not needed! if (!_cus_arr.base) _throw_null(); */ 
   if (_cus_ans < _cus_arr.base || _cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
@@ -498,7 +498,7 @@ _check_dyneither_subscript(struct _dyneither_ptr arr,unsigned elt_sz,unsigned in
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
   unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
-  if (!_cus_arr.base) _throw_null(); \
+  /* JGM: not needed! if (!_cus_arr.base) _throw_null();*/ \
   if (_cus_ans < _cus_arr.base || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
@@ -1129,12 +1129,11 @@ _tmp157){for(*_tmp159=0;*_tmp159 < *_tmp158;(*_tmp159)++){(*_tmp157)[*_tmp159]=(
 struct Cyc_Dict_T*)(*d2).t;}}static void _tmp160(struct _dyneither_ptr*queue,struct
 Cyc_Dict_Dict*d2,unsigned int*_tmp15F,unsigned int*_tmp15E,struct Cyc_Dict_T***
 _tmp15C){for(*_tmp15F=0;*_tmp15F < *_tmp15E;(*_tmp15F)++){(*_tmp15C)[*_tmp15F]=*
-_tmp15F < _get_dyneither_size(*queue,sizeof(struct Cyc_Dict_T*))?*((struct Cyc_Dict_T**)
-_check_dyneither_subscript(*queue,sizeof(struct Cyc_Dict_T*),(int)*_tmp15F)):(
-struct Cyc_Dict_T*)(*d2).t;}}struct Cyc_Dict_Dict Cyc_Dict_intersect_c(void*(*f)(
-void*,void*,void*,void*),void*env,struct Cyc_Dict_Dict d1,struct Cyc_Dict_Dict d2){
-if((int)d1.t == (int)d2.t  || d2.t == 0)return d2;{struct Cyc_Dict_T*_tmpE1=0;{struct
-_RegionHandle _tmpE2=_new_region("temp");struct _RegionHandle*temp=& _tmpE2;
+_tmp15F < _get_dyneither_size(*queue,sizeof(struct Cyc_Dict_T*))?((struct Cyc_Dict_T**)(*
+queue).curr)[(int)*_tmp15F]:(struct Cyc_Dict_T*)(*d2).t;}}struct Cyc_Dict_Dict Cyc_Dict_intersect_c(
+void*(*f)(void*,void*,void*,void*),void*env,struct Cyc_Dict_Dict d1,struct Cyc_Dict_Dict
+d2){if((int)d1.t == (int)d2.t  || d2.t == 0)return d2;{struct Cyc_Dict_T*_tmpE1=0;{
+struct _RegionHandle _tmpE2=_new_region("temp");struct _RegionHandle*temp=& _tmpE2;
 _push_region(temp);{unsigned int _tmp159;unsigned int _tmp158;struct Cyc_Dict_T**
 _tmp157;unsigned int _tmp156;struct _dyneither_ptr queue=_tag_dyneither(((_tmp156=(
 unsigned int)16,((_tmp157=(struct Cyc_Dict_T**)_region_malloc(temp,_check_times(

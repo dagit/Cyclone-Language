@@ -487,7 +487,7 @@ _check_dyneither_subscript(struct _dyneither_ptr arr,unsigned elt_sz,unsigned in
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
   unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
-  if (!_cus_arr.base) _throw_null();
+  /* JGM: not needed! if (!_cus_arr.base) _throw_null(); */ 
   if (_cus_ans < _cus_arr.base || _cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
@@ -498,7 +498,7 @@ _check_dyneither_subscript(struct _dyneither_ptr arr,unsigned elt_sz,unsigned in
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
   unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
-  if (!_cus_arr.base) _throw_null(); \
+  /* JGM: not needed! if (!_cus_arr.base) _throw_null();*/ \
   if (_cus_ans < _cus_arr.base || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
@@ -954,10 +954,10 @@ return putw(x,f->file);}char Cyc_FileCloseError[19]="\000\000\000\000FileCloseEr
 char Cyc_FileOpenError[18]="\000\000\000\000FileOpenError\000";struct Cyc___cycFILE*
 Cyc_file_open(struct _dyneither_ptr fname,struct _dyneither_ptr mode);static void
 _tmpB3(struct _dyneither_ptr*fname,unsigned int*_tmpB2,unsigned int*_tmpB1,char**
-_tmpAF){for(*_tmpB2=0;*_tmpB2 < *_tmpB1;(*_tmpB2)++){(*_tmpAF)[*_tmpB2]=*((const
-char*)_check_dyneither_subscript(*fname,sizeof(char),(int)*_tmpB2));}}struct Cyc___cycFILE*
-Cyc_file_open(struct _dyneither_ptr fname,struct _dyneither_ptr mode){struct Cyc___cycFILE*
-f=Cyc_fopen((const char*)_untag_dyneither_ptr(fname,sizeof(char),1),(const char*)
+_tmpAF){for(*_tmpB2=0;*_tmpB2 < *_tmpB1;(*_tmpB2)++){(*_tmpAF)[*_tmpB2]=((const
+char*)(*fname).curr)[(int)*_tmpB2];}}struct Cyc___cycFILE*Cyc_file_open(struct
+_dyneither_ptr fname,struct _dyneither_ptr mode){struct Cyc___cycFILE*f=Cyc_fopen((
+const char*)_untag_dyneither_ptr(fname,sizeof(char),1),(const char*)
 _untag_dyneither_ptr(mode,sizeof(char),1));if(f == 0){unsigned int _tmpB2;
 unsigned int _tmpB1;struct _dyneither_ptr _tmpB0;char*_tmpAF;unsigned int _tmpAE;
 struct _dyneither_ptr fn=(_tmpAE=_get_dyneither_size(fname,sizeof(char)),((_tmpAF=(

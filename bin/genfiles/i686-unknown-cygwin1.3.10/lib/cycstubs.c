@@ -487,7 +487,7 @@ _check_dyneither_subscript(struct _dyneither_ptr arr,unsigned elt_sz,unsigned in
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
   unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
-  if (!_cus_arr.base) _throw_null();
+  /* JGM: not needed! if (!_cus_arr.base) _throw_null(); */ 
   if (_cus_ans < _cus_arr.base || _cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
@@ -498,7 +498,7 @@ _check_dyneither_subscript(struct _dyneither_ptr arr,unsigned elt_sz,unsigned in
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
   unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
-  if (!_cus_arr.base) _throw_null(); \
+  /* JGM: not needed! if (!_cus_arr.base) _throw_null();*/ \
   if (_cus_ans < _cus_arr.base || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
@@ -945,19 +945,18 @@ _untag_dyneither_ptr(mode,sizeof(char),1));if(f == 0){struct _dyneither_ptr fn=(
 unsigned int _tmp3A=_get_dyneither_size(fname,sizeof(char));char*_tmp3B=(char*)
 _cycalloc_atomic(_check_times(sizeof(char),_tmp3A + 1));struct _dyneither_ptr
 _tmp3D=_tag_dyneither(_tmp3B,sizeof(char),_tmp3A + 1);{unsigned int _tmp3C=_tmp3A;
-unsigned int i;for(i=0;i < _tmp3C;i ++){_tmp3B[i]=*((const char*)
-_check_dyneither_subscript(fname,sizeof(char),(int)i));}_tmp3B[_tmp3C]=(char)0;}
-_tmp3D;});(int)_throw((void*)({struct Cyc_FileOpenError_struct*_tmp38=_cycalloc(
-sizeof(*_tmp38));_tmp38[0]=({struct Cyc_FileOpenError_struct _tmp39;_tmp39.tag=Cyc_FileOpenError;
-_tmp39.f1=fn;_tmp39;});_tmp38;}));}return(struct Cyc___cycFILE*)f;}void Cyc_file_close(
-struct Cyc___cycFILE*f){if(Cyc_fclose(f)!= 0)(int)_throw((void*)Cyc_FileCloseError);}
-typedef struct{int quot;int rem;}Cyc_div_t;typedef struct{long quot;long rem;}Cyc_ldiv_t;
-void*abort();void exit(int);void Cyc_free(struct _dyneither_ptr);void Cyc_qsort(
-struct _dyneither_ptr,unsigned int,unsigned int,int(*)(const void*,const void*));
-void Cyc_free(struct _dyneither_ptr ptr){;}void qsort(void*,unsigned int,
-unsigned int,int(*)(const void*,const void*));static char _tmp3F[23]="qsort called with NULL";
-static struct Cyc_Core_Failure_struct Cyc___qsort_failure_1={Cyc_Core_Failure,{
-_tmp3F,_tmp3F,_tmp3F + 23}};static char _tmp41[42]="qsort called with insufficient array size";
+unsigned int i;for(i=0;i < _tmp3C;i ++){_tmp3B[i]=((const char*)fname.curr)[(int)i];}
+_tmp3B[_tmp3C]=(char)0;}_tmp3D;});(int)_throw((void*)({struct Cyc_FileOpenError_struct*
+_tmp38=_cycalloc(sizeof(*_tmp38));_tmp38[0]=({struct Cyc_FileOpenError_struct
+_tmp39;_tmp39.tag=Cyc_FileOpenError;_tmp39.f1=fn;_tmp39;});_tmp38;}));}return(
+struct Cyc___cycFILE*)f;}void Cyc_file_close(struct Cyc___cycFILE*f){if(Cyc_fclose(
+f)!= 0)(int)_throw((void*)Cyc_FileCloseError);}typedef struct{int quot;int rem;}Cyc_div_t;
+typedef struct{long quot;long rem;}Cyc_ldiv_t;void*abort();void exit(int);void Cyc_free(
+struct _dyneither_ptr);void Cyc_qsort(struct _dyneither_ptr,unsigned int,
+unsigned int,int(*)(const void*,const void*));void Cyc_free(struct _dyneither_ptr ptr){;}
+void qsort(void*,unsigned int,unsigned int,int(*)(const void*,const void*));static
+char _tmp3F[23]="qsort called with NULL";static struct Cyc_Core_Failure_struct Cyc___qsort_failure_1={
+Cyc_Core_Failure,{_tmp3F,_tmp3F,_tmp3F + 23}};static char _tmp41[42]="qsort called with insufficient array size";
 static struct Cyc_Core_Failure_struct Cyc___qsort_failure_2={Cyc_Core_Failure,{
 _tmp41,_tmp41,_tmp41 + 42}};void Cyc_qsort(struct _dyneither_ptr tab,unsigned int
 nmemb,unsigned int szmemb,int(*compar)(const void*,const void*)){if(!((unsigned int)
