@@ -1,6 +1,6 @@
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c i386-unknown-openbsd2.8/lib/execinfo.c
-*** i686-unknown-linux/lib/execinfo.c	Fri Aug 24 15:08:14 2001
---- i386-unknown-openbsd2.8/lib/execinfo.c	Fri Aug 31 15:51:52 2001
+*** i686-unknown-linux/lib/execinfo.c	Wed Aug 29 09:00:06 2001
+--- i386-unknown-openbsd2.8/lib/execinfo.c	Fri Aug 31 16:39:57 2001
 ***************
 *** 11,105 ****
   extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
@@ -127,25 +127,3 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c i386-unknown-openbsd
 ! _temp1.f1= _tag_arr("backtrace: unsupported except under Linux", sizeof(
 ! unsigned char), 42u); _temp1;}); _temp0;})); return 0;} int Cyc_Execinfo_bt(){
 ! return 1;}
-diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c i386-unknown-openbsd2.8/src/cyclone.c
-*** i686-unknown-linux/src/cyclone.c	Sat Aug 25 14:53:30 2001
---- i386-unknown-openbsd2.8/src/cyclone.c	Fri Aug 31 15:51:52 2001
-***************
-*** 552,559 ****
-  struct Cyc_Interface_I* Cyc_Interface_parse( struct Cyc_Std___sFILE*); extern
-  void Cyc_Interface_save( struct Cyc_Interface_I*, struct Cyc_Std___sFILE*);
-  extern struct Cyc_Interface_I* Cyc_Interface_load( struct Cyc_Std___sFILE*);
-! static unsigned char _temp0[ 4u]="0.1"; static struct _tagged_arr Cyc_version={
-! _temp0, _temp0, _temp0 +  4u}; extern void Cyc_Lex_lex_init(); static int Cyc_pp_r=
-  0; static int Cyc_noexpand_r= 0; static int Cyc_noshake_r= 0; static int Cyc_stop_after_cpp_r=
-  0; static int Cyc_parseonly_r= 0; static int Cyc_tc_r= 0; static int Cyc_ic_r= 0;
-  static int Cyc_toc_r= 0; static int Cyc_stop_after_objectfile_r= 0; static int
---- 552,559 ----
-  struct Cyc_Interface_I* Cyc_Interface_parse( struct Cyc_Std___sFILE*); extern
-  void Cyc_Interface_save( struct Cyc_Interface_I*, struct Cyc_Std___sFILE*);
-  extern struct Cyc_Interface_I* Cyc_Interface_load( struct Cyc_Std___sFILE*);
-! static unsigned char _temp0[ 6u]="0.1.1"; static struct _tagged_arr Cyc_version={
-! _temp0, _temp0, _temp0 +  6u}; extern void Cyc_Lex_lex_init(); static int Cyc_pp_r=
-  0; static int Cyc_noexpand_r= 0; static int Cyc_noshake_r= 0; static int Cyc_stop_after_cpp_r=
-  0; static int Cyc_parseonly_r= 0; static int Cyc_tc_r= 0; static int Cyc_ic_r= 0;
-  static int Cyc_toc_r= 0; static int Cyc_stop_after_objectfile_r= 0; static int
