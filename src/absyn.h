@@ -636,7 +636,8 @@ namespace Absyn {
   extern type_t exn_typ;
   // string (char ?)
   extern type_t string_typ(type_t rgn);
-  // FILE
+  // FILE -- KLUDGE -- first call determines all future ones!
+  extern type_t file_typ_nocyc();
   extern type_t file_typ();
   // pointers
   extern tunion Bounds bounds_one; // Upper(1) (good for sharing)

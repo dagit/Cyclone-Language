@@ -138,6 +138,10 @@ list_t<Absyn::decl_t> do_parse(FILE @ f, list_t<Absyn::decl_t> ignore) {
 list_t<Absyn::decl_t> do_typecheck(Tcenv::tenv_t te,list_t<Absyn::decl_t> tds){
   Absynpp::expand_typedefs = ! *noexpand;
   add_cyc_namespace_r = add_cyc_namespace_r && toc_r; //don't add namespaces if we don't translate to C
+  if(add_cyc_namespace_r)
+    Absyn::file_typ();
+  else
+    Absyn::file_typ_nocyc();
   Tc::tc(te, add_cyc_namespace_r, true, tds);
   if(!*noshake)
     tds = Tc::treeshake(te,tds);

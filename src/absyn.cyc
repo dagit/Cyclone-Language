@@ -11,9 +11,6 @@ using String;
 using Position;
 namespace Absyn;
 
-// FIX: file_typ, void_star_typ, etc. don't take into account that
-// the -nocyc flag may be enabled.
-
 // return a negative, zero, or positive int according to whether the
 // first string list is less than, equal to, or greater than the
 // second 
@@ -194,6 +191,7 @@ type_t tagged_typ(type_t t, type_t r, tqual_t tq) {
 
 // FILE
 static opt_t<type_t> file_t_opt = null;
+
 // Maybe someday we'll allow FILE objects to live somewhere other than
 // in the heap (by making the runtime interface more flexible).  
 // If so, we'll need a rgn_t argument.
@@ -204,16 +202,23 @@ static stringptr cyc = &cyc_str;
 static string st_str = "Stdio";
 static stringptr st = &st_str;
 
-type_t file_typ() {
-  if (file_t_opt == null) {
-    // struct Cyc::Stdio::__sFILE *
-    typedef_name_t file_t_name = 
-      new $(new Abs_n((list_t<var_t>)(new List(cyc,new List(st,null)))), sf);
-    structdecl_t sd = new Structdecl(Abstract,new Opt(file_t_name),null,
+//KLUDGE -- FIRST CALL DETERMINES EVERYTHING!
+static void file_typ_ns(list_t<var_t> ns) {
+  typedef_name_t file_t_name = 
+    new $(new Abs_n(ns), sf);
+  structdecl_t sd = new Structdecl(Abstract,new Opt(file_t_name),null,
                                    null,null);
-    type_t file_struct_typ = new StructType(file_t_name, null, new {sd});
-    file_t_opt = new Opt(at_typ(file_struct_typ, HeapRgn, empty_tqual()));
-  }
+  type_t file_struct_typ = new StructType(file_t_name, null, new {sd});
+  file_t_opt = new Opt(at_typ(file_struct_typ, HeapRgn, empty_tqual()));
+}
+type_t file_typ() {
+  if(file_t_opt == null)
+    file_typ_ns(list(cyc,st));
+  return file_t_opt->v;
+}
+type_t file_typ_nocyc() {
+  if(file_t_opt == null)
+    file_typ_ns(list(st));
   return file_t_opt->v;
 }
 

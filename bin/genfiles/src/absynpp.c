@@ -2245,26 +2245,25 @@ _LL1924: _temp1923=(( struct Cyc_Absyn_String_c_struct*) _temp1883)->f1; goto
 _LL1900;} else{ goto _LL1884;} _LL1886: return Cyc_PP_text(({ struct
 _tagged_string _temp1925= Cyc_Absynpp_char_escape( _temp1901); xprintf("'%.*s'",
 _temp1925.last_plus_one - _temp1925.curr, _temp1925.curr);})); _LL1888: return
-Cyc_PP_text( xprintf("(short)%d",( int) _temp1905)); _LL1890: return Cyc_PP_text(
-Cyc_Core_string_of_int( _temp1909)); _LL1892: return Cyc_PP_text( xprintf("%u",(
-unsigned int) _temp1913)); _LL1894: return Cyc_PP_text(({ unsigned char*
-_temp1926="<<FIX LONG LONG CONSTANT>>"; struct _tagged_string _temp1927;
-_temp1927.curr= _temp1926; _temp1927.base= _temp1926; _temp1927.last_plus_one=
-_temp1926 + 27; _temp1927;})); _LL1896: return Cyc_PP_text( _temp1921); _LL1898:
-return Cyc_PP_text(({ unsigned char* _temp1928="null"; struct _tagged_string
-_temp1929; _temp1929.curr= _temp1928; _temp1929.base= _temp1928; _temp1929.last_plus_one=
-_temp1928 + 5; _temp1929;})); _LL1900: return({ struct Cyc_PP_Doc*(* _temp1930)(
-struct _tagged_ptr0)= Cyc_PP_cat; struct Cyc_PP_Doc* _temp1933= Cyc_PP_text(({
-unsigned char* _temp1938="\""; struct _tagged_string _temp1939; _temp1939.curr=
-_temp1938; _temp1939.base= _temp1938; _temp1939.last_plus_one= _temp1938 + 2;
-_temp1939;})); struct Cyc_PP_Doc* _temp1934= Cyc_PP_text( Cyc_Absynpp_string_escape(
-_temp1923)); struct Cyc_PP_Doc* _temp1935= Cyc_PP_text(({ unsigned char*
-_temp1936="\""; struct _tagged_string _temp1937; _temp1937.curr= _temp1936;
-_temp1937.base= _temp1936; _temp1937.last_plus_one= _temp1936 + 2; _temp1937;}));
-struct Cyc_PP_Doc* _temp1931[ 3u]={ _temp1933, _temp1934, _temp1935}; struct
-_tagged_ptr0 _temp1932={ _temp1931, _temp1931, _temp1931 + 3u}; _temp1930(
-_temp1932);}); _LL1884:;} struct Cyc_PP_Doc* Cyc_Absynpp_primapp2doc( int inprec,
-void* p, struct Cyc_List_List* es){ struct Cyc_PP_Doc* ps= Cyc_Absynpp_prim2doc(
+Cyc_PP_text( xprintf("%d",( int) _temp1905)); _LL1890: return Cyc_PP_text( Cyc_Core_string_of_int(
+_temp1909)); _LL1892: return Cyc_PP_text( xprintf("%u",( unsigned int) _temp1913));
+_LL1894: return Cyc_PP_text(({ unsigned char* _temp1926="<<FIX LONG LONG CONSTANT>>";
+struct _tagged_string _temp1927; _temp1927.curr= _temp1926; _temp1927.base=
+_temp1926; _temp1927.last_plus_one= _temp1926 + 27; _temp1927;})); _LL1896:
+return Cyc_PP_text( _temp1921); _LL1898: return Cyc_PP_text(({ unsigned char*
+_temp1928="null"; struct _tagged_string _temp1929; _temp1929.curr= _temp1928;
+_temp1929.base= _temp1928; _temp1929.last_plus_one= _temp1928 + 5; _temp1929;}));
+_LL1900: return({ struct Cyc_PP_Doc*(* _temp1930)( struct _tagged_ptr0)= Cyc_PP_cat;
+struct Cyc_PP_Doc* _temp1933= Cyc_PP_text(({ unsigned char* _temp1938="\"";
+struct _tagged_string _temp1939; _temp1939.curr= _temp1938; _temp1939.base=
+_temp1938; _temp1939.last_plus_one= _temp1938 + 2; _temp1939;})); struct Cyc_PP_Doc*
+_temp1934= Cyc_PP_text( Cyc_Absynpp_string_escape( _temp1923)); struct Cyc_PP_Doc*
+_temp1935= Cyc_PP_text(({ unsigned char* _temp1936="\""; struct _tagged_string
+_temp1937; _temp1937.curr= _temp1936; _temp1937.base= _temp1936; _temp1937.last_plus_one=
+_temp1936 + 2; _temp1937;})); struct Cyc_PP_Doc* _temp1931[ 3u]={ _temp1933,
+_temp1934, _temp1935}; struct _tagged_ptr0 _temp1932={ _temp1931, _temp1931,
+_temp1931 + 3u}; _temp1930( _temp1932);}); _LL1884:;} struct Cyc_PP_Doc* Cyc_Absynpp_primapp2doc(
+int inprec, void* p, struct Cyc_List_List* es){ struct Cyc_PP_Doc* ps= Cyc_Absynpp_prim2doc(
 p); if( p ==( void*) Cyc_Absyn_Size){ if( es == 0? 1:(( struct Cyc_List_List*)
 _check_null( es))->tl != 0){( void) _throw(( void*)({ struct Cyc_Core_Failure_struct*
 _temp1940=( struct Cyc_Core_Failure_struct*) GC_malloc( sizeof( struct Cyc_Core_Failure_struct));
