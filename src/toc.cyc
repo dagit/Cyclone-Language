@@ -3386,12 +3386,11 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
   let t = (type_t)e->topt;
   exp_to_c(nv,e);
 
-  // Tcstmt ensures e is a variable right now
-  // let v = temp_var();
-  let v;
+  qvar_t v;
+  bool already_var;
   switch(e->r) {
-  case &Var_e(b): v = binding2qvar(b); break;
-  default: Warn::impos_loc2(e->loc,"pattern expression not a variable: ",e);
+  case &Var_e(b): already_var = true;  v = binding2qvar(b); break;
+  default:        already_var = false; v = temp_var();      break;
   }
   var_t end_l = fresh_label();
   TOC_RGN(nv,rgn) {
@@ -3460,7 +3459,9 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
       continue;
     }
     // overwrite original switch with new code.
-    whole_s->r = res->r; //declare_stmt(v,typ_to_c((type_t)e->topt),e,res,DL)->r;
+    if(!already_var)
+      res = declare_stmt(v,typ_to_c((type_t)e->topt),e,res,DL);
+    whole_s->r = res->r; 
     return;
   }
 }
@@ -4039,12 +4040,12 @@ static stmt_t letdecl_to_c(env_t nv, pat_t p, Tcpat::decision_opt_t dopt,
   let nv = share_env(rgn,nv);
   let t = (type_t)e->topt;
   exp_to_c(nv,e);
-  // Tcstmt ensures e is a variable right now
-  // let v = temp_var();
-  let v;
+
+  qvar_t v;
+  bool already_var;
   switch(e->r) {
-  case &Var_e(b): v = binding2qvar(b); break;
-  default: Warn::impos_loc2(e->loc,"pattern expression not a variable: ",e);
+  case &Var_e(b): already_var = true;  v = binding2qvar(b); break;
+  default:        already_var = false; v = temp_var();      break;
   }
   exp_t  path  = var_exp(v,DL);
   var_t  end_l = fresh_label();
@@ -4081,8 +4082,9 @@ static stmt_t letdecl_to_c(env_t nv, pat_t p, Tcpat::decision_opt_t dopt,
     let &$(_,vd) = mydecls->hd;
     res = decl_stmt(new_decl(new Var_d(vd), DL), res, DL);
   }
-  // finally declare the root variable v and initialize it with e
-  return res; // declare_stmt(v,typ_to_c(t),e,res,DL);
+  if(!already_var)
+    res = declare_stmt(v,typ_to_c(t),e,res,DL);
+  return res;
 }
 
 // These next few functions clean up the types in C code, getting
