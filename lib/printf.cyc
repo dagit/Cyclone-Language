@@ -240,7 +240,7 @@ static int _IO_padn(int (@ioputc)(int,`a), `a ioputc_env, char c, int howmany)
 }
 
 /* like strchr but works only up to max characters */
-static const char ?`r1 memchr(const char ?`r1 s, char c, int n) {
+static const char ?`r1 my_memchr(const char ?`r1 s, char c, int n) {
   int sz = s.size;
   n = (n < sz) ? n : sz;
   for (; n != 0; n--, s++) {
@@ -494,7 +494,7 @@ reswitch:	use_cp2 = false;
 				 * NUL in the first `prec' characters, and
 				 * strlen() will go further.
 				 */
-				const char ? `r2 p = memchr(cp2, 0, prec);
+				const char ? `r2 p = my_memchr(cp2, 0, prec);
 
 				if (p != NULL) {
 					size = p - cp2;

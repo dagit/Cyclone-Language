@@ -670,6 +670,9 @@ doc_t ntyp2doc(type_t t) {
     break;
   case &EnumType(n,_):
     s = cat(text("enum "),qvar2doc(n)); break;
+  case &SizeofType(t):
+    s = cat(text("sizeof_t<"),typ2doc(t),text(">"));
+    break;
   case &TypedefType(n,ts,topt):
     // NB: we could print out the expanded typedef by following the topt
     // pointer (when non-NULL).

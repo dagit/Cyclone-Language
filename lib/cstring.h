@@ -75,7 +75,16 @@ extern mstring_t<`r> rstr_sepstr(region_t<`r>,list_t<stringptr_t>,string_t);
 extern mstring_t<`r> strcpy(mstring_t<`r> dest,string_t src); 
 extern mstring_t<`r> strncpy(mstring_t<`r>,string_t,size_t);
 extern mstring_t<`r> zstrncpy(mstring_t<`r>,string_t,size_t);
-#define memcpy(d,s,z) *(d) = *(s) /* hack for now; won't work for strings */
+
+// memcpy and memmove behave like C's except that instead of
+// calling it memcpy(d,s,n*sizeof(t)), separate out the sizeof(t).
+extern `a::A?`r memcpy(`a?`r d, const `a? s, size_t, sizeof_t<`a>);
+extern `a::A?`r memmove(`a?`r d, const `a? s, size_t, sizeof_t<`a>);
+extern int memcmp(const char ?s1, const char ?s2, size_t n);
+extern const char ?`r memchr(const char ?`r s, char c, size_t n);
+extern char ?`r mmemchr(char ?`r s, char c, size_t n);
+extern char ?`r memset(char ?`r s, char c, size_t n);
+                                        
 // Allocating
 extern mstring_t     expand(string_t s, size_t sz); /* like realloc */
 extern mstring_t<`r> rexpand(region_t<`r>,string_t s, size_t sz);

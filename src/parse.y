@@ -918,7 +918,7 @@ using Parse;
 %token NEW ABSTRACT FALLTHRU USING NAMESPACE TUNION XTUNION
 %token FILL CODEGEN CUT SPLICE
 %token MALLOC
-%token REGION_T REGION RNEW RMALLOC REGIONS
+%token REGION_T SIZEOF_T REGION RNEW RMALLOC REGIONS
 %token GEN
 // double and triple-character tokens
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
@@ -1337,6 +1337,8 @@ type_specifier:
                       LOC(@1,@4))); }
 | REGION_T '<' any_type_name '>'
     { $$=^$(type_spec(new RgnHandleType($3),LOC(@1,@4))); }
+| SIZEOF_T '<' any_type_name '>'
+    { $$=^$(type_spec(new SizeofType($3),LOC(@1,@4))); }
 ;
 
 /* Cyc: new */

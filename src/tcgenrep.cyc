@@ -1135,6 +1135,8 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
     //    default:
     //      Tcutil::impos("gen() expression not yet supported");
     //      throw Tcutil::TypeErr; // redundant, as impos will do this
+  case &SizeofType(_):
+    Tcutil::impos("gen() for sizeof_t<-> not yet supported"); break;
   }
   //printf("Done %s\n",typ2string(type));
   return new $(dict,lookup(dict,type));

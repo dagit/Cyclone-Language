@@ -305,6 +305,7 @@ namespace Absyn {
     StructType(typedef_name_opt_t,list_t<type_t>,structdecl_t *); // MemKind
     UnionType(typedef_name_opt_t,list_t<type_t>,uniondecl_t *); // MemKind 
     EnumType(typedef_name_t,struct Enumdecl *); // MemKind
+    SizeofType(type_t); // AnyKind -> BoxKind
     // We treat anonymous structs, unions, and enums slightly differently
     // than C.  In particular, we treat structurally equivalent types as
     // equal, whereas C requires a name for each type and uses by-name

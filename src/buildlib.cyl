@@ -1024,6 +1024,9 @@ and block_comment = parse
     case &RgnsEff(_):
       fprintf(stderr,"Error: unexpected RgnsEff\n");
       exit(1); return;
+    case &SizeofType(_):
+      fprintf(stderr,"Error: unexpected sizeof_t\n");
+      exit(1); return;
     }
   }
 

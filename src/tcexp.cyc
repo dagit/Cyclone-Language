@@ -1021,7 +1021,14 @@ static type_t tcSizeof(tenv_t te, seg_t loc, type_t *`r topt, type_t t) {
   if(!Evexp::okay_szofarg(t))
     terr(loc, "sizeof applied to type %s, which has unknown size here",
          typ2string(t));
-  return uint_t; // FIX: use topt
+  if (topt != NULL) {
+    switch (compress(*topt)) {
+    // only return sizeof_t<t> when requested from context
+    case &SizeofType(_): return new SizeofType(t);
+    default: break;
+    }
+  }
+  return uint_t; 
 }
 
 bool structfield_has_name(field_name_t n, structfield_t sf) {

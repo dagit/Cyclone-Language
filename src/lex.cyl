@@ -139,6 +139,7 @@ static $(string_t,short) rw_array[] = {
   $("short", SHORT),
   $("signed", SIGNED),
   $("sizeof", SIZEOF),
+  $("sizeof_t", SIZEOF_T),
   $("splice", SPLICE),
   $("static", STATIC),
   $("struct", STRUCT),

@@ -94,6 +94,7 @@ bool okay_szofarg(type_t t) {
     case &Eq_constr(_): return true;
     default: return false;
     }
+  case &SizeofType(_): return true;
   case &IntType(_,_): return true;
   case FloatType:     return true;
   case &DoubleType(_):    return true;

@@ -415,6 +415,8 @@ void dumpntyp(type_t t) {
     if (b) dump_alpha("long double"); 
     else dump_alpha("double");
     return;
+  case &SizeofType(t):
+    dump_alpha("sizeof_t<"); dumptyp(t); dump_alpha(">"); return;
   case &TupleType(ts): dump_symbol("\\$"); dumpargs(ts); return;
   case &StructType(NULL,ts,_):   dump_alpha("struct"); dumptps(ts); return;
   case &StructType(n,  ts,_):

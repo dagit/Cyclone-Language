@@ -297,7 +297,9 @@ static type_t typ_to_c(type_t t) {
   case VoidType: return t;
   case &Evar(_,NULL,_,_): return sint_t; // pick something widely useful
   case &Evar(_,&Opt{.v=t2},_,_): return typ_to_c(t2); 
-  case &VarType(_): return void_star_typ(); // map `a to void *
+  case &VarType(tv): 
+    if (tvar_kind(tv) == AnyKind) return VoidType;
+    else return void_star_typ(); // map `a to void *
   case &TunionType(TunionInfo{&KnownTunion(_),_,_}): return void_star_typ();
   case &TunionType(_): throw impos("unresolved TunionType");
   case &TunionFieldType(TunionFieldInfo{&KnownTunionfield(tud,tuf),_}):
@@ -369,6 +371,8 @@ static type_t typ_to_c(type_t t) {
     if (topt == NULL) return toc_impos("Toc::typ_to_c: unresolved TypedefType");
     // just drop the type arguments and translate the nested types
     return new TypedefType(tdn,NULL, new Opt(typ_to_c_array(topt->v)));
+  case &SizeofType(_): 
+    return uint_t;
   case &RgnHandleType(t):
     return cstar_typ(strct(_RegionHandle_sp),mt_tq); // could be shared
   case HeapRgn: 
@@ -400,6 +404,7 @@ static bool atomic_typ(type_t t) {
   case FloatType:      return true;
   case &DoubleType(_): return true;
   case &FnType(_):     return true;
+  case &SizeofType(_): return true;
   case &ArrayType(t,_,_): return atomic_typ(t);
     // FIX: really should compute in terms of the instantiation
     // to be as aggressive as possible.

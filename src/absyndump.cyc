@@ -415,6 +415,7 @@ void dumpntyp(type_t t) {
   case &AnonEnumType(fs):
     dump("enum {"); dumpenumfields(fs); dump("}"); return;
   case &TypedefType(n,ts,topt):  dumpqvar(n), dumptps(ts); return;
+  case &SizeofType(t): dump("sizeof_t<"); dumpntyp(t); dump(">"); return;
   case &RgnHandleType(rgn):
     dumprgn(rgn); return;
   case HeapRgn: return; 

@@ -238,8 +238,8 @@ void*); extern int Cyc_Core_false_f( void*); struct _tuple0{ void* f1; void* f2;
 struct _tuple0*); struct _tuple1{ void* f1; void* f2; void* f3; } ; extern void*
 Cyc_Core_third( struct _tuple1*); extern void* Cyc_Core_identity( void*); extern
 int Cyc_Core_intcmp( int, int); extern int Cyc_Core_charcmp( unsigned char,
-unsigned char); extern int Cyc_Core_ptrcmp( void**, void**); extern
-unsigned char Cyc_Core_Invalid_argument[ 21u]; struct Cyc_Core_Invalid_argument_struct{
+unsigned char); extern int Cyc_Core_ptrcmp( void*, void*); extern unsigned char
+Cyc_Core_Invalid_argument[ 21u]; struct Cyc_Core_Invalid_argument_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
 12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
 } ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
@@ -271,8 +271,8 @@ unsigned char),( unsigned int) i);{ unsigned int _temp7= _temp5; unsigned int j;
 for( j= 0; j <  _temp7; j ++){ _temp6[ j]='\000';}}; _temp8;});} int Cyc_Core_true_f(
 void* x){ return 1;} int Cyc_Core_false_f( void* x){ return 0;} int Cyc_Core_intcmp(
 int a, int b){ return a -  b;} int Cyc_Core_charcmp( unsigned char a,
-unsigned char b){ return( int) a - ( int) b;} int Cyc_Core_ptrcmp( void** a,
-void** b){ if( a ==  b){ return 0;} if( a >  b){ return 1;} return - 1;} void*
-Cyc_Core_fst( struct _tuple0* pair){ return(* pair).f1;} void* Cyc_Core_snd(
-struct _tuple0* pair){ return(* pair).f2;} void* Cyc_Core_third( struct _tuple1*
-triple){ return(* triple).f3;} void* Cyc_Core_identity( void* x){ return x;}
+unsigned char b){ return( int) a - ( int) b;} int Cyc_Core_ptrcmp( void* a, void*
+b){ if( a ==  b){ return 0;} if( a >  b){ return 1;} return - 1;} void* Cyc_Core_fst(
+struct _tuple0* pair){ return(* pair).f1;} void* Cyc_Core_snd( struct _tuple0*
+pair){ return(* pair).f2;} void* Cyc_Core_third( struct _tuple1* triple){ return(*
+triple).f3;} void* Cyc_Core_identity( void* x){ return x;}

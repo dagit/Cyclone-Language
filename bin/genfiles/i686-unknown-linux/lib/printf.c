@@ -405,7 +405,7 @@ _tagged_arr_inplace_plus_post(& s, sizeof( unsigned char), 1); i ++;} return i;}
 static int Cyc_Std__IO_padn( int(* ioputc)( int, void*), void* ioputc_env,
 unsigned char c, int howmany){ int i= 0; while( i <  howmany) { if( ioputc(( int)
 c, ioputc_env) ==  - 1){ return i;} i ++;} return i;} static struct _tagged_arr
-Cyc_Std_memchr( struct _tagged_arr s, unsigned char c, int n){ int sz=( int)
+Cyc_Std_my_memchr( struct _tagged_arr s, unsigned char c, int n){ int sz=( int)
 _get_arr_size( s, sizeof( unsigned char)); n= n <  sz? n: sz; for( 0; n !=  0;(
 n --, _tagged_arr_inplace_plus_post(& s, sizeof( unsigned char), 1))){ if(*((
 const unsigned char*) _check_unknown_subscript( s, sizeof( unsigned char), 0u))
@@ -482,7 +482,7 @@ sizeof( void*), 1); base= Cyc_Std_HEX; flags |= 64; ch=( int)'x'; goto nosign;
 case 's': _LL113: use_cp2= 1; cp2= Cyc_Std_va_arg_string( ap);
 _tagged_arr_inplace_plus_post(& ap, sizeof( void*), 1); if( cp2.curr == ((
 struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr){ cp2= _tag_arr("(NULL)",
-sizeof( unsigned char), 7u);} if( prec >=  0){ struct _tagged_arr p= Cyc_Std_memchr(
+sizeof( unsigned char), 7u);} if( prec >=  0){ struct _tagged_arr p= Cyc_Std_my_memchr(
 cp2,'\000', prec); if( p.curr != (( struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr){
 size=( p.curr -  cp2.curr) /  sizeof( unsigned char); if( size >  prec){ size=
 prec;}} else{ size= prec;}} else{ size=( int) Cyc_Std_strlen( cp2);} sign='\000';

@@ -269,6 +269,8 @@ type_t copy_type(type_t t) {
     return new EnumType(tdn,fs);
   case &AnonEnumType(fs):
     return new AnonEnumType(List::map(copy_enumfield,fs));
+  case &SizeofType(t):
+    return new SizeofType(copy_type(t));
   case &RgnHandleType(t): return new RgnHandleType(copy_type(t));
   case &TypedefType(tdn,ts,_):
     return new TypedefType(tdn,copy_types(ts),NULL);
@@ -347,6 +349,7 @@ kind_t typ_kind(type_t t) {
     case &Forward_constr(_): 
       return impos("typ_kind: forward constraint in ptr bounds");
     }
+  case &SizeofType(_): return BoxKind;
   // Arrays are always of memkind
   case &ArrayType(_,_,_): 
   case &TupleType(_): return MemKind;
@@ -439,6 +442,7 @@ static void occurs(type_t evar, list_t<tvar_t> env, type_t t) {
     for (; fs != NULL; fs = fs->tl)
       occurs(evar, env, fs->hd->type);
     break;
+  case &SizeofType(t0): occurs(evar,env,t0); break;
   case &AccessEff(t0): occurs(evar,env,t0); break;
   case &JoinEff(ts): occurslist(evar,env,ts); break;
   case &RgnsEff(t0): occurs(evar,env,t0); break;
@@ -598,6 +602,7 @@ static type_t rgns_of(type_t t) {
   case &AnonStructType(sfs): fallthru(sfs);
   case &AnonUnionType(sfs):
     return normalize_effect(new JoinEff(map(rgns_of_field,sfs)));
+  case &SizeofType(t): return rgns_of(t);
   case &FnType(FnInfo{tvs,eff,rt,args,_,cyc_varargs,rpo,_}):
     // NOTE:  we define RgnsEff(t) in this case to be the regions in the
     // effect.  So, if the effect is smaller than the argument or return
@@ -1191,7 +1196,11 @@ void unify_it(type_t t1, type_t t2) {
   case $(FloatType,  FloatType):  return;
   case $(&DoubleType(b2), &DoubleType(b1)): 
     if (b2 == b1) return;
-    break;
+   break;
+
+  case $(&SizeofType(t1), &SizeofType(t2)):
+    unify_it(t1,t2); return;
+
   case $(&ArrayType(t2a,tq2a,e1), &ArrayType(t1a,tq1a,e2)):
     unify_tqual(tq1a,tq2a);
     unify_it(t1a,t2a);
@@ -1527,6 +1536,7 @@ int type_case_number(type_t t) {
   case &AccessEff(_): return 21;
   case &JoinEff(_): return 22;
   case &RgnsEff(_): return 23;
+  case &SizeofType(_): return 24;
   }
 }
 // compares top cases
@@ -1663,6 +1673,7 @@ int typecmp(type_t t1, type_t t2) {
   case $(HeapRgn, HeapRgn): return 0; 
   case $(&RgnHandleType(rt1),&RgnHandleType(rt2)):
     return typecmp(rt1,rt2);
+  case $(&SizeofType(s1),&SizeofType(s2)): return typecmp(s1,s2);
   case $(&JoinEff(_), _)  : 
   case $(_, &JoinEff(_))  : 
   case $(&AccessEff(_), _): 
@@ -1684,7 +1695,7 @@ bool is_arithmetic_type(type_t t) {
   case &IntType(_,_): 
   case FloatType:     
   case &DoubleType(_):    
-  case &EnumType(_,_): return true;
+  case &EnumType(_,_): 
   case &AnonEnumType(_): return true;
   default: return false;
   }
@@ -1700,13 +1711,17 @@ bool will_lose_precision(type_t t1, type_t t2) {
     return (!b2 && b1);
   case $(&DoubleType(_),     FloatType):       
   case $(&DoubleType(_),     &IntType(_,_)):   
+  case $(&DoubleType(_),     &SizeofType(_)):   
+  case $(FloatType,     &SizeofType(_)):
   case $(FloatType,      &IntType(_,_)):  return true;
   case $(&IntType(_,B8), &IntType(_,B8)): return false;
   case $(&IntType(_,B8), _): // see prev case
   case $(&IntType(_,B4), FloatType):       
   case $(&IntType(_,B4), &IntType(_,B2)):  
   case $(&IntType(_,B4), &IntType(_,B1)):  
-  case $(&IntType(_,B2), &IntType(_,B1)): return true;
+  case $(&IntType(_,B2), &IntType(_,B1)): 
+  case $(&SizeofType(_), &IntType(_,B2)):  
+  case $(&SizeofType(_), &IntType(_,B1)): return true;
   default: return false;
   }
 }
@@ -1751,7 +1766,8 @@ bool coerce_to_bool(tenv_t te, exp_t e) {
 bool is_integral_type(type_t t) {
   switch (compress(t)) {
   case &IntType(_,_): 
-  case &EnumType(_,_): return true;
+  case &SizeofType(_):
+  case &EnumType(_,_): 
   case &AnonEnumType(_): return true;
   default: return false;
   }
@@ -1888,6 +1904,8 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     }
     return false;
 
+  case $(&SizeofType(_),&IntType(_,B4)): return true;
+
   default: return unify(t1,t2);
   }
 }
@@ -1927,13 +1945,25 @@ bool zero_to_null(tenv_t te, type_t t2, exp_t e1) {
   return false;
 }
 
+static bool is_sizeof_type(type_t t1) {
+  switch (compress(t1)) {
+  case &SizeofType(_): return true;
+  default: return false;
+  }
+}
+
+static string_t b2s(bool b) {
+  return b ? (string_t)"true" : "false";
+}
+
 // coerce e to have type t -- used in function call and explicit fallthru
 bool coerce_arg(tenv_t te, exp_t e, type_t t2) {
   type_t t1 = compress(e->topt->v);
   // see if types immediately match
   if (unify(t1,t2)) return true;
   // try arithmetic conversions
-  if (is_arithmetic_type(t1) && is_arithmetic_type(t2)) {
+  if ((is_arithmetic_type(t1) && is_arithmetic_type(t2)) ||
+      (is_sizeof_type(t1) && is_arithmetic_type(t2))) {
     // issue a warning if we lose precision
     if (will_lose_precision(t1,t2))
       warn(e->loc,"integral size mismatch; conversion supplied");
@@ -2074,6 +2104,13 @@ static bool ptrsubtype(tenv_t te, list_t<$(type_t,type_t)@`H,`H> assume, type_t 
   return true;
 }
 
+static bool is_char_type(type_t t) {
+  switch (compress(t)) {
+  case &IntType(_,B1): return true;
+  default: return false;
+  }
+}
+
 // Can t1 be cast to t2?  Assumes that the types are well-formed.
 // FIX: add function types...
 bool castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
@@ -2105,13 +2142,16 @@ bool castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     // can cast a non-const pointer to a const pointer.  
     // can cast a pointer in region r1 to a pointer in region r2 as
     // long as r1 outlives r2.
+    // can cast a "bits-only" pointer to a char pointer ?
     switch (t2) {
     case &PointerType(PtrInfo{t_b,rt_b,null_b,q_b,b_b}):
       let assump = new List(new $(t1,t2),NULL);
       let ptrsub =
 	ptrsubtype(te,assump,t_a,t_b) && (!q_a.q_const || q_b.q_const);
+      let bitcase = ptrsub ? false : (bits_only(t_a) && is_char_type(t_b)
+                                      && (q_b.q_const || !q_a.q_const));
       bool bounds_ok = unify_conrefs(boundscmp,b_a,b_b);
-      if (!bounds_ok) {
+      if (!bounds_ok && !bitcase) {
 	switch ($(conref_val(b_a),conref_val(b_b))) {
 	  // We allow casts of any form as long as we can't statically
 	  // tell that the bounds will be violated.
@@ -2123,7 +2163,7 @@ bool castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
 	default: bounds_ok = true; break;
 	}
       }
-      return bounds_ok && ptrsub && 
+      return bounds_ok && (ptrsub || bitcase) && 
         (unify(rt_a,rt_b) || region_outlives(te,rt_a,rt_b));
     case VoidType: return true;
     default: break;
@@ -2176,6 +2216,7 @@ bool is_integral(exp_t e) {
   case &AnonEnumType(_):
   case &IntType(_,_): return true;
   case &Evar(_,_,_,_): return unify(e->topt->v,sint_t);
+  case &SizeofType(_): return true;
   default: return false;
   }
 }
@@ -2436,6 +2477,9 @@ type_t rsubstitute(region_t<`r> rgn,
   case &RgnHandleType(rt): 
     let new_rt = rsubstitute(rgn,inst,rt);
     return new_rt == rt ? t : new RgnHandleType(new_rt);
+  case &SizeofType(t2):
+    let new_t2 = rsubstitute(rgn,inst,t2);
+    return new_t2 == t2 ? t : new SizeofType(new_t2);
   case &EnumType(_,_): return t;
   case &AnonEnumType(_): return t;
   case VoidType:       return t;
@@ -2877,6 +2921,9 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       break;
     default: break;
     }
+    break;
+  case &SizeofType(t1):
+    cvtenv = i_check_valid_type(loc,te,cvtenv,AnyKind,t1);
     break;
   case &IntType(_,_): break; 
   case FloatType:    break; 
