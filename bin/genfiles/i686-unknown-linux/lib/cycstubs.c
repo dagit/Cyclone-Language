@@ -505,7 +505,7 @@ Cyc_MM_APPL  = 8,Cyc_MM_UTIL  = 16,Cyc_MM_OPSYS  = 32,Cyc_MM_RECOVER  = 64,Cyc_M
  = 128,Cyc_MM_PRINT  = 256,Cyc_MM_CONSOLE  = 512};enum Cyc___anonymous_enum_62__{
 Cyc_MM_NOSEV  = 0,Cyc_MM_HALT  = 1,Cyc_MM_ERROR  = 2,Cyc_MM_WARNING  = 3,Cyc_MM_INFO
  = 4};enum Cyc___anonymous_enum_63__{Cyc_MM_NOTOK  = -1,Cyc_MM_OK  = 0,Cyc_MM_NOMSG
- = 1,Cyc_MM_NOCON  = 4};enum Cyc___anonymous_enum_118__{Cyc_IPPORT_ECHO  = 7,Cyc_IPPORT_DISCARD
+ = 1,Cyc_MM_NOCON  = 4};enum Cyc___anonymous_enum_119__{Cyc_IPPORT_ECHO  = 7,Cyc_IPPORT_DISCARD
  = 9,Cyc_IPPORT_SYSTAT  = 11,Cyc_IPPORT_DAYTIME  = 13,Cyc_IPPORT_NETSTAT  = 15,Cyc_IPPORT_FTP
  = 21,Cyc_IPPORT_TELNET  = 23,Cyc_IPPORT_SMTP  = 25,Cyc_IPPORT_TIMESERVER  = 37,Cyc_IPPORT_NAMESERVER
  = 42,Cyc_IPPORT_WHOIS  = 43,Cyc_IPPORT_MTP  = 57,Cyc_IPPORT_TFTP  = 69,Cyc_IPPORT_RJE
@@ -515,7 +515,7 @@ Cyc_MM_NOSEV  = 0,Cyc_MM_HALT  = 1,Cyc_MM_ERROR  = 2,Cyc_MM_WARNING  = 3,Cyc_MM_
  = 520,Cyc_IPPORT_RESERVED  = 1024,Cyc_IPPORT_USERRESERVED  = 5000};struct Cyc_servent{
 char*s_name;char**s_aliases;int s_port;char*s_proto;};struct Cyc_protoent{char*
 p_name;char**p_aliases;int p_proto;};struct Cyc_hostent{char*h_name;char**
-h_aliases;int h_addrtype;int h_length;struct Cyc_in_addr**h_addr_list;};enum Cyc___anonymous_enum_121__{
+h_aliases;int h_addrtype;int h_length;struct Cyc_in_addr**h_addr_list;};enum Cyc___anonymous_enum_122__{
 Cyc_IPPROTO_IP  = 0,Cyc_IPPROTO_HOPOPTS  = 0,Cyc_IPPROTO_ICMP  = 1,Cyc_IPPROTO_IGMP
  = 2,Cyc_IPPROTO_IPIP  = 4,Cyc_IPPROTO_TCP  = 6,Cyc_IPPROTO_EGP  = 8,Cyc_IPPROTO_PUP
  = 12,Cyc_IPPROTO_UDP  = 17,Cyc_IPPROTO_IDP  = 22,Cyc_IPPROTO_TP  = 29,Cyc_IPPROTO_IPV6
@@ -547,7 +547,7 @@ _LL8:;_LL9:(void)_throw(_tmp11);_LL5:;}}}{int len=(int)_get_arr_size(a,sizeof(
 struct Cyc_pollfd));return poll((struct Cyc_pollfd*)_untag_arr(a,sizeof(struct Cyc_pollfd),
 0),b < (unsigned int)len?b:(unsigned int)len,c);}}typedef struct{unsigned int __val[
 1024 / (8 * sizeof(unsigned int))];}Cyc___sigset_t;typedef Cyc___sigset_t Cyc_sigset_t;
-enum Cyc___anonymous_enum_181__{Cyc_SIGEV_SIGNAL  = 0,Cyc_SIGEV_NONE  = 1,Cyc_SIGEV_THREAD
+enum Cyc___anonymous_enum_182__{Cyc_SIGEV_SIGNAL  = 0,Cyc_SIGEV_NONE  = 1,Cyc_SIGEV_THREAD
  = 2};struct Cyc___SIG_BUILTIN_struct{int tag;void*f1;};struct Cyc___SIG_HANDLER_struct{
 int tag;void(*f1)(int);};void*Cyc_signal(int,struct _tagged_arr);void*Cyc_Csignal_make_SIG_DFL(){
 return(void*)({struct Cyc___SIG_BUILTIN_struct*_tmp12=_cycalloc(sizeof(*_tmp12));
@@ -757,14 +757,14 @@ __stub_FD_CLR(a,b);}int Cyc_FD_ISSET(int a,Cyc_fd_set*b){return __stub_FD_ISSET(
 void Cyc_FD_SET(int a,Cyc_fd_set*b){return __stub_FD_SET(a,b);}void Cyc_FD_ZERO(Cyc_fd_set*
 a){return __stub_FD_ZERO(a);}enum Cyc___socket_type{Cyc_SOCK_STREAM  = 1,Cyc_SOCK_DGRAM
  = 2,Cyc_SOCK_RAW  = 3,Cyc_SOCK_RDM  = 4,Cyc_SOCK_SEQPACKET  = 5,Cyc_SOCK_PACKET  = 
-10};enum Cyc___anonymous_enum_270__{Cyc_MSG_OOB  = 1,Cyc_MSG_PEEK  = 2,Cyc_MSG_DONTROUTE
+10};enum Cyc___anonymous_enum_271__{Cyc_MSG_OOB  = 1,Cyc_MSG_PEEK  = 2,Cyc_MSG_DONTROUTE
  = 4,Cyc_MSG_CTRUNC  = 8,Cyc_MSG_PROXY  = 16,Cyc_MSG_TRUNC  = 32,Cyc_MSG_DONTWAIT
  = 64,Cyc_MSG_EOR  = 128,Cyc_MSG_WAITALL  = 256,Cyc_MSG_FIN  = 512,Cyc_MSG_SYN  = 
 1024,Cyc_MSG_CONFIRM  = 2048,Cyc_MSG_RST  = 4096,Cyc_MSG_ERRQUEUE  = 8192,Cyc_MSG_NOSIGNAL
  = 16384,Cyc_MSG_MORE  = 32768};struct Cyc_cmsghdr{unsigned int cmsg_len;int
-cmsg_level;int cmsg_type;unsigned char __cmsg_data[0];};enum Cyc___anonymous_enum_271__{
+cmsg_level;int cmsg_type;unsigned char __cmsg_data[0];};enum Cyc___anonymous_enum_272__{
 Cyc_SCM_RIGHTS  = 1,Cyc_SCM_CREDENTIALS  = 2,Cyc___SCM_CONNECT  = 3};struct Cyc_linger{
-int l_onoff;int l_linger;};enum Cyc___anonymous_enum_272__{Cyc_SHUT_RD  = 0,Cyc_SHUT_WR
+int l_onoff;int l_linger;};enum Cyc___anonymous_enum_273__{Cyc_SHUT_RD  = 0,Cyc_SHUT_WR
  = 1,Cyc_SHUT_RDWR  = 2};struct Cyc_SA_sockaddr_in_struct{int tag;struct Cyc_sockaddr_in*
 f1;};struct Cyc_SA_socklenptr_struct{int tag;unsigned int*f1;};struct Cyc_SA_socklen_struct{
 int tag;unsigned int f1;};struct Cyc_SO_int_struct{int tag;int*f1;};struct Cyc_SO_timeval_struct{
@@ -920,13 +920,13 @@ _tmp8B,_tmp8B,_tmp8B + 27}};unsigned int Cyc_strftime(struct _tagged_arr s,
 unsigned int maxsize,struct _tagged_arr fmt,const struct Cyc_tm*t){if(maxsize > 
 _get_arr_size(s,sizeof(char)))(int)_throw((void*)& Cyc___strftime_failure);return
 strftime((char*)_check_null(_untag_arr(s,sizeof(char),1)),maxsize,(const char*)
-_check_null(_untag_arr(fmt,sizeof(char),1)),t);}enum Cyc___anonymous_enum_366__{
+_check_null(_untag_arr(fmt,sizeof(char),1)),t);}enum Cyc___anonymous_enum_368__{
 Cyc__PC_LINK_MAX  = 0,Cyc__PC_MAX_CANON  = 1,Cyc__PC_MAX_INPUT  = 2,Cyc__PC_NAME_MAX
  = 3,Cyc__PC_PATH_MAX  = 4,Cyc__PC_PIPE_BUF  = 5,Cyc__PC_CHOWN_RESTRICTED  = 6,Cyc__PC_NO_TRUNC
  = 7,Cyc__PC_VDISABLE  = 8,Cyc__PC_SYNC_IO  = 9,Cyc__PC_ASYNC_IO  = 10,Cyc__PC_PRIO_IO
  = 11,Cyc__PC_SOCK_MAXBUF  = 12,Cyc__PC_FILESIZEBITS  = 13,Cyc__PC_REC_INCR_XFER_SIZE
  = 14,Cyc__PC_REC_MAX_XFER_SIZE  = 15,Cyc__PC_REC_MIN_XFER_SIZE  = 16,Cyc__PC_REC_XFER_ALIGN
- = 17,Cyc__PC_ALLOC_SIZE_MIN  = 18,Cyc__PC_SYMLINK_MAX  = 19};enum Cyc___anonymous_enum_368__{
+ = 17,Cyc__PC_ALLOC_SIZE_MIN  = 18,Cyc__PC_SYMLINK_MAX  = 19};enum Cyc___anonymous_enum_370__{
 Cyc__CS_PATH  = 0,Cyc__CS_V6_WIDTH_RESTRICTED_ENVS  = 1};struct Cyc_option{struct
 _tagged_arr name;int has_arg;int*flag;int val;};int Cyc_execlp(const char*,const char*,
 struct _tagged_arr);int execvp(const char*file,const char**argv);struct _tagged_arr

@@ -2941,9 +2941,10 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
   case &IntType(_,_): 
   case FloatType:    
   case &DoubleType(_): break; 
-  case &ArrayType(ArrayInfo{t1,tq,e,zt}):
+  case &ArrayType(ArrayInfo{t1,tq,*eptr,zt}):
     // FIX: check that tqual is valid?
     // we don't allow abstract mem types as the elt type of an array type
+    let e = *eptr;
     cvtenv = i_check_valid_type(loc,te,cvtenv,MemKind,t1);
     bool is_zero_terminated;
     switch (compress_conref(zt)->v) {
@@ -2978,19 +2979,26 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     }
     // FIX: should memoize the size so that we don't have to worry about
     // evaluating it during unification
-    if(e==NULL)
-      terr(loc,"an explicit array bound is required here");
-    else {
-      Tcexp::tcExp(te,NULL,(exp_t)e);
-      if (!is_const_exp(te,(exp_t)e))
-        terr(loc,"array bounds expression is not constant");
-      if (!coerce_uint_typ(te,(exp_t)e))
-        terr(loc,"array bounds expression is not an unsigned int");
-      let $(sz,known) = Evexp::eval_const_uint_exp((exp_t)e); 
-      // FIX: if we have an unknown size then it might not be zero-terminated!
-      if (is_zero_terminated && known && sz < 1)
-        warn(loc,"zero terminated array cannot have zero elements");
+    if(e==NULL) {
+      // No explicit array bounds was given
+      if (is_zero_terminated) {
+        // zero-terminated arrays have at least size 1
+        *eptr = e = uint_exp(1,NULL);
+      } else {
+        // warn that this array is essentially useless
+        warn(loc,"array bound defaults to 0 here");
+        *eptr = e = uint_exp(0,NULL);
+      }
     }
+    Tcexp::tcExp(te,NULL,(exp_t)e);
+    if (!is_const_exp(te,(exp_t)e))
+      terr(loc,"array bounds expression is not constant");
+    if (!coerce_uint_typ(te,(exp_t)e))
+      terr(loc,"array bounds expression is not an unsigned int");
+    let $(sz,known) = Evexp::eval_const_uint_exp((exp_t)e); 
+    // FIX: if we have an unknown size then it might not be zero-terminated!
+    if (is_zero_terminated && known && sz < 1)
+      warn(loc,"zero terminated array cannot have zero elements");
     break;
   case &FnType(FnInfo{*btvs,*eff,tr,args,c_vararg,cyc_vararg,rgn_po,atts}):
     // This is an unusual and complicated case because (a) we may have to

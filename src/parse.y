@@ -1358,6 +1358,7 @@ enum_field:
 
 enum_declaration_list:
   enum_field { $$ = ^$(new List($1,NULL)); }
+| enum_field ',' { $$ = ^$(new List($1,NULL)); }
 | enum_field ',' enum_declaration_list { $$ = ^$(new List($1,$3)); }
 ;
 
