@@ -54,7 +54,8 @@ $(CYC_LIB_PATH)/gc.a:
 	$(MAKE) -C gc CC="$(CC)" gc.a CFLAGS="$(CFLAGS) -O -I./include -DATOMIC_UNCOLLECTABLE -DNO_SIGNALS -DNO_EXECUTE_PERMISSION -DALL_INTERIOR_POINTERS -DSILENT -DNO_DEBUGGING -DDONT_ADD_BYTE_AT_END"
 	ln gc/gc.a $@
 
-#This klduge replaces the PLATFORM_INCLUDE kludge -- we hope buildlib comes soon
+# Kludge to use architecture-specific constants -- we hope buildlib comes soon
+# The resulting files must *not* be used when cross-compiling.
 include/cstdio.h: include/cstdio.h_in include/arch/$(ARCH).h
 	-$(RM) $@
 	echo "#ifndef _STDIO_H" >> $@
@@ -292,7 +293,7 @@ clean_nogc: clean_test clean_build
 	$(RM) bin/cyc-lib/*libcyc*.a
 	$(RM) $(addprefix bin/, $(addsuffix $(EXE), cyclone cycdoc buildlib cycbison cyclex cycflex aprof))
 	$(RM) *~ amon.out
-	$(RM) include/cstdio.h include/csignal.h lib/cstdio.h lib/csignal.h
+	$(RM) include/cstdio.h include/csignal.h 
 
 clean: clean_nogc
 	$(MAKE) clean -C gc

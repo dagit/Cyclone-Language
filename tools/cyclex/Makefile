@@ -15,7 +15,7 @@ CYCBISON=$(CYCDIR)/bin/cycbison$(EXE)
 LC_FLAG =
 # We put in the explicit -I and -B because install builds this tool before
 # installing the include files and libraries.  Also we use a particular CYCC.
-override CYC_FLAGS += -I$(CYCDIR)/include -B$(BINDIR)/cyc-lib $(LC_FLAG)
+override CYCFLAGS += -I$(CYCDIR)/include -B$(BINDIR)/cyc-lib $(LC_FLAG)
 CYCC:=$(BINDIR)/$(CYCCOMP) 
 
 SRCS=syntax parser_tab lexer lexgen compact output main
@@ -25,13 +25,13 @@ O_SRCS=$(addsuffix .o, $(SRCS))
 install: $(BINDIR)/$(PROG)
 
 $(BINDIR)/$(PROG): $(PROG)
-	cp $^ $@
+	cp $< $@
 
 $(PROG): $(O_SRCS) $(BINDIR)/cyc-lib/$(CYCLIB)
 	$(CYCC) -B$(BINDIR)/cyc-lib $(LC_FLAG) -o $@ $(O_SRCS) $(LDFLAGS)
 
 boot:
-	-rm -f lexer.cyc
+	-$(RM) lexer.cyc
 	make $(PROG) BOOTSTRAP=X
 
 diff:
@@ -39,7 +39,6 @@ diff:
 
 # careful -- this overwrites the cyclone file needed to bootstrap!
 update: all genfiles/lexer.cyc
-
 
 parser_tab.cyc: parser.y $(CYCBISON)
 	$(CYCBISON) -v -d $< -o $@
@@ -51,14 +50,14 @@ lexer.cyc: lexer.cyl $(PROG)
 	./$(PROG) $< $@
 
 genfiles/lexer.cyc: lexer.cyc
-	cp lexer.cyc genfiles/lexer.cyc
+	cp $< $@
 else
 lexer.cyc: genfiles/lexer.cyc
 	cp $< $@
 endif
 
 %.o: %.cyc $(CYCC)
-	$(CYCC) $(CYC_FLAGS) -c $< 
+	$(CYCC) $(CYCFLAGS) -c $< 
 
 clean:
 	rm -f *.o *.c lexer.cyc parser_tab.cyc parser_tab.h *.output *.stackdump

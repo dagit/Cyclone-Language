@@ -31,19 +31,17 @@ BINDIR = $(CYCDIR)/bin
 
 # hack so executable can find cycbison.simple
 BISONDIR=$(shell pwd)
-
-LC_FLAG =
-# We put in the explicit -I and -B because install builds this tool before
-# installing the include files and libraries.  Also we use a particular CYCC.
-override CYC_FLAGS += -I$(CYCDIR)/include -B$(BINDIR)/cyc-lib $(LC_FLAG)
-CYCC:=$(BINDIR)/$(CYCCOMP) 
-
 # names of parser files
 PFILE=cycbison.simple
 # DO NOT USE bison.hairy! NOT PORTED! (maybe someday)
 PFILE1=bison.hairy
-
 PFILES = -DXPFILE=\"$(BISONDIR)/$(PFILE)\" -DXPFILE1=\"$(BISONDIR)/$(PFILE1)\"
+
+LC_FLAG =
+# We put in the explicit -I and -B because install builds this tool before
+# installing the include files and libraries.  Also we use a particular CYCC.
+override CYCFLAGS += -I$(CYCDIR)/include -B$(BINDIR)/cyc-lib $(LC_FLAG)
+CYCC:=$(BINDIR)/$(CYCCOMP) 
 
 SRCS = main getargs version warshall files gram \
 symtab closure LR0 reader print conflicts lex lalr reduce \
@@ -51,26 +49,23 @@ nullable output derives
 
 O_SRCS = $(addsuffix .o, $(SRCS))
 
-install: all $(BINDIR)/$(PROG)
+install: $(BINDIR)/$(PROG)
 
 $(BINDIR)/$(PROG): $(PROG)
-	cp $(PROG) $(BINDIR)
-
-all: $(PROG)
+	cp $< $@
 
 $(PROG): $(O_SRCS) $(BINDIR)/cyc-lib/$(CYCLIB)
 	$(CYCC) -B$(BINDIR)/cyc-lib $(LC_FLAG) -o $@ $(O_SRCS) $(LDFLAGS)
 
-
 # This file is different to pass the parser file names to the compiler.
 files.o: files.cyc
-	$(CYCC) $(CYC_FLAGS) $(PFILES) -c files.cyc
+	$(CYCC) $(CYCFLAGS) $(PFILES) -c files.cyc
 %.o: %.cyc $(CYCC)
-	$(CYCC) $(CYC_FLAGS) -c $<
+	$(CYCC) $(CYCFLAGS) -c $<
 
 clean:
-	rm -f *.o *.c core cycbison *~ *.stackdump
-	rm -f $(PROG)
+	$(RM) *.o *.c core cycbison *~ *.stackdump
+	$(RM) $(PROG)
 
 LR0.o: system.h machine.h new.h gram.h state.h
 closure.o: system.h machine.h new.h gram.h

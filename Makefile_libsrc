@@ -44,7 +44,6 @@ ifdef MS
 	cl /Fe$@ $(CYC_LIB_PATH)/snprintf.obj $^ $(CYCDIR)/bin/cyc-lib/gc.lib
 else
 	$(CYCC) -v -B. -B$(CYCDIR)/bin/cyc-lib -o $@ $^ $(LDFLAGS)
-
 endif
 
 # Why do these want two -B arguments -- because the first one makes sure
@@ -60,16 +59,13 @@ cycdoc$(EXE): $(addsuffix .$(O), $(CYCDOC_SRCS))
 buildlib$(EXE): $(addsuffix .$(O), $(BUILDLIB_SRCS)) install_path.$(O)
 	$(CYCC) -v -B. -B$(CYCDIR)/bin/cyc-lib -o $@ $^ $(LDFLAGS)
 
-install_path.c: $(CYCDIR)/Makefile.inc
-	@(echo "char *Carch = \"$(ARCH)\";"; \
+install_path.c: $(CYCDIR)/.version $(CYCDIR)/Makefile.inc
+	 (echo "char *Carch = \"$(ARCH)\";"; \
 	  echo "char *Cdef_inc_path = \"$(INC_INSTALL)\";"; \
 	  echo "char *Cdef_lib_path = \"$(LIB_INSTALL)\";"; \
-	  echo "char *Ccomp = \"$(CC)\";") > $@
-
-cyclone.$(O): version.h
-version.h: $(CYCDIR)/.version
-	@(version=`cat $<`; \
-	  echo "static string_t version = \"$$version\";") > $@
+	  echo "char *Ccomp = \"$(CC)\";"; \
+	  version=`cat $<`; \
+	  echo "char *Cversion = \"$$version\";") > $@
 
 $(CYCLIB): $(O_LIBS) $(RUNTIME).$(O)
 ifdef MS
@@ -98,7 +94,7 @@ precore_c.h: core.h $(CYCC) $(CYCINC_H)
 %_tab.cyc: %.y $(CYCBISON)
 	$(CYCBISON) -d $< -o $@
 %_tab.h: %.y $(CYCBISON)
-	$(CYCBISON) -d $< -o %.cyc
+	$(CYCBISON) -d $< -o $(patsubst %.h,%.cyc,$@)
 %.c: %.cyc $(CYCC) $(CYCINC_H)
 	$(CYCC) $(CYCFLAGS) -c -o $@ -stopafter-toc $<
 %.$(O): %.cyc $(CYCC) $(CYCINC_H)
