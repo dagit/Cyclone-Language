@@ -19,6 +19,10 @@ char _Match_Exception_tag[] = "\0\0\0\0Match_Exception";
 struct _xtunion_struct _Match_Exception_struct = { _Match_Exception_tag };
 struct _xtunion_struct * Match_Exception = &_Match_Exception_struct;
 
+#ifdef CYC_REGION_PROFILE
+static FILE *alloc_log = NULL;
+#endif;
+
 struct _tagged_string xprintf(char *fmt, ...) {
   char my_buff[1];
   va_list argp;
@@ -223,8 +227,19 @@ FILE *Cyc_Stdio_stderr;
 ///////////////////////////////////////////////
 // Regions
 
+#ifdef CYC_REGION_PROFILE
+static int rgn_total_bytes = 0;
+static int heap_total_bytes = 0;
+static int heap_total_atomic_bytes = 0;
+#endif CYC_REGION_PROFILE
+
+
 // exported in core.h
 struct _RegionHandle *Cyc_Core_heap_region = NULL;
+
+// defined below so profiling macros work
+struct _RegionHandle _new_region();
+static void grow_region(struct _RegionHandle *r, unsigned int s);
 
 // minimum page size for a region
 #define CYC_MIN_REGION_PAGE_SIZE 128
@@ -241,62 +256,7 @@ bool Cyc_set_default_region_page_size(size_t s) {
   return 1;
 }
 
-// allocate a new page and return a region handle for a new region.
-struct _RegionHandle _new_region() {
-  struct _RegionHandle r;
-  struct _RegionPage *p = 
-    (struct _RegionPage *)GC_malloc(sizeof(struct _RegionPage) + 
-                                    default_region_page_size);
-  if (p == NULL) {
-    fprintf(stderr,"_new_region failure");
-    throw(Null_Exception);
-  }
-  p->next = NULL;
-  r.s.tag = 1;
-  r.s.next = NULL;
-  r.curr = p;
-  r.offset = ((char *)p) + sizeof(struct _RegionPage);
-  r.last_plus_one = r.offset + default_region_page_size;
-  return r;
-}
-
-static void grow_region(struct _RegionHandle *r, unsigned int s) {
-  struct _RegionPage *p;
-  unsigned int prev_size, next_size;
-
-  prev_size = r->last_plus_one - ((char *)r->curr + sizeof(struct _RegionPage));
-  next_size = prev_size * 2;
-
-  if (next_size < s) 
-    next_size = s + default_region_page_size;
-
-  p = GC_malloc(sizeof(struct _RegionPage) + next_size);
-  if (p == NULL) {
-    fprintf(stderr,"grow_region failure");
-    throw(Null_Exception);
-  }
-  p->next = r->curr;
-  r->curr = p;
-  r->offset = ((char *)p) + sizeof(struct _RegionPage);
-  r->last_plus_one = r->offset + next_size;
-}
-
 #define MIN_ALIGNMENT (sizeof(double))
-
-// allocate s bytes within region r
-void * _region_malloc(struct _RegionHandle *r, unsigned int s) {
-  void *result;
-  // allocate in the heap
-  if (r == NULL)
-    return GC_malloc(s);
-  // round s up to the nearest MIN_ALIGNMENT value
-  s =  (s + MIN_ALIGNMENT - 1) & (~(MIN_ALIGNMENT - 1));
-  if (s > (r->last_plus_one - r->offset))
-    grow_region(r,s);
-  result = (void *)r->offset;
-  r->offset = r->offset + s;
-  return result;
-}
 
 extern void _free_region(struct _RegionHandle *r) {
   struct _RegionPage *p = r->curr;
@@ -316,12 +276,40 @@ struct _tagged_argv {
   struct _tagged_string *base;
   struct _tagged_string *last_plus_one;
 };
+
+// some debugging routines
+// ONLY WORKS on x86 with frame pointer -- dumps out a list of 
+// return addresses which can then be "looked up" using the output
+// of nm.  I suggest doing nm -a -A -n -l cyclone.exe > nmout.txt.
+// You'll have to adjust the output addresses depending upon where
+// the text segment gets placed.  This could be useful for debugging
+// certain exceptions because you can then get a lot of context. 
+// I plan to use it for doing some statistics collection.
+void stack_trace() {
+  unsigned int x = 0;
+  unsigned int *ra = (&x)+2;
+  unsigned int *fp = (&x)+1;
+  unsigned int *old_fp = fp;
+
+  fprintf(stderr,"stack trace: ");
+  while (*ra != 0) {
+    fprintf(stderr,"0x%x ",*ra);
+    old_fp = fp;
+    fp = (unsigned int *)*fp;
+    ra = fp+1;
+  }
+  fprintf(stderr,"\n");
+}  
+
 extern int Cyc_main(int argc, struct _tagged_argv argv); 
 
 int main(int argc, char **argv) {
   // install outermost exception handler
   struct _handler_cons top_handler;
   int status = 0;
+#ifdef CYC_REGION_PROFILE
+  alloc_log = fopen("alloc_profile.txt","w");
+#endif
   if (setjmp(top_handler.handler)) status = 1;
   _push_handler(&top_handler);
   if (status) {
@@ -339,13 +327,130 @@ int main(int argc, char **argv) {
   Cyc_Stdio_stderr = stderr;
   // convert command-line args to Cyclone strings
   {struct _tagged_argv args;
-  int i;
+  int i, result;
   args.base = 
     (struct _tagged_string *)GC_malloc(argc*sizeof(struct _tagged_string));
   args.curr = args.base;
   args.last_plus_one = args.base + argc;
   for(i = 0; i < argc; ++i)
     args.curr[i] = Cstring_to_string(argv[i]);
-  return Cyc_main(argc, args);
+  result = Cyc_main(argc, args);
+#ifdef CYC_REGION_PROFILE
+  fprintf(stderr,"rgn_total_bytes: %d\n",rgn_total_bytes);
+  fprintf(stderr,"heap_total_bytes: %d\n",heap_total_bytes);
+  fprintf(stderr,"heap_total_atomic_bytes: %d\n",heap_total_atomic_bytes);
+  if (alloc_log != NULL)
+    fclose(alloc_log);
+#endif
+  return result;
   }
 }
+
+#ifdef CYC_REGION_PROFILE
+#undef _region_malloc
+#undef GC_malloc
+#undef GC_malloc_atomic
+#endif
+
+static void grow_region(struct _RegionHandle *r, unsigned int s) {
+  struct _RegionPage *p;
+  unsigned int prev_size, next_size;
+
+  prev_size = r->last_plus_one - ((char *)r->curr + sizeof(struct _RegionPage));
+  next_size = prev_size * 2;
+
+  if (next_size < s) 
+    next_size = s + default_region_page_size;
+
+  p = GC_malloc(sizeof(struct _RegionPage) + next_size);
+  if (p == NULL) {
+    fprintf(stderr,"grow_region failure");
+    throw(Null_Exception);
+  }
+  p->next = r->curr;
+#ifdef CYC_REGION_PROFILE
+  p->total_bytes = sizeof(struct _RegionPage) + next_size;
+  p->free_bytes = next_size;
+#endif CYC_REGION_PROFILE
+  r->curr = p;
+  r->offset = ((char *)p) + sizeof(struct _RegionPage);
+  r->last_plus_one = r->offset + next_size;
+}
+
+// allocate s bytes within region r
+void * _region_malloc(struct _RegionHandle *r, unsigned int s) {
+  void *result;
+  // allocate in the heap
+  if (r == NULL)
+    return GC_malloc(s);
+  // round s up to the nearest MIN_ALIGNMENT value
+  s =  (s + MIN_ALIGNMENT - 1) & (~(MIN_ALIGNMENT - 1));
+  if (s > (r->last_plus_one - r->offset))
+    grow_region(r,s);
+  result = (void *)r->offset;
+  r->offset = r->offset + s;
+#ifdef CYC_REGION_PROFILE
+  r->curr->free_bytes = r->curr->free_bytes - s;
+  rgn_total_bytes += s;
+#endif
+  return result;
+}
+
+
+// allocate a new page and return a region handle for a new region.
+struct _RegionHandle _new_region() {
+  struct _RegionHandle r;
+  struct _RegionPage *p;
+
+  p = (struct _RegionPage *)GC_malloc(sizeof(struct _RegionPage) + 
+                                      default_region_page_size);
+  if (p == NULL) {
+    fprintf(stderr,"_new_region failure");
+    throw(Null_Exception);
+  }
+  p->next = NULL;
+#ifdef CYC_REGION_PROFILE
+  p->total_bytes = sizeof(struct _RegionPage) + default_region_page_size;
+  p->free_bytes = default_region_page_size;
+#endif
+  r.s.tag = 1;
+  r.s.next = NULL;
+  r.curr = p;
+  r.offset = ((char *)p) + sizeof(struct _RegionPage);
+  r.last_plus_one = r.offset + default_region_page_size;
+  return r;
+}
+
+
+
+#ifdef CYC_REGION_PROFILE
+
+void * _profile_region_malloc(struct _RegionHandle *r, unsigned int s,
+                              char *file, int lineno) {
+  if (alloc_log != NULL) {
+    fputs(file,alloc_log);
+    fprintf(alloc_log,":%d\t%d\n",lineno,s);
+  }
+  return _region_malloc(r,s);
+}
+
+void * GC_profile_malloc(int n, char *file, int lineno) {
+  heap_total_bytes += n;
+  if (alloc_log != NULL) {
+    fputs(file,alloc_log);
+    fprintf(alloc_log,":%d\t%d\n",lineno,n);
+  }
+  return GC_malloc(n);
+}
+
+void * GC_profile_malloc_atomic(int n, char *file, int lineno) {
+  heap_total_bytes += n;
+  heap_total_atomic_bytes +=n;
+  if (alloc_log != NULL) {
+    fputs(file,alloc_log);
+    fprintf(alloc_log,":%d\t%d\n",lineno,n);
+  }
+  return GC_malloc_atomic(n);
+}
+
+#endif

@@ -1,0 +1,66 @@
+#include "core.h"
+#include "string.h"
+#include "hashtable.h"
+#include "stdio.h"
+// A little histogram program.
+// Usage:  histogram [filename]
+// The file (or stdin if no file is specified) should be a text file,
+// and consist of a list of newline separated records, with no extraneous
+// whitespace.  The first field in a record should start in the first
+// column and consists of anything but a tab.  The second field should
+// follow immediately and be an integer.  The output, which is sent to
+// stdout just prints the sum totals for the unique elements in the
+// first field.
+using Core;
+using Stdio;
+using String;
+using Hashtable;
+
+
+char buf[80];
+
+void print_results(stringptr pos, $(int,int) @totals) {
+  let &$(byte_count, call_count) = totals;
+  printf("%s\t%d\t%d\n",*pos,byte_count,call_count);
+}
+
+bool getline(FILE @f) {
+  int c = fgetc(f);
+  int i = 0;
+  while (c != '\n') {
+    if (c == EOF) return false;
+    buf[i] = (char)c;
+    i++;
+    c = fgetc(f);
+  }
+  buf[i] = '\0';
+  return true;
+}
+
+int main(int argc, string ?argv) {
+  FILE @f;
+  if (argc < 2) {
+    f = stdin;
+  } else {
+    f = (FILE @)fopen(argv[1],"r");
+  }
+  table_t<stringptr,$(int,int)@,{},{}> table =
+      create(101, strptrcmp, hash_stringptr);
+
+  while (getline(f)) {
+    int end_of_str = 0;
+    while (buf[end_of_str] != '\t') end_of_str++;
+    stringptr pos = new (substring(buf,0,end_of_str));
+    int count = to_int(buf, &end_of_str);
+    try {
+      let &$(*byte_count,*call_count) = lookup(table, pos);
+      *byte_count = *byte_count + count;
+      *call_count = *call_count + 1;
+    } catch {
+    case Not_found:
+      insert(table, pos, new $(count,1)); break;
+    }
+  }
+  iter(print_results, table);
+  return 0;
+}

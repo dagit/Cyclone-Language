@@ -20,7 +20,7 @@ CYC_FLAGS=-I ../lib -tc -toc -pp
 LIB=../bin/$(OUT_PREFIX)$(CYCLIB)
 
 all: $(OUT_PREFIX)cyctest $(OUT_PREFIX)foo $(OUT_PREFIX)hello \
-     $(OUT_PREFIX)test_regions
+     $(OUT_PREFIX)test_regions $(OUT_PREFIX)histogram
 	./$(OUT_PREFIX)test_regions
 	./$(OUT_PREFIX)cyctest
 	./$(OUT_PREFIX)foo < foo_input
@@ -47,14 +47,17 @@ $(OUT_PREFIX)foo_tab.cyc : foo.y $(CYCBISON)
 $(OUT_PREFIX)foo_tab.h : foo.y $(CYCBISON)
 	$(CYCBISON) -v -d $< -o $@
 
+$(OUT_PREFIX)histogram: $(OUT_PREFIX)histogram.o $(LIB)
+	gcc -g -o $@ $^ ../bin/cyclib.a ../bin/gc.a $(LDFLAGS)
+
 # This takes care of non-machine-generated versions (the .cyc is already there)
 $(OUT_PREFIX)%.c : %.cyc $(CYCC)
 	$(CYCC) $(CYC_FLAGS) -o $@ $< 
 
 clean_prefix:
-	rm -f $(addprefix $(OUT_PREFIX), hello.o cyctest.o cyctest.c foo_tab.* foo.o foo.c *.exe)
+	rm -f $(addprefix $(OUT_PREFIX), hello.o cyctest.o cyctest.c foo_tab.* foo.o foo.c histogram.o histogram.c *.exe)
 
 clean:
-	rm -f *hello.o *hello.c *bytes.o *bytes.c *cyctest.o *cyctest.c *foo_tab.* *foo.o *foo.c 
+	rm -f *hello.o *hello.c *bytes.o *bytes.c *cyctest.o *cyctest.c *foo_tab.* *foo.o *foo.c *histogram.o *histogram.c
 	rm -f *test_regions.o *test_regions.c
 	rm -f *~ *.exe *.output *.stackdump

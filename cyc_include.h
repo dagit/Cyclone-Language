@@ -23,6 +23,10 @@ struct _RuntimeStack {
 //// Regions
 struct _RegionPage {
   struct _RegionPage *next;
+#ifdef CYC_REGION_PROFILE
+  unsigned int total_bytes;
+  unsigned int free_bytes;
+#endif CYC_REGION_PROFILE
   char data[0];
 };
 
@@ -94,5 +98,14 @@ static inline unsigned _check_known_subscript_notnull(unsigned bound,
 //// Allocation
 extern void * GC_malloc(int);
 extern void * GC_malloc_atomic(int);
+#ifdef CYC_REGION_PROFILE
+extern void * GC_profile_malloc(int,char *file,int lineno);
+extern void * GC_profile_malloc_atomic(int,char *file,int lineno);
+extern void * _profile_region_malloc(struct _RegionHandle *, unsigned int,
+                                     char *file,int lineno);
+#define GC_malloc(n) GC_profile_malloc(n,__FILE__,__LINE__)
+#define GC_malloc_atomic(n) GC_profile_malloc_atomic(n,__FILE__,__LINE__)
+#define _region_malloc(rh,n) _profile_region_malloc(rh,n,__FILE__,__LINE__)
+#endif
 
 #endif

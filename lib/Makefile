@@ -10,10 +10,16 @@ CYCLEX:=../bin/cyclex.exe
 # Override this prefix to check the compiler on itself w/o clobbering files
 OUT_PREFIX:=
 
-CFLAGS:=-fwritable-strings -I..
-#CFLAGS:=-g -fwritable-strings -I..
-#CFLAGS:=-pg -fwritable-strings -I..
-#CFLAGS:=-O -fwritable-strings -I..
+ifdef PROFILE_REGIONS
+PROF_RGN_FLAG := -D CYC_REGION_PROFILE
+else
+PROF_RGN_FLAG := 
+endif
+
+CFLAGS:=-fwritable-strings -I.. $(PROF_RGN_FLAG)
+#CFLAGS:=-g -fwritable-strings -I.. $(PROF_RGN_FLAG)
+#CFLAGS:=-pg -fwritable-strings -I.. $(PROF_RGN_FLAG)
+#CFLAGS:=-O -fwritable-strings -I.. $(PROF_RGN_FLAG)
 
 CYC_LIBS:=$(addsuffix .cyc, $(CYCLONE_LIBS))
 
@@ -24,7 +30,7 @@ TOC_FLAG = -toc
 endif
 
 # uh, the precore_c.h building doesn't work with the ugly printer :-)
-CYC_FLAGS_PP := -tc $(TOC_FLAG) -pp
+CYC_FLAGS_PP := -tc $(TOC_FLAG) $(CYC_REGION_PROFILE) -pp
 
 #CYC_FLAGS:= -tc $(TOC_FLAG) -pp -I . 
 CYC_FLAGS:= -tc $(TOC_FLAG) -up -I . 
