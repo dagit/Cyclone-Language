@@ -96,3 +96,61 @@ void a17(int x) {
   case y: 42; break;
   }
 }
+
+//////////////////////////////////
+//// UNIQUENESS-RELATED TESTS ////
+//////////////////////////////////
+
+#include <core.h>
+void a18(int *`U x) {
+  // aliased expression x was overwritten
+  {
+    let alias <`r>int *`r y = x;
+    x = new 1;
+  }
+  Core::ufree(x);
+}
+void a19(int *`U x) {
+  // expression attempts to copy unique value; i.e. x cannot be unconsumed
+  { let y = x;
+    x = new 1;
+    Core::ufree(x);
+  }
+  Core::ufree(x);
+}
+void a20(int *`U y) __attribute__((noconsume(1))) {
+  // expression consumes value with attribute noconsume
+  Core::ufree(y);
+}
+void a21(int *`U*`U y) __attribute__((noconsume(1))) {
+  // expression consumes value with attribute noconsume
+  Core::ufree(*y);
+}
+void a22(int *`U y) __attribute__((noconsume(1))) {
+  // noconsume expression no longer set to orginal value
+  y = new 1;
+}
+void a23(int *`U x) {
+  // dereference of uninitialized lhs pointer
+  Core::ufree(x);
+  *x = 1;
+}
+void a24(int *`U x) {
+  // dereference of uninitialized rhs pointer
+  Core::ufree(x);
+  int y = *x;
+}
+void a25() {
+  // aliased pattern expression is not an l-value
+  let alias<`r>int *`r x = rnew (Core::unique_region) 1;
+}
+void a26(int *`U x) {
+  // cannot track unique pointers through multiple assignments
+  int *`U z, *`U y;
+  z = y = x;
+}
+void a27(int *`U x) {
+  let y = x;
+  // attempts to copy a consumed value
+  Core::ufree(x);
+}

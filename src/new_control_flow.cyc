@@ -197,7 +197,7 @@ static void check_unique_root($(analenv_t<`r>,seg_t,flowdict_t<`r>)@ckenv,
       case &Zero: break;
 	// FIX: should handle Aggregates as well
       default:
-	Tcutil::warn(loc,"unique pointer(s) reachable from %s may become unreachable.",qvar2string(vd->name));
+	Tcutil::warn(loc,"alias-free pointer(s) reachable from %s may become unreachable.",qvar2string(vd->name));
 	break;
       }
     }
@@ -374,7 +374,7 @@ static void check_nounique(analenv_t<`r> env, seg_t loc, type_t t, absRval_t<`r>
       check_nounique(env,loc,fs->hd->type,d[i]);
     return;
   case $(&PointerType(_),_) && Tcutil::is_noalias_pointer(t,false):
-    Tcutil::warn(loc,"argument may still contain unique pointers");
+    Tcutil::warn(loc,"argument may still contain alias-free pointers");
     return;
   default: return;
   }
@@ -385,7 +385,7 @@ static flow_t<`r> use_nounique_Rval(analenv_t<`r> env, seg_t loc, Absyn::type_t 
   case {.BottomFL = _}: return BottomFL();
   case {.ReachableFL = $(d,relns)}:
     if (!Tcutil::is_noalias_pointer(t,false)) {
-      aerr(loc,"noliveunique attribute requires unique pointer");
+      Tcutil::impos("noliveunique attribute requires alias-free pointer");
       return BottomFL();
     }
     let elt_type = Tcutil::pointer_elt_type(t);
@@ -396,7 +396,7 @@ static flow_t<`r> use_nounique_Rval(analenv_t<`r> env, seg_t loc, Absyn::type_t 
       break;
     default:
       if (Tcutil::is_noalias_pointer_or_aggr(env->fenv->r,elt_type))
-	Tcutil::warn(loc,"argument may contain live unique pointers");
+	Tcutil::warn(loc,"argument may contain live alias-free pointers");
       return use_Rval(env,loc,inflow,r);
     }
     let ans_d = escape_deref(env->fenv, d, env->all_changed, r);
@@ -681,9 +681,10 @@ static $(flow_t<`r>,absRval_t<`r>)
       }
       switch(initlevel(env->fenv,outdict,r)) {
       case NoneIL:
+	let $(r,_) = unname_rval(env->fenv->r,r);
         switch (r) {
         case &Consumed(_,_,_):
-          aerr(e->loc,"attempt to use a unique pointer that has already been copied");
+          aerr(e->loc,"attempt to dereference a consumed alias-free pointer");
           break;
         default:
           aerr(e->loc,"dereference of possibly uninitialized pointer");
@@ -758,7 +759,7 @@ static flow_t<`r> restore_noconsume_arg(analenv_t<`r> env,
     break;
   case $({.BottomFL = _}, _): break;
   default:
-    aerr(loc,"noconsume() parameters must be l-values");
+    Tcutil::impos("noconsume() parameters must be l-values");
     break;
   }
   return inflow;
@@ -792,7 +793,7 @@ static $(flow_t<`r>,absRval_t<`r>)
         case &Consumed(...):
         case &Zero: break;
         default:
-         Tcutil::warn(lexp->loc,"assignment may overwrite unique pointer(s)");
+         Tcutil::warn(lexp->loc,"assignment may overwrite alias-free pointer(s)");
          break;
         }
       }
@@ -897,7 +898,7 @@ static flow_t<`r> initialize_pat_vars(flow_env_t<`r> fenv,
 						   (type_t)ve->topt) &&
 		!Tcutil::is_noalias_pointer_or_aggr(env->fenv->r,
 						    (*vd)->type))
-	      aerr(exp_loc,"aliased pattern expression |%s| not an l-value",
+	      aerr(exp_loc,"aliased pattern expression not an l-value: %s",
 		   exp2string(ve));
 	    // Otherwise, there just isn't a place for it, either because
 	    // we haven't expanded out locations, or because the
@@ -998,7 +999,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
       let old_rval = lookup_place(fd,p);
       bool needs_unconsume = false;
       if (is_unique_consumed(e,env->iteration_num,old_rval,&needs_unconsume)) {
-	aerr(e->loc,"expression attempts to copy unique value that may be copied elsewhere.");
+	aerr(e->loc,"expression attempts to copy a consumed alias-free value");
 	return $(BottomFL(),fenv->unknown_all);
       }
       else if (needs_unconsume) {
@@ -1086,7 +1087,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
 
   case &AssignOp_e(l,&_,r):
     if (copy_ctxt && Tcutil::is_noalias_pointer_or_aggr(env->r,(type_t)e->topt)) {
-      aerr(e->loc,"cannot track unique pointers through multiple assignments");
+      aerr(e->loc,"cannot track alias-free pointers through multiple assignments");
       return $(BottomFL(), fenv->unknown_all);
     }
     let arg2 = List{r,NULL};
@@ -1119,7 +1120,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
   case &AssignOp_e(e1,NULL,e2):
     DEBUG_PRINT("in Rexp:AssignOp_e for |%s|\n",Absynpp::exp2string(e));
     if (copy_ctxt && Tcutil::is_noalias_pointer_or_aggr(env->r,(type_t)e->topt)) {
-      aerr(e->loc,"cannot track unique pointers through multiple assignments");
+      aerr(e->loc,"cannot track alias-free pointers through multiple assignments");
       return $(BottomFL(), fenv->unknown_all);
     }
     let outer_all_changed = env->all_changed;
@@ -1733,8 +1734,17 @@ static $(flow_t<`r>,absLval_t<`r>)
       }
       else
 	e->annot = new UnknownZ(copy_relns(Core::heap_region,relns)); // FIX: too conservative?
-      if(initlevel(fenv,outdict,r)==NoneIL)
-	aerr(e->loc,"dereference of possibly uninitialized pointer");
+      if(initlevel(fenv,outdict,r)==NoneIL) {
+	let $(r,_) = unname_rval(env->fenv->r,r);
+	switch (r) {
+	case &Consumed(...):
+	  aerr(e->loc,"attempt to dereference an alias-free that has already been copied");
+	  break;
+	default:
+	  aerr(e->loc,"dereference of possibly uninitialized pointer");
+	  break;
+	}
+      }
       return $(f,UnknownL());
     }
   default: throw new Core::Impossible("left deref of non-pointer-type");
@@ -2067,7 +2077,6 @@ anal_test(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
       case &Consumed(_,_,_):
         aerr(e->loc,"expression may not be initialized");
         return $(BottomFL(),BottomFL());
-        /* XXX another place to add VirtAddrOf fallthru */
       case &UnknownR(il): return splitzero(env,inflow,f,e,il,names);
       case &Esc(_):       return $(f,f);
       case &Aggregate(...): throw new Core::Impossible("anal_test");

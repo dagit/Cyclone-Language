@@ -754,7 +754,7 @@ void check_pat_regions_rec(tenv_t te, pat_t p, bool did_noalias_deref,
 	case &Address_e(e):
 	  if (is_noalias_pointer_or_aggr(Tcenv::get_fnrgn(te),
 					 (type_t)e->topt))
-	    terr(p->loc,"Reference pattern not allowed on unique pointers");
+	    terr(p->loc,"reference pattern not allowed on alias-free pointers");
 	  break;
 	default:
 	  impos("check_pat_regions: bad reference access expression");
@@ -783,7 +783,7 @@ void check_pat_regions_rec(tenv_t te, pat_t p, bool did_noalias_deref,
       // case we disallow the alias, since we must know the path
       if (vdopt != NULL && *vdopt == vd) {
 	if (eopt == NULL)
-	  terr(p->loc,"Cannot alias pattern expression");
+	  terr(p->loc,"cannot alias pattern expression in datatype");
 	else {
 	  TEMP_RGN(te, r) {
 	    tenv_t te2 = add_type_vars(r,p->loc,te,rlist(r,tv));
@@ -825,7 +825,7 @@ void check_pat_regions(tenv_t te, pat_t p,
 	if (is_noalias_pointer_or_aggr(r,(type_t)e->topt) &&
 	    !is_noalias_path(r,e))
 	  // FIX: need better location information
-	  terr(p->loc,"Pattern %s dereferences a unique pointer from a "
+	  terr(p->loc,"pattern %s dereferences a alias-free pointer from a "
 	       "non-unique path",
 	       vdopt != NULL ? (const char ? @nozeroterm)
 	                        aprintf("for variable %s",

@@ -1795,7 +1795,7 @@ if((_tmp1C7 != 0  && *_tmp1C7 == _tmp1B7) && _tmp1C8 != 0){
 # 755
  if(Cyc_Tcutil_is_noalias_pointer_or_aggr(Cyc_Tcenv_get_fnrgn(te),(void*)_check_null(_tmp1CC->topt))){
 # 757
-const char*_tmp4FA;void*_tmp4F9;(_tmp4F9=0,Cyc_Tcutil_terr(p->loc,((_tmp4FA="Reference pattern not allowed on unique pointers",_tag_dyneither(_tmp4FA,sizeof(char),49))),_tag_dyneither(_tmp4F9,sizeof(void*),0)));}
+const char*_tmp4FA;void*_tmp4F9;(_tmp4F9=0,Cyc_Tcutil_terr(p->loc,((_tmp4FA="reference pattern not allowed on alias-free pointers",_tag_dyneither(_tmp4FA,sizeof(char),53))),_tag_dyneither(_tmp4F9,sizeof(void*),0)));}
 goto _LLBE;_LLC1:;_LLC2: {
 # 760
 const char*_tmp4FD;void*_tmp4FC;(_tmp4FC=0,((int(*)(struct _dyneither_ptr fmt,struct _dyneither_ptr ap))Cyc_Tcutil_impos)(((_tmp4FD="check_pat_regions: bad reference access expression",_tag_dyneither(_tmp4FD,sizeof(char),51))),_tag_dyneither(_tmp4FC,sizeof(void*),0)));}_LLBE:;}
@@ -1822,7 +1822,7 @@ struct _tuple16*_tmp1D6=(struct _tuple16*)x->hd;struct Cyc_Absyn_Vardecl**_tmp1D
 # 784
 if(_tmp1D8 != 0  && *_tmp1D8 == _tmp1BE){
 if(_tmp1D9 == 0){
-const char*_tmp503;void*_tmp502;(_tmp502=0,Cyc_Tcutil_terr(p->loc,((_tmp503="Cannot alias pattern expression",_tag_dyneither(_tmp503,sizeof(char),32))),_tag_dyneither(_tmp502,sizeof(void*),0)));}else{
+const char*_tmp503;void*_tmp502;(_tmp502=0,Cyc_Tcutil_terr(p->loc,((_tmp503="cannot alias pattern expression in datatype",_tag_dyneither(_tmp503,sizeof(char),44))),_tag_dyneither(_tmp502,sizeof(void*),0)));}else{
 # 788
 struct _RegionHandle _tmp1DC=_new_region("r");struct _RegionHandle*r=& _tmp1DC;_push_region(r);
 {struct Cyc_Absyn_Tvar*_tmp504[1];struct Cyc_Tcenv_Tenv*te2=Cyc_Tcenv_add_type_vars(r,p->loc,te,((_tmp504[0]=_tmp1BD,((struct Cyc_List_List*(*)(struct _RegionHandle*,struct _dyneither_ptr))Cyc_List_rlist)(r,_tag_dyneither(_tmp504,sizeof(struct Cyc_Absyn_Tvar*),1)))));
@@ -1854,7 +1854,7 @@ const char*_tmp514;void*_tmp513[1];const char*_tmp512;struct Cyc_String_pa_Print
 _tmp1E3 != 0?(struct _dyneither_ptr)(
 (_tmp511.tag=0,((_tmp511.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)
 Cyc_Absynpp_qvar2string((*_tmp1E3)->name)),((_tmp510[0]=& _tmp511,Cyc_aprintf(((_tmp50F="for variable %s",_tag_dyneither(_tmp50F,sizeof(char),16))),_tag_dyneither(_tmp510,sizeof(void*),1)))))))):(
-(_tmp512="",_tag_dyneither(_tmp512,sizeof(char),1)))),((_tmp513[0]=& _tmp50E,Cyc_Tcutil_terr(p->loc,((_tmp514="Pattern %s dereferences a unique pointer from a non-unique path",_tag_dyneither(_tmp514,sizeof(char),64))),_tag_dyneither(_tmp513,sizeof(void*),1)))))));}}}}
+(_tmp512="",_tag_dyneither(_tmp512,sizeof(char),1)))),((_tmp513[0]=& _tmp50E,Cyc_Tcutil_terr(p->loc,((_tmp514="pattern %s dereferences a alias-free pointer from a non-unique path",_tag_dyneither(_tmp514,sizeof(char),68))),_tag_dyneither(_tmp513,sizeof(void*),1)))))));}}}}
 # 819
 ;_pop_region(r);};}struct _union_Name_value_Name_v{int tag;struct _dyneither_ptr val;};struct _union_Name_value_Int_v{int tag;int val;};union Cyc_Tcpat_Name_value{struct _union_Name_value_Name_v Name_v;struct _union_Name_value_Int_v Int_v;};
 # 876 "tcpat.cyc"

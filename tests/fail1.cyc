@@ -1039,3 +1039,33 @@ void f252(int x) __attribute__((initializes(1)));
 // noliveunique allowed only on unique pointers
 void f253(int x) __attribute__((noliveunique(1)));
 
+struct f254 { 
+  <`i::I> tag_t<`i> len;
+  char buf[len] @nozeroterm;
+};
+void f255(struct f254 @`U x) {
+  // pattern would create alias out of no-alias pointer
+  let &f254{<`i> .len=l,.buf=buf} = x;
+}
+void f256(struct f254 @`U x) {
+  // alias requires pointer type; array coercion not done automatically
+  let &f254{<`i> .len=l,.buf=alias <`r>char [valueof(`i)] @nozeroterm buf} = x;
+}
+datatype f257 { C257(int *`H); };
+void f258(datatype f257 @x) {
+  // cannot alias pattern expression in a datatype
+  let &C257(alias <`r>int *`r y) = x;
+}
+struct f259<`r> { int *`r x; };
+void f260(struct f259<`U> *`U x) {
+  // reference pattern not allowed on unique pointers
+  let &f259{.x = *y} = x;
+}
+void f261(struct f259<`U> * x) {
+  // dereference of alias-free pointer from non-unique path
+  let &f259{.x = y} = x;
+}
+void f262(struct f259<`U> * x) {
+  // reference pattern not allowed on alias-free pointers
+  let &f259{.x = *y} = x;
+}
