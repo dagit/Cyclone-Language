@@ -2889,10 +2889,13 @@ DynCast:
                                                 list(e1,esz,
                                                      sizeoftyp_exp(ta1,DL),
                                                      e2),DL)));
-	} else
+	} else {
+          if (!Evexp::c_can_eval(esz))
+            terr(e->loc,"cannot determine subscript is in bounds");
 	  // e1[_check_known_subscript_notnull(esz,e2)]
 	  e2->r = fncall_exp_r(_check_known_subscript_notnull_e,
                                list(esz,copy_exp(e2)));
+        }
 	break;
       case &DynEither_b:
 	type_t ta1 = typ_to_c_array(ta);

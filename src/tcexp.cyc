@@ -315,7 +315,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
 }
 
 // variables
-static type_t tcVar(tenv_t te, seg_t loc, qvar_t q, binding_t b) {
+static type_t tcVar(tenv_t te, seg_t loc, exp_t e, qvar_t q, binding_t b) {
   switch(b) {
   case &Unresolved_b:
     return expr_err(te,loc,NULL,"undeclared identifier: %s",qvar2string(q));
@@ -323,7 +323,17 @@ static type_t tcVar(tenv_t te, seg_t loc, qvar_t q, binding_t b) {
   case &Funname_b(fd): *q = *fd->name; return fndecl2typ(fd);
   case &Pat_b(vd):     fallthru(vd);
   case &Local_b(vd):   fallthru(vd);
-  case &Param_b(vd):   (*q)[0] = Nmspace{.Loc_n = 0}; return vd->type;
+  case &Param_b(vd):   
+    (*q)[0] = Nmspace{.Loc_n = 0}; 
+    if (te->allow_valueof) {
+      switch (compress(vd->type)) {
+      case &TagType(i): 
+        e->r = new Valueof_e(i);
+        break;
+      default: break;
+      }
+    }
+    return vd->type;
   }
 }
 
@@ -1329,9 +1339,6 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
                       qvar2string(ad->name), *f);
     // must do after previous check else could dereference NULL
     if (ad->impl->tagged) *is_tagged = true;
-    if(ad->impl->exist_vars != NULL)
-      return expr_err(te,loc,topt,"must use pattern-matching to access fields "
-		      "of existential types");
     _ t2;
     TEMP_RGN(te, rgn) {
       let inst = List::rzip(rgn,rgn,ad->tvs,ts);
@@ -1339,6 +1346,12 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
       // prevent someone from reading a non-bits-only union member
       if (ad->kind == UnionA && !ad->impl->tagged && !in_notreadctxt(te) && !bits_only(t2))
         return expr_err(te,loc,topt,"cannot read union member %s since it is not `bits-only'",*f);
+    }
+    if(ad->impl->exist_vars != NULL) {
+      // this will force the result to not have a type containing any of the 
+      // existentially bound variables.
+      if (!unify(t2,wildtyp(lookup_opt_type_vars(te)))) 
+        return expr_err(te,loc,topt,"must use pattern-matching to access field %s\n\tdue to existential type variables.",*f);
     }
     return t2;
   case &AnonAggrType(k,fs):
@@ -1384,10 +1397,6 @@ static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt,
 			qvar2string(ad->name), *f);
       // must do after previous check else could dereference NULL
       if (ad->impl->tagged) *is_tagged = true;
-      if(ad->impl->exist_vars != NULL)
-	return expr_err(te,loc,topt,
-                        "must use pattern-matching to access fields "
-			"of existential types");
       _ t3;
       TEMP_RGN(te, rgn) {
 	let inst = List::rzip(rgn,rgn,ad->tvs,ts);
@@ -1395,6 +1404,12 @@ static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt,
       }
       if (ad->kind == UnionA && !ad->impl->tagged && !in_notreadctxt(te) && !bits_only(t3))
         return expr_err(te,loc,topt,"cannot read union member %s since it is not `bits-only'",*f);
+      if(ad->impl->exist_vars != NULL) {
+        if (!unify(t3,wildtyp(lookup_opt_type_vars(te))))
+	return expr_err(te,loc,topt,
+                        "must use pattern-matching to access field %s\n\t"
+			"due to extistential types",*f);
+      }
       return t3;
     case &AnonAggrType(k,fs):
       let finfo = lookup_field(fs,f);
@@ -2077,7 +2092,15 @@ static type_t tcStmtExp(tenv_t te, seg_t loc, type_t * topt, stmt_t s) {
   // The type is the type of the expression that ends the statment.
   while(true)
     switch (s->r) {
-    case &Exp_s(e):     return e->topt->v;
+    case &Exp_s(e):     
+      // must check that e does not allow any type variables to escape
+      let t = e->topt->v;
+      if (!unify(t,wildtyp(lookup_opt_type_vars(te)))) {
+        terr(loc,"statement expression returns type %s",
+             typ2string(t));
+        explain_failure();
+      }
+      return t;
     case &Seq_s(s1,s2): s = s2; continue;
     case &Decl_s(d,s1): s = s1; continue;
     default:
@@ -2381,7 +2404,7 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
   case &Const_e(*c):
     t = tcConst(te,loc,topt,c,e); break;
   case &Var_e(q,b):
-    t = tcVar(te,loc,q,b); break;
+    t = tcVar(te,loc,e,q,b); break;
   case &Primop_e(p,es):
     t = tcPrimop(te,loc,topt,p,es); break;
   case &Increment_e(e1,i):

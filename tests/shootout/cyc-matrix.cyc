@@ -9,16 +9,16 @@
 
 #define SIZE 30
 
-int @{valueof(`j)}`r @{valueof(`i)}`r mkmatrix(region_t<`r> r,
-                                               tag_t<`i> rows, 
-                                               tag_t<`j> cols) {
+int @{cols}`r @{rows}`r mkmatrix(region_t r,
+                                 tag_t rows, 
+                                 tag_t cols) {
     int count = 1;
-    int @{valueof(`j)}@{valueof(`i)} m = 
+    int @{cols}@{rows} m = 
        rnew(r) {for i < rows : rnew(r) {for j < cols : count++}};
     return(m);
 }
 
-void zeromatrix(tag_t<`i> rows, tag_t<`j> cols, int @{valueof(`j)}@{valueof(`i)} m) {
+void zeromatrix(tag_t rows, tag_t cols, int @{cols}@{rows} m) {
     unsigned int i, j;
     for (i=0; i<rows; i++) {
         let v = m[i];
@@ -27,11 +27,11 @@ void zeromatrix(tag_t<`i> rows, tag_t<`j> cols, int @{valueof(`j)}@{valueof(`i)}
     }
 }
 
-void mmult(tag_t<`i> rows,
-           tag_t<`j> cols,
-           int @{valueof(`j)}@{valueof(`i)} m1,
-           int @{valueof(`j)}@{valueof(`j)} m2,
-           int @{valueof(`j)}@{valueof(`i)} m3) {
+void mmult(tag_t rows,
+           tag_t cols,
+           int @{cols}@{rows} m1,
+           int @{cols}@{cols} m2,
+           int @{cols}@{rows} m3) {
   unsigned int i, j, k;
   int val;
   for (i=0; i<rows; i++) {

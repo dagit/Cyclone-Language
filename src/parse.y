@@ -221,9 +221,108 @@ static type_t array2ptr(type_t t, bool argposn) {
   }
 }
 
-// convert an argument's type from arrays to pointers
-static void arg_array2ptr($(opt_t<var_t>,tqual_t,type_t) @x) {
-  (*x)[2] = array2ptr((*x)[2],true);
+// The next few functions are used when we have a function (or aggregate)
+// where the type of one parameter appears to depend on the value of
+// another.  Specifically, when we have:
+//    void foo(tag_t<`i> x, int arr[x])
+// we want to rewrite it to:
+//    void foo(tag_t<`i> x, int arr[valueof(`i)])
+
+// given a list of arguments, pull out those that have names and
+// are given tag_t's
+static list_t<$(var_t,type_t)@> get_arg_tags(list_t<$(opt_t<var_t>,tqual_t,type_t) @>x) {
+  let res = NULL;
+  for (; x != NULL; x = x->tl) {
+    switch (x->hd) {
+    case &$(&Opt(v),_,&TagType(i)): 
+      switch (i) {
+      case &Evar(_,*z,_,_):
+        // using an evar here will mess things up since the evar will be
+        // duplicated.  So, we pin the evar down to a type variable instead.
+        stringptr_t nm = new aprintf("`%s",*v);
+        *z = new Opt(new VarType(new Tvar{nm,-1,new Eq_kb(IntKind)}));
+        break;
+      default: break;
+      }
+      res = new List(new $(v,i),res); break;
+      // while we're at it, give any anonymous regions_t's a name that
+      // corresponds to the variable.
+    case &$(&Opt(v),_,&RgnHandleType(&Evar(_,*z,_,_))): 
+      stringptr_t nm = new aprintf("`%s",*v);
+      *z = new Opt(new VarType(new Tvar{nm,-1,new Eq_kb(RgnKind)}));
+      break;
+    default: break;
+    }
+  }
+  return res;
+}
+
+// same as above, but for a list of aggregate fields
+static list_t<$(var_t,type_t)@> get_argrfield_tags(list_t<aggrfield_t> x) {
+  let res = NULL;
+  for (; x != NULL; x = x->tl) {
+    switch (x->hd->type) {
+    case &TagType(i):
+      res = new List(new $(x->hd->name,i), res); break;
+    default: break;
+    }
+  }
+  return res;
+}
+
+// given a mapping of variables to tags (x->`i), replace the variable x with `i
+static exp_t substitute_tags_exp(list_t<$(var_t,type_t)@> tags, exp_t e) {
+  switch (e->r) {
+  case &Var_e(&$({.Rel_n = NULL},y),_): fallthru(y);
+  case &UnknownId_e(&$({.Rel_n = NULL},y)):
+    for (let ts = tags; ts != NULL; ts = ts->tl) {
+      let &$(x,i) = ts->hd;
+      if (strptrcmp(x,y) == 0) 
+        return new_exp(new Valueof_e(Tcutil::copy_type(i)),e->loc);
+    }
+    break;
+  default: break;
+  }
+  return e;
+}
+
+// we have a variable x in scope with type tag_t<`i> -- look for
+// array or pointer bounds involving x and replace with valueof(`i).
+static type_t substitute_tags(list_t<$(var_t,type_t)@> tags, type_t t) {
+  switch (t) {
+  case &ArrayType(ArrayInfo{et,tq,nelts,zt,ztloc}):
+    exp_opt_t nelts2 = nelts;
+    if (nelts != 0) {
+      nelts2 = substitute_tags_exp(tags,nelts);
+    }
+    let et2 = substitute_tags(tags,et);
+    if (nelts != nelts2 || et != et2)
+      return new ArrayType(ArrayInfo{et2,tq,nelts2,zt,ztloc});
+    break;
+  case &PointerType(PtrInfo{et,tq,PtrAtts{r,n,b,zt,pl}}):
+    let et2 = substitute_tags(tags,et);
+    let b2 = b;
+    switch (*b) {
+    case {.Eq_constr = &Upper_b(e)}: 
+      e = substitute_tags_exp(tags,e);
+      b2 = new Constraint{.Eq_constr = new Upper_b(e)};
+      break;
+    default: break;
+    }
+    if (et2 != et || b2 != b)
+      return new PointerType(PtrInfo{et2,tq,PtrAtts{r,n,b2,zt,pl}});
+    break;
+  default: 
+    // FIX: should go into other types too
+    break;
+  }
+  return t;
+}
+
+// eliminate dependencies on tag fields by substituting the type-level
+// value for the associated field name.
+static void substitute_aggrfield_tags(list_t<$(var_t,type_t)@> tags, aggrfield_t x) {
+  x->type = substitute_tags(tags,x->type);
 }
 
 // given an optional variable, tqual, type, and list of type
@@ -623,10 +722,20 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
 	  && (*args2->hd)[2] == &VoidType_val) {
 	args2 = NULL;
       }
+      // pull out any tag_t variables and their associated tag_t types
+      let tags = get_arg_tags(args2);
       // convert result type from array to pointer result
+      if (tags != NULL)
+        t = substitute_tags(tags,t);
       t = array2ptr(t,false);
-      // convert any array arguments to pointer arguments
-      List::iter(arg_array2ptr,args2);
+      // convert any array arguments to suitable  pointer arguments
+      // and substitute away any implicit tag arguments.  
+      for (let a = args2; a != NULL; a = a->tl) {
+        let &$(vopt,tq,*t) = a->hd;
+        if (tags != NULL) 
+          *t = substitute_tags(tags,*t);
+        *t = array2ptr(*t,true);
+      }
       // Note, we throw away the tqual argument.  An example where
       // this comes up is "const int f(char c)"; it doesn't really
       // make sense to think of the function as returning a const
@@ -1442,6 +1551,9 @@ type_specifier_notypedef:
                       LOC(@1,@4))); }
 | REGION_T '<' any_type_name right_angle
     { $$=^$(type_spec(new RgnHandleType($3),LOC(@1,@4))); }
+| REGION_T 
+    { $$=^$(type_spec(new RgnHandleType(new_evar(&Tcutil::rk, NULL)),
+                      LOC(@1,@1))); }
 | DYNREGION_T '<' any_type_name right_angle
   { let t2 = new_evar(&Tcutil::rk, NULL);
     $$=^$(type_spec(new DynRgnType($3,t2), LOC(@1,@4)));
@@ -1543,7 +1655,13 @@ struct_or_union:
 struct_declaration_list:
   /* empty */
   { $$=^$(NULL); }
-| struct_declaration_list0 { $$=^$(List::flatten(List::imp_rev($1))); }
+| struct_declaration_list0 
+  { let decls = List::flatten(List::imp_rev($1));
+    let tags = get_argrfield_tags(decls);
+    if (tags != NULL)
+      List::iter_c(substitute_aggrfield_tags,tags,decls);
+    $$=^$(decls);
+  }
 ;
 
 /* NB: returns list in reverse order */

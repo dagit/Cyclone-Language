@@ -178,6 +178,12 @@ type_t compress(type_t t) {
     if (t2 != (*t2opt_ref)->v)
       *t2opt_ref = new Opt(t2);
     return t2;
+  case &ValueofType(e):
+    Evexp::eval_const_uint_exp(e);
+    switch (e->r) {
+    case &Valueof_e(t2): return t2;
+    default: return t;
+    }
   default: return t;
   }
 }
