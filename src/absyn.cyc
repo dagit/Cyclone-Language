@@ -118,6 +118,14 @@ conref_t<`a> compress_conref(conref_t<`a> x) {
   }
 }
 
+`a conref_def(`a y, conref_t<`a> x) {
+  switch (compress_conref(x)->v) {
+  case &Eq_constr(v): return v;
+  default: return y;
+  }
+}
+    
+
 //////////////////////////// Types ///////////////////////////////
 // unsigned types
 static tunion Type.IntType uchar_tt  = IntType(Unsigned,B1);

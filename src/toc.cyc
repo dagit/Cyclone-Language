@@ -157,10 +157,7 @@ static bool is_zero(exp_t e) {
 static bool is_nullable(type_t t) {
   switch (compress(t)) {
   case &PointerType(PtrInfo{_,_,b,_,_}):
-    switch (compress_conref(b)->v) {
-    case &Eq_constr(b2): return b2;
-    default:            return false;
-    }
+    return conref_def(false,b);
   default: toc_impos("is_nullable"); return false;
   }
 }
@@ -555,10 +552,10 @@ static conv conversion(type_t t1, type_t t2) {
   t2 = compress(t2);
   switch ($(t1,t2)) {
   case $(&PointerType(p1), &PointerType(p2)):
-    let n1 = conref_val(p1.nullable);
-    let n2 = conref_val(p2.nullable);
-    let b1 = conref_val(p1.bounds);
-    let b2 = conref_val(p2.bounds);
+    let n1 = conref_def(false,p1.nullable);
+    let n2 = conref_def(false,p2.nullable);
+    let b1 = conref_def(bounds_one,p1.bounds);
+    let b2 = conref_def(bounds_one,p2.bounds);
     switch ($(b1,b2)) {
     case $(&Upper_b(_), &Upper_b(_)): 
       if (n1 && !n2) return new NullCheck(t2);
@@ -568,7 +565,7 @@ static conv conversion(type_t t1, type_t t2) {
     case $(Unknown_b, &Upper_b(e2)): return new UntagPtr(typ_to_c(t1),e2,n2);
     }
   case $(&PointerType(p1), &IntType(_,_)):
-    let b1 = conref_val(p1.bounds);
+    let b1 = conref_def(bounds_one,p1.bounds);
     switch (b1) {
     case &Upper_b(_): return NoConv;
     case Unknown_b: return new UntagPtrNocheck(typ_to_c(t1));
@@ -1355,7 +1352,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	e->r = signed_int_exp(0,DL)->r;
 	break;
       }
-      switch (conref_val(b)) {
+      switch (conref_def(bounds_one,b)) {
       case Unknown_b:
 	let zero = new $(null,signed_int_exp(0,DL));
 	let um = unresolvedmem_exp(null,list(zero,zero,zero),DL);
@@ -1799,10 +1796,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       bool is_tagged_ptr = false;
       switch (compress(old_typ)) {
       case &PointerType(PtrInfo{et,_,_,tq,b}):
-        switch (compress_conref(b)->v) {
-        case &Eq_constr(Unknown_b): is_tagged_ptr = true; break;
-        default: break;
-        }
+        is_tagged_ptr = (conref_def(bounds_one,b) == Unknown_b);
         break;
       default:
         toc_impos("exp_to_c: comprehension not an array type");
@@ -1897,7 +1891,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     exp_to_c(nv, e1);
     switch (e1_typ) {
     case &PointerType(PtrInfo{t2,rgn,cr,tq,b}):
-      switch (conref_val(b)) {
+      switch (conref_def(bounds_one,b)) {
       case Unknown_b:
 	// ({ tagged_ptr x = e1;
 	//    t2 *a = x.curr;
@@ -1961,16 +1955,12 @@ static void exp_to_c(env_t nv, exp_t e) {
     exp_to_c(nv, e1);
     bool is_poly = is_poly_project(e); // decide before mutating e
     let PtrInfo{ta,rgn,bcr,tq,b} = get_ptr_type(e1typ);
-    switch (conref_val(b)) {
+    switch (conref_def(bounds_one,b)) {
     case &Upper_b(esz):
       // the type-checker should've ensured the size is at least 1
       if (Evexp::eval_const_uint_exp(esz) < 1)
         impos("exp_to_c:  StructArrow_e on pointer of size 0");
-      bool possibly_null;
-      switch (compress_conref(bcr)->v) {
-      case &Eq_constr(b): possibly_null = b; break;
-      default: possibly_null = false; break;
-      }
+      bool possibly_null = conref_def(false,bcr);
       if (is_nullable(e1->topt->v)) {
         if(use_runtimecheck_funs) {
           // ((t *)_check_null(e))->f
@@ -2058,15 +2048,11 @@ static void exp_to_c(env_t nv, exp_t e) {
       e->r = structmember_exp(e1,fieldname(i),DL)->r;
       break;
     case &PointerType(PtrInfo{ta,rgn,bcr,tq,b}):
-      switch (conref_val(b)) {
+      switch (conref_def(bounds_one,b)) {
       case &Upper_b(esz):
 	// FIX: should avoid bounds-check when e2 is constant
 	esz = uint_exp(Evexp::eval_const_uint_exp(esz),DL);
-        bool possibly_null;
-        switch (compress_conref(bcr)->v) {
-        case &Eq_constr(b): possibly_null = b;     break;
-        default:            possibly_null = false; break;
-        }
+        bool possibly_null = conref_def(false,bcr);
 	type_t ta1 = typ_to_c(ta);
 	type_t ta2 = cstar_typ(ta1, tq);
 	if(use_runtimecheck_funs) {

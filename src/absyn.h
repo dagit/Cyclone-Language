@@ -641,6 +641,7 @@ namespace Absyn {
   extern conref_t<`a> empty_conref();
   extern conref_t<`a> compress_conref(conref_t<`a> x);
   extern `a conref_val(conref_t<`a> x);
+  extern `a conref_def(`a, conref_t<`a> x);
 
   ////////////////////////////// Types //////////////////////////////
   // return a fresh type variable of the given kind that can be unified
