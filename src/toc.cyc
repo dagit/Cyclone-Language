@@ -94,10 +94,6 @@ static bool really_is_nullable(typ t) {
   return ans;
 }
 
-// no longer does anything -- much easier to do in pretty-printer
-static qvar collapse_qvar(qvar x) {
-  return x;
-}
 static qvar collapse_qvar_tag(qvar x,string tag) {
   return &$(x[0], String::strconcat(x[1],tag));
 }
@@ -216,12 +212,12 @@ static typ typ_to_c(typ t) {
   case EnumType(tdnopt,ts,_):
     if (tdnopt == null) unimp("anonymous enum");
     // enum foo is mapped to foo -- see enumdecl_to_c below
-    return TypedefType(collapse_qvar(tdnopt->v),null, &Opt(void_star_typ()));
+    return TypedefType(tdnopt->v,null, &Opt(void_star_typ()));
   case XenumType(tdn,_):
     // xenum bar is mapped to bar -- see xenumdecl_to_c below
     // FIX:  the actual type appears both here and in xenumdecl_to_c,
     // get rid of the repetition
-    return TypedefType(collapse_qvar(tdn),null,
+    return TypedefType(tdn,null,
 		       &Opt(nullableptr_typ(strct("_xenum_struct"),
 					    empty_tqual())));
   case PointerType(t2,_,b,tq):
@@ -259,11 +255,11 @@ static typ typ_to_c(typ t) {
   case StructType(tdnopt,ts,_):
     if (tdnopt == null) unimp("anonymous struct");
     // just drop the type arguments and translate the nested types
-    return strctq(collapse_qvar(tdnopt->v));
+    return strctq(tdnopt->v);
   case TypedefType(tdn,ts,topt):
     if (topt == null) return toc_impos("Toc::typ_to_c: unresolved TypedefType");
     // just drop the type arguments and translate the nested types
-    return TypedefType(collapse_qvar(tdn),null, &Opt(typ_to_c_array(topt->v)));
+    return TypedefType(tdn,null, &Opt(typ_to_c_array(topt->v)));
   case RgnHandleType(t):
     // presumably the runtime will cast this as necessary
     return void_star_typ();
@@ -1013,7 +1009,7 @@ static exp init_struct(env nv,bool pointer,list<$(list<designator>,exp)@> dles,
       default: throw toc_impos("array designator in struct");
       }
   }
-  return make_struct(x, strctq(collapse_qvar(tdn)), s, pointer, is_atomic);
+  return make_struct(x, strctq(tdn), s, pointer, is_atomic);
 }
 
 // forward declaration
@@ -1484,7 +1480,7 @@ static void exp_to_c(env nv, exp e) {
       e->r = init_struct(nv,false,dles,tdn)->r;
     else {
       // At top-level must use deisignators
-      _ n = collapse_qvar(tdn);
+      _ n = tdn;
       for (_ es = dles; es != null; es = es->tl)
 	exp_to_c(nv,es->hd[1]);
       e->r = cast_exp(strctq(n), unresolvedmem_exp(null,dles,DL),DL)->r;
@@ -1497,7 +1493,7 @@ static void exp_to_c(env nv, exp e) {
       // non-value-carrying constructor -- just use the constructor name
       // (see enumdecl_to_c below)
       if (!nv->toplevel)
-	e->r = var_exp(collapse_qvar(qv),DL)->r;
+	e->r = var_exp(qv,DL)->r;
       else {
 	// FIX: we should get the tag from a centralized place and we
 	// might as well use it everywhere.
@@ -1735,7 +1731,7 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
       succ_lab = lab;
     }
     if (ps == null) {
-      s = if_eq_goto_stmt(r, var_exp(collapse_qvar(qv),DL), succ_lab, fail_lab);
+      s = if_eq_goto_stmt(r, var_exp(qv,DL), succ_lab, fail_lab);
     } else {
       unsigned int max_tag = 0;
       for (_ fs = ed->fields->v; fs != null; fs = fs->tl) {
@@ -2236,7 +2232,6 @@ static void stmt_to_c(env nv, stmt s) {
 ///////////////////////////////////////////////////////////////
 // function declaration translation -- straightforward
 static void fndecl_to_c(env nv, fndecl f) {
-  f->name     = collapse_qvar(f->name);
   f->tvs      = null;
   f->ret_type = typ_to_c(f->ret_type);
   for (_ args=f->args; args != null; args = args->tl) {
@@ -2251,6 +2246,7 @@ static void fndecl_to_c(env nv, fndecl f) {
 static scope scope_to_c(scope s) {
   switch (s) {
   case Abstract: return Public;
+  case ExternC : return Extern;
   default:       return s;
   }
 }
@@ -2258,7 +2254,7 @@ static scope scope_to_c(scope s) {
 // struct declarations -- straightforward
 Opt_t<Dict::Dict<var,structdecl>> structs_so_far = null;
 static void structdecl_to_c(structdecl s) {
-  _ n = collapse_qvar(s->name->v);
+  _ n = s->name->v;
   if (structs_so_far == null) structs_so_far =
 				&Opt(Dict::empty(String::zstrcmp));
   bool seen_defn_before;
@@ -2324,7 +2320,7 @@ static void structdecl_to_c(structdecl s) {
 //
 static Opt_t<Dict::Dict<var,enumdecl>> enums_so_far = null;
 static list<decl> enumdecl_to_c(enumdecl ed, list<decl> res) {
-  _ n = collapse_qvar(ed->name->v);
+  _ n = ed->name->v;
   if (enums_so_far == null)
     enums_so_far = &Opt(Dict::empty(String::zstrcmp));
   bool seen_before;
@@ -2362,7 +2358,7 @@ static list<decl> enumdecl_to_c(enumdecl ed, list<decl> res) {
       // Declare an integer constant for the unboxed field
       _ eopt = (ed->sc == Extern) ? null :
 	        &Opt(cast_exp(t,signed_int_exp(tag_count++,DL),DL));
-      _ vd = new_vardecl(collapse_qvar(f->name), t, eopt);
+      _ vd = new_vardecl(f->name, t, eopt);
       vd->sc = scope_to_c(ed->sc);
       vd->tq = &Tqual{.q_const=true, .q_volatile=false, .q_restrict=false};
       res = &cons(new_decl(Var_d(vd),DL),res);
@@ -2422,7 +2418,7 @@ static list<decl> enumdecl_to_c(enumdecl ed, list<decl> res) {
 //
 static Opt_t<Dict::Dict<var,xenumdecl>> xenums_so_far = null;
 static list<decl> xenumdecl_to_c(xenumdecl xd, list<decl> res) {
-  _ n = collapse_qvar(xd->name);
+  _ n = xd->name;
 
   if (xd->fields == null) {
     _ t  = nullableptr_typ(strct("_xenum_struct"),empty_tqual());
@@ -2434,7 +2430,7 @@ static list<decl> xenumdecl_to_c(xenumdecl xd, list<decl> res) {
     for (_ fs = xd->fields; fs != null; fs = fs->tl) {
       enumfield f = fs->hd;
       if (f->tag != null) unimp("xenum:  can't deal with explicit tags");
-      string fn      = collapse_qvar(f->name)[1];
+      string fn      = f->name[1];
       _      sz_exp  = uint_exp(fn.size,DL);
       _      tag_typ = ArrayType(uchar_t,empty_tqual(),FixedArray(sz_exp));
       Opt_t<exp> initopt = null;
@@ -2531,7 +2527,10 @@ static $(env,list<decl>) decls_to_c(env nv, list<decl> ds, bool top) {
     decl d = ds->hd;
     switch (d->r) {
     case Var_d(vd):
-      _ n = collapse_qvar(vd->name);
+      _ c_name = vd->name;
+      // strip any namespace from an extern C declaration
+      if (vd->sc == ExternC) 
+	c_name = &$(null,c_name[1]);
       if (vd->initializer != null)
 	exp_to_c(nv, vd->initializer->v);
       if (nv->toplevel) {
@@ -2539,17 +2538,21 @@ static $(env,list<decl>) decls_to_c(env nv, list<decl> ds, bool top) {
 	temp_topdecls = null;
       }
       if (top)
-	nv = add_varmap(nv,vd->name,varb_exp(n,Global_b(vd),DL));
+	nv = add_varmap(nv,vd->name,varb_exp(c_name,Global_b(vd),DL));
       else
-	nv = add_varmap(nv,vd->name,varb_exp(n,Local_b(vd),DL));
-      vd->name = n;
+	nv = add_varmap(nv,vd->name,varb_exp(c_name,Local_b(vd),DL));
+      vd->name = c_name;
       vd->sc   = scope_to_c(vd->sc);
-      //vd->type = top ? typ_to_c_array(vd->type) : typ_to_c(vd->type);
       vd->type = typ_to_c_array(vd->type);
       res = &cons(d,res);
       break;
     case Fn_d(fd):
-      nv = add_varmap(nv,fd->name,var_exp(collapse_qvar(fd->name),DL));
+      // extern C declarations are not placed in a namespace
+      _ c_name = fd->name;
+      if (fd->sc == ExternC)
+	c_name = &$(null,c_name[1]);
+      nv = add_varmap(nv,fd->name,var_exp(c_name,DL));
+      fd->name = c_name;
       fndecl_to_c(nv, fd);
       res = &cons(d,res);
       break;
@@ -2568,7 +2571,7 @@ static $(env,list<decl>) decls_to_c(env nv, list<decl> ds, bool top) {
     case Xenum_d(xd):
       res = xenumdecl_to_c(xd,res); break;
     case Typedef_d(td):
-      td->name = collapse_qvar(td->name);
+      td->name = td->name;
       td->tvs = null;
       td->defn = typ_to_c_array(td->defn);
       res = &cons(d,res);
@@ -2576,12 +2579,17 @@ static $(env,list<decl>) decls_to_c(env nv, list<decl> ds, bool top) {
     case Namespace_d(v,ds2):
       _ p = decls_to_c(nv,ds2,top);
       nv = p[0];
-      res = List::append(List::rev(p[1]),res);
+      res = List::imp_append(List::imp_rev(p[1]),res);
       break;
     case Using_d(q,ds2):
       _ p = decls_to_c(nv,ds2,top);
       nv = p[0];
-      res = List::append(List::rev(p[1]),res);
+      res = List::imp_append(List::imp_rev(p[1]),res);
+      break;
+    case ExternC_d(ds2):
+      _ p = decls_to_c(nv,ds2,top);
+      nv = p[0];
+      res = List::imp_append(List::imp_rev(p[1]),res);
       break;
     }
   }

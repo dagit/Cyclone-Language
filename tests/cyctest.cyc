@@ -945,6 +945,25 @@ void scanf_test() {
 }
 */
 
+// check the functionality of extern "C"
+extern "C" double cos(double);
+
+extern "C" {
+  double sin(double);
+  extern double sinh(double);  // should get a warning here
+}
+
+namespace CMath {
+  extern "C" double atan(double);
+}
+
+namespace MyMath {
+  double atan(double x) {
+    return CMath::atan(x);
+  }
+}
+
+
 int cyc_main() {
   printf("*************** CYCLONE TEST SUITE ***************\n\n");
 

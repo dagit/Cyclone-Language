@@ -1191,6 +1191,13 @@ Doc decl2doc(decl d) {
              line_doc(),
              text("}"));
     break;
+  case ExternC_d(tdl):
+    s = cat5(text("extern \"C\" {"),
+	     line_doc(),
+	     ppseql(decl2doc,"",tdl),
+	     line_doc(),
+	     text("}"));
+    break;
   }
   return s;
 }
@@ -1200,6 +1207,7 @@ Doc scope2doc(scope sc) {
   case Static:   return text("static ");
   case Public:   return nil_doc();
   case Extern:   return text("extern ");
+  case ExternC:  return text("extern \"C\"");
   case Abstract: return text("abstract ");
   }
 }

@@ -33,6 +33,9 @@ static scope scope_redecl_okay<`a>(scope s1, Opt_t<`a> fields1,
                                    scope s2, Opt_t<`a> fields2,
                                    segment loc, string t, string v) {
   switch ($(s1,s2)) {
+  case $(ExternC, ExternC): break;
+  case $(_,       ExternC): 
+    redecl_err(loc, t, v, "non-extern \"C\"", "extern \"C\""); break;
   case $(Static,  Static): break;
   case $(_,       Static): redecl_err(loc, t, v, "non-static", "static"); break;
   case $(Static,  Public): redecl_err(loc, t, v, "static",     "public"); break;
@@ -160,10 +163,13 @@ static bool var_redecl_okay(genv_t ge, segment loc, var name, typ t, scope sc) {
                    name));
     if (vd->sc == Static && sc != Static)
       warn(loc,
-           xprintf("non-static declaration of %s follows static declaration",
-                   name));
+	   xprintf("non-static declaration of %s follows static declaration",
+		   name));
+    if ((vd->sc == ExternC && sc != ExternC) || 
+	(vd->sc != ExternC && sc == ExternC))
+      terr(loc,xprintf("incompatible redeclaration of %s",name));
     // either they must both be static, both public, or at most one non-extern
-    if ((sc != Extern && vd->sc != Extern) && 
+    else if ((sc != Extern && vd->sc != Extern) && 
 	!(sc == Static && vd->sc == Static) &&
 	!(sc == Public && vd->sc == Public))
       terr(loc,xprintf("incompatible redeclaration of %s",name));
@@ -203,7 +209,7 @@ static void tcVardecl(tenv te, genv_t ge, segment loc, vardecl vd) {
   // check for redeclaration
   bool is_redecl = var_redecl_okay(ge,loc,v,t,sc);
   // if extern, make sure it has no initializer
-  if (sc == Extern) {
+  if (sc == Extern || sc == ExternC) {
     if(vd->initializer != null) 
       terr(loc,"extern declaration should not have initializer");
   } else if (!is_function_type(t)) {
@@ -583,12 +589,30 @@ static void tcXenumdecl(tenv te, genv_t ge, segment loc, xenumdecl xd) {
   }
 }
 
+static bool okay_externC(segment loc, scope sc) {
+  switch (sc) {
+  case Static:
+    warn(loc,"static declaration nested within extern \"C\"");
+    return false;
+  case Abstract:
+    warn(loc,"abstract declaration nested within extern \"C\"");
+    return false;
+  case Public: return true;
+  case Extern:
+    warn(loc,"converting extern declaration to extern \"C\"");
+    return true;
+  case ExternC:
+    warn(loc,"nested extern \"C\" declaration");
+    return true;
+  }
+}
+
 // Typecheck a list, ds, of declarations in environment te.
 // As a side effect, all declarations and variable references are made
 // absolute, so later passes just recurse through namespace and using
 // New: a second pass shakes out unnecessary vardecls.
 // FIX: shake out type definitions too.
-void tc(tenv te, list<decl> ds0) {
+static void tc_decls(tenv te, list<decl> ds0, bool in_externC) {
 
   genv_t ge = Dict::lookup(te->ae,te->ns); // no longer a copy!!!
 
@@ -603,12 +627,34 @@ void tc(tenv te, list<decl> ds0) {
     case Union_d: // FIX
       terr(loc,"union is not implemented");
       break;
-    case Var_d(vd):     tcVardecl(te,ge,loc,vd);     break;
-    case Fn_d(fd):      tcFndecl(te,ge,loc,fd);      break;
-    case Typedef_d(td): tcTypedefdecl(te,ge,loc,td); break;
-    case Struct_d(sd):  tcStructdecl(te,ge,loc,sd);  break;
-    case Enum_d(ed):    tcEnumdecl(te,ge,loc,ed);    break;
-    case Xenum_d(xd):   tcXenumdecl(te,ge,loc,xd);   break;
+    case Var_d(vd):     
+      if (in_externC && okay_externC(d->loc,vd->sc))
+	vd->sc = ExternC;
+      tcVardecl(te,ge,loc,vd);
+      break;
+    case Fn_d(fd):      
+      if (in_externC && okay_externC(d->loc,fd->sc))
+	fd->sc = ExternC;
+      tcFndecl(te,ge,loc,fd);
+      break;
+    case Typedef_d(td): 
+      tcTypedefdecl(te,ge,loc,td);
+      break;
+    case Struct_d(sd):  
+      if (in_externC && okay_externC(d->loc,sd->sc))
+	sd->sc = ExternC;
+      tcStructdecl(te,ge,loc,sd);
+      break;
+    case Enum_d(ed):    
+      if (in_externC && okay_externC(d->loc,ed->sc))
+	ed->sc = ExternC;
+      tcEnumdecl(te,ge,loc,ed);
+      break;
+    case Xenum_d(xd):   
+      if (in_externC && okay_externC(d->loc,xd->sc))
+	xd->sc = ExternC;
+      tcXenumdecl(te,ge,loc,xd);
+      break;
 
     case Namespace_d(v,ds2):
       // DAN: This case is much more imperative than it used to be.
@@ -621,7 +667,7 @@ void tc(tenv te, list<decl> ds0) {
       }
       // Do the nested declarations then restore the namespace
       te->ns = ns2;
-      tc(te,ds2);
+      tc_decls(te,ds2,in_externC);
       te->ns = ns;
       break;
       
@@ -629,12 +675,19 @@ void tc(tenv te, list<decl> ds0) {
       // DAN: We're more imperative here too.
       _ ns2 = resolve_namespace(te,loc,List::append(nsl,&cons(v,null)));
       ge->availables = &cons(ns2,ge->availables);
-      tc(te,ds2);
+      tc_decls(te,ds2,in_externC);
       ge->availables = ge->availables->tl;
+      break;
+
+    case ExternC_d(ds2):
+      tc_decls(te,ds2,true);
       break;
     }
   }
+}
 
+void tc(tenv te, list<decl> ds) {
+  tc_decls(te,ds,false);
 }
 
 // for tree-shaking (so we don't include the world)

@@ -76,7 +76,8 @@ enum Type_specifier {
 typedef enum Type_specifier type_specifier_t;
 
 enum Storage_class {
-  Typedef_sc, Extern_sc, Static_sc, Auto_sc, Register_sc, Abstract_sc;
+  Typedef_sc, Extern_sc, ExternC_sc, Static_sc, Auto_sc, 
+  Register_sc, Abstract_sc;
 };
 typedef enum Storage_class storage_class_t;
 
@@ -214,6 +215,7 @@ static void only_vardecl(list<string> params,decl x) {
   case Xenum_d(_):       decl_kind = "xenum declaration";      break;
   case Namespace_d(_,_): decl_kind = "namespace declaration";  break;
   case Using_d(_,_):     decl_kind = "using declaration";      break;
+  case ExternC_d(_):     decl_kind = "extern C declaration";   break;
   }
   abort(xprintf("%s appears in parameter type", decl_kind), x->loc);
   return;
@@ -322,6 +324,7 @@ static fndecl make_function(Opt_t<decl_spec_t> dso, declarator_t d,
     if (dso->v->sc != null)
       switch (dso->v->sc->v) {
       case Extern_sc: sc = Extern; break;
+      case ExternC_sc: sc = ExternC; break;
       case Static_sc: sc = Static; break;
       default: err("bad storage class on function",loc); break;
       }
@@ -603,6 +606,7 @@ static list<decl> make_declarations(decl_spec_t ds,
     switch (ds->sc->v) {
     case Typedef_sc:  istypedef = true; break;
     case Extern_sc:   s = Extern;   break;
+    case ExternC_sc:  s = ExternC;  break;
     case Static_sc:   s = Static;   break;
     case Auto_sc:     s = Public;   break;
     case Register_sc: s = Public;   break;
@@ -879,6 +883,11 @@ translation_unit:
 | namespace_action '{' translation_unit unnamespace_action translation_unit_opt
     { $$=^$(&cons(&Decl(Namespace_d($1,$3),LOC(@1,@4)),$5));
     }
+| EXTERN STRING '{' translation_unit '}' translation_unit_opt
+    { if (String::strcmp($2,"C") != 0)
+        err("only extern \"C\" { ... } is allowed",LOC(@1,@2));
+      $$=^$(&cons(&Decl(ExternC_d($4),LOC(@1,@5)),$6));
+    }
 ;
 
 translation_unit_opt:
@@ -972,6 +981,11 @@ storage_class_specifier:
 | REGISTER  { $$=^$(Register_sc); }
 | STATIC    { $$=^$(Static_sc); }
 | EXTERN    { $$=^$(Extern_sc); }
+| EXTERN STRING
+  { if (strcmp($2,"C") != 0)
+      err("only extern or extern \"C\" is allowed",LOC(@1,@2));
+    $$ = ^$(ExternC_sc);
+  } 
 | TYPEDEF   { $$=^$(Typedef_sc); }
 /* Cyc:  exception and abstract specifiers */
 | ABSTRACT  { $$=^$(Abstract_sc); }

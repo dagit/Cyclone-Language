@@ -111,7 +111,7 @@ namespace Absyn {
   typedef enum Designator designator;
   typedef xenum StmtAnnot stmt_annot_t;
 
-  EXTERN_DEFINITION enum Scope { Static, Abstract, Public, Extern };
+  EXTERN_DEFINITION enum Scope { Static, Abstract, Public, Extern, ExternC };
   EXTERN_DEFINITION struct Tqual { 
     bool q_const; bool q_volatile; bool q_restrict; 
   };
@@ -393,6 +393,7 @@ namespace Absyn {
     Typedef_d(typedefdecl);
     Namespace_d(var,list<decl>);
     Using_d(qvar,list<decl>);
+    ExternC_d(list<decl>);
   };
 
   EXTERN_DEFINITION struct Decl {

@@ -277,6 +277,7 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
     case Enum_d(_):          unimp_msg_part = "enum";      break;
     case Xenum_d(_):         unimp_msg_part = "xenum";     break;
     case Typedef_d(_):       unimp_msg_part = "typedef";   break;
+    case ExternC_d(_):       unimp_msg_part = "extern \"C\""; break;
     }
     throw impos(xprintf("tcStmt: nested %s declarations unimplemented",
 			unimp_msg_part));

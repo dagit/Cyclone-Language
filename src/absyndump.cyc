@@ -123,6 +123,7 @@ void dumpscope(scope sc) {
   case Static:   dump("static"); return;
   case Public:   return;
   case Extern:   dump("extern"); return;
+  case ExternC:  dump("extern \"C\""); return;
   case Abstract: dump("abstract"); return;
   }
 }
@@ -656,6 +657,12 @@ void dumpdecl(decl d) {
     dump("using");
     dumpqvar(q);
     dump("{");
+    for(; tdl != null; tdl = tdl->tl)
+      dumpdecl(tdl->hd);
+    dump("}");
+    break;
+  case ExternC_d(tdl):
+    dump("extern \"C\" {");
     for(; tdl != null; tdl = tdl->tl)
       dumpdecl(tdl->hd);
     dump("}");
