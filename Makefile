@@ -794,7 +794,7 @@ clean_nogc: clean_test clean_build
 #	$(MAKE) -C doc          clean
 	$(MAKE) -C lib/xml      clean
 	$(RM) -r $(BL)
-	$(RM) $(addprefix bin/, $(addsuffix $(EXE), cyclone cyclone_a cycdoc buildlib cycbison cyclex cycflex aprof rewrite errorgen))
+	$(RM) $(addprefix bin/, $(addsuffix $(EXE), cyclone cyclone_a cyclone_pg cyclone_nocheck cycdoc buildlib cycbison cyclex cycflex aprof rewrite errorgen))
 	$(RM) *~ amon.out
 
 clean: clean_nogc

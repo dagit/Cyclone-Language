@@ -69,7 +69,7 @@ void *GC_realloc_hint(void *x, size_t old_size, size_t new_size) {
 #if (defined(__linux__) && defined(__KERNEL__))
   return cyc_krealloc(x, old_size, new_size);
 #else 
-  return GC_realloc(x, new_size);
+  return (void *)GC_realloc(x, new_size);
 #endif
 }
 
