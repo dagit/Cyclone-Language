@@ -63,7 +63,7 @@ gen-libdoc.tex: \
 
 clean:
 	$(RM) *.aux *.dvi *.hind *.haux *.idx *.ilg *.ind *.ing *.log
-	$(RM) *.pdf *.toc *.out
+	$(RM) *.pdf *.toc *.out *~
 	$(RM) main-screen.html
 	$(RM) gen-libdoc.tex
 	$(RM) -r online-manual

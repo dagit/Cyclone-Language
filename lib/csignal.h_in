@@ -16,16 +16,9 @@
    write to the Free Software Foundation, Inc., 59 Temple Place, Suite
    330, Boston, MA 02111-1307 USA. */
 
-#ifndef _SIGNAL_H
-#define _SIGNAL_H
-
 #define SIG_DFL _SIG_DFL
 #define SIG_IGN _SIG_IGN
 #define SIG_ERR _SIG_ERR
-
-#define _EXTRACT_SIGNALCONSTS
-#include _PLATFORM_INCLUDES_
-#undef _EXTRACT_SIGNALCONSTS
 
 #include <sys/ctypes.h> // for pid_t
 

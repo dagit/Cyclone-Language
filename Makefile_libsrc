@@ -1,0 +1,130 @@
+# -*- Makefile -*-
+# CYCDIR must be defined by the environment for this file to work correctly.
+#
+# This file is normally invoked recursively by the top-level Cyclone
+# Makefile, which exports CYCDIR, so all is well.
+#
+# This file should be called from the directory where you want the results
+# of building the Cyclone library and/or compiler to be put.
+# By using flags, variables, etc., this file can be used to build
+# bootstrap iterations, compilers for other targets, debug/profile versions, etc
+
+include $(CYCDIR)/Makefile.inc
+VPATH=$(CYCDIR)/lib $(CYCDIR)/src $(CYCDIR)
+
+# For bootstrapping, may want to override these with somehting appropriate
+CYCC:=$(CYCDIR)/bin/$(CYCCOMP)
+CYCLEX:=$(CYCDIR)/bin/cyclex$(EXE)
+CYCBISON:=$(CYCDIR)/bin/cycbison$(EXE)
+INC_PATH:=$(CYCDIR)/lib
+LIB_PATH:=$(CYCDIR)/lib
+LIBR:=$(CYCLIB)
+
+CYCINC_H:=$(LIB_PATH)/include/cyc_include.h
+
+override CYCFLAGS += -I. -I$(INC_PATH) -B$(LIB_PATH) -save-c
+
+CYC_SRCS := $(addsuffix .cyc, $(CYCLONE_SRCS))
+
+all: libs $(CYCCOMP) cycdoc$(EXE) buildlib$(EXE) 
+
+# See kludge described below
+libs: cstdio.h csignal.h $(CYCLIB) nogc.a 
+
+cfiles: cstdio.h csignal.h $(C_SRCS) cycdoc.c buildlib.c $(C_LIBS) $(RUNTIME).c nogc.c precore_c.h
+
+$(CYCCOMP): $(O_SRCS) $(LIBR) install_path.$(O)
+ifdef MS
+#FIX: Ignore fewer flags.
+	cl /Fe$@ $(CYC_LIB_PATH)/snprintf.obj $^ $(CYCDIR)/bin/cyc-lib/gc.lib
+else
+	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
+endif
+
+# Why do these want two -B arguments???
+# Why don't these use $(CYCFLAGS)
+cycdoc$(EXE): $(addsuffix .$(O), $(CYCDOC_SRCS))
+	$(CYCC) -v -B$(LIB_PATH) -B$(CYCDIR)/bin/cyc-lib -o $@ $^ $(LDFLAGS)
+
+buildlib$(EXE): $(addsuffix .$(O), $(BUILDLIB_SRCS)) install_path.$(O)
+	$(CYCC) -v -B$(LIB_PATH) -B$(CYCDIR)/bin/cyc-lib -o $@ $^ $(LDFLAGS)
+
+install_path.c: $(CYCDIR)/Makefile.inc
+	@(echo "char *Carch = \"$(ARCH)\";"; \
+	  echo "char *Cdef_inc_path = \"$(INC_INSTALL)\";"; \
+	  echo "char *Cdef_lib_path = \"$(LIB_INSTALL)\";"; \
+	  echo "char *Ccomp = \"$(CC)\";") > $@
+
+cyclone.$(O): version.h
+version.h: $(CYCDIR)/.version
+	@(version=`cat $<`; \
+	  echo "static string_t version = \"$$version\";") > $@
+
+$(CYCLIB): $(O_LIBS) $(RUNTIME).$(O)
+ifdef MS
+	lib /out:$@ $^
+else
+	-rm -f $@
+ifdef LC_FLAG
+	$(CYCC) $(LC_FLAG) -o $@ $^
+else
+	ar rc $@ $^
+	@echo Trying ranlib, if not found, probably ok to ignore error messages
+	-ranlib $@
+endif
+endif
+
+nogc.a: nogc.o
+	ar rc $@ $^
+	@echo Trying ranlib, if not found, probably ok to ignore error messages
+	-ranlib $@
+
+precore_c.h: core.h $(CYCC) $(CYCINC_H)
+	$(CYCC) $(CYCFLAGS) -stopafter-toc -pp -D_CYC_GENERATE_PRECORE_C_ -nocyc -noremoveunused -noexpandtypedefs -o $@ -x cyc $<
+
+%.cyc: %.cyl $(CYCLEX)
+	$(CYCLEX) $< $@
+%_tab.cyc: %.y $(CYCBISON)
+	$(CYCBISON) -d $< -o $@
+%_tab.h: %.y $(CYCBISON)
+	$(CYCBISON) -d $< -o %.cyc
+%.c: %.cyc $(CYCC) $(CYCINC_H)
+	$(CYCC) $(CYCFLAGS) -c -o $@ -stopafter-toc $<
+%.$(O): %.cyc $(CYCC) $(CYCINC_H)
+	$(CYCC) $(CYCFLAGS) -c -o $@ $<
+# For runtime_cyc.c and nogc.c
+%.$(O): %.c precore_c.h $(CYCINC_H)
+	$(CC) $(CFLAGS) -I. -c -o $@ $<
+# Always use the original compiler to avoid circularities
+# Note: In most cases, it would be correct to share .d files
+%.d: %.cyc
+	$(CYCDIR)/bin/$(CYCCOMP) -M -MG $(CYC_FLAGS) $< > $@
+
+ifdef MS
+%.obj: %.c precore_c.h $(CYCINC_H)
+	cl /I$(CYCDIR) /Dinline=__inline /c /w /nologo /Fo$@ $^
+endif
+
+#This klduge replaces the PLATFORM_INCLUDE kludge -- we hope buildlib comes soon
+cstdio.h: cstdio.h_in arch/$(UPDATEARCH).h
+	-rm $@
+	echo "#ifndef _STDIO_H" >> $@
+	echo "#define _STDIO_H" >> $@
+	echo "#define _EXTRACT_STDIOCONSTS" >> $@
+	cat $(CYCDIR)/lib/arch/$(UPDATEARCH).h >> $@
+	echo "#undef _EXTRACT_STDIOCONSTS" >> $@
+	cat $< >> $@
+csignal.h: csignal.h_in arch/$(UPDATEARCH).h
+	-rm $@
+	echo "#ifndef _SIGNAL_H" >> $@
+	echo "#define _SIGNAL_H" >> $@
+	echo "#define _EXTRACT_SIGNALCONSTS" >> $@
+	cat $(CYCDIR)/lib/arch/$(UPDATEARCH).h >> $@
+	echo "#undef _EXTRACT_SIGNALCONSTS" >> $@
+	cat $< >> $@
+
+ifneq ($(MAKECMDGOALS),clean)
+ifndef NODEPS
+-include $(addsuffix .d, $(CYCLONE_LIBS) $(CYCLONE_SRCS) cycdoc)
+endif
+endif

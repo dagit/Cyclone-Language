@@ -1,7 +1,5 @@
-
 # The following instructions assume you have not added any files to
-# src or lib.  If you have, you must update Makefile.inc.in in the
-# obvious manner.
+# src or lib.  If you have, go update Makefile.inc.in in the obvious manner!
 
 # To update to a new version of the compiler, here's the boostrap sequence
 #   1. make all
@@ -9,57 +7,73 @@
 #   3. make update
 #   4. make cyclone
 # It is strongly advised that you precede step 3 with the boostrap-checking
-# facilities provided by CYCC and OUT_PREFIX.
+# facilities provided by overriding CYCC, BUILDDIR, INC_PATH, and LIB_PATH.
 # To update for other architectures, do make update_all_archs after you have
-# reached a fixpoint.  Alternatively, do make update_devel_archs to just
-# update linux and cygwin; you can wait until just before a release to
-# do update_all_archs.
+# reached a fixpoint.  Alternatively, do make update_devel_archs to update 
+# linux and cygwin and wait until just before a release to do update_all_archs.
 
 # To use a new version of the compiler without nuking the C files used to
 # bootstrap:
 #   1. make all
 #   2. make cyclone_src
-# There is now a src/cyclone.exe that you can use/move as you wish.
+# There is now a build/boot/cyclone.exe that you can use/move as you wish.
 
 include Makefile.inc
+export CYCDIR CC CYCFLAGS UPDATEARCH
 
 ifndef ARCH
-$(error "Must have ARCH variable defined to properly compile -- perhaps forgot to run ./configure")
+$(error "Must have ARCH variable defined -- perhaps forgot to run ./configure")
 endif
 
 CYC_BIN_PATH := $(CYCDIR)/bin
 CYC_LIB_PATH := $(CYCDIR)/bin/cyc-lib/
 CYC_INC_PATH := $(CYCDIR)/lib
 
-# These are passed to src and lib to control bootstrapping.  Override them
-# on the command-line (using a path that will be interpreted in src and lib)
-CYCC:=$(CYC_BIN_PATH)/$(CYCCOMP) 
-OUT_PREFIX=
+build: $(CYC_LIB_PATH)/gc.a cyclone tools aprof libs 
 
-build: $(CYC_LIB_PATH)/gc.a cyclone tools aprof libs
-
-# This target builds off the C files in bin/genfiles
-cyclone:
-	$(MAKE) install -C bin/genfiles
-
+cyclone: include/cstdio.h include/csignal.h
+	$(MAKE) -C bin/genfiles install 
 tools:
-	$(MAKE) install -C tools/bison
-	$(MAKE) install -C tools/cyclex
-	$(MAKE) install -C tools/flex
-.PHONY: tools
-
+	$(MAKE) -C tools/bison  install 
+	$(MAKE) -C tools/cyclex install 
+	$(MAKE) -C tools/flex   install 
+aprof:
+	$(MAKE) -C bin/genfiles install_a 
+	$(MAKE) -C tools/aprof  install 
 libs:
 ifndef NO_XML_LIB
-	$(MAKE) install -C lib/xml
+	$(MAKE) -C lib/xml install 
 endif
-.PHONY: libs
+# Non-null/bounds checked version of the library -- not built by default
+nocheck:
+	$(MAKE) -C bin/genfiles install_nocheck 
+
+.PHONY: tools cyclone aprof libs nocheck
 
 $(CYC_LIB_PATH)/gc.a:
-	$(MAKE) -C gc gc.a CC="$(CC)" CFLAGS="$(CFLAGS) -O -I./include -DATOMIC_UNCOLLECTABLE -DNO_SIGNALS -DNO_EXECUTE_PERMISSION -DALL_INTERIOR_POINTERS -DSILENT -DNO_DEBUGGING -DDONT_ADD_BYTE_AT_END"
+	$(MAKE) -C gc CC=$(CC) gc.a CFLAGS="$(CFLAGS) -O -I./include -DATOMIC_UNCOLLECTABLE -DNO_SIGNALS -DNO_EXECUTE_PERMISSION -DALL_INTERIOR_POINTERS -DSILENT -DNO_DEBUGGING -DDONT_ADD_BYTE_AT_END"
 	ln gc/gc.a $@
 
-# After building all of the source, install it in the user-defined 
-# directories.  Also, keep a record of what was copied for later uninstall.
+#This klduge replaces the PLATFORM_INCLUDE kludge -- we hope buildlib comes soon
+include/cstdio.h: include/cstdio.h_in include/arch/$(ARCH).h
+	-rm $@
+	echo "#ifndef _STDIO_H" >> $@
+	echo "#define _STDIO_H" >> $@
+	echo "#define _EXTRACT_STDIOCONSTS" >> $@
+	cat include/arch/$(ARCH).h >> $@
+	echo "#undef _EXTRACT_STDIOCONSTS" >> $@
+	cat $< >> $@
+include/csignal.h: include/csignal.h_in include/arch/$(ARCH).h
+	-rm $@
+	echo "#ifndef _SIGNAL_H" >> $@
+	echo "#define _SIGNAL_H" >> $@
+	echo "#define _EXTRACT_SIGNALCONSTS" >> $@
+	cat include/arch/$(ARCH).h >> $@
+	echo "#undef _EXTRACT_SIGNALCONSTS" >> $@
+	cat $< >> $@
+
+# Store the compiler, libraries, and tools in the user-defined directories.
+# Also, keep a record of what was copied for later uninstall.
 install: build inc_install lib_install bin_install
 uninstall: inc_uninstall lib_uninstall bin_uninstall
 
@@ -69,93 +83,94 @@ inc_install:
 inc_uninstall:
 	$(SHELL) config/cyc_install -u $(INC_INSTALL)
 else
-inc_install:
-	@(echo "no include directory specified"; exit 1)
-inc_uninstall:
+inc_install inc_uninstall:
 	@(echo "no include directory specified"; exit 1)
 endif
-
 ifdef BIN_INSTALL
 bin_install:
 	$(SHELL) config/cyc_install bin/cyclone$(EXE) bin/cycbison$(EXE) bin/cyclex$(EXE) bin/cycflex$(EXE) $(BIN_INSTALL)
 bin_uninstall:
 	$(SHELL) config/cyc_install -u $(BIN_INSTALL)
 else
-bin_install:
-	@(echo "no bin directory specified"; exit 1)
-bin_uninstall:
+bin_install bin_uninstall:
 	@(echo "no bin directory specified"; exit 1)
 endif
-
 ifdef LIB_INSTALL
 lib_install:
 	$(SHELL) config/cyc_install bin/cyc-lib/* $(LIB_INSTALL)
 lib_uninstall:
 	$(SHELL) config/cyc_install -u $(LIB_INSTALL)
 else
-lib_install:
-	@(echo "no lib directory specified"; exit 1)
-lib_uninstall:
+lib_install lib_uninstall:
 	@(echo "no lib directory specified"; exit 1)
 endif
+.PHONY: install uninstall inc_install lib_install bin_install
+.PHONY: inc_uninstall lib_uninstall bin_uninstall
+
+UPDATEARCH=$(ARCH)
+BUILDDIR=build/boot
+ARCHDIR=bin/genfiles/$(UPDATEARCH)
 
 # These build off the Cyclone source files, but do not replace anything in bin
-# They are affected by CYCC and OUT_PREFIX.
-cyclone_src: lib_src
-	$(MAKE) -C src
+# We override BUILD_DIR and CYCFLAGS for many nefarious purposes:
+#   cross-compiling, bootstrapping, profiling, ...
+DO_LIBSRC=$(MAKE) -C $(BUILDDIR) -f $(CYCDIR)/Makefile_libsrc 
+
+cyclone_src:
+	-mkdir $(BUILDDIR) >& /dev/null
+	$(DO_LIBSRC) all
 lib_src:
-	$(MAKE) -C lib
+	-mkdir $(BUILDDIR) >& /dev/null
+	$(DO_LIBSRC) libs
+cfiles:
+	-mkdir $(BUILDDIR) >& /dev/null
+	$(DO_LIBSRC) CYCFLAGS="$(CYCFLAGS) -stopafter-toc" cfiles
 
-#Non-null/bounds checked version of the library
-nocheck:
-	$(MAKE) install_nocheck -C bin/genfiles
-
-# Allocation profiler and its special version of the Cyclone library
-aprof:
-	$(MAKE) install_a -C bin/genfiles
-	$(MAKE) install -C tools/aprof
+dbg_src:
+	$(MAKE) BUILDDIR=build/dbg CYCFLAGS="$(CYCFLAGS) -g" cyclone_src
+dbg_lib_src:
+	$(MAKE) BUILDDIR=build/dbg CYCFLAGS="$(CYCFLAGS) -g" lib_src
 
 # This target compares the C files in bin/genfiles to those in src
 # Lack of difference means running the update would have no real effect.
 diff: cyclone_src
-	for i in $(UPDATE__SRCS); do (diff bin/genfiles/$(ARCH)/src/$$i src/$$i) done
-	for i in $(C_LIBS); do (diff bin/genfiles/$(ARCH)/lib/$$i lib/$$i) done
-	for i in $(CYCLONE_H); do (diff include/$$i lib/$$i) done
-	diff bin/genfiles/$(ARCH)/lib/$(C_RUNTIME) lib/$(C_RUNTIME)
-	diff bin/genfiles/$(ARCH)/lib/precore_c.h lib/precore_c.h
+	for i in $(UPDATE_SRCS);\
+	   do (diff $(ARCHDIR)/src/$$i $(BUILDDIR)/$$i) done
+	for i in $(C_LIBS);\
+	   do (diff $(ARCHDIR)/lib/$$i $(BUILDDIR)/$$i) done
+	diff $(ARCHDIR)/lib/precore_c.h $(BUILDDIR)/precore_c.h
+	for i in $(CYCLONE_H);\
+	   do (diff include/$$i lib/$$i) done
+	diff $(ARCHDIR)/lib/$(C_RUNTIME) lib/$(C_RUNTIME)
+	diff $(ARCHDIR)/lib/nogc.c lib/nogc.c
 	diff bin/cyc-lib/include/cyc_include.h lib/include/cyc_include.h
-	diff bin/genfiles/$(ARCH)/lib/nogc.c lib/nogc.c
-	diff bin/genfiles/$(ARCH)/src/cycdoc.c src/cycdoc.c
-	diff bin/genfiles/$(ARCH)/src/buildlib.c src/buildlib.c
 
 # This target compares the C files in bin/genfiles to those in src
 # Lack of difference means running the update would have no real effect.
+XS=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 cmp: 
-	@for i in $(UPDATE_SRCS); do (cmp -s bin/genfiles/$(ARCH)/src/$$i src/$$i || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX src/$$i CHANGED) done
-	@for i in $(C_LIBS); do (cmp -s bin/genfiles/$(ARCH)/lib/$$i lib/$$i || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX lib/$$i CHANGED) done
-	@for i in $(CYCLONE_H); do (cmp -s include/$$i lib/$$i || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX lib/$$i CHANGED) done
-	@cmp -s bin/genfiles/$(ARCH)/lib/$(C_RUNTIME) lib/$(C_RUNTIME) || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX lib/$(C_RUNTIME) CHANGED
-	@cmp -s bin/genfiles/$(ARCH)/lib/precore_c.h lib/precore_c.h || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX lib/precore_c.h CHANGED
-	@cmp -s bin/cyc-lib/include/cyc_include.h lib/include/cyc_include.h || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX cyc-lib/include/cyc_include.h CHANGED
-	@cmp -s bin/genfiles/$(ARCH)/lib/nogc.c lib/nogc.c || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX lib/nogc.c CHANGED
-	@cmp -s bin/genfiles/$(ARCH)/src/cycdoc.c src/cycdoc.c || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX src/cycdoc.c CHANGED
-	@cmp -s bin/genfiles/$(ARCH)/src/buildlib.c src/buildlib.c || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX src/buildlib.c CHANGED
+	@for i in $(UPDATE_SRCS);\
+	  do (cmp -s $(ARCHDIR)/src/$$i $(BUILDDIR)/$$i\
+	      || echo $(XS) src/$$i CHANGED) done
+	@for i in $(C_LIBS);\
+	  do (cmp -s $(ARCHDIR)/lib/$$i $(BUILDDIR)/$$i\
+	      || echo $(XS) lib/$$i CHANGED) done
+	@cmp -s $(ARCHDIR)/lib/precore_c.h $(BUILDDIR)/precore_c.h\
+	      || echo $(XS) lib/precore_c.h CHANGED
+	@for i in $(CYCLONE_H);\
+	  do (cmp -s include/$$i lib/$$i\
+              || echo $(XS) lib/$$i CHANGED) done
+	@cmp -s $(ARCHDIR)/lib/$(C_RUNTIME) lib/$(C_RUNTIME)\
+              || echo $(XS) lib/$(C_RUNTIME) CHANGED
+	@cmp -s $(ARCHDIR)/lib/nogc.c lib/nogc.c\
+              || echo $(XS) lib/nogc.c CHANGED
+	@cmp -s bin/cyc-lib/include/cyc_include.h lib/include/cyc_include.h\
+              || echo $(XS) cyc-lib/include/cyc_include.h CHANGED
 
 # This target updates what is in bin/genfiles and include.
 # It would be "dangerous" to invoke this target if we did not have 
 # version control.  Only updates changed files (makes cvs faster).
-ifndef TARGET
-SRCDIR:=src
-LIBDIR:=lib
-ARCHDIR:=bin/genfiles/$(ARCH)
-UPDATEARCH:=$(ARCH)
-else
-SRCDIR:=$(TARGET)
-LIBDIR:=$(TARGET)
-ARCHDIR:=bin/genfiles/$(TARGET)
-UPDATEARCH:=$(TARGET)
-endif
-update: 
+update: cfiles
 	@if [ "$(UPDATEARCH)" = "$(PATCH_ARCH)" ]; then\
 	  cd bin/genfiles; echo "UPDATING REFERENCE ARCH $(UPDATEARCH)";\
 	  for arch in $(ALL_ARCHS); do\
@@ -165,17 +180,35 @@ update:
 	  cd bin/genfiles; ./extract_patch $(PATCH_ARCH) $(UPDATEARCH);\
 	  cd ../..;\
 	fi
-	@for i in $(UPDATE_SRCS); do (cmp -s $(SRCDIR)/$$i $(ARCHDIR)/src/$$i || (echo UPDATING $(SRCDIR)/$$i; cp $(SRCDIR)/$$i $(ARCHDIR)/src/$$i)) done
-	@for i in $(C_LIBS); do (cmp -s $(LIBDIR)/$$i $(ARCHDIR)/lib/$$i || (echo UPDATING $(LIBDIR)/$$i; cp $(LIBDIR)/$$i $(ARCHDIR)/lib/$$i)) done
-	@cmp -s $(LIBDIR)/nogc.c $(ARCHDIR)/lib/nogc.c || (echo UPDATING $(LIBDIR)/nogc.c; cp $(LIBDIR)/nogc.c $(ARCHDIR)/lib/nogc.c)
-	@cmp -s $(LIBDIR)/$(C_RUNTIME) $(ARCHDIR)/lib/$(C_RUNTIME) || (echo UPDATING $(LIBDIR)/$(C_RUNTIME); cp $(LIBDIR)/$(C_RUNTIME) $(ARCHDIR)/lib/$(C_RUNTIME))
-	@cmp -s $(LIBDIR)/precore_c.h $(ARCHDIR)/lib/precore_c.h || (echo UPDATING $(LIBDIR)/precore_c.h; cp $(LIBDIR)/precore_c.h $(ARCHDIR)/lib/precore_c.h)
-ifndef TARGET
-	@cmp -s $(SRCDIR)/cycdoc.c $(ARCHDIR)/src/cycdoc.c || (echo UPDATING $(SRCDIR)/cycdoc.c; cp $(SRCDIR)/cycdoc.c $(ARCHDIR)/src/cycdoc.c)
-	@cmp -s $(SRCDIR)/buildlib.c $(ARCHDIR)/src/buildlib.c || (echo UPDATING $(SRCDIR)/buildlib.c; cp $(SRCDIR)/buildlib.c $(ARCHDIR)/src/buildlib.c)
-	@for i in $(CYCLONE_H); do (cmp -s lib/$$i include/$$i || (echo UPDATING lib/$$i; cp lib/$$i include/$$i)) done
-	@(cd lib; for i in arch/*.h; do (cmp -s $$i ../include/$$i || (echo UPDATING lib/$$i; cp $$i ../include/$$i)) done)
-	@cmp -s lib/include/cyc_include.h bin/cyc-lib/include/cyc_include.h || (echo UPDATING cyc-lib/include/cyc_include.h; cp lib/include/cyc_include.h bin/cyc-lib/include/cyc_include.h)
+	@for i in $(UPDATE_SRCS);\
+	   do (cmp -s $(BUILDDIR)/$$i $(ARCHDIR)/src/$$i\
+               || (echo UPDATING $(ARCHDIR)/src/$$i;\
+	           cp $(BUILDDIR)/$$i $(ARCHDIR)/src/$$i)) done
+	@for i in $(C_LIBS);\
+           do (cmp -s $(BUILDDIR)/$$i $(ARCHDIR)/lib/$$i\
+               || (echo UPDATING $(ARCHDIR)/lib/$$i;\
+	           cp $(BUILDDIR)/$$i $(ARCHDIR)/lib/$$i)) done
+	@cmp -s $(BUILDDIR)/precore_c.h $(ARCHDIR)/lib/precore_c.h\
+	       || (echo UPDATING $(ARCHDIR)/lib/precore_c.h;\
+	            cp $(BUILDDIR)/precore_c.h $(ARCHDIR)/lib/precore_c.h)
+	@cmp -s lib/$(C_RUNTIME) $(ARCHDIR)/lib/$(C_RUNTIME)\
+               || (echo UPDATING $(ARCHDIR)lib/$(C_RUNTIME);\
+                   cp lib/$(C_RUNTIME) $(ARCHDIR)/lib/$(C_RUNTIME))
+	@cmp -s lib/nogc.c $(ARCHDIR)/lib/nogc.c\
+               || (echo UPDATING $(ARCHDIR)/lib/nogc.c;\
+                   cp lib/nogc.c $(ARCHDIR)/lib/nogc.c)
+ifeq ($(UPDATEARCH),$(ARCH))
+	@for i in $(CYCLONE_H);\
+           do (cmp -s lib/$$i include/$$i\
+               || (echo UPDATING lib/$$i;\
+                   cp lib/$$i include/$$i)) done
+	@(cd lib; for i in arch/*.h;\
+	   do (cmp -s $$i ../include/$$i\
+               || (echo UPDATING include/$$i;\
+                    cp $$i ../include/$$i)) done)
+	@cmp -s lib/include/cyc_include.h bin/cyc-lib/include/cyc_include.h\
+               || (echo UPDATING cyc-lib/include/cyc_include.h;\
+                 cp lib/include/cyc_include.h bin/cyc-lib/include/cyc_include.h)
 endif
 	@if [ "$(UPDATEARCH)" = "$(PATCH_ARCH)" ]; then\
 	  for arch in $(ALL_ARCHS); do\
@@ -206,23 +239,23 @@ endif
 update_all_archs: 
 	$(MAKE) -C bin/genfiles clean
 	@if [ "$(PATCH_ARCH)" != "$(ARCH)" ]; then\
-	  if [ ! -d "$(PATCH_ARCH)" ]; then mkdir $(PATCH_ARCH); fi;\
-          $(MAKE) -C lib TARGET=$(PATCH_ARCH) $(PATCH_ARCH);\
-	  $(MAKE) -C src TARGET=$(PATCH_ARCH) $(PATCH_ARCH);\
-	  $(MAKE) update TARGET=$(PATCH_ARCH);\
+	  $(MAKE) update\
+	 NODEPS=X\
+	 BUILDDIR=build/$(PATCH_ARCH)\
+	 UPDATEARCH=$(PATCH_ARCH)\
+	 CYCFLAGS="$(CYCFLAGS) -use-cpp '$(addprefix $(CYCDIR)/config/, cyccpp arch/$(ARCH) arch/$(PATCH_ARCH))'";\
 	else\
-	  $(MAKE) cyclone_src;\
 	  $(MAKE) update;\
 	fi;
 	@for arch in $(ALL_ARCHS); do\
 	  if [ "$$arch" != "$(PATCH_ARCH)" ]; then\
 	    if [ "$$arch" != "$(ARCH)" ]; then\
-	      if [ ! -d "$$arch" ]; then mkdir $$arch; fi;\
-              $(MAKE) -C lib TARGET=$$arch $$arch;\
-	      $(MAKE) -C src TARGET=$$arch $$arch;\
-	      $(MAKE) update TARGET=$$arch;\
+	      $(MAKE) update\
+	 NODEPS=X\
+	 BUILDDIR=build/$$arch\
+	 UPDATEARCH=$$arch\
+	CYCFLAGS="$(CYCFLAGS) -use-cpp '$(addprefix $(CYCDIR)/config/, cyccpp arch/$(ARCH) arch/$$arch)'";\
 	    else\
-	      $(MAKE) cyclone_src;\
 	      $(MAKE) update;\
 	    fi;\
 	  fi;\
@@ -240,57 +273,35 @@ test_bin:
          CYCC=$(CYCDIR)/bin/cyclone$(EXE)\
          CYCBISON=$(CYCDIR)/bin/cycbison$(EXE)\
          CYCFLAGS="-g -save-c -pp -I$(CYCDIR)/include -B$(CYCDIR)/bin/cyc-lib"
-test_src:
+test_boot:
 	$(MAKE) -C tests\
-         CYCC=$(CYCDIR)/src/cyclone$(EXE)\
+         CYCC=$(CYCDIR)/build/boot/cyclone$(EXE)\
          CYCBISON=$(CYCDIR)/bin/cycbison$(EXE)\
          CYCFLAGS="-g -save-c -pp -I$(CYCDIR)/lib -B$(CYCDIR)/lib"
 
-# cleaning
-clean_src:
-	$(MAKE) clean -C src
-	$(MAKE) clean -C lib
-
 clean_test:
-	$(MAKE) clean -C tests
+	$(MAKE) -C tests clean
 
-# affected by OUT_PREFIX
-clean_src_prefix:
-	$(MAKE) clean_prefix -C src 
-	$(MAKE) clean_prefix -C lib 
+# To do: a much safer way to clean build!
+# To do: a way to clean individual directories in build.
+clean_build:
+	$(RM) -rf build/*
 
-# To do: using OUT_PREFIX for other targets is a wasteful kludge.
-clean_nogc:
-	$(MAKE) clean -C tools/bison
-	$(MAKE) clean -C tools/cyclex
-	$(MAKE) clean -C tools/flex
-	$(MAKE) clean -C tools/aprof
-	$(MAKE) clean -C src
-	$(MAKE) clean -C lib
-	$(MAKE) clean -C tests
-	@for arch in $(ALL_ARCHS); do\
-	    if [ -d "$$arch" ]; then\
-	    $(MAKE) clean_prefix -C src OUT_PREFIX=../$$arch/;\
-	    $(MAKE) clean_prefix -C lib OUT_PREFIX=../$$arch/;\
-	    $(RM) $$arch/cycdoc.c $$arch/nogc.c $$arch/runtime_cyc.c;\
-	    fi;\
-	done
-	$(RM) bin/cyc-lib/libcyc.a bin/cyc-lib/libcyc_a.a
-	$(MAKE) clean -C bin/genfiles
-	$(MAKE) clean -C tests
-	$(MAKE) clean -C doc
-	$(RM) bin/cyclone bin/cyclone.exe 
-	$(RM) bin/cycdoc bin/cycdoc.exe 
-	$(RM) bin/buildlib bin/buildlib.exe 
-	$(RM) bin/cycbison bin/cycbison.exe 
-	$(RM) bin/cyclex bin/cyclex.exe
-	$(RM) bin/cycflex bin/cycflex.exe
-	$(RM) bin/aprof bin/aprof.exe
-	$(RM) *~ doc/*~ amon.out
+clean_nogc: clean_test clean_build
+	$(MAKE) -C tools/bison  clean
+	$(MAKE) -C tools/cyclex clean
+	$(MAKE) -C tools/flex   clean
+	$(MAKE) -C tools/aprof  clean
+	$(MAKE) -C bin/genfiles clean
+	$(MAKE) -C tests        clean
+	$(MAKE) -C doc          clean
+	$(MAKE) -C lib/xml      clean
+	$(RM) bin/cyc-lib/*libcyc*.a
+	$(RM) $(addprefix bin/, $(addsuffix $(EXE), cycdoc buildlib cycbison cyclex cycflex aprof))
+	$(RM) *~ amon.out
+	$(RM) include/cstdio.h include/csignal.h lib/cstdio.h lib/csignal.h
 
 clean: clean_nogc
 	$(MAKE) clean -C gc
 	$(RM) gc/*.exe gc/base_lib gc/*.obj gc/gc.lib
-# 	$(RM) bin/cyc-lib/gc.a bin/gc_pg.a 
-# 	$(RM) bin/cyc-lib/nogc.a bin/cyc-lib/nogc_a.a
-	$(RM) bin/cyc-lib/*.a
+	$(RM) bin/cyc-lib/*gc*.a

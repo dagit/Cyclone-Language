@@ -222,7 +222,8 @@ static void add_other(string_t<`H> s) {
     cyclone_files = new List(new s,cyclone_files);
 
     // The C compiler wants the .c file, not the .cyc files
-    let basename = Filename::chop_extension(s);
+    let basename = 
+      Filename::chop_extension(output_file==NULL ? s : *output_file);
     let cfile    = strconcat(basename, ".c");
     add_ccarg(cfile);
   }
@@ -536,7 +537,8 @@ static stringptr_t sh_escape_stringptr(stringptr_t<`H,`H> sp) {
 
 static void process_file(string_t<`H> filename) {
 
-  let basename      = Filename::chop_extension(filename);
+  let basename = 
+    Filename::chop_extension(output_file==NULL ? filename : *output_file);
   let preprocfile   = strconcat(basename, ".cyp");
   let interfacefile = strconcat(basename, ".cyci");
   let interfaceobjfile = strconcat(basename, ".cycio");
@@ -604,9 +606,8 @@ static void process_file(string_t<`H> filename) {
     }
   else fixup_string = "";
 
-  string_t arch = Cstring_to_string(Carch);
-  let cmd = aprintf("%s '-D_PLATFORM_INCLUDES_=\"arch/%s.h\"'%s%s %s%s%s",
-	            cpp, arch, cppargs_string, stdinc_string,
+  let cmd = aprintf("%s %s%s %s%s%s",
+	            cpp, cppargs_string, stdinc_string,
                     sh_escape_string(filename),
                     fixup_string, ofile_string);
 

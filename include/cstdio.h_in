@@ -23,8 +23,6 @@
  *	ISO C99 Standard: 7.19 Input/output	<stdio.h>
  */
 
-#ifndef _STDIO_H_
-#define _STDIO_H_
 #include <core.h>
 
 namespace Cstdio {
@@ -61,10 +59,6 @@ typedef long fpos_t;  //FIX: __off_t in linux
 /* End of file character.
    Some things throughout the library rely on this being -1.  */
 #define	EOF	(-1)
-
-#define _EXTRACT_STDIOCONSTS
-#include _PLATFORM_INCLUDES_
-#undef _EXTRACT_STDIOCONSTS
 
 /* The possibilities for the third argument to `fseek'.
    These values should not be changed.  */

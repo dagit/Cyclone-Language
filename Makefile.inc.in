@@ -93,9 +93,9 @@ CYCLONE_H:=arg.h\
 	core.h\
 	cpwd.h\
 	crypt.h\
-	csignal.h\
+	csignal.h_in\
 	cstddef.h\
-	cstdio.h\
+	cstdio.h_in\
 	cstdlib.h\
 	cstring.h\
 	cstrings.h\
