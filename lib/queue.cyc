@@ -53,7 +53,7 @@ queue_t<`a::TB,`r> rcreate(region_t<`r> r) {
 }
 
 // insert an element into the rear of the queue (side effect)
-void radd(region_t<`r> r, queue_t<`a::TB,`r> q,`a x) {
+void radd(region_t<`r> r, queue_t<`a::TB,`r> q,`a x) __attribute__((consume(3))) {
   list_t cell = rnew(r) List(x,NULL);
 
   if (q->front == NULL) {
@@ -66,19 +66,19 @@ void radd(region_t<`r> r, queue_t<`a::TB,`r> q,`a x) {
   q->len++;
 }
 
-void add(queue_t<`a::TB,`H> q, `a x) {
+void add(queue_t<`a::TB,`H> q, `a x) __attribute__((consume(2))) {
   radd(Core::heap_region,q,x);
 }
 
 // insert an element into the front of the queue (side effect)
-void rpush(region_t<`r> r, queue_t<`a::TB,`r> q,`a x) {
+void rpush(region_t<`r> r, queue_t<`a::TB,`r> q,`a x) __attribute__((consume(3))) {
   q->front = rnew(r) List(x,q->front);
   if (q->rear == NULL)
     q->rear = q->front;
   q->len++;
 }
 
-void push(queue_t<`a::TB,`H> q, `a x) {
+void push(queue_t<`a::TB,`H> q, `a x) __attribute__((consume(2))) {
   rpush(Core::heap_region,q,x);
 }
 
@@ -97,7 +97,7 @@ void push(queue_t<`a::TB,`H> q, `a x) {
   }
 }
 
-`a noalias_take(queue_t<`a::TB> q, `a null_elem) {
+`a noalias_take(queue_t<`a::TB> q, `a null_elem) __attribute__((consume(2))) {
   if (q->front == NULL)
     throw &Empty_val;
   else {
@@ -152,7 +152,7 @@ void remove(queue_t<`a,`r> q,`a v) {
 }
 
 `a *`U take_match(region_t<`r> r, queue_t<`a::TA *`U,`r> q,
-		  bool (@f)(`b,`a *`U) __attribute__((noconsume(2))), `b env) {
+		  bool (@f)(`b,`a *`U), `b env) {
 
   region g;
   queue_t<`a *,`g> saveq = rcreate(g);

@@ -12,7 +12,7 @@ CYCC=../build/boot/cyclone$(EXE)
 CYCFLAGS=-I../lib -I../include -B../build/boot -pp -save-c -g
 endif
 
-EXES=$(addsuffix $(EXE), cyctest foo hello test_regions histogram test_getopt zeroterm structarray flatlist require md5 streambufftest unique_patterns dynregion scheme refcnt_test)
+EXES=$(addsuffix $(EXE), cyctest foo hello test_regions histogram test_getopt zeroterm structarray flatlist md5 unique_patterns dynregion refcnt_test require streambufftest scheme)
 
 CYCTESTS=arg_suite.h				\
   array_suite.h					\

@@ -114,7 +114,7 @@ extern `b snd($(`a,`b)@);
 extern `c third($(`a,`b,`c)@);
   /** [third(x)] returns the third element of the triple pointed to by
       [x].  */
-extern `a identity(`a::TB);
+extern `a identity(`a);
   /** [identity] is the identity function: [identity(x)] returns [x].  */
 extern int intcmp(int,int);
   /** [intcmp] is a comparison function on integers: [intcmp(i1,i2)]
@@ -182,10 +182,10 @@ extern region_t<`RC> refcnt_region;
 #define rcnew rnew (Core::refcnt_region)
 #define rcmalloc(arg) rmalloc (Core::refcnt_region,arg)
   /** [rcnew] and [rcmalloc] are for allocating reference-counted data. */
-extern int refptr_count(`a::TA *`RC ptr) __attribute__((noconsume(1)));
+extern int refptr_count(`a::TA *`RC ptr);
   /** [refptr_count(p)] returns the current reference count for [p]
       (always >= 1); [p] is not consumed. */
-extern `a ?`RC alias_refptr(`a::TA ?`RC ptr;{}) __attribute__((noconsume(1)));
+extern `a ?`RC alias_refptr(`a::TA ?`RC ptr;{});
   /** [alias_refptr(p)] returns an alias to [p], and increments the
       reference count by 1.  [p] is not consumed.  */
 extern void drop_refptr(`a::TA *`RC ptr;{}) __attribute__((noliveunique(1)));
@@ -248,11 +248,11 @@ extern struct NewDynamicRegion<`RC> _new_rckey(const char *file,
 #define new_rckey() _new_rckey(__FILE__,"",__LINE__)
 #endif
 
-extern void free_ukey(uregion_key_t<`r> k; {});
+extern void free_ukey(uregion_key_t<`r> k; {}) __attribute__((consume(1)));
   /** [free_ukey(k)] takes a unique key for the region [`r] and
       deallocates the region [`r] and destroys the key [k]. */
 
-extern void free_rckey(rcregion_key_t<`r> k; {});
+extern void free_rckey(rcregion_key_t<`r> k; {}) __attribute__((consume(1)));
   /** [free_rckey(k)] takes a reference-counted key for the region [`r],
       decrements the reference count and destroyes the key [k].  If the
       reference count becomes zero, then all keys have been destroyed
@@ -262,7 +262,7 @@ extern `result open_region(region_key_t<`r,`r2::TR> key,
                            `arg arg,
                            `result body(region_t<`r> h, 
                                         `arg arg;{`r,`r2}+`eff);
-                           {`r2}+`eff) __attribute__((noconsume(1)));
+                           {`r2}+`eff);
   /** [open_region(k,arg,body)] extracts a region handle [h] for
       the region [`r] which the [k] provides access to.  The handle
       and value [arg] are passed to the function pointer [body]
@@ -288,16 +288,6 @@ extern void set_uncaught_exn_fun(int (*)());
 extern int get_exn_lineno();
   /** if an exception is thrown, then you can use @get_exn_lineno@ to
       determine what source line caused the exception. */
-
-// copies the string, making sure there's a zero at the end
-// extern "C" Cstring<`H> string_to_Cstring(string_t);
-// extracts the underlying char[] from the char[?] -- returns NULL
-// when the string is empty
-//  extern "C" Cstring<`r> underlying_Cstring(const char ? @nozeroterm`r);
-// extern "C" mstring_t<`H> Cstring_to_string(Cstring);
-// extern "C" mbuffer_t<`r> wrap_Cbuffer_as_buffer(Cbuffer_t<`r>, size_t);
-//  extern "C" mbuffer_t<`r> wrap_Cstring_as_string(Cbuffer_t<`r>, size_t);
-// extern "C" mstring_t<`H> ?`H ntCsl_to_ntsl(Cstring @);
 
   // JGM: I have to define this using a typedef here because
   // valueof(-) is not considered a Cyclone keyword.

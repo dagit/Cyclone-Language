@@ -115,7 +115,7 @@ void a18(int *`U x) {
   }
   Core::ufree(x);
 }
-void a19(int *`U x) {
+void a19(int *`U x) __attribute__((consume(1))) {
   // expression attempts to copy unique value; i.e. x cannot be unconsumed
   { let y = x;
     x = new 1;
@@ -123,24 +123,24 @@ void a19(int *`U x) {
   }
   Core::ufree(x);
 }
-void a20(int *`U y) __attribute__((noconsume(1))) {
+void a20(int *`U y) {
   // expression consumes value with attribute noconsume
   Core::ufree(y);
 }
-void a21(int *`U*`U y) __attribute__((noconsume(1))) {
+void a21(int *`U*`U y) {
   // expression consumes value with attribute noconsume
   Core::ufree(*y);
 }
-void a22(int *`U y) __attribute__((noconsume(1))) {
+void a22(int *`U y) {
   // noconsume expression no longer set to orginal value
   y = new 1;
 }
-void a23(int *`U x) {
+void a23(int *`U x) __attribute__((consume(1))) {
   // dereference of uninitialized lhs pointer
   Core::ufree(x);
   *x = 1;
 }
-void a24(int *`U x) {
+void a24(int *`U x) __attribute__((consume(1))) {
   // dereference of uninitialized rhs pointer
   Core::ufree(x);
   int y = *x;
@@ -154,7 +154,7 @@ void a26(int *`U x) {
   int *`U z, *`U y;
   z = y = x;
 }
-void a27(int *`U x) {
+void a27(int *`U x) __attribute__((consume(1))) {
   let y = x;
   // attempts to copy a consumed value
   Core::ufree(x);
@@ -162,7 +162,7 @@ void a27(int *`U x) {
 typedef _::UR uregion;
 typedef int @ @region(uregion) uptr;
 extern void uptrfree(uptr);
-void a28(uptr x) {
+void a28(uptr x) __attribute__((consume(1))) {
   let y = x;
   // attempts to copy a consumed value
   uptrfree(x);

@@ -11,9 +11,7 @@ CT_SUITE_BEGIN(Streambuff)
 void begin() { }
 void end() { }
 
-static bool matchPrio(unsigned int prio, streambuff_opt_t<`U> stb)
-  __attribute__((noconsume(2))) {
-
+static bool matchPrio(unsigned int prio, streambuff_opt_t<`U> stb) {
   return (stb->priority == prio) && (stb->typ == Packet);
 }
 

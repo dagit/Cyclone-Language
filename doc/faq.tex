@@ -130,23 +130,29 @@ compile-time constant.
 
 \begin{faqa}{faq:region}{What does \texttt{int *`r} mean?}
 This is the type of a pointer to an \texttt{int} in region
-\texttt{`r}.  A region is just a group of objects with the same
-lifetime---all objects in a region are freed at once.  Cyclone uses
-this region information to prevent dereferencing a pointer into a
-previously freed region.  Regions can have a ``nested'' structure, for
-example, if the region for a function parameter is a variable, then
-the function may assume that the parameter points into a region whose
-lifetime includes the lifetime of the function.
+\texttt{`r}.  This can also be written as ``\texttt{int
+  *@region(`r)}''.  A region indicates conceptually where in memory an
+object is stored; different regions have different lifetimes and
+deallocation strategies, and the aliasing into certain regions may be
+restricted.  Cyclone uses
+this region information to prevent dereferencing a pointer whose
+storage has been deallocated.  See Section~\ref{sec:regions} for more
+information on regions.
+%%   Regions can have a ``nested'' structure, for
+%% example, if the region for a function parameter is a variable, then
+%% the function may assume that the parameter points into a region whose
+%% lifetime includes the lifetime of the function.
 \end{faqa}
 
 \begin{faqa}{faq:heapregion}{What does \texttt{`H} mean?}
   This is Cyclone's heap region: objects in this region cannot be
   explicitly freed, only garbage-collected.  Effectively, this means
   that pointers into the heap region can always be safely
-  dereferenced; conceptually, objects in the heap last ``forever,''
-  since they are always available if needed; garbage collection is
-  like an optimization that frees objects after they are no longer
-  needed.  
+  dereferenced.
+%%  conceptually, objects in the heap last ``forever,''
+%%   since they are always available if needed; garbage collection is
+%%   like an optimization that frees objects after they are no longer
+%%   needed.  
 \end{faqa}
 
 \begin{faqa}{faq:boundsregion}{What does \texttt{int @\lb 37\rb `r} mean?}
@@ -158,12 +164,14 @@ bound is omitted it default to 1.
 
 \begin{faqa}{faq:omitregion}{What is a pointer type's region when it's
 omitted?} Every pointer type has a region; if you omit it, the
-compiler puts it in for you implicitly.  The region added depends on
-where the pointer type occurs.  In function arguments, a new region
-variable is used.  In function results and type definitions (inlcuding
+compiler chooses a region name you implicitly.  The name chosen depends on
+where the pointer type occurs.  In function arguments, a fresh region
+variable is used.  In function results and type definitions (including
 \texttt{typedef}), the heap region (\texttt{`H}) is used.  In function
 bodies, the compiler looks at the uses (using unification) to try to
 determine a region.
+See~\hyperref[{sec:tut-regions}]{Section~\ref{sec:regions}} 
+and~\hyperref[{sec:regions}]{Section~\ref{sec:regions}} for more information.
 \end{faqa}
 
 \begin{faqa}{faq:questionable}{What does \texttt{int ?} mean?}
@@ -205,7 +213,9 @@ when you cast from a \texttt{void *} in C, there is no guarantee that
 the pointer actually points to a value of the expected type.  This can
 lead to crashes, so Cyclone doesn't permit it.  Cyclone's
 polymorphism and tagged unions can often be used in places where C
-needs to use \texttt{void *}, and they are safe.
+needs to use \texttt{void *}, and they are safe.  Note that you can
+generally cast to a \texttt{void *} in Cyclone, you just won't be able
+to cast back.
 \end{faqa}
 
 \begin{faqa}{faq:uscore-types}{What does \texttt{_} (underscore) mean in types?}
@@ -223,7 +233,8 @@ the compiler can easily infer that the wildcard stands for
 \texttt{NULL}, the compiler will infer that \texttt{x} has type
 \texttt{struct Pair *} instead.
 
-Note that \texttt{_} is not allowed as part of top-level declarations.
+Note that only in restricted cases is \texttt{_} allowed as part of
+top-level declarations.
 \end{faqa}
 
 % \begin{faqa}{faq:uscore-region}{In particular, what does \texttt{int *_} mean?}
@@ -258,7 +269,7 @@ Note that \texttt{_} is not allowed as part of top-level declarations.
 \begin{faqa}{faq:kinds}{What do \texttt{`a::B}, \texttt{`a::M},
 \texttt{`a::A}, \texttt{`a::R}, \texttt{`a::UR}, \texttt{`a::TR} and
 \texttt{`a::E} mean?}  Types are divided into different groups, which we
-call kinds.  There are four ``normal'' kinds: B (for Box), M (for Memory), A
+call \emph{kinds}.  There are four ``normal'' kinds: B (for Box), M (for Memory), A
 (for Any), and E (for Effect); and three ``region'' kinds: R (for Region),
 UR (for unique region), and TR (for either regular or unique region).  The
 notation \textit{typevar}\texttt{::}\textit{kind} says that a type variable
@@ -638,13 +649,12 @@ Two techniques help with initializing global arrays.  First, if an array
 element could be 0 or NULL, the compiler will insert 0 for any elements you
 do not specify.  For example, you can write
 \begin{verbatim}
-  int x[37] = {};
+  int x[37];
 \end{verbatim}
-to declare a global array \texttt{x} initialized with 37 elements, all 0.
-Second, you can use
-the comprehension form
+to declare a global array \texttt{x} initialized with 37 elements, all
+0.  Second, you can use the comprehension form
 \begin{alltt}
-  int x[37] = \lb for i < \textit{expr}\(\sb{1}\) : \texttt{expr}\(\sb{2}\) \rb
+  int x[37] = \lb for i < \textit{expr}\(\sb{1}\) : \textit{expr}\(\sb{2}\) \rb
 \end{alltt}
 provided that 
 \textit{expr}$_1$ and
@@ -675,9 +685,15 @@ non-local control flow.
 \end{faqa}
 
 \begin{faqa}{faq:uniontypes}{What types are allowed for union members?}
-Currently, \texttt{union} members cannot contain pointers.  You can
-have numeric types (including bit fields and enumerations), structs
-and tuples of allowable union-member types, and other unions.
+Currently, \texttt{union} members can be just about any type, other
+than those with kind (\texttt{A}) (see question on kinds, above).
+Examples include numeric types (including bit fields and
+enumerations), structs and tuples of allowable union-member types, and
+other unions.  However, if a union contains a pointer type, you can
+only write the pointer, not read it.  This prevents effectively
+casting an \texttt{int} to a pointer by writing an \texttt{int} member
+and then reading the pointer, for example.  To use pointers as normal
+within a union, you must use \texttt{@tagged} unions.
 \end{faqa}
 
 \begin{faqa}{faq:voidstar2}{Why can't I do anything with values of type \texttt{void *}?}
@@ -690,7 +706,9 @@ substitute in some cases where \texttt{void *} is used in C\@.
 
 \begin{faqa}{faq:aprintf}{What is \texttt{aprintf}?}
 The \texttt{aprintf} function is just like \texttt{printf}, but
-the output is placed in a new string allocated on the heap.
+the output is placed in a new string allocated on the heap.  Note that
+you can use the more general function \texttt{rprintf} to allocate the
+output in a region of your choosing.
 \end{faqa}
 
 \begin{faqa}{faq:commandline}{How do I access command-line arguments?}
@@ -714,7 +732,7 @@ explicit region annotation.
 
 \begin{faqa}{faq:localaddress}{Why do I get an incomprehensible error when I assign a local's address to a pointer variable?}
 If the pointer variable has a type indicating that it points into the
-heap, then the assignment is illegal.  Try initializng the pointer variable
+heap, then the assignment is illegal.  Try initializing the pointer variable
 with the local's address, rather than delaying the assignment until later.
 \end{faqa}
 
@@ -724,7 +742,8 @@ increment/decrement), as in C\@.  It is okay for the result to be
 outside the bounds of the object pointed to; it is a run-time error to
 dereference outside of the bounds.  (The compiler inserts bounds
 information and a run-time check; an exception is thrown if the check
-fails.)  Currently, we do not support pointer arithmetic on the other
+fails.)  You can also do pointer arithmetic on zero-terminated
+pointers.  Currently, we do not support pointer arithmetic on the other
 pointer types.  As in C, you can subtract two pointers of the same
 type; the type of the result is \texttt{unsigned int}.
 \end{faqa}

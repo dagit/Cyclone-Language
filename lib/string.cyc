@@ -394,6 +394,7 @@ mstring_t expand(buffer_t s, size_t sz) {
 }
 
 mstring_t<`r> rrealloc_str(region_t<`r::TR> r, mstring_t<`r> str, size_t sz)
+  __attribute__((consume(2)))
 {
   size_t maxsizeP = numelts(str);
 

@@ -38,7 +38,7 @@ typedef struct StreamBuff *`r streambuff_opt_t<`r>;
 extern unsigned int stb_size(streambuff_t stb);
 extern string_t stb_info(streambuff_t stb);
 extern void stb_free(streambuff_t stb);
-extern void stb_free_unique(streambuff_t<`U> stb);
+extern void stb_free_unique(streambuff_t<`U> stb) __attribute__((consume(1)));
   // stb_free frees the underlying buffers if unique; caller must free header
 extern bool stb_noaliases(streambuff_t stb);
 extern streambuff_t<`r> alloc_stb_with(region_t<`r::TR> rgnhdr,
@@ -57,12 +57,14 @@ extern streambuff_t<`r> stb_clone(region_t<`r::TR> rgn, streambuff_t stb);
   // pulls out the first buffer from the given streambuffer and
   // invokes the given function with it.  Takes care of swapping, etc.
 
-extern streambuff_t<`U> stb_rest(int ofs, streambuff_t<`U> stb);
+extern streambuff_t<`U> stb_rest(int ofs, streambuff_t<`U> stb) 
+  __attribute__((consume(2)));
   // we assume `U streambuffs for stb_rest, so that refcounts are
   // properly updated
 
 extern streambuff_t<`r> stb_prepend(region_t<`r::TR> rgn, streambuff_t stb,
-				    char ? @nozeroterm `RC nbuf);
+				    char ? @nozeroterm `RC nbuf)
+  __attribute__((consume(3)));
   // prepends the given buffer to the streambuffer.  Creates aliases to
   // the existing databuf buffers.
 

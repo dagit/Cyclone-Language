@@ -39,7 +39,7 @@ void stb_free(streambuff_t stb) {
   }
 }
 
-void stb_free_unique(streambuff_t<`U> stb) {
+void stb_free_unique(streambuff_t<`U> stb) __attribute__((consume(1))) {
   stb_free(stb);
   Core::ufree(stb);
 }
@@ -168,7 +168,9 @@ streambuff_t<`r> stb_copy(region_t<`r::TR> rgnhdr,
 				   .bufs = { DataBuff{.ofs=0,.buf=newb}}};
 }
 
-streambuff_t<`U> stb_rest(int ofs, streambuff_t<`U> stb) {
+streambuff_t<`U> stb_rest(int ofs, streambuff_t<`U> stb) 
+  __attribute__((consume(2))) 
+{
   char ? @nozeroterm `RC buf = NULL;
   streambuff_opt_t<`U> newstb = NULL;
   { let alias <`r>streambuff_t<`r> stb2 = stb;
@@ -245,7 +247,9 @@ streambuff_t<`U> stb_rest(int ofs, streambuff_t<`U> stb) {
 }
 
 streambuff_t<`r> stb_prepend(region_t<`r::TR> rgn, streambuff_t stb,
-			     char ? @nozeroterm `RC nbuf) {
+			     char ? @nozeroterm `RC nbuf) 
+  __attribute__((consume(3))) 
+{
   let &StreamBuff{<`i> .numbufs=n,.bufs=bufs,
 		       .typ=typ, .priority=prio,
 		       .device=dev } = stb;

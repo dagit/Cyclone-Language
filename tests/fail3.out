@@ -16,9 +16,9 @@ fail3.cyc:95: `noreturn' function might return
 fail3.cyc:100: switch clause may implicitly fallthru
 fail3.cyc:113: aliased expression x was overwritten
 fail3.cyc:124: expression attempts to copy a consumed alias-free value
-fail3.cyc:128: function consumes parameter y with attribute 'noconsume'
-fail3.cyc:132: function consumes value pointed to by parameter y, which has attribute 'noconsume'
-fail3.cyc:136: function parameter y with attribute 'noconsume' no longer set to its original value
+fail3.cyc:128: function consumes parameter y which is does not have the 'consume' attribute
+fail3.cyc:132: function consumes value pointed to by parameter y, which does not have the 'consume' attribute
+fail3.cyc:136: function parameter y without 'consume' attribute no longer set to its original value
 fail3.cyc:141: attempt to dereference an alias-free that has already been copied
 fail3.cyc:146: attempt to dereference a consumed alias-free pointer
 fail3.cyc:150: aliased pattern expression not an l-value: rnew(Core::unique_region) 1

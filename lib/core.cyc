@@ -65,7 +65,7 @@ int ptrcmp(`a::TA @ `r a, `a @ `r b) {
 `b snd($(`a,`b) @ pair) { return (*pair)[1]; }
 `c third($(`a,`b,`c) @ triple) { return (*triple)[2];}
 
-`a identity(`a::TB x) {
+`a identity(`a x) {
   return x;
 }
 

@@ -372,7 +372,9 @@ static env_t<next_rgn<`r>> copy_env(region_t<next_rgn<`r>> r2, env_t<`r> env;
 // copy the stack and anything reachable from it from `r to next_rgn<`r>
 // This destroys the old stack.
 static stack_t<next_rgn<`r>> 
-  copy_roots(region_t<next_rgn<`r>> r2, stack_t<`r> s ; {`r,next_rgn<`r>}) {
+  copy_roots(region_t<next_rgn<`r>> r2, stack_t<`r> s ; {`r,next_rgn<`r>}) 
+  __attribute__((consume(2))) 
+{
   if (s == NULL) return NULL;
   stack_t<next_rgn<`r>> frame2;
   stack_t<next_rgn<`r>> next2 = copy_roots(r2, s->next);

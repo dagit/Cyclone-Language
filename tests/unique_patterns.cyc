@@ -16,7 +16,7 @@ struct s3<`r> {
   int * x;
 };
 
-void func1(struct s1<`U> @`U s) {
+void func1(struct s1<`U> @`U s) __attribute__((consume(1))) {
   int y = 0;
   { let &s1{.p=p,...} = s; // consumes s->p
     y = *p;
@@ -27,7 +27,7 @@ void func1(struct s1<`U> @`U s) {
   return;
 }
 
-void func1a(struct s1<`U> @`U s) {
+void func1a(struct s1<`U> @`U s) __attribute__((consume(1))) {
   int y = 0;
   { let &s1{.p=p,...} = s; // consumes s->p
     y = *p;
@@ -38,7 +38,7 @@ void func1a(struct s1<`U> @`U s) {
   return;
 }
 
-void func1b(struct s1<`U> @`U s) {
+void func1b(struct s1<`U> @`U s) __attribute__((consume(1))) {
   int y = 0;
   { let &s1{.p=p,...} = s; // consumes s->p
     y = *p;
@@ -50,7 +50,7 @@ void func1b(struct s1<`U> @`U s) {
   return;
 }
 
-void func1c(struct s1<`U> @`U s) {
+void func1c(struct s1<`U> @`U s) __attribute__((consume(1))) {
   { let &s1{.p=p,...} = s; // consumes s->p
     s->p = p;
 //     Core::ufree(s->p); // fails
@@ -61,7 +61,7 @@ void func1c(struct s1<`U> @`U s) {
 }
 
 // basic alias patterns
-void func1d(struct s1<`U> @`U s) {
+void func1d(struct s1<`U> @`U s) __attribute__((consume(1))) {
   { let &s1{.p=alias <`r>int *`r p,...} = s; // consumes s->p
     int * p2 = p;
     int * p3 = p; 
@@ -71,7 +71,7 @@ void func1d(struct s1<`U> @`U s) {
   Core::ufree(s);
 }
 
-void func1e(struct s1<`U> *`U s) {
+void func1e(struct s1<`U> *`U s) __attribute__((consume(1))) {
   switch (s) {
   case &s1{.p=alias <`r>int *`r p,...}:
     int * p2 = p;
@@ -84,7 +84,7 @@ void func1e(struct s1<`U> *`U s) {
   Core::ufree(s);
 }
 
-void func2a(struct s2<`U> @`U s) {
+void func2a(struct s2<`U> @`U s) __attribute__((consume(1))) {
   { let &s2{.ps=ps,...} = s; // consumes s->ps
     Core::ufree(ps->p);
   } // unconsumes s->ps, but makes it ThisIL
@@ -93,7 +93,7 @@ void func2a(struct s2<`U> @`U s) {
   Core::ufree(s);
 }
 
-void func2b(struct s2<`U> @`U s) {
+void func2b(struct s2<`U> @`U s) __attribute__((consume(1))) {
   int zvar;
   { let &s2{.ps=ps as &s1{.p=p,...},.x=x} = s; 
     // consumes s->ps, s->ps->p s->x
@@ -117,7 +117,7 @@ void func3a(struct s2<`U> s) {
   Core::ufree(s.ps);
 }
 
-void func3b(struct s3<`U> @`U s) {
+void func3b(struct s3<`U> @`U s) __attribute__((consume(1))) {
   int z;
 //   { let &s3{.s=xs as s2{.ps=ps,...},...} = s; // fails
   { let &s3{.s=s2{.ps=ps,...},.x=x} = s;
@@ -130,7 +130,7 @@ void func3b(struct s3<`U> @`U s) {
 //   Core::ufree(s->s.ps); // fails
 }
 
-void func3c(struct s3<`U> *`U s) {
+void func3c(struct s3<`U> *`U s) __attribute__((consume(1))) {
   int z;
   switch (s) {
   case &s3{.s=s2{.ps=ps,...},.x=x}:
@@ -195,8 +195,8 @@ void func3c(struct s3<`U> *`U s) {
 //   Core::ufree(s);
 // }
 
-// noconsume(x) parameters
-void func4a(struct s3<`U> @`U s) __attribute__((noconsume(1))) {
+// s is not consumed
+void func4a(struct s3<`U> @`U s) {
   int z;
   { let &s3{.s=s2{.ps=ps,...},.x=x} = s;
     z = *ps->p + *x;

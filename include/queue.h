@@ -42,15 +42,15 @@ extern bool is_empty(queue_t<`a::TB>);
 extern queue_t<`a::TB> create();
   /** [create()] allocates a new, empty queue on the heap and returns it. */
 
-extern void add(queue_t<`a::TB,`H>,`a x);
+extern void add(queue_t<`a::TB,`H>,`a x) __attribute__((consume(2)));
   /** [add(q,x)] adds [x] to the end of [q] (by side effect). */
-extern void radd(region_t<`r>, queue_t<`a::TB,`r>,`a x);
+extern void radd(region_t<`r>, queue_t<`a::TB,`r>,`a x) __attribute__((consume(3)));
   /** [radd(r,q,x)] is like [add(q,x)] except that the queue lives in
       the region with handle [r]. */
 
-extern void push(queue_t<`a::TB,`H> q, `a x);
+extern void push(queue_t<`a::TB,`H> q, `a x) __attribute__((consume(2)));
   /** [push(q,x)] adds [x] to the front of [q] (by side effect). */
-extern void rpush(region_t<`r> r, queue_t<`a::TB,`r> q,`a x);
+extern void rpush(region_t<`r> r, queue_t<`a::TB,`r> q,`a x) __attribute__((consume(3)));
   /** [rpush(r,q,x)] is like [push(q,x)] except that the queue lives in
       the region with handle [r]. */
 
@@ -86,13 +86,13 @@ extern void app(`b f(`a), queue_t<`a>);
        no-aliasable and/or unique pointers. */
 
 extern `a *`U take_match(region_t<`r> r, queue_t<`a::TA *`U,`r> q,
-			 bool (@f)(`b,`a *`U) __attribute__((noconsume(2))),
+			 bool (@f)(`b,`a *`U),
 			 `b env);
   /** [take_match(r,q,f,c)] looks through the queue (starting from the
       front) and returns the element [x] for which [f(x,c)] returns
       true. */
 
-extern `a noalias_take(queue_t<`a::TB> q, `a null_elem);
+extern `a noalias_take(queue_t<`a::TB> q, `a null_elem) __attribute__((consume(2)));
   /** [noalias_take(q)] is as take, above, but works when the queue
       contains potentially-unique elements; the caller needs to supply
       a 'null' element to swap with the element in the first spot in

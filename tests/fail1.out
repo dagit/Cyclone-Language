@@ -168,8 +168,8 @@ fail1.cyc:801: swap non-lvalue
 fail1.cyc:803: swap non-lvalue
 fail1.cyc:811: incompatible initializes() and noliveunique() attributes on parameter 1
 fail1.cyc:813: incompatible noliveunique() and initializes() attributes on parameter 1
-fail1.cyc:815: incompatible initializes() and noconsume() attributes on parameter 1
-fail1.cyc:817: incompatible noconsume() and initializes() attributes on parameter 1
+fail1.cyc:815: incompatible initializes() and consume() attributes on parameter 1
+fail1.cyc:817: incompatible consume() and initializes() attributes on parameter 1
 fail1.cyc:820: extern declaration should not have initializer
 fail1.cyc:823: bad attribute stdcall for variable f157
 fail1.cyc:825: bad attribute cdecl for variable f158
@@ -183,7 +183,7 @@ fail1.cyc:839: bad attribute format(printf,0,0) for variable f165
 fail1.cyc:841: bad attribute no_check_memory_usage for variable f166
 fail1.cyc:843: bad attribute initializes(1) for variable f167
 fail1.cyc:845: bad attribute noliveunique(1) for variable f168
-fail1.cyc:847: bad attribute noconsume(1) for variable f169
+fail1.cyc:847: bad attribute consume(1) for variable f169
 fail1.cyc:849: bad attribute pure for variable f170
 fail1.cyc:851: bad attribute aligned in function declaration
 fail1.cyc:853: bad attribute packed in function declaration
@@ -263,11 +263,10 @@ fail1.cyc:1013: @extensible datatype F239, field C239: parameter number mismatch
 fail1.cyc:1015: duplicate enum constructor C240
 fail1.cyc:1017: bad static expression $(3,3)
 fail1.cyc:1020: enum field name F242 shadows global name
-fail1.cyc:1026: noconsume(12) has an out-of-range index
+fail1.cyc:1026: consume(12) has an out-of-range index
 fail1.cyc:1028: noliveunique(12) has an out-of-range index
 fail1.cyc:1030: initializes(12) has an out-of-range index
-fail1.cyc:1032: incompatible noconsume() and noliveunique() attributes on parameter 1
-fail1.cyc:1033: incompatible noliveunique() and noconsume() attributes on parameter 1
+fail1.cyc:1032: consume attribute allowed only on unique pointers
 fail1.cyc:1035: initializes attribute allowed only on non-null pointers
 fail1.cyc:1036: initializes attribute allowed only on pointers of size 1
 fail1.cyc:1037: initializes attribute allowed only on pointers to non-zero-terminated arrays

@@ -429,9 +429,10 @@ We explain pointers in more detail in
 \hyperref[{sec:pointers}]{Section~\ref{sec:pointers}}.
 
 \subsection{Regions}
+\label{sec:tut-regions}
 
 Another potential way to crash a program or violate security is
-to dereference a \emph{dangling pointer}: a pointer to storage that
+to dereference a \emph{dangling pointer}, which is a pointer to storage that
 has been deallocated.  These are particularly insidious bugs
 because the error might not manifest itself immediately.  
 For example, consider the following C code:
@@ -479,7 +480,7 @@ Cyclone achieves this by assigning each object a symbolic
 object is declared.  Cyclone also tracks, for every pointer, what
 region it points into.  The region pointed to can be written as part
 of the pointer type, but usually the region can be omitted---the
-compiler is smart enough to discover the region automatically in most
+compiler is smart enough to discover the region automatically in many
 cases.
 
 For example, the variable \texttt{result} in our code above lives
@@ -538,7 +539,7 @@ to C, is that a pointer's type indicates \emph{one} region instead of
 \subsubsection*{Region Inference}
 
 If you had to write a \texttt{@region} qualifier on every
-pointer type, then writing code would be far from pleasant.
+pointer type, then writing code would be unpleasant.
 Fortunately, Cyclone provides a number of mechanisms to
 cut down on the region annotations you have to write.  
 
@@ -602,7 +603,7 @@ struct Point p = {0,1};
 struct Point *@region(`H) ptr = &p;
 \end{verbatim}
 
-As another example, the following function heap-allocates a point and
+As another example, the following function heap-allocates a \texttt{Point} and
 returns it to the caller.  We put the regions in here to be explicit:
 \begin{verbatim}
 struct Point *@region(`H) good_newPoint(int x,int y) {
@@ -629,7 +630,8 @@ via \texttt{new} or \texttt{malloc}, but there is no support in
 Cyclone for explicitly freeing an object in the heap.  The reason is
 that Cyclone cannot accurately track the lifetimes of individual
 objects within the heap, so it can't be sure whether dereferencing a
-pointer into the heap would cause problems.  Instead, a conservative
+pointer into the heap would cause problems.  Instead, unless otherwise
+specified, a conservative
 garbage collector is used to reclaim the data allocated in the heap.
 
 Using a garbage collector to recycle memory is the right thing to do
@@ -772,7 +774,8 @@ that you can write functions in Cyclone that don't care which
 specific region a given object lives in, as long as it's still
 alive.  For example, the function \texttt{foo} from the beginning
 of this section is a region-polymorphic function.  To make this
-clear, let us re-write the function making the regions explicit:
+clear, let us re-write the \texttt{foo} function
+(page~\pageref{sec:tut-regions}) making the region of its argument explicit:
 \begin{verbatim}
 void foo(struct Point *@region(`r) p) {
   p->y = 1234;
@@ -781,8 +784,9 @@ void foo(struct Point *@region(`r) p) {
 \end{verbatim}
 The function is parameterized by a \emph{region variable} \texttt{`r},
 and accepts a pointer to a \texttt{Point} that lives in region
-\texttt{`r}.  Note that \texttt{`r} can be instantiated with any
-region you like, including the heap, or a region local to a function.
+\texttt{`r}.  When calling \texttt{foo}, \texttt{`r} can be \emph{instantiated} with any
+region you like, including the heap \texttt{`H}, or a region local to
+a function. 
 So, for instance, we can write the following:
 \begin{verbatim}
 void g() {
@@ -799,8 +803,8 @@ a pointer into region \texttt{`g}, and in the second call to
 the first call, \texttt{`r} is implicitly instantiated with
 \texttt{`g}, and in the second call, with \texttt{`H}.  
 
-Cyclone automatically inserts region parameters for function
-arguments, so you rarely have to write them.  For instance,
+Cyclone automatically assigns region variables to function
+arguments that have pointer type, so you rarely have to write them.  For instance,
 \texttt{foo} can be written simply as:
 \begin{verbatim}
 void foo(struct Point * p) {
@@ -815,10 +819,11 @@ void h(struct Point * p1, struct Point * p2) {
   p2->x += p2->y;
 }
 \end{verbatim}
-then Cyclone fills in the region parameters for you by assuming
-that the points \texttt{p1} and \texttt{p2} can live in any
-two regions \texttt{`r1} and \texttt{`r2}.  To make this explicit,
-we would write:
+then Cyclone fills in the region parameters for you by assuming that
+the points \texttt{p1} and \texttt{p2} can live in any two regions,
+and so it generates assigns fresh names for the region variables of
+\texttt{p1} and \texttt{p2}, e.g. something like \texttt{`r1} and
+\texttt{`r2}.  To make this explicit, we would write:
 \begin{verbatim}
 void h(struct Point *@region(`r1) p1, 
        struct Point *@region(`r2) p2) {
@@ -839,19 +844,27 @@ void j(struct Point * p1, struct Point * p2) {
 }
 \end{verbatim}
 Cyclone will reject the code because it assumes that in general,
-\texttt{p1} and \texttt{p2} might point into \emph{different} regions.
-That is, Cyclone fills in the missing regions as follows:
+\texttt{p1} and \texttt{p2} might point into \emph{different}
+regions.  The error is roughly the following:
 \begin{verbatim}
-void j(struct Point *@region(`r1) p1, 
-       struct Point *@region(`r2) p2) {
+foo.cyc:2: type mismatch: struct Point *`GR0 != struct Point *`GR1
+  `GR1 and `GR0 are not compatible. (variable types are not the same)
+\end{verbatim}
+Cyclone has picked the name \texttt{GR1} for \texttt{p1}'s region, and
+\texttt{GR2} for \texttt{p2}'s region.  That is, Cyclone fills in the
+missing regions as follows:
+\begin{verbatim}
+void j(struct Point *@region(`GR1) p1, 
+       struct Point *@region(`GR2) p2) {
   p1 = p2;
 }
 \end{verbatim}
 Now it is clear that the assignment does not type-check because
 the types of \texttt{p1} and \texttt{p2} differ.  In other words,
-\texttt{`r1} and \texttt{`r2} \emph{might} be instantiated with
+\texttt{`GR1} and \texttt{`GR2} \emph{might} be instantiated with
 different regions, in which case the code would be incorrect.
-But you can make them the same by putting in the same explicit region
+But you can require that they be instantiated with the same region by
+explicitly specifying the same explicit region variable
 for each pointer.  Thus, the following code does type-check:
 \begin{verbatim}
 void j(struct Point *@region(`r) p1, 
@@ -868,30 +881,32 @@ the sense that if it does work out, clients will have the most
 lattitude in passing arguments from different regions or the
 same region to the function.  
 
-What about the results?  Here, there is no good answer because
+What region variable is chosen for return-types that mention pointers?
+Here, there is no good answer because 
 the region of the result of a function cannot be easily determined
-without looking at the body of the function, which defeats separate
-compilation of function definitions from their prototypes.  Therefore,
+without looking at the body of the function, which defeats \emph{separate
+compilation} of function definitions from their prototypes.  Therefore,
 we have arbitrarily chosen the heap as the default region for
-function results.  Consequently, the following code:
+function results.  Consequently, the following code type-checks:
 \begin{verbatim}
 struct Point * good_newPoint(int x,int y) {
   return new Point{x,y};
 }
 \end{verbatim}
-type-checks since the \texttt{new} operator returns a pointer
+This is because the \texttt{new} operator returns a pointer
 to the heap, and the default region for the return type is the heap.
 
-This explains why the original bad code for allocating a new
-point does not type-check:
+This also explains why the \texttt{newPoint} function
+(page~\pageref{sec:tut-regions}) for allocating a new
+\texttt{Point} does not type-check:
 \begin{verbatim}
 struct Point *newPoint(int x,int y) {
   struct Point result = {x,y};
   return &result;
 }
 \end{verbatim}
-The value \texttt{\&result} is a pointer into region \texttt{`newPoint}
-but the result type of the function needs to be a pointer into
+The expression \texttt{\&result} is a pointer into region \texttt{`newPoint}
+but the result type of the function must be a pointer into
 the heap (region \texttt{`H}).  
 
 If you want to return a pointer that is not in the heap region,
@@ -904,10 +919,10 @@ int * id(int *x) {
 \end{verbatim}
 will not type-check.  To see why, let us rewrite the
 code with the default region annotations filled in.  The argument
-is assumed to be in a region \texttt{`r}, and the result is assumed to be
+is assumed to be in a region \texttt{`GR1}, and the result is assumed to be
 in the heap, so the fully elaborated code is:
 \begin{verbatim}
-int *@region(`H) id(int *@region(`r) x) {
+int *@region(`H) id(int *@region(`GR1) x) {
   return x;
 }
 \end{verbatim}
@@ -930,31 +945,32 @@ int *`r id(int *`r x) {
 
 In summary, each pointer in Cyclone points into a given region
 and this region is reflected in the type of the pointer.  Cyclone
-won't let you dereference a pointer into a deallocated region.
+will not let you dereference a pointer into a deallocated region.
 The lexical blocks declared in functions correspond to one
-type of region, and simply declaring a variable within that
+type of region (a \emph{stack region}), and simply declaring a variable within that
 block allocates storage within the region.  The storage is
-deallocated upon exit of the block.  Growable regions are
+deallocated upon exit of the block.  LIFO regions are
 similar, except that a dynamic number of objects can be allocated
-within the region using the region's handle.  Both block
-and growable regions have structured lifetimes.  Dynamic
+within the region using the region's handle.  Both stack
+and LIFO regions have structured lifetimes.  Dynamic
 regions, in contrast, support arbitrary lifetimes, but
 must be opened to be accessed.  Finally, the heap is a
-special growable region that is garbage collected.  
+special region whose dead objects are garbage collected.  
 
 Region polymorphism and region inference make it possible to omit many
-region annotations on types.  Cyclone assumes that pointers passed to
-functions may live in distinct regions, and assumes that result
-pointers are in the heap.  These assumptions are not perfect, but (a)
+region annotations on types.  By default, Cyclone assumes that
+unannotated pointer arguments in
+functions may live in distinct regions, and that unannotated result
+pointers are in the heap.  These assumptions are not perfect, but 
 programmers can fix the assumptions by providing explicit region
-annotations, (b) it permits Cyclone files to be separately compiled.
+annotations, and they permit Cyclone files to be separately compiled.
 
-The region-based type system of Cyclone is perhaps the most
+The region-based type system of Cyclone is perhaps the
 complicated aspect of the language.  In large part, this is
 because memory management is a difficult and tricky business.
 We have attempted to make stack allocation and region polymorphic
 functions simple to use without sacrificing programmer control
-over the lifetimes of objects and without having to resort to
+over the lifetimes of objects and without (always) having to resort to
 garbage collection.  As more advanced features, we also provide
 even finer control over object lifetimes, but at the expense of
 more work from the programmer, using the \emph{unique region} and
@@ -992,6 +1008,8 @@ call \texttt{printf} with arguments that don't match the format
 string.  This is called a \emph{format string attack}, and it's an
 increasingly common exploit.
 
+\subsubsection*{Tagged Unions}
+
 Cyclone provides \emph{tagged unions} so that you can safely write
 functions that accept an argument with more than one possible type.
 Like a C \texttt{union}, a Cyclone \texttt{@tagged union} is a type that has
@@ -1005,7 +1023,8 @@ several possible cases.  Here's a simple example:
     union T y = {.String = "hello, world"};
 \end{verbatim}
 This declares a new tagged union type \texttt{T}, that can hold either an
-integer or a string (remember, a string is a \texttt{char *@fat}\ in
+integer or a string (remember, a literal string can always be
+converted to a \texttt{char *@fat}\ in
 Cyclone).  It also declares to \texttt{union T} values \texttt{x} and
 \texttt{y} and initializes them with an integer and string respectively.
 
@@ -1039,7 +1058,7 @@ Each write to a tagged union member causes the hidden tag to
 be updated, and each read is preceded by a 
 check to ensure that the member was the last one written.
 If you attempt to read some member other than the last one
-written, than the \texttt{Match}
+written, then the \texttt{Match}
 exception is thrown.  For example, the following code writes
 the \texttt{String} member and then attempts to read the
 \texttt{Integer} member, so it will throw a \texttt{Match}
@@ -1084,6 +1103,8 @@ since \texttt{x} holds \texttt{\{.Integer = 3\}}, and
 You can find out more about patterns in
 \hyperref[{sec:patterns}]{Section~\ref{sec:patterns}}; 
 
+\subsubsection*{Untagged Unions}
+
 Cyclone also supports untagged unions, but there are restrictions
 on how they may be used to ensure safety.  In particular, you can
 write any value you like into a union, but you can only read out
@@ -1092,6 +1113,8 @@ values that do not contain pointers.  This ensures that you don't
 So, the general rule is that you can use a normal C union if
 you aren't using pointers, but you must use a \texttt{@tagged}
 union if you are using pointers.  
+
+\subsubsection*{Datatypes}
 
 Cyclone provides another alternative to tagged unions for supporting
 hetrogenous values called a \emph{datatype}.  Tagged
@@ -1159,7 +1182,7 @@ If the exception is not caught, the program halts and prints an error
 message.  Consider our earlier example:
 \begin{verbatim}
     FILE *f = fopen("/etc/passwd","r");
-    int c = getc((FILE @)f);
+    int c = getc((FILE *@notnull)f);
 \end{verbatim}
 Suppose that there is no file \texttt{/etc/passwd}; then
 \texttt{fopen} will return NULL, and when \texttt{f} is cast to
@@ -1171,7 +1194,8 @@ halt with an error message,
 \texttt{Null_Exception} is one of a handful of standard exceptions
 used in Cyclone.  Each exception is like a case of a \texttt{datatype}:
 it can carry along some values with it.  For example, the standard
-exception \texttt{InvalidArg} carries a string.  Exceptions can be
+exception \texttt{Invalid_argument} carries a string (which is a
+zero-terminated fat pointer).  Exceptions can be
 handled in \texttt{try}-\texttt{catch} statements, using pattern
 matching:
 \begin{verbatim}
@@ -1184,8 +1208,8 @@ matching:
     case &Null_Exception:
       printf("Error: can't open /etc/passwd\n");
       exit(1);
-    case &InvalidArg(s):
-      printf("Error: InvalidArg(%s)\n",s);
+    case &Invalid_argument(s):
+      printf("Error: Invalid_argument(%s)\n",s);
       exit(1);
     }
 \end{verbatim}
@@ -1196,7 +1220,7 @@ the \texttt{catch}.  But if \texttt{f} is NULL, then the null check
 will fail and the exception \texttt{Null_Exception} will be thrown;
 execution immediately continues with the \texttt{catch} (the call to
 \texttt{getc} never happens).  In the \texttt{catch}, the thrown
-exception is pattern matched against the cases.  Since the thrown
+exception is pattern-matched against the cases, in order.  Since the thrown
 exception is \texttt{Null_Exception}, the first case is executed here.
 
 There is one important difference between an exception and a case of a

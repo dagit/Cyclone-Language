@@ -99,7 +99,7 @@ extern void _bcopy(const `a::A? src, `a?`r dst, size_t n, Core::sizeof_t<`a> sz)
 extern mstring_t     expand(buffer_t s, size_t sz); /* like realloc */
 extern mstring_t<`r> rexpand(region_t<`r::TR>,buffer_t s, size_t sz);
 extern mstring_t     realloc_str(mstring_t<`H> str, size_t sz); /* conditional realloc */
-extern mstring_t<`r> rrealloc_str(region_t<`r::TR> r, mstring_t<`r> str, size_t sz);
+extern mstring_t<`r> rrealloc_str(region_t<`r::TR> r, mstring_t<`r> str, size_t sz) __attribute__((consume(2)));
 extern mstring_t     strdup(buffer_t src);
 extern mstring_t<`r> rstrdup(region_t<`r::TR>,buffer_t src);
 

@@ -811,10 +811,10 @@ void f148(int x, int ?@zeroterm y) {
 void f149(int @`U x) __attribute__((initializes(1),noliveunique(1)));
 // incompatible initializes() and noliveunique() attributes on parameter 1
 void f150(int @`U x) __attribute__((noliveunique(1),initializes(1)));
-// incompatible initializes() and noconsume() attributes on parameter 1
-void f151(int @`U x) __attribute__((initializes(1),noconsume(1)));
-// incompatible initializes() and noconsume() attributes on parameter 1
-void f152(int @`U x) __attribute__((noconsume(1),initializes(1)));
+// incompatible initializes() and consume() attributes on parameter 1
+void f151(int @`U x) __attribute__((initializes(1),consume(1)));
+// incompatible initializes() and consume() attributes on parameter 1
+void f152(int @`U x) __attribute__((consume(1),initializes(1)));
 
 // extern declaration should not have initializer
 extern int f156 = 0;
@@ -844,7 +844,7 @@ int f167 __attribute__((initializes(1)));
 // bad attribute noliveunique(1) for variable f
 int f168 __attribute__((noliveunique(1)));
 // bad attribute noconsume(1) for variable f
-int f169 __attribute__((noconsume(1)));
+int f169 __attribute__((consume(1)));
 // bad attribute pure for variable f
 int f170 __attribute__((pure));
 // bad attribute aligned in function declaration
@@ -1023,14 +1023,14 @@ static enum F243 { F243 };
 extern enum F243 { F243 };
 
 // noconsume attribute: index 12 out of range
-void f244(int x, int y) __attribute__((noconsume(12)));
+void f244(int x, int y) __attribute__((consume(12)));
 // noliveunique attribute: index 12 out of range
 void f245(int x, int y) __attribute__((noliveunique(12)));
 // initializes attribute: index 12 out of range
 void f246(int x, int y) __attribute__((initializes(12)));
-// attribute overlap (others are earlier)
-void f247(int @`U x) __attribute__((noliveunique(1))) __attribute__((noconsume(1)));
-void f248(int @`U x) __attribute__((noconsume(1))) __attribute__((noliveunique(1)));
+// consume(1) only allowed on unique pointers
+void f247(int x) __attribute__((consume(1)));
+// void f248(int @`U x) __attribute__((noconsume(1))) __attribute__((noliveunique(1)));
 // initializes disallowed on null, >1, zero-terminated, and nonpointers
 void f249(int *x) __attribute__((initializes(1)));
 void f250(int @{2} x) __attribute__((initializes(1)));

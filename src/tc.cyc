@@ -71,7 +71,7 @@ static void fnTypeAttsOverlap(seg_t loc, int i,
 static void fnTypeAttsOK(tenv_t te, type_t t, seg_t loc) {
   $(list_t<int>,string_t) init_params          = $(NULL,"initializes");
   $(list_t<int>,string_t) nolive_unique_params = $(NULL,"noliveunique");
-  $(list_t<int>,string_t) noconsume_params     = $(NULL,"noconsume");
+  $(list_t<int>,string_t) consume_params       = $(NULL,"consume");
   switch (compress(t)) {
   case &FnType(FnInfo{.attributes=atts,.args=args,...}):
     int nargs = List::length(args);
@@ -80,7 +80,7 @@ static void fnTypeAttsOK(tenv_t te, type_t t, seg_t loc) {
       case &Initializes_att(i):
 	if(!fnTypeAttsRangeOK(loc,i,nargs,atts->hd)) break;
 	fnTypeAttsOverlap(loc,i,init_params,nolive_unique_params);
-	fnTypeAttsOverlap(loc,i,init_params,noconsume_params);
+	fnTypeAttsOverlap(loc,i,init_params,consume_params);
 	let &$(_,_,t) = List::nth(args,i-1);
 	string_t s = "initializes attribute allowed only on";
 	switch(Tcutil::compress(t)) {
@@ -100,19 +100,20 @@ static void fnTypeAttsOK(tenv_t te, type_t t, seg_t loc) {
       case &Noliveunique_att(i):
 	if(!fnTypeAttsRangeOK(loc,i,nargs,atts->hd)) break;
 	fnTypeAttsOverlap(loc,i,nolive_unique_params,init_params);
-	fnTypeAttsOverlap(loc,i,nolive_unique_params,noconsume_params);
+	// NB. noliveunique and consume can overlap
 	let &$(_,_,t) = List::nth(args,i-1);
 	if (!is_noalias_pointer(t,false))
 	  terr(loc,"noliveunique attribute allowed only on unique pointers");
 	nolive_unique_params[0] = new List(i,nolive_unique_params[0]);
 	break;
-      case &Noconsume_att(i):
+      case &Consume_att(i):
 	if(!fnTypeAttsRangeOK(loc,i,nargs,atts->hd)) break;
-	fnTypeAttsOverlap(loc,i,noconsume_params,init_params);
-	fnTypeAttsOverlap(loc,i,noconsume_params,nolive_unique_params);
+	fnTypeAttsOverlap(loc,i,consume_params,init_params);
+	// NB. noliveunique and consume can overlap
 	let &$(_,_,t) = List::nth(args,i-1);
-	// XXX other restrictions?  E.g. not on arrays or fat pointers?
-	noconsume_params[0] = new List(i,noconsume_params[0]); 
+	if (!is_noalias_pointer(t,false))
+	  terr(loc,"consume attribute allowed only on unique pointers");
+	consume_params[0] = new List(i,consume_params[0]); 
 	break;
       default: break;
       }

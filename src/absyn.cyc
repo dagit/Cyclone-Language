@@ -1050,7 +1050,7 @@ string_t attribute2string(attribute_t a) {
   case &Format_att(Scanf_ft,n,m):  return aprintf("format(scanf,%u,%u)", n,m);
   case &Initializes_att(n): return aprintf("initializes(%d)",n);
   case &Noliveunique_att(n): return aprintf("noliveunique(%d)",n);
-  case &Noconsume_att(n): return aprintf("noconsume(%d)",n);
+  case &Consume_att(n): return aprintf("consume(%d)",n);
   case &Pure_att: return "pure";
   case &Always_inline_att: return "always_inline";
   case &Mode_att(s): return aprintf("__mode__(\"%s\")",s); 
@@ -1071,7 +1071,7 @@ bool fntype_att(attribute_t a) {
   case &Const_att:
   case &Noliveunique_att(_):
   case &Initializes_att(_):
-  case &Noconsume_att(_): return true;
+  case &Consume_att(_): return true;
   default: return false;
   }
 }
