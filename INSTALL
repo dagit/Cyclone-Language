@@ -6,7 +6,13 @@ To build Cyclone, do
 make
 make install
 
-After these steps, you can optionally do
+To build the profiling libraries, you should instead do
+
+./configure
+make all gprof aprof
+make install
+
+In either case, after these steps, you can optionally do
 
 make clean
 

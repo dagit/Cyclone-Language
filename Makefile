@@ -31,7 +31,7 @@ CYC_INC_PATH := $(CYCDIR)/lib
 
 all: $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/gc.a cyclone \
 	$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include \
-	tools aprof libs 
+	tools libs 
 
 # FIX: a bug in buildlib forces us to use a relative path for -d
 cyclone: $(CYC_LIB_PATH)

@@ -3734,11 +3734,21 @@ prologue {
 
 sys/ioctl.h:
 cpp {
+/* Cygwin doesn't define the ioctl constants in ioctl.h */
+#if defined(__CYGWIN32__) || defined(__CYGWIN__)
 #include <sys/socket.h>
+#endif
 }
 include {
 FIONREAD
 FIONBIO
+}
+epilogue ioctl {
+  // ioctl normally takes a void * as its arg, but
+  //   for the moment we forbid it to taking only ints.
+  //   Ultimately should change to use tunions as
+  //   socket commands do
+  extern "C" int ioctl(int fd, int cmd, int @arg);
 }
 ;
 
