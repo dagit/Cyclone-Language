@@ -270,8 +270,97 @@ static list_t<doc_t> local_get_docs(context_t ctxt, buf_t b, FILE @f) {
   return docs;
 }
   
+/* Parser that keeps state on a list instead of the runtime stack */
+/* NOTE: this one doesn't check whether tags match up */
+static tag_t get_endtag_nocheck(FILE @f) {
+  // < has already been consumed.
+  int c = GETC(f);
+  if (c != '/')
+    die("expecting end tag /");
+  return get_tag(f);
+}
+list_t<doc_t> get_nest(context_t ctxt, buf_t b, FILE @f) {
+  list_t<doc_t> ds = null;
+  unsigned int count = 0; /* Invariant: count is length of ds */
+
+  /* Maintain a stack with an elt for each level of nesting.
+     The elt tells how many elts were on ds on entry to the nest,
+     plus whether the tag is redundant. */
+  list_t<$(unsigned int,context_t)@> nest = null;
+  int c = GETC(f);
+  //  printf("Starting parse, c = %c\n",c);
+  while (true) {
+    if (c == EOF) break;
+    else if (c == '<') {
+      /* Must be a start or end tag */
+      c = GETC(f);
+      UNGETC(c,f);
+      if (c == '/') {
+        /* end tag */
+        let tag = get_endtag_nocheck(f);
+        let &$(old_count,old_ctxt) = nest->hd;
+        nest = nest->tl;
+        //        printf("Pop %x\n",x);
+        let redundant =
+          (old_ctxt.B == ctxt.B &&
+           old_ctxt.EM == ctxt.EM &&
+           old_ctxt.I == ctxt.I &&
+           old_ctxt.S == ctxt.S &&
+           old_ctxt.TT == ctxt.TT &&
+           old_ctxt.U == ctxt.U &&
+           old_ctxt.size == ctxt.size &&
+           old_ctxt.color == ctxt.color);
+        ctxt = old_ctxt;
+        if (!redundant) {
+          //          printf("Not redundant\n");
+          let howmany = count - old_count;
+          if (howmany == 1) {
+            //            printf("Picking up 1 doc\n");
+            doc_t d = new Tagged(tag,ds->hd);
+            ds->hd = d;
+          }
+          else if (howmany > 1) {
+            //            printf("Picking up %d docs\n",howmany);
+            //            printf("Num avail: %d\n",List::length(ds));
+            //            printf("Count: %d\n",count);
+            let docs = null;
+            for (; howmany>0; howmany--) {
+              //              printf("tick");
+              docs = new List(ds->hd,docs);
+              ds = ds->tl;
+              count--;
+            }
+            //            printf("Done w/dem docs\n");
+            let d = new Tagged(tag,new Seq(docs));
+            ds = new List(d,ds);
+            count++;
+          }
+        }
+      }
+      else  {
+        /* start tag */
+	let tag = get_tag(f);
+        let old_ctxt = ctxt;
+	let redundant = check_redundant(&ctxt,tag); // side-effect
+        //        printf("Push %x (tag=%d)\n",x,tag);
+        nest = new List(new $(count,old_ctxt),nest);
+      }
+    }
+    else {
+      /* Not a start or end tag, so grab a bunch of text */
+      //      printf("Getting text\n");
+      UNGETC(c,f);
+      ds = new List(get_text(ctxt,b,f),ds);
+      count++;
+    }
+    c = GETC(f);
+  } /* end of while loop */
+  return ds;
+}
+
 doc_t get_docs(context_t ctxt, buf_t b, FILE @f) {
-  list_t<doc_t> docs = imp_rev(local_get_docs(ctxt,b,f));
+  //  list_t<doc_t> docs = imp_rev(local_get_docs(ctxt,b,f));
+  list_t<doc_t> docs = imp_rev(get_nest(ctxt,b,f));
   if(docs == null)
     return Mt;
   if(docs->tl == null)

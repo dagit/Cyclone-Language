@@ -373,6 +373,7 @@ int main(int argc, char ??argv) {
   // fprintf(stderr,"%d\ncopying docs...",check_time()); fflush(stderr);
   // doc_t d = copy_doc(orig);
   doc_t d = get_docs(init_context,b,f);
+  //  printf("\nDONE PARSING\n");
   d = remove_Mt(d);
 
   try {
