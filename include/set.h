@@ -30,7 +30,9 @@ using List;
   /*** Defines namespace Set, which implements polymorphic,
        functional, finite sets over elements with a total order,
        following the conventions of the Objective Caml set library as
-       much as possible.
+       much as possible.  Sets can also be used imperatively, but
+       choosing the imp\_ variations of functions, but unioning and
+       intersecting imperative sets should be done with caution.
   */
 
 extern struct Set<`a,`r::R>;
@@ -61,9 +63,15 @@ extern set_t<`a> from_list(int (@`H cmp)(`a,`a),list_t<`a> l);
 extern set_t<`a> insert(set_t<`a,`H> s,`a elt);
   /** [insert(s,elt)] returns a set containing all the elements of
       [s], plus [elt].  The set [s] is not modified. */
+extern void imp_insert(set_t<`a,`H> s,`a elt);
+  /** [imp_insert(s,elt)] returns modifies [s] to additionally contain
+      [elt], if not already present. */
 extern set_t<`a,`r> rinsert(region_t<`r> r, set_t<`a,`r> s, `a elt);
   /** [rinsert(r,s,elt)] is like [insert(s,elt)], except that it works
       on sets allocated in the region with handle [r]. */
+extern void imp_rinsert(region_t<`r> r, set_t<`a,`r> s, `a elt);
+  /** [imp_rinsert(r,s,elt)] is like [imp_insert(s,elt)], except that
+      it works on sets allocated in the region with handle [r]. */
 extern set_t<`a> union_two(set_t<`a,`H> s1,set_t<`a,`H> s2);
   /** [union_two(s1,s2)] returns a set whose elements are the union of
       the elements of [s1] and [s2].  (We use the name [union_two]
@@ -77,6 +85,8 @@ extern set_t<`a> diff(set_t<`a,`H> s1,set_t<`a,`H> s2);
 extern set_t<`a> delete(set_t<`a,`H> s,`a elt);
   /** [delete(s,elt)] returns a set whose elements are the elements of
       [s], minus [elt]. */
+extern void imp_delete(set_t<`a,`H> s,`a elt);
+  /** [imp_delete(s,elt)] imperatively deletes [elt] from [s], if present. */
 
 extern int cardinality(set_t s);
   /** [cardinality(s)] returns the number of elements in the set [s]. */

@@ -17,11 +17,11 @@ CYCC:=$(BINDIR)/$(CYCCOMP)
 $(BINDIR)/$(PROG): $(PROG)
 	cp $< $@
 
-$(PROG): aprof.o $(CYC_LIB_PATH)/$(CYCLIB)
-	$(CYCC) -L$(CYC_LIB_PATH) -B$(CYC_LIB_PATH)/cyc-lib $(LC_FLAG) -o $@ aprof.o $(LDFLAGS)
+$(PROG): aprof.o aprof_event.o $(CYC_LIB_PATH)/$(CYCLIB)
+	$(CYCC) -L$(CYC_LIB_PATH) -B$(CYC_LIB_PATH)/cyc-lib $(LC_FLAG) -o $@ aprof.o aprof_event.o $(LDFLAGS)
 
 clean:
 	$(RM) aprof aprof.exe *.o
 
 %.o: %.cyc $(CYCC)
-	$(CYCC) $(CYCFLAGS) -c $<
+	$(CYCC) $(CYCFLAGS) -detailedlocation -c $<

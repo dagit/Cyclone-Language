@@ -73,6 +73,7 @@ CYCLONE_H:=arg.h\
 	execinfo.h\
 	filename.h\
 	fn.h\
+	gc_ifc.h\
 	getopt.h\
 	grp.h\
 	hashtable.h\

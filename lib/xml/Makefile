@@ -15,13 +15,19 @@ SRCS=xml xmlparse_tab xmlscan xmldump
 
 OBJS=$(addsuffix .o, $(SRCS))
 CSRCS=$(addsuffix .c, $(SRCS))
+A_OBJS=$(addsuffix .o, $(addsuffix _a, $(SRCS)))
 
 all: xmlecho$(EXE) libxml.a
 
 install: all $(CYCDIR)/bin/cyc-lib/libxml.a
 
+a_install: $(CYCDIR)/bin/cyc-lib/libxml_a.a 
+
 $(CYCDIR)/bin/cyc-lib/libxml.a: libxml.a
 	cp -p libxml.a $(CYC_LIB_PATH)
+
+$(CYCDIR)/bin/cyc-lib/libxml_a.a: libxml_a.a
+	cp -p libxml_a.a $(CYC_LIB_PATH)
 
 xmlecho$(EXE): $(OBJS) xmlecho.o
 	$(CYCC) -L$(CYC_LIB_PATH) -B$(CYC_LIB_PATH)/cyc-lib -o $@ $^ $(LDFLAGS)
@@ -35,17 +41,27 @@ libxml.a: $(OBJS)
 	@echo Trying ranlib, if not found, probably ok to ignore error messages
 	-ranlib $@
 
+libxml_a.a: $(A_OBJS)
+	-echo $(A_OBJS)
+	-rm -f $@
+	ar rc $@ $^
+	@echo Trying ranlib, if not found, probably ok to ignore error messages
+	-ranlib $@
+
 csrc: $(CSRCS)
 
 clean:
-	rm -f *.o *.c *.output *.stackdump
+	rm -f *.o *_a.o *.c *.output *.stackdump
 	rm -f xmlscan.cyc
 	rm -f xmlparse_tab.cyc xmlparse_tab.h
-	rm -f libxml.a
+	rm -f libxml.a libxml_a.a
 	rm -f xmlecho xmlecho.exe
 
 %.o : %.cyc
 	$(CYCC) $(CYC_FLAGS) -c $< 
+
+%_a.o : %.cyc
+	$(CYCC) $(CYC_FLAGS) -pa -c $< -o $@ 
 
 xmlparse_tab.cyc: xmlparse.y
 	$(CYCBISON) -d $< -o $@

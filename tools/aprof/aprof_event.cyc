@@ -1,0 +1,285 @@
+/* Allocation profiler
+   Copyright (C) 2001 Greg Morrisett, AT&T
+   This file is part of the Cyclone compiler.
+
+   The Cyclone compiler is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   The Cyclone compiler is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with the Cyclone compiler; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+#define APROF_LIB
+#include <core.h>
+#include <string.h>
+#include <hashtable.h>
+#include <list.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <array.h>
+#include "aprof_event.h"
+
+/***** This file is used to process the amon.out file.  It uses callbacks
+       to actually process the data in that file.  We have two processors
+       at the moment: one that prints tabular allocation data, and the
+       other that outputs jgraph coordinates to show an allocation
+       graph.
+*****/
+
+namespace Aprof;
+using Core;
+using Aprof;
+
+//////////////////// LEXING/PARSING ROUTINES //////////////////////
+
+static char buf[1000]@zeroterm;
+static struct RegionStats region_stats;
+
+static bool eof = false;
+
+static void skip_whitespace(FILE @f) {
+  int c = getc(f);
+  while (c == ' ' || c == '\t' || c == '\n') 
+    c = getc(f);
+  ungetc(c,f);
+}  
+
+static bool gettoken(FILE @f) {
+  int i = 0;
+  int c;
+  skip_whitespace(f);
+  c = getc(f);
+  if (c == EOF) return false;
+  while (c != EOF && c != ' ' && c != '\t' && c != '\n') {
+    buf[i++] = (char)c;
+    c = getc(f);
+  }
+  buf[i] = '\0';
+  ungetc(c,f);
+  return true;
+}  
+
+static int snarfline(FILE @f) {
+  try {
+    int c = getc(f);
+    while (c != '\n' && c != EOF) c = getc(f);
+    if (c == EOF) return false;
+    else { ungetc(c,f); return true; }
+  } catch {
+  default: fprintf(stderr,"snarfline failed\n"); break;
+  }
+  return false;
+}
+
+static bool getint(FILE @f, int @result) {
+  if (!gettoken(f)) return false;
+  try {
+    *result = atoi(buf);
+  } catch {
+  default: fprintf(stderr,"bad integer %s\n",buf); return -1;
+  }  
+  return true;
+}
+
+static bool get_region_stats(FILE @f, struct RegionStats @stats) {
+  // get the allocation amount
+  if (!getint(f,&stats->region_size_bytes)) return false;
+  if (!getint(f,&stats->free_bytes)) return false;
+  if (!getint(f,&stats->total_alloc_bytes)) return false;
+  return true;
+}
+
+///////////////////// PROCESSING A FILE ///////////////////////
+
+int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
+
+  // cached versions of events; callback better not cache them!
+  static datatype AProfEvent.AllocE __alloc_event =
+    AllocE(AllocEvent("bogus","bogus",0,RegionStats(0,0,0)));
+  static datatype AProfEvent.GcE __gc_event =
+    GcE(GcEvent(0,RegionStats(0,0,0)));
+  static datatype AProfEvent.CreateE __create_event =
+    CreateE(CreateEvent("bogus","bogus",RegionStats(0,0,0)));
+  static datatype AProfEvent.GrowE __grow_event =
+    GrowE(GrowEvent("bogus",0,RegionStats(0,0,0)));
+  static datatype AProfEvent.ShrinkE __shrink_event =
+    ShrinkE(ShrinkEvent("bogus",0,RegionStats(0,0,0)));
+  static datatype AProfEvent.FreeE __free_event =
+    FreeE(FreeEvent("bogus",RegionStats(0,0,0)));
+
+  FILE @f;
+  f = (FILE @)fopen(file,"r");
+  fseek(f,0,SEEK_END);
+  int filesz = ftell(f);
+  fseek(f,0,SEEK_SET);
+#define UPDATE_FREQ_PERCENT 2
+  int seg = filesz / (100/UPDATE_FREQ_PERCENT);
+  int ticks = 0;
+  for (int i = 0; i<(100/UPDATE_FREQ_PERCENT); i++)
+    fprintf(stderr,"=");
+  fprintf(stderr,"\n");
+
+  // process the input file one line at a time
+  while (gettoken(f)) {
+    if (strcmp(buf,"----") == 0) break;
+    int cur_loc = ftell(f);
+    if ((cur_loc - (ticks*seg)) >= seg) {
+      fprintf(stderr,".");
+      ticks++;
+    }
+
+    // get the location
+    let s = (string_t)strdup(buf);
+
+    // get the region name
+    if (!gettoken(f)) {
+      fprintf(stderr,"missing region name for %s\n",s);
+      return -1;
+    }
+    let rname = (string_t)strdup(buf);
+
+    // get the event
+    if (!gettoken(f)) {
+      fprintf(stderr,"missing allocation action for %s\n",s); 
+      return -1;
+    }
+
+    /***********************/
+    /* CREATE REGION event */
+    /***********************/
+    if (!strcmp(buf,"create")) {
+      // set up the event
+      let &CreateE(CreateEvent(*loc,*rgn,*stats)) = &__create_event;
+      if (!get_region_stats(f, stats)) {
+	fprintf(stderr,"failed to get region stats for %s\n",s);
+	return -1;
+      }
+      *loc = s;
+      *rgn = rname;
+      // invoke the handler
+      if (!Fn::apply(callback,&__create_event)) {
+	fprintf(stderr,"callback failed for create event at %s\n",s);
+	return -1;
+      }
+    }
+
+    /*********************/
+    /* FREE REGION event */
+    /*********************/
+    else if  (!strcmp(buf,"free")) {
+      // set up the event
+      let &FreeE(FreeEvent(*rgn,*stats)) = &__free_event;
+      if (!get_region_stats(f, stats)) {
+	fprintf(stderr,"failed to get region stats for %s\n",s);
+	return -1;
+      }
+      *rgn = rname;
+      // invoke the handler
+      if (!Fn::apply(callback,&__free_event)) {
+	fprintf(stderr,"callback failed for free event at %s\n",s);
+	return -1;
+      }
+    }
+
+    /***********************/
+    /* SHRINK REGION event */
+    /***********************/
+    else if (!strcmp(buf,"shrink")) {
+      // set up the event
+      let &ShrinkE(ShrinkEvent(*rgn,*amt,*stats)) = &__shrink_event;
+      if (!getint(f,amt)) {
+	fprintf(stderr,"failed to get shrink amount for %s\n",s);
+	return -1;
+      }
+      if (!get_region_stats(f, stats)) {
+	fprintf(stderr,"failed to get region stats for %s\n",s);
+	return -1;
+      }
+      *rgn = rname;
+      // invoke the handler
+      if (!Fn::apply(callback,&__shrink_event)) {
+	fprintf(stderr,"callback failed for shrink event at %s\n",s);
+	return -1;
+      }
+    }
+
+    /***********************/
+    /* GROW REGION event */
+    /***********************/
+    else if (!strcmp(buf,"grow")) {
+      // set up the event
+      let &GrowE(GrowEvent(*rgn,*amt,*stats)) = &__grow_event;
+      if (!getint(f,amt)) {
+	fprintf(stderr,"failed to get shrink amount for %s\n",s);
+	return -1;
+      }
+      if (!get_region_stats(f, stats)) {
+	fprintf(stderr,"failed to get region stats for %s\n",s);
+	return -1;
+      }
+      *rgn = rname;
+      // invoke the handler
+      if (!Fn::apply(callback,&__grow_event)) {
+	fprintf(stderr,"callback failed for grow event at %s\n",s);
+	return -1;
+      }
+    }
+
+    /************/
+    /* GC event */
+    /************/
+    else if  (!strcmp(buf,"gc")) {
+      // set up the event
+      let &GcE(GcEvent(*amt,*stats)) = &__gc_event;
+      if (!get_region_stats(f, stats)) {
+	fprintf(stderr,"failed to get region stats for %s\n",s);
+	return -1;
+      }
+      *amt = *amt + 1;
+      // invoke the handler
+      if (!Fn::apply(callback,&__gc_event)) {
+	fprintf(stderr,"callback failed for gc event at %s\n",s);
+	return -1;
+      }
+    }
+
+    /********************************/
+    /* ALLOCATE INTO A REGION event */
+    /********************************/
+    else if (!strcmp(buf,"alloc")) {
+      // set up the event
+      let &AllocE(AllocEvent(*loc,*rgn,*amt,*stats)) = &__alloc_event;
+      if (!getint(f,amt)) {
+	fprintf(stderr,"failed to get alloc amount for %s\n",s);
+	return -1;
+      }
+      if (!get_region_stats(f, stats)) {
+	fprintf(stderr,"failed to get region stats for %s\n",s);
+	return -1;
+      }
+      *loc = s;
+      *rgn = rname;
+      // invoke the handler
+      if (!Fn::apply(callback,&__alloc_event)) {
+	fprintf(stderr,"callback failed for alloc event at %s\n",s);
+	return -1;
+      }
+    }
+
+    else {
+      fprintf(stderr,"Got unknown event %s\n",buf);
+      return -1;
+    }
+    snarfline(f);
+  }
+
+  return 0;
+}

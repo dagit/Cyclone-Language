@@ -195,7 +195,10 @@ static void add_cyclone_exec_path(string_t s) {
 static list_t<stringptr_t> libargs = NULL;
 static void add_libarg(string_t<`H> s) {
   if (strcmp(s,"-lxml") == 0)
-    add_ccarg(s);
+    if (!pa_r)
+      add_ccarg(s);
+    else
+      add_ccarg("-lxml_a");
   else
     libargs = new List(new s,libargs);
 }

@@ -24,12 +24,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <array.h>
+#include "aprof_event.h"
 
 using Core;
 using Hashtable;
-
-
-char buf[1000]@zeroterm;
+using Fn;
+using Aprof;
 
 List::list_t<$(stringptr_t<`H,`H>,
 	       $(table_t<stringptr_t<`H,`H>,$(int,int)@>,int)@,
@@ -116,43 +116,6 @@ void print_results(stringptr_t rgn_name, int num_rgns, int count,
            call_count, 100.0 * call_count / (double) total_calls,
            *pos);
   }
-}
-
-bool eof = false;
-
-void skip_whitespace(FILE @f) {
-  int c = getc(f);
-  while (c == ' ' || c == '\t' || c == '\n') 
-    c = getc(f);
-  ungetc(c,f);
-}
-  
-
-bool gettoken(FILE @f) {
-  int i = 0;
-  int c;
-  skip_whitespace(f);
-  c = getc(f);
-  if (c == EOF) return false;
-  while (c != EOF && c != ' ' && c != '\t' && c != '\n') {
-    buf[i++] = (char)c;
-    c = getc(f);
-  }
-  buf[i] = '\0';
-  ungetc(c,f);
-  return true;
-}  
-
-int snarfline(FILE @f) {
-  try {
-    int c = getc(f);
-    while (c != '\n' && c != EOF) c = getc(f);
-    if (c == EOF) return false;
-    else { ungetc(c,f); return true; }
-  } catch {
-  default: fprintf(stderr,"snarfline failed\n"); break;
-  }
-  return false;
 }
 
 bool remove_from_table(table_t<`a,`b> tab, `a x) {
@@ -256,150 +219,121 @@ collate_dyn_region(stringptr_t<`H,`H> createloc,
      collated_totals);
 }
 
-#define UPDATE_FREQ_PERCENT 2
-int main(int argc, string_t ?argv) {
-  FILE @f;
-  if (argc < 2) {
-    f = (FILE @)fopen("amon.out","r");
-  } else {
-    f = (FILE @)fopen(argv[1],"r");
+struct ProcEnv {
+  table_t<stringptr_t<`H,`H>,
+	  table_t<stringptr_t<`H,`H>,
+		  $(int,int)@`H>> regiontable;
+  table_t<stringptr_t<`H,`H>,table_t<stringptr_t<`H,`H>,bool>> loctab;
+};  
+
+// for processing individual events
+bool proc_event(struct ProcEnv @env, aprof_event_t event) {
+  switch (event) {
+  case &CreateE(CreateEvent(loc,rname,_)):
+    /* at mapping to location correlation table */
+    let locptr = new loc;
+    try {
+      let names = lookup(env->loctab,locptr);
+      /* we've created a region at this location before,
+	 so let's correlate this dynamic region with all those
+	 past ones created at this spot. */
+      insert(names,new rname,true);
+    } catch {
+    case &Not_found:
+      /* first time; add initial correlation. */
+      table_t<stringptr_t<`H,`H>,bool> tab = 
+	create(101, strptrcmp, hash_stringptr);
+      insert(tab,new rname,true);
+      insert(env->loctab,locptr,tab);
+      break;
+    }
+    break;
+
+  case &AllocE(AllocEvent(loc,rname,count,_)):
+    // ignore freeing of memory for now
+    if (count <= 0) break;
+    // update the region table with this event
+    let rnameptr = new rname;
+    try {
+      let locptr = new loc;
+      let table = lookup(env->regiontable,rnameptr);
+      try {
+	let &$(*byte_count,*call_count) = lookup(table, locptr);
+	*byte_count = *byte_count + count;
+	*call_count = *call_count + 1;
+      } catch {
+      case &Not_found:
+	insert(table, locptr, new $(count,1)); break;
+      }
+    } catch {
+    case &Not_found:
+      /* first time we've seen this (dynamic) region;
+	 add it to the region table.  Should have only
+	 one entry per region. */
+      table_t<stringptr_t<`H,`H>,$(int,int)@`H> table =
+	create(101, strptrcmp, hash_stringptr);
+      insert(env->regiontable, rnameptr, table); break;
+    }
+    break;
+
+  case &FreeE(_):
+  case &GrowE(_):
+  case &ShrinkE(_):
+  case &GcE(_): break;
   }
-  fseek(f,0,SEEK_END);
-  int filesz = ftell(f);
-  fseek(f,0,SEEK_SET);
-  int seg = filesz / (100/UPDATE_FREQ_PERCENT);
-  int ticks = 0;
-  for (int i = 0; i<(100/UPDATE_FREQ_PERCENT); i++)
-    fprintf(stderr,"=");
-  fprintf(stderr,"\n");
+  return true;
+} 
+
+int main(int argc, string_t<`H> ?`H argv) {
+  struct ProcEnv @`H env;
+
+  string_t file;
+  if (argc < 2) {
+    file = "amon.out";
+  } else {
+    file = argv[1];
+  }
 
   /* We want a table of tables, where each "sub-table"
      contains the total allocation calls and bytes for each
      callsite (for the region in question). */
 
-  table_t<stringptr_t<`H,`H>,
-    table_t<stringptr_t<`H,`H>,$(int,int)@`H>> regiontable =
-    create(101, strptrcmp, hash_stringptr);
-
-  /* create table to correlate locations with region names */
-  table_t<stringptr_t<`H,`H>,table_t<stringptr_t<`H,`H>,bool>> loctab =
-    create(101, strptrcmp, hash_stringptr);
+  env = new ProcEnv{.regiontable = create(101, strptrcmp, hash_stringptr),
+		    .loctab = create(101, strptrcmp, hash_stringptr)};
 
   /* create tables for the heap */
   table_t<stringptr_t<`H,`H>,$(int,int)@`H> table =
     create(101, strptrcmp, hash_stringptr);
-  insert(regiontable, new "heap", table);
+  insert(env->regiontable, new "heap", table);
   table_t<stringptr_t<`H,`H>,bool> tab = 
     create(101, strptrcmp, hash_stringptr);
   insert(tab,new "heap",true);
-  insert(loctab,new "heap",tab);
+  insert(env->loctab,new "heap",tab);
 
   /* create tables for the unique region */
   table = create(101, strptrcmp, hash_stringptr);
-  insert(regiontable, new "unique", table);
+  insert(env->regiontable, new "unique", table);
   tab = create(101, strptrcmp, hash_stringptr);
   insert(tab,new "unique",true);
-  insert(loctab,new "unique",tab);
+  insert(env->loctab,new "unique",tab);
 
-  // get the program point
-  while (gettoken(f)) {
-    if (strcmp(buf,"----") == 0) break;
-    int cur_loc = ftell(f);
-    if ((cur_loc - (ticks*seg)) >= seg) {
-      fprintf(stderr,".");
-      ticks++;
-    }
-
-    stringptr_t<`H,`H> s = new ((string_t)strdup(buf));
-
-    // get the region name
-    if (!gettoken(f)) {
-      fprintf(stderr,"missing region name for %s\n",*s); return -1;
-    }
-    stringptr_t<`H,`H> rname = new ((string_t)strdup(buf));
-
-    // get the event
-    if (!gettoken(f)) {
-      fprintf(stderr,"missing allocation amount/action for %s\n",*s); 
-      return -1;
-    }
-
-    /***********************/
-    /* CREATE REGION event */
-    /***********************/
-    if (!strcmp(buf,"create")) {
-      snarfline(f);
-      /* at mapping to location correlation table */
-      try {
-	let names = lookup(loctab,s);
-	/* we've created a region at this location before,
-	   so let's correlate this dynamic region with all those
-	   past ones created at this spot. */
-	insert(names,rname,true);
-      } catch {
-      case &Not_found:
-	/* first time; add initial correlation. */
-	table_t<stringptr_t<`H,`H>,bool> tab = 
-	  create(101, strptrcmp, hash_stringptr);
-	insert(tab,rname,true);
-	insert(loctab,s,tab);
-	continue;
-      }
-    }
-
-    /*********************/
-    /* FREE REGION event */
-    /*********************/
-    else if  (!strcmp(buf,"free")) {
-      continue;
-    }
-
-    /********************************/
-    /* ALLOCATE INTO A REGION event */
-    /********************************/
-    else {
-      // get the allocation amount
-      int count;
-      try {
-	count = atoi(buf);
-      } catch {
-      default: fprintf(stderr,"bad integer %s\n",buf); return -1;
-      }
-      snarfline(f);
-      // update the region table with this event
-      try {
-	let table = lookup(regiontable,rname);
-	try {
-	  let &$(*byte_count,*call_count) = lookup(table, s);
-	  *byte_count = *byte_count + count;
-	  *call_count = *call_count + 1;
-	} catch {
-	case &Not_found:
-	  insert(table, s, new $(count,1)); break;
-	}
-      } catch {
-	case &Not_found:
-	  /* first time we've seen this (dynamic) region;
-	     add it to the region table.  Should have only
-	     one entry per region. */
-	  table_t<stringptr_t<`H,`H>,$(int,int)@`H> table =
-	    create(101, strptrcmp, hash_stringptr);
-	  insert(regiontable, rname, table); break;
-      }
-    }
-  }
-  fprintf(stderr,"\n");
+  // process the file
+  fn_t clos = make_fn(proc_event,env);
+  int ret = proc_file(file,clos);
+  if (ret != 0) return ret;
 
   /* Now we can collate and print the results */
 
+  fprintf(stderr,"\n");
+
   /* Create a list, one element per region, that totals the
      entire bytes and calls allocated for each dynamic region. */
-  iter(inccount, regiontable);
+  iter(inccount, env->regiontable);
 
   /* Now we further compress the list to merge events that are
      associated with the same call site. */
 //    collated_totals = totals;
-  iter(collate_dyn_region, loctab);
+  iter(collate_dyn_region, env->loctab);
 
   /* Sort the list */
   totals = List::rimp_merge_sort(listcmp,collated_totals);

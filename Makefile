@@ -47,15 +47,21 @@ tools:
 	$(MAKE) -C tools/flex   install 
 	$(MAKE) -C tools/rewrite install
 
-libs:
 ifndef NO_XML_LIB
+libs:
 	$(MAKE) -C lib/xml install 
+a_libs:
+	$(MAKE) -C lib/xml a_install
+else
+libs:
+a_libs:
 endif
 
 aprof: $(CYC_INCLUDE_H) \
   bin/lib/libcycboot_a.a \
   bin/lib/libcyc_a.a \
-  $(addprefix bin/lib/cyc-lib/$(ARCH)/, nogc_a.a $(RUNTIME)_a.$(O))
+  $(addprefix bin/lib/cyc-lib/$(ARCH)/, nogc_a.a $(RUNTIME)_a.$(O)) \
+  a_libs
 	$(MAKE) -C tools/aprof install
 
 cyclone_a: aprof bin/cyclone_a$(EXE)
@@ -327,6 +333,9 @@ bin/lib/cyc-lib/$(ARCH)/gc.a: gc/gc.a $(CYC_INCLUDE_H)
 
 gc/gc.a:
 	$(MAKE) -C gc CC="$(CC)" gc.a CFLAGS="$(CFLAGS) -O -I./include -DATOMIC_UNCOLLECTABLE -DNO_SIGNALS -DNO_EXECUTE_PERMISSION -DALL_INTERIOR_POINTERS -DSILENT -DNO_DEBUGGING -DDONT_ADD_BYTE_AT_END"
+
+# gc/gc.a:
+# 	$(MAKE) -C gc CC="$(CC)" gc.a CFLAGS="$(CFLAGS) -O -I./include -DATOMIC_UNCOLLECTABLE -DNO_SIGNALS -DNO_EXECUTE_PERMISSION -DALL_INTERIOR_POINTERS -DNO_DEBUGGING -DDONT_ADD_BYTE_AT_END"
 
 # Store the compiler, libraries, and tools in the user-defined directories.
 # Also, keep a record of what was copied for later uninstall.

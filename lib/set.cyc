@@ -111,6 +111,43 @@ set_t<`a,`r> rinsert(region_t<`r> rgn, set_t<`a,`r> s, `a elt) {
 			    insert_b(rgn,s->cmp,s->nodes,elt));
 }
 
+/* Internal function to insert an elt into a sorted list of nodes
+ * that modifies the old list.  Assumes elt is not in the list.
+ */
+static list_t<`a,`r> imp_insert_b(region_t<`r> rgn,
+				  int cmp(`a,`a),list_t<`a,`r> n,`a elt) {
+
+  if (n == NULL)
+    return rnew(rgn) List(elt,NULL);
+  else {
+    int i = cmp(elt,n->hd);
+    if (i < 0) 
+      return rnew(rgn) List(elt,n);
+    else {
+      list_t<`a,`r> prev = n;
+      n = n->tl;
+      while (n != NULL && (i = cmp(n->hd,elt)) < 0) {
+	prev = prev->tl;
+	n = n->tl;
+      }
+      prev->tl = rnew(rgn) List(elt,n);
+      return(n);
+    }
+  }
+}
+
+/* Inserts an elt into a set. */
+void imp_insert(set_t<`a,`H> s,`a elt) {
+  if (member(s,elt)) return;
+  s->nodes = imp_insert_b(Core::heap_region,s->cmp,s->nodes,elt);
+  return;
+}
+void imp_rinsert(region_t<`r> rgn, set_t<`a,`r> s, `a elt) {
+  if (member(s,elt)) return;
+  s->nodes = imp_insert_b(rgn,s->cmp,s->nodes,elt);
+  return;
+}
+
 /* Unions two sets by merging the nodes */
 set_t<`a> union_two(set_t<`a,`H> s1,set_t<`a,`H> s2) {
   if(s1 == s2)
@@ -199,6 +236,30 @@ set_t<`a> delete(set_t<`a,`H> s,`a elt) {
     return new Set(s->cmp,s->cardinality - 1,
                    delete_b(s->cmp,s->nodes,elt));
   else return(s);
+}
+
+/* Internal function used to delete an elt from a list of nodes --
+ * assumes the elt is in the list exactly once and that the nodes are sorted.
+ * Modifies the list in place.
+ */
+static list_t<`a> imp_delete_b(int cmp(`a,`a),list_t<`a,`H> n,`a elt) {
+  if (cmp(n->hd,elt) == 0) return(n->tl);
+
+  list_t<`a> prev = n;
+  n = n->tl;
+  while (n != NULL && (cmp(n->hd,elt) != 0)) {
+    prev = prev->tl;
+    n = n->tl;
+  }
+  prev->tl = n->tl;
+  return(n);
+}
+
+/* Delete a elt/pair from the set if present. */
+void imp_delete(set_t<`a,`H> s,`a elt) {
+  if (member(s,elt))
+    s->nodes = imp_delete_b(s->cmp,s->nodes,elt);
+  return;
 }
 
 /* Fold a function f across the set yielding an accumulator. */
