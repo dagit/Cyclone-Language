@@ -324,13 +324,14 @@ static void tcTypedefdecl(tenv_t te, seg_t loc, typedefdecl_t td) {
 
 static void tcAggrImpl(tenv_t te, seg_t loc, 
                        aggr_kind_t str_or_union,
-                       list_t<tvar_t,`H> tvs,
+                       list_t<$(tvar_t,bool)@,`H> flagged_tvs,
 		       list_t<$(type_t,type_t)@> rpo, 
 		       list_t<$(type_t,type_t)@, `H> @qb, 
 		       list_t<aggrfield_t> fields) {
   // check fields, rejecting ill-formed types, bad fields, and duplicates
   // (unless the field name is empty)
   region uprev_rgn; 
+  _ tvs = List::map(fst, flagged_tvs);
   // FIX?: forbid effect variables (but they're going away)
   for(; rpo != NULL; rpo = rpo->tl) {
     let &$(e,r) = rpo->hd;
@@ -358,7 +359,7 @@ static void tcAggrImpl(tenv_t te, seg_t loc,
     if (str_or_union == UnionA || 
 	(fs->tl == NULL && str_or_union == StructA)) 
       field_kind = &Kinds::ak; // we allow abstract kind for the last field
-    check_type_with_bounds(loc,te,tvs,qb,field_kind,false,false,t);
+    check_type_with_bounds(loc,te,flagged_tvs,qb,field_kind,false,false,t);
 
     fs->hd->tq.real_const = extract_const_from_typedef(loc,fs->hd->tq.print_const,t);
 
@@ -375,7 +376,7 @@ static void tcAggrImpl(tenv_t te, seg_t loc,
 		   "@requires clause has type ",(type_t)requires_clause->topt,
 		   " instead of integral type");
       else {
-	check_type_with_bounds(requires_clause->loc,te,tvs, qb,
+	check_type_with_bounds(requires_clause->loc,te,flagged_tvs, qb,
 			       &Kinds::ik,false,false,new ValueofType(requires_clause));
         // convert the requires expression to a CNF formula
 	let relns = Relations::exp2relns(uprev_rgn,requires_clause);
@@ -399,8 +400,7 @@ static void tcAggrImpl(tenv_t te, seg_t loc,
   }
 }
 
-static void rule_out_memkind(seg_t loc, qvar_t n, list_t<tvar_t> tvs,
-			     bool constrain_top_kind) {
+static void rule_out_memkind(seg_t loc, qvar_t n, list_t<tvar_t> tvs) {
   for(_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl)
     switch (Kinds::compress_kb(tvs2->hd->kind)) {
     case &Unknown_kb(*f):
@@ -466,7 +466,7 @@ void tcAggrdecl(tenv_t te, seg_t loc, aggrdecl_t ad) {
   switch ($(ad->impl, Dict::lookup_opt(te->ae->aggrdecls, q))) {
   case $(NULL, NULL):
     // insert ad in the environment
-    rule_out_memkind(loc,q,tvs,false);
+    rule_out_memkind(loc,q,tvs);
     // FIX: ignores @tagged qualifier which may be on struct!
     te->ae->aggrdecls = Dict::insert(te->ae->aggrdecls, q, new ad);
     break;
@@ -488,12 +488,14 @@ void tcAggrdecl(tenv_t te, seg_t loc, aggrdecl_t ad) {
     // reject struct with @tagged qualifier
     if (tagged && (ad->kind == StructA))
       Warn::err2(loc,"@tagged is allowed only on union declarations");
-    tcAggrImpl(te, loc, ad->kind, append(tvs,exist_vars), rgn_po, qb, fs);
+    _ btvs = List::append(List::map_c(Tcutil::tvar_bool_pair, false, tvs),
+			  List::map_c(Tcutil::tvar_bool_pair, true, exist_vars));
+    tcAggrImpl(te, loc, ad->kind, btvs, rgn_po, qb, fs);
 
-    rule_out_memkind(loc, q, tvs, false);
+    rule_out_memkind(loc, q, tvs);
     // we constrain existential variables to be Aliasable if
     //   they have not yet been fixed
-    rule_out_memkind(loc, q, exist_vars, true);
+    //    rule_out_memkind(loc, q, exist_vars, true);
 
     if(ad->kind == UnionA && !tagged)
       // warn when fields of unions are not bits-only -- these can
@@ -523,7 +525,9 @@ void tcAggrdecl(tenv_t te, seg_t loc, aggrdecl_t ad) {
     // reject struct with @tagged qualifier
     if (tagged && (ad->kind == StructA))
       Warn::err2(loc,"@tagged is allowed only on union declarations");
-    tcAggrImpl(te, loc, ad->kind, append(tvs,exist_vars), rgn_po, qb,fs);
+    _ btvs = List::append(List::map_c(tvar_bool_pair, false, tvs),
+			  List::map_c(tvar_bool_pair, true, exist_vars));
+    tcAggrImpl(te, loc, ad->kind, btvs, rgn_po, qb,fs);
 
     *adp = ad0;// restore the previous declaration and go update the environment
     fallthru(adp);
@@ -532,11 +536,11 @@ void tcAggrdecl(tenv_t te, seg_t loc, aggrdecl_t ad) {
     let ad2 = Tcdecl::merge_aggrdecl(*adp, ad, loc, tc_msg);
     if (ad2 == NULL)
       return; // error in redeclaration
-    rule_out_memkind(loc, q, tvs, false);
+    rule_out_memkind(loc, q, tvs);
     // we constrain existential variables to be Aliasable if
     //   they have not yet been fixed
-    if (ad->impl != NULL) 
-      rule_out_memkind(loc, q, ad->impl->exist_vars, true);
+    //    if (ad->impl != NULL) 
+    //      rule_out_memkind(loc, q, ad->impl->exist_vars, true);
     *adp = ad2; // make the update
   }
 }

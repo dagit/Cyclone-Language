@@ -96,7 +96,7 @@ typedef struct Opt<`a> *@aqual(`q) `r opt_t<`a,`r,`q>;
   /** [new_string(n)] allocates space for [n] characters on the heap
       and returns a pointer to the space.  All of the characters are
       set to NUL (0). */
- mstring_t<`r::TR> rnew_string(region_t<`r>,unsigned int);
+ mstring_t<`r::R> rnew_string(region_t<`r>,unsigned int);
   /** [rnew_string(r,n)] allocates space for [n] characters in the
       region with handle [r], and returns a pointer to the space.  All
       of the characters are set to NUL (0). */
@@ -122,9 +122,9 @@ typedef struct Opt<`a> *@aqual(`q) `r opt_t<`a,`r,`q>;
       than [i2].  */
  int charcmp(char,char);
   /** [charcmp] is a comparison function on [char]. */
- int ptrcmp(`a::TA @ `r, `a @ `r);
+ int ptrcmp(`a::A\T @ `r, `a @ `r);
   /** [ptrcmp] is a comparison function on pointers. */
- int nptrcmp(`a::TA * `r, `a * `r);
+ int nptrcmp(`a::A\T * `r, `a * `r);
 
  region_t<`C> current_handle(void);
   /** [current_handle()] returns the region handle on the top of the
@@ -187,9 +187,9 @@ extern region_t<`H> heap_region;
   //#define umalloc(arg) rmalloc (Core::unique_region, arg)
 #define umalloc(arg) qmalloc (Core::heap_region, Core::unique_qual,  arg)
   /** [unew] and [umalloc] are for allocating uniquely-pointed-to data. */
- void ufree(`a::TA *@aqual(UNIQUE) `H ptr) __attribute__((noliveunique(1)));
+ void ufree(`a::A\T *@aqual(UNIQUE) `H ptr) __attribute__((noliveunique(1)));
   /** [ufree] frees a unique pointer. */
- void rufree(region_t<`r> h, `a::TA *@aqual(UNIQUE) `r ptr) __attribute__((noliveunique(2)));
+ void rufree(region_t<`r> h, `a::A\T *@aqual(UNIQUE) `r ptr) __attribute__((noliveunique(2)));
 
   //extern region_t<`RC> refcnt_region;
   /** [refcnt_region] is the region handle of the reference-counted
@@ -200,30 +200,30 @@ extern region_t<`H> heap_region;
 #define rcnew qnew (Core::refcnt_qual)
 #define rcmalloc(arg) qmalloc (Core::heap_region,Core::refcnt_qual,arg)
   /** [rcnew] and [rcmalloc] are for allocating reference-counted data. */
- int refptr_count(`a::TA ?@aqual(REFCNT) `r ptr);
+ int refptr_count(`a::A\T ?@aqual(REFCNT) `r ptr);
   /** [refptr_count(p)] returns the current reference count for [p]
       (always >= 1); [p] is not consumed. */
- `a ?@aqual(REFCNT) `r alias_refptr(`a::TA ?@aqual(REFCNT) `r ptr;{});
+ `a ?@aqual(REFCNT) `r alias_refptr(`a::A\T ?@aqual(REFCNT) `r ptr;{});
   /** [alias_refptr(p)] returns an alias to [p], and increments the
       reference count by 1.  [p] is not consumed.  */
- void drop_refptr(`a::TA ?@aqual(REFCNT) `H ptr;{}) __attribute__((noliveunique(1)));
+ void drop_refptr(`a::A\T ?@aqual(REFCNT) `H ptr;{}) __attribute__((noliveunique(1)));
   /** [drop_refptr(p)] decrements the reference count on [p] by 1.  If
       the reference count goes to 0, it frees p.  This will not
       recursively decrement reference counts to embedded pointers,
       meaning that those pointers will have to get GC'ed if [p] ends
       up being freed. */
- void rdrop_refptr(region_t<`r> h, `a::TA ?@aqual(REFCNT) `r ptr;{}) __attribute__((noliveunique(2)));
+ void rdrop_refptr(region_t<`r> h, `a::A\T ?@aqual(REFCNT) `r ptr;{}) __attribute__((noliveunique(2)));
 
- `a::TA ? @autoreleased `r autorelease_handle(region_t<`r> h, `a::TA ?`RC ptr)  __attribute__((noliveunique(2)));
+ `a ? @autoreleased `r autorelease_handle(region_t<`r> h, `a::A\T ?`RC ptr)  __attribute__((noliveunique(2)));
   /** [autorelease(h,p)] attaches the given reference-counted pointer
       to the region h; the count on [p] will be decremted when the
       region is freed.  An alias into the pool is returned, and [p] is
       consumed. */
 
- `a::TA ? @autoreleased `C autorelease(`a::TA ?`RC ptr)  __attribute__((noliveunique(1)));
+ `a ? @autoreleased `C autorelease(`a::A\T ?`RC ptr)  __attribute__((noliveunique(1)));
   /** [autorelease(p)] is the same as [autorelease_handle(current_handle(),p)]. */
 
- `a ?`RC inc_refptr(`a::TA ? @autoreleased `r ptr);
+ `a ?`RC inc_refptr(`a::A\T ? @autoreleased `r ptr);
   /** [inc_refptr(p)] increments the reference count of the given
       autoreleased pointer, returning a reference-counted pointer to
       that storage.  This pointer will outlive the current autorelease
@@ -336,7 +336,7 @@ arrcast(`a ?`r dyn, __cyclone_internal_singleton<`i> bd, sizeof_t<`a> sz);
       elements in [dyn].  This routine is useful for eliminating
       bounds checks within loops. */
 
- `a?`r mkfat(__nn_cyclone_internal_array_t<`a,`i,`r::TR> arr,
+ `a?`r mkfat(__nn_cyclone_internal_array_t<`a,`i,`r::R> arr,
 	     sizeof_t<`a> s, __cyclone_internal_singleton<`i> n);
   /** mkfat can be used to convert a thin pointer (@) of elements of type `a
       to a fat pointer (?).  It requires that you pass in the size of the

@@ -381,6 +381,7 @@ static inline void*_fast_region_malloc(struct _RegionHandle*r, _AliasQualHandle_
 #define _aqual_calloc(aq,s,i) _reap_aqual_calloc(aq, s, i)
 #define _RegionHandle _ReapHandle
 #define Cyc_Core_NewDynamicRegion Cyc_Core_NewDynamicReap
+#define Cyc_Core_DynamicRegion Cyc_Core_DynamicReap
 #define Cyc_Core__new_ukey(f,fn,l) Cyc_Core__reap_new_ukey(f, fn, l)
 #define Cyc_Core__new_rckey(f,fn,l) Cyc_Core__reap_new_rckey(f, fn, l)
 #define Cyc_Core_free_ukey(k) Cyc_Core_reap_free_ukey(k)

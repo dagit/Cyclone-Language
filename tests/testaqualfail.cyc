@@ -175,4 +175,27 @@ int test_autoalias(int *@aqual(UNIQUE) `H a) {
   return 0;
 }
 
-//separate control flow failures
+//failures for existential types
+struct Ex {
+  <`a::B> //default to ALIASABLEE 
+  `a elt;
+};
+
+struct Ex2 {
+  <`a::B\T> //default to ALIASABLEE 
+  `a elt;
+};
+
+void make_ex(int *@aqual(\U) a) __attribute((consume(1))) {
+  let e = Ex{a}; //fail
+};
+void use_ex(struct Ex @e) {
+  let &Ex{elt} = e; //ok
+}
+
+void make_ex2(int *@aqual(\U) a) __attribute((consume(1))) {
+  let e = Ex2{a}; //ok
+};
+void use_ex2(struct Ex2 @e) {
+  let &Ex2{elt} = e; //fail -- alias free path
+}

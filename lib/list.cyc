@@ -27,7 +27,7 @@ namespace List;
 using Core;
 
 // Return the length of a list. 
-int length(list_t<`a::TB> x) {
+int length(list_t<`a::B\T> x) {
   int i = 0;
   for(; x != NULL; x = x->tl)
     ++i;
@@ -40,7 +40,7 @@ int length(list_t<`a::TB> x) {
 }
 
 // return the tail of a list
-list_t<`a,`r> tl(List_t<`a::TB,`r> x) {
+list_t<`a,`r> tl(List_t<`a::B\T,`r> x) {
   return x->tl;
 }
 
@@ -278,7 +278,7 @@ list_t<`a> rev(list_t<`a> x) {
 }
 
 // Imperatively reverse a list 
-list_t<`a,`r> imp_rev(list_t<`a::TB,`r> x) {
+list_t<`a,`r> imp_rev(list_t<`a::B\T,`r> x) {
   if (x == NULL) return x;
   list_t<`a,`r> first  = x;
   list_t<`a,`r> second = x->tl;
@@ -315,7 +315,7 @@ list_t<`a> append(list_t<`a> x,list_t<`a,`H> y) {
 
 // Modify x so that y is appended to it -- if x is empty, return y else
 // return the modified list x.
-list_t<`a,`r> imp_append(list_t<`a::TB,`r> x,list_t<`a,`r> y) {
+list_t<`a,`r> imp_append(list_t<`a::B\T,`r> x,list_t<`a,`r> y) {
   list_t z;
 
   if (x == NULL) return y;
@@ -507,7 +507,7 @@ bool exists_c(bool pred(`a,`b),`a env,list_t<`b> x) {
   return false;
 }
 
-`c *`r find_c(`c::TA *`r pred(`a,`b),`a env,list_t<`b> x) {
+`c *`r find_c(`c::A\T *`r pred(`a,`b),`a env,list_t<`b> x) {
   for (; x != NULL; x=x->tl) {
     let v = pred(env,x->hd);
     if (v) return v;

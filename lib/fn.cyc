@@ -24,7 +24,7 @@
 
 namespace Fn;
 
-struct Function<`arg,`res,`bd> { <`env> : regions(`env) > `bd
+struct Function<`arg,`res,`bd> { <`env::B> : regions(`env) > `bd
   `res (@`bd f)(`env,`arg);
   `env env;
 };

@@ -152,32 +152,35 @@ kind_t id_to_kind(string_t<`H> s, seg_t loc) {
     case 'I': return &ik;
     case 'Q': return &aqk;
     default:
-      if(s[1] == 'B') {
-	switch (s[0]) {
-	case 'U': return &bk_uhint;
-	case 'T': return &bk_rhint;
-	case 'C': return &bk_rchint;
-	default: break;
+      if(strlen(s) == 2) {
+	Warn::warn2(loc, "Usage of deprecated kind: ", s);
+	if(s[1] == 'B') {
+	  switch (s[0]) {
+	  case 'U': return &bk_uhint;
+	  case 'T': return &bk_rhint;
+	  case 'C': return &bk_rchint;
+	  default: break;
+	  }
 	}
-      }
-      if(s[1] == 'M') {
-	switch (s[0]) {
-	case 'U': return &mk_uhint;
-	case 'T': return &mk_rhint;
-	case 'C': return &mk_rchint;
-	default: break;
+	if(s[1] == 'M') {
+	  switch (s[0]) {
+	  case 'U': return &mk_uhint;
+	  case 'T': return &mk_rhint;
+	  case 'C': return &mk_rchint;
+	  default: break;
+	  }
 	}
-      }
-      if(s[1] == 'A') {
-	switch (s[0]) {
-	case 'U': return &ak_uhint;
-	case 'T': return &ak_rhint;
-	case 'C': return &ak_rchint;
-	default: break;
+	if(s[1] == 'A') {
+	  switch (s[0]) {
+	  case 'U': return &ak_uhint;
+	  case 'T': return &ak_rhint;
+	  case 'C': return &ak_rchint;
+	  default: break;
+	  }
 	}
+	if(s[1] == 'R') 
+	  return &rk;
       }
-      if(s[1] == 'R') 
-	return &rk;
       break;
     }
   }
@@ -294,6 +297,13 @@ kind_t tvar_kind(tvar_t tv, kind_t def) {
   default: tv->kind = new Less_kb(NULL,def); return def;
   }
 }
+struct Opt<struct Kind*> tvar_kind_opt(tvar_t tv) {
+  switch (compress_kb(tv->kind)) {
+  case &Eq_kb(k):     return Opt{k};
+  case &Less_kb(_,k): return Opt{k};
+  default: return Opt{NULL};
+  }
+}
 
 $(tvar_t,kindbound_t) swap_kind(type_t t, kindbound_t kb) {
   switch (compress(t)) {
@@ -341,4 +351,35 @@ bool constrain_kinds(kindbound_t c1, kindbound_t c2) {
     } 
     return false;
   }
+}
+
+type_opt_t consistent_aliashint(seg_t loc, kindbound_t kb, type_opt_t aq) {
+  switch(kb) {
+  case &Eq_kb(&Kind(_, ah)):
+    switch(ah) {
+    case NoHint:
+      return aq;
+    case RestrictedHint:
+      if(aq==NULL || aq==rtd_qual_type)
+	return rtd_qual_type;
+      Warn::err2(loc,"Inconsistent qualifier bounds");
+      break;
+    case UniqueHint:
+      if(aq==NULL || aq==un_qual_type)
+	return un_qual_type;
+      Warn::err2(loc,"Inconsistent qualifier bounds");
+      break;
+    case RefcntHint:
+      if(aq==NULL || aq==rc_qual_type)
+	return rc_qual_type;
+      Warn::err2(loc,"Inconsistent qualifier bounds");
+      break;
+    default:
+      Warn::err2(loc,"Inconsistent qualifier bounds");
+    }
+    break;
+  default:
+    break;
+  }
+  return aq;
 }

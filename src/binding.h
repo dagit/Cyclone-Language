@@ -48,6 +48,5 @@ namespace Binding {
   void leave_ns(nsctxt_t ctxt);
   void leave_using(nsctxt_t ctxt);
   namespace_name_t resolve_rel_ns(Absyn::seg_t, nsctxt_t, namespace_name_t);
-  void deconstruct_type(Absyn::type_t t);
 }
 #endif

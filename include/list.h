@@ -28,7 +28,7 @@ namespace List {
        various operations over them, following the conventions of the
        Objective Caml list library as much as possible. */
 
-  struct List<`a::TB,`r,`q::Q>{`a hd; struct List<`a,`r,`q> *@aqual(`q) `r tl;};
+  struct List<`a::B\T,`r,`q::Q>{`a hd; struct List<`a,`r,`q> *@aqual(`q) `r tl;};
   /** A [struct List] is a memory cell with a head field containing an
       element and a tail field that points to the rest of the list.
       Such a structure is traditionally called a cons cell.  Note that
@@ -58,13 +58,13 @@ namespace List {
   /** [rlist(r, x1,...,xn)] builds a list with elements [x1] through
       [xn], allocated in the region with handle [r]. */
 
-  extern int length(list_t<`a::TB> x);
+  extern int length(list_t<`a::B\T> x);
   /** [length(x)] returns the number of elements in list [x].  */
 
   extern `a hd(List_t<`a> x);
   /** [hd(x)] returns the first element of list [x]. */
 
-  extern list_t<`a,`r> tl(List_t<`a::TB,`r> x);
+  extern list_t<`a,`r> tl(List_t<`a::B\T,`r> x);
   /** [tl(x)] returns the tail of list [x]. */
 
   extern list_t<`a> copy(list_t<`a> x);
@@ -175,7 +175,7 @@ namespace List {
   extern list_t<`a,`r> rrev(region_t<`r>,list_t<`a> x);
   /** [rrev(r,x)] is like [rev(x)], except that the result is
       allocated in the region with handle [r].  */
-  extern list_t<`a,`r> imp_rev(list_t<`a::TB,`r> x);
+  extern list_t<`a,`r> imp_rev(list_t<`a::B\T,`r> x);
   /** [imp_rev(x)] imperatively reverses list [x] (the list is
       side-effected).  Note that [imp_rev] returns a list.  This is
       because the first cons cell of the result is the last cons cell
@@ -192,7 +192,7 @@ namespace List {
       allocated in the region with handle [r], and the result is
       allocated in the same region.  */
 
-  extern list_t<`a,`r> imp_append(list_t<`a::TB,`r> x,list_t<`a,`r> y);
+  extern list_t<`a,`r> imp_append(list_t<`a::B\T,`r> x,list_t<`a,`r> y);
   /** [imp_append(x,y)] modifies [x] to append [y] to it,
       destructively.  Note that [imp_append] returns a list.  This is
       because [x] might be NULL, in which case, [imp_append(x,y)]
@@ -262,7 +262,7 @@ namespace List {
   /** [exists_c] is a version of [exists] where the function
       argument requires a closure as its first argument. */
 
-  extern `c *`r find_c(`c::TA *`r pred(`a,`b),`a env,list_t<`b> x);
+  extern `c *`r find_c(`c::A\T *`r pred(`a,`b),`a env,list_t<`b> x);
   /** [find_c] iterates over the given list and returns the first element
       for which [pred] does not return NULL.  Otherwise it returns
       NULL. */

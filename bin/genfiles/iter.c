@@ -381,6 +381,7 @@ static inline void*_fast_region_malloc(struct _RegionHandle*r, _AliasQualHandle_
 #define _aqual_calloc(aq,s,i) _reap_aqual_calloc(aq, s, i)
 #define _RegionHandle _ReapHandle
 #define Cyc_Core_NewDynamicRegion Cyc_Core_NewDynamicReap
+#define Cyc_Core_DynamicRegion Cyc_Core_DynamicReap
 #define Cyc_Core__new_ukey(f,fn,l) Cyc_Core__reap_new_ukey(f, fn, l)
 #define Cyc_Core__new_rckey(f,fn,l) Cyc_Core__reap_new_rckey(f, fn, l)
 #define Cyc_Core_free_ukey(k) Cyc_Core_reap_free_ukey(k)
@@ -417,5 +418,5 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
  struct Cyc_Iter_Iter{void*env;int(*next)(void*,void*);};
 # 22 "iter.cyc"
 int Cyc_Iter_next(struct Cyc_Iter_Iter iter,void*dest){
-void*_Tmp0;void*_Tmp1;_Tmp1=(void*)iter.env;_Tmp0=iter.next;{void*env=_Tmp1;int(*f)(void*,void*)=_Tmp0;
+void*_Tmp0;void*_Tmp1;_Tmp1=iter.env;_Tmp0=iter.next;{void*env=_Tmp1;int(*f)(void*,void*)=_Tmp0;
 return f(env,dest);}}

@@ -997,7 +997,7 @@ static stringptr_t us_p = &us;
 
 static $(tqual_t,type_t)@ rewrite_datatypefield_type($(tqual_t,type_t)@`H x) {
   return new $(empty_tqual(0),
-	       new VarType(new Tvar(us_p, -1, Kinds::kind_to_bound(&Kinds::bk))));
+	       new VarType(new Tvar(us_p, -1, Kinds::kind_to_bound(&Kinds::bk),NULL)));
 }
 
 static datatypefield_t rewrite_datatypefield(datatypefield_t f) {

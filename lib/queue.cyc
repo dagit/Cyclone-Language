@@ -35,7 +35,7 @@ struct Queue<`a,`r,`q> {
 };
 
 // true when the queue is empty
-bool is_empty(queue_t<`a::TB> q)  {
+bool is_empty(queue_t<`a::B\T> q)  {
    return(q->front == NULL);
 }
 
@@ -44,16 +44,16 @@ datatype exn { Empty };
 datatype exn.Empty Empty_val = Empty;
 
 // create a new queue
-queue_t<`a::TB> create() {
+queue_t<`a::B\T> create() {
   return new Queue(NULL,NULL,0);
 }
 
-queue_t<`a::TB,`r> rcreate(region_t<`r> r) {
+queue_t<`a::B\T,`r> rcreate(region_t<`r> r) {
   return rnew (r) Queue(NULL,NULL,0);
 }
 
 // insert an element into the rear of the queue (side effect)
-void radd(region_t<`r> r, queue_t<`a::TB,`r> q,`a x) __attribute__((consume(3))) {
+void radd(region_t<`r> r, queue_t<`a::B\T,`r> q,`a x) __attribute__((consume(3))) {
   list_t cell = rnew(r) List(x,NULL);
 
   if (q->front == NULL) {
@@ -66,19 +66,19 @@ void radd(region_t<`r> r, queue_t<`a::TB,`r> q,`a x) __attribute__((consume(3)))
   q->len++;
 }
 
-void add(queue_t<`a::TB,`H> q, `a x) __attribute__((consume(2))) {
+void add(queue_t<`a::B\T,`H> q, `a x) __attribute__((consume(2))) {
   radd(Core::heap_region,q,x);
 }
 
 // insert an element into the front of the queue (side effect)
-void rpush(region_t<`r> r, queue_t<`a::TB,`r> q,`a x) __attribute__((consume(3))) {
+void rpush(region_t<`r> r, queue_t<`a::B\T,`r> q,`a x) __attribute__((consume(3))) {
   q->front = rnew(r) List(x,q->front);
   if (q->rear == NULL)
     q->rear = q->front;
   q->len++;
 }
 
-void push(queue_t<`a::TB,`H> q, `a x) __attribute__((consume(2))) {
+void push(queue_t<`a::B\T,`H> q, `a x) __attribute__((consume(2))) {
   rpush(Core::heap_region,q,x);
 }
 
@@ -94,7 +94,7 @@ void push(queue_t<`a::TB,`H> q, `a x) __attribute__((consume(2))) {
   return x;
 }
 
-`a noalias_take(queue_t<`a::TB> q, `a null_elem) __attribute__((consume(2))) {
+`a noalias_take(queue_t<`a::B\T> q, `a null_elem) __attribute__((consume(2))) {
   if (q->front == NULL)
     throw &Empty_val;
   null_elem :=: q->front->hd;
@@ -105,7 +105,7 @@ void push(queue_t<`a::TB,`H> q, `a x) __attribute__((consume(2))) {
   return null_elem;
 }
 
-`a *`U ptr_take(queue_t<`a::TA *`U> q) {
+`a *`U ptr_take(queue_t<`a::A\T *`U> q) {
   return noalias_take(q,NULL);
 }
 
@@ -117,7 +117,7 @@ void push(queue_t<`a::TB,`H> q, `a x) __attribute__((consume(2))) {
 }
 
 // clear out the entire queue (side effect)
-void clear(queue_t<`a::TB> q) {
+void clear(queue_t<`a::B\T> q) {
   q->front = NULL;
   q->rear = NULL;
   q->len = 0;
@@ -141,7 +141,7 @@ void remove(queue_t<`a,`r> q,`a v) {
     }      
 }
 
-`a *`U take_match(region_t<`r> r, queue_t<`a::TA *`U,`r> q,
+`a *`U take_match(region_t<`r> r, queue_t<`a::A\T *`U,`r> q,
 		  bool (@f)(`b,`a *`U), `b env) {
 
   region g;
@@ -170,7 +170,7 @@ void remove(queue_t<`a,`r> q,`a v) {
 
 
 // return the number of elements in the queue
-int length(queue_t<`a::TB> q) {
+int length(queue_t<`a::B\T> q) {
   return q->len;
 }
 

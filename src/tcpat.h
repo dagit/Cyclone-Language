@@ -53,7 +53,8 @@ typedef struct TcPatResult tcpat_result_t;
   // you're switching, then call check_pat_regions.
   // If someone has a less clumsy proposal, I'd love to hear it.
 tcpat_result_t tcPat(tenv_t, pat_t, type_t @ topt, exp_opt_t pat_var_exp);
-void check_pat_regions(tenv_t,pat_t, list_t<$(vardecl_t *,exp_opt_t)@> patvars);
+void check_pat_regions(tenv_t,pat_t, tcpat_result_t@);
+
 
 extern datatype PatTest {
   WhereTest(exp_opt_t);

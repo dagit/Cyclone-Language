@@ -308,7 +308,7 @@ static list_t<$(var_t,type_t)@> get_arg_tags(list_t<$(var_opt_t,tqual_t,type_t) 
         // using an evar here will mess things up since the evar will be
         // duplicated.  So, we pin the evar down to a type variable instead.
         stringptr_t nm = new ((string_t)aprintf("`%s",*((var_t)v)));
-        *z = var_type(new Tvar{nm,-1,new Eq_kb(&Kinds::ik)});
+        *z = var_type(new Tvar{nm,-1,new Eq_kb(&Kinds::ik),NULL});
         break;
       default: break;
       }
@@ -317,7 +317,7 @@ static list_t<$(var_t,type_t)@> get_arg_tags(list_t<$(var_opt_t,tqual_t,type_t) 
       // corresponds to the variable.
     case &$(&v,_,&AppType(&RgnHandleCon,&List{&Evar(_,*z,_,_),NULL})):
       stringptr_t nm = new ((string_t)aprintf("`%s",v));
-      *z = var_type(new Tvar{nm,-1,new Eq_kb(&Kinds::rk)});
+      *z = var_type(new Tvar{nm,-1,new Eq_kb(&Kinds::rk),NULL});
       break;
     default: break;
     }
@@ -404,7 +404,7 @@ static bool is_typeparam(type_modifier_t tm) {
 
 // convert an identifier to a type -- if it's the special identifier
 // `H then return HeapRgn, otherwise, return a type variable.
-static type_t id2type(string_t<`H> s, kindbound_t k) {
+static type_t id2type(string_t<`H> s, kindbound_t k, type_opt_t aliashint,seg_t loc) {
   if (zstrcmp(s,"`H") == 0)
     return heap_rgn_type;
   //eventually parse these as regular type vars 
@@ -414,7 +414,25 @@ static type_t id2type(string_t<`H> s, kindbound_t k) {
     return refcnt_rgn_shorthand_type;
   if (zstrcmp(s,CurRgn::curr_rgn_name) == 0)
     return CurRgn::curr_rgn_type();
-  return var_type(new Tvar(new s,-1,k));
+  aliashint = Kinds::consistent_aliashint(loc, k, aliashint);
+  return var_type(new Tvar(new s,-1,k,aliashint));
+}
+
+static type_t id2aqual(seg_t loc, string_t<`H> s) {
+  if(strlen(s)==2) {
+    switch (s[1]) {
+    case 'A': return al_qual_type;
+    case 'U': return un_qual_type;
+    case 'T': return rtd_qual_type;
+    default: break;
+    }
+  }
+  else if(strlen(s) == 3) {
+    if(s[1] == 'R' && s[2] == 'C')
+      return rc_qual_type;
+  }
+  Warn::err2(loc,"bad aqual bound ",s);
+  return al_qual_type;
 }
 
 static void tvar_ok(string_t<`H> s,seg_t loc) {
@@ -442,7 +460,7 @@ static tvar_t typ2tvar(seg_t loc, type_t t) {
 // if tvar's kind is unconstrained, set it to k
 static void set_vartyp_kind(type_t t, kind_t k, bool leq) {
   switch(compress(t)) {
-  case &VarType(&Tvar(_,_,*cptr)): 
+  case &VarType(&Tvar(_,_,*cptr,_)): 
     switch(Kinds::compress_kb(*cptr)) {
     case &Unknown_kb(_): 
       *cptr = leq ? new Less_kb(NULL,k) : Kinds::kind_to_bound(k); return;
@@ -1051,7 +1069,7 @@ using Parse;
 %token IDENTIFIER INTEGER_CONSTANT STRING WSTRING
 %token CHARACTER_CONSTANT WCHARACTER_CONSTANT FLOATING_CONSTANT
 // Cyc: type variables, qualified identifers and typedef names
-%token TYPE_VAR TYPEDEF_NAME QUAL_IDENTIFIER QUAL_TYPEDEF_NAME 
+%token TYPE_VAR TYPEDEF_NAME QUAL_IDENTIFIER QUAL_TYPEDEF_NAME AQUAL_SHORT_CONST
 // Cyc: added __attribute__ keyword
 %token ATTRIBUTE
 // Cyc: removed ASM "token" -- completely uninterpreted text.  See lex.cyl
@@ -1070,7 +1088,7 @@ using Parse;
 %type <cnst_t> INTEGER_CONSTANT
 %type <char> CHARACTER_CONSTANT
 %type <string_t<`H>> FLOATING_CONSTANT namespace_action
-%type <string_t<`H>> IDENTIFIER TYPEDEF_NAME TYPE_VAR
+%type <string_t<`H>> IDENTIFIER TYPEDEF_NAME TYPE_VAR AQUAL_SHORT_CONST
 %type <string_t<`H>> STRING WSTRING WCHARACTER_CONSTANT field_name
 %type <$(seg_t,booltype_t, ptrbound_t)@`H> pointer_null_and_bound
 %type <ptrbound_t> pointer_bound
@@ -1143,7 +1161,7 @@ using Parse;
 %type <attribute_t> attribute
 %type <enumfield_t> enum_field
 %type <list_t<enumfield_t,`H>> enum_declaration_list
-%type <type_opt_t> optional_effect 
+%type <type_opt_t> optional_effect opt_aqual_bnd
 //%type <list_t<$(type_t,type_t)@`H,`H>> optional_rgn_order rgn_order
 %type <$(list_t<$(type_t,type_t)@`H,`H>, list_t<$(type_t,type_t)@`H,`H>)*`H> optional_rgnpo_qualbnd rgnpo_qualbnd
 %type <$(type_t, type_t)@`H> rgn_order_elt, qual_bnd_elt
@@ -1151,7 +1169,7 @@ using Parse;
 %type <list_t<$(seg_t,qvar_t,bool)@`H,`H>> export_list_values
 %type <$(list_t<$(seg_t,qvar_t,bool)@`H,`H>, seg_t)@`H> export_list export_list_opt
 %type <list_t<qvar_t,`H>> hide_list_opt hide_list_values
-%type <aqualtype_t> aqual_specifier
+%type <aqualtype_t> aqual_specifier aqual_const
 %type <pointer_qual_t<`yy>> pointer_qual
 %type <pointer_quals_t<`yy>> pointer_quals
 %type <exp_opt_t> requires_clause_opt open_opt
@@ -1360,7 +1378,7 @@ declaration:
 /* region <`r> h;  */
 | REGION '<' TYPE_VAR '>' IDENTIFIER ';'
   { tvar_ok($3,SLOC(@3));
-    tvar_t tv = new Tvar(new $3,-1,Kinds::kind_to_bound(&Kinds::rk));
+    tvar_t tv = new Tvar(new $3,-1,Kinds::kind_to_bound(&Kinds::rk),NULL);
     type_t t  = var_type(tv);
     vardecl_t vd = new_vardecl(SLOC(@5), new $(Loc_n,new $5),rgn_handle_type(t),NULL);
     $$ = ^$(new List(region_decl(tv,vd,NULL,LOC(@1,@6)),NULL));
@@ -1369,7 +1387,7 @@ declaration:
 | REGION IDENTIFIER open_opt ';'
   { string_t tvstring = (string_t)aprintf("`%s",$2);
     tvar_ok($2,SLOC(@2));
-    tvar_t tv = new Tvar(new tvstring, -1, Kinds::kind_to_bound(&Kinds::rk));
+    tvar_t tv = new Tvar(new tvstring, -1, Kinds::kind_to_bound(&Kinds::rk),NULL);
     type_t t = var_type(tv);
     vardecl_t vd = new_vardecl(SLOC(@2), new $(Loc_n,new $2),rgn_handle_type(t),NULL);
     $$ = ^$(new List(region_decl(tv,vd,$3,LOC(@1,@4)),NULL));
@@ -1896,13 +1914,10 @@ pointer_qual:
 ;
 
 aqual_specifier: 
-  AQ_ALIASABLE { $$ = ^$(al_qual_type);}
-| AQ_UNIQUE { $$ = ^$(un_qual_type);}
-| AQ_REFCNT { $$ = ^$(rc_qual_type);}
-| AQ_RESTRICTED { $$ = ^$(rtd_qual_type);}
-| TYPE_VAR 
+  aqual_const {$$ = ^$($1);}
+| TYPE_VAR opt_aqual_bnd
   { tvar_ok($1,SLOC(@1));
-    tvar_t tv = new Tvar(new $1,-1,Kinds::kind_to_bound(&Kinds::aqk));
+    tvar_t tv = new Tvar(new $1,-1,Kinds::kind_to_bound(&Kinds::aqk),$2);
     type_t t  = var_type(tv);
     $$ = ^$(aqual_var_type(t, al_qual_type));//default aliasable -- real bound filled in by typechecker
   }
@@ -1973,9 +1988,13 @@ parameter_type_list:
 ;
 
 /* CYC:  new */
+opt_aqual_bnd:
+{$$=^$(NULL);}
+| AQUAL_SHORT_CONST {$$ = ^$(id2aqual(SLOC(@1), $1));}
+
 type_var:
-  TYPE_VAR                  { $$ = ^$(id2type($1,new Unknown_kb(NULL))); }
-| TYPE_VAR COLON_COLON kind { $$ = ^$(id2type($1,Kinds::kind_to_bound($3))); }
+  TYPE_VAR opt_aqual_bnd  { $$ = ^$(id2type($1,new Unknown_kb(NULL),$2, SLOC(@1))); }
+| TYPE_VAR COLON_COLON kind opt_aqual_bnd { $$ = ^$(id2type($1,Kinds::kind_to_bound($3),$4, SLOC(@1))); }
 
 optional_effect:
   /* empty */    { $$=^$(NULL); }
@@ -2014,7 +2033,7 @@ rgn_order_elt:
     // $$ = ^$(new List(new $(join_eff($1),id2type(id,new Less_kb(NULL,TopRgnKind))), NULL));
     // then we get a core-dump.  I think it must be the gcc bug...
     let kb = new Less_kb(NULL,&Kinds::rk);
-    let t = id2type($3,kb);
+    let t = id2type($3,kb,NULL,SLOC(@3));
     $$ = ^$(new $(join_eff($1),t));
   }
 ;
@@ -2026,11 +2045,17 @@ qual_bnd_elt:
 }
 ;
 
-qual_bnd_const:
+aqual_const:
   AQ_ALIASABLE { $$ = ^$(al_qual_type);}
 | AQ_UNIQUE { $$ = ^$(un_qual_type);}
 | AQ_REFCNT { $$ = ^$(rc_qual_type);}
 | AQ_RESTRICTED  { $$ = ^$(rtd_qual_type);}
+| AQUAL_SHORT_CONST {$$ = ^$(id2aqual(SLOC(@1),$1));}
+;
+
+//allow aquals(`a) >= aquals(`b) ... not sure this is ever used
+qual_bnd_const:
+  aqual_const {$$ = ^$($1);}
 | AQUALS '(' any_type_name ')'
 { 
   $$ = ^$(aqual_var_type(aqualsof_type($3), al_qual_type));
@@ -2041,7 +2066,7 @@ qual_bnd_term:
   TYPE_VAR
 { 
   let kb = new Eq_kb(&Kinds::aqk);
-  $$ = ^$(id2type($1,kb)); 
+  $$ = ^$(id2type($1,kb,NULL,SLOC(@1))); 
 }
 | AQUALS '(' any_type_name ')'
 { 
@@ -2562,7 +2587,7 @@ pattern:
         Warn::err(SLOC(@2),"expecting `alias'");
       let location = LOC(@1,@6);
       tvar_ok($3,location);
-      tvar_t tv = new Tvar(new $3,-1,new Eq_kb(&Kinds::rk));
+      tvar_t tv = new Tvar(new $3,-1,new Eq_kb(&Kinds::rk),NULL);
       vardecl_t vd = new_vardecl(SLOC(@1),new $(Loc_n, new $6),
 				 type_name_to_type($5,SLOC(@5)),NULL);
       $$ = ^$(new_pat(new AliasVar_p(tv,vd),location));
@@ -2572,7 +2597,7 @@ pattern:
         Warn::err(SLOC(@2),"expecting `alias'");
       let location = LOC(@1,@6);
       tvar_ok($3,location);
-      tvar_t tv = new Tvar(new $3,-1,new Eq_kb(&Kinds::rk));
+      tvar_t tv = new Tvar(new $3,-1,new Eq_kb(&Kinds::rk),NULL);
       vardecl_t vd = new_vardecl(SLOC(@1),new $(Loc_n, new $6),
 				 type_name_to_type($5,SLOC(@5)),NULL);
       $$ = ^$(new_pat(new AliasVar_p(tv,vd),location));
@@ -2612,7 +2637,7 @@ pattern:
                                     $4),LOC(@1,@2))); 
     }
 | IDENTIFIER '<' TYPE_VAR '>' 
-   { let tag = id2type($3,Kinds::kind_to_bound(&Kinds::ik));
+   { let tag = id2type($3,Kinds::kind_to_bound(&Kinds::ik),NULL,SLOC(@3));
      $$=^$(new_pat(new TagInt_p(typ2tvar(SLOC(@3),tag),
 				new_vardecl(SLOC(@1),new $(Loc_n,new $1),
 					    tag_type(tag),NULL)),

@@ -39,7 +39,8 @@ tvar_t curr_rgn_tvar (void) {
   if (curr_tvar == NULL) {
     curr_tvar = new Tvar(new curr_rgn_name,
 			 Tcutil::new_tvar_id(),
-			 Kinds::kind_to_bound(&Kinds::rk));
+			 Kinds::kind_to_bound(&Kinds::rk),
+			 NULL);
     curr_rgn_typ = var_type((tvar_t)curr_tvar);
   }
   return (tvar_t)curr_tvar;

@@ -5447,7 +5447,7 @@ hstub execve {
   // FIX: what did I lose by removing the const from this spec?
   //  extern int execve(const char ?, const char ? const ?, const char ? const ?);
     extern "C" int execve(const char @ path, 
-			  char *`r::TR* @zeroterm argv, char *`r2::TR* @zeroterm envp);
+			  char *`r::R* @zeroterm argv, char *`r2::R* @zeroterm envp);
 //    extern int execve(const char ?, char ? const ?, char ? const ?);
 }
 cycstub execve {

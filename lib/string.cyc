@@ -337,7 +337,7 @@ mstring_t<`r> strcpy(mstring_t<`r> dest, buffer_t src) {
 // Allocating functions
 
 // Not an ISO function, but available in gcGc
-mstring_t<`r> rstrdup(region_t<`r::TR> r, buffer_t src) {
+mstring_t<`r> rstrdup(region_t<`r::R> r, buffer_t src) {
   size_t len;
   mstring_t<`r> temp;
 
@@ -354,7 +354,7 @@ mstring_t strdup(buffer_t src) {
   return rstrdup(heap_region, src);
 }
 
-mbuffer_t<`r> rrealloc(region_t<`r::TR> r,mbuffer_t s, size_t sz) {
+mbuffer_t<`r> rrealloc(region_t<`r::R> r,mbuffer_t s, size_t sz) {
   mbuffer_t temp;
   size_t slen;
 
@@ -369,7 +369,7 @@ mbuffer_t<`r> rrealloc(region_t<`r::TR> r,mbuffer_t s, size_t sz) {
   return temp;
 }
 
-mstring_t<`r> rexpand(region_t<`r::TR> r,buffer_t s, size_t sz) {
+mstring_t<`r> rexpand(region_t<`r::R> r,buffer_t s, size_t sz) {
   mstring_t temp;
   size_t slen;
 
@@ -391,7 +391,7 @@ mstring_t expand(buffer_t s, size_t sz) {
   return rexpand(heap_region,s,sz);
 }
 
-mstring_t<`r> cond_rrealloc_str(region_t<`r::TR> r, mstring_t<`r> str, size_t sz) {
+mstring_t<`r> cond_rrealloc_str(region_t<`r::R> r, mstring_t<`r> str, size_t sz) {
   size_t maxsizeP = numelts(str);
   let res = NULL;
 

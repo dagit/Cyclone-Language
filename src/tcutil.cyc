@@ -288,7 +288,7 @@ int fast_tvar_cmp(tvar_t tv1, tvar_t tv2) {
 }
 
 static tvar_t copy_tvar(tvar_t tv) {  // NB: loses sharing of identity here!
-  return new Tvar(tv->name,-1,Kinds::copy_kindbound(tv->kind));
+  return new Tvar(tv->name,-1,Kinds::copy_kindbound(tv->kind),tv->aquals_bound);
 }
 static $(var_opt_t,tqual_t,type_t)@ copy_arg($(var_opt_t,tqual_t,type_t) @arg) {
   let &$(x,y,t) = arg;
@@ -2190,7 +2190,7 @@ int new_tvar_id() {
 
 static int tvar_counter = 0;
 tvar_t new_tvar(kindbound_t k) {
-  return new Tvar(new (string_t)aprintf("#%d",tvar_counter++),-1,k);
+  return new Tvar(new (string_t)aprintf("#%d",tvar_counter++),-1,k,NULL);
 }
 bool is_temp_tvar(tvar_t t) {
   return (*(t->name)[0]=='#');
@@ -3186,4 +3186,8 @@ static bool aquals_bnds_pred($(type_t, type_t)@ bnd) {
 
 list_t<$(type_t, type_t)@> get_aquals_bounds(fndecl_t fd) {
   return List::filter(aquals_bnds_pred, fd->i.qual_bnd);
+}
+
+$(tvar_t, bool)@ tvar_bool_pair(bool b, tvar_t t){
+  return new $(t, b);
 }

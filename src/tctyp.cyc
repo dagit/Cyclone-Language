@@ -174,6 +174,11 @@ static list_t<tvar_t> add_free_tvar(seg_t loc,list_t<tvar_t,`H> tvs,tvar_t tv) {
       if (!Kinds::constrain_kinds(k1,k2))
         err2(loc,"type variable ",tv," used with inconsistent kinds ",
 	     k1," and ",k2);
+      if(tvs2->hd->aquals_bound == NULL)
+	tvs2->hd->aquals_bound = tv->aquals_bound;
+      else if(tv->aquals_bound != NULL && Tcutil::typecmp(tv->aquals_bound, tvs2->hd->aquals_bound))
+	err2(loc,"type variable ",tv," used with inconsistent alias qualifier bounds ",
+	     tv->aquals_bound," and ",tvs2->hd->aquals_bound);
       if (tv->identity == -1)
         tv->identity = tvs2->hd->identity;
       else if (tv->identity != tvs2->hd->identity)
@@ -484,15 +489,7 @@ static cvtenv_t i_check_type_app(cvtenv_t env, kind_t expected_kind,
     if (ts == NULL || ts->tl != NULL)
       impos2("aquals expects a single argument");
     return i_check_type(env, &Kinds::ak, ts->hd,false, false);      
-    /*     let k = Tcutil::type_kind(ts->hd); //damn ... this side effects! */
-    /*     if(k->kind == BoxKind || k->kind == AnyKind || k->kind == MemKind) { */
-    /*       return i_check_type(env, &Kinds::ak, ts->hd,false, false);       */
-    /*     } */
-    /*     else  */
-    /*       err2(loc,"type ",ts->hd," has kind ",k, */
-    /* 	   " but as used here needs a boxed, mem or any kind "); */
-    return env;
-  case &AqualVarCon:
+  case &AqualVarCon: 
     if(length(ts) != 2) 
       impos2("aquals expects two arguments");
     env = i_check_type(env, &Kinds::aqk, ts->hd,false, false);
@@ -585,52 +582,109 @@ static bool aqualvar_unconstrained($(type_t, bool)@ t) {
   }
 }
 
-static bool is_aqualsof_var_bnd(type_t var, $(type_t, type_t)@ bnd) {
-  let &$(v, _) = bnd;
-  switch(v) {
+static int aqualsof_var_bnd(type_t bndv, type_t var) {
+  switch(bndv) {
   case &AppType(&AqualsCon, &List(vv, _)):
-    return (Tcutil::typecmp(var, vv) == 0);
+    return Tcutil::typecmp(var, vv);
   default:
-    return false;
+    return 1;
   }
 }
-//for each pointer kinded `a vars add an def <= aquals(`a) to qb ... if not already present
-static void constrain_boxed_vars(cvtenv_t env, 
-				 list_t<$(type_t,bool)@, `H> vars, 
-				 list_t<$(type_t, type_t)@, `H> @qb,
-				 type_t def) {
+
+//add the appropriate qualifier bound based on `a::B\T etc. or default to def if no bound present
+static void constrain_vars(seg_t loc, cvtenv_t env, 
+			   list_t<$(type_t,bool)@, `H> vars, 
+			   list_t<$(type_t, type_t)@, `H> @qb,
+			   type_t def, bool make_ex_aliasable) {
   for(; vars!=NULL; vars= vars->tl) {
-    let &$(v, _) = vars->hd;
+    let &$(v, existential) = vars->hd;
+    if(!make_ex_aliasable)
+      existential = false;
+    type_t adef = def;
+    bool explicit_bound_set = false;
     switch(v) {
     case &VarType(tv): 
-      fallthru(Kinds::tvar_kind(tv, &Kinds::rk)); //default the kind to ::rk so that it doesn't pass the guard below
+      if(tv->aquals_bound != NULL) {
+	adef = tv->aquals_bound;
+	explicit_bound_set = true;
+      }
+      let ko = Kinds::tvar_kind_opt(tv); //no side effect
+      fallthru(ko.v ? ko.v : &Kinds::rk); //silly Kinds::rk hack to prevent it from through the guard below1
     case &Evar(&Opt{k}, ...):
-      if(k->kind == BoxKind || (k->kind == AnyKind) || (k->kind == MemKind)) { //allow any kind?
-	if(!List::exists_c(is_aqualsof_var_bnd, v, *qb)) {
+      if(k->kind == BoxKind || (k->kind == AnyKind) || (k->kind == MemKind)) {
+	try {
+	  let xbnd = List::assoc_cmp(aqualsof_var_bnd, *qb, v);
+	  if(explicit_bound_set && Tcutil::typecmp(adef, xbnd))
+	    Warn::warn2(loc, "Inconsistent aqual bounds on type ", v);
+	} catch {
+	case &Not_found: 
 	  let aqt = aqualsof_type(v);
-	  //already ensured k is a BoxKind ... 
-	  //pass expected kind down for backward compatibility
-	  //	  env = i_check_type(env, &Kinds::aqk, aqt, false, false); -- unnecessary ... messes with tvar identities
-	  //if the alias kind is present... then it is because of user specification.
-	  switch(k->aliashint) {
-	  case RestrictedHint:
-	    *qb = new List(new $(aqt, rtd_qual_type), *qb);
-	    break;
-	  case UniqueHint:
-	    *qb = new List(new $(aqt, un_qual_type), *qb);
-	    break;
-	  case RefcntHint:
-	    *qb = new List(new $(aqt, rc_qual_type), *qb);
-	    break;
-	  default:
-	    *qb = new List(new $(aqt, def), *qb);
-	    break;
-	  }
+	  if(existential && !explicit_bound_set)
+	    *qb = new List(new $(aqt, al_qual_type), *qb);
+	  else
+	    *qb = new List(new $(aqt, adef), *qb);
+	  break;
+	}
+      }
+      else if(k->kind == AqualKind) { 
+	try {
+	  let xbnd = List::assoc_cmp(bnd_qual_cmp, *qb, v);
+	  if(explicit_bound_set && Tcutil::typecmp(adef, xbnd))
+	    Warn::warn2(loc, "Inconsistent aqual bounds on type ", v);
+	} catch {
+	case &Not_found: 
+	  if(existential && !explicit_bound_set)
+	    *qb = new List(new $(v, al_qual_type), *qb);
+	  else
+	    *qb = new List(new $(v, adef), *qb);
+	  break;
 	}
       }
       break;
+    case &AppType(&AqualVarCon, tv_bnd): {
+      let tv = tv_bnd->hd; //could be a tvar, evar, or AqualsCon(tvar/evar)
+      switch(tv) {
+      case &VarType(tv): //if `q\U ... then use this \U as the bound
+	if(tv->aquals_bound) {
+	  adef = tv->aquals_bound;
+	  explicit_bound_set =true;
+	}
+	break;
+      default:
+	break;
+      }
+      try {
+	let x_bnd = List::assoc_cmp(bnd_qual_cmp, *qb, tv);
+	if(explicit_bound_set  && Tcutil::typecmp(x_bnd, adef)) //explicit bound set
+	  Warn::warn2(loc, "Inconsistent aqual bounds on type ", v);
+	tv_bnd->tl->hd = x_bnd;//copy_type(x_bnd); 
+      }catch {
+      case &Not_found: //default bound of ALIASABLE is ok
+	//but add the ALIASABLE bound to the qb list
+	switch(compress(tv)) { //is tv really unbound?
+	case &Evar(...):
+	case &VarType(...):
+	  if(existential && !explicit_bound_set){
+	    *qb = new List(new $(tv, al_qual_type), *qb); //constrain it
+	    tv_bnd->tl->hd = al_qual_type;
+	  }
+	  else {
+	    *qb = new List(new $(tv, adef), *qb); //constrain it
+	    tv_bnd->tl->hd = adef;
+	  }
+	  break;
+	case &AppType(&AqualsCon, _):
+	  Warn::impos2("aquals bounds must be present");
+	default:
+	  break;
+	}
+	break;
+      }
+      break;
+    }
     default:
-      Warn::impos2("Expect only tvars and evars");
+      Warn::impos2("Expect only tvars, evars and aqual_vars -- got ", v);
+      break;
     }
   }
 }
@@ -641,51 +695,23 @@ static $(type_t, bool)@ tvar2type($(tvar_t, bool)@ in) {
   return new $(t, b);
 }
 
+static bool evar_unconstrained($(type_t, bool)@ evb) {
+  switch(compress((*evb)[0])) {
+  case &Evar(...): return true;
+  default: return false;
+  }
+}
 //add qualifier bounds here too, and constrain any free_qualvars in the env to the bound
-static void update_qualifier_bounds(cvtenv_t env,
+static void update_qualifier_bounds(seg_t loc, cvtenv_t env,
+				    list_t<$(tvar_t, bool)@> flagged_tvars,
 				    list_t<$(type_t, type_t)@, `H> @qb,
 				    type_t def) {
   let freeqvs = env.free_qualvars;
-  let freetvs = List::map(tvar2type, env.free_vars);
   let freeevs = env.free_evars;
-  constrain_boxed_vars(env, freetvs, qb, def); //unfortunate allocation ... fix
-  constrain_boxed_vars(env, freeevs, qb, def);
-  freeqvs = List::filter(aqualvar_unconstrained ,freeqvs);
-  for(_ fq = freeqvs; fq != NULL; fq=fq->tl){
-    let &$(t, b) = fq->hd; 
-    switch(t) {
-    case &AppType(&AqualVarCon, tv_bnd): {
-      let tv = tv_bnd->hd; //could be a tvar, evar, or AqualsCon(tvar/evar)
-      if(b) { //newly added tvar for subtyping ... add the bound to the qual_bnd list
-	*qb = new List(new $(tv, tv_bnd->tl->hd), *qb); //constrain it
-      }
-      else {
-	try {
-	  let x_bnd = List::assoc_cmp(bnd_qual_cmp, *qb, tv);
-	  tv_bnd->tl->hd = x_bnd;//copy_type(x_bnd); 
-	}catch {
-	case &Not_found: //default bound of ALIASABLE is ok
-	  //but add the ALIASABLE bound to the qb list
-	  switch(compress(tv)) { //is tv really unbound?
-	  case &Evar(...):
-	  case &VarType(...):
-	    *qb = new List(new $(tv, def), *qb); //constrain it
-	    tv_bnd->tl->hd = def;
-	    break;
-	  case &AppType(&AqualsCon, _):
-	    Warn::impos2("aquals bounds must be present");
-	  default:
-	    break;
-	  }
-	  break;
-	}
-      }
-      break;
-    }
-    default:
-      Warn::impos("Only AqualVars are added to the list");
-    }
-  }
+  constrain_vars(loc, env, List::map(tvar2type, flagged_tvars), qb, def, true); 
+  constrain_vars(loc, env, List::map(tvar2type, env.free_vars), qb, def, false); //unfortunate allocation ... fix
+  constrain_vars(loc, env, List::filter(evar_unconstrained, freeevs), qb, def, false);
+  constrain_vars(loc, env, List::filter(aqualvar_unconstrained ,freeqvs), qb, def, false);
 }
 
 static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
@@ -704,9 +730,6 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
       *k = Kinds::kind_to_opt(expected_kind);
     if ((env.fn_result && env.generalize_evars)) {
       if(expected_kind->kind == RgnKind && !te->tempest_generalize) { 
-	/* 	if (expected_kind->aliasqual == Unique) */
-	/* 	  *ref = unique_rgn_type; */
-	/* 	else // generalize Top RgnKind evars to be the heap in return values */
 	*ref = heap_rgn_type;
       }
       else if(expected_kind->kind == AqualKind && !te->tempest_generalize) { 
@@ -1308,7 +1331,8 @@ void check_valid_toplevel_type(seg_t loc, Tcenv::tenv_t te, type_t t) {
     switch (compress(t)) {
     case &FnType(FnInfo{.tvars=*btvs,.qual_bnd=*qb,...}):
       //update the bound in each AqualVar that appears in the function's type
-      update_qualifier_bounds(cvt, qb, al_qual_type);
+      update_qualifier_bounds(loc,cvt,List::map_c(Tcutil::tvar_bool_pair, false, *btvs),
+			      qb, al_qual_type);
       if (*btvs == NULL) {
 	// abstract the free tvars, removing the current region
 	*btvs = List::filter(CurRgn::is_not_curr_rgn,free_tvars);
@@ -1373,10 +1397,11 @@ void check_type(seg_t loc, Tcenv::tenv_t te, list_t<tvar_t,`H> bound_tvars,
     check_free_evars(cvt.free_evars,t,loc);
 }
 
-void check_type_with_bounds(seg_t loc, Tcenv::tenv_t te, list_t<tvar_t,`H> bound_tvars, 
+void check_type_with_bounds(seg_t loc, Tcenv::tenv_t te, list_t<$(tvar_t,bool)@,`H> flagged_tvars, 
 			    list_t<$(type_t, type_t)@, `H> @qual_bnd,
 			    kind_t expected_kind, bool allow_evars, bool allow_abs_aggr,
 			    type_t t) {
+  _ bound_tvars = List::map(fst, flagged_tvars);
   let cvt = check_valid_type(CVTEnv{loc,te,bound_tvars,false,false,false,false,NULL,NULL,NULL},
 			     expected_kind, allow_abs_aggr, t);
   //this will check the qual_bnd multiple times since it is called once for each field in an Aggr
@@ -1392,5 +1417,5 @@ void check_type_with_bounds(seg_t loc, Tcenv::tenv_t te, list_t<tvar_t,`H> bound
     err2(loc,"unbound type variable ",(*free_tvs->hd)[0]," in type ",t);
   if (!allow_evars) 
     check_free_evars(cvt.free_evars,t,loc);
-  update_qualifier_bounds(cvt,qual_bnd, rtd_qual_type); //for non-function types, default is RESTRICTED
+  update_qualifier_bounds(loc,cvt,flagged_tvars,qual_bnd, rtd_qual_type); //for non-function types, default is RESTRICTED
 }

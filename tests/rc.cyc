@@ -85,7 +85,7 @@ int len(list_t x) { // works but uses stack
   tmp :=: x->tl;
   return l+1;
 }
-int length(list_t<`a::TB> x) {
+int length(list_t<`a::B\T> x) {
   let z = alias_refptr(x);
   let l = 0;
   for (; z; l++)
@@ -96,7 +96,7 @@ int length(list_t<`a::TB> x) {
 `a hd(list_t<`a> x) {
   return x->hd;
 }
-list_t<`a> tl(list_t<`a::TB> x) {
+list_t<`a> tl(list_t<`a::B\T> x) {
   // return alias_refptr(x)
   let tmp = NULL;
   tmp :=: x->tl;
@@ -146,7 +146,7 @@ list_t<`a> copy(list_t<`a> x) {
   drop_refptr(prev); // Note, no warning if this is left off. 
   return(result);
 }
-list_t<`b> map(`b::TB f(`a),list_t<`a> x) {
+list_t<`b> map(`b::B\T f(`a),list_t<`a> x) {
 
   if (x == NULL) return NULL;
 
@@ -179,7 +179,7 @@ list_t<`b> map(`b::TB f(`a),list_t<`a> x) {
   drop_refptr(prev); // Note, no warning if this is left off. 
   return(result);
 }
-list_t<`c> map_c(`c::TB f(`a,`b),`a::TB env,list_t<`b> x) {
+list_t<`c> map_c(`c::B\T f(`a,`b),`a::B\T env,list_t<`b> x) {
 
   if (x == NULL) return NULL;
 
@@ -221,7 +221,7 @@ void app(`b f(`a),list_t<`a> x) {
   }
   drop_refptr(z);
 }
-void app_c(`c f(`a::TB,`b),`a env,list_t<`b> x) {
+void app_c(`c f(`a::B\T,`b),`a env,list_t<`b> x) {
   let z = alias_refptr(x);
   while (z) {
     f(env,z->hd);
@@ -237,7 +237,7 @@ void iter(void f(`a),list_t<`a> x) {
   }
   drop_refptr(z);
 }
-void iter_c(void f(`a::TB,`b),`a env,list_t<`b> x) {
+void iter_c(void f(`a::B\T,`b),`a env,list_t<`b> x) {
   let z = alias_refptr(x);
   while (z) {
     f(env,z->hd);
@@ -264,7 +264,7 @@ void app2(`d f(`b,`c),list_t<`b> x,list_t<`c> y) {
     throw &List_mismatch_val;
   }
 }
-void app2_c(`d f(`a::TB,`b,`c),`a env,list_t<`b> x,list_t<`c> y) {
+void app2_c(`d f(`a::B\T,`b,`c),`a env,list_t<`b> x,list_t<`c> y) {
   list_t x1 = alias_refptr(x);
   list_t y1 = alias_refptr(y);
   for(; x1 != NULL && y1 != NULL; ASSIGN(x1,x1->tl), ASSIGN(y1,y1->tl))
@@ -296,7 +296,7 @@ void iter2(void f(`b,`c),list_t<`b> x,list_t<`c> y) {
     throw &List_mismatch_val;
   }
 }
-void iter2_c(void f(`a::TB,`b,`c),`a env,list_t<`b> x,list_t<`c> y) {
+void iter2_c(void f(`a::B\T,`b,`c),`a env,list_t<`b> x,list_t<`c> y) {
   list_t x1 = alias_refptr(x);
   list_t y1 = alias_refptr(y);
   for(; x1 != NULL && y1 != NULL; ASSIGN(x1,x1->tl), ASSIGN(y1,y1->tl))
@@ -578,7 +578,7 @@ bool exists_c(bool pred(`a,`b),`a env,list_t<`b> y) {
   drop_refptr(x);
   return false;
 }
-`c *`RC find_c(`c::TA *`RC pred(`a,`b),`a env,list_t<`b> x) {
+`c *`RC find_c(`c::A\T *`RC pred(`a,`b),`a env,list_t<`b> x) {
   let z = alias_refptr(x);
   for (; z != NULL; ASSIGN(z,z->tl)) {
     let v = pred(env,z->hd);
@@ -947,12 +947,12 @@ struct Table<`a,`b> {
 };
 typedef struct Table<`a,`b>@`RC table_t<`a,`b>;
 
-table_t<`a::TB,`b::TB> create(int sz, int (@`H cmp)(`a,`a), int (@`H hash)(`a)) {
+table_t<`a::B\T,`b::B\T> create(int sz, int (@`H cmp)(`a,`a), int (@`H hash)(`a)) {
   return rcnew Table{cmp, hash, 3, qcalloc(heap_region, refcnt_qual,sz,sizeof(list_t))};
 }
 
 static
- void insert_bucket(list_t<$(`a,`b::TB)@`RC> ?`RC tab, int (@hash)(`a),
+ void insert_bucket(list_t<$(`a,`b::B\T)@`RC> ?`RC tab, int (@hash)(`a),
                    list_t<$(`a,`b)@`RC> elems) __attribute__((consume(3))) {
   if (elems == NULL) return;
   let tl = NULL;
@@ -963,7 +963,7 @@ static
   elems->tl :=: tab[nidx];
   tab[nidx] = elems; // re-use cons cell
 }
-void resize(table_t<`a,`b::TB> t) {
+void resize(table_t<`a,`b::B\T> t) {
   let odata = NULL;
   odata :=: t->tab;
   unsigned int osize = numelts(odata);
@@ -994,7 +994,7 @@ void insert(table_t<`a,`b> t, `a key, `b val) {
   }
   else t->tab[bucket] :=: tmp;
 }
-void insert2(table_t<`a,`b::TB> t, `a key, `b val) __attribute((consume(3))) {
+void insert2(table_t<`a,`b::B\T> t, `a key, `b val) __attribute((consume(3))) {
   int bucket = (t->hash)(key) % numelts(t->tab);
   let tmp = NULL;
   tmp :=: t->tab[bucket];
@@ -1152,7 +1152,7 @@ void iter(void f(`a,`b), table_t<`a,`b> t) {
   }
   drop_refptr(odata);
 }  
-void iter_c(void f(`a,`b,`c::TB), table_t<`a,`b> t, `c env) {
+void iter_c(void f(`a,`b,`c::B\T), table_t<`a,`b> t, `c env) {
 
   let odata;
   { let tmp = NULL; // odata = alias_refptr(t->tab); // Do this b/c don't want t->tab==NULL during app of f

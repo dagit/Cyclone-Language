@@ -239,7 +239,7 @@ void testrec2(int *@aqual(ALIASABLE) *@aqual(UNIQUE) in) __attribute((consume(1)
 }
 
 //aquals(`a) in aggregates -- test sugar .. TB
-struct test_agg1<`a::TB> { // : RESTRICTED >= aquals(`a)
+struct test_agg1<`a::B\T> { // : RESTRICTED >= aquals(`a)
   `a elt;
   int b;
 };
@@ -257,12 +257,12 @@ void use_tagg2(int *@aqual(RESTRICTED) a, int *b) __attribute((consume(1))) {
   //    let t1 = test_agg2{a, 0}; //fail
   let t2 = test_agg2{b, 0}; //succeed
 }
-struct Queue<`a::TB,`r::R> {
+struct Queue<`a::B\T,`r::R> {
   `a a;
   int *`r r;
 };
 typedef struct Queue<`a,`r::R> @`r queue_t<`a,`r::R>;
-`a take2(queue_t<`a::TB> q, `a v)__attribute((consume(2))) {return v;}//: RESTRICTED >= aquals(`a)){}return q->a;}
+`a take2(queue_t<`a::B\T> q, `a v)__attribute((consume(2))) {return v;}//: RESTRICTED >= aquals(`a)){}return q->a;}
 void use_queue_foobar(queue_t<int*> q2){
   let a = take2(q2, new 1);
 }
@@ -310,13 +310,27 @@ struct Stack<`r> {
 
 //test delayed constraints on evars ... from lib/sexp.cyc
 static void next_list(list_t<int@`H,`H> xs) {}
-extern void imp_rev(list_t<`a::TB,`r> x){}
+extern void imp_rev(list_t<`a::B\T,`r> x){}
 
 // parse in a tuple of objects
 static void parse_tuple(){
   list_t<int@@aqual(ALIASABLE) `H,`H> xs = NULL;
   imp_rev(xs);
   next_list(xs);
+}
+
+//defaults for existential types
+struct Ex {
+  <`a::B> 
+  `a elt;
+};
+
+void make_ex(int *@aqual(\A) a){// __attribute((consume(1))) {
+  let e = Ex{a};
+};
+
+void use_ex(struct Ex @e) {
+  let &Ex{elt} = e;
 }
 
 int main() {return 0;}

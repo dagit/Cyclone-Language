@@ -800,6 +800,7 @@ int yylex(Lexing::Lexbuf<Lexing::Function_lexbuf_state<FILE@>> lbuf,
  yylloc.first_line = yyllocptr->first_line = lexeme_start(lbuf);
  yylloc.last_line  = yyllocptr->last_line  = lexeme_end(lbuf);
  switch (ans) {
+ case AQUAL_SHORT_CONST: 
  case TYPE_VAR: 
  case WCHARACTER_CONSTANT:
  case FLOATING_CONSTANT: 
@@ -837,6 +838,9 @@ rule token = parse
 | '`' (firstidchar | '_') idchar*
    { token_string = *(get_symbol(str_index_lbuf(lexbuf))); 
      return TYPE_VAR; }
+| '\\' (firstidchar) idchar*
+   { token_string = *(get_symbol(str_index_lbuf(lexbuf))); 
+     return AQUAL_SHORT_CONST; }
 /* Cyclone qualifiers (e.g., @zeroterm, @tagged, etc.) */
 /* HACK: If we see @taggedfoo then this should be lexed as '@' 'taggedfoo' */
 | '@'((firstidchar idchar*) | ('_' idchar+)) 

@@ -192,7 +192,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     // We make new_block false because we explicitly create a new block here
     // Note: NewControlFlow requires we add the label with s, not s0 !!
     let tv = new Tvar(new (string_t)aprintf("`%s",*l),
-		      new_tvar_id(), Kinds::kind_to_bound(&Kinds::rk));
+		      new_tvar_id(), Kinds::kind_to_bound(&Kinds::rk),NULL);
     tcStmt(new_named_block(s0->loc,te,tv),s,false);
     return;
 
@@ -266,7 +266,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	Unify::explain_failure();
       }
       else
-	check_pat_regions(te,p,this_pattern.patvars);
+	check_pat_regions(te,p,&this_pattern);
 
       scs->hd->pat_vars = new Opt(this_pattern.patvars);
       pattern_synth(scs->hd->loc, te, this_pattern, scs->hd->body, 
@@ -330,7 +330,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	Unify::explain_failure();
       }
       else
-	check_pat_regions(te,p,this_pattern.patvars);
+	check_pat_regions(te,p,&this_pattern);
 
       scs->hd->pat_vars = new Opt(this_pattern.patvars);
       pattern_synth(scs->hd->loc, te, this_pattern, scs->hd->body, 
@@ -440,7 +440,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	Unify::explain_failure();
       }
       else
-	check_pat_regions(te,p,pat_res.patvars);
+	check_pat_regions(te,p,&pat_res);
       check_let_pat_exhaustive(p->loc,te,p,dtp);
       pattern_synth(s0->loc, te, pat_res, s, NULL, false);
       return;

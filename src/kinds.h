@@ -35,9 +35,9 @@ extern struct Kind boolk; // boolean kind
 extern struct Kind ptrbk; // pointer bound kind
 extern struct Kind aqk;  // alias qualifier kind
 
-extern struct Kind bk_rhint; // restricted boxed kind
-extern struct Kind bk_uhint; // unique boxed kind
-extern struct Kind bk_rchint; // refcnt boxed kind
+// extern struct Kind bk_rhint; // restricted boxed kind
+// extern struct Kind bk_uhint; // unique boxed kind
+// extern struct Kind bk_rchint; // refcnt boxed kind
 
 // extern struct Kind trk; // top region kind
 // extern struct Kind tak; // top abstract kind
@@ -59,9 +59,9 @@ extern struct Core::Opt<kind_t> boolko;
 extern struct Core::Opt<kind_t> ptrbko;
 extern struct Core::Opt<kind_t> aqko;
 
-extern struct Core::Opt<kind_t> bk_rhinto;
-extern struct Core::Opt<kind_t> bk_uhinto;
-extern struct Core::Opt<kind_t> bk_rchinto;
+// extern struct Core::Opt<kind_t> bk_rhinto;
+// extern struct Core::Opt<kind_t> bk_uhinto;
+// extern struct Core::Opt<kind_t> bk_rchinto;
   
 // extern struct Core::Opt<kind_t> trko;
 // extern struct Core::Opt<kind_t> tako;
@@ -81,6 +81,7 @@ kind_t id_to_kind(string_t<`H>, seg_t); // used in parse.y
 string_t kind2string(kind_t);
 
 kind_t tvar_kind(tvar_t,kind_t def);
+struct Core::Opt<struct Kind*> tvar_kind_opt(tvar_t);
 
 $(tvar_t,kindbound_t) swap_kind(type_t, kindbound_t);
   // for temporary kind refinement
@@ -95,5 +96,8 @@ bool kind_eq(kind_t,kind_t);
 // only used by tctyp
 Core::opt_t<kindbound_t> kind_to_bound_opt(kind_t);
 bool constrain_kinds(kindbound_t, kindbound_t);
+
+  //used only by parse.y
+type_opt_t consistent_aliashint(seg_t loc,kindbound_t kb, type_opt_t aq);
 }
 #endif 

@@ -768,9 +768,21 @@ void check_pat_regions_rec(tenv_t te, pat_t p, bool did_noalias_deref,
 //
 // FIX: ultimately we should just toss this stuff and use tcExp on
 // each of the access expressions.
-void check_pat_regions(tenv_t te, pat_t p,
-		       list_t<$(vardecl_t *,exp_opt_t)@> patvars) {
+void check_pat_regions(tenv_t te, pat_t p, tcpat_result_t @pat_res) {
+  let patvars = pat_res->patvars;
   check_pat_regions_rec(te,p,false,patvars);
+  //add aquals assumptions to te
+  let &TcPatResult(_,_,aqb) = pat_res;
+  for(;aqb != NULL; aqb = aqb->tl) {
+    let &$(tv,b) = aqb->hd;
+    switch(compress(tv)) {
+    case &AppType(&AqualsCon, _):
+      te = add_aquals_bound(te, tv, b);
+      break;
+    default:
+      break;
+    }
+  }
   for (_ x = patvars; x != NULL; x=x->tl) {
     let &$(vdopt,eopt) = x->hd;
     if (eopt != NULL) {

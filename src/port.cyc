@@ -1155,7 +1155,7 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
     switch (r) {
     case &AppType(&HeapCon,_):
       new_rgn = heap_ct(); break;
-    case &VarType(&Tvar{name,_,_}):
+    case &VarType(&Tvar{name,_,_,_}):
       new_rgn = rgnvar_ct(name); break;
     case &Evar(_,_,_,_):
       // fn arguments are in their own unique region if not otherwise

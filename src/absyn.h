@@ -165,14 +165,14 @@ namespace Absyn {
   };
   typedef enum AliasQualVal alias_qual_val_t;
 
-//   // Used to classify kinds: Aliasable <= Top, Unique <= Top
-//   EXTERN_ABSYN enum AliasQual { 
-//     Aliasable, // for types that can be aliased
-//     Unique,    // for types that cannot be aliased
-//     Top        // any of the above
-//   };
+  //   // Used to classify kinds: Aliasable <= Top, Unique <= Top
+  //   EXTERN_ABSYN enum AliasQual { 
+  //     Aliasable, // for types that can be aliased
+  //     Unique,    // for types that cannot be aliased
+  //     Top        // any of the above
+  //   };
    
-  // Used to support sugar `a::TB --> `a : RESTRICTED >= aquals(`a)
+  // Used to support sugar `a::B\T --> `a : RESTRICTED >= aquals(`a)
   EXTERN_ABSYN enum AliasHint { 
     UniqueHint,    // for types that cannot be aliased
     RefcntHint,    // for types that cannot be aliased
@@ -212,7 +212,8 @@ namespace Absyn {
   EXTERN_ABSYN struct Tvar {
     tvarname_t  name;       // the user-level name of the type variable
     int         identity;   // for alpha-conversion -- unique -- -1 is error
-    kindbound_t kind;
+    kindbound_t kind;     
+    type_opt_t aquals_bound; //used only by the parser, tctyp strips this out and adds to qual_bnd
   };
 
   EXTERN_ABSYN struct PtrLoc {

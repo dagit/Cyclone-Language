@@ -44,9 +44,9 @@ void check_fndecl_valid_type(seg_t,Tcenv::tenv_t,fndecl_t);
 void check_type(seg_t, Tcenv::tenv_t, List::list_t<tvar_t,`H> bound_tvars, 
 		kind_t k, bool allow_evars, bool allow_abs_aggr, type_t);
 
-void check_type_with_bounds(seg_t, Tcenv::tenv_t, List::list_t<tvar_t,`H> bound_tvars, 
-		List::list_t<$(type_t, type_t)@, `H> @qb,
-		kind_t k, bool allow_evars, bool allow_abs_aggr, type_t);
+void check_type_with_bounds(seg_t, Tcenv::tenv_t, List::list_t<$(tvar_t,bool)@,`H> flagged_tvars, 
+			    List::list_t<$(type_t, type_t)@, `H> @qb,
+			    kind_t k, bool allow_evars, bool allow_abs_aggr, type_t);
 
 }
 #endif
