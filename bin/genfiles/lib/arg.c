@@ -61,39 +61,37 @@ _tagged_arr errmsg, struct _tagged_arr args); struct Cyc_Buffer_t; extern struct
 Cyc_Buffer_t* Cyc_Buffer_create( unsigned int n); extern struct _tagged_arr Cyc_Buffer_contents(
 struct Cyc_Buffer_t*); extern void Cyc_Buffer_add_substring( struct Cyc_Buffer_t*,
 struct _tagged_arr, int offset, int len); extern void Cyc_Buffer_add_string(
-struct Cyc_Buffer_t*, struct _tagged_arr); extern int isalnum( int __c)
- __attribute__(( cdecl )) ; extern int isalpha( int __c)  __attribute__(( cdecl
-)) ; extern int iscntrl( int __c)  __attribute__(( cdecl )) ; extern int isdigit(
-int __c)  __attribute__(( cdecl )) ; extern int isgraph( int __c)
- __attribute__(( cdecl )) ; extern int islower( int __c)  __attribute__(( cdecl
-)) ; extern int isprint( int __c)  __attribute__(( cdecl )) ; extern int ispunct(
-int __c)  __attribute__(( cdecl )) ; extern int isspace( int __c)
- __attribute__(( cdecl )) ; extern int isupper( int __c)  __attribute__(( cdecl
-)) ; extern int isxdigit( int __c)  __attribute__(( cdecl )) ; extern int
-tolower( int __c)  __attribute__(( cdecl )) ; extern int toupper( int __c)
- __attribute__(( cdecl )) ; extern int isascii( int __c)  __attribute__(( cdecl
-)) ; extern int toascii( int __c)  __attribute__(( cdecl )) ; extern int
-_tolower( int __c)  __attribute__(( cdecl )) ; extern int _toupper( int __c)
- __attribute__(( cdecl )) ; unsigned char Cyc_Arg_Bad[ 8u]="\000\000\000\000Bad";
-unsigned char Cyc_Arg_Error[ 10u]="\000\000\000\000Error"; static const int Cyc_Arg_Prefix=
-0; struct Cyc_Arg_Prefix_struct{ int tag; struct _tagged_arr f1; } ; static
-const int Cyc_Arg_Exact= 1; struct Cyc_Arg_Exact_struct{ int tag; struct
-_tagged_arr f1; } ; static const int Cyc_Arg_Unknown= 0; struct Cyc_Arg_Unknown_struct{
-int tag; struct _tagged_arr f1; } ; static const int Cyc_Arg_Missing= 1; struct
-Cyc_Arg_Missing_struct{ int tag; struct _tagged_arr f1; } ; static const int Cyc_Arg_Message=
-2; struct Cyc_Arg_Message_struct{ int tag; struct _tagged_arr f1; } ; static
-const int Cyc_Arg_Wrong= 3; struct Cyc_Arg_Wrong_struct{ int tag; struct
-_tagged_arr f1; struct _tagged_arr f2; struct _tagged_arr f3; } ; struct _tuple0{
-struct _tagged_arr f1; int f2; struct _tagged_arr f3; void* f4; struct
-_tagged_arr f5; } ; static void* Cyc_Arg_lookup( struct Cyc_List_List* l, struct
-_tagged_arr x){ while( l !=  0) { struct _tagged_arr _temp0=(*(( struct _tuple0*)((
-struct Cyc_List_List*) _check_null( l))->hd)).f1; int _temp1= Cyc_String_strlen(
-_temp0); if( _temp1 >  0?(*(( struct _tuple0*)(( struct Cyc_List_List*)
-_check_null( l))->hd)).f2: 0){ if( Cyc_String_strncmp( x,(*(( struct _tuple0*)((
-struct Cyc_List_List*) _check_null( l))->hd)).f1, _temp1) ==  0){ return(*((
-struct _tuple0*)(( struct Cyc_List_List*) _check_null( l))->hd)).f4;}} else{ if(
-Cyc_String_strcmp( x,(*(( struct _tuple0*)(( struct Cyc_List_List*) _check_null(
-l))->hd)).f1) ==  0){ return(*(( struct _tuple0*)(( struct Cyc_List_List*)
+struct Cyc_Buffer_t*, struct _tagged_arr); extern int isalnum( int)
+ __attribute__(( cdecl )) ; extern int isalpha( int)  __attribute__(( cdecl )) ;
+extern int iscntrl( int)  __attribute__(( cdecl )) ; extern int isdigit( int)
+ __attribute__(( cdecl )) ; extern int isgraph( int)  __attribute__(( cdecl )) ;
+extern int islower( int)  __attribute__(( cdecl )) ; extern int isprint( int)
+ __attribute__(( cdecl )) ; extern int ispunct( int)  __attribute__(( cdecl )) ;
+extern int isspace( int)  __attribute__(( cdecl )) ; extern int isupper( int)
+ __attribute__(( cdecl )) ; extern int isxdigit( int)  __attribute__(( cdecl )) ;
+extern int tolower( int)  __attribute__(( cdecl )) ; extern int toupper( int)
+ __attribute__(( cdecl )) ; extern int isascii( int)  __attribute__(( cdecl )) ;
+extern int toascii( int)  __attribute__(( cdecl )) ; extern int _tolower( int)
+ __attribute__(( cdecl )) ; extern int _toupper( int)  __attribute__(( cdecl )) ;
+unsigned char Cyc_Arg_Bad[ 8u]="\000\000\000\000Bad"; unsigned char Cyc_Arg_Error[
+10u]="\000\000\000\000Error"; static const int Cyc_Arg_Prefix= 0; struct Cyc_Arg_Prefix_struct{
+int tag; struct _tagged_arr f1; } ; static const int Cyc_Arg_Exact= 1; struct
+Cyc_Arg_Exact_struct{ int tag; struct _tagged_arr f1; } ; static const int Cyc_Arg_Unknown=
+0; struct Cyc_Arg_Unknown_struct{ int tag; struct _tagged_arr f1; } ; static
+const int Cyc_Arg_Missing= 1; struct Cyc_Arg_Missing_struct{ int tag; struct
+_tagged_arr f1; } ; static const int Cyc_Arg_Message= 2; struct Cyc_Arg_Message_struct{
+int tag; struct _tagged_arr f1; } ; static const int Cyc_Arg_Wrong= 3; struct
+Cyc_Arg_Wrong_struct{ int tag; struct _tagged_arr f1; struct _tagged_arr f2;
+struct _tagged_arr f3; } ; struct _tuple0{ struct _tagged_arr f1; int f2; struct
+_tagged_arr f3; void* f4; struct _tagged_arr f5; } ; static void* Cyc_Arg_lookup(
+struct Cyc_List_List* l, struct _tagged_arr x){ while( l !=  0) { struct
+_tagged_arr _temp0=(*(( struct _tuple0*)(( struct Cyc_List_List*) _check_null( l))->hd)).f1;
+int _temp1= Cyc_String_strlen( _temp0); if( _temp1 >  0?(*(( struct _tuple0*)((
+struct Cyc_List_List*) _check_null( l))->hd)).f2: 0){ if( Cyc_String_strncmp( x,(*((
+struct _tuple0*)(( struct Cyc_List_List*) _check_null( l))->hd)).f1, _temp1) == 
+0){ return(*(( struct _tuple0*)(( struct Cyc_List_List*) _check_null( l))->hd)).f4;}}
+else{ if( Cyc_String_strcmp( x,(*(( struct _tuple0*)(( struct Cyc_List_List*)
+_check_null( l))->hd)).f1) ==  0){ return(*(( struct _tuple0*)(( struct Cyc_List_List*)
 _check_null( l))->hd)).f4;}} l=(( struct Cyc_List_List*) _check_null( l))->tl;}(
 int) _throw(( void*) Cyc_Core_Not_found);} static struct _tagged_arr Cyc_Arg_Justify_break_line(
 struct Cyc_Buffer_t* b, int howmuch, struct _tagged_arr s){ if( s.curr == ((

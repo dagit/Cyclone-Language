@@ -3,23 +3,23 @@
 #include <config.h>
 namespace Ctype {
 extern "C" {
-int _EXFUN(isalnum, (int __c));
-int _EXFUN(isalpha, (int __c));
-int _EXFUN(iscntrl, (int __c));
-int _EXFUN(isdigit, (int __c));
-int _EXFUN(isgraph, (int __c));
-int _EXFUN(islower, (int __c));
-int _EXFUN(isprint, (int __c));
-int _EXFUN(ispunct, (int __c));
-int _EXFUN(isspace, (int __c));
-int _EXFUN(isupper, (int __c));
-int _EXFUN(isxdigit,(int __c));
-int _EXFUN(tolower, (int __c));
-int _EXFUN(toupper, (int __c));
-int _EXFUN(isascii, (int __c));
-int _EXFUN(toascii, (int __c));
-int _EXFUN(_tolower, (int __c));
-int _EXFUN(_toupper, (int __c));
+int __cdecl isalnum(int);
+int __cdecl isalpha(int);
+int __cdecl iscntrl(int);
+int __cdecl isdigit(int);
+int __cdecl isgraph(int);
+int __cdecl islower(int);
+int __cdecl isprint(int);
+int __cdecl ispunct(int);
+int __cdecl isspace(int);
+int __cdecl isupper(int);
+int __cdecl isxdigit(int);
+int __cdecl tolower(int);
+int __cdecl toupper(int);
+int __cdecl isascii(int);
+int __cdecl toascii(int);
+int __cdecl _tolower(int);
+int __cdecl _toupper(int);
 }
 }
 #endif /* _CTYPE_H_ */

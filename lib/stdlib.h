@@ -28,15 +28,15 @@ typedef struct _Ldiv
 
 #define RAND_MAX __RAND_MAX
 
-extern __IMPORT int __mb_cur_max;
+extern int __mb_cur_max;
 
 #define MB_CUR_MAX __mb_cur_max
 
 /* CYCLONE: now defined in core.h
-_VOID	_EXFUN(abort,(_VOID) _ATTRIBUTE ((noreturn)));
+void	_EXFUN(abort,(void) _ATTRIBUTE ((noreturn)));
 */
 int	_EXFUN(abs,(int));
-int	_EXFUN(atexit,(_VOID (*__func)(_VOID)));
+int	_EXFUN(atexit,(void (*__func)(void)));
 /* wrapped
 double	_EXFUN(atof,(const char *__nptr));
 */
@@ -50,32 +50,32 @@ int	_EXFUN(atoi,(const char *__nptr));
 long	_EXFUN(atol,(const char *__nptr));
 */
 /* unsafe
-_PTR	_EXFUN(bsearch,(const _PTR __key,
-		       const _PTR __base,
+void *	_EXFUN(bsearch,(const void * __key,
+		       const void * __base,
 		       size_t __nmemb,
 		       size_t __size,
-		       int _compar(const _PTR, const _PTR)));
-_PTR	_EXFUN(calloc,(size_t __nmemb, size_t __size));
+		       int _compar(const void *, const void *)));
+void *	_EXFUN(calloc,(size_t __nmemb, size_t __size));
 */
 div_t	_EXFUN(div,(int __numer, int __denom));
 /* now in core.h
-_VOID	_EXFUN(exit,(int __status) _ATTRIBUTE ((noreturn)));
+void	_EXFUN(exit,(int __status) _ATTRIBUTE ((noreturn)));
 */
 /* unsafe
-_VOID	_EXFUN(free,(_PTR));
+void	_EXFUN(free,(void *));
 */
 /* wrapped
 char *  _EXFUN(getenv,(const char *__string));
 char *	_EXFUN(_getenv_r,(struct _reent *, const char *__string));
-char *	_EXFUN(_findenv,(_CONST char *, int *));
-char *	_EXFUN(_findenv_r,(struct _reent *, _CONST char *, int *));
+char *	_EXFUN(_findenv,(const char *, int *));
+char *	_EXFUN(_findenv_r,(struct _reent *, const char *, int *));
 */
 /* JGM: I'm commenting this out as we get a confliciting types warning here
 long	_EXFUN(labs,(long));
 */
 ldiv_t	_EXFUN(ldiv,(long __numer, long __denom));
 /*
-_PTR	_EXFUN(malloc,(size_t __size));
+void *	_EXFUN(malloc,(size_t __size));
 */
 /* FIX:  need to be wrapped
 int	_EXFUN(mblen,(const char *, size_t));
@@ -98,13 +98,13 @@ char *  _EXFUN(mktemp,(char *));
 #endif
 #endif
 /* unsafe
-_VOID	_EXFUN(qsort,(_PTR __base, size_t __nmemb, size_t __size, int(*_compar)(const _PTR, const _PTR)));
+void	_EXFUN(qsort,(void * __base, size_t __nmemb, size_t __size, int(*_compar)(const void *, const void *)));
 */
-int	_EXFUN(rand,(_VOID));
+int	_EXFUN(rand,(void));
 /* unsafe
-_PTR	_EXFUN(realloc,(_PTR __r, size_t __size));
+void *	_EXFUN(realloc,(void * __r, size_t __size));
 */
-_VOID	_EXFUN(srand,(unsigned __seed));
+void	_EXFUN(srand,(unsigned __seed));
 /* FIX: needs to be wrapped
 double	_EXFUN(strtod,(const char *__n, char **_end_PTR));
 */
@@ -141,7 +141,7 @@ int	_EXFUN(rand_r,(unsigned *__seed));
 
 #ifndef __CYGWIN__
 /* unsafe 
-_VOID	_EXFUN(cfree,(_PTR));
+void	_EXFUN(cfree,(void *));
 */
 #else
 /* wrapped
@@ -149,7 +149,7 @@ char *	_EXFUN(realpath,(const char *, char *));
 void	_EXFUN(unsetenv,(const char *__string));
 void	_EXFUN(_unsetenv_r,(struct _reent *, const char *__string));
 */
-int	_EXFUN(random,(_VOID));
+int	_EXFUN(random,(void));
 long	_EXFUN(srandom,(unsigned __seed));
 /* wrapped
 char *  _EXFUN(ptsname, (int));
@@ -164,16 +164,16 @@ int     _EXFUN(unlockpt,(int));
 char *	_EXFUN(_dtoa_r,(struct _reent *, double, int, int, int *, int*, char**));
 */
 /* unsafe
-_PTR	_EXFUN(_malloc_r,(struct _reent *, size_t));
-_PTR	_EXFUN(_calloc_r,(struct _reent *, size_t, size_t));
-_VOID	_EXFUN(_free_r,(struct _reent *, _PTR));
-_PTR	_EXFUN(_realloc_r,(struct _reent *, _PTR, size_t));
+void *	_EXFUN(_malloc_r,(struct _reent *, size_t));
+void *	_EXFUN(_calloc_r,(struct _reent *, size_t, size_t));
+void	_EXFUN(_free_r,(struct _reent *, void *));
+void *	_EXFUN(_realloc_r,(struct _reent *, void *, size_t));
 */
 /* wrapped
-_VOID	_EXFUN(_mstats_r,(struct _reent *, char *));
+void	_EXFUN(_mstats_r,(struct _reent *, char *));
 int	_EXFUN(_system_r,(struct _reent *, const char *));
 
-_VOID	_EXFUN(__eprintf,(const char *, const char *, unsigned int, const char *));
+void	_EXFUN(__eprintf,(const char *, const char *, unsigned int, const char *));
 */
 }
 extern double atof(const char ?`r);

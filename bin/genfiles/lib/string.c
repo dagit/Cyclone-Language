@@ -20,21 +20,20 @@ struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int system(
 unsigned char*); extern int* __errno(); struct Cyc_List_List{ void* hd; struct
 Cyc_List_List* tl; } ; extern int Cyc_List_length( struct Cyc_List_List* x);
 extern unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
-18u]; extern unsigned char Cyc_List_Nth[ 8u]; extern int isalnum( int __c)
- __attribute__(( cdecl )) ; extern int isalpha( int __c)  __attribute__(( cdecl
-)) ; extern int iscntrl( int __c)  __attribute__(( cdecl )) ; extern int isdigit(
-int __c)  __attribute__(( cdecl )) ; extern int isgraph( int __c)
- __attribute__(( cdecl )) ; extern int islower( int __c)  __attribute__(( cdecl
-)) ; extern int isprint( int __c)  __attribute__(( cdecl )) ; extern int ispunct(
-int __c)  __attribute__(( cdecl )) ; extern int isspace( int __c)
- __attribute__(( cdecl )) ; extern int isupper( int __c)  __attribute__(( cdecl
-)) ; extern int isxdigit( int __c)  __attribute__(( cdecl )) ; extern int
-tolower( int __c)  __attribute__(( cdecl )) ; extern int toupper( int __c)
- __attribute__(( cdecl )) ; extern int isascii( int __c)  __attribute__(( cdecl
-)) ; extern int toascii( int __c)  __attribute__(( cdecl )) ; extern int
-_tolower( int __c)  __attribute__(( cdecl )) ; extern int _toupper( int __c)
- __attribute__(( cdecl )) ; struct Cyc_Stdio___sFILE; extern unsigned char Cyc_Stdio_FileCloseError[
-19u]; extern unsigned char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
+18u]; extern unsigned char Cyc_List_Nth[ 8u]; extern int isalnum( int)
+ __attribute__(( cdecl )) ; extern int isalpha( int)  __attribute__(( cdecl )) ;
+extern int iscntrl( int)  __attribute__(( cdecl )) ; extern int isdigit( int)
+ __attribute__(( cdecl )) ; extern int isgraph( int)  __attribute__(( cdecl )) ;
+extern int islower( int)  __attribute__(( cdecl )) ; extern int isprint( int)
+ __attribute__(( cdecl )) ; extern int ispunct( int)  __attribute__(( cdecl )) ;
+extern int isspace( int)  __attribute__(( cdecl )) ; extern int isupper( int)
+ __attribute__(( cdecl )) ; extern int isxdigit( int)  __attribute__(( cdecl )) ;
+extern int tolower( int)  __attribute__(( cdecl )) ; extern int toupper( int)
+ __attribute__(( cdecl )) ; extern int isascii( int)  __attribute__(( cdecl )) ;
+extern int toascii( int)  __attribute__(( cdecl )) ; extern int _tolower( int)
+ __attribute__(( cdecl )) ; extern int _toupper( int)  __attribute__(( cdecl )) ;
+struct Cyc_Stdio___sFILE; extern unsigned char Cyc_Stdio_FileCloseError[ 19u];
+extern unsigned char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; static const int Cyc_Stdio_String_pa=
 0; struct Cyc_Stdio_String_pa_struct{ int tag; struct _tagged_arr f1; } ; static
 const int Cyc_Stdio_Int_pa= 1; struct Cyc_Stdio_Int_pa_struct{ int tag;

@@ -13,8 +13,8 @@ namespace Cstdlib {
     long  _EXFUN(atol,(const Cstring _nptr));
     Cstring _EXFUN(getenv,(const Cstring __string));
     //Cstring _EXFUN(_getenv_r,(struct _reent @, const Cstring __string));
-    Cstring _EXFUN(_findenv,(_CONST Cstring, int *));
-    //Cstring _EXFUN(_findenv_r,(struct _reent *, _CONST Cstring, int *));
+    Cstring _EXFUN(_findenv,(const Cstring, int *));
+    //Cstring _EXFUN(_findenv_r,(struct _reent *, const Cstring, int *));
     int _EXFUN(putenv,(const Cstring __string));
     //int	_EXFUN(_putenv_r,(struct _reent @, const Cstring __string));
 /* Commented out because it's not available in IRIX

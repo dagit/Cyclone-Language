@@ -108,12 +108,12 @@ struct __sFILE {
   int	_lbfsize;	/* 0 or -_bf._size, for inline putc */
 
   /* operations */
-  _PTR	_cookie;	/* cookie passed to io functions */
+  void *	_cookie;	/* cookie passed to io functions */
 
-  int	_EXFUN((*_read),(_PTR _cookie, char *_buf, int _n;{}));
-  int	_EXFUN((*_write),(_PTR _cookie, const char *_buf, int _n;{}));
-  _fpos_t _EXFUN((*_seek),(_PTR _cookie, _fpos_t _offset, int _whence;{}));
-  int	_EXFUN((*_close),(_PTR _cookie;{}));
+  int __cdecl (*_read)(void * _cookie, char *_buf, int _n;{});
+  int __cdecl (*_write)(void * _cookie, const char *_buf, int _n;{});
+  _fpos_t __cdecl (*_seek)(void * _cookie, _fpos_t _offset, int _whence;{});
+  int __cdecl (*_close)(void * _cookie;{});
 
   /* separate buffer for long sequences of ungetc() */
   struct __sbuf _ub;	/* ungetc buffer */
@@ -185,7 +185,7 @@ struct _reent
   char _emergency[25];
  
   int _current_category;	/* used by setlocale */
-  _CONST char *_current_locale;
+  const char *_current_locale;
 
   int __sdidinit;		/* 1 means stdio has been init'd */
 

@@ -16,16 +16,16 @@ struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*
 extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, int); extern
 struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int system(
 unsigned char*); extern int* __errno(); struct Cyc_Stdlib__Div{ int quot; int
-rem; } ; struct Cyc_Stdlib__Ldiv{ int quot; int rem; } ; extern int __mb_cur_max
- __attribute__(( dllimport )) ; extern int abs( int)  __attribute__(( cdecl )) ;
-extern int atexit( void(* __func)())  __attribute__(( cdecl )) ; extern struct
-Cyc_Stdlib__Div div( int __numer, int __denom)  __attribute__(( cdecl )) ;
-extern struct Cyc_Stdlib__Ldiv ldiv( int __numer, int __denom)  __attribute__((
-cdecl )) ; extern int rand()  __attribute__(( cdecl )) ; extern void srand(
-unsigned int __seed)  __attribute__(( cdecl )) ; extern int rand_r( unsigned int*
-__seed)  __attribute__(( cdecl )) ; extern int random()  __attribute__(( cdecl
-)) ; extern int srandom( unsigned int __seed)  __attribute__(( cdecl )) ; extern
-int grantpt( int)  __attribute__(( cdecl )) ; extern int unlockpt( int)
+rem; } ; struct Cyc_Stdlib__Ldiv{ int quot; int rem; } ; extern int __mb_cur_max;
+extern int abs( int)  __attribute__(( cdecl )) ; extern int atexit( void(*
+__func)())  __attribute__(( cdecl )) ; extern struct Cyc_Stdlib__Div div( int
+__numer, int __denom)  __attribute__(( cdecl )) ; extern struct Cyc_Stdlib__Ldiv
+ldiv( int __numer, int __denom)  __attribute__(( cdecl )) ; extern int rand()
+ __attribute__(( cdecl )) ; extern void srand( unsigned int __seed)
+ __attribute__(( cdecl )) ; extern int rand_r( unsigned int* __seed)
+ __attribute__(( cdecl )) ; extern int random()  __attribute__(( cdecl )) ;
+extern int srandom( unsigned int __seed)  __attribute__(( cdecl )) ; extern int
+grantpt( int)  __attribute__(( cdecl )) ; extern int unlockpt( int)
  __attribute__(( cdecl )) ; extern double Cyc_Stdlib_atof( struct _tagged_arr);
 extern int Cyc_Stdlib_atoi( struct _tagged_arr); extern int Cyc_Stdlib_atol(
 struct _tagged_arr); extern struct _tagged_arr Cyc_Stdlib_getenv( struct
