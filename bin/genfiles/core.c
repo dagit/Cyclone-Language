@@ -71,6 +71,10 @@ void _free_region(struct _RegionHandle*);
 struct _RegionHandle*_open_dynregion(struct _DynRegionFrame*,struct _DynRegionHandle*);
 void _pop_dynregion();
 
+/* Alias qualifier stuff */
+
+typedef unsigned char _AliasQualHandle_t;
+
 /* Exceptions */
 struct _handler_cons {
   struct _RuntimeStack s;
@@ -328,7 +332,7 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 struct _RegionHandle*Cyc_Core_current_handle (void);extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};
 # 171
 extern struct _RegionHandle*Cyc_Core_unique_region;
-# 201
+# 210 "core.h"
 struct _fat_ptr Cyc_Core_autorelease_handle(struct _RegionHandle*,struct _fat_ptr);struct Cyc_Core_ThinRes{void*arr;unsigned nelts;};char Cyc_Core_Invalid_argument[17U]="Invalid_argument";char Cyc_Core_SysError[9U]="SysError";char Cyc_Core_Failure[8U]="Failure";char Cyc_Core_Impossible[11U]="Impossible";char Cyc_Core_Not_found[10U]="Not_found";
 # 31 "core.cyc"
 struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val={Cyc_Core_Not_found};char Cyc_Core_Unreachable[12U]="Unreachable";

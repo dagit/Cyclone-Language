@@ -387,7 +387,7 @@ static void do_exp(env_t nv, exp_t e) {
   case &Subscript_e(e1,e2): 
     switch(compress((type_t)e1->topt)) {
     case &TupleType(_): e->annot = &NoCheck_val; break; // type-checker checks
-    case &PointerType(PtrInfo(ta,tq,PtrAtts(rgn,n,b,zt,_,_))):
+    case &PointerType(PtrInfo(ta,tq,PtrAtts(rgn,n,b,zt,_,_,_))):
       bool bds_ck;
       //bds_ck  = need_bounds_check(nv,get_relns(e1),e1,e2);
       // try to eliminate the bounds check by just looking for constants.
@@ -453,9 +453,10 @@ static void do_exp(env_t nv, exp_t e) {
     do_exp(enter_sizeof(nv),e1);
     break;
 
-  case &New_e(rgnopt,e1):
+  case &New_e(rgnopt,e1,qualopt):
     e->annot = &NoCheck_val;
     do_exp_opt(nv,rgnopt);
+    do_exp_opt(nv,qualopt);
     do_exp(nv,e1);
     break;
   case &Malloc_e(MallocInfo(_,rgnopt,_,sizeexp,_,_)):

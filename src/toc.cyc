@@ -425,7 +425,7 @@ static aggrdecl_t make_c_struct_defn(var_t name, list_t<aggrfield_t,`H> fs) {
   return new Aggrdecl{.kind=StructA, .sc=Public, .tvs=NULL,
 		      .attributes=NULL, .expected_mem_kind=false,
 		      .name= new $(Rel_n(NULL),name),
-		      .impl= new AggrdeclImpl{NULL,NULL,fs,false}};
+		      .impl= new AggrdeclImpl{NULL,NULL,NULL,fs,false}};
 }
 
 // used to generate struct definitions for tuple types
@@ -716,7 +716,7 @@ type_t typ_to_c(type_t t) {
   case &AppType(&FloatCon(_),_): return t;
   case &ArrayType(ArrayInfo{t2,tq,e,_,ztl}):
     return array_type(typ_to_c(t2),tq,e,false_type,ztl);
-  case &FnType(FnInfo{_,_,tq2,t2,args,c_vararg,cyc_vararg,_,atts,...}):
+  case &FnType(FnInfo{_,_,tq2,t2,args,c_vararg,cyc_vararg,_,_,atts,...}):
     // just drop the type arguments & effect and translate the nested types
     // also, drop any format descriptors
     let new_atts = Atts::atts2c(atts);
@@ -728,7 +728,7 @@ type_t typ_to_c(type_t t) {
       new_args = List::imp_append(new_args,new List(vararg,NULL));
     }
     return new FnType(FnInfo{NULL,NULL,tq2,typ_to_c(t2),new_args,
-                               c_vararg,NULL,NULL,new_atts,NULL,NULL,NULL,NULL,NULL,NULL});
+                               c_vararg,NULL,NULL,NULL,new_atts,NULL,NULL,NULL,NULL,NULL,NULL});
   case &TupleType(tqs):
     // $(t1,...,tn) maps to struct tuple_type_n where we define
     // struct tuple_type_n { t1 f1; ...; tn fn; };
@@ -2204,7 +2204,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       e->r = cast_it_r(typ_to_c((type_t)e->topt),e1);
     break;
 
-  case &New_e(rgnopt,e1):
+  case &New_e(rgnopt,e1,qual): //ignore qual for now
     // we share the work with RemoveAggrs:
     // * we create the malloc-exp and if necessary, the tag_fat and cast
     // * we pass the malloc-exp as an attribute to RemoveAggrs,
@@ -3698,6 +3698,7 @@ static void fndecl_to_c(env_t nv, fndecl_t f, bool cinclude) {
   f->i.tvars  = NULL;
   f->i.effect = NULL;
   f->i.rgn_po = NULL;
+  f->i.qual_bnd = NULL;
   f->i.requires_clause = NULL;
   f->i.ensures_clause  = NULL;
   f->i.ret_type  = typ_to_c(f->i.ret_type);
@@ -3772,6 +3773,7 @@ static int aggrdecl_to_c_body<`r2,`d,`r>(region_t<`d> d,
   if(ad->impl != NULL && !seen_defn_before) {
     new_ad->impl = new AggrdeclImpl { .exist_vars = NULL,
                                       .rgn_po = NULL,
+				      .qual_bnd = NULL,
                                       .fields = NULL,
                                       .tagged = false };
     list_t<aggrfield_t> new_fields = NULL;

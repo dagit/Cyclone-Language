@@ -1,0 +1,178 @@
+#include <core.h>
+/********************************************************************************
+ Test unification cases
+********************************************************************************/
+
+//case 1 const X const
+//case 1(a,b):
+int*@aqual(ALIASABLE) test1_ab() {
+  int *@aqual(ALIASABLE) a = new 1;
+  int *@aqual(ALIASABLE) b = a; //simple assignment
+  int *@aqual(UNIQUE) c = b; //fail
+  if(*a)
+    return a; //simple return
+  else
+    return c; //success -- UNIQUE <: ALIASABLE
+}
+
+//case 1(c): default return qual is ALIASABLE -- must be set in tctyp
+int* test_1c(  int *@aqual(RESTRICTED) c) {
+  int *@aqual(ALIASABLE) a = new 1;
+  int *@aqual(UNIQUE) b;
+  if(*a)
+    return a;
+  else if(c)
+    return b;//success -- UNIQUE <: ALIASABLE
+  else 
+    return c;//fail -- RESTRICTED !<: ALIASABLE 
+}
+
+//case 2 VarType X const
+//2(a) -- subtyping fails for C <: `q
+int *@aqual(`q) id(int *@aqual(`q) a : RESTRICTED >= `q) {
+  return new 0; //fail
+}
+
+//case 3 Evar X const
+//3(a) default assignment
+void test_3a() {
+  int *a = new<Core::unique_qual> 1;
+  int *b = new 1;
+  a = b; //fail -- UNIQUE != ALIASABLE
+  
+}
+//3(a) pattern matching
+struct struct3a_pat {
+  int *@aqual(ALIASABLE) a;
+  int *@aqual(UNIQUE) b;
+};
+int*@aqual(UNIQUE) test_3a_pat(struct struct3a_pat s) {
+  switch(s) {
+  case struct3a_pat{NULL, NULL}: return NULL;
+  case struct3a_pat{NULL, b}: return b; //success
+  case struct3a_pat{a, b}: return a; //fail
+  }
+}
+
+//3(b) Function call
+void explicit_arg2(int *@aqual(`q) `H a: ALIASABLE >= `q) {}
+void explicit_arg(int *@aqual(ALIASABLE) `H a) {}
+void use_xarg(aqual_t<UNIQUE> hdl) {
+  int *@aqual(ALIASABLE) a = new 1;
+  explicit_arg(a);
+  int *b = new<hdl> 1;
+  explicit_arg2(b); //fails ... explicit_arg2 used a qualifier tvar ...bounds violated
+  explicit_arg(b); //b should be consumed here
+}
+//argument default
+void def_arg(int *a) {} //should def to int *@aqual(ALIASABLE) a
+void use_def_arg(int *@aqual(RESTRICTED) a) {
+  //  def_arg(a); //fail -- existing bug causes this to fail badly ... needs fix
+}
+
+//3(c) aggregate construction
+struct s3c<`q::Q> { //default RESTRICTED >= `q
+  int *@aqual(`q) a;
+};
+struct s3c<ALIASABLE> test_s3c(aqual_t<UNIQUE> hdl) {
+  struct s3c<ALIASABLE> s1 = s3c{new 1};
+  let s2 = s3c{new 1};
+  struct s3c<UNIQUE> s3 = s3c{new<hdl> 1};
+  if(1)
+    return s1;
+  else
+    return s3; //fail -- s3c<UNIQUE> !<: s3c<ALIASABLE> ... only true for quals on pointer types, not apptypes
+}
+
+//case 4  VarType x VarType
+//4(a,b) Constrained return, assignment between args, assignment of returned type
+int *@aqual(`q) id_4a(int *@aqual(`q)`H a) {return a;}
+int *@aqual(`q) test_4a(int *@aqual(`q)`H a, int *@aqual(`q)`H b, int *@aqual(`r)`H c) {
+  b = a;
+  c = a; //fail
+  a = id_4a(a);
+  return a;
+}
+//4(c) Assignment to existentially bound var
+struct s4c {
+  <`q::Q, `r::Q> : ALIASABLE >= `q, ALIASABLE >= `r
+  int *@aqual(`q) f1;
+  int *@aqual(`q) f2;
+  int *@aqual(`r) f3;
+};
+void test_4c(struct s4c *s) {
+  let &s4c{<`q,`r> f1, f2, f3} = s;
+  f2 = f1; //success
+  f3 = f1; //fail
+}
+
+//case 5 Evar x VarType
+//5(a) -- Function call
+int *@aqual(`q)`r id_5a(int *@aqual(`q)`r a : ALIASABLE >= `q) { return a; }
+void use_5a(int *@aqual(`q) a : RESTRICTED >= `q) {
+  a = id_5a(a); //fails bounds check 
+}
+
+//5(b) -- Aggregate construction
+struct s5b<`q::Q> { : ALIASABLE >= `q
+  int *@aqual(`q) a;
+};
+struct s5b<`q>* use_s5b(int *@aqual(`q)`H a : RESTRICTED >= `q) {
+  return new s5b{a}; //fails bounds check
+}
+
+//5(c) -- Pattern matching with VarType in access expression
+
+//let alias works in two separate ways
+//1: explicit let alias
+//case 6 Evar x Evar
+//6(a) -- only reasonable case is when using NULL ... (control_flow barfs on no_consume here)
+int *@aqual(`q) id_6c(int *@aqual(`q)`H a : RESTRICTED >= `q) {return a;}
+int*@aqual(ALIASABLE) use_6c(void) {
+  int *a = id_6c(NULL); //a should be constrained to int *@aqual(RESTRICTED)
+  return a; //fail  subtyping violation
+}
+
+
+/********************************************************************************
+ Defaults tested above
+********************************************************************************/
+//function return type defaults to ALIASABLE
+//function argument types default to ALIASABLE
+//bound for explicit qualifiers in functions default to ALIASABLE
+
+//aggregate fields default to ALIASABLE
+//top level type definitions default to `q <= RESTRICTED for maximal unification
+//bound for explicit qualifiers in aggregate fields defaults to RESTRICTED
+
+
+//Let alias
+int test_letalias(int *@aqual(UNIQUE) `p a) {
+  {
+    //the type of b is set to int *@aqual(ALIASABLE) `r
+    //and int *@aqual(UNIQUE) `rr is found to be a subtype ... so this is ok
+    let alias<`r> int *@aqual(REFCNT) `r b = a;  //fails ... REFCNT doesn't unify
+    int *c = b;
+  }
+  return 0;
+}
+
+void autoalias_helper(int *@aqual(ALIASABLE) `H a) {}
+void autoalias_helper2(int *@aqual(`q) `H a : ALIASABLE >= `q) {}
+void autoalias_helper3(int *@aqual(`q) `r a : ALIASABLE >= `q) {}
+int test_autoalias(int *@aqual(UNIQUE) `H a) {
+  //this works by first casting (int *@aqual(ALIASABLE))a
+  //then a {let alias<`r> int *@aqual(ALIASABLE) __aliasvar17 = (int *@aqual(ALIASABLE))a; autoalias_helper(__aliasvar17);}
+  //is constructed
+  autoalias_helper(a); //a consumed
+  autoalias_helper2(a);//fails for `q variable and `H 
+  autoalias_helper3(a);//fails for `q variable
+  //if `q is explicitly bound in the function, then it might appear in the return type, or other arguments too
+  //for instance ... if you had 
+  //int *@aqual(`q) foo(int *@aqual(`q) : ALIASABLE >= `q)
+  //int *@aqual(UNIQUE) a;
+  //a = foo(a); ??? what does this mean? so ... if the qual var is explicitly bound, don't allow alias coercion
+  return 0;
+}
+
+//separate control flow failures

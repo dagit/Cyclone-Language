@@ -331,6 +331,23 @@ static void unify_it(type_t t1, type_t t2) {
     // we can constrain the Evar to be equal to t2 only when the kind of
     // the evar is greater than or equal to the kind of t2 
     if (Kinds::kind_leq(kind2,kind1->v)) {
+      // check the aliasability qualifier if t2 is a pointer
+      switch(t2) {
+      case &PointerType(PtrInfo(_,_,PtrAtts(_,_,_,_,_,_,aq))):
+	//hack for the default aliasability aquals(`a::B) in function types is ALIASABLE
+	//need to fix this for aggregates where default aliasability of aquals(`a::B) is RESTRICTED
+	_ bnd = al_qual_type;
+	switch(kind1->v->aliasqual) {
+	case Unique: bnd = un_qual_type; break;
+	case Top: bnd = rtd_qual_type; break;
+	default: break;
+	}
+	if(!Tcutil::alias_qual_subtype(aq, bnd))
+	  fail_because("(aliasing qualifiers are incompatible)");
+	break;
+      default:
+	break;
+      }
       *ref1_ref = t2;
       return;
     } 
@@ -363,6 +380,45 @@ static void unify_it(type_t t1, type_t t2) {
       fail_because("effects don't unify");
     return;
 
+  case $(&AppType(&AqualConstCon(aqv1), _), &AppType(&AqualConstCon(aqv2), _)) : //case 1
+    if(aqv1 != aqv2) {
+      ts_failure = $(t1,t2);
+      fail_because("(different alias qualifiers)");
+    }
+    break;
+  case $(&AppType(&AqualVarCon, &List{&VarType(...), _}),  &AppType(&AqualConstCon(_),_)):     //case 2
+  case $(&AppType(&AqualConstCon(_),_), &AppType(&AqualVarCon, &List{&VarType(...), _})): //2'
+    fail_because("(abstracted type variable doesn't unify with constant)");
+  case $(&AppType(&AqualConstCon(_),_), &AppType(&AqualVarCon, &List{&Evar(...), _})): //3'
+    unify_it(t2, t1);
+    break;
+  case $(&AppType(&AqualVarCon, &List{&Evar(k,*ref, ...), bnd}), &AppType(&AqualConstCon(aqv),_)): //case 3
+    if(!Kinds::kind_eq(k->v, &Kinds::aqk))
+      fail_because("(incompatible kind)");
+    *ref = t1; //bounds check done externally in the case of fncall_e, or aggregate_e
+    break;
+  case $(&AppType(&AqualVarCon, &List{&VarType(tv2),_}), &AppType(&AqualVarCon, &List{&VarType(tv1),_})): //case 4
+    if (tv2->identity != tv1->identity) //this is the case of existential pattern matching, function return, ...
+      fail_because("(variable types are not the same)");
+    break;
+  case $(&AppType(&AqualVarCon, &List{&VarType(...),_}), &AppType(&AqualVarCon, &List{&Evar(...), _})): //5'
+    unify_it(t2, t1);
+    break;
+  case $(&AppType(&AqualVarCon, &List{&Evar(k, *ref, _, s2_opt), _}), &AppType(&AqualVarCon, &List{&VarType(tv),bnd}))://case 5
+    //check that tv is legal in the evar's environment
+    occurs(t1, heap_region, s2_opt->v, t2);
+    //check that kinds are compatible
+    if(!Kinds::kind_eq(k->v, Tcutil::type_kind(t1)))
+      fail_because("(incompatible kinds");
+    *ref = t1;//bounds checking for fncall_e, aggregate_e done externally
+    break;
+  case $(&AppType(&AqualVarCon, &List{&Evar(k2,_,id2,s2opt),_}), &AppType(&AqualVarCon, &List{&Evar(k1,_,id1,s1opt),_}))://case 6
+    if(id1 != id2) {      //need to check s2opt and s1opt
+      if(!Kinds::kind_eq(k2->v, k1->v)) //force kinds to be the *same*
+	fail_because("(incompatible kinds)");
+      //no point in constraining the evars
+    }
+    break;
   case $(&AppType(c1,ts1),&AppType(c2,ts2)):
     if (Tcutil::tycon_cmp(c1,c2) != 0) 
       fail_because("different type constructors");
@@ -375,11 +431,13 @@ static void unify_it(type_t t1, type_t t2) {
       fail_because("variable types are not the same");
     return;
 
-  case $(&PointerType(PtrInfo(t2a,tqual2a,PtrAtts(rgn2,null2a,b2,zt2,_,rel2))),
-         &PointerType(PtrInfo(t1a,tqual1a,PtrAtts(rgn1,null1a,b1,zt1,_,rel1)))):
+  case $(&PointerType(PtrInfo(t2a,tqual2a,PtrAtts(rgn2,null2a,b2,zt2,_,rel2,aq2))),
+         &PointerType(PtrInfo(t1a,tqual1a,PtrAtts(rgn1,null1a,b1,zt1,_,rel1,aq1)))):
     unify_it(t1a,t2a);
     unify_it(rgn2,rgn1); // the whole reason regions are "types"
     let orig_failure = failure_reason;
+    unify_it(aq2, aq1);
+
     if (!unify(zt1,zt2)) {
       ts_failure = $(t1,t2);
       fail_because("not both zero terminated");
@@ -419,8 +477,8 @@ static void unify_it(type_t t1, type_t t2) {
       fail_because("different array sizes");
     return;
 
-  case $(&FnType(FnInfo{tvs2,eff2,rt_tq2,rt2,args2,c_vararg2,cyc_vararg2,rpo2,atts2,req2,req_relns2,ens2,ens_relns2,argvds2,return_value2}),
-         &FnType(FnInfo{tvs1,eff1,rt_tq1,rt1,args1,c_vararg1,cyc_vararg1,rpo1,atts1,req1,req_relns1,ens1,ens_relns1,argvds1,return_value1})):
+  case $(&FnType(FnInfo{tvs2,eff2,rt_tq2,rt2,args2,c_vararg2,cyc_vararg2,rpo2,qb2,atts2,req2,req_relns2,ens2,ens_relns2,argvds2,return_value2}),
+         &FnType(FnInfo{tvs1,eff1,rt_tq1,rt1,args1,c_vararg1,cyc_vararg1,rpo1,qb1,atts1,req1,req_relns1,ens1,ens_relns1,argvds1,return_value1})):
     { region rgn; 
     list_t<$(tvar_t,type_t)@`rgn,`rgn> inst = NULL;
     while (tvs1 != NULL) {
@@ -443,11 +501,11 @@ static void unify_it(type_t t1, type_t t2) {
       fail_because("second function type has too many type variables");
     if (inst != NULL) {
       unify_it(new FnType(FnInfo{NULL,eff1,rt_tq1,rt1,args1,c_vararg1,
-				   cyc_vararg1,rpo1,atts1,req1,req_relns1,ens1,
+				   cyc_vararg1,rpo1,qb1,atts1,req1,req_relns1,ens1,
                                    ens_relns1,argvds1,return_value1}),
 	       Tcutil::rsubstitute(rgn, inst,
 				   new FnType(FnInfo{NULL,eff2,rt_tq2,rt2,args2,
-						       c_vararg2,cyc_vararg2,rpo2,
+						       c_vararg2,cyc_vararg2,rpo2,qb2,
 						       atts2,req2,req_relns2,
 						       ens2,ens_relns2,argvds2,return_value2})));
       return;

@@ -172,7 +172,7 @@ static tcpat_result_t combine_results(tcpat_result_t res1, tcpat_result_t res2){
 // Promote an array, using an evar for the region if necessary.
 static type_t pat_promote_array(tenv_t te, type_t t, type_opt_t rgn_opt) {
   return is_array_type(t) ?
-    promote_array(t, (rgn_opt == NULL) ? new_evar(&Kinds::rko,new Opt(lookup_type_vars(te))) : rgn_opt,false) : t;
+    promote_array(t, (rgn_opt == NULL) ? new_evar(&Kinds::rko,new Opt(lookup_type_vars(te))) : rgn_opt,al_qual_type, false) : t;
 }
 
 #define DL 0
@@ -336,7 +336,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
                                    empty_tqual(0)),
                                   PtrAtts(ptr_rgn, any_bool(lookup_type_vars(te)),
                                           bounds_one(), false_type,
-                                          NULL, any_bool(lookup_type_vars(te)))));
+                                          NULL, any_bool(lookup_type_vars(te)), al_qual_type)));
       break;
     default:
 DONT_PROMOTE:
@@ -454,8 +454,8 @@ DONT_PROMOTE:
       let all_typs   = List::map(snd,all_inst);
       let exist_typs = List::map(snd,exist_inst);
       let inst       = List::rappend(rgn,all_inst,exist_inst);
-
-      if(exist_ts != NULL || ad->impl->rgn_po != NULL) {
+      
+      if(exist_ts != NULL || ad->impl->rgn_po != NULL) { //how does qual_bnd get handled here?
 	if(res.tvars_and_bounds_opt==NULL)
 	  res.tvars_and_bounds_opt = new $(NULL,NULL);
 	(*res.tvars_and_bounds_opt)[0] = 
@@ -555,7 +555,7 @@ DONT_PROMOTE:
 tcpat_result_t tcPat(tenv_t te, pat_t  p, type_t @ topt,
 		     exp_opt_t pat_var_exp) {
   let ans = tcPatRec(te,p,topt,NULL,false,pat_var_exp);
-  // caller will check tvar uniqueness when adding to environment
+  // caller will check tvar uniqueness when adding to environment 
   let $(vs1,_) = List::split(ans.patvars);
   let vs = NULL;
   for (_ x = vs1; x != NULL; x=x->tl)
@@ -587,7 +587,8 @@ static bool try_alias_coerce(tenv_t tenv, type_t old_type, type_t new_type,
                                                pnew.ptr_atts.bounds, 
                                                pnew.ptr_atts.zero_term, 
                                                pold.ptr_atts.ptrloc,
-				               pnew.ptr_atts.autoreleased}});
+				               pnew.ptr_atts.autoreleased,
+					       pold.ptr_atts.aqual}});
     return (subtype(curr_rgnpo(tenv), assump, ptry, new_type) && 
             coerce_assign(curr_rgnpo(tenv), initializer, ptry));
   default: return false;
@@ -597,10 +598,26 @@ static bool try_alias_coerce(tenv_t tenv, type_t old_type, type_t new_type,
 // we're aliasing an expression of type old_type, temporarily
 // assigning it the type new_type where some occurrences of
 // unique regions are replaced with tv.
+// We also replace any UNIQUE alias qualifier with ALIASABLE
 static void check_alias_coercion(tenv_t tenv, seg_t loc, type_t old_type, 
                                  tvar_t tv, type_t new_type, 
                                  exp_t initializer) {
   list_t<$(type_t,type_t)@> assump = new List{new $(unique_rgn_type,new VarType(tv)), NULL};
+  switch $(compress(old_type),compress(new_type)) {
+    case $(&PointerType(PtrInfo(_, _, PtrAtts(_,_,_,_,_,_,aq_old))),
+	   &PointerType(PtrInfo(_, _, PtrAtts(_,_,_,_,_,_,*aq_new)))):
+      switch(*aq_new) {     
+      case &AppType(&AqualVarCon, &List{&Evar(...), bnd}):
+	*aq_new = al_qual_type;
+	break;
+      default:
+	//user specified some qualifier ... don't override
+	break;
+      }
+    break;
+  default: Warn::err2(loc,"alias requires pointer type"); break;
+  }
+  
   if (subtype(curr_rgnpo(tenv), assump, old_type, new_type) 
       //JGM: the following line would be valid if we could somehow
       //get the coercion applied to the right expression instead of

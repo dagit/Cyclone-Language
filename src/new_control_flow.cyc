@@ -573,7 +573,7 @@ static $(flow_t,absRval_t) anal_derefR(analenv_t env, flow_t inflow,
                                        exp_opt_t index) {
 
   switch(compress((type_t)e->topt)) {
-  case &PointerType(PtrInfo(elttype,_,PtrAtts(_,_,bd,_,_,_))):
+  case &PointerType(PtrInfo(elttype,_,PtrAtts(_,_,bd,_,_,_,_))):
     switch(f) {
     case {.BottomFL = _}:
       return $(f,typ_to_absrval(env->fenv,elttype,false,env->fenv->unknown_all));
@@ -1371,17 +1371,30 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
     DEBUG_PRINT_F(print_flow,outflow);
     return $(outflow,fenv->unknown_all);
 
-  case &New_e(eopt,e2):
+  case &New_e(eopt,e2,qopt):
     flow_t    outflow;
     absRval_t place_val;
-    if(eopt!=NULL) {
-      let $(f,rvals) = anal_Rexps(env,inflow,list((exp_t)eopt,e2),true,true);
-      outflow   = f;
-      place_val = rvals->tl->hd;
-    } else {
+    switch($(eopt, qopt)) {
+    case $(NULL, NULL):
       let $(f,r) = anal_Rexp(env,true,inflow,e2,local_alias);
       outflow   = f;
       place_val = r;
+      break;
+    case $(NULL, q):
+      let $(f,rvals) = anal_Rexps(env,inflow,list((exp_t)qopt,e2),true,true);
+      outflow   = f;
+      place_val = rvals->tl->hd;
+      break;
+    case $(r, NULL):
+      let $(f,rvals) = anal_Rexps(env,inflow,list((exp_t)eopt,e2),true,true);
+      outflow   = f;
+      place_val = rvals->tl->hd;
+      break;
+    default:
+      let $(f,rvals) = anal_Rexps(env,inflow,list((exp_t)eopt,(exp_t)qopt,e2),true,true);
+      outflow   = f;
+      place_val = rvals->tl->tl->hd;
+      break;
     }
     // If this is a unique pointer, no need to create a place for it
     if (Tcutil::is_noalias_pointer((type_t)e->topt,true)) {
@@ -1702,7 +1715,7 @@ static $(flow_t,absLval_t) anal_derefL(analenv_t env,
 //   DEBUG_PRINT("In anal_derefL for %s\n",exp2string(e));
   let fenv = env->fenv;
   switch(compress((type_t)e->topt)) {
-  case &PointerType(PtrInfo{_,_,PtrAtts(_,_,bd,_,_,_)}):
+  case &PointerType(PtrInfo{_,_,PtrAtts(_,_,bd,_,_,_,_)}):
     switch(f) {
     case {.BottomFL = _}: return $(f,UnknownL());
     case {.ReachableFL = $(outdict,relns)}:

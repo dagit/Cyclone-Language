@@ -392,6 +392,17 @@ static void dumpeff(type_t t) {
     group(dumprgn,rgions,"{","}",",");
 }
 
+static void dump_aqual_val(alias_qual_val_t aqv) {
+  switch(aqv) {
+  case Aliasable_qual: dump("ALIASABLE");break;
+  case Unique_qual: dump("UNIQUE");break;
+  case Refcnt_qual: dump("REFCNT");break;
+  case DynamicTrk_qual: dump("DYNTRK");break;
+  case Restricted_qual: dump("RESTRICTED");break;
+  default: break;
+  }
+}
+
 // Print a normalized typ to a doc
 static void dumpntyp(type_t t) {
   switch (t) {
@@ -483,6 +494,8 @@ static void dumpntyp(type_t t) {
     case &FalseCon:  dump("@false"); return;
     case &ThinCon:   dump("@thin");  return;
     case &FatCon:    dump("@fat");   return;
+    case &AqualConstCon(v): dump_aqual_val(v); return;
+    case &AqualsCon: dump("aquals(");dumptyp(ts->hd);dump(")");return;
     default: Warn::impos2("bad type constructor");
     }
   }
@@ -500,9 +513,16 @@ static void dump_rgncmp($(type_t,type_t)@ cmp) {
 static void dump_rgnpo(list_t<$(type_t,type_t)@> rgn_po) {
   dump_sep(dump_rgncmp,rgn_po,",");
 }
+static void dump_qb_elt($(type_t, type_t)@ q) {
+  dumptyp((*q)[1]);dump(">=");dumptyp((*q)[0]);
+}
+static void dump_qualbnd(list_t<$(type_t,type_t)@> qual_bnd) {
+  dump_sep(dump_qb_elt,qual_bnd,",");
+}
 static void dumpfunargs(list_t<$(var_opt_t,tqual_t,type_t)@> args,
 			bool c_varargs, vararg_info_t *cyc_varargs, 
 			type_opt_t effopt, list_t<$(type_t,type_t)@> rgn_po,
+			list_t<$(type_t,type_t)@> qual_bnd,
 			exp_opt_t req, exp_opt_t ens) {
   if(args == NULL && !c_varargs && cyc_varargs == NULL && 
      effopt == NULL && rgn_po == NULL) {
@@ -521,6 +541,10 @@ static void dumpfunargs(list_t<$(var_opt_t,tqual_t,type_t)@> args,
     }
     if (rgn_po != NULL) {
       dump_char(':'); dump_rgnpo(rgn_po);
+    }
+    if(qual_bnd != NULL) {
+      let sep = (rgn_po == NULL ? ':' : ',');
+      dump_char(sep); dump_qualbnd(qual_bnd);
     }
     dump_char(')');
   }
@@ -690,9 +714,22 @@ static void dumpexp_prec(int inprec, exp_t e) {
 
   case &Address_e(e1):   dump_char('&');   dumpexp_prec(myprec,e1);     break;
   case &Deref_e(e1):     dump_char('*');   dumpexp_prec(myprec,e1);     break;
-  case &New_e(ropt,e1):  
+  case &New_e(ropt,e1,qual):  
     // FIX: use ropt!
-    dump("new");      dumpexp_prec(myprec,e1);     break;
+    if(ropt) {
+      dump("rnew(");dumpexp_prec(140, ropt);
+      if(qual) {
+	dump_char(',');dumpexp_prec(140, qual);
+      }
+      dump_char(')');
+    }
+    else {
+      dump("new");      
+      if(qual) {
+	dump_char('(');dumpexp_prec(140, qual);dump_char(')');
+      }
+    }
+    dumpexp_prec(myprec,e1);     break;
   case &Sizeoftype_e(t): dump("sizeof(");  dumptyp(t);  dump_char(')'); break;
   case &Sizeofexp_e(e1): dump("sizeof(");  dumpexp(e1); dump_char(')'); break;
   case &Valueof_e(t):    dump("valueof("); dumptyp(t);  dump_char(')'); break;
@@ -1140,6 +1177,10 @@ static void dump_aggrdecl(aggrdecl_t ad) {
     if(ad->impl->rgn_po != NULL) {
       dump_char(':'); dump_rgnpo(ad->impl->rgn_po);
     }
+    if(ad->impl->qual_bnd != NULL) {
+      let sep = (ad->impl->rgn_po == NULL ? ':' : ',');
+      dump_char(sep); dump_qualbnd(ad->impl->qual_bnd);
+    }
     dumpaggrfields(ad->impl->fields);
     dump_char('}');
     dumpatts(ad->attributes);
@@ -1278,7 +1319,7 @@ static void dumptms(bool is_char_ptr, list_t<type_modifier_t> tms,
   switch(tms->hd) {
     // FIX: doesn't invert zeroterm default when elt type is char!! (never did)
     // FIX? What about attributes that we parse before tq2??
-  case &Pointer_mod(PtrAtts(rgn,nullable,bd,zt,_,rel),tq2):
+  case &Pointer_mod(PtrAtts(rgn,nullable,bd,zt,_,rel,aq),tq2):
     switch(compress(bd)) {
     case &AppType(&FatCon,_): dump_char('?'); break;
     case &AppType(&ThinCon,&List{&ValueofType(e),_}):
@@ -1286,6 +1327,17 @@ static void dumptms(bool is_char_ptr, list_t<type_modifier_t> tms,
     default: 
       dump_char(type2bool(true,nullable)? '*' : '@');
     }
+    if(!qvar_to_Cids)
+      switch(aq) {
+      case &AppType(&AqualConstCon(aqv), _): 
+	dump("@aqual(");dump_aqual_val(aqv);dump(")");break;
+	break;
+      case &AppType(&AqualVarCon, tv):
+	dump("@aqual(");dumpntyp(tv->hd);dump(")");
+	break;
+      default:
+	Warn::impos2("unexpected alias qualifier", aq);
+      }
     if(!qvar_to_Cids && !is_char_ptr && type2bool(false,zt)) dump("@zeroterm");
     if(!qvar_to_Cids && is_char_ptr && !type2bool(false,zt)) dump("@nozeroterm");
     if(!qvar_to_Cids && type2bool(false,rel)) dump("@autoreleased");
@@ -1323,8 +1375,8 @@ static void dumptms(bool is_char_ptr, list_t<type_modifier_t> tms,
       dump_char('['); dumpexp(e); dump_char(']'); 
       if (type2bool(false,zeroterm)) dump("@zeroterm");
       break;
-    case &Function_mod(&WithTypes(args,c_varargs,cyc_varargs,effopt,rgn_po,req,ens)):
-      dumpfunargs(args,c_varargs,cyc_varargs,effopt,rgn_po,req,ens); break;
+    case &Function_mod(&WithTypes(args,c_varargs,cyc_varargs,effopt,rgn_po,qb,req,ens)):
+      dumpfunargs(args,c_varargs,cyc_varargs,effopt,rgn_po,qb,req,ens); break;
     case &Function_mod(&NoTypes(sl,_)):
       group(dump_str,sl,"(",")",","); break;
     case &TypeParams_mod(ts,_,print_kinds): 

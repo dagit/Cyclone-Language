@@ -63,7 +63,8 @@ void check_consume(seg_t loc, type_t t, exp_t e) {
 #endif
 }
 
-ptr_info_t fresh_pointer_type(tenv_t te) {
+
+ptr_info_t fresh_pointer_type_with_aqual(tenv_t te, aqualtype_t aq) {
   let tenv_tvs = lookup_type_vars(te);
   let t2  = new_evar(&Kinds::tako,new Opt(tenv_tvs));
   let rt  = new_evar(&Kinds::trko,new Opt(tenv_tvs));
@@ -71,7 +72,13 @@ ptr_info_t fresh_pointer_type(tenv_t te) {
   let b   = any_bounds(tenv_tvs);
   let zt  = any_bool(tenv_tvs);
   let rel = any_bool(tenv_tvs);
-  return PtrInfo{t2,empty_tqual(0),PtrAtts(rt,nbl,b,zt,NULL,rel)};
+  return PtrInfo{t2,empty_tqual(0),PtrAtts(rt,nbl,b,zt,NULL,rel,aq)};
+}
+
+ptr_info_t fresh_pointer_type(tenv_t te) {
+  let tenv_tvs = lookup_type_vars(te);
+  return fresh_pointer_type_with_aqual(te, aqual_var_type(new_evar(&Kinds::aqko, new Opt(tenv_tvs)),
+							  rtd_qual_type));
 }
 
 static
@@ -219,7 +226,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
     // The default is to treat a string as if it's statically heap
     // allocated and return a pointer to that string.  However, if the
     // string is used as an initializer, then we should return an array type.
-    let t = atb_type(string_elt_typ,heap_rgn_type,const_tqual(0),
+    let t = atb_type(string_elt_typ,heap_rgn_type,al_qual_type,const_tqual(0),
 		     thin_bounds_exp(elen),true_type,false_type);
     if(topt == NULL)
       return t;
@@ -381,7 +388,7 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
   type_t t1 = compress((type_t)e1->topt);
   type_t t2 = compress((type_t)e2->topt);
   switch (t1) {
-  case &PointerType(PtrInfo(et,tq,PtrAtts(r,n,b,zt,_,rel))):
+  case &PointerType(PtrInfo(et,tq,PtrAtts(r,n,b,zt,_,rel,aq))):
     if (!Kinds::kind_leq(type_kind(et),&Kinds::tmk))
       Warn::err2(e1->loc,"can't do arithmetic on abstract pointer type");
     if (is_noalias_pointer(t1,true))
@@ -406,7 +413,7 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
     // is coerce e1 to a ? type.
     let new_t1 = new PointerType(PtrInfo(et,tq,PtrAtts(r,true_type,
 						       fat_bound_type,zt,
-						       NULL,rel)));
+						       NULL,rel,aq)));
     unchecked_cast(e1, new_t1, Other_coercion);
     return new_t1;
   default: return tcArithBinop(te, e1, e2, is_numeric);
@@ -414,7 +421,7 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
 }
 static booltype_t relqual(type_t t) {
   switch (t) {
-  case &PointerType(PtrInfo(_,_,PtrAtts(_,_,_,_,_,rel))): return rel;
+  case &PointerType(PtrInfo(_,_,PtrAtts(_,_,_,_,_,rel,_))): return rel;
   default: return false_type;
   }
 }
@@ -867,7 +874,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
   // right arity but there may be coercions involved with the arguments
   // and the function might actually be a vararg.
   switch (t) {
-  case &PointerType(PtrInfo(t1,tq,PtrAtts(rgn,x,b,zt,_,_))):
+  case &PointerType(PtrInfo(t1,tq,PtrAtts(rgn,x,b,zt,_,_,_))):
     // Note: rgn is irrelevant -- all code is in the heap.
     // Nonetheless, perhaps we cast to another region, so check
     // the capability just for fun.
@@ -879,7 +886,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
     t1 = CurRgn::instantiate(compress(t1),Tcenv::curr_lifo_rgn(te));
     switch (t1) {
       case &FnType(FnInfo{tvars,eff,res_tq,res_typ,args_info,c_vararg,
-                          cyc_vararg,rgn_po,atts,req,req_relns,ens,ens_relns,
+                          cyc_vararg,rgn_po,qb,atts,req,req_relns,ens,ens_relns,
                           ret_var,_}):
 	if(tvars != NULL || rgn_po != NULL)
 	  Warn::err(e->loc,"function should have been instantiated prior to use -- probably a compiler bug");
@@ -1017,9 +1024,26 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
 	  }
 	}
       }
+      //check qualifier bounds are satisfied  -- 
+      //make sure these are present even for the default cases: see check_valid_type
+      for(_ qbit =qb; qbit != NULL; qbit = qbit->tl) {
+	let &$(qv,bnd) = qbit->hd;
+	let qvc = compress(qv);
+	if(qvc == qv) {
+	  switch(qv) {
+	  case &Evar(_, *ref, _, _): //still unconstrained ...force it to the upper bound
+	    *ref = bnd;
+	    break;
+	  default:
+	    Warn::impos2("Unconstrained typevar is not an evar");
+	  }
+	}
+	else if(!check_aqual_bounds(qvc, bnd)) 
+	  Warn::err2(loc, "alias qualifier bounds violated: ", qvc, " <> ", bnd); 
+      }
       if (*alias_arg_exps == NULL) {
 	// JGM: we can't do these checks when we're going to re-type
-	// something due to insertion of alias's because they're likely
+ 	// something due to insertion of alias's because they're likely
 	// to be delayed and later cause a failure where there should be
 	// none.  Note, however, this depends crucially on the caller
 	// of TcFnCall to check that alias_arg_exps is not NULL and
@@ -1123,7 +1147,7 @@ static type_t tcCast(tenv_t te, seg_t loc, type_t * topt, type_t t, exp_t e,
   // lose information.
   switch ($(e->r, compress(t))) {
   case $(&Malloc_e(MallocInfo{_,_,_,_,fat_result,_}),
-         &PointerType(PtrInfo{_,_,PtrAtts{_,nbl,bds,zt,_,rel}})):
+         &PointerType(PtrInfo{_,_,PtrAtts{_,nbl,bds,zt,_,rel,_}})):
     // malloc must be fat and t must be a NOZEROTERM, *{1} type
     if (fat_result && !force_type2bool(false,zt) && force_type2bool(false,nbl)
 	&& !force_type2bool(false,rel)){
@@ -1330,7 +1354,7 @@ static type_t tcDeref(tenv_t te, seg_t loc, type_t * topt, exp_t e) {
   default: break;
   }
   switch(t) {
-  case &PointerType(PtrInfo(t2,_,PtrAtts(rt,_,b,zt,_,_))):
+  case &PointerType(PtrInfo(t2,_,PtrAtts(rt,_,b,zt,_,_,_))):
     check_rgn_accessible(te,loc,rt);
     check_nonzero_bound(loc, b);
     if (!Kinds::kind_leq(type_kind(t2),&Kinds::tmk) && !abstract_val_ok(te))
@@ -1429,7 +1453,7 @@ static type_t tcSubscript(tenv_t te_orig, seg_t loc, type_t * topt,
   // the subscript could be on a tuple or a pointer -- any arrays
   // should've been coerced to pointers
   switch (t1) {
-  case &PointerType(PtrInfo(t,tq,PtrAtts(rt,_,b,zt,_,_))):
+  case &PointerType(PtrInfo(t,tq,PtrAtts(rt,_,b,zt,_,_,_))):
     // for zero-terminated, thin pointers we warn when doing subscripting
     // to remind the user that this is an expensive operation.
     if (force_type2bool(false,zt)) {
@@ -1757,6 +1781,11 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
   let all_typs   = List::map(snd,all_inst);
   let exist_typs = List::map(snd,exist_inst);
   let inst       = List::append(all_inst,exist_inst);
+  let qb_inst = NULL;
+  for(let qbit=ad->impl->qual_bnd; qbit != NULL; qbit = qbit->tl)
+    qb_inst = new List(new $(substitute(inst,(*qbit->hd)[0]),
+			     substitute(inst,(*qbit->hd)[1])),
+		       qb_inst);
   type_t res_typ;
   // this will instantiate the struct if we have type information in topt
   // unfortunately, I think it allows topt to cause failure.
@@ -1821,6 +1850,23 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
  			rpo_inst);
   rpo_inst = imp_rev(rpo_inst);
   Tcenv::check_rgn_partial_order(te2,loc,rpo_inst);
+  //check qualifier bounds are obeyed
+  for(_ qb=qb_inst; qb != NULL; qb = qb->tl) {
+    let &$(qv,bnd) = qb->hd;
+    let qvc = compress(qv);
+    if(qvc == qv) {
+      switch(qv) {
+      case &Evar(_, *ref, _, _): //still unconstrained ...force it to the upper bound
+	*ref = bnd;
+	break;
+      default:
+	Warn::impos2("Unconstrained typevar is not an evar");
+      }
+    }
+    else if(!check_aqual_bounds(qvc, bnd))
+      Warn::err2(loc, "alias qualifier bounds violated: ", qvc, " <> ", bnd);
+  }
+  
   return res_typ;
 }
 
@@ -2040,7 +2086,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt,
   let zero_term = false_type;
   if(topt != NULL)
     switch (compress(*topt)) {
-    case &PointerType(PtrInfo(_,_,PtrAtts(_,n,b,zt,_,rel))):
+    case &PointerType(PtrInfo(_,_,PtrAtts(_,n,b,zt,_,rel,_))):
       zero_term = zt;
       if(force_type2bool(false,rel))
         Warn::err2(loc,"cannot malloc() an autoreleased pointer");
@@ -2060,7 +2106,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt,
         let is_constant = Evexp::c_can_eval(num_elts);
         if (is_constant && Evexp::same_uint_const_exp(upper_exp,num_elts)) {
           *is_fat = false;
-          return atb_type(elt_type,rgn,empty_tqual(0),b,zero_term,false_type);
+          return atb_type(elt_type,rgn,al_qual_type,empty_tqual(0),b,zero_term,false_type);
         }
         switch (compress((type_t)num_elts->topt)) {
         case &AppType(&TagCon,&List(tagtyp,_)):
@@ -2068,7 +2114,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt,
                                     No_coercion,0);
           if (Evexp::same_uint_const_exp(tagtyp_exp,upper_exp)) {
             *is_fat = false;
-            return atb_type(elt_type,rgn,empty_tqual(0),b,zero_term,false_type);
+            return atb_type(elt_type,rgn,al_qual_type,empty_tqual(0),b,zero_term,false_type);
           }
           break;
         default: break;
@@ -2152,8 +2198,9 @@ static type_t tcAssert(tenv_t te, seg_t loc, exp_t e) {
 
 // e has the form new e1
 static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
-                    exp_opt_t @rgn_handle, exp_t e, exp_t e1) {
-  // by default, we allocate heap pointers; this is for making inference
+                    exp_opt_t @rgn_handle, exp_opt_t @qual_hndl, 
+		    exp_t e, exp_t e1) {
+  // by default, we allocate aliasable heap pointers; this is for making inference
   // simpler.  If you want a unique pointer, do rnew (Core::unique_region)
   type_t rgn = heap_rgn_type;
   te = clear_abstract_val_ok(set_new_status(InNew,te));
@@ -2183,7 +2230,36 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
 	*rgn_handle = uniquergn_exp();
     }
   }
-    
+
+  aqualtype_t aqual=al_qual_type;
+  if(*qual_hndl != NULL) {
+    //type should be AppType(AqualHandleCon, AppType(AqualConstCon(aqv)))
+    //constrain as AppType(AqualHandleCon, Evar(`q::Q))
+    type_t expected_type = //?what's the point of expected type ... ignored by tcVar
+      aqual_handle_type(new_evar(&Kinds::aqko, lookup_opt_type_vars(te)));
+    type_t qhndl_type = tcExp(te, &expected_type, (exp_t)*qual_hndl);
+    bool ok = false;
+    switch(qhndl_type) {//ensure expectation
+    case &AppType(&AqualHandleCon, &List{&AppType(&AqualConstCon(aqv), NULL),_}): //ok
+      switch(aqv) {
+      case Aliasable_qual:  ok=true;break;
+      case Unique_qual:     aqual = un_qual_type; ok=true;break;
+      case Refcnt_qual:     aqual = rc_qual_type; ok=true;break;
+      case DynamicTrk_qual: aqual = dt_qual_type; ok=true;break;
+      case Restricted_qual: aqual = rtd_qual_type; ok=true;break;
+      default: 
+	Warn::impos("Unexpected alias qualifier");
+      }
+      if(ok)
+	break;
+      fallthru;
+    default:
+      Warn::err2((*qual_hndl)->loc,"expecting qual_t type but found ",
+		 qhndl_type);
+      break;
+    }
+  }
+  
   switch (e1->r) {
   case &Comprehension_e(...):
   case &ComprehensionNoinit_e(...):
@@ -2192,7 +2268,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     type_t res_typ = tcExpNoPromote(te,topt,e1);
     if (!is_array_type(res_typ))
       Warn::impos2("tcNew: comprehension returned non-array type");
-    res_typ = promote_array(res_typ,rgn,true);
+    res_typ = promote_array(res_typ,rgn,aqual,true);
     if (topt != NULL)
       if (!Unify::unify(*topt,res_typ) 
 	  && silent_castable(curr_rgnpo(te),loc,res_typ,*topt)) {
@@ -2209,7 +2285,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     bool zero_term = false;
     if (topt != NULL)
       switch (compress(*topt)) {
-      case &PointerType(PtrInfo(*elt_typ,_,PtrAtts(_,_,_,zt,_,_))):
+      case &PointerType(PtrInfo(*elt_typ,_,PtrAtts(_,_,_,zt,_,_,_))):
 	// tcArray only needs the element type, so the bound is bogus
 	elt_typ_opt = elt_typ;
 	zero_term = force_type2bool(false,zt);
@@ -2220,7 +2296,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     e1->topt = res_typ;
     if (!is_array_type(res_typ))
       Warn::impos2("tcExpNoPromote on Array_e returned non-array type");
-    res_typ = promote_array(res_typ,rgn,false);
+    res_typ = promote_array(res_typ,rgn,aqual,false);
     if (topt != NULL)
       // try unifying res_typ and topt -- if that fails, then see if we
       // can cast res_typ to topt, and insert the cast so that the code
@@ -2236,17 +2312,17 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     // here I'm going to guess that the user wants a char *@ instead of
     // a char @{n}@.  They can get the char@{n}@ by using a cast.  This
     // is a total hack...
-    let topt2 = atb_type(char_type, rgn, const_tqual(0),
+    let topt2 = atb_type(char_type, rgn, aqual, const_tqual(0),
 			 fat_bound_type, true_type, false_type);
     let t = tcExp(te,&topt2,e1);
-    return atb_type(t, rgn, empty_tqual(0), 
+    return atb_type(t, rgn, aqual, empty_tqual(0), 
 		    thin_bounds_exp(uint_exp(1,0)), false_type, false_type);
   case &Const_e({.Wstring_c = _}):
     // handled like the String_c case
-    let topt2 = atb_type(wchar_type(), rgn, const_tqual(0),
+    let topt2 = atb_type(wchar_type(), rgn, aqual, const_tqual(0),
 			 fat_bound_type, true_type, false_type);
     let t = tcExp(te,&topt2,e1);
-    return atb_type(t, rgn, empty_tqual(0), 
+    return atb_type(t, rgn, aqual, empty_tqual(0), 
 		    thin_bounds_exp(uint_exp(1,0)), false_type, false_type);
   default:
     // code that's equivalent to "new {e1}" -- i.e., an array of size 1.
@@ -2271,7 +2347,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     type_t telt = tcExp(te,topt2,e1);
     // must prevent copy of unique pointer
     check_consume(e1->loc,telt,e1);
-    let pi = fresh_pointer_type(te);
+    let pi = fresh_pointer_type_with_aqual(te, aqual); //save allocation of new evar
     pi.elt_type = telt;
     pi.ptr_atts.rgn = rgn;
     pi.ptr_atts.bounds = bounds_one();
@@ -2293,7 +2369,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
 type_t tcExp(tenv_t te, type_t * topt, exp_t e) {
   type_t t = tcExpNoPromote(te, topt, e);
   if (is_array_type(t))
-    e->topt = t = promote_array(t,addressof_props(e)[1],false);
+    e->topt = t = promote_array(t,addressof_props(e)[1],al_qual_type,false);
   return t;
 }
 
@@ -2313,7 +2389,7 @@ type_t tcExpInitializer(tenv_t te, type_t * topt, exp_t e) {
   case &Const_e({.String_c = _}): return t;
   default:
     if (is_array_type(t)) 
-      e->topt = t = promote_array(t,addressof_props(e)[1],false);
+      e->topt = t = promote_array(t,addressof_props(e)[1],al_qual_type,false);
     return t;
   }
 }
@@ -2327,6 +2403,7 @@ type_t tcExpInitializer(tenv_t te, type_t * topt, exp_t e) {
 // poly-type, we instantiate the quantifiers.
 static type_t tcExpNoPromote(tenv_t te, type_t * topt, exp_t e) {
   tcExpNoInst(te,topt,e);
+  type_t cached_type = e->topt;
   type_t t = e->topt = compress(pointer_expand((type_t)e->topt,false));
     // see if the user has asked not to implicitly instantiate any quantifiers
   switch (e->r) {
@@ -2340,6 +2417,8 @@ static type_t tcExpNoPromote(tenv_t te, type_t * topt, exp_t e) {
     case &FnType(info):
       let env  = $(lookup_type_vars(te),heap_region);
       let inst = List::map_c(r_make_inst_var,&env,info.tvars);
+      //inst is an assoc-list mapping each tvars in fndecl
+      //to a fresh evars of the same kind1
       let ts = map(snd,inst); // FIX: wasteful allocation
       let inner = copy_exp(e);
       e->r = new Instantiate_e(inner, ts); 
@@ -2456,7 +2535,7 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
   case &Instantiate_e(e2,ts):  t = tcInstantiate(te,loc,topt,e2,ts); break;
   case &Cast_e(t1,e1,_,*c):    t = tcCast(te,loc,topt,t1,e1,c); break;
   case &Address_e(e1):         t = tcAddress(te,loc,e,topt,e1); break;
-  case &New_e(*rgn_handle,e1): t = tcNew(te,loc,topt,rgn_handle,e,e1); break;
+  case &New_e(*rgn_handle,e1,*qual_hndl): t = tcNew(te,loc,topt,rgn_handle,qual_hndl,e,e1); break;
   case &Sizeofexp_e(e1):       fallthru(tcExpNoPromote(te, NULL, e1));
   case &Sizeoftype_e(t1):      t = tcSizeof(te,loc,topt,t1); break;
   case &Offsetof_e(t1,l):      t = tcOffsetof(te,loc,topt,t1,l); break;

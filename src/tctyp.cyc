@@ -39,7 +39,8 @@ namespace Tctyp;
 // bool indicates whether the element should go in an effect
 typedef list_t<$(tvar_t,bool)@> free_tvars_t;
 typedef list_t<$(type_t,bool)@> free_evars_t;
-
+//if true requires the update to be performed on the qual_bnd list -- the bool is not used for now
+typedef list_t<$(type_t,bool)@> free_qualvars_t; 
 // Check-Valid-Type environments
 static struct CVTEnv {
   // passed down:
@@ -47,10 +48,13 @@ static struct CVTEnv {
   Tcenv::tenv_t te;
   list_t<tvar_t> kind_env;  // used to get consistent id's and kinds for tvars
   bool fn_result;           // whether we are in a function result
+  bool def_aliasable;          // whether we are examining some component of a function type
+  bool inst_type_evar;  //evar's appearing in inst types within a function should not be generalized
   bool generalize_evars;    // whether we replace evars with fresh tvars
   // passed up: 
   free_tvars_t free_vars;  // free tvars found in this type
   free_evars_t free_evars; // free evars found in this type
+  free_qualvars_t free_qualvars;
 };
 typedef struct CVTEnv cvtenv_t;
 
@@ -148,6 +152,7 @@ static void check_free_evars(free_evars_t free_evars, type_t in_typ, seg_t loc){
     case &Kind(EffKind,_):      t = empty_effect;    s = "{}";         break;
     case &Kind(BoolKind,_):     t = false_type;      s = "@false";     break;
     case &Kind(PtrBndKind,_):   t = bounds_one();    s = "bounds_one"; break;
+    case &Kind(AqualKind,_):    t = al_qual_type;    s = "aliasable"; break;
     default:
       err2(loc,"hidden type variable ",e," isn't abstracted in type ",in_typ);
       return;
@@ -297,6 +302,8 @@ static cvtenv_t check_type_inst(cvtenv_t env, types_t @ targsp,
 				struct Typedefdecl *td) {
   // *targsp is mutated appropriately for implicit instantiation
   let targs = *targsp;
+  let old_inst_evar = env.inst_type_evar;
+  env.inst_type_evar = env.generalize_evars; //only do this when in a function type 
   for (; targs != NULL && tvs != NULL; targs = targs->tl,tvs = tvs->tl) {
     type_t t = targs->hd;
     tvar_t tv = tvs->hd;
@@ -306,6 +313,10 @@ static cvtenv_t check_type_inst(cvtenv_t env, types_t @ targsp,
     case $(&Unknown_kb(_), &VarType(tv2)):
       env.kind_env  = add_free_tvar(env.loc, env.kind_env, tv2);
       env.free_vars = fast_add_free_tvar_bool(env.free_vars, tv2, true);
+      continue;
+    case $(&Eq_kb(&Kind(AqualKind, _)), &VarType(tv2)): //need to replace this with an AqualVar
+      targs->hd = aqual_var_type(t, al_qual_type);
+      env = i_check_type(env, &Kinds::aqk, targs->hd, true, allow_abs_aggr);
       continue;
     default: break;
     }
@@ -324,6 +335,7 @@ static cvtenv_t check_type_inst(cvtenv_t env, types_t @ targsp,
     env = i_check_type(env,k,e,true,allow_abs_aggr);
   }
   *targsp = imp_append(*targsp,imp_rev(hidden_ts));
+  env.inst_type_evar = old_inst_evar;
   return env;
 }
 
@@ -461,17 +473,34 @@ static cvtenv_t i_check_unary_app(cvtenv_t env, kind_t k, types_t ts,
 
 static cvtenv_t i_check_type_app(cvtenv_t env, kind_t expected_kind, 
 				 tycon_t c, types_t@ targsp,
-				 bool put_in_effect, bool allow_abs_aggr){
+				 bool put_in_effect, bool allow_abs_aggr, type_t apptype){
   let CVTEnv(loc,te,...) = env;
   let ts = *targsp;
   switch (c) {
-  // zero-arity constructors
+    // zero-arity constructors
   case &IntCon(...): case &FloatCon(...): case &VoidCon:
   case &RefCntCon: case &UniqueCon: case &HeapCon:
   case &FalseCon: case &TrueCon: case &FatCon:
   case &BuiltinCon(...): 
     if (ts != NULL) 
       impos2(new AppType(c,ts)," applied to argument(s)");
+    return env;
+  case &AqualConstCon(...):    //RESTRICTED,UNIQUE... what about ensuring expected kind matches
+    if (ts != NULL) 
+      impos2(new AppType(c,ts)," applied to argument(s)");
+    if(expected_kind != &Kinds::aqk)
+      err2(c, " is not of kind: ", expected_kind);
+    return env;
+  case &AqualsCon: //aquals(`a::B)
+    if (ts == NULL || ts->tl != NULL)
+      impos2("aquals expects a single argument");
+    return i_check_type(env, &Kinds::bk, ts->hd,false, false);      
+  case &AqualVarCon:
+    if(length(ts) != 2) 
+      impos2("aquals expects two arguments");
+    env = i_check_type(env, &Kinds::aqk, ts->hd,false, false);
+    env = i_check_type(env, &Kinds::aqk, ts->tl->hd,false, false);
+    env.free_qualvars = new List(new $(apptype, false), env.free_qualvars); //may be constrained later
     return env;
   case &ComplexCon: // the front-end only builds well-formed complex's
     for (; ts != NULL; ts = ts->tl)
@@ -485,10 +514,11 @@ static cvtenv_t i_check_type_app(cvtenv_t env, kind_t expected_kind,
     if (ts != NULL) impos2("enum applied to argument(s)");
     if (*edp == NULL || (*edp)->fields == NULL) {
       try *edp = *Tcenv::lookup_enumdecl(te,loc,n);
-      catch {case &Dict::Absent:
-        Tc::tcEnumdecl(te,loc,new Enumdecl{Extern,n,NULL});
-        *edp = *Tcenv::lookup_enumdecl(te,loc,n);
-        break;
+      catch {
+      case &Dict::Absent:
+	Tc::tcEnumdecl(te,loc,new Enumdecl{Extern,n,NULL});
+	*edp = *Tcenv::lookup_enumdecl(te,loc,n);
+	break;
       }
     }
     return env;
@@ -513,6 +543,8 @@ static cvtenv_t i_check_type_app(cvtenv_t env, kind_t expected_kind,
     return env;
   case &RgnsCon:    return i_check_unary_app(env,&Kinds::tak,ts,true,"regions");
   case &RgnHandleCon: return i_check_unary_app(env,&Kinds::trk,ts,true,"region_t");
+  case &AqualHandleCon: //aqual_t<`q::Q | RES...>; if this contains a tvar it may be bounded
+    return i_check_unary_app(env,&Kinds::aqk,ts,true,"aqual_t");
   case &AccessCon:  return i_check_unary_app(env,&Kinds::trk,ts,true,"access");
   case &TagCon:     return i_check_unary_app(env,&Kinds::ik,ts,false,"tag_t");
   case &ThinCon:    return i_check_unary_app(env,&Kinds::ik,ts,false,"@thin");
@@ -525,6 +557,70 @@ static cvtenv_t i_check_type_app(cvtenv_t env, kind_t expected_kind,
   }
 }
 
+static int tvar_type_cmp(type_t tvt1, type_t tvt2) {
+  switch($(compress(tvt1), compress(tvt2))) {
+  case $(&VarType(tv1), &VarType(tv2)):
+    return tvar_cmp(tv1, tv2);
+  case $(&Evar(k1,_,i1,_), &Evar(k2,_,i2,_)):
+    return (i1 == i2 && Kinds::kind_eq(k1->v, k2->v));
+  case $(&VarType(...), &Evar(...)):
+  case $(&Evar(...), &VarType(...)):    return 0;
+  default:  Warn::impos2("Expect only tvars or evars in qualifier bounds: ", tvt1, ",", tvt2);
+  }
+}
+
+//add case for aquals(`a)
+static bool aqualvar_unconstrained($(type_t, bool)@ t) {
+  switch(compress((*t)[0])) {
+  case &AppType(&AqualConstCon(_), _):
+    return false;
+  case &AppType(&AqualVarCon, ...):
+    return true;
+  default:
+    Warn::impos2("Expect only Aqual types -- got ", t);
+  }
+}
+
+//add qualifier bounds here too, and constrain any free_qualvars in the env to the bound
+static void update_qualifier_bounds(list_t<$(type_t,bool)@, `H> freeqvs, 
+				    list_t<$(type_t, type_t)@, `H> @qb,
+				    type_t def) {
+  freeqvs = List::filter(aqualvar_unconstrained ,freeqvs);
+  for(_ fq = freeqvs; fq != NULL; fq=fq->tl){
+    let &$(t, b) = fq->hd;
+    switch(t) {
+    case &AppType(&AqualVarCon, tv_bnd): {
+      let tv = tv_bnd->hd;
+      if(b) { //newly added tvar for subtyping ... add the bound to the qual_bnd list
+	*qb = new List(new $(tv, tv_bnd->tl->hd), *qb); //constrain it
+      }
+      else {
+	try {
+	  let x_bnd = List::assoc_cmp(tvar_type_cmp, *qb, tv);
+	  //this bound is like a kind -- it gets mutated during unification. 
+	  tv_bnd->tl->hd = x_bnd;//copy_type(x_bnd); 
+	}catch {
+	case &Not_found: //default bound of ALIASABLE is ok
+	  //but add the ALIASABLE bound to the qb list
+	  switch(compress(tv)) { //is tv really unbound?
+	  case &Evar(...):
+	  case &VarType(...):
+	    *qb = new List(new $(tv, def), *qb); //constrain it
+	    tv_bnd->tl->hd = def;
+	    break;
+	  default:
+	    break;
+	  }
+	  break;
+	}
+      }
+      break;
+    }
+    default:
+      Warn::impos("Only AqualVars are added to the list");
+    }
+  }
+}
 
 static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
 			     bool put_in_effect, bool allow_abs_aggr) {
@@ -532,7 +628,7 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
   switch (compress(t)) {
   case &AppType(c,*targsp):
     env = i_check_type_app(env,expected_kind,c,targsp,
-			   put_in_effect,allow_abs_aggr);
+			   put_in_effect,allow_abs_aggr,t);
     break;
   case &Evar(*k,*ref,_,_):
     // if we have some latitude with moving the type var, do it here
@@ -540,14 +636,24 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
 	(Kinds::kind_leq(expected_kind,(*k)->v) 
 	 && !Kinds::kind_leq((*k)->v,expected_kind)))
       *k = Kinds::kind_to_opt(expected_kind);
-    if (env.fn_result && env.generalize_evars &&
-	expected_kind->kind == RgnKind && !te->tempest_generalize) {
-      if (expected_kind->aliasqual == Unique)
-	*ref = unique_rgn_type;
-      else // generalize Top RgnKind evars to be the heap in return values
-	*ref = heap_rgn_type;
-    } else if (env.generalize_evars && expected_kind->kind != BoolKind
-               && expected_kind->kind != PtrBndKind) {
+    if ((env.fn_result && env.generalize_evars)) {
+      if(expected_kind->kind == RgnKind && !te->tempest_generalize) { 
+	if (expected_kind->aliasqual == Unique)
+	  *ref = unique_rgn_type;
+	else // generalize Top RgnKind evars to be the heap in return values
+	  *ref = heap_rgn_type;
+      }
+      else if(expected_kind->kind == AqualKind && !te->tempest_generalize) { 
+	*ref = al_qual_type;
+      }
+    }
+    else if (env.inst_type_evar && 
+	     expected_kind->kind == AqualKind && 
+	     !te->tempest_generalize) { 
+      *ref = al_qual_type;
+    }
+    else if (env.generalize_evars && expected_kind->kind != BoolKind
+	     && expected_kind->kind != PtrBndKind) {
       // generalize evars that aren't bool or ptrbounds.
       let v = new_tvar(new Less_kb(NULL,expected_kind));
       *ref = var_type(v);
@@ -596,7 +702,7 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
     *topt = new new_typ;
     return i_check_type(env,expected_kind,new_typ,put_in_effect,allow_abs_aggr);
 
-  case &PointerType(PtrInfo(t1,*tqp,PtrAtts(rgn_type,nullable,b,zt,_,rel))):
+  case &PointerType(PtrInfo(t1,*tqp,PtrAtts(rgn_type,nullable,b,zt,_,rel,*aq))): //bind free_qualvars for apptype/aqual_t too
     // FIX: check that tqual is valid?
     kind_t rgnk;
     switch (expected_kind->aliasqual) {
@@ -610,7 +716,18 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
     env = i_check_type(env,&Kinds::boolk,  nullable,false,true);
     env = i_check_type(env,&Kinds::ptrbk,  b,       false,allow_abs_aggr);
     env = i_check_type(env,&Kinds::boolk,  rel,     false,true);
+    switch(*aq) {
+    case &AppType(&AqualVarCon, &List(&Evar(...), bnd)): //introduced for unification, need to adjust bound 
+      if(env.def_aliasable) //tl cannot be null
+	*aq = al_qual_type; //bnd->hd = al_qual_type;
+      else 
+	bnd->hd = rtd_qual_type; //equivalent of ::TR kind for omitted regions for unification
+      break;
+    default: //user specified qualifier 
+      break;
+    }
 
+    env = i_check_type(env,&Kinds::aqk,    *aq,     false,true);
     tqp->real_const = extract_const_from_typedef(env.loc,tqp->print_const,t1);
 
     // if zero_term is unconstrained, then set it to false unless
@@ -679,9 +796,10 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
       *eptr = uint_exp(1,0);
     }
     break;
-  case &FnType(FnInfo{*btvs,*eff,*rtq,tr,args,c_vararg,cyc_vararg,rgn_po,atts,req,*req_relns,ens,*ens_relns,_,_}):
+  case &FnType(FnInfo{*btvs,*eff,*rtq,tr,args,c_vararg,cyc_vararg,rgn_po,*qb,atts,req,*req_relns,ens,*ens_relns,_,_}):
     // This is an unusual and complicated case because (a) we may have to
     // bind type variables here, (b) we may have to calculate the effect.
+    // (c) rewrite bounds on qualifiers according to the qual_bnd field
 
     // attributes: check that the attributes are function type attributes
     // and that at most one of {stdcall, cdecl, fastcall} is there.
@@ -727,12 +845,14 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
     }
     // We use a fresh environment here so that we only track the free type
     // vars (and evars) of the function type in case we have to abstract them.
-    _ new_env = CVTEnv{loc,te,env.kind_env,true,env.generalize_evars,NULL,NULL};
+    _ new_env = CVTEnv{loc,te,env.kind_env,true,true,false,env.generalize_evars,NULL,NULL,NULL};
     new_env = i_check_type(new_env,&Kinds::tmk,tr,true,true);
     rtq->real_const = extract_const_from_typedef(loc,rtq->print_const,tr);
     new_env.fn_result = false;
     // results and arguments of functions cannot be abstract mem types
     // FIX?: should check that variables are unique and that tquals are ok
+    //    let old_rac =     new_env.replace_aqual_constants;
+    //    new_env.replace_aqual_constants = true;
     for (_ a = args; a != NULL; a = a->tl) {
       let trip = a->hd;
       let t = (*trip)[2];
@@ -745,7 +865,10 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
 	// create a new region variable for the pointer
 	let ptr_rgn = new_evar(NULL,NULL);
 	new_env = i_check_type(new_env,&Kinds::rk,ptr_rgn,true,true);
-	(*trip)[2] = promote_array(t,ptr_rgn,false);
+	let aqt = aqual_var_type(new_evar(&Kinds::aqko, NULL),
+				 al_qual_type); //force it to be aliasable
+	new_env = i_check_type(new_env,&Kinds::aqk,aqt,true,true);	
+	(*trip)[2] = promote_array(t,ptr_rgn,aqt,false);
       }
     }
     // varargs
@@ -757,7 +880,7 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
       // if inject, then check the type is an appropriate datatype
       if (vi)
 	switch (compress(vt)) {
-	case &PointerType(PtrInfo{et,_,PtrAtts{_,_,bs,zt,_,_}}):
+	case &PointerType(PtrInfo{et,_,PtrAtts{_,_,bs,zt,_,_,_}}):
 	  switch (compress(et)) {
 	  case &AppType(&DatatypeCon(...),_):
 	    if (force_type2bool(false,zt))
@@ -785,7 +908,7 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
 	let $(_,_,t) = *List::nth(args, fmt_desc_arg - 1);
 	//can't use unification because evars aren't properly nailed down yet...
 	switch (compress(t)) {
-	case &PointerType(PtrInfo(et,_,PtrAtts(_,_,b,_,_,_))):
+	case &PointerType(PtrInfo(et,_,PtrAtts(_,_,b,_,_,_,_))):
 	  // FIX:  zero-termination?
 	  if (!is_char_type(et)) 
 	    err2(loc,"format descriptor is not a string");
@@ -828,6 +951,15 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
       new_env = i_check_type(new_env,&Kinds::ek,r1,true,true);
       new_env = i_check_type(new_env,&Kinds::trk,r2,true,true);
     }
+    //check each qualifier bound
+    for (_ qbit = *qb; qbit != NULL; qbit = qbit->tl) {//none of these types are AppType(AqualVarCon, ...), ...
+      let &$(tv,bnd) = qbit->hd;  //...so these are not added in env.free_qualvars
+      new_env = i_check_type(new_env,&Kinds::aqk,bnd,false,false);
+      new_env = i_check_type(new_env,&Kinds::aqk,tv,false,false);
+    }
+    //now update the bound in each AqualVar that appears in the function's type
+    update_qualifier_bounds(new_env.free_qualvars, qb, al_qual_type);
+
     // check the @requires clause -- we build a bogus function environment
     // to make it possible to enter the parameters as variables that can
     // be mentioned in the @requires clause.  
@@ -985,21 +1117,21 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
     typedefdecl_t td;
     try td = Tcenv::lookup_typedefdecl(te,loc,tdn);
     catch { case &Dict::Absent:
-      err2(loc,"unbound typedef name ",tdn);
-      return env;
+	      err2(loc,"unbound typedef name ",tdn);
+	      return env;
     }
-    *tdopt = td;
-    env = check_type_inst(env,targs_ref,td->tvs,
-			  expected_kind,allow_abs_aggr,tdn,td);
-    if (td->defn != NULL) { // don't use zip in case we had too many args
-      list_t<$(tvar_t,type_t)@> inst = NULL;
-      let tvs = td->tvs;
-      let ts = *targs_ref;
-      for(; tvs != NULL; tvs=tvs->tl, ts=ts->tl)
-	inst = new List(new $(tvs->hd,ts->hd),inst);
-      *toptp = substitute(inst,(type_t)td->defn);
-    }
-    break;
+	      *tdopt = td;
+	      env = check_type_inst(env,targs_ref,td->tvs,
+				    expected_kind,allow_abs_aggr,tdn,td);
+	      if (td->defn != NULL) { // don't use zip in case we had too many args
+		list_t<$(tvar_t,type_t)@> inst = NULL;
+		let tvs = td->tvs;
+		let ts = *targs_ref;
+		for(; tvs != NULL; tvs=tvs->tl, ts=ts->tl)
+		  inst = new List(new $(tvs->hd,ts->hd),inst);
+		*toptp = substitute(inst,(type_t)td->defn);
+	      }
+	      break;
   }
   if (!Kinds::kind_leq(type_kind(t), expected_kind))
     err2(loc,"type ",t," has kind ",type_kind(t),
@@ -1049,7 +1181,7 @@ void check_valid_toplevel_type(seg_t loc, Tcenv::tenv_t te, type_t t) {
   kind_t expected_kind = is_function_type(t) ? &Kinds::tak : &Kinds::tmk;
   let te_vars = Tcenv::lookup_type_vars(te);
   let cvt = check_valid_type(CVTEnv{loc,te,
-				    te_vars,false,generalize_evars,NULL,NULL},
+				    te_vars,false,false,false,generalize_evars,NULL,NULL,NULL},
 			     expected_kind, true, t);
   let free_tvars = List::map(fst,cvt.free_vars);
   let free_evars = cvt.free_evars;
@@ -1148,14 +1280,35 @@ void check_fndecl_valid_type(seg_t loc, Tcenv::tenv_t te, fndecl_t fd) {
 
 // Same as check_valid_type except that we ensure the free type variables
 // are drawn from the given set of bound type variables.
-void check_type(seg_t loc, Tcenv::tenv_t te, list_t<tvar_t,`H> bound_tvars,
+void check_type(seg_t loc, Tcenv::tenv_t te, list_t<tvar_t,`H> bound_tvars, 
                 kind_t expected_kind, bool allow_evars, bool allow_abs_aggr,
                 type_t t) {
-  let cvt = check_valid_type(CVTEnv{loc,te,bound_tvars,false,false,NULL,NULL},
+  let cvt = check_valid_type(CVTEnv{loc,te,bound_tvars,false,false,false,false,NULL,NULL,NULL},
 			     expected_kind, allow_abs_aggr, t);
   let free_tvs= remove_bound_tvars(cvt.free_vars,bound_tvars,fst);
   for (; free_tvs != NULL; free_tvs = free_tvs->tl)
     err2(loc,"unbound type variable ",(*free_tvs->hd)[0]," in type ",t);
   if (!allow_evars)
     check_free_evars(cvt.free_evars,t,loc);
+}
+
+void check_type_with_bounds(seg_t loc, Tcenv::tenv_t te, list_t<tvar_t,`H> bound_tvars, 
+			    list_t<$(type_t, type_t)@, `H> @qual_bnd,
+			    kind_t expected_kind, bool allow_evars, bool allow_abs_aggr,
+			    type_t t) {
+  let cvt = check_valid_type(CVTEnv{loc,te,bound_tvars,false,false,false,false,NULL,NULL,NULL},
+			     expected_kind, allow_abs_aggr, t);
+
+  for(_ qbit = *qual_bnd; qbit != NULL; qbit = qbit->tl) {
+    let &$(tv, bnd) = qbit->hd;
+    cvt = check_valid_type(cvt, &Kinds::aqk, allow_abs_aggr, tv);
+    cvt = check_valid_type(cvt, &Kinds::aqk, allow_abs_aggr, bnd);
+  }
+
+  let free_tvs= remove_bound_tvars(cvt.free_vars,bound_tvars,fst);
+  for (; free_tvs != NULL; free_tvs = free_tvs->tl)
+    err2(loc,"unbound type variable ",(*free_tvs->hd)[0]," in type ",t);
+  if (!allow_evars) 
+    check_free_evars(cvt.free_evars,t,loc);
+  update_qualifier_bounds(cvt.free_qualvars, qual_bnd, rtd_qual_type); //for non-function types, default is RESTRICTED
 }

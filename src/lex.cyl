@@ -130,8 +130,13 @@ static char cnst2char(cnst_t cnst, Lexbuf lb) {
 // ************************** RESERVED WORDS **************************
 // bool is true when the keyword is a GCC keyword, not just a Cyclone keyword
 static $(string_t,short,bool) rw_array[] = {
+  $("ALIASABLE", AQ_ALIASABLE, false),
+  $("aqual_t", AQUAL_T, false),  
+  $("aquals", AQUALS, false),
   $("__attribute__", ATTRIBUTE, true),
   $("__attribute", ATTRIBUTE, true),
+  $("__asm__", ASM_TOK, true),
+  $("asm", ASM_TOK, true),
   $("abstract", ABSTRACT, false),
   $("auto", AUTO, true),
   $("break", BREAK, true),
@@ -150,6 +155,7 @@ static $(string_t,short,bool) rw_array[] = {
   $("default", DEFAULT, true),
   $("do", DO, true),
   $("double", DOUBLE, true),
+  $("DYNTRK", AQ_DYNTRK, false),
   $("else", ELSE, true),
   $("enum", ENUM, true),
   $("export", EXPORT, false),
@@ -177,11 +183,13 @@ static $(string_t,short,bool) rw_array[] = {
   $("__cyclone_port_off__", PORTOFF, false),
   $("__cyclone_pragma__", PRAGMA, false),
   $("rcalloc", RCALLOC, false),
+  $("REFCNT", AQ_REFCNT, false),
   $("region_t", REGION_T, false),
   $("region", REGION, false),
   $("regions", REGIONS, false),
   $("register", REGISTER, true),
   $("restrict", RESTRICT, true),
+  $("RESTRICTED", AQ_RESTRICTED, false),
   $("return", RETURN, true),
   $("rmalloc", RMALLOC, false),
   $("rmalloc_inline", RMALLOC_INLINE, false),
@@ -203,6 +211,7 @@ static $(string_t,short,bool) rw_array[] = {
   $("typedef", TYPEDEF, true),
   $("typeof", TYPEOF, true),
   $("__typeof__", TYPEOF, true),
+  $("UNIQUE", AQ_UNIQUE, false),
   $("union", UNION, true),
   $("unsigned", UNSIGNED, true),
   $("__unsigned__", UNSIGNED, true),
@@ -212,8 +221,6 @@ static $(string_t,short,bool) rw_array[] = {
   $("void", VOID, true),
   $("volatile", VOLATILE, true),
   $("__volatile__", VOLATILE, true),
-  $("asm", ASM_TOK, true),
-  $("__asm__", ASM_TOK, true),
   $("while", WHILE, true),
 };
 
@@ -257,6 +264,7 @@ static int do_possible_qualifier(Lexbuf lexbuf) {
     if(len == 3 && strncmp(b,"fat",3)==0) return FAT_QUAL;
     break;
   case 'a':
+    if(len == 5 && strncmp(b,"aqual",5)==0) return ALIAS_QUAL;
     if(len == 6 && strncmp(b,"assert",6)==0) return ASSERT_QUAL;
     if(len == 8 && strncmp(b,"assert__",8)==0) return ASSERT_QUAL;
     if(len == 12 && strncmp(b,"autoreleased",12)==0) return AUTORELEASED_QUAL;

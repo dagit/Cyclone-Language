@@ -94,7 +94,7 @@ namespace Absyn {
   typedef union DatatypeFieldInfo datatype_field_info_t;
   typedef union AggrInfo aggr_info_t;
   typedef struct ArrayInfo array_info_t;
-  typedef datatype Type @type_t, @rgntype_t, @booltype_t, @ptrbound_t;
+  typedef datatype Type @type_t, @rgntype_t, @booltype_t, @ptrbound_t, @aqualtype_t;
   typedef datatype Type *type_opt_t;
   typedef list_t<type_t,`H> types_t;
   typedef union Cnst cnst_t;
@@ -155,7 +155,16 @@ namespace Absyn {
   EXTERN_ABSYN enum Size_of { Char_sz, Short_sz, Int_sz, Long_sz, LongLong_sz };
   EXTERN_ABSYN enum Sign     { Signed, Unsigned, None }; // for integral types
   EXTERN_ABSYN enum AggrKind { StructA, UnionA };
-                                  
+
+  EXTERN_ABSYN enum AliasQualVal { 
+    Aliasable_qual,  // for types that can be aliased
+    Unique_qual,     // for types that cannot be aliased
+    Refcnt_qual,     // for reference counted types
+    DynamicTrk_qual, //
+    Restricted_qual  // any of the above
+  };
+  typedef enum AliasQualVal alias_qual_val_t;
+
   // Used to classify kinds: Aliasable <= Top, Unique <= Top
   EXTERN_ABSYN enum AliasQual { 
     Aliasable, // for types that can be aliased
@@ -171,9 +180,10 @@ namespace Absyn {
     EffKind, // effects
     IntKind, // ints at the specification level
     BoolKind, // booleans at the specification level: true or false
-    PtrBndKind   // fat or thin(e) used for pointers
+    PtrBndKind,   // fat or thin(e) used for pointers
+    AqualKind //for alias qualifier type variables
   };
-  EXTERN_ABSYN struct Kind {
+  EXTERN_ABSYN struct Kind { 
     enum KindQual  kind;
     enum AliasQual aliasqual;
   };
@@ -181,7 +191,7 @@ namespace Absyn {
   // kind bounds are used on tvar's to infer their kinds
   //   Eq_kb(k):  the tvar has kind k
   //   Unknown_kb(&Opt(kb)): follow the link to kb to determine bound
-  //   Less_kb(&Opt(kb1),k): same, but link should be less than k
+  //   Less_kb(&Opt(kb),k): same, but link should be less than k
   //   Unknown_kb(NULL):  the tvar's kind is completely unconstrained
   //   Less_kb(NULL,k): the tvar's kind is unknown but less than k
   EXTERN_ABSYN datatype KindBound {
@@ -210,11 +220,12 @@ namespace Absyn {
     booltype_t zero_term; // true => zero terminated array
     ptrloc_t   ptrloc;    // location info -- only present when porting C code
     booltype_t autoreleased;  // true => an autoreleased, reference-counted pointer
+    aqualtype_t aqual;
   };
 
   // information about a pointer type
   EXTERN_ABSYN struct PtrInfo {
-    type_t     elt_type;  // type of value to which pointer points
+    type_t     elt_type;  // type of value to which pointer points 
     tqual_t    elt_tq;   // qualifier **for elements** 
     ptr_atts_t ptr_atts;
   };
@@ -242,6 +253,8 @@ namespace Absyn {
     vararg_info_t*                           cyc_varargs;
     // partial order on region parameters
     list_t<$(type_t,type_t)@>                rgn_po;
+    // bounds on qualifier variables -- first term is a tvar, second is the bound
+    list_t<$(type_t,type_t)@>                qual_bnd;
     // function type attributes can include regparm(n), noreturn, const, nothrow
     // and at most one of cdecl, stdcall, and fastcall.  See gcc info
     // for documentation on attributes.
@@ -331,6 +344,10 @@ namespace Absyn {
     FalseCon; // BoolKind
     ThinCon;  // IntKind -> PtrBndKind 
     FatCon;   // PtrBndKind
+    AqualsCon;   // aquals(`a) : BoxKind -> AqualKind (aquals(`a::B))
+    AqualConstCon(alias_qual_val_t); //AqualKind (RESTRICTED, UNIQUE etc.)
+    AqualVarCon; // AqualKind x AqualKind -> AqualKind  (arg1: tvar, arg2: bound)
+    AqualHandleCon; // AqualKind -> BoxKind  (aqual_t<`q>)
     EnumCon(typedef_name_t,struct Enumdecl *); // MemKind 
     AnonEnumCon(list_t<enumfield_t>); // MemKind
     BuiltinCon(string_t,kind_t); // e.g., __builtin_va_list
@@ -357,7 +374,7 @@ namespace Absyn {
     // The list of tvars is the set of free type variables that can
     // occur in the type to which the evar is constrained.  
     Evar(opt_t<kind_t>,type_opt_t,int,opt_t<list_t<tvar_t>>); 
-    VarType(tvar_t); // type variables, kind induced by tvar
+    VarType(tvar_t); // type variables, kind induced by tvar 
     PointerType(ptr_info_t); // t*, t?, t@, etc.  BoxKind when not Unknown_b
     ArrayType(array_info_t);// MemKind
     FnType(fn_info_t); // MemKind
@@ -422,6 +439,7 @@ namespace Absyn {
               vararg_info_t *,                         // cyc_varargs
               type_opt_t,                              // effect
               list_t<$(type_t,type_t)@>,               // region partial order
+              list_t<$(type_t,type_t)@>,               // qualifier bounds
               exp_opt_t,                               // requires clause
               exp_opt_t);                              // ensures clause
   };
@@ -533,7 +551,7 @@ namespace Absyn {
     // (t)e.  
     Cast_e(type_t,exp_t,bool,coercion_t);//true bool indicates user made cast
     Address_e(exp_t); // &e
-    New_e(exp_opt_t, exp_t); // first expression is region -- null is heap
+    New_e(exp_opt_t, exp_t, exp_opt_t); // first expression is region -- null is heap, 3rd is aqual_t -- null is ALIASABLE
     Sizeoftype_e(type_t); // sizeof(t)
     Sizeofexp_e(exp_t); // sizeof(e)
     Offsetof_e(type_t,list_t<offsetof_field_t>); // offsetof(t,e)
@@ -733,6 +751,7 @@ namespace Absyn {
   EXTERN_ABSYN struct AggrdeclImpl {
     list_t<tvar_t>            exist_vars;
     list_t<$(type_t,type_t)@> rgn_po;
+    list_t<$(type_t,type_t)@> qual_bnd;
     list_t<aggrfield_t>       fields;
     bool                      tagged; // only applicable for unions
   };
@@ -757,6 +776,7 @@ namespace Absyn {
     scope_t                    sc; // relevant only for extensible datatypes
   };
 
+  //for now, tvs cannot contain any qualifier variables, so no bounds info either
   EXTERN_ABSYN struct Datatypedecl { 
     scope_t                      sc;
     typedef_name_t               name;
@@ -880,6 +900,8 @@ namespace Absyn {
   extern type_t complex_type(type_t);
   // regions
   extern rgntype_t heap_rgn_type, unique_rgn_type, refcnt_rgn_type;
+  // alias qualifiers types
+  extern aqualtype_t al_qual_type, un_qual_type, rc_qual_type, dt_qual_type, rtd_qual_type;
   // empty effect
   extern type_t empty_effect;
   // bool types
@@ -889,6 +911,9 @@ namespace Absyn {
     var_type(tvar_t),
     tag_type(type_t),
     rgn_handle_type(rgntype_t),
+    aqual_handle_type(type_t),
+    aqual_var_type(type_t,type_t),
+    aqual_constant(alias_qual_val_t),
     valueof_type(exp_t),
     typeof_type(exp_t),
     access_eff(rgntype_t),
@@ -920,7 +945,7 @@ namespace Absyn {
   // t *{e}`r
   type_t starb_type(type_t,rgntype_t,tqual_t, ptrbound_t, booltype_t zero_term, booltype_t rel);
   // t @{e}`r
-  type_t atb_type(type_t, rgntype_t, tqual_t, ptrbound_t, booltype_t zero_term, booltype_t rel);
+  type_t atb_type(type_t, rgntype_t, aqualtype_t, tqual_t, ptrbound_t, booltype_t zero_term, booltype_t rel);
   // t *`r (bounds = Upper(1)
   type_t star_type(type_t, rgntype_t, tqual_t, booltype_t zero_term, booltype_t rel);
   // t @`r (bounds = Upper(1)
@@ -942,6 +967,8 @@ namespace Absyn {
   type_t datatype_type(datatype_info_t, types_t args);
   type_t datatype_field_type(datatype_field_info_t,types_t args);
   type_t aggr_type(aggr_info_t, types_t args);
+  //type for aquals(`a::B)::Q
+  type_t aqualsof_type(type_t); 
 
   /////////////////////////////// Constants //////////////////////////
   cnst_t Char_c(sign_t,char);
@@ -955,7 +982,7 @@ namespace Absyn {
 
   /////////////////////////////// Expressions ////////////////////////
   exp_t new_exp(raw_exp_t, seg_t);
-  exp_t New_exp(exp_opt_t rgn_handle, exp_t, seg_t); // New_e
+  exp_t New_exp(exp_opt_t rgn_handle, exp_t, exp_opt_t qual_hdl, seg_t); // New_e
   exp_t copy_exp(exp_t);
   exp_t const_exp(cnst_t, seg_t);
   exp_t null_exp(seg_t);
@@ -1060,6 +1087,7 @@ namespace Absyn {
   vardecl_t static_vardecl(qvar_t, type_t, exp_opt_t init);
   struct AggrdeclImpl @ aggrdecl_impl(list_t<tvar_t,`H> exists,
 				      list_t<$(type_t,type_t)@`H,`H> po,
+				      list_t<$(type_t,type_t)@`H,`H> qb,
 				      list_t<aggrfield_t,`H> fs,
 				      bool tagged);
   decl_t aggr_decl(aggr_kind_t, scope_t, typedef_name_t,
@@ -1085,6 +1113,7 @@ namespace Absyn {
 		       list_t<$(var_opt_t,tqual_t,type_t)@`H,`H> args,
 		       bool c_varargs, vararg_info_t *`H cyc_varargs,
 		       list_t<$(type_t,type_t)@`H,`H> rgn_po,
+		       list_t<$(type_t,type_t)@`H,`H> qb,
 		       attributes_t, 
 		       exp_opt_t requires_clause, exp_opt_t ensures_clause);
   // turn t f(t1,...,tn) into t (@f)(t1,...,tn) -- when fresh_evar is

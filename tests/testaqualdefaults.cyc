@@ -1,0 +1,204 @@
+//!!!!!!!!!!!!!!DEFAULTS!!!!!!!!!!!!!!
+/* 1. Function Arguments: */
+/*     `r appearing in function arguments has kind ::R */
+/*     So, the default aliasability of arguments in a function should be ALIASABLE */
+/*     Even if a `q appears in a function, the bound should default to ALIASABLE */
+/*     The only way to get RESTRICTED is to specify it explicitly either as  */
+/*     int *@aqual(RESTRICTED) for subtyping or */
+/*     int *@aqual(`q) a : RES >= `q for polymorphism */
+//Mechanism: Parser generated default qualifier of aqual_var_type(`EVARq <= RTD)
+//           tctyp CVTEnv.def_aliasable field is used to compress the evar to al_qual_type
+void defarg(int *a){}
+void testdefarg() {
+  int *@aqual(RESTRICTED) a = NULL;
+  int *@aqual(UNIQUE) c = NULL;
+  int *@aqual(ALIASABLE) b = NULL;
+  //  defarg(a);//fail --let alias should succeed -- but pre-existing makes this fail
+  defarg(c);//let alias should succeed
+  defarg(b);//success
+}
+
+//Mechanism: Parser generates aqual_var_type with default bound of al_qual_type
+//           tctyp.update_qualifier_bound reflects this default in FnInfo.qual_bnd
+int*@aqual(`q)`r defargbound(int *@aqual(`q)`r a) { return a; }
+void testdefargbound() {
+  int *@aqual(RESTRICTED) a = NULL;
+  int *@aqual(ALIASABLE) b = NULL;
+  defargbound(a);//fail
+  b = defargbound(b);//success
+}
+
+//Mechanism: Parser generates aqual_var_type with default bound of al_qual_type, qual bnd is explicitly constructed
+//           tctyp adds aqual_var_type(`q) to free_qualvars list
+//           update_qualifier_bounds mutates bound in aqual_var_type(`q) based on value in qual_bnd
+int*@aqual(`q)`r xargbound(int *@aqual(`q)`r a : RESTRICTED >= `q) { return a; }
+void testxargbound() {
+  int *@aqual(RESTRICTED) a = NULL;
+  int *@aqual(ALIASABLE) b = NULL;
+  a = xargbound(a);//success
+  b = xargbound(b);//success
+}
+
+    
+/* 2. Function Return Type: */
+/*    The default region for a ret type is `H */
+/*    So, the default aliasability for a function ret type should be ALIASABLE */
+
+//Mechanism: Parser generates int*@aqual(Evar <= RTD) for return type
+//           tctyp CVTEnv.fn_result flag is used to unify this Evar with al_qual_type
+//           compression of Evar results in int *@aqual(ALIASABLE)
+int* defreturn() { return NULL; }
+void testdefreturn() {
+  int *@aqual(ALIASABLE) a = defreturn();
+  int *@aqual(UNIQUE) b = defreturn(); //fail
+}
+
+/* 3. Pointer fields in structs: */
+/*    The default region for pointer fields in structs is `H */
+/*    So, the default aliasability should be ALIASABLE */
+/*    The default kind of region typevars in a struct is ::TR */
+/*    So, the default bound on qualifier variables in a struct should be RESTRICTED */
+
+//Mechanism: Parser generates int *@aqual(`EVAR <= RTD) a
+//           tctyp.check_type_with_bounds (check_valid_type) add `EVAR to free_evars list
+//           check_free_evars compresses out `EVAR::Q with al_qual_type
+//           Parser generates int *@aqual(VarType(`q) <= ALIASABLE) b
+//           tctyp.check_valid_type_with_bounds results in aqual_var_type(`q, ALIASABLE) added to env.free_qualvars
+//           update_qualifier_bounds uses a default bound of RTD and updates both qual_bnd and aqual_var_type(`q, RTD)
+struct defstruct<`q::Q> {
+  int *a;
+  int *@aqual(`q) b;
+};
+void testdefstruct() {
+  int *@aqual(RESTRICTED) a = NULL;
+  int *@aqual(RESTRICTED) b = NULL;
+  int *@aqual(ALIASABLE) c = NULL;
+
+  let a1 = new defstruct{a, b}; //fail
+  let a2 = new defstruct{c, b}; //success
+}
+
+/* 4. Type instantiations: */
+/*    Type instantiations with pointer type have region `H when they appear in struct or datatype declarations*/
+/*    But when it appears in a function argument it has region `r::R (not `r::TR) */
+/*    So, the default qualifier should always be ALIASABLE */
+/*    If an explicit type variable appears, it should be constrained by */
+/*    the bound in the context ... either function or aggregate    */
+/*    But when it appears in a variable declaration (list_t<int*> a = b)  */
+/*    then we require the qualifier bound to be RESTRICTED for unification */
+struct List<`a> {
+  `a hd;               //aquals(`a) <= RESTRICTED (see case 5)
+  struct List<`a> *tl; //tl is ALIASABLE
+};
+typedef struct List<`a> *list_t<`a>;
+datatype LC {
+  ListCon(list_t<int*>);//int * should default to ALIASABLE
+  Other(int*);
+};
+//Mechanism: Parser generated list_t<int*@aqual(`EQ <= RTD)> a
+//           tctyp doesn't allow free evars for aggregates
+//           tctyp.check_free_evars compresses out `EQ with al_qual_type 
+// same mech for datatypes
+struct LCS {
+  list_t<int*> a; //int * should default to ALIASABLE, region `H
+};
+void use_list(list_t<int*@aqual(ALIASABLE) `r::R> l2){}
+
+//Mechanism: Parser generates list_t<int*@aqual(`EQ <= RTD) `ER> l2
+//           check_valid_toplevel_type is called with generalize_evars to signal checking fndecl
+//           check_type_inst called to check type arguments ... in the case of fndecl context
+//           this sets flag CVTEnv.inst_type_evar. When checking Evars with this flag, i_check_type
+//           compresses Aqual kinded Evars to al_qual_type
+void test_tinst_defaults(list_t<int*`H> l, //int* aquals is ALIASABLE
+			 int *`H a, //ALIASABLE
+			 list_t<int*> l2){ //int * aquals ALIASABLE, region is some `r::R
+  ListCon(l); //success --XXX -fixed
+  l->hd = a; //success --XXX -fixed
+  LCS{l};//success --XXX - fixed
+  LCS{l2};//fail -- region mismatch (but not for region mismatch) --XXX -fixed
+  use_list(l2);//should succeed --XXX -fixed
+}
+
+//Mechanism: Parser generates list_t<int*@aqual(`EQ <= RTD) `ER> l2
+//           tcstmt (decl_s) calls check_type with allow_evars true
+//           results in calls to check_type_inst with env.generalize_evars=false
+//           So, i_check_type(Evar::Q) does not compress to al_qual_type ... leaves Evar as is
+void list_vardecl_default(list_t<int*@aqual(ALIASABLE) `r::R> l1, 
+			  list_t<int*@aqual(RESTRICTED) `r::R> l2) {
+  list_t<int*> ll1 = l1; //succeed
+  list_t<int*> ll2 = l2; //succeed
+}
+
+struct LCS2<`q::Q> { : RESTRICTED >= `q
+  list_t<int*@aqual(`q)> a; //int * should default to ALIASABLE, region `H
+};
+struct LCS3<`q::Q> { : ALIASABLE >= `q
+  list_t<int*@aqual(`q)> a; //int * should default to ALIASABLE, region `H
+};
+void test_tinst_xp(list_t<int*@aqual(`p) `H> a,
+		   list_t<int*@aqual(`q) `H> b
+		   : RESTRICTED >= `p, ALIASABLE >= `q) {
+  use_list(a);//should fail -- breaks type abstraction, also bounds violation
+  use_list(b);//fail -- breaks type abstraction
+  LCS{a};//fail -- bound failure --XXX (wrong reason) ... breaks type abstraction
+  LCS{b};//fail --XXX ... breaks type abstraction
+  LCS2{a};//succeed 
+  LCS2{b};//succeed
+  LCS3{b};//succeed
+  LCS3{a};//fail
+}
+
+/* 5. Type variables */
+/* The default kind of a tvar in a struct is ::TB */
+/* The default kind of a tvar in a datatype is ::B */
+/* The default kind of a tvar in a function is ::B */
+/* So, we require aquals(`a) in a struct to be <= RESTRICTED */
+/* So, we require aquals(`a) in a datatype to be <= ALIASABLE 
+/* So, we require aquals(`a) in a function to be <= ALIASABLE */
+struct ttv_s<`a> {
+  `a fld;//aquals(`a) <= RESTRICTED
+};
+datatype ttv_d<`a::B> {
+  AAA(`a);//aquals(`a) <= ALIASABLE
+  BBB;
+};
+void test_ttv(`a::B arg) {
+  int *@aqual(RESTRICTED) a = NULL;
+  int *@aqual(ALIASABLE) b = NULL;
+  ttv_s{a}; //success --XXX --need to fix aquals(`a) implementation
+  ttv_s{b}; //success
+  ttv_s{arg}; //success
+  AAA(b);//success --XXX 
+  AAA(arg);//success
+  AAA(a);//fail --XXX wrong reason
+};
+
+
+/* 6. Datatypes: */
+/*    It is not possible to place a ::TR pointer in a datatype */
+/*    So, the only aliasability allowed for datatype fields in ALIASABLE */
+
+datatype dt_def<`q::Q> {
+  CCC(int*); //ALIASABLE
+  DDD(int*@aqual(`q)); //ALIASABLE >= `q
+};
+void test_dt_def() {
+  int *@aqual(RESTRICTED) a = NULL;
+  int *@aqual(ALIASABLE) b = NULL;
+  CCC(a);//fail
+  CCC(b);//success
+  DDD(a);//fail --XXX
+  DDD(b);//success
+};
+
+/* 7. Pointer variable declarations: */
+/*    Variables are declared with an Evar for their region of kind ::TR to maximise unification */
+/*    So, the default qualvar is an Evar with bound RESTRICTED */
+void test_al_def(int *@aqual(ALIASABLE) a) {}
+int*@aqual(RESTRICTED)`r test_vardecl(int *@aqual(RESTRICTED)`r b)__attribute((consume(1))) {
+  int *a = new 1; //unify to ALIASABLE
+  test_al_def(a);
+  int *c = b; //unify to RESTRICTED
+  return c;
+}
+   

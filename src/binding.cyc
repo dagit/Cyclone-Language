@@ -33,6 +33,7 @@
 #include "flags.h"
 #include "binding.h"
 #include "cifc.h"
+
 using List;
 using Absyn;
 using Warn;
@@ -261,6 +262,7 @@ void resolve_pat(env_t,   pat_t);
 void resolve_exp(env_t,   exp_t);
 void resolve_type(seg_t, env_t,  type_t);
 void resolve_rgnpo(seg_t, env_t, list_t<$(type_t,type_t)@>);
+void resolve_qualbnd(seg_t, env_t, list_t<$(type_t,type_t)@>);
 void resolve_scs(env_t,   list_t<switch_clause_t>);
 void resolve_aggrfields(seg_t, env_t, list_t<aggrfield_t>);
 static void resolve_function_stuff(seg_t, env_t, fn_info_t @);
@@ -523,6 +525,7 @@ static void resolve_function_stuff(seg_t loc, env_t env, fn_info_t @i) {
   if(i->cyc_varargs != NULL)
     resolve_type(loc,env,i->cyc_varargs->type);
   resolve_rgnpo(loc,env,i->rgn_po);
+  resolve_qualbnd(loc, env, i->qual_bnd);
   if(i->requires_clause != NULL)
     resolve_exp(env,(exp_t)i->requires_clause);
   if(i->ensures_clause != NULL) {
@@ -666,7 +669,7 @@ void resolve_type(seg_t loc, env_t env, type_t t) {
       resolve_type(loc,env,ts->hd);
     return;
 
-  case &PointerType(PtrInfo(t1,_,PtrAtts(t2,_,bds,_,_,_))):
+  case &PointerType(PtrInfo(t1,_,PtrAtts(t2,_,bds,_,_,_,_))):
     resolve_type(loc,env,t1);
     resolve_type(loc,env,t2);
     resolve_type(loc,env,bds);
@@ -797,6 +800,13 @@ void resolve_rgnpo(seg_t loc, env_t env, list_t<$(type_t,type_t)@> po) {
   for(; po != NULL; po = po->tl) {
     resolve_type(loc,env,(*po->hd)[0]);
     resolve_type(loc,env,(*po->hd)[1]);
+  }
+}
+
+void resolve_qualbnd(seg_t loc, env_t env, list_t<$(type_t,type_t)@> qb) {
+  for(; qb != NULL; qb = qb->tl) {
+    resolve_type(loc,env,(*qb->hd)[0]);
+    resolve_type(loc,env,(*qb->hd)[1]);
   }
 }
 
@@ -956,8 +966,9 @@ void resolve_decl(env_t env, decl_t d) {
 					      decl_name, new AggrRes(ad));
     }
     if(ad->impl != NULL) {
-      let &AggrdeclImpl(_,rpo,fs,_) = (struct AggrdeclImpl@)ad->impl;
+      let &AggrdeclImpl(_,rpo,qb,fs,_) = (struct AggrdeclImpl@)ad->impl;
       resolve_rgnpo(loc,env,rpo);
+      resolve_qualbnd(loc,env,qb);
       resolve_aggrfields(loc,env,fs);
     }
     break;

@@ -164,8 +164,8 @@ struct Aggrdecl * merge_aggrdecl(aggrdecl_t d0, aggrdecl_t d1,
   switch ($(d0->impl, d1->impl)) {
   case $(_, NULL): d2 = d0; break;
   case $(NULL, _): d2 = d1; break;
-  case $(&AggrdeclImpl(exist_vars0,rgn_po0,f0s,tagged0), 
-	 &AggrdeclImpl(exist_vars1,rgn_po1,f1s,tagged1)):
+  case $(&AggrdeclImpl(exist_vars0,rgn_po0,qb0,f0s,tagged0), 
+	 &AggrdeclImpl(exist_vars1,rgn_po1,qb1,f1s,tagged1)):
 
     // both declare fields, so they must agree (with renaming w.r.t. tyvars)
     if(!check_tvs(exist_vars0, exist_vars1, "type", v, loc, msg)) 

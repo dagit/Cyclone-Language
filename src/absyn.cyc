@@ -139,6 +139,18 @@ type_t valueof_type(exp_t e) {
   return new ValueofType(e);
 }
 
+#define MAKE_ALIAS_QUAL(TN,E)\
+    static datatype TyCon.AqualConstCon TN##_tyc = AqualConstCon(E); \
+    static datatype Type.AppType TN##_gval = AppType(&TN##_tyc, NULL); \
+    aqualtype_t TN=&TN##_gval
+
+MAKE_ALIAS_QUAL(al_qual_type,  Aliasable_qual);
+MAKE_ALIAS_QUAL(un_qual_type,  Unique_qual);
+MAKE_ALIAS_QUAL(rc_qual_type,  Refcnt_qual);
+MAKE_ALIAS_QUAL(dt_qual_type,  DynamicTrk_qual);
+MAKE_ALIAS_QUAL(rtd_qual_type, Restricted_qual);
+
+
 // e.g., MAKE_NULLARY_TYPE(void_type,VoidCon) becomes
 // static datatype TyCon.VoidCon void_type_cval = VoidCon;
 // static datatype Type.AppType  void_type_tval = AppType(&void_type_cval,NULL);
@@ -180,12 +192,30 @@ MAKE_FLOAT_TYPE(long_double_type, 2);
 MAKE_NULLARY_TYPE(empty_effect,JoinCon); // see kludge in join_eff below
 
 static datacon(TyCon,RgnHandleCon);
+static datacon(TyCon,AqualHandleCon);
+static datacon(TyCon,AqualVarCon);
 static datacon(TyCon,TagCon);
 static datacon(TyCon,AccessCon);
 static datacon(TyCon,RgnsCon);
 static datacon(TyCon,ThinCon);
 static datacon(TyCon,JoinCon);
+static datacon(TyCon,AqualsCon);
+
+type_t aqual_constant(alias_qual_val_t v)  { 
+  switch(v) {
+  case Aliasable_qual: return al_qual_type;
+  case Unique_qual: return un_qual_type;
+  case Refcnt_qual:return rc_qual_type; 
+  case DynamicTrk_qual: return dt_qual_type;
+  case Restricted_qual: return rtd_qual_type;
+  default: Warn::impos2("Impossible alias qualifier constant");
+  }
+}
+
 type_t rgn_handle_type (rgntype_t r) { return app_type(&RgnHandleCon_val, r);  }
+type_t aqual_handle_type(type_t aq)  { return app_type(&AqualHandleCon_val, aq); }
+type_t aqual_var_type(type_t tv, type_t bnd)  { return app_type(&AqualVarCon_val, tv, bnd); }
+
 type_t tag_type        (type_t    t) { return app_type(&TagCon_val,       t);  }
 type_t access_eff      (rgntype_t r) { return app_type(&AccessCon_val,    r);  }
 type_t regionsof_eff   (type_t    t) { return app_type(&RgnsCon_val,      t);  }
@@ -210,8 +240,13 @@ type_t datatype_field_type(union DatatypeFieldInfo di, types_t args) {
 type_t aggr_type(union AggrInfo ai, types_t args) {
   return new AppType(new AggrCon(ai),args);
 }
-
 type_t var_type(tvar_t x) { return new VarType(x); }
+
+//type for aquals(`a::B)::Q
+type_t aqualsof_type(type_t tv) {
+  return app_type(&AqualsCon_val,tv);
+}
+
 type_t gen_float_type(unsigned i) {
   switch (i) {
   case 0: return float_type;
@@ -375,19 +410,20 @@ type_t fatptr_type(type_t t, type_t r, tqual_t tq, booltype_t zt, booltype_t rel
   return pointer_type(PtrInfo{t, tq, PtrAtts{.rgn = r, .nullable = true_type, 
 					     .bounds = fat_bound_type,
 					     .zero_term = zt, .ptrloc=NULL,
-					     .autoreleased = rel}});
+					     .autoreleased = rel, .aqual=al_qual_type}});
+						
 }
 type_t starb_type(type_t t, type_t r, tqual_t tq, ptrbound_t b, booltype_t zt, booltype_t rel) {
   return pointer_type(PtrInfo{t, tq, PtrAtts{.rgn = r, .nullable = true_type, 
 					     .bounds = b, 
 					     .zero_term = zt, .ptrloc=NULL,
-					     .autoreleased = rel }});
+					     .autoreleased = rel,.aqual=al_qual_type }});
 }
-type_t atb_type(type_t t, type_t r, tqual_t tq, ptrbound_t b, booltype_t zt, booltype_t rel) {
+type_t atb_type(type_t t, type_t r, aqualtype_t aq, tqual_t tq, ptrbound_t b, booltype_t zt, booltype_t rel) {
   return pointer_type(PtrInfo{t, tq, PtrAtts{.rgn = r, .nullable = false_type, 
 					     .bounds = b, 
 					     .zero_term = zt, .ptrloc=NULL,
-					     .autoreleased = rel }});
+					     .autoreleased = rel,.aqual=aq }});
 }
 type_t star_type(type_t t, type_t r, tqual_t tq, booltype_t zeroterm, booltype_t rel) { 
   return starb_type(t,r,tq,bounds_one(),zeroterm,rel);
@@ -396,7 +432,7 @@ type_t cstar_type(type_t t, tqual_t tq) {
   return star_type(t, heap_rgn_type, tq, false_type, false_type);
 }
 type_t at_type(type_t t, type_t r, tqual_t tq, booltype_t zeroterm, booltype_t rel) {
-  return atb_type(t,r,tq,bounds_one(),zeroterm,rel);
+  return atb_type(t,r,al_qual_type,tq,bounds_one(),zeroterm,rel);
 }
 type_t string_type(type_t rgn) {
   return starb_type(char_type,rgn,empty_tqual(0),fat_bound_type,true_type,false_type);
@@ -458,6 +494,19 @@ type_t compress(type_t t) {
     let t2 = e->topt;
     return (t2 != NULL) ? t2 : t;
   case &TypeDeclType(_,&t): return compress(t);
+  case &AppType(&AqualVarCon, tv_bnd):
+    _ comp = compress(tv_bnd->hd);
+    switch(comp) {
+    case &AppType(&AqualConstCon(aqv), _):
+      return comp;
+    case &VarType(_):
+    case &Evar(...):
+      return aqual_var_type(comp, compress(tv_bnd->tl->hd));
+    case &AppType(&AqualVarCon, tvb2):
+      return compress(comp);
+    default:
+      Warn::impos2("Unexpected type within AqualVar: ", comp);
+    }
   default: return t;
   }
 }
@@ -476,8 +525,8 @@ cnst_t Wstring_c(string_t<`H> s)         { return Cnst{.Wstring_c  = s};       }
 exp_t new_exp(raw_exp_t r, seg_t loc) {
   return new Exp{.topt=NULL, .r=r, .loc=loc, .annot=&EmptyAnnot_val};
 }
-exp_t New_exp(exp_opt_t rgn_handle, exp_t e, seg_t loc) {
-  return new_exp(new New_e(rgn_handle,e), loc);
+exp_t New_exp(exp_opt_t rgn_handle, exp_t e, exp_opt_t qual_hdl, seg_t loc) {
+  return new_exp(new New_e(rgn_handle,e, qual_hdl), loc);
 }
 exp_t copy_exp(exp_t e) {
   return new *e;
@@ -745,9 +794,10 @@ vardecl_t static_vardecl(qvar_t x, type_t t, exp_opt_t init) {
 }
 struct AggrdeclImpl @ aggrdecl_impl(list_t<tvar_t,`H> exists,
 				    list_t<$(type_t,type_t)@`H,`H> po,
+				    list_t<$(type_t,type_t)@`H,`H> qb,
 				    list_t<aggrfield_t,`H> fs, 
                                     bool tagged) {
-  return new AggrdeclImpl{.exist_vars=exists, .rgn_po=po, 
+  return new AggrdeclImpl{.exist_vars=exists, .rgn_po=po, .qual_bnd=qb,
                           .fields=fs, .tagged = tagged};
 }
 decl_t aggr_decl(aggr_kind_t k, scope_t s, typedef_name_t n,
@@ -803,6 +853,7 @@ type_t function_type(list_t<tvar_t,`H> tvs, type_opt_t eff_type,
                      list_t<$(var_opt_t,tqual_t,type_t)@`H,`H> args, 
                      bool c_varargs, vararg_info_t *`H cyc_varargs,
                      list_t<$(type_t,type_t)@`H,`H> rgn_po,
+		     list_t<$(type_t,type_t)@`H,`H> qb,
                      attributes_t atts, exp_opt_t req, exp_opt_t ens) {
   for(let args2 = args; args2 != NULL; args2 = args2->tl)
     (*args2->hd)[2] = pointer_expand((*args2->hd)[2], true);
@@ -814,6 +865,7 @@ type_t function_type(list_t<tvar_t,`H> tvs, type_opt_t eff_type,
                               .c_varargs = c_varargs, 
                               .cyc_varargs = cyc_varargs,
                               .rgn_po = rgn_po,
+                              .qual_bnd = qb,
                               .attributes=atts,
                               .requires_clause = req,
                               .requires_relns = NULL,
@@ -1066,9 +1118,12 @@ void visit_exp(bool (@f1)(`a,exp_t), bool (@f2)(`a,stmt_t), `a env, exp_t e) {
       visit_exp(f1,f2,env,lexp->hd);
     break;
 
-  case &Malloc_e(MallocInfo{.rgn=e1o,.num_elts=e2,...}): fallthru(e1o,e2);
-  case &New_e(e1, e2): // first expression is region -- null is heap
+  case &Malloc_e(MallocInfo{.rgn=e1o,.num_elts=e2,...}): fallthru(e1o,e2,NULL);
+  case &New_e(e1, e2, e3): 
+    // first expression is region -- null is heap
+    // e3 is qualifier literal -- null is ALIASABLE
     if(e1!=NULL) visit_exp(f1,f2,env,e1);
+    if(e3!=NULL) visit_exp(f1,f2,env,e3);
     visit_exp(f1,f2,env,e2);
     break;
 

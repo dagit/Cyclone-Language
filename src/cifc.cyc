@@ -350,8 +350,8 @@ void merge_sys_user_decl(seg_t loc, tenv_t te, bool is_buildlib,
       return;
     }
     switch ($(cd->impl,ud->impl)) {
-    case $(&AggrdeclImpl(*tvarsC,*rgnpoC,cfields,_),
-	   &AggrdeclImpl(tvars,rgnpo,ufields,tagged)):
+    case $(&AggrdeclImpl(*tvarsC,*rgnpoC,*qbC,cfields,_),
+	   &AggrdeclImpl(tvars,rgnpo,qb,ufields,tagged)):
       if (tagged)
 	FAIL_MERGE(false,loc,is_buildlib,cd->name,
 		   ": user @tagged annotation not allowed (ignoring)");
@@ -394,6 +394,7 @@ void merge_sys_user_decl(seg_t loc, tenv_t te, bool is_buildlib,
       if (ud->tvs != NULL) cd->tvs = ud->tvs;
       if (tvars) *tvarsC = tvars;
       if (rgnpo) *rgnpoC = rgnpo;
+      if (qb) *qbC = qb;
 	
       // Make sure the C version is not missing any expected fields
       x = ufields;

@@ -966,7 +966,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     case &Instantiate_e(_,_):
       fprintf(stderr,"Error: unexpected Instantiate_e\n");
       exit(1); return;
-    case &New_e(_,_):
+    case &New_e(...):
       fprintf(stderr,"Error: unexpected New_e\n");
       exit(1); return;
     case &Tuple_e(_):
@@ -1030,6 +1030,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       case &RgnsCon:               case &TagCon:
       case &TrueCon:               case &FalseCon:
       case &ThinCon:               case &FatCon:
+      case &AqualsCon:             case &AqualConstCon(_):
+      case &AqualHandleCon:        case &AqualVarCon:
         fprintf(stderr,"Error: unexpected %s\n",Absynpp::typ2string(t));
         exit(1); return;
       }

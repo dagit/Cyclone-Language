@@ -44,6 +44,8 @@ extern struct Kind uak;  // unique abstract kind
 extern struct Kind ubk;  // unique boxed kind
 extern struct Kind umk;  // unique memory kind
 
+extern struct Kind aqk;  // alias qualifier kind
+
 extern struct Core::Opt<kind_t> rko;
 extern struct Core::Opt<kind_t> ako;
 extern struct Core::Opt<kind_t> bko;
@@ -62,6 +64,8 @@ extern struct Core::Opt<kind_t> urko;
 extern struct Core::Opt<kind_t> uako;
 extern struct Core::Opt<kind_t> ubko;
 extern struct Core::Opt<kind_t> umko;
+
+extern struct Core::Opt<kind_t> aqko;
 
 Core::opt_t<kind_t> kind_to_opt(kind_t);
 kindbound_t kind_to_bound(kind_t);

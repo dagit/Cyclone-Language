@@ -1236,9 +1236,11 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
       update_try_assn(env,ain); // coercion could fail
       return $(topt == NULL ? NULL : cast(tp,(term_t)topt),a);
     }
-  case &Absyn::New_e(eopt,e):
+  case &Absyn::New_e(eopt,e,qopt):
     if (eopt != NULL)
       ain = vcgen_rexp(env,(exp_t)eopt,ain)[1];
+    if (qopt != NULL)
+      ain = vcgen_rexp(env,(exp_t)qopt,ain)[1];
     return $(NULL,vcgen_rexp(env,e,ain)[1]);
 
   // these cases should be captured by the const-expression check above.

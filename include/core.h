@@ -170,6 +170,15 @@ extern region_t<`H> heap_region;
 
 extern region_t<`U> unique_region;
   /** [unique_region] is the region handle of the unique pointer region. */
+
+
+  extern aqual_t<ALIASABLE> aliasable_qual;
+  extern aqual_t<UNIQUE> unique_qual;
+  extern aqual_t<REFCNT> refcnt_qual;
+  extern aqual_t<DYNTRK> dyntrk_qual;
+
+  /** these handles are used for allocating pointers of each kind; RESTRICTED is abstract */ 
+
   // FIX: unique_region also defined in absyn.cyc; should really unify
   //   the two definitions!
 #define unew rnew (Core::unique_region)

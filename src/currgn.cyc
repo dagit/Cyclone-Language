@@ -78,7 +78,7 @@ static $(var_opt_t,tqual_t,type_t)@ argtype($(var_opt_t,tqual_t,type_t)@`H arg) 
   case &PointerType(PtrInfo(t1,...)):
     switch (compress(t1)) {
     case &FnType(FnInfo{*tvars,eff,res_tq,res_typ,args_info,c_vararg,
-			  cyc_vararg,rgn_po,atts,req,req_relns,ens,ens_relns,
+			  cyc_vararg,rgn_po,qb,atts,req,req_relns,ens,ens_relns,
 			  ret_var,argvds}):
       // change the type of functions to be parameterized by `C, so
       // that `C is not substituted for
@@ -95,7 +95,7 @@ static $(var_opt_t,tqual_t,type_t)@ argtype($(var_opt_t,tqual_t,type_t)@`H arg) 
 type_t instantiate(type_t fntype, type_t currgn) {
   switch (fntype) {
   case &FnType(FnInfo{tvars,eff,res_tq,res_typ,*args_info,c_vararg,
-			cyc_vararg,rgn_po,atts,req,req_relns,ens,ens_relns,
+			cyc_vararg,rgn_po,qb,atts,req,req_relns,ens,ens_relns,
 			ret_var,argvds}):
     // Need to make sure we don't instantiate for any functions
     // appearing in the arguments of the function; simulates our
@@ -108,8 +108,9 @@ type_t instantiate(type_t fntype, type_t currgn) {
     let fntype2 = Tcutil::substitute(inst,fntype);
     // restore the old bound variables in both types
     switch (fntype2) {
-    case &FnType(FnInfo{_,_,_,_,*args_info2,...}):
+    case &FnType(FnInfo{tvars,_,_,_,*args_info2,...}):
       *args_info2 = old_args_info;
+      let tvars2 = tvars;
       break;
     default: break;
     }
@@ -166,7 +167,7 @@ static void rgnsubtype(Position::seg_t loc, struct rgnsubenv env, type_t type) {
     rgnsubexpopt(env,e);
     rgnsubtype(loc,env,zt);
     return;
-  case &PointerType(PtrInfo(t1,_,PtrAtts(r,_,b,zt,_,rel))):
+  case &PointerType(PtrInfo(t1,_,PtrAtts(r,_,b,zt,_,rel,_))):
     rgnsubtype(loc,env,t1);
     rgnsubtype(loc,env,r);
     rgnsubtype(loc,env,b);
@@ -299,8 +300,8 @@ static void rgnsubexp(struct rgnsubenv env, exp_t e) {
     rgnsubexp(env,e1);
     break;
 
-  case &New_e(eopt,e1):
-    rgnsubexpopt(env,eopt); rgnsubexp(env,e1); break;
+  case &New_e(eopt,e1,qopt):
+    rgnsubexpopt(env,eopt);rgnsubexpopt(env,qopt); rgnsubexp(env,e1); break;
 
   case &CompoundLit_e(i,ds):
     rgnsubtype(e->loc,env,(*i)[2]);

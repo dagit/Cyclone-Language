@@ -128,7 +128,7 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
   case &Asm_e(...):  
   case &Var_e(_): break;
 
-  case &New_e(_,e1):
+  case &New_e(_,e1,_):
     switch(e->annot) {
     case &Toc::NewInfo(mexp,typ): 
       // for less output, try to special case initializers: t x = new e;

@@ -567,30 +567,37 @@ static bool ensure_no_throw_exp(exp_t e) {
     case &Var_e(b):              fname_ok = ensure_no_throw_exp(fname); break;
     default: break; //fname must be a Var_e or Inst_e
     }
+    if(fname_ok)
+      switch(fname->topt) {
+      case &PointerType(PtrInfo(&FnType(fi), ...)):
+	fname_ok = List::mem(Atts::attribute_cmp,fi.attributes,&Atts::No_throw_att_val);
+      default:
+	Warn::impos2("Expected function pointer type");
+      }
     return fname_ok && List::forall(ensure_no_throw_exp, args);
   case &Var_e(b):
     switch(b) {
-    case &Funname_b(fd): { //attributes should have been transferred already
-	let atts; 
-	switch(fd->cached_type) {
-	case &FnType(fi): atts = fi.attributes; break;
-	case NULL: atts = fd->i.attributes; break;
-	default: Warn::impos2("Tcstmt: bad cached function type");
-	}
-	return List::mem(Atts::attribute_cmp,atts,&Atts::No_throw_att_val);
-      }
-    case &Global_b(fvard): {
-      switch(fvard->type) {
-      case &FnType(fi):
-	return List::mem(Atts::attribute_cmp,
-			 fi.attributes,
-			 &Atts::No_throw_att_val) ||
-	  List::mem(Atts::attribute_cmp,
-		    fvard->attributes,
-		    &Atts::No_throw_att_val);
-      default: return false;
-      }
-    }
+/*     case &Funname_b(fd): { //attributes should have been transferred already */
+/* 	let atts;  */
+/* 	switch(fd->cached_type) { */
+/* 	case &FnType(fi): atts = fi.attributes; break; */
+/* 	case NULL: atts = fd->i.attributes; break; */
+/* 	default: Warn::impos2("Tcstmt: bad cached function type"); */
+/* 	} */
+/* 	return List::mem(Atts::attribute_cmp,atts,&Atts::No_throw_att_val); */
+/*       } */
+/*     case &Global_b(fvard): { */
+/*       switch(fvard->type) { */
+/*       case &FnType(fi): */
+/* 	return List::mem(Atts::attribute_cmp, */
+/* 			 fi.attributes, */
+/* 			 &Atts::No_throw_att_val) || */
+/* 	  List::mem(Atts::attribute_cmp, */
+/* 		    fvard->attributes, */
+/* 		    &Atts::No_throw_att_val); */
+/*       default: return false; */
+/*       } */
+/*     } */
     case &Param_b(_):
     case &Local_b(_): return true;
     default: return false;  //only funname supported

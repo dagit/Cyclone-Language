@@ -183,7 +183,7 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
   // reject ill-formed type
   if(te->in_extern_c_inc_repeat)
     fd->cached_type = NULL;
-  check_fndecl_valid_type(loc,te,fd);
+  check_fndecl_valid_type(loc,te,fd); 
   type_t t = fndecl2type(fd);
   // move any function type attributes into the function's type
   bool nothrow = List::mem(Atts::attribute_cmp,
@@ -328,6 +328,7 @@ static void tcAggrImpl(tenv_t te, seg_t loc,
                        aggr_kind_t str_or_union,
                        list_t<tvar_t,`H> tvs,
 		       list_t<$(type_t,type_t)@> rpo, 
+		       list_t<$(type_t,type_t)@, `H> @qb, 
 		       list_t<aggrfield_t> fields) {
   // check fields, rejecting ill-formed types, bad fields, and duplicates
   // (unless the field name is empty)
@@ -359,7 +360,7 @@ static void tcAggrImpl(tenv_t te, seg_t loc,
     if (str_or_union == UnionA || 
 	(fs->tl == NULL && str_or_union == StructA)) 
       field_kind = &Kinds::tak; // we allow abstract kind for the last field
-    check_type(loc,te,tvs,field_kind,false,false,t);
+    check_type_with_bounds(loc,te,tvs,qb,field_kind,false,false,t);
 
     fs->hd->tq.real_const = extract_const_from_typedef(loc,fs->hd->tq.print_const,t);
 
@@ -376,7 +377,8 @@ static void tcAggrImpl(tenv_t te, seg_t loc,
 		   "@requires clause has type ",(type_t)requires_clause->topt,
 		   " instead of integral type");
       else {
-	check_type(requires_clause->loc,te,tvs,&Kinds::ik,false,false,new ValueofType(requires_clause));
+	check_type_with_bounds(requires_clause->loc,te,tvs, qb,
+			       &Kinds::ik,false,false,new ValueofType(requires_clause));
         // convert the requires expression to a CNF formula
 	let relns = Relations::exp2relns(uprev_rgn,requires_clause);
 
@@ -475,9 +477,11 @@ void tcAggrdecl(tenv_t te, seg_t loc, aggrdecl_t ad) {
     // FIX: ignores @tagged qualifier which may be on struct!
     te->ae->aggrdecls = Dict::insert(te->ae->aggrdecls, q, new ad);
     break;
-  case $(&AggrdeclImpl(exist_vars,rgn_po,fs,tagged), NULL):
+  case $(&AggrdeclImpl(exist_vars,rgn_po,*qb,fs,tagged), NULL):
     // FIX: check rgn_po for well-formed!
     // for the sake of recursive fields, make name abstract in body
+    // check qb well-formed
+    // add qualifier bounds to ::Q tvars according to qb
     let adp = new (new Aggrdecl(ad->kind, Extern, ad->name, tvs,
 				NULL, ad->attributes, false));
     te->ae->aggrdecls = Dict::insert(te->ae->aggrdecls, q, adp);
@@ -491,7 +495,7 @@ void tcAggrdecl(tenv_t te, seg_t loc, aggrdecl_t ad) {
     // reject struct with @tagged qualifier
     if (tagged && (ad->kind == StructA))
       Warn::err2(loc,"@tagged is allowed only on union declarations");
-    tcAggrImpl(te, loc, ad->kind, append(tvs,exist_vars), rgn_po, fs);
+    tcAggrImpl(te, loc, ad->kind, append(tvs,exist_vars), rgn_po, qb, fs);
 
     rule_out_memkind(loc, q, tvs, false);
     // we constrain existential variables to be Aliasable if
@@ -508,7 +512,7 @@ void tcAggrdecl(tenv_t te, seg_t loc, aggrdecl_t ad) {
 		      f->hd->type," so it can only be written and not read");
     *adp = ad; //insert ad in the environment
     break;
-  case $(&AggrdeclImpl(exist_vars,rgn_po,fs,tagged), &adp):
+  case $(&AggrdeclImpl(exist_vars,rgn_po,*qb,fs,tagged), &adp):
     // FIX: check rgn_po!!! (just need to be closed (and no > `a ??))
     if(ad->kind != (*adp)->kind)
       Warn::err2(loc,"cannot reuse struct names for unions and vice-versa");
@@ -526,7 +530,7 @@ void tcAggrdecl(tenv_t te, seg_t loc, aggrdecl_t ad) {
     // reject struct with @tagged qualifier
     if (tagged && (ad->kind == StructA))
       Warn::err2(loc,"@tagged is allowed only on union declarations");
-    tcAggrImpl(te, loc, ad->kind, append(tvs,exist_vars), rgn_po, fs);
+    tcAggrImpl(te, loc, ad->kind, append(tvs,exist_vars), rgn_po, qb,fs);
 
     *adp = ad0;// restore the previous declaration and go update the environment
     fallthru(adp);

@@ -202,7 +202,7 @@ bool is_zero_pointer_type_elt(type_t t, type_t@ elt_type_dest) {
 bool is_zero_ptr_type(type_t t, type_t @ptr_type,
 		      bool @is_fat, type_t @elt_type) {
   switch (compress(t)) {
-  case &PointerType(PtrInfo{elt,_,PtrAtts(_,_,bnds,zt,_,_)}):
+  case &PointerType(PtrInfo{elt,_,PtrAtts(_,_,bnds,zt,_,_,_)}):
     if (!type2bool(false,zt))
       return false;
     *ptr_type = t;
@@ -217,7 +217,7 @@ bool is_zero_ptr_type(type_t t, type_t @ptr_type,
       return false;
     *elt_type = elt;
     *is_fat = false;      
-    *ptr_type = promote_array(t,heap_rgn_type,false);
+    *ptr_type = promote_array(t,heap_rgn_type,al_qual_type,false);
     return true;
   default: return false;
   }
@@ -317,7 +317,7 @@ type_t copy_type(type_t t) {
   case &AppType(c,ts):   return new AppType(c,map(copy_type,ts));
   case &Evar(...):       return t; //FIX?: introduces constraints -- should it??
   case &VarType(tv):     return var_type(copy_tvar(tv));
-  case &PointerType(PtrInfo(elt,tq,PtrAtts(rgn,nbl,bs,zt,loc,rel))):
+  case &PointerType(PtrInfo(elt,tq,PtrAtts(rgn,nbl,bs,zt,loc,rel,aq))):
     let elt2 = copy_type(elt);
     let rgn2 = copy_type(rgn);
     let nbl2 = copy_type(nbl);
@@ -326,11 +326,11 @@ type_t copy_type(type_t t) {
     let bs2 = copy_type(bs);
     let zt2 = copy_type(zt);
     let rel2 = copy_type(rel);
-    return new PointerType(PtrInfo(elt2,tq2,PtrAtts(rgn2,nbl2,bs2,zt2,loc,rel2)));
+    return new PointerType(PtrInfo(elt2,tq2,PtrAtts(rgn2,nbl2,bs2,zt2,loc,rel2,aq)));
   case &ArrayType(ArrayInfo{et,tq,eo,zt,ztl}):
     return new ArrayType(ArrayInfo{copy_type(et),tq,deep_copy_exp_opt(true,eo),
 				     copy_type(zt),ztl});
-  case &FnType(FnInfo{tvs,effopt,rt_tq,rt,args,c_varargs,cyc_varargs,rgn_po,atts,req,req_rlns,ens,ens_rlns,ret_val,argvds}):
+  case &FnType(FnInfo{tvs,effopt,rt_tq,rt,args,c_varargs,cyc_varargs,rgn_po,qb,atts,req,req_rlns,ens,ens_rlns,ret_val,argvds}):
     let tvs2 = map(copy_tvar,tvs);
     type_opt_t effopt2 = (effopt == NULL) ? NULL : copy_type(effopt);
     let rt2 = copy_type(rt);
@@ -340,6 +340,7 @@ type_t copy_type(type_t t) {
     if (cyc_varargs != NULL)
       cyc_varargs2->type = copy_type(cyc_varargs->type);
     let rgn_po2 = map(copy_rgncmp,rgn_po);
+    let qb2 = map(copy_rgncmp,qb);;
     let atts2 = atts;
     let req2 = deep_copy_exp_opt(true,req);
     let req_rlns2 = Relations::copy_relns(heap_region, req_rlns);
@@ -352,7 +353,7 @@ type_t copy_type(type_t t) {
     vardecl_opt_t ret_val2 = ret_val;
     list_t<vardecl_t> argvds2 = argvds;
     return new FnType(FnInfo{tvs2,effopt2,rt_tq,rt2,args2,c_varargs2,
-                               cyc_varargs2,rgn_po2,atts2,req2,req_rlns2,
+                               cyc_varargs2,rgn_po2,qb2,atts2,req2,req_rlns2,
                                ens2,ens_rlns2,ret_val2,argvds2});
   case &TupleType(tqts):    return new TupleType(map(copy_tqt,tqts));
   case &AnonAggrType(k,fs): return new AnonAggrType(k,map(copy_field,fs));
@@ -422,8 +423,8 @@ exp_t deep_copy_exp(bool preserve_types, exp_t e) {
     new_e = instantiate_exp(DC(pt,e1),map(copy_type,ts),e->loc); break;
   case &Cast_e(t,e1,b,c):
     new_e = cast_exp(copy_type(t),DC(pt,e1),b,c,e->loc); break;
-  case &New_e(eo,e1):
-    new_e = New_exp((eo?(exp_opt_t)DC(pt,eo):NULL), DC(pt,e1),e->loc); break;
+  case &New_e(eo,e1,qo):
+    new_e = New_exp((eo?(exp_opt_t)DC(pt,eo):NULL), DC(pt,e1), (qo?(exp_opt_t)DC(pt,qo):NULL), e->loc); break;
   case &Address_e(e1):     new_e = address_exp(DC(pt,e1),e->loc);         break;
   case &Sizeoftype_e(t):   new_e = sizeoftype_exp(copy_type(t),e->loc);   break;
   case &Sizeofexp_e(e1):   new_e = sizeofexp_exp(DC(pt,e1),e->loc);       break;
@@ -536,6 +537,7 @@ kind_t type_kind(type_t t) {
     case &EnumCon(_,_):
     case &AnonEnumCon(_):
     case &RgnHandleCon:    return &Kinds::bk;
+    case &AqualHandleCon:  return &Kinds::bk;
     case &UniqueCon:	   return &Kinds::urk;
     case &HeapCon:         return &Kinds::rk;
     case &RefCntCon:	   return &Kinds::trk;
@@ -548,6 +550,9 @@ kind_t type_kind(type_t t) {
     case &TrueCon:         return &Kinds::boolk;
     case &ThinCon:
     case &FatCon:          return &Kinds::ptrbk;
+    case &AqualVarCon:
+    case &AqualConstCon(_):
+    case &AqualsCon: return &Kinds::aqk;
     case &DatatypeCon(...): return &Kinds::ak; // datatypes always have abstract kind
     case &DatatypeFieldCon({.KnownDatatypefield = _}): return &Kinds::mk;
     case &DatatypeFieldCon({.UnknownDatatypefield = _}):
@@ -731,14 +736,14 @@ static type_t dummy_fntype(type_t eff) {
                                  .ret_tqual = empty_tqual(0),
                                  .ret_type=void_type,
 				 .args=NULL,.c_varargs=false,
-                                 .cyc_varargs=NULL,.rgn_po=NULL,
+                                 .cyc_varargs=NULL,.rgn_po=NULL, .qual_bnd=NULL,
                                  .attributes = NULL, .requires_clause = NULL,
                                  .requires_relns = NULL,
                                  .ensures_clause = NULL,
                                  .ensures_relns = NULL,
                                  .return_value = NULL,
                                  .arg_vardecls = NULL});
-  return atb_type(fntype,heap_rgn_type,empty_tqual(0),bounds_one(),false_type,false_type);
+  return atb_type(fntype,heap_rgn_type,al_qual_type,empty_tqual(0),bounds_one(),false_type,false_type);
 }
 
 
@@ -1023,6 +1028,8 @@ static int tycon2int(tycon_t t) {
   case &DatatypeFieldCon(...):        return 35;
   case &AggrCon(...):                 return 36;
   case &ComplexCon:                   return 37;
+  case &AqualVarCon:                  return 38;
+  case &AqualConstCon(...):           return 39;
   default: Warn::impos2("bad con");
   }
 }
@@ -1154,8 +1161,8 @@ int typecmp(type_t t1, type_t t2) {
     // identities should be resolved
     return intcmp(tv1->identity,tv2->identity);
 
-  case $(&PointerType(PtrInfo(t2a,tqual2a,PtrAtts(rgn2,null2a,b2,zt2,_,rel2))),
-	 &PointerType(PtrInfo(t1a,tqual1a,PtrAtts(rgn1,null1a,b1,zt1,_,rel1)))):
+  case $(&PointerType(PtrInfo(t2a,tqual2a,PtrAtts(rgn2,null2a,b2,zt2,_,rel2,aq2))),
+	 &PointerType(PtrInfo(t1a,tqual1a,PtrAtts(rgn1,null1a,b1,zt1,_,rel1,aq1)))):
     let etc = typecmp(t1a,t2a);
     if(etc != 0) return etc;
     let rc = typecmp(rgn1,rgn2);
@@ -1170,6 +1177,7 @@ int typecmp(type_t t1, type_t t2) {
     if (relc != 0) return relc;
     let bc = typecmp(b1,b2);
     if (bc != 0) return bc;
+    if(aq1 != aq2) return 1;
     return typecmp(null1a,null2a);
 
   case $(&ArrayType(ArrayInfo{t2a,tq2a,e1,zt1,_}),
@@ -1453,6 +1461,7 @@ bool silent_castable(RgnOrder::rgn_po_opt_t po,seg_t loc,type_t t1,type_t t2) {
                get_bounds_exp(bounds_one(),pinfo_b.ptr_atts.bounds)) {
       // okay regardless of nullable
       case $(_, NULL): break;
+
       case $(NULL, _):
         // when zero-terminated can silently cast from ? to *{1}/@{1}
         if (force_type2bool(false,pinfo_a.ptr_atts.zero_term)
@@ -1482,6 +1491,10 @@ bool silent_castable(RgnOrder::rgn_po_opt_t po,seg_t loc,type_t t1,type_t t2) {
 	Warn::warn2(loc, "implicit cast from region ", pinfo_a.ptr_atts.rgn,
 		    " to region ", pinfo_b.ptr_atts.rgn);
     }
+    //must ensure that alias qualifiers are respected
+    if(!unify(pinfo_a.ptr_atts.aqual, pinfo_b.ptr_atts.aqual) &&
+       !alias_qual_subtype(pinfo_a.ptr_atts.aqual, pinfo_b.ptr_atts.aqual))
+      return false;
     // must preserve zero-termination or second pointer must be const
     if(!unify(pinfo_a.ptr_atts.zero_term, pinfo_b.ptr_atts.zero_term)
        && (!force_type2bool(true,pinfo_a.ptr_atts.zero_term)
@@ -1514,9 +1527,6 @@ bool silent_castable(RgnOrder::rgn_po_opt_t po,seg_t loc,type_t t1,type_t t2) {
     if(!unify(t1a,t2a)) return false;
     // FIX: we need to take qualifiers into account on typedefs
     return (!tq1a.real_const || tq2a.real_const);
-
-  case $(&AppType(&TagCon,_),&AppType(&IntCon(...),_)): return false;
-
   default: return unify(t1,t2);
   }
 }
@@ -1637,6 +1647,17 @@ $(decl_t,exp_t) insert_alias(exp_t e, type_t e_type) {
   return $(d,ve);
 }
 
+static bool is_aliasable_qual(aqualtype_t aq) {
+  switch(compress(aq)) {
+  case &AppType(&AqualConstCon(aqv), _):
+    return aqv == Aliasable_qual;
+  case &AppType(&AqualVarCon, tv_bnd):
+    return is_aliasable_qual(tv_bnd->tl->hd);
+  default:  
+    return false;
+  }
+}
+
 // returns true if we could insert an alias construct around the context
 // of the expression with type has_typ to avoid consuming it
 static bool can_insert_alias(exp_t e, type_t e_type,
@@ -1648,22 +1669,25 @@ static bool can_insert_alias(exp_t e, type_t e_type,
     // check if the expected type is has a pointer type into an
     // aliasable region but not the heap region
     switch (compress(wants_type)) {
-    case &PointerType(PtrInfo(_,_,PtrAtts(r2,...))):
+    case &PointerType(PtrInfo(_,_,PtrAtts(r2,_,_,_,_,_,aq))):
       if (is_heap_rgn_type(r2)) return false;
       let k = type_kind(r2);
-      return k->kind == RgnKind && k->aliasqual == Aliasable;
+      return (k->kind == RgnKind && 
+	      k->aliasqual == Aliasable && 
+	      is_aliasable_qual(aq));
     default: return false;
     }
   }
   return false;
 }
 
-// coerce e to have type t -- used in function call and explicit fallthru
+// coerce e to have type t -- used in function call and explicit fallthru and assignop
 bool coerce_arg(RgnOrder::rgn_po_opt_t po, exp_t e, type_t t2, 
 		bool *alias_coercion) {
   type_t t1 = compress((type_t)e->topt);
   coercion_t c;
-  bool do_alias_coercion = false;
+  //do this before unification -- because the region type can change after unification
+  bool do_alias_coercion = can_insert_alias(e, t1, t2, e->loc); 
   // see if types immediately match
   if (unify(t1,t2)) 
     return true;
@@ -1678,7 +1702,7 @@ bool coerce_arg(RgnOrder::rgn_po_opt_t po, exp_t e, type_t t2,
   } 
   // check if we can do an alias coercion; if so, make sure it otherwise
   // typechecks before performing the coercion (for better error reporting).
-  if (can_insert_alias(e,t1,t2,e->loc)) {
+  if (do_alias_coercion) {//can_insert_alias(e,t1,t2,e->loc)) {
     if (Flags::warn_alias_coerce)
       Warn::warn2(e->loc,"implicit alias coercion for ",e,":",t1," to ",t2);
     if(alias_coercion != NULL)
@@ -1812,8 +1836,8 @@ bool subtype(RgnOrder::rgn_po_opt_t po, list_t<$(type_t,type_t)@`H,`H> assume,
   switch ($(t1,t2)) {
     // the following allows us to cast an unsigned int pointer to an int
     // pointer and vice versa.  This is okay because the types are isomorphic.
-   case $(&PointerType(PtrInfo(t_a, q_a, PtrAtts(rt_a,null_a,b_a,zt_a,_,rel_a))),
-          &PointerType(PtrInfo(t_b, q_b, PtrAtts(rt_b,null_b,b_b,zt_b,_,rel_b)))):
+   case $(&PointerType(PtrInfo(t_a, q_a, PtrAtts(rt_a,null_a,b_a,zt_a,_,rel_a,aq_a))),
+          &PointerType(PtrInfo(t_b, q_b, PtrAtts(rt_b,null_b,b_b,zt_b,_,rel_b,aq_b)))):
     // if t1 is const then t2 must be const
     if (q_a.real_const && !q_b.real_const)
       return false;
@@ -1832,6 +1856,9 @@ bool subtype(RgnOrder::rgn_po_opt_t po, list_t<$(type_t,type_t)@`H,`H> assume,
     // rt_a must outlive rt_b
     if (!unify(rt_a,rt_b) && !RgnOrder::rgn_outlives_rgn(po,rt_a,rt_b) && 
         !subtype(po, assume, rt_a, rt_b)) 
+      return false;
+    if (!unify(aq_a, aq_b) && !alias_qual_subtype(aq_a, aq_b) && 
+	!subtype(po, assume, aq_a, aq_b))
       return false;
     // need to check that the bounds match up
     if (!unify(b_a,b_b)) {
@@ -1953,6 +1980,49 @@ static bool ptrsubtype(RgnOrder::rgn_po_opt_t po,
   return true;
 }
 
+bool check_aqual_bounds(aqualtype_t aq, aqualtype_t bnd) {
+  switch ($(compress(aq), compress(bnd))) {
+  case $(&AppType(&AqualConstCon(v_sub), _), &AppType(&AqualConstCon(v_sup), _)):
+    return (v_sup==v_sub || v_sup==Restricted_qual);
+  case $(&AppType(&AqualVarCon, tv_sub), &AppType(&AqualConstCon(v_sup), _)):
+    return check_aqual_bounds(tv_sub->tl->hd, bnd);
+  default: //revise for aquals(`a) support
+    Warn::impos2("check_aqual_bounds expects a constant bound; got ", bnd);
+  }
+}
+
+//also need to handle aquals(`a) types 
+//can't use unify ... don't want side effects
+bool alias_qual_subtype(aqualtype_t aq_sub, aqualtype_t aq_sup) {
+  switch ($(compress(aq_sub), compress(aq_sup))) {
+  case $(&AppType(&AqualConstCon(v_sub), _), &AppType(&AqualConstCon(v_sup), _)):
+    return ((v_sup==v_sub || v_sup==Restricted_qual)
+	    ||(v_sup == Aliasable_qual && (v_sub == Unique_qual || v_sub == Refcnt_qual)));
+  case $(&AppType(&AqualVarCon, &List(&VarType(tv1), bnd1)), &AppType(&AqualVarCon, &List(&VarType(tv2), bnd2))):
+    return (tv2->identity == tv1->identity);
+  case $(&AppType(&AqualVarCon, &List(&VarType(tv1), bnd1)), &AppType(&AqualVarCon, &List(&Evar(k, ...), bnd2))):
+    return (Kinds::kind_eq(Kinds::tvar_kind(tv1,&Kinds::aqk), k->v) && alias_qual_subtype(bnd1->hd, bnd2->hd));
+  case $(&AppType(&AqualVarCon, &List(&Evar(k1, ...), bnd1)), &AppType(&AqualVarCon, &List(&VarType(tv2), bnd2))):
+    return (Kinds::kind_eq(k1->v, Kinds::tvar_kind(tv2, &Kinds::aqk)) && check_aqual_bounds(bnd2->hd, bnd1->hd));
+  case $(&AppType(&AqualVarCon, &List(&Evar(k1, ...), bnd1)), &AppType(&AqualVarCon, &List(&Evar(k2, ...), bnd2))):
+    return (Kinds::kind_eq(k1->v, k2->v) && alias_qual_subtype(bnd1->hd, bnd2->hd));
+  case $(&AppType(&AqualVarCon, tv_sub), &AppType(&AqualVarCon, tv_sup)):
+    return (unify(tv_sub->hd, tv_sup->hd) && alias_qual_subtype(tv_sub->tl->hd, tv_sup->tl->hd));
+    //we can use an @aqual(`q <= C) in place of C ... 
+  case $(&AppType(&AqualVarCon, &List(&VarType(tv), bnd)), &AppType(&AqualConstCon(v_sup),_)):
+    return alias_qual_subtype(bnd->hd, aq_sup);
+  case $(&AppType(&AqualVarCon, &List(&Evar(k, ...), bnd)), &AppType(&AqualConstCon(v_sup),_)):
+    return (Kinds::kind_eq(k->v, &Kinds::aqk) && check_aqual_bounds(aq_sup, bnd->hd));//, aq_sup));
+    //but not C in place of @aqual(`q <= C) (VarType does not unify with AqualConst, but Evar does)
+  case $(&AppType(&AqualConstCon(v_sub),_), &AppType(&AqualVarCon, &List(&VarType(tv), ...))):
+    return false;
+  case $(&AppType(&AqualConstCon(v_sub),_), &AppType(&AqualVarCon, &List(&Evar(k, ...), bnd))):
+    return (Kinds::kind_eq(k->v, &Kinds::aqk) && alias_qual_subtype(aq_sub, bnd->hd));
+  default:
+    return false;
+  }
+}
+
 // Can t1 be cast to t2?  Assumes that the types are well-formed.
 // FIX: add function types...
 coercion_t castable(RgnOrder::rgn_po_opt_t po, seg_t loc, type_t t1, type_t t2){
@@ -1970,7 +2040,7 @@ coercion_t castable(RgnOrder::rgn_po_opt_t po, seg_t loc, type_t t1, type_t t2){
   default: break;
   }
   switch (t1) {
-  case &PointerType(PtrInfo(t_a,q_a,PtrAtts(rt_a,null_a,b_a,zt_a,_,rel_a))):
+  case &PointerType(PtrInfo(t_a,q_a,PtrAtts(rt_a,null_a,b_a,zt_a,_,rel_a,aq_a))):
     
     // can cast t* to t@ and vice versa.
     // can cast a non-const pointer to a const pointer.
@@ -1979,8 +2049,9 @@ coercion_t castable(RgnOrder::rgn_po_opt_t po, seg_t loc, type_t t1, type_t t2){
     // can cast a "bits-only" pointer to a char pointer ?NOZEROTERM
     // can cast a zero-terminated pointer to a non-zero terminated pointer
     // can cast an autoreleased pointer to a non-autoreleased pointer
+    // can cast any aqual to an alias-restricted pointer
     switch (t2) {
-    case &PointerType(PtrInfo(t_b,q_b,PtrAtts(rt_b,null_b,b_b,zt_b,_,rel_b))):
+    case &PointerType(PtrInfo(t_b,q_b,PtrAtts(rt_b,null_b,b_b,zt_b,_,rel_b,aq_b))):
       coercion_t coercion = Other_coercion;
       let assump = new List(new $(t1,t2),NULL);
       let quals_okay = (q_b.real_const || !q_a.real_const);
@@ -2020,7 +2091,8 @@ coercion_t castable(RgnOrder::rgn_po_opt_t po, seg_t loc, type_t t1, type_t t2){
       if (t1_nullable && !t2_nullable)
         coercion = Null_to_NonNull;
 
-      if (bounds_ok && zeroterm_ok && autoreleased_ok && (ptrsub || bitcase) &&
+      if (bounds_ok && zeroterm_ok && autoreleased_ok && 
+	  (ptrsub || bitcase) && alias_qual_subtype(aq_a, aq_b) &&
           (unify(rt_a,rt_b) || RgnOrder::rgn_outlives_rgn(po,rt_a,rt_b)))
         return coercion;
       else return Unknown_coercion;
@@ -2322,27 +2394,28 @@ type_t rsubstitute(region_t<`r> rgn,
     let new_zt = rsubstitute(rgn,inst,zt);
     return (new_t1 == t1 && new_e == e && new_zt == zt) ? t : 
       new ArrayType(ArrayInfo{new_t1,tq,new_e,new_zt,ztl});
-  case &PointerType(PtrInfo(t1,tq,PtrAtts(r,n,b,zt,_,rel))):
+  case &PointerType(PtrInfo(t1,tq,PtrAtts(r,n,b,zt,_,rel,aq))):
     let new_t1 = rsubstitute(rgn,inst,t1);
     let new_r  = rsubstitute(rgn,inst,r);
     let new_b  = rsubstitute(rgn,inst,b);
     let new_zt = rsubstitute(rgn,inst,zt);
     let new_rel = rsubstitute(rgn,inst,rel);
-    if(new_t1 == t1 && new_r == r && new_b == b && new_zt == zt && new_rel == rel)
+    let new_aq = rsubstitute(rgn,inst,aq);
+    if(new_t1 == t1 && new_r == r && new_b == b && new_zt == zt && new_rel == rel && new_aq == aq)
       return t;
-    return pointer_type(PtrInfo(new_t1,tq,PtrAtts(new_r,n,new_b,new_zt,NULL,new_rel)));
-  case &FnType(FnInfo{vs,eff,rtq,rtyp,args,c_varargs,cyc_varargs,rgn_po,atts,
-                        req,_,ens,_,ret_value,argvds}):
+    return pointer_type(PtrInfo(new_t1,tq,PtrAtts(new_r,n,new_b,new_zt,NULL,new_rel,new_aq)));
+  case &FnType(FnInfo{vs,eff,rtq,rtyp,args,c_varargs,cyc_varargs,rgn_po,qb,atts,
+                        req,_,ens,_,ret_value,argvds}): //sub the qb also ... need it for delayed checking
     if (skip_fntypes) return t;
-    // FIX: capture???
+    // FIX: capture??? 
     for (let p = vs; p != NULL; p = p->tl)
       inst = rnew(rgn) List(rnew(rgn) $(p->hd,var_type(p->hd)),inst);
     let $(qs,ts) = List::rsplit(rgn,rgn,
 				List::rmap_c(rgn,substitute_f1,rgn,args));
-    let args2 = args;
-    let ts2 = substs(rgn,inst,ts);
-    if (ts2 != ts) 
-      args2 = List::map2(substitute_f2, args, ts2);
+    let args2 = args; //inst contains all abstracted tvars and their corresponding var_type's
+    let ts2 = substs(rgn,inst,ts); //ts is the types of all the arguments
+    if (ts2 != ts) //ts2 are the argtyps with free tvars replaced with the abstracted var_type's from inst
+      args2 = List::map2(substitute_f2, args, ts2); //args list with new types
     type_opt_t eff2 = (eff==NULL) ? NULL : rsubstitute(rgn,inst,eff);
 
     vararg_info_t *cyc_varargs2;
@@ -2354,12 +2427,13 @@ type_t rsubstitute(region_t<`r> rgn,
       cyc_varargs2 = (t2 == t) ? cyc_varargs : new VarargInfo{n,tq,t2,i};
     }
     list_t<$(type_t,type_t)@> rgn_po2 = rsubst_rgnpo(rgn,inst,rgn_po);
+    list_t<$(type_t,type_t)@> qb2 = rsubst_rgnpo(rgn,inst,qb);
     exp_opt_t req2 = rsubs_exp_opt(rgn,inst,req);
     exp_opt_t ens2 = rsubs_exp_opt(rgn,inst,ens);
     let req_relns2 = extract_relns(args2,req2);
     let ens_relns2 = extract_relns(args2,ens2);
     return new FnType(FnInfo{vs,eff2,rtq,rsubstitute(rgn,inst,rtyp),args2,
-			       c_varargs,cyc_varargs2,rgn_po2,atts,
+			       c_varargs,cyc_varargs2,rgn_po2,qb2,atts,
 			       req2,req_relns2,ens2,ens_relns2,ret_value,argvds});
   case &TupleType(tqts):
     list_t<type_t,`r> ts2 = NULL;
@@ -2377,6 +2451,9 @@ type_t rsubstitute(region_t<`r> rgn,
     return (fs==new_fs) ? t : new AnonAggrType(k,new_fs);
   case &Evar(_,r,_,_):
     return (r==NULL) ? t : rsubstitute(rgn,inst,(type_t)r);
+  case &AppType(&AqualVarCon, ts): //special case this, because the bounds info is mutated by unification...so no sharing
+    return aqual_var_type(rsubstitute(rgn, inst,ts->hd), 
+			  rsubstitute(rgn, inst,ts->tl->hd));
   case &AppType(c,ts):
     let new_ts = substs(rgn,inst,ts);
     return (ts==new_ts) ? t : new AppType(c,new_ts);
@@ -2648,8 +2725,30 @@ bool is_noalias_region(type_t r, bool must_be_unique) {
 //   flavor if they are not yet solidly bounded
 bool is_noalias_pointer(type_t t, bool must_be_unique) {
   switch (compress(t)) {
-  case &PointerType(PtrInfo(_,_,PtrAtts(r,...))):
-    return is_noalias_region(r,must_be_unique);
+  case &PointerType(PtrInfo(_,_,PtrAtts(r,_,_,_,_,_,aq))):
+    if(!is_noalias_region(r,must_be_unique)) {
+      switch(compress(aq)) {
+      case &AppType(&AqualConstCon(aqv), _): {
+	switch(aqv) {
+	case Unique_qual: return true;
+	case Refcnt_qual:
+	case Restricted_qual: return !must_be_unique;
+	default: return false;
+	}
+      }
+      case &AppType(&AqualVarCon, &List(&VarType(...), bnd)): {
+	switch(bnd->hd) {
+	case &AppType(&AqualConstCon(Unique_qual), _): return true;
+	case &AppType(&AqualConstCon(Refcnt_qual), _): 
+	case &AppType(&AqualConstCon(Restricted_qual), _): return !must_be_unique;
+	default: return false;
+	}
+      }//how about aquals(`a)?
+      default:
+	return false;
+      }
+    }
+    return true;
   case &VarType(tv):
     let &Kind(k,a) = Kinds::tvar_kind(tv,&Kinds::bk);
     switch (k) {
@@ -2743,7 +2842,7 @@ bool is_noalias_path(exp_t e) {
 // used by address of.
 // Ensure e is an lvalue or function designator.
 // Return if &e is const (true for const) and what region e is in (via a type
-//    of RgnKind).
+//    of RgnKind) 
 // FIX: not sure const is sufficient to prevent assigning to a function
 //      designator???
 // Type errors should already have been reported, so we often silently return
@@ -3048,7 +3147,7 @@ list_t<`a> filter_nulls(list_t<`a*> l) {
   return res;
 }
 
-type_t promote_array(type_t t, type_t rgn, bool convert_tag) {
+type_t promote_array(type_t t, type_t rgn, aqualtype_t aqual, bool convert_tag) {
   switch(compress(t)) { 
   case &ArrayType(ArrayInfo(et,tq,eopt,zt,_)):
     ptrbound_t b;
@@ -3066,7 +3165,7 @@ type_t promote_array(type_t t, type_t rgn, bool convert_tag) {
       }
     } else
       b = thin_bounds_exp(eopt);
-    return atb_type(et,rgn,tq,b,zt,false_type);
+    return atb_type(et,rgn,aqual,tq,b,zt,false_type);
   default: return t;
   }
 }

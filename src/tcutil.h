@@ -108,6 +108,8 @@ coercion_t castable(RgnOrder::rgn_po_opt_t,seg_t,type_t,type_t);
 // true when t1 is a subtype of t2 under the given list of subtype assumptions
 bool subtype(RgnOrder::rgn_po_opt_t, list_t<$(type_t,type_t)@`H,`H> assume, 
 	     type_t t1, type_t t2);
+bool alias_qual_subtype(aqualtype_t sub, aqualtype_t sup);
+  bool check_aqual_bounds(aqualtype_t sub, aqualtype_t bnd);
 // if t is a nullable pointer type and e is 0, changes e to null 
 bool zero_to_null(type_t, exp_t);
 
@@ -185,7 +187,7 @@ bool is_noalias_path(exp_t);
 bool is_noalias_pointer_or_aggr(type_t);
 
 // Ensure e is an lvalue or function designator -- return whether
-// or not &e is const and what region e is in.
+// or not &e is const and what region e is in 
 $(bool,type_t) addressof_props(exp_t);
 
 // Given an effect, express/mutate it to have only regions(`a), `r, and joins.
@@ -220,7 +222,7 @@ list_t<`a> filter_nulls(list_t<`a *>);
 
 // If t is an array type, promote it to an at-pointer type into the
 // specified region.
-type_t promote_array(type_t t, type_t rgn, bool convert_tag);
+type_t promote_array(type_t t, type_t rgn, aqualtype_t aqual, bool convert_tag);
 
 // does the type admit zero?
 bool zeroable_type(type_t);

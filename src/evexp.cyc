@@ -623,6 +623,7 @@ bool okay_szofarg(type_t t) {
     case &BuiltinCon(...):
     case &EnumCon(_,_):
     case &RgnHandleCon: 
+    case &AqualHandleCon:
     case &DatatypeCon(_): 
     case &AnonEnumCon(_): return true;
 
@@ -636,7 +637,11 @@ bool okay_szofarg(type_t t) {
     case &FalseCon:
     case &ThinCon:
     case &FatCon:
-    case &RgnsCon:   return false;
+    case &RgnsCon:   
+    case &AqualsCon:
+    case &AqualConstCon(...):
+    case &AqualVarCon:
+      return false;
     case &AggrCon({.UnknownAggr = _}):
       Warn::impos2("szof on unchecked StructType");
     case &AggrCon({.KnownAggr = &ad}):

@@ -1,0 +1,43 @@
+
+testaqualdefaults.cyc:27: alias qualifier bounds violated: RESTRICTED <> ALIASABLE
+testaqualdefaults.cyc:53: b was declared with type int *@aqual(UNIQUE) but initialized with type int *
+  ALIASABLE and UNIQUE are not compatible. ((different alias qualifiers))
+testaqualdefaults.cyc:77: field a of struct defstruct expects type int *@aqual(ALIASABLE) != int *@aqual(RESTRICTED)
+
+  @false and @true are not compatible. (different type constructors)
+testaqualdefaults.cyc:118: field a of struct LCS expects type list_t<int *@aqual(ALIASABLE)> != struct List<int *`GR12> *@aqual(ALIASABLE)
+
+  @false and @true are not compatible. (different type constructors)
+testaqualdefaults.cyc:141: actual argument has type 
+	struct List<int *@aqual(`p)> *@aqual(ALIASABLE)
+ but formal has type 
+
+	struct List<int *> *@aqual(ALIASABLE)
+  `p and ALIASABLE are not compatible. 
+	((abstracted type variable doesn't unify with constant))
+testaqualdefaults.cyc:142: actual argument has type 
+	struct List<int *@aqual(`q)> *@aqual(ALIASABLE)
+ but formal has type 
+
+	struct List<int *> *@aqual(ALIASABLE)
+  `q and ALIASABLE are not compatible. 
+	((abstracted type variable doesn't unify with constant))
+testaqualdefaults.cyc:143: field a of struct LCS expects type list_t<int *@aqual(ALIASABLE)> != struct List<int *@aqual(`p)> *@aqual(ALIASABLE)
+
+  @false and @true are not compatible. (different type constructors)
+testaqualdefaults.cyc:144: field a of struct LCS expects type list_t<int *@aqual(ALIASABLE)> != struct List<int *@aqual(`q)> *@aqual(ALIASABLE)
+
+  @false and @true are not compatible. (different type constructors)
+testaqualdefaults.cyc:148: alias qualifier bounds violated: `p <> ALIASABLE
+testaqualdefaults.cyc:171: datatype constructor AAA expects argument of type `EB183 but this argument has type 
+int *`ETR116
+  `EB183 and int *`ETR116 are not compatible. (kinds are incompatible)
+testaqualdefaults.cyc:173: datatype constructor AAA expects argument of type `EB185 but this argument has type 
+int *@aqual(RESTRICTED)`ETR113
+  `EB185 and int *@aqual(RESTRICTED)`ETR113 are not compatible. 
+	(kinds are incompatible)
+testaqualdefaults.cyc:188: datatype constructor CCC expects argument of type int *@aqual(ALIASABLE) but this argument has type 
+int *@aqual(RESTRICTED)
+  @false and @true are not compatible. (different type constructors)
+
+COMPILATION FAILED!

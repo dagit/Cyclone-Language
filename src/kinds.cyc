@@ -42,6 +42,8 @@ struct Kind uak = Kind(AnyKind,Unique);
 struct Kind ubk = Kind(BoxKind,Unique);
 struct Kind umk = Kind(MemKind,Unique);
 
+struct Kind aqk = Kind(AqualKind,Top);
+
 struct Opt<kind_t> rko = {&rk};
 struct Opt<kind_t> ako = {&ak};
 struct Opt<kind_t> bko = {&bk};
@@ -60,6 +62,7 @@ struct Opt<kind_t> urko = {&urk};
 struct Opt<kind_t> uako = {&uak};
 struct Opt<kind_t> ubko = {&ubk};
 struct Opt<kind_t> umko = {&umk};
+struct Opt<kind_t> aqko = {&aqk};
 
 opt_t<kind_t> kind_to_opt(kind_t ka) {
   let &Kind(k,a) = ka;
@@ -73,7 +76,9 @@ opt_t<kind_t> kind_to_opt(kind_t ka) {
     case EffKind: return &eko;
     case IntKind: return &iko;
     case BoolKind: return &bko;
-    case PtrBndKind: default: return &ptrbko;
+    case AqualKind: return &aqko;
+    case PtrBndKind:       
+    default: return &ptrbko; 
     }
   case Unique:
     switch (k) {
@@ -90,6 +95,7 @@ opt_t<kind_t> kind_to_opt(kind_t ka) {
     case MemKind: return &tmko;
     case BoxKind: return &tbko;
     case RgnKind: return &trko;
+    case AqualKind: return &aqko;
     default: break;
     }
     break;
@@ -115,6 +121,7 @@ kind_t id_to_kind(string_t<`H> s, seg_t loc) {
     case 'R': return &rk;
     case 'E': return &ek;
     case 'I': return &ik;
+    case 'Q': return &aqk;
     case 'U': 
       switch (s[1]) {
       case 'R':	return &urk;
@@ -166,6 +173,7 @@ string_t kind2string(kind_t ka) {
     case Unique: return "UR";
     case Top: default: return "TR";
     }
+  case AqualKind: return "Q";
   case EffKind: return "E";
   case IntKind: return "I";
   case BoolKind: return "BOOL";
@@ -289,4 +297,3 @@ bool constrain_kinds(kindbound_t c1, kindbound_t c2) {
     return false;
   }
 }
-

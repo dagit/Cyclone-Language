@@ -30,5 +30,6 @@ void check_consume(Position::seg_t,Absyn::type_t,Absyn::exp_t);
 
   // for tcpat:
   Absyn::ptr_info_t fresh_pointer_type(Tcenv::tenv_t);
+  Absyn::ptr_info_t fresh_pointer_type_with_aqual(Tcenv::tenv_t, Absyn::aqualtype_t aq);
 }
 #endif

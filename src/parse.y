@@ -158,6 +158,7 @@ datatype Pointer_qual {
   Autoreleased_ptrqual;
   Notnull_ptrqual;
   Nullable_ptrqual;
+  Alias_ptrqual(aqualtype_t);
 };
 
 struct Abstractdeclarator<`yy> {
@@ -194,6 +195,7 @@ make_pointer_mod(region_t<`r> r, ptrloc_t loc,
   // for now, the last qualifier wins and overrides previous ones
   booltype_t zeroterm = Tcutil::any_bool(NULL);
   booltype_t autoreleased = Tcutil::any_bool(NULL);
+  type_opt_t aqual = NULL;//default determined by usage -- non-functions are `q <= RESTRICTED
   for (; pqs != NULL; pqs = pqs->tl)
     switch (pqs->hd) {
     case &Zeroterm_ptrqual:     zeroterm = true_type;            break;
@@ -205,12 +207,14 @@ make_pointer_mod(region_t<`r> r, ptrloc_t loc,
     case &Thin_ptrqual:            bound = bounds_one();         break;
     case &Numelts_ptrqual(e):      bound = thin_bounds_exp(e);   break;
     case &Region_ptrqual(t):         rgn = t;                    break;
+    case &Alias_ptrqual(aq):       aqual=aq;                     break;
     }
   return rnew(r) Pointer_mod(PtrAtts(rgn,nullable,bound,zeroterm,
-				     loc,autoreleased),
+				     loc,autoreleased,
+				     (aqual!=NULL ? aqual : aqual_var_type(new_evar(&Kinds::aqko, NULL), rtd_qual_type))),
 			     tqs);
 }
-
+  
 ////////////////// Functions for creating abstract syntax //////////////////
 
 static qvar_t gensym_enum() { // a way to gensym an enum name
@@ -282,7 +286,7 @@ static type_specifier_t complex_spec(seg_t loc) {
 static type_t array2ptr(type_t t, bool argposn) {
     // FIX: don't lose zero-term location
   return Tcutil::is_array_type(t) ? 
-    Tcutil::promote_array(t, argposn ? new_evar(&Kinds::rko, NULL) : heap_rgn_type, false) : t;
+    Tcutil::promote_array(t, argposn ? new_evar(&Kinds::rko, NULL) : heap_rgn_type, al_qual_type, false) : t;
 }
 
 // The next few functions are used when we have a function (or aggregate)
@@ -359,11 +363,11 @@ static type_t substitute_tags(list_t<$(var_t,type_t)@> tags, type_t t) {
     if (nelts != nelts2 || et != et2)
       return array_type(et2,tq,nelts2,zt,ztloc);
     break;
-  case &PointerType(PtrInfo{et,tq,PtrAtts{r,n,b,zt,pl,rel}}):
+  case &PointerType(PtrInfo{et,tq,PtrAtts{r,n,b,zt,pl,rel,aq}}):
     let et2 = substitute_tags(tags,et);
     let b2 = substitute_tags(tags,b);
     if (et2 != et || b2 != b)
-      return pointer_type(PtrInfo{et2,tq,PtrAtts{r,n,b2,zt,pl,rel}});
+      return pointer_type(PtrInfo{et2,tq,PtrAtts{r,n,b2,zt,pl,rel,aq}});
     break;
   case &AppType(&ThinCon, &List{t,NULL}):
     let t2 = substitute_tags(tags,t);
@@ -403,6 +407,7 @@ static bool is_typeparam(type_modifier_t tm) {
 static type_t id2type(string_t<`H> s, kindbound_t k) {
   if (zstrcmp(s,"`H") == 0)
     return heap_rgn_type;
+  //eventually parse these as regular type vars 
   if (zstrcmp(s,"`U") == 0)
     return unique_rgn_type;
   if (zstrcmp(s,"`RC") == 0)
@@ -498,7 +503,7 @@ static list_t<type_modifier_t<`yy>,`yy>
 	}
 	return
 	  rnew(yy) List(rnew(yy) Function_mod(rnew(yy) WithTypes(imp_rev(rev_new_params),
-						  false,NULL,NULL,NULL,NULL,NULL)),
+						  false,NULL,NULL,NULL,NULL,NULL,NULL)),
 		   NULL);
       }
     } 
@@ -691,7 +696,7 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
                      array_type(t,tq,e,zeroterm,ztloc),atts,tms->tl);
   case &Function_mod(args): {
     switch (args) {
-    case &WithTypes(args2,c_vararg,cyc_vararg,eff,rgn_po,req,ens):
+    case &WithTypes(args2,c_vararg,cyc_vararg,eff,rgn_po,qb,req,ens):
       list_t<tvar_t> typvars = NULL;
       // function type attributes seen thus far get put in the function type
       attributes_t fn_atts = NULL, new_atts = NULL;
@@ -771,7 +776,7 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
       // now we don't have a loc so the warning will be confusing.
       return apply_tms(empty_tqual(tq.loc),
 		       function_type(typvars,eff,tq,t,args2,
-                                     c_vararg,cyc_vararg,rgn_po,fn_atts,
+                                     c_vararg,cyc_vararg,rgn_po,qb,fn_atts,
                                      req,ens),
 		       new_atts,
 		       tms->tl);
@@ -1022,11 +1027,11 @@ using Parse;
 %token MALLOC RMALLOC RVMALLOC RMALLOC_INLINE CALLOC RCALLOC SWAP
 %token REGION_T TAG_T REGION RNEW REGIONS 
 %token PORTON PORTOFF PRAGMA TEMPESTON TEMPESTOFF
-// %token ALIAS
+%token AQ_ALIASABLE AQ_DYNTRK AQ_REFCNT AQ_RESTRICTED AQ_UNIQUE AQUAL_T
 %token NUMELTS VALUEOF VALUEOF_T TAGCHECK NUMELTS_QUAL THIN_QUAL
-%token FAT_QUAL NOTNULL_QUAL NULLABLE_QUAL REQUIRES_QUAL ENSURES_QUAL
-// Cyc:  CYCLONE qualifiers (e.g., @zeroterm, @tagged)
-%token REGION_QUAL NOZEROTERM_QUAL ZEROTERM_QUAL TAGGED_QUAL ASSERT_QUAL
+%token FAT_QUAL NOTNULL_QUAL NULLABLE_QUAL REQUIRES_QUAL ENSURES_QUAL 
+// Cyc:  CYCLONE qualifiers (e.g., @zeroterm, @tagged, @aqual, aquals)
+%token REGION_QUAL NOZEROTERM_QUAL ZEROTERM_QUAL TAGGED_QUAL ASSERT_QUAL ALIAS_QUAL AQUALS
 %token EXTENSIBLE_QUAL AUTORELEASED_QUAL
 // double and triple-character tokens
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
@@ -1071,6 +1076,7 @@ using Parse;
 %type <exp_t> logical_or_expression conditional_expression
 %type <exp_t> assignment_expression expression constant_expression
 %type <exp_t> initializer array_initializer for_exp_opt
+%type <exp_opt_t> opt_qual_exp 
 %type <list_t<exp_t,`H>> argument_expression_list argument_expression_list0
 %type <list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H>> initializer_list
 %type <primop_t> unary_operator 
@@ -1120,23 +1126,26 @@ using Parse;
 %type <list_t<var_t,`H>> identifier_list identifier_list0
 %type <$(var_opt_t,tqual_t,type_t)@`H> parameter_declaration type_name
 %type <list_t<$(var_opt_t,tqual_t,type_t)@`H,`H>> parameter_list
-%type <$(list_t<$(var_opt_t,tqual_t,type_t)@`H,`H>, bool,vararg_info_t *`H,type_opt_t, list_t<$(type_t,type_t)@`H,`H>)@`H> parameter_type_list
+%type <$(list_t<$(var_opt_t,tqual_t,type_t)@`H,`H>, bool,vararg_info_t *`H,type_opt_t, list_t<$(type_t,type_t)@`H,`H>, list_t<$(type_t,type_t)@`H,`H>)@`H> parameter_type_list
 %type <types_t> type_name_list type_params_opt effect_set region_set
 %type <types_t> atomic_effect
 %type <list_t<designator_t,`H>> designation designator_list
 %type <designator_t> designator
 %type <kind_t> kind
-%type <type_t> any_type_name type_var rgn_opt
+%type <type_t> any_type_name type_var rgn_opt qual_bnd_term
 %type <list_t<attribute_t,`H>> attributes_opt attributes attribute_list
 %type <attribute_t> attribute
 %type <enumfield_t> enum_field
 %type <list_t<enumfield_t,`H>> enum_declaration_list
 %type <type_opt_t> optional_effect 
-%type <list_t<$(type_t,type_t)@`H,`H>> optional_rgn_order rgn_order
+//%type <list_t<$(type_t,type_t)@`H,`H>> optional_rgn_order rgn_order
+%type <$(list_t<$(type_t,type_t)@`H,`H>, list_t<$(type_t,type_t)@`H,`H>)*`H> optional_rgnpo_qualbnd rgnpo_qualbnd
+%type <$(type_t, type_t)@`H> rgn_order_elt, qual_bnd_elt
 %type <booltype_t> zeroterm_qual_opt
 %type <list_t<$(seg_t,qvar_t,bool)@`H,`H>> export_list_values
 %type <$(list_t<$(seg_t,qvar_t,bool)@`H,`H>, seg_t)@`H> export_list export_list_opt
 %type <list_t<qvar_t,`H>> hide_list_opt hide_list_values
+%type <aqualtype_t> aqual_specifier
 %type <pointer_qual_t<`yy>> pointer_qual
 %type <pointer_quals_t<`yy>> pointer_quals
 %type <exp_opt_t> requires_clause_opt open_opt
@@ -1505,6 +1514,8 @@ type_specifier_notypedef:
     { $$=^$(type_spec(rgn_handle_type($3),LOC(@1,@4))); }
 | REGION_T 
     { $$=^$(type_spec(rgn_handle_type(new_evar(&Kinds::rko, NULL)), SLOC(@1)));}
+| AQUAL_T '<' qual_bnd_term right_angle
+    { $$=^$(type_spec(aqual_handle_type($3),LOC(@1,@4))); }
 | TAG_T '<' any_type_name right_angle
     { $$=^$(type_spec(tag_type($3),LOC(@1,@4))); }
 | TAG_T 
@@ -1558,11 +1569,13 @@ struct_or_union_specifier:
   { $$=^$(type_spec(new AnonAggrType($1,$3),LOC(@1,@4))); }
 /* Cyc:  TAGGED_QUAL, type_params_opt are added */
 | maybe_tagged_struct_union struct_union_name type_params_opt '{' 
-    type_params_opt optional_rgn_order struct_declaration_list '}'
+    type_params_opt optional_rgnpo_qualbnd struct_declaration_list '}'
     { let ts = List::map_c(typ2tvar,SLOC(@3),$3);
       let exist_ts = List::map_c(typ2tvar,SLOC(@5),$5);
+      let po_qb = $6;
+      let $(po, qb) = po_qb ? *po_qb : $(NULL, NULL);
       let td = aggr_tdecl($1[1], Public, $2, ts, 
-                          aggrdecl_impl(exist_ts,$6,$7,$1[0]), NULL,
+                          aggrdecl_impl(exist_ts,po,qb,$7,$1[0]), NULL,
                           LOC(@1,@8));
       $$ = ^$(type_spec(new TypeDeclType(td,NULL), LOC(@1,@8)));
    }
@@ -1778,10 +1791,10 @@ direct_declarator:
 { $$=^$(Declarator($1.id, $1.varloc,
                        rnew(yyr) List(rnew(yyr) ConstArray_mod($3,$5,SLOC(@5)),$1.tms)));}
 | direct_declarator '(' parameter_type_list ')' requires_and_ensures_opt
-    { let &$(lis,b,c,eff,po) = $3;
+    { let &$(lis,b,c,eff,po,qb) = $3;
       let req = $5[0];
       let ens = $5[1];
-      $$=^$(Declarator($1.id, $1.varloc,rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(lis,b,c,eff,po,req,ens)),$1.tms)));
+      $$=^$(Declarator($1.id, $1.varloc,rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(lis,b,c,eff,po,qb,req,ens)),$1.tms)));
     }
 | direct_declarator '(' identifier_list ')'
     { $$=^$(Declarator($1.id, $1.varloc, rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) NoTypes($3,LOC(@1,@4))),$1.tms))); }
@@ -1818,11 +1831,11 @@ direct_declarator_withtypedef:
                        rnew(yyr) List(rnew(yyr) ConstArray_mod($3,$5,SLOC(@5)),
                                 one.tms)));}
 | direct_declarator_withtypedef '(' parameter_type_list ')' requires_and_ensures_opt 
-    { let &$(lis,b,c,eff,po) = $3;
+    { let &$(lis,b,c,eff,po,qb) = $3;
       let req = $5[0];
       let ens = $5[1];
       let one=$1;
-      $$=^$(Declarator(one.id, one.varloc, rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(lis,b,c,eff,po,req,ens)),one.tms)));
+      $$=^$(Declarator(one.id, one.varloc, rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(lis,b,c,eff,po,qb,req,ens)),one.tms)));
     }
 | direct_declarator_withtypedef '(' identifier_list ')'
     { let one=$1;
@@ -1873,6 +1886,25 @@ pointer_qual:
 | NOZEROTERM_QUAL   { $$ = ^$(rnew(yyr) Nozeroterm_ptrqual); }
 | NOTNULL_QUAL      { $$ = ^$(rnew(yyr) Notnull_ptrqual); }
 | NULLABLE_QUAL     { $$ = ^$(rnew(yyr) Nullable_ptrqual); }
+| ALIAS_QUAL '(' aqual_specifier ')' { $$ = ^$(rnew(yyr) Alias_ptrqual($3)); }
+;
+
+aqual_specifier: 
+  AQ_ALIASABLE { $$ = ^$(al_qual_type);}
+| AQ_UNIQUE { $$ = ^$(un_qual_type);}
+| AQ_REFCNT { $$ = ^$(rc_qual_type);}
+| AQ_DYNTRK { $$ = ^$(dt_qual_type);}
+| AQ_RESTRICTED { $$ = ^$(rtd_qual_type);}
+| TYPE_VAR 
+  { tvar_ok($1,SLOC(@1));
+    tvar_t tv = new Tvar(new $1,-1,Kinds::kind_to_bound(&Kinds::aqk));
+    type_t t  = var_type(tv);
+    $$ = ^$(aqual_var_type(t, al_qual_type));//default aliasable -- real bound filled in by typechecker
+  }
+| AQUALS '(' any_type_name ')'
+  {
+    $$ = ^$(aqualsof_type($3));
+  }
 ;
 
 pointer_null_and_bound:
@@ -1905,22 +1937,33 @@ tqual_list:
 ;
 
 parameter_type_list:
-  optional_effect optional_rgn_order { $$= ^$(new $(NULL,false,NULL,$1,$2)); }
-| parameter_list optional_effect optional_rgn_order 
-    { $$=^$(new $(List::imp_rev($1),false,NULL,$2,$3)); }
-| parameter_list ',' ELLIPSIS optional_effect optional_rgn_order 
-    { $$=^$(new $(List::imp_rev($1),true,NULL,$4,$5)); }
+  optional_effect optional_rgnpo_qualbnd 
+{ let po_qb = $2;
+  let $(po, qb) = po_qb ? *po_qb : $(NULL, NULL);
+  $$= ^$(new $(NULL,false,NULL,$1,po,qb)); }
+| parameter_list optional_effect optional_rgnpo_qualbnd 
+    { let po_qb = $3;
+    let $(po, qb) = po_qb ? *po_qb : $(NULL, NULL);
+    $$=^$(new $(List::imp_rev($1),false,NULL,$2,po,qb)); }
+| parameter_list ',' ELLIPSIS optional_effect optional_rgnpo_qualbnd 
+    { let po_qb = $5;
+    let $(po, qb) = po_qb ? *po_qb : $(NULL, NULL);
+    $$=^$(new $(List::imp_rev($1),true,NULL,$4,po,qb)); }
 | ELLIPSIS optional_inject parameter_declaration optional_effect
-  optional_rgn_order 
+  optional_rgnpo_qualbnd 
 { let &$(n,tq,t) = $3;
   let v = new VarargInfo {.name = n,.tq = tq,.type = t,.inject = $2};
-  $$=^$(new $(NULL,false,v,$4,$5)); 
+  let po_qb = $5;
+  let $(po, qb) = po_qb ? *po_qb : $(NULL, NULL);
+  $$=^$(new $(NULL,false,v,$4,po,qb)); 
 }
 | parameter_list ',' ELLIPSIS optional_inject parameter_declaration
-  optional_effect optional_rgn_order 
+  optional_effect optional_rgnpo_qualbnd
 { let &$(n,tq,t) = $5;
   let v = new VarargInfo {.name = n,.tq = tq,.type = t,.inject = $4};
-  $$=^$(new $(List::imp_rev($1),false,v,$6,$7)); 
+  let po_qb = $7;
+  let $(po, qb) = po_qb ? *po_qb : $(NULL, NULL);
+  $$=^$(new $(List::imp_rev($1),false,v,$6,po,qb)); 
 }
 ;
 
@@ -1934,27 +1977,88 @@ optional_effect:
 | ';' effect_set { $$ = ^$(join_eff($2)); }
 ;
 
-optional_rgn_order:
+optional_rgnpo_qualbnd:
   /* empty */    { $$ = ^$(NULL); }
-| ':' rgn_order  { $$ = $!2; }
+| ':' rgnpo_qualbnd  { $$ = $!2; }
 ;
 
-rgn_order:
+rgnpo_qualbnd:
+  rgn_order_elt
+  { $$ = ^$(new $(list($1), NULL)); }
+| qual_bnd_elt
+  { $$ = ^$(new $(NULL, list($1))); }
+| rgn_order_elt ',' rgnpo_qualbnd
+  {
+    let rest = $3;
+    let &$(rpo, _) = rest; 
+    (*rest)[0] = new List($1, rpo);
+    $$ = ^$(rest);
+  }
+| qual_bnd_elt ',' rgnpo_qualbnd
+  {
+    let rest = $3;
+    let &$(_, qb) = rest; 
+    (*rest)[1] = new List($1, qb);
+    $$ = ^$(rest);
+  }
+;
+
+rgn_order_elt:
   atomic_effect '>' TYPE_VAR
   { // FIX: if we replace the following with:
     // $$ = ^$(new List(new $(join_eff($1),id2type(id,new Less_kb(NULL,TopRgnKind))), NULL));
     // then we get a core-dump.  I think it must be the gcc bug...
     let kb = new Less_kb(NULL,&Kinds::trk);
     let t = id2type($3,kb);
-    $$ = ^$(new List(new $(join_eff($1),t), NULL));
-  }
-| atomic_effect '>' TYPE_VAR ',' rgn_order 
-  { 
-    let kb = new Less_kb(NULL,&Kinds::trk);
-    let t = id2type($3,kb);
-    $$ = ^$(new List(new $(join_eff($1),t),$5)); 
+    $$ = ^$(new $(join_eff($1),t));
   }
 ;
+
+qual_bnd_elt:
+  qual_bnd_term GE_OP TYPE_VAR
+{ 
+  let kb = new Eq_kb(&Kinds::aqk);
+  let t = id2type($3,kb);
+  $$ = ^$(new $(t, $1));
+}
+;
+
+qual_bnd_term:
+  AQ_ALIASABLE { $$ = ^$(al_qual_type);}
+| AQ_UNIQUE { $$ = ^$(un_qual_type);}
+| AQ_REFCNT { $$ = ^$(rc_qual_type);}
+| AQ_DYNTRK { $$ = ^$(dt_qual_type);}
+| AQ_RESTRICTED  { $$ = ^$(rtd_qual_type);}
+| AQUALS '(' any_type_name ')'
+  { 
+    /*    let kb = new Eq_kb(&Kinds::bk);
+	  let t = id2type($3,kb);*/
+    $$ = ^$(aqualsof_type($3));
+  }
+;
+
+//not used anymore ... merged with qual_bnd
+// optional_rgn_order:
+//   /* empty */    { $$ = ^$(NULL); }
+// | ':' rgn_order  { $$ = $!2; }
+// ;
+
+// rgn_order:
+//   atomic_effect '>' TYPE_VAR
+//   { // FIX: if we replace the following with:
+//     // $$ = ^$(new List(new $(join_eff($1),id2type(id,new Less_kb(NULL,TopRgnKind))), NULL));
+//     // then we get a core-dump.  I think it must be the gcc bug...
+//     let kb = new Less_kb(NULL,&Kinds::trk);
+//     let t = id2type($3,kb);
+//     $$ = ^$(new List(new $(join_eff($1),t), NULL));
+//   }
+// | atomic_effect '>' TYPE_VAR ',' rgn_order 
+//   { 
+//     let kb = new Less_kb(NULL,&Kinds::trk);
+//     let t = id2type($3,kb);
+//     $$ = ^$(new List(new $(join_eff($1),t),$5)); 
+//   }
+// ;
 
 optional_inject:
   /* empty */
@@ -2124,6 +2228,7 @@ any_type_name:
 | '{' region_set '}'              { $$ = ^$(join_eff($2)); }
 | REGIONS '(' any_type_name ')'   { $$ = ^$(regionsof_eff($3)); }
 | any_type_name '+' atomic_effect { $$ = ^$(join_eff(new List($1,$3))); }
+| qual_bnd_term                 {$$ = ^$($1); }
 ;
 
 /* Cyc: new */
@@ -2154,13 +2259,13 @@ direct_abstract_declarator:
                                             $1.tms)));
     }
 | '(' parameter_type_list ')' requires_and_ensures_opt
-    { let &$(lis,b,c,eff,po) = $2;
-      $$=^$(Abstractdeclarator(rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(lis,b,c,eff,po,$4[0],$4[1])),NULL)));
+    { let &$(lis,b,c,eff,po,qb) = $2;
+      $$=^$(Abstractdeclarator(rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(lis,b,c,eff,po,qb,$4[0],$4[1])),NULL)));
     }
 | direct_abstract_declarator '(' parameter_type_list ')' requires_and_ensures_opt
-    { let &$(lis,b,c,eff,po) = $3;
+    { let &$(lis,b,c,eff,po,qb) = $3;
       $$=^$(Abstractdeclarator(rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(lis,
-                                                                           b,c,eff,po,$5[0],$5[1])),$1.tms)));
+                                                                           b,c,eff,po,qb,$5[0],$5[1])),$1.tms)));
     }
 /* Cyc: new */
 | direct_abstract_declarator '<' type_name_list right_angle
@@ -2565,11 +2670,19 @@ conditional_expression:
 /* Cyc: throw expressions */
 | THROW conditional_expression { $$=^$(throw_exp($2,LOC(@1,@2))); }
 /* Cyc: expressions to build heap-allocated objects and arrays */
-| NEW array_initializer        { $$=^$(New_exp(NULL,$2,LOC(@1,@2))); }
-| NEW logical_or_expression    { $$=^$(New_exp(NULL,$2,LOC(@1,@2))); }
-| RNEW '(' expression ')' array_initializer {$$=^$(New_exp($3,$5,LOC(@1,@5))); }
-| RNEW '(' expression ')' logical_or_expression
-{ $$=^$(New_exp($3,$5,LOC(@1,@5))); }
+| NEW opt_qual_exp array_initializer        { $$=^$(New_exp(NULL,$3,$2,LOC(@1,@3))); }
+| NEW opt_qual_exp logical_or_expression    { $$=^$(New_exp(NULL,$3,$2,LOC(@1,@3))); }
+| RNEW opt_qual_exp '(' expression ')' array_initializer {$$=^$(New_exp($4,$6,$2,LOC(@1,@6))); }
+| RNEW opt_qual_exp '(' expression ')' logical_or_expression
+{ $$=^$(New_exp($4,$6,$2,LOC(@1,@6))); }
+;
+
+opt_qual_exp:
+/* empty */ { $$=^$(NULL);}
+|  '<' primary_expression '>'
+  { 
+    $$ = ^$($2); 
+  }
 ;
 
 constant_expression:

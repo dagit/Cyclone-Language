@@ -13,7 +13,7 @@ CYCFLAGS=-I../lib -I../include -B../build/boot -pp -save-c -g #--vcgen
 endif
 HAVE_PTHREAD=no
 # test asm doesn't work for me on cygwin
-EXES := $(addsuffix $(EXE), cyctest foo hello test_regions test_currgn histogram test_getopt zeroterm structarray flatlist md5 unique_patterns dynregion refcnt_test require streambufftest scheme cinclude patterns multimethod rc testasm)
+EXES := $(addsuffix $(EXE), cyctest foo hello test_regions test_currgn histogram test_getopt zeroterm structarray flatlist md5 unique_patterns dynregion refcnt_test require streambufftest scheme cinclude patterns multimethod rc testasm testaqualsuccess)
  # testsexp)
 
 ifeq ($(HAVE_PTHREAD),yes)
@@ -88,6 +88,10 @@ failtest:
 	diff -w fail3.tmp fail3.out || true
 	($(CYCC) $(CYCFLAGS) -c --manyerrors fail4.cyc 2> fail4.tmp) || true
 	diff -w fail4.tmp fail4.out || true
+	($(CYCC) $(CYCFLAGS) -c --manyerrors testaqualfail.cyc 2> taf.tmp) || true
+	diff -w taf.tmp taf.out || true
+	($(CYCC) $(CYCFLAGS) -c --manyerrors testaqualdefaults.cyc 2> tad.tmp) || true
+	diff -w tad.tmp tad.out || true
 
 cyctest$(EXE): cyctest.cyc $(addprefix cyctests/, $(CYCTESTS))
 	$(CYCC) $(CYCFLAGS) -I. -Icyctests -o $@ $< $(LDFLAGS) -lm
@@ -127,10 +131,10 @@ endif
 	$(CYCC) $(CYCFLAGS) $(LDFLAGS) -o $@ $^
 
 clean:
-	$(RM) $(addsuffix .[oc], hello bytes cyctest foo histogram test_getopt typeref test_regions test_currgn unique_test zeroterm structarray flatlist md5 require streambufftest streambuff refcnt_test dynregion md5driver scheme unique_patterns cinclude testasm testexn multimethod)
+	$(RM) $(addsuffix .[oc], hello bytes cyctest foo histogram test_getopt typeref test_regions test_currgn unique_test zeroterm structarray flatlist md5 require streambufftest streambuff refcnt_test dynregion md5driver scheme unique_patterns cinclude testasm testexn multimethod testaqualsuccess)
 # testsexp)
 	$(RM) foo_tab.* unsafe_cast.o pcredemo.o pcredemo.c pcredemo md5driver.o
-	$(RM) $(EXES) fail1.tmp fail2.tmp fail3.tmp fail4.tmp
+	$(RM) $(EXES) fail1.tmp fail2.tmp fail3.tmp fail4.tmp taf.tmp tad.tmp
 	$(RM) *~ *.exe *.output *.stackdump
 #	$(MAKE) clean -C benchmarks
 #	$(MAKE) clean -C compress/cacm

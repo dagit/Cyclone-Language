@@ -186,6 +186,16 @@ struct _RegionHandle *Cyc_Core_heap_region = CYC_CORE_HEAP_REGION;
 struct _RegionHandle *Cyc_Core_unique_region = CYC_CORE_UNIQUE_REGION;
 struct _RegionHandle *Cyc_Core_refcnt_region = CYC_CORE_REFCNT_REGION;
 
+#define CYC_CORE_ALIASABLE_AQUAL ((_AliasQualHandle_t)0)
+#define CYC_CORE_UNIQUE_AQUAL    ((_AliasQualHandle_t)1)
+#define CYC_CORE_REFCNT_AQUAL    ((_AliasQualHandle_t)2)
+#define CYC_CORE_DYNTRK_AQUAL    ((_AliasQualHandle_t)3)
+
+_AliasQualHandle_t Cyc_Core_aliasable_qual = CYC_CORE_ALIASABLE_AQUAL;
+_AliasQualHandle_t Cyc_Core_unique_qual = CYC_CORE_UNIQUE_AQUAL;
+_AliasQualHandle_t Cyc_Core_refcnt_qual = CYC_CORE_REFCNT_AQUAL;
+_AliasQualHandle_t Cyc_Core_dyntrk_qual = CYC_CORE_DYNTRK_AQUAL;
+
 struct _RegionHandle *Cyc_Core_current_handle(void) {
   struct _RegionHandle *h = (struct _RegionHandle *)_frame_until(LIFO_REGION,0);
   return h == NULL ? Cyc_Core_heap_region : h;
