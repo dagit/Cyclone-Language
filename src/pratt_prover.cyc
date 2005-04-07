@@ -157,7 +157,6 @@ typedef struct Distance {
   struct Distance *next;
   node_t @target;
   int    dist;
-  bool   associated_ud_sd;
 } distance_t;
 
 
@@ -350,17 +349,6 @@ static int *lookup_dist(node_t @`H source, node_t @`H target, bool is_signed) {
   return NULL;
 }
 
-static $(int *,bool *) lookup_dist_flag(node_t @`H source, node_t @`H target, bool is_signed){
-  static int zero = 0;
-  static bool flag = false;
-  if (source == target) return $(&zero,&flag);
-  distance_t *ds = is_signed ? source->signed_distances : 
-    source->unsigned_distances;
-  for (; ds != NULL; ds = ds->next) 
-    if (ds->target == target) return $(&ds->dist,&ds->associated_ud_sd);
-  return $(NULL,NULL);
-}
-
 // returns true iff t --0--> r and r --0--> t
 // or else          r --c--> zero and zero --(-c)--> r and
 //                  t --c--> zero and zero --(-c)--> t and
@@ -422,7 +410,7 @@ static inline $(bool, int) is_signed_overflow(int c1, int c2){
 // assumes source and target do not have a distance between them in the
 // graph.  inserts a new distance reflecting source - target <= d.
 static void new_distance(node_t @`H source, node_t @`H target, bool is_signed, int d) {
-  let dist = new Distance{NULL,target,d,false};
+  let dist = new Distance{NULL,target,d};
   if (is_signed) {
     dist->next = source->signed_distances;
     source->signed_distances = dist;
@@ -452,7 +440,7 @@ static void set_dist(graph_t @g, node_t @`H i, node_t @`H j, int dist, bool is_s
     if (sum < 0) throw(&inconsistent); // there is a negative loop 
   }
   for (let k = g->rows; k != NULL; k = k->next) {
-    let $(ki_dist,associated_ud_sd_flag) = lookup_dist_flag(k,i,is_signed);
+    let ki_dist = lookup_dist(k,i,is_signed);
     if (ki_dist == NULL) continue; // no new path through ij
     let ds = is_signed ? j->signed_distances : j->unsigned_distances;
     // we're going to iterate through the j edges (ds), but must be sure
@@ -497,15 +485,11 @@ static void set_dist(graph_t @g, node_t @`H i, node_t @`H j, int dist, bool is_s
         // old k->l distance is greater than new dist -- update edge.
         else if (*kl_dist > sum) {
 	  *kl_dist = sum;
-	  if (associated_ud_sd_flag != NULL)
-	    *associated_ud_sd_flag = false;
 	}
       } else if (sum < 0) {//underflow happened
 	if (kl_dist == NULL) new_distance(k,l,is_signed,MININT);
 	else {
 	  *kl_dist = MININT;
-	  if (associated_ud_sd_flag != NULL)
-	    *associated_ud_sd_flag = false;
 	}
       }
       }
@@ -530,7 +514,7 @@ static distance_t *copy_distances(graph_t @newg, distance_t *ds) {
   distance_t *res = NULL;
   for (; ds != NULL; ds = ds->next) {
     let t = ds->target->rep;
-    res = new Distance{res,term2node(newg,t),ds->dist,ds->associated_ud_sd};
+    res = new Distance{res,term2node(newg,t),ds->dist};
   }
   return res;
 }
@@ -651,6 +635,8 @@ static $(bool, unsigned int) eq_node_const(node_t @`H n, node_t @`H z, bool is_s
   return $(false,0xBAD);
 }
 
+// return $(true,c) if n -- c --> z and z -- (-c) --> n
+// where either both edges are unsigned or both are signed
 static $(bool, unsigned int) equal_node_const(node_t @`H n, node_t @`H z){
   let $(ok, c) = eq_node_const(n,z,true);
   if (!ok) return eq_node_const(n,z,false);
@@ -827,67 +813,56 @@ static graph_t *break_term_in_graphs(graph_t *`H gs){
   return app_graphs(break_term_in_graph, 0, gs);
 }
 
-static void associate_ud_sd_in_graph(int dummy, graph_t @g){
-  node_t @zero_node = term2node(g,zero());
-  for(let rs = g->rows; rs != NULL; rs = rs->next){
-    bool src_big;
-    bool src_small;
 
-    // checking if src u> MAXINT
-    let dist = lookup_dist(zero_node,rs,false);
-    if (dist != NULL && (unsigned)*dist == MININT)
-      src_big = true;
-    else
-      src_big = false;
-    // checking if src u<= MAXINT
-    let dist = lookup_dist(rs,zero_node,false);
-    if (dist != NULL && *dist <= MAXINT)
-      src_small = true;
-    else
-      src_small = false;
-    for(let uds = rs->unsigned_distances; uds != NULL; uds=uds->next){
-      if (!uds->associated_ud_sd){
-	if (!src_big && src_small) {//src u> MAXINT, check tgt u> MAXINT
-	  let dist = lookup_dist(uds->target,zero_node,false);
-	  if (dist != NULL && *dist <= MAXINT) {
-	    set_distance(g,rs->rep,uds->target->rep,uds->dist,true);
-	    uds->associated_ud_sd = true;
-	  }
-	} else if (src_big && !src_small) {//src u<= MAXINT, check tgt u<= MAXINT
-	  let dist = lookup_dist(zero_node,uds->target,false);
-	  if (dist != NULL && (unsigned)*dist == MININT) {
-	    set_distance(g,rs->rep,uds->target->rep,uds->dist,true);
-	    uds->associated_ud_sd = true;
-	  }
+// given a node t in graph g
+// return -1 if s[t] < 0 or u[t] > MAXINT
+// return 1 if s[t] >= 0 or u[t] <= MAXINT
+// return 0 if unknown
+static int range_of_term(graph_t @g, node_t @`H t){
+  node_t @zero_node = term2node(g,zero());
+  // 0 - u[t] <= MININT, so u[t] > MAXINT
+  let dist = lookup_dist(zero_node,t,false);
+  if (dist != NULL && (unsigned) *dist == MININT)
+    return 1;
+  // u[t] - 0 <= MAXINT, so u[t] <= MAXINT
+  let dist = lookup_dist(t,zero_node,false);
+  if (dist != NULL && (unsigned) *dist <= MAXINT)
+    return -1;
+  // 0 - s[t] <= 0, so s[t] >= 0
+  let dist = lookup_dist(zero_node,t,true);
+  if (dist != NULL && *dist <= 0) 
+    return 1;
+  // s[t] - 0 <= -1 so s[t] < 0
+  let dist = lookup_dist(t,zero_node,true);
+  if (dist != NULL && *dist <= -1)
+    return -1;
+  // don't know enough information to determine t's range
+  return 0;
+}
+
+// if we know that src u<= MAXINT or src s>= 0
+// and that        tgt u<= MAXINT or tgt s>= 0
+// then u[src] - u[tgt] <= c if and only if
+//      s[src] - s[tgt] <= c
+// if we know that src u> MAXINT or src s< 0
+// and that        tgt u> MAXINT or tgt s< 0
+// then u[src] - u[tgt] <= c if and only if
+//      s[src] - s[tgt] <= c
+static void associate_ud_sd_in_graph(int dummy, graph_t @g){
+  int range_of_src, range_of_tgt;
+  for(let rs = g->rows; rs != NULL; rs = rs->next){
+    range_of_src = range_of_term(g,rs);
+    if (range_of_src != 0){
+      for(let uds = rs->unsigned_distances; uds != NULL; uds = uds->next){
+	range_of_tgt = range_of_term(g,uds->target);
+	if (range_of_src == range_of_tgt){
+	  set_distance(g,rs->rep,uds->target->rep,uds->dist,true);
 	}
       }
-    }
-    // checking if src s>= 0
-    let dist = lookup_dist(zero_node,rs,true);
-    if (dist != NULL && *dist <= 0) 
-      src_big = true;
-    else
-      src_big = false;
-    // checking if src s< 0
-    let dist = lookup_dist(rs,zero_node,true);
-    if (dist != NULL && *dist < 0)
-      src_small = true;
-    else
-      src_small = false;
-    for(let sds = rs->signed_distances; sds != NULL; sds=sds->next) {
-      if (!sds->associated_ud_sd){
-	if (!src_big && src_small){ // src s< 0, check tgt s< 0
-	  let dist = lookup_dist(sds->target,zero_node,true);
-	  if (dist != NULL && *dist < 0) {
-	    set_distance(g,rs->rep,sds->target->rep,sds->dist,false);
-	    sds->associated_ud_sd = true;
-	  }
-	} else if (src_big && !src_small) { //src s>= 0, check tgt s>= 0
-	  let dist = lookup_dist(zero_node,sds->target,true);
-	  if (dist != NULL && *dist <= 0){
-	    set_distance(g,rs->rep,sds->target->rep,sds->dist,false);
-	    sds->associated_ud_sd = true;
-	  }
+      for(let sds = rs->signed_distances; sds != NULL; sds = sds->next){
+	range_of_tgt = range_of_term(g,sds->target);
+	if (range_of_src == range_of_tgt){
+	  set_distance(g,rs->rep,sds->target->rep,sds->dist,false);
 	}
       }
     }
@@ -1042,12 +1017,6 @@ static graph_t *cgraph(graph_t *`H gs, assn_t a) {
     a = a2;
     goto LOOP;
   case &Or(a1,a2):
-    unsigned int n = num_graphs(gs);
-    if (max_paths_seen < n) max_paths_seen = n;
-    // too many disjuncts -- give up.  
-    if (n >= max_paths) {
-      throw &too_large; // could just set gs = true_graph(); 
-    }
     // must copy the graphs since we mutate them in place
     graph_t *gs1 = gs;
     graph_t *gs2 = copy_graphs(gs);
@@ -1067,6 +1036,12 @@ static graph_t *cgraph(graph_t *`H gs, assn_t a) {
     gs2 = associate_ud_sd_in_graphs(gs2);
     // return (gs and a1) or (gs and a2)
     gs = graph_append(gs1,gs2);
+    unsigned int n = num_graphs(gs);
+    if (max_paths_seen < n) max_paths_seen = n;
+    // too many disjuncts -- give up.  
+    if (n >= max_paths) {
+      throw &too_large; // could just set gs = true_graph(); 
+    }
     break;
   case &Prim(&Uint(0),Neq,t2): fallthru(t2);
   case &Prim(t1,Neq,&Uint(0)):

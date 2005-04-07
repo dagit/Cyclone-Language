@@ -2037,10 +2037,10 @@ if(yychar <= 0){
 yychar1=0;
 yychar=0;}else{
 # 282
-yychar1=yychar > 0 && yychar <= 393?(int)Cyc_yytranslate[yychar]: 340;}
+yychar1=yychar > 0 && yychar <= 393?(int)*((short*)_check_known_subscript_notnull(Cyc_yytranslate,394U,sizeof(short),yychar)): 340;}
 # 299 "cycbison.simple"
 yyn +=yychar1;
-if((yyn < 0 || yyn > 7524)||(int)Cyc_yycheck[yyn]!=yychar1)goto yydefault;
+if((yyn < 0 || yyn > 7524)||(int)*((short*)_check_known_subscript_notnull(Cyc_yycheck,7525U,sizeof(short),yyn))!=yychar1)goto yydefault;
 # 302
 yyn=(int)Cyc_yytable[yyn];
 # 309
@@ -4245,7 +4245,7 @@ p[1].l.last_column=p[0].l.last_column;}else{
 yyn=(int)Cyc_yyr1[yyn];
 # 411
 yystate=({int _Tmp1=(int)*((short*)_check_known_subscript_notnull(Cyc_yypgoto,174U,sizeof(short),yyn - 166));_Tmp1 + (int)*((short*)_check_fat_subscript(yyss,sizeof(short),yyssp_offset));});
-if((yystate >= 0 && yystate <= 7524)&&(int)Cyc_yycheck[yystate]==(int)((short*)yyss.curr)[yyssp_offset])
+if((yystate >= 0 && yystate <= 7524)&&(int)*((short*)_check_known_subscript_notnull(Cyc_yycheck,7525U,sizeof(short),yystate))==(int)((short*)yyss.curr)[yyssp_offset])
 yystate=(int)Cyc_yytable[yystate];else{
 # 415
 yystate=(int)Cyc_yydefgoto[yyn - 166];}
@@ -4321,7 +4321,7 @@ yyerrhandle:
 if(yyn==-32768)goto yyerrdefault;
 # 525
 yyn +=1;
-if((yyn < 0 || yyn > 7524)||(int)Cyc_yycheck[yyn]!=1)goto yyerrdefault;
+if((yyn < 0 || yyn > 7524)||(int)*((short*)_check_known_subscript_notnull(Cyc_yycheck,7525U,sizeof(short),yyn))!=1)goto yyerrdefault;
 # 528
 yyn=(int)Cyc_yytable[yyn];
 if(yyn < 0){
