@@ -33,8 +33,11 @@ using Hashtable;
 
 datatype Term {
   Uint(unsigned int);
-  Const(exp_t); // a Cyclone "constant" expression (e.g., 3, sizeof(e), etc.)
+  Const(exp_t); 
   Var(vardecl_t);
+  Addr(vardecl_t);
+  Select(term_t mem,term_t addr,type_opt_t);
+  Update(term_t mem,term_t addr,term_t value);
   LogicVar(vardecl_opt_t,int,type_opt_t);
   Unop(Absyn::primop_t,term_t,type_opt_t);
   Binop(Absyn::primop_t,term_t,term_t,type_opt_t);
@@ -51,6 +54,18 @@ string_t term2string(term_t t) {
       res = aprintf("%s_%x",Absynpp::qvar2string(vd->name),(unsigned int)vd); 
     else 
       res = Absynpp::qvar2string(vd->name);
+    break;
+  case &Addr(vd):
+    if (Flags::debug_assn) 
+      res = aprintf("&%s_%x",Absynpp::qvar2string(vd->name),(unsigned int)vd); 
+    else 
+      res = aprintf("&%s",Absynpp::qvar2string(vd->name));
+    break;
+  case &Select(t1,t2,_):
+    res = aprintf("Sel(%s,%s)",term2string(t1),term2string(t2));
+    break;
+  case &Update(t1,t2,t3):
+    res = aprintf("Upd(%s,%s,%s)",term2string(t1),term2string(t2),term2string(t3));
     break;
   case &LogicVar(NULL,i,_): res = aprintf("_X%d",i); break;
   case &LogicVar(vd,i,_): 
@@ -102,6 +117,11 @@ static int termhash(datatype Term @t) {
     return p ^ (unsigned int)t1 ^ (unsigned int)t2;
   case &Unop(p,t1,_): return p ^ (unsigned int)t1 + 1;
   case &Cast(_,t): return termhash(t);
+  case &Select(t1,t2,_):
+    return (unsigned int)t1 ^ (unsigned int)t2 + 2;
+  case &Update(t1,t2,t3):
+    return (unsigned int)t1 ^ (unsigned int)t2 ^ (unsigned int)t3 + 3;
+  case &Addr(vd): return (unsigned int)vd+4;
   }
 }
 
@@ -116,6 +136,9 @@ int cmp_term(datatype Term @t1, datatype Term @t2) {
   case $(&Var(vd1),&Var(vd2)): return (int)vd1 - (int)vd2;
   case $(&Var(_),_): return -1;
   case $(_,&Var(_)): return 1;
+  case $(&Addr(vd1),&Addr(vd2)): return (int)vd1 - (int)vd2;
+  case $(&Addr(_),_): return -1;
+  case $(_,&Addr(_)): return 1;
   case $(&LogicVar(vd1,i,_),&LogicVar(vd2,j,_)): 
     if (vd1 == vd2) return (i - j);
     return (int)vd1 - (int)vd2;
@@ -132,11 +155,25 @@ int cmp_term(datatype Term @t1, datatype Term @t2) {
     return cmp_term(t1,t2);
   case $(&Unop(...),_): return -1;
   case $(_,&Unop(...)): return 1;
+  case $(&Select(t11,t12,_),&Select(t21,t22,_)):
+    int c = cmp_term(t11,t21);
+    if (c != 0) return c;
+    return cmp_term(t12,t22);
+  case $(&Select(...),_): return -1;
+  case $(_,&Select(...)): return 1;
+  case $(&Update(t11,t12,t13),&Update(t21,t22,t23)):
+    int c = cmp_term(t11,t21);
+    if (c != 0) return c;
+    int c = cmp_term(t12,t22);
+    if (c != 0) return c;
+    return cmp_term(t13,t23);
+  case $(&Update(...),_): return -1;
+  case $(_,&Update(...)): return 1;
   case $(&Binop(p1,t11,t12,tp1),&Binop(p2,t21,t22,tp2)):
     if (p1 != p2) return (int)p1 - (int)p2;
     int c = cmp_term(t11,t21);
     if (c != 0) return c;
-    return  cmp_term(t12,t22);
+    return cmp_term(t12,t22);
   }
 }
 
@@ -145,10 +182,13 @@ static term_t copy_term(datatype Term@ t) {
   case &Uint(i): return new Uint(i);
   case &Const(e): return new Const(e);
   case &Var(vd): return new Var(vd);
+  case &Addr(vd): return new Addr(vd);
   case &LogicVar(vd,i,tp): return new LogicVar(vd,i,tp);
   case &Binop(p,t1,t2,tp): return new Binop(p,t1,t2,tp);
   case &Unop(p,t,tp): return new Unop(p,t,tp);
   case &Cast(tp,t): return new Cast(tp,t);
+  case &Select(t1,t2,tp): return new Select(t1,t2,tp);
+  case &Update(t1,t2,t3): return new Update(t1,t2,t3);
   }
 }
 
@@ -193,9 +233,47 @@ term_t var(vardecl_t vd) {
   let t = Var(vd);
   return hash_cons_term(&t);
 }
+term_t addr(vardecl_t vd) {
+  let t = Addr(vd);
+  return hash_cons_term(&t);
+}
 term_t logicvar(vardecl_opt_t vd,int i,type_opt_t tp) {
   let t = LogicVar(vd,i,tp);
   return hash_cons_term(&t);
+}
+term_t update(term_t t1, term_t t2, term_t t3) {
+  switch $(t1,t2) {
+  case $(&Update(m,a as &Addr(x),e1),&Addr(y)):
+    // Update(Update(m,Addr(x),e1),Addr(x),t3) = Update(m,Addr(x),t3)
+    if (x == y) return update(m,t2,t3);
+    // Not sure if this is worth it since it is a slow insertion sort
+    // on the updates...  
+    // Update(Update(m,Addr(x),e1),Addr(y),t3) = 
+    //    Update(Update(m,Addr(y),t3),Addr(x),e1)
+    //if ((unsigned int)y < (unsigned int)x)
+    //  return update(update(m,t2,t3),a,e1);
+    break;
+  default: break;
+  }
+  let t = Update(t1,t2,t3);
+  return hash_cons_term(&t);
+}
+term_t select(term_t t1, term_t t2,type_opt_t tp) {
+  switch $(t1,t2) {
+  case $(&Update(m,&Addr(x),v),&Addr(y)):
+    // Select(Update(m,a,v),a) == v
+    if (x == y) return v;
+    // addresses of distinct program variables must be distinct so we
+    // know that Select(Update(m,Addr(x),v),Addr(y)) == Select(m,Addr(y))
+    else return select(m,t2,tp);
+  case $(&Update(m,a1,v),a2):
+    // Select(Update(m,a,v),a) == v
+    if (a1 == a2) return v;
+    fallthru;
+  default:
+    let t = Select(t1,t2,tp);
+    return hash_cons_term(&t);
+  }
 }
 
 inline static bool is_nonassociative_commutative(Absyn::primop_t p) {
@@ -226,6 +304,10 @@ Absyn::type_opt_t get_term_type(term_t t) {
   case &Binop(_,_,_,tp): return tp;
   case &Unop(_,_,tp): return tp;
   case &Cast(tp,_): return tp;
+  case &Select(_,_,tp): return tp;
+    // not sure that this is the right thing to do...
+  case &Addr(vd): return Absyn::int_type(Absyn::None, Absyn::Int_sz);
+  case &Update(...): return NULL;
   }
 }
 
@@ -383,7 +465,6 @@ datatype Assn {
   Or(assn_t,assn_t);
   Not(assn_t);
   Subst(vardecl_t x,term_t t,assn_t a); // a[t/x] -- lazy substitution
-  Kill(assn_t); // replace all escaping variables with fresh logic variables
 };
 
 // inner loop for calculating the size of an assertion -- we
@@ -407,10 +488,6 @@ assn_size_loop(assn_t a, unsigned int c, list_t<assn_t,`H>@ prev){
     a = a1;
     goto LOOP;
   case &Subst(vd,t,a1):
-    ++c;
-    a = a1;
-    goto LOOP;
-  case &Kill(a1): 
     ++c;
     a = a1;
     goto LOOP;
@@ -462,10 +539,6 @@ static string_t d2string(assn_t a, int @c,
     s = aprintf("Subst[%s=%s](%s)",Absynpp::qvar2string(vd->name),
                 term2string(t),d);
     break;
-  case &Kill(a):
-    let d = d2string(a,c,prev);
-    s = aprintf("Kill(%s)",d);
-    break;
   }
   *prev = new List{new $(a,n,s),*prev};
   return n;
@@ -477,7 +550,7 @@ string_t dag2string(assn_t a) {
   string_t@`H equals = new " = ";
   int count = 0;
   string_t res = d2string(a,&count,&decls);
-  list_t<string_t@`H,`H> strings = new List{new " in ",new List{new res,NULL}};
+  list_t<string_t@`H,`H> strings = list(new " in ",new res,newline);
   for (; decls != NULL; decls = decls->tl) {
     let &$(_,*n,*d) = decls->hd;
     strings = new List{n,new List{equals,new List{d,new List{newline,strings}}}};
@@ -523,9 +596,6 @@ static string_t a2string(assn_t a, int prec, int@ size) {
     *size += 1;
     return aprintf("Subst[%s:=%s](%s)",Absynpp::qvar2string(vd->name),
                    term2string(t),a2string(a,0,size));
-  case &Kill(a):
-    *size += 1;
-    return aprintf("Kill(%s)",a2string(a,0,size));
   }
 }
 
@@ -560,7 +630,6 @@ int assnhash(datatype Assn @a) {
   case &Not(a1): return ((unsigned int)a1) + 61;
   case &Subst(vd,t,a): return ((unsigned int)a ^ (unsigned int)vd ^
                                (unsigned int)t) | 3;
-  case &Kill(a): return (unsigned int)a + 37;
   }
 }
 
@@ -598,9 +667,6 @@ int assncmp(datatype Assn @a1, datatype Assn @a2) {
   case $(&Not(na1),&Not(na2)): a1 = na1; a2 = na2; goto LOOP;
   case $(&Not(_),_): return -1;
   case $(_,&Not(_)): return 1;
-  case $(&Kill(na1),&Kill(na2)): a1 = na1; a2 = na2; goto LOOP;
-  case $(&Kill(_),_): return -1;
-  case $(_,&Kill(_)): return 1;
   case $(&Subst(vd1,t1,a11),&Subst(vd2,t2,a22)):
     int c = (int)vd1 - (int)vd2;
     if (c != 0) return c;
@@ -613,61 +679,92 @@ int assncmp(datatype Assn @a1, datatype Assn @a2) {
 }
 
 // a hash-table to hold all of the assertion nodes to maximize
-// sharing.  we also record whether or not a node has delayed
-// substitutions or kills within it, and also provide an optional 
-// set of primitive assertions that correspond to the factored
-// normal form for the assertion.
-typedef Set::set_t<assn_t> assn_set_t;
-typedef struct Set::Set<assn_t> *assn_set_opt_t;
+// sharing.  we also record an optional reduced version of the
+// assertion, and provide an optional set of primitive assertions 
+// that correspond to the factored normal form for the assertion.
+typedef struct AssnInfo {
+  assn_t          assn;
+  assn_opt_t      reduced;
+  assn_set_opt_t *widened_set;
+} assn_info_t;
 
-static struct Hashtable::Table<assn_t,$(assn_t,bool reduced,assn_set_opt_t@)@> 
+static struct Hashtable::Table<assn_t,assn_info_t@> 
 *hash_cons_table = NULL;
-
-static Hashtable::table_t<assn_t,$(assn_t,bool reduced,assn_set_opt_t@)@>
-get_hash_cons_table() {
-  Hashtable::table_t h;
-  if (hash_cons_table == NULL) {
-    h = Hashtable::create(123, assncmp, assnhash);
-    hash_cons_table = h;
-    // make sure true and false are in the table so we can
-    // ask if they are reduced.
-    assn_set_opt_t s = Set::empty(assncmp);
-    Hashtable::insert(h,&true_assn,new $(&true_assn,true,new s));
-    Hashtable::insert(h,&false_assn,new $(&false_assn,true,new NULL));
-  } else {
-    h = (Hashtable::table_t)hash_cons_table;
-  }
-  return h;
-}
 
 void reset_hash_cons_table(void){
   term_hash_cons_table = NULL;
   hash_cons_table = NULL;
 };
-// lookup an assertion to see if it has delayed substitutions or
-// kills with in it.  
-bool is_reduced(assn_t a) {
-  let resopt = Hashtable::lookup_opt(get_hash_cons_table(),a);
-  if (resopt == NULL) return false;
-  let &$(_,b,_) = *resopt;
-  return b;
+
+static Hashtable::table_t<assn_t,assn_info_t@>
+get_hash_cons_table() {
+  Hashtable::table_t h;
+  if (hash_cons_table == NULL) {
+    h = Hashtable::create(123, assncmp, assnhash);
+    hash_cons_table = h;
+  } else {
+    h = (Hashtable::table_t)hash_cons_table;
+  }
+  return h;
 }
+static assn_info_t@ hash_cons_it(datatype Assn@`r a);
+static assn_t hash_cons(datatype Assn@`r a);
+
 
 // shallow copy of an assertion from region `r to the heap and 
 // simultaneously determine whether or not the assertion is
 // reduced so that we can put the information in the table.
-static $(assn_t,bool reduced) copy_assn(datatype Assn@`r a){
+static assn_info_t@ copy_assn(datatype Assn@`r a){
   switch (a) {
-  case &True: return $(&true_assn,true);
-  case &False: return $(&false_assn,true);
+  case &True: 
+    assn_set_opt_t s = Set::empty(assncmp);
+    return new AssnInfo{&true_assn,&true_assn,new s};
+  case &False: 
+    return new AssnInfo{&false_assn,&false_assn,new NULL};
   case &And(a1,a2): 
-    return $(new And(a1,a2),is_reduced(a1) && is_reduced(a2));
+    let a1info = hash_cons_it(a1);
+    let a2info = hash_cons_it(a2);
+    bool reduced = true;
+    if (a1info->reduced == NULL) {
+      reduced = false;
+      a1 = a1info->assn;
+    } else {
+      a1 = (assn_t)a1info->reduced;
+    }
+    if (a2info->reduced == NULL) {
+      reduced = false;
+      a2 = a2info->assn;
+    } else {
+      a2 = (assn_t)a2info->reduced;
+    }
+    assn_t newa = new And(a1,a2);
+    assn_opt_t reda = reduced ? (assn_opt_t)newa : (assn_opt_t)NULL;
+    return new AssnInfo{newa,reda,NULL};
   case &Or(a1,a2): 
-    return $(new Or(a1,a2),is_reduced(a1) && is_reduced(a2));
-  case &Not(a): return $(new Not(a),false);
-  case &Prim(t1,p,t2): return $(new Prim(t1,p,t2),true);
-  case &Subst(vd1,t1,a1): return $(new Subst(vd1,t1,a1),false);
-  case &Kill(a): return $(new Kill(a),false);
+    let a1info = hash_cons_it(a1);
+    let a2info = hash_cons_it(a2);
+    bool reduced = true;
+    if (a1info->reduced == NULL) {
+      reduced = false;
+      a1 = a1info->assn;
+    } else {
+      a1 = (assn_t)a1info->reduced;
+    }
+    if (a2info->reduced == NULL) {
+      reduced = false;
+      a2 = a2info->assn;
+    } else {
+      a2 = (assn_t)a2info->reduced;
+    }
+    assn_t newa = new Or(a1,a2);
+    assn_opt_t reda = reduced ? (assn_opt_t)newa : (assn_opt_t)NULL;
+    return new AssnInfo{newa,reda,NULL};
+  case &Prim(t1,p,t2): 
+    assn_t newa = new Prim(t1,p,t2);
+    return new AssnInfo{newa,newa,NULL};
+  case &Not(a): return new AssnInfo{new Not(hash_cons(a)),NULL,NULL};
+  case &Subst(vd1,t1,a1): 
+    return new AssnInfo{new Subst(vd1,t1,hash_cons(a1)),NULL,NULL};
   }
 }
 
@@ -675,29 +772,46 @@ static $(assn_t,bool reduced) copy_assn(datatype Assn@`r a){
 // not already there, then make a shallow copy and enter it (along
 // with info regarding whether or not it's been reduced) into the
 // hash table.
-static assn_t hash_cons(datatype Assn@`r a) {
+static assn_info_t@ hash_cons_it(datatype Assn@`r a) {
   Hashtable::table_t h = get_hash_cons_table();
   let resopt = Hashtable::lookup_other_opt(h,a,assncmp,assnhash);
   if (resopt == NULL) {
-    let $(res,reduced) = copy_assn(a);
-    Hashtable::insert(h,res,new $(res,reduced,new NULL));
-    return res;
+    let ainfo = copy_assn(a);
+    Hashtable::insert(h,ainfo->assn,ainfo);
+    return ainfo;
   } else {
-    let &$(res,_,_) = *resopt;
-    return res;
+    return *resopt;
   }
 }
 
-// build a kill node.
-assn_t kill(assn_t a) {
-  switch (a) {
-  case &True: 
-  case &False:
-  case &Kill(_): return a; // Kill(Kill(a)) = Kill(a)
-  default:
-    let p = Kill(a);
-    return hash_cons(&p);
-  }
+static assn_t hash_cons(datatype Assn@`r a) {
+  let ainfo = hash_cons_it(a);
+  let redopt = ainfo->reduced;
+  if (redopt == NULL) return ainfo->assn;
+  else return (assn_t)redopt;
+}
+
+// Need to fake up a vardecl for the "memory"
+using Absyn {
+  static string_t memory_var = "#Mem";
+  static $(nmspace_t,var_t) memvar = $(Nmspace{.Loc_n = 0},&memory_var);
+  static datatype TyCon.VoidCon void_con = VoidCon;
+  static datatype Type.AppType vd_type = AppType(&void_con,NULL);
+
+
+  struct Absyn::Vardecl memory_struct = {
+    .sc = Absyn::Public,
+    .name = &memvar,
+    .varloc = 0,
+    .tq = {0,0,0,0,0},
+    .type = &vd_type,
+    .initializer = NULL,
+    .rgn = NULL,
+    .attributes = NULL,
+    .escapes = false,
+    .is_proto = false
+  };
+  vardecl_t memory = &memory_struct;
 }
 
 // build an and node.
@@ -737,6 +851,9 @@ assn_t subst(vardecl_t x, term_t newx, assn_t a) {
   switch (a) {
   case &True:
   case &False: return a;
+  case &Subst(y,newy,a2) && x == y:
+    // we have a2[newy/x][newx/x] == a2[newy[newx/x]/x]
+    return subst(x, subst_term(newx,x,newy), a2);
   default:
     let p = Subst(x,newx,a); 
     return hash_cons(&p);
@@ -810,8 +927,8 @@ assn_t not(assn_t a) {
   }
 }
 
-////// Push Through Subst, Kill, and Not nodes ////
-// These functions take care of eliminating all of the Not, Kill and
+////// Push Through Subst and Not nodes ////
+// These functions take care of eliminating all of the Not and
 // Subst nodes in an assertion in one pass.  It is, unfortunately,
 // something that requires crawling over the tree, not just the dag.
 // However, we could improve things by memoizing the results, since
@@ -821,98 +938,80 @@ assn_t not(assn_t a) {
 
 // Both reduce_term and reduce_assn take in a substitution for 
 // non-escaping variables, as well as a pointer to a substitution
-// for escaping variables.  We want to reduce Kill(a) to something
-// like substitute fresh logic variables for each escaping variable
-// in a.  We do this by accumulating a substitution for the escaping
-// variables as we go.  So, the esc_subst pointer is non-NULL when
-// we are under a Kill node.
-
+// for escaping variables.  
 // TRY: we could try using dictionaries here instead of lists.
 static term_t 
-reduce_term(term_t t, list_t<$(vardecl_t,term_t)@`H,`H> non_esc_subst,
-            list_t<$(vardecl_t,term_t)@`H,`H> *esc_subst) {
+reduce_term(term_t t, list_t<$(vardecl_t,term_t)@> subst) {
   switch (t) {
   case &Uint(_):
   case &Const(_):
   case &LogicVar(...): return t;
   case &Cast(tp,tm):
-    let tm2 = reduce_term(tm,non_esc_subst,esc_subst);
+    let tm2 = reduce_term(tm,subst);
     if (tm != tm2) return cast(tp,tm2);
     else return t;
   case &Unop(p,tm,tp):
-    let tm2 = reduce_term(tm,non_esc_subst,esc_subst);
+    let tm2 = reduce_term(tm,subst);
     if (tm != tm2) return unop(p,tm2,tp);
     else return t;
   case &Binop(p,t1,s1,tp):
-    let t2 = reduce_term(t1,non_esc_subst,esc_subst);
-    let s2 = reduce_term(s1,non_esc_subst,esc_subst);
+    let t2 = reduce_term(t1,subst);
+    let s2 = reduce_term(s1,subst);
     if (t1 != t2 || s1 != s2) return binop(p,t2,s2,tp);
     else return t;
+  case &Select(t1,s1,tp):
+    let t2 = reduce_term(t1,subst);
+    let s2 = reduce_term(t2,subst);
+    if (t1 != t2 || s1 != s2) return select(t2,s2,tp);
+    else return t;
+  case &Update(t1,s1,u1):
+    let t2 = reduce_term(t1,subst);
+    let s2 = reduce_term(s1,subst);
+    let u2 = reduce_term(u1,subst);
+    if (t1 != t2 || s1 != s2 || u1 != u2) return update(t2,s2,u2);
+    else return t;
+  case &Addr(vd): fallthru(vd);
   case &Var(vd):
-    if (vd->escapes && esc_subst != NULL) {
-      // it's an escaping variable and we're under a Kill node.
-      // see if we've already assigned it a fresh variable in the esc_subst.
-      let s = *esc_subst;
-      for (; s != NULL; s = s->tl) {
-        let $(vd2,t2) = *s->hd;
-	//wangyl: originally it was "return t", but I think it's t2
-        if (vd2 == vd) return t2;
-      }
-      // if not, then assign it a fresh variable and record it in the
-      // esc_subst.
-      let t = fresh_var(vd->type);
-      *esc_subst = new List{new $(vd,t),*esc_subst};
-      return t;
-    } else if (!vd->escapes) {
-      // it's a non-escaping variable -- look it up in non_esc_subst.
-      for (; non_esc_subst != NULL; non_esc_subst = non_esc_subst->tl) {
-        let $(vd2,t2) = *non_esc_subst->hd;
-        if (vd == vd2) return t2;
-      }
+    for (; subst != NULL; subst = subst->tl) {
+      let $(vd2,t2) = *subst->hd;
+      if (vd == vd2) return t2;
     }
     return t;
   }
 }
 
 static assn_t 
-reduce_assn(assn_t a, list_t<$(vardecl_t,term_t)@`H,`H> non_esc_subst, 
-            list_t<$(vardecl_t,term_t)@`H,`H> *esc_subst,
-            bool negate) {
+reduce_assn(assn_t a, list_t<$(vardecl_t,term_t)@`H,`H> subst, bool negate) {
   assn_t res;
  LOOP:
   switch (a) {
   case &True: if (negate) return &false_assn; else return &true_assn;
   case &False: if (negate) return &true_assn; else return &false_assn;
   case &Prim(t1,p,t2):
-    let newt1 = reduce_term(t1,non_esc_subst,esc_subst);
-    let newt2 = reduce_term(t2,non_esc_subst,esc_subst);
+    let newt1 = reduce_term(t1,subst);
+    let newt2 = reduce_term(t2,subst);
     if (negate) return not_prim(t1,p,t2);
     if (t1 != newt1 || t2 != newt2) 
       a = prim(newt1,p,newt2);
     return a;
   case &And(a1,a2):
-    let newa1 = reduce_assn(a1,non_esc_subst,esc_subst,negate);
-    let newa2 = reduce_assn(a2,non_esc_subst,esc_subst,negate);
+    let newa1 = reduce_assn(a1,subst,negate);
+    let newa2 = reduce_assn(a2,subst,negate);
     if (negate) return or(newa1,newa2);
     if (a1 != newa1 || a2 != newa2) 
       a = and(newa1,newa2);
     return a;
   case &Or(a1,a2):
-    let newa1 = reduce_assn(a1,non_esc_subst,esc_subst,negate);
-    let newa2 = reduce_assn(a2,non_esc_subst,esc_subst,negate);
+    let newa1 = reduce_assn(a1,subst,negate);
+    let newa2 = reduce_assn(a2,subst,negate);
     if (negate) return and(newa1,newa2);
     if (a1 != newa1 || a2 != newa2) 
       a = or(newa1,newa2);
     return a;
-  case &Kill(a): 
-    // start a new esc_subst for a.  not sure this is necessary
-    // when esc_subst is non-null...
-    list_t<$(vardecl_t,term_t)@> new_esc_subst = NULL;
-    return reduce_assn(a,non_esc_subst,&new_esc_subst,negate);
   case &Subst(vd,t,a1):
-    // add vd->t to the non_esc_subst
-    t = reduce_term(t,non_esc_subst,esc_subst);
-    non_esc_subst = new List(new $(vd,t),non_esc_subst);
+    t = reduce_term(t,subst);
+    // add vd->t to the subst
+    subst = new List(new $(vd,t),subst);
     a = a1;
     goto LOOP;
   case &Not(a1):
@@ -922,44 +1021,23 @@ reduce_assn(assn_t a, list_t<$(vardecl_t,term_t)@`H,`H> non_esc_subst,
   }
 }
 
-// get rid of all Not, Kill and Subst nodes.
+// get rid of all Not and Subst nodes.
 assn_t reduce(assn_t a) {
   // check to see if we've already eliminated them.
-  if (is_reduced(a)) return a;
-  return reduce_assn(a,NULL,NULL,false);
+  let ainfo = hash_cons_it(a);
+  let redopt = ainfo->reduced;
+  if (redopt != NULL) return (assn_t)redopt;
+  a = reduce_assn(a,NULL,false);
+  ainfo->reduced = a;
+  return a;
 }
 
-// a one-shot substitution -- needed in the assignment code below.
+// a one-shot substitution -- needed in the assignment code.
 term_t subst_term(term_t t, vardecl_t x, term_t newx) {
-  switch (t) {
-  case &Var(vd):
-    if (vd == x) return newx;
-    return t;
-  case &Unop(p,t1,tp):
-    let t2 = subst_term(t1,x,newx);
-    if (t1 != t2) return unop(p,t2,tp);
-    return t;
-  case &Binop(p,t1,s1,tp):
-    let t2 = subst_term(t1,x,newx);
-    let s2 = subst_term(s1,x,newx);
-    if (t1 != t2 || s1 != s2) return binop(p,t2,s2,tp);
-    else return t;
-  case &Cast(tp,tm):
-    let tm2 = subst_term(tm,x,newx);
-    if (tm != tm2) return cast(tp,tm2);
-    else return t;
-  case &Uint(_):
-  case &Const(_):
-  case &LogicVar(...): return t;
-  }
+  let s = $(x,newx);
+  let subst = List{&s,NULL};
+  return reduce_term(t,&subst);
 }
-
-// an eager kill for terms (we don't bother to do terms lazily, only assns)
-term_t kill_mem_term(term_t t) {
-  let esc_subst = NULL;
-  return reduce_term(t,NULL,&esc_subst);
-}
-
 
 /////////////////// Assertion Factoring //////////////////
 // This code isn't currently used but may be useful.  The
@@ -1037,32 +1115,24 @@ assn_t factor_assn(assn_t a) {
 
 // returns the set of primitive relations implied by the assertion (if any).
 // this gets cached in the hash-cons-table so it isn't recomputed.
-static assn_set_opt_t widen_it(Hashtable::table_t<assn_t,$(assn_t,bool,assn_set_opt_t@`H)@`H> table, assn_t a) {
- LOOP:
-  let popt = Hashtable::lookup_opt(table, a);
-  if (popt == NULL) { 
-    a = hash_cons(a); goto LOOP; 
-  }
-  $(assn_t,bool,assn_set_opt_t@)@ p = *popt;
-  let &$(_,_,*r) = p;
-  if (**r != NULL) {
-    return **r;
-  }
+assn_set_opt_t widen_it(assn_t a) {
+  let ainfo = hash_cons_it(a);
+  if (ainfo->widened_set != NULL) return *ainfo->widened_set;
   assn_set_opt_t s;
   switch (a) {
   case &True: s = Set::empty(assncmp); break;
   case &False: s = NULL; break;
   case &And(a1,a2):
-    let s1 = widen_it(table,a1);
-    let s2 = widen_it(table,a2);
+    let s1 = widen_it(a1);
+    let s2 = widen_it(a2);
     if (s1 == NULL || s2 == NULL) 
       s = NULL; 
     else 
       s = Set::union_two((assn_set_t)s1,(assn_set_t)s2);
     break;
   case &Or(a1,a2):
-    let s1 = widen_it(table,a1);
-    let s2 = widen_it(table,a2);
+    let s1 = widen_it(a1);
+    let s2 = widen_it(a2);
     if (s1 == NULL) 
       s = s2;
     else if (s2 == NULL)
@@ -1097,20 +1167,20 @@ static assn_set_opt_t widen_it(Hashtable::table_t<assn_t,$(assn_t,bool,assn_set_
     }
     break;
   default:
-    s = widen_it(table,reduce(a));
+    s = widen_it(reduce(a));
     break;
   }
-  *r = new s;
+  ainfo->widened_set = new s;
   return s;
 }
 
 // factors out all of the common primitive relations in a.
 assn_t widen(assn_t a) {
   // force the hash-cons table to be around just to be safe
-  let h = get_hash_cons_table();
-  let sopt = widen_it(h,a);
+  let sopt = widen_it(a);
   if (sopt == NULL) return &false_assn;
-  return Set::fold(and,(assn_set_t)sopt,&true_assn);
+  let res = Set::fold(and,(assn_set_t)sopt,&true_assn);
+  return res;
 }
 
 // tries to see if a can be proved from the set of primitive
@@ -1156,7 +1226,7 @@ static bool simple_prv(assn_set_t ctxt, assn_t a) {
 // uses only very local, syntactic matching.
 bool simple_prove(assn_t ctxt, assn_t a) {
   if (ctxt == a) return true; 
-  let sopt = widen_it(get_hash_cons_table(),ctxt);
+  let sopt = widen_it(ctxt);
   if (sopt == NULL) return true;
   return simple_prv((assn_set_t)sopt, a);
 }

@@ -150,39 +150,35 @@ static assn_t may_widen(env_t env, assn_t a);
 ////////// Updating an Assertion //////////////////
 static term_t fresh_nonescvar(env_t env, vardecl_t vd);
 
+// FIX:
 static assn_t kill_var(env_t env, vardecl_t vd, assn_t a) {
-  if (vd->escapes) {
-    a = kill(a);
-  } else {
-    let v2 = fresh_nonescvar(env,vd);
-    a = subst(vd,v2,a);
-  }
+  let v2 = fresh_nonescvar(env,vd);
+  a = subst(vd,v2,a);
   return a;
 }
 
 // We are executing tgt := src
 static assn_t do_assign(env_t env, assn_t a, term_opt_t tgt, term_opt_t src) {
   switch (tgt) {
-  case NULL: 
-    // We don't know what the target is except that it's not a non-escaping
-    // variable, so we must kill those references.
-    return kill(a);
   case &Var(vd):
-    // We know what the target is -- if it escapes then we kill all 
-    // escaping variables, otherwise we just kill the target vd by
-    // substituting a fresh logic variable.
-    // We must make sure to also kill within the src term.
-    if (vd->escapes) {
-      a = kill(a);
-      src = (src == NULL) ? NULL : kill_mem_term(src);
-    } else {
-      let v2 = fresh_nonescvar(env,vd);
-      a = subst(vd,v2,a);
-      src = (src == NULL) ? NULL : subst_term(src,vd,v2);
-    }
-    // Finally, add in tgt == src.
+    // This is a non-escaping variable so we just substitute a fresh
+    // logic variable for it.  That is, we return
+    // a[v2/vd] && vd == src[v2/vd]
+    let v2 = fresh_nonescvar(env,vd);
+    a = subst(vd,v2,a);
+    src = (src == NULL) ? NULL : subst_term(src,vd,v2);
     return and(a,eq(tgt,src));
-  default: Warn::impos("vcgen do_assign");
+  default:
+    // We have some address that we're updating but not sure what it is.
+    // So we substitute a fresh logic variable m for memory and add in
+    // that memory = upd(m,tgt,src).  That is, we return
+    // a[m/memory] && memory = upd(m,tgt[m/memory],src[m/memory]).
+    let m = fresh_nonescvar(env,memory);
+    a = subst(memory,m,a);
+    term_opt_t upd = NULL;
+    if (src != NULL && tgt != NULL)
+      upd = update(m,subst_term(tgt,memory,m),subst_term(src,memory,m));
+    return and(a,eq(var(memory),upd));
   }
 }
 
@@ -241,7 +237,7 @@ initial_env(JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd, assn_info_
                             .res_term = res_term,
                             .res_assn = res_assn,
                             .widen_paths = !Flags::allpaths};
-  let d = Dict::empty(Core::ptrcmp);
+  let d = Dict::insert(Dict::empty(Core::ptrcmp),memory,0);
   return new Env { .shared = senv, .state_counter = d, .assn_info = assn_info};
 }
 
@@ -819,8 +815,13 @@ static assn_t vcgen_switch(env_t env, list_t<switch_clause_t> scs, assn_t ain) {
 static assn_t add_vardecl(env_t env, vardecl_t vd, assn_t a) {
   // stupid C semantics means I have to put in a dummy value for vd first,
   // then run the initializer.  
-  let tv = var(vd);
-  a = kill_var(env,vd,a);
+  term_t tv;
+  if (vd->escapes) 
+    tv = addr(vd);
+  else {
+    tv = var(vd);
+    a = kill_var(env,vd,a);
+  }
   if (vd->initializer != NULL) {
     let $(t,a1) = vcgen_rexp(env,(exp_t)vd->initializer,a);
     a = do_assign(env,a1,tv,t);
@@ -836,17 +837,18 @@ static assn_t vcgen_local_decl(env_t env, decl_t d, assn_t a) {
     for (let vds = vds->v; vds != NULL; vds = vds->tl) {
       let $(vdopt,eopt) = *vds->hd;
       if (vdopt != NULL) {
-        if (eopt == NULL) a = add_vardecl(env,*vdopt,a);
+        let vd = *vdopt;
+        if (eopt == NULL) a = add_vardecl(env,vd,a);
         else {
           let $(t,a1) = vcgen_rexp(env,eopt,a);
-          let tv = var(*vdopt);
+          term_t tv = (vd->escapes) ? addr(vd) : var(vd);
           a = do_assign(env,a1,tv,t);
         }
       }
     }
     return a;
   case &Absyn::Letv_d(vds): 
-    for (; vds != NULL; vds = vds->tl)
+    for (; vds != NULL; vds = vds->tl) 
       a = add_vardecl(env,vds->hd,a);
     return a;
   case &Absyn::Region_d(_,vd,eopt): 
@@ -994,15 +996,17 @@ static struct Absyn::Vardecl *bind2vardecl(Absyn::binding_t b) {
   }
 }
 
-static term_opt_t varopt(Absyn::binding_t b) {
-  let vdopt = bind2vardecl(b); 
-  if (vdopt == NULL) return NULL;
-  return var((vardecl_t)vdopt);
-}
-
 static $(term_opt_t,assn_t) vcgen_lexp(env_t env, exp_t e, assn_t ain) {
   switch (e->r) {
-  case &Absyn::Var_e(b): return $(varopt(b),ain);
+  case &Absyn::Var_e(b): 
+    let vdopt = bind2vardecl(b);
+    if (vdopt == NULL) return $(NULL, ain);
+    vardecl_t vd = (vardecl_t)vdopt;
+    if (vd->escapes) 
+      return $(addr(vd), ain);
+    else 
+      return $(var(vd), ain);
+  // IMPROVE:  we can return a more general address term here...
   default: return $(NULL, vcgen_rexp(env,e,ain)[1]);
   }
 }
@@ -1045,7 +1049,11 @@ static void check_requires(Position::seg_t loc,
 }
 
 static term_opt_t deref_lterm(env_t env, term_opt_t lt, assn_t ain) {
-  return lt;
+  switch (lt) {
+  case &Var(_): return lt;
+  case &Addr(vd): return select(var(memory),lt,vd->type);
+  default: return NULL;
+  }
 }
 
 static bool is_unsigned_int_exp(exp_t e){
@@ -1086,7 +1094,14 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
   case &Absyn::Const_e(c): 
     // should really be caught by the above...
     return $(cnst(e),ain);
-  case &Absyn::Var_e(b): return $(varopt(b),ain);
+  case &Absyn::Var_e(b): 
+    let vdopt = bind2vardecl(b);
+    if (vdopt == NULL) return $(NULL,ain);
+    let vd = (vardecl_t)vdopt;
+    if (vd->escapes)
+      return $(select(var(memory),addr(vd),vd->type),ain);
+    else 
+      return $(var(vd),ain);
   case &Absyn::Primop_e(p,&List{e1,NULL}):
     let $(t, aout) = vcgen_rexp_always(env, e1, ain);
     return $(unop(p,t,e->topt),aout);
@@ -1176,7 +1191,7 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
     check_requires(e->loc,env,ts,argvds,a2,reqopt);
     // kill every variable that points into memory -- could refine
     // this to only those reachable from globals or the parameters.
-    a2 = kill(a2);
+    a2 = subst(memory, fresh_nonescvar(env,memory), a2);
     update_try_assn(env,a2);
     // noreturn functions don't return...
     if (Atts::is_noreturn_fn_type((type_t)e1->topt)) a2 = &false_assn;
@@ -1291,6 +1306,8 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
       return $(topt == NULL ? NULL : cast(tp,(term_t)topt),a);
     }
   case &Absyn::New_e(eopt,e,qopt):
+    // IMPROVE: could assert that the resulting value is not equal to
+    // the address of any variable...
     if (eopt != NULL)
       ain = vcgen_rexp(env,(exp_t)eopt,ain)[1];
     if (qopt != NULL)

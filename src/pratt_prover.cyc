@@ -191,6 +191,7 @@ static graph_t@ true_graph() { return new Graph{NULL,NULL}; }
 static int constraints_added = 0;
 static int graphs_copied = 0;
 static int max_lookup = 0;
+static int already_seen_hits = 0;
 
 // Print out a graph.
 void print_graph(graph_t @g) {
@@ -990,7 +991,7 @@ datatype exn { TooLarge };
 datatype exn.TooLarge too_large = TooLarge;
 
 //FIX: add a way for the user to control this.
-unsigned int max_paths = 33;
+unsigned int max_paths = 6;
 unsigned int max_paths_seen = 0;
 
 // given a set of graphs gs representing A1 or A2 or ... or An
@@ -1004,44 +1005,48 @@ unsigned int max_paths_seen = 0;
 // until we've gotten all of the And, Prim, True, and False nodes
 // pushed into the graphs.  That way we're more likely to hit an
 // inconsistency early.
-static graph_t *cgraph(graph_t *`H gs, assn_t a) {
+static graph_t *cgraph(graph_t *`H gs, Set::set_t<assn_t,`H> @already_seen,
+                       assn_t a, unsigned *or_depth) {
  LOOP:
   if (gs == NULL) return gs; // already inconsistent
   //fprintf(stderr,"inserting assertion %s into \n",assn2string(a));
   //print_graphs(gs);
+  // if we've already added in this assertion, return the graphs
+  if (Set::member(*already_seen,a)) {++already_seen_hits; return gs;}
+  *already_seen = Set::insert(*already_seen,a);
   switch (a) {
   case &True: break;         // gs and true == gs
   case &False: gs = NULL; break; // gs and false == false
   case &And(a1,a2): 
-    gs = cgraph(gs,a1);  // gs and (a1 and a2) == (gs and a1) and a2
+    gs = cgraph(gs,already_seen,a1,or_depth);// gs and (a1 and a2) == (gs and a1) and a2
     a = a2;
     goto LOOP;
   case &Or(a1,a2):
+    if (*or_depth > max_paths) throw &too_large;
     // must copy the graphs since we mutate them in place
     graph_t *gs1 = gs;
     graph_t *gs2 = copy_graphs(gs);
+    let already_seen1 = *already_seen;
+    let already_seen2 = *already_seen;
     // compute (gs and a1)
-    gs1 = cgraph(gs1,a1);
+    gs1 = cgraph(gs1,&already_seen1,a1,or_depth);
     gs1 = associate_ud_sd_in_graphs(gs1);
     gs1 = break_term_in_graphs(gs1);
     // try to weed out graphs through congruence closure
     gs1 = congruence_close_graphs(gs1);
     gs1 = associate_ud_sd_in_graphs(gs1);
+    // at this point, we're splitting so increase the or-depth
+    *or_depth = *or_depth + 1;
     // compute (gs and a2)
-    gs2 = cgraph(gs2,a2);
+    gs2 = cgraph(gs2,&already_seen2,a2,or_depth);
     gs2 = associate_ud_sd_in_graphs(gs2);
     gs2 = break_term_in_graphs(gs2); 
     // try to weed out graphs through congruence closure
     gs2 = congruence_close_graphs(gs2);
     gs2 = associate_ud_sd_in_graphs(gs2);
     // return (gs and a1) or (gs and a2)
+    *already_seen = Set::intersect(already_seen1,already_seen2);
     gs = graph_append(gs1,gs2);
-    unsigned int n = num_graphs(gs);
-    if (max_paths_seen < n) max_paths_seen = n;
-    // too many disjuncts -- give up.  
-    if (n >= max_paths) {
-      throw &too_large; // could just set gs = true_graph(); 
-    }
     break;
   case &Prim(&Uint(0),Neq,t2): fallthru(t2);
   case &Prim(t1,Neq,&Uint(0)):
@@ -1135,15 +1140,23 @@ static graph_t *add_type_assns(graph_t *`H gs) {
 // if it returns false, then the assertion is definitely inconsistent.
 // if it returns true, then the assertion might be consistent.
 static bool consistent(assn_t a) {
+  //fprintf(stderr,"checking consistency of: \n");
+  //fprintf(stderr,"%s",AssnDef::dag2string(a));
+  
   try {
     // start with just an empty graph (true) and then add in assertion a
     constraints_added = 0;
     graphs_copied = 0;
     max_lookup = 0;
-    graph_t *gs = cgraph(true_graph(),a);
+    already_seen_hits = 0;
+    assn_set_t already_seen = Set::empty(assncmp);
+    unsigned or_depth = 0;
+    graph_t *gs = cgraph(true_graph(),&already_seen,a,&or_depth);
+
     //fprintf(stderr,"constraints added = %d\n",constraints_added);
     //fprintf(stderr,"graphs_copied = %d\n",graphs_copied);
     //fprintf(stderr,"max_lookup = %d\n",max_lookup);
+    //fprintf(stderr,"already_seen_hits = %d\n",already_seen_hits);
     // run closure passes to weed out graphs
     graph_change = true;
     while (graph_change && gs != NULL) {
