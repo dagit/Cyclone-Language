@@ -41,6 +41,9 @@ void check_fndecl_valid_type(seg_t,Tcenv::tenv_t,fndecl_t);
 // In addition, if allow_evars is true, then the evars in the type are
 // unconstrained.  Otherwise, we set all region evars to the heap and
 // all effect evars to the empty set, and signal an error for a free type evar.
+// NB: This function disallows aliasqual bounds from appearing on type variables
+// These are only legal in function decls and aggregates
+// This behaviour of check_type rules out bounds from local variable decls, casts etc.
 void check_type(seg_t, Tcenv::tenv_t, List::list_t<tvar_t,`H> bound_tvars, 
 		kind_t k, bool allow_evars, bool allow_abs_aggr, type_t);
 

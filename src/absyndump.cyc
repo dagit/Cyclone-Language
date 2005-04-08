@@ -1360,9 +1360,13 @@ static void dumptms(bool is_char_ptr, list_t<type_modifier_t> tms,
       dump_char(type2bool(true,nullable)? '*' : '@');
     }
     if(!qvar_to_Cids)
-      switch(aq) {
+      switch(compress(aq)) {
       case &AppType(&AqualConstCon(aqv), _): 
-	dump("@aqual(");dump_aqual_val(aqv);dump(")");break;
+	switch(aqv) {
+	case Aliasable_qual: break;
+	default:
+	  dump("@aqual(");dump_aqual_val(aqv);dump(")");break;
+	}
 	break;
       case &AppType(&AqualVarCon, tv):
 	dump("@aqual(");dumpntyp(tv->hd);dump(")");

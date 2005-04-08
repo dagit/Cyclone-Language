@@ -672,7 +672,7 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
       break;
     }
     if (print_zeroterm) {
-      switch(aq) {
+      switch(compress(aq)) {
       case &AppType(&AqualConstCon(aqv), _):
 	switch(aqv) {
 	case Aliasable_qual: break;
@@ -880,7 +880,7 @@ doc_t qb_cmp2doc($(type_t,type_t)@ cmp) {
   return cat(ntyp2doc(t2),text(" >= "),ntyp2doc(t1));
 }
 doc_t qualbnd2doc(list_t<$(type_t,type_t)@> qb) {
-  return group("","",",",List::map(rgn_cmp2doc,qb));
+  return group("","",",",List::map(qb_cmp2doc,qb));
 }
 
 doc_t funarg2doc($(var_opt_t,tqual_t,type_t)@ t) {

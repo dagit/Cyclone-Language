@@ -29,13 +29,14 @@
 #include "bget.h"
 
 #define _throw_bad_reapalloc() (_throw_bad_reapalloc_fn(__FILE__,__LINE__))
-#ifndef CYC_REGION_PROFILE
-// defined in cyc_include.h when profiling turned on
-struct _RegionPage {
-  struct _RegionPage *next;
-  char data[1];  /*FJS: used to be size 0, but that's forbidden in ansi c*/
-};
-#endif
+
+/* #ifndef CYC_REGION_PROFILE */
+/* // defined in cyc_include.h when profiling turned on */
+/* struct _RegionPage { */
+/*   struct _RegionPage *next; */
+/*   char data[1];  /\*FJS: used to be size 0, but that's forbidden in ansi c*\/ */
+/* }; */
+/* #endif */
 
 struct _RegionAllocFunctions {
   void (*_rufree) (struct _RegionHandle*, unsigned char*);
@@ -48,7 +49,6 @@ struct _RegionAllocFunctions {
 
 
 #define POOLSIZE 256
-
 struct _pool {
   size_t         count;
   struct _pool  *next;

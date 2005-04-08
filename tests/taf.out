@@ -5,7 +5,7 @@ testaqualfail.cyc:27: returns value of type int *@aqual(RESTRICTED)`GR14 but req
   @false and @true are not compatible. (different type constructors)
 testaqualfail.cyc:33: returns value of type int * but requires int *@aqual(`q)
   @false and @true are not compatible. (different type constructors)
-testaqualfail.cyc:41: type mismatch: int *@aqual(UNIQUE) != int *@aqual(ALIASABLE)
+testaqualfail.cyc:41: type mismatch: int *@aqual(UNIQUE) != int *
   ALIASABLE and UNIQUE are not compatible. ((different alias qualifiers))
 testaqualfail.cyc:53: returns value of type int * but requires int *@aqual(UNIQUE)
   @false and @true are not compatible. (different type constructors)
@@ -23,6 +23,8 @@ testaqualfail.cyc:168: alias qualifier bounds violated: UNIQUE <> ALIASABLE
 testaqualfail.cyc:169: alias qualifier bounds violated: UNIQUE <> ALIASABLE
 testaqualfail.cyc:190: alias qualifier bounds violated: UNIQUE <> ALIASABLE
 testaqualfail.cyc:200: pattern for variable elt dereferences an alias-free-pointer from a non-unique path
+
+testaqualfail.cyc:204: alias bound appears on type variable `a which is not in a function declaration or aggregate field
 
 
 COMPILATION FAILED!

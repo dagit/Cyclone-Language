@@ -199,3 +199,7 @@ void make_ex2(int *@aqual(\U) a) __attribute((consume(1))) {
 void use_ex2(struct Ex2 @e) {
   let &Ex2{elt} = e; //fail -- alias free path
 }
+
+void foo(`a\A arg) {
+  `a\U hd = arg;
+}

@@ -27,17 +27,19 @@ struct _fat_ptr {
 
 /* Regions */
 struct _RegionPage
+{ 
 #ifdef CYC_REGION_PROFILE
-{ unsigned total_bytes;
+  unsigned total_bytes;
   unsigned free_bytes;
+#endif
   struct _RegionPage *next;
   char data[1];
-}
-#endif
-; // abstract -- defined in runtime_memory.c
+};
+
 struct _pool;
 struct bget_region_key;
 struct _RegionAllocFunctions;
+
 struct _RegionHandle {
   struct _RuntimeStack s;
   struct _RegionPage *curr;

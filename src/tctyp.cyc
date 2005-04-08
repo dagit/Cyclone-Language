@@ -51,6 +51,7 @@ static struct CVTEnv {
   bool def_aliasable;          // whether we are examining some component of a function type
   bool inst_type_evar;  //evar's appearing in inst types within a function should not be generalized
   bool generalize_evars;    // whether we replace evars with fresh tvars
+  bool allow_aqual_bounds;
   // passed up: 
   free_tvars_t free_vars;  // free tvars found in this type
   free_evars_t free_evars; // free evars found in this type
@@ -166,7 +167,7 @@ static void check_free_evars(free_evars_t free_evars, type_t in_typ, seg_t loc){
 // most constrained kind as the kind of the variable, and in fact
 // physically share the kinds so that further constraints on it are
 // propagated.  Also ensures that the tvars share the same identity.
-static list_t<tvar_t> add_free_tvar(seg_t loc,list_t<tvar_t,`H> tvs,tvar_t tv) {
+static list_t<tvar_t> add_free_tvar(seg_t loc,list_t<tvar_t,`H> tvs,tvar_t tv, bool allow_aqual_bounds) {
   for (_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl)
     if (strptrcmp(tvs2->hd->name, tv->name) == 0) {
       kindbound_t k1 = tvs2->hd->kind;
@@ -174,10 +175,13 @@ static list_t<tvar_t> add_free_tvar(seg_t loc,list_t<tvar_t,`H> tvs,tvar_t tv) {
       if (!Kinds::constrain_kinds(k1,k2))
         err2(loc,"type variable ",tv," used with inconsistent kinds ",
 	     k1," and ",k2);
+      if(tv->aquals_bound != NULL && !allow_aqual_bounds) 
+	err2(loc,"alias bound appears on type variable ", tv, 
+	     " which is not in a function declaration or aggregate field");
       if(tvs2->hd->aquals_bound == NULL)
-	tvs2->hd->aquals_bound = tv->aquals_bound;
+ 	tvs2->hd->aquals_bound = tv->aquals_bound;
       else if(tv->aquals_bound != NULL && Tcutil::typecmp(tv->aquals_bound, tvs2->hd->aquals_bound))
-	err2(loc,"type variable ",tv," used with inconsistent alias qualifier bounds ",
+ 	err2(loc,"type variable ",tv," used with inconsistent alias qualifier bounds ",
 	     tv->aquals_bound," and ",tvs2->hd->aquals_bound);
       if (tv->identity == -1)
         tv->identity = tvs2->hd->identity;
@@ -305,7 +309,7 @@ static cvtenv_t check_type_inst(cvtenv_t env, types_t @ targsp,
     // have not yet been figured out.
     switch $(Kinds::compress_kb(tv->kind),t) {
     case $(&Unknown_kb(_), &VarType(tv2)):
-      env.kind_env  = add_free_tvar(env.loc, env.kind_env, tv2);
+      env.kind_env  = add_free_tvar(env.loc, env.kind_env, tv2, env.allow_aqual_bounds);
       env.free_vars = fast_add_free_tvar_bool(env.free_vars, tv2, true);
       continue;
     case $(&Eq_kb(&Kind(AqualKind, _)), &VarType(tv2)): //replace plain vartype with an AqualVar
@@ -758,7 +762,7 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
     }
     // this constrains the variable's kind according to other occurrences
     // of that variable and makes sure they share the same tvar identity.
-    env.kind_env = add_free_tvar(loc, env.kind_env, v);
+    env.kind_env = add_free_tvar(loc, env.kind_env, v, env.allow_aqual_bounds);
     // no need to constrain things here, but want to add it only if
     // it hasn't already been added.
     env.free_vars = fast_add_free_tvar_bool(env.free_vars, v, put_in_effect);
@@ -956,7 +960,7 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
     }
     // We use a fresh environment here so that we only track the free type
     // vars (and evars) of the function type in case we have to abstract them.
-    _ new_env = CVTEnv{loc,te,env.kind_env,true,true,false,env.generalize_evars,NULL,NULL,NULL};
+    _ new_env = CVTEnv{loc,te,env.kind_env,true,true,false,env.generalize_evars,true,NULL,NULL,NULL};
     new_env = i_check_type(new_env,&Kinds::mk,tr,true,true);
     rtq->real_const = extract_const_from_typedef(loc,rtq->print_const,tr);
     new_env.fn_result = false;
@@ -1285,7 +1289,7 @@ void check_valid_toplevel_type(seg_t loc, Tcenv::tenv_t te, type_t t) {
   kind_t expected_kind = is_function_type(t) ? &Kinds::ak : &Kinds::mk;
   let te_vars = Tcenv::lookup_type_vars(te);
   let cvt = check_valid_type(CVTEnv{loc,te,
-				    te_vars,false,false,false,generalize_evars,NULL,NULL,NULL},
+				    te_vars,false,false,false,generalize_evars,true,NULL,NULL,NULL},
 			     expected_kind, true, t);
   let free_tvars = List::map(fst,cvt.free_vars);
   let free_evars = cvt.free_evars;
@@ -1385,10 +1389,13 @@ void check_fndecl_valid_type(seg_t loc, Tcenv::tenv_t te, fndecl_t fd) {
 
 // Same as check_valid_type except that we ensure the free type variables
 // are drawn from the given set of bound type variables.
+// NB: This function disallows aliasqual bounds from appearing on type variables
+// These are only legal in function decls and aggregates
+// This behaviour of check_type rules out bounds from local variable decls, casts etc.
 void check_type(seg_t loc, Tcenv::tenv_t te, list_t<tvar_t,`H> bound_tvars, 
                 kind_t expected_kind, bool allow_evars, bool allow_abs_aggr,
                 type_t t) {
-  let cvt = check_valid_type(CVTEnv{loc,te,bound_tvars,false,false,false,false,NULL,NULL,NULL},
+  let cvt = check_valid_type(CVTEnv{loc,te,bound_tvars,false,false,false,false,false,NULL,NULL,NULL},
 			     expected_kind, allow_abs_aggr, t);
   let free_tvs= remove_bound_tvars(cvt.free_vars,bound_tvars,fst);
   for (; free_tvs != NULL; free_tvs = free_tvs->tl)
@@ -1396,13 +1403,13 @@ void check_type(seg_t loc, Tcenv::tenv_t te, list_t<tvar_t,`H> bound_tvars,
   if (!allow_evars)
     check_free_evars(cvt.free_evars,t,loc);
 }
-
+//the bool (true) on flagged_tvars indicates which tvars are existentially quantified
 void check_type_with_bounds(seg_t loc, Tcenv::tenv_t te, list_t<$(tvar_t,bool)@,`H> flagged_tvars, 
 			    list_t<$(type_t, type_t)@, `H> @qual_bnd,
 			    kind_t expected_kind, bool allow_evars, bool allow_abs_aggr,
 			    type_t t) {
   _ bound_tvars = List::map(fst, flagged_tvars);
-  let cvt = check_valid_type(CVTEnv{loc,te,bound_tvars,false,false,false,false,NULL,NULL,NULL},
+  let cvt = check_valid_type(CVTEnv{loc,te,bound_tvars,false,false,false,false,true,NULL,NULL,NULL},
 			     expected_kind, allow_abs_aggr, t);
   //this will check the qual_bnd multiple times since it is called once for each field in an Aggr
   //may screw up tvar identities?

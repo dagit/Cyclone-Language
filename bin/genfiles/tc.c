@@ -27,17 +27,19 @@ struct _fat_ptr {
 
 /* Regions */
 struct _RegionPage
+{ 
 #ifdef CYC_REGION_PROFILE
-{ unsigned total_bytes;
+  unsigned total_bytes;
   unsigned free_bytes;
+#endif
   struct _RegionPage *next;
   char data[1];
-}
-#endif
-; // abstract -- defined in runtime_memory.c
+};
+
 struct _pool;
 struct bget_region_key;
 struct _RegionAllocFunctions;
+
 struct _RegionHandle {
   struct _RuntimeStack s;
   struct _RegionPage *curr;
@@ -498,9 +500,9 @@ struct Cyc_Tcenv_Tenv*Cyc_Tcenv_copy_tenv_dicts(struct Cyc_Tcenv_Tenv*);
 # 34 "tctyp.h"
 void Cyc_Tctyp_check_valid_toplevel_type(unsigned,struct Cyc_Tcenv_Tenv*,void*);
 void Cyc_Tctyp_check_fndecl_valid_type(unsigned,struct Cyc_Tcenv_Tenv*,struct Cyc_Absyn_Fndecl*);
-# 44 "tctyp.h"
+# 47 "tctyp.h"
 void Cyc_Tctyp_check_type(unsigned,struct Cyc_Tcenv_Tenv*,struct Cyc_List_List*,struct Cyc_Absyn_Kind*,int,int,void*);
-# 47
+# 50
 void Cyc_Tctyp_check_type_with_bounds(unsigned,struct Cyc_Tcenv_Tenv*,struct Cyc_List_List*,struct Cyc_List_List**,struct Cyc_Absyn_Kind*,int,int,void*);
 # 26 "tcexp.h"
 void*Cyc_Tcexp_tcExp(struct Cyc_Tcenv_Tenv*,void**,struct Cyc_Absyn_Exp*);

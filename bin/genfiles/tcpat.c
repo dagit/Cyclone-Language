@@ -27,17 +27,19 @@ struct _fat_ptr {
 
 /* Regions */
 struct _RegionPage
+{ 
 #ifdef CYC_REGION_PROFILE
-{ unsigned total_bytes;
+  unsigned total_bytes;
   unsigned free_bytes;
+#endif
   struct _RegionPage *next;
   char data[1];
-}
-#endif
-; // abstract -- defined in runtime_memory.c
+};
+
 struct _pool;
 struct bget_region_key;
 struct _RegionAllocFunctions;
+
 struct _RegionHandle {
   struct _RuntimeStack s;
   struct _RegionPage *curr;
@@ -539,7 +541,7 @@ struct Cyc_Tcenv_Tenv*Cyc_Tcenv_add_aquals_bound(struct Cyc_Tcenv_Tenv*,void*,vo
 struct Cyc_Tcenv_Tenv*Cyc_Tcenv_add_region(struct Cyc_Tcenv_Tenv*,void*,int,int);
 # 146
 void Cyc_Tcenv_check_rgn_accessible(struct Cyc_Tcenv_Tenv*,unsigned,void*);
-# 44 "tctyp.h"
+# 47 "tctyp.h"
 void Cyc_Tctyp_check_type(unsigned,struct Cyc_Tcenv_Tenv*,struct Cyc_List_List*,struct Cyc_Absyn_Kind*,int,int,void*);
 # 26 "tcexp.h"
 void*Cyc_Tcexp_tcExp(struct Cyc_Tcenv_Tenv*,void**,struct Cyc_Absyn_Exp*);
