@@ -30,14 +30,6 @@
 
 #define _throw_bad_reapalloc() (_throw_bad_reapalloc_fn(__FILE__,__LINE__))
 
-/* #ifndef CYC_REGION_PROFILE */
-/* // defined in cyc_include.h when profiling turned on */
-/* struct _RegionPage { */
-/*   struct _RegionPage *next; */
-/*   char data[1];  /\*FJS: used to be size 0, but that's forbidden in ansi c*\/ */
-/* }; */
-/* #endif */
-
 struct _RegionAllocFunctions {
   void (*_rufree) (struct _RegionHandle*, unsigned char*);
   void (*_rdrop) (struct _RegionHandle*, struct _fat_ptr);

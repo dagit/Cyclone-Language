@@ -991,7 +991,7 @@ datatype exn { TooLarge };
 datatype exn.TooLarge too_large = TooLarge;
 
 //FIX: add a way for the user to control this.
-unsigned int max_paths = 6;
+unsigned int max_paths = 33;
 unsigned int max_paths_seen = 0;
 
 // given a set of graphs gs representing A1 or A2 or ... or An
@@ -1006,7 +1006,7 @@ unsigned int max_paths_seen = 0;
 // pushed into the graphs.  That way we're more likely to hit an
 // inconsistency early.
 static graph_t *cgraph(graph_t *`H gs, Set::set_t<assn_t,`H> @already_seen,
-                       assn_t a, unsigned *or_depth) {
+                       assn_t a, unsigned *total_paths) {
  LOOP:
   if (gs == NULL) return gs; // already inconsistent
   //fprintf(stderr,"inserting assertion %s into \n",assn2string(a));
@@ -1018,27 +1018,29 @@ static graph_t *cgraph(graph_t *`H gs, Set::set_t<assn_t,`H> @already_seen,
   case &True: break;         // gs and true == gs
   case &False: gs = NULL; break; // gs and false == false
   case &And(a1,a2): 
-    gs = cgraph(gs,already_seen,a1,or_depth);// gs and (a1 and a2) == (gs and a1) and a2
+    gs = cgraph(gs,already_seen,a1,total_paths);// gs and (a1 and a2) == (gs and a1) and a2
     a = a2;
     goto LOOP;
   case &Or(a1,a2):
-    if (*or_depth > max_paths) throw &too_large;
+    let n = num_graphs(gs);
+    if (*total_paths > max_paths) throw &too_large;
+    // fprintf(stderr, "num_graphs(gs) = %d, total_paths = %d\n", n, *total_paths);
     // must copy the graphs since we mutate them in place
+    *total_paths = *total_paths + n;
     graph_t *gs1 = gs;
     graph_t *gs2 = copy_graphs(gs);
     let already_seen1 = *already_seen;
     let already_seen2 = *already_seen;
     // compute (gs and a1)
-    gs1 = cgraph(gs1,&already_seen1,a1,or_depth);
+    gs1 = cgraph(gs1,&already_seen1,a1,total_paths);
     gs1 = associate_ud_sd_in_graphs(gs1);
     gs1 = break_term_in_graphs(gs1);
     // try to weed out graphs through congruence closure
     gs1 = congruence_close_graphs(gs1);
     gs1 = associate_ud_sd_in_graphs(gs1);
     // at this point, we're splitting so increase the or-depth
-    *or_depth = *or_depth + 1;
     // compute (gs and a2)
-    gs2 = cgraph(gs2,&already_seen2,a2,or_depth);
+    gs2 = cgraph(gs2,&already_seen2,a2,total_paths);
     gs2 = associate_ud_sd_in_graphs(gs2);
     gs2 = break_term_in_graphs(gs2); 
     // try to weed out graphs through congruence closure
@@ -1150,8 +1152,8 @@ static bool consistent(assn_t a) {
     max_lookup = 0;
     already_seen_hits = 0;
     assn_set_t already_seen = Set::empty(assncmp);
-    unsigned or_depth = 0;
-    graph_t *gs = cgraph(true_graph(),&already_seen,a,&or_depth);
+    unsigned total_paths = 1;
+    graph_t *gs = cgraph(true_graph(),&already_seen,a,&total_paths);
 
     //fprintf(stderr,"constraints added = %d\n",constraints_added);
     //fprintf(stderr,"graphs_copied = %d\n",graphs_copied);
