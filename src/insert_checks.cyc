@@ -563,6 +563,7 @@ static void do_decl(env_t nv, decl_t d) {
     gettimeofday(&start,NULL);
 #endif
     do_stmt(nv,fd->body); 
+    AssnDef::reset_hash_cons_table();
 #ifdef PERFORMANCE_DEBUG
     gettimeofday(&end,NULL);
     end.tv_sec -= start.tv_sec;

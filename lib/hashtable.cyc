@@ -26,18 +26,31 @@
 namespace Hashtable;
 using List;
 
+struct Cell<`a,`b,`r> {
+  `a key;
+  `b value;
+  struct Cell<`a,`b,`r>*`r next;
+};
+
+typedef struct Cell<`a,`b,`r>*`r cell_t<`a,`b,`r>;
+
+typedef struct Bucket<`a,`b,`r> {
+  unsigned int length;
+  cell_t<`a,`b,`r> cells;
+} bucket_t<`a,`b,`r>;
+
 /*abstract*/
 struct Table<`a,`b,`r> {
   region_t<`r> r;
   int          (@cmp)(`a,`a);
   int          (@hash)(`a);
   int	       max_len; // maximum length of bucket list before resize
-  list_t<$(`a,`b)@`r,`r> ?`r tab;
+  bucket_t<`a,`b,`r>?`r tab;
 };
 
 table_t<`a,`b,`r> rcreate(region_t<`r> r, int sz, int (@`H cmp)(`a,`a), 
                           int (@`H hash)(`a)) {
-  return rnew(r) Table{r, cmp, hash, 3, rcalloc(r,sz,sizeof(list_t))};
+  return rnew(r) Table{r, cmp, hash, 3, rcalloc(r,sz,sizeof(bucket_t))};
 }
 
 table_t<`a,`b> create(int sz, int (@`H cmp)(`a,`a), int (@`H hash)(`a)) {
@@ -45,26 +58,34 @@ table_t<`a,`b> create(int sz, int (@`H cmp)(`a,`a), int (@`H hash)(`a)) {
 }
 
 void insert(table_t<`a,`b> t, `a key, `b val) {
-  list_t<$(`a,`b)@> ?tab   = t->tab;
-  int             bucket = (t->hash)(key) % numelts(tab);
-  tab[bucket] = rnew(t->r) List(rnew(t->r) $(key,val),tab[bucket]);
-  if (length(tab[bucket]) > t->max_len) 
+  bucket_t?tab   = t->tab;
+  unsigned bucket = (t->hash)(key) % numelts(tab);
+  let b = (bucket_t@)&tab[bucket];
+  b->cells = rnew(t->r) Cell{key,val,b->cells};
+  let i = b->length + 1;
+  b->length = i;
+  if (i > t->max_len) {
+    //fprintf(stderr,"resizing table %s with length %d\n",(unsigned)t,i);
     resize(t);
+  }
 }
 
 `b lookup(table_t<`a,`b> t, `a key) { // throws Not_found
-  list_t<$(`a,`b)@> ?tab   = t->tab;
-  list_t<$(`a,`b)@> l      = tab[(t->hash)(key) % numelts(tab)];
-  return assoc_cmp(t->cmp, l, key);
+  let tab = t->tab;
+  let cmp = t->cmp;
+  cell_t p = tab[(t->hash)(key) % numelts(tab)].cells;
+  for (; p != NULL; p = p->next) {
+    if (cmp(p->key,key) == 0) return p->value;
+  }
+  throw &Core::Not_found_val;
 }
 
 `b*`r lookup_opt(table_t<`a,`b,`r> t, `a key) {
   let tab = t->tab;
-  let l = tab[(t->hash)(key) % numelts(tab)];
   let cmp = t->cmp;
-  for (; l != NULL; l = l->tl) {
-    let &$(k,*v) = l->hd;
-    if (cmp(key,k) == 0) return v;
+  let p = tab[(t->hash)(key) % numelts(tab)].cells;
+  for (; p != NULL; p = p->next) {
+    if (cmp(p->key,key) == 0) return &p->value;
   }
   return NULL;
 }
@@ -76,22 +97,21 @@ void insert(table_t<`a,`b> t, `a key, `b val) {
 `b*`r lookup_other_opt(table_t<`a,`b,`r> t, `c key, 
                        int cmp(`c,`a), int hash(`c)) {
   let tab = t->tab;
-  let l = tab[hash(key) % numelts(tab)];
-  for (; l != NULL; l = l->tl) {
-    let &$(k,*v) = l->hd;
-    if (cmp(key,k) == 0) return v;
+  let p = tab[hash(key) % numelts(tab)].cells;
+  for (; p != NULL; p = p->next) {
+    if (cmp(key,p->key) == 0) 
+      return &p->value;
   }
   return NULL;
 }
 
 bool try_lookup(table_t<`a,`b> t, `a key, `b@ data) {
   let tab = t->tab;
-  let l = tab[(t->hash)(key) % numelts(tab)];
   let cmp = t->cmp;
-  for (; l != NULL; l = l->tl) {
-    let $(k,v) = *l->hd;
-    if (cmp(key,k) == 0) {
-      *data = v;
+  let p = tab[(t->hash)(key) % numelts(tab)].cells;
+  for (; p != NULL; p = p->next) {
+    if (cmp(p->key,key) == 0) {
+      *data = p->value;
       return true;
     }
   }
@@ -103,17 +123,18 @@ void remove(table_t<`a,`b> t, `a key) {
   // does a destructive list update since this data structure is not functional
   let tab = t->tab;
   let cmp = t->cmp;
-  int bucket = (t->hash)(key) % numelts(tab);
-  let l = tab[bucket];
+  unsigned bucket = (t->hash)(key) % numelts(tab);
+  let b = (bucket_t@)&tab[bucket];
+  let l = b->cells;
   if (l == NULL) return;
-  if (cmp(key,l->hd[0][0]) == 0) {
-    tab[bucket] = l->tl;
+  if (cmp(key,l->key) == 0) {
+    b->cells = l->next;
     return;
   }
-  for (let next = l->tl; l->tl != NULL; l = l->tl, next = next->tl)
-    // invariant: l != NULL != l->tl == next, l->hd should not be removed
-    if (cmp(key,next->hd[0][0]) == 0) {
-      l->tl = next->tl;
+  for (let next = l->next; l->next != NULL; l = l->next, next = next->next)
+    // invariant: l != NULL != l->next == next, l should not be removed
+    if (cmp(key,next->key) == 0) {
+      l->next = next->next;
       return;
     }
 }
@@ -123,7 +144,7 @@ int hash_string(string_t s) {
   int ans   = 0;
   int sz    = numelts(s);
   int shift = 0;
-  for (int i=0; i < sz; ++i) {
+  for (unsigned i=0; i < sz; ++i) {
     ans = ans ^ (s[i] << shift);
     shift += 8;
     if(shift == 32)
@@ -136,58 +157,81 @@ int hash_stringptr(stringptr_t s) {
   return hash_string(*s);
 }
 
-// For resizing
-void insert_bucket(region_t<`r> r,
-                   list_t<$(`a,`b)@`r,`r> ?`r tab, int (@hash)(`a),
-                   list_t<$(`a,`b)@> elems) {
-  if (elems == NULL) return;
-  insert_bucket(r,tab,hash,elems->tl); // preserve the original order
-  `a  key  = elems->hd[0][0];
-  `b  val  = elems->hd[0][1];
-  int nidx = (hash)(key) % numelts(tab);
-  tab[nidx] = rnew(r) List(rnew(r) $(key,val),tab[nidx]);
+// Reverse a list of cells in-place
+static cell_t<`a,`b,`r> rev_cells(cell_t<`a,`b,`r> cells) {
+  if (cells == NULL) return NULL;
+  cell_t first = cells;
+  cell_t second = cells->next;
+  cells->next = NULL;
+  while (second != NULL) {
+    cell_t temp = second->next;
+    second->next = first;
+    first = second;
+    second = temp;
+  }
+  return first;
 }
 
-void resize(table_t<`a,`b> t) {
-  list_t<$(`a,`b)@> ?odata   = t->tab;
-  int             osize    = numelts(odata);
-  int             nsize    = 2 * osize + 1;
-  list_t<$(`a,`b)@> ? ndata  = rcalloc(t->r,nsize,sizeof(list_t));
-  for (int i = 0; i<osize; i++)
-    insert_bucket(t->r,ndata,t->hash,odata[i]);
+// For resizing -- elements are in reverse order so they get 
+// inserted into the table in proper order.
+static void insert_bucket(region_t<`r> r,
+                          bucket_t<`a,`b,`r>?`r tab, int (@hash)(`a),
+                          cell_t<`a,`b,`r> elems) {
+  for (; elems != NULL; elems = elems->next) {
+    `a  key  = elems->key;
+    `b  val  = elems->value;
+    unsigned int nidx = (hash)(key) % numelts(tab);
+    tab[nidx].cells = rnew(r) Cell{key,val,tab[nidx].cells};
+    tab[nidx].length++;
+  }
+}
+
+void resize(table_t<`a,`b,`r> t) {
+  bucket_t<`a,`b,`r> ?odata = t->tab;
+  unsigned int    osize     = numelts(odata);
+  unsigned int    nsize     = 2 * osize + 1;
+  bucket_t<`a,`b,`r> ?ndata = rcalloc(t->r,nsize,sizeof(bucket_t));
+  for (unsigned int i = 0; i<osize; i++)
+    insert_bucket(t->r,ndata,t->hash,rev_cells(odata[i].cells));
   t->tab     = ndata;
-  t->max_len = 2 * t->max_len;
+  // double the length allowed on the bucket lists before resizing again.
+  unsigned cur_max_len = 0;
+  for (unsigned int j = 0; j < nsize; j++) {
+    let k = ndata[j].length;
+    if (k > cur_max_len) cur_max_len = k;
+  }
+  t->max_len = 2 * cur_max_len;
 }
 
 // Iterating over a hashtable
 void iter(void f(`a,`b), table_t<`a,`b> t) {
-  list_t<$(`a,`b)@> ?odata   = t->tab;
-  int             osize    = numelts(odata);
-  for (int i = 0; i<osize; i++) 
-    for(list_t<$(`a,`b)@> iter = odata[i]; iter != NULL; iter = iter->tl) 
-      f(iter->hd[0][0],iter->hd[0][1]);
+  bucket_t? odata = t->tab;
+  unsigned int osize = numelts(odata);
+  for (unsigned int i = 0; i<osize; i++) 
+    for(let iter = odata[i].cells; iter != NULL; iter = iter->next) 
+      f(iter->key,iter->value);
 }
 
 void iter_c(void f(`a,`b,`c), table_t<`a,`b> t, `c env) {
-  list_t<$(`a,`b)@> ?odata   = t->tab;
-  int             osize    = numelts(odata);
-  for (int i = 0; i<osize; i++) 
-    for(list_t<$(`a,`b)@> iter = odata[i]; iter != NULL; iter = iter->tl) 
-      f(iter->hd[0][0],iter->hd[0][1],env);
+  bucket_t? odata = t->tab;
+  unsigned int osize = numelts(odata);
+  for (unsigned int i = 0; i<osize; i++) 
+    for(let iter = odata[i].cells; iter != NULL; iter = iter->next) 
+      f(iter->key,iter->value,env);
 }  
 
 // debugging
 void print_table_map(table_t<`a,`b> t, 
                      void prn_key(`a), void prn_val(`b)){
-  list_t<$(`a,`b)@> ?odata = t->tab;
-  int osize = numelts(odata);
-  for (int i = 0; i<osize; i++) {
+  bucket_t ?odata = t->tab;
+  unsigned int osize = numelts(odata);
+  for (unsigned int i = 0; i<osize; i++) {
     printf("%d: ",i);
-    for(list_t<$(`a,`b)@> iter = odata[i]; iter != NULL; iter = iter->tl) {
+    for(let iter = odata[i].cells; iter != NULL; iter = iter->next) {
       printf("(");
-      prn_key(iter->hd[0][0]);
+      prn_key(iter->key);
       printf(",");
-      prn_val(iter->hd[0][1]);
+      prn_val(iter->value);
       printf(") ");
     }
     printf("\n");

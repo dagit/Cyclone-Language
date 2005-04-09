@@ -26,6 +26,7 @@
 #include "pratt_prover.h"
 #include <sexp.h>
 #include <set.h>
+
 namespace AssnDef;
 using List;
 using Hashtable;
@@ -82,9 +83,24 @@ string_t term2string(term_t t) {
   return res;
 }
 
+static int hash_const(Absyn::cnst_t c) {
+  switch (c) {
+  case Absyn::Cnst{.Null_c = _}: return 0;
+  case Absyn::Cnst{.Char_c = $(_,c)}: return c;
+  case Absyn::Cnst{.Short_c = $(_,c)}: return c;
+  case Absyn::Cnst{.Int_c = $(_,i)}: return i;
+  case Absyn::Cnst{.LongLong_c = $(_,i)}: return (int)i;
+  case Absyn::Cnst{.Float_c = $(s,_)}: fallthru(s);
+  case Absyn::Cnst{.Wchar_c = s}: fallthru(s);
+  case Absyn::Cnst{.String_c = s}: fallthru(s);
+  case Absyn::Cnst{.Wstring_c = s}:
+    return Hashtable::hash_string(s);
+  }
+}
+
 static int hash_exp(exp_t e) {
   switch (e->r) {
-  case &Absyn::Const_e(...): return 0;
+  case &Absyn::Const_e(c): return hash_const(c);
   case &Absyn::Var_e(...): return 1;
   case &Absyn::Pragma_e(...): return 2;
   case &Absyn::Primop_e(...): return 3;
@@ -195,11 +211,16 @@ static term_t copy_term(datatype Term@ t) {
 // a hash-table to hold all of the term nodes to maximize sharing.  
 static struct Hashtable::Table<term_t,term_t> *term_hash_cons_table = NULL;
 
+datatype Term.Uint zero_value = Uint(0);
+datatype Term.Uint one_value = Uint(1);
+
 static term_t hash_cons_term(datatype Term @t) {
-  Hashtable::table_t h;
+  Hashtable::table_t<term_t,term_t> h;
   if (term_hash_cons_table == NULL) {
     h = Hashtable::create(123, cmp_term, termhash);
     term_hash_cons_table = h;
+    Hashtable::insert(h,&zero_value,&zero_value);
+    Hashtable::insert(h,&one_value,&one_value);
   } else {
     h = (Hashtable::table_t)term_hash_cons_table;
   }
@@ -218,10 +239,10 @@ term_t uint(unsigned int i) {
   return hash_cons_term(&t);
 }
 term_t zero() {
-  return uint(0);
+  return &zero_value;
 }
 term_t one() {
-  return uint(1);
+  return &one_value;
 }
 term_t cnst(Absyn::exp_t e) { 
   let $(c, known) = Evexp::eval_const_uint_exp(e);
@@ -688,8 +709,7 @@ typedef struct AssnInfo {
   assn_set_opt_t *widened_set;
 } assn_info_t;
 
-static struct Hashtable::Table<assn_t,assn_info_t@> 
-*hash_cons_table = NULL;
+static struct Hashtable::Table<assn_t,assn_info_t@> *hash_cons_table = NULL;
 
 void reset_hash_cons_table(void){
   term_hash_cons_table = NULL;
@@ -767,6 +787,20 @@ static assn_info_t@ copy_assn(datatype Assn@`r a){
     return new AssnInfo{new Subst(vd1,t1,hash_cons(a1)),NULL,NULL};
   }
 }
+
+/*
+void print_assn(assn_t a) {
+  printf("%s",assn2string(a));
+}
+
+void print_assninfo(assn_info_t @a) {
+  return;
+}
+
+void dump_hashtable(Hashtable::table_t<assn_t,assn_info_t@> h) {
+  print_table_map(h, print_assn, print_assninfo);
+}
+*/
 
 // given an assertion node, look it up in the hash-table.  If it's
 // not already there, then make a shallow copy and enter it (along
@@ -940,11 +974,12 @@ assn_t not(assn_t a) {
 // non-escaping variables, as well as a pointer to a substitution
 // for escaping variables.  
 // TRY: we could try using dictionaries here instead of lists.
+
 static term_t 
 reduce_term(term_t t, list_t<$(vardecl_t,term_t)@> subst) {
   switch (t) {
-  case &Uint(_):
-  case &Const(_):
+  case &Uint(_): 
+  case &Const(_): 
   case &LogicVar(...): return t;
   case &Cast(tp,tm):
     let tm2 = reduce_term(tm,subst);
@@ -980,45 +1015,77 @@ reduce_term(term_t t, list_t<$(vardecl_t,term_t)@> subst) {
   }
 }
 
+typedef list_t<$(vardecl_t,term_t)@> subst_t;
+typedef Hashtable::table_t<assn_t,list_t<$(subst_t,bool,assn_t)@>> reduce_info_t;
+
+static bool same_subst(subst_t s1, subst_t s2) {
+  if (s1 == s2) return true;
+  for (; s1 != NULL && s2 != NULL; s1=s1->tl, s2=s2->tl) {
+    let $(vd1,t1) = *s1->hd;
+    let $(vd2,t2) = *s2->hd;
+    if (vd1 != vd2 || t1 != t2) return false;
+    if (s1->tl == s2->tl) return true;
+  }
+  return (s1 != s2);
+}
+
+// We memoize the reductions to once again ensure we traverse the dag
+// instead of the tree.  The problem is that we have to memoize w.r.t.
+// substitution as well as the negation flag.  Nonetheless, this results
+// in a substantial speedup when we have large assertions.
 static assn_t 
-reduce_assn(assn_t a, list_t<$(vardecl_t,term_t)@`H,`H> subst, bool negate) {
+reduce_assn(assn_t a, subst_t subst, bool negate, reduce_info_t h) {
+  let info_opt = Hashtable::lookup_opt(h,a);
+  list_t<$(subst_t,bool,assn_t)@> info = NULL;
+  if (info_opt != NULL) {
+    info = *info_opt;
+    for (let p = info; p != NULL; p = p->tl) {
+      let $(subst2,negate2,a2) = *p->hd;
+      if (negate == negate2 && same_subst(subst,subst2)) { 
+        return a2;
+      }
+    }
+  } 
   assn_t res;
- LOOP:
   switch (a) {
   case &True: if (negate) return &false_assn; else return &true_assn;
   case &False: if (negate) return &true_assn; else return &false_assn;
   case &Prim(t1,p,t2):
     let newt1 = reduce_term(t1,subst);
     let newt2 = reduce_term(t2,subst);
-    if (negate) return not_prim(t1,p,t2);
+    if (negate) { res = not_prim(newt1,p,newt2); break; }
     if (t1 != newt1 || t2 != newt2) 
       a = prim(newt1,p,newt2);
-    return a;
+    res = a;
+    break;
   case &And(a1,a2):
-    let newa1 = reduce_assn(a1,subst,negate);
-    let newa2 = reduce_assn(a2,subst,negate);
-    if (negate) return or(newa1,newa2);
+    let newa1 = reduce_assn(a1,subst,negate,h);
+    let newa2 = reduce_assn(a2,subst,negate,h);
+    if (negate) { res = or(newa1,newa2); break; }
     if (a1 != newa1 || a2 != newa2) 
       a = and(newa1,newa2);
-    return a;
+    res = a;
+    break;
   case &Or(a1,a2):
-    let newa1 = reduce_assn(a1,subst,negate);
-    let newa2 = reduce_assn(a2,subst,negate);
-    if (negate) return and(newa1,newa2);
+    let newa1 = reduce_assn(a1,subst,negate,h);
+    let newa2 = reduce_assn(a2,subst,negate,h);
+    if (negate) { res = and(newa1,newa2); break; }
     if (a1 != newa1 || a2 != newa2) 
       a = or(newa1,newa2);
-    return a;
+    res = a;
+    break;
   case &Subst(vd,t,a1):
     t = reduce_term(t,subst);
     // add vd->t to the subst
-    subst = new List(new $(vd,t),subst);
-    a = a1;
-    goto LOOP;
+    let new_subst = new List(new $(vd,t),subst);
+    res = reduce_assn(a1, new_subst, negate, h);
+    break;
   case &Not(a1):
-    a = a1;
-    negate = !negate;
-    goto LOOP;
+    res = reduce_assn(a1, subst, !negate, h);
+    break;
   }
+  Hashtable::insert(h,a,new List{new $(subst,negate,res),info}); 
+  return res;
 }
 
 // get rid of all Not and Subst nodes.
@@ -1027,7 +1094,7 @@ assn_t reduce(assn_t a) {
   let ainfo = hash_cons_it(a);
   let redopt = ainfo->reduced;
   if (redopt != NULL) return (assn_t)redopt;
-  a = reduce_assn(a,NULL,false);
+  a = reduce_assn(a,NULL,false,Hashtable::create(33,assncmp,assnhash));
   ainfo->reduced = a;
   return a;
 }
