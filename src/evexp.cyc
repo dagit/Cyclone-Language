@@ -574,7 +574,8 @@ int exp_cmp(exp_t e1, exp_t e2) {
     // FIX:  need to add these two cases in.
   case $(&Enum_e(_,_),&Enum_e(_,_)):  
   case $(&AnonEnum_e(_,_),&AnonEnum_e(_,_)):
-  default: Warn::impos2("Evexp::exp_cmp, unexpected case");
+  default: Warn::impos2("Evexp::exp_cmp, unexpected case $(",
+                        e1,",",e2,")");
   }
 }
 

@@ -893,7 +893,7 @@ if(tms==0)return 0;{
 void*_Tmp0=(void*)tms->hd;void*_Tmp1;if(*((int*)_Tmp0)==3){_Tmp1=(void*)((struct Cyc_Absyn_Function_mod_Absyn_Type_modifier_struct*)_Tmp0)->f1;{void*args=_Tmp1;
 # 487
 if(tms->tl==0 ||
- Cyc_Parse_is_typeparam((void*)_check_null(tms->tl)->hd)&& _check_null(tms->tl)->tl==0){
+ Cyc_Parse_is_typeparam((void*)tms->tl->hd)&& tms->tl->tl==0){
 # 490
 void*_Tmp2;if(*((int*)args)==1){
 # 492
@@ -1099,7 +1099,7 @@ fn_atts=({struct Cyc_List_List*_TmpF=_cycalloc(sizeof(struct Cyc_List_List));_Tm
 new_atts=({struct Cyc_List_List*_TmpF=_cycalloc(sizeof(struct Cyc_List_List));_TmpF->hd=(void*)as->hd,_TmpF->tl=new_atts;_TmpF;});}}}
 # 727
 if(tms->tl!=0){
-void*_TmpF=(void*)_check_null(tms->tl)->hd;void*_Tmp10;if(*((int*)_TmpF)==4){_Tmp10=((struct Cyc_Absyn_TypeParams_mod_Absyn_Type_modifier_struct*)_TmpF)->f1;{struct Cyc_List_List*ts=_Tmp10;
+void*_TmpF=(void*)tms->tl->hd;void*_Tmp10;if(*((int*)_TmpF)==4){_Tmp10=((struct Cyc_Absyn_TypeParams_mod_Absyn_Type_modifier_struct*)_TmpF)->f1;{struct Cyc_List_List*ts=_Tmp10;
 # 730
 typvars=ts;
 tms=tms->tl;

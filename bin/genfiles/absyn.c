@@ -1202,7 +1202,7 @@ return(struct Cyc_Absyn_Aggrfield*)fs->hd;}}
 return 0;}
 # 980
 struct Cyc_Absyn_Aggrfield*Cyc_Absyn_lookup_decl_field(struct Cyc_Absyn_Aggrdecl*ad,struct _fat_ptr*v){
-return ad->impl==0?0: Cyc_Absyn_lookup_field(_check_null(ad->impl)->fields,v);}
+return ad->impl==0?0: Cyc_Absyn_lookup_field(ad->impl->fields,v);}
 # 984
 struct _tuple14*Cyc_Absyn_lookup_tuple_field(struct Cyc_List_List*ts,int i){
 for(1;i!=0 && ts!=0;(-- i,ts=ts->tl)){

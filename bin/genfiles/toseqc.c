@@ -656,7 +656,7 @@ return;}case 12: _Tmp4=((struct Cyc_Absyn_Decl_s_Absyn_Raw_stmt_struct*)_Tmp0)->
 # 381
 if(vd->initializer!=0){
 # 384
-void*_Tmp7=_check_null(vd->initializer)->r;void*_Tmp8;if(*((int*)_Tmp7)==35){_Tmp8=((struct Cyc_Absyn_UnresolvedMem_e_Absyn_Raw_exp_struct*)_Tmp7)->f2;{struct Cyc_List_List*dles=_Tmp8;
+void*_Tmp7=vd->initializer->r;void*_Tmp8;if(*((int*)_Tmp7)==35){_Tmp8=((struct Cyc_Absyn_UnresolvedMem_e_Absyn_Raw_exp_struct*)_Tmp7)->f2;{struct Cyc_List_List*dles=_Tmp8;
 # 397 "toseqc.cyc"
 struct Cyc_Absyn_Stmt*laststmt=({struct Cyc_Absyn_Exp*_Tmp9=_check_null(vd->initializer);Cyc_Toseqc_exps_to_seqc(_Tmp9,
 ({(struct Cyc_List_List*(*)(struct Cyc_Absyn_Exp*(*)(struct _tuple13*),struct Cyc_List_List*))Cyc_List_map;})(({(struct Cyc_Absyn_Exp*(*)(struct _tuple13*))Cyc_Core_snd;}),dles));});
@@ -665,7 +665,7 @@ if(laststmt==0)goto _LL24;
 # 406
 {void*_Tmp9=laststmt->r;void*_TmpA;if(*((int*)_Tmp9)==1){_TmpA=((struct Cyc_Absyn_Exp_s_Absyn_Raw_stmt_struct*)_Tmp9)->f1;{struct Cyc_Absyn_Exp*initexp=_TmpA;
 # 408
-{void*_TmpB=_check_null(vd->initializer)->r;void*_TmpC;if(*((int*)_TmpB)==36){_TmpC=((struct Cyc_Absyn_StmtExp_e_Absyn_Raw_exp_struct*)_TmpB)->f1;{struct Cyc_Absyn_Stmt*s3=_TmpC;
+{void*_TmpB=vd->initializer->r;void*_TmpC;if(*((int*)_TmpB)==36){_TmpC=((struct Cyc_Absyn_StmtExp_e_Absyn_Raw_exp_struct*)_TmpB)->f1;{struct Cyc_Absyn_Stmt*s3=_TmpC;
 # 410
 vd->initializer=initexp;
 laststmt->r=s->r;

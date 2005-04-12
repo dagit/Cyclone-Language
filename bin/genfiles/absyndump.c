@@ -1475,20 +1475,20 @@ if(do_semi)Cyc_Absyndump_dump_semi();}}
 # 1201
 static void Cyc_Absyndump_dump_aggrdecl(struct Cyc_Absyn_Aggrdecl*ad){
 Cyc_Absyndump_dumpscope(ad->sc);
-if(ad->impl!=0 && _check_null(ad->impl)->tagged)
+if(ad->impl!=0 && ad->impl->tagged)
 Cyc_Absyndump_dump(_tag_fat("@tagged ",sizeof(char),9U));
 Cyc_Absyndump_dumpaggr_kind(ad->kind);Cyc_Absyndump_dumpqvar(ad->name);Cyc_Absyndump_dumpkindedtvars(ad->tvs);
 if(ad->impl!=0){
 Cyc_Absyndump_dump_char(123);
-({(void(*)(void(*)(struct Cyc_Absyn_Tvar*),struct Cyc_List_List*,struct _fat_ptr,struct _fat_ptr,struct _fat_ptr))Cyc_Absyndump_egroup;})(Cyc_Absyndump_dumpkindedtvar,_check_null(ad->impl)->exist_vars,_tag_fat("<",sizeof(char),2U),_tag_fat(">",sizeof(char),2U),_tag_fat(",",sizeof(char),2U));
-if(_check_null(ad->impl)->rgn_po!=0){
-Cyc_Absyndump_dump_char(58);Cyc_Absyndump_dump_rgnpo(_check_null(ad->impl)->rgn_po);}
+({(void(*)(void(*)(struct Cyc_Absyn_Tvar*),struct Cyc_List_List*,struct _fat_ptr,struct _fat_ptr,struct _fat_ptr))Cyc_Absyndump_egroup;})(Cyc_Absyndump_dumpkindedtvar,ad->impl->exist_vars,_tag_fat("<",sizeof(char),2U),_tag_fat(">",sizeof(char),2U),_tag_fat(",",sizeof(char),2U));
+if(ad->impl->rgn_po!=0){
+Cyc_Absyndump_dump_char(58);Cyc_Absyndump_dump_rgnpo(ad->impl->rgn_po);}
 # 1212
-if(_check_null(ad->impl)->qual_bnd!=0){
-char sep=_check_null(ad->impl)->rgn_po==0?':':',';
-Cyc_Absyndump_dump_char((int)sep);Cyc_Absyndump_dump_qualbnd(_check_null(ad->impl)->qual_bnd);}
+if(ad->impl->qual_bnd!=0){
+char sep=ad->impl->rgn_po==0?':':',';
+Cyc_Absyndump_dump_char((int)sep);Cyc_Absyndump_dump_qualbnd(ad->impl->qual_bnd);}
 # 1216
-Cyc_Absyndump_dumpaggrfields(_check_null(ad->impl)->fields);
+Cyc_Absyndump_dumpaggrfields(ad->impl->fields);
 Cyc_Absyndump_dump_char(125);
 Cyc_Absyndump_dumpatts(ad->attributes);}}
 # 1221
@@ -1649,7 +1649,7 @@ return;}}else{
 # 1394
 int next_is_pointer=0;
 if(tms->tl!=0){
-void*_Tmp8=(void*)_check_null(tms->tl)->hd;if(*((int*)_Tmp8)==2){
+void*_Tmp8=(void*)tms->tl->hd;if(*((int*)_Tmp8)==2){
 next_is_pointer=1;goto _LL27;}else{
 goto _LL27;}_LL27:;}
 # 1400

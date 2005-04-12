@@ -589,8 +589,8 @@ struct Cyc_Set_Set*Cyc_Set_from_list(int(*comp)(void*,void*),struct Cyc_List_Lis
 struct Cyc_List_List*z=Cyc_List_merge_sort(comp,x);
 # 320
 {struct Cyc_List_List*y=z;for(0;y!=0;y=y->tl){
-if(y->tl!=0 && comp(y->hd,_check_null(y->tl)->hd)==0)
-y->tl=_check_null(y->tl)->tl;}}
+if(y->tl!=0 && comp(y->hd,y->tl->hd)==0)
+y->tl=y->tl->tl;}}
 return({struct Cyc_Set_Set*_Tmp0=_cycalloc(sizeof(struct Cyc_Set_Set));_Tmp0->cmp=comp,({int _Tmp1=Cyc_List_length(z);_Tmp0->cardinality=_Tmp1;}),_Tmp0->nodes=z;_Tmp0;});}
 # 326
 int Cyc_Set_subset(struct Cyc_Set_Set*s1,struct Cyc_Set_Set*s2){
@@ -650,12 +650,12 @@ struct Cyc_Set_Absent_exn_struct Cyc_Set_Absent_val={Cyc_Set_Absent};
 # 389
 void*Cyc_Set_choose(struct Cyc_Set_Set*s){
 if(s->nodes==0)_throw(& Cyc_Set_Absent_val);
-return _check_null(s->nodes)->hd;}
+return s->nodes->hd;}
 # 394
 int Cyc_Set_iter_f(struct Cyc_List_List**elts_left,void**dest){
 if(!((unsigned)*elts_left))
 return 0;
-*dest=_check_null(*elts_left)->hd;
+*dest=(*elts_left)->hd;
 *elts_left=_check_null(*elts_left)->tl;
 return 1;}
 # 401

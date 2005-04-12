@@ -70,6 +70,8 @@ namespace AssnDef{
     Unop(Absyn::primop_t,term_t,type_opt_t); // Not, Bitnot, Numelts
     Binop(Absyn::primop_t,term_t,term_t,type_opt_t); // all other primops
     Cast(Absyn::type_t, term_t); // type-cast
+    Aggr(list_t<term_t>,type_opt_t); // an aggregate (struct, tuple, etc.)
+    Proj(term_t tuple, unsigned index, type_opt_t); // projection off of aggr
   };
 
   // a distinguished program variable representing memory -- when we
@@ -95,6 +97,9 @@ namespace AssnDef{
   extern term_t plus(term_t t1, term_t t2, type_opt_t);
   extern term_t minus(term_t t1, term_t t2, type_opt_t);
   extern term_t cast(Absyn::type_t tp, term_t tm);
+  extern term_t proj(term_t t, unsigned i, type_opt_t);
+  extern term_t aggr(list_t<term_t,`H>, type_opt_t tp);
+
   extern term_t fresh_var(type_opt_t);
 
   extern int cmp_term(datatype Term @t1, datatype Term @t2);

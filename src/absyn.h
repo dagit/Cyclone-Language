@@ -375,8 +375,8 @@ namespace Absyn {
   // FIX: May want to make this raw_type and store the kinds with the types.
   EXTERN_ABSYN datatype Type {
     // application of a type constructor to zero or more arguments
-    AppType(tycon_t, types_t);
-    // Evars are introduced for unification or via _ by the user.
+    AppType(tycon_t, types_t); 
+   // Evars are introduced for unification or via _ by the user.
     // The kind can get filled in during well-formedness checking.
     // The type can get filled in during unification.
     // The int is used as a unique identifier for printing messages.

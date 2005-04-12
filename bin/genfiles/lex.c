@@ -868,7 +868,7 @@ static int Cyc_Lex_linenumber=1;
 static struct Cyc_Lex_PosInfo*Cyc_Lex_rnew_filepos(struct _RegionHandle*r,struct _fat_ptr filename,unsigned starting_line,struct Cyc_Lex_PosInfo*next){
 # 696
 struct _fat_ptr linenumpos=({unsigned _Tmp0=10U;_tag_fat(_region_calloc(Cyc_Core_heap_region,Cyc_Core_unique_qual,sizeof(unsigned),_Tmp0),sizeof(unsigned),_Tmp0);});
-*((unsigned*)_check_fat_subscript(linenumpos,sizeof(unsigned),0))=(unsigned)Cyc_yylloc.first_line;
+((unsigned*)linenumpos.curr)[0]=(unsigned)Cyc_yylloc.first_line;
 return({struct Cyc_Lex_PosInfo*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_Lex_PosInfo));_Tmp0->next=next,_Tmp0->starting_line=starting_line,_Tmp0->filename=filename,_Tmp0->linenumpos=linenumpos,_Tmp0->linenumpos_offset=1U;_Tmp0;});}
 # 705
 static void Cyc_Lex_inc_linenumber (void){

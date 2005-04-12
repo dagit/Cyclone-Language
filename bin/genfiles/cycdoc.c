@@ -729,7 +729,7 @@ lineno_comments=lineno_comments->tl;
 continue;}
 # 352
 if(lineno_decls->tl!=0){
-struct _tuple15*_Tmp7=(struct _tuple15*)_check_null(lineno_decls->tl)->hd;int _Tmp8;_Tmp8=_Tmp7->f0;{int dline2=_Tmp8;
+struct _tuple15*_Tmp7=(struct _tuple15*)lineno_decls->tl->hd;int _Tmp8;_Tmp8=_Tmp7->f0;{int dline2=_Tmp8;
 if(dline2 < cline){
 # 356
 lineno_decls=lineno_decls->tl;

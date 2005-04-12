@@ -709,13 +709,13 @@ Cyc_CurRgn_rgnsubexp(env,e);return;}};}}struct _tuple14{void*f0;void*f1;};
 static void Cyc_CurRgn_rgnsubaggrdecl(unsigned loc,struct Cyc_CurRgn_rgnsubenv env,struct Cyc_Absyn_Aggrdecl*ad){
 Cyc_CurRgn_check_tvars(loc,ad->tvs);
 if(ad->impl!=0){
-Cyc_CurRgn_check_tvars(loc,_check_null(ad->impl)->exist_vars);{
-struct Cyc_List_List*ps=_check_null(ad->impl)->rgn_po;
+Cyc_CurRgn_check_tvars(loc,ad->impl->exist_vars);{
+struct Cyc_List_List*ps=ad->impl->rgn_po;
 for(1;ps!=0;ps=ps->tl){
 Cyc_CurRgn_rgnsubtype(loc,env,(*((struct _tuple14*)ps->hd)).f0);
 Cyc_CurRgn_rgnsubtype(loc,env,(*((struct _tuple14*)ps->hd)).f1);}{
 # 422
-struct Cyc_List_List*fs=_check_null(ad->impl)->fields;
+struct Cyc_List_List*fs=ad->impl->fields;
 for(1;fs!=0;fs=fs->tl){
 Cyc_CurRgn_rgnsubtype(loc,env,((struct Cyc_Absyn_Aggrfield*)fs->hd)->type);
 Cyc_CurRgn_rgnsubexpopt(env,((struct Cyc_Absyn_Aggrfield*)fs->hd)->requires_clause);}}}}}struct _tuple15{struct Cyc_Absyn_Tqual f0;void*f1;};
@@ -723,7 +723,7 @@ Cyc_CurRgn_rgnsubexpopt(env,((struct Cyc_Absyn_Aggrfield*)fs->hd)->requires_clau
 static void Cyc_CurRgn_rgnsubdtdecl(unsigned loc,struct Cyc_CurRgn_rgnsubenv env,struct Cyc_Absyn_Datatypedecl*tud){
 Cyc_CurRgn_check_tvars(loc,tud->tvs);
 if(tud->fields!=0){
-struct Cyc_List_List*fs=(struct Cyc_List_List*)_check_null(tud->fields)->v;for(0;fs!=0;fs=fs->tl){
+struct Cyc_List_List*fs=(struct Cyc_List_List*)tud->fields->v;for(0;fs!=0;fs=fs->tl){
 struct Cyc_List_List*ts=((struct Cyc_Absyn_Datatypefield*)fs->hd)->typs;
 while(ts!=0){
 struct _tuple15*_Tmp0=(struct _tuple15*)ts->hd;void*_Tmp1;_Tmp1=(void**)& _Tmp0->f1;{void**typ=(void**)_Tmp1;

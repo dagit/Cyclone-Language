@@ -1124,7 +1124,7 @@ changed=Cyc_Cifc_update_fninfo_usage(loc,te,tv_ovrs,& fd->i,d);
 goto _LL0;}case 5: _Tmp1=((struct Cyc_Absyn_Aggr_d_Absyn_Raw_decl_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Aggrdecl*ad=_Tmp1;
 # 916
 if((unsigned)ad->impl){
-struct Cyc_List_List*fit=_check_null(ad->impl)->fields;
+struct Cyc_List_List*fit=ad->impl->fields;
 struct Cyc_List_List*added_tvars=0;
 struct Cyc_List_List*removed_tvars=0;
 while((unsigned)fit){

@@ -369,7 +369,9 @@ int Cyc_Tcutil_is_nullable_pointer_type(void*,int);
 # 72
 struct Cyc_Absyn_Exp*Cyc_Tcutil_get_type_bound(void*);
 # 125
-int Cyc_Tcutil_typecmp(void*,void*);struct Cyc_Set_Set;
+int Cyc_Tcutil_typecmp(void*,void*);
+# 212
+int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*);struct Cyc_Set_Set;
 # 51 "set.h"
 extern struct Cyc_Set_Set*Cyc_Set_empty(int(*)(void*,void*));
 # 63
@@ -380,31 +382,31 @@ extern struct Cyc_Set_Set*Cyc_Set_intersect(struct Cyc_Set_Set*,struct Cyc_Set_S
 extern int Cyc_Set_member(struct Cyc_Set_Set*,void*);
 # 114
 extern void*Cyc_Set_fold(void*(*)(void*,void*),struct Cyc_Set_Set*,void*);struct Cyc_AssnDef_Uint_AssnDef_Term_struct{int tag;unsigned f1;};struct Cyc_AssnDef_Unop_AssnDef_Term_struct{int tag;enum Cyc_Absyn_Primop f1;void*f2;void*f3;};struct Cyc_AssnDef_Binop_AssnDef_Term_struct{int tag;enum Cyc_Absyn_Primop f1;void*f2;void*f3;void*f4;};struct Cyc_AssnDef_Cast_AssnDef_Term_struct{int tag;void*f1;void*f2;};
-# 80 "assndef.h"
+# 82 "assndef.h"
 extern struct _fat_ptr Cyc_AssnDef_term2string(void*);
-# 82
+# 84
 extern void*Cyc_AssnDef_uint(unsigned);
 extern void*Cyc_AssnDef_cnst(struct Cyc_Absyn_Exp*);
 extern void*Cyc_AssnDef_zero (void);
-# 93
+# 95
 extern void*Cyc_AssnDef_binop(enum Cyc_Absyn_Primop,void*,void*,void*);
 extern void*Cyc_AssnDef_unop(enum Cyc_Absyn_Primop,void*,void*);
-# 100
+# 105
 extern int Cyc_AssnDef_cmp_term(void*,void*);
 extern void*Cyc_AssnDef_get_term_type(void*);
-# 105
+# 110
 enum Cyc_AssnDef_Primreln{Cyc_AssnDef_Eq =0U,Cyc_AssnDef_Neq =1U,Cyc_AssnDef_SLt =2U,Cyc_AssnDef_SLte =3U,Cyc_AssnDef_ULt =4U,Cyc_AssnDef_ULte =5U};struct Cyc_AssnDef_Prim_AssnDef_Assn_struct{int tag;void*f1;enum Cyc_AssnDef_Primreln f2;void*f3;};struct Cyc_AssnDef_And_AssnDef_Assn_struct{int tag;void*f1;void*f2;};struct Cyc_AssnDef_Or_AssnDef_Assn_struct{int tag;void*f1;void*f2;};
-# 117
+# 122
 extern int Cyc_AssnDef_assncmp(void*,void*);
-# 143 "assndef.h"
+# 148 "assndef.h"
 extern void*Cyc_AssnDef_and(void*,void*);
 extern void*Cyc_AssnDef_or(void*,void*);
 extern void*Cyc_AssnDef_not(void*);
-# 151
+# 156
 extern void*Cyc_AssnDef_slt(void*,void*);
-# 153
+# 158
 extern void*Cyc_AssnDef_ult(void*,void*);
-# 157
+# 162
 extern void*Cyc_AssnDef_reduce(void*);struct Cyc_PrattProver_Node;struct Cyc_PrattProver_Distance{struct Cyc_PrattProver_Distance*next;struct Cyc_PrattProver_Node*target;int dist;};struct Cyc_PrattProver_Node{struct Cyc_PrattProver_Node*next;void*rep;int broken_as_signed: 1;int broken_as_unsigned: 1;struct Cyc_PrattProver_Distance*unsigned_distances;struct Cyc_PrattProver_Distance*signed_distances;};struct Cyc_PrattProver_Graph{struct Cyc_PrattProver_Graph*next;struct Cyc_PrattProver_Node*rows;};
 # 181 "pratt_prover.cyc"
 static unsigned Cyc_PrattProver_num_graphs(struct Cyc_PrattProver_Graph*gs){
@@ -487,7 +489,7 @@ void*topt=Cyc_AssnDef_get_term_type(term);
 if(topt!=0){
 void*t=topt;
 struct Cyc_Absyn_Exp*eopt=Cyc_Tcutil_get_type_bound(t);
-if(eopt!=0){
+if(eopt!=0 && Cyc_Tcutil_is_const_exp(eopt)){
 void*t1=Cyc_AssnDef_unop(18U,term,Cyc_Absyn_uint_type);
 # 283
 struct Cyc_Absyn_Exp*e=Cyc_PrattProver_strip_cast(eopt);

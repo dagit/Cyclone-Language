@@ -545,16 +545,16 @@ if(cmp(top,v)!=0 ||
 goto _LL0;}}_LL0:;}
 # 290
 {int hnow=Cyc_List_length(ts->cstack);for(0;hnow > hsaved;-- hnow){
-int X=(int)_check_null(ts->cstack)->hd;
-ts->cstack=_check_null(ts->cstack)->tl;
+int X=(int)ts->cstack->hd;
+ts->cstack=ts->cstack->tl;
 if(!({(int(*)(struct Cyc_Set_Set*,int))Cyc_Set_member;})(csCnew->Succ,X)){
 struct Cyc_Set_Set*s=({(struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*,int))Cyc_Set_insert;})(csCnew->Succ,X);
 s=({struct Cyc_Set_Set*_Tmp0=s;Cyc_Set_union_two(_Tmp0,({(struct Cyc_Graph_componentstate*(*)(struct Cyc_Dict_Dict,int))Cyc_Dict_lookup;})(ts->cs,X)->Succ);});
 csCnew->Succ=s;}}}
 # 299
 while((unsigned)ts->nstack){
-void*w=_check_null(ts->nstack)->hd;
-ts->nstack=_check_null(ts->nstack)->tl;{
+void*w=ts->nstack->hd;
+ts->nstack=ts->nstack->tl;{
 struct Cyc_Graph_nodestate*nsw=({(struct Cyc_Graph_nodestate*(*)(struct Cyc_Dict_Dict,void*))Cyc_Dict_lookup;})(ts->ns,w);
 nsw->C=Cnew;
 ({struct Cyc_Set_Set*_Tmp0=Cyc_Set_insert(csCnew->nodes,w);csCnew->nodes=_Tmp0;});
@@ -614,7 +614,7 @@ component=Cyc_Set_insert(component,top);
 if(cmp(top,x)==0)break;}}
 # 379
 for(1;(unsigned)*S;*S=_check_null(*S)->tl){
-void*top=_check_null(*S)->hd;
+void*top=(*S)->hd;
 ({struct Cyc_Dict_Dict _Tmp0=({(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,void*,unsigned))Cyc_Dict_insert;})(*N,top,4294967295U);*N=_Tmp0;});
 ({struct Cyc_Dict_Dict _Tmp0=Cyc_Graph_add_node(*output,top);*output=_Tmp0;});
 ({struct Cyc_Dict_Dict _Tmp0=Cyc_Graph_add_edges(*output,top,component);*output=_Tmp0;});
@@ -661,7 +661,7 @@ component=Cyc_Set_insert(component,top);
 if(cmp(top,x)==0)break;}}
 # 433
 for(1;(unsigned)*S;*S=_check_null(*S)->tl){
-void*top=_check_null(*S)->hd;
+void*top=(*S)->hd;
 ({struct Cyc_Dict_Dict _Tmp0=({(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,void*,unsigned))Cyc_Dict_insert;})(*N,top,4294967295U);*N=_Tmp0;});
 ({struct Cyc_List_List*_Tmp0=({struct Cyc_List_List*_Tmp1=_cycalloc(sizeof(struct Cyc_List_List));_Tmp1->hd=top,_Tmp1->tl=*output;_Tmp1;});*output=_Tmp0;});
 if(cmp(top,x)==0){

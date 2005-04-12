@@ -695,8 +695,8 @@ return*f2sp;}}struct _tuple17{struct Cyc_List_List*f0;struct Cyc_List_List*f1;};
 static struct _tuple17 Cyc_Tcdecl_split(struct Cyc_List_List*f){
 if(f==0)return({struct _tuple17 _Tmp0;_Tmp0.f0=0,_Tmp0.f1=0;_Tmp0;});
 if(f->tl==0)return({struct _tuple17 _Tmp0;_Tmp0.f0=f,_Tmp0.f1=0;_Tmp0;});{
-struct _tuple17 _Tmp0=Cyc_Tcdecl_split(_check_null(f->tl)->tl);void*_Tmp1;void*_Tmp2;_Tmp2=_Tmp0.f0;_Tmp1=_Tmp0.f1;{struct Cyc_List_List*f1=_Tmp2;struct Cyc_List_List*f2=_Tmp1;
-return({struct _tuple17 _Tmp3;({struct Cyc_List_List*_Tmp4=({struct Cyc_List_List*_Tmp5=_cycalloc(sizeof(struct Cyc_List_List));_Tmp5->hd=f->hd,_Tmp5->tl=f1;_Tmp5;});_Tmp3.f0=_Tmp4;}),({struct Cyc_List_List*_Tmp4=({struct Cyc_List_List*_Tmp5=_cycalloc(sizeof(struct Cyc_List_List));_Tmp5->hd=_check_null(f->tl)->hd,_Tmp5->tl=f2;_Tmp5;});_Tmp3.f1=_Tmp4;});_Tmp3;});}}}
+struct _tuple17 _Tmp0=Cyc_Tcdecl_split(f->tl->tl);void*_Tmp1;void*_Tmp2;_Tmp2=_Tmp0.f0;_Tmp1=_Tmp0.f1;{struct Cyc_List_List*f1=_Tmp2;struct Cyc_List_List*f2=_Tmp1;
+return({struct _tuple17 _Tmp3;({struct Cyc_List_List*_Tmp4=({struct Cyc_List_List*_Tmp5=_cycalloc(sizeof(struct Cyc_List_List));_Tmp5->hd=f->hd,_Tmp5->tl=f1;_Tmp5;});_Tmp3.f0=_Tmp4;}),({struct Cyc_List_List*_Tmp4=({struct Cyc_List_List*_Tmp5=_cycalloc(sizeof(struct Cyc_List_List));_Tmp5->hd=f->tl->hd,_Tmp5->tl=f2;_Tmp5;});_Tmp3.f1=_Tmp4;});_Tmp3;});}}}
 # 396
 struct Cyc_List_List*Cyc_Tcdecl_sort_xdatatype_fields(struct Cyc_List_List*f,int*res,struct _fat_ptr*v,unsigned loc,struct _fat_ptr*msg){
 # 399

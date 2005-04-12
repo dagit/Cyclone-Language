@@ -508,7 +508,7 @@ goto _LL0;else{_Tmp3=_Tmp2;{void*exn=_Tmp3;_rethrow(exn);}}_LL0:;}}}{
 int res=1;
 ({struct Cyc_Dict_Dict _Tmp0=({(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,struct _tuple0*,int))Cyc_Dict_insert;})(seen->aggrs,d->name,res);seen->aggrs=_Tmp0;});
 if(d->impl!=0){
-struct Cyc_List_List*fs=_check_null(d->impl)->fields;for(0;fs!=0;fs=fs->tl){
+struct Cyc_List_List*fs=d->impl->fields;for(0;fs!=0;fs=fs->tl){
 if(!Cyc_Interface_check_public_type(ae,seen,_tag_fat("type",sizeof(char),5U),d->name,((struct Cyc_Absyn_Aggrfield*)fs->hd)->type))
 res=0;}}
 # 201
@@ -527,7 +527,7 @@ goto _LL0;else{_Tmp3=_Tmp2;{void*exn=_Tmp3;_rethrow(exn);}}_LL0:;}}}{
 int res=1;
 ({struct Cyc_Dict_Dict _Tmp0=({(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,struct _tuple0*,int))Cyc_Dict_insert;})(seen->datatypes,d->name,res);seen->datatypes=_Tmp0;});
 if(d->fields!=0){
-struct Cyc_List_List*fs=(struct Cyc_List_List*)_check_null(d->fields)->v;for(0;fs!=0;fs=fs->tl){
+struct Cyc_List_List*fs=(struct Cyc_List_List*)d->fields->v;for(0;fs!=0;fs=fs->tl){
 if(!({(int(*)(struct Cyc_Tcenv_Genv*,struct Cyc_Interface_Seen*,struct _fat_ptr,struct _tuple0*,void*(*)(struct _tuple12*),struct Cyc_List_List*))Cyc_Interface_check_public_type_list;})(ae,seen,_tag_fat("datatype",sizeof(char),9U),d->name,Cyc_Interface_get_type1,((struct Cyc_Absyn_Datatypefield*)fs->hd)->typs))
 # 221
 res=0;}}
@@ -605,7 +605,7 @@ if(tud->fields==0)
 struct _fat_ptr _Tmp7=(struct _fat_ptr)((struct _fat_ptr)Cyc_Absynpp_qvar2string(tud->name));_Tmp6.f1=_Tmp7;});_Tmp6;});void*_Tmp6[1];_Tmp6[0]=& _Tmp5;Cyc_aprintf(_tag_fat("check_public_type (datatype %s has no fields)",sizeof(char),46U),_tag_fat(_Tmp6,sizeof(void*),1));}));{
 # 306
 struct Cyc_Absyn_Datatypefield*tuf1=0;
-{struct Cyc_List_List*fs=(struct Cyc_List_List*)_check_null(tud->fields)->v;for(0;fs!=0;fs=fs->tl){
+{struct Cyc_List_List*fs=(struct Cyc_List_List*)tud->fields->v;for(0;fs!=0;fs=fs->tl){
 if(Cyc_strptrcmp((*tuf0->name).f1,(*((struct Cyc_Absyn_Datatypefield*)fs->hd)->name).f1)==0){
 tuf1=(struct Cyc_Absyn_Datatypefield*)fs->hd;
 break;}}}
@@ -750,7 +750,7 @@ d->sc=1U;}
 # 458
 if(Cyc_Interface_check_public_datatypedecl(ae,seen,d)){
 if(d->is_extensible && d->fields!=0){
-struct Cyc_List_List*fields=(struct Cyc_List_List*)_check_null(d->fields)->v;
+struct Cyc_List_List*fields=(struct Cyc_List_List*)d->fields->v;
 d->fields=0;{
 struct Cyc_List_List*f=fields;for(0;f!=0;f=f->tl){
 Cyc_Interface_extract_xdatatypefielddecl(i,d,(struct Cyc_Absyn_Datatypefield*)f->hd);}}}
@@ -763,7 +763,7 @@ goto _LL3;case Cyc_Absyn_ExternC:
  if(Cyc_Interface_check_public_datatypedecl(ae,seen,d)){
 if(d->is_extensible && d->fields!=0){
 d=({struct Cyc_Absyn_Datatypedecl*_Tmp7=_cycalloc(sizeof(struct Cyc_Absyn_Datatypedecl));*_Tmp7=*d;_Tmp7;});{
-struct Cyc_List_List*fields=(struct Cyc_List_List*)_check_null(d->fields)->v;
+struct Cyc_List_List*fields=(struct Cyc_List_List*)d->fields->v;
 d->fields=0;
 {struct Cyc_List_List*f=fields;for(0;f!=0;f=f->tl){
 Cyc_Interface_extract_xdatatypefielddecl(i,d,(struct Cyc_Absyn_Datatypefield*)f->hd);}}

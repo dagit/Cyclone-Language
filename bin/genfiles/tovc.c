@@ -757,7 +757,7 @@ vd->name=newqvar;
 struct Cyc_List_List*unresolvedmem_inits=0;
 if(vd->initializer!=0){
 Cyc_Tovc_apply_varmap(env.varmap,_check_null(vd->initializer));{
-void*_Tmp6=_check_null(vd->initializer)->r;void*_Tmp7;if(*((int*)_Tmp6)==35){_Tmp7=((struct Cyc_Absyn_UnresolvedMem_e_Absyn_Raw_exp_struct*)_Tmp6)->f2;{struct Cyc_List_List*dles=_Tmp7;
+void*_Tmp6=vd->initializer->r;void*_Tmp7;if(*((int*)_Tmp6)==35){_Tmp7=((struct Cyc_Absyn_UnresolvedMem_e_Absyn_Raw_exp_struct*)_Tmp6)->f2;{struct Cyc_List_List*dles=_Tmp7;
 # 479 "tovc.cyc"
 struct Cyc_Absyn_Exp*var=Cyc_Absyn_var_exp(vd->name,0U);
 {unsigned i=0U;for(0;dles!=0;(dles=dles->tl,++ i)){
@@ -890,7 +890,7 @@ if(Cyc_Tovc_elim_array_initializers){
 void*_Tmp7=Cyc_Absyn_compress(vd->type);if(*((int*)_Tmp7)==4){
 # 632
 if(vd->initializer!=0){
-void*_Tmp8=_check_null(vd->initializer)->r;void*_Tmp9;if(*((int*)_Tmp8)==35){_Tmp9=((struct Cyc_Absyn_UnresolvedMem_e_Absyn_Raw_exp_struct*)_Tmp8)->f2;{struct Cyc_List_List*dles=_Tmp9;
+void*_Tmp8=vd->initializer->r;void*_Tmp9;if(*((int*)_Tmp8)==35){_Tmp9=((struct Cyc_Absyn_UnresolvedMem_e_Absyn_Raw_exp_struct*)_Tmp8)->f2;{struct Cyc_List_List*dles=_Tmp9;
 # 635
 vd->initializer=0;{
 # 637
@@ -931,7 +931,7 @@ if(fd->param_vardecls!=0){
 struct _RegionHandle _Tmp2=_new_region(0U,"rgn");struct _RegionHandle*rgn=& _Tmp2;_push_region(rgn);
 {struct Cyc_List_List**gen_ds;gen_ds=_region_malloc(rgn,0U,sizeof(struct Cyc_List_List*)),*gen_ds=0;
 ({struct Cyc_Tovc_ToExpEnv _Tmp3=({struct Cyc_Tovc_ToExpEnv _Tmp4;_Tmp4.rgn=rgn,({
-struct Cyc_List_List*_Tmp5=Cyc_List_rcopy(rgn,(struct Cyc_List_List*)_check_null(fd->param_vardecls)->v);_Tmp4.all_locals=_Tmp5;}),({
+struct Cyc_List_List*_Tmp5=Cyc_List_rcopy(rgn,(struct Cyc_List_List*)fd->param_vardecls->v);_Tmp4.all_locals=_Tmp5;}),({
 struct Cyc_Dict_Dict _Tmp5=({(struct Cyc_Dict_Dict(*)(struct _RegionHandle*,int(*)(struct _fat_ptr*,struct _fat_ptr*)))Cyc_Dict_rempty;})(rgn,Cyc_strptrcmp);_Tmp4.varmap=_Tmp5;}),_Tmp4.encloser=fd->body,_Tmp4.gen_ds=gen_ds;_Tmp4;});
 # 684
 Cyc_Tovc_stmt_to_vc(_Tmp3,fd->body);});

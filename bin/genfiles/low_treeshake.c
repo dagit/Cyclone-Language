@@ -464,7 +464,7 @@ goto _LL0;}case 5: _Tmp1=((struct Cyc_Absyn_Aggr_d_Absyn_Raw_decl_struct*)_Tmp0)
 ({(void(*)(struct Cyc_Hashtable_Table*,struct _tuple0*,struct Cyc_Absyn_Aggrdecl*))Cyc_LowTreeShake_add_to_table;})(env->aggrdecls,ad->name,ad);goto _LL0;}case 7: _Tmp1=((struct Cyc_Absyn_Enum_d_Absyn_Raw_decl_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Enumdecl*ed=_Tmp1;
 # 143
 if(ed->fields!=0){
-struct Cyc_List_List*fs=(struct Cyc_List_List*)_check_null(ed->fields)->v;for(0;fs!=0;fs=fs->tl){
+struct Cyc_List_List*fs=(struct Cyc_List_List*)ed->fields->v;for(0;fs!=0;fs=fs->tl){
 if(((struct Cyc_Absyn_Enumfield*)fs->hd)->tag!=0)
 Cyc_LowTreeShake_build_tables_exp(env,_check_null(((struct Cyc_Absyn_Enumfield*)fs->hd)->tag));}}
 goto _LL0;}case 8: _Tmp1=((struct Cyc_Absyn_Typedef_d_Absyn_Raw_decl_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Typedefdecl*td=_Tmp1;
@@ -484,7 +484,7 @@ if(!((unsigned)ads_opt))
 continue;{
 struct Cyc_List_List*ads=*ads_opt;for(0;ads!=0;ads=ads->tl){
 if(((struct Cyc_Absyn_Aggrdecl*)ads->hd)->impl!=0){
-struct Cyc_List_List*fs=_check_null(((struct Cyc_Absyn_Aggrdecl*)ads->hd)->impl)->fields;for(0;fs!=0;fs=fs->tl){
+struct Cyc_List_List*fs=((struct Cyc_Absyn_Aggrdecl*)ads->hd)->impl->fields;for(0;fs!=0;fs=fs->tl){
 Cyc_LowTreeShake_build_tables_type(env,((struct Cyc_Absyn_Aggrfield*)fs->hd)->type);}}}}}}}
 # 171
 static struct Cyc_List_List*Cyc_LowTreeShake_trim_decls(struct Cyc_LowTreeShake_Env*env,struct Cyc_List_List*tds){

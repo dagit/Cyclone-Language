@@ -100,7 +100,6 @@ things that need to be fixed:
   track whether x == null, or tagcheck(x.f), or datatype tags, etc.)?
 * Could have user-defined predicates...
 * If we knew that a goto was forward, then we could deal with it...  
-
 */
 
 #include "vcgen.h"
@@ -113,6 +112,7 @@ things that need to be fixed:
 #include "pratt_prover.h"
 #include "warn.h"
 #include "flags.h"
+#include "cf_flowinfo.h"
 #include <hashtable.h>
 #include <dict.h>
 #include <string.h> 
@@ -492,7 +492,10 @@ static list_t<assn_t> heuristic_loop_invariants(env_t env, stmt_t s, assn_t ain)
     switch (e2->r){
     case &Absyn::Primop_e(Absyn::Lt, es):
       let exp = Absyn::primop_exp(Absyn::Lte, es, 0);
+      exp->topt = e2->topt;
       assn_t a = vcgen_test(env, Absyn::primop_exp(Absyn::Lte, es, 0), &true_assn)[0];
+      ain = reduce(ain);
+      a = reduce(a);
       if (implies(&ain, &a)) loop_invariants = new List(a, loop_invariants);
       break;
     default:break;
@@ -628,7 +631,7 @@ static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
     assn_t loop_inv = &true_assn;
     switch (e2->r){
       // we treat e2 = @assert(...) && ... specially
-      // the @assert would be considered as loop invariance
+      // the @assert would be considered as loop invariant
     case &Absyn::And_e(eleft, eright):
       switch (eleft->r){
       case &Absyn::Assert_e(eassn):
@@ -1073,8 +1076,45 @@ static bool is_unsigned_int_exp(exp_t e){
     else return false;
   default: return false;
   }
-
 }
+
+// factor out code for *e, e->f and e[i]
+static $(term_opt_t,term_opt_t,assn_t) vcgen_deref(env_t env, exp_t root,
+                                                   exp_t index, assn_t ain) {
+  let $(t1,a1) = vcgen_rexp_always(env,root,ain);
+  let $(t2,a2) = vcgen_rexp(env,index,a1);
+  term_t term_numelts, term_typebound;
+  // we don't know t2, can't really infer anything about the bound and
+  // must assume an exception is thrown.
+  if (t2 == NULL) { 
+    update_try_assn(env, a2);
+    return $(t1,t2,a2);
+  }
+  let eopt = Tcutil::get_type_bound((type_t)root->topt);
+  if (eopt == NULL) {
+    // fat pointer -- express bounds in terms of numelts(t1)
+    term_numelts = unop(Absyn::Numelts, t1, Absyn::uint_type);
+  } else {
+    // thin pointer -- express bounds directly from type
+    exp_t e = (exp_t)eopt;
+    term_numelts = vcgen_rexp_always(env, e, a2)[0];
+  }
+  let bnds_check = ult(t2, term_numelts);
+  // note that although this is a neq, the prover will not blow
+  // up because it need only consider 0 < t1.
+  let null_check = neq(zero(),t1);
+  // if we have an exception, then we know either the bounds check
+  // failed or the null check failed.
+  update_try_assn(env,and(a2,or(not(bnds_check),not(null_check))));
+  // associate these checks with the expression for insert_checks
+  let exp_checks = new ExpChecks{.ctxt=a2,.bounds_check=bnds_check,
+                                 .null_check=null_check};
+  insert_exp_checks(env->assn_info, root, exp_checks);
+  // afterwards, we know both the bounds check and null check succeeded.
+  a2 = and(and(a2,bnds_check),null_check);;
+  return $(t1,t2,a2);
+}
+
 static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
   if (Tcutil::is_const_exp(e)){
      // special case for pragmas
@@ -1311,14 +1351,19 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
       update_try_assn(env,ain); // coercion could fail
       return $(topt == NULL ? NULL : cast(tp,(term_t)topt),a);
     }
-  case &Absyn::New_e(eopt,e,qopt):
+  case &Absyn::New_e(eopt,e1,qopt):
     // IMPROVE: could assert that the resulting value is not equal to
     // the address of any variable...
     if (eopt != NULL)
       ain = vcgen_rexp(env,(exp_t)eopt,ain)[1];
     if (qopt != NULL)
       ain = vcgen_rexp(env,(exp_t)qopt,ain)[1];
-    return $(NULL,vcgen_rexp(env,e,ain)[1]);
+    let $(t,ain) = vcgen_rexp(env,e1,ain);
+    // we know the result is not NULL -- if it's a new {...} then we
+    // could also calculate the numelts.
+    let res = fresh_var(e->topt);
+    ain = and(ain,neq(res,zero()));
+    return $(res,ain);
 
   // these cases should be captured by the const-expression check above.
   case &Absyn::Enum_e(...):
@@ -1328,53 +1373,44 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
   case &Absyn::Valueof_e(_):
   case &Absyn::Offsetof_e(_,_): return $(cnst(e),ain);
 
-  // These can all throw exceptions
-  case &Absyn::AggrMember_e(e,...): fallthru(e);
-    ain = vcgen_rexp(env,e,ain)[1];
-    update_try_assn(env,ain);
-    return $(NULL,ain);
-
+  case &Absyn::AggrMember_e(e1,f,is_tagged,is_read): 
+    let $(t,ain) = vcgen_rexp(env,e1,ain);
+    // can throw an exception
+    if (is_tagged && is_read) {
+      update_try_assn(env,ain);
+      return $(NULL,ain);
+    } else if (is_tagged || t == NULL) return $(NULL,ain);
+    else {
+      let i = CfFlowInfo::get_field_index((type_t)e1->topt,f);
+      return $(proj((term_t)t,i,e->topt),ain);
+    }
+    // these two can throw an exception...
   case &Absyn::Tagcheck_e(e,_): fallthru(e);
   case &Absyn::Address_e(e): 
     return $(NULL,vcgen_rexp(env,e,ain)[1]);
 
-  case &Absyn::Deref_e(e): fallthru(e);
-  case &Absyn::AggrArrow_e(e,...): fallthru(e, zero_exp());
+    // most of the code for these next three cases is factored out
+    // into the vcgen_deref code above.
+  case &Absyn::Deref_e(e1): 
+    let $(t1,_,ain) = vcgen_deref(env, e1, zero_exp(), ain);
+    if (t1 == NULL) return $(NULL,ain);
+    else return $(select(var(memory),(term_t)t1,e->topt),ain);
+  case &Absyn::AggrArrow_e(e1,f,is_tagged,is_read): 
+    let $(t1,_,ain) = vcgen_deref(env, e1, zero_exp(), ain);
+    if (t1 == NULL || is_tagged) return $(NULL,ain);
+    else {
+      let elt_type = Tcutil::pointer_elt_type((type_t)e1->topt);
+      let i = CfFlowInfo::get_field_index(elt_type,f);
+      return $(proj(select(var(memory),(term_t)t1,elt_type),i,e->topt),ain);
+    }
   case &Absyn::Subscript_e(e1,e2): 
-    let $(t1,a1) = vcgen_rexp_always(env,e1,ain);
-    let $(t2,a2) = vcgen_rexp(env,e2,a1);
-    term_t term_numelts, term_typebound;
-    // we don't know t2, can't really infer anything about the bound
-    if (t2 == NULL) { 
-      update_try_assn(env, a2);
-      return $(NULL,a2);
-    }
-    let eopt = Tcutil::get_type_bound((type_t)e1->topt);
-    if (eopt == NULL) {
-      // fat pointer -- express bounds in terms of numelts(t1)
-      term_numelts = unop(Absyn::Numelts, t1, Absyn::uint_type);
-    } else {
-      // thin pointer -- express bounds directly from type
-      exp_t e = (exp_t)eopt;
-      term_numelts = vcgen_rexp_always(env, e, a2)[0];
-    }
-    let bnds_check = ult(t2, term_numelts);
-    // note that although this is a neq, the prover will not blow
-    // up because it need only consider 0 < t1.
-    let null_check = neq(zero(),t1);
-    // if we have an exception, then we know either the bounds check
-    // failed or the null check failed.
-    update_try_assn(env,and(a2,or(not(bnds_check),not(null_check))));
-    // associate these checks with the expression for insert_checks
-    let exp_checks = new ExpChecks{.ctxt=a2,.bounds_check=bnds_check,
-                                   .null_check=null_check};
-    insert_exp_checks(env->assn_info, e1, exp_checks);
-    // afterwards, we know both the bounds check and null check succeeded.
-    a2 = and(and(a2,bnds_check),null_check);;
-    return $(NULL,a2);
+    let $(t1,t2,ain) = vcgen_deref(env, e1, e2, ain);
+    if (t1 == NULL || t2 == NULL) return $(NULL,ain);
+    else return $(select(var(memory),plus(t1,t2,NULL),e->topt),ain);
 
   case &Absyn::Datatype_e(es,...): return $(NULL,vcgen_rexps_nosave(env,es,ain));
 
+    // FIX: at least for structs, we can use the Aggr(...) term.
   case &Absyn::CompoundLit_e(_,dles):   fallthru(dles);
   case &Absyn::Array_e(dles):           fallthru(dles);
   case &Absyn::Aggregate_e(_,_,dles,_): fallthru(dles);
@@ -1401,13 +1437,19 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
       // no choice about widening here to ensure termination
       a = widen(or(abody,a));  // widen and possibly iterate
     }
-    return $(NULL,a);
+    let res = fresh_var(e->topt);
+    // can add it in that numelts(res) == t1
+    a = and(a,eq(unop(Absyn::Numelts,res,Absyn::uint_type),t1));
+    return $(res,a);
   case &Absyn::ComprehensionNoinit_e(e,_,_):
     return $(NULL,vcgen_rexp(env,e,ain)[1]);
   case &Absyn::Malloc_e(mi):
     if (mi.rgn != NULL) 
       ain = vcgen_rexp(env,(exp_t)mi.rgn,ain)[1];
-    return $(NULL,vcgen_rexp(env,mi.num_elts,ain)[1]);
+    let $(t,ain) = vcgen_rexp(env,mi.num_elts,ain);
+    let res = fresh_var(e->topt);
+    ain = and(ain,eq(unop(Absyn::Numelts,res,Absyn::uint_type),t));
+    return $(res,ain);
   case &Absyn::Swap_e(e1,e2): 
     let $(lt1,a1) = vcgen_lexp(env,e1,ain);
     update_try_assn(env,a1); // could have null-exn?

@@ -542,8 +542,8 @@ if(po==0)
 # 299 "rgnorder.cyc"
 struct Cyc_RgnOrder_OutlivesEnv env=Cyc_RgnOrder_initial_env(listrgn,po,rgn);
 while(env.todo!=0){
-struct Cyc_Absyn_Tvar*next=(struct Cyc_Absyn_Tvar*)_check_null(env.todo)->hd;
-env.todo=_check_null(env.todo)->tl;
+struct Cyc_Absyn_Tvar*next=(struct Cyc_Absyn_Tvar*)env.todo->hd;
+env.todo=env.todo->tl;
 if(Cyc_Absyn_tvar_cmp(next,tv)==0){
 int _Tmp5=1;_npop_handler(0);return _Tmp5;}
 # 309
@@ -570,8 +570,8 @@ if(Cyc_RgnOrder_contains_rgnseff(tv,po->these_outlive_heap)||
 int _Tmp8=1;_npop_handler(0);return _Tmp8;}}
 # 340
 while(env.todo!=0){
-struct Cyc_Absyn_Tvar*next=(struct Cyc_Absyn_Tvar*)_check_null(env.todo)->hd;
-env.todo=_check_null(env.todo)->tl;
+struct Cyc_Absyn_Tvar*next=(struct Cyc_Absyn_Tvar*)env.todo->hd;
+env.todo=env.todo->tl;
 if(!({(int(*)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*))Cyc_Dict_member;})(po->d,next))
 ({(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;})(_tag_fat("RgnOrder: type variable not in dict",sizeof(char),36U),_tag_fat(0U,sizeof(void*),0));{
 void*next_eff=({(void*(*)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*))Cyc_Dict_lookup;})(po->d,next);

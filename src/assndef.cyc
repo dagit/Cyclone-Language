@@ -32,19 +32,6 @@ using List;
 using Hashtable;
 ///////////////////// Terms /////////////////////
 
-datatype Term {
-  Uint(unsigned int);
-  Const(exp_t); 
-  Var(vardecl_t);
-  Addr(vardecl_t);
-  Select(term_t mem,term_t addr,type_opt_t);
-  Update(term_t mem,term_t addr,term_t value);
-  LogicVar(vardecl_opt_t,int,type_opt_t);
-  Unop(Absyn::primop_t,term_t,type_opt_t);
-  Binop(Absyn::primop_t,term_t,term_t,type_opt_t);
-  Cast(Absyn::type_t, term_t);
-};
-
 string_t term2string(term_t t) {
   string_t res;
   switch (t) {
@@ -79,6 +66,23 @@ string_t term2string(term_t t) {
     res = aprintf("%s(%s)",Absynpp::prim2string(p),term2string(t1)); break;
   case &Cast(tp,tm):
     res = aprintf("(%s)%s",Absynpp::typ2string(tp),term2string(tm)); break;
+  case &Aggr(tms,_):
+    static string_t lb = "{";
+    static string_t rb = "}";
+    static string_t comma = ",";
+    list_t<stringptr_t> ss = new List{&lb,NULL};
+    for (; tms != NULL; tms = tms->tl) {
+      let s = term2string(tms->hd);
+      ss = new List{new s,ss};
+      if (tms->tl != NULL) ss = new List{&comma,ss};
+    }
+    ss = new List{&rb,ss};
+    ss = List::imp_rev(ss);
+    res = strconcat_l(ss);
+    break;
+  case &Proj(t,i,_):
+    res = aprintf("#%d(%s)",i,term2string(t));
+    break;
   }
   return res;
 }
@@ -138,6 +142,12 @@ static int termhash(datatype Term @t) {
   case &Update(t1,t2,t3):
     return (unsigned int)t1 ^ (unsigned int)t2 ^ (unsigned int)t3 + 3;
   case &Addr(vd): return (unsigned int)vd+4;
+  case &Proj(t,i,_): return (unsigned int)t ^ i;
+  case &Aggr(ts,_):
+    unsigned int res = 37;
+    for (; ts != NULL; ts = ts->tl)
+      res = res ^ (unsigned int)ts->hd;
+    return res;
   }
 }
 
@@ -190,6 +200,23 @@ int cmp_term(datatype Term @t1, datatype Term @t2) {
     int c = cmp_term(t11,t21);
     if (c != 0) return c;
     return cmp_term(t12,t22);
+  case $(&Binop(...),_): return -1;
+  case $(_,&Binop(...)): return 1;
+  case $(&Proj(t1,i1,_),&Proj(t2,i2,_)): 
+    int c = i1 - i2;
+    if (c != 0) return c;
+    return cmp_term(t1,t2);
+  case $(&Proj(...),_): return -1;
+  case $(_,&Proj(...)): return 1;
+  case $(&Aggr(ts1,_),&Aggr(ts2,_)):
+    int c;
+    for (; ts1 != NULL && ts2 != NULL; ts1=ts1->tl, ts2=ts2->tl) {
+      c = cmp_term(ts1->hd,ts2->hd);
+      if (c != 0) return c;
+    }
+    if (ts1 == ts2) return 0;
+    if (ts1 == NULL) return -1;
+    return 1;
   }
 }
 
@@ -205,6 +232,8 @@ static term_t copy_term(datatype Term@ t) {
   case &Cast(tp,t): return new Cast(tp,t);
   case &Select(t1,t2,tp): return new Select(t1,t2,tp);
   case &Update(t1,t2,t3): return new Update(t1,t2,t3);
+  case &Proj(t,i,tp): return new Proj(t,i,tp);
+  case &Aggr(ts,tp): return new Aggr(ts,tp);
   }
 }
 
@@ -296,6 +325,20 @@ term_t select(term_t t1, term_t t2,type_opt_t tp) {
     return hash_cons_term(&t);
   }
 }
+term_t proj(term_t t1, unsigned i, type_opt_t tp) {
+  switch (t1) {
+  case &Aggr(ts,_): return nth(ts,i);
+  default: 
+    let t = Proj(t1,i,tp);
+    return hash_cons_term(&t);
+  }
+}
+term_t aggr(list_t<term_t,`H> ts, type_opt_t tp) {
+  // could eta-reduce Aggr(proj(t,0),proj(t,1),...,proj(t,n)) to t,
+  // using the type information to figure out n.
+  let t = Aggr(ts,tp);
+  return hash_cons_term(&t);
+}
 
 inline static bool is_nonassociative_commutative(Absyn::primop_t p) {
   switch (p) {
@@ -326,7 +369,9 @@ Absyn::type_opt_t get_term_type(term_t t) {
   case &Unop(_,_,tp): return tp;
   case &Cast(tp,_): return tp;
   case &Select(_,_,tp): return tp;
-    // not sure that this is the right thing to do...
+  case &Aggr(ts,tp): return tp;
+  case &Proj(t1,i,tp): return tp;
+  // not sure that this is the right thing to do...
   case &Addr(vd): return Absyn::int_type(Absyn::None, Absyn::Int_sz);
   case &Update(...): return NULL;
   }
@@ -478,16 +523,6 @@ term_t fresh_var(type_opt_t t) {
 static bool same_term(term_t t1, term_t t2) { return cmp_term(t1,t2) == 0; }
 
 ///////////////////// Assertions /////////////////////
-datatype Assn {
-  True;
-  False;
-  Prim(term_t,prim_reln_t,term_t);
-  And(assn_t,assn_t);
-  Or(assn_t,assn_t);
-  Not(assn_t);
-  Subst(vardecl_t x,term_t t,assn_t a); // a[t/x] -- lazy substitution
-};
-
 // inner loop for calculating the size of an assertion -- we
 // take care to figure out the size as a dag and not a tree.
 static unsigned int 
@@ -1005,6 +1040,22 @@ reduce_term(term_t t, list_t<$(vardecl_t,term_t)@> subst) {
     let u2 = reduce_term(u1,subst);
     if (t1 != t2 || s1 != s2 || u1 != u2) return update(t2,s2,u2);
     else return t;
+  case &Proj(t1,i,tp):
+    let t2 = reduce_term(t1,subst);
+    if (t1 != t2) return proj(t1,i,tp);
+    else return t;
+  case &Aggr(ts1,tp):
+    list_t<term_t> ts2 = NULL;
+    bool change = false;
+    for (; ts1 != NULL; ts1 = ts1->tl) {
+      let t1 = ts1->hd;
+      let t2 = reduce_term(t1,subst);
+      ts2 = new List{t2,ts2};
+      if (t1 != t2) change = true;
+    }
+    if (change) {
+      return aggr(List::imp_rev(ts2),tp);
+    } else return t;
   case &Addr(vd): fallthru(vd);
   case &Var(vd):
     for (; subst != NULL; subst = subst->tl) {
