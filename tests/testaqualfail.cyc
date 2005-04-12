@@ -203,3 +203,19 @@ void use_ex2(struct Ex2 @e) {
 void foo(`a\A arg) {
   `a\U hd = arg;
 }
+
+struct List<`a::B,`r::R,`q::Q>{ : RESTRICTED >= aquals(`a), RESTRICTED >= `q
+  `a hd;
+  struct List<`a,`r,`q> *@aqual(`q) `r tl;
+};
+typedef struct List<`a,`r,`q> *@aqual(`q) `r list_t<`a,`r,`q>;
+
+list_t<`a,`r,`q> rqcopy(region_t<`r> r,aqual_t<`q> q,list_t<`a,`r2,`p> l
+			: ALIASABLE >= aquals(`a),
+			RESTRICTED >= `q,
+			RESTRICTED >= `p) {
+  if(l == NULL)
+    return NULL;
+  list_t<`a,`r,`q> result = rnew(r,q) List{l->hd, rqcopy(r,q,l->tl)};
+  return result;
+}

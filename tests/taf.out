@@ -26,5 +26,6 @@ testaqualfail.cyc:200: pattern for variable elt dereferences an alias-free-point
 
 testaqualfail.cyc:204: alias bound appears on type variable `a which is not in a function declaration or aggregate field
 
+testaqualfail.cyc:219: Cannot consume non-unique paths; do swap instead
 
 COMPILATION FAILED!

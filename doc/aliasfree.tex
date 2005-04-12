@@ -1,0 +1,968 @@
+\section{Pointers with Restricted Aliasing}
+\label{sec:aliasfree}
+
+
+%% \item[The unique region] All of the regions mentioned thus far only permit
+%%   deallocation \emph{en masse.}  Cyclone also defines the \emph{unique
+%%   region}, whose type is denoted \texttt{`U}, which allows objects to be
+%%   deallocated individually, using the function \texttt{ufree}.  For freeing
+%%   objects to be safe, we only allow access to objects in \texttt{`U} via
+%%   \emph{unique pointers}.  That is, only a single pointer may be used to
+%%   access the object at any given time; this trivially guarantees that if the
+%%   object is freed through its unique pointer, no other access to the object
+%%   beyond that point is possible.  Objects that become unreachable but are
+%%   not freed manually will be freed by the garbage collector (assuming it's
+%%   not removed with \texttt{-nogc}).
+
+%% \item[The reference-counted region] The reference-counted region, denoted
+%%   \texttt{`RC}, also permits freeing individual objects.  Unlike the unique
+%%   region, multiple pointers to a single object are permitted, the number of
+%%   which is tracked dynamically via a hidden reference count stored with the
+%%   object.  Additional pointers to an object are created explicitly via a
+%%   call to \texttt{alias\_refptr}, which increases the reference count.
+%%   Individual pointers are removed via a call to \texttt{drop\_refptr}; when
+%%   the last pointer is removed (i.e. the reference count is 0), the object is
+%%   freed.  Like the unique region, objects that become unreachable will be
+%%   freed by the garbage collector.
+%% \end{description}
+
+
+%% Unique pointers can be allocated just as with the heap, but the context must
+%% make clear that a unique pointer is desired.  For example, in the following
+%% the variable \texttt{temp} is allocated in the heap:
+%% \begin{alltt}
+%%   t * temp = malloc(sizeof(t));
+%% \end{alltt}
+%% Modifying it slightly, we allocate into the unique region instead:
+%% \begin{alltt}
+%%   t *`U temp  =        malloc(sizeof(t));
+%%   t *   temp2 = (t *`U)malloc(sizeof(t));
+%% \end{alltt}
+%% Unfortunately, our type inference system for allocation is overly simple, so
+%% you can't do something like:
+%% \begin{alltt}
+%%   t * temp = malloc(sizeof(t));
+%%   ufree(temp);
+%% \end{alltt}
+%% In an ideal world, the fact that \texttt{temp} was passed to \texttt{ufree}
+%% would signal that it is a unique pointer, rather than a heap pointer.
+\subsection{Introduction}
+
+The main benefit of the regions described thus far is also their
+drawback: to free data you must free an entire region.  This implies
+that to amortize the cost of creating a region, one needs to allocate
+into it many times.  Furthermore, the objects allocated in a region
+should be mostly in use until the region is freed, or else memory will
+be wasted in the region that is unused by the program.
+
+In an attempt to alleviate each of these problems Cyclone provides a
+mechanism by which individual objects in a region may be freed prior
+to freeing the entire region. Pointers to objects that may be freed
+early must obey an aliasing discipline to prevent dangling pointers. A
+static analysis ensures that such objects can only ever be accessed
+through one pointer at any time. At the time it is freed, this pointer
+is invalidated, thus preventing all future accesses to the object.
+
+Pointer types in Cyclone can be qualified by their aliasability. As of
+now, there are four alias qualifiers. Each of these qualifiers must
+appear as arguments to the {\tt @aqual(...)} pointer qualifier
+mentioned in section~\ref{sec:pointers}. The four alias qualifiers are:
+
+\begin{description}
+\item[Aliasable] Pointer types are by default qualified as {\tt
+  ALIASABLE}. These may be freely aliased, but can never be freed. For
+  instance, {\tt int @@aqual(ALIASABLE)} is an aliasable non-null
+  pointer to an {\tt int}.
+
+\item[Unique] The {\tt UNIQUE} qualifier on a pointer allows the
+  object pointed to by that pointer to be deallocated individually,
+  using the function \texttt{rufree}. For freeing objects to be safe,
+  all accesses to such objects must be made through a single {\tt
+  UNIQUE} pointer. That is, only a single pointer may be used to
+  access the object at any given time; this trivially guarantees that
+  if the object is freed through its unique pointer, no other access
+  to the object beyond that point is possible.  Objects that become
+  unreachable but are not freed manually will be freed by the garbage
+  collector (assuming it's not removed with \texttt{-nogc}). For
+  instance, {\tt int ?@aqual(UNIQUE)} is a unique fat pointer to an
+  {\tt int}.
+
+\item[Reference-counted] The {\tt REFCNT} qualifier reference-counted
+  qualifier also permits freeing individual objects.  Unlike the {\tt
+  UNIQUE} qualifier, multiple pointers to a single object are
+  permitted, the number of which is tracked dynamically via a hidden
+  reference count stored with the object.  Additional pointers to an
+  object are created explicitly via a call to \texttt{alias\_refptr},
+  which increases the reference count.  Individual pointers are
+  removed via a call to \texttt{rdrop\_refptr}; when the last pointer
+  is removed (i.e. the reference count is 0), the object is freed.
+  Like the unique region, objects that become unreachable will be
+  freed by the garbage collector. For instance, {\tt int
+  *@aqual(REFCNT)} is a nullable pointer to a reference counted {\tt
+  int}.
+
+\item[Restricted] All the alias qualifiers are arranged in a subtyping
+  hierarchy. The {\tt RESTRICTED} qualifier is a super-type of all the
+  other qualifiers. A {\tt RESTRICTED} pointer may not be freed nor
+  can any aliases of the pointer be created. For instance, {\tt int
+  *@aqual(RESTRICTED)} is a restricted nullable pointer to an {\tt
+  int}. The subtyping hierarchy is as below:
+
+\begin{verbatim}
+               RESTRICTED
+               /   |   \
+              /    |    \
+             /     |     \
+     ALIASABLE   UNIQUE   REFCNT
+\end{verbatim}
+  
+\end{description}
+
+\subsection{Allocation and Freeing}
+
+Unique and reference-counted pointers can be allocated in any
+region. As such, the allocation mechanism for these pointers is
+similar to that used for region allocation described in the previous
+section. The allocation function rely on handles for alias qualifiers
+which are of type {\tt aqual\_t<`q::Q>}. Here {\tt `q} is a type
+variable of alias qualifier kind and may be instantiated with the
+alias qualifiers above. The Cyclone libraries provide the following global
+variables:
+\begin{verbatim}
+ aqual_t<ALIASABLE> Core::aliasable_qual
+ aqual_t<UNIQUE> Core::unique_qual} 
+ aqual_t<REFCNT> Core::refcnt_qual} 
+\end{verbatim}
+
+which are handles for the aliasable, unique and reference-counted
+qualifiers respectively. Note that there is no handle for the
+restricted qualifier. 
+
+The following expressions are used for allocation
+
+\begin{itemize}
+\item \texttt{qnew({\it aq-identifier}) {\it expr}}
+\item \texttt{qnew({\it aq-identifier}) {\it array-initializer}}
+
+The {\tt qnew} functions allocate in the {\tt `H} region, i.e. the
+ heap. They expect a alias qualifier handle. For instance, to allocate
+ a unique integer in the heap, one might use
+
+\begin{verbatim}
+  int @@aqual(UNIQUE) a = qnew(Core::unique_qual) 0;
+\end{verbatim}
+
+\item \texttt{rnew({\it rgn-identifier, aq-identifier}){\it expr}}
+\item \texttt{rnew({\it rgn-identifier, aq-identifier}){\it
+    array-initializer}} 
+
+To allocate a unique object in a region other than the heap the {\tt
+rnew} functions can be used. For instance,
+
+\begin{verbatim}
+  {
+    region<`r> r;
+    int @@aqual(UNIQUE) `r a = rnew(r, Core::unique_qual) 0;
+  }
+\end{verbatim}
+   
+If {\it aq-identifier} is not specified it defaults to the {\tt ALIASABLE}
+handle.
+
+\item \texttt{qmalloc({\it aq-identifier},sizeof({\it type}))}
+\item \texttt{qcalloc({\it aq-identifier},n,sizeof({\it type}))}
+
+Similar to {\tt qnew} these functions allocate in the heap.
+
+\item \texttt{rmalloc({\it rgn-identifier, aq-identifier},sizeof({\it type}))}
+\item \texttt{rcalloc({\it rgn-identifier,
+    aq-identifier},n,sizeof({\it type}))}
+
+Similar to {\tt rnew} these functions can be used to allocate alias
+restricted pointers in the specified region. If {\it aq-identifier} is
+omitted, it defaults to {\tt ALIASABLE}.
+\end{itemize}
+
+Since there is no handle for the restricted qualifier, {\tt
+  RESTRICTED} qualified pointers are purely abstract. As with normal
+  region allocation, we use very simple type inference to ease the
+  burden of writing qualifiers on types. For instance,
+\begin{verbatim}
+  int *a = rnew(r, Core::unique_qual) 0;
+\end{verbatim}
+suffices to allocate a unique integer in the region {\tt r}.
+
+The Cyclone library provides the following functions to free
+alias-free pointers.
+
+\begin{itemize}
+\item \texttt{Core::ufree({\it ptr})}
+  To free a heap resident unique pointer {\tt ufree} is used. 
+
+\item \texttt{Core::rufree({\it rgn-identifier, ptr})} To free a
+unique pointer from an arbitrary region {\tt rufree} is used. 
+
+\item \texttt{Core::drop\_refptr({\it ptr})}
+To reduce the reference count on a heap resident reference counted
+object {\tt drop\_refptr} is used. The {\it ptr} can no longer be
+dereferenced following this call. If the reference count on the object
+reaches zero then the object is freed automatically.
+
+\item \texttt{Core::rdrop\_refptr({\it rgn-identifier, ptr})} To reduce
+the reference count on a reference counted object in an arbitrary
+region {\tt rdrop\_refptr} is used.
+
+\end{itemize}
+
+\subsection{Unique Pointers}
+
+To ease programming with unique pointers and allow reuse of library
+code, unique pointers can be aliased temporarily within a designated
+lexical scope using a special \texttt{alias} pattern.  If this kind of
+aliasing is not sufficient, users can choose to allocate
+reference-counted objects; this idea is explained in the next
+subsection.  We also define syntax \texttt{{\it a} :=: {\it b}} to
+allow two unique pointers $a$ and $b$ to be atomically swapped.
+Careful use of the swap operator allows us to store unique pointers in
+objects that are not themselves uniquely pointed to.  We also
+introduce bounded polymorphism over alias qualifiers and add an
+additional \emph{kind} to specify type variables over these
+qualifiers. In practice, all of these mechanisms are necessary for
+writing useful and reusable code.
+
+\subsubsection{Simple Unique Pointers}
+
+Having a unique pointer ensures the object pointed to is not reachable by
+any other means.  When pointers are first allocated, e.g. using
+\texttt{malloc}, they are unique.  Such pointers are allowed to be
+\emph{read through} (that is, dereferenced or indexed) but not copied, as
+the following example shows:
+\begin{verbatim}
+  char @fat @aqual(UNIQUE) buf = malloc(3*sizeof(char));
+  buf[0] = 'h';
+  buf[1] = 'i';
+  buf[2] = '\0';
+  ...
+  ufree(buf);
+\end{verbatim}
+This piece of code allocates a unique buffer, and then indexes that buffer
+three times to initialize it.  Because the process of storing to the
+buffer does not copy its unique pointer, it can be safely freed.
+
+When a unique pointer is copied, e.g. when passed as a parameter to a
+function or stored in a datastructure, we say it has been \emph{consumed}.
+We ensure that consumed pointers are not read through or copied via a
+dataflow analysis.  When a consumed pointer is assigned to, very often it
+can be \emph{unconsumed}, making it accessible again.  Here is a simple
+example that initializes a datastructure with unique pointers:
+\begin{alltt}
+{\small 1}  struct pair \{ int *@aqual(UNIQUE) x; int *@aqual(UNIQUE) y; \} p;
+{\small 2}  int *@aqual(UNIQUE) x = new 1;  // initializes x
+{\small 3}  p.x = x;            // consumes x
+{\small 4}  x = new 2;          // unconsumes x
+{\small 5}  p.y = x;            // consumes x
+\end{alltt}
+If an attempt was made to read through or copy \texttt{x} between lines 3
+and 4 or after line 5, the flow analysis would reject the code, as in
+\begin{alltt}
+  int *@aqual(UNIQUE) x = new 1;  // initializes x
+  p.x = x;            // consumes x
+  p.y = x;            // rejected! x has been consumed already
+\end{alltt}
+When a multi-word data structure is assigned to another one, all of the
+unique pointers it contains are consumed.  For example:
+\begin{alltt}
+{\small 1}  struct pair \{ int *@aqual(UNIQUE) x; int *@aqual(UNIQUE) y; \} p, q;
+{\small 2}  p.x = new 1; p.y = new 2;
+{\small 3}  q = p;              // consumes p.x and p.y
+\end{alltt}
+
+By default, when a unique pointer is passed to a function, we expect
+that the function will not free the pointer, store it in a data
+structure, or otherwise make it unavailable to the caller.  If a
+function violates any of thse assumptions its type must be augmented
+with the attribute \texttt{consume}, which indicates that a particular
+argument is no longer available to the caller after the call.  For
+example:
+\begin{verbatim}
+void foo(int *@aqual(UNIQUE) x) __attribute__((consume(1))) {
+  ufree(x);
+}
+void bar() {
+  int *@aqual(UNIQUE) x = malloc(sizeof(int));
+  foo(x);
+  *x;//<--- this dereference is not allowed
+}
+\end{verbatim}
+Here, the \texttt{consume(1)} attribute in the definition of
+\texttt{foo} indicates that the first argument is consumed within the
+function body.  
+
+Note that if you fail to free a unique pointer, it will eventually be
+garbage collected.
+
+Unique pointers have some restrictions.  In particular:
+\begin{itemize}
+\item No pointer arithmetic is allowed on unique pointers.  This ensures
+  that all unique pointers point to the beginning of the object, so that the
+  allocator is not confused when a pointer is passed to \texttt{ufree}.
+\item Take the address of a unique pointer is not allowed.  This is because
+  doing so effectively creates an alias to the original pointer that cannot
+  be easily tracked statically.
+\item Unique pointers cannot be stored within datatypes (though they can be
+  stored in tagged unions).  This is a shortcoming of the current flow
+  analysis.
+\end{itemize}
+
+\subsubsection{Nested Unique Pointers}
+
+Directly reading a unique pointer is only allowed along a \emph{unique
+path}.  A unique path $u$ has the form
+\begin{center}
+$u$ \texttt{::=} $x$ $\mid$ $u$\texttt{.m} $\mid$ $u$\texttt{->m} $\mid$ \texttt{*}$u$
+\end{center}
+where $x$ is a local variable, and $u$ is a unique pointer.  To
+appreciate the unique-path restriction, consider this incorrect code:
+\begin{verbatim}
+int f(int *@aqual(UNIQUE) *`r x) {
+  int *@aqual(UNIQUE) *`r y = x;  //x and y are aliases
+  int *@aqual(UNIQUE) z = *y;
+  ufree(z);
+  return **x;  //accesses deallocated storage!
+}
+\end{verbatim}
+Here, \texttt{x} is a pointer into a conventional region \texttt{`r} and
+thus its value can be freely copied to \texttt{y}.  We then extract a unique
+pointer pointed to by \texttt{y} and free it.  Then we attempt to access the
+deallocated storage through \texttt{x}.
+
+If a unique pointer is not accessible via a unique path, it must be
+\emph{swapped out} atomically to be used; in Cyclone this is expressed with
+syntax \texttt{:=:}.  In particular, the code \texttt{{\it a} :=:{\it b}}
+will swap the contents of {\it a} and {\it b}.  We can use this to swap out
+a nested unique pointer, and replace it with a different one; we will often
+swap in NULL, since this is a unique pointer that is always unconsumed.  For
+example, in the code below, we define a queue type for queues that contain
+unique pointers, and a function \texttt{take} for removing the first element
+from the queue.
+\begin{verbatim}
+struct Queue<`a,`r> { 
+  list_t<`a *@aqual(UNIQUE),`r> front; 
+  list_t<`a *@aqual(UNIQUE),`r> rear; 
+};
+typedef struct Queue<`a,`r> *`r queue_t<`a,`r>;
+
+`a *@aqual(UNIQUE) take(queue_t<`a> q) {
+  if (q->front == NULL)
+    throw &Empty_val;  // exception: def not shown
+  else {
+    let elem = NULL;
+    elem :=: q->front->hd;
+    q->front = q->front->tl;
+    if (q->front == NULL) q->rear = NULL;
+    return elem;
+  }
+}
+\end{verbatim}
+Here, in order to extract the element stored in the queue (the \texttt{hd}
+portion of the underlying list), we need to use swap, because
+\texttt{q->front} is a non-unique pointer, and therefore
+\texttt{q->front->hd} is not a unique path.
+
+Note that this code is not as polymorphic as it could be.  In particular,
+the above queue definition requires its elements to be nullable unique
+pointers, when they could just as easily be non-unique pointers, or even
+reference-counted pointers (illustrated later), and the code for
+\texttt{take} would still work.  This problem can be addressed, and its
+solution is described in \sectionref{sec:qual-poly}.
+
+\subsubsection{Pattern Matching on Unique Pointers}
+\label{sec:unique-patterns}
+
+As described in \sectionref{sec:patterns}, Cyclone supports pattern
+matching on structured data with \texttt{let} declarations and
+\texttt{switch} statements.  Unique pointers, or structures containing
+unique pointers, can be matched against, while still ensuring that only one
+legal pointer to a unique object exists at any given time.
+
+In the simplest case, when a unique pointer to a structure is matched
+against, the matching operation is treated just like a dereference.
+Therefore, the pointer itself is \emph{not} consumed.  For example:
+\begin{verbatim}
+struct pair { int x; int y; };
+void foo() {
+  struct pair @@aqual(UNIQUE) p = new pair(1,2);
+  let &pair{.x=x, .y=y} = p;
+  ufree(p);
+}
+\end{verbatim}
+Here, we match against the unique pointer \texttt{p}'s two fields
+\texttt{x} and \texttt{y}.  Because we don't make a copy of \texttt{p}, but
+rather only of its fields, \texttt{p} is not consumed.  Therefore,
+\texttt{p} can be safely freed.
+
+Because each of the fields matched against is assigned to the pattern
+variables, unique paths through the original pointer are consumed by virtue
+of being assigned.  At the conclusion of the scope of the pattern, we can
+\emph{unconsume} any location whose pattern variable has not been consumed
+or assigned to, as long as the parent pointer has not been consumed or
+assigned to.  Here's an example:
+\begin{verbatim}
+struct Foo { int *@aqual(UNIQUE) x; int *@aqual(UNIQUE) y; };
+void foo(struct Foo *@aqual(UNIQUE) p) {
+  { let &Foo{.x=x, .y=y} = p; // consumes p->x and p->y
+    ufree(x);                 // consumes x
+  }                           // p->y is unconsumed
+  ufree(p->y);                // p->y consumed
+  ufree(p);                   // p consumed
+}
+\end{verbatim}
+The initial match against \texttt{p} consumes \texttt{p->x} and
+\texttt{p->y}, whose contents are copied to \texttt{x} and \texttt{y},
+respectively.  At the conclusion of the block, \texttt{p->y} is unconsumed
+because it did not change, whereas \texttt{p->x} is not, because \texttt{x}
+was freed within the block.
+
+Note that the following code is illegal:
+\begin{verbatim}
+void foo(struct Foo *`H p) {
+ let &Foo{.x=x, .y=y} = p; // non-unique path!
+ ...
+}
+\end{verbatim}
+To see why, notice that this is equivalent to
+\begin{verbatim}
+void foo(struct Foo *`H p) {
+ let x = p->x;
+ let y = p->y;
+ ...
+}
+\end{verbatim}
+This code is illegal because neither \texttt{p->x} nor \texttt{p->y} is a
+unique path.  We also do not allow \texttt{*} patterns to create aliases of
+the original unique pointer, for the same reason we forbid \texttt{\&}$e$
+when $e$ is a unique pointer.  Unfortunately, this means we don't provide a
+way to assign to matched-against fields.  However, in the case of the
+matched-against struct, we can just do this with regular paths.  In the
+above example pattern block, we could do \texttt{p->y = new 1} or something
+like that (even within the scope of the pattern).
+
+Matching against tagged unions is essentially like matching against
+structures, as just described.  Since we do not allow unique pointers to be
+stored within datatypes, there is no change to how datatypes are
+matched.
+
+
+\subsection{Reference-counted Pointers}
+
+Cyclone also supports reference-counted pointers, which are treated
+quite similarly to unique pointers.  Reference-counted objects may be
+allocated in any region. We define the constant
+\texttt{Core::refcnt\_qual}, having type \texttt{aqual\_t<REFCNT>}, for
+creating reference-counted pointers.  The caveat here is that when you
+allocate something in this region, an extra word will be prepended to
+your data, which contains the reference count, initialized to $1$.
+
+As with unique pointers, no pointer arithmetic is allowed, for similar
+reasons: it can occlude where the "head" of the object is, and thus make
+it impossible to find the hidden reference count.  The reference count
+can be accessed via the routine \texttt{Core::refptr\_count}:
+\begin{verbatim}
+  int refptr_count(`a::TA ?@aqual(REFCNT) ptr);
+\end{verbatim} %$ <--- for syntax highlighting
+The constant NULL is allowed to have type
+\verb+`a::A ?@aqual(REFCNT)+, and its reference count is always 0.
+Like unique pointers, implicit aliasing is not allowed.  Aliases are
+created explicitly using the routine \texttt{Core::alias\_refptr}:
+\begin{verbatim}
+  `a ?@aqual(REFCNT) alias_refptr(`a::TA ?@aqual(REFCNT) ptr);
+\end{verbatim} %$ <--- for syntax highlighting
+This routine returns a copy of its argument, which is itself not consumed.
+Furthermore, the reference count will be incremented by one.  Reference
+counts are reduced explicitly by the routine \texttt{drop\_refptr}:
+\begin{verbatim}
+  void drop_refptr(`a::TA ?@aqual(REFCNT) ptr) __attribute((consume(1)));
+\end{verbatim}
+In the case that the provided object's reference count is 1 (and is thus
+dropped to zero), the provided pointer is freed.  The flow analysis will
+consume the passed pointer (as is always the case for function arguments),
+so you won't be able to use it afterwards.  Just like unique pointers, you
+can ``forget'' reference-counted pointers without decrementing the count;
+this just means you'll never be able to free the pointer explicitly, but the
+GC will get it once it becomes unreachable.
+
+Just like unique pointers, reference-counted pointers can be stored in
+normal, aliasable datastructures, and accessed using swap (e.g. \texttt{x
+:=: y}).  Because NULL is a \verb+`a::TA ?@aqual(REFCNT)+ pointer, we can always
+cheaply construct a pointer to swap in.  
+
+A good example of the use of unique pointers and reference-counted
+pointers is in the Cyclone distribution's \texttt{tests}
+directory---the file \texttt{streambuff.cyc}.  This is an
+implementation of a packet manipulation library with a representation
+for packets (called \texttt{streambuff\_t}'s) that is similar to
+Linux's \texttt{skbuff\_t}'s.  It uses a combination of unique header
+structures and reference-counted data structures.
+
+\subsection{Qualifier Polymorphism}
+\label{sec:qual-poly}
+
+To allow the writing of reusable code we support both subtyping and
+bounded polymorphism over alias qualifiers. Type variables that range
+over the set of alias qualifiers are of kind {\tt Q} are used in
+addition to the other kinds. 
+
+The list data structure in the Cyclone libraries illustrates many
+features of qualifier polymorphism. It has the following declaration:
+
+\begin{verbatim} 
+  struct List<`a::B,`r::R,`q::Q>{ 
+    : RESTRICTED >= aquals(`a), RESTRICTED >= `q
+    `a hd; 
+    struct List<`a,`r,`q> *@aqual(`q) `r tl;
+  };
+  typedef struct List<`a,`r,`q> *@aqual(`q) `r list_t<`a,`r,`q>;
+\end{verbatim}
+
+Here, the structure is parameterized by three type variables. The
+first, of boxed-kind, admits instantiation by pointer types. Since
+pointer types may be qualified according to their aliasability, we
+require a bound on this aliasability. For this purpose, we use the
+construct {\tt aquals(`a)}. Similar to the {\tt regions(`a)}
+construct, {\tt aquals(`a)} evaluates to the top-level alias qualifier
+of the type that instantiates the variable {\tt `a}. For instance,{\tt
+aquals(int *@aqual(ALIASABLE) *@aqual(UNIQUE)) = UNIQUE}. The bound in
+the list declaration {\tt RESTRICTED >= aquals(`a)} states that {\tt
+`a} can be instantiated with a boxed kind with an aliasability that is
+a subtype of {\tt RESTRICTED}. Since {\tt RESTRICTED} is at the top of
+the subtyping hierarchy, this is the most general bound on the
+aliasability of the type.
+
+The second type variable is of region kind. These types may not be
+qualified by aliasability and thus do not appear in the bounds at
+all. 
+
+Finally, we have the type variable {\tt `q::Q}, of alias qualifier
+kind. Thus it can be instantiated with any type that reduces to one of
+the alias qualifiers. That is, one of {\tt ALIASABLE, UNIQUE, REFCNT,
+RESTRICTED} or {\tt aquals(`a)}. The bound on {\tt `q} also is the
+most general bound.
+
+A list that uses unique pointers on the ``spine'' with reference
+counted elements might be constructed as follows:
+
+\begin{verbatim}
+  int *rc_int = qnew(Core::refcnt_qual) 0;
+  int *rc_int2 = qnew(Core::refcnt_qual) 1;
+  list_t<int*@aqual(REFCNT),Core::heap_region,Core::unique_qual> l =
+      rnew(Core::heap_region, Core::unique_qual) 
+          List{rc_int, 
+	       rnew(Core::heap_region, Core::unique_qual) 
+	          List{rc_int2, NULL}};
+\end{verbatim}
+
+We can also quantify over alias qualifiers in function types. For
+instance, a function that copies a list can be defined as follows.
+
+\begin{verbatim}
+list_t<`a,`r,`q> rqcopy(region_t<`r> r,aqual_t<`q> q,
+                        list_t<`a,`r2,`p> l
+                        : RESTRICTED >= `q,
+                          ALIASABLE >= aquals(`a),
+                          RESTRICTED >= `p) {
+  if(l == NULL)
+    return NULL;
+  _ tl = NULL;
+  tl :=: l->tl;
+  list_t<`a,`r,`q> result = rnew(r,q) List{l->hd, rqcopy(r,q,tl)};
+  l->tl :=: tl;
+  return result;
+}
+\end{verbatim}
+
+This function copies a list allocated in a region {\tt r2} into a
+region {\tt r}. As previously, the function is polymorphic in both the
+source and destination regions. Furthermore, the aliasability of the
+new list is specified by the handle {\tt q} which has type {\tt
+aqual\_t<`q>}. As previously, since {\tt `q} is of alias qualifier
+kind, a bound can be specified for it -- this appears after the
+argument list along with any effects for this function. Note that the
+list that is being copied may also have a spine that is {\tt
+RESTRICTED} as specified by the {\tt RESTRICTED >= `p} bound. This
+bound requires that we use the swap operator ({\tt :=:}) to ensure
+that no aliases are manufactured. Finally, since we are copying the
+list, the elements of the list itself must be aliasable -- this is
+specified by the {\tt ALIASABLE >= aquals(`a)} bound.
+
+\subsection{Aliasing Unique Pointers}
+\label{sec:alias}
+
+Programmers often write code that aliases values temporarily, e.g. by
+storing them in loop iterator variables or by passing them to functions.
+Such reasonable uses would be severely hampered by ``no alias'' restrictions
+on unique pointers.  To address this problem, we introduce a special
+\texttt{alias} pattern variable that permits temporary aliasing of a unique
+pointer.  Here is a simple example:
+\begin{alltt}
+  char *@fat@aqual(UNIQUE) dst, *@fat@aqual(UNIQUE) src = ...
+  \{ let alias <`r>char *@fat`r x = src; // consumes src
+    memcpy(dst,x,numelts(x)); \}
+  // src unconsumed
+  ...
+  ufree(src);
+\end{alltt}
+In general, an alias pattern has form \texttt{alias <`r>$t$ x}, where
+\texttt{`r} is a fresh region variable, and $t$ is the type of \texttt{x},
+which may mention \texttt{`r}.  The \texttt{alias} pattern introduces a
+region \texttt{`r}, copies \texttt{src} to \texttt{x} which is treated as
+having the designated type \texttt{char *@fat`r}.  Because \texttt{`r} is
+non-unique, \texttt{x} can be freely aliased.  As such, we can pass
+\texttt{x} to the \texttt{memcpy} function.  The matching operation consumes
+\texttt{src} during the block, and unconsumes it upon exit, so that
+\texttt{src} can be ultimately freed.
+
+Alias pattern variables are similar to regular pattern variables.  Like
+regular pattern variables, the matched-against expression (i.e. \texttt{src}
+in the above example) must be a unique path, and is consumed as a result of
+the match.  As well, this expression can be unconsumed at the conclusion of
+the surrounding block as long as it hasn't been overwritten.  However, in
+the case of regular pattern variables, unconsumption also requires that the
+pattern variable itself (i.e. \texttt{x} in the above example) hasn't
+changed within the block, while this requirement is unnecessary for alias
+patterns.
+
+Intuitively, alias pattern variables are sound because we cast a unique
+pointer to instead point into a fresh region, for which there is no
+possibility of either creating new values or storing existing values into
+escaping data structures.  As such we cannot create aliases that persist
+beyond the surrounding scope.  However, we must take care when aliasing data
+having recursive type.  For example, the following code is unsound:
+\begin{alltt}
+  void foo(list\_t<`a, `r1, UNIQUE> l) \{
+    let alias <`r> x = (list\_t<`a, `r1, UNIQUE>)l;
+    x->tl = x; // unsound: creates alias!
+  \}
+\end{alltt}
+In this case, the \texttt{alias} effectively created many values in the
+fresh region \texttt{`r}: one for each element of the list.  This allows
+storing an alias in an element reachable from the original expression
+\texttt{l}, so that when the block is exited, this alias escapes.
+
+
+%% To prevent this, we only allow ``deep'' aliasing when the aliased pointers
+%% are immutable.  For example, if we have a list structure whose tail pointers
+%% are \texttt{const}, call it \texttt{clist\_t}, we rule out the above code
+%% because the assignment to \texttt{x->tl} would be forbidden.  Here is an
+%% example implementation of a \texttt{length} function that is amenable to
+%% deep aliasing:
+%% \begin{alltt}
+%%   int length(clist\_t<`a,`r> l) \{
+%%     int len = 0;
+%%     while (l != NULL) \{
+%%       len++;
+%%       l = l->tl;
+%%     \}
+%%     return len;
+%%   \}
+
+%%   int foo() \{
+%%     list\_t<int,@aqual(UNIQUE)> l = new List(1,new List(2,NULL));
+%%     let alias <`r>clist\_t<int,`r> x = l;
+%%     return length(x);
+%%   \}
+%% \end{alltt}
+%% Here, the \texttt{length} function works on constant lists, and the
+%% \texttt{foo} function aliases a unique, mutable list \texttt{l} to call
+%% \texttt{length}.
+
+For improved programmer convenience, the Cyclone typechecker
+optimistically inserts \texttt{alias} blocks around function-call
+arguments that are unique pointers when the formal-parameter type is
+polymorphic in the pointer's region.  If this modified call does not
+type-check, we remove the inserted \texttt{alias}.  For example, the
+\texttt{alias} pattern in the \texttt{foo} function above could be
+inferred, so we could instead write:
+\begin{alltt}
+  int foo() \{
+    list\_t<int,`H,UNIQUE> l = new List(1,new List(2,NULL));
+    return length(l);
+  \}
+\end{alltt}
+Right now, \texttt{alias} inference in Cyclone is fairly primitive,
+but could be extended to more contexts.  We plan to improve this
+feature in future releases.
+
+\subsection{Defaults and Shorthands}
+
+As described so far, the notation for alias qualifiers is extremely
+verbose. The default qualifier annotations and bounds are intended to
+capture the most common cases and reduce the burden on the
+programmer. Where the defaults do not suffice, shorthand versions
+allow explicit types to specified in a more compact manner. 
+
+The shorthand notation is as follows:
+
+\begin{description}
+\item[Alias Qualifier Specifier] The strings \verb+ \A, \U, \RC, \T+
+  can be used as substitutes for {\tt ALIASABLE, UNIQUE, REFCNT,} and
+  {\tt RESTRICTED} respectively. For example
+  \begin{verbatim}
+    void cons(int *@aqual(\T) a, int *@aqual(\U) b)
+  \end{verbatim} 
+  is equivalent to 
+  \begin{verbatim}
+    void cmp(int *@aqual(RESTRICTED) a, int *@aqual(UNIQUE) b)
+  \end{verbatim}
+  
+\item[Type Variable Bound] The bound on a type variable, as shown
+  previously, generally appears together with the effects in a
+  function type, or with the outlives relations for an aggregate
+  type. However, when the strings \verb+ \A, \U, \RC, \T+ succeed a
+  type variable they are interpreted as a bound on the type
+  variable. This bound is only legal within an struct declaration or a
+  function type; i.e. bounds may not appear within a local variable
+  declaration, typedefs etc. If the type variable is of alias
+  qualifier kind (kind Q) then this is interpreted as a qualifier
+  bound. If the variable is of boxed kind then it is interpreted as an
+  aquals bound. For instance, the function {\tt rqcopy} above can be
+  written as
+  
+  \begin{verbatim}
+  list_t<`a,`r,`q> rqcopy(region_t<`r> r,aqual_t<`q\T> q,
+                          list_t<`a\A,`r2,`p\T> l);
+  \end{verbatim}
+  
+  The same convention applies to aggregate types. For instance, we
+  could define {\tt List} as follows
+
+  \begin{verbatim}
+  struct List<`a::B\T,`r::R,`q::Q\T>{ 
+    `a hd; 
+    struct List<`a,`r,`q> *@aqual(`q) `r tl;
+  };
+  \end{verbatim}
+
+\item[Heap Pointers] For unique and reference counted pointers that
+  reside in the heap we overload the region notation to provide a
+  further shorthand. This is also for backward compatibility with
+  previous versions of Cyclone where unique and reference counted
+  pointers always resided in a separate region. Thus the type
+  \verb+ T *@aqual(\U) `H+ can be written more compactly as
+  \verb+ T *`U+; the type \verb+ T *@aqual(\RC) `H+ can be written as
+  \verb+ T *`RC+.
+
+\end{description}
+
+The default qualifier bounds are as follows:
+
+\begin{description}
+\item[Function Types] The aliasability of all parameters and return
+  types in a function type is {\tt ALIASABLE} by default. If a formal
+  parameter is declared as \verb+ T *@aqual(\T)+ then all subtypes of
+  {\tt T *@aqual(RESTRICTED)} may be passed as an argument. For
+  parametricity \verb+ T *@aqual(`q\T)+ should be used instead.
+
+\item[Struct Types] For pointers within a struct the default
+  aliasability is {\tt ALIASABLE}. For qualifier variables {\tt `q::Q}
+  the default bound is {\tt RESTRICTED}. The aquals bounds for type
+  variables is {\tt RESTRICTED} by default. Thus the following
+  declarations are equivalent
+
+  \begin{verbatim}
+    struct PtrList<`a::A, `q> {
+      `a *hd; 
+      struct PtrList<`a,`q> *@aqual(`q) tl;
+    };
+
+    struct PtrList<`a::A\T,`q\T> { 
+      `a *@aqual(\A) hd; 
+      struct PtrList<`a,`q> *@aqual(`q) tl;
+    };
+  \end{verbatim}
+  
+\item[Type Instantiations] When a type variable is instantiated with a
+  pointer type we have to decide the aliasability of pointer. When
+  instantiated in a function type or an aggregate type the
+  aliasability is by default {\tt ALIASABLE}. For instance, the
+  following are equivalent:
+  
+  \begin{verbatim}
+    void int_list(list_t<int*> l);
+    void int_list(list_t<int *@aqual(\A)> l);
+
+    struct Wrapper {
+      list_t<int*> l;
+    }
+    struct Wrapper {
+      list_t<int*@aqual(ALIASABLE)> l;
+    }
+  \end{verbatim}
+
+  In variable declarations the default is {\tt RESTRICTED} to allow
+  for more aggressive unification. For instance
+
+  \begin{verbatim} 
+    void int_list(list_t<int*@aqual(\T)> l) {
+      list_t<int*> cp = l;
+    }
+  \end{verbatim}
+  
+  In the local variable declaration the bound defaults to {\tt
+  RESTRICTED} so that unification with the formal succeeds.
+
+\end{description}
+
+\subsection{Region Allocator Implementation}
+
+To support deallocation of objects within a region the allocator must
+maintain some meta-data associated with each object. The current
+implementation uses a version of the bget allocator adapted for use
+with regions. When deallocation is rare, bget behaves much like a
+simple pointer bumping allocator and we expect performance to be
+competitive. However, the metadata does consume two additional header
+words for each object allocated.
+
+If your application does not free objects from a region then you
+\emph{might} get better performance by disabling the bget
+allocator. This is possible by compiling your program with the {\tt
+-noreaps} option. With this flag the region library does not use bget,
+and consequently does not consume any additional header words for
+allocation. Operations such as {\tt rufree} have no effect when this
+option is chosen.
+
+
+%% \subsubsection{Polymorphism}
+%% \label{sec:poly-allocate}
+
+%% As described in \sectionref{sec:common-use}, we can write functions that
+%% take as arguments a region handle to allocate into.  For example, we wrote a
+%% function \texttt{rcopy} that copies a list into some region \texttt{`r2}.
+%% However, we didn't provide the full story that accounts for the unique
+%% region.  In particular, consider the following function:
+%% \begin{alltt}
+%%   $(int @`r, int @`r) make\_pair(region\_t<`r> rgn) \{
+%%     int @x = rnew (rgn) 1;
+%%     return $(x, x);
+%%   \}
+%% \end{alltt}
+%% This function will return a pair of pointers to the same object.  If we pass
+%% in something other than the unique region, this function will behave
+%% properly:
+%% \begin{alltt}
+%%   $(int @,int@) pair = make\_pair(heap_region);
+%% \end{alltt}
+%% However, things can go badly wrong if we pass in the unique region instead:
+%% \begin{alltt}
+%%   $(int @@aqual(UNIQUE),int @@aqual(UNIQUE)) pair = make\_pair(unique_region);
+%%   ufree(pair[0]);
+%%   int x = pair[1]; // error! dereferences freed pointer
+%% \end{alltt}
+%% The problem is that \texttt{make\_pair} creates an alias; if we pass in the
+%% unique region for \texttt{rgn}, we can free one of these aliases (e.g. the
+%% pointer via the first element of the pair), but then dereference the other
+%% (i.e. via the second pair element).
+
+%% To prevent this behavior, we have to classify the different kinds of regions
+%% that we support: aliasable regions, whose pointers can be freely aliased,
+%% and unique regions, whose pointers cannot be aliased, and can form part of
+%% unique paths.  To do this, we define \emph{kinds} R for aliasable regions
+%% and UR for unique ones.  We can then classify a polymorphic region variable
+%% with the proper kind.  This allows us to change the \texttt{make\_pair}
+%% function as follows:
+%% \begin{alltt}
+%%   $(int @`r, int @`r) make\_pair(region\_t<`r::R> rgn) \{
+%%     int @x = rnew (rgn) 1;
+%%     return $(x, x);
+%%   \}
+%% \end{alltt}
+%% Now we have specified specifically that \texttt{`r} must be an aliasable
+%% region (in fact, when not specified, this is the default for function
+%% parameters).  As such, the illegal code above will not typecheck because we
+%% are attempting to instantiate a unique region (having kind UR) for an
+%% aliasable one, which is disallowed.
+
+%% For generality, we introduce a third region kind TR (which stands for ``top
+%% region''); TR is a ``super-kind'' of R and UR, meaning that types having TR
+%% kind can be used in places expecting types of R or UR kind.  This also means
+%% that we cannot allow pointers into a TR-kinded region to be aliased, nor can
+%% we assume they do not have aliases (and so they cannot safely form part of a
+%% unique path).  This is because we might instantiate either the unique region
+%% (whose pointers cannot be aliased) or an aliasable region (whose pointers
+%% might be aliased) in place of the TR-kinded variable.
+
+%% We can now generalize the \texttt{rcopy} example above:
+%% \begin{verbatim}
+%%   struct List<`a,`r::TR>{`a hd; struct List<`a,`r> *`r tl;};
+%%   typedef struct List<`a,`r> *`r list_t<`a,`r>;
+
+%%   // return a fresh copy of the list in r2
+%%   list_t<`a,`r2> rcopy(region_t<`r2::TR> r2, list_t<`a> x) {
+%%     if (x == NULL) return NULL;
+%%     else {
+%%       list_t rest = rcopy(r2,x->tl);
+%%       return rnew(r2) List{.hd=x->hd,.tl=rest};
+%%     }
+%%   }
+%%   list_t<`a> copy(list_t<`a> x) {
+%%     return rcopy(heap_region, x);
+%%   }
+%% \end{verbatim}
+%% We have made three key changes to the prior version of \texttt{rcopy}:
+%% \begin{enumerate}
+%% \item The definition of \texttt{List} has been generalized so that its
+%%   \texttt{`r} region variable now has kind TR.  This implies that lists can
+%%   point into any region, whether unique or aliasable.  Actually, we need not
+%%   include the ::TR kind annotation on region type variables in typedefs;
+%%   this is the default (since it allows instantation of any region
+%%   parameter).
+%% \item The region handle \texttt{r2} now has kind TR, rather than the default
+%%   R.  This means that we can pass in any region handle, and thus copy a list
+%%   into any kind of region.
+%% \item We have made \texttt{rcopy}'s implementation recursive.  This was
+%%   necessary to avoid creating aliases to the newly created list.  In
+%%   particular, if we were to have used a \texttt{prev} pointer as in the
+%%   version from \sectionref{sec:common-use}, we would have two pointers to
+%%   the last-copied element: the \texttt{tl} field of the element before it in
+%%   the list, and the current iterator variable \texttt{prev}.  The use of
+%%   recursion allows us to iterate to the end of the list and construct it
+%%   back to front, in which no aliases are required.  The cost is we need to
+%%   do extra stack allocation.  This example illustrates that it is sometimes
+%%   difficult to program using no-alias pointers.  This is why, in cases other
+%%   than allocation, we would prefer to use the \texttt{alias} construct to
+%%   allow temporary aliasing.
+%% \end{enumerate}
+
+%% In addition to needing polymorphism for region allocation, for the same
+%% reasons we need polymorphism for arbitrary values which might be pointers
+%% into either unique or aliasable regions.  For example, consider the
+%% following code analogous to the \texttt{make\_pair} function above:
+%% \begin{verbatim}
+%%   $(`a,`a) pair(`a x) {
+%%     return $(x,x);
+%%   }
+%% \end{verbatim}
+%% Now consider what happens if we call \texttt{pair} with a unique pointer:
+%% \begin{verbatim}
+%%   int @@aqual(UNIQUE) p = new 1;
+%%   $(int @@aqual(UNIQUE),int @@aqual(UNIQUE)) pair = pair(p);
+%%   ufree(pair[0]);
+%%   int x = pair[1]; // error! dereferences freed pointer
+%% \end{verbatim}%$ <-- help syntax highlighting
+%% Again, the problem is that we have not restricted the kinds of things that
+%% can be used to instantiate polymorphic variables.  We extend our solution
+%% for region kinds, above, to all of Cyclone's kinds.  For example, Cyclone's
+%% ``box-kind'' B, which classifies word-sized values, must be extended so that
+%% B refers to aliasable word-sized values, while UB refers to non-aliasable
+%% word-sized values, and TB is the super-kind of both.  A similar extension
+%% occurs for kind M (memory-kinds, having arbitrary size), and kind A
+%% (any-kinds, for abstract, arbitrary-sized data).  With this, we can fix the
+%% \texttt{pair} function to be:
+%% \begin{verbatim}
+%%   $(`a,`a) pair(`a::B x) {
+%%     return $(x,x);
+%%   }
+%% \end{verbatim}
+%% This would prevent the call to \texttt{pair(p)} in the code snippet above.
+%% Actually, as with regions, aliasable kinds are the default, so the
+%% \texttt{::B} can be elided.
+

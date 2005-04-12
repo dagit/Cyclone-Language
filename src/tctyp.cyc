@@ -560,7 +560,7 @@ static int bnd_qual_cmp(type_t tvt1, type_t tvt2) {
   case $(&VarType(tv1), &VarType(tv2)):
     return tvar_cmp(tv1, tv2);
   case $(&Evar(k1,_,i1,_), &Evar(k2,_,i2,_)):
-    return (i1 == i2 && Kinds::kind_eq(k1->v, k2->v));
+    return ((i1 == i2 && Kinds::kind_eq(k1->v, k2->v)) ? 0 : 1);
   case $(&AppType(&AqualsCon, &List(tv11, _)), &AppType(&AqualsCon, &List(tv21, _))):
     return bnd_qual_cmp(tv11, tv21);
   case $(&VarType(...), &Evar(...)):
@@ -569,7 +569,7 @@ static int bnd_qual_cmp(type_t tvt1, type_t tvt2) {
   case $(&AppType(...), &Evar(...)):    
   case $(&VarType(...), &AppType(...)):    
   case $(&AppType(...), &VarType(...)):    
-    return 0;
+    return 1;
   default:  Warn::impos2("Expect only tvars, evars or aquals in qualifier bounds: ", tvt1, ",", tvt2);
   }
 }

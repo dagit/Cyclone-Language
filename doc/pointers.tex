@@ -99,6 +99,13 @@ after any other Cyclone qualifiers.
 For instance, the type ``\texttt{int *@notnull @region{`r}}''
 may be abbreviated as ``\texttt{int @`r}''.  The rules about default
 region annotations are context-dependent and therefore described below.
+
+\item \texttt{@aqual(...)}: This qualifier is used to specify the
+  aliasability of the pointer. Valid arguments to the {\texttt
+  @aqual(...)} qualifier are {\tt ALIASABLE, UNIQUE, REFCNT,
+  RESTRICTED}, each of which impose a different aliasing discipline on
+  the pointer. A type variable of kind {\tt Q} may also appear as an
+  argument. See section~\ref{sec:aliasfree} for more details.
 \end{itemize}
 
 \subsection{Pointer Subtyping}

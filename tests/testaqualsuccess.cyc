@@ -333,4 +333,23 @@ void use_ex(struct Ex @e) {
   let &Ex{elt} = e;
 }
 
+struct TList<`a::B,`r::R,`q::Q>{ : RESTRICTED >= aquals(`a), RESTRICTED >= `q
+  `a hd;
+  struct TList<`a,`r,`q> *@aqual(`q) `r tl;
+};
+typedef struct TList<`a,`r,`q> *@aqual(`q) `r tlist_t<`a,`r,`q>;
+
+tlist_t<`a,`r,`q> rqcopy(region_t<`r> r,aqual_t<`q> q,tlist_t<`a,`r2,`p> l
+			: ALIASABLE >= aquals(`a),
+			RESTRICTED >= `q,
+			RESTRICTED >= `p) {
+  if(l == NULL)
+    return NULL;
+  _ tl = NULL;
+  tl :=: l->tl;
+  tlist_t<`a,`r,`q> result = rnew(r,q) TList{l->hd, rqcopy(r,q,tl)};
+  l->tl :=: tl;
+  return result;
+}
+
 int main() {return 0;}

@@ -22,6 +22,7 @@ INPUTS= advanced.tex \
 	pointers.tex \
 	porting.tex \
 	regions.tex \
+	aliasfree.tex \
 	taggedunions.tex \
 	tutorial.tex \
 	typeinference.tex \
