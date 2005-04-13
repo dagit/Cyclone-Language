@@ -276,9 +276,16 @@ bool sub_attributes(attributes_t a1, attributes_t a2) {
     case &Initializes_att(_): continue;
     default: if (!List::exists_c(equal_att, t->hd, a2)) return false;
     }
+  //it is okay if a2 contains additional consume attributes 
   for (; a2 != NULL; a2 = a2->tl)
-    if (!List::exists_c(equal_att, a2->hd, a1)) 
-      return false;
+    if (!List::exists_c(equal_att, a2->hd, a1)) {
+      switch(a2->hd) {
+      case &Consume_att(_):
+	break;
+      default:
+	return false;
+      }
+    }
   return true;
 }
 
