@@ -730,7 +730,7 @@ for(1;(int)*((const char*)_check_fat_subscript(p,sizeof(char),0U))==48 &&(int)*(
 start=(const char*)_untag_fat_ptr(p,sizeof(char),1U);
 for(1;((48 <= (int)*((const char*)_check_fat_subscript(p,sizeof(char),0U))&&(int)*((const char*)p.curr)<= 57)&&(int)*((const char*)p.curr)< 48 + base ||
 (97 <= (int)*((const char*)p.curr)&&(int)*((const char*)p.curr)<= 122)&&(int)*((const char*)p.curr)< (97 + base)- 10)||
-(65 <= (int)*((const char*)_check_fat_subscript(p,sizeof(char),0U))&&(int)*((const char*)_check_fat_subscript(p,sizeof(char),0U))<= 90)&&(int)*((const char*)_check_fat_subscript(p,sizeof(char),0U))< (65 + base)- 10;_fat_ptr_inplace_plus(& p,sizeof(char),1)){
+(65 <= (int)*((const char*)p.curr)&&(int)*((const char*)p.curr)<= 90)&&(int)*((const char*)p.curr)< (65 + base)- 10;_fat_ptr_inplace_plus(& p,sizeof(char),1)){
 ++ n;}
 for(k=1;1 << k < base;++ k){
 ;}

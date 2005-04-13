@@ -873,7 +873,7 @@ return 0;}}
 # 696
 static struct Cyc_Sexp_Object Cyc_Sexp_next_list(struct Cyc_List_List**xs){
 struct Cyc_Sexp_Object*h=(struct Cyc_Sexp_Object*)(*xs)->hd;
-*xs=_check_null(*xs)->tl;
+*xs=(*xs)->tl;
 return*h;}
 # 703
 static struct _tuple10*Cyc_Sexp_parse_tuple(struct Cyc_Sexp_Parser*p){

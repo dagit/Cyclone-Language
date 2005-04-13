@@ -3818,7 +3818,7 @@ struct Cyc_List_List*mybodies=0;
 # 4040
 struct Cyc_Absyn_Stmt*test_tree=Cyc_Toc_compile_decision_tree(rgn,nv,& mydecls,& mybodies,dopt,lscs,v);
 # 4044
-for(1;1;mybodies=_check_null(mybodies)->tl){
+for(1;1;mybodies=mybodies->tl){
 if(mybodies==0)
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp2=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3;_Tmp3.tag=0,_Tmp3.f1=_tag_fat("letdecl_to_c: couldn't find env!",sizeof(char),33U);_Tmp3;});void*_Tmp3[1];_Tmp3[0]=& _Tmp2;({(int(*)(struct _fat_ptr ap))Cyc_Toc_toc_impos;})(_tag_fat(_Tmp3,sizeof(void*),1));});{
 struct _tuple42*_Tmp2=(struct _tuple42*)mybodies->hd;void*_Tmp3;void*_Tmp4;_Tmp4=_Tmp2->f0;_Tmp3=_Tmp2->f2;{struct Cyc_Toc_Env*env=_Tmp4;struct Cyc_Absyn_Stmt*st=_Tmp3;

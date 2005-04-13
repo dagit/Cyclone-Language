@@ -933,7 +933,7 @@ struct _fat_ptr*equals;equals=_cycalloc(sizeof(struct _fat_ptr)),*equals=_tag_fa
 int count=0;
 struct _fat_ptr res=Cyc_AssnDef_d2string(a,& count,& decls);
 struct Cyc_List_List*strings=({struct _fat_ptr*_Tmp0[3];({struct _fat_ptr*_Tmp1=({struct _fat_ptr*_Tmp2=_cycalloc(sizeof(struct _fat_ptr));*_Tmp2=_tag_fat(" in ",sizeof(char),5U);_Tmp2;});_Tmp0[0]=_Tmp1;}),({struct _fat_ptr*_Tmp1=({struct _fat_ptr*_Tmp2=_cycalloc(sizeof(struct _fat_ptr));*_Tmp2=res;_Tmp2;});_Tmp0[1]=_Tmp1;}),_Tmp0[2]=newline;Cyc_List_list(_tag_fat(_Tmp0,sizeof(struct _fat_ptr*),3));});
-for(1;decls!=0;decls=_check_null(decls)->tl){
+for(1;decls!=0;decls=decls->tl){
 struct _tuple26*_Tmp0=(struct _tuple26*)decls->hd;void*_Tmp1;void*_Tmp2;_Tmp2=(struct _fat_ptr*)& _Tmp0->f1;_Tmp1=(struct _fat_ptr*)& _Tmp0->f2;{struct _fat_ptr*n=(struct _fat_ptr*)_Tmp2;struct _fat_ptr*d=(struct _fat_ptr*)_Tmp1;
 strings=({struct Cyc_List_List*_Tmp3=_cycalloc(sizeof(struct Cyc_List_List));_Tmp3->hd=n,({struct Cyc_List_List*_Tmp4=({struct Cyc_List_List*_Tmp5=_cycalloc(sizeof(struct Cyc_List_List));_Tmp5->hd=equals,({struct Cyc_List_List*_Tmp6=({struct Cyc_List_List*_Tmp7=_cycalloc(sizeof(struct Cyc_List_List));_Tmp7->hd=d,({struct Cyc_List_List*_Tmp8=({struct Cyc_List_List*_Tmp9=_cycalloc(sizeof(struct Cyc_List_List));_Tmp9->hd=newline,_Tmp9->tl=strings;_Tmp9;});_Tmp7->tl=_Tmp8;});_Tmp7;});_Tmp5->tl=_Tmp6;});_Tmp5;});_Tmp3->tl=_Tmp4;});_Tmp3;});}}
 # 614
@@ -1238,7 +1238,7 @@ if(t1!=t2 || s1!=s2)return Cyc_AssnDef_binop(p,t2,s2,tp);else{
 return t;}}case 4: _Tmp4=(void*)((struct Cyc_AssnDef_Select_AssnDef_Term_struct*)t)->f1;_Tmp3=(void*)((struct Cyc_AssnDef_Select_AssnDef_Term_struct*)t)->f2;_Tmp1=(void*)((struct Cyc_AssnDef_Select_AssnDef_Term_struct*)t)->f3;{void*t1=_Tmp4;void*s1=_Tmp3;void*tp=_Tmp1;
 # 1033
 void*t2=Cyc_AssnDef_reduce_term(t1,subst);
-void*s2=Cyc_AssnDef_reduce_term(t2,subst);
+void*s2=Cyc_AssnDef_reduce_term(s1,subst);
 if(t1!=t2 || s1!=s2)return Cyc_AssnDef_select(t2,s2,tp);else{
 return t;}}case 5: _Tmp4=(void*)((struct Cyc_AssnDef_Update_AssnDef_Term_struct*)t)->f1;_Tmp3=(void*)((struct Cyc_AssnDef_Update_AssnDef_Term_struct*)t)->f2;_Tmp1=(void*)((struct Cyc_AssnDef_Update_AssnDef_Term_struct*)t)->f3;{void*t1=_Tmp4;void*s1=_Tmp3;void*u1=_Tmp1;
 # 1038

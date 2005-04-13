@@ -1031,7 +1031,7 @@ reduce_term(term_t t, list_t<$(vardecl_t,term_t)@> subst) {
     else return t;
   case &Select(t1,s1,tp):
     let t2 = reduce_term(t1,subst);
-    let s2 = reduce_term(t2,subst);
+    let s2 = reduce_term(s1,subst);
     if (t1 != t2 || s1 != s2) return select(t2,s2,tp);
     else return t;
   case &Update(t1,s1,u1):
