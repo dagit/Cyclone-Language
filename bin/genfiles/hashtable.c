@@ -415,16 +415,18 @@ struct Cyc_Hashtable_Cell*l=b->cells;
 if(l==0)return;
 if(cmp(key,l->key)==0){
 b->cells=l->next;
+-- b->length;
 return;}{
-# 134
+# 135
 struct Cyc_Hashtable_Cell*next=l->next;for(0;_check_null(l)->next!=0;(l=l->next,next=next->next)){
-# 136
+# 137
 if(cmp(key,_check_null(next)->key)==0){
 l->next=next->next;
+-- b->length;
 return;}}}}
-# 142
-int Cyc_Hashtable_hash_string(struct _fat_ptr s){
 # 144
+int Cyc_Hashtable_hash_string(struct _fat_ptr s){
+# 146
 int ans=0;
 int sz=(int)_get_fat_size(s,sizeof(char));
 int shift=0;
@@ -433,12 +435,12 @@ ans=ans ^ (int)((const char*)s.curr)[(int)i]<< shift;
 shift +=8;
 if(shift==32)
 shift=0;}}
-# 153
+# 155
 return ans;}
-# 156
+# 158
 int Cyc_Hashtable_hash_stringptr(struct _fat_ptr*s){
 return Cyc_Hashtable_hash_string(*s);}
-# 161
+# 163
 static struct Cyc_Hashtable_Cell*Cyc_Hashtable_rev_cells(struct Cyc_Hashtable_Cell*cells){
 if(cells==0)return 0;{
 struct Cyc_Hashtable_Cell*first=cells;
@@ -449,18 +451,18 @@ struct Cyc_Hashtable_Cell*temp=second->next;
 second->next=first;
 first=second;
 second=temp;}
-# 172
+# 174
 return first;}}
-# 177
+# 179
 static void Cyc_Hashtable_insert_bucket(struct _RegionHandle*r,struct _fat_ptr tab,int(*hash)(void*),struct Cyc_Hashtable_Cell*elems){
-# 180
+# 182
 for(1;elems!=0;elems=elems->next){
 void*key=elems->key;
 void*val=elems->value;
 unsigned nidx=({unsigned _Tmp0=(unsigned)hash(key);_Tmp0 % _get_fat_size(tab,sizeof(struct Cyc_Hashtable_Bucket));});
 ({struct Cyc_Hashtable_Cell*_Tmp0=({struct Cyc_Hashtable_Cell*_Tmp1=_region_malloc(r,0U,sizeof(struct Cyc_Hashtable_Cell));_Tmp1->key=key,_Tmp1->value=val,_Tmp1->next=(*((struct Cyc_Hashtable_Bucket*)_check_fat_subscript(tab,sizeof(struct Cyc_Hashtable_Bucket),(int)nidx))).cells;_Tmp1;});((struct Cyc_Hashtable_Bucket*)tab.curr)[(int)nidx].cells=_Tmp0;});
 ++((struct Cyc_Hashtable_Bucket*)tab.curr)[(int)nidx].length;}}
-# 189
+# 191
 void Cyc_Hashtable_resize(struct Cyc_Hashtable_Table*t){
 struct _fat_ptr odata=t->tab;
 unsigned osize=_get_fat_size(odata,sizeof(struct Cyc_Hashtable_Bucket));
@@ -469,30 +471,30 @@ struct _fat_ptr ndata=({unsigned _Tmp0=nsize;_tag_fat(_region_calloc(t->r,0U,siz
 {unsigned i=0U;for(0;i < osize;++ i){
 ({struct _RegionHandle*_Tmp0=t->r;struct _fat_ptr _Tmp1=ndata;int(*_Tmp2)(void*)=t->hash;Cyc_Hashtable_insert_bucket(_Tmp0,_Tmp1,_Tmp2,Cyc_Hashtable_rev_cells(((struct Cyc_Hashtable_Bucket*)odata.curr)[(int)i].cells));});}}
 t->tab=ndata;{
-# 198
+# 200
 unsigned cur_max_len=0U;
 {unsigned j=0U;for(0;j < nsize;++ j){
 unsigned k=((struct Cyc_Hashtable_Bucket*)ndata.curr)[(int)j].length;
 if(k > cur_max_len)cur_max_len=k;}}
-# 203
+# 205
 t->max_len=(int)(2U * cur_max_len);}}
-# 207
+# 209
 void Cyc_Hashtable_iter(void(*f)(void*,void*),struct Cyc_Hashtable_Table*t){
 struct _fat_ptr odata=t->tab;
 unsigned osize=_get_fat_size(odata,sizeof(struct Cyc_Hashtable_Bucket));
 unsigned i=0U;for(0;i < osize;++ i){
 struct Cyc_Hashtable_Cell*iter=((struct Cyc_Hashtable_Bucket*)odata.curr)[(int)i].cells;for(0;iter!=0;iter=iter->next){
 f(iter->key,iter->value);}}}
-# 215
+# 217
 void Cyc_Hashtable_iter_c(void(*f)(void*,void*,void*),struct Cyc_Hashtable_Table*t,void*env){
 struct _fat_ptr odata=t->tab;
 unsigned osize=_get_fat_size(odata,sizeof(struct Cyc_Hashtable_Bucket));
 unsigned i=0U;for(0;i < osize;++ i){
 struct Cyc_Hashtable_Cell*iter=((struct Cyc_Hashtable_Bucket*)odata.curr)[(int)i].cells;for(0;iter!=0;iter=iter->next){
 f(iter->key,iter->value,env);}}}
-# 224
-void Cyc_Hashtable_print_table_map(struct Cyc_Hashtable_Table*t,void(*prn_key)(void*),void(*prn_val)(void*)){
 # 226
+void Cyc_Hashtable_print_table_map(struct Cyc_Hashtable_Table*t,void(*prn_key)(void*),void(*prn_val)(void*)){
+# 228
 struct _fat_ptr odata=t->tab;
 unsigned osize=_get_fat_size(odata,sizeof(struct Cyc_Hashtable_Bucket));
 unsigned i=0U;for(0;i < osize;++ i){
@@ -503,5 +505,5 @@ prn_key(iter->key);
 Cyc_printf(_tag_fat(",",sizeof(char),2U),_tag_fat(0U,sizeof(void*),0));
 prn_val(iter->value);
 Cyc_printf(_tag_fat(") ",sizeof(char),3U),_tag_fat(0U,sizeof(void*),0));}}
-# 237
+# 239
 Cyc_printf(_tag_fat("\n",sizeof(char),2U),_tag_fat(0U,sizeof(void*),0));}}

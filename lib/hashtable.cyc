@@ -129,12 +129,14 @@ void remove(table_t<`a,`b> t, `a key) {
   if (l == NULL) return;
   if (cmp(key,l->key) == 0) {
     b->cells = l->next;
+    b->length--;
     return;
   }
   for (let next = l->next; l->next != NULL; l = l->next, next = next->next)
     // invariant: l != NULL != l->next == next, l should not be removed
     if (cmp(key,next->key) == 0) {
       l->next = next->next;
+      b->length--;
       return;
     }
 }
