@@ -16,7 +16,7 @@ int*@aqual(ALIASABLE) test1_ab() {
 }
 
 //case 1(c): default return qual is ALIASABLE -- must be set in tctyp
-int* test_1c(  int *@aqual(RESTRICTED) c) {
+int* test_1c(  int *@aqual(RESTRICTED) `H c) {
   int *@aqual(ALIASABLE) a = new 1;
   int *@aqual(UNIQUE) b;
   if(*a)
@@ -24,7 +24,7 @@ int* test_1c(  int *@aqual(RESTRICTED) c) {
   else if(c)
     return b;//success -- UNIQUE <: ALIASABLE
   else 
-    return c;//fail -- RESTRICTED !<: ALIASABLE 
+    return c;//success -- RESTRICTED !<: ALIASABLE 
 }
 
 //case 2 VarType X const

@@ -74,8 +74,8 @@ void testdefstruct() {
   int *@aqual(RESTRICTED) b = NULL;
   int *@aqual(ALIASABLE) c = NULL;
 
-  let a1 = new defstruct{a, b}; //fail
-  let a2 = new defstruct{c, b}; //success
+  let a1 = new defstruct{a, b}; //success ...a consumed, b consumed
+  let a2 = new defstruct{c, b}; //success, but cf failure .. b consumed
 }
 
 /* 4. Type instantiations: */
@@ -186,9 +186,9 @@ datatype dt_def{//<`q::Q> { -- not allowed to abstract ::Q for datatypes
 void test_dt_def() {
   int *@aqual(RESTRICTED) a = NULL;
   int *@aqual(ALIASABLE) b = NULL;
-  CCC(a);//fail
+  CCC(a);//success -- cast away restricted ... a consumed 
   CCC(b);//success
-  DDD(a);//fail 
+  DDD(a);//success -- cf failure
   DDD(b);//success
 };
 

@@ -2011,7 +2011,17 @@ bool check_aqual_bounds(aqualbnds_t aquals_bnd,
 
 //typically t is a tvar
 type_t lookup_aquals(aqualbnds_t aquals_map, type_t t) {
-  let aqt = aqualsof_type(t);
+  let aqt = t;
+  switch(t) {
+  case &VarType(tv): 
+    let Opt{k} = Kinds::tvar_kind_opt(tv);
+    if(k && k->kind != AqualKind) {
+      aqt = aqualsof_type(t);
+    }
+    break;
+  default:
+    break;
+  }
   try { 
     return List::assoc_cmp(typecmp, aquals_map, aqt);
   }catch {
@@ -2027,7 +2037,7 @@ bool alias_qual_subtype(aqualtype_t aq_sub, aqualtype_t aq_sup) {
   switch ($(compress(aq_sub), compress(aq_sup))) {
   case $(&AppType(&AqualConstCon(v_sub), _), &AppType(&AqualConstCon(v_sup), _))://c,c
     return ((v_sup==v_sub || v_sup==Restricted_qual)
-	    ||(v_sup == Aliasable_qual && (v_sub == Unique_qual || v_sub == Refcnt_qual)));
+	    ||(v_sup == Aliasable_qual && (v_sub == Unique_qual || v_sub == Refcnt_qual || v_sub == Restricted_qual)));
   case $(&AppType(&AqualVarCon, &List(&VarType(tv1), _)), &AppType(&AqualVarCon, &List(&VarType(tv2), _)))://v,v
     return (tv2->identity == tv1->identity);
   case $(&AppType(&AqualVarCon, &List(&AppType(&AqualsCon, &List{tv1, NULL}), _)), 
@@ -3185,9 +3195,23 @@ static bool aquals_bnds_pred($(type_t, type_t)@ bnd) {
 }
 
 list_t<$(type_t, type_t)@> get_aquals_bounds(fndecl_t fd) {
-  return List::filter(aquals_bnds_pred, fd->i.qual_bnd);
+  //  return List::filter(aquals_bnds_pred, fd->i.qual_bnd);
+  return fd->i.qual_bnd;
+}
+
+//extract the top-level alias qualifier if there is one
+type_opt_t eval_aquals_of(aqualbnds_t aqb, type_t t) {
+  switch(t) {
+  case &PointerType(PtrInfo(_,_,PtrAtts(_,_,_,_,_,_,aq))):  
+    return aq;
+  case &VarType(_):
+    return lookup_aquals(aqb, t);
+  default:
+    return NULL;
+  }
 }
 
 $(tvar_t, bool)@ tvar_bool_pair(bool b, tvar_t t){
   return new $(t, b);
 }
+

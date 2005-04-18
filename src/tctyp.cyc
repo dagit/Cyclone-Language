@@ -497,7 +497,13 @@ static cvtenv_t i_check_type_app(cvtenv_t env, kind_t expected_kind,
     if(length(ts) != 2) 
       impos2("aquals expects two arguments");
     env = i_check_type(env, &Kinds::aqk, ts->hd,false, false);
-    env = i_check_type(env, &Kinds::aqk, ts->tl->hd,false, false);
+    let ctx_bnd = Tcutil::lookup_aquals(Tcenv::curr_aquals_bounds(env.te), ts->hd);
+    if(ctx_bnd) {
+      ts->tl->hd = ctx_bnd;
+    }
+    else {
+      env = i_check_type(env, &Kinds::aqk, ts->tl->hd,false, false);
+    }
     env.free_qualvars = new List(new $(apptype, false), env.free_qualvars); //may be constrained later
     return env;
   case &ComplexCon: // the front-end only builds well-formed complex's

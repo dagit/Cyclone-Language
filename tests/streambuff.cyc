@@ -1,3 +1,21 @@
+/* This file is part of the MediaNet Project.
+   Copyright (C) 2002-2004 Michael Hicks
+
+   MediaNet is free software; you can redistribute it and/or it
+   under the terms of the GNU Lesser General Public License as
+   published by the Free Software Foundation; either version 2.1 of
+   the License, or (at your option) any later version.
+
+   MediaNet is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
+
+   You should have received a copy of the GNU Lesser General Public
+   License along with this library; see the file COPYING.LIB.  If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place, Suite
+   330, Boston, MA 02111-1307 USA. */
+
 #include <core.h>
 #include <stdio.h>
 #include <string.h>
@@ -7,7 +25,7 @@
 #define myassert(e) ((e) ? 0 : (exit(1),0))
 
 /* counts the total size of the data collected by the streambuffer */
-unsigned int stb_size(streambuff_t<`q> stb : RESTRICTED >= `q) {
+unsigned int stb_size(streambuff_t stb) {
   unsigned int sz = 0;
   char ? @nozeroterm `RC buf = NULL;
   let &StreamBuff{<`i> .numbufs=n,.bufs=bufs,...} = stb;
@@ -21,12 +39,13 @@ unsigned int stb_size(streambuff_t<`q> stb : RESTRICTED >= `q) {
 
 string_t stb_info(streambuff_t stb) {
   let sz = stb_size(stb);
-  switch (stb->typ) {
+  switch (stb->typ) { //Cool! ...didn't know you could project a unabstracted field out of an existential type!!
   case CharBuffer:
     return aprintf("CharBuffer(%d)",sz);
   case Packet:
-  default:
     return aprintf("Packet(%d)",sz);
+  default:
+    return aprintf("UNKNOWN(%d)",sz);
   }
 }
 
@@ -40,7 +59,7 @@ void stb_free(streambuff_t stb) {
   }
 }
 
-void stb_free_unique(streambuff_t<`U> stb) __attribute__((consume(1))) {
+void stb_free_unique(streambuff_t<`H,\U> stb) __attribute((consume(1))) {
   stb_free(stb);
   Core::ufree(stb);
 }
@@ -62,59 +81,62 @@ bool stb_noaliases(streambuff_t stb) {
 }
 
 /* allocates a streambuffer with the given type and data */
-streambuff_t<`q> alloc_stb_with(aqual_t<`q> aqh,
-				enum StreamType typ,
-				const char ?`H device,
-				unsigned int priority,
-				databuf_t<REFCNT> data : RESTRICTED >= `q) {
+streambuff_t<`r,`q> alloc_stb_with(region_t<`r::R> rgnhdr,
+				   aqual_t<`q\T> q,
+				   enum StreamType typ,
+				   const char ?`H device,
+				   unsigned int priority,
+				   databuf_t<\RC> data) {
   assert(priority <= MAX_STB_PRIORITY);
-  return qnew(aqh) StreamBuff{ .typ=typ,
-				  .priority = priority,
-				  .device = device,
-				  .numbufs = 1,
-				  .bufs = { data }};
+  return qnew(rgnhdr,q) StreamBuff{ .typ=typ,
+				       .priority = priority,
+				       .device = device,
+				       .numbufs = 1,
+				       .bufs = { data }};
 }
 
 /* allocates a streambuffer with the given type; allocates the data
    of the given size (must be >= 0 bytes) */
-streambuff_t<`q> alloc_stb(aqual_t<`q> aqh,
-			   enum StreamType typ,
-			   const char ?`H device,
-			   unsigned int priority,
-			   const char ? @nozeroterm buf : RESTRICTED >= `q) {
+streambuff_t<`r,`q> alloc_stb(region_t<`r::R> rgnhdr,
+			      aqual_t<`q\T> q,
+			      enum StreamType typ,
+			      const char ?`H device,
+			      unsigned int priority,
+			      const char ? @nozeroterm buf) {
   let n = numelts(buf);
   if (n == 0)
-    return alloc_stb_with(aqh, typ, device, priority, DataBuff{0,NULL});
+    return alloc_stb_with(rgnhdr, q,typ, device, priority, DataBuff{0,NULL});
   else {
-    let buf2 = qmalloc(Core::heap_region, Core::refcnt_qual,n);
-    // FIX: automatic alias insertion fails because memcpy is a macro ...
+    char ? @nozeroterm  buf2 = qmalloc(Core::heap_region,Core::refcnt_qual,n);
+    // FIX: automatic alias insertion fails because memcpy is
+    // a macro that does pointer arithmetic
     { let alias <`r2>char ? @nozeroterm `r2 abuf2 = buf2;
       memcpy(abuf2,buf,n);
     }
-    return alloc_stb_with(aqh, typ, device, priority,
+    return alloc_stb_with(rgnhdr, q, typ, device, priority,
 			  DataBuff{0,buf2});
   }
 }
 
 /* copies the streambuff header, but aliases its data. */
-streambuff_t<`q> stb_clone(aqual_t<`q> aqh, streambuff_t stb : RESTRICTED >= `q) {
+streambuff_t<`r,`q> stb_clone(region_t<`r::R> rgn, aqual_t<`q\T> q, streambuff_t stb) {
   let &StreamBuff{<`i> .numbufs=n,.bufs=bufs,
-		     .typ=typ, .priority=prio,
-		     .device=dev } = stb;
+		       .typ=typ, .priority=prio,
+		       .device=dev } = stb;
   streambuff_t newstb =
-    qnew(aqh) StreamBuff{.typ = typ,
-			 .device = dev,
-			 .priority = prio,
-			 .numbufs = n,
-			 .bufs = { for i < n : DataBuff{bufs[i].ofs,NULL}} };
+    qnew(rgn,q) StreamBuff{.typ = typ,
+			   .device = dev,
+			   .priority = prio,
+			   .numbufs = n,
+			   .bufs = { for i < n : DataBuff{bufs[i].ofs,NULL}} };
   // copy the data buffers
-  char ? @nozeroterm `RC buf = NULL;
+  char ?@aqual(\RC) @nozeroterm `H buf = NULL;
   { let alias <`r2> streambuff_t<`r2> astb = newstb;
     let &StreamBuff{<`j> .numbufs=nn,.bufs=bufsn,...} = astb;
     myassert (nn == n); // dumb array bounds checker
     for (unsigned int i = 0; i<n; i++) {
       bufs[i].buf :=: buf;
-      char ? @nozeroterm `RC buf2 = Core::alias_refptr(buf);
+      char ?@aqual(\RC) @nozeroterm `H buf2 = Core::alias_refptr(buf);
       bufs[i].buf :=: buf;
       bufsn[i].buf = buf2;
     }
@@ -124,8 +146,8 @@ streambuff_t<`q> stb_clone(aqual_t<`q> aqh, streambuff_t stb : RESTRICTED >= `q)
 
 /* copies the streambuff header and the data (starting at the given offset
    ofs); needed when a client writes to data that is shared */
-streambuff_t<`q> stb_copy(aqual_t<`q> aqh,
-			  int ofs, streambuff_t stb : RESTRICTED >= `q) {
+streambuff_t<`r,`q> stb_copy(region_t<`r::R> rgnhdr, aqual_t<`q\T> q,
+			     int ofs, streambuff_t stb) {
    
  unsigned int szb = stb_size(stb);
  if (ofs >= szb) throw new Core::Invalid_argument("stb_copy: ofs >= szb");
@@ -136,7 +158,7 @@ streambuff_t<`q> stb_copy(aqual_t<`q> aqh,
 		    .device=dev } = stb;
 
  // copy all buffers into a single buffer
- char ? @nozeroterm newb = qmalloc(Core::heap_region, Core::refcnt_qual, len);
+ char ? @nozeroterm newb = rcmalloc(len);
  {
    let alias <`y>char ? @nozeroterm `y newbuf = newb;
    unsigned int idx = 0;
@@ -146,8 +168,7 @@ streambuff_t<`q> stb_copy(aqual_t<`q> aqh,
      if (buf != NULL) {
        // FIX: get this to work with memcpy instead
        let szb = numelts(buf);
-//        unsigned int nb = szb - bufs[i].ofs;
-       let nb = szb - bufs[i].ofs; // breaks bounds checks
+       let nb = szb - bufs[i].ofs;
        if (nb > ofs) {
 	 let alias <`x>char ? @nozeroterm `x b = buf;
 	 _memcpy(&newbuf[idx],b+bufs[i].ofs+ofs,nb-ofs,sizeof(char));
@@ -162,26 +183,23 @@ streambuff_t<`q> stb_copy(aqual_t<`q> aqh,
    }
  }
  
- return qnew(aqh) StreamBuff{.priority = prio,
-				.typ = typ,
-				.device = dev,
-				.numbufs = 1,
-				.bufs = { DataBuff{.ofs=0,.buf=newb}}};
+ return qnew(rgnhdr,q) StreamBuff{.priority = prio,
+				   .typ = typ,
+				   .device = dev,
+				   .numbufs = 1,
+				   .bufs = { DataBuff{.ofs=0,.buf=newb}}};
 }
 
-streambuff_t<UNIQUE> stb_rest(int ofs, streambuff_t<UNIQUE> stb) 
-  __attribute__((consume(2))) 
-{
+streambuff_t<`H,\U> stb_rest(int ofs, streambuff_t<`H,\U> stb) __attribute((consume(2))) {
   char ? @nozeroterm `RC buf = NULL;
-  streambuff_opt_t<UNIQUE> newstb = NULL;
-  { let alias <`r>streambuff_t<`r> stb2 = stb;
-  let &StreamBuff{<`i> .numbufs=n, .bufs=bufs,
-		     .priority=prio, .device=dev,
+  streambuff_opt_t<`H,\U> newstb = NULL;
+  { let alias <`r>streambuff_t<`H,\A> stb2 = stb;
+    let &StreamBuff{<`i> .numbufs=n, .bufs=bufs,
+		       .priority=prio, .device=dev,
 		       .typ=t } = stb2;
     if (n == 1) {
       if (bufs[0].buf != NULL) {
-// 	unsigned int szb = numelts(bufs[0].buf);
-	let szb = numelts(bufs[0].buf); // bounds checks fail
+	let szb = numelts(bufs[0].buf);
 	if (bufs[0].ofs + ofs > szb)
 	  throw new Core::Invalid_argument("ofs > sz");
 	bufs[0].ofs = bufs[0].ofs + ofs;
@@ -197,8 +215,7 @@ streambuff_t<UNIQUE> stb_rest(int ofs, streambuff_t<UNIQUE> stb)
       // look for the start of the buffers to copy over
       for (i=0; i<n; i++) {
 	if (bufs[i].buf != NULL) {
-	  let szb = numelts(bufs[i].buf); // bounds checks fails
-// 	  unsigned int szb = numelts(bufs[i].buf);
+	  let szb = numelts(bufs[i].buf);
 	  let bofs = bufs[i].ofs;
 	  // ok, we've found the offset.  Now modify the offset in this
 	  // buf and copy over the rest next...
@@ -247,16 +264,14 @@ streambuff_t<UNIQUE> stb_rest(int ofs, streambuff_t<UNIQUE> stb)
   return stb;
 }
 
-streambuff_t<`q> stb_prepend(aqual_t<`q> aqh, streambuff_t stb,
-			     char ? @nozeroterm `RC nbuf : RESTRICTED >= `q)
-  __attribute__((consume(3))) 
-{
+streambuff_t<`r,`q> stb_prepend(region_t<`r::R> rgn, aqual_t<`q\T> q, streambuff_t stb,
+				char ? @nozeroterm `RC nbuf) __attribute((consume(4))) {
   let &StreamBuff{<`i> .numbufs=n,.bufs=bufs,
 		       .typ=typ, .priority=prio,
 		       .device=dev } = stb;
   let m<_> = n+1;
   streambuff_t newstb =
-    qnew(aqh) StreamBuff{.typ = typ,
+    qnew(rgn,q) StreamBuff{.typ = typ,
 			 .device = dev,
 			 .priority = prio,
 			 .numbufs = m,
@@ -265,7 +280,7 @@ streambuff_t<`q> stb_prepend(aqual_t<`q> aqh, streambuff_t stb,
   char ? @nozeroterm `RC buf = NULL;
   { let alias <`r2> streambuff_t<`r2> astb = newstb;
     let &StreamBuff{<`j> .numbufs=nn,.bufs=bufsn,...} = astb;
-    let fatbufs = Core::mkfat(bufsn,sizeof(databuf_t<`RC>),nn);
+    let fatbufs = Core::mkfat(bufsn,sizeof(databuf_t<\RC>),nn);
     fatbufs[0].buf = nbuf;
     for (unsigned int i = 0; i<n; i++) {
       bufs[i].buf :=: buf;
@@ -301,4 +316,3 @@ int stb_with_buffer(streambuff_t stb, int idx,
   else
     throw new Core::Invalid_argument("bad index");
 }
-

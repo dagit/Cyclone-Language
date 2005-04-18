@@ -448,7 +448,7 @@ int Cyc_Tcutil_extract_const_from_typedef(unsigned,int,void*);
 int Cyc_Tcutil_zeroable_type(void*);
 # 240
 void*Cyc_Tcutil_any_bool(struct Cyc_List_List*);struct _tuple12{struct Cyc_Absyn_Tvar*f0;int f1;};
-# 257
+# 258
 struct _tuple12*Cyc_Tcutil_tvar_bool_pair(int,struct Cyc_Absyn_Tvar*);
 # 28 "kinds.h"
 extern struct Cyc_Absyn_Kind Cyc_Kinds_rk;

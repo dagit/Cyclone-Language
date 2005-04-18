@@ -13,7 +13,7 @@ CYCFLAGS=-I../lib -I../include -B../build/boot -pp -save-c -g  #--vcgen
 endif
 HAVE_PTHREAD=no
 # test asm doesn't work for me on cygwin
-EXES := $(addsuffix $(EXE), cyctest foo hello test_regions test_currgn histogram test_getopt zeroterm flatlist md5 unique_patterns dynregion cinclude  multimethod  testasm testaqualsuccess structarray scheme scheme-2 patterns refcnt_test rc require)
+EXES := $(addsuffix $(EXE), cyctest foo hello test_regions test_currgn histogram test_getopt zeroterm flatlist md5 unique_patterns dynregion cinclude  multimethod  testasm testaqualsuccess structarray scheme scheme-2 patterns refcnt_test rc require streambufftest)
  # testbget testsexp)
 #these are broken
 #streambuff.cyc is broken badly ... it is unsound to pattern match on existentials with `RC inside them, wait until restrict
@@ -52,7 +52,7 @@ CYCTESTS=arg_suite.h				\
   union_suite.h					\
   xarray_suite.h
 
-all: $(EXES) failtest streambufftest.o
+all: $(EXES) failtest 
 	./test_regions
 	./test_currgn
 	./cyctest
@@ -64,7 +64,7 @@ all: $(EXES) failtest streambufftest.o
 	./md5 -q
 	./require
 	./test_getopt -abc123
-#	./streambufftest -q
+	./streambufftest -q
 	./unique_patterns
 	./dynregion
 	./scheme

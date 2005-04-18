@@ -1,8 +1,6 @@
 
 testaqualfail.cyc:11: c was declared with type int *@aqual(UNIQUE) but initialized with type int *
   ALIASABLE and UNIQUE are not compatible. ((different alias qualifiers))
-testaqualfail.cyc:27: returns value of type int *@aqual(RESTRICTED)`GR14 but requires int *
-  @false and @true are not compatible. (different type constructors)
 testaqualfail.cyc:33: returns value of type int * but requires int *@aqual(`q)
   @false and @true are not compatible. (different type constructors)
 testaqualfail.cyc:41: type mismatch: int *@aqual(UNIQUE) != int *

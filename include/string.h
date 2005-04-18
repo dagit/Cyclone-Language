@@ -103,7 +103,7 @@ extern mstring_t<`r> cond_rrealloc_str(region_t<`r::R> r, mstring_t<`r> str, siz
 /* cond_rrealloc_str returns NULL if the given string is >= the given size */
 extern mstring_t     strdup(buffer_t src);
 extern mstring_t<`r> rstrdup(region_t<`r::R>,buffer_t src);
-
+extern mstring_t<`r,`q> rqstrdup(region_t<`r::R>,aqual_t<`q\T>,buffer_t src);
 ///////////////////////// TRANSFORMATIONS
 // Return a substring of a string, by allocation.
 extern mstring_t     substring(buffer_t,int ofs, size_t n);

@@ -529,6 +529,8 @@ type_t compress(type_t t) {
     case &VarType(_):
     case &Evar(...):
     case &AppType(&AqualsCon, _):
+      if(comp == tv_bnd->hd) //no point in compressing the bound here
+	return t;
       return aqual_var_type(comp, compress(tv_bnd->tl->hd));
     case &AppType(&AqualVarCon, tvb2):
       return compress(comp);

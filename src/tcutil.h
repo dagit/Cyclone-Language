@@ -253,6 +253,7 @@ type_t any_bounds(list_t<tvar_t,`H>);
   int tycon_cmp(tycon_t,tycon_t);
   aqualbnds_t get_aquals_bounds(fndecl_t fd);
   type_t lookup_aquals(aqualbnds_t aquals_map, type_t t);
+  type_opt_t eval_aquals_of(aqualbnds_t aquals_map, type_t t);
   bool is_aliasable_qual(aqualtype_t aq);
   $(tvar_t, bool)@ tvar_bool_pair(bool b, tvar_t t);
 }

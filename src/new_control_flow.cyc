@@ -687,9 +687,13 @@ static flow_t restore_noconsume_arg(analenv_t env,
     DEBUG_PRINT("}\n");
     break;
   case $({.BottomFL = _}, _): break;
-  default:
-    Warn::impos("noconsume parameter %s must be l-values",exp2string(exp));
+  case $({.ReachableFL = _},{.UnknownL = u}):
+    //you can get a non l-value in this position if say NULL is passed to a function
+    //Warn::impos("noconsume parameter %s got unknown l-value",exp2string(exp));
     break;
+    /*   default: */
+    /*     Warn::impos("noconsume parameter %s must be l-values",exp2string(exp)); */
+    /*     break; */
   }
   return inflow;
 }

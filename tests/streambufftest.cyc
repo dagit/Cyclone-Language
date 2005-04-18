@@ -11,32 +11,28 @@ CT_SUITE_BEGIN(Streambuff)
 void begin() { }
 void end() { }
 
-static bool matchPrio(unsigned int prio, streambuff_opt_t<UNIQUE> stb) {
+static bool matchPrio(unsigned int prio, streambuff_opt_t<`H, UNIQUE> stb) {
   return (stb->priority == prio) && (stb->typ == Packet);
 }
 
 static int mystrcmp(char ? @nozeroterm @buf, char ? @nozeroterm buf2) {
   return strcmp(*buf,buf2);
 }
-static int stb_cmp_buf(streambuff_t stb, char ? @nozeroterm buf) {
-  return stb_with_buffer(stb, 0, mystrcmp, &buf);
+static int stb_cmp_buf(streambuff_t stb, char ? @nozeroterm `r buf) {
+  return stb_with_buffer(stb, 0, mystrcmp@<`r, `stb_cmp_buf><>, &buf);
 }
-int stb_cmp(streambuff_t<`q1> stb1, streambuff_t<`q2> stb2 : RESTRICTED >= `q1, RESTRICTED >= `q2) {
-  _ stb11 = NULL;
-  _ stb22 = NULL;
-  if (stb_num_bufs(stb1) != 1)
-    stb11 = stb_copy(Core::aliasable_qual,0,stb1);
-  if (stb_num_bufs(stb2) != 1)
-    stb22 = stb_copy(Core::aliasable_qual,0,stb2);
-  return stb_with_buffer(stb11, 0, stb_cmp_buf, stb22);
+int stb_cmp(streambuff_t<`H,`q1\T> stb1, streambuff_t<`H,`q2\T> stb2) {
+  _ stb11 = stb_copy(Core::heap_region,Core::aliasable_qual,0,stb1);
+  _ stb22 = stb_copy(Core::heap_region,Core::aliasable_qual,0,stb2);
+  return stb_with_buffer(stb11, 0, stb_cmp_buf@<`H><>, stb22);
 }
 
 void bufqueue_test() {
-  Queue::queue_t<streambuff_opt_t<UNIQUE>> q = Queue::create();
+  Queue::queue_t<streambuff_opt_t<`H,\U>> q = Queue::create();
   //  Queue::queue_t<streambuff_opt_t> q = Queue::create();
   for (unsigned int i = 0; i<10; i++) {
-    streambuff_t<UNIQUE> stb = alloc_stb(Core::unique_qual, 
-					 Packet, "eth0", i, new { for i < 10*i : char }); 
+    streambuff_t<`H,UNIQUE> stb = alloc_stb(Core::heap_region, Core::unique_qual, 
+					    Packet, "eth0", i, new { for i < 10*i : char }); 
     Queue::add(q,stb); 
   }
 
@@ -61,16 +57,16 @@ void bufqueue_test() {
 }
 
 void copy_test() {
-  let stb = alloc_stb(Core::unique_qual, Packet, "eth0", 1, "hello");
-  let stb2 = stb_copy(Core::unique_qual,1,stb); // "ello"
+  let stb = alloc_stb(Core::heap_region, Core::unique_qual, Packet, "eth0", 1, "hello");
+  let stb2 = stb_copy(Core::heap_region, Core::unique_qual,1,stb); // "ello"
   CT_ASSERT(stb_size(stb) == 6); // includes null terminator
   CT_ASSERT(stb_size(stb) -1 == stb_size(stb2));
   CT_ASSERT(stb_noaliases(stb));
   CT_ASSERT(stb_noaliases(stb2));
   unsigned int stb_addr, stb3_addr;
-  { let alias <`r> streambuff_r_t<`r> x = stb; stb_addr = (unsigned int)x; }
+  { let alias <`r> streambuff_t<`r> x = stb; stb_addr = (unsigned int)x; }
   let stb3 = stb_rest(3,stb); // "lo"
-  { let alias <`r> streambuff_r_t<`r> x = stb3; stb3_addr = (unsigned int)x; }
+  { let alias <`r> streambuff_t<`r> x = stb3; stb3_addr = (unsigned int)x; }
   CT_ASSERT(stb_addr == stb3_addr);
   CT_ASSERT(stb_size(stb3) == 3);
   stb_free_unique(stb3);
@@ -78,17 +74,17 @@ void copy_test() {
 }
 
 void clone_test() {
-  let stb = alloc_stb(Core::unique_qual, Packet, "eth0", 1, "hello");
-  let stb2 = stb_clone(Core::unique_qual,stb);
+  let stb = alloc_stb(Core::heap_region, Core::unique_qual, Packet, "eth0", 1, "hello");
+  let stb2 = stb_clone(Core::heap_region, Core::unique_qual,stb);
   CT_ASSERT(stb_size(stb) == stb_size(stb2));
   CT_ASSERT(!stb_cmp(stb,stb2));
   CT_ASSERT(!stb_noaliases(stb));
   CT_ASSERT(!stb_noaliases(stb2));
-  let stb3 = stb_clone(Core::unique_qual,stb);
+  let stb3 = stb_clone(Core::heap_region, Core::unique_qual,stb);
   unsigned int stb_addr, stb4_addr;
-  { let alias <`r> streambuff_r_t<`r> x = stb; stb_addr = (unsigned int)x; }
+  { let alias <`r> streambuff_t<`r> x = stb; stb_addr = (unsigned int)x; }
   let stb4 = stb_rest(3,stb);
-  { let alias <`r> streambuff_r_t<`r> x = stb4; stb4_addr = (unsigned int)x; }
+  { let alias <`r> streambuff_t<`r> x = stb4; stb4_addr = (unsigned int)x; }
   CT_ASSERT(stb_size(stb4) == 3);
   CT_ASSERT(stb_size(stb3) == stb_size(stb2));
   CT_ASSERT(!stb_cmp(stb3,stb2));
@@ -98,10 +94,10 @@ void clone_test() {
 }
 
 void prepend_test() {
-  streambuff_t stb = alloc_stb(Core::unique_qual,Packet,"eth0", 1, "hello");
+  streambuff_t stb = alloc_stb(Core::heap_region, Core::unique_qual,Packet,"eth0", 1, "hello");
   char ? @nozeroterm `RC rbuf = qmalloc (Core::heap_region, Core::refcnt_qual,6);
   rbuf[0] = rbuf[1] = rbuf[2] = rbuf[3] = rbuf[4] =rbuf[5] = 'a';
-  streambuff_t stb2 = stb_prepend(Core::unique_qual,stb,rbuf);
+  streambuff_t stb2 = stb_prepend(Core::heap_region, Core::unique_qual,stb,rbuf);
   CT_ASSERT(stb_size(stb) == stb_size(stb2) - 6);
   CT_ASSERT(stb_cmp(stb,stb2) > 0);
   CT_ASSERT(!stb_noaliases(stb));
@@ -115,6 +111,7 @@ void prepend_test() {
   stb_free_unique(stb4);
   stb_free_unique(stb);
 }
+
 
 CT_SUITE_INIT
 CT_ADD_TEST(bufqueue_test)

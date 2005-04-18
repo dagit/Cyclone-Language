@@ -100,7 +100,7 @@ typedef struct Opt<`a> *@aqual(`q) `r opt_t<`a,`r,`q>;
   /** [rnew_string(r,n)] allocates space for [n] characters in the
       region with handle [r], and returns a pointer to the space.  All
       of the characters are set to NUL (0). */
- mstring_t<`r,`q> rqnew_string(region_t<`r>,aqual_t<`q>,unsigned int);
+ mstring_t<`r,`q> rqnew_string(region_t<`r>,aqual_t<`q\T>,unsigned int);
   /** [rqnew_string(r,q,n)] same as above ...except allocates with aqual(`q)*/
  bool true_f(`a);
   /** [true_f] is the constant [true] function: [true_f(x)] returns
@@ -234,18 +234,18 @@ struct DynamicRegion<`r::R>;
       named [`r].  Dynamic regions can be created and destroyed at will,
       but access to them must be done through the open_region function. */
 
-typedef struct DynamicRegion<`r1>@@aqual(`q) region_key_t<`r1,`q>;
+typedef struct DynamicRegion<`r1>@@aqual(`q) `r2 region_key_t<`r1,`q,`r2>;
   /** A [region_key_t<`r1,`r2>] is a pointer (in [`r2]) to a 
       [DynamicRegion<`r1>].  Keys are used as capabilities for accessing a 
       dynamic region.  You have to present a key to the open procedure to 
       access the region. */
 
-typedef region_key_t<`r,UNIQUE> uregion_key_t<`r>;
+typedef region_key_t<`r,UNIQUE,`r2> uregion_key_t<`r,`r2>;
   /** A [uregion_key_t<`r>] is a unique pointer to a [DynamicRegion<`r>].  You
       can't make copies of the key, but if you call [free_ukey], then
       you are assured that the region [`r] is reclaimed. */
 
-  typedef region_key_t<`r,REFCNT> rcregion_key_t<`r>;
+  typedef region_key_t<`r,REFCNT,`r2> rcregion_key_t<`r,`r2>;
   /** A [rcregion_key_t<`r>] is a reference-counted pointer to a 
       [DynamicRegion<`r>].  You can make copies of the key
       using [alias_refptr] which increments the reference count.

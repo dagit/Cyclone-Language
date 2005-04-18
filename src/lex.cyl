@@ -45,13 +45,13 @@ typedef struct Trie<`r> *`r trie_t<`r>;
 @tagged union TrieChildren<`r::R> {
   int Zero;
   $(int, trie_t<`r>) One;
-  trie_t<`r> @{64}`r Many; // enough room for id chars and `
+  trie_t<`r> @{65}`r Many; // enough room for id chars and ` and backslash
 };
 union TrieChildren<`r> Zero() { return TrieChildren{.Zero = 0}; }
 union TrieChildren<`r> One(int i,trie_t<`r> t) { 
   return TrieChildren{.One = $(i,t)}; 
 }
-union TrieChildren<`r> Many(trie_t<`r>@{64}`r ts) {
+union TrieChildren<`r> Many(trie_t<`r>@{65}`r ts) {
   return TrieChildren{.Many = ts}; 
 }
 struct Trie<`r> {
@@ -283,9 +283,14 @@ static trie_t<`d> empty_trie(region_t<`d> d, int dummy) {
   return rnew(d) Trie(Zero(),false);
 }
 
+  //     ['0'-'9'] --> [0,9]
+  //     ['A'-'Z'] --> [10, 35]
+  //     '\' --> 36
+  //     ['_'-'z'] --> [37, 64]
 static int trie_char(int c) {
   // get the legal chars into a narrow range starting at 0
-  if(c >= 95) return c - 59;
+  if(c==92) return 37; 
+  if(c >= 95) return c - 58;
   if(c > 64) return c - 55;
   return c - 48;
 }
@@ -311,7 +316,7 @@ static trie_t<`r> trie_lookup(region_t<`r> r, trie_t<`r> t,
       if(one_ch == buff[i]) {
 	t = one_trie;
       } else {
-	let arr = rnew(r) {for j < 64: NULL};
+	let arr = rnew(r) {for j < 65: NULL};
 	arr[trie_char(one_ch)] = one_trie;
 	let ch = trie_char(buff[i]);
 	arr[ch] = rnew(r) Trie(Zero(),0);

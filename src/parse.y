@@ -1915,11 +1915,12 @@ pointer_qual:
 
 aqual_specifier: 
   aqual_const {$$ = ^$($1);}
-| TYPE_VAR opt_aqual_bnd
-  { tvar_ok($1,SLOC(@1));
-    tvar_t tv = new Tvar(new $1,-1,Kinds::kind_to_bound(&Kinds::aqk),$2);
-    type_t t  = var_type(tv);
-    $$ = ^$(aqual_var_type(t, al_qual_type));//default aliasable -- real bound filled in by typechecker
+| type_var
+  {
+    // tvar_ok($1,SLOC(@1));
+    //     tvar_t tv = new Tvar(new $1,-1,Kinds::kind_to_bound(&Kinds::aqk),$2);
+    //     type_t t  = var_type(tv);
+    $$ = ^$(aqual_var_type($1, al_qual_type));//default aliasable -- real bound filled in by typechecker
   }
 | AQUALS '(' any_type_name ')'
   {

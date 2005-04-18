@@ -467,7 +467,7 @@ int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*);
 int Cyc_Tcutil_extract_const_from_typedef(unsigned,int,void*);
 # 226
 struct Cyc_List_List*Cyc_Tcutil_filter_nulls(struct Cyc_List_List*);
-# 256
+# 257
 int Cyc_Tcutil_is_aliasable_qual(void*);
 # 28 "kinds.h"
 extern struct Cyc_Absyn_Kind Cyc_Kinds_rk;

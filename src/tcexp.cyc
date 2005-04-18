@@ -1952,7 +1952,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt, exp
       rgn = mallocRgn(optrgn);
     }
   }
-  //similarly for the aqual
+  //similarly for the aqual -- default is unique
   _ aqual_type = al_qual_type;
   if (*aqopt != NULL) {
     type_t expected_type =
@@ -1965,6 +1965,15 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt, exp
     default:
     Warn::err2((*ropt)->loc,"expecting aqual_t type but found ",qhandle_type);
     break;
+    }
+  }
+  else if(topt != NULL) {
+    _ aq = Tcutil::eval_aquals_of(Tcenv::curr_aquals_bounds(te), *topt);
+    if(aq != NULL) {
+      switch(aq) {
+      case &AppType(&AqualConstCon(Unique_qual), _): aqual_type = un_qual_type; break;
+      default: break;
+      }
     }
   }
   
@@ -2219,27 +2228,39 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     type_t expected_type = //?what's the point of expected type ... ignored by tcVar
       aqual_handle_type(new_evar(&Kinds::aqko, lookup_opt_type_vars(te)));
     type_t qhndl_type = tcExp(te, &expected_type, (exp_t)*qual_hndl);
-    switch(qhndl_type) {//ensure expectation
-    case &AppType(&AqualHandleCon, &List{&AppType(&AqualConstCon(aqv), NULL),_}): //ok
-      switch(aqv) {
-      case Aliasable_qual:  break;
-      case Unique_qual:     aqual = un_qual_type; break;
-      case Refcnt_qual:     aqual = rc_qual_type; break;
-      case Restricted_qual: aqual = rtd_qual_type; break;
-      default: 
-	Warn::impos("Unexpected alias qualifier");
-      }
+    switch(compress(qhndl_type)) {//ensure expectation
+    case &AppType(&AqualHandleCon, &List{aq,_}):
+      aqual = aq;
       break;
-    case &AppType(&AqualHandleCon, &List{aqv as &AppType(&AqualVarCon, _), _}):
-      aqual = aqv;
-      break;
-    case &AppType(&AqualHandleCon, &List{aqv as &VarType(_), _}):
-      aqual = aqual_var_type(aqv, Tcutil::lookup_aquals(curr_aquals_bounds(te), aqv));
-      break;
+/*     case &AppType(&AqualHandleCon, &List{&AppType(&AqualConstCon(aqv), NULL),_}): //ok */
+/*       switch(aqv) { */
+/*       case Aliasable_qual:  break; */
+/*       case Unique_qual:     aqual = un_qual_type; break; */
+/*       case Refcnt_qual:     aqual = rc_qual_type; break; */
+/*       case Restricted_qual: aqual = rtd_qual_type; break; */
+/*       default:  */
+/* 	Warn::impos("Unexpected alias qualifier"); */
+/*       } */
+/*       break; */
+/*     case &AppType(&AqualHandleCon, &List{aqv as &AppType(&AqualVarCon, _), _}): */
+/*       aqual = aqv; */
+/*       break; */
+/*     case &AppType(&AqualHandleCon, &List{aqv as &VarType(_), _}): */
+/*       aqual = aqual_var_type(aqv, Tcutil::lookup_aquals(curr_aquals_bounds(te), aqv)); */
+/*       break; */
     default:
       Warn::err2((*qual_hndl)->loc,"expecting aqual_t type but found ",
 		 qhndl_type);
       break;
+    }
+  }
+  else if(topt != NULL) {
+    _ aq = Tcutil::eval_aquals_of(Tcenv::curr_aquals_bounds(te), *topt);
+    if(aq != NULL) {
+      switch(aq) {
+      case &AppType(&AqualConstCon(Unique_qual), _): aqual = un_qual_type; break;
+      default: break;
+      }
     }
   }
   

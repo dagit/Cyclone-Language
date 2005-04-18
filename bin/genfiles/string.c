@@ -342,7 +342,9 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 # 95 "core.h"
  struct _fat_ptr Cyc_Core_new_string(unsigned);
 # 99
-struct _fat_ptr Cyc_Core_rnew_string(struct _RegionHandle*,unsigned);extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _fat_ptr f1;};
+struct _fat_ptr Cyc_Core_rnew_string(struct _RegionHandle*,unsigned);
+# 103
+struct _fat_ptr Cyc_Core_rqnew_string(struct _RegionHandle*,unsigned,unsigned);extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _fat_ptr f1;};
 # 170
 extern struct _RegionHandle*Cyc_Core_heap_region;
 # 349 "core.h"
@@ -625,75 +627,85 @@ Cyc_strncpy(dst,src,len);}}
 # 350
 return temp;}
 # 353
+struct _fat_ptr Cyc_rqstrdup(struct _RegionHandle*r,unsigned q,struct _fat_ptr src){
+unsigned long len=Cyc_strlen(src);
+struct _fat_ptr temp=Cyc_Core_rqnew_string(r,q,len + 1U);
+{
+struct _fat_ptr temp2=_fat_ptr_decrease_size(temp,sizeof(char),1U);
+struct _fat_ptr _Tmp0;_Tmp0=temp2;{struct _fat_ptr dst=_Tmp0;
+Cyc_strncpy(dst,src,len);}}
+# 361
+return temp;}
+# 364
 struct _fat_ptr Cyc_strdup(struct _fat_ptr src){
 return Cyc_rstrdup(Cyc_Core_heap_region,src);}
-# 357
+# 368
 struct _fat_ptr Cyc_rrealloc(struct _RegionHandle*r,struct _fat_ptr s,unsigned long sz){
 struct _fat_ptr temp;
 unsigned long slen;
-# 361
+# 372
 slen=_get_fat_size(s,sizeof(char));
 sz=sz > slen?sz: slen;
 temp=({unsigned _Tmp0=sz;_tag_fat(_region_calloc(r,0U,sizeof(char),_Tmp0),sizeof(char),_Tmp0);});
-# 365
+# 376
 {struct _fat_ptr _Tmp0;_Tmp0=temp;{struct _fat_ptr dst=_Tmp0;
 Cyc_strncpy(dst,s,slen);}}
-# 369
+# 380
 return temp;}
-# 372
+# 383
 struct _fat_ptr Cyc_rexpand(struct _RegionHandle*r,struct _fat_ptr s,unsigned long sz){
 struct _fat_ptr temp;
 unsigned long slen;
-# 376
+# 387
 slen=Cyc_strlen(s);
 sz=sz > slen?sz: slen;
 temp=Cyc_Core_rnew_string(r,sz);
-# 380
+# 391
 {struct _fat_ptr _Tmp0;_Tmp0=temp;{struct _fat_ptr dst=_Tmp0;
 Cyc_strncpy(dst,s,slen);}}
-# 384
+# 395
 if(slen!=_get_fat_size(s,sizeof(char)))
 ({struct _fat_ptr _Tmp0=_fat_ptr_plus(temp,sizeof(char),(int)slen);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2='\000';if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
-# 387
+# 398
 return temp;}
-# 390
+# 401
 struct _fat_ptr Cyc_expand(struct _fat_ptr s,unsigned long sz){
 return Cyc_rexpand(Cyc_Core_heap_region,s,sz);}
-# 394
+# 405
 struct _fat_ptr Cyc_cond_rrealloc_str(struct _RegionHandle*r,struct _fat_ptr str,unsigned long sz){
 unsigned long maxsizeP=_get_fat_size(str,sizeof(char));
 struct _fat_ptr res=_tag_fat(0,0,0);
-# 398
+# 409
 if(maxsizeP==0U){
 maxsizeP=Cyc_umax(30U,sz);
 res=Cyc_Core_rnew_string(r,maxsizeP);
 ({struct _fat_ptr _Tmp0=_fat_ptr_plus(res,sizeof(char),0);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2='\000';if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});}else{
-# 403
+# 414
 if(sz > maxsizeP){
 maxsizeP=maxsizeP * 2U > (sz * 5U)/ 4U?maxsizeP * 2U:(sz * 5U)/ 4U;{
 struct _fat_ptr _Tmp0;_Tmp0=str;{struct _fat_ptr dst=_Tmp0;
 res=Cyc_rexpand(r,dst,maxsizeP);}}}}
-# 410
+# 421
 return res;}
-# 413
+# 424
 struct _fat_ptr Cyc_realloc_str(struct _fat_ptr str,unsigned long sz){
 struct _fat_ptr res=Cyc_cond_rrealloc_str(Cyc_Core_heap_region,str,sz);
 if((char*)res.curr==(char*)_tag_fat(0,0,0).curr)return str;else{
 return res;}}
-# 424
+# 435
 struct _fat_ptr Cyc_rsubstring(struct _RegionHandle*r,struct _fat_ptr s,int start,unsigned long amt){
-# 428
+# 439
 struct _fat_ptr ans=Cyc_Core_rnew_string(r,amt + 1U);
 s=_fat_ptr_plus(s,sizeof(char),start);
-amt < _get_fat_size(ans,sizeof(char))&& amt <= _get_fat_size(s,sizeof(char))?0:({(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;})(_tag_fat("amt < numelts(ans) && amt <= numelts(s)",sizeof(char),40U),_tag_fat("string.cyc",sizeof(char),11U),430U);
+amt < _get_fat_size(ans,sizeof(char))&& amt <= _get_fat_size(s,sizeof(char))?0:({(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;})(_tag_fat("amt < numelts(ans) && amt <= numelts(s)",sizeof(char),40U),_tag_fat("string.cyc",sizeof(char),11U),441U);
 {unsigned long i=0U;for(0;i < amt;++ i){
 ({struct _fat_ptr _Tmp0=_fat_ptr_plus(ans,sizeof(char),(int)i);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=((const char*)s.curr)[(int)i];if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});}}
 ({struct _fat_ptr _Tmp0=_fat_ptr_plus(ans,sizeof(char),(int)amt);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2='\000';if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
 return ans;}
-# 437
+# 448
 struct _fat_ptr Cyc_substring(struct _fat_ptr s,int start,unsigned long amt){
 return Cyc_rsubstring(Cyc_Core_heap_region,s,start,amt);}
-# 443
+# 454
 struct _fat_ptr Cyc_rreplace_suffix(struct _RegionHandle*r,struct _fat_ptr src,struct _fat_ptr curr_suffix,struct _fat_ptr new_suffix){
 unsigned long m=_get_fat_size(src,sizeof(char));
 unsigned long n=_get_fat_size(curr_suffix,sizeof(char));
@@ -707,10 +719,10 @@ struct _fat_ptr ans=Cyc_Core_rnew_string(r,((m - n)+ _get_fat_size(new_suffix,si
 ({struct _fat_ptr _Tmp0=_fat_ptr_decrease_size(ans,sizeof(char),1U);struct _fat_ptr _Tmp1=src;Cyc_strncpy(_Tmp0,_Tmp1,m - n);});
 ({struct _fat_ptr _Tmp0=_fat_ptr_decrease_size(_fat_ptr_plus(ans,sizeof(char),(int)(m - n)),sizeof(char),1U);struct _fat_ptr _Tmp1=new_suffix;Cyc_strncpy(_Tmp0,_Tmp1,_get_fat_size(new_suffix,sizeof(char)));});
 return ans;}}
-# 458
+# 469
 struct _fat_ptr Cyc_replace_suffix(struct _fat_ptr src,struct _fat_ptr curr_suffix,struct _fat_ptr new_suffix){
 return Cyc_rreplace_suffix(Cyc_Core_heap_region,src,curr_suffix,new_suffix);}
-# 465
+# 476
 struct _fat_ptr Cyc_strpbrk(struct _fat_ptr s,struct _fat_ptr accept){
 int len=(int)_get_fat_size(s,sizeof(char));
 unsigned asize=_get_fat_size(accept,sizeof(char));
@@ -720,9 +732,9 @@ for(i=0U;i < (unsigned)len &&(int)(c=((const char*)s.curr)[(int)i])!=0;++ i){
 unsigned j=0U;for(0;j < asize;++ j){
 if((int)c==(int)((const char*)accept.curr)[(int)j])
 return _fat_ptr_plus(s,sizeof(char),(int)i);}}
-# 475
+# 486
 return _tag_fat(0,0,0);}
-# 478
+# 489
 struct _fat_ptr Cyc_mstrpbrk(struct _fat_ptr s,struct _fat_ptr accept){
 int len=(int)_get_fat_size(s,sizeof(char));
 unsigned asize=_get_fat_size(accept,sizeof(char));
@@ -732,79 +744,79 @@ for(i=0U;i < (unsigned)len &&(int)(c=((char*)s.curr)[(int)i])!=0;++ i){
 unsigned j=0U;for(0;j < asize;++ j){
 if((int)c==(int)((const char*)accept.curr)[(int)j])
 return _fat_ptr_plus(s,sizeof(char),(int)i);}}
-# 488
+# 499
 return _tag_fat(0,0,0);}
-# 493
+# 504
 struct _fat_ptr Cyc_mstrchr(struct _fat_ptr s,char c){
 int len=(int)_get_fat_size(s,sizeof(char));
 char c2;
 unsigned i;
-# 498
+# 509
 for(i=0U;i < (unsigned)len &&(int)(c2=((char*)s.curr)[(int)i])!=0;++ i){
 if((int)c2==(int)c)return _fat_ptr_plus(s,sizeof(char),(int)i);}
-# 501
+# 512
 return _tag_fat(0,0,0);}
-# 504
+# 515
 struct _fat_ptr Cyc_strchr(struct _fat_ptr s,char c){
 int len=(int)_get_fat_size(s,sizeof(char));
 char c2;
 unsigned i;
-# 509
+# 520
 for(i=0U;i < (unsigned)len &&(int)(c2=((const char*)s.curr)[(int)i])!=0;++ i){
 if((int)c2==(int)c)return _fat_ptr_plus(s,sizeof(char),(int)i);}
-# 512
+# 523
 return _tag_fat(0,0,0);}
-# 517
+# 528
 struct _fat_ptr Cyc_strrchr(struct _fat_ptr s0,char c){
 int len=(int)Cyc_strlen(s0);
 int i=len - 1;
 struct _fat_ptr s=s0;
 _fat_ptr_inplace_plus(& s,sizeof(char),i);
-# 523
+# 534
 for(1;i >= 0;(i --,_fat_ptr_inplace_plus_post(& s,sizeof(char),-1))){
 if((int)*((const char*)_check_fat_subscript(s,sizeof(char),0U))==(int)c)
 return s;}
-# 527
+# 538
 return _tag_fat(0,0,0);}
-# 530
+# 541
 struct _fat_ptr Cyc_mstrrchr(struct _fat_ptr s0,char c){
 int len=(int)Cyc_strlen(s0);
 int i=len - 1;
 struct _fat_ptr s=s0;
 _fat_ptr_inplace_plus(& s,sizeof(char),i);
-# 536
+# 547
 for(1;i >= 0;(i --,_fat_ptr_inplace_plus_post(& s,sizeof(char),-1))){
 if((int)*((char*)_check_fat_subscript(s,sizeof(char),0U))==(int)c)
 return s;}
-# 540
+# 551
 return _tag_fat(0,0,0);}
-# 545
+# 556
 struct _fat_ptr Cyc_strstr(struct _fat_ptr haystack,struct _fat_ptr needle){
 if(!((unsigned)haystack.curr)|| !((unsigned)needle.curr))_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp0->tag=Cyc_Core_Invalid_argument,_Tmp0->f1=_tag_fat("strstr",sizeof(char),7U);_Tmp0;}));
 if((int)*((const char*)_check_fat_subscript(needle,sizeof(char),0U))==0)return haystack;{
-# 549
+# 560
 int len=(int)Cyc_strlen(needle);
 {struct _fat_ptr start=haystack;for(0;({
 char*_Tmp0=(char*)(start=Cyc_strchr(start,*((const char*)needle.curr))).curr;_Tmp0!=(char*)_tag_fat(0,0,0).curr;});start=({
 struct _fat_ptr _Tmp0=_fat_ptr_plus(start,sizeof(char),1);Cyc_strchr(_Tmp0,*((const char*)needle.curr));})){
 if(Cyc_strncmp(start,needle,(unsigned long)len)==0)
 return start;}}
-# 556
+# 567
 return _tag_fat(0,0,0);}}
-# 559
+# 570
 struct _fat_ptr Cyc_mstrstr(struct _fat_ptr haystack,struct _fat_ptr needle){
 if(!((unsigned)haystack.curr)|| !((unsigned)needle.curr))_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp0->tag=Cyc_Core_Invalid_argument,_Tmp0->f1=_tag_fat("mstrstr",sizeof(char),8U);_Tmp0;}));
 if((int)*((const char*)_check_fat_subscript(needle,sizeof(char),0U))==0)return haystack;{
-# 563
+# 574
 int len=(int)Cyc_strlen(needle);
 {struct _fat_ptr start=haystack;for(0;({
 char*_Tmp0=(char*)(start=Cyc_mstrchr(start,*((const char*)needle.curr))).curr;_Tmp0!=(char*)_tag_fat(0,0,0).curr;});start=({
 struct _fat_ptr _Tmp0=_fat_ptr_plus(start,sizeof(char),1);Cyc_mstrchr(_Tmp0,*((const char*)needle.curr));})){
 if(Cyc_strncmp(start,needle,(unsigned long)len)==0)
 return start;}}
-# 570
+# 581
 return _tag_fat(0,0,0);}}
-# 576
+# 587
 unsigned long Cyc_strspn(struct _fat_ptr s,struct _fat_ptr accept){
 struct _fat_ptr b=s;
 unsigned long len=Cyc_strlen(b);
@@ -817,113 +829,113 @@ if((int)((const char*)b.curr)[(int)i]==(int)((const char*)accept.curr)[j])
 break;}
 if((unsigned)j==asize)
 return i;}}
-# 590
+# 601
 return len;}
-# 596
+# 607
 unsigned long Cyc_strcspn(struct _fat_ptr s,struct _fat_ptr accept){
 struct _fat_ptr b=s;
 unsigned long len=Cyc_strlen(b);
 unsigned asize=_get_fat_size(accept,sizeof(char));
-# 601
+# 612
 1;
 {unsigned long i=0U;for(0;i < len;++ i){
 int j;
 for(j=0;(unsigned)j < asize;++ j){
 if((int)((const char*)b.curr)[(int)i]==(int)((const char*)accept.curr)[j])return i;}}}
-# 607
+# 618
 return len;}
-# 614
+# 625
 struct _fat_ptr Cyc_strtok(struct _fat_ptr s,struct _fat_ptr delim){
-# 616
+# 627
 static struct _fat_ptr olds={(void*)0,(void*)0,(void*)(0 + 0)};
 struct _fat_ptr token;
-# 619
+# 630
 if((char*)s.curr==(char*)_tag_fat(0,0,0).curr){
 if((char*)olds.curr==(char*)_tag_fat(0,0,0).curr)
 return _tag_fat(0,0,0);
 s=olds;}{
-# 626
+# 637
 unsigned long inc=Cyc_strspn(s,delim);
 if(inc >= _get_fat_size(s,sizeof(char))||(int)*((char*)_check_fat_subscript(_fat_ptr_plus(s,sizeof(char),(int)inc),sizeof(char),0U))==0){
-# 629
+# 640
 olds=_tag_fat(0,0,0);
 return _tag_fat(0,0,0);}else{
-# 633
+# 644
 _fat_ptr_inplace_plus(& s,sizeof(char),(int)inc);}
-# 636
+# 647
 token=s;
 s=Cyc_mstrpbrk(token,delim);
 if((char*)s.curr==(char*)_tag_fat(0,0,0).curr)
-# 640
+# 651
 olds=_tag_fat(0,0,0);else{
-# 644
+# 655
 ({struct _fat_ptr _Tmp0=s;char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2='\000';if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
 olds=_fat_ptr_plus(s,sizeof(char),1);}
-# 647
+# 658
 return token;}}
-# 651
+# 662
 struct Cyc_List_List*Cyc_rexplode(struct _RegionHandle*r,struct _fat_ptr s){
 struct Cyc_List_List*result=0;
 {int i=(int)(Cyc_strlen(s)- 1U);for(0;i >= 0;-- i){
 result=({struct Cyc_List_List*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_List_List));_Tmp0->hd=(void*)((int)*((const char*)_check_fat_subscript(s,sizeof(char),i))),_Tmp0->tl=result;_Tmp0;});}}
 return result;}
-# 658
+# 669
 struct Cyc_List_List*Cyc_explode(struct _fat_ptr s){
 return Cyc_rexplode(Cyc_Core_heap_region,s);}
-# 662
+# 673
 struct _fat_ptr Cyc_implode(struct Cyc_List_List*chars){
 struct _fat_ptr s=Cyc_Core_new_string((unsigned)(Cyc_List_length(chars)+ 1));
 unsigned long i=0U;
 while(chars!=0){
 ({struct _fat_ptr _Tmp0=_fat_ptr_plus(s,sizeof(char),(int)i ++);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=(char)((int)chars->hd);if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
 chars=chars->tl;}
-# 669
+# 680
 return s;}
-# 673
+# 684
 inline static int Cyc_casecmp(struct _fat_ptr s1,unsigned long len1,struct _fat_ptr s2,unsigned long len2){
-# 677
+# 688
 unsigned long min_length=Cyc_umin(len1,len2);
-# 679
+# 690
 1;{
-# 681
+# 692
 int i=-1;
 while((++ i,(unsigned long)i < min_length)){
 int diff=({int _Tmp0=toupper((int)((const char*)s1.curr)[i]);_Tmp0 - toupper((int)((const char*)s2.curr)[i]);});
 if(diff!=0)
 return diff;}
-# 687
+# 698
 return(int)len1 - (int)len2;}}
-# 690
+# 701
 int Cyc_strcasecmp(struct _fat_ptr s1,struct _fat_ptr s2){
 if((char*)s1.curr==(char*)s2.curr)
 return 0;{
 unsigned long len1=Cyc_strlen(s1);
 unsigned long len2=Cyc_strlen(s2);
 return Cyc_casecmp(s1,len1,s2,len2);}}
-# 698
+# 709
 inline static int Cyc_caseless_ncmp(struct _fat_ptr s1,unsigned long len1,struct _fat_ptr s2,unsigned long len2,unsigned long n){
-# 702
+# 713
 if(n <= 0U)return 0;{
-# 704
+# 715
 unsigned long min_len=Cyc_umin(len1,len2);
 unsigned long bound=Cyc_umin(min_len,n);
-# 707
+# 718
 1;
-# 709
+# 720
 {int i=0;for(0;(unsigned long)i < bound;++ i){
 int retc;
 if((retc=({int _Tmp0=toupper((int)((const char*)s1.curr)[i]);_Tmp0 - toupper((int)((const char*)s2.curr)[i]);}))!=0)
 return retc;}}
-# 714
+# 725
 if(len1 < n || len2 < n)
 return(int)len1 - (int)len2;
 return 0;}}
-# 720
+# 731
 int Cyc_strncasecmp(struct _fat_ptr s1,struct _fat_ptr s2,unsigned long n){
 unsigned long len1=Cyc_strlen(s1);
 unsigned long len2=Cyc_strlen(s2);
 return Cyc_caseless_ncmp(s1,len1,s2,len2,n);}
-# 729
+# 740
 extern void*memcpy(void*,const void*,unsigned long);
 extern void*memmove(void*,const void*,unsigned long);
 extern int memcmp(const void*,const void*,unsigned long);
@@ -932,30 +944,30 @@ extern void*memset(void*,int,unsigned long);
 extern void bcopy(const void*,void*,unsigned long);
 extern void bzero(void*,unsigned long);
 extern char*GC_realloc_hint(char*,unsigned,unsigned);
-# 742
+# 753
 struct _fat_ptr Cyc_realloc(struct _fat_ptr s,unsigned long n){
 unsigned _Tmp0=_get_fat_size(s,sizeof(char));unsigned _Tmp1;_Tmp1=_Tmp0;{unsigned oldsz=_Tmp1;
 unsigned _Tmp2;_Tmp2=n;{unsigned l=_Tmp2;
 char*res=GC_realloc_hint((char*)_untag_fat_ptr(s,sizeof(char),1U),oldsz,l);
 return({(struct _fat_ptr(*)(char*,unsigned,unsigned))Cyc_Core_mkfat;})(_check_null(res),sizeof(char),l);}}}
-# 749
+# 760
 struct _fat_ptr Cyc__memcpy(struct _fat_ptr d,struct _fat_ptr s,unsigned long n,unsigned sz){
 if((((void*)d.curr==(void*)_tag_fat(0,0,0).curr || _get_fat_size(d,sizeof(void))< n)||(void*)s.curr==(void*)_tag_fat(0,0,0).curr)|| _get_fat_size(s,sizeof(void))< n)
 _throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp0->tag=Cyc_Core_Invalid_argument,_Tmp0->f1=_tag_fat("memcpy",sizeof(char),7U);_Tmp0;}));
 ({void*_Tmp0=(void*)_untag_fat_ptr(d,sizeof(void),1U);const void*_Tmp1=(const void*)_untag_fat_ptr(s,sizeof(void),1U);memcpy(_Tmp0,_Tmp1,n * sz);});
 return d;}
-# 756
+# 767
 struct _fat_ptr Cyc__memmove(struct _fat_ptr d,struct _fat_ptr s,unsigned long n,unsigned sz){
 if((((void*)d.curr==(void*)_tag_fat(0,0,0).curr || _get_fat_size(d,sizeof(void))< n)||(void*)s.curr==(void*)_tag_fat(0,0,0).curr)|| _get_fat_size(s,sizeof(void))< n)
 _throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp0->tag=Cyc_Core_Invalid_argument,_Tmp0->f1=_tag_fat("memove",sizeof(char),7U);_Tmp0;}));
 ({void*_Tmp0=(void*)_untag_fat_ptr(d,sizeof(void),1U);const void*_Tmp1=(const void*)_untag_fat_ptr(s,sizeof(void),1U);memmove(_Tmp0,_Tmp1,n * sz);});
 return d;}
-# 763
+# 774
 int Cyc_memcmp(struct _fat_ptr s1,struct _fat_ptr s2,unsigned long n){
 if((((char*)s1.curr==(char*)_tag_fat(0,0,0).curr ||(char*)s2.curr==(char*)_tag_fat(0,0,0).curr)|| _get_fat_size(s1,sizeof(char))< n)|| _get_fat_size(s2,sizeof(char))< n)
 _throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp0->tag=Cyc_Core_Invalid_argument,_Tmp0->f1=_tag_fat("memcmp",sizeof(char),7U);_Tmp0;}));
 return({const void*_Tmp0=(const void*)_untag_fat_ptr(s1,sizeof(char),1U);const void*_Tmp1=(const void*)_untag_fat_ptr(s2,sizeof(char),1U);memcmp(_Tmp0,_Tmp1,n);});}
-# 769
+# 780
 struct _fat_ptr Cyc_memchr(struct _fat_ptr s,char c,unsigned long n){
 unsigned sz=_get_fat_size(s,sizeof(char));
 if((char*)s.curr==(char*)_tag_fat(0,0,0).curr || n > sz)
@@ -966,7 +978,7 @@ unsigned sval=(unsigned)((const char*)_untag_fat_ptr(s,sizeof(char),1U));
 unsigned pval=(unsigned)((const char*)p);
 unsigned delta=pval - sval;
 return _fat_ptr_plus(s,sizeof(char),(int)delta);}}}
-# 781
+# 792
 struct _fat_ptr Cyc_mmemchr(struct _fat_ptr s,char c,unsigned long n){
 unsigned sz=_get_fat_size(s,sizeof(char));
 if((char*)s.curr==(char*)_tag_fat(0,0,0).curr || n > sz)
@@ -977,18 +989,18 @@ unsigned sval=(unsigned)((const char*)_untag_fat_ptr(s,sizeof(char),1U));
 unsigned pval=(unsigned)p;
 unsigned delta=pval - sval;
 return _fat_ptr_plus(s,sizeof(char),(int)delta);}}}
-# 793
+# 804
 struct _fat_ptr Cyc_memset(struct _fat_ptr s,char c,unsigned long n){
 if((char*)s.curr==(char*)_tag_fat(0,0,0).curr || n > _get_fat_size(s,sizeof(char)))
 _throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp0->tag=Cyc_Core_Invalid_argument,_Tmp0->f1=_tag_fat("memset",sizeof(char),7U);_Tmp0;}));
 memset((void*)((char*)_untag_fat_ptr(s,sizeof(char),1U)),(int)c,n);
 return s;}
-# 800
+# 811
 void Cyc_bzero(struct _fat_ptr s,unsigned long n){
 if((char*)s.curr==(char*)_tag_fat(0,0,0).curr || _get_fat_size(s,sizeof(char))< n)
 _throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp0->tag=Cyc_Core_Invalid_argument,_Tmp0->f1=_tag_fat("bzero",sizeof(char),6U);_Tmp0;}));
 ({(void(*)(char*,unsigned long))bzero;})((char*)_untag_fat_ptr(s,sizeof(char),1U),n);}
-# 806
+# 817
 void Cyc__bcopy(struct _fat_ptr src,struct _fat_ptr dst,unsigned long n,unsigned sz){
 if((((void*)src.curr==(void*)_tag_fat(0,0,0).curr || _get_fat_size(src,sizeof(void))< n)||(void*)dst.curr==(void*)_tag_fat(0,0,0).curr)|| _get_fat_size(dst,sizeof(void))< n)
 _throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp0->tag=Cyc_Core_Invalid_argument,_Tmp0->f1=_tag_fat("bcopy",sizeof(char),6U);_Tmp0;}));

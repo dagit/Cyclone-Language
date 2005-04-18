@@ -238,6 +238,11 @@ void testrec2(int *@aqual(ALIASABLE) *@aqual(UNIQUE) in) __attribute((consume(1)
   rec(in);// auto alias coercion fails because static bound on rec is RESTRICTED... i.e can_insert_alias is false
 }
 
+void testaliascallee(int *a){}
+void testaliascaller(int *@aqual(\T) a) {
+  testaliascallee(a); //automatic alias coercion
+}
+
 //aquals(`a) in aggregates -- test sugar .. TB
 struct test_agg1<`a::B\T> { // : RESTRICTED >= aquals(`a)
   `a elt;

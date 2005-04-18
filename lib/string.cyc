@@ -350,6 +350,17 @@ mstring_t<`r> rstrdup(region_t<`r::R> r, buffer_t src) {
   return temp;
 }
 
+mstring_t<`r,`q> rqstrdup(region_t<`r::R> r,aqual_t<`q\T> q, buffer_t src) {
+  size_t len = strlen(src);
+  _ temp = rqnew_string(r,q,len+1);
+  {
+    let temp2 = (char ? @nozeroterm`r)temp;
+    let alias <`x>char ? @nozeroterm`x dst = temp2;
+    strncpy(dst,src,len);
+  }
+  return temp;
+}
+
 mstring_t strdup(buffer_t src) {
   return rstrdup(heap_region, src);
 }

@@ -358,7 +358,7 @@ struct _fat_ptr Cyc_Core_rnew_string(struct _RegionHandle*r,unsigned i){
 return({unsigned _Tmp0=i;_tag_fat(_region_calloc(r,0U,sizeof(char),_Tmp0),sizeof(char),_Tmp0);});}
 # 45
 struct _fat_ptr Cyc_Core_rqnew_string(struct _RegionHandle*r,unsigned q,unsigned i){
-return _tag_fat(0,0,0);}
+return({unsigned _Tmp0=i;_tag_fat(_region_calloc(r,q,sizeof(char),_Tmp0),sizeof(char),_Tmp0);});}
 # 49
 int Cyc_Core_true_f(void*x){return 1;}
 int Cyc_Core_false_f(void*x){return 0;}
