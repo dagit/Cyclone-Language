@@ -400,7 +400,7 @@ Cyc_AP_one=Cyc_AP_fromint(1);}
 static struct Cyc_AP_T*Cyc_mk(int size){
 struct Cyc_AP_T*z;
 if(!Cyc_init)Cyc_AP_init();
-z=_cycalloc(sizeof(struct Cyc_AP_T));
+z=(struct Cyc_AP_T*)_cycalloc(sizeof(struct Cyc_AP_T));
 z->digits=({unsigned _Tmp0=size;_tag_fat(_cyccalloc_atomic(sizeof(unsigned char),_Tmp0),sizeof(unsigned char),_Tmp0);});
 size > 0?0:({(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;})(_tag_fat("size > 0",sizeof(char),9U),_tag_fat("ap.cyc",sizeof(char),7U),37U);
 z->sign=1;

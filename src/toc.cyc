@@ -2577,8 +2577,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     if (mknd == Calloc) { //ignores aqopt for now ... revisit
       if((rgnopt == NULL && aqopt == NULL) || Flags::no_regions) {
 	pexp = calloc_exp(*topt,sizeoftype_exp(t_c,DL), num_elts2);
-      }
-      else {
+      } else {
 	if(aqopt != NULL) exp_to_c(nv,aqopt);
 	if(rgnopt != NULL) {
 	  exp_to_c(nv,rgnopt);
@@ -2592,15 +2591,13 @@ static void exp_to_c(env_t nv, exp_t e) {
     } else {
       if((rgnopt == NULL && aqopt == NULL) || Flags::no_regions) {
 	pexp = malloc_exp(*topt, num_elts2);
-      }
-      else {
+      } else {
 	if(aqopt != NULL) exp_to_c(nv,aqopt);
 	if (rgnopt != NULL) {
 	  exp_to_c(nv,rgnopt);
 	  if(mknd == Vmalloc) {
 	    pexp = rvmalloc_exp(rgnopt, num_elts2);
-	  }
-	  else {
+	  } else {
 	    let fn_e = (inline_call ? rmalloc_inline_exp : rmalloc_exp);	    
 	    pexp = fn_e(rgnopt, (aqopt == NULL ? aliasable_qual_exp() : aqopt), num_elts2);
 	  }
@@ -2616,7 +2613,10 @@ static void exp_to_c(env_t nv, exp_t e) {
 				   exp_stmt(rexp,DL),DL);
       e->r = stmt_exp_r(s);
     } else
-      e->r = pexp->r;
+      e->r = cast_it_r(typ_to_c(e->topt),pexp);
+    // necessary so a later pass does not remove the cast we put in 1 line up
+    // (the cast is usually, but not always, unnecessary)
+    e->topt = void_star_type();
     break;
 
   case &Swap_e(e1,e2):

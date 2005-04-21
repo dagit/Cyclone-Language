@@ -245,7 +245,8 @@ RUNTIME:=runtime_cyc \
 	runtime_stack \
 	runtime_exception \
 	runtime_zeroterm \
-	runtime_memory
+	runtime_memory \
+        bget
 
 CYCLIB:=libcyc.$(A)
 CYCBOOTLIB:=libcycboot.$(A)

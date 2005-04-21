@@ -369,26 +369,26 @@ if(Cyc_AP_cmp(_check_null(q)->d,Cyc_AP_zero)< 0){
 struct Cyc_AP_T*gcd=({struct Cyc_AP_T*_Tmp0=Cyc_AP_abs(q->n);Cyc_AP_gcd(_Tmp0,q->d);});
 if(Cyc_AP_cmp(gcd,Cyc_AP_one)==0)
 return q;{
-struct Cyc_APQ_T*newq=_cycalloc(sizeof(struct Cyc_APQ_T));
+struct Cyc_APQ_T*newq=(struct Cyc_APQ_T*)_cycalloc(sizeof(struct Cyc_APQ_T));
 ({struct Cyc_AP_T*_Tmp0=Cyc_AP_div(q->n,gcd);newq->n=_Tmp0;});
 ({struct Cyc_AP_T*_Tmp0=Cyc_AP_div(q->d,gcd);newq->d=_Tmp0;});
 return newq;}}}
 # 27
 struct Cyc_APQ_T*Cyc_APQ_fromint(int i){
-struct Cyc_APQ_T*q=_cycalloc(sizeof(struct Cyc_APQ_T));
+struct Cyc_APQ_T*q=(struct Cyc_APQ_T*)_cycalloc(sizeof(struct Cyc_APQ_T));
 ({struct Cyc_AP_T*_Tmp0=Cyc_AP_fromint(i);q->n=_Tmp0;});
 q->d=Cyc_AP_one;
 return q;}
 # 34
 struct Cyc_APQ_T*Cyc_APQ_fromAP(struct Cyc_AP_T*n,struct Cyc_AP_T*d){
 if(Cyc_AP_cmp(d,Cyc_AP_zero)==0)_throw((void*)({struct Cyc_Invalid_argument_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Invalid_argument_exn_struct));_Tmp0->tag=Cyc_Invalid_argument,_Tmp0->f1=_tag_fat("APQ_fromAP: divide by zero",sizeof(char),27U);_Tmp0;}));{
-struct Cyc_APQ_T*q=_cycalloc(sizeof(struct Cyc_APQ_T));
+struct Cyc_APQ_T*q=(struct Cyc_APQ_T*)_cycalloc(sizeof(struct Cyc_APQ_T));
 q->n=n;
 q->d=d;
 return Cyc_reduce(q);}}
 # 42
 struct Cyc_APQ_T*Cyc_APQ_fromstr(struct _fat_ptr str,int base){
-struct Cyc_APQ_T*q=_cycalloc(sizeof(struct Cyc_APQ_T));
+struct Cyc_APQ_T*q=(struct Cyc_APQ_T*)_cycalloc(sizeof(struct Cyc_APQ_T));
 struct _fat_ptr s=str;
 while((int)*((const char*)_check_fat_subscript(s,sizeof(char),0U))&&(int)*((const char*)s.curr)!=47){_fat_ptr_inplace_plus(& s,sizeof(char),1);}
 ({struct Cyc_AP_T*_Tmp0=Cyc_AP_fromstr((const char*)_untag_fat_ptr(str,sizeof(char),1U),base);q->n=_Tmp0;});
