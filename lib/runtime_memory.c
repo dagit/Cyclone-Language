@@ -1166,20 +1166,37 @@ void * _profile_region_malloc(struct _RegionHandle *r, _AliasQualHandle_t aq, un
     if (r == CYC_CORE_HEAP_REGION) {
       if(aq == CYC_CORE_REFCNT_AQUAL) {
 	s = GC_size(addr-sizeof(int)); // back up to before the refcnt
-	fprintf(alloc_log,"%u %s:%s:%d\t%s\talloc\t%d\t%d\t%d\t%d\t%x\n",
-		clock(),
-		file,func,lineno, "refcnt",
-		"heap", s,
-		region_get_heap_size(r), 
-		region_get_free_bytes(r),
-		region_get_total_bytes(r),
-		(unsigned int)addr);
+	set_finalizer((GC_PTR)(addr - sizeof(int)));
       }
       else {
 	s = GC_size(addr);
 	set_finalizer((GC_PTR)addr);
       }
     }
+    else {
+      if(r->fcns == &reap_functions)
+	s +=  2*sizeof(int); //bget takes two additional words
+      if(aq == CYC_CORE_REFCNT_AQUAL)
+	s += sizeof(int);
+    }
+    //logging for reaps isn't exact right now. In particular, if U and RC stuff
+    //allocated in a reap, aprof will still treat it as if it was in the old `U, `RC
+    //Need to beef up aprof to handle reaps. 
+    fprintf(alloc_log,"%u %s:%s:%d\t%s\talloc\t%d\t%d\t%d\t%d\t%x\n",
+	    clock(),
+	    file,func,lineno, 
+	    (aq == Cyc_Core_unique_qual ? "unique" :
+	     (aq == Cyc_Core_refcnt_qual ? "refcnt" : 
+	      (r == CYC_CORE_HEAP_REGION ? "heap" : r->name))),
+	    s,
+	    region_get_heap_size(r), 
+	    region_get_free_bytes(r),
+	    region_get_total_bytes(r),
+	    (unsigned int)addr);
+  }
+  else {
+    s = GC_size(addr);
+    set_finalizer((GC_PTR)addr);
   }
   return (void *)addr;
 }
@@ -1195,19 +1212,33 @@ void * _profile_region_calloc(struct _RegionHandle *r, _AliasQualHandle_t aq, un
     if (r == CYC_CORE_HEAP_REGION) {
       if(aq == CYC_CORE_REFCNT_AQUAL) {
 	s = GC_size(addr-sizeof(int)); // back up to before the refcnt
-	fprintf(alloc_log,"%u %s:%s:%d\t%s\talloc\t%d\t%d\t%d\t%d\t%x\n",
-		clock(),
-		file,func,lineno,r->name, s,
-		region_get_heap_size(r), 
-		region_get_free_bytes(r),
-		region_get_total_bytes(r),
-		(unsigned int)addr);
+	set_finalizer((GC_PTR)(addr - sizeof(int)));
       }
       else {
 	s = GC_size(addr);
 	set_finalizer((GC_PTR)addr);
       }
     }
+    else {
+      if(r->fcns == &reap_functions)
+	s +=  2*sizeof(int); //bget takes two additional words
+      if(aq == CYC_CORE_REFCNT_AQUAL)
+	s += sizeof(int);
+    }
+    //logging for reaps isn't exact right now. In particular, if U and RC stuff
+    //allocated in a reap, aprof will still treat it as if it was in the old `U, `RC
+    //Need to beef up aprof to handle reaps. 
+    fprintf(alloc_log,"%u %s:%s:%d\t%s\talloc\t%d\t%d\t%d\t%d\t%x\n",
+	    clock(),
+	    file,func,lineno, 
+	    (aq == Cyc_Core_unique_qual ? "unique" :
+	     (aq == Cyc_Core_refcnt_qual ? "refcnt" : 
+	      (r == CYC_CORE_HEAP_REGION ? "heap" : r->name))),
+	    s,
+	    region_get_heap_size(r), 
+	    region_get_free_bytes(r),
+	    region_get_total_bytes(r),
+	    (unsigned int)addr);
   }
   return (void *)addr;
 }
