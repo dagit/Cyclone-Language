@@ -1971,7 +1971,10 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt, exp
     _ aq = Tcutil::eval_aquals_of(Tcenv::curr_aquals_bounds(te), *topt);
     if(aq != NULL) {
       switch(aq) {
-      case &AppType(&AqualConstCon(Unique_qual), _): aqual_type = un_qual_type; break;
+      case &AppType(&AqualConstCon(Unique_qual), _): 
+	aqual_type = un_qual_type; 
+	*aqopt = uniqueaqual_exp();
+	break;
       default: break;
       }
     }
@@ -2258,7 +2261,10 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     _ aq = Tcutil::eval_aquals_of(Tcenv::curr_aquals_bounds(te), *topt);
     if(aq != NULL) {
       switch(aq) {
-      case &AppType(&AqualConstCon(Unique_qual), _): aqual = un_qual_type; break;
+      case &AppType(&AqualConstCon(Unique_qual), _): 
+	aqual = un_qual_type; 
+	*qual_hndl = uniqueaqual_exp();
+	break;
       default: break;
       }
     }

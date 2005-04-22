@@ -906,8 +906,8 @@ static bool vardecl_needed(treeshake_env_t env, decl_t d) {
   switch(d->r) {
   case &Var_d(vd):
     // get rid of externs that are never referenced
-    if (env->in_cinclude || !is_extern(vd))
-      //||  !qvar_cmp(vd->name,uniquergn_qvar()))
+    if (env->in_cinclude || !is_extern(vd)
+	||  !qvar_cmp(vd->name,uniqueaqual_qvar()))
       return true;
     return (*Dict::lookup(env->ordinaries,vd->name))[1];
   case &ExternC_d(*ds2p): fallthru(ds2p);

@@ -1063,8 +1063,8 @@ namespace Absyn {
 			  list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H>,
 			  seg_t);
 
-//   qvar_t uniquergn_qvar();
-//   exp_t uniquergn_exp(); // refers to the unique region in Core::
+  qvar_t uniqueaqual_qvar();
+  exp_t uniqueaqual_exp(); // refers to the unique region in Core::
 
   /////////////////////////// Statements ///////////////////////////////
   stmt_t new_stmt(raw_stmt_t,seg_t);

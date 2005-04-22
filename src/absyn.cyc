@@ -401,6 +401,21 @@ qvar_t datatype_scanf_arg_qvar() {
 /* 		 .r = new Var_e(new Global_b(vd))}; */
 /* } */
 
+
+qvar_t uniqueaqual_qvar() {
+  static qvar_opt_t q = NULL;
+  if(q==NULL)
+    q = new $(Abs_n(new List(new "Core",NULL), false), new "unique_qual");
+  return (qvar_t)q;
+}
+exp_t uniqueaqual_exp() {
+  let t  = aqual_handle_type(un_qual_type);
+  let vd = new_vardecl(0,uniqueaqual_qvar(),t,NULL);
+  vd->sc = Extern;
+  return new Exp{.topt = t, .loc = 0, .annot = &EmptyAnnot_val,
+		 .r = new Var_e(new Global_b(vd))};
+}
+
 // pointers
 type_t pointer_type(struct PtrInfo s) {
   return new PointerType(s);
