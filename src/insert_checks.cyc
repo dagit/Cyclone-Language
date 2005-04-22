@@ -287,7 +287,26 @@ static bool need_null_check_vcgen(env_t nv, exp_t a) {
 }
 static bool need_bounds_check_vcgen(env_t nv, exp_t a){
   let ec = Vcgen::exp2ctxt_checks(nv.assn_info, a);
-  return !PrattProver::constraint_prove(ec->ctxt,ec->bounds_check);
+#ifdef PERFORMANCE_DEBUG
+  fprintf(stderr, "checking bounds with constraint for exp:\n%s\n",
+	  Absynpp::exp2string(a));
+  struct timeval start, end;
+  gettimeofday(&start,NULL);
+#endif
+  let flag = !PrattProver::constraint_prove(ec->ctxt,ec->bounds_check);
+#ifdef PERFORMANCE_DEBUG
+  gettimeofday(&end,NULL);
+  end.tv_sec -= start.tv_sec;
+  end.tv_usec -= start.tv_usec;
+  if (end.tv_usec < 0) {
+    end.tv_usec += 1000000;
+    --end.tv_sec;
+  }
+  fprintf(stderr, "checking done in %d.%06d secs\n",
+	  end.tv_sec,end.tv_usec);
+#endif
+  //return !PrattProver::constraint_prove(ec->ctxt,ec->bounds_check);
+  return flag;
 }
 
 static void do_exp(env_t nv, exp_t e) {

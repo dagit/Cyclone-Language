@@ -640,8 +640,8 @@ if(({struct Cyc_Absyn_Kind*_Tmp25=(struct Cyc_Absyn_Kind*)_check_null(*kind2opt)
 Cyc_Unify_fail_because("kinds are incompatible");}}
 *t2r=t1;{
 # 296
-struct Cyc_List_List*s1=(struct Cyc_List_List*)(*s1opt)->v;
-struct Cyc_List_List*s2=(struct Cyc_List_List*)(*s2opt)->v;
+struct Cyc_List_List*s1=(struct Cyc_List_List*)_check_null(*s1opt)->v;
+struct Cyc_List_List*s2=(struct Cyc_List_List*)_check_null(*s2opt)->v;
 if(s1==s2)return;
 for(1;s1!=0;s1=s1->tl){
 if(!({(int(*)(int(*)(struct Cyc_Absyn_Tvar*,struct Cyc_Absyn_Tvar*),struct Cyc_List_List*,struct Cyc_Absyn_Tvar*))Cyc_List_mem;})(Cyc_Tcutil_fast_tvar_cmp,s2,(struct Cyc_Absyn_Tvar*)s1->hd))

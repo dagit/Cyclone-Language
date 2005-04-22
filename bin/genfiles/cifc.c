@@ -927,7 +927,7 @@ return Cyc_Cifc_update_tvars(te,tv_ovrs,ai->elt_type,enclosing_decl,instantiate)
 return 0;}
 # 685
 static int Cyc_Cifc_update_fninfo_usage(unsigned loc,struct Cyc_Tcenv_Tenv*te,struct Cyc_List_List*tv_ovrs,struct Cyc_Absyn_FnInfo*fi,struct Cyc_Absyn_Decl*enclosing_decl){
-struct _tuple13*ad=Cyc_Cifc_update_tvars(te,tv_ovrs,fi->ret_type,enclosing_decl,0);
+struct _tuple13*ad=Cyc_Cifc_update_tvars(te,tv_ovrs,_check_null(fi)->ret_type,enclosing_decl,0);
 # 688
 struct Cyc_List_List*argit=fi->args;
 struct Cyc_List_List*added_tvars=(unsigned)ad?(*ad).f0: 0;
@@ -1276,7 +1276,7 @@ struct Cyc_Absyn_Decl*ud=(struct Cyc_Absyn_Decl*)x->hd;
 struct _fat_ptr*un=Cyc_Absyn_decl_name(ud);
 if(!((unsigned)un))Cyc_Warn_warn(ud->loc,_tag_fat("Overriding decl without a name\n",sizeof(char),32U),_tag_fat(0U,sizeof(void*),0));else{
 # 1100
-struct Cyc_Absyn_Decl*d=Cyc_Cifc_lookup_concrete_decl(*ds,un);
+struct Cyc_Absyn_Decl*d=Cyc_Cifc_lookup_concrete_decl(*_check_null(ds),un);
 if(!((unsigned)d))({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=(struct _fat_ptr)((struct _fat_ptr)*un);_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_Warn_warn(ud->loc,_tag_fat("%s is overridden but not defined",sizeof(char),33U),_tag_fat(_Tmp1,sizeof(void*),1));});else{
 # 1103
 overriden_decls=({struct Cyc_List_List*_Tmp0=_cycalloc(sizeof(struct Cyc_List_List));_Tmp0->hd=d,_Tmp0->tl=overriden_decls;_Tmp0;});{
@@ -1287,7 +1287,7 @@ if(Cyc_Cifc_contains_type_vars(ud)&& !pre_tvars_d){
 abs_decls=({struct Cyc_List_List*_Tmp0=_cycalloc(sizeof(struct Cyc_List_List));({struct Cyc_Absyn_Decl*_Tmp1=Cyc_Cifc_make_abstract_decl(ud);_Tmp0->hd=_Tmp1;}),_Tmp0->tl=abs_decls;_Tmp0;});
 type_overrides=({struct Cyc_List_List*_Tmp0=_cycalloc(sizeof(struct Cyc_List_List));_Tmp0->hd=d,_Tmp0->tl=type_overrides;_Tmp0;});}}}}}}{
 # 1115
-struct Cyc_List_List*unoverriden_decls=({(struct Cyc_List_List*(*)(int(*)(struct Cyc_List_List*,struct Cyc_Absyn_Decl*),struct Cyc_List_List*,struct Cyc_List_List*))Cyc_List_filter_c;})(Cyc_Cifc_decl_not_present,overriden_decls,*ds);
+struct Cyc_List_List*unoverriden_decls=({(struct Cyc_List_List*(*)(int(*)(struct Cyc_List_List*,struct Cyc_Absyn_Decl*),struct Cyc_List_List*,struct Cyc_List_List*))Cyc_List_filter_c;})(Cyc_Cifc_decl_not_present,overriden_decls,*_check_null(ds));
 abs_decls=({struct Cyc_List_List*_Tmp0=abs_decls;Cyc_List_append(_Tmp0,
 Cyc_Cifc_update_usages(loc,te,type_overrides,unoverriden_decls));});
 if((unsigned)abs_decls)

@@ -545,7 +545,7 @@ if(cmp(top,v)!=0 ||
 goto _LL0;}}_LL0:;}
 # 290
 {int hnow=Cyc_List_length(ts->cstack);for(0;hnow > hsaved;-- hnow){
-int X=(int)ts->cstack->hd;
+int X=(int)_check_null(ts->cstack)->hd;
 ts->cstack=ts->cstack->tl;
 if(!({(int(*)(struct Cyc_Set_Set*,int))Cyc_Set_member;})(csCnew->Succ,X)){
 struct Cyc_Set_Set*s=({(struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*,int))Cyc_Set_insert;})(csCnew->Succ,X);

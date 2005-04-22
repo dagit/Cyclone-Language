@@ -483,7 +483,7 @@ int i;
 {
 int km=k + m;
 unsigned long y2=(unsigned long)((int)*((unsigned char*)_check_fat_subscript(y,sizeof(unsigned char),m - 1))* 256U + (int)((unsigned char*)y.curr)[m - 2]);
-unsigned long r3=(unsigned long)(((int)*((unsigned char*)_check_fat_subscript(rem,sizeof(unsigned char),km))* 65536U + (int)((unsigned char*)rem.curr)[km - 1]* 256U)+ (int)((unsigned char*)rem.curr)[km - 2]);
+unsigned long r3=(unsigned long)(((int)((unsigned char*)rem.curr)[km]* 65536U + (int)((unsigned char*)rem.curr)[km - 1]* 256U)+ (int)((unsigned char*)rem.curr)[km - 2]);
 # 143
 qk=(int)(r3 / y2);
 if(qk >= 256U)
@@ -491,9 +491,9 @@ qk=255U;}
 # 147
 ({unsigned char _Tmp0=(unsigned char)Cyc_XP_product(m,dq,y,qk);*((unsigned char*)_check_fat_subscript(dq,sizeof(unsigned char),m))=_Tmp0;});
 for(i=m;i > 0;-- i){
-if(({int _Tmp0=(int)*((unsigned char*)_check_fat_subscript(rem,sizeof(unsigned char),i + k));_Tmp0!=(int)*((unsigned char*)_check_fat_subscript(dq,sizeof(unsigned char),i));}))
+if((int)*((unsigned char*)_check_fat_subscript(rem,sizeof(unsigned char),i + k))!=(int)((unsigned char*)dq.curr)[i])
 break;}
-if(({int _Tmp0=(int)*((unsigned char*)_check_fat_subscript(rem,sizeof(unsigned char),i + k));_Tmp0 < (int)*((unsigned char*)_check_fat_subscript(dq,sizeof(unsigned char),i));}))
+if((int)*((unsigned char*)_check_fat_subscript(rem,sizeof(unsigned char),i + k))< (int)((unsigned char*)dq.curr)[i])
 ({unsigned char _Tmp0=(unsigned char)Cyc_XP_product(m,dq,y,-- qk);((unsigned char*)dq.curr)[m]=_Tmp0;});}
 # 154
 *((unsigned char*)_check_fat_subscript(q,sizeof(unsigned char),k))=(unsigned char)qk;{
@@ -507,9 +507,9 @@ Cyc__memcpy(r,rem,(unsigned)m / sizeof(*((unsigned char*)rem.curr))+ (unsigned)(
 # 164
 int i;
 for(i=(n - m)+ 1;i < nx;++ i){
-*((unsigned char*)_check_fat_subscript(q,sizeof(unsigned char),i))='\000';}
+((unsigned char*)q.curr)[i]='\000';}
 for(i=m;i < my;++ i){
-*((unsigned char*)_check_fat_subscript(r,sizeof(unsigned char),i))='\000';}}}}
+((unsigned char*)r.curr)[i]='\000';}}}}
 # 171
 return 1;}
 # 173

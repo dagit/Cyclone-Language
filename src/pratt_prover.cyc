@@ -30,7 +30,7 @@ namespace PrattProver;
 #define MAXINT (0x7FFFFFFF)
 #define MININT (-MAXINT-1)
 #define MAXUINT (0xFFFFFFFF)
-
+//#define PROVER_DEBUG
 
 /**********************************************************************
 This is a simple constraint solver that can (conservatively) determine 
@@ -50,7 +50,7 @@ The algorithm that we use here is roughly as follows:
 
 (3) We then close the graph by computing the shortest path from each 
     term to another, and by performing congruence closure w.r.t. the 
-    uninterpreted functions (e.g., numelts).  We also attempt to "break" 
+    uninterpreted functions (e.g., numelts).  We also attempt to "break"
     terms involving addition of a constant (e.t., x+3) by adding edges 
     x+3 ---(-3)---> x. However, we must be careful in doing this due to the
     issues described below.  We use the information in the graph to try to 
@@ -142,7 +142,7 @@ Because they depend upon whether or not a term may overflow (or underflow),
 and this information may only become apparent later on (e.g., we discover 
 that x is actually 5, so x-2 does not underflow) we must do the
 term breaking as part of the closure process.
-*/
+*********************************************************************/
 
 //
 // Forward declaration -- represents an equivalence class for terms
@@ -160,6 +160,14 @@ typedef struct Distance {
 } distance_t;
 
 
+// shortest path information from some source s to this node
+datatype ShortestPathInfo{
+  Infinity;       // the distance from s to this node is infinity
+  Shortest(int);  // the final shortest distance from s to this node
+  Current(int);   // the current distance from s to this node
+};
+
+typedef datatype ShortestPathInfo @shortestpathinfo_t;
 // Represents a row within a graph.
 struct Node {
   node_t     *next; // next row in graph
@@ -168,6 +176,9 @@ struct Node {
   bool        broken_as_unsigned : 1; // constants (see below)
   distance_t *unsigned_distances;     // distance edges with this node's term
   distance_t *signed_distances;       // as the source
+  int signeddistFromS;                // used in the shortest path algorithms to record 
+  int unsigneddistFromS;              // distance from the source S to this node
+  shortestpathinfo_t shortest_path_info;
 };
 
 // A graph is essentially a pair of sparse matrices of 
@@ -176,6 +187,7 @@ struct Node {
 typedef struct Graph {
   struct Graph *next;
   node_t       *rows;  // we keep the rows sorted by rep order
+  bool         changed;
 } graph_t;
 
 static unsigned num_graphs(graph_t *gs) {
@@ -186,7 +198,7 @@ static unsigned num_graphs(graph_t *gs) {
 }
 
 // An empty graph represents the proposition "true".
-static graph_t@ true_graph() { return new Graph{NULL,NULL}; }
+static graph_t@ true_graph() { return new Graph{NULL,NULL,false}; }
 
 static int constraints_added = 0;
 static int graphs_copied = 0;
@@ -199,7 +211,7 @@ void print_graph(graph_t @g) {
   if (g->rows == NULL) fprintf(stderr,"<true>");
   else {
     for (let rs = g->rows; rs != NULL; rs = rs->next) {
-      let &Node{_,rep,_,_,uds,sds} = (node_t@)rs;
+      let &Node{_,rep,_,_,uds,sds,_,_,_} = (node_t@)rs;
       let s = term2string(rep);
       fprintf(stderr,"row %s:",s);
       if (uds == NULL) fprintf(stderr,"\n");
@@ -230,7 +242,7 @@ datatype exn.Inconsistent inconsistent = Inconsistent;
 
 // forward declarations
 static node_t @term2node(graph_t @g, term_t t);
-static void set_distance(graph_t @g, term_t s, term_t t, int dist, bool is_signed);
+static void set_distance(graph_t @g, term_t s, term_t t, unsigned dist, bool is_signed);
 static void add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2);
 static void add_eq(graph_t @g, term_t t1, term_t t2);
 static $(bool,unsigned,term_opt_t) subst_term_with_const(graph_t @g, term_t t);
@@ -325,10 +337,10 @@ static node_t @term2node(graph_t @g, term_t t) {
   node_t @n;
   switch (t){
   case &Binop(Absyn::Plus,t1,&Uint(c2),_):
-    n = new Node{*prev,t,false,false,NULL,NULL};
+    n = new Node{*prev,t,false,false,NULL,NULL,0,0,new Infinity};
     break;
   default:
-    n = new Node{*prev,t,true,true,NULL,NULL};
+    n = new Node{*prev,t,true,true,NULL,NULL,0,0,new Infinity};
     break;
   }
   *prev = n;
@@ -427,6 +439,7 @@ static void new_distance(node_t @`H source, node_t @`H target, bool is_signed, i
 // and throws Inconsistent otherwise.  
 // Care must be taken when computing shortest paths to ensure that we
 // don't end up with an overflow or underflow.
+/***************************************************************************
 static void set_dist(graph_t @g, node_t @`H i, node_t @`H j, int dist, bool is_signed) {
   // equivalent terms are always at distance 0.
   if (i == j && dist < 0) throw(&inconsistent);
@@ -502,9 +515,372 @@ static void set_dist(graph_t @g, node_t @`H i, node_t @`H j, int dist, bool is_s
     }
   }
 }
+**********************************************************************/
 
+static inline void set_dist(graph_t @g, node_t @`H i, node_t @`H j, int dist, bool is_signed) {
+  // equivalent terms are always at distance 0.
+  if (i == j && (dist < 0 || (unsigned)dist == MININT)) throw(&inconsistent);
+  if (i == j && dist > 0) return;
+  let ij_dist = lookup_dist(i,j,is_signed);
+  // if we already have a shorter path, then this constraint is redundant
+  if (ij_dist != NULL && (unsigned)*ij_dist == MININT) return;
+  if (ij_dist != NULL && (unsigned)dist != MININT && *ij_dist < dist) return;
+  // otherwise, we update the weight for this edge if the edge existed
+  // or add this new edge if the edge did not exist
+  // we also set a mark saying that the graph changed
+  // testing if the new edge weight will cause a negative cycle
+  let ji_dist = lookup_dist(j,i,is_signed);
+  if(ji_dist != NULL){
+    let $(overflow,sum)=is_signed_overflow(*ji_dist,dist);
+      if (sum < 0) {
+#ifdef PROVER_DEBUG
+	fprintf(stderr,"inconsistency found in set_dist\n");
+#endif
+	throw &inconsistent;
+      }
+  }
+  if (ij_dist != NULL) *ij_dist = dist;
+  else new_distance(i,j,is_signed,dist);
+  g->changed = true;
+  return;
+}
+
+// computing all pair shortest paths using the naive set dist
+// algorithm we had before
+/******************************************************************
+static void naive_all_pair_shortest_paths(int dummy, graph_t @g){
+#ifdef PROVER_DEBUG
+  fprintf(stderr,"using naive algorithm to compute shortest path\n");
+#endif
+  int n = 0;
+  for(let node = g->rows; node != NULL; node = node->next){
+    n++;
+  }
+  for(int m = 0; m < n; m++){
+    for(let node = g->rows; node != NULL; node = node->next){
+      for(let dists = node->unsigned_distances; dists != NULL; dists = dists->next){
+	for(let target_dists = dists->target->unsigned_distances; 
+	    target_dists != NULL; target_dists = target_dists->next){
+	  let $(overflow,sum) = is_signed_overflow(dists->dist,target_dists->dist);
+	  if (!overflow)
+	    set_dist(g,node,target_dists->target,sum,false);
+	  else if (sum < 0) //underflow
+	    set_dist(g,node,target_dists->target,MININT,false);
+	}
+      }
+      for(let dists = node->signed_distances; dists != NULL; dists = dists->next){
+	for(let target_dists = dists->target->signed_distances; 
+	    target_dists != NULL; target_dists = target_dists->next){
+	  let $(overflow,sum) = is_signed_overflow(dists->dist,target_dists->dist);
+	  if (!overflow)
+	    set_dist(g,node,target_dists->target,sum,true);
+	  else if (sum < 0) //underflow
+	    set_dist(g,node,target_dists->target,MININT,true);
+	}
+      }
+    }
+  }
+  return;
+}
+********************************************************************/
+static int num_of_nodes(graph_t @g){
+  int n = 0;
+  for(let node = g->rows; node != NULL; node = node->next){
+    n++;
+  }
+  return n;
+}
+
+// Given a graph with negative weight, throws Inconsistent when
+// the algorithm detects a negative weight cycle.
+// the idea is to use bellman-ford algorithm for single-source
+// shortest path algorithm.
+// we add an extra node S to the graph, and add edges with weight 0
+// from S to all the nodes in the graph.  then we compute the
+// shortest path from S to all the nodes in the graph,
+// if there is a negative cycle in the graph, it should be reachable
+// from S and bellman-ford algorithm will be able to detect it
+static void bellman_ford(int dummy,graph_t @g){
+#ifdef PROVER_DEBUG
+  fprintf(stderr,"bellman-ford algorithm\n");
+#endif
+  int n = num_of_nodes(g);
+  // initialize the path weight from the added source (S)
+  for(let node = g->rows; node != NULL; node = node->next){
+    node->signeddistFromS = 0;
+    node->unsigneddistFromS = 0;
+  }
+  // so the number of elements in the graph is n;
+  // we are using bellman_ford algorithm
+  for(let i = 0; i < n; i++){
+    // the inner two loops traverse all the edges in the graph
+    for(let node = g->rows; node != NULL; node = node->next){
+      int du_unsigned = node->unsigneddistFromS;
+      for(let dists = node->unsigned_distances; dists != NULL; dists = dists->next){
+	int uv_unsigned = dists->dist;
+	int dv_unsigned = dists->target->unsigneddistFromS;
+	// dv_unsigned is already the smallest we can keep track of, 
+	// so we won't make any progress here.
+	if ((unsigned)dv_unsigned == MININT) continue;
+	let $(overflow, sum) = is_signed_overflow(du_unsigned, uv_unsigned);
+	// no overflow, and du+uv < dv, relax dv
+	if (!overflow && (unsigned)dv_unsigned != MININT && sum < dv_unsigned) dists->target->unsigneddistFromS = sum;
+	// underflow happened, du + uv <= MININT, 
+	if (overflow && sum < 0) dists->target->unsigneddistFromS = MININT;
+      }
+      int du_signed = node->signeddistFromS;
+      for(let dists = node->signed_distances; dists != NULL; dists = dists->next){
+	int uv_signed = dists->dist;
+	int dv_signed = dists->target->signeddistFromS;
+	// dv_signed is already the smallest we can keep track of,
+	// so we won't make any progress here.
+	if ((unsigned)dv_signed == MININT) continue;
+	let $(overflow, sum) = is_signed_overflow(du_signed, uv_signed);
+	// no overflow, and du+uv < dv, relax dv
+	if (!overflow && (unsigned)dv_signed != MININT && sum < dv_signed) dists->target->signeddistFromS = sum;
+	// underflow happened, du + uv <= MININT, 
+	if (overflow && sum < 0) dists->target->signeddistFromS = MININT;
+      }
+    }
+  }
+  // now we have computed the shortest path from S to u
+  // in the graph with at most n+1 nodes
+  // if this is still not the shortest path from S to u
+  // then there is a negative cycle reachable from S
+  for(let node = g->rows; node != NULL; node = node->next){
+    int du_unsigned = node->unsigneddistFromS;
+    for(let dists = node->unsigned_distances; dists != NULL; dists = dists->next){
+      int uv_unsigned = dists->dist;
+      int dv_unsigned = dists->target->unsigneddistFromS;
+      // dv_unsigned is already the smallest we can keep track of, 
+      // so we do not conclude inconsistency here.
+      if ((unsigned)dv_unsigned == MININT) continue; 
+      let $(overflow, sum) = is_signed_overflow(du_unsigned,uv_unsigned);
+      // there is a shorter path
+      if (!overflow && sum < dv_unsigned || overflow && sum < 0){
+#ifdef PROVER_DEBUG
+	fprintf(stderr,"inconsistency found in bellman-ford\n");
+#endif
+	throw &inconsistent;
+      }
+    }
+    int du_signed = node->signeddistFromS;
+    for(let dists = node->signed_distances; dists != NULL; dists = dists->next){
+      int uv_signed = dists->dist;
+      int dv_signed = dists->target->signeddistFromS;
+      // dv_signed is already the smallest we can keep track of,
+      // so we do not conclude inconsistency here.
+      if ((unsigned)dv_signed == MININT) continue;
+      let $(overflow, sum) = is_signed_overflow(du_signed, uv_signed);
+      if (!overflow && sum < dv_signed || overflow && sum<0){
+#ifdef PROVER_DEBUG
+	fprintf(stderr,"inconsistency found in bellman-ford\n");
+#endif
+	throw &inconsistent;
+      }
+    }
+  }
+  return;
+}
+
+
+// initialize the distant set from source s for dijkstra algorithm
+// everything is unreachable from s except s itself.
+static void initialize_dist_set(node_t @s, graph_t @g){
+  for(let node = g->rows; node != NULL; node = node->next){
+    if (node == s) node->shortest_path_info = new Current(0);
+    else node->shortest_path_info = new Infinity;
+  }
+  return;
+}
+
+
+// find the node with the smallest shortest distance
+// ignore those nodes that are already removed from 
+// the set with a final shortest path
+// if there is no more available nodes with a finite distance
+// return NULL
+static node_t * extract_min(graph_t @g){
+  node_t *current_shortest_node = NULL;
+  for(let node = g->rows; node != NULL; node = node->next){
+    switch (node->shortest_path_info){
+    case &Infinity: break;
+    case &Shortest(_): break;
+    case &Current(d_new): 
+      if (current_shortest_node == NULL) current_shortest_node = node;
+      else {
+	switch (current_shortest_node->shortest_path_info){
+	case &Current(d_old): 
+	  if (d_new <= d_old) current_shortest_node = node;
+	  break;
+	default:
+	  Warn::impos(aprintf("current_shortest_node should always be NULL or &Current(d)\n"));
+	}
+      }
+      break;
+    }
+  }
+  return current_shortest_node;
+}
+
+static void relaxation(node_t @u, graph_t @g, bool is_signed){
+  distance_t *dists;
+  int su;
+  switch(u->shortest_path_info){
+  case &Shortest(d): su = d; break;
+  default:
+    Warn::impos(aprintf("current_shortest_node should always containe &Shortest(d)\n"));
+    break;
+  }
+  if (is_signed) dists = u->signed_distances;
+  else dists = u->unsigned_distances;
+  for(; dists != NULL; dists = dists->next){
+    switch (dists->target->shortest_path_info){
+    case &Shortest(_): break; // already has the final shortest path, no action
+    case &Current(sv): 
+      int uv = dists->dist;
+      let $(overflow,sum) = is_signed_overflow(su,uv);
+      if (!overflow && sum < sv) dists->target->shortest_path_info = new Current(sum);
+      break;
+    case &Infinity:
+      int uv = dists->dist;
+      let $(overflow,sum) = is_signed_overflow(su,uv);
+      if (!overflow) dists->target->shortest_path_info = new Current(sum);
+      break;
+    }
+  }
+  return;
+}
+
+// we finished computing the shortest distance from s to all nodes,
+// d(s,v) is stored in v->shortest_path_info
+// now we put this information into the s->dist
+static void set_shortest_dist_from_s(node_t @`H s, graph_t @`H g, bool is_signed){
+  for(let node = g->rows; node != NULL; node = node->next){
+    switch (node->shortest_path_info){
+    case &Shortest(d): set_dist(g,s,node,d,is_signed); break;
+    default: break;
+    }
+  }
+}
+// compute single-source shortest path from s to
+// all nodes in a graph g with no negative weight edges
+static void dijkstra(node_t @`H s, graph_t @`H g){
+#ifdef PROVER_DEBUG
+  fprintf(stderr,"dijkstra algorithm\n");
+#endif  
+
+  // first compute the shortest unsigned distance from s to all other vertices
+  initialize_dist_set(s,g);
+  while(true){
+    let current_shortest_node = extract_min(g);
+    // no more nodes reachable from source, can and the algorithm
+    if (current_shortest_node == NULL) break;
+    else {
+      switch(current_shortest_node->shortest_path_info){
+      case &Current(d): 
+	// extracted the min, now set the node info to Done
+	current_shortest_node->shortest_path_info = new Shortest(d);
+	break;
+      default:
+	Warn::impos(aprintf("current_shortest_node should always contain &Current(d)\n"));
+	break;
+      }
+    }
+    relaxation(current_shortest_node,g,false);
+  }
+  set_shortest_dist_from_s(s,g,false);
+
+  // then compute the shortest signed distance from s to all other vertices
+  initialize_dist_set(s,g);
+  while(true){
+    let current_shortest_node = extract_min(g);
+    // no more nodes reachable from source, can and the algorithm
+    if (current_shortest_node == NULL) break;
+    else {
+      switch(current_shortest_node->shortest_path_info){
+      case &Current(d): 
+	// extracted the min, now set the node info to Done
+	current_shortest_node->shortest_path_info = new Shortest(d);
+	break;
+      default:
+	Warn::impos(aprintf("current_shortest_node should always contain &Current(d)\n"));
+	break;
+      }
+    }
+    relaxation(current_shortest_node,g,true);
+  }
+  set_shortest_dist_from_s(s,g,true);
+  return;
+}
+
+// compute all-pair shortest paths for a graph with negative weight
+// 1) calls bellman-ford to see if there is any negative cycle
+// 2) change the weight of all edges so that they are nonegative
+// 3) calls dijkstra for each vertex to compute all-pair shortest paths
+// 4) change the weight back so that the represent the original
+//    weight value
+// see Corman90 26.3 Johnson's algorithm
+static void johnson(int dummy, graph_t @`H g){
+#ifdef PROVER_DEBUG
+  fprintf(stderr,"johnson algorithm\n");
+#endif
+  // there is no new edges added to the graph since
+  // the last shortest path computation
+  if (!g->changed) return;
+  // bellman ford to test if there is any negative weight cycle 
+  // could really omit this step because we've already run bellman_ford before
+  // calling johnson
+  bellman_ford(0,g); 
+  // no inconsistency thrown so there is no negative weight cycle
+  // reweighs all the edges in the garph to make their weight nonnegative
+  for(let node = g->rows; node != NULL; node = node->next){
+    int du_unsigned = node->unsigneddistFromS;
+    for(let dists = node->unsigned_distances; dists != NULL; dists = dists->next){
+      int uv_unsigned = dists->dist;
+      int dv_unsigned = dists->target->unsigneddistFromS;
+      // since after bellmanford, dx_unsigned is the shortest path,
+      // so uv_unsigned + du_unsigned >= dv_unsigned
+      // this ensures the new weight to be non negative
+      dists->dist = uv_unsigned + du_unsigned - dv_unsigned;
+    }
+    int du_signed = node->signeddistFromS;
+    for(let dists = node->signed_distances; dists != NULL; dists = dists->next){
+      int uv_signed = dists->dist;
+      int dv_signed = dists->target->signeddistFromS;
+      // same argument as for the unsigned weight
+      dists->dist = uv_signed + du_signed - dv_signed;
+    }
+  }
+  // now for each vertex, we run dijkstra to calculate shortest path
+  // this is OK because now all weights are nonnegative
+  for(let node = g->rows; node != NULL; node = node->next){
+    dijkstra(node,g);
+  }
+  // now recover the original weight (possibily negative) for
+  // distance between two vertices
+  for(let node = g->rows; node != NULL; node = node->next){
+    int du_unsigned = node->unsigneddistFromS;
+    for(let dists = node->unsigned_distances; dists != NULL; dists = dists->next){
+      int uv_unsigned = dists->dist;
+      int dv_unsigned = dists->target->unsigneddistFromS;
+      dists->dist = uv_unsigned + dv_unsigned - du_unsigned;
+    }
+    int du_signed = node->signeddistFromS;
+    for(let dists = node->signed_distances; dists != NULL; dists = dists->next){
+      int uv_signed = dists->dist;
+      int dv_signed = dists->target->signeddistFromS;
+      // same argument as for the unsigned weight
+      dists->dist = uv_signed + dv_signed - du_signed;
+    }
+  }
+#ifdef PROVER_DEBUG
+  fprintf(stderr,"no inconsistency from johnson\n");
+#endif
+  return;
+}
 // same as above but maps terms to nodes first.
-static void set_distance(graph_t @g, term_t it, term_t jt, int dist, bool is_signed) {
+static void set_distance(graph_t @g, term_t it, term_t jt, unsigned dist, bool is_signed) {
   let i = term2node(g,it);
   let j = term2node(g,jt);
   set_dist(g,i,j,dist,is_signed);
@@ -541,13 +917,13 @@ static graph_t *copy_graphs(graph_t *gopt) {
   for (; gopt != NULL; gopt = gopt->next) {
     ++graphs_copied;
     let g = (graph_t@)gopt;
-    graph_t @newg = new Graph{.next = res,.rows = NULL};
+    graph_t @newg = new Graph{.next = res,.rows = NULL,.changed=g->changed};
     res = newg;
     // insert a row for each term
     node_t *newrs = NULL;
     for (let rs = g->rows; rs != NULL; rs = rs->next) {
       newrs = new Node{newrs,rs->rep,rs->broken_as_signed,
-                       rs->broken_as_unsigned,NULL,NULL};
+                       rs->broken_as_unsigned,NULL,NULL,0,0,new Infinity};
     }
     newrs = revnodes(newrs);
     newg->rows = newrs;
@@ -561,7 +937,7 @@ static graph_t *copy_graphs(graph_t *gopt) {
 }
 
 // used to control iteration
-static bool graph_change = false;
+static bool graphs_change = false;
 
 // Applies f to each of the graphs in gs.  If f throws Inconsistent,
 // then the graph is removed from the list gs (imperatively).  
@@ -574,7 +950,7 @@ static graph_t *app_graphs(void (@f)(`env,graph_t @`H), `env e, graph_t *`H gs) 
       prev = g;
     } catch {
     case &Inconsistent:
-      graph_change = true;
+      graphs_change = true;
       if (prev == NULL) {
         gs = g->next;
       } else {
@@ -889,13 +1265,21 @@ static void add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
     case SLte: if (((int)c1) <= ((int)c2)) return; break;
     default: Warn::impos("Vcgen: found bad primop in add_constraint");
     }
-    throw &inconsistent; 
+#ifdef PROVER_DEBUG
+    fprintf(stderr,"inconsistency found in comparing two constants\n");
+#endif PROVER_DEBUG
+    throw &inconsistent;
   case $(_,&Uint(c2)):
     // we have t1 p c2 
     switch (p) {
     case ULt: 
       //no unsigned integer t could satisfy t u< 0
-      if (c2 == 0) throw &inconsistent;
+      if (c2 == 0){
+#ifdef PROVER_DEBUG
+	fprintf(stderr,"inconsistency: add constraint x u< 0 \n");
+#endif PROVER_DEBUG
+	throw &inconsistent;
+      }
       c2 = c2 - 1; 
       fallthru;
     case ULte:
@@ -907,7 +1291,12 @@ static void add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
       return;
     case SLt: 
       //no signed integer t could satisfy t s< MININT
-      if (c2 == MININT) throw &inconsistent;
+      if (c2 == MININT){
+#ifdef PROVER_DEBUG
+	fprintf(stderr,"inconsistency: add constraint x s< MININT \n");
+#endif PROVER_DEBUG
+	throw &inconsistent;
+      }
       c2 = c2 - 1;
       fallthru;
     case SLte:
@@ -921,7 +1310,12 @@ static void add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
     switch (p) {
     case ULt: 
       //no unsigned integer t could be greater than the biggest unsigned
-      if (c1 == MAXUINT) throw &inconsistent;
+      if (c1 == MAXUINT){
+#ifdef PROVER_DEBUG
+	fprintf(stderr,"inconsistency: add constraint MAXUINT u< x \n");
+#endif PROVER_DEBUG
+	throw &inconsistent;
+      }
       c1 = c1 + 1;
       fallthru;
     case ULte:
@@ -939,7 +1333,12 @@ static void add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
       return;
     case SLt: 
       //no signed integer could be greater than the biggest signed int
-      if (c1 == MAXINT) throw &inconsistent;
+      if (c1 == MAXINT){
+#ifdef PROVER_DEBUG
+	fprintf(stderr,"inconsistency: add constraint MAXINT s< x \n");
+#endif PROVER_DEBUG
+	throw &inconsistent;
+      }
       c1 = c1 + 1;
       fallthru;
     case SLte:
@@ -991,7 +1390,7 @@ datatype exn { TooLarge };
 datatype exn.TooLarge too_large = TooLarge;
 
 //FIX: add a way for the user to control this.
-unsigned int max_paths = 33;
+unsigned int max_paths = 17;
 unsigned int max_paths_seen = 0;
 
 // given a set of graphs gs representing A1 or A2 or ... or An
@@ -1018,15 +1417,18 @@ static graph_t *cgraph(graph_t *`H gs, Set::set_t<assn_t,`H> @already_seen,
   case &True: break;         // gs and true == gs
   case &False: gs = NULL; break; // gs and false == false
   case &And(a1,a2): 
-    gs = cgraph(gs,already_seen,a1,total_paths);// gs and (a1 and a2) == (gs and a1) and a2
-    a = a2;
+    gs = cgraph(gs,already_seen,a2,total_paths);// gs and (a1 and a2) == (gs and a2) and a1
+    a = a1;
     goto LOOP;
   case &Or(a1,a2):
     let n = num_graphs(gs);
-    if (*total_paths > max_paths) throw &too_large;
+    if (*total_paths > max_paths){
+      throw &too_large;
+    }
     // fprintf(stderr, "num_graphs(gs) = %d, total_paths = %d\n", n, *total_paths);
     // must copy the graphs since we mutate them in place
     *total_paths = *total_paths + n;
+    gs = app_graphs(johnson,0,gs);
     graph_t *gs1 = gs;
     graph_t *gs2 = copy_graphs(gs);
     let already_seen1 = *already_seen;
@@ -1160,9 +1562,10 @@ static bool consistent(assn_t a) {
     //fprintf(stderr,"max_lookup = %d\n",max_lookup);
     //fprintf(stderr,"already_seen_hits = %d\n",already_seen_hits);
     // run closure passes to weed out graphs
-    graph_change = true;
-    while (graph_change && gs != NULL) {
-      graph_change = false;
+    graphs_change = true;
+    while (graphs_change && gs != NULL) {
+      gs = app_graphs(johnson,0,gs);
+      graphs_change = false;
       gs = associate_ud_sd_in_graphs(gs);
       gs = add_type_assns(gs);
       gs = congruence_close_graphs(gs);

@@ -366,44 +366,44 @@ static void*Cyc_badarg(struct _fat_ptr s){
 return(void*)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp0->tag=Cyc_Core_Invalid_argument,_Tmp0->f1=s;_Tmp0;}));}
 # 104
 static int Cyc_va_arg_int(struct _fat_ptr ap){
-void*_Tmp0=*((void**)ap.curr);unsigned long _Tmp1;if(*((int*)_Tmp0)==1){_Tmp1=((struct Cyc_Int_pa_PrintArg_struct*)_Tmp0)->f1;{unsigned long i=_Tmp1;
+void*_Tmp0=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));unsigned long _Tmp1;if(*((int*)_Tmp0)==1){_Tmp1=((struct Cyc_Int_pa_PrintArg_struct*)_Tmp0)->f1;{unsigned long i=_Tmp1;
 return(int)i;}}else{
 return({(int(*)(struct _fat_ptr))Cyc_badarg;})(_tag_fat("printf expected int",sizeof(char),20U));};}
 # 111
 static long Cyc_va_arg_long(struct _fat_ptr ap){
-void*_Tmp0=*((void**)ap.curr);unsigned long _Tmp1;if(*((int*)_Tmp0)==1){_Tmp1=((struct Cyc_Int_pa_PrintArg_struct*)_Tmp0)->f1;{unsigned long i=_Tmp1;
+void*_Tmp0=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));unsigned long _Tmp1;if(*((int*)_Tmp0)==1){_Tmp1=((struct Cyc_Int_pa_PrintArg_struct*)_Tmp0)->f1;{unsigned long i=_Tmp1;
 return(long)i;}}else{
 return({(long(*)(struct _fat_ptr))Cyc_badarg;})(_tag_fat("printf expected int",sizeof(char),20U));};}
 # 118
 static unsigned long Cyc_va_arg_ulong(struct _fat_ptr ap){
-void*_Tmp0=*((void**)ap.curr);unsigned long _Tmp1;if(*((int*)_Tmp0)==1){_Tmp1=((struct Cyc_Int_pa_PrintArg_struct*)_Tmp0)->f1;{unsigned long i=_Tmp1;
+void*_Tmp0=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));unsigned long _Tmp1;if(*((int*)_Tmp0)==1){_Tmp1=((struct Cyc_Int_pa_PrintArg_struct*)_Tmp0)->f1;{unsigned long i=_Tmp1;
 return i;}}else{
 return({(unsigned long(*)(struct _fat_ptr))Cyc_badarg;})(_tag_fat("printf expected int",sizeof(char),20U));};}
 # 125
 static unsigned long Cyc_va_arg_uint(struct _fat_ptr ap){
-void*_Tmp0=*((void**)ap.curr);unsigned long _Tmp1;if(*((int*)_Tmp0)==1){_Tmp1=((struct Cyc_Int_pa_PrintArg_struct*)_Tmp0)->f1;{unsigned long i=_Tmp1;
+void*_Tmp0=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));unsigned long _Tmp1;if(*((int*)_Tmp0)==1){_Tmp1=((struct Cyc_Int_pa_PrintArg_struct*)_Tmp0)->f1;{unsigned long i=_Tmp1;
 return i;}}else{
 return({(unsigned long(*)(struct _fat_ptr))Cyc_badarg;})(_tag_fat("printf expected int",sizeof(char),20U));};}
 # 133
 static double Cyc_va_arg_double(struct _fat_ptr ap){
-void*_Tmp0=*((void**)ap.curr);long double _Tmp1;double _Tmp2;switch(*((int*)_Tmp0)){case 2: _Tmp2=((struct Cyc_Double_pa_PrintArg_struct*)_Tmp0)->f1;{double d=_Tmp2;
+void*_Tmp0=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));long double _Tmp1;double _Tmp2;switch(*((int*)_Tmp0)){case 2: _Tmp2=((struct Cyc_Double_pa_PrintArg_struct*)_Tmp0)->f1;{double d=_Tmp2;
 return d;}case 3: _Tmp1=((struct Cyc_LongDouble_pa_PrintArg_struct*)_Tmp0)->f1;{long double ld=_Tmp1;
 return(double)ld;}default:
 # 138
  _throw(Cyc_badarg(({struct Cyc_String_pa_PrintArg_struct _Tmp3=({struct Cyc_String_pa_PrintArg_struct _Tmp4;_Tmp4.tag=0,({struct _fat_ptr _Tmp5=(struct _fat_ptr)((struct _fat_ptr)Cyc_parg2string(*((void**)ap.curr)));_Tmp4.f1=_Tmp5;});_Tmp4;});void*_Tmp4[1];_Tmp4[0]=& _Tmp3;Cyc_aprintf(_tag_fat("printf expected double but found %s",sizeof(char),36U),_tag_fat(_Tmp4,sizeof(void*),1));})));};}
 # 144
 static short*Cyc_va_arg_short_ptr(struct _fat_ptr ap){
-void*_Tmp0=*((void**)ap.curr);void*_Tmp1;if(*((int*)_Tmp0)==4){_Tmp1=((struct Cyc_ShortPtr_pa_PrintArg_struct*)_Tmp0)->f1;{short*p=_Tmp1;
+void*_Tmp0=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));void*_Tmp1;if(*((int*)_Tmp0)==4){_Tmp1=((struct Cyc_ShortPtr_pa_PrintArg_struct*)_Tmp0)->f1;{short*p=_Tmp1;
 return p;}}else{
 _throw(Cyc_badarg(_tag_fat("printf expected short pointer",sizeof(char),30U)));};}
 # 152
 static unsigned long*Cyc_va_arg_int_ptr(struct _fat_ptr ap){
-void*_Tmp0=*((void**)ap.curr);void*_Tmp1;if(*((int*)_Tmp0)==5){_Tmp1=((struct Cyc_IntPtr_pa_PrintArg_struct*)_Tmp0)->f1;{unsigned long*p=_Tmp1;
+void*_Tmp0=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));void*_Tmp1;if(*((int*)_Tmp0)==5){_Tmp1=((struct Cyc_IntPtr_pa_PrintArg_struct*)_Tmp0)->f1;{unsigned long*p=_Tmp1;
 return p;}}else{
 _throw(Cyc_badarg(_tag_fat("printf expected int pointer",sizeof(char),28U)));};}
 # 160
 static const struct _fat_ptr Cyc_va_arg_string(struct _fat_ptr ap){
-void*_Tmp0=*((void**)ap.curr);struct _fat_ptr _Tmp1;if(*((int*)_Tmp0)==0){_Tmp1=((struct Cyc_String_pa_PrintArg_struct*)_Tmp0)->f1;{struct _fat_ptr s=_Tmp1;
+void*_Tmp0=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));struct _fat_ptr _Tmp1;if(*((int*)_Tmp0)==0){_Tmp1=((struct Cyc_String_pa_PrintArg_struct*)_Tmp0)->f1;{struct _fat_ptr s=_Tmp1;
 return s;}}else{
 _throw(Cyc_badarg(_tag_fat("printf expected string",sizeof(char),23U)));};}
 # 177 "printf.cyc"

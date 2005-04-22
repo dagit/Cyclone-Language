@@ -413,13 +413,13 @@ struct Cyc_APQ_T*Cyc_APQ_abs(struct Cyc_APQ_T*q){
 return({struct Cyc_AP_T*_Tmp0=Cyc_AP_abs(_check_null(q)->n);Cyc_APQ_fromAP(_Tmp0,q->d);});}
 # 72
 struct Cyc_APQ_T*Cyc_APQ_add(struct Cyc_APQ_T*p,struct Cyc_APQ_T*q){
-struct Cyc_AP_T*d=Cyc_AP_lcm(p->d,q->d);
+struct Cyc_AP_T*d=({struct Cyc_AP_T*_Tmp0=_check_null(p)->d;Cyc_AP_lcm(_Tmp0,_check_null(q)->d);});
 struct Cyc_AP_T*px=Cyc_AP_div(d,p->d);
 struct Cyc_AP_T*qx=Cyc_AP_div(d,q->d);
 return({struct Cyc_AP_T*_Tmp0=({struct Cyc_AP_T*_Tmp1=Cyc_AP_mul(p->n,px);Cyc_AP_add(_Tmp1,Cyc_AP_mul(q->n,qx));});Cyc_APQ_fromAP(_Tmp0,d);});}
 # 79
 struct Cyc_APQ_T*Cyc_APQ_sub(struct Cyc_APQ_T*p,struct Cyc_APQ_T*q){
-struct Cyc_AP_T*d=Cyc_AP_lcm(p->d,q->d);
+struct Cyc_AP_T*d=({struct Cyc_AP_T*_Tmp0=_check_null(p)->d;Cyc_AP_lcm(_Tmp0,_check_null(q)->d);});
 struct Cyc_AP_T*px=Cyc_AP_div(d,p->d);
 struct Cyc_AP_T*qx=Cyc_AP_div(d,q->d);
 return({struct Cyc_AP_T*_Tmp0=({struct Cyc_AP_T*_Tmp1=Cyc_AP_mul(p->n,px);Cyc_AP_sub(_Tmp1,Cyc_AP_mul(q->n,qx));});Cyc_APQ_fromAP(_Tmp0,d);});}
@@ -432,7 +432,7 @@ if(Cyc_AP_cmp(_check_null(q)->n,Cyc_AP_zero)==0)_throw((void*)({struct Cyc_Inval
 return({struct Cyc_AP_T*_Tmp0=Cyc_AP_mul(_check_null(p)->n,q->d);Cyc_APQ_fromAP(_Tmp0,Cyc_AP_mul(p->d,q->n));});}
 # 95
 int Cyc_APQ_cmp(struct Cyc_APQ_T*p,struct Cyc_APQ_T*q){
-struct Cyc_AP_T*d=Cyc_AP_lcm(p->d,q->d);
+struct Cyc_AP_T*d=({struct Cyc_AP_T*_Tmp0=_check_null(p)->d;Cyc_AP_lcm(_Tmp0,_check_null(q)->d);});
 struct Cyc_AP_T*px=Cyc_AP_div(d,p->d);
 struct Cyc_AP_T*qx=Cyc_AP_div(d,q->d);
 return({struct Cyc_AP_T*_Tmp0=Cyc_AP_mul(p->n,px);Cyc_AP_cmp(_Tmp0,Cyc_AP_mul(q->n,qx));});}

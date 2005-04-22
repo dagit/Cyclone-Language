@@ -785,7 +785,7 @@ void*_Tmp0;struct _fat_ptr _Tmp1;_Tmp1=stk->f0;_Tmp0=(int*)& stk->f1;{struct _fa
 int ind=*indp;
 if(ind==-1)
 return 0;{
-const struct Cyc_Dict_T*t=((const struct Cyc_Dict_T**)stack.curr)[ind];
+const struct Cyc_Dict_T*t=*((const struct Cyc_Dict_T**)_check_fat_subscript(stack,sizeof(const struct Cyc_Dict_T*),ind));
 *dest=_check_null(t)->key_val;
 -- ind;
 if((unsigned)t->left)

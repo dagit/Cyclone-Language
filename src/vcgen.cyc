@@ -843,16 +843,17 @@ static assn_t vcgen_local_decl(env_t env, decl_t d, assn_t a) {
   case &Absyn::Var_d(vd): return add_vardecl(env,vd,a);
   case &Absyn::Let_d(p,vds,e,_): 
     let $(_,a) = vcgen_rexp(env,e,a);
-    for (let vds = vds->v; vds != NULL; vds = vds->tl) {
+     for (let vds = vds->v; vds != NULL; vds = vds->tl) {
       let $(vdopt,eopt) = *vds->hd;
       if (vdopt != NULL) {
         let vd = *vdopt;
-        if (eopt == NULL) a = add_vardecl(env,vd,a);
-        else {
-          let $(t,a1) = vcgen_rexp(env,eopt,a);
-          term_t tv = (vd->escapes) ? addr(vd) : var(vd);
-          a = do_assign(env,a1,tv,t);
-        }
+//         if (eopt == NULL) a = add_vardecl(env,vd,a);
+//         else {
+//           let $(t,a1) = vcgen_rexp(env,eopt,a);
+//           term_t tv = (vd->escapes) ? addr(vd) : var(vd);
+//           a = do_assign(env,a1,tv,t);
+//         }
+	a = add_vardecl(env,vd,a);
       }
     }
     return a;

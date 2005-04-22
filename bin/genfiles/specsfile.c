@@ -501,7 +501,7 @@ while(1){
 # 158
 while(1){
 if((unsigned long)i >= n)goto DONE;
-if((int)((const char*)cmdline.curr)[i]==0)goto DONE;
+if((int)*((const char*)_check_fat_subscript(cmdline,sizeof(char),i))==0)goto DONE;
 if(!isspace((int)((const char*)cmdline.curr)[i]))break;
 ++ i;}
 # 164
@@ -509,13 +509,13 @@ j=0;
 # 169
 while(1){
 if((unsigned long)i >= n)break;
-if((int)((const char*)cmdline.curr)[i]==0)break;
+if((int)*((const char*)_check_fat_subscript(cmdline,sizeof(char),i))==0)break;
 if(isspace((int)((const char*)cmdline.curr)[i]))break;
 if((int)((const char*)cmdline.curr)[i]==92){
 # 175
 ++ i;
 if((unsigned long)i >= n)break;
-if((int)((const char*)cmdline.curr)[i]==0)break;
+if((int)*((const char*)_check_fat_subscript(cmdline,sizeof(char),i))==0)break;
 *((char*)_check_known_subscript_notnull(buf,4096U,sizeof(char),j))=((const char*)cmdline.curr)[i];
 ++ j;}else{
 # 182

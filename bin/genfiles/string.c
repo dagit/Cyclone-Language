@@ -490,15 +490,15 @@ struct _fat_ptr Cyc_strcat(struct _fat_ptr dest,struct _fat_ptr src){
 return Cyc_int_strcato(dest,src);}
 # 197
 struct _fat_ptr Cyc_rstrconcat(struct _RegionHandle*r,struct _fat_ptr a,struct _fat_ptr b){
-unsigned long alen=Cyc_strlen(a);
-unsigned long blen=Cyc_strlen(b);
+unsigned alen=Cyc_strlen(a);
+unsigned blen=Cyc_strlen(b);
 struct _fat_ptr ans=Cyc_Core_rnew_string(r,(alen + blen)+ 1U);
 int i;int j;
 alen <= _get_fat_size(ans,sizeof(char))?0:({(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;})(_tag_fat("alen <= numelts(ans)",sizeof(char),21U),_tag_fat("string.cyc",sizeof(char),11U),202U);
 1;
-for(i=0;(unsigned long)i < alen;++ i){({struct _fat_ptr _Tmp0=_fat_ptr_plus(ans,sizeof(char),i);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=((const char*)a.curr)[i];if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});}
+for(i=0;(unsigned)i < alen;++ i){({struct _fat_ptr _Tmp0=_fat_ptr_plus(ans,sizeof(char),i);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=((const char*)a.curr)[i];if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});}
 1;
-for(j=0;(unsigned long)j < blen;++ j){({struct _fat_ptr _Tmp0=_fat_ptr_plus(ans,sizeof(char),i + j);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=((const char*)b.curr)[j];if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});}
+for(j=0;(unsigned)j < blen;++ j){({struct _fat_ptr _Tmp0=_fat_ptr_plus(ans,sizeof(char),i + j);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=((const char*)b.curr)[j];if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});}
 return ans;}
 # 210
 struct _fat_ptr Cyc_strconcat(struct _fat_ptr a,struct _fat_ptr b){
@@ -582,7 +582,7 @@ struct _fat_ptr Cyc_strncpy(struct _fat_ptr dest,struct _fat_ptr src,unsigned lo
 int i;
 n <= _get_fat_size(dest,sizeof(char))?0:({(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;})(_tag_fat("n <= numelts(dest)",sizeof(char),19U),_tag_fat("string.cyc",sizeof(char),11U),296U);
 for(i=0;(unsigned long)i < n;++ i){
-char srcChar=((const char*)src.curr)[i];
+char srcChar=*((const char*)_check_fat_subscript(src,sizeof(char),i));
 if((int)srcChar==0)break;
 ((char*)dest.curr)[i]=srcChar;}
 # 302

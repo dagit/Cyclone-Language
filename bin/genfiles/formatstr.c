@@ -388,7 +388,7 @@ if(i < 0 ||(unsigned long)i >= len)return 0;{
 struct Cyc_List_List*flags=0;
 char c=' ';
 for(1;(unsigned long)i < len;++ i){
-c=((const char*)s.curr)[i];
+c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
 switch((int)c){case 43:
  goto _LL4;case 45: _LL4:
  goto _LL6;case 32: _LL6:
@@ -403,13 +403,13 @@ if((unsigned long)i >= len)return 0;
 flags=Cyc_List_imp_rev(flags);{
 # 69
 struct Cyc_List_List*width=0;
-c=((const char*)s.curr)[i];
+c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
 if((int)c==42){
 width=({struct Cyc_List_List*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_List_List));_Tmp0->hd=(void*)((int)c),_Tmp0->tl=width;_Tmp0;});
 ++ i;}else{
 # 75
 for(1;(unsigned long)i < len;++ i){
-c=((const char*)s.curr)[i];
+c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
 if(isdigit((int)c))width=({struct Cyc_List_List*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_List_List));_Tmp0->hd=(void*)((int)c),_Tmp0->tl=width;_Tmp0;});else{
 break;}}}
 # 81
@@ -417,17 +417,17 @@ if((unsigned long)i >= len)return 0;
 width=Cyc_List_imp_rev(width);{
 # 85
 struct Cyc_List_List*precision=0;
-c=((const char*)s.curr)[i];
+c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
 if((int)c==46){
 precision=({struct Cyc_List_List*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_List_List));_Tmp0->hd=(void*)((int)c),_Tmp0->tl=precision;_Tmp0;});
 if((unsigned long)++ i >= len)return 0;
-c=((const char*)s.curr)[i];
+c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
 if((int)c==42){
 precision=({struct Cyc_List_List*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_List_List));_Tmp0->hd=(void*)((int)c),_Tmp0->tl=precision;_Tmp0;});
 ++ i;}else{
 # 95
 for(1;(unsigned long)i < len;++ i){
-c=((const char*)s.curr)[i];
+c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
 if(isdigit((int)c))precision=({struct Cyc_List_List*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_List_List));_Tmp0->hd=(void*)((int)c),_Tmp0->tl=precision;_Tmp0;});else{
 break;}}}}
 # 101
@@ -435,18 +435,18 @@ if((unsigned long)i >= len)return 0;
 precision=Cyc_List_imp_rev(precision);{
 # 106
 struct Cyc_List_List*lenmod=0;
-c=((const char*)s.curr)[i];
+c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
 switch((int)c){case 104:
 # 110
  lenmod=({struct Cyc_List_List*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_List_List));_Tmp0->hd=(void*)((int)c),_Tmp0->tl=lenmod;_Tmp0;});
 if((unsigned long)++ i >= len)return 0;
-c=((const char*)s.curr)[i];
+c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
 if((int)c==104){lenmod=({struct Cyc_List_List*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_List_List));_Tmp0->hd=(void*)((int)c),_Tmp0->tl=lenmod;_Tmp0;});++ i;}
 goto _LLD;case 108:
 # 116
  lenmod=({struct Cyc_List_List*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_List_List));_Tmp0->hd=(void*)((int)c),_Tmp0->tl=lenmod;_Tmp0;});
 if((unsigned long)++ i >= len)return 0;
-c=((const char*)s.curr)[i];
+c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
 if((int)c==108){lenmod=({struct Cyc_List_List*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_List_List));_Tmp0->hd=(void*)((int)c),_Tmp0->tl=lenmod;_Tmp0;});++ i;}
 goto _LLD;case 106:
  goto _LL15;case 122: _LL15:
@@ -461,7 +461,7 @@ goto _LLD;default:
 if((unsigned long)i >= len)return 0;
 lenmod=Cyc_List_imp_rev(lenmod);
 # 134
-c=((const char*)s.curr)[i];
+c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
 switch((int)c){case 100:
  goto _LL20;case 105: _LL20:
  goto _LL22;case 111: _LL22:
@@ -493,7 +493,7 @@ struct Cyc_List_List*typs=0;
 int i;
 struct _RegionHandle _Tmp0=_new_region(0U,"temp");struct _RegionHandle*temp=& _Tmp0;_push_region(temp);
 for(i=0;(unsigned long)i < len;++ i){
-if((int)((const char*)s.curr)[i]!=37)continue;{
+if((int)*((const char*)_check_fat_subscript(s,sizeof(char),i))!=37)continue;{
 struct Cyc_Core_Opt*cs=Cyc_Formatstr_parse_conversionspecification(temp,s,i + 1);
 if(cs==0){
 struct Cyc_List_List*_Tmp1=({(struct Cyc_List_List*(*)(unsigned,struct _fat_ptr,struct _fat_ptr ap))Cyc_Formatstr_err_null;})(loc,_tag_fat("bad format string",sizeof(char),18U),_tag_fat(0U,sizeof(void*),0));_npop_handler(0);return _Tmp1;}{
@@ -699,7 +699,7 @@ unsigned long len=Cyc_strlen(s);
 if(i < 0 ||(unsigned long)i >= len)return 0;{
 # 362
 int suppress=0;
-char c=((const char*)s.curr)[i];
+char c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
 if((int)c==42){
 suppress=1;
 ++ i;
@@ -707,7 +707,7 @@ if((unsigned long)i >= len)return 0;}{
 # 370
 struct Cyc_List_List*width=0;
 for(1;(unsigned long)i < len;++ i){
-c=((const char*)s.curr)[i];
+c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
 if(isdigit((int)c))width=({struct Cyc_List_List*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_List_List));_Tmp0->hd=(void*)((int)c),_Tmp0->tl=width;_Tmp0;});else{
 break;}}
 # 376
@@ -715,20 +715,20 @@ if((unsigned long)i >= len)return 0;
 width=Cyc_List_imp_rev(width);{
 # 381
 struct Cyc_List_List*lenmod=0;
-c=((const char*)s.curr)[i];
+c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
 switch((int)c){case 104:
 # 385
  lenmod=({struct Cyc_List_List*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_List_List));_Tmp0->hd=(void*)((int)c),_Tmp0->tl=lenmod;_Tmp0;});
 ++ i;
 if((unsigned long)i >= len)return 0;
-c=((const char*)s.curr)[i];
+c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
 if((int)c==104){lenmod=({struct Cyc_List_List*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_List_List));_Tmp0->hd=(void*)((int)c),_Tmp0->tl=lenmod;_Tmp0;});++ i;}
 goto _LL0;case 108:
 # 392
  lenmod=({struct Cyc_List_List*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_List_List));_Tmp0->hd=(void*)((int)c),_Tmp0->tl=lenmod;_Tmp0;});
 ++ i;
 if((unsigned long)i >= len)return 0;
-c=((const char*)s.curr)[i];
+c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
 if((int)c==108){lenmod=({struct Cyc_List_List*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_List_List));_Tmp0->hd=(void*)((int)c),_Tmp0->tl=lenmod;_Tmp0;});++ i;}
 goto _LL0;case 106:
  goto _LL8;case 122: _LL8:
@@ -743,7 +743,7 @@ goto _LL0;default:
 if((unsigned long)i >= len)return 0;
 lenmod=Cyc_List_imp_rev(lenmod);
 # 411
-c=((const char*)s.curr)[i];
+c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
 switch((int)c){case 100:
  goto _LL13;case 105: _LL13:
  goto _LL15;case 111: _LL15:
@@ -775,7 +775,7 @@ struct Cyc_List_List*typs=0;
 int i;
 {struct _RegionHandle _Tmp0=_new_region(0U,"temp");struct _RegionHandle*temp=& _Tmp0;_push_region(temp);
 for(i=0;(unsigned long)i < len;++ i){
-if((int)((const char*)s.curr)[i]!=37)continue;{
+if((int)*((const char*)_check_fat_subscript(s,sizeof(char),i))!=37)continue;{
 struct Cyc_Core_Opt*x=Cyc_Formatstr_parse_inputformat(temp,s,i + 1);
 if(x==0){
 struct Cyc_List_List*_Tmp1=({(struct Cyc_List_List*(*)(unsigned,struct _fat_ptr,struct _fat_ptr ap))Cyc_Formatstr_err_null;})(loc,_tag_fat("bad format string",sizeof(char),18U),_tag_fat(0U,sizeof(void*),0));_npop_handler(0);return _Tmp1;}{

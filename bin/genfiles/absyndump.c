@@ -684,7 +684,7 @@ static void Cyc_Absyndump_dump_noncallconv(struct Cyc_List_List*atts){
 # 324
 int hasatt=0;
 {struct Cyc_List_List*atts2=atts;for(0;atts2!=0;atts2=atts2->tl){
-void*_Tmp0=(void*)atts->hd;switch(*((int*)_Tmp0)){case 1:
+void*_Tmp0=(void*)_check_null(atts)->hd;switch(*((int*)_Tmp0)){case 1:
  goto _LL4;case 2: _LL4:
  goto _LL6;case 3: _LL6:
  goto _LL0;default:

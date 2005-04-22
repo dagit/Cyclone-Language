@@ -195,8 +195,8 @@ mstring_t<`r> strcat(mstring_t<`r> dest,buffer_t src) {
 
 // Allocate a new string and fill it with the concatenation of a and b
 mstring_t<`r> rstrconcat(region_t<`r> r, buffer_t a, buffer_t b) {
-  let alen = strlen(a);
-  let blen = strlen(b);
+  unsigned alen = strlen(a);
+  unsigned blen = strlen(b);
   mstring_t<`r> ans = rnew_string(r,alen+blen+1);
   int i, j;
   assert(alen <= numelts(ans));

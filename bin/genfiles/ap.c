@@ -412,7 +412,7 @@ static struct Cyc_AP_T*Cyc_set(struct Cyc_AP_T*z,long n){
 if(n==Cyc_long_min)
 Cyc_XP_fromint(_check_null(z)->size,z->digits,(unsigned)Cyc_long_max + 1U);else{
 if(n < 0)
-Cyc_XP_fromint(z->size,z->digits,(unsigned long)(- n));else{
+Cyc_XP_fromint(_check_null(z)->size,z->digits,(unsigned long)(- n));else{
 # 49
 Cyc_XP_fromint(_check_null(z)->size,z->digits,(unsigned long)n);}}
 z->sign=n < 0?-1: 1;
