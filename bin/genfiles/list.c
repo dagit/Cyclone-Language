@@ -575,7 +575,7 @@ struct Cyc_List_List*z;
 # 321
 if(x==0)return y;
 if(y==0)return x;
-for(z=x;_check_null(z)->tl!=0;z=z->tl){
+for(z=x;1 && z->tl!=0;z=z->tl){
 ;}
 z->tl=y;
 return x;}

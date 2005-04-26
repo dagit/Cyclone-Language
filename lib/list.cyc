@@ -320,7 +320,7 @@ list_t<`a,`r> imp_append(list_t<`a::B\T,`r> x,list_t<`a,`r> y) {
 
   if (x == NULL) return y;
   if (y == NULL) return x;
-  for (z = x; z->tl != NULL; z = z->tl) 
+  for (z = x; @assert(z!=NULL)&&z->tl != NULL; z = z->tl) 
     ; // skip
   z->tl = y;
   return x;
