@@ -130,8 +130,8 @@ static bool need_null_check(env_t nv, exp_t e) {
     err(e->loc,"cannot perform NULL-pointer check at toplevel");
     return false;
   }
-  if(Flags::warn_all_null_deref)
-    warn(e->loc,"inserted null check");
+  //if(Flags::warn_all_null_deref)
+  //  warn(e->loc,"inserted null check");
   return true;
 }
 
@@ -347,17 +347,22 @@ static void do_exp(env_t nv, exp_t e) {
     // * thin zt pointer: yes! (and toc.cyc also always checks for *e2 != 0)
     if(Tcutil::get_type_bound((type_t)e2->topt) != NULL
        && Tcutil::is_zeroterm_pointer_type((type_t)e2->topt) 
-       && need_null_check(nv,e2))
+       && need_null_check(nv,e2) && need_null_check_vcgen(nv,e2)) {
+      if (Flags::warn_all_null_deref)
+        warn(e->loc,"inserted null check");
       e->annot = &NullOnly_val;
-    else
+    } else
       e->annot = &NoCheck_val;
     do_exp(nv,e2);
     break;
 
   case &FnCall_e(e1,es,_,_): // e1 must not be NULL 
-    if(need_null_check(nv,e1)) // DJG: I think e1 is always a pointer type
+      // DJG: I think e1 is always a pointer type
+    if(need_null_check(nv,e1) && need_null_check_vcgen(nv,e1)) {
+      if (Flags::warn_all_null_deref)
+        warn(e1->loc,"inserted null check");
       e->annot = &NullOnly_val;
-    else
+    } else
       e->annot = &NoCheck_val;
     do_exp(nv,e1);
     for(; es!=NULL; es=es->tl)
@@ -466,6 +471,8 @@ static void do_exp(env_t nv, exp_t e) {
         null_ck = need_null_check(nv,e1);
         if (null_ck) {
           null_ck = need_null_check_vcgen(nv,e1);
+          if (null_ck && Flags::warn_all_null_deref)
+            warn(e->loc,"inserted null check");
         }
       }
       if(bds_ck) {
