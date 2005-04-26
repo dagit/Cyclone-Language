@@ -782,7 +782,6 @@ struct _fat_ptr Cyc_Core_alias_refptr(struct _fat_ptr ptr) {
   return ptr;
 }
 
-
 static void drop_refptr_base(unsigned char *ptr) {
   int *cnt = get_refcnt(ptr);
   if (cnt != NULL) {
@@ -800,8 +799,9 @@ static void drop_refptr_base(unsigned char *ptr) {
 		region_get_heap_size(CYC_CORE_HEAP_REGION), 
 		region_get_free_bytes(CYC_CORE_HEAP_REGION),
 		region_get_total_bytes(CYC_CORE_HEAP_REGION),
-                (unsigned int)ptr);
+                (unsigned int)(ptr - sizeof(int)));
       }
+      GC_register_finalizer_no_order((ptr-sizeof(int)),NULL,NULL,NULL,NULL);
 #endif
       GC_free(ptr - sizeof(int));
     }
@@ -979,6 +979,7 @@ static void _profile_check_gc() {
     }
   }
 }
+
 
 typedef void * GC_PTR; /* Taken from gc/include/gc.h, must be kept in sync. */
 
@@ -1162,10 +1163,12 @@ void * _profile_region_malloc(struct _RegionHandle *r, _AliasQualHandle_t aq, un
   char *addr;
   addr = _region_malloc(r,aq,s);
   _profile_check_gc();
+  char *logaddr=addr;
   if (alloc_log != NULL) {
     if (r == CYC_CORE_HEAP_REGION) {
       if(aq == CYC_CORE_REFCNT_AQUAL) {
 	s = GC_size(addr-sizeof(int)); // back up to before the refcnt
+	logaddr = (addr-sizeof(int));
 	set_finalizer((GC_PTR)(addr - sizeof(int)));
       }
       else {
@@ -1192,7 +1195,7 @@ void * _profile_region_malloc(struct _RegionHandle *r, _AliasQualHandle_t aq, un
 	    region_get_heap_size(r), 
 	    region_get_free_bytes(r),
 	    region_get_total_bytes(r),
-	    (unsigned int)addr);
+	    (unsigned int)logaddr);
   }
   else {
     s = GC_size(addr);
@@ -1208,11 +1211,13 @@ void * _profile_region_calloc(struct _RegionHandle *r, _AliasQualHandle_t aq, un
   unsigned s = t1 * t2;
   addr = _region_calloc(r,aq,t1,t2);
   _profile_check_gc();
+  char *logaddr=addr;
   if (alloc_log != NULL) {
     if (r == CYC_CORE_HEAP_REGION) {
       if(aq == CYC_CORE_REFCNT_AQUAL) {
 	s = GC_size(addr-sizeof(int)); // back up to before the refcnt
 	set_finalizer((GC_PTR)(addr - sizeof(int)));
+	logaddr = (addr - sizeof(int));
       }
       else {
 	s = GC_size(addr);
@@ -1238,7 +1243,7 @@ void * _profile_region_calloc(struct _RegionHandle *r, _AliasQualHandle_t aq, un
 	    region_get_heap_size(r), 
 	    region_get_free_bytes(r),
 	    region_get_total_bytes(r),
-	    (unsigned int)addr);
+	    (unsigned int)logaddr);
   }
   return (void *)addr;
 }
