@@ -31,6 +31,10 @@ export CYCC CYCLEX CYCBISON INC_PATH LIB_PATH LIBR
 #   directory, and the -B. ensures we use that one.
 override CYCFLAGS += $(addprefix -I, $(INC_PATH)) -B. -B$(LIB_PATH) -save-c
 
+
+ifdef CHECKFLAG
+override CYCFLAGS += -print-check-totals
+endif
 # various flags to set
 ifdef DEBUGBUILD
 #override CYCFLAGS += -pp -g

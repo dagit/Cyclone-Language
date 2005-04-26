@@ -161,13 +161,14 @@ typedef struct Distance {
 
 
 // shortest path information from some source s to this node
-datatype ShortestPathInfo{
-  Infinity;       // the distance from s to this node is infinity
-  Shortest(int);  // the final shortest distance from s to this node
-  Current(int);   // the current distance from s to this node
+@tagged union ShortestPathInfo{
+  int Infinity;  // the distance from s to this node is infinity, int unused
+  int Shortest;  // the final shortest distance from s to this node
+  int Current;   // the current distance from s to this node
 };
+typedef union ShortestPathInfo shortestpathinfo_t;
+shortestpathinfo_t infinity = {.Infinity = 0};
 
-typedef datatype ShortestPathInfo @shortestpathinfo_t;
 // Represents a row within a graph.
 struct Node {
   node_t     *next; // next row in graph
@@ -337,10 +338,10 @@ static node_t @term2node(graph_t @g, term_t t) {
   node_t @n;
   switch (t){
   case &Binop(Absyn::Plus,t1,&Uint(c2),_):
-    n = new Node{*prev,t,false,false,NULL,NULL,0,0,new Infinity};
+    n = new Node{*prev,t,false,false,NULL,NULL,0,0,infinity};
     break;
   default:
-    n = new Node{*prev,t,true,true,NULL,NULL,0,0,new Infinity};
+    n = new Node{*prev,t,true,true,NULL,NULL,0,0,infinity};
     break;
   }
   *prev = n;
@@ -688,8 +689,8 @@ static void bellman_ford(int dummy,graph_t @g){
 // everything is unreachable from s except s itself.
 static void initialize_dist_set(node_t @s, graph_t @g){
   for(let node = g->rows; node != NULL; node = node->next){
-    if (node == s) node->shortest_path_info = new Current(0);
-    else node->shortest_path_info = new Infinity;
+    if (node == s) node->shortest_path_info = ShortestPathInfo{.Current = 0};
+    else node->shortest_path_info = infinity;
   }
   return;
 }
@@ -704,13 +705,13 @@ static node_t * extract_min(graph_t @g){
   node_t *current_shortest_node = NULL;
   for(let node = g->rows; node != NULL; node = node->next){
     switch (node->shortest_path_info){
-    case &Infinity: break;
-    case &Shortest(_): break;
-    case &Current(d_new): 
+    case {.Infinity = _}: break;
+    case {.Shortest = _}: break;
+    case {.Current = d_new}: 
       if (current_shortest_node == NULL) current_shortest_node = node;
       else {
 	switch (current_shortest_node->shortest_path_info){
-	case &Current(d_old): 
+	case {.Current = d_old}:
 	  if (d_new <= d_old) current_shortest_node = node;
 	  break;
 	default:
@@ -727,7 +728,7 @@ static void relaxation(node_t @u, graph_t @g, bool is_signed){
   distance_t *dists;
   int su;
   switch(u->shortest_path_info){
-  case &Shortest(d): su = d; break;
+  case {.Shortest = d}: su = d; break;
   default:
     Warn::impos(aprintf("current_shortest_node should always containe &Shortest(d)\n"));
     break;
@@ -736,16 +737,16 @@ static void relaxation(node_t @u, graph_t @g, bool is_signed){
   else dists = u->unsigned_distances;
   for(; dists != NULL; dists = dists->next){
     switch (dists->target->shortest_path_info){
-    case &Shortest(_): break; // already has the final shortest path, no action
-    case &Current(sv): 
+    case {.Shortest = _}: break; // already has the final shortest path, no action
+    case {.Current = sv}: 
       int uv = dists->dist;
       let $(overflow,sum) = is_signed_overflow(su,uv);
-      if (!overflow && sum < sv) dists->target->shortest_path_info = new Current(sum);
+      if (!overflow && sum < sv) dists->target->shortest_path_info = ShortestPathInfo{.Current = sum};
       break;
-    case &Infinity:
+    case {.Infinity = _}:
       int uv = dists->dist;
       let $(overflow,sum) = is_signed_overflow(su,uv);
-      if (!overflow) dists->target->shortest_path_info = new Current(sum);
+      if (!overflow) dists->target->shortest_path_info = ShortestPathInfo{.Current = sum};
       break;
     }
   }
@@ -758,7 +759,7 @@ static void relaxation(node_t @u, graph_t @g, bool is_signed){
 static void set_shortest_dist_from_s(node_t @`H s, graph_t @`H g, bool is_signed){
   for(let node = g->rows; node != NULL; node = node->next){
     switch (node->shortest_path_info){
-    case &Shortest(d): set_dist(g,s,node,d,is_signed); break;
+    case {.Shortest = d}: set_dist(g,s,node,d,is_signed); break;
     default: break;
     }
   }
@@ -778,9 +779,9 @@ static void dijkstra(node_t @`H s, graph_t @`H g){
     if (current_shortest_node == NULL) break;
     else {
       switch(current_shortest_node->shortest_path_info){
-      case &Current(d): 
+      case {.Current = d}: 
 	// extracted the min, now set the node info to Done
-	current_shortest_node->shortest_path_info = new Shortest(d);
+	current_shortest_node->shortest_path_info = ShortestPathInfo{.Shortest = d};
 	break;
       default:
 	Warn::impos(aprintf("current_shortest_node should always contain &Current(d)\n"));
@@ -799,9 +800,9 @@ static void dijkstra(node_t @`H s, graph_t @`H g){
     if (current_shortest_node == NULL) break;
     else {
       switch(current_shortest_node->shortest_path_info){
-      case &Current(d): 
+      case {.Current = d}: 
 	// extracted the min, now set the node info to Done
-	current_shortest_node->shortest_path_info = new Shortest(d);
+	current_shortest_node->shortest_path_info = ShortestPathInfo{.Shortest = d};
 	break;
       default:
 	Warn::impos(aprintf("current_shortest_node should always contain &Current(d)\n"));
@@ -923,7 +924,7 @@ static graph_t *copy_graphs(graph_t *gopt) {
     node_t *newrs = NULL;
     for (let rs = g->rows; rs != NULL; rs = rs->next) {
       newrs = new Node{newrs,rs->rep,rs->broken_as_signed,
-                       rs->broken_as_unsigned,NULL,NULL,0,0,new Infinity};
+                       rs->broken_as_unsigned,NULL,NULL,0,0,infinity};
     }
     newrs = revnodes(newrs);
     newg->rows = newrs;
