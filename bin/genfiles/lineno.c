@@ -432,16 +432,16 @@ enum Cyc_Lineno_token_val Cyc_Lineno_token(struct Cyc_Lexing_lexbuf*lexbuf){retu
 static struct _tuple0*Cyc_Lineno_parse_linedef(struct _fat_ptr line){
 struct _handler_cons _Tmp0;_push_handler(& _Tmp0);{int _Tmp1=0;if(setjmp(_Tmp0.handler))_Tmp1=1;if(!_Tmp1){
 {int i=0;
-while((unsigned)i < _get_fat_size(line,sizeof(char))&&((int)((char*)line.curr)[i]< 48 ||(int)((char*)line.curr)[i]> 57)){++ i;}{
+while((unsigned)i < _get_fat_size(line,sizeof(char))&&((int)*((char*)_check_fat_subscript(line,sizeof(char),i))< 48 ||(int)((char*)line.curr)[i]> 57)){++ i;}{
 int j=i;
-while(((unsigned)j < _get_fat_size(line,sizeof(char))&&(int)((char*)line.curr)[j]>= 48)&&(int)((char*)line.curr)[j]<= 57){++ j;}
+while(((unsigned)j < _get_fat_size(line,sizeof(char))&&(int)*((char*)_check_fat_subscript(line,sizeof(char),j))>= 48)&&(int)((char*)line.curr)[j]<= 57){++ j;}
 if((unsigned)i==_get_fat_size(line,sizeof(char))){struct _tuple0*_Tmp2=0;_npop_handler(0);return _Tmp2;}{
 int number=0;
 if(({struct Cyc_IntPtr_sa_ScanfArg_struct _Tmp2=({struct Cyc_IntPtr_sa_ScanfArg_struct _Tmp3;_Tmp3.tag=2,_Tmp3.f1=& number;_Tmp3;});void*_Tmp3[1];_Tmp3[0]=& _Tmp2;({struct _fat_ptr _Tmp4=(struct _fat_ptr)Cyc_substring((struct _fat_ptr)line,i,(unsigned long)(j - i));struct _fat_ptr _Tmp5=_tag_fat("%d",sizeof(char),3U);Cyc_sscanf(_Tmp4,_Tmp5,_tag_fat(_Tmp3,sizeof(void*),1));});})!=1){
 struct _tuple0*_Tmp2=0;_npop_handler(0);return _Tmp2;}
-while((unsigned)j < _get_fat_size(line,sizeof(char))&&(int)((char*)line.curr)[j]!=34){++ j;}{
+while((unsigned)j < _get_fat_size(line,sizeof(char))&&(int)*((char*)_check_fat_subscript(line,sizeof(char),j))!=34){++ j;}{
 int k=++ j;
-while((unsigned)k < _get_fat_size(line,sizeof(char))&&(int)((char*)line.curr)[k]!=34){++ k;}
+while((unsigned)k < _get_fat_size(line,sizeof(char))&&(int)*((char*)_check_fat_subscript(line,sizeof(char),k))!=34){++ k;}
 if((unsigned)j==_get_fat_size(line,sizeof(char))||(unsigned)k==_get_fat_size(line,sizeof(char))){struct _tuple0*_Tmp2=0;_npop_handler(0);return _Tmp2;}{
 struct _fat_ptr fname=Cyc_substring(line,j,(unsigned long)(k - j));
 struct _tuple0*_Tmp2;_Tmp2=_cycalloc(sizeof(struct _tuple0)),_Tmp2->f0=fname,_Tmp2->f1=number;_npop_handler(0);return _Tmp2;}}}}}

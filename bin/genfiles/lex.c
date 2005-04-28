@@ -554,14 +554,14 @@ if(!(len < _get_fat_size(buff,sizeof(char))))
 while(i < len){
 union Cyc_Lex_TrieChildren _Tmp0=_check_null(t)->children;int _Tmp1;void*_Tmp2;switch(_Tmp0.One.tag){case 3: _Tmp2=_Tmp0.Many.val;{struct Cyc_Lex_Trie**arr=_Tmp2;
 # 308
-int ch=Cyc_Lex_trie_char((int)((const char*)buff.curr)[(int)i]);
+int ch=Cyc_Lex_trie_char((int)*((const char*)_check_fat_subscript(buff,sizeof(char),(int)i)));
 if(*((struct Cyc_Lex_Trie**)_check_known_subscript_notnull(arr,65U,sizeof(struct Cyc_Lex_Trie*),ch))==0)
 ({struct Cyc_Lex_Trie*_Tmp3=({struct Cyc_Lex_Trie*_Tmp4=_region_malloc(r,0U,sizeof(struct Cyc_Lex_Trie));({union Cyc_Lex_TrieChildren _Tmp5=Cyc_Lex_Zero();_Tmp4->children=_Tmp5;}),_Tmp4->shared_str=0;_Tmp4;});arr[ch]=_Tmp3;});
 t=arr[ch];
 ++ i;
 goto _LL0;}case 2: _Tmp1=_Tmp0.One.val.f0;_Tmp2=_Tmp0.One.val.f1;{int one_ch=_Tmp1;struct Cyc_Lex_Trie*one_trie=_Tmp2;
 # 316
-if(one_ch==(int)((const char*)buff.curr)[(int)i])
+if(one_ch==(int)*((const char*)_check_fat_subscript(buff,sizeof(char),(int)i)))
 t=one_trie;else{
 # 319
 struct Cyc_Lex_Trie**arr=({unsigned _Tmp3=65U;({struct Cyc_Lex_Trie**_Tmp4=({struct _RegionHandle*_Tmp5=r;_region_malloc(_Tmp5,0U,_check_times(_Tmp3,sizeof(struct Cyc_Lex_Trie*)));});({{unsigned _Tmp5=65U;unsigned j;for(j=0;j < _Tmp5;++ j){_Tmp4[j]=0;}}0;});_Tmp4;});});
@@ -576,7 +576,7 @@ goto _LL0;}default:
 # 330
  while(i < len){
 struct Cyc_Lex_Trie*next;next=_region_malloc(r,0U,sizeof(struct Cyc_Lex_Trie)),({union Cyc_Lex_TrieChildren _Tmp3=Cyc_Lex_Zero();next->children=_Tmp3;}),next->shared_str=0;
-({union Cyc_Lex_TrieChildren _Tmp3=Cyc_Lex_One((int)((const char*)buff.curr)[(int)i ++],next);t->children=_Tmp3;});
+({union Cyc_Lex_TrieChildren _Tmp3=Cyc_Lex_One((int)*((const char*)_check_fat_subscript(buff,sizeof(char),(int)i ++)),next);t->children=_Tmp3;});
 t=next;}
 # 335
 return t;}_LL0:;}
@@ -659,7 +659,7 @@ if(len >= 1 &&((int)*((char*)_check_fat_subscript(buff,sizeof(char),len - 1))==1
 # 434
 len -=1;
 declared_size=1;
-if(len >= 1 &&((int)((char*)buff.curr)[len - 1]==108 ||(int)((char*)buff.curr)[len - 1]==76)){
+if(len >= 1 &&((int)*((char*)_check_fat_subscript(buff,sizeof(char),len - 1))==108 ||(int)((char*)buff.curr)[len - 1]==76)){
 len -=1;
 size=4U;}}
 # 441
@@ -869,7 +869,7 @@ static int Cyc_Lex_linenumber=1;
 static struct Cyc_Lex_PosInfo*Cyc_Lex_rnew_filepos(struct _RegionHandle*r,struct _fat_ptr filename,unsigned starting_line,struct Cyc_Lex_PosInfo*next){
 # 701
 struct _fat_ptr linenumpos=({unsigned _Tmp0=10U;_tag_fat(_region_calloc(Cyc_Core_heap_region,Cyc_Core_unique_qual,sizeof(unsigned),_Tmp0),sizeof(unsigned),_Tmp0);});
-((unsigned*)linenumpos.curr)[0]=(unsigned)Cyc_yylloc.first_line;
+*((unsigned*)_check_fat_subscript(linenumpos,sizeof(unsigned),0))=(unsigned)Cyc_yylloc.first_line;
 return({struct Cyc_Lex_PosInfo*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_Lex_PosInfo));_Tmp0->next=next,_Tmp0->starting_line=starting_line,_Tmp0->filename=filename,_Tmp0->linenumpos=linenumpos,_Tmp0->linenumpos_offset=1U;_Tmp0;});}
 # 710
 static void Cyc_Lex_inc_linenumber (void){
@@ -885,7 +885,7 @@ if(offset >= n){
 # 721
 struct _fat_ptr newlinenums=({unsigned _Tmp0=n * 2U;_tag_fat(_region_calloc(Cyc_Core_heap_region,Cyc_Core_unique_qual,sizeof(unsigned),_Tmp0),sizeof(unsigned),_Tmp0);});
 {unsigned i=0U;for(0;i < n;++ i){
-*((unsigned*)_check_fat_subscript(newlinenums,sizeof(unsigned),(int)i))=((unsigned*)linenums.curr)[(int)i];}}
+({unsigned _Tmp0=*((unsigned*)_check_fat_subscript(linenums,sizeof(unsigned),(int)i));*((unsigned*)_check_fat_subscript(newlinenums,sizeof(unsigned),(int)i))=_Tmp0;});}}
 ({struct _fat_ptr _Tmp0=linenums;struct _fat_ptr _Tmp1=newlinenums;linenums=_Tmp1;newlinenums=_Tmp0;});
 # 726
 ({(void(*)(unsigned*))Cyc_Core_ufree;})((unsigned*)_untag_fat_ptr(newlinenums,sizeof(unsigned),1U));}

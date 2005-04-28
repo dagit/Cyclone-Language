@@ -72,6 +72,7 @@ namespace AssnDef{
     Cast(Absyn::type_t, term_t); // type-cast
     Aggr(list_t<term_t>,type_opt_t); // an aggregate (struct, tuple, etc.)
     Proj(term_t tuple, unsigned index, type_opt_t); // projection off of aggr
+    Okderef(term_t t); // value u>0 iff t is an address of a valid memory location
   };
 
   // a distinguished program variable representing memory -- when we
@@ -99,6 +100,8 @@ namespace AssnDef{
   extern term_t cast(Absyn::type_t tp, term_t tm);
   extern term_t proj(term_t t, unsigned i, type_opt_t);
   extern term_t aggr(list_t<term_t,`H>, type_opt_t tp);
+
+  extern term_t okderef(term_t t);
 
   extern term_t fresh_var(type_opt_t);
 
@@ -149,6 +152,7 @@ namespace AssnDef{
   extern assn_t or(assn_t a1, assn_t a2);
   extern assn_t not(assn_t a);
   extern assn_t subst(vardecl_t x, term_t newx, assn_t a);
+
 
   extern assn_t prim(term_t t1, prim_reln_t p, term_t t2);
   extern assn_t eq(term_opt_t, term_opt_t);

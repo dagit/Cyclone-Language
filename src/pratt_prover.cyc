@@ -1100,6 +1100,9 @@ static void congruence_close_graph(int dummy, graph_t @g) {
           add_eq(g,rs->rep,ts->rep);
         }
         break;
+      case $(&Okderef(t1),&Okderef(t2)):
+	if (!equal_terms(g,t1,t2)) break;
+	add_eq(g,rs->rep,ts->rep);
       default: break;
       }
     }

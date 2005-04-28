@@ -687,7 +687,7 @@ struct Cyc_PP_Doc*Cyc_PP_cats_arr(struct _fat_ptr docs){
 int sz=(int)_get_fat_size(docs,sizeof(struct Cyc_PP_Doc*));
 if(sz==0)
 _throw((void*)({struct Cyc_Core_Failure_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Failure_exn_struct));_Tmp0->tag=Cyc_Core_Failure,_Tmp0->f1=_tag_fat("cats_arr -- size zero array",sizeof(char),28U);_Tmp0;}));{
-struct Cyc_PP_Doc*d=((struct Cyc_PP_Doc**)docs.curr)[0];
+struct Cyc_PP_Doc*d=*((struct Cyc_PP_Doc**)_check_fat_subscript(docs,sizeof(struct Cyc_PP_Doc*),0));
 int mw=d->mw;
 int mwo=d->mw;
 {int i=1;for(0;i < sz;++ i){

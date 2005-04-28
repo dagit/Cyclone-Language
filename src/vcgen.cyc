@@ -1092,15 +1092,17 @@ static $(term_opt_t,term_opt_t,assn_t) vcgen_deref(env_t env, exp_t root,
     return $(t1,t2,a2);
   }
   let eopt = Tcutil::get_type_bound((type_t)root->topt);
+  assn_t bnds_check;
   if (eopt == NULL) {
     // fat pointer -- express bounds in terms of numelts(t1)
-    term_numelts = unop(Absyn::Numelts, t1, Absyn::uint_type);
+    bnds_check = ult(zero(),okderef(plus(t1,t2,NULL)));
   } else {
     // thin pointer -- express bounds directly from type
     exp_t e = (exp_t)eopt;
     term_numelts = vcgen_rexp_always(env, e, a2)[0];
+    bnds_check = ult(t2, term_numelts);
   }
-  let bnds_check = ult(t2, term_numelts);
+
   // note that although this is a neq, the prover will not blow
   // up because it need only consider 0 < t1.
   let null_check = neq(zero(),t1);

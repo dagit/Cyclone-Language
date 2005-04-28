@@ -83,6 +83,9 @@ string_t term2string(term_t t) {
   case &Proj(t,i,_):
     res = aprintf("#%d(%s)",i,term2string(t));
     break;
+  case &Okderef(t):
+    res = aprintf("Okderef(%s)",term2string(t));
+    break;
   }
   return res;
 }
@@ -148,6 +151,8 @@ static int termhash(datatype Term @t) {
     for (; ts != NULL; ts = ts->tl)
       res = res ^ (unsigned int)ts->hd;
     return res;
+  case &Okderef(t):
+    return termhash(t)+97;
   }
 }
 
@@ -208,6 +213,10 @@ int cmp_term(datatype Term @t1, datatype Term @t2) {
     return cmp_term(t1,t2);
   case $(&Proj(...),_): return -1;
   case $(_,&Proj(...)): return 1;
+  case $(&Okderef(t1),&Okderef(t2)):
+    return cmp_term(t1,t2);
+  case $(&Okderef(_),_): return -1;
+  case $(_,&Okderef(_)): return 1;
   case $(&Aggr(ts1,_),&Aggr(ts2,_)):
     int c;
     for (; ts1 != NULL && ts2 != NULL; ts1=ts1->tl, ts2=ts2->tl) {
@@ -234,6 +243,7 @@ static term_t copy_term(datatype Term@ t) {
   case &Update(t1,t2,t3): return new Update(t1,t2,t3);
   case &Proj(t,i,tp): return new Proj(t,i,tp);
   case &Aggr(ts,tp): return new Aggr(ts,tp);
+  case &Okderef(t): return new Okderef(t);
   }
 }
 
@@ -339,7 +349,10 @@ term_t aggr(list_t<term_t,`H> ts, type_opt_t tp) {
   let t = Aggr(ts,tp);
   return hash_cons_term(&t);
 }
-
+term_t okderef(term_t t1){
+  let t = Okderef(t1);
+  return hash_cons_term(&t);
+}
 inline static bool is_nonassociative_commutative(Absyn::primop_t p) {
   switch (p) {
   case Absyn::Eq:
@@ -374,6 +387,7 @@ Absyn::type_opt_t get_term_type(term_t t) {
   // not sure that this is the right thing to do...
   case &Addr(vd): return Absyn::int_type(Absyn::None, Absyn::Int_sz);
   case &Update(...): return NULL;
+  case &Okderef(_): return NULL;
   }
 }
 
@@ -1063,6 +1077,10 @@ reduce_term(term_t t, list_t<$(vardecl_t,term_t)@> subst) {
       if (vd == vd2) return t2;
     }
     return t;
+  case &Okderef(t1): 
+    let t2 = reduce_term(t1,subst);
+    if (t1 != t2) return okderef(t2);
+    else return t;
   }
 }
 

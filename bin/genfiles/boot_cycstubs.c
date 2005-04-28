@@ -346,7 +346,7 @@ extern int open_with_mode(const char*,int,unsigned short);
 int Cyc_open(const char*s,int i,struct _fat_ptr ms){
 # 34
 if(_get_fat_size(ms,sizeof(unsigned short))>= 1U)
-return open_with_mode(s,i,((unsigned short*)ms.curr)[0]);else{
+return open_with_mode(s,i,*((unsigned short*)_check_fat_subscript(ms,sizeof(unsigned short),0)));else{
 # 37
 return open_without_mode(s,i);}}struct __abstractFILE;struct Cyc___cycFILE{struct __abstractFILE*file;};
 # 49
@@ -437,7 +437,7 @@ return putw(x,f->file);}char Cyc_FileCloseError[15U]="FileCloseError";char Cyc_F
 struct Cyc___cycFILE*Cyc_file_open(struct _fat_ptr fname,struct _fat_ptr mode){
 struct Cyc___cycFILE*f=({const char*_Tmp0=(const char*)_check_null(_untag_fat_ptr(fname,sizeof(char),1U));Cyc_fopen(_Tmp0,(const char*)_check_null(_untag_fat_ptr(mode,sizeof(char),1U)));});
 if(f==0){
-struct _fat_ptr fn=({unsigned _Tmp0=_get_fat_size(fname,sizeof(char))+ 1U;_tag_fat(({char*_Tmp1=_cycalloc_atomic(_check_times(_Tmp0,sizeof(char)));({{unsigned _Tmp2=_get_fat_size(fname,sizeof(char));unsigned i;for(i=0;i < _Tmp2;++ i){_Tmp1[i]=((const char*)fname.curr)[(int)i];}_Tmp1[_Tmp2]=0;}0;});_Tmp1;}),sizeof(char),_Tmp0);});
+struct _fat_ptr fn=({unsigned _Tmp0=_get_fat_size(fname,sizeof(char))+ 1U;_tag_fat(({char*_Tmp1=_cycalloc_atomic(_check_times(_Tmp0,sizeof(char)));({{unsigned _Tmp2=_get_fat_size(fname,sizeof(char));unsigned i;for(i=0;i < _Tmp2;++ i){_Tmp1[i]=*((const char*)_check_fat_subscript(fname,sizeof(char),(int)i));}_Tmp1[_Tmp2]=0;}0;});_Tmp1;}),sizeof(char),_Tmp0);});
 _throw((void*)({struct Cyc_FileOpenError_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_FileOpenError_exn_struct));_Tmp0->tag=Cyc_FileOpenError,_Tmp0->f1=fn;_Tmp0;}));}
 # 172
 return f;}

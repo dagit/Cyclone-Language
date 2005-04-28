@@ -363,7 +363,7 @@ void*Cyc_Warn_impos2(struct _fat_ptr);struct Cyc_RenameTemps_Env{struct Cyc_Dict
 # 35 "rename_temps.cyc"
 static int Cyc_RenameTemps_is_temp_var(struct _tuple0*qv){
 struct _fat_ptr v=*(*qv).f1;
-return(((_get_fat_size(v,sizeof(char))> 4U &&(int)((const char*)v.curr)[0]==95)&&(int)((const char*)v.curr)[1]==116)&&(int)((const char*)v.curr)[2]==109)&&(int)((const char*)v.curr)[3]==112;}
+return(((_get_fat_size(v,sizeof(char))> 4U &&(int)*((const char*)_check_fat_subscript(v,sizeof(char),0))==95)&&(int)*((const char*)_check_fat_subscript(v,sizeof(char),1))==116)&&(int)*((const char*)_check_fat_subscript(v,sizeof(char),2))==109)&&(int)*((const char*)_check_fat_subscript(v,sizeof(char),3))==112;}
 # 40
 static void*Cyc_RenameTemps_toplevel_temp_var(int i){
 return(void*)({struct Cyc_Absyn_Unresolved_b_Absyn_Binding_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Absyn_Unresolved_b_Absyn_Binding_struct));_Tmp0->tag=0,({struct _tuple0*_Tmp1=({struct _tuple0*_Tmp2=_cycalloc(sizeof(struct _tuple0));_Tmp2->f0=Cyc_Absyn_Loc_n,({struct _fat_ptr*_Tmp3=({struct _fat_ptr*_Tmp4=_cycalloc(sizeof(struct _fat_ptr));({struct _fat_ptr _Tmp5=(struct _fat_ptr)({struct Cyc_Int_pa_PrintArg_struct _Tmp6=({struct Cyc_Int_pa_PrintArg_struct _Tmp7;_Tmp7.tag=1,_Tmp7.f1=(unsigned)i;_Tmp7;});void*_Tmp7[1];_Tmp7[0]=& _Tmp6;Cyc_aprintf(_tag_fat("_TmpG%X",sizeof(char),8U),_tag_fat(_Tmp7,sizeof(void*),1));});*_Tmp4=_Tmp5;});_Tmp4;});_Tmp2->f1=_Tmp3;});_Tmp2;});_Tmp0->f1=_Tmp1;});_Tmp0;});}

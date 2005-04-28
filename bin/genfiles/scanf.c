@@ -632,7 +632,7 @@ struct _fat_ptr p5=p4;
 int c=_IO_peekc(fp);
 while((int)*((char*)_check_known_subscript_notnull(ccltab,256U,sizeof(char),(int)((char)c)))){
 if(_get_fat_size(p5,sizeof(char))==0U)goto eof_failure;
-*((char*)p5.curr)=(char)c;
+*((char*)_check_fat_subscript(p5,sizeof(char),0U))=(char)c;
 _fat_ptr_inplace_plus(& p5,sizeof(char),1);
 _IO_getc(fp);
 if(-- width==0)
@@ -647,7 +647,7 @@ n=(p5.curr - p4.curr)/ sizeof(char);
 if(n==0)
 goto match_failure;
 if(_get_fat_size(p5,sizeof(char))==0U)goto eof_failure;
-*((char*)p5.curr)='\000';
+*((char*)_check_fat_subscript(p5,sizeof(char),0U))='\000';
 ++ nassigned;}}
 # 505
 nread +=n;
@@ -675,7 +675,7 @@ int c=_IO_peekc(fp);
 while(!isspace((int)((unsigned char)c))){
 c=_IO_getc(fp);
 if(_get_fat_size(p3,sizeof(char))==0U)goto eof_failure;
-*((char*)p3.curr)=(char)c;
+*((char*)_check_fat_subscript(p3,sizeof(char),0U))=(char)c;
 _fat_ptr_inplace_plus(& p3,sizeof(char),1);
 if(-- width==0)
 break;
@@ -684,7 +684,7 @@ if((c=_IO_peekc(fp))==-1){
 break;}}
 # 542
 if(_get_fat_size(p3,sizeof(char))==0U)goto eof_failure;
-*((char*)p3.curr)='\000';
+*((char*)_check_fat_subscript(p3,sizeof(char),0U))='\000';
 nread +=(p3.curr - p2.curr)/ sizeof(char);
 ++ nassigned;}}
 # 547
@@ -929,7 +929,7 @@ goto _LL0;}_LL0:;}}
 static int Cyc_string_getc(struct _fat_ptr*sptr){
 char c;
 struct _fat_ptr s=*sptr;
-if(((char*)s.curr==(char*)_tag_fat(0,0,0).curr || _get_fat_size(s,sizeof(char))==0U)||(int)(c=((const char*)s.curr)[0])==0)return -1;
+if(((char*)s.curr==(char*)_tag_fat(0,0,0).curr || _get_fat_size(s,sizeof(char))==0U)||(int)(c=*((const char*)_check_fat_subscript(s,sizeof(char),0)))==0)return -1;
 ({struct _fat_ptr _Tmp0=_fat_ptr_plus(s,sizeof(char),1);*sptr=_Tmp0;});
 return(int)c;}
 # 904
@@ -941,7 +941,7 @@ return 0;}
 static int Cyc_string_peekc(struct _fat_ptr*sptr){
 char c;
 struct _fat_ptr s=*sptr;
-if(((char*)s.curr==(char*)_tag_fat(0,0,0).curr || _get_fat_size(s,sizeof(char))==0U)||(int)(c=((const char*)s.curr)[0])==0)return -1;
+if(((char*)s.curr==(char*)_tag_fat(0,0,0).curr || _get_fat_size(s,sizeof(char))==0U)||(int)(c=*((const char*)_check_fat_subscript(s,sizeof(char),0)))==0)return -1;
 return(int)c;}
 # 917
 int Cyc_vsscanf(struct _fat_ptr src1,struct _fat_ptr fmt,struct _fat_ptr ap){

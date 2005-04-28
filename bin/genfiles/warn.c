@@ -451,7 +451,7 @@ struct Cyc_List_List*lst=0;
 int curr_line_len=0;
 {int i=0;for(0;(unsigned)i < _get_fat_size(args,sizeof(void*));++ i){
 struct _fat_ptr s;
-{void*_Tmp0=((void**)args.curr)[i];int _Tmp1;void*_Tmp2;struct _fat_ptr _Tmp3;switch(*((int*)_Tmp0)){case 0: _Tmp3=((struct Cyc_Warn_String_Warn_Warg_struct*)_Tmp0)->f1;{struct _fat_ptr s2=_Tmp3;
+{void*_Tmp0=*((void**)_check_fat_subscript(args,sizeof(void*),i));int _Tmp1;void*_Tmp2;struct _fat_ptr _Tmp3;switch(*((int*)_Tmp0)){case 0: _Tmp3=((struct Cyc_Warn_String_Warn_Warg_struct*)_Tmp0)->f1;{struct _fat_ptr s2=_Tmp3;
 s=s2;goto _LL0;}case 4: _Tmp2=((struct Cyc_Warn_Exp_Warn_Warg_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Exp*e=_Tmp2;
 s=Cyc_Absynpp_exp2string(e);goto _LL0;}case 3: _Tmp2=(void*)((struct Cyc_Warn_TypOpt_Warn_Warg_struct*)_Tmp0)->f1;{void*t=_Tmp2;
 if((unsigned)t){_Tmp2=t;goto _LL8;}else{s=_tag_fat("<?>",sizeof(char),4U);}goto _LL0;}case 2: _Tmp2=(void*)((struct Cyc_Warn_Typ_Warn_Warg_struct*)_Tmp0)->f1;_LL8: {void*t=_Tmp2;
