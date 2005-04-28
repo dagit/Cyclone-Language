@@ -460,7 +460,7 @@ return _tag_fat(0,0,0);}
 inline static const unsigned long Cyc_my_strlen(struct _fat_ptr s){
 unsigned sz=_get_fat_size(s,sizeof(char));
 unsigned i=0U;
-while(i < sz &&(int)*((const char*)_check_fat_subscript(s,sizeof(char),(int)i))!=0){++ i;}
+while(i < sz &&(int)((const char*)s.curr)[(int)i]!=0){++ i;}
 return i;}
 # 278
 int Cyc__IO_vfprintf(int(*ioputc)(int,void*),void*ioputc_env,struct _fat_ptr fmt0,struct _fat_ptr ap){
@@ -505,7 +505,7 @@ for(1;1;1){
 # 349
 fmark=fmt;{
 unsigned fmt_sz=_get_fat_size(fmt,sizeof(char));
-for(n=0;((unsigned)n < fmt_sz &&(ch=(int)*((const char*)_check_fat_subscript(fmt,sizeof(char),n)))!=0)&& ch!=37;++ n){
+for(n=0;((unsigned)n < fmt_sz &&(ch=(int)((const char*)fmt.curr)[n])!=0)&& ch!=37;++ n){
 ;}
 fmt=_fat_ptr_plus(fmt,sizeof(char),n);
 # 355

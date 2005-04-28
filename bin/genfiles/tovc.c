@@ -446,7 +446,7 @@ if(({(int(*)(struct Cyc_Dict_Dict,struct _fat_ptr*))Cyc_Dict_member;})(env.varma
 continue;}
 # 114
 {int i=0;for(0;(unsigned)i < _get_fat_size(Cyc_Toc_globals,sizeof(struct _fat_ptr*));++ i){
-if(Cyc_strptrcmp(v,*((struct _fat_ptr**)_check_fat_subscript(Cyc_Toc_globals,sizeof(struct _fat_ptr*),i)))==0)
+if(Cyc_strptrcmp(v,((struct _fat_ptr**)Cyc_Toc_globals.curr)[i])==0)
 return 0;}}
 # 118
 for(1;env.boundvars!=0;env.boundvars=env.boundvars->tl){

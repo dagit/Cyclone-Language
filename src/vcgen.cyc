@@ -1093,8 +1093,10 @@ static $(term_opt_t,term_opt_t,assn_t) vcgen_deref(env_t env, exp_t root,
   }
   let eopt = Tcutil::get_type_bound((type_t)root->topt);
   assn_t bnds_check;
+
   if (eopt == NULL) {
     // fat pointer -- express bounds in terms of numelts(t1)
+    term_numelts = unop(Absyn::Numelts, t1, Absyn::uint_type);
     bnds_check = ult(zero(),okderef(plus(t1,t2,NULL)));
   } else {
     // thin pointer -- express bounds directly from type
@@ -1102,7 +1104,7 @@ static $(term_opt_t,term_opt_t,assn_t) vcgen_deref(env_t env, exp_t root,
     term_numelts = vcgen_rexp_always(env, e, a2)[0];
     bnds_check = ult(t2, term_numelts);
   }
-
+  let bnds_check_sufficient = ult(t2,term_numelts);
   // note that although this is a neq, the prover will not blow
   // up because it need only consider 0 < t1.
   let null_check = neq(zero(),t1);
@@ -1110,7 +1112,7 @@ static $(term_opt_t,term_opt_t,assn_t) vcgen_deref(env_t env, exp_t root,
   // failed or the null check failed.
   update_try_assn(env,and(a2,or(not(bnds_check),not(null_check))));
   // associate these checks with the expression for insert_checks
-  let exp_checks = new ExpChecks{.ctxt=a2,.bounds_check=bnds_check,
+  let exp_checks = new ExpChecks{.ctxt=a2,.bounds_check=or(bnds_check,bnds_check_sufficient),
                                  .null_check=null_check};
   insert_exp_checks(env->assn_info, root, exp_checks);
   // afterwards, we know both the bounds check and null check succeeded.

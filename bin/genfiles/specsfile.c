@@ -533,7 +533,7 @@ DONE:
  l=Cyc_List_imp_rev(l);
 l=({struct Cyc_List_List*_Tmp0=_cycalloc(sizeof(struct Cyc_List_List));({struct _fat_ptr*_Tmp1=({struct _fat_ptr*_Tmp2=_cycalloc(sizeof(struct _fat_ptr));*_Tmp2=_tag_fat("",sizeof(char),1U);_Tmp2;});_Tmp0->hd=_Tmp1;}),_Tmp0->tl=l;_Tmp0;});{
 struct _fat_ptr ptrarray=Cyc_List_to_array(l);
-struct _fat_ptr result=({unsigned _Tmp0=_get_fat_size(ptrarray,sizeof(struct _fat_ptr*));_tag_fat(({struct _fat_ptr*_Tmp1=_cycalloc(_check_times(_Tmp0,sizeof(struct _fat_ptr)));({{unsigned _Tmp2=_get_fat_size(ptrarray,sizeof(struct _fat_ptr*));unsigned k;for(k=0;k < _Tmp2;++ k){_Tmp1[k]=*(*((struct _fat_ptr**)_check_fat_subscript(ptrarray,sizeof(struct _fat_ptr*),(int)k)));}}0;});_Tmp1;}),sizeof(struct _fat_ptr),_Tmp0);});
+struct _fat_ptr result=({unsigned _Tmp0=_get_fat_size(ptrarray,sizeof(struct _fat_ptr*));_tag_fat(({struct _fat_ptr*_Tmp1=_cycalloc(_check_times(_Tmp0,sizeof(struct _fat_ptr)));({{unsigned _Tmp2=_get_fat_size(ptrarray,sizeof(struct _fat_ptr*));unsigned k;for(k=0;k < _Tmp2;++ k){_Tmp1[k]=*((struct _fat_ptr**)ptrarray.curr)[(int)k];}}0;});_Tmp1;}),sizeof(struct _fat_ptr),_Tmp0);});
 return result;}}}
 # 200
 struct _fat_ptr Cyc_Specsfile_get_spec(struct Cyc_List_List*specs,struct _fat_ptr spec_name){
