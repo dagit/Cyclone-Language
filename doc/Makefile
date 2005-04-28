@@ -50,8 +50,8 @@ online-manual: main-screen.html
 	(cd online-manual; hacha main-screen.html)
 
 %.html: %.tex $(INPUTS)
-	hevea $<
-	hevea $<
+	hevea.bat $<
+	hevea.bat $<
 
 %.pdf: %.tex $(INPUTS)
 	pdflatex '\nonstopmode\input' $<
