@@ -130,7 +130,7 @@ static int hash_exp(exp_t e) {
   }
 }
 
-static int termhash(datatype Term @t) {
+int termhash(datatype Term @t) {
   switch (t) {
   case &Uint(i): return i;
   case &Const(e): return hash_exp(e) + 61;
@@ -431,6 +431,10 @@ term_t unop(Absyn::primop_t p, term_t t, type_opt_t tp) {
   if (p == Absyn::Minus) return binop(Absyn::Times,t,uint(-1),tp);
   let ptr = Unop(p,t,tp);
   return hash_cons_term(&ptr);
+}
+
+term_t numelts_term(term_t t) {
+  return unop(Absyn::Numelts, t, Absyn::uint_type);
 }
 
 static int inv_cmp_term(term_t t1, term_t t2){

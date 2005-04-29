@@ -856,7 +856,7 @@ return _tag_fat(0,0,0);
 s=olds;}{
 # 637
 unsigned long inc=Cyc_strspn(s,delim);
-if(inc >= _get_fat_size(s,sizeof(char))||(int)*((char*)_check_fat_subscript(_fat_ptr_plus(s,sizeof(char),(int)inc),sizeof(char),0U))==0){
+if(inc >= _get_fat_size(s,sizeof(char))||(int)*((char*)_fat_ptr_plus(s,sizeof(char),(int)inc).curr)==0){
 # 640
 olds=_tag_fat(0,0,0);
 return _tag_fat(0,0,0);}else{

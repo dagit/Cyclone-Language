@@ -100,11 +100,12 @@ namespace AssnDef{
   extern term_t cast(Absyn::type_t tp, term_t tm);
   extern term_t proj(term_t t, unsigned i, type_opt_t);
   extern term_t aggr(list_t<term_t,`H>, type_opt_t tp);
-
   extern term_t okderef(term_t t);
+  extern term_t numelts_term(term_t t);
 
   extern term_t fresh_var(type_opt_t);
 
+  extern int termhash(datatype Term @t);
   extern int cmp_term(datatype Term @t1, datatype Term @t2);
   extern type_opt_t get_term_type(term_t t);
   ///////////////////// Assertions /////////////////////

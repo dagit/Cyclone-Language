@@ -1096,7 +1096,7 @@ static $(term_opt_t,term_opt_t,assn_t) vcgen_deref(env_t env, exp_t root,
 
   if (eopt == NULL) {
     // fat pointer -- express bounds in terms of numelts(t1)
-    term_numelts = unop(Absyn::Numelts, t1, Absyn::uint_type);
+    term_numelts = numelts_term(t1);
     bnds_check = ult(zero(),okderef(plus(t1,t2,NULL)));
   } else {
     // thin pointer -- express bounds directly from type
@@ -1332,7 +1332,7 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
           let term = (term_t)topt;
           let null_check = n2 ? (assn_t)&true_assn : neq(zero(),term);
           let $(b,_) = vcgen_rexp_always(env, (exp_t)b2, a);
-          let bcheck = ulte(b,unop(Absyn::Numelts,term,Absyn::uint_type));
+          let bcheck = ulte(b,numelts_term(term));
           let exp_checks = new ExpChecks{.ctxt=a,.bounds_check=bcheck,
                                          .null_check=null_check};
           let checks = and(null_check,bcheck);
@@ -1444,7 +1444,7 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
     }
     let res = fresh_var(e->topt);
     // can add it in that numelts(res) == t1
-    a = and(a,eq(unop(Absyn::Numelts,res,Absyn::uint_type),t1));
+    a = and(a,eq(numelts_term(res),t1));
     return $(res,a);
   case &Absyn::ComprehensionNoinit_e(e,_,_):
     return $(NULL,vcgen_rexp(env,e,ain)[1]);
@@ -1453,7 +1453,7 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
       ain = vcgen_rexp(env,(exp_t)mi.rgn,ain)[1];
     let $(t,ain) = vcgen_rexp(env,mi.num_elts,ain);
     let res = fresh_var(e->topt);
-    ain = and(ain,eq(unop(Absyn::Numelts,res,Absyn::uint_type),t));
+    ain = and(ain,eq(numelts_term(res),t));
     return $(res,ain);
   case &Absyn::Swap_e(e1,e2): 
     let $(lt1,a1) = vcgen_lexp(env,e1,ain);

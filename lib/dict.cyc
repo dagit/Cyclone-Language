@@ -123,7 +123,7 @@ bool lookup_bool(dict_t<`a,`b> d, `a key, `b @ ans_place) {
   return false;
 } 
 
-static struct T<`a,`b,`r> *`r
+static struct T<`a,`b,`r> @`r
 balance(region_t<`r> r,
         $(enum Color, tree<`a,`b,`r>, tree<`a,`b,`r>, $(`a,`b)) quad) {
   switch(quad) {
@@ -137,7 +137,7 @@ balance(region_t<`r> r,
   }
 }
 
-static struct T<`a,`b,`r> *`r
+static struct T<`a,`b,`r> @`r
 ins(region_t<`r> r, int rel(`a,`a), $(`a,`b) key_val, tree<`a,`b,`r> t) {
   switch (t) {
   case NULL: return rnew(r) T(R,NULL,NULL,key_val);

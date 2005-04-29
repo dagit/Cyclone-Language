@@ -678,7 +678,7 @@ list_t<`a,`r> delete_cmp(int cmp(`a,`a), list_t<`a,`r> l, `a x) {
   while (iter != NULL) {
     if (cmp(iter->hd,x) == 0) {
       if (prev == NULL)
-	return l->tl;
+	return iter->tl;
       prev->tl = iter->tl;
       return l;
     }
@@ -742,7 +742,8 @@ opt_t<`a> check_unique(int cmp(`a,`a),list_t<`a> x) {
 // makes a new list with ith element arr[i]
 list_t<`a,`r> rfrom_array(region_t<`r> r2, `a ? arr) {
   list_t<`a,`r> ans = NULL;
-  for (int i = numelts(arr)-1; i >= 0; --i)
+  unsigned n = numelts(arr);
+  for (unsigned i = n-1; i < n; --i)
     ans = rnew(r2) List(arr[i],ans);
   return ans;
 }

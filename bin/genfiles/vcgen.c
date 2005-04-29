@@ -434,33 +434,34 @@ extern void*Cyc_AssnDef_plus(void*,void*,void*);
 extern void*Cyc_AssnDef_minus(void*,void*,void*);
 extern void*Cyc_AssnDef_cast(void*,void*);
 extern void*Cyc_AssnDef_proj(void*,unsigned,void*);
-# 104
+# 103
 extern void*Cyc_AssnDef_okderef(void*);
+extern void*Cyc_AssnDef_numelts_term(void*);
 # 106
 extern void*Cyc_AssnDef_fresh_var(void*);struct Cyc_AssnDef_True_AssnDef_Assn_struct{int tag;};struct Cyc_AssnDef_False_AssnDef_Assn_struct{int tag;};
-# 128
+# 129
 extern struct _fat_ptr Cyc_AssnDef_assn2string(void*);
-# 132
+# 133
 extern struct Cyc_AssnDef_True_AssnDef_Assn_struct Cyc_AssnDef_true_assn;
 extern struct Cyc_AssnDef_False_AssnDef_Assn_struct Cyc_AssnDef_false_assn;
-# 151 "assndef.h"
+# 152 "assndef.h"
 extern void*Cyc_AssnDef_and(void*,void*);
 extern void*Cyc_AssnDef_or(void*,void*);
 extern void*Cyc_AssnDef_not(void*);
 extern void*Cyc_AssnDef_subst(struct Cyc_Absyn_Vardecl*,void*,void*);
-# 158
+# 159
 extern void*Cyc_AssnDef_eq(void*,void*);
 extern void*Cyc_AssnDef_neq(void*,void*);
 extern void*Cyc_AssnDef_slt(void*,void*);
 extern void*Cyc_AssnDef_slte(void*,void*);
 extern void*Cyc_AssnDef_ult(void*,void*);
 extern void*Cyc_AssnDef_ulte(void*,void*);
-# 166
+# 167
 extern void*Cyc_AssnDef_reduce(void*);
 extern void*Cyc_AssnDef_subst_term(void*,struct Cyc_Absyn_Vardecl*,void*);
-# 174
+# 175
 extern void*Cyc_AssnDef_widen(void*);
-# 176
+# 177
 extern int Cyc_AssnDef_simple_prove(void*,void*);struct Cyc_Vcgen_ExpChecks{void*ctxt;void*bounds_check;void*null_check;};
 # 52 "attributes.h"
 int Cyc_Atts_is_noreturn_fn_type(void*);
@@ -1142,7 +1143,7 @@ void*bnds_check;
 # 1097
 if(eopt==0){
 # 1099
-term_numelts=Cyc_AssnDef_unop(18U,t1,Cyc_Absyn_uint_type);
+term_numelts=Cyc_AssnDef_numelts_term(t1);
 bnds_check=({void*_Tmp6=Cyc_AssnDef_zero();Cyc_AssnDef_ult(_Tmp6,Cyc_AssnDef_okderef(Cyc_AssnDef_plus(t1,t2,0)));});}else{
 # 1103
 struct Cyc_Absyn_Exp*e=eopt;
@@ -1350,7 +1351,7 @@ if(topt!=0){
 void*term=topt;
 void*null_check=n2?(void*)& Cyc_AssnDef_true_assn:({void*_Tmp17=Cyc_AssnDef_zero();Cyc_AssnDef_neq(_Tmp17,term);});
 struct _tuple14 _Tmp17=Cyc_Vcgen_vcgen_rexp_always(env,_check_null(b2),a);void*_Tmp18;_Tmp18=_Tmp17.f0;{void*b=_Tmp18;
-void*bcheck=({void*_Tmp19=b;Cyc_AssnDef_ulte(_Tmp19,Cyc_AssnDef_unop(18U,term,Cyc_Absyn_uint_type));});
+void*bcheck=({void*_Tmp19=b;Cyc_AssnDef_ulte(_Tmp19,Cyc_AssnDef_numelts_term(term));});
 struct Cyc_Vcgen_ExpChecks*exp_checks;exp_checks=_cycalloc(sizeof(struct Cyc_Vcgen_ExpChecks)),exp_checks->ctxt=a,exp_checks->bounds_check=bcheck,exp_checks->null_check=null_check;{
 # 1338
 void*checks=Cyc_AssnDef_and(null_check,bcheck);
@@ -1447,7 +1448,7 @@ a=Cyc_AssnDef_widen(Cyc_AssnDef_or(abody,a));}}{
 # 1445
 void*res=Cyc_AssnDef_fresh_var(e->topt);
 # 1447
-a=({void*_TmpF=a;Cyc_AssnDef_and(_TmpF,({void*_Tmp10=Cyc_AssnDef_unop(18U,res,Cyc_Absyn_uint_type);Cyc_AssnDef_eq(_Tmp10,t1);}));});
+a=({void*_TmpF=a;Cyc_AssnDef_and(_TmpF,({void*_Tmp10=Cyc_AssnDef_numelts_term(res);Cyc_AssnDef_eq(_Tmp10,t1);}));});
 return({struct _tuple14 _TmpF;_TmpF.f0=res,_TmpF.f1=a;_TmpF;});}}}case 27: _TmpA=((struct Cyc_Absyn_ComprehensionNoinit_e_Absyn_Raw_exp_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Exp*e=_TmpA;
 # 1450
 return({struct _tuple14 _TmpC;_TmpC.f0=0,({void*_TmpD=Cyc_Vcgen_vcgen_rexp_nodebug(env,e,ain).f1;_TmpC.f1=_TmpD;});_TmpC;});}case 33: _Tmp2=((struct Cyc_Absyn_Malloc_e_Absyn_Raw_exp_struct*)_Tmp0)->f1;{struct Cyc_Absyn_MallocInfo mi=_Tmp2;
@@ -1456,7 +1457,7 @@ if(mi.rgn!=0)
 ain=Cyc_Vcgen_vcgen_rexp_nodebug(env,mi.rgn,ain).f1;{
 struct _tuple14 _TmpC=Cyc_Vcgen_vcgen_rexp_nodebug(env,mi.num_elts,ain);void*_TmpD;void*_TmpE;_TmpE=_TmpC.f0;_TmpD=_TmpC.f1;{void*t=_TmpE;void*ain=_TmpD;
 void*res=Cyc_AssnDef_fresh_var(e->topt);
-ain=({void*_TmpF=ain;Cyc_AssnDef_and(_TmpF,({void*_Tmp10=Cyc_AssnDef_unop(18U,res,Cyc_Absyn_uint_type);Cyc_AssnDef_eq(_Tmp10,t);}));});
+ain=({void*_TmpF=ain;Cyc_AssnDef_and(_TmpF,({void*_Tmp10=Cyc_AssnDef_numelts_term(res);Cyc_AssnDef_eq(_Tmp10,t);}));});
 return({struct _tuple14 _TmpF;_TmpF.f0=res,_TmpF.f1=ain;_TmpF;});}}}case 34: _TmpA=((struct Cyc_Absyn_Swap_e_Absyn_Raw_exp_struct*)_Tmp0)->f1;_Tmp8=((struct Cyc_Absyn_Swap_e_Absyn_Raw_exp_struct*)_Tmp0)->f2;{struct Cyc_Absyn_Exp*e1=_TmpA;struct Cyc_Absyn_Exp*e2=_Tmp8;
 # 1459
 struct _tuple14 _TmpC=Cyc_Vcgen_vcgen_lexp(env,e1,ain);void*_TmpD;void*_TmpE;_TmpE=_TmpC.f0;_TmpD=_TmpC.f1;{void*lt1=_TmpE;void*a1=_TmpD;
