@@ -362,7 +362,15 @@ static void * region_malloc_impl(struct _RegionHandle *r, _AliasQualHandle_t aq,
     if(aq == CYC_CORE_REFCNT_AQUAL) {
       *((int*)result) = 1;
       result += sizeof(int);
+#ifdef CYC_REGION_PROFILE
+      refcnt_total_bytes += s;
+#endif
     }
+#ifdef CYC_REGION_PROFILE
+    if(aq == CYC_CORE_UNIQUE_AQUAL){
+      unique_total_bytes += s;
+    }
+#endif
     return (void *)result;
   } 
 }
@@ -444,7 +452,15 @@ static void * region_calloc_impl(struct _RegionHandle *r, _AliasQualHandle_t aq,
     if(aq == CYC_CORE_REFCNT_AQUAL) {
       *((int*)result) = 1;
       result += sizeof(int);
+#ifdef CYC_REGION_PROFILE
+      refcnt_total_bytes += s;
+#endif
     }
+#ifdef CYC_REGION_PROFILE
+    if(aq == CYC_CORE_UNIQUE_AQUAL){
+      unique_total_bytes += s;
+    }
+#endif
     return (void *)result;
   }
 }
@@ -515,6 +531,20 @@ static void free_region_impl(struct _RegionHandle *r) {
 static void reap_rufree_impl(struct _RegionHandle *r, unsigned char *ptr) {
   if(ptr == NULL || r == NULL || r->key == NULL)
     return;
+#ifdef CYC_REGION_PROFILE
+    unsigned int sz = bget_size(r->key, ptr);
+    unique_freed_bytes += sz;
+    // output special "alloc" event here, where we have a negative size
+    if (alloc_log != NULL) {
+      fprintf(alloc_log,"%u @\tunique\talloc\t-%d\t%d\t%d\t%d\t%x\n",
+              clock(),
+	      sz,
+	      region_get_heap_size(CYC_CORE_HEAP_REGION), 
+	      region_get_free_bytes(CYC_CORE_HEAP_REGION),
+	      region_get_total_bytes(CYC_CORE_HEAP_REGION),
+              (unsigned int)ptr);
+    }
+#endif
   brel(r->key, ptr); //add something to bget to update page stats
 }
 
@@ -597,7 +627,7 @@ static void * reap_malloc_impl(struct _RegionHandle *r, _AliasQualHandle_t aq, u
 	_throw_bad_reapalloc();
       *((int*)result) = 1;
 #ifdef CYC_REGION_PROFILE
-      refcnt_total_bytes += GC_size(result);
+      refcnt_total_bytes += bget_size(r->key, result);
 #endif
       result += sizeof(int);
     }
@@ -609,7 +639,7 @@ static void * reap_malloc_impl(struct _RegionHandle *r, _AliasQualHandle_t aq, u
     	_throw_bad_reapalloc();
 #ifdef CYC_REGION_PROFILE
       if(aq == CYC_CORE_UNIQUE_AQUAL){
-    	unsigned int actual_size = GC_size(result);
+    	unsigned int actual_size = bget_size(r->key,result);
     	unique_total_bytes += actual_size;
       }
 #endif
@@ -654,6 +684,19 @@ static void reap_rdrop_refptr_impl(struct _RegionHandle *r, struct _fat_ptr ptr)
   if (cnt != NULL) {
     *cnt = *cnt - 1;
     if (*cnt == 0) { // no more references //add something to bget to update page usage stats
+#ifdef CYC_REGION_PROFILE
+      unsigned int sz =  bget_size(r->key, (ptr.base - sizeof(int)));
+      refcnt_freed_bytes += sz;
+      if (alloc_log != NULL) {
+	fprintf(alloc_log,"%u @\trefcnt\talloc\t-%d\t%d\t%d\t%d\t%x\n",
+                clock(),
+		sz,
+		region_get_heap_size(CYC_CORE_HEAP_REGION), 
+		region_get_free_bytes(CYC_CORE_HEAP_REGION),
+		region_get_total_bytes(CYC_CORE_HEAP_REGION),
+                (unsigned int)(ptr.base - sizeof(int)));
+      }
+#endif
       brel(r->key, (void*)(ptr.base - sizeof(int)));
     }
   }
@@ -1177,9 +1220,14 @@ void * _profile_region_malloc(struct _RegionHandle *r, _AliasQualHandle_t aq, un
       }
     }
     else {
-      if(r->fcns == &reap_functions)
-	s +=  2*sizeof(int); //bget takes two additional words
-      if(aq == CYC_CORE_REFCNT_AQUAL)
+      if(r->fcns == &reap_functions) {
+	if(aq == CYC_CORE_REFCNT_AQUAL) {
+	  logaddr=(addr-sizeof(int));
+	}
+	//bget takes two additional words
+	s = bget_size(r->key, logaddr);
+      }
+      else if(aq == CYC_CORE_REFCNT_AQUAL)
 	s += sizeof(int);
     }
     //logging for reaps isn't exact right now. In particular, if U and RC stuff
@@ -1225,9 +1273,14 @@ void * _profile_region_calloc(struct _RegionHandle *r, _AliasQualHandle_t aq, un
       }
     }
     else {
-      if(r->fcns == &reap_functions)
-	s +=  2*sizeof(int); //bget takes two additional words
-      if(aq == CYC_CORE_REFCNT_AQUAL)
+      if(r->fcns == &reap_functions) {
+	if(aq == CYC_CORE_REFCNT_AQUAL) {
+	  logaddr=(addr-sizeof(int));
+	}
+	//bget takes two additional words
+	s = bget_size(r->key, logaddr);
+      }
+      else if(aq == CYC_CORE_REFCNT_AQUAL)
 	s += sizeof(int);
     }
     //logging for reaps isn't exact right now. In particular, if U and RC stuff

@@ -435,6 +435,19 @@ static type_t id2aqual(seg_t loc, string_t<`H> s) {
   return al_qual_type;
 }
 
+static pointer_quals_t<`yy> insert_aqual(region_t<`yy> yy, pointer_quals_t<`yy> qlist, aqualtype_t aq, seg_t loc) {
+  for(_ l = qlist; l != NULL; l=l->tl) {
+    switch(l->hd) {
+    case &Alias_ptrqual(...):
+      Warn::err2(loc, "Multiple alias qualifiers");
+      return qlist;
+    default:
+      break;
+    }
+  }
+  return rnew(yy) List{rnew(yy)Alias_ptrqual(aq), qlist};
+}
+
 static void tvar_ok(string_t<`H> s,seg_t loc) {
   if (zstrcmp(s,"`H") == 0)
     Warn::err(loc,"bad occurrence of heap region");
@@ -1169,7 +1182,7 @@ using Parse;
 %type <list_t<$(seg_t,qvar_t,bool)@`H,`H>> export_list_values
 %type <$(list_t<$(seg_t,qvar_t,bool)@`H,`H>, seg_t)@`H> export_list export_list_opt
 %type <list_t<qvar_t,`H>> hide_list_opt hide_list_values
-%type <aqualtype_t> aqual_specifier aqual_const
+%type <aqualtype_t> aqual_specifier aqual_const aqual_opt
 %type <pointer_qual_t<`yy>> pointer_qual
 %type <pointer_quals_t<`yy>> pointer_quals
 %type <exp_opt_t> requires_clause_opt open_opt
@@ -1911,6 +1924,7 @@ pointer_qual:
 | NOTNULL_QUAL      { $$ = ^$(rnew(yyr) Notnull_ptrqual); }
 | NULLABLE_QUAL     { $$ = ^$(rnew(yyr) Nullable_ptrqual); }
 | ALIAS_QUAL '(' aqual_specifier ')' { $$ = ^$(rnew(yyr) Alias_ptrqual($3)); }
+| AQUAL_SHORT_CONST {_ aq = id2aqual(SLOC(@1), $1); $$ = ^$(rnew(yyr) Alias_ptrqual(aq)); }
 ;
 
 aqual_specifier: 
@@ -1926,6 +1940,11 @@ aqual_specifier:
   {
     $$ = ^$(aqual_var_type(aqualsof_type($3), al_qual_type));
   }
+;
+
+aqual_opt:
+{}
+| AQUAL_SHORT_CONST {$$=^$(id2aqual(SLOC(@1), $1));}
 ;
 
 pointer_null_and_bound:

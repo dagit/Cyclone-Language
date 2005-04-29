@@ -903,6 +903,13 @@ void *bgetr(bget_rgn_key_t regkey, void *buf, bufsize size)
   return nbuf;
 }
 
+bufsize bget_size(bget_rgn_key_t regkey, void *buf) {
+  struct bfhead *b = BFH(((char *) buf) - sizeof(struct bhead));
+  if(b->bh.bsize >= 0)
+    return -1;
+  return -b->bh.bsize;
+}
+
 /*  BREL  --  Release a buffer.  */
 
 void brel(bget_rgn_key_t regkey, void *buf)

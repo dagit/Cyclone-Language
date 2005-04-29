@@ -55,5 +55,5 @@ void	       bstatse     _((bget_rgn_key_t, bufsize *pool_incr, long *npool, long
 void	       bufdump     _((bget_rgn_key_t, void *buf));
 void	       bpoold	    _((bget_rgn_key_t, void *pool, int dumpalloc, int dumpfree));
 int	       bpoolv	    _((bget_rgn_key_t, void *pool));
-
+bufsize bget_size(bget_rgn_key_t regkey, void *buf);
 #endif
