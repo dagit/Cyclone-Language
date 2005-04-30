@@ -441,17 +441,15 @@ static int inv_cmp_term(term_t t1, term_t t2){
   return -cmp_term(t1, t2);
 }
 
-typedef list_t<$(`a,unsigned)*,`r> coef_list_t<`a,`r>;
-typedef coef_list_t<term_t,`H> term_coef_list_t;
 
-inline static term_t compute_factor(term_t t, unsigned c, type_opt_t topt){
+inline static term_t compute_factor(int c, term_t t, type_opt_t topt){
   if (c == 1) return t;
   else {
     let newfactor = Binop(Absyn::Times,t,uint(c),topt);
     return hash_cons_term(&newfactor);
   }
 }
-static term_t termcoeflist2term(term_coef_list_t q_list, unsigned newc, type_opt_t topt){
+static term_t termcoeflist2term(term_coef_list_t q_list, int newc, type_opt_t topt){
   if (q_list == NULL) return uint(newc);
   // q_list is not empty, compute the first factor term newf = hd->f0 * hd->f1
   term_t res = compute_factor(q_list->hd->f0,q_list->hd->f1,topt);
@@ -469,9 +467,9 @@ static term_t termcoeflist2term(term_coef_list_t q_list, unsigned newc, type_opt
   }
 }
 // the normal for of term t is t1*c1 + t2*c2 + ... + tn*cn+c
-static $(term_coef_list_t,unsigned res) flatten_plus(term_t t){
+$(term_coef_list_t,int res) flatten_plus(term_t t){
   term_coef_list_t term_coef_list = NULL;
-  unsigned res = 0;
+  int res = 0;
  LOOP:
   switch(t){
   case &Uint(i): res = i; break;
@@ -482,10 +480,13 @@ static $(term_coef_list_t,unsigned res) flatten_plus(term_t t){
   case &Binop(Absyn::Plus, t1, t2,_):
     switch(t2){
     case &Binop(Absyn::Times,t21,&Uint(c2),_):
-      term_coef_list = new List(new $(t21,c2), term_coef_list);
+      term_coef_list = new List(new $(c2,t21), term_coef_list);
+      break;
+    case &Binop(Absyn::Plus,_,_,_):
+      Warn::impos("Plus in the right branch, not a normal form");
       break;
     default:
-      term_coef_list = new List(new $(t2,1),term_coef_list);
+      term_coef_list = new List(new $(1,t2),term_coef_list);
       break;
     }
     t = t1;
@@ -493,10 +494,10 @@ static $(term_coef_list_t,unsigned res) flatten_plus(term_t t){
   default:
     switch(t){
     case &Binop(Absyn::Times,t21,&Uint(c2),_):
-      term_coef_list = new List(new $(t21,c2), term_coef_list);
+      term_coef_list = new List(new $(c2,t21), term_coef_list);
       break;
     default:
-      term_coef_list = new List(new $(t,1),term_coef_list);
+      term_coef_list = new List(new $(1,t),term_coef_list);
       break;
     }
     break;
@@ -515,9 +516,9 @@ static coef_list_t<`a,`r> imp_merge_with_coef(int less_eq(`a,`a), coef_list_t<`a
   coef_list_t c=NULL, d=NULL;
   if (a == NULL) return b;
   if (b == NULL) return a;
-  let cmp_result = less_eq(a->hd->f0,b->hd->f0);
+  let cmp_result = less_eq(a->hd->f1,b->hd->f1);
   while ((a != NULL) && (b != NULL)){
-    let cmp_result = less_eq(a->hd->f0,b->hd->f0);
+    let cmp_result = less_eq(a->hd->f1,b->hd->f1);
     if (cmp_result < 0){ // a < b
       if (c == NULL){
 	c = a;
@@ -540,9 +541,9 @@ static coef_list_t<`a,`r> imp_merge_with_coef(int less_eq(`a,`a), coef_list_t<`a
       }
     } else { // cmp_result == 0, a == b
       // merge two values;
-      let i = a->hd->f1 + b->hd->f1;
+      let i = a->hd->f0 + b->hd->f0;
       if (i != 0){
-	a->hd->f1 = i;
+	a->hd->f0 = i;
 	if (c == NULL){
 	  c = a;
 	  d = c;
@@ -581,9 +582,9 @@ static term_t flatten_merge_plus(term_t t, term_t s, type_opt_t topt){
 // p are some commutative and associative binops excluding plus
 // !!! flatten, and flatten_merge only work with the assumption
 // that Uint(_) is the form of smallest term.
-static $(list_t<term_t,`H>,unsigned res) flatten(Absyn::primop_t p, term_t t){
+static $(list_t<term_t,`H>,int res) flatten(Absyn::primop_t p, term_t t){
   list_t<term_t,`H> termlist = NULL;
-  unsigned res = id_of_primop(p);
+  int res = id_of_primop(p);
  LOOP:
   switch (t){
   case &Uint(i): res = i; break;
@@ -602,8 +603,8 @@ static $(list_t<term_t,`H>,unsigned res) flatten(Absyn::primop_t p, term_t t){
   return $(termlist,res);
 }
 
-static $(term_t,unsigned)* times_newc(unsigned c, $(term_t,unsigned)* td){
-  return new $(td->f0,td->f1 * c);
+static $(int,term_t)@ times_newc(int c, $(int,term_t)@ td){
+  return new $(td->f0*c,td->f1);
 }
 
 // flatten generates two lists of terms [t11,t12,...] and [t21,t22,...]

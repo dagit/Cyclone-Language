@@ -78,6 +78,9 @@ namespace AssnDef{
   // a distinguished program variable representing memory -- when we
   // write to an escaping variable, we substitute a fresh logic variable
   // for this vardecl.
+  typedef list_t<$(int,`a)@,`r> coef_list_t<`a,`r>;
+  typedef coef_list_t<term_t,`H> term_coef_list_t;
+
   extern vardecl_t memory;
 
   extern string_t term2string(term_t t);
@@ -102,6 +105,8 @@ namespace AssnDef{
   extern term_t aggr(list_t<term_t,`H>, type_opt_t tp);
   extern term_t okderef(term_t t);
   extern term_t numelts_term(term_t t);
+
+  extern $(term_coef_list_t,int) flatten_plus(term_t t);
 
   extern term_t fresh_var(type_opt_t);
 

@@ -1163,7 +1163,7 @@ static graph_t *congruence_close_graphs(graph_t *`H gs) {
   return app_graphs(congruence_close_graph,0,gs);
 }
 
-
+/************ use the similar function from assndef ***********
 // Warning:  this is imperative so it destroys the two lists passed in.
 // merges two polynomials, multiplying the coefficients of the second
 // by factor.  Example:  p1 = c1*t1 + c2*t2 + ... + cn*tn
@@ -1244,6 +1244,8 @@ static term_t poly2term(list_t<$(int,term_t)@> p, unsigned int c,type_opt_t type
   return res;
 }
 
+***********************************************************/
+
 // try to perform gaussian elimination on the given matrix -- not
 // the smartest implementation, but simple.
 static void simplify_matrix(unsigned Rows, unsigned Columns,int ??M) {
@@ -1317,14 +1319,15 @@ static void gaussian_terms(int unused, graph_t @g) {
   for (let rs = g->rows; rs != NULL; rs = rs->next) {
     for (let ts = rs->next; ts != NULL; ts = ts->next) 
       if (eq_nodes(rs,ts,false)) {
-        //fprintf(stderr,"adding %s == %s to matrix\n",term2string(rs->rep),
-        //        term2string(ts->rep));
-        let $(r_terms,r_c) = term2poly(rs->rep);
-        //fprintf(stderr,"poly1: "); print_poly(r_terms,r_c);
-        let $(t_terms,t_c) = term2poly(ts->rep);
-        //fprintf(stderr,"poly2: "); print_poly(t_terms,t_c);
-        let terms = merge_poly(r_terms,-1,t_terms);
-        // add each primitive term to the hashtable
+//         //fprintf(stderr,"adding %s == %s to matrix\n",term2string(rs->rep),
+//         //        term2string(ts->rep));
+//         let $(r_terms,r_c) = term2poly(rs->rep);
+//         //fprintf(stderr,"poly1: "); print_poly(r_terms,r_c);
+//         let $(t_terms,t_c) = term2poly(ts->rep);
+//         //fprintf(stderr,"poly2: "); print_poly(t_terms,t_c);
+//         let terms = merge_poly(r_terms,-1,t_terms);
+//         // add each primitive term to the hashtable
+	let $(terms,c) = AssnDef::flatten_plus(minus(rs->rep,ts->rep,NULL));
         for (let x = terms; x != NULL; x=x->tl) {
           let $(_,t) = *x->hd;
           let iopt = Hashtable::lookup_opt(term_index,t);
@@ -1335,7 +1338,6 @@ static void gaussian_terms(int unused, graph_t @g) {
           }
         }
         Rows++;
-        let c = r_c - t_c;
         //print_poly(terms,c);
         S = new List{new $(terms,c),S};
       }
@@ -1582,7 +1584,7 @@ static void break_term_in_graph(int dummy, graph_t @g){
 	add_eq(g,t1,uint(c1-c2));
 	break;
       default:
-	break;
+ 	break;
       }
     }
   }
@@ -1796,7 +1798,7 @@ static void add_prim($(term_t,prim_reln_t,term_t)@ p, graph_t @`H g) {
 // you should get out p + j.  However, it's likely to get confused
 // if we have a pointer subtraction in here...
 static $(term_t base, term_t offset) find_ptr_base(term_t t) {
-  let $(ts,c) = term2poly(t);
+  let $(ts,c) = flatten_plus(t);
   //fprintf(stderr,"term %s splits into polynomial 0x%x",term2string(t),c);
   //for (let us=ts; us!=NULL; us=us->tl) {
   //  let $(i,u) = *us->hd;
