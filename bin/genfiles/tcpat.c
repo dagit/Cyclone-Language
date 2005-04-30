@@ -546,7 +546,7 @@ void Cyc_Tctyp_check_type(unsigned,struct Cyc_Tcenv_Tenv*,struct Cyc_List_List*,
 # 26 "tcexp.h"
 void*Cyc_Tcexp_tcExp(struct Cyc_Tcenv_Tenv*,void**,struct Cyc_Absyn_Exp*);
 # 32
-struct Cyc_Absyn_PtrInfo Cyc_Tcexp_fresh_pointer_type(struct Cyc_Tcenv_Tenv*);struct Cyc_Tcpat_TcPatResult{struct _tuple1*tvars_and_bounds_opt;struct Cyc_List_List*patvars;struct Cyc_List_List*aquals_bounds;};struct Cyc_Tcpat_WhereTest_Tcpat_PatTest_struct{int tag;struct Cyc_Absyn_Exp*f1;};struct Cyc_Tcpat_EqNull_Tcpat_PatTest_struct{int tag;};struct Cyc_Tcpat_NeqNull_Tcpat_PatTest_struct{int tag;};struct Cyc_Tcpat_EqEnum_Tcpat_PatTest_struct{int tag;struct Cyc_Absyn_Enumdecl*f1;struct Cyc_Absyn_Enumfield*f2;};struct Cyc_Tcpat_EqAnonEnum_Tcpat_PatTest_struct{int tag;void*f1;struct Cyc_Absyn_Enumfield*f2;};struct Cyc_Tcpat_EqFloat_Tcpat_PatTest_struct{int tag;struct _fat_ptr f1;int f2;};struct Cyc_Tcpat_EqConst_Tcpat_PatTest_struct{int tag;unsigned f1;};struct Cyc_Tcpat_EqDatatypeTag_Tcpat_PatTest_struct{int tag;int f1;struct Cyc_Absyn_Datatypedecl*f2;struct Cyc_Absyn_Datatypefield*f3;};struct Cyc_Tcpat_EqTaggedUnion_Tcpat_PatTest_struct{int tag;struct _fat_ptr*f1;int f2;};struct Cyc_Tcpat_EqExtensibleDatatype_Tcpat_PatTest_struct{int tag;struct Cyc_Absyn_Datatypedecl*f1;struct Cyc_Absyn_Datatypefield*f2;};struct Cyc_Tcpat_Dummy_Tcpat_Access_struct{int tag;};struct Cyc_Tcpat_Deref_Tcpat_Access_struct{int tag;};struct Cyc_Tcpat_DatatypeField_Tcpat_Access_struct{int tag;struct Cyc_Absyn_Datatypedecl*f1;struct Cyc_Absyn_Datatypefield*f2;unsigned f3;};struct Cyc_Tcpat_AggrField_Tcpat_Access_struct{int tag;int f1;struct _fat_ptr*f2;};struct _union_PatOrWhere_pattern{int tag;struct Cyc_Absyn_Pat*val;};struct _union_PatOrWhere_where_clause{int tag;struct Cyc_Absyn_Exp*val;};union Cyc_Tcpat_PatOrWhere{struct _union_PatOrWhere_pattern pattern;struct _union_PatOrWhere_where_clause where_clause;};struct Cyc_Tcpat_PathNode{union Cyc_Tcpat_PatOrWhere orig_pat;void*access;};struct Cyc_Tcpat_Rhs{int used;unsigned pat_loc;struct Cyc_Absyn_Stmt*rhs;};struct Cyc_Tcpat_Failure_Tcpat_Decision_struct{int tag;void*f1;};struct Cyc_Tcpat_Success_Tcpat_Decision_struct{int tag;struct Cyc_Tcpat_Rhs*f1;};struct Cyc_Tcpat_SwitchDec_Tcpat_Decision_struct{int tag;struct Cyc_List_List*f1;struct Cyc_List_List*f2;void*f3;};struct _tuple15{unsigned f0;int f1;};
+struct Cyc_Absyn_PtrInfo Cyc_Tcexp_fresh_pointer_type(struct Cyc_Tcenv_Tenv*);struct Cyc_Tcpat_TcPatResult{struct _tuple1*tvars_and_bounds_opt;struct Cyc_List_List*patvars;struct Cyc_List_List*aquals_bounds;};struct Cyc_Tcpat_WhereTest_Tcpat_PatTest_struct{int tag;struct Cyc_Absyn_Exp*f1;};struct Cyc_Tcpat_EqNull_Tcpat_PatTest_struct{int tag;};struct Cyc_Tcpat_NeqNull_Tcpat_PatTest_struct{int tag;};struct Cyc_Tcpat_EqEnum_Tcpat_PatTest_struct{int tag;struct Cyc_Absyn_Enumdecl*f1;struct Cyc_Absyn_Enumfield*f2;};struct Cyc_Tcpat_EqAnonEnum_Tcpat_PatTest_struct{int tag;void*f1;struct Cyc_Absyn_Enumfield*f2;};struct Cyc_Tcpat_EqFloat_Tcpat_PatTest_struct{int tag;struct _fat_ptr f1;int f2;};struct Cyc_Tcpat_EqConst_Tcpat_PatTest_struct{int tag;unsigned f1;};struct Cyc_Tcpat_EqDatatypeTag_Tcpat_PatTest_struct{int tag;int f1;struct Cyc_Absyn_Datatypedecl*f2;struct Cyc_Absyn_Datatypefield*f3;};struct Cyc_Tcpat_EqTaggedUnion_Tcpat_PatTest_struct{int tag;struct _fat_ptr*f1;int f2;};struct Cyc_Tcpat_EqExtensibleDatatype_Tcpat_PatTest_struct{int tag;struct Cyc_Absyn_Datatypedecl*f1;struct Cyc_Absyn_Datatypefield*f2;};struct Cyc_Tcpat_Dummy_Tcpat_Access_struct{int tag;};struct Cyc_Tcpat_Deref_Tcpat_Access_struct{int tag;};struct Cyc_Tcpat_DatatypeField_Tcpat_Access_struct{int tag;struct Cyc_Absyn_Datatypedecl*f1;struct Cyc_Absyn_Datatypefield*f2;unsigned f3;};struct Cyc_Tcpat_AggrField_Tcpat_Access_struct{int tag;void*f1;int f2;struct _fat_ptr*f3;};struct _union_PatOrWhere_pattern{int tag;struct Cyc_Absyn_Pat*val;};struct _union_PatOrWhere_where_clause{int tag;struct Cyc_Absyn_Exp*val;};union Cyc_Tcpat_PatOrWhere{struct _union_PatOrWhere_pattern pattern;struct _union_PatOrWhere_where_clause where_clause;};struct Cyc_Tcpat_PathNode{union Cyc_Tcpat_PatOrWhere orig_pat;void*access;};struct Cyc_Tcpat_Rhs{int used;unsigned pat_loc;struct Cyc_Absyn_Stmt*rhs;};struct Cyc_Tcpat_Failure_Tcpat_Decision_struct{int tag;void*f1;};struct Cyc_Tcpat_Success_Tcpat_Decision_struct{int tag;struct Cyc_Tcpat_Rhs*f1;};struct Cyc_Tcpat_SwitchDec_Tcpat_Decision_struct{int tag;struct Cyc_List_List*f1;struct Cyc_List_List*f2;void*f3;};struct _tuple15{unsigned f0;int f1;};
 # 28 "evexp.h"
 extern struct _tuple15 Cyc_Evexp_eval_const_uint_exp(struct Cyc_Absyn_Exp*);
 # 46 "tcpat.cyc"
@@ -597,7 +597,7 @@ if(more_exists < 0){
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp8=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp9;_Tmp9.tag=0,_Tmp9.f1=_tag_fat("too many existential type variables in pattern",sizeof(char),47U);_Tmp9;});void*_Tmp9[1];_Tmp9[0]=& _Tmp8;Cyc_Warn_err2(p->loc,_tag_fat(_Tmp9,sizeof(void*),1));});{
 struct Cyc_List_List**ts=exist_ts;
 {int n=Cyc_List_length(ad->impl->exist_vars);for(0;n!=0;-- n){
-ts=& _check_null(*ts)->tl;}}
+ts=&(*ts)->tl;}}
 *ts=0;}}else{
 if(more_exists > 0){
 # 100
@@ -875,7 +875,7 @@ struct Cyc_List_List*outlives_constraints=0;
 struct Cyc_List_List*u=ad->impl->exist_vars;
 {struct Cyc_List_List*t=exist_ts;for(0;t!=0;t=t->tl){
 struct Cyc_Absyn_Tvar*tv=(struct Cyc_Absyn_Tvar*)t->hd;
-struct Cyc_Absyn_Tvar*uv=(struct Cyc_Absyn_Tvar*)_check_null(u)->hd;
+struct Cyc_Absyn_Tvar*uv=(struct Cyc_Absyn_Tvar*)u->hd;
 u=u->tl;{
 void*kb1=Cyc_Kinds_compress_kb(tv->kind);
 void*kb2=Cyc_Kinds_compress_kb(uv->kind);
@@ -1274,9 +1274,9 @@ return(void*)({struct Cyc_Tcpat_EqDatatypeTag_Tcpat_PatTest_struct*_Tmp8=_cycall
 void*_Tmp8=Cyc_Absyn_compress(atype);union Cyc_Absyn_AggrInfo _Tmp9;if(*((int*)_Tmp8)==0){if(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp8)->f1)==25){_Tmp9=((struct Cyc_Absyn_AggrCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp8)->f1)->f1;{union Cyc_Absyn_AggrInfo info=_Tmp9;
 # 950
 struct Cyc_Absyn_Aggrdecl*ad=Cyc_Absyn_get_known_aggrdecl(info);
-if(!_check_null(ad->impl)->tagged)
+if(!ad->impl->tagged)
 ({struct Cyc_Warn_String_Warn_Warg_struct _TmpA=({struct Cyc_Warn_String_Warn_Warg_struct _TmpB;_TmpB.tag=0,_TmpB.f1=_tag_fat("non-tagged aggregate in pattern test",sizeof(char),37U);_TmpB;});void*_TmpB[1];_TmpB[0]=& _TmpA;({(int(*)(struct _fat_ptr))Cyc_Warn_impos2;})(_tag_fat(_TmpB,sizeof(void*),1));});{
-void*_TmpA=(void*)_check_null((*((struct _tuple16*)_check_null(dlps)->hd)).f0)->hd;void*_TmpB;if(*((int*)_TmpA)==1){_TmpB=((struct Cyc_Absyn_FieldName_Absyn_Designator_struct*)_TmpA)->f1;{struct _fat_ptr*f=_TmpB;
+void*_TmpA=(void*)(*((struct _tuple16*)dlps->hd)).f0->hd;void*_TmpB;if(*((int*)_TmpA)==1){_TmpB=((struct Cyc_Absyn_FieldName_Absyn_Designator_struct*)_TmpA)->f1;{struct _fat_ptr*f=_TmpB;
 return(void*)({struct Cyc_Tcpat_EqTaggedUnion_Tcpat_PatTest_struct*_TmpC=_cycalloc(sizeof(struct Cyc_Tcpat_EqTaggedUnion_Tcpat_PatTest_struct));_TmpC->tag=8,_TmpC->f1=f,({int _TmpD=Cyc_Tcpat_get_member_offset(ad,f);_TmpC->f2=_TmpD;});_TmpC;});}}else{
 ({struct Cyc_Warn_String_Warn_Warg_struct _TmpC=({struct Cyc_Warn_String_Warn_Warg_struct _TmpD;_TmpD.tag=0,_TmpD.f1=_tag_fat("no field name in tagged union pattern",sizeof(char),38U);_TmpD;});void*_TmpD[1];_TmpD[0]=& _TmpC;({(int(*)(struct _fat_ptr))Cyc_Warn_impos2;})(_tag_fat(_TmpD,sizeof(void*),1));});};}}}else{goto _LL21;}}else{_LL21:
 # 957
@@ -1360,7 +1360,7 @@ goto _LL0;}case 7: _Tmp3=((struct Cyc_Absyn_Datatype_p_Absyn_Raw_pat_struct*)_Tm
 int*span;
 {void*_Tmp8=Cyc_Absyn_compress(_check_null(p->topt));if(*((int*)_Tmp8)==0)switch(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp8)->f1)){case 23:
 # 1045
- span=tud->is_extensible?0:({int*_Tmp9=_cycalloc_atomic(sizeof(int));({int _TmpA=Cyc_List_length((struct Cyc_List_List*)_check_null(tud->fields)->v);*_Tmp9=_TmpA;});_Tmp9;});
+ span=tud->is_extensible?0:({int*_Tmp9=_cycalloc_atomic(sizeof(int));({int _TmpA=Cyc_List_length((struct Cyc_List_List*)tud->fields->v);*_Tmp9=_TmpA;});_Tmp9;});
 goto _LL28;case 24:
  span=& Cyc_Tcpat_one_opt;goto _LL28;default: goto _LL2D;}else{_LL2D:
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp9=({struct Cyc_Warn_String_Warn_Warg_struct _TmpA;_TmpA.tag=0,_TmpA.f1=_tag_fat("void datatype pattern has bad type",sizeof(char),35U);_TmpA;});void*_TmpA[1];_TmpA[0]=& _Tmp9;({(int(*)(struct _fat_ptr))Cyc_Warn_impos2;})(_tag_fat(_TmpA,sizeof(void*),1));});}_LL28:;}
@@ -1375,7 +1375,7 @@ int is_tagged=0;
 # 1059
 struct Cyc_Absyn_Aggrdecl*ad=Cyc_Absyn_get_known_aggrdecl(ainfo);
 aggr_kind=ad->kind;
-fields=_check_null(ad->impl)->fields;
+fields=ad->impl->fields;
 is_tagged=ad->impl->tagged;
 goto _LL2F;}}else{goto _LL34;}case 6: _TmpA=((struct Cyc_Absyn_AnonAggrType_Absyn_Type_struct*)_Tmp8)->f1;_Tmp9=((struct Cyc_Absyn_AnonAggrType_Absyn_Type_struct*)_Tmp8)->f3;{enum Cyc_Absyn_AggrKind ak=_TmpA;struct Cyc_List_List*fs=_Tmp9;
 # 1065
@@ -1430,7 +1430,7 @@ struct _tuple0 _Tmp0=({struct _tuple0 _Tmp1;_Tmp1.f0=a1,_Tmp1.f1=a2;_Tmp1;});int
 return 1;else{goto _LL9;}case 1: if(*((int*)_Tmp0.f1)==1)
 return 1;else{goto _LL9;}case 2: if(*((int*)_Tmp0.f1)==2){_Tmp6=((struct Cyc_Tcpat_DatatypeField_Tcpat_Access_struct*)_Tmp0.f0)->f2;_Tmp5=((struct Cyc_Tcpat_DatatypeField_Tcpat_Access_struct*)_Tmp0.f0)->f3;_Tmp4=((struct Cyc_Tcpat_DatatypeField_Tcpat_Access_struct*)_Tmp0.f1)->f2;_Tmp3=((struct Cyc_Tcpat_DatatypeField_Tcpat_Access_struct*)_Tmp0.f1)->f3;{struct Cyc_Absyn_Datatypefield*df1=_Tmp6;unsigned i1=_Tmp5;struct Cyc_Absyn_Datatypefield*df2=_Tmp4;unsigned i2=_Tmp3;
 # 1149
-return df1==df2 && i1==i2;}}else{goto _LL9;}default: if(*((int*)_Tmp0.f1)==3){_Tmp2=((struct Cyc_Tcpat_AggrField_Tcpat_Access_struct*)_Tmp0.f0)->f1;_Tmp6=((struct Cyc_Tcpat_AggrField_Tcpat_Access_struct*)_Tmp0.f0)->f2;_Tmp1=((struct Cyc_Tcpat_AggrField_Tcpat_Access_struct*)_Tmp0.f1)->f1;_Tmp4=((struct Cyc_Tcpat_AggrField_Tcpat_Access_struct*)_Tmp0.f1)->f2;{int b1=_Tmp2;struct _fat_ptr*f1=_Tmp6;int b2=_Tmp1;struct _fat_ptr*f2=_Tmp4;
+return df1==df2 && i1==i2;}}else{goto _LL9;}default: if(*((int*)_Tmp0.f1)==3){_Tmp2=((struct Cyc_Tcpat_AggrField_Tcpat_Access_struct*)_Tmp0.f0)->f2;_Tmp6=((struct Cyc_Tcpat_AggrField_Tcpat_Access_struct*)_Tmp0.f0)->f3;_Tmp1=((struct Cyc_Tcpat_AggrField_Tcpat_Access_struct*)_Tmp0.f1)->f2;_Tmp4=((struct Cyc_Tcpat_AggrField_Tcpat_Access_struct*)_Tmp0.f1)->f3;{int b1=_Tmp2;struct _fat_ptr*f1=_Tmp6;int b2=_Tmp1;struct _fat_ptr*f2=_Tmp4;
 # 1151
 return b1==b2 && Cyc_strptrcmp(f1,f2)==0;}}else{_LL9:
  return 0;}};}
@@ -1468,7 +1468,7 @@ int _Tmp0;unsigned _Tmp1;void*_Tmp2;switch(*((int*)a)){case 0:
  Cyc_fprintf(Cyc_stderr,_tag_fat("DUMMY",sizeof(char),6U),_tag_fat(0U,sizeof(void*),0));goto _LL0;case 1:
  Cyc_fprintf(Cyc_stderr,_tag_fat("*",sizeof(char),2U),_tag_fat(0U,sizeof(void*),0));goto _LL0;case 2: _Tmp2=((struct Cyc_Tcpat_DatatypeField_Tcpat_Access_struct*)a)->f2;_Tmp1=((struct Cyc_Tcpat_DatatypeField_Tcpat_Access_struct*)a)->f3;{struct Cyc_Absyn_Datatypefield*f=_Tmp2;unsigned i=_Tmp1;
 # 1203
-({struct Cyc_String_pa_PrintArg_struct _Tmp3=({struct Cyc_String_pa_PrintArg_struct _Tmp4;_Tmp4.tag=0,({struct _fat_ptr _Tmp5=(struct _fat_ptr)((struct _fat_ptr)Cyc_Absynpp_qvar2string(f->name));_Tmp4.f1=_Tmp5;});_Tmp4;});struct Cyc_Int_pa_PrintArg_struct _Tmp4=({struct Cyc_Int_pa_PrintArg_struct _Tmp5;_Tmp5.tag=1,_Tmp5.f1=(unsigned long)((int)i);_Tmp5;});void*_Tmp5[2];_Tmp5[0]=& _Tmp3,_Tmp5[1]=& _Tmp4;Cyc_fprintf(Cyc_stderr,_tag_fat("%s[%d]",sizeof(char),7U),_tag_fat(_Tmp5,sizeof(void*),2));});goto _LL0;}default: _Tmp0=((struct Cyc_Tcpat_AggrField_Tcpat_Access_struct*)a)->f1;_Tmp2=((struct Cyc_Tcpat_AggrField_Tcpat_Access_struct*)a)->f2;{int tagged=_Tmp0;struct _fat_ptr*f=_Tmp2;
+({struct Cyc_String_pa_PrintArg_struct _Tmp3=({struct Cyc_String_pa_PrintArg_struct _Tmp4;_Tmp4.tag=0,({struct _fat_ptr _Tmp5=(struct _fat_ptr)((struct _fat_ptr)Cyc_Absynpp_qvar2string(f->name));_Tmp4.f1=_Tmp5;});_Tmp4;});struct Cyc_Int_pa_PrintArg_struct _Tmp4=({struct Cyc_Int_pa_PrintArg_struct _Tmp5;_Tmp5.tag=1,_Tmp5.f1=(unsigned long)((int)i);_Tmp5;});void*_Tmp5[2];_Tmp5[0]=& _Tmp3,_Tmp5[1]=& _Tmp4;Cyc_fprintf(Cyc_stderr,_tag_fat("%s[%d]",sizeof(char),7U),_tag_fat(_Tmp5,sizeof(void*),2));});goto _LL0;}default: _Tmp0=((struct Cyc_Tcpat_AggrField_Tcpat_Access_struct*)a)->f2;_Tmp2=((struct Cyc_Tcpat_AggrField_Tcpat_Access_struct*)a)->f3;{int tagged=_Tmp0;struct _fat_ptr*f=_Tmp2;
 # 1205
 if(tagged)
 Cyc_fprintf(Cyc_stderr,_tag_fat(".tagunion",sizeof(char),10U),_tag_fat(0U,sizeof(void*),0));
@@ -1615,7 +1615,7 @@ int is_tagged=0;
 {void*_Tmp4=Cyc_Absyn_compress(_check_null(atype));void*_Tmp5;union Cyc_Absyn_AggrInfo _Tmp6;switch(*((int*)_Tmp4)){case 0: if(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp4)->f1)==25){_Tmp6=((struct Cyc_Absyn_AggrCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp4)->f1)->f1;{union Cyc_Absyn_AggrInfo ainfo=_Tmp6;
 # 1414
 struct Cyc_Absyn_Aggrdecl*ad=Cyc_Absyn_get_known_aggrdecl(ainfo);
-is_tagged=_check_null(ad->impl)->tagged;
+is_tagged=ad->impl->tagged;
 fields=ad->impl->fields;
 goto _LLE;}}else{goto _LL13;}case 6: _Tmp5=((struct Cyc_Absyn_AnonAggrType_Absyn_Type_struct*)_Tmp4)->f3;{struct Cyc_List_List*fs=_Tmp5;
 # 1419
@@ -1626,13 +1626,13 @@ goto _LLE;}default: _LL13:
 if(is_tagged){
 struct Cyc_List_List*_Tmp4=(*((struct _tuple16*)_check_null(dlps)->hd)).f0;void*_Tmp5;if(_Tmp4!=0){if(*((int*)((struct Cyc_List_List*)_Tmp4)->hd)==1){if(((struct Cyc_List_List*)_Tmp4)->tl==0){_Tmp5=((struct Cyc_Absyn_FieldName_Absyn_Designator_struct*)_Tmp4->hd)->f1;{struct _fat_ptr*f=_Tmp5;
 # 1426
-return(void*)({struct Cyc_Tcpat_AggrField_Tcpat_Access_struct*_Tmp6=_cycalloc(sizeof(struct Cyc_Tcpat_AggrField_Tcpat_Access_struct));_Tmp6->tag=3,_Tmp6->f1=is_tagged,_Tmp6->f2=f;_Tmp6;});}}else{goto _LL18;}}else{goto _LL18;}}else{_LL18:
+return(void*)({struct Cyc_Tcpat_AggrField_Tcpat_Access_struct*_Tmp6=_cycalloc(sizeof(struct Cyc_Tcpat_AggrField_Tcpat_Access_struct));_Tmp6->tag=3,_Tmp6->f1=atype,_Tmp6->f2=is_tagged,_Tmp6->f3=f;_Tmp6;});}}else{goto _LL18;}}else{goto _LL18;}}else{_LL18:
 # 1428
 ({struct Cyc_String_pa_PrintArg_struct _Tmp6=({struct Cyc_String_pa_PrintArg_struct _Tmp7;_Tmp7.tag=0,({struct _fat_ptr _Tmp8=(struct _fat_ptr)((struct _fat_ptr)Cyc_Absynpp_pat2string(p));_Tmp7.f1=_Tmp8;});_Tmp7;});void*_Tmp7[1];_Tmp7[0]=& _Tmp6;({(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;})(_tag_fat("get_access on bad aggr pattern: %s",sizeof(char),35U),_tag_fat(_Tmp7,sizeof(void*),1));});};}{
 # 1431
 int orig_i=i;
 for(1;i!=0;-- i){fields=_check_null(fields)->tl;}
-return(void*)({struct Cyc_Tcpat_AggrField_Tcpat_Access_struct*_Tmp4=_cycalloc(sizeof(struct Cyc_Tcpat_AggrField_Tcpat_Access_struct));_Tmp4->tag=3,_Tmp4->f1=is_tagged,_Tmp4->f2=((struct Cyc_Absyn_Aggrfield*)_check_null(fields)->hd)->name;_Tmp4;});}}default:
+return(void*)({struct Cyc_Tcpat_AggrField_Tcpat_Access_struct*_Tmp4=_cycalloc(sizeof(struct Cyc_Tcpat_AggrField_Tcpat_Access_struct));_Tmp4->tag=3,_Tmp4->f1=atype,_Tmp4->f2=is_tagged,_Tmp4->f3=((struct Cyc_Absyn_Aggrfield*)_check_null(fields)->hd)->name;_Tmp4;});}}default:
 ({struct Cyc_String_pa_PrintArg_struct _Tmp4=({struct Cyc_String_pa_PrintArg_struct _Tmp5;_Tmp5.tag=0,({struct _fat_ptr _Tmp6=(struct _fat_ptr)((struct _fat_ptr)Cyc_Absynpp_pat2string(p));_Tmp5.f1=_Tmp6;});_Tmp5;});void*_Tmp5[1];_Tmp5[0]=& _Tmp4;({(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;})(_tag_fat("get_access on bad pattern: %s",sizeof(char),30U),_tag_fat(_Tmp5,sizeof(void*),1));});};}};}struct _tuple24{struct Cyc_List_List*f0;struct Cyc_Tcpat_Con_s*f1;};
 # 1440
 static struct Cyc_List_List*Cyc_Tcpat_getoarg(struct _tuple24*env,int i){
@@ -1704,7 +1704,7 @@ void*_Tmp0;void*_Tmp1;if(*((int*)d)==0){_Tmp1=((struct Cyc_Tcpat_Pos_Tcpat_Term_
 union Cyc_Tcpat_Name_value n=c->name;
 struct Cyc_Absyn_Pat*p;
 {union Cyc_Tcpat_PatOrWhere _Tmp2=c->orig_pat;void*_Tmp3;if(_Tmp2.where_clause.tag==2)
-return Cyc_Tcpat_desc2string((void*)_check_null(ds)->hd);else{_Tmp3=_Tmp2.pattern.val;{struct Cyc_Absyn_Pat*p2=_Tmp3;
+return Cyc_Tcpat_desc2string((void*)ds->hd);else{_Tmp3=_Tmp2.pattern.val;{struct Cyc_Absyn_Pat*p2=_Tmp3;
 p=p2;goto _LL5;}}_LL5:;}{
 # 1538
 void*_Tmp2=p->r;struct _fat_ptr _Tmp3;char _Tmp4;int _Tmp5;void*_Tmp6;void*_Tmp7;switch(*((int*)_Tmp2)){case 0:
@@ -1762,7 +1762,7 @@ return({struct Cyc_Int_pa_PrintArg_struct _Tmp5=({struct Cyc_Int_pa_PrintArg_str
 _throw(& Cyc_Tcpat_Desc2string_val);}case 23: if(((struct Cyc_Absyn_DatatypeCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp2)->f1)->f1.KnownDatatype.tag==2){_Tmp4=*((struct Cyc_Absyn_DatatypeCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp2)->f1)->f1.KnownDatatype.val;{struct Cyc_Absyn_Datatypedecl*tud=_Tmp4;
 # 1601
 if(tud->is_extensible)_throw(& Cyc_Tcpat_Desc2string_val);{
-struct Cyc_List_List*fields=(struct Cyc_List_List*)_check_null(tud->fields)->v;
+struct Cyc_List_List*fields=(struct Cyc_List_List*)tud->fields->v;
 int span=Cyc_List_length(fields);
 for(1;(unsigned)fields;fields=fields->tl){
 struct _fat_ptr n=*(*((struct Cyc_Absyn_Datatypefield*)fields->hd)->name).f1;
@@ -1774,7 +1774,7 @@ _throw(& Cyc_Tcpat_Desc2string_val);}}}else{goto _LL40;}case 25: _Tmp3=((struct 
 # 1612
 struct Cyc_Absyn_Aggrdecl*ad=Cyc_Absyn_get_known_aggrdecl(ainfo);
 if((int)ad->kind!=1)_throw(& Cyc_Tcpat_Desc2string_val);{
-struct Cyc_List_List*fields=_check_null(ad->impl)->fields;
+struct Cyc_List_List*fields=ad->impl->fields;
 int span=Cyc_List_length(fields);
 struct _tuple2*_Tmp5=ad->name;struct _fat_ptr _Tmp6;_Tmp6=*_Tmp5->f1;{struct _fat_ptr union_name=_Tmp6;
 for(1;(unsigned)fields;fields=fields->tl){

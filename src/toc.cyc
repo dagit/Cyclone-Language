@@ -2749,7 +2749,7 @@ static exp_t compile_path(path_t ps, exp_t v) {
       v = deref_exp(v,DL);
       break;
     case &DatatypeField(_,_,i): v = member_exp(v,fieldname(i+1),DL); break;
-    case &AggrField(tagged, f):
+    case &AggrField(_,tagged, f):
       v = member_exp(v,f,DL);
       if (tagged)  // tagged unions require getting the .val member
         v = member_exp(v,val_sp,DL);

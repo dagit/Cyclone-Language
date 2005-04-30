@@ -498,7 +498,7 @@ return Cyc_Tcenv_get_fenv(te,_tag_fat("return_typ",sizeof(char),11U))->shared->r
 struct Cyc_List_List*Cyc_Tcenv_lookup_type_vars(struct Cyc_Tcenv_Tenv*te){
 struct Cyc_Tcenv_Fenv*le=te->le;
 if(te->le==0)return 0;
-return _check_null(le)->type_vars;}
+return le->type_vars;}
 # 177
 struct Cyc_Core_Opt*Cyc_Tcenv_lookup_opt_type_vars(struct Cyc_Tcenv_Tenv*te){
 return({struct Cyc_Core_Opt*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Opt));({struct Cyc_List_List*_Tmp1=Cyc_Tcenv_lookup_type_vars(te);_Tmp0->v=_Tmp1;});_Tmp0;});}

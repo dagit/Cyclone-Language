@@ -440,7 +440,7 @@ if((int)env.ctxt==2 && Cyc_Tcutil_is_array_type(_check_null(e->topt))){
 struct Cyc_List_List*dles=0;
 unsigned n=_get_fat_size(s,sizeof(char));
 {unsigned i=0U;for(0;i < n;++ i){
-struct Cyc_Absyn_Exp*c=Cyc_Absyn_char_exp(*((const char*)_check_fat_subscript(s,sizeof(char),(int)i)),0U);
+struct Cyc_Absyn_Exp*c=Cyc_Absyn_char_exp(((const char*)s.curr)[(int)i],0U);
 c->topt=Cyc_Absyn_char_type;
 dles=({struct Cyc_List_List*_Tmp6=_cycalloc(sizeof(struct Cyc_List_List));({struct _tuple11*_Tmp7=({struct _tuple11*_Tmp8=_cycalloc(sizeof(struct _tuple11));_Tmp8->f0=0,_Tmp8->f1=c;_Tmp8;});_Tmp6->hd=_Tmp7;}),_Tmp6->tl=dles;_Tmp6;});}}
 # 118

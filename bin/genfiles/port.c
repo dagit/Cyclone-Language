@@ -1654,11 +1654,11 @@ struct _tuple11 _Tmp5=*Cyc_Port_lookup_struct_decl(env,n);void*_Tmp6;_Tmp6=_Tmp5
 if(ad==0)({(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;})(_tag_fat("struct is not yet defined",sizeof(char),26U),_tag_fat(0U,sizeof(void*),0));
 _Tmp4=ad;goto _LL15;}}}}else{goto _LL16;}}else{_Tmp4=*((struct Cyc_Absyn_AggrCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)t)->f1)->f1.KnownAggr.val;_LL15: {struct Cyc_Absyn_Aggrdecl*ad=_Tmp4;
 # 1615
-struct Cyc_List_List*fields=_check_null(ad->impl)->fields;
+struct Cyc_List_List*fields=ad->impl->fields;
 for(1;dles!=0;dles=dles->tl){
 struct _tuple18 _Tmp5=*((struct _tuple18*)dles->hd);void*_Tmp6;void*_Tmp7;_Tmp7=_Tmp5.f0;_Tmp6=_Tmp5.f1;{struct Cyc_List_List*d=_Tmp7;struct Cyc_Absyn_Exp*e=_Tmp6;
 if((unsigned)d)({(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;})(_tag_fat("designators in initializers",sizeof(char),28U),_tag_fat(0U,sizeof(void*),0));{
-struct Cyc_Absyn_Aggrfield*f=(struct Cyc_Absyn_Aggrfield*)_check_null(fields)->hd;
+struct Cyc_Absyn_Aggrfield*f=(struct Cyc_Absyn_Aggrfield*)fields->hd;
 fields=fields->tl;{
 void*te=Cyc_Port_gen_initializer(env,f->type,e);;}}}}
 # 1623

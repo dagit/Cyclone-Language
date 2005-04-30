@@ -940,7 +940,7 @@ return Cyc_Absyn_tvar_cmp(tv1,tv2);}case 1:
 # 576
  goto _LL12;default: goto _LL13;}case 1: switch(*((int*)_Tmp0.f1)){case 1: _Tmp4=((struct Cyc_Absyn_Evar_Absyn_Type_struct*)_Tmp0.f0)->f1;_Tmp2=((struct Cyc_Absyn_Evar_Absyn_Type_struct*)_Tmp0.f0)->f3;_Tmp3=((struct Cyc_Absyn_Evar_Absyn_Type_struct*)_Tmp0.f1)->f1;_Tmp1=((struct Cyc_Absyn_Evar_Absyn_Type_struct*)_Tmp0.f1)->f3;{struct Cyc_Core_Opt*k1=_Tmp4;int i1=_Tmp2;struct Cyc_Core_Opt*k2=_Tmp3;int i2=_Tmp1;
 # 569
-return i1==i2 &&({struct Cyc_Absyn_Kind*_Tmp5=(struct Cyc_Absyn_Kind*)_check_null(k1)->v;Cyc_Kinds_kind_eq(_Tmp5,(struct Cyc_Absyn_Kind*)_check_null(k2)->v);})?0: 1;}case 2: _LLA:
+return i1==i2 && Cyc_Kinds_kind_eq((struct Cyc_Absyn_Kind*)_check_null(k1)->v,(struct Cyc_Absyn_Kind*)k2->v)?0: 1;}case 2: _LLA:
 # 573
  goto _LLC;case 0: _LLC:
  goto _LLE;default: goto _LL13;}case 0: if(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0.f0)->f1)==16){if(((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0.f0)->f2!=0)switch(*((int*)_Tmp0.f1)){case 0: if(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0.f1)->f1)==16){if(((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0.f1)->f2!=0){_Tmp4=(void*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0.f0)->f2->hd;_Tmp3=(void*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0.f1)->f2->hd;{void*tv11=_Tmp4;void*tv21=_Tmp3;
@@ -1016,7 +1016,7 @@ goto _LL11;}else{_Tmp7=_Tmp6;{void*exn=_Tmp7;_rethrow(exn);}}_LL11:;}}}}
 # 653
 goto _LL3;}}else{goto _LLA;}case 0: if(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)v)->f1)==18){_Tmp3=((struct Cyc_Absyn_AppType_Absyn_Type_struct*)v)->f2;{struct Cyc_List_List*tv_bnd=_Tmp3;
 # 655
-void*tv=(void*)_check_null(tv_bnd)->hd;
+void*tv=(void*)tv_bnd->hd;
 {void*_Tmp4;if(*((int*)tv)==2){_Tmp4=((struct Cyc_Absyn_VarType_Absyn_Type_struct*)tv)->f1;{struct Cyc_Absyn_Tvar*tv=_Tmp4;
 # 658
 if((unsigned)tv->aquals_bound){
@@ -1031,7 +1031,7 @@ goto _LL16;}_LL16:;}
 {void*x_bnd=Cyc_List_assoc_cmp(Cyc_Tctyp_bnd_qual_cmp,*qb,tv);
 if(explicit_bound_set && Cyc_Tcutil_typecmp(x_bnd,adef))
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp6=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp7;_Tmp7.tag=0,_Tmp7.f1=_tag_fat("Inconsistent aqual bounds on type ",sizeof(char),35U);_Tmp7;});struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp7=({struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp8;_Tmp8.tag=2,_Tmp8.f1=(void*)v;_Tmp8;});void*_Tmp8[2];_Tmp8[0]=& _Tmp6,_Tmp8[1]=& _Tmp7;Cyc_Warn_warn2(loc,_tag_fat(_Tmp8,sizeof(void*),2));});
-_check_null(tv_bnd->tl)->hd=(void*)x_bnd;}
+tv_bnd->tl->hd=(void*)x_bnd;}
 # 667
 ;_pop_handler();}else{void*_Tmp6=(void*)Cyc_Core_get_exn_thrown();void*_Tmp7;if(((struct Cyc_Core_Not_found_exn_struct*)_Tmp6)->tag==Cyc_Core_Not_found){
 # 674
@@ -1040,10 +1040,10 @@ _check_null(tv_bnd->tl)->hd=(void*)x_bnd;}
 # 677
  if(existential && !explicit_bound_set){
 ({struct Cyc_List_List*_Tmp9=({struct Cyc_List_List*_TmpA=_cycalloc(sizeof(struct Cyc_List_List));({struct _tuple0*_TmpB=({struct _tuple0*_TmpC=_cycalloc(sizeof(struct _tuple0));_TmpC->f0=tv,_TmpC->f1=Cyc_Absyn_al_qual_type;_TmpC;});_TmpA->hd=_TmpB;}),_TmpA->tl=*qb;_TmpA;});*qb=_Tmp9;});
-_check_null(tv_bnd->tl)->hd=(void*)Cyc_Absyn_al_qual_type;}else{
+tv_bnd->tl->hd=(void*)Cyc_Absyn_al_qual_type;}else{
 # 682
 ({struct Cyc_List_List*_Tmp9=({struct Cyc_List_List*_TmpA=_cycalloc(sizeof(struct Cyc_List_List));({struct _tuple0*_TmpB=({struct _tuple0*_TmpC=_cycalloc(sizeof(struct _tuple0));_TmpC->f0=tv,_TmpC->f1=adef;_TmpC;});_TmpA->hd=_TmpB;}),_TmpA->tl=*qb;_TmpA;});*qb=_Tmp9;});
-_check_null(tv_bnd->tl)->hd=(void*)adef;}
+tv_bnd->tl->hd=(void*)adef;}
 # 685
 goto _LL20;case 0: if(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp8)->f1)==16)
 # 687
@@ -1177,7 +1177,7 @@ env=Cyc_Tctyp_i_check_type(env,& Cyc_Kinds_boolk,rel,0,1);
 if(env.def_aliasable)
 *aq=Cyc_Absyn_al_qual_type;else{
 # 845
-_check_null(bnd)->hd=(void*)Cyc_Absyn_rtd_qual_type;}
+bnd->hd=(void*)Cyc_Absyn_rtd_qual_type;}
 goto _LL37;}}else{goto _LL3A;}}else{goto _LL3A;}}else{goto _LL3A;}}else{_LL3A:
 # 848
  goto _LL37;}_LL37:;}

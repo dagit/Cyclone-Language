@@ -671,7 +671,7 @@ Cyc_Unify_unify_it(t2,t1);return;}}else{if(*((int*)_Tmp0.f1)==1){_Tmp24=((struct
 Cyc_Unify_occurs(t1,Cyc_Core_heap_region,(struct Cyc_List_List*)_check_null(s1opt)->v,t2);{
 struct Cyc_Absyn_Kind*kind2=Cyc_Tcutil_type_kind(t2);
 # 329
-if(Cyc_Kinds_kind_leq(kind2,(struct Cyc_Absyn_Kind*)_check_null(kind1)->v)){
+if(Cyc_Kinds_kind_leq(kind2,(struct Cyc_Absyn_Kind*)kind1->v)){
 *ref1_ref=t2;
 return;}{
 # 336
@@ -709,14 +709,14 @@ goto _LL0;}case 1:
  Cyc_Unify_unify_it(t2,t1);
 goto _LL0;default: goto _LL27;}else{goto _LL27;}default: goto _LL27;}case 1: switch(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0.f1)->f1)){case 17: _Tmp24=((struct Cyc_Absyn_Evar_Absyn_Type_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0.f0)->f2->hd)->f1;_Tmp23=(void**)&((struct Cyc_Absyn_Evar_Absyn_Type_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0.f0)->f2->hd)->f2;_Tmp22=((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0.f0)->f2->tl;_Tmp1F=((struct Cyc_Absyn_AqualConstCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0.f1)->f1)->f1;{struct Cyc_Core_Opt*k=_Tmp24;void**ref=_Tmp23;struct Cyc_List_List*bnd=_Tmp22;enum Cyc_Absyn_AliasQualVal aqv=_Tmp1F;
 # 375
-if(!Cyc_Kinds_kind_eq((struct Cyc_Absyn_Kind*)_check_null(k)->v,& Cyc_Kinds_aqk))
+if(!Cyc_Kinds_kind_eq((struct Cyc_Absyn_Kind*)k->v,& Cyc_Kinds_aqk))
 Cyc_Unify_fail_because("(incompatible kind)");
 *ref=t1;
 goto _LL0;}case 18: if(((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0.f1)->f2!=0)switch(*((int*)((struct Cyc_List_List*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0.f1)->f2)->hd)){case 2: _Tmp24=((struct Cyc_Absyn_Evar_Absyn_Type_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0.f0)->f2->hd)->f1;_Tmp23=(void**)&((struct Cyc_Absyn_Evar_Absyn_Type_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0.f0)->f2->hd)->f2;_Tmp22=((struct Cyc_Absyn_Evar_Absyn_Type_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0.f0)->f2->hd)->f4;_Tmp21=((struct Cyc_Absyn_VarType_Absyn_Type_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0.f1)->f2->hd)->f1;_Tmp20=((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0.f1)->f2->tl;{struct Cyc_Core_Opt*k=_Tmp24;void**ref=_Tmp23;struct Cyc_Core_Opt*s2_opt=_Tmp22;struct Cyc_Absyn_Tvar*tv=_Tmp21;struct Cyc_List_List*bnd=_Tmp20;
 # 392
-Cyc_Unify_occurs(t1,Cyc_Core_heap_region,(struct Cyc_List_List*)_check_null(s2_opt)->v,t2);
+Cyc_Unify_occurs(t1,Cyc_Core_heap_region,(struct Cyc_List_List*)s2_opt->v,t2);
 # 394
-if(!({struct Cyc_Absyn_Kind*_Tmp25=(struct Cyc_Absyn_Kind*)_check_null(k)->v;Cyc_Kinds_kind_eq(_Tmp25,Cyc_Tcutil_type_kind(t1));}))
+if(!({struct Cyc_Absyn_Kind*_Tmp25=(struct Cyc_Absyn_Kind*)k->v;Cyc_Kinds_kind_eq(_Tmp25,Cyc_Tcutil_type_kind(t1));}))
 Cyc_Unify_fail_because("(incompatible kinds");
 *ref=t1;
 goto _LL0;}case 1: _Tmp24=(void*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0.f0)->f2->hd;_Tmp23=(void*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0.f1)->f2->hd;{void*ev2=_Tmp24;void*ev1=_Tmp23;

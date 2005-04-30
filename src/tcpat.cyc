@@ -848,7 +848,7 @@ datatype Access {
   Dummy;
   Deref;
   DatatypeField(datatypedecl_t, datatypefield_t, unsigned);
-  AggrField(bool tagged, stringptr_t);
+  AggrField(type_t aggrtype, bool tagged, stringptr_t);
 };
 datatype Access.Dummy Dummy_val = Dummy;
 datatype Access.Deref Deref_val = Deref;
@@ -1147,7 +1147,7 @@ static bool same_access(access_t a1, access_t a2) {
   case $(&Deref,&Deref): return true;
   case $(&DatatypeField(_,df1,i1),&DatatypeField(_,df2,i2)): 
     return (df1 == df2) && (i1 == i2);
-  case $(&AggrField(b1,f1), &AggrField(b2,f2)):
+  case $(&AggrField(_,b1,f1), &AggrField(_,b2,f2)):
     return (b1 == b2) && (strptrcmp(f1,f2) == 0);
   default: return false;
   }
@@ -1201,7 +1201,7 @@ static void print_access(access_t a) {
   case &Deref: fprintf(stderr,"*"); break;
   case &DatatypeField(_,f,i):
     fprintf(stderr,"%s[%d]",qvar2string(f->name),i); break;
-  case &AggrField(tagged, f):
+  case &AggrField(_,tagged, f):
     if (tagged)
       fprintf(stderr,".tagunion");
     fprintf(stderr,".%s",*f);
@@ -1423,14 +1423,14 @@ static access_t get_access(union PatOrWhere pw, int i) {
       if (is_tagged) {
         switch ((*dlps->hd)[0]) {
         case &List{&FieldName(f),NULL}:
-          return new AggrField(is_tagged,f);
+          return new AggrField(atype,is_tagged,f);
         default: 
 	  Warn::impos("get_access on bad aggr pattern: %s",pat2string(p));
         }
       }
       let orig_i = i;
       for (; i != 0; i--) fields = fields->tl;
-      return new AggrField(is_tagged,fields->hd->name);
+      return new AggrField(atype,is_tagged,fields->hd->name);
     default: Warn::impos("get_access on bad pattern: %s",pat2string(p));
     }
   }

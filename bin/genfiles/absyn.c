@@ -835,14 +835,14 @@ return Cyc_Absyn_compress(aq);}case 2:
 # 538
 return Cyc_Absyn_aqualsof_type(ctv);}}else{goto _LL13;}case 18: _Tmp0=((struct Cyc_Absyn_AppType_Absyn_Type_struct*)t)->f2;{struct Cyc_List_List*tv_bnd=_Tmp0;
 # 540
-void*comp=Cyc_Absyn_compress((void*)_check_null(tv_bnd)->hd);
+void*comp=Cyc_Absyn_compress((void*)tv_bnd->hd);
 void*_Tmp1;enum Cyc_Absyn_AliasQualVal _Tmp2;switch(*((int*)comp)){case 0: switch(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)comp)->f1)){case 17: _Tmp2=((struct Cyc_Absyn_AqualConstCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)comp)->f1)->f1;{enum Cyc_Absyn_AliasQualVal aqv=_Tmp2;
 # 543
 return comp;}case 16: _LL39:
 # 547
  if(comp==(void*)tv_bnd->hd)
 return t;
-return({void*_Tmp3=comp;Cyc_Absyn_aqual_var_type(_Tmp3,Cyc_Absyn_compress((void*)_check_null(tv_bnd->tl)->hd));});case 18: _Tmp1=((struct Cyc_Absyn_AppType_Absyn_Type_struct*)comp)->f2;{struct Cyc_List_List*tvb2=_Tmp1;
+return({void*_Tmp3=comp;Cyc_Absyn_aqual_var_type(_Tmp3,Cyc_Absyn_compress((void*)tv_bnd->tl->hd));});case 18: _Tmp1=((struct Cyc_Absyn_AppType_Absyn_Type_struct*)comp)->f2;{struct Cyc_List_List*tvb2=_Tmp1;
 # 551
 return Cyc_Absyn_compress(comp);}default: goto _LL3C;}case 2:
 # 544
@@ -1283,7 +1283,7 @@ int _Tmp3;enum Cyc_Absyn_AggrKind _Tmp4;void*_Tmp5;if(info.KnownAggr.tag==2){_Tm
 # 1071
 if((int)ad->kind!=1)return 0;{
 struct Cyc_Absyn_AggrdeclImpl*impl=ad->impl;
-if(_check_null(impl)->tagged)return 0;{
+if(impl->tagged)return 0;{
 struct Cyc_List_List*fields=impl->fields;
 return fields==0 ||((struct Cyc_Absyn_Aggrfield*)fields->hd)->requires_clause==0;}}}}else{if(info.UnknownAggr.val.f2==0){_Tmp4=info.UnknownAggr.val.f0;{enum Cyc_Absyn_AggrKind k=_Tmp4;
 return(int)k==1;}}else{_Tmp4=info.UnknownAggr.val.f0;_Tmp3=(int)info.UnknownAggr.val.f2->v;{enum Cyc_Absyn_AggrKind k=_Tmp4;int b=_Tmp3;
@@ -1300,7 +1300,7 @@ enum Cyc_Absyn_AggrKind _Tmp3;void*_Tmp4;if(info.KnownAggr.tag==2){_Tmp4=*info.K
 # 1089
 if((int)ad->kind!=1)return 0;{
 struct Cyc_Absyn_AggrdeclImpl*impl=ad->impl;
-if(_check_null(impl)->tagged)return 0;{
+if(impl->tagged)return 0;{
 struct Cyc_List_List*fields=impl->fields;
 return fields!=0 &&((struct Cyc_Absyn_Aggrfield*)fields->hd)->requires_clause!=0;}}}}else{_Tmp3=info.UnknownAggr.val.f0;{enum Cyc_Absyn_AggrKind k=_Tmp3;
 return 0;}};}}else{goto _LL5;}default: _LL5:

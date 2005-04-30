@@ -113,6 +113,7 @@ things that need to be fixed:
 #include "warn.h"
 #include "flags.h"
 #include "cf_flowinfo.h"
+#include "tcpat.h"
 #include <hashtable.h>
 #include <dict.h>
 #include <string.h> 
@@ -403,7 +404,9 @@ static assn_t vcgen_rexps_nosave(env_t env, list_t<exp_t> es, assn_t a);
 // Folds vcgen_rexp_always across the list.
 static $(list_t<term_t>,assn_t) vcgen_rexps_always(env_t env, list_t<exp_t> es, assn_t ain);
 // Do vcgen for all of the cases in a switch.  
-static assn_t vcgen_switch(env_t env, list_t<switch_clause_t> scs, assn_t ain);
+static assn_t vcgen_switch(env_t env, term_t v, list_t<switch_clause_t> scs, assn_t ain);
+//static assn_t vcgen_switch(env_t env, term_t v, Tcpat::decision_t d,
+//                           list_t<switch_clause_t> scs, assn_t ain);
 // Do vcgen for a local declaration
 static assn_t vcgen_local_decl(env_t env, decl_t d, assn_t a);
 
@@ -717,14 +720,14 @@ static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
       if (simple_implies(&ain,get_assn(env,dummy))) return af;
       loop_assn(env,dummy,ain);
     }
-  case &Absyn::Switch_s(e,scs,_):
+  case &Absyn::Switch_s(e,scs,dtree):
     // FIX: take into acount test of e
     // note that we do not split the state counter for a switch
     // because a fallthru might lead to problems.  if we merged
     // environments at entry points of control-flow paths, then
     // we could handle this.
-    let $(t,a) = vcgen_rexp(env,e,ain);
-    return vcgen_switch(env,scs,a);
+    let $(t,a) = vcgen_rexp_always(env,e,ain);
+    return vcgen_switch(env,t,scs,a);
   case &Absyn::Fallthru_s(_,NULL): Warn::impos("vcgen fallthru");
   case &Absyn::Fallthru_s(es,&dest):
     // Also a forward jump so we can do an or.
@@ -778,7 +781,7 @@ static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
       }
     }
     return &false_assn; // see above
-  case &Absyn::TryCatch_s(s,scs,_):
+  case &Absyn::TryCatch_s(s,scs,dtree):
     // save old try/catch-handler assertion
     let old_try_assn = env->shared->try_assn;
     // install new try/catch-handler assertion
@@ -791,32 +794,379 @@ static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
     env->shared->try_assn = old_try_assn;
     // analyze the catch handlers and merge with the body to get
     // the final output.
-    return or(ain,vcgen_switch(env,scs,new_try_assn));
+    return or(ain,vcgen_switch(env,fresh_var(NULL),scs,new_try_assn));
   }
 }
 
-static assn_t vcgen_switch(env_t env, list_t<switch_clause_t> scs, assn_t ain) {
+static assn_t initialize_var(env_t env, vardecl_t vd, term_opt_t vopt, assn_t a) {
+  term_t v;
+  if (vopt == NULL) 
+    v = fresh_var(vd->type);
+  else
+    v = (term_t)vopt;
+  if (vd->escapes) 
+    a = do_assign(env,a,addr(vd),v);
+  else 
+    a = and(kill_var(env,vd,a),eq(var(vd),v));
+  return a;
+}
+
+static unsigned datatype_constructor_index(Absyn::datatypedecl_t dd,
+                                           Absyn::datatypefield_t df) {
+  unsigned i = 0;
+  let fs = dd->fields->v;
+  for (; fs != NULL; fs = fs->tl, ++i) {
+    if (fs->hd == df) return i;
+    if (Absyn::qvar_cmp(df->name,fs->hd->name) == 0) return i;
+  }
+  Warn::impos("vcgen: datatype_constructor_index");
+}
+
+static $(assn_t,assn_t) vcgen_pat(env_t env, Absyn::pat_t p, 
+                                  term_opt_t path, term_t v, assn_t ain) {
+  switch (p->r) {
+  case &Absyn::Wild_p: return $(ain,&false_assn);
+  case &Absyn::Var_p(vd,p2): 
+    let $(at,af) = vcgen_pat(env,p2,path,v,ain);
+    return $(initialize_var(env,vd,v,at),af);
+  case &Absyn::AliasVar_p(tv,vd):
+    return $(initialize_var(env,vd,v,ain),&false_assn);
+  case &Absyn::Reference_p(vd,p2):
+    let $(at,af) = vcgen_pat(env,p2,path,v,ain);
+    return $(initialize_var(env,vd,path,at),af);
+  case &Absyn::TagInt_p(_,vd):
+    return $(initialize_var(env,vd,v,ain),&false_assn);
+  case &Absyn::Null_p:
+    let t = zero();
+    return $(and(ain,eq(v,t)),and(ain,neq(v,t)));
+  case &Absyn::Int_p(s,i):
+    let t = uint(i);
+    return $(and(ain,eq(v,t)),and(ain,neq(v,t)));
+  case &Absyn::Char_p(c):
+    let t = uint(c);
+    return $(and(ain,eq(v,t)),and(ain,neq(v,t)));
+  case &Absyn::Float_p(f,i): 
+    let e = Absyn::float_exp(f,i,0);
+    e->topt = Absyn::gen_float_type(i);
+    let t = cnst(e);
+    return $(and(ain,eq(v,t)),and(ain,neq(v,t)));
+  case &Absyn::Enum_p(ed,ef):
+    let e = Absyn::new_exp(new Absyn::Enum_e(ed,ef),0);
+    e->topt = p->topt;
+    let t = cnst(e);
+    return $(and(ain,eq(v,t)),and(ain,neq(v,t)));
+  case &Absyn::AnonEnum_p(type,ef):
+    let e = Absyn::new_exp(new Absyn::AnonEnum_e(type,ef),0);
+    e->topt = p->topt;
+    let t = cnst(e);
+    return $(and(ain,eq(v,t)),and(ain,neq(v,t)));
+  case &Absyn::Pointer_p(p2):
+    let path2 = v;
+    let v2 = select(var(memory),v,p->topt);
+    let $(at,af) = vcgen_pat(env,p2,path2,v2,ain);
+    return $(and(and(at,ult(zero(),okderef(v))),neq(zero(),v)),af);
+  case &Absyn::Aggr_p(topt,_,_,dlps,_):
+    type_t type = (type_t)topt;
+    list_t<Absyn::aggrfield_t> fields;
+    bool is_tagged = false;
+    switch (Absyn::compress(type)) {
+    case &Absyn::AppType(&Absyn::AggrCon(info),_):
+      let ad = Absyn::get_known_aggrdecl(info);
+      fields = ad->impl->fields;
+      is_tagged = ad->impl->tagged;
+      break;
+    case &Absyn::AnonAggrType(ak,is_tuple,fs):
+      fields = fs;
+      break;
+    default: Warn::impos("vcgen: bad type in aggr pattern");
+    }
+    assn_t at = ain;
+    assn_t af = &false_assn;
+    for (; dlps != NULL; dlps = dlps->tl) {
+      let tup = dlps->hd;
+      let p2 = tup->f1;
+      if (p2->r == &Absyn::Wild_p_val) continue;
+      let f = Absyn::designatorlist_to_fieldname(tup->f0);
+      let i = CfFlowInfo::get_field_index(type,f);
+      if (is_tagged) {
+        // for tagged unions, we pretend the tag is an extra member
+        // at the end of the aggregate.
+        let tag_check = eq(proj(v,length(fields),Absyn::uint_type),uint(i));
+        at = and(at,tag_check);
+        af = and(at,not(tag_check));
+      }
+      let member = proj(v,i,p2->topt);
+      // FIX: path needs to be expressed using offsetof, but we really
+      // need a way to distinguish this from pointer arithmetic, so for
+      // now, I'm making the path "NULL" so that you won't be able to do
+      // a reference pattern on a field...
+      //let offset = Absyn::offsetof_exp(type,list(new Absyn::StructField(f)));
+      //offset->topt = Absyn::uint_type;
+      //let member_path = plus(v,cnst(offset),NULL);
+      let $(at2,af2) = vcgen_pat(env,p2,NULL,member,at);
+      at = at2;
+      af = or(af,af2);
+    }
+    return $(at,af);
+  case &Absyn::Datatype_p(dd,df,ps,_):
+    // for datatypes, we pretend we have an aggregate with the first
+    // field being an integer corresponding to the constructor.
+    int i = datatype_constructor_index(dd,df);
+    assn_t tag_check = eq(proj(v,0,Absyn::uint_type),uint(i));
+    assn_t at = and(ain,tag_check);
+    assn_t af = and(ain,not(tag_check));
+    for (unsigned j = 1; ps != NULL; ps=ps->tl, ++j) {
+      let p2 = ps->hd;
+      let member = proj(v,i,p2->topt);
+      // FIX: path needs to be expressed using offsetof, but we really
+      // need a way to distinguish this from pointer arithmetic.
+      let $(at2,af2) = vcgen_pat(env,p2,NULL,member,at);
+      at = at2;
+      af = or(af,af2);
+    }
+    return $(at,af);
+  case &Absyn::UnknownId_p(_):
+  case &Absyn::UnknownCall_p(...):
+  case &Absyn::Exp_p(_): Warn::impos("vcgen pat found bad pattern");
+  }
+}
+
+// if we have and(and(a2,i!=x),i==x) reduce to and(a2,i==x)
+static assn_t simplify_constants(assn_t a) {
+  while (true) {
+    switch (a) {
+    case &And(&And(a2,&Prim(&Uint(i),Neq,x)),p as &Prim(&Uint(j),Eq,y)) && x == y && i != j:
+      a = and(a2,p); continue;
+    default: return a;
+    }
+  }
+}
+
+/* Alternative code for patterns based on decision trees -- it's okay,
+ * but no better than the code I have here and doesn't deal with 
+ * where-clauses properly.
+
+static assn_t extract_pattern_vars(env_t env, Absyn::pat_t p, 
+                                   term_opt_t path, term_t v, assn_t ain) {
+  switch (p->r) {
+  case &Absyn::Wild_p: return ain;
+  case &Absyn::Var_p(vd,p2): 
+    return extract_pattern_vars(env,p2,path,v,initialize_var(env,vd,v,ain));
+  case &Absyn::AliasVar_p(tv,vd):
+    return initialize_var(env,vd,v,ain);
+  case &Absyn::Reference_p(vd,p2):
+    return extract_pattern_vars(env,p2,path,v,initialize_var(env,vd,path,ain));
+  case &Absyn::TagInt_p(_,vd):
+    return initialize_var(env,vd,v,ain);
+  case &Absyn::Pointer_p(p2):
+    let path2 = v;
+    let v2 = select(var(memory),v,p->topt);
+    return extract_pattern_vars(env,p2,path2,v2,ain);
+  case &Absyn::Aggr_p(topt,_,_,dlps,_):
+    type_t type = (type_t)topt;
+    list_t<Absyn::aggrfield_t> fields;
+    bool is_tagged = false;
+    switch (Absyn::compress(type)) {
+    case &Absyn::AppType(&Absyn::AggrCon(info),_):
+      let ad = Absyn::get_known_aggrdecl(info);
+      fields = ad->impl->fields;
+      is_tagged = ad->impl->tagged;
+      break;
+    case &Absyn::AnonAggrType(ak,is_tuple,fs):
+      fields = fs;
+      break;
+    default: Warn::impos("vcgen: bad type in aggr pattern");
+    }
+    for (; dlps != NULL; dlps = dlps->tl) {
+      let tup = dlps->hd;
+      let p2 = tup->f1;
+      if (p2->r == &Absyn::Wild_p_val) continue;
+      let f = Absyn::designatorlist_to_fieldname(tup->f0);
+      let i = CfFlowInfo::get_field_index(type,f);
+      if (is_tagged) i = i + 1;
+      // for tagged unions, the 0th field is the tag and the rest are
+      // down stream...
+      let member = proj(v,i,p2->topt);
+      // FIX: path needs to be expressed using offsetof, but we really
+      // need a way to distinguish this from pointer arithmetic, so for
+      // now, I'm making the path "NULL" so that you won't be able to do
+      // a reference pattern on a field...
+      //let offset = Absyn::offsetof_exp(type,list(new Absyn::StructField(f)));
+      //offset->topt = Absyn::uint_type;
+      //let member_path = plus(v,cnst(offset),NULL);
+      ain = extract_pattern_vars(env,p2,NULL,member,ain);
+    }
+    return ain;
+  case &Absyn::Datatype_p(dd,df,ps,_):
+    // for datatypes, we pretend we have an aggregate with the first
+    // field being an integer corresponding to the constructor.
+    int i = datatype_constructor_index(dd,df);
+    for (unsigned j = 1; ps != NULL; ps=ps->tl, ++j) {
+      let p2 = ps->hd;
+      let member = proj(v,i,p2->topt);
+      // FIX: path needs to be expressed using offsetof, but we really
+      // need a way to distinguish this from pointer arithmetic.
+      ain = extract_pattern_vars(env,p2,NULL,member,ain);
+    }
+    return ain;
+  case &Absyn::Null_p: 
+  case &Absyn::Int_p(...):
+  case &Absyn::Char_p(...): 
+  case &Absyn::Float_p(...): 
+  case &Absyn::Enum_p(...): 
+  case &Absyn::AnonEnum_p(...): 
+  case &Absyn::UnknownId_p(_):
+  case &Absyn::UnknownCall_p(...):
+  case &Absyn::Exp_p(_): return ain;
+  }
+}
+
+static term_t apply_path(env_t env, term_t v, list_t<Tcpat::path_node_t> path){
+  for (; path != NULL; path = path->tl) {
+    switch (path->hd) {
+    case &Tcpat::PathNode{.access = &Tcpat::Dummy,...}: continue;
+    case &Tcpat::PathNode{.access = &Tcpat::Deref,.orig_pat = op}: 
+      type_opt_t topt = op.pattern->topt;
+      v = select(var(memory),v,topt);
+      break;
+    case &Tcpat::PathNode{.access = &Tcpat::DatatypeField(dd,df,i), .orig_pat = op}:
+      type_opt_t topt = op.pattern->topt;
+      v = proj(v,i+1,topt);
+      break;
+    case &Tcpat::PathNode{.access = &Tcpat::AggrField(atype,tgd,f), .orig_pat = op}:
+      unsigned i = CfFlowInfo::get_field_index(atype,f);
+      type_opt_t topt = op.pattern->topt;
+      v = proj(v,i,topt);
+      break;
+    }
+  }
+  return v;
+}
+
+static $(assn_t,assn_t) vcgen_pat_test(env_t env, term_t v, 
+                                       Tcpat::pat_test_t test) {
+  switch (test) {
+  case &Tcpat::WhereTest(eopt):
+    if (eopt == NULL) return $(&true_assn,&false_assn);
+    return vcgen_test(env,(exp_t)eopt,&true_assn);
+  case &Tcpat::EqNull:
+    let t = zero();
+    return $(eq(v,t),neq(v,t));
+  case &Tcpat::NeqNull:
+    let t = zero();
+    return $(neq(v,t),eq(v,t));
+  case &Tcpat::EqEnum(ed,ef):
+    let e = Absyn::new_exp(new Absyn::Enum_e(ed,ef),0);
+    e->topt = Absyn::uint_type;
+    let t = cnst(e);
+    return $(eq(v,t),neq(v,t));
+  case &Tcpat::EqAnonEnum(type,ef):
+    let e = Absyn::new_exp(new Absyn::AnonEnum_e(type,ef),0);
+    e->topt = type;
+    let t = cnst(e);
+    return $(eq(v,t),neq(v,t));
+  case &Tcpat::EqFloat(s,i):
+    let e = Absyn::float_exp(s,i,0);
+    e->topt = Absyn::gen_float_type(i);
+    let t = cnst(e);
+    return $(eq(v,t),neq(v,t));
+  case &Tcpat::EqConst(i):
+    let t = uint(i);
+    return $(eq(v,t),neq(v,t));
+  case &Tcpat::EqDatatypeTag(i,_,_):
+    let p = eq(proj(select(var(memory),v,NULL),0,Absyn::uint_type),uint(i));
+    return $(p,not(p));
+  case &Tcpat::EqTaggedUnion(_,i):
+    let p = eq(proj(v,0,Absyn::uint_type),uint(i));
+    return $(p,not(p));
+  case &Tcpat::EqExtensibleDatatype(dd,df):
+    let i = datatype_constructor_index(dd,df);
+    let p = eq(proj(select(var(memory),v,NULL),0,Absyn::uint_type),uint(i));
+    return $(p,not(p));
+  }
+}
+
+// compile a decision tree for a switch
+static void vcgen_decision(env_t env, list_t<Absyn::switch_clause_t> scs,
+                           Tcpat::decision_t d, assn_t ain, term_t v) {
+  switch (d) {
+  case &Tcpat::Failure(_): 
+    update_try_assn(env,ain);
+    break;
+  case &Tcpat::Success(&Tcpat::Rhs{.rhs = s,...}):
+    // find the corresponding pattern
+    for (; scs != NULL; scs = scs->tl)
+      if (s == scs->hd->body) break;
+    let p = scs->hd->pattern;
+    ain = extract_pattern_vars(env,p,NULL,v,ain);
+    forward_assn(env, s, ain);
+    break;
+  case &Tcpat::SwitchDec(path, trees, def):
+    let v2 = apply_path(env,v,path);
+    for (; trees != NULL; trees = trees->tl) {
+      let $(pat_test,tree) = *trees->hd;
+      let $(at,af) = vcgen_pat_test(env,v,pat_test);
+      at = simplify_constants(and(ain,at));
+      vcgen_decision(env,scs,tree,at,v);
+      ain = simplify_constants(and(ain,af));
+    }
+    vcgen_decision(env,scs,def,ain,v);
+  }
+}
+
+static assn_t vcgen_switch(env_t env, term_t v, Tcpat::decision_t d,
+                            list_t<switch_clause_t> scs, assn_t ain) {
+  vcgen_decision(env,scs,d,ain,v);
+  assn_t res = &false_assn;
+  for (; scs != NULL; scs = scs->tl) {
+    let sc = scs->hd;
+    res = or(res,vcgen_stmt(env,sc->body,&false_assn));
+  }
+  return res;
+}
+
+// compile a decision tree for a let
+static void vcgen_let_decision(env_t env, Absyn::pat_t p, Tcpat::decision_t d, 
+                               assn_t @res, assn_t ain, term_t v) {
+  switch (d) {
+  case &Tcpat::Failure(_): 
+    update_try_assn(env,ain);
+    break;
+  case &Tcpat::Success(&Tcpat::Rhs{.rhs = s,...}):
+    ain = extract_pattern_vars(env,p,NULL,v,ain);
+    *res = or(ain,*res);
+    break;
+  case &Tcpat::SwitchDec(path, trees, def):
+    let v2 = apply_path(env,v,path);
+    for (; trees != NULL; trees = trees->tl) {
+      let $(pat_test,tree) = *trees->hd;
+      let $(at,af) = vcgen_pat_test(env,v,pat_test);
+      vcgen_let_decision(env,p,tree,res,and(at,ain),v);
+      ain = and(ain,af);
+    }
+    return vcgen_let_decision(env,p,def,res,ain,v);
+  }
+}
+*/
+
+static assn_t vcgen_switch(env_t env, term_t v, 
+                           list_t<switch_clause_t> scs, assn_t ain) {
   // note that all of the clauses should explicitly jump (via break)
   // or something else outside of the clause so the result should always
   // be false...
   assn_t res = &false_assn;
   for (; scs != NULL; scs = scs->tl) {
     let sc = scs->hd;
-    let a = ain;
-    for (let pvs = sc->pat_vars->v; pvs != NULL; pvs = pvs->tl) {
-      let &$(vdopt,eopt) = pvs->hd;
-      if (vdopt != NULL) {
-        // FIX: the expression associated with the vardecls isn't right.
-        //if (eopt != NULL)
-        //  a = do_assign(env,a,var(*vdopt),vcgen_rexp(env,(exp_t)eopt,a)[0]);
-        //else 
-          a = kill_var(env,*vdopt,a);
-          //do_assign(env,a,var(*vdopt),fresh_var((*vdopt)->type));
-      }
+    let $(at,af) = vcgen_pat(env,sc->pattern,NULL,v,ain);
+    if (sc->where_clause != NULL) {
+      let $(at2,af2) = vcgen_test(env, (exp_t)sc->where_clause, at);
+      at = at2;
+      af = or(af,af2);
     }
-    if (sc->where_clause != NULL) 
-      a = vcgen_test(env, (exp_t)sc->where_clause, a)[0];
-    res = or(res,vcgen_stmt(env,sc->body,a));
+    at = simplify_constants(at);
+    res = or(res,vcgen_stmt(env,sc->body,at));
+    if (!env->shared->widen_paths)
+      ain = af;
   }
   return res;
 }
@@ -841,22 +1191,11 @@ static assn_t add_vardecl(env_t env, vardecl_t vd, assn_t a) {
 static assn_t vcgen_local_decl(env_t env, decl_t d, assn_t a) {
   switch (d->r) {
   case &Absyn::Var_d(vd): return add_vardecl(env,vd,a);
-  case &Absyn::Let_d(p,vds,e,_): 
-    let $(_,a) = vcgen_rexp(env,e,a);
-     for (let vds = vds->v; vds != NULL; vds = vds->tl) {
-      let $(vdopt,eopt) = *vds->hd;
-      if (vdopt != NULL) {
-        let vd = *vdopt;
-//         if (eopt == NULL) a = add_vardecl(env,vd,a);
-//         else {
-//           let $(t,a1) = vcgen_rexp(env,eopt,a);
-//           term_t tv = (vd->escapes) ? addr(vd) : var(vd);
-//           a = do_assign(env,a1,tv,t);
-//         }
-	a = add_vardecl(env,vd,a);
-      }
-    }
-    return a;
+  case &Absyn::Let_d(p,_,e,dtree): 
+    let $(v,a) = vcgen_rexp_always(env,e,a);
+    let $(at,af) = vcgen_pat(env,p,NULL,v,a);
+    if (af != &false_assn) update_try_assn(env,af);
+    return at;
   case &Absyn::Letv_d(vds): 
     for (; vds != NULL; vds = vds->tl) 
       a = add_vardecl(env,vds->hd,a);
