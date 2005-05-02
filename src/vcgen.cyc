@@ -822,6 +822,18 @@ static unsigned datatype_constructor_index(Absyn::datatypedecl_t dd,
   Warn::impos("vcgen: datatype_constructor_index");
 }
 
+static $(bool is_tagged,Absyn::aggr_kind_t,list_t<Absyn::aggrfield_t>) 
+  get_aggr_info(type_t t) {
+  switch (Absyn::compress(t)) {
+  case &Absyn::AppType(&Absyn::AggrCon(info),_):
+    let ad = Absyn::get_known_aggrdecl(info);
+    return $(ad->impl->tagged, ad->kind, ad->impl->fields);
+  case &Absyn::AnonAggrType(ak,is_tuple,fs):
+    return $(false,ak,fs);
+  default: Warn::impos("vcgen: bad type in get_aggr_info");
+  }
+}
+
 static $(assn_t,assn_t) vcgen_pat(env_t env, Absyn::pat_t p, 
                                   term_opt_t path, term_t v, assn_t ain) {
   switch (p->r) {
@@ -867,19 +879,7 @@ static $(assn_t,assn_t) vcgen_pat(env_t env, Absyn::pat_t p,
     return $(and(and(at,ult(zero(),okderef(v))),neq(zero(),v)),af);
   case &Absyn::Aggr_p(topt,_,_,dlps,_):
     type_t type = (type_t)topt;
-    list_t<Absyn::aggrfield_t> fields;
-    bool is_tagged = false;
-    switch (Absyn::compress(type)) {
-    case &Absyn::AppType(&Absyn::AggrCon(info),_):
-      let ad = Absyn::get_known_aggrdecl(info);
-      fields = ad->impl->fields;
-      is_tagged = ad->impl->tagged;
-      break;
-    case &Absyn::AnonAggrType(ak,is_tuple,fs):
-      fields = fs;
-      break;
-    default: Warn::impos("vcgen: bad type in aggr pattern");
-    }
+    let $(is_tagged,_,fields) = get_aggr_info(type);
     assn_t at = ain;
     assn_t af = &false_assn;
     for (; dlps != NULL; dlps = dlps->tl) {
@@ -891,7 +891,7 @@ static $(assn_t,assn_t) vcgen_pat(env_t env, Absyn::pat_t p,
       if (is_tagged) {
         // for tagged unions, we pretend the tag is an extra member
         // at the end of the aggregate.
-        let tag_check = eq(proj(v,length(fields),Absyn::uint_type),uint(i));
+        let tag_check = eq(tagof(v),uint(i));
         at = and(at,tag_check);
         af = and(at,not(tag_check));
       }
@@ -912,10 +912,10 @@ static $(assn_t,assn_t) vcgen_pat(env_t env, Absyn::pat_t p,
     // for datatypes, we pretend we have an aggregate with the first
     // field being an integer corresponding to the constructor.
     int i = datatype_constructor_index(dd,df);
-    assn_t tag_check = eq(proj(v,0,Absyn::uint_type),uint(i));
+    assn_t tag_check = eq(tagof(v),uint(i));
     assn_t at = and(ain,tag_check);
     assn_t af = and(ain,not(tag_check));
-    for (unsigned j = 1; ps != NULL; ps=ps->tl, ++j) {
+    for (unsigned j = 0; ps != NULL; ps=ps->tl, ++j) {
       let p2 = ps->hd;
       let member = proj(v,i,p2->topt);
       // FIX: path needs to be expressed using offsetof, but we really
@@ -1418,6 +1418,10 @@ static bool is_unsigned_int_exp(exp_t e){
   }
 }
 
+static int cmp_index($(int,`a)@ x,$(int,`a)@ y) {
+  return x->f0 - y->f0;
+}
+
 // factor out code for *e, e->f and e[i]
 static $(term_opt_t,term_opt_t,assn_t) vcgen_deref(env_t env, exp_t root,
                                                    exp_t index, assn_t ain) {
@@ -1706,7 +1710,8 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
     // we know the result is not NULL -- if it's a new {...} then we
     // could also calculate the numelts.
     let res = fresh_var(e->topt);
-    ain = and(ain,neq(res,zero()));
+    ain = and(ain,and(eq(select(var(memory),res,e1->topt),t),
+                      neq(res,zero())));
     return $(res,ain);
 
   // these cases should be captured by the const-expression check above.
@@ -1718,20 +1723,20 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
   case &Absyn::Offsetof_e(_,_): return $(cnst(e),ain);
 
   case &Absyn::AggrMember_e(e1,f,is_tagged,is_read): 
-    let $(t,ain) = vcgen_rexp(env,e1,ain);
+    let $(t,ain) = vcgen_rexp_always(env,e1,ain);
+    let i = CfFlowInfo::get_field_index((type_t)e1->topt,f);
     // can throw an exception
     if (is_tagged && is_read) {
-      update_try_assn(env,ain);
-      return $(NULL,ain);
-    } else if (is_tagged || t == NULL) return $(NULL,ain);
-    else {
-      let i = CfFlowInfo::get_field_index((type_t)e1->topt,f);
-      return $(proj((term_t)t,i,e->topt),ain);
+      // FIX: have insert_checks look for tag here...
+      let ck = eq(tagof(t),uint(i));
+      update_try_assn(env,and(ain,not(ck)));
+      ain = and(ain,ck);
     }
+    return $(proj((term_t)t,i,e->topt),ain);
     // these two can throw an exception...
   case &Absyn::Tagcheck_e(e,_): fallthru(e);
   case &Absyn::Address_e(e): 
-    return $(NULL,vcgen_rexp(env,e,ain)[1]);
+    return vcgen_lexp(env,e,ain);
 
     // most of the code for these next three cases is factored out
     // into the vcgen_deref code above.
@@ -1741,30 +1746,59 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
     else return $(select(var(memory),(term_t)t1,e->topt),ain);
   case &Absyn::AggrArrow_e(e1,f,is_tagged,is_read): 
     let $(t1,_,ain) = vcgen_deref(env, e1, zero_exp(), ain);
-    if (t1 == NULL || is_tagged) return $(NULL,ain);
-    else {
-      let elt_type = Tcutil::pointer_elt_type((type_t)e1->topt);
-      let i = CfFlowInfo::get_field_index(elt_type,f);
-      return $(proj(select(var(memory),(term_t)t1,elt_type),i,e->topt),ain);
+    let i = CfFlowInfo::get_field_index(Tcutil::pointer_elt_type((type_t)e1->topt),f);
+    if (is_tagged && is_read) {
+      let ck = eq(tagof(select(var(memory),t1 ? t1 : fresh_var(NULL),NULL)),
+                  uint(i));
+      update_try_assn(env,and(ain,not(ck)));
+      ain = and(ain,ck);
     }
+    let elt_type = Tcutil::pointer_elt_type((type_t)e1->topt);
+    return $(proj(select(var(memory),(term_t)t1,elt_type),i,e->topt),ain);
   case &Absyn::Subscript_e(e1,e2): 
     let $(t1,t2,ain) = vcgen_deref(env, e1, e2, ain);
     if (t1 == NULL || t2 == NULL) return $(NULL,ain);
     else return $(select(var(memory),plus(t1,t2,NULL),e->topt),ain);
 
-  case &Absyn::Datatype_e(es,...): return $(NULL,vcgen_rexps_nosave(env,es,ain));
+  case &Absyn::Datatype_e(es,dd,df): 
+    let $(ts,ain) = vcgen_rexps_always(env,es,ain);
+    let i = datatype_constructor_index(dd,df);
+    return $(datatype_aggr(i,ts,e->topt),ain);
 
     // FIX: at least for structs, we can use the Aggr(...) term.
   case &Absyn::CompoundLit_e(_,dles):   fallthru(dles);
   case &Absyn::Array_e(dles):           fallthru(dles);
-  case &Absyn::Aggregate_e(_,_,dles,_): fallthru(dles);
-  case &Absyn::UnresolvedMem_e(_,dles): fallthru(dles);
-  case &Absyn::AnonStruct_e(_,_,dles):
+  case &Absyn::UnresolvedMem_e(_,dles): 
     for (; dles != NULL; dles = dles->tl) {
       let &$(_,e) = dles->hd;
       ain = (vcgen_rexp(env,e,ain))[1];
     }
     return $(NULL,ain);
+
+  case &Absyn::Aggregate_e(_,_,dles,_): fallthru(dles);
+  case &Absyn::AnonStruct_e(_,_,dles):
+    let atype = (type_t)e->topt;
+    let $(is_tagged,ak,_) = get_aggr_info(atype);
+    list_t<$(int,term_t)@> dlvs = NULL;
+    unsigned tag = 0;
+    for (; dles != NULL; dles = dles->tl) {
+      let &$(dl,e) = dles->hd;
+      let $(v,a) = vcgen_rexp_always(env,e,ain);
+      ain = a;
+      switch (dl) {
+      case &List{&Absyn::FieldName(f),NULL}:
+        let i = CfFlowInfo::get_field_index(atype,f);
+        tag = i;
+        dlvs = new List{new $(i,v),dlvs};        
+        break;
+      default: Warn::impos("no field name in designator!");
+      }
+    }
+    dlvs = rimp_merge_sort(cmp_index,dlvs);
+    let vs = map(Core::snd,dlvs);
+    let res = (ak == Absyn::UnionA) ? union_aggr(tag,vs,e->topt) : 
+      struct_aggr(vs,e->topt);
+    return $(res,ain);
 
   case &Absyn::Comprehension_e(vd,e1,e2,_): 
     // similar to a while-loop except we evaluate e1 only once.

@@ -404,10 +404,12 @@ static bool equal_terms(graph_t @g, term_t t1, term_t t2){
     return (i1 == i2) && equal_terms(g,t1,t2);
   case $(&Okderef(t1),&Okderef(t2)):
     return equal_terms(g,t1,t2);
-  case $(&Aggr(ts1,_),&Aggr(ts2,_)):
+  case $(&Aggr(is_union1,tag1,ts1,_),&Aggr(is_union2,tag2,ts2,_)):
     for (; ts1 != NULL && ts2 != NULL; ts1 = ts1->tl, ts2=ts2->tl)
       if (!equal_terms(g,ts1->hd,ts2->hd)) return false;
-    return true;
+    return (tag1 == tag2 && is_union1 == is_union2);
+  case $(&Tagof(t1),&Tagof(t2)):
+    return equal_terms(g,t1,t2);
   default:
     return false;
   }
@@ -1484,13 +1486,13 @@ static void equality_close_graph(int dummy, graph_t @g) {
         default: continue;
         }
       break;
-    case &Aggr(ts1,_):
+    case &Aggr(is_union1,tag1,ts1,_):
       for (let ts = rs->next; ts != NULL; ts = ts->next)
         switch (ts->rep) {
-        case &Aggr(ts2,_):
+        case &Aggr(is_union2,tag2,ts2,_) && tag1 == tag2:
           for (; ts1 != NULL && ts2 != NULL; ts1=ts1->tl, ts2=ts2->tl) 
             if (!equal_terms(g,ts1->hd,ts2->hd)) break;
-          if (ts1 == ts2) add_eq(g,rep1,ts->rep);
+          if (ts1 == ts2 && is_union1 == is_union2) add_eq(g,rep1,ts->rep);
           continue;
         default: continue;
         }
@@ -1499,6 +1501,15 @@ static void equality_close_graph(int dummy, graph_t @g) {
       for (let ts = rs->next; ts != NULL; ts = ts->next)
         switch (ts->rep) {
         case &Okderef(t2): 
+          if (equal_terms(g,t1,t2)) add_eq(g,rep1,ts->rep);
+          continue;
+        default: continue;
+        }
+      break;
+    case &Tagof(t1):
+      for (let ts = rs->next; ts != NULL; ts = ts->next)
+        switch (ts->rep) {
+        case &Tagof(t2): 
           if (equal_terms(g,t1,t2)) add_eq(g,rep1,ts->rep);
           continue;
         default: continue;

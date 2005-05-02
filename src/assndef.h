@@ -70,9 +70,17 @@ namespace AssnDef{
     Unop(Absyn::primop_t,term_t,type_opt_t); // Not, Bitnot, Numelts
     Binop(Absyn::primop_t,term_t,term_t,type_opt_t); // all other primops
     Cast(Absyn::type_t, term_t); // type-cast
-    Aggr(list_t<term_t>,type_opt_t); // an aggregate (struct, tuple, etc.)
+    // Unions are represented by one tagged value.  The tag records
+    // the member that was last written, and we can only reduce a
+    // projection when the member being read was the same as the one last
+    // written.  (This holds for both @tagged and bits-only unions.)
+    // For datatypes, the is_union field is false, and the tag field
+    // records which constructor we're dealing with.  For structs,
+    // the is_union field is false, and the tag is set to -1.
+    Aggr(bool is_union, unsigned tag, list_t<term_t>,type_opt_t); // an aggregate (struct, tuple, datatype, tagged union, union, etc.  the tag is only used for datatypes and tagged unions)
     Proj(term_t tuple, unsigned index, type_opt_t); // projection off of aggr
     Okderef(term_t t); // value u>0 iff t is an address of a valid memory location
+    Tagof(term_t);
   };
 
   // a distinguished program variable representing memory -- when we
@@ -102,7 +110,11 @@ namespace AssnDef{
   extern term_t minus(term_t t1, term_t t2, type_opt_t);
   extern term_t cast(Absyn::type_t tp, term_t tm);
   extern term_t proj(term_t t, unsigned i, type_opt_t);
-  extern term_t aggr(list_t<term_t,`H>, type_opt_t tp);
+  extern term_t aggr(bool is_union, unsigned tag, list_t<term_t,`H>, type_opt_t tp);
+  extern term_t struct_aggr(list_t<term_t,`H>, type_opt_t tp);
+  extern term_t datatype_aggr(unsigned tag, list_t<term_t,`H>, type_opt_t tp);
+  extern term_t union_aggr(unsigned tag, list_t<term_t,`H>, type_opt_t tp);
+  extern term_t tagof(term_t);
   extern term_t okderef(term_t t);
   extern term_t numelts_term(term_t t);
 

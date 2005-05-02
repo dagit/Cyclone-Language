@@ -37,6 +37,7 @@ string_t term2string(term_t t) {
   switch (t) {
   case &Uint(i): res = aprintf("0x%x", i); break;
   case &Const(e): res = Absynpp::exp2string(e); break;
+  case &Tagof(t): res = aprintf("tagof(%s)",term2string(t)); break;
   case &Var(vd): 
     if (Flags::debug_assn) 
       res = aprintf("%s_%x",Absynpp::qvar2string(vd->name),(unsigned int)vd); 
@@ -66,7 +67,7 @@ string_t term2string(term_t t) {
     res = aprintf("%s(%s)",Absynpp::prim2string(p),term2string(t1)); break;
   case &Cast(tp,tm):
     res = aprintf("(%s)%s",Absynpp::typ2string(tp),term2string(tm)); break;
-  case &Aggr(tms,_):
+  case &Aggr(is_union,tag,tms,_):
     static string_t lb = "{";
     static string_t rb = "}";
     static string_t comma = ",";
@@ -79,6 +80,8 @@ string_t term2string(term_t t) {
     ss = new List{&rb,ss};
     ss = List::imp_rev(ss);
     res = strconcat_l(ss);
+    if (tag != -1) res = aprintf("tag(%d)%s",tag,res);
+    if (is_union) res = aprintf("union%s",res);
     break;
   case &Proj(t,i,_):
     res = aprintf("#%d(%s)",i,term2string(t));
@@ -146,13 +149,13 @@ int termhash(datatype Term @t) {
     return (unsigned int)t1 ^ (unsigned int)t2 ^ (unsigned int)t3 + 3;
   case &Addr(vd): return (unsigned int)vd+4;
   case &Proj(t,i,_): return (unsigned int)t ^ i;
-  case &Aggr(ts,_):
-    unsigned int res = 37;
+  case &Aggr(is_union,tag,ts,_):
+    unsigned int res = 37+tag+is_union;
     for (; ts != NULL; ts = ts->tl)
       res = res ^ (unsigned int)ts->hd;
     return res;
-  case &Okderef(t):
-    return termhash(t)+97;
+  case &Okderef(t): return (unsigned)t ^ 97;
+  case &Tagof(t): return (unsigned)t ^ 741;
   }
 }
 
@@ -210,8 +213,14 @@ int cmp_term(datatype Term @t1, datatype Term @t2) {
     return cmp_term(t1,t2);
   case $(&Okderef(_),_): return -1;
   case $(_,&Okderef(_)): return 1;
-  case $(&Aggr(ts1,_),&Aggr(ts2,_)):
-    int c;
+  case $(&Tagof(t1),&Tagof(t2)): return cmp_term(t1,t2);
+  case $(&Tagof(_),_): return -1;
+  case $(_,&Tagof(_)): return 1;
+  case $(&Aggr(is_union1,tag1,ts1,_),&Aggr(is_union2,tag2,ts2,_)):
+    int c = tag1 - tag2;
+    if (c != 0) return c;
+    c = is_union2 - is_union1;
+    if (c != 0) return c;
     for (; ts1 != NULL && ts2 != NULL; ts1=ts1->tl, ts2=ts2->tl) {
       c = cmp_term(ts1->hd,ts2->hd);
       if (c != 0) return c;
@@ -242,8 +251,9 @@ static term_t copy_term(datatype Term@ t) {
   case &Select(t1,t2,tp): return new Select(t1,t2,tp);
   case &Update(t1,t2,t3): return new Update(t1,t2,t3);
   case &Proj(t,i,tp): return new Proj(t,i,tp);
-  case &Aggr(ts,tp): return new Aggr(ts,tp);
+  case &Aggr(is_union,tag,ts,tp): return new Aggr(is_union,tag,ts,tp);
   case &Okderef(t): return new Okderef(t);
+  case &Tagof(t): return new Tagof(t);
   }
 }
 
@@ -335,19 +345,50 @@ term_t select(term_t t1, term_t t2,type_opt_t tp) {
     return hash_cons_term(&t);
   }
 }
+
+// Unions are represented by one tagged value.  The tag records
+// the member that was last written, and we can only reduce a
+// projection when the member being read was the same as the one last
+// written.  (This holds for both @tagged and bits-only unions.)
+// For datatypes, the is_union field is false, and the tag field
+// records which constructor we're dealing with.  For structs,
+// the is_union field is false, and the tag is set to -1.
 term_t proj(term_t t1, unsigned i, type_opt_t tp) {
   switch (t1) {
-  case &Aggr(ts,_): return nth(ts,i);
+  case &Aggr(is_union,tag,ts,_): 
+    let n = List::length(ts);
+    if (!is_union && i < n)
+      return nth(ts,i);
+    else if (tag == i && n >= 1)
+      return ts->hd;
+    else break;
+  default: break;
+  }
+  let t = Proj(t1,i,tp);
+  return hash_cons_term(&t);
+}
+term_t tagof(term_t t1) {
+  switch (t1) {
+  case &Aggr(_,tag,...): return uint(tag);
   default: 
-    let t = Proj(t1,i,tp);
+    let t = Tagof(t1);
     return hash_cons_term(&t);
   }
 }
-term_t aggr(list_t<term_t,`H> ts, type_opt_t tp) {
+term_t aggr(bool is_union, unsigned tag, list_t<term_t,`H> ts, type_opt_t tp){
   // could eta-reduce Aggr(proj(t,0),proj(t,1),...,proj(t,n)) to t,
   // using the type information to figure out n.
-  let t = Aggr(ts,tp);
+  let t = Aggr(is_union,tag,ts,tp);
   return hash_cons_term(&t);
+}
+term_t struct_aggr(list_t<term_t,`H> ts, type_opt_t tp) {
+  return aggr(false,-1,ts,tp);
+}
+term_t datatype_aggr(unsigned tag, list_t<term_t,`H> ts, type_opt_t tp) {
+  return aggr(false,tag,ts,tp);
+}
+term_t union_aggr(unsigned tag, list_t<term_t,`H> ts, type_opt_t tp) {
+  return aggr(true,tag,ts,tp);
 }
 term_t okderef(term_t t1){
   let t = Okderef(t1);
@@ -400,7 +441,7 @@ inline static unsigned eval_binop(Absyn::primop_t p, unsigned i, unsigned j){
 
 Absyn::type_opt_t get_term_type(term_t t) {
   switch (t) {
-  case &Uint(_): return Absyn::int_type(Absyn::None, Absyn::Int_sz);
+  case &Uint(_): return Absyn::uint_type;
   case &Const(e): return e->topt;
   case &Var(vd): return vd->type;
   case &LogicVar(_,_,topt): return topt;
@@ -408,12 +449,13 @@ Absyn::type_opt_t get_term_type(term_t t) {
   case &Unop(_,_,tp): return tp;
   case &Cast(tp,_): return tp;
   case &Select(_,_,tp): return tp;
-  case &Aggr(ts,tp): return tp;
+  case &Aggr(_,_,_,tp): return tp;
   case &Proj(t1,i,tp): return tp;
   // not sure that this is the right thing to do...
-  case &Addr(vd): return Absyn::int_type(Absyn::None, Absyn::Int_sz);
+  case &Addr(vd): return Absyn::uint_type;
   case &Update(...): return NULL;
   case &Okderef(_): return NULL;
+  case &Tagof(_): return Absyn::uint_type;
   }
 }
 
@@ -1219,7 +1261,7 @@ reduce_term(term_t t, list_t<$(vardecl_t,term_t)@> subst) {
     let t2 = reduce_term(t1,subst);
     if (t1 != t2) return proj(t1,i,tp);
     else return t;
-  case &Aggr(ts1,tp):
+  case &Aggr(is_union,tag,ts1,tp):
     list_t<term_t> ts2 = NULL;
     bool change = false;
     for (; ts1 != NULL; ts1 = ts1->tl) {
@@ -1229,7 +1271,7 @@ reduce_term(term_t t, list_t<$(vardecl_t,term_t)@> subst) {
       if (t1 != t2) change = true;
     }
     if (change) {
-      return aggr(List::imp_rev(ts2),tp);
+      return aggr(is_union,tag,List::imp_rev(ts2),tp);
     } else return t;
   case &Addr(vd): fallthru(vd);
   case &Var(vd):
@@ -1241,6 +1283,10 @@ reduce_term(term_t t, list_t<$(vardecl_t,term_t)@> subst) {
   case &Okderef(t1): 
     let t2 = reduce_term(t1,subst);
     if (t1 != t2) return okderef(t2);
+    else return t;
+  case &Tagof(t1):
+    let t2 = reduce_term(t1,subst);
+    if (t1 != t2) return tagof(t2);
     else return t;
   }
 }

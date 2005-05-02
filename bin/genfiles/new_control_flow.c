@@ -698,7 +698,7 @@ return;else{_Tmp0=inflow.ReachableFL.val.f1;{struct Cyc_List_List*relns=_Tmp0;
 # 302
 struct Cyc_Absyn_Aggrdecl*ad=Cyc_Absyn_get_known_aggrdecl(ainfo);
 struct Cyc_Absyn_Aggrfield*field=Cyc_Absyn_lookup_decl_field(ad,f);
-struct Cyc_Absyn_Exp*req=field->requires_clause;
+struct Cyc_Absyn_Exp*req=_check_null(field)->requires_clause;
 if(req!=0){
 struct _RegionHandle _Tmp4=_new_region(0U,"temp");struct _RegionHandle*temp=& _Tmp4;_push_region(temp);
 {struct Cyc_Absyn_Exp*ireq=({struct _RegionHandle*_Tmp5=temp;struct Cyc_List_List*_Tmp6=Cyc_List_rzip(temp,temp,ad->tvs,ts);Cyc_Tcutil_rsubsexp(_Tmp5,_Tmp6,req);});
@@ -755,7 +755,7 @@ struct _RegionHandle _Tmp7=_new_region(0U,"temp");struct _RegionHandle*temp=& _T
 {struct Cyc_List_List*inst=Cyc_List_rzip(temp,temp,tud->tvs,targs);
 struct Cyc_List_List*fs=tuf->typs;
 {int i=0;for(0;(unsigned)i < _get_fat_size(ad,sizeof(void*));(i ++,fs=fs->tl)){
-struct _tuple22*_Tmp8=(struct _tuple22*)fs->hd;void*_Tmp9;_Tmp9=_Tmp8->f1;{void*t=_Tmp9;
+struct _tuple22*_Tmp8=(struct _tuple22*)_check_null(fs)->hd;void*_Tmp9;_Tmp9=_Tmp8->f1;{void*t=_Tmp9;
 if(inst!=0)t=Cyc_Tcutil_rsubstitute(temp,inst,t);
 Cyc_NewControlFlow_check_nounique(env,loc,t,((void**)ad.curr)[i]);}}}
 # 367
@@ -769,7 +769,7 @@ struct Cyc_List_List*fs=ad->impl->fields;
 struct _RegionHandle _Tmp7=_new_region(0U,"temp");struct _RegionHandle*temp=& _Tmp7;_push_region(temp);
 {struct Cyc_List_List*inst=Cyc_List_rzip(temp,temp,ad->tvs,targs);
 {int i=0;for(0;(unsigned)i < _get_fat_size(d,sizeof(void*));(i ++,fs=fs->tl)){
-void*t=((struct Cyc_Absyn_Aggrfield*)fs->hd)->type;
+void*t=((struct Cyc_Absyn_Aggrfield*)_check_null(fs)->hd)->type;
 if(inst!=0)t=Cyc_Tcutil_rsubstitute(temp,inst,t);
 Cyc_NewControlFlow_check_nounique(env,loc,t,((void**)d.curr)[i]);}}
 # 381
