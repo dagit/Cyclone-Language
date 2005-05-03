@@ -19,6 +19,10 @@
 # include <stdio.h>
 # include "private/gc_pmark.h"
 
+#if defined(MSWIN32) && defined(__GNUC__)
+# include <excpt.h>
+#endif
+
 /* We put this here to minimize the risk of inlining. */
 /*VARARGS*/
 #ifdef __WATCOMC__
@@ -261,20 +265,20 @@ static void alloc_mark_stack();
 /* remains valid until all marking is complete.		*/
 /* A zero value indicates that it's OK to miss some	*/
 /* register values.					*/
-GC_bool GC_mark_some(cold_gc_frame)
-ptr_t cold_gc_frame;
+/* We hold the allocation lock.  In the case of 	*/
+/* incremental collection, the world may not be stopped.*/
+#ifdef MSWIN32
+  /* For win32, this is called after we establish a structured	*/
+  /* exception handler, in case Windows unmaps one of our root	*/
+  /* segments.  See below.  In either case, we acquire the 	*/
+  /* allocator lock long before we get here.			*/
+  GC_bool GC_mark_some_inner(cold_gc_frame)
+  ptr_t cold_gc_frame;
+#else
+  GC_bool GC_mark_some(cold_gc_frame)
+  ptr_t cold_gc_frame;
+#endif
 {
-#if defined(MSWIN32) && !defined(__GNUC__)
-  /* Windows 98 appears to asynchronously create and remove writable	*/
-  /* memory mappings, for reasons we haven't yet understood.  Since	*/
-  /* we look for writable regions to determine the root set, we may	*/
-  /* try to mark from an address range that disappeared since we 	*/
-  /* started the collection.  Thus we have to recover from faults here. */
-  /* This code does not appear to be necessary for Windows 95/NT/2000.	*/ 
-  /* Note that this code should never generate an incremental GC write	*/
-  /* fault.								*/
-  __try {
-#endif /* defined(MSWIN32) && !defined(__GNUC__) */
     switch(GC_mark_state) {
     	case MS_NONE:
     	    return(FALSE);
@@ -395,23 +399,130 @@ ptr_t cold_gc_frame;
     	    ABORT("GC_mark_some: bad state");
     	    return(FALSE);
     }
-#if defined(MSWIN32) && !defined(__GNUC__)
-  } __except (GetExceptionCode() == EXCEPTION_ACCESS_VIOLATION ?
-	    EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH) {
-#   ifdef CONDPRINT
-      if (GC_print_stats) {
-	GC_printf0("Caught ACCESS_VIOLATION in marker. "
-		   "Memory mapping disappeared.\n");
-      }
-#   endif /* CONDPRINT */
-    /* We have bad roots on the stack.  Discard mark stack.  	*/
-    /* Rescan from marked objects.  Redetermine roots.		*/
-    GC_invalidate_mark_state();	
-    scan_ptr = 0;
-    return FALSE;
-  }
-#endif /* defined(MSWIN32) && !defined(__GNUC__) */
 }
+
+
+#ifdef MSWIN32
+
+# ifdef __GNUC__
+
+    typedef struct {
+      EXCEPTION_REGISTRATION ex_reg;
+      void *alt_path;
+    } ext_ex_regn;
+
+
+    static EXCEPTION_DISPOSITION mark_ex_handler(
+        struct _EXCEPTION_RECORD *ex_rec, 
+        void *est_frame,
+        struct _CONTEXT *context,
+        void *disp_ctxt)
+    {
+        if (ex_rec->ExceptionCode == STATUS_ACCESS_VIOLATION) {
+          ext_ex_regn *xer = (ext_ex_regn *)est_frame;
+
+          /* Unwind from the inner function assuming the standard */
+          /* function prologue.                                   */
+          /* Assumes code has not been compiled with              */
+          /* -fomit-frame-pointer.                                */
+          context->Esp = context->Ebp;
+          context->Ebp = *((DWORD *)context->Esp);
+          context->Esp = context->Esp - 8;
+
+          /* Resume execution at the "real" handler within the    */
+          /* wrapper function.                                    */
+          context->Eip = (DWORD )(xer->alt_path);
+
+          return ExceptionContinueExecution;
+
+        } else {
+            return ExceptionContinueSearch;
+        }
+    }
+# endif /* __GNUC__ */
+
+
+  GC_bool GC_mark_some(cold_gc_frame)
+  ptr_t cold_gc_frame;
+  {
+      GC_bool ret_val;
+
+#   ifndef __GNUC__
+      /* Windows 98 appears to asynchronously create and remove  */
+      /* writable memory mappings, for reasons we haven't yet    */
+      /* understood.  Since we look for writable regions to      */
+      /* determine the root set, we may try to mark from an      */
+      /* address range that disappeared since we started the     */
+      /* collection.  Thus we have to recover from faults here.  */
+      /* This code does not appear to be necessary for Windows   */
+      /* 95/NT/2000. Note that this code should never generate   */
+      /* an incremental GC write fault.                          */
+
+      __try {
+
+#   else /* __GNUC__ */
+
+      /* Manually install an exception handler since GCC does    */
+      /* not yet support Structured Exception Handling (SEH) on  */
+      /* Win32.                                                  */
+
+      ext_ex_regn er;
+
+      er.alt_path = &&handle_ex;
+      er.ex_reg.handler = mark_ex_handler;
+      asm volatile ("movl %%fs:0, %0" : "=r" (er.ex_reg.prev));
+      asm volatile ("movl %0, %%fs:0" : : "r" (&er));
+
+#   endif /* __GNUC__ */
+
+          ret_val = GC_mark_some_inner(cold_gc_frame);
+
+#   ifndef __GNUC__
+
+      } __except (GetExceptionCode() == EXCEPTION_ACCESS_VIOLATION ?
+                EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH) {
+
+#   else /* __GNUC__ */
+
+          /* Prevent GCC from considering the following code unreachable */
+          /* and thus eliminating it.                                    */
+          if (er.alt_path != 0)
+              goto rm_handler;
+
+handle_ex:
+          /* Execution resumes from here on an access violation. */
+
+#   endif /* __GNUC__ */
+
+#         ifdef CONDPRINT
+            if (GC_print_stats) {
+	      GC_printf0("Caught ACCESS_VIOLATION in marker. "
+		         "Memory mapping disappeared.\n");
+            }
+#         endif /* CONDPRINT */
+
+          /* We have bad roots on the stack.  Discard mark stack.  */
+          /* Rescan from marked objects.  Redetermine roots.	 */
+          GC_invalidate_mark_state();	
+          scan_ptr = 0;
+
+          ret_val = FALSE;
+
+#   ifndef __GNUC__
+
+      }
+
+#   else /* __GNUC__ */
+
+rm_handler:
+      /* Uninstall the exception handler */
+      asm volatile ("mov %0, %%fs:0" : : "r" (er.ex_reg.prev));
+
+#   endif /* __GNUC__ */
+
+      return ret_val;
+  }
+#endif /* MSWIN32 */
 
 
 GC_bool GC_mark_stack_empty()
@@ -447,8 +558,8 @@ register hdr *hhdr, **new_hdr_p;
 	      current = current - HBLKSIZE*(word)hhdr;
 	      hhdr = HDR(current);
 	    } while(IS_FORWARDING_ADDR_OR_NIL(hhdr));
-	    /* current points to the start of the large object */
-	    if (hhdr -> hb_flags & IGNORE_OFF_PAGE) return(0);
+	    /* current points to near the start of the large object */
+	    if (hhdr -> hb_flags & IGNORE_OFF_PAGE) return(orig);
 	    if ((word *)orig - (word *)current
 	         >= (ptrdiff_t)(hhdr->hb_sz)) {
 	        /* Pointer past the end of the block */
@@ -573,7 +684,7 @@ mse * mark_stack_limit;
               current = *current_p;
 	      FIXUP_POINTER(current);
 	      if ((ptr_t)current >= least_ha && (ptr_t)current < greatest_ha) {
-		PREFETCH(current);
+		PREFETCH((ptr_t)current);
                 HC_PUSH_CONTENTS((ptr_t)current, mark_stack_top,
 			      mark_stack_limit, current_p, exit1);
 	      }
@@ -649,7 +760,7 @@ mse * mark_stack_limit;
 	  FIXUP_POINTER(deferred);
 	  limit = (word *)((char *)limit - ALIGNMENT);
 	  if ((ptr_t)deferred >= least_ha && (ptr_t)deferred <  greatest_ha) {
-	    PREFETCH(deferred);
+	    PREFETCH((ptr_t)deferred);
 	    break;
 	  }
 	  if (current_p > limit) goto next_object;
@@ -659,7 +770,7 @@ mse * mark_stack_limit;
 	  FIXUP_POINTER(deferred);
 	  limit = (word *)((char *)limit - ALIGNMENT);
 	  if ((ptr_t)deferred >= least_ha && (ptr_t)deferred <  greatest_ha) {
-	    PREFETCH(deferred);
+	    PREFETCH((ptr_t)deferred);
 	    break;
 	  }
 	  if (current_p > limit) goto next_object;
@@ -676,7 +787,7 @@ mse * mark_stack_limit;
         if ((ptr_t)current >= least_ha && (ptr_t)current <  greatest_ha) {
   	  /* Prefetch the contents of the object we just pushed.  It's	*/
   	  /* likely we will need them soon.				*/
-  	  PREFETCH(current);
+  	  PREFETCH((ptr_t)current);
           HC_PUSH_CONTENTS((ptr_t)current, mark_stack_top,
   		           mark_stack_limit, current_p, exit2);
         }
@@ -1339,8 +1450,8 @@ void GC_push_all_eager(bottom, top)
 ptr_t bottom;
 ptr_t top;
 {
-    word * b = (word *)(((long) bottom + ALIGNMENT-1) & ~(ALIGNMENT-1));
-    word * t = (word *)(((long) top) & ~(ALIGNMENT-1));
+    word * b = (word *)(((word) bottom + ALIGNMENT-1) & ~(ALIGNMENT-1));
+    word * t = (word *)(((word) top) & ~(ALIGNMENT-1));
     register word *p;
     register word q;
     register word *lim;
@@ -1628,7 +1739,7 @@ register hdr * hhdr;
 {
     register int sz = hhdr -> hb_sz;
     
-    if (sz < MAXOBJSZ) {
+    if (sz <= MAXOBJSZ) {
          return(GC_page_was_dirty(h));
     } else {
     	 register ptr_t p = (ptr_t)h;

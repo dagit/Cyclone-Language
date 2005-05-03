@@ -764,7 +764,6 @@ int GC_invoke_finalizers()
     struct finalizable_object * curr_fo;
     int count = 0;
     word mem_freed_before;
-    GC_bool first_time = TRUE;
     DCL_LOCK_STATE;
     
     while (GC_finalize_now != 0) {
@@ -772,9 +771,8 @@ int GC_invoke_finalizers()
 	    DISABLE_SIGNALS();
 	    LOCK();
 #	endif
-	if (first_time) {
+	if (count == 0) {
 	    mem_freed_before = GC_mem_freed;
-	    first_time = FALSE;
 	}
     	curr_fo = GC_finalize_now;
 #	ifdef THREADS
@@ -797,7 +795,7 @@ int GC_invoke_finalizers()
     	    GC_free((GC_PTR)curr_fo);
 #	endif
     }
-    if (mem_freed_before != GC_mem_freed) {
+    if (count != 0 && mem_freed_before != GC_mem_freed) {
         LOCK();
 	GC_finalizer_mem_freed += (GC_mem_freed - mem_freed_before);
 	UNLOCK();
@@ -811,6 +809,36 @@ static GC_word last_finalizer_notification = 0;
 
 void GC_notify_or_invoke_finalizers GC_PROTO((void))
 {
+    /* This is a convenient place to generate backtraces if appropriate, */
+    /* since that code is not callable with the allocation lock.	 */
+#   if defined(KEEP_BACK_PTRS) || defined(MAKE_BACK_GRAPH)
+      static word last_back_trace_gc_no = 1;	/* Skip first one. */
+
+      if (GC_gc_no > last_back_trace_gc_no) {
+	word i;
+
+#	ifdef KEEP_BACK_PTRS
+	  LOCK();
+	  /* Stops when GC_gc_no wraps; that's OK.	*/
+	  last_back_trace_gc_no = (word)(-1);  /* disable others. */
+	  for (i = 0; i < GC_backtraces; ++i) {
+	      /* FIXME: This tolerates concurrent heap mutation,	*/
+	      /* which may cause occasional mysterious results.		*/
+	      /* We need to release the GC lock, since GC_print_callers	*/
+	      /* acquires it.  It probably shouldn't.			*/
+	      UNLOCK();
+	      GC_generate_random_backtrace_no_gc();
+	      LOCK();
+	  }
+	  last_back_trace_gc_no = GC_gc_no;
+	  UNLOCK();
+#	endif
+#       ifdef MAKE_BACK_GRAPH
+	  if (GC_print_back_height)
+            GC_print_back_graph_stats();
+#	endif
+      }
+#   endif
     if (GC_finalize_now == 0) return;
     if (!GC_finalize_on_demand) {
 	(void) GC_invoke_finalizers();

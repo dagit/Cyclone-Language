@@ -68,14 +68,13 @@
 #   include <pthread.h>
 # endif
 
-# ifdef GC_WIN32_THREADS
-#   ifndef MSWINCE
-      /* FIXME - Why is this here? */
-#     include <process.h>
-#     define GC_CreateThread(a,b,c,d,e,f) ((HANDLE) _beginthreadex(a,b,c,d,e,f))
-#   endif
+# if defined(GC_WIN32_THREADS) && !defined(GC_PTHREADS)
     static CRITICAL_SECTION incr_cs;
 # endif
+
+#ifdef __STDC__
+# include <stdarg.h>
+#endif
 
 
 /* Allocation Statistics */
@@ -209,7 +208,6 @@ sexpr y;
 #ifdef GC_GCJ_SUPPORT
 
 #include "gc_mark.h"
-#include "private/dbg_mlc.h"  /* For USR_PTR_FROM_BASE */
 #include "gc_gcj.h"
 
 /* The following struct emulates the vtable in gcj.	*/
@@ -234,7 +232,7 @@ struct GC_ms_entry * fake_gcj_mark_proc(word * addr,
     sexpr x;
     if (1 == env) {
 	/* Object allocated with debug allocator.	*/
-	addr = (word *)USR_PTR_FROM_BASE(addr);
+	addr = (word *)GC_USR_PTR_FROM_BASE(addr);
     }
     x = (sexpr)(addr + 1); /* Skip the vtable pointer. */
     mark_stack_ptr = GC_MARK_AND_PUSH(
@@ -521,20 +519,13 @@ sexpr x;
     }
 }
 
-/* Try to force a to be strangely aligned */
-struct {
-  char dummy;
-  sexpr aa;
-} A;
-#define a A.aa
-
 /*
  * A tiny list reversal test to check thread creation.
  */
 #ifdef THREADS
 
 # if defined(GC_WIN32_THREADS) && !defined(CYGWIN32)
-    unsigned __stdcall tiny_reverse_test(void * arg)
+    DWORD  __stdcall tiny_reverse_test(void * arg)
 # else
     void * tiny_reverse_test(void * arg)
 # endif
@@ -569,7 +560,7 @@ struct {
 # elif defined(GC_WIN32_THREADS)
     void fork_a_thread()
     {
-  	unsigned thread_id;
+  	DWORD thread_id;
 	HANDLE h;
     	h = GC_CreateThread(NULL, 0, tiny_reverse_test, 0, 0, &thread_id);
         if (h == (HANDLE)NULL) {
@@ -597,6 +588,13 @@ struct {
 # define fork_a_thread()
 
 #endif 
+
+/* Try to force a to be strangely aligned */
+struct {
+  char dummy;
+  sexpr aa;
+} A;
+#define a A.aa
 
 /*
  * Repeatedly reverse lists built out of very different sized cons cells.
@@ -718,6 +716,8 @@ void reverse_test()
     b = c = 0;
 }
 
+#undef a
+
 /*
  * The rest of this builds balanced binary trees, checks that they don't
  * disappear, and tests finalization.
@@ -762,6 +762,7 @@ VOLATILE int dropped_something = 0;
      FAIL;
   }
   finalized_count++;
+  t -> level = -1;	/* detect duplicate finalization immediately */
 # ifdef PCR
     PCR_ThCrSec_ExitSys();
 # endif
@@ -1169,6 +1170,25 @@ void fail_proc1(GC_PTR x)
     fail_count++;
 }   
 
+static void uniq(void *p, ...) {
+  va_list a;
+  void *q[100];
+  int n = 0, i, j;
+  q[n++] = p;
+  va_start(a,p);
+  for (;(q[n] = va_arg(a,void *));n++) ;
+  va_end(a);
+  for (i=0; i<n; i++)
+    for (j=0; j<i; j++)
+      if (q[i] == q[j]) {
+        GC_printf0(
+              "Apparently failed to mark form some function arguments.\n"
+              "Perhaps GC_push_regs was configured incorrectly?\n"
+        );
+	FAIL;
+      }
+}
+
 #endif /* __STDC__ */
 
 #ifdef THREADS
@@ -1235,9 +1255,11 @@ void run_one_test()
 	FAIL;
       }
       if (!TEST_FAIL_COUNT(1)) {
-#	if!(defined(RS6000) || defined(POWERPC) || defined(IA64))
+#	if!(defined(RS6000) || defined(POWERPC) || defined(IA64)) || defined(M68K)
 	  /* ON RS6000s function pointers point to a descriptor in the	*/
 	  /* data segment, so there should have been no failures.	*/
+	  /* The same applies to IA64.  Something similar seems to	*/
+	  /* be going on with NetBSD/M68K.				*/
     	  (void)GC_printf0("GC_is_visible produced wrong failure indication\n");
     	  FAIL;
 #	endif
@@ -1281,6 +1303,21 @@ void run_one_test()
 #   ifdef GC_GCJ_SUPPORT
       GC_REGISTER_DISPLACEMENT(sizeof(struct fake_vtable *));
       GC_init_gcj_malloc(0, (void *)fake_gcj_mark_proc);
+#   endif
+    /* Make sure that fn arguments are visible to the collector.	*/
+#   ifdef __STDC__
+      uniq(
+        GC_malloc(12), GC_malloc(12), GC_malloc(12),
+        (GC_gcollect(),GC_malloc(12)),
+        GC_malloc(12), GC_malloc(12), GC_malloc(12),
+	(GC_gcollect(),GC_malloc(12)),
+        GC_malloc(12), GC_malloc(12), GC_malloc(12),
+	(GC_gcollect(),GC_malloc(12)),
+        GC_malloc(12), GC_malloc(12), GC_malloc(12),
+	(GC_gcollect(),GC_malloc(12)),
+        GC_malloc(12), GC_malloc(12), GC_malloc(12),
+	(GC_gcollect(),GC_malloc(12)),
+        (void *)0);
 #   endif
     /* Repeated list reversal test. */
 	reverse_test();
@@ -1461,15 +1498,20 @@ void SetMinimumStack(long minSize)
 	/* Cheat and let stdio initialize toolbox for us.	*/
 	printf("Testing GC Macintosh port.\n");
 #   endif
-    GC_INIT();	/* Only needed if gc is dynamic library.	*/
+    GC_INIT();	/* Only needed on a few platforms.	*/
     (void) GC_set_warn_proc(warn_proc);
-#   if (defined(MPROTECT_VDB) || defined(PROC_VDB)) && !defined(MAKE_BACK_GRAPH)
+#   if (defined(MPROTECT_VDB) || defined(PROC_VDB)) \
+          && !defined(MAKE_BACK_GRAPH)
       GC_enable_incremental();
       (void) GC_printf0("Switched to incremental mode\n");
 #     if defined(MPROTECT_VDB)
 	(void)GC_printf0("Emulating dirty bits with mprotect/signals\n");
 #     else
+#       ifdef PROC_VDB
 	(void)GC_printf0("Reading dirty bits from /proc\n");
+#       else
+    (void)GC_printf0("Using DEFAULT_VDB dirty bit implementation\n");
+#       endif
 #      endif
 #   endif
     run_one_test();
@@ -1503,7 +1545,7 @@ void SetMinimumStack(long minSize)
 
 #if defined(GC_WIN32_THREADS) && !defined(CYGWIN32)
 
-unsigned __stdcall thr_run_one_test(void *arg)
+DWORD __stdcall thr_run_one_test(void *arg)
 {
   run_one_test();
   return 0;
@@ -1535,7 +1577,7 @@ LRESULT CALLBACK window_proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
   return ret;
 }
 
-unsigned __stdcall thr_window(void *arg)
+DWORD __stdcall thr_window(void *arg)
 {
   WNDCLASS win_class = {
     CS_NOCLOSE,
@@ -1597,10 +1639,11 @@ int APIENTRY WinMain(HINSTANCE instance, HINSTANCE prev, LPSTR cmd, int n)
 # ifdef MSWINCE
     HANDLE win_thr_h;
 # endif
-  unsigned thread_id;
+  DWORD thread_id;
 # if 0
     GC_enable_incremental();
 # endif
+  GC_init();
   InitializeCriticalSection(&incr_cs);
   (void) GC_set_warn_proc(warn_proc);
 # ifdef MSWINCE
@@ -1748,16 +1791,28 @@ main()
           (void)GC_printf0("pthread_default_stacksize_np failed.\n");
 	}
 #   endif	/* GC_HPUX_THREADS */
+    GC_INIT();
+
     pthread_attr_init(&attr);
 #   if defined(GC_IRIX_THREADS) || defined(GC_FREEBSD_THREADS) \
-    	|| defined(GC_MACOSX_THREADS)
+    	|| defined(GC_DARWIN_THREADS) || defined(GC_AIX_THREADS)
     	pthread_attr_setstacksize(&attr, 1000000);
 #   endif
     n_tests = 0;
-#   if  defined(MPROTECT_VDB) && !defined(PARALLEL_MARK) &&!defined(REDIRECT_MALLOC) && !defined(MAKE_BACK_GRAPH)
+#   if (defined(MPROTECT_VDB)) \
+            && !defined(PARALLEL_MARK) &&!defined(REDIRECT_MALLOC) \
+            && !defined(MAKE_BACK_GRAPH)
     	GC_enable_incremental();
         (void) GC_printf0("Switched to incremental mode\n");
-	(void) GC_printf0("Emulating dirty bits with mprotect/signals\n");
+#     if defined(MPROTECT_VDB)
+        (void)GC_printf0("Emulating dirty bits with mprotect/signals\n");
+#     else
+#       ifdef PROC_VDB
+            (void)GC_printf0("Reading dirty bits from /proc\n");
+#       else
+            (void)GC_printf0("Using DEFAULT_VDB dirty bit implementation\n");
+#       endif
+#     endif
 #   endif
     (void) GC_set_warn_proc(warn_proc);
     if ((code = pthread_key_create(&fl_key, 0)) != 0) {

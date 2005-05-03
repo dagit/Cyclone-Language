@@ -42,8 +42,8 @@
 #   include <sys/resource.h>
 #endif /* BSD_TIME */
 
-# ifndef GC_H
-#   include "gc.h"
+# ifndef _GC_H
+#   include "../gc.h"
 # endif
 
 # ifndef GC_MARK_H
@@ -352,7 +352,8 @@ void GC_print_callers GC_PROTO((struct callinfo info[NFRAMES]));
 #   include <string.h>
 #   define BCOPY_EXISTS
 # endif
-# if defined(MACOSX)
+# if defined(DARWIN)
+#   include <string.h>
 #   define BCOPY_EXISTS
 # endif
 
@@ -447,7 +448,19 @@ extern GC_warn_proc GC_current_warn_proc;
 
 /* Get environment entry */
 #if !defined(NO_GETENV)
-#   define GETENV(name) getenv(name)
+#   if defined(EMPTY_GETENV_RESULTS)
+	/* Workaround for a reputed Wine bug.	*/
+	static inline char * fixed_getenv(const char *name)
+	{
+	  char * tmp = getenv(name);
+	  if (tmp == 0 || strlen(tmp) == 0)
+	    return 0;
+	  return tmp;
+	}
+#       define GETENV(name) fixed_getenv(name)
+#   else
+#       define GETENV(name) getenv(name)
+#   endif
 #else
 #   define GETENV(name) 0
 #endif
@@ -537,7 +550,7 @@ extern GC_warn_proc GC_current_warn_proc;
 
 #define CPP_MAXOBJBYTES (CPP_HBLKSIZE/2)
 #define MAXOBJBYTES ((word)CPP_MAXOBJBYTES)
-#define CPP_MAXOBJSZ    BYTES_TO_WORDS(CPP_HBLKSIZE/2)
+#define CPP_MAXOBJSZ    BYTES_TO_WORDS(CPP_MAXOBJBYTES)
 #define MAXOBJSZ ((word)CPP_MAXOBJSZ)
 		
 # define divHBLKSZ(n) ((n) >> LOG_HBLKSIZE)
@@ -565,7 +578,7 @@ extern GC_warn_proc GC_current_warn_proc;
 # else
 #       define ALIGNED_WORDS(n) ROUNDED_UP_WORDS(n)
 # endif
-# define SMALL_OBJ(bytes) ((bytes) < (MAXOBJBYTES - EXTRA_BYTES))
+# define SMALL_OBJ(bytes) ((bytes) <= (MAXOBJBYTES - EXTRA_BYTES))
 # define ADD_SLOP(bytes) ((bytes) + EXTRA_BYTES)
 # ifndef MIN_WORDS
     /* MIN_WORDS is the size of the smallest allocated object.	*/
@@ -602,6 +615,10 @@ extern GC_warn_proc GC_current_warn_proc;
 #     define LOG_PHT_ENTRIES  16 /* Collisions are likely if heap grows	*/
 				 /* to more than 64K hblks >= 256MB.	*/
 				 /* Each hash table occupies 8K bytes.  */
+				 /* Even for somewhat smaller heaps, 	*/
+				 /* say half that, collisions may be an	*/
+				 /* issue because we blacklist 		*/
+				 /* addresses outside the heap.		*/
 #   endif
 # endif
 # define PHT_ENTRIES ((word)1 << LOG_PHT_ENTRIES)
@@ -905,7 +922,7 @@ struct _GC_arrays {
   		       /* OFFSET_TOO_BIG if the value j would be too 	*/
   		       /* large to fit in the entry.  (Note that the	*/
   		       /* size of these entries matters, both for 	*/
-  		       /* space consumption and for cache utilization.	*/
+  		       /* space consumption and for cache utilization.)	*/
 #   define OFFSET_TOO_BIG 0xfe
 #   define OBJ_INVALID 0xff
 #   define MAP_ENTRY(map, bytes) (map)[bytes]
@@ -921,11 +938,11 @@ struct _GC_arrays {
   	char _valid_offsets[VALID_OFFSET_SZ];
 				/* GC_valid_offsets[i] == TRUE ==> i 	*/
 				/* is registered as a displacement.	*/
-#	define OFFSET_VALID(displ) \
-	  (GC_all_interior_pointers || GC_valid_offsets[displ])
   	char _modws_valid_offsets[sizeof(word)];
 				/* GC_valid_offsets[i] ==>		  */
 				/* GC_modws_valid_offsets[i%sizeof(word)] */
+#   define OFFSET_VALID(displ) \
+	  (GC_all_interior_pointers || GC_valid_offsets[displ])
 # ifdef STUBBORN_ALLOC
     page_hash_table _changed_pages;
         /* Stubborn object pages that were changes since last call to	*/
@@ -953,7 +970,7 @@ struct _GC_arrays {
 #   endif
 # else
 #   ifdef SMALL_CONFIG
-#     define MAX_HEAP_SECTS 128		/* Roughly 1GB			*/
+#     define MAX_HEAP_SECTS 128		/* Roughly 256MB (128*2048*1K)	*/
 #   else
 #     define MAX_HEAP_SECTS 384		/* Roughly 3GB			*/
 #   endif
@@ -1180,6 +1197,10 @@ extern long GC_large_alloc_warn_interval;
 extern long GC_large_alloc_warn_suppressed;
 	/* Number of warnings suppressed so far.	*/
 
+#ifdef THREADS
+  extern GC_bool GC_world_stopped;
+#endif
+
 /* Operations */
 # ifndef abs
 #   define abs(x)  ((x) < 0? (-(x)) : (x))
@@ -1354,6 +1375,11 @@ extern void (*GC_start_call_back) GC_PROTO((void));
 # else
   void GC_push_regs GC_PROTO((void));
 # endif
+# if defined(SPARC) || defined(IA64)
+  /* Cause all stacked registers to be saved in memory.  Return a	*/
+  /* pointer to the top of the corresponding memory stack.		*/
+  word GC_save_regs_in_stack GC_PROTO((void));
+# endif
 			/* Push register contents onto mark stack.	*/
   			/* If NURSERY is defined, the default push	*/
   			/* action can be overridden with GC_push_proc	*/
@@ -1403,6 +1429,7 @@ void GC_set_fl_marks GC_PROTO((ptr_t p));
 				    /* Set all mark bits associated with */
 				    /* a free list.			 */
 void GC_add_roots_inner GC_PROTO((char * b, char * e, GC_bool tmp));
+void GC_remove_roots_inner GC_PROTO((char * b, char * e));
 GC_bool GC_is_static_root GC_PROTO((ptr_t p));
   		/* Is the address p in one of the registered static	*/
   		/* root sections?					*/
@@ -1588,7 +1615,7 @@ void GC_collect_a_little_inner GC_PROTO((int n));
   				/* collection work, if appropriate.	*/
   				/* A unit is an amount appropriate for  */
   				/* HBLKSIZE bytes of allocation.	*/
-ptr_t GC_generic_malloc GC_PROTO((word lb, int k));
+/* ptr_t GC_generic_malloc GC_PROTO((word lb, int k)); */
   				/* Allocate an object of the given	*/
   				/* kind.  By default, there are only	*/
   				/* a few kinds: composite(pointerfree), */
@@ -1598,12 +1625,17 @@ ptr_t GC_generic_malloc GC_PROTO((word lb, int k));
 				/* internals to add more, e.g. to	*/
 				/* communicate object layout info	*/
 				/* to the collector.			*/
+				/* The actual decl is in gc_mark.h.	*/
 ptr_t GC_generic_malloc_ignore_off_page GC_PROTO((size_t b, int k));
   				/* As above, but pointers past the 	*/
   				/* first page of the resulting object	*/
   				/* are ignored.				*/
 ptr_t GC_generic_malloc_inner GC_PROTO((word lb, int k));
   				/* Ditto, but I already hold lock, etc.	*/
+ptr_t GC_generic_malloc_words_small_inner GC_PROTO((word lw, int k));
+				/* Analogous to the above, but assumes	*/
+				/* a small object size, and bypasses	*/
+				/* MERGE_SIZES mechanism.		*/
 ptr_t GC_generic_malloc_words_small GC_PROTO((size_t lw, int k));
   				/* As above, but size in units of words */
   				/* Bypasses MERGE_SIZES.  Assumes	*/
@@ -1618,6 +1650,8 @@ ptr_t GC_allocobj GC_PROTO((word sz, int kind));
   				/* Make the indicated 			*/
   				/* free list nonempty, and return its	*/
   				/* head.				*/
+
+void GC_free_inner(GC_PTR p);
   
 void GC_init_headers GC_PROTO((void));
 struct hblkhdr * GC_install_header GC_PROTO((struct hblk *h));
@@ -1691,6 +1725,17 @@ extern GC_bool GC_print_stats;	/* Produce at least some logging output	*/
 # define COND_DUMP if (GC_dump_regularly) GC_dump();
 #else
 # define COND_DUMP
+#endif
+
+#ifdef KEEP_BACK_PTRS
+  extern long GC_backtraces;
+  void GC_generate_random_backtrace_no_gc(void);
+#endif
+
+extern GC_bool GC_print_back_height;
+
+#ifdef MAKE_BACK_GRAPH
+  void GC_print_back_graph_stats(void);
 #endif
 
 /* Macros used for collector internal allocation.	*/
@@ -1845,6 +1890,16 @@ void GC_err_puts GC_PROTO((GC_CONST char *s));
 # else 
 #	define GC_ASSERT(expr)
 # endif
+
+/* Check a compile time assertion at compile time.  The error	*/
+/* message for failure is a bit baroque, but ...		*/
+#if defined(mips) && !defined(__GNUC__)
+/* DOB: MIPSPro C gets an internal error taking the sizeof an array type. 
+   This code works correctly (ugliness is to avoid "unused var" warnings) */
+# define GC_STATIC_ASSERT(expr) do { if (0) { char j[(expr)? 1 : -1]; j[0]='\0'; j[0]=j[0]; } } while(0)
+#else
+# define GC_STATIC_ASSERT(expr) sizeof(char[(expr)? 1 : -1])
+#endif
 
 # if defined(PARALLEL_MARK) || defined(THREAD_LOCAL_ALLOC)
     /* We need additional synchronization facilities from the thread	*/

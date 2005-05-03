@@ -888,7 +888,7 @@ void GC_print_block_list()
 {
     struct Print_stats pstats;
 
-    GC_printf0("(kind(0=ptrfree,1=normal,2=unc.,3=stubborn):size_in_bytes, #_marks_set)\n");
+    GC_printf1("(kind(0=ptrfree,1=normal,2=unc.,%lu=stubborn):size_in_bytes, #_marks_set)\n", STUBBORN);
     pstats.number_of_blocks = 0;
     pstats.total_bytes = 0;
     GC_apply_to_all_blocks(GC_print_block_descr, (word)&pstats);
@@ -904,7 +904,7 @@ void GC_print_block_list()
  * Clear *flp.
  * This must be done before dropping a list of free gcj-style objects,
  * since may otherwise end up with dangling "descriptor" pointers.
- * It may help for other pointer-containg objects.
+ * It may help for other pointer-containing objects.
  */
 void GC_clear_fl_links(flp)
 ptr_t *flp;

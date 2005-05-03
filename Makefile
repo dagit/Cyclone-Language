@@ -3,7 +3,7 @@ export CYCDIR CYCC EXEC_PREFIX
 
 CYCC=$(CYCDIR)/bin/cyclone$(EXE)
 EXEC_PREFIX=$(CYCDIR)/bin/lib/cyc-lib
-
+GC=gc
 # Target directories:
 # BB is where object files for the standard build are put
 # BT is where object files for a cross build are put
@@ -72,7 +72,7 @@ $(BL)/cyc-lib/%/nogc_pthread.a: build/%/pthread/nogc.a
 	cp -p $< $@
 
 gc_pthread:
-	cp -r gc $@
+	cp -r $(GC) $@
 	(cd $@; $(MAKE) clean; ./configure --enable-threads=pthreads --enable-shared=no --enable-cplusplus=no)
 
 .PRECIOUS: gc_pthread gc_pthread/.libs/libgc.a
@@ -295,11 +295,11 @@ $(BL)/cyc-lib/$(build)/cyc_setjmp.h: bin/cyc-lib/libc.cys bin/buildlib$(EXE)
 $(BL)/cyc-lib/cyc_include.h: $(CYCDIR)/bin/cyc-lib/cyc_include.h
 	cp $< $@
 
-$(BL)/cyc-lib/$(build)/gc.a: gc/.libs/libgc.a
+$(BL)/cyc-lib/$(build)/gc.a: $(GC)/.libs/libgc.a
 	cp -p -p $< $@
 
-gc/.libs/libgc.a:
-	$(MAKE) -C gc libgc.la CC="$(CC)" CFLAGS="$(CFLAGS)"
+$(GC)/.libs/libgc.a:
+	$(MAKE) -C $(GC) libgc.la CC="$(CC)" CFLAGS="$(CFLAGS)"
 
 # Print version to standard output -- used by makedist
 version:
@@ -815,8 +815,8 @@ clean_nogc: clean_test clean_build
 	$(RM) *~ amon.out
 
 clean: clean_nogc
-	$(MAKE) clean -C gc
-	$(RM) gc/*.exe gc/base_lib gc/*.obj gc/gc.lib
+	$(MAKE) clean -C $(GC)
+	$(RM) $(GC)/*.exe $(GC)/base_lib $(GC)/*.obj $(GC)/gc.lib
 ifeq ($(HAVE_PTHREAD),yes)
 	$(RM) -r gc_pthread
 endif
