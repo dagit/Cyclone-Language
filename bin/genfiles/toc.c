@@ -1919,9 +1919,9 @@ goto _LL60;}case Cyc_Absyn_Eq:
  goto _LL6A;case Cyc_Absyn_Neq: _LL6A: goto _LL6C;case Cyc_Absyn_Gt: _LL6C: goto _LL6E;case Cyc_Absyn_Gte: _LL6E: goto _LL70;case Cyc_Absyn_Lt: _LL70: goto _LL72;case Cyc_Absyn_Lte: _LL72: {
 # 1704
 struct Cyc_Absyn_Exp*e1=(struct Cyc_Absyn_Exp*)es->hd;
-struct Cyc_Absyn_Exp*e2=(struct Cyc_Absyn_Exp*)es->tl->hd;
-void*t1=(void*)old_types->hd;
-void*t2=(void*)old_types->tl->hd;
+struct Cyc_Absyn_Exp*e2=(struct Cyc_Absyn_Exp*)_check_null(es->tl)->hd;
+void*t1=(void*)_check_null(old_types)->hd;
+void*t2=(void*)_check_null(old_types->tl)->hd;
 void*elt_type=Cyc_Absyn_void_type;
 if(Cyc_Tcutil_is_fat_pointer_type_elt(t1,& elt_type)){
 void*t=({void*_TmpB=Cyc_Toc_typ_to_c(elt_type);Cyc_Absyn_cstar_type(_TmpB,Cyc_Toc_mt_tq);});

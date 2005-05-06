@@ -42,14 +42,14 @@ has been suitably adapted to deal with modular arithmetic.
 
 The algorithm that we use here is roughly as follows:
 
-(1) We (conceptually) compute the DNF of an assertion A, yielding
+   (1) We (conceptually) compute the DNF of an assertion A, yielding
     A1 || A2 || ... || An  where the Ai's are conjunctions of 
     primitive relations.  
 
-(2) For each Ai, we build two distance graphs representing the difference
+   (2) For each Ai, we build two distance graphs representing the difference
     between signed and unsigned terms.
 
-(3) We then close the graph by computing the shortest path from each 
+   (3) We then close the graph by computing the shortest path from each 
     term to another, and by performing congruence closure w.r.t. the 
     uninterpreted functions (e.g., numelts).  We also attempt to "break"
     terms involving addition of a constant (e.t., x+3) by adding edges 
@@ -58,12 +58,12 @@ The algorithm that we use here is roughly as follows:
     prove that over/underflow cannot happen, in which case the edges are 
     safe to add.  
      
-(4) Finally, if we detect a cycle in one of the graphs 
+   (4) Finally, if we detect a cycle in one of the graphs 
        t --c0--> t1 --c1--> t2 --c2--> ... --> tn --cn--> t
     and the sum of the ci's is negative, then we have a contradiction since 
     this would imply t - t < 0.  We can thus determine that Ai is false.
 
-(5) If all of the graphs are found to be inconsistent, then we know A is false.
+   (5) If all of the graphs are found to be inconsistent, then we know A is false.
 
 In practice, we incrementally convert the assertion to graphs and try to 
 prune inconsistent graphs as early as possible.  This avoids building graphs 
@@ -207,6 +207,20 @@ static int graphs_copied = 0;
 static int max_lookup = 0;
 static int already_seen_hits = 0;
 
+static void print_shortestpathinfo(shortestpathinfo_t info){
+  switch (info){
+  case {.Infinity=_}: 
+    fprintf(stderr,"not reachable from s\n");
+    break;
+  case {.Shortest = d}: 
+    fprintf(stderr,"shortest distance from s is %d\n",d);
+    break;
+  case {.Current = d}: 
+    fprintf(stderr,"current distance from s is %d\n",d);  
+    break;
+  }
+  return;
+}
 // Print out a graph.
 void print_graph(graph_t @g) {
   fprintf(stderr,"{");
@@ -217,6 +231,11 @@ void print_graph(graph_t @g) {
       let s = term2string(rep);
       fprintf(stderr,"row %s:",s);
       if (uds == NULL) fprintf(stderr,"\n");
+      print_shortestpathinfo(rs->shortest_path_info);
+      fprintf(stderr,"unsigned shortest dist from S: %d\n",
+	      rs->unsigneddistFromS);
+      fprintf(stderr,"signed shortest dist from S: %d\n",
+	      rs->signeddistFromS);
       for (; uds != NULL; uds = uds->next)
         fprintf(stderr,"  %s - %s U<= %d\n ",s,
                 term2string(uds->target->rep),uds->dist);
@@ -233,7 +252,10 @@ void print_graphs(graph_t *g) {
   fprintf(stderr,"Graphs:-----------\n");
   if (g == NULL) fprintf(stderr,"<false>\n");
   else {
-    for (; g != NULL; g = g->next) print_graph(g);
+    for (int i=0; g != NULL;i++, g = g->next){
+      fprintf(stderr, "graph %d:\n",i);
+      print_graph(g);
+    }
   }
   fprintf(stderr,"------------------\n");
 }
@@ -538,6 +560,11 @@ static void set_dist(graph_t @g, node_t @`H i, node_t @`H j, int dist, bool is_s
 **********************************************************************/
 
 static inline void set_dist(graph_t @g, node_t @`H i, node_t @`H j, int dist, bool is_signed) {
+#ifdef PROVER_DEBUG
+  fprintf(stderr,"adding %s dist: %s --> %s (%d)\n",
+	  is_signed?"signed":"unsigned",
+	  term2string(i->rep),term2string(j->rep),dist);
+#endif  
   // equivalent terms are always at distance 0.
   if (i == j && (dist < 0 || (unsigned)dist == MININT)) throw(&inconsistent);
   if (i == j && dist > 0) return;
@@ -630,6 +657,7 @@ static void bellman_ford(int dummy,graph_t @g){
     node->signeddistFromS = 0;
     node->unsigneddistFromS = 0;
   }
+  
   // so the number of elements in the graph is n;
   // we are using bellman_ford algorithm
   for(let i = 0; i < n; i++){
@@ -851,32 +879,71 @@ static void johnson(int dummy, graph_t @`H g){
   // bellman ford to test if there is any negative weight cycle 
   // could really omit this step because we've already run bellman_ford before
   // calling johnson
+#ifdef PROVER_DEBUG
+  fprintf(stderr,"******************* run bellman_ford****************\n");
+  print_graph(g);
+#endif
   bellman_ford(0,g); 
+#ifdef PROVER_DEBUG
+  fprintf(stderr,"******************* done bellman_ford****************\n");
+  print_graph(g);
+#endif
   // no inconsistency thrown so there is no negative weight cycle
   // reweighs all the edges in the garph to make their weight nonnegative
   for(let node = g->rows; node != NULL; node = node->next){
     int du_unsigned = node->unsigneddistFromS;
-    for(let dists = node->unsigned_distances; dists != NULL; dists = dists->next){
+    distance_t *pre_dists, *dists;
+    for(pre_dists = NULL, dists = node->unsigned_distances;
+	dists != NULL; pre_dists = dists,dists = dists->next){
       int uv_unsigned = dists->dist;
       int dv_unsigned = dists->target->unsigneddistFromS;
       // since after bellmanford, dx_unsigned is the shortest path,
       // so uv_unsigned + du_unsigned >= dv_unsigned
       // this ensures the new weight to be non negative
       dists->dist = uv_unsigned + du_unsigned - dv_unsigned;
+      // overflow happens, the weight is too big
+      if (dists->dist < 0) {
+	// the weight is too big to be represented as signed int,
+	// we have to remove the edge. 
+	if (pre_dists == NULL) 
+	  node->unsigned_distances = dists->next;
+	else
+	  pre_dists->next = dists->next;
+      }
     }
     int du_signed = node->signeddistFromS;
-    for(let dists = node->signed_distances; dists != NULL; dists = dists->next){
+    for(pre_dists = NULL, dists = node->signed_distances; 
+	dists != NULL; pre_dists = dists, dists = dists->next){
       int uv_signed = dists->dist;
       int dv_signed = dists->target->signeddistFromS;
       // same argument as for the unsigned weight
       dists->dist = uv_signed + du_signed - dv_signed;
+      // overflow happens, the weight is too big
+      if (dists->dist < 0) {
+	dists->dist = 0;
+	if (pre_dists == NULL) 
+	  node->signed_distances = dists->next;
+	else
+	  pre_dists->next = dists->next;
+      }
+
     }
   }
+#ifdef PROVER_DEBUG
+  fprintf(stderr,"*************adjusted weight****************\n");
+  print_graphs(g);
+#endif
+  
   // now for each vertex, we run dijkstra to calculate shortest path
   // this is OK because now all weights are nonnegative
   for(let node = g->rows; node != NULL; node = node->next){
     dijkstra(node,g);
   }
+#ifdef PROVER_DEBUG
+  fprintf(stderr,"*************done dijkstra****************\n");
+  print_graphs(g);
+#endif
+  
   // now recover the original weight (possibily negative) for
   // distance between two vertices
   for(let node = g->rows; node != NULL; node = node->next){
@@ -894,6 +961,7 @@ static void johnson(int dummy, graph_t @`H g){
       dists->dist = uv_signed + dv_signed - du_signed;
     }
   }
+
 #ifdef PROVER_DEBUG
   fprintf(stderr,"no inconsistency from johnson\n");
 #endif

@@ -597,7 +597,7 @@ if(more_exists < 0){
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp8=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp9;_Tmp9.tag=0,_Tmp9.f1=_tag_fat("too many existential type variables in pattern",sizeof(char),47U);_Tmp9;});void*_Tmp9[1];_Tmp9[0]=& _Tmp8;Cyc_Warn_err2(p->loc,_tag_fat(_Tmp9,sizeof(void*),1));});{
 struct Cyc_List_List**ts=exist_ts;
 {int n=Cyc_List_length(ad->impl->exist_vars);for(0;n!=0;-- n){
-ts=& _check_null(*ts)->tl;}}
+ts=&(*ts)->tl;}}
 *ts=0;}}else{
 if(more_exists > 0){
 # 100
