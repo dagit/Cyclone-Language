@@ -909,8 +909,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
     t1 = CurRgn::instantiate(compress(t1),Tcenv::curr_lifo_rgn(te));
     switch (t1) {
       case &FnType(FnInfo{tvars,eff,res_tq,res_typ,args_info,c_vararg,
-                          cyc_vararg,rgn_po,qb,atts,req,req_relns,ens,ens_relns,
-                          ret_var,_}):
+                            cyc_vararg,rgn_po,qb,atts,req,req_relns,ens,ens_relns,thrws,thrws_relns,ret_var,_}):
 	if(tvars != NULL || rgn_po != NULL)
 	  Warn::err(e->loc,"function should have been instantiated prior to use -- probably a compiler bug");
       // unify the result type with the expected type to get better

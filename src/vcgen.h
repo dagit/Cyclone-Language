@@ -35,9 +35,11 @@ namespace Vcgen {
   } exp_checks_t;
   typedef Hashtable::table_t<Absyn::exp_t, exp_checks_t@> *assn_info_t;
   assn_info_t new_assn_info();
-  extern void vcgen_fundecl(JumpAnalysis::jump_anal_res_t tables, 
+  extern void vcgen_fundecl(Position::seg_t loc,
+                            JumpAnalysis::jump_anal_res_t tables, 
 			    Absyn::fndecl_t fd,
 			    assn_info_t assn_info);
   exp_checks_t@ exp2ctxt_checks(assn_info_t,Absyn::exp_t);
+  extern AssnDef::assn_t clause2assn(Absyn::exp_t);
 }
 #endif

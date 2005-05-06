@@ -867,8 +867,12 @@ static string_t a2string(assn_t a, int prec, int@ size) {
     return aprintf("!%s",a2string(a1,20,size));
   case &Subst(vd,t,a):
     *size += 1;
-    return aprintf("Subst[%s:=%s](%s)",Absynpp::qvar2string(vd->name),
-                   term2string(t),a2string(a,0,size));
+    if (Flags::debug_assn)
+      return aprintf("Subst[%s_%x:=%s](%s)",Absynpp::qvar2string(vd->name),
+                     (unsigned int)vd, term2string(t),a2string(a,0,size));
+    else 
+      return aprintf("Subst[%s:=%s](%s)",Absynpp::qvar2string(vd->name),
+                     term2string(t),a2string(a,0,size));
   }
 }
 
@@ -1572,4 +1576,20 @@ bool simple_prove(assn_t ctxt, assn_t a) {
   let sopt = widen_it(ctxt);
   if (sopt == NULL) return true;
   return simple_prv((assn_set_t)sopt, a);
+}
+
+// substitutes the new variables for the old in the assertion.  If the
+// assertion is NULL, returns true.
+assn_t subst_vardecls(list_t<vardecl_opt_t> oldargs, vardecl_opt_t old_res,
+                      list_t<vardecl_opt_t> newargs, vardecl_opt_t new_res,
+                      assn_opt_t aopt) {
+  if (aopt == NULL) return &true_assn;
+  assn_t a = (assn_t)aopt;
+  for (; oldargs != NULL && newargs != NULL; oldargs=oldargs->tl, newargs=newargs->tl) {
+    if (oldargs->hd != NULL && newargs->hd != NULL)
+      a = subst((vardecl_t)oldargs->hd, var((vardecl_t)newargs->hd), a);
+  }
+  if (old_res != NULL && new_res != NULL)
+    a = subst((vardecl_t)old_res, var((vardecl_t)new_res), a);
+  return reduce(a);
 }

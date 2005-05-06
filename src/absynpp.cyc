@@ -53,7 +53,7 @@ doc_t funargs2doc(list_t<$(var_opt_t,tqual_t,type_t)@> args,
 		  type_opt_t effopt,
 		  list_t<$(type_t,type_t)@> rgn_po,
 		  list_t<$(type_t,type_t)@> qb,
-		  exp_opt_t requires, exp_opt_t ensures);
+		  exp_opt_t requires, exp_opt_t ensures, exp_opt_t thrws);
 doc_t datatypefields2doc(list_t<datatypefield_t>);
 doc_t enumfields2doc(list_t<enumfield_t>);
 doc_t vardecl2doc(vardecl_t);
@@ -619,8 +619,8 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
   case &Function_mod(args):
     if (next_is_pointer(tms->tl)) rest = p_rest;
     switch (args) {
-    case &WithTypes(args2,c_varargs,cyc_varargs,effopt,rgn_po,qb,req,ens):
-      return cat(rest,funargs2doc(args2,c_varargs,cyc_varargs,effopt,rgn_po,qb,req,ens));
+    case &WithTypes(args2,c_varargs,cyc_varargs,effopt,rgn_po,qb,req,ens,thrws):
+      return cat(rest,funargs2doc(args2,c_varargs,cyc_varargs,effopt,rgn_po,qb,req,ens,thrws));
     case &NoTypes(sl,loc):
       return cat(rest,group("(",")",",",List::map(textptr,sl)));
     }
@@ -893,7 +893,7 @@ doc_t funargs2doc(list_t<$(var_opt_t,tqual_t,type_t)@> args,bool c_varargs,
                   vararg_info_t *cyc_varargs, type_opt_t effopt,
                   list_t<$(type_t,type_t)@> rgn_po, 
                   list_t<$(type_t,type_t)@> qb, 
-		  exp_opt_t req,exp_opt_t ens) {
+		  exp_opt_t req,exp_opt_t ens,exp_opt_t thrws) {
                   
   let arg_docs = List::map(funarg2doc,args);
   doc_t eff_doc;
@@ -920,6 +920,8 @@ doc_t funargs2doc(list_t<$(var_opt_t,tqual_t,type_t)@> args,bool c_varargs,
     res = cat(res,text(" @requires("),exp2doc(req),text(")"));
   if (ens != NULL)
     res = cat(res,text(" @ensures("),exp2doc(ens),text(")"));
+  if (thrws != NULL)
+    res = cat(res,text(" @throws("),exp2doc(thrws),text(")"));
   return res;
 }
 
@@ -1924,7 +1926,7 @@ $(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r> r,
     return $(tq3, t3, tml3);
 
   case &FnType(FnInfo{typvars,effopt,t2qual,t2,args,c_varargs,cyc_varargs,
-                        rgn_po,qb,fn_atts,req,_,ens,_,_,_}):
+                        rgn_po,qb,fn_atts,req,_,ens,_,thrws,_,_,_}):
     if (! print_all_tvars) {
       // don't print default effects
       // WARNING: this is our criterion to detect default effect,
@@ -1959,13 +1961,13 @@ $(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r> r,
       tms = rnew(r) List(rnew(r)
                          Function_mod(rnew(r) WithTypes(args,c_varargs,
                                                         cyc_varargs,effopt,
-                                                        rgn_po,qb,req,ens)),tms);
+                                                        rgn_po,qb,req,ens,thrws)),tms);
       break;
     default:
       tms = rnew(r) List(rnew(r)
                          Function_mod(rnew(r) WithTypes(args,c_varargs,
                                                         cyc_varargs,effopt,
-							rgn_po,qb,req,ens)),tms);
+							rgn_po,qb,req,ens,thrws)),tms);
       for(; fn_atts != NULL; fn_atts = fn_atts->tl)
 	switch(fn_atts->hd) {
 	case &Stdcall_att:

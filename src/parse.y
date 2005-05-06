@@ -534,7 +534,7 @@ static list_t<type_modifier_t<`yy>,`yy>
 	}
 	return
 	  rnew(yy) List(rnew(yy) Function_mod(rnew(yy) WithTypes(imp_rev(rev_new_params),
-						  false,NULL,NULL,NULL,NULL,NULL,NULL)),
+						  false,NULL,NULL,NULL,NULL,NULL,NULL,NULL)),
 		   NULL);
       }
     } 
@@ -727,7 +727,7 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
                      array_type(t,tq,e,zeroterm,ztloc),atts,tms->tl);
   case &Function_mod(args): {
     switch (args) {
-    case &WithTypes(args2,c_vararg,cyc_vararg,eff,rgn_po,qb,req,ens):
+    case &WithTypes(args2,c_vararg,cyc_vararg,eff,rgn_po,qb,req,ens,thrw):
       list_t<tvar_t> typvars = NULL;
       // function type attributes seen thus far get put in the function type
       attributes_t fn_atts = NULL, new_atts = NULL;
@@ -808,7 +808,7 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
       return apply_tms(empty_tqual(tq.loc),
 		       function_type(typvars,eff,tq,t,args2,
                                      c_vararg,cyc_vararg,rgn_po,qb,fn_atts,
-                                     req,ens),
+                                     req,ens,thrw),
 		       new_atts,
 		       tms->tl);
     case &NoTypes(_,loc):
@@ -1048,6 +1048,19 @@ static $(exp_t, exp_opt_t) split_seq(exp_t maybe_seq) {
     return $(maybe_seq, NULL);
   }
 }
+static exp_opt_t join_assn(exp_opt_t e1, exp_opt_t e2) {
+  if (e1 != NULL && e2 != NULL) return and_exp((exp_t)e1,(exp_t)e2,0);
+  else if (e1 != NULL) return e1;
+  else return e2;
+}
+static $(exp_opt_t,exp_opt_t,exp_opt_t) join_assns($(exp_opt_t,exp_opt_t,exp_opt_t) a1, $(exp_opt_t,exp_opt_t,exp_opt_t) a2) {
+  let $(r1,e1,t1) = a1;
+  let $(r2,e2,t2) = a2;
+  let r = join_assn(r1,r2);
+  let e = join_assn(e1,e2);
+  let t = join_assn(t1,t2);
+  return $(r,e,t);
+}
 } // end namespace Parse
 using Parse;
 %}
@@ -1068,6 +1081,7 @@ using Parse;
 %token AQ_ALIASABLE  AQ_REFCNT AQ_RESTRICTED AQ_UNIQUE AQUAL_T
 %token NUMELTS VALUEOF VALUEOF_T TAGCHECK NUMELTS_QUAL THIN_QUAL
 %token FAT_QUAL NOTNULL_QUAL NULLABLE_QUAL REQUIRES_QUAL ENSURES_QUAL 
+%token THROWS_QUAL
 // Cyc:  CYCLONE qualifiers (e.g., @zeroterm, @tagged, @aqual, aquals)
 %token REGION_QUAL NOZEROTERM_QUAL ZEROTERM_QUAL TAGGED_QUAL ASSERT_QUAL ALIAS_QUAL AQUALS
 %token EXTENSIBLE_QUAL AUTORELEASED_QUAL
@@ -1186,7 +1200,8 @@ using Parse;
 %type <pointer_qual_t<`yy>> pointer_qual
 %type <pointer_quals_t<`yy>> pointer_quals
 %type <exp_opt_t> requires_clause_opt open_opt
-%type <$(exp_opt_t,exp_opt_t)> requires_and_ensures_opt
+%type <$(exp_opt_t,exp_opt_t,exp_opt_t)> requires_and_ensures_and_throws_opt
+%type <$(exp_opt_t,exp_opt_t,exp_opt_t)> requires_and_ensures_and_throws
 %type <raw_exp_t> asm_expr
 %type <$(list_t<$(string_t<`H>, exp_t)@`H, `H>, list_t<$(string_t<`H>, exp_t)@`H, `H>, list_t<string_t<`H>@`H, `H>)@`H> asm_out_opt
 %type <$(list_t<$(string_t<`H>, exp_t)@`H, `H>, list_t<string_t<`H>@`H, `H>)@`H> asm_in_opt
@@ -1827,11 +1842,10 @@ direct_declarator:
 | direct_declarator '[' assignment_expression ']' zeroterm_qual_opt
 { $$=^$(Declarator($1.id, $1.varloc,
                        rnew(yyr) List(rnew(yyr) ConstArray_mod($3,$5,SLOC(@5)),$1.tms)));}
-| direct_declarator '(' parameter_type_list ')' requires_and_ensures_opt
+| direct_declarator '(' parameter_type_list ')' requires_and_ensures_and_throws_opt
     { let &$(lis,b,c,eff,po,qb) = $3;
-      let req = $5[0];
-      let ens = $5[1];
-      $$=^$(Declarator($1.id, $1.varloc,rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(lis,b,c,eff,po,qb,req,ens)),$1.tms)));
+      let $(req,ens,thrws) = $5;
+      $$=^$(Declarator($1.id, $1.varloc,rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(lis,b,c,eff,po,qb,req,ens,thrws)),$1.tms)));
     }
 | direct_declarator '(' identifier_list ')'
     { $$=^$(Declarator($1.id, $1.varloc, rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) NoTypes($3,LOC(@1,@4))),$1.tms))); }
@@ -1867,12 +1881,11 @@ direct_declarator_withtypedef:
     $$=^$(Declarator(one.id, one.varloc,
                        rnew(yyr) List(rnew(yyr) ConstArray_mod($3,$5,SLOC(@5)),
                                 one.tms)));}
-| direct_declarator_withtypedef '(' parameter_type_list ')' requires_and_ensures_opt 
+| direct_declarator_withtypedef '(' parameter_type_list ')' requires_and_ensures_and_throws_opt 
     { let &$(lis,b,c,eff,po,qb) = $3;
-      let req = $5[0];
-      let ens = $5[1];
+      let $(req,ens,thrws) = $5;
       let one=$1;
-      $$=^$(Declarator(one.id, one.varloc, rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(lis,b,c,eff,po,qb,req,ens)),one.tms)));
+      $$=^$(Declarator(one.id, one.varloc, rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(lis,b,c,eff,po,qb,req,ens,thrws)),one.tms)));
     }
 | direct_declarator_withtypedef '(' identifier_list ')'
     { let one=$1;
@@ -2315,14 +2328,16 @@ direct_abstract_declarator:
     { $$=^$(Abstractdeclarator(rnew(yyr) List(rnew(yyr) ConstArray_mod($3,$5,SLOC(@5)),
                                             $1.tms)));
     }
-| '(' parameter_type_list ')' requires_and_ensures_opt
+| '(' parameter_type_list ')' requires_and_ensures_and_throws_opt
     { let &$(lis,b,c,eff,po,qb) = $2;
-      $$=^$(Abstractdeclarator(rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(lis,b,c,eff,po,qb,$4[0],$4[1])),NULL)));
+      let $(req,ens,thrws) = $4;
+      $$=^$(Abstractdeclarator(rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(lis,b,c,eff,po,qb,req,ens,thrws)),NULL)));
     }
-| direct_abstract_declarator '(' parameter_type_list ')' requires_and_ensures_opt
+| direct_abstract_declarator '(' parameter_type_list ')' requires_and_ensures_and_throws_opt
     { let &$(lis,b,c,eff,po,qb) = $3;
+      let $(req,ens,thrws) = $5;
       $$=^$(Abstractdeclarator(rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(lis,
-                                                                           b,c,eff,po,qb,$5[0],$5[1])),$1.tms)));
+                                                                           b,c,eff,po,qb,req,ens,thrws)),$1.tms)));
     }
 /* Cyc: new */
 | direct_abstract_declarator '<' type_name_list right_angle
@@ -2335,12 +2350,25 @@ direct_abstract_declarator:
     }
 ;
 
-requires_and_ensures_opt:
-  /* empty */                               { $$=  ^$($(NULL,NULL)); }
-| REQUIRES_QUAL '(' constant_expression ')' { $$ = ^$($($3,NULL));   }
-| ENSURES_QUAL  '(' constant_expression ')' { $$ = ^$($(NULL,$3));   }
-| REQUIRES_QUAL '(' constant_expression ')' 
-  ENSURES_QUAL  '(' constant_expression ')' { $$ = ^$($($3,$7)); }
+requires_and_ensures_and_throws:
+  REQUIRES_QUAL '(' constant_expression ')' 
+{ $$ = ^$($($3,NULL,NULL)); }
+| ENSURES_QUAL '(' constant_expression ')' 
+{ $$ = ^$($(NULL,$3,NULL)); }
+| THROWS_QUAL '(' constant_expression ')' 
+{ $$ = ^$($(NULL,NULL,$3)); }
+| REQUIRES_QUAL '(' constant_expression ')' requires_and_ensures_and_throws
+{ $$ = ^$(join_assns($($3,NULL,NULL),$5)); }
+| ENSURES_QUAL '(' constant_expression ')' requires_and_ensures_and_throws
+{ $$ = ^$(join_assns($(NULL,$3,NULL),$5)); }
+| THROWS_QUAL '(' constant_expression ')' requires_and_ensures_and_throws
+{ $$ = ^$(join_assns($(NULL,NULL,$3),$5)); }
+;
+
+requires_and_ensures_and_throws_opt:
+  /* empty */                               { $$=  ^$($(NULL,NULL,NULL)); }
+| requires_and_ensures_and_throws           { $$=$!1; }
+;
 
 /***************************** STATEMENTS *****************************/
 statement:

@@ -26,6 +26,8 @@
 #include "kinds.h"
 #include "attributes.h"
 #include "unify.h"
+#include "assndef.h"
+#include "pratt_prover.h"
 using Core;
 using List;
 using Absyn;
@@ -101,11 +103,21 @@ void explain_failure() {
 
 // e1 and e2 represent requires/ensures clauses and we're to check
 // logical equivalence.
-static bool check_logical_equivalence(Relations::relns_t<`H> r1, 
-				      Relations::relns_t<`H> r2) {
-  if (r1 == r2) return true;
-  return Relations::check_logical_implication(r1,r2) && 
-         Relations::check_logical_implication(r2,r1);
+static bool check_logical_equivalence(list_t<vardecl_opt_t> args1,
+                                      vardecl_opt_t ret1,
+                                      AssnDef::assn_opt_t a1opt,
+                                      list_t<vardecl_opt_t> args2,
+                                      vardecl_opt_t ret2,
+                                      AssnDef::assn_opt_t a2opt) {
+  if (a1opt == a2opt) return true;
+  AssnDef::assn_t a1 = (a1opt != NULL) ? (AssnDef::assn_t)a1opt : &AssnDef::true_assn;
+  AssnDef::assn_t a2 = (a2opt != NULL) ? (AssnDef::assn_t)a2opt : &AssnDef::true_assn;
+  a2 = AssnDef::subst_vardecls(args2,ret2,args1,ret1,a2);
+  return ((AssnDef::simple_prove(a1,a2) || 
+           PrattProver::constraint_prove(a1,a2))
+          &&
+          (AssnDef::simple_prove(a2,a1) || 
+           PrattProver::constraint_prove(a2,a1)));
 }
 
 bool unify_kindbound(kindbound_t kb1, kindbound_t kb2) {
@@ -461,8 +473,8 @@ static void unify_it(type_t t1, type_t t2) {
       fail_because("different array sizes");
     return;
 
-  case $(&FnType(FnInfo{tvs2,eff2,rt_tq2,rt2,args2,c_vararg2,cyc_vararg2,rpo2,qb2,atts2,req2,req_relns2,ens2,ens_relns2,argvds2,return_value2}),
-         &FnType(FnInfo{tvs1,eff1,rt_tq1,rt1,args1,c_vararg1,cyc_vararg1,rpo1,qb1,atts1,req1,req_relns1,ens1,ens_relns1,argvds1,return_value1})):
+  case $(&FnType(FnInfo{tvs2,eff2,rt_tq2,rt2,args2,c_vararg2,cyc_vararg2,rpo2,qb2,atts2,req2,req_relns2,ens2,ens_relns2,thrws2,thrws_relns2,return_value2,argvds2}),
+         &FnType(FnInfo{tvs1,eff1,rt_tq1,rt1,args1,c_vararg1,cyc_vararg1,rpo1,qb1,atts1,req1,req_relns1,ens1,ens_relns1,thrws1,thrws_relns1,return_value1,argvds1})):
     { region rgn; 
     list_t<$(tvar_t,type_t)@`rgn,`rgn> inst = NULL;
     while (tvs1 != NULL) {
@@ -484,14 +496,15 @@ static void unify_it(type_t t1, type_t t2) {
     if (tvs2 != NULL)
       fail_because("second function type has too many type variables");
     if (inst != NULL) {
-      unify_it(new FnType(FnInfo{NULL,eff1,rt_tq1,rt1,args1,c_vararg1,
+      let newftype1 = new FnType(FnInfo{NULL,eff1,rt_tq1,rt1,args1,c_vararg1,
 				   cyc_vararg1,rpo1,qb1,atts1,req1,req_relns1,ens1,
-                                   ens_relns1,argvds1,return_value1}),
-	       Tcutil::rsubstitute(rgn, inst,
-				   new FnType(FnInfo{NULL,eff2,rt_tq2,rt2,args2,
-						       c_vararg2,cyc_vararg2,rpo2,qb2,
-						       atts2,req2,req_relns2,
-						       ens2,ens_relns2,argvds2,return_value2})));
+                                        ens_relns1,thrws1,thrws_relns1,return_value1,argvds1});
+      let newftype2 = Tcutil::rsubstitute(rgn, inst,
+                                          new FnType(FnInfo{NULL,eff2,rt_tq2,rt2,args2,
+                                                            c_vararg2,cyc_vararg2,rpo2,qb2,
+                                                            atts2,req2,req_relns2,
+                                                            ens2,ens_relns2,thrws2,thrws_relns2,return_value2,argvds2}));
+      unify_it(newftype1,newftype2);
       return;
     }
     }
@@ -536,13 +549,16 @@ static void unify_it(type_t t1, type_t t2) {
       fail_because("function types have different attributes");
     if (!Tcutil::same_rgn_po(rpo2,rpo1))
       fail_because("function types have different region lifetime orderings");
-    // FIX: need to use pratt prover or something like it here -- also,
-    // we'll need to substitute for the return_value and argvds to get
-    // this right...
-    if (!check_logical_equivalence(req_relns1,req_relns2))
+
+    if (!check_logical_equivalence(argvds1,return_value1,req_relns1,
+                                   argvds2,return_value2,req_relns2))
       fail_because("@requires clauses not equivalent");
-    if (!check_logical_equivalence(ens_relns1,ens_relns2))
+    if (!check_logical_equivalence(argvds1,return_value1,ens_relns1,
+                                   argvds2,return_value2,ens_relns2))
       fail_because("@ensures clauses not equivalent");
+    if (!check_logical_equivalence(argvds1,return_value1,thrws_relns1,
+                                   argvds2,return_value2,thrws_relns2))
+      fail_because("@throws clauses not equivalent");
     return;
 
   case $(&AnonAggrType(k2,tup2,fs2), &AnonAggrType(k1,tup1,fs1)):

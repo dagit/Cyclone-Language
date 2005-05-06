@@ -245,6 +245,7 @@ static int do_possible_qualifier(Lexbuf lexbuf) {
   case 't':
     if(len == 6 && strncmp(b,"tagged",6)==0) return TAGGED_QUAL;
     if(len == 4 && strncmp(b,"thin",4)==0)   return THIN_QUAL;
+    if(len == 6 && strncmp(b,"throws",6)==0) return THROWS_QUAL;
     break;
   case 'n':
     if(len == 7 && strncmp(b,"notnull",7)==0) return NOTNULL_QUAL;

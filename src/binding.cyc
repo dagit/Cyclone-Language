@@ -61,7 +61,7 @@ nsctxt_t<`a> mt_nsctxt(`b env, `a mkdata(`b)) {
 		    .availables = new List(new Namespace(NULL),NULL),
 		    .ns_data    = Dict::singleton(varlist_cmp,NULL,data)};
 }
-`a get_ns_data(nsctxt_t<`a> ctxt, Absyn::nmspace_t abs_ns) {
+static `a get_ns_data(nsctxt_t<`a> ctxt, Absyn::nmspace_t abs_ns) {
   switch (abs_ns) {
   case {.C_n  =vs}: fallthru(vs);
   case {.Abs_n=vs}: return Dict::lookup(ctxt->ns_data, vs);
@@ -99,7 +99,7 @@ namespace_name_t resolve_rel_ns(seg_t loc, nsctxt_t<`a> ctxt,
 }
 // no need to absolutize because we replace bound occurrence with reference
 // to (absolutized) declaration
-`b resolve_lookup(seg_t loc, nsctxt_t<`a> ctxt, qvar_t qv, `b lookup(`a,var_t)){
+static `b resolve_lookup(seg_t loc, nsctxt_t<`a> ctxt, qvar_t qv, `b lookup(`a,var_t)){
   let &$(ns,v) = qv;
   switch (ns) {
   case {.Rel_n = NULL}:
@@ -255,24 +255,24 @@ static resolved_t lookup_ordinary(seg_t loc, env_t env, qvar_t qv) {
   }
 }
 
-void resolve_decl(env_t,  decl_t);
-void resolve_decls(env_t, list_t<decl_t>);
-void resolve_stmt(env_t,  stmt_t);
-void resolve_pat(env_t,   pat_t);
-void resolve_exp(env_t,   exp_t);
-void resolve_type(seg_t, env_t,  type_t);
-void resolve_rgnpo(seg_t, env_t, list_t<$(type_t,type_t)@>);
-void resolve_qualbnd(seg_t, env_t, list_t<$(type_t,type_t)@>);
-void resolve_scs(env_t,   list_t<switch_clause_t>);
-void resolve_aggrfields(seg_t, env_t, list_t<aggrfield_t>);
+static void resolve_decl(env_t,  decl_t);
+static void resolve_decls(env_t, list_t<decl_t>);
+static void resolve_stmt(env_t,  stmt_t);
+static void resolve_pat(env_t,   pat_t);
+static void resolve_exp(env_t,   exp_t);
+static void resolve_type(seg_t, env_t,  type_t);
+static void resolve_rgnpo(seg_t, env_t, list_t<$(type_t,type_t)@>);
+static void resolve_qualbnd(seg_t, env_t, list_t<$(type_t,type_t)@>);
+static void resolve_scs(env_t,   list_t<switch_clause_t>);
+static void resolve_aggrfields(seg_t, env_t, list_t<aggrfield_t>);
 static void resolve_function_stuff(seg_t, env_t, fn_info_t @);
-void resolve_asm_iolist(env_t, list_t<$(string_t, exp_t)@>);
-list_t<vardecl_t> get_fun_vardecls(bool, seg_t, env_t, 
-				   list_t<$(var_opt_t,tqual_t,type_t)@>, 
-				   vararg_info_t*);
+static void resolve_asm_iolist(env_t, list_t<$(string_t, exp_t)@>);
+static list_t<vardecl_opt_t> get_fun_vardecls(bool, seg_t, env_t, 
+                                              list_t<$(var_opt_t,tqual_t,type_t)@>, 
+                                              vararg_info_t*);
 //void resolve_enumfields(seg_t, env_t, list_t<enumfield_t>); // FIX: DO ME
 
-void absolutize_decl(seg_t loc, env_t env, qvar_t qv, scope_t sc) {
+static void absolutize_decl(seg_t loc, env_t env, qvar_t qv, scope_t sc) {
   switch((*qv)[0]) {
   case {.Rel_n = NULL}: 
     if(at_toplevel(env))
@@ -291,14 +291,14 @@ void absolutize_decl(seg_t loc, env_t env, qvar_t qv, scope_t sc) {
 // This is a kludge because we find unbound type names (e.g., a struct name)
 // inside a function, but we need to give them absolute names, not
 // local names.  It's really C's kludge for allowing unbound types.
-void absolutize_topdecl(seg_t loc, env_t env, qvar_t qv, scope_t sc) {
+static void absolutize_topdecl(seg_t loc, env_t env, qvar_t qv, scope_t sc) {
   let old_locals = env->local_vars;
   env->local_vars = NULL;
   absolutize_decl(loc,env,qv,sc);
   env->local_vars = old_locals;
 }
 
-void check_warn_override(seg_t loc, env_t env, qvar_t q) {
+static void check_warn_override(seg_t loc, env_t env, qvar_t q) {
   string_t hides_what;
   try { 
     switch (lookup_ordinary(loc,env,q)) {
@@ -324,7 +324,7 @@ void check_warn_override(seg_t loc, env_t env, qvar_t q) {
   } catch { case &BindingError: return; }
 }
 
-void resolve_and_add_vardecl(seg_t loc, env_t env, vardecl_t vd) {
+static void resolve_and_add_vardecl(seg_t loc, env_t env, vardecl_t vd) {
   absolutize_decl(loc,env,vd->name,vd->sc);
   let &$(decl_ns,decl_name) = vd->name;
   resolve_type(loc,env,vd->type);
@@ -437,7 +437,7 @@ static bool resolve_visit_f1(env_t env, exp_t e) {
   default: return true;
   }
 }
-bool resolve_visit_f2(env_t env, stmt_t s) {
+static bool resolve_visit_f2(env_t env, stmt_t s) {
   switch(s->r) {
   case &Decl_s(d,s1):
     let old_locals = *env->local_vars;
@@ -456,14 +456,14 @@ bool resolve_visit_f2(env_t env, stmt_t s) {
   default: return true;
   }
 }
-void resolve_stmt(env_t env, stmt_t s) { 
+static void resolve_stmt(env_t env, stmt_t s) { 
   visit_stmt(resolve_visit_f1,resolve_visit_f2,env,s);
 }
-void resolve_exp(env_t env, exp_t e) { 
+static void resolve_exp(env_t env, exp_t e) { 
   visit_exp(resolve_visit_f1,resolve_visit_f2,env,e); 
 }
 
-void resolve_scs(env_t env, list_t<switch_clause_t> scs) {
+static void resolve_scs(env_t env, list_t<switch_clause_t> scs) {
   let old_locals = *env->local_vars;
   for(; scs != NULL; scs = scs->tl) {
     let &Switch_clause(pattern,_,where_clause,body,_) = scs->hd;
@@ -475,7 +475,7 @@ void resolve_scs(env_t env, list_t<switch_clause_t> scs) {
   }
   return;
 }
-void resolve_aggrfields(seg_t loc, env_t env, list_t<aggrfield_t> fs) {
+static void resolve_aggrfields(seg_t loc, env_t env, list_t<aggrfield_t> fs) {
   for(; fs != NULL; fs = fs->tl) {
     let &Aggrfield(fn,tq,t,width,atts,requires_clause) = fs->hd;
     resolve_type(loc,env,t);
@@ -487,17 +487,19 @@ void resolve_aggrfields(seg_t loc, env_t env, list_t<aggrfield_t> fs) {
   return;
 }
 
-list_t<vardecl_t> get_fun_vardecls(bool need_va_name,
-				   seg_t loc, env_t env, 
-				   list_t<$(var_opt_t,tqual_t,type_t)@> args,
-				   vararg_info_t* vai) {
+static list_t<vardecl_opt_t> get_fun_vardecls(bool need_va_name,
+                                              seg_t loc, env_t env, 
+                                              list_t<$(var_opt_t,tqual_t,type_t)@> args,
+                                              vararg_info_t* vai) {
   // Note: we resolve the types in resolve_function_stuff after we have
   // all the vardecls so that types can refer to parameters.
-  let vds = NULL;
+  list_t<vardecl_opt_t> vds = NULL;
   for(; args != NULL; args = args->tl) {
     let &$(a,tq,t) = args->hd;
-    if(a==NULL)
+    if(a==NULL) {
+      vds = new List{NULL,vds};
       continue;
+    }
     let vd = new_vardecl(0,new $((nmspace_t)Loc_n,a), t, NULL);
     vd->tq = tq;
     vds = new List(vd,vds);
@@ -530,7 +532,7 @@ static void resolve_function_stuff(seg_t loc, env_t env, fn_info_t @i) {
   resolve_qualbnd(loc, env, i->qual_bnd);
   if(i->requires_clause != NULL)
     resolve_exp(env,(exp_t)i->requires_clause);
-  if(i->ensures_clause != NULL) {
+  if(i->ensures_clause != NULL || i->throws_clause != NULL) {
     // return_value is a dummy var in scope only here
     let locs = *env->local_vars;
     let v    = new "return_value";
@@ -538,7 +540,12 @@ static void resolve_function_stuff(seg_t loc, env_t env, fn_info_t @i) {
     i->return_value = vd;
     *env->local_vars = Dict::insert(*env->local_vars, v,
 				    new VarRes(new Local_b(vd)));
-    resolve_exp(env,(exp_t)i->ensures_clause);
+    if (i->ensures_clause != NULL) {
+      resolve_exp(env,(exp_t)i->ensures_clause);
+    }
+    if (i->throws_clause != NULL) {
+      resolve_exp(env,(exp_t)i->throws_clause);
+    }
     *env->local_vars = locs;
   }
 }
@@ -548,7 +555,7 @@ static void resolve_function_stuff(seg_t loc, env_t env, fn_info_t @i) {
 //      uses an indirection kludge that won't work as a prepass and requires
 //      thought.  So for now we just absolutize the names.
 // DO ME: see above
-void resolve_type(seg_t loc, env_t env, type_t t) { 
+static void resolve_type(seg_t loc, env_t env, type_t t) { 
   switch(t) {
   case &AppType(&DatatypeCon(*info),targs):
     for(; targs != NULL; targs = targs->tl)
@@ -692,10 +699,11 @@ void resolve_type(seg_t loc, env_t env, type_t t) {
       env->local_vars = new *env->local_vars; // can refer to callers' vars
     else
       env->local_vars = new Dict::empty(strptrcmp);
-    for(let vds1 = vds; vds1 != NULL; vds1 = vds1->tl)
-      *env->local_vars = Dict::insert(*env->local_vars,(*vds1->hd->name)[1],
-				      new VarRes(new Param_b(vds1->hd)));
-
+    for(let vds1 = vds; vds1 != NULL; vds1 = vds1->tl) {
+      if (vds1->hd != NULL)
+        *env->local_vars = Dict::insert(*env->local_vars,vds1->hd->name->f1,
+                                        new VarRes(new Param_b((vardecl_t)vds1->hd)));
+    }
     resolve_function_stuff(loc, env, i);
     env->local_vars = old_locals;
     return;
@@ -705,7 +713,7 @@ void resolve_type(seg_t loc, env_t env, type_t t) {
   }
 }
 
-void resolve_pat(env_t env, pat_t p) { // must not be at top-level
+static void resolve_pat(env_t env, pat_t p) { // must not be at top-level
   let &Pat(r,_,loc) = p;
   switch(r) {
   case &UnknownId_p(qv): 
@@ -797,14 +805,14 @@ void resolve_pat(env_t env, pat_t p) { // must not be at top-level
   }
 }
 
-void resolve_rgnpo(seg_t loc, env_t env, list_t<$(type_t,type_t)@> po) {
+static void resolve_rgnpo(seg_t loc, env_t env, list_t<$(type_t,type_t)@> po) {
   for(; po != NULL; po = po->tl) {
     resolve_type(loc,env,(*po->hd)[0]);
     resolve_type(loc,env,(*po->hd)[1]);
   }
 }
 
-void resolve_qualbnd(seg_t loc, env_t env, list_t<$(type_t,type_t)@> qb) {
+static void resolve_qualbnd(seg_t loc, env_t env, list_t<$(type_t,type_t)@> qb) {
   for(; qb != NULL; qb = qb->tl) {
     resolve_type(loc,env,(*qb->hd)[0]);
     resolve_type(loc,env,(*qb->hd)[1]);
@@ -813,7 +821,7 @@ void resolve_qualbnd(seg_t loc, env_t env, list_t<$(type_t,type_t)@> qb) {
 
 //used for Dict::iter_c(f('c var_t resolved_t), 'c env, dict<var_t resolved_t 'r>)
 //adds each symbol to the export list 
-void export_all_symbols($(list_t<$(seg_t, qvar_t, bool)@>@, dict_t<var_t, resolved_t>@, env_t, $(seg_t, list_t<qvar_t>)@)@ cenv,
+static void export_all_symbols($(list_t<$(seg_t, qvar_t, bool)@>@, dict_t<var_t, resolved_t>@, env_t, $(seg_t, list_t<qvar_t>)@)@ cenv,
 			var_t name, resolved_t res) {
   let &$(exlist_ptr, out_dict, env, &$(wcloc, hidelist)) = cenv;
   switch(res) {
@@ -851,7 +859,7 @@ void export_all_symbols($(list_t<$(seg_t, qvar_t, bool)@>@, dict_t<var_t, resolv
 // then later passes can just throw an exception on them
 
 // FIX: need to predefine exception as in TCenv::tc_init
-void resolve_decl(env_t env, decl_t d) {
+static void resolve_decl(env_t env, decl_t d) {
   // because qualified declarations are unimplemented, every declaration
   // will go in the current namespace, but this function does not assume that
   seg_t loc = d->loc;
@@ -873,9 +881,13 @@ void resolve_decl(env_t env, decl_t d) {
     absolutize_decl(loc,env,fd->name,fd->sc);
     let &$(decl_ns,decl_name) = fd->name;
     let argit = fd->i.args;
-    let vds = get_fun_vardecls(true, loc, env, fd->i.args, fd->i.cyc_varargs);
+    let vdsopts = get_fun_vardecls(true, loc, env, fd->i.args, fd->i.cyc_varargs);
+    list_t<vardecl_t> vds = NULL;
+    for (let v = vdsopts; v != NULL; v = v->tl)
+      if (v->hd != NULL) vds = new List{(vardecl_t)v->hd,vds};
+    vds = List::imp_rev(vds);
     fd->param_vardecls = new Core::Opt(vds);
-    fd->i.arg_vardecls = vds;
+    fd->i.arg_vardecls = vdsopts;
     if(Flags::warn_override) // need to do before changing env->local_vars
       check_warn_override(loc,env,fd->name);
 
@@ -884,10 +896,11 @@ void resolve_decl(env_t env, decl_t d) {
       env->local_vars = new *env->local_vars; // can refer to callers' vars
     else
       env->local_vars = new Dict::empty(strptrcmp);
-    for(let vds1 = vds; vds1 != NULL; vds1 = vds1->tl)
-      *env->local_vars = Dict::insert(*env->local_vars,(*vds1->hd->name)[1],
-				      new VarRes(new Param_b(vds1->hd)));
-
+    for(let vds1 = vds; vds1 != NULL; vds1 = vds1->tl) {
+      if (vds1->hd != NULL)
+        *env->local_vars = Dict::insert(*env->local_vars,vds1->hd->name->f1,
+                                        new VarRes(new Param_b((vardecl_t)vds1->hd)));
+    }
     resolve_function_stuff(loc, env, &fd->i);
 
     if(old_locals != NULL) { 
@@ -1130,7 +1143,7 @@ void resolve_decl(env_t env, decl_t d) {
   }
 }
 
-void resolve_decls(env_t env, list_t<decl_t> tds) {
+static void resolve_decls(env_t env, list_t<decl_t> tds) {
   for(; tds != NULL; tds = tds->tl)
     resolve_decl(env,tds->hd);
 }

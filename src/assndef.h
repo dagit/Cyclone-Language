@@ -127,7 +127,7 @@ namespace AssnDef{
   extern type_opt_t get_term_type(term_t t);
   ///////////////////// Assertions /////////////////////
   typedef datatype Assn @assn_t;
-  typedef datatype Assn *assn_opt_t;
+  // typedef datatype Assn *assn_opt_t; -- defined in absyn.h
   typedef enum Primreln { Eq, Neq, SLt, SLte, ULt, ULte } prim_reln_t;
 
   datatype Assn {
@@ -153,25 +153,13 @@ namespace AssnDef{
   //////////////////////////////////////////////////////////////
   // hash-consing to try to preserve as much sharing as we
   // can -- has a nice impact on performance (much better than
-  // lazy substitution), but alas, we still end up allocating a lot.  
-  // It would be better if we didn't have to allocate the thing 
-  // that want to lookup.  That could happen if we had a different 
-  // type for hashtable lookup (as we did with dictionaries.)
-
+  // lazy substitution).
   extern void reset_hash_cons_table(void);
-
-  //  int assnhash(datatype Assn @a);
-
-  // compare two assertions for structural equality -- does not assume
-  // the components have been hash-consed, but probably could.
-  //  int assncmp(datatype Assn @a1, datatype Assn @a2);
 
   extern assn_t and(assn_t a1, assn_t a2);
   extern assn_t or(assn_t a1, assn_t a2);
   extern assn_t not(assn_t a);
   extern assn_t subst(vardecl_t x, term_t newx, assn_t a);
-
-
   extern assn_t prim(term_t t1, prim_reln_t p, term_t t2);
   extern assn_t eq(term_opt_t, term_opt_t);
   extern assn_t neq(term_opt_t, term_opt_t);
@@ -180,9 +168,10 @@ namespace AssnDef{
   extern assn_t ult(term_opt_t, term_opt_t);
   extern assn_t ulte(term_opt_t, term_opt_t);
 
-  // eliminates not, subst, and kill
+  // eliminates not, subst
   extern assn_t reduce(assn_t a);
   extern term_t subst_term(term_t t, vardecl_t x, term_t newx);
+
   // factors out the common conjuncts in a as if we computed the DNF,
   // but is much more efficient.  
   typedef Set::set_t<assn_t> assn_set_t;
@@ -190,7 +179,16 @@ namespace AssnDef{
 
   extern assn_set_opt_t widen_it(assn_t a);
   extern assn_t widen(assn_t a);
+
   // sees if ctxt |- a using only very simple, syntactic proof rules.
   extern bool simple_prove(assn_t ctxt, assn_t a);
+
+  // substitutes the new variables for the old in the assertion.  If
+  // the assertion is NULL, returns true.
+  extern assn_t subst_vardecls(list_t<vardecl_opt_t> oldargs, 
+                               vardecl_opt_t old_res,
+                               list_t<vardecl_opt_t> newvars, 
+                               vardecl_opt_t new_res,
+                               assn_opt_t);
 }
 #endif

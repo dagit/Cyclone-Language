@@ -531,7 +531,7 @@ static void dumpfunargs(list_t<$(var_opt_t,tqual_t,type_t)@> args,
 			bool c_varargs, vararg_info_t *cyc_varargs, 
 			type_opt_t effopt, list_t<$(type_t,type_t)@> rgn_po,
 			list_t<$(type_t,type_t)@> qual_bnd,
-			exp_opt_t req, exp_opt_t ens) {
+			exp_opt_t req, exp_opt_t ens, exp_opt_t thrws) {
   if(args == NULL && !c_varargs && cyc_varargs == NULL && 
      effopt == NULL && rgn_po == NULL) {
     dump("(void)"); //when compiling for the linux kernel, expect -Wstrict-prototypes
@@ -561,6 +561,9 @@ static void dumpfunargs(list_t<$(var_opt_t,tqual_t,type_t)@> args,
   }
   if (ens != NULL) {
     dump(" @ensures(");  dumpexp(ens); dump_char(')');
+  }
+  if (thrws != NULL) {
+    dump(" @throws(");  dumpexp(thrws); dump_char(')');
   }
 }
 
@@ -1411,8 +1414,8 @@ static void dumptms(bool is_char_ptr, list_t<type_modifier_t> tms,
       dump_char('['); dumpexp(e); dump_char(']'); 
       if (type2bool(false,zeroterm)) dump("@zeroterm");
       break;
-    case &Function_mod(&WithTypes(args,c_varargs,cyc_varargs,effopt,rgn_po,qb,req,ens)):
-      dumpfunargs(args,c_varargs,cyc_varargs,effopt,rgn_po,qb,req,ens); break;
+    case &Function_mod(&WithTypes(args,c_varargs,cyc_varargs,effopt,rgn_po,qb,req,ens,thrws)):
+      dumpfunargs(args,c_varargs,cyc_varargs,effopt,rgn_po,qb,req,ens,thrws); break;
     case &Function_mod(&NoTypes(sl,_)):
       group(dump_str,sl,"(",")",","); break;
     case &TypeParams_mod(ts,_,print_kinds): 

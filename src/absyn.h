@@ -47,6 +47,10 @@ namespace Relations {
   typedef struct Reln@`r reln_t<`r>;
   typedef List::list_t<reln_t<`r>,`r> relns_t<`r>;
 }
+namespace AssnDef { // see assndef.h
+  extern datatype Assn;
+  typedef datatype Assn *assn_opt_t;
+}
 namespace Tcpat {
   extern datatype Decision;  // see tcpat.h
   typedef datatype Decision *decision_opt_t;
@@ -254,7 +258,10 @@ namespace Absyn {
     type_opt_t      effect;  // null => default effect
     tqual_t         ret_tqual;   // return type qualifier
     type_t          ret_type; // return type
-    // arguments are optionally named
+    // arguments are optionally named -- note that after checking well-
+    // formedness of the type, these names are no longer used.  Rather,
+    // the arg_vardecls are used e.g., in the requires, ensures, and
+    // throws assertions.
     list_t<$(var_opt_t,tqual_t,type_t)@>  args; 
     // if c_varargs is true, then cyc_varargs == null, and if 
     // cyc_varargs is non-null, then c_varargs is false.
@@ -268,18 +275,22 @@ namespace Absyn {
     // and at most one of cdecl, stdcall, and fastcall.  See gcc info
     // for documentation on attributes.
     attributes_t                             attributes; 
-    // pre-condition to call function
+    // pre-condition to call function as expression
     exp_opt_t                                requires_clause;
-    Relations::relns_t                       requires_relns;
+    // pre-condition after checking well-formedness
+    AssnDef::assn_opt_t                      requires_assn;
     // post-condition on return from function
     exp_opt_t                                ensures_clause;
-    Relations::relns_t                       ensures_relns;
+    AssnDef::assn_opt_t                      ensures_assn;
+    // post-condition on an escaping throw from function
+    exp_opt_t                                throws_clause;
+    AssnDef::assn_opt_t                      throws_assn;
     // the variable used in the @ensures clause for the return value
     vardecl_opt_t                            return_value;
     // the variable declarations used in the @requires and @ensures clauses --
     // we only have vardecls corresponding to those arguments that are actually
     // named.
-    list_t<vardecl_t>                        arg_vardecls;
+    list_t<vardecl_opt_t>                    arg_vardecls;
   };
 
   // information for datatypes
@@ -450,7 +461,8 @@ namespace Absyn {
               list_t<$(type_t,type_t)@>,               // region partial order
               list_t<$(type_t,type_t)@>,               // qualifier bounds
               exp_opt_t,                               // requires clause
-              exp_opt_t);                              // ensures clause
+              exp_opt_t,                               // ensures clause
+              exp_opt_t);                              // throws clause
   };
 
   // Type modifiers are used for parsing/pretty-printing
@@ -1130,7 +1142,8 @@ namespace Absyn {
 		       list_t<$(type_t,type_t)@`H,`H> rgn_po,
 		       list_t<$(type_t,type_t)@`H,`H> qb,
 		       attributes_t, 
-		       exp_opt_t requires_clause, exp_opt_t ensures_clause);
+		       exp_opt_t requires_clause, exp_opt_t ensures_clause,
+                       exp_opt_t throws_clause);
   // turn t f(t1,...,tn) into t (@f)(t1,...,tn) -- when fresh_evar is
   // true, generates a fresh evar for the region of f else uses `H
   type_t pointer_expand(type_t, bool fresh_evar);

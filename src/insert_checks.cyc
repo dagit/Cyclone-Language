@@ -571,7 +571,7 @@ static void do_decl(env_t nv, decl_t d) {
       struct timeval start, end;
       gettimeofday(&start,NULL);
 #endif
-      Vcgen::vcgen_fundecl(nv.tables, fd, nv.assn_info);
+      Vcgen::vcgen_fundecl(d->loc, nv.tables, fd, nv.assn_info);
 #ifdef PERFORMANCE_DEBUG
       gettimeofday(&end,NULL);
       end.tv_sec -= start.tv_sec;

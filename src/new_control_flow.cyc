@@ -1182,14 +1182,12 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
     list_t<int> init_params = NULL;
     list_t<int> nolive_unique_params = NULL;
     list_t<int> consume_params = NULL;
-    relns_t requires;
-    relns_t ensures;
+    relns_t requires = NULL;
+    relns_t ensures = NULL;
     switch(compress((type_t)e1->topt)) {
     case &PointerType(PtrInfo(t,_,_)):
       switch(compress(t)) {
-      case &FnType(FnInfo{.attributes = atts, .requires_relns = req, .ensures_relns = ens, ...}):
-	requires = req;
-	ensures = ens;
+      case &FnType(FnInfo{.attributes = atts,  ...}):
 	for(; atts != NULL; atts = atts->tl)
 	  // These attributes are assumed to be disjoint
 	  switch(atts->hd) {
@@ -2870,11 +2868,11 @@ static flow_t anal_decl(analenv_t env, flow_t inflow, decl_t decl) {
 
   case &Fn_d(fd):
     check_nested_fun(env->all_tables,fenv,inflow,fd);
-    let vd = (vardecl_t)fd->fn_vardecl;
+    let vd = fd->fn_vardecl;
     // JGM: hmmmm.  nested functions can effect local variables, so if we
     // call one of these, then we should set all of the local variables
     // to unknown-init-level.
-    return add_vars(fenv,inflow,new List(vd,NULL),fenv->unknown_all,decl->loc,false);
+    return add_vars(fenv,inflow,new List((vardecl_t)vd,NULL),fenv->unknown_all,decl->loc,false);
 
   case &Region_d(tv,vd,open_exp_opt):
     if (open_exp_opt != NULL)
@@ -2962,13 +2960,13 @@ static void check_nested_fun(JumpAnalysis::jump_anal_res_t tables,
   let $(d,relns) = inflow.ReachableFL;
   // Enter the requires relations -- have to substitute the vardecls
   // for the parameters in the relns
-  let vardecls = fd->param_vardecls->v;
-  for (let reqs = fd->i.requires_relns; reqs != NULL; reqs = reqs->tl) {
-    let req = reqs->hd;
-    relns = add_relation(Core::heap_region, translate_rop(vardecls,req->rop1),
-                         req->relation, translate_rop(vardecls,req->rop2),
-                         relns);
-  }
+  //let vardecls = fd->param_vardecls->v;
+  //for (let reqs = fd->i.requires_relns; reqs != NULL; reqs = reqs->tl) {
+  //  let req = reqs->hd;
+  //  relns = add_relation(Core::heap_region, translate_rop(vardecls,req->rop1),
+  //                       req->relation, translate_rop(vardecls,req->rop2),
+  //                       relns);
+  //}
   _ aquals_bounds = Tcutil::get_aquals_bounds(fd);
   // NOTE: for reasons Dan doesn't understand, the attributes, are not
   // on the fndecl, only on the type.
@@ -3019,7 +3017,7 @@ static void check_nested_fun(JumpAnalysis::jump_anal_res_t tables,
 		Hashtable::lookup(tables->pat_pop_tables,fd),
 		fenv,true,0,false,inflow,noreturn,fd->i.ret_type,
 		NULL,param_roots,noconsume_roots,
-		flow_table,fd->i.ensures_relns, aquals_bounds);
+		flow_table,/*fd->i.ensures_relns*/NULL, aquals_bounds);
   flow_t    outflow  = inflow;
   while(env->iterate_again && !anal_error) {
     ++(env->iteration_num);

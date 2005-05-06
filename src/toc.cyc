@@ -740,7 +740,7 @@ type_t typ_to_c(type_t t) {
       new_args = List::imp_append(new_args,new List(vararg,NULL));
     }
     return new FnType(FnInfo{NULL,NULL,tq2,typ_to_c(t2),new_args,
-                               c_vararg,NULL,NULL,NULL,new_atts,NULL,NULL,NULL,NULL,NULL,NULL});
+                               c_vararg,NULL,NULL,NULL,new_atts,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL});
   case &AnonAggrType(k,_,fs):
     // similar to tuple translation (introduce sharing to appease C)
     // but we have full aggrfields to deal with
@@ -3671,6 +3671,7 @@ static void fndecl_to_c(env_t nv, fndecl_t f, bool cinclude) {
   f->i.qual_bnd = NULL;
   f->i.requires_clause = NULL;
   f->i.ensures_clause  = NULL;
+  f->i.throws_clause = NULL;
   f->i.ret_type  = typ_to_c(f->i.ret_type);
   f->cached_type = typ_to_c((type_t)f->cached_type);
   region frgn;

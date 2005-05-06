@@ -228,16 +228,40 @@ static assn_t may_widen(env_t env, assn_t a) {
 }
 
 static env_t 
-initial_env(JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd, assn_info_t assn_info, assn_t *`H res_assn, term_opt_t res_term) {
+initial_env(JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd, assn_info_t assn_info, assn_t *`H res_assn, assn_t *`H try_assn, term_opt_t res_term) {
   let succ_table = Hashtable::lookup(tables->succ_tables,fd);
   let assn_table = Hashtable::create(57, Core::ptrcmp, hash_ptr);
   let senv =  new SharedEnv{.assn_table = assn_table,
                             .succ_table = succ_table,
-                            .try_assn = NULL,
+                            .try_assn = try_assn,
                             .exp_stmt = NULL,
                             .res_term = res_term,
                             .res_assn = res_assn,
                             .widen_paths = !Flags::allpaths};
+  let d = Dict::insert(Dict::empty(Core::ptrcmp),memory,0);
+  return new Env { .shared = senv, .state_counter = d, .assn_info = assn_info};
+}
+
+// this environment is used for converting "pure" expressions into assertions
+static env_t
+bogus_env() {
+  static struct SharedEnv *bogus_shared = NULL;
+  assn_info_t assn_info = NULL;
+  struct SharedEnv @senv;
+  if (bogus_shared == NULL) {
+    let succ_table = Hashtable::create(1,Core::ptrcmp,hash_ptr);
+    let assn_table = Hashtable::create(1,Core::ptrcmp,hash_ptr);
+    senv = new SharedEnv{.assn_table = assn_table,
+                         .succ_table = succ_table,
+                         .try_assn = NULL,
+                         .exp_stmt = NULL,
+                         .res_term = NULL,
+                         .res_assn = NULL,
+                         .widen_paths = false};
+    bogus_shared = senv;
+  } else senv = (_@)bogus_shared;
+  if (assn_info == NULL) 
+    assn_info = new Hashtable::create(1, Core::ptrcmp, hash_ptr);
   let d = Dict::insert(Dict::empty(Core::ptrcmp),memory,0);
   return new Env { .shared = senv, .state_counter = d, .assn_info = assn_info};
 }
@@ -1362,11 +1386,12 @@ static $(term_opt_t,assn_t) vcgen_lexp(env_t env, exp_t e, assn_t ain) {
 
 // extract the arguments, requires, and ensures clause for a function from
 // its type.
-static $(list_t<$(var_opt_t,tqual_t,type_t)@> args, list_t<vardecl_t> argvds, exp_opt_t req, exp_opt_t ens, vardecl_opt_t ret_value) get_requires_and_ensures_info(Absyn::fn_info_t @fi) {
-  return $(fi->args,fi->arg_vardecls,fi->requires_clause,fi->ensures_clause,fi->return_value);
+static $(list_t<$(var_opt_t,tqual_t,type_t)@> args, list_t<vardecl_opt_t> argvds, assn_opt_t req, assn_opt_t ens, assn_opt_t thrws, vardecl_opt_t ret_value) get_requires_and_ensures_info(Absyn::fn_info_t @fi) {
+  return $(fi->args,fi->arg_vardecls,fi->requires_assn,
+           fi->ensures_assn,fi->throws_assn,fi->return_value);
 }
 
-static $(list_t<$(var_opt_t,tqual_t,type_t)@> args, list_t<vardecl_t> argvds, exp_opt_t req, exp_opt_t ens, vardecl_opt_t ret_value) get_requires_and_ensures(type_opt_t topt) {
+static $(list_t<$(var_opt_t,tqual_t,type_t)@> args, list_t<vardecl_opt_t> argvds, assn_opt_t req, assn_opt_t ens, assn_opt_t thrws, vardecl_opt_t ret_value) get_requires_and_ensures(type_opt_t topt) {
   if (topt != NULL) {
     type_t t = Tcutil::pointer_elt_type((type_t)topt);
     switch (t) {
@@ -1374,26 +1399,26 @@ static $(list_t<$(var_opt_t,tqual_t,type_t)@> args, list_t<vardecl_t> argvds, ex
     default: break;
     }
   } 
-  return $(NULL,NULL,NULL,NULL,NULL);
+  return $(NULL,NULL,NULL,NULL,NULL,NULL);
 }
 
 static void check_requires(Position::seg_t loc,
                            env_t env, list_t<term_t> inputs,
-                           list_t<vardecl_t> argvds,
-                           assn_t a, exp_opt_t reqopt) {
+                           list_t<vardecl_opt_t> argvds,
+                           assn_t a, assn_opt_t reqopt) {
   if (reqopt != NULL) {
-    exp_t req = (exp_t)reqopt;
+    assn_t req = (assn_t)reqopt;
     // pretend like we're assigning the actual values to the parameter
     // values
     for (; argvds != NULL && inputs != NULL; argvds = argvds->tl, inputs = inputs->tl) {
       let vd = argvds->hd;
-      a = and(a,eq(var(vd),inputs->hd));
+      if (vd != NULL)
+        a = and(a,eq(var((vardecl_t)vd),inputs->hd));
     }
     // FIX? varargs.
-    let $(at,_) = vcgen_test(env,(exp_t)reqopt,&true_assn);
-    if (!implies(&a,&at))
+    if (!implies(&a,&req))
       Warn::err(loc, "cannot prove @requires %s from %s",
-                assn2string(reduce(at)), assn2string(reduce(a)));
+                assn2string(reduce(req)), assn2string(reduce(a)));
   }
 }
 
@@ -1581,36 +1606,48 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
     let $(ts,a) = vcgen_rexps_always(env,es,ain);
     let $(_,a2) = vcgen_rexp(env,e1,a);
     // check @requires clause on function
-    let $(args,argvds,reqopt,ensopt,ret_value) = get_requires_and_ensures(e1->topt);
+    let $(args,argvds,reqopt,ensopt,thrwsopt,ret_value) = get_requires_and_ensures(e1->topt);
     check_requires(e->loc,env,ts,argvds,a2,reqopt);
     // kill every variable that points into memory -- could refine
     // this to only those reachable from globals or the parameters.
     a2 = subst(memory, fresh_nonescvar(env,memory), a2);
-    update_try_assn(env,a2);
+    // and in the throws clause when updating the try handler
+    if (thrwsopt != NULL) {
+      assn_t thrws = (assn_t)thrwsopt;
+      // substitute ts for function formals in throws clause
+      let ts2 = ts;
+      for (let avs=argvds; avs != NULL && ts2 != NULL; avs=avs->tl, ts2=ts2->tl) {
+        let vdopt = avs->hd;
+        if (vdopt != NULL) {
+          let vd = (vardecl_t)avs->hd;
+          thrws = subst(vd,ts2->hd,thrws);
+        }
+      }
+      update_try_assn(env,and(a2,thrws));
+    } else 
+      update_try_assn(env,a2);
     // noreturn functions don't return...
     if (Atts::is_noreturn_fn_type((type_t)e1->topt)) a2 = &false_assn;
     if (ensopt == NULL) 
       return $(NULL,a2);
-    exp_t ensures = (exp_t)ensopt;
     // add in the @ensures clause for the result
-    let $(at,_) = vcgen_test(env,ensures,a2);
+    assn_t ensures = (assn_t)ensopt;
     // substitute ts for function formals in resulting assertion
-    for (; args != NULL && ts != NULL; args=args->tl, ts=ts->tl) {
-      let &$(vdopt,_,_) = args->hd;
+    for (; argvds != NULL && ts != NULL; argvds=argvds->tl, ts=ts->tl) {
+      let vdopt = argvds->hd;
       if (vdopt != NULL) {
         let vd = argvds->hd;
-        argvds = argvds->tl;
-        at = subst(vd,ts->hd,at);
+        ensures = subst((vardecl_t)vd,ts->hd,ensures);
       }
     }
     // substitute v for the return_value
     if (ret_value != NULL) {
       let v = fresh_var(((vardecl_t)ret_value)->type);
       // FIX: substitute ts for formal parameters
-      at = subst((vardecl_t)ret_value,v,at);
-      return $(v,at);
+      ensures = subst((vardecl_t)ret_value,v,ensures);
+      return $(v,and(a2,ensures));
     } 
-    return $(NULL,at);
+    return $(NULL,a2);
   case &Absyn::Throw_e(e,_):
     let $(_,a) = vcgen_rexp(env,e,ain);
     update_try_assn(env,a);
@@ -1859,28 +1896,48 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
 
 
 // FIX? take into account top-level (const) variable intializers?
-void vcgen_fundecl(JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd, assn_info_t assn_info){
+void vcgen_fundecl(Position::seg_t loc, JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd, assn_info_t assn_info){
+  let $(args,arvds,reqopt,ensopt,thrwsopt,ret_value) = get_requires_and_ensures_info(&fd->i);
   assn_t a = &true_assn;
   // put in the requires clause as an assumption.
-  let $(args,arvds,reqopt,ensopt,ret_value) = get_requires_and_ensures_info(&fd->i);
+  if (reqopt != NULL) {
+    a = (assn_t)reqopt;
+  }
+  // if we have a throws clause, then pretend like we're installing
+  // a "fake" exception handler so we can check to see if the function
+  // throws.
+  assn_t *thrws_assn = NULL;
+  if (thrwsopt != NULL) {
+    thrws_assn = new (assn_t)&false_assn;
+  }
   assn_t *result_assn = (ensopt == NULL) ? NULL : new ((assn_t)&false_assn);
   term_opt_t res_term = (ret_value == NULL) ? NULL : (var((vardecl_t)ret_value));
-  let env = initial_env(tables,fd,assn_info,result_assn,res_term);
-  if (reqopt != NULL) {
-    // hope the vards in here point to the vardecls in the fn...
-    a = vcgen_test(env,(exp_t)reqopt,a)[0];
-  }
+  let env = initial_env(tables,fd,assn_info,result_assn,thrws_assn,res_term);
   vcgen_stmt(env,fd->body,a);
   // check the ensures clause
   if (ensopt != NULL) {
-    exp_t ens = (exp_t)ensopt;
-    let $(at,_) = vcgen_test(env,ens,&true_assn);
+    assn_t at = (assn_t)ensopt;
     let senv = env->shared;
     let res_assn_opt = *senv->res_assn;
     assn_t res_assn = &false_assn;
     if (res_assn_opt != NULL) res_assn = ((assn_t)res_assn_opt);
     if (!implies(&res_assn,&at))
-      Warn::err(ens->loc, "cannot prove the @ensures clause %s from %s",
+      Warn::err(loc, "cannot prove the @ensures clause %s from %s",
 		assn2string(reduce(at)),assn2string(reduce(res_assn)));
   }
+  // check the throws clause
+  if (thrwsopt != NULL) {
+    assn_t desired_throws_state = (assn_t)thrwsopt;
+    assn_t actual_throws_state = *thrws_assn;
+    if (!implies(&actual_throws_state,&desired_throws_state))
+      Warn::err(loc, "cannot prove the @throws clause %s from %s",
+                assn2string(reduce(desired_throws_state)),
+                assn2string(reduce(actual_throws_state)));
+  }
+}
+
+// convert a "pure" boolean expression to an assertion.
+assn_t clause2assn(exp_t e) {
+  let env = bogus_env();
+  return vcgen_test(env,e,&true_assn).f0;
 }

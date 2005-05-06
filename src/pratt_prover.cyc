@@ -1987,9 +1987,6 @@ static graph_t *cgraph(graph_t *`H gs, Set::set_t<assn_t,`H> @already_seen,
     // inconsistent ones.
     let env = $(t1,p,t2);
     gs = app_graphs(add_prim,&env,gs);
-    //fprintf(stderr,"after inserting primitive assn %s, graphs are\n",
-    //        assn2string(a));
-    //print_graphs(gs);
     break;
   default: 
     // reduce any substitutions or negations and go around the loop.

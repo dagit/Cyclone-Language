@@ -27,6 +27,9 @@
 #include "relations-ap.h"
 #include "tcutil.h"
 #include "attributes.h"
+#include "assndef.h"
+#include "vcgen.h"
+#include "pratt_prover.h"
 using Core;
 using List;
 using Absyn;
@@ -311,6 +314,15 @@ static $(type_t,type_t)@ copy_rgncmp($(type_t,type_t)@ x) {
 static type_t tvar2type(tvar_t t) {
   return var_type(copy_tvar(t));
 }
+static vardecl_opt_t copy_vardecl_opt(vardecl_opt_t vdopt) {
+  if (vdopt == NULL) return NULL;
+  vardecl_t vd = new *vdopt;
+  vd->type = copy_type(vd->type);
+  vd->initializer = deep_copy_exp_opt(true,vd->initializer);
+  if (vd->rgn != NULL) 
+    vd->rgn = copy_type((type_t)vd->rgn);
+  return vd;
+}
 
 type_t copy_type(type_t t) {
   switch (compress(t)) {
@@ -331,7 +343,7 @@ type_t copy_type(type_t t) {
   case &ArrayType(ArrayInfo{et,tq,eo,zt,ztl}):
     return new ArrayType(ArrayInfo{copy_type(et),tq,deep_copy_exp_opt(true,eo),
 				     copy_type(zt),ztl});
-  case &FnType(FnInfo{tvs,effopt,rt_tq,rt,args,c_varargs,cyc_varargs,rgn_po,qb,atts,req,req_rlns,ens,ens_rlns,ret_val,argvds}):
+  case &FnType(FnInfo{tvs,effopt,rt_tq,rt,args,c_varargs,cyc_varargs,rgn_po,qb,atts,req,req_rlns,ens,ens_rlns,thrws,thrws_rlns,ret_val,argvds}):
     let tvs2 = map(copy_tvar,tvs);
     type_opt_t effopt2 = (effopt == NULL) ? NULL : copy_type(effopt);
     let rt2 = copy_type(rt);
@@ -341,21 +353,30 @@ type_t copy_type(type_t t) {
     if (cyc_varargs != NULL)
       cyc_varargs2->type = copy_type(cyc_varargs->type);
     let rgn_po2 = map(copy_rgncmp,rgn_po);
-    let qb2 = map(copy_rgncmp,qb);;
+    let qb2 = map(copy_rgncmp,qb);
     let atts2 = atts;
     let req2 = deep_copy_exp_opt(true,req);
-    let req_rlns2 = Relations::copy_relns(heap_region, req_rlns);
+    let req_rlns2 = req_rlns;
     let ens2 = deep_copy_exp_opt(true,ens);
-    let ens_rlns2 = Relations::copy_relns(heap_region, ens_rlns);
-    // FIX? we can't copy the vardecls here since 
-    // free occurrences of variables in the @requires and @ensures clauses
-    // will not point to the right vardecl.  But it's not clear that
-    // sharing them is the right thing to do...
-    vardecl_opt_t ret_val2 = ret_val;
-    list_t<vardecl_t> argvds2 = argvds;
+    let ens_rlns2 = ens_rlns;
+    let thrws2 = deep_copy_exp_opt(true,thrws);
+    let thrws_rlns2 = thrws_rlns;
+    // we have to create new arg and return-value vardecls and then
+    // make sure that the requires, ensures, and throws relations
+    // talk about these.  We should *really* substitute within the
+    // req/ens/throws expressions to be on the safe side.
+    list_t<vardecl_opt_t> argvds2 = List::map(copy_vardecl_opt,argvds);
+    vardecl_opt_t ret_val2 = copy_vardecl_opt(ret_val);
+    req_rlns2 = AssnDef::subst_vardecls(argvds,ret_val,argvds2,ret_val2,
+                                        req_rlns2);
+    ens_rlns2 = AssnDef::subst_vardecls(argvds,ret_val,argvds2,ret_val2,
+                                        ens_rlns2);
+    thrws_rlns2 = AssnDef::subst_vardecls(argvds,ret_val,argvds2,ret_val2,
+                                          thrws_rlns2);
     return new FnType(FnInfo{tvs2,effopt2,rt_tq,rt2,args2,c_varargs2,
                                cyc_varargs2,rgn_po2,qb2,atts2,req2,req_rlns2,
-                               ens2,ens_rlns2,ret_val2,argvds2});
+                               ens2,ens_rlns2,thrws2,thrws_rlns2,ret_val2,
+                               argvds2});
   case &AnonAggrType(k,b,fs): return new AnonAggrType(k,b,map(copy_field,fs));
   case &ValueofType(e):     return new ValueofType(e); // FIX: should copy e
   case &TypeofType(e):      return new TypeofType(e);  // FIX: should copy e
@@ -729,9 +750,11 @@ static type_t dummy_fntype(type_t eff) {
 				 .args=NULL,.c_varargs=false,
                                  .cyc_varargs=NULL,.rgn_po=NULL, .qual_bnd=NULL,
                                  .attributes = NULL, .requires_clause = NULL,
-                                 .requires_relns = NULL,
+                                 .requires_assn = NULL,
                                  .ensures_clause = NULL,
-                                 .ensures_relns = NULL,
+                                 .ensures_assn = NULL,
+                                 .throws_clause = NULL,
+                                 .throws_assn = NULL,
                                  .return_value = NULL,
                                  .arg_vardecls = NULL});
   return atb_type(fntype,heap_rgn_type,al_qual_type,empty_tqual(0),bounds_one(),false_type,false_type);
@@ -1948,12 +1971,32 @@ bool subtype(RgnOrder::rgn_po_opt_t po, list_t<$(type_t,type_t)@`H,`H> assume,
     if (!sub_rgnpo(f1.rgn_po,f2.rgn_po)) return false;
     // deal with attributes that can be dropped
     if (!Atts::sub_attributes(f1.attributes,f2.attributes)) return false;
-    // deal with requires and ensures clauses
-    if (!Relations::check_logical_implication(f2.requires_relns,
-					      f1.requires_relns)) 
+    // check f2.requires => f1.requires
+    let req1 = f1.requires_assn ? (AssnDef::assn_t)f1.requires_assn : &AssnDef::true_assn;
+    let req2 = AssnDef::subst_vardecls(f2.arg_vardecls,f2.return_value,
+                                       f1.arg_vardecls,f1.return_value,
+                                       f2.requires_assn);
+    if (!AssnDef::simple_prove(req2,req1) && 
+        !PrattProver::constraint_prove(req2,req1))
       return false;
-    if (!Relations::check_logical_implication(f1.ensures_relns,
-					      f2.ensures_relns))
+    // check f1.ensures => f2.ensures
+    let ens1 = f1.ensures_assn ? (AssnDef::assn_t)f1.ensures_assn : &AssnDef::true_assn;
+    let ens2 = AssnDef::subst_vardecls(f2.arg_vardecls,f2.return_value,
+                                       f1.arg_vardecls,f1.return_value,
+                                       f2.ensures_assn);
+    fprintf(stderr,"checking %s => %s\n",AssnDef::assn2string(ens1),
+            AssnDef::assn2string(ens2));
+    if (!AssnDef::simple_prove(ens1,ens2) && 
+        !PrattProver::constraint_prove(ens1,ens2))
+      return false;
+    fprintf(stderr,"succeeded\n");
+    // check f1.throws => f2.throws
+    let thr1 = f1.throws_assn ? (AssnDef::assn_t)f1.throws_assn : &AssnDef::true_assn;
+    let thr2 = AssnDef::subst_vardecls(f2.arg_vardecls,f2.return_value,
+                                       f1.arg_vardecls,f1.return_value,
+                                       f2.throws_assn);
+    if (!AssnDef::simple_prove(thr1,thr2) && 
+        !PrattProver::constraint_prove(thr1,thr2))
       return false;
     // otherwise okay
     return true;
@@ -2448,7 +2491,7 @@ type_t rsubstitute(region_t<`r> rgn,
       return t;
     return pointer_type(PtrInfo(new_t1,tq,PtrAtts(new_r,n,new_b,new_zt,NULL,new_rel,new_aq)));
   case &FnType(FnInfo{vs,eff,rtq,rtyp,args,c_varargs,cyc_varargs,rgn_po,qb,atts,
-                        req,_,ens,_,ret_value,argvds}): //sub the qb also ... need it for delayed checking
+                        req,_,ens,_,thrws,_,ret_value,argvds}): //sub the qb also ... need it for delayed checking
     if (skip_fntypes) return t;
     // FIX: capture??? 
     for (let p = vs; p != NULL; p = p->tl)
@@ -2473,11 +2516,42 @@ type_t rsubstitute(region_t<`r> rgn,
     list_t<$(type_t,type_t)@> qb2 = rsubst_rgnpo(rgn,inst,qb);
     exp_opt_t req2 = rsubs_exp_opt(rgn,inst,req);
     exp_opt_t ens2 = rsubs_exp_opt(rgn,inst,ens);
-    let req_relns2 = extract_relns(args2,req2);
-    let ens_relns2 = extract_relns(args2,ens2);
+    exp_opt_t thrws2 = rsubs_exp_opt(rgn,inst,thrws);
+    // re-calculate assertions -- saves having to do a type-substitution
+    // for assertions, though we have to fix up the vardecls below.
+    AssnDef::assn_opt_t req_assn2 = (req2 != NULL) ? (_*)(Vcgen::clause2assn((exp_t)req2)) : NULL;
+    AssnDef::assn_opt_t ens_assn2 = (ens2 != NULL) ? (_*)(Vcgen::clause2assn((exp_t)ens2)) : NULL;
+    AssnDef::assn_opt_t thrws_assn2 = (thrws2 != NULL) ? (_*)(Vcgen::clause2assn((exp_t)thrws2)) : NULL;
+    // At this point, we need to generate fresh vardecls for the argvds,
+    // and a fresh return_value that has the appropriate substituted
+    // type.  Then we need to crawl through req2, ens2, and thrws2 and
+    // substitute these fresh vars for the old ones.
+    list_t<vardecl_opt_t> argvds2 = NULL;
+    for (let avs = argvds; avs != NULL; avs = avs->tl) {
+      vardecl_opt_t av = avs->hd;
+      vardecl_opt_t av2 = NULL;
+      if (av != NULL) {
+        av2 = new *av;
+        av2->type = rsubstitute(rgn,inst,av->type);
+      }
+      argvds2 = new List{av2,argvds2};
+    }
+    argvds2 = List::imp_rev(argvds2);
+    vardecl_opt_t ret_value2 = NULL;
+    if (ret_value != NULL) {
+      ret_value2 = new *ret_value;
+      ret_value2->type = rsubstitute(rgn,inst,ret_value2->type);
+    }
+    req_assn2 = AssnDef::subst_vardecls(argvds,ret_value,argvds2,ret_value2,
+                                        req_assn2);
+    ens_assn2 = AssnDef::subst_vardecls(argvds,ret_value,argvds2,ret_value2,
+                                        ens_assn2);
+    thrws_assn2 = AssnDef::subst_vardecls(argvds,ret_value,argvds2,ret_value2,
+                                          thrws_assn2);
     return new FnType(FnInfo{vs,eff2,rtq,rsubstitute(rgn,inst,rtyp),args2,
 			       c_varargs,cyc_varargs2,rgn_po2,qb2,atts,
-			       req2,req_relns2,ens2,ens_relns2,ret_value,argvds});
+			       req2,req_assn2,ens2,ens_assn2,
+                               thrws2,thrws_assn2,ret_value2,argvds2});
   case &AnonAggrType(k,b,fs):
     let new_fs = subst_aggrfields(rgn,inst,fs);
     return (fs==new_fs) ? t : new AnonAggrType(k,b,new_fs);
