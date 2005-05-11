@@ -2593,6 +2593,7 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
   case &Tagcheck_e(e,f): t = tcTagcheck(te,loc,topt,e,f); break;
   case &Extension_e(e1): t = tcExp(te,topt,e1); break;
   case &Assert_e(e):     t = tcAssert(te,loc,e); break;
+  case &Assert_false_e(e): t = tcAssert(te,loc,e); break;
   case &Valueof_e(t2):
     if (!te->allow_valueof)
       Warn::err2(e->loc,"valueof(-) can only occur within types");

@@ -443,6 +443,7 @@ static unsigned int exp_case_number(exp_t e) {
   case &Asm_e(...):          return 40;
   case &Extension_e(...):    return 41;
   case &Assert_e(...):       return 42;
+  case &Assert_false_e(...): return 43;
   }
 }
 

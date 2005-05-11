@@ -1057,6 +1057,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
   case &Datatype_e(NULL,_,_): // FIX: distinguish zero/non-zero
   case &Const_e(_):
   case &Assert_e(_):
+  case &Assert_false_e(_):
   case &Sizeofexp_e(_): // note: the exp is NOT evaluated
   case &Sizeoftype_e(_):
   case &Offsetof_e(_,_): // FIX: ?? (first field guaranteed zero?)

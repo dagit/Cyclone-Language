@@ -506,6 +506,7 @@ exp_t deep_copy_exp(bool preserve_types, exp_t e) {
   case &Valueof_e(t):     new_e = valueof_exp(copy_type(t),e->loc); break;
   case &Asm_e(v,t,o,i,c): new_e = asm_exp(v,t,o,i,c,e->loc); break;
   case &Assert_e(e1):     new_e = assert_exp(e1,e->loc); break;
+  case &Assert_false_e(e1): new_e = assert_false_exp(e1,e->loc); break;
   }
   // types/annotations are shared
   if (preserve_types) {

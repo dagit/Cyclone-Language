@@ -957,6 +957,9 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     case &Assert_e(...):
       fprintf(stderr,"Error: unexpected Assert_e\n");
       exit(1); return;
+    case &Assert_false_e(...):
+      fprintf(stderr,"Error: unexpected Assert_false_e\n");
+      exit(1); return;
     case &Throw_e(...):
       fprintf(stderr,"Error: unexpected Throw_e\n");
       exit(1); return;

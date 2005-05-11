@@ -748,7 +748,9 @@ static void dumpexp_prec(int inprec, exp_t e) {
     dump("__extension__("); dumpexp(e1); dump_char(')'); break;
   case &Assert_e(e1):
     dump("@assert("); dumpexp(e1); dump_char(')'); break;
-
+  case &Assert_false_e(e1):
+    dump("@assert_false("); dumpexp(e1); dump_char(')'); break;
+    
   case &Asm_e(vol,t,o,i,cl):
     dump("__asm__");
     if (vol) dump(" volatile ");

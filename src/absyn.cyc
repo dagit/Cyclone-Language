@@ -757,6 +757,9 @@ exp_t extension_exp(exp_t e, seg_t loc) {
 exp_t assert_exp(exp_t e, seg_t loc) { 
   return new_exp(new Assert_e(e), loc);
 }
+exp_t assert_false_exp(exp_t e, seg_t loc) {
+  return new_exp(new Assert_false_e(e),loc);
+}
 
 exp_t array_exp(list_t<exp_t,`H> es, seg_t loc) {
   let dles = NULL;
@@ -1146,6 +1149,7 @@ void visit_exp(bool (@f1)(`a,exp_t), bool (@f2)(`a,stmt_t), `a env, exp_t e) {
     
   case &Extension_e(e1):               fallthru(e1);  
   case &Assert_e(e1):                  fallthru(e1);
+  case &Assert_false_e(e1):            fallthru(e1);
   case &Increment_e(e1,_):             fallthru(e1);
   case &Throw_e(e1,_):                 fallthru(e1);
   case &NoInstantiate_e(e1):           fallthru(e1);

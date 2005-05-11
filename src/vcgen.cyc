@@ -1891,6 +1891,12 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
       Warn::err(e->loc, "cannot prove @assert(%s) \nfrom %s",
                 assn2string(at), assn2string(reduce(ain)));
     return $(one(),and(ain,at));
+  case &Absyn::Assert_false_e(e1):
+    let $(at,_) = vcgen_test(env,e1,&true_assn);
+    if (implies(&ain,&at)) 
+      Warn::err(e->loc, "proved @assert_false(%s) \nfrom %s",
+                assn2string(at), assn2string(reduce(ain)));
+    return $(one(),ain);
   }
 }
 

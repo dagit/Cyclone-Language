@@ -1519,6 +1519,7 @@ static ctype_t gen_exp(bool takeaddress,cenv_t env, exp_t e) {
     let t = (topt) ? type_to_ctype(env,*topt) : var();
     return ptr_ct(t,var(),fat_ct(),heap_ct(),var());
   case &Assert_e(...): impos("@assert");
+  case &Assert_false_e(...): impos("@assert_false");
   case &Throw_e(...): impos("throw");
   case &Instantiate_e(_,_): impos("instantiate");
   case &Pragma_e(_): impos("Pragma_e");

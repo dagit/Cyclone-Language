@@ -627,6 +627,7 @@ namespace Absyn {
     Extension_e(exp_t); 
     // implements GCC's __extension__ (...) though we just pass it through.
     Assert_e(exp_t); // a static assertion to be checked by the analysis
+    Assert_false_e(exp_t); // a static assertion that shouldn't be proved by the analysis
   };
   // expression with auxiliary information
   EXTERN_ABSYN struct Exp {
@@ -1070,7 +1071,8 @@ namespace Absyn {
 		list_t<$(string_t<`H>,exp_t)@`H,`H>, 
 		list_t<string_t<`H>@`H,`H>, seg_t);
   exp_t extension_exp(exp_t, seg_t);
-  exp_t assert_exp(exp_t, seg_t);
+  exp_t assert_exp(exp_t,seg_t);
+  exp_t assert_false_exp(exp_t,seg_t);
   exp_t unresolvedmem_exp(opt_t<typedef_name_t,`H>,
 			  list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H>,
 			  seg_t);

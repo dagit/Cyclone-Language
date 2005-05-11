@@ -1061,6 +1061,7 @@ int exp_prec(exp_t e) {
   case &Offsetof_e(...):
   case &Deref_e(...):
   case &Assert_e(...):
+  case &Assert_false_e(...):
   case &Extension_e(...):     return 130;
   case &AggrMember_e(...):
   case &AggrArrow_e(...):
@@ -1185,6 +1186,7 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
   case &Sizeoftype_e(t): s = cat(text("sizeof("), typ2doc(t), text(")")); break;
   case &Sizeofexp_e(e1): s = cat(text("sizeof("),exp2doc(e1), text(")")); break;
   case &Assert_e(e):     s = cat(text("@assert("),exp2doc(e),text(")"));  break;
+  case &Assert_false_e(e): s = cat(text("@assert_false("),exp2doc(e),text(")"));  break;
   case &Extension_e(e):  
     s = cat(text("__extension__("),exp2doc(e),text(")")); break;
   case &Valueof_e(t): s = cat(text("valueof("), typ2doc(t), text(")")); break;
