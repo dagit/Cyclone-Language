@@ -590,7 +590,7 @@ struct Cyc_List_List*z=Cyc_List_merge_sort(comp,x);
 # 320
 {struct Cyc_List_List*y=z;for(0;y!=0;y=y->tl){
 if(y->tl!=0 && comp(y->hd,y->tl->hd)==0)
-y->tl=y->tl->tl;}}
+y->tl=_check_null(y->tl)->tl;}}
 return({struct Cyc_Set_Set*_Tmp0=_cycalloc(sizeof(struct Cyc_Set_Set));_Tmp0->cmp=comp,({int _Tmp1=Cyc_List_length(z);_Tmp0->cardinality=_Tmp1;}),_Tmp0->nodes=z;_Tmp0;});}
 # 326
 int Cyc_Set_subset(struct Cyc_Set_Set*s1,struct Cyc_Set_Set*s2){

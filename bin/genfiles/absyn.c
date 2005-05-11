@@ -835,7 +835,7 @@ return Cyc_Absyn_compress(aq);}case 2:
 # 538
 return Cyc_Absyn_aqualsof_type(ctv);}}else{goto _LL13;}case 18: _Tmp0=((struct Cyc_Absyn_AppType_Absyn_Type_struct*)t)->f2;{struct Cyc_List_List*tv_bnd=_Tmp0;
 # 540
-void*comp=Cyc_Absyn_compress((void*)tv_bnd->hd);
+void*comp=Cyc_Absyn_compress((void*)_check_null(tv_bnd)->hd);
 void*_Tmp1;enum Cyc_Absyn_AliasQualVal _Tmp2;switch(*((int*)comp)){case 0: switch(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)comp)->f1)){case 17: _Tmp2=((struct Cyc_Absyn_AqualConstCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)comp)->f1)->f1;{enum Cyc_Absyn_AliasQualVal aqv=_Tmp2;
 # 543
 return comp;}case 16: _LL39:

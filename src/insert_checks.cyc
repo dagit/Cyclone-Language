@@ -581,8 +581,8 @@ static void do_decl(env_t nv, decl_t d) {
         end.tv_usec += 1000000;
         --end.tv_sec;
       }
-      //fprintf(stderr,"vcgen for %s:  %d.%06d secs\n",
-      //        Absynpp::qvar2string(fd->name),end.tv_sec,end.tv_usec);
+      fprintf(stderr,"vcgen for %s:  %d.%06d secs\n",
+              Absynpp::qvar2string(fd->name),end.tv_sec,end.tv_usec);
 #endif
     }
 #ifdef PERFORMANCE_DEBUG

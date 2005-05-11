@@ -905,7 +905,7 @@ if(tms==0)return 0;{
 void*_Tmp0=(void*)tms->hd;void*_Tmp1;if(*((int*)_Tmp0)==3){_Tmp1=(void*)((struct Cyc_Absyn_Function_mod_Absyn_Type_modifier_struct*)_Tmp0)->f1;{void*args=_Tmp1;
 # 500
 if(tms->tl==0 ||
- Cyc_Parse_is_typeparam((void*)tms->tl->hd)&& tms->tl->tl==0){
+ Cyc_Parse_is_typeparam((void*)tms->tl->hd)&& _check_null(tms->tl)->tl==0){
 # 503
 void*_Tmp2;if(*((int*)args)==1){
 # 505

@@ -392,44 +392,44 @@ extern struct Cyc_Set_Set*Cyc_Set_intersect(struct Cyc_Set_Set*,struct Cyc_Set_S
 extern int Cyc_Set_member(struct Cyc_Set_Set*,void*);
 # 114
 extern void*Cyc_Set_fold(void*(*)(void*,void*),struct Cyc_Set_Set*,void*);struct Cyc_AssnDef_Uint_AssnDef_Term_struct{int tag;unsigned f1;};struct Cyc_AssnDef_Select_AssnDef_Term_struct{int tag;void*f1;void*f2;void*f3;};struct Cyc_AssnDef_Update_AssnDef_Term_struct{int tag;void*f1;void*f2;void*f3;};struct Cyc_AssnDef_Unop_AssnDef_Term_struct{int tag;enum Cyc_Absyn_Primop f1;void*f2;void*f3;};struct Cyc_AssnDef_Binop_AssnDef_Term_struct{int tag;enum Cyc_Absyn_Primop f1;void*f2;void*f3;void*f4;};struct Cyc_AssnDef_Cast_AssnDef_Term_struct{int tag;void*f1;void*f2;};struct Cyc_AssnDef_Aggr_AssnDef_Term_struct{int tag;int f1;unsigned f2;struct Cyc_List_List*f3;void*f4;};struct Cyc_AssnDef_Proj_AssnDef_Term_struct{int tag;void*f1;unsigned f2;void*f3;};struct Cyc_AssnDef_Okderef_AssnDef_Term_struct{int tag;void*f1;};struct Cyc_AssnDef_Tagof_AssnDef_Term_struct{int tag;void*f1;};
-# 94 "assndef.h"
+# 97 "assndef.h"
 extern struct _fat_ptr Cyc_AssnDef_term2string(void*);
-# 96
+# 99
 extern void*Cyc_AssnDef_uint(unsigned);
 extern void*Cyc_AssnDef_cnst(struct Cyc_Absyn_Exp*);
 extern void*Cyc_AssnDef_zero (void);
-# 103
+# 106
 extern void*Cyc_AssnDef_select(void*,void*,void*);
 extern void*Cyc_AssnDef_update(void*,void*,void*);
-# 107
+# 110
 extern void*Cyc_AssnDef_binop(enum Cyc_Absyn_Primop,void*,void*,void*);
 extern void*Cyc_AssnDef_unop(enum Cyc_Absyn_Primop,void*,void*);
 extern void*Cyc_AssnDef_plus(void*,void*,void*);
 extern void*Cyc_AssnDef_minus(void*,void*,void*);
-# 112
+# 115
 extern void*Cyc_AssnDef_proj(void*,unsigned,void*);
-# 118
+# 121
 extern void*Cyc_AssnDef_okderef(void*);
 extern void*Cyc_AssnDef_numelts_term(void*);struct _tuple11{struct Cyc_List_List*f0;int f1;};
-# 121
+# 124
 extern struct _tuple11 Cyc_AssnDef_flatten_plus(void*);
-# 125
+# 128
 extern int Cyc_AssnDef_termhash(void*);
 extern int Cyc_AssnDef_cmp_term(void*,void*);
 extern void*Cyc_AssnDef_get_term_type(void*);
-# 131
+# 134
 enum Cyc_AssnDef_Primreln{Cyc_AssnDef_Eq =0U,Cyc_AssnDef_Neq =1U,Cyc_AssnDef_SLt =2U,Cyc_AssnDef_SLte =3U,Cyc_AssnDef_ULt =4U,Cyc_AssnDef_ULte =5U};struct Cyc_AssnDef_Prim_AssnDef_Assn_struct{int tag;void*f1;enum Cyc_AssnDef_Primreln f2;void*f3;};struct Cyc_AssnDef_And_AssnDef_Assn_struct{int tag;void*f1;void*f2;};struct Cyc_AssnDef_Or_AssnDef_Assn_struct{int tag;void*f1;void*f2;};
-# 143
+# 146
 extern int Cyc_AssnDef_assncmp(void*,void*);
-# 159
+# 162
 extern void*Cyc_AssnDef_and(void*,void*);
 extern void*Cyc_AssnDef_or(void*,void*);
 extern void*Cyc_AssnDef_not(void*);
-# 166
+# 169
 extern void*Cyc_AssnDef_slt(void*,void*);
-# 168
+# 171
 extern void*Cyc_AssnDef_ult(void*,void*);
-# 172
+# 175
 extern void*Cyc_AssnDef_reduce(void*);struct Cyc_Xarray_Xarray{struct _fat_ptr elmts;int num_elmts;};
 # 42 "xarray.h"
 extern void*Cyc_Xarray_get(struct Cyc_Xarray_Xarray*,int);

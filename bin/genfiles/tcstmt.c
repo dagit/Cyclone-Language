@@ -719,7 +719,7 @@ te=Cyc_Tcenv_clear_fallthru(te);else{
 struct Cyc_List_List*vs=Cyc_List_imp_rev(Cyc_Tcutil_filter_nulls(Cyc_List_split(next_pattern->patvars).f0));
 struct Cyc_List_List*new_tvs=next_pattern->tvars_and_bounds_opt==0?0:
 ({(struct Cyc_List_List*(*)(struct Cyc_Absyn_Tvar*(*)(struct _tuple15*),struct Cyc_List_List*))Cyc_List_map;})(({(struct Cyc_Absyn_Tvar*(*)(struct _tuple15*))Cyc_Core_fst;}),(*next_pattern->tvars_and_bounds_opt).f0);
-te=Cyc_Tcenv_set_fallthru(te,new_tvs,vs,(struct Cyc_Absyn_Switch_clause*)scs->tl->hd);}}else{
+te=Cyc_Tcenv_set_fallthru(te,new_tvs,vs,(struct Cyc_Absyn_Switch_clause*)_check_null(scs->tl)->hd);}}else{
 # 260
 te=Cyc_Tcenv_clear_fallthru(te);}{
 # 262
@@ -771,7 +771,7 @@ te=Cyc_Tcenv_clear_fallthru(te);else{
 struct Cyc_List_List*vs=Cyc_List_imp_rev(Cyc_Tcutil_filter_nulls(Cyc_List_split(next_pattern->patvars).f0));
 struct Cyc_List_List*new_tvs=next_pattern->tvars_and_bounds_opt==0?0:
 ({(struct Cyc_List_List*(*)(struct Cyc_Absyn_Tvar*(*)(struct _tuple15*),struct Cyc_List_List*))Cyc_List_map;})(({(struct Cyc_Absyn_Tvar*(*)(struct _tuple15*))Cyc_Core_fst;}),(*next_pattern->tvars_and_bounds_opt).f0);
-te=Cyc_Tcenv_set_fallthru(te,new_tvs,vs,(struct Cyc_Absyn_Switch_clause*)scs->tl->hd);}}else{
+te=Cyc_Tcenv_set_fallthru(te,new_tvs,vs,(struct Cyc_Absyn_Switch_clause*)_check_null(scs->tl)->hd);}}else{
 # 324
 te=Cyc_Tcenv_clear_fallthru(te);}{
 # 326

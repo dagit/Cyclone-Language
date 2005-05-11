@@ -65,7 +65,7 @@ void insert(table_t<`a,`b> t, `a key, `b val) {
   let i = b->length + 1;
   b->length = i;
   if (i > t->max_len) {
-    //fprintf(stderr,"resizing table %s with length %d\n",(unsigned)t,i);
+    //fprintf(stderr,"resizing table %x with length %d\n",(unsigned)t,i);
     resize(t);
   }
 }

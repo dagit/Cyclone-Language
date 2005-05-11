@@ -83,13 +83,16 @@ namespace AssnDef{
     Tagof(term_t);
   };
 
-  // a distinguished program variable representing memory -- when we
-  // write to an escaping variable, we substitute a fresh logic variable
-  // for this vardecl.
   typedef list_t<$(int,`a)@,`r> coef_list_t<`a,`r>;
   typedef coef_list_t<term_t,`H> term_coef_list_t;
 
+  // a distinguished program variable representing memory -- when we
+  // write to an escaping variable, we substitute a fresh logic variable
+  // for this vardecl.
   extern vardecl_t memory;
+  // a distinguished program variable representing the exception that 
+  // was thrown.  
+  extern vardecl_t exception_vardecl();
 
   extern string_t term2string(term_t t);
   

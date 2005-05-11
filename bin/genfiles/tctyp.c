@@ -932,7 +932,7 @@ return Cyc_Absyn_tvar_cmp(tv1,tv2);}case 1:
 # 575
  goto _LL12;default: goto _LL13;}case 1: switch(*((int*)_Tmp0.f1)){case 1: _Tmp4=((struct Cyc_Absyn_Evar_Absyn_Type_struct*)_Tmp0.f0)->f1;_Tmp2=((struct Cyc_Absyn_Evar_Absyn_Type_struct*)_Tmp0.f0)->f3;_Tmp3=((struct Cyc_Absyn_Evar_Absyn_Type_struct*)_Tmp0.f1)->f1;_Tmp1=((struct Cyc_Absyn_Evar_Absyn_Type_struct*)_Tmp0.f1)->f3;{struct Cyc_Core_Opt*k1=_Tmp4;int i1=_Tmp2;struct Cyc_Core_Opt*k2=_Tmp3;int i2=_Tmp1;
 # 568
-return i1==i2 && Cyc_Kinds_kind_eq((struct Cyc_Absyn_Kind*)_check_null(k1)->v,(struct Cyc_Absyn_Kind*)k2->v)?0: 1;}case 2: _LLA:
+return i1==i2 && Cyc_Kinds_kind_eq((struct Cyc_Absyn_Kind*)k1->v,(struct Cyc_Absyn_Kind*)k2->v)?0: 1;}case 2: _LLA:
 # 572
  goto _LLC;case 0: _LLC:
  goto _LLE;default: goto _LL13;}case 0: if(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0.f0)->f1)==16){if(((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0.f0)->f2!=0)switch(*((int*)_Tmp0.f1)){case 0: if(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0.f1)->f1)==16){if(((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0.f1)->f2!=0){_Tmp4=(void*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0.f0)->f2->hd;_Tmp3=(void*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0.f1)->f2->hd;{void*tv11=_Tmp4;void*tv21=_Tmp3;
@@ -1008,7 +1008,7 @@ goto _LL11;}else{_Tmp7=_Tmp6;{void*exn=_Tmp7;_rethrow(exn);}}_LL11:;}}}}
 # 652
 goto _LL3;}}else{goto _LLA;}case 0: if(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)v)->f1)==18){_Tmp3=((struct Cyc_Absyn_AppType_Absyn_Type_struct*)v)->f2;{struct Cyc_List_List*tv_bnd=_Tmp3;
 # 654
-void*tv=(void*)tv_bnd->hd;
+void*tv=(void*)_check_null(tv_bnd)->hd;
 {void*_Tmp4;if(*((int*)tv)==2){_Tmp4=((struct Cyc_Absyn_VarType_Absyn_Type_struct*)tv)->f1;{struct Cyc_Absyn_Tvar*tv=_Tmp4;
 # 657
 if((unsigned)tv->aquals_bound){

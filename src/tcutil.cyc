@@ -1985,12 +1985,9 @@ bool subtype(RgnOrder::rgn_po_opt_t po, list_t<$(type_t,type_t)@`H,`H> assume,
     let ens2 = AssnDef::subst_vardecls(f2.arg_vardecls,f2.return_value,
                                        f1.arg_vardecls,f1.return_value,
                                        f2.ensures_assn);
-    fprintf(stderr,"checking %s => %s\n",AssnDef::assn2string(ens1),
-            AssnDef::assn2string(ens2));
     if (!AssnDef::simple_prove(ens1,ens2) && 
         !PrattProver::constraint_prove(ens1,ens2))
       return false;
-    fprintf(stderr,"succeeded\n");
     // check f1.throws => f2.throws
     let thr1 = f1.throws_assn ? (AssnDef::assn_t)f1.throws_assn : &AssnDef::true_assn;
     let thr2 = AssnDef::subst_vardecls(f2.arg_vardecls,f2.return_value,

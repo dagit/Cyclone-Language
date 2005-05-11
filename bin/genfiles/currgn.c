@@ -711,12 +711,12 @@ static void Cyc_CurRgn_rgnsubaggrdecl(unsigned loc,struct Cyc_CurRgn_rgnsubenv e
 Cyc_CurRgn_check_tvars(loc,ad->tvs);
 if(ad->impl!=0){
 Cyc_CurRgn_check_tvars(loc,ad->impl->exist_vars);{
-struct Cyc_List_List*ps=ad->impl->rgn_po;
+struct Cyc_List_List*ps=_check_null(ad->impl)->rgn_po;
 for(1;ps!=0;ps=ps->tl){
 Cyc_CurRgn_rgnsubtype(loc,env,(*((struct _tuple14*)ps->hd)).f0);
 Cyc_CurRgn_rgnsubtype(loc,env,(*((struct _tuple14*)ps->hd)).f1);}{
 # 422
-struct Cyc_List_List*fs=ad->impl->fields;
+struct Cyc_List_List*fs=_check_null(ad->impl)->fields;
 for(1;fs!=0;fs=fs->tl){
 Cyc_CurRgn_rgnsubtype(loc,env,((struct Cyc_Absyn_Aggrfield*)fs->hd)->type);
 Cyc_CurRgn_rgnsubexpopt(env,((struct Cyc_Absyn_Aggrfield*)fs->hd)->requires_clause);}}}}}struct _tuple15{struct Cyc_Absyn_Tqual f0;void*f1;};

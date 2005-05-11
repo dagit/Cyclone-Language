@@ -1463,7 +1463,7 @@ return;}case 19: _Tmp5=(void*)((struct Cyc_Absyn_Offsetof_e_Absyn_Raw_exp_struct
 # 933
 Cyc_scan_type(t1,dep);
 # 935
-{void*_Tmp6=(void*)f->hd;void*_Tmp7;_Tmp7=((struct Cyc_Absyn_StructField_Absyn_OffsetofField_struct*)_Tmp6)->f1;{struct _fat_ptr*fn=_Tmp7;
+{void*_Tmp6=(void*)_check_null(f)->hd;void*_Tmp7;_Tmp7=((struct Cyc_Absyn_StructField_Absyn_OffsetofField_struct*)_Tmp6)->f1;{struct _fat_ptr*fn=_Tmp7;
 Cyc_add_target(fn);goto _LL57;}_LL57:;}
 # 938
 return;}case 0:
@@ -1646,7 +1646,7 @@ struct Cyc_Absyn_Aggrfield*f=(struct Cyc_Absyn_Aggrfield*)fs->hd;
 Cyc_scan_type(f->type,dep);
 Cyc_scan_exp_opt(f->width,dep);}}{
 # 1130
-struct Cyc_List_List*fs=x->impl->fields;for(0;fs!=0;fs=fs->tl){;}}}
+struct Cyc_List_List*fs=_check_null(x->impl)->fields;for(0;fs!=0;fs=fs->tl){;}}}
 # 1134
 goto _LL0;}}case 7: _Tmp1=((struct Cyc_Absyn_Enum_d_Absyn_Raw_decl_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Enumdecl*x=_Tmp1;
 # 1136
@@ -1657,7 +1657,7 @@ if((unsigned)x->fields){
 struct Cyc_Absyn_Enumfield*f=(struct Cyc_Absyn_Enumfield*)fs->hd;
 Cyc_scan_exp_opt(f->tag,dep);}}{
 # 1145
-struct Cyc_List_List*fs=(struct Cyc_List_List*)x->fields->v;for(0;fs!=0;fs=fs->tl){;}}}
+struct Cyc_List_List*fs=(struct Cyc_List_List*)_check_null(x->fields)->v;for(0;fs!=0;fs=fs->tl){;}}}
 # 1149
 goto _LL0;}}case 8: _Tmp1=((struct Cyc_Absyn_Typedef_d_Absyn_Raw_decl_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Typedefdecl*x=_Tmp1;
 # 1151

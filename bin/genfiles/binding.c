@@ -561,10 +561,10 @@ switch(nsl.Rel_n.tag){case 4:
 # 246
  if(Cyc_Binding_at_toplevel(env)|| !({(int(*)(struct Cyc_Dict_Dict,struct _fat_ptr*))Cyc_Dict_member;})(*_check_null(env->local_vars),v))
 _throw((void*)({struct Cyc_Binding_BindingError_exn_struct*_Tmp2=_cycalloc(sizeof(struct Cyc_Binding_BindingError_exn_struct));_Tmp2->tag=Cyc_Binding_BindingError;_Tmp2;}));
-return({(void*(*)(struct Cyc_Dict_Dict,struct _fat_ptr*))Cyc_Dict_lookup;})(*env->local_vars,v);case 1: if(nsl.Rel_n.val==0){
+return({(void*(*)(struct Cyc_Dict_Dict,struct _fat_ptr*))Cyc_Dict_lookup;})(*_check_null(env->local_vars),v);case 1: if(nsl.Rel_n.val==0){
 # 250
 if(!Cyc_Binding_at_toplevel(env)&&({(int(*)(struct Cyc_Dict_Dict,struct _fat_ptr*))Cyc_Dict_member;})(*_check_null(env->local_vars),v))
-return({(void*(*)(struct Cyc_Dict_Dict,struct _fat_ptr*))Cyc_Dict_lookup;})(*env->local_vars,v);
+return({(void*(*)(struct Cyc_Dict_Dict,struct _fat_ptr*))Cyc_Dict_lookup;})(*_check_null(env->local_vars),v);
 goto _LL9;}else{goto _LL8;}default: _LL8: _LL9:
 # 254
  return({(void*(*)(unsigned,struct Cyc_Binding_NSCtxt*,struct _tuple0*,void*(*)(struct Cyc_Binding_ResolveNSEnv*,struct _fat_ptr*)))Cyc_Binding_resolve_lookup;})(loc,env->ns,qv,Cyc_Binding_lookup_ordinary_global);};}}
@@ -638,7 +638,7 @@ if(!Cyc_Binding_at_toplevel(env))
 ({struct Cyc_Dict_Dict _Tmp3=({struct Cyc_Dict_Dict _Tmp4=*_check_null(env->local_vars);struct _fat_ptr*_Tmp5=decl_name;({(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,struct _fat_ptr*,void*))Cyc_Dict_insert;})(_Tmp4,_Tmp5,(void*)({struct Cyc_Binding_VarRes_Binding_Resolved_struct*_Tmp6=_cycalloc(sizeof(struct Cyc_Binding_VarRes_Binding_Resolved_struct));
 _Tmp6->tag=0,({void*_Tmp7=(void*)({struct Cyc_Absyn_Local_b_Absyn_Binding_struct*_Tmp8=_cycalloc(sizeof(struct Cyc_Absyn_Local_b_Absyn_Binding_struct));_Tmp8->tag=4,_Tmp8->f1=vd;_Tmp8;});_Tmp6->f1=_Tmp7;});_Tmp6;}));});
 # 334
-*env->local_vars=_Tmp3;});else{
+*_check_null(env->local_vars)=_Tmp3;});else{
 # 336
 if(!env->in_cyc_override){
 struct Cyc_Binding_ResolveNSEnv*decl_ns_data=({(struct Cyc_Binding_ResolveNSEnv*(*)(struct Cyc_Binding_NSCtxt*,union Cyc_Absyn_Nmspace))Cyc_Binding_get_ns_data;})(env->ns,decl_ns);
@@ -721,7 +721,7 @@ return 0;}{
 struct Cyc_Dict_Dict old_locals=*_check_null(env->local_vars);
 Cyc_Binding_resolve_and_add_vardecl(e->loc,env,vd);
 Cyc_Binding_resolve_exp(env,e2);
-*env->local_vars=old_locals;
+*_check_null(env->local_vars)=old_locals;
 return 0;}}case 13: _Tmp4=((struct Cyc_Absyn_Instantiate_e_Absyn_Raw_exp_struct*)_Tmp0)->f1;_Tmp3=((struct Cyc_Absyn_Instantiate_e_Absyn_Raw_exp_struct*)_Tmp0)->f2;{struct Cyc_Absyn_Exp*e1=_Tmp4;struct Cyc_List_List*ts=_Tmp3;
 # 419
 for(1;ts!=0;ts=ts->tl){
@@ -750,7 +750,7 @@ void*_Tmp0=s->r;void*_Tmp1;void*_Tmp2;switch(*((int*)_Tmp0)){case 12: _Tmp2=((st
 struct Cyc_Dict_Dict old_locals=*_check_null(env->local_vars);
 Cyc_Binding_resolve_decl(env,d);
 Cyc_Binding_resolve_stmt(env,s1);
-*env->local_vars=old_locals;
+*_check_null(env->local_vars)=old_locals;
 return 0;}case 10: _Tmp2=((struct Cyc_Absyn_Switch_s_Absyn_Raw_stmt_struct*)_Tmp0)->f1;_Tmp1=((struct Cyc_Absyn_Switch_s_Absyn_Raw_stmt_struct*)_Tmp0)->f2;{struct Cyc_Absyn_Exp*e=_Tmp2;struct Cyc_List_List*scs=_Tmp1;
 # 449
 Cyc_Binding_resolve_exp(env,e);
@@ -776,7 +776,7 @@ Cyc_Binding_resolve_pat(env,pattern);
 if(where_clause!=0)
 Cyc_Binding_resolve_exp(env,where_clause);
 Cyc_Binding_resolve_stmt(env,body);
-*env->local_vars=old_locals;}}
+*_check_null(env->local_vars)=old_locals;}}
 # 476
 return;}
 # 478
@@ -835,10 +835,10 @@ struct Cyc_Dict_Dict locs=*_check_null(env->local_vars);
 struct _fat_ptr*v;v=_cycalloc(sizeof(struct _fat_ptr)),*v=_tag_fat("return_value",sizeof(char),13U);{
 struct Cyc_Absyn_Vardecl*vd=({struct _tuple0*_Tmp0=({struct _tuple0*_Tmp1=_cycalloc(sizeof(struct _tuple0));_Tmp1->f0=Cyc_Absyn_Loc_n,_Tmp1->f1=v;_Tmp1;});Cyc_Absyn_new_vardecl(0U,_Tmp0,i->ret_type,0);});
 i->return_value=vd;
-({struct Cyc_Dict_Dict _Tmp0=({struct Cyc_Dict_Dict _Tmp1=*env->local_vars;struct _fat_ptr*_Tmp2=v;({(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,struct _fat_ptr*,void*))Cyc_Dict_insert;})(_Tmp1,_Tmp2,(void*)({struct Cyc_Binding_VarRes_Binding_Resolved_struct*_Tmp3=_cycalloc(sizeof(struct Cyc_Binding_VarRes_Binding_Resolved_struct));
+({struct Cyc_Dict_Dict _Tmp0=({struct Cyc_Dict_Dict _Tmp1=*_check_null(env->local_vars);struct _fat_ptr*_Tmp2=v;({(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,struct _fat_ptr*,void*))Cyc_Dict_insert;})(_Tmp1,_Tmp2,(void*)({struct Cyc_Binding_VarRes_Binding_Resolved_struct*_Tmp3=_cycalloc(sizeof(struct Cyc_Binding_VarRes_Binding_Resolved_struct));
 _Tmp3->tag=0,({void*_Tmp4=(void*)({struct Cyc_Absyn_Local_b_Absyn_Binding_struct*_Tmp5=_cycalloc(sizeof(struct Cyc_Absyn_Local_b_Absyn_Binding_struct));_Tmp5->tag=4,_Tmp5->f1=vd;_Tmp5;});_Tmp3->f1=_Tmp4;});_Tmp3;}));});
 # 541
-*env->local_vars=_Tmp0;});
+*_check_null(env->local_vars)=_Tmp0;});
 # 543
 if(i->ensures_clause!=0)
 Cyc_Binding_resolve_exp(env,_check_null(i->ensures_clause));
@@ -846,7 +846,7 @@ Cyc_Binding_resolve_exp(env,_check_null(i->ensures_clause));
 if(i->throws_clause!=0)
 Cyc_Binding_resolve_exp(env,_check_null(i->throws_clause));
 # 549
-*env->local_vars=locs;}}}
+*_check_null(env->local_vars)=locs;}}}
 # 558
 static void Cyc_Binding_resolve_type(unsigned loc,struct Cyc_Binding_Env*env,void*t){
 void*_Tmp0;void*_Tmp1;void*_Tmp2;switch(*((int*)t)){case 0: switch(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)t)->f1)){case 23: _Tmp2=(union Cyc_Absyn_DatatypeInfo*)&((struct Cyc_Absyn_DatatypeCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)t)->f1)->f1;_Tmp1=((struct Cyc_Absyn_AppType_Absyn_Type_struct*)t)->f2;{union Cyc_Absyn_DatatypeInfo*info=_Tmp2;struct Cyc_List_List*targs=_Tmp1;
@@ -990,7 +990,7 @@ if((struct Cyc_Absyn_Vardecl*)vds1->hd!=0)
 ({struct Cyc_Dict_Dict _Tmp3=({struct Cyc_Dict_Dict _Tmp4=*_check_null(env->local_vars);struct _fat_ptr*_Tmp5=((struct Cyc_Absyn_Vardecl*)vds1->hd)->name->f1;({(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,struct _fat_ptr*,void*))Cyc_Dict_insert;})(_Tmp4,_Tmp5,(void*)({struct Cyc_Binding_VarRes_Binding_Resolved_struct*_Tmp6=_cycalloc(sizeof(struct Cyc_Binding_VarRes_Binding_Resolved_struct));
 _Tmp6->tag=0,({void*_Tmp7=(void*)({struct Cyc_Absyn_Param_b_Absyn_Binding_struct*_Tmp8=_cycalloc(sizeof(struct Cyc_Absyn_Param_b_Absyn_Binding_struct));_Tmp8->tag=3,_Tmp8->f1=_check_null((struct Cyc_Absyn_Vardecl*)vds1->hd);_Tmp8;});_Tmp6->f1=_Tmp7;});_Tmp6;}));});
 # 704
-*env->local_vars=_Tmp3;});}}
+*_check_null(env->local_vars)=_Tmp3;});}}
 # 707
 Cyc_Binding_resolve_function_stuff(loc,env,i);
 env->local_vars=old_locals;
@@ -1166,7 +1166,7 @@ if((struct Cyc_Absyn_Vardecl*)vds1->hd!=0)
 ({struct Cyc_Dict_Dict _Tmp8=({struct Cyc_Dict_Dict _Tmp9=*_check_null(env->local_vars);struct _fat_ptr*_TmpA=((struct Cyc_Absyn_Vardecl*)vds1->hd)->name->f1;({(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,struct _fat_ptr*,void*))Cyc_Dict_insert;})(_Tmp9,_TmpA,(void*)({struct Cyc_Binding_VarRes_Binding_Resolved_struct*_TmpB=_cycalloc(sizeof(struct Cyc_Binding_VarRes_Binding_Resolved_struct));
 _TmpB->tag=0,({void*_TmpC=(void*)({struct Cyc_Absyn_Param_b_Absyn_Binding_struct*_TmpD=_cycalloc(sizeof(struct Cyc_Absyn_Param_b_Absyn_Binding_struct));_TmpD->tag=3,_TmpD->f1=(struct Cyc_Absyn_Vardecl*)vds1->hd;_TmpD;});_TmpB->f1=_TmpC;});_TmpB;}));});
 # 901
-*env->local_vars=_Tmp8;});}}
+*_check_null(env->local_vars)=_Tmp8;});}}
 # 904
 Cyc_Binding_resolve_function_stuff(loc,env,& fd->i);
 # 906
@@ -1177,10 +1177,10 @@ _TmpB->tag=0,({void*_TmpC=(void*)({struct Cyc_Absyn_Funname_b_Absyn_Binding_stru
 # 908
 *old_locals=_Tmp8;});
 # 910
-({struct Cyc_Dict_Dict _Tmp8=({struct Cyc_Dict_Dict _Tmp9=*env->local_vars;struct _fat_ptr*_TmpA=decl_name;({(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,struct _fat_ptr*,void*))Cyc_Dict_insert;})(_Tmp9,_TmpA,(void*)({struct Cyc_Binding_VarRes_Binding_Resolved_struct*_TmpB=_cycalloc(sizeof(struct Cyc_Binding_VarRes_Binding_Resolved_struct));
+({struct Cyc_Dict_Dict _Tmp8=({struct Cyc_Dict_Dict _Tmp9=*_check_null(env->local_vars);struct _fat_ptr*_TmpA=decl_name;({(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,struct _fat_ptr*,void*))Cyc_Dict_insert;})(_Tmp9,_TmpA,(void*)({struct Cyc_Binding_VarRes_Binding_Resolved_struct*_TmpB=_cycalloc(sizeof(struct Cyc_Binding_VarRes_Binding_Resolved_struct));
 _TmpB->tag=0,({void*_TmpC=(void*)({struct Cyc_Absyn_Funname_b_Absyn_Binding_struct*_TmpD=_cycalloc(sizeof(struct Cyc_Absyn_Funname_b_Absyn_Binding_struct));_TmpD->tag=2,_TmpD->f1=fd;_TmpD;});_TmpB->f1=_TmpC;});_TmpB;}));});
 # 910
-*env->local_vars=_Tmp8;});}else{
+*_check_null(env->local_vars)=_Tmp8;});}else{
 # 913
 struct Cyc_Binding_ResolveNSEnv*decl_ns_data=({(struct Cyc_Binding_ResolveNSEnv*(*)(struct Cyc_Binding_NSCtxt*,union Cyc_Absyn_Nmspace))Cyc_Binding_get_ns_data;})(env->ns,decl_ns);
 ({struct Cyc_Dict_Dict _Tmp8=({struct Cyc_Dict_Dict _Tmp9=decl_ns_data->ordinaries;struct _fat_ptr*_TmpA=decl_name;({(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,struct _fat_ptr*,void*))Cyc_Dict_insert;})(_Tmp9,_TmpA,(void*)({struct Cyc_Binding_VarRes_Binding_Resolved_struct*_TmpB=_cycalloc(sizeof(struct Cyc_Binding_VarRes_Binding_Resolved_struct));

@@ -1215,7 +1215,9 @@ using Arg {
               "Stop after currrgn");
   make_option(opt79,"--allpaths",false,"",Set_spec,&Flags::allpaths,
               "analyze all forward paths in verification-condition generator");
-  make_option(opt80,"-noreaps",false,"",
+  make_option(opt80,"--mergepaths",false,"",Clear_spec,&Flags::allpaths,
+              "merge paths at join-points within the verification-condition generator");
+  make_option(opt81,"-noreaps",false,"",
               Unit_spec,set_noreaps,
               "Generate code that doesn't use reaps");
 
@@ -1230,7 +1232,7 @@ using Arg {
     &opt50,&opt51,&opt52,&opt53,&opt54,&opt55,&opt56,&opt57,&opt58,&opt59,
     &opt60,&opt61,&opt62,&opt63,&opt64,&opt65,&opt66,&opt67,&opt68,&opt69,
 	    &opt70,&opt71,&opt72,&opt73,&opt74,&opt75,&opt76,&opt77,&opt78,&opt79,
-	    &opt80
+            &opt80,&opt81
             
   };
 

@@ -347,7 +347,7 @@ void Cyc_Absyn_visit_stmt(int(*)(void*,struct Cyc_Absyn_Exp*),int(*)(void*,struc
 extern int Cyc_strptrcmp(struct _fat_ptr*,struct _fat_ptr*);struct Cyc_RemoveLabels_LabelBin{struct Cyc_List_List*label_gotos;struct Cyc_List_List*label_stmts;};
 # 33 "remove_labels.cyc"
 static void Cyc_RemoveLabels_remove_with_labelbin(struct Cyc_RemoveLabels_LabelBin*lb){
-for(1;lb->label_stmts!=0;lb->label_stmts=lb->label_stmts->tl){
+for(1;lb->label_stmts!=0;lb->label_stmts=_check_null(lb->label_stmts)->tl){
 struct Cyc_Absyn_Stmt*statement=(struct Cyc_Absyn_Stmt*)lb->label_stmts->hd;
 void*_Tmp0=statement->r;void*_Tmp1;void*_Tmp2;if(*((int*)_Tmp0)==13){_Tmp2=((struct Cyc_Absyn_Label_s_Absyn_Raw_stmt_struct*)_Tmp0)->f1;_Tmp1=((struct Cyc_Absyn_Label_s_Absyn_Raw_stmt_struct*)_Tmp0)->f2;{struct _fat_ptr*label=_Tmp2;struct Cyc_Absyn_Stmt*s=_Tmp1;
 # 38

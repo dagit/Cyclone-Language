@@ -251,7 +251,7 @@ streambuff_t<`H,\U> stb_rest(int ofs, streambuff_t<`H,\U> stb) __attribute((cons
 	// now move over the remaining ones
 	for (j = 0; j<n2 && k<n; j++, k++) {
 	  bufs2[j].buf :=: bufs[k].buf;
-	  bufs2[j].ofs = bufs[k].ofs;
+          bufs2[j].ofs = bufs[k].ofs;
 	}
       } // end alias newstb
     } // end else --> !(n == 1)

@@ -37,27 +37,27 @@ abstract struct T<`a,`b,`r> {
 };
 typedef struct T<`a,`b,`r> const @`r Tree_t<`a,`b,`r>;
 
-dict_t<`a,`b,`r> rempty(region_t<`r> r,int (@`H comp)(`a,`a)) {
+dict_t<`a,`b,`r> rempty(region_t<`r> r,int (@`H comp)(`a,`a)) @throws(false) {
   return Dict(comp,r,NULL);
 }
-dict_t<`a,`b> empty(int (@`H comp)(`a,`a)) {
+dict_t<`a,`b> empty(int (@`H comp)(`a,`a)) @throws(false) {
   return rempty(Core::heap_region,comp);
 }
 dict_t<`a,`b,`r> rsingleton(region_t<`r> r, int (@`H comp)(`a,`a),
-                                `a key, `b data) {
+                                `a key, `b data) @throws(false) {
   return Dict(comp,r,rnew(r) T(B,NULL,NULL,$(key,data)));
 }
-dict_t<`a,`b> singleton(int (@`H comp)(`a,`a), `a key, `b data) {
+dict_t<`a,`b> singleton(int (@`H comp)(`a,`a), `a key, `b data) @throws(false) {
   return rsingleton(Core::heap_region, comp, key, data);
 }
 
-dict_t<`a,`b,`r> rshare(region_t<`r> r, dict_t<`a,`b,`r2> d : {`r2} > `r) {
+dict_t<`a,`b,`r> rshare(region_t<`r> r, dict_t<`a,`b,`r2> d : {`r2} > `r) @throws(false) {
   struct T<`a,`b,`r2> const * t = d.t;
   struct T<`a,`b,`r> const * t2 = t;
   return Dict{d.rel, r, t2};
 }
 
-bool is_empty(dict_t d) {
+bool is_empty(dict_t d) @throws(false) {
   return d.t == NULL;
 }
 

@@ -27,6 +27,31 @@
 #include <sexp.h>
 #include <set.h>
 
+namespace Hashtable {
+  using List;
+  struct Cell<`a,`b,`r> {
+    `a key;
+    `b value;
+    struct Cell<`a,`b,`r>*`r next;
+  };
+  
+  typedef struct Cell<`a,`b,`r>*`r cell_t<`a,`b,`r>;
+  
+  typedef struct Bucket<`a,`b,`r> {
+    unsigned int length;
+    cell_t<`a,`b,`r> cells;
+  } bucket_t<`a,`b,`r>;
+  
+  /*abstract*/
+  struct Table<`a,`b,`r> {
+    region_t<`r> r;
+    int          (@cmp)(`a,`a);
+    int          (@hash)(`a);
+    int	       max_len; // maximum length of bucket list before resize
+    bucket_t<`a,`b,`r>?`r tab;
+  };
+}
+
 namespace AssnDef;
 using List;
 using Hashtable;
@@ -137,62 +162,79 @@ int termhash(datatype Term @t) {
   switch (t) {
   case &Uint(i): return i;
   case &Const(e): return hash_exp(e) + 61;
-  case &Var(vd): return (unsigned int)vd;
-  case &LogicVar(vd,i,_): return (unsigned int)vd ^ (i+1);
+  case &Var(vd): return (unsigned int)vd >> 4;
+  case &LogicVar(vd,i,_): return ((unsigned int)vd >> 3) + (i+1);
   case &Binop(p,t1,t2,_):
-    return p ^ (unsigned int)t1 ^ (unsigned int)t2;
-  case &Unop(p,t1,_): return p ^ (unsigned int)t1 + 1;
+    return p + (((unsigned int)t1 + (unsigned int)t2) >> 4);
+  case &Unop(p,t1,_): return p + ((unsigned int)t1 >> 4) + 1;
   case &Cast(_,t): return termhash(t);
   case &Select(t1,t2,_):
-    return (unsigned int)t1 ^ (unsigned int)t2 + 2;
+    return (((unsigned int)t1 + (unsigned int)t2) >> 4) + 2;
   case &Update(t1,t2,t3):
-    return (unsigned int)t1 ^ (unsigned int)t2 ^ (unsigned int)t3 + 3;
-  case &Addr(vd): return (unsigned int)vd+4;
-  case &Proj(t,i,_): return (unsigned int)t ^ i;
+    return (((unsigned int)t1 + (unsigned int)t2 + (unsigned int)t3) >> 4) + 3;
+  case &Addr(vd): return ((unsigned int)vd >> 4)+7;
+  case &Proj(t,i,_): return ((unsigned int)t >> 4) + i + 23;
   case &Aggr(is_union,tag,ts,_):
     unsigned int res = 37+tag+is_union;
     for (; ts != NULL; ts = ts->tl)
-      res = res ^ (unsigned int)ts->hd;
+      res = res + ((unsigned int)ts->hd >> 4);
     return res;
-  case &Okderef(t): return (unsigned)t ^ 97;
-  case &Tagof(t): return (unsigned)t ^ 741;
+  case &Okderef(t): return ((unsigned)t >> 4) + 97;
+  case &Tagof(t): return ((unsigned)t >> 3) + 741;
   }
 }
 
 int cmp_term(datatype Term @t1, datatype Term @t2) {
+ LOOP:
+  if (t1 == t2) return 0;
   switch $(t1,t2) {
   case $(&Uint(i1), &Uint(i2)): return i1-i2;
-  case $(&Uint(_), _): return -1;
-  case $(_, &Uint(_)): return 1;
-  case $(&Const(e1),&Const(e2)): return Evexp::exp_cmp(e1,e2);
-  case $(&Const(_),_): return -1;
-  case $(_,&Const(_)): return 1;
-  case $(&Var(vd1),&Var(vd2)): return (int)vd1 - (int)vd2;
-  case $(&Var(_),_): return -1;
-  case $(_,&Var(_)): return 1;
-  case $(&Addr(vd1),&Addr(vd2)): return (int)vd1 - (int)vd2;
-  case $(&Addr(_),_): return -1;
-  case $(_,&Addr(_)): return 1;
+  case $(&Uint(...),_): return -1;
+  case $(_,&Uint(...)): return 1;
   case $(&LogicVar(vd1,i,_),&LogicVar(vd2,j,_)): 
     if (vd1 == vd2) return (i - j);
     return (int)vd1 - (int)vd2;
-  case $(&LogicVar(...),_): return -1;
-  case $(_,&LogicVar(...)): return 1;
+  case $(&LogicVar(vd1,i,_),_): return -1;
+  case $(_,&LogicVar(vd2,j,_)): return 1;
+  case $(&Var(vd1),&Var(vd2)): return (int)vd1 - (int)vd2;
+  case $(&Var(...),_): return -1;
+  case $(_,&Var(...)): return 1;
+  case $(&Const(e1),&Const(e2)): return Evexp::exp_cmp(e1,e2);
+  case $(&Const(...),_): return -1;
+  case $(_,&Const(...)): return 1;
+  case $(&Addr(vd1),&Addr(vd2)): return (int)vd1 - (int)vd2;
+  case $(&Addr(...),_): return -1;
+  case $(_,&Addr(...)): return 1;
+  case $(&Unop(p1,t1a,_),&Unop(p2,t2a,_)): 
+    if (p1 != p2) return (int)p1 - (int)p2;
+    t1 = t1a;
+    t2 = t2a;
+    goto LOOP;
+  case $(&Unop(...),_): return -1;
+  case $(_,&Unop(...)): return 1;
+  case $(&Binop(p1,t11,t12,tp1),&Binop(p2,t21,t22,tp2)):
+    if (p1 != p2) return (int)p1 - (int)p2;
+    int c = cmp_term(t11,t21);
+    if (c != 0) return c;
+    t1 = t12;
+    t2 = t22;
+    goto LOOP;
+  case $(&Binop(...),_): return -1;
+  case $(_,&Binop(...)): return 1;
   case $(&Cast(tp1,tm1),&Cast(tp2,tm2)):
     int c = Tcutil::typecmp(tp1,tp2);
     if (c != 0) return c;
-    return cmp_term(tm1,tm2);
+    t1 = tm1;
+    t2 = tm2;
+    goto LOOP;
   case $(&Cast(...),_): return -1;
   case $(_,&Cast(...)): return 1;
-  case $(&Unop(p1,t1,_),&Unop(p2,t2,_)): 
-    if (p1 != p2) return (int)p1 - (int)p2;
-    return cmp_term(t1,t2);
-  case $(&Unop(...),_): return -1;
-  case $(_,&Unop(...)): return 1;
   case $(&Select(t11,t12,_),&Select(t21,t22,_)):
     int c = cmp_term(t11,t21);
     if (c != 0) return c;
-    return cmp_term(t12,t22);
+    t1 = t12;
+    t2 = t22;
+    goto LOOP;
   case $(&Select(...),_): return -1;
   case $(_,&Select(...)): return 1;
   case $(&Update(t11,t12,t13),&Update(t21,t22,t23)):
@@ -200,22 +242,31 @@ int cmp_term(datatype Term @t1, datatype Term @t2) {
     if (c != 0) return c;
     int c = cmp_term(t12,t22);
     if (c != 0) return c;
-    return cmp_term(t13,t23);
-  case $(&Update(...),_): return -1;
-  case $(_,&Update(...)): return 1;
-  case $(&Proj(t1,i1,_),&Proj(t2,i2,_)): 
+    t1 = t13;
+    t2 = t23;
+    goto LOOP;
+  case $(&Update(t11,t12,t13),_): return -1;
+  case $(_,&Update(t21,t22,t23)): return 1;
+  case $(&Proj(tm1,i1,_),&Proj(tm2,i2,_)): 
     int c = i1 - i2;
     if (c != 0) return c;
-    return cmp_term(t1,t2);
+    t1 = tm1;
+    t2 = tm2;
+    goto LOOP;
   case $(&Proj(...),_): return -1;
   case $(_,&Proj(...)): return 1;
-  case $(&Okderef(t1),&Okderef(t2)):
-    return cmp_term(t1,t2);
-  case $(&Okderef(_),_): return -1;
-  case $(_,&Okderef(_)): return 1;
-  case $(&Tagof(t1),&Tagof(t2)): return cmp_term(t1,t2);
-  case $(&Tagof(_),_): return -1;
-  case $(_,&Tagof(_)): return 1;
+  case $(&Okderef(tm1),&Okderef(tm2)):
+    t1 = tm1;
+    t2 = tm2;
+    goto LOOP;
+  case $(&Okderef(...),_): return -1;
+  case $(_,&Okderef(...)): return 1;
+  case $(&Tagof(tm1),&Tagof(tm2)): 
+    t1 = tm1;
+    t2 = tm2;
+    goto LOOP;
+  case $(&Tagof(...),_): return -1;
+  case $(_,&Tagof(...)): return 1;
   case $(&Aggr(is_union1,tag1,ts1,_),&Aggr(is_union2,tag2,ts2,_)):
     int c = tag1 - tag2;
     if (c != 0) return c;
@@ -228,13 +279,6 @@ int cmp_term(datatype Term @t1, datatype Term @t2) {
     if (ts1 == ts2) return 0;
     if (ts1 == NULL) return -1;
     return 1;
-  case $(&Aggr(...),_): return -1;
-  case $(_,&Aggr(...)): return 1;
-  case $(&Binop(p1,t11,t12,tp1),&Binop(p2,t21,t22,tp2)):
-    if (p1 != p2) return (int)p1 - (int)p2;
-    int c = cmp_term(t11,t21);
-    if (c != 0) return c;
-    return cmp_term(t12,t22);
   }
 }
 
@@ -266,7 +310,7 @@ datatype Term.Uint one_value = Uint(1);
 static term_t hash_cons_term(datatype Term @t) {
   Hashtable::table_t<term_t,term_t> h;
   if (term_hash_cons_table == NULL) {
-    h = Hashtable::create(123, cmp_term, termhash);
+    h = Hashtable::create(221, cmp_term, termhash);
     term_hash_cons_table = h;
     Hashtable::insert(h,&zero_value,&zero_value);
     Hashtable::insert(h,&one_value,&one_value);
@@ -901,12 +945,54 @@ int assnhash(datatype Assn @a) {
   case &False: return 0;
   case &True: return 1;
   case &Prim(t1,p,t2): 
-    return (unsigned int)t1 ^ (unsigned int)p ^ (unsigned int)t2;
-  case &And(a1,a2): return (unsigned int)a1 ^ (unsigned int)a2;
-  case &Or(a1,a2): return ((unsigned int)a1 ^ (unsigned int)a2) | 1;
-  case &Not(a1): return ((unsigned int)a1) + 61;
-  case &Subst(vd,t,a): return ((unsigned int)a ^ (unsigned int)vd ^
-                               (unsigned int)t) | 3;
+    return termhash(t1) + p + termhash(t2);
+  case &And(a1,a2): 
+    return (((unsigned int)a1 + (unsigned int)a2) >> 4) + 3;
+  case &Or(a1,a2): 
+    return (((unsigned int)a2 + (unsigned int)a1) >> 4) + 5;    
+  case &Not(a1): 
+    return ((unsigned int)a1 >> 4) + 61;
+  case &Subst(vd,t,a): 
+    return ((unsigned int)a >> 4) + ((unsigned int)vd >> 4) ^ termhash(t) + 1;
+  }
+}
+
+static inline int assncode(datatype Assn @a) {
+  switch (a) {
+  case &True:  return 0;
+  case &False: return 1;
+  case &Prim(...): return 2;
+  case &And(...): return 3;
+  case &Or(...): return 4;
+  case &Not(...): return 5;
+  case &Subst(...): return 6;
+  }
+}
+
+// compare two assertions and return 0 if they are structurally equal,
+// non-zero value otherwise.
+int neqassn(datatype Assn @a1, datatype Assn @a2) {
+ LOOP:
+  if (a1 == a2) return 0;
+  switch $(a1,a2) {
+  case $(&And(a11,a12),&And(a21,a22)): fallthru(a11,a12,a21,a22);
+  case $(&Or(a11,a12),&Or(a21,a22)): 
+    if (neqassn(a12,a22)) return 1;
+    a1 = a11;
+    a2 = a21;
+    goto LOOP;
+  case $(&Prim(t11,p1,t12),&Prim(t21,p2,t22)):
+    if (p1 != p2) return 1;
+    if (cmp_term(t11,t21) != 0) return 1;
+    return cmp_term(t12,t22);
+  case $(&Not(na1),&Not(na2)): a1 = na1; a2 = na2; goto LOOP;
+  case $(&Subst(vd1,t1,a11),&Subst(vd2,t2,a22)):
+    if ((int)vd1 != (int)vd2) return 1;
+    if (cmp_term(t1,t2) != 0) return 1;
+    a1 = a11;
+    a2 = a22;
+    goto LOOP;
+  default: return 1;
   }
 }
 
@@ -916,34 +1002,20 @@ int assncmp(datatype Assn @a1, datatype Assn @a2) {
  LOOP:
   if (a1 == a2) return 0;
   switch $(a1,a2) {
-  case $(&True,&True): return 0;
-  case $(&True,_): return -1;
-  case $(_,&True): return 1;
-  case $(&False,&False): return 0;
-  case $(&False,_): return -1;
-  case $(_,&False): return 1;
-  case $(&Or(a11,a12),&Or(a21,a22)): fallthru(a11,a12,a21,a22);
-  case $(&And(a11,a12),&And(a21,a22)): 
+  case $(&And(a11,a12),&And(a21,a22)): fallthru(a11,a12,a21,a22);
+  case $(&Or(a11,a12),&Or(a21,a22)): 
     int c = assncmp(a11,a21);
     if (c != 0) return c;
     a1 = a12;
     a2 = a22;
     goto LOOP;
-  case $(&Or(_,_),_): return -1;
-  case $(_,&Or(_,_)): return 1;
-  case $(&And(_,_),_): return -1;
-  case $(_,&And(_,_)): return 1;
   case $(&Prim(t11,p1,t12),&Prim(t21,p2,t22)):
     int c = (int)p1 - (int)p2;
     if (c != 0) return c;
     c = cmp_term(t11,t21);
     if (c != 0) return c;
     return cmp_term(t12,t22);
-  case $(&Prim(...),_): return -1;
-  case $(_,&Prim(...)): return 1;
   case $(&Not(na1),&Not(na2)): a1 = na1; a2 = na2; goto LOOP;
-  case $(&Not(_),_): return -1;
-  case $(_,&Not(_)): return 1;
   case $(&Subst(vd1,t1,a11),&Subst(vd2,t2,a22)):
     int c = (int)vd1 - (int)vd2;
     if (c != 0) return c;
@@ -952,6 +1024,7 @@ int assncmp(datatype Assn @a1, datatype Assn @a2) {
     a1 = a11;
     a2 = a22;
     goto LOOP;
+  default: return assncode(a2) - assncode(a1);
   }
 }
 
@@ -967,16 +1040,11 @@ typedef struct AssnInfo {
 
 static struct Hashtable::Table<assn_t,assn_info_t@> *hash_cons_table = NULL;
 
-void reset_hash_cons_table(void){
-  term_hash_cons_table = NULL;
-  hash_cons_table = NULL;
-};
-
 static Hashtable::table_t<assn_t,assn_info_t@>
 get_hash_cons_table() {
   Hashtable::table_t h;
   if (hash_cons_table == NULL) {
-    h = Hashtable::create(123, assncmp, assnhash);
+    h = Hashtable::create(221, neqassn, assnhash);
     hash_cons_table = h;
   } else {
     h = (Hashtable::table_t)hash_cons_table;
@@ -1064,7 +1132,7 @@ void dump_hashtable(Hashtable::table_t<assn_t,assn_info_t@> h) {
 // hash table.
 static assn_info_t@ hash_cons_it(datatype Assn@`r a) {
   Hashtable::table_t h = get_hash_cons_table();
-  let resopt = Hashtable::lookup_other_opt(h,a,assncmp,assnhash);
+  let resopt = Hashtable::lookup_other_opt(h,a,neqassn,assnhash);
   if (resopt == NULL) {
     let ainfo = copy_assn(a);
     Hashtable::insert(h,ainfo->assn,ainfo);
@@ -1081,13 +1149,12 @@ static assn_t hash_cons(datatype Assn@`r a) {
   else return (assn_t)redopt;
 }
 
-// Need to fake up a vardecl for the "memory"
+// Need to fake up vardecls for the "memory" and "exception"
 using Absyn {
   static string_t memory_var = "#Mem";
   static $(nmspace_t,var_t) memvar = $(Nmspace{.Loc_n = 0},&memory_var);
   static datatype TyCon.VoidCon void_con = VoidCon;
   static datatype Type.AppType vd_type = AppType(&void_con,NULL);
-
 
   struct Absyn::Vardecl memory_struct = {
     .sc = Absyn::Public,
@@ -1102,6 +1169,28 @@ using Absyn {
     .is_proto = false
   };
   vardecl_t memory = &memory_struct;
+
+  static string_t exception_var = "#Exn";
+  static $(nmspace_t,var_t) exnvar = $(Nmspace{.Loc_n = 0},&exception_var);
+
+  struct Absyn::Vardecl exception_struct = {
+    .sc = Absyn::Public,
+    .name = &exnvar,
+    .varloc = 0,
+    .tq = {0,0,0,0,0},
+    .type = &vd_type,
+    .initializer = NULL,
+    .rgn = NULL,
+    .attributes = NULL,
+    .escapes = false,
+    .is_proto = false
+  };
+
+  vardecl_t exception_vardecl() {
+    let vd = &exception_struct;
+    vd->type = Absyn::exn_type();
+    return vd;
+  }
 }
 
 // build an and node.
@@ -1227,12 +1316,17 @@ assn_t not(assn_t a) {
 // different environments built up when we run into them.
 
 // Both reduce_term and reduce_assn take in a substitution for 
-// non-escaping variables, as well as a pointer to a substitution
-// for escaping variables.  
+// non-escaping variables.
 // TRY: we could try using dictionaries here instead of lists.
+struct SubstNode<`r::R> {
+  struct SubstNode<`r> *`r next;
+  vardecl_t vd;
+  term_t    term;
+};
+typedef struct SubstNode<`r>*`r subst_t<`r>;
 
 static term_t 
-reduce_term(term_t t, list_t<$(vardecl_t,term_t)@> subst) {
+reduce_term(term_t t, subst_t subst) {
   switch (t) {
   case &Uint(_): 
   case &Const(_): 
@@ -1263,7 +1357,7 @@ reduce_term(term_t t, list_t<$(vardecl_t,term_t)@> subst) {
     else return t;
   case &Proj(t1,i,tp):
     let t2 = reduce_term(t1,subst);
-    if (t1 != t2) return proj(t1,i,tp);
+    if (t1 != t2) return proj(t2,i,tp);
     else return t;
   case &Aggr(is_union,tag,ts1,tp):
     list_t<term_t> ts2 = NULL;
@@ -1279,9 +1373,8 @@ reduce_term(term_t t, list_t<$(vardecl_t,term_t)@> subst) {
     } else return t;
   case &Addr(vd): fallthru(vd);
   case &Var(vd):
-    for (; subst != NULL; subst = subst->tl) {
-      let $(vd2,t2) = *subst->hd;
-      if (vd == vd2) return t2;
+    for (; subst != NULL; subst = subst->next) {
+      if (subst->vd == vd) return subst->term;
     }
     return t;
   case &Okderef(t1): 
@@ -1295,41 +1388,61 @@ reduce_term(term_t t, list_t<$(vardecl_t,term_t)@> subst) {
   }
 }
 
-typedef list_t<$(vardecl_t,term_t)@> subst_t;
-typedef Hashtable::table_t<assn_t,list_t<$(subst_t,bool,assn_t)@>> reduce_info_t;
+typedef struct ReduceMemo {
+  struct ReduceMemo *next;
+  subst_t subst;
+  bool negate;
+  assn_t result;
+} *reduce_memo_t;
+typedef Hashtable::table_t<assn_t,reduce_memo_t@> reduce_info_t;
 
-static bool same_subst(subst_t s1, subst_t s2) {
-  if (s1 == s2) return true;
-  for (; s1 != NULL && s2 != NULL; s1=s1->tl, s2=s2->tl) {
-    let $(vd1,t1) = *s1->hd;
-    let $(vd2,t2) = *s2->hd;
-    if (vd1 != vd2 || t1 != t2) return false;
-    if (s1->tl == s2->tl) return true;
-  }
-  return (s1 != s2);
+static struct Hashtable::Table<assn_t,reduce_memo_t@> *reduce_table = NULL;
+static reduce_info_t get_reduce_table() {
+  if (reduce_table == NULL) {
+    let t = Hashtable::create(221,neqassn,assnhash);
+    reduce_table = t;
+    return t;
+  } else 
+    return (reduce_info_t)reduce_table;
 }
+void reset_reduce_table() {
+  reduce_table = NULL;
+}
+
+static inline bool same_subst(subst_t s1, subst_t s2) {
+  for (; s1 != NULL && s2 != NULL; s1=s1->next, s2=s2->next) {
+    if ((unsigned)s1 == (unsigned)s2) return true;
+    if (s1->vd != s2->vd || s1->term != s2->term) return false;
+  }
+  return ((unsigned)s1 == (unsigned)s2);
+}
+
+//static unsigned reduce_length = 0;
+//static unsigned reduce_calls = 0;
+//static unsigned reduce_hits = 0;
+
+//void reset_reduce_counters() {
+//  reduce_length = 0; reduce_calls = 0; reduce_hits = 0; 
+//}
 
 // We memoize the reductions to once again ensure we traverse the dag
 // instead of the tree.  The problem is that we have to memoize w.r.t.
 // substitution as well as the negation flag.  Nonetheless, this results
 // in a substantial speedup when we have large assertions.
 static assn_t 
-reduce_assn(assn_t a, subst_t subst, bool negate, reduce_info_t h) {
-  let info_opt = Hashtable::lookup_opt(h,a);
-  list_t<$(subst_t,bool,assn_t)@> info = NULL;
+reduce_assn(assn_t a, subst_t<`H> subst, bool negate, reduce_info_t h) {
+  reduce_memo_t @info;
+  reduce_memo_t @*info_opt = Hashtable::lookup_opt(h,a);
   if (info_opt != NULL) {
     info = *info_opt;
-    for (let p = info; p != NULL; p = p->tl) {
-      let $(subst2,negate2,a2) = *p->hd;
-      if (negate == negate2 && same_subst(subst,subst2)) { 
-        return a2;
-      }
-    }
-  } 
+    for (let p = *info; p != NULL; p = p->next) 
+      if (negate == p->negate && same_subst(subst,p->subst)) return p->result;
+  } else {
+    info = new NULL;
+    Hashtable::insert(h,a,info);
+  }
   assn_t res;
   switch (a) {
-  case &True: if (negate) return &false_assn; else return &true_assn;
-  case &False: if (negate) return &true_assn; else return &false_assn;
   case &Prim(t1,p,t2):
     let newt1 = reduce_term(t1,subst);
     let newt2 = reduce_term(t2,subst);
@@ -1357,16 +1470,21 @@ reduce_assn(assn_t a, subst_t subst, bool negate, reduce_info_t h) {
   case &Subst(vd,t,a1):
     t = reduce_term(t,subst);
     // add vd->t to the subst
-    let new_subst = new List(new $(vd,t),subst);
+    let new_subst = new SubstNode{subst,vd,t};
     res = reduce_assn(a1, new_subst, negate, h);
     break;
   case &Not(a1):
     res = reduce_assn(a1, subst, !negate, h);
     break;
+  case &True: if (negate) return &false_assn; else return &true_assn;
+  case &False: if (negate) return &true_assn; else return &false_assn;
   }
-  Hashtable::insert(h,a,new List{new $(subst,negate,res),info}); 
+  reduce_memo_t rm = new ReduceMemo{*info,subst,negate,res};
+  *info = rm;
   return res;
 }
+
+static int ptrhash(`a @p) { return (int)p >> 3; }
 
 // get rid of all Not and Subst nodes.
 assn_t reduce(assn_t a) {
@@ -1374,15 +1492,46 @@ assn_t reduce(assn_t a) {
   let ainfo = hash_cons_it(a);
   let redopt = ainfo->reduced;
   if (redopt != NULL) return (assn_t)redopt;
-  a = reduce_assn(a,NULL,false,Hashtable::create(33,assncmp,assnhash));
+  //a = reduce_assn(a,NULL,false,Hashtable::create(33,assncmp,assnhash));
+  //let h = Hashtable::create(33,Core::assncmp,assnhash);
+  let h = get_reduce_table();
+  //fprintf(stderr,"reducing with hashtable %x\n",(unsigned)h);
+  //fprintf(stderr,"reducing\n");
+  //reset_reduce_counters();
+  a = reduce_assn(a,NULL,false,h);
+  //fprintf(stderr,"done reducing: calls %d, max length %d, hits = %d\n",
+  //        reduce_calls, reduce_length, reduce_hits);
+  //fflush(stderr);
+  /*
+  fprintf(stderr,"resulting hash-table: \n");
+  for (unsigned i = 0; i < numelts(h->tab); ++i) {
+    if (h->tab[i].length > 1) {
+      fprintf(stderr,"%d(%d): ",i,h->tab[i].length);
+      let c = h->tab[i].cells;
+      for (unsigned j = 0; j < 10 && c != NULL; ++j, c = c->next) {
+        switch (c->key) {
+        case &True: fprintf(stderr,"true"); break;
+        case &False: fprintf(stderr,"false"); break;
+        case &And(x,y): fprintf(stderr,"and(%x,%x)",x,y); break;
+        case &Or(x,y): fprintf(stderr,"or(%x,%x)",x,y); break;
+        case &Not(x): fprintf(stderr,"not(%x)",x); break;
+        case &Subst(vd,t,a): fprintf(stderr,"subst(%x,%x,%x)",vd,t,a); break;
+        case &Prim(t1,p,t2): fprintf(stderr,"prim(%x,%x,%x)",t1,p,t2); break;
+        }
+        fprintf(stderr,"[hash = %d]  ", ptrhash(c->key));
+      }
+      fprintf(stderr,"\n");
+    }
+  }
+  fprintf(stderr,"\n");
+  */
   ainfo->reduced = a;
   return a;
 }
 
 // a one-shot substitution -- needed in the assignment code.
 term_t subst_term(term_t t, vardecl_t x, term_t newx) {
-  let s = $(x,newx);
-  let subst = List{&s,NULL};
+  let subst = SubstNode{NULL,x,newx};
   return reduce_term(t,&subst);
 }
 
@@ -1593,3 +1742,10 @@ assn_t subst_vardecls(list_t<vardecl_opt_t> oldargs, vardecl_opt_t old_res,
     a = subst((vardecl_t)old_res, var((vardecl_t)new_res), a);
   return reduce(a);
 }
+
+void reset_hash_cons_table(void){
+  term_hash_cons_table = NULL;
+  hash_cons_table = NULL;
+  reduce_table = NULL;
+};
+

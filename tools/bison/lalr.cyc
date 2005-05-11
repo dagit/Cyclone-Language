@@ -615,8 +615,12 @@ short ?? transpose(short?`H ?`H R_arg, int n)
       sp = R_arg[i];
       if (sp)
 	{
-	  while (*sp >= 0)
-	    *temp_R[*sp++]++ = (short)i;
+	  while (*sp >= 0) {
+            //JGM: need to fix this so this works
+	    //*temp_R[*sp++]++ = (short)i;
+            let z = *sp++;
+            *temp_R[z]++ = (short)i;
+          }
 	}
     }
 

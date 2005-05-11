@@ -975,7 +975,7 @@ void*_Tmp3;switch(*((int*)c)){case 24:
 if(ad->impl==0)return 0;{
 struct _RegionHandle _Tmp4=_new_region(0U,"temp");struct _RegionHandle*temp=& _Tmp4;_push_region(temp);
 {struct Cyc_List_List*inst=Cyc_List_rzip(temp,temp,ad->tvs,ts);
-{struct Cyc_List_List*fs=ad->impl->fields;for(0;fs!=0;fs=fs->tl){
+{struct Cyc_List_List*fs=_check_null(ad->impl)->fields;for(0;fs!=0;fs=fs->tl){
 if(!Cyc_Evexp_okay_szofarg(Cyc_Tcutil_rsubstitute(temp,inst,((struct Cyc_Absyn_Aggrfield*)fs->hd)->type))){
 int _Tmp5=0;_npop_handler(0);return _Tmp5;}}}{
 int _Tmp5=1;_npop_handler(0);return _Tmp5;}}
