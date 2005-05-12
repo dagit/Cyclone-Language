@@ -1,0 +1,129 @@
+/* Convert a file to a C or Cyclone string
+   Copyright (C) 2005 Greg Morrisett, AT&T
+   This file is part of the Cyclone compiler.
+
+   The Cyclone compiler is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   The Cyclone compiler is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with the Cyclone compiler; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+
+
+/* There are only two heap allocations performed (to
+   duplicate command-line args) so there is no need
+   for the gc; use -nogc. */
+
+#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+/* The only difference between Cyclone and C style strings:
+     For Cyclone we use a declaration const char ?
+     For C we use const char []
+   Using a fat pointer in Cyclone means we don't have to worry
+   about the length of the array in code that imports the string.
+   Another way would be to #include the file in the Cyclone code.
+ */
+#define CYCLONE_OUTPUT 0
+#define C_OUTPUT 1
+int output_style = CYCLONE_OUTPUT;
+int cyclone_style_string = 1;
+FILE *outf = NULL;
+
+void stringify(const char ?varname, FILE @f) {
+  if (!outf) outf = stdout;
+  if (output_style == CYCLONE_OUTPUT)
+    fprintf(outf,"const char ?%s =\n\"",varname);
+  else
+    fprintf(outf,"const char %s[] =\n\"",varname);
+  int c;
+  while ( (c = fgetc(f)) != EOF) {
+    switch (c) {
+    case '\n': fprintf(outf,"\\n\"\n\""); break;
+    case '\a': fprintf(outf,"\\a"); break;
+    case '\b': fprintf(outf,"\\b"); break;
+    case '\f': fprintf(outf,"\\f"); break;
+    case '\r': fprintf(outf,"\\r"); break;
+    case '\v': fprintf(outf,"\\v"); break;
+    case '"': fprintf(outf,"\\\""); break;
+    case '\\': fprintf(outf,"\\\\"); break;
+    default:
+      if (isprint(c)) fprintf(outf,"%c",c);
+      else fprintf(outf,"\\x%x",(unsigned char)c);
+    }
+  }
+  fprintf(outf,"\";\n");
+}
+void stringify_file(const char ?varname,const char ?filename) {
+  let f = fopen(filename,"r");
+  if (!f) {
+    fprintf(stderr,"Cannot open file %s\n",filename);
+    return;
+  }
+  stringify(varname,f);
+}
+
+void usage() __attribute__((__noreturn__)) {
+  fprintf(stderr,"Usage: stringify <options> [file]\n");
+  fprintf(stderr,"Options: -v variable\n");
+  fprintf(stderr,"         -c           Output for C\n");
+  fprintf(stderr,"         -cyclone     Output for Cyclone (default)\n");
+  fprintf(stderr,"Input defaults to stdin unless file is given.\n");
+  fprintf(stderr,"The name of the string comes from the input file name, or -v.\n");
+  exit(1);
+}
+
+int main(int argc, char ??argv) {
+  char ?infile = NULL;
+  char ?varname = NULL;
+  char ?arg;
+  for (let i = 1; i < argc; i++) {
+    arg = argv[i];
+    if (strcmp(arg,"-c") == 0) {
+      output_style = C_OUTPUT;
+    }
+    else if (strcmp(arg,"-cyclone") == 0) {
+      output_style = CYCLONE_OUTPUT;
+    }
+    else if (strcmp(arg,"-v") == 0) {
+      i++; if (i >= argc) usage();
+      if (varname) usage();
+      varname = strdup(argv[i]);
+    }
+    else if (strcmp(arg,"-o") == 0) {
+      i++; if (i >= argc) usage();
+      if (outf) usage();
+      outf = fopen(argv[i],"w");
+      if (!outf) {
+        fprintf(stderr,"Cannot open file %s\n",argv[i]);
+        exit(1);
+      }
+    }
+    else {
+      if (infile) usage();
+      infile = strdup(arg);
+    }
+  }
+  if (!varname && !infile) usage();
+  if (!varname) {
+    varname = strdup(infile);
+    let len = strlen(varname);
+    for (let i = 0; i < len; i++) {
+      if (varname[i] == '.') { varname[i] = '\0'; break; }
+    }
+  }
+  if (!infile) stringify(varname,stdin);
+  else stringify_file(varname,infile);
+  return 0;
+}
