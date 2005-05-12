@@ -1,0 +1,409 @@
+/* Detect definitions of character sets and eliminate the minus
+   operator on character sets. */
+
+/* Copyright (C) 2005 Greg Morrisett, AT&T.
+   This file is part of the Cyclone project.
+
+   Cyclone is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   Cyclone is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Cyclone; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+#include "cs.h"
+#include <string.h>
+#include <ctype.h>
+
+int is_cs_empty(cs_t a) {
+  for (let i = 0; i < BUCKETS; i++)
+    if (a[i]) return 0;
+  return 1;
+}
+int is_cs_full(cs_t a) {
+  for (let i = 0; i < BUCKETS; i++)
+    if (a[i] != 255) return 0;
+  return 1;
+}
+int is_cs_singleton(cs_t a) {
+  let num = 0;
+  for (let i = 0; i < BUCKETS; i++) {
+    unsigned char b = a[i];
+    for (let j = 0; j < 8; j++) {
+      if (b & (1<<j)) num++;
+      if (num > 1) return 0;
+    }
+  }
+  return num;
+}
+int first_of_cs(cs_t a) {
+  for (let i = 0; i < BUCKETS; i++) {
+    unsigned char b = a[i];
+    for (let j = 0; j < 8; j++) {
+      if (b & (1<<j)) return i*8+j;
+    }
+  }
+  return -1;
+}
+void cs_intersect(cs_t a,cs_t b) {
+  for (let i = 0; i < BUCKETS; i++)
+    a[i] &= b[i];
+}
+void cs_union(cs_t a,cs_t b) {
+  for (let i = 0; i < BUCKETS; i++)
+    a[i] |= b[i];
+}
+void cs_xor(cs_t a,cs_t b) {
+  for (let i = 0; i < BUCKETS; i++)
+    a[i] ^= b[i];
+}
+void cs_insert(cs_t a,unsigned char x) { /* Note, have to change for Unicode */
+  if (x > MAXCSCHAR) {
+    fprintf(stderr,"character sets can't hold large character %u\n",x);
+    return;
+  }
+  a[x/8] |= (1<<(x%8));
+}
+void cs_difference(cs_t a,cs_t b) {
+  for (let i = 0; i < BUCKETS; i++)
+    a[i] &= ~b[i];
+}
+void cs_complement(cs_t a) {
+  for (let i = 0; i < BUCKETS; i++)
+    a[i] = ~a[i];
+}
+cs_t cs_dup(cs_t a) {
+  return new {for i<BUCKETS: a[i]};
+}
+cs_t cs_empty() {
+  return new {for i<BUCKETS: (unsigned char)0};
+}
+cs_t cs_singleton(unsigned char x) {
+  let r = cs_empty();
+  cs_insert(r,x);
+  return r;
+}
+cs_t cs_full() {
+  return new {for i<BUCKETS: (unsigned char)0xff};
+}
+/* half-open interval [lb,ub) */
+cs_t cs_range(unsigned int lb, unsigned int ub) {
+  let r = cs_empty();
+  for (; lb < ub; lb++) {
+    cs_insert(r,(unsigned char)lb);
+  }
+  return r;
+}
+int cs_member(cs_t a,unsigned char c) {
+  return (a[c/8] & (1<<(c%8))) != 0;
+}
+/* Returns correct bounds IF cs not empty */
+$(unsigned char,unsigned char) cs_bounds(cs_t rng) {
+  unsigned int min = MAXCSCHAR;
+  unsigned int max = 0;
+  for (unsigned int i = 0; i <= MAXCSCHAR; i++) {
+    if (!cs_member(rng,(unsigned char)i)) continue;
+    min = i;
+    max = i;
+    break;
+  }
+  for (unsigned int i = MAXCSCHAR; i >min; i--) {
+    if (!cs_member(rng,(unsigned char)i)) continue;
+    max = i;
+    break;
+  }
+  return $((unsigned char)min,(unsigned char)max);
+}
+
+static const char ?cs_char_escape(unsigned int c) {
+  if (isprint(c) && c != ' ' && c != ',' && c != '-')
+    return aprintf("%c",(unsigned char)c);
+  else return aprintf("0x%x",c);
+}
+#include <buffer.h>
+const char ?cs2string(cs_t rng) {
+  if (is_cs_empty(rng)) return "<EMPTY>";
+
+  let b = Buffer::create(32);
+  int state = 0;
+  int first_print = 1;
+  unsigned int left_edge = 0;
+  for (unsigned int i = 0; i <= MAXCSCHAR; i++) {
+    if (state != cs_member(rng,(unsigned char)i)) {
+      if (!state) left_edge = i;
+      else {
+	if (!first_print) Buffer::add_char(b,','); else first_print = 0;
+	if (left_edge == i-1) Buffer::add_string(b,cs_char_escape(left_edge));
+	else if (left_edge == i-2) {
+          Buffer::add_string(b,cs_char_escape(left_edge));
+          Buffer::add_char(b,',');
+          Buffer::add_string(b,cs_char_escape(i-1));
+        }
+	else {
+          Buffer::add_string(b,cs_char_escape(left_edge));
+          Buffer::add_char(b,'-');
+          Buffer::add_string(b,cs_char_escape(i-1));
+        }
+      }
+      state = !state;
+    }
+  }
+  if (state) {
+    if (!first_print) Buffer::add_char(b,',');
+    if (left_edge == 255) Buffer::add_string(b,cs_char_escape(255));
+    else if (left_edge == 254) {
+      Buffer::add_string(b,cs_char_escape(left_edge));
+      Buffer::add_char(b,',');
+      Buffer::add_string(b,cs_char_escape(255));
+    }
+    else {
+      Buffer::add_string(b,cs_char_escape(left_edge));
+      Buffer::add_char(b,'-');
+      Buffer::add_string(b,cs_char_escape(255));
+    }
+  }
+  //  return Buffer::extract(b);
+  return Buffer::contents(b);
+}
+void cs_print(FILE @f,cs_t rng) {
+  fprintf(f,"%s",cs2string(rng));
+}
+rule_t cs2rule(cs_t rng) {
+  if (is_cs_empty(rng)) return LIT(""); // FIX: maybe should be FAIL?
+  List::list_t<rule_t> cs = NULL;
+
+  int state = 0;
+  unsigned int left_edge = 0;
+  for (unsigned int i = 0; i <= MAXCSCHAR; i++) {
+    if (state != cs_member(rng,(unsigned char)i)) {
+      if (!state) left_edge = i;
+      else {
+        cs = new List::List(CHARRANGE(left_edge,i-1),cs);
+      }
+      state = !state;
+    }
+  }
+  if (state) {
+    cs = new List::List(CHARRANGE(left_edge,MAXCSCHAR),cs);
+  }
+  if (!cs) return LIT(""); // impossible; prevents NULL check warning
+  let result = cs->hd;
+  cs = cs->tl;
+  for (; cs; cs = cs->tl)
+    result = ALT(result,cs->hd);
+  return result;
+}
+
+static List::list_t<$(const char ?,cs_t)@> known_cs = NULL;
+static void add_cs(const char ?`H r, cs_t rng) {
+  known_cs = new List::List(new $(r,rng),known_cs);
+}
+static int is_known_cs(const char ?x) {
+  for (let r = known_cs; r; r = r->tl) {
+    let &$(n,_) = r->hd;
+    if (strcmp(n,x) == 0) return 1;
+  }
+  return 0;
+}
+int is_cs(rule_t r) {
+  if (r->a) return false; // TODO: how to handle cs with semantic actions?
+  switch (r->r) {
+  case &Minus(r2,r3):
+    return is_cs(r2) && is_cs(r3);
+  case &Alt(r2,r3):
+    return is_cs(r2) && is_cs(r3);
+  case &Symb(x,_):
+    return is_known_cs(x);
+  case &Lit(x):
+    return (strlen(x) == 1);
+  case &CharRange(_,_):
+    return 1;
+  case &Seq(_,_):
+  case &Prose(_):
+  case &Opt(_):
+  case &Rcount(_,_):
+  case &Star(_,_,_):
+  case &Hash(_,_,_):
+    return 0;
+  }
+}
+/* Return the set of characters defined by rule, or the empty cs
+   if the rule does not seem to define a set of characters. */
+static cs_t rule2cs(rule_t r) {
+  switch (r->r) {
+  case &Symb(x,_):
+    for (let t = known_cs; t; t = t->tl) {
+      let &$(n,rng) = t->hd;
+      if (strcmp(n,x) == 0) return rng;
+    }
+    fprintf(stderr,"Internal error: rule2cs called on non-character-set %s\n",x);
+    return new {for i<BUCKETS: (unsigned char)0};
+  case &CharRange(a,b):
+    let result = new {for i<BUCKETS: (unsigned char)0};
+    for (unsigned int i = a; i<=b && i<=MAXCSCHAR; i++) {
+      let j = i/8;
+      let k = i%8;
+      result[j] = (unsigned char)(result[j] | (1<<k));
+    }
+    return result;
+  case &Lit(x):
+    if (strlen(x) == 1) {
+      let c = x[0];
+      if (isalpha(c))
+        /* String literals are case insensitive */
+        return rule2cs(ALT(CHARRANGE(tolower(c),tolower(c)),
+                           CHARRANGE(toupper(c),toupper(c))));
+      else
+        return rule2cs(CHARRANGE(c,c));
+    }
+    else {
+      fprintf(stderr,"Internal error: rule2cs called on non-character-set\n");
+      return new {for i<BUCKETS: 0};
+    } 
+  case &Minus(r2,r3):
+    let x = rule2cs(r2);
+    let y = rule2cs(r3);
+    return new {for i<BUCKETS: (unsigned char)(x[i] & ~y[i])};
+  case &Alt(r2,r3):
+    let x = rule2cs(r2);
+    let y = rule2cs(r3);
+    return new {for i<BUCKETS: (unsigned char)(x[i] | y[i])};
+  case &Seq(_,_):
+  case &Prose(_):
+  case &Opt(_):
+  case &Rcount(_,_):
+  case &Star(_,_,_):
+  case &Hash(_,_,_):
+    fprintf(stderr,"Internal error: rule2cs called on non-character-set\n");
+    return new {for i<BUCKETS: (unsigned char)0};
+  }
+}
+static void mark_cs(grammar_t ds) {
+  /* NB: ASSUME DS IS SORTED!! */
+  for (let x = ds; x; x = x->tl) {
+    let &$(n,r,_) = x->hd;
+    if (is_cs(r)) add_cs(n,rule2cs(r));
+  }
+}
+static int contains_minus(rule_t r) {
+  switch (r->r) {
+  case &Symb(_,_):
+  case &CharRange(_,_):
+  case &Lit(_):
+  case &Prose(_):
+    return 0;
+  case &Minus(r2,r3):
+    return 1;
+  case &Seq(r2,r3): fallthru(r2,r3);
+  case &Alt(r2,r3):
+    return contains_minus(r2) || contains_minus(r3);
+  case &Opt(r2): fallthru(r2);
+  case &Rcount(_,r2): fallthru(r2);
+  case &Star(_,_,r2): fallthru(r2);
+  case &Hash(_,_,r2):
+    return contains_minus(r2);
+  }
+}
+static rule_t minus_elim_rule(rule_t r) {
+  switch (r->r) {
+  case &Minus(r2,r3):
+    break; /* See below */
+  case &Alt(r2,r3):
+    return ALT_r(r,minus_elim_rule(r2),minus_elim_rule(r3));
+  case &Symb(_,_):
+  case &CharRange(_,_):
+  case &Lit(_):
+  case &Prose(_):
+    return r;
+  case &Seq(r2,r3):
+    return SEQ_r(r,minus_elim_rule(r2),minus_elim_rule(r3));
+  case &Opt(r2):
+    return OPT_r(r,minus_elim_rule(r2));
+  case &Rcount(c,r2):
+    return RCOUNT_r(r,c,minus_elim_rule(r2));
+  case &Star(m,N,r2):
+    return STAR_r(r,m,N,minus_elim_rule(r2));
+  case &Hash(m,N,r2):
+    return HASH_r(r,m,N,minus_elim_rule(r2));
+  }
+  /* Minus case */
+  let rng = rule2cs(r);
+  List::list_t<rule_t> rngs = NULL;
+  int mark = 0;
+  let state = 0; /* last saw 0 or 1 */
+  for (let i = 0; i<BUCKETS; i++) {
+    for (let j = 0; j<8; j++) {
+      let new_state = (rng[i] & (1<<j)) != 0;
+      // fprintf(stderr,"%d",new_state);
+      if (new_state && !state)
+	mark = i*8+j;
+      else if (!new_state && state)
+	rngs = new List::List(CHARRANGE(mark,i*8+j-1),rngs);
+      state = new_state;
+    }
+    // fprintf(stderr,"\n");
+  }
+  if (state)
+    rngs = new List::List(CHARRANGE(mark,255),rngs);
+  if (rngs == NULL) {
+    fprintf(stderr,"Internal error: no cs in minus_elim_rule\n");
+    return r;
+  }
+  let result = rngs->hd;
+  for (let t = rngs->tl; t; t = t->tl)
+    result = ALT(t->hd,result);
+  result->a = r->a; // Preserve any semantic action
+  return result;
+}
+grammar_t minus_elim(grammar_t<`H> ds) {
+  ds = sort_definitions(ds);
+  mark_cs(ds);
+  let result = NULL;
+  for (let t = ds; t; t = t->tl) {
+    let &$(n,r,a) = t->hd;
+    if (is_known_cs(n)) { /* This is not actually needed for minus elimination... */
+      /* ...the point is to compress ("a"|..|"z") so DFA conversion is faster */
+      /* FIX: this can eliminate some ambiguities, e.g., ("a"|"b"|"a") */
+      let symb = SYMB_r(r,n); // Preserve any semantic action
+      result = new List::List(new $(n,cs2rule(rule2cs(symb)),a),result);
+    }
+    else if (contains_minus(r))
+      result = new List::List(new $(n,minus_elim_rule(r),a),result);
+    else 
+      result = new List::List(t->hd,result);
+  }
+  result = List::imp_rev(result);
+  return result;
+}
+
+List::list_t<$(unsigned int,unsigned int)@> cs2ranges(cs_t a) {
+  let empty_so_far = 1;
+  let in_range = 0;
+  unsigned int lb = 0;
+  let result = NULL;
+  for (unsigned int i = 0; i < MAXCSCHAR+1; i++) {
+    if (cs_member(a,i)) {
+      if (!in_range) {
+        empty_so_far = 0;
+        lb = i;
+        in_range = 1;
+      }
+    }
+    else if (in_range) {
+      in_range = 0;
+      result = new List::List(new $(lb,i),result);
+    }
+  }
+  if (in_range)
+    result = new List::List(new $(lb,MAXCSCHAR+1),result);
+  result = List::imp_rev(result);
+  return result;
+}

@@ -1,0 +1,1721 @@
+<   A legal Internet host domain name
+              or an IPv4 address using the textual representation
+                 defined in Section 2.1 of RFC 1123 [9]
+              or an IPv6 address using the textual representation
+                 defined in Section 2.2 of RFC 2373 [10].  The IPv6
+                 address MUST be enclosed in "[" and "]"
+                 characters.>
+=
+<UNDEFINED>
+.
+< ALPHA or DIGIT or "-" >
+=
+ALPHA | DIGIT | "-"
+.
+< KD ( H(A1),     unq(nonce-value)
+                                          ":" nc-value
+                                          ":" unq(cnonce-value)
+                                          ":" unq(qop-value)
+                                          ":" H(A2)
+                                  ) <">
+=
+32LHEX <">
+.
+< KD ( H(A1), unq(nonce-value) ":" H(A2) ) >
+=
+32LHEX <">
+.
+< KD ( H(A1), unquoted nonce-value ":" H(A2) >
+=
+<UNDEFINED>
+.
+< any CHAR  except CTL's  or separators>
+=
+(CHAR - (CTL | separators))
+.
+< any TEXT-UTF8  excluding "("  and ")">
+=
+(TEXT-UTF8 - ("(" | ")" ))
+.
+< any one of the 128 ASCII characters, but
+                  not any special or SP >
+=
+(%d0-127 - (special | SP))
+.
+< implementation dependent status information >
+=
+<UNDEFINED>
+.
+< the OCTETs  making up the field-value
+                            and consisting of either *TEXT-UTF8
+                            or combinations of token,
+                            separators, and quoted-string>
+=
+<UNDEFINED>
+.
+< user's password >
+=
+<UNDEFINED>
+.
+<"message" as defined in RFC 822,
+                     with all header fields optional, and with the
+                     specified delimiter not occurring anywhere in
+                     the message body, either on a line by itself
+                     or as a substring anywhere.>
+=
+<UNDEFINED>
+.
+<"message" as defined in RFC 822,
+             with all header fields optional, and with the
+             specified delimiter not occurring anywhere in
+             the message body, either on a line by itself
+             or as a substring anywhere.  Note that the
+             semantics of a part differ from the semantics
+             of a message, as described in the text.>
+=
+<UNDEFINED>
+.
+<"message" as defined in RFC 822,
+            with all header fields optional, and with the
+            specified delimiter not occurring anywhere in
+            the message body, either on a line by itself
+            or as a substring anywhere.>
+=
+<UNDEFINED>
+.
+<"message" as defined in RFC 822, with all
+                   header fields optional, not starting with the
+                   specified dash-boundary, and with the
+                   delimiter not occurring anywhere in the
+                   body part.  Note that the semantics of a
+                   part differ from the semantics of a message,
+                   as described in the text.>
+=
+<UNDEFINED>
+.
+<"{", "}", "*", and any ps-char
+                                                      except ".">
+=
+"{" | "}" | "*" | (ps-char - ".")
+.
+<"{", "}", "*", and any ps-char
+                                                except ".">
+=
+"{" | "}" | "*" | (ps-char - ".")
+.
+<"{", "}", "*", and any ps-char
+                                                except "/" and "=" >
+=
+"{" | "}" | "*" | (ps-char - ("/" | "="))
+.
+<"{", "}", "*", and any ps-char
+                                              except ".">
+=
+"{" | "}" | "*" | (ps-char - ".")
+.
+<"{", "}", "*", and any ps-char
+                                         except ".">
+=
+"{" | "}" | "*" | (ps-char - ".")
+.
+<"{", "}", "*", and any ps-char
+                                         except "/" and "=" >
+=
+"{" | "}" | "*" | (ps-char - ("/" | "="))
+.
+<"{", "}", "*", and any ps-char
+                                 except "/" and "=">
+=
+"{" | "}" | "*" | (ps-char - ("/" | "="))
+.
+<%d32-%d255 except nl>
+=
+(%d32-255 - LF)
+.
+<%d32-%d255 except specialbyte>
+=
+(%d32-255 - specialbyte)
+.
+<%d32-126 except specialbyte>
+=
+(%d32-126 - specialbyte)
+.
+<%d32-255, except specialbyte>
+=
+(%d32-255 - specialbyte)
+.
+<%d33-127 except specialbyte>
+=
+(%d33-127 - specialbyte)
+.
+<%d33-255, except specialbyte>
+=
+(%d33-255 - specialbyte)
+.
+<'>
+=
+"'"
+.
+<*text as defined below,
+                            with LWSP wrapping>
+=
+<UNDEFINED>
+.
+<0..dkLen-1>
+=
+<UNDEFINED>
+.
+<8..15>
+=
+<UNDEFINED>
+.
+<A "B" binary encoded string as defined by [RFC 2047].>
+=
+<UNDEFINED>
+.
+<A "b" encoded text value as defined in [RFC 2047]>
+=
+<UNDEFINED>
+.
+<A IANA registered iCalendar version identifier>
+=
+<UNDEFINED>
+.
+<A legal Internet host domain name
+                            or IP address (in dotted-decimal form),
+                            as defined by Section 2.1 of RFC 1123>
+=
+<UNDEFINED>
+.
+<A legal Internet host domain name
+                         or IP address (in dotted-decimal form),
+                         as defined by Section 2.1 of RFC 1123>
+=
+<UNDEFINED>
+.
+<A legal Internet host domain name of IP address
+                 (in dotted decimal form), as defined by Section 2.1
+                 of RFC 1123 \cite{rfc1123}>
+=
+<UNDEFINED>
+.
+<A publicly-defined extension token. Tokens
+                    of this form must be registered with IANA
+                    as specified in RFC 2048.>
+=
+<UNDEFINED>
+.
+<A publicly-defined extension token. Tokens
+                 of this form must be registered with IANA
+                 as specified in RFC 2048.>
+=
+<UNDEFINED>
+.
+<A single date value as defined in [MIME-DIR]>
+=
+<UNDEFINED>
+.
+<A single float value as defined in [MIME-DIR]>
+=
+<UNDEFINED>
+.
+<A single text  value as defined in [CCITT
+                         E.163] and [CCITT X.121]>
+=
+<UNDEFINED>
+.
+<A single time value as defined in [MIME-DIR]>
+=
+<UNDEFINED>
+.
+<A uri value as defined in [MIME-DIR]>
+=
+<UNDEFINED>
+.
+<ALPHA or DIGIT>
+=
+ALPHA | DIGIT
+.
+<ALPHA or DIGIT or HYPHEN>
+=
+ALPHA | DIGIT | HYPHEN
+.
+<ASCII 1..255,
+              except LF (linefeed) and CR (carriage return)>
+=
+(%d1-255 - (LF | CR))
+.
+<ASCII CR (carriage return)>
+=
+%d13
+.
+<ASCII CR, carriage return>
+=
+%d13
+.
+<ASCII CR, carriage return, %x0D>
+=
+%d13
+.
+<ASCII HT, horizontal-tab>
+=
+HT
+.
+<ASCII LF (linefeed)>
+=
+LF
+.
+<ASCII LF, line feed, %x0A>
+=
+LF
+.
+<ASCII LF, linefeed>
+=
+LF
+.
+<ASCII SI, shift in>
+=
+<UNDEFINED>
+.
+<ASCII SO, shift out>
+=
+<UNDEFINED>
+.
+<ASCII SP, space>
+=
+SP
+.
+<ASCII TAB (tab)>
+=
+HT
+.
+<ASCII space, %x20>
+=
+SP
+.
+<An extension token defined by a
+                    standards-track RFC and registered
+                    with IANA.>
+=
+<UNDEFINED>
+.
+<An extension token defined by a
+                 standards-track RFC and registered
+                 with IANA.>
+=
+<UNDEFINED>
+.
+<Any CHAR except SPACE, CTLs, and cspecials>
+=
+(CHAR - (SPACE | CTL | cspecial))
+.
+<Any CHAR except SPACE, CTLs, and especials>
+=
+(CHAR - (SPACE | CTL | especial))
+.
+<Any CHAR except SPACE, CTLs, and tspecials>
+=
+(CHAR - (SPACE | CTL | tspecial))
+.
+<Any RFC 822 header field which
+                              begins with the string
+                              "Content-">
+=
+<UNDEFINED>
+.
+<Any RFC 822 header field which
+                           begins with the string
+                           "Content-">
+=
+<UNDEFINED>
+.
+<Any field which has not been defined
+                    in this specification or published as an
+                    extension to this specification; names for
+                    such fields must be unique and may be
+                    pre-empted by published extensions>
+=
+<UNDEFINED>
+.
+<Any field which has not been defined in
+               this specification or published as an extension to
+               this specification; names for such fields must be
+               unique and may be preempted by putlished
+               extensions>
+=
+<UNDEFINED>
+.
+<Any field which is defined in a document
+                    published as a formal extension to this
+                    specification; none will have names beginning
+                    with the string "X-">
+=
+<UNDEFINED>
+.
+<Any field which is defined in a document
+               published as a formal extension to this
+               specification>
+=
+<UNDEFINED>
+.
+<Any printable ASCII character other
+                     than "?" or SPACE>
+=
+<UNDEFINED>
+.
+<Any printable ASCII character other than "?"
+                     or SPACE>
+=
+<UNDEFINED>
+.
+<As defined by any IETF RFC>
+=
+<UNDEFINED>
+.
+<As defined for 'Filter' by RFC 2533 [6]>
+=
+<UNDEFINED>
+.
+<As defined in ISO 639:1988>
+=
+<UNDEFINED>
+.
+<BearerEncoding>
+=
+<UNDEFINED>
+.
+<BearerInformation>
+=
+<UNDEFINED>
+.
+<COUNT0>
+=
+<UNDEFINED>
+.
+<CR LF (decimal 13 10)>
+=
+CRLF
+.
+<CRLF>
+=
+CRLF
+.
+<CallId>
+=
+<UNDEFINED>
+.
+<Capabilities>
+=
+<UNDEFINED>
+.
+<Characters 0-255 (decimal) except specialchar>
+=
+(%d0-255 - specialchar)
+.
+<ConnectionId>
+=
+<UNDEFINED>
+.
+<ConnectionMode>
+=
+<UNDEFINED>
+.
+<ConnectionParameters>
+=
+<UNDEFINED>
+.
+<Content-ID>
+=
+<UNDEFINED>
+.
+<DIGIT>
+=
+DIGIT
+.
+<DetectEvents>
+=
+<UNDEFINED>
+.
+<DigitMap>
+=
+<UNDEFINED>
+.
+<EGP>
+=
+<UNDEFINED>
+.
+<EventStates>
+=
+<UNDEFINED>
+.
+<Extension constraint predicate, not defined here>
+=
+<UNDEFINED>
+.
+<FIPS-5 corresponding name>
+=
+<UNDEFINED>
+.
+<FIPS-5 name>
+=
+<UNDEFINED>
+.
+<FIPS-5 state alpha code>
+=
+<UNDEFINED>
+.
+<FIPS-5 state numeric code>
+=
+<UNDEFINED>
+.
+<FIPS-55 name with remarks>
+=
+<UNDEFINED>
+.
+<FIPS-55 name without remarks>
+=
+<UNDEFINED>
+.
+<FIPS-55 place numeric code>
+=
+<UNDEFINED>
+.
+<FIPS-55 state alpha code>
+=
+<UNDEFINED>
+.
+<FQDN>
+=
+<UNDEFINED>
+.
+<Feature tag, as defined in RFC 2506 [3]>
+=
+<UNDEFINED>
+.
+<HEX excluding "0">
+=
+(HEX - "0")
+.
+<IGP>
+=
+<UNDEFINED>
+.
+<INCOMPLETE>
+=
+<UNDEFINED>
+.
+<INTEGER or OBJECT IDENTIFIER>
+=
+<UNDEFINED>
+.
+<ISO 2022 ESC, escape>
+=
+<UNDEFINED>
+.
+<ISO 2022 SI, shift-in>
+=
+<UNDEFINED>
+.
+<ISO 2022 SO, shift-out>
+=
+<UNDEFINED>
+.
+<ISO-8859-1>
+=
+<UNDEFINED>
+.
+<LocalConnectionOptions>
+=
+<UNDEFINED>
+.
+<NADF registered name>
+=
+<UNDEFINED>
+.
+<NL>
+=
+<UNDEFINED>
+.
+<NotifiedEntity>
+=
+<UNDEFINED>
+.
+<ObservedEvents>
+=
+<UNDEFINED>
+.
+<POS-DIGIT>
+=
+<UNDEFINED>
+.
+<POSIX 1003.2 regular expressions>
+=
+<UNDEFINED>
+.
+<QUOTED_CHAR>
+=
+QUOTED_CHAR
+.
+<QuarantineHandling>
+=
+<UNDEFINED>
+.
+<ReasonCode>
+=
+<UNDEFINED>
+.
+<RequestIdentifier>
+=
+<UNDEFINED>
+.
+<RequestedEvents>
+=
+<UNDEFINED>
+.
+<RequestedInfo>
+=
+<UNDEFINED>
+.
+<ResponseAck>
+=
+<UNDEFINED>
+.
+<RestartDelay>
+=
+<UNDEFINED>
+.
+<RestartMethod>
+=
+<UNDEFINED>
+.
+<S-HTTP cryptopt lines described below>
+=
+<UNDEFINED>
+.
+<STRIP0>
+=
+<UNDEFINED>
+.
+<SecondConnectionID>
+=
+<UNDEFINED>
+.
+<SecondEndpointID>
+=
+<UNDEFINED>
+.
+<SignalRequests>
+=
+<UNDEFINED>
+.
+<SpecificEndpointID>
+=
+<UNDEFINED>
+.
+<TELNET ASCII carriage return>
+=
+CR
+.
+<TELNET ASCII horizontal-tab>
+=
+HT
+.
+<TELNET ASCII linefeed>
+=
+LF
+.
+<TELNET ASCII space>
+=
+SP
+.
+<TEXT excluding ":">
+=
+(TEXT - ":")
+.
+<TEXT, excluding CR, LF>
+=
+(TEXT - (CR | LF))
+.
+<TEXT-UTF8,  excluding CR, LF>
+=
+(TEXT-UTF8 - (CR | LF))
+.
+<Text identifying a language, as defined in [RFC 1766]>
+=
+<UNDEFINED>
+.
+<The language code defined in RFC1766>
+=
+<UNDEFINED>
+.
+<The language code defined in RFC1766 [ALVE95]>
+=
+<UNDEFINED>
+.
+<The two characters "X-" followed, with no
+                       intervening white space, by any token>
+=
+<UNDEFINED>
+.
+<The two characters "X-" or "x-" followed, with
+                 no intervening white space, by any token>
+=
+"X-" token
+.
+<The two characters "X-" or "x-" followed, with
+              no  intervening white space, by any token>
+=
+"X-" token
+.
+<The two characters "X-" or "x-" followed, with no
+              intervening white space, by any token>
+=
+"X-" token
+.
+<UNICODE-1-1-UTF-8>
+=
+<UNDEFINED>
+.
+<UNICODE-2-0-UTF-8>
+=
+<UNDEFINED>
+.
+<URI>
+=
+<UNDEFINED>
+.
+<URI-Reference>
+=
+<UNDEFINED>
+.
+<URL:http://a/b/c/g>
+=
+<UNDEFINED>
+.
+<US-ASCII CR, carriage return (13)>
+=
+CR
+.
+<US-ASCII LF, linefeed (10)>
+=
+LF
+.
+<US-ASCII SP, space (32)>
+=
+SP
+.
+<US-ASCII coded character 20 hexadecimal>
+=
+%x20
+.
+<US-ASCII coded characters 00-1F and 7F hexadecimal>
+=
+%x0-1f | 0x7f
+.
+<US-ASCII or quoted-printable encoded
+                   ISO-8859-1 or UTF-8 except nl and sp>
+=
+<UNDEFINED>
+.
+<Visible (printable) UTF8-encoded characters>
+=
+<UNDEFINED>
+.
+<WS cmd-param>
+=
+<UNDEFINED>
+.
+<X-Token>
+=
+<UNDEFINED>
+.
+<a "field-name", the exact field-names which are
+		      valid will be presented later>
+=
+<UNDEFINED>
+.
+<a Uniform Resource Locator,
+                            as defined in [6]>
+=
+<UNDEFINED>
+.
+<a host name>
+=
+<UNDEFINED>
+.
+<a language string as defined in RFC 1766>
+=
+<UNDEFINED>
+.
+<a publicly-defined extension token,
+               registered with IANA, as specified in
+               appendix E>
+=
+<UNDEFINED>
+.
+<a publicly-defined extension token,
+             registered with IANA, as specified in
+             appendix E>
+=
+<UNDEFINED>
+.
+<a publicly-defined extension token, registered
+                        with IANA, as specified in Section 9 of this
+                        document>
+=
+<UNDEFINED>
+.
+<a publicly-defined valuetype format, registered
+                     with IANA, as defined in section 15 of this
+                     document>
+=
+<UNDEFINED>
+.
+<a standard OTP challenge>
+=
+<UNDEFINED>
+.
+<a-z, A-Z, 0-9, and "-">
+=
+%d97-122 | %d65-90 | %d48-57 | "-"
+.
+<a-z, A-Z, 1-9, and "-">
+=
+%d97-122 | %d66-90 | %d48-57 | "-"
+.
+<active duration>
+=
+<UNDEFINED>
+.
+<address>
+=
+<UNDEFINED>
+.
+<address type>
+=
+<UNDEFINED>
+.
+<addressType>
+=
+<UNDEFINED>
+.
+<adjustment time>
+=
+<UNDEFINED>
+.
+<alpha-numeric>
+=
+<UNDEFINED>
+.
+<altbase>
+=
+<UNDEFINED>
+.
+<althostport>
+=
+<UNDEFINED>
+.
+<an encoded IA5 String>
+=
+<UNDEFINED>
+.
+<any  (ASCII) CHAR except SPACE, CTLs, or tspecials>
+=
+(CHAR - (SPACE | CTL | tspecial))
+.
+<any (ASCII) CHAR except SPACE, CTLs,
+                   or tspecials>
+=
+(CHAR - (SPACE | CTL | tspecial))
+.
+<any (US-ASCII) CHAR except SPACE, CTLs,
+                     "*", "'", "%", or tspecials>
+=
+(CHAR - (SPACE | CTL | "*" | "'" | "%" | tspecial))
+.
+<any (US-ASCII) CHAR except SPACE, CTLs,
+                 or tspecials>
+=
+(CHAR - (SPACE | CTL | tspecial))
+.
+<any (US-ASCII) CHAR except SPACE, CTLs,
+              or tspecials>
+=
+(CHAR - (SPACE | CTL | tspecial))
+.
+<any 0-255 octet value>
+=
+%d0-255
+.
+<any 7BIT, including bare CR & bare LF,
+                        but NOT including CRLF, and not including
+                        ESC, SI, SO>
+=
+(%d0-127 - (%d14-15 | %d27))
+.
+<any 7BIT, including bare CR & bare LF, but NOT
+                          including CRLF, and not including ESC, SI, SO>
+=
+(%d0-127 - (%d14-15 | %d27))
+.
+<any 8-bit sequence of data>
+=
+%d0-255
+.
+<any ASCII alphabetic character>
+=
+%d97-122 | %d66-90
+.
+<any ASCII character>
+=
+%d0-127
+.
+<any ASCII character except "=", SPACE,  or TAB>
+=
+(%d0-127 - ("=" | SP | HT))
+.
+<any ASCII character except "=", SPACE, or TAB>
+=
+(%d0-127 - ("=" | SP | HT))
+.
+<any ASCII control           ; (  0- 37,  0.- 31.)
+                     character and DEL>
+=
+%d0-31 | %d127
+.
+<any ASCII control           ; (  0- 37,  0.- 31.)
+                    character and DEL>
+=
+%d0-31 | %d127
+.
+<any ASCII decimal digit>
+=
+%d48-57
+.
+<any ASTRING-CHAR except "+">
+=
+(ASTRING-CHAR - "+")
+.
+<any CHAR except
+                            ";", "\", and CTLS>
+=
+(CHAR - (";" | "\" | CTL))
+.
+<any CHAR except ":" and CTLs>
+=
+(CHAR - (":" | CTL))
+.
+<any CHAR except ";","\", and CTLS>
+=
+(CHAR - (";" | "\" | CTL))
+.
+<any CHAR except CR and LF>
+=
+(CHAR - (CR | LF))
+.
+<any CHAR except CTLs or separators>
+=
+(CHAR - (CTL | separator))
+.
+<any CHAR except CTLs or tspecials>
+=
+(CHAR - (CTL | tspecial))
+.
+<any CHAR except LWSP, CTLs, or ",">
+=
+<UNDEFINED>
+.
+<any CHAR except SPACE, CTLs,
+                                "<", ">
+=
+(CHAR - (SP | CTL | "<" | ">"))
+.
+<any CHAR except SPACE, CTLs, or tspecials>
+=
+(CHAR - (SP | CTL | tspecial))
+.
+<any CHAR except atom-specials>
+=
+(CHAR - atom-specials)
+.
+<any CHAR except specials (other than "@"
+                              and "."), SPACE,
+                              CTL, "_", and "#">
+=
+(CHAR - ((special - ("@" | ".")) | SP | CTL | "_" | "#"))
+.
+<any CHAR except specials and CTLs>
+=
+(CHAR - (special | CTL))
+.
+<any CHAR except specials, SPACE and CTLs>
+=
+(CHAR - (special | SP | CTL))
+.
+<any CHAR except specials, SPACE,
+                                 CTL, "_", and "#">
+=
+(CHAR - (special | SP | CTL | "_" | "#"))
+.
+<any CHAR excluding "(", ")", CR, LF and
+               including linear-white-space>
+=
+<UNDEFINED>
+.
+<any CHAR excluding SP, COMMA and all control
+                           characters (US ASCII 0-31 inclusive)>
+=
+(CHAR - (SP | "," | CTL))
+.
+<any CHAR, excluding CTLs, SPACE, and ":">
+=
+(CHAR - (CTL | SP | ":"))
+.
+<any CHAR, including bare CR & bare LF, but NOT
+                      including CRLF, and not including ESC, SI, SO>
+=
+<UNDEFINED>
+.
+<any OCTET except CTLs>
+=
+(OCTET - CTL)
+.
+<any OCTET except CTLs,
+                           but including LWS>
+=
+LWS | (OCTET - CTL)
+.
+<any OCTET except CTLs,
+                        but including LWS>
+=
+LWS | (OCTET - CTL)
+.
+<any OCTET excluding ALPHA, DIGIT,
+                           reserved, extra, safe, and unsafe>
+=
+(OCTET - (ALPHA | DIGIT | reserved | extra | safe | unsafe))
+.
+<any OCTET excluding ALPHA, DIGIT,
+                        reserved, extra, safe, and unsafe>
+=
+(OCTET - (ALPHA | DIGIT | reserved | extra | safe | unsafe))
+.
+<any TELNET ASCII alphabetic character>
+=
+%d97-122 | %d66-90
+.
+<any TELNET ASCII character>
+=
+%d0-127
+.
+<any TELNET ASCII control character and DEL>
+=
+%d0-31 | %d127
+.
+<any TELNET ASCII digit>
+=
+%d48-57
+.
+<any TEXT-CHAR except "]">
+=
+(TEXT-CHAR - "]")
+.
+<any TEXT-CHAR except quoted-specials>
+=
+(TEXT-CHAR - quoted-specials)
+.
+<any TEXT except <">>
+=
+(TEXT - <">)
+.
+<any TEXT excluding "(" and ")">
+=
+(TEXT - ("(" | ")"))
+.
+<any US-ASCII character (octets 0 - 127)>
+=
+%d0-127
+.
+<any US-ASCII control character
+                              (octets 0 - 31) and DEL (127)>
+=
+%d0-31 | %d127
+.
+<any US-ASCII control character
+                           (octets 0 - 31) and DEL (127)>
+=
+%d0-31 | %d127
+.
+<any US-ASCII control character
+                        (octets 0 - 31) and DEL (127)>
+=
+%d0-31 | %d127
+.
+<any US-ASCII control character
+                     (octets 0 -- 31) and DEL (127)>
+=
+%d0-31 | %d127
+.
+<any US-ASCII digit "0".."9">
+=
+%d48-57
+.
+<any US-ASCII lowercase letter "a".."z">
+=
+%d97-122
+.
+<any US-ASCII uppercase letter "A".."Z">
+=
+%d66-90
+.
+<any UTF-8 character encoding, except CTLs,
+                      but including LWS>
+=
+LWS | (UTF-8 - CTL)
+.
+<any VALUE-CHAR except , or \ or newline>
+=
+(VALUE-CHAR - ("," | "\" | %d10))
+.
+<any char in 94-char set>
+=
+<UNDEFINED>
+.
+<any character except "\" or QUOTATION >
+=
+(%d0-127 - ("\" | QUOTATION))
+.
+<any character except one of special, "\" or QUOTATION >
+=
+(%d0-127 - (special | "\" | QUOTATION))
+.
+<any digit (0-9)>
+=
+%d48-57
+.
+<any octet with decimal value of 33 through
+                  60 inclusive, and 62 through 126>
+=
+%d33-60 | %d62-126
+.
+<any octet with decimal value of 33 through
+               60 inclusive, and 62 through 126>
+=
+%d33-60 | %d62-126
+.
+<any one of 94 values>
+=
+<UNDEFINED>
+.
+<any one of 96 values>
+=
+<UNDEFINED>
+.
+<any sequence of octets formed from the UTF-8 [9]
+                       transformation of a character from ISO10646 [10]>
+=
+<UNDEFINED>
+.
+<any upper or lowercase alphabetic character
+                  (A-Z a-z)>
+=
+%d66-90 | %d97-122
+.
+<any upper or lowercase alphabetic character
+                 (A-Z a-z)>
+=
+%d66-90 | %d97-122
+.
+<any upper or lowercase alphabetic character (A-Z a-z)>
+=
+%d66-90 | %d97-122
+.
+<any valid word in the standard OTP coding
+                      dictionary>
+=
+<UNDEFINED>
+.
+<any-char, except """, space, tab>
+=
+<UNDEFINED>
+.
+<atom>
+=
+<UNDEFINED>
+.
+<atom / string>
+=
+<UNDEFINED>
+.
+<att-field>
+=
+<UNDEFINED>
+.
+<attribute>
+=
+<UNDEFINED>
+.
+<bandwidth>
+=
+<UNDEFINED>
+.
+<base64 [4] encoding of user-pass,
+                       except not limited to 76 char/line>
+=
+base64
+.
+<base64 [5] encoding of userid-password,
+                            except not limited to 76 char/line>
+=
+base64
+.
+<base64 [7] encoding of user-pass,
+                           except not limited to 76 char/line>
+=
+base64
+.
+<base64 of 128 bit MD5 digest as per RFC 1864>
+=
+base64
+.
+<bchars>
+=
+<UNDEFINED>
+.
+<company, school, etc.>
+=
+<UNDEFINED>
+.
+<compressionAlgorithm>
+=
+<UNDEFINED>
+.
+<computation as described above represented as HEX>
+=
+<UNDEFINED>
+.
+<connection address>
+=
+<UNDEFINED>
+.
+<date>
+=
+<UNDEFINED>
+.
+<digitized compressed portrait>
+=
+<UNDEFINED>
+.
+<domain>
+=
+<UNDEFINED>
+.
+<dqstring / sqstring / quoted-pair>
+=
+<UNDEFINED>
+.
+<echoCancellation>
+=
+<UNDEFINED>
+.
+<email address>
+=
+<UNDEFINED>
+.
+<encoded digest output>
+=
+<UNDEFINED>
+.
+<encryptionKey>
+=
+<UNDEFINED>
+.
+<encryptionmethod>
+=
+<UNDEFINED>
+.
+<endpointName>
+=
+<UNDEFINED>
+.
+<entity-body encoded as per Transfer-Encoding>
+=
+<UNDEFINED>
+.
+<experimental command arguments>
+=
+""
+.
+<file name>
+=
+<UNDEFINED>
+.
+<file-id>
+=
+<UNDEFINED>
+.
+<first m. last>
+=
+<UNDEFINED>
+.
+<fmt list>
+=
+<UNDEFINED>
+.
+<format list>
+=
+<UNDEFINED>
+.
+<format list#1>
+=
+<UNDEFINED>
+.
+<format list#2>
+=
+<UNDEFINED>
+.
+<gainControl>
+=
+<UNDEFINED>
+.
+<hash algorithms from section 3.2.4.8>
+=
+<UNDEFINED>
+.
+<how authors are verified off-line>
+=
+<UNDEFINED>
+.
+<identity of T>
+=
+<UNDEFINED>
+.
+<ietf39-mbone@uni-koeln.de>
+=
+<UNDEFINED>
+.
+<integer>
+=
+<UNDEFINED>
+.
+<last three digits of FIPS-55
+                                    place code>
+=
+<UNDEFINED>
+.
+<linebreak>
+=
+<UNDEFINED>
+.
+<list of hashes>
+=
+<UNDEFINED>
+.
+<list of offsets from start-
+     time>
+=
+<UNDEFINED>
+.
+<list_mailbox>
+=
+<UNDEFINED>
+.
+<maddr-param>
+=
+<UNDEFINED>
+.
+<mailbox>
+=
+<UNDEFINED>
+.
+<matchtype>
+=
+<UNDEFINED>
+.
+<md5,sha, etc.>
+=
+<UNDEFINED>
+.
+<media>
+=
+<UNDEFINED>
+.
+<method>
+=
+<UNDEFINED>
+.
+<method-param>
+=
+<UNDEFINED>
+.
+<mjh@isi.edu>
+=
+<UNDEFINED>
+.
+<network type>
+=
+<UNDEFINED>
+.
+<networkType>
+=
+<UNDEFINED>
+.
+<new line sequence appropriate for the context
+                        in which OTP is being used>
+=
+<UNDEFINED>
+.
+<newline as defined by OS convention>
+=
+<UNDEFINED>
+.
+<nil>
+=
+<UNDEFINED>
+.
+<nothing>
+=
+<UNDEFINED>
+.
+<number of ports>
+=
+<UNDEFINED>
+.
+<official name of region>
+=
+<UNDEFINED>
+.
+<offset>
+=
+<UNDEFINED>
+.
+<or as appropriate>
+=
+<UNDEFINED>
+.
+<other-param>
+=
+<UNDEFINED>
+.
+<packetizationPeriod>
+=
+<UNDEFINED>
+.
+<parameter value, according to the named parameter>
+=
+<UNDEFINED>
+.
+<parameterString>
+=
+<UNDEFINED>
+.
+<password>
+=
+<UNDEFINED>
+.
+<payloadType#1>
+=
+<UNDEFINED>
+.
+<payloadType#2>
+=
+<UNDEFINED>
+.
+<personal name>
+=
+<UNDEFINED>
+.
+<phone number>
+=
+<UNDEFINED>
+.
+<port>
+=
+<UNDEFINED>
+.
+<ps-char not including ".">
+=
+(ps-char - ".")
+.
+<ps-delim, and any ps-char except ".">
+=
+ps-delim | (ps-char - ".")
+.
+<ps-delim, and any ps-char except "/"
+                              and "=">
+=
+ps-delim | (ps-char - ("/" | "="))
+.
+<quoted-string not containing any ";">
+=
+<UNDEFINED>
+.
+<raw password>
+=
+<UNDEFINED>
+.
+<referral_response_code>
+=
+<UNDEFINED>
+.
+<registered character set name>
+=
+<UNDEFINED>
+.
+<registered language tag [RFC-1766]>
+=
+<UNDEFINED>
+.
+<repeat interval>
+=
+<UNDEFINED>
+.
+<resourceReservation>
+=
+<UNDEFINED>
+.
+<responseCode>
+=
+<UNDEFINED>
+.
+<responseString>
+=
+<UNDEFINED>
+.
+<rtcpIPaddr>
+=
+<UNDEFINED>
+.
+<see [RFC 822]>
+=
+<UNDEFINED>
+.
+<see [RFC822] "fields" and [MIME1] "body-part">
+=
+<UNDEFINED>
+.
+<session description>
+=
+<UNDEFINED>
+.
+<session id>
+=
+<UNDEFINED>
+.
+<session name>
+=
+<UNDEFINED>
+.
+<sessionID>
+=
+<UNDEFINED>
+.
+<sessionName>
+=
+<UNDEFINED>
+.
+<silenceSuppression>
+=
+<UNDEFINED>
+.
+<sp>
+=
+SP
+.
+<space>
+=
+SP
+.
+<specialbyte except
+                       ":" " " tab nl>
+=
+(specialbyte - (":" | SP | HT | LF))
+.
+<start time>
+=
+<UNDEFINED>
+.
+<startTime>
+=
+<UNDEFINED>
+.
+<stop time>
+=
+<UNDEFINED>
+.
+<stopTime>
+=
+<UNDEFINED>
+.
+<stored password verifier>
+=
+<UNDEFINED>
+.
+<string>
+=
+<UNDEFINED>
+.
+<subtype>
+=
+<UNDEFINED>
+.
+<supportedModes>
+=
+<UNDEFINED>
+.
+<supportedPackages>
+=
+<UNDEFINED>
+.
+<tab>
+=
+<UNDEFINED>
+.
+<tag>
+=
+<UNDEFINED>
+.
+<tag-spec>
+=
+<UNDEFINED>
+.
+<textual representation of an X.400 O/R addr>
+=
+<UNDEFINED>
+.
+<the ASCII characters making up the field-body, as
+                    defined in the following sections, and consisting
+                    of combinations of atom, quoted-string, and
+                    specials tokens, or else consisting of texts>
+=
+<UNDEFINED>
+.
+<the ASCII double quotation mark character '"' decimal 34>
+=
+%d34
+.
+<the OCTETs making up the field-value
+                           and consisting of either *TEXT or combinations
+                           of token, tspecials, and quoted-string>
+=
+*TEXT | *(token | tspecial | quoted-string)
+.
+<the OCTETs making up the field-value
+                        and consisting of either *TEXT or combinations
+                        of token, separators, and quoted-string>
+=
+*TEXT | *(token | tspecial | quoted-string)
+.
+<the OCTETs making up the field-value
+                        and consisting of either *TEXT or combinations
+                        of token, tspecials, and quoted-string>
+=
+*TEXT | *(token | tspecial | quoted-string)
+.
+<the OCTETs making up the field-value and
+                              consisting of either *TEXT or
+                              combinations of token, tspecials, and
+                              quoted-string>
+=
+*TEXT | *(token | tspecial | quoted-string)
+.
+<the TELNET ASCII characters making up the
+               field-body, as defined in the following sections,
+               and consisting of combinations of atom, quoted-
+               string, and specials tokens, or else consisting of
+               texts>
+=
+<UNDEFINED>
+.
+<the comma character (ASCII decimal code 44)>
+=
+","
+.
+<the space character (ASCII decimal code 32)>
+=
+SP
+.
+<transaction-id>
+=
+<UNDEFINED>
+.
+<transport>
+=
+<UNDEFINED>
+.
+<transport#1>
+=
+<UNDEFINED>
+.
+<transport#2>
+=
+<UNDEFINED>
+.
+<transport-param>
+=
+<UNDEFINED>
+.
+<ttl-param>
+=
+<UNDEFINED>
+.
+<typeOfNetwork>
+=
+<UNDEFINED>
+.
+<typeOfService>
+=
+<UNDEFINED>
+.
+<unicast-address>
+=
+<UNDEFINED>
+.
+<unsigned seconds since Unix epoch represented as HEX>
+=
+<UNDEFINED>
+.
+<uric>
+=
+<UNDEFINED>
+.
+<url>
+=
+<UNDEFINED>
+.
+<user name of person who submitted the job>
+=
+<UNDEFINED>
+.
+<user-id>
+=
+<UNDEFINED>
+.
+<user-param>
+=
+<UNDEFINED>
+.
+<username>
+=
+<UNDEFINED>
+.
+<value>
+=
+<UNDEFINED>
+.
+<value used in HTML anchor NAME attribute>
+=
+<UNDEFINED>
+.
+<version>
+=
+<UNDEFINED>
+.
+<virtualConnectionId>
+=
+<UNDEFINED>
+.
+<word / WS>
+=
+<UNDEFINED>
+.

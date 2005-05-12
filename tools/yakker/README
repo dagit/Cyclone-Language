@@ -1,0 +1,83 @@
+Tools for processing the augmented BNF grammars used in IETF standards
+and documented in RFC 2234.
+
+TODO
+
+* Consider a rule like the following (from IMAP):
+    fetch-att = "ENVELOPE"|"FLAGS"|"INTERNALDATE"|("RFC822" [".HEADER"|".SIZE"|".TEXT"])|"UID"|
+                ("BODY.PEEK" section ["<" number "." nz-number ">"])|
+                ("BODY" section ["<" number "." nz-number ">"])|
+                ("BODY" ["STRUCTURE"]).
+  For the current dumb parser, it's crucial that the BODY rules be arranged in this order
+  (in fact I've rearranged them by hand).  If, e.g., ("BODY" ["STRUCTURE"]) comes first,
+  then the parser succeeds on that alternative even for BODY.PEEK and does not ever
+  consider the BODY.PEEK case, **when fetch-att is used elsewhere in context**.  In other
+  words, the parser does not back up properly.  However, why should it?  The grammar
+  has been written with no backup needed, we just need to detect that and rearrange
+  the rules for our parser.
+
+  Another IMAP example is
+    seq-number = nz-number|"*".
+    seq-range = seq-number ":" seq-number.
+    sequence-set = (seq-range|seq-number) *("," sequence-set).
+  Here seq-range needs come first in the alternatives or a parse of a sequence-set
+  can fail.
+
+  I guess another alternative is to implement backup properly.  Probably using a CPS
+  transformation.
+
+* Need to support notation %b01
+
+* Issue a warning if whitespace insertion is performed on a rule that
+  has explicit whitespace, e.g.,
+
+       Status-Line = HTTP-Version SP Status-Code SP Reason-Phrase CRLF
+
+  from the HTTP spec.
+
+* Whitespace training: given a grammar and sample inputs, try to
+  determine where whitespace needs to be inserted in order to
+  accept the inputs.
+
+* Try to detect when the language accepted by a greedy parse of a
+  grammar would differ from a non-greedy parse.
+
+* Handle recursive rules in PADS.
+
+* Detect symbols with multiple rules and check to see whether they
+  are identical.
+
+* Detect common symbols (WS, SP, etc.) and check to see whether they
+  have the usual definitions.
+
+* Add a flag for testing whether the input conforms to RFC 2234
+  (which defines augmented BNF).  It will be interesting to see
+  how often RFCs don't match.
+
+* The tools should handle case insensitivity.
+
+* Get rid of the RFCs from the repository now that we have the extractor.
+
+* Implement semantic comparison of nonrecursive rules.
+
+* Extract information about what RFCs are obsolete, etc., from the
+  master index, http://www.ietf.org/iesg/1rfc_index.txt.
+
+* For each RFC, remember what symbols it defines, check that symbols
+  defined in multiple RFCs are defined the same, and suggest RFCs to
+  import when a grammar has an undefined symbol that is defined in
+  some RFC.
+
+* Need some kind of syntax for attaching semantic actions to rules.
+
+* For the extractor: maybe we can throw away some extra "rules" for
+  symbol by looking at the rule and seeing if it contains references
+  to symbols defined by other rules -- if not it's likely not an
+  actual definition.  Another idea is to keep track of the "define"
+  symbol, sometimes the anomalous "rule" will use a different symbol,
+  e.g., "=" vs. ":=" in rfc2616.  Some RFCs use "::=", e.g., RFC 114
+  (FTP); that one also uses ";;=" but I think that's a typo.
+
+NOTES
+
+* BNF is used as early as RFC 114 (File Transfer Protocol, April 1971).

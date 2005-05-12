@@ -1,0 +1,14 @@
+#include <buffer.h>
+#include <stdio.h>
+int main() {
+  let input = NULL;
+  {
+    Buffer::T buf = Buffer::create(1024);
+    int c;
+    while ( (c = getchar()) != -1) Buffer::add_char(buf,(char)c);
+    input = Buffer::contents(buf);
+  }
+  char ?cursor = input;
+  char ?marker = input;
+#define YYMARKER marker
+#define YYCURSOR cursor

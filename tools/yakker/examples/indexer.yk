@@ -1,0 +1,179 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; indexer.yk
+;;;
+;;; Process an RFC index file (http://www.ietf.org/iesg/1rfc_index.txt)
+;;; and dump statistics.
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+entry-list = *entry { dump_table(); }. ;;; The start symbol
+entry =
+ (number "")$n ws "Not Issued." end-of-entry
+    { add_not_issued(atoi(n)); }
+| (number "")$n ws (title "")$t "." ws (authors "")$a "." ws (date "")$d "."
+    { List::list_t<char ?`H@`H,`H> comments = NULL; }
+  1*(ws (comment "")$c
+    { compress_whitespace(c); comments = new List::List(new c,comments); }
+     ) end-of-entry
+    {
+      compress_whitespace(t);
+      compress_whitespace(a);
+      compress_whitespace(d);
+      comments = List::imp_rev(comments);
+      add_entry(atoi(n),t,a,d,comments);
+    }
+  .
+end-of-entry = *(SP|HTAB) LF LF *(SP|HTAB).
+number = 1*DIGIT.
+ws = 1*([ LF ] (SP|HTAB)).
+ws-char = SP|HTAB|CR|LF.
+title =
+  "M.I.T"
+| "Correction to BBN Report No. 1822 (NIC NO 7958)"
+| (title-word "") *(ws (title-word "")) .
+title-word =
+  "(E.I.S.S.-Report"
+| "3.0/3.1"
+| "Rec."
+| ".sex"
+| 1*title-char *("." 1*title-char).
+
+title-char = ALPHA | DIGIT | "(" | ")" | "-" | ":" | "'" | "," | "/" | "#" | DQUOTE | "$" | "?" | "=" | "!" | "+" | "&" | "_" | "'" | "*" .
+authors = author-word *(ws author-word).
+author-word = 1*author-char.
+author-char = ALPHA | DIGIT | "." | "," | "(" | ")" | "'" | "-" | "/" | "`" .
+date = month ws year
+  | short-month "-" 2DIGIT "-" year
+  | "April-01-" year
+  | "1 April " year.
+year = 4DIGIT.
+month = "January" | "February" | "March" | "April" | "May" | "June"
+  | "July" | "August" | "September" | "October" | "November" | "December".
+short-month = "Jan" | "Feb" | "Mar" | "Apr" | "May" | "Jun"
+  | "Jul" | "Aug" | "Sep" | "Oct" | "Nov" | "Dec".
+comment = "(" comment-word *(ws comment-word) ")".
+comment-word = 1*comment-char.
+comment-char = ALPHA | DIGIT | "-" | ":" | "=" | "," .
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Auxilliary functions
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+{
+#include "bnf.h"
+#include "extract.h"
+#include <hashtable.h>
+#include <set.h>
+struct Info {
+  int number;
+  const char ?title;
+  const char ?authors;
+  const char ?date;
+  List::list_t<char ?@> comments;
+  grammar_t *ds_opt;
+};
+int num_entries;
+int num_not_issued;
+int num_first;
+int num_last;
+struct Set::Set<int> *indices, *obsoleted, *has_bnf, *missing_rfcs, *not_online;
+struct Hashtable::Table<int,struct Info *> *table;
+void init_globals() {
+  if (table) return;
+  table = Hashtable::create(5000,Core::intcmp,Core::identity);
+  indices = obsoleted = has_bnf = missing_rfcs = not_online = Set::empty(Core::intcmp);
+}
+static grammar_t *extract_bnf(int n) {
+  printf("."); fflush(stdout);
+  FILE *f;
+  f = fopen(aprintf("my-rfc-mirror/rfc%d.txt",n),"r");
+  if (!f) return NULL; /* We don't have the RFC */
+  grammar_t ds;
+  ds = extract_definitions(f);
+  fclose(f);
+  return new ds; /* We have the RFC and here are its rules */
+}
+void add_entry(int n,const char ?`H t, const char ?`H a,
+               const char ?`H d, List::list_t<char ?`H@`H,`H> comments) {
+  init_globals();
+  int is_not_online = 0;
+  for (let x = comments; x; x = x->tl) {
+    if (strncmp("(Obsoleted by",*x->hd,strlen("(Obsoleted by")) == 0)
+      obsoleted = Set::insert(obsoleted,n);
+    else if (strncmp("(Not online)",*x->hd,strlen("(Not online)")) == 0) {
+      not_online = Set::insert(not_online,n);
+      is_not_online = 1;
+    }
+  }
+  let ds_opt = NULL;
+  if (!is_not_online) {
+    ds_opt = extract_bnf(n);
+    if (ds_opt && *ds_opt) has_bnf = Set::insert(has_bnf,n);
+    if (!ds_opt) missing_rfcs = Set::insert(missing_rfcs,n);
+  }
+  Hashtable::insert(table,n,new Info(n,t,a,d,comments,ds_opt));
+  indices = Set::insert(indices,n);
+  num_entries++;
+  if (!num_first) num_first = n;
+  num_last = n;
+}
+void add_not_issued(int n) {
+  init_globals();
+  Hashtable::insert(table,n,NULL);
+  indices = Set::insert(indices,n);
+  num_not_issued++;
+  if (!num_first) num_first = n;
+  num_last = n;
+}
+void dump_table() {
+  printf("\n");
+  for (let s = indices; !Set::is_empty(s); ) {
+    let n = Set::choose(s);
+    s = Set::delete(s,n);
+    switch (Hashtable::lookup(table,n)) {
+    case &Info(_,t,a,d,comments,ds_opt):
+      printf("%d: %s.\n%s.\n%s.\n",n,t,a,d);
+      printf("Rules: ");
+      if (!ds_opt) printf("MISSING\n");
+      else printf("%d\n",List::length(*ds_opt));
+      for (let x = comments; x; x = x->tl)
+        printf("%s\n",*x->hd);
+      break;
+    case NULL:
+      printf("%d: Not issued.\n",n);
+      break;
+    }
+  }
+  printf("\nSummary:\n");
+  printf("There are %d current RFCs.\n",
+         num_entries - Set::cardinality(obsoleted));
+  printf("There are %d obsoleted RFCs.\n",Set::cardinality(obsoleted));
+  printf("There are %d RFCs with BNFs.\n",Set::cardinality(has_bnf));
+  printf("There are %d non-obsoleted RFCs with BNFs.\n",
+         Set::cardinality(Set::diff(has_bnf,obsoleted)));
+  for (let s = Set::diff(has_bnf,obsoleted); !Set::is_empty(s); ) {
+    let n = Set::choose(s);
+    s = Set::delete(s,n);
+    printf(" %d",n);
+  }
+  printf("There are %d numbers not issued.\n",num_not_issued);
+  printf("!! There were %d numbers neither issued nor not issued\n",
+         (num_last-num_first+1) - (num_entries+num_not_issued));
+  printf("The first RFC was numbered %d.\n",num_first);
+  printf("The last RFC was numbered %d.\n",num_last);
+  printf("There are %d RFCs not online.\n",Set::cardinality(not_online));
+  printf("There are %d missing RFCs.\n",Set::cardinality(missing_rfcs));
+  for (let s = missing_rfcs; !Set::is_empty(s); ) {
+    let n = Set::choose(s);
+    s = Set::delete(s,n);
+    printf(" %d",n);
+  }
+  printf("\n");
+//  for (int i = num_first; i <= num_last; i++) {
+//    if (!Set::member(indices,i))
+//      printf("!! Number %d is neither issued nor not issued\n",i);
+//  }
+}
+} 

@@ -1,0 +1,38 @@
+RE_ON
+OCTET = %d0-255.
+CHAR = %d0-127.
+UPALPHA = %d65-90.
+LOALPHA = %d97-122.
+DIGIT = %d48-57.
+CTL = %d0-31 | %d127.
+CR = %d13.
+LF = %d10.
+SP = %d32.
+HT = %d9.
+
+; NOT QUITE RIGHT, MUST INCLUDE LWS
+TEXT = %d32-126 | %d128-255.
+
+; <any CHAR except CTLs or separators>
+token-char = %d33 | %d35-39 | %d42-43 | %d45-46 | %d48-57 | %d63 | %d65-90 | %d94-122 | %d124 | %d126-127.
+token = 1*token-char.
+
+; NOT QUITE RIGHT, MUST INCLUDE LWS
+ctext = %d32-39 | %d42-126 | %d128-255.
+
+; NOTE WS FOR FIELD_CONTENT0 ONLY
+field-content0 .= *(token | separators | quoted-string).
+field-content = *TEXT | field-content0.
+
+; NOT QUITE RIGHT, MUST INCLUDE LWS
+Reason-Phrase = *(%d32-126 | %d128-255).
+
+; MISSING FROM MAILBOX
+WSP             = %d9 / %d32 .
+DQUOTE          = <"> .
+
+; DEFINITELY WRONG
+base64-user-pass = "XX".
+md5-digest = "XX".
+message-body = entity-body.
+

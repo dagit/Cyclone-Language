@@ -1,0 +1,74 @@
+/* Prose elimination */
+/* Copyright (C) 2005 Greg Morrisett, AT&T.
+   This file is part of the Cyclone project.
+
+   Cyclone is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   Cyclone is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Cyclone; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+#include <hashtable.h>
+#include <string.h>
+#include "prose.h"
+using List;
+
+static struct Hashtable::Table<const char ?@,rule_t,`H> *prose_table;
+
+static rule_t prose_elim_rule(rule_t r) {
+  switch (r->r) {
+  case &Prose(x):
+    let z = Hashtable::lookup_opt((_@)prose_table,new x);
+    if (z == NULL) {
+      fprintf(stderr,"Warning: could not eliminate prose: <%s>\n",x);
+      return r;
+    }
+    else return *z;
+  case &Symb(_,_):
+  case &CharRange(_,_):
+  case &Lit(_):
+    return r;
+  case &Minus(r2,r3): 
+    return MINUS_r(r,prose_elim_rule(r2),prose_elim_rule(r3));
+  case &Seq(r2,r3):
+    return SEQ_r(r,prose_elim_rule(r2),prose_elim_rule(r3));
+  case &Alt(r2,r3):
+    return ALT_r(r,prose_elim_rule(r2),prose_elim_rule(r3));
+  case &Opt(r2):
+    return OPT_r(r,prose_elim_rule(r2));
+  case &Rcount(c,r2):
+    return RCOUNT_r(r,c,prose_elim_rule(r2));
+  case &Star(m,N,r2):
+    return STAR_r(r,m,N,prose_elim_rule(r2));
+  case &Hash(m,N,r2):
+    return HASH_r(r,m,N,prose_elim_rule(r2));
+  }
+}
+
+// Annoying that this does not take a const char ?; a problem with <lexing.h>
+extern grammar_t parse_string(char ?s);
+extern const char ?prose_elim_grm;
+grammar_t prose_elim(grammar_t<`H> ds) {
+  prose_table = Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr);
+  let prose_ds = parse_string(strdup(prose_elim_grm));
+  for (; prose_ds; prose_ds = prose_ds->tl) {
+    let &$(n,r,a) = prose_ds->hd;
+    Hashtable::insert((_@)prose_table,new n,r);
+  }
+  let result = NULL;
+  for (; ds; ds = ds->tl) {
+    let &$(n,r,a) = ds->hd;
+    result = new List(new $(n,prose_elim_rule(r),a),result);
+  }
+  result = imp_rev(result);
+  return result;
+}

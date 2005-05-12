@@ -1,0 +1,392 @@
+/* termgrammar.cyc
+ * Library for specifying and printing parse trees for an ABNF grammar.
+ */
+
+/* Copyright (C) 2005 Greg Morrisett, AT&T.
+   This file is part of the Cyclone project.
+
+   Cyclone is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   Cyclone is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Cyclone; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+/*
+ Sometimes want to format a rule so that it has a tag
+   f(...)
+ Call this a *term*.
+ Sometimes, with commas only, as in the ... above.
+ Sometimes we format a rule, sometimes a list of rules.
+
+     +-------------+-----------------------------------+
+     |             |             OUTPUT                |
+     |  INPUT      |  tagged         sequence of args  |
+     |-------------+-----------------------------------+
+     |  rule       |  rule2term      rule2terms        |
+     |  rule list  |  rules2term     rules2terms       |
+     +-------------+-----------------------------------+
+ */
+
+#include "bnf.h"
+#include "pr.h"
+#include "analyze.h"
+#include "termgrammar.h"
+#include <list.h>
+#include <buffer.h>
+#include <string.h>
+using List;
+
+/* Return a possible tag from a sequence, if any */
+static
+const char ?format_tag(rule_t r) {
+  switch (r->r) {
+  case &Lit(x): return x;
+  case &Seq(r1,r2):
+    let tag_opt = format_tag(r1);
+    return (tag_opt)?tag_opt:format_tag(r2);
+  default:
+    return NULL;
+  }
+}
+
+/* If a rule expands to a unique string (the rule has arity 0),
+   return that string, else return NULL. */
+static
+const char ?rule2string(rule_t r0) {
+  let b = Buffer::create(23);
+  let rs = list(r0);
+  while (rs) {
+    let r = rs->hd;
+    switch (r->r) {
+    case &Symb(n,_):
+      if (arity_rule(r) != 0) return NULL;
+      /* FIX: need to look up rule! */
+      internal_err("rule2string needs to look up rule for symbol %s\n",n);
+      Buffer::add_string(b,n);
+      rs = rs->tl;
+      break;
+    case &Lit(x):
+      Buffer::add_string(b,x);
+      rs = rs->tl;
+      break;
+    case &Seq(r2,r3): /* Flatten r2 and r3 into the rule list */
+      rs = new List(r2,new List(r3,rs->tl));
+      break;
+
+    case &Star(m,&Num(n),r2):
+      if (m==n) {
+        let s = rule2string(r2);
+        for (let i = 0; i < m; i++) Buffer::add_string(b,s); 
+        break;
+      }
+      else return NULL;
+    case &Rcount(_,_):
+    case &Star(_,_,_):
+    case &Hash(_,_,_):
+    case &Opt(_):
+    case &Alt(_,_):
+    case &CharRange(_,_):
+      return NULL;
+    case &Prose(x): /* Should have been handled elsewhere */
+      internal_err("Unexpected Prose(%s) in rule2string\n",x);
+      return "<error>";
+    case &Minus(_,_): /* Should have been handled elsewhere */
+      internal_err("Unexpected Minus in rule2string\n");
+      return "<error>";
+    }
+  }
+  return Buffer::contents(b);
+}
+
+static
+rule_t rule2term(rule_t r0) {
+  let res = NULL;
+  let rs = list(r0);
+  while (rs) {
+    let r = rs->hd;
+    switch (r->r) {
+    case &Rcount(n,r2):
+      // FIX: what to do about n???
+      res = new List(SEQ(LIT("("),SEQ(STAR(0,new Infinity,rule2term(r2)),LIT(")"))),res);
+      rs = rs->tl;
+      break;
+    case &Star(m,N,r2): fallthru(m,N,r2);
+    case &Hash(m,N,r2):
+      res = new List(SEQ(LIT("("),SEQ(STAR(m,N,rule2term(r2)),LIT(")"))),res);
+      rs = rs->tl;
+      break;
+    case &Opt(r2):
+      res = new List(ALT(LIT("NULL"),rule2term(r2)),res);
+      rs = rs->tl;
+      break;
+    case &Alt(r1,r2):
+      let R1;
+      if (arity_rule(r1)) {
+        let tag_opt = format_tag(r1);
+        if (tag_opt)
+          R1 = SEQ(LIT(tag_opt),LIT("("),rule2term(r1),LIT(")"));
+        else
+          R1 = rule2term(r1);
+      }
+      else
+        R1 = LIT(rule2string(r1));
+
+      let R2;
+      if (arity_rule(r2)) {
+        let tag_opt = format_tag(r2);
+        if (tag_opt)
+          R2 = SEQ(LIT(tag_opt),LIT("("),rule2term(r2),LIT(")"));
+        else
+          R2 = rule2term(r2);
+      }
+      else
+        R2 = LIT(rule2string(r2));
+
+      res = new List(ALT(R1,R2),res);
+      rs = rs->tl;
+      break;
+    case &Symb(_,_):
+      if (arity_rule(r) != 0) // ELSE CASE IS NO ADD
+        res = new List(r,res);
+      rs = rs->tl;
+      break;
+    case &CharRange(min,max):
+      res = new List(r,res);
+      rs = rs->tl;
+      break;
+    case &Lit(_):
+      rs = rs->tl; // NO ADD
+      break;
+    case &Seq(r2,r3): /* Flatten r2 and r3 into the rule list */
+      rs = new List(r2,new List(r3,rs->tl));
+      break;
+    case &Prose(x): /* Should have been handled elsewhere */
+      internal_err("Unexpected Prose(%s) in rule2term\n",x);
+      rs = rs->tl;
+      break;
+    case &Minus(_,_): /* Should have been handled elsewhere */
+      internal_err("Unexpected Minus in rule2term\n");
+      rs = rs->tl;
+      break;
+    }
+  }
+  while (res) {
+    if (!res->tl) return res->hd;
+    // Notice that the res list is backwards so we build the sequence from the back
+    res = new List(SEQ(res->tl->hd,res->hd),res->tl->tl);
+  }
+  warn("Exit case\n");
+  exit(1);
+}
+
+static
+int is_term(rule_t r) {
+  if (is_cs(r)) return 1;
+  switch (r->r) {
+  case &Symb(_,_): return 1;
+  default:
+    break;
+  }
+  return !arity_rule(r); // An arity-0 rule is a term (a string literal)
+}
+
+/* Is a rule a necessary argument? */
+static
+int is_arg(rule_t r) {
+  switch (r->r) {
+  case &Symb(_,_):
+  case &Star(_,_,_):
+    return (arity_rule(r) > 0);
+  case &Alt(_,_):
+  case &Opt(_):
+  case &Rcount(_,_):
+  case &Hash(_,_,_):
+  case &CharRange(_,_):
+    return 1;
+  case &Seq(_,_):
+  case &Lit(_):
+  case &Prose(_):
+  case &Minus(_,_):
+    return 0;
+  }
+}
+
+/* Turn an Alt rule into a list of the alternatives */
+static
+list_t<rule_t> rule2alts(rule_t r) {
+  return gather_alt(r);
+}
+
+/* Turn a Seq rule into a list of the rule sequence */
+static
+list_t<rule_t> rule2seq(rule_t r0) {
+  let res = NULL;
+  let rs = list(r0);
+  while (rs) {
+    let r = rs->hd;
+    switch (r->r) {
+    case &Seq(r2,r3):
+      rs = new List(r2,new List(r3,rs->tl));
+      break;
+    case &Symb(_,_):
+    case &Alt(_,_):
+    case &Opt(_):
+    case &Rcount(_,_):
+    case &Star(_,_,_):
+    case &Hash(_,_,_):
+    case &CharRange(_,_):
+    case &Lit(_):
+    case &Prose(_):
+    case &Minus(_,_):
+      res = new List(r,res);
+      rs = rs->tl;
+      break;
+    }
+  }
+  res = imp_rev(res);
+  return res;
+}
+
+static
+list_t<rule_t> rule2args(rule_t r) {
+  return filter(is_arg,rule2seq(r));
+}
+
+static
+list_t<rule_t> ruleargs2terms(rule_t r) {
+  let args = rule2args(r);
+  return map(rule2term,args);
+}
+
+/* Separate a rule list with commas */
+static
+rule_t with_commas(list_t<rule_t> rs) {
+  if (rs == NULL) return LIT("");
+  let res = rs->hd;
+  rs = rs->tl;
+  for (; rs; rs = rs->tl)
+    res = SEQ(res,LIT(","),rs->hd);
+  return res;
+}
+
+static
+int non_zero_arity(rule_t r) {
+  /* Can't pass arity_rule to exists because it returns unsigned int instead
+     of int.  Have to do this annoying cast. */
+  return (arity_rule(r) != 0);
+}
+
+static
+$(rule_t,list_t<rule_t>)* format_tags(rule_t r0) {
+  let rs = rule2seq(r0);
+  let args = filter(is_arg,rs);
+
+  if (length(args) > 1) {
+    /* Look for an Alt which could serve as a tag */
+    list_t<rule_t,`H> revargs = NULL;
+    for (let x = args; x; x = x->tl) {
+      let r = x->hd;
+      switch (r->r) {
+      case &Alt(_,_):
+        let alts = rule2alts(r);
+        if (exists(non_zero_arity,alts)) {
+          revargs = new List(r,revargs);
+          continue;
+        }
+        else {
+          /* All alternatives have zero arity, so r can be used as a tag.
+             Gather up all the rest of the args and return. */
+          x = x->tl; // remove r from the list of args
+          for (; revargs; revargs = revargs->tl) // put back the already-examined args
+            x = new List(revargs->hd,x);
+          return new $(r,x);
+        }
+      default:
+        revargs = new List(r,revargs);
+        break;
+      }
+    }
+  }
+ litsearch:
+  /* No Alt could be a tag, look for a Lit instead */
+  for (; rs; rs = rs->tl) {
+    let r = rs->hd;
+    switch (r->r) {
+    case &Lit(_):
+      return new $(r,args);
+    default:
+      break;
+    }
+  }
+
+  /* Nothing worked */
+  return NULL;
+}
+
+static
+rule_t r2t(rule_t r) {
+  if (is_term(r))
+    return r;
+  switch (rule2args(r)) {
+  case NULL:           // Impossible unless r is arity 0 -- would have been handled above
+    break;
+  case &List(fst,NULL):
+    if (is_term(fst)) return fst;
+    switch (rule2alts(fst)) {
+    case NULL:           // Never happens
+    case &List(_,NULL):  // Happens if fst is not an Alt
+      break;
+    case &List(fst,rst): // Otherwise fst is an Alt
+      let res = r2t(fst);
+      for (; rst; rst = rst->tl)
+        res = ALT(res,r2t(rst->hd));
+      return res;
+    }
+    switch (fst->r) {
+    case &Opt(r2):
+      return ALT(LIT("NULL"),r2t(r2));
+    default:
+      break;
+    }
+    break;
+  default:
+    break;
+  }
+  switch (format_tags(r)) {
+  case NULL:
+    warn("r2t could not build a term out of:\n    ");
+    pr_rule(stderr,r);
+    fprintf(stderr,"\n");
+    return SEQ(LIT("@list("),r,LIT(")"));
+  case &$(tag,args):
+    return SEQ(tag,LIT("("),with_commas(map(r2t,args)),LIT(")"));
+  }
+}
+
+grammar_t grammar2termgrammar(grammar_t ds) {
+  init_arityt(ds);
+  let res = NULL;
+  for (; ds; ds = ds->tl) {
+    let &$(n,r,a) = ds->hd;
+//    let r2;
+//    let args = ruleargs2terms(r);
+//    if (args == NULL)
+//      r2 = LIT(n);
+//    else
+//      //      r2 = ALT(rule2term(r),SEQ(LIT(n),LIT("("),with_commas(args),LIT(")")));
+//      r2 = rule2term(r);
+//    res = new List(new $(n,r2,a),res);
+    res = new List(new $(n,r2t(r),a),res);
+  }
+  res = imp_rev(res);
+  return res;
+}

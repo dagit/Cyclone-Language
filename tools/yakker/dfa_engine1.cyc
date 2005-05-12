@@ -1,0 +1,21 @@
+#include <stdio.h>
+int main() {
+  unsigned int state, position, last_final_state, last_final_position;
+  int c;
+  state = 1;
+  position = last_final_state = last_final_position = 0;
+  while (state && (c = getchar()) != EOF) {
+    position++;
+    state = next[state][c];
+    if (final[state]) {
+      last_final_state = state;
+      last_final_position = position;
+    }
+  }
+  printf("Exit at position %d with character '%c'\n",position,c);
+  if (last_final_state)
+    printf("Last final position and state: %d,%d\n",last_final_position,last_final_state);
+  else
+    printf("No prefix was accepted\n");
+  return 0;
+}

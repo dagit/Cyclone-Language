@@ -1,0 +1,66 @@
+/************************ EXTENSIBLE ARRAYS ************************/
+/* The standard implementation of <xarray.h> is annoying because
+   it does not **automatically** extend arrays.  This is a slight
+   modification that extends arrays as necessary when storing
+   elements.
+*/
+
+/* Copyright (C) 2005 Greg Morrisett, AT&T.
+   This file is part of the Cyclone project.
+
+   Cyclone is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   Cyclone is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Cyclone; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+#include "axarray.h"
+#include <core.h>
+using Core;
+
+namespace Axarray;
+static
+void bigger(xarray_t<`a> xarr, int minsize) { // NB minsize is number of elements not index (1-based not 0-based)
+  if (xarr->num_elmts >= minsize) return;
+  else if (numelts(xarr->elmts) >= minsize) {
+    xarr->num_elmts = minsize;
+    return;
+  }
+  // Otherwise we have to grow the array
+  let newsize = minsize*2+1;
+  if (xarr->num_elmts == 0)
+    xarr->elmts = unew {for i < newsize : xarr->dflt};
+  else {
+    `a ?newarr = unew {for i < newsize : xarr->dflt};
+    for (int i=1; i < xarr->num_elmts; ++i)
+      newarr[i] = xarr->elmts[i];
+    xarr->elmts :=: newarr;
+    Core::ufree((_*)newarr); // cast to avoid warning
+  }
+  xarr->num_elmts = minsize;
+}
+`a get(xarray_t<`a> xarr, unsigned int i) {
+  if (i >= xarr->num_elmts) return xarr->dflt;
+  return xarr->elmts[i];
+}
+void set(xarray_t<`a> xarr, unsigned int i, `a a) {
+  if (i >= xarr->num_elmts) bigger(xarr,i+1);
+  xarr->elmts[i] = a;
+}
+xarray_t<`a,`r> rcreate(region_t<`r> r, int len, `a a) {
+  if (len < 0)
+    throw new Core::Invalid_argument("xarrays must have a non-negative size buffer");
+  return rnew(r) Xarray{.dflt=a,.elmts=unew {for i < len : a}, .num_elmts=0};
+}
+xarray_t<`a> create(int len, `a a) {
+  return rcreate(Core::heap_region, len, a);
+}

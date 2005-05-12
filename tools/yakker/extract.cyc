@@ -1,0 +1,309 @@
+/* Extract BNF from a document containing text and BNF.
+   Not-efficient. */
+
+/* Copyright (C) 2005 Greg Morrisett, AT&T.
+   This file is part of the Cyclone project.
+
+   Cyclone is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   Cyclone is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Cyclone; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+#include <stdio.h>
+#include <string.h>
+#include <buffer.h>
+#include <list.h>
+#include "bnf.h"
+#include "pr.h"
+#include "extract.h"
+#include "prose.h"
+
+using List;
+
+/* Return 1 if the argument looks like the first line of a rule */
+static int rule_first_line(const char ?s) {
+  /* Look for, e.g., "    fooo8 =" */
+  let len = strlen(s);
+  let maybe_starts_with_id = 0;
+  for (let i = 0; i < len; i++) {
+    switch (s[i]) {
+    case ' ':
+    case '\t':
+    case '-':
+    case '_':
+      continue;
+    case ':':
+      if (i+1<len && s[i+1] == '=') fallthru; /* the := form */
+      continue;
+    case '=':
+      return maybe_starts_with_id;
+    case c:
+      if ('a' <= c && c <= 'z') { maybe_starts_with_id = 1; continue; }
+      if ('A' <= c && c <= 'Z') { maybe_starts_with_id = 1; continue; }
+      if ('0' <= c && c <= '9') continue;
+      return 0;
+    }
+  }
+  return 0;
+}
+
+static int blank_line(const char ?s) {
+  let len = strlen(s);
+  for (let i = 0; i < len; i++) {
+    switch (s[i]) {
+    case ' ':
+    case '\t':
+    case '\r':
+      continue;
+    case '\n':
+      return 1;
+    case c:
+      return 0;
+    }
+  }
+  return 1;
+}
+
+static int page_break(const char ?s) {
+  return strlen(s) > 0 && s[0] == '\f';
+}
+
+static int indentation(const char ?s) {
+  let len = strlen(s);
+  let result = 0;
+  for (let i = 0; i < len; i++) {
+    switch (s[i]) {
+    case ' ': result++; break;
+    case '\t': result += 8; break;
+    default: goto DONE;
+    }
+  }
+ DONE:
+  return result;
+}
+
+static char ?get_line(FILE @f) {
+  let buf = Buffer::create(100);
+  int c = 0;
+  while ( (c = fgetc(f)) != '\n' && c != EOF)
+    Buffer::add_char(buf,(char)c);
+  if (c != EOF)
+    Buffer::add_char(buf,(char)c);
+  let z = Buffer::contents(buf);
+  return z;
+}
+
+/* Had to dup some functions from string because of const char?@ clash
+   with char ?@ */
+#include <core.h>
+using Core;
+static
+mstring_t<`r> my_rstrconcat_l(region_t<`r> r,list_t<char ?@>strs)
+{
+  size_t len;                           // temp
+  size_t total_len  = 0;                // sum of lengths of the strings
+  mstring_t<`r> ans;
+  region temp; {
+    list_t<size_t,`temp> lens = 
+      rnew(temp) List((size_t)0,        // save length of each string
+                      NULL);            // (with junk 0 on front)
+    list_t<size_t,`temp> end = lens;   // last cons cell in 'lens'
+    for(_ p = strs; p!=NULL; p = p->tl) {
+      len = strlen(*(p->hd));
+      total_len += len;
+      end->tl = rnew(temp) List(len,NULL);
+      end = end->tl;
+    } 
+    lens = lens->tl;                      // remove junk/temporary 0
+    ans = rnew_string(r,total_len+1);
+    size_t i = 0;
+    while (strs != NULL) {
+      let next    = *(strs->hd);
+      len            = lens->hd;
+      strncpy((char ? @nozeroterm)(ans+i),next,len);
+      i += len;
+      strs = strs->tl;
+      lens = lens->tl;
+    }
+  }
+  return ans;
+}
+
+static
+mstring_t my_strconcat_l(list_t<char ?@> strs) {
+  return my_rstrconcat_l(heap_region,strs);
+}
+
+//         maxage=0", the proxy MUST always revalidate it before re-using
+//         it
+// becomes
+// maxage = *0", the proxy MUST always revalidate it before re-using" it.
+
+extern grammar_t parse_string(char ?s);
+static list_t<char ?@> linebuf = NULL;
+static void restore_line(char ?`H@`H x) {
+  linebuf = new List(x,linebuf);
+}
+static char ?*next_line(FILE @f) {
+  if (linebuf != NULL) {
+    let x = linebuf->hd;
+    linebuf = linebuf->tl;
+    return x;
+  }
+  if (feof(f)) return NULL;
+  let line = get_line(f);
+  if (!blank_line(line)) {
+    return new line;
+  }
+  /* we're at a blank line, it could be a footer, let's look ahead and see */
+  linebuf = new List(new line,linebuf);
+  int saw_page_break = 0;
+  int one_good_line = 0;
+  while (!feof(f)) {
+    /* Keep getting lines until we see two content lines in a row */
+    line = get_line(f);
+    linebuf = new List(new line,linebuf);
+    if (blank_line(line)) { one_good_line = 0; continue; }
+    else if (page_break(line)) { saw_page_break = 1; one_good_line = 0; continue; }
+    else {
+      /* Not blank, not a page break -- a content line */
+      if (one_good_line) break; /* second in a row */
+      else { one_good_line = 1; continue; } /* keep looking */
+    }
+  }
+  if (saw_page_break) {
+    /* eliminate the header and footer */
+    let x = NULL;
+    while (linebuf) {
+      if (!page_break(*linebuf->hd)) {
+        x = new List(linebuf->hd,x); 
+        linebuf = linebuf->tl;
+      }
+      else {
+	int num_deleted = 0;
+	/* Delete up to 3 blank lines after header and before footer; otherwise it's
+	   probably a section break. */
+        if (x) x = x->tl;             /* delete following header */
+        while (num_deleted <= 3 && x && blank_line(*x->hd)) {
+          x = x->tl;                  /* delete blank lines after header */
+	  num_deleted++;
+	}
+	num_deleted = 0;
+        x = new List(linebuf->hd,x);    /* keep page break */
+        linebuf = linebuf->tl;
+        if (linebuf) linebuf = linebuf->tl; /* delete preceeding footer */
+        while (num_deleted <= 3 && linebuf && blank_line(*linebuf->hd)) {
+          linebuf = linebuf->tl;          /* delete blank lines before footer */
+	  num_deleted++;
+	}
+      }
+    }
+    linebuf = imp_rev(x);
+  }
+  linebuf = imp_rev(linebuf);
+  return next_line(f);
+}
+grammar_t extract_definitions(FILE @f) {
+  let old_print_errors = print_errors;
+  print_errors = 0; 
+  let result = NULL;
+  let check_for_rule = 0;
+  let line;
+  while (line = next_line(f)) {
+    if (blank_line(*line) || page_break(*line)) {
+      check_for_rule = 1;
+      continue;
+    }
+    if (!check_for_rule) continue;
+    if (!rule_first_line(*line)) {
+      check_for_rule = 0;
+      continue;
+    }
+    let possible_rule = new List((char ?@)line,NULL);
+    let rule_indent = indentation(*line);
+    while (line = next_line(f)) {
+      if (rule_first_line(*line)) { restore_line(line); break; }
+      if (blank_line(*line)) { restore_line(line); break; }
+      if (page_break(*line)) continue;
+      if (indentation(*line) < rule_indent) { restore_line(line); break; }
+      possible_rule = new List((char ?@)line,possible_rule);
+    }
+    let dot = new strdup(".\n");
+    possible_rule = new List(dot,possible_rule);
+    possible_rule = imp_rev(possible_rule);
+    let rule_string = my_strconcat_l(possible_rule);
+    let ds = parse_string(rule_string);
+    if (debug) {
+      if (ds)
+	fprintf(stderr,"Extracted rule(s) from:\n%s\n",rule_string);
+      else
+	fprintf(stderr,"Failed to extract rule(s) from:\n%s\n",rule_string);
+    }
+    for (; ds; ds = ds->tl)
+      result = new List(ds->hd,result);
+  }
+  result = imp_rev(result);
+  print_errors = old_print_errors;
+  return result;
+}
+static list_t<rule_t> prose_list = NULL;
+static void extract_prose_rule(rule_t r) {
+  switch (r->r) {
+  case &Prose(_):
+    prose_list = new List(r,prose_list);
+    return;
+  case &Symb(_,_):
+  case &CharRange(_,_):
+  case &Lit(_):
+    return;
+  case &Minus(r2,r3): fallthru(r2,r3);
+  case &Seq(r2,r3): fallthru(r2,r3);
+  case &Alt(r2,r3):
+    extract_prose_rule(r2);
+    extract_prose_rule(r3);
+    return;
+  case &Opt(r2): fallthru(r2);
+  case &Rcount(_,r2): fallthru(r2);
+  case &Star(_,_,r2): fallthru(r2);
+  case &Hash(_,_,r2):
+    extract_prose_rule(r2);
+    return;
+  }
+}
+static int prose_cmp(rule_t r1,rule_t r2) {
+  switch $(r1->r,r2->r) {
+  case $(&Prose(x1),&Prose(x2)):
+    return strcmp(x1,x2);
+  default:
+    /* Should never happen, we only use this on Prose */
+    return 1;
+  }
+}
+void extract_prose(FILE @f) {
+  let ds = extract_definitions(f);
+  for (let t = ds; t; t = t->tl) {
+    let &$(_,r,_) = t->hd;
+    extract_prose_rule(r);
+  }
+  /* Eliminate duplicates and print */
+  prose_list = List::merge_sort(prose_cmp,prose_list);
+  rule_t last = PROSE("");
+  for (let t = prose_list; t; t = t->tl) {
+    let p = t->hd;
+    if (prose_cmp(last,p) != 0) {
+      pr_rule(stdout,p);
+      printf("\n=\n\n.\n");
+      last = p;
+    }
+  }
+}

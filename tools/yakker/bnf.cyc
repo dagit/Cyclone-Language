@@ -1,0 +1,470 @@
+/* Copyright (C) 2005 Greg Morrisett, AT&T.
+   This file is part of the Cyclone project.
+
+   Cyclone is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   Cyclone is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Cyclone; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+#include <string.h>
+#include "bnf.h"
+#include <core.h>
+
+rule_t arule_inj(datatype Rule @`H r) {
+  return new arule(NULL,NULL,NULL,r);
+}
+
+rule_t SYMB(const char ?`H x) {
+  return arule_inj(new Symb(x,NULL));
+}
+rule_t LIT(const char ?`H x) {
+  return arule_inj(new Lit(x));
+}
+rule_t CHARRANGE(unsigned int min,unsigned int max) {
+  return arule_inj(new CharRange(min,max));
+}
+rule_t PROSE(const char ?`H x) {
+  return arule_inj(new Prose(x));
+}
+rule_t OPT(rule_t r1) {
+  return arule_inj(new Opt(r1));
+}
+rule_t SEQ(... rule_t rs) {
+  let len = numelts(rs);
+  if (len == 0) return LIT("");
+  let res = rs[0];
+  for (let i = 1; i < len; i++)
+    res = arule_inj(new Seq(res,rs[i]));
+  return res;
+}
+rule_t ALT(... rule_t rs) {
+  let len = numelts(rs);
+  if (len == 0) return LIT(""); // FIX: maybe this should match nothing, instead of the empty string
+  let res = rs[0];
+  for (let i = 1; i < len; i++)
+    res = arule_inj(new Alt(res,rs[i]));
+  return res;
+}
+rule_t RCOUNT(const char ?`H c,rule_t r1) {
+  return arule_inj(new Rcount(c,r1));
+}
+rule_t STAR(unsigned int m,repeat_t N,rule_t r1) {
+  return arule_inj(new Star(m,N,r1));
+}
+rule_t HASH(unsigned int m,repeat_t N,rule_t r1) {
+  return arule_inj(new Hash(m,N,r1));
+}
+rule_t MINUS(rule_t r1,rule_t r2) {
+  return arule_inj(new Minus(r1,r2));
+}
+rule_t SYMB_r(rule_t r,const char ?`H x) {
+  return new arule(r->a,r->p,r->v,new Symb(x,NULL));
+}
+rule_t LIT_r(rule_t r,const char ?`H x) {
+  return new arule(r->a,r->p,r->v,new Lit(x));
+}
+rule_t CHARRANGE_r(rule_t r,unsigned int min,unsigned int max) {
+  return new arule(r->a,r->p,r->v,new CharRange(min,max));
+}
+rule_t PROSE_r(rule_t r,const char ?`H x) {
+  return new arule(r->a,r->p,r->v,new Prose(x));
+}
+rule_t OPT_r(rule_t r,rule_t r1) {
+  return new arule(r->a,r->p,r->v,new Opt(r1));
+}
+rule_t SEQ_r(rule_t r,rule_t r1,rule_t r2) {
+  return new arule(r->a,r->p,r->v,new Seq(r1,r2));
+}
+rule_t ALT_r(rule_t r,rule_t r1,rule_t r2) {
+  return new arule(r->a,r->p,r->v,new Alt(r1,r2));
+}
+rule_t RCOUNT_r(rule_t r,const char ?`H c,rule_t r1) {
+  return new arule(r->a,r->p,r->v,new Rcount(c,r1));
+}
+rule_t STAR_r(rule_t r,unsigned int m,repeat_t N,rule_t r1) {
+  return new arule(r->a,r->p,r->v,new Star(m,N,r1));
+}
+rule_t HASH_r(rule_t r,unsigned int m,repeat_t N,rule_t r1) {
+  return new arule(r->a,r->p,r->v,new Hash(m,N,r1));
+}
+rule_t MINUS_r(rule_t r,rule_t r1,rule_t r2) {
+  return new arule(r->a,r->p,r->v,new Minus(r1,r2));
+}
+
+int lower_prec(rule_t r1, rule_t r2) {
+  switch $(r1->r,r2->r) {
+  case $(&Alt(_,_),&Alt(_,_)): return 0;
+  case $(&Alt(_,_),_): return 1;
+  case $(&Seq(_,_),&Seq(_,_)): return 0;
+  case $(&Seq(_,_),_): return 1;
+  case $(&Rcount(_,_),&Star(_,_,_)): return 1;
+  case $(&Rcount(_,_),&Hash(_,_,_)): return 1;
+  case $(&Rcount(_,_),&Rcount(_,_)): return 1;
+  case $(&Star(_,_,_),&Rcount(_,_)): return 1;
+  case $(&Star(_,_,_),&Star(_,_,_)): return 1;
+  case $(&Star(_,_,_),&Hash(_,_,_)): return 1;
+  case $(&Hash(_,_,_),&Rcount(_,_)): return 1;
+  case $(&Hash(_,_,_),&Star(_,_,_)): return 1;
+  case $(&Hash(_,_,_),&Hash(_,_,_)): return 1;
+  case $(&Minus(_,_),_): return 1;
+  default: return 0;
+  }
+}
+int do_ws(definition_t d) {
+  let &$(_,_,a) = d;
+  return a.ws;
+}
+int do_re(definition_t d) {
+  let &$(_,_,a) = d;
+  return a.re;
+}
+
+/* Free variables */
+#define EMPTYSET (Set::empty(strptrcmp))
+strset_t freevars_rule(rule_t r) {
+  switch (r->r) {
+  case &Symb(x,_):
+    return Set::insert(EMPTYSET,new x);
+  case &Prose(_):
+  case &CharRange(_,_):
+  case &Lit(_):
+    return EMPTYSET;
+  case &Minus(r2,r3): fallthru(r2,r3);
+  case &Seq(r2,r3): fallthru(r2,r3);
+  case &Alt(r2,r3):
+    return Set::union_two(freevars_rule(r2),freevars_rule(r3));
+  case &Opt(r2): fallthru(r2);
+  case &Rcount(_,r2): fallthru(r2);
+  case &Star(_,_,r2): fallthru(r2);
+  case &Hash(_,_,r2):
+    return freevars_rule(r2);
+  }
+}
+strset_t freevars(grammar_t ds) {
+  let result = EMPTYSET;
+  let defined = EMPTYSET;
+  for (let t = ds; t; t = t->tl) {
+    let &$(n,r,_) = t->hd;
+    defined = Set::insert(defined,new n);
+    result = Set::union_two(result,freevars_rule(r));
+  }
+  result = Set::diff(result,defined);
+  return result;
+}
+void report_undefined(grammar_t ds) {
+  let freevs = freevars(ds);
+  while (!Set::is_empty(freevs)) {
+    let freev = Set::choose(freevs);
+    warn("%s is undefined\n",*freev);
+    freevs = Set::delete(freevs,freev);
+  }
+}
+
+/* Add dependencies for n to a graph given definition r */
+static strgraph_t get_depend(strgraph_t g, str_t n, rule_t r) {
+  switch (r->r) {
+  case &Symb(x,_):
+    let xptr = new x;
+    g = Graph::add_node(g,xptr);
+    g = Graph::add_edge(g,n,xptr);
+    break;
+  case &Prose(_):
+  case &CharRange(_,_):
+  case &Lit(_):
+    break;
+  case &Minus(r2,r3): fallthru(r2,r3);
+  case &Seq(r2,r3): fallthru(r2,r3);
+  case &Alt(r2,r3):
+    g = get_depend(g,n,r2);
+    g = get_depend(g,n,r3);
+    break;
+  case &Opt(r2): fallthru(r2);
+  case &Rcount(_,r2): fallthru(r2);
+  case &Star(_,_,r2): fallthru(r2);
+  case &Hash(_,_,r2):
+    g = get_depend(g,n,r2);
+    break;
+  }
+  return g;
+}
+
+strgraph_t dependency_graph(grammar_t ds) {
+  let g = Graph::empty(strptrcmp);
+  for (let x = ds; x; x = x->tl) {
+    let &$(n,r,_) = x->hd;
+    let nptr = new n;
+    g = Graph::add_node(g,nptr);
+    g = get_depend(g,nptr,r);
+  }
+  return g;
+}
+grammar_t sort_definitions(grammar_t ds) {
+  let g = dependency_graph(ds);
+  let in_order = Graph::tsort(g);
+  in_order = List::imp_rev(in_order);
+
+  let result = NULL;
+  let undefined = Set::empty(strptrcmp);
+  /* FIX: N squared */
+  for (let x = in_order; x; x = x->tl) {
+    let &n = x->hd;
+    let found = 0;
+    for (let y = ds; y; y = y->tl) {
+      let &$(m,_,_) = y->hd;
+      if (strcmp(n,m) != 0) continue;
+      result = new List::List(y->hd,result);
+      found = 1;
+      break;
+    }
+    if (!found) {
+      undefined = Set::insert(undefined,x->hd);
+    }
+  }
+  if (!Set::is_empty(undefined)) {
+    warn("the following symbols are undefined:");
+    fprint_strset(stderr,undefined);
+  }
+  result = List::imp_rev(result);
+  return result;
+}
+static int cmp_by_name(definition_t d1, definition_t d2) {
+  let &$(n1,_,_) = d1;
+  let &$(n2,_,_) = d2;
+  return strcmp(n1,n2);
+}
+static int casecmp_by_name(definition_t d1, definition_t d2) {
+  let &$(n1,_,_) = d1;
+  let &$(n2,_,_) = d2;
+  return strcasecmp(n1,n2);
+}
+grammar_t sort_definitions_by_name(grammar_t ds) {
+  return List::merge_sort(cmp_by_name,ds);
+}
+grammar_t isort_definitions_by_name(grammar_t ds) {
+  return List::merge_sort(casecmp_by_name,ds);
+}
+
+/* Syntactic comparison of rules.  A semantic comparison would
+   be better... */
+static int repeat_cmp(repeat_t x,repeat_t y) {
+  switch $(x,y) {
+  case $(&Infinity,&Infinity): return 0;
+  case $(&Num(m),&Num(n)): return Core::intcmp(m,n);
+  case $(&Num(_),&Infinity): return -1;    
+  case $(&Infinity,&Num(_)): return 1;
+  }
+}
+int rule_cmp(rule_t r1, rule_t r2) {
+  switch $(r1->r,r2->r) {
+  case $(&Symb(x,_),&Symb(y,_)): fallthru(x,y);
+  case $(&Lit(x),&Lit(y)):  fallthru(x,y);
+  case $(&Prose(x),&Prose(y)):
+    return strcmp(x,y);
+  case $(&CharRange(a,b),&CharRange(c,d)):
+    if (a == c && b == d) return 0;
+    else if (a < c) return -1;
+    else if (a > c) return 1;
+    else if (b < d) return -1;
+    else return 1;
+  case $(&Opt(x),&Opt(y)):
+    return rule_cmp(x,y);
+  case $(&Rcount(a,x),&Rcount(b,y)):
+    let p = rule_cmp(x,y);
+    if (p != 0) return p;
+    return strcmp(a,b);
+  case $(&Minus(a,b),&Minus(c,d)): fallthru(a,b,c,d);
+  case $(&Seq(a,b),&Seq(c,d)): fallthru(a,b,c,d);
+  case $(&Alt(a,b),&Alt(c,d)):
+    let p = rule_cmp(a,c);
+    if (p != 0) return p;
+    else return rule_cmp(b,d);
+  case $(&Hash(m,N,x),&Hash(o,P,y)): fallthru(m,N,x,o,P,y);
+  case $(&Star(m,N,x),&Star(o,P,y)):
+    let p = Core::intcmp(m,o);
+    if (p != 0) return p;
+    p = repeat_cmp(N,P);
+    if (p != 0) return p;
+    return rule_cmp(x,y);
+  case $(&Symb(_,_),_): return -1;
+  case $(_,&Symb(_,_)): return 1;
+  case $(&Lit(_),_): return -1;
+  case $(_,&Lit(_)): return 1;
+  case $(&Prose(_),_): return -1;
+  case $(_,&Prose(_)): return 1;
+  case $(&CharRange(_,_),_): return -1;
+  case $(_,&CharRange(_,_)): return 1;
+  case $(&Opt(_),_): return -1;
+  case $(_,&Opt(_)): return 1;
+  case $(&Minus(_,_),_): return -1;
+  case $(_,&Minus(_,_)): return 1;
+  case $(&Seq(_,_),_): return -1;
+  case $(_,&Seq(_,_)): return 1;
+  case $(&Alt(_,_),_): return -1;
+  case $(_,&Alt(_,_)): return 1;
+  case $(&Hash(_,_,_),_): return -1;
+  case $(_,&Hash(_,_,_)): return 1;
+  case $(&Rcount(_,_),_): return -1;
+  case $(_,&Rcount(_,_)): return 1;
+  }
+}
+static int eqdef_cmp(definition_t d1,definition_t d2) {
+  let &$(n1,_,_) = d1;
+  let &$(n2,_,_) = d2;
+  return strcmp(n1,n2);
+}
+int eq_definitions(grammar_t ds_1,grammar_t ds_2) {
+  let ds1 = List::merge_sort(eqdef_cmp,ds_1);
+  let ds2 = List::merge_sort(eqdef_cmp,ds_2);
+  let res = 1;
+  while (ds1 && ds2) {
+    let &$(n1,r1,_) = ds1->hd;
+    let &$(n2,r2,_) = ds2->hd;
+    if (ds1->tl) {
+      let &$(n,_,_) = ds1->tl->hd;
+      if (strcmp(n1,n) == 0) {
+	res = 0;
+	eprintf("Symbol %s has multiple definitions in first grammar\n",n); 
+	ds1 = ds1->tl;
+	continue;
+      }
+    }
+    if (ds2->tl) {
+      let &$(n,_,_) = ds2->tl->hd;
+      if (strcmp(n2,n) == 0) {
+	res = 0;
+	eprintf("Symbol %s has multiple definitions in second grammar\n",n); 
+	ds2 = ds2->tl;
+	continue;
+      }
+    }
+    let c = strcmp(n1,n2);
+    if (c < 0) {
+      res = 0;
+      eprintf("Symbol %s is defined in first grammar but not the second\n",n1);
+      ds1 = ds1->tl;
+    }
+    else if (c > 0) {
+      res = 0;
+      eprintf("Symbol %s is defined in second grammar but not the first\n",n2);
+      ds2 = ds2->tl;
+    }
+    else if (rule_cmp(r1,r2) != 0) {
+      res = 0;
+      eprintf("Symbol %s has different definitions\n",n1);
+      ds1 = ds1->tl;
+      ds2 = ds2->tl;
+    }
+    else {
+      ds1 = ds1->tl;
+      ds2 = ds2->tl;
+    }
+  }
+  return res;
+}
+void report_multiple(grammar_t ds) {
+  let x = List::merge_sort(eqdef_cmp,ds);
+  let multiples = EMPTYSET;
+  while (x && x->tl) {
+    let &$(n1,r1,_) = x->hd;
+    let &$(n2,r2,_) = x->tl->hd;
+    if (strcmp(n1,n2) == 0)
+      multiples = Set::insert(multiples,new n1);
+    x = x->tl;
+  }
+  while (!Set::is_empty(multiples)) {
+    let nptr = Set::choose(multiples);
+    multiples = Set::delete(multiples,nptr);
+    warn("grammar contains multiple definitions for symbol %s\n",*nptr);
+  }
+}
+grammar_t remove_duplicates(grammar_t ds) {
+  let result = List::merge_sort(eqdef_cmp,ds);
+  let x = result;
+  while (x && x->tl) {
+    let &$(n1,r1,_) = x->hd;
+    let &$(n2,r2,_) = x->tl->hd;
+    if (strcmp(n1,n2) == 0) {
+      if (!rule_cmp(r1,r2)) {
+      /* Duplicate, cut it out of result */
+      x->tl = x->tl->tl;
+      continue;
+      }
+      else
+        fprintf(stderr, "Warning: grammar contains multiple (different)"
+                " definitions for symbol %s\n",n1);
+    }
+    x = x->tl;
+  }
+  return result;
+}
+
+repeat_t minus_one(repeat_t N) {
+  switch (N) {
+  case &Num(0): return N;
+  case &Num(n): return new Num(n-1);
+  case &Infinity: return N;
+  }
+}
+int repeat_zero(repeat_t N) {
+  switch (N) {
+  case &Num(0): return 1;
+  case &Num(n): return 0;
+  case &Infinity: return 0;
+  }
+}
+grammar_t get_reachable(grammar_t<`H> ds, List::list_t<const char ?@> roots) {
+  if (roots == NULL) return ds;
+  let g = dependency_graph(ds);
+  g = Graph::tc(g);
+  strset_t reachable = Set::empty(strptrcmp);
+  for (let r = roots; r; r = r->tl) {
+    let root = new (const char ?)strdup(*r->hd);
+    reachable = Set::insert(reachable,root);
+    reachable = Set::union_two(reachable,Graph::get_targets(g,root));
+  }  
+  let result = NULL;
+  for (let x = ds; x; x = x->tl) {
+    let &$(n,r,_) = x->hd; // FIX: ws
+    let nptr = new n;
+    if (Set::member(reachable,nptr))
+      result = new List::List(x->hd,result);
+  }
+  return result;
+}
+
+static
+List::list_t<rule_t> gather_alt0(rule_t r,List::list_t<rule_t,`H> l) {
+  switch (r->r) {
+  case &Alt(r2,r3):
+    return gather_alt0(r2,gather_alt0(r3,l));
+  default:
+    return new List::List(r,l);
+  }
+}
+List::list_t<rule_t> gather_alt(rule_t r) {
+  return gather_alt0(r,NULL);
+}
+
+// Annoying that this does not take a const char ?; a problem with <lexing.h>
+extern grammar_t parse_string(char ?s);
+rule_t commas() {
+  // TODO: the definition of commas varies from RFC to RFC;
+  // this one does not allow LWS for example
+  static struct arule *r = NULL;
+  if (r) return (_@)r; // cast to avoid annoying warning
+  let ds = parse_string(strdup("commas = 1*(*(%d32|%d9)%d44*(%d32|%d9))."));
+  let &$(_,c,_) = ds->hd;
+  r = c;
+  return r;
+}
+

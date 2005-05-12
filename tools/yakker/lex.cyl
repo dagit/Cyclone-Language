@@ -1,0 +1,434 @@
+{
+/* Copyright (C) 2005 Greg Morrisett, AT&T.
+   This file is part of the Cyclone project.
+
+   Cyclone is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   Cyclone is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Cyclone; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+#include <lexing.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <list.h>
+#include "bnf.h"
+#include "parse_tab.h"
+
+static unsigned int braces_to_match = 0;
+static unsigned int parens_to_match = 0;
+static unsigned int token_num = 0;
+static $(unsigned int,unsigned int) token_charrange = $(0,0);
+static datatype Rule.Lit bogus = Lit("");
+static struct arule abogus = {NULL,NULL,NULL,&bogus};
+static rule_t token_charseq = &abogus;
+static const char ?token_string = "";
+int token(Lexing::Lexbuf);
+int strng(Lexing::Lexbuf);
+int prose(Lexing::Lexbuf);
+int braces(Lexing::Lexbuf);
+int parens(Lexing::Lexbuf);
+int gobble_string(Lexing::Lexbuf);
+int gobble_comment(Lexing::Lexbuf);
+void set_token_char(const char ?s) {
+  let len = strlen(s);
+  if (len < 3) {
+    token_charrange = $(0,0);
+    return;
+  }
+  let num = atoi(substring(s,2,len-2));
+  token_charrange = $(num,num);
+}
+void set_token_charrange(const char ?s) {
+  let len = strlen(s);
+  if (len < 5) {
+    token_charrange = $(0,0);
+    return;
+  }
+  let s2 = strchr(s,'-');
+  let l1 = s2-s-2;
+  let n1 = atoi(substring(s,2,l1));
+  let n2 = atoi(substring(s2,1,strlen(s2)-1));
+  token_charrange = $(n1,n2);
+}
+void set_token_charseq(const char ?s) {
+  /* s looks like %d13.10.11.12 */
+  let len = strlen(s);
+  let result = NULL;
+  int c;
+  for (let i = 2; i < len; i++) {
+    sscanf(s+i,"%d",&c);
+    let crng = CHARRANGE(c,c);
+    result = result ? SEQ(result,crng) : crng;
+    while (i<len && s[i] != '.') i++;
+  }
+  token_charseq = (_@)result;
+}
+void set_token_char_hex(const char ?s) {
+  let len = strlen(s);
+  if (len < 3) {
+    token_charrange = $(0,0);
+    return;
+  }
+  unsigned int num;
+  sscanf(substring(s,2,len-2),"%x",&num);
+  token_charrange = $(num,num);
+}
+void set_token_charrange_hex(const char ?s) {
+  let len = strlen(s);
+  if (len < 5) {
+    token_charrange = $(0,0);
+    return;
+  }
+  let s2 = strchr(s,'-');
+  let l1 = s2-s-2;
+  unsigned int n1;
+  unsigned int n2;
+  sscanf(substring(s,2,l1),"%x",&n1);
+  sscanf(substring(s2,1,strlen(s2)-1),"%x",&n2);
+  token_charrange = $(n1,n2);
+}
+void set_token_charseq_hex(const char ?s) {
+  /* s looks like %xf2.1b.11.ee */
+  let len = strlen(s);
+  let result = NULL;
+  unsigned int c;
+  for (let i = 2; i < len; i++) {
+    sscanf(s+i,"%x",&c);
+    let crng = CHARRANGE(c,c);
+    result = result ? SEQ(result,crng) : crng;
+    while (i<len && s[i] != '.') i++;
+  }
+  token_charseq = (_@)result;
+}
+
+// ************************ INTEGER CONSTANTS ************************
+
+  // String to integer conversions.  Core::int_of_string does not handle
+  // all of the cases we want: it does not handle a trailing 'u', 'U',
+  // 'l', or 'L'; and in particular, it does not treat '0'['0'-'7'] as
+  // an octal number.  
+
+  // copied from Core
+static unsigned int int_of_char(char c) {
+  if ('0'<=c && c<='9')      return c-'0';
+  else if ('a'<=c && c<='f') return 10+c-'a';
+  else if ('A'<=c && c<='F') return 10+c-'A';
+  else {
+    warn("bad string to integer conversion");
+    return 0;
+  }
+}
+ 
+static char numchar(Lexing::Lexbuf<`a> lbuf, int start, int end, int base) {
+  start += lbuf->lex_start_pos;
+  char ?buff = lbuf->lex_buffer + start;
+  int          end2 = lbuf->lex_curr_pos - end;
+  int          len  = end2 - start;
+  char n = 0;
+  for (int i = 0; i < len; i++)
+    n = (char)(n*base + int_of_char(buff[i]));
+  return n;
+}
+
+// ************************* STRING CONSTANTS *************************
+char string_buffer_v[]@zeroterm = {'x','x','x','x','x','x','x','x','x','x',0};
+char ? string_buffer = (char ?)string_buffer_v;
+int    string_pos    = 0;
+void store_string_char(char c) {
+  int sz = numelts(string_buffer) - 1;
+  if (string_pos >= sz) {
+    int newsz = sz;
+    while (string_pos >= newsz) newsz = newsz * 2;
+    char ? str = new {for i < newsz : (i < sz) ? string_buffer[i] : '\000'};
+    string_buffer = str;
+  }     
+  string_buffer[string_pos] = c;
+  ++string_pos;
+}
+void store_string(string_t s) {
+  int sz = strlen(s);
+  for (int i = 0; i < sz; i++)
+    store_string_char(s[i]);
+}
+char ? get_stored_string() {
+  char ? str = substring(string_buffer,0,string_pos);
+  string_pos = 0;
+  return str;
+} 
+}
+
+let idchar0      = ['A'-'Z''a'-'z''_'] 
+let idchar       = ['A'-'Z''a'-'z''_''0'-'9''-'] 
+let digit        = ['0'-'9'] 
+let dotdigits    = '.' digit+
+let hexdigit     = ['0'-'9''a'-'f''A'-'F'] 
+let dothexdigits = '.' hexdigit+
+let newline      = '\n'
+let ws           = [' ''\t''\r''\n'] 
+
+rule token = parse
+| "("              { return LPAREN; }
+| ")"              { return RPAREN; }
+| "["              { return LBRACKET; }
+| "]"              { return RBRACKET; }
+| "*"              { return STAR_T; }
+| "#"              { return HASH_T; }
+| "="              { return DEF; }
+| ":="             { return DEF; }
+| ".="             { return DEF_WS; }
+| "@="             { return DEF_RE; }
+| ".@="            { return DEF_WSRE; }
+| "|"              { return BAR; }
+| "/"              { return BAR; }
+| "."              { return DOT; }
+| ","              { return COMMA; }
+| "WS_ON"          { return WS_ON; }
+| "WS_OFF"         { return WS_OFF; }
+| "RE_ON"          { return RE_ON; }
+| "RE_OFF"         { return RE_OFF; }
+| idchar0 idchar*  { token_string = lexeme(lexbuf); return ID; }
+| digit+           { token_num = atoi(lexeme(lexbuf)); return NUM; }
+| "%d" digit+ "-" digit+
+                   { set_token_charrange(lexeme(lexbuf)); return RANGE; }
+| "%d" digit+ dotdigits+
+                   { set_token_charseq(lexeme(lexbuf)); return CHARSEQ; }
+| "%d" digit+      { set_token_char(lexeme(lexbuf)); return RANGE; }
+| "%x" hexdigit+ "-" hexdigit+
+                   { set_token_charrange_hex(lexeme(lexbuf)); return RANGE; }
+| "%x" hexdigit+ dothexdigits+
+                   { set_token_charseq_hex(lexeme(lexbuf)); return CHARSEQ; }
+| "%x" hexdigit+   { set_token_char_hex(lexeme(lexbuf)); return RANGE; }
+| "<\">"           { token_string = "\""; return STRING; }
+| "'\"'"           { token_string = "\""; return STRING; } /* Used in RFC 989 */
+| "\""             { token_string = "";
+                     while (strng(lexbuf))
+                       /* skip */;
+                     return STRING;
+                     // string_pos = 0;
+                     // while (strng2(lexbuf))
+                     //   /* skip */;
+                     // token_string = get_stored_string();
+                     // return STRING;
+                   }
+| "<"              { token_string = "";
+                     while (prose(lexbuf))
+                       /* skip */;
+                     return PROSE_T; }
+| "{"              { token_string = "";
+                     string_pos = 0;
+                     braces_to_match = 1;
+                     while (braces(lexbuf))
+                       /* skip */;
+                     token_string = get_stored_string();
+                     return SEMACTION; }
+| "@("             { token_string = "";
+                     string_pos = 0;
+                     parens_to_match = 1;
+                     while (parens(lexbuf))
+                       /* skip */;
+                     token_string = get_stored_string();
+                     return PARAMS; }
+| "@when("         { token_string = "";
+                     string_pos = 0;
+                     parens_to_match = 1;
+                     while (parens(lexbuf))
+                       /* skip */;
+                     token_string = get_stored_string();
+                     return PRED; }
+| "@repeat("       { token_string = "";
+                     string_pos = 0;
+                     parens_to_match = 1;
+                     while (parens(lexbuf))
+                       /* skip */;
+                     token_string = get_stored_string();
+                     return RCOUNT_T; }
+| "@"              { return AT; }
+| "$("             { token_string = "";
+                     string_pos = 0;
+                     parens_to_match = 1;
+                     while (parens(lexbuf))
+                       /* skip */;
+                     token_string = get_stored_string();
+                     return DPARAMS; }
+| "$"              { return DOLLAR; }
+| "-"              { return MINUS_T; }
+| ws+              { return token(lexbuf); }
+| ";" [^'\r''\n']* { return token(lexbuf); }
+| eof              { return -1; }
+| '\000'           { return -1; } /* for null-terminated string inputs */
+| _                { warn("hit the default in lexer on character %u\n",
+                          (unsigned int)(lexeme_char(lexbuf,0)));
+                     return (int)(lexeme_char(lexbuf,0)); }
+
+and strng = parse
+  "\""             { return 0; }
+| [^ '"''\n']+     { token_string = lexeme(lexbuf); return 1; }
+| "\n"             { warn("string closed by newline\n");
+                     return 0;
+                   }
+| eof              { warn("string closed by end of file\n");
+                     return 0;
+                   }
+
+and strng2 = parse /* overkill for now, so we don't use it */
+  "\""             { return 0; }
+| "\\a"            { store_string_char('\a'); return 1; }
+| "\\b"            { store_string_char('\b'); return 1; }
+| "\\f"            { store_string_char('\f'); return 1; }
+| "\\n"            { store_string_char('\n'); return 1; }
+| "\\r"            { store_string_char('\r'); return 1; }
+| "\\t"            { store_string_char('\t'); return 1; }
+| "\\v"            { store_string_char('\v'); return 1; }
+| "\\\\"           { store_string_char('\\'); return 1; }
+| "\\'"            { store_string_char('\''); return 1; }
+| "\\\""           { store_string_char('"');  return 1; }
+| "\\?"            { store_string_char('?');  return 1; }
+/* octal character escapes */
+| "\\" ['0'-'7']['0'-'7']?['0'-'7']?
+                   { store_string_char(numchar(lexbuf,1,0,8));
+                     return 1;
+                   }
+/* hex character escapes FIX? any length okay? */
+| "\\x" ['0'-'9''A'-'F''a'-'f']+
+                   { store_string_char(numchar(lexbuf,2,0,16));
+                     return 1;
+                   }
+| [^ '"''\\''\n']+ /* NOT double quote, backslash, or newline */
+                   { store_string(lexeme(lexbuf));
+                      return 1;
+                   }
+| "\n"             { warn("string closed by newline\n");
+                     return 0;
+                   }
+| eof              { warn("string closed by end of file\n");
+                     return 0;
+                   }
+| _                { warn("bad character following backslash in string");
+                     return 1;
+                   }
+
+and prose = parse
+  ">"              { return 0; }
+| "any TEXT except <\">" /* special case from rfc2616 */
+                   { token_string = lexeme(lexbuf); return 1; }
+| [^ '>']+         { token_string = lexeme(lexbuf); return 1; }
+| eof              { warn("prose closed by end of file\n"); return 0; }
+
+and braces = parse
+/* Expects to be entered just after a left brace, searches for the
+   matching right brace, saves everything in between.
+   Braces in comments, strings, and character constants aren't counted.
+   braces_to_match should be set to 1 before calling braces. */
+ /* returns 1 if more to do, 0 if all done */
+  eof              { return 0; }
+| '}'
+                   { if (braces_to_match == 1) return 0;
+                     braces_to_match--;
+                     store_string(lexeme(lexbuf));
+                     return 1; }
+| '{'
+                   { braces_to_match++;
+                     store_string(lexeme(lexbuf));
+                     return 1; }
+| '"'
+                   { store_string(lexeme(lexbuf));
+                     while (gobble_string(lexbuf)) /* skip */;
+                     return 1; }
+| "/*"
+                   { store_string(lexeme(lexbuf));
+                     while (gobble_comment(lexbuf)) /* skip */;
+                     return 1; }
+| "//" [^'\n''\r']*
+                   { store_string(lexeme(lexbuf));
+                     return 1; }
+| _
+                   { store_string(lexeme(lexbuf));
+                     return 1; }
+
+/* Unlike strng above, this assumes C conventions for backslash-quote, backslash-backslash */
+and gobble_string = parse /* returns 1 if more to do, 0 if all done */
+  eof              { warn("unclosed string\n"); return 0; }
+| "\""
+                   { store_string(lexeme(lexbuf)); return 0; }
+| newline
+                   { store_string(lexeme(lexbuf)); warn("unclosed string\n"); return 1; }
+| "\\" newline
+                   { store_string(lexeme(lexbuf)); return 1; }
+| "\\\""
+                   { store_string(lexeme(lexbuf)); return 1; }
+| "\\\\"
+                   { store_string(lexeme(lexbuf)); return 1; }
+| _
+                   { store_string(lexeme(lexbuf)); return 1; }
+
+and gobble_comment = parse /* returns 1 if more to do, 0 if all done */
+  eof              { warn("unclosed comment\n"); return 0; }
+| "*/"      /* Assumes that comments can't be nested */
+                   { store_string(lexeme(lexbuf)); return 0; }
+| _
+                   { store_string(lexeme(lexbuf)); return 1; }
+
+and parens = parse
+/* Expects to be entered just after a left paren, searches for the
+   matching right paren, saves everything in between.
+   Parens in comments, strings, and character constants aren't counted.
+   parens_to_match should be set to 1 before calling parens. */
+ /* returns 1 if more to do, 0 if all done */
+  eof              { return 0; }
+| ')'
+                   { if (parens_to_match == 1) return 0;
+                     parens_to_match--;
+                     store_string(lexeme(lexbuf));
+                     return 1; }
+| '('
+                   { parens_to_match++;
+                     store_string(lexeme(lexbuf));
+                     return 1; }
+| '"'
+                   { store_string(lexeme(lexbuf));
+                     while (gobble_string(lexbuf)) /* skip */;
+                     return 1; }
+| "/*"
+                   { store_string(lexeme(lexbuf));
+                     while (gobble_comment(lexbuf)) /* skip */;
+                     return 1; }
+| "//" [^'\n''\r']*
+                   { store_string(lexeme(lexbuf));
+                     return 1; }
+| _
+                   { store_string(lexeme(lexbuf));
+                     return 1; }
+
+{
+int yylex(Lexing::Lexbuf<Lexing::Function_lexbuf_state<FILE@>> lbuf,
+          union YYSTYPE @yylval) { 
+ int ans = token(lbuf);
+ switch (ans) {
+ case CHARSEQ:   *yylval = YYSTYPE{.Rule_tok = token_charseq}; break;
+ case RANGE:     *yylval = YYSTYPE{.Range_tok = token_charrange}; break;
+ case NUM:       *yylval = YYSTYPE{.Int_tok = token_num}; break;
+ case ID:
+ case STRING:
+ case PROSE_T:
+ case SEMACTION:
+ case PARAMS:
+ case DPARAMS:
+ case PRED:
+ case RCOUNT_T:
+   *yylval = YYSTYPE{.String_tok = token_string}; break;
+ default: break;
+ }
+ return ans;
+} 
+}

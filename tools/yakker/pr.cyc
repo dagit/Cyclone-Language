@@ -1,0 +1,132 @@
+/* Copyright (C) 2005 Greg Morrisett, AT&T.
+   This file is part of the Cyclone project.
+
+   Cyclone is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   Cyclone is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Cyclone; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+#include <stdio.h>
+#include <string.h>
+#include <graph.h>
+#include "bnf.h"
+#include "pr.h"
+
+List::list_t<$(const char ?,const char ?)@> renamings = NULL;
+static const char ?rename_pr(const char ?`H name) {
+  for (let x = renamings; x; x = x->tl) {
+    let &$(a,b) = x->hd;
+    if (strcmp(name,a) == 0) return b;
+  }
+  return name;
+}
+void pr_repeat(FILE @f,repeat_t rp) {
+  switch (rp) {
+  case &Num(n): fprintf(f,"%d",n); break;
+  case &Infinity: fprintf(f,"&"); break;
+  }
+}
+void pr_rule(FILE @f,rule_t r);
+static void pr_rule_paren(FILE @f,rule_t r) {
+  fprintf(f,"("); pr_rule(f,r); fprintf(f,")");
+}
+void pr_rule(FILE @f,rule_t r) {
+  if (r->v) {
+    switch (r->r) {
+    case &Seq(_,_): fprintf(f,"("); break;
+    default: break;
+    }
+  }
+  switch (r->r) {
+  case &Prose(x):
+    /* FIX */
+    fprintf(f,"<%s>",x); break;
+    break;
+  case &Symb(x,y):
+    fprintf(f,"%s",rename_pr(x));
+    if (y) fprintf(f,"@(%s)",y);
+    break;
+  case &CharRange(low,high):
+    if (low == high) fprintf(f,"%%d%d",low);
+    else fprintf(f,"%%d%d-%d",low,high);
+    break;
+  case &Lit(x):
+    if (strcmp("\"",x) == 0) fprintf(f,"<\">");
+    else fprintf(f,"\"%s\"",x);
+    break;
+  case &Opt(r2):
+    fprintf(f,"["); pr_rule(f,r2); fprintf(f,"]"); break;
+  case &Rcount(c,r2):
+    fprintf(f,"@repeat(%s)",c); pr_rule(f,r2); break;
+  case &Seq(r2,r3):
+    if (lower_prec(r2,r)) pr_rule_paren(f,r2); else pr_rule(f,r2);
+    fprintf(f," ");
+    if (lower_prec(r3,r)) pr_rule_paren(f,r3); else pr_rule(f,r3);
+    break;
+  case &Alt(r2,r3):
+    if (lower_prec(r2,r)) pr_rule_paren(f,r2); else pr_rule(f,r2);
+    fprintf(f,"|");
+    if (lower_prec(r3,r)) pr_rule_paren(f,r3); else pr_rule(f,r3);
+    break;
+  case &Star(m,&Num(n),r2):
+    if (m == n) fprintf(f,"%d",m);
+    else if (m == 0) fprintf(f,"*%d",n);
+    else fprintf(f,"%d*%d",m,n);
+    if (lower_prec(r2,r)) pr_rule_paren(f,r2); else pr_rule(f,r2);
+    break;
+  case &Star(m,&Infinity,r2):
+    if (m == 0) fprintf(f,"*");
+    else fprintf(f,"%d*",m);
+    if (lower_prec(r2,r)) pr_rule_paren(f,r2); else pr_rule(f,r2);
+    break;
+  case &Hash(m,&Num(n),r2):
+    if (m == 0) fprintf(f,"#%d",n);
+    else fprintf(f,"%d#%d",m,n);
+    if (lower_prec(r2,r)) pr_rule_paren(f,r2); else pr_rule(f,r2);
+    break;
+  case &Hash(m,&Infinity,r2):
+    if (m == 0) fprintf(f,"#");
+    else fprintf(f,"%d#",m);
+    if (lower_prec(r2,r)) pr_rule_paren(f,r2); else pr_rule(f,r2);
+    break;
+  case &Minus(r2,r3):
+    fprintf(f,"("); pr_rule_paren(f,r2); fprintf(f,"-"); pr_rule_paren(f,r3); fprintf(f,")");
+    break;
+  }
+  if (r->v) {
+    switch (r->r) {
+    case &Seq(_,_): fprintf(f,")"); break;
+    default: break;
+    }
+    fprintf(f,"$%s",r->v);
+  }
+  if (r->a)
+    fprintf(f,"{%s}",r->a);
+}
+void pr_definition(FILE @f,definition_t d) {
+  let &$(n,r,a) = d; // FIX: ws
+  fprintf(f,"%s ",rename_pr(n));
+  if (a.paramtype)
+    fprintf(f,"@(%s) ",a.paramtype);
+  if (a.rettype)
+    fprintf(f,"@(%s) ",a.rettype);
+  if (do_ws(d)) fprintf(f,".");
+  if (do_re(d)) fprintf(f,"@");
+  fprintf(f,"= ");
+  pr_rule(f,r);
+  fprintf(f,".\n");
+}
+void pr_definitions(FILE @f,grammar_t ds) {
+  for (; ds; ds = ds->tl)
+    pr_definition(f,ds->hd);
+}

@@ -1,0 +1,31 @@
+ANY = %d1-255.
+WCHAR = ((ANY - WSP) - LF) .
+word$(const char ?) = (1*WCHAR)$w { return w; }.
+line = *WSP LF
+     | *WSP word$w1 {add(w1);} *(1*WSP word$w2 {add(w2);}) *WSP LF.
+file = "" { init_globals(); } *line { report(); }.
+{
+#include <hashtable.h>
+struct Hashtable::Table<const char ?@,int> *table;
+void init_globals() {
+  if (table) return;
+  table = Hashtable::create(5000,strptrcmp,Hashtable::hash_stringptr);
+}
+void add(const char ?`H w) {
+  let wptr = new w;
+  int n = 0;     
+  if (Hashtable::try_lookup(table,wptr,&n)) {
+    Hashtable::remove(table,wptr);
+    Hashtable::insert(table,wptr,++n);
+  }
+  else Hashtable::insert(table,wptr,1);
+}
+void report_item(const char ?@wptr,int n) {
+  printf("%s: %d\n",*wptr,n);
+}
+void report() {
+  Hashtable::iter(report_item,table);
+}
+
+//
+}

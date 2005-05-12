@@ -1,0 +1,192 @@
+/* Copyright (C) 2005 Greg Morrisett, AT&T.
+   This file is part of the Cyclone project.
+
+   Cyclone is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   Cyclone is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Cyclone; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+#include <unistd.h>
+#include <stdio.h>
+#include <errno.h>
+#include <string.h>
+
+#define BSIZE 8192
+//#define UINTCAST (unsigned int)(unsigned char *{0}@nozeroterm)
+
+#include "buf.h"
+
+yybuf_t @fd2yybuf(int fd) {
+  let buf = malloc(BSIZE*sizeof(unsigned char));
+  let result = new yybuf{
+    .fd = fd,
+    .bot=buf,
+    .save=NULL,
+    .mark=NULL,
+    .cur=buf,
+    .lim=buf,
+    .top=buf+BSIZE,
+    .eof=0,
+    .save_count=0,
+    .discarded=0};
+  return result;
+}
+
+// TODO: this is annoying, we have to copy the string.
+// Actually it should not be necessary because we never
+// modify the string, unlike when we need to fill a buffer.
+yybuf_t @string2yybuf(const char ?s) {
+  let len = strlen(s);
+  let buf = malloc((len+1)*sizeof(unsigned char));
+  memcpy(buf,s,len);
+  buf[len] = '\0';
+  let result = new yybuf{
+    .fd = 0,
+    .bot=buf,
+    .save=NULL,
+    .mark=NULL,
+    .cur=buf,
+    .lim=buf,
+    .top=buf+BSIZE,
+    .eof=1,
+    .save_count=0,
+    .discarded=0};
+  return result;
+}
+
+/*
+  bot points to the memory object obtained from malloc.
+  top points one past the end of the memory object obtained from malloc.
+  lim points one past the end of the input currently in memory.
+  save is NULL if no input needs to be saved on a fill,
+    else save points at the first character of the input to save.
+  save_count is used to handle nested saves.  When it goes to zero, save should be NULL'd.
+  eof records whether end-of-file has been reached.  Note, re2c does it
+    a bit differently, eof is a pointer, allows the sentinel to be a legal input character,
+    at the cost of a comparison when a (possible) sentinel is under YYCURSOR.
+
+  mark is set by scanners, it points one past the last input which reached a final state.
+    It is kept as part of the yybuf_t because it has to be adjusted on fill.
+
+  discarded records the number of characters discarded by yyfill.  It is
+  useful to find the position of the current character with respect to
+  the complete input.
+
+  Scanners should call YYSAVE on entry and YYRESTORE on exit, because they may have to
+    back up to the longest match.
+
+  These invariants are maintained by yyfill:
+  If save == NULL bot < lim <= top
+  If save != NULL bot <= save < lim <= top
+
+  These invariants should be maintained by users of the library:
+  save == NULL iff save_count == 0
+
+  Here are the definitions for using yybuf_t in a scanner or parser.
+  They assume two variables, yyb of type yybuf_t, and yycursor of type
+  unsigned char ?@nozeroterm.
+
+#define YYLIMIT yyb->lim
+#define YYCURSOR yycursor
+#define YYFILL(n) (yycursor = yyfill(yyb,yycursor))
+#define YYMARKER yyb->mark
+//#define YYSAVE ((yyb->save)?(yyb->save_count++):((yyb->save=yycursor),yyb->save_count++))
+//#define YYDISCARD ((--yyb->save_count)?0:(yyb->save==NULL))
+#define YYSAVE ({ let x = 0; yyb->save_count++; if (yyb->save) x = yycursor-yyb->save; else yyb->save = yycursor; x; })
+#define YYRESTORE(x) ({ let p = yyb->save+x; if (--yyb->save_count == 0) yyb->save=NULL; p; })
+*/
+
+void yyfill(yybuf_t @s,unsigned int n) {
+  if (n < (s->lim - s->cur)) return;
+  if (!s->eof) {
+    int TO_READ = BSIZE;
+    int cnt;
+    if (s->save) {
+      // discard chars from bot to save, keep chars from save to lim
+      cnt = s->save - s->bot;
+      if (cnt) {
+        memcpy(s->bot, s->save, s->lim - s->save);
+        s->save = s->bot;
+        s->mark -= cnt;
+        s->cur -= cnt;
+        s->lim -= cnt;
+        s->discarded += cnt;
+      }
+    }
+    // Invariant: (s->save == NULL || s->save == s->bot)
+    // We want to read in TO_READ chars.  Resize the buffer if not enough space.
+    if ((s->top - s->lim) < TO_READ) {
+      unsigned char ?@nozeroterm buf = malloc(((s->lim - s->bot) + TO_READ)*sizeof(unsigned char));
+      memcpy(buf, s->bot, s->lim - s->bot);
+      if (s->save) s->save = buf;
+      s->mark = &buf[s->mark - s->bot];
+      // s->mark = buf + (s->mark - s->bot);
+      s->cur = &buf[s->cur - s->bot];
+      //      cursor = buf + (cursor - s->bot);
+      s->lim = &buf[s->lim - s->bot];
+      s->top = &s->lim[TO_READ];
+      // TODO: free(s->bot);
+      s->bot = buf;
+    }
+    // Read in TO_READ characters
+  YYREADLOOP:
+    if ((cnt = read(s->fd, s->lim, TO_READ)) != TO_READ) {
+      if (!cnt) {                   // end-of-file
+        s->eof = 1;
+        s->lim[cnt++] = '\0'; // Invariant: cnt < TO_READ
+      }
+      else if (cnt < 0) {
+        if (errno == EINTR) {       // interrupt occurred during a slow read
+          goto YYREADLOOP;
+        }
+        else if (errno == EAGAIN) { // read from non-blocking fd, no data available
+          // TODO: maybe we should change the fill API to allow a return here?
+          goto YYREADLOOP;
+        }
+        else {                      // some other error
+          perror("Read error on fill");
+          // Act as if eof was encountered
+          s->eof = cnt = 1;
+          s->lim = '\0';          
+        }
+      }
+      else {                        // read fewer than TO_READ characters for some other reason
+        // TODO: we could change the fill API to pass in the desired number of characters,
+        // and return when we get that many, even if less than TO_READ.
+        s->lim += cnt;
+        TO_READ -= cnt;
+        goto YYREADLOOP;
+      }
+    }
+    s->lim += cnt;
+  }
+}
+
+/* This has nothing to do with buffers but it's convenient to stick it here. */
+void compress_whitespace(char ?x) {
+  if (!x) return;
+  if (!x[0]) return;
+  const int COPYING_MODE = 0;
+  const int COMPRESSING_MODE = 1;
+  int mode = (isspace(x[0])) ? COMPRESSING_MODE : COPYING_MODE;
+  int i = 0;
+  int j = 0;
+  while (x[j]) {
+    let c = x[j++];
+    let sp = isspace(c);
+    if (!sp) { mode = COPYING_MODE; x[i++] = c; }
+    else if (mode == COPYING_MODE) { x[i++] = ' '; mode = COMPRESSING_MODE; }
+  }
+  x[i--] = 0;
+  if (i > 0 && isspace(x[i])) x[i] = 0; // possible trailing whitespace
+}

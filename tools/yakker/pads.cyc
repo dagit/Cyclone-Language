@@ -1,0 +1,888 @@
+/* Copyright (C) 2005 Greg Morrisett, AT&T.
+   This file is part of the Cyclone project.
+
+   Cyclone is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   Cyclone is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Cyclone; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+/* TODO: string literal -> valid c id
+   LWS issue
+   literals in unions
+   inplace stuff in pads
+   recursion
+*/
+
+/* Convert augmented BNF to PADS */
+
+#include <core.h>
+#include <stdio.h>
+#include <list.h>
+#include <string.h>
+#include <set.h>
+#include <ctype.h>
+#include <graph.h>
+#include "bnf.h"
+#include "pr.h"
+#include "cs.h"
+#include "prose.h"
+
+using List;
+
+/* To make sure Punion tags are distinct */
+static Set::set_t<str_t> *tags = NULL;
+/* To make sure Pstruct fields are distinct */
+static Set::set_t<str_t> *fields = NULL;
+
+/* PADS NAMES */
+static int ok_firstchar(char c) {
+  return (c == '_' || isalpha(c));
+}
+static int ok_otherchar(char c) {
+  return (c == '_' || isalnum(c));
+}
+static int is_c_identifier(const char ?n) {
+  /* FIX: Needs to check for keywords */
+  let len = strlen(n);
+  if (len == 0) return 0;
+  if (!ok_firstchar(n[0])) return 0;
+  for (int i = 1; i < len; i++)
+    if (!ok_otherchar(n[i])) return 0;
+  return 1;
+}
+const char ?make_c_identifier0(const char ?`H n) {
+  let len = strlen(n); // len > 0 b/c only called from make_c_identifier
+  char ?x = calloc(len+1,sizeof(char));
+  for (int i = 0; i < len; i++) {
+    let c = n[i];
+    if (ok_otherchar(c)) x[i] = n[i];
+    else x[i] = '_';
+  }    
+  return x;
+}
+static const char ?make_c_identifier(const char ?`H n) {
+  if (is_c_identifier(n)) return n;
+
+  let len = strlen(n);
+  if (len == 0) return "ZEROLEN";
+  if (isalpha(n[0])) return make_c_identifier0(n);
+  else return aprintf("__cident_%s",make_c_identifier0(n));
+}
+Set::set_t<str_t> *defined = NULL;
+static const char ?new_definition(const char ?`H n) {
+  let nptr = new n;
+  if (Set::member(*defined,nptr))
+    fprintf(stderr,"Warning: %s defined more than once\n",n);
+  else *defined = Set::insert(*defined,nptr);
+  return make_c_identifier(n);
+}
+static const char ?fresh_name() {
+  static int count = 0;
+  return aprintf("_bnf_%d",count++);
+}
+
+/* NORMALIZATION: INTRODUCE NAMES FOR INTERMEDIARIES */
+static grammar_t nml_definitions = NULL;
+static rule_t nmlz_rule(rule_t r);
+static void add_nml_definition(const char ?`H n, rule_t r) {
+  let r2 = nmlz_rule(r);
+  nml_definitions = new List(new $(n,r2,Attr{.ws=0,.re=0,.paramtype=NULL,.rettype=NULL}), nml_definitions);
+}
+static rule_t nmlz_seq(rule_t r) {
+  switch (r->r) {
+  case &Seq(r2,r3):
+    let r22 = nmlz_seq(r2);
+    let r32 = nmlz_seq(r3);
+    return SEQ(r22,r32);
+  case &Prose(_):
+  case &Symb(_,_):
+  case &Lit(_):
+    return r;
+  case &CharRange(low,high):
+    if (low == high) return r;
+    else fallthru();
+  case &Alt(_,_):
+  case &Opt(_):
+  case &Rcount(_,_): // FIX: maybe we don't need this for Rcount?
+  case &Star(_,_,_):
+  case &Hash(_,_,_):
+    let n = fresh_name();
+    add_nml_definition(n,r);
+    return SYMB(n);
+  case &Minus(_,_): /* Assume that r is a character range */
+    fprintf(stderr,"Internal error: Minus in nmlz_seq\n");
+    return r;
+  }
+}
+static rule_t nmlz_alt(rule_t r) {
+  switch (r->r) {
+  case &Alt(r2,r3):
+    let r22 = nmlz_alt(r2);
+    let r32 = nmlz_alt(r3);
+    return ALT(r22,r32);
+  case &Symb(_,_):
+  case &Lit(_):
+    return r;
+  case &Prose(_):
+  case &CharRange(_,_):
+  case &Seq(_,_):
+  case &Opt(_):
+  case &Rcount(_,_):
+  case &Star(_,_,_):
+  case &Hash(_,_,_):
+    let n = fresh_name();
+    add_nml_definition(n,r);
+    return SYMB(n);
+  case &Minus(_,_): /* Assume that r is a character range */
+    fprintf(stderr,"Internal error: Minus in nmlz_alt\n");
+    return r;
+  }
+}
+static rule_t nmlz_rule(rule_t r) {
+  switch (r->r) {
+  case &Seq(_,_):
+    return nmlz_seq(r);
+  case &Alt(_,_): 
+    if (is_cs(r)) return r;
+    return nmlz_alt(r);
+  case &Star(_,_,&arule(_,_,_,&Symb(_,_))):
+    return r;
+  case &Star(m,N,r2):
+    if (is_cs(r2)) return r;
+    return STAR(m,N,nmlz_rule(r2));
+  case &Hash(_,_,&arule(_,_,_,&Symb(_,_))):
+    return r;
+  case &Hash(m,N,r2):
+    return HASH(m,N,nmlz_rule(r2));
+  case &Opt(r2):
+    return OPT(nmlz_alt(r2));
+  case &Rcount(c,r2):
+    return RCOUNT(c,nmlz_alt(r2));
+  case &Prose(_):
+  case &CharRange(_,_):
+  case &Symb(_,_):
+  case &Lit(_):
+    return r;
+  case &Minus(_,_):
+    fprintf(stderr,"Internal error: Minus in nmlz_rule\n");
+    return r;
+  }
+}
+static void nmlz_definition(definition_t d) {
+  let &$(n,r,_) = d;
+  add_nml_definition(n,r);
+}
+static grammar_t nmlz_definitions(grammar_t ds) {
+  nml_definitions = NULL;
+  for (let x = ds; x; x = x->tl) {
+    if (!do_re(x->hd)) nmlz_definition(x->hd);
+    else nml_definitions = new List(x->hd, nml_definitions);
+  }
+  nml_definitions = imp_rev(nml_definitions);
+  let nds = nml_definitions;
+  nml_definitions = NULL;
+  return nds;
+}
+
+/* CONVERSION */
+static void cvt_definition(definition_t d);
+static const char ?cvt_and_name(rule_t r) {
+  switch (r->r) {
+  case &Symb(x,_):
+    x = make_c_identifier(x);
+    return x;
+  default:
+    let n = fresh_name();
+    cvt_definition(new $(n,r,Attr{.ws=0,.re=0,.paramtype=NULL,.rettype=NULL}));
+    return n;
+  }
+}
+static const char ?cvt_lit(const char ?`H x) {
+  return aprintf("\"%s\"",string_escape(x));
+}
+static void cvt_seq(rule_t r) {
+  switch (r->r) {
+  case &Seq(r2,r3):
+    cvt_seq(r2);
+    cvt_seq(r3);
+    break;
+  case &Prose(x):
+    /* FIX */
+    printf("  Pprose prose; /* %s */\n",x);
+    fprintf(stderr,"Warning: Pprose prose\n");
+    break;
+  case &Symb(x,_):
+    let y = make_c_identifier(x);
+    x = y;
+    if (Set::member(*fields,new x))
+      x = fresh_name();
+    printf("  %s_t %s;\n",y,x);
+    *fields = Set::insert(*fields,new x);
+    break;
+  case &Lit(x):
+    printf("  %s;\n",cvt_lit(x)); break;
+  case &CharRange(low,high):
+    if (low == high)
+      printf("  \"\\x%x\";\n",low);
+    else fallthru();
+    break;
+  case &Alt(_,_):
+  case &Opt(_):
+  case &Rcount(_,_):
+  case &Star(_,_,_):
+  case &Hash(_,_,_):
+    fprintf(stderr,"Internal error: bad case on cvt_seq\n");
+    cvt_seq(SYMB(cvt_and_name(r)));
+    break;
+  case &Minus(_,_):
+    fprintf(stderr,"Internal error: Minus in cvt_seq\n");
+    break;
+  }
+}
+static void cvt_alt(rule_t r) {
+  switch (r->r) {
+  case &Alt(r2,r3):
+    cvt_alt(r2);
+    cvt_alt(r3);
+    break;
+  case &Prose(x):
+    /* FIX */
+    printf("  Pprose prose; /* %s */\n",x);
+    fprintf(stderr,"Warning: Pprose prose\n");
+    break;
+  case &Symb(x,_):
+    let y = make_c_identifier(x);
+    x = y;
+    if (Set::member(*tags,new x)) x = fresh_name();
+    printf("  %s_t %s;\n",y,x);
+    *tags = Set::insert(*tags,new x);
+    break;
+  case &Lit(x):
+    if (is_c_identifier(x) && !Set::member(*tags,new x)) {
+      printf("  \"%s\";\n",x);
+      *tags = Set::insert(*tags,new x);
+    }
+    else {
+      let y = cvt_lit(x);
+      x = make_c_identifier(x);
+      if (Set::member(*tags,new x))
+        x = fresh_name();
+      printf("  %s Pfrom(%s);\n",x,y);
+      *tags = Set::insert(*tags,new x);
+    }
+    break;
+  case &CharRange(_,_):
+  case &Seq(_,_):
+  case &Opt(_):
+  case &Rcount(_,_):
+  case &Star(_,_,_):
+  case &Hash(_,_,_):
+    fprintf(stderr,"Internal error: bad case on cvt_alt\n");
+    cvt_alt(SYMB(cvt_and_name(r)));
+    break;
+  case &Minus(_,_):
+    fprintf(stderr,"Internal error: Minus in cvt_alt\n");
+    break;
+  }
+}
+static $(const char ?,int) pads_bounds(unsigned int m, repeat_t N)
+{
+  switch $(m,N) {
+  case $(0,&Infinity): return $("[]",1);
+  case $(min,&Infinity): return $(aprintf("[%d:]",min),1);
+  case $(min,&Num(max)):
+    if (min == max) return $(aprintf("[%d]",min),0);
+    else return $(aprintf("[%d:%d]",min,max),1); /* NB: longest (the 1) is needed here by PADS */
+  }
+}
+static const char ?re_bounds(unsigned int m, repeat_t N)
+{
+  switch $(m,N) {
+  case $(0,&Infinity): return "*";
+  case $(1,&Infinity): return "+";
+  case $(min,&Infinity): return aprintf("{%d,}",min);
+  case $(min,&Num(max)):
+    if (min == max) return aprintf("{%d}",min);
+    else if (min == 0 && max == 1) return "?";
+    else return aprintf("{%d,%d}",min,max);
+  }
+}
+static void re_cs(rule_t r) {
+  switch (r->r) {
+  case &Alt(r2,r3):
+    re_cs(r2);
+    re_cs(r3);
+    break;
+  case &CharRange(low,high):
+    if (low == high)
+      printf("\\\\x%x",low);
+    else
+      printf("\\\\x%x-\\\\x%x\n",low,high);
+    break;
+  case &Lit(x):
+    if (strlen(x) != 1) {
+      fprintf(stderr,"Internal error: re_cs called with bad Lit\n");
+      break;
+    }
+    printf("\\\\x%x",x[0]);
+    break;
+  case &Symb(x,_):
+    let x_c = make_c_identifier(x);
+    printf("[:%s:]",x_c);
+    break;
+  default:
+    fprintf(stderr,"Internal error: re_cs received bad argument\n");
+    break;
+  }
+  return;
+}
+static int first_range = 1;
+static void cvt_cs0(rule_t r) {
+  switch (r->r) {
+  case &Alt(r2,r3):
+    cvt_cs0(r2);
+    cvt_cs0(r3);
+    break;
+  case &CharRange(low,high):
+    if (first_range) {
+      if (low == high)
+        printf("  (x == %d)\n",low);
+      else
+        printf("  ((%d <= x) && (x <= %d))\n",low,high);
+    }
+    else {
+      if (low == high)
+        printf("  || (x == %d)\n",low);
+      else
+        printf("  || ((%d <= x) && (x <= %d))\n",low,high);
+    }
+    break;
+  case &Lit(x):
+    if (strlen(x) != 1) {
+      fprintf(stderr,"Internal error: cvt_cs0 called with bad Lit\n");
+      break;
+    }
+    if (first_range) printf("  (x == %d)\n",x[0]);
+    else printf("  || (x == %d)\n",x[0]);
+    break;
+  case &Symb(x,_):
+    let x_c = make_c_identifier(x);
+    if (first_range) printf("  is_%s(x)\n",x_c);
+    else printf("  || is_%s(x)\n",x_c);
+    break;
+  default:
+    break;
+  }
+  first_range = 0;
+  return;
+}
+static void cvt_cs(const char ?`H name, rule_t r) {
+  printf("int is_%s(Pchar x) { return\n",name);
+  first_range = 1;
+  cvt_cs0(r);
+  printf("  ;\n};\n");
+  printf("Ptypedef Pchar %s_t : %s_t x => { is_%s(x) };\n",name,name,name);
+  printf("Pcharclass %s {is_%s};\n",name,name);
+}
+static void cvt_rule(const char ?`H name, rule_t r) {
+  switch (r->r) {
+  case &Prose(x):
+    /* FIX */
+    printf("Ptypedef Pprose %s_t; /* %s */\n",name,x);
+    fprintf(stderr,"Warning: %s_t defined as Pprose\n",name);
+    break;
+  case &Symb(x,_):
+    x = make_c_identifier(x);
+    printf("Ptypedef %s_t %s_t;\n",x,name);
+    break;
+  case &Lit(x):
+    if (is_cs(r)) cvt_cs(name,r);
+    else printf("Pstruct %s_t {\n"
+                "  %s;\n"
+                "};\n",
+                name,cvt_lit(x));
+    break;
+  case &CharRange(low,high):
+    if (low == high)
+      printf("int is_%s(Pchar x) { return (x == %d); };\n",name,low);
+    else
+      printf("int is_%s(Pchar x) { return (%d <= x) && (x <= %d); };\n",
+             name,low,high);
+    printf("Ptypedef Pchar %s_t : %s_t x => { is_%s(x) };\n",name,name,name);
+    printf("Pcharclass %s {is_%s};\n",name,name);
+    break;
+  case &Opt(r2):
+    printf("Punion %s_t {\n",name);
+    cvt_alt(r2);
+    printf("  Pvoid(%s);\n"
+           "};\n",
+           fresh_name());
+    break;
+  case &Rcount(c,r2):
+    fprintf(stderr,"Internal error: Rcount in cvt_alt\n");
+    printf("Parray %s_t {\n",name);
+    cvt_alt(r2);
+    printf("};\n");
+    // FIX
+    printf("NEED TO ADD COUNT %s\n",c);
+    break;
+  case &Seq(r2,r3):
+    printf("Pstruct %s_t {\n",name);
+    fields = new Set::empty(strptrcmp);
+    cvt_seq(r);
+    printf("};\n");
+    break;
+  case &Alt(r2,r3):
+    if (is_cs(r)) cvt_cs(name,r);
+    else {
+      printf("Punion %s_t {\n",name);
+      cvt_alt(r);
+      printf("};\n");
+    }
+    break;
+  case &Star(m,N,r2):
+    if (is_cs(r2)) {
+      printf("Ptypedef Pstring_ME(:\"/[");
+      re_cs(r2);
+      printf("]%s",re_bounds(m,N));
+      printf("/\":) %s_t;\n",name);
+    }
+    else {
+      let n = cvt_and_name(r2);
+      let $(bounds,longest) = pads_bounds(m,N);
+      printf("Parray %s_t {\n"
+             "  %s_t%s%s;\n"
+             "};\n",name,n,bounds,
+	     (longest?" : Plongest":""));
+    }
+    break;
+  case &Hash(m,N,r2):
+    let n = cvt_and_name(r2);
+    let $(bounds,longest) = pads_bounds(m,N);
+    printf("Parray %s_t {\n"
+           "  %s_t%s : Psep(Pre \"/,+/\")%s;\n"
+           "};\n",name,n,bounds,
+           (longest?" && Plongest":""));
+    break;
+  case &Minus(_,_):
+    fprintf(stderr,"Internal error: Minus in cvt_rule\n");
+    break;
+  }
+}
+static void cvt_definition(definition_t d) {
+  let &$(n,r,_) = d;
+  cvt_rule(new_definition(n),r);
+}
+
+/**********************************************************************/
+
+static bool re_special(const char ?s){
+  int sz = numelts(s)-1;
+  for (int i = 0; i<sz; i++) {
+    char c = s[i];
+    if (c<=' ' || c>='~' || c=='\042' || c=='\\' || c=='|' ||
+        c=='(' || c==')' || c=='[' || c==']' || c=='{' || c=='}' ||
+        c=='?' || c=='*' || c=='+' || c=='$' || c=='.' || c=='^' ||
+	c=='\"' || c=='\'' || c==',' || c=='-' || c=='=' || c=='@' ||
+	c==':' || c==';' || c== '#' || c=='!' || c=='%' || c=='/' || c=='&' )
+      return true;
+  }
+  return false;
+}
+static const char ?re_escape(const char ?`H s) {
+  if (!re_special(s)) return s;
+
+  int n = numelts(s) - 1;
+  // Check for the expected NUL terminator of a string constant
+  if (n>0 && s[n]=='\000') n--;
+  // determine length
+  int len = 0;
+  for (int i=0; i<=n; i++)
+    switch (s[i]) {
+    case '\a':
+    case '\b':
+    case '\f':
+    case '\n':
+    case '\r':
+    case '\t':
+    case '\v':
+    case '{':
+    case '}':
+    case '[':
+    case ']':
+    case '(':
+    case ')':
+    case '^':
+    case '$':
+    case '.':
+    case '|':
+    case '*':
+    case '+':
+    case '?':
+    case '\'':
+    case ',' :
+    case '-' :
+    case '=' :
+    case '@' :
+    case ':' :
+    case ';' :
+    case '#':
+    case '!' :
+    case '%' :
+    case '/' :
+    case '&' : len += 3; break;
+    case '\"':
+    case '\\': len += 4; break;
+    case c:
+      if (c>=' ' && c<='~') len++;
+      else len += 5;
+      break;
+    }
+  // build the escaped string
+  char ?t = Core::new_string(len+1);
+  int j = 0;
+  for (int i=0; i<=n; i++)
+    switch (s[i]) {
+    case '\a': t[j++] = '\\'; t[j++] = '\\'; t[j++] = 'a'; break;
+    case '\b': t[j++] = '\\'; t[j++] = '\\'; t[j++] = 'b'; break;
+    case '\f': t[j++] = '\\'; t[j++] = '\\'; t[j++] = 'f'; break;
+    case '\n': t[j++] = '\\'; t[j++] = '\\'; t[j++] = 'n'; break;
+    case '\r': t[j++] = '\\'; t[j++] = '\\'; t[j++] = 'r'; break;
+    case '\t': t[j++] = '\\'; t[j++] = '\\'; t[j++] = 't'; break;
+    case '\v': t[j++] = '\\'; t[j++] = '\\'; t[j++] = 'v'; break;
+    case '{':
+    case '}':
+    case '[':
+    case ']':
+    case '(':
+    case ')':
+    case '^':
+    case '$':
+    case '.':
+    case '|':
+    case '*':
+    case '+':
+    case '?':
+    case '\'':
+    case ',' :
+    case '-' :
+    case '=' :
+    case '@' :
+    case ':' :
+    case ';' :
+    case  '#':
+    case '!' :
+    case '%' :
+    case '/' :
+    case '&' : t[j++] = '\\'; t[j++] = '\\'; t[j++] = s[i]; break;
+    case '\"':
+    case '\\': t[j++] = '\\'; t[j++] = '\\'; t[j++] = '\\'; t[j++] = s[i]; break;
+    case c:
+      if (c>=' ' && c<='~') t[j++] = c;
+      else {
+        t[j++] = '\\';
+        t[j++] = '\\';
+        t[j++] = (char)('0'+((c>>6)&7));
+        t[j++] = (char)('0'+((c>>3)&7));
+        t[j++] = (char)('0'+(c&7));
+      }
+      break;
+    }
+  return t;
+}
+static rule_t commas_symb() {
+  static struct arule *commas = NULL;
+  if (!commas) commas = SYMB("commas");
+  return commas;
+}
+static void re_rule0(rule_t r);
+static void re_rule0_paren (rule_t r) {
+  printf("(");
+  re_rule0(r);
+  printf(")");
+}
+static void re_rule0(rule_t r) {
+  switch (r->r) {
+  case &Prose(x):
+    printf("(\" PPROSE \")");
+    fprintf(stderr,"Warning: PPROSE\n");
+    break;
+  case &Symb(x,_):
+    x = make_c_identifier(x);
+    printf("\" RE_%s \"",x);
+    break;
+  case &Lit(x):
+    printf("%s",re_escape(x));
+    break;
+  case &CharRange(low,high):
+    if (low == high) printf("\\\\x%x",low);
+    else printf("[\\\\x%x-\\\\x%x]",low,high);
+    break;
+  case &Opt(r2):
+    if (lower_prec(r2,r)) re_rule0_paren(r2);
+    else re_rule0(r2);
+    printf("?");
+    break;
+  case &Rcount(c,r2):
+    fprintf(stderr,"Internal error: Rcount in re_rule0\n");
+    break;
+  case &Seq(r2,r3):
+    if (lower_prec(r2,r)) re_rule0_paren(r2); else re_rule0(r2);
+    if (lower_prec(r3,r)) re_rule0_paren(r3); else re_rule0(r3);
+    break;
+  case &Alt(r2,r3):
+    if (lower_prec(r2,r)) re_rule0_paren(r2); else re_rule0(r2);
+    printf("|");
+    if (lower_prec(r3,r)) re_rule0_paren(r3); else re_rule0(r3);
+    break;
+  case &Star(m,N,r2):
+    if (lower_prec(r2,r)) re_rule0_paren(r2); else re_rule0(r2);
+    printf("%s",re_bounds(m,N));
+    break;
+  case &Hash(m,N,r2):
+    rule_t rr;
+    switch (N) {
+    case &Num(n):
+      if (n == 0)
+        rr = LIT("");
+      else if (n == 1)
+        rr = OPT(r2);
+      else
+        rr = OPT(SEQ(r2,STAR(m?m-1:0,new Num(n-1),SEQ(commas_symb(),r2))));
+      break;
+    case &Infinity: 
+      if (m == 0)
+        rr = OPT(SEQ(r2,STAR(0,N,SEQ(commas_symb(),r2))));
+      else
+        rr = SEQ(r2,STAR(m?m-1:0,N,SEQ(commas_symb(),r2)));
+      break;
+    }
+    re_rule0(rr);
+    break;
+  case &Minus(_,_):
+    fprintf(stderr,"Internal error: Minus in re_rule0\n");
+    break;
+  }
+}
+static void re_rule(const char ?`H name, rule_t r) {
+  switch (r->r) {
+  case &Lit(x):
+    if (is_cs(r)) {
+      cvt_cs(name,r);
+      printf("#define RE_%s \"[[:%s:]]\"\n",name,name);
+    }
+    else {
+      printf("#define RE_%s \"%s\"\n",name,re_escape(x));
+      printf("Ptypedef Pstring_ME(:\"/\" RE_%s \"/\":) %s_t;\n",name,name);
+    }
+    break;
+  case &CharRange(low,high):
+    if (low == high)
+      printf("int is_%s(Pchar x) { return (x == %d); };\n",name,low);
+    else
+      printf("int is_%s(Pchar x) { return (%d <= x) && (x <= %d); };\n",
+             name,low,high);
+    printf("Ptypedef Pchar %s_t : %s_t x => { is_%s(x) };\n",name,name,name);
+    printf("Pcharclass %s {is_%s};\n",name,name);
+    printf("#define RE_%s \"[[:%s:]]\"\n",name,name);
+    break;
+  case &Symb(x,_):
+    x = make_c_identifier(x);
+    printf("#define RE_%s RE_%s\n",name,x);
+    printf("Ptypedef Pstring_ME(:\"/\" RE_%s \"/\":) %s_t;\n",name,name);
+    break;
+  case &Alt(_,_):
+    if (is_cs(r)) {
+      cvt_cs(name,r);
+      printf("#define RE_%s \"[[:%s:]]\"\n",name,name);
+    }
+    else fallthru();
+    break;
+  case &Seq(_,_):
+    printf("#define RE_%s \"(",name);
+    re_rule0(r);
+    printf(")\"\n");
+    printf("Ptypedef Pstring_ME(:\"/\" RE_%s \"/\":) %s_t;\n",name,name);
+    break;
+  case &Prose(_):
+  case &Opt(_):
+  case &Rcount(_,_):
+  case &Star(_,_,_):
+  case &Hash(_,_,_):
+    /* Like last case except don't bother with parens */
+    printf("#define RE_%s \"",name);
+    re_rule0(r);
+    printf("\"\n");
+    printf("Ptypedef Pstring_ME(:\"/\" RE_%s \"/\":) %s_t;\n",name,name);
+    break;
+  case &Minus(_,_):
+    fprintf(stderr,"Internal error: Minus in re_rule\n");
+    break;
+  }
+}
+static void re_definition(definition_t d) {
+  let &$(n,r,_) = d;
+  re_rule(new_definition(n),r);
+}
+/* WHITESPACE */
+static rule_t ws_symb() {
+  static struct arule *ws = NULL;
+  if (!ws) ws = SYMB("ws");
+  return ws;
+}
+static rule_t ws_rule(rule_t r) {
+  switch (r->r) {
+  case &Prose(_):
+  case &Symb(_,_):
+  case &Lit(_):
+  case &CharRange(_,_):
+    return r;
+  case &Opt(r2):
+    return OPT(ws_rule(r2));
+  case &Rcount(c,r2):
+    return RCOUNT(c,ws_rule(r2));
+  case &Seq(r2,r3):
+    return SEQ(ws_rule(r2),ws_symb(),ws_rule(r3));
+  case &Alt(r2,r3):
+    return ALT(ws_rule(r2),ws_rule(r3));
+  case &Star(m,N,r2):
+    r2 = ws_rule(r2);
+    // (m*0)r2 --> same
+    // (0*1)r2 --> [r2]
+    // (0*4)r2 --> [r2 (0*3)(ws r2)]
+    // (m*n)r2 where m>0 --> r2 (m-1*n-1)(ws r2)
+    // (0*inf)r2 --> [r2 (0*inf)(ws r2)]
+    // (m*inf)r2 --> r2 (m-1*inf)(ws r2)
+    switch (N) {
+    case &Num(n):
+      if (n == 0)
+        return r;
+      else if (n == 1)
+        return OPT(r2);
+      else
+        return OPT(SEQ(r2,STAR(m?m-1:0,new Num(n-1),SEQ(ws_symb(),r2))));
+    case &Infinity: 
+      if (m == 0)
+        return OPT(SEQ(r2,STAR(0,N,SEQ(ws_symb(),r2))));
+      else
+        return SEQ(r2,STAR(m?m-1:m,N,SEQ(ws_symb(),r2)));
+    }
+  case &Hash(m,N,r2):
+    r2 = ws_rule(r2);
+    /* Identical to above case except commas instead of whitespace */
+    switch (N) {
+    case &Num(n):
+      if (n == 0)
+        return r;
+      else if (n == 1)
+        return OPT(r2);
+      else
+        return OPT(SEQ(r2,STAR(m?m-1:0,new Num(n-1),SEQ(commas_symb(),r2))));
+    case &Infinity: 
+      if (m == 0)
+        return OPT(SEQ(r2,STAR(0,N,SEQ(commas_symb(),r2))));
+      else
+        return SEQ(r2,STAR(m?m-1:0,N,SEQ(commas_symb(),r2)));
+    }
+  case &Minus(_,_):
+    fprintf(stderr,"Internal error: Minus in ws_rule\n");
+    return r;
+  }
+}
+/* HASH ELIMINATION */
+/* Needed for regular expressions where whitespace is not inserted.
+   Hashes are dealt with properly by ws_rule and by cvt_rule, so it's
+   not needed for PADS and for regular expressions with ws insertion.
+   If re_rule is called where hashes have not been eliminated, it
+   works EXCEPT that the resulting definitions use the "commas"
+   symbol, which might not be defined if we are not careful; so we do
+   hash elimination before sorting the definitions.
+*/
+static rule_t hashelim_rule(rule_t r) {
+  switch (r->r) {
+  case &Prose(_):
+  case &Symb(_,_):
+  case &Lit(_):
+  case &CharRange(_,_):
+  case &Minus(_,_):
+    return r;
+  case &Opt(r2):
+    return OPT(hashelim_rule(r2));
+  case &Rcount(c,r2):
+    return RCOUNT(c,hashelim_rule(r2));
+  case &Seq(r2,r3):
+    return SEQ(hashelim_rule(r2),hashelim_rule(r3));
+  case &Alt(r2,r3):
+    return ALT(hashelim_rule(r2),hashelim_rule(r3));
+  case &Star(m,N,r2):
+    return STAR(m,N,hashelim_rule(r2));
+  case &Hash(m,N,r2):
+    r2 = hashelim_rule(r2);
+    switch (N) {
+    case &Num(n):
+      if (n == 0)
+        return LIT("");
+      else if (n == 1)
+        return OPT(r2);
+      else
+        return OPT(SEQ(r2,STAR(m?m-1:0,new Num(n-1),SEQ(commas_symb(),r2))));
+    case &Infinity: 
+      if (m == 0)
+        return OPT(SEQ(r2,STAR(0,N,SEQ(commas_symb(),r2))));
+      else
+        return SEQ(r2,STAR(m?m-1:0,N,SEQ(commas_symb(),r2)));
+    }
+  }
+}
+static definition_t ws_definition(definition_t d) {
+  let &$(n,r,a) = d;
+  if (do_ws(d)) return new $(n,ws_rule(r),Attr{.ws=0,.re=do_re(d),.paramtype=a.paramtype,.rettype=a.rettype});
+  else if (do_re(d)) return new $(n,hashelim_rule(r),a);
+  else return d;
+}
+grammar_t ws_definitions(grammar_t<`H> ds) {
+  let result = NULL;
+  for (let x = ds; x; x = x->tl)
+    result = new List(ws_definition(x->hd),result);
+  result = imp_rev(result);
+  return result;
+}
+/* COMBINED REGULAR EXPRESSIONS AND PADS DATATYPES */
+void pads_definitions(grammar_t<`H> ds) {
+  ds = prose_elim(ds);
+  ds = minus_elim(ds); // NB: sorts definitions
+  ds = ws_definitions(ds);
+  // AN UGLY TEMPORARY HACK: MAKE SURE REGEXP DOES NOT DEPEND ON PADS;
+  // ALL DEFS UP TO LAST WITH REGEXP ARE REGEXP.
+  {
+    ds = imp_rev(ds);
+    int doing_re = 0;
+    for (let x = ds; x; x = x->tl) {
+      if (doing_re) (*x->hd)[2].re = 1;
+      else if (do_re(x->hd)) doing_re = 1;
+    }
+    ds = imp_rev(ds);
+    ds = ws_definitions(ds); //BECAUSE SOME NEW REGEXPS MIGHT NEED HASHELIM!!
+    ds = sort_definitions(ds);
+  }
+  ds = nmlz_definitions(ds);
+  defined = new Set::empty(strptrcmp);
+  tags = new Set::empty(strptrcmp);
+  printf("#define Pvoid(label) Pcompute Pomit Puint32 label = 0\n\n");
+  while (ds) {
+    let d = ds->hd;
+    if (do_re(d)) re_definition(d);
+    else cvt_definition(d);
+    ds = ds->tl;
+  }
+}

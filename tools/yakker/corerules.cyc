@@ -1,0 +1,80 @@
+/* Copyright (C) 2005 Greg Morrisett, AT&T.
+   This file is part of the Cyclone project.
+
+   Cyclone is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   Cyclone is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Cyclone; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+#include <hashtable.h>
+#include <string.h>
+#include "corerules.h"
+using List;
+
+// Annoying that this does not take a const char ?; a problem with <lexing.h>
+extern grammar_t parse_string(char ?s);
+extern const char ?corerules_grm;
+void core_compare(grammar_t<`H> ds) {
+  // FIX: this is duplicated below.  Combine; or get rid of n and a components, not needed
+  let core_ds = parse_string(strdup(corerules_grm));
+  let core_table = Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr);
+  for (; core_ds; core_ds = core_ds->tl) {
+    let &$(n,r,a) = core_ds->hd;
+    Hashtable::insert(core_table,new n,core_ds->hd);
+  }
+  // If there are any core rules in ds make sure they match up with the real definitions
+  for (; ds; ds = ds->tl) {
+    let &$(n,r,a) = ds->hd;
+    let core_opt = Hashtable::lookup_opt(core_table,new n);
+    switch (core_opt) {
+    case NULL: break;
+    case &&$(_,r2,_):
+      // Note: we don't compare the attributes
+      if (rule_cmp(r,r2))
+        warn("grammar has a non-standard definition for core rule %s\n",n);
+      break;
+    }
+  }
+}
+grammar_t core_augment(grammar_t<`H> ds) {
+  // FIX: this is duplicated above
+  let core_ds = parse_string(strdup(corerules_grm));
+  let core_table = Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr);
+  let core_symbols = Set::empty(strptrcmp);
+  let g = Graph::empty(strptrcmp);
+  for (; core_ds; core_ds = core_ds->tl) {
+    let &$(n,r,a) = core_ds->hd;
+    core_symbols = Set::insert(core_symbols,new n);
+    Hashtable::insert(core_table,new n,core_ds->hd);
+    let free_r = freevars_rule(r);
+    g = Graph::add_edges(g,new n,free_r);
+  }
+  g = Graph::tc(g); // (s,t) in g IFF core symbol s requires core symbol t
+  let free_core_symbols = Set::intersect(freevars(ds),core_symbols);
+  for (let s = free_core_symbols; !Set::is_empty(s); ) {
+    let cs = Set::choose(s); s = Set::delete(s,cs);
+    free_core_symbols = Set::union_two(free_core_symbols,Graph::get_targets(g,cs));
+  }
+  while (!Set::is_empty(free_core_symbols)) {
+    let freev = Set::choose(free_core_symbols);
+    free_core_symbols = Set::delete(free_core_symbols,freev);
+    let core_opt = Hashtable::lookup_opt(core_table,freev);
+    if (core_opt) {
+      ds = new List (*core_opt,ds);
+      warn("adding standard definition for free variable %s\n",*freev);
+    }
+    else
+      warn("free variable %s\n",*freev);
+  }
+  return ds;
+}

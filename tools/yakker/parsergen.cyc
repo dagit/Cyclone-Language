@@ -1,0 +1,1035 @@
+/* Copyright (C) 2005 Greg Morrisett, AT&T.
+   This file is part of the Cyclone project.
+
+   Cyclone is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   Cyclone is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Cyclone; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+#include "bnf.h"
+#include "fa.h"
+#include "analyze.h"
+#include "pr.h"
+#include "pads.h"
+#include "cs.h"
+#include <string.h>
+#include <stdio.h>
+#include <buffer.h>
+#include <stdlib.h>
+
+int local_lookahead = 0;
+
+#define FAIL ({ s->i = -1; return; 0; })
+enum count_state { LOOKING, OBTAINED, USED };
+struct S {
+  int i;
+  char ?input;
+  unsigned int count;
+  enum count_state cs;
+};
+typedef struct S @`r S_t<`r>;
+int get(S_t s,unsigned int x) {
+  if (x >= numelts(s->input)) return -1;
+  else return s->input[x];
+}
+
+/**********************************************************************/
+/* A greedy interpreted parse.
+   Does not handle semantic actions.
+   Does not handle semantic predicates.
+*/
+List::list_t<const char ?@> symbol_stack = NULL;
+void pr_symbol_stack() {
+  symbol_stack = List::imp_rev(symbol_stack);
+  for (let a = symbol_stack; a; a = a->tl)
+    fprintf(stderr,".%s",*a->hd);
+  symbol_stack = List::imp_rev(symbol_stack);
+  fprintf(stderr,"\n");
+}
+grammar_t defs = NULL;
+void p_rule(S_t s,rule_t r);
+void p_seq(S_t s,rule_t r,char ?count_symb);
+void p_symb(S_t s,const char ?`H symb) {
+  for (let w = defs; w; w = w->tl) {
+    let &$(n,r,_) = w->hd;
+    if (strcmp(n,symb) == 0) {
+      let before = s->i;
+      symbol_stack = new List::List(new symb,symbol_stack);
+      if (strcmp("literal",symb) == 0) { // FIX: TEMPORARY FOR IMAP
+	let old_count = s->count;
+	let old_cs = s->cs;
+	s->cs = LOOKING;
+	p_seq(s,r,strdup("number"));
+	s->count = old_count;
+	s->cs = old_cs;
+	return;
+      }
+      else p_rule(s,r);
+      if (s->i != -1) {
+	fprintf(stderr,"(%x,%x)",before,s->i);
+	pr_symbol_stack();
+      }
+      symbol_stack = symbol_stack->tl;
+      return;
+    }
+  }
+  fprintf(stderr,"Error: symbol %s not found\n",symb);
+  FAIL;
+}
+void p_seq(S_t s,rule_t r,char ?count_symb) {
+  switch (r->r) {
+  case &Seq(r2,r3):
+    p_seq(s,r2,count_symb);
+    if (s->i != -1) p_seq(s,r3,count_symb);
+    return;
+  case &Symb(x,_):
+    if (s->cs == LOOKING && strcmp(x,count_symb) == 0) {
+      let before = s->i;
+      p_symb(s,x);
+      if (s->i == -1) return;
+      s->count = 0;
+      for (; before < s->i; before++)
+	s->count = s->count*10 + (get(s,before)-'0');
+      s->cs = OBTAINED;
+    }
+    else p_rule(s,r);
+    return;
+  case &Star(0,&Infinity,r2):
+    if (s->cs == OBTAINED) {
+      p_rule(s,STAR(s->count,new Num(s->count),r2));
+      s->cs = USED; /* so subsequent Star does not use count */
+    }
+    else p_rule(s,r);
+    return;
+  default:
+    p_rule(s,r);
+    return;
+  }
+}
+void p_rule(S_t s,rule_t r) {
+  switch (r->r) {
+  case &Symb(x,_):
+    p_symb(s,x);
+    return;
+  case &Lit(x):
+    int j = s->i;
+    int c;
+    int len = strlen(x);
+    for (int k = 0; k < len; k++) {
+      c = get(s,j++);
+      /* FIX: string literals are case-insensitive */
+      if (c == -1 || c != (unsigned int)x[k]) FAIL;
+    }
+    s->i += len;
+    return;
+  case &CharRange(min,max):
+    int c = get(s,s->i);
+    if (c != -1 && min <= c && c <= max) s->i++;
+    else FAIL;
+    return;
+  case &Prose(x):
+    internal_err("Prose in p_rule\n");
+    return;
+  case &Opt(r2):
+    let j = s->i;
+    p_rule(s,r2);
+    if (s->i == -1) s->i = j;
+    return;
+  case &Seq(r2,r3):
+    p_rule(s,r2);
+    if (s->i != -1) p_rule(s,r3);
+    return;
+  case &Alt(r2,r3):
+    let j = s->i;
+    p_rule(s,r2);
+    if (s->i == -1) { s->i = j; p_rule(s,r3); }
+    return;
+  case &Rcount(c,r2):
+    internal_err("Rcount in p_rule");
+    return;
+  case &Star(m,&Infinity,r2):
+    int count;
+    for (count = 0; count < m; count++) {
+      p_rule(s,r2);
+      if (s->i == -1) return;
+    }
+    let k = s->i;
+    while (1) {
+      let j = s->i;
+      p_rule(s,r2);
+      if (j == s->i || s->i == -1) break;
+      k = s->i;
+      count++;
+    }
+    s->i = k;
+    return;
+  case &Star(m,&Num(n),r2):
+    int count;
+    for (count = 0; count < m; count++) {
+      p_rule(s,r2);
+      if (s->i == -1) return;
+    }
+    let k = s->i;
+    while (count < n) {
+      let j = s->i;
+      p_rule(s,r2);
+      if (j == s->i || s->i == -1) break;
+      k = s->i;
+      count++;
+    }
+    s->i = k;
+    return;
+  case &Hash(0,&Infinity,r2): // 0# r2 -> [r2 *(commas r2)]
+    p_rule(s,OPT(SEQ(r2, STAR(0,new Infinity,SEQ(commas(),r2)))));
+    return;
+  case &Hash(m,&Infinity,r2): // m# r2 -> r2 (m-1)*(commas r2)
+    p_rule(s,SEQ(r2, STAR(m-1,new Infinity,SEQ(commas(),r2))));
+    return;
+  case &Hash(0,&Num(0),r2): // #0 r2 -> ""
+    p_rule(s,LIT(""));
+    return;
+  case &Hash(0,&Num(1),r2): // #1 r2 -> [r2]
+    p_rule(s,OPT(r2));
+    return;
+  case &Hash(0,&Num(n),r2): // #n r2 -> [r2 *(n-1)(commas r2)]
+    p_rule(s,OPT(SEQ(r2, STAR(0,new Num(n-1),SEQ(commas(),r2)))));
+    return;
+  case &Hash(m,&Num(n),r2): // m#n r2 -> r2 (m-1)*(n-1)(commas r2)
+    p_rule(s,SEQ(r2, STAR(m-1,new Num(n-1),SEQ(commas(),r2))));
+    return;
+  case &Minus(_,_):
+    internal_err("Minus in p_rule\n");
+    return;
+  }
+}
+void parse(S_t s,grammar_t<`H> ds, const char ?`H symb) {
+  defs = ds;
+  fprintf(stderr,"Getting input... ");
+  Buffer::T buf = Buffer::create(1024);
+  int c;
+  while ( (c = getchar()) != -1) Buffer::add_char(buf,(char)c);
+  let input = Buffer::contents(buf);
+  fprintf(stderr,"done\n");
+  fprintf(stderr,"%s",input);
+  fprintf(stderr,"Trying to parse...\n");
+  s->input = input;
+  while (1) {
+    let before = s->i;
+    p_rule(s,SYMB(symb));
+    if (s->i != -1) printf("succeeded up to %d (0x%x)\n",s->i,s->i);
+    else printf("failed\n");
+    if (s->i == -1 || before == s->i || s->i >= numelts(s->input)-1) break;
+  }
+}
+
+/**********************************************************************/
+/* A generator for greedy parsers.
+   Does not handle semantic actions.
+   Does not handle semantic predicates.
+*/
+static const char ?p_id(const char ?`H n) {
+  return aprintf("p_%s",make_c_identifier0(n));
+}
+static int scope = 0;
+static void pgen_rule(rule_t r) {
+  switch (r->r) {
+  case &Symb(x,_):
+    printf("%s(s);\n",p_id(x));
+    return;
+  case &Lit(x):
+    let myscope = scope++;
+    printf("{ int j = s->i;\n"
+	   "  int c;\n");
+    int len = strlen(x);
+    for (int k = 0; k < len; k++) {
+      printf("  c = get(s,j++);\n");
+      /* FIX: string literals are case-insensitive */
+      printf("  if (c == -1 || c != (unsigned int)%d) { s->i = -1; goto A%d; }\n",x[k],myscope);
+    }
+    printf("  s->i += %d;\n"
+	   "}\n",len);
+    printf("A%d: 0;\n",myscope);
+    return;
+  case &CharRange(min,max):
+    printf("{ int c = get(s,s->i);\n"
+	   "  if (c != -1 && %d <= c && c <= %d) s->i++; else s->i = -1;\n"
+	   "}\n",min,max);
+    return;
+  case &Prose(x):
+    internal_err("prose in pgen_rule\n");
+    return;
+  case &Opt(r2):
+    printf("{ let j = s->i;\n");
+    /*******/ pgen_rule(r2);
+    printf("  if (s->i == -1) s->i = j;\n"
+	   "}\n");
+    return;
+  case &Seq(r2,r3):
+    /*****/ pgen_rule(r2);
+    printf("if (s->i != -1) {\n");
+    /*******/ pgen_rule(r3);
+    printf("}\n");
+    return;
+  case &Alt(r2,r3):
+    printf("{ let j = s->i;\n");
+    /*******/ pgen_rule(r2);
+    printf("  if (s->i == -1) { s->i = j;\n");
+    /*********/ pgen_rule(r3);
+    printf("  }\n"
+	   "}\n");
+    return;
+  case &Star(m,&Infinity,r2):
+    let myscope = scope++;
+    printf("{ int count;\n");
+    if (m > 0) {
+      printf("  for (count = 0; count < %d; count++) {\n",m);
+      /*********/ pgen_rule(r2);
+      printf("    if (s->i == -1) goto A%d;\n"
+             "  }\n",myscope);
+    }
+    printf("  let k = s->i;\n"
+	   "  while (1) {\n"
+	   "    let j = s->i;\n");
+    /*********/ pgen_rule(r2);
+    printf("    if (j == s->i || s->i == -1) break;\n"
+	   "    k = s->i;\n"
+	   "    count++;\n"
+	   "  }\n"
+	   "s->i = k;\n"
+	   "}\n");
+    printf("A%d: 0;\n",myscope);
+    return;
+  case &Rcount(c,r2):
+    let myscope = scope++;
+    printf("{ int bounds = %s;\n"
+           "  int count;\n"
+	   "  for (count = 0; count < bounds; count++) {\n",c);
+    /*********/ pgen_rule(r2);
+    printf("    if (s->i == -1) goto A%d;\n"
+	   "  }\n",myscope);
+    printf("}\n");
+    printf("A%d: 0;\n",myscope);
+    return;
+  case &Star(m,&Num(n),r2):
+    let myscope = scope++;
+    printf("{ int count;\n"
+	   "  for (count = 0; count < %d; count++) {\n",m);
+    /*********/ pgen_rule(r2);
+    printf("    if (s->i == -1) goto A%d;\n"
+	   "  }\n",myscope);
+    printf("  let k = s->i;\n"
+	   "  while (count < %d) {\n"
+	   "    let j = s->i;\n",n);
+    /*********/ pgen_rule(r2);
+    printf("    if (j == s->i || s->i == -1) break;\n"
+	   "    k = s->i;\n"
+	   "    count++;\n"
+	   "  }\n"
+	   "  s->i = k;\n"
+	   "}\n");
+    printf("A%d: 0;\n",myscope);
+    return;
+  case &Hash(0,&Infinity,r2): // 0# r2 -> [r2 *(commas r2)]
+    pgen_rule(OPT(SEQ(r2, STAR(0,new Infinity,SEQ(commas(),r2)))));
+    return;
+  case &Hash(m,&Infinity,r2): // m# r2 -> r2 (m-1)*(commas r2)
+    pgen_rule(SEQ(r2, STAR(m-1,new Infinity,SEQ(commas(),r2))));
+    return;
+  case &Hash(0,&Num(0),r2): // #0 r2 -> ""
+    pgen_rule(LIT(""));
+    return;
+  case &Hash(0,&Num(1),r2): // #1 r2 -> [r2]
+    pgen_rule(OPT(r2));
+    return;
+  case &Hash(0,&Num(n),r2): // #n r2 -> [r2 *(n-1)(commas r2)]
+    pgen_rule(OPT(SEQ(r2, STAR(0,new Num(n-1),SEQ(commas(),r2)))));
+    return;
+  case &Hash(m,&Num(n),r2): // m#n r2 -> r2 (m-1)*(n-1)(commas r2)
+    pgen_rule(SEQ(r2, STAR(m-1,new Num(n-1),SEQ(commas(),r2))));
+    return;
+  case &Minus(_,_):
+    internal_err("Minus in pgen_rule\n");
+    return;
+  }
+}
+enum count_state pgen_seq(rule_t r,char ?count_symb,enum count_state cs) {
+  switch (r->r) {
+  case &Seq(r2,r3):
+    cs = pgen_seq(r2,count_symb,cs);
+    printf("if (s->i != -1) {\n");
+    cs = pgen_seq(r3,count_symb,cs);
+    printf("}\n");
+    return cs;
+  case &Symb(x,_):
+    if (cs == LOOKING && strcmp(x,count_symb) == 0) {
+      printf("let before = s->i;\n");
+      /*****/ pgen_rule(r);
+      printf("if (s->i == -1) return;\n"
+	     "s->count = 0;\n"
+	     "for (; before < s->i; before++)\n"
+	     "  s->count = s->count*10 + (get(s,before)-'0');\n");
+      return OBTAINED;
+    }
+    else {
+      pgen_rule(r);
+      return cs;
+    }
+  case &Star(0,&Infinity,r2):
+    if (cs == OBTAINED) {
+      printf("{\n"
+	     "  for (int count = 0; count < s->count; count++) {\n");
+      /*********/ pgen_rule(r2);
+      printf("    if (s->i == -1) return;\n"
+	     "  }\n"
+	     "}\n");
+      return USED;
+    }
+    else {
+      pgen_rule(r);
+      return cs;
+    }
+  default:
+    pgen_rule(r);
+    return cs;
+  }
+}
+void pgen(grammar_t<`H> ds, const char ?`H symb) {
+  printf("#include <buffer.h>\n"
+	 "#include <stdio.h>\n"
+	 "struct S {\n"
+	 "  int i;\n"
+	 "  char ?input;\n"
+	 "  unsigned int count;\n"
+	 "};\n"
+	 "typedef struct S @`r S_t<`r>;\n"
+	 "int get(S_t s,unsigned int x) {\n"
+	 "  if (x >= numelts(s->input)) return -1;\n"
+	 "  else return s->input[x];\n"
+	 "}\n");
+  for (let x = ds; x; x = x->tl) {
+    let &$(n,r,_) = x->hd;
+    printf("void %s(S_t s) {\n",p_id(n));
+  }
+  for (let a = ds; a; a = a->tl) {
+    let &$(n,r,_) = a->hd;
+    printf("void %s(S_t s) {\n",p_id(n));
+    printf("let q = s->i;\n");
+    if (strcmp("literal",n) == 0) { // FIX: TEMPORARY FOR IMAP
+      printf("let old_count = s->count;\n");
+      pgen_seq(r,strdup("number"),LOOKING);
+      printf("s->count = old_count;\n");
+    }
+    else pgen_rule(r);
+    printf("if (s->i != -1) printf(\"(%%x,%%x):%s\\n\",q,s->i);\n",n);
+    printf("}\n");
+  }
+  printf("int main() {\n"
+	 "  struct S ss = {0,NULL,0};\n"
+	 "  fprintf(stderr,\"Getting input... \");\n"
+	 "  Buffer::T buf = Buffer::create(1024);\n"
+	 "  int c;\n"
+	 "  while ( (c = getchar()) != -1) Buffer::add_char(buf,(char)c);\n"
+	 "  let input = Buffer::contents(buf);\n"
+	 "  fprintf(stderr,\"done\\n\");\n"
+	 "  fprintf(stderr,\"%%s\",input);\n"
+	 "  fprintf(stderr,\"Trying to parse...\\n\");\n"
+	 "  ss.input = input;\n"
+	 "  %s(&ss);\n"
+	 "  if (ss.i != -1) printf(\"succeeded up to %%d (0x%%x)\\n\",ss.i,ss.i);\n"
+	 "  else printf(\"failed\\n\");\n"
+	 "  return 0;\n"
+	 "}\n",
+	 p_id(symb));
+}
+
+/**********************************************************************/
+/* A generator for parsers with dfa lookahead.
+*/
+static unsigned int fill_amount(rule_t r) {
+  switch (r->r) {
+  case &Lit(x):
+    return strlen(x);
+
+  case &Seq(r2,r3):
+    return fill_amount(r2)+fill_amount(r3);
+
+  case &Alt(r2,r3):
+    let a = fill_amount(r2);
+    let b = fill_amount(r3);
+    return (a<b)?b:a;
+
+  case &Opt(r2):
+    return fill_amount(r2);
+
+  case &CharRange(_,_):
+  case &Minus(_,_):
+    return 1;
+
+  case &Prose(_):
+  case &Symb(_,_):
+  case &Rcount(_,_):
+  case &Star(_,_,_):
+  case &Hash(_,_,_):
+    return 0;
+  }
+}
+
+static void gen_cs(cs_t cs) {
+  let ranges = cs2ranges(cs);
+  printf("if (0");
+  for (; ranges; ranges = ranges->tl) {
+    printf("||");
+    let &$(lb,ub) = ranges->hd;
+    if (lb == ub-1) { gen_uint(lb); printf("==c"); }
+    else {
+      printf("("); gen_uint(lb); printf("<=c&&c<"); gen_uint(ub); printf(")");
+    }
+  }
+  printf(") {\n");
+}
+static grammar_t checking_conflicts_grammar;
+static void gen_fill(rule_t r) {
+  let fa = fill_amount(r);
+  if (fa)
+    printf("  if ((YYLIMIT - YYCURSOR) < %u) YYFILL(%u);\n",fa,fa);
+}
+static void gen_fill_constant(unsigned int fa) {
+  if (fa)
+    printf("  if ((YYLIMIT - YYCURSOR) < %u) YYFILL(%u);\n",fa,fa);
+}
+static
+void gen0(rule_t r, rule_t right_ctxt) {
+  int save;
+  if (r->v) {
+    switch (r->r) {
+    case &Symb(x,y):
+      printf("let %s = ",r->v);
+      break;
+    default:
+      save = scope++;
+      printf("let save%d = YYSAVE;\n",save);
+      break;
+    }
+  }
+  switch (r->r) {
+  case &Symb(x,y):
+    printf("%s(yyb%s%s);\n",
+	   p_id(x),
+	   (y?",":""),
+	   y);
+    gen_fill(right_ctxt);
+    break;
+  case &Lit(x):
+    printf("{ int c;\n");
+    int len = strlen(x);
+    for (int k = 0; k < len; k++) {
+      printf("  c = *YYCURSOR++;\n");
+      let orig = x[k];
+      let l = tolower(orig);
+      let u = toupper(orig);
+      if (l == u)
+        printf("  if (c!=%d) throw &Parse_error_val;\n",l);
+      else
+        printf("  if (c!=%d&&c!=%d) throw &Parse_error_val;\n",l,u);
+    }
+    printf("}\n");
+    break;
+  case &CharRange(min,max):
+    if (min == max)
+      printf("if (*YYCURSOR++ != %u) throw &Parse_error_val;\n",min);
+    else
+      printf("{ int c = *YYCURSOR++;\n"
+             "  if (!(%u <= c && c <= %u)) throw &Parse_error_val;\n}\n",min,max);
+    break;
+  case &Prose(x):
+    internal_err("Prose in gen0: <%s>\n",x);
+    break;
+  case &Minus(_,_):
+    internal_err("Minus in gen0\n");
+    break;
+
+  case &Seq(r2,r3):
+    gen0(r2,SEQ(r3,right_ctxt));
+    gen0(r3,right_ctxt);
+    break;
+
+  case &Alt(r2,r3):
+    let rng_all = cs_empty();
+    let rng_conflict = cs_empty();
+  
+    let alts = gather_alt(r);
+    let csets = NULL;
+    let has_pred = 0;
+    for (let rs = alts; rs; rs = rs->tl) {
+      let rng = cs_empty();
+      first(rng,SEQ(rs->hd,right_ctxt));
+      csets = new List::List(rng,csets);
+      let rng2 = cs_dup(rng);
+      cs_intersect(rng2,rng_all);
+      cs_union(rng_conflict,rng2);
+      cs_union(rng_all,rng);
+      if (rs->hd->p) has_pred = 1;
+    }
+    csets = List::imp_rev(csets);
+    if (has_pred) {
+      // FIX: for now assume all cases have predicates, do a greedy parse
+      printf("{\n");
+      for (; alts && csets; alts = alts->tl, csets = csets->tl) {
+        let pred = (alts->hd->p)?(alts->hd->p):"1";
+        printf("if (%s) {\n",pred);
+        gen0(alts->hd,right_ctxt);
+        printf("}\n");
+        printf("else\n");
+      }
+      printf("throw &Parse_error_val;\n");
+      printf("}\n");
+    }
+    else if (!is_cs_empty(rng_conflict)) {
+      /* an LL(1) conflict */
+      eprintf("************************************************************************\n");
+      num_conflicts_ll++;
+      eprintf("Conflict %u\n",num_conflicts_ll);
+      eprintf("LL(1) conflict on character(s) ");
+      cs_print(stderr,rng_conflict);
+      eprintf(" in Alt\n  ");
+      pr_rule(stderr,SEQ(r,right_ctxt));
+      int altnum = 1;
+      for (let x = alts; x; x = x->tl) {
+        eprintf("\nAlternative %d: ",altnum++);
+        pr_rule(stderr,x->hd);
+      }
+      eprintf("\nRight context: ");
+      pr_rule(stderr,right_ctxt);
+      eprintf("\n");
+      let dfa;
+      if (local_lookahead) {
+	eprintf("Ignoring right context.\n");
+	dfa = lookahead_dfa(checking_conflicts_grammar,alts,LIT(""));
+      }
+      else {
+	dfa = lookahead_dfa(checking_conflicts_grammar,alts,right_ctxt);
+      }
+      printf("{ int yyaccept = 0;\n");
+      printf("{ let save = YYSAVE;\n");
+      dfa_generate2(dfa);
+      printf("YYCURSOR = YYRESTORE(save);\n}\n");
+      printf("switch (yyaccept) {\n");
+      for (unsigned int i = 1; alts; alts = alts->tl, i++) {
+        printf("case %u:\n",i);
+        gen0(alts->hd,right_ctxt);
+        printf("break;\n");
+      }
+      printf("default: throw &Parse_error_val;\n");
+      printf("}\n");
+      printf("}\n");
+    }
+    else {
+      printf("{\n");
+      gen_fill_constant(1);
+      printf("int c = *YYCURSOR;\n"); // Looking ahead, so don't advance cursor
+      for (; alts && csets; alts = alts->tl, csets = csets->tl) {
+        gen_cs(csets->hd);
+        gen0(alts->hd,right_ctxt); // FIX: if this is a charset we are needlessly repeating
+        printf("}\n");
+        printf("else\n");
+      }
+      printf("throw &Parse_error_val;\n");
+      printf("}\n");
+    }
+    break;
+  case &Opt(r2):
+    let cs2 = cs_empty();
+    let cs3 = cs_empty();
+    first(cs2,SEQ(r2,right_ctxt));
+    first(cs3,right_ctxt);
+    let cs = cs_dup(cs2);
+    cs_intersect(cs,cs3);
+    if (!is_cs_empty(cs)) {
+      /* an LL(1) conflict */
+      eprintf("************************************************************************\n");
+      num_conflicts_ll++;
+      eprintf("Conflict %u\n",num_conflicts_ll);
+      eprintf("LL(1) conflict on character(s) ");
+      cs_print(stderr,cs);
+      eprintf(" in Opt\n  ");
+      pr_rule(stderr,SEQ(r,right_ctxt));
+      eprintf("\n");
+      let dfa;
+      if (local_lookahead) {
+	eprintf("Ignoring right context.\n");
+	dfa = lookahead_dfa(checking_conflicts_grammar,
+			    List::list(r2,right_ctxt),
+                            LIT(""));
+
+      }
+      else {
+	dfa = lookahead_dfa(checking_conflicts_grammar,
+			    List::list(r2,LIT("")),
+                            right_ctxt);
+      }
+      printf("{ int yyaccept = 0;\n");
+      printf("{ let save = YYSAVE;\n");
+      dfa_generate2(dfa);
+      printf("YYCURSOR = YYRESTORE(save);\n}\n");
+      printf("switch (yyaccept) {\n");
+      printf("case 1:\n");
+      gen0(r2,right_ctxt);
+      printf("  break;\n");
+      printf("case 2:\n");
+      printf("  break;\n");
+      printf("default: throw &Parse_error_val;\n");
+      printf("}\n");
+      printf("}\n");
+    }
+    else {
+      printf("{\n");
+      gen_fill_constant(1);
+      printf("int c = *YYCURSOR;\n"); // Looking ahead, so don't advance cursor
+      gen_cs(cs2);
+      gen0(r2,right_ctxt); // FIX: if this is a charset we are needlessly repeating
+      printf("}\n");
+      printf("else ");
+      gen_cs(cs3);
+      printf("}\n");
+      printf("else throw &Parse_error_val;\n");
+      printf("}\n");
+    }
+    break;
+  case &Rcount(c,r2):
+    printf("{\n");
+    printf("unsigned int bounds = %s;\n",c);
+    printf("unsigned int count;\n");
+    printf("for (count = 0; count < bounds; count++) {\n");
+    gen_fill(r2);
+    gen0(r2,LIT("")); // throw away right context b/c we are doing a greedy parse
+    printf("}\n");
+    printf("}\n");
+    gen_fill(right_ctxt);
+    break;
+  case &Star(m,&Num(0),r2):
+    gen_fill(right_ctxt);
+    break;
+  case &Star(m,&Num(n),r2):
+    if (m > n) break;
+    for (; m > 0; m--,n--) {
+      gen_fill(r2);
+      gen0(r2,SEQ(STAR(m-1,new Num(n-1),r2),right_ctxt));
+    }
+    for (; n > 0; n--) {
+      gen_fill(r2);
+      gen0(OPT(STAR(1,new Num(n-1),r2)),right_ctxt);
+    }
+    gen_fill(right_ctxt);
+    break;
+  case &Star(m,&Infinity,r2):
+    let inf = new Infinity;
+    for (; m > 0; m--) {
+      gen_fill(r2);
+      gen0(r2,SEQ(STAR(m-1,inf,r2),right_ctxt));
+    }
+
+    let before = scope++;
+    let after = scope++;
+    let cs2 = cs_empty();
+    let cs3 = cs_empty();
+    let oneplus_r2 = STAR(1,inf,r2);
+    first(cs2,SEQ(oneplus_r2,right_ctxt));
+    first(cs3,right_ctxt);
+    let cs = cs_dup(cs2);
+    cs_intersect(cs,cs3);
+    let new_right_ctxt = SEQ(STAR(0,inf,r2),right_ctxt);
+    if (!is_cs_empty(cs)) {
+      /* an LL(1) conflict */
+      eprintf("************************************************************************\n");
+      num_conflicts_ll++;
+      eprintf("Conflict %u\n",num_conflicts_ll);
+      eprintf("LL(1) conflict on character(s) ");
+      cs_print(stderr,cs);
+      eprintf(" in Star\n  ");
+      pr_rule(stderr,SEQ(r,right_ctxt));
+      eprintf("\n");
+      eprintf("Alternative 1: ");
+      pr_rule(stderr,oneplus_r2);
+      eprintf("\nAlternative 2: ");
+      pr_rule(stderr,LIT(""));
+      eprintf("\nRight context: ");
+      pr_rule(stderr,right_ctxt);
+      eprintf("\n");
+      let dfa;
+      if (local_lookahead) {
+	eprintf("Ignoring right context.\n");
+	dfa = lookahead_dfa(checking_conflicts_grammar,
+			    List::list(oneplus_r2,right_ctxt),
+                            LIT(""));
+
+      }
+      else {
+	dfa = lookahead_dfa(checking_conflicts_grammar,
+			    List::list(oneplus_r2,LIT("")),
+                            right_ctxt);
+      }
+      printf("A%d: 0;\n",before);
+      printf("{ int yyaccept = 0;\n");
+      printf("{ let save = YYSAVE;\n");
+      dfa_generate2(dfa);
+      printf("YYCURSOR = YYRESTORE(save);\n}\n");
+      printf("switch (yyaccept) {\n");
+      printf("case 1:\n");
+      gen_fill(r2);
+      gen0(r2,new_right_ctxt);
+      printf("  goto A%d;\n",before);
+      printf("case 2:\n");
+      printf("  goto A%d;\n",after);
+      printf("default: throw &Parse_error_val;\n");
+      printf("}\n");
+      printf("}\n");
+      printf("A%d: 0;\n",after);
+    }
+    else {
+      printf("A%d: 0;\n",before);
+      printf("{\n");
+      gen_fill(r2);
+      gen_fill_constant(1);
+      printf("int c = *YYCURSOR;\n"); // Looking ahead, so don't advance cursor
+      gen_cs(cs2);
+      gen0(r2,new_right_ctxt); // FIX: if this is a charset we are needlessly repeating
+      printf("  goto A%d;\n",before);
+      printf("}\n");
+      printf("else ");
+      gen_cs(cs3);
+      printf("  goto A%d;\n",after);
+      printf("}\n");
+      printf("else throw &Parse_error_val;\n");
+      printf("}\n");
+      printf("A%d: 0;\n",after);
+    }
+    gen_fill(right_ctxt);
+    break;
+  case &Hash(0,&Infinity,r2): // 0# r2 -> [r2 *(commas r2)]
+    gen_fill(r2);
+    gen0(OPT(SEQ(r2,STAR(0,new Infinity,SEQ(commas(),r2)))),right_ctxt);
+    // NB: no need to fill for right context, that will be handled by the STAR
+    break;
+  case &Hash(m,&Infinity,r2): // m# r2 -> r2 (m-1)*(commas r2)
+    gen_fill(r2);
+    gen0(SEQ(r2,STAR(m-1,new Infinity,SEQ(commas(),r2))),right_ctxt);
+    break;
+  case &Hash(0,&Num(0),r2): // #0 r2 -> ""
+    gen0(LIT(""),right_ctxt);
+    // NB: must fill for right context, since LIT("") does not
+    gen_fill(right_ctxt);
+    break;
+  case &Hash(0,&Num(1),r2): // #1 r2 -> [r2]
+    gen_fill(r2);
+    gen0(OPT(r2),right_ctxt);
+    gen_fill(right_ctxt);
+    break;
+  case &Hash(0,&Num(n),r2): // #n r2 -> [r2 *(n-1)(commas r2)]
+    gen_fill(r2);
+    gen0(OPT(SEQ(r2,STAR(0,new Num(n-1),SEQ(commas(),r2)))),right_ctxt);
+    break;
+  case &Hash(m,&Num(n),r2): // m#n r2 -> r2 (m-1)*(n-1)(commas r2)
+    gen_fill(r2);
+    gen0(SEQ(r2,STAR(m-1,new Num(n-1),SEQ(commas(),r2))),right_ctxt);
+    break;
+  }
+  if (r->v) {
+    switch (r->r) {
+    case &Symb(_,_):
+      break;
+    default:
+      printf("unsigned char ?@nozeroterm yyr%d = YYRESTORE(save%d);\n"
+             "let %s = substring((const char ?@nozeroterm)yyr%d,0,YYCURSOR-yyr%d);\n",
+             save,save,
+             r->v,save,save);
+      break;
+    }
+  }
+  if (r->a) printf("%s\n",r->a);
+  return;
+}
+
+static grammar_t
+eof_follow_grammar(grammar_t<`H> grm, const char ?`H symb) {
+  grm = follow_grammar(grm);
+  let f = follow_symbol(symb);
+  for (let x = grm; x; x = x->tl) {
+    let &$(n,*r,_) = x->hd;
+    if (strcmp(n,f) == 0) {
+      *r = ALT(CHARRANGE(0,1),*r);
+      break;
+    }
+  }
+  return grm;
+}
+
+void gen(grammar_t<`H> grm, const char ?`H start_symbol,
+         List::list_t<const char ?@>textblobs) {
+  reset_globals();
+  // init_recursive(grm); // FIX: want to warn only on non-follow symbols,
+  // but still need to know whether a follow symbol is recursive
+  debugprint(1,"Computing follow grammar... ");
+  grammar_t followgrm = eof_follow_grammar(grm,start_symbol);
+  // grammar_t followgrm = follow_grammar(grm);
+  debugprint(1,"done\n");
+  if (debug > 1) {
+    eprintf("The follow grammar:\n");
+    pr_definitions(stderr,followgrm);
+  }
+  grammar_t combinedgrm = List::append(grm,followgrm);
+  init_recursive(combinedgrm);
+  checking_conflicts_grammar = combinedgrm;
+  init_firstt(combinedgrm);
+  init_mayt(combinedgrm);
+  init_mustt(combinedgrm);
+  init_maybe_empty(combinedgrm);
+
+  printf("#include <buffer.h>\n"
+	 "#include <stdio.h>\n"
+	 "#include <stdlib.h>\n"
+	 "#include <string.h>\n");
+#ifdef STRINGINPUT
+  printf("unsigned char ?@nozeroterm YYSTART;\n"
+         "unsigned char ?@nozeroterm YYCURSOR;\n"
+         "unsigned char ?@nozeroterm YYMARKER;\n"
+         "unsigned char ?@nozeroterm YYLIMIT;\n"
+         "#define YYFILL(i) 0\n"
+         "#define YYPOSN (YYCURSOR-YYSTART)\n"
+         "#define YYSAVE (YYCURSOR-YYSTART)\n"
+         "#define YYRESTORE(x) (YYSTART+(x))\n");
+#else
+  printf("#include \"buf.h\"\n"
+         "#define YYLIMIT yyb->lim\n"
+         "#define YYCURSOR yyb->cur\n"
+         "#define YYFILL(n) (yyfill(yyb,(n)))\n"
+         "#define YYPOSN ((yyb->cur-yyb->bot)+yyb->discarded)\n"
+         "#define YYMARKER yyb->mark\n"
+         "#define YYSAVE ({ let x = 0; yyb->save_count++; if (yyb->save) x = yyb->cur-yyb->save; else yyb->save = yyb->cur; x; })\n"
+         "#define YYRESTORE(x) ({ let p = yyb->save+x; if (--yyb->save_count == 0) yyb->save=NULL; p; })\n");
+#endif
+  printf("int yydebug = 0;\n"
+         "datatype exn { Parse_error };\n"
+         "datatype exn.Parse_error Parse_error_val = Parse_error;\n");
+
+  /* Print forward definitions of parsing functions */
+  for (let x = grm; x; x = x->tl) {
+    let &$(n,r,a) = x->hd;
+    if (a.rettype)
+      printf("%s ",a.rettype);
+    else
+      printf("void ");
+    printf("%s(yybuf_t @yyb%s%s);\n",
+	   p_id(n),
+	   (a.paramtype)?",":"",
+	   a.paramtype);
+  }
+
+  /* Print the text blobs */
+  for (let x = textblobs; x; x = x->tl) {
+    printf("%s\n",*x->hd);
+  }
+
+  /* Print the parsing functions */
+  for (let x = grm; x; x = x->tl) {
+    let &$(n,r,a) = x->hd;
+    let fn = follow_symbol(n);
+    if (a.rettype)
+      printf("%s ",a.rettype);
+    else
+      printf("void ");
+    printf("%s(yybuf_t @yyb%s%s) {\n",
+	   p_id(n),
+	   (a.paramtype)?",":"",
+	   a.paramtype);
+    printf("let YKq = YYPOSN;\n");
+    // TODO: HANDLE IMAP STRING SPECIAL CASE AS IN PGEN
+    gen_fill(r);
+    gen0(r,SYMB(fn));
+    printf("  if (yydebug) printf(\"[%%x,%%x):%s\\n\",YKq,YYPOSN);\n",n);
+    printf("}\n");
+  }
+  printf("int main(int argc, char ??argv) {\n"
+         "  while ((argc--)>1) {\n"
+         "    if (strcmp(*(++argv),\"-d\") == 0) yydebug++;\n"
+         "    else { fprintf(stderr,\"Unrecognized option: %%s\\n\",*argv); exit(1); }\n"
+         "  }\n");
+#ifdef STRINGINPUT
+  printf("  fprintf(stderr,\"Getting input... \");\n"
+	 "  Buffer::T buf = Buffer::create(1024);\n"
+	 "  int c;\n"
+	 "  while ( (c = getchar()) != -1) Buffer::add_char(buf,(char)c);\n"
+         "  let len = Buffer::length(buf);\n"
+         "  let buf = Buffer::extract(buf);\n"
+         "  unsigned char ?@nozeroterm input = malloc((len+1)*sizeof(unsigned char));\n"
+         "  for (let i = 0; i < len; i++) input[i] = buf[i];\n"
+         "  input[len] = '\\0';\n"
+	 "  fprintf(stderr,\"done\\n\");\n"
+	 "  // fprintf(stderr,\"%%s\",input);\n"
+	 "  fprintf(stderr,\"Trying to parse...\\n\");\n"
+         "  YYCURSOR = input;\n"
+         "  YYSTART = input;\n"
+         "  YYMARKER = input;\n"
+         "  YYLIMIT = input+numelts(input);\n");
+#else
+  printf("  yybuf_t @yyb = fd2yybuf(0); // read from stdin\n");
+#endif
+  printf("  try {\n");
+  printf("    %s(yyb);\n", // FIX: what if start_symbol takes args?
+         p_id(start_symbol));
+  printf("    let n = YYPOSN;\n"
+         "    if (n<60) for (int i = 0; i < n; i++) printf(\"^\");\n"
+         "    printf(\" accepted %%d (0x%%x) characters\\n\",n,n);\n"
+         "  }\n"
+         "  catch {\n"
+         "  case &Parse_error:\n"
+         "    let n = YYPOSN;\n"
+         "    if (n<60) for (int i = 0; i < n; i++) printf(\" \");\n"
+         "    printf(\"^ failed at position %%d (0x%%x)\\n\",n,n);\n"
+         "    break;\n"
+         "  }\n"
+	 "  return 0;\n"
+	 "}\n");
+  if (num_conflicts_ll) {
+    eprintf("************************************************************************\n");
+    eprintf("SUMMARY\n\n");
+    if (num_conflicts_ll == 1)
+      eprintf("There was 1 LL(1) conflict\n");
+    else
+      eprintf("There were %u LL(1) conflicts\n", num_conflicts_ll);
+    if (num_conflicts_dfa == 0)
+      eprintf("There were no conflicts for the lookahead dfas\n");
+    else {
+      if (num_conflicts_dfa == 1)
+        eprintf("There was 1 conflict in the dfas\n");
+      else if (num_conflicts_dfa > 1)
+        eprintf("There were %u conflicts in the dfas\n", num_conflicts_dfa);
+      if (num_conflicts_resolved == 1)
+        eprintf("  1 was resolved\n");
+      else
+        eprintf("  %u were resolved\n",num_conflicts_resolved);
+      if (num_conflicts_unresolved == 1)
+        eprintf("  1 was unresolved\n");
+      else
+        eprintf("  %u were unresolved\n",num_conflicts_unresolved);
+      if (num_conflicts_unbounded == 1)
+        eprintf("  1 instance might require unbounded lookahead\n");
+      else
+        eprintf("  %u instances might require unbounded lookahead\n",num_conflicts_unbounded);
+      if (num_conflicts_change_order == 1)
+        eprintf("  1 conflict was out of order\n");
+      else if (num_conflicts_change_order)
+        eprintf("  %u conflicts were out of order\n",num_conflicts_change_order);
+    }
+  }
+}
+

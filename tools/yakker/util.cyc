@@ -1,0 +1,209 @@
+/* Copyright (C) 2005 Greg Morrisett, AT&T.
+   This file is part of the Cyclone project.
+
+   Cyclone is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   Cyclone is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Cyclone; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+#include "util.h"
+
+int debug = 0;
+int print_errors = 1;
+int expand_nonrec = 1;
+static void pr_stderr(string_t fmt, parg_t ? ap) {
+  vfprintf(stderr,fmt,ap);
+  fflush(stderr);
+}
+void eprintf(string_t fmt, ... inject parg_t ap)
+  __attribute__((format(printf,1,2))) {
+  pr_stderr(fmt, ap);
+}
+void warn(string_t fmt, ... inject parg_t ap)
+  __attribute__((format(printf,1,2))) {
+  if (!print_errors) return;
+  fprintf(stderr,"Warning: ");
+  pr_stderr(fmt, ap);
+}
+void debugprint(int level, string_t fmt, ... inject parg_t ap)
+  __attribute__((format(printf,2,3))) {
+  if (debug <= level) return;
+  pr_stderr(fmt, ap);
+}
+void internal_err(string_t fmt, ... inject parg_t ap)
+  __attribute__((format(printf,1,2))) {
+  if (!print_errors) return;
+  fprintf(stderr,"Internal error: ");
+  pr_stderr(fmt, ap);
+}
+
+static void printstr(FILE @f,str_t x) { fprintf(f,"\"%s\"",*x); }
+void printGraph(Graph::graph_t<str_t> g) {
+  Graph::print(stdout,g,printstr);
+}
+static void printuint(FILE @f, unsigned int x) { fprintf(f,"%u",x); }
+void printUintGraph(Graph::graph_t<unsigned int> g) {
+  Graph::print(stdout,g,printuint);
+}
+
+void gen_uint(unsigned int u) {
+  if (!isprint(u))
+    printf("%u",u);
+  else if (u == '\\' || u == '\'')
+    printf("'\\%c'",u);
+  else printf("'%c'",u);
+}
+
+void fprint_strset(FILE @f,strset_t ns) {
+  while (!Set::is_empty(ns)) {
+    let n = Set::choose(ns);
+    ns = Set::delete(ns,n);
+    fprintf(f," %s",*n);
+  }
+  fprintf(f,"\n");
+  fflush(f);
+}
+
+void fprint_uintset(FILE @f,Set::set_t<unsigned int,`H> ns) {
+  while (!Set::is_empty(ns)) {
+    let n = Set::choose(ns);
+    ns = Set::delete(ns,n);
+    fprintf(f," %u",n);
+  }
+  fprintf(f,"\n");
+  fflush(f);
+}
+
+Graph::graph_t<`a>
+node_intersect(Graph::graph_t<`a> g, Set::set_t<`a,`H> x) {
+  let result = Graph::empty(g.rel);
+  for (let edges = Dict::to_list(g); edges; edges = edges->tl) {
+    let &$(src,targets) = edges->hd;
+    if (Set::member(x,src))
+      result = Graph::add_edges(result,src,Set::intersect(x,targets));
+  }
+  return result;
+}
+
+Graph::graph_t<`a>
+node_delete(Graph::graph_t<`a> g, Set::set_t<`a,`H> x) {
+  let result = Graph::empty(g.rel);
+  for (let edges = Dict::to_list(g); edges; edges = edges->tl) {
+    let &$(src,targets) = edges->hd;
+    if (!Set::member(x,src))
+      result = Graph::add_edges(result,src,Set::diff(targets,x));
+  }
+  return result;
+}
+
+static bool special_char(char c) {
+  return (c<=' ' || c>='~' || c=='\042' || c=='\\');
+}
+static bool special(const char ?s){
+  int sz = numelts(s)-1;
+  for (int i = 0; i<sz; i++)
+    if (special_char(s[i])) return true;
+  return false;
+}
+const char ?char_escape(char c) {
+  if (!special_char(c)) return aprintf("%c",c);
+  unsigned int len;
+  switch (c) {
+    case '\a':
+    case '\b':
+    case '\f':
+    case '\n':
+    case '\r':
+    case '\t':
+    case '\v':
+    case '\\':
+    case '\"': len = 2; break;
+    case c:
+      if (c>=' ' && c<='~') len = 1;
+      else len = 4;
+      break;
+  }
+  char ?t = Core::new_string(len+1);
+  unsigned int j = 0;
+  switch (c) {
+  case '\a': t[j++] = '\\'; t[j++] = 'a'; break;
+  case '\b': t[j++] = '\\'; t[j++] = 'b'; break;
+  case '\f': t[j++] = '\\'; t[j++] = 'f'; break;
+  case '\n': t[j++] = '\\'; t[j++] = 'n'; break;
+  case '\r': t[j++] = '\\'; t[j++] = 'r'; break;
+  case '\t': t[j++] = '\\'; t[j++] = 't'; break;
+  case '\v': t[j++] = '\\'; t[j++] = 'v'; break;
+  case '\\': t[j++] = '\\'; t[j++] = '\\'; break;
+  case '"' : t[j++] = '\\'; t[j++] = '"'; break;
+  default:
+    if (c>=' ' && c<='~') t[j++] = c;
+    else {
+      t[j++] = '\\';
+      t[j++] = (char)('0'+((c>>6)&7));
+      t[j++] = (char)('0'+((c>>3)&7));
+      t[j++] = (char)('0'+(c&7));
+    }
+    break;
+  }
+  return t;
+}
+const char ?string_escape(const char ?`H s) {
+  if (!special(s)) return s;
+
+  int n = numelts(s) - 1;
+  // Check for the expected NUL terminator of a string constant
+  if (n>0 && s[n]=='\000') n--;
+  // determine length
+  int len = 0;
+  for (int i=0; i<=n; i++)
+    switch (s[i]) {
+    case '\a':
+    case '\b':
+    case '\f':
+    case '\n':
+    case '\r':
+    case '\t':
+    case '\v':
+    case '\\':
+    case '\"': len += 2; break;
+    case c:
+      if (c>=' ' && c<='~') len++;
+      else len += 4;
+      break;
+    }
+  // build the escaped string
+  char ?t = Core::new_string(len+1);
+  int j = 0;
+  for (int i=0; i<=n; i++)
+    switch (s[i]) {
+    case '\a': t[j++] = '\\'; t[j++] = 'a'; break;
+    case '\b': t[j++] = '\\'; t[j++] = 'b'; break;
+    case '\f': t[j++] = '\\'; t[j++] = 'f'; break;
+    case '\n': t[j++] = '\\'; t[j++] = 'n'; break;
+    case '\r': t[j++] = '\\'; t[j++] = 'r'; break;
+    case '\t': t[j++] = '\\'; t[j++] = 't'; break;
+    case '\v': t[j++] = '\\'; t[j++] = 'v'; break;
+    case '\\': t[j++] = '\\'; t[j++] = '\\'; break;
+    case '"' : t[j++] = '\\'; t[j++] = '"'; break;
+    case c:
+      if (c>=' ' && c<='~') t[j++] = c;
+      else {
+        t[j++] = '\\';
+        t[j++] = (char)('0'+((c>>6)&7));
+        t[j++] = (char)('0'+((c>>3)&7));
+        t[j++] = (char)('0'+(c&7));
+      }
+      break;
+    }
+  return t;
+}

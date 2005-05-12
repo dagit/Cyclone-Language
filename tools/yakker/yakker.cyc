@@ -1,0 +1,377 @@
+/* Copyright (C) 2005 Greg Morrisett, AT&T.
+   This file is part of the Cyclone project.
+
+   Cyclone is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   Cyclone is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Cyclone; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+#include "bnf.h"
+#include "pr.h"
+#include "pads.h"
+#include "extract.h"
+#include "cs.h"
+#include "prose.h"
+#include "analyze.h"
+#include "fa.h"
+#include "parsergen.h"
+#include "termgrammar.h"
+#include "corerules.h"
+#include <stdio.h>
+#include <string.h>
+#include <list.h>
+using List;
+
+extern List::list_t<const char ?@> nowslist;
+extern List::list_t<const char ?@> wslist;
+extern List::list_t<const char ?@> norelist;
+extern List::list_t<const char ?@> relist;
+
+#define FILE_MODE 0
+#define ROOT_MODE 1
+#define OMIT_MODE 2
+#define NOWS_MODE 3
+#define WS_MODE 4
+#define NORE_MODE 5
+#define RE_MODE 6
+
+extern int ws_on;
+extern int re_on;
+
+extern grammar_t parse_file(FILE @`H f);      // parse.y
+extern List::list_t<const char ?@> textblobs; // parse.y
+
+static int do_graph = 0;
+
+static int do_test_nfa2dfa = 0;
+static int do_test_tc = 0;
+
+static int check_undefined = 0;
+static int check_multiple = 0;
+static int check_empty = 0;
+static int check_left_recursion = 0;
+static int check_firstfollow = 0;
+static int check_conflicts = 0;
+static int check_whitespace = 0;
+
+static void check_all() { /* except conflicts1 */
+  check_undefined = 
+    check_multiple =
+    check_empty = 
+    check_left_recursion = 
+    check_firstfollow =
+    check_conflicts =
+    check_whitespace = 1;
+}
+static int check_any() {
+  return
+    check_undefined ||
+    check_multiple ||
+    check_empty || 
+    check_left_recursion ||
+    check_firstfollow ||
+    check_conflicts ||
+    check_whitespace;
+}
+
+#define USAGE \
+"Usage: yakker [OPTIONS] [FILES]\n"\
+"Options: -gen <sym>             generate a parser using <sym> as the start symbol\n"\
+"           -local                 use only local lookahead (without FOLLOW)\n"\
+"           -no-expand             don't expand recursive symbols, share them instead\n"\
+"         -extract               extract EBNF from the input, assumed to be in RFC format\n"\
+"         -check                 perform all sanity checks on the input grammar\n"\
+"           -check-undefined       check for undefined symbols\n"\
+"           -check-multiple        check for multiply defined symbols\n"\
+"           -check-empty           check for symbols that might be empty\n"\
+"           -check-left-recursion  check for left recursive symbols\n"\
+"           -check-firstfollow     check the FIRST and FOLLOW sets\n"\
+"           -check-conflicts       check for conflicts\n"\
+"           -check-whitespace      check whitespace\n"\
+"         -compare               compare two grammars\n"\
+"         -pads                  generate a PADS specification\n"\
+"         -sort                  sort the input grammar by name (case sensitive)\n"\
+"         -isort                 sort the input grammar by name (case insensitive)\n"\
+"         -tsort                 sort the input grammar topologically\n"\
+"         -rename <sym1> <sym2>  rename <sym1> to <sym2>\n"\
+"         -subset <syms>         use only the subset of the input grammar with roots <syms>\n"\
+"         -omit <syms>           omit the definitions of <syms>\n"\
+"         -re-on                 use regular expressions by default\n"\
+"         -ws-on                 do whitespace elimination by default\n"\
+"         -nows <syms>           don't perform whitespace elimination on the definitions of <syms>\n"\
+"         -ws <syms>             do perform whitespace elimination on the definitions of <syms>\n"\
+"         -nore <syms>           don't handle <syms> as regular expressions\n"\
+"         -re <syms>             do handle <syms> as regular expressions\n"\
+"         -termgrammar           produce a term grammar for the input grammar\n"\
+"         -help                  print this message\n"
+
+static void die() {
+  fprintf(stderr,USAGE);
+  exit(1);
+}
+
+int main(int argc, const char ?`H?argv) {
+  list_t<const char ?@> files = NULL;
+  list_t<const char ?@> roots = NULL;
+  int extractp = 0;
+  int extractprosep = 0;
+  int generate = 0;
+  int subset = 0;
+  int pads = 0;
+  int sortp = 0;
+  int isortp = 0;
+  int tsortp = 0;
+  int termgrammarp = 0;
+  int compare = 0;
+  int local_lookahead = 0;
+  const char ?start_symbol = NULL;
+  int mode = FILE_MODE;
+
+  let omitset = Set::empty(strptrcmp);
+
+  for (int i = 1; i < argc; i++) {
+    if (strcmp("-rename",argv[i]) == 0) {
+      if (i+2 >= argc) die();
+      renamings = new List(new $(strdup(argv[i+1]),strdup(argv[i+2])),renamings);
+      i += 2;
+    }
+    else if (strcmp("-gen",argv[i]) == 0) {
+      generate = 1;
+      if (i+1 >= argc) die();
+      start_symbol = argv[i+1];
+      i += 1;
+    }
+    else if (strcmp("-help",argv[i]) == 0) die();
+    else if (strcmp("-termgrammar",argv[i]) == 0) termgrammarp = 1;
+    else if (strcmp("-compare",argv[i]) == 0) compare = 1;
+    else if (strcmp("-local",argv[i]) == 0) local_lookahead = 1;
+    else if (strcmp("-no-expand",argv[i]) == 0) expand_nonrec = 0;
+    else if (strcmp("-d",argv[i]) == 0) debug++;
+    else if (strcmp("-ws-on",argv[i]) == 0) ws_on = 1;
+    else if (strcmp("-re-on",argv[i]) == 0) re_on = 1;
+    else if (strcmp("-extract",argv[i]) == 0) extractp = 1;
+    else if (strcmp("-pads",argv[i]) == 0) pads = 1;
+    else if (strcmp("-sort",argv[i]) == 0) sortp = 1;
+    else if (strcmp("-isort",argv[i]) == 0) isortp = 1;
+    else if (strcmp("-tsort",argv[i]) == 0) tsortp = 1;
+    else if (strcmp("-test-nfa2dfa",argv[i]) == 0) do_test_nfa2dfa = 1;
+    else if (strcmp("-test-tc",argv[i]) == 0) do_test_tc = 1;
+    else if (strcmp("-check",argv[i]) == 0) check_all();
+    else if (strcmp("-check-undefined",argv[i]) == 0) check_undefined = 1;
+    else if (strcmp("-check-multiple",argv[i]) == 0) check_multiple = 1;
+    else if (strcmp("-check-empty",argv[i]) == 0) check_empty = 1;
+    else if (strcmp("-check-left-recursion",argv[i]) == 0) check_left_recursion = 1;
+    else if (strcmp("-check-firstfollow",argv[i]) == 0) check_firstfollow = 1;
+    else if (strcmp("-check-conflicts",argv[i]) == 0) check_conflicts = 1;
+    else if (strcmp("-check-whitespace",argv[i]) == 0) check_whitespace = 1;
+    else if (strcmp("-extract-prose",argv[i]) == 0) extractprosep = 1;
+    else if (strcmp("-graph",argv[i]) == 0) do_graph = 1;
+    else if (strcmp("-subset",argv[i]) == 0) { mode = ROOT_MODE; subset = 1; }
+    else if (strcmp("-omit",argv[i]) == 0) mode = OMIT_MODE;
+    else if (strcmp("-nows",argv[i]) == 0) mode = NOWS_MODE;
+    else if (strcmp("-ws",argv[i]) == 0) mode = WS_MODE;
+    else if (strcmp("-nore",argv[i]) == 0) mode = NORE_MODE;
+    else if (strcmp("-re",argv[i]) == 0) mode = RE_MODE;
+    else if (mode == ROOT_MODE) roots = new List(new (const char ?)strdup(argv[i]),roots);
+    else if (mode == OMIT_MODE) omitset = Set::insert(omitset,new (const char ?)strdup(argv[i]));
+    else if (mode == NOWS_MODE) nowslist = new List(new (const char ?)strdup(argv[i]),nowslist);
+    else if (mode == WS_MODE) wslist = new List(new (const char ?)strdup(argv[i]),wslist);
+    else if (mode == NORE_MODE) norelist = new List(new (const char ?)strdup(argv[i]),norelist);
+    else if (mode == RE_MODE) relist = new List(new (const char ?)strdup(argv[i]),relist);
+    else files = new List(new (const char ?)strdup(argv[i]),files);
+  }
+
+  files = List::imp_rev(files);
+  let len = List::length(files);
+
+  /* Compare two grammars and exit */
+  if (compare) {
+    if (len == 0 || len > 2) die();
+    FILE *f;
+    FILE *g;
+    if (len == 1) {
+      f = stdin;
+      g = fopen(*files->hd,"r");
+      if (!g) {
+        fprintf(stderr,"Cannot open file %s\n",*files->hd);
+        exit(1);
+      }
+    }
+    else { // len == 2
+      f = fopen(*files->hd,"r");
+      if (!f) {
+        fprintf(stderr,"Cannot open file %s\n",*files->hd);
+        exit(1);
+      }
+      g = fopen(*files->tl->hd,"r");
+      if (!g) {
+        fprintf(stderr,"Cannot open file %s\n",*files->tl->hd);
+        exit(1);
+      }
+    }
+    /* FIX: ignore whitespace stuff */
+    let ds1 = parse_file(f);
+    fclose(f);
+    let ds2 = parse_file(g);
+    fclose(g);
+    let c = eq_definitions(ds1,ds2);
+    if (c) fprintf(stderr,"Grammars ARE EQUAL\n");
+    else fprintf(stderr,"Grammars ARE NOT equal\n");
+    return !c; /* return 1 iff the grammars are not equal */
+  }
+
+  /* Set up the input source */
+  if (len > 1) die(); // FIX: allow multiple input files
+  FILE *f;
+  if (len == 0) f = stdin;
+  else {
+    f = fopen(*files->hd,"r");
+    if (!f) {
+      fprintf(stderr,"Cannot open file %s\n",*files->hd);
+      exit(1);
+    }
+  }
+
+  /* Extract prose from a document like an RFC and exit */
+  if (extractprosep) {
+    extract_prose(f);
+    fclose(f);
+    return 0;
+  }
+
+  /* Or, suck in a grammar from somewhere and do something with it */
+  grammar_t ds;
+  if (extractp) { /* Extract a grammar from a document like an RFC */
+    debugprint(1,"Extracting bnf... ");
+    ds = extract_definitions(f);
+    debugprint(1,"done\n");
+  }
+  else {
+    debugprint(1,"Parsing bnf... ");
+    ds = parse_file(f);
+    debugprint(1,"done\n");
+  }
+  fclose(f);
+
+  {
+    // FIX: need flags to turn on and off
+    debugprint(1,"Checking core rules... ");
+    core_compare(ds);
+    ds = core_augment(ds);
+    debugprint(1,"done\n");
+  }
+
+  {
+    debugprint(1,"Filtering... ");
+    let filtered = NULL;
+    for (; ds; ds = ds->tl) {
+      let &$(name,_,_) = ds->hd;
+      if (Set::member(omitset,new name)) continue;
+      filtered = new List::List(ds->hd,filtered);
+    }
+    ds = filtered;
+    ds = List::imp_rev(ds);
+    debugprint(1,"done\n");
+  }
+    
+  if (subset) {
+    debugprint(1,"Subsetting... ");
+    ds = get_reachable(ds,roots);
+    debugprint(1,"done\n");
+  }
+
+  /* Produce the term grammar and exit */
+  if (termgrammarp) {
+    debugprint(1,"Producing term grammar... ");
+    ds = minus_elim(ds); // also marks character sets, needed for the conversion
+    pr_definitions(stdout,grammar2termgrammar(ds));
+    debugprint(1,"done\n");
+    return 0;
+  }
+
+  /* Produce the dependency graph and exit */
+  if (do_graph) {
+    debugprint(1,"Calculating dependency graph... ");
+    let g = dependency_graph(ds);
+    g = node_delete(g,omitset); // unlike above, this gets rid of targets too
+    printGraph(Graph::tkernel(g));
+    debugprint(1,"done\n");
+    return 0;
+  }
+
+  /* FIX: what should the defaults be?  Should there be flags for these? */
+  debugprint(1,"Eliminating prose... ");
+  ds = prose_elim(ds);
+  debugprint(1,"done\n");
+
+  debugprint(1,"Removing duplicates... ");
+  ds = remove_duplicates(ds);
+  debugprint(1,"done\n");
+
+  if (sortp) {
+    debugprint(1,"Sorting... ");
+    ds = sort_definitions_by_name(ds);
+    debugprint(1,"done\n");
+  }
+  else if (isortp) {
+    debugprint(1,"Sorting... ");
+    ds = isort_definitions_by_name(ds);
+    debugprint(1,"done\n");
+  }
+  else if (tsortp) {
+    debugprint(1,"Sorting... ");
+    ds = sort_definitions(ds);
+    debugprint(1,"done\n");
+  }
+
+  if (do_test_nfa2dfa) test_nfa2dfa(ds);
+  if (do_test_tc) test_tc(ds);
+
+  if (check_any()) {
+    if (check_whitespace) report_whitespace(ds);
+    ds = ws_definitions(ds); // NB: report_whitespace must come before this
+    if (check_undefined) report_undefined(ds);
+    if (check_multiple) report_multiple(ds);
+    if (check_empty) report_empty_nonterminals(ds);
+    if (check_left_recursion) report_left_recursion(ds);
+    ds = minus_elim(ds);
+    if (check_firstfollow) report_first_follow(ds);
+    if (check_conflicts) report_conflicts(ds);
+  }
+  else if (pads) {
+    ds = minus_elim(ds);
+    ds = ws_definitions(ds);
+    pads_definitions(ds);
+  }
+  else if (generate) {
+    if (!ds) {
+      fprintf(stderr,"Error: no definitions in input\n");
+      exit(1);
+    }
+    debugprint(1,"Minus elimination... ");
+    ds = minus_elim(ds);
+    debugprint(1,"done\n");
+    debugprint(1,"Processing whitespace... ");
+    ds = ws_definitions(ds);
+    debugprint(1,"done\n");
+    if (!start_symbol) die();
+    //    pgen(ds,start_symbol);
+    debugprint(1,"Generating... ");
+    gen(ds,start_symbol,textblobs);
+    debugprint(1,"done\n");
+  }
+  else
+    // ds = ws_definitions(ds);
+    pr_definitions(stdout,ds);
+  return 0;
+}
