@@ -986,9 +986,9 @@ void gen(grammar_t<`H> grm, const char ?`H start_symbol,
   printf("  try {\n");
   printf("    %s(yyb);\n", // FIX: what if start_symbol takes args?
          p_id(start_symbol));
-  printf("    let n = YYPOSN;\n"
-         "    if (n<60) for (int i = 0; i < n; i++) printf(\"^\");\n"
-         "    printf(\" accepted %%d (0x%%x) characters\\n\",n,n);\n"
+  printf("    //let n = YYPOSN;\n"
+         "    //if (n<60) for (int i = 0; i < n; i++) printf(\"^\");\n"
+         "    //printf(\" accepted %%d (0x%%x) characters\\n\",n,n);\n"
          "  }\n"
          "  catch {\n"
          "  case &Parse_error:\n"
