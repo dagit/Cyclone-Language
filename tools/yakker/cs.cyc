@@ -235,9 +235,18 @@ int is_cs(rule_t r) {
     return 0;
   }
 }
+cs_t string2cs(const char ?s) {
+  let res = cs_empty();
+  let n = strlen(s);
+  for (let i = 0; i < n; i++)
+    cs_insert(res,s[i]);
+  return res;
+}
+
+
 /* Return the set of characters defined by rule, or the empty cs
    if the rule does not seem to define a set of characters. */
-static cs_t rule2cs(rule_t r) {
+cs_t rule2cs(rule_t r) {
   switch (r->r) {
   case &Symb(x,_):
     for (let t = known_cs; t; t = t->tl) {

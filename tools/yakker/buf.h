@@ -18,8 +18,14 @@
 
 #ifndef BUF_H
 #define BUF_H
+struct ssl_st;
+typedef struct ssl_st SSL;
+datatype yyproducer {
+  yyp_fd(int);
+  yyp_ssl(SSL@);
+};
 typedef struct yybuf {
-  int             fd;
+  datatype yyproducer *prod;
   unsigned char
     ? @nozeroterm bot,
     ? @nozeroterm save,
@@ -33,6 +39,7 @@ typedef struct yybuf {
 } yybuf_t;
 extern yybuf_t @fd2yybuf(int fd);
 extern yybuf_t @string2yyb(const char ?s);
+extern yybuf_t @ssl2yybuf(SSL@`H);
 extern void yyfill(yybuf_t @s,unsigned int n);
 
 extern void compress_whitespace(char ?x);

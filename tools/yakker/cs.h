@@ -45,8 +45,10 @@ extern cs_t cs_range(unsigned int lb, unsigned int ub); /* half-open interval [l
 extern $(unsigned char,unsigned char) cs_bounds(cs_t rng);
 extern void cs_print(FILE @f,cs_t rng);
 extern const char ?cs2string(cs_t rng);
+extern cs_t string2cs(const char ?s);
 extern int cs_member(cs_t a,unsigned char c);
 extern int is_cs(rule_t r);
+extern cs_t rule2cs(rule_t r);
 extern int is_cs_empty(cs_t a);
 extern int is_cs_full(cs_t a);
 extern int is_cs_singleton(cs_t a);

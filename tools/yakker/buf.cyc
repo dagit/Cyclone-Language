@@ -29,7 +29,22 @@
 yybuf_t @fd2yybuf(int fd) {
   let buf = malloc(BSIZE*sizeof(unsigned char));
   let result = new yybuf{
-    .fd = fd,
+    .prod=new yyp_fd(fd),
+    .bot=buf,
+    .save=NULL,
+    .mark=NULL,
+    .cur=buf,
+    .lim=buf,
+    .top=buf+BSIZE,
+    .eof=0,
+    .save_count=0,
+    .discarded=0};
+  return result;
+}
+yybuf_t @ssl2yybuf(SSL @`H ssl) {
+  let buf = malloc(BSIZE*sizeof(unsigned char));
+  let result = new yybuf{
+    .prod=new yyp_ssl(ssl),
     .bot=buf,
     .save=NULL,
     .mark=NULL,
@@ -51,7 +66,7 @@ yybuf_t @string2yybuf(const char ?s) {
   memcpy(buf,s,len);
   buf[len] = '\0';
   let result = new yybuf{
-    .fd = 0,
+    .prod=NULL,
     .bot=buf,
     .save=NULL,
     .mark=NULL,
@@ -106,7 +121,19 @@ yybuf_t @string2yybuf(const char ?s) {
 #define YYRESTORE(x) ({ let p = yyb->save+x; if (--yyb->save_count == 0) yyb->save=NULL; p; })
 */
 
+// Note: SSL uses int instead of size_t
+extern int SSL_read(SSL @ssl, char ? @nozeroterm buf, int count);
+
+int yyread(datatype yyproducer *p, unsigned char? @nozeroterm b, int n) {
+  switch (p) {
+  case NULL: return 0;
+  case &yyp_fd(fd): return read(fd,b,n);
+  case &yyp_ssl(ssl): return SSL_read(ssl,b,n);
+  }
+}
+
 void yyfill(yybuf_t @s,unsigned int n) {
+  //  fprintf(stderr,"yyfill(%d)\n",n); fflush(stderr);
   if (n < (s->lim - s->cur)) return;
   if (!s->eof) {
     int TO_READ = BSIZE;
@@ -140,7 +167,7 @@ void yyfill(yybuf_t @s,unsigned int n) {
     }
     // Read in TO_READ characters
   YYREADLOOP:
-    if ((cnt = read(s->fd, s->lim, TO_READ)) != TO_READ) {
+    if ((cnt = yyread(s->prod, s->lim, TO_READ)) != TO_READ) {
       if (!cnt) {                   // end-of-file
         s->eof = 1;
         s->lim[cnt++] = '\0'; // Invariant: cnt < TO_READ
@@ -161,9 +188,8 @@ void yyfill(yybuf_t @s,unsigned int n) {
         }
       }
       else {                        // read fewer than TO_READ characters for some other reason
-        // TODO: we could change the fill API to pass in the desired number of characters,
-        // and return when we get that many, even if less than TO_READ.
         s->lim += cnt;
+        if (n < (s->lim - s->cur)) return; // TO_READ was larger than n
         TO_READ -= cnt;
         goto YYREADLOOP;
       }

@@ -372,6 +372,52 @@ rule_t r2t(rule_t r) {
   }
 }
 
+// Yet another try...
+rule_t r2t2(rule_t r) {
+  switch (r->r) {
+  case &Star(m,N,r2):
+    if (is_cs(r2) && m > 0) {
+      let cs = rule2cs(r);
+      let cs_avoid = string2cs(" \n\t\r\",");
+      cs_intersect(cs_avoid,cs);
+      if (is_cs_empty(cs_avoid)) return r;
+    }
+    warn("r2t2: failed 1\n");
+    return LIT("");
+  case &Opt(r2):
+    return ALT(LIT("NULL"),r2t2(r2));
+  case &Rcount(n,r2):
+    warn("r2t2: failed 2\n");
+    return LIT("");
+  case &Hash(m,N,r2):
+    warn("r2t2: failed 3\n");
+    return LIT("");
+  case &Alt(r1,r2):
+    warn("r2t2: failed 5\n");
+    return LIT("");
+  case &Symb(_,_):
+    warn("r2t2: failed 6\n");
+    return LIT("");
+  case &CharRange(min,max):
+    warn("r2t2: failed 7\n");
+    return LIT("");
+  case &Lit(_):
+    warn("r2t2: failed 8\n");
+    return LIT("");
+  case &Seq(r2,r3):
+    warn("r2t2: failed 9\n");
+    return LIT("");
+  case &Prose(x):
+    internal_err("Unexpected Prose in r2t2\n");
+    return LIT("");
+  case &Minus(_,_):
+    internal_err("Unexpected Minus in r2t2\n");
+    return LIT("");
+  }
+}
+
+
+
 grammar_t grammar2termgrammar(grammar_t ds) {
   init_arityt(ds);
   let res = NULL;

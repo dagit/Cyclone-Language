@@ -27,6 +27,7 @@
 #include <buffer.h>
 #include <stdlib.h>
 
+int print_main = 1;
 int local_lookahead = 0;
 
 #define FAIL ({ s->i = -1; return; 0; })
@@ -958,47 +959,49 @@ void gen(grammar_t<`H> grm, const char ?`H start_symbol,
     printf("  if (yydebug) printf(\"[%%x,%%x):%s\\n\",YKq,YYPOSN);\n",n);
     printf("}\n");
   }
-  printf("int main(int argc, char ??argv) {\n"
-         "  while ((argc--)>1) {\n"
-         "    if (strcmp(*(++argv),\"-d\") == 0) yydebug++;\n"
-         "    else { fprintf(stderr,\"Unrecognized option: %%s\\n\",*argv); exit(1); }\n"
-         "  }\n");
+  if (print_main) {
+    printf("int main(int argc, char ??argv) {\n"
+           "  while ((argc--)>1) {\n"
+           "    if (strcmp(*(++argv),\"-d\") == 0) yydebug++;\n"
+           "    else { fprintf(stderr,\"Unrecognized option: %%s\\n\",*argv); exit(1); }\n"
+           "  }\n");
 #ifdef STRINGINPUT
-  printf("  fprintf(stderr,\"Getting input... \");\n"
-	 "  Buffer::T buf = Buffer::create(1024);\n"
-	 "  int c;\n"
-	 "  while ( (c = getchar()) != -1) Buffer::add_char(buf,(char)c);\n"
-         "  let len = Buffer::length(buf);\n"
-         "  let buf = Buffer::extract(buf);\n"
-         "  unsigned char ?@nozeroterm input = malloc((len+1)*sizeof(unsigned char));\n"
-         "  for (let i = 0; i < len; i++) input[i] = buf[i];\n"
-         "  input[len] = '\\0';\n"
-	 "  fprintf(stderr,\"done\\n\");\n"
-	 "  // fprintf(stderr,\"%%s\",input);\n"
-	 "  fprintf(stderr,\"Trying to parse...\\n\");\n"
-         "  YYCURSOR = input;\n"
-         "  YYSTART = input;\n"
-         "  YYMARKER = input;\n"
-         "  YYLIMIT = input+numelts(input);\n");
+    printf("  fprintf(stderr,\"Getting input... \");\n"
+           "  Buffer::T buf = Buffer::create(1024);\n"
+           "  int c;\n"
+           "  while ( (c = getchar()) != -1) Buffer::add_char(buf,(char)c);\n"
+           "  let len = Buffer::length(buf);\n"
+           "  let buf = Buffer::extract(buf);\n"
+           "  unsigned char ?@nozeroterm input = malloc((len+1)*sizeof(unsigned char));\n"
+           "  for (let i = 0; i < len; i++) input[i] = buf[i];\n"
+           "  input[len] = '\\0';\n"
+           "  fprintf(stderr,\"done\\n\");\n"
+           "  // fprintf(stderr,\"%%s\",input);\n"
+           "  fprintf(stderr,\"Trying to parse...\\n\");\n"
+           "  YYCURSOR = input;\n"
+           "  YYSTART = input;\n"
+           "  YYMARKER = input;\n"
+           "  YYLIMIT = input+numelts(input);\n");
 #else
-  printf("  yybuf_t @yyb = fd2yybuf(0); // read from stdin\n");
+    printf("  yybuf_t @yyb = fd2yybuf(0); // read from stdin\n");
 #endif
-  printf("  try {\n");
-  printf("    %s(yyb);\n", // FIX: what if start_symbol takes args?
-         p_id(start_symbol));
-  printf("    //let n = YYPOSN;\n"
-         "    //if (n<60) for (int i = 0; i < n; i++) printf(\"^\");\n"
-         "    //printf(\" accepted %%d (0x%%x) characters\\n\",n,n);\n"
-         "  }\n"
-         "  catch {\n"
-         "  case &Parse_error:\n"
-         "    let n = YYPOSN;\n"
-         "    if (n<60) for (int i = 0; i < n; i++) printf(\" \");\n"
-         "    printf(\"^ failed at position %%d (0x%%x)\\n\",n,n);\n"
-         "    break;\n"
-         "  }\n"
-	 "  return 0;\n"
-	 "}\n");
+    printf("  try {\n");
+    printf("    %s(yyb);\n", // FIX: what if start_symbol takes args?
+           p_id(start_symbol));
+    printf("    //let n = YYPOSN;\n"
+           "    //if (n<60) for (int i = 0; i < n; i++) printf(\"^\");\n"
+           "    //printf(\" accepted %%d (0x%%x) characters\\n\",n,n);\n"
+           "  }\n"
+           "  catch {\n"
+           "  case &Parse_error:\n"
+           "    let n = YYPOSN;\n"
+           "    if (n<60) for (int i = 0; i < n; i++) printf(\" \");\n"
+           "    printf(\"^ failed at position %%d (0x%%x)\\n\",n,n);\n"
+           "    break;\n"
+           "  }\n"
+           "  return 0;\n"
+           "}\n");
+  }
   if (num_conflicts_ll) {
     eprintf("************************************************************************\n");
     eprintf("SUMMARY\n\n");

@@ -100,10 +100,9 @@ http-re.bnf: yakker ws.bnf fixup.bnf mailbox.bnf uri.bnf auth.bnf http-grammar.b
 message-header.bnf: http.bnf yakker
 	./yakker $< -subset message-header > $@
 
-imap.bnf: rfc3501.bnf rfc2234.bnf yakker
+imap.bnf: rfc3501.bnf yakker
 	./yakker rfc3501.bnf -omit literal > $@.tmp
 	echo 'literal = "{" (number "")$$x "}" CRLF @repeat(atoi(x))CHAR8.' >> $@.tmp
-	./yakker rfc2234.bnf -subset ALPHA CRLF CHAR CTL DIGIT DQUOTE SP CR LF >> $@.tmp
 	./yakker $@.tmp -tsort > $@
 	$(RM) $@.tmp
 
