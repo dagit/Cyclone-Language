@@ -48,6 +48,8 @@ extern List::list_t<const char ?@> relist;
 extern int ws_on;
 extern int re_on;
 
+extern int lazyfill; // parsergen.cyc
+
 extern grammar_t parse_file(FILE @`H f);      // parse.y
 extern List::list_t<const char ?@> textblobs; // parse.y
 
@@ -114,6 +116,7 @@ static int check_any() {
 "         -re <syms>             do handle <syms> as regular expressions\n"\
 "         -termgrammar           produce a term grammar for the input grammar\n"\
 "         -no-main               don't output a default main procedure\n"\
+"         -lazyfill              use lazy filling (for interactive connections)\n"\
 "         -help                  print this message\n"
 
 static void die() {
@@ -159,6 +162,7 @@ int main(int argc, const char ?`H?argv) {
     else if (strcmp("-no-expand",argv[i]) == 0) expand_nonrec = 0;
     else if (strcmp("-d",argv[i]) == 0) debug++;
     else if (strcmp("-no-main",argv[i]) == 0) print_main = 0;
+    else if (strcmp("-lazyfill",argv[i]) == 0) lazyfill = 1;
     else if (strcmp("-ws-on",argv[i]) == 0) ws_on = 1;
     else if (strcmp("-re-on",argv[i]) == 0) re_on = 1;
     else if (strcmp("-extract",argv[i]) == 0) extractp = 1;

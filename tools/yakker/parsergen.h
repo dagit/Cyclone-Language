@@ -22,4 +22,5 @@
 extern void gen(grammar_t<`H> grm, const char ?`H symb,
                 List::list_t<const char ?@>textblobs);
 extern int print_main;
+extern int lazyfill;
 #endif

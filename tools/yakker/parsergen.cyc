@@ -29,433 +29,16 @@
 
 int print_main = 1;
 int local_lookahead = 0;
-
-#define FAIL ({ s->i = -1; return; 0; })
-enum count_state { LOOKING, OBTAINED, USED };
-struct S {
-  int i;
-  char ?input;
-  unsigned int count;
-  enum count_state cs;
-};
-typedef struct S @`r S_t<`r>;
-int get(S_t s,unsigned int x) {
-  if (x >= numelts(s->input)) return -1;
-  else return s->input[x];
-}
+int lazyfill = 0;
 
 /**********************************************************************/
-/* A greedy interpreted parse.
-   Does not handle semantic actions.
-   Does not handle semantic predicates.
-*/
-List::list_t<const char ?@> symbol_stack = NULL;
-void pr_symbol_stack() {
-  symbol_stack = List::imp_rev(symbol_stack);
-  for (let a = symbol_stack; a; a = a->tl)
-    fprintf(stderr,".%s",*a->hd);
-  symbol_stack = List::imp_rev(symbol_stack);
-  fprintf(stderr,"\n");
-}
-grammar_t defs = NULL;
-void p_rule(S_t s,rule_t r);
-void p_seq(S_t s,rule_t r,char ?count_symb);
-void p_symb(S_t s,const char ?`H symb) {
-  for (let w = defs; w; w = w->tl) {
-    let &$(n,r,_) = w->hd;
-    if (strcmp(n,symb) == 0) {
-      let before = s->i;
-      symbol_stack = new List::List(new symb,symbol_stack);
-      if (strcmp("literal",symb) == 0) { // FIX: TEMPORARY FOR IMAP
-	let old_count = s->count;
-	let old_cs = s->cs;
-	s->cs = LOOKING;
-	p_seq(s,r,strdup("number"));
-	s->count = old_count;
-	s->cs = old_cs;
-	return;
-      }
-      else p_rule(s,r);
-      if (s->i != -1) {
-	fprintf(stderr,"(%x,%x)",before,s->i);
-	pr_symbol_stack();
-      }
-      symbol_stack = symbol_stack->tl;
-      return;
-    }
-  }
-  fprintf(stderr,"Error: symbol %s not found\n",symb);
-  FAIL;
-}
-void p_seq(S_t s,rule_t r,char ?count_symb) {
-  switch (r->r) {
-  case &Seq(r2,r3):
-    p_seq(s,r2,count_symb);
-    if (s->i != -1) p_seq(s,r3,count_symb);
-    return;
-  case &Symb(x,_):
-    if (s->cs == LOOKING && strcmp(x,count_symb) == 0) {
-      let before = s->i;
-      p_symb(s,x);
-      if (s->i == -1) return;
-      s->count = 0;
-      for (; before < s->i; before++)
-	s->count = s->count*10 + (get(s,before)-'0');
-      s->cs = OBTAINED;
-    }
-    else p_rule(s,r);
-    return;
-  case &Star(0,&Infinity,r2):
-    if (s->cs == OBTAINED) {
-      p_rule(s,STAR(s->count,new Num(s->count),r2));
-      s->cs = USED; /* so subsequent Star does not use count */
-    }
-    else p_rule(s,r);
-    return;
-  default:
-    p_rule(s,r);
-    return;
-  }
-}
-void p_rule(S_t s,rule_t r) {
-  switch (r->r) {
-  case &Symb(x,_):
-    p_symb(s,x);
-    return;
-  case &Lit(x):
-    int j = s->i;
-    int c;
-    int len = strlen(x);
-    for (int k = 0; k < len; k++) {
-      c = get(s,j++);
-      /* FIX: string literals are case-insensitive */
-      if (c == -1 || c != (unsigned int)x[k]) FAIL;
-    }
-    s->i += len;
-    return;
-  case &CharRange(min,max):
-    int c = get(s,s->i);
-    if (c != -1 && min <= c && c <= max) s->i++;
-    else FAIL;
-    return;
-  case &Prose(x):
-    internal_err("Prose in p_rule\n");
-    return;
-  case &Opt(r2):
-    let j = s->i;
-    p_rule(s,r2);
-    if (s->i == -1) s->i = j;
-    return;
-  case &Seq(r2,r3):
-    p_rule(s,r2);
-    if (s->i != -1) p_rule(s,r3);
-    return;
-  case &Alt(r2,r3):
-    let j = s->i;
-    p_rule(s,r2);
-    if (s->i == -1) { s->i = j; p_rule(s,r3); }
-    return;
-  case &Rcount(c,r2):
-    internal_err("Rcount in p_rule");
-    return;
-  case &Star(m,&Infinity,r2):
-    int count;
-    for (count = 0; count < m; count++) {
-      p_rule(s,r2);
-      if (s->i == -1) return;
-    }
-    let k = s->i;
-    while (1) {
-      let j = s->i;
-      p_rule(s,r2);
-      if (j == s->i || s->i == -1) break;
-      k = s->i;
-      count++;
-    }
-    s->i = k;
-    return;
-  case &Star(m,&Num(n),r2):
-    int count;
-    for (count = 0; count < m; count++) {
-      p_rule(s,r2);
-      if (s->i == -1) return;
-    }
-    let k = s->i;
-    while (count < n) {
-      let j = s->i;
-      p_rule(s,r2);
-      if (j == s->i || s->i == -1) break;
-      k = s->i;
-      count++;
-    }
-    s->i = k;
-    return;
-  case &Hash(0,&Infinity,r2): // 0# r2 -> [r2 *(commas r2)]
-    p_rule(s,OPT(SEQ(r2, STAR(0,new Infinity,SEQ(commas(),r2)))));
-    return;
-  case &Hash(m,&Infinity,r2): // m# r2 -> r2 (m-1)*(commas r2)
-    p_rule(s,SEQ(r2, STAR(m-1,new Infinity,SEQ(commas(),r2))));
-    return;
-  case &Hash(0,&Num(0),r2): // #0 r2 -> ""
-    p_rule(s,LIT(""));
-    return;
-  case &Hash(0,&Num(1),r2): // #1 r2 -> [r2]
-    p_rule(s,OPT(r2));
-    return;
-  case &Hash(0,&Num(n),r2): // #n r2 -> [r2 *(n-1)(commas r2)]
-    p_rule(s,OPT(SEQ(r2, STAR(0,new Num(n-1),SEQ(commas(),r2)))));
-    return;
-  case &Hash(m,&Num(n),r2): // m#n r2 -> r2 (m-1)*(n-1)(commas r2)
-    p_rule(s,SEQ(r2, STAR(m-1,new Num(n-1),SEQ(commas(),r2))));
-    return;
-  case &Minus(_,_):
-    internal_err("Minus in p_rule\n");
-    return;
-  }
-}
-void parse(S_t s,grammar_t<`H> ds, const char ?`H symb) {
-  defs = ds;
-  fprintf(stderr,"Getting input... ");
-  Buffer::T buf = Buffer::create(1024);
-  int c;
-  while ( (c = getchar()) != -1) Buffer::add_char(buf,(char)c);
-  let input = Buffer::contents(buf);
-  fprintf(stderr,"done\n");
-  fprintf(stderr,"%s",input);
-  fprintf(stderr,"Trying to parse...\n");
-  s->input = input;
-  while (1) {
-    let before = s->i;
-    p_rule(s,SYMB(symb));
-    if (s->i != -1) printf("succeeded up to %d (0x%x)\n",s->i,s->i);
-    else printf("failed\n");
-    if (s->i == -1 || before == s->i || s->i >= numelts(s->input)-1) break;
-  }
-}
-
-/**********************************************************************/
-/* A generator for greedy parsers.
-   Does not handle semantic actions.
-   Does not handle semantic predicates.
+/* A generator for parsers with dfa lookahead.
 */
 static const char ?p_id(const char ?`H n) {
   return aprintf("p_%s",make_c_identifier0(n));
 }
 static int scope = 0;
-static void pgen_rule(rule_t r) {
-  switch (r->r) {
-  case &Symb(x,_):
-    printf("%s(s);\n",p_id(x));
-    return;
-  case &Lit(x):
-    let myscope = scope++;
-    printf("{ int j = s->i;\n"
-	   "  int c;\n");
-    int len = strlen(x);
-    for (int k = 0; k < len; k++) {
-      printf("  c = get(s,j++);\n");
-      /* FIX: string literals are case-insensitive */
-      printf("  if (c == -1 || c != (unsigned int)%d) { s->i = -1; goto A%d; }\n",x[k],myscope);
-    }
-    printf("  s->i += %d;\n"
-	   "}\n",len);
-    printf("A%d: 0;\n",myscope);
-    return;
-  case &CharRange(min,max):
-    printf("{ int c = get(s,s->i);\n"
-	   "  if (c != -1 && %d <= c && c <= %d) s->i++; else s->i = -1;\n"
-	   "}\n",min,max);
-    return;
-  case &Prose(x):
-    internal_err("prose in pgen_rule\n");
-    return;
-  case &Opt(r2):
-    printf("{ let j = s->i;\n");
-    /*******/ pgen_rule(r2);
-    printf("  if (s->i == -1) s->i = j;\n"
-	   "}\n");
-    return;
-  case &Seq(r2,r3):
-    /*****/ pgen_rule(r2);
-    printf("if (s->i != -1) {\n");
-    /*******/ pgen_rule(r3);
-    printf("}\n");
-    return;
-  case &Alt(r2,r3):
-    printf("{ let j = s->i;\n");
-    /*******/ pgen_rule(r2);
-    printf("  if (s->i == -1) { s->i = j;\n");
-    /*********/ pgen_rule(r3);
-    printf("  }\n"
-	   "}\n");
-    return;
-  case &Star(m,&Infinity,r2):
-    let myscope = scope++;
-    printf("{ int count;\n");
-    if (m > 0) {
-      printf("  for (count = 0; count < %d; count++) {\n",m);
-      /*********/ pgen_rule(r2);
-      printf("    if (s->i == -1) goto A%d;\n"
-             "  }\n",myscope);
-    }
-    printf("  let k = s->i;\n"
-	   "  while (1) {\n"
-	   "    let j = s->i;\n");
-    /*********/ pgen_rule(r2);
-    printf("    if (j == s->i || s->i == -1) break;\n"
-	   "    k = s->i;\n"
-	   "    count++;\n"
-	   "  }\n"
-	   "s->i = k;\n"
-	   "}\n");
-    printf("A%d: 0;\n",myscope);
-    return;
-  case &Rcount(c,r2):
-    let myscope = scope++;
-    printf("{ int bounds = %s;\n"
-           "  int count;\n"
-	   "  for (count = 0; count < bounds; count++) {\n",c);
-    /*********/ pgen_rule(r2);
-    printf("    if (s->i == -1) goto A%d;\n"
-	   "  }\n",myscope);
-    printf("}\n");
-    printf("A%d: 0;\n",myscope);
-    return;
-  case &Star(m,&Num(n),r2):
-    let myscope = scope++;
-    printf("{ int count;\n"
-	   "  for (count = 0; count < %d; count++) {\n",m);
-    /*********/ pgen_rule(r2);
-    printf("    if (s->i == -1) goto A%d;\n"
-	   "  }\n",myscope);
-    printf("  let k = s->i;\n"
-	   "  while (count < %d) {\n"
-	   "    let j = s->i;\n",n);
-    /*********/ pgen_rule(r2);
-    printf("    if (j == s->i || s->i == -1) break;\n"
-	   "    k = s->i;\n"
-	   "    count++;\n"
-	   "  }\n"
-	   "  s->i = k;\n"
-	   "}\n");
-    printf("A%d: 0;\n",myscope);
-    return;
-  case &Hash(0,&Infinity,r2): // 0# r2 -> [r2 *(commas r2)]
-    pgen_rule(OPT(SEQ(r2, STAR(0,new Infinity,SEQ(commas(),r2)))));
-    return;
-  case &Hash(m,&Infinity,r2): // m# r2 -> r2 (m-1)*(commas r2)
-    pgen_rule(SEQ(r2, STAR(m-1,new Infinity,SEQ(commas(),r2))));
-    return;
-  case &Hash(0,&Num(0),r2): // #0 r2 -> ""
-    pgen_rule(LIT(""));
-    return;
-  case &Hash(0,&Num(1),r2): // #1 r2 -> [r2]
-    pgen_rule(OPT(r2));
-    return;
-  case &Hash(0,&Num(n),r2): // #n r2 -> [r2 *(n-1)(commas r2)]
-    pgen_rule(OPT(SEQ(r2, STAR(0,new Num(n-1),SEQ(commas(),r2)))));
-    return;
-  case &Hash(m,&Num(n),r2): // m#n r2 -> r2 (m-1)*(n-1)(commas r2)
-    pgen_rule(SEQ(r2, STAR(m-1,new Num(n-1),SEQ(commas(),r2))));
-    return;
-  case &Minus(_,_):
-    internal_err("Minus in pgen_rule\n");
-    return;
-  }
-}
-enum count_state pgen_seq(rule_t r,char ?count_symb,enum count_state cs) {
-  switch (r->r) {
-  case &Seq(r2,r3):
-    cs = pgen_seq(r2,count_symb,cs);
-    printf("if (s->i != -1) {\n");
-    cs = pgen_seq(r3,count_symb,cs);
-    printf("}\n");
-    return cs;
-  case &Symb(x,_):
-    if (cs == LOOKING && strcmp(x,count_symb) == 0) {
-      printf("let before = s->i;\n");
-      /*****/ pgen_rule(r);
-      printf("if (s->i == -1) return;\n"
-	     "s->count = 0;\n"
-	     "for (; before < s->i; before++)\n"
-	     "  s->count = s->count*10 + (get(s,before)-'0');\n");
-      return OBTAINED;
-    }
-    else {
-      pgen_rule(r);
-      return cs;
-    }
-  case &Star(0,&Infinity,r2):
-    if (cs == OBTAINED) {
-      printf("{\n"
-	     "  for (int count = 0; count < s->count; count++) {\n");
-      /*********/ pgen_rule(r2);
-      printf("    if (s->i == -1) return;\n"
-	     "  }\n"
-	     "}\n");
-      return USED;
-    }
-    else {
-      pgen_rule(r);
-      return cs;
-    }
-  default:
-    pgen_rule(r);
-    return cs;
-  }
-}
-void pgen(grammar_t<`H> ds, const char ?`H symb) {
-  printf("#include <buffer.h>\n"
-	 "#include <stdio.h>\n"
-	 "struct S {\n"
-	 "  int i;\n"
-	 "  char ?input;\n"
-	 "  unsigned int count;\n"
-	 "};\n"
-	 "typedef struct S @`r S_t<`r>;\n"
-	 "int get(S_t s,unsigned int x) {\n"
-	 "  if (x >= numelts(s->input)) return -1;\n"
-	 "  else return s->input[x];\n"
-	 "}\n");
-  for (let x = ds; x; x = x->tl) {
-    let &$(n,r,_) = x->hd;
-    printf("void %s(S_t s) {\n",p_id(n));
-  }
-  for (let a = ds; a; a = a->tl) {
-    let &$(n,r,_) = a->hd;
-    printf("void %s(S_t s) {\n",p_id(n));
-    printf("let q = s->i;\n");
-    if (strcmp("literal",n) == 0) { // FIX: TEMPORARY FOR IMAP
-      printf("let old_count = s->count;\n");
-      pgen_seq(r,strdup("number"),LOOKING);
-      printf("s->count = old_count;\n");
-    }
-    else pgen_rule(r);
-    printf("if (s->i != -1) printf(\"(%%x,%%x):%s\\n\",q,s->i);\n",n);
-    printf("}\n");
-  }
-  printf("int main() {\n"
-	 "  struct S ss = {0,NULL,0};\n"
-	 "  fprintf(stderr,\"Getting input... \");\n"
-	 "  Buffer::T buf = Buffer::create(1024);\n"
-	 "  int c;\n"
-	 "  while ( (c = getchar()) != -1) Buffer::add_char(buf,(char)c);\n"
-	 "  let input = Buffer::contents(buf);\n"
-	 "  fprintf(stderr,\"done\\n\");\n"
-	 "  fprintf(stderr,\"%%s\",input);\n"
-	 "  fprintf(stderr,\"Trying to parse...\\n\");\n"
-	 "  ss.input = input;\n"
-	 "  %s(&ss);\n"
-	 "  if (ss.i != -1) printf(\"succeeded up to %%d (0x%%x)\\n\",ss.i,ss.i);\n"
-	 "  else printf(\"failed\\n\");\n"
-	 "  return 0;\n"
-	 "}\n",
-	 p_id(symb));
-}
 
-/**********************************************************************/
-/* A generator for parsers with dfa lookahead.
-*/
 static unsigned int fill_amount(rule_t r) {
   switch (r->r) {
   case &Lit(x):
@@ -500,13 +83,20 @@ static void gen_cs(cs_t cs) {
 }
 static grammar_t checking_conflicts_grammar;
 static void gen_fill(rule_t r) {
+  if (lazyfill) return;
   let fa = fill_amount(r);
   if (fa)
-    printf("  if ((YYLIMIT - YYCURSOR) < %u) YYFILL(%u);\n",fa,fa);
+    printf("  if ((YKLIMIT - YKCURSOR) < %u) YKFILL(%u);\n",fa,fa);
 }
 static void gen_fill_constant(unsigned int fa) {
+  if (lazyfill) return;
   if (fa)
-    printf("  if ((YYLIMIT - YYCURSOR) < %u) YYFILL(%u);\n",fa,fa);
+    printf("  if ((YKLIMIT - YKCURSOR) < %u) YKFILL(%u);\n",fa,fa);
+}
+static void gen_lazyfill(unsigned int fa) {
+  if (!lazyfill) return;
+  if (fa)
+    printf("  if ((YKLIMIT - YKCURSOR) < %u) YKFILL(%u);\n",fa,fa);
 }
 static
 void gen0(rule_t r, rule_t right_ctxt) {
@@ -518,13 +108,13 @@ void gen0(rule_t r, rule_t right_ctxt) {
       break;
     default:
       save = scope++;
-      printf("let save%d = YYSAVE;\n",save);
+      printf("let save%d = YKSAVE;\n",save);
       break;
     }
   }
   switch (r->r) {
   case &Symb(x,y):
-    printf("%s(yyb%s%s);\n",
+    printf("%s(ykb%s%s);\n",
 	   p_id(x),
 	   (y?",":""),
 	   y);
@@ -533,8 +123,9 @@ void gen0(rule_t r, rule_t right_ctxt) {
   case &Lit(x):
     printf("{ int c;\n");
     int len = strlen(x);
+    gen_lazyfill(len);
     for (int k = 0; k < len; k++) {
-      printf("  c = *YYCURSOR++;\n");
+      printf("  c = *YKCURSOR++;\n");
       let orig = x[k];
       let l = tolower(orig);
       let u = toupper(orig);
@@ -546,10 +137,11 @@ void gen0(rule_t r, rule_t right_ctxt) {
     printf("}\n");
     break;
   case &CharRange(min,max):
+    gen_lazyfill(1);
     if (min == max)
-      printf("if (*YYCURSOR++ != %u) throw &Parse_error_val;\n",min);
+      printf("if (*YKCURSOR++ != %u) throw &Parse_error_val;\n",min);
     else
-      printf("{ int c = *YYCURSOR++;\n"
+      printf("{ int c = *YKCURSOR++;\n"
              "  if (!(%u <= c && c <= %u)) throw &Parse_error_val;\n}\n",min,max);
     break;
   case &Prose(x):
@@ -620,11 +212,11 @@ void gen0(rule_t r, rule_t right_ctxt) {
       else {
 	dfa = lookahead_dfa(checking_conflicts_grammar,alts,right_ctxt);
       }
-      printf("{ int yyaccept = 0;\n");
-      printf("{ let save = YYSAVE;\n");
+      printf("{ int ykaccept = 0;\n");
+      printf("{ let save = YKSAVE;\n");
       dfa_generate2(dfa);
-      printf("YYCURSOR = YYRESTORE(save);\n}\n");
-      printf("switch (yyaccept) {\n");
+      printf("YKCURSOR = YKRESTORE(save);\n}\n");
+      printf("switch (ykaccept) {\n");
       for (unsigned int i = 1; alts; alts = alts->tl, i++) {
         printf("case %u:\n",i);
         gen0(alts->hd,right_ctxt);
@@ -637,7 +229,8 @@ void gen0(rule_t r, rule_t right_ctxt) {
     else {
       printf("{\n");
       gen_fill_constant(1);
-      printf("int c = *YYCURSOR;\n"); // Looking ahead, so don't advance cursor
+      gen_lazyfill(1);
+      printf("int c = *YKCURSOR;\n"); // Looking ahead, so don't advance cursor
       for (; alts && csets; alts = alts->tl, csets = csets->tl) {
         gen_cs(csets->hd);
         gen0(alts->hd,right_ctxt); // FIX: if this is a charset we are needlessly repeating
@@ -678,11 +271,11 @@ void gen0(rule_t r, rule_t right_ctxt) {
 			    List::list(r2,LIT("")),
                             right_ctxt);
       }
-      printf("{ int yyaccept = 0;\n");
-      printf("{ let save = YYSAVE;\n");
+      printf("{ int ykaccept = 0;\n");
+      printf("{ let save = YKSAVE;\n");
       dfa_generate2(dfa);
-      printf("YYCURSOR = YYRESTORE(save);\n}\n");
-      printf("switch (yyaccept) {\n");
+      printf("YKCURSOR = YKRESTORE(save);\n}\n");
+      printf("switch (ykaccept) {\n");
       printf("case 1:\n");
       gen0(r2,right_ctxt);
       printf("  break;\n");
@@ -695,7 +288,8 @@ void gen0(rule_t r, rule_t right_ctxt) {
     else {
       printf("{\n");
       gen_fill_constant(1);
-      printf("int c = *YYCURSOR;\n"); // Looking ahead, so don't advance cursor
+      gen_lazyfill(1);
+      printf("int c = *YKCURSOR;\n"); // Looking ahead, so don't advance cursor
       gen_cs(cs2);
       gen0(r2,right_ctxt); // FIX: if this is a charset we are needlessly repeating
       printf("}\n");
@@ -780,11 +374,11 @@ void gen0(rule_t r, rule_t right_ctxt) {
                             right_ctxt);
       }
       printf("A%d: 0;\n",before);
-      printf("{ int yyaccept = 0;\n");
-      printf("{ let save = YYSAVE;\n");
+      printf("{ int ykaccept = 0;\n");
+      printf("{ let save = YKSAVE;\n");
       dfa_generate2(dfa);
-      printf("YYCURSOR = YYRESTORE(save);\n}\n");
-      printf("switch (yyaccept) {\n");
+      printf("YKCURSOR = YKRESTORE(save);\n}\n");
+      printf("switch (ykaccept) {\n");
       printf("case 1:\n");
       gen_fill(r2);
       gen0(r2,new_right_ctxt);
@@ -801,7 +395,8 @@ void gen0(rule_t r, rule_t right_ctxt) {
       printf("{\n");
       gen_fill(r2);
       gen_fill_constant(1);
-      printf("int c = *YYCURSOR;\n"); // Looking ahead, so don't advance cursor
+      gen_lazyfill(1);
+      printf("int c = *YKCURSOR;\n"); // Looking ahead, so don't advance cursor
       gen_cs(cs2);
       gen0(r2,new_right_ctxt); // FIX: if this is a charset we are needlessly repeating
       printf("  goto A%d;\n",before);
@@ -849,8 +444,8 @@ void gen0(rule_t r, rule_t right_ctxt) {
     case &Symb(_,_):
       break;
     default:
-      printf("unsigned char ?@nozeroterm yyr%d = YYRESTORE(save%d);\n"
-             "let %s = substring((const char ?@nozeroterm)yyr%d,0,YYCURSOR-yyr%d);\n",
+      printf("unsigned char ?@nozeroterm ykr%d = YKRESTORE(save%d);\n"
+             "let %s = substring((const char ?@nozeroterm)ykr%d,0,YKCURSOR-ykr%d);\n",
              save,save,
              r->v,save,save);
       break;
@@ -900,25 +495,25 @@ void gen(grammar_t<`H> grm, const char ?`H start_symbol,
 	 "#include <stdlib.h>\n"
 	 "#include <string.h>\n");
 #ifdef STRINGINPUT
-  printf("unsigned char ?@nozeroterm YYSTART;\n"
-         "unsigned char ?@nozeroterm YYCURSOR;\n"
-         "unsigned char ?@nozeroterm YYMARKER;\n"
-         "unsigned char ?@nozeroterm YYLIMIT;\n"
-         "#define YYFILL(i) 0\n"
-         "#define YYPOSN (YYCURSOR-YYSTART)\n"
-         "#define YYSAVE (YYCURSOR-YYSTART)\n"
-         "#define YYRESTORE(x) (YYSTART+(x))\n");
+  printf("unsigned char ?@nozeroterm YKSTART;\n"
+         "unsigned char ?@nozeroterm YKCURSOR;\n"
+         "unsigned char ?@nozeroterm YKMARKER;\n"
+         "unsigned char ?@nozeroterm YKLIMIT;\n"
+         "#define YKFILL(i) 0\n"
+         "#define YKPOSN (YKCURSOR-YKSTART)\n"
+         "#define YKSAVE (YKCURSOR-YKSTART)\n"
+         "#define YKRESTORE(x) (YKSTART+(x))\n");
 #else
-  printf("#include \"buf.h\"\n"
-         "#define YYLIMIT yyb->lim\n"
-         "#define YYCURSOR yyb->cur\n"
-         "#define YYFILL(n) (yyfill(yyb,(n)))\n"
-         "#define YYPOSN ((yyb->cur-yyb->bot)+yyb->discarded)\n"
-         "#define YYMARKER yyb->mark\n"
-         "#define YYSAVE ({ let x = 0; yyb->save_count++; if (yyb->save) x = yyb->cur-yyb->save; else yyb->save = yyb->cur; x; })\n"
-         "#define YYRESTORE(x) ({ let p = yyb->save+x; if (--yyb->save_count == 0) yyb->save=NULL; p; })\n");
+  printf("#include \"ykbuf.h\"\n"
+         "#define YKLIMIT ykb->lim\n"
+         "#define YKCURSOR ykb->cur\n"
+         "#define YKFILL(n) (ykfill(ykb,(n)))\n"
+         "#define YKPOSN ((ykb->cur-ykb->bot)+ykb->discarded)\n"
+         "#define YKMARKER ykb->mark\n"
+         "#define YKSAVE ({ let x = 0; ykb->save_count++; if (ykb->save) x = ykb->cur-ykb->save; else ykb->save = ykb->cur; x; })\n"
+         "#define YKRESTORE(x) ({ let p = ykb->save+x; if (--ykb->save_count == 0) ykb->save=NULL; p; })\n");
 #endif
-  printf("int yydebug = 0;\n"
+  printf("int ykdebug = 0;\n"
          "datatype exn { Parse_error };\n"
          "datatype exn.Parse_error Parse_error_val = Parse_error;\n");
 
@@ -929,7 +524,7 @@ void gen(grammar_t<`H> grm, const char ?`H start_symbol,
       printf("%s ",a.rettype);
     else
       printf("void ");
-    printf("%s(yybuf_t @yyb%s%s);\n",
+    printf("%s(ykbuf_t @ykb%s%s);\n",
 	   p_id(n),
 	   (a.paramtype)?",":"",
 	   a.paramtype);
@@ -948,21 +543,21 @@ void gen(grammar_t<`H> grm, const char ?`H start_symbol,
       printf("%s ",a.rettype);
     else
       printf("void ");
-    printf("%s(yybuf_t @yyb%s%s) {\n",
+    printf("%s(ykbuf_t @ykb%s%s) {\n",
 	   p_id(n),
 	   (a.paramtype)?",":"",
 	   a.paramtype);
-    printf("let YKq = YYPOSN;\n");
+    printf("let YKq = YKPOSN;\n");
     // TODO: HANDLE IMAP STRING SPECIAL CASE AS IN PGEN
     gen_fill(r);
     gen0(r,SYMB(fn));
-    printf("  if (yydebug) printf(\"[%%x,%%x):%s\\n\",YKq,YYPOSN);\n",n);
+    printf("  if (ykdebug) printf(\"[%%x,%%x):%s\\n\",YKq,YKPOSN);\n",n);
     printf("}\n");
   }
   if (print_main) {
     printf("int main(int argc, char ??argv) {\n"
            "  while ((argc--)>1) {\n"
-           "    if (strcmp(*(++argv),\"-d\") == 0) yydebug++;\n"
+           "    if (strcmp(*(++argv),\"-d\") == 0) ykdebug++;\n"
            "    else { fprintf(stderr,\"Unrecognized option: %%s\\n\",*argv); exit(1); }\n"
            "  }\n");
 #ifdef STRINGINPUT
@@ -978,23 +573,23 @@ void gen(grammar_t<`H> grm, const char ?`H start_symbol,
            "  fprintf(stderr,\"done\\n\");\n"
            "  // fprintf(stderr,\"%%s\",input);\n"
            "  fprintf(stderr,\"Trying to parse...\\n\");\n"
-           "  YYCURSOR = input;\n"
-           "  YYSTART = input;\n"
-           "  YYMARKER = input;\n"
-           "  YYLIMIT = input+numelts(input);\n");
+           "  YKCURSOR = input;\n"
+           "  YKSTART = input;\n"
+           "  YKMARKER = input;\n"
+           "  YKLIMIT = input+numelts(input);\n");
 #else
-    printf("  yybuf_t @yyb = fd2yybuf(0); // read from stdin\n");
+    printf("  ykbuf_t @ykb = fd2ykbuf(0); // read from stdin\n");
 #endif
     printf("  try {\n");
-    printf("    %s(yyb);\n", // FIX: what if start_symbol takes args?
+    printf("    %s(ykb);\n", // FIX: what if start_symbol takes args?
            p_id(start_symbol));
-    printf("    //let n = YYPOSN;\n"
+    printf("    //let n = YKPOSN;\n"
            "    //if (n<60) for (int i = 0; i < n; i++) printf(\"^\");\n"
            "    //printf(\" accepted %%d (0x%%x) characters\\n\",n,n);\n"
            "  }\n"
            "  catch {\n"
            "  case &Parse_error:\n"
-           "    let n = YYPOSN;\n"
+           "    let n = YKPOSN;\n"
            "    if (n<60) for (int i = 0; i < n; i++) printf(\" \");\n"
            "    printf(\"^ failed at position %%d (0x%%x)\\n\",n,n);\n"
            "    break;\n"

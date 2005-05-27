@@ -1,7 +1,7 @@
 CYCFLAGS=
 #CYCFLAGS=-pg
 
-FILES=analyze axarray bnf buf corerules cs extract fa termgrammar lex pads parse_tab parsergen pr prose stringify util yakker
+FILES=analyze axarray bnf ykbuf corerules cs extract fa termgrammar lex pads parse_tab parsergen pr prose stringify util yakker
 
 all: yakker
 
@@ -14,8 +14,8 @@ yakker: analyze.o axarray.o bnf.o cs.o extract.o fa.o termgrammar.o lex.o pads.o
 testindexer: indexer 1rfc_index
 	./indexer < 1rfc_index
 
-indexer: indexer.o buf.o bnf.o extract.o pr.o parse_tab.o util.o lex.o
-	cyclone $^ -o $@
+indexer: indexer.o ykbuf.o ssl.o bnf.o extract.o pr.o parse_tab.o util.o lex.o
+	cyclone $^ -o $@ -lssl -lcrypto
 
 # --novcgen is temporary until a bug is fixed
 indexer.o: indexer.cyc
@@ -24,11 +24,20 @@ indexer.o: indexer.cyc
 indexer.cyc: examples/indexer.yk yakker
 	./yakker -gen entry-list $< > $@
 
-wf: wf.o buf.o
-	cyclone $^ -o $@
+wf: wf.o ykbuf.o ssl.o
+	cyclone $^ -o $@ -lssl -lcrypto
 
 wf.cyc: examples/wf.yk yakker
 	./yakker -gen file $< > $@
+
+imapcl: imapcl.o ykbuf.o ssl.o imap.o
+	cyclone $^ -o $@ -lssl -lcrypto
+
+imapcl.o: examples/imapcl.cyc
+	cyclone -c $^ -o $@ -I.
+
+imap.cyc: imap.bnf
+	./yakker -gen command -no-main -lazyfill $< > $@
 
 stringify: stringify.cyc
 	cyclone $^ -nogc -o $@
@@ -101,8 +110,11 @@ message-header.bnf: http.bnf yakker
 	./yakker $< -subset message-header > $@
 
 imap.bnf: rfc3501.bnf yakker
-	./yakker rfc3501.bnf -omit literal > $@.tmp
+	./yakker rfc3501.bnf -omit literal capability-data > $@.tmp
 	echo 'literal = "{" (number "")$$x "}" CRLF @repeat(atoi(x))CHAR8.' >> $@.tmp
+	echo 'capability-data = "CAPABILITY" *(SP capability).' >> $@.tmp
+	echo 'my-greeting = ("" greeting)$$x {printf("S: %s",x);}.' >> $@.tmp
+	echo 'my-response = ("" response)$$x {printf("S: %s",x);}.' >> $@.tmp
 	./yakker $@.tmp -tsort > $@
 	$(RM) $@.tmp
 
@@ -110,7 +122,7 @@ clean:
 	$(RM) *.d *.o parse_tab.cyc parse_tab.h lex.cyc yakker
 	$(RM) in out errs parse.output
 	$(RM) http.bnf http.p message-header.bnf message-header.p
-	$(RM) imap.bnf rfc3501.bnf rfc2234.bnf rfc3501.txt rfc2234.txt
+	$(RM) imap.bnf imap.cyc rfc3501.bnf rfc2234.bnf rfc3501.txt rfc2234.txt
 	$(RM) string_dfa_engine1.*
 	$(RM) prose_elim_grammar.cyc
 	$(RM) prose_elim_grm.cyc corerules_grm.cyc

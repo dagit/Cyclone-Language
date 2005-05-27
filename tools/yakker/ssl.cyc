@@ -1,0 +1,39 @@
+/* This file is part of the Cyclone Library.
+   Copyright (C) 2005 Greg Morrisett, AT&T
+
+   This library is free software; you can redistribute it and/or it
+   under the terms of the GNU Lesser General Public License as
+   published by the Free Software Foundation; either version 2.1 of
+   the License, or (at your option) any later version.
+
+   This library is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
+
+   You should have received a copy of the GNU Lesser General Public
+   License along with this library; see the file COPYING.LIB.  If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place, Suite
+   330, Boston, MA 02111-1307 USA. */
+
+#include "ssl.h"
+using Core;
+
+namespace Cssl {
+  extern "C" int SSL_read(SSL @ssl, char * @nozeroterm buf, int count);
+}
+static datatype exn.Failure __SSL_read_failure =
+  Failure("SSL_read: called with count > numelts(buf)");
+int SSL_read(SSL @ssl, char ? @nozeroterm buf, int count) {
+  if (count > numelts(buf)) { fprintf(stderr,"count %d, numelts %d\n",count,numelts(buf)); throw &__SSL_read_failure; }
+  return Cssl::SSL_read(ssl, (char * @nozeroterm)buf, count);
+}
+namespace Cssl {
+  extern "C" int SSL_write(SSL @, const char @ @nozeroterm buf, int count);
+}
+static datatype exn.Failure __SSL_write_failure =
+  Failure("SSL_write: called with count > numelts(buf)");
+int SSL_write(SSL @ssl, const char ? @nozeroterm buf, int count) {
+  if (count > numelts(buf)) throw &__SSL_write_failure;
+  return Cssl::SSL_write(ssl, (const char @ @nozeroterm)buf, count);
+}

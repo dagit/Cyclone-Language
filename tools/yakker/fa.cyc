@@ -1708,7 +1708,7 @@ void dfa_generate1(dfa_t dfa) {
 
 /* re2c switch statement version */
 /* Does not do filling.  Does not check limits.  Assumes input is in a string. */
-/* Does not generate unique labels.  Uses variables yyaccept. */
+/* Does not generate unique labels.  Uses variables ykaccept. */
 
 /* A key state is one that has to fill the buffer */
 static int key_state(stgraph_t reachable, stgraph_t scc, st_t s) {
@@ -1753,7 +1753,9 @@ static void fill_table0(dfa_t dfa, stgraph_t reachable, stgraph_t scc, unsigned 
     if (result[s] < distance) result[s] = distance;
   }
 }
+extern int lazyfill; // in parsergen.cyc
 static unsigned int ?fill_table(dfa_t dfa) {
+  if (lazyfill) return new {for i < dfa->number_of_states : 1 };
   unsigned int ?result = new {for i < dfa->number_of_states : 0 };
   let g = dfa_onestep(dfa);
   let g_reachable = Graph::tc(g);
@@ -1772,16 +1774,16 @@ void dfa_generate2(dfa_t dfa) {
   // printf("%s",dfa_engine2_1);
   printf("{\n"
          "goto M%u_1;\n"
-         "fin%u: YYCURSOR = YYMARKER;\n",base,base);
-  //  printf("printf(\"The result was %%u\\n\",yyaccept);\n"); // FIX: do something
+         "fin%u: YKCURSOR = YKMARKER;\n",base,base);
+  //  printf("printf(\"The result was %%u\\n\",ykaccept);\n"); // FIX: do something
   printf("goto theend%u;\n",base);
   for (let i = 1; i < dfa->number_of_states; i++) { // NB, no code for dead state 0
     let t = Axarray::get(dfa->states,i);
-    printf("L%u_%u:\n  ++YYCURSOR;\n",base,i);
+    printf("L%u_%u:\n  ++YKCURSOR;\n",base,i);
     if (Set::member(dfa->final_states,i)) {
       let a = Set::choose(Hashtable::lookup(dfa->final_attrs,i));
-      printf("  yyaccept = %u;\n",a);
-      printf("  YYMARKER = YYCURSOR;\n");
+      printf("  ykaccept = %u;\n",a);
+      printf("  YKMARKER = YKCURSOR;\n");
     }
     if (!t) {
       printf("  goto fin%u;\n",base);
@@ -1790,10 +1792,10 @@ void dfa_generate2(dfa_t dfa) {
     let lb = t->lb;
     printf("M%u_%u:\n",base,i);
     if (my_fill_table[i])
-      printf("  if ((YYLIMIT - YYCURSOR) < %u) YYFILL(%u);\n",my_fill_table[i],my_fill_table[i]);
+      printf("  if ((YKLIMIT - YKCURSOR) < %u) YKFILL(%u);\n",my_fill_table[i],my_fill_table[i]);
     if (0) {
       // A big switch statement.  Usually the code is too big so disabled for now
-      printf("  switch (*YYCURSOR) {\n");
+      printf("  switch (*YKCURSOR) {\n");
       for (let spans = t->spans; spans; spans = spans->tl) {
 	let ub = spans->hd->ub;
 	let target = spans->hd->target;
@@ -1808,7 +1810,7 @@ void dfa_generate2(dfa_t dfa) {
     else {
       // A simple chain of if-statements.
       // TODO: binary search.
-      printf("{ int c = *YYCURSOR;\n");
+      printf("{ int c = *YKCURSOR;\n");
       for (let spans = t->spans; spans; spans = spans->tl) {
 	let ub = spans->hd->ub;
 	let target = spans->hd->target;

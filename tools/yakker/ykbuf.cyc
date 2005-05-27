@@ -1,20 +1,20 @@
-/* Copyright (C) 2005 Greg Morrisett, AT&T.
-   This file is part of the Cyclone project.
+/* This file is part of the Cyclone Library.
+   Copyright (C) 2005 Greg Morrisett, AT&T
 
-   Cyclone is free software; you can redistribute it
-   and/or modify it under the terms of the GNU General Public License
-   as published by the Free Software Foundation; either version 2 of
+   This library is free software; you can redistribute it and/or it
+   under the terms of the GNU Lesser General Public License as
+   published by the Free Software Foundation; either version 2.1 of
    the License, or (at your option) any later version.
 
-   Cyclone is distributed in the hope that it will be
-   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
-   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+   This library is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with Cyclone; see the file COPYING. If not,
-   write to the Free Software Foundation, Inc., 59 Temple Place -
-   Suite 330, Boston, MA 02111-1307, USA. */
+   You should have received a copy of the GNU Lesser General Public
+   License along with this library; see the file COPYING.LIB.  If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place, Suite
+   330, Boston, MA 02111-1307 USA. */
 
 #include <unistd.h>
 #include <stdio.h>
@@ -24,12 +24,12 @@
 #define BSIZE 8192
 //#define UINTCAST (unsigned int)(unsigned char *{0}@nozeroterm)
 
-#include "buf.h"
+#include "ykbuf.h"
 
-yybuf_t @fd2yybuf(int fd) {
+ykbuf_t @fd2ykbuf(int fd) {
   let buf = malloc(BSIZE*sizeof(unsigned char));
-  let result = new yybuf{
-    .prod=new yyp_fd(fd),
+  let result = new ykbuf{
+    .prod=new ykp_fd(fd),
     .bot=buf,
     .save=NULL,
     .mark=NULL,
@@ -41,10 +41,10 @@ yybuf_t @fd2yybuf(int fd) {
     .discarded=0};
   return result;
 }
-yybuf_t @ssl2yybuf(SSL @`H ssl) {
+ykbuf_t @ssl2ykbuf(SSL @`H ssl) {
   let buf = malloc(BSIZE*sizeof(unsigned char));
-  let result = new yybuf{
-    .prod=new yyp_ssl(ssl),
+  let result = new ykbuf{
+    .prod=new ykp_ssl(ssl),
     .bot=buf,
     .save=NULL,
     .mark=NULL,
@@ -60,12 +60,12 @@ yybuf_t @ssl2yybuf(SSL @`H ssl) {
 // TODO: this is annoying, we have to copy the string.
 // Actually it should not be necessary because we never
 // modify the string, unlike when we need to fill a buffer.
-yybuf_t @string2yybuf(const char ?s) {
+ykbuf_t @string2ykbuf(const char ?s) {
   let len = strlen(s);
   let buf = malloc((len+1)*sizeof(unsigned char));
   memcpy(buf,s,len);
   buf[len] = '\0';
-  let result = new yybuf{
+  let result = new ykbuf{
     .prod=NULL,
     .bot=buf,
     .save=NULL,
@@ -88,52 +88,52 @@ yybuf_t @string2yybuf(const char ?s) {
   save_count is used to handle nested saves.  When it goes to zero, save should be NULL'd.
   eof records whether end-of-file has been reached.  Note, re2c does it
     a bit differently, eof is a pointer, allows the sentinel to be a legal input character,
-    at the cost of a comparison when a (possible) sentinel is under YYCURSOR.
+    at the cost of a comparison when a (possible) sentinel is under YKCURSOR.
 
   mark is set by scanners, it points one past the last input which reached a final state.
-    It is kept as part of the yybuf_t because it has to be adjusted on fill.
+    It is kept as part of the ykbuf_t because it has to be adjusted on fill.
 
-  discarded records the number of characters discarded by yyfill.  It is
+  discarded records the number of characters discarded by ykfill.  It is
   useful to find the position of the current character with respect to
   the complete input.
 
-  Scanners should call YYSAVE on entry and YYRESTORE on exit, because they may have to
+  Scanners should call YKSAVE on entry and YKRESTORE on exit, because they may have to
     back up to the longest match.
 
-  These invariants are maintained by yyfill:
+  These invariants are maintained by ykfill:
   If save == NULL bot < lim <= top
   If save != NULL bot <= save < lim <= top
 
   These invariants should be maintained by users of the library:
   save == NULL iff save_count == 0
 
-  Here are the definitions for using yybuf_t in a scanner or parser.
-  They assume two variables, yyb of type yybuf_t, and yycursor of type
+  Here are the definitions for using ykbuf_t in a scanner or parser.
+  They assume two variables, ykb of type ykbuf_t, and ykcursor of type
   unsigned char ?@nozeroterm.
 
-#define YYLIMIT yyb->lim
-#define YYCURSOR yycursor
-#define YYFILL(n) (yycursor = yyfill(yyb,yycursor))
-#define YYMARKER yyb->mark
-//#define YYSAVE ((yyb->save)?(yyb->save_count++):((yyb->save=yycursor),yyb->save_count++))
-//#define YYDISCARD ((--yyb->save_count)?0:(yyb->save==NULL))
-#define YYSAVE ({ let x = 0; yyb->save_count++; if (yyb->save) x = yycursor-yyb->save; else yyb->save = yycursor; x; })
-#define YYRESTORE(x) ({ let p = yyb->save+x; if (--yyb->save_count == 0) yyb->save=NULL; p; })
+#define YKLIMIT ykb->lim
+#define YKCURSOR ykcursor
+#define YKFILL(n) (ykcursor = ykfill(ykb,ykcursor))
+#define YKMARKER ykb->mark
+//#define YKSAVE ((ykb->save)?(ykb->save_count++):((ykb->save=ykcursor),ykb->save_count++))
+//#define YKDISCARD ((--ykb->save_count)?0:(ykb->save==NULL))
+#define YKSAVE ({ let x = 0; ykb->save_count++; if (ykb->save) x = ykcursor-ykb->save; else ykb->save = ykcursor; x; })
+#define YKRESTORE(x) ({ let p = ykb->save+x; if (--ykb->save_count == 0) ykb->save=NULL; p; })
 */
 
 // Note: SSL uses int instead of size_t
 extern int SSL_read(SSL @ssl, char ? @nozeroterm buf, int count);
 
-int yyread(datatype yyproducer *p, unsigned char? @nozeroterm b, int n) {
+int ykread(datatype ykproducer *p, unsigned char? @nozeroterm b, int n) {
   switch (p) {
   case NULL: return 0;
-  case &yyp_fd(fd): return read(fd,b,n);
-  case &yyp_ssl(ssl): return SSL_read(ssl,b,n);
+  case &ykp_fd(fd): return read(fd,b,n);
+  case &ykp_ssl(ssl): return SSL_read(ssl,b,n);
   }
 }
 
-void yyfill(yybuf_t @s,unsigned int n) {
-  //  fprintf(stderr,"yyfill(%d)\n",n); fflush(stderr);
+void ykfill(ykbuf_t @s,unsigned int n) {
+  //  fprintf(stderr,"ykfill(%d)\n",n); fflush(stderr);
   if (n < (s->lim - s->cur)) return;
   if (!s->eof) {
     int TO_READ = BSIZE;
@@ -166,19 +166,19 @@ void yyfill(yybuf_t @s,unsigned int n) {
       s->bot = buf;
     }
     // Read in TO_READ characters
-  YYREADLOOP:
-    if ((cnt = yyread(s->prod, s->lim, TO_READ)) != TO_READ) {
+  YKREADLOOP:
+    if ((cnt = ykread(s->prod, s->lim, TO_READ)) != TO_READ) {
       if (!cnt) {                   // end-of-file
         s->eof = 1;
         s->lim[cnt++] = '\0'; // Invariant: cnt < TO_READ
       }
       else if (cnt < 0) {
         if (errno == EINTR) {       // interrupt occurred during a slow read
-          goto YYREADLOOP;
+          goto YKREADLOOP;
         }
         else if (errno == EAGAIN) { // read from non-blocking fd, no data available
           // TODO: maybe we should change the fill API to allow a return here?
-          goto YYREADLOOP;
+          goto YKREADLOOP;
         }
         else {                      // some other error
           perror("Read error on fill");
@@ -190,8 +190,9 @@ void yyfill(yybuf_t @s,unsigned int n) {
       else {                        // read fewer than TO_READ characters for some other reason
         s->lim += cnt;
         if (n < (s->lim - s->cur)) return; // TO_READ was larger than n
+        //        fprintf(stderr,">> %s",substring(s->cur,0,s->lim - s->cur));
         TO_READ -= cnt;
-        goto YYREADLOOP;
+        goto YKREADLOOP;
       }
     }
     s->lim += cnt;

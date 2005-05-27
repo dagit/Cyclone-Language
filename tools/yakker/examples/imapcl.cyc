@@ -1,0 +1,152 @@
+/* An imap command line repl.
+   imap.bnf has been hand-modified:
+   * To avoid the conflict in capability-data
+   * To print responses.
+   * To print greetings.
+   * To have a new catch-all line parser; this looks for continuation requests
+*/
+#include <core.h>
+using Core;
+
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+
+#include "ssl.h"
+#include "ykbuf.h"
+
+//extern void p_command(ykbuf_t @ykb);
+extern void p_my_response(ykbuf_t @ykb);
+extern void p_my_greeting(ykbuf_t @ykb);
+//extern void p_line(ykbuf_t @ykb);
+//extern int keep_going;
+//extern char ?get_lines();
+
+static void
+doit(string_t host, int port, int use_ssl) {
+  struct hostent *he;
+  struct servent *se;
+  struct protoent *pe;
+  struct sockaddr_in sin;
+
+  SSL_CTX* ssl_ctx = NULL;
+  SSL* ssl = NULL;
+
+  char buf[10000]@zeroterm={for i<9999:0};
+  int bytes, b;
+
+  he = gethostbyname(host);
+  if (!he) {
+    fprintf(stderr, "unknown host - %s\n", host);
+    exit(1);
+  }
+  se = getservbyname("telnet","tcp");
+  if (!se) {
+    fprintf(stderr, "unknown service\n");
+    exit(1);
+  }
+  pe = getprotobyname(se->s_proto);
+  if (!pe) {
+    fprintf(stderr, "unknown protocol\n");
+    exit(1);
+  }
+  bzero((_?)&sin,sizeof(sin));
+  sin.sin_family = (sa_family_t)he->h_addrtype;
+
+  int fd = socket(he->h_addrtype, SOCK_STREAM, pe->p_proto);
+  if (fd < 0) perror("socket");
+
+  if (bind(fd, &sin, sizeof(sin)) < 0) perror("bind");
+  bcopy(he->h_addr, &sin.sin_addr, he->h_length);
+
+  sin.sin_port = htons((unsigned short)port);
+
+  if (connect(fd, &sin, sizeof(sin)) < 0) perror("connect");
+
+  if (use_ssl) {
+    /* Make SSL connection. */
+    SSL_load_error_strings();
+    SSLeay_add_ssl_algorithms();
+    ssl_ctx = SSL_CTX_new(SSLv23_client_method());
+    ssl = SSL_new(ssl_ctx);
+    SSL_set_fd(ssl, fd);
+    int r = SSL_connect(ssl);
+    if (r <= 0) {
+      fprintf(stderr, "%s - SSL connection failed - %d\n", host, r);
+      fprintf(stderr, "error is %d\n", SSL_get_error(ssl,r));
+      ERR_print_errors_fp(stderr);
+      exit(1);
+    }
+  }
+  fprintf(stderr,"Initial connection to %s established\n",host);
+
+  ykbuf_t @ykb = ssl2ykbuf(ssl);
+  try {
+    p_my_greeting(ykb);
+  }
+  catch {
+  default:
+    fprintf(stderr,"failed\n");
+    exit(1);
+    break;
+  }
+  char sendbuf[2048];
+  int command_num = 1;
+  while (1) {
+    printf("C: A%03d ",command_num);
+    sprintf(sendbuf,"A%03d ",command_num++);
+    if (!fgets(sendbuf+5,2048-5,stdin)) break;
+    int i = 0;
+    for (; i < 2048; i++) {
+      if (sendbuf[i] == '\n') {
+        sendbuf[i++] = '\r';
+        sendbuf[i++] = '\n';
+        sendbuf[i] = 0;
+        break;
+      }
+    }
+    SSL_write(ssl,sendbuf,i);
+
+    try {
+      p_my_response(ykb);
+//      do {
+//        p_line(ykb);
+//      } while (keep_going);
+    }
+    catch {
+    default:
+      fprintf(stderr,"failed\n");
+      exit(1);
+      break;
+    }
+//    let lines = get_lines();
+//    try {
+//      p_response(string2ykbuf(lines));
+//      printf("<response>\n");
+//    }
+//    catch {
+//    default:
+//      printf("<could not parse as response!!>\n");
+//      printf("%s",lines);
+//      break;
+//    }
+  }
+  close(fd);
+}
+
+int main(int argc, mstring_t<`H>? argv) {
+  if (argc < 2) {
+    fprintf(stderr,"Usage: %s <ssl imap server>\n",argv[0]);
+    exit(1);
+  }
+  doit(argv[1],993,1);
+  return 0;
+}
+
