@@ -684,6 +684,9 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
       case &AppType(&AqualVarCon, tv):
 	aqd=cat(text("@aqual("), typ2doc(tv->hd), text(")"));
 	break;
+      case &Evar(...):
+	aqd=cat(text("@aqual("), typ2doc(aq), text(")"));
+	break;
 	//can never appear unwrapped  in a pointer qualifier
 	/*       case &AppType(&AqualsCon, tv): */
 	/* 	aqd=cat(text("aquals("), typ2doc(tv->hd), text(")")); */

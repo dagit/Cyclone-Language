@@ -1376,6 +1376,9 @@ static void dumptms(bool is_char_ptr, list_t<type_modifier_t> tms,
       case &AppType(&AqualVarCon, tv):
 	dump("@aqual(");dumpntyp(tv->hd);dump(")");
 	break;
+      case &Evar(...):
+	dump("@aqual(");dumpntyp(aq);dump(")"); 
+	break;
       default:
 	Warn::impos2("unexpected alias qualifier", aq);
       }
