@@ -22,12 +22,20 @@ using Core;
 #include "ssl.h"
 #include "ykbuf.h"
 
-//extern void p_command(ykbuf_t @ykb);
+extern datatype exn { extern Parse_error };
+
 extern void p_my_response(ykbuf_t @ykb);
 extern void p_my_greeting(ykbuf_t @ykb);
-//extern void p_line(ykbuf_t @ykb);
-//extern int keep_going;
-//extern char ?get_lines();
+
+void greeting_hook(const char ?x) {
+  printf("S: %s",x);
+}
+void response_hook(const char ?x) {
+  printf("S: %s",x);
+}
+void command_hook(const char ?x) {
+  /* unused by imapcl */
+}
 
 static void
 doit(string_t host, int port, int use_ssl) {
@@ -74,7 +82,8 @@ doit(string_t host, int port, int use_ssl) {
     /* Make SSL connection. */
     SSL_load_error_strings();
     SSLeay_add_ssl_algorithms();
-    ssl_ctx = SSL_CTX_new(SSLv23_client_method());
+    //    ssl_ctx = SSL_CTX_new(SSLv23_client_method());
+    ssl_ctx = SSL_CTX_new(SSLv3_method());
     ssl = SSL_new(ssl_ctx);
     SSL_set_fd(ssl, fd);
     int r = SSL_connect(ssl);
@@ -93,7 +102,7 @@ doit(string_t host, int port, int use_ssl) {
   }
   catch {
   default:
-    fprintf(stderr,"failed\n");
+    fprintf(stderr,"client failed 1\n");
     exit(1);
     break;
   }
@@ -116,37 +125,31 @@ doit(string_t host, int port, int use_ssl) {
 
     try {
       p_my_response(ykb);
-//      do {
-//        p_line(ykb);
-//      } while (keep_going);
     }
     catch {
+    case &Parse_error:
+      fprintf(stderr,"client failed in parsing response\n");
+      fprintf(stderr,"'%s'\n",substring(ykb->bot,0,ykb->lim-ykb->bot));
+      exit(1);
+      break;
     default:
-      fprintf(stderr,"failed\n");
+      fprintf(stderr,"client failed 2\n");
       exit(1);
       break;
     }
-//    let lines = get_lines();
-//    try {
-//      p_response(string2ykbuf(lines));
-//      printf("<response>\n");
-//    }
-//    catch {
-//    default:
-//      printf("<could not parse as response!!>\n");
-//      printf("%s",lines);
-//      break;
-//    }
   }
   close(fd);
 }
 
+extern void p_response(ykbuf_t @ykb);
 int main(int argc, mstring_t<`H>? argv) {
-  if (argc < 2) {
-    fprintf(stderr,"Usage: %s <ssl imap server>\n",argv[0]);
+  if (argc < 2 || argc > 3) {
+    fprintf(stderr,"Usage: %s <ssl imap server> [port]\n",argv[0]);
     exit(1);
   }
-  doit(argv[1],993,1);
+  int port = 993;
+  if (argc == 3) port = atoi(argv[2]);
+  doit(argv[1],port,1);
   return 0;
 }
 

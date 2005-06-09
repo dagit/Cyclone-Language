@@ -1,0 +1,248 @@
+/* An imap proxy.
+*/
+#include <core.h>
+using Core;
+
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+
+#include "ssl.h"
+#include "ykbuf.h"
+
+extern void p_my_greeting(ykbuf_t @ykb);
+extern void p_my_response(ykbuf_t @ykb);
+extern void p_my_command(ykbuf_t @ykb);
+
+SSL *clissl = NULL;
+SSL *servssl = NULL;
+
+void greeting_hook(const char ?x) {
+  /* A greeting read from server will be echoed to client */
+  printf("S: %s",x);
+  SSL_write(clissl,x,numelts(x)-1); // don't echo extra NIL
+}
+void response_hook(const char ?x) {
+  /* A response read from server will be echoed to client */
+  printf("S: %s",x);
+  SSL_write(clissl,x,numelts(x)-1);
+}
+void command_hook(const char ?x) {
+  /* A command read from client will be echoed to server */
+  printf("C: %s",x);
+  SSL_write(servssl,x,numelts(x)-1);
+}
+
+void prErr(int i) {
+  switch (i) {
+  case SSL_ERROR_NONE             : fprintf(stderr,"SSL_ERROR_NONE\n"); break;
+  case SSL_ERROR_SSL              : fprintf(stderr,"SSL_ERROR_SSL\n"); break;
+  case SSL_ERROR_WANT_READ        : fprintf(stderr,"SSL_ERROR_WANT_READ\n"); break;
+  case SSL_ERROR_WANT_WRITE       : fprintf(stderr,"SSL_ERROR_WANT_WRITE\n"); break;
+  case SSL_ERROR_WANT_X509_LOOKUP : fprintf(stderr,"SSL_ERROR_WANT_X509_LOOKUP\n"); break;
+  case SSL_ERROR_SYSCALL          : fprintf(stderr,"SSL_ERROR_SYSCALL\n"); break;
+  case SSL_ERROR_ZERO_RETURN      : fprintf(stderr,"SSL_ERROR_ZERO_RETURN\n"); break;
+  case SSL_ERROR_WANT_CONNECT     : fprintf(stderr,"SSL_ERROR_WANT_CONNECT\n"); break;
+  case SSL_ERROR_WANT_ACCEPT      : fprintf(stderr,"SSL_ERROR_WANT_ACCEPT\n"); break;
+  default                         : fprintf(stderr,"%d\n",i); break;
+  }
+}
+
+static void
+proxy(int connfd, string_t host, int port) {
+  /* Negotiate SSL with client */
+  
+  SSL_CTX *clictx = SSL_CTX_new(SSLv23_method());
+
+  if (!(SSL_CTX_use_certificate_file(clictx, "imapp.cert", SSL_FILETYPE_PEM))) {
+    fprintf(stderr, "Error loading certificate\n");
+    ERR_print_errors_fp(stderr);
+    exit(1);
+  }
+
+  if (!(SSL_CTX_use_PrivateKey_file(clictx, "imapp.key", SSL_FILETYPE_PEM))) {
+    fprintf(stderr, "Error loading private key\n");
+    ERR_print_errors_fp(stderr);
+    exit(1);
+  }
+
+  if (!SSL_CTX_check_private_key(clictx)) {
+    fprintf(stderr, "Error verifying private key\n");
+    ERR_print_errors_fp(stderr);
+    exit(1);
+  }
+
+  clissl = SSL_new(clictx);
+  SSL_set_fd(clissl,connfd); 
+
+  int r;
+  if ( (r = SSL_accept(clissl)) <= 0) {
+    fprintf(stderr, "Error on SSL accept\n");
+    fprintf(stderr, "SSL_get_error(%d) is %d\n", r, SSL_get_error(clissl,r));
+    prErr(SSL_get_error(clissl,r));
+    fprintf(stderr, "A\n");
+    ERR_print_errors_fp(stderr);
+    fprintf(stderr, "B\n");
+    exit(0);
+  }
+
+  /* Open connection to server */
+  struct hostent *he;
+  struct servent *se;
+  struct protoent *pe;
+  struct sockaddr_in sin;
+
+  char buf[10000]@zeroterm={for i<9999:0};
+  int bytes, b;
+
+  he = gethostbyname(host);
+  if (!he) {
+    fprintf(stderr, "unknown host - %s\n", host);
+    exit(1);
+  }
+  se = getservbyname("telnet","tcp");
+  if (!se) {
+    fprintf(stderr, "unknown service\n");
+    exit(1);
+  }
+  pe = getprotobyname(se->s_proto);
+  if (!pe) {
+    fprintf(stderr, "unknown protocol\n");
+    exit(1);
+  }
+  bzero((_?)&sin,sizeof(sin));
+  sin.sin_family = (sa_family_t)he->h_addrtype;
+
+  int fd = socket(he->h_addrtype, SOCK_STREAM, pe->p_proto);
+  if (fd < 0) perror("socket");
+
+  if (bind(fd, &sin, sizeof(sin)) < 0) perror("bind");
+  bcopy(he->h_addr, &sin.sin_addr, he->h_length);
+
+  sin.sin_port = htons((unsigned short)port);
+
+  fprintf(stderr,"Connecting to server %s:%d... ",host,port);
+  if (connect(fd, &sin, sizeof(sin)) < 0) {
+    perror("connect");
+    exit(1);
+  }
+  fprintf(stderr,"done\n");
+
+  /* Make SSL connection. */
+  SSL_CTX *servctx = SSL_CTX_new(SSLv23_client_method());
+  servssl = SSL_new(servctx);
+  SSL_set_fd(servssl, fd);
+  int r = SSL_connect(servssl);
+  if (r <= 0) {
+    fprintf(stderr, "%s - SSL connection failed - %d\n", host, r);
+    fprintf(stderr, "error is %d\n", SSL_get_error(servssl,r));
+    ERR_print_errors_fp(stderr);
+    exit(1);
+  }
+  fprintf(stderr, "Initial connection to %s established\n", host);
+
+  ykbuf_t @servykb = ssl2ykbuf(servssl);
+  /* Read greeting from server and echo to client */
+  try { p_my_greeting(servykb); }
+  catch {
+  default:
+    fprintf(stderr, "server failed 1\n");
+    exit(1);
+    break;
+  }
+
+  if (fork() == 0) {
+    ykbuf_t @cliykb = ssl2ykbuf(clissl);
+    while (1) {
+      /* Read command from client and echo to server */
+      try { p_my_command(cliykb); }
+      catch {
+      default:
+        fprintf(stderr, "server failed 2\n");
+        ykdumpbuf(cliykb);
+        exit(1);
+        break;
+      }
+    }
+  }
+  else {
+    while (1) {
+      /* Read response from server and echo to client */
+      try { p_my_response(servykb); }
+      catch {
+      default:
+        fprintf(stderr, "server failed 3\n");
+        exit(1);
+        break;
+      }
+    }
+  }
+}
+
+/* Wait for connection, when it comes, fork a proxy */
+static void
+server(string_t host, int lport, int port) {
+  int listenfd, connfd;
+  pid_t childpid;
+  socklen_t clilen;
+  struct sockaddr_in cliaddr, servaddr;
+
+  SSL_load_error_strings();
+  SSLeay_add_ssl_algorithms();
+
+  listenfd = socket(AF_INET, SOCK_STREAM, 0);
+  if (listenfd < 0) {
+    fprintf(stderr, "Error opening socket\n");
+    exit(1);
+  }
+  bzero((_?)&servaddr,sizeof(servaddr));
+  servaddr.sin_family = AF_INET;
+  servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+  servaddr.sin_port = htons(lport);
+  if (bind(listenfd, &servaddr, sizeof(servaddr)) < 0) {
+    fprintf(stderr, "Error binding socket\n");
+    exit(1);
+  }
+  if (listen(listenfd, 64) < 0) {
+    fprintf(stderr, "Error listening on socket\n");
+    exit(1);
+  }
+  fprintf(stderr, "Proxy started on port %d\n",lport);
+  while (1) {
+    clilen = sizeof(cliaddr);
+    connfd = accept(listenfd, &cliaddr, &clilen);
+    if (connfd < 0) {
+      fprintf(stderr,"Error on accept\n");
+      break;
+    }
+    if ( (childpid = fork()) == 0) {
+      /* client */
+      close(listenfd);
+      proxy(connfd,host,port);
+      exit(0);
+    }
+    /* server */
+    close(connfd);
+  }
+}
+
+extern void p_command(ykbuf_t @ykb);
+
+int main(int argc, mstring_t<`H>? argv) {
+  if (argc < 2 || argc > 3) {
+    fprintf(stderr, "Usage: %s <ssl imap server> [local port]\n", argv[0]);
+    exit(1);
+  }
+  int lport = 10000;
+  if (argc == 3) lport = atoi(argv[2]);
+  server(argv[1],lport,993);
+  return 0;
+}
+

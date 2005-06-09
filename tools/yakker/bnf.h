@@ -27,8 +27,8 @@ datatype Repeat {
   Infinity;
 };
 typedef datatype Repeat @repeat_t;
-//typedef datatype Rule @rule_t;
 typedef struct arule @rule_t;
+typedef struct arule *Rule_t;
 datatype Rule {
   Symb(const char ?,const char ?); // grammar symbol, params
   Lit(const char ?);
@@ -95,6 +95,7 @@ extern grammar_t remove_duplicates(grammar_t ds);
 extern repeat_t minus_one(repeat_t);
 extern int repeat_zero(repeat_t);
 extern grammar_t get_reachable(grammar_t<`H> ds, List::list_t<const char ?@> roots);
-extern List::list_t<rule_t> gather_alt(rule_t r);
+extern List::list_t<rule_t> alt2rules(rule_t r);
+extern List::list_t<rule_t> seq2rules(rule_t r);
 extern rule_t commas();
 #endif

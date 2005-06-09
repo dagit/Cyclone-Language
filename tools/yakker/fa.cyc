@@ -227,6 +227,7 @@ st_t mkact(cs_t x) {
   action(s,x,f);
   return s;
 }
+#define CASE_INSENSITIVE 1
 st_t mklit(const char ?x) { /* A bit more space efficient than looping mkact */
   let s = nfa_fresh_state();
   let len = strlen(x);
@@ -239,7 +240,12 @@ st_t mklit(const char ?x) { /* A bit more space efficient than looping mkact */
     let a = s;
     for (let i = 0; i < len; i++) {
       let b = nfa_fresh_state();
-      cs_opt_t y = cs_singleton(x[i]);
+      cs_opt_t y;
+      if (CASE_INSENSITIVE) {
+        y = cs_singleton(tolower(x[i]));
+        cs_insert(y,toupper(x[i]));
+      }
+      else y = cs_singleton(x[i]);
       action(a,y,b);
       a = b;
     }

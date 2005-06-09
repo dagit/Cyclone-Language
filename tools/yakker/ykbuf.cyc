@@ -121,13 +121,40 @@ ykbuf_t @string2ykbuf(const char ?s) {
 #define YKRESTORE(x) ({ let p = ykb->save+x; if (--ykb->save_count == 0) ykb->save=NULL; p; })
 */
 
+void ykdumpbuf(ykbuf_t @y) {
+  let right = y->lim - y->cur;
+  let left = y->cur - y->bot;
+  let leftp;
+  if (left+right < 80) leftp = y->bot;
+  else if (left < 80) leftp = y->bot;
+  else if (right < 80) leftp = y->lim - 80;
+  else leftp = y->cur - 40;
+
+  fprintf(stderr,"cur = bot + %d\n",left);
+  fprintf(stderr,"lim = bot + %d = cur + %d\n",left+right,right);
+  fprintf(stderr,"Window:\n");
+
+  for (let x = leftp; x < y->lim && x < leftp + 80; x++)
+    if (isprint(*x)) fprintf(stderr," ");
+    else fprintf(stderr,"%x",*x/16);
+  fprintf(stderr,"\n");
+  for (let x = leftp; x < y->lim && x < leftp + 80; x++)
+    if (isprint(*x)) fprintf(stderr,"%c",*x);
+    else fprintf(stderr,"%x",*x%16);
+  fprintf(stderr,"\n");
+  for (let x = leftp; x < y->lim && x < leftp + 80; x++)
+    if (x != y->cur) fprintf(stderr," ");
+    else fprintf(stderr,"*");
+  fprintf(stderr,"\n");
+}
+
 // Note: SSL uses int instead of size_t
 extern int SSL_read(SSL @ssl, char ? @nozeroterm buf, int count);
 
 int ykread(datatype ykproducer *p, unsigned char? @nozeroterm b, int n) {
   switch (p) {
-  case NULL: return 0;
-  case &ykp_fd(fd): return read(fd,b,n);
+  case NULL:          return 0;
+  case &ykp_fd(fd):   return read(fd,b,n);
   case &ykp_ssl(ssl): return SSL_read(ssl,b,n);
   }
 }

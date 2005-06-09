@@ -22,6 +22,7 @@
 #include "bnf.h"
 #include "pr.h"
 
+int html_mode = 0;
 List::list_t<$(const char ?,const char ?)@> renamings = NULL;
 static const char ?rename_pr(const char ?`H name) {
   for (let x = renamings; x; x = x->tl) {
@@ -50,7 +51,12 @@ void pr_rule(FILE @f,rule_t r) {
   switch (r->r) {
   case &Prose(x):
     /* FIX */
-    fprintf(f,"<%s>",x); break;
+    if (html_mode) {
+      fprintf(f,"&lt;%s&gt;",x); break;
+    }
+    else {
+      fprintf(f,"<%s>",x); break;
+    }
     break;
   case &Symb(x,y):
     fprintf(f,"%s",rename_pr(x));
@@ -61,8 +67,14 @@ void pr_rule(FILE @f,rule_t r) {
     else fprintf(f,"%%d%d-%d",low,high);
     break;
   case &Lit(x):
-    if (strcmp("\"",x) == 0) fprintf(f,"<\">");
-    else fprintf(f,"\"%s\"",x);
+    if (html_mode) {
+      if (strcmp("\"",x) == 0) fprintf(f,"<b>&lt;\"&gt;</b>");
+      else fprintf(f,"<b>%s</b>",x);
+    }
+    else {
+      if (strcmp("\"",x) == 0) fprintf(f,"<\">");
+      else fprintf(f,"\"%s\"",x);
+    }
     break;
   case &Opt(r2):
     fprintf(f,"["); pr_rule(f,r2); fprintf(f,"]"); break;
@@ -124,7 +136,9 @@ void pr_definition(FILE @f,definition_t d) {
   if (do_re(d)) fprintf(f,"@");
   fprintf(f,"= ");
   pr_rule(f,r);
-  fprintf(f,".\n");
+  fprintf(f,".");
+  if (html_mode) fprintf(f,"<br>");
+  fprintf(f,"\n");
 }
 void pr_definitions(FILE @f,grammar_t ds) {
   for (; ds; ds = ds->tl)

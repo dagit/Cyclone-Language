@@ -27,6 +27,8 @@ struct ssl_ctx_st;
 typedef struct ssl_ctx_st SSL_CTX;
 struct ssl_method_st;
 typedef struct ssl_method_st SSL_METHOD;
+struct bio_st;
+typedef struct bio_st BIO;
 #define SSLeay_add_ssl_algorithms() SSL_library_init()
 extern "C" int SSL_library_init();
 extern "C" int SSL_set_fd(SSL @s,int fd);
@@ -58,5 +60,27 @@ extern int SSL_write(SSL @, const char ? @nozeroterm, int);
 #define SSL_CTX_free(x) (0)
 extern "C" void ERR_print_errors_fp(FILE @fp);
 extern "C" int SSL_get_error(SSL @ssl, int ret);
+extern "C" BIO *BIO_new_socket(int sock, int close_flag);
+extern "C" int SSL_accept(SSL *ssl);
+extern "C" void SSL_set_bio(SSL *s, BIO *rbio,BIO *wbio);
+
+#define X509_FILETYPE_PEM 1
+#define X509_FILETYPE_ASN1 2
+#define SSL_FILETYPE_PEM X509_FILETYPE_PEM
+#define SSL_FILETYPE_ASN1 X509_FILETYPE_ASN1
+
+#define SSL_ERROR_NONE             0
+#define SSL_ERROR_SSL              1
+#define SSL_ERROR_WANT_READ        2
+#define SSL_ERROR_WANT_WRITE       3
+#define SSL_ERROR_WANT_X509_LOOKUP 4
+#define SSL_ERROR_SYSCALL          5
+#define SSL_ERROR_ZERO_RETURN      6
+#define SSL_ERROR_WANT_CONNECT     7
+#define SSL_ERROR_WANT_ACCEPT      8
+
+extern "C" int SSL_CTX_use_certificate_file(SSL_CTX @ctx, const char @file, int type);
+extern "C" int SSL_CTX_use_PrivateKey_file(SSL_CTX @ctx, const char @file, int type);
+extern "C" int SSL_CTX_check_private_key(SSL_CTX @ctx);
 
 #endif

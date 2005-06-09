@@ -117,6 +117,7 @@ static int check_any() {
 "         -termgrammar           produce a term grammar for the input grammar\n"\
 "         -no-main               don't output a default main procedure\n"\
 "         -lazyfill              use lazy filling (for interactive connections)\n"\
+"         -depend                produce a dependency graph of symbols in DOT format\n"\
 "         -help                  print this message\n"
 
 static void die() {
@@ -127,6 +128,7 @@ static void die() {
 int main(int argc, const char ?`H?argv) {
   list_t<const char ?@> files = NULL;
   list_t<const char ?@> roots = NULL;
+  int dependp = 0;
   int extractp = 0;
   int extractprosep = 0;
   int generate = 0;
@@ -168,6 +170,7 @@ int main(int argc, const char ?`H?argv) {
     else if (strcmp("-extract",argv[i]) == 0) extractp = 1;
     else if (strcmp("-pads",argv[i]) == 0) pads = 1;
     else if (strcmp("-sort",argv[i]) == 0) sortp = 1;
+    else if (strcmp("-depend",argv[i]) == 0) dependp = 1;
     else if (strcmp("-isort",argv[i]) == 0) isortp = 1;
     else if (strcmp("-tsort",argv[i]) == 0) tsortp = 1;
     else if (strcmp("-test-nfa2dfa",argv[i]) == 0) do_test_nfa2dfa = 1;
@@ -298,6 +301,14 @@ int main(int argc, const char ?`H?argv) {
     debugprint(1,"Subsetting... ");
     ds = get_reachable(ds,roots);
     debugprint(1,"done\n");
+  }
+
+  /* Produce the dependency graph and exit */
+  if (dependp) {
+    let g = dependency_graph(ds);
+    g = Graph::tkernel(g);
+    printGraph(g);
+    return 0;
   }
 
   /* Produce the term grammar and exit */

@@ -39,6 +39,18 @@ imapcl.o: examples/imapcl.cyc
 imap.cyc: imap.bnf
 	./yakker -gen command -no-main -lazyfill $< > $@
 
+imapp.key:
+	openssl genrsa > $@
+
+imapp.cert: imapp.key
+	openssl req -new -key $< -x509 -subj /C=aa/ST=b/L=c/O=d/OU=e/CN=shoebox.research.att.com > $@
+
+imapp: imapp.o ykbuf.o ssl.o imap.o
+	cyclone $^ -o $@ -lssl -lcrypto
+
+imapp.o: examples/imapp.cyc
+	cyclone -c $^ -o $@ -I.
+
 stringify: stringify.cyc
 	cyclone $^ -nogc -o $@
 
@@ -113,10 +125,14 @@ imap.bnf: rfc3501.bnf yakker
 	./yakker rfc3501.bnf -omit literal capability-data > $@.tmp
 	echo 'literal = "{" (number "")$$x "}" CRLF @repeat(atoi(x))CHAR8.' >> $@.tmp
 	echo 'capability-data = "CAPABILITY" *(SP capability).' >> $@.tmp
-	echo 'my-greeting = ("" greeting)$$x {printf("S: %s",x);}.' >> $@.tmp
-	echo 'my-response = ("" response)$$x {printf("S: %s",x);}.' >> $@.tmp
+	echo 'my-greeting = ("" greeting)$$x {greeting_hook(x);}.' >> $@.tmp
+	echo 'my-response = ("" response)$$x {response_hook(x);}.' >> $@.tmp
+	echo 'my-command = ("" command)$$x {command_hook(x);}.' >> $@.tmp
 	./yakker $@.tmp -tsort > $@
 	$(RM) $@.tmp
+	echo '{ extern void greeting_hook(const char ?); }' >> $@
+	echo '{ extern void response_hook(const char ?); }' >> $@
+	echo '{ extern void command_hook(const char ?); }' >> $@
 
 clean:
 	$(RM) *.d *.o parse_tab.cyc parse_tab.h lex.cyc yakker
@@ -130,6 +146,7 @@ clean:
 	$(RM) indexer indexer.cyc 1rfc_index 1rfc_index.txt
 	$(RM) wf wf.cyc
 	$(RM) http.cyc
+	$(RM) imapp imapcl imapp.key imapp.cert
 
 %.p: %.bnf yakker
 	./yakker -pads $< > $@

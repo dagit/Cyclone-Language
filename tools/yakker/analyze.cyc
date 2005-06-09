@@ -924,7 +924,7 @@ void conflicts0(rule_t r,rule_t right_ctxt) {
     let rng_all = cs_empty();
     let rng_conflict = cs_empty();
 
-    let alts = gather_alt(r);
+    let alts = alt2rules(r);
     for (let rs = alts; rs; rs = rs->tl) {
       let rng = cs_empty();
       first(rng,SEQ(rs->hd,right_ctxt));

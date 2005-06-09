@@ -56,4 +56,5 @@ extern int first_of_cs(cs_t a);
 extern grammar_t minus_elim(grammar_t<`H> ds);
 extern const char ?char_escape(unsigned int c);
 extern List::list_t<$(unsigned int,unsigned int)@> cs2ranges(cs_t a);
+extern rule_t cs2rule(cs_t rng);
 #endif

@@ -40,6 +40,7 @@ extern ykbuf_t @fd2ykbuf(int fd);
 extern ykbuf_t @string2ykbuf(const char ?s);
 extern ykbuf_t @ssl2ykbuf(SSL@`H);
 extern void ykfill(ykbuf_t @s,unsigned int n);
+extern void ykdumpbuf(ykbuf_t @y);
 
 extern void compress_whitespace(char ?x);
 

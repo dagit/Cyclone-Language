@@ -696,6 +696,10 @@ SP
 =
 CR
 .
+<US-ASCII HT, horizontal-tab (9)>
+=
+HT
+.
 <US-ASCII LF, linefeed (10)>
 =
 LF
