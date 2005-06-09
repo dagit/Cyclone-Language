@@ -381,11 +381,11 @@ static void Cyc_LowTreeShake_build_tables_type(struct Cyc_LowTreeShake_Env*env,v
 struct Cyc_Absyn_FnInfo _Tmp0;void*_Tmp1;void*_Tmp2;union Cyc_Absyn_AggrInfo _Tmp3;switch(*((int*)t)){case 0: switch(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)t)->f1)){case 25: if(((struct Cyc_Absyn_AppType_Absyn_Type_struct*)t)->f2==0){_Tmp3=((struct Cyc_Absyn_AggrCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)t)->f1)->f1;{union Cyc_Absyn_AggrInfo ai=_Tmp3;
 # 51
 struct _tuple0*n=Cyc_Absyn_aggr_kinded_name(ai).f1;
-if(!({(int(*)(struct Cyc_Set_Set*,struct _tuple0*))Cyc_Set_member;})(env->aggr_keepers,n))
-({(void(*)(struct Cyc_Set_Set*,struct _tuple0*))Cyc_Set_imp_insert;})(env->aggr_worklist,n);
+if(!({int(*_Tmp4)(struct Cyc_Set_Set*,struct _tuple0*)=(int(*)(struct Cyc_Set_Set*,struct _tuple0*))Cyc_Set_member;_Tmp4;})(env->aggr_keepers,n))
+({void(*_Tmp4)(struct Cyc_Set_Set*,struct _tuple0*)=(void(*)(struct Cyc_Set_Set*,struct _tuple0*))Cyc_Set_imp_insert;_Tmp4;})(env->aggr_worklist,n);
 goto _LL0;}}else{goto _LL15;}case 20: if(((struct Cyc_Absyn_AppType_Absyn_Type_struct*)t)->f2==0){_Tmp2=((struct Cyc_Absyn_EnumCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)t)->f1)->f1;{struct _tuple0*n=_Tmp2;
 # 56
-({(void(*)(struct Cyc_Set_Set*,struct _tuple0*))Cyc_Set_imp_insert;})(env->enum_keepers,n);goto _LL0;}}else{goto _LL15;}case 3:
+({void(*_Tmp4)(struct Cyc_Set_Set*,struct _tuple0*)=(void(*)(struct Cyc_Set_Set*,struct _tuple0*))Cyc_Set_imp_insert;_Tmp4;})(env->enum_keepers,n);goto _LL0;}}else{goto _LL15;}case 3:
  goto _LL8;default: if(((struct Cyc_Absyn_AppType_Absyn_Type_struct*)t)->f2==0){_LL8:
  goto _LL0;}else{goto _LL15;}}case 1: _Tmp2=(void*)((struct Cyc_Absyn_Evar_Absyn_Type_struct*)t)->f2;{void*topt=_Tmp2;
 # 60
@@ -404,18 +404,18 @@ goto _LL0;}case 10: _Tmp2=((struct Cyc_Absyn_TypeofType_Absyn_Type_struct*)t)->f
 # 75
 Cyc_LowTreeShake_build_tables_exp(env,e);goto _LL0;}default: _LL15:
 # 77
-({struct Cyc_Warn_String_Warn_Warg_struct _Tmp4=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp5;_Tmp5.tag=0,_Tmp5.f1=_tag_fat("LowTreeshake: unexpected type ",sizeof(char),31U);_Tmp5;});struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp5=({struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp6;_Tmp6.tag=2,_Tmp6.f1=(void*)t;_Tmp6;});void*_Tmp6[2];_Tmp6[0]=& _Tmp4,_Tmp6[1]=& _Tmp5;({(int(*)(struct _fat_ptr))Cyc_Warn_impos2;})(_tag_fat(_Tmp6,sizeof(void*),2));});}_LL0:;}
+({struct Cyc_Warn_String_Warn_Warg_struct _Tmp4=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp5;_Tmp5.tag=0,_Tmp5.f1=_tag_fat("LowTreeshake: unexpected type ",sizeof(char),31U);_Tmp5;});struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp5=({struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp6;_Tmp6.tag=2,_Tmp6.f1=(void*)t;_Tmp6;});void*_Tmp6[2];_Tmp6[0]=& _Tmp4,_Tmp6[1]=& _Tmp5;({int(*_Tmp7)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp7;})(_tag_fat(_Tmp6,sizeof(void*),2));});}_LL0:;}
 # 81
 static int Cyc_LowTreeShake_build_tables_visit_f1(struct Cyc_LowTreeShake_Env*env,struct Cyc_Absyn_Exp*e){
 void*_Tmp0=e->r;void*_Tmp1;switch(*((int*)_Tmp0)){case 1: switch(*((int*)((struct Cyc_Absyn_Var_e_Absyn_Raw_exp_struct*)_Tmp0)->f1)){case 1: _Tmp1=((struct Cyc_Absyn_Global_b_Absyn_Binding_struct*)((struct Cyc_Absyn_Var_e_Absyn_Raw_exp_struct*)_Tmp0)->f1)->f1;{struct Cyc_Absyn_Vardecl*vd=_Tmp1;
 _Tmp1=vd->name;goto _LL4;}case 2: _Tmp1=((struct Cyc_Absyn_Funname_b_Absyn_Binding_struct*)((struct Cyc_Absyn_Var_e_Absyn_Raw_exp_struct*)_Tmp0)->f1)->f1->name;_LL4: {struct _tuple0*qv=_Tmp1;
 _Tmp1=qv;goto _LL6;}case 0: _Tmp1=((struct Cyc_Absyn_Unresolved_b_Absyn_Binding_struct*)((struct Cyc_Absyn_Var_e_Absyn_Raw_exp_struct*)_Tmp0)->f1)->f1;_LL6: {struct _tuple0*qv=_Tmp1;
 # 86
-if(!((unsigned)({(int*(*)(struct Cyc_Hashtable_Table*,struct _tuple0*))Cyc_Hashtable_lookup_opt;})(env->funs_defined,qv))&& !((unsigned)
-({(int*(*)(struct Cyc_Hashtable_Table*,struct _tuple0*))Cyc_Hashtable_lookup_opt;})(env->global_keepers,qv)))
-({(void(*)(struct Cyc_Hashtable_Table*,struct _tuple0*,int))Cyc_Hashtable_insert;})(env->global_keepers,qv,1);
+if(!((unsigned)({int*(*_Tmp2)(struct Cyc_Hashtable_Table*,struct _tuple0*)=(int*(*)(struct Cyc_Hashtable_Table*,struct _tuple0*))Cyc_Hashtable_lookup_opt;_Tmp2;})(env->funs_defined,qv))&& !((unsigned)
+({int*(*_Tmp2)(struct Cyc_Hashtable_Table*,struct _tuple0*)=(int*(*)(struct Cyc_Hashtable_Table*,struct _tuple0*))Cyc_Hashtable_lookup_opt;_Tmp2;})(env->global_keepers,qv)))
+({void(*_Tmp2)(struct Cyc_Hashtable_Table*,struct _tuple0*,int)=(void(*)(struct Cyc_Hashtable_Table*,struct _tuple0*,int))Cyc_Hashtable_insert;_Tmp2;})(env->global_keepers,qv,1);
 return 0;}default: goto _LLF;}case 31: _Tmp1=((struct Cyc_Absyn_Enum_e_Absyn_Raw_exp_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Enumdecl*ed=_Tmp1;
-({(void(*)(struct Cyc_Set_Set*,struct _tuple0*))Cyc_Set_imp_insert;})(env->enum_keepers,ed->name);return 0;}case 19: _Tmp1=(void*)((struct Cyc_Absyn_Offsetof_e_Absyn_Raw_exp_struct*)_Tmp0)->f1;{void*t=_Tmp1;
+({void(*_Tmp2)(struct Cyc_Set_Set*,struct _tuple0*)=(void(*)(struct Cyc_Set_Set*,struct _tuple0*))Cyc_Set_imp_insert;_Tmp2;})(env->enum_keepers,ed->name);return 0;}case 19: _Tmp1=(void*)((struct Cyc_Absyn_Offsetof_e_Absyn_Raw_exp_struct*)_Tmp0)->f1;{void*t=_Tmp1;
 _Tmp1=t;goto _LLC;}case 17: _Tmp1=(void*)((struct Cyc_Absyn_Sizeoftype_e_Absyn_Raw_exp_struct*)_Tmp0)->f1;_LLC: {void*t=_Tmp1;
 _Tmp1=t;goto _LLE;}case 14: _Tmp1=(void*)((struct Cyc_Absyn_Cast_e_Absyn_Raw_exp_struct*)_Tmp0)->f1;_LLE: {void*t=_Tmp1;
 Cyc_LowTreeShake_build_tables_type(env,t);return 1;}default: _LLF:
@@ -433,18 +433,18 @@ Cyc_LowTreeShake_build_tables_type(env,fd->i.ret_type);
 {struct Cyc_List_List*args=fd->i.args;for(0;args!=0;args=args->tl){
 Cyc_LowTreeShake_build_tables_type(env,(*((struct _tuple8*)args->hd)).f2);}}
 return 1;}default:
-({struct Cyc_Warn_String_Warn_Warg_struct _Tmp5=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp6;_Tmp6.tag=0,_Tmp6.f1=_tag_fat("LowTreeShake: local decl not a var or function",sizeof(char),47U);_Tmp6;});void*_Tmp6[1];_Tmp6[0]=& _Tmp5;({(int(*)(struct _fat_ptr))Cyc_Warn_impos2;})(_tag_fat(_Tmp6,sizeof(void*),1));});};}}else{
+({struct Cyc_Warn_String_Warn_Warg_struct _Tmp5=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp6;_Tmp6.tag=0,_Tmp6.f1=_tag_fat("LowTreeShake: local decl not a var or function",sizeof(char),47U);_Tmp6;});void*_Tmp6[1];_Tmp6[0]=& _Tmp5;({int(*_Tmp7)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp7;})(_tag_fat(_Tmp6,sizeof(void*),1));});};}}else{
 # 111
 return 1;};}
 # 114
 static void Cyc_LowTreeShake_build_tables_exp(struct Cyc_LowTreeShake_Env*env,struct Cyc_Absyn_Exp*e){
-({(void(*)(int(*)(struct Cyc_LowTreeShake_Env*,struct Cyc_Absyn_Exp*),int(*)(struct Cyc_LowTreeShake_Env*,struct Cyc_Absyn_Stmt*),struct Cyc_LowTreeShake_Env*,struct Cyc_Absyn_Exp*))Cyc_Absyn_visit_exp;})(Cyc_LowTreeShake_build_tables_visit_f1,Cyc_LowTreeShake_build_tables_visit_f2,env,e);}
+({void(*_Tmp0)(int(*)(struct Cyc_LowTreeShake_Env*,struct Cyc_Absyn_Exp*),int(*)(struct Cyc_LowTreeShake_Env*,struct Cyc_Absyn_Stmt*),struct Cyc_LowTreeShake_Env*,struct Cyc_Absyn_Exp*)=(void(*)(int(*)(struct Cyc_LowTreeShake_Env*,struct Cyc_Absyn_Exp*),int(*)(struct Cyc_LowTreeShake_Env*,struct Cyc_Absyn_Stmt*),struct Cyc_LowTreeShake_Env*,struct Cyc_Absyn_Exp*))Cyc_Absyn_visit_exp;_Tmp0;})(Cyc_LowTreeShake_build_tables_visit_f1,Cyc_LowTreeShake_build_tables_visit_f2,env,e);}
 # 118
 static void Cyc_LowTreeShake_add_to_table(struct Cyc_Hashtable_Table*tab,struct _tuple0*qv,void*d){
 # 120
-struct Cyc_List_List**lst_opt=({(struct Cyc_List_List**(*)(struct Cyc_Hashtable_Table*,struct _tuple0*))Cyc_Hashtable_lookup_opt;})(tab,qv);
+struct Cyc_List_List**lst_opt=({struct Cyc_List_List**(*_Tmp0)(struct Cyc_Hashtable_Table*,struct _tuple0*)=(struct Cyc_List_List**(*)(struct Cyc_Hashtable_Table*,struct _tuple0*))Cyc_Hashtable_lookup_opt;_Tmp0;})(tab,qv);
 struct Cyc_List_List*lst;lst=_cycalloc(sizeof(struct Cyc_List_List)),lst->hd=d,(unsigned)lst_opt?lst->tl=*lst_opt:(lst->tl=0);
-({(void(*)(struct Cyc_Hashtable_Table*,struct _tuple0*,struct Cyc_List_List*))Cyc_Hashtable_insert;})(tab,qv,lst);}
+({void(*_Tmp0)(struct Cyc_Hashtable_Table*,struct _tuple0*,struct Cyc_List_List*)=(void(*)(struct Cyc_Hashtable_Table*,struct _tuple0*,struct Cyc_List_List*))Cyc_Hashtable_insert;_Tmp0;})(tab,qv,lst);}
 # 125
 static void Cyc_LowTreeShake_build_tables(struct Cyc_LowTreeShake_Env*env,struct Cyc_List_List*tds){
 for(1;tds!=0;tds=tds->tl){
@@ -455,13 +455,13 @@ if(vd->initializer!=0)
 Cyc_LowTreeShake_build_tables_exp(env,_check_null(vd->initializer));
 goto _LL0;}case 1: _Tmp1=((struct Cyc_Absyn_Fn_d_Absyn_Raw_decl_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Fndecl*fd=_Tmp1;
 # 134
-({(void(*)(struct Cyc_Hashtable_Table*,struct _tuple0*,int))Cyc_Hashtable_insert;})(env->funs_defined,fd->name,1);
+({void(*_Tmp2)(struct Cyc_Hashtable_Table*,struct _tuple0*,int)=(void(*)(struct Cyc_Hashtable_Table*,struct _tuple0*,int))Cyc_Hashtable_insert;_Tmp2;})(env->funs_defined,fd->name,1);
 Cyc_LowTreeShake_build_tables_type(env,fd->i.ret_type);
 {struct Cyc_List_List*args=fd->i.args;for(0;args!=0;args=args->tl){
 Cyc_LowTreeShake_build_tables_type(env,(*((struct _tuple8*)args->hd)).f2);}}
-({(void(*)(int(*)(struct Cyc_LowTreeShake_Env*,struct Cyc_Absyn_Exp*),int(*)(struct Cyc_LowTreeShake_Env*,struct Cyc_Absyn_Stmt*),struct Cyc_LowTreeShake_Env*,struct Cyc_Absyn_Stmt*))Cyc_Absyn_visit_stmt;})(Cyc_LowTreeShake_build_tables_visit_f1,Cyc_LowTreeShake_build_tables_visit_f2,env,fd->body);
+({void(*_Tmp2)(int(*)(struct Cyc_LowTreeShake_Env*,struct Cyc_Absyn_Exp*),int(*)(struct Cyc_LowTreeShake_Env*,struct Cyc_Absyn_Stmt*),struct Cyc_LowTreeShake_Env*,struct Cyc_Absyn_Stmt*)=(void(*)(int(*)(struct Cyc_LowTreeShake_Env*,struct Cyc_Absyn_Exp*),int(*)(struct Cyc_LowTreeShake_Env*,struct Cyc_Absyn_Stmt*),struct Cyc_LowTreeShake_Env*,struct Cyc_Absyn_Stmt*))Cyc_Absyn_visit_stmt;_Tmp2;})(Cyc_LowTreeShake_build_tables_visit_f1,Cyc_LowTreeShake_build_tables_visit_f2,env,fd->body);
 goto _LL0;}case 5: _Tmp1=((struct Cyc_Absyn_Aggr_d_Absyn_Raw_decl_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Aggrdecl*ad=_Tmp1;
-({(void(*)(struct Cyc_Hashtable_Table*,struct _tuple0*,struct Cyc_Absyn_Aggrdecl*))Cyc_LowTreeShake_add_to_table;})(env->aggrdecls,ad->name,ad);goto _LL0;}case 7: _Tmp1=((struct Cyc_Absyn_Enum_d_Absyn_Raw_decl_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Enumdecl*ed=_Tmp1;
+({void(*_Tmp2)(struct Cyc_Hashtable_Table*,struct _tuple0*,struct Cyc_Absyn_Aggrdecl*)=(void(*)(struct Cyc_Hashtable_Table*,struct _tuple0*,struct Cyc_Absyn_Aggrdecl*))Cyc_LowTreeShake_add_to_table;_Tmp2;})(env->aggrdecls,ad->name,ad);goto _LL0;}case 7: _Tmp1=((struct Cyc_Absyn_Enum_d_Absyn_Raw_decl_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Enumdecl*ed=_Tmp1;
 # 143
 if(ed->fields!=0){
 struct Cyc_List_List*fs=(struct Cyc_List_List*)ed->fields->v;for(0;fs!=0;fs=fs->tl){
@@ -470,16 +470,16 @@ Cyc_LowTreeShake_build_tables_exp(env,_check_null(((struct Cyc_Absyn_Enumfield*)
 goto _LL0;}case 8: _Tmp1=((struct Cyc_Absyn_Typedef_d_Absyn_Raw_decl_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Typedefdecl*td=_Tmp1;
 # 149
 Cyc_LowTreeShake_build_tables_type(env,_check_null(td->defn));goto _LL0;}default:
-({struct Cyc_Warn_String_Warn_Warg_struct _Tmp2=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3;_Tmp3.tag=0,_Tmp3.f1=_tag_fat("LowTreeShake: top-level Cyclone decl",sizeof(char),37U);_Tmp3;});void*_Tmp3[1];_Tmp3[0]=& _Tmp2;({(int(*)(struct _fat_ptr))Cyc_Warn_impos2;})(_tag_fat(_Tmp3,sizeof(void*),1));});}_LL0:;}}
+({struct Cyc_Warn_String_Warn_Warg_struct _Tmp2=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3;_Tmp3.tag=0,_Tmp3.f1=_tag_fat("LowTreeShake: top-level Cyclone decl",sizeof(char),37U);_Tmp3;});void*_Tmp3[1];_Tmp3[0]=& _Tmp2;({int(*_Tmp4)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp4;})(_tag_fat(_Tmp3,sizeof(void*),1));});}_LL0:;}}
 # 154
 static void Cyc_LowTreeShake_process_worklist(struct Cyc_LowTreeShake_Env*env){
 # 156
 while(!Cyc_Set_is_empty(env->aggr_worklist)){
-struct _tuple0*n=({(struct _tuple0*(*)(struct Cyc_Set_Set*))Cyc_Set_choose;})(env->aggr_worklist);
-({(struct _tuple0*(*)(struct Cyc_Set_Set*,struct _tuple0*))Cyc_Set_imp_delete;})(env->aggr_worklist,n);
-({(void(*)(struct Cyc_Set_Set*,struct _tuple0*))Cyc_Set_imp_insert;})(env->aggr_keepers,n);{
+struct _tuple0*n=({struct _tuple0*(*_Tmp0)(struct Cyc_Set_Set*)=(struct _tuple0*(*)(struct Cyc_Set_Set*))Cyc_Set_choose;_Tmp0;})(env->aggr_worklist);
+({struct _tuple0*(*_Tmp0)(struct Cyc_Set_Set*,struct _tuple0*)=(struct _tuple0*(*)(struct Cyc_Set_Set*,struct _tuple0*))Cyc_Set_imp_delete;_Tmp0;})(env->aggr_worklist,n);
+({void(*_Tmp0)(struct Cyc_Set_Set*,struct _tuple0*)=(void(*)(struct Cyc_Set_Set*,struct _tuple0*))Cyc_Set_imp_insert;_Tmp0;})(env->aggr_keepers,n);{
 # 161
-struct Cyc_List_List**ads_opt=({(struct Cyc_List_List**(*)(struct Cyc_Hashtable_Table*,struct _tuple0*))Cyc_Hashtable_lookup_opt;})(env->aggrdecls,n);
+struct Cyc_List_List**ads_opt=({struct Cyc_List_List**(*_Tmp0)(struct Cyc_Hashtable_Table*,struct _tuple0*)=(struct Cyc_List_List**(*)(struct Cyc_Hashtable_Table*,struct _tuple0*))Cyc_Hashtable_lookup_opt;_Tmp0;})(env->aggrdecls,n);
 if(!((unsigned)ads_opt))
 continue;{
 struct Cyc_List_List*ads=*ads_opt;for(0;ads!=0;ads=ads->tl){
@@ -493,10 +493,10 @@ for(1;tds!=0;tds=tds->tl){
 int keep;
 {void*_Tmp0=((struct Cyc_Absyn_Decl*)tds->hd)->r;void*_Tmp1;switch(*((int*)_Tmp0)){case 0: _Tmp1=((struct Cyc_Absyn_Var_d_Absyn_Raw_decl_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Vardecl*vd=_Tmp1;
 keep=(int)vd->sc!=3 && vd->is_proto!=1 ||(unsigned)
-({(int*(*)(struct Cyc_Hashtable_Table*,struct _tuple0*))Cyc_Hashtable_lookup_opt;})(env->global_keepers,vd->name);
+({int*(*_Tmp2)(struct Cyc_Hashtable_Table*,struct _tuple0*)=(int*(*)(struct Cyc_Hashtable_Table*,struct _tuple0*))Cyc_Hashtable_lookup_opt;_Tmp2;})(env->global_keepers,vd->name);
 goto _LL0;}case 5: _Tmp1=((struct Cyc_Absyn_Aggr_d_Absyn_Raw_decl_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Aggrdecl*ad=_Tmp1;
-keep=({(int(*)(struct Cyc_Set_Set*,struct _tuple0*))Cyc_Set_member;})(env->aggr_keepers,ad->name);goto _LL0;}case 7: _Tmp1=((struct Cyc_Absyn_Enum_d_Absyn_Raw_decl_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Enumdecl*ed=_Tmp1;
-keep=({(int(*)(struct Cyc_Set_Set*,struct _tuple0*))Cyc_Set_member;})(env->enum_keepers,ed->name);goto _LL0;}default:
+keep=({int(*_Tmp2)(struct Cyc_Set_Set*,struct _tuple0*)=(int(*)(struct Cyc_Set_Set*,struct _tuple0*))Cyc_Set_member;_Tmp2;})(env->aggr_keepers,ad->name);goto _LL0;}case 7: _Tmp1=((struct Cyc_Absyn_Enum_d_Absyn_Raw_decl_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Enumdecl*ed=_Tmp1;
+keep=({int(*_Tmp2)(struct Cyc_Set_Set*,struct _tuple0*)=(int(*)(struct Cyc_Set_Set*,struct _tuple0*))Cyc_Set_member;_Tmp2;})(env->enum_keepers,ed->name);goto _LL0;}default:
  keep=1;goto _LL0;}_LL0:;}
 # 183
 if(keep)
@@ -505,12 +505,12 @@ ans=({struct Cyc_List_List*_Tmp0=_cycalloc(sizeof(struct Cyc_List_List));_Tmp0->
 return Cyc_List_imp_rev(ans);}
 # 189
 struct Cyc_List_List*Cyc_LowTreeShake_shake(struct Cyc_List_List*tds){
-struct Cyc_LowTreeShake_Env env=({struct Cyc_LowTreeShake_Env _Tmp0;({struct Cyc_Hashtable_Table*_Tmp1=({(struct Cyc_Hashtable_Table*(*)(int,int(*)(struct _tuple0*,struct _tuple0*),int(*)(struct _tuple0*)))Cyc_Hashtable_create;})(37,Cyc_Absyn_qvar_cmp,Cyc_Absyn_hash_qvar);_Tmp0.aggrdecls=_Tmp1;}),({
-struct Cyc_Set_Set*_Tmp1=({(struct Cyc_Set_Set*(*)(int(*)(struct _tuple0*,struct _tuple0*)))Cyc_Set_empty;})(Cyc_Absyn_qvar_cmp);_Tmp0.aggr_worklist=_Tmp1;}),({
-struct Cyc_Set_Set*_Tmp1=({(struct Cyc_Set_Set*(*)(int(*)(struct _tuple0*,struct _tuple0*)))Cyc_Set_empty;})(Cyc_Absyn_qvar_cmp);_Tmp0.aggr_keepers=_Tmp1;}),({
-struct Cyc_Set_Set*_Tmp1=({(struct Cyc_Set_Set*(*)(int(*)(struct _tuple0*,struct _tuple0*)))Cyc_Set_empty;})(Cyc_Absyn_qvar_cmp);_Tmp0.enum_keepers=_Tmp1;}),({
-struct Cyc_Hashtable_Table*_Tmp1=({(struct Cyc_Hashtable_Table*(*)(int,int(*)(struct _tuple0*,struct _tuple0*),int(*)(struct _tuple0*)))Cyc_Hashtable_create;})(37,Cyc_Absyn_qvar_cmp,Cyc_Absyn_hash_qvar);_Tmp0.global_keepers=_Tmp1;}),({
-struct Cyc_Hashtable_Table*_Tmp1=({(struct Cyc_Hashtable_Table*(*)(int,int(*)(struct _tuple0*,struct _tuple0*),int(*)(struct _tuple0*)))Cyc_Hashtable_create;})(37,Cyc_Absyn_qvar_cmp,Cyc_Absyn_hash_qvar);_Tmp0.funs_defined=_Tmp1;});_Tmp0;});
+struct Cyc_LowTreeShake_Env env=({struct Cyc_LowTreeShake_Env _Tmp0;({struct Cyc_Hashtable_Table*_Tmp1=({struct Cyc_Hashtable_Table*(*_Tmp2)(int,int(*)(struct _tuple0*,struct _tuple0*),int(*)(struct _tuple0*))=(struct Cyc_Hashtable_Table*(*)(int,int(*)(struct _tuple0*,struct _tuple0*),int(*)(struct _tuple0*)))Cyc_Hashtable_create;_Tmp2;})(37,Cyc_Absyn_qvar_cmp,Cyc_Absyn_hash_qvar);_Tmp0.aggrdecls=_Tmp1;}),({
+struct Cyc_Set_Set*_Tmp1=({struct Cyc_Set_Set*(*_Tmp2)(int(*)(struct _tuple0*,struct _tuple0*))=(struct Cyc_Set_Set*(*)(int(*)(struct _tuple0*,struct _tuple0*)))Cyc_Set_empty;_Tmp2;})(Cyc_Absyn_qvar_cmp);_Tmp0.aggr_worklist=_Tmp1;}),({
+struct Cyc_Set_Set*_Tmp1=({struct Cyc_Set_Set*(*_Tmp2)(int(*)(struct _tuple0*,struct _tuple0*))=(struct Cyc_Set_Set*(*)(int(*)(struct _tuple0*,struct _tuple0*)))Cyc_Set_empty;_Tmp2;})(Cyc_Absyn_qvar_cmp);_Tmp0.aggr_keepers=_Tmp1;}),({
+struct Cyc_Set_Set*_Tmp1=({struct Cyc_Set_Set*(*_Tmp2)(int(*)(struct _tuple0*,struct _tuple0*))=(struct Cyc_Set_Set*(*)(int(*)(struct _tuple0*,struct _tuple0*)))Cyc_Set_empty;_Tmp2;})(Cyc_Absyn_qvar_cmp);_Tmp0.enum_keepers=_Tmp1;}),({
+struct Cyc_Hashtable_Table*_Tmp1=({struct Cyc_Hashtable_Table*(*_Tmp2)(int,int(*)(struct _tuple0*,struct _tuple0*),int(*)(struct _tuple0*))=(struct Cyc_Hashtable_Table*(*)(int,int(*)(struct _tuple0*,struct _tuple0*),int(*)(struct _tuple0*)))Cyc_Hashtable_create;_Tmp2;})(37,Cyc_Absyn_qvar_cmp,Cyc_Absyn_hash_qvar);_Tmp0.global_keepers=_Tmp1;}),({
+struct Cyc_Hashtable_Table*_Tmp1=({struct Cyc_Hashtable_Table*(*_Tmp2)(int,int(*)(struct _tuple0*,struct _tuple0*),int(*)(struct _tuple0*))=(struct Cyc_Hashtable_Table*(*)(int,int(*)(struct _tuple0*,struct _tuple0*),int(*)(struct _tuple0*)))Cyc_Hashtable_create;_Tmp2;})(37,Cyc_Absyn_qvar_cmp,Cyc_Absyn_hash_qvar);_Tmp0.funs_defined=_Tmp1;});_Tmp0;});
 Cyc_LowTreeShake_build_tables(& env,tds);
 Cyc_LowTreeShake_process_worklist(& env);
 return Cyc_LowTreeShake_trim_decls(& env,tds);}

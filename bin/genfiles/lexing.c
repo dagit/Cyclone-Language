@@ -397,7 +397,7 @@ static int Cyc_Lexing_read_from_file(struct _fat_ptr aux,int n,struct Cyc___cycF
 return Cyc_file_string_read(f,aux,0,n);}
 # 123
 struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_file(struct Cyc___cycFILE*f){
-return({(struct Cyc_Lexing_lexbuf*(*)(int(*)(struct _fat_ptr,int,struct Cyc___cycFILE*),struct Cyc___cycFILE*))Cyc_Lexing_from_function;})(Cyc_Lexing_read_from_file,f);}
+return({struct Cyc_Lexing_lexbuf*(*_Tmp0)(int(*)(struct _fat_ptr,int,struct Cyc___cycFILE*),struct Cyc___cycFILE*)=(struct Cyc_Lexing_lexbuf*(*)(int(*)(struct _fat_ptr,int,struct Cyc___cycFILE*),struct Cyc___cycFILE*))Cyc_Lexing_from_function;_Tmp0;})(Cyc_Lexing_read_from_file,f);}
 # 127
 static void Cyc_Lexing_set_eof(struct Cyc_Lexing_lexbuf*lbuf){
 lbuf->lex_eof_reached=1;}

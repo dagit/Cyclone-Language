@@ -399,7 +399,7 @@ struct _fat_ptr Cyc_Absynpp_typ2string(void*);struct Cyc_RgnOrder_RgnPO{struct C
 static int Cyc_RgnOrder_valid_constraint(void*eff,void*rgn){
 struct Cyc_Absyn_Kind*_Tmp0=Cyc_Tcutil_type_kind(rgn);enum Cyc_Absyn_KindQual _Tmp1;_Tmp1=_Tmp0->kind;{enum Cyc_Absyn_KindQual k=_Tmp1;
 if((int)k!=3)
-({struct Cyc_Warn_String_Warn_Warg_struct _Tmp2=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3;_Tmp3.tag=0,_Tmp3.f1=_tag_fat("bad region type |",sizeof(char),18U);_Tmp3;});struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp3=({struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp4;_Tmp4.tag=2,_Tmp4.f1=(void*)rgn;_Tmp4;});struct Cyc_Warn_String_Warn_Warg_struct _Tmp4=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp5;_Tmp5.tag=0,_Tmp5.f1=_tag_fat("| passed to add_outlives_constraint",sizeof(char),36U);_Tmp5;});void*_Tmp5[3];_Tmp5[0]=& _Tmp2,_Tmp5[1]=& _Tmp3,_Tmp5[2]=& _Tmp4;({(int(*)(struct _fat_ptr))Cyc_Warn_impos2;})(_tag_fat(_Tmp5,sizeof(void*),3));});{
+({struct Cyc_Warn_String_Warn_Warg_struct _Tmp2=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3;_Tmp3.tag=0,_Tmp3.f1=_tag_fat("bad region type |",sizeof(char),18U);_Tmp3;});struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp3=({struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp4;_Tmp4.tag=2,_Tmp4.f1=(void*)rgn;_Tmp4;});struct Cyc_Warn_String_Warn_Warg_struct _Tmp4=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp5;_Tmp5.tag=0,_Tmp5.f1=_tag_fat("| passed to add_outlives_constraint",sizeof(char),36U);_Tmp5;});void*_Tmp5[3];_Tmp5[0]=& _Tmp2,_Tmp5[1]=& _Tmp3,_Tmp5[2]=& _Tmp4;({int(*_Tmp6)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp6;})(_tag_fat(_Tmp5,sizeof(void*),3));});{
 void*_Tmp2=Cyc_Absyn_compress(eff);void*_Tmp3;switch(*((int*)_Tmp2)){case 0: switch(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp2)->f1)){case 10: _Tmp3=((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp2)->f2;{struct Cyc_List_List*es=_Tmp3;
 # 73
 for(1;es!=0;es=es->tl){
@@ -414,7 +414,7 @@ return(int)rk==3;}}}else{goto _LLE;}default: goto _LLE;}case 1:
  goto _LL9;case 2: _LL9:
  goto _LLB;default: _LLE:
 # 86
-({struct Cyc_Warn_String_Warn_Warg_struct _Tmp4=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp5;_Tmp5.tag=0,_Tmp5.f1=_tag_fat("bad effect |",sizeof(char),13U);_Tmp5;});struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp5=({struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp6;_Tmp6.tag=2,_Tmp6.f1=(void*)eff;_Tmp6;});struct Cyc_Warn_String_Warn_Warg_struct _Tmp6=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp7;_Tmp7.tag=0,_Tmp7.f1=_tag_fat("| passed to add_outlives_constraint",sizeof(char),36U);_Tmp7;});void*_Tmp7[3];_Tmp7[0]=& _Tmp4,_Tmp7[1]=& _Tmp5,_Tmp7[2]=& _Tmp6;({(int(*)(struct _fat_ptr))Cyc_Warn_impos2;})(_tag_fat(_Tmp7,sizeof(void*),3));});};}}}
+({struct Cyc_Warn_String_Warn_Warg_struct _Tmp4=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp5;_Tmp5.tag=0,_Tmp5.f1=_tag_fat("bad effect |",sizeof(char),13U);_Tmp5;});struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp5=({struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp6;_Tmp6.tag=2,_Tmp6.f1=(void*)eff;_Tmp6;});struct Cyc_Warn_String_Warn_Warg_struct _Tmp6=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp7;_Tmp7.tag=0,_Tmp7.f1=_tag_fat("| passed to add_outlives_constraint",sizeof(char),36U);_Tmp7;});void*_Tmp7[3];_Tmp7[0]=& _Tmp4,_Tmp7[1]=& _Tmp5,_Tmp7[2]=& _Tmp6;({int(*_Tmp8)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp8;})(_tag_fat(_Tmp7,sizeof(void*),3));});};}}}
 # 93
 struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_add_outlives_constraint(struct Cyc_RgnOrder_RgnPO*po,void*eff,void*rgn,unsigned loc){
 # 95
@@ -429,8 +429,8 @@ void*_Tmp0=Cyc_Absyn_compress(rgn);void*_Tmp1;switch(*((int*)_Tmp0)){case 2: _Tm
 # 105
 struct Cyc_Dict_Dict d=po->d;
 void*new_eff=
-({(int(*)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*))Cyc_Dict_member;})(d,tv)?Cyc_Absyn_join_eff(({void*_Tmp2[2];_Tmp2[0]=eff,({void*_Tmp3=({(void*(*)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*))Cyc_Dict_lookup;})(d,tv);_Tmp2[1]=_Tmp3;});Cyc_List_list(_tag_fat(_Tmp2,sizeof(void*),2));})): eff;
-d=({(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*,void*))Cyc_Dict_insert;})(d,tv,new_eff);
+({int(*_Tmp2)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*)=(int(*)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*))Cyc_Dict_member;_Tmp2;})(d,tv)?Cyc_Absyn_join_eff(({void*_Tmp2[2];_Tmp2[0]=eff,({void*_Tmp3=({void*(*_Tmp4)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*)=(void*(*)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*))Cyc_Dict_lookup;_Tmp4;})(d,tv);_Tmp2[1]=_Tmp3;});Cyc_List_list(_tag_fat(_Tmp2,sizeof(void*),2));})): eff;
+d=({struct Cyc_Dict_Dict(*_Tmp2)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*,void*)=(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*,void*))Cyc_Dict_insert;_Tmp2;})(d,tv,new_eff);
 ans->d=d;
 return ans;}case 1:
 # 112
@@ -440,43 +440,43 @@ goto _LL6;case 0: if(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0
 ({void*_Tmp2=Cyc_Absyn_join_eff(({void*_Tmp3[2];_Tmp3[0]=eff,_Tmp3[1]=po->these_outlive_heap;Cyc_List_list(_tag_fat(_Tmp3,sizeof(void*),2));}));ans->these_outlive_heap=_Tmp2;});
 return ans;}else{goto _LL7;}default: _LL7:
 # 124
-({(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;})(_tag_fat("RgnOrder::add_outlives_constraint passed a bad region",sizeof(char),54U),_tag_fat(0U,sizeof(void*),0));};}}}
+({int(*_Tmp2)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp2;})(_tag_fat("RgnOrder::add_outlives_constraint passed a bad region",sizeof(char),54U),_tag_fat(0U,sizeof(void*),0));};}}}
 # 128
 struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_add_youngest(struct Cyc_RgnOrder_RgnPO*po,struct Cyc_Absyn_Tvar*rgn,int opened){
 # 130
-if(!opened &&({(int(*)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*))Cyc_Dict_member;})(po->d,rgn))
-({(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;})(_tag_fat("RgnOrder::add_youngest: repeated region",sizeof(char),40U),_tag_fat(0U,sizeof(void*),0));{
+if(!opened &&({int(*_Tmp0)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*)=(int(*)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*))Cyc_Dict_member;_Tmp0;})(po->d,rgn))
+({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp0;})(_tag_fat("RgnOrder::add_youngest: repeated region",sizeof(char),40U),_tag_fat(0U,sizeof(void*),0));{
 struct Cyc_RgnOrder_RgnPO*ans;ans=_cycalloc(sizeof(struct Cyc_RgnOrder_RgnPO)),*ans=*po;
 if(opened){
-({struct Cyc_Dict_Dict _Tmp0=({(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*,void*))Cyc_Dict_insert;})(po->d,rgn,Cyc_Absyn_empty_effect);ans->d=_Tmp0;});
+({struct Cyc_Dict_Dict _Tmp0=({struct Cyc_Dict_Dict(*_Tmp1)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*,void*)=(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*,void*))Cyc_Dict_insert;_Tmp1;})(po->d,rgn,Cyc_Absyn_empty_effect);ans->d=_Tmp0;});
 ({void*_Tmp0=Cyc_Absyn_join_eff(({void*_Tmp1[2];({void*_Tmp2=Cyc_Absyn_access_eff(Cyc_Absyn_var_type(rgn));_Tmp1[0]=_Tmp2;}),_Tmp1[1]=ans->opened_regions;Cyc_List_list(_tag_fat(_Tmp1,sizeof(void*),2));}));ans->opened_regions=_Tmp0;});}else{
 # 137
 void*eff=Cyc_Absyn_join_eff(({void*_Tmp0[2];({void*_Tmp1=Cyc_Absyn_access_eff(Cyc_Absyn_var_type(po->youngest));_Tmp0[0]=_Tmp1;}),_Tmp0[1]=ans->opened_regions;Cyc_List_list(_tag_fat(_Tmp0,sizeof(void*),2));}));
 # 139
-({struct Cyc_Dict_Dict _Tmp0=({(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*,void*))Cyc_Dict_insert;})(po->d,rgn,eff);ans->d=_Tmp0;});
+({struct Cyc_Dict_Dict _Tmp0=({struct Cyc_Dict_Dict(*_Tmp1)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*,void*)=(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*,void*))Cyc_Dict_insert;_Tmp1;})(po->d,rgn,eff);ans->d=_Tmp0;});
 ans->youngest=rgn;}
 # 142
 return ans;}}
 # 144
 struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_add_unordered(struct Cyc_RgnOrder_RgnPO*po,struct Cyc_Absyn_Tvar*rgn){
-if(({(int(*)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*))Cyc_Dict_member;})(po->d,rgn))
-({(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;})(_tag_fat("RgnOrder::add_unordered: repeated region",sizeof(char),41U),_tag_fat(0U,sizeof(void*),0));{
+if(({int(*_Tmp0)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*)=(int(*)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*))Cyc_Dict_member;_Tmp0;})(po->d,rgn))
+({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp0;})(_tag_fat("RgnOrder::add_unordered: repeated region",sizeof(char),41U),_tag_fat(0U,sizeof(void*),0));{
 struct Cyc_RgnOrder_RgnPO*ans;ans=_cycalloc(sizeof(struct Cyc_RgnOrder_RgnPO)),*ans=*po;
-({struct Cyc_Dict_Dict _Tmp0=({(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*,void*))Cyc_Dict_insert;})(ans->d,rgn,Cyc_Absyn_empty_effect);ans->d=_Tmp0;});
+({struct Cyc_Dict_Dict _Tmp0=({struct Cyc_Dict_Dict(*_Tmp1)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*,void*)=(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*,void*))Cyc_Dict_insert;_Tmp1;})(ans->d,rgn,Cyc_Absyn_empty_effect);ans->d=_Tmp0;});
 return ans;}}
 # 152
 struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_initial_fn_po(struct Cyc_List_List*tvs,struct Cyc_List_List*po,void*effect,struct Cyc_Absyn_Tvar*fst_rgn,unsigned loc){
 # 155
-struct Cyc_Dict_Dict d=({(struct Cyc_Dict_Dict(*)(int(*)(struct Cyc_Absyn_Tvar*,struct Cyc_Absyn_Tvar*)))Cyc_Dict_empty;})(Cyc_Absyn_tvar_cmp);
+struct Cyc_Dict_Dict d=({struct Cyc_Dict_Dict(*_Tmp0)(int(*)(struct Cyc_Absyn_Tvar*,struct Cyc_Absyn_Tvar*))=(struct Cyc_Dict_Dict(*)(int(*)(struct Cyc_Absyn_Tvar*,struct Cyc_Absyn_Tvar*)))Cyc_Dict_empty;_Tmp0;})(Cyc_Absyn_tvar_cmp);
 {struct Cyc_List_List*tvs2=tvs;for(0;tvs2!=0;tvs2=tvs2->tl){
 if((int)Cyc_Kinds_tvar_kind((struct Cyc_Absyn_Tvar*)tvs2->hd,& Cyc_Kinds_bk)->kind==3)
-d=({(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*,void*))Cyc_Dict_insert;})(d,(struct Cyc_Absyn_Tvar*)tvs2->hd,Cyc_Absyn_empty_effect);}}
+d=({struct Cyc_Dict_Dict(*_Tmp0)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*,void*)=(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*,void*))Cyc_Dict_insert;_Tmp0;})(d,(struct Cyc_Absyn_Tvar*)tvs2->hd,Cyc_Absyn_empty_effect);}}
 # 160
 if(!({void*_Tmp0=effect;Cyc_RgnOrder_valid_constraint(_Tmp0,Cyc_Absyn_var_type(fst_rgn));})){
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp0=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=_tag_fat("Invalid region ordering constraint; kind mismatch",sizeof(char),50U);_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_Warn_err2(loc,_tag_fat(_Tmp1,sizeof(void*),1));});
 return({struct Cyc_RgnOrder_RgnPO*_Tmp0=_cycalloc(sizeof(struct Cyc_RgnOrder_RgnPO));_Tmp0->d=d,_Tmp0->these_outlive_heap=Cyc_Absyn_empty_effect,_Tmp0->these_outlive_unique=Cyc_Absyn_empty_effect,_Tmp0->youngest=fst_rgn,_Tmp0->opened_regions=Cyc_Absyn_empty_effect;_Tmp0;});}
 # 164
-d=({(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*,void*))Cyc_Dict_insert;})(d,fst_rgn,effect);{
+d=({struct Cyc_Dict_Dict(*_Tmp0)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*,void*)=(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*,void*))Cyc_Dict_insert;_Tmp0;})(d,fst_rgn,effect);{
 # 166
 struct Cyc_RgnOrder_RgnPO*ans;ans=_cycalloc(sizeof(struct Cyc_RgnOrder_RgnPO)),ans->d=d,ans->these_outlive_heap=Cyc_Absyn_empty_effect,ans->these_outlive_unique=Cyc_Absyn_empty_effect,ans->youngest=fst_rgn,ans->opened_regions=Cyc_Absyn_empty_effect;
 for(1;po!=0;po=po->tl){
@@ -517,7 +517,7 @@ struct Cyc_RgnOrder_OutlivesEnv ans=({struct Cyc_RgnOrder_OutlivesEnv _Tmp0;_Tmp
 void*r=Cyc_Absyn_compress(rgn);
 struct Cyc_Absyn_Kind*_Tmp0=Cyc_Tcutil_type_kind(r);enum Cyc_Absyn_AliasHint _Tmp1;enum Cyc_Absyn_KindQual _Tmp2;_Tmp2=_Tmp0->kind;_Tmp1=_Tmp0->aliashint;{enum Cyc_Absyn_KindQual k=_Tmp2;enum Cyc_Absyn_AliasHint a=_Tmp1;
 if((int)k!=3)
-({(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;})(_tag_fat("RgnOrder: rgn not of correct kind",sizeof(char),34U),_tag_fat(0U,sizeof(void*),0));
+({int(*_Tmp3)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp3;})(_tag_fat("RgnOrder: rgn not of correct kind",sizeof(char),34U),_tag_fat(0U,sizeof(void*),0));
 Cyc_RgnOrder_add_to_search(& ans,po->these_outlive_unique);
 Cyc_RgnOrder_add_to_search(& ans,po->these_outlive_heap);{
 # 256 "rgnorder.cyc"
@@ -538,7 +538,7 @@ struct Cyc_Absyn_Kind*_Tmp5=Cyc_Tcutil_type_kind(Cyc_Absyn_compress(rgn));enum C
 int _Tmp7=(int)k==3;_npop_handler(0);return _Tmp7;}}else{goto _LLC;}case 2: _Tmp4=((struct Cyc_Absyn_VarType_Absyn_Type_struct*)_Tmp3)->f1;{struct Cyc_Absyn_Tvar*tv=_Tmp4;
 # 287
 if(po==0)
-({(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;})(_tag_fat("RgnOrder: tvar without a partial-order",sizeof(char),39U),_tag_fat(0U,sizeof(void*),0));{
+({int(*_Tmp5)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp5;})(_tag_fat("RgnOrder: tvar without a partial-order",sizeof(char),39U),_tag_fat(0U,sizeof(void*),0));{
 # 299 "rgnorder.cyc"
 struct Cyc_RgnOrder_OutlivesEnv env=Cyc_RgnOrder_initial_env(listrgn,po,rgn);
 while(env.todo!=0){
@@ -547,8 +547,8 @@ env.todo=env.todo->tl;
 if(Cyc_Absyn_tvar_cmp(next,tv)==0){
 int _Tmp5=1;_npop_handler(0);return _Tmp5;}
 # 309
-if(({(int(*)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*))Cyc_Dict_member;})(po->d,next))
-Cyc_RgnOrder_add_to_search(& env,({(void*(*)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*))Cyc_Dict_lookup;})(po->d,next));else{
+if(({int(*_Tmp5)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*)=(int(*)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*))Cyc_Dict_member;_Tmp5;})(po->d,next))
+Cyc_RgnOrder_add_to_search(& env,({void*(*_Tmp5)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*)=(void*(*)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*))Cyc_Dict_lookup;_Tmp5;})(po->d,next));else{
 # 312
 int _Tmp5=0;_npop_handler(0);return _Tmp5;}}{
 # 315
@@ -558,7 +558,7 @@ int _Tmp5=0;_npop_handler(0);return _Tmp5;}};}}else{goto _LL5;}case 11: if(((str
 void*_Tmp3=Cyc_Absyn_compress(vt);void*_Tmp4;if(*((int*)_Tmp3)==2){_Tmp4=((struct Cyc_Absyn_VarType_Absyn_Type_struct*)_Tmp3)->f1;{struct Cyc_Absyn_Tvar*tv=_Tmp4;
 # 322
 if(po==0)
-({(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;})(_tag_fat("RgnOrder: tvar without a partial-order",sizeof(char),39U),_tag_fat(0U,sizeof(void*),0));{
+({int(*_Tmp5)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp5;})(_tag_fat("RgnOrder: tvar without a partial-order",sizeof(char),39U),_tag_fat(0U,sizeof(void*),0));{
 # 327
 struct Cyc_RgnOrder_OutlivesEnv env=Cyc_RgnOrder_initial_env(listrgn,po,rgn);
 struct Cyc_Absyn_Kind*_Tmp5=Cyc_Tcutil_type_kind(rgn);enum Cyc_Absyn_AliasHint _Tmp6;enum Cyc_Absyn_KindQual _Tmp7;_Tmp7=_Tmp5->kind;_Tmp6=_Tmp5->aliashint;{enum Cyc_Absyn_KindQual k=_Tmp7;enum Cyc_Absyn_AliasHint a=_Tmp6;
@@ -572,9 +572,9 @@ int _Tmp8=1;_npop_handler(0);return _Tmp8;}}
 while(env.todo!=0){
 struct Cyc_Absyn_Tvar*next=(struct Cyc_Absyn_Tvar*)env.todo->hd;
 env.todo=env.todo->tl;
-if(!({(int(*)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*))Cyc_Dict_member;})(po->d,next))
-({(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;})(_tag_fat("RgnOrder: type variable not in dict",sizeof(char),36U),_tag_fat(0U,sizeof(void*),0));{
-void*next_eff=({(void*(*)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*))Cyc_Dict_lookup;})(po->d,next);
+if(!({int(*_Tmp8)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*)=(int(*)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*))Cyc_Dict_member;_Tmp8;})(po->d,next))
+({int(*_Tmp8)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp8;})(_tag_fat("RgnOrder: type variable not in dict",sizeof(char),36U),_tag_fat(0U,sizeof(void*),0));{
+void*next_eff=({void*(*_Tmp8)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*)=(void*(*)(struct Cyc_Dict_Dict,struct Cyc_Absyn_Tvar*))Cyc_Dict_lookup;_Tmp8;})(po->d,next);
 if(Cyc_RgnOrder_contains_rgnseff(tv,next_eff)){
 int _Tmp8=1;_npop_handler(0);return _Tmp8;}
 Cyc_RgnOrder_add_to_search(& env,next_eff);}}{
@@ -672,9 +672,9 @@ return 1;}struct _tuple12{struct Cyc_Absyn_Tvar*f0;void*f1;};
 # 470
 void Cyc_RgnOrder_print_region_po(struct Cyc_RgnOrder_RgnPO*po){
 struct Cyc_Iter_Iter iter=Cyc_Dict_make_iter(Cyc_Core_heap_region,po->d);
-struct _tuple12 elem=*({(struct _tuple12*(*)(struct _RegionHandle*,struct Cyc_Dict_Dict))Cyc_Dict_rchoose;})(Cyc_Core_heap_region,po->d);
+struct _tuple12 elem=*({struct _tuple12*(*_Tmp0)(struct _RegionHandle*,struct Cyc_Dict_Dict)=(struct _tuple12*(*)(struct _RegionHandle*,struct Cyc_Dict_Dict))Cyc_Dict_rchoose;_Tmp0;})(Cyc_Core_heap_region,po->d);
 Cyc_fprintf(Cyc_stderr,_tag_fat("region po:\n",sizeof(char),12U),_tag_fat(0U,sizeof(void*),0));
-while(({(int(*)(struct Cyc_Iter_Iter,struct _tuple12*))Cyc_Iter_next;})(iter,& elem)){
+while(({int(*_Tmp0)(struct Cyc_Iter_Iter,struct _tuple12*)=(int(*)(struct Cyc_Iter_Iter,struct _tuple12*))Cyc_Iter_next;_Tmp0;})(iter,& elem)){
 ({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=(struct _fat_ptr)((struct _fat_ptr)*elem.f0->name);_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,({
 struct _fat_ptr _Tmp3=(struct _fat_ptr)((struct _fat_ptr)Cyc_Absynpp_typ2string(elem.f1));_Tmp2.f1=_Tmp3;});_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;Cyc_fprintf(Cyc_stderr,_tag_fat("  %s outlived by %s\n",sizeof(char),21U),_tag_fat(_Tmp2,sizeof(void*),2));});}
 ({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,({

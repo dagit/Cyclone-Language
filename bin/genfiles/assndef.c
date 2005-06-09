@@ -797,7 +797,7 @@ switch((int)p){case Cyc_Absyn_Plus:
  return 4294967295U;case Cyc_Absyn_Bitor:
  return 0U;case Cyc_Absyn_Bitxor:
  return 0U;default:
-({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,({struct _fat_ptr _Tmp2=(struct _fat_ptr)((struct _fat_ptr)Cyc_Absynpp_prim2string(p));_Tmp1.f1=_Tmp2;});_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;({(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;})(_tag_fat("no id for primop %s",sizeof(char),20U),_tag_fat(_Tmp1,sizeof(void*),1));});};}
+({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,({struct _fat_ptr _Tmp2=(struct _fat_ptr)((struct _fat_ptr)Cyc_Absynpp_prim2string(p));_Tmp1.f1=_Tmp2;});_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;({int(*_Tmp2)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp2;})(_tag_fat("no id for primop %s",sizeof(char),20U),_tag_fat(_Tmp1,sizeof(void*),1));});};}
 # 475
 inline static unsigned Cyc_AssnDef_eval_binop(enum Cyc_Absyn_Primop p,unsigned i,unsigned j){
 switch((int)p){case Cyc_Absyn_Plus:
@@ -806,7 +806,7 @@ switch((int)p){case Cyc_Absyn_Plus:
  return i & j;case Cyc_Absyn_Bitor:
  return i | j;case Cyc_Absyn_Bitxor:
  return i ^ j;default:
-({(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;})(_tag_fat("Error in evaluating binop",sizeof(char),26U),_tag_fat(0U,sizeof(void*),0));};}
+({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp0;})(_tag_fat("Error in evaluating binop",sizeof(char),26U),_tag_fat(0U,sizeof(void*),0));};}
 # 486
 void*Cyc_AssnDef_get_term_type(void*t){
 void*_Tmp0;unsigned _Tmp1;void*_Tmp2;switch(*((int*)t)){case 0:
@@ -884,7 +884,7 @@ goto LOOP;}}else{_Tmp1=(void*)((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)t)
 term_coef_list=({struct Cyc_List_List*_Tmp5=_cycalloc(sizeof(struct Cyc_List_List));({struct _tuple25*_Tmp6=({struct _tuple25*_Tmp7=_cycalloc(sizeof(struct _tuple25));_Tmp7->f0=(int)c2,_Tmp7->f1=t21;_Tmp7;});_Tmp5->hd=_Tmp6;}),_Tmp5->tl=term_coef_list;_Tmp5;});
 goto _LL9;}}else{goto _LLE;}case Cyc_Absyn_Plus:
 # 572
-({(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;})(_tag_fat("Plus in the right branch, not a normal form",sizeof(char),44U),_tag_fat(0U,sizeof(void*),0));
+({int(*_Tmp5)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp5;})(_tag_fat("Plus in the right branch, not a normal form",sizeof(char),44U),_tag_fat(0U,sizeof(void*),0));
 goto _LL9;default: goto _LLE;}else{_LLE:
 # 575
  term_coef_list=({struct Cyc_List_List*_Tmp5=_cycalloc(sizeof(struct Cyc_List_List));({struct _tuple25*_Tmp6=({struct _tuple25*_Tmp7=_cycalloc(sizeof(struct _tuple25));_Tmp7->f0=1,_Tmp7->f1=t2;_Tmp7;});_Tmp5->hd=_Tmp6;}),_Tmp5->tl=term_coef_list;_Tmp5;});
@@ -1004,7 +1004,7 @@ if((int)p==1){
 if(*((int*)t)==8){if(((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)t)->f1==Cyc_Absyn_Plus){
 # 721
 struct _tuple12 _Tmp6=Cyc_AssnDef_flatten_plus(t);int _Tmp7;void*_Tmp8;_Tmp8=_Tmp6.f0;_Tmp7=_Tmp6.f1;{struct Cyc_List_List*t_list=_Tmp8;int c=_Tmp7;
-struct Cyc_List_List*newt_list=({(struct Cyc_List_List*(*)(struct _tuple25*(*)(int,struct _tuple25*),int,struct Cyc_List_List*))Cyc_List_map_c;})(Cyc_AssnDef_times_newc,(int)newc,t_list);
+struct Cyc_List_List*newt_list=({struct Cyc_List_List*(*_Tmp9)(struct _tuple25*(*)(int,struct _tuple25*),int,struct Cyc_List_List*)=(struct Cyc_List_List*(*)(struct _tuple25*(*)(int,struct _tuple25*),int,struct Cyc_List_List*))Cyc_List_map_c;_Tmp9;})(Cyc_AssnDef_times_newc,(int)newc,t_list);
 return Cyc_AssnDef_termcoeflist2term(newt_list,(int)((unsigned)c * newc),topt);
 goto _LL6;}}else{goto _LL9;}}else{_LL9:
  goto _LL6;}_LL6:;}{
@@ -1150,7 +1150,7 @@ switch((int)p){case Cyc_AssnDef_Eq:
  ps=_tag_fat(" S<= ",sizeof(char),6U);goto _LLF;case Cyc_AssnDef_ULt:
  ps=_tag_fat(" U< ",sizeof(char),5U);goto _LLF;case Cyc_AssnDef_ULte:
  ps=_tag_fat(" U<= ",sizeof(char),6U);goto _LLF;default:
-({(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;})(_tag_fat("assn2string primop",sizeof(char),19U),_tag_fat(0U,sizeof(void*),0));}_LLF:;
+({int(*_Tmp4)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp4;})(_tag_fat("assn2string primop",sizeof(char),19U),_tag_fat(0U,sizeof(void*),0));}_LLF:;
 # 896
 return({struct Cyc_String_pa_PrintArg_struct _Tmp4=({struct Cyc_String_pa_PrintArg_struct _Tmp5;_Tmp5.tag=0,({struct _fat_ptr _Tmp6=(struct _fat_ptr)((struct _fat_ptr)Cyc_AssnDef_term2string(t1));_Tmp5.f1=_Tmp6;});_Tmp5;});struct Cyc_String_pa_PrintArg_struct _Tmp5=({struct Cyc_String_pa_PrintArg_struct _Tmp6;_Tmp6.tag=0,_Tmp6.f1=(struct _fat_ptr)((struct _fat_ptr)ps);_Tmp6;});struct Cyc_String_pa_PrintArg_struct _Tmp6=({struct Cyc_String_pa_PrintArg_struct _Tmp7;_Tmp7.tag=0,({struct _fat_ptr _Tmp8=(struct _fat_ptr)((struct _fat_ptr)Cyc_AssnDef_term2string(t2));_Tmp7.f1=_Tmp8;});_Tmp7;});void*_Tmp7[3];_Tmp7[0]=& _Tmp4,_Tmp7[1]=& _Tmp5,_Tmp7[2]=& _Tmp6;Cyc_aprintf(_tag_fat("%s%s%s",sizeof(char),7U),_tag_fat(_Tmp7,sizeof(void*),3));});}}case 4: _Tmp3=(void*)((struct Cyc_AssnDef_Or_AssnDef_Assn_struct*)a)->f1;_Tmp1=(void*)((struct Cyc_AssnDef_Or_AssnDef_Assn_struct*)a)->f2;{void*a1=_Tmp3;void*a2=_Tmp1;
 # 898
@@ -1332,10 +1332,10 @@ return({struct Cyc_AssnDef_AssnInfo*_Tmp4=_cycalloc(sizeof(struct Cyc_AssnDef_As
 # 1133 "assndef.cyc"
 static struct Cyc_AssnDef_AssnInfo*Cyc_AssnDef_hash_cons_it(void*a){
 struct Cyc_Hashtable_Table*h=Cyc_AssnDef_get_hash_cons_table();
-struct Cyc_AssnDef_AssnInfo**resopt=({(struct Cyc_AssnDef_AssnInfo**(*)(struct Cyc_Hashtable_Table*,void*,int(*)(void*,void*),int(*)(void*)))Cyc_Hashtable_lookup_other_opt;})(h,a,Cyc_AssnDef_neqassn,Cyc_AssnDef_assnhash);
+struct Cyc_AssnDef_AssnInfo**resopt=({struct Cyc_AssnDef_AssnInfo**(*_Tmp0)(struct Cyc_Hashtable_Table*,void*,int(*)(void*,void*),int(*)(void*))=(struct Cyc_AssnDef_AssnInfo**(*)(struct Cyc_Hashtable_Table*,void*,int(*)(void*,void*),int(*)(void*)))Cyc_Hashtable_lookup_other_opt;_Tmp0;})(h,a,Cyc_AssnDef_neqassn,Cyc_AssnDef_assnhash);
 if(resopt==0){
 struct Cyc_AssnDef_AssnInfo*ainfo=Cyc_AssnDef_copy_assn(a);
-({(void(*)(struct Cyc_Hashtable_Table*,void*,struct Cyc_AssnDef_AssnInfo*))Cyc_Hashtable_insert;})(h,ainfo->assn,ainfo);
+({void(*_Tmp0)(struct Cyc_Hashtable_Table*,void*,struct Cyc_AssnDef_AssnInfo*)=(void(*)(struct Cyc_Hashtable_Table*,void*,struct Cyc_AssnDef_AssnInfo*))Cyc_Hashtable_insert;_Tmp0;})(h,ainfo->assn,ainfo);
 return ainfo;}else{
 # 1141
 return*resopt;}}
@@ -1432,7 +1432,7 @@ switch((int)p){case Cyc_AssnDef_Eq:
  return Cyc_AssnDef_slt(t2,t1);case Cyc_AssnDef_ULt:
  return Cyc_AssnDef_ulte(t2,t1);case Cyc_AssnDef_ULte:
  return Cyc_AssnDef_ult(t2,t1);default:
-({(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;})(_tag_fat("Vcgen::not_prim: non-primop",sizeof(char),28U),_tag_fat(0U,sizeof(void*),0));};}
+({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp0;})(_tag_fat("Vcgen::not_prim: non-primop",sizeof(char),28U),_tag_fat(0U,sizeof(void*),0));};}
 # 1297
 void*Cyc_AssnDef_not(void*a){
 void*_Tmp0;enum Cyc_AssnDef_Primreln _Tmp1;void*_Tmp2;switch(*((int*)a)){case 0:
@@ -1527,14 +1527,14 @@ return(unsigned)s1==(unsigned)s2;}
 static void*Cyc_AssnDef_reduce_assn(void*a,struct Cyc_AssnDef_SubstNode*subst,int negate,struct Cyc_Hashtable_Table*h){
 # 1434
 struct Cyc_AssnDef_ReduceMemo**info;
-struct Cyc_AssnDef_ReduceMemo***info_opt=({(struct Cyc_AssnDef_ReduceMemo***(*)(struct Cyc_Hashtable_Table*,void*))Cyc_Hashtable_lookup_opt;})(h,a);
+struct Cyc_AssnDef_ReduceMemo***info_opt=({struct Cyc_AssnDef_ReduceMemo***(*_Tmp0)(struct Cyc_Hashtable_Table*,void*)=(struct Cyc_AssnDef_ReduceMemo***(*)(struct Cyc_Hashtable_Table*,void*))Cyc_Hashtable_lookup_opt;_Tmp0;})(h,a);
 if(info_opt!=0){
 info=*info_opt;{
 struct Cyc_AssnDef_ReduceMemo*p=*info;for(0;p!=0;p=p->next){
 if(negate==p->negate && Cyc_AssnDef_same_subst(subst,p->subst))return p->result;}}}else{
 # 1441
 info=({struct Cyc_AssnDef_ReduceMemo**_Tmp0=_cycalloc(sizeof(struct Cyc_AssnDef_ReduceMemo*));*_Tmp0=0;_Tmp0;});
-({(void(*)(struct Cyc_Hashtable_Table*,void*,struct Cyc_AssnDef_ReduceMemo**))Cyc_Hashtable_insert;})(h,a,info);}{
+({void(*_Tmp0)(struct Cyc_Hashtable_Table*,void*,struct Cyc_AssnDef_ReduceMemo**)=(void(*)(struct Cyc_Hashtable_Table*,void*,struct Cyc_AssnDef_ReduceMemo**))Cyc_Hashtable_insert;_Tmp0;})(h,a,info);}{
 # 1444
 void*res;
 {void*_Tmp0;void*_Tmp1;enum Cyc_AssnDef_Primreln _Tmp2;void*_Tmp3;switch(*((int*)a)){case 2: _Tmp3=(void*)((struct Cyc_AssnDef_Prim_AssnDef_Assn_struct*)a)->f1;_Tmp2=((struct Cyc_AssnDef_Prim_AssnDef_Assn_struct*)a)->f2;_Tmp1=(void*)((struct Cyc_AssnDef_Prim_AssnDef_Assn_struct*)a)->f3;{void*t1=_Tmp3;enum Cyc_AssnDef_Primreln p=_Tmp2;void*t2=_Tmp1;

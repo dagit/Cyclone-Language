@@ -433,7 +433,7 @@ switch((int)k){case Cyc_Absyn_AnyKind:
  return& Cyc_Kinds_bko;case Cyc_Absyn_AqualKind:
  return& Cyc_Kinds_aqko;case Cyc_Absyn_PtrBndKind:
  return& Cyc_Kinds_ptrbko;default:
-({struct Cyc_Warn_String_Warn_Warg_struct _Tmp2=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3;_Tmp3.tag=0,_Tmp3.f1=_tag_fat("kind_to_opt: bad kind ",sizeof(char),23U);_Tmp3;});struct Cyc_Warn_Kind_Warn_Warg_struct _Tmp3=({struct Cyc_Warn_Kind_Warn_Warg_struct _Tmp4;_Tmp4.tag=9,_Tmp4.f1=kh;_Tmp4;});void*_Tmp4[2];_Tmp4[0]=& _Tmp2,_Tmp4[1]=& _Tmp3;({(int(*)(struct _fat_ptr))Cyc_Warn_impos2;})(_tag_fat(_Tmp4,sizeof(void*),2));});};}else{
+({struct Cyc_Warn_String_Warn_Warg_struct _Tmp2=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3;_Tmp3.tag=0,_Tmp3.f1=_tag_fat("kind_to_opt: bad kind ",sizeof(char),23U);_Tmp3;});struct Cyc_Warn_Kind_Warn_Warg_struct _Tmp3=({struct Cyc_Warn_Kind_Warn_Warg_struct _Tmp4;_Tmp4.tag=9,_Tmp4.f1=kh;_Tmp4;});void*_Tmp4[2];_Tmp4[0]=& _Tmp2,_Tmp4[1]=& _Tmp3;({int(*_Tmp5)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp5;})(_tag_fat(_Tmp4,sizeof(void*),2));});};}else{
 # 102
 switch((int)k){case Cyc_Absyn_BoxKind:
 # 104
@@ -461,7 +461,7 @@ switch((int)k){case Cyc_Absyn_BoxKind:
 # 128
  return& Cyc_Kinds_ak_rchinto;};default:
 # 131
-({struct Cyc_Warn_String_Warn_Warg_struct _Tmp2=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3;_Tmp3.tag=0,_Tmp3.f1=_tag_fat("kind_to_opt: bad kind ",sizeof(char),23U);_Tmp3;});struct Cyc_Warn_Kind_Warn_Warg_struct _Tmp3=({struct Cyc_Warn_Kind_Warn_Warg_struct _Tmp4;_Tmp4.tag=9,_Tmp4.f1=kh;_Tmp4;});void*_Tmp4[2];_Tmp4[0]=& _Tmp2,_Tmp4[1]=& _Tmp3;({(int(*)(struct _fat_ptr))Cyc_Warn_impos2;})(_tag_fat(_Tmp4,sizeof(void*),2));});};}}}
+({struct Cyc_Warn_String_Warn_Warg_struct _Tmp2=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3;_Tmp3.tag=0,_Tmp3.f1=_tag_fat("kind_to_opt: bad kind ",sizeof(char),23U);_Tmp3;});struct Cyc_Warn_Kind_Warn_Warg_struct _Tmp3=({struct Cyc_Warn_Kind_Warn_Warg_struct _Tmp4;_Tmp4.tag=9,_Tmp4.f1=kh;_Tmp4;});void*_Tmp4[2];_Tmp4[0]=& _Tmp2,_Tmp4[1]=& _Tmp3;({int(*_Tmp5)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp5;})(_tag_fat(_Tmp4,sizeof(void*),2));});};}}}
 # 136
 void*Cyc_Kinds_kind_to_bound(struct Cyc_Absyn_Kind*k){
 return(void*)({struct Cyc_Absyn_Eq_kb_Absyn_KindBound_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Absyn_Eq_kb_Absyn_KindBound_struct));_Tmp0->tag=0,_Tmp0->f1=k;_Tmp0;});}
@@ -542,7 +542,7 @@ switch((int)k){case Cyc_Absyn_BoxKind:
  return _tag_fat("UA",sizeof(char),3U);default:
  return _tag_fat("CA",sizeof(char),3U);};default:
 # 227
-({struct Cyc_Warn_String_Warn_Warg_struct _Tmp2=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3;_Tmp3.tag=0,_Tmp3.f1=_tag_fat("Bad kind",sizeof(char),9U);_Tmp3;});void*_Tmp3[1];_Tmp3[0]=& _Tmp2;({(int(*)(struct _fat_ptr))Cyc_Warn_impos2;})(_tag_fat(_Tmp3,sizeof(void*),1));});};}}}
+({struct Cyc_Warn_String_Warn_Warg_struct _Tmp2=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3;_Tmp3.tag=0,_Tmp3.f1=_tag_fat("Bad kind",sizeof(char),9U);_Tmp3;});void*_Tmp3[1];_Tmp3[0]=& _Tmp2;({int(*_Tmp4)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp4;})(_tag_fat(_Tmp3,sizeof(void*),1));});};}}}
 # 232
 void*Cyc_Kinds_compress_kb(void*k){
 void*_Tmp0;switch(*((int*)k)){case 0:
@@ -601,7 +601,7 @@ void*_Tmp0=Cyc_Absyn_compress(t);void*_Tmp1;if(*((int*)_Tmp0)==2){_Tmp1=((struct
 void*oldkb=tv->kind;
 tv->kind=kb;
 return({struct _tuple12 _Tmp2;_Tmp2.f0=tv,_Tmp2.f1=oldkb;_Tmp2;});}}else{
-({struct Cyc_Warn_String_Warn_Warg_struct _Tmp2=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3;_Tmp3.tag=0,_Tmp3.f1=_tag_fat("swap_kind: cannot update the kind of ",sizeof(char),38U);_Tmp3;});struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp3=({struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp4;_Tmp4.tag=2,_Tmp4.f1=(void*)t;_Tmp4;});void*_Tmp4[2];_Tmp4[0]=& _Tmp2,_Tmp4[1]=& _Tmp3;({(int(*)(struct _fat_ptr))Cyc_Warn_impos2;})(_tag_fat(_Tmp4,sizeof(void*),2));});};}
+({struct Cyc_Warn_String_Warn_Warg_struct _Tmp2=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3;_Tmp3.tag=0,_Tmp3.f1=_tag_fat("swap_kind: cannot update the kind of ",sizeof(char),38U);_Tmp3;});struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp3=({struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp4;_Tmp4.tag=2,_Tmp4.f1=(void*)t;_Tmp4;});void*_Tmp4[2];_Tmp4[0]=& _Tmp2,_Tmp4[1]=& _Tmp3;({int(*_Tmp5)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp5;})(_tag_fat(_Tmp4,sizeof(void*),2));});};}
 # 318
 int Cyc_Kinds_kind_eq(struct Cyc_Absyn_Kind*k1,struct Cyc_Absyn_Kind*k2){
 return k1==k2 ||(int)k1->kind==(int)k2->kind &&(int)k1->aliashint==(int)k2->aliashint;}struct _tuple13{void*f0;void*f1;};

@@ -644,7 +644,7 @@ struct Cyc_Relations_Reln*Cyc_Relations_copy_reln(struct _RegionHandle*r2,struct
 return({struct Cyc_Relations_Reln*_Tmp0=_region_malloc(r2,0U,sizeof(struct Cyc_Relations_Reln));*_Tmp0=*r;_Tmp0;});}
 # 272
 struct Cyc_List_List*Cyc_Relations_copy_relns(struct _RegionHandle*r2,struct Cyc_List_List*relns){
-return({(struct Cyc_List_List*(*)(struct _RegionHandle*,struct Cyc_Relations_Reln*(*)(struct _RegionHandle*,struct Cyc_Relations_Reln*),struct _RegionHandle*,struct Cyc_List_List*))Cyc_List_rmap_c;})(r2,Cyc_Relations_copy_reln,r2,relns);}
+return({struct Cyc_List_List*(*_Tmp0)(struct _RegionHandle*,struct Cyc_Relations_Reln*(*)(struct _RegionHandle*,struct Cyc_Relations_Reln*),struct _RegionHandle*,struct Cyc_List_List*)=(struct Cyc_List_List*(*)(struct _RegionHandle*,struct Cyc_Relations_Reln*(*)(struct _RegionHandle*,struct Cyc_Relations_Reln*),struct _RegionHandle*,struct Cyc_List_List*))Cyc_List_rmap_c;_Tmp0;})(r2,Cyc_Relations_copy_reln,r2,relns);}
 # 276
 int Cyc_Relations_same_relns(struct Cyc_List_List*r1,struct Cyc_List_List*r2){
 for(1;r1!=0 && r2!=0;(r1=r1->tl,r2=r2->tl)){
@@ -702,7 +702,7 @@ return Cyc_Pratt_NType(x);}case 5: _Tmp0=r.RParam.val;{unsigned i=_Tmp0;
 return Cyc_Pratt_NParam(i);}case 6: _Tmp0=r.RParamNumelts.val;{unsigned i=_Tmp0;
 return Cyc_Pratt_NParamNumelts(i);}case 7:
  return Cyc_Pratt_NReturn();default:
-({(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;})(_tag_fat("rop2node",sizeof(char),9U),_tag_fat(0U,sizeof(void*),0));};}
+({int(*_Tmp2)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp2;})(_tag_fat("rop2node",sizeof(char),9U),_tag_fat(0U,sizeof(void*),0));};}
 # 350
 struct _fat_ptr Cyc_Relations_relation2string(enum Cyc_Relations_Relation r){
 switch((int)r){case Cyc_Relations_Req:
@@ -862,7 +862,7 @@ switch((int)p){case Cyc_Absyn_Eq:
  return({struct _tuple11 _Tmp0;_Tmp0.f0=e1,_Tmp0.f1=2U,_Tmp0.f2=e2;_Tmp0;});case Cyc_Absyn_Gt:
  return({struct _tuple11 _Tmp0;_Tmp0.f0=e2,_Tmp0.f1=3U,_Tmp0.f2=e1;_Tmp0;});case Cyc_Absyn_Gte:
  return({struct _tuple11 _Tmp0;_Tmp0.f0=e2,_Tmp0.f1=2U,_Tmp0.f2=e1;_Tmp0;});default:
-({(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;})(_tag_fat("primop2relation",sizeof(char),16U),_tag_fat(0U,sizeof(void*),0));};}
+({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp0;})(_tag_fat("primop2relation",sizeof(char),16U),_tag_fat(0U,sizeof(void*),0));};}
 # 574
 enum Cyc_Relations_Relation Cyc_Relations_flip_relation(enum Cyc_Relations_Relation r){
 switch((int)r){case Cyc_Relations_Req:

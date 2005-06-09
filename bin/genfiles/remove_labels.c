@@ -378,7 +378,7 @@ for(1;tds!=0;tds=tds->tl){
 void*_Tmp0=((struct Cyc_Absyn_Decl*)tds->hd)->r;void*_Tmp1;void*_Tmp2;switch(*((int*)_Tmp0)){case 1: _Tmp2=((struct Cyc_Absyn_Fn_d_Absyn_Raw_decl_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Fndecl*fndt=_Tmp2;
 # 68
 struct Cyc_RemoveLabels_LabelBin*lb;lb=_cycalloc(sizeof(struct Cyc_RemoveLabels_LabelBin)),lb->label_gotos=0,lb->label_stmts=0;
-({(void(*)(int(*)(struct Cyc_RemoveLabels_LabelBin*,struct Cyc_Absyn_Exp*),int(*)(struct Cyc_RemoveLabels_LabelBin*,struct Cyc_Absyn_Stmt*),struct Cyc_RemoveLabels_LabelBin*,struct Cyc_Absyn_Stmt*))Cyc_Absyn_visit_stmt;})(Cyc_RemoveLabels_visit_label_f1,Cyc_RemoveLabels_visit_label_f2,lb,fndt->body);
+({void(*_Tmp3)(int(*)(struct Cyc_RemoveLabels_LabelBin*,struct Cyc_Absyn_Exp*),int(*)(struct Cyc_RemoveLabels_LabelBin*,struct Cyc_Absyn_Stmt*),struct Cyc_RemoveLabels_LabelBin*,struct Cyc_Absyn_Stmt*)=(void(*)(int(*)(struct Cyc_RemoveLabels_LabelBin*,struct Cyc_Absyn_Exp*),int(*)(struct Cyc_RemoveLabels_LabelBin*,struct Cyc_Absyn_Stmt*),struct Cyc_RemoveLabels_LabelBin*,struct Cyc_Absyn_Stmt*))Cyc_Absyn_visit_stmt;_Tmp3;})(Cyc_RemoveLabels_visit_label_f1,Cyc_RemoveLabels_visit_label_f2,lb,fndt->body);
 Cyc_RemoveLabels_remove_with_labelbin(lb);
 goto _LL0;}case 12: _Tmp2=((struct Cyc_Absyn_ExternCinclude_d_Absyn_Raw_decl_struct*)_Tmp0)->f1;_Tmp1=((struct Cyc_Absyn_ExternCinclude_d_Absyn_Raw_decl_struct*)_Tmp0)->f2;{struct Cyc_List_List*tds1=_Tmp2;struct Cyc_List_List*tds2=_Tmp1;
 Cyc_RemoveLabels_anal_decl(tds1);_Tmp2=tds2;goto _LL6;}case 10: _Tmp2=((struct Cyc_Absyn_Using_d_Absyn_Raw_decl_struct*)_Tmp0)->f2;_LL6: {struct Cyc_List_List*tds=_Tmp2;

@@ -544,7 +544,7 @@ res_atts=({struct Cyc_List_List*_Tmp2=_cycalloc(sizeof(struct Cyc_List_List));_T
 if(!Cyc_List_mem(Cyc_Atts_attribute_cmp,*fnatts,(void*)atts->hd))
 ({struct Cyc_List_List*_Tmp2=({struct Cyc_List_List*_Tmp3=_cycalloc(sizeof(struct Cyc_List_List));_Tmp3->hd=(void*)atts->hd,_Tmp3->tl=*fnatts;_Tmp3;});*fnatts=_Tmp2;});}}
 return res_atts;}}else{
-({struct Cyc_Warn_String_Warn_Warg_struct _Tmp2=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3;_Tmp3.tag=0,_Tmp3.f1=_tag_fat("transfer_fn_type_atts",sizeof(char),22U);_Tmp3;});void*_Tmp3[1];_Tmp3[0]=& _Tmp2;({(int(*)(struct _fat_ptr))Cyc_Warn_impos2;})(_tag_fat(_Tmp3,sizeof(void*),1));});};}
+({struct Cyc_Warn_String_Warn_Warg_struct _Tmp2=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3;_Tmp3.tag=0,_Tmp3.f1=_tag_fat("transfer_fn_type_atts",sizeof(char),22U);_Tmp3;});void*_Tmp3[1];_Tmp3[0]=& _Tmp2;({int(*_Tmp4)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp4;})(_tag_fat(_Tmp3,sizeof(void*),1));});};}
 # 201
 static int Cyc_Atts_fnTypeAttsRangeOK(unsigned loc,int i,int nargs,void*att){
 if(i < 1 || i > nargs){
@@ -555,7 +555,7 @@ return 1;}struct _tuple12{struct Cyc_List_List*f0;struct _fat_ptr f1;};
 # 208
 static void Cyc_Atts_fnTypeAttsOverlap(unsigned loc,int i,struct _tuple12 lst1,struct _tuple12 lst2){
 # 211
-if(({(int(*)(struct Cyc_List_List*,int))Cyc_List_memq;})(lst2.f0,i))
+if(({int(*_Tmp0)(struct Cyc_List_List*,int)=(int(*)(struct Cyc_List_List*,int))Cyc_List_memq;_Tmp0;})(lst2.f0,i))
 ({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=(struct _fat_ptr)((struct _fat_ptr)lst1.f1);_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,_Tmp2.f1=(struct _fat_ptr)((struct _fat_ptr)lst2.f1);_Tmp2;});struct Cyc_Int_pa_PrintArg_struct _Tmp2=({struct Cyc_Int_pa_PrintArg_struct _Tmp3;_Tmp3.tag=1,_Tmp3.f1=(unsigned long)i;_Tmp3;});void*_Tmp3[3];_Tmp3[0]=& _Tmp0,_Tmp3[1]=& _Tmp1,_Tmp3[2]=& _Tmp2;Cyc_Warn_err(loc,_tag_fat("incompatible %s() and %s() attributes on parameter %d",sizeof(char),54U),_tag_fat(_Tmp3,sizeof(void*),3));});}
 # 215
 void Cyc_Atts_fnTypeAttsOK(unsigned loc,void*t){
@@ -573,7 +573,7 @@ goto _LL5;
 Cyc_Atts_fnTypeAttsOverlap(loc,i,init_params,nolive_unique_params);
 Cyc_Atts_fnTypeAttsOverlap(loc,i,init_params,consume_params);{
 struct _fat_ptr s=_tag_fat("initializes attribute allowed only on",sizeof(char),38U);
-{void*_Tmp6=Cyc_Absyn_compress((*({(struct _tuple8*(*)(struct Cyc_List_List*,int))Cyc_List_nth;})(args,i - 1)).f2);void*_Tmp7;void*_Tmp8;void*_Tmp9;if(*((int*)_Tmp6)==3){_Tmp9=((struct Cyc_Absyn_PointerType_Absyn_Type_struct*)_Tmp6)->f1.ptr_atts.nullable;_Tmp8=((struct Cyc_Absyn_PointerType_Absyn_Type_struct*)_Tmp6)->f1.ptr_atts.bounds;_Tmp7=((struct Cyc_Absyn_PointerType_Absyn_Type_struct*)_Tmp6)->f1.ptr_atts.zero_term;{void*nullable=_Tmp9;void*bd=_Tmp8;void*zt=_Tmp7;
+{void*_Tmp6=Cyc_Absyn_compress((*({struct _tuple8*(*_Tmp7)(struct Cyc_List_List*,int)=(struct _tuple8*(*)(struct Cyc_List_List*,int))Cyc_List_nth;_Tmp7;})(args,i - 1)).f2);void*_Tmp7;void*_Tmp8;void*_Tmp9;if(*((int*)_Tmp6)==3){_Tmp9=((struct Cyc_Absyn_PointerType_Absyn_Type_struct*)_Tmp6)->f1.ptr_atts.nullable;_Tmp8=((struct Cyc_Absyn_PointerType_Absyn_Type_struct*)_Tmp6)->f1.ptr_atts.bounds;_Tmp7=((struct Cyc_Absyn_PointerType_Absyn_Type_struct*)_Tmp6)->f1.ptr_atts.zero_term;{void*nullable=_Tmp9;void*bd=_Tmp8;void*zt=_Tmp7;
 # 232
 if(Cyc_Tcutil_force_type2bool(0,nullable))
 ({struct Cyc_Warn_String_Warn_Warg_struct _TmpA=({struct Cyc_Warn_String_Warn_Warg_struct _TmpB;_TmpB.tag=0,_TmpB.f1=s;_TmpB;});struct Cyc_Warn_String_Warn_Warg_struct _TmpB=({struct Cyc_Warn_String_Warn_Warg_struct _TmpC;_TmpC.tag=0,_TmpC.f1=_tag_fat(" non-null pointers",sizeof(char),19U);_TmpC;});void*_TmpC[2];_TmpC[0]=& _TmpA,_TmpC[1]=& _TmpB;Cyc_Warn_err2(loc,_tag_fat(_TmpC,sizeof(void*),2));});
@@ -591,7 +591,7 @@ goto _LL5;}}case 21: _Tmp5=((struct Cyc_Absyn_Noliveunique_att_Absyn_Attribute_s
 if(!Cyc_Atts_fnTypeAttsRangeOK(loc,i,nargs,(void*)atts->hd))goto _LL5;
 Cyc_Atts_fnTypeAttsOverlap(loc,i,nolive_unique_params,init_params);{
 # 248
-struct _tuple8*_Tmp6=({(struct _tuple8*(*)(struct Cyc_List_List*,int))Cyc_List_nth;})(args,i - 1);void*_Tmp7;_Tmp7=_Tmp6->f2;{void*t=_Tmp7;
+struct _tuple8*_Tmp6=({struct _tuple8*(*_Tmp7)(struct Cyc_List_List*,int)=(struct _tuple8*(*)(struct Cyc_List_List*,int))Cyc_List_nth;_Tmp7;})(args,i - 1);void*_Tmp7;_Tmp7=_Tmp6->f2;{void*t=_Tmp7;
 if(!Cyc_Tcutil_is_noalias_pointer(aqb,t,0))
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp8=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp9;_Tmp9.tag=0,_Tmp9.f1=_tag_fat("noliveunique allowed only on unique pointers",sizeof(char),45U);_Tmp9;});void*_Tmp9[1];_Tmp9[0]=& _Tmp8;Cyc_Warn_err2(loc,_tag_fat(_Tmp9,sizeof(void*),1));});
 ({struct Cyc_List_List*_Tmp8=({struct Cyc_List_List*_Tmp9=_cycalloc(sizeof(struct Cyc_List_List));_Tmp9->hd=(void*)i,_Tmp9->tl=nolive_unique_params.f0;_Tmp9;});nolive_unique_params.f0=_Tmp8;});
@@ -600,7 +600,7 @@ goto _LL5;}}}case 22: _Tmp5=((struct Cyc_Absyn_Consume_att_Absyn_Attribute_struc
 if(!Cyc_Atts_fnTypeAttsRangeOK(loc,i,nargs,(void*)atts->hd))goto _LL5;
 Cyc_Atts_fnTypeAttsOverlap(loc,i,consume_params,init_params);{
 # 257
-struct _tuple8*_Tmp6=({(struct _tuple8*(*)(struct Cyc_List_List*,int))Cyc_List_nth;})(args,i - 1);void*_Tmp7;_Tmp7=_Tmp6->f2;{void*t=_Tmp7;
+struct _tuple8*_Tmp6=({struct _tuple8*(*_Tmp7)(struct Cyc_List_List*,int)=(struct _tuple8*(*)(struct Cyc_List_List*,int))Cyc_List_nth;_Tmp7;})(args,i - 1);void*_Tmp7;_Tmp7=_Tmp6->f2;{void*t=_Tmp7;
 if(!Cyc_Tcutil_is_noalias_pointer(aqb,t,0))
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp8=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp9;_Tmp9.tag=0,_Tmp9.f1=_tag_fat("consume allowed only on unique pointers",sizeof(char),40U);_Tmp9;});void*_Tmp9[1];_Tmp9[0]=& _Tmp8;Cyc_Warn_err2(loc,_tag_fat(_Tmp9,sizeof(void*),1));});
 ({struct Cyc_List_List*_Tmp8=({struct Cyc_List_List*_Tmp9=_cycalloc(sizeof(struct Cyc_List_List));_Tmp9->hd=(void*)i,_Tmp9->tl=consume_params.f0;_Tmp9;});consume_params.f0=_Tmp8;});
@@ -608,7 +608,7 @@ goto _LL5;}}}default:
  goto _LL5;}_LL5:;}
 # 265
 goto _LL0;}}else{
-({struct Cyc_Warn_String_Warn_Warg_struct _Tmp4=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp5;_Tmp5.tag=0,_Tmp5.f1=_tag_fat("fnTypeAttsOK: not a function type",sizeof(char),34U);_Tmp5;});void*_Tmp5[1];_Tmp5[0]=& _Tmp4;({(int(*)(struct _fat_ptr))Cyc_Warn_impos2;})(_tag_fat(_Tmp5,sizeof(void*),1));});}_LL0:;}
+({struct Cyc_Warn_String_Warn_Warg_struct _Tmp4=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp5;_Tmp5.tag=0,_Tmp5.f1=_tag_fat("fnTypeAttsOK: not a function type",sizeof(char),34U);_Tmp5;});void*_Tmp5[1];_Tmp5[0]=& _Tmp4;({int(*_Tmp6)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp6;})(_tag_fat(_Tmp5,sizeof(void*),1));});}_LL0:;}
 # 271
 int Cyc_Atts_sub_attributes(struct Cyc_List_List*a1,struct Cyc_List_List*a2){
 {struct Cyc_List_List*t=a1;for(0;t!=0;t=t->tl){
@@ -708,7 +708,7 @@ void*_Tmp0=(void*)atts->hd;switch(*((int*)_Tmp0)){case 6:
 return;default:
 # 377
  if(!is_defn && Cyc_Atts_fntype_att((void*)atts->hd))
-({struct Cyc_Warn_String_Warn_Warg_struct _Tmp1=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp2;_Tmp2.tag=0,_Tmp2.f1=_tag_fat("function-type att in function variable declaration",sizeof(char),51U);_Tmp2;});void*_Tmp2[1];_Tmp2[0]=& _Tmp1;({(int(*)(struct _fat_ptr))Cyc_Warn_impos2;})(_tag_fat(_Tmp2,sizeof(void*),1));});};}}
+({struct Cyc_Warn_String_Warn_Warg_struct _Tmp1=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp2;_Tmp2.tag=0,_Tmp2.f1=_tag_fat("function-type att in function variable declaration",sizeof(char),51U);_Tmp2;});void*_Tmp2[1];_Tmp2[0]=& _Tmp1;({int(*_Tmp3)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp3;})(_tag_fat(_Tmp2,sizeof(void*),1));});};}}
 # 382
 void Cyc_Atts_check_variable_atts(unsigned loc,struct Cyc_Absyn_Vardecl*vd,struct Cyc_List_List*atts){
 for(1;atts!=0;atts=atts->tl){

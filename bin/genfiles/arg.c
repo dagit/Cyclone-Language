@@ -386,7 +386,7 @@ static struct _fat_ptr Cyc_Arg_Justify_break_line(struct Cyc_Buffer_t*b,int howm
 if((char*)s.curr==(char*)_tag_fat(0,0,0).curr)return _tag_fat(0,0,0);
 if(howmuch < 0)howmuch=0;{
 unsigned long len=Cyc_strlen(s);
-len <= _get_fat_size(s,sizeof(char))?0:({(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;})(_tag_fat("len <= numelts(s)",sizeof(char),18U),_tag_fat("arg.cyc",sizeof(char),8U),93U);
+len <= _get_fat_size(s,sizeof(char))?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp0;})(_tag_fat("len <= numelts(s)",sizeof(char),18U),_tag_fat("arg.cyc",sizeof(char),8U),93U);
 if((unsigned long)howmuch > len){
 Cyc_Buffer_add_string(b,s);
 return _tag_fat(0,0,0);}{

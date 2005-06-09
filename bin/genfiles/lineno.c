@@ -454,7 +454,7 @@ int Cyc_Lineno_place_cmp(struct _tuple1*place1,struct _tuple1*place2){
 return Cyc_Core_intcmp((*place1).f0,(*place2).f0);}
 # 87
 void Cyc_Lineno_poss_of_abss(struct _fat_ptr filename,struct Cyc_List_List*places){
-places=({(struct Cyc_List_List*(*)(int(*)(struct _tuple1*,struct _tuple1*),struct Cyc_List_List*))Cyc_List_merge_sort;})(Cyc_Lineno_place_cmp,places);{
+places=({struct Cyc_List_List*(*_Tmp0)(int(*)(struct _tuple1*,struct _tuple1*),struct Cyc_List_List*)=(struct Cyc_List_List*(*)(int(*)(struct _tuple1*,struct _tuple1*),struct Cyc_List_List*))Cyc_List_merge_sort;_Tmp0;})(Cyc_Lineno_place_cmp,places);{
 struct Cyc___cycFILE*f=Cyc_file_open(filename,_tag_fat("r",sizeof(char),2U));
 {struct _handler_cons _Tmp0;_push_handler(& _Tmp0);{int _Tmp1=0;if(setjmp(_Tmp0.handler))_Tmp1=1;if(!_Tmp1){
 {struct Cyc_Lexing_lexbuf*lbuf=Cyc_Lexing_from_file(f);

@@ -581,7 +581,7 @@ z->tl=y;
 return x;}
 # 330
 struct Cyc_List_List*Cyc_List_rflatten(struct _RegionHandle*r,struct Cyc_List_List*x){
-return({(struct Cyc_List_List*(*)(struct Cyc_List_List*(*)(struct _RegionHandle*,struct Cyc_List_List*,struct Cyc_List_List*),struct _RegionHandle*,struct Cyc_List_List*,struct Cyc_List_List*))Cyc_List_fold_right_c;})(Cyc_List_rappend,r,x,0);}
+return({struct Cyc_List_List*(*_Tmp0)(struct Cyc_List_List*(*)(struct _RegionHandle*,struct Cyc_List_List*,struct Cyc_List_List*),struct _RegionHandle*,struct Cyc_List_List*,struct Cyc_List_List*)=(struct Cyc_List_List*(*)(struct Cyc_List_List*(*)(struct _RegionHandle*,struct Cyc_List_List*,struct Cyc_List_List*),struct _RegionHandle*,struct Cyc_List_List*,struct Cyc_List_List*))Cyc_List_fold_right_c;_Tmp0;})(Cyc_List_rappend,r,x,0);}
 # 334
 struct Cyc_List_List*Cyc_List_flatten(struct Cyc_List_List*x){
 return Cyc_List_rflatten(Cyc_Core_heap_region,x);}

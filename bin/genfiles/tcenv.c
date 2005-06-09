@@ -447,42 +447,42 @@ _throw(& Cyc_Tcenv_Env_error_val);}struct _tuple12{struct Cyc_Absyn_Switch_claus
 # 117
 struct Cyc_Tcenv_Tenv*Cyc_Tcenv_tc_init (void){
 # 119
-struct Cyc_Tcenv_Genv*ae;ae=_cycalloc(sizeof(struct Cyc_Tcenv_Genv)),({struct Cyc_Dict_Dict _Tmp0=({(struct Cyc_Dict_Dict(*)(int(*)(struct _tuple0*,struct _tuple0*)))Cyc_Dict_empty;})(Cyc_Absyn_qvar_cmp);ae->aggrdecls=_Tmp0;}),({
-struct Cyc_Dict_Dict _Tmp0=({(struct Cyc_Dict_Dict(*)(int(*)(struct _tuple0*,struct _tuple0*)))Cyc_Dict_empty;})(Cyc_Absyn_qvar_cmp);ae->datatypedecls=_Tmp0;}),({
-struct Cyc_Dict_Dict _Tmp0=({(struct Cyc_Dict_Dict(*)(int(*)(struct _tuple0*,struct _tuple0*)))Cyc_Dict_empty;})(Cyc_Absyn_qvar_cmp);ae->enumdecls=_Tmp0;}),({
-struct Cyc_Dict_Dict _Tmp0=({(struct Cyc_Dict_Dict(*)(int(*)(struct _tuple0*,struct _tuple0*)))Cyc_Dict_empty;})(Cyc_Absyn_qvar_cmp);ae->typedefs=_Tmp0;}),({
-struct Cyc_Dict_Dict _Tmp0=({(struct Cyc_Dict_Dict(*)(int(*)(struct _tuple0*,struct _tuple0*)))Cyc_Dict_empty;})(Cyc_Absyn_qvar_cmp);ae->ordinaries=_Tmp0;});
-({struct Cyc_Dict_Dict _Tmp0=({struct Cyc_Dict_Dict _Tmp1=ae->datatypedecls;struct _tuple0*_Tmp2=Cyc_Absyn_exn_name;({(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,struct _tuple0*,struct Cyc_Absyn_Datatypedecl**))Cyc_Dict_insert;})(_Tmp1,_Tmp2,({struct Cyc_Absyn_Datatypedecl**_Tmp3=_cycalloc(sizeof(struct Cyc_Absyn_Datatypedecl*));({struct Cyc_Absyn_Datatypedecl*_Tmp4=Cyc_Absyn_exn_tud();*_Tmp3=_Tmp4;});_Tmp3;}));});ae->datatypedecls=_Tmp0;});
+struct Cyc_Tcenv_Genv*ae;ae=_cycalloc(sizeof(struct Cyc_Tcenv_Genv)),({struct Cyc_Dict_Dict _Tmp0=({struct Cyc_Dict_Dict(*_Tmp1)(int(*)(struct _tuple0*,struct _tuple0*))=(struct Cyc_Dict_Dict(*)(int(*)(struct _tuple0*,struct _tuple0*)))Cyc_Dict_empty;_Tmp1;})(Cyc_Absyn_qvar_cmp);ae->aggrdecls=_Tmp0;}),({
+struct Cyc_Dict_Dict _Tmp0=({struct Cyc_Dict_Dict(*_Tmp1)(int(*)(struct _tuple0*,struct _tuple0*))=(struct Cyc_Dict_Dict(*)(int(*)(struct _tuple0*,struct _tuple0*)))Cyc_Dict_empty;_Tmp1;})(Cyc_Absyn_qvar_cmp);ae->datatypedecls=_Tmp0;}),({
+struct Cyc_Dict_Dict _Tmp0=({struct Cyc_Dict_Dict(*_Tmp1)(int(*)(struct _tuple0*,struct _tuple0*))=(struct Cyc_Dict_Dict(*)(int(*)(struct _tuple0*,struct _tuple0*)))Cyc_Dict_empty;_Tmp1;})(Cyc_Absyn_qvar_cmp);ae->enumdecls=_Tmp0;}),({
+struct Cyc_Dict_Dict _Tmp0=({struct Cyc_Dict_Dict(*_Tmp1)(int(*)(struct _tuple0*,struct _tuple0*))=(struct Cyc_Dict_Dict(*)(int(*)(struct _tuple0*,struct _tuple0*)))Cyc_Dict_empty;_Tmp1;})(Cyc_Absyn_qvar_cmp);ae->typedefs=_Tmp0;}),({
+struct Cyc_Dict_Dict _Tmp0=({struct Cyc_Dict_Dict(*_Tmp1)(int(*)(struct _tuple0*,struct _tuple0*))=(struct Cyc_Dict_Dict(*)(int(*)(struct _tuple0*,struct _tuple0*)))Cyc_Dict_empty;_Tmp1;})(Cyc_Absyn_qvar_cmp);ae->ordinaries=_Tmp0;});
+({struct Cyc_Dict_Dict _Tmp0=({struct Cyc_Dict_Dict(*_Tmp1)(struct Cyc_Dict_Dict,struct _tuple0*,struct Cyc_Absyn_Datatypedecl**)=({struct Cyc_Dict_Dict(*_Tmp2)(struct Cyc_Dict_Dict,struct _tuple0*,struct Cyc_Absyn_Datatypedecl**)=(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,struct _tuple0*,struct Cyc_Absyn_Datatypedecl**))Cyc_Dict_insert;_Tmp2;});struct Cyc_Dict_Dict _Tmp2=ae->datatypedecls;struct _tuple0*_Tmp3=Cyc_Absyn_exn_name;_Tmp1(_Tmp2,_Tmp3,({struct Cyc_Absyn_Datatypedecl**_Tmp4=_cycalloc(sizeof(struct Cyc_Absyn_Datatypedecl*));({struct Cyc_Absyn_Datatypedecl*_Tmp5=Cyc_Absyn_exn_tud();*_Tmp4=_Tmp5;});_Tmp4;}));});ae->datatypedecls=_Tmp0;});
 return({struct Cyc_Tcenv_Tenv*_Tmp0=_cycalloc(sizeof(struct Cyc_Tcenv_Tenv));_Tmp0->ns=0,_Tmp0->ae=ae,_Tmp0->le=0,_Tmp0->allow_valueof=0,_Tmp0->in_extern_c_include=0,_Tmp0->in_tempest=0,_Tmp0->tempest_generalize=0,_Tmp0->in_extern_c_inc_repeat=0;_Tmp0;});}struct _tuple13{void*f0;int f1;};
 # 127
 void*Cyc_Tcenv_lookup_ordinary_global(struct Cyc_Tcenv_Tenv*te,unsigned loc,struct _tuple0*q,int is_use){
-struct _tuple13*ans=({(struct _tuple13*(*)(struct Cyc_Dict_Dict,struct _tuple0*))Cyc_Dict_lookup;})(te->ae->ordinaries,q);
+struct _tuple13*ans=({struct _tuple13*(*_Tmp0)(struct Cyc_Dict_Dict,struct _tuple0*)=(struct _tuple13*(*)(struct Cyc_Dict_Dict,struct _tuple0*))Cyc_Dict_lookup;_Tmp0;})(te->ae->ordinaries,q);
 if(is_use)
 (*ans).f1=1;
 return(*ans).f0;}
 # 133
 struct Cyc_Absyn_Aggrdecl**Cyc_Tcenv_lookup_aggrdecl(struct Cyc_Tcenv_Tenv*te,unsigned loc,struct _tuple0*q){
-return({(struct Cyc_Absyn_Aggrdecl**(*)(struct Cyc_Dict_Dict,struct _tuple0*))Cyc_Dict_lookup;})(te->ae->aggrdecls,q);}
+return({struct Cyc_Absyn_Aggrdecl**(*_Tmp0)(struct Cyc_Dict_Dict,struct _tuple0*)=(struct Cyc_Absyn_Aggrdecl**(*)(struct Cyc_Dict_Dict,struct _tuple0*))Cyc_Dict_lookup;_Tmp0;})(te->ae->aggrdecls,q);}
 # 136
 struct Cyc_Absyn_Datatypedecl**Cyc_Tcenv_lookup_datatypedecl(struct Cyc_Tcenv_Tenv*te,unsigned loc,struct _tuple0*q){
-return({(struct Cyc_Absyn_Datatypedecl**(*)(struct Cyc_Dict_Dict,struct _tuple0*))Cyc_Dict_lookup;})(te->ae->datatypedecls,q);}
+return({struct Cyc_Absyn_Datatypedecl**(*_Tmp0)(struct Cyc_Dict_Dict,struct _tuple0*)=(struct Cyc_Absyn_Datatypedecl**(*)(struct Cyc_Dict_Dict,struct _tuple0*))Cyc_Dict_lookup;_Tmp0;})(te->ae->datatypedecls,q);}
 # 139
 struct Cyc_Absyn_Datatypedecl***Cyc_Tcenv_lookup_xdatatypedecl(struct _RegionHandle*r,struct Cyc_Tcenv_Tenv*te,unsigned loc,struct _tuple0*q){
-return({struct Cyc_Absyn_Datatypedecl***_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_Absyn_Datatypedecl**));({struct Cyc_Absyn_Datatypedecl**_Tmp1=({(struct Cyc_Absyn_Datatypedecl**(*)(struct Cyc_Dict_Dict,struct _tuple0*))Cyc_Dict_lookup;})(te->ae->datatypedecls,q);*_Tmp0=_Tmp1;});_Tmp0;});}
+return({struct Cyc_Absyn_Datatypedecl***_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_Absyn_Datatypedecl**));({struct Cyc_Absyn_Datatypedecl**_Tmp1=({struct Cyc_Absyn_Datatypedecl**(*_Tmp2)(struct Cyc_Dict_Dict,struct _tuple0*)=(struct Cyc_Absyn_Datatypedecl**(*)(struct Cyc_Dict_Dict,struct _tuple0*))Cyc_Dict_lookup;_Tmp2;})(te->ae->datatypedecls,q);*_Tmp0=_Tmp1;});_Tmp0;});}
 # 142
 struct Cyc_Absyn_Enumdecl**Cyc_Tcenv_lookup_enumdecl(struct Cyc_Tcenv_Tenv*te,unsigned loc,struct _tuple0*q){
-return({(struct Cyc_Absyn_Enumdecl**(*)(struct Cyc_Dict_Dict,struct _tuple0*))Cyc_Dict_lookup;})(te->ae->enumdecls,q);}
+return({struct Cyc_Absyn_Enumdecl**(*_Tmp0)(struct Cyc_Dict_Dict,struct _tuple0*)=(struct Cyc_Absyn_Enumdecl**(*)(struct Cyc_Dict_Dict,struct _tuple0*))Cyc_Dict_lookup;_Tmp0;})(te->ae->enumdecls,q);}
 # 145
 struct Cyc_Absyn_Typedefdecl*Cyc_Tcenv_lookup_typedefdecl(struct Cyc_Tcenv_Tenv*te,unsigned loc,struct _tuple0*q){
-return({(struct Cyc_Absyn_Typedefdecl*(*)(struct Cyc_Dict_Dict,struct _tuple0*))Cyc_Dict_lookup;})(te->ae->typedefs,q);}
+return({struct Cyc_Absyn_Typedefdecl*(*_Tmp0)(struct Cyc_Dict_Dict,struct _tuple0*)=(struct Cyc_Absyn_Typedefdecl*(*)(struct Cyc_Dict_Dict,struct _tuple0*))Cyc_Dict_lookup;_Tmp0;})(te->ae->typedefs,q);}
 # 151
 static struct Cyc_Tcenv_Fenv*Cyc_Tcenv_get_fenv(struct Cyc_Tcenv_Tenv*te,struct _fat_ptr err_msg){
 struct Cyc_Tcenv_Fenv*le=te->le;
-if(le==0)({(int(*)(struct _fat_ptr))Cyc_Tcenv_env_err;})(err_msg);
+if(le==0)({int(*_Tmp0)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Tcenv_env_err;_Tmp0;})(err_msg);
 return le;}
 # 156
 static struct Cyc_Tcenv_Tenv*Cyc_Tcenv_put_fenv(struct Cyc_Tcenv_Tenv*te,struct Cyc_Tcenv_Fenv*fe){
-if(te->le==0)({(int(*)(struct _fat_ptr))Cyc_Tcenv_env_err;})(_tag_fat("put_fenv",sizeof(char),9U));{
+if(te->le==0)({int(*_Tmp0)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Tcenv_env_err;_Tmp0;})(_tag_fat("put_fenv",sizeof(char),9U));{
 struct Cyc_Tcenv_Tenv*ans;ans=_cycalloc(sizeof(struct Cyc_Tcenv_Tenv)),*ans=*te;
 ans->le=fe;
 return ans;}}

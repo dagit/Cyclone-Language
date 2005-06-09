@@ -362,7 +362,7 @@ return 1;};}
 static int Cyc_RemoveCasts_remove_visit_f1(int ignore,struct Cyc_Absyn_Exp*e){
 void*_Tmp0=e->r;void*_Tmp1;void*_Tmp2;switch(*((int*)_Tmp0)){case 14: _Tmp2=(void*)((struct Cyc_Absyn_Cast_e_Absyn_Raw_exp_struct*)_Tmp0)->f1;_Tmp1=((struct Cyc_Absyn_Cast_e_Absyn_Raw_exp_struct*)_Tmp0)->f2;{void*t=_Tmp2;struct Cyc_Absyn_Exp*e1=_Tmp1;
 # 43
-({(void(*)(int(*)(int,struct Cyc_Absyn_Exp*),int(*)(int,struct Cyc_Absyn_Stmt*),int,struct Cyc_Absyn_Exp*))Cyc_Absyn_visit_exp;})(Cyc_RemoveCasts_remove_visit_f1,Cyc_RemoveCasts_remove_visit_f2,ignore,e1);{
+({void(*_Tmp3)(int(*)(int,struct Cyc_Absyn_Exp*),int(*)(int,struct Cyc_Absyn_Stmt*),int,struct Cyc_Absyn_Exp*)=(void(*)(int(*)(int,struct Cyc_Absyn_Exp*),int(*)(int,struct Cyc_Absyn_Stmt*),int,struct Cyc_Absyn_Exp*))Cyc_Absyn_visit_exp;_Tmp3;})(Cyc_RemoveCasts_remove_visit_f1,Cyc_RemoveCasts_remove_visit_f2,ignore,e1);{
 void*_Tmp3=Cyc_Absyn_compress(t);if(*((int*)_Tmp3)==0){if(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp3)->f1)==25){if(((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp3)->f2==0){
 *e=*e1;return 0;}else{goto _LLA;}}else{goto _LLA;}}else{_LLA:
  return 0;};}}case 36: _Tmp2=((struct Cyc_Absyn_StmtExp_e_Absyn_Raw_exp_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Stmt*s=_Tmp2;
@@ -370,10 +370,10 @@ void*_Tmp3=Cyc_Absyn_compress(t);if(*((int*)_Tmp3)==0){if(*((int*)((struct Cyc_A
 while(1){
 void*_Tmp3=s->r;void*_Tmp4;void*_Tmp5;switch(*((int*)_Tmp3)){case 1: _Tmp5=((struct Cyc_Absyn_Exp_s_Absyn_Raw_stmt_struct*)_Tmp3)->f1;{struct Cyc_Absyn_Exp*e=_Tmp5;
 # 52
-({(void(*)(int(*)(int,struct Cyc_Absyn_Exp*),int(*)(int,struct Cyc_Absyn_Stmt*),int,struct Cyc_Absyn_Exp*))Cyc_Absyn_visit_exp;})(Cyc_RemoveCasts_remove_visit_f1,Cyc_RemoveCasts_remove_visit_f2,1,e);
+({void(*_Tmp6)(int(*)(int,struct Cyc_Absyn_Exp*),int(*)(int,struct Cyc_Absyn_Stmt*),int,struct Cyc_Absyn_Exp*)=(void(*)(int(*)(int,struct Cyc_Absyn_Exp*),int(*)(int,struct Cyc_Absyn_Stmt*),int,struct Cyc_Absyn_Exp*))Cyc_Absyn_visit_exp;_Tmp6;})(Cyc_RemoveCasts_remove_visit_f1,Cyc_RemoveCasts_remove_visit_f2,1,e);
 return 0;}case 2: _Tmp5=((struct Cyc_Absyn_Seq_s_Absyn_Raw_stmt_struct*)_Tmp3)->f1;_Tmp4=((struct Cyc_Absyn_Seq_s_Absyn_Raw_stmt_struct*)_Tmp3)->f2;{struct Cyc_Absyn_Stmt*s1=_Tmp5;struct Cyc_Absyn_Stmt*s2=_Tmp4;
 # 55
-({(void(*)(int(*)(int,struct Cyc_Absyn_Exp*),int(*)(int,struct Cyc_Absyn_Stmt*),int,struct Cyc_Absyn_Stmt*))Cyc_Absyn_visit_stmt;})(Cyc_RemoveCasts_remove_visit_f1,Cyc_RemoveCasts_remove_visit_f2,1,s1);
+({void(*_Tmp6)(int(*)(int,struct Cyc_Absyn_Exp*),int(*)(int,struct Cyc_Absyn_Stmt*),int,struct Cyc_Absyn_Stmt*)=(void(*)(int(*)(int,struct Cyc_Absyn_Exp*),int(*)(int,struct Cyc_Absyn_Stmt*),int,struct Cyc_Absyn_Stmt*))Cyc_Absyn_visit_stmt;_Tmp6;})(Cyc_RemoveCasts_remove_visit_f1,Cyc_RemoveCasts_remove_visit_f2,1,s1);
 s=s2;
 continue;}case 12: _Tmp5=((struct Cyc_Absyn_Decl_s_Absyn_Raw_stmt_struct*)_Tmp3)->f2;{struct Cyc_Absyn_Stmt*s1=_Tmp5;
 s=s1;continue;}default:
@@ -386,7 +386,7 @@ struct Cyc_List_List*Cyc_RemoveCasts_remove_casts(struct Cyc_List_List*tds){
 {struct Cyc_List_List*tds2=tds;for(0;tds2!=0;tds2=tds2->tl){
 void*_Tmp0=((struct Cyc_Absyn_Decl*)tds2->hd)->r;void*_Tmp1;if(*((int*)_Tmp0)==1){_Tmp1=((struct Cyc_Absyn_Fn_d_Absyn_Raw_decl_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Fndecl*fd=_Tmp1;
 # 69
-({(void(*)(int(*)(int,struct Cyc_Absyn_Exp*),int(*)(int,struct Cyc_Absyn_Stmt*),int,struct Cyc_Absyn_Stmt*))Cyc_Absyn_visit_stmt;})(Cyc_RemoveCasts_remove_visit_f1,Cyc_RemoveCasts_remove_visit_f2,1,fd->body);goto _LL0;}}else{
+({void(*_Tmp2)(int(*)(int,struct Cyc_Absyn_Exp*),int(*)(int,struct Cyc_Absyn_Stmt*),int,struct Cyc_Absyn_Stmt*)=(void(*)(int(*)(int,struct Cyc_Absyn_Exp*),int(*)(int,struct Cyc_Absyn_Stmt*),int,struct Cyc_Absyn_Stmt*))Cyc_Absyn_visit_stmt;_Tmp2;})(Cyc_RemoveCasts_remove_visit_f1,Cyc_RemoveCasts_remove_visit_f2,1,fd->body);goto _LL0;}}else{
 goto _LL0;}_LL0:;}}
 # 72
 return tds;}

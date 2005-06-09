@@ -2033,13 +2033,18 @@ static void exp_to_c(env_t nv, exp_t e) {
     let tc = typ_to_c((type_t)e->topt);
     let tc1 = typ_to_c((type_t)e1->topt);
     if(!Tcutil::typecmp(tc,tc1)==0) {
-      e->r = array_to_ptr_cast(tc,e1,DL)->r;
-      // HACK ALERT:
-      // gcc 3.4 refuses to compile a function call ( (t)f )(...)
-      // for types t that we need, so use ({(t)f})(...) instead.
-      // This turns out to be easiest to code here, in Instantiate,
-      // because functions are always instantiated before calling.
-      e->r = stmt_exp_r(exp_stmt(new_exp(e->r,e->loc),e->loc));
+      // // HACK ALERT:
+      // // gcc 3.4 refuses to compile a function call ( (t)f )(...)
+      // // for types t that we need, so use ({(t)f})(...) instead.
+      // // This turns out to be easiest to code here, in Instantiate,
+      // // because functions are always instantiated before calling.
+      // e->r = array_to_ptr_cast(tc,e1,DL)->r;
+      // e->r = stmt_exp_r(exp_stmt(new_exp(e->r,e->loc),e->loc));
+      // HACK ALERT: in addition, gcc 4.0 doesn't like ({(t)f})(...).
+      // So use ({ t g = (t) f; g; })(...) instead.
+      let $(temp,temp_exp) = temp_var_and_exp();
+      e->r = stmt_exp_r(declare_stmt(temp,tc,array_to_ptr_cast(tc,e1,DL),
+                                     exp_stmt(temp_exp,e->loc),e->loc));
     }
     break;
   case &Cast_e(*t,e1,user_inserted,coercion):

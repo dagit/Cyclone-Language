@@ -456,7 +456,7 @@ struct Cyc_List_List*x=0;
 ({struct Cyc_List_List*_Tmp0=x;struct Cyc_List_List*_Tmp1=Cyc_Lex_prev_extern_c;x=_Tmp1;Cyc_Lex_prev_extern_c=_Tmp0;});
 Cyc_Lex_in_extern_c=(int)_check_null(x)->hd;
 Cyc_Lex_prev_extern_c=x->tl;
-({(void(*)(struct Cyc_List_List*))Cyc_Core_ufree;})(x);}
+({void(*_Tmp0)(struct Cyc_List_List*)=(void(*)(struct Cyc_List_List*))Cyc_Core_ufree;_Tmp0;})(x);}
 # 98
 static struct Cyc_Lex_DynTrieSymbols*Cyc_Lex_ids_trie=0;
 static struct Cyc_Lex_DynTrie*Cyc_Lex_typedefs_trie=0;
@@ -552,7 +552,7 @@ static struct Cyc_Lex_Trie*Cyc_Lex_trie_lookup(struct _RegionHandle*r,struct Cyc
 unsigned i=0U;
 buff=_fat_ptr_plus(buff,sizeof(char),offset);
 if(!(len < _get_fat_size(buff,sizeof(char))))
-({(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;})(_tag_fat("array bounds in trie_lookup",sizeof(char),28U),_tag_fat(0U,sizeof(void*),0));
+({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp0;})(_tag_fat("array bounds in trie_lookup",sizeof(char),28U),_tag_fat(0U,sizeof(void*),0));
 while(i < len){
 union Cyc_Lex_TrieChildren _Tmp0=_check_null(t)->children;int _Tmp1;void*_Tmp2;switch(_Tmp0.One.tag){case 3: _Tmp2=_Tmp0.Many.val;{struct Cyc_Lex_Trie**arr=_Tmp2;
 # 310
@@ -593,7 +593,7 @@ struct Cyc_Lex_Trie*t=Cyc_Lex_trie_lookup(d,tree,buff,offset,(unsigned)len);
 if(_check_null(t)->shared_str==0){
 struct _fat_ptr newstr=Cyc_Core_new_string((unsigned)(len + 1));
 ({struct _fat_ptr _Tmp6=_fat_ptr_decrease_size(newstr,sizeof(char),1U);struct _fat_ptr _Tmp7=(struct _fat_ptr)_fat_ptr_plus(buff,sizeof(char),offset);Cyc_zstrncpy(_Tmp6,_Tmp7,(unsigned long)len);});{
-int ans=({struct Cyc_Xarray_Xarray*_Tmp6=symbols;({(int(*)(struct Cyc_Xarray_Xarray*,struct _fat_ptr*))Cyc_Xarray_add_ind;})(_Tmp6,({struct _fat_ptr*_Tmp7=_cycalloc(sizeof(struct _fat_ptr));*_Tmp7=newstr;_Tmp7;}));});
+int ans=({int(*_Tmp6)(struct Cyc_Xarray_Xarray*,struct _fat_ptr*)=({int(*_Tmp7)(struct Cyc_Xarray_Xarray*,struct _fat_ptr*)=(int(*)(struct Cyc_Xarray_Xarray*,struct _fat_ptr*))Cyc_Xarray_add_ind;_Tmp7;});struct Cyc_Xarray_Xarray*_Tmp7=symbols;_Tmp6(_Tmp7,({struct _fat_ptr*_Tmp8=_cycalloc(sizeof(struct _fat_ptr));*_Tmp8=newstr;_Tmp8;}));});
 t->shared_str=ans;}}
 # 354
 return t->shared_str;}}
@@ -603,7 +603,7 @@ struct Cyc_Lex_DynTrieSymbols*idt=0;
 ({struct Cyc_Lex_DynTrieSymbols*_Tmp0=idt;struct Cyc_Lex_DynTrieSymbols*_Tmp1=Cyc_Lex_ids_trie;idt=_Tmp1;Cyc_Lex_ids_trie=_Tmp0;});{
 struct Cyc_Lex_DynTrieSymbols _Tmp0=*_check_null(idt);void*_Tmp1;void*_Tmp2;void*_Tmp3;_Tmp3=_Tmp0.dyn;_Tmp2=_Tmp0.t;_Tmp1=_Tmp0.symbols;{struct Cyc_Core_DynamicRegion*dyn=_Tmp3;struct Cyc_Lex_Trie*t=_Tmp2;struct Cyc_Xarray_Xarray*symbols=_Tmp1;
 struct _tuple29 env=({struct _tuple29 _Tmp4;_Tmp4.f0=t,_Tmp4.f1=symbols,_Tmp4.f2=buff,_Tmp4.f3=offset,_Tmp4.f4=len;_Tmp4;});
-int res=({(int(*)(struct Cyc_Core_DynamicRegion*,struct _tuple29*,int(*)(struct _RegionHandle*,struct _tuple29*)))Cyc_Core_open_region;})(dyn,& env,Cyc_Lex_str_index_body);
+int res=({int(*_Tmp4)(struct Cyc_Core_DynamicRegion*,struct _tuple29*,int(*)(struct _RegionHandle*,struct _tuple29*))=(int(*)(struct Cyc_Core_DynamicRegion*,struct _tuple29*,int(*)(struct _RegionHandle*,struct _tuple29*)))Cyc_Core_open_region;_Tmp4;})(dyn,& env,Cyc_Lex_str_index_body);
 ({struct Cyc_Lex_DynTrieSymbols _Tmp4=({struct Cyc_Lex_DynTrieSymbols _Tmp5;_Tmp5.dyn=dyn,_Tmp5.t=t,_Tmp5.symbols=symbols;_Tmp5;});*idt=_Tmp4;});
 ({struct Cyc_Lex_DynTrieSymbols*_Tmp4=idt;struct Cyc_Lex_DynTrieSymbols*_Tmp5=Cyc_Lex_ids_trie;idt=_Tmp5;Cyc_Lex_ids_trie=_Tmp4;});
 return res;}}}
@@ -623,21 +623,21 @@ struct Cyc_Lex_DynTrie*tdefs=0;
 ({struct Cyc_Lex_DynTrie*_Tmp0=tdefs;struct Cyc_Lex_DynTrie*_Tmp1=Cyc_Lex_typedefs_trie;tdefs=_Tmp1;Cyc_Lex_typedefs_trie=_Tmp0;});{
 struct Cyc_Lex_DynTrie _Tmp0=*_check_null(tdefs);void*_Tmp1;void*_Tmp2;_Tmp2=_Tmp0.dyn;_Tmp1=_Tmp0.t;{struct Cyc_Core_DynamicRegion*dyn=_Tmp2;struct Cyc_Lex_Trie*t=_Tmp1;
 struct _tuple30 env=({struct _tuple30 _Tmp3;_Tmp3.f0=t,_Tmp3.f1=s;_Tmp3;});
-({(int(*)(struct Cyc_Core_DynamicRegion*,struct _tuple30*,int(*)(struct _RegionHandle*,struct _tuple30*)))Cyc_Core_open_region;})(dyn,& env,Cyc_Lex_insert_typedef_body);
+({int(*_Tmp3)(struct Cyc_Core_DynamicRegion*,struct _tuple30*,int(*)(struct _RegionHandle*,struct _tuple30*))=(int(*)(struct Cyc_Core_DynamicRegion*,struct _tuple30*,int(*)(struct _RegionHandle*,struct _tuple30*)))Cyc_Core_open_region;_Tmp3;})(dyn,& env,Cyc_Lex_insert_typedef_body);
 ({struct Cyc_Lex_DynTrie _Tmp3=({struct Cyc_Lex_DynTrie _Tmp4;_Tmp4.dyn=dyn,_Tmp4.t=t;_Tmp4;});*tdefs=_Tmp3;});
 ({struct Cyc_Lex_DynTrie*_Tmp3=tdefs;struct Cyc_Lex_DynTrie*_Tmp4=Cyc_Lex_typedefs_trie;tdefs=_Tmp4;Cyc_Lex_typedefs_trie=_Tmp3;});
 return;}}}struct _tuple31{struct Cyc_Lex_Trie*f0;struct Cyc_Xarray_Xarray*f1;int f2;};
 # 393
 static struct _fat_ptr*Cyc_Lex_get_symbol_body(struct _RegionHandle*dyn,struct _tuple31*env){
 struct _tuple31 _Tmp0=*env;int _Tmp1;void*_Tmp2;void*_Tmp3;_Tmp3=_Tmp0.f0;_Tmp2=_Tmp0.f1;_Tmp1=_Tmp0.f2;{struct Cyc_Lex_Trie*t=_Tmp3;struct Cyc_Xarray_Xarray*symbols=_Tmp2;int symbol_num=_Tmp1;
-return({(struct _fat_ptr*(*)(struct Cyc_Xarray_Xarray*,int))Cyc_Xarray_get;})(symbols,symbol_num);}}
+return({struct _fat_ptr*(*_Tmp4)(struct Cyc_Xarray_Xarray*,int)=(struct _fat_ptr*(*)(struct Cyc_Xarray_Xarray*,int))Cyc_Xarray_get;_Tmp4;})(symbols,symbol_num);}}
 # 398
 static struct _fat_ptr*Cyc_Lex_get_symbol(int symbol_num){
 struct Cyc_Lex_DynTrieSymbols*idt=0;
 ({struct Cyc_Lex_DynTrieSymbols*_Tmp0=idt;struct Cyc_Lex_DynTrieSymbols*_Tmp1=Cyc_Lex_ids_trie;idt=_Tmp1;Cyc_Lex_ids_trie=_Tmp0;});{
 struct Cyc_Lex_DynTrieSymbols _Tmp0=*_check_null(idt);void*_Tmp1;void*_Tmp2;void*_Tmp3;_Tmp3=_Tmp0.dyn;_Tmp2=_Tmp0.t;_Tmp1=_Tmp0.symbols;{struct Cyc_Core_DynamicRegion*dyn=_Tmp3;struct Cyc_Lex_Trie*t=_Tmp2;struct Cyc_Xarray_Xarray*symbols=_Tmp1;
 struct _tuple31 env=({struct _tuple31 _Tmp4;_Tmp4.f0=t,_Tmp4.f1=symbols,_Tmp4.f2=symbol_num;_Tmp4;});
-struct _fat_ptr*res=({(struct _fat_ptr*(*)(struct Cyc_Core_DynamicRegion*,struct _tuple31*,struct _fat_ptr*(*)(struct _RegionHandle*,struct _tuple31*)))Cyc_Core_open_region;})(dyn,& env,Cyc_Lex_get_symbol_body);
+struct _fat_ptr*res=({struct _fat_ptr*(*_Tmp4)(struct Cyc_Core_DynamicRegion*,struct _tuple31*,struct _fat_ptr*(*)(struct _RegionHandle*,struct _tuple31*))=(struct _fat_ptr*(*)(struct Cyc_Core_DynamicRegion*,struct _tuple31*,struct _fat_ptr*(*)(struct _RegionHandle*,struct _tuple31*)))Cyc_Core_open_region;_Tmp4;})(dyn,& env,Cyc_Lex_get_symbol_body);
 ({struct Cyc_Lex_DynTrieSymbols _Tmp4=({struct Cyc_Lex_DynTrieSymbols _Tmp5;_Tmp5.dyn=dyn,_Tmp5.t=t,_Tmp5.symbols=symbols;_Tmp5;});*idt=_Tmp4;});
 ({struct Cyc_Lex_DynTrieSymbols*_Tmp4=idt;struct Cyc_Lex_DynTrieSymbols*_Tmp5=Cyc_Lex_ids_trie;idt=_Tmp5;Cyc_Lex_ids_trie=_Tmp4;});
 return res;}}}
@@ -726,10 +726,10 @@ return str;}struct Cyc_Lex_Ldecls{struct Cyc_Set_Set*typedefs;};
 static struct Cyc_Core_Opt*Cyc_Lex_lstate=0;
 # 519
 static struct Cyc_Lex_Ldecls*Cyc_Lex_mk_empty_ldecls(int ignore){
-return({struct Cyc_Lex_Ldecls*_Tmp0=_cycalloc(sizeof(struct Cyc_Lex_Ldecls));({struct Cyc_Set_Set*_Tmp1=({(struct Cyc_Set_Set*(*)(int(*)(struct _fat_ptr*,struct _fat_ptr*)))Cyc_Set_empty;})(Cyc_zstrptrcmp);_Tmp0->typedefs=_Tmp1;});_Tmp0;});}
+return({struct Cyc_Lex_Ldecls*_Tmp0=_cycalloc(sizeof(struct Cyc_Lex_Ldecls));({struct Cyc_Set_Set*_Tmp1=({struct Cyc_Set_Set*(*_Tmp2)(int(*)(struct _fat_ptr*,struct _fat_ptr*))=(struct Cyc_Set_Set*(*)(int(*)(struct _fat_ptr*,struct _fat_ptr*)))Cyc_Set_empty;_Tmp2;})(Cyc_zstrptrcmp);_Tmp0->typedefs=_Tmp1;});_Tmp0;});}
 # 523
 static void Cyc_Lex_typedef_init (void){
-Cyc_Lex_lstate=({struct Cyc_Core_Opt*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Opt));({struct Cyc_Binding_NSCtxt*_Tmp1=({(struct Cyc_Binding_NSCtxt*(*)(int,struct Cyc_Lex_Ldecls*(*)(int)))Cyc_Binding_mt_nsctxt;})(1,Cyc_Lex_mk_empty_ldecls);_Tmp0->v=_Tmp1;});_Tmp0;});}
+Cyc_Lex_lstate=({struct Cyc_Core_Opt*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Opt));({struct Cyc_Binding_NSCtxt*_Tmp1=({struct Cyc_Binding_NSCtxt*(*_Tmp2)(int,struct Cyc_Lex_Ldecls*(*)(int))=(struct Cyc_Binding_NSCtxt*(*)(int,struct Cyc_Lex_Ldecls*(*)(int)))Cyc_Binding_mt_nsctxt;_Tmp2;})(1,Cyc_Lex_mk_empty_ldecls);_Tmp0->v=_Tmp1;});_Tmp0;});}
 # 527
 static void Cyc_Lex_recompute_typedefs (void){
 # 529
@@ -738,7 +738,7 @@ struct Cyc_Lex_DynTrie*tdefs=0;
 struct Cyc_Lex_DynTrie _Tmp0=*_check_null(tdefs);void*_Tmp1;void*_Tmp2;_Tmp2=_Tmp0.dyn;_Tmp1=_Tmp0.t;{struct Cyc_Core_DynamicRegion*dyn=_Tmp2;struct Cyc_Lex_Trie*t=_Tmp1;
 Cyc_Core_free_ukey(dyn);{
 struct Cyc_Core_NewDynamicRegion _Tmp3=Cyc_Core__new_ukey(0U,"internal-error","internal-error",0);void*_Tmp4;_Tmp4=_Tmp3.key;{struct Cyc_Core_DynamicRegion*dyn2=_Tmp4;
-struct Cyc_Lex_Trie*t2=({(struct Cyc_Lex_Trie*(*)(struct Cyc_Core_DynamicRegion*,int,struct Cyc_Lex_Trie*(*)(struct _RegionHandle*,int)))Cyc_Core_open_region;})(dyn2,0,Cyc_Lex_empty_trie);
+struct Cyc_Lex_Trie*t2=({struct Cyc_Lex_Trie*(*_Tmp5)(struct Cyc_Core_DynamicRegion*,int,struct Cyc_Lex_Trie*(*)(struct _RegionHandle*,int))=(struct Cyc_Lex_Trie*(*)(struct Cyc_Core_DynamicRegion*,int,struct Cyc_Lex_Trie*(*)(struct _RegionHandle*,int)))Cyc_Core_open_region;_Tmp5;})(dyn2,0,Cyc_Lex_empty_trie);
 ({struct Cyc_Lex_DynTrie _Tmp5=({struct Cyc_Lex_DynTrie _Tmp6;_Tmp6.dyn=dyn2,_Tmp6.t=t2;_Tmp6;});*tdefs=_Tmp5;});
 ({struct Cyc_Lex_DynTrie*_Tmp5=Cyc_Lex_typedefs_trie;struct Cyc_Lex_DynTrie*_Tmp6=tdefs;Cyc_Lex_typedefs_trie=_Tmp6;tdefs=_Tmp5;});{
 # 539
@@ -746,14 +746,14 @@ struct Cyc_List_List*as=((struct Cyc_Binding_NSCtxt*)_check_null(Cyc_Lex_lstate)
 void*_Tmp5=(void*)as->hd;void*_Tmp6;if(*((int*)_Tmp5)==1){_Tmp6=((struct Cyc_Binding_Using_Binding_NSDirective_struct*)_Tmp5)->f1;{struct Cyc_List_List*ns=_Tmp6;
 _Tmp6=ns;goto _LLA;}}else{_Tmp6=((struct Cyc_Binding_Namespace_Binding_NSDirective_struct*)_Tmp5)->f1;_LLA: {struct Cyc_List_List*ns=_Tmp6;
 # 543
-struct Cyc_Lex_Ldecls*ts=({(struct Cyc_Lex_Ldecls*(*)(struct Cyc_Dict_Dict,struct Cyc_List_List*))Cyc_Dict_lookup;})(((struct Cyc_Binding_NSCtxt*)_check_null(Cyc_Lex_lstate)->v)->ns_data,ns);
-({(void(*)(void(*)(struct _fat_ptr*),struct Cyc_Set_Set*))Cyc_Set_iter;})(Cyc_Lex_insert_typedef,ts->typedefs);
+struct Cyc_Lex_Ldecls*ts=({struct Cyc_Lex_Ldecls*(*_Tmp7)(struct Cyc_Dict_Dict,struct Cyc_List_List*)=(struct Cyc_Lex_Ldecls*(*)(struct Cyc_Dict_Dict,struct Cyc_List_List*))Cyc_Dict_lookup;_Tmp7;})(((struct Cyc_Binding_NSCtxt*)_check_null(Cyc_Lex_lstate)->v)->ns_data,ns);
+({void(*_Tmp7)(void(*)(struct _fat_ptr*),struct Cyc_Set_Set*)=(void(*)(void(*)(struct _fat_ptr*),struct Cyc_Set_Set*))Cyc_Set_iter;_Tmp7;})(Cyc_Lex_insert_typedef,ts->typedefs);
 goto _LL6;}}_LL6:;}}}}}}}
 # 551
 static int Cyc_Lex_is_typedef_in_namespace(struct Cyc_List_List*ns,struct _fat_ptr*v){
 struct Cyc_List_List*ans=Cyc_Binding_resolve_rel_ns(0U,(struct Cyc_Binding_NSCtxt*)_check_null(Cyc_Lex_lstate)->v,ns);
-struct Cyc_Lex_Ldecls*ts=({(struct Cyc_Lex_Ldecls*(*)(struct Cyc_Dict_Dict,struct Cyc_List_List*))Cyc_Dict_lookup;})(((struct Cyc_Binding_NSCtxt*)_check_null(Cyc_Lex_lstate)->v)->ns_data,ans);
-return({(int(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_member;})(ts->typedefs,v);}struct _tuple32{struct Cyc_List_List*f0;struct Cyc_Lex_Trie*f1;struct _fat_ptr f2;};
+struct Cyc_Lex_Ldecls*ts=({struct Cyc_Lex_Ldecls*(*_Tmp0)(struct Cyc_Dict_Dict,struct Cyc_List_List*)=(struct Cyc_Lex_Ldecls*(*)(struct Cyc_Dict_Dict,struct Cyc_List_List*))Cyc_Dict_lookup;_Tmp0;})(((struct Cyc_Binding_NSCtxt*)_check_null(Cyc_Lex_lstate)->v)->ns_data,ans);
+return({int(*_Tmp0)(struct Cyc_Set_Set*,struct _fat_ptr*)=(int(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_member;_Tmp0;})(ts->typedefs,v);}struct _tuple32{struct Cyc_List_List*f0;struct Cyc_Lex_Trie*f1;struct _fat_ptr f2;};
 # 557
 static int Cyc_Lex_is_typedef_body(struct _RegionHandle*d,struct _tuple32*env){
 # 560
@@ -782,16 +782,16 @@ struct Cyc_Lex_DynTrie*tdefs=0;
 ({struct Cyc_Lex_DynTrie*_Tmp0=tdefs;struct Cyc_Lex_DynTrie*_Tmp1=Cyc_Lex_typedefs_trie;tdefs=_Tmp1;Cyc_Lex_typedefs_trie=_Tmp0;});{
 struct Cyc_Lex_DynTrie _Tmp0=*_check_null(tdefs);void*_Tmp1;void*_Tmp2;_Tmp2=_Tmp0.dyn;_Tmp1=_Tmp0.t;{struct Cyc_Core_DynamicRegion*dyn=_Tmp2;struct Cyc_Lex_Trie*t=_Tmp1;
 struct _tuple32 env=({struct _tuple32 _Tmp3;_Tmp3.f0=ns,_Tmp3.f1=t,_Tmp3.f2=s;_Tmp3;});
-int res=({(int(*)(struct Cyc_Core_DynamicRegion*,struct _tuple32*,int(*)(struct _RegionHandle*,struct _tuple32*)))Cyc_Core_open_region;})(dyn,& env,Cyc_Lex_is_typedef_body);
+int res=({int(*_Tmp3)(struct Cyc_Core_DynamicRegion*,struct _tuple32*,int(*)(struct _RegionHandle*,struct _tuple32*))=(int(*)(struct Cyc_Core_DynamicRegion*,struct _tuple32*,int(*)(struct _RegionHandle*,struct _tuple32*)))Cyc_Core_open_region;_Tmp3;})(dyn,& env,Cyc_Lex_is_typedef_body);
 ({struct Cyc_Lex_DynTrie _Tmp3=({struct Cyc_Lex_DynTrie _Tmp4;_Tmp4.dyn=dyn,_Tmp4.t=t;_Tmp4;});*tdefs=_Tmp3;});
 ({struct Cyc_Lex_DynTrie*_Tmp3=tdefs;struct Cyc_Lex_DynTrie*_Tmp4=Cyc_Lex_typedefs_trie;tdefs=_Tmp4;Cyc_Lex_typedefs_trie=_Tmp3;});
 return res;}}}}
 # 592
 void Cyc_Lex_enter_namespace(struct _fat_ptr*s){
-({(void(*)(struct Cyc_Binding_NSCtxt*,struct _fat_ptr*,int,struct Cyc_Lex_Ldecls*(*)(int)))Cyc_Binding_enter_ns;})((struct Cyc_Binding_NSCtxt*)_check_null(Cyc_Lex_lstate)->v,s,1,Cyc_Lex_mk_empty_ldecls);{
-struct Cyc_Lex_Ldecls*ts=({(struct Cyc_Lex_Ldecls*(*)(struct Cyc_Dict_Dict,struct Cyc_List_List*))Cyc_Dict_lookup;})(((struct Cyc_Binding_NSCtxt*)_check_null(Cyc_Lex_lstate)->v)->ns_data,((struct Cyc_Binding_NSCtxt*)Cyc_Lex_lstate->v)->curr_ns);
+({void(*_Tmp0)(struct Cyc_Binding_NSCtxt*,struct _fat_ptr*,int,struct Cyc_Lex_Ldecls*(*)(int))=(void(*)(struct Cyc_Binding_NSCtxt*,struct _fat_ptr*,int,struct Cyc_Lex_Ldecls*(*)(int)))Cyc_Binding_enter_ns;_Tmp0;})((struct Cyc_Binding_NSCtxt*)_check_null(Cyc_Lex_lstate)->v,s,1,Cyc_Lex_mk_empty_ldecls);{
+struct Cyc_Lex_Ldecls*ts=({struct Cyc_Lex_Ldecls*(*_Tmp0)(struct Cyc_Dict_Dict,struct Cyc_List_List*)=(struct Cyc_Lex_Ldecls*(*)(struct Cyc_Dict_Dict,struct Cyc_List_List*))Cyc_Dict_lookup;_Tmp0;})(((struct Cyc_Binding_NSCtxt*)_check_null(Cyc_Lex_lstate)->v)->ns_data,((struct Cyc_Binding_NSCtxt*)Cyc_Lex_lstate->v)->curr_ns);
 # 597
-({(void(*)(void(*)(struct _fat_ptr*),struct Cyc_Set_Set*))Cyc_Set_iter;})(Cyc_Lex_insert_typedef,ts->typedefs);}}
+({void(*_Tmp0)(void(*)(struct _fat_ptr*),struct Cyc_Set_Set*)=(void(*)(void(*)(struct _fat_ptr*),struct Cyc_Set_Set*))Cyc_Set_iter;_Tmp0;})(Cyc_Lex_insert_typedef,ts->typedefs);}}
 # 599
 void Cyc_Lex_leave_namespace (void){
 Cyc_Binding_leave_ns((struct Cyc_Binding_NSCtxt*)_check_null(Cyc_Lex_lstate)->v);
@@ -799,9 +799,9 @@ Cyc_Lex_recompute_typedefs();}
 # 603
 void Cyc_Lex_enter_using(struct _tuple0*q){
 struct Cyc_List_List*ns=Cyc_Binding_enter_using(0U,(struct Cyc_Binding_NSCtxt*)_check_null(Cyc_Lex_lstate)->v,q);
-struct Cyc_Lex_Ldecls*ts=({(struct Cyc_Lex_Ldecls*(*)(struct Cyc_Dict_Dict,struct Cyc_List_List*))Cyc_Dict_lookup;})(((struct Cyc_Binding_NSCtxt*)_check_null(Cyc_Lex_lstate)->v)->ns_data,ns);
+struct Cyc_Lex_Ldecls*ts=({struct Cyc_Lex_Ldecls*(*_Tmp0)(struct Cyc_Dict_Dict,struct Cyc_List_List*)=(struct Cyc_Lex_Ldecls*(*)(struct Cyc_Dict_Dict,struct Cyc_List_List*))Cyc_Dict_lookup;_Tmp0;})(((struct Cyc_Binding_NSCtxt*)_check_null(Cyc_Lex_lstate)->v)->ns_data,ns);
 # 608
-({(void(*)(void(*)(struct _fat_ptr*),struct Cyc_Set_Set*))Cyc_Set_iter;})(Cyc_Lex_insert_typedef,ts->typedefs);}
+({void(*_Tmp0)(void(*)(struct _fat_ptr*),struct Cyc_Set_Set*)=(void(*)(void(*)(struct _fat_ptr*),struct Cyc_Set_Set*))Cyc_Set_iter;_Tmp0;})(Cyc_Lex_insert_typedef,ts->typedefs);}
 # 610
 void Cyc_Lex_leave_using (void){
 Cyc_Binding_leave_using((struct Cyc_Binding_NSCtxt*)_check_null(Cyc_Lex_lstate)->v);
@@ -810,8 +810,8 @@ Cyc_Lex_recompute_typedefs();}
 # 616
 void Cyc_Lex_register_typedef(struct _tuple0*q){
 # 618
-struct Cyc_Lex_Ldecls*ts=({(struct Cyc_Lex_Ldecls*(*)(struct Cyc_Dict_Dict,struct Cyc_List_List*))Cyc_Dict_lookup;})(((struct Cyc_Binding_NSCtxt*)_check_null(Cyc_Lex_lstate)->v)->ns_data,((struct Cyc_Binding_NSCtxt*)Cyc_Lex_lstate->v)->curr_ns);
-({struct Cyc_Set_Set*_Tmp0=({(struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_insert;})(ts->typedefs,(*q).f1);ts->typedefs=_Tmp0;});
+struct Cyc_Lex_Ldecls*ts=({struct Cyc_Lex_Ldecls*(*_Tmp0)(struct Cyc_Dict_Dict,struct Cyc_List_List*)=(struct Cyc_Lex_Ldecls*(*)(struct Cyc_Dict_Dict,struct Cyc_List_List*))Cyc_Dict_lookup;_Tmp0;})(((struct Cyc_Binding_NSCtxt*)_check_null(Cyc_Lex_lstate)->v)->ns_data,((struct Cyc_Binding_NSCtxt*)Cyc_Lex_lstate->v)->curr_ns);
+({struct Cyc_Set_Set*_Tmp0=({struct Cyc_Set_Set*(*_Tmp1)(struct Cyc_Set_Set*,struct _fat_ptr*)=(struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_insert;_Tmp1;})(ts->typedefs,(*q).f1);ts->typedefs=_Tmp0;});
 # 623
 Cyc_Lex_insert_typedef((*q).f1);}
 # 626
@@ -876,7 +876,7 @@ return({struct Cyc_Lex_PosInfo*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_Lex_P
 # 712
 static void Cyc_Lex_inc_linenumber (void){
 if(Cyc_Lex_pos_info==0)
-({struct Cyc_Warn_String_Warn_Warg_struct _Tmp0=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=_tag_fat("empty position info!",sizeof(char),21U);_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;({(int(*)(struct _fat_ptr))Cyc_Warn_impos2;})(_tag_fat(_Tmp1,sizeof(void*),1));});{
+({struct Cyc_Warn_String_Warn_Warg_struct _Tmp0=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=_tag_fat("empty position info!",sizeof(char),21U);_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;({int(*_Tmp2)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp2;})(_tag_fat(_Tmp1,sizeof(void*),1));});{
 struct Cyc_Lex_PosInfo*p=_check_null(Cyc_Lex_pos_info);
 struct _fat_ptr linenums=_tag_fat(0,0,0);
 ({struct _fat_ptr _Tmp0=p->linenumpos;struct _fat_ptr _Tmp1=linenums;p->linenumpos=_Tmp1;linenums=_Tmp0;});{
@@ -890,7 +890,7 @@ struct _fat_ptr newlinenums=({unsigned _Tmp0=n * 2U;_tag_fat(_region_calloc(Cyc_
 *((unsigned*)_check_fat_subscript(newlinenums,sizeof(unsigned),(int)i))=((unsigned*)linenums.curr)[(int)i];}}
 ({struct _fat_ptr _Tmp0=linenums;struct _fat_ptr _Tmp1=newlinenums;linenums=_Tmp1;newlinenums=_Tmp0;});
 # 728
-({(void(*)(unsigned*))Cyc_Core_ufree;})((unsigned*)_untag_fat_ptr(newlinenums,sizeof(unsigned),1U));}
+({void(*_Tmp0)(unsigned*)=(void(*)(unsigned*))Cyc_Core_ufree;_Tmp0;})((unsigned*)_untag_fat_ptr(newlinenums,sizeof(unsigned),1U));}
 # 731
 *((unsigned*)_check_fat_subscript(linenums,sizeof(unsigned),(int)offset))=(unsigned)Cyc_yylloc.first_line;
 p->linenumpos_offset=offset + 1U;
@@ -1382,9 +1382,9 @@ Cyc_Lex_pos_info=0;}
 # 1109
 static struct Cyc_Xarray_Xarray*Cyc_Lex_empty_xarray(struct _RegionHandle*id_rgn,int dummy){
 struct Cyc_Xarray_Xarray*symbols=({
-struct _RegionHandle*_Tmp0=id_rgn;({(struct Cyc_Xarray_Xarray*(*)(struct _RegionHandle*,int,struct _fat_ptr*))Cyc_Xarray_rcreate;})(_Tmp0,101,({struct _fat_ptr*_Tmp1=_cycalloc(sizeof(struct _fat_ptr));*_Tmp1=_tag_fat("",sizeof(char),1U);_Tmp1;}));});
+struct Cyc_Xarray_Xarray*(*_Tmp0)(struct _RegionHandle*,int,struct _fat_ptr*)=({struct Cyc_Xarray_Xarray*(*_Tmp1)(struct _RegionHandle*,int,struct _fat_ptr*)=(struct Cyc_Xarray_Xarray*(*)(struct _RegionHandle*,int,struct _fat_ptr*))Cyc_Xarray_rcreate;_Tmp1;});struct _RegionHandle*_Tmp1=id_rgn;_Tmp0(_Tmp1,101,({struct _fat_ptr*_Tmp2=_cycalloc(sizeof(struct _fat_ptr));*_Tmp2=_tag_fat("",sizeof(char),1U);_Tmp2;}));});
 # 1113
-({(void(*)(struct Cyc_Xarray_Xarray*,struct _fat_ptr*))Cyc_Xarray_add;})(symbols,& Cyc_Lex_bogus_string);
+({void(*_Tmp0)(struct Cyc_Xarray_Xarray*,struct _fat_ptr*)=(void(*)(struct Cyc_Xarray_Xarray*,struct _fat_ptr*))Cyc_Xarray_add;_Tmp0;})(symbols,& Cyc_Lex_bogus_string);
 return symbols;}
 # 1117
 void Cyc_Lex_lex_init(int include_cyclone_keywords){
@@ -1394,7 +1394,7 @@ struct Cyc_List_List*x=0;
 ({struct Cyc_List_List*_Tmp0=Cyc_Lex_prev_extern_c;struct Cyc_List_List*_Tmp1=x;Cyc_Lex_prev_extern_c=_Tmp1;x=_Tmp0;});
 while(x!=0){
 struct Cyc_List_List*t=x->tl;
-({(void(*)(struct Cyc_List_List*))Cyc_Core_ufree;})(x);
+({void(*_Tmp0)(struct Cyc_List_List*)=(void(*)(struct Cyc_List_List*))Cyc_Core_ufree;_Tmp0;})(x);
 x=t;}
 # 1128
 if(Cyc_Lex_ids_trie!=0){
@@ -1402,22 +1402,22 @@ struct Cyc_Lex_DynTrieSymbols*idt=0;
 ({struct Cyc_Lex_DynTrieSymbols*_Tmp0=idt;struct Cyc_Lex_DynTrieSymbols*_Tmp1=Cyc_Lex_ids_trie;idt=_Tmp1;Cyc_Lex_ids_trie=_Tmp0;});{
 struct Cyc_Lex_DynTrieSymbols _Tmp0=*idt;void*_Tmp1;_Tmp1=_Tmp0.dyn;{struct Cyc_Core_DynamicRegion*dyn=_Tmp1;
 Cyc_Core_free_ukey(dyn);
-({(void(*)(struct Cyc_Lex_DynTrieSymbols*))Cyc_Core_ufree;})(idt);}}}
+({void(*_Tmp2)(struct Cyc_Lex_DynTrieSymbols*)=(void(*)(struct Cyc_Lex_DynTrieSymbols*))Cyc_Core_ufree;_Tmp2;})(idt);}}}
 # 1135
 if(Cyc_Lex_typedefs_trie!=0){
 struct Cyc_Lex_DynTrie*tdefs=0;
 ({struct Cyc_Lex_DynTrie*_Tmp0=tdefs;struct Cyc_Lex_DynTrie*_Tmp1=Cyc_Lex_typedefs_trie;tdefs=_Tmp1;Cyc_Lex_typedefs_trie=_Tmp0;});{
 struct Cyc_Lex_DynTrie _Tmp0=*tdefs;void*_Tmp1;_Tmp1=_Tmp0.dyn;{struct Cyc_Core_DynamicRegion*dyn=_Tmp1;
 Cyc_Core_free_ukey(dyn);
-({(void(*)(struct Cyc_Lex_DynTrie*))Cyc_Core_ufree;})(tdefs);}}}{
+({void(*_Tmp2)(struct Cyc_Lex_DynTrie*)=(void(*)(struct Cyc_Lex_DynTrie*))Cyc_Core_ufree;_Tmp2;})(tdefs);}}}{
 # 1143
 struct Cyc_Core_NewDynamicRegion _Tmp0=Cyc_Core__new_ukey(0U,"internal-error","internal-error",0);void*_Tmp1;_Tmp1=_Tmp0.key;{struct Cyc_Core_DynamicRegion*id_dyn=_Tmp1;
-struct Cyc_Lex_Trie*ts=({(struct Cyc_Lex_Trie*(*)(struct Cyc_Core_DynamicRegion*,int,struct Cyc_Lex_Trie*(*)(struct _RegionHandle*,int)))Cyc_Core_open_region;})(id_dyn,0,Cyc_Lex_empty_trie);
-struct Cyc_Xarray_Xarray*xa=({(struct Cyc_Xarray_Xarray*(*)(struct Cyc_Core_DynamicRegion*,int,struct Cyc_Xarray_Xarray*(*)(struct _RegionHandle*,int)))Cyc_Core_open_region;})(id_dyn,0,Cyc_Lex_empty_xarray);
+struct Cyc_Lex_Trie*ts=({struct Cyc_Lex_Trie*(*_Tmp2)(struct Cyc_Core_DynamicRegion*,int,struct Cyc_Lex_Trie*(*)(struct _RegionHandle*,int))=(struct Cyc_Lex_Trie*(*)(struct Cyc_Core_DynamicRegion*,int,struct Cyc_Lex_Trie*(*)(struct _RegionHandle*,int)))Cyc_Core_open_region;_Tmp2;})(id_dyn,0,Cyc_Lex_empty_trie);
+struct Cyc_Xarray_Xarray*xa=({struct Cyc_Xarray_Xarray*(*_Tmp2)(struct Cyc_Core_DynamicRegion*,int,struct Cyc_Xarray_Xarray*(*)(struct _RegionHandle*,int))=(struct Cyc_Xarray_Xarray*(*)(struct Cyc_Core_DynamicRegion*,int,struct Cyc_Xarray_Xarray*(*)(struct _RegionHandle*,int)))Cyc_Core_open_region;_Tmp2;})(id_dyn,0,Cyc_Lex_empty_xarray);
 Cyc_Lex_ids_trie=({struct Cyc_Lex_DynTrieSymbols*_Tmp2=_aqual_malloc(Cyc_Core_unique_qual,sizeof(struct Cyc_Lex_DynTrieSymbols));_Tmp2->dyn=id_dyn,_Tmp2->t=ts,_Tmp2->symbols=xa;_Tmp2;});{
 # 1148
 struct Cyc_Core_NewDynamicRegion _Tmp2=Cyc_Core__new_ukey(0U,"internal-error","internal-error",0);void*_Tmp3;_Tmp3=_Tmp2.key;{struct Cyc_Core_DynamicRegion*typedefs_dyn=_Tmp3;
-struct Cyc_Lex_Trie*t=({(struct Cyc_Lex_Trie*(*)(struct Cyc_Core_DynamicRegion*,int,struct Cyc_Lex_Trie*(*)(struct _RegionHandle*,int)))Cyc_Core_open_region;})(typedefs_dyn,0,Cyc_Lex_empty_trie);
+struct Cyc_Lex_Trie*t=({struct Cyc_Lex_Trie*(*_Tmp4)(struct Cyc_Core_DynamicRegion*,int,struct Cyc_Lex_Trie*(*)(struct _RegionHandle*,int))=(struct Cyc_Lex_Trie*(*)(struct Cyc_Core_DynamicRegion*,int,struct Cyc_Lex_Trie*(*)(struct _RegionHandle*,int)))Cyc_Core_open_region;_Tmp4;})(typedefs_dyn,0,Cyc_Lex_empty_trie);
 Cyc_Lex_typedefs_trie=({struct Cyc_Lex_DynTrie*_Tmp4=_aqual_malloc(Cyc_Core_unique_qual,sizeof(struct Cyc_Lex_DynTrie));_Tmp4->dyn=typedefs_dyn,_Tmp4->t=t;_Tmp4;});
 Cyc_Lex_num_kws=Cyc_Lex_num_keywords(include_cyclone_keywords);
 Cyc_Lex_kw_nums=({unsigned _Tmp4=(unsigned)Cyc_Lex_num_kws;_tag_fat(({struct Cyc_Lex_KeyWordInfo*_Tmp5=_cycalloc(_check_times(_Tmp4,sizeof(struct Cyc_Lex_KeyWordInfo)));({{unsigned _Tmp6=(unsigned)Cyc_Lex_num_kws;unsigned i;for(i=0;i < _Tmp6;++ i){_Tmp5[i].token_index=0,_Tmp5[i].is_c_keyword=0;}}0;});_Tmp5;}),sizeof(struct Cyc_Lex_KeyWordInfo),_Tmp4);});{

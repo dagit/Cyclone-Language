@@ -368,22 +368,22 @@ return(void*)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp0=_
 static int Cyc_va_arg_int(struct _fat_ptr ap){
 void*_Tmp0=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));unsigned long _Tmp1;if(*((int*)_Tmp0)==1){_Tmp1=((struct Cyc_Int_pa_PrintArg_struct*)_Tmp0)->f1;{unsigned long i=_Tmp1;
 return(int)i;}}else{
-return({(int(*)(struct _fat_ptr))Cyc_badarg;})(_tag_fat("printf expected int",sizeof(char),20U));};}
+return({int(*_Tmp2)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_badarg;_Tmp2;})(_tag_fat("printf expected int",sizeof(char),20U));};}
 # 111
 static long Cyc_va_arg_long(struct _fat_ptr ap){
 void*_Tmp0=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));unsigned long _Tmp1;if(*((int*)_Tmp0)==1){_Tmp1=((struct Cyc_Int_pa_PrintArg_struct*)_Tmp0)->f1;{unsigned long i=_Tmp1;
 return(long)i;}}else{
-return({(long(*)(struct _fat_ptr))Cyc_badarg;})(_tag_fat("printf expected int",sizeof(char),20U));};}
+return({long(*_Tmp2)(struct _fat_ptr)=(long(*)(struct _fat_ptr))Cyc_badarg;_Tmp2;})(_tag_fat("printf expected int",sizeof(char),20U));};}
 # 118
 static unsigned long Cyc_va_arg_ulong(struct _fat_ptr ap){
 void*_Tmp0=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));unsigned long _Tmp1;if(*((int*)_Tmp0)==1){_Tmp1=((struct Cyc_Int_pa_PrintArg_struct*)_Tmp0)->f1;{unsigned long i=_Tmp1;
 return i;}}else{
-return({(unsigned long(*)(struct _fat_ptr))Cyc_badarg;})(_tag_fat("printf expected int",sizeof(char),20U));};}
+return({unsigned long(*_Tmp2)(struct _fat_ptr)=(unsigned long(*)(struct _fat_ptr))Cyc_badarg;_Tmp2;})(_tag_fat("printf expected int",sizeof(char),20U));};}
 # 125
 static unsigned long Cyc_va_arg_uint(struct _fat_ptr ap){
 void*_Tmp0=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));unsigned long _Tmp1;if(*((int*)_Tmp0)==1){_Tmp1=((struct Cyc_Int_pa_PrintArg_struct*)_Tmp0)->f1;{unsigned long i=_Tmp1;
 return i;}}else{
-return({(unsigned long(*)(struct _fat_ptr))Cyc_badarg;})(_tag_fat("printf expected int",sizeof(char),20U));};}
+return({unsigned long(*_Tmp2)(struct _fat_ptr)=(unsigned long(*)(struct _fat_ptr))Cyc_badarg;_Tmp2;})(_tag_fat("printf expected int",sizeof(char),20U));};}
 # 133
 static double Cyc_va_arg_double(struct _fat_ptr ap){
 void*_Tmp0=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));long double _Tmp1;double _Tmp2;switch(*((int*)_Tmp0)){case 2: _Tmp2=((struct Cyc_Double_pa_PrintArg_struct*)_Tmp0)->f1;{double d=_Tmp2;
@@ -986,7 +986,7 @@ return(t.curr - startp.curr)/ sizeof(char);}
 int Cyc_vfprintf(struct Cyc___cycFILE*f,struct _fat_ptr fmt,struct _fat_ptr ap){
 # 962
 int ans;
-ans=({(int(*)(int(*)(int,struct Cyc___cycFILE*),struct Cyc___cycFILE*,struct _fat_ptr,struct _fat_ptr))Cyc__IO_vfprintf;})(Cyc_putc,f,fmt,ap);
+ans=({int(*_Tmp0)(int(*)(int,struct Cyc___cycFILE*),struct Cyc___cycFILE*,struct _fat_ptr,struct _fat_ptr)=(int(*)(int(*)(int,struct Cyc___cycFILE*),struct Cyc___cycFILE*,struct _fat_ptr,struct _fat_ptr))Cyc__IO_vfprintf;_Tmp0;})(Cyc_putc,f,fmt,ap);
 return ans;}
 # 967
 int Cyc_fprintf(struct Cyc___cycFILE*f,struct _fat_ptr fmt,struct _fat_ptr ap){
@@ -996,7 +996,7 @@ return Cyc_vfprintf(f,fmt,ap);}
 int Cyc_vprintf(struct _fat_ptr fmt,struct _fat_ptr ap){
 # 977
 int ans;
-ans=({(int(*)(int(*)(int,struct Cyc___cycFILE*),struct Cyc___cycFILE*,struct _fat_ptr,struct _fat_ptr))Cyc__IO_vfprintf;})(Cyc_putc,Cyc_stdout,fmt,ap);
+ans=({int(*_Tmp0)(int(*)(int,struct Cyc___cycFILE*),struct Cyc___cycFILE*,struct _fat_ptr,struct _fat_ptr)=(int(*)(int(*)(int,struct Cyc___cycFILE*),struct Cyc___cycFILE*,struct _fat_ptr,struct _fat_ptr))Cyc__IO_vfprintf;_Tmp0;})(Cyc_putc,Cyc_stdout,fmt,ap);
 return ans;}
 # 982
 int Cyc_printf(struct _fat_ptr fmt,struct _fat_ptr ap){
@@ -1021,7 +1021,7 @@ int ans;
 struct _fat_ptr sptr=s;
 unsigned long nptr=n;
 struct _tuple0 sptr_n=({struct _tuple0 _Tmp0;_Tmp0.f0=& sptr,_Tmp0.f1=& nptr;_Tmp0;});
-ans=({(int(*)(int(*)(int,struct _tuple0*),struct _tuple0*,struct _fat_ptr,struct _fat_ptr))Cyc__IO_vfprintf;})(Cyc_putc_string,& sptr_n,fmt,ap);
+ans=({int(*_Tmp0)(int(*)(int,struct _tuple0*),struct _tuple0*,struct _fat_ptr,struct _fat_ptr)=(int(*)(int(*)(int,struct _tuple0*),struct _tuple0*,struct _fat_ptr,struct _fat_ptr))Cyc__IO_vfprintf;_Tmp0;})(Cyc_putc_string,& sptr_n,fmt,ap);
 if(0 <= ans)
 *((char*)_check_fat_subscript(s,sizeof(char),ans))='\000';
 return ans;}
@@ -1043,7 +1043,7 @@ return 1;}
 # 1036
 struct _fat_ptr Cyc_vrprintf(struct _RegionHandle*r1,struct _fat_ptr fmt,struct _fat_ptr ap){
 # 1040
-int size=({(int(*)(int(*)(int,int),int,struct _fat_ptr,struct _fat_ptr))Cyc__IO_vfprintf;})(Cyc_putc_void,0,fmt,ap)+ 1;
+int size=({int(*_Tmp0)(int(*)(int,int),int,struct _fat_ptr,struct _fat_ptr)=(int(*)(int(*)(int,int),int,struct _fat_ptr,struct _fat_ptr))Cyc__IO_vfprintf;_Tmp0;})(Cyc_putc_void,0,fmt,ap)+ 1;
 struct _fat_ptr s=({unsigned _Tmp0=size + 1;_tag_fat(_cyccalloc_atomic(sizeof(char),_Tmp0),sizeof(char),_Tmp0);});
 ({struct _fat_ptr _Tmp0=_fat_ptr_decrease_size(s,sizeof(char),1U);struct _fat_ptr _Tmp1=fmt;Cyc_vsprintf(_Tmp0,_Tmp1,ap);});
 return s;}

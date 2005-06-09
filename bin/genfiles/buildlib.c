@@ -542,7 +542,7 @@ static struct _fat_ptr*Cyc_current_source=0;
 static struct Cyc_List_List*Cyc_current_args=0;
 static struct Cyc_Set_Set**Cyc_current_targets=0;
 static void Cyc_add_target(struct _fat_ptr*sptr){
-Cyc_current_targets=({struct Cyc_Set_Set**_Tmp0=_cycalloc(sizeof(struct Cyc_Set_Set*));({struct Cyc_Set_Set*_Tmp1=({(struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_insert;})(*_check_null(Cyc_current_targets),sptr);*_Tmp0=_Tmp1;});_Tmp0;});}struct _tuple13{struct _fat_ptr*f0;struct Cyc_Set_Set*f1;};
+Cyc_current_targets=({struct Cyc_Set_Set**_Tmp0=_cycalloc(sizeof(struct Cyc_Set_Set*));({struct Cyc_Set_Set*_Tmp1=({struct Cyc_Set_Set*(*_Tmp2)(struct Cyc_Set_Set*,struct _fat_ptr*)=(struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_insert;_Tmp2;})(*_check_null(Cyc_current_targets),sptr);*_Tmp0=_Tmp1;});_Tmp0;});}struct _tuple13{struct _fat_ptr*f0;struct Cyc_Set_Set*f1;};
 # 117
 struct _tuple13*Cyc_line(struct Cyc_Lexing_lexbuf*);
 int Cyc_macroname(struct Cyc_Lexing_lexbuf*);
@@ -666,7 +666,7 @@ switch((int)lexstate){case 0:
 # 211 "buildlib.cyl"
  Cyc_macroname(lexbuf);
 for(1;Cyc_current_args!=0;Cyc_current_args=_check_null(Cyc_current_args)->tl){
-Cyc_current_targets=({struct Cyc_Set_Set**_Tmp0=_cycalloc(sizeof(struct Cyc_Set_Set*));({struct Cyc_Set_Set*_Tmp1=({(struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_delete;})(*_check_null(Cyc_current_targets),(struct _fat_ptr*)Cyc_current_args->hd);*_Tmp0=_Tmp1;});_Tmp0;});}
+Cyc_current_targets=({struct Cyc_Set_Set**_Tmp0=_cycalloc(sizeof(struct Cyc_Set_Set*));({struct Cyc_Set_Set*_Tmp1=({struct Cyc_Set_Set*(*_Tmp2)(struct Cyc_Set_Set*,struct _fat_ptr*)=(struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_delete;_Tmp2;})(*_check_null(Cyc_current_targets),(struct _fat_ptr*)Cyc_current_args->hd);*_Tmp0=_Tmp1;});_Tmp0;});}
 # 216
 return({struct _tuple13*_Tmp0=_cycalloc(sizeof(struct _tuple13));_Tmp0->f0=_check_null(Cyc_current_source),_Tmp0->f1=*_check_null(Cyc_current_targets);_Tmp0;});case 1:
 # 219 "buildlib.cyl"
@@ -689,7 +689,7 @@ int _Tmp3=Cyc_Lexing_lexeme_end(lexbuf);_Tmp3 - Cyc_Lexing_lexeme_start(lexbuf);
 *_Tmp0=_Tmp1;});_Tmp0;});
 # 227
 Cyc_current_args=0;
-Cyc_current_targets=({struct Cyc_Set_Set**_Tmp0=_cycalloc(sizeof(struct Cyc_Set_Set*));({struct Cyc_Set_Set*_Tmp1=({(struct Cyc_Set_Set*(*)(int(*)(struct _fat_ptr*,struct _fat_ptr*)))Cyc_Set_empty;})(Cyc_strptrcmp);*_Tmp0=_Tmp1;});_Tmp0;});
+Cyc_current_targets=({struct Cyc_Set_Set**_Tmp0=_cycalloc(sizeof(struct Cyc_Set_Set*));({struct Cyc_Set_Set*_Tmp1=({struct Cyc_Set_Set*(*_Tmp2)(int(*)(struct _fat_ptr*,struct _fat_ptr*))=(struct Cyc_Set_Set*(*)(int(*)(struct _fat_ptr*,struct _fat_ptr*)))Cyc_Set_empty;_Tmp2;})(Cyc_strptrcmp);*_Tmp0=_Tmp1;});_Tmp0;});
 Cyc_token(lexbuf);
 return 0;case 1:
 # 233
@@ -699,13 +699,13 @@ int _Tmp3=Cyc_Lexing_lexeme_end(lexbuf);_Tmp3 - Cyc_Lexing_lexeme_start(lexbuf);
 *_Tmp0=_Tmp1;});_Tmp0;});
 # 235
 Cyc_current_args=0;
-Cyc_current_targets=({struct Cyc_Set_Set**_Tmp0=_cycalloc(sizeof(struct Cyc_Set_Set*));({struct Cyc_Set_Set*_Tmp1=({(struct Cyc_Set_Set*(*)(int(*)(struct _fat_ptr*,struct _fat_ptr*)))Cyc_Set_empty;})(Cyc_strptrcmp);*_Tmp0=_Tmp1;});_Tmp0;});
+Cyc_current_targets=({struct Cyc_Set_Set**_Tmp0=_cycalloc(sizeof(struct Cyc_Set_Set*));({struct Cyc_Set_Set*_Tmp1=({struct Cyc_Set_Set*(*_Tmp2)(int(*)(struct _fat_ptr*,struct _fat_ptr*))=(struct Cyc_Set_Set*(*)(int(*)(struct _fat_ptr*,struct _fat_ptr*)))Cyc_Set_empty;_Tmp2;})(Cyc_strptrcmp);*_Tmp0=_Tmp1;});_Tmp0;});
 Cyc_args(lexbuf);
 return 0;case 2:
 # 241
  Cyc_current_source=({struct _fat_ptr*_Tmp0=_cycalloc(sizeof(struct _fat_ptr));({struct _fat_ptr _Tmp1=(struct _fat_ptr)Cyc_Lexing_lexeme(lexbuf);*_Tmp0=_Tmp1;});_Tmp0;});
 Cyc_current_args=0;
-Cyc_current_targets=({struct Cyc_Set_Set**_Tmp0=_cycalloc(sizeof(struct Cyc_Set_Set*));({struct Cyc_Set_Set*_Tmp1=({(struct Cyc_Set_Set*(*)(int(*)(struct _fat_ptr*,struct _fat_ptr*)))Cyc_Set_empty;})(Cyc_strptrcmp);*_Tmp0=_Tmp1;});_Tmp0;});
+Cyc_current_targets=({struct Cyc_Set_Set**_Tmp0=_cycalloc(sizeof(struct Cyc_Set_Set*));({struct Cyc_Set_Set*_Tmp1=({struct Cyc_Set_Set*(*_Tmp2)(int(*)(struct _fat_ptr*,struct _fat_ptr*))=(struct Cyc_Set_Set*(*)(int(*)(struct _fat_ptr*,struct _fat_ptr*)))Cyc_Set_empty;_Tmp2;})(Cyc_strptrcmp);*_Tmp0=_Tmp1;});_Tmp0;});
 Cyc_token(lexbuf);
 return 0;default:
 # 247
@@ -1616,7 +1616,7 @@ exit(1);return;};}
 void Cyc_scan_decl(struct Cyc_Absyn_Decl*d,struct Cyc_Hashtable_Table*dep){
 struct Cyc_Set_Set**saved_targets=Cyc_current_targets;
 struct _fat_ptr*saved_source=Cyc_current_source;
-Cyc_current_targets=({struct Cyc_Set_Set**_Tmp0=_cycalloc(sizeof(struct Cyc_Set_Set*));({struct Cyc_Set_Set*_Tmp1=({(struct Cyc_Set_Set*(*)(int(*)(struct _fat_ptr*,struct _fat_ptr*)))Cyc_Set_empty;})(Cyc_strptrcmp);*_Tmp0=_Tmp1;});_Tmp0;});
+Cyc_current_targets=({struct Cyc_Set_Set**_Tmp0=_cycalloc(sizeof(struct Cyc_Set_Set*));({struct Cyc_Set_Set*_Tmp1=({struct Cyc_Set_Set*(*_Tmp2)(int(*)(struct _fat_ptr*,struct _fat_ptr*))=(struct Cyc_Set_Set*(*)(int(*)(struct _fat_ptr*,struct _fat_ptr*)))Cyc_Set_empty;_Tmp2;})(Cyc_strptrcmp);*_Tmp0=_Tmp1;});_Tmp0;});
 {void*_Tmp0=d->r;void*_Tmp1;switch(*((int*)_Tmp0)){case 0: _Tmp1=((struct Cyc_Absyn_Var_d_Absyn_Raw_decl_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Vardecl*x=_Tmp1;
 # 1101
 struct _tuple1*_Tmp2=x->name;void*_Tmp3;_Tmp3=_Tmp2->f1;{struct _fat_ptr*v=_Tmp3;
@@ -1706,30 +1706,30 @@ exit(1);}_LL0:;}{
 struct Cyc_Set_Set*old;
 struct _fat_ptr*name=_check_null(Cyc_current_source);
 {struct _handler_cons _Tmp0;_push_handler(& _Tmp0);{int _Tmp1=0;if(setjmp(_Tmp0.handler))_Tmp1=1;if(!_Tmp1){
-old=({(struct Cyc_Set_Set*(*)(struct Cyc_Hashtable_Table*,struct _fat_ptr*))Cyc_Hashtable_lookup;})(dep,name);;_pop_handler();}else{void*_Tmp2=(void*)Cyc_Core_get_exn_thrown();void*_Tmp3;if(((struct Cyc_Core_Not_found_exn_struct*)_Tmp2)->tag==Cyc_Core_Not_found){
+old=({struct Cyc_Set_Set*(*_Tmp2)(struct Cyc_Hashtable_Table*,struct _fat_ptr*)=(struct Cyc_Set_Set*(*)(struct Cyc_Hashtable_Table*,struct _fat_ptr*))Cyc_Hashtable_lookup;_Tmp2;})(dep,name);;_pop_handler();}else{void*_Tmp2=(void*)Cyc_Core_get_exn_thrown();void*_Tmp3;if(((struct Cyc_Core_Not_found_exn_struct*)_Tmp2)->tag==Cyc_Core_Not_found){
 # 1203
-old=({(struct Cyc_Set_Set*(*)(int(*)(struct _fat_ptr*,struct _fat_ptr*)))Cyc_Set_empty;})(Cyc_strptrcmp);goto _LL35;}else{_Tmp3=_Tmp2;{void*exn=_Tmp3;_rethrow(exn);}}_LL35:;}}}{
+old=({struct Cyc_Set_Set*(*_Tmp4)(int(*)(struct _fat_ptr*,struct _fat_ptr*))=(struct Cyc_Set_Set*(*)(int(*)(struct _fat_ptr*,struct _fat_ptr*)))Cyc_Set_empty;_Tmp4;})(Cyc_strptrcmp);goto _LL35;}else{_Tmp3=_Tmp2;{void*exn=_Tmp3;_rethrow(exn);}}_LL35:;}}}{
 # 1205
 struct Cyc_Set_Set*targets=Cyc_Set_union_two(*_check_null(Cyc_current_targets),old);
-({(void(*)(struct Cyc_Hashtable_Table*,struct _fat_ptr*,struct Cyc_Set_Set*))Cyc_Hashtable_insert;})(dep,name,targets);
+({void(*_Tmp0)(struct Cyc_Hashtable_Table*,struct _fat_ptr*,struct Cyc_Set_Set*)=(void(*)(struct Cyc_Hashtable_Table*,struct _fat_ptr*,struct Cyc_Set_Set*))Cyc_Hashtable_insert;_Tmp0;})(dep,name,targets);
 # 1208
 Cyc_current_targets=saved_targets;
 Cyc_current_source=saved_source;}}}
 # 1212
 struct Cyc_Hashtable_Table*Cyc_new_deps (void){
-return({(struct Cyc_Hashtable_Table*(*)(int,int(*)(struct _fat_ptr*,struct _fat_ptr*),int(*)(struct _fat_ptr*)))Cyc_Hashtable_create;})(107,Cyc_strptrcmp,Cyc_Hashtable_hash_stringptr);}
+return({struct Cyc_Hashtable_Table*(*_Tmp0)(int,int(*)(struct _fat_ptr*,struct _fat_ptr*),int(*)(struct _fat_ptr*))=(struct Cyc_Hashtable_Table*(*)(int,int(*)(struct _fat_ptr*,struct _fat_ptr*),int(*)(struct _fat_ptr*)))Cyc_Hashtable_create;_Tmp0;})(107,Cyc_strptrcmp,Cyc_Hashtable_hash_stringptr);}
 # 1216
 struct Cyc_Set_Set*Cyc_find(struct Cyc_Hashtable_Table*t,struct _fat_ptr*x){
-struct _handler_cons _Tmp0;_push_handler(& _Tmp0);{int _Tmp1=0;if(setjmp(_Tmp0.handler))_Tmp1=1;if(!_Tmp1){{struct Cyc_Set_Set*_Tmp2=({(struct Cyc_Set_Set*(*)(struct Cyc_Hashtable_Table*,struct _fat_ptr*))Cyc_Hashtable_lookup;})(t,x);_npop_handler(0);return _Tmp2;};_pop_handler();}else{void*_Tmp2=(void*)Cyc_Core_get_exn_thrown();void*_Tmp3;if(((struct Cyc_Core_Not_found_exn_struct*)_Tmp2)->tag==Cyc_Core_Not_found)
+struct _handler_cons _Tmp0;_push_handler(& _Tmp0);{int _Tmp1=0;if(setjmp(_Tmp0.handler))_Tmp1=1;if(!_Tmp1){{struct Cyc_Set_Set*_Tmp2=({struct Cyc_Set_Set*(*_Tmp3)(struct Cyc_Hashtable_Table*,struct _fat_ptr*)=(struct Cyc_Set_Set*(*)(struct Cyc_Hashtable_Table*,struct _fat_ptr*))Cyc_Hashtable_lookup;_Tmp3;})(t,x);_npop_handler(0);return _Tmp2;};_pop_handler();}else{void*_Tmp2=(void*)Cyc_Core_get_exn_thrown();void*_Tmp3;if(((struct Cyc_Core_Not_found_exn_struct*)_Tmp2)->tag==Cyc_Core_Not_found)
 # 1219
-return({(struct Cyc_Set_Set*(*)(int(*)(struct _fat_ptr*,struct _fat_ptr*)))Cyc_Set_empty;})(Cyc_strptrcmp);else{_Tmp3=_Tmp2;{void*exn=_Tmp3;_rethrow(exn);}};}}}
+return({struct Cyc_Set_Set*(*_Tmp4)(int(*)(struct _fat_ptr*,struct _fat_ptr*))=(struct Cyc_Set_Set*(*)(int(*)(struct _fat_ptr*,struct _fat_ptr*)))Cyc_Set_empty;_Tmp4;})(Cyc_strptrcmp);else{_Tmp3=_Tmp2;{void*exn=_Tmp3;_rethrow(exn);}};}}}
 # 1223
 struct Cyc_Set_Set*Cyc_reachable(struct Cyc_List_List*init,struct Cyc_Hashtable_Table*t){
 # 1233 "buildlib.cyl"
-struct Cyc_Set_Set*emptyset=({(struct Cyc_Set_Set*(*)(int(*)(struct _fat_ptr*,struct _fat_ptr*)))Cyc_Set_empty;})(Cyc_strptrcmp);
+struct Cyc_Set_Set*emptyset=({struct Cyc_Set_Set*(*_Tmp0)(int(*)(struct _fat_ptr*,struct _fat_ptr*))=(struct Cyc_Set_Set*(*)(int(*)(struct _fat_ptr*,struct _fat_ptr*)))Cyc_Set_empty;_Tmp0;})(Cyc_strptrcmp);
 struct Cyc_Set_Set*curr;
 for(curr=emptyset;init!=0;init=init->tl){
-curr=({(struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_insert;})(curr,(struct _fat_ptr*)init->hd);}{
+curr=({struct Cyc_Set_Set*(*_Tmp0)(struct Cyc_Set_Set*,struct _fat_ptr*)=(struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_insert;_Tmp0;})(curr,(struct _fat_ptr*)init->hd);}{
 # 1238
 struct Cyc_Set_Set*delta=curr;
 # 1240
@@ -1737,7 +1737,7 @@ struct _fat_ptr*sptr;sptr=_cycalloc(sizeof(struct _fat_ptr)),*sptr=_tag_fat("",s
 while(Cyc_Set_cardinality(delta)> 0){
 struct Cyc_Set_Set*next=emptyset;
 struct Cyc_Iter_Iter iter=Cyc_Set_make_iter(Cyc_Core_heap_region,delta);
-while(({(int(*)(struct Cyc_Iter_Iter,struct _fat_ptr**))Cyc_Iter_next;})(iter,& sptr)){
+while(({int(*_Tmp0)(struct Cyc_Iter_Iter,struct _fat_ptr**)=(int(*)(struct Cyc_Iter_Iter,struct _fat_ptr**))Cyc_Iter_next;_Tmp0;})(iter,& sptr)){
 next=({struct Cyc_Set_Set*_Tmp0=next;Cyc_Set_union_two(_Tmp0,Cyc_find(t,sptr));});}
 delta=Cyc_Set_diff(next,curr);
 curr=Cyc_Set_union_two(curr,delta);}
@@ -1888,7 +1888,7 @@ Cyc_fputs((const char*)_check_null(_untag_fat_ptr(*((struct _fat_ptr*)l->hd),siz
 Cyc_fclose(out_file);{
 struct _fat_ptr cppargs_string=({
 struct Cyc_List_List*_Tmp2=({struct Cyc_List_List*_Tmp3=_cycalloc(sizeof(struct Cyc_List_List));({struct _fat_ptr*_Tmp4=({struct _fat_ptr*_Tmp5=_cycalloc(sizeof(struct _fat_ptr));*_Tmp5=(struct _fat_ptr)_tag_fat("",sizeof(char),1U);_Tmp5;});_Tmp3->hd=_Tmp4;}),({
-struct Cyc_List_List*_Tmp4=({(struct Cyc_List_List*(*)(struct _fat_ptr*(*)(struct _fat_ptr*),struct Cyc_List_List*))Cyc_List_map;})(Cyc_sh_escape_stringptr,Cyc_List_rev(Cyc_cppargs));_Tmp3->tl=_Tmp4;});_Tmp3;});
+struct Cyc_List_List*_Tmp4=({struct Cyc_List_List*(*_Tmp5)(struct _fat_ptr*(*)(struct _fat_ptr*),struct Cyc_List_List*)=({struct Cyc_List_List*(*_Tmp6)(struct _fat_ptr*(*)(struct _fat_ptr*),struct Cyc_List_List*)=(struct Cyc_List_List*(*)(struct _fat_ptr*(*)(struct _fat_ptr*),struct Cyc_List_List*))Cyc_List_map;_Tmp6;});_Tmp5(Cyc_sh_escape_stringptr,Cyc_List_rev(Cyc_cppargs));});_Tmp3->tl=_Tmp4;});_Tmp3;});
 # 1452
 Cyc_str_sepstr(_Tmp2,
 # 1454
@@ -1917,7 +1917,7 @@ struct Cyc_Lexing_lexbuf*l=Cyc_Lexing_from_file(in_file);
 struct _tuple13*entry;
 while((entry=Cyc_line(l))!=0){
 struct _tuple13*_Tmp2=_check_null(entry);void*_Tmp3;void*_Tmp4;_Tmp4=_Tmp2->f0;_Tmp3=_Tmp2->f1;{struct _fat_ptr*name=_Tmp4;struct Cyc_Set_Set*uses=_Tmp3;
-({(void(*)(struct Cyc_Hashtable_Table*,struct _fat_ptr*,struct Cyc_Set_Set*))Cyc_Hashtable_insert;})(t,name,uses);}}
+({void(*_Tmp5)(struct Cyc_Hashtable_Table*,struct _fat_ptr*,struct Cyc_Set_Set*)=(void(*)(struct Cyc_Hashtable_Table*,struct _fat_ptr*,struct Cyc_Set_Set*))Cyc_Hashtable_insert;_Tmp5;})(t,name,uses);}}
 # 1491
 Cyc_fclose(in_file);
 if(Cyc_verbose)Cyc_fprintf(Cyc_stderr,_tag_fat("done.\n",sizeof(char),7U),_tag_fat(0U,sizeof(void*),0));
@@ -1958,26 +1958,26 @@ if(Cyc_verbose)Cyc_fprintf(Cyc_stderr,_tag_fat("done.\n",sizeof(char),7U),_tag_f
 {struct Cyc_List_List*d=decls;for(0;d!=0;d=d->tl){
 Cyc_scan_decl((struct Cyc_Absyn_Decl*)d->hd,t);}}{
 # 1535
-struct Cyc_List_List*user_symbols=({(struct Cyc_List_List*(*)(struct _fat_ptr*(*)(struct _fat_ptr*),struct Cyc_List_List*))Cyc_List_map;})(Cyc_add_user_prefix,Cyc_List_split(user_defs).f0);
+struct Cyc_List_List*user_symbols=({struct Cyc_List_List*(*_Tmp2)(struct _fat_ptr*(*)(struct _fat_ptr*),struct Cyc_List_List*)=({struct Cyc_List_List*(*_Tmp3)(struct _fat_ptr*(*)(struct _fat_ptr*),struct Cyc_List_List*)=(struct Cyc_List_List*(*)(struct _fat_ptr*(*)(struct _fat_ptr*),struct Cyc_List_List*))Cyc_List_map;_Tmp3;});_Tmp2(Cyc_add_user_prefix,Cyc_List_split(user_defs).f0);});
 struct Cyc_Set_Set*reachable_set=({struct Cyc_List_List*_Tmp2=Cyc_List_append(start_symbols,user_symbols);Cyc_reachable(_Tmp2,t);});
 # 1539
 struct Cyc_List_List*reachable_decls=0;
 struct Cyc_List_List*user_decls=0;
-struct Cyc_Set_Set*defined_symbols=({(struct Cyc_Set_Set*(*)(int(*)(struct _fat_ptr*,struct _fat_ptr*)))Cyc_Set_empty;})(Cyc_strptrcmp);
+struct Cyc_Set_Set*defined_symbols=({struct Cyc_Set_Set*(*_Tmp2)(int(*)(struct _fat_ptr*,struct _fat_ptr*))=(struct Cyc_Set_Set*(*)(int(*)(struct _fat_ptr*,struct _fat_ptr*)))Cyc_Set_empty;_Tmp2;})(Cyc_strptrcmp);
 {struct Cyc_List_List*d=decls;for(0;d!=0;d=d->tl){
 struct Cyc_Absyn_Decl*decl=(struct Cyc_Absyn_Decl*)d->hd;
 struct _fat_ptr*name;
 {void*_Tmp2=decl->r;void*_Tmp3;switch(*((int*)_Tmp2)){case 0: _Tmp3=((struct Cyc_Absyn_Var_d_Absyn_Raw_decl_struct*)_Tmp2)->f1;{struct Cyc_Absyn_Vardecl*x=_Tmp3;
 # 1547
 struct _tuple1*_Tmp4=x->name;void*_Tmp5;_Tmp5=_Tmp4->f1;{struct _fat_ptr*v=_Tmp5;
-defined_symbols=({(struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_insert;})(defined_symbols,v);
-if(({(int(*)(int(*)(struct _fat_ptr*,struct _fat_ptr*),struct Cyc_List_List*,struct _fat_ptr*))Cyc_List_mem;})(Cyc_strptrcmp,omit_symbols,v))name=0;else{
+defined_symbols=({struct Cyc_Set_Set*(*_Tmp6)(struct Cyc_Set_Set*,struct _fat_ptr*)=(struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_insert;_Tmp6;})(defined_symbols,v);
+if(({int(*_Tmp6)(int(*)(struct _fat_ptr*,struct _fat_ptr*),struct Cyc_List_List*,struct _fat_ptr*)=(int(*)(int(*)(struct _fat_ptr*,struct _fat_ptr*),struct Cyc_List_List*,struct _fat_ptr*))Cyc_List_mem;_Tmp6;})(Cyc_strptrcmp,omit_symbols,v))name=0;else{
 name=v;}
 goto _LL6;}}case 1: _Tmp3=((struct Cyc_Absyn_Fn_d_Absyn_Raw_decl_struct*)_Tmp2)->f1;{struct Cyc_Absyn_Fndecl*x=_Tmp3;
 # 1553
 struct _tuple1*_Tmp4=x->name;void*_Tmp5;_Tmp5=_Tmp4->f1;{struct _fat_ptr*v=_Tmp5;
-defined_symbols=({(struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_insert;})(defined_symbols,v);
-if(({(int(*)(int(*)(struct _fat_ptr*,struct _fat_ptr*),struct Cyc_List_List*,struct _fat_ptr*))Cyc_List_mem;})(Cyc_strptrcmp,omit_symbols,v))name=0;else{
+defined_symbols=({struct Cyc_Set_Set*(*_Tmp6)(struct Cyc_Set_Set*,struct _fat_ptr*)=(struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_insert;_Tmp6;})(defined_symbols,v);
+if(({int(*_Tmp6)(int(*)(struct _fat_ptr*,struct _fat_ptr*),struct Cyc_List_List*,struct _fat_ptr*)=(int(*)(int(*)(struct _fat_ptr*,struct _fat_ptr*),struct Cyc_List_List*,struct _fat_ptr*))Cyc_List_mem;_Tmp6;})(Cyc_strptrcmp,omit_symbols,v))name=0;else{
 name=v;}
 goto _LL6;}}case 5: _Tmp3=((struct Cyc_Absyn_Aggr_d_Absyn_Raw_decl_struct*)_Tmp2)->f1;{struct Cyc_Absyn_Aggrdecl*x=_Tmp3;
 # 1559
@@ -1988,14 +1988,14 @@ goto _LL6;}}case 7: _Tmp3=((struct Cyc_Absyn_Enum_d_Absyn_Raw_decl_struct*)_Tmp2
 struct _tuple1*_Tmp4=x->name;void*_Tmp5;_Tmp5=_Tmp4->f1;{struct _fat_ptr*v=_Tmp5;
 name=v;
 # 1567
-if(name!=0 &&({(int(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_member;})(reachable_set,name))
+if(name!=0 &&({int(*_Tmp6)(struct Cyc_Set_Set*,struct _fat_ptr*)=(int(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_member;_Tmp6;})(reachable_set,name))
 reachable_decls=({struct Cyc_List_List*_Tmp6=_cycalloc(sizeof(struct Cyc_List_List));_Tmp6->hd=decl,_Tmp6->tl=reachable_decls;_Tmp6;});else{
 # 1570
 if((unsigned)x->fields){
 struct Cyc_List_List*fs=(struct Cyc_List_List*)x->fields->v;for(0;fs!=0;fs=fs->tl){
 struct Cyc_Absyn_Enumfield*f=(struct Cyc_Absyn_Enumfield*)fs->hd;
 struct _tuple1*_Tmp6=f->name;void*_Tmp7;_Tmp7=_Tmp6->f1;{struct _fat_ptr*v=_Tmp7;
-if(({(int(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_member;})(reachable_set,v)){
+if(({int(*_Tmp8)(struct Cyc_Set_Set*,struct _fat_ptr*)=(int(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_member;_Tmp8;})(reachable_set,v)){
 reachable_decls=({struct Cyc_List_List*_Tmp8=_cycalloc(sizeof(struct Cyc_List_List));_Tmp8->hd=decl,_Tmp8->tl=reachable_decls;_Tmp8;});
 break;}}}}}
 # 1580
@@ -2020,7 +2020,7 @@ goto _LL6;}}case 13:
  name=0;
 goto _LL6;}_LL6:;}
 # 1602
-if(name!=0 &&({(int(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_member;})(reachable_set,name)){
+if(name!=0 &&({int(*_Tmp2)(struct Cyc_Set_Set*,struct _fat_ptr*)=(int(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_member;_Tmp2;})(reachable_set,name)){
 if(({struct _fat_ptr _Tmp2=(struct _fat_ptr)*name;struct _fat_ptr _Tmp3=(struct _fat_ptr)Cyc_user_prefix;Cyc_strncmp(_Tmp2,_Tmp3,Cyc_strlen(Cyc_user_prefix));})!=0)
 reachable_decls=({struct Cyc_List_List*_Tmp2=_cycalloc(sizeof(struct Cyc_List_List));_Tmp2->hd=decl,_Tmp2->tl=reachable_decls;_Tmp2;});else{
 # 1607
@@ -2086,7 +2086,7 @@ goto _LL3B;}_LL3B:;}
 # 1676
 if(!((unsigned)name)&& !anon_enum)continue;
 # 1681
-if(({struct Cyc_Set_Set*_Tmp2=reachable_set;({(int(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_member;})(_Tmp2,Cyc_add_user_prefix(name));})){
+if(({int(*_Tmp2)(struct Cyc_Set_Set*,struct _fat_ptr*)=({int(*_Tmp3)(struct Cyc_Set_Set*,struct _fat_ptr*)=(int(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_member;_Tmp3;});struct Cyc_Set_Set*_Tmp3=reachable_set;_Tmp2(_Tmp3,Cyc_add_user_prefix(name));})){
 struct Cyc_Absyn_Decl*user_decl=Cyc_Absyn_lookup_decl(user_decls,name);
 if(user_decl==0)
 _throw((void*)({struct Cyc_Core_Impossible_exn_struct*_Tmp2=_cycalloc(sizeof(struct Cyc_Core_Impossible_exn_struct));_Tmp2->tag=Cyc_Core_Impossible,_Tmp2->f1=_tag_fat("Internal Error: bad user-def name",sizeof(char),34U);_Tmp2;}));else{
@@ -2137,7 +2137,7 @@ l=Cyc_Lexing_from_file(in_file);{
 struct _tuple14*entry2;
 while((entry2=Cyc_suck_line(l))!=0){
 struct _tuple14*_Tmp2=_check_null(entry2);void*_Tmp3;struct _fat_ptr _Tmp4;_Tmp4=_Tmp2->f0;_Tmp3=_Tmp2->f1;{struct _fat_ptr line=_Tmp4;struct _fat_ptr*name=_Tmp3;
-if(({(int(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_member;})(reachable_set,name)){
+if(({int(*_Tmp5)(struct Cyc_Set_Set*,struct _fat_ptr*)=(int(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_member;_Tmp5;})(reachable_set,name)){
 ({struct Cyc_String_pa_PrintArg_struct _Tmp5=({struct Cyc_String_pa_PrintArg_struct _Tmp6;_Tmp6.tag=0,_Tmp6.f1=(struct _fat_ptr)((struct _fat_ptr)*name);_Tmp6;});void*_Tmp6[1];_Tmp6[0]=& _Tmp5;Cyc_fprintf(out_file,_tag_fat("#ifndef %s\n",sizeof(char),12U),_tag_fat(_Tmp6,sizeof(void*),1));});
 ({struct Cyc_String_pa_PrintArg_struct _Tmp5=({struct Cyc_String_pa_PrintArg_struct _Tmp6;_Tmp6.tag=0,_Tmp6.f1=(struct _fat_ptr)((struct _fat_ptr)line);_Tmp6;});void*_Tmp6[1];_Tmp6[0]=& _Tmp5;Cyc_fprintf(out_file,_tag_fat("%s\n",sizeof(char),4U),_tag_fat(_Tmp6,sizeof(void*),1));});
 Cyc_fprintf(out_file,_tag_fat("#endif\n",sizeof(char),8U),_tag_fat(0U,sizeof(void*),0));}}}
@@ -2149,7 +2149,7 @@ if(hstubs!=0){
 struct Cyc_List_List*x=hstubs;for(0;x!=0;x=x->tl){
 struct _tuple15*_Tmp2=(struct _tuple15*)x->hd;struct _fat_ptr _Tmp3;struct _fat_ptr _Tmp4;_Tmp4=_Tmp2->f0;_Tmp3=_Tmp2->f1;{struct _fat_ptr symbol=_Tmp4;struct _fat_ptr text=_Tmp3;
 if((char*)text.curr!=(char*)_tag_fat(0,0,0).curr &&(
-(char*)symbol.curr==(char*)_tag_fat(0,0,0).curr ||({struct Cyc_Set_Set*_Tmp5=defined_symbols;({(int(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_member;})(_Tmp5,({struct _fat_ptr*_Tmp6=_cycalloc(sizeof(struct _fat_ptr));*_Tmp6=symbol;_Tmp6;}));})))
+(char*)symbol.curr==(char*)_tag_fat(0,0,0).curr ||({int(*_Tmp5)(struct Cyc_Set_Set*,struct _fat_ptr*)=({int(*_Tmp6)(struct Cyc_Set_Set*,struct _fat_ptr*)=(int(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_member;_Tmp6;});struct Cyc_Set_Set*_Tmp6=defined_symbols;_Tmp5(_Tmp6,({struct _fat_ptr*_Tmp7=_cycalloc(sizeof(struct _fat_ptr));*_Tmp7=symbol;_Tmp7;}));})))
 # 1760
 Cyc_fputs((const char*)_untag_fat_ptr(text,sizeof(char),1U),out_file);else{
 # 1762
@@ -2164,7 +2164,7 @@ out_file=_check_null(Cyc_cstubs_file);{
 struct Cyc_List_List*x=cstubs;for(0;x!=0;x=x->tl){
 struct _tuple15*_Tmp2=(struct _tuple15*)x->hd;struct _fat_ptr _Tmp3;struct _fat_ptr _Tmp4;_Tmp4=_Tmp2->f0;_Tmp3=_Tmp2->f1;{struct _fat_ptr symbol=_Tmp4;struct _fat_ptr text=_Tmp3;
 if((char*)text.curr!=(char*)_tag_fat(0,0,0).curr &&(
-(char*)symbol.curr==(char*)_tag_fat(0,0,0).curr ||({struct Cyc_Set_Set*_Tmp5=defined_symbols;({(int(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_member;})(_Tmp5,({struct _fat_ptr*_Tmp6=_cycalloc(sizeof(struct _fat_ptr));*_Tmp6=symbol;_Tmp6;}));})))
+(char*)symbol.curr==(char*)_tag_fat(0,0,0).curr ||({int(*_Tmp5)(struct Cyc_Set_Set*,struct _fat_ptr*)=({int(*_Tmp6)(struct Cyc_Set_Set*,struct _fat_ptr*)=(int(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_member;_Tmp6;});struct Cyc_Set_Set*_Tmp6=defined_symbols;_Tmp5(_Tmp6,({struct _fat_ptr*_Tmp7=_cycalloc(sizeof(struct _fat_ptr));*_Tmp7=symbol;_Tmp7;}));})))
 Cyc_fputs((const char*)_untag_fat_ptr(text,sizeof(char),1U),out_file);}}}}
 # 1781
 out_file=_check_null(Cyc_cycstubs_file);
@@ -2175,7 +2175,7 @@ out_file=_check_null(Cyc_cycstubs_file);
 {struct Cyc_List_List*x=cycstubs;for(0;x!=0;x=x->tl){
 struct _tuple15*_Tmp2=(struct _tuple15*)x->hd;struct _fat_ptr _Tmp3;struct _fat_ptr _Tmp4;_Tmp4=_Tmp2->f0;_Tmp3=_Tmp2->f1;{struct _fat_ptr symbol=_Tmp4;struct _fat_ptr text=_Tmp3;
 if((char*)text.curr!=(char*)_tag_fat(0,0,0).curr &&(
-(char*)symbol.curr==(char*)_tag_fat(0,0,0).curr ||({struct Cyc_Set_Set*_Tmp5=defined_symbols;({(int(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_member;})(_Tmp5,({struct _fat_ptr*_Tmp6=_cycalloc(sizeof(struct _fat_ptr));*_Tmp6=symbol;_Tmp6;}));})))
+(char*)symbol.curr==(char*)_tag_fat(0,0,0).curr ||({int(*_Tmp5)(struct Cyc_Set_Set*,struct _fat_ptr*)=({int(*_Tmp6)(struct Cyc_Set_Set*,struct _fat_ptr*)=(int(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_member;_Tmp6;});struct Cyc_Set_Set*_Tmp6=defined_symbols;_Tmp5(_Tmp6,({struct _fat_ptr*_Tmp7=_cycalloc(sizeof(struct _fat_ptr));*_Tmp7=symbol;_Tmp7;}));})))
 Cyc_fputs((const char*)_untag_fat_ptr(text,sizeof(char),1U),out_file);}}}
 # 1794
 Cyc_fprintf(out_file,_tag_fat("\n",sizeof(char),2U),_tag_fat(0U,sizeof(void*),0));}{

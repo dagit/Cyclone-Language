@@ -649,7 +649,7 @@ return({struct _tuple16*_Tmp2=_cycalloc(sizeof(struct _tuple16));_Tmp2->f0=tq,({
 static struct Cyc_Absyn_Datatypefield*Cyc_Tcdecl_substitute_datatypefield(struct Cyc_List_List*inst1,struct Cyc_Absyn_Datatypefield*f1){
 # 326
 struct Cyc_Absyn_Datatypefield*f0;f0=_cycalloc(sizeof(struct Cyc_Absyn_Datatypefield)),*f0=*f1;
-({struct Cyc_List_List*_Tmp0=({(struct Cyc_List_List*(*)(struct _tuple16*(*)(struct Cyc_List_List*,struct _tuple16*),struct Cyc_List_List*,struct Cyc_List_List*))Cyc_List_map_c;})(Cyc_Tcdecl_substitute_datatypefield_f2,inst1,f1->typs);f0->typs=_Tmp0;});
+({struct Cyc_List_List*_Tmp0=({struct Cyc_List_List*(*_Tmp1)(struct _tuple16*(*)(struct Cyc_List_List*,struct _tuple16*),struct Cyc_List_List*,struct Cyc_List_List*)=(struct Cyc_List_List*(*)(struct _tuple16*(*)(struct Cyc_List_List*,struct _tuple16*),struct Cyc_List_List*,struct Cyc_List_List*))Cyc_List_map_c;_Tmp1;})(Cyc_Tcdecl_substitute_datatypefield_f2,inst1,f1->typs);f0->typs=_Tmp0;});
 # 329
 return f0;}
 # 336

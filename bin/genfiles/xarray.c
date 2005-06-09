@@ -391,7 +391,7 @@ struct _fat_ptr newarr=({unsigned _Tmp0=(unsigned)(xarr->num_elmts * 2);_tag_fat
 {int i=1;for(0;i < xarr->num_elmts;++ i){
 ({void*_Tmp0=*((void**)_check_fat_subscript(xarr->elmts,sizeof(void*),i));*((void**)_check_fat_subscript(newarr,sizeof(void*),i))=_Tmp0;});}}
 ({struct _fat_ptr _Tmp0=xarr->elmts;struct _fat_ptr _Tmp1=newarr;xarr->elmts=_Tmp1;newarr=_Tmp0;});
-({(void(*)(void**))Cyc_Core_ufree;})((void**)_untag_fat_ptr(newarr,sizeof(void*),1U));}}
+({void(*_Tmp0)(void**)=(void(*)(void**))Cyc_Core_ufree;_Tmp0;})((void**)_untag_fat_ptr(newarr,sizeof(void*),1U));}}
 # 81
 *((void**)_check_fat_subscript(xarr->elmts,sizeof(void*),xarr->num_elmts ++))=a;}
 # 84
@@ -481,7 +481,7 @@ void Cyc_Xarray_reuse(struct Cyc_Xarray_Xarray*xarr){
 struct _fat_ptr newarr=_tag_fat(0,0,0);
 ({struct _fat_ptr _Tmp0=newarr;struct _fat_ptr _Tmp1=xarr->elmts;newarr=_Tmp1;xarr->elmts=_Tmp0;});
 xarr->num_elmts=0;
-({(void(*)(void**))Cyc_Core_ufree;})((void**)_untag_fat_ptr(newarr,sizeof(void*),1U));}
+({void(*_Tmp0)(void**)=(void(*)(void**))Cyc_Core_ufree;_Tmp0;})((void**)_untag_fat_ptr(newarr,sizeof(void*),1U));}
 # 189
 void Cyc_Xarray_delete(struct Cyc_Xarray_Xarray*xarr,int num){
 if(({int _Tmp0=num;_Tmp0 > Cyc_Xarray_length(xarr);}))

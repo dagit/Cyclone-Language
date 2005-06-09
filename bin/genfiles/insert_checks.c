@@ -455,7 +455,7 @@ return 0;
 if(!Cyc_Tcutil_force_type2bool(0,n))
 return 0;
 goto _LL0;}}else{
-({(int(*)(unsigned,struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos_loc;})(e->loc,_tag_fat("need_null_check: non-pointer type",sizeof(char),34U),_tag_fat(0U,sizeof(void*),0));}_LL0:;}
+({int(*_Tmp2)(unsigned,struct _fat_ptr,struct _fat_ptr)=(int(*)(unsigned,struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos_loc;_Tmp2;})(e->loc,_tag_fat("need_null_check: non-pointer type",sizeof(char),34U),_tag_fat(0U,sizeof(void*),0));}_LL0:;}
 # 119
 {void*_Tmp0=e->annot;if(((struct Cyc_CfFlowInfo_UnknownZ_Absyn_AbsynAnnot_struct*)_Tmp0)->tag==Cyc_CfFlowInfo_UnknownZ)
 goto _LL5;else{if(((struct Cyc_CfFlowInfo_NotZero_Absyn_AbsynAnnot_struct*)_Tmp0)->tag==Cyc_CfFlowInfo_NotZero)
@@ -465,7 +465,7 @@ Cyc_Warn_err(e->loc,_tag_fat("NULL pointer check will definitely fail",sizeof(ch
 return 0;}else{if(((struct Cyc_Absyn_EmptyAnnot_Absyn_AbsynAnnot_struct*)_Tmp0)->tag==Cyc_Absyn_EmptyAnnot)
 # 126
 return 0;else{
-({(int(*)(unsigned,struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos_loc;})(e->loc,_tag_fat("need_null_check: unexpected annotation",sizeof(char),39U),_tag_fat(0U,sizeof(void*),0));}}}}_LL5:;}
+({int(*_Tmp1)(unsigned,struct _fat_ptr,struct _fat_ptr)=(int(*)(unsigned,struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos_loc;_Tmp1;})(e->loc,_tag_fat("need_null_check: unexpected annotation",sizeof(char),39U),_tag_fat(0U,sizeof(void*),0));}}}}_LL5:;}
 # 129
 if(nv.at_toplevel){
 Cyc_Warn_err(e->loc,_tag_fat("cannot perform NULL-pointer check at toplevel",sizeof(char),46U),_tag_fat(0U,sizeof(void*),0));
@@ -479,13 +479,13 @@ return r;}}else{if(((struct Cyc_CfFlowInfo_NotZero_Absyn_AbsynAnnot_struct*)_Tmp
 return r;}}else{if(((struct Cyc_CfFlowInfo_IsZero_Absyn_AbsynAnnot_struct*)_Tmp0)->tag==Cyc_CfFlowInfo_IsZero)
 return 0;else{if(((struct Cyc_Absyn_EmptyAnnot_Absyn_AbsynAnnot_struct*)_Tmp0)->tag==Cyc_Absyn_EmptyAnnot)
 return 0;else{
-({(int(*)(unsigned,struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos_loc;})(e->loc,_tag_fat("get_relns: unexpected annotation",sizeof(char),33U),_tag_fat(0U,sizeof(void*),0));}}}};}
+({int(*_Tmp2)(unsigned,struct _fat_ptr,struct _fat_ptr)=(int(*)(unsigned,struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos_loc;_Tmp2;})(e->loc,_tag_fat("get_relns: unexpected annotation",sizeof(char),33U),_tag_fat(0U,sizeof(void*),0));}}}};}
 # 149
 static int Cyc_InsertChecks_simple_need_bounds_check(struct Cyc_InsertChecks_Env nv,struct Cyc_Absyn_Exp*a,struct Cyc_Absyn_Exp*i){
 if(nv.in_sizeof)return 0;
 # 154
 if(nv.at_toplevel)
-({(int(*)(unsigned,struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos_loc;})(a->loc,_tag_fat("InsertChecks: memory read at top-level",sizeof(char),39U),_tag_fat(0U,sizeof(void*),0));{
+({int(*_Tmp0)(unsigned,struct _fat_ptr,struct _fat_ptr)=(int(*)(unsigned,struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos_loc;_Tmp0;})(a->loc,_tag_fat("InsertChecks: memory read at top-level",sizeof(char),39U),_tag_fat(0U,sizeof(void*),0));{
 # 161
 struct Cyc_Absyn_Exp*bound_opt=Cyc_Tcutil_get_type_bound(_check_null(a->topt));
 # 163
@@ -504,7 +504,7 @@ static int Cyc_InsertChecks_need_bounds_check(struct Cyc_InsertChecks_Env nv,str
 if(nv.in_sizeof)
 return 0;
 if(nv.at_toplevel)
-({(int(*)(unsigned,struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos_loc;})(a->loc,_tag_fat("InsertChecks: memory read at top-level",sizeof(char),39U),_tag_fat(0U,sizeof(void*),0));{
+({int(*_Tmp0)(unsigned,struct _fat_ptr,struct _fat_ptr)=(int(*)(unsigned,struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos_loc;_Tmp0;})(a->loc,_tag_fat("InsertChecks: memory read at top-level",sizeof(char),39U),_tag_fat(0U,sizeof(void*),0));{
 # 194
 int bd_valid=0;union Cyc_Relations_RelnOp rop_bd=Cyc_Relations_RConst(0U);
 int a_valid=0;union Cyc_Relations_RelnOp rop_a=Cyc_Relations_RConst(0U);
@@ -639,13 +639,13 @@ int n2=Cyc_Tcutil_force_type2bool(0,p2.ptr_atts.nullable);
 struct Cyc_Absyn_Exp*b1=({void*_TmpA=Cyc_Absyn_bounds_one();Cyc_Tcutil_get_bounds_exp(_TmpA,p1.ptr_atts.bounds);});
 struct Cyc_Absyn_Exp*b2=({void*_TmpA=Cyc_Absyn_bounds_one();Cyc_Tcutil_get_bounds_exp(_TmpA,p2.ptr_atts.bounds);});
 if((n1 && !n2)&&(int)coercion!=2)
-({(int(*)(unsigned,struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos_loc;})(e->loc,_tag_fat("null-check conversion mis-classified",sizeof(char),37U),_tag_fat(0U,sizeof(void*),0));else{
+({int(*_TmpA)(unsigned,struct _fat_ptr,struct _fat_ptr)=(int(*)(unsigned,struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos_loc;_TmpA;})(e->loc,_tag_fat("null-check conversion mis-classified",sizeof(char),37U),_tag_fat(0U,sizeof(void*),0));else{
 if(((unsigned)b1 && !((unsigned)b2))&&(int)coercion==2)
-({(int(*)(unsigned,struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos_loc;})(e->loc,_tag_fat("conversion mis-classified as null-check",sizeof(char),40U),_tag_fat(0U,sizeof(void*),0));}
+({int(*_TmpA)(unsigned,struct _fat_ptr,struct _fat_ptr)=(int(*)(unsigned,struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos_loc;_TmpA;})(e->loc,_tag_fat("conversion mis-classified as null-check",sizeof(char),40U),_tag_fat(0U,sizeof(void*),0));}
 {struct _tuple14 _TmpA=({struct _tuple14 _TmpB;_TmpB.f0=b1,_TmpB.f1=b2;_TmpB;});if(_TmpA.f0!=0){if(_TmpA.f1!=0){
 # 387
 if(!({struct Cyc_Absyn_Exp*_TmpB=_check_null(b2);Cyc_Evexp_lte_const_exp(_TmpB,_check_null(b1));}))
-({(int(*)(unsigned,struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos_loc;})(e->loc,_tag_fat("InsertChecks: cast to maybe-shorter pointer type",sizeof(char),49U),_tag_fat(0U,sizeof(void*),0));
+({int(*_TmpB)(unsigned,struct _fat_ptr,struct _fat_ptr)=(int(*)(unsigned,struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos_loc;_TmpB;})(e->loc,_tag_fat("InsertChecks: cast to maybe-shorter pointer type",sizeof(char),49U),_tag_fat(0U,sizeof(void*),0));
 if(((n1 && !n2)&& Cyc_InsertChecks_need_null_check(nv,e1))&& Cyc_InsertChecks_need_null_check_vcgen(nv,e)){
 if(!user_inserted)
 Cyc_Warn_warn(e->loc,
@@ -731,7 +731,7 @@ e->annot=(void*)& Cyc_InsertChecks_NullOnly_val;else{
 # 494
 e->annot=(void*)& Cyc_InsertChecks_NoCheck_val;}}
 goto _LL65;}}}else{
-({(int(*)(unsigned,struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos_loc;})(e->loc,_tag_fat("InsertChecks: non-pointer-type on dereference",sizeof(char),46U),_tag_fat(0U,sizeof(void*),0));}_LL65:;}
+({int(*_TmpE)(unsigned,struct _fat_ptr,struct _fat_ptr)=(int(*)(unsigned,struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos_loc;_TmpE;})(e->loc,_tag_fat("InsertChecks: non-pointer-type on dereference",sizeof(char),46U),_tag_fat(0U,sizeof(void*),0));}_LL65:;}
 # 498
 Cyc_InsertChecks_do_exp(nv,e1);
 Cyc_InsertChecks_do_exp(nv,e2);
@@ -790,7 +790,7 @@ e->annot=(void*)& Cyc_InsertChecks_NoCheck_val;Cyc_InsertChecks_do_stmt(nv,s);go
 # 556
  goto _LL54;case 24: _LL54:
  goto _LL56;default: _LL56:
-({(int(*)(unsigned,struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos_loc;})(e->loc,_tag_fat("InsertChecks, unexpected exp form",sizeof(char),34U),_tag_fat(0U,sizeof(void*),0));}_LL0:;}
+({int(*_Tmp7)(unsigned,struct _fat_ptr,struct _fat_ptr)=(int(*)(unsigned,struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos_loc;_Tmp7;})(e->loc,_tag_fat("InsertChecks, unexpected exp form",sizeof(char),34U),_tag_fat(0U,sizeof(void*),0));}_LL0:;}
 # 562
 static void Cyc_InsertChecks_do_decl(struct Cyc_InsertChecks_Env nv,struct Cyc_Absyn_Decl*d){
 void*_Tmp0=d->r;void*_Tmp1;switch(*((int*)_Tmp0)){case 0: _Tmp1=((struct Cyc_Absyn_Var_d_Absyn_Raw_decl_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Vardecl*vd=_Tmp1;
