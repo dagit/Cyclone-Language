@@ -136,6 +136,7 @@ static $(string_t,short,bool) rw_array[] = {
   $("__attribute__", ATTRIBUTE, true),
   $("__attribute", ATTRIBUTE, true),
   $("__asm__", ASM_TOK, true),
+  $("__asm", ASM_TOK, true),
   $("asm", ASM_TOK, true),
   $("abstract", ABSTRACT, false),
   $("auto", AUTO, true),

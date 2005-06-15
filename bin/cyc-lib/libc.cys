@@ -2,6 +2,10 @@
 // Has a structure containing void *
 // Not supported yet
 aio.h:
+cpp {
+  /* Mac OS 10.4 needs off_t */
+  #include <sys/types.h>
+}
 ;
 
 arpa/inet.h:
@@ -2583,6 +2587,10 @@ hstub {
 ;
 
 stdio.h:
+cpp {
+  /* Mac OS 10.4 needs off_t */
+  #include <sys/types.h>
+}
 include {
 BUFSIZ
 _IOFBF
@@ -2603,14 +2611,15 @@ size_t
 off_t
 }
 hstub {
-  // FreeBSD doesn't seem to define off_t here but does it in unistd.h!
-  #if defined(__FreeBSD__)
-  #if !defined(_off_t_def_) && !defined(_OFF_T_DECLARED)
-  #define _off_t_def_
-  #define _OFF_T_DECLARED
-  typedef __off_t off_t;
-  #endif
-  #endif
+/* I expect the OS 10.4 hack above fixes this */
+//  // FreeBSD doesn't seem to define off_t here but does it in unistd.h!
+//  #if defined(__FreeBSD__)
+//  #if !defined(_off_t_def_) && !defined(_OFF_T_DECLARED)
+//  #define _off_t_def_
+//  #define _OFF_T_DECLARED
+//  typedef __off_t off_t;
+//  #endif
+//  #endif
 }
 hstub {
   // NOTES:

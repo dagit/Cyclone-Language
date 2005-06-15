@@ -244,6 +244,9 @@ $(BB)/aprof/cyclone$(EXE): $(BL)/cyc-lib/$(build)/gc.a
 $(BB)/gprof/cyclone$(EXE): $(BL)/cyc-lib/$(build)/gc.a
 	+$(rmake-gprof)
 
+$(BB)/gdb/cyclone$(EXE): $(BL)/cyc-lib/$(build)/gc.a
+	+$(rmake-gdb)
+
 $(BB)/nocheck/cyclone$(EXE): $(BL)/cyc-lib/$(build)/gc.a
 	+$(rmake-nocheck)
 
@@ -252,6 +255,9 @@ $(BB)/cycdoc$(EXE): $(BL)/cyc-lib/$(build)/gc.a
 
 $(BB)/buildlib$(EXE): $(BL)/cyc-lib/$(build)/gc.a
 	+$(rmake)
+
+$(BB)/gdb/buildlib$(EXE): $(BL)/cyc-lib/$(build)/gc.a
+	+$(rmake-gdb)
 
 # Directory structure of the installed library.  (During boot,
 # this is built in bin/lib ($(BL)).)

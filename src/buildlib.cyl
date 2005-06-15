@@ -470,6 +470,8 @@ and slurp = parse /* returns 1 if more to do, 0 if all done */
 { fputs("const",(FILE @)slurp_out); return 1; }
 | "__const" /* Used in cygwin in unistd.h; an undocumented gcc extension?? */
 { fputs("const",(FILE @)slurp_out); return 1; }
+| "__signed" /* Used in Mac OS in netdb.h, stdint.h; an undocumented gcc extension?? */
+{ fputs("signed",(FILE @)slurp_out); return 1; }
 | "__builtin_va_list"
 /* Used in linux in /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stdarg.h;
    an undocumented gcc extension?  This is a HACK -- shouldn't matter since
@@ -1754,12 +1756,24 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     if (hstubs != NULL) {
       for (let x = hstubs; x != NULL; x = x->tl) {
         let &$(symbol,text) = x->hd;
-        if (text != NULL &&
-            (symbol == NULL || Set::member(defined_symbols, new symbol)))
-          // FIX: FPUTS DUMPS CORE ON LINUX IF FIRST ARG IS NULL!!
-          fputs((const char @)text,out_file);
+        if (text != NULL)
+          if (symbol == NULL)
+            // FIX: FPUTS DUMPS CORE ON LINUX IF FIRST ARG IS NULL!!
+            fputs((const char @)text,out_file);
+          else if (Set::member(defined_symbols, new symbol))
+            fputs((const char @)text,out_file);
+          else {
+            log("%s is not supported on this platform\n",symbol);
+            for (let x = defined_symbols; !Set::is_empty(x); ) {
+              let y = Set::choose(x); x = Set::delete(x,y);
+              log("+%s",*y);
+              log("\n");
+            }
+          }
+        
         else
-          log("%s is not supported on this platform\n",symbol);
+          log("Null text for %s, will not be supported on this platform\n",
+              symbol);
       }
     }
     fprintf(out_file,"#endif\n");
