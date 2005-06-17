@@ -39,7 +39,7 @@ mstring_t<`H> new_string(unsigned int i) {
   return calloc(i,sizeof(char));
 }
 
-mstring_t<`r::R> rnew_string(region_t<`r> r, unsigned int i) {
+mstring_t<`r::E> rnew_string(region_t<`r> r, unsigned int i) {
   return rcalloc(r,i,sizeof(char));
 }
 mstring_t<`r,`q> rqnew_string(region_t<`r> r, aqual_t<`q\T> q, unsigned int i) {

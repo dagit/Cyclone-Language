@@ -78,12 +78,13 @@ static void pattern_synth(seg_t loc, tenv_t te, tcpat_result_t pat_res,
   let TcPatResult(p,vse,aqb) = pat_res;
   let vs   = map(fst,vse);
   let tvs  = (p==NULL) ? NULL : map(fst,(*p)[0]);
-  let bds  = (p==NULL) ? NULL : (*p)[1];
+  let ecs  = (p==NULL) ? NULL : (*p)[1];
   let rgns = (p==NULL) ? NULL : map(fst,filter(snd,(*p)[0]));
   te = add_type_vars(loc,te,tvs);
   for (; rgns != NULL; rgns=rgns->tl)
     te = add_region(te,new VarType(rgns->hd),false,false);
-  te = new_outlives_constraints(te,bds,loc);
+  te = new_effect_constraints(te, ecs, loc); //use this instead
+  //  te = new_outlives_constraints(te,ecs,loc); //remove this 
   if(new_block)
     te = Tcenv::new_block(loc,te);
   let ropt = Tcenv::curr_rgn(te);
@@ -115,7 +116,7 @@ static bool is_case_default(switch_clause_t c) {
   }
 }
 
-// new_block is a kludge because we he abstract syntax doesn't group the
+// new_block is a kludge because the abstract syntax doesn't group the
 // local declarations in a block, but the region rules do.  (That is,
 // adjacent declarations are in the same region.  Those at the beginning
 // of a function are in the same region as the parameters.
@@ -153,7 +154,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     } 
     // don't introduce alias expressions here; would be useless
     tcExp(te,&t,eopt);
-    if (!coerce_arg(curr_rgnpo(te),curr_aquals_bounds(te),eopt,t,NULL)) {
+    if (!coerce_arg(curr_aquals_bounds(te),eopt,t,NULL)) {
      Warn::err2(s0->loc,"returns value of type ",eopt->topt," but requires ",t);
      Unify::explain_failure();
     }
@@ -192,14 +193,14 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     // We make new_block false because we explicitly create a new block here
     // Note: NewControlFlow requires we add the label with s, not s0 !!
     let tv = new Tvar(new (string_t)aprintf("`%s",*l),
-		      new_tvar_id(), Kinds::kind_to_bound(&Kinds::rk),NULL);
+		      new_tvar_id(), Kinds::kind_to_bound(&Kinds::ek),NULL);
     tcStmt(new_named_block(s0->loc,te,tv),s,false);
     return;
 
   case &Fallthru_s(es,*clauseopt):
     let trip_opt = process_fallthru(te,s0,clauseopt);
     if(trip_opt == NULL) {
-      Warn::err2(s0->loc,"fallthru not in a non-last case");
+      Warn::err2(s0->loc,"fallthru in a last case");
       return;
     }
     let $(_,tvs,ts_orig) = *trip_opt;
@@ -208,7 +209,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     for(; ts != NULL && es != NULL; ts = ts->tl, es = es->tl) {
       // don't introduce alias expression here, would be useless
       tcExp(te,NULL,es->hd);
-      if(!coerce_arg(curr_rgnpo(te),curr_aquals_bounds(te),es->hd,ts->hd,NULL)) {
+      if(!coerce_arg(curr_aquals_bounds(te),es->hd,ts->hd,NULL)) {
 	Warn::err2(s0->loc, "fallthru argument has type ",es->hd->topt,
 		   "but pattern variable has type ",ts->hd);
         Unify::explain_failure();
@@ -247,13 +248,13 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 
       if(scs->tl != NULL) {
 	next_pattern = new tcPat(te,scs->tl->hd->pattern,&t,e);
-	if(next_pattern->tvars_and_bounds_opt != NULL
-	   && (*next_pattern->tvars_and_bounds_opt)[1] != NULL)
+	if(next_pattern->tvars_and_effconstr_opt != NULL
+	   && (*next_pattern->tvars_and_effconstr_opt)[1] != NULL)
 	  te = clear_fallthru(te);
 	else {
 	  let vs = imp_rev(filter_nulls(List::split(next_pattern->patvars)[0]));
-	  let new_tvs = next_pattern->tvars_and_bounds_opt==NULL ? NULL 
-	                 : map(fst,(*next_pattern->tvars_and_bounds_opt)[0]);
+	  let new_tvs = next_pattern->tvars_and_effconstr_opt==NULL ? NULL 
+	                 : map(fst,(*next_pattern->tvars_and_effconstr_opt)[0]);
 	  te = set_fallthru(te, new_tvs, vs, scs->tl->hd);
 	}
       } else
@@ -311,13 +312,13 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       
       if(scs->tl != NULL) {
 	next_pattern = new tcPat(te,scs->tl->hd->pattern,&exception_type,NULL);
-	if(next_pattern->tvars_and_bounds_opt != NULL
-	   && (*next_pattern->tvars_and_bounds_opt)[1] != NULL)
+	if(next_pattern->tvars_and_effconstr_opt != NULL
+	   && (*next_pattern->tvars_and_effconstr_opt)[1] != NULL)
 	  te = clear_fallthru(te);
 	else {
 	  let vs = imp_rev(filter_nulls(List::split(next_pattern->patvars)[0]));
-	  let new_tvs = next_pattern->tvars_and_bounds_opt==NULL ? NULL 
-	                 : map(fst,(*next_pattern->tvars_and_bounds_opt)[0]);
+	  let new_tvs = next_pattern->tvars_and_effconstr_opt==NULL ? NULL 
+	                 : map(fst,(*next_pattern->tvars_and_effconstr_opt)[0]);
 	  te = set_fallthru(te, new_tvs, vs, scs->tl->hd);
 	}
       } else
@@ -401,7 +402,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	// te is only used by is_const_exp for globals and function names
 	if(!is_local && !is_const_exp(initializer))
 	  Warn::err2(d->loc, "initializer for static variable needs to be a constant expression");
-	if (!coerce_assign(curr_rgnpo(te),curr_aquals_bounds(te),initializer,t)) {
+	if (!coerce_assign(curr_aquals_bounds(te),initializer,t)) {
 	  Warn::err2(d->loc,vd," was declared with type ",t,
 		     " but initialized with type ",initializer->topt);
 	  Unify::unify(t,(type_t)initializer->topt);
@@ -433,7 +434,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       *vds = new Opt(pat_res.patvars);
       let pt = (type_t)p->topt;
       let et = (type_t)e->topt;
-      if (!Unify::unify(pt,et) && !coerce_assign(curr_rgnpo(te),curr_aquals_bounds(te),e,pt)) {
+      if (!Unify::unify(pt,et) && !coerce_assign(curr_aquals_bounds(te),e,pt)) {
 	Warn::err2(d->loc,
 		   "pattern type ",pt," does not match definition type ",et);
 	Unify::unify(pt,et);
@@ -469,8 +470,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	// the open expression should have type 
 	// struct Core::DynamicRegion<`r1::R> @aqual(RESTRICTED) @`r2
 	let drname = new $(Abs_n(list(new "Core"),false), new "DynamicRegion");
-	let outer_rgn = new_evar(new Opt(&Kinds::rk), NULL);
-	rgn_typ = new_evar(new Opt(&Kinds::rk),NULL);
+	let outer_rgn = new_evar(new Opt(&Kinds::ek), NULL);
+	rgn_typ = new_evar(new Opt(&Kinds::ek),NULL);
 	let aq =  new_evar(new Opt(&Kinds::aqk),NULL);
 	let dr_type = aggr_type(UnknownAggr(StructA,drname,NULL),list(rgn_typ));
 	let exp_type = at_type(dr_type, outer_rgn, aq, empty_tqual(0),false_type,false_type);
@@ -478,7 +479,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 			  true,false,exp_type);
 	let key_typ = tcExp(te,&exp_type,open_exp_opt);
 	if (!Unify::unify(exp_type,key_typ) && 
-	    !coerce_assign(curr_rgnpo(te),curr_aquals_bounds(te),open_exp_opt,exp_type))
+	    !coerce_assign(curr_aquals_bounds(te),open_exp_opt,exp_type))
 	  Warn::err2(s0->loc,"expected ",exp_type," but found ",key_typ);
 /* 	if (!Unify::unify(outer_rgn,unique_rgn_type) &&  */
 /* 	    !Unify::unify(outer_rgn,refcnt_rgn_type)) */

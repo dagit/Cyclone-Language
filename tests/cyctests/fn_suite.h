@@ -18,12 +18,12 @@ static int addpair($(int,int)@ x) {
 }
 
 void fn_test() {
-  fn_t<int,int> inc = make_fn(addn,1);
-  fn_t<int,int> dec = make_fn(addn,-1);
-  fn_t<int,int> blah = compose(inc,dec);
-  fn_t<$(int,int)@,int> addp = fp2fn(addpair);
-  fn_t<int,fn_t<int,int>> addc = curry(addp);
-  fn_t<$(int,int)@,int> addu = uncurry(addc);
+  fn_t<int,int,`H> inc = make_fn(addn,1);
+  fn_t<int,int,`H> dec = make_fn(addn,-1);
+  fn_t<int,int,`H> blah = compose(inc,dec);
+  fn_t<$(int,int)@,int,`H> addp = fp2fn(addpair);
+  fn_t<int,fn_t<int,int,`H>,`H> addc = curry(addp);
+  fn_t<$(int,int)@,int,`H> addu = uncurry(addc);
   CT_ASSERT(apply(inc,0) == 1);
   CT_ASSERT(apply(dec,0) == -1);
   CT_ASSERT(apply(blah,0) == 0);

@@ -84,12 +84,12 @@ int place_cmp($(int,pos_t)@ place1, $(int,pos_t)@ place2) {
 }
 
 // mutates second argument's elements
-void poss_of_abss(string_t filename, List::list_t<$(int,pos_t)@,`H> places) {
+void poss_of_abss(string_t<`r> filename, List::list_t<$(int,pos_t)@,`H> places) {
   places = List::merge_sort(place_cmp, places);
   FILE @f = file_open(filename, "r");
   try {
     Lexbuf<Function_lexbuf_state<FILE@>> lbuf = from_file(f);
-    let source_file = filename;
+    string_t<`r+`H> source_file = filename;
     let line        = 1;
     mstring_t this_line;
     let eol;

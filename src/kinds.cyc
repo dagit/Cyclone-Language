@@ -23,7 +23,7 @@ using Core;
 using Absyn;
 namespace Kinds;
 
-struct Kind rk = Kind(RgnKind,NoHint);
+//struct Kind rk = Kind(RgnKind,NoHint);
 struct Kind ak = Kind(AnyKind,NoHint);
 struct Kind bk = Kind(BoxKind,NoHint);
 struct Kind mk = Kind(MemKind,NoHint);
@@ -51,7 +51,7 @@ struct Kind ak_rchint = Kind(AnyKind,RefcntHint);
 /* struct Kind urk = Kind(RgnKind,Unique); */
 /* struct Kind uak = Kind(AnyKind,Unique); */
 /* struct Kind umk = Kind(MemKind,Unique); */
-struct Opt<kind_t> rko = {&rk};
+//struct Opt<kind_t> rko = {&rk};
 struct Opt<kind_t> ako = {&ak};
 struct Opt<kind_t> bko = {&bk};
 struct Opt<kind_t> mko = {&mk};
@@ -89,7 +89,7 @@ opt_t<kind_t> kind_to_opt(kind_t kh) {
     case AnyKind: return &ako;
     case MemKind: return &mko;
     case BoxKind: return &bko;
-    case RgnKind: return &rko;
+      //    case RgnKind: return &rko;
     case EffKind: return &eko;
     case IntKind: return &iko;
     case BoolKind: return &bko;
@@ -147,7 +147,7 @@ kind_t id_to_kind(string_t<`H> s, seg_t loc) {
     case 'A': return &ak;
     case 'M': return &mk;
     case 'B': return &bk;
-    case 'R': return &rk;
+    case 'R': Warn::warn(loc, "Region kind ::R is deprecated; use effect kind ::E instead"); return &ek;
     case 'E': return &ek;
     case 'I': return &ik;
     case 'Q': return &aqk;
@@ -178,8 +178,10 @@ kind_t id_to_kind(string_t<`H> s, seg_t loc) {
 	  default: break;
 	  }
 	}
-	if(s[1] == 'R') 
-	  return &rk;
+	if(s[1] == 'R') {
+	  Warn::warn(loc, "Region kind ::R is deprecated; use effect kind ::E instead"); 
+	  return &ek;
+	}
       }
       break;
     }
@@ -195,7 +197,7 @@ string_t kind2string(kind_t kh) {
     case AnyKind: return "A";
     case MemKind: return "M";
     case BoxKind: return "B";
-    case RgnKind: return "R";
+      //    case RgnKind: return "R";
     case AqualKind: return "Q";
     case EffKind: return "E";
     case IntKind: return "I";

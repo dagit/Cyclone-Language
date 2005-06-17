@@ -39,12 +39,12 @@ struct Obj<`a::A> {
  * region and use that as the bound instead.)
  */
 struct Object {
-  <`a> : regions(`a) > `H, ALIASABLE >= aquals(`a)
+  <`a> : regions(`a) <= `H, ALIASABLE >= aquals(`a)
   struct Obj<`a> @self;
 };
 
 /* upcast a Obj<`T> to an Object */
-obj_t upcast(struct Obj<`a> @`H p : regions(`a) > `H) {
+obj_t upcast(struct Obj<`a> @`H p : regions(`a) <= `H) {
   return Object(p);
 }
 

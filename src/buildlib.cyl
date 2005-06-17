@@ -1028,7 +1028,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       case &DatatypeCon(_):        case &DatatypeFieldCon(_):
       case &RgnHandleCon:          case &HeapCon:
       case &UniqueHeapCon:         case &RefCntHeapCon:
-      case &AccessCon:             case &JoinCon:
+      case &JoinCon:
       case &RgnsCon:               case &TagCon:
       case &TrueCon:               case &FalseCon:
       case &ThinCon:               case &FatCon:

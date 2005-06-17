@@ -35,10 +35,10 @@ namespace DynamicRegionSeq {
 
   // next_rgn maps regions to regions and gives us a way to generate
   // an infinite name supply for regions.
-  typedef _::R next_rgn<`r::R>;
+  typedef _::E next_rgn<`r::E>;
 
   // a capability to generate next_region<`r>'s key (and the next generator)
-  struct DynamicRegionGen<`r::R>;
+  struct DynamicRegionGen<`r::E>;
   typedef struct DynamicRegionGen<`r>@`U uregion_gen_t<`r>;
 
   struct DynamicRegionSeq<`r> {
@@ -49,7 +49,7 @@ namespace DynamicRegionSeq {
 
   // return type for new_region_seq() -- a fresh region, a key for the region,
   // and a seed for generating follow-on regions.
-  struct NewDynamicRegionSeq { <`r::R>
+  struct NewDynamicRegionSeq { <`r::E>
     struct DynamicRegionSeq<`r> drseq;
   };
 
@@ -72,30 +72,30 @@ namespace Scheme {
   //////////////////////////////////////////////////////////////////////
   // Core data-structures
   //////////////////////////////////////////////////////////////////////
-  datatype Const<`r::R>;
+  datatype Const<`r::E>;
   typedef datatype Const<`r>@`r const_t<`r>;
 
-  datatype ExpD<`r::R>;
-  struct Exp<`a::A,`r::R>;
+  datatype ExpD<`r::E>;
+  struct Exp<`a::A,`r::E>;
   typedef struct Exp<datatype ExpD<`r>,`r>*`r exp_t<`r>;
 
-  datatype ValueD<`r::R>;
-  struct Value<`a::A,`r::R>;
+  datatype ValueD<`r::E>;
+  struct Value<`a::A,`r::E>;
   typedef struct Value<datatype ValueD<`r>,`r>*`r value_t<`r>;
 
-  struct Env<`r::R>;
+  struct Env<`r::E>;
   typedef struct Env<`r>*`r env_t<`r>;
 
-  @tagged union Frame<`r::R>;
+  @tagged union Frame<`r::E>;
   typedef union Frame<`r> frame_t<`r>;
 
-  struct Stack<`r::R>;
+  struct Stack<`r::E>;
   typedef struct Stack<`r>*`r stack_t<`r>;
 
-  @tagged union Result<`r::R>;
+  @tagged union Result<`r::E>;
   typedef union Result<`r> result_t<`r>;
 
-  struct State<`r::R>;
+  struct State<`r::E>;
   typedef struct State<`r> state_t<`r>;
   typedef struct State<`r>@`s state_ptr_t<`r,`s>;
 
@@ -128,7 +128,7 @@ namespace Scheme {
     If_e(exp_t<`r> e1, exp_t<`r> e2, exp_t<`r> e3);
     Set_e(const char ?, unsigned int i, unsigned int j, exp_t<`r> e);
   };
-  struct Exp<`a::A,`r::R> {
+  struct Exp<`a::A,`r::E> {
     forward_ptr_t(exp_t,`r) forward;
     `a exp;
   };
@@ -170,7 +170,7 @@ namespace Scheme {
   };
 
   typedef void (@`H primop_t)<`r,`s>(region_t<`r>,state_ptr_t<`r,`s>,value_t<`r>*@notnull@fat`r);
-  typedef Dict::dict_t<stringptr_t<`H,`r::R>,$(unsigned,unsigned)@`r,`r> static_env_t<`r>;
+  typedef Dict::dict_t<stringptr_t<`H,`r::E>,$(unsigned,unsigned)@`r,`r> static_env_t<`r>;
   // run-time values:
   datatype ValueD<`r> {
     Const_v(const_t<`r> K);
@@ -187,7 +187,7 @@ namespace Scheme {
     Primop_eq_p_v;
     Primop_null_p_v;
   };
-  struct Value<`a::A,`r::R> {
+  struct Value<`a::A,`r::E> {
     forward_ptr_t(value_t,`r) forward;
     `a value;
   };
@@ -301,7 +301,7 @@ namespace Scheme {namespace PrimOps {
 
   // constructs the initial static environment which will map the
   // name of the primop to the right offset in the top-level environment.
-  extern static_env_t<`r> initial_static_env(region_t<`r> r);
+  extern static_env_t<`r+`H> initial_static_env(region_t<`r> r);
 
   // Find the name of a primop.
   extern const char?`H prim_name(primop_t p);
@@ -573,7 +573,7 @@ int heap_limit = INITIAL_HEAP_LIMIT;
 ////////////////////////////////////////////////////////////////////
 // The explicit queue used for maintaining the frontier of objects
 // to be forwarded.
-struct Frontier<`r::R>;
+struct Frontier<`r::E>;
 typedef struct Frontier<`r>*`U frontier_t<`r>;
 // A non-null pointer in region `r to an `a -- useful when `r needs
 // to be next_rgn<->.  
@@ -2324,9 +2324,10 @@ static struct Prim primop_table[] = {
 };
 // constructs the initial static environment which will map the
 // name of the primop to the right offset in the top-level environment.
-Dict::dict_t<stringptr_t<`H,`r::R>,$(unsigned,unsigned)@`r,`r>
-initial_static_env(region_t<`r> r) {
-  let env = Dict::rempty(r, strptrcmp);
+Dict::dict_t<stringptr_t<`H,`r::E+`H>,$(unsigned,unsigned)@`r+`H,`r+`H>
+initial_static_env(region_t<`r> _r) {
+  region_t<`r+`H> r = _r;
+  Dict::dict_t<stringptr_t<`H,`r+`H>,$(unsigned,unsigned)@`r+`H,`r+`H>   env = Dict::rempty(r, strptrcmp);
   for (unsigned i = 0; i < numelts(primop_table); i++)
     env = Dict::insert(env, rnew(r) (primop_table[i].id), rnew(r) $((unsigned)0,i));
   return env;
@@ -2658,7 +2659,7 @@ eval_exp(region_t<`r> r,
     case &Apply_e(es):
       // push "[] e2 ... en" on stack and evaluate e1
       value_t<`r>? vs = RNEW(r, {for i < numelts(es) : NULL});
-      eval_apply_frame(r,state,es,0,vs);
+      eval_apply_frame((region_t<`r+`H>)r,state,es,0,vs);
       break;
     case &If_e(e1,e2,e3):
       // push "if [] e2 e3" on stack and evaluate e1
@@ -2766,7 +2767,7 @@ static bool stepi(int n,region_t<`r> r, state_ptr_t<`r> state) {
 static $(unsigned depth,unsigned offset)
   static_map(region_t<`r> r,
 	     unsigned depth,
-	     Dict::dict_t<stringptr_t<`H,`r::R>,$(unsigned,unsigned)@`r,`r> env,
+	     Dict::dict_t<stringptr_t<`H,`r::E>,$(unsigned,unsigned)@`r,`r> env,
 	     stringptr_t<`H,`r> x) {
   try {
     let $(height,off) = *Dict::lookup(env, x);
@@ -2780,14 +2781,14 @@ static $(unsigned depth,unsigned offset)
 // add debruijn indices in to all variables
 static void deb(region_t<`r> r,
 		unsigned d,
-		Dict::dict_t<stringptr_t<`H,`r::R>,$(unsigned,unsigned)@`r,`r> env,
+		Dict::dict_t<stringptr_t<`H,`r+`H>,$(unsigned,unsigned)@`r+`H,`r+`H> env,
 		exp_t<`H> e) {
   switch (e) {
   case NULL: break;
   case &ExpP(*e_):
     switch (e_) {
     case &Var_e(*x,*depth,*offset):
-      let $(dep,off) = static_map(r,d,env,x);
+      let $(dep,off) = static_map((region_t<`r+`H>)r,d,env,x);
       *depth = dep;
       *offset = off;
       break;
@@ -2818,7 +2819,7 @@ static void deb(region_t<`r> r,
       deb(r,d,env,e3);
       break;
     case &Set_e(*x,*depth,*offset,e):
-      let $(dep,off) = static_map(r,d,env,x);
+      let $(dep,off) = static_map((region_t<`r+`H>)r,d,env,x);
       *depth = dep;
       *offset = off;
       deb(r,d,env,e);

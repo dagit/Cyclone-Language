@@ -398,9 +398,7 @@ bool iter_f<`a,`r1,`r2,`r3>(list_t<`a,`r1> @`r2 elts_left, `a @`r3 dest) {
   *elts_left = (*elts_left)->tl;
   return true;
 }
-Iter::iter_t<`a,`bd> make_iter(region_t<`r1> rgn, set_t<`a,`r2> s
-			      : regions(`a) > `bd,
-                                {`r1,`r2} > `bd) {
+Iter::iter_t<`a,regions(`a)+`r1+`r2> make_iter(region_t<`r1> rgn, set_t<`a,`r2> s) {
   return Iter::Iter{.env=rnew(rgn) s->nodes, 
-		    .next = iter_f@<`a,`r2,`r1><>};
+		       .next = iter_f@<`a,`r2,`r1><>};
 }

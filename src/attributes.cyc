@@ -50,7 +50,7 @@ static attribute_t bad_attribute(seg_t loc) {
   return &Atts::Cdecl_att_val; // just return something
 }
 
-attribute_t parse_nullary_att(seg_t loc, string_t s) {
+attribute_t parse_nullary_att(seg_t loc, string_t<`H> s) {
   static datatype Attribute.Aligned_att att_aligned = Aligned_att(NULL);
   static $(string_t,datatype Attribute @) att_map[] = {
     $("stdcall", &Atts::Stdcall_att_val),

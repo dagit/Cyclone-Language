@@ -135,7 +135,7 @@ static struct TocState<`d>@`d empty_toc_state(region_t<`d> d) {
 }
 
 struct TocStateWrap {
-  <`d::R>
+  <`d::E>
   //  Core::real_rcregion_key_t<`d> dyn;
   Core::rcregion_key_t<`d> dyn;
   struct TocState<`d>@`d state;
@@ -418,7 +418,7 @@ static qvar_t collapse_qvars_body<`r2,`d,`r>(region_t<`d> d,
   let $(fieldname,dtname) = *pair;
   try return Dict::lookup_other(*qvs,qvar_tag_cmp,pair);
   catch { case &Dict::Absent:
-    let new_pair = new $(fieldname,dtname);
+    let new_pair = rnew(d) $(fieldname,dtname);
     let &$(nmspace,fieldvar) = fieldname;
     string_t newvar = collapse_qvar(fieldvar,dtname);
     qvar_t res = new $(nmspace, new newvar);
@@ -437,7 +437,7 @@ static aggrdecl_t make_c_struct_defn(var_t name, list_t<aggrfield_t,`H> fs) {
   return new Aggrdecl{.kind=StructA, .sc=Public, .tvs=NULL,
 		      .attributes=NULL, .expected_mem_kind=false,
 		      .name= new $(Rel_n(NULL),name),
-		      .impl= new AggrdeclImpl{NULL,NULL,NULL,fs,false}};
+		      .impl= new AggrdeclImpl{NULL,NULL,fs,false,NULL}};
 }
 
 // used to generate struct definitions for tuple types
@@ -530,8 +530,8 @@ add_struct_type_body<`r2,`r3,`d,`r>(region_t<`d> d,
         let t = ts->hd;
         let t2 = ts2->hd;
         switch (type_kind(t)) {
-        case &Kind{.kind = EffKind, _}://Effects/regions won't appear in C types
-        case &Kind{.kind = RgnKind, _}: continue;
+        case &Kind{.kind = EffKind, _}:continue;//Effects/regions won't appear in C types
+	  //        case &Kind{.kind = RgnKind, _}: 
         default:
           // Check if they're the same before translating them to C
           if (Unify::unify(t,t2) || Unify::unify(typ_to_c(t),typ_to_c(t2)))
@@ -728,7 +728,7 @@ type_t typ_to_c(type_t t) {
   case &AppType(&FloatCon(_),_): return t;
   case &ArrayType(ArrayInfo{t2,tq,e,_,ztl}):
     return array_type(typ_to_c(t2),tq,e,false_type,ztl);
-  case &FnType(FnInfo{_,_,tq2,t2,args,c_vararg,cyc_vararg,_,_,atts,...}):
+  case &FnType(FnInfo{_,_,tq2,t2,args,c_vararg,cyc_vararg,_,atts,...}):
     // just drop the type arguments & effect and translate the nested types
     // also, drop any format descriptors
     let new_atts = Atts::atts2c(atts);
@@ -740,7 +740,7 @@ type_t typ_to_c(type_t t) {
       new_args = List::imp_append(new_args,new List(vararg,NULL));
     }
     return new FnType(FnInfo{NULL,NULL,tq2,typ_to_c(t2),new_args,
-                               c_vararg,NULL,NULL,NULL,new_atts,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL});
+                               c_vararg,NULL,NULL,new_atts,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL});
   case &AnonAggrType(k,_,fs):
     // similar to tuple translation (introduce sharing to appease C)
     // but we have full aggrfields to deal with
@@ -994,12 +994,11 @@ static struct FallthruInfo {
   list_t<vardecl_t> binders;
 };
 static struct Env<`r> {
-  <`r2::R> : {`r2} > `r
   var_t *`r break_lab;
   var_t *`r continue_lab;
-  struct FallthruInfo *`r2 fallthru_info;
+  struct FallthruInfo *`r fallthru_info;
   bool toplevel;
-  bool @`r2 in_lhs;
+  bool @`r in_lhs;
   region_t<`r> rgn;
 };
 typedef struct Env<`r> @`r env_t<`r>;
@@ -1012,11 +1011,11 @@ static bool is_toplevel(env_t nv) {
   let &Env{.toplevel=t,...} = nv;
   return t;
 }
-static env_t<`r> clear_toplevel(region_t<`r> r, env_t<`r2> e : {`r2} > `r) {
+static env_t<`r+`r2> clear_toplevel(region_t<`r> r, env_t<`r2> e){
   let &Env{b,c,f,t,lhs,_} = e;
   return rnew(r) Env{b,c,f,false,lhs,r};
 }
-static env_t<`r> set_toplevel(region_t<`r> r, env_t<`r2> e : {`r2} > `r) {
+static env_t<`r+`r2> set_toplevel(region_t<`r> r, env_t<`r2> e) {
   let &Env{b,c,f,t,lhs,_} = e;
   return rnew(r) Env{b,c,f,true,lhs,r};
 }
@@ -1029,30 +1028,30 @@ static void set_lhs(env_t<`r> e, bool b) {
   *lhs = b;
 }
 
-static env_t<`r> share_env(region_t<`r> r, env_t<`r2> e : {`r2} > `r) {
+static env_t<`r+`r2> share_env(region_t<`r> r, env_t<`r2> e) { 
   let &Env{b,c,f,t,lhs,_} = e;
   return rnew(r) Env{b,c,f,t,lhs,r};
 }
-
+ 
 // env for loop body: break and continue labels are set to null,
 // exception handler pop counters for break and continue are zeroed
-static env_t<`r> loop_env(region_t<`r> r, env_t<`r2> e : {`r2} > `r) {
+static env_t<`r+`r2> loop_env(region_t<`r> r, env_t<`r2> e){
   let &Env{b,c,f,t,lhs,_} = e;
   return rnew(r) Env{NULL,NULL,f,t,lhs,r};
 }
 
 // env for a switch clause: give new label for break, and zero its pop counter
-static env_t<`r>
+static env_t<`r+`r2>
 non_last_switchclause_env(region_t<`r> r, env_t<`r2> e,
 			  var_t break_l, var_t fallthru_l,
-                          list_t<vardecl_t,`H> fallthru_binders : {`r2} > `r) {
+                          list_t<vardecl_t,`H> fallthru_binders){
   let &Env{b,c,f,t,lhs,_} = e;
   struct FallthruInfo*`r fi =
     rnew(r) FallthruInfo{fallthru_l,fallthru_binders};
   return rnew(r) Env{rnew(r) break_l, c, fi, t,lhs,r};
 }
-static env_t<`r>
-last_switchclause_env(region_t<`r> r, env_t<`r2> e, var_t break_l :{`r2} > `r) {
+static env_t<`r+`r2>
+last_switchclause_env(region_t<`r> r, env_t<`r2> e, var_t break_l){
   let &Env{b,c,f,t,lhs,_} = e;
   return rnew(r) Env{rnew(r) break_l, c,NULL,t,lhs,r};
 }
@@ -1296,7 +1295,7 @@ static exp_t incr_lvalue(exp_t e1, incrementor_t incr) {
   return new_exp(new Increment_e(e1,incr),DL);
 }
 
-static void lvalue_assign_stmt(stmt_t s,list_t<field_name_t> fs,
+static void lvalue_assign_stmt(stmt_t s,list_t<field_name_t,`H> fs,
 			       exp_t f(exp_t,`a), `a f_env);
 
 // e1 is the result of translating an lvalue.  fs is the path of struct
@@ -1305,7 +1304,7 @@ static void lvalue_assign_stmt(stmt_t s,list_t<field_name_t> fs,
 // We find the underlying lvalue, call it el.
 // We replace el in e1 with f(el,env)
 // We assume that variables in f(el,env) will not be captured by any
-static void lvalue_assign(exp_t e1, list_t<field_name_t> fs,
+static void lvalue_assign(exp_t e1, list_t<field_name_t,`H> fs,
 			  exp_t f(exp_t,`a), `a f_env){
   switch (e1->r) {
   case &StmtExp_e(s): lvalue_assign_stmt(s,fs,f,f_env); break;
@@ -1328,7 +1327,7 @@ static void lvalue_assign(exp_t e1, list_t<field_name_t> fs,
     break;
   }
 }
-static void lvalue_assign_stmt(stmt_t s,list_t<field_name_t> fs,
+static void lvalue_assign_stmt(stmt_t s,list_t<field_name_t,`H> fs,
 			       exp_t f(exp_t,`a), `a f_env) {
   switch (s->r) {
   case &Exp_s(e1):    lvalue_assign(e1,fs,f,f_env);      break;
@@ -1921,10 +1920,10 @@ static void exp_to_c(env_t nv, exp_t e) {
     break;
   case &FnCall_e(e1,es,&VarargCallInfo{num_varargs,injectors,vai},_):
     // if vai->inject:
-    //    t vn = injector[n](es[n])
+    //    t vm = injector[m](es[n])
     //    ...
     //    t v0 = injector[0](es[n-num_varargs+1])
-    //    t argv[num_varargs] = {&v0, ..., &vn};
+    //    t argv[num_varargs] = {&v0, ..., &vm};
     // else
     //    t argv[num_varargs] = {es[n-num_varargs+1], ..., es[n]};
     // e1(es[0], ..., es[n-num_varargs], tag_fat(argv, sizeof(t), num_varargs));
@@ -2497,7 +2496,7 @@ static void exp_to_c(env_t nv, exp_t e) {
         // for tagged unions, must insert tag here
         int i = get_member_offset(sd,field->name);
         exp_t field_tag_exp = signed_int_exp(i,0);
-        let newdles = list(new $(NULL,field_tag_exp), new $(NULL,fieldexp));
+	let newdles = list(new $(NULL,field_tag_exp), new $(NULL,fieldexp));
         exp_t umem = unresolvedmem_exp(NULL,newdles,0);
         e->r = unresolvedmem_exp_r(NULL,list(make_field(field->name,umem)));
       } else { // not tagged
@@ -3352,7 +3351,7 @@ find_case_env(list_t<$(env_t<`rgn>,var_t,stmt_t)@`rgn,`rgn> bodies, stmt_t s) {
 }
 
 // translate a switch according to the given decision tree.
-static void xlate_switch(env_t nv, stmt_t whole_s,
+static void xlate_switch(env_t<`r> nv, stmt_t whole_s,
 			 exp_t e, list_t<switch_clause_t> scs,
                          Tcpat::decision_opt_t dopt) {
   let t = (type_t)e->topt;
@@ -3374,10 +3373,10 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
     // compile the decision tree -- generates a list of declarations and
     // a list of case bodies with associated labels and environments, as
     // well as a big test statement.
-    patdecls_t<`rgn> mydecls = NULL;
-    list_t<$(env_t<`rgn>,var_t,stmt_t)@`rgn,`rgn> mybodies = NULL;
-    stmt_t test_tree = compile_decision_tree(rgn, nv, &mydecls, &mybodies,
-                                             dopt, lscs, v);
+    _ mydecls = NULL;
+    _ mybodies = NULL;
+    stmt_t test_tree = compile_decision_tree((region_t<`rgn+`r>)rgn, nv, &mydecls, &mybodies,
+					     dopt, lscs, v);
     // Note that at this point, test_tree contains all of the rhs's, but they
     // have not yet been translated.  That's because we need the compiler environment
     // for the fallthru case which is only generated after compiling the decision
@@ -3386,7 +3385,7 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
       let &$(_,_,body_lab,body_sc) = lscs2->hd;
       stmt_t s = body_sc->body;
       // find the environment for this rhs.
-      env_t<`rgn>* envp = find_case_env(mybodies,s);
+      env_t<`rgn+`r>* envp = find_case_env(mybodies,s);
       // skip over any case that is never called (i.e., has no envp), as it
       // must be dead code (not reachable in the decision tree).
       if (envp == NULL) continue;
@@ -3673,11 +3672,12 @@ static void stmt_to_c(env_t nv, stmt_t s) {
 static void fndecl_to_c(env_t nv, fndecl_t f, bool cinclude) {
   f->i.tvars  = NULL;
   f->i.effect = NULL;
-  f->i.rgn_po = NULL;
+  //  f->i.rgn_po = NULL;
   f->i.qual_bnd = NULL;
   f->i.requires_clause = NULL;
   f->i.ensures_clause  = NULL;
   f->i.throws_clause = NULL;
+  f->i.effconstr = NULL;
   f->i.ret_type  = typ_to_c(f->i.ret_type);
   f->cached_type = typ_to_c((type_t)f->cached_type);
   region frgn;
@@ -3749,10 +3749,11 @@ static int aggrdecl_to_c_body<`r2,`d,`r>(region_t<`d> d,
                                     .attributes = ad->attributes};
   if(ad->impl != NULL && !seen_defn_before) {
     new_ad->impl = new AggrdeclImpl { .exist_vars = NULL,
-                                      .rgn_po = NULL,
+				      //                                      .rgn_po = NULL,
 				      .qual_bnd = NULL,
                                       .fields = NULL,
-                                      .tagged = false };
+                                      .tagged = false,
+				      .effconstr = NULL};
     list_t<aggrfield_t> new_fields = NULL;
     for (let fields = ad->impl->fields; fields != NULL; fields = fields->tl){
       // JGM: I'm trying to get rid of warnings when we assign "const"
@@ -4013,7 +4014,7 @@ static Tcpat::decision_t rewrite_decision(Tcpat::decision_t d,stmt_t success) {
 // above) with one case, but where the failure throws Match_Exception.
 // Lots of hacks to get this to work right and re-use the pattern
 // match compiler.
-static stmt_t letdecl_to_c(env_t nv, pat_t p, Tcpat::decision_opt_t dopt,
+static stmt_t letdecl_to_c(env_t<`r> nv, pat_t p, Tcpat::decision_opt_t dopt,
                            type_t t, exp_t e, stmt_t s) {
   TOC_RGN(nv,rgn);
   let nv = share_env(rgn,nv);
@@ -4040,12 +4041,16 @@ static stmt_t letdecl_to_c(env_t nv, pat_t p, Tcpat::decision_opt_t dopt,
   let c1   = new Switch_clause{p, NULL, NULL, succ_stmt, 0};
   let lscs = List::rmap_c(rgn,gen_labels,rgn,rlist(rgn,c1));
   // declarations and environments generated while compiling decision tree
-  patdecls_t<`rgn> mydecls = NULL;
-  list_t<$(env_t<`rgn>,var_t,stmt_t)@`rgn,`rgn> mybodies = NULL;
+  //  patdecls_t<`rgn> mydecls = NULL;
+  //  list_t<$(env_t<`rgn>,var_t,stmt_t)@`rgn,`rgn> mybodies = NULL;
+  _ mydecls = NULL;
+  _ mybodies = NULL;
+  /*   patdecls_t<`rgn+`r> mydecls = NULL; */
+  /*   list_t<$(env_t<`rgn+`r>,var_t,stmt_t)@`rgn+`r,`rgn+`r> mybodies = NULL; */
   // compile the pattern -- this essentially generates
   // if e matches p then <skip> else _throw_match()
-  stmt_t test_tree = compile_decision_tree(rgn, nv, &mydecls, &mybodies,
-					   dopt, lscs, v);
+  stmt_t test_tree = compile_decision_tree((region_t<`rgn+`r>)rgn, nv, &mydecls, 
+					   &mybodies, dopt, lscs, v);
   // translate the body of the let under the env we get out of match
   // compilation.
   for (; ; mybodies = mybodies->tl) {

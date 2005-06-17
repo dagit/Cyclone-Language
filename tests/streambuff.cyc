@@ -81,14 +81,14 @@ bool stb_noaliases(streambuff_t stb) {
 }
 
 /* allocates a streambuffer with the given type and data */
-streambuff_t<`r,`q> alloc_stb_with(region_t<`r::R> rgnhdr,
+streambuff_t<`r,`q> alloc_stb_with(region_t<`r::E> rgnhdr,
 				   aqual_t<`q\T> q,
 				   enum StreamType typ,
 				   const char ?`H device,
 				   unsigned int priority,
 				   databuf_t<\RC> data) {
   assert(priority <= MAX_STB_PRIORITY);
-  return qnew(rgnhdr,q) StreamBuff{ .typ=typ,
+  return rnew(rgnhdr,q) StreamBuff{ .typ=typ,
 				       .priority = priority,
 				       .device = device,
 				       .numbufs = 1,
@@ -97,7 +97,7 @@ streambuff_t<`r,`q> alloc_stb_with(region_t<`r::R> rgnhdr,
 
 /* allocates a streambuffer with the given type; allocates the data
    of the given size (must be >= 0 bytes) */
-streambuff_t<`r,`q> alloc_stb(region_t<`r::R> rgnhdr,
+streambuff_t<`r,`q> alloc_stb(region_t<`r::E> rgnhdr,
 			      aqual_t<`q\T> q,
 			      enum StreamType typ,
 			      const char ?`H device,
@@ -119,12 +119,12 @@ streambuff_t<`r,`q> alloc_stb(region_t<`r::R> rgnhdr,
 }
 
 /* copies the streambuff header, but aliases its data. */
-streambuff_t<`r,`q> stb_clone(region_t<`r::R> rgn, aqual_t<`q\T> q, streambuff_t stb) {
+streambuff_t<`r,`q> stb_clone(region_t<`r::E> rgn, aqual_t<`q\T> q, streambuff_t stb) {
   let &StreamBuff{<`i> .numbufs=n,.bufs=bufs,
 		       .typ=typ, .priority=prio,
 		       .device=dev } = stb;
   streambuff_t newstb =
-    qnew(rgn,q) StreamBuff{.typ = typ,
+    rnew(rgn,q) StreamBuff{.typ = typ,
 			   .device = dev,
 			   .priority = prio,
 			   .numbufs = n,
@@ -146,7 +146,7 @@ streambuff_t<`r,`q> stb_clone(region_t<`r::R> rgn, aqual_t<`q\T> q, streambuff_t
 
 /* copies the streambuff header and the data (starting at the given offset
    ofs); needed when a client writes to data that is shared */
-streambuff_t<`r,`q> stb_copy(region_t<`r::R> rgnhdr, aqual_t<`q\T> q,
+streambuff_t<`r,`q> stb_copy(region_t<`r::E> rgnhdr, aqual_t<`q\T> q,
 			     int ofs, streambuff_t stb) {
    
  unsigned int szb = stb_size(stb);
@@ -183,7 +183,7 @@ streambuff_t<`r,`q> stb_copy(region_t<`r::R> rgnhdr, aqual_t<`q\T> q,
    }
  }
  
- return qnew(rgnhdr,q) StreamBuff{.priority = prio,
+ return rnew(rgnhdr,q) StreamBuff{.priority = prio,
 				   .typ = typ,
 				   .device = dev,
 				   .numbufs = 1,
@@ -264,14 +264,14 @@ streambuff_t<`H,\U> stb_rest(int ofs, streambuff_t<`H,\U> stb) __attribute((cons
   return stb;
 }
 
-streambuff_t<`r,`q> stb_prepend(region_t<`r::R> rgn, aqual_t<`q\T> q, streambuff_t stb,
+streambuff_t<`r,`q> stb_prepend(region_t<`r::E> rgn, aqual_t<`q\T> q, streambuff_t stb,
 				char ? @nozeroterm `RC nbuf) __attribute((consume(4))) {
   let &StreamBuff{<`i> .numbufs=n,.bufs=bufs,
 		       .typ=typ, .priority=prio,
 		       .device=dev } = stb;
   let m<_> = n+1;
   streambuff_t newstb =
-    qnew(rgn,q) StreamBuff{.typ = typ,
+    rnew(rgn,q) StreamBuff{.typ = typ,
 			 .device = dev,
 			 .priority = prio,
 			 .numbufs = m,
@@ -299,7 +299,7 @@ int stb_num_bufs(streambuff_t stb) {
 }
 
 int stb_with_buffer(streambuff_t stb, int idx,
-		    int (@f)<`r::R>(`a env, char ? @nozeroterm `r),
+		    int (@f)<`r::E>(`a env, char ? @nozeroterm `r),
 		    `a env) {
   int retv;
   char ? @nozeroterm `RC buf = NULL;

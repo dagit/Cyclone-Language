@@ -390,7 +390,7 @@ void*_Tmp0=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));long double _Tmp
 return d;}case 3: _Tmp1=((struct Cyc_LongDouble_pa_PrintArg_struct*)_Tmp0)->f1;{long double ld=_Tmp1;
 return(double)ld;}default:
 # 138
- _throw(Cyc_badarg(({struct Cyc_String_pa_PrintArg_struct _Tmp3=({struct Cyc_String_pa_PrintArg_struct _Tmp4;_Tmp4.tag=0,({struct _fat_ptr _Tmp5=(struct _fat_ptr)((struct _fat_ptr)Cyc_parg2string(*((void**)ap.curr)));_Tmp4.f1=_Tmp5;});_Tmp4;});void*_Tmp4[1];_Tmp4[0]=& _Tmp3;Cyc_aprintf(_tag_fat("printf expected double but found %s",sizeof(char),36U),_tag_fat(_Tmp4,sizeof(void*),1));})));};}
+ _throw(Cyc_badarg(({struct Cyc_String_pa_PrintArg_struct _Tmp3=({struct Cyc_String_pa_PrintArg_struct _Tmp4;_Tmp4.tag=0,({struct _fat_ptr _Tmp5=(struct _fat_ptr)Cyc_parg2string(*((void**)ap.curr));_Tmp4.f1=_Tmp5;});_Tmp4;});void*_Tmp4[1];_Tmp4[0]=& _Tmp3;Cyc_aprintf(_tag_fat("printf expected double but found %s",sizeof(char),36U),_tag_fat(_Tmp4,sizeof(void*),1));})));};}
 # 144
 static short*Cyc_va_arg_short_ptr(struct _fat_ptr ap){
 void*_Tmp0=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));void*_Tmp1;if(*((int*)_Tmp0)==4){_Tmp1=((struct Cyc_ShortPtr_pa_PrintArg_struct*)_Tmp0)->f1;{short*p=_Tmp1;
@@ -1044,7 +1044,7 @@ return 1;}
 struct _fat_ptr Cyc_vrprintf(struct _RegionHandle*r1,struct _fat_ptr fmt,struct _fat_ptr ap){
 # 1040
 int size=({int(*_Tmp0)(int(*)(int,int),int,struct _fat_ptr,struct _fat_ptr)=(int(*)(int(*)(int,int),int,struct _fat_ptr,struct _fat_ptr))Cyc__IO_vfprintf;_Tmp0;})(Cyc_putc_void,0,fmt,ap)+ 1;
-struct _fat_ptr s=({unsigned _Tmp0=size + 1;_tag_fat(_cyccalloc_atomic(sizeof(char),_Tmp0),sizeof(char),_Tmp0);});
+struct _fat_ptr s=({unsigned _Tmp0=size + 1;_tag_fat(_region_calloc(r1,0U,sizeof(char),_Tmp0),sizeof(char),_Tmp0);});
 ({struct _fat_ptr _Tmp0=_fat_ptr_decrease_size(s,sizeof(char),1U);struct _fat_ptr _Tmp1=fmt;Cyc_vsprintf(_Tmp0,_Tmp1,ap);});
 return s;}
 # 1046

@@ -49,11 +49,11 @@ typedef $(name<`r>,attvalue_t<`r>)@`r attribute_t<`r>;
 
 typedef $(name<`r>,string_t<`r>)@`r pi_t<`r>;
 
-extern datatype content<`r::R>; // forward definition
-typedef datatype content<`r::R> @`r content_t<`r>;
+extern datatype content<`r::E>; // forward definition
+typedef datatype content<`r::E> @`r content_t<`r>;
 
 EXTERN_DEFINITION
-datatype element<`r::R> {
+datatype element<`r::E> {
   StartEnd(name<`r>,list_t<attribute_t<`r>,`r>, // Element with start and end tags
            list_t<content_t<`r>,`r>);
   Empty(name<`r>,list_t<attribute_t<`r>,`r>);   // Element with no content

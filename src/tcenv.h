@@ -21,7 +21,7 @@
 
 #include <dict.h>
 #include "absyn.h"
-#include "rgnorder.h"
+//#include "rgnorder.h"
 
 namespace Tcenv {
 using Core;
@@ -126,34 +126,35 @@ bool in_stmt_exp(tenv_t);
 
 // assigns through its last arg
 $(switch_clause_t,list_t<tvar_t>,list_t<type_t>)const* const
-process_fallthru(tenv_t,stmt_t,switch_clause_t *@);
+process_fallthru(tenv_t,stmt_t,switch_clause_t *`H@);
                                      
 tenv_t new_block(seg_t,tenv_t);
 tenv_t new_named_block(seg_t,tenv_t,tvar_t);
-tenv_t new_outlives_constraints(tenv_t,list_t<$(type_t,type_t)@>, seg_t);
-tenv_t add_region_equality(tenv_t, type_t r1, type_t r2, 
-			   $(tvar_t,kindbound_t) * @oldtv,
-			   seg_t);
+tenv_t new_effect_constraints(tenv_t te, list_t<effconstr_t,`H> ecs, seg_t loc);
+  //tenv_t new_outlives_constraints(tenv_t,list_t<$(type_t,type_t)@>, seg_t);
+
+// tenv_t add_region_equality(tenv_t, type_t r1, type_t r2, 
+// 			   $(tvar_t,kindbound_t) * @oldtv,
+// 			   seg_t);
 
 type_t curr_rgn(tenv_t);
 type_t curr_lifo_rgn(tenv_t);
-RgnOrder::rgn_po_opt_t curr_rgnpo(tenv_t);
+  //RgnOrder::rgn_po_opt_t curr_rgnpo(tenv_t);
+list_t<effconstr_t> curr_effect_constraints(tenv_t);
 aqualbnds_t curr_aquals_bounds(tenv_t te);
 tenv_t add_aquals_bound(tenv_t te, type_t aq, type_t bnd);
 
 tenv_t add_region(tenv_t, type_t, bool opened, bool lifo);
 // Check that the region is in the current capability
-void check_rgn_accessible(tenv_t,seg_t,type_t rgn);
+
+void check_effect_accessible_nodelay(tenv_t te, seg_t loc, type_t rgn);
 // Check that an effect is a sub-effect of the current capability, may delay
 void check_effect_accessible(tenv_t, seg_t, type_t eff);
-// Returns true when region r1 outlives region r2 -- assumes r1 <> r2
-bool region_outlives(tenv_t, type_t r1, type_t r2);
-// Checks that for each pair of regions (r1,r2), r1 outlives r2 under
-// the current partial order on region lifetimes in the environment, may delay
-void check_rgn_partial_order(tenv_t, seg_t, list_t<$(type_t,type_t)@`H,`H> po);
 
+void check_effect_constraints(tenv_t te, seg_t loc, list_t<effconstr_t,`H> ec);  
 void check_delayed_effects(tenv_t);
 void check_delayed_constraints(tenv_t);
 tenv_t copy_tenv_dicts(tenv_t);
+extern type_opt_t glob_curr_rgn;
 }
 #endif

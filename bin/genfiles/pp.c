@@ -409,7 +409,7 @@ int last=0;
 while(last >= 0){
 void*_Tmp0=Cyc_Xarray_get(xarr,last);void*_Tmp1;void*_Tmp2;switch(*((int*)_Tmp0)){case 0:
  -- last;goto _LL0;case 1: _Tmp2=(struct _fat_ptr*)((struct Cyc_PP_Single_PP_Alist_struct*)_Tmp0)->f1;{struct _fat_ptr*s=_Tmp2;
--- last;({struct Cyc_String_pa_PrintArg_struct _Tmp3=({struct Cyc_String_pa_PrintArg_struct _Tmp4;_Tmp4.tag=0,_Tmp4.f1=(struct _fat_ptr)((struct _fat_ptr)*s);_Tmp4;});void*_Tmp4[1];_Tmp4[0]=& _Tmp3;Cyc_fprintf(f,_tag_fat("%s",sizeof(char),3U),_tag_fat(_Tmp4,sizeof(void*),1));});goto _LL0;}default: _Tmp2=(void*)((struct Cyc_PP_Append_PP_Alist_struct*)_Tmp0)->f1;_Tmp1=(void*)((struct Cyc_PP_Append_PP_Alist_struct*)_Tmp0)->f2;{void*a1=_Tmp2;void*a2=_Tmp1;
+-- last;({struct Cyc_String_pa_PrintArg_struct _Tmp3=({struct Cyc_String_pa_PrintArg_struct _Tmp4;_Tmp4.tag=0,_Tmp4.f1=(struct _fat_ptr)*s;_Tmp4;});void*_Tmp4[1];_Tmp4[0]=& _Tmp3;Cyc_fprintf(f,_tag_fat("%s",sizeof(char),3U),_tag_fat(_Tmp4,sizeof(void*),1));});goto _LL0;}default: _Tmp2=(void*)((struct Cyc_PP_Append_PP_Alist_struct*)_Tmp0)->f1;_Tmp1=(void*)((struct Cyc_PP_Append_PP_Alist_struct*)_Tmp0)->f2;{void*a1=_Tmp2;void*a2=_Tmp1;
 # 107
 Cyc_Xarray_set(xarr,last,a2);
 if(({int _Tmp3=last;_Tmp3==Cyc_Xarray_length(xarr)- 1;}))

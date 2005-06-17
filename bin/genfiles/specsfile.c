@@ -412,7 +412,7 @@ char strvalue[4096U];
 struct Cyc___cycFILE*spec_file=Cyc_fopen((const char*)_check_null(_untag_fat_ptr(file,sizeof(char),1U)),"r");
 # 65
 if(spec_file==0){
-({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=(struct _fat_ptr)((struct _fat_ptr)file);_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_fprintf(Cyc_stderr,_tag_fat("Error opening spec file %s\n",sizeof(char),28U),_tag_fat(_Tmp1,sizeof(void*),1));});
+({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=(struct _fat_ptr)file;_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_fprintf(Cyc_stderr,_tag_fat("Error opening spec file %s\n",sizeof(char),28U),_tag_fat(_Tmp1,sizeof(void*),1));});
 Cyc_fflush(Cyc_stderr);
 return 0;}
 # 71
@@ -422,7 +422,7 @@ c=Cyc_fgetc(spec_file);
 if(isspace(c))continue;
 if(c==42)break;
 if(c!=-1){
-({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=(struct _fat_ptr)((struct _fat_ptr)file);_Tmp1;});struct Cyc_Int_pa_PrintArg_struct _Tmp1=({struct Cyc_Int_pa_PrintArg_struct _Tmp2;_Tmp2.tag=1,_Tmp2.f1=(unsigned long)c;_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;Cyc_fprintf(Cyc_stderr,_tag_fat("Error reading spec file %s: unexpected character '%c'\n",sizeof(char),55U),_tag_fat(_Tmp2,sizeof(void*),2));});
+({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=(struct _fat_ptr)file;_Tmp1;});struct Cyc_Int_pa_PrintArg_struct _Tmp1=({struct Cyc_Int_pa_PrintArg_struct _Tmp2;_Tmp2.tag=1,_Tmp2.f1=(unsigned long)c;_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;Cyc_fprintf(Cyc_stderr,_tag_fat("Error reading spec file %s: unexpected character '%c'\n",sizeof(char),55U),_tag_fat(_Tmp2,sizeof(void*),2));});
 # 80
 Cyc_fflush(Cyc_stderr);}
 # 82
@@ -433,7 +433,7 @@ JUST_AFTER_STAR:
 while(1){
 c=Cyc_fgetc(spec_file);
 if(c==-1){
-({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=(struct _fat_ptr)((struct _fat_ptr)file);_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_fprintf(Cyc_stderr,_tag_fat("Error reading spec file %s: unexpected EOF\n",sizeof(char),44U),_tag_fat(_Tmp1,sizeof(void*),1));});
+({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=(struct _fat_ptr)file;_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_fprintf(Cyc_stderr,_tag_fat("Error reading spec file %s: unexpected EOF\n",sizeof(char),44U),_tag_fat(_Tmp1,sizeof(void*),1));});
 # 92
 Cyc_fflush(Cyc_stderr);
 goto CLEANUP_AND_RETURN;}
@@ -445,7 +445,7 @@ break;}
 *((char*)_check_known_subscript_notnull(strname,256U,sizeof(char),i))=(char)c;
 ++ i;
 if(i >= 256){
-({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=(struct _fat_ptr)((struct _fat_ptr)file);_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_fprintf(Cyc_stderr,_tag_fat("Error reading spec file %s: string name too long\n",sizeof(char),50U),_tag_fat(_Tmp1,sizeof(void*),1));});
+({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=(struct _fat_ptr)file;_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_fprintf(Cyc_stderr,_tag_fat("Error reading spec file %s: string name too long\n",sizeof(char),50U),_tag_fat(_Tmp1,sizeof(void*),1));});
 # 105
 Cyc_fflush(Cyc_stderr);
 goto CLEANUP_AND_RETURN;}}
@@ -472,7 +472,7 @@ if((c==-1 || c==10)|| c==13){*((char*)_check_known_subscript_notnull(strvalue,40
 *((char*)_check_known_subscript_notnull(strvalue,4096U,sizeof(char),i))=(char)c;
 ++ i;
 if(i >= 4096){
-({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=(struct _fat_ptr)((struct _fat_ptr)file);_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,_Tmp2.f1=(struct _fat_ptr)
+({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=(struct _fat_ptr)file;_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,_Tmp2.f1=
 # 131
 _tag_fat(strname,sizeof(char),256U);_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;Cyc_fprintf(Cyc_stderr,_tag_fat("Error reading spec file %s: value of %s too long\n",sizeof(char),50U),_tag_fat(_Tmp2,sizeof(void*),2));});
 Cyc_fflush(Cyc_stderr);
@@ -626,8 +626,8 @@ return tmp;}
 static struct _fat_ptr Cyc_Specsfile_do_find(struct Cyc_List_List*dirs,struct _fat_ptr file){
 struct _fat_ptr*f=Cyc_Specsfile_find(dirs,file);
 if(f==0){
-({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=(struct _fat_ptr)((struct _fat_ptr)file);_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,({
-struct _fat_ptr _Tmp3=(struct _fat_ptr)((struct _fat_ptr)Cyc_Specsfile_sprint_list(dirs));_Tmp2.f1=_Tmp3;});_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;Cyc_fprintf(Cyc_stderr,_tag_fat("Error: can't find internal compiler file %s in path %s\n",sizeof(char),56U),_tag_fat(_Tmp2,sizeof(void*),2));});
+({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=(struct _fat_ptr)file;_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,({
+struct _fat_ptr _Tmp3=(struct _fat_ptr)Cyc_Specsfile_sprint_list(dirs);_Tmp2.f1=_Tmp3;});_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;Cyc_fprintf(Cyc_stderr,_tag_fat("Error: can't find internal compiler file %s in path %s\n",sizeof(char),56U),_tag_fat(_Tmp2,sizeof(void*),2));});
 Cyc_fflush(Cyc_stderr);
 return _tag_fat(0,0,0);}
 # 341

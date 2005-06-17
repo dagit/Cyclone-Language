@@ -15,7 +15,7 @@ int @@aqual(`q) my_alloc(aqual_t<`q> aqh : RESTRICTED >= `q) {
 //   return unew 1; // no good
 }
 
-int my_deref(int *`r::R x) { return *x; }
+int my_deref(int *`r::E x) { return *x; }
 
 struct foo<`q::Q> {
   int *@aqual(`q) x;

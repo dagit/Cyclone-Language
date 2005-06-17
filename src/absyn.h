@@ -98,7 +98,7 @@ namespace Absyn {
   typedef union DatatypeFieldInfo datatype_field_info_t;
   typedef union AggrInfo aggr_info_t;
   typedef struct ArrayInfo array_info_t;
-  typedef datatype Type @type_t, @rgntype_t, @booltype_t, @ptrbound_t, @aqualtype_t;
+  typedef datatype Type @type_t, @rgntype_t, @booltype_t, @ptrbound_t, @aqualtype_t, @efftype_t;
   typedef datatype Type *type_opt_t;
   typedef list_t<type_t,`H> types_t;
   typedef list_t<$(type_t,type_t)@> aqualbnds_t;
@@ -134,6 +134,7 @@ namespace Absyn {
   typedef struct MallocInfo malloc_info_t;
   typedef enum Coercion coercion_t;
   typedef struct PtrLoc *ptrloc_t;
+  typedef datatype EffConstraint @effconstr_t, *effconstr_opt_t;
 
   // scopes for declarations 
   EXTERN_ABSYN enum Scope { 
@@ -188,7 +189,7 @@ namespace Absyn {
     AnyKind, // kind of all types, including abstract structs
     MemKind, // excludes abstract structs
     BoxKind, // excludes types whose values dont go in general-purpose registers
-    RgnKind, // regions
+    //    RgnKind, // regions
     EffKind, // effects
     IntKind, // ints at the specification level
     BoolKind, // booleans at the specification level: true or false
@@ -227,7 +228,7 @@ namespace Absyn {
   };
 
   EXTERN_ABSYN struct PtrAtts {
-    rgntype_t  rgn;       // region of value to which pointer points
+    efftype_t eff;        // the set of regions into which the pointer may point
     booltype_t nullable;  // type admits NULL
     ptrbound_t bounds;    // legal bounds for pointer indexing
     booltype_t zero_term; // true => zero terminated array
@@ -268,7 +269,7 @@ namespace Absyn {
     bool                                     c_varargs;
     vararg_info_t*                           cyc_varargs;
     // partial order on region parameters
-    list_t<$(type_t,type_t)@>                rgn_po;
+    //    list_t<$(type_t,type_t)@>                rgn_po; //NKS remove this
     // bounds on qualifier variables -- first term is a tvar, second is the bound
     list_t<$(type_t,type_t)@>                qual_bnd;
     // function type attributes can include regparm(n), noreturn, const, nothrow
@@ -291,6 +292,8 @@ namespace Absyn {
     // we only have vardecls corresponding to those arguments that are actually
     // named.
     list_t<vardecl_opt_t>                    arg_vardecls;
+    //NEW
+    list_t<effconstr_t>  effconstr;
   };
 
   // information for datatypes
@@ -354,10 +357,10 @@ namespace Absyn {
     ComplexCon; // complex ranges over intcon and floatcons only.
     RgnHandleCon; // region_t<`r> (handle for allocating).  RgnKind -> BoxKind
     TagCon;     // tag_t<t>.  IntKind -> BoxKind.
-    HeapCon;    // The heap region.  RgnKind 
+    HeapCon;    // The heap region.  EffKind // used to be RgnKind 
     UniqueHeapCon;  // Short hand for the heap region with @aqual(UNIQUE). RgnKind
     RefCntHeapCon;   // Short hand for the heap region with @aqual(REFCNT). RgnKind
-    AccessCon;  // Uses region r.  RgnKind -> EffKind
+    //    AccessCon;  // Uses region r.  RgnKind -> EffKind //don't need this anymore REMOVE
     JoinCon;  // e1+e2.  EffKind list -> EffKind
     RgnsCon;  // regions(t).  AnyKind -> EffKind
     TrueCon;  // BoolKind
@@ -376,6 +379,12 @@ namespace Absyn {
     AggrCon(aggr_info_t); // e.g., union U or struct S
   };
   typedef datatype TyCon @tycon_t;
+  
+  EXTERN_ABSYN datatype EffConstraint {
+    SingleConstraint(type_t); //single(e1) used to ensure that a pointer *points into* a given region, e.g in rfree
+    DisjointConstraint(type_t, type_t); //e1|e2 (useful for restrict / alias information)
+    SubsetConstraint(type_t, type_t); //regions(`env)<`e, used in existential types t
+  };
 
   // Note: The last fields of AggrType, TypedefType, and the decl 
   // are set by check_valid_type which most of the compiler assumes
@@ -458,7 +467,8 @@ namespace Absyn {
               bool,                                    // true ==> c_varargs
               vararg_info_t *,                         // cyc_varargs
               type_opt_t,                              // effect
-              list_t<$(type_t,type_t)@>,               // region partial order
+	      // list_t<$(type_t,type_t)@>,               // region partial order
+	      list_t<effconstr_t>,                      //effect constraints
               list_t<$(type_t,type_t)@>,               // qualifier bounds
               exp_opt_t,                               // requires clause
               exp_opt_t,                               // ensures clause
@@ -774,10 +784,11 @@ namespace Absyn {
 
   EXTERN_ABSYN struct AggrdeclImpl {
     list_t<tvar_t>            exist_vars;
-    list_t<$(type_t,type_t)@> rgn_po;
     list_t<$(type_t,type_t)@> qual_bnd;
     list_t<aggrfield_t>       fields;
     bool                      tagged; // only applicable for unions
+    //    NEW
+    list_t<effconstr_t> effconstr;
   };
 
   //for structs and datatypes we could memoize the string->field-number mapping
@@ -880,6 +891,7 @@ namespace Absyn {
   int hash_qvar(qvar_t);
   int varlist_cmp(list_t<var_t>, list_t<var_t>);
   int tvar_cmp(tvar_t,tvar_t); // WARNING: ignores the kinds
+  int tvar_id(tvar_t);
 
   ///////////////////////// Namespaces ////////////////////////////
   bool is_qvar_qualified(qvar_t);
@@ -940,7 +952,7 @@ namespace Absyn {
     aqual_constant(alias_qual_val_t),
     valueof_type(exp_t),
     typeof_type(exp_t),
-    access_eff(rgntype_t),
+    //    access_eff(type_t),
     join_eff(list_t<type_t,`H>),
     regionsof_eff(type_t),
     enum_type(typedef_name_t, struct Enumdecl *`H),
@@ -1115,7 +1127,8 @@ namespace Absyn {
   vardecl_t new_vardecl(seg_t varloc, qvar_t, type_t, exp_opt_t init);
   vardecl_t static_vardecl(qvar_t, type_t, exp_opt_t init);
   struct AggrdeclImpl @ aggrdecl_impl(list_t<tvar_t,`H> exists,
-				      list_t<$(type_t,type_t)@`H,`H> po,
+				      // list_t<$(type_t,type_t)@`H,`H> po,
+				      list_t<effconstr_t,`H> ec,
 				      list_t<$(type_t,type_t)@`H,`H> qb,
 				      list_t<aggrfield_t,`H> fs,
 				      bool tagged);
@@ -1141,7 +1154,8 @@ namespace Absyn {
 		       tqual_t ret_tqual, type_t ret_type, 
 		       list_t<$(var_opt_t,tqual_t,type_t)@`H,`H> args,
 		       bool c_varargs, vararg_info_t *`H cyc_varargs,
-		       list_t<$(type_t,type_t)@`H,`H> rgn_po,
+		       //		       list_t<$(type_t,type_t)@`H,`H> rgn_po,
+		       list_t<effconstr_t,`H> effconstr,
 		       list_t<$(type_t,type_t)@`H,`H> qb,
 		       attributes_t, 
 		       exp_opt_t requires_clause, exp_opt_t ensures_clause,

@@ -27,7 +27,10 @@ using Absyn;
 using Tcenv;
 
 struct TcPatResult {
-  $(list_t<$(tvar_t,bool)@>,list_t<$(type_t,type_t)@>) * tvars_and_bounds_opt;
+  $(list_t<$(tvar_t,bool)@>,list_t<effconstr_t>) * tvars_and_effconstr_opt;  
+  //the effects result from unpacked existentials, or in the case of let alias
+  //the newly introduced effect var is added to the capability
+  //$(list_t<$(tvar_t,bool)@>,list_t<$(type_t,type_t)@>) * tvars_and_bounds_opt; //REMOVE THIS!
   // tvars_and_bounds_opt is a list of tvars and outlives constraints
   // to add to the environment of the statement in the scope of the
   // pattern.  These can arise either from an unpacked existential or

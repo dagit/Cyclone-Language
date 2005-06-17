@@ -72,7 +72,9 @@ int tvar_cmp(tvar_t tv1, tvar_t tv2) {
   int i = strptrcmp(tv1->name,tv2->name);
   return (i != 0) ? i : (tv1->identity) - (tv2->identity);
 }
-  
+int tvar_id(tvar_t tv) {
+  return tv->identity;
+}
 nmspace_t Loc_n = Nmspace{.Loc_n = 0};
 nmspace_t Abs_n(list_t<var_t,`H> x, bool C_scope) { 
   return C_scope ? Nmspace{.C_n = x} : Nmspace{.Abs_n = x}; 
@@ -150,6 +152,15 @@ MAKE_ALIAS_QUAL(un_qual_type,  Unique_qual);
 MAKE_ALIAS_QUAL(rc_qual_type,  Refcnt_qual);
 MAKE_ALIAS_QUAL(rtd_qual_type, Restricted_qual);
 
+//static datatype TyCon.AccessCon access_con_cval = AccessCon;
+//static List<type_t> l = List{heap_rgn_inner_type, NULL};
+//static datatype Type.AppType heap_rgn_type_tval = AppType(&access_con_cval, &l);
+//type_t heap_rgn_type = &heap_rgn_type_tval;
+#define MAKE_UNARY_TYPE(N,TC,A) \
+static datatype TyCon.TC N##_cval = TC; \
+static List<type_t> N##_argl = List{A, NULL}; \
+static datatype Type.AppType N##_tval = AppType(&N##_cval, &N##_argl); \
+type_t N = &N##_tval;
 
 // e.g., MAKE_NULLARY_TYPE(void_type,VoidCon) becomes
 // static datatype TyCon.VoidCon void_type_cval = VoidCon;
@@ -195,7 +206,7 @@ static datacon(TyCon,RgnHandleCon);
 static datacon(TyCon,AqualHandleCon);
 static datacon(TyCon,AqualVarCon);
 static datacon(TyCon,TagCon);
-static datacon(TyCon,AccessCon);
+//static datacon(TyCon,AccessCon);
 static datacon(TyCon,RgnsCon);
 static datacon(TyCon,ThinCon);
 static datacon(TyCon,JoinCon);
@@ -216,7 +227,7 @@ type_t aqual_handle_type(type_t aq)  { return app_type(&AqualHandleCon_val, aq);
 type_t aqual_var_type(type_t tv, type_t bnd)  { return app_type(&AqualVarCon_val, tv, bnd); }
 
 type_t tag_type        (type_t    t) { return app_type(&TagCon_val,       t);  }
-type_t access_eff      (rgntype_t r) { return app_type(&AccessCon_val,    r);  }
+//type_t access_eff      (type_t r) { return app_type(&AccessCon_val,    r);  }
 type_t regionsof_eff   (type_t    t) { return app_type(&RgnsCon_val,      t);  }
 type_t thin_bounds_type(type_t    t) { return app_type(&ThinCon_val,      t);  }
 type_t join_eff(types_t  ts) { return new AppType(&empty_effect_cval,ts);}
@@ -422,20 +433,20 @@ type_t pointer_type(struct PtrInfo s) {
 }
 
 type_t fatptr_type(type_t t, type_t r, aqualtype_t aq, tqual_t tq, booltype_t zt, booltype_t rel) {
-  return pointer_type(PtrInfo{t, tq, PtrAtts{.rgn = r, .nullable = true_type, 
+  return pointer_type(PtrInfo{t, tq, PtrAtts{.eff = r, .nullable = true_type, 
 					     .bounds = fat_bound_type,
 					     .zero_term = zt, .ptrloc=NULL,
 					     .autoreleased = rel, .aqual=aq}});
 						
 }
 type_t starb_type(type_t t, type_t r, aqualtype_t aq, tqual_t tq, ptrbound_t b, booltype_t zt, booltype_t rel) {
-  return pointer_type(PtrInfo{t, tq, PtrAtts{.rgn = r, .nullable = true_type, 
+  return pointer_type(PtrInfo{t, tq, PtrAtts{.eff = r, .nullable = true_type, 
 					     .bounds = b, 
 					     .zero_term = zt, .ptrloc=NULL,
 					     .autoreleased = rel,.aqual=aq }});
 }
 type_t atb_type(type_t t, type_t r, aqualtype_t aq, tqual_t tq, ptrbound_t b, booltype_t zt, booltype_t rel) {
-  return pointer_type(PtrInfo{t, tq, PtrAtts{.rgn = r, .nullable = false_type, 
+  return pointer_type(PtrInfo{t, tq, PtrAtts{.eff = r, .nullable = false_type, 
 					     .bounds = b, 
 					     .zero_term = zt, .ptrloc=NULL,
 					     .autoreleased = rel,.aqual=aq }});
@@ -868,19 +879,20 @@ vardecl_t static_vardecl(qvar_t x, type_t t, exp_opt_t init) {
   return ans;
 }
 struct AggrdeclImpl @ aggrdecl_impl(list_t<tvar_t,`H> exists,
-				    list_t<$(type_t,type_t)@`H,`H> po,
+				    //				    list_t<$(type_t,type_t)@`H,`H> po,
+				    list_t<effconstr_t,`H> ec,
 				    list_t<$(type_t,type_t)@`H,`H> qb,
 				    list_t<aggrfield_t,`H> fs, 
                                     bool tagged) {
-  return new AggrdeclImpl{.exist_vars=exists, .rgn_po=po, .qual_bnd=qb,
-                          .fields=fs, .tagged = tagged};
+  return new AggrdeclImpl{.exist_vars=exists, .qual_bnd=qb,
+			     .fields=fs, .tagged = tagged, .effconstr=ec};
 }
 decl_t aggr_decl(aggr_kind_t k, scope_t s, typedef_name_t n,
 		 list_t<tvar_t,`H> ts, struct AggrdeclImpl *`H i,
 		 attributes_t atts, seg_t loc) {
   return new_decl(new Aggr_d(new Aggrdecl {.kind = k, .sc=s, .name=n, .tvs=ts,
-					   .impl=i, .attributes = atts,
-                                           .expected_mem_kind = false}),
+					      .impl=i, .attributes = atts,
+					      .expected_mem_kind = false}),
 		  loc);
 }
 type_decl_t aggr_tdecl(aggr_kind_t k, scope_t s, typedef_name_t n,
@@ -927,7 +939,7 @@ type_t function_type(list_t<tvar_t,`H> tvs, type_opt_t eff_type,
                      tqual_t ret_tqual, type_t ret_type, 
                      list_t<$(var_opt_t,tqual_t,type_t)@`H,`H> args, 
                      bool c_varargs, vararg_info_t *`H cyc_varargs,
-                     list_t<$(type_t,type_t)@`H,`H> rgn_po,
+                     list_t<effconstr_t,`H> effc,
 		     list_t<$(type_t,type_t)@`H,`H> qb,
                      attributes_t atts, exp_opt_t req, exp_opt_t ens,
                      exp_opt_t thrws) {
@@ -940,7 +952,7 @@ type_t function_type(list_t<tvar_t,`H> tvs, type_opt_t eff_type,
                               .args = args, 
                               .c_varargs = c_varargs, 
                               .cyc_varargs = cyc_varargs,
-                              .rgn_po = rgn_po,
+			      //                              .rgn_po = NULL,
                               .qual_bnd = qb,
                               .attributes=atts,
                               .requires_clause = req,
@@ -950,7 +962,8 @@ type_t function_type(list_t<tvar_t,`H> tvs, type_opt_t eff_type,
                               .throws_clause = thrws,
                               .throws_assn = NULL,
                               .arg_vardecls = NULL,
-                              .return_value = NULL});
+                              .return_value = NULL,
+			      .effconstr=effc});
 }
 // MWH: use RgnKind here rather than TopRgnKind for fresh evars;
 //   function pointers can't be unique at the moment
@@ -958,7 +971,7 @@ type_t function_type(list_t<tvar_t,`H> tvs, type_opt_t eff_type,
 type_t pointer_expand(type_t t,bool fresh_evar) {
   switch (compress(t)) {
   case &FnType(_): 
-    let rtyp = fresh_evar ? new_evar(new Opt(&Kinds::rk), NULL) : heap_rgn_type;
+    let rtyp = fresh_evar ? new_evar(new Opt(&Kinds::ek), NULL) : heap_rgn_type;
     return at_type(t,rtyp,al_qual_type,empty_tqual(0),false_type,false_type);
   default: return t;
   }

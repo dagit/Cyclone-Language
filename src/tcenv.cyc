@@ -35,7 +35,7 @@
    with the same names) so their bindings don't belong in our environments.
 */
 #include <string.h>
-#include "rgnorder.h"
+//#include "rgnorder.h"
 #include "tcutil.h"
 #include "warn.h"
 #include "kinds.h"
@@ -45,7 +45,7 @@
 using List;
 using Absyn;
 using Tcutil;
-using RgnOrder;
+//using RgnOrder;
 namespace Tcenv;
 
 datatype exn {Env_error};
@@ -87,8 +87,10 @@ typedef $(switch_clause_t, list_t<tvar_t>, list_t<type_t>) const * ftclause_t;
 // than threading labels which must be function-wide unique anyway.
 static struct SharedFenv {
   type_t   return_typ;
-  list_t<$(type_t,type_t,rgn_po_t,seg_t)@> delayed_effect_checks;
-  list_t<$(rgn_po_t,list_t<$(type_t,type_t)@>,seg_t)@> delayed_constraint_checks;
+  //cap,eff,equality constraints at the time of the check ... new ones may be introduced by subsequent unpacks etc.
+  list_t<$(type_t,type_t,list_t<effconstr_t>,seg_t)@> delayed_effect_checks;
+  //single/disjoint constraints on effects, constraint environment at time of check
+  list_t<$(list_t<effconstr_t>, list_t<effconstr_t>, seg_t)@> delayed_constraint_checks;
 };
 
 // flags for local function environments
@@ -100,17 +102,31 @@ struct FenvFlags {
   bool in_stmt_exp : 1;    // true when in a statement-expression ({ s })
 };
 
+//Computing disjoint constraints is messy; here's how it works:
+//When typechecking a function with effect {`ei}, add each `ei to the environment
+//as a list<type_t> within an InitialConstraint. The first region<`r> declaration 
+//introduces a constraint `r|{`ei} into the env and this is also maintained in the 
+//lastconstraint field of Fenv. Each succeeding region<`s> declaration asserts 
+//`e|{`r,`ei} where `r|{`ei} was the last constraint.
+//StoreConstraintEnv is used to maintain this context of disjoint constraints
+typedef datatype StoreConstraintEnv {
+  InitialConstraint(list_t<type_t>);
+  LastConstraint(effconstr_t);
+} @storeconstraint_t, *storeconstraint_opt_t;
+
 // Local function environments -- local variables are already bound
 abstract struct Fenv {
   struct SharedFenv @ shared;
   list_t<tvar_t>      type_vars; //type variables that can occur free
-  rgn_po_t            region_order; // partial order on region variables
+  //  rgn_po_opt_t            region_order; // partial order on region variables
   aqualbnds_t aquals_bounds; //need this to decide the bounds of aquals(`a)
   ftclause_t          ctrl_env;
   type_t              capability;
   type_t              curr_rgn;   // current block's region
   type_t              curr_lifo_rgn; // top of LIFO region stack
   struct FenvFlags    flags;
+  storeconstraint_t   lastconstraint; //disjoint constraint context
+  list_t<effconstr_t> effconstr; //single,disjoint,equality constraints on effects
 };
 
 //////////////////////// Top-level Environment Manipulation //////////////////
@@ -271,7 +287,7 @@ bool in_stmt_exp(tenv_t te) {
 
 // do not stop setting clauseopt -- JumpAnalysis needs it!
 $(switch_clause_t,list_t<tvar_t>,list_t<type_t>)const* const
-process_fallthru(tenv_t te,stmt_t s, switch_clause_t *@ clauseopt){
+process_fallthru(tenv_t te,stmt_t s, switch_clause_t *`H @ clauseopt){
   let ans = get_fenv(te,"process_fallthru")->ctrl_env;
   if(ans != NULL)
     *clauseopt = new (*ans)[0];
@@ -324,16 +340,36 @@ bool in_tempest(tenv_t te) {
 }
 tenv_t add_region(tenv_t te, type_t rgn, bool opened, bool lifo) {
   let ans = new *get_fenv(te,"add_region");
-  let region_order = ans->region_order;
-  switch (compress(rgn)) {
-  case &VarType(x): region_order = add_youngest(region_order, x, opened); break;
-  default: break;
-  }
-  ans->region_order = region_order;
-  ans->capability   = join_eff(new List(access_eff(rgn),
+  ans->capability   = join_eff(new List(rgn,
 					new List(ans->capability,NULL)));
   // FIX: add || opened to support dynamic regions
-  if (lifo) ans->curr_lifo_rgn = rgn;
+  if (lifo) {
+    ans->curr_lifo_rgn = rgn;
+    if(!opened) { //this should be redundant for now, ...
+      //... but will be necessary if dyn regions are ever to be `C
+      //fresh regions can be treated as single(`r)
+      effconstr_opt_t dj=NULL;
+      switch(ans->lastconstraint) {
+      case &InitialConstraint(l):
+	dj = new DisjointConstraint(rgn, join_eff(l));
+	ans->lastconstraint = new LastConstraint(dj); //initialize the context
+	break;
+      case &LastConstraint(*c):
+	switch(*c) {
+	case &DisjointConstraint(e, &AppType(&JoinCon, l)):
+	  dj = new DisjointConstraint(rgn, join_eff(new List(e, l)));
+	  *c = dj;//update the dijoint constraint context
+	  break;
+	default:
+	  break;
+	}
+	break;
+      }
+      ans->effconstr = new List{new SingleConstraint(rgn),
+				new List {dj, 
+					  ans->effconstr}};
+    }
+  }
   return put_fenv(te,ans);
 }
 
@@ -342,75 +378,43 @@ tenv_t new_named_block(seg_t loc, tenv_t te, tvar_t block_rgn) {
   let block_typ = new VarType(block_rgn);
   ans->type_vars = new List(block_rgn, ans->type_vars);
   check_unique_tvars(loc, ans->type_vars); // DJG: FIX -- very wasteful
-  ans->region_order = add_youngest(ans->region_order, block_rgn, false);
-  ans->capability = join_eff(new List(access_eff(block_typ), 
-					 new List(ans->capability,NULL)));
+  //  ans->region_order = add_youngest(ans->region_order, block_rgn, false);
+  ans->capability = join_eff(new List(block_typ, 
+				      new List(ans->capability,NULL)));
   ans->curr_rgn = block_typ;
   return put_fenv(te,ans);
 }
 
-static datatype KindBound.Eq_kb rgn_kb = Eq_kb(&Kinds::rk);
+static datatype KindBound.Eq_kb eff_kb = Eq_kb(&Kinds::ek);
 
 tenv_t new_block(seg_t loc, tenv_t te) {
-  tvar_t t = new_tvar(&rgn_kb);
+  tvar_t t = new_tvar(&eff_kb);
   add_tvar_identity(t);
   return new_named_block(loc, te, t);
 }
 
-tenv_t new_outlives_constraints(tenv_t te, list_t<$(type_t,type_t)@> cs,
-				seg_t loc) {
-  let ans = new *get_fenv(te,"new_outlives_constraints");
-  for(; cs != NULL; cs = cs->tl)
-    ans->region_order =
-      add_outlives_constraint(ans->region_order,(*cs->hd)[0],(*cs->hd)[1], loc);
-  return put_fenv(te,ans);
+tenv_t new_effect_constraints(tenv_t te, list_t<effconstr_t,`H> ecs, seg_t loc) {
+  let ans = new *get_fenv(te,"new_effect_equalities");
+  ans->effconstr = List::append(ans->effconstr, ecs);
+  return put_fenv(te, ans);
 }
 
-tenv_t add_region_equality(tenv_t te, type_t r1, type_t r2,
-			   $(tvar_t,kindbound_t) * @oldtv,
-			   seg_t loc) {
-  // we add outlives constraints and refine the kind of the type variable
-  r1 = compress(r1);
-  r2 = compress(r2);
-  let r1k = type_kind(r1);
-  let r2k = type_kind(r2);
-
-  // first do kind refinement
-  bool r1_le_r2 = Kinds::kind_leq(r1k,r2k);
-  bool r2_le_r1 = Kinds::kind_leq(r2k,r1k);
-  if (!r1_le_r2 && !r2_le_r1) {
-    Warn::err2(loc,"Cannot compare region handles for ",r1," and ",r2,
-	       "\n  kinds ",r1k," and ",r2k," are not compatible");
-    return new_outlives_constraints(te,NULL,loc);
-  }
-  else if (r1_le_r2 && !r2_le_r1)
-    *oldtv = new Kinds::swap_kind(r2,Kinds::kind_to_bound(r1k));
-  else if (!r1_le_r2 && r2_le_r1)
-    *oldtv = new Kinds::swap_kind(r1,Kinds::kind_to_bound(r2k));
-
-  // now update the outlives constraints
-  let bds = NULL;
-  if (r1 != heap_rgn_type)// && r1 != unique_rgn_type && r1 != refcnt_rgn_type)
-    bds = new List(new $(access_eff(r1),r2),bds);
-  if (r2 != heap_rgn_type)// && r2 != unique_rgn_type && r2 != refcnt_rgn_type)
-    bds = new List(new $(access_eff(r2),r1),bds);
-  return new_outlives_constraints(te,bds,loc);
-}
-
+type_opt_t glob_curr_rgn=NULL;
 type_t curr_rgn(tenv_t te) {
   let le = te->le;
-  if (le == NULL) return heap_rgn_type;
-  return le->curr_rgn;
+  if (le == NULL) {glob_curr_rgn = heap_rgn_type; return heap_rgn_type;}
+  glob_curr_rgn = le->curr_rgn; return le->curr_rgn; 
 }
 type_t curr_lifo_rgn(tenv_t te) {
   let le = te->le;
   if (le == NULL) return heap_rgn_type;
   return le->curr_lifo_rgn;
 }
-rgn_po_opt_t curr_rgnpo(tenv_t te) {
+
+list_t<effconstr_t> curr_effect_constraints(tenv_t te) {
   let le = te->le;
   if(le == NULL) return NULL;
-  return le->region_order;
+  return le->effconstr;
 }
 aqualbnds_t curr_aquals_bounds(tenv_t te) {
   let le = te->le;
@@ -440,100 +444,112 @@ tenv_t add_aquals_bound(tenv_t te, type_t aq, type_t bnd) {
 // Check that rgn_typ is currently accessible:  the heap region is always
 // accessible, and a region variable r is accessible if it appears in the
 // capability or outlives something in the capability.
-void check_rgn_accessible(tenv_t te, seg_t loc, type_t rgn) {
+void check_effect_accessible_nodelay(tenv_t te, seg_t loc, type_t rgn) {
   fenv_t fe = get_fenv(te,"check_rgn_accessible");
-  if (region_in_effect(false, rgn, fe->capability) ||
-      region_in_effect(true, rgn, fe->capability))
+  if (subset_effect(false, rgn, fe->capability) ||
+      subset_effect(true, rgn, fe->capability))
     return;
-  if(eff_outlives_eff(fe->region_order,access_eff(rgn),fe->capability))
+  //In the case of existentials we will need to use the equality
+  // constraints to decide if the value is accessible
+  //But, typically this should be handled by check_effect_accessible
+  if (check_eff_in_cap(loc, rgn, fe->effconstr, fe->capability))
     return;
+  /*   if(eff_outlives_eff(loc, fe->region_order,access_eff(rgn),fe->capability)) */
+  /*     return; */
   Warn::err2(loc, "Expression accesses unavailable region ", rgn);
-}
-
-// check that region rt_a outlives region rt_b using the partial order in
-// the environment.  Assumes that rt_a <> rt_b.
-// Note: inefficient allocation here!
-bool region_outlives(tenv_t te, type_t rt_a, type_t rt_b) {
-  return rgn_outlives_rgn(curr_rgnpo(te),rt_a,rt_b);
 }
 
 // Check that a function call's effect is contained in the current capability.
 // Do not constrain evars -- delay the check instead.
 void check_effect_accessible(tenv_t te, seg_t loc, type_t eff) {
-  let &Fenv{.capability = capability, .region_order = ro,
-            .shared = shared, ...} = get_fenv(te,"check_effect_accessible");
+  let &Fenv{.capability = capability, .shared = shared, .effconstr=effc, ...} = 
+    get_fenv(te,"check_effect_accessible");
   if(subset_effect(false, eff, capability))
     return;
-  if(eff_outlives_eff(ro, eff, capability))
+  if(check_eff_in_cap(loc, eff, effc, capability))
     return;
   shared->delayed_effect_checks =
-    new List (new $(capability,eff,ro,loc), shared->delayed_effect_checks);
+    new List (new $(capability,eff,effc,loc), shared->delayed_effect_checks);
 }
 void check_delayed_effects(tenv_t te) {
   let checks =
     get_fenv(te,"check_delayed_constraints")->shared->delayed_effect_checks;
   for(; checks != NULL; checks = checks->tl) {
-    let &$(capability,eff,rgn_order,loc) = checks->hd;
+    let &$(capability,eff,constr,loc) = checks->hd;
     if(subset_effect(true, eff, capability))
       continue;
-    if(eff_outlives_eff(rgn_order, eff, capability))
+    if(check_eff_in_cap(loc, eff, constr, capability))
       continue;
     Warn::err2(loc, "Capability \n",capability,
 	       "\ndoes not cover function's effect\n",eff);
   }
 }
-
-// Check that a function call's region partial order is compatible
-// with the current region partial order
-// Do not constrain evars -- delay the check instead.
-// FIX: better error message!
-void check_rgn_partial_order(tenv_t te, seg_t loc,
-                             list_t<$(type_t,type_t)@`H,`H> po) {
-  let le = te->le;
-  if(le == NULL) {
-    // not sure this could ever fail
-    for(; po != NULL; po=po->tl)
-      if((!subset_effect(true, (*po->hd)[0], empty_effect))
-	 || !subset_effect(true, access_eff((*po->hd)[1]), empty_effect))
-	Warn::err2(loc,"the required region ordering is not satisfied here");
+void print_delayed_checks(list_t<$(list_t<effconstr_t>, list_t<effconstr_t>, seg_t)@> dcc);
+void check_effect_constraints(tenv_t te, seg_t loc, list_t<effconstr_t,`H> ec) {
+  if(te->le == NULL) {
+    if(!satisfies_effect_constraints(loc, ec, NULL)) {
+      Warn::err2(loc,"the effect constraints are not satisfied here");
+    }
     return;
   }
-  let &Fenv{.region_order = ro, .shared = shared, ...} = (fenv_t)le;
-  if(!satisfies_constraints(ro,po,heap_rgn_type,false))
+  let &Fenv{.effconstr = env_ec, .shared = shared, ...} = te->le;
+  if(!satisfies_effect_constraints(loc, ec, env_ec)) {
     shared->delayed_constraint_checks =
-      new List(new $(ro,po,loc), shared->delayed_constraint_checks);
+      new List(new $(ec,env_ec,loc), shared->delayed_constraint_checks);
+  }
 }
 
 void check_delayed_constraints(tenv_t te) {
   let checks = 
     get_fenv(te,"check_delayed_constraints")->shared->delayed_constraint_checks;
   for(; checks != NULL; checks = checks->tl) {
-    let &$(rgn_order,po,loc) = checks->hd;
-    if(!satisfies_constraints(rgn_order,po,heap_rgn_type,true))
-      Warn::err2(loc,"the required region ordering is not satisfied here");
+    let &$(ec,env_ec,loc) = checks->hd;
+    if(!satisfies_effect_constraints(loc, ec, env_ec))
+      Warn::err2(loc,"the effect constraints are not satisfied here");
   }
 }
 
 static struct SharedFenv @`H new_shared_fenv(type_t ret) {
   return new SharedFenv{.return_typ = ret,
-			.delayed_effect_checks = NULL,
-			.delayed_constraint_checks = NULL };
+			   .delayed_effect_checks = NULL,
+			   .delayed_constraint_checks = NULL };
 }
 
+storeconstraint_t make_init_store_constraint(list_t<tvar_t> tvs, storeconstraint_opt_t sc) {
+  list_t<type_t> es = NULL;
+  for(;tvs!=NULL;tvs=tvs->tl) {
+    let Core::Opt{k} = Kinds::tvar_kind_opt(tvs->hd);
+    if(k == &Kinds::ek)
+      es = new List(var_type(tvs->hd), es);
+  }
+  switch(sc) {
+  case &InitialConstraint(ll):
+    es = List::imp_append(es, ll);
+    break;
+  case &LastConstraint(&DisjointConstraint(r, &AppType(&JoinCon, l))):
+    es = List::imp_append(es, l);
+    es = new List(r, es);
+    break;
+  default:
+    break;
+  }
+  return new InitialConstraint(es);
+}
 
 fenv_t new_fenv(seg_t loc, fndecl_t fd) {
   tvar_t rgn0 =
     new Tvar(new ((string_t)aprintf("`%s",*(*fd->name)[1])),
-             new_tvar_id(), &rgn_kb, NULL); //this has always been ::rk
-//   let $(tvs1,cap,ret_t,f_rgn_po) = CurRgn::add_curr_tvar(fd);
-  let $(tvs1,cap,ret_t,f_rgn_po) = $(new List(CurRgn::curr_rgn_tvar(),fd->i.tvars),
-				     join_eff(new List(access_eff(CurRgn::curr_rgn_type()),
+             new_tvar_id(), &eff_kb, NULL); //this has always been ::rk
+  //   let $(tvs1,cap,ret_t,f_rgn_po) = CurRgn::add_curr_tvar(fd);
+  let $(tvs1,cap,ret_t) = $(new List(CurRgn::curr_rgn_tvar(),fd->i.tvars),
+			    join_eff(new List(CurRgn::curr_rgn_type(),
 					      new List((type_t)fd->i.effect,NULL))),
-				     fd->i.ret_type,fd->i.rgn_po);
+			    fd->i.ret_type);
   let tvs = new List(rgn0,tvs1);
   Tcutil::check_unique_tvars(loc,tvs);
-  let rgn_po = initial_fn_po(tvs1,f_rgn_po,cap,rgn0,loc);
-  type_t param_rgn = new VarType(rgn0); //so param aqual is al_qual_type
+  storeconstraint_t init_store_constraint = make_init_store_constraint(tvs, NULL);
+  //  let rgn_po = initial_fn_po(tvs1,f_rgn_po,cap,rgn0,loc);
+  type_t param_rgn = new VarType(rgn0); 
   for(let vds = fd->param_vardecls->v; vds != NULL; vds = vds->tl) 
     vds->hd->rgn = param_rgn;
   if (fd->i.cyc_varargs != NULL) {
@@ -550,37 +566,30 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
   
   return new
     Fenv{.shared = new_shared_fenv(ret_t),
-         .type_vars     = tvs,
-         .region_order  = rgn_po,
-	 .aquals_bounds = Tcutil::get_aquals_bounds(fd),
-         .ctrl_env      = NULL,
-         .capability    = join_eff(new List(access_eff(param_rgn),
-					    new List(cap,NULL))),
-         .curr_rgn      = param_rgn,
-	 .curr_lifo_rgn = CurRgn::curr_rgn_type(),
-	 .flags         = FenvFlags{NoneNew,false,false,false,false}
-       };
+	    .type_vars     = tvs,
+	    //         .region_order  = rgn_po,
+	    .aquals_bounds = Tcutil::get_aquals_bounds(fd),
+	    .ctrl_env      = NULL,
+	    .capability    = join_eff(new List(param_rgn,
+					       new List(cap,NULL))),
+	    .curr_rgn      = param_rgn,
+	    .curr_lifo_rgn = CurRgn::curr_rgn_type(),
+	    .flags         = FenvFlags{NoneNew,false,false,false,false},
+	    .lastconstraint = init_store_constraint,
+	    .effconstr = fd->i.effconstr
+  };
 }
 
 fenv_t nested_fenv(seg_t loc, fenv_t old_fenv, fndecl_t fd) {
-  let &Fenv{.region_order = rgn_po, .aquals_bounds = aqb, 
-            .type_vars = type_vars, .shared = shared, ...} = old_fenv;
+  let &Fenv{ .aquals_bounds = aqb, .type_vars = type_vars, 
+		.shared = shared, .lastconstraint=lc, .effconstr=ec_old, ...} = old_fenv;
+  
   tvar_t rgn0 =
     new Tvar(new ((string_t)aprintf("`%s",*(*fd->name)[1])),
-             new_tvar_id(), &rgn_kb, NULL);
-  for (let tvars = fd->i.tvars; tvars != NULL; tvars = tvars->tl) {
-    let &Kind(k,a) = Kinds::tvar_kind(tvars->hd,&Kinds::bk);
-    if (k == RgnKind)
-      //      if (a == Aliasable)
-      rgn_po = add_unordered(rgn_po, tvars->hd);
-    //    else
-    //      Warn::impos2("non-intuitionistic tvar in nested_fenv");
-  }
-  rgn_po = add_youngest(rgn_po, rgn0, false);
-  for(let po2 = fd->i.rgn_po; po2 != NULL; po2=po2->tl)
-    rgn_po = add_outlives_constraint(rgn_po,(*po2->hd)[0],(*po2->hd)[1],loc);
+             new_tvar_id(), &eff_kb, NULL);
   let tvs = new List(rgn0,append(fd->i.tvars,type_vars));
   check_unique_tvars(loc,tvs);
+  storeconstraint_t initconstr = make_init_store_constraint(tvs, lc);
   type_t param_rgn = new VarType(rgn0);
   for(let vds = fd->param_vardecls->v; vds != NULL; vds = vds->tl)
     vds->hd->rgn = param_rgn;
@@ -597,35 +606,37 @@ fenv_t nested_fenv(seg_t loc, fenv_t old_fenv, fndecl_t fd) {
   }
   return new
     Fenv{.shared = new_shared_fenv(fd->i.ret_type),
-         .type_vars   = tvs,
-         .region_order = rgn_po,
-         .aquals_bounds = aqb,
-         .ctrl_env    = NULL,
-         .capability  = join_eff(new List(access_eff(param_rgn),
-					  new List((type_t)fd->i.effect,NULL))),
-         .curr_rgn    = param_rgn,
-	 .curr_lifo_rgn = CurRgn::curr_rgn_type(),
-	 .flags       = FenvFlags{NoneNew,false,false,false,false}
-       };
+	    .type_vars   = tvs,
+	    //      .region_order = rgn_po,
+	    .aquals_bounds = aqb,
+	    .ctrl_env    = NULL,
+	    .capability  = join_eff(new List(param_rgn,
+					     new List((type_t)fd->i.effect,NULL))),
+	    .curr_rgn    = param_rgn,
+	    .curr_lifo_rgn = CurRgn::curr_rgn_type(),
+	    .flags       = FenvFlags{NoneNew,false,false,false,false},
+	    .lastconstraint = initconstr,
+	    .effconstr   = List::append(fd->i.effconstr, ec_old)};
 }
 
 fenv_t bogus_fenv(type_t ret_type,
 		  list_t<$(var_opt_t,tqual_t,type_t)@> args) {
-  tvar_t rgn0 = new Tvar(new "bogus", new_tvar_id(), &rgn_kb, NULL);
+  tvar_t rgn0 = new Tvar(new "bogus", new_tvar_id(), &eff_kb, NULL);
   let tvs = new List(rgn0,NULL);
-  let rgn_po = initial_fn_po(NULL,NULL,join_eff(NULL),rgn0,0);
+  //  let rgn_po = initial_fn_po(NULL,NULL,join_eff(NULL),rgn0,0);
   type_t param_rgn = new VarType(rgn0);
   return new
     Fenv{.shared = new_shared_fenv(ret_type),
-         .type_vars   = tvs,
-         .region_order = rgn_po,
-	 .aquals_bounds = NULL,
-         .ctrl_env    = NULL,
-         .capability  = join_eff(new List(access_eff(param_rgn),NULL)),
-         .curr_rgn    = param_rgn,
-	 .curr_lifo_rgn = CurRgn::curr_rgn_type(),
-	 .flags       = FenvFlags{NoneNew,false,false,false,false}
-       };
+	    .type_vars   = tvs,
+	    //         .region_order = rgn_po,
+	    .aquals_bounds = NULL,
+	    .ctrl_env    = NULL,
+	    .capability  = join_eff(new List(param_rgn,NULL)),
+	    .curr_rgn    = param_rgn,
+	    .curr_lifo_rgn = CurRgn::curr_rgn_type(),
+	    .flags       = FenvFlags{NoneNew,false,false,false,false},
+	    .lastconstraint = new InitialConstraint(NULL),
+	    .effconstr   = NULL};
 }
 
 tenv_t copy_tenv_dicts(tenv_t te) {
@@ -638,4 +649,13 @@ tenv_t copy_tenv_dicts(tenv_t te) {
   ans->ae->ordinaries = Dict::copy(te->ae->ordinaries);
   ans->le = NULL; 
   return ans;
+}
+
+void print_delayed_checks(list_t<$(list_t<effconstr_t>, list_t<effconstr_t>, seg_t)@> dcc) {
+  for(_ c = dcc;c != NULL; c=c->tl){
+    let &$(ec1, env, _) = c->hd;
+    fprintf(stderr, " (%s , %s)\n", 
+	    Absynpp::effconstr2string(ec1), 
+	    Absynpp::effconstr2string(env));
+  }
 }

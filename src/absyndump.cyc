@@ -367,7 +367,7 @@ static $(list_t<type_t>, list_t<type_t>) effects_split(type_t t) {
   list_t<type_t> rgions  = NULL;
   list_t<type_t> effects = NULL;
   switch (compress(t)) {
-  case &AppType(&AccessCon,&List(r,_)): rgions = new List(r,rgions); break;
+    //  case &AppType(&AccessCon,&List(r,_)): rgions = new List(r,rgions); break;
   case &AppType(&JoinCon,ts):
     for (; ts != NULL; ts = ts->tl) {
       let $(rs,es) = effects_split(ts->hd);
@@ -495,7 +495,7 @@ static void dumpntyp(type_t t) {
     case &UniqueHeapCon: dump("`U");  return;
     case &RefCntHeapCon: dump("`RC"); return;
     case &HeapCon:   dump("`H");  return;
-    case &AccessCon: dump("{");        dumptyp(ts->hd); dump("}"); return;
+      //    case &AccessCon: dump("{");        dumptyp(ts->hd); dump("}"); return;
     case &RgnsCon:   dump("regions("); dumptyp(ts->hd); dump(")"); return;
     case &JoinCon:   group(dumptyp,ts,"","","+"); return;
     case &TrueCon:   dump("@true");  return;
@@ -521,6 +521,22 @@ static void dump_rgncmp($(type_t,type_t)@ cmp) {
 static void dump_rgnpo(list_t<$(type_t,type_t)@> rgn_po) {
   dump_sep(dump_rgncmp,rgn_po,",");
 }
+static void dump_oneeffc(effconstr_t fc) {
+  switch(fc) {
+  case &SubsetConstraint(e1, e2):
+    dumpeff(e1); dump("<="); dumpeff(e2);
+    break;
+  case &DisjointConstraint(e1, e2):
+    dumpeff(e1); dump_char('|'); dumpeff(e2);
+    break;
+  case &SingleConstraint(e):
+    dump("single("); dumpeff(e); dump_char(')');
+    break;
+  }
+}
+static void dump_effc(list_t<effconstr_t> effc) {
+  dump_sep(dump_oneeffc,effc,",");
+}
 static void dump_qb_elt($(type_t, type_t)@ q) {
   dumptyp((*q)[1]);dump(">=");dumptyp((*q)[0]);
 }
@@ -529,11 +545,11 @@ static void dump_qualbnd(list_t<$(type_t,type_t)@> qual_bnd) {
 }
 static void dumpfunargs(list_t<$(var_opt_t,tqual_t,type_t)@> args,
 			bool c_varargs, vararg_info_t *cyc_varargs, 
-			type_opt_t effopt, list_t<$(type_t,type_t)@> rgn_po,
+			type_opt_t effopt, list_t<effconstr_t> effc,
 			list_t<$(type_t,type_t)@> qual_bnd,
 			exp_opt_t req, exp_opt_t ens, exp_opt_t thrws) {
   if(args == NULL && !c_varargs && cyc_varargs == NULL && 
-     effopt == NULL && rgn_po == NULL) {
+     effopt == NULL && effc == NULL) {
     dump("(void)"); //when compiling for the linux kernel, expect -Wstrict-prototypes
   }
   else {
@@ -547,11 +563,11 @@ static void dumpfunargs(list_t<$(var_opt_t,tqual_t,type_t)@> args,
     if (effopt != NULL) {
       dump_semi(); dumpeff(effopt);
     }
-    if (rgn_po != NULL) {
-      dump_char(':'); dump_rgnpo(rgn_po);
+    if (effc != NULL) {
+      dump_char(':'); dump_effc(effc);
     }
     if(qual_bnd != NULL) {
-      let sep = (rgn_po == NULL ? ':' : ',');
+      let sep = (effc == NULL ? ':' : ',');
       dump_char(sep); dump_qualbnd(qual_bnd);
     }
     dump_char(')');
@@ -1211,11 +1227,11 @@ static void dump_aggrdecl(aggrdecl_t ad) {
   if(ad->impl != NULL) {
     dump_char('{');
     egroup(dumpkindedtvar,ad->impl->exist_vars,"<",">",",");
-    if(ad->impl->rgn_po != NULL) {
-      dump_char(':'); dump_rgnpo(ad->impl->rgn_po);
+    if(ad->impl->effconstr != NULL) {
+      dump_char(':'); dump_effc(ad->impl->effconstr);
     }
     if(ad->impl->qual_bnd != NULL) {
-      let sep = (ad->impl->rgn_po == NULL ? ':' : ',');
+      let sep = (ad->impl->effconstr == NULL ? ':' : ',');
       dump_char(sep); dump_qualbnd(ad->impl->qual_bnd);
     }
     dumpaggrfields(ad->impl->fields);
@@ -1419,8 +1435,8 @@ static void dumptms(bool is_char_ptr, list_t<type_modifier_t> tms,
       dump_char('['); dumpexp(e); dump_char(']'); 
       if (type2bool(false,zeroterm)) dump("@zeroterm");
       break;
-    case &Function_mod(&WithTypes(args,c_varargs,cyc_varargs,effopt,rgn_po,qb,req,ens,thrws)):
-      dumpfunargs(args,c_varargs,cyc_varargs,effopt,rgn_po,qb,req,ens,thrws); break;
+    case &Function_mod(&WithTypes(args,c_varargs,cyc_varargs,effopt,effc,qb,req,ens,thrws)):
+      dumpfunargs(args,c_varargs,cyc_varargs,effopt,effc,qb,req,ens,thrws); break;
     case &Function_mod(&NoTypes(sl,_)):
       group(dump_str,sl,"(",")",","); break;
     case &TypeParams_mod(ts,_,print_kinds): 

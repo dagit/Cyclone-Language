@@ -51,9 +51,9 @@ dict_t<`a,`b> singleton(int (@`H comp)(`a,`a), `a key, `b data) @throws(false) {
   return rsingleton(Core::heap_region, comp, key, data);
 }
 
-dict_t<`a,`b,`r> rshare(region_t<`r> r, dict_t<`a,`b,`r2> d : {`r2} > `r) @throws(false) {
+dict_t<`a,`b,`r+`r2> rshare(region_t<`r> r, dict_t<`a,`b,`r2> d) @throws(false) {
   struct T<`a,`b,`r2> const * t = d.t;
-  struct T<`a,`b,`r> const * t2 = t;
+  struct T<`a,`b,`r+`r2> const * t2 = t;
   return Dict{d.rel, r, t2};
 }
 
@@ -573,10 +573,10 @@ bool iter_f<`a,`b,`r1,`r2,`r3>($(tree<`a,`b,`r1> ?`r2,int) @`r2 stk,
   return true;
 }
 
-Iter::iter_t<$(`a,`b),`bd> make_iter(region_t<`r1> rgn,
-				     dict_t<`a,`b,`r2> d
-				     : regions($(`a,`b)) > `bd,
-				       {`r1,`r2} > `bd) {
+
+// we exploit the balancing invariant to bound the array size
+Iter::iter_t<$(`a,`b),regions($(`a,`b))+`r1+`r2> make_iter(region_t<`r1> rgn, 
+							   dict_t<`a,`b,`r2> d) {
   // we exploit the balancing invariant to bound the array size
   int half_max_size = 1;
   let t = d.t;
@@ -596,8 +596,8 @@ Iter::iter_t<$(`a,`b),`bd> make_iter(region_t<`r1> rgn,
 
 `c marshal(region_t rgn,
 	   `c env,
-	   `c (write_key<`a,`c,`r1::R>)(`c, FILE @`r1, `a),
-	   `c (write_val<`b,`c,`r1::R>)(`c, FILE @`r1, `b),
+	   `c (write_key<`a,`c,`r1::E>)(`c, FILE @`r1, `a),
+	   `c (write_val<`b,`c,`r1::E>)(`c, FILE @`r1, `b),
 	   FILE @ fp,
 	   dict_t<`a,`b> dict)
 {

@@ -14,7 +14,7 @@ endif
 HAVE_PTHREAD=no
 # test asm doesn't work for me on cygwin
 EXES := $(addsuffix $(EXE), cyctest foo hello test_regions test_currgn histogram test_getopt zeroterm flatlist md5 unique_patterns dynregion cinclude  multimethod  testasm testaqualsuccess structarray scheme scheme-2 patterns refcnt_test rc require streambufftest)
- # testbget testsexp)
+ # testbget testsexp) 
 #these are broken
 #streambuff.cyc is broken badly ... it is unsound to pattern match on existentials with `RC inside them, wait until restrict
 ifeq ($(HAVE_PTHREAD),yes)

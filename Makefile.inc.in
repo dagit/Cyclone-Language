@@ -119,7 +119,6 @@ CYCLONE_SRCS:=absyn\
          lex\
          absynpp\
 	 absyndump\
-	 rgnorder\
          tcenv\
 	 unify\
 	 attributes\
@@ -170,7 +169,6 @@ CYCDOC_SRCS:=cycdoc\
 	tcutil\
 	kinds\
 	tctyp\
-	rgnorder\
         relations-ap\
 	tcenv\
 	tcexp\
@@ -219,7 +217,6 @@ BUILDLIB_SRCS:=buildlib\
 	tcstmt\
 	formatstr\
 	evexp\
-	rgnorder\
 	tcenv\
 	tcpat\
         pratt-ap\

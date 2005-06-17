@@ -319,7 +319,7 @@ static string_t *find(list_t<stringptr_t> dirs, string_t file) {
 }
 
 /* Prints out a list of string pointers */
-static string_t sprint_list(list_t<stringptr_t>dirs) {
+static string_t sprint_list(list_t<stringptr_t<`H>>dirs) {
   string_t tmp = "";
   for (; dirs != NULL; dirs = dirs->tl) {
     let dir = *dirs->hd;
@@ -330,7 +330,7 @@ static string_t sprint_list(list_t<stringptr_t>dirs) {
   return tmp;
 }
 
-static string_t do_find(list_t<stringptr_t> dirs, string_t file) {
+static string_t do_find(list_t<stringptr_t<`H>> dirs, string_t file) {
   let f = find(dirs, file);
   if (f == NULL) {
     fprintf(stderr,"Error: can't find internal compiler file %s in path %s\n",

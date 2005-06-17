@@ -115,7 +115,7 @@ static void build_tables_exp(env_t env, exp_t e) {
   visit_exp(build_tables_visit_f1,build_tables_visit_f2,env,e);
 }
 
-static void add_to_table(Hashtable::table_t<qvar_t,List::list_t<`a>> tab,
+static void add_to_table(Hashtable::table_t<qvar_t,List::list_t<`a,`H>> tab,
 			 qvar_t qv, `a d) {
   let lst_opt = Hashtable::lookup_opt(tab,qv);
   let lst = new List::List(d, lst_opt ? *lst_opt : NULL);

@@ -184,7 +184,9 @@ int termhash(datatype Term @t) {
   }
 }
 
-int cmp_term(datatype Term @t1, datatype Term @t2) {
+int cmp_term(datatype Term @`r1 _t1, datatype Term @`r2 _t2) {
+  datatype Term @`r1+`H t1 = _t1;
+  datatype Term @`r2+`H t2 = _t2;
  LOOP:
   if (t1 == t2) return 0;
   switch $(t1,t2) {
@@ -971,7 +973,9 @@ static inline int assncode(datatype Assn @a) {
 
 // compare two assertions and return 0 if they are structurally equal,
 // non-zero value otherwise.
-int neqassn(datatype Assn @a1, datatype Assn @a2) {
+int neqassn(datatype Assn @`r1 _a1, datatype Assn @`r2 _a2) {
+  datatype Assn @`r1+`H a1 = _a1;
+  datatype Assn @`r2+`H a2 = _a2;
  LOOP:
   if (a1 == a2) return 0;
   switch $(a1,a2) {
@@ -998,7 +1002,9 @@ int neqassn(datatype Assn @a1, datatype Assn @a2) {
 
 // compare two assertions for structural equality -- does not assume
 // the components have been hash-consed, but probably could.
-int assncmp(datatype Assn @a1, datatype Assn @a2) {
+int assncmp(datatype Assn @`r1 _a1, datatype Assn @`r2 _a2) {
+  datatype Assn @`r1+`H a1 = _a1;
+  datatype Assn @`r2+`H a2 = _a2;
  LOOP:
   if (a1 == a2) return 0;
   switch $(a1,a2) {
@@ -1038,7 +1044,7 @@ typedef struct AssnInfo {
   assn_set_opt_t *widened_set;
 } assn_info_t;
 
-static struct Hashtable::Table<assn_t,assn_info_t@> *hash_cons_table = NULL;
+static struct Hashtable::Table<assn_t,assn_info_t@,`H> *hash_cons_table = NULL;
 
 static Hashtable::table_t<assn_t,assn_info_t@>
 get_hash_cons_table() {
@@ -1318,7 +1324,7 @@ assn_t not(assn_t a) {
 // Both reduce_term and reduce_assn take in a substitution for 
 // non-escaping variables.
 // TRY: we could try using dictionaries here instead of lists.
-struct SubstNode<`r::R> {
+struct SubstNode<`r::E> {
   struct SubstNode<`r> *`r next;
   vardecl_t vd;
   term_t    term;
@@ -1399,9 +1405,8 @@ typedef Hashtable::table_t<assn_t,reduce_memo_t@> reduce_info_t;
 static struct Hashtable::Table<assn_t,reduce_memo_t@> *reduce_table = NULL;
 static reduce_info_t get_reduce_table() {
   if (reduce_table == NULL) {
-    let t = Hashtable::create(221,neqassn,assnhash);
-    reduce_table = t;
-    return t;
+    reduce_table = Hashtable::create(221,neqassn,assnhash);
+    return reduce_table;
   } else 
     return (reduce_info_t)reduce_table;
 }

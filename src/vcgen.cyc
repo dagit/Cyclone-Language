@@ -251,6 +251,8 @@ bogus_env() {
   if (bogus_shared == NULL) {
     let succ_table = Hashtable::create(1,Core::ptrcmp,hash_ptr);
     let assn_table = Hashtable::create(1,Core::ptrcmp,hash_ptr);
+/*     Hashtable::table_t<stmt_t,stmt_opt_t,`H> succ_table = Hashtable::create(1,Core::ptrcmp,hash_ptr); */
+/*     Hashtable::table_t<stmt_t,assn_t @`H,`H> assn_table = Hashtable::create(1,Core::ptrcmp,hash_ptr); */
     senv = new SharedEnv{.assn_table = assn_table,
                          .succ_table = succ_table,
                          .try_assn = NULL,

@@ -27,9 +27,9 @@ namespace Array {
   /*** Defines namespace Array, implementing utility functions on
        arrays. */
 
-typedef int (@cmpfn_t<`a,`r1::R,`r2::R>)(`a @`r1, `a @`r2);
+typedef int (@cmpfn_t<`a,`r1::E,`r2::E>)(`a @`r1, `a @`r2);
 
-extern void qsort<`a::B,`r::R>(cmpfn_t<`a,`r,`r>, `a ?`r x, int len);
+extern void qsort<`a::B,`r::E>(cmpfn_t<`a,`r,`r>, `a ?`r x, int len);
   /** [qsort(cmp,x,len)] sorts the first [len] elements of array [x]
       into ascending order (according to the comparison function
       [cmp]) by the QuickSort algorithm.  [cmp(a,b)] should return a

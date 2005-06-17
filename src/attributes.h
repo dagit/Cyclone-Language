@@ -43,7 +43,7 @@ namespace Atts {
   extern_datacon(Attribute,No_throw_att);
 
   // parsing: locations just in case of errors
-attribute_t parse_nullary_att(seg_t, string_t);
+attribute_t parse_nullary_att(seg_t, string_t<`H>);
 attribute_t parse_unary_att(seg_t sloc, string_t s, seg_t eloc, exp_t e);
 attribute_t parse_format_att(seg_t loc, seg_t s2loc, string_t s1, string_t s2, 
 			     unsigned u1, unsigned u2);

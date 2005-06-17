@@ -125,7 +125,7 @@ typedef long long int _IO_ssize_t;
 
 static const char ?`r __sccl (char @{256}  @nozeroterm tab, const char ?`r fmt);
 
-datatype ScanfArg<`r::R> {
+datatype ScanfArg<`r::E> {
   ShortPtr_sa(short @`r);
   UShortPtr_sa(unsigned short @`r);
   IntPtr_sa(int @`r);

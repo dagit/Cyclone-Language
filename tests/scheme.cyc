@@ -13,12 +13,12 @@ namespace Scheme {
 typedef struct DynamicRegion<`r>@`U ukey_t<`r>;
 
 // a capability to generate next_region<`r>'s key (and the next counter)
-struct RegionCtr<`r::R>;
+struct RegionCtr<`r::E>;
 typedef struct RegionCtr<`r>@`U rgn_ctr_t<`r>;
 
 // next_rgn maps regions to regions and gives us a way to generate
 // an infinite name supply for regions.
-typedef _::R next_rgn<`r::R>;
+typedef _::E next_rgn<`r::E>;
 
 struct CounterRgn<`r> {
   ukey_t<`r> key;
@@ -28,7 +28,7 @@ struct CounterRgn<`r> {
 // return type for new_ukey() -- a fresh region, a key for the region,
 // and a counter for generating follow-on regions.
 struct NewCounterRgn {
-  <`r::R>
+  <`r::E>
   struct CounterRgn<`r> cr;
 };
 
@@ -64,9 +64,9 @@ extern "C include" {
 // Core lambda calculus interpreter
 //////////////////////////////////////////////////////////////////////
 // forward declarations
-struct Closure<`r::R>;
-datatype Object<`r::R>;
-struct Env<`r::R>;
+struct Closure<`r::E>;
+datatype Object<`r::E>;
+struct Env<`r::E>;
 typedef struct Closure<`r> closure_t<`r>;
 typedef datatype Object<`r>*`r object_t<`r>;
 typedef datatype Exp@`H exp_t;
@@ -210,7 +210,7 @@ static state_t<`r> step(region_t<`r> r, state_t<`r> arg) {
       arg.result.value = rnew(r) Primop_v(p<>);
       break;
     case &Apply_e(es):        // push "[] e2" on stack and evaluate e1
-      object_t<`r>? vs = new {for i < numelts(es) : NULL};
+      object_t<`r>?`r vs = rnew(r) {for i < numelts(es) : NULL};
       arg.stack = unew Stack{arg.stack, arg.env,
                              Frame{.apply_frame = $(es,0,vs)}};
       arg.result.expr = es[0];

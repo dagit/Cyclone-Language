@@ -2,13 +2,13 @@
 Test Parser
 ********************************************************************************/
 struct foo<`a, `q::Q> {
-  <`i> : regions(`a) > `H, RESTRICTED >= `q, aquals(`a) >= `q
+  <`i> : regions(`a) <= `H, RESTRICTED >= `q, aquals(`a) >= `q
   int *@aqual(`q) foo;
   `a bar;
   tag_t<`i> len;
 };
 
-void foo_fn(int *@aqual(`q) x, `a y : regions(`a) > `H, aquals(`a) >= `q) {
+void foo_fn(int *@aqual(`q) x, `a y : regions(`a) <= `H, aquals(`a) >= `q) {
   return;
 }
 
@@ -200,7 +200,7 @@ void use_adrof() {
 }
 
 //extern struct Table<`a::B>;
-struct List <`a,`r::R> {
+struct List <`a,`r::E> {
   `a hd;
   struct List<`a,`r> *`r tl;
 };
@@ -262,13 +262,13 @@ void use_tagg2(int *@aqual(RESTRICTED) a, int *b) __attribute((consume(1))) {
   //    let t1 = test_agg2{a, 0}; //fail
   let t2 = test_agg2{b, 0}; //succeed
 }
-struct Queue<`a::B\T,`r::R> {
+struct Queue<`a::B\T,`r::E> {
   `a a;
   int *`r r;
 };
-typedef struct Queue<`a,`r::R> @`r queue_t<`a,`r::R>;
+typedef struct Queue<`a,`r::E> @`r queue_t<`a,`r::E>;
 `a take2(queue_t<`a::B\T> q, `a v)__attribute((consume(2))) {return v;}//: RESTRICTED >= aquals(`a)){}return q->a;}
-void use_queue_foobar(queue_t<int*> q2){
+void use_queue_foobar(queue_t<int*`H> q2){
   let a = take2(q2, new 1);
 }
 
@@ -303,7 +303,7 @@ void use_assert() {
 }
 
 //test kind
-//struct Env<`r::R>;
+//struct Env<`r::E>;
 struct Env<`rr> {
   int *`rr a;
 };
@@ -338,7 +338,7 @@ void use_ex(struct Ex @e) {
   let &Ex{elt} = e;
 }
 
-struct TList<`a::B,`r::R,`q::Q>{ : RESTRICTED >= aquals(`a), RESTRICTED >= `q
+struct TList<`a::B,`r::E,`q::Q>{ : RESTRICTED >= aquals(`a), RESTRICTED >= `q
   `a hd;
   struct TList<`a,`r,`q> *@aqual(`q) `r tl;
 };

@@ -20,7 +20,7 @@
 #define _TCUTIL_H_
 
 #include "relations-ap.h"
-#include "rgnorder.h"
+//#include "rgnorder.h"
 
 namespace Tcutil {
 using List;
@@ -101,15 +101,15 @@ bool coerce_uint_type(exp_t);
 bool coerce_sint_type(exp_t);
 bool coerce_to_bool(exp_t);
 
-bool coerce_arg(RgnOrder::rgn_po_opt_t,aqualbnds_t, exp_t, type_t, bool* alias_coercion); 
-bool coerce_assign(RgnOrder::rgn_po_opt_t,aqualbnds_t, exp_t, type_t);
-bool coerce_list(RgnOrder::rgn_po_opt_t,aqualbnds_t, type_t, list_t<exp_t>);
+bool coerce_arg(aqualbnds_t, exp_t, type_t, bool* alias_coercion); 
+bool coerce_assign(aqualbnds_t, exp_t, type_t);
+bool coerce_list(aqualbnds_t, type_t, list_t<exp_t>);
 // true when expressions of type t1 can be implicitly cast to t2
-bool silent_castable(RgnOrder::rgn_po_opt_t,seg_t,type_t,type_t);
+bool silent_castable(seg_t,type_t,type_t);
 // true when expressions of type t1 can be cast to t2 -- call silent first
-coercion_t castable(RgnOrder::rgn_po_opt_t,seg_t,type_t,type_t);
+coercion_t castable(seg_t,type_t,type_t);
 // true when t1 is a subtype of t2 under the given list of subtype assumptions
-bool subtype(RgnOrder::rgn_po_opt_t, list_t<$(type_t,type_t)@`H,`H> assume, 
+bool subtype(list_t<$(type_t,type_t)@`H,`H> assume, 
 	     type_t t1, type_t t2);
 bool alias_qual_subtype(aqualtype_t sub, aqualtype_t sup);
 bool check_aqual_bounds(aqualbnds_t aqb, aqualtype_t sub, aqualtype_t bnd);
@@ -129,9 +129,12 @@ type_t substitute(list_t<$(tvar_t,type_t)@`H,`H>, type_t);
 type_t substitute_nofun(list_t<$(tvar_t,type_t)@`H,`H> inst, type_t t);
   // could also have a version with two regions, but doesn't seem useful
 type_t rsubstitute(region_t<`r>,list_t<$(tvar_t,type_t)@`r,`r>,type_t);
-list_t<$(type_t,type_t)@> rsubst_rgnpo(region_t<`r>,
-				       list_t<$(tvar_t,type_t)@`r,`r>,
-				       list_t<$(type_t,type_t)@`H,`H>);
+list_t<$(type_t,type_t)@> rsubst_type_assoc(region_t<`r>,
+					    list_t<$(tvar_t,type_t)@`r,`r>,
+					    list_t<$(type_t,type_t)@`H,`H>);
+list_t<effconstr_t> rsubst_effconstr(region_t<`r> rgn,
+				     list_t<$(tvar_t,type_t)@`r,`r> inst,
+				     list_t<effconstr_t,`H> ec);
 
 // substitute through an expression
 exp_t rsubsexp(region_t<`r>, list_t<$(tvar_t,type_t)@`r,`r>, exp_t);
@@ -139,9 +142,16 @@ exp_t rsubsexp(region_t<`r>, list_t<$(tvar_t,type_t)@`r,`r>, exp_t);
 // true when e1 is a sub-effect of e2
 bool subset_effect(bool may_constrain_evars, type_t e1, type_t e2);
 
+bool check_eff_in_cap(seg_t loc, type_t eff, 
+		      list_t<effconstr_t,`H> equality_constraints, 
+		      type_t cap);
+bool satisfies_effect_constraints(seg_t loc, 
+				  list_t<effconstr_t> ec, 
+				  list_t<effconstr_t,`H> equality_constraints);
+type_t evaluate_effect(list_t<effconstr_t,`H> ec, type_t eff);
 // returns true when rgn is in effect -- won't side-effect any evars when
 // constrain is false.
-bool region_in_effect(bool constrain, type_t r, type_t e);
+//bool region_in_effect(bool constrain, type_t r, type_t e);
 
 type_t fndecl2type(fndecl_t);
 
@@ -165,7 +175,7 @@ void check_bound(seg_t, unsigned int i, ptrbound_t, bool do_warn);
 
 list_t<$(aggrfield_t,`a)@`r,`r> 
 resolve_aggregate_designators(region_t<`r>, seg_t,
-                              list_t<$(list_t<designator_t>,`a)@`r2,`r3>, 
+                              list_t<$(list_t<designator_t,`H>,`a)@`r2,`r3>, 
                               aggr_kind_t, list_t<aggrfield_t>);
 // is e1 of the form *ea or ea[eb] where ea is a zero-terminated pointer?
 // If so, return true and set ea and eb appropriately (for *ea set eb to 0).
@@ -249,12 +259,14 @@ type_t any_bounds(list_t<tvar_t,`H>);
 
   // This stuff is used only by unify and tcutil
   // fairly semantic equivalence
-  bool same_rgn_po(list_t<$(type_t,type_t)@>, list_t<$(type_t,type_t)@>);
+  //  bool same_rgn_po(list_t<$(type_t,type_t)@>, list_t<$(type_t,type_t)@>);
   int tycon_cmp(tycon_t,tycon_t);
   aqualbnds_t get_aquals_bounds(fndecl_t fd);
   type_t lookup_aquals(aqualbnds_t aquals_map, type_t t);
   type_opt_t eval_aquals_of(aqualbnds_t aquals_map, type_t t);
   bool is_aliasable_qual(aqualtype_t aq);
   $(tvar_t, bool)@ tvar_bool_pair(bool b, tvar_t t);
+  int cmp_effect_constraints(list_t<effconstr_t> ec0,list_t<effconstr_t> ec1);
+  bool type_in_effect(bool may_constrain_evars, type_t t, type_t e);
 }
 #endif

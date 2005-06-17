@@ -38,7 +38,7 @@ using List;
 
 namespace Splay;
 
-datatype tree<`a,`b,`r::R> {
+datatype tree<`a,`b,`r::E> {
   Leaf(dummy_t),
   Node(struct noderef<`a,`b,`r> @`r)
 };

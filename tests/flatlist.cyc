@@ -25,7 +25,7 @@ using Core;
   // List nodes that hold `a values and live in region `r.
   // Unlike the List library, these nodes can hold values of
   // arbitrary type (e.g., doubles, char?, etc.)
-  struct Node<`a::A,`r::R> {
+  struct Node<`a::A,`r::E> {
     struct Node<`a,`r> *`r next;
     `a value;
   };

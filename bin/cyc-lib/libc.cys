@@ -669,7 +669,7 @@ pid_t
 hstub {
   // FIX: ADV is not supported
 
-  datatype FcntlArg<`r::R> {
+  datatype FcntlArg<`r::E> {
     Flock(struct flock @`r);
     Long(long);
   };
@@ -2670,7 +2670,7 @@ cstub {
 hstub {
   // vararg for printf functions.  The functions themselves are defined
   // in printf.cyc.
-  extern datatype PrintArg<`r::R> {
+  extern datatype PrintArg<`r::E> {
     String_pa(const char ? @nozeroterm`r);
     Int_pa(unsigned long);
     Double_pa(double);
@@ -2899,24 +2899,31 @@ cycstub fread {
   }
 }
 hstub freopen {
-  extern FILE *`r freopen(const char *, const char @, FILE @`r);
+  extern FILE * freopen(const char *, const char @, FILE @`H);
+  extern FILE *`r r_freopen(region_t<`r> r, const char *, const char @, FILE @`r);
 }
 cycstub freopen {
   namespace Cstdio {
-    extern "C" __cFILE *`r freopen(const char *, const char @, 
-				   __cFILE @`r);
+    extern "C" __cFILE *`H freopen(const char *, const char @, 
+				   __cFILE @`H);
   }
-  FILE *`r freopen(const char * filename, const char @ modes, FILE @`r f) {
+  FILE *`r r_freopen(region_t<`r> r, const char * filename, const char @modes, FILE @`r f) {
     // Note, filename is allowed to be NULL
     let cf = Cstdio::freopen(filename,modes,f->file);
-    // FIX: get rid of the heap allocation
+    return cf ? rnew(r) __cycFILE((Cstdio::__cFILE @)cf) : NULL;
+  }
+
+  FILE *`H freopen(const char * filename, const char @ modes, FILE @`H f) {
+    // Note, filename is allowed to be NULL
+    let cf = Cstdio::freopen(filename,modes,f->file);
     return cf ? new __cycFILE((Cstdio::__cFILE @)cf) : NULL;
   }
+
 }
 hstub {
   // vararg for scanf functions.  The functions themselves are defined
   // in scanf.cyc.
-  extern datatype ScanfArg<`r::R> {
+  extern datatype ScanfArg<`r::E> {
     ShortPtr_sa(short @`r);
     UShortPtr_sa(unsigned short @`r);
     IntPtr_sa(int @`r);
@@ -4148,7 +4155,7 @@ hstub {
   #endif
 }
 hstub {
-  extern datatype SockAddr<`r::R> {
+  extern datatype SockAddr<`r::E> {
     SA_sockaddr_in(struct sockaddr_in @`r);
     /* We will add other cases as necessary, e.g., SockAddr_In6 */
 
@@ -4161,7 +4168,7 @@ hstub {
   typedef datatype SockAddr<`r> @`r SA<`r>;
 }
 hstub {
-  extern datatype SockOpt<`r::R> {
+  extern datatype SockOpt<`r::E> {
     SO_int(int @`r);
     SO_timeval(struct timeval @`r);
     SO_linger(struct linger@`r);
@@ -5456,7 +5463,7 @@ hstub execve {
   // FIX: what did I lose by removing the const from this spec?
   //  extern int execve(const char ?, const char ? const ?, const char ? const ?);
     extern "C" int execve(const char @ path, 
-			  char *@aqual(`q\T) `r::R* @zeroterm argv, char *@aqual(`q2\T) `r2::R* @zeroterm envp);
+			  char *@aqual(`q\T) `r::E* @zeroterm argv, char *@aqual(`q2\T) `r2::E* @zeroterm envp);
     //    extern int execve(const char ?, char ? const ?, char ? const ?);
 }
 cycstub execve {

@@ -54,7 +54,7 @@ typedef unsigned short mode_t; // correct on powerpc
 
   // vararg for printf functions.  The functions themselves are defined
   // in printf.cyc.
-  extern datatype PrintArg<`r::R> {
+  extern datatype PrintArg<`r::E> {
     String_pa(const char ? @nozeroterm`r);
     Int_pa(unsigned long);
     Double_pa(double);
@@ -111,7 +111,7 @@ typedef unsigned short mode_t; // correct on powerpc
 
   // vararg for scanf functions.  The functions themselves are defined
   // in scanf.cyc.
-  extern datatype ScanfArg<`r::R> {
+  extern datatype ScanfArg<`r::E> {
     ShortPtr_sa(short @`r);
     UShortPtr_sa(unsigned short @`r);
     IntPtr_sa(int @`r);

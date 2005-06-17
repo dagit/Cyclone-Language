@@ -74,7 +74,7 @@ the executable file might be covered by the GNU General Public License. */
 using Core;
 
 // vararg union for printf, fprintf, sprintf 
-datatype PrintArg<`r::R> {
+datatype PrintArg<`r::E> {
   String_pa(const char ? @nozeroterm`r);
   Int_pa(unsigned long);
   //  Float_pa(float);
@@ -281,7 +281,7 @@ int _IO_vfprintf (int (@ioputc)(int,`a), `a ioputc_env,
 	register int ch;	/* character from fmt */
 	register int n;		/* handy integer (short term usage) */
         /* cp is a handy char pointer (short term usage) for a local buffer */
-	char ? cp = NULL;	
+	char ?`_IO_vfprintf+`H cp = NULL;	
         /* cp2 is a handy char pointer (short term usage) for the case when
          * the argument is a string -- that lives in a different region. */
 	const char ? cp2 = NULL;
@@ -1038,7 +1038,7 @@ char ?`r vrprintf(region_t<`r> r1, const char ? fmt, parg_t ? ap)
 {
   // figure out the size of the resulting string -- add one for 0 terminator
   int size = _IO_vfprintf(putc_void, 0, fmt, ap) + 1;
-  char ?`r s = calloc(size+1,sizeof(char));
+  char ?`r s = rcalloc(r1, size+1,sizeof(char));
   vsprintf((char ? @nozeroterm)s, fmt, ap);
   return s;
 }

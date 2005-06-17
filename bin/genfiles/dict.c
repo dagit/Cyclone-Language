@@ -794,7 +794,7 @@ if((unsigned)t->right)
 *((const struct Cyc_Dict_T**)_check_fat_subscript(stack,sizeof(const struct Cyc_Dict_T*),++ ind))=t->right;
 *indp=ind;
 return 1;}}}
-# 576
+# 578
 struct Cyc_Iter_Iter Cyc_Dict_make_iter(struct _RegionHandle*rgn,struct Cyc_Dict_Dict d){
 # 581
 int half_max_size=1;

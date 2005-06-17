@@ -36,8 +36,8 @@ namespace Tcdecl;
 datatype exn {Incompatible};
 datatype exn.Incompatible Incompatible_val = Incompatible;
 
-void merr(seg_t loc,string_t<`r2> * msg1,string_t fmt, ... inject parg_t<`r> ap
-	  : {`r2} > `r)
+void merr(seg_t loc,string_t<`r2> * msg1,string_t fmt, ... inject parg_t<`r> ap)
+     //     	  : {`r2} > `r)
   __attribute__((format(printf,3,4)))
 {
   if (msg1 == NULL)
@@ -47,8 +47,8 @@ void merr(seg_t loc,string_t<`r2> * msg1,string_t fmt, ... inject parg_t<`r> ap
     fmt2 = strconcat("%s", fmt);
   else 
     fmt2 = strconcat("%s ", fmt);
-  parg_t<`r> ? ap2 = new {for i < numelts(ap)+1 : 
-		     i==0 ? ((parg_t<`r>)(new String_pa((string_t<`r>)(*msg1)))) : ap[i-1]};
+  parg_t<`r+`r2+`H> ? ap2 = new {for i < numelts(ap)+1 : 
+				 i==0 ? ((parg_t<`r+`r2+`H>)(new String_pa((string_t<`r2>)(*msg1)))) : ap[i-1]};
   Position::post_error(Position::mk_err(loc,vrprintf(heap_region,fmt2,ap2)));
 }
 
@@ -164,8 +164,8 @@ struct Aggrdecl * merge_aggrdecl(aggrdecl_t d0, aggrdecl_t d1,
   switch ($(d0->impl, d1->impl)) {
   case $(_, NULL): d2 = d0; break;
   case $(NULL, _): d2 = d1; break;
-  case $(&AggrdeclImpl(exist_vars0,rgn_po0,qb0,f0s,tagged0), 
-	 &AggrdeclImpl(exist_vars1,rgn_po1,qb1,f1s,tagged1)):
+    case $(&AggrdeclImpl(exist_vars0,qb0,f0s,tagged0,ec0), 
+	   &AggrdeclImpl(exist_vars1,qb1,f1s,tagged1,ec1)):
 
     // both declare fields, so they must agree (with renaming w.r.t. tyvars)
     if(!check_tvs(exist_vars0, exist_vars1, "type", v, loc, msg)) 
@@ -177,10 +177,14 @@ struct Aggrdecl * merge_aggrdecl(aggrdecl_t d0, aggrdecl_t d1,
 
     // check region partial order under the map 
     // FIX: a semantic equality check would be more permissive
-    for(; rgn_po0 != NULL && rgn_po1 != NULL; 
-	rgn_po0=rgn_po0->tl, rgn_po1=rgn_po1->tl) {      
-      check_type((*rgn_po0->hd)[0], (*rgn_po1->hd)[0]);
-      check_type((*rgn_po0->hd)[1], (*rgn_po1->hd)[1]);
+    /*     for(; rgn_po0 != NULL && rgn_po1 != NULL;  */
+    /* 	rgn_po0=rgn_po0->tl, rgn_po1=rgn_po1->tl) {       */
+    /*       check_type((*rgn_po0->hd)[0], (*rgn_po1->hd)[0]); */
+    /*       check_type((*rgn_po0->hd)[1], (*rgn_po1->hd)[1]); */
+    /*     } */
+    let ec11 = Tcutil::rsubst_effconstr(heap_region, inst, ec1);
+    if(Tcutil::cmp_effect_constraints(ec0, ec11)) {
+      merr(loc, msg, "Effect constraints do not match");
     }
 
     // check each field under the map

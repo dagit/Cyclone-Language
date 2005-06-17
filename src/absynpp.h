@@ -92,6 +92,7 @@ string_t tvar2string(tvar_t);
   // that we have to wrap extra braces around when a declaration shadows a 
   // previous one.
   $(bool, list_t<qvar_t>) shadows(decl_t d, list_t<qvar_t,`H> varsinblock);
+  string_t effconstr2string(list_t<effconstr_t> effc);
 }
 
 #endif

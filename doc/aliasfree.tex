@@ -705,14 +705,13 @@ The shorthand notation is as follows:
 \begin{description}
 \item[Alias Qualifier Specifier] The strings \verb+ \A, \U, \RC, \T+
   can be used as substitutes for {\tt ALIASABLE, UNIQUE, REFCNT,} and
-  {\tt RESTRICTED} respectively. For example
+  {\tt RESTRICTED} respectively. For example each of the following
+  three forms are equivalent.
   \begin{verbatim}
-    void cons(int *@aqual(\T) a, int *@aqual(\U) b)
+    void foo(int *\T a, int *\U b)
+    void foo(int *@aqual(\T) a, int *@aqual(\U) b)
+    void foo(int *@aqual(RESTRICTED) a, int *@aqual(UNIQUE) b)
   \end{verbatim} 
-  is equivalent to 
-  \begin{verbatim}
-    void cmp(int *@aqual(RESTRICTED) a, int *@aqual(UNIQUE) b)
-  \end{verbatim}
   
 \item[Type Variable Bound] The bound on a type variable, as shown
   previously, generally appears together with the effects in a
@@ -741,6 +740,11 @@ The shorthand notation is as follows:
     struct List<`a,`r,`q> *@aqual(`q) `r tl;
   };
   \end{verbatim}
+
+  Note that if a type variable is used to specify the alias qualifier
+  on a pointer, then the \texttt{@aqual(.)} notation must be
+  used. That is, \texttt{int *@aqual(`q\T)} cannot be substituted with
+  \texttt{int *`q\T}. 
 
 \item[Heap Pointers] For unique and reference counted pointers that
   reside in the heap we overload the region notation to provide a

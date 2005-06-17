@@ -350,7 +350,7 @@ static exp_t stmt_to_fun(toexpenv_t env, stmt_t s, type_t rettype) {
   list_t<$(var_opt_t,tqual_t,type_t)@> params = NULL;
   list_t<exp_t> args = NULL;
   
-  Iter::iter_t<_,`stmt_to_fun> iter = Set::make_iter(Core::heap_region, freevars);
+  let iter = Set::make_iter(Core::heap_region, freevars);
   // having to initialize is a pain :-(
   let vd = new Vardecl(Public,exn_name,0,empty_tqual(0),void_type,
 		       NULL,NULL,NULL,false,false);
@@ -374,9 +374,9 @@ static exp_t stmt_to_fun(toexpenv_t env, stmt_t s, type_t rettype) {
   *env.gen_ds=
     new List(new_decl(new Fn_d(new Fndecl(Static,false,funname,s,
 					  FnInfo(NULL,NULL,empty_tqual(0),
-						 rettype,params,false,NULL,
+						 rettype,params,false,
 						 NULL,NULL,NULL,NULL,NULL,
-                                                 NULL,NULL,NULL,NULL,NULL,NULL),
+                                                 NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 					  NULL,NULL,NULL,Static)),DL),
 	     *env.gen_ds);
   return fncall_exp(var_exp(funname,DL), args, DL);

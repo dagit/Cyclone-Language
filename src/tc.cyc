@@ -118,7 +118,7 @@ static void tcVardecl(tenv_t te, seg_t loc, vardecl_t vd, bool check_var_init,
       // is not a valid-toplevel one.
       try {
         let t2 = Tcexp::tcExpInitializer(te,&t,initializer);
-        if (!coerce_assign(curr_rgnpo(te),curr_aquals_bounds(te),initializer,t)) {
+        if (!coerce_assign(curr_aquals_bounds(te),initializer,t)) {
           let s0 = Absynpp::qvar2string(vd->name);
           let s1 = " declared with type ";
           let s2 = Absynpp::typ2string(t);
@@ -262,17 +262,17 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
         if (args != NULL)
           Warn::err2(loc,"main declared with too many arguments");
         opt_t<list_t<tvar_t>> tvs = new Opt(fd->i.tvars);
-        if (!Unify::unify(t2,fatptr_type(string_type(new_evar(new Opt(&Kinds::rk),tvs),al_qual_type),
-					 new_evar(new Opt(&Kinds::rk),tvs), al_qual_type,
+        if (!Unify::unify(t2,fatptr_type(string_type(new_evar(new Opt(&Kinds::ek),tvs),al_qual_type),
+					 new_evar(new Opt(&Kinds::ek),tvs), al_qual_type,
 					 empty_tqual(0),any_bool(tvs->v),false_type)) &&
-            !Unify::unify(t2,fatptr_type(const_string_type(new_evar(new Opt(&Kinds::rk),tvs),al_qual_type),
-					 new_evar(new Opt(&Kinds::rk),tvs),al_qual_type,
+            !Unify::unify(t2,fatptr_type(const_string_type(new_evar(new Opt(&Kinds::ek),tvs),al_qual_type),
+					 new_evar(new Opt(&Kinds::ek),tvs),al_qual_type,
 					 empty_tqual(0),any_bool(tvs->v),false_type)) &&
-            !Unify::unify(t2,fatptr_type(string_type(new_evar(new Opt(&Kinds::rk),tvs),al_qual_type),
-					 new_evar(new Opt(&Kinds::rk),tvs),al_qual_type,
+            !Unify::unify(t2,fatptr_type(string_type(new_evar(new Opt(&Kinds::ek),tvs),al_qual_type),
+					 new_evar(new Opt(&Kinds::ek),tvs),al_qual_type,
 					 const_tqual(0),any_bool(tvs->v),false_type)) &&
-            !Unify::unify(t2,fatptr_type(const_string_type(new_evar(new Opt(&Kinds::rk),tvs),al_qual_type),
-					 new_evar(new Opt(&Kinds::rk),tvs),al_qual_type,
+            !Unify::unify(t2,fatptr_type(const_string_type(new_evar(new Opt(&Kinds::ek),tvs),al_qual_type),
+					 new_evar(new Opt(&Kinds::ek),tvs),al_qual_type,
 					 const_tqual(0),any_bool(tvs->v),false_type))) {
           Warn::err2(loc,"second argument of main has type ",t2,
 		     " instead of char??");
@@ -325,18 +325,24 @@ static void tcTypedefdecl(tenv_t te, seg_t loc, typedefdecl_t td) {
 static void tcAggrImpl(tenv_t te, seg_t loc, 
                        aggr_kind_t str_or_union,
                        list_t<$(tvar_t,bool)@,`H> flagged_tvs,
-		       list_t<$(type_t,type_t)@> rpo, 
-		       list_t<$(type_t,type_t)@, `H> @qb, 
+		       list_t<effconstr_t> effc, 
+		       list_t<$(type_t,type_t)@`H, `H> @qb, 
 		       list_t<aggrfield_t> fields) {
   // check fields, rejecting ill-formed types, bad fields, and duplicates
   // (unless the field name is empty)
   region uprev_rgn; 
   _ tvs = List::map(fst, flagged_tvs);
-  // FIX?: forbid effect variables (but they're going away)
-  for(; rpo != NULL; rpo = rpo->tl) {
-    let &$(e,r) = rpo->hd;
-    check_type(loc,te,tvs,&Kinds::ek,false,false,e);
-    check_type(loc,te,tvs,&Kinds::rk,false,false,r); 
+  for(; effc != NULL; effc = effc->tl) {
+    switch(effc->hd) {
+    case &DisjointConstraint(e1, e2): fallthru(e1,e2);
+    case &SubsetConstraint(e1,e2):
+      check_type(loc,te,tvs,&Kinds::ek,false,false,e1);
+      check_type(loc,te,tvs,&Kinds::ek,false,false,e2); 
+      break;
+    case &SingleConstraint(e1):
+      check_type(loc, te, tvs, &Kinds::ek,false,false,e1);
+      break;
+    }
   }
 
   list_t<field_name_t, `uprev_rgn> prev_fields = NULL;
@@ -433,8 +439,8 @@ static void rule_out_mem_and_qual(seg_t loc, qvar_t q, list_t<tvar_t> tvs) {
       *f = new Opt(Kinds::kind_to_bound(&Kinds::bk)); break;
     case &Less_kb(*f,&Kind(AnyKind,_)):
       *f = new Opt(Kinds::kind_to_bound(&Kinds::ak)); break;
-    case &Less_kb(*f,&Kind(RgnKind,_)):
-      *f = new Opt(Kinds::kind_to_bound(&Kinds::rk)); break;
+    case &Less_kb(*f,&Kind(EffKind,_)):
+      *f = new Opt(Kinds::kind_to_bound(&Kinds::ek)); break;
     case &Eq_kb(&Kind(AqualKind,_)):
       Warn::err2(loc,"type ",q," attempts to abstract type variable ",
 		 tvs2->hd," of kind Q"); break;
@@ -470,7 +476,7 @@ void tcAggrdecl(tenv_t te, seg_t loc, aggrdecl_t ad) {
     // FIX: ignores @tagged qualifier which may be on struct!
     te->ae->aggrdecls = Dict::insert(te->ae->aggrdecls, q, new ad);
     break;
-  case $(&AggrdeclImpl(exist_vars,rgn_po,*qb,fs,tagged), NULL):
+  case $(&AggrdeclImpl(exist_vars,*qb,fs,tagged, effconstr), NULL):
     // FIX: check rgn_po for well-formed!
     // for the sake of recursive fields, make name abstract in body
     // check qb well-formed
@@ -490,7 +496,7 @@ void tcAggrdecl(tenv_t te, seg_t loc, aggrdecl_t ad) {
       Warn::err2(loc,"@tagged is allowed only on union declarations");
     _ btvs = List::append(List::map_c(Tcutil::tvar_bool_pair, false, tvs),
 			  List::map_c(Tcutil::tvar_bool_pair, true, exist_vars));
-    tcAggrImpl(te, loc, ad->kind, btvs, rgn_po, qb, fs);
+    tcAggrImpl(te, loc, ad->kind, btvs, effconstr, qb, fs);
 
     rule_out_memkind(loc, q, tvs);
     // we constrain existential variables to be Aliasable if
@@ -507,7 +513,7 @@ void tcAggrdecl(tenv_t te, seg_t loc, aggrdecl_t ad) {
 		      f->hd->type," so it can only be written and not read");
     *adp = ad; //insert ad in the environment
     break;
-  case $(&AggrdeclImpl(exist_vars,rgn_po,*qb,fs,tagged), &adp):
+  case $(&AggrdeclImpl(exist_vars,*qb,fs,tagged, effconstr), &adp):
     // FIX: check rgn_po!!! (just need to be closed (and no > `a ??))
     if(ad->kind != (*adp)->kind)
       Warn::err2(loc,"cannot reuse struct names for unions and vice-versa");
@@ -527,7 +533,7 @@ void tcAggrdecl(tenv_t te, seg_t loc, aggrdecl_t ad) {
       Warn::err2(loc,"@tagged is allowed only on union declarations");
     _ btvs = List::append(List::map_c(tvar_bool_pair, false, tvs),
 			  List::map_c(tvar_bool_pair, true, exist_vars));
-    tcAggrImpl(te, loc, ad->kind, btvs, rgn_po, qb,fs);
+    tcAggrImpl(te, loc, ad->kind, btvs, effconstr, qb,fs);
 
     *adp = ad0;// restore the previous declaration and go update the environment
     fallthru(adp);

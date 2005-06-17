@@ -154,8 +154,8 @@ extern "C include" {
 cyclone_override {
   struct list<`a> { `a x; struct list<`a> *tl; };
   struct f { <`i::I> tag_t<`i> len; char * @nozeroterm @numelts(valueof(`i)) buf; };
-  struct Function<`arg,`res,`bd::R> { 
-    <`env::B> : regions(`env) > `bd
+  struct Function<`arg,`res,`bd::E> { 
+    <`env::B> : regions(`env) <= `bd
     `res (@`bd f)(`env,`arg);
     `env env;
   };

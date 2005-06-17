@@ -14,7 +14,7 @@
 using Core;
 
 extern "C" void GC_blacklist_warn_clear();
-int main(int argc, string_t ? argv) {
+int main(int argc, string_t<`r> ? argv) {
   /* Don't print garbage collector warnings about allocations of 
      blacklisted blocks.  This turns up on OS X and possibly other
      BSD systems (??) */
@@ -24,7 +24,7 @@ int main(int argc, string_t ? argv) {
     return 1;
   }
   string_t source_name = argv[1];
-  string_t dest_name;
+  string_t<`H+`r> dest_name;
   if(argc==3)
     dest_name = argv[2];
   else if (Filename::check_suffix(source_name,".cyl"))

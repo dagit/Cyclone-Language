@@ -29,7 +29,7 @@ namespace Queue {
        queues and various operations following the conventions of the
        Objective Caml queue library as much as possible.  */
 
-extern struct Queue<`a::B\T,`r::R,`q::Q>;
+extern struct Queue<`a::B\T,`r::E,`q::Q>;
 typedef struct Queue<`a,`r,`q> @@aqual(`q) `r queue_t<`a,`r,`q>;
   /** A value of type [queue_t<`a,`r>] is a first-in, first-out queue
       of elements of type [`a]; the queue data structures are

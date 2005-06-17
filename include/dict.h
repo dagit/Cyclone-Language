@@ -42,9 +42,9 @@ namespace Dict {
 
 using List;
 
-extern struct T<`a::B,`b::B,`r::R>;
+extern struct T<`a::B,`b::B,`r::E>;
 typedef struct T<`a,`b,`r> const *`r tree<`a,`b,`r>;
-extern struct Dict<`a,`b,`r::R> {
+extern struct Dict<`a,`b,`r::E> {
   int (@`H rel)(`a,`a);
   region_t<`r> r;
   tree<`a,`b,`r> t;
@@ -69,7 +69,7 @@ extern dict_t<`a,`b,`r> rempty(region_t<`r>,int (@`H cmp)(`a,`a)) @throws(false)
 /** [rempty(r,cmp)] is like [empty(cmp)] except that the dictionary is
     allocated in the region with handle [r]. */
 
-extern dict_t<`a,`b,`r> rshare(region_t<`r>,dict_t<`a,`b,`r2> : {`r2} > `r) @throws(false);
+extern dict_t<`a,`b,`r+`r2> rshare(region_t<`r>,dict_t<`a,`b,`r2>) @throws(false);
 /** [rshare(r,d)] creates a virtual copy in region [`r] of the dictionary 
     [d] that lives in region [`r2].  The internal data structures of the
     new dictionary share with the old one. */
@@ -280,18 +280,16 @@ extern dict_t<`a,`b,`r> rdelete_same(dict_t<`a,`b,`r>, `a);
     dictionary [d].  This can be faster than [delete(d,k)] because it
     avoids a copy when [k] is not a member of [d]. */
 
-extern Iter::iter_t<$(`a,`b),`bd> make_iter(region_t<`r1> rgn, 
-					    dict_t<`a,`b,`r2> d
-					    : regions($(`a,`b)) > `bd,
-                                              {`r1,`r2} > `bd);
+extern Iter::iter_t<$(`a,`b),regions($(`a,`b))+`r1+`r2> make_iter(region_t<`r1> rgn, 
+								  dict_t<`a,`b,`r2> d);
 /** [make_iter(rgn,d)] returns an iterator over the dictionary [d];
     O(log n) space is allocated in [rgn] where n is the number of
     elements in [d]. */
 
 extern `c marshal(region_t<`r> rgn,
 		  `c env,
-		  `c (write_key<`a,`c,`r1::R>)(`c, FILE @`r1, `a),
-		  `c (write_val<`b,`c,`r1::R>)(`c, FILE @`r1, `b),
+		  `c (write_key<`a,`c,`r1::E>)(`c, FILE @`r1, `a),
+		  `c (write_val<`b,`c,`r1::E>)(`c, FILE @`r1, `b),
 		  FILE @ fp,
 		  dict_t<`a,`b> dict);
 

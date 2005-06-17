@@ -172,7 +172,7 @@ void occurs(type_t evar,region_t<`r> r,list_t<tvar_t,`r> env,type_t t) {
     break;
   case &PointerType(pinfo):
     occurs(evar,r,env,pinfo.elt_type);
-    occurs(evar,r,env,pinfo.ptr_atts.rgn);
+    occurs(evar,r,env,pinfo.ptr_atts.eff);
     occurs(evar,r,env,pinfo.ptr_atts.nullable);
     occurs(evar,r,env,pinfo.ptr_atts.bounds);
     occurs(evar,r,env,pinfo.ptr_atts.zero_term);
@@ -360,11 +360,10 @@ static void unify_it(type_t t1, type_t t2) {
 
   case $(&Evar(...),_): // t2 is an evar, t1 is not, so swap
     unify_it(t2,t1); return;
-
+    /*   case $(&AppType(&AccessCon,_), _): */
+    /*   case $(_, &AppType(&AccessCon,_)): */
   case $(&AppType(&JoinCon,_), _):
   case $(_, &AppType(&JoinCon,_)):
-  case $(&AppType(&AccessCon,_), _):
-  case $(_, &AppType(&AccessCon,_)):
   case $(&AppType(&RgnsCon,_), _):
   case $(_, &AppType(&RgnsCon,_)):
     if (!unify_effect(t1,t2)) 
@@ -473,8 +472,8 @@ static void unify_it(type_t t1, type_t t2) {
       fail_because("different array sizes");
     return;
 
-  case $(&FnType(FnInfo{tvs2,eff2,rt_tq2,rt2,args2,c_vararg2,cyc_vararg2,rpo2,qb2,atts2,req2,req_relns2,ens2,ens_relns2,thrws2,thrws_relns2,return_value2,argvds2}),
-         &FnType(FnInfo{tvs1,eff1,rt_tq1,rt1,args1,c_vararg1,cyc_vararg1,rpo1,qb1,atts1,req1,req_relns1,ens1,ens_relns1,thrws1,thrws_relns1,return_value1,argvds1})):
+  case $(&FnType(FnInfo{tvs2,eff2,rt_tq2,rt2,args2,c_vararg2,cyc_vararg2,qb2,atts2,req2,req_relns2,ens2,ens_relns2,thrws2,thrws_relns2,return_value2,argvds2,effc2}),
+         &FnType(FnInfo{tvs1,eff1,rt_tq1,rt1,args1,c_vararg1,cyc_vararg1,qb1,atts1,req1,req_relns1,ens1,ens_relns1,thrws1,thrws_relns1,return_value1,argvds1,effc1})):
     { region rgn; 
     list_t<$(tvar_t,type_t)@`rgn,`rgn> inst = NULL;
     while (tvs1 != NULL) {
@@ -497,13 +496,13 @@ static void unify_it(type_t t1, type_t t2) {
       fail_because("second function type has too many type variables");
     if (inst != NULL) {
       let newftype1 = new FnType(FnInfo{NULL,eff1,rt_tq1,rt1,args1,c_vararg1,
-				   cyc_vararg1,rpo1,qb1,atts1,req1,req_relns1,ens1,
-                                        ens_relns1,thrws1,thrws_relns1,return_value1,argvds1});
+				   cyc_vararg1,qb1,atts1,req1,req_relns1,ens1,
+                                        ens_relns1,thrws1,thrws_relns1,return_value1,argvds1,effc1});
       let newftype2 = Tcutil::rsubstitute(rgn, inst,
                                           new FnType(FnInfo{NULL,eff2,rt_tq2,rt2,args2,
-                                                            c_vararg2,cyc_vararg2,rpo2,qb2,
+                                                            c_vararg2,cyc_vararg2,qb2,
                                                             atts2,req2,req_relns2,
-                                                            ens2,ens_relns2,thrws2,thrws_relns2,return_value2,argvds2}));
+                                                            ens2,ens_relns2,thrws2,thrws_relns2,return_value2,argvds2,effc2}));
       unify_it(newftype1,newftype2);
       return;
     }
@@ -547,9 +546,12 @@ static void unify_it(type_t t1, type_t t2) {
 			   eff2 ? Absynpp::typ2string(eff2) : (string_t)"-"));
     if (!Atts::equiv_fn_atts(atts2,atts1))
       fail_because("function types have different attributes");
-    if (!Tcutil::same_rgn_po(rpo2,rpo1))
-      fail_because("function types have different region lifetime orderings");
-
+    //replace this with effect constraint comparison
+    if(Tcutil::cmp_effect_constraints(effc1, effc2))
+      fail_because("function types have different effect constraints"); 
+    /*     if (!Tcutil::same_rgn_po(rpo2,rpo1)) */
+    /*       fail_because("function types have different region lifetime orderings"); */
+    
     if (!check_logical_equivalence(argvds1,return_value1,req_relns1,
                                    argvds2,return_value2,req_relns2))
       fail_because("@requires clauses not equivalent");

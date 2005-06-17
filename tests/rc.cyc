@@ -807,7 +807,7 @@ bool mem_assoc_cmp(int cmp(`a,`c),list_t<$(`a,`b)@`RC> l,`c x) {
   drop_refptr(z);
   return false;
 }
-opt_t<`a,`RC> check_unique(int cmp(`a,`a),list_t<`a> x) {
+opt_t<`a,`H,\RC> check_unique(int cmp(`a,`a),list_t<`a> x) {
   let z = alias_refptr(x);
   while (z != NULL) {
     let hd = z->hd;

@@ -348,8 +348,8 @@ void merge_sys_user_decl(seg_t loc, tenv_t te, bool is_buildlib,
       return;
     }
     switch ($(cd->impl,ud->impl)) {
-    case $(&AggrdeclImpl(*tvarsC,*rgnpoC,*qbC,cfields,_),
-	   &AggrdeclImpl(tvars,rgnpo,qb,ufields,tagged)):
+      case $(&AggrdeclImpl(*tvarsC,*qbC,cfields,_,*effcC),
+	     &AggrdeclImpl(tvars,qb,ufields,tagged,effc)):
       if (tagged)
 	FAIL_MERGE(false,loc,is_buildlib,cd->name,
 		   ": user @tagged annotation not allowed (ignoring)");
@@ -391,7 +391,7 @@ void merge_sys_user_decl(seg_t loc, tenv_t te, bool is_buildlib,
       // Copy over any type variables, etc.
       if (ud->tvs != NULL) cd->tvs = ud->tvs;
       if (tvars) *tvarsC = tvars;
-      if (rgnpo) *rgnpoC = rgnpo;
+      if (effc) *effcC = effc;
       if (qb) *qbC = qb;
 	
       // Make sure the C version is not missing any expected fields
@@ -569,8 +569,8 @@ static type_t instantiate_tvar(seg_t loc, tvar_t tv) {
   case &Less_kb(_, k):
     if(k->kind == BoxKind || k->kind == AnyKind)
       return cstar_type(void_type, empty_tqual(loc));
-    else if(k->kind == RgnKind)
-      return new AppType(new HeapCon, NULL);
+    else if(k->kind == EffKind)
+      return heap_rgn_type;//new AppType(new HeapCon, NULL);
     break;
   case &Unknown_kb(_): 
     return cstar_type(void_type, empty_tqual(loc));
@@ -870,7 +870,7 @@ static list_t<decl_t, `H> update_usages(seg_t loc, tenv_t te, list_t<decl_t,`H> 
   unsigned niter = 0;
   list_t<decl_t> abs_decls = NULL;
   bool some_change = false;
-  list_t<decl_t,`H> tv_ovrs = in_tv_ovrs;
+  list_t<decl_t> tv_ovrs = in_tv_ovrs;
   let dsm = List::copy(dsmm);
   list_t<decl_t> changed_decls = NULL;
   do {

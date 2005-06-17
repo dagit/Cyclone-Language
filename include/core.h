@@ -96,7 +96,7 @@ typedef struct Opt<`a> *@aqual(`q) `r opt_t<`a,`r,`q>;
   /** [new_string(n)] allocates space for [n] characters on the heap
       and returns a pointer to the space.  All of the characters are
       set to NUL (0). */
- mstring_t<`r::R> rnew_string(region_t<`r>,unsigned int);
+ mstring_t<`r::E> rnew_string(region_t<`r>,unsigned int);
   /** [rnew_string(r,n)] allocates space for [n] characters in the
       region with handle [r], and returns a pointer to the space.  All
       of the characters are set to NUL (0). */
@@ -229,7 +229,7 @@ extern region_t<`H> heap_region;
       that storage.  This pointer will outlive the current autorelease
       pool. */
 
-struct DynamicRegion<`r::R>;
+struct DynamicRegion<`r::E>;
   /** [struct DynamicRegion<`r>] is an abstract type for the dynamic region 
       named [`r].  Dynamic regions can be created and destroyed at will,
       but access to them must be done through the open_region function. */
@@ -254,7 +254,7 @@ typedef region_key_t<`r,UNIQUE,`r2> uregion_key_t<`r,`r2>;
       then the region will be reclaimed. */
 
 struct NewDynamicRegion<`q::Q> {
-  <`r>
+  <`r> : single(`r)
   region_key_t<`r,`q> key;
 };
 
@@ -303,10 +303,9 @@ struct NewDynamicRegion<`q::Q> {
       reference count becomes zero, then all keys have been destroyed
       and the region [`r] is deallocated. */
 
- `result open_region(region_key_t<`r,`q> key,
-		     `arg arg,
-		     `result body(region_t<`r> h, `arg arg;{`r}+`eff);
-		     `eff : RESTRICTED >= `q);
+  `result open_region(region_key_t<`r,`q> key,
+		      `arg arg,
+		      `result body(region_t<`r> h, `arg arg); {} : RESTRICTED >= `q);
   /** [open_region(k,arg,body)] extracts a region handle [h] for
       the region [`r] which the [k] provides access to.  The handle
       and value [arg] are passed to the function pointer [body]
@@ -346,7 +345,7 @@ arrcast(`a ?`r dyn, __cyclone_internal_singleton<`i> bd, sizeof_t<`a> sz);
       elements in [dyn].  This routine is useful for eliminating
       bounds checks within loops. */
 
- `a?`r mkfat(__nn_cyclone_internal_array_t<`a,`i,`r::R> arr,
+ `a?`r mkfat(__nn_cyclone_internal_array_t<`a,`i,`r::E> arr,
 	     sizeof_t<`a> s, __cyclone_internal_singleton<`i> n);
   /** mkfat can be used to convert a thin pointer (@) of elements of type `a
       to a fat pointer (?).  It requires that you pass in the size of the

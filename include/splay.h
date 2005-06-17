@@ -26,19 +26,19 @@
 
 namespace Splay {
 
-struct node<`a,`b,`r::R>;
+struct node<`a,`b,`r::E>;
 
-struct noderef<`a,`b,`r::R> {
+struct noderef<`a,`b,`r::E> {
   struct node<`a,`b,`r> @`r v;
 };
 
 typedef int dummy_t;
-extern datatype tree<`a,`b,`r::R> {
+extern datatype tree<`a,`b,`r::E> {
   Leaf(dummy_t),
   Node(struct noderef<`a,`b,`r> @`r)
 };
 
-struct node<`a,`b,`r::R> {
+struct node<`a,`b,`r::E> {
   `a key;
   `b data;
   datatype tree<`a,`b,`r> @`r left;

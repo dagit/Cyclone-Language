@@ -29,7 +29,7 @@ static int most_frequent_elt(int ?v) {
   int most_freq = 0;
   for(int i=0; i < numelts(v); ++i) {
     int   e = v[i];
-    int @ r;
+    int @`rgn r;
     try r = Hashtable::lookup(frequencies, e);
     catch {
     case &Not_found: 

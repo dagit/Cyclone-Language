@@ -63,15 +63,15 @@ extern streambuff_t<`r,`q> alloc_stb_with(region_t<`r> rgnhdr,
 					  const char ?`H device,
 					  unsigned int priority,
 					  databuf_t<\RC> data);
-extern streambuff_t<`rhdr,`q> alloc_stb(region_t<`rhdr::R> rgnhdr,
+extern streambuff_t<`rhdr,`q> alloc_stb(region_t<`rhdr::E> rgnhdr,
 					aqual_t<`q\T> q,
 					enum StreamType typ,
 					const char ?`H device,
 					unsigned int priority,
 					const char ? @nozeroterm buf);
-extern streambuff_t<`r,`q> stb_copy(region_t<`r::R> rgnhdr, aqual_t<`q\T> q,
+extern streambuff_t<`r,`q> stb_copy(region_t<`r::E> rgnhdr, aqual_t<`q\T> q,
 				 int ofs, streambuff_t stb);
-extern streambuff_t<`r,`q> stb_clone(region_t<`r::R> rgn, aqual_t<`q\T> q, streambuff_t stb);
+extern streambuff_t<`r,`q> stb_clone(region_t<`r::E> rgn, aqual_t<`q\T> q, streambuff_t stb);
 // pulls out the first buffer from the given streambuffer and
 // invokes the given function with it.  Takes care of swapping, etc.
 
@@ -79,14 +79,14 @@ extern streambuff_t<`H,\U> stb_rest(int ofs, streambuff_t<`H,\U> stb) __attribut
 // we assume `U streambuffs for stb_rest, so that refcounts are
 // properly updated
 
-extern streambuff_t<`r,`q> stb_prepend(region_t<`r::R> rgn,aqual_t<`q\T> q, streambuff_t stb,
+extern streambuff_t<`r,`q> stb_prepend(region_t<`r::E> rgn,aqual_t<`q\T> q, streambuff_t stb,
 				       char ?@aqual(\RC) @nozeroterm `H nbuf)  __attribute((consume(4)));
 // prepends the given buffer to the streambuffer.  Creates aliases to
 // the existing databuf buffers.
 
 extern int stb_num_bufs(streambuff_t stb);
 extern int stb_with_buffer(streambuff_t stb, int idx,
-			   int (@f)<`r::R>(`a env, char ? @nozeroterm `r),
+			   int (@f)<`r::E>(`a env, char ? @nozeroterm `r),
 			   `a env);
 
 

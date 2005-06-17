@@ -660,5 +660,4 @@ return 0;
 return 1;}
 # 401
 struct Cyc_Iter_Iter Cyc_Set_make_iter(struct _RegionHandle*rgn,struct Cyc_Set_Set*s){
-# 404
 return({struct Cyc_Iter_Iter _Tmp0;({struct Cyc_List_List**_Tmp1=({struct Cyc_List_List**_Tmp2=_region_malloc(rgn,0U,sizeof(struct Cyc_List_List*));*_Tmp2=s->nodes;_Tmp2;});_Tmp0.env=_Tmp1;}),_Tmp0.next=Cyc_Set_iter_f;_Tmp0;});}

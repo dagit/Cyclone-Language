@@ -1015,13 +1015,13 @@ static type_t main_type() {
                               .ret_tqual = empty_tqual(0),
                               .ret_type = sint_type,
                               .args = list(arg1,arg2), .c_varargs = false,
-                              .cyc_varargs = NULL, .rgn_po = NULL, .qual_bnd=NULL,
+                              .cyc_varargs = NULL, .qual_bnd=NULL,
                               .attributes = NULL, .requires_clause = NULL,
                               .requires_assn = NULL,
                               .ensures_clause = NULL, .arg_vardecls = NULL,
                               .ensures_assn = NULL, .throws_clause = NULL,
                               .throws_assn = NULL,
-                              .return_value = NULL});
+                              .return_value = NULL, .effconstr=NULL});
 
 }
 
@@ -1039,7 +1039,7 @@ static cenv_t initial_cenv() {
 // Record how many times each region variable occurs in a type --
 // used to determine whether we need to spit out an explicit region
 // name (i.e., when a region var occurs more than once.)
-static void region_counts(Dict::dict_t<tvarname_t,int@> @cts, ctype_t t) {
+static void region_counts(Dict::dict_t<tvarname_t,int@`H> @cts, ctype_t t) {
   switch (compress_ct(t)) {
   case &Const_ct:
   case &Notconst_ct:
@@ -1108,7 +1108,7 @@ static void register_rgns(cenv_t env, Dict::dict_t<tvarname_t,int@> counts,
   case $(&ArrayType(ArrayInfo{et,_,_,_,_}), &Array_ct(ec,_,_)):
     register_rgns(env, counts, fn_res, et, ec);
     break;
-  case $(&FnType(FnInfo{_,_,_,rt,argst,_,_,_,_,_,_,_,_,_,_,_,_,_}), &Fn_ct(rc,argsc)):
+  case $(&FnType(FnInfo{_,_,_,rt,argst,...}), &Fn_ct(rc,argsc)):
     register_rgns(env, counts, true, rt, rc);
     for (; argst != NULL && argsc != NULL; argst=argst->tl, argsc=argsc->tl) {
       let $(_,_,at) = *argst->hd;
@@ -1253,7 +1253,7 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
       return array_ct(cet,tq.print_const ? const_ct() : notconst_ct(),
                       orig_zt ? zterm_ct() : nozterm_ct());
     }
-  case &FnType(FnInfo{_,_,_,rt,args,_,_,_,_,_,_,_,_,_,_,_,_,_}):
+  case &FnType(FnInfo{_,_,_,rt,args,...}):
     let crt = type_to_ctype(set_cpos(env,FnRes_pos),rt);
     let env_arg = set_cpos(env,FnArg_pos);
     list_t<ctype_t> cargs = NULL;

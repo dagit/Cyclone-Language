@@ -39,7 +39,7 @@ tvar_t curr_rgn_tvar (void) {
   if (curr_tvar == NULL) {
     curr_tvar = new Tvar(new curr_rgn_name,
 			 Tcutil::new_tvar_id(),
-			 Kinds::kind_to_bound(&Kinds::rk),
+			 Kinds::kind_to_bound(&Kinds::ek),
 			 NULL);
     curr_rgn_typ = var_type((tvar_t)curr_tvar);
   }
@@ -77,8 +77,7 @@ static $(var_opt_t,tqual_t,type_t)@ argtype($(var_opt_t,tqual_t,type_t)@`H arg) 
   switch (compress(t2)) {
   case &PointerType(PtrInfo(t1,...)):
     switch (compress(t1)) {
-    case &FnType(FnInfo{*tvars,eff,res_tq,res_typ,args_info,c_vararg,
-			  cyc_vararg,rgn_po,qb,atts,req,req_relns,ens,ens_relns,thrws,thrws_relns,ret_var,argvds}):
+    case &FnType(FnInfo{*tvars, ...}):
       // change the type of functions to be parameterized by `C, so
       // that `C is not substituted for
       let tvars2 = *tvars;
@@ -93,9 +92,7 @@ static $(var_opt_t,tqual_t,type_t)@ argtype($(var_opt_t,tqual_t,type_t)@`H arg) 
 // "Instantiates" `C in the function's type with the current LIFO region
 type_t instantiate(type_t fntype, type_t currgn) {
   switch (fntype) {
-  case &FnType(FnInfo{tvars,eff,res_tq,res_typ,*args_info,c_vararg,
-			cyc_vararg,rgn_po,qb,atts,req,req_relns,ens,ens_relns,
-			thrws,thrws_relns,ret_var,argvds}):
+  case &FnType(FnInfo{tvars,eff,res_tq,res_typ,*args_info, ...}):
     // Need to make sure we don't instantiate for any functions
     // appearing in the arguments of the function; simulates our
     // assumption that they will be higher order
@@ -414,10 +411,13 @@ static void rgnsubaggrdecl(Position::seg_t loc,struct rgnsubenv env,aggrdecl_t a
   check_tvars(loc,ad->tvs);
   if (ad->impl != NULL) {
     check_tvars(loc,ad->impl->exist_vars);
-    let ps = ad->impl->rgn_po;
-    for (; ps!=NULL; ps = ps->tl) {
-      rgnsubtype(loc,env,(*ps->hd)[0]);
-      rgnsubtype(loc,env,(*ps->hd)[1]);
+    let fc = ad->impl->effconstr;
+    for (; fc!=NULL; fc = fc->tl) {
+      switch(fc->hd) {
+      case &SingleConstraint(e):       rgnsubtype(loc,env,e); break;
+      case &DisjointConstraint(e1, e2): fallthru(e1,e2);
+      case &SubsetConstraint(e1, e2): rgnsubtype(loc,env,e1); rgnsubtype(loc,env,e2); break;
+      }
     }
     let fs = ad->impl->fields;
     for (; fs!=NULL; fs = fs->tl) {

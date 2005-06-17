@@ -25,7 +25,7 @@ namespace Kinds {
 using Absyn;
 
 // useful kinds
-extern struct Kind rk; // shareable region kind
+//extern struct Kind rk; // shareable region kind
 extern struct Kind ak; // shareable abstract kind
 extern struct Kind bk; // shareable boxed kind
 extern struct Kind mk; // shareable mem kind
@@ -49,7 +49,7 @@ extern struct Kind aqk;  // alias qualifier kind
 // extern struct Kind ubk;  // unique boxed kind
 // extern struct Kind umk;  // unique memory kind
 
-extern struct Core::Opt<kind_t> rko;
+//extern struct Core::Opt<kind_t> rko;
 extern struct Core::Opt<kind_t> ako;
 extern struct Core::Opt<kind_t> bko;
 extern struct Core::Opt<kind_t> mko;

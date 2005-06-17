@@ -51,7 +51,7 @@ doc_t tqtd2doc(tqual_t, type_t, opt_t<doc_t>);
 doc_t funargs2doc(list_t<$(var_opt_t,tqual_t,type_t)@> args,
 		  bool c_varargs,vararg_info_t *cyc_varargs,
 		  type_opt_t effopt,
-		  list_t<$(type_t,type_t)@> rgn_po,
+		  list_t<effconstr_t> rgn_po,
 		  list_t<$(type_t,type_t)@> qb,
 		  exp_opt_t requires, exp_opt_t ensures, exp_opt_t thrws);
 doc_t datatypefields2doc(list_t<datatypefield_t>);
@@ -619,8 +619,8 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
   case &Function_mod(args):
     if (next_is_pointer(tms->tl)) rest = p_rest;
     switch (args) {
-    case &WithTypes(args2,c_varargs,cyc_varargs,effopt,rgn_po,qb,req,ens,thrws):
-      return cat(rest,funargs2doc(args2,c_varargs,cyc_varargs,effopt,rgn_po,qb,req,ens,thrws));
+    case &WithTypes(args2,c_varargs,cyc_varargs,effopt,effc,qb,req,ens,thrws):
+      return cat(rest,funargs2doc(args2,c_varargs,cyc_varargs,effopt,effc,qb,req,ens,thrws));
     case &NoTypes(sl,loc):
       return cat(rest,group("(",")",",",List::map(textptr,sl)));
     }
@@ -717,8 +717,8 @@ static void effects2docs(list_t<doc_t,`H> @ rgions,
 			 list_t<doc_t,`H> @ effects,
 			 type_t t) {
   switch (compress(t)) {
-  case &AppType(&AccessCon,&List{r,_}): 
-    *rgions = new List(rgn2doc(r), *rgions); break;
+/*   case &AppType(&AccessCon,&List{r,_}):  */
+/*     *rgions = new List(rgn2doc(r), *rgions); break; */
   case &AppType(&JoinCon,ts):
     for (; ts != NULL; ts = ts->tl)
       effects2docs(rgions, effects, ts->hd);
@@ -853,7 +853,7 @@ doc_t ntyp2doc(type_t t) {
   case &AppType(&HeapCon,_):   return text("`H");
   case &AppType(&UniqueHeapCon,_): return text("`U");
   case &AppType(&RefCntHeapCon,_): return text("`RC");
-  case &AppType(&AccessCon,_):
+    //  case &AppType(&AccessCon,_):
   case &AppType(&JoinCon,_):   return eff2doc(t);
   case &TypeDeclType(&{.r=&Aggr_td(d),...},_):     return aggrdecl2doc(d);
   case &TypeDeclType(&{.r=&Enum_td(d),...},_):     return enumdecl2doc(d);
@@ -876,7 +876,19 @@ doc_t rgn_cmp2doc($(type_t,type_t)@ cmp) {
 doc_t rgnpo2doc(list_t<$(type_t,type_t)@> po) {
   return ppseq(rgn_cmp2doc,",",po);
 }
-
+doc_t one_ec2doc(effconstr_t ec) {
+  switch(ec) {
+  case &SubsetConstraint(e1,e2):
+    return cat(eff2doc(e1), text(" <= "), eff2doc(e2));
+  case &DisjointConstraint(e1, e2):
+    return cat(eff2doc(e1), text(" | "), eff2doc(e2));
+  case &SingleConstraint(e):
+    return cat(text("single("), eff2doc(e), text(")"));
+  }
+}
+doc_t effconstr2doc(list_t<effconstr_t> effc) {
+  return ppseq(one_ec2doc,",",effc);
+}
 
 doc_t qb_cmp2doc($(type_t,type_t)@ cmp) {
   let &$(t1,t2) = cmp;
@@ -894,7 +906,7 @@ doc_t funarg2doc($(var_opt_t,tqual_t,type_t)@ t) {
 
 doc_t funargs2doc(list_t<$(var_opt_t,tqual_t,type_t)@> args,bool c_varargs,
                   vararg_info_t *cyc_varargs, type_opt_t effopt,
-                  list_t<$(type_t,type_t)@> rgn_po, 
+                  list_t<effconstr_t> effc, 
                   list_t<$(type_t,type_t)@> qb, 
 		  exp_opt_t req,exp_opt_t ens,exp_opt_t thrws) {
                   
@@ -912,10 +924,10 @@ doc_t funargs2doc(list_t<$(var_opt_t,tqual_t,type_t)@> args,bool c_varargs,
   let arg_doc = group("","",",",arg_docs);
   if (effopt != NULL && print_all_effects)
     arg_doc = cat(arg_doc,text(";"),eff2doc(effopt));
-  if (rgn_po != NULL)
-    arg_doc = cat(arg_doc,text(":"),rgnpo2doc(rgn_po));
+  if (effc != NULL)
+    arg_doc = cat(arg_doc,text(":"),effconstr2doc(effc));
   if(qb != NULL) {
-    let sep = (rgn_po == NULL ? text(":") : text(","));
+    let sep = (effc == NULL ? text(":") : text(","));
     arg_doc = cat(arg_doc, sep, qualbnd2doc(qb));
   }
   let res = cat(text("("),arg_doc,text(")"));
@@ -1671,10 +1683,10 @@ doc_t aggrdecl2doc(aggrdecl_t ad) {
 	     ktvars2doc(ad->tvs),
 	     blank_doc(),lb(),
 	     ktvars2doc(ad->impl->exist_vars),
-	     (ad->impl->rgn_po==NULL ? nil_doc() :
-	      cat(text(":"),rgnpo2doc(ad->impl->rgn_po))),
+	     (ad->impl->effconstr==NULL ? nil_doc() :
+	      cat(text(":"),effconstr2doc(ad->impl->effconstr))),
 	     (ad->impl->qual_bnd==NULL ? nil_doc() :
-	      cat(text(ad->impl->rgn_po==NULL ? ":" : ","),
+	      cat(text(ad->impl->effconstr==NULL ? ":" : ","),
 		  qualbnd2doc(ad->impl->qual_bnd))),
 	     nest(2, cat(line_doc(),aggrfields2doc(ad->impl->fields))),
 	     line_doc(),
@@ -1931,7 +1943,7 @@ $(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r> r,
     return $(tq3, t3, tml3);
 
   case &FnType(FnInfo{typvars,effopt,t2qual,t2,args,c_varargs,cyc_varargs,
-                        rgn_po,qb,fn_atts,req,_,ens,_,thrws,_,_,_}):
+                        qb,fn_atts,req,_,ens,_,thrws,_,_,_,effc}):
     if (! print_all_tvars) {
       // don't print default effects
       // WARNING: this is our criterion to detect default effect,
@@ -1959,20 +1971,20 @@ $(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r> r,
 
     switch(Flags::c_compiler){
     case Flags::Gcc_c:
-      // if the return type is a function pointer, then we have to
+      // if the return type is a function pointer, then we have to 
       // move the attributes past that function modifier and so forth
       if (fn_atts != NULL)
         tms = bubble_attributes(r,rnew(r) Attributes_mod(0,fn_atts),tms);
       tms = rnew(r) List(rnew(r)
                          Function_mod(rnew(r) WithTypes(args,c_varargs,
                                                         cyc_varargs,effopt,
-                                                        rgn_po,qb,req,ens,thrws)),tms);
+                                                        effc,qb,req,ens,thrws)),tms);
       break;
     default:
       tms = rnew(r) List(rnew(r)
                          Function_mod(rnew(r) WithTypes(args,c_varargs,
                                                         cyc_varargs,effopt,
-							rgn_po,qb,req,ens,thrws)),tms);
+							effc,qb,req,ens,thrws)),tms);
       for(; fn_atts != NULL; fn_atts = fn_atts->tl)
 	switch(fn_atts->hd) {
 	case &Stdcall_att:
@@ -2079,6 +2091,9 @@ string_t typ2string(type_t t)    {return string_of_doc(typ2doc(t),  PP_WIDTH);}
 string_t tvar2string(tvar_t t)   {return string_of_doc(tvar2doc(t), PP_WIDTH);}
 string_t rgnpo2string(list_t<$(type_t,type_t)@> po) {
   return string_of_doc(rgnpo2doc(po),  PP_WIDTH);
+}
+string_t effconstr2string(list_t<effconstr_t> effc) {
+  return string_of_doc(effconstr2doc(effc), PP_WIDTH);
 }
 string_t typ2cstring(type_t t) {
   bool old_qvar_to_Cids = qvar_to_Cids;

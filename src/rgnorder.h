@@ -40,12 +40,12 @@ rgn_po_t initial_fn_po(list_t<tvar_t> tvs,
 rgn_po_t add_outlives_constraint(rgn_po_t, type_t eff, type_t rgn, Position::seg_t);
 rgn_po_t add_youngest(rgn_po_t, tvar_t rgn,bool opened);
 rgn_po_t add_unordered(rgn_po_t, tvar_t rgn);
-bool effect_outlives(rgn_po_opt_t, type_t eff, type_t rgn);
-bool rgn_outlives_rgn(rgn_po_opt_t, type_t rgn1, type_t rgn2);
-bool eff_outlives_eff(rgn_po_opt_t, type_t eff1, type_t eff2);
-bool satisfies_constraints(rgn_po_opt_t, list_t<$(type_t,type_t)@> constraints,
+bool effect_outlives(seg_t, rgn_po_opt_t, type_t eff, type_t rgn);
+bool rgn_outlives_rgn(seg_t, rgn_po_opt_t, type_t rgn1, type_t rgn2);
+bool eff_outlives_eff(seg_t, rgn_po_opt_t, type_t eff1, type_t eff2);
+bool satisfies_constraints(seg_t, rgn_po_opt_t, list_t<$(type_t,type_t)@> constraints,
 			   type_t default_bound, bool do_pin);
-
+  
 //DEBUGGING
 void print_region_po(rgn_po_t po);
 }

@@ -271,7 +271,7 @@ int main(int argc, const char ?`H? argv) {
       DEBUG(printf("old_str: %s\n",old_str));
       read_line(input);
       // insert into fs
-      let f = fs;
+      list_t<$(char ?`H, list_t<rewrite_t, `H>)@`H,`H> f = fs;
       while (f != NULL) {
         if (strcmp((*f->hd)[0],filename) == 0) break;
         f = f->tl;

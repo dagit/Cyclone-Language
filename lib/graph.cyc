@@ -354,7 +354,7 @@ graph_t<`a> tc(graph_t<`a> g) {
 /**********************************************************************/
 static void
 traverse(graph_t<`a> input, graph_t<`a> @output,
-         Dict::dict_t<`a,unsigned int> @N, List::list_t<`a> @S,
+         Dict::dict_t<`a,unsigned int> @N, List::list_t<`a,`H> @S,
          `a x, unsigned int k) {
   *S = new List::List(x,*S);
   *N = Dict::insert(*N,x,k);
@@ -407,8 +407,8 @@ graph_t<`a> scc(graph_t<`a> input) {
 
 /* Topological sort, based on the above SCC algorithm. */
 static void
-tsort0(graph_t<`a> input, List::list_t<`a> @output,
-       Dict::dict_t<`a,unsigned int> @N, List::list_t<`a> @S,
+tsort0(graph_t<`a> input, List::list_t<`a,`H> @output,
+       Dict::dict_t<`a,unsigned int> @N, List::list_t<`a,`H> @S,
        `a x, unsigned int k) {
   *S = new List::List(x,*S);
   *N = Dict::insert(*N,x,k);

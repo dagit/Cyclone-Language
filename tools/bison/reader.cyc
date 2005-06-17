@@ -1259,12 +1259,12 @@ parse_expect_decl()
 /* Get the data type (alternative in the union) of the value for symbol n in rule rule.  */
 
 char ?
-get_type_name(int n, symbol_list *rule)
+get_type_name(int n, symbol_list *`r rule)
 {
   const char ?msg = "invalid $ value";
 
   int i;
-  symbol_list *rp;
+  symbol_list *`r+`H rp;
 
   if (n < 0)
     {

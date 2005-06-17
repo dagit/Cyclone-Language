@@ -31,7 +31,7 @@ namespace Hashtable {
        To enable an efficient implementation, you are required to
        provide a total order on keys (a comparison function).  */
 
-extern struct Table<`a,`b,`r::R>;
+extern struct Table<`a,`b,`r::E>;
 typedef struct Table<`a,`b,`r> @`r table_t<`a,`b,`r>;
   /** A [table_t<`a,`b>] is a hash table with keys of type [`a]
       and values of type [`b]. */

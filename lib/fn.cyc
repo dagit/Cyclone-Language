@@ -24,22 +24,23 @@
 
 namespace Fn;
 
-struct Function<`arg,`res,`bd> { <`env::B> : regions(`env) > `bd
-  `res (@`bd f)(`env,`arg);
+struct Function<`arg,`res,`bd> { <`env::B> : regions(`env) <= `bd
+  `res (@`H f)(`env,`arg);
   `env env;
 };
 
-// make a closure out of a function pointer and environment
-fn_t<`arg,`res,`bd> make_fn(`res (@`bd f)(`env,`arg), `env x : regions(`env) > `bd) {
+
+fn_t<`arg,`res,`bd> make_fn(`res (@`H f)(`env,`arg), `env x : regions(`env) <= `bd) {
   return new Function(f,x);
 }
 
-static `res fp_apply(`res (@f)(`arg), `arg x) {
+
+static `res fp_apply(`res (@`H f)(`arg), `arg x) {
   return f(x);
 }
 
 // convert a function pointer to a closure
-fn_t<`arg,`res,`bd> fp2fn(`res (@`bd f)(`arg) : regions($(`arg,`res)) > `bd) {
+fn_t<`arg,`res,`bd> fp2fn(`res (@`H f)(`arg) : regions(`res (@`H)(`arg)) <= `bd) {
   return make_fn(fp_apply, f);
 }
 
@@ -55,41 +56,39 @@ static `c fn_compose($(fn_t<`b,`c,`bd>, fn_t<`a,`b,`bd>)@`H f_and_g,`a arg) {
 }
 
 // compose closures
-fn_t<`a,`c,`bd> compose(fn_t<`a,`b,`bd> g, fn_t<`b,`c,`bd> f 
-			: regions($(`a,`b,`c)) > `bd) {
+fn_t<`a,`c, `bd2> compose(fn_t<`a,`b,`bd> g, fn_t<`b,`c,`bd> f : regions($(`a,`b,`c)@`H+`bd) <= `bd2) {
   return make_fn(fn_compose,new $(f,g));
 }
 
-
 // These next two functions are used for currying
-static `c inner($(fn_t<$(`a,`b)@,`c,`bd>,`a)@ env, `b second) {
+static `c inner($(fn_t<$(`a,`b)@`H,`c,`bd>,`a)@ env, `b second) {
   return apply((*env)[0],new $((*env)[1],second));
 }
-static fn_t<`b,`c,`bd> outer(fn_t<$(`a,`b)@`H,`c,`bd> f, `a first 
-			     : regions($(`a,`b,`c)) > `bd) {
+
+//regions($(fn_t<$(`a,`b)@`H,`c,`bd>, `a))+`H> 
+static fn_t<`b,`c,`bd2> outer(fn_t<$(`a,`b)@`H,`c,`bd> f, `a first : regions($(`a,`b,`c)@`H+`bd) <= `bd2) {
   return make_fn(inner, new $(f,first));
 }
 
 // curry a closure that takes a pair
-fn_t<`a,fn_t<`b,`c,`bd>,`bd> curry(fn_t<$(`a,`b)@`H,`c,`bd> f 
-				   : regions($(`a,`b,`c)) > `bd) {
+fn_t<`a, fn_t<`b,`c,`bd2>, `bd2> curry(fn_t<$(`a,`b)@`H,`c,`bd> f : regions($(`a,`b,`c)@`H+`bd) <= `bd2) { 
   return make_fn(outer, f);
 }
 
-static `c lambda(fn_t<`a,fn_t<`b,`c>> f, $(`a,`b)@ arg) {
+
+static `c lambda(fn_t<`a,fn_t<`b,`c, `bd2>, `bd> f, $(`a,`b)@ arg) {
   return apply(apply(f,(*arg)[0]),(*arg)[1]);
 }
 
 // uncurry a closure
-fn_t<$(`a,`b)@,`c,`bd> uncurry(fn_t<`a,fn_t<`b,`c,`bd>,`bd> f
-			       : regions($(`a,`b,`c)) > `bd) {
+fn_t<$(`a,`b)@,`c,`bd3> uncurry(fn_t<`a,fn_t<`b,`c,`bd2>,`bd> f : regions($(`a,`b,`c)@`H+`bd+`bd2) <= `bd3){
   return make_fn(lambda,f);
 }
 
 // map a closure across a list
 List::list_t<`b,`H> map_fn(fn_t<`a,`b,`bd> f,List::list_t<`a> x) {
   List::list_t res = NULL;
-  for (; x != NULL; x = x->tl) 
+  for (; x != NULL; x = x->tl)
     res = new List::List(apply(f,x->hd), res);
   return List::imp_rev(res);
 }

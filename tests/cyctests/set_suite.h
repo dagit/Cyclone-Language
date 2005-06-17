@@ -17,7 +17,7 @@ list_t<`a> set_elements(set_t<`a> s) {
   if(Set::is_empty(s))
     return NULL;
   let a = Set::choose(s);
-  Iter::iter_t<_,`set_elements> iterator = Set::make_iter(Core::heap_region,s);
+  Iter::iter_t<`a> iterator = Set::make_iter(Core::heap_region,s);
   while(Iter::next(iterator,&a))
     ans = new List(a,ans);
   return List::rev(ans); // we're wrongly assuming Set's implementation!!!

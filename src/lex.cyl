@@ -40,9 +40,9 @@ using Absyn;
 
 namespace Lex {
 
-struct Trie<`r::R>;
+struct Trie<`r::E>;
 typedef struct Trie<`r> *`r trie_t<`r>;
-@tagged union TrieChildren<`r::R> {
+@tagged union TrieChildren<`r::E> {
   int Zero;
   $(int, trie_t<`r>) One;
   trie_t<`r> @{65}`r Many; // enough room for id chars and ` and backslash
@@ -258,6 +258,7 @@ static int do_possible_qualifier(Lexbuf lexbuf) {
     if(len == 8 && strncmp(b,"zeroterm",8)==0) return ZEROTERM_QUAL;
     break;
   case 'e':
+    if(len == 6 &&  strncmp(b, "effect", 6)==0) return EFFECT_QUAL;
     if(len == 7 && strncmp(b,"ensures",7)==0) return ENSURES_QUAL;
     if(len == 10 && strncmp(b,"extensible",10)==0) return EXTENSIBLE_QUAL;
     break;
@@ -331,7 +332,7 @@ static trie_t<`r> trie_lookup(region_t<`r> r, trie_t<`r> t,
     case {.Zero = _}:
       // new string -- extend the trie
       while(i < len) {
-	let next = rnew(r) Trie(Zero(),0);
+	trie_t<`r> next = rnew(r) Trie(Zero(),0);
 	t->children = One(buff[i++], next);
 	t = next;
       }
@@ -341,7 +342,7 @@ static trie_t<`r> trie_lookup(region_t<`r> r, trie_t<`r> t,
 }
 
 static int str_index_body(region_t<`d> d, 
-                          $(trie_t<`d>, Xarray::xarray_t<stringptr_t<`H>,`d>,
+                          $(trie_t<`d>, Xarray::xarray_t<stringptr_t<`H,`H>,`d>,
                             string_t buff, int offset, int len)@ env) {
   let $(tree,symbols,buff,offset,len) = *env;
   let t = trie_lookup(d, tree, buff, offset, len);
@@ -697,7 +698,7 @@ static pinfo_opt_t pos_info = NULL;
 static int linenumber = 1;
 
 // when we see a new # nnn <file> directive, we create a new filepos entry
-static pinfo_t<`r> rnew_filepos(region_t<`r> r,
+static pinfo_t<`r+`H> rnew_filepos(region_t<`r> r,
                                 const char ?`H filename, 
                                 unsigned int starting_line, 
                                 pinfo_opt_t<`r> next) {

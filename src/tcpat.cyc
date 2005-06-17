@@ -168,7 +168,7 @@ static type_t num_type(type_t * topt, type_t numt) {
 }
 
 static void set_vd(vardecl_t *`r vd, exp_opt_t e, 
-		   list_t<$(vardecl_t *`r,exp_opt_t)@>@ v_result_ptr, type_t t){
+		   list_t<$(vardecl_t *`r,exp_opt_t)@`H,`H>@ v_result_ptr, type_t t){
   if (vd != NULL) {
     (*vd)->type = t;
     (*vd)->tq   = empty_tqual(0);
@@ -196,7 +196,7 @@ static tcpat_result_t combine_results(tcpat_result_t res1, tcpat_result_t res2){
 // Promote an array, using an evar for the region if necessary.
 static type_t pat_promote_array(tenv_t te, type_t t, type_opt_t rgn_opt) {
   return is_array_type(t) ?
-    promote_array(t, (rgn_opt == NULL) ? new_evar(&Kinds::rko,new Opt(lookup_type_vars(te))) : rgn_opt,al_qual_type, false) : t;
+    promote_array(t, (rgn_opt == NULL) ? new_evar(&Kinds::eko,new Opt(lookup_type_vars(te))) : rgn_opt,al_qual_type, false) : t;
 }
 
 #define DL 0
@@ -241,10 +241,10 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
     break;
   case &AliasVar_p(tv,vd):
     tenv_t te2 = add_type_vars(p->loc,te,list(tv));
-    if(res.tvars_and_bounds_opt==NULL)
-      res.tvars_and_bounds_opt = new $(NULL,NULL);
-    (*res.tvars_and_bounds_opt)[0] = 
-      append((*res.tvars_and_bounds_opt)[0],new List(new $(tv,true),NULL));
+    if(res.tvars_and_effconstr_opt==NULL)
+      res.tvars_and_effconstr_opt = new $(NULL,NULL);
+    (*res.tvars_and_effconstr_opt)[0] = 
+      append((*res.tvars_and_effconstr_opt)[0],new List(new $(tv,true),NULL));
     Tctyp::check_type(p->loc,te2,lookup_type_vars(te2),&Kinds::mk,true,false,vd->type);
     // Now we repeat checks for the Var_p case above (except the var's type)
     //   this is the type of the access expression
@@ -273,7 +273,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
     exp_opt_t new_access_exp = NULL;
     let pi = Tcexp::fresh_pointer_type(te); 
     pi.elt_type = t;
-    pi.ptr_atts.rgn = rgn_pat;
+    pi.ptr_atts.eff = rgn_pat;
     pi.ptr_atts.nullable = false_type;
     type_t t2 = pointer_type(pi);
     if (access_exp) {
@@ -291,10 +291,10 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
     // the kind is IntKind, so no partial-order munging, etc.
     // this checks uniqueness of new tvars (kinda kludgy)
       add_type_vars(p->loc,te,list(tv));
-    if(res.tvars_and_bounds_opt==NULL)
-      res.tvars_and_bounds_opt = new $(NULL,NULL);
-    (*res.tvars_and_bounds_opt)[0] = 
-      new List(new $(tv,false),(*res.tvars_and_bounds_opt)[0]);
+    if(res.tvars_and_effconstr_opt==NULL)
+      res.tvars_and_effconstr_opt = new $(NULL,NULL);
+    (*res.tvars_and_effconstr_opt)[0] = 
+      new List(new $(tv,false),(*res.tvars_and_effconstr_opt)[0]);
     t = uint_type; // this is what we match against
     break;
 
@@ -333,7 +333,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
     
     // we put in an unconstrained region.  Then the client calls
     // check_pat_regions after unifying against the type they're destructuring.
-    type_t ptr_rgn = new_evar(&Kinds::rko,lookup_opt_type_vars(te));
+    type_t ptr_rgn = new_evar(&Kinds::eko,lookup_opt_type_vars(te));
     exp_opt_t new_access_exp = NULL;
     if (access_exp) new_access_exp = deref_exp(access_exp,DL);
     res = combine_results(res,tcPatRec(te,p2,inner_topt,ptr_rgn,true,
@@ -368,7 +368,7 @@ DONT_PROMOTE:
       let pi = Tcexp::fresh_pointer_type(te);
       pi.elt_type = (type_t)p2->topt;
       pi.elt_tq = elt_const ? const_tqual(0) : empty_tqual(0);
-      pi.ptr_atts.rgn = ptr_rgn;
+      pi.ptr_atts.eff = ptr_rgn;
       t = pointer_type(pi);
     }
     if (new_access_exp) new_access_exp->topt = p2->topt;
@@ -403,7 +403,6 @@ DONT_PROMOTE:
       { region rgn;
       // constrain type variables to have at least the kind they were abstracted over
         let var_tvs = NULL;
-        list_t<$(type_t,type_t)@> outlives_constraints = NULL;
         let u = ad->impl->exist_vars;
         for (_ t = exist_ts ; t != NULL; t = t->tl) {
           tvar_t tv = t->hd;
@@ -430,13 +429,15 @@ DONT_PROMOTE:
           type_t vartype = new VarType(tv);
           var_tvs = rnew(rgn) List(vartype,var_tvs);
           // if unpacking a region var, must add it to the po
+	  //This doesn't appear to be neccessary anymore
+	  //The region variable should be leaked into the effect equality constraint for it to be usable
           // FIX: allow adding existentials of TR kind?
-          if(k2->kind == RgnKind) {
-            /* 	  if (k2->aliasqual != Aliasable) */
-            /* 	    Warn::impos2("opened existential had unique or top region kind"); */
-            outlives_constraints =
-              new List(new $(empty_effect,vartype),outlives_constraints);
-          }
+	  /*           if(k2->kind == RgnKind) { */
+	  /*             /\* 	  if (k2->aliasqual != Aliasable) *\/ */
+	  /*             /\* 	    Warn::impos2("opened existential had unique or top region kind"); *\/ */
+	  /*             outlives_constraints = */
+	  /*               new List(new $(empty_effect,vartype),outlives_constraints); */
+	  /*           } */
         }
         
         var_tvs = imp_rev(var_tvs);
@@ -450,21 +451,17 @@ DONT_PROMOTE:
         let exist_typs = List::map(snd,exist_inst);
         let inst       = List::rappend(rgn,all_inst,exist_inst);
       
-        if(exist_ts != NULL || ad->impl->rgn_po != NULL) { //how does qual_bnd get handled here?
-          if(res.tvars_and_bounds_opt==NULL)
-            res.tvars_and_bounds_opt = new $(NULL,NULL);
-          (*res.tvars_and_bounds_opt)[0] = 
-            append((*res.tvars_and_bounds_opt)[0],map(add_false,exist_ts));
-          (*res.tvars_and_bounds_opt)[1] = 
-            append((*res.tvars_and_bounds_opt)[1],outlives_constraints);
-          let rpo_inst = NULL;
-          for(let rpo=ad->impl->rgn_po; rpo != NULL; rpo = rpo->tl)
-            rpo_inst = new List(new $(rsubstitute(rgn,inst,(*rpo->hd)[0]),
-                                      rsubstitute(rgn,inst,(*rpo->hd)[1])),
-                                rpo_inst);
-          rpo_inst = imp_rev(rpo_inst);
-          (*res.tvars_and_bounds_opt)[1] = 
-            append((*res.tvars_and_bounds_opt)[1],rpo_inst);
+        if(exist_ts != NULL || ad->impl->effconstr != NULL) { //how does qual_bnd get handled here?
+          if(res.tvars_and_effconstr_opt==NULL)
+            res.tvars_and_effconstr_opt = new $(NULL,NULL);
+          (*res.tvars_and_effconstr_opt)[0] = 
+            append((*res.tvars_and_effconstr_opt)[0],map(add_false,exist_ts));
+	  /*           (*res.tvars_and_effconstr_opt)[1] =  */
+	  /*             append((*res.tvars_and_effconstr_opt)[1],outlives_constraints); */
+          let ec_inst = rsubst_effconstr(rgn,inst,ad->impl->effconstr);
+	  //          rpo_inst = imp_rev(rpo_inst);
+          (*res.tvars_and_effconstr_opt)[1] = 
+            append((*res.tvars_and_effconstr_opt)[1],ec_inst);
           let aqb_inst = NULL;
           for(let aqb=ad->impl->qual_bnd; aqb != NULL; aqb = aqb->tl) {
 	    let $(tv, b) = $(rsubstitute(rgn,inst,(*aqb->hd)[0]),
@@ -619,15 +616,15 @@ static bool try_alias_coerce(tenv_t tenv, type_t old_type, type_t new_type,
   switch $(compress(old_type),compress(new_type)) {
   case $(&PointerType(pold), &PointerType(pnew)):
     let ptry = new PointerType(PtrInfo{pold.elt_type, pnew.elt_tq, 
-                                       PtrAtts{pold.ptr_atts.rgn, 
+                                       PtrAtts{pold.ptr_atts.eff, 
                                                pnew.ptr_atts.nullable, 
                                                pnew.ptr_atts.bounds, 
                                                pnew.ptr_atts.zero_term, 
                                                pold.ptr_atts.ptrloc,
 				               pnew.ptr_atts.autoreleased,
 					       pold.ptr_atts.aqual}});
-    return (subtype(curr_rgnpo(tenv), assump, ptry, new_type) && 
-            coerce_assign(curr_rgnpo(tenv), curr_aquals_bounds(tenv),initializer, ptry));
+    return (subtype(assump, ptry, new_type) && 
+            coerce_assign(curr_aquals_bounds(tenv),initializer, ptry));
   default: return false;
   }
 }
@@ -655,7 +652,7 @@ static void check_alias_coercion(tenv_t tenv, seg_t loc, type_t old_type,
   default: Warn::err2(loc,"alias requires pointer type"); break;
   }
   
-  if (subtype(curr_rgnpo(tenv), assump, old_type, new_type) 
+  if (subtype(assump, old_type, new_type) 
       //JGM: the following line would be valid if we could somehow
       //get the coercion applied to the right expression instead of
       //this access expression that is passed in for initializer.
@@ -688,8 +685,8 @@ void check_pat_regions_rec(tenv_t te, pat_t p, bool did_noalias_deref,
   switch(p->r) {
   case &Pointer_p(p2):
     switch ((type_t)p->topt) {
-    case &PointerType(PtrInfo(_,_,PtrAtts{.rgn=rt,.aqual=aq, ...})): 
-      check_rgn_accessible(te,p->loc,rt);
+    case &PointerType(PtrInfo(_,_,PtrAtts{.eff=rt,.aqual=aq, ...})): 
+      check_effect_accessible_nodelay(te,p->loc,rt);
       check_pat_regions_rec(te,p2,is_noalias_qual(aq,false),patvars);
       return;
     default: Warn::impos2("check_pat_regions: bad pointer type");

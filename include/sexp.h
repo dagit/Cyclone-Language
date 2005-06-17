@@ -35,10 +35,10 @@ namespace Sexp {
 /* various forward declarations of types */
 struct Class<`a::A>;
 struct Obj<`a::A>;
-struct Object;
-struct Visitor<`a,`env,`r::R>;
+struct Object<`e::E>;
+struct Visitor<`a,`env,`r::E>;
 typedef struct Class<`a> Class_t<`a>;
-typedef struct Object Object_t;
+typedef struct Object<`H> Object_t;
 typedef struct Obj<`a> Obj_t<`a>;
 typedef struct Visitor<`a,`env,`r> Visitor_t<`a,`env,`r>;
 typedef Visitor_t<`a,`env,`r>@`r visitor_t<`a,`env,`r>;
@@ -76,7 +76,7 @@ struct Class<`a::A> { : ALIASABLE >= aquals(`a)
   /* hash produces an integer hash code for a given object */
   int (@hash)<`r>(Obj_t<`a>@`r self);
   /* accept is used for visitors (see below) */
-  `b (@accept)<`b,`env,`r>(Obj_t<`a>@ self, visitor_t<`b,`env,`r>,`env env);
+  `b (@accept)<`b,`env,`r>(Obj_t<`a>@ self, visitor_t<`b,`env,`r>,`env env : regions(`a) <= `H);
   /* the hash-table is used for hash-consing objects to maximize sharing */
   struct Hashtable::Table<Obj_t<`a>@,Obj_t<`a>@> *hash_table;
 };
@@ -90,15 +90,14 @@ struct Obj<`a::A> { : ALIASABLE >= aquals(`a)
   `a            v;
 };
 
-/* An Object abstracts the type of an Obj.  The regions constraint
- * effectively forces everything to be heap-allocated. */
-struct Object {
-  <`a> : regions(`a) > `H, ALIASABLE >= aquals(`a)
+/* An Object abstracts the type of an Obj.*/
+struct Object<`bd::E> {
+  <`a> : regions(`a) <= `bd, ALIASABLE >= aquals(`a)
   Obj_t<`a> @self;
 };
 
 /* convert a Obj_t<`a> to an Object -- essentially an up-cast. */
-extern Object_t up(Obj_t<`a>@`H self : regions(`a) > `H);
+extern Object_t up(Obj_t<`a>@`H self : regions(`a) <= `H);
 /* convert an Object to an Obj_t<`C> given some class C -- returns
  * null upon failure, and otherwise returns a pointer to the underlying
  * object at the correct type -- effectively a down-cast. */
@@ -187,7 +186,7 @@ extern Visitor_t<`b,`a,`r> default_visitor(`b (@`H def)(`a,Object_t,visitor_t<`b
 extern int cmp(Object_t x, Object_t y);
 /* register a new class -- this is necessary to support parsing for
    new classes.  Built in classes are pre-registered. */
-extern void register_class(struct Class<`a>@`H : regions(`a) > `H);
+extern void register_class(struct Class<`a>@`H : regions(`a) <= `H);
 /* print an object using the supplied printer. */
 extern void print(struct Printer<`p>@, Object_t);
 /* parse an object -- uses the registered classes' tags to determine

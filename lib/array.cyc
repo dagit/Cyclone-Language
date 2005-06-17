@@ -56,7 +56,7 @@ typedef `a@`r ptr_t<`a,`r>;
                           /* Note!  T must be at least 3          */
 
 
-void qsort<`a,`r::R>(cmpfn_t<`a,`r,`r> less_eq, `a ?`r arr, int len)
+void qsort<`a,`r::E>(cmpfn_t<`a,`r,`r> less_eq, `a ?`r arr, int len)
 //  void qsort(cmpfn_t less_eq,`a ?`r arr, int len)
 {
   int base_ofs = 0;  // FIX: this used to be an arg; need to get rid of it completely, but it's assigned to

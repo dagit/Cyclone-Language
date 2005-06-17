@@ -38,11 +38,11 @@ int f5() {
       let p = rnew(x) Point(i,i+1);
       let q1 = f4(); // allocates in `r
       region <`r2>y;
-      let q2 = f4(); // allocates in `r2
+      struct Point @`C+`r q2 = f4(); // allocates in `r2
       let s = rnew(x) "hello";
       z = p->x + p->y + q1->x + q2->y + *(f3()) + *(f2());
       q1 = p; // OK, same region
-      q2 = p; // OK due to outlives
+      q2 = p; // OK due effect subtyping
     }
   }
   return z;

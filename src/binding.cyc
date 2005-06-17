@@ -261,7 +261,8 @@ static void resolve_stmt(env_t,  stmt_t);
 static void resolve_pat(env_t,   pat_t);
 static void resolve_exp(env_t,   exp_t);
 static void resolve_type(seg_t, env_t,  type_t);
-static void resolve_rgnpo(seg_t, env_t, list_t<$(type_t,type_t)@>);
+//static void resolve_rgnpo(seg_t, env_t, list_t<$(type_t,type_t)@>);
+static void resolve_effconstr(seg_t, env_t, list_t<effconstr_t>);
 static void resolve_qualbnd(seg_t, env_t, list_t<$(type_t,type_t)@>);
 static void resolve_scs(env_t,   list_t<switch_clause_t>);
 static void resolve_aggrfields(seg_t, env_t, list_t<aggrfield_t>);
@@ -528,7 +529,8 @@ static void resolve_function_stuff(seg_t loc, env_t env, fn_info_t @i) {
     resolve_type(loc,env,(*args->hd)[2]);
   if(i->cyc_varargs != NULL)
     resolve_type(loc,env,i->cyc_varargs->type);
-  resolve_rgnpo(loc,env,i->rgn_po);
+  resolve_effconstr(loc, env, i->effconstr);
+  //  resolve_rgnpo(loc,env,i->rgn_po);
   resolve_qualbnd(loc, env, i->qual_bnd);
   if(i->requires_clause != NULL)
     resolve_exp(env,(exp_t)i->requires_clause);
@@ -812,6 +814,18 @@ static void resolve_rgnpo(seg_t loc, env_t env, list_t<$(type_t,type_t)@> po) {
   }
 }
 
+static void resolve_effconstr(seg_t loc, env_t env, list_t<effconstr_t> effc) {
+  for (; effc != NULL; effc = effc->tl) {
+    switch(effc->hd) {
+    case &SingleConstraint(e):      resolve_type(loc, env, e); break;
+    case &DisjointConstraint(e1, e2): fallthru(e1, e2);
+    case &SubsetConstraint(e1, e2): 
+      resolve_type(loc, env, e1);
+      resolve_type(loc, env, e2);
+      break;
+    }
+  }
+}
 static void resolve_qualbnd(seg_t loc, env_t env, list_t<$(type_t,type_t)@> qb) {
   for(; qb != NULL; qb = qb->tl) {
     resolve_type(loc,env,(*qb->hd)[0]);
@@ -821,8 +835,8 @@ static void resolve_qualbnd(seg_t loc, env_t env, list_t<$(type_t,type_t)@> qb) 
 
 //used for Dict::iter_c(f('c var_t resolved_t), 'c env, dict<var_t resolved_t 'r>)
 //adds each symbol to the export list 
-static void export_all_symbols($(list_t<$(seg_t, qvar_t, bool)@>@, dict_t<var_t, resolved_t>@, env_t, $(seg_t, list_t<qvar_t>)@)@ cenv,
-			var_t name, resolved_t res) {
+static void export_all_symbols($(list_t<$(seg_t, qvar_t, bool)@`H,`H>@, dict_t<var_t, resolved_t>@, env_t, $(seg_t, list_t<qvar_t>)@)@ cenv,
+			       var_t name, resolved_t res) {
   let &$(exlist_ptr, out_dict, env, &$(wcloc, hidelist)) = cenv;
   switch(res) {
   case &VarRes(bnd):
@@ -980,8 +994,9 @@ static void resolve_decl(env_t env, decl_t d) {
 					      decl_name, new AggrRes(ad));
     }
     if(ad->impl != NULL) {
-      let &AggrdeclImpl(_,rpo,qb,fs,_) = (struct AggrdeclImpl@)ad->impl;
-      resolve_rgnpo(loc,env,rpo);
+      let &AggrdeclImpl(_,qb,fs,_,fc) = (struct AggrdeclImpl@)ad->impl;
+      resolve_effconstr(loc, env, fc); 
+      //      resolve_rgnpo(loc,env,rpo);
       resolve_qualbnd(loc,env,qb);
       resolve_aggrfields(loc,env,fs);
     }

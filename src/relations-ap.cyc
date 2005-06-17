@@ -424,7 +424,7 @@ static reln_op_t reduce_relnop(reln_op_t rop) {
 
 // add all of the relations to the graph G and return true iff 
 // the resulting relations are consistent.  
-static bool consist_relations(Pratt::graph_t *G, relns_t rlns) {
+static bool consist_relations(Pratt::graph_t *`H G, relns_t rlns) {
   for (; G && rlns != NULL; rlns = rlns->tl) {
     let reln = rlns->hd;
     reln->rop1 = reduce_relnop(reln->rop1);

@@ -347,7 +347,7 @@ struct _fat_ptr Cyc_Core_rnew_string(struct _RegionHandle*,unsigned);
 struct _fat_ptr Cyc_Core_rqnew_string(struct _RegionHandle*,unsigned,unsigned);extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _fat_ptr f1;};
 # 170
 extern struct _RegionHandle*Cyc_Core_heap_region;
-# 349 "core.h"
+# 348 "core.h"
 struct _fat_ptr Cyc_Core_mkfat(void*,unsigned,unsigned);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
 # 61 "list.h"
 extern int Cyc_List_length(struct Cyc_List_List*);

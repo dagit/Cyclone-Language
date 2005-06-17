@@ -52,7 +52,7 @@ typedef const char ?`H symbol_t;
 typedef Object_t ?`H tuple_t;
 
 /* coerce an Obj_t<`a> to an Object */
-Object_t up(Obj_t<`a>@ `H self : regions(`a) > `H, ALIASABLE >= aquals(`a)) {
+Object_t up(Obj_t<`a>@ `H self : regions(`a) <= `H, ALIASABLE >= aquals(`a)) {
   return Object{<`a> .self = self};
 }
 
@@ -151,15 +151,16 @@ const char ?tostring(Object_t v) {
 
 /* used to build a collection of classes */
 typedef struct Cls {
-  <`a> : regions(`a) > `H, ALIASABLE >= aquals(`a)
+  <`a> : regions(`a) <= `H, ALIASABLE >= aquals(`a)
   Class_t<`a> @vtable;
 } @class_t;
+//typedef struct Cls<`H> @class_t;
 
 /* defined below -- a list of all registered classes */
 extern list_t<class_t> classes;
 
 /* register a new class -- should check that the tag is unique */
-void register_class(struct Class<`a>@`H c : regions(`a) > `H) {
+void register_class(struct Class<`a>@`H c : regions(`a) <= `H) {
   classes = new List(new Cls{c},classes);
 }
 
@@ -321,7 +322,7 @@ gencmp(schar)
 #define genaccept(n) \
   static `b accept_##n<`b,`env,`r>(Obj_t<n##_t>@`H self, \
                                    Visitor_t<`b,`env,`r>@`r visitor,\
-                                   `env env) { \
+                                   `env env : regions(n##_t) <= `H) { \
     let f = visitor->visit_##n; \
     if (f == NULL) return visitor->visit_default(env, up(self), visitor); \
     else return f(env, self, visitor); \
@@ -701,7 +702,7 @@ static Object_t next_list(list_t<Object_t@`H,`H> @xs) {
 
 // parse in a tuple of objects
 static Obj_t<Object_t ?> @parse_tuple(struct Parser<`a>@ p) {
-  List::list_t<Object_t @> xs = NULL;
+  List::list_t<Object_t @`H,`H> xs = NULL;
  Next:    
     int ch = pgetc(p);
     while (whitespace(ch)) ch = pgetc(p);
@@ -762,7 +763,7 @@ genclass(tuple,'t',"tuple")
 static Obj_t<`a>@* hashcons(Obj_t<`a>@ x) {
   let c = x->vtable;
   struct Hashtable::Table *topt = c->hash_table;
-  Hashtable::table_t t;
+  Hashtable::table_t<Obj_t<`a>@`H,Obj_t<`a>@`H,`H> t;
   if (topt == NULL) {
     t = Hashtable::create(101,c->cmp,c->hash);
     c->hash_table = t;
@@ -774,6 +775,17 @@ static Obj_t<`a>@* hashcons(Obj_t<`a>@ x) {
 
 // define the constructors for the built-in classes, as well as an
 // encapsulated class for use in the registered classes list below.
+Obj_t<uchar_t> @mk_uchar(uchar_t v) { 
+    let obj = Obj{.vtable = &uchar_class, .v = v}; 
+    let objopt = hashcons(&obj); 
+    if (objopt != NULL) return *objopt; 
+    let objp = new obj; 
+    Hashtable::insert((Hashtable::table_t)obj.vtable->hash_table,objp,objp); 
+    return objp; 
+  } 
+  Object_t obj_uchar(uchar_t v) { return up(mk_uchar(v)); }
+  struct Cls uchar_class_w = Cls{&uchar_class}; 
+
 #define mk(n) \
   Obj_t<n##_t> @mk_##n(n##_t v) { \
     let obj = Obj{.vtable = &n##_class, .v = v}; \
@@ -786,7 +798,7 @@ static Obj_t<`a>@* hashcons(Obj_t<`a>@ x) {
   Object_t obj_##n(n##_t v) { return up(mk_##n(v)); }\
   struct Cls n##_class_w = Cls{&n##_class}; 
 
-mk(uchar)
+//mk(uchar)
 mk(schar)
 mk(ushort)
 mk(sshort)

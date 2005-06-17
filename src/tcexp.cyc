@@ -23,6 +23,7 @@
  */
 
 #include <string.h>
+#include <hashtable.h>
 #include "warn.h"
 #include "flags.h"
 #include "absynpp.h"
@@ -36,12 +37,14 @@
 #include "tctyp.h"
 #include "tcexp.h"
 #include "attributes.h"
+
 using Core;
 using List;
 using Absyn;
 using Tctyp;
 using Tcenv;
 using Tcutil;
+using Hashtable;
 namespace Tcexp;
 
 static type_t expr_err(tenv_t te,seg_t loc,type_t * topt, 
@@ -67,7 +70,7 @@ void check_consume(seg_t loc,aqualbnds_t aqb, type_t t, exp_t e) {
 ptr_info_t fresh_pointer_type_with_aqual(tenv_t te, aqualtype_t aq) {
   let tenv_tvs = lookup_type_vars(te);
   let t2  = new_evar(&Kinds::ako,new Opt(tenv_tvs));
-  let rt  = new_evar(&Kinds::rko,new Opt(tenv_tvs));
+  let rt  = new_evar(&Kinds::eko,new Opt(tenv_tvs));
   let nbl = any_bool(tenv_tvs);
   let b   = any_bounds(tenv_tvs);
   let zt  = any_bool(tenv_tvs);
@@ -253,7 +256,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
     case &PointerType(_):
       // maybe it's going in a different region, but region subtyping
       // should take care of that
-      if (!Unify::unify(*topt,t) &&silent_castable(curr_rgnpo(te),loc,t,*topt)){
+      if (!Unify::unify(*topt,t) &&silent_castable(loc,t,*topt)){
 	e->topt = t;
 	unchecked_cast(e, *topt, Other_coercion);
 	return *topt;
@@ -296,9 +299,9 @@ static type_t tcVar(tenv_t te, seg_t loc, type_t * topt, exp_t e, binding_t *b){
 static
 void check_format_args(tenv_t te, exp_t fmt, opt_t<list_t<exp_t>> opt_args,
 		       int arg_cnt,
-		       list_t<int> @alias_arg_exps,
+		       list_t<int,`H> @alias_arg_exps,
 		       bool isCproto,
-		       list_t<type_t> type_getter(tenv_t,string_t,bool,seg_t)) {
+		       list_t<type_t> type_getter<`r::E>(tenv_t,string_t<`r>,bool,seg_t)) {
   // check the format string and get the types it requires
   switch (fmt->r) {
   case &Const_e({.String_c = s}): fallthru(s);
@@ -314,7 +317,7 @@ void check_format_args(tenv_t te, exp_t fmt, opt_t<list_t<exp_t>> opt_args,
       type_t t = desc_types->hd;
       exp_t  e = args->hd;
       tcExp(te,&t,e);
-      if (!coerce_arg(curr_rgnpo(te),curr_aquals_bounds(te), e,t,&alias_coercion))
+      if (!coerce_arg(curr_aquals_bounds(te), e,t,&alias_coercion))
 	err_and_explain(e->loc,"descriptor has type ",t,
 			" but argument has type ",e->topt);
       if (alias_coercion)
@@ -510,11 +513,11 @@ static type_t tcCmpBinop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
     if (Unify::unify(t1,t2))
       return sint_type;
     // okay if t1 can be silently cast to t2 or vice versa
-    if (silent_castable(curr_rgnpo(te),loc,t2,t1)) {
+    if (silent_castable(loc,t2,t1)) {
       unchecked_cast(e2,t1, Other_coercion);
       return sint_type;
     } 
-    if (silent_castable(curr_rgnpo(te),loc,t1,t2)) {
+    if (silent_castable(loc,t1,t2)) {
       unchecked_cast(e1,t2, Other_coercion);
       return sint_type;
     } 
@@ -732,7 +735,7 @@ static type_t tcConditional(tenv_t te, seg_t loc, type_t * topt,
   let t  = new_evar(ko,lookup_opt_type_vars(te));
   let l1 = List(e3,NULL);
   let l2 = List(e2,&l1);
-  if (!coerce_list(curr_rgnpo(te),curr_aquals_bounds(te),t,&l2))
+  if (!coerce_list(curr_aquals_bounds(te),t,&l2))
     err_and_explain(loc,"conditional clause types do not match: ",
 		    e2->topt," != ", e3->topt);
   return t;
@@ -779,7 +782,7 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t * topt,
   check_writable(te, e1);
   if (po == NULL) {
     check_consume(e2->loc,curr_aquals_bounds(te),t2,e2);
-    if (!coerce_assign(curr_rgnpo(te),curr_aquals_bounds(te),e2,t1)) {
+    if (!coerce_assign(curr_aquals_bounds(te),e2,t1)) {
       let result = expr_err(te,loc,topt,"type mismatch: ",t1," != ",t2);
       Unify::unify(t1,t2); // needed to get right error message
       Unify::explain_failure();
@@ -810,6 +813,8 @@ static type_t tcSeqExp(tenv_t te,seg_t loc,type_t * topt,exp_t e1,exp_t e2) {
 }
 
 // try to find a field that e can be injected into
+// tu is the type of the datatype
+// inst 
 static struct Datatypefield *tcInjection(tenv_t te,exp_t e,type_t tu,
 					 list_t<$(tvar_t,type_t)@`H,`H> inst,
 					 list_t<datatypefield_t> fs) {
@@ -843,7 +848,7 @@ static struct Datatypefield *tcInjection(tenv_t te,exp_t e,type_t tu,
     // I hate doing this because it has side-effects, but oh well...
     // MWH: ignores potential to insert alias coercions
     bool bogus = false;
-    if (coerce_arg(curr_rgnpo(te),curr_aquals_bounds(te),e,t2,&bogus))
+    if (coerce_arg(curr_aquals_bounds(te),e,t2,&bogus))
       return fields->hd;
   }
   Warn::err2(e->loc,"can't find a field in ",tu," to inject value of type ",t1);
@@ -878,13 +883,65 @@ static void check_all_aqual_bounds(seg_t loc, tenv_t te,
     }
   }
 }
-				   
+
+static list_t<$(tvar_t, type_t)@> fresh_effect_evars(tenv_t te, list_t<$(tvar_t, type_t)@`H,`H> inst) {
+  list_t<$(tvar_t, type_t)@`H,`H> fresh = NULL;
+  for(_ i = inst; i!=NULL; i=i->tl) {
+    let &$(tv, *t) = i->hd;
+    switch(Kinds::tvar_kind_opt(tv)) {
+    case Opt{NULL}: Warn::impos("Tvar kind must be set by now"); return NULL;
+    case Opt{k}: 
+      if(Kinds::kind_eq(k, &Kinds::ek)) {
+	switch(*t) {
+	case &Evar(...):
+	  *t =  new_evar(&Kinds::eko, lookup_opt_type_vars(te));
+	  fresh = new List{i->hd, fresh}; 
+	  break;
+	default:
+	  break;
+	}
+      }
+      break;
+    }
+  }
+  return fresh;
+}
+
+static void inst_with_joineff(type_t ptrrgn_evar, type_t curr_rgn,
+			      list_t<$(tvar_t, type_t)@> orig, 
+			      table_t<tvar_t, types_t> inst_effects) {
+  //what about unifying ptr_rgn_tv even if no datatype field was constructed??
+/*   _ ptrrgn_tv = NULL; */
+/*   switch(ptrrgn) { */
+/*   case &VarType(tv): ptrrgn_tv = tv;break; */
+/*   default: break; */
+/*   } */
+  bool found_ptrrgn = false;
+  for(;orig != NULL; orig = orig->tl) {
+    let &$(tv, origev) = orig->hd;
+    try {
+      let l = lookup(inst_effects, tv);
+      if(ptrrgn_evar == origev) {
+	found_ptrrgn = true;
+	l = new List{curr_rgn, l};
+      }
+      Unify::unify(origev, join_eff(l));
+    }
+    catch {
+    case &Not_found: break;
+    }
+  }
+  if (!found_ptrrgn) {
+    Unify::unify(ptrrgn_evar, curr_rgn);
+  }
+}
+
 
 // e(es)
 static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
 		       list_t<exp_t> args,
-		       vararg_call_info_t *@vararg_call_info,
-		       list_t<int> @alias_arg_exps) {
+		       vararg_call_info_t *`H @vararg_call_info,
+		       list_t<int,`H> @alias_arg_exps) {
   // if e is a vararg function then we need to declare a new local
   // region block -- we just do it always here.
   let es = args;
@@ -901,7 +958,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
     // Note: rgn is irrelevant -- all code is in the heap.
     // Nonetheless, perhaps we cast to another region, so check
     // the capability just for fun.
-    check_rgn_accessible(te,loc,rgn);
+    check_effect_accessible_nodelay(te,loc,rgn);
     // Check that the bounds on the pointer aren't 0
     check_nonzero_bound(loc,b);
     // Now we "instantiate" occurrences of the current region in the function's
@@ -909,8 +966,8 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
     t1 = CurRgn::instantiate(compress(t1),Tcenv::curr_lifo_rgn(te));
     switch (t1) {
       case &FnType(FnInfo{tvars,eff,res_tq,res_typ,args_info,c_vararg,
-                            cyc_vararg,rgn_po,qb,atts,req,req_relns,ens,ens_relns,thrws,thrws_relns,ret_var,_}):
-	if(tvars != NULL || rgn_po != NULL)
+                            cyc_vararg,qb,atts,req,req_relns,ens,ens_relns,thrws,thrws_relns,ret_var,_,effc}):
+	if(tvars != NULL || effc != NULL)
 	  Warn::err(e->loc,"function should have been instantiated prior to use -- probably a compiler bug");
       // unify the result type with the expected type to get better
       // information while type-checking the arguments.
@@ -922,7 +979,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
 	exp_t e1 = es->hd;
 	type_t t2 = (*args_info->hd)[2];
 	tcExp(te, &t2, e1);
-	if (!coerce_arg(curr_rgnpo(te),curr_aquals_bounds(te),e1,t2,&alias_coercion)) {
+	if (!coerce_arg(curr_aquals_bounds(te),e1,t2,&alias_coercion)) {
 	  string_t s0 = "actual argument has type ";
 	  string_t s1 = Absynpp::typ2string((type_t)e1->topt);
 	  string_t s2 = " but formal has type ";
@@ -963,13 +1020,13 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
 	    case Printf_ft:
 	      check_format_args(te,fmt_arg,fmt_args,
 				arg_start_pos - 1,alias_arg_exps,c_vararg,
-				Formatstr::get_format_types);
+				Formatstr::get_format_types<>);
 	      break;
 	    case Scanf_ft: 
             default:
 	      check_format_args(te,fmt_arg,fmt_args,
 				arg_start_pos - 1,alias_arg_exps,c_vararg,
-				Formatstr::get_scanf_types);
+				Formatstr::get_scanf_types<>);
 	      break;
 	    }
 	  } catch {case &Nth: Warn::err2(loc,"bad format arguments"); break;}
@@ -1000,7 +1057,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
 	      exp_t e1 = es->hd;
 	      vci->num_varargs++;
 	      tcExp(te, &vt, e1);
-	      if (!coerce_arg(curr_rgnpo(te),curr_aquals_bounds(te),e1,vt,&alias_coercion))
+	      if (!coerce_arg(curr_aquals_bounds(te),e1,vt,&alias_coercion))
 		err_and_explain(loc,"vararg requires type ",vt,
 				" but argument has type ", e1->topt);
 	      if (alias_coercion)
@@ -1024,9 +1081,11 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
 	      // and instead get away with subtyping since it's more
 	      // flexible.  So, we're going to constraint the region
 	      // of the pointer to the datatype to be the current block's region
-              Unify::unify(pointer_region(vt),curr_rgn(te));
+	      //              Unify::unify(pointer_region(vt),curr_rgn(te));
 
 	      let inst = List::zip(td->tvs,targs);
+	      Hashtable::table_t<tvar_t, list_t<type_t>> inst_effects = 
+		Hashtable::create(10, tvar_cmp, tvar_id);
 	      for (; es != NULL; es = es->tl) {
 		vci->num_varargs++;
 		exp_t e1 = es->hd;
@@ -1035,11 +1094,32 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
 		  tcExp(te,NULL,e1);
 		  check_consume(e1->loc,curr_aquals_bounds(te),(type_t)e1->topt,e1);
 		}
+		let fresh = fresh_effect_evars(te, inst);
 		let f = tcInjection(te,e1,pointer_elt_type(vt),inst,fields);
 		if (f != NULL)
 		  vci->injectors =
 		    append(vci->injectors, new List{f,NULL});
+		for(;fresh != NULL; fresh = fresh->tl) {
+		  let &$(tv, ev) = fresh->hd;
+		  let cf = compress(ev);
+		  switch(cf){
+		  case &Evar(...): break;
+		  default: 
+		    _ l = NULL;
+		    try {
+		      l = Hashtable::lookup(inst_effects, tv);
+		    }catch {
+		    case &Not_found: l = NULL; break;
+		    }
+		    Hashtable::insert(inst_effects, tv, new List{cf, l});
+		    break;
+		  }
+		}
 	      }
+	      inst_with_joineff(pointer_region(vt), curr_rgn(te),
+				List::zip(td->tvs, targs), inst_effects);
+	      //	      substitute(inst, vt);
+	      //	      Unify::unify(pointer_region(vt), join_eff(inst_effects));
 	      break;
 	    default: Warn::err2(loc,"bad inject vararg type"); break;
 	    }
@@ -1073,7 +1153,7 @@ static type_t tcThrow(tenv_t te, seg_t loc, type_t * topt, exp_t e) {
   bool bogus = false;
   let exception_type = exn_type();
   tcExp(te,&exception_type,e);
-  if (!castable(curr_rgnpo(te),loc,(type_t)e->topt,exception_type))
+  if (!castable(loc,(type_t)e->topt,exception_type))
     Warn::err2(loc,"expected ",exception_type," but found ",e->topt);
   if (topt != NULL) 
     return *topt;
@@ -1103,9 +1183,10 @@ static type_t doInstantiate(tenv_t te, seg_t loc, type_t * topt,
       // is compatible with the current region partial order. 
       // May be delayed. Don't do if more instantiation remains.
       if(tvars == NULL) {
-	info.rgn_po = rsubst_rgnpo(heap_region,instantiation,info.rgn_po);
-	check_rgn_partial_order(te, loc, info.rgn_po);
-	info.rgn_po = NULL;
+	//	info.rgn_po = rsubst_rgnpo(heap_region,instantiation,info.rgn_po);
+	info.effconstr = rsubst_effconstr(heap_region, instantiation, info.effconstr);
+	check_effect_constraints(te, loc, info.effconstr);
+	info.effconstr = NULL;
       }
       type_t new_fn_typ = substitute(instantiation, new FnType(info));
       return pointer_type(PtrInfo(new_fn_typ,tq,atts));
@@ -1134,10 +1215,10 @@ static type_t tcCast(tenv_t te, seg_t loc, type_t * topt, type_t t, exp_t e,
   check_no_qual(loc,t);
   tcExp(te,&t,e);
   type_t t2 = (type_t)e->topt;
-  if (silent_castable(curr_rgnpo(te),loc,t2,t)) {
+  if (silent_castable(loc,t2,t)) {
     *c = No_coercion;
   } else {
-    coercion_t crc = castable(curr_rgnpo(te),loc,t2,t);
+    coercion_t crc = castable(loc,t2,t);
     if (crc != Unknown_coercion)
       *c = crc;
     else if (zero_to_null(t,e))
@@ -1319,7 +1400,7 @@ static type_t tcDeref(tenv_t te, seg_t loc, type_t * topt, exp_opt_t orig_e,
   }
   switch(t) {
   case &PointerType(PtrInfo(t2,_,PtrAtts(rt,_,b,zt,_,_,_))):
-    check_rgn_accessible(te,loc,rt);
+    check_effect_accessible_nodelay(te,loc,rt);
     check_nonzero_bound(loc, b);
     if (!Kinds::kind_leq(type_kind(t2),&Kinds::mk) && !abstract_val_ok(te))
       switch (compress(t2)) {
@@ -1460,7 +1541,7 @@ static type_t tcSubscript(tenv_t te_orig, seg_t loc, type_t * topt,
 	check_nonzero_bound(loc,b);
       }
     }
-    check_rgn_accessible(te,loc,rt);
+    check_effect_accessible_nodelay(te,loc,rt);
     if (!Kinds::kind_leq(type_kind(t),&Kinds::mk) && !abstract_val_ok(te))
       Warn::err2(e1->loc,"can't subscript an abstract pointer");
     return t;
@@ -1527,7 +1608,7 @@ static type_t tcArray(tenv_t te, seg_t loc, type_t *elt_topt,
   for (_ es2 = es; es2 != NULL; es2 = es2->tl)
     tcExpInitializer(te,elt_topt,es2->hd);
   
-  if (!coerce_list(curr_rgnpo(te),curr_aquals_bounds(te),res,es))
+  if (!coerce_list(curr_aquals_bounds(te),res,es))
     // JGMFIX: lousy error messages...
     Warn::err2(es->hd->loc,"elements of array do not all have the same type (",
 	       res,")");
@@ -1686,7 +1767,7 @@ static bool ensure_nothrow_initializer(exp_t e) {
  // Later, we should support array designators and so forth.
 static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
                           typedef_name_t @tn, list_t<type_t,`H> @ ts,
-                          list_t<$(list_t<designator_t>,exp_t)@> args,
+                          list_t<$(list_t<designator_t,`H>,exp_t)@> args,
                           struct Aggrdecl *`H @`H ad_opt) {
   aggrdecl_t @ adptr;
   aggrdecl_t ad;
@@ -1732,14 +1813,18 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
   // unfortunately, I think it allows topt to cause failure.
   // It's important for region partial order stuff though (so user can pick
   // the region bound)
+  // This early instantiation is also used for cases such as 
+  // return Opt{int@}, where Opt{int*} is expected
+  // Here, the coercion on the field level will succeed, but fail for the 
+  // aggregate as a whole
   if (topt != NULL)
     switch (compress(*topt)) {
     case &AppType(&AggrCon({.KnownAggr = adptr2}),all_typs2):
       if(*adptr2 != *adptr)
-	fallthru;
+  	fallthru;
       for (let ats = all_typs; ats != NULL && all_typs2 != NULL;
-	   ats = ats->tl, all_typs2=all_typs2->tl) {
-	Unify::unify(ats->hd,all_typs2->hd);
+  	   ats = ats->tl, all_typs2=all_typs2->tl) {
+  	Unify::unify(ats->hd,all_typs2->hd);
       }
       res_typ = *topt;
       break;
@@ -1773,7 +1858,7 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
     let inst_fieldtyp = substitute(inst,field->type);
     let ftyp = tcExpInitializer(clear_abstract_val_ok(te2),
 				&inst_fieldtyp, field_exp);   
-    if (!coerce_arg(curr_rgnpo(te2),curr_aquals_bounds(te),field_exp,inst_fieldtyp,&bogus))
+    if (!coerce_arg(curr_aquals_bounds(te),field_exp,inst_fieldtyp,&bogus))
       err_and_explain(field_exp->loc,"field ",*(field->name)," of ",ad,
 		      " expects type ",inst_fieldtyp, " != ", 
 		      field_exp->topt);
@@ -1784,13 +1869,32 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
       Warn::err2(field_exp->loc, "field ", *(field->name), " can only hold a no_throw function");
     }
   }
-  let rpo_inst = NULL;
-  for(let rpo=ad->impl->rgn_po; rpo != NULL; rpo = rpo->tl)
-    rpo_inst = new List(new $(substitute(inst,(*rpo->hd)[0]),
- 			      substitute(inst,(*rpo->hd)[1])),
- 			rpo_inst);
-  rpo_inst = imp_rev(rpo_inst);
-  Tcenv::check_rgn_partial_order(te2,loc,rpo_inst);
+  _ constraint_checks = NULL;
+  _ effc = Tcutil::rsubst_effconstr(heap_region, inst, ad->impl->effconstr);
+  for(_ ec = effc; ec != NULL; ec = ec->tl) {
+    switch(ec->hd) {
+    case &SubsetConstraint(e1s, e2s):
+      let ev1 = evaluate_effect(curr_effect_constraints(te), e1s);
+      if(!Unify::unify(ev1, e2s) &&
+	 !subset_effect(false, ev1, e2s)) {
+	Warn::err2(loc, "Effect equality constraint not satisfied");
+      }
+      break;
+    case &SingleConstraint(e1):
+      constraint_checks = new List{ec->hd, constraint_checks};
+      break;
+    default:
+      Warn::impos("Disjoint constraints in aggregates are not supported yet");
+    }
+  }
+  Tcenv::check_effect_constraints(te, loc, constraint_checks);
+  /*   let rpo_inst = NULL; */
+  /*   for(let rpo=ad->impl->rgn_po; rpo != NULL; rpo = rpo->tl) */
+  /*     rpo_inst = new List(new $(substitute(inst,(*rpo->hd)[0]), */
+  /*  			      substitute(inst,(*rpo->hd)[1])), */
+  /*  			rpo_inst); */
+  /*   rpo_inst = imp_rev(rpo_inst); */
+  /*   Tcenv::check_rgn_partial_order(te2,loc,rpo_inst); */
   //check qualifier bounds are obeyed
   check_all_aqual_bounds(loc, te2, qb_inst);
   return res_typ;
@@ -1849,7 +1953,7 @@ static type_t tcAnonStruct(tenv_t te, seg_t loc, type_t *topt, exp_t orig,
       bool bogus = false;
       let &$(field,field_exp) = fields->hd;
       tcExpInitializer(clear_abstract_val_ok(te), &field->type, field_exp);
-      if (!coerce_arg(curr_rgnpo(te),curr_aquals_bounds(te),field_exp,field->type,&bogus))
+      if (!coerce_arg(curr_aquals_bounds(te),field_exp,field->type,&bogus))
 	err_and_explain(field_exp->loc,"field ",*field->name,
 			" of struct expects type ",field->type," != ",
 			field_exp->topt);
@@ -1881,7 +1985,7 @@ static type_t tcDatatype(tenv_t te, seg_t loc, type_t * topt, exp_t e,
     exp_t  e = es->hd;
     type_t t = substitute(inst,(*ts->hd)[1]);
     tcExpInitializer(te, &t, e);
-    if (!coerce_arg(curr_rgnpo(te),curr_aquals_bounds(te),e,t,&bogus)) {
+    if (!coerce_arg(curr_aquals_bounds(te),e,t,&bogus)) {
       Warn::err2(e->loc,"datatype constructor ",tuf->name,
 		 " expects argument of type ",t, " but this argument has type ",
 		 (e->topt == NULL) ? (string_t)"?" : Absynpp::typ2string((type_t)e->topt));
@@ -1923,7 +2027,7 @@ static type_t mallocRgn(type_t rgn) {
 }
 
 static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt, exp_opt_t @aqopt,
-                       type_t *@t, exp_t @e, malloc_kind_t @mknd, bool @is_fat) {
+                       type_t *`H @t, exp_t @e, malloc_kind_t @mknd, bool @is_fat) {
   // by default, we allocate heap pointers unless the topt tells us
   //   to do otherwise (see below)
   type_t rgn = heap_rgn_type;
@@ -1931,12 +2035,12 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt, exp
     // check that the region handle is still valid
     // JGMFIX: should just unify here...
     type_t expected_type =
-      rgn_handle_type(new_evar(&Kinds::rko,lookup_opt_type_vars(te)));
+      rgn_handle_type(new_evar(&Kinds::eko,lookup_opt_type_vars(te)));
     type_t handle_type = tcExp(te,&expected_type,(exp_t)*ropt);
     switch (compress(handle_type)) {
     case &AppType(&RgnHandleCon,&List{r,_}):
       rgn = r;
-      check_rgn_accessible(te,loc,rgn);
+      check_effect_accessible_nodelay(te,loc,rgn);
       break;
     default:
     Warn::err2((*ropt)->loc,"expecting region_t type but found ",handle_type);
@@ -2202,12 +2306,12 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     // check that the region handle is still valid
     //JGMFIX: should just unify here
     type_t expected_type =
-      rgn_handle_type(new_evar(&Kinds::rko,lookup_opt_type_vars(te)));
+      rgn_handle_type(new_evar(&Kinds::eko,lookup_opt_type_vars(te)));
     type_t handle_type = tcExp(te,&expected_type,(exp_t)*rgn_handle);
     switch (compress(handle_type)) {
     case &AppType(&RgnHandleCon,&List{r,_}):
       rgn = r;
-      check_rgn_accessible(te,loc,rgn);
+      check_effect_accessible_nodelay(te,loc,rgn);
       break;
     default:
       Warn::err2((*rgn_handle)->loc,"expecting region_t type but found ",
@@ -2280,7 +2384,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     res_typ = promote_array(res_typ,rgn,aqual,true);
     if (topt != NULL)
       if (!Unify::unify(*topt,res_typ) 
-	  && silent_castable(curr_rgnpo(te),loc,res_typ,*topt)) {
+	  && silent_castable(loc,res_typ,*topt)) {
 	e->topt = res_typ;
 	unchecked_cast(e, *topt, Other_coercion);
 	res_typ = *topt;
@@ -2311,7 +2415,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
       // can cast res_typ to topt, and insert the cast so that the code
       // generator knows what to do.
       if (!Unify::unify(*topt,res_typ) 
-	  && silent_castable(curr_rgnpo(te),loc,res_typ,*topt)) {
+	  && silent_castable(loc,res_typ,*topt)) {
 	e->topt = res_typ;
 	unchecked_cast(e, *topt, Other_coercion);
 	res_typ = *topt;
@@ -2339,11 +2443,11 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     // to use an Array_e, but this would involve more allocation.
   RG:{
     type_t bogus = void_type;
-    type_t *`RG topt2 = NULL;
+    type_t *`H+`RG topt2 = NULL;
     if (topt != NULL) {
       switch (compress(*topt)) {
       case &PointerType(PtrInfo(*elttype,tq,_)):
-	topt2 = (type_t *`RG)elttype; break;
+	topt2 = elttype; break;
       case &AppType(&DatatypeCon(_),_):
 	// Note, we're lying here in the sense that we should pass down
 	// a DatatypeFieldCon -- but we don't know which field...
@@ -2358,13 +2462,13 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     check_consume(e1->loc,curr_aquals_bounds(te),telt,e1);
     let pi = fresh_pointer_type_with_aqual(te, aqual); //save allocation of new evar
     pi.elt_type = telt;
-    pi.ptr_atts.rgn = rgn;
+    pi.ptr_atts.eff = rgn;
     pi.ptr_atts.bounds = bounds_one();
     pi.ptr_atts.zero_term = false_type;
     pi.ptr_atts.autoreleased = false_type;
     type_t res_typ = pointer_type(pi);
     if (topt != NULL && !Unify::unify(*topt,res_typ) &&
-	silent_castable(curr_rgnpo(te),loc,res_typ,*topt)) {
+	silent_castable(loc,res_typ,*topt)) {
 	e->topt = res_typ;
 	unchecked_cast(e,*topt,Other_coercion);
 	res_typ = *topt;

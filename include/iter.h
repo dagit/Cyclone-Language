@@ -25,8 +25,8 @@ namespace Iter {
        over sets/sequences of elements.
   */
 
-  struct Iter<`a::A,`bd::R> { 
-    <`env> : regions(`env) > `bd
+  struct Iter<`a::A,`bd::E> { 
+    <`env> : regions(`env) <= `bd
     `env env;
     // return false when no more elts.
     bool (@next)<`r>(`env env, `a @`r dest); 
