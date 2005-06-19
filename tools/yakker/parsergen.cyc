@@ -98,14 +98,22 @@ static void gen_lazyfill(unsigned int fa) {
   if (fa)
     printf("  if ((YKLIMIT - YKCURSOR) < %u) YKFILL(%u);\n",fa,fa);
 }
+/* The set of symbols that return semantic values.  Used to
+   determine whether symb$x should bind x to the semantic
+   value of symb, or to the string matched by symb.
+   This needs to be initialized by the caller of gen0. */
+static struct Set::Set<const char ?@> *semvalue_symbs;
 static
 void gen0(rule_t r, rule_t right_ctxt) {
   int save;
   if (r->v) {
     switch (r->r) {
     case &Symb(x,y):
-      printf("let %s = ",r->v);
-      break;
+      if (Set::member(semvalue_symbs,new x)) {
+        printf("let %s = ",r->v);
+        break;
+      }
+      else fallthru;
     default:
       save = scope++;
       printf("let save%d = YKSAVE;\n",save);
@@ -441,8 +449,9 @@ void gen0(rule_t r, rule_t right_ctxt) {
   }
   if (r->v) {
     switch (r->r) {
-    case &Symb(_,_):
-      break;
+    case &Symb(x,_):
+      if (Set::member(semvalue_symbs,new x)) break;
+      else fallthru;
     default:
       printf("unsigned char ?@nozeroterm ykr%d = YKRESTORE(save%d);\n"
              "let %s = substring((const char ?@nozeroterm)ykr%d,0,YKCURSOR-ykr%d);\n",
@@ -472,6 +481,7 @@ eof_follow_grammar(grammar_t<`H> grm, const char ?`H symb) {
 void gen(grammar_t<`H> grm, const char ?`H start_symbol,
          List::list_t<const char ?@>textblobs) {
   reset_globals();
+  semvalue_symbs = Set::empty(strptrcmp);
   // init_recursive(grm); // FIX: want to warn only on non-follow symbols,
   // but still need to know whether a follow symbol is recursive
   debugprint(1,"Computing follow grammar... ");
@@ -520,9 +530,10 @@ void gen(grammar_t<`H> grm, const char ?`H start_symbol,
   /* Print forward definitions of parsing functions */
   for (let x = grm; x; x = x->tl) {
     let &$(n,r,a) = x->hd;
-    if (a.rettype)
+    if (a.rettype) {
       printf("%s ",a.rettype);
-    else
+      semvalue_symbs = Set::insert(semvalue_symbs,new n);
+    } else
       printf("void ");
     printf("%s(ykbuf_t @ykb%s%s);\n",
 	   p_id(n),

@@ -45,8 +45,6 @@
 #include <string.h>
 using List;
 
-static Rule_t seq2term(rule_t r0);
-
 static
 cs_t termchars() {
   return string2cs("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_=~&@");
@@ -121,8 +119,15 @@ const char ?rule2string(rule_t r0) {
   }
   return Buffer::contents(b);
 }
-static 
-rule_t alt2term(rule_t r);
+static rule_t alt2term(rule_t r);
+static Rule_t seq2term(rule_t r0);
+
+static cs_opt_t avoid_cs;
+static int avoid(cs_t cs) {
+  let x = string2cs("()[], \t\n\r");
+  cs_intersect(x,cs);
+  return !is_cs_empty(x);
+}
 
 static
 rule_t rule2term(rule_t r) {
@@ -136,7 +141,7 @@ rule_t rule2term(rule_t r) {
   case &Star(m,N,r2):
     if (is_cs(r2)) {
       let cs = rule2cs(r2);
-      if (!(cs_member(cs,',') || cs_member(cs,'(') || cs_member(cs,')')))
+      if (!avoid(cs))
         return STAR(m,N,cs2rule(cs));
     }
     fallthru(m,N,r2);

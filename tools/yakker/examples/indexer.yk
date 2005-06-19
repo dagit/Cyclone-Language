@@ -9,11 +9,11 @@
 
 entry-list = *entry { dump_table(); }. ;;; The start symbol
 entry =
- (number "")$n ws "Not Issued." end-of-entry
+  number$n ws "Not Issued." end-of-entry
     { add_not_issued(atoi(n)); }
-| (number "")$n ws (title "")$t "." ws (authors "")$a "." ws (date "")$d "."
+| number$n ws title$t "." ws authors$a "." ws date$d "."
     { List::list_t<char ?`H@`H,`H> comments = NULL; }
-  1*(ws (comment "")$c
+  1*(ws comment$c
     { compress_whitespace(c); comments = new List::List(new c,comments); }
      ) end-of-entry
     {
@@ -31,7 +31,7 @@ ws-char = SP|HTAB|CR|LF.
 title =
   "M.I.T"
 | "Correction to BBN Report No. 1822 (NIC NO 7958)"
-| (title-word "") *(ws (title-word "")) .
+| title-word *(ws title-word) .
 title-word =
   "(E.I.S.S.-Report"
 | "3.0/3.1"
