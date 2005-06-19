@@ -452,7 +452,8 @@ void check_effect_accessible_nodelay(tenv_t te, seg_t loc, type_t rgn) {
   //In the case of existentials we will need to use the equality
   // constraints to decide if the value is accessible
   //But, typically this should be handled by check_effect_accessible
-  if (check_eff_in_cap(loc, rgn, fe->effconstr, fe->capability))
+  if (check_eff_in_cap(loc, false, rgn, fe->effconstr, fe->capability) ||
+      check_eff_in_cap(loc, true, rgn, fe->effconstr, fe->capability))
     return;
   /*   if(eff_outlives_eff(loc, fe->region_order,access_eff(rgn),fe->capability)) */
   /*     return; */
@@ -466,7 +467,7 @@ void check_effect_accessible(tenv_t te, seg_t loc, type_t eff) {
     get_fenv(te,"check_effect_accessible");
   if(subset_effect(false, eff, capability))
     return;
-  if(check_eff_in_cap(loc, eff, effc, capability))
+  if(check_eff_in_cap(loc, false, eff, effc, capability))
     return;
   shared->delayed_effect_checks =
     new List (new $(capability,eff,effc,loc), shared->delayed_effect_checks);
@@ -478,7 +479,7 @@ void check_delayed_effects(tenv_t te) {
     let &$(capability,eff,constr,loc) = checks->hd;
     if(subset_effect(true, eff, capability))
       continue;
-    if(check_eff_in_cap(loc, eff, constr, capability))
+    if(check_eff_in_cap(loc, true, eff, constr, capability))
       continue;
     Warn::err2(loc, "Capability \n",capability,
 	       "\ndoes not cover function's effect\n",eff);

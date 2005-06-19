@@ -142,7 +142,7 @@ exp_t rsubsexp(region_t<`r>, list_t<$(tvar_t,type_t)@`r,`r>, exp_t);
 // true when e1 is a sub-effect of e2
 bool subset_effect(bool may_constrain_evars, type_t e1, type_t e2);
 
-bool check_eff_in_cap(seg_t loc, type_t eff, 
+bool check_eff_in_cap(seg_t loc, bool may_constrain_evars, type_t eff, 
 		      list_t<effconstr_t,`H> equality_constraints, 
 		      type_t cap);
 bool satisfies_effect_constraints(seg_t loc, 

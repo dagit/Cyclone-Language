@@ -910,12 +910,6 @@ static list_t<$(tvar_t, type_t)@> fresh_effect_evars(tenv_t te, list_t<$(tvar_t,
 static void inst_with_joineff(type_t ptrrgn_evar, type_t curr_rgn,
 			      list_t<$(tvar_t, type_t)@> orig, 
 			      table_t<tvar_t, types_t> inst_effects) {
-  //what about unifying ptr_rgn_tv even if no datatype field was constructed??
-/*   _ ptrrgn_tv = NULL; */
-/*   switch(ptrrgn) { */
-/*   case &VarType(tv): ptrrgn_tv = tv;break; */
-/*   default: break; */
-/*   } */
   bool found_ptrrgn = false;
   for(;orig != NULL; orig = orig->tl) {
     let &$(tv, origev) = orig->hd;

@@ -895,6 +895,35 @@ static bool evar_in_effect(type_t evar, type_t e) {
   }
 }
 
+//eff is a normalized join effect
+static bool unify_effect_component(type_t ev, type_t eff) {
+  switch(ev) {
+  case &Evar(_,*p,_,s):
+    switch(eff) {
+    case &AppType(&JoinCon, l):
+      for(;l!=NULL;l=l->tl) {
+	try {
+	  Unify::occurs(ev, heap_region, s->v, l->hd);
+	  *p = l->hd;
+	  return true;
+	}
+	catch {
+	default:
+	  break;
+	}
+      }
+      break;
+    default:
+      //eff failed an occurs check already; must be a join con
+      return false;
+    }
+    break;
+  default:
+    Warn::impos("unify_effect_component expects an Evar");
+  }
+  return false;
+}
+
 // Returns true when e1 is a sub-effect of e2 -- this isn't very
 // efficient and can constrain both effect and region evars in
 // unpredictable ways (though it tries hard not to).
@@ -916,15 +945,6 @@ bool subset_effect(bool may_constrain_evars, type_t e1, type_t e2) {
       if (!subset_effect(may_constrain_evars,es->hd,e2))
 	return false;
     return true;
-    /*   case &AppType(&AccessCon,&List{r,_}): */
-    /*     // Try checking if the region is in the effect without performing */
-    /*     // any unification first and only if this fails do we actually */
-    /*     // go in and try to unify something.  It's not clear whether it's */
-    /*     // best to just pin the region to HeapRgn or try to unify it with */
-    /*     // some region already in the effect e2.  We used to try the latter, then */
-    /*     // the former.  Now we just pick the former. */
-    /*     return (region_in_effect(may_constrain_evars,r,e2) */
-    /* 	    || (may_constrain_evars && unify(r,heap_rgn_type)));  */
   case &VarType(v): return variable_in_effect(may_constrain_evars,v,e2);
   case &AppType(&RgnsCon,&List(t,_)):
     switch (rgns_of(t)) {
@@ -937,14 +957,28 @@ bool subset_effect(bool may_constrain_evars, type_t e1, type_t e2) {
     case e: return subset_effect(may_constrain_evars,e,e2);
     }
   case &Evar(_,*p,_,s):
-    if (evar_in_effect(e1,e2)) 
-      return true; // this used to be false ... but that makes no sense
+    bool evar_occurs = evar_in_effect(e1,e2);
+    //if this is not a "unification" call, then evar_occurs does not matter
+    if (!may_constrain_evars && evar_occurs) 
+      return true; 
     // We can set the evar to be any subset of e2.
-    // Right now, we set it to the empty effect which may
-    // not be the best solution...
-    if(may_constrain_evars) {
-      *p = (type_opt_t)e2;
-      return true;
+    // Right now, we set it to the entire effect
+    if(may_constrain_evars && !evar_occurs) {
+      e2 = normalize_effect(e2);
+      try {
+	Unify::occurs(e1, heap_region, s->v, e2);
+	*p = (type_opt_t)e2;
+	return true;
+      } catch {
+      default: 
+	if(type_in_effect(false, heap_rgn_type, e2)) {
+	  *p = (type_opt_t)heap_rgn_type;
+	  return true;
+	} 
+	else {
+	  return unify_effect_component(e1, e2);
+	}
+      }
     }
     return false;
   default: return type_in_effect(may_constrain_evars, e1, e2);
@@ -1105,7 +1139,7 @@ static type_opt_t close_rgnof_effect(type_t rgnof, list_t<effconstr_t,`H> effcon
   return NULL;
 }
 //finds an effect in the capability
-bool check_eff_in_cap(seg_t loc, type_t eff, 
+bool check_eff_in_cap(seg_t loc, bool may_constrain_evars, type_t eff, 
 		      list_t<effconstr_t,`H> effconstr, 
 		      type_t cap) {
   eff = compress(eff);
@@ -1116,20 +1150,20 @@ bool check_eff_in_cap(seg_t loc, type_t eff,
       //close regions(`a) under the equality constraints 
       let e = close_effect(regionsof_eff(t2), effconstr); //stupid allocation ... 
       //and check that the effect is in the capability
-      return subset_effect(false, e, cap);
+      return subset_effect(may_constrain_evars, e, cap);
     case e:
-      return subset_effect(false, e, cap);
+      return subset_effect(may_constrain_evars, e, cap);
     }
   case &AppType(&JoinCon, l) : 
     for(;l != NULL; l = l->tl) {
       //check_eff_in_cap for each elt of l
-      if(!check_eff_in_cap(loc, l->hd, effconstr, cap))
+      if(!check_eff_in_cap(loc, may_constrain_evars, l->hd, effconstr, cap))
 	return false;
     }
     return true;
   default: 
-    return (subset_effect(false, eff, cap)  ||
-	    subset_effect(false, close_effect(eff, effconstr), cap));
+    return (subset_effect(may_constrain_evars, eff, cap)  ||
+	    subset_effect(may_constrain_evars, close_effect(eff, effconstr), cap));
   }
 }
 //attempts to prove e by looking for single(e) assertions in the environment env_ec
@@ -1624,7 +1658,7 @@ type_t max_arithmetic_type(type_t t1, type_t t2) {
 bool coerce_list(aqualbnds_t aqb, type_t t, list_t<exp_t> es) {
   // find the biggest arithmetic type (if any) for the list and determine
   // if all of the elements are boxed.
-  opt_t<type_t,`H> max_arith_type = NULL;
+  opt_t<type_t> max_arith_type = NULL;
   for (list_t<exp_t> el = es; el != NULL; el = el->tl) {
     type_t t1 = compress((type_t)el->hd->topt);
     if (is_arithmetic_type(t1))
@@ -1780,10 +1814,6 @@ bool silent_castable(seg_t loc,type_t t1,type_t t2) {
 	!subset_effect(true, pinfo_a.ptr_atts.eff, pinfo_b.ptr_atts.eff)) {
       return false;
     }
-    //BUG!!
-    /*     if (!unify(pinfo_a.ptr_atts.eff,pinfo_b.ptr_atts.eff)) { */
-    /*       return subset_effect(true, pinfo_a.ptr_atts.eff, pinfo_b.ptr_atts.eff); */
-    /*     } */
     //must ensure that alias qualifiers are respected
     if(!unify(pinfo_a.ptr_atts.aqual, pinfo_b.ptr_atts.aqual) &&
        !alias_qual_subtype(pinfo_a.ptr_atts.aqual, pinfo_b.ptr_atts.aqual))
