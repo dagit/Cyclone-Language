@@ -22,7 +22,7 @@ $(BL)/libcycboot.a: $(BB)/libcycboot.a
 $(BL)/libcycboot_a.a: $(BB)/aprof/libcycboot.a
 	cp -p $< $@
 
-$(BL)/libcycboot_pg.a: $(BB)/gprof/libcycboot.a
+$(BL)/cyc-lib/%/libcycboot_pg.a: $(BB)/gprof/libcycboot.a
 	cp -p $< $@
 
 $(BL)/libcycboot_nocheck.a: $(BB)/nocheck/libcycboot.a
@@ -37,7 +37,7 @@ $(BL)/libcyc_g.a: $(BB)/gdb/libcyc.a
 $(BL)/libcyc_a.a: $(BB)/aprof/libcyc.a
 	cp -p $< $@
 
-$(BL)/libcyc_pg.a: $(BB)/gprof/libcyc.a
+$(BL)/cyc-lib/%/libcyc_pg.a: $(BB)/gprof/libcyc.a
 	cp -p $< $@
 
 $(BL)/libcyc_nocheck.a: $(BB)/nocheck/libcyc.a
@@ -344,8 +344,8 @@ aprof: \
 	$(MAKE) -C tools/aprof install
 
 gprof: \
-  $(BL)/libcycboot_pg.a \
-  $(BL)/libcyc_pg.a \
+  $(BL)/cyc-lib/$(build)/libcycboot_pg.a \
+  $(BL)/cyc-lib/$(build)/libcyc_pg.a \
   $(BL)/cyc-lib/$(build)/nogc_pg.a \
   $(BL)/cyc-lib/$(build)/runtime_cyc_pg.a \
   bin/cyclone_pg$(EXE)

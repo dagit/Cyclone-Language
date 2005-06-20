@@ -1366,7 +1366,9 @@ int main(int argc, string_t<`H> ?`H argv) {
       nogc_filename = "nogc.a";
       runtime_filename = "runtime_cyc.a";
     } else if(pg_r) {
-      libcyc_flag = "-lcyc_pg";
+      if (Flags::compile_for_boot)
+	libcyc_flag = "-lcycboot_pg";
+      else libcyc_flag = "-lcyc_pg";
       runtime_filename = "runtime_cyc_pg.a";
       nogc_filename = "nogc_pg.a";
     } else if(Flags::compile_for_boot) {
