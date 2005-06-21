@@ -387,7 +387,7 @@ if(has_drive_name){
 ans_sz=(int)(_get_fat_size(filename,sizeof(char))+ 1U);
 ans=({unsigned _Tmp0=(unsigned)ans_sz + 1U;_tag_fat(({char*_Tmp1=_cycalloc_atomic(_check_times(_Tmp0,sizeof(char)));({{unsigned _Tmp2=(unsigned)ans_sz;unsigned k;for(k=0;k < _Tmp2;++ k){_Tmp1[k]='\000';}_Tmp1[_Tmp2]=0;}0;});_Tmp1;}),sizeof(char),_Tmp0);});
 ({struct _fat_ptr _Tmp0=_fat_ptr_plus(ans,sizeof(char),0);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=({struct _fat_ptr _Tmp3=_fat_ptr_plus(ans,sizeof(char),1);char _Tmp4=*((char*)_check_fat_subscript(_Tmp3,sizeof(char),0U));char _Tmp5='/';if(_get_fat_size(_Tmp3,sizeof(char))==1U &&(_Tmp4==0 && _Tmp5!=0))_throw_arraybounds();*((char*)_Tmp3.curr)=_Tmp5;});if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
-({struct _fat_ptr _Tmp0=_fat_ptr_plus(ans,sizeof(char),2);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=*((const char*)_check_fat_subscript(filename,sizeof(char),0));if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
+({struct _fat_ptr _Tmp0=_fat_ptr_plus(ans,sizeof(char),2);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=((const char*)filename.curr)[0];if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
 i=3;
 j=2;}else{
 # 88

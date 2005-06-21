@@ -668,7 +668,7 @@ struct Cyc_List_List*os=0;
 struct _fat_ptr docs=*docs_ptr;
 int sz=(int)_get_fat_size(docs,sizeof(struct Cyc_PP_Doc*));
 {int i=0;for(0;i < sz;++ i){
-struct Cyc_PP_Doc*d=*((struct Cyc_PP_Doc**)_check_fat_subscript(docs,sizeof(struct Cyc_PP_Doc*),i));
+struct Cyc_PP_Doc*d=((struct Cyc_PP_Doc**)docs.curr)[i];
 struct Cyc_PP_Out*o=({struct Cyc_PP_Out*(*_Tmp0)(struct Cyc_Fn_Function*,struct Cyc_PP_Ppstate*)=(struct Cyc_PP_Out*(*)(struct Cyc_Fn_Function*,struct Cyc_PP_Ppstate*))Cyc_Fn_apply;_Tmp0;})(d->f,st);
 st=({struct Cyc_PP_Ppstate*_Tmp0=_cycalloc(sizeof(struct Cyc_PP_Ppstate));_Tmp0->ci=st->ci,_Tmp0->cc=o->newcc,_Tmp0->cl=o->newcl,_Tmp0->pw=st->pw,_Tmp0->epw=st->epw - d->mwo;_Tmp0;});
 os=({struct Cyc_List_List*_Tmp0=_cycalloc(sizeof(struct Cyc_List_List));_Tmp0->hd=o,_Tmp0->tl=os;_Tmp0;});}}{
@@ -691,7 +691,7 @@ struct Cyc_PP_Doc*d=((struct Cyc_PP_Doc**)docs.curr)[0];
 int mw=d->mw;
 int mwo=d->mw;
 {int i=1;for(0;i < sz;++ i){
-int mw2=Cyc_PP_min(mw,mwo + (*((struct Cyc_PP_Doc**)_check_fat_subscript(docs,sizeof(struct Cyc_PP_Doc*),i)))->mwo);
+int mw2=Cyc_PP_min(mw,mwo + ((struct Cyc_PP_Doc**)docs.curr)[i]->mwo);
 int mwo2=Cyc_PP_min(mw,mwo + ((struct Cyc_PP_Doc**)docs.curr)[i]->mw);
 mw=mw2;
 mwo=mwo2;}}

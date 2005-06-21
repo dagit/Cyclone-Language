@@ -17,6 +17,10 @@
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
 #include "assndef.h"
+#include "tcutil.h"
+#include "warn.h"
+#include "absynpp.h"
+#include <hashtable.h>
 #include <list.h>
 #include <set.h>
 #include <dict.h>
@@ -353,7 +357,7 @@ static node_t @term2node(graph_t @`r g, term_t t) {
   for (let r = g->rows; r != NULL; r = r->next) {
     ++count;
     if (count > max_lookup) max_lookup = count;
-    int c = cmp_term(t,r->rep);
+    int c = termcmp(t,r->rep);
     if (c == 0) return r;
     if (c > 1) break;
     prev = &r->next;
@@ -361,7 +365,7 @@ static node_t @term2node(graph_t @`r g, term_t t) {
   // term not directly found -- insert it in the graph.  
   node_t @n;
   switch (t){
-  case &Binop(Absyn::Plus,t1,&Uint(c2),_):
+  case &Binop(Absyn::Plus,t1,&Uint(c2,_),_):
     n = new Node{*prev,t,false,false,NULL,NULL,0,0,infinity};
     break;
   default:
@@ -424,8 +428,6 @@ static bool equal_terms(graph_t @g, term_t t1, term_t t2){
       equal_terms(g,t12,t22) && equal_terms(g,t13,t23);
   case $(&Proj(t1,i1,_),&Proj(t2,i2,_)):
     return (i1 == i2) && equal_terms(g,t1,t2);
-  case $(&Okderef(t1),&Okderef(t2)):
-    return equal_terms(g,t1,t2);
   case $(&Aggr(is_union1,tag1,ts1,_),&Aggr(is_union2,tag2,ts2,_)):
     for (; ts1 != NULL && ts2 != NULL; ts1 = ts1->tl, ts2=ts2->tl)
       if (!equal_terms(g,ts1->hd,ts2->hd)) return false;
@@ -1114,7 +1116,7 @@ static $(bool, unsigned int) equal_node_const(node_t @`H n, node_t @`H z){
 static $(bool, unsigned,term_opt_t) subst_term_with_const(graph_t @g, term_t t) {
   term_opt_t newterm = NULL;
   switch(t){
-  case &Uint(c): return $(true,c,NULL);
+  case &Uint(c,_): return $(true,c,NULL);
   case &Binop(p,t1,t2,topt):
     // wangyl: for relations, since we are not keeping track of 
     // whether we are comparing between signed or unsigned here
@@ -1180,12 +1182,6 @@ static void congruence_close_graph(int dummy, graph_t @g) {
         if (t1node != ts && equal_nodes(ts,t1node)) 
           add_eq(g,t,proj(ts->rep,i,type));
       break;
-    case &Okderef(t1):
-      let t1node = term2node(g,t1);
-      for (let ts = g->rows; ts != NULL; ts = ts->next)
-        if (t1node != ts && equal_nodes(ts,t1node)) 
-          add_eq(g,t,okderef(ts->rep));
-      break;
     case &Binop(p,t1,t2,type):
       // FIX:  really ought to have an inner loop to get all combinations
       // of terms in the graph...
@@ -1235,88 +1231,6 @@ static graph_t *congruence_close_graphs(graph_t *`H gs) {
   return app_graphs(congruence_close_graph,0,gs);
 }
 
-/************ use the similar function from assndef ***********
-// Warning:  this is imperative so it destroys the two lists passed in.
-// merges two polynomials, multiplying the coefficients of the second
-// by factor.  Example:  p1 = c1*t1 + c2*t2 + ... + cn*tn
-//                       p2 = k1*t1 + k2*t2 + ... + un*tn
-//                   result = (c1+factor*k1)*t1 + ... + (cn+factor*k1)*tn
-static list_t<$(int,term_t)@> merge_poly(list_t<$(int,term_t)@`H,`H> p1,
-                                         int factor,
-                                         list_t<$(int,term_t)@`H,`H> p2) {
-  list_t<$(int,term_t)@> res = NULL;
-  // multiply p2 by factor first
-  for (let p = p2; p != NULL; p = p->tl)
-    p->hd->f0 *= factor;
-  while (p1 != NULL && p2 != NULL) {
-    let $(i1,t1) = *p1->hd;
-    let $(i2,t2) = *p2->hd;
-    int c = cmp_term(t1,t2);
-    if (c == 0) {
-      let temp = p1;
-      p1 = p1->tl;
-      p2 = p2->tl;
-      int i = i1 + i2;
-      if (i != 0) {
-        temp->hd->f0 = i;
-        temp->tl = res;
-        res = temp;
-      }
-    } else if (c < 0) {
-      let temp = p1;
-      p1 = p1->tl;
-      temp->tl = res;
-      res = temp;
-    } else {
-      let temp = p2;
-      p2 = p2->tl;
-      temp->tl = res;
-      res = temp;
-    }
-  }
-  res = List::imp_rev(res);
-  if (p1 != NULL) 
-    res = List::imp_append(res,p1);
-  else
-    res = List::imp_append(res,p2);
-  return res;
-}
-
-// converts a term t to a polynomial representation:
-//   t = (i1 * t1) + (i2 * t2) + ... + (in * tn) + c
-// where the terms t1,...,tn are unique (and sorted).  
-static $(list_t<$(int,term_t)@> terms, unsigned int cnst) term2poly(term_t t) {
-  switch (t) {
-  case &Uint(i): return $(NULL,i);
-  case &Binop(Absyn::Plus,t1,t2,_):
-    let $(ts1,c1) = term2poly(t1);
-    let $(ts2,c2) = term2poly(t2);
-    return $(merge_poly(ts1,1,ts2),c1+c2);
-  case &Binop(Absyn::Minus,t1,t2,_):
-    let $(ts1,c1) = term2poly(t1);
-    let $(ts2,c2) = term2poly(t2);
-    return $(merge_poly(ts1,-1,ts2),c1-c2);
-  default: 
-    return $(new List{new $(1,t),NULL},0);
-  }
-}
-
-// convert a polynomial back to a term.
-static term_t poly2term(list_t<$(int,term_t)@> p, unsigned int c,type_opt_t type) {
-  term_t res = uint(c);
-  for (; p != NULL; p = p->tl) {
-    let $(i,t) = *p->hd;
-    if (i > 0) 
-      for (int j = 0; j < i; j++)
-        res = plus(res,t,type);
-    else if (i < 0)
-      for (int j = 0; j > i; j--)
-        res = minus(res,t,type);
-  }
-  return res;
-}
-
-***********************************************************/
 
 // try to perform gaussian elimination on the given matrix -- not
 // the smartest implementation, but simple.
@@ -1377,108 +1291,108 @@ static void print_poly(list_t<$(int,term_t)@> ts, unsigned c) {
 // to their polynomial form, and then try to solve the equations using
 // gaussian elimination.  Then add the resulting equations back to the
 // graph.
-static void gaussian_terms(int unused, graph_t @g) {
-  // for each terms T1 == T2, compute polynomials T1 = P1+c1 and T2 = P2+c2
-  // and place in P1-P2 + c1-c2 == 0 in the list S, representing a row in a 
-  // matrix.  While we're doing this, assign each primitive term in the
-  // polynomials an index.
-  list_t<$(list_t<$(int,term_t)@>,unsigned int)@> S = NULL;
-  Hashtable::table_t<term_t,int> term_index = 
-    Hashtable::create(33,cmp_term,termhash);
-  Xarray::xarray_t<term_t> index_term = Xarray::create_empty();
-  unsigned int Cols = 0;
-  unsigned int Rows = 0;
-  for (let rs = g->rows; rs != NULL; rs = rs->next) {
-    for (let ts = rs->next; ts != NULL; ts = ts->next) 
-      if (eq_nodes(rs,ts,false)) {
-//         //fprintf(stderr,"adding %s == %s to matrix\n",term2string(rs->rep),
-//         //        term2string(ts->rep));
-//         let $(r_terms,r_c) = term2poly(rs->rep);
-//         //fprintf(stderr,"poly1: "); print_poly(r_terms,r_c);
-//         let $(t_terms,t_c) = term2poly(ts->rep);
-//         //fprintf(stderr,"poly2: "); print_poly(t_terms,t_c);
-//         let terms = merge_poly(r_terms,-1,t_terms);
-//         // add each primitive term to the hashtable
-	let $(terms,c) = AssnDef::flatten_plus(minus(rs->rep,ts->rep,NULL));
-        for (let x = terms; x != NULL; x=x->tl) {
-          let $(_,t) = *x->hd;
-          let iopt = Hashtable::lookup_opt(term_index,t);
-          if (iopt == NULL) {
-            Hashtable::insert(term_index,t,Cols);
-            Xarray::add(index_term,t);
-            Cols++;
-          }
-        }
-        Rows++;
-        //print_poly(terms,c);
-        S = new List{new $(terms,c),S};
-      }
-  }
-  // we want to convert the sparse matrix to a dense one to simplify
-  // processing.
-  int ?? M = new {for i < Rows : new {for j < Cols+1 : 0}};
-  for (unsigned int r = 0; r < Rows; S = S->tl, ++r) {
-    let $(its,c) = *S->hd;
-    let row = M[r];
-    row[Cols] = c;
-    for (; its != NULL; its = its->tl) {
-      let $(v,t) = *its->hd;
-      let column = Hashtable::lookup(term_index,t);
-      row[column] = v;
-    }
-  }
+// static void gaussian_terms(int unused, graph_t @g) {
+//   // for each terms T1 == T2, compute polynomials T1 = P1+c1 and T2 = P2+c2
+//   // and place in P1-P2 + c1-c2 == 0 in the list S, representing a row in a 
+//   // matrix.  While we're doing this, assign each primitive term in the
+//   // polynomials an index.
+//   list_t<$(list_t<$(int,term_t)@>,unsigned int)@> S = NULL;
+//   Hashtable::table_t<term_t,int> term_index = 
+//     Hashtable::create(33,termcmp,termhash);
+//   Xarray::xarray_t<term_t> index_term = Xarray::create_empty();
+//   unsigned int Cols = 0;
+//   unsigned int Rows = 0;
+//   for (let rs = g->rows; rs != NULL; rs = rs->next) {
+//     for (let ts = rs->next; ts != NULL; ts = ts->next) 
+//       if (eq_nodes(rs,ts,false)) {
+// //         //fprintf(stderr,"adding %s == %s to matrix\n",term2string(rs->rep),
+// //         //        term2string(ts->rep));
+// //         let $(r_terms,r_c) = term2poly(rs->rep);
+// //         //fprintf(stderr,"poly1: "); print_poly(r_terms,r_c);
+// //         let $(t_terms,t_c) = term2poly(ts->rep);
+// //         //fprintf(stderr,"poly2: "); print_poly(t_terms,t_c);
+// //         let terms = merge_poly(r_terms,-1,t_terms);
+// //         // add each primitive term to the hashtable
+// 	let $(terms,c) = AssnDef::flatten_plus(minus(rs->rep,ts->rep,NULL));
+//         for (let x = terms; x != NULL; x=x->tl) {
+//           let $(_,t) = *x->hd;
+//           let iopt = Hashtable::lookup_opt(term_index,t);
+//           if (iopt == NULL) {
+//             Hashtable::insert(term_index,t,Cols);
+//             Xarray::add(index_term,t);
+//             Cols++;
+//           }
+//         }
+//         Rows++;
+//         //print_poly(terms,c);
+//         S = new List{new $(terms,c),S};
+//       }
+//   }
+//   // we want to convert the sparse matrix to a dense one to simplify
+//   // processing.
+//   int ?? M = new {for i < Rows : new {for j < Cols+1 : 0}};
+//   for (unsigned int r = 0; r < Rows; S = S->tl, ++r) {
+//     let $(its,c) = *S->hd;
+//     let row = M[r];
+//     row[Cols] = c;
+//     for (; its != NULL; its = its->tl) {
+//       let $(v,t) = *its->hd;
+//       let column = Hashtable::lookup(term_index,t);
+//       row[column] = v;
+//     }
+//   }
 
-  // DEBUGGING:
-  // print mapping from primitive terms to indices
-  //fprintf(stderr,"Initial matrix:\n"); fflush(stderr);
-  //print_matrix(Rows,Cols,index_term,M);
+//   // DEBUGGING:
+//   // print mapping from primitive terms to indices
+//   //fprintf(stderr,"Initial matrix:\n"); fflush(stderr);
+//   //print_matrix(Rows,Cols,index_term,M);
 
-  // try to solve for the primitive terms
-  simplify_matrix(Rows,Cols,M);
+//   // try to solve for the primitive terms
+//   simplify_matrix(Rows,Cols,M);
 
-  //fprintf(stderr,"After simplification matrix:\n"); fflush(stderr);
-  //print_matrix(Rows,Cols,index_term,M);
+//   //fprintf(stderr,"After simplification matrix:\n"); fflush(stderr);
+//   //print_matrix(Rows,Cols,index_term,M);
 
-  simplify_matrix(Rows,Cols,M);
+//   simplify_matrix(Rows,Cols,M);
 
-  // add the resulting equations to the graph
-  for (unsigned r = 0; r < Rows; ++r) {
-    let row = M[r];
-    let c = uint(-row[Cols]);
-    let t = uint(0);
-    // add in all of the positive values first
-    for (unsigned j = 0; j < Cols; ++j) {
-      let v = row[j];
-      if (v > 0) {
-        let term = Xarray::get(index_term,j);
-        for (; v != 0; v--)
-          t = plus(t,term,Absyn::uint_type);
-      }
-    }
-    // add all of the negative values to c
-    for (unsigned j = 0; j < Cols; ++j) {
-      let v = row[j];
-      if (v < 0) {
-        let term = Xarray::get(index_term,j);
-        for (; v != 0; v++)
-          c = plus(c,term,Absyn::uint_type);
-      }
-    }
-    //fprintf(stderr,"adding equation %s = %s\n",term2string(t),term2string(c));
-    add_eq(g,t,c);
-  }
-}
+//   // add the resulting equations to the graph
+//   for (unsigned r = 0; r < Rows; ++r) {
+//     let row = M[r];
+//     let c = uint(-row[Cols]);
+//     let t = uint(0);
+//     // add in all of the positive values first
+//     for (unsigned j = 0; j < Cols; ++j) {
+//       let v = row[j];
+//       if (v > 0) {
+//         let term = Xarray::get(index_term,j);
+//         for (; v != 0; v--)
+//           t = plus(t,term,Absyn::uint_type);
+//       }
+//     }
+//     // add all of the negative values to c
+//     for (unsigned j = 0; j < Cols; ++j) {
+//       let v = row[j];
+//       if (v < 0) {
+//         let term = Xarray::get(index_term,j);
+//         for (; v != 0; v++)
+//           c = plus(c,term,Absyn::uint_type);
+//       }
+//     }
+//     //fprintf(stderr,"adding equation %s = %s\n",term2string(t),term2string(c));
+//     add_eq(g,t,c);
+//   }
+// }
 
-static graph_t *gaussian_graphs(graph_t *`H gs) {
-  //bool old_graphs_change = graphs_change;
-  //graphs_change = false;
-  gs = app_graphs(gaussian_terms,0,gs);
-  //if (graphs_change) {
-  //  fprintf(stderr,"gaussian_graphs eliminated graph\n");
-  //}
-  //graphs_change = graphs_change || old_graphs_change;
-  return gs;
-}
+// static graph_t *gaussian_graphs(graph_t *`H gs) {
+//   //bool old_graphs_change = graphs_change;
+//   //graphs_change = false;
+//   gs = app_graphs(gaussian_terms,0,gs);
+//   //if (graphs_change) {
+//   //  fprintf(stderr,"gaussian_graphs eliminated graph\n");
+//   //}
+//   //graphs_change = graphs_change || old_graphs_change;
+//   return gs;
+// }
 
 // JGM: I've renamed this "equality_close" instead of "congruence_close"
 // since we don't really generate all of the congruent terms...
@@ -1567,15 +1481,6 @@ static void equality_close_graph(int dummy, graph_t @g) {
         default: continue;
         }
       break;
-    case &Okderef(t1):
-      for (let ts = rs->next; ts != NULL; ts = ts->next)
-        switch (ts->rep) {
-        case &Okderef(t2): 
-          if (equal_terms(g,t1,t2)) add_eq(g,rep1,ts->rep);
-          continue;
-        default: continue;
-        }
-      break;
     case &Tagof(t1):
       for (let ts = rs->next; ts != NULL; ts = ts->next)
         switch (ts->rep) {
@@ -1598,7 +1503,7 @@ static graph_t *equality_close_graphs(graph_t *`H gs) {
 //find out if s[t] = s[t1+c2] =? s[t1] + c2
 static $(bool, term_t, int) break_term(graph_t @g, term_t t, bool is_signed){
   switch (t){
-  case &Binop(Absyn::Plus,t1,&Uint(c2),_):
+  case &Binop(Absyn::Plus,t1,&Uint(c2,_),_):
     if ((int)c2 >= 0){
       if (is_signed){
 	let dist = lookup_dist(term2node(g,t1),term2node(g,zero()),true);
@@ -1659,7 +1564,7 @@ static void break_term_in_graph(int dummy, graph_t @g){
     // we know that rs->rep == c, we try to solve subpart of rs->rep;
     if (ok){
       switch (rs->rep){
-      case &Binop(Absyn::Plus,t1,&Uint(c2),_):
+      case &Binop(Absyn::Plus,t1,&Uint(c2,_),_):
 	rs->broken_as_signed = true;
 	rs->broken_as_unsigned = true;
 	add_eq(g,t1,uint(c1-c2));
@@ -1742,7 +1647,7 @@ static graph_t *associate_ud_sd_in_graphs(graph_t *`H gs){
 static void add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
   ++constraints_added;
   switch $(t1,t2) {
-  case $(&Uint(c1),&Uint(c2)):
+  case $(&Uint(c1,_),&Uint(c2,_)):
     switch (p) {
     case ULt: if (c1 < c2) return; break;
     case ULte: if (c1 <= c2) return; break;
@@ -1754,7 +1659,7 @@ static void add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
     fprintf(stderr,"inconsistency found in comparing two constants\n");
 #endif PROVER_DEBUG
     throw &inconsistent;
-  case $(_,&Uint(c2)):
+  case $(_,&Uint(c2,_)):
     // we have t1 p c2 
     switch (p) {
     case ULt: 
@@ -1790,7 +1695,7 @@ static void add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
       return;
     default: Warn::impos("Vcgen: found bad primop in add_constraint");
     }
-  case $(&Uint(c1),_):
+  case $(&Uint(c1,_),_):
     // we have c1 p t2
     switch (p) {
     case ULt: 
@@ -1878,38 +1783,38 @@ static void add_prim($(term_t,prim_reln_t,term_t)@ p, graph_t @`H g) {
 // So, for instance, if you have (p + numelts(p)) - (numelts(p) - j)
 // you should get out p + j.  However, it's likely to get confused
 // if we have a pointer subtraction in here...
-static $(term_t base, term_t offset) find_ptr_base(term_t t) {
-  let $(ts,c) = flatten_plus(t);
-  //fprintf(stderr,"term %s splits into polynomial 0x%x",term2string(t),c);
-  //for (let us=ts; us!=NULL; us=us->tl) {
-  //  let $(i,u) = *us->hd;
-  //  fprintf(stderr," + %d*%s",i,term2string(u));
-  //}
-  //fprintf(stderr,"\n");
-  term_t base = zero();
-  term_t offset = uint(c);
-  bool found_base = false;
-  for (; ts != NULL; ts=ts->tl) {
-    let $(i,s) = *ts->hd;
-    let stype = get_term_type(s);
-    if (i > 0 && stype != NULL && Tcutil::is_pointer_type((type_t)stype)) {
-      // if we have two potential base pointers, then we're not sure
-      // how things line up so be conservative and don't split.
-      if (found_base) return $(t,zero());
-      //fprintf(stderr,"type of %s is %s\n",term2string(s),Absynpp::typ2string((type_t)stype));
-      found_base = true;
-      base = s;
-      i = i - 1;
-    }
-    if (i > 0) {
-      for (let j = 0; j < i; j++) offset = plus(offset,s,Absyn::uint_type);
-    } else if (i < 0) {
-      for (let j = 0; j > i; j--) offset = minus(offset,s,Absyn::uint_type);
-    }
-  }
-  if (!found_base) return $(t,zero());
-  return $(base,offset);
-}
+// static $(term_t base, term_t offset) find_ptr_base(term_t t) {
+//   let $(ts,c) = flatten_plus(t);
+//   //fprintf(stderr,"term %s splits into polynomial 0x%x",term2string(t),c);
+//   //for (let us=ts; us!=NULL; us=us->tl) {
+//   //  let $(i,u) = *us->hd;
+//   //  fprintf(stderr," + %d*%s",i,term2string(u));
+//   //}
+//   //fprintf(stderr,"\n");
+//   term_t base = zero();
+//   term_t offset = uint(c);
+//   bool found_base = false;
+//   for (; ts != NULL; ts=ts->tl) {
+//     let $(i,s) = *ts->hd;
+//     let stype = get_term_type(s);
+//     if (i > 0 && stype != NULL && Tcutil::is_pointer_type((type_t)stype)) {
+//       // if we have two potential base pointers, then we're not sure
+//       // how things line up so be conservative and don't split.
+//       if (found_base) return $(t,zero());
+//       //fprintf(stderr,"type of %s is %s\n",term2string(s),Absynpp::typ2string((type_t)stype));
+//       found_base = true;
+//       base = s;
+//       i = i - 1;
+//     }
+//     if (i > 0) {
+//       for (let j = 0; j < i; j++) offset = plus(offset,s,Absyn::uint_type);
+//     } else if (i < 0) {
+//       for (let j = 0; j > i; j--) offset = minus(offset,s,Absyn::uint_type);
+//     }
+//   }
+//   if (!found_base) return $(t,zero());
+//   return $(base,offset);
+// }
 
 // The semantics of Okderef(t) is as follows:
 //    Okderef(t) U<= 0  iff All t1,t2.t!=t1+t2 || t2 U>= numelts(t1)
@@ -1923,49 +1828,49 @@ static $(term_t base, term_t offset) find_ptr_base(term_t t) {
 // indicating that we think it's not okay to dereference t1+t2.  We
 // then add a constraint t2 U>= numelts(t1) hoping to achieve a
 // contradiction.  
-static void constrain_okderef(int unused, graph_t @`H g) {
-  let zn = term2node(g,zero());
-  for (let rs = g->rows; rs != NULL; rs = rs->next) {
-    switch (rs->rep) {
-    case &Okderef(t2):
-      //fprintf(stderr,"found okderef(%s)\n",term2string(t2));
-      let dist = lookup_dist(rs, zn, false);
-      if (dist == NULL || *dist != 0) {
-        //string_t s = dist ? (string_t)aprintf("%d",*dist) : "<inf>";
-        //fprintf(stderr,"okderef(%s) - 0 != 0, rather %s\n",term2string(t2),s);
-        continue;
-      }
-      //fprintf(stderr,"okderef(%s) - 0 == 0\n",term2string(t2));
-      let t2node = term2node(g,t2);
-      // find any t3 == t2 and try to do the following:
-      for (let ts = g->rows; ts != NULL; ts = ts->next) {
-        if (eq_nodes(t2node,ts,false)) {
-          let $(base,offset) = find_ptr_base(ts->rep);
-          //fprintf(stderr,"splitting %s == %s into %s + %s\n",
-          //        term2string(t2),term2string(ts->rep),
-          //        term2string(base),term2string(offset));
-          //fprintf(stderr,"adding constraint numelts(%s) U<= %s\n",
-          //        term2string(base),term2string(offset));
-          add_constraint(g, numelts_term(base), ULte, offset);
-          //fprintf(stderr,"no inconsistency\n");
-        }
-      }
-      break;
-    default: break;
-    }
-  }
-}
+// static void constrain_okderef(int unused, graph_t @`H g) {
+//   let zn = term2node(g,zero());
+//   for (let rs = g->rows; rs != NULL; rs = rs->next) {
+//     switch (rs->rep) {
+//     case &Okderef(t2):
+//       //fprintf(stderr,"found okderef(%s)\n",term2string(t2));
+//       let dist = lookup_dist(rs, zn, false);
+//       if (dist == NULL || *dist != 0) {
+//         //string_t s = dist ? (string_t)aprintf("%d",*dist) : "<inf>";
+//         //fprintf(stderr,"okderef(%s) - 0 != 0, rather %s\n",term2string(t2),s);
+//         continue;
+//       }
+//       //fprintf(stderr,"okderef(%s) - 0 == 0\n",term2string(t2));
+//       let t2node = term2node(g,t2);
+//       // find any t3 == t2 and try to do the following:
+//       for (let ts = g->rows; ts != NULL; ts = ts->next) {
+//         if (eq_nodes(t2node,ts,false)) {
+//           let $(base,offset) = find_ptr_base(ts->rep);
+//           //fprintf(stderr,"splitting %s == %s into %s + %s\n",
+//           //        term2string(t2),term2string(ts->rep),
+//           //        term2string(base),term2string(offset));
+//           //fprintf(stderr,"adding constraint numelts(%s) U<= %s\n",
+//           //        term2string(base),term2string(offset));
+//           add_constraint(g, numelts_term(base), ULte, offset);
+//           //fprintf(stderr,"no inconsistency\n");
+//         }
+//       }
+//       break;
+//     default: break;
+//     }
+//   }
+// }
 
-static graph_t *constrain_okderefs(graph_t *`H gs) {
-  bool old_graphs_change = graphs_change;
-  graphs_change = false;
-  gs = app_graphs(constrain_okderef,0,gs);
-  //if (graphs_change) {
-  //  fprintf(stderr,"constrain_okderefs eliminated graph\n");
-  //}
-  graphs_change = graphs_change || old_graphs_change;
-  return gs;
-}
+// static graph_t *constrain_okderefs(graph_t *`H gs) {
+//   bool old_graphs_change = graphs_change;
+//   graphs_change = false;
+//   gs = app_graphs(constrain_okderef,0,gs);
+//   //if (graphs_change) {
+//   //  fprintf(stderr,"constrain_okderefs eliminated graph\n");
+//   //}
+//   graphs_change = graphs_change || old_graphs_change;
+//   return gs;
+// }
 
 
 datatype exn { TooLarge };
@@ -2034,8 +1939,8 @@ static graph_t *cgraph(graph_t *`H gs, Set::set_t<assn_t,`H> @already_seen,
     *already_seen = Set::intersect(already_seen1,already_seen2);
     gs = graph_append(gs1,gs2);
     break;
-  case &Prim(&Uint(0),Neq,t2): fallthru(t2);
-  case &Prim(t1,Neq,&Uint(0)):
+  case &Prim(&Uint(0,_),Neq,t2): fallthru(t2);
+  case &Prim(t1,Neq,&Uint(0,_)):
     // when doing an unsigned or pointer comparison against 0, we know
     // that 0 < t1.  So use this instead of introducing a disjunction.
     type_opt_t topt = AssnDef::get_term_type(t1);
@@ -2058,10 +1963,6 @@ static graph_t *cgraph(graph_t *`H gs, Set::set_t<assn_t,`H> @already_seen,
     let env = $(t1,p,t2);
     gs = app_graphs(add_prim,&env,gs);
     break;
-  default: 
-    // reduce any substitutions or negations and go around the loop.
-    a = reduce(a);
-    goto LOOP;
   }
   return gs;
 }
@@ -2116,7 +2017,7 @@ static graph_t *add_ptr_type_info(term_t t, graph_t *`H gs) {
 // to add or(t == 0, c <= numelts(t)).  So we add these facts to the
 // assertion explicitly before converting it to the graph representation.
 static graph_t *add_type_assns(graph_t *`H gs) {
-  Set::set_t<term_t> ptrs = get_graph_pointer_terms(gs,Set::empty(cmp_term));
+  Set::set_t<term_t> ptrs = get_graph_pointer_terms(gs,Set::empty(termcmp));
   return Set::fold(add_ptr_type_info,ptrs,gs);
 }
 
@@ -2149,8 +2050,8 @@ static bool consistent(assn_t a) {
       gs = associate_ud_sd_in_graphs(gs);
       gs = add_type_assns(gs);
       gs = equality_close_graphs(gs);
-      gs = gaussian_graphs(gs);
-      gs = constrain_okderefs(gs);
+      //      gs = gaussian_graphs(gs);
+      //      gs = constrain_okderefs(gs);
       gs = break_term_in_graphs(gs);
       gs = associate_ud_sd_in_graphs(gs);
     }

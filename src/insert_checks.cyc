@@ -481,7 +481,7 @@ static void do_exp(env_t nv, exp_t e) {
             let ec = Vcgen::exp2ctxt_checks(nv.assn_info, e1);
 	    err(e->loc,"cannot determine subscript is in bounds");
             fprintf(stderr,"[all that I can prove is %s",
-                    AssnDef::assn2string(AssnDef::reduce(ec->ctxt)));
+                    AssnDef::assn2string(ec->ctxt));
             fprintf(stderr,"]\n");
           }
 	  e->annot =

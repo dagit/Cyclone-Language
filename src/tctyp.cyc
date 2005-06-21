@@ -340,18 +340,18 @@ static cvtenv_t check_type_inst(cvtenv_t env, types_t @ targsp,
 }
 
 // check that a @requires/@ensures clause is well-formed and satisfiable
-static $(cvtenv_t,AssnDef::assn_opt_t) check_clause(cvtenv_t env, 
+static $(cvtenv_t,AssnDef::assn_map_t) check_clause(cvtenv_t env, 
                                                     string_t<`H> clause_name, 
                                                     exp_opt_t clause) {
   if(clause==NULL)
-    return $(env,NULL);
+    return $(env,AssnDef::true_assnmap());
   Tcexp::tcExp(env.te,NULL,clause);
   if (!is_integral(clause))
     err2(env.loc, clause_name," clause has type ",clause->topt,
 	 " instead of integral type");
   env = i_check_type_level_exp(clause,env);
-  let assn = Vcgen::clause2assn(clause);
-  return $(env,assn);
+  let assnmap = Vcgen::clause2assn(clause);
+  return $(env,assnmap);
 }
 
 // helper function to check aggregates
@@ -1108,13 +1108,13 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
 				 te->in_extern_c_inc_repeat};
     let $(nenv,req_assn) = check_clause(new_env,"@requires",req);
     new_env = nenv;
-    *req_relns = req_assn;
+    *req_relns = new req_assn;
     let $(nenv,ens_assn) = check_clause(new_env,"@ensures",ens);
     new_env = nenv;
-    *ens_relns = ens_assn;
+    *ens_relns = new ens_assn;
     let $(nenv,thrws_assn) = check_clause(new_env,"@throws",thrws);
     new_env = nenv;
-    *thrws_relns = thrws_assn;
+    *thrws_relns = new thrws_assn;
     new_env.te = old_te;
     // finally, the effect -- usually inferred
     if (*eff != NULL) {

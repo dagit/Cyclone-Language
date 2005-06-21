@@ -378,12 +378,11 @@ type_t copy_type(type_t t) {
     // req/ens/throws expressions to be on the safe side.
     list_t<vardecl_opt_t> argvds2 = List::map(copy_vardecl_opt,argvds);
     vardecl_opt_t ret_val2 = copy_vardecl_opt(ret_val);
-    req_rlns2 = AssnDef::subst_vardecls(argvds,ret_val,argvds2,ret_val2,
-                                        req_rlns2);
-    ens_rlns2 = AssnDef::subst_vardecls(argvds,ret_val,argvds2,ret_val2,
-                                        ens_rlns2);
-    thrws_rlns2 = AssnDef::subst_vardecls(argvds,ret_val,argvds2,ret_val2,
-                                          thrws_rlns2);
+    let vds1 = new List(ret_val,argvds);
+    let vds2 = new List(ret_val2,argvds2);
+    req_rlns2 = AssnDef::subst_vardecls(vds1,vds2,req_rlns2);
+    ens_rlns2 = AssnDef::subst_vardecls(vds1,vds2,ens_rlns2);
+    thrws_rlns2 = AssnDef::subst_vardecls(vds1,vds2,thrws_rlns2);
     return new FnType(FnInfo{tvs2,effopt2,rt_tq,rt2,args2,c_varargs2,
                                cyc_varargs2,qb2,atts2,req2,req_rlns2,
                                ens2,ens_rlns2,thrws2,thrws_rlns2,ret_val2,
@@ -1043,6 +1042,7 @@ static bool canonical_join_effect(type_t je) {
       *l = rimp_merge_sort(cmp_atomic_effect, *l);
       return true;
     }
+    break;
   default:
     break;
   }
@@ -1061,7 +1061,7 @@ static type_t close_effect(type_t eff, list_t<effconstr_t,`H> effconstr) {
     if(can) {
       type_opt_t t = close_canonical_join(eff, effconstr);
       if(t != eff)
-	return t;
+	return (type_t)t;
     }
     //matching the whole thing failed ... maybe we can match the components
     _ tmplist = NULL;
@@ -1107,6 +1107,7 @@ static type_opt_t close_canonical_join(type_t je,
 	if(can && (typecmp(lhs, je) == 0)) {
 	  return close_effect(rhs, effconstr);
 	}
+	break;
       default:
 	break;
       }
@@ -2335,30 +2336,41 @@ bool subtype(list_t<$(type_t,type_t)@`H,`H> assume,
     if(cmp_effect_constraints(f1.effconstr, f2.effconstr)) return false;
     // deal with attributes that can be dropped
     if (!Atts::sub_attributes(f1.attributes,f2.attributes)) return false;
+
+    // vds1, vds2 are list of vardecls that include both arg and ret.
+    let vds1 = new List(f1.return_value,f1.arg_vardecls);
+    let vds2 = new List(f2.return_value,f2.arg_vardecls);
     // check f2.requires => f1.requires
-    let req1 = f1.requires_assn ? (AssnDef::assn_t)f1.requires_assn : &AssnDef::true_assn;
-    let req2 = AssnDef::subst_vardecls(f2.arg_vardecls,f2.return_value,
-                                       f1.arg_vardecls,f1.return_value,
-                                       f2.requires_assn);
-    if (!AssnDef::simple_prove(req2,req1) && 
-        !PrattProver::constraint_prove(req2,req1))
-      return false;
+    // f1.requires_assn == NULL, then f1.requires_assn = true, 
+    // no need to check f2.req => f1.req
+    if (f1.requires_assn != NULL) {
+      let req1 = *f1.requires_assn;
+      let req2 = f2.requires_assn ? *f2.requires_assn : AssnDef::true_assnmap();
+      let req1_assn = AssnDef::merge_assnmaps(vds2,req2,vds1,req1);
+      if (!AssnDef::simple_prove(req2.assn,req1_assn) && 
+	  !PrattProver::constraint_prove(req2.assn,req1_assn))
+	return false;
+    }
     // check f1.ensures => f2.ensures
-    let ens1 = f1.ensures_assn ? (AssnDef::assn_t)f1.ensures_assn : &AssnDef::true_assn;
-    let ens2 = AssnDef::subst_vardecls(f2.arg_vardecls,f2.return_value,
-                                       f1.arg_vardecls,f1.return_value,
-                                       f2.ensures_assn);
-    if (!AssnDef::simple_prove(ens1,ens2) && 
-        !PrattProver::constraint_prove(ens1,ens2))
-      return false;
+    // f2.ensures_assn == NULL, then f2.ensures_assn = true,
+    // no need to check f1.ens => f2.ens
+    if (f2.ensures_assn != NULL) {
+      let ens2 = *f2.ensures_assn;
+      let ens1 = f1.ensures_assn ? *f1.ensures_assn : AssnDef::true_assnmap();
+      let ens2_assn = AssnDef::merge_assnmaps(vds1,ens1,vds2,ens2);
+      if (!AssnDef::simple_prove(ens1.assn,ens2_assn) && 
+	  !PrattProver::constraint_prove(ens1.assn,ens2_assn))
+	return false;
+    }
     // check f1.throws => f2.throws
-    let thr1 = f1.throws_assn ? (AssnDef::assn_t)f1.throws_assn : &AssnDef::true_assn;
-    let thr2 = AssnDef::subst_vardecls(f2.arg_vardecls,f2.return_value,
-                                       f1.arg_vardecls,f1.return_value,
-                                       f2.throws_assn);
-    if (!AssnDef::simple_prove(thr1,thr2) && 
-        !PrattProver::constraint_prove(thr1,thr2))
-      return false;
+    if (f2.throws_assn != NULL) {
+      let thrws2 = *f2.throws_assn;
+      let thrws1 = f1.throws_assn ? *f1.throws_assn : AssnDef::true_assnmap();
+      let thrws2_assn = AssnDef::merge_assnmaps(vds1,thrws1,vds2,thrws2);
+      if (!AssnDef::simple_prove(thrws1.assn,thrws2_assn) && 
+	  !PrattProver::constraint_prove(thrws1.assn,thrws2_assn))
+	return false;
+    }
     // otherwise okay
     return true;
   default: return effect_subtype(t1, t2, true);
@@ -2914,9 +2926,9 @@ type_t rsubstitute(region_t<`r> rgn,
     exp_opt_t thrws2 = rsubs_exp_opt(rgn,inst,thrws);
     // re-calculate assertions -- saves having to do a type-substitution
     // for assertions, though we have to fix up the vardecls below.
-    AssnDef::assn_opt_t req_assn2 = (req2 != NULL) ? (_*)(Vcgen::clause2assn((exp_t)req2)) : NULL;
-    AssnDef::assn_opt_t ens_assn2 = (ens2 != NULL) ? (_*)(Vcgen::clause2assn((exp_t)ens2)) : NULL;
-    AssnDef::assn_opt_t thrws_assn2 = (thrws2 != NULL) ? (_*)(Vcgen::clause2assn((exp_t)thrws2)) : NULL;
+    AssnDef::assn_map_opt_t req_assn2 = (req2 != NULL) ? new Vcgen::clause2assn((exp_t)req2) : NULL;
+    AssnDef::assn_map_opt_t ens_assn2 = (ens2 != NULL) ? new Vcgen::clause2assn((exp_t)ens2) : NULL;
+    AssnDef::assn_map_opt_t thrws_assn2 = (thrws2 != NULL) ? new Vcgen::clause2assn((exp_t)thrws2) : NULL;
     // At this point, we need to generate fresh vardecls for the argvds,
     // and a fresh return_value that has the appropriate substituted
     // type.  Then we need to crawl through req2, ens2, and thrws2 and
@@ -2937,12 +2949,11 @@ type_t rsubstitute(region_t<`r> rgn,
       ret_value2 = new *ret_value;
       ret_value2->type = rsubstitute(rgn,inst,ret_value2->type);
     }
-    req_assn2 = AssnDef::subst_vardecls(argvds,ret_value,argvds2,ret_value2,
-                                        req_assn2);
-    ens_assn2 = AssnDef::subst_vardecls(argvds,ret_value,argvds2,ret_value2,
-                                        ens_assn2);
-    thrws_assn2 = AssnDef::subst_vardecls(argvds,ret_value,argvds2,ret_value2,
-                                          thrws_assn2);
+    let vds1 = new List(ret_value,argvds);
+    let vds2 = new List(ret_value2,argvds2);
+    req_assn2 = AssnDef::subst_vardecls(vds1,vds2,req_assn2);
+    ens_assn2 = AssnDef::subst_vardecls(vds1,vds2,ens_assn2);
+    thrws_assn2 = AssnDef::subst_vardecls(vds1,vds2,thrws_assn2);
     return new FnType(FnInfo{vs,eff2,rtq,rsubstitute(rgn,inst,rtyp),args2,
 			       c_varargs,cyc_varargs2,qb2,atts,
 			       req2,req_assn2,ens2,ens_assn2,

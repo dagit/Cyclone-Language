@@ -103,21 +103,19 @@ void explain_failure() {
 
 // e1 and e2 represent requires/ensures clauses and we're to check
 // logical equivalence.
-static bool check_logical_equivalence(list_t<vardecl_opt_t> args1,
-                                      vardecl_opt_t ret1,
-                                      AssnDef::assn_opt_t a1opt,
-                                      list_t<vardecl_opt_t> args2,
-                                      vardecl_opt_t ret2,
-                                      AssnDef::assn_opt_t a2opt) {
+static bool check_logical_equivalence(list_t<vardecl_opt_t> vds1,
+                                      AssnDef::assn_map_opt_t a1opt,
+                                      list_t<vardecl_opt_t> vds2,
+                                      AssnDef::assn_map_opt_t a2opt) {
   if (a1opt == a2opt) return true;
-  AssnDef::assn_t a1 = (a1opt != NULL) ? (AssnDef::assn_t)a1opt : &AssnDef::true_assn;
-  AssnDef::assn_t a2 = (a2opt != NULL) ? (AssnDef::assn_t)a2opt : &AssnDef::true_assn;
-  a2 = AssnDef::subst_vardecls(args2,ret2,args1,ret1,a2);
-  return ((AssnDef::simple_prove(a1,a2) || 
-           PrattProver::constraint_prove(a1,a2))
+  AssnDef::assn_map_t a1 = (a1opt != NULL) ? *a1opt : AssnDef::true_assnmap();
+  AssnDef::assn_map_t a2 = (a2opt != NULL) ? *a2opt : AssnDef::true_assnmap();
+  let a2_assn = AssnDef::merge_assnmaps(vds1,a1,vds2,a2);
+  return ((AssnDef::simple_prove(a1.assn,a2_assn) || 
+           PrattProver::constraint_prove(a1.assn,a2_assn))
           &&
-          (AssnDef::simple_prove(a2,a1) || 
-           PrattProver::constraint_prove(a2,a1)));
+          (AssnDef::simple_prove(a2_assn,a1.assn) || 
+           PrattProver::constraint_prove(a2_assn,a1.assn)));
 }
 
 bool unify_kindbound(kindbound_t kb1, kindbound_t kb2) {
@@ -551,15 +549,16 @@ static void unify_it(type_t t1, type_t t2) {
       fail_because("function types have different effect constraints"); 
     /*     if (!Tcutil::same_rgn_po(rpo2,rpo1)) */
     /*       fail_because("function types have different region lifetime orderings"); */
-    
-    if (!check_logical_equivalence(argvds1,return_value1,req_relns1,
-                                   argvds2,return_value2,req_relns2))
+    let vds1 = new List(return_value1,argvds1);
+    let vds2 = new List(return_value2,argvds2);
+    if (!check_logical_equivalence(vds1,req_relns1,
+                                   vds2,req_relns2))
       fail_because("@requires clauses not equivalent");
-    if (!check_logical_equivalence(argvds1,return_value1,ens_relns1,
-                                   argvds2,return_value2,ens_relns2))
+    if (!check_logical_equivalence(vds1,ens_relns1,
+                                   vds2,ens_relns2))
       fail_because("@ensures clauses not equivalent");
-    if (!check_logical_equivalence(argvds1,return_value1,thrws_relns1,
-                                   argvds2,return_value2,thrws_relns2))
+    if (!check_logical_equivalence(vds1,thrws_relns1,
+                                   vds2,thrws_relns2))
       fail_because("@throws clauses not equivalent");
     return;
 

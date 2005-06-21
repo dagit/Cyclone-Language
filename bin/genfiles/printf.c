@@ -568,8 +568,8 @@ goto rflag;case 49:
  goto _LL1A;case 54: _LL1A: goto _LL1C;case 55: _LL1C: goto _LL1E;case 56: _LL1E: goto _LL20;case 57: _LL20:
  n=0;
 do{
-n=10 * n + (ch - 48);
-ch=(int)*((const char*)_check_fat_subscript(_fat_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0U));}while((unsigned)(ch - 48)<= 9U);
+n=10 * n + (ch - (int)'0');
+ch=(int)*((const char*)_check_fat_subscript(_fat_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0U));}while((unsigned)(ch - (int)'0')<= (unsigned)9);
 # 433
 width=n;
 goto reswitch;case 76:
@@ -683,10 +683,10 @@ struct _fat_ptr xdigs;
 switch((int)base){case Cyc_OCT:
 # 574
  do{
-({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus(& cp,sizeof(char),-1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=(char)((_ulong & 7U)+ 48U);if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
+({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus(& cp,sizeof(char),-1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=(char)((_ulong & (unsigned long)7)+ (unsigned long)'0');if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
 _ulong >>=3U;}while((int)_ulong);
 # 579
-if(flags & 8 &&(int)*((char*)cp.curr)!=48)
+if(flags & 8 &&(int)*((char*)_check_fat_subscript(cp,sizeof(char),0U))!=48)
 ({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus(& cp,sizeof(char),-1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2='0';if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
 goto _LL4F;case Cyc_DEC:
 # 585
@@ -702,7 +702,7 @@ xdigs=_tag_fat("0123456789ABCDEF",sizeof(char),17U);else{
 # 596
 xdigs=_tag_fat("0123456789abcdef",sizeof(char),17U);}
 do{
-({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus(& cp,sizeof(char),-1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=*((const char*)_check_fat_subscript(xdigs,sizeof(char),(int)(_ulong & 15U)));if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
+({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus(& cp,sizeof(char),-1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=*((const char*)_check_fat_subscript(xdigs,sizeof(char),(int)(_ulong & (unsigned long)15)));if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
 _ulong >>=4U;}while((int)_ulong);
 # 601
 goto _LL4F;default:
@@ -783,7 +783,7 @@ exp=- exp;
 t=_fat_ptr_plus(expbuf,sizeof(char),308);
 if(exp > 9){
 do{
-({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus(& t,sizeof(char),-1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=(char)(exp % 10 + 48);if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});}while((exp /=10)> 9);
+({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus(& t,sizeof(char),-1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=(char)(exp % 10 + (int)'0');if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});}while((exp /=10)> 9);
 # 718
 ({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus(& t,sizeof(char),-1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=(char)(exp + 48);if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
 for(1;({char*_Tmp0=(char*)t.curr;_Tmp0 < (char*)_fat_ptr_plus(expbuf,sizeof(char),308).curr;});({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus_post(& p,sizeof(char),1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=*((char*)_fat_ptr_inplace_plus_post(& t,sizeof(char),1).curr);if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;})){;}}else{
@@ -822,7 +822,7 @@ if(*signp==45)
 for(1;1;_fat_ptr_inplace_plus(& end,sizeof(char),-1)){
 if((int)*((char*)_check_fat_subscript(end,sizeof(char),0U))==46)
 _fat_ptr_inplace_plus(& end,sizeof(char),-1);
-if((int)*((char*)_check_fat_subscript(end,sizeof(char),0U))!=48)
+if((int)*((char*)end.curr)!=48)
 break;
 if((char*)end.curr==(char*)start.curr)
 *signp=0;}}
@@ -866,7 +866,7 @@ if(fract!=0.0){
 if(prec)
 do{
 fract=modf(fract * (double)10,& tmp);
-({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus_post(& t,sizeof(char),1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=(char)((int)tmp + 48);if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});}while(
+({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus_post(& t,sizeof(char),1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=(char)((int)tmp + (int)'0');if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});}while(
 -- prec && fract!=0.0);
 if(fract!=0.0)
 startp=({double _Tmp0=fract;struct _fat_ptr _Tmp1=startp;struct _fat_ptr _Tmp2=
@@ -913,7 +913,7 @@ if(fract!=0.0){
 if(prec)
 do{
 fract=modf(fract * (double)10,& tmp);
-({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus_post(& t,sizeof(char),1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=(char)((int)tmp + 48);if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});}while(
+({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus_post(& t,sizeof(char),1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=(char)((int)tmp + (int)'0');if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});}while(
 -- prec && fract!=0.0);
 if(fract!=0.0)
 startp=({double _Tmp0=fract;struct _fat_ptr _Tmp1=startp;struct _fat_ptr _Tmp2=
@@ -959,7 +959,7 @@ if(prec){
 # 931
 do{
 fract=modf(fract * (double)10,& tmp);
-({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus_post(& t,sizeof(char),1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=(char)((int)tmp + 48);if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});}while(
+({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus_post(& t,sizeof(char),1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=(char)((int)tmp + (int)'0');if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});}while(
 tmp==0.0 && !expcnt);
 while(-- prec && fract!=0.0){
 fract=modf(fract * (double)10,& tmp);

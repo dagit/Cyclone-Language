@@ -40,6 +40,6 @@ namespace Vcgen {
 			    Absyn::fndecl_t fd,
 			    assn_info_t assn_info);
   exp_checks_t@ exp2ctxt_checks(assn_info_t,Absyn::exp_t);
-  extern AssnDef::assn_t clause2assn(Absyn::exp_t);
+  extern AssnDef::assn_map_t clause2assn(Absyn::exp_t);
 }
 #endif

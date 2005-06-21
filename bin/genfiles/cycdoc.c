@@ -451,7 +451,7 @@ state=(- state)- 1;}
 while(1){
 base=*((const int*)_check_known_subscript_notnull(Cyc_lex_base,15U,sizeof(int),state));
 if(base < 0)return(- base)- 1;
-backtrk=Cyc_lex_backtrk[state];
+backtrk=*((const int*)_check_known_subscript_notnull(Cyc_lex_backtrk,15U,sizeof(int),state));
 if(backtrk >= 0){
 lbuf->lex_last_pos=lbuf->lex_curr_pos;
 lbuf->lex_last_action=backtrk;}
@@ -467,9 +467,9 @@ if(c==-1)c=256;else{
 if(c < 0)c=256 + c;}}
 # 82
 if(*((const int*)_check_known_subscript_notnull(Cyc_lex_check,266U,sizeof(int),base + c))==state)
-state=Cyc_lex_trans[base + c];else{
+state=*((const int*)_check_known_subscript_notnull(Cyc_lex_trans,266U,sizeof(int),base + c));else{
 # 85
-state=Cyc_lex_default[state];}
+state=*((const int*)_check_known_subscript_notnull(Cyc_lex_default,15U,sizeof(int),state));}
 if(state < 0){
 lbuf->lex_curr_pos=lbuf->lex_last_pos;
 if(lbuf->lex_last_action==-1)
@@ -518,13 +518,13 @@ static void Cyc_pr_comment(struct Cyc___cycFILE*outf,struct _fat_ptr s){
 int depth=0;
 int len=(int)Cyc_strlen(s);
 int i=0;for(0;i < len;++ i){
-char c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
+char c=((const char*)s.curr)[i];
 if((int)c!=91){Cyc_fputc((int)c,outf);continue;}
 Cyc_fputs("\\texttt{",outf);
 ++ i;
 ++ depth;
 for(1;i < len;++ i){
-char c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
+char c=((const char*)s.curr)[i];
 if((int)c==93){
 -- depth;
 if(depth==0){
@@ -596,11 +596,11 @@ if(single_quotes==0)
 return Cyc_strconcat_l(({struct _fat_ptr*_Tmp0[3];({struct _fat_ptr*_Tmp1=({struct _fat_ptr*_Tmp2=_cycalloc(sizeof(struct _fat_ptr));*_Tmp2=_tag_fat("'",sizeof(char),2U);_Tmp2;});_Tmp0[0]=_Tmp1;}),({struct _fat_ptr*_Tmp1=({struct _fat_ptr*_Tmp2=_cycalloc(sizeof(struct _fat_ptr));*_Tmp2=(struct _fat_ptr)s;_Tmp2;});_Tmp0[1]=_Tmp1;}),({struct _fat_ptr*_Tmp1=({struct _fat_ptr*_Tmp2=_cycalloc(sizeof(struct _fat_ptr));*_Tmp2=_tag_fat("'",sizeof(char),2U);_Tmp2;});_Tmp0[2]=_Tmp1;});Cyc_List_list(_tag_fat(_Tmp0,sizeof(struct _fat_ptr*),3));}));{
 # 199
 unsigned long len2=(len + (unsigned long)single_quotes)+ (unsigned long)other_special;
-struct _fat_ptr s2=({unsigned _Tmp0=(len2 + 1U)+ 1U;_tag_fat(({char*_Tmp1=_cycalloc_atomic(_check_times(_Tmp0,sizeof(char)));({{unsigned _Tmp2=len2 + 1U;unsigned i;for(i=0;i < _Tmp2;++ i){_Tmp1[i]='\000';}_Tmp1[_Tmp2]=0;}0;});_Tmp1;}),sizeof(char),_Tmp0);});
+struct _fat_ptr s2=({unsigned _Tmp0=(len2 + (unsigned long)1)+ 1U;_tag_fat(({char*_Tmp1=_cycalloc_atomic(_check_times(_Tmp0,sizeof(char)));({{unsigned _Tmp2=len2 + (unsigned long)1;unsigned i;for(i=0;i < _Tmp2;++ i){_Tmp1[i]='\000';}_Tmp1[_Tmp2]=0;}0;});_Tmp1;}),sizeof(char),_Tmp0);});
 int i=0;
 int j=0;
 for(1;(unsigned long)i < len;++ i){
-char c=((const char*)s.curr)[i];
+char c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
 if((int)c==39 || Cyc_is_other_special(c))
 ({struct _fat_ptr _Tmp0=_fat_ptr_plus(s2,sizeof(char),j ++);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2='\\';if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
 ({struct _fat_ptr _Tmp0=_fat_ptr_plus(s2,sizeof(char),j ++);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=c;if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});}

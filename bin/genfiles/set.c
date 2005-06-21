@@ -389,7 +389,7 @@ struct Cyc_List_List*result;result=_region_malloc(rgn,0U,sizeof(struct Cyc_List_
 struct Cyc_List_List*prev=result;
 n=n->tl;
 while(n!=0 &&(i=cmp(n->hd,elt))< 0){
-({struct Cyc_List_List*_Tmp0=({struct Cyc_List_List*_Tmp1=_region_malloc(rgn,0U,sizeof(struct Cyc_List_List));_Tmp1->hd=n->hd,_Tmp1->tl=0;_Tmp1;});prev->tl=_Tmp0;});
+({struct Cyc_List_List*_Tmp0=({struct Cyc_List_List*_Tmp1=_region_malloc(rgn,0U,sizeof(struct Cyc_List_List));_Tmp1->hd=n->hd,_Tmp1->tl=0;_Tmp1;});_check_null(prev)->tl=_Tmp0;});
 prev=prev->tl;
 n=n->tl;}
 # 90
@@ -518,10 +518,10 @@ if(cmp(_check_null(n)->hd,elt)==0)return n->tl;{
 struct Cyc_List_List*prev=n;struct Cyc_List_List*res=n;
 n=n->tl;
 while(n!=0 && cmp(n->hd,elt)!=0){
-prev=_check_null(prev)->tl;
+prev=prev->tl;
 n=n->tl;}
 # 241
-({struct Cyc_List_List*_Tmp0=_check_null(n)->tl;_check_null(prev)->tl=_Tmp0;});
+prev->tl=_check_null(n)->tl;
 *ret=n->hd;
 return res;}}
 # 247

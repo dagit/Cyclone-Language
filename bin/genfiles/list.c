@@ -907,7 +907,7 @@ struct Cyc_List_List*Cyc_List_rfrom_array(struct _RegionHandle*r2,struct _fat_pt
 struct Cyc_List_List*ans=0;
 unsigned n=_get_fat_size(arr,sizeof(void*));
 {unsigned i=n - 1U;for(0;i < n;-- i){
-ans=({struct Cyc_List_List*_Tmp0=_region_malloc(r2,0U,sizeof(struct Cyc_List_List));_Tmp0->hd=((void**)arr.curr)[(int)i],_Tmp0->tl=ans;_Tmp0;});}}
+ans=({struct Cyc_List_List*_Tmp0=_region_malloc(r2,0U,sizeof(struct Cyc_List_List));_Tmp0->hd=*((void**)_check_fat_subscript(arr,sizeof(void*),(int)i)),_Tmp0->tl=ans;_Tmp0;});}}
 return ans;}
 # 751
 struct Cyc_List_List*Cyc_List_from_array(struct _fat_ptr arr){

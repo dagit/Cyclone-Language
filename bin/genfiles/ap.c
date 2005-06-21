@@ -576,7 +576,7 @@ struct Cyc_AP_T*z;
 (unsigned)x?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp0;})(_tag_fat("x",sizeof(char),2U),_tag_fat("ap.cyc",sizeof(char),7U),197U);
 (unsigned)y?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp0;})(_tag_fat("y",sizeof(char),2U),_tag_fat("ap.cyc",sizeof(char),7U),198U);
 y->sign==1?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp0;})(_tag_fat("y->sign == 1",sizeof(char),13U),_tag_fat("ap.cyc",sizeof(char),7U),199U);
-(!((unsigned)p)||(p->sign==1 && !(p->ndigits==1 &&(int)*((unsigned char*)_check_fat_subscript(p->digits,sizeof(unsigned char),0))==0))&& !(p->ndigits==1 &&(int)((unsigned char*)p->digits.curr)[0]==1))?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp0;})(_tag_fat("!p || p->sign==1 && !((p)->ndigits==1 && (p)->digits[0]==0) && !((p)->ndigits==1 && (p)->digits[0]==1)",sizeof(char),103U),_tag_fat("ap.cyc",sizeof(char),7U),200U);
+(!((unsigned)p)||(p->sign==1 && !(p->ndigits==1 &&(int)*((unsigned char*)_check_fat_subscript(p->digits,sizeof(unsigned char),0))==0))&& !(p->ndigits==1 &&(int)*((unsigned char*)_check_fat_subscript(p->digits,sizeof(unsigned char),0))==1))?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp0;})(_tag_fat("!p || p->sign==1 && !((p)->ndigits==1 && (p)->digits[0]==0) && !((p)->ndigits==1 && (p)->digits[0]==1)",sizeof(char),103U),_tag_fat("ap.cyc",sizeof(char),7U),200U);
 if(x->ndigits==1 &&(int)*((unsigned char*)_check_fat_subscript(x->digits,sizeof(unsigned char),0))==0)
 return Cyc_AP_new(0);
 if(y->ndigits==1 &&(int)*((unsigned char*)_check_fat_subscript(y->digits,sizeof(unsigned char),0))==0)
@@ -721,14 +721,14 @@ base >= 2 && base <= 36?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned
 while((int)*((const char*)_check_fat_subscript(p,sizeof(char),0U))&& isspace((int)*((const char*)p.curr))){
 _fat_ptr_inplace_plus(& p,sizeof(char),1);}
 if((int)*((const char*)p.curr)==45 ||(int)*((const char*)p.curr)==43)
-sign=*((const char*)_check_fat_subscript(_fat_ptr_inplace_plus_post(& p,sizeof(char),1),sizeof(char),0U));
+sign=*((const char*)_fat_ptr_inplace_plus_post(& p,sizeof(char),1).curr);
 {
 const char*start;
 int k;int n=0;
-for(1;(int)*((const char*)_check_fat_subscript(p,sizeof(char),0U))==48 &&(int)*((const char*)_check_fat_subscript(p,sizeof(char),1))==48;_fat_ptr_inplace_plus(& p,sizeof(char),1)){
+for(1;(int)*((const char*)p.curr)==48 &&(int)*((const char*)_check_fat_subscript(p,sizeof(char),1))==48;_fat_ptr_inplace_plus(& p,sizeof(char),1)){
 ;}
 start=(const char*)_untag_fat_ptr(p,sizeof(char),1U);
-for(1;((48 <= (int)*((const char*)_check_fat_subscript(p,sizeof(char),0U))&&(int)*((const char*)p.curr)<= 57)&&(int)*((const char*)p.curr)< 48 + base ||
+for(1;((48 <= (int)*((const char*)p.curr)&&(int)*((const char*)p.curr)<= 57)&&(int)*((const char*)p.curr)< 48 + base ||
 (97 <= (int)*((const char*)p.curr)&&(int)*((const char*)p.curr)<= 122)&&(int)*((const char*)p.curr)< (97 + base)- 10)||
 (65 <= (int)*((const char*)p.curr)&&(int)*((const char*)p.curr)<= 90)&&(int)*((const char*)p.curr)< (65 + base)- 10;_fat_ptr_inplace_plus(& p,sizeof(char),1)){
 ++ n;}

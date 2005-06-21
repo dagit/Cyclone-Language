@@ -369,7 +369,7 @@ Cyc_Hashtable_resize(t);}}
 void*Cyc_Hashtable_lookup(struct Cyc_Hashtable_Table*t,void*key){
 struct _fat_ptr tab=t->tab;
 int(*cmp)(void*,void*)=t->cmp;
-struct Cyc_Hashtable_Cell*p=(*((struct Cyc_Hashtable_Bucket*)({typeof(tab )_Tmp0=tab;_check_fat_subscript(_Tmp0,sizeof(struct Cyc_Hashtable_Bucket),(int)({unsigned _Tmp1=(unsigned)t->hash(key);_Tmp1 % _get_fat_size(tab,sizeof(struct Cyc_Hashtable_Bucket));}));}))).cells;
+struct Cyc_Hashtable_Cell*p=({struct Cyc_Hashtable_Bucket*_Tmp0=(struct Cyc_Hashtable_Bucket*)tab.curr;_Tmp0[(int)({unsigned _Tmp1=(unsigned)t->hash(key);_Tmp1 % _get_fat_size(tab,sizeof(struct Cyc_Hashtable_Bucket));})];}).cells;
 for(1;p!=0;p=p->next){
 if(cmp(p->key,key)==0)return p->value;}
 # 80
@@ -378,7 +378,7 @@ _throw(& Cyc_Core_Not_found_val);}
 void**Cyc_Hashtable_lookup_opt(struct Cyc_Hashtable_Table*t,void*key){
 struct _fat_ptr tab=t->tab;
 int(*cmp)(void*,void*)=t->cmp;
-struct Cyc_Hashtable_Cell*p=(*((struct Cyc_Hashtable_Bucket*)({typeof(tab )_Tmp0=tab;_check_fat_subscript(_Tmp0,sizeof(struct Cyc_Hashtable_Bucket),(int)({unsigned _Tmp1=(unsigned)t->hash(key);_Tmp1 % _get_fat_size(tab,sizeof(struct Cyc_Hashtable_Bucket));}));}))).cells;
+struct Cyc_Hashtable_Cell*p=({struct Cyc_Hashtable_Bucket*_Tmp0=(struct Cyc_Hashtable_Bucket*)tab.curr;_Tmp0[(int)({unsigned _Tmp1=(unsigned)t->hash(key);_Tmp1 % _get_fat_size(tab,sizeof(struct Cyc_Hashtable_Bucket));})];}).cells;
 for(1;p!=0;p=p->next){
 if(cmp(p->key,key)==0)return& p->value;}
 # 90
@@ -387,7 +387,7 @@ return 0;}
 void**Cyc_Hashtable_lookup_other_opt(struct Cyc_Hashtable_Table*t,void*key,int(*cmp)(void*,void*),int(*hash)(void*)){
 # 99
 struct _fat_ptr tab=t->tab;
-struct Cyc_Hashtable_Cell*p=(*((struct Cyc_Hashtable_Bucket*)({typeof(tab )_Tmp0=tab;_check_fat_subscript(_Tmp0,sizeof(struct Cyc_Hashtable_Bucket),(int)({unsigned _Tmp1=(unsigned)hash(key);_Tmp1 % _get_fat_size(tab,sizeof(struct Cyc_Hashtable_Bucket));}));}))).cells;
+struct Cyc_Hashtable_Cell*p=({struct Cyc_Hashtable_Bucket*_Tmp0=(struct Cyc_Hashtable_Bucket*)tab.curr;_Tmp0[(int)({unsigned _Tmp1=(unsigned)hash(key);_Tmp1 % _get_fat_size(tab,sizeof(struct Cyc_Hashtable_Bucket));})];}).cells;
 for(1;p!=0;p=p->next){
 if(cmp(key,p->key)==0)
 return& p->value;}
@@ -397,7 +397,7 @@ return 0;}
 int Cyc_Hashtable_try_lookup(struct Cyc_Hashtable_Table*t,void*key,void**data){
 struct _fat_ptr tab=t->tab;
 int(*cmp)(void*,void*)=t->cmp;
-struct Cyc_Hashtable_Cell*p=(*((struct Cyc_Hashtable_Bucket*)({typeof(tab )_Tmp0=tab;_check_fat_subscript(_Tmp0,sizeof(struct Cyc_Hashtable_Bucket),(int)({unsigned _Tmp1=(unsigned)t->hash(key);_Tmp1 % _get_fat_size(tab,sizeof(struct Cyc_Hashtable_Bucket));}));}))).cells;
+struct Cyc_Hashtable_Cell*p=({struct Cyc_Hashtable_Bucket*_Tmp0=(struct Cyc_Hashtable_Bucket*)tab.curr;_Tmp0[(int)({unsigned _Tmp1=(unsigned)t->hash(key);_Tmp1 % _get_fat_size(tab,sizeof(struct Cyc_Hashtable_Bucket));})];}).cells;
 for(1;p!=0;p=p->next){
 if(cmp(p->key,key)==0){
 *data=p->value;
@@ -418,9 +418,9 @@ b->cells=l->next;
 -- b->length;
 return;}{
 # 135
-struct Cyc_Hashtable_Cell*next=l->next;for(0;_check_null(l)->next!=0;(l=l->next,next=next->next)){
+struct Cyc_Hashtable_Cell*next=l->next;for(0;l->next!=0;(l=l->next,next=next->next)){
 # 137
-if(cmp(key,_check_null(next)->key)==0){
+if(cmp(key,next->key)==0){
 l->next=next->next;
 -- b->length;
 return;}}}}
@@ -460,7 +460,7 @@ for(1;elems!=0;elems=elems->next){
 void*key=elems->key;
 void*val=elems->value;
 unsigned nidx=({unsigned _Tmp0=(unsigned)hash(key);_Tmp0 % _get_fat_size(tab,sizeof(struct Cyc_Hashtable_Bucket));});
-({struct Cyc_Hashtable_Cell*_Tmp0=({struct Cyc_Hashtable_Cell*_Tmp1=_region_malloc(r,0U,sizeof(struct Cyc_Hashtable_Cell));_Tmp1->key=key,_Tmp1->value=val,_Tmp1->next=(*((struct Cyc_Hashtable_Bucket*)_check_fat_subscript(tab,sizeof(struct Cyc_Hashtable_Bucket),(int)nidx))).cells;_Tmp1;});((struct Cyc_Hashtable_Bucket*)tab.curr)[(int)nidx].cells=_Tmp0;});
+({struct Cyc_Hashtable_Cell*_Tmp0=({struct Cyc_Hashtable_Cell*_Tmp1=_region_malloc(r,0U,sizeof(struct Cyc_Hashtable_Cell));_Tmp1->key=key,_Tmp1->value=val,_Tmp1->next=(*((struct Cyc_Hashtable_Bucket*)_check_fat_subscript(tab,sizeof(struct Cyc_Hashtable_Bucket),(int)nidx))).cells;_Tmp1;});(*((struct Cyc_Hashtable_Bucket*)_check_fat_subscript(tab,sizeof(struct Cyc_Hashtable_Bucket),(int)nidx))).cells=_Tmp0;});
 ++((struct Cyc_Hashtable_Bucket*)tab.curr)[(int)nidx].length;}}
 # 191
 void Cyc_Hashtable_resize(struct Cyc_Hashtable_Table*t){

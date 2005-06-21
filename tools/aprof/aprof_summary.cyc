@@ -56,7 +56,7 @@ static void inccount(stringptr_t<`H,`H> rname,
 }
 
 static void add(stringptr_t<`H,`H> pos, $(int,int) @totals, 
-		$($(stringptr_t<`H,`H>,int,int) @?,int) @closure) {
+		$($(stringptr_t<`H,`H>,int,int) @`H?,int) @closure) {
   let &$(results,*index) = closure;
   results[(*index)++] = new $(pos,(*totals)[0],(*totals)[1]);
 }

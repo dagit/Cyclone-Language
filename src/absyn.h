@@ -48,8 +48,8 @@ namespace Relations {
   typedef List::list_t<reln_t<`r>,`r> relns_t<`r>;
 }
 namespace AssnDef { // see assndef.h
-  extern datatype Assn;
-  typedef datatype Assn *assn_opt_t;
+  extern struct AssnMap;
+  typedef struct AssnMap *assn_map_opt_t;
 }
 namespace Tcpat {
   extern datatype Decision;  // see tcpat.h
@@ -279,13 +279,13 @@ namespace Absyn {
     // pre-condition to call function as expression
     exp_opt_t                                requires_clause;
     // pre-condition after checking well-formedness
-    AssnDef::assn_opt_t                      requires_assn;
+    AssnDef::assn_map_opt_t                      requires_assn;
     // post-condition on return from function
     exp_opt_t                                ensures_clause;
-    AssnDef::assn_opt_t                      ensures_assn;
+    AssnDef::assn_map_opt_t                      ensures_assn;
     // post-condition on an escaping throw from function
     exp_opt_t                                throws_clause;
-    AssnDef::assn_opt_t                      throws_assn;
+    AssnDef::assn_map_opt_t                      throws_assn;
     // the variable used in the @ensures clause for the return value
     vardecl_opt_t                            return_value;
     // the variable declarations used in the @requires and @ensures clauses --

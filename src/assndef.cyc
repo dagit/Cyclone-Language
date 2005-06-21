@@ -21,11 +21,16 @@
    assertions as well as utilities on them (such as comparison, debugging
    printing etc.). */
 
+#include "absyn.h"
+#include "absynpp.h"
 #include "flags.h"
+#include "evexp.h"
+#include "tcutil.h"
+#include "warn.h"
 #include "assndef.h"
-#include "pratt_prover.h"
-#include <sexp.h>
-#include <set.h>
+#include <hashtable.h>
+#include <list.h>
+#include <dict.h>
 
 namespace Hashtable {
   using List;
@@ -55,26 +60,16 @@ namespace Hashtable {
 namespace AssnDef;
 using List;
 using Hashtable;
+
+
 ///////////////////// Terms /////////////////////
 
 string_t term2string(term_t t) {
   string_t res;
   switch (t) {
-  case &Uint(i): res = aprintf("0x%x", i); break;
+  case &Uint(i,_): res = aprintf("0x%x", i); break;
   case &Const(e): res = Absynpp::exp2string(e); break;
   case &Tagof(t): res = aprintf("tagof(%s)",term2string(t)); break;
-  case &Var(vd): 
-    if (Flags::debug_assn) 
-      res = aprintf("%s_%x",Absynpp::qvar2string(vd->name),(unsigned int)vd); 
-    else 
-      res = Absynpp::qvar2string(vd->name);
-    break;
-  case &Addr(vd):
-    if (Flags::debug_assn) 
-      res = aprintf("&%s_%x",Absynpp::qvar2string(vd->name),(unsigned int)vd); 
-    else 
-      res = aprintf("&%s",Absynpp::qvar2string(vd->name));
-    break;
   case &Select(t1,t2,_):
     res = aprintf("Sel(%s,%s)",term2string(t1),term2string(t2));
     break;
@@ -84,12 +79,12 @@ string_t term2string(term_t t) {
   case &LogicVar(NULL,i,_): res = aprintf("_X%d",i); break;
   case &LogicVar(vd,i,_): 
     res = aprintf("_%s%d",Absynpp::qvar2string(vd->name),i); break;
+  case &Unop(p,t1,_):
+    res = aprintf("%s(%s)",Absynpp::prim2string(p),term2string(t1)); break;
   case &Binop(p,t1,t2,_):
     res = aprintf("(%s%s%s)",term2string(t1),Absynpp::prim2string(p),
                   term2string(t2));
     break;
-  case &Unop(p,t1,_):
-    res = aprintf("%s(%s)",Absynpp::prim2string(p),term2string(t1)); break;
   case &Cast(tp,tm):
     res = aprintf("(%s)%s",Absynpp::typ2string(tp),term2string(tm)); break;
   case &Aggr(is_union,tag,tms,_):
@@ -111,8 +106,20 @@ string_t term2string(term_t t) {
   case &Proj(t,i,_):
     res = aprintf("#%d(%s)",i,term2string(t));
     break;
-  case &Okderef(t):
-    res = aprintf("Okderef(%s)",term2string(t));
+  case &Addr(vd):
+    if (Flags::debug_assn) 
+      res = aprintf("&%s_%x",Absynpp::qvar2string(vd->name),(unsigned int)vd); 
+    else 
+      res = aprintf("&%s",Absynpp::qvar2string(vd->name));
+    break;
+  case &Alloc(e,_,i,_):
+    res = aprintf("Alloc(%s,%d)", Absynpp::exp2string(e),i);
+    break;
+  case &Offsetf(field,t,_):
+    res = aprintf("Offsetf(%s)+%s",*field,term2string(t));
+    break;
+  case &Offseti(t1,t2,_):
+    res = aprintf("%s+%s",term2string(t1),term2string(t2));
     break;
   }
   return res;
@@ -160,37 +167,38 @@ static int hash_exp(exp_t e) {
 
 int termhash(datatype Term @t) {
   switch (t) {
-  case &Uint(i): return i;
+  case &Uint(i,_): return i;
   case &Const(e): return hash_exp(e) + 61;
-  case &Var(vd): return (unsigned int)vd >> 4;
   case &LogicVar(vd,i,_): return ((unsigned int)vd >> 3) + (i+1);
+  case &Unop(p,t1,_): return p + ((unsigned int)t1 >> 4) + 1;
   case &Binop(p,t1,t2,_):
     return p + (((unsigned int)t1 + (unsigned int)t2) >> 4);
-  case &Unop(p,t1,_): return p + ((unsigned int)t1 >> 4) + 1;
   case &Cast(_,t): return termhash(t);
   case &Select(t1,t2,_):
     return (((unsigned int)t1 + (unsigned int)t2) >> 4) + 2;
   case &Update(t1,t2,t3):
     return (((unsigned int)t1 + (unsigned int)t2 + (unsigned int)t3) >> 4) + 3;
-  case &Addr(vd): return ((unsigned int)vd >> 4)+7;
   case &Proj(t,i,_): return ((unsigned int)t >> 4) + i + 23;
   case &Aggr(is_union,tag,ts,_):
     unsigned int res = 37+tag+is_union;
     for (; ts != NULL; ts = ts->tl)
       res = res + ((unsigned int)ts->hd >> 4);
     return res;
-  case &Okderef(t): return ((unsigned)t >> 4) + 97;
+  case &Addr(vd): return ((unsigned int)vd >> 4)+7;
+  case &Alloc(e,_,i,_): return hash_exp(e) + i;
+  case &Offsetf(f,t,_): return (unsigned int)f + termhash(t)+11;
+  case &Offseti(index,t,_): return termhash(index) + termhash(t) + 13;
   case &Tagof(t): return ((unsigned)t >> 3) + 741;
   }
 }
 
-int cmp_term(datatype Term @`r1 _t1, datatype Term @`r2 _t2) {
+int termcmp(datatype Term @`r1 _t1, datatype Term @`r2 _t2) {
   datatype Term @`r1+`H t1 = _t1;
   datatype Term @`r2+`H t2 = _t2;
  LOOP:
   if (t1 == t2) return 0;
   switch $(t1,t2) {
-  case $(&Uint(i1), &Uint(i2)): return i1-i2;
+  case $(&Uint(i1,_), &Uint(i2,_)): return i1-i2;
   case $(&Uint(...),_): return -1;
   case $(_,&Uint(...)): return 1;
   case $(&LogicVar(vd1,i,_),&LogicVar(vd2,j,_)): 
@@ -198,9 +206,6 @@ int cmp_term(datatype Term @`r1 _t1, datatype Term @`r2 _t2) {
     return (int)vd1 - (int)vd2;
   case $(&LogicVar(vd1,i,_),_): return -1;
   case $(_,&LogicVar(vd2,j,_)): return 1;
-  case $(&Var(vd1),&Var(vd2)): return (int)vd1 - (int)vd2;
-  case $(&Var(...),_): return -1;
-  case $(_,&Var(...)): return 1;
   case $(&Const(e1),&Const(e2)): return Evexp::exp_cmp(e1,e2);
   case $(&Const(...),_): return -1;
   case $(_,&Const(...)): return 1;
@@ -216,7 +221,7 @@ int cmp_term(datatype Term @`r1 _t1, datatype Term @`r2 _t2) {
   case $(_,&Unop(...)): return 1;
   case $(&Binop(p1,t11,t12,tp1),&Binop(p2,t21,t22,tp2)):
     if (p1 != p2) return (int)p1 - (int)p2;
-    int c = cmp_term(t11,t21);
+    int c = termcmp(t11,t21);
     if (c != 0) return c;
     t1 = t12;
     t2 = t22;
@@ -232,7 +237,7 @@ int cmp_term(datatype Term @`r1 _t1, datatype Term @`r2 _t2) {
   case $(&Cast(...),_): return -1;
   case $(_,&Cast(...)): return 1;
   case $(&Select(t11,t12,_),&Select(t21,t22,_)):
-    int c = cmp_term(t11,t21);
+    int c = termcmp(t11,t21);
     if (c != 0) return c;
     t1 = t12;
     t2 = t22;
@@ -240,15 +245,21 @@ int cmp_term(datatype Term @`r1 _t1, datatype Term @`r2 _t2) {
   case $(&Select(...),_): return -1;
   case $(_,&Select(...)): return 1;
   case $(&Update(t11,t12,t13),&Update(t21,t22,t23)):
-    int c = cmp_term(t11,t21);
+    int c = termcmp(t11,t21);
     if (c != 0) return c;
-    int c = cmp_term(t12,t22);
+    int c = termcmp(t12,t22);
     if (c != 0) return c;
     t1 = t13;
     t2 = t23;
     goto LOOP;
   case $(&Update(t11,t12,t13),_): return -1;
   case $(_,&Update(t21,t22,t23)): return 1;
+  case $(&Tagof(tm1),&Tagof(tm2)): 
+    t1 = tm1;
+    t2 = tm2;
+    goto LOOP;
+  case $(&Tagof(...),_): return -1;
+  case $(_,&Tagof(...)): return 1;
   case $(&Proj(tm1,i1,_),&Proj(tm2,i2,_)): 
     int c = i1 - i2;
     if (c != 0) return c;
@@ -257,25 +268,34 @@ int cmp_term(datatype Term @`r1 _t1, datatype Term @`r2 _t2) {
     goto LOOP;
   case $(&Proj(...),_): return -1;
   case $(_,&Proj(...)): return 1;
-  case $(&Okderef(tm1),&Okderef(tm2)):
+  case $(&Alloc(e1,_,i1,_),&Alloc(e2,_,i2,_)):
+    if (e1 != e2) return (int)e1-(int)e2;
+    else return (i1-i2);
+  case $(&Alloc(...),_): return -1;
+  case $(_,&Alloc(...)): return 1;
+  case $(&Offsetf(f1,tm1,_),&Offsetf(f2,tm2,_)):
+    int c = strptrcmp(f1,f2);
+    if (c != 0) return c;
     t1 = tm1;
     t2 = tm2;
     goto LOOP;
-  case $(&Okderef(...),_): return -1;
-  case $(_,&Okderef(...)): return 1;
-  case $(&Tagof(tm1),&Tagof(tm2)): 
+  case $(&Offsetf(...),_): return -1;
+  case $(_,&Offsetf(...)): return 1;
+  case $(&Offseti(i1,tm1,_),&Offseti(i2,tm2,_)):
+    int c = termcmp(tm1,tm2);
+    if (c != 0) return c;
     t1 = tm1;
     t2 = tm2;
     goto LOOP;
-  case $(&Tagof(...),_): return -1;
-  case $(_,&Tagof(...)): return 1;
+  case $(&Offseti(...),_): return -1;
+  case $(_,&Offseti(...)): return 1;
   case $(&Aggr(is_union1,tag1,ts1,_),&Aggr(is_union2,tag2,ts2,_)):
     int c = tag1 - tag2;
     if (c != 0) return c;
     c = is_union2 - is_union1;
     if (c != 0) return c;
     for (; ts1 != NULL && ts2 != NULL; ts1=ts1->tl, ts2=ts2->tl) {
-      c = cmp_term(ts1->hd,ts2->hd);
+      c = termcmp(ts1->hd,ts2->hd);
       if (c != 0) return c;
     }
     if (ts1 == ts2) return 0;
@@ -286,9 +306,8 @@ int cmp_term(datatype Term @`r1 _t1, datatype Term @`r2 _t2) {
 
 static term_t copy_term(datatype Term@ t) {
   switch (t) {
-  case &Uint(i): return new Uint(i);
+  case &Uint(i,tp): return new Uint(i,tp);
   case &Const(e): return new Const(e);
-  case &Var(vd): return new Var(vd);
   case &Addr(vd): return new Addr(vd);
   case &LogicVar(vd,i,tp): return new LogicVar(vd,i,tp);
   case &Binop(p,t1,t2,tp): return new Binop(p,t1,t2,tp);
@@ -298,7 +317,9 @@ static term_t copy_term(datatype Term@ t) {
   case &Update(t1,t2,t3): return new Update(t1,t2,t3);
   case &Proj(t,i,tp): return new Proj(t,i,tp);
   case &Aggr(is_union,tag,ts,tp): return new Aggr(is_union,tag,ts,tp);
-  case &Okderef(t): return new Okderef(t);
+  case &Alloc(e,offset,i,tp): return new Alloc(e,offset,i,tp);
+  case &Offsetf(f,t,tp): return new Offsetf(f,t,tp);
+  case &Offseti(i,t,tp): return new Offseti(i,t,tp);
   case &Tagof(t): return new Tagof(t);
   }
 }
@@ -306,20 +327,20 @@ static term_t copy_term(datatype Term@ t) {
 // a hash-table to hold all of the term nodes to maximize sharing.  
 static struct Hashtable::Table<term_t,term_t> *term_hash_cons_table = NULL;
 
-datatype Term.Uint zero_value = Uint(0);
-datatype Term.Uint one_value = Uint(1);
+datatype Term.Uint zero_value = Uint(0,NULL);
+datatype Term.Uint one_value = Uint(1,NULL);
 
 static term_t hash_cons_term(datatype Term @t) {
   Hashtable::table_t<term_t,term_t> h;
   if (term_hash_cons_table == NULL) {
-    h = Hashtable::create(221, cmp_term, termhash);
+    h = Hashtable::create(221, termcmp, termhash);
     term_hash_cons_table = h;
     Hashtable::insert(h,&zero_value,&zero_value);
     Hashtable::insert(h,&one_value,&one_value);
   } else {
     h = (Hashtable::table_t)term_hash_cons_table;
   }
-  let resopt = Hashtable::lookup_other_opt(h,t,cmp_term,termhash);
+  let resopt = Hashtable::lookup_other_opt(h,t,termcmp,termhash);
   if (resopt == NULL) {
     let t2 = copy_term(t);
     Hashtable::insert(h,t2,t2);
@@ -328,9 +349,8 @@ static term_t hash_cons_term(datatype Term @t) {
 }
 
 
-// rewrite uint, cnst, var, 
 term_t uint(unsigned int i) {
-  let t = Uint(i);
+  let t = Uint(i,NULL);
   return hash_cons_term(&t);
 }
 term_t zero() {
@@ -343,10 +363,6 @@ term_t cnst(Absyn::exp_t e) {
   let $(c, known) = Evexp::eval_const_uint_exp(e);
   if (known) return uint(c);
   let t = Const(e);
-  return hash_cons_term(&t);
-}
-term_t var(vardecl_t vd) { 
-  let t = Var(vd);
   return hash_cons_term(&t);
 }
 term_t addr(vardecl_t vd) {
@@ -362,18 +378,13 @@ term_t update(term_t t1, term_t t2, term_t t3) {
   case $(&Update(m,a as &Addr(x),e1),&Addr(y)):
     // Update(Update(m,Addr(x),e1),Addr(x),t3) = Update(m,Addr(x),t3)
     if (x == y) return update(m,t2,t3);
-    // Not sure if this is worth it since it is a slow insertion sort
-    // on the updates...  
-    // Update(Update(m,Addr(x),e1),Addr(y),t3) = 
-    //    Update(Update(m,Addr(y),t3),Addr(x),e1)
-    //if ((unsigned int)y < (unsigned int)x)
-    //  return update(update(m,t2,t3),a,e1);
     break;
   default: break;
   }
   let t = Update(t1,t2,t3);
   return hash_cons_term(&t);
 }
+
 term_t select(term_t t1, term_t t2,type_opt_t tp) {
   switch $(t1,t2) {
   case $(&Update(m,&Addr(x),v),&Addr(y)):
@@ -413,14 +424,7 @@ term_t proj(term_t t1, unsigned i, type_opt_t tp) {
   let t = Proj(t1,i,tp);
   return hash_cons_term(&t);
 }
-term_t tagof(term_t t1) {
-  switch (t1) {
-  case &Aggr(_,tag,...): return uint(tag);
-  default: 
-    let t = Tagof(t1);
-    return hash_cons_term(&t);
-  }
-}
+
 term_t aggr(bool is_union, unsigned tag, list_t<term_t,`H> ts, type_opt_t tp){
   // could eta-reduce Aggr(proj(t,0),proj(t,1),...,proj(t,n)) to t,
   // using the type information to figure out n.
@@ -436,73 +440,41 @@ term_t datatype_aggr(unsigned tag, list_t<term_t,`H> ts, type_opt_t tp) {
 term_t union_aggr(unsigned tag, list_t<term_t,`H> ts, type_opt_t tp) {
   return aggr(true,tag,ts,tp);
 }
-term_t okderef(term_t t1){
-  let t = Okderef(t1);
+term_t tagof(term_t t1) {
+  switch (t1) {
+  case &Aggr(_,tag,...): return uint(tag);
+  default: 
+    let t = Tagof(t1);
+    return hash_cons_term(&t);
+  }
+}
+
+term_t cast(type_t tp, term_t tm){
+  let t = Cast(tp,tm);
   return hash_cons_term(&t);
 }
-inline static bool is_nonassociative_commutative(Absyn::primop_t p) {
-  switch (p) {
-  case Absyn::Eq:
-  case Absyn::Neq: return true;
-  default: return false;
-  }
+
+term_t alloc(exp_t e, term_t offset, type_opt_t tp){
+  static int counter = 0;
+  let t = Alloc(e,offset,counter,tp);
+  counter++;
+  return hash_cons_term(&t);
 }
 
-inline static bool is_associative_commutative(Absyn::primop_t p) {
-  switch (p) {
-  case Absyn::Plus:
-  case Absyn::Times:
-  case Absyn::Bitand:
-  case Absyn::Bitor:
-  case Absyn::Bitxor: return true;
-  default: return false;
-  }
+term_t offsetf(field_name_t f, term_t tm, type_opt_t tp){
+  let t = Offsetf(f,tm,tp);
+  return hash_cons_term(&t);
 }
 
-// given a primop p, return an unsigned int u such that
-// for all term t, t p Uint(u) == Uint(u) p t == t,
-// i.e., Uint(u) is the identity in the commutative group.
-inline static unsigned id_of_primop(Absyn::primop_t p){
-  switch(p) {
-  case Absyn::Plus:   return 0;
-  case Absyn::Times:  return 1;
-  case Absyn::Bitand: return 0xFFFFFFFF;
-  case Absyn::Bitor:  return 0;
-  case Absyn::Bitxor: return 0;
-  default: Warn::impos("no id for primop %s",Absynpp::prim2string(p));
-  }
+term_t offseti(term_t i, term_t tm, type_opt_t tp){
+  let t = Offseti(i,tm,tp);
+  return hash_cons_term(&t);
 }
-
-//evaluating commutative associative bin op on constants.
-inline static unsigned eval_binop(Absyn::primop_t p, unsigned i, unsigned j){
-  switch(p){
-  case Absyn::Plus: return (i+j);
-  case Absyn::Times: return (i*j);
-  case Absyn::Bitand: return (i & j);
-  case Absyn::Bitor: return (i | j);
-  case Absyn::Bitxor: return (i ^ j);
-  default: Warn::impos("Error in evaluating binop");
-  }
-}
-
-Absyn::type_opt_t get_term_type(term_t t) {
-  switch (t) {
-  case &Uint(_): return Absyn::uint_type;
-  case &Const(e): return e->topt;
-  case &Var(vd): return vd->type;
-  case &LogicVar(_,_,topt): return topt;
-  case &Binop(_,_,_,tp): return tp;
-  case &Unop(_,_,tp): return tp;
-  case &Cast(tp,_): return tp;
-  case &Select(_,_,tp): return tp;
-  case &Aggr(_,_,_,tp): return tp;
-  case &Proj(t1,i,tp): return tp;
-  // not sure that this is the right thing to do...
-  case &Addr(vd): return Absyn::uint_type;
-  case &Update(...): return NULL;
-  case &Okderef(_): return NULL;
-  case &Tagof(_): return Absyn::uint_type;
-  }
+term_t fresh_var(type_opt_t tp){
+  static int counter = 0;
+  let t = logicvar(NULL,counter,tp);
+  counter++;
+  return t;
 }
 
 term_t plus(term_t t1, term_t t2, type_opt_t tp) {
@@ -523,636 +495,6 @@ term_t unop(Absyn::primop_t p, term_t t, type_opt_t tp) {
 
 term_t numelts_term(term_t t) {
   return unop(Absyn::Numelts, t, Absyn::uint_type);
-}
-
-static int inv_cmp_term(term_t t1, term_t t2){
-  return -cmp_term(t1, t2);
-}
-
-
-inline static term_t compute_factor(int c, term_t t, type_opt_t topt){
-  if (c == 1) return t;
-  else {
-    let newfactor = Binop(Absyn::Times,t,uint(c),topt);
-    return hash_cons_term(&newfactor);
-  }
-}
-static term_t termcoeflist2term(term_coef_list_t q_list, int newc, type_opt_t topt){
-  if (q_list == NULL) return uint(newc);
-  // q_list is not empty, compute the first factor term newf = hd->f0 * hd->f1
-  term_t res = compute_factor(q_list->hd->f0,q_list->hd->f1,topt);
-  q_list = q_list -> tl;
-  while(q_list != NULL){
-    let newf = compute_factor(q_list->hd->f0,q_list->hd->f1,topt);
-    let newterm = Binop(Absyn::Plus,res,newf,topt);
-    res = hash_cons_term(&newterm);
-    q_list = q_list->tl;
-  }
-  if (newc == 0) return res;
-  else {
-    let newterm = Binop(Absyn::Plus,res,uint(newc),topt);
-    return hash_cons_term(&newterm);
-  }
-}
-// the normal for of term t is t1*c1 + t2*c2 + ... + tn*cn+c
-$(term_coef_list_t,int res) flatten_plus(term_t t){
-  term_coef_list_t term_coef_list = NULL;
-  int res = 0;
- LOOP:
-  switch(t){
-  case &Uint(i): res = i; break;
-  case &Binop(Absyn::Plus,t1,&Uint(i),_):
-    res = i;
-    t = t1;
-    goto LOOP;
-  case &Binop(Absyn::Plus, t1, t2,_):
-    switch(t2){
-    case &Binop(Absyn::Times,t21,&Uint(c2),_):
-      term_coef_list = new List(new $(c2,t21), term_coef_list);
-      break;
-    case &Binop(Absyn::Plus,_,_,_):
-      Warn::impos("Plus in the right branch, not a normal form");
-      break;
-    default:
-      term_coef_list = new List(new $(1,t2),term_coef_list);
-      break;
-    }
-    t = t1;
-    goto LOOP;
-  default:
-    switch(t){
-    case &Binop(Absyn::Times,t21,&Uint(c2),_):
-      term_coef_list = new List(new $(c2,t21), term_coef_list);
-      break;
-    default:
-      term_coef_list = new List(new $(1,t),term_coef_list);
-      break;
-    }
-    break;
-  }
-  return $(term_coef_list,res);
-}
-
-// given two sorted list [(t1,c1),(t2,c2),...,(tn,cn)]
-// and [(s1,d1),(s2,d2),...,(sn,dn)]
-// generate a merged list [(q1,e1),(q2,e2),...,(qm,em)]
-// think about it as adding two polynomials
-// by merging the coefficients of same terms.
-// the final result should also be sorted and each term
-// in the list should be unique.
-static coef_list_t<`a,`r> imp_merge_with_coef(int less_eq(`a,`a), coef_list_t<`a,`r> a,coef_list_t<`a,`r> b){
-  coef_list_t c=NULL, d=NULL;
-  if (a == NULL) return b;
-  if (b == NULL) return a;
-  let cmp_result = less_eq(a->hd->f1,b->hd->f1);
-  while ((a != NULL) && (b != NULL)){
-    let cmp_result = less_eq(a->hd->f1,b->hd->f1);
-    if (cmp_result < 0){ // a < b
-      if (c == NULL){
-	c = a;
-	a = a->tl;
-	d = c;
-      }else{
-	c->tl = a;
-	c = a;
-	a = a->tl;
-      }
-    } else if (cmp_result > 0) { // b < a
-      if (c == NULL){
-	c = b;
-	b = b->tl;
-	d = c;
-      } else {
-	c->tl = b;
-	c = b;
-	b = b->tl;
-      }
-    } else { // cmp_result == 0, a == b
-      // merge two values;
-      let i = a->hd->f0 + b->hd->f0;
-      if (i != 0){
-	a->hd->f0 = i;
-	if (c == NULL){
-	  c = a;
-	  d = c;
-	} else {
-	  c->tl = a;
-	  c = a;
-	}
-      }
-      a = a->tl;
-      b = b->tl;
-    }
-  }
-  if (c == NULL) {
-    c = (a == NULL)? b : a;
-    d = c;
-  } else {
-    c->tl = (a==NULL)? b : a;
-  }
-  return d;
-}
-// given two terms of the form 
-// t = t1*c1 + t2*c2 + ... + tn*cn + c
-// s = s1*d1 + s2*d2 + ... + sm*dm + d
-// we want to produce a new term q = t+s with common terms merged
-static term_t flatten_merge_plus(term_t t, term_t s, type_opt_t topt){
-  let $(t_list,c) = flatten_plus(t);
-  let $(s_list,d) = flatten_plus(s);
-  let q_list = imp_merge_with_coef(inv_cmp_term,t_list,s_list);
-  let newc = c+d;
-  return termcoeflist2term(q_list,newc,topt);
-}
-
-// for a binop p that is both commutative and associative
-// t has normal form for p, i.e., t = (((t1*c1 p t2*c2) p t3*c3)...p tn*cn)+c
-// where t1 >= t2 >= t3 >= tn and c, ci are all constants
-// p are some commutative and associative binops excluding plus
-// !!! flatten, and flatten_merge only work with the assumption
-// that Uint(_) is the form of smallest term.
-static $(list_t<term_t,`H>,int res) flatten(Absyn::primop_t p, term_t t){
-  list_t<term_t,`H> termlist = NULL;
-  int res = id_of_primop(p);
- LOOP:
-  switch (t){
-  case &Uint(i): res = i; break;
-  case &Binop(p1,t1,&Uint(i),_) && p1 == p: 
-    res = i;
-    t = t1;
-    goto LOOP;
-  case &Binop(p1, t1, t2,_)&& p1 == p:
-    termlist = new List(t2, termlist);
-    t = t1;
-    goto LOOP;
-  default:
-    termlist = new List(t, termlist);
-    break;
-  }
-  return $(termlist,res);
-}
-
-static $(int,term_t)@ times_newc(int c, $(int,term_t)@ td){
-  return new $(td->f0*c,td->f1);
-}
-
-// flatten generates two lists of terms [t11,t12,...] and [t21,t22,...]
-// merge the list into one, and generate a normalized term from the
-// new list.
-static term_t flatten_merge(Absyn::primop_t p, term_t t1, term_t t2, type_opt_t topt){
-  let $(tlist1,c1) = flatten(p,t1);
-  let $(tlist2,c2) = flatten(p,t2);
-  // termlist is (tn, tn-1, ..., t2, t1) where ti >= t(i-1).
-  let termlist = List::imp_merge(inv_cmp_term, tlist1, tlist2);
-  let id = id_of_primop(p);
-  let newc = eval_binop(p,c1,c2);
-  if (termlist == NULL) return uint(newc);
-  term_t t = termlist->hd;
-  termlist = termlist -> tl;
-  while(termlist != NULL){
-    let newterm = Binop(p,t, termlist->hd, topt);
-    t = hash_cons_term(&newterm);
-    termlist = termlist->tl;
-  }
-  if (id == newc) return t;
-  else {
-    // term is of the form t * c
-    if (p == Absyn::Times){
-      switch(t){
-	// term is of the form (t1 + ... + tn) * newc, distribute the newc
-      case &Binop(Absyn::Plus,_,_,_):
-	let $(t_list,c) = flatten_plus(t);
-	let newt_list = map_c(times_newc,newc,t_list);
-	return termcoeflist2term(newt_list,c*newc,topt);
-	break;
-      default: break;
-      }
-    }
-    let newterm = Binop(p,t,uint(newc),topt);
-    return hash_cons_term(&newterm);
-  }
-}
-
-term_t binop(Absyn::primop_t p, term_t t1, term_t t2, type_opt_t tp) {
-  if (is_nonassociative_commutative(p) && cmp_term(t1,t2) < 0) {
-    t1 :=: t2;
-  }
-  switch $(p,t1,t2) {
-    // constant folding
-  case $(_,&Uint(i),&Uint(j)):
-    switch (p) {
-    case Absyn::Plus: return uint(i+j);
-    case Absyn::Minus: return uint(i-j);
-    case Absyn::Bitand: return uint(i & j);
-    case Absyn::Bitor: return uint(i | j);
-    case Absyn::Bitxor: return uint(i ^ j);
-    case Absyn::Bitlshift: return uint(i << j);
-    case Absyn::Bitlrshift: return uint(i >> j);
-    default: break;
-    }
-    break;
-    // t1 - c  ==>  t1 + (-c)
-  case $(Absyn::Minus,t1,&Uint(i)): return plus(t1,uint(0 - i),tp);
-    // t - t   ==>  0
-  case $(Absyn::Minus,t1,t2):
-    if (cmp_term(t1,t2) == 0) return uint(0);
-    p == Absyn::Plus;
-    t2 = binop(Absyn::Times,t2,uint(-1),tp);
-    return binop(Absyn::Plus,t1,t2,tp);
-    // t1 + 0  ==>  t1
-    //  case $(Absyn::Plus,t1,&Uint(0)): return t1;
-    // t1 * 1  ==>  t1
-    //  case $(Absyn::Times,t1,&Uint(1)): return t1;
-    // trying to normalize for commutative and associative operator p
-    // into the form ((t1 p t2) p t3) ... p tn) where
-    // t1 <= t2 <= t3 <= ... <= tn
-  default:
-    if (p == Absyn::Plus) return flatten_merge_plus(t1,t2,tp);
-    if (is_associative_commutative(p)) return flatten_merge(p,t1,t2,tp);
-    break;
-  }
-  let p = Binop(p,t1,t2,tp);
-  return hash_cons_term(&p);
-}
-
-term_t cast(Absyn::type_t tp, term_t tm) {
-  let t = Cast(tp,tm);
-  return hash_cons_term(&t);
-}
-term_t fresh_var(type_opt_t t) {
-  static int counter = 0;
-  return logicvar(NULL,counter++,t);
-}
-
-static bool same_term(term_t t1, term_t t2) { return cmp_term(t1,t2) == 0; }
-
-///////////////////// Assertions /////////////////////
-// inner loop for calculating the size of an assertion -- we
-// take care to figure out the size as a dag and not a tree.
-static unsigned int 
-assn_size_loop(assn_t a, unsigned int c, list_t<assn_t,`H>@ prev){
- LOOP:
-  if (memq(*prev,a)) return c;
-  *prev = new List(a,*prev);
-  switch (a) {
-  case &True:  return c;
-  case &False: return c;
-  case &Prim(...): return 1+c;
-  case &And(a1,a2): fallthru(a1,a2);
-  case &Or(a1,a2): 
-    c = assn_size_loop(a2,1+c,prev);
-    a = a1;
-    goto LOOP;
-  case &Not(a1):
-    ++c;
-    a = a1;
-    goto LOOP;
-  case &Subst(vd,t,a1):
-    ++c;
-    a = a1;
-    goto LOOP;
-  }
-}
-
-// counter used for reporting purposes
-static unsigned int max_assn_size = 0;
-
-// calculate the size of an assertion
-unsigned int assn_size(assn_t a) {
-  list_t<assn_t,`H> prev = NULL;
-  let c = assn_size_loop(a,0,&prev);
-  if (c > max_assn_size) {
-    max_assn_size = c;
-  }
-  return c;
-}
-
-static string_t d2string(assn_t a, int @c,
-                         list_t<$(assn_t,string_t<`H>,string_t<`H>)@`H,`H>@ prev) {
-  for (let ps = *prev; ps != NULL; ps = ps->tl) {
-    let &$(a1,n,v) = ps->hd;
-    if ((unsigned int)a1 == (unsigned int)a) return n;
-  }
-  let n = aprintf("A%d",*c); 
-  *c = *c+1;
-  string_t s;
-  switch (a) {
-  case &True: s = "true"; break;
-  case &False: s = "false"; break;
-  case &Prim(...): s = assn2string(a); break;
-  case &And(a1,a2):
-    let d1 = d2string(a1,c,prev);
-    let d2 = d2string(a2,c,prev);
-    s = aprintf("%s && %s",d1,d2);
-    break;
-  case &Or(a1,a2):
-    let d1 = d2string(a1,c,prev);
-    let d2 = d2string(a2,c,prev);
-    s = aprintf("%s || %s",d1,d2);
-    break;
-  case &Not(a):
-    let d = d2string(a,c,prev);
-    s = aprintf("not(%s)",d);
-    break;
-  case &Subst(vd,t,a):
-    let d = d2string(a,c,prev);
-    s = aprintf("Subst[%s=%s](%s)",Absynpp::qvar2string(vd->name),
-                term2string(t),d);
-    break;
-  }
-  *prev = new List{new $(a,n,s),*prev};
-  return n;
-}
-
-string_t dag2string(assn_t a) {
-  list_t<$(assn_t,string_t<`H>,string_t<`H>)@`H,`H> decls = NULL;
-  string_t@`H newline = new "\n";
-  string_t@`H equals = new " = ";
-  int count = 0;
-  string_t res = d2string(a,&count,&decls);
-  list_t<string_t@`H,`H> strings = list(new " in ",new res,newline);
-  for (; decls != NULL; decls = decls->tl) {
-    let &$(_,*n,*d) = decls->hd;
-    strings = new List{n,new List{equals,new List{d,new List{newline,strings}}}};
-  }
-  return strconcat_l(strings);
-}
-
-// calculate a string representation (and total tree node count) for an
-// assertion.  the prec field (precedent) is used to avoid some parens.
-static string_t a2string(assn_t a, int prec, int@ size) {
-  switch (a) {
-  case &True: return "true";
-  case &False: return "false";
-  case &Prim(t1,p,t2):
-    *size += 1;
-    string_t ps;
-    switch (p) {
-    case Eq: ps = "=="; break;
-    case Neq: ps = "!="; break;
-    case SLt: ps = " S< "; break;
-    case SLte: ps = " S<= "; break;
-    case ULt: ps = " U< "; break;
-    case ULte: ps = " U<= "; break;
-    default: Warn::impos("assn2string primop");
-    }
-    return aprintf("%s%s%s",term2string(t1),ps,term2string(t2));
-  case &Or(a1,a2): 
-    *size += 1;
-    if (prec <= 5)
-      return aprintf("%s || %s",a2string(a1,5,size),a2string(a2,5,size));
-    else 
-      return aprintf("(%s || %s)",a2string(a1,5,size),a2string(a2,5,size));
-  case &And(a1,a2): 
-    *size += 1;
-    if (prec <= 10)
-      return aprintf("%s && %s",a2string(a1,10,size),a2string(a2,10,size));
-    else 
-      return aprintf("(%s && %s)",a2string(a1,10,size),a2string(a2,10,size));
-  case &Not(a1):
-    *size += 1;
-    return aprintf("!%s",a2string(a1,20,size));
-  case &Subst(vd,t,a):
-    *size += 1;
-    if (Flags::debug_assn)
-      return aprintf("Subst[%s_%x:=%s](%s)",Absynpp::qvar2string(vd->name),
-                     (unsigned int)vd, term2string(t),a2string(a,0,size));
-    else 
-      return aprintf("Subst[%s:=%s](%s)",Absynpp::qvar2string(vd->name),
-                     term2string(t),a2string(a,0,size));
-  }
-}
-
-int tree_size = 0;
-
-// convert an assertion to a string.
-string_t assn2string(assn_t a) {
-  tree_size = 0;
-  return a2string(a,0,&tree_size);
-}
-
-// assertion constants for true and false
-datatype Assn.True true_assn = True;
-datatype Assn.False false_assn = False;
-
-//////////////////////////////////////////////////////////////
-// hash-consing to try to preserve as much sharing as we
-// can -- has a nice impact on performance (much better than
-// lazy substitution), but alas, we still end up allocating a lot.  
-// It would be better if we didn't have to allocate the thing 
-// that want to lookup.  That could happen if we had a different 
-// type for hashtable lookup (as we did with dictionaries.)
-
-int assnhash(datatype Assn @a) {
-  switch (a) {
-  case &False: return 0;
-  case &True: return 1;
-  case &Prim(t1,p,t2): 
-    return termhash(t1) + p + termhash(t2);
-  case &And(a1,a2): 
-    return (((unsigned int)a1 + (unsigned int)a2) >> 4) + 3;
-  case &Or(a1,a2): 
-    return (((unsigned int)a2 + (unsigned int)a1) >> 4) + 5;    
-  case &Not(a1): 
-    return ((unsigned int)a1 >> 4) + 61;
-  case &Subst(vd,t,a): 
-    return ((unsigned int)a >> 4) + ((unsigned int)vd >> 4) ^ termhash(t) + 1;
-  }
-}
-
-static inline int assncode(datatype Assn @a) {
-  switch (a) {
-  case &True:  return 0;
-  case &False: return 1;
-  case &Prim(...): return 2;
-  case &And(...): return 3;
-  case &Or(...): return 4;
-  case &Not(...): return 5;
-  case &Subst(...): return 6;
-  }
-}
-
-// compare two assertions and return 0 if they are structurally equal,
-// non-zero value otherwise.
-int neqassn(datatype Assn @`r1 _a1, datatype Assn @`r2 _a2) {
-  datatype Assn @`r1+`H a1 = _a1;
-  datatype Assn @`r2+`H a2 = _a2;
- LOOP:
-  if (a1 == a2) return 0;
-  switch $(a1,a2) {
-  case $(&And(a11,a12),&And(a21,a22)): fallthru(a11,a12,a21,a22);
-  case $(&Or(a11,a12),&Or(a21,a22)): 
-    if (neqassn(a12,a22)) return 1;
-    a1 = a11;
-    a2 = a21;
-    goto LOOP;
-  case $(&Prim(t11,p1,t12),&Prim(t21,p2,t22)):
-    if (p1 != p2) return 1;
-    if (cmp_term(t11,t21) != 0) return 1;
-    return cmp_term(t12,t22);
-  case $(&Not(na1),&Not(na2)): a1 = na1; a2 = na2; goto LOOP;
-  case $(&Subst(vd1,t1,a11),&Subst(vd2,t2,a22)):
-    if ((int)vd1 != (int)vd2) return 1;
-    if (cmp_term(t1,t2) != 0) return 1;
-    a1 = a11;
-    a2 = a22;
-    goto LOOP;
-  default: return 1;
-  }
-}
-
-// compare two assertions for structural equality -- does not assume
-// the components have been hash-consed, but probably could.
-int assncmp(datatype Assn @`r1 _a1, datatype Assn @`r2 _a2) {
-  datatype Assn @`r1+`H a1 = _a1;
-  datatype Assn @`r2+`H a2 = _a2;
- LOOP:
-  if (a1 == a2) return 0;
-  switch $(a1,a2) {
-  case $(&And(a11,a12),&And(a21,a22)): fallthru(a11,a12,a21,a22);
-  case $(&Or(a11,a12),&Or(a21,a22)): 
-    int c = assncmp(a11,a21);
-    if (c != 0) return c;
-    a1 = a12;
-    a2 = a22;
-    goto LOOP;
-  case $(&Prim(t11,p1,t12),&Prim(t21,p2,t22)):
-    int c = (int)p1 - (int)p2;
-    if (c != 0) return c;
-    c = cmp_term(t11,t21);
-    if (c != 0) return c;
-    return cmp_term(t12,t22);
-  case $(&Not(na1),&Not(na2)): a1 = na1; a2 = na2; goto LOOP;
-  case $(&Subst(vd1,t1,a11),&Subst(vd2,t2,a22)):
-    int c = (int)vd1 - (int)vd2;
-    if (c != 0) return c;
-    c = cmp_term(t1,t2);
-    if (c != 0) return c;
-    a1 = a11;
-    a2 = a22;
-    goto LOOP;
-  default: return assncode(a2) - assncode(a1);
-  }
-}
-
-// a hash-table to hold all of the assertion nodes to maximize
-// sharing.  we also record an optional reduced version of the
-// assertion, and provide an optional set of primitive assertions 
-// that correspond to the factored normal form for the assertion.
-typedef struct AssnInfo {
-  assn_t          assn;
-  assn_opt_t      reduced;
-  assn_set_opt_t *widened_set;
-} assn_info_t;
-
-static struct Hashtable::Table<assn_t,assn_info_t@,`H> *hash_cons_table = NULL;
-
-static Hashtable::table_t<assn_t,assn_info_t@>
-get_hash_cons_table() {
-  Hashtable::table_t h;
-  if (hash_cons_table == NULL) {
-    h = Hashtable::create(221, neqassn, assnhash);
-    hash_cons_table = h;
-  } else {
-    h = (Hashtable::table_t)hash_cons_table;
-  }
-  return h;
-}
-static assn_info_t@ hash_cons_it(datatype Assn@`r a);
-static assn_t hash_cons(datatype Assn@`r a);
-
-
-// shallow copy of an assertion from region `r to the heap and 
-// simultaneously determine whether or not the assertion is
-// reduced so that we can put the information in the table.
-static assn_info_t@ copy_assn(datatype Assn@`r a){
-  switch (a) {
-  case &True: 
-    assn_set_opt_t s = Set::empty(assncmp);
-    return new AssnInfo{&true_assn,&true_assn,new s};
-  case &False: 
-    return new AssnInfo{&false_assn,&false_assn,new NULL};
-  case &And(a1,a2): 
-    let a1info = hash_cons_it(a1);
-    let a2info = hash_cons_it(a2);
-    bool reduced = true;
-    if (a1info->reduced == NULL) {
-      reduced = false;
-      a1 = a1info->assn;
-    } else {
-      a1 = (assn_t)a1info->reduced;
-    }
-    if (a2info->reduced == NULL) {
-      reduced = false;
-      a2 = a2info->assn;
-    } else {
-      a2 = (assn_t)a2info->reduced;
-    }
-    assn_t newa = new And(a1,a2);
-    assn_opt_t reda = reduced ? (assn_opt_t)newa : (assn_opt_t)NULL;
-    return new AssnInfo{newa,reda,NULL};
-  case &Or(a1,a2): 
-    let a1info = hash_cons_it(a1);
-    let a2info = hash_cons_it(a2);
-    bool reduced = true;
-    if (a1info->reduced == NULL) {
-      reduced = false;
-      a1 = a1info->assn;
-    } else {
-      a1 = (assn_t)a1info->reduced;
-    }
-    if (a2info->reduced == NULL) {
-      reduced = false;
-      a2 = a2info->assn;
-    } else {
-      a2 = (assn_t)a2info->reduced;
-    }
-    assn_t newa = new Or(a1,a2);
-    assn_opt_t reda = reduced ? (assn_opt_t)newa : (assn_opt_t)NULL;
-    return new AssnInfo{newa,reda,NULL};
-  case &Prim(t1,p,t2): 
-    assn_t newa = new Prim(t1,p,t2);
-    return new AssnInfo{newa,newa,NULL};
-  case &Not(a): return new AssnInfo{new Not(hash_cons(a)),NULL,NULL};
-  case &Subst(vd1,t1,a1): 
-    return new AssnInfo{new Subst(vd1,t1,hash_cons(a1)),NULL,NULL};
-  }
-}
-
-/*
-void print_assn(assn_t a) {
-  printf("%s",assn2string(a));
-}
-
-void print_assninfo(assn_info_t @a) {
-  return;
-}
-
-void dump_hashtable(Hashtable::table_t<assn_t,assn_info_t@> h) {
-  print_table_map(h, print_assn, print_assninfo);
-}
-*/
-
-// given an assertion node, look it up in the hash-table.  If it's
-// not already there, then make a shallow copy and enter it (along
-// with info regarding whether or not it's been reduced) into the
-// hash table.
-static assn_info_t@ hash_cons_it(datatype Assn@`r a) {
-  Hashtable::table_t h = get_hash_cons_table();
-  let resopt = Hashtable::lookup_other_opt(h,a,neqassn,assnhash);
-  if (resopt == NULL) {
-    let ainfo = copy_assn(a);
-    Hashtable::insert(h,ainfo->assn,ainfo);
-    return ainfo;
-  } else {
-    return *resopt;
-  }
-}
-
-static assn_t hash_cons(datatype Assn@`r a) {
-  let ainfo = hash_cons_it(a);
-  let redopt = ainfo->reduced;
-  if (redopt == NULL) return ainfo->assn;
-  else return (assn_t)redopt;
 }
 
 // Need to fake up vardecls for the "memory" and "exception"
@@ -1199,8 +541,595 @@ using Absyn {
   }
 }
 
-// build an and node.
-assn_t and(assn_t a1, assn_t a2) {
+// data structure for a polynomial a1*t1 + a2*t2 + ... + an*tn
+// used in 1) normalizing a term. 
+//         2) generating matrix for Gaussian elimination
+typedef List::list_t<$(int,term_t)@,`H> coefficient_term_list_t;
+// a function to retrieve the coefficients and terms in a
+// polynomial from a term, the extra integer represent
+// the constants a0 in the term
+// a0 + a1*t1 + a2*t2 + ...
+
+
+$(coefficient_term_list_t,int) get_coefficient_term_list(term_t t) {
+  coefficient_term_list_t coefficient_term_list = NULL;
+  int res = 0;
+ LOOP:
+  switch(t){
+  case &Uint(i,_): res = i; break;
+  case &Binop(Absyn::Plus,t1,&Uint(i,_),_):
+    res = i;
+    t = t1;
+    goto LOOP;
+  case &Binop(Absyn::Plus, t1, t2,_):
+    switch(t2){
+    case &Binop(Absyn::Times,t21,&Uint(c2,_),_):
+      coefficient_term_list = new List(new $(c2,t21), coefficient_term_list);
+      break;
+    case &Binop(Absyn::Plus,_,_,_):
+      Warn::impos("Plus in the right branch, not a normal form");
+      break;
+    default:
+      coefficient_term_list = new List(new $(1,t2),coefficient_term_list);
+      break;
+    }
+    t = t1;
+    goto LOOP;
+  default:
+    switch(t){
+    case &Binop(Absyn::Times,t21,&Uint(c2,_),_):
+      coefficient_term_list = new List(new $(c2,t21), coefficient_term_list);
+      break;
+    default:
+      coefficient_term_list = new List(new $(1,t),coefficient_term_list);
+      break;
+    }
+    break;
+  }
+  return $(coefficient_term_list,res);
+}
+
+// given two sorted list [(t1,c1),(t2,c2),...,(tn,cn)]
+// and [(s1,d1),(s2,d2),...,(sn,dn)]
+// generate a merged list [(q1,e1),(q2,e2),...,(qm,em)]
+// think about it as adding two polynomials
+// by merging the coefficients of same terms.
+// the final result should also be sorted and each term
+// in the list should be unique.
+static coefficient_term_list_t 
+imp_merge_coefficient_term_list(int less_eq(term_t,term_t),
+		    coefficient_term_list_t termlist1,
+		    coefficient_term_list_t termlist2){
+  coefficient_term_list_t res_tail = NULL;
+  coefficient_term_list_t res = NULL;
+  if (termlist1 == NULL) return termlist2;
+  if (termlist2 == NULL) return termlist1;
+  let cmp_result = less_eq(termlist1->hd->f1,termlist2->hd->f1);
+  while ((termlist1 != NULL) && (termlist2!= NULL)){
+    let cmp_result = less_eq(termlist1->hd->f1,termlist2->hd->f1);
+    if (cmp_result < 0){ // termlist1< termlist2
+      if (res_tail== NULL){
+	res_tail= termlist1;
+	termlist1= termlist1->tl;
+	res = res_tail;
+      }else{
+	res_tail->tl = termlist1;
+	res_tail= termlist1;
+	termlist1= termlist1->tl;
+      }
+    } else if (cmp_result > 0) { // termlist2< termlist1
+      if (res_tail== NULL){
+	res_tail= termlist2;
+	termlist2= termlist2->tl;
+	res = res_tail;
+      } else {
+	res_tail->tl = termlist2;
+	res_tail= termlist2;
+	termlist2= termlist2->tl;
+      }
+    } else { // cmp_result == 0, termlist1== termlist2
+      // merge two values;
+      let i = termlist1->hd->f0 + termlist2->hd->f0;
+      if (i != 0){
+	termlist1->hd->f0 = i;
+	if (res_tail== NULL){
+	  res_tail= termlist1;
+	  res = res_tail;
+	} else {
+	  res_tail->tl = termlist1;
+	  res_tail= termlist1;
+	}
+      }
+      termlist1= termlist1->tl;
+      termlist2= termlist2->tl;
+    }
+  }
+  if (res_tail== NULL) {
+    res_tail= (termlist1== NULL)? termlist2: termlist1;
+    res = res_tail;
+  } else {
+    res_tail->tl = (termlist1==NULL)? termlist2: termlist1;
+  }
+  return res;
+}
+
+// given a primop p, return an unsigned int u such that
+// for all term t, t p Uint(u) == Uint(u) p t == t,
+// i.e., Uint(u) is the identity in the commutative group.
+inline static unsigned id_of_primop(Absyn::primop_t p){
+  switch(p) {
+  case Absyn::Plus:   return 0;
+  case Absyn::Times:  return 1;
+  case Absyn::Bitand: return 0xFFFFFFFF;
+  case Absyn::Bitor:  return 0;
+  case Absyn::Bitxor: return 0;
+  default: Warn::impos("no id for primop %s",Absynpp::prim2string(p));
+  }
+}
+
+
+// given a list t1, t2, t3, t4,... and a primop p
+// return a term ((((t1 p t2) p t3) p t4)...)
+static term_t termlist2term(list_t<term_t> termlist, int newc, Absyn::primop_t p, type_opt_t tp){
+  let id = id_of_primop(p);
+  if (termlist == NULL) return uint(newc);
+  term_t t = termlist->hd;
+  termlist = termlist->tl;
+  while(termlist != NULL){
+    let newterm = Binop(p,t, termlist->hd, tp);
+    t = hash_cons_term(&newterm);
+    termlist = termlist->tl;
+  }
+  if (id == newc) return t;
+  else {
+//     // term is of the form t * c
+//     if (p == Absyn::Times){
+//       switch(t){
+// 	// term is of the form (t1 + ... + tn) * newc, distribute the newc
+//       case &Binop(Absyn::Plus,_,_,_):
+// 	let $(t_list,c) = flatten_plus(t);
+// 	let newt_list = map_c(times_newc,newc,t_list);
+// 	return termcoeflist2term(newt_list,c*newc,topt);
+// 	break;
+//       default: break;
+//       }
+//     }
+    let newterm = Binop(p,t,uint(newc),tp);
+    return hash_cons_term(&newterm);
+  }
+}
+
+// given a term t and its coefficient c, returns a 
+// new term c*t
+static term_t compute_factor(type_opt_t tp, $(int, term_t) @coefficient_term){
+  let &$(c,t) = coefficient_term;
+  if (c == 1) return t;
+  else {
+    let newfactor = Binop(Absyn::Times,t,uint(c),tp);
+    return hash_cons_term(&newfactor);
+  }
+}
+
+static int inv_termcmp(term_t t1, term_t t2){
+  return -termcmp(t1, t2);
+}
+
+// try to normalize a term t1 + t2
+// first generate coefficient term list from t1, and t2,
+// t1 = a1 * t11 + a2 * t12 + ...
+// t2 = b1 * t21 + b2 * t22 + ...
+// merge the two lists by combining coefficients for the same term
+// and return a new normalized term of the form
+// c1 * t31 + c2 * t32 + ...
+static term_t normalize_plus(term_t t1, term_t t2, type_opt_t tp){
+  let $(coefficient_term_list1,i1) = get_coefficient_term_list(t1);
+  let $(coefficient_term_list2,i2) = get_coefficient_term_list(t2);
+  let coefficient_term_list = 
+    imp_merge_coefficient_term_list(inv_termcmp,
+				    coefficient_term_list1, 
+				    coefficient_term_list2);
+  
+  let term_list = map_c(compute_factor,tp,coefficient_term_list);
+  return termlist2term(term_list,i1+i2,Absyn::Plus,tp);
+}
+
+
+// given a term of the form t1 p t2 p t3 ... tn p c
+// where p is a commutative and associative primop,
+// return the ordered list [t1,t2,...,tn] and c
+// so that we can merge two terms
+static $(list_t<term_t,`H>, int)  term2termlist(Absyn::primop_t p, term_t t){
+  list_t<term_t,`H> termlist = NULL;
+  int res = id_of_primop(p);
+ LOOP:
+  switch (t){
+  case &Uint(i,_): res = i; break;
+  case &Binop(p1,t1,&Uint(i,_),_) && p1 == p: 
+    res = i;
+    t = t1;
+    goto LOOP;
+  case &Binop(p1, t1, t2,_)&& p1 == p:
+    termlist = new List(t2, termlist);
+    t = t1;
+    goto LOOP;
+  default:
+    termlist = new List(t, termlist);
+    break;
+  }
+  return $(termlist,res);
+}
+
+//evaluating commutative associative bin op on constants.
+inline static unsigned eval_binop(Absyn::primop_t p, unsigned i, unsigned j){
+  switch(p){
+  case Absyn::Plus: return (i+j);
+  case Absyn::Times: return (i*j);
+  case Absyn::Bitand: return (i & j);
+  case Absyn::Bitor: return (i | j);
+  case Absyn::Bitxor: return (i ^ j);
+  default: Warn::impos("Error in evaluating binop");
+  }
+}
+
+
+static term_t normalize_assoc_commu(Absyn::primop_t p, term_t t1, term_t t2,type_opt_t tp){
+  let $(term_list1,c1) = term2termlist(p,t1);
+  let $(term_list2,c2) = term2termlist(p,t2);
+  let term_list = List::imp_merge(inv_termcmp,term_list1,term_list2);
+  let c = eval_binop(p,c1,c2);
+  return termlist2term(term_list,c,p,tp);
+}
+
+inline static bool is_nonassociative_commutative(Absyn::primop_t p,type_opt_t tp) {
+  switch (p) {
+  case Absyn::Plus: 
+  case Absyn::Times:
+    switch (tp) {
+    case &Absyn::AppType(&Absyn::FloatCon(_),...): return true;
+    default: return false;
+    }
+  case Absyn::Eq:
+  case Absyn::Neq: return true;
+  default: return false;
+  }
+}
+
+inline static bool is_associative_commutative(Absyn::primop_t p,type_opt_t tp) {
+  switch (p) {
+  case Absyn::Plus:
+  case Absyn::Times:
+    switch (tp) {
+      // integer type
+    case &Absyn::AppType(&Absyn::IntCon(...),...):return true;
+    default: return false;
+    }
+  case Absyn::Bitand:
+  case Absyn::Bitor:
+  case Absyn::Bitxor: return true;
+  default: return false;
+  }
+}
+
+
+term_t binop(Absyn::primop_t p, term_t t1, term_t t2, type_opt_t tp) {
+  switch $(p,t1,t2) {
+  case $(_,&Uint(i,_),&Uint(j,_)):
+    // constant folding
+    switch (p) {
+    case Absyn::Plus: return uint(i+j);
+    case Absyn::Minus: return uint(i-j);
+    case Absyn::Bitand: return uint(i & j);
+    case Absyn::Bitor: return uint(i | j);
+    case Absyn::Bitxor: return uint(i ^ j);
+    case Absyn::Bitlshift: return uint(i << j);
+    case Absyn::Bitlrshift: return uint(i >> j);
+    default: break;
+    }
+    break;
+  case $(Absyn::Minus,t1,t2):
+    switch (tp) {
+    case &Absyn::AppType(&Absyn::IntCon(...),...):
+      // t1 - t1 == 0
+      if (termcmp(t1,t2) == 0) return uint(0);
+      // t1 - t2 == t1 + (-1) * t2
+      t2 = binop(Absyn::Times,t2,uint(-1),tp);
+      return binop(Absyn::Plus,t1,t2,tp);
+    default: break;
+    }
+    break;
+  default:
+    // trying to normalize for commutative and associative operator p
+    // into the form ((t1 p t2) p t3) ... p tn) where
+    // t1 <= t2 <= t3 <= ... <= tn
+    if (is_associative_commutative(p,tp)){
+      // given two terms of the form a0 + a1*t1 + a2*t2 + ...
+      // and b0 + b1 * s1 + b2 * s2 + ...
+      // trying to normalize the sum by merging the coefficient
+      // of the same terms
+      if (p == Absyn::Plus) return normalize_plus(t1,t2,tp);
+      else return normalize_assoc_commu(p,t1,t2,tp);
+    }
+    if (is_nonassociative_commutative(p,tp)) {
+      if (termcmp(t1,t2) > 0) {
+	let tmpt = t1;
+	t1 = t2;
+	t2 = tmpt;
+      }
+    }
+    break;
+  }
+  let p = Binop(p,t1,t2,tp);
+  return hash_cons_term(&p);
+}
+
+type_opt_t get_term_type(term_t t) {
+  switch (t) {
+  case &Uint(_,tp): return tp;
+  case &Const(e): return e->topt;
+  case &LogicVar(_,_,topt): return topt;
+  case &Binop(_,_,_,tp): return tp;
+  case &Unop(_,_,tp): return tp;
+  case &Cast(tp,_): return tp;
+  case &Select(_,_,tp): return tp;
+  case &Aggr(_,_,_,tp): return tp;
+  case &Proj(t1,i,tp): return tp;
+  case &Addr(vd): return Absyn::uint_type;
+  case &Update(...): return NULL;
+  case &Alloc(_,_,_,tp): return tp;
+  case &Offsetf(_,_,tp): return tp;
+  case &Offseti(_,_,tp): return tp;
+  case &Tagof(_): return Absyn::uint_type;
+  }
+}
+
+static term_t subst_term(Dict::dict_t<term_t,term_t> dict, term_t t,
+			 Hashtable::table_t<term_t,term_t> term_h){
+  let t1 = Hashtable::lookup_opt(term_h,t);
+  if (t1 != NULL) {
+#ifdef AssnDefDebug
+    fprintf(stderr,"%s was substituted, the result was \n%s\n",
+	    term2string(t),term2string(*t1));
+#endif
+    return *t1;
+  }
+  term_t res;
+  switch (t){
+  case &Uint(...):
+  case &Const(...): 
+  case &Addr(...): 
+  case &Alloc(...): res = t; break;
+  case &Select(t1,t2,tp):
+    let s1 = subst_term(dict,t1,term_h);
+    let s2 = subst_term(dict,t2,term_h);
+    res = select(s1,s2,tp);
+    break;
+  case &Update(t1,t2,t3):
+    let s1 = subst_term(dict,t1,term_h);
+    let s2 = subst_term(dict,t2,term_h);
+    let s3 = subst_term(dict,t3,term_h);
+    res = update(s1,s2,s3);
+    break;
+  case &LogicVar(...):
+    let t1 = Dict::lookup_opt(dict,t);
+    if (t1 != NULL) res = *t1;
+    else res = t;
+    break;
+  case &Unop(p,t1,tp):
+    let s1 = subst_term(dict,t1,term_h);
+    res = unop(p,s1,tp);
+    break;
+  case &Binop(p,t1,t2,tp):
+    let s1 = subst_term(dict,t1,term_h);
+    let s2 = subst_term(dict,t2,term_h);
+    res = binop(p,s1,s2,tp);
+    break;
+  case &Cast(tp,t1):
+    let s1 = subst_term(dict,t1,term_h);
+    res = cast(tp,t1);
+    break;
+  case &Aggr(b,tag,tlist,tp):
+    let slist = NULL;
+    for(;tlist != NULL; tlist = tlist->tl){
+      slist = new List(subst_term(dict,tlist->hd,term_h),slist);
+    }
+    List::imp_rev(slist);
+    res = aggr(b,tag,slist,tp);
+    break;
+  case &Proj(t1,i,tp):
+    let s1 = subst_term(dict,t1,term_h);
+    res = proj(s1,i,tp);
+    break;
+  case &Offsetf(f,t1,tp):
+    let s1 = subst_term(dict,t1,term_h);
+    res = offsetf(f,s1,tp);
+    break;
+  case &Offseti(t1,t2,tp):
+    let s1 = subst_term(dict,t1,term_h);
+    let s2 = subst_term(dict,t2,term_h);
+    res = offseti(s1,s2,tp);
+    break;
+  case &Tagof(t1):
+    res = tagof(subst_term(dict,t1,term_h));
+    break;
+  }
+  Hashtable::insert(term_h,t,res);
+  return res;
+}
+/////// assertion manipulation /////////////
+  
+// calculate a string representation (and total tree node count) for an
+// assertion.  the prec field (precedent) is used to avoid some parens.
+static string_t a2string(datatype Assn @a, int prec) {
+  switch (a) {
+  case &True: return "true";
+  case &False: return "false";
+  case &Prim(t1,p,t2):
+    string_t ps;
+    switch (p) {
+    case Eq: ps = "=="; break;
+    case Neq: ps = "!="; break;
+    case SLt: ps = " S< "; break;
+    case SLte: ps = " S<= "; break;
+    case ULt: ps = " U< "; break;
+    case ULte: ps = " U<= "; break;
+    default: Warn::impos("assn2string primop");
+    }
+    return aprintf("%s%s%s",term2string(t1),ps,term2string(t2));
+  case &Or(a1,a2): 
+    if (prec <= 5)
+      return aprintf("%s OR %s",a2string(a1,5),a2string(a2,5));
+    else 
+      return aprintf("(%s OR %s)",a2string(a1,5),a2string(a2,5));
+  case &And(a1,a2): 
+    if (prec <= 10)
+      return aprintf("%s AND %s",a2string(a1,10),a2string(a2,10));
+    else 
+      return aprintf("(%s AND %s)",a2string(a1,10),a2string(a2,10));
+  }
+}
+
+
+string_t assn2string(datatype Assn @a){
+  return a2string(a,0);
+}
+
+//////////////////////////////////////////////////////////////
+// hash-consing to try to preserve as much sharing as we
+// can -- has a nice impact on performance (much better than
+// lazy substitution), but alas, we still end up allocating a lot.  
+// It would be better if we didn't have to allocate the thing 
+// that want to lookup.  That could happen if we had a different 
+// type for hashtable lookup (as we did with dictionaries.)
+
+int assnhash(datatype Assn @a) {
+  switch (a) {
+  case &False: return 0;
+  case &True: return 1;
+  case &Prim(t1,p,t2): 
+    return termhash(t1) + p + termhash(t2);
+  case &And(a1,a2): 
+    return (((unsigned int)a1 + (unsigned int)a2) >> 4) + 3;
+  case &Or(a1,a2): 
+    return (((unsigned int)a2 + (unsigned int)a1) >> 4) + 5;    
+  }
+}
+
+static inline int assncode(datatype Assn @a) {
+  switch (a) {
+  case &True:  return 0;
+  case &False: return 1;
+  case &Prim(...): return 2;
+  case &And(...): return 3;
+  case &Or(...): return 4;
+  }
+}
+
+// compare two assertions for structural equality -- does not assume
+// the components have been hash-consed, but probably could.
+int assncmp(datatype Assn @`r1 _a1, datatype Assn @`r2 _a2) {
+  datatype Assn @`r1+`H a1 = _a1;
+  datatype Assn @`r2+`H a2 = _a2;
+ LOOP:
+  if (a1 == a2) return 0;
+  switch $(a1,a2) {
+  case $(&And(a11,a12),&And(a21,a22)): fallthru(a11,a12,a21,a22);
+  case $(&Or(a11,a12),&Or(a21,a22)): 
+    int c = assncmp(a11,a21);
+    if (c != 0) return c;
+    a1 = a12;
+    a2 = a22;
+    goto LOOP;
+  case $(&Prim(t11,p1,t12),&Prim(t21,p2,t22)):
+    int c = (int)p1 - (int)p2;
+    if (c != 0) return c;
+    c = termcmp(t11,t21);
+    if (c != 0) return c;
+    return termcmp(t12,t22);
+  default: return assncode(a2) - assncode(a1);
+  }
+}
+
+// shallow copy of an assertion from region `r to the heap and 
+// simultaneously determine whether or not the assertion is
+// reduced so that we can put the information in the table.
+static assn_t copy_assn(datatype Assn@`r a){
+  switch (a) {
+  case &True: 
+    Warn::impos("True assertion should be in the table");
+  case &False: 
+    Warn::impos("False assertion should be in the table");
+  case &And(a1,a2): return new And(a1,a2);
+  case &Or(a1,a2): return new Or(a1,a2);
+  case &Prim(t1,p,t2): return new Prim(t1,p,t2);
+  }
+}
+
+
+// assertion constants for true and false
+datatype Assn.True true_assn = True;
+datatype Assn.False false_assn = False;
+
+static assn_t neg_assn(datatype Assn@ a){
+  switch (a) {
+  case &True: return &false_assn;
+  case &False: return &true_assn;
+  case &And(a1,a2): return new Or(not(a1),not(a2));
+  case &Or(a1,a2): return new And(not(a1),not(a2));
+  case &Prim(t1,p,t2): 
+    switch (p){
+    case Eq: return new Prim(t1,Neq,t2);
+    case Neq: return new Prim(t1,Eq,t2);
+    case SLt: return new Prim(t2,SLte,t1);
+    case SLte: return new Prim(t2,SLt,t1);
+    case ULt: return new Prim(t2,ULte,t1);
+    case ULte: return new Prim(t2,ULt,t1);
+    default: Warn::impos("undefined prim relation");
+    }
+  }
+}
+
+// the assn_hash_table stores the assertion, its negation, and the widened_set
+// the invariant for the assn_hash_table is that each assertion
+// a and not a are added to the table at the same time.
+// i.e., if a is not in the table, neither is not a.
+typedef struct AssnHashedInfo {
+  assn_t assn;
+  assn_t negation;
+  assn_set_opt_t *widened_set;
+} @assn_hashed_info_t;
+
+static struct Hashtable::Table<assn_t, assn_hashed_info_t> *assn_hash_cons_table;
+
+static Hashtable::table_t<assn_t,assn_hashed_info_t> 
+get_assn_hash_cons_table(){
+  Hashtable::table_t<assn_t,assn_hashed_info_t> h;
+  if (assn_hash_cons_table == NULL) {
+    h = Hashtable::create(221, assncmp, assnhash);
+    assn_hash_cons_table = h;
+    assn_set_opt_t st = Set::empty(assncmp);
+    Hashtable::insert(h,&true_assn,new AssnHashedInfo{&true_assn,&false_assn,new st});
+    Hashtable::insert(h,&false_assn,new AssnHashedInfo{&false_assn,&true_assn,new NULL});
+  } else {
+    h = (Hashtable::table_t)assn_hash_cons_table;
+  }
+  return h;
+}
+static assn_t hash_cons_assn(datatype Assn @a) {
+  let h = get_assn_hash_cons_table();
+  let resopt = Hashtable::lookup_other_opt(h,a,assncmp,assnhash);
+  if (resopt == NULL) {
+    // given the invariant, if a was not in the table,
+    // neither was nega in the table.
+    let a2 = copy_assn(a);
+    let nega2 = neg_assn(a);
+    Hashtable::insert(h,a2,new AssnHashedInfo{a2,nega2,NULL});
+    Hashtable::insert(h,nega2,new AssnHashedInfo{nega2,a2,NULL});
+    return a2;
+  } else 
+    return (*resopt)->assn;
+}
+
+assn_t and(assn_t a1, assn_t a2){
   if (a1 == a2) return a1;
   switch $(a1,a2) {
   case $(&True,_): return a2;
@@ -1211,12 +1140,11 @@ assn_t and(assn_t a1, assn_t a2) {
     // NB: used to sort the operands based on physical address, but
     // to keep things more deterministic, I'm not sorting now.
     let a = And(a1,a2);
-    return hash_cons(&a);
-  }
+    return hash_cons_assn(&a);
+  }  
 }
 
-// build an or-node.
-assn_t or(assn_t a1, assn_t a2) {
+assn_t or(assn_t a1, assn_t a2){
   if (a1 == a2) return a1;
   switch $(a1,a2) {
   case $(&True,_): return a1;
@@ -1227,55 +1155,52 @@ assn_t or(assn_t a1, assn_t a2) {
     // NB: used to sort the operands based on physical address, but
     // to keep things more deterministic, I'm not sorting now.
     let a = Or(a1,a2);
-    return hash_cons(&a);
+    return hash_cons_assn(&a);
   }
 }
 
-// build a lazy substitution node.  
-assn_t subst(vardecl_t x, term_t newx, assn_t a) {
+static assn_t reinsert(assn_t a) {
+  let h = get_assn_hash_cons_table();
   switch (a) {
   case &True:
   case &False: return a;
-  case &Subst(y,newy,a2) && x == y:
-    // we have a2[newy/x][newx/x] == a2[newy[newx/x]/x]
-    return subst(x, subst_term(newx,x,newy), a2);
-  default:
-    let p = Subst(x,newx,a); 
-    return hash_cons(&p);
+  case &And(a1,a2): 
+    if (Hashtable::lookup_opt(h,a1) == NULL)
+      a1 = reinsert(a1);
+    if (Hashtable::lookup_opt(h,a2) == NULL)
+      a2 = reinsert(a2);
+    let a = And(a1,a2);
+    return hash_cons_assn(&a);
+  case &Or(a1,a2):
+    if (Hashtable::lookup_opt(h,a1) == NULL)
+      a1 = reinsert(a1);
+    if (Hashtable::lookup_opt(h,a2) == NULL)
+      a2 = reinsert(a2);
+    let a = Or(a1,a2);
+    return hash_cons_assn(&a);
+  case &Prim(...):
+    return hash_cons_assn(a);
   }
 }
+// since a was already in the assn hashtable, (not a) must
+// be there too. 
+assn_t not(assn_t a){
+  let h = get_assn_hash_cons_table();
+  assn_hashed_info_t *ahinfo = Hashtable::lookup_opt(h,a);
+  if (ahinfo == NULL) {
+    a = reinsert(a);
+    ahinfo = Hashtable::lookup_opt(h,a);
+  }
+  return (*ahinfo)->negation;
+}
 
-// build a primitive relation node.
-assn_t prim(term_t t1, prim_reln_t p, term_t t2) {
+assn_t prim(term_t t1, prim_reln_t p, term_t t2){
   let ptr = Prim(t1,p,t2);
-  return hash_cons(&ptr);
-}
-
-// for eq and neq, we sort the terms
-assn_t eq(term_opt_t t1opt, term_opt_t t2opt) {
-  if (t1opt == NULL || t2opt == NULL) return &true_assn;
-  let t1 = (term_t)t1opt;
-  let t2 = (term_t)t2opt;
-  if (cmp_term(t1,t2) > 0) {
-    t1 :=: t2;
-  }
-  return prim(t1,Eq,t2); 
-}
-
-// for eq and neq, we sort the terms
-assn_t neq(term_opt_t t1opt, term_opt_t t2opt) {
-  if (t1opt == NULL || t2opt == NULL) return &true_assn;
-  let t1 = (term_t)t1opt;
-  let t2 = (term_t)t2opt;
-  if (cmp_term(t1,t2) > 0) {
-    t1 :=: t2;
-  }
-  return prim(t1,Neq,t2); 
+  return hash_cons_assn(&ptr);
 }
 
 // some macros and functions for rest of the primitive relations.
-#define prim_assn(p,P) assn_t p(term_opt_t t1, term_opt_t t2) { \
-  if (t1 == NULL || t2 == NULL) return &true_assn; \
+#define prim_assn(p,P) assn_t p(term_t t1, term_t t2) { \
   return prim((term_t)t1,P,(term_t)t2); \
 }
 
@@ -1283,346 +1208,38 @@ prim_assn(slt,SLt)
   prim_assn(slte,SLte)
   prim_assn(ult,ULt)
   prim_assn(ulte,ULte)
-#define sgte(t1,t2) (slte(t2,t1))
-#define ugte(t1,t2) (ulte(t2,t1))
-#define sgt(t1,t2) (slt(t2,t1))
-#define ugt(t1,t2) (ult(t2,t1))
 
-static assn_t not_prim(term_t t1, Absyn::primop_t p, term_t t2) {
-  switch (p) {
-  case Eq : return neq(t1,t2);
-  case Neq: return eq(t1,t2);
-  case SLt : return sgte(t1,t2);
-  case SLte: return sgt(t1,t2);
-  case ULt : return ugte(t1,t2);
-  case ULte: return ugt(t1,t2);
-  default: Warn::impos("Vcgen::not_prim: non-primop");
+assn_t eq(term_t t1, term_t t2){
+  if (termcmp(t1,t2)>0) {
+    t1 :=: t2;
   }
+  return prim(t1,Eq,t2);
 }
 
-assn_t not(assn_t a) {
-  switch (a) {
-  case &True: return &false_assn;
-  case &False: return &true_assn;
-  case &Prim(t1,p,t2): return not_prim(t1,p,t2);
-  case &Not(a): return a;
-  default:
-    let ptr = Not(a);
-    return hash_cons(&ptr);
+assn_t neq(term_t t1, term_t t2){
+  if (termcmp(t1,zero())==0)
+    return prim(zero(),ULt,t2);
+  else if (termcmp(t2,zero())==0)
+    return prim(zero(),ULt,t1);
+  if (termcmp(t1,t2)>0) {
+    t1 :=: t2;
   }
+  return prim(t1,Neq,t2);
 }
 
-////// Push Through Subst and Not nodes ////
-// These functions take care of eliminating all of the Not and
-// Subst nodes in an assertion in one pass.  It is, unfortunately,
-// something that requires crawling over the tree, not just the dag.
-// However, we could improve things by memoizing the results, since
-// it's likely that we'll hit the same substitutions for various
-// assertion nodes.  The problem is that we will generally have
-// different environments built up when we run into them.
-
-// Both reduce_term and reduce_assn take in a substitution for 
-// non-escaping variables.
-// TRY: we could try using dictionaries here instead of lists.
-struct SubstNode<`r::E> {
-  struct SubstNode<`r> *`r next;
-  vardecl_t vd;
-  term_t    term;
-};
-typedef struct SubstNode<`r>*`r subst_t<`r>;
-
-static term_t 
-reduce_term(term_t t, subst_t subst) {
-  switch (t) {
-  case &Uint(_): 
-  case &Const(_): 
-  case &LogicVar(...): return t;
-  case &Cast(tp,tm):
-    let tm2 = reduce_term(tm,subst);
-    if (tm != tm2) return cast(tp,tm2);
-    else return t;
-  case &Unop(p,tm,tp):
-    let tm2 = reduce_term(tm,subst);
-    if (tm != tm2) return unop(p,tm2,tp);
-    else return t;
-  case &Binop(p,t1,s1,tp):
-    let t2 = reduce_term(t1,subst);
-    let s2 = reduce_term(s1,subst);
-    if (t1 != t2 || s1 != s2) return binop(p,t2,s2,tp);
-    else return t;
-  case &Select(t1,s1,tp):
-    let t2 = reduce_term(t1,subst);
-    let s2 = reduce_term(s1,subst);
-    if (t1 != t2 || s1 != s2) return select(t2,s2,tp);
-    else return t;
-  case &Update(t1,s1,u1):
-    let t2 = reduce_term(t1,subst);
-    let s2 = reduce_term(s1,subst);
-    let u2 = reduce_term(u1,subst);
-    if (t1 != t2 || s1 != s2 || u1 != u2) return update(t2,s2,u2);
-    else return t;
-  case &Proj(t1,i,tp):
-    let t2 = reduce_term(t1,subst);
-    if (t1 != t2) return proj(t2,i,tp);
-    else return t;
-  case &Aggr(is_union,tag,ts1,tp):
-    list_t<term_t> ts2 = NULL;
-    bool change = false;
-    for (; ts1 != NULL; ts1 = ts1->tl) {
-      let t1 = ts1->hd;
-      let t2 = reduce_term(t1,subst);
-      ts2 = new List{t2,ts2};
-      if (t1 != t2) change = true;
-    }
-    if (change) {
-      return aggr(is_union,tag,List::imp_rev(ts2),tp);
-    } else return t;
-  case &Addr(vd): fallthru(vd);
-  case &Var(vd):
-    for (; subst != NULL; subst = subst->next) {
-      if (subst->vd == vd) return subst->term;
-    }
-    return t;
-  case &Okderef(t1): 
-    let t2 = reduce_term(t1,subst);
-    if (t1 != t2) return okderef(t2);
-    else return t;
-  case &Tagof(t1):
-    let t2 = reduce_term(t1,subst);
-    if (t1 != t2) return tagof(t2);
-    else return t;
+static assn_set_opt_t widen_it(assn_t a){
+  let h = get_assn_hash_cons_table();
+  let ahinfo = Hashtable::lookup_opt(h,a);
+  if (ahinfo == NULL) {
+    a = reinsert(a);
+    ahinfo = Hashtable::lookup_opt(h,a);
   }
-}
-
-typedef struct ReduceMemo {
-  struct ReduceMemo *next;
-  subst_t subst;
-  bool negate;
-  assn_t result;
-} *reduce_memo_t;
-typedef Hashtable::table_t<assn_t,reduce_memo_t@> reduce_info_t;
-
-static struct Hashtable::Table<assn_t,reduce_memo_t@> *reduce_table = NULL;
-static reduce_info_t get_reduce_table() {
-  if (reduce_table == NULL) {
-    reduce_table = Hashtable::create(221,neqassn,assnhash);
-    return reduce_table;
-  } else 
-    return (reduce_info_t)reduce_table;
-}
-void reset_reduce_table() {
-  reduce_table = NULL;
-}
-
-static inline bool same_subst(subst_t s1, subst_t s2) {
-  for (; s1 != NULL && s2 != NULL; s1=s1->next, s2=s2->next) {
-    if ((unsigned)s1 == (unsigned)s2) return true;
-    if (s1->vd != s2->vd || s1->term != s2->term) return false;
-  }
-  return ((unsigned)s1 == (unsigned)s2);
-}
-
-//static unsigned reduce_length = 0;
-//static unsigned reduce_calls = 0;
-//static unsigned reduce_hits = 0;
-
-//void reset_reduce_counters() {
-//  reduce_length = 0; reduce_calls = 0; reduce_hits = 0; 
-//}
-
-// We memoize the reductions to once again ensure we traverse the dag
-// instead of the tree.  The problem is that we have to memoize w.r.t.
-// substitution as well as the negation flag.  Nonetheless, this results
-// in a substantial speedup when we have large assertions.
-static assn_t 
-reduce_assn(assn_t a, subst_t<`H> subst, bool negate, reduce_info_t h) {
-  reduce_memo_t @info;
-  reduce_memo_t @*info_opt = Hashtable::lookup_opt(h,a);
-  if (info_opt != NULL) {
-    info = *info_opt;
-    for (let p = *info; p != NULL; p = p->next) 
-      if (negate == p->negate && same_subst(subst,p->subst)) return p->result;
-  } else {
-    info = new NULL;
-    Hashtable::insert(h,a,info);
-  }
-  assn_t res;
-  switch (a) {
-  case &Prim(t1,p,t2):
-    let newt1 = reduce_term(t1,subst);
-    let newt2 = reduce_term(t2,subst);
-    if (negate) { res = not_prim(newt1,p,newt2); break; }
-    if (t1 != newt1 || t2 != newt2) 
-      a = prim(newt1,p,newt2);
-    res = a;
-    break;
-  case &And(a1,a2):
-    let newa1 = reduce_assn(a1,subst,negate,h);
-    let newa2 = reduce_assn(a2,subst,negate,h);
-    if (negate) { res = or(newa1,newa2); break; }
-    if (a1 != newa1 || a2 != newa2) 
-      a = and(newa1,newa2);
-    res = a;
-    break;
-  case &Or(a1,a2):
-    let newa1 = reduce_assn(a1,subst,negate,h);
-    let newa2 = reduce_assn(a2,subst,negate,h);
-    if (negate) { res = and(newa1,newa2); break; }
-    if (a1 != newa1 || a2 != newa2) 
-      a = or(newa1,newa2);
-    res = a;
-    break;
-  case &Subst(vd,t,a1):
-    t = reduce_term(t,subst);
-    // add vd->t to the subst
-    let new_subst = new SubstNode{subst,vd,t};
-    res = reduce_assn(a1, new_subst, negate, h);
-    break;
-  case &Not(a1):
-    res = reduce_assn(a1, subst, !negate, h);
-    break;
-  case &True: if (negate) return &false_assn; else return &true_assn;
-  case &False: if (negate) return &true_assn; else return &false_assn;
-  }
-  reduce_memo_t rm = new ReduceMemo{*info,subst,negate,res};
-  *info = rm;
-  return res;
-}
-
-static int ptrhash(`a @p) { return (int)p >> 3; }
-
-// get rid of all Not and Subst nodes.
-assn_t reduce(assn_t a) {
-  // check to see if we've already eliminated them.
-  let ainfo = hash_cons_it(a);
-  let redopt = ainfo->reduced;
-  if (redopt != NULL) return (assn_t)redopt;
-  //a = reduce_assn(a,NULL,false,Hashtable::create(33,assncmp,assnhash));
-  //let h = Hashtable::create(33,Core::assncmp,assnhash);
-  let h = get_reduce_table();
-  //fprintf(stderr,"reducing with hashtable %x\n",(unsigned)h);
-  //fprintf(stderr,"reducing\n");
-  //reset_reduce_counters();
-  a = reduce_assn(a,NULL,false,h);
-  //fprintf(stderr,"done reducing: calls %d, max length %d, hits = %d\n",
-  //        reduce_calls, reduce_length, reduce_hits);
-  //fflush(stderr);
-  /*
-  fprintf(stderr,"resulting hash-table: \n");
-  for (unsigned i = 0; i < numelts(h->tab); ++i) {
-    if (h->tab[i].length > 1) {
-      fprintf(stderr,"%d(%d): ",i,h->tab[i].length);
-      let c = h->tab[i].cells;
-      for (unsigned j = 0; j < 10 && c != NULL; ++j, c = c->next) {
-        switch (c->key) {
-        case &True: fprintf(stderr,"true"); break;
-        case &False: fprintf(stderr,"false"); break;
-        case &And(x,y): fprintf(stderr,"and(%x,%x)",x,y); break;
-        case &Or(x,y): fprintf(stderr,"or(%x,%x)",x,y); break;
-        case &Not(x): fprintf(stderr,"not(%x)",x); break;
-        case &Subst(vd,t,a): fprintf(stderr,"subst(%x,%x,%x)",vd,t,a); break;
-        case &Prim(t1,p,t2): fprintf(stderr,"prim(%x,%x,%x)",t1,p,t2); break;
-        }
-        fprintf(stderr,"[hash = %d]  ", ptrhash(c->key));
-      }
-      fprintf(stderr,"\n");
-    }
-  }
-  fprintf(stderr,"\n");
-  */
-  ainfo->reduced = a;
-  return a;
-}
-
-// a one-shot substitution -- needed in the assignment code.
-term_t subst_term(term_t t, vardecl_t x, term_t newx) {
-  let subst = SubstNode{NULL,x,newx};
-  return reduce_term(t,&subst);
-}
-
-/////////////////// Assertion Factoring //////////////////
-// This code isn't currently used but may be useful.  The
-// basic idea is to try to pull the common conjuncts out
-// to a wider scope.  Eg..,  (A & B & C) || (A & D & C) 
-// should factor into (A & C) & (B || D).  
-
-// intersect two lists of assertions returning the common
-// assertions, and the remainders of the two lists.  Assumes
-// the assertions are in sorted order.
-static void intersect(list_t<assn_t,`H> a1s, list_t<assn_t,`H> a2s, 
-                      list_t<assn_t,`H>@common,
-                      list_t<assn_t,`H>@res1,
-                      list_t<assn_t,`H>@res2) {
-  while (true) {
-    switch $(a1s,a2s) {
-    case $(NULL,NULL): return;
-    case $(_,NULL): *res1 = List::revappend(a1s,*res1); return;
-    case $(NULL,_): *res2 = List::revappend(a2s,*res2); return;
-    default: 
-      int c = assncmp(a1s->hd,a2s->hd);
-      if (c == 0) {
-        *common = new List(a1s->hd,*common);
-        a1s = a1s->tl;
-        a2s = a2s->tl;
-      } else if (c < 0) {
-        *res1 = new List(a1s->hd,*res1);
-        a1s = a1s->tl;
-      } else {
-        *res2 = new List(a2s->hd,*res2);
-        a2s = a2s->tl;
-      }
-    }
-  }
-}
-
-$(list_t<assn_t> common, list_t<assn_t> res1, list_t<assn_t> res2) 
-  intersect_assns(list_t<assn_t,`H> a1s, list_t<assn_t,`H> a2s) {
-  let common = NULL;
-  let res1 = NULL;
-  let res2 = NULL;
-  intersect(a1s,a2s,&common,&res1,&res2);
-  return $(List::imp_rev(common),List::imp_rev(res1),List::imp_rev(res2));
-}
-
-// pull out the common primitive relations, but avoid duplicating
-// things in forming the full cross-product
-$(list_t<assn_t>,assn_t) factor(assn_t a) {
-  switch (a) {
-  case &True: return $(NULL,&true_assn);
-  case &False: return $(NULL,&false_assn);
-  case &Prim(...): return $(new List{a,NULL},&true_assn);
-  case &And(a1,a2):
-    let $(c1s,a1) = factor(a1);
-    let $(c2s,a2) = factor(a2);
-    return $(List::merge(assncmp,c1s,c2s),and(a1,a2));
-  case &Or(a1,a2):
-    let $(c1s,a1) = factor(a1);
-    let $(c2s,a2) = factor(a2);
-    let $(cs,c1s,c2s) = intersect_assns(c1s,c2s);
-    return $(cs,or(List::fold_left(and,a1,c1s),List::fold_left(and,a2,c2s)));
-  default: return $(NULL,a);
-  }
-}
-
-assn_t factor_assn(assn_t a) {
-  //unsigned int asize = assn_size(a);
-  let $(cs,a) = factor(a);
-  a = List::fold_left(and,a,cs);
-  //unsigned int newsize = assn_size(a);
-  //fprintf(stderr,"factor before %d after %d\n",asize,newsize);
-  //fprintf(stderr,"%s\n",assn2string(a));
-  return a;
-}
-
-// returns the set of primitive relations implied by the assertion (if any).
-// this gets cached in the hash-cons-table so it isn't recomputed.
-assn_set_opt_t widen_it(assn_t a) {
-  let ainfo = hash_cons_it(a);
-  if (ainfo->widened_set != NULL) return *ainfo->widened_set;
+  if ((*ahinfo)->widened_set != NULL) return *(*ahinfo)->widened_set;
   assn_set_opt_t s;
-  switch (a) {
-  case &True: s = Set::empty(assncmp); break;
-  case &False: s = NULL; break;
+  switch (a){
+  case &True:
+  case &False:
+    Warn::impos("true and false should have widened_set");
   case &And(a1,a2):
     let s1 = widen_it(a1);
     let s2 = widen_it(a2);
@@ -1667,21 +1284,63 @@ assn_set_opt_t widen_it(assn_t a) {
     default: break;
     }
     break;
-  default:
-    s = widen_it(reduce(a));
-    break;
   }
-  ainfo->widened_set = new s;
+  (*ahinfo)->widened_set = new s;
   return s;
 }
 
 // factors out all of the common primitive relations in a.
-assn_t widen(assn_t a) {
+static assn_t widen(assn_t a) {
   // force the hash-cons table to be around just to be safe
   let sopt = widen_it(a);
   if (sopt == NULL) return &false_assn;
   let res = Set::fold(and,(assn_set_t)sopt,&true_assn);
   return res;
+}
+
+static assn_t subst_assn(Dict::dict_t<term_t,term_t> dict, assn_t a, 
+			 Hashtable::table_t<assn_t,assn_t> assn_h,
+			 Hashtable::table_t<term_t,term_t> term_h){
+  let a1 = Hashtable::lookup_opt(assn_h,a);
+  if (a1 != NULL) {
+#ifdef AssnDefDebug
+    fprintf(stderr, "%s was substituted before, and the result is \n%s\n",
+	    assn2string(a),assn2string(*a1));
+#endif
+    return *a1;
+  }
+  assn_t res;
+  switch (a) {
+  case &True:
+  case &False: res = a; break;
+  case &Prim(t1,p,t2):
+    let s1 = subst_term(dict,t1,term_h);
+    let s2 = subst_term(dict,t2,term_h);
+    res = prim(s1,p,s2);
+    break;
+  case &And(a1,a2):
+    let b1 = subst_assn(dict,a1,assn_h,term_h);
+    let b2 = subst_assn(dict,a2,assn_h,term_h);
+    res = and(b1,b2);
+    break;
+  case &Or(a1,a2):
+    let b1 = subst_assn(dict,a1,assn_h,term_h);
+    let b2 = subst_assn(dict,a2,assn_h,term_h);
+    res = or(b1,b2);
+    break;
+  }
+  Hashtable::insert(assn_h,a,res);
+  return res;
+} 
+
+int hash_ptr(`a s) { return (int) s;}
+
+static assn_t subst(Dict::dict_t<term_t,term_t> dict, assn_t a){
+  // create new hashtables to record the substituted result
+  // with respect to this particular dict. 
+  Hashtable::table_t<assn_t,assn_t> assn_h = Hashtable::create(107,Core::ptrcmp,hash_ptr);
+  Hashtable::table_t<term_t,term_t> term_h = Hashtable::create(137,Core::ptrcmp,hash_ptr);
+  return subst_assn(dict,a,assn_h,term_h);
 }
 
 // tries to see if a can be proved from the set of primitive
@@ -1694,9 +1353,9 @@ static bool simple_prv(assn_set_t ctxt, assn_t a) {
       switch (p) {
       case Neq: 
         return (Set::member(ctxt,ult(t2,t1)) ||
-                Set::member(ctxt,ugt(t2,t1)) ||
+                Set::member(ctxt,ult(t1,t2)) ||
                 Set::member(ctxt,slt(t2,t1)) ||
-                Set::member(ctxt,sgt(t2,t1)));
+                Set::member(ctxt,slt(t1,t2)));
       case SLte: 
         return (Set::member(ctxt,slt(t1,t2)) || 
                 Set::member(ctxt,eq(t1,t2)));
@@ -1715,9 +1374,6 @@ static bool simple_prv(assn_set_t ctxt, assn_t a) {
       if (simple_prv(ctxt,a1)) return true;
       a = a2;
       continue;
-    default: 
-      a = reduce(a);
-      continue;
     }
   }
 }
@@ -1732,25 +1388,245 @@ bool simple_prove(assn_t ctxt, assn_t a) {
   return simple_prv((assn_set_t)sopt, a);
 }
 
-// substitutes the new variables for the old in the assertion.  If the
-// assertion is NULL, returns true.
-assn_t subst_vardecls(list_t<vardecl_opt_t> oldargs, vardecl_opt_t old_res,
-                      list_t<vardecl_opt_t> newargs, vardecl_opt_t new_res,
-                      assn_opt_t aopt) {
-  if (aopt == NULL) return &true_assn;
-  assn_t a = (assn_t)aopt;
-  for (; oldargs != NULL && newargs != NULL; oldargs=oldargs->tl, newargs=newargs->tl) {
-    if (oldargs->hd != NULL && newargs->hd != NULL)
-      a = subst((vardecl_t)oldargs->hd, var((vardecl_t)newargs->hd), a);
+
+// functions related to handling the nonescvar_map
+static list_t<string_t<`H>@`H, `H> m2string(vardecl_t vd, term_t value, list_t<string_t<`H>@`H, `H> stringlist){
+  string_t<`H> res = aprintf("%s == %s", Absynpp::qvar2string(vd->name),term2string(value));
+  return new List{new res,stringlist};
+}
+
+static string_t<`H> map2string(nonescvar_map_t m){
+  list_t<string_t<`H>@`H, `H> stringlist = Dict::fold(m2string,m,NULL);
+  string_t<`H> s;
+  if (stringlist == NULL) return aprintf(" ");
+  else s = aprintf("%s",*stringlist->hd);
+  while (stringlist->tl != NULL){
+    stringlist = stringlist->tl;
+    s = aprintf("%s && %s",s,*stringlist->hd);
   }
-  if (old_res != NULL && new_res != NULL)
-    a = subst((vardecl_t)old_res, var((vardecl_t)new_res), a);
-  return reduce(a);
+  return s;
+}
+
+// functions related to handling assnmap as one entity
+string_t<`H> assnmap2string(assn_map_t am){
+  return aprintf("%s\n%s",assn2string(am.assn),map2string(am.map));
+}
+
+
+assn_map_t false_assnmap(){
+  return AssnMap{&false_assn,Dict::empty(Core::ptrcmp)};
+}
+
+assn_map_t true_assnmap(){
+  return AssnMap{&true_assn,Dict::empty(Core::ptrcmp)};
+}
+
+// looking up a vd in the nonescvar_map,
+// if the vd was not defined before, create a fresh new var
+// and let vd maps to that var.
+$(term_t,assn_map_t) lookup_var_map(vardecl_t vd, assn_map_t am){
+  term_t *t = Dict::lookup_opt(am.map,vd);
+  if (t != NULL) return $(*t,am);
+  let newt = fresh_var(vd->type);
+  let newm = Dict::insert(am.map,vd,newt);
+  return $(newt, AssnMap{am.assn,newm});
+}
+
+
+// update the nonescvar_map to associate vd with a new term newt
+assn_map_t update_var_map(vardecl_t vd,term_t newt,assn_map_t am){
+  let newm = Dict::insert(am.map,vd,newt);
+  return AssnMap{am.assn,newm};
+}
+
+// widen the assn part of an assnmap
+assn_map_t widen_assnmap(assn_map_t am){
+  return AssnMap{widen(am.assn),am.map};
+}
+
+// extend the assn part of an assnmap with or(a,_)
+assn_map_t or_assnmap_assn(assn_map_t am, assn_t a){
+  return AssnMap{or(am.assn,a),am.map};
+}
+
+// extend the assn part of an assnmap with and(a,_)
+assn_map_t and_assnmap_assn(assn_map_t am, assn_t a){
+  return AssnMap{and(am.assn,a),am.map};
+}
+
+term_t merge(vardecl_t vd, term_t t1, term_t t2){
+  if (t1 == t2) return t1;
+  else return fresh_var(vd->type);
+}
+
+
+typedef struct Accum{
+  assn_t a1;
+  assn_t a2;
+  nonescvar_map_t m1;
+  nonescvar_map_t m2;
+  nonescvar_map_t m;
+} accum_t;
+
+// helper function used when we are folding in am1.map
+// for each vd in am1.map, we look it up in am2.map and
+// adjust the new map and assertions accordingly
+static accum_t @`r foldm1(vardecl_t vd, term_t t, accum_t @`r accum){
+  let t2 = Dict::lookup_opt(accum->m2,vd);
+  // before merge: M1: x -> t M2: x undefined
+  // after merge:  M: x -> v, a1 = and(a1,v==t), a2 unchanged
+  if (t2 == NULL) {
+    switch (t) {
+    case &LogicVar(...): 
+      accum->m = Dict::insert(accum->m,vd,t);
+      return accum;
+    default:
+      let v = fresh_var(vd->type);
+      accum->a1 = and(accum->a1,eq(v,t));
+      accum->m = Dict::insert(accum->m,vd,v);
+      return accum;
+    }
+  }
+  // t2 != NULL
+  if (t == *t2){
+    // before merge: M1: x -> t, M2: x -> t
+    // after merge:  M: x -> t
+    accum->m = Dict::insert(accum->m,vd,t);
+    return accum;
+  }
+  // before merge: M1: x -> t, M2: x -> t2
+  // after merge: M: x -> v, a1 = and(a1,v==t), a2 = and(a2,v==t2)
+  switch $(t,*t2) {
+  case $(&LogicVar(...),_):
+    accum->a2 = and(eq(t,*t2),accum->a2);
+    accum->m = Dict::insert(accum->m,vd,t);
+    return accum;
+  case $(_,&LogicVar(...)):
+    accum->a1 = and(eq(*t2,t),accum->a1);
+    accum->m = Dict::insert(accum->m,vd,*t2);
+    return accum;
+  default:
+    let v = fresh_var(vd->type);
+    accum->a1 = and(eq(v,t),accum->a1);
+    accum->a2 = and(eq(v,*t2),accum->a2);
+    accum->m = Dict::insert(accum->m,vd,v);
+    return accum;
+  }
+}
+
+// helper function when we are folding in am2.map-am1.map
+// all the vd's in here are undefined in am1.map
+// before merge: M1: x undefined,, M2: x->t
+// after merge: M: x->v, a2 = and(v==t,a2);
+static accum_t @`r foldm2(vardecl_t vd, term_t t, accum_t @`r accum){
+  switch (t) {
+  case &LogicVar(...):
+    accum->m = Dict::insert(accum->m,vd,t);
+    return accum;
+  default:
+    let v = fresh_var(vd->type);
+    accum->a2 = and(eq(v,t),accum->a2);
+    accum->m = Dict::insert(accum->m,vd,v);
+    return accum;
+  }
+}
+
+
+assn_map_t or_assnmap_assnmap(assn_map_t am1, assn_map_t am2){
+  if (am1.assn == &false_assn) return am2;
+  if (am2.assn == &false_assn) return am1;
+  accum_t accum = Accum{am1.assn,am2.assn,am1.map,am2.map,Dict::empty(Core::ptrcmp)};
+  Dict::fold(foldm1,am1.map, &accum);
+  Dict::fold(foldm2,Dict::difference(am2.map,am1.map),&accum);
+  return AssnMap(or(accum.a1,accum.a2),accum.m);
+}
+
+// given two assertion_map a1, a2, where the nonescvarmap 
+// only maps vardecls to logical vars of the form:
+// a1 = assn1, x1=v1(or NULL) ,x2=v2(or NULL),...
+// a2 = assn2, y1=u1,          y2=u2,...
+// return a new a2
+// a2 = assn2(vi/ui) yi = ui for each xi=vi in a1.
+// this function is used when we are comparing two
+// function signatures (such as subtyping or type equivalence)
+assn_t merge_assnmaps(list_t<vardecl_opt_t> vds1, assn_map_t a1,
+			  list_t<vardecl_opt_t> vds2, assn_map_t a2){
+  Dict::dict_t<term_t,term_t> dict=Dict::empty(Core::ptrcmp);
+  for (; vds1 != NULL && vds2 != NULL; vds1 = vds1->tl, vds2 = vds2->tl){
+    if (vds1->hd != NULL && vds2->hd != NULL){
+      let v1 = Dict::lookup_opt(a1.map,(vardecl_t)vds1->hd);
+      let v2 = Dict::lookup_opt(a2.map,(vardecl_t)vds2->hd);
+      if (v1 != NULL && v2 != NULL){
+	dict = Dict::insert(dict,*v2,*v1);
+      }
+    }
+#ifdef AssnDefDebug
+    else {
+      if (vds1->hd == NULL) fprintf(stderr, "var in vds1 is NULL\n");
+      if (vds2->hd == NULL) fprintf(stderr, "var in vds2 is NULL\n");
+    }
+#endif
+  }
+  if (Dict::is_empty(dict)) return a2.assn;
+  else return subst(dict,a2.assn);
+}
+
+// given an assertion_map of the form 
+// a1 = assn1, x1 = v1, x2 = v2, ...xn = vn
+// and a new list of vardecls y1, y2, ...yn
+// generating a new assertion_map of the form
+// a2 = assn1[ui/vi] yi = ui
+// this function is used when we are creating a
+// new function signature that has the same type
+// as the old function signature
+extern assn_map_t *subst_vardecls(List::list_t<vardecl_opt_t> vds1,
+				  List::list_t<vardecl_opt_t> vds2,
+				  assn_map_t *a){
+  if (a == NULL) return NULL;
+  let newmap = Dict::empty(Core::ptrcmp);
+  let dict = Dict::empty(Core::ptrcmp);
+  for(; vds1 != NULL && vds2 != NULL; vds1 = vds1->tl, vds2 = vds2->tl){
+    if (vds1->hd != NULL && vds2->hd != NULL){
+      let v = Dict::lookup_opt(a->map,(vardecl_t)vds1->hd);
+      if (v != NULL) {
+	let u = fresh_var(vds2->hd->type);
+	// map yi to a new logicvar ui,
+	newmap = Dict::insert(newmap,(vardecl_t)vds2->hd,u);
+	// add pair vi,ui into the dict for substitution
+	dict = Dict::insert(dict,*v,u);
+      }
+    }
+  }
+  // get newa = a.assn[ui/vi]
+  let newa = subst(dict,a->assn);
+  return new AssnMap(newa,newmap);
+}
+
+// given an assnmap that was part of a function's signature
+// of the form assn /\ x1 = v1, x2 = v2,
+// and the actual function argument t1,t2,...
+// return the assertion assn[ti/vi]
+// this function is used during vcgen for function calls
+assn_t subst_args(list_t<vardecl_opt_t> args, vardecl_opt_t res,
+		      list_t<term_t> actual_args, term_opt_t actual_res,
+		      assn_map_t am){
+  Dict::dict_t<term_t,term_t> dict = Dict::empty(Core::ptrcmp);
+  if (res != NULL && actual_res != NULL){
+    let res_val = Dict::lookup_opt(am.map,(vardecl_t)res);
+    if (res_val != NULL)
+      dict = Dict::insert(dict,*res_val, (term_t)actual_res);
+  }
+  for(; args != NULL && actual_args != NULL; args = args->tl, actual_args=actual_args->tl){
+    if (args->hd != NULL && actual_args->hd != NULL){
+      let arg_val = Dict::lookup_opt(am.map,(vardecl_t)args->hd);
+      if (arg_val != NULL) 
+	dict = Dict::insert(dict,*arg_val,actual_args->hd);
+    }
+  }
+  return subst(dict,am.assn);
 }
 
 void reset_hash_cons_table(void){
   term_hash_cons_table = NULL;
-  hash_cons_table = NULL;
-  reduce_table = NULL;
+  assn_hash_cons_table = NULL;
 };
-
