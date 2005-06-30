@@ -422,11 +422,11 @@ int Cyc_Kinds_kind_eq(struct Cyc_Absyn_Kind*,struct Cyc_Absyn_Kind*);
 int Cyc_Atts_same_atts(struct Cyc_List_List*,struct Cyc_List_List*);
 # 58
 int Cyc_Atts_equiv_fn_atts(struct Cyc_List_List*,struct Cyc_List_List*);struct Cyc_Dict_T;struct Cyc_Dict_Dict{int(*rel)(void*,void*);struct _RegionHandle*r;const struct Cyc_Dict_T*t;};struct Cyc_AssnDef_AssnMap{void*assn;struct Cyc_Dict_Dict map;};
-# 198 "assndef.h"
+# 201 "assndef.h"
 extern struct Cyc_AssnDef_AssnMap Cyc_AssnDef_true_assnmap (void);
-# 218
+# 225
 extern int Cyc_AssnDef_simple_prove(void*,void*);
-# 228 "assndef.h"
+# 235 "assndef.h"
 extern void*Cyc_AssnDef_merge_assnmaps(struct Cyc_List_List*,struct Cyc_AssnDef_AssnMap,struct Cyc_List_List*,struct Cyc_AssnDef_AssnMap);
 # 8 "pratt_prover.h"
 int Cyc_PrattProver_constraint_prove(void*,void*);char Cyc_Unify_Unify[6U]="Unify";struct Cyc_Unify_Unify_exn_struct{char*tag;};
@@ -544,7 +544,7 @@ problem=1;}}
 # 163
 if(problem){
 struct Cyc_List_List*result=0;
-{struct Cyc_List_List*s=(struct Cyc_List_List*)(*sopt)->v;for(0;s!=0;s=s->tl){
+{struct Cyc_List_List*s=(struct Cyc_List_List*)_check_null(*sopt)->v;for(0;s!=0;s=s->tl){
 if(({int(*_Tmp8)(int(*)(struct Cyc_Absyn_Tvar*,struct Cyc_Absyn_Tvar*),struct Cyc_List_List*,struct Cyc_Absyn_Tvar*)=(int(*)(int(*)(struct Cyc_Absyn_Tvar*,struct Cyc_Absyn_Tvar*),struct Cyc_List_List*,struct Cyc_Absyn_Tvar*))Cyc_List_mem;_Tmp8;})(Cyc_Tcutil_fast_tvar_cmp,env,(struct Cyc_Absyn_Tvar*)s->hd))
 result=({struct Cyc_List_List*_Tmp8=_cycalloc(sizeof(struct Cyc_List_List));_Tmp8->hd=(struct Cyc_Absyn_Tvar*)s->hd,_Tmp8->tl=result;_Tmp8;});}}
 ({struct Cyc_Core_Opt*_Tmp8=({struct Cyc_Core_Opt*_Tmp9=_cycalloc(sizeof(struct Cyc_Core_Opt));_Tmp9->v=result;_Tmp9;});*sopt=_Tmp8;});}
@@ -810,7 +810,9 @@ Cyc_Unify_fail_because((const char*)_untag_fat_ptr(({struct Cyc_String_pa_PrintA
 # 489
 inst=({struct Cyc_List_List*_Tmp2A=_region_malloc(rgn,0U,sizeof(struct Cyc_List_List));({struct _tuple13*_Tmp2B=({struct _tuple13*_Tmp2C=_region_malloc(rgn,0U,sizeof(struct _tuple13));_Tmp2C->f0=(struct Cyc_Absyn_Tvar*)tvs2->hd,({void*_Tmp2D=Cyc_Absyn_var_type((struct Cyc_Absyn_Tvar*)tvs1->hd);_Tmp2C->f1=_Tmp2D;});_Tmp2C;});_Tmp2A->hd=_Tmp2B;}),_Tmp2A->tl=inst;_Tmp2A;});
 tvs1=tvs1->tl;
-tvs2=tvs2->tl;}}
+tvs2=tvs2->tl;}
+# 478
+1U;}
 # 493
 if(tvs2!=0)
 Cyc_Unify_fail_because("second function type has too many type variables");

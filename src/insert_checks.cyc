@@ -38,14 +38,18 @@
 #include "vcgen.h"
 #include "pratt_prover.h"
 
-//#define BCE_DEBUG
+// #define PERFORMANCE_DEBUG
+#ifdef PERFORMANCE_DEBUG
+#include "absynpp.h"
+using Absynpp;
+#endif
+// #define BCE_DEBUG
 #ifdef BCE_DEBUG
 #include "absynpp.h"
 using Absynpp;
 #endif
 
 
-//#define PERFORMANCE_DEBUG
 using Absyn;
 using Warn;
 using Core;
@@ -305,7 +309,13 @@ static bool need_bounds_check_vcgen(env_t nv, exp_t a){
   fprintf(stderr, "checking done in %d.%06d secs\n",
 	  end.tv_sec,end.tv_usec);
 #endif
-  //return !PrattProver::constraint_prove(ec->ctxt,ec->bounds_check);
+#ifdef BCE_DEBUG
+  fprintf(stderr,"proving %s\nfrom %s\nresult is %s\n",
+	  AssnDef::assn2string(ec->ctxt),
+	  AssnDef::assn2string(ec->bounds_check),
+	  flag?"True":"False");
+#endif
+
   return flag;
 }
 
@@ -478,7 +488,10 @@ static void do_exp(env_t nv, exp_t e) {
       if(bds_ck) {
 	if(bd) { // thin pointer
 	  if(!Evexp::c_can_eval(bd)) {
-            let ec = Vcgen::exp2ctxt_checks(nv.assn_info, e1);
+#ifdef BCE_DEBUG	    
+	    fprintf(stderr,"bd is %s\n",Absynpp::exp2string(bd));
+#endif
+	    let ec = Vcgen::exp2ctxt_checks(nv.assn_info, e1);
 	    err(e->loc,"cannot determine subscript is in bounds");
             fprintf(stderr,"[all that I can prove is %s",
                     AssnDef::assn2string(ec->ctxt));

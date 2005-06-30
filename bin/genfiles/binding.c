@@ -563,8 +563,8 @@ switch(nsl.Rel_n.tag){case 4:
 _throw((void*)({struct Cyc_Binding_BindingError_exn_struct*_Tmp2=_cycalloc(sizeof(struct Cyc_Binding_BindingError_exn_struct));_Tmp2->tag=Cyc_Binding_BindingError;_Tmp2;}));
 return({void*(*_Tmp2)(struct Cyc_Dict_Dict,struct _fat_ptr*)=(void*(*)(struct Cyc_Dict_Dict,struct _fat_ptr*))Cyc_Dict_lookup;_Tmp2;})(*_check_null(env->local_vars),v);case 1: if(nsl.Rel_n.val==0){
 # 250
-if(!Cyc_Binding_at_toplevel(env)&&({int(*_Tmp2)(struct Cyc_Dict_Dict,struct _fat_ptr*)=(int(*)(struct Cyc_Dict_Dict,struct _fat_ptr*))Cyc_Dict_member;_Tmp2;})(*_check_null(env->local_vars),v))
-return({void*(*_Tmp2)(struct Cyc_Dict_Dict,struct _fat_ptr*)=(void*(*)(struct Cyc_Dict_Dict,struct _fat_ptr*))Cyc_Dict_lookup;_Tmp2;})(*_check_null(env->local_vars),v);
+if(!Cyc_Binding_at_toplevel(env)&&({int(*_Tmp2)(struct Cyc_Dict_Dict,struct _fat_ptr*)=(int(*)(struct Cyc_Dict_Dict,struct _fat_ptr*))Cyc_Dict_member;_Tmp2;})(*env->local_vars,v))
+return({void*(*_Tmp2)(struct Cyc_Dict_Dict,struct _fat_ptr*)=(void*(*)(struct Cyc_Dict_Dict,struct _fat_ptr*))Cyc_Dict_lookup;_Tmp2;})(*env->local_vars,v);
 goto _LL9;}else{goto _LL8;}default: _LL8: _LL9:
 # 254
  return({void*(*_Tmp2)(unsigned,struct Cyc_Binding_NSCtxt*,struct _tuple0*,void*(*)(struct Cyc_Binding_ResolveNSEnv*,struct _fat_ptr*))=(void*(*)(unsigned,struct Cyc_Binding_NSCtxt*,struct _tuple0*,void*(*)(struct Cyc_Binding_ResolveNSEnv*,struct _fat_ptr*)))Cyc_Binding_resolve_lookup;_Tmp2;})(loc,env->ns,qv,Cyc_Binding_lookup_ordinary_global);};}}

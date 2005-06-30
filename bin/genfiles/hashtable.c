@@ -418,9 +418,9 @@ b->cells=l->next;
 -- b->length;
 return;}{
 # 135
-struct Cyc_Hashtable_Cell*next=l->next;for(0;l->next!=0;(l=l->next,next=next->next)){
+struct Cyc_Hashtable_Cell*next=l->next;for(0;_check_null(l)->next!=0;(l=l->next,next=next->next)){
 # 137
-if(cmp(key,next->key)==0){
+if(cmp(key,_check_null(next)->key)==0){
 l->next=next->next;
 -- b->length;
 return;}}}}
@@ -447,10 +447,12 @@ struct Cyc_Hashtable_Cell*first=cells;
 struct Cyc_Hashtable_Cell*second=cells->next;
 cells->next=0;
 while(second!=0){
-struct Cyc_Hashtable_Cell*temp=second->next;
+{struct Cyc_Hashtable_Cell*temp=second->next;
 second->next=first;
 first=second;
 second=temp;}
+# 169
+1U;}
 # 174
 return first;}}
 # 179
@@ -460,7 +462,7 @@ for(1;elems!=0;elems=elems->next){
 void*key=elems->key;
 void*val=elems->value;
 unsigned nidx=({unsigned _Tmp0=(unsigned)hash(key);_Tmp0 % _get_fat_size(tab,sizeof(struct Cyc_Hashtable_Bucket));});
-({struct Cyc_Hashtable_Cell*_Tmp0=({struct Cyc_Hashtable_Cell*_Tmp1=_region_malloc(r,0U,sizeof(struct Cyc_Hashtable_Cell));_Tmp1->key=key,_Tmp1->value=val,_Tmp1->next=(*((struct Cyc_Hashtable_Bucket*)_check_fat_subscript(tab,sizeof(struct Cyc_Hashtable_Bucket),(int)nidx))).cells;_Tmp1;});(*((struct Cyc_Hashtable_Bucket*)_check_fat_subscript(tab,sizeof(struct Cyc_Hashtable_Bucket),(int)nidx))).cells=_Tmp0;});
+({struct Cyc_Hashtable_Cell*_Tmp0=({struct Cyc_Hashtable_Cell*_Tmp1=_region_malloc(r,0U,sizeof(struct Cyc_Hashtable_Cell));_Tmp1->key=key,_Tmp1->value=val,_Tmp1->next=((struct Cyc_Hashtable_Bucket*)tab.curr)[(int)nidx].cells;_Tmp1;});((struct Cyc_Hashtable_Bucket*)tab.curr)[(int)nidx].cells=_Tmp0;});
 ++((struct Cyc_Hashtable_Bucket*)tab.curr)[(int)nidx].length;}}
 # 191
 void Cyc_Hashtable_resize(struct Cyc_Hashtable_Table*t){
@@ -469,12 +471,12 @@ unsigned osize=_get_fat_size(odata,sizeof(struct Cyc_Hashtable_Bucket));
 unsigned nsize=2U * osize + 1U;
 struct _fat_ptr ndata=({unsigned _Tmp0=nsize;_tag_fat(_region_calloc(t->r,0U,sizeof(struct Cyc_Hashtable_Bucket),_Tmp0),sizeof(struct Cyc_Hashtable_Bucket),_Tmp0);});
 {unsigned i=0U;for(0;i < osize;++ i){
-({struct _RegionHandle*_Tmp0=t->r;struct _fat_ptr _Tmp1=ndata;int(*_Tmp2)(void*)=t->hash;Cyc_Hashtable_insert_bucket(_Tmp0,_Tmp1,_Tmp2,Cyc_Hashtable_rev_cells(((struct Cyc_Hashtable_Bucket*)odata.curr)[(int)i].cells));});}}
+({struct _RegionHandle*_Tmp0=t->r;struct _fat_ptr _Tmp1=ndata;int(*_Tmp2)(void*)=t->hash;Cyc_Hashtable_insert_bucket(_Tmp0,_Tmp1,_Tmp2,Cyc_Hashtable_rev_cells((*((struct Cyc_Hashtable_Bucket*)_check_fat_subscript(odata,sizeof(struct Cyc_Hashtable_Bucket),(int)i))).cells));});}}
 t->tab=ndata;{
 # 200
 unsigned cur_max_len=0U;
 {unsigned j=0U;for(0;j < nsize;++ j){
-unsigned k=((struct Cyc_Hashtable_Bucket*)ndata.curr)[(int)j].length;
+unsigned k=(*((struct Cyc_Hashtable_Bucket*)_check_fat_subscript(ndata,sizeof(struct Cyc_Hashtable_Bucket),(int)j))).length;
 if(k > cur_max_len)cur_max_len=k;}}
 # 205
 t->max_len=(int)(2U * cur_max_len);}}
@@ -483,14 +485,14 @@ void Cyc_Hashtable_iter(void(*f)(void*,void*),struct Cyc_Hashtable_Table*t){
 struct _fat_ptr odata=t->tab;
 unsigned osize=_get_fat_size(odata,sizeof(struct Cyc_Hashtable_Bucket));
 unsigned i=0U;for(0;i < osize;++ i){
-struct Cyc_Hashtable_Cell*iter=((struct Cyc_Hashtable_Bucket*)odata.curr)[(int)i].cells;for(0;iter!=0;iter=iter->next){
+struct Cyc_Hashtable_Cell*iter=(*((struct Cyc_Hashtable_Bucket*)_check_fat_subscript(odata,sizeof(struct Cyc_Hashtable_Bucket),(int)i))).cells;for(0;iter!=0;iter=iter->next){
 f(iter->key,iter->value);}}}
 # 217
 void Cyc_Hashtable_iter_c(void(*f)(void*,void*,void*),struct Cyc_Hashtable_Table*t,void*env){
 struct _fat_ptr odata=t->tab;
 unsigned osize=_get_fat_size(odata,sizeof(struct Cyc_Hashtable_Bucket));
 unsigned i=0U;for(0;i < osize;++ i){
-struct Cyc_Hashtable_Cell*iter=((struct Cyc_Hashtable_Bucket*)odata.curr)[(int)i].cells;for(0;iter!=0;iter=iter->next){
+struct Cyc_Hashtable_Cell*iter=(*((struct Cyc_Hashtable_Bucket*)_check_fat_subscript(odata,sizeof(struct Cyc_Hashtable_Bucket),(int)i))).cells;for(0;iter!=0;iter=iter->next){
 f(iter->key,iter->value,env);}}}
 # 226
 void Cyc_Hashtable_print_table_map(struct Cyc_Hashtable_Table*t,void(*prn_key)(void*),void(*prn_val)(void*)){
@@ -499,7 +501,7 @@ struct _fat_ptr odata=t->tab;
 unsigned osize=_get_fat_size(odata,sizeof(struct Cyc_Hashtable_Bucket));
 unsigned i=0U;for(0;i < osize;++ i){
 ({struct Cyc_Int_pa_PrintArg_struct _Tmp0=({struct Cyc_Int_pa_PrintArg_struct _Tmp1;_Tmp1.tag=1,_Tmp1.f1=(unsigned long)((int)i);_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_printf(_tag_fat("%d: ",sizeof(char),5U),_tag_fat(_Tmp1,sizeof(void*),1));});
-{struct Cyc_Hashtable_Cell*iter=((struct Cyc_Hashtable_Bucket*)odata.curr)[(int)i].cells;for(0;iter!=0;iter=iter->next){
+{struct Cyc_Hashtable_Cell*iter=(*((struct Cyc_Hashtable_Bucket*)_check_fat_subscript(odata,sizeof(struct Cyc_Hashtable_Bucket),(int)i))).cells;for(0;iter!=0;iter=iter->next){
 Cyc_printf(_tag_fat("(",sizeof(char),2U),_tag_fat(0U,sizeof(void*),0));
 prn_key(iter->key);
 Cyc_printf(_tag_fat(",",sizeof(char),2U),_tag_fat(0U,sizeof(void*),0));

@@ -366,37 +366,37 @@ extern struct Cyc_Set_Set*Cyc_Set_intersect(struct Cyc_Set_Set*,struct Cyc_Set_S
 extern int Cyc_Set_member(struct Cyc_Set_Set*,void*);
 # 114
 extern void*Cyc_Set_fold(void*(*)(void*,void*),struct Cyc_Set_Set*,void*);struct Cyc_AssnDef_Uint_AssnDef_Term_struct{int tag;unsigned f1;void*f2;};struct Cyc_AssnDef_Select_AssnDef_Term_struct{int tag;void*f1;void*f2;void*f3;};struct Cyc_AssnDef_Update_AssnDef_Term_struct{int tag;void*f1;void*f2;void*f3;};struct Cyc_AssnDef_Unop_AssnDef_Term_struct{int tag;enum Cyc_Absyn_Primop f1;void*f2;void*f3;};struct Cyc_AssnDef_Binop_AssnDef_Term_struct{int tag;enum Cyc_Absyn_Primop f1;void*f2;void*f3;void*f4;};struct Cyc_AssnDef_Cast_AssnDef_Term_struct{int tag;void*f1;void*f2;};struct Cyc_AssnDef_Aggr_AssnDef_Term_struct{int tag;int f1;unsigned f2;struct Cyc_List_List*f3;void*f4;};struct Cyc_AssnDef_Proj_AssnDef_Term_struct{int tag;void*f1;unsigned f2;void*f3;};struct Cyc_AssnDef_Tagof_AssnDef_Term_struct{int tag;void*f1;};
-# 96 "assndef.h"
+# 99 "assndef.h"
 int Cyc_AssnDef_termcmp(void*,void*);
-# 99
+# 102
 extern struct _fat_ptr Cyc_AssnDef_term2string(void*);
-# 113
+# 116
 extern void*Cyc_AssnDef_zero (void);
-# 117
+# 120
 extern void*Cyc_AssnDef_uint(unsigned);
 extern void*Cyc_AssnDef_cnst(struct Cyc_Absyn_Exp*);
 extern void*Cyc_AssnDef_select(void*,void*,void*);
 extern void*Cyc_AssnDef_update(void*,void*,void*);
-# 122
+# 125
 extern void*Cyc_AssnDef_unop(enum Cyc_Absyn_Primop,void*,void*);
 extern void*Cyc_AssnDef_binop(enum Cyc_Absyn_Primop,void*,void*,void*);
-# 127
+# 130
 extern void*Cyc_AssnDef_proj(void*,unsigned,void*);
-# 134
+# 137
 extern void*Cyc_AssnDef_numelts_term(void*);
-# 142
+# 145
 extern void*Cyc_AssnDef_get_term_type(void*);
-# 155 "assndef.h"
+# 158 "assndef.h"
 enum Cyc_AssnDef_Primreln{Cyc_AssnDef_Eq =0U,Cyc_AssnDef_Neq =1U,Cyc_AssnDef_SLt =2U,Cyc_AssnDef_SLte =3U,Cyc_AssnDef_ULt =4U,Cyc_AssnDef_ULte =5U};struct Cyc_AssnDef_Prim_AssnDef_Assn_struct{int tag;void*f1;enum Cyc_AssnDef_Primreln f2;void*f3;};struct Cyc_AssnDef_And_AssnDef_Assn_struct{int tag;void*f1;void*f2;};struct Cyc_AssnDef_Or_AssnDef_Assn_struct{int tag;void*f1;void*f2;};
-# 167
+# 170
 int Cyc_AssnDef_assncmp(void*,void*);
-# 173
+# 176
 extern void*Cyc_AssnDef_and(void*,void*);
 extern void*Cyc_AssnDef_or(void*,void*);
 extern void*Cyc_AssnDef_not(void*);
-# 179
+# 182
 extern void*Cyc_AssnDef_slt(void*,void*);
-# 181
+# 184
 extern void*Cyc_AssnDef_ult(void*,void*);
 # 38 "tcutil.h"
 int Cyc_Tcutil_is_signed_type(void*);
@@ -798,7 +798,7 @@ static void Cyc_PrattProver_dijkstra(struct Cyc_PrattProver_Node*s,struct Cyc_Pr
 # 824
 Cyc_PrattProver_initialize_dist_set(s,g);
 while(1){
-struct Cyc_PrattProver_Node*current_shortest_node=Cyc_PrattProver_extract_min(g);
+{struct Cyc_PrattProver_Node*current_shortest_node=Cyc_PrattProver_extract_min(g);
 # 828
 if(current_shortest_node==0)break;else{
 # 830
@@ -811,12 +811,14 @@ goto _LL0;}}else{
 goto _LL0;}_LL0:;}
 # 840
 Cyc_PrattProver_relaxation(current_shortest_node,g,0);}
+# 826
+1U;}
 # 842
 Cyc_PrattProver_set_shortest_dist_from_s(s,g,0);
 # 845
 Cyc_PrattProver_initialize_dist_set(s,g);
 while(1){
-struct Cyc_PrattProver_Node*current_shortest_node=Cyc_PrattProver_extract_min(g);
+{struct Cyc_PrattProver_Node*current_shortest_node=Cyc_PrattProver_extract_min(g);
 # 849
 if(current_shortest_node==0)break;else{
 # 851
@@ -829,6 +831,8 @@ goto _LL5;}}else{
 goto _LL5;}_LL5:;}
 # 861
 Cyc_PrattProver_relaxation(current_shortest_node,g,1);}
+# 847
+1U;}
 # 863
 Cyc_PrattProver_set_shortest_dist_from_s(s,g,1);
 return;}
@@ -910,10 +914,12 @@ struct Cyc_PrattProver_Node*first=n;
 struct Cyc_PrattProver_Node*second=n->next;
 n->next=0;
 while(second!=0){
-struct Cyc_PrattProver_Node*temp=second->next;
+{struct Cyc_PrattProver_Node*temp=second->next;
 second->next=first;
 first=second;
 second=temp;}
+# 997
+1U;}
 # 1002
 return first;}}
 # 1006
@@ -1118,12 +1124,12 @@ if(*((int*)_check_fat_subscript(*((struct _fat_ptr*)_check_fat_subscript(M,sizeo
 if(r >= Rows)continue;{
 # 1249
 unsigned r2=0U;for(0;r2 < Rows;++ r2){
-if(r2==r ||((int*)((struct _fat_ptr*)M.curr)[(int)r2].curr)[(int)c]==0)continue;{
+if(r2==r ||*((int*)_check_fat_subscript(*((struct _fat_ptr*)_check_fat_subscript(M,sizeof(struct _fat_ptr),(int)r2)),sizeof(int),(int)c))==0)continue;{
 int kr2=((int*)((struct _fat_ptr*)M.curr)[(int)r2].curr)[(int)c];
-int kr=((int*)((struct _fat_ptr*)M.curr)[(int)r].curr)[(int)c];
+int kr=*((int*)_check_fat_subscript(*((struct _fat_ptr*)_check_fat_subscript(M,sizeof(struct _fat_ptr),(int)r)),sizeof(int),(int)c));
 # 1254
 unsigned i=0U;for(0;i < Columns + 1U;++ i){
-((int*)((struct _fat_ptr*)M.curr)[(int)r2].curr)[(int)i]=kr * ((int*)((struct _fat_ptr*)M.curr)[(int)r2].curr)[(int)i]- kr2 * ((int*)((struct _fat_ptr*)M.curr)[(int)r].curr)[(int)i];}}}}}}
+({int _Tmp0=({int _Tmp1=kr * *((int*)_check_fat_subscript(*((struct _fat_ptr*)_check_fat_subscript(M,sizeof(struct _fat_ptr),(int)r2)),sizeof(int),(int)i));_Tmp1 - kr2 * *((int*)_check_fat_subscript(((struct _fat_ptr*)M.curr)[(int)r],sizeof(int),(int)i));});((int*)((struct _fat_ptr*)M.curr)[(int)r2].curr)[(int)i]=_Tmp0;});}}}}}}
 # 1261
 static void Cyc_PrattProver_print_matrix(unsigned R,unsigned C,struct Cyc_Xarray_Xarray*ts,struct _fat_ptr M){
 # 1263
@@ -1564,7 +1570,9 @@ gs=Cyc_PrattProver_add_type_assns(gs);
 gs=Cyc_PrattProver_equality_close_graphs(gs);
 # 2055
 gs=Cyc_PrattProver_break_term_in_graphs(gs);
-gs=Cyc_PrattProver_associate_ud_sd_in_graphs(gs);}{
+gs=Cyc_PrattProver_associate_ud_sd_in_graphs(gs);
+# 2048
+1U;}{
 # 2064
 int _Tmp2=gs!=0;_npop_handler(0);return _Tmp2;}}
 # 2033

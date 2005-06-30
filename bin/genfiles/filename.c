@@ -352,7 +352,7 @@ return({struct _fat_ptr _Tmp0=(struct _fat_ptr)s1;Cyc_strconcat(_Tmp0,Cyc_strcon
 struct _fat_ptr Cyc_Filename_chop_extension(struct _fat_ptr filename){
 int i=(int)(_get_fat_size(filename,sizeof(char))- 1U);
 while(i >= 0 &&(int)*((const char*)_check_fat_subscript(filename,sizeof(char),i))!=46){
--- i;}
+-- i;1U;}
 if(i < 0)
 _throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp0->tag=Cyc_Core_Invalid_argument,_Tmp0->f1=_tag_fat("chop_extension",sizeof(char),15U);_Tmp0;}));
 return Cyc_substring(filename,0,(unsigned long)i);}
@@ -360,21 +360,21 @@ return Cyc_substring(filename,0,(unsigned long)i);}
 struct _fat_ptr Cyc_Filename_dirname(struct _fat_ptr filename){
 int i=(int)(_get_fat_size(filename,sizeof(char))- 1U);
 while(i >= 0 &&(int)*((const char*)_check_fat_subscript(filename,sizeof(char),i))!=47){
--- i;}
+-- i;1U;}
 if(i < 0)return Cyc_Core_new_string(0U);
 return Cyc_substring(filename,0,(unsigned long)i);}
 # 59
 struct _fat_ptr Cyc_Filename_basename(struct _fat_ptr filename){
 int i=(int)(_get_fat_size(filename,sizeof(char))- 1U);
 while(i >= 0 &&(int)*((const char*)_check_fat_subscript(filename,sizeof(char),i))!=47){
--- i;}
+-- i;1U;}
 return Cyc_substring(filename,i + 1,_get_fat_size(filename,sizeof(char))- (unsigned)(i + 1));}
 # 66
 int Cyc_Filename_check_suffix(struct _fat_ptr filename,struct _fat_ptr suffix){
 int i=(int)(_get_fat_size(filename,sizeof(char))- 1U);
 int j=(int)(_get_fat_size(suffix,sizeof(char))- 1U);
 while(i >= 0 && j >= 0){
-if(({int _Tmp0=(int)*((const char*)_check_fat_subscript(filename,sizeof(char),i --));_Tmp0!=(int)*((const char*)_check_fat_subscript(suffix,sizeof(char),j --));}))return 0;}
+if(({int _Tmp0=(int)*((const char*)_check_fat_subscript(filename,sizeof(char),i --));_Tmp0!=(int)*((const char*)_check_fat_subscript(suffix,sizeof(char),j --));}))return 0;1U;}
 if(j >= 0)return 0;
 return 1;}
 # 75
@@ -397,7 +397,9 @@ i=0;
 j=0;}
 # 93
 while(i < ans_sz){
-char c=*((const char*)_check_fat_subscript(filename,sizeof(char),j ++));
+{char c=*((const char*)_check_fat_subscript(filename,sizeof(char),j ++));
 ({struct _fat_ptr _Tmp0=_fat_ptr_plus(ans,sizeof(char),i ++);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=(int)c==92?'/': c;if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});}
+# 94
+1U;}
 # 97
 return ans;}

@@ -407,7 +407,7 @@ struct Cyc_Xarray_Xarray*xarr=Cyc_Xarray_create(16,al);
 Cyc_Xarray_add(xarr,al);{
 int last=0;
 while(last >= 0){
-void*_Tmp0=Cyc_Xarray_get(xarr,last);void*_Tmp1;void*_Tmp2;switch(*((int*)_Tmp0)){case 0:
+{void*_Tmp0=Cyc_Xarray_get(xarr,last);void*_Tmp1;void*_Tmp2;switch(*((int*)_Tmp0)){case 0:
  -- last;goto _LL0;case 1: _Tmp2=(struct _fat_ptr*)((struct Cyc_PP_Single_PP_Alist_struct*)_Tmp0)->f1;{struct _fat_ptr*s=_Tmp2;
 -- last;({struct Cyc_String_pa_PrintArg_struct _Tmp3=({struct Cyc_String_pa_PrintArg_struct _Tmp4;_Tmp4.tag=0,_Tmp4.f1=(struct _fat_ptr)*s;_Tmp4;});void*_Tmp4[1];_Tmp4[0]=& _Tmp3;Cyc_fprintf(f,_tag_fat("%s",sizeof(char),3U),_tag_fat(_Tmp4,sizeof(void*),1));});goto _LL0;}default: _Tmp2=(void*)((struct Cyc_PP_Append_PP_Alist_struct*)_Tmp0)->f1;_Tmp1=(void*)((struct Cyc_PP_Append_PP_Alist_struct*)_Tmp0)->f2;{void*a1=_Tmp2;void*a2=_Tmp1;
 # 107
@@ -418,6 +418,8 @@ Cyc_Xarray_add(xarr,a1);else{
 Cyc_Xarray_set(xarr,last + 1,a1);}
 ++ last;
 goto _LL0;}}_LL0:;}
+# 103
+1U;}
 # 116
 Cyc_Xarray_reuse(xarr);}}
 # 120
@@ -668,7 +670,7 @@ struct Cyc_List_List*os=0;
 struct _fat_ptr docs=*docs_ptr;
 int sz=(int)_get_fat_size(docs,sizeof(struct Cyc_PP_Doc*));
 {int i=0;for(0;i < sz;++ i){
-struct Cyc_PP_Doc*d=((struct Cyc_PP_Doc**)docs.curr)[i];
+struct Cyc_PP_Doc*d=*((struct Cyc_PP_Doc**)_check_fat_subscript(docs,sizeof(struct Cyc_PP_Doc*),i));
 struct Cyc_PP_Out*o=({struct Cyc_PP_Out*(*_Tmp0)(struct Cyc_Fn_Function*,struct Cyc_PP_Ppstate*)=(struct Cyc_PP_Out*(*)(struct Cyc_Fn_Function*,struct Cyc_PP_Ppstate*))Cyc_Fn_apply;_Tmp0;})(d->f,st);
 st=({struct Cyc_PP_Ppstate*_Tmp0=_cycalloc(sizeof(struct Cyc_PP_Ppstate));_Tmp0->ci=st->ci,_Tmp0->cc=o->newcc,_Tmp0->cl=o->newcl,_Tmp0->pw=st->pw,_Tmp0->epw=st->epw - d->mwo;_Tmp0;});
 os=({struct Cyc_List_List*_Tmp0=_cycalloc(sizeof(struct Cyc_List_List));_Tmp0->hd=o,_Tmp0->tl=os;_Tmp0;});}}{
@@ -691,7 +693,7 @@ struct Cyc_PP_Doc*d=((struct Cyc_PP_Doc**)docs.curr)[0];
 int mw=d->mw;
 int mwo=d->mw;
 {int i=1;for(0;i < sz;++ i){
-int mw2=Cyc_PP_min(mw,mwo + ((struct Cyc_PP_Doc**)docs.curr)[i]->mwo);
+int mw2=Cyc_PP_min(mw,mwo + (*((struct Cyc_PP_Doc**)_check_fat_subscript(docs,sizeof(struct Cyc_PP_Doc*),i)))->mwo);
 int mwo2=Cyc_PP_min(mw,mwo + ((struct Cyc_PP_Doc**)docs.curr)[i]->mw);
 mw=mw2;
 mwo=mwo2;}}
@@ -740,9 +742,11 @@ struct Cyc_PP_Doc*sep2=Cyc_PP_text(sep);
 struct Cyc_PP_Doc*oline=Cyc_PP_oline_doc();
 struct Cyc_List_List*x=l;
 while(_check_null(x)->tl!=0){
-struct Cyc_List_List*temp=x->tl;
+{struct Cyc_List_List*temp=x->tl;
 ({struct Cyc_List_List*_Tmp0=({struct Cyc_List_List*_Tmp1=_cycalloc(sizeof(struct Cyc_List_List));_Tmp1->hd=sep2,({struct Cyc_List_List*_Tmp2=({struct Cyc_List_List*_Tmp3=_cycalloc(sizeof(struct Cyc_List_List));_Tmp3->hd=oline,_Tmp3->tl=temp;_Tmp3;});_Tmp1->tl=_Tmp2;});_Tmp1;});x->tl=_Tmp0;});
 x=temp;}
+# 485
+1U;}
 # 489
 return Cyc_PP_cats(l);}}}
 # 497

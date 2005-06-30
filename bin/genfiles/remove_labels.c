@@ -355,7 +355,9 @@ int label_used=0;
 struct Cyc_List_List*label_iter=lb->label_gotos;
 while(label_iter!=0 && !label_used){
 if(Cyc_strptrcmp((struct _fat_ptr*)label_iter->hd,label)==0)label_used=1;
-label_iter=label_iter->tl;}
+label_iter=label_iter->tl;
+# 41
+1U;}
 # 44
 if(!label_used)
 *statement=*s;

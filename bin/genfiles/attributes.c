@@ -445,7 +445,7 @@ if((((_get_fat_size(s,sizeof(char))> 4U &&(int)((const char*)s.curr)[0]==95)&&(i
 s=Cyc_substring(s,2,_get_fat_size(s,sizeof(char))- 5U);{
 int i=0;
 for(1;(unsigned)i < 19U;++ i){
-if(Cyc_strcmp(s,att_map[i].f0)==0)
+if(Cyc_strcmp(s,(*((struct _tuple11*)_check_known_subscript_notnull(att_map,19U,sizeof(struct _tuple11),i))).f0)==0)
 return att_map[i].f1;}
 return Cyc_Atts_bad_attribute(loc);}}
 # 87
@@ -493,9 +493,9 @@ void*Cyc_Atts_parse_format_att(unsigned loc,unsigned s2loc,struct _fat_ptr s1,st
 if(!(Cyc_zstrcmp(s1,_tag_fat("format",sizeof(char),7U))==0)&& !(Cyc_zstrcmp(s1,_tag_fat("__format__",sizeof(char),11U))==0))
 return Cyc_Atts_bad_attribute(loc);
 if(Cyc_zstrcmp(s2,_tag_fat("printf",sizeof(char),7U))==0 || Cyc_zstrcmp(s2,_tag_fat("__printf__",sizeof(char),11U))==0)
-return(void*)({struct Cyc_Absyn_Format_att_Absyn_Attribute_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Absyn_Format_att_Absyn_Attribute_struct));_Tmp0->tag=19,_Tmp0->f1=Cyc_Absyn_Printf_ft,_Tmp0->f2=(int)u1,_Tmp0->f3=(int)u2;_Tmp0;});
+return(void*)({struct Cyc_Absyn_Format_att_Absyn_Attribute_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Absyn_Format_att_Absyn_Attribute_struct));_Tmp0->tag=19,_Tmp0->f1=0U,_Tmp0->f2=(int)u1,_Tmp0->f3=(int)u2;_Tmp0;});
 if(Cyc_zstrcmp(s2,_tag_fat("scanf",sizeof(char),6U))==0 || Cyc_zstrcmp(s2,_tag_fat("__scanf__",sizeof(char),10U))==0)
-return(void*)({struct Cyc_Absyn_Format_att_Absyn_Attribute_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Absyn_Format_att_Absyn_Attribute_struct));_Tmp0->tag=19,_Tmp0->f1=Cyc_Absyn_Scanf_ft,_Tmp0->f2=(int)u1,_Tmp0->f3=(int)u2;_Tmp0;});
+return(void*)({struct Cyc_Absyn_Format_att_Absyn_Attribute_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Absyn_Format_att_Absyn_Attribute_struct));_Tmp0->tag=19,_Tmp0->f1=1U,_Tmp0->f2=(int)u1,_Tmp0->f3=(int)u2;_Tmp0;});
 Cyc_Warn_err(loc,_tag_fat("unrecognized format type",sizeof(char),25U),_tag_fat(0U,sizeof(void*),0));
 return(void*)& Cyc_Atts_Cdecl_att_val;}
 # 144

@@ -673,7 +673,7 @@ if((unsigned)cv->uppers){
 Cyc_Port_unifies(t,(void*)cv->uppers->hd);
 Cyc_Port_generalize(1,t);}else{
 # 410
-Cyc_Port_unifies(t,(void*)_check_null(cv->lowers)->hd);
+Cyc_Port_unifies(t,(void*)cv->lowers->hd);
 Cyc_Port_generalize(1,t);}}
 # 414
 return;}case 0:
@@ -970,7 +970,7 @@ struct Cyc_Dict_Dict _Tmp0=({struct Cyc_Dict_Dict(*_Tmp1)(int(*)(struct _tuple0*
 struct Cyc_Hashtable_Table*_Tmp0=({struct Cyc_Hashtable_Table*(*_Tmp1)(int,int(*)(unsigned,unsigned),int(*)(unsigned))=(struct Cyc_Hashtable_Table*(*)(int,int(*)(unsigned,unsigned),int(*)(unsigned)))Cyc_Hashtable_create;_Tmp1;})(128,Cyc_Port_cmp_seg_t,Cyc_Port_hash_seg_t);g->varusage_tab=_Tmp0;}),g->edits=0,g->porting=0,({
 # 809
 void*_Tmp0=Cyc_Port_void_ct();g->return_type=_Tmp0;});
-return({struct Cyc_Port_Cenv*_Tmp0=_cycalloc(sizeof(struct Cyc_Port_Cenv));_Tmp0->gcenv=g,_Tmp0->cpos=Cyc_Port_Toplevel_pos,({
+return({struct Cyc_Port_Cenv*_Tmp0=_cycalloc(sizeof(struct Cyc_Port_Cenv));_Tmp0->gcenv=g,_Tmp0->cpos=3U,({
 # 812
 struct Cyc_Dict_Dict _Tmp1=({struct Cyc_Dict_Dict(*_Tmp2)(int(*)(struct _tuple0*,struct _tuple0*))=(struct Cyc_Dict_Dict(*)(int(*)(struct _tuple0*,struct _tuple0*)))Cyc_Dict_empty;_Tmp2;})(Cyc_Absyn_qvar_cmp);_Tmp0->var_dict=_Tmp1;});_Tmp0;});}
 # 818
@@ -1010,7 +1010,7 @@ struct _tuple11**popt=({struct _tuple11**(*_Tmp0)(struct Cyc_Dict_Dict,struct _t
 if((unsigned)popt)
 return*popt;else{
 # 865
-struct Cyc_Absyn_Aggrdecl*ad;ad=_cycalloc(sizeof(struct Cyc_Absyn_Aggrdecl)),ad->kind=Cyc_Absyn_StructA,ad->sc=Cyc_Absyn_Public,ad->name=n,ad->tvs=0,ad->impl=0,ad->attributes=0,ad->expected_mem_kind=0;{
+struct Cyc_Absyn_Aggrdecl*ad;ad=_cycalloc(sizeof(struct Cyc_Absyn_Aggrdecl)),ad->kind=0U,ad->sc=2U,ad->name=n,ad->tvs=0,ad->impl=0,ad->attributes=0,ad->expected_mem_kind=0;{
 # 868
 struct _tuple11*p;p=_cycalloc(sizeof(struct _tuple11)),p->f0=ad,p->f1=0;
 ({struct Cyc_Dict_Dict _Tmp0=({struct Cyc_Dict_Dict(*_Tmp1)(struct Cyc_Dict_Dict,struct _tuple0*,struct _tuple11*)=(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,struct _tuple0*,struct _tuple11*))Cyc_Dict_insert;_Tmp1;})(env->gcenv->struct_dict,n,p);env->gcenv->struct_dict=_Tmp0;});
@@ -1022,7 +1022,7 @@ struct _tuple11**popt=({struct _tuple11**(*_Tmp0)(struct Cyc_Dict_Dict,struct _t
 if((unsigned)popt)
 return*popt;else{
 # 882
-struct Cyc_Absyn_Aggrdecl*ad;ad=_cycalloc(sizeof(struct Cyc_Absyn_Aggrdecl)),ad->kind=Cyc_Absyn_UnionA,ad->sc=Cyc_Absyn_Public,ad->name=n,ad->tvs=0,ad->impl=0,ad->attributes=0,ad->expected_mem_kind=0;{
+struct Cyc_Absyn_Aggrdecl*ad;ad=_cycalloc(sizeof(struct Cyc_Absyn_Aggrdecl)),ad->kind=1U,ad->sc=2U,ad->name=n,ad->tvs=0,ad->impl=0,ad->attributes=0,ad->expected_mem_kind=0;{
 # 885
 struct _tuple11*p;p=_cycalloc(sizeof(struct _tuple11)),p->f0=ad,p->f1=0;
 ({struct Cyc_Dict_Dict _Tmp0=({struct Cyc_Dict_Dict(*_Tmp1)(struct Cyc_Dict_Dict,struct _tuple0*,struct _tuple11*)=(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,struct _tuple0*,struct _tuple11*))Cyc_Dict_insert;_Tmp1;})(env->gcenv->union_dict,n,p);env->gcenv->union_dict=_Tmp0;});
@@ -1093,7 +1093,7 @@ struct Cyc_Port_VarUsage*varusage=0;
 if(({int(*_Tmp0)(struct Cyc_Hashtable_Table*,unsigned,struct Cyc_Port_VarUsage**)=(int(*)(struct Cyc_Hashtable_Table*,unsigned,struct Cyc_Port_VarUsage**))Cyc_Hashtable_try_lookup;_Tmp0;})(env->gcenv->varusage_tab,declloc,& varusage)){
 if(takeaddress)_check_null(varusage)->address_taken=1;{
 struct Cyc_List_List*l=_check_null(varusage)->usage_locs;
-({struct Cyc_List_List*_Tmp0=({struct Cyc_List_List*_Tmp1=_cycalloc(sizeof(struct Cyc_List_List));_Tmp1->hd=(void*)useloc,_Tmp1->tl=l;_Tmp1;});_check_null(varusage)->usage_locs=_Tmp0;});}}}struct _tuple17{void*f0;void*f1;unsigned f2;};
+({struct Cyc_List_List*_Tmp0=({struct Cyc_List_List*_Tmp1=_cycalloc(sizeof(struct Cyc_List_List));_Tmp1->hd=(void*)useloc,_Tmp1->tl=l;_Tmp1;});varusage->usage_locs=_Tmp0;});}}}struct _tuple17{void*f0;void*f1;unsigned f2;};
 # 985
 static void Cyc_Port_register_const_cvar(struct Cyc_Port_Cenv*env,void*new_qual,void*orig_qual,unsigned loc){
 # 987
@@ -1929,7 +1929,7 @@ edits=({struct Cyc_List_List*(*_Tmp0)(int(*)(struct Cyc_Port_Edit*,struct Cyc_Po
 # 1989
 while((unsigned)edits &&((struct Cyc_Port_Edit*)edits->hd)->loc==0U){
 # 1993
-edits=edits->tl;}
+edits=edits->tl;1U;}
 # 1995
 return edits;}
 # 2000

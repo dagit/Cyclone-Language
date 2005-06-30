@@ -408,9 +408,11 @@ static struct Cyc_List_List*Cyc_Graph_to_list(struct Cyc_Set_Set*ts){
 # 88
 struct Cyc_List_List*result=0;
 while(!Cyc_Set_is_empty(ts)){
-void*z=Cyc_Set_choose(ts);
+{void*z=Cyc_Set_choose(ts);
 ts=Cyc_Set_delete(ts,z);
 result=({struct Cyc_List_List*_Tmp0=_cycalloc(sizeof(struct Cyc_List_List));_Tmp0->hd=z,_Tmp0->tl=result;_Tmp0;});}
+# 90
+1U;}
 # 94
 return result;}
 # 100
@@ -485,11 +487,13 @@ struct Cyc_Dict_Dict result=Cyc_Graph_empty(cmp);
 {struct Cyc_List_List*edges=Cyc_Dict_to_list(g);for(0;(unsigned)edges;edges=edges->tl){
 struct _tuple0*_Tmp0=(struct _tuple0*)edges->hd;void*_Tmp1;void*_Tmp2;_Tmp2=(void*)_Tmp0->f0;_Tmp1=_Tmp0->f1;{void*source=_Tmp2;struct Cyc_Set_Set*targets=_Tmp1;
 while(!Cyc_Set_is_empty(targets)){
-void*target=Cyc_Set_choose(targets);
+{void*target=Cyc_Set_choose(targets);
 targets=Cyc_Set_delete(targets,target);
 if(Cyc_Graph_is_edge(closure,source,target))continue;
 closure=Cyc_Graph_add_edgeTc(closure,source,target);
-result=Cyc_Graph_add_edge(result,source,target);}}}}
+result=Cyc_Graph_add_edge(result,source,target);}
+# 204
+1U;}}}}
 # 211
 return result;}struct Cyc_Graph_nodestate{void*root;int C;int visitindex;};struct Cyc_Graph_componentstate{struct Cyc_Set_Set*Succ;struct Cyc_Set_Set*nodes;};struct Cyc_Graph_tcstate{struct Cyc_Set_Set*visited;int visitindex;struct Cyc_Dict_Dict ns;struct Cyc_Dict_Dict cs;int Cindex;struct Cyc_List_List*nstack;struct Cyc_List_List*cstack;};
 # 237
@@ -503,7 +507,7 @@ struct Cyc_Graph_nodestate*nsv;nsv=_cycalloc(sizeof(struct Cyc_Graph_nodestate))
 int hsaved=Cyc_List_length(ts->cstack);
 struct Cyc_Set_Set*targets=Cyc_Graph_get_targets(g,v);
 while(!Cyc_Set_is_empty(targets)){
-void*w=Cyc_Set_choose(targets);
+{void*w=Cyc_Set_choose(targets);
 targets=Cyc_Set_delete(targets,w);
 if(cmp(v,w)==0)continue;{
 int is_forward_edge;
@@ -526,6 +530,8 @@ nsv->root=nsw->root;}else{
 # 270
 if(!is_forward_edge)
 ({struct Cyc_List_List*_Tmp0=({struct Cyc_List_List*_Tmp1=_cycalloc(sizeof(struct Cyc_List_List));_Tmp1->hd=(void*)Cw,_Tmp1->tl=ts->cstack;_Tmp1;});ts->cstack=_Tmp0;});}}}}
+# 247
+1U;}
 # 273
 if(cmp(nsv->root,v)!=0)
 return;{
@@ -552,12 +558,14 @@ s=({struct Cyc_Set_Set*_Tmp0=s;Cyc_Set_union_two(_Tmp0,({struct Cyc_Graph_compon
 csCnew->Succ=s;}}}
 # 298
 while((unsigned)ts->nstack){
-void*w=ts->nstack->hd;
+{void*w=ts->nstack->hd;
 ts->nstack=ts->nstack->tl;{
 struct Cyc_Graph_nodestate*nsw=({struct Cyc_Graph_nodestate*(*_Tmp0)(struct Cyc_Dict_Dict,void*)=(struct Cyc_Graph_nodestate*(*)(struct Cyc_Dict_Dict,void*))Cyc_Dict_lookup;_Tmp0;})(ts->ns,w);
 nsw->C=Cnew;
 ({struct Cyc_Set_Set*_Tmp0=Cyc_Set_insert(csCnew->nodes,w);csCnew->nodes=_Tmp0;});
-if(cmp(w,v)==0)break;}}}}}}
+if(cmp(w,v)==0)break;}}
+# 299
+1U;}}}}}
 # 307
 struct Cyc_Dict_Dict Cyc_Graph_tc(struct Cyc_Dict_Dict g){
 int(*cmp)(void*,void*)=g.rel;
@@ -578,16 +586,20 @@ struct Cyc_Graph_componentstate*cs=({struct Cyc_Graph_componentstate*(*_Tmp0)(st
 struct Cyc_Set_Set*targets=Cyc_Set_empty(cmp);
 struct Cyc_Set_Set*Succ=cs->Succ;
 while(!Cyc_Set_is_empty(Succ)){
-int C2=({int(*_Tmp0)(struct Cyc_Set_Set*)=(int(*)(struct Cyc_Set_Set*))Cyc_Set_choose;_Tmp0;})(Succ);
+{int C2=({int(*_Tmp0)(struct Cyc_Set_Set*)=(int(*)(struct Cyc_Set_Set*))Cyc_Set_choose;_Tmp0;})(Succ);
 Succ=({struct Cyc_Set_Set*(*_Tmp0)(struct Cyc_Set_Set*,int)=(struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*,int))Cyc_Set_delete;_Tmp0;})(Succ,C2);
 targets=({struct Cyc_Set_Set*_Tmp0=targets;Cyc_Set_union_two(_Tmp0,
-({struct Cyc_Graph_componentstate*(*_Tmp1)(struct Cyc_Dict_Dict,int)=(struct Cyc_Graph_componentstate*(*)(struct Cyc_Dict_Dict,int))Cyc_Dict_lookup;_Tmp1;})(ts->cs,C2)->nodes);});}{
+({struct Cyc_Graph_componentstate*(*_Tmp1)(struct Cyc_Dict_Dict,int)=(struct Cyc_Graph_componentstate*(*)(struct Cyc_Dict_Dict,int))Cyc_Dict_lookup;_Tmp1;})(ts->cs,C2)->nodes);});}
+# 330
+1U;}{
 # 335
 struct Cyc_Set_Set*nodes=cs->nodes;
 while(!Cyc_Set_is_empty(nodes)){
-void*v=Cyc_Set_choose(nodes);
+{void*v=Cyc_Set_choose(nodes);
 nodes=Cyc_Set_delete(nodes,v);
-result=Cyc_Graph_add_edges(result,v,targets);}}}}
+result=Cyc_Graph_add_edges(result,v,targets);}
+# 337
+1U;}}}}
 # 342
 return result;}}
 # 355 "graph.cyc"

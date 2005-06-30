@@ -31,6 +31,7 @@
 #include <hashtable.h>
 #include <list.h>
 #include <dict.h>
+#include <set.h>
 
 namespace Hashtable {
   using List;
@@ -324,30 +325,111 @@ static term_t copy_term(datatype Term@ t) {
   }
 }
 
-// a hash-table to hold all of the term nodes to maximize sharing.  
-static struct Hashtable::Table<term_t,term_t> *term_hash_cons_table = NULL;
-
 datatype Term.Uint zero_value = Uint(0,NULL);
 datatype Term.Uint one_value = Uint(1,NULL);
 
-static term_t hash_cons_term(datatype Term @t) {
-  Hashtable::table_t<term_t,term_t> h;
+static term_set_t empty_term_set() {
+   static term_set_t *term_set = NULL;
+   if (term_set == NULL) {
+     term_set = new Set::empty(termcmp);
+   }
+   return *term_set;
+}
+
+typedef struct TermHashedInfo {
+  term_t term;
+  term_set_t *free_logicvar_set;
+} @term_hashed_info_t;
+
+// a hash-table to hold all of the term nodes to maximize sharing.  
+static struct Hashtable::Table<term_t,term_hashed_info_t> *term_hash_cons_table = NULL;
+
+
+static Hashtable::table_t<term_t,term_hashed_info_t>
+get_term_hash_cons_table(){
+  Hashtable::table_t<term_t,term_hashed_info_t> h;
   if (term_hash_cons_table == NULL) {
     h = Hashtable::create(221, termcmp, termhash);
     term_hash_cons_table = h;
-    Hashtable::insert(h,&zero_value,&zero_value);
-    Hashtable::insert(h,&one_value,&one_value);
+    term_set_t tst = empty_term_set();
+    Hashtable::insert(h,&zero_value,new TermHashedInfo{&zero_value,new tst});
+    Hashtable::insert(h,&one_value,new TermHashedInfo{&one_value,new tst});
   } else {
     h = (Hashtable::table_t)term_hash_cons_table;
   }
+  return h;
+}
+
+static term_t hash_cons_term(datatype Term @t) {
+  let h = get_term_hash_cons_table();
   let resopt = Hashtable::lookup_other_opt(h,t,termcmp,termhash);
   if (resopt == NULL) {
     let t2 = copy_term(t);
-    Hashtable::insert(h,t2,t2);
+    Hashtable::insert(h,t2,new TermHashedInfo{t2,NULL});
     return t2;
-  } else return *resopt;
+  } else 
+    return (*resopt)->term;
 }
 
+// computing the set of logicvars that occured
+// in a term, use the hash table to memoize the
+// result
+static term_set_t term_fr_logicvar(term_t t) {
+  let h = get_term_hash_cons_table();
+  let thinfo = Hashtable::lookup_opt(h,t);
+  // the info was computed before and stored in the table
+  if (thinfo == NULL) {
+    t = hash_cons_term(t);
+    thinfo = Hashtable::lookup_opt(h,t);
+  }
+  if ((*thinfo)->free_logicvar_set != NULL)
+    return *(*thinfo)->free_logicvar_set;
+  term_set_t res;
+  switch (t) {
+  case &Uint(...): 
+  case &Const(...):
+  case &Addr(...):
+  case &Alloc(...):
+    res = empty_term_set(); break;
+  case &LogicVar(...):
+    res = Set::singleton(termcmp,t);
+    break;
+  case &Select(t1,t2,_):
+    fallthru(t1,t2);
+  case &Binop(_,t1,t2,_):
+    fallthru(t1,t2);
+  case &Offseti(t1,t2,_):
+    res = Set::union_two(term_fr_logicvar(t1),term_fr_logicvar(t2));
+    break;
+  case &Update(t1,t2,t3):
+    res = Set::union_two(Set::union_two(term_fr_logicvar(t1),
+					term_fr_logicvar(t2)),
+			 term_fr_logicvar(t3));
+    break;
+  case &Unop(_,t1,_):
+    fallthru(t1);
+  case &Proj(t1,_,_):
+    fallthru(t1);
+  case &Offsetf(_,t1,_):
+    fallthru(t1);
+  case &Tagof(t1):
+    fallthru(t1);
+  case &Cast(_,t1):
+    res = term_fr_logicvar(t1);
+    break;
+  case &Aggr(_,_,ts,_):
+    let tsets = map(term_fr_logicvar,ts);
+    res = fold_left(Set::union_two,empty_term_set(),tsets);
+    break;
+  }
+  (*thinfo)->free_logicvar_set = new res;
+  return res;
+}
+
+static bool logicvar_in_term(term_t lvar, term_t t) {
+  let lvset = term_fr_logicvar(t);
+  return Set::member(lvset,lvar);
+}
 
 term_t uint(unsigned int i) {
   let t = Uint(i,NULL);
@@ -882,7 +964,9 @@ type_opt_t get_term_type(term_t t) {
   }
 }
 
-static term_t subst_term(Dict::dict_t<term_t,term_t> dict, term_t t,
+typedef Dict::dict_t<term_t,term_t> term_dict_t;
+
+static term_t subst_term(term_dict_t dict, term_t t,
 			 Hashtable::table_t<term_t,term_t> term_h){
   let t1 = Hashtable::lookup_opt(term_h,t);
   if (t1 != NULL) {
@@ -954,6 +1038,14 @@ static term_t subst_term(Dict::dict_t<term_t,term_t> dict, term_t t,
   }
   Hashtable::insert(term_h,t,res);
   return res;
+}
+
+static int hash_ptr(`a s) { return (int) s;}
+
+
+static term_t subst_t(term_dict_t dict,term_t t) {
+  Hashtable::table_t<term_t,term_t> term_h = Hashtable::create(137,Core::ptrcmp,hash_ptr);
+  return subst_term(dict,t,term_h);
 }
 /////// assertion manipulation /////////////
   
@@ -1096,6 +1188,7 @@ typedef struct AssnHashedInfo {
   assn_t assn;
   assn_t negation;
   assn_set_opt_t *widened_set;
+  term_set_t *free_logicvar_set;
 } @assn_hashed_info_t;
 
 static struct Hashtable::Table<assn_t, assn_hashed_info_t> *assn_hash_cons_table;
@@ -1106,9 +1199,10 @@ get_assn_hash_cons_table(){
   if (assn_hash_cons_table == NULL) {
     h = Hashtable::create(221, assncmp, assnhash);
     assn_hash_cons_table = h;
-    assn_set_opt_t st = Set::empty(assncmp);
-    Hashtable::insert(h,&true_assn,new AssnHashedInfo{&true_assn,&false_assn,new st});
-    Hashtable::insert(h,&false_assn,new AssnHashedInfo{&false_assn,&true_assn,new NULL});
+    assn_set_opt_t ast = Set::empty(assncmp);
+    term_set_t tst = empty_term_set();
+    Hashtable::insert(h,&true_assn,new AssnHashedInfo{&true_assn,&false_assn,new ast,new tst});
+    Hashtable::insert(h,&false_assn,new AssnHashedInfo{&false_assn,&true_assn,new NULL,new tst});
   } else {
     h = (Hashtable::table_t)assn_hash_cons_table;
   }
@@ -1122,8 +1216,8 @@ static assn_t hash_cons_assn(datatype Assn @a) {
     // neither was nega in the table.
     let a2 = copy_assn(a);
     let nega2 = neg_assn(a);
-    Hashtable::insert(h,a2,new AssnHashedInfo{a2,nega2,NULL});
-    Hashtable::insert(h,nega2,new AssnHashedInfo{nega2,a2,NULL});
+    Hashtable::insert(h,a2,new AssnHashedInfo{a2,nega2,NULL,NULL});
+    Hashtable::insert(h,nega2,new AssnHashedInfo{nega2,a2,NULL,NULL});
     return a2;
   } else 
     return (*resopt)->assn;
@@ -1159,6 +1253,15 @@ assn_t or(assn_t a1, assn_t a2){
   }
 }
 
+// some assertions that was created as part of 
+// function signatures get nuked out before
+// entering a new function definition analysis
+// we need to enter the assertion (as well as
+// its sub assertions) into the hash table again
+// the reason we need to do this is while inserting
+// an assertion to the table, we are computing
+// the negation for the assertion at the same time
+// and stored in the hash table as well.
 static assn_t reinsert(assn_t a) {
   let h = get_assn_hash_cons_table();
   switch (a) {
@@ -1182,6 +1285,40 @@ static assn_t reinsert(assn_t a) {
     return hash_cons_assn(a);
   }
 }
+
+static term_set_t assn_fr_logicvar(assn_t a) {
+  let h = get_assn_hash_cons_table();
+  let ahinfo = Hashtable::lookup_opt(h,a);
+  if (ahinfo == NULL) {
+    a = reinsert(a);
+    ahinfo = Hashtable::lookup_opt(h,a);
+  }
+  if ((*ahinfo)->free_logicvar_set != NULL)
+    return *(*ahinfo)->free_logicvar_set;
+  term_set_t res; 
+  switch (a) {
+  case &True:
+  case &False:
+    res = empty_term_set();
+    break;
+  case &And(a1,a2):
+    fallthru(a1,a2);
+  case &Or(a1,a2):
+    res = Set::union_two(assn_fr_logicvar(a1),assn_fr_logicvar(a2));
+    break;
+  case &Prim(t1,_,t2):
+    res = Set::union_two(term_fr_logicvar(t1),term_fr_logicvar(t2));
+    break;
+  }
+  (*ahinfo)->free_logicvar_set = new res;
+  return res;
+}
+
+static bool logicvar_in_assn(term_t lvar, assn_t a) {
+  let lvset = assn_fr_logicvar(a);
+  return Set::member(lvset,lvar);
+}
+
 // since a was already in the assn hashtable, (not a) must
 // be there too. 
 assn_t not(assn_t a){
@@ -1261,7 +1398,7 @@ static assn_set_opt_t widen_it(assn_t a){
   case &Prim(t1,p,t2):
     s = Set::singleton(assncmp,a);
     switch (p) {
-    case Eq:
+   case Eq:
       // when we have t1 == t2 and they are of integral type, then we
       // also want to remember that t1 <= t2 and t2 <= t1 so that when
       // we intersect, we don't lose the information.
@@ -1298,7 +1435,7 @@ static assn_t widen(assn_t a) {
   return res;
 }
 
-static assn_t subst_assn(Dict::dict_t<term_t,term_t> dict, assn_t a, 
+static assn_t subst_assn(term_dict_t dict, assn_t a, 
 			 Hashtable::table_t<assn_t,assn_t> assn_h,
 			 Hashtable::table_t<term_t,term_t> term_h){
   let a1 = Hashtable::lookup_opt(assn_h,a);
@@ -1333,9 +1470,7 @@ static assn_t subst_assn(Dict::dict_t<term_t,term_t> dict, assn_t a,
   return res;
 } 
 
-int hash_ptr(`a s) { return (int) s;}
-
-static assn_t subst(Dict::dict_t<term_t,term_t> dict, assn_t a){
+static assn_t subst_a(term_dict_t dict, assn_t a){
   // create new hashtables to record the substituted result
   // with respect to this particular dict. 
   Hashtable::table_t<assn_t,assn_t> assn_h = Hashtable::create(107,Core::ptrcmp,hash_ptr);
@@ -1395,7 +1530,7 @@ static list_t<string_t<`H>@`H, `H> m2string(vardecl_t vd, term_t value, list_t<s
   return new List{new res,stringlist};
 }
 
-static string_t<`H> map2string(nonescvar_map_t m){
+string_t<`H> map2string(nonescvar_map_t m){
   list_t<string_t<`H>@`H, `H> stringlist = Dict::fold(m2string,m,NULL);
   string_t<`H> s;
   if (stringlist == NULL) return aprintf(" ");
@@ -1412,13 +1547,22 @@ string_t<`H> assnmap2string(assn_map_t am){
   return aprintf("%s\n%s",assn2string(am.assn),map2string(am.map));
 }
 
+static nonescvar_map_t empty_map() {
+   static nonescvar_map_t *mt = NULL;
+   if (mt == NULL) {
+     let d = Dict::empty(Core::ptrcmp);
+     mt = new d;
+     return d;
+   } else
+     return *mt;
+}
 
 assn_map_t false_assnmap(){
-  return AssnMap{&false_assn,Dict::empty(Core::ptrcmp)};
+  return AssnMap{&false_assn,empty_map()};
 }
 
 assn_map_t true_assnmap(){
-  return AssnMap{&true_assn,Dict::empty(Core::ptrcmp)};
+  return AssnMap{&true_assn,empty_map()};
 }
 
 // looking up a vd in the nonescvar_map,
@@ -1459,7 +1603,19 @@ term_t merge(vardecl_t vd, term_t t1, term_t t2){
   else return fresh_var(vd->type);
 }
 
+static term_t subst_term_internal($(Hashtable::table_t<term_t,term_t>, term_dict_t) @env, term_t t) {
+  return subst_term(env->f1,t,env->f0);
+}
 
+static assn_map_t subst_am(term_dict_t dict, assn_map_t am) {
+  // create new hashtables to record the substituted result
+  // with respect to this particular dict. 
+  Hashtable::table_t<assn_t,assn_t> assn_h = Hashtable::create(107,Core::ptrcmp,hash_ptr);
+  Hashtable::table_t<term_t,term_t> term_h = Hashtable::create(137,Core::ptrcmp,hash_ptr);
+  let assn = subst_assn(dict,am.assn,assn_h,term_h);
+  let map = Dict::map_c(subst_term_internal,new $(term_h,dict),am.map);
+  return AssnMap(assn,map);
+}
 typedef struct Accum{
   assn_t a1;
   assn_t a2;
@@ -1467,6 +1623,14 @@ typedef struct Accum{
   nonescvar_map_t m2;
   nonescvar_map_t m;
 } accum_t;
+
+static bool logicvar_in_map_internal(term_t lvar, vardecl_t dummy, term_t value, bool in_map) {
+  return in_map || logicvar_in_term(lvar,value);
+}
+
+static bool logicvar_in_map(term_t lv, nonescvar_map_t m) {
+  return Dict::fold_c(logicvar_in_map_internal,lv,m,false);
+}
 
 // helper function used when we are folding in am1.map
 // for each vd in am1.map, we look it up in am2.map and
@@ -1478,14 +1642,21 @@ static accum_t @`r foldm1(vardecl_t vd, term_t t, accum_t @`r accum){
   if (t2 == NULL) {
     switch (t) {
     case &LogicVar(...): 
-      accum->m = Dict::insert(accum->m,vd,t);
-      return accum;
+      if (!logicvar_in_assn(t,accum->a2) && !logicvar_in_map(t,accum->m2)) {
+	accum->m2 = Dict::insert(accum->m2,vd,t);
+	accum->m = Dict::insert(accum->m,vd,t);
+	return accum;
+      }
+      break;
     default:
-      let v = fresh_var(vd->type);
-      accum->a1 = and(accum->a1,eq(v,t));
-      accum->m = Dict::insert(accum->m,vd,v);
-      return accum;
+      break;
     }
+    let v = fresh_var(vd->type);
+    accum->a1 = and(accum->a1,eq(v,t));
+    accum->m1 = Dict::insert(accum->m1,vd,v);
+    accum->m2 = Dict::insert(accum->m2,vd,v);
+    accum->m = Dict::insert(accum->m,vd,v);
+    return accum;
   }
   // t2 != NULL
   if (t == *t2){
@@ -1497,21 +1668,47 @@ static accum_t @`r foldm1(vardecl_t vd, term_t t, accum_t @`r accum){
   // before merge: M1: x -> t, M2: x -> t2
   // after merge: M: x -> v, a1 = and(a1,v==t), a2 = and(a2,v==t2)
   switch $(t,*t2) {
+  case $(&LogicVar(...),&LogicVar(...)):
+    if (!logicvar_in_assn(t,accum->a2) && !logicvar_in_map(t,accum->m2)){
+      // t is logicvar and does not occur in am2
+      accum->a2 = and(eq(t,*t2),accum->a2);
+      accum->m2 = Dict::insert(accum->m2,vd,t);
+      accum->m = Dict::insert(accum->m,vd,t);
+      return accum;
+    } else if (!logicvar_in_assn(*t2,accum->a1) && !logicvar_in_map(*t2,accum->m1)) {
+      // *t2 is logicvar and does not occur in am1
+      accum->a1 = and(eq(t,*t2),accum->a1);
+      accum->m1 = Dict::insert(accum->m1,vd,*t2);
+      accum->m = Dict::insert(accum->m,vd,*t2);
+    }
+    break;
   case $(&LogicVar(...),_):
-    accum->a2 = and(eq(t,*t2),accum->a2);
-    accum->m = Dict::insert(accum->m,vd,t);
-    return accum;
+    if (!logicvar_in_assn(t,accum->a2) && !logicvar_in_map(t,accum->m2)){
+      // t is logicvar and does not occur in am2
+      accum->a2 = and(eq(t,*t2),accum->a2);
+      accum->m2 = Dict::insert(accum->m2,vd,t);
+      accum->m = Dict::insert(accum->m,vd,t);
+      return accum;
+    }
+    break;
   case $(_,&LogicVar(...)):
-    accum->a1 = and(eq(*t2,t),accum->a1);
-    accum->m = Dict::insert(accum->m,vd,*t2);
-    return accum;
+    if (!logicvar_in_assn(*t2,accum->a1) && !logicvar_in_map(*t2,accum->m1)) {
+      // *t2 is logicvar and does not occur in am1
+      accum->a1 = and(eq(t,*t2),accum->a1);
+      accum->m1 = Dict::insert(accum->m1,vd,*t2);
+      accum->m = Dict::insert(accum->m,vd,*t2);
+    }
+    break;
   default:
-    let v = fresh_var(vd->type);
-    accum->a1 = and(eq(v,t),accum->a1);
-    accum->a2 = and(eq(v,*t2),accum->a2);
-    accum->m = Dict::insert(accum->m,vd,v);
-    return accum;
+    break;
   }
+  let v = fresh_var(vd->type);
+  accum->a1 = and(eq(v,t),accum->a1);
+  accum->a2 = and(eq(v,*t2),accum->a2);
+  accum->m1 = Dict::insert(accum->m1,vd,v);
+  accum->m2 = Dict::insert(accum->m2,vd,v);
+  accum->m = Dict::insert(accum->m,vd,v);
+  return accum;
 }
 
 // helper function when we are folding in am2.map-am1.map
@@ -1520,9 +1717,9 @@ static accum_t @`r foldm1(vardecl_t vd, term_t t, accum_t @`r accum){
 // after merge: M: x->v, a2 = and(v==t,a2);
 static accum_t @`r foldm2(vardecl_t vd, term_t t, accum_t @`r accum){
   switch (t) {
-  case &LogicVar(...):
-    accum->m = Dict::insert(accum->m,vd,t);
-    return accum;
+//   case &LogicVar(...):
+//     accum->m = Dict::insert(accum->m,vd,t);
+//     return accum;
   default:
     let v = fresh_var(vd->type);
     accum->a2 = and(eq(v,t),accum->a2);
@@ -1532,15 +1729,108 @@ static accum_t @`r foldm2(vardecl_t vd, term_t t, accum_t @`r accum){
 }
 
 
-assn_map_t or_assnmap_assnmap(assn_map_t am1, assn_map_t am2){
-  if (am1.assn == &false_assn) return am2;
-  if (am2.assn == &false_assn) return am1;
-  accum_t accum = Accum{am1.assn,am2.assn,am1.map,am2.map,Dict::empty(Core::ptrcmp)};
-  Dict::fold(foldm1,am1.map, &accum);
-  Dict::fold(foldm2,Dict::difference(am2.map,am1.map),&accum);
-  return AssnMap(or(accum.a1,accum.a2),accum.m);
+term_dict_t empty_term_dict() {
+  static term_dict_t *term_dict = NULL;
+  if (term_dict == NULL) {
+    term_dict = new Dict::empty(Core::ptrcmp);
+  }
+  return *term_dict;
 }
 
+// Given two assn_map am1, am2, where the nonescvarmap
+// might be different, unify their nonescvar_maps and
+// return a1,a2 map such that
+// AssnMap(a1,map) <=> am1 and
+// AssnMap(a2,map) <=> am2
+$(assn_t,assn_t,nonescvar_map_t) unify_var_maps(assn_map_t am1, assn_map_t am2){
+  if (am1.assn == &false_assn) return $(am1.assn,am2.assn,am2.map);
+  if (am2.assn == &false_assn) return $(am1.assn,am2.assn,am1.map);
+  accum_t accum = Accum{am1.assn,am2.assn,am1.map,am2.map,empty_map()};
+  Dict::fold(foldm1,am1.map,&accum);
+  Dict::fold(foldm2,Dict::difference(am2.map,am1.map),&accum);
+  return $(accum.a1,accum.a2,accum.m);
+}
+
+
+static term_dict_t @collect_subst(nonescvar_map_t @map2, vardecl_t vd, term_t value, term_dict_t @`H dict) {
+  switch (value) {
+  case &LogicVar(...):
+    // even if we have a logic var, if 
+    // the other map had the same value for 
+    // this vd, there is no need to do substitution
+    let v = Dict::lookup_opt(*map2,vd);
+    // otherwise, make sure we haven't used this 
+    // value in earlier substitution.
+    if (Dict::lookup_opt(*dict,value) == NULL) {
+      if (v != NULL && *v == value) 
+	return new Dict::insert(*dict,value,*v);
+      return new Dict::insert(*dict,value,fresh_var(vd->type));
+    }
+    break;
+  default:
+    break;
+  }
+  return dict;
+}
+// given two assn_map am1, am2, where the nonescvarmap
+// might be different unify their nonescvar_maps
+// if am1.map: x->v where v is a logic var,
+// we unify the am2.map to x->v too, but we need
+// to do substitution in am2.assn and am2.map so
+// that v does not occur free in am2
+// we only want to do this expensive unify during
+// loops to keep the cost do
+$(assn_t,assn_t,nonescvar_map_t) unify_var_maps_subst(assn_map_t am1, assn_map_t am2) {
+  if (am1.assn == &false_assn) return $(am1.assn,am2.assn,am2.map);
+  if (am2.assn == &false_assn) return $(am1.assn,am2.assn,am1.map);
+  // go over am1.map, if xi->vi, vi is a logic var,
+  // we will substitue vi with a new ui in am2 so
+  // that we can have x->vi in am2.
+  term_dict_t subst_dict = *Dict::fold_c(collect_subst,&am2.map,am1.map,new empty_term_dict());
+  let am2 = subst_am(subst_dict,am2);
+  return unify_var_maps(am1,am2);
+}
+
+assn_map_t or_assnmap_assnmap(assn_map_t am1, assn_map_t am2){
+  let $(a1,a2,map) = unify_var_maps(am1,am2);
+  return AssnMap(or(a1,a2),map);
+}
+
+
+typedef struct Canonical_am_accum {
+  assn_t assn;
+  nonescvar_map_t map;
+  struct Set::Set<term_t> @used_lvars;
+} @canonical_am_accum_t;
+
+static canonical_am_accum_t fold_canonical(vardecl_t vd, term_t value, canonical_am_accum_t accum) {
+  switch (value) {
+  case &LogicVar(...):
+    if (!Set::member(accum->used_lvars,value)) {
+      accum->used_lvars = Set::insert(accum->used_lvars,value);
+      accum->map = Dict::insert(accum->map,vd,value);
+      return accum;
+    }
+    break;
+  default:
+    break;
+  }
+  let v = fresh_var(vd->type);
+  accum->used_lvars = Set::insert(accum->used_lvars,v);
+  accum->map = Dict::insert(accum->map,vd,v);
+  accum->assn = and(accum->assn,eq(v,value));
+  return accum;
+}
+
+// given an assnmap, return a logically equivalent
+// assnmap such that
+// xi->vi where v1, ..., vn are distinct logicvars
+// for every vd in the map
+assn_map_t canonical_assnmap(assn_map_t am) {
+  let accum = new Canonical_am_accum(am.assn,empty_map(),Set::empty(Core::ptrcmp));
+  Dict::fold(fold_canonical,am.map,accum);
+  return AssnMap (accum->assn,accum->map);
+}
 // given two assertion_map a1, a2, where the nonescvarmap 
 // only maps vardecls to logical vars of the form:
 // a1 = assn1, x1=v1(or NULL) ,x2=v2(or NULL),...
@@ -1551,7 +1841,7 @@ assn_map_t or_assnmap_assnmap(assn_map_t am1, assn_map_t am2){
 // function signatures (such as subtyping or type equivalence)
 assn_t merge_assnmaps(list_t<vardecl_opt_t> vds1, assn_map_t a1,
 			  list_t<vardecl_opt_t> vds2, assn_map_t a2){
-  Dict::dict_t<term_t,term_t> dict=Dict::empty(Core::ptrcmp);
+  term_dict_t dict=empty_term_dict();
   for (; vds1 != NULL && vds2 != NULL; vds1 = vds1->tl, vds2 = vds2->tl){
     if (vds1->hd != NULL && vds2->hd != NULL){
       let v1 = Dict::lookup_opt(a1.map,(vardecl_t)vds1->hd);
@@ -1568,7 +1858,7 @@ assn_t merge_assnmaps(list_t<vardecl_opt_t> vds1, assn_map_t a1,
 #endif
   }
   if (Dict::is_empty(dict)) return a2.assn;
-  else return subst(dict,a2.assn);
+  else return subst_a(dict,a2.assn);
 }
 
 // given an assertion_map of the form 
@@ -1583,8 +1873,8 @@ extern assn_map_t *subst_vardecls(List::list_t<vardecl_opt_t> vds1,
 				  List::list_t<vardecl_opt_t> vds2,
 				  assn_map_t *a){
   if (a == NULL) return NULL;
-  let newmap = Dict::empty(Core::ptrcmp);
-  let dict = Dict::empty(Core::ptrcmp);
+  let newmap = empty_map();
+  let dict = empty_term_dict();
   for(; vds1 != NULL && vds2 != NULL; vds1 = vds1->tl, vds2 = vds2->tl){
     if (vds1->hd != NULL && vds2->hd != NULL){
       let v = Dict::lookup_opt(a->map,(vardecl_t)vds1->hd);
@@ -1598,7 +1888,7 @@ extern assn_map_t *subst_vardecls(List::list_t<vardecl_opt_t> vds1,
     }
   }
   // get newa = a.assn[ui/vi]
-  let newa = subst(dict,a->assn);
+  let newa = subst_a(dict,a->assn);
   return new AssnMap(newa,newmap);
 }
 
@@ -1610,7 +1900,7 @@ extern assn_map_t *subst_vardecls(List::list_t<vardecl_opt_t> vds1,
 assn_t subst_args(list_t<vardecl_opt_t> args, vardecl_opt_t res,
 		      list_t<term_t> actual_args, term_opt_t actual_res,
 		      assn_map_t am){
-  Dict::dict_t<term_t,term_t> dict = Dict::empty(Core::ptrcmp);
+  term_dict_t dict = empty_term_dict();
   if (res != NULL && actual_res != NULL){
     let res_val = Dict::lookup_opt(am.map,(vardecl_t)res);
     if (res_val != NULL)
@@ -1623,7 +1913,7 @@ assn_t subst_args(list_t<vardecl_opt_t> args, vardecl_opt_t res,
 	dict = Dict::insert(dict,*arg_val,actual_args->hd);
     }
   }
-  return subst(dict,am.assn);
+  return subst_a(dict,am.assn);
 }
 
 void reset_hash_cons_table(void){

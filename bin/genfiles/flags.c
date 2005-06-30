@@ -377,7 +377,7 @@ int Cyc_Flags_warn_lose_unique=0;
 int Cyc_Flags_tc_aggressive_warn=0;
 enum Cyc_Flags_Cyclone_Passes Cyc_Flags_stop_after_pass=Cyc_Flags_AllPasses;
 int Cyc_Flags_print_parser_state_and_token=0;
-int Cyc_Flags_allpaths=0;
+int Cyc_Flags_allpaths=1;
 int Cyc_Flags_debug_assn=0;
 # 45
 void Cyc_Flags_set_all_warnings (void){

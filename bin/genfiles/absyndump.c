@@ -506,7 +506,7 @@ unsigned sz=Cyc_strlen(s);
 if(sz >= 1U){
 if(Cyc_Absyndump_need_space_before())
 Cyc_fputc(32,*Cyc_Absyndump_dump_file);
-Cyc_Absyndump_prev_char=*((const char*)_check_fat_subscript(s,sizeof(char),(int)(sz - 1U)));
+Cyc_Absyndump_prev_char=((const char*)s.curr)[(int)(sz - 1U)];
 Cyc_file_string_write(*Cyc_Absyndump_dump_file,s,0,(int)sz);}}
 # 134
 static void Cyc_Absyndump_dump_nospace(struct _fat_ptr s){
@@ -551,7 +551,7 @@ Cyc_Absyndump_dump_char(59);}
 static void Cyc_Absyndump_dump_sep(void(*f)(void*),struct Cyc_List_List*l,struct _fat_ptr sep){
 if(l==0)
 return;
-for(1;l->tl!=0;l=l->tl){
+for(1;_check_null(l)->tl!=0;l=l->tl){
 f(l->hd);
 Cyc_Absyndump_dump_nospace(sep);}
 # 187
@@ -560,7 +560,7 @@ f(l->hd);}
 static void Cyc_Absyndump_dump_sep_c(void(*f)(void*,void*),void*env,struct Cyc_List_List*l,struct _fat_ptr sep){
 if(l==0)
 return;
-for(1;l->tl!=0;l=l->tl){
+for(1;_check_null(l)->tl!=0;l=l->tl){
 f(env,l->hd);
 Cyc_Absyndump_dump_nospace(sep);}
 # 196
@@ -949,12 +949,14 @@ Cyc_Absyndump_dump_nospace(*n);return;};}struct _tuple20{struct _fat_ptr f0;stru
 # 607
 static void Cyc_Absyndump_dump_asm_iolist(struct Cyc_List_List*iolist){
 while((unsigned)iolist){
-struct _tuple20*_Tmp0=(struct _tuple20*)iolist->hd;void*_Tmp1;struct _fat_ptr _Tmp2;_Tmp2=_Tmp0->f0;_Tmp1=_Tmp0->f1;{struct _fat_ptr constr=_Tmp2;struct Cyc_Absyn_Exp*e1=_Tmp1;
+{struct _tuple20*_Tmp0=(struct _tuple20*)iolist->hd;void*_Tmp1;struct _fat_ptr _Tmp2;_Tmp2=_Tmp0->f0;_Tmp1=_Tmp0->f1;{struct _fat_ptr constr=_Tmp2;struct Cyc_Absyn_Exp*e1=_Tmp1;
 Cyc_Absyndump_dump_char(34);Cyc_Absyndump_dump_nospace(Cyc_Absynpp_string_escape(constr));Cyc_Absyndump_dump_char(34);
 Cyc_Absyndump_dump_char(40);Cyc_Absyndump_dumpexp(e1);Cyc_Absyndump_dump_char(41);
 iolist=iolist->tl;
 if((unsigned)iolist)
-Cyc_Absyndump_dump_char(44);}}}
+Cyc_Absyndump_dump_char(44);}}
+# 609
+1U;}}
 # 618
 static void Cyc_Absyndump_dumpexps_prec(int inprec,struct Cyc_List_List*es){
 ({void(*_Tmp0)(void(*)(int,struct Cyc_Absyn_Exp*),int,struct Cyc_List_List*,struct _fat_ptr,struct _fat_ptr,struct _fat_ptr)=(void(*)(void(*)(int,struct Cyc_Absyn_Exp*),int,struct Cyc_List_List*,struct _fat_ptr,struct _fat_ptr,struct _fat_ptr))Cyc_Absyndump_group_c;_Tmp0;})(Cyc_Absyndump_dumpexp_prec,inprec,es,_tag_fat("",sizeof(char),1U),_tag_fat("",sizeof(char),1U),_tag_fat(",",sizeof(char),2U));}
@@ -1111,7 +1113,9 @@ Cyc_Absyndump_dump_nospace(Cyc_Absynpp_string_escape(*((struct _fat_ptr*)cl->hd)
 Cyc_Absyndump_dump_char(34);
 cl=cl->tl;
 if((unsigned)cl)
-Cyc_Absyndump_dump_char(44);}}
+Cyc_Absyndump_dump_char(44);
+# 789
+1U;}}
 # 797
 Cyc_Absyndump_dump_char(41);
 goto _LL0;}case 37: _Tmp6=((struct Cyc_Absyn_Tagcheck_e_Absyn_Raw_exp_struct*)_Tmp0)->f1;_Tmp4=((struct Cyc_Absyn_Tagcheck_e_Absyn_Raw_exp_struct*)_Tmp0)->f2;{struct Cyc_Absyn_Exp*e=_Tmp6;struct _fat_ptr*f=_Tmp4;
@@ -1434,11 +1438,13 @@ void*_Tmp0;switch(*((int*)t)){case 1: _Tmp0=(void*)((struct Cyc_Absyn_Evar_Absyn
 return Cyc_Absyndump_is_char_ptr(def);}else{goto _LL5;}case 3: _Tmp0=((struct Cyc_Absyn_PointerType_Absyn_Type_struct*)t)->f1.elt_type;{void*elt_typ=_Tmp0;
 # 1159
 while(1){
-void*_Tmp1;switch(*((int*)elt_typ)){case 1: _Tmp1=(void*)((struct Cyc_Absyn_Evar_Absyn_Type_struct*)elt_typ)->f2;if((void*)_Tmp1!=0){void*t=_Tmp1;
+{void*_Tmp1;switch(*((int*)elt_typ)){case 1: _Tmp1=(void*)((struct Cyc_Absyn_Evar_Absyn_Type_struct*)elt_typ)->f2;if((void*)_Tmp1!=0){void*t=_Tmp1;
 elt_typ=t;goto _LL7;}else{goto _LLE;}case 7: _Tmp1=(void*)((struct Cyc_Absyn_TypedefType_Absyn_Type_struct*)elt_typ)->f4;if((void*)_Tmp1!=0){void*t=_Tmp1;
 elt_typ=t;goto _LL7;}else{goto _LLE;}case 0: if(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)elt_typ)->f1)==1){if(((struct Cyc_Absyn_IntCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)elt_typ)->f1)->f2==Cyc_Absyn_Char_sz)
 return 1;else{goto _LLE;}}else{goto _LLE;}default: _LLE:
- return 0;}_LL7:;}}default: _LL5:
+ return 0;}_LL7:;}
+# 1160
+1U;}}default: _LL5:
 # 1166
  return 0;};}
 # 1170

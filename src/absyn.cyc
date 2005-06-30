@@ -811,6 +811,13 @@ stmt_t ifthenelse_stmt(exp_t e,stmt_t s1,stmt_t s2,seg_t loc) {
   return new_stmt(new IfThenElse_s(e,s1,s2),loc);
 }
 stmt_t while_stmt(exp_t e,stmt_t s,seg_t loc) { 
+  // vcgen need to make sure that break is
+  // always a forward jump statement 
+  // but a sole switch inside while, break
+  // would be backward pointing to the 
+  // beginning of while unless we add
+  // a dummy after switch.
+  s = seq_stmt(s,exp_stmt(uint_exp(1,s->loc),s->loc),s->loc);
   return new_stmt(new While_s($(e,skip_stmt(e->loc)),s), loc);
 }
 stmt_t for_stmt(exp_t e1,exp_t e2,exp_t e3,stmt_t s,seg_t loc) {

@@ -362,8 +362,8 @@ static char Cyc_map[75U]={'\000','\001','\002','\003','\004','\005','\006','\a',
 unsigned long Cyc_XP_fromint(int n,struct _fat_ptr z,unsigned long u){
 int i=0;
 do{
-*((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i ++))=(unsigned char)(u % (unsigned long)(1 << 8));}while(
-(u /=(unsigned long)(1 << 8))> (unsigned long)0 && i < n);
+*((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i ++))=(unsigned char)(u % 256U);}while(
+(u /=256U)> 0U && i < n);
 for(1;i < n;++ i){
 *((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i))='\000';}
 return u;}
@@ -374,12 +374,12 @@ int i=(int)sizeof(u);
 if(i > n)
 i=n;
 while(-- i >= 0){
-u=256U * u + (unsigned long)*((unsigned char*)_check_fat_subscript(x,sizeof(unsigned char),i));}
+u=256U * u + (unsigned long)*((unsigned char*)_check_fat_subscript(x,sizeof(unsigned char),i));1U;}
 return u;}
 # 35
 int Cyc_XP_length(int n,struct _fat_ptr x){
 while(n > 1 &&(int)*((unsigned char*)_check_fat_subscript(x,sizeof(unsigned char),n - 1))==0){
--- n;}
+-- n;1U;}
 return n;}
 # 40
 int Cyc_XP_add(int n,struct _fat_ptr z,struct _fat_ptr x,struct _fat_ptr y,int carry){
@@ -483,7 +483,7 @@ int i;
 {
 int km=k + m;
 unsigned long y2=(unsigned long)((int)*((unsigned char*)_check_fat_subscript(y,sizeof(unsigned char),m - 1))* 256U + (int)((unsigned char*)y.curr)[m - 2]);
-unsigned long r3=(unsigned long)(((int)((unsigned char*)rem.curr)[km]* 65536U + (int)((unsigned char*)rem.curr)[km - 1]* 256U)+ (int)((unsigned char*)rem.curr)[km - 2]);
+unsigned long r3=(unsigned long)(((int)*((unsigned char*)_check_fat_subscript(rem,sizeof(unsigned char),km))* 65536U + (int)((unsigned char*)rem.curr)[km - 1]* 256U)+ (int)((unsigned char*)rem.curr)[km - 2]);
 # 143
 qk=(int)(r3 / y2);
 if(qk >= 256U)
@@ -491,10 +491,10 @@ qk=255U;}
 # 147
 ({unsigned char _Tmp0=(unsigned char)Cyc_XP_product(m,dq,y,qk);*((unsigned char*)_check_fat_subscript(dq,sizeof(unsigned char),m))=_Tmp0;});
 for(i=m;i > 0;-- i){
-if((int)((unsigned char*)rem.curr)[i + k]!=(int)((unsigned char*)dq.curr)[i])
+if(({int _Tmp0=(int)*((unsigned char*)_check_fat_subscript(rem,sizeof(unsigned char),i + k));_Tmp0!=(int)*((unsigned char*)_check_fat_subscript(dq,sizeof(unsigned char),i));}))
 break;}
-if((int)((unsigned char*)rem.curr)[i + k]< (int)((unsigned char*)dq.curr)[i])
-({unsigned char _Tmp0=(unsigned char)Cyc_XP_product(m,dq,y,-- qk);((unsigned char*)dq.curr)[m]=_Tmp0;});}
+if(({int _Tmp0=(int)*((unsigned char*)_check_fat_subscript(rem,sizeof(unsigned char),i + k));_Tmp0 < (int)*((unsigned char*)_check_fat_subscript(dq,sizeof(unsigned char),i));}))
+({unsigned char _Tmp0=(unsigned char)Cyc_XP_product(m,dq,y,-- qk);*((unsigned char*)_check_fat_subscript(dq,sizeof(unsigned char),m))=_Tmp0;});}
 # 154
 *((unsigned char*)_check_fat_subscript(q,sizeof(unsigned char),k))=(unsigned char)qk;{
 # 156
@@ -526,7 +526,7 @@ return(int)carry;}
 int Cyc_XP_cmp(int n,struct _fat_ptr x,struct _fat_ptr y){
 int i=n - 1;
 while(i > 0 &&({int _Tmp0=(int)*((unsigned char*)_check_fat_subscript(x,sizeof(unsigned char),i));_Tmp0==(int)*((unsigned char*)_check_fat_subscript(y,sizeof(unsigned char),i));})){
--- i;}
+-- i;1U;}
 return({int _Tmp0=(int)*((unsigned char*)_check_fat_subscript(x,sizeof(unsigned char),i));_Tmp0 - (int)*((unsigned char*)_check_fat_subscript(y,sizeof(unsigned char),i));});}
 # 189
 void Cyc_XP_lshift(int n,struct _fat_ptr z,int m,struct _fat_ptr x,int s,int fill){
@@ -591,10 +591,10 @@ const char*p=str;
 (unsigned)p?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp0;})(_tag_fat("p",sizeof(char),2U),_tag_fat("xp.cyc",sizeof(char),7U),250U);
 base >= 2 && base <= 36?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp0;})(_tag_fat("base >= 2 && base <= 36",sizeof(char),24U),_tag_fat("xp.cyc",sizeof(char),7U),251U);
 while((int)*_check_null(p)&& isspace((int)*p)){
-({const char**_Tmp0=& p;if(*(*_Tmp0)!=0)++(*_Tmp0);else{_throw_arraybounds();}*_Tmp0;});}
+({const char**_Tmp0=& p;if(*(*_Tmp0)!=0)++(*_Tmp0);else{_throw_arraybounds();}*_Tmp0;});1U;}
 if(((int)*p && isalnum((int)*p))&&(int)*((char*)_check_known_subscript_notnull(Cyc_map,75U,sizeof(char),(int)*p - 48))< base){
 int carry;
-for(1;((int)*p && isalnum((int)*p))&&(int)*((char*)_check_known_subscript_notnull(Cyc_map,75U,sizeof(char),(int)*p - 48))< base;({const char**_Tmp0=& p;if(*(*_Tmp0)!=0)++(*_Tmp0);else{_throw_arraybounds();}*_Tmp0;})){
+for(1;((int)*_check_null(p)&& isalnum((int)*p))&&(int)*((char*)_check_known_subscript_notnull(Cyc_map,75U,sizeof(char),(int)*p - 48))< base;({const char**_Tmp0=& p;if(*(*_Tmp0)!=0)++(*_Tmp0);else{_throw_arraybounds();}*_Tmp0;})){
 carry=Cyc_XP_product(n,z,z,base);
 if(carry)
 break;
@@ -614,15 +614,15 @@ int r=Cyc_XP_quotient(n,x,x,base);
 i < size?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp0;})(_tag_fat("i < size",sizeof(char),9U),_tag_fat("xp.cyc",sizeof(char),7U),274U);
 ({struct _fat_ptr _Tmp0=_fat_ptr_plus(str,sizeof(char),i ++);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=*((const char*)_check_fat_subscript(Cyc_digits,sizeof(char),r));if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
 while(n > 1 &&(int)*((unsigned char*)_check_fat_subscript(x,sizeof(unsigned char),n - 1))==0){
--- n;}}while(
+-- n;1U;}}while(
 n > 1 ||(int)*((unsigned char*)_check_fat_subscript(x,sizeof(unsigned char),0))!=0);
 i < size?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp0;})(_tag_fat("i < size",sizeof(char),9U),_tag_fat("xp.cyc",sizeof(char),7U),279U);
 ({struct _fat_ptr _Tmp0=_fat_ptr_plus(str,sizeof(char),i);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2='\000';if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
 {
 int j;
 for(j=0;j < -- i;++ j){
-char c=((char*)str.curr)[j];
-({struct _fat_ptr _Tmp0=_fat_ptr_plus(str,sizeof(char),j);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=((char*)str.curr)[i];if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
+char c=*((char*)_check_fat_subscript(str,sizeof(char),j));
+({struct _fat_ptr _Tmp0=_fat_ptr_plus(str,sizeof(char),j);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=*((char*)_check_fat_subscript(str,sizeof(char),i));if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
 ({struct _fat_ptr _Tmp0=_fat_ptr_plus(str,sizeof(char),i);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=c;if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});}}
 # 289
 return str;}

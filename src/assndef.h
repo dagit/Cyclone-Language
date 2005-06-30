@@ -47,6 +47,9 @@ namespace AssnDef{
 
   typedef datatype Term @term_t;
   typedef datatype Term *term_opt_t;
+
+  typedef struct Set::Set<term_t> @term_set_t;
+  
   /********************************************************** 
    t ::= i | c | loc | select(m,loc) | update(m,loc,t) | v | 
          op t | t1 op t2 | (\tau) t | {tag, [t1,t2,...tn]} | 
@@ -196,12 +199,16 @@ namespace AssnDef{
   // and generate a new assnmap
   extern assn_map_t false_assnmap();
   extern assn_map_t true_assnmap();
+  extern string_t map2string(nonescvar_map_t);
   extern string_t assnmap2string(assn_map_t);
   
   //given a nonescvar's vardecl, retrieve its value from the mapping
   extern $(term_t,assn_map_t) lookup_var_map(vardecl_t, assn_map_t);
   extern assn_map_t update_var_map(vardecl_t, term_t, assn_map_t);
 
+  extern $(assn_t,assn_t,nonescvar_map_t) unify_var_maps(assn_map_t,assn_map_t);
+  extern $(assn_t,assn_t,nonescvar_map_t) unify_var_maps_subst(assn_map_t,assn_map_t);
+  extern assn_map_t canonical_assnmap(assn_map_t);
   // merging (or) two assertions with nonescvar mapping.
   // (A /\ x == t1) \/ (B /\ x == t2) merge into
   // (A /\ v == t1 \/ B /\ v == t2) /\ x == v

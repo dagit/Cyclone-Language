@@ -405,10 +405,10 @@ static enum Cyc_Toseqc_SideEffect Cyc_Toseqc_fun_effect(struct _tuple1*qv){
 void*_Tmp0;if(((struct _tuple1*)qv)->f0.Loc_n.tag==4){_Tmp0=qv->f1;{struct _fat_ptr*fn=_Tmp0;
 # 74
 {int i=0;for(0;(unsigned)i < 9U;++ i){
-if(!Cyc_strcmp(Cyc_Toseqc_pure_funs[i],*fn))
+if(!Cyc_strcmp(*((struct _fat_ptr*)_check_known_subscript_notnull(Cyc_Toseqc_pure_funs,9U,sizeof(struct _fat_ptr),i)),*fn))
 return 1U;}}
 {int i=0;for(0;(unsigned)i < 7U;++ i){
-if(!Cyc_strcmp(Cyc_Toseqc_exn_effect_funs[i],*fn))
+if(!Cyc_strcmp(*((struct _fat_ptr*)_check_known_subscript_notnull(Cyc_Toseqc_exn_effect_funs,7U,sizeof(struct _fat_ptr),i)),*fn))
 return 2U;}}
 return 3U;}}else{
 return 3U;};}
@@ -490,7 +490,7 @@ return Cyc_Toseqc_stmt_effect(s);}default:
 static enum Cyc_Toseqc_SideEffect Cyc_Toseqc_stmt_effect(struct Cyc_Absyn_Stmt*s){
 enum Cyc_Toseqc_SideEffect res=0U;
 while(1){
-void*_Tmp0=s->r;void*_Tmp1;void*_Tmp2;switch(*((int*)_Tmp0)){case 0:
+{void*_Tmp0=s->r;void*_Tmp1;void*_Tmp2;switch(*((int*)_Tmp0)){case 0:
  return res;case 1: _Tmp2=((struct Cyc_Absyn_Exp_s_Absyn_Raw_stmt_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Exp*e=_Tmp2;
 return({enum Cyc_Toseqc_SideEffect _Tmp3=res;Cyc_Toseqc_join_side_effect(_Tmp3,Cyc_Toseqc_exp_effect(e));});}case 13: _Tmp2=((struct Cyc_Absyn_Label_s_Absyn_Raw_stmt_struct*)_Tmp0)->f2;{struct Cyc_Absyn_Stmt*s2=_Tmp2;
 # 172
@@ -517,7 +517,9 @@ return 3U;};}case 6:
  goto _LL1A;case 14: _LL1A:
  goto _LL1C;case 10: _LL1C:
  return 3U;default:
-({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp4;_Tmp4.tag=0,_Tmp4.f1=_tag_fat("bad stmt after xlation to C",sizeof(char),28U);_Tmp4;});void*_Tmp4[1];_Tmp4[0]=& _Tmp3;({int(*_Tmp5)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp5;})(_tag_fat(_Tmp4,sizeof(void*),1));});};}}
+({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp4;_Tmp4.tag=0,_Tmp4.f1=_tag_fat("bad stmt after xlation to C",sizeof(char),28U);_Tmp4;});void*_Tmp4[1];_Tmp4[0]=& _Tmp3;({int(*_Tmp5)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp5;})(_tag_fat(_Tmp4,sizeof(void*),1));});};}
+# 168
+1U;}}
 # 203
 static int Cyc_Toseqc_is_toc_var(struct Cyc_Absyn_Exp*e){
 void*_Tmp0=e->r;void*_Tmp1;if(*((int*)_Tmp0)==1){if(*((int*)((struct Cyc_Absyn_Var_e_Absyn_Raw_exp_struct*)_Tmp0)->f1)==0){_Tmp1=((struct Cyc_Absyn_Unresolved_b_Absyn_Binding_struct*)((struct Cyc_Absyn_Var_e_Absyn_Raw_exp_struct*)_Tmp0)->f1)->f1;{struct _tuple1*v=_Tmp1;
@@ -614,7 +616,7 @@ Cyc_Toseqc_stmt_to_seqc(s);return;}case 39:
 static void Cyc_Toseqc_stmt_to_seqc(struct Cyc_Absyn_Stmt*s){
 # 332
 while(1){
-void*_Tmp0=s->r;void*_Tmp1;void*_Tmp2;void*_Tmp3;void*_Tmp4;switch(*((int*)_Tmp0)){case 0:
+{void*_Tmp0=s->r;void*_Tmp1;void*_Tmp2;void*_Tmp3;void*_Tmp4;switch(*((int*)_Tmp0)){case 0:
  goto _LL4;case 6: _LL4:
  goto _LL6;case 7: _LL6:
  goto _LL8;case 8: _LL8:
@@ -694,8 +696,10 @@ continue;}}else{
 goto _LL1F;}_LL1F:;}
 # 433
 goto _LL1E;}default: _LL1E:
-({struct Cyc_Warn_String_Warn_Warg_struct _Tmp5=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp6;_Tmp6.tag=0,_Tmp6.f1=_tag_fat("bad stmt after xlation to C",sizeof(char),28U);_Tmp6;});void*_Tmp6[1];_Tmp6[0]=& _Tmp5;({int(*_Tmp7)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp7;})(_tag_fat(_Tmp6,sizeof(void*),1));});};}}
-# 438
+({struct Cyc_Warn_String_Warn_Warg_struct _Tmp5=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp6;_Tmp6.tag=0,_Tmp6.f1=_tag_fat("bad stmt after xlation to C",sizeof(char),28U);_Tmp6;});void*_Tmp6[1];_Tmp6[0]=& _Tmp5;({int(*_Tmp7)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp7;})(_tag_fat(_Tmp6,sizeof(void*),1));});};}
+# 333 "toseqc.cyc"
+1U;}}
+# 438 "toseqc.cyc"
 struct Cyc_List_List*Cyc_Toseqc_toseqc(struct Cyc_List_List*ds){
 {struct Cyc_List_List*old_ds=ds;for(0;old_ds!=0;old_ds=old_ds->tl){
 void*_Tmp0=((struct Cyc_Absyn_Decl*)old_ds->hd)->r;void*_Tmp1;switch(*((int*)_Tmp0)){case 1: _Tmp1=((struct Cyc_Absyn_Fn_d_Absyn_Raw_decl_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Fndecl*fd=_Tmp1;

@@ -30,6 +30,7 @@
 #include "pratt_prover.h"
 #include "absynpp.h"
 #include "cf_flowinfo.h"
+#include "stdio.h"
 
 #define VCGEN_DEBUG
 namespace Vcgen;
@@ -59,6 +60,7 @@ struct Env {
   // the return_value is represented by a logical var
   term_opt_t res_term;
   assn_map_opt_t res_assnmap; 
+  assn_map_opt_t continue_assnmap;
   // true by default: controls whether we widen assertions at join points
   bool    widen_paths;
 };
@@ -82,7 +84,8 @@ initial_env(JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd,
                      .exp_stmt = NULL,
                      .res_term = res_term,
                      .res_assnmap = res_assnmap,
-                     .widen_paths = true};
+		     .continue_assnmap = NULL,
+                     .widen_paths = !Flags::allpaths};
   return env;
 }
 
@@ -100,6 +103,7 @@ static env_t bogus_env(){
 		      .exp_stmt = NULL,
 		      .res_term = NULL,
 		      .res_assnmap = NULL,
+		      .continue_assnmap = NULL,
                       .widen_paths = false};
   return env;
 }
@@ -127,6 +131,12 @@ static void update_stmt_assnmap(env_t env, stmt_t s, assn_map_t newam){
   assn_map_t @*preconopt = Hashtable::lookup_opt(env->assn_table,s);
   if (preconopt != NULL) **preconopt = may_widen(env,or_assnmap_assnmap(**preconopt,newam));
   else Hashtable::insert(env->assn_table,s,new newam);
+}
+
+// replace assertions reaching a statement 
+// discard whatever was in there before.
+static void replace_stmt_assnmap(env_t env, stmt_t s, assn_map_t newam){
+  Hashtable::insert(env->assn_table,s,new newam);
 }
 
 // vcgen for statements. amin is the assertion and mapping that
@@ -164,6 +174,16 @@ static bool simple_implies(assn_t a1, assn_t a2){
 static bool implies(assn_t a1, assn_t a2){
   return simple_implies(a1,a2) || PrattProver::constraint_prove(a1,a2);
 }
+
+static bool implies_assnmap(assn_map_t am1, assn_map_t am2){
+  // am1 and am2 might have different var_maps,
+  // unify_var_maps would generate two new assertions
+  // and a mapping such that am1 <=> AssnMap(a1,map) and
+  // AssnMap(a2,map) <=> am2
+  let $(a1,a2,map) = unify_var_maps(am1,am2);
+  return simple_implies(a1,a2) || PrattProver::constraint_prove(a1,a2);
+}
+
 // helper function, retrieve the vardecl from a binding.
 static struct Absyn::Vardecl *bind2vardecl(Absyn::binding_t b) {
   switch (b) {
@@ -284,6 +304,33 @@ static $(list_t<$(var_opt_t,tqual_t,type_t)@> args, list_t<vardecl_opt_t> argvds
   return $(NULL,NULL,NULL,NULL,NULL,NULL);
 }
 
+static unsigned datatype_constructor_index(Absyn::datatypedecl_t dd,
+                                           Absyn::datatypefield_t df) {
+  unsigned i = 0;
+  let fs = dd->fields->v;
+  for (; fs != NULL; fs = fs->tl, ++i) {
+    if (fs->hd == df) return i;
+    if (Absyn::qvar_cmp(df->name,fs->hd->name) == 0) return i;
+  }
+  Warn::impos("vcgen: datatype_constructor_index");
+}
+
+static $(bool is_tagged,Absyn::aggr_kind_t,list_t<Absyn::aggrfield_t>) 
+  get_aggr_info(type_t t) {
+  switch (Absyn::compress(t)) {
+  case &Absyn::AppType(&Absyn::AggrCon(info),_):
+    let ad = Absyn::get_known_aggrdecl(info);
+    return $(ad->impl->tagged, ad->kind, ad->impl->fields);
+  case &Absyn::AnonAggrType(ak,is_tuple,fs):
+    return $(false,ak,fs);
+  default: Warn::impos("vcgen: bad type in get_aggr_info");
+  }
+}
+
+static int cmp_index($(int,`a)@ x,$(int,`a)@ y) {
+  return x->f0 - y->f0;
+}
+
 // functions related to maintain the information passed to insert_checks
 assn_info_t new_assn_info(void){
   let assn_info =  Hashtable::create(57, Core::ptrcmp, hash_ptr);
@@ -381,7 +428,6 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
      case &Absyn::Pragma_e(s):
        if (strcmp(s,"print_assn") == 0) {
          let seg_str = Position::string_of_segment(e->loc);
-         fprintf(stderr,"%s: current assn is %s\n",seg_str,assnmap2string(amin));
        }
        if (strcmp(s,"all_paths") == 0) {
          env->widen_paths = false;
@@ -500,7 +546,6 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
     let $(_,am1) = vcgen_rexp(env,e1,amin);
     return vcgen_rexp(env,e2,am1);
   case &Absyn::FnCall_e(e1,es,...):
-    // FIX
     let $(f,am1) = vcgen_rexp(env,e1,amin);
     let $(ts,am2) = vcgen_rexps(env,es,am1);
 
@@ -657,6 +702,65 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
     let $(t1,t2,amin) = vcgen_deref(env, e1, e2, amin);
     let $(mem,amin) = lookup_var_map(memory,amin);
     return $(select(mem,plus(t1,t2,NULL),e->topt),amin);
+  case &Absyn::Datatype_e(es,dd,df): 
+    let $(ts,amin) = vcgen_rexps(env,es,amin);
+    let i = datatype_constructor_index(dd,df);
+    return $(datatype_aggr(i,ts,e->topt),amin);
+
+    // FIX: at least for structs, we can use the Aggr(...) term.
+  case &Absyn::CompoundLit_e(_,dles):   fallthru(dles);
+  case &Absyn::Array_e(dles):           fallthru(dles);
+  case &Absyn::UnresolvedMem_e(_,dles): 
+    for (; dles != NULL; dles = dles->tl) {
+      let &$(_,e) = dles->hd;
+      amin = (vcgen_rexp(env,e,amin))[1];
+    }
+    return $(fresh_var(NULL),amin);
+  case &Absyn::Aggregate_e(_,_,dles,_): fallthru(dles);
+  case &Absyn::AnonStruct_e(_,_,dles):
+    let atype = (type_t)e->topt;
+    let $(is_tagged,ak,_) = get_aggr_info(atype);
+    list_t<$(int,term_t)@> dlvs = NULL;
+    unsigned tag = 0;
+    for (; dles != NULL; dles = dles->tl) {
+      let &$(dl,e) = dles->hd;
+      let $(v,a) = vcgen_rexp(env,e,amin);
+      amin = a;
+      switch (dl) {
+      case &List{&Absyn::FieldName(f),NULL}:
+        let i = CfFlowInfo::get_field_index(atype,f);
+        tag = i;
+        dlvs = new List{new $(i,v),dlvs};        
+        break;
+      default: Warn::impos("no field name in designator!");
+      }
+    }
+    dlvs = rimp_merge_sort(cmp_index,dlvs);
+    let vs = map(Core::snd,dlvs);
+    let res = (ak == Absyn::UnionA) ? union_aggr(tag,vs,e->topt) : 
+      struct_aggr(vs,e->topt);
+    return $(res,amin);
+  case &Absyn::Comprehension_e(vd,e1,e2,_): 
+    // similar to a while-loop except we evaluate e1 only once.
+    let $(t1,am) = vcgen_rexp(env,e1,amin);
+    // start off with index 0
+    am = do_assign(env,am,addr(vd),zero());
+    let $(v,am) = lookup_var_map(vd,am);
+    while (true) {
+      let amt = and_assnmap_assn(am,ult(v,t1));  // simulate test
+      let amf = and_assnmap_assn(am,ulte(t1,v));
+      let $(_,ambody) = vcgen_rexp(env,e2,amt);  // run body and add one
+      ambody = do_assign(env,ambody,addr(vd),plus(v,one(),vd->type));
+      if (simple_implies(ambody.assn,am.assn)) { am = amf; break; }
+      // no choice about widening here to ensure termination
+      am = widen_assnmap(or_assnmap_assnmap(ambody,am));  // widen and possibly iterate
+    }
+    let res = fresh_var(e->topt);
+    // can add it in that numelts(res) == t1
+    am = and_assnmap_assn(am,eq(numelts_term(res),t1));
+    return $(res,am);
+  case &Absyn::ComprehensionNoinit_e(e,_,_):
+    return $(fresh_var(NULL),vcgen_rexp(env,e,amin)[1]);
   case &Absyn::Malloc_e(mi):
     if (mi.rgn != NULL) 
       amin = vcgen_rexp(env,(exp_t)mi.rgn,amin)[1];
@@ -682,18 +786,23 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
   case &Absyn::Asm_e(...): return $(fresh_var(NULL),amin);
   case &Absyn::Extension_e(e): return vcgen_rexp(env,e,amin);
   case &Absyn::Assert_e(e1):
+    let old_widen_paths = env->widen_paths;
+    env->widen_paths = false;
     let $(amt,_) = vcgen_test(env,e1,AssnMap{&true_assn,amin.map});
+    env->widen_paths = old_widen_paths;
     if (!implies(amin.assn,amt.assn)) 
       Warn::err(e->loc, "cannot prove @assert(%s)\nfrom\n %s",
                 assnmap2string(amt), assnmap2string(amin));
     return $(one(),and_assnmap_assn(amin,amt.assn));
   case &Absyn::Assert_false_e(e1):
+    let old_widen_paths = env->widen_paths;
+    env->widen_paths = false;
     let $(amt,_) = vcgen_test(env,e1,AssnMap{&true_assn,amin.map});
+    env->widen_paths = old_widen_paths;
     if (implies(amin.assn,amt.assn)) 
       Warn::err(e->loc, "proved @assert_false(%s)\nfrom\n %s",
                 assnmap2string(amt), assnmap2string(amin));
     return $(one(),amin);;
-  default: return $(fresh_var(e->topt),true_assnmap());
   }
 }
 
@@ -890,9 +999,11 @@ static assn_map_t vcgen_stmt(env_t env, stmt_t s, assn_map_t amin) {
     amt = vcgen_stmt(env,s1,amt);
     amf = vcgen_stmt(env,s2,amf);
     return may_widen(env,or_assnmap_assnmap(amt,amf));
-  case &Absyn::While_s($(e,dummy),s): 
+  case &Absyn::While_s($(e,dummy),s1): 
+    assn_map_opt_t old_continue_assnmap = env->continue_assnmap;
+    env->continue_assnmap = new false_assnmap();
     exp_opt_t loop_inv_exp = NULL;
-    assn_map_t loop_inv_assnmap = true_assnmap();
+    assn_map_t loop_inv_assnmap;
     switch (e->r) {
     case &Absyn::And_e(eleft, eright):
       switch (eleft->r){
@@ -907,34 +1018,65 @@ static assn_map_t vcgen_stmt(env_t env, stmt_t s, assn_map_t amin) {
     default:
       break;
     }
+    if (loop_inv_exp != NULL) {
+      let old_widen_paths = env->widen_paths;
+      env->widen_paths = false;
+      loop_inv_assnmap = vcgen_test(env,(exp_t)loop_inv_exp, AssnMap{&true_assn,amin.map})[0];
+      env->widen_paths = old_widen_paths;
+    }
+    else 
+      loop_inv_assnmap = AssnMap(&true_assn,amin.map);
+    if (!implies(amin.assn,loop_inv_assnmap.assn)) {
+      Warn::err(e->loc, "cannot prove loop invariant %s from %s\n",
+		assnmap2string(loop_inv_assnmap),assnmap2string(amin));
+      return true_assnmap();
+    }
+    amin = canonical_assnmap(amin);
     while (true) {
-      if (loop_inv_exp != NULL) 
-	loop_inv_assnmap = vcgen_test(env,(exp_t)loop_inv_exp, AssnMap{&true_assn,amin.map})[0];
-      if (!implies(amin.assn,loop_inv_assnmap.assn)) {
-	Warn::err(e->loc, "cannot prove loop invariant %s from %s\n",
-		  assnmap2string(loop_inv_assnmap),assnmap2string(amin));
-	return true_assnmap();
-      }
       // merge(and widen) incoming flow with existing info on the loop
       let amold = lookup_stmt_assnmap(env,dummy);
-      amin = widen_assnmap(or_assnmap_assnmap(amin,amold));
-      update_stmt_assnmap(env,dummy,amin);
+      amin = widen_assnmap(or_assnmap_assnmap(amold,amin));
+      replace_stmt_assnmap(env,dummy,amin);
       if (loop_inv_exp != NULL) {
 	amin = vcgen_test(env,(exp_t)loop_inv_exp,amin)[0];
       }
       let $(amt,amf) = vcgen_test(env,e,amin);
-      amin = vcgen_stmt(env,s,amt);
-      if (implies(amin.assn,lookup_stmt_assnmap(env,dummy).assn))
+      amin = vcgen_stmt(env,s1,amt);
+      // merging in flow from continue statement
+      amin = or_assnmap_assnmap(amin,*env->continue_assnmap);
+      if (loop_inv_exp != NULL) {
+	let old_widen_paths = env->widen_paths;
+	env->widen_paths = false;
+	loop_inv_assnmap = vcgen_test(env,(exp_t)loop_inv_exp, AssnMap{&true_assn,amin.map})[0];
+	env->widen_paths = old_widen_paths;
+      }
+      else 
+	loop_inv_assnmap = AssnMap(&true_assn,amin.map);
+      if (!implies(amin.assn,loop_inv_assnmap.assn)) {
+	Warn::err(e->loc, "cannot prove loop invariant %s from %s\n",
+		  assnmap2string(loop_inv_assnmap),assnmap2string(amin));
+	env->continue_assnmap = old_continue_assnmap;
+	return true_assnmap();
+      }
+      amin = canonical_assnmap(amin);
+//       fprintf(stderr,"amin = %s\n",assnmap2string(amin));
+//       fprintf(stderr,"amold = %s\n",assnmap2string(lookup_stmt_assnmap(env,dummy)));
+//       int i;
+//       scanf("%d",&i);
+      let $(a1,a2,map) = unify_var_maps_subst(lookup_stmt_assnmap(env,dummy),amin);
+//       fprintf(stderr,"a1 = %s\n",assn2string(a1));
+//       fprintf(stderr,"a2 = %s\n",assn2string(a2));
+//       fprintf(stderr,"map = %s\n",map2string(map));
+//       scanf("%d",&i);
+      amin = AssnMap(a2,map);
+      if (implies(a2,a1)) {
+	env->continue_assnmap = old_continue_assnmap;
 	return amf;
+      }
     }
+    
   case &Absyn::Continue_s: 
-    let dest = Hashtable::lookup(env->succ_table,s);
-    // even though this is a backward edge
-    // we do not widen the assertion here yet
-    // let the iteration for loop worry about it
-    // so that we will have enough information to
-    // prove loop invariant if there is one
-    update_stmt_assnmap(env,(stmt_t)dest,amin);
+    *env->continue_assnmap = or_assnmap_assnmap(*env->continue_assnmap,amin);
     return false_assnmap();
   case &Absyn::Break_s:
     let dest = Hashtable::lookup(env->succ_table,s);
@@ -943,9 +1085,11 @@ static assn_map_t vcgen_stmt(env_t env, stmt_t s, assn_map_t amin) {
     else 
       update_stmt_assnmap(env, (stmt_t)dest, amin);
     return false_assnmap();
-  case &Absyn::For_s(e1,$(e2,dummy2),$(e3,dummy3),s):
+  case &Absyn::For_s(e1,$(e2,dummy2),$(e3,dummy3),s1):
+    assn_map_opt_t old_continue_assnmap = env->continue_assnmap;
+    env->continue_assnmap = new false_assnmap();
     exp_opt_t loop_inv_exp = NULL;
-    assn_map_t loop_inv_assnmap = true_assnmap();
+    assn_map_t loop_inv_assnmap;
     switch (e2->r) {
     case &Absyn::And_e(eleft, eright):
       switch (eleft->r){
@@ -962,30 +1106,129 @@ static assn_map_t vcgen_stmt(env_t env, stmt_t s, assn_map_t amin) {
     }
     // the initialization
     let $(_,amin) = vcgen_rexp(env,e1,amin);
+    if (loop_inv_exp != NULL) {
+      let old_widen_paths = env->widen_paths;
+      env->widen_paths = false;
+      loop_inv_assnmap = vcgen_test(env,(exp_t)loop_inv_exp, AssnMap{&true_assn,amin.map})[0];
+      env->widen_paths = old_widen_paths;
+    }
+    else 
+      loop_inv_assnmap = AssnMap(&true_assn,amin.map);
+    if (!implies(amin.assn,loop_inv_assnmap.assn)) {
+      Warn::err(e2->loc, "cannot prove loop invariant %s from %s\n",
+		assnmap2string(loop_inv_assnmap),assnmap2string(amin));
+      return true_assnmap();
+    }
     while (true) {
-      if (loop_inv_exp != NULL) 
-	loop_inv_assnmap = vcgen_test(env,(exp_t)loop_inv_exp, AssnMap{&true_assn,amin.map})[0];
-      if (!implies(amin.assn,loop_inv_assnmap.assn)) {
-	Warn::err(e2->loc, "cannot prove loop invariant %s from %s\n",
-		  assnmap2string(loop_inv_assnmap),assnmap2string(amin));
-	return true_assnmap();
-      }
       // merge(and widen) incoming flow with existing info on the loop
       let amold = lookup_stmt_assnmap(env,dummy2);
       amin = widen_assnmap(or_assnmap_assnmap(amin,amold));
-      update_stmt_assnmap(env,dummy2,amin);
+      replace_stmt_assnmap(env,dummy2,amin);
       if (loop_inv_exp != NULL) {
 	amin = vcgen_test(env,(exp_t)loop_inv_exp,amin)[0];
       }
       let $(amt,amf) = vcgen_test(env,e2,amin);
-      amin = vcgen_stmt(env,s,amt);
-      let $(_,amin) = vcgen_rexp(env,e3,amin);
-      if (implies(amin.assn,lookup_stmt_assnmap(env,dummy2).assn))
+      
+      amin = vcgen_stmt(env,s1,amt);
+      let $(_,am) = vcgen_rexp(env,e3,amin);
+      amin = am;
+      if (loop_inv_exp != NULL) {
+	let old_widen_paths = env->widen_paths;
+	env->widen_paths = false;
+	loop_inv_assnmap = vcgen_test(env,(exp_t)loop_inv_exp, AssnMap{&true_assn,amin.map})[0];
+	env->widen_paths = old_widen_paths;
+      }
+      else 
+	loop_inv_assnmap = AssnMap(&true_assn,amin.map);
+      if (!implies(amin.assn,loop_inv_assnmap.assn)) {
+	Warn::err(e2->loc, "cannot prove loop invariant %s from %s\n",
+		  assnmap2string(loop_inv_assnmap),assnmap2string(amin));
+	env->continue_assnmap = old_continue_assnmap;
+	return true_assnmap();
+      }
+      let $(a1,a2,map) = unify_var_maps_subst(lookup_stmt_assnmap(env,dummy2),amin);
+      amin = AssnMap(a2,map);
+      if (implies(a2,a1)) {
+	env->continue_assnmap = old_continue_assnmap;
 	return amf;
+      }
     }
-  case &Absyn::Do_s(s,$(e,dummy)):
-    // FIX 
-    return amin;
+  case &Absyn::Do_s(s1,$(e,dummy)):
+    assn_map_opt_t old_continue_assnmap = env->continue_assnmap;
+    env->continue_assnmap = new false_assnmap();
+    amin = vcgen_stmt(env,s1,amin);
+    exp_opt_t loop_inv_exp = NULL;
+    assn_map_t loop_inv_assnmap;
+    switch (e->r) {
+    case &Absyn::And_e(eleft, eright):
+      switch (eleft->r){
+      case &Absyn::Assert_e(eassn):
+	loop_inv_exp = eassn;
+	e = eright;
+	break;
+      default:
+	break;
+      }
+      break;
+    default:
+      break;
+    }
+    if (loop_inv_exp != NULL) {
+      let old_widen_paths = env->widen_paths;
+      env->widen_paths = false;
+      loop_inv_assnmap = vcgen_test(env,(exp_t)loop_inv_exp, AssnMap{&true_assn,amin.map})[0];
+      env->widen_paths = old_widen_paths;
+    }
+    else 
+      loop_inv_assnmap = AssnMap(&true_assn,amin.map);
+    if (!implies(amin.assn,loop_inv_assnmap.assn)) {
+      Warn::err(e->loc, "cannot prove loop invariant %s from %s\n",
+		assnmap2string(loop_inv_assnmap),assnmap2string(amin));
+      return true_assnmap();
+    }
+    amin = canonical_assnmap(amin);
+    while (true) {
+      // merge(and widen) incoming flow with existing info on the loop
+      let amold = lookup_stmt_assnmap(env,dummy);
+      amin = widen_assnmap(or_assnmap_assnmap(amold,amin));
+      replace_stmt_assnmap(env,dummy,amin);
+      if (loop_inv_exp != NULL) {
+	amin = vcgen_test(env,(exp_t)loop_inv_exp,amin)[0];
+      }
+      let $(amt,amf) = vcgen_test(env,e,amin);
+      amin = vcgen_stmt(env,s1,amt);
+      // merging in flow from continue statement
+      amin = or_assnmap_assnmap(amin,*env->continue_assnmap);
+      if (loop_inv_exp != NULL) {
+	let old_widen_paths = env->widen_paths;
+	env->widen_paths = false;
+	loop_inv_assnmap = vcgen_test(env,(exp_t)loop_inv_exp, AssnMap{&true_assn,amin.map})[0];
+	env->widen_paths = old_widen_paths;
+      }
+      else 
+	loop_inv_assnmap = AssnMap(&true_assn,amin.map);
+      if (!implies(amin.assn,loop_inv_assnmap.assn)) {
+	Warn::err(e->loc, "cannot prove loop invariant %s from %s\n",
+		  assnmap2string(loop_inv_assnmap),assnmap2string(amin));
+	env->continue_assnmap = old_continue_assnmap;
+	return true_assnmap();
+      }
+      amin = canonical_assnmap(amin);
+//       fprintf(stderr,"amin = %s\n",assnmap2string(amin));
+//       fprintf(stderr,"amold = %s\n",assnmap2string(lookup_stmt_assnmap(env,dummy)));
+//       int i;
+//       scanf("%d",&i);
+      let $(a1,a2,map) = unify_var_maps_subst(lookup_stmt_assnmap(env,dummy),amin);
+//       fprintf(stderr,"a1 = %s\n",assn2string(a1));
+//       fprintf(stderr,"a2 = %s\n",assn2string(a2));
+//       fprintf(stderr,"map = %s\n",map2string(map));
+//       scanf("%d",&i);
+      amin = AssnMap(a2,map);
+      if (implies(a2,a1)) {
+	env->continue_assnmap = old_continue_assnmap;
+	return amf;
+      }
+    }
   case &Absyn::Switch_s(e,scs,dtree):
     let $(t,am) = vcgen_rexp(env,e,amin);
     return vcgen_switch(env,t,scs,am);
@@ -1069,29 +1312,6 @@ static assn_map_t vcgen_stmt(env_t env, stmt_t s, assn_map_t amin) {
     let am3 = vcgen_switch(env,exc,scs,new_try_assnmap);
     return may_widen(env,or_assnmap_assnmap(am1,am2));
   }
-}
-
-static $(bool is_tagged,Absyn::aggr_kind_t,list_t<Absyn::aggrfield_t>) 
-  get_aggr_info(type_t t) {
-  switch (Absyn::compress(t)) {
-  case &Absyn::AppType(&Absyn::AggrCon(info),_):
-    let ad = Absyn::get_known_aggrdecl(info);
-    return $(ad->impl->tagged, ad->kind, ad->impl->fields);
-  case &Absyn::AnonAggrType(ak,is_tuple,fs):
-    return $(false,ak,fs);
-  default: Warn::impos("vcgen: bad type in get_aggr_info");
-  }
-}
-
-static unsigned datatype_constructor_index(Absyn::datatypedecl_t dd,
-                                           Absyn::datatypefield_t df) {
-  unsigned i = 0;
-  let fs = dd->fields->v;
-  for (; fs != NULL; fs = fs->tl, ++i) {
-    if (fs->hd == df) return i;
-    if (Absyn::qvar_cmp(df->name,fs->hd->name) == 0) return i;
-  }
-  Warn::impos("vcgen: datatype_constructor_index");
 }
 
 static $(assn_map_t,assn_map_t) vcgen_pat(env_t env, Absyn::pat_t p, 

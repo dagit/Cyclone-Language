@@ -803,7 +803,7 @@ Cyc_add_ccarg(s);
 return 1;}else{
 # 363
 {int i=0;for(0;(unsigned)i < 10U;++ i){
-if(!Cyc_strcmp(known_gcc_flags[i].flag,s)){
+if(!Cyc_strcmp((*((struct _tuple13*)_check_known_subscript_notnull(known_gcc_flags,10U,sizeof(struct _tuple13),i))).flag,s)){
 Cyc_add_ccarg(s);
 Cyc_gcc_optarg=known_gcc_flags[i].optargs;
 break;}}}
@@ -984,7 +984,9 @@ if(n_read!=n_written){
 Cyc_compile_failure=1;
 ({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=(struct _fat_ptr)file;_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_fprintf(Cyc_stderr,_tag_fat("\nError: problem copying %s\n",sizeof(char),28U),_tag_fat(_Tmp1,sizeof(void*),1));});
 Cyc_fflush(Cyc_stderr);
-return 1;}}
+return 1;}
+# 556
+1U;}
 # 571
 Cyc_fclose(file_f);
 return 0;}}}
@@ -1047,7 +1049,7 @@ struct Cyc_List_List*result=0;
 unsigned long len=Cyc_strlen(s);
 # 638
 while(len > 0U){
-struct _fat_ptr end=Cyc_strchr(s,c);
+{struct _fat_ptr end=Cyc_strchr(s,c);
 if((char*)end.curr==(char*)_tag_fat(0,0,0).curr){
 result=({struct Cyc_List_List*_Tmp0=_cycalloc(sizeof(struct Cyc_List_List));({struct _fat_ptr*_Tmp1=({struct _fat_ptr*_Tmp2=_cycalloc(sizeof(struct _fat_ptr));*_Tmp2=s;_Tmp2;});_Tmp0->hd=_Tmp1;}),_Tmp0->tl=result;_Tmp0;});
 break;}else{
@@ -1055,6 +1057,8 @@ break;}else{
 result=({struct Cyc_List_List*_Tmp0=_cycalloc(sizeof(struct Cyc_List_List));({struct _fat_ptr*_Tmp1=({struct _fat_ptr*_Tmp2=_cycalloc(sizeof(struct _fat_ptr));({struct _fat_ptr _Tmp3=(struct _fat_ptr)Cyc_substring((struct _fat_ptr)s,0,(unsigned long)((((struct _fat_ptr)end).curr - s.curr)/ sizeof(char)));*_Tmp2=_Tmp3;});_Tmp2;});_Tmp0->hd=_Tmp1;}),_Tmp0->tl=result;_Tmp0;});
 len -=(unsigned long)((end.curr - s.curr)/ sizeof(char));
 s=_fat_ptr_plus(end,sizeof(char),1);}}
+# 639
+1U;}
 # 649
 return Cyc_List_imp_rev(result);}}
 # 654
@@ -1100,11 +1104,11 @@ if(single_quotes==0)
 return Cyc_strconcat_l(({struct _fat_ptr*_Tmp0[3];({struct _fat_ptr*_Tmp1=({struct _fat_ptr*_Tmp2=_cycalloc(sizeof(struct _fat_ptr));*_Tmp2=_tag_fat("'",sizeof(char),2U);_Tmp2;});_Tmp0[0]=_Tmp1;}),({struct _fat_ptr*_Tmp1=({struct _fat_ptr*_Tmp2=_cycalloc(sizeof(struct _fat_ptr));*_Tmp2=(struct _fat_ptr)s;_Tmp2;});_Tmp0[1]=_Tmp1;}),({struct _fat_ptr*_Tmp1=({struct _fat_ptr*_Tmp2=_cycalloc(sizeof(struct _fat_ptr));*_Tmp2=_tag_fat("'",sizeof(char),2U);_Tmp2;});_Tmp0[2]=_Tmp1;});Cyc_List_list(_tag_fat(_Tmp0,sizeof(struct _fat_ptr*),3));}));{
 # 707
 unsigned long len2=(len + (unsigned long)single_quotes)+ (unsigned long)other_special;
-struct _fat_ptr s2=({unsigned _Tmp0=(len2 + (unsigned long)1)+ 1U;_tag_fat(({char*_Tmp1=_cycalloc_atomic(_check_times(_Tmp0,sizeof(char)));({{unsigned _Tmp2=len2 + (unsigned long)1;unsigned i;for(i=0;i < _Tmp2;++ i){_Tmp1[i]='\000';}_Tmp1[_Tmp2]=0;}0;});_Tmp1;}),sizeof(char),_Tmp0);});
+struct _fat_ptr s2=({unsigned _Tmp0=(len2 + 1U)+ 1U;_tag_fat(({char*_Tmp1=_cycalloc_atomic(_check_times(_Tmp0,sizeof(char)));({{unsigned _Tmp2=len2 + 1U;unsigned i;for(i=0;i < _Tmp2;++ i){_Tmp1[i]='\000';}_Tmp1[_Tmp2]=0;}0;});_Tmp1;}),sizeof(char),_Tmp0);});
 int i=0;
 int j=0;
 for(1;(unsigned long)i < len;++ i){
-char c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
+char c=((const char*)s.curr)[i];
 if((int)c==39 || Cyc_is_other_special(c))
 ({struct _fat_ptr _Tmp0=_fat_ptr_plus(s2,sizeof(char),j ++);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2='\\';if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
 ({struct _fat_ptr _Tmp0=_fat_ptr_plus(s2,sizeof(char),j ++);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=c;if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});}
@@ -1497,7 +1501,7 @@ GC_blacklist_warn_clear();{
 struct _fat_ptr optstring=_tag_fat("Options:",sizeof(char),9U);
 # 1252
 {int i=1;for(0;(unsigned)i < 80U;++ i){
-Cyc_global_options[i - 1]->tl=Cyc_global_options[i];}}{
+({struct Cyc_List_List*_Tmp0=*((struct Cyc_List_List**)_check_known_subscript_notnull(Cyc_global_options,80U,sizeof(struct Cyc_List_List*),i));(*((struct Cyc_List_List**)_check_known_subscript_notnull(Cyc_global_options,80U,sizeof(struct Cyc_List_List*),i - 1)))->tl=_Tmp0;});}}{
 struct Cyc_List_List*options=Cyc_global_options[0];
 # 1256
 struct _fat_ptr otherargs=Cyc_Specsfile_parse_b(options,Cyc_add_other,Cyc_add_other_flag,optstring,argv);

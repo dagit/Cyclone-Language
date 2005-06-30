@@ -390,7 +390,7 @@ return Cyc_reduce(q);}}
 struct Cyc_APQ_T*Cyc_APQ_fromstr(struct _fat_ptr str,int base){
 struct Cyc_APQ_T*q=(struct Cyc_APQ_T*)_cycalloc(sizeof(struct Cyc_APQ_T));
 struct _fat_ptr s=str;
-while((int)*((const char*)_check_fat_subscript(s,sizeof(char),0U))&&(int)*((const char*)s.curr)!=47){_fat_ptr_inplace_plus(& s,sizeof(char),1);}
+while((int)*((const char*)_check_fat_subscript(s,sizeof(char),0U))&&(int)*((const char*)s.curr)!=47){_fat_ptr_inplace_plus(& s,sizeof(char),1);1U;}
 ({struct Cyc_AP_T*_Tmp0=Cyc_AP_fromstr((const char*)_untag_fat_ptr(str,sizeof(char),1U),base);q->n=_Tmp0;});
 if((int)*((const char*)s.curr)){
 struct Cyc_AP_T*d=Cyc_AP_fromstr((const char*)_untag_fat_ptr(_fat_ptr_plus(s,sizeof(char),1),sizeof(char),1U),base);

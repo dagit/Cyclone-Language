@@ -566,7 +566,9 @@ n=_IO_getc(fp);
 ++ nread;
 n=_IO_peekc(fp);
 if(n==-1)
-goto eof_failure;}}
+goto eof_failure;
+# 401
+1U;}}
 # 415
 switch((int)c){case 0:
 # 421
@@ -622,7 +624,9 @@ if((c=_IO_peekc(fp))==-1){
 if(n==0)
 goto eof_failure;
 ++ seen_eof;
-break;}}
+break;}
+# 467
+1U;}
 # 478
 if(n==0)
 goto match_failure;}}else{
@@ -641,7 +645,9 @@ if((c=_IO_peekc(fp))==-1){
 if((char*)p5.curr==(char*)p0.curr)
 goto eof_failure;
 ++ seen_eof;
-break;}}
+break;}
+# 485
+1U;}
 # 498
 n=(p5.curr - p4.curr)/ sizeof(char);
 if(n==0)
@@ -665,7 +671,9 @@ if(-- width==0)
 break;
 if((c=_IO_peekc(fp))==-1){
 ++ seen_eof;
-break;}}
+break;}
+# 516
+1U;}
 # 525
 nread +=n;}}else{
 # 527
@@ -681,7 +689,9 @@ if(-- width==0)
 break;
 if((c=_IO_peekc(fp))==-1){
 ++ seen_eof;
-break;}}
+break;}
+# 531
+1U;}
 # 542
 if(_get_fat_size(p3,sizeof(char))==0U)goto eof_failure;
 *((char*)p3.curr)='\000';
@@ -777,13 +787,13 @@ res=strtoul(buf,0,base);else{
 # 672
 res=(unsigned long)strtol(buf,0,base);}
 if(flags & 16)
-({int _Tmp0=(int)res;*Cyc_va_arg_int_ptr(*((void**)ap.curr))=_Tmp0;});else{
+({int _Tmp0=(int)res;*Cyc_va_arg_int_ptr(*((void**)_check_fat_subscript(ap,sizeof(void*),0U)))=_Tmp0;});else{
 if(flags & 4)
-({short _Tmp0=(short)res;*Cyc_va_arg_short_ptr(*((void**)ap.curr))=_Tmp0;});else{
+({short _Tmp0=(short)res;*Cyc_va_arg_short_ptr(*((void**)_check_fat_subscript(ap,sizeof(void*),0U)))=_Tmp0;});else{
 if(flags & 1)
-({int _Tmp0=(int)res;*Cyc_va_arg_int_ptr(*((void**)ap.curr))=_Tmp0;});else{
+({int _Tmp0=(int)res;*Cyc_va_arg_int_ptr(*((void**)_check_fat_subscript(ap,sizeof(void*),0U)))=_Tmp0;});else{
 # 680
-({int _Tmp0=(int)res;*Cyc_va_arg_int_ptr(*((void**)ap.curr))=_Tmp0;});}}}
+({int _Tmp0=(int)res;*Cyc_va_arg_int_ptr(*((void**)_check_fat_subscript(ap,sizeof(void*),0U)))=_Tmp0;});}}}
 _fat_ptr_inplace_plus(& ap,sizeof(void*),1);
 ++ nassigned;}
 # 684
@@ -840,7 +850,9 @@ if(flags & 512){
 # 747
 while((char*)p.curr > buf){
 _fat_ptr_inplace_plus(& p,sizeof(char),-1);
-_IO_ungetc((int)*((char*)_check_fat_subscript(p,sizeof(char),0U)),fp);}
+_IO_ungetc((int)*((char*)_check_fat_subscript(p,sizeof(char),0U)),fp);
+# 748
+1U;}
 # 751
 goto match_failure;}
 # 754
@@ -895,13 +907,13 @@ c=(int)*((const char*)_check_fat_subscript(_fat_ptr_inplace_plus_post(& fmt,size
 v=0;}
 # 817
 for(n=0;n < 256;++ n){
-tab[n]=(char)v;}
+*((char*)_check_known_subscript_notnull(tab,256U,sizeof(char),n))=(char)v;}
 if(c==0)
 return _fat_ptr_plus(fmt,sizeof(char),- 1);
 # 829 "scanf.cyc"
 v=1 - v;
 for(1;1;1){
-tab[c]=(char)v;
+*((char*)_check_known_subscript_notnull(tab,256U,sizeof(char),c))=(char)v;
 doswitch:
  n=(int)*((const char*)_check_fat_subscript(_fat_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0U));
 switch((int)n){case 0:

@@ -411,7 +411,7 @@ unsigned long len=b->length;
 unsigned long new_len=len==0U?1U: len;
 struct _fat_ptr new_buffer;
 while(b->position + more > new_len){
-new_len=2U * new_len;}
+new_len=2U * new_len;1U;}
 # 116
 new_buffer=({unsigned _Tmp0=new_len + 1U;_tag_fat(_region_calloc(Cyc_Core_heap_region,Cyc_Core_unique_qual,sizeof(char),_Tmp0),sizeof(char),_Tmp0);});
 if(b->length!=0U){

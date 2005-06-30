@@ -498,7 +498,7 @@ return((ch==32 || ch==9)|| ch==10)|| ch==13;}
 # 191
 static void Cyc_Sexp_expectws(struct Cyc_Sexp_Parser*p,int expected_ch){
 int ch=Cyc_Sexp_pgetc(p);
-while(Cyc_Sexp_whitespace(ch)){ch=Cyc_Sexp_pgetc(p);}
+while(Cyc_Sexp_whitespace(ch)){ch=Cyc_Sexp_pgetc(p);1U;}
 if(ch!=expected_ch)({struct Cyc_Sexp_Parser*_Tmp0=p;int _Tmp1=ch;Cyc_Sexp_perror(_Tmp0,_Tmp1,({struct Cyc_Int_pa_PrintArg_struct _Tmp2=({struct Cyc_Int_pa_PrintArg_struct _Tmp3;_Tmp3.tag=1,_Tmp3.f1=(unsigned long)expected_ch;_Tmp3;});void*_Tmp3[1];_Tmp3[0]=& _Tmp2;Cyc_aprintf(_tag_fat("expected '%c'",sizeof(char),14U),_tag_fat(_Tmp3,sizeof(void*),1));}));});}
 # 198
 static void Cyc_Sexp_expect(struct Cyc_Sexp_Parser*p,int expected_ch){
@@ -507,7 +507,7 @@ if(ch!=expected_ch)({struct Cyc_Sexp_Parser*_Tmp0=p;int _Tmp1=ch;Cyc_Sexp_perror
 # 206
 struct Cyc_Sexp_Object Cyc_Sexp_parse(struct Cyc_Sexp_Parser*p){
 int ch=Cyc_Sexp_pgetc(p);
-while(Cyc_Sexp_whitespace(ch)){ch=Cyc_Sexp_pgetc(p);}
+while(Cyc_Sexp_whitespace(ch)){ch=Cyc_Sexp_pgetc(p);1U;}
 {struct Cyc_List_List*cs=Cyc_Sexp_classes;for(0;cs!=0;cs=cs->tl){
 struct Cyc_Sexp_Cls*_Tmp0=(struct Cyc_Sexp_Cls*)cs->hd;void*_Tmp1;_Tmp1=_Tmp0->vtable;{struct Cyc_Sexp_Class*v=_Tmp1;
 if(ch==(int)v->tag){
@@ -774,7 +774,7 @@ p->print(p->env,self->v);}
 static struct _tuple10*Cyc_Sexp_parse_symbol(struct Cyc_Sexp_Parser*p){
 struct Cyc_List_List*chars=0;
 int ch=Cyc_Sexp_pgetc(p);
-while(Cyc_Sexp_whitespace(ch)){ch=Cyc_Sexp_pgetc(p);}
+while(Cyc_Sexp_whitespace(ch)){ch=Cyc_Sexp_pgetc(p);1U;}
 while(1){
 if(ch==-1)Cyc_Sexp_perror(p,ch,_tag_fat("unexpected end of file",sizeof(char),23U));
 if(Cyc_Sexp_whitespace(ch)|| ch==41){
@@ -782,7 +782,9 @@ Cyc_Sexp_pungetc(p,ch);
 break;}
 # 586
 chars=({struct Cyc_List_List*_Tmp0=_cycalloc(sizeof(struct Cyc_List_List));_Tmp0->hd=(void*)ch,_Tmp0->tl=chars;_Tmp0;});
-ch=Cyc_Sexp_pgetc(p);}
+ch=Cyc_Sexp_pgetc(p);
+# 581
+1U;}
 # 589
 chars=Cyc_List_imp_rev(chars);{
 struct _fat_ptr buf=({unsigned _Tmp0=Cyc_List_length(chars)+ 1;_tag_fat(_cyccalloc_atomic(sizeof(char),_Tmp0),sizeof(char),_Tmp0);});
@@ -797,10 +799,10 @@ int escapes=0;
 if((int)((const char*)s.curr)[(int)i]==34 ||(int)((const char*)s.curr)[(int)i]==92)++ escapes;}}
 # 603
 if(escapes==0)return s;{
-struct _fat_ptr news=({unsigned _Tmp0=((n + (unsigned)escapes)+ (unsigned)1)+ 1U;_tag_fat(({char*_Tmp1=_cycalloc_atomic(_check_times(_Tmp0,sizeof(char)));({{unsigned _Tmp2=(n + (unsigned)escapes)+ (unsigned)1;unsigned i;for(i=0;i < _Tmp2;++ i){_Tmp1[i]='\000';}_Tmp1[_Tmp2]=0;}0;});_Tmp1;}),sizeof(char),_Tmp0);});
+struct _fat_ptr news=({unsigned _Tmp0=((n + (unsigned)escapes)+ 1U)+ 1U;_tag_fat(({char*_Tmp1=_cycalloc_atomic(_check_times(_Tmp0,sizeof(char)));({{unsigned _Tmp2=(n + (unsigned)escapes)+ 1U;unsigned i;for(i=0;i < _Tmp2;++ i){_Tmp1[i]='\000';}_Tmp1[_Tmp2]=0;}0;});_Tmp1;}),sizeof(char),_Tmp0);});
 unsigned pos=0U;
 {unsigned i=0U;for(0;i < n;++ i){
-char ch=*((const char*)_check_fat_subscript(s,sizeof(char),(int)i));
+char ch=((const char*)s.curr)[(int)i];
 if((int)((const char*)s.curr)[(int)i]==34 ||(int)((const char*)s.curr)[(int)i]==92){
 ({struct _fat_ptr _Tmp0=_fat_ptr_plus(news,sizeof(char),(int)pos);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2='\\';if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
 ++ pos;}
@@ -825,7 +827,7 @@ static struct _tuple10*Cyc_Sexp_parse_str(struct Cyc_Sexp_Parser*p){
 Cyc_Sexp_expectws(p,34);{
 struct Cyc_List_List*chars=0;
 while(1){
-int ch=Cyc_Sexp_pgetc(p);
+{int ch=Cyc_Sexp_pgetc(p);
 if(ch==-1)Cyc_Sexp_perror(p,ch,_tag_fat("unexpected end of file",sizeof(char),23U));
 if(ch==34)break;
 if(ch==92){
@@ -833,6 +835,8 @@ ch=Cyc_Sexp_pgetc(p);
 if(ch!=34 && ch!=92)Cyc_Sexp_perror(p,ch,_tag_fat("expected '\"' or '\\'",sizeof(char),20U));}
 # 648
 chars=({struct Cyc_List_List*_Tmp0=_cycalloc(sizeof(struct Cyc_List_List));_Tmp0->hd=(void*)ch,_Tmp0->tl=chars;_Tmp0;});}
+# 641
+1U;}
 # 650
 chars=Cyc_List_imp_rev(chars);{
 struct _fat_ptr buf=({unsigned _Tmp0=Cyc_List_length(chars)+ 1;_tag_fat(_cyccalloc_atomic(sizeof(char),_Tmp0),sizeof(char),_Tmp0);});
@@ -845,7 +849,7 @@ static void Cyc_Sexp_print_tuple(struct _tuple10*self,struct Cyc_Sexp_Printer*p)
 struct _fat_ptr vs=self->v;
 unsigned n=_get_fat_size(vs,sizeof(struct Cyc_Sexp_Object));
 unsigned i=0U;for(0;i < n;++ i){
-Cyc_Sexp_print(p,((struct Cyc_Sexp_Object*)vs.curr)[(int)i]);}}
+Cyc_Sexp_print(p,*((struct Cyc_Sexp_Object*)_check_fat_subscript(vs,sizeof(struct Cyc_Sexp_Object),(int)i)));}}
 # 669
 static int Cyc_Sexp_hash_tuple(struct _tuple10*x){
 unsigned res=0U;
@@ -866,7 +870,7 @@ unsigned ny=_get_fat_size(ys,sizeof(struct Cyc_Sexp_Object));
 if(nx < ny)return -1;
 if(nx > ny)return 1;
 {unsigned i=0U;for(0;i < nx;++ i){
-int c=Cyc_Sexp_cmp(((struct Cyc_Sexp_Object*)xs.curr)[(int)i],((struct Cyc_Sexp_Object*)ys.curr)[(int)i]);
+int c=({struct Cyc_Sexp_Object _Tmp0=*((struct Cyc_Sexp_Object*)_check_fat_subscript(xs,sizeof(struct Cyc_Sexp_Object),(int)i));Cyc_Sexp_cmp(_Tmp0,*((struct Cyc_Sexp_Object*)_check_fat_subscript(ys,sizeof(struct Cyc_Sexp_Object),(int)i)));});
 if(c!=0)return c;}}
 # 693
 return 0;}}
@@ -880,7 +884,7 @@ static struct _tuple10*Cyc_Sexp_parse_tuple(struct Cyc_Sexp_Parser*p){
 struct Cyc_List_List*xs=0;
 Next: {
 int ch=Cyc_Sexp_pgetc(p);
-while(Cyc_Sexp_whitespace(ch)){ch=Cyc_Sexp_pgetc(p);}
+while(Cyc_Sexp_whitespace(ch)){ch=Cyc_Sexp_pgetc(p);1U;}
 if(ch==41){
 Cyc_Sexp_pungetc(p,ch);
 xs=Cyc_List_imp_rev(xs);{
@@ -950,7 +954,7 @@ struct _tuple10*Cyc_Sexp_mk_symbol(struct _fat_ptr v){struct _tuple10 obj=({stru
 struct _tuple10*Cyc_Sexp_mk_tuple(struct _fat_ptr v){struct _tuple10 obj=({struct _tuple10 _Tmp0;_Tmp0.vtable=& Cyc_Sexp_tuple_class,_Tmp0.v=v;_Tmp0;});struct _tuple10**objopt=({struct _tuple10**(*_Tmp0)(struct _tuple10*)=(struct _tuple10**(*)(struct _tuple10*))Cyc_Sexp_hashcons;_Tmp0;})(& obj);if(objopt!=0)return*objopt;{struct _tuple10*objp;objp=_cycalloc(sizeof(struct _tuple10)),*objp=obj;({void(*_Tmp0)(struct Cyc_Hashtable_Table*,struct _tuple10*,struct _tuple10*)=(void(*)(struct Cyc_Hashtable_Table*,struct _tuple10*,struct _tuple10*))Cyc_Hashtable_insert;_Tmp0;})(_check_null(obj.vtable->hash_table),objp,objp);return objp;}}struct Cyc_Sexp_Object Cyc_Sexp_obj_tuple(struct _fat_ptr v){return({struct Cyc_Sexp_Object(*_Tmp0)(struct _tuple10*)=({struct Cyc_Sexp_Object(*_Tmp1)(struct _tuple10*)=(struct Cyc_Sexp_Object(*)(struct _tuple10*))Cyc_Sexp_up;_Tmp1;});_Tmp0(Cyc_Sexp_mk_tuple(v));});}struct Cyc_Sexp_Cls Cyc_Sexp_tuple_class_w={& Cyc_Sexp_tuple_class};
 # 817
 struct Cyc_Sexp_Object Cyc_Sexp_tuple(struct _fat_ptr objs){
-return Cyc_Sexp_obj_tuple(({unsigned _Tmp0=_get_fat_size(objs,sizeof(struct Cyc_Sexp_Object));_tag_fat(({struct Cyc_Sexp_Object*_Tmp1=_cycalloc(_check_times(_Tmp0,sizeof(struct Cyc_Sexp_Object)));({{unsigned _Tmp2=_get_fat_size(objs,sizeof(struct Cyc_Sexp_Object));unsigned i;for(i=0;i < _Tmp2;++ i){_Tmp1[i]=*((struct Cyc_Sexp_Object*)_check_fat_subscript(objs,sizeof(struct Cyc_Sexp_Object),(int)i));}}0;});_Tmp1;}),sizeof(struct Cyc_Sexp_Object),_Tmp0);}));}
+return Cyc_Sexp_obj_tuple(({unsigned _Tmp0=_get_fat_size(objs,sizeof(struct Cyc_Sexp_Object));_tag_fat(({struct Cyc_Sexp_Object*_Tmp1=_cycalloc(_check_times(_Tmp0,sizeof(struct Cyc_Sexp_Object)));({{unsigned _Tmp2=_get_fat_size(objs,sizeof(struct Cyc_Sexp_Object));unsigned i;for(i=0;i < _Tmp2;++ i){_Tmp1[i]=((struct Cyc_Sexp_Object*)objs.curr)[(int)i];}}0;});_Tmp1;}),sizeof(struct Cyc_Sexp_Object),_Tmp0);}));}
 # 823
 static struct Cyc_List_List Cyc_Sexp_c0={(void*)& Cyc_Sexp_uchar_class_w,0};
 static struct Cyc_List_List Cyc_Sexp_c1={(void*)& Cyc_Sexp_schar_class_w,& Cyc_Sexp_c0};

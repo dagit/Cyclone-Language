@@ -469,7 +469,7 @@ return({struct Cyc_Core_Opt*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Opt));({void*
 # 144
 struct Cyc_Absyn_Kind*Cyc_Kinds_id_to_kind(struct _fat_ptr s,unsigned loc){
 if(Cyc_strlen(s)==1U || Cyc_strlen(s)==2U){
-char _Tmp0=*((const char*)_check_fat_subscript(s,sizeof(char),0));switch((int)_Tmp0){case 65:
+char _Tmp0=((const char*)s.curr)[0];switch((int)_Tmp0){case 65:
  return& Cyc_Kinds_ak;case 77:
  return& Cyc_Kinds_mk;case 66:
  return& Cyc_Kinds_bk;case 82:

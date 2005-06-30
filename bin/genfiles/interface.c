@@ -1213,7 +1213,7 @@ static struct _fat_ptr*Cyc_Interface_us_p=& Cyc_Interface_us;
 # 998
 static struct _tuple12*Cyc_Interface_rewrite_datatypefield_type(struct _tuple12*x){
 return({struct _tuple12*_Tmp0=_cycalloc(sizeof(struct _tuple12));({struct Cyc_Absyn_Tqual _Tmp1=Cyc_Absyn_empty_tqual(0U);_Tmp0->f0=_Tmp1;}),({
-void*_Tmp1=(void*)({struct Cyc_Absyn_VarType_Absyn_Type_struct*_Tmp2=_cycalloc(sizeof(struct Cyc_Absyn_VarType_Absyn_Type_struct));_Tmp2->tag=2,({struct Cyc_Absyn_Tvar*_Tmp3=({struct Cyc_Absyn_Tvar*_Tmp4=_cycalloc(sizeof(struct Cyc_Absyn_Tvar));_Tmp4->name=Cyc_Interface_us_p,_Tmp4->identity=- 1,({void*_Tmp5=Cyc_Kinds_kind_to_bound(& Cyc_Kinds_bk);_Tmp4->kind=_Tmp5;}),_Tmp4->aquals_bound=0;_Tmp4;});_Tmp2->f1=_Tmp3;});_Tmp2;});_Tmp0->f1=_Tmp1;});_Tmp0;});}
+void*_Tmp1=(void*)({struct Cyc_Absyn_VarType_Absyn_Type_struct*_Tmp2=_cycalloc(sizeof(struct Cyc_Absyn_VarType_Absyn_Type_struct));_Tmp2->tag=2,({struct Cyc_Absyn_Tvar*_Tmp3=({struct Cyc_Absyn_Tvar*_Tmp4=_cycalloc(sizeof(struct Cyc_Absyn_Tvar));_Tmp4->name=Cyc_Interface_us_p,_Tmp4->identity=-1,({void*_Tmp5=Cyc_Kinds_kind_to_bound(& Cyc_Kinds_bk);_Tmp4->kind=_Tmp5;}),_Tmp4->aquals_bound=0;_Tmp4;});_Tmp2->f1=_Tmp3;});_Tmp2;});_Tmp0->f1=_Tmp1;});_Tmp0;});}
 # 1003
 static struct Cyc_Absyn_Datatypefield*Cyc_Interface_rewrite_datatypefield(struct Cyc_Absyn_Datatypefield*f){
 f=({struct Cyc_Absyn_Datatypefield*_Tmp0=_cycalloc(sizeof(struct Cyc_Absyn_Datatypefield));*_Tmp0=*f;_Tmp0;});

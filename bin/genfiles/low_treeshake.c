@@ -475,7 +475,7 @@ Cyc_LowTreeShake_build_tables_type(env,_check_null(td->defn));goto _LL0;}default
 static void Cyc_LowTreeShake_process_worklist(struct Cyc_LowTreeShake_Env*env){
 # 156
 while(!Cyc_Set_is_empty(env->aggr_worklist)){
-struct _tuple0*n=({struct _tuple0*(*_Tmp0)(struct Cyc_Set_Set*)=(struct _tuple0*(*)(struct Cyc_Set_Set*))Cyc_Set_choose;_Tmp0;})(env->aggr_worklist);
+{struct _tuple0*n=({struct _tuple0*(*_Tmp0)(struct Cyc_Set_Set*)=(struct _tuple0*(*)(struct Cyc_Set_Set*))Cyc_Set_choose;_Tmp0;})(env->aggr_worklist);
 ({struct _tuple0*(*_Tmp0)(struct Cyc_Set_Set*,struct _tuple0*)=(struct _tuple0*(*)(struct Cyc_Set_Set*,struct _tuple0*))Cyc_Set_imp_delete;_Tmp0;})(env->aggr_worklist,n);
 ({void(*_Tmp0)(struct Cyc_Set_Set*,struct _tuple0*)=(void(*)(struct Cyc_Set_Set*,struct _tuple0*))Cyc_Set_imp_insert;_Tmp0;})(env->aggr_keepers,n);{
 # 161
@@ -485,7 +485,9 @@ continue;{
 struct Cyc_List_List*ads=*ads_opt;for(0;ads!=0;ads=ads->tl){
 if(((struct Cyc_Absyn_Aggrdecl*)ads->hd)->impl!=0){
 struct Cyc_List_List*fs=((struct Cyc_Absyn_Aggrdecl*)ads->hd)->impl->fields;for(0;fs!=0;fs=fs->tl){
-Cyc_LowTreeShake_build_tables_type(env,((struct Cyc_Absyn_Aggrfield*)fs->hd)->type);}}}}}}}
+Cyc_LowTreeShake_build_tables_type(env,((struct Cyc_Absyn_Aggrfield*)fs->hd)->type);}}}}}}
+# 157
+1U;}}
 # 171
 static struct Cyc_List_List*Cyc_LowTreeShake_trim_decls(struct Cyc_LowTreeShake_Env*env,struct Cyc_List_List*tds){
 struct Cyc_List_List*ans=0;
