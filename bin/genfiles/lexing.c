@@ -389,9 +389,9 @@ lexbuf->lex_last_pos=lexbuf->lex_last_pos - n;}}
 # 107
 struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_function(int(*read_fun)(struct _fat_ptr,int,void*),void*read_fun_state){
 # 109
-return({struct Cyc_Lexing_lexbuf*_Tmp0=_cycalloc(sizeof(struct Cyc_Lexing_lexbuf));_Tmp0->refill_buff=Cyc_Lexing_lex_refill,({
+struct Cyc_Lexing_lexbuf*_Tmp0=_cycalloc(sizeof(struct Cyc_Lexing_lexbuf));_Tmp0->refill_buff=Cyc_Lexing_lex_refill,({
 struct Cyc_Lexing_function_lexbuf_state*_Tmp1=({struct Cyc_Lexing_function_lexbuf_state*_Tmp2=_cycalloc(sizeof(struct Cyc_Lexing_function_lexbuf_state));_Tmp2->read_fun=read_fun,_Tmp2->read_fun_state=read_fun_state;_Tmp2;});_Tmp0->refill_state=_Tmp1;}),({
-struct _fat_ptr _Tmp1=Cyc_Core_new_string(8193U);_Tmp0->lex_buffer=_Tmp1;}),_Tmp0->lex_buffer_len=8192,_Tmp0->lex_abs_pos=-8192,_Tmp0->lex_start_pos=8192,_Tmp0->lex_curr_pos=8192,_Tmp0->lex_last_pos=8192,_Tmp0->lex_last_action=0,_Tmp0->lex_eof_reached=0;_Tmp0;});}
+struct _fat_ptr _Tmp1=Cyc_Core_new_string(8193U);_Tmp0->lex_buffer=_Tmp1;}),_Tmp0->lex_buffer_len=8192,_Tmp0->lex_abs_pos=-8192,_Tmp0->lex_start_pos=8192,_Tmp0->lex_curr_pos=8192,_Tmp0->lex_last_pos=8192,_Tmp0->lex_last_action=0,_Tmp0->lex_eof_reached=0;return _Tmp0;}
 # 118
 static int Cyc_Lexing_read_from_file(struct _fat_ptr aux,int n,struct Cyc___cycFILE*f){
 return Cyc_file_string_read(f,aux,0,n);}
@@ -403,10 +403,10 @@ static void Cyc_Lexing_set_eof(struct Cyc_Lexing_lexbuf*lbuf){
 lbuf->lex_eof_reached=1;}
 # 131
 struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_string(struct _fat_ptr s){
-return({struct Cyc_Lexing_lexbuf*_Tmp0=_cycalloc(sizeof(struct Cyc_Lexing_lexbuf));_Tmp0->refill_buff=Cyc_Lexing_set_eof,_Tmp0->refill_state=(void*)0,({
+struct Cyc_Lexing_lexbuf*_Tmp0=_cycalloc(sizeof(struct Cyc_Lexing_lexbuf));_Tmp0->refill_buff=Cyc_Lexing_set_eof,_Tmp0->refill_state=(void*)0,({
 # 134
 struct _fat_ptr _Tmp1=Cyc_strdup((struct _fat_ptr)s);_Tmp0->lex_buffer=_Tmp1;}),_Tmp0->lex_buffer_len=(int)
-_get_fat_size(s,sizeof(char)),_Tmp0->lex_abs_pos=0,_Tmp0->lex_start_pos=0,_Tmp0->lex_curr_pos=0,_Tmp0->lex_last_pos=0,_Tmp0->lex_last_action=0,_Tmp0->lex_eof_reached=1;_Tmp0;});}
+_get_fat_size(s,sizeof(char)),_Tmp0->lex_abs_pos=0,_Tmp0->lex_start_pos=0,_Tmp0->lex_curr_pos=0,_Tmp0->lex_last_pos=0,_Tmp0->lex_last_action=0,_Tmp0->lex_eof_reached=1;return _Tmp0;}
 # 140
 struct _fat_ptr Cyc_Lexing_rlexeme(struct _RegionHandle*r,struct Cyc_Lexing_lexbuf*lbuf){
 int len=lbuf->lex_curr_pos - lbuf->lex_start_pos;

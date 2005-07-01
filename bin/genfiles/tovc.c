@@ -685,9 +685,9 @@ _Tmp5->i.tvars=0,_Tmp5->i.effect=0,({struct Cyc_Absyn_Tqual _Tmp6=Cyc_Absyn_empt
 # 375
 _Tmp3->f1=_Tmp4;});_Tmp3;}),0U);_Tmp1->hd=_Tmp2;}),_Tmp1->tl=*env.gen_ds;_Tmp1;});
 # 374
-*env.gen_ds=_Tmp0;});
+*env.gen_ds=_Tmp0;});{
 # 382
-return({struct Cyc_Absyn_Exp*_Tmp0=Cyc_Absyn_var_exp(funname,0U);Cyc_Absyn_fncall_exp(_Tmp0,args,0U);});}}}
+struct Cyc_Absyn_Exp*_Tmp0=Cyc_Absyn_var_exp(funname,0U);return Cyc_Absyn_fncall_exp(_Tmp0,args,0U);}}}}
 # 385
 static void Cyc_Tovc_apply_varmap(struct Cyc_Dict_Dict varmap,struct Cyc_Absyn_Exp*e){
 void*_Tmp0=e->r;void*_Tmp1;void*_Tmp2;void*_Tmp3;switch(*((int*)_Tmp0)){case 1: _Tmp3=(void*)((struct Cyc_Absyn_Var_e_Absyn_Raw_exp_struct*)_Tmp0)->f1;{void*b=_Tmp3;

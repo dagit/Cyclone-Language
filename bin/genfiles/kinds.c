@@ -465,7 +465,7 @@ void*Cyc_Kinds_kind_to_bound(struct Cyc_Absyn_Kind*k){
 return(void*)({struct Cyc_Absyn_Eq_kb_Absyn_KindBound_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Absyn_Eq_kb_Absyn_KindBound_struct));_Tmp0->tag=0,_Tmp0->f1=k;_Tmp0;});}
 # 139
 struct Cyc_Core_Opt*Cyc_Kinds_kind_to_bound_opt(struct Cyc_Absyn_Kind*k){
-return({struct Cyc_Core_Opt*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Opt));({void*_Tmp1=Cyc_Kinds_kind_to_bound(k);_Tmp0->v=_Tmp1;});_Tmp0;});}
+struct Cyc_Core_Opt*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Opt));({void*_Tmp1=Cyc_Kinds_kind_to_bound(k);_Tmp0->v=_Tmp1;});return _Tmp0;}
 # 144
 struct Cyc_Absyn_Kind*Cyc_Kinds_id_to_kind(struct _fat_ptr s,unsigned loc){
 if(Cyc_strlen(s)==1U || Cyc_strlen(s)==2U){
@@ -590,16 +590,16 @@ return k;}default:
 # 302
 struct Cyc_Core_Opt Cyc_Kinds_tvar_kind_opt(struct Cyc_Absyn_Tvar*tv){
 void*_Tmp0=Cyc_Kinds_compress_kb(tv->kind);void*_Tmp1;switch(*((int*)_Tmp0)){case 0: _Tmp1=((struct Cyc_Absyn_Eq_kb_Absyn_KindBound_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Kind*k=_Tmp1;
-return({struct Cyc_Core_Opt _Tmp2;_Tmp2.v=k;_Tmp2;});}case 2: _Tmp1=((struct Cyc_Absyn_Less_kb_Absyn_KindBound_struct*)_Tmp0)->f2;{struct Cyc_Absyn_Kind*k=_Tmp1;
-return({struct Cyc_Core_Opt _Tmp2;_Tmp2.v=k;_Tmp2;});}default:
- return({struct Cyc_Core_Opt _Tmp2;_Tmp2.v=0;_Tmp2;});};}struct _tuple12{struct Cyc_Absyn_Tvar*f0;void*f1;};
+struct Cyc_Core_Opt _Tmp2;_Tmp2.v=k;return _Tmp2;}case 2: _Tmp1=((struct Cyc_Absyn_Less_kb_Absyn_KindBound_struct*)_Tmp0)->f2;{struct Cyc_Absyn_Kind*k=_Tmp1;
+struct Cyc_Core_Opt _Tmp2;_Tmp2.v=k;return _Tmp2;}default:  {
+struct Cyc_Core_Opt _Tmp2;_Tmp2.v=0;return _Tmp2;}};}struct _tuple12{struct Cyc_Absyn_Tvar*f0;void*f1;};
 # 310
 struct _tuple12 Cyc_Kinds_swap_kind(void*t,void*kb){
 void*_Tmp0=Cyc_Absyn_compress(t);void*_Tmp1;if(*((int*)_Tmp0)==2){_Tmp1=((struct Cyc_Absyn_VarType_Absyn_Type_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Tvar*tv=_Tmp1;
 # 313
 void*oldkb=tv->kind;
-tv->kind=kb;
-return({struct _tuple12 _Tmp2;_Tmp2.f0=tv,_Tmp2.f1=oldkb;_Tmp2;});}}else{
+tv->kind=kb;{
+struct _tuple12 _Tmp2;_Tmp2.f0=tv,_Tmp2.f1=oldkb;return _Tmp2;}}}else{
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp2=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3;_Tmp3.tag=0,_Tmp3.f1=_tag_fat("swap_kind: cannot update the kind of ",sizeof(char),38U);_Tmp3;});struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp3=({struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp4;_Tmp4.tag=2,_Tmp4.f1=(void*)t;_Tmp4;});void*_Tmp4[2];_Tmp4[0]=& _Tmp2,_Tmp4[1]=& _Tmp3;({int(*_Tmp5)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp5;})(_tag_fat(_Tmp4,sizeof(void*),2));});};}
 # 320
 int Cyc_Kinds_kind_eq(struct Cyc_Absyn_Kind*k1,struct Cyc_Absyn_Kind*k2){

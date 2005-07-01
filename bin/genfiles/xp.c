@@ -526,8 +526,8 @@ return(int)carry;}
 int Cyc_XP_cmp(int n,struct _fat_ptr x,struct _fat_ptr y){
 int i=n - 1;
 while(i > 0 &&({int _Tmp0=(int)*((unsigned char*)_check_fat_subscript(x,sizeof(unsigned char),i));_Tmp0==(int)*((unsigned char*)_check_fat_subscript(y,sizeof(unsigned char),i));})){
--- i;1U;}
-return({int _Tmp0=(int)*((unsigned char*)_check_fat_subscript(x,sizeof(unsigned char),i));_Tmp0 - (int)*((unsigned char*)_check_fat_subscript(y,sizeof(unsigned char),i));});}
+-- i;1U;}{
+int _Tmp0=(int)*((unsigned char*)_check_fat_subscript(x,sizeof(unsigned char),i));return _Tmp0 - (int)*((unsigned char*)_check_fat_subscript(y,sizeof(unsigned char),i));}}
 # 189
 void Cyc_XP_lshift(int n,struct _fat_ptr z,int m,struct _fat_ptr x,int s,int fill){
 fill=fill?255: 0;

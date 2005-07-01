@@ -371,12 +371,12 @@ struct _fat_ptr Cyc_Absynpp_qvar2string(struct _tuple0*);struct _union_Node_NZer
 extern union Cyc_Pratt_Node Cyc_Pratt_zero_node;struct Cyc_Pratt_Graph;
 # 85 "pratt-ap.cyc"
 union Cyc_Pratt_Node Cyc_Pratt_zero_node={.NZero={1,0}};
-union Cyc_Pratt_Node Cyc_Pratt_NVar(struct Cyc_Absyn_Vardecl*vd){return({union Cyc_Pratt_Node _Tmp0;_Tmp0.NVar.tag=2U,_Tmp0.NVar.val=vd;_Tmp0;});}
-union Cyc_Pratt_Node Cyc_Pratt_NNumelts(struct Cyc_Absyn_Vardecl*vd){return({union Cyc_Pratt_Node _Tmp0;_Tmp0.NNumelts.tag=3U,_Tmp0.NNumelts.val=vd;_Tmp0;});}
-union Cyc_Pratt_Node Cyc_Pratt_NType(void*t){return({union Cyc_Pratt_Node _Tmp0;_Tmp0.NType.tag=4U,_Tmp0.NType.val=t;_Tmp0;});}
-union Cyc_Pratt_Node Cyc_Pratt_NParam(unsigned i){return({union Cyc_Pratt_Node _Tmp0;_Tmp0.NParam.tag=5U,_Tmp0.NParam.val=i;_Tmp0;});}
-union Cyc_Pratt_Node Cyc_Pratt_NParamNumelts(unsigned i){return({union Cyc_Pratt_Node _Tmp0;_Tmp0.NParamNumelts.tag=6U,_Tmp0.NParamNumelts.val=i;_Tmp0;});}
-union Cyc_Pratt_Node Cyc_Pratt_NReturn (void){return({union Cyc_Pratt_Node _Tmp0;_Tmp0.NReturn.tag=7U,_Tmp0.NReturn.val=0;_Tmp0;});}struct _tuple12{union Cyc_Pratt_Node f0;union Cyc_Pratt_Node f1;};
+union Cyc_Pratt_Node Cyc_Pratt_NVar(struct Cyc_Absyn_Vardecl*vd){union Cyc_Pratt_Node _Tmp0;_Tmp0.NVar.tag=2U,_Tmp0.NVar.val=vd;return _Tmp0;}
+union Cyc_Pratt_Node Cyc_Pratt_NNumelts(struct Cyc_Absyn_Vardecl*vd){union Cyc_Pratt_Node _Tmp0;_Tmp0.NNumelts.tag=3U,_Tmp0.NNumelts.val=vd;return _Tmp0;}
+union Cyc_Pratt_Node Cyc_Pratt_NType(void*t){union Cyc_Pratt_Node _Tmp0;_Tmp0.NType.tag=4U,_Tmp0.NType.val=t;return _Tmp0;}
+union Cyc_Pratt_Node Cyc_Pratt_NParam(unsigned i){union Cyc_Pratt_Node _Tmp0;_Tmp0.NParam.tag=5U,_Tmp0.NParam.val=i;return _Tmp0;}
+union Cyc_Pratt_Node Cyc_Pratt_NParamNumelts(unsigned i){union Cyc_Pratt_Node _Tmp0;_Tmp0.NParamNumelts.tag=6U,_Tmp0.NParamNumelts.val=i;return _Tmp0;}
+union Cyc_Pratt_Node Cyc_Pratt_NReturn (void){union Cyc_Pratt_Node _Tmp0;_Tmp0.NReturn.tag=7U,_Tmp0.NReturn.val=0;return _Tmp0;}struct _tuple12{union Cyc_Pratt_Node f0;union Cyc_Pratt_Node f1;};
 # 93
 static int Cyc_Pratt_cmp_node(union Cyc_Pratt_Node n1,union Cyc_Pratt_Node n2){
 struct _tuple12 _Tmp0=({struct _tuple12 _Tmp1;_Tmp1.f0=n1,_Tmp1.f1=n2;_Tmp1;});unsigned _Tmp1;unsigned _Tmp2;void*_Tmp3;void*_Tmp4;if(_Tmp0.f0.NZero.tag==1){if(_Tmp0.f1.NZero.tag==1)
@@ -413,8 +413,8 @@ return({struct Cyc_Int_pa_PrintArg_struct _Tmp2=({struct Cyc_Int_pa_PrintArg_str
  return Cyc_aprintf(_tag_fat("return_value",sizeof(char),13U),_tag_fat(0U,sizeof(void*),0));};}struct Cyc_Pratt_Edge{union Cyc_Pratt_Node x;union Cyc_Pratt_Node y;struct Cyc_AP_T*value;};struct Cyc_Pratt_Graph{struct Cyc_List_List*nodes;struct Cyc_List_List*edges;};
 # 149
 struct Cyc_Pratt_Graph*Cyc_Pratt_empty_graph (void){
-struct Cyc_List_List*nodes;nodes=_cycalloc(sizeof(struct Cyc_List_List)),nodes->hd=& Cyc_Pratt_zero_node,nodes->tl=0;
-return({struct Cyc_Pratt_Graph*_Tmp0=_cycalloc(sizeof(struct Cyc_Pratt_Graph));_Tmp0->nodes=nodes,_Tmp0->edges=0;_Tmp0;});}
+struct Cyc_List_List*nodes;nodes=_cycalloc(sizeof(struct Cyc_List_List)),nodes->hd=& Cyc_Pratt_zero_node,nodes->tl=0;{
+struct Cyc_Pratt_Graph*_Tmp0=_cycalloc(sizeof(struct Cyc_Pratt_Graph));_Tmp0->nodes=nodes,_Tmp0->edges=0;return _Tmp0;}}
 # 155
 static struct Cyc_List_List*Cyc_Pratt_copy_edges(struct Cyc_List_List*ds){
 struct Cyc_List_List*res=0;
@@ -426,7 +426,7 @@ return Cyc_List_imp_rev(res);}
 # 164
 struct Cyc_Pratt_Graph*Cyc_Pratt_copy_graph(struct Cyc_Pratt_Graph*G){
 void*_Tmp0;void*_Tmp1;_Tmp1=G->nodes;_Tmp0=G->edges;{struct Cyc_List_List*nodes=_Tmp1;struct Cyc_List_List*edges=_Tmp0;
-return({struct Cyc_Pratt_Graph*_Tmp2=_cycalloc(sizeof(struct Cyc_Pratt_Graph));_Tmp2->nodes=nodes,({struct Cyc_List_List*_Tmp3=Cyc_Pratt_copy_edges(edges);_Tmp2->edges=_Tmp3;});_Tmp2;});}}
+struct Cyc_Pratt_Graph*_Tmp2=_cycalloc(sizeof(struct Cyc_Pratt_Graph));_Tmp2->nodes=nodes,({struct Cyc_List_List*_Tmp3=Cyc_Pratt_copy_edges(edges);_Tmp2->edges=_Tmp3;});return _Tmp2;}}
 # 171
 static struct Cyc_AP_T**Cyc_Pratt_lookup_distance(struct Cyc_Pratt_Graph*G,union Cyc_Pratt_Node x,union Cyc_Pratt_Node y){
 # 173

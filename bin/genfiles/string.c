@@ -388,16 +388,16 @@ unsigned minsz=Cyc_umin(sz1,sz2);
 for(1;1 &&(unsigned)i < minsz;++ i){
 char c1=((const char*)s1.curr)[i];
 char c2=((const char*)s2.curr)[i];
-if((int)c1==0)
-return(int)c2==0?0: -1;
+if((int)c1==0){
+if((int)c2==0)return 0;else{return -1;}}
 if((int)c2==0)return 1;{
 int diff=(int)c1 - (int)c2;
 if(diff!=0)return diff;}}
 # 76
 if(sz1==sz2)return 0;
-if(sz1 < sz2)return(int)((const char*)s2.curr)[i]==0?0: -1;
+if(sz1 < sz2){if((int)((const char*)s2.curr)[i]==0)return 0;else{return -1;}}
 1;
-return(int)((const char*)s1.curr)[i]==0?0: 1;}}
+if((int)((const char*)s1.curr)[i]==0)return 0;else{return 1;}}}
 # 82
 int Cyc_strptrcmp(struct _fat_ptr*s1,struct _fat_ptr*s2){
 return Cyc_strcmp(*s1,*s2);}
@@ -975,8 +975,8 @@ return d;}
 # 774
 int Cyc_memcmp(struct _fat_ptr s1,struct _fat_ptr s2,unsigned long n){
 if((((char*)s1.curr==(char*)_tag_fat(0,0,0).curr ||(char*)s2.curr==(char*)_tag_fat(0,0,0).curr)|| _get_fat_size(s1,sizeof(char))< n)|| _get_fat_size(s2,sizeof(char))< n)
-_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp0->tag=Cyc_Core_Invalid_argument,_Tmp0->f1=_tag_fat("memcmp",sizeof(char),7U);_Tmp0;}));
-return({const void*_Tmp0=(const void*)_untag_fat_ptr(s1,sizeof(char),1U);const void*_Tmp1=(const void*)_untag_fat_ptr(s2,sizeof(char),1U);memcmp(_Tmp0,_Tmp1,n);});}
+_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp0->tag=Cyc_Core_Invalid_argument,_Tmp0->f1=_tag_fat("memcmp",sizeof(char),7U);_Tmp0;}));{
+const void*_Tmp0=(const void*)_untag_fat_ptr(s1,sizeof(char),1U);const void*_Tmp1=(const void*)_untag_fat_ptr(s2,sizeof(char),1U);return memcmp(_Tmp0,_Tmp1,n);}}
 # 780
 struct _fat_ptr Cyc_memchr(struct _fat_ptr s,char c,unsigned long n){
 unsigned sz=_get_fat_size(s,sizeof(char));

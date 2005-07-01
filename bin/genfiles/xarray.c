@@ -361,14 +361,14 @@ _throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp0=_cycalloc(size
 # 41
 struct Cyc_Xarray_Xarray*Cyc_Xarray_rcreate_empty(struct _RegionHandle*r){
 struct _fat_ptr x=_tag_fat(0,0,0);
-return({struct Cyc_Xarray_Xarray*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_Xarray_Xarray));_Tmp0->elmts=x,_Tmp0->num_elmts=0;_Tmp0;});}
+struct Cyc_Xarray_Xarray*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_Xarray_Xarray));_Tmp0->elmts=x,_Tmp0->num_elmts=0;return _Tmp0;}
 # 45
 struct Cyc_Xarray_Xarray*Cyc_Xarray_create_empty (void){return Cyc_Xarray_rcreate_empty(Cyc_Core_heap_region);}
 # 48
 struct Cyc_Xarray_Xarray*Cyc_Xarray_rcreate(struct _RegionHandle*r,int len,void*a){
 if(len < 0)
-_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp0->tag=Cyc_Core_Invalid_argument,_Tmp0->f1=_tag_fat("xarrays must have a non-negative size buffer",sizeof(char),45U);_Tmp0;}));
-return({struct Cyc_Xarray_Xarray*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_Xarray_Xarray));_Tmp0->elmts=({unsigned _Tmp1=(unsigned)len;_tag_fat(({void**_Tmp2=({unsigned _Tmp3=Cyc_Core_unique_qual;_aqual_malloc(_Tmp3,_check_times(_Tmp1,sizeof(void*)));});({{unsigned _Tmp3=(unsigned)len;unsigned i;for(i=0;i < _Tmp3;++ i){_Tmp2[i]=a;}}0;});_Tmp2;}),sizeof(void*),_Tmp1);}),_Tmp0->num_elmts=0;_Tmp0;});}
+_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp0->tag=Cyc_Core_Invalid_argument,_Tmp0->f1=_tag_fat("xarrays must have a non-negative size buffer",sizeof(char),45U);_Tmp0;}));{
+struct Cyc_Xarray_Xarray*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_Xarray_Xarray));_Tmp0->elmts=({unsigned _Tmp1=(unsigned)len;_tag_fat(({void**_Tmp2=({unsigned _Tmp3=Cyc_Core_unique_qual;_aqual_malloc(_Tmp3,_check_times(_Tmp1,sizeof(void*)));});({{unsigned _Tmp3=(unsigned)len;unsigned i;for(i=0;i < _Tmp3;++ i){_Tmp2[i]=a;}}0;});_Tmp2;}),sizeof(void*),_Tmp1);}),_Tmp0->num_elmts=0;return _Tmp0;}}
 # 54
 struct Cyc_Xarray_Xarray*Cyc_Xarray_create(int len,void*a){
 return Cyc_Xarray_rcreate(Cyc_Core_heap_region,len,a);}

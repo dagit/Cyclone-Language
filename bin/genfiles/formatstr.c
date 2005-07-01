@@ -482,9 +482,9 @@ switch((int)c){case 100:
  goto _LL40;case 110: _LL40:
  goto _LL42;case 37: _LL42:
  goto _LL1C;default:
- return 0;}_LL1C:;
+ return 0;}_LL1C:;{
 # 166 "formatstr.cyc"
-return({struct Cyc_Core_Opt*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_Core_Opt));({struct _tuple11*_Tmp1=({struct _tuple11*_Tmp2=_region_malloc(r,0U,sizeof(struct _tuple11));_Tmp2->f0=flags,_Tmp2->f1=width,_Tmp2->f2=precision,_Tmp2->f3=lenmod,_Tmp2->f4=c,_Tmp2->f5=i + 1;_Tmp2;});_Tmp0->v=_Tmp1;});_Tmp0;});}}}}}
+struct Cyc_Core_Opt*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_Core_Opt));({struct _tuple11*_Tmp1=({struct _tuple11*_Tmp2=_region_malloc(r,0U,sizeof(struct _tuple11));_Tmp2->f0=flags,_Tmp2->f1=width,_Tmp2->f2=precision,_Tmp2->f3=lenmod,_Tmp2->f4=c,_Tmp2->f5=i + 1;_Tmp2;});_Tmp0->v=_Tmp1;});return _Tmp0;}}}}}}
 # 169
 struct Cyc_List_List*Cyc_Formatstr_get_format_types(struct Cyc_Tcenv_Tenv*te,struct _fat_ptr s,int isCproto,unsigned loc){
 # 172
@@ -764,9 +764,9 @@ switch((int)c){case 100:
  goto _LL33;case 110: _LL33:
  goto _LL35;case 37: _LL35:
  goto _LLF;default:
- return 0;}_LLF:;
+ return 0;}_LLF:;{
 # 434
-return({struct Cyc_Core_Opt*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_Core_Opt));({struct _tuple12*_Tmp1=({struct _tuple12*_Tmp2=_region_malloc(r,0U,sizeof(struct _tuple12));_Tmp2->f0=suppress,_Tmp2->f1=width,_Tmp2->f2=lenmod,_Tmp2->f3=c,_Tmp2->f4=i + 1;_Tmp2;});_Tmp0->v=_Tmp1;});_Tmp0;});}}}}
+struct Cyc_Core_Opt*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_Core_Opt));({struct _tuple12*_Tmp1=({struct _tuple12*_Tmp2=_region_malloc(r,0U,sizeof(struct _tuple12));_Tmp2->f0=suppress,_Tmp2->f1=width,_Tmp2->f2=lenmod,_Tmp2->f3=c,_Tmp2->f4=i + 1;_Tmp2;});_Tmp0->v=_Tmp1;});return _Tmp0;}}}}}
 # 436
 struct Cyc_List_List*Cyc_Formatstr_get_scanf_types(struct Cyc_Tcenv_Tenv*te,struct _fat_ptr s,int isCproto,unsigned loc){
 # 439

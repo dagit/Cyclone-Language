@@ -1003,7 +1003,7 @@ if(is_extensible){
 # 578
 int res=1;
 struct Cyc_List_List*fs=Cyc_Tcdecl_sort_xdatatype_fields(fields,& res,(*name).f1,loc,Cyc_Tc_tc_msg);
-return res?fs: 0;}{
+if(res)return fs;else{return 0;}}{
 # 582
 struct _RegionHandle _Tmp0=_new_region(0U,"uprev_rgn");struct _RegionHandle*uprev_rgn=& _Tmp0;_push_region(uprev_rgn);
 # 584

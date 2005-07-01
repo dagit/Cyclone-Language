@@ -625,7 +625,7 @@ for(1;dirs!=0;dirs=dirs->tl){
 struct _fat_ptr dir=*((struct _fat_ptr*)dirs->hd);
 if((char*)dir.curr==(char*)_tag_fat(0,0,0).curr || Cyc_strlen(dir)==0U)continue;{
 struct _fat_ptr s=Cyc_Filename_concat(dir,file);
-if(Cyc_Specsfile_file_exists(s))return({struct _fat_ptr*_Tmp0=_cycalloc(sizeof(struct _fat_ptr));*_Tmp0=s;_Tmp0;});}}
+if(Cyc_Specsfile_file_exists(s)){struct _fat_ptr*_Tmp0=_cycalloc(sizeof(struct _fat_ptr));*_Tmp0=s;return _Tmp0;}}}
 # 318
 return 0;}
 # 322

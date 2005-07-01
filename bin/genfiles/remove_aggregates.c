@@ -414,7 +414,7 @@ enum Cyc_RemoveAggrs_ExpContext{Cyc_RemoveAggrs_Initializer =0U,Cyc_RemoveAggrs_
 # 74
 static struct Cyc_RemoveAggrs_Env Cyc_RemoveAggrs_other_env={Cyc_RemoveAggrs_Other,0};
 static struct Cyc_RemoveAggrs_Env Cyc_RemoveAggrs_no_init(struct Cyc_RemoveAggrs_Env env){
-return(int)env.ctxt==0?Cyc_RemoveAggrs_other_env: env;}
+if((int)env.ctxt==0)return Cyc_RemoveAggrs_other_env;else{return env;}}
 # 79
 enum Cyc_RemoveAggrs_ExpResult{Cyc_RemoveAggrs_WasArray =0U,Cyc_RemoveAggrs_UsedInitializer =1U,Cyc_RemoveAggrs_OtherRes =2U};struct Cyc_RemoveAggrs_Result{enum Cyc_RemoveAggrs_ExpResult res;};
 # 89
@@ -634,8 +634,8 @@ Cyc_RemoveAggrs_remove_aggrs_stmt(s);goto _LL0;}default: _LL3F:
 if((int)env.ctxt==2 && !did_assign)
 ({void*_Tmp0=({struct Cyc_Absyn_Exp*_Tmp1=_check_null(env.dest);Cyc_Absyn_assign_exp(_Tmp1,Cyc_Absyn_copy_exp(e),0U);})->r;e->r=_Tmp0;});
 if((int)env.ctxt==1 && !did_assign)
-({void*_Tmp0=({struct Cyc_Absyn_Exp*_Tmp1=Cyc_Absyn_deref_exp(_check_null(env.dest),0U);Cyc_Absyn_assign_exp(_Tmp1,Cyc_Absyn_copy_exp(e),0U);})->r;e->r=_Tmp0;});
-return({struct Cyc_RemoveAggrs_Result _Tmp0;_Tmp0.res=res;_Tmp0;});}
+({void*_Tmp0=({struct Cyc_Absyn_Exp*_Tmp1=Cyc_Absyn_deref_exp(_check_null(env.dest),0U);Cyc_Absyn_assign_exp(_Tmp1,Cyc_Absyn_copy_exp(e),0U);})->r;e->r=_Tmp0;});{
+struct Cyc_RemoveAggrs_Result _Tmp0;_Tmp0.res=res;return _Tmp0;}}
 # 328
 static int Cyc_RemoveAggrs_remove_aggrs_stmt_f1(int ignore,struct Cyc_Absyn_Exp*e){
 Cyc_RemoveAggrs_remove_aggrs_exp(Cyc_RemoveAggrs_other_env,e);

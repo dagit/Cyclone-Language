@@ -731,9 +731,9 @@ rgions=Cyc_List_imp_append(rs,rgions);
 effects=Cyc_List_imp_append(es,effects);}}
 # 377
 goto _LL0;}}else{goto _LL3;}}else{_LL3:
- effects=({struct Cyc_List_List*_Tmp2=_cycalloc(sizeof(struct Cyc_List_List));_Tmp2->hd=t,_Tmp2->tl=effects;_Tmp2;});goto _LL0;}_LL0:;}
+ effects=({struct Cyc_List_List*_Tmp2=_cycalloc(sizeof(struct Cyc_List_List));_Tmp2->hd=t,_Tmp2->tl=effects;_Tmp2;});goto _LL0;}_LL0:;}{
 # 380
-return({struct _tuple18 _Tmp0;_Tmp0.f0=rgions,_Tmp0.f1=effects;_Tmp0;});}
+struct _tuple18 _Tmp0;_Tmp0.f0=rgions,_Tmp0.f1=effects;return _Tmp0;}}
 # 383
 static void Cyc_Absyndump_dumpeff(void*t){
 struct _tuple18 _Tmp0=Cyc_Absyndump_effects_split(t);void*_Tmp1;void*_Tmp2;_Tmp2=_Tmp0.f0;_Tmp1=_Tmp0.f1;{struct Cyc_List_List*rgions=_Tmp2;struct Cyc_List_List*effects=_Tmp1;
@@ -755,7 +755,7 @@ switch((int)aqv){case Cyc_Absyn_Aliasable_qual:
  goto _LL0;}_LL0:;}
 # 405
 static struct _tuple17*Cyc_Absyndump_aggrfield2arg(struct Cyc_Absyn_Aggrfield*f){
-return({struct _tuple17*_Tmp0=_cycalloc(sizeof(struct _tuple17));_Tmp0->f0=f->tq,_Tmp0->f1=f->type;_Tmp0;});}
+struct _tuple17*_Tmp0=_cycalloc(sizeof(struct _tuple17));_Tmp0->f0=f->tq,_Tmp0->f1=f->type;return _Tmp0;}
 # 410
 static void Cyc_Absyndump_dumpntyp(void*t){
 enum Cyc_Absyn_AggrKind _Tmp0;int _Tmp1;void*_Tmp2;void*_Tmp3;switch(*((int*)t)){case 4:
@@ -1328,7 +1328,7 @@ static void Cyc_Absyndump_dumpdp(struct _tuple21*dp){
 Cyc_Absyndump_egroup(Cyc_Absyndump_dumpdesignator,(*dp).f0,_tag_fat("",sizeof(char),1U),_tag_fat("=",sizeof(char),2U),_tag_fat("=",sizeof(char),2U));
 Cyc_Absyndump_dumppat((*dp).f1);}
 # 1044
-static struct _fat_ptr Cyc_Absyndump_pat_term(int dots){return dots?_tag_fat("...)",sizeof(char),5U): _tag_fat(")",sizeof(char),2U);}
+static struct _fat_ptr Cyc_Absyndump_pat_term(int dots){if(dots)return _tag_fat("...)",sizeof(char),5U);else{return _tag_fat(")",sizeof(char),2U);}}
 # 1046
 static void Cyc_Absyndump_dumppat(struct Cyc_Absyn_Pat*p){
 void*_Tmp0=p->r;int _Tmp1;void*_Tmp2;void*_Tmp3;char _Tmp4;void*_Tmp5;struct _fat_ptr _Tmp6;int _Tmp7;switch(*((int*)_Tmp0)){case 0:

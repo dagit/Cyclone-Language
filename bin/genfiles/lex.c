@@ -430,12 +430,12 @@ void*Cyc_Warn_impos2(struct _fat_ptr);
 # 129 "flags.h"
 extern int Cyc_Flags_compile_for_boot;struct Cyc_Lex_Trie;struct _union_TrieChildren_Zero{int tag;int val;};struct _tuple27{int f0;struct Cyc_Lex_Trie*f1;};struct _union_TrieChildren_One{int tag;struct _tuple27 val;};struct _union_TrieChildren_Many{int tag;struct Cyc_Lex_Trie**val;};union Cyc_Lex_TrieChildren{struct _union_TrieChildren_Zero Zero;struct _union_TrieChildren_One One;struct _union_TrieChildren_Many Many;};
 # 50 "lex.cyl"
-union Cyc_Lex_TrieChildren Cyc_Lex_Zero (void){return({union Cyc_Lex_TrieChildren _Tmp0;_Tmp0.Zero.tag=1U,_Tmp0.Zero.val=0;_Tmp0;});}
+union Cyc_Lex_TrieChildren Cyc_Lex_Zero (void){union Cyc_Lex_TrieChildren _Tmp0;_Tmp0.Zero.tag=1U,_Tmp0.Zero.val=0;return _Tmp0;}
 union Cyc_Lex_TrieChildren Cyc_Lex_One(int i,struct Cyc_Lex_Trie*t){
-return({union Cyc_Lex_TrieChildren _Tmp0;_Tmp0.One.tag=2U,_Tmp0.One.val.f0=i,_Tmp0.One.val.f1=t;_Tmp0;});}
+union Cyc_Lex_TrieChildren _Tmp0;_Tmp0.One.tag=2U,_Tmp0.One.val.f0=i,_Tmp0.One.val.f1=t;return _Tmp0;}
 # 54
 union Cyc_Lex_TrieChildren Cyc_Lex_Many(struct Cyc_Lex_Trie**ts){
-return({union Cyc_Lex_TrieChildren _Tmp0;_Tmp0.Many.tag=3U,_Tmp0.Many.val=ts;_Tmp0;});}struct Cyc_Lex_Trie{union Cyc_Lex_TrieChildren children;int shared_str;};struct Cyc_Lex_DynTrie{struct Cyc_Core_DynamicRegion*dyn;struct Cyc_Lex_Trie*t;};struct Cyc_Lex_DynTrieSymbols{struct Cyc_Core_DynamicRegion*dyn;struct Cyc_Lex_Trie*t;struct Cyc_Xarray_Xarray*symbols;};
+union Cyc_Lex_TrieChildren _Tmp0;_Tmp0.Many.tag=3U,_Tmp0.Many.val=ts;return _Tmp0;}struct Cyc_Lex_Trie{union Cyc_Lex_TrieChildren children;int shared_str;};struct Cyc_Lex_DynTrie{struct Cyc_Core_DynamicRegion*dyn;struct Cyc_Lex_Trie*t;};struct Cyc_Lex_DynTrieSymbols{struct Cyc_Core_DynamicRegion*dyn;struct Cyc_Lex_Trie*t;struct Cyc_Xarray_Xarray*symbols;};
 # 76
 static int Cyc_Lex_num_kws=0;struct Cyc_Lex_KeyWordInfo{int token_index;int is_c_keyword;};
 # 78
@@ -539,7 +539,7 @@ lexbuf->lex_curr_pos=lexbuf->lex_start_pos + 1;
 return 64;}
 # 287
 static struct Cyc_Lex_Trie*Cyc_Lex_empty_trie(struct _RegionHandle*d,int dummy){
-return({struct Cyc_Lex_Trie*_Tmp0=_region_malloc(d,0U,sizeof(struct Cyc_Lex_Trie));({union Cyc_Lex_TrieChildren _Tmp1=Cyc_Lex_Zero();_Tmp0->children=_Tmp1;}),_Tmp0->shared_str=0;_Tmp0;});}
+struct Cyc_Lex_Trie*_Tmp0=_region_malloc(d,0U,sizeof(struct Cyc_Lex_Trie));({union Cyc_Lex_TrieChildren _Tmp1=Cyc_Lex_Zero();_Tmp0->children=_Tmp1;}),_Tmp0->shared_str=0;return _Tmp0;}
 # 295
 static int Cyc_Lex_trie_char(int c){
 # 297
@@ -731,7 +731,7 @@ return str;}struct Cyc_Lex_Ldecls{struct Cyc_Set_Set*typedefs;};
 static struct Cyc_Core_Opt*Cyc_Lex_lstate=0;
 # 522
 static struct Cyc_Lex_Ldecls*Cyc_Lex_mk_empty_ldecls(int ignore){
-return({struct Cyc_Lex_Ldecls*_Tmp0=_cycalloc(sizeof(struct Cyc_Lex_Ldecls));({struct Cyc_Set_Set*_Tmp1=({struct Cyc_Set_Set*(*_Tmp2)(int(*)(struct _fat_ptr*,struct _fat_ptr*))=(struct Cyc_Set_Set*(*)(int(*)(struct _fat_ptr*,struct _fat_ptr*)))Cyc_Set_empty;_Tmp2;})(Cyc_zstrptrcmp);_Tmp0->typedefs=_Tmp1;});_Tmp0;});}
+struct Cyc_Lex_Ldecls*_Tmp0=_cycalloc(sizeof(struct Cyc_Lex_Ldecls));({struct Cyc_Set_Set*_Tmp1=({struct Cyc_Set_Set*(*_Tmp2)(int(*)(struct _fat_ptr*,struct _fat_ptr*))=(struct Cyc_Set_Set*(*)(int(*)(struct _fat_ptr*,struct _fat_ptr*)))Cyc_Set_empty;_Tmp2;})(Cyc_zstrptrcmp);_Tmp0->typedefs=_Tmp1;});return _Tmp0;}
 # 526
 static void Cyc_Lex_typedef_init (void){
 Cyc_Lex_lstate=({struct Cyc_Core_Opt*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Opt));({struct Cyc_Binding_NSCtxt*_Tmp1=({struct Cyc_Binding_NSCtxt*(*_Tmp2)(int,struct Cyc_Lex_Ldecls*(*)(int))=(struct Cyc_Binding_NSCtxt*(*)(int,struct Cyc_Lex_Ldecls*(*)(int)))Cyc_Binding_mt_nsctxt;_Tmp2;})(1,Cyc_Lex_mk_empty_ldecls);_Tmp0->v=_Tmp1;});_Tmp0;});}
@@ -831,7 +831,7 @@ return res;}}{
 # 641
 struct _fat_ptr*s=Cyc_Lex_get_symbol(symbol_num);
 Cyc_Lex_token_string=*s;
-return Cyc_Lex_is_typedef(0,s)?392: 384;}}
+if(Cyc_Lex_is_typedef(0,s))return 392;else{return 384;}}}
 # 646
 static short Cyc_Lex_process_qual_id(struct Cyc_Lexing_lexbuf*lbuf){
 if(Cyc_Lex_in_extern_c)
@@ -869,7 +869,7 @@ vs=vs->tl;
 Cyc_Lex_token_qvar=({struct _tuple0*_Tmp0=_cycalloc(sizeof(struct _tuple0));({union Cyc_Absyn_Nmspace _Tmp1=Cyc_Absyn_Abs_n(vs,1);_Tmp0->f0=_Tmp1;}),_Tmp0->f1=v;_Tmp0;});}else{
 # 680
 Cyc_Lex_token_qvar=({struct _tuple0*_Tmp0=_cycalloc(sizeof(struct _tuple0));({union Cyc_Absyn_Nmspace _Tmp1=Cyc_Absyn_Rel_n(vs);_Tmp0->f0=_Tmp1;}),_Tmp0->f1=v;_Tmp0;});}}
-return Cyc_Lex_is_typedef(vs,v)?394: 393;}}}struct Cyc_Lex_PosInfo{struct Cyc_Lex_PosInfo*next;unsigned starting_line;struct _fat_ptr filename;struct _fat_ptr linenumpos;unsigned linenumpos_offset;};
+if(Cyc_Lex_is_typedef(vs,v))return 394;else{return 393;}}}}struct Cyc_Lex_PosInfo{struct Cyc_Lex_PosInfo*next;unsigned starting_line;struct _fat_ptr filename;struct _fat_ptr linenumpos;unsigned linenumpos_offset;};
 # 697
 static struct Cyc_Lex_PosInfo*Cyc_Lex_pos_info=0;
 # 699
@@ -878,8 +878,8 @@ static int Cyc_Lex_linenumber=1;
 static struct Cyc_Lex_PosInfo*Cyc_Lex_rnew_filepos(struct _RegionHandle*r,struct _fat_ptr filename,unsigned starting_line,struct Cyc_Lex_PosInfo*next){
 # 706
 struct _fat_ptr linenumpos=({unsigned _Tmp0=10U;_tag_fat(_region_calloc(Cyc_Core_heap_region,Cyc_Core_unique_qual,sizeof(unsigned),_Tmp0),sizeof(unsigned),_Tmp0);});
-((unsigned*)linenumpos.curr)[0]=(unsigned)Cyc_yylloc.first_line;
-return({struct Cyc_Lex_PosInfo*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_Lex_PosInfo));_Tmp0->next=next,_Tmp0->starting_line=starting_line,_Tmp0->filename=filename,_Tmp0->linenumpos=linenumpos,_Tmp0->linenumpos_offset=1U;_Tmp0;});}
+((unsigned*)linenumpos.curr)[0]=(unsigned)Cyc_yylloc.first_line;{
+struct Cyc_Lex_PosInfo*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_Lex_PosInfo));_Tmp0->next=next,_Tmp0->starting_line=starting_line,_Tmp0->filename=(struct _fat_ptr)filename,_Tmp0->linenumpos=linenumpos,_Tmp0->linenumpos_offset=1U;return _Tmp0;}}
 # 715
 static void Cyc_Lex_inc_linenumber (void){
 if(Cyc_Lex_pos_info==0)
@@ -950,11 +950,11 @@ size=size - (unsigned)half;}else{
 # 789
 size=(unsigned)half;}}
 # 783
-1U;}
+1U;}{
 # 792
-return({struct _tuple33 _Tmp0;_Tmp0.f0=p->filename,_Tmp0.f1=p->starting_line + base;_Tmp0;});}}}
+struct _tuple33 _Tmp0;_Tmp0.f0=p->filename,_Tmp0.f1=p->starting_line + base;return _Tmp0;}}}}{
 # 794
-return({struct _tuple33 _Tmp0;_Tmp0.f0=_tag_fat(0,0,0),_Tmp0.f1=0U;_Tmp0;});}
+struct _tuple33 _Tmp0;_Tmp0.f0=_tag_fat(0,0,0),_Tmp0.f1=0U;return _Tmp0;}}
 # 798
 int Cyc_Lex_token(struct Cyc_Lexing_lexbuf*);
 int Cyc_Lex_scan_charconst(struct Cyc_Lexing_lexbuf*);

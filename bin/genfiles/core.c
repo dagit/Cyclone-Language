@@ -349,16 +349,16 @@ struct _fat_ptr Cyc_Core_autorelease_handle(struct _RegionHandle*,struct _fat_pt
 struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val={Cyc_Core_Not_found};char Cyc_Core_Unreachable[12U]="Unreachable";
 # 34
 struct Cyc_Core_Opt*Cyc_Core_opt_map(void*(*f)(void*),struct Cyc_Core_Opt*o){
-return o==0?0:({struct Cyc_Core_Opt*_Tmp0=_aqual_malloc(Cyc_Core_unique_qual,sizeof(struct Cyc_Core_Opt));({void*_Tmp1=f(o->v);_Tmp0->v=_Tmp1;});_Tmp0;});}
+if(o==0)return 0;else{struct Cyc_Core_Opt*_Tmp0=_aqual_malloc(Cyc_Core_unique_qual,sizeof(struct Cyc_Core_Opt));({void*_Tmp1=f(o->v);_Tmp0->v=_Tmp1;});return _Tmp0;}}
 # 38
 struct _fat_ptr Cyc_Core_new_string(unsigned i){
-return({unsigned _Tmp0=i;_tag_fat(_cyccalloc_atomic(sizeof(char),_Tmp0),sizeof(char),_Tmp0);});}
+unsigned _Tmp0=i;return _tag_fat(_cyccalloc_atomic(sizeof(char),_Tmp0),sizeof(char),_Tmp0);}
 # 42
 struct _fat_ptr Cyc_Core_rnew_string(struct _RegionHandle*r,unsigned i){
-return({unsigned _Tmp0=i;_tag_fat(_region_calloc(r,0U,sizeof(char),_Tmp0),sizeof(char),_Tmp0);});}
+unsigned _Tmp0=i;return _tag_fat(_region_calloc(r,0U,sizeof(char),_Tmp0),sizeof(char),_Tmp0);}
 # 45
 struct _fat_ptr Cyc_Core_rqnew_string(struct _RegionHandle*r,unsigned q,unsigned i){
-return({unsigned _Tmp0=i;_tag_fat(_region_calloc(r,q,sizeof(char),_Tmp0),sizeof(char),_Tmp0);});}
+unsigned _Tmp0=i;return _tag_fat(_region_calloc(r,q,sizeof(char),_Tmp0),sizeof(char),_Tmp0);}
 # 49
 int Cyc_Core_true_f(void*x){return 1;}
 int Cyc_Core_false_f(void*x){return 0;}
@@ -380,7 +380,7 @@ void*Cyc_Core_third(struct _tuple1*triple){return(*triple).f2;}
 void*Cyc_Core_identity(void*x){return x;}
 # 69
 struct _fat_ptr Cyc_Core_autorelease(struct _fat_ptr ptr){
-return({struct _RegionHandle*_Tmp0=Cyc_Core_current_handle();Cyc_Core_autorelease_handle(_Tmp0,ptr);});}
+struct _RegionHandle*_Tmp0=Cyc_Core_current_handle();return Cyc_Core_autorelease_handle(_Tmp0,ptr);}
 # 76
 struct _fat_ptr Cyc_Core_mkfat(void*arr,unsigned s,unsigned n){
 # 78
@@ -409,5 +409,5 @@ return res;}
 unsigned Cyc_Core_arr_prevsize(struct _fat_ptr arr,unsigned elt_sz){
 unsigned char*_get_arr_size_curr=arr.curr;
 unsigned char*_get_arr_size_base=arr.base;
-return
-(_get_arr_size_curr < _get_arr_size_base || _get_arr_size_curr >= arr.last_plus_one)?0:(_get_arr_size_curr - _get_arr_size_base)/ elt_sz;}
+if(
+_get_arr_size_curr < _get_arr_size_base || _get_arr_size_curr >= arr.last_plus_one)return 0;else{return(_get_arr_size_curr - _get_arr_size_base)/ elt_sz;}}

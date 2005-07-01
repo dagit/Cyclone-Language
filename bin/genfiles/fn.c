@@ -343,7 +343,7 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 extern struct Cyc_List_List*Cyc_List_imp_rev(struct Cyc_List_List*);struct Cyc_Fn_Function{void*(*f)(void*,void*);void*env;};
 # 33 "fn.cyc"
 struct Cyc_Fn_Function*Cyc_Fn_make_fn(void*(*f)(void*,void*),void*x){
-return({struct Cyc_Fn_Function*_Tmp0=_cycalloc(sizeof(struct Cyc_Fn_Function));_Tmp0->f=f,_Tmp0->env=x;_Tmp0;});}
+struct Cyc_Fn_Function*_Tmp0=_cycalloc(sizeof(struct Cyc_Fn_Function));_Tmp0->f=f,_Tmp0->env=x;return _Tmp0;}
 # 38
 static void*Cyc_Fn_fp_apply(void*(*f)(void*),void*x){
 return f(x);}
@@ -357,22 +357,22 @@ return code(env,x);}}struct _tuple0{struct Cyc_Fn_Function*f0;struct Cyc_Fn_Func
 # 53
 static void*Cyc_Fn_fn_compose(struct _tuple0*f_and_g,void*arg){
 void*_Tmp0;void*_Tmp1;_Tmp1=f_and_g->f0;_Tmp0=f_and_g->f1;{struct Cyc_Fn_Function*f=_Tmp1;struct Cyc_Fn_Function*g=_Tmp0;
-return({struct Cyc_Fn_Function*_Tmp2=f;Cyc_Fn_apply(_Tmp2,Cyc_Fn_apply(g,arg));});}}
+struct Cyc_Fn_Function*_Tmp2=f;return Cyc_Fn_apply(_Tmp2,Cyc_Fn_apply(g,arg));}}
 # 59
 struct Cyc_Fn_Function*Cyc_Fn_compose(struct Cyc_Fn_Function*g,struct Cyc_Fn_Function*f){
-return({struct Cyc_Fn_Function*(*_Tmp0)(void*(*)(struct _tuple0*,void*),struct _tuple0*)=({struct Cyc_Fn_Function*(*_Tmp1)(void*(*)(struct _tuple0*,void*),struct _tuple0*)=(struct Cyc_Fn_Function*(*)(void*(*)(struct _tuple0*,void*),struct _tuple0*))Cyc_Fn_make_fn;_Tmp1;});_Tmp0(Cyc_Fn_fn_compose,({struct _tuple0*_Tmp1=_cycalloc(sizeof(struct _tuple0));_Tmp1->f0=f,_Tmp1->f1=g;_Tmp1;}));});}struct _tuple1{struct Cyc_Fn_Function*f0;void*f1;};struct _tuple2{void*f0;void*f1;};
+struct Cyc_Fn_Function*(*_Tmp0)(void*(*)(struct _tuple0*,void*),struct _tuple0*)=({struct Cyc_Fn_Function*(*_Tmp1)(void*(*)(struct _tuple0*,void*),struct _tuple0*)=(struct Cyc_Fn_Function*(*)(void*(*)(struct _tuple0*,void*),struct _tuple0*))Cyc_Fn_make_fn;_Tmp1;});return _Tmp0(Cyc_Fn_fn_compose,({struct _tuple0*_Tmp1=_cycalloc(sizeof(struct _tuple0));_Tmp1->f0=f,_Tmp1->f1=g;_Tmp1;}));}struct _tuple1{struct Cyc_Fn_Function*f0;void*f1;};struct _tuple2{void*f0;void*f1;};
 # 64
 static void*Cyc_Fn_inner(struct _tuple1*env,void*second){
-return({void*(*_Tmp0)(struct Cyc_Fn_Function*,struct _tuple2*)=({void*(*_Tmp1)(struct Cyc_Fn_Function*,struct _tuple2*)=(void*(*)(struct Cyc_Fn_Function*,struct _tuple2*))Cyc_Fn_apply;_Tmp1;});struct Cyc_Fn_Function*_Tmp1=(*env).f0;_Tmp0(_Tmp1,({struct _tuple2*_Tmp2=_cycalloc(sizeof(struct _tuple2));_Tmp2->f0=(*env).f1,_Tmp2->f1=second;_Tmp2;}));});}
+void*(*_Tmp0)(struct Cyc_Fn_Function*,struct _tuple2*)=({void*(*_Tmp1)(struct Cyc_Fn_Function*,struct _tuple2*)=(void*(*)(struct Cyc_Fn_Function*,struct _tuple2*))Cyc_Fn_apply;_Tmp1;});struct Cyc_Fn_Function*_Tmp1=(*env).f0;return _Tmp0(_Tmp1,({struct _tuple2*_Tmp2=_cycalloc(sizeof(struct _tuple2));_Tmp2->f0=(*env).f1,_Tmp2->f1=second;_Tmp2;}));}
 # 69
 static struct Cyc_Fn_Function*Cyc_Fn_outer(struct Cyc_Fn_Function*f,void*first){
-return({struct Cyc_Fn_Function*(*_Tmp0)(void*(*)(struct _tuple1*,void*),struct _tuple1*)=({struct Cyc_Fn_Function*(*_Tmp1)(void*(*)(struct _tuple1*,void*),struct _tuple1*)=(struct Cyc_Fn_Function*(*)(void*(*)(struct _tuple1*,void*),struct _tuple1*))Cyc_Fn_make_fn;_Tmp1;});_Tmp0(Cyc_Fn_inner,({struct _tuple1*_Tmp1=_cycalloc(sizeof(struct _tuple1));_Tmp1->f0=f,_Tmp1->f1=first;_Tmp1;}));});}
+struct Cyc_Fn_Function*(*_Tmp0)(void*(*)(struct _tuple1*,void*),struct _tuple1*)=({struct Cyc_Fn_Function*(*_Tmp1)(void*(*)(struct _tuple1*,void*),struct _tuple1*)=(struct Cyc_Fn_Function*(*)(void*(*)(struct _tuple1*,void*),struct _tuple1*))Cyc_Fn_make_fn;_Tmp1;});return _Tmp0(Cyc_Fn_inner,({struct _tuple1*_Tmp1=_cycalloc(sizeof(struct _tuple1));_Tmp1->f0=f,_Tmp1->f1=first;_Tmp1;}));}
 # 74
 struct Cyc_Fn_Function*Cyc_Fn_curry(struct Cyc_Fn_Function*f){
 return({struct Cyc_Fn_Function*(*_Tmp0)(struct Cyc_Fn_Function*(*)(struct Cyc_Fn_Function*,void*),struct Cyc_Fn_Function*)=(struct Cyc_Fn_Function*(*)(struct Cyc_Fn_Function*(*)(struct Cyc_Fn_Function*,void*),struct Cyc_Fn_Function*))Cyc_Fn_make_fn;_Tmp0;})(Cyc_Fn_outer,f);}
 # 79
 static void*Cyc_Fn_lambda(struct Cyc_Fn_Function*f,struct _tuple2*arg){
-return({struct Cyc_Fn_Function*_Tmp0=({struct Cyc_Fn_Function*(*_Tmp1)(struct Cyc_Fn_Function*,void*)=(struct Cyc_Fn_Function*(*)(struct Cyc_Fn_Function*,void*))Cyc_Fn_apply;_Tmp1;})(f,(*arg).f0);Cyc_Fn_apply(_Tmp0,(*arg).f1);});}
+struct Cyc_Fn_Function*_Tmp0=({struct Cyc_Fn_Function*(*_Tmp1)(struct Cyc_Fn_Function*,void*)=(struct Cyc_Fn_Function*(*)(struct Cyc_Fn_Function*,void*))Cyc_Fn_apply;_Tmp1;})(f,(*arg).f0);return Cyc_Fn_apply(_Tmp0,(*arg).f1);}
 # 84
 struct Cyc_Fn_Function*Cyc_Fn_uncurry(struct Cyc_Fn_Function*f){
 return({struct Cyc_Fn_Function*(*_Tmp0)(void*(*)(struct Cyc_Fn_Function*,struct _tuple2*),struct Cyc_Fn_Function*)=(struct Cyc_Fn_Function*(*)(void*(*)(struct Cyc_Fn_Function*,struct _tuple2*),struct Cyc_Fn_Function*))Cyc_Fn_make_fn;_Tmp0;})(Cyc_Fn_lambda,f);}

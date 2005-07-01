@@ -426,8 +426,8 @@ void*_Tmp3=Cyc_Absyn_compress(t2);void*_Tmp4;if(*((int*)_Tmp3)==3){_Tmp4=((struc
 void*_Tmp5=Cyc_Absyn_compress(t1);void*_Tmp6;if(*((int*)_Tmp5)==5){_Tmp6=(struct Cyc_List_List**)&((struct Cyc_Absyn_FnType_Absyn_Type_struct*)_Tmp5)->f1.tvars;{struct Cyc_List_List**tvars=(struct Cyc_List_List**)_Tmp6;
 # 83
 struct Cyc_List_List*tvars2=*tvars;
-({struct Cyc_List_List*_Tmp7=({struct Cyc_List_List*_Tmp8=_cycalloc(sizeof(struct Cyc_List_List));_Tmp8->hd=_check_null(Cyc_CurRgn_curr_tvar),_Tmp8->tl=tvars2;_Tmp8;});*tvars=_Tmp7;});
-return({struct _tuple8*_Tmp7=_cycalloc(sizeof(struct _tuple8));_Tmp7->f0=vopt,_Tmp7->f1=tq,_Tmp7->f2=t2;_Tmp7;});}}else{
+({struct Cyc_List_List*_Tmp7=({struct Cyc_List_List*_Tmp8=_cycalloc(sizeof(struct Cyc_List_List));_Tmp8->hd=_check_null(Cyc_CurRgn_curr_tvar),_Tmp8->tl=tvars2;_Tmp8;});*tvars=_Tmp7;});{
+struct _tuple8*_Tmp7=_cycalloc(sizeof(struct _tuple8));_Tmp7->f0=vopt,_Tmp7->f1=tq,_Tmp7->f2=t2;return _Tmp7;}}}else{
 ({int(*_Tmp7)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp7;})(_tag_fat("internal compiler error: not a function type",sizeof(char),45U),_tag_fat(0U,sizeof(void*),0));};}}else{
 # 88
 ({int(*_Tmp5)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp5;})(_tag_fat("internal compiler error: not a pointer type",sizeof(char),44U),_tag_fat(0U,sizeof(void*),0));};}}}

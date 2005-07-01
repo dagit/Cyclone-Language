@@ -350,7 +350,7 @@ extern int Cyc_printf(struct _fat_ptr,struct _fat_ptr);struct Cyc_Hashtable_Cell
 # 51 "hashtable.cyc"
 struct Cyc_Hashtable_Table*Cyc_Hashtable_rcreate(struct _RegionHandle*r,int sz,int(*cmp)(void*,void*),int(*hash)(void*)){
 # 53
-return({struct Cyc_Hashtable_Table*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_Hashtable_Table));_Tmp0->r=r,_Tmp0->cmp=cmp,_Tmp0->hash=hash,_Tmp0->max_len=3,_Tmp0->tab=({unsigned _Tmp1=sz;_tag_fat(_region_calloc(r,0U,sizeof(struct Cyc_Hashtable_Bucket),_Tmp1),sizeof(struct Cyc_Hashtable_Bucket),_Tmp1);});_Tmp0;});}
+struct Cyc_Hashtable_Table*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_Hashtable_Table));_Tmp0->r=r,_Tmp0->cmp=cmp,_Tmp0->hash=hash,_Tmp0->max_len=3,_Tmp0->tab=({unsigned _Tmp1=sz;_tag_fat(_region_calloc(r,0U,sizeof(struct Cyc_Hashtable_Bucket),_Tmp1),sizeof(struct Cyc_Hashtable_Bucket),_Tmp1);});return _Tmp0;}
 # 56
 struct Cyc_Hashtable_Table*Cyc_Hashtable_create(int sz,int(*cmp)(void*,void*),int(*hash)(void*)){
 return Cyc_Hashtable_rcreate(Cyc_Core_heap_region,sz,cmp,hash);}

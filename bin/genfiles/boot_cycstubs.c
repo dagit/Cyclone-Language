@@ -377,7 +377,7 @@ extern struct __abstractFILE*fopen(const char*,const char*);
 struct Cyc___cycFILE*Cyc_fopen(const char*name,const char*type){
 struct __abstractFILE*cf=fopen(name,type);
 # 84
-return(unsigned)cf?({struct Cyc___cycFILE*_Tmp0=_cycalloc(sizeof(struct Cyc___cycFILE));_Tmp0->file=cf;_Tmp0;}): 0;}
+if((unsigned)cf){struct Cyc___cycFILE*_Tmp0=_cycalloc(sizeof(struct Cyc___cycFILE));_Tmp0->file=cf;return _Tmp0;}else{return 0;}}
 # 88
 extern int fputc(int,struct __abstractFILE*);
 # 90
@@ -453,7 +453,7 @@ static struct Cyc_Core_Failure_exn_struct Cyc___getcwd_failure={Cyc_Core_Failure
 struct _fat_ptr Cyc_getcwd(struct _fat_ptr buf,unsigned long size){
 if(_get_fat_size(buf,sizeof(char))< size)_throw(& Cyc___getcwd_failure);{
 char*response=getcwd((char*)_untag_fat_ptr(buf,sizeof(char),1U),size);
-return(unsigned)response?buf: _tag_fat(0,0,0);}}
+if((unsigned)response)return buf;else{return _tag_fat(0,0,0);}}}
 # 194
 int Cyc_Execinfo_bt (void){
 return 1;}

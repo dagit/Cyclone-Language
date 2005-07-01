@@ -22,8 +22,11 @@
 // It runs on C code, not Cyclone code.
 
 #include "remove_casts.h"
+#include "warn.h"
 using Absyn;
 namespace RemoveCasts;
+
+static bool remove_visit_f1(bool ignore, exp_t e);
 
 static bool remove_visit_f2(bool ignore, stmt_t s) {
   switch(s->r) {
@@ -33,6 +36,26 @@ static bool remove_visit_f2(bool ignore, stmt_t s) {
     default: break;
     }
     return true;
+  case &Return_s(&Exp{.r = &StmtExp_e(s1),...}):
+    // we want to turn "return ({s;e});"  into  "s; return e;"
+    s->r = s1->r;
+    while (true) {
+      switch (s1->r) {
+      case &Exp_s(e):
+        s1->r = new Return_s(e); break;
+      case &Seq_s(_,s2): s1 = s2; continue;
+      case &Decl_s(_,s2): s1 = s2; continue;
+      case &Label_s(_,s2): s1 = s2; continue;
+      default: Warn::impos_loc(s1->loc, "pushing return: no expression statement!");
+      }
+      break;
+    }
+    visit_stmt(remove_visit_f1,remove_visit_f2,true,s1);
+    return false;
+  case &Return_s(&Exp{.r = &Conditional_e(e1,e2,e3),...}):
+    s->r = new IfThenElse_s(e1,return_stmt(e2,0),return_stmt(e3,0));
+    visit_stmt(remove_visit_f1,remove_visit_f2,true,s);
+    return false;
   default: return true;
   }
 }

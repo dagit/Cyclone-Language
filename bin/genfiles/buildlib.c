@@ -594,7 +594,7 @@ static struct Cyc_List_List*Cyc_cppargs=0;static char _TmpG2[14U]="BUILDLIB_sym_
 struct _fat_ptr Cyc_user_prefix={_TmpG2,_TmpG2,_TmpG2 + 14U};
 static struct _fat_ptr*Cyc_add_user_prefix(struct _fat_ptr*symbol){
 struct _fat_ptr s=Cyc_strconcat(Cyc_user_prefix,*symbol);
-return({struct _fat_ptr*_Tmp0=_cycalloc(sizeof(struct _fat_ptr));*_Tmp0=s;_Tmp0;});}
+struct _fat_ptr*_Tmp0=_cycalloc(sizeof(struct _fat_ptr));*_Tmp0=s;return _Tmp0;}
 # 177
 static struct _fat_ptr Cyc_remove_user_prefix(struct _fat_ptr symbol){
 unsigned prefix_len=Cyc_strlen(Cyc_user_prefix);
@@ -672,9 +672,9 @@ switch((int)lexstate){case 0:
 # 211 "buildlib.cyl"
  Cyc_macroname(lexbuf);
 for(1;Cyc_current_args!=0;Cyc_current_args=_check_null(Cyc_current_args)->tl){
-Cyc_current_targets=({struct Cyc_Set_Set**_Tmp0=_cycalloc(sizeof(struct Cyc_Set_Set*));({struct Cyc_Set_Set*_Tmp1=({struct Cyc_Set_Set*(*_Tmp2)(struct Cyc_Set_Set*,struct _fat_ptr*)=(struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_delete;_Tmp2;})(*_check_null(Cyc_current_targets),(struct _fat_ptr*)Cyc_current_args->hd);*_Tmp0=_Tmp1;});_Tmp0;});}
+Cyc_current_targets=({struct Cyc_Set_Set**_Tmp0=_cycalloc(sizeof(struct Cyc_Set_Set*));({struct Cyc_Set_Set*_Tmp1=({struct Cyc_Set_Set*(*_Tmp2)(struct Cyc_Set_Set*,struct _fat_ptr*)=(struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_delete;_Tmp2;})(*_check_null(Cyc_current_targets),(struct _fat_ptr*)Cyc_current_args->hd);*_Tmp0=_Tmp1;});_Tmp0;});}{
 # 216
-return({struct _tuple13*_Tmp0=_cycalloc(sizeof(struct _tuple13));_Tmp0->f0=_check_null(Cyc_current_source),_Tmp0->f1=*_check_null(Cyc_current_targets);_Tmp0;});case 1:
+struct _tuple13*_Tmp0=_cycalloc(sizeof(struct _tuple13));_Tmp0->f0=_check_null(Cyc_current_source),_Tmp0->f1=*_check_null(Cyc_current_targets);return _Tmp0;}case 1:
 # 219 "buildlib.cyl"
  return Cyc_line(lexbuf);case 2:
 # 221
@@ -1081,8 +1081,8 @@ lexstate=Cyc_lex_engine(lexstate,lexbuf);
 switch((int)lexstate){case 0:
 # 579 "buildlib.cyl"
  Cyc_current_line=_tag_fat("#define ",sizeof(char),9U);
-Cyc_suck_macroname(lexbuf);
-return({struct _tuple14*_Tmp0=_cycalloc(sizeof(struct _tuple14));_Tmp0->f0=Cyc_current_line,_Tmp0->f1=_check_null(Cyc_current_source);_Tmp0;});case 1:
+Cyc_suck_macroname(lexbuf);{
+struct _tuple14*_Tmp0=_cycalloc(sizeof(struct _tuple14));_Tmp0->f0=Cyc_current_line,_Tmp0->f1=_check_null(Cyc_current_source);return _Tmp0;}case 1:
 # 583
  return Cyc_suck_line(lexbuf);case 2:
 # 585
@@ -1138,8 +1138,8 @@ while(Cyc_commands(lexbuf)){1U;}
 Cyc_current_hstubs=Cyc_List_imp_rev(Cyc_current_hstubs);
 Cyc_current_cstubs=Cyc_List_imp_rev(Cyc_current_cstubs);
 Cyc_current_cycstubs=Cyc_List_imp_rev(Cyc_current_cycstubs);
-Cyc_current_cpp=Cyc_List_imp_rev(Cyc_current_cpp);
-return({struct _tuple17*_Tmp0=_cycalloc(sizeof(struct _tuple17));_Tmp0->f0=Cyc_current_headerfile,_Tmp0->f1=Cyc_current_symbols,_Tmp0->f2=Cyc_current_user_defs,_Tmp0->f3=Cyc_current_omit_symbols,_Tmp0->f4=Cyc_current_hstubs,_Tmp0->f5=Cyc_current_cstubs,_Tmp0->f6=Cyc_current_cycstubs,_Tmp0->f7=Cyc_current_cpp;_Tmp0;});case 2:
+Cyc_current_cpp=Cyc_List_imp_rev(Cyc_current_cpp);{
+struct _tuple17*_Tmp0=_cycalloc(sizeof(struct _tuple17));_Tmp0->f0=Cyc_current_headerfile,_Tmp0->f1=Cyc_current_symbols,_Tmp0->f2=Cyc_current_user_defs,_Tmp0->f3=Cyc_current_omit_symbols,_Tmp0->f4=Cyc_current_hstubs,_Tmp0->f5=Cyc_current_cstubs,_Tmp0->f6=Cyc_current_cycstubs,_Tmp0->f7=Cyc_current_cpp;return _Tmp0;}case 2:
 # 630
  return Cyc_spec(lexbuf);case 3:
 # 632
@@ -1845,7 +1845,7 @@ if((int)c==39 || Cyc_is_other_special(c))
 return s2;}}
 # 1367
 static struct _fat_ptr*Cyc_sh_escape_stringptr(struct _fat_ptr*sp){
-return({struct _fat_ptr*_Tmp0=_cycalloc(sizeof(struct _fat_ptr));({struct _fat_ptr _Tmp1=Cyc_sh_escape_string(*sp);*_Tmp0=_Tmp1;});_Tmp0;});}
+struct _fat_ptr*_Tmp0=_cycalloc(sizeof(struct _fat_ptr));({struct _fat_ptr _Tmp1=Cyc_sh_escape_string(*sp);*_Tmp0=_Tmp1;});return _Tmp0;}
 # 1372
 int Cyc_process_file(const char*filename,struct Cyc_List_List*start_symbols,struct Cyc_List_List*user_defs,struct Cyc_List_List*omit_symbols,struct Cyc_List_List*hstubs,struct Cyc_List_List*cstubs,struct Cyc_List_List*cycstubs,struct Cyc_List_List*cpp_insert){
 # 1380

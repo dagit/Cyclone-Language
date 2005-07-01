@@ -436,13 +436,13 @@ ans=Cyc_Absyn_uint_exp(0U,0U);
 return _check_null(ans);}struct Cyc_InsertChecks_Env{struct Cyc_JumpAnalysis_Jump_Anal_Result*tables;struct Cyc_Hashtable_Table**assn_info;int in_sizeof: 1;int at_toplevel: 1;int vcgen_r: 1;};
 # 98
 static struct Cyc_InsertChecks_Env Cyc_InsertChecks_toplevel_env(struct Cyc_JumpAnalysis_Jump_Anal_Result*tables,int do_vcgen){
-return({struct Cyc_InsertChecks_Env _Tmp0;_Tmp0.tables=tables,_Tmp0.assn_info=0,_Tmp0.in_sizeof=0,_Tmp0.at_toplevel=1,_Tmp0.vcgen_r=do_vcgen;_Tmp0;});}
+struct Cyc_InsertChecks_Env _Tmp0;_Tmp0.tables=tables,_Tmp0.assn_info=0,_Tmp0.in_sizeof=0,_Tmp0.at_toplevel=1,_Tmp0.vcgen_r=do_vcgen;return _Tmp0;}
 # 102
 static struct Cyc_InsertChecks_Env Cyc_InsertChecks_fn_body_env(struct Cyc_InsertChecks_Env nv){
-return({struct Cyc_InsertChecks_Env _Tmp0;_Tmp0.tables=nv.tables,_Tmp0.assn_info=nv.assn_info,_Tmp0.in_sizeof=0,_Tmp0.at_toplevel=0,_Tmp0.vcgen_r=nv.vcgen_r;_Tmp0;});}
+struct Cyc_InsertChecks_Env _Tmp0;_Tmp0.tables=nv.tables,_Tmp0.assn_info=nv.assn_info,_Tmp0.in_sizeof=0,_Tmp0.at_toplevel=0,_Tmp0.vcgen_r=nv.vcgen_r;return _Tmp0;}
 # 106
 static struct Cyc_InsertChecks_Env Cyc_InsertChecks_enter_sizeof(struct Cyc_InsertChecks_Env nv){
-return({struct Cyc_InsertChecks_Env _Tmp0;_Tmp0.tables=nv.tables,_Tmp0.assn_info=nv.assn_info,_Tmp0.in_sizeof=1,_Tmp0.at_toplevel=nv.at_toplevel,_Tmp0.vcgen_r=nv.vcgen_r;_Tmp0;});}
+struct Cyc_InsertChecks_Env _Tmp0;_Tmp0.tables=nv.tables,_Tmp0.assn_info=nv.assn_info,_Tmp0.in_sizeof=1,_Tmp0.at_toplevel=nv.at_toplevel,_Tmp0.vcgen_r=nv.vcgen_r;return _Tmp0;}
 # 112
 static int Cyc_InsertChecks_need_null_check(struct Cyc_InsertChecks_Env nv,struct Cyc_Absyn_Exp*e){
 if(nv.in_sizeof)

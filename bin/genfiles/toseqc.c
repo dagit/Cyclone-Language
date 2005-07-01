@@ -492,7 +492,7 @@ enum Cyc_Toseqc_SideEffect res=0U;
 while(1){
 {void*_Tmp0=s->r;void*_Tmp1;void*_Tmp2;switch(*((int*)_Tmp0)){case 0:
  return res;case 1: _Tmp2=((struct Cyc_Absyn_Exp_s_Absyn_Raw_stmt_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Exp*e=_Tmp2;
-return({enum Cyc_Toseqc_SideEffect _Tmp3=res;Cyc_Toseqc_join_side_effect(_Tmp3,Cyc_Toseqc_exp_effect(e));});}case 13: _Tmp2=((struct Cyc_Absyn_Label_s_Absyn_Raw_stmt_struct*)_Tmp0)->f2;{struct Cyc_Absyn_Stmt*s2=_Tmp2;
+enum Cyc_Toseqc_SideEffect _Tmp3=res;return Cyc_Toseqc_join_side_effect(_Tmp3,Cyc_Toseqc_exp_effect(e));}case 13: _Tmp2=((struct Cyc_Absyn_Label_s_Absyn_Raw_stmt_struct*)_Tmp0)->f2;{struct Cyc_Absyn_Stmt*s2=_Tmp2;
 # 172
 s=s2;continue;}case 2: _Tmp2=((struct Cyc_Absyn_Seq_s_Absyn_Raw_stmt_struct*)_Tmp0)->f1;_Tmp1=((struct Cyc_Absyn_Seq_s_Absyn_Raw_stmt_struct*)_Tmp0)->f2;{struct Cyc_Absyn_Stmt*s1=_Tmp2;struct Cyc_Absyn_Stmt*s2=_Tmp1;
 # 174

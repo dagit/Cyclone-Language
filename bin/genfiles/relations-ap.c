@@ -436,13 +436,13 @@ extern struct _tuple12 Cyc_Evexp_eval_const_uint_exp(struct Cyc_Absyn_Exp*);
 # 64 "string.h"
 extern struct _fat_ptr Cyc_strconcat_l(struct Cyc_List_List*);
 # 35 "relations-ap.cyc"
-union Cyc_Relations_RelnOp Cyc_Relations_RConst(unsigned i){return({union Cyc_Relations_RelnOp _Tmp0;_Tmp0.RConst.tag=1U,_Tmp0.RConst.val=i;_Tmp0;});}
-union Cyc_Relations_RelnOp Cyc_Relations_RVar(struct Cyc_Absyn_Vardecl*v){return({union Cyc_Relations_RelnOp _Tmp0;_Tmp0.RVar.tag=2U,_Tmp0.RVar.val=v;_Tmp0;});}
-union Cyc_Relations_RelnOp Cyc_Relations_RNumelts(struct Cyc_Absyn_Vardecl*v){return({union Cyc_Relations_RelnOp _Tmp0;_Tmp0.RNumelts.tag=3U,_Tmp0.RNumelts.val=v;_Tmp0;});}
-union Cyc_Relations_RelnOp Cyc_Relations_RType(void*t){return({union Cyc_Relations_RelnOp _Tmp0;_Tmp0.RType.tag=4U,({void*_Tmp1=Cyc_Absyn_compress(t);_Tmp0.RType.val=_Tmp1;});_Tmp0;});}
-union Cyc_Relations_RelnOp Cyc_Relations_RParam(unsigned i){return({union Cyc_Relations_RelnOp _Tmp0;_Tmp0.RParam.tag=5U,_Tmp0.RParam.val=i;_Tmp0;});}
-union Cyc_Relations_RelnOp Cyc_Relations_RParamNumelts(unsigned i){return({union Cyc_Relations_RelnOp _Tmp0;_Tmp0.RParamNumelts.tag=6U,_Tmp0.RParamNumelts.val=i;_Tmp0;});}
-union Cyc_Relations_RelnOp Cyc_Relations_RReturn (void){return({union Cyc_Relations_RelnOp _Tmp0;_Tmp0.RReturn.tag=7U,_Tmp0.RReturn.val=0U;_Tmp0;});}struct _tuple13{union Cyc_Relations_RelnOp f0;union Cyc_Relations_RelnOp f1;};
+union Cyc_Relations_RelnOp Cyc_Relations_RConst(unsigned i){union Cyc_Relations_RelnOp _Tmp0;_Tmp0.RConst.tag=1U,_Tmp0.RConst.val=i;return _Tmp0;}
+union Cyc_Relations_RelnOp Cyc_Relations_RVar(struct Cyc_Absyn_Vardecl*v){union Cyc_Relations_RelnOp _Tmp0;_Tmp0.RVar.tag=2U,_Tmp0.RVar.val=v;return _Tmp0;}
+union Cyc_Relations_RelnOp Cyc_Relations_RNumelts(struct Cyc_Absyn_Vardecl*v){union Cyc_Relations_RelnOp _Tmp0;_Tmp0.RNumelts.tag=3U,_Tmp0.RNumelts.val=v;return _Tmp0;}
+union Cyc_Relations_RelnOp Cyc_Relations_RType(void*t){union Cyc_Relations_RelnOp _Tmp0;_Tmp0.RType.tag=4U,({void*_Tmp1=Cyc_Absyn_compress(t);_Tmp0.RType.val=_Tmp1;});return _Tmp0;}
+union Cyc_Relations_RelnOp Cyc_Relations_RParam(unsigned i){union Cyc_Relations_RelnOp _Tmp0;_Tmp0.RParam.tag=5U,_Tmp0.RParam.val=i;return _Tmp0;}
+union Cyc_Relations_RelnOp Cyc_Relations_RParamNumelts(unsigned i){union Cyc_Relations_RelnOp _Tmp0;_Tmp0.RParamNumelts.tag=6U,_Tmp0.RParamNumelts.val=i;return _Tmp0;}
+union Cyc_Relations_RelnOp Cyc_Relations_RReturn (void){union Cyc_Relations_RelnOp _Tmp0;_Tmp0.RReturn.tag=7U,_Tmp0.RReturn.val=0U;return _Tmp0;}struct _tuple13{union Cyc_Relations_RelnOp f0;union Cyc_Relations_RelnOp f1;};
 # 43
 static int Cyc_Relations_same_relop(union Cyc_Relations_RelnOp r1,union Cyc_Relations_RelnOp r2){
 struct _tuple13 _Tmp0=({struct _tuple13 _Tmp1;_Tmp1.f0=r1,_Tmp1.f1=r2;_Tmp1;});void*_Tmp1;void*_Tmp2;unsigned _Tmp3;unsigned _Tmp4;switch(_Tmp0.f0.RParamNumelts.tag){case 1: if(_Tmp0.f1.RConst.tag==1){_Tmp4=_Tmp0.f0.RConst.val;_Tmp3=_Tmp0.f1.RConst.val;{unsigned c1=_Tmp4;unsigned c2=_Tmp3;
@@ -460,9 +460,9 @@ struct Cyc_List_List*Cyc_Relations_add_relation(struct _RegionHandle*rgn,union C
 {struct Cyc_List_List*rs=relns;for(0;rs!=0;rs=rs->tl){
 struct Cyc_Relations_Reln*r=(struct Cyc_Relations_Reln*)rs->hd;
 if((Cyc_Relations_same_relop(r->rop1,rop1)&&(int)r->relation==(int)relation)&&
- Cyc_Relations_same_relop(r->rop2,rop2))return relns;}}
+ Cyc_Relations_same_relop(r->rop2,rop2))return relns;}}{
 # 65
-return({struct Cyc_List_List*_Tmp0=_region_malloc(rgn,0U,sizeof(struct Cyc_List_List));({struct Cyc_Relations_Reln*_Tmp1=({struct Cyc_Relations_Reln*_Tmp2=_region_malloc(rgn,0U,sizeof(struct Cyc_Relations_Reln));_Tmp2->rop1=rop1,_Tmp2->relation=relation,_Tmp2->rop2=rop2;_Tmp2;});_Tmp0->hd=_Tmp1;}),_Tmp0->tl=relns;_Tmp0;});}
+struct Cyc_List_List*_Tmp0=_region_malloc(rgn,0U,sizeof(struct Cyc_List_List));({struct Cyc_Relations_Reln*_Tmp1=({struct Cyc_Relations_Reln*_Tmp2=_region_malloc(rgn,0U,sizeof(struct Cyc_Relations_Reln));_Tmp2->rop1=rop1,_Tmp2->relation=relation,_Tmp2->rop2=rop2;_Tmp2;});_Tmp0->hd=_Tmp1;}),_Tmp0->tl=relns;return _Tmp0;}}
 # 68
 struct Cyc_List_List*Cyc_Relations_duplicate_relation(struct _RegionHandle*rgn,struct Cyc_Absyn_Exp*e_old,struct Cyc_Absyn_Exp*e_new,struct Cyc_List_List*relns){
 # 71
@@ -543,8 +543,8 @@ return v==v2;}case 4:
 # 154
 union Cyc_Relations_RelnOp Cyc_Relations_subst_rop_var(union Cyc_Relations_RelnOp r,struct Cyc_Absyn_Vardecl*v,union Cyc_Relations_RelnOp new_rop){
 void*_Tmp0;switch(r.RReturn.tag){case 2: _Tmp0=r.RVar.val;{struct Cyc_Absyn_Vardecl*v2=_Tmp0;
-return v==v2?new_rop: r;}case 3: _Tmp0=r.RNumelts.val;{struct Cyc_Absyn_Vardecl*v2=_Tmp0;
-return v==v2?new_rop: r;}case 4:
+if(v==v2)return new_rop;else{return r;}}case 3: _Tmp0=r.RNumelts.val;{struct Cyc_Absyn_Vardecl*v2=_Tmp0;
+if(v==v2)return new_rop;else{return r;}}case 4:
  goto _LL8;case 5: _LL8:
  goto _LLA;case 6: _LLA:
  goto _LLC;case 7: _LLC:
@@ -553,8 +553,8 @@ return v==v2?new_rop: r;}case 4:
 # 166
 struct Cyc_Relations_Reln*Cyc_Relations_substitute_rop_var(struct _RegionHandle*rgn,struct Cyc_Relations_Reln*reln,struct Cyc_Absyn_Vardecl*v,union Cyc_Relations_RelnOp new_rop){
 # 168
-return({struct Cyc_Relations_Reln*_Tmp0=_region_malloc(rgn,0U,sizeof(struct Cyc_Relations_Reln));({union Cyc_Relations_RelnOp _Tmp1=Cyc_Relations_subst_rop_var(reln->rop1,v,new_rop);_Tmp0->rop1=_Tmp1;}),_Tmp0->relation=reln->relation,({
-union Cyc_Relations_RelnOp _Tmp1=Cyc_Relations_subst_rop_var(reln->rop2,v,new_rop);_Tmp0->rop2=_Tmp1;});_Tmp0;});}
+struct Cyc_Relations_Reln*_Tmp0=_region_malloc(rgn,0U,sizeof(struct Cyc_Relations_Reln));({union Cyc_Relations_RelnOp _Tmp1=Cyc_Relations_subst_rop_var(reln->rop1,v,new_rop);_Tmp0->rop1=_Tmp1;}),_Tmp0->relation=reln->relation,({
+union Cyc_Relations_RelnOp _Tmp1=Cyc_Relations_subst_rop_var(reln->rop2,v,new_rop);_Tmp0->rop2=_Tmp1;});return _Tmp0;}
 # 171
 struct Cyc_List_List*Cyc_Relations_reln_kill_var(struct _RegionHandle*rgn,struct Cyc_List_List*rs,struct Cyc_Absyn_Vardecl*v){
 struct Cyc_List_List*p;
@@ -641,7 +641,7 @@ return r;}}}else{
 return r;};}
 # 268
 struct Cyc_Relations_Reln*Cyc_Relations_copy_reln(struct _RegionHandle*r2,struct Cyc_Relations_Reln*r){
-return({struct Cyc_Relations_Reln*_Tmp0=_region_malloc(r2,0U,sizeof(struct Cyc_Relations_Reln));*_Tmp0=*r;_Tmp0;});}
+struct Cyc_Relations_Reln*_Tmp0=_region_malloc(r2,0U,sizeof(struct Cyc_Relations_Reln));*_Tmp0=*r;return _Tmp0;}
 # 272
 struct Cyc_List_List*Cyc_Relations_copy_relns(struct _RegionHandle*r2,struct Cyc_List_List*relns){
 return({struct Cyc_List_List*(*_Tmp0)(struct _RegionHandle*,struct Cyc_Relations_Reln*(*)(struct _RegionHandle*,struct Cyc_Relations_Reln*),struct _RegionHandle*,struct Cyc_List_List*)=(struct Cyc_List_List*(*)(struct _RegionHandle*,struct Cyc_Relations_Reln*(*)(struct _RegionHandle*,struct Cyc_Relations_Reln*),struct _RegionHandle*,struct Cyc_List_List*))Cyc_List_rmap_c;_Tmp0;})(r2,Cyc_Relations_copy_reln,r2,relns);}
@@ -670,8 +670,8 @@ void*_Tmp2=e2->r;void*_Tmp3;switch(*((int*)_Tmp2)){case 14: _Tmp3=((struct Cyc_A
 e2=e3;goto malloc_loop;}case 1: _Tmp3=(void*)((struct Cyc_Absyn_Var_e_Absyn_Raw_exp_struct*)_Tmp2)->f1;{void*b=_Tmp3;
 # 307
 struct Cyc_Absyn_Vardecl*vd=Cyc_Tcutil_nonesc_vardecl(b);
-if(vd!=0)
-return({struct _RegionHandle*_Tmp4=rgn;union Cyc_Relations_RelnOp _Tmp5=Cyc_Relations_RVar(vd);union Cyc_Relations_RelnOp _Tmp6=Cyc_Relations_RNumelts(v);Cyc_Relations_add_relation(_Tmp4,_Tmp5,0U,_Tmp6,r);});else{
+if(vd!=0){
+struct _RegionHandle*_Tmp4=rgn;union Cyc_Relations_RelnOp _Tmp5=Cyc_Relations_RVar(vd);union Cyc_Relations_RelnOp _Tmp6=Cyc_Relations_RNumelts(v);return Cyc_Relations_add_relation(_Tmp4,_Tmp5,0U,_Tmp6,r);}else{
 return r;}}default:
  return r;};}}}else{goto _LL3;}}else{_LL3:
 # 314
@@ -680,8 +680,8 @@ return r;}}default:
 if(!Cyc_Tcutil_is_integral_type(v->type))return r;{
 # 319
 union Cyc_Relations_RelnOp eop=Cyc_Relations_RConst(0U);
-if(Cyc_Relations_exp2relnop(e,& eop))
-return({struct _RegionHandle*_Tmp0=rgn;union Cyc_Relations_RelnOp _Tmp1=Cyc_Relations_RVar(v);union Cyc_Relations_RelnOp _Tmp2=eop;Cyc_Relations_add_relation(_Tmp0,_Tmp1,0U,_Tmp2,r);});
+if(Cyc_Relations_exp2relnop(e,& eop)){
+struct _RegionHandle*_Tmp0=rgn;union Cyc_Relations_RelnOp _Tmp1=Cyc_Relations_RVar(v);union Cyc_Relations_RelnOp _Tmp2=eop;return Cyc_Relations_add_relation(_Tmp0,_Tmp1,0U,_Tmp2,r);}
 # 323
 return r;}}
 # 326
@@ -855,13 +855,13 @@ return 1;}
 # 560
 struct _tuple11 Cyc_Relations_primop2relation(struct Cyc_Absyn_Exp*e1,enum Cyc_Absyn_Primop p,struct Cyc_Absyn_Exp*e2){
 # 562
-switch((int)p){case Cyc_Absyn_Eq:
- return({struct _tuple11 _Tmp0;_Tmp0.f0=e1,_Tmp0.f1=0U,_Tmp0.f2=e2;_Tmp0;});case Cyc_Absyn_Neq:
- return({struct _tuple11 _Tmp0;_Tmp0.f0=e1,_Tmp0.f1=1U,_Tmp0.f2=e2;_Tmp0;});case Cyc_Absyn_Lt:
- return({struct _tuple11 _Tmp0;_Tmp0.f0=e1,_Tmp0.f1=3U,_Tmp0.f2=e2;_Tmp0;});case Cyc_Absyn_Lte:
- return({struct _tuple11 _Tmp0;_Tmp0.f0=e1,_Tmp0.f1=2U,_Tmp0.f2=e2;_Tmp0;});case Cyc_Absyn_Gt:
- return({struct _tuple11 _Tmp0;_Tmp0.f0=e2,_Tmp0.f1=3U,_Tmp0.f2=e1;_Tmp0;});case Cyc_Absyn_Gte:
- return({struct _tuple11 _Tmp0;_Tmp0.f0=e2,_Tmp0.f1=2U,_Tmp0.f2=e1;_Tmp0;});default:
+switch((int)p){case Cyc_Absyn_Eq:  {
+struct _tuple11 _Tmp0;_Tmp0.f0=e1,_Tmp0.f1=0U,_Tmp0.f2=e2;return _Tmp0;}case Cyc_Absyn_Neq:  {
+struct _tuple11 _Tmp0;_Tmp0.f0=e1,_Tmp0.f1=1U,_Tmp0.f2=e2;return _Tmp0;}case Cyc_Absyn_Lt:  {
+struct _tuple11 _Tmp0;_Tmp0.f0=e1,_Tmp0.f1=3U,_Tmp0.f2=e2;return _Tmp0;}case Cyc_Absyn_Lte:  {
+struct _tuple11 _Tmp0;_Tmp0.f0=e1,_Tmp0.f1=2U,_Tmp0.f2=e2;return _Tmp0;}case Cyc_Absyn_Gt:  {
+struct _tuple11 _Tmp0;_Tmp0.f0=e2,_Tmp0.f1=3U,_Tmp0.f2=e1;return _Tmp0;}case Cyc_Absyn_Gte:  {
+struct _tuple11 _Tmp0;_Tmp0.f0=e2,_Tmp0.f1=2U,_Tmp0.f2=e1;return _Tmp0;}default:
 ({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp0;})(_tag_fat("primop2relation",sizeof(char),16U),_tag_fat(0U,sizeof(void*),0));};}
 # 574
 enum Cyc_Relations_Relation Cyc_Relations_flip_relation(enum Cyc_Relations_Relation r){
@@ -872,7 +872,7 @@ switch((int)r){case Cyc_Relations_Req:
  goto _LLA;default: _LLA: return 3U;};}
 # 583
 struct Cyc_Relations_Reln*Cyc_Relations_negate(struct _RegionHandle*r,struct Cyc_Relations_Reln*rln){
-return({struct Cyc_Relations_Reln*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_Relations_Reln));_Tmp0->rop1=rln->rop2,({enum Cyc_Relations_Relation _Tmp1=Cyc_Relations_flip_relation(rln->relation);_Tmp0->relation=_Tmp1;}),_Tmp0->rop2=rln->rop1;_Tmp0;});}
+struct Cyc_Relations_Reln*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_Relations_Reln));_Tmp0->rop1=rln->rop2,({enum Cyc_Relations_Relation _Tmp1=Cyc_Relations_flip_relation(rln->relation);_Tmp0->relation=_Tmp1;}),_Tmp0->rop2=rln->rop1;return _Tmp0;}
 # 594
 struct Cyc_List_List*Cyc_Relations_exp2relns(struct _RegionHandle*r,struct Cyc_Absyn_Exp*e){
 # 596
@@ -883,15 +883,15 @@ return Cyc_Relations_exp2relns(r,e);else{goto _LLE;}}else{goto _LLE;}}else{_LLE:
  goto _LLB;}_LLB:;}
 # 603
 goto _LL0;}case 7: _Tmp3=((struct Cyc_Absyn_And_e_Absyn_Raw_exp_struct*)_Tmp0)->f1;_Tmp2=((struct Cyc_Absyn_And_e_Absyn_Raw_exp_struct*)_Tmp0)->f2;{struct Cyc_Absyn_Exp*e1=_Tmp3;struct Cyc_Absyn_Exp*e2=_Tmp2;
-return({struct _RegionHandle*_Tmp4=r;struct Cyc_List_List*_Tmp5=Cyc_Relations_exp2relns(r,e1);Cyc_List_rappend(_Tmp4,_Tmp5,Cyc_Relations_exp2relns(r,e2));});}case 3: if(((struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*)_Tmp0)->f1==Cyc_Absyn_Not){if(((struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*)_Tmp0)->f2!=0){if(*((int*)((struct Cyc_Absyn_Exp*)((struct Cyc_List_List*)((struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*)_Tmp0)->f2)->hd)->r)==3){if(((struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*)((struct Cyc_Absyn_Exp*)((struct Cyc_List_List*)((struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*)_Tmp0)->f2)->hd)->r)->f2!=0){if(((struct Cyc_List_List*)((struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*)((struct Cyc_Absyn_Exp*)((struct Cyc_List_List*)((struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*)_Tmp0)->f2)->hd)->r)->f2)->tl!=0){if(((struct Cyc_List_List*)((struct Cyc_List_List*)((struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*)((struct Cyc_Absyn_Exp*)((struct Cyc_List_List*)((struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*)_Tmp0)->f2)->hd)->r)->f2)->tl)->tl==0){if(((struct Cyc_List_List*)((struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*)_Tmp0)->f2)->tl==0){_Tmp1=((struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*)((struct Cyc_Absyn_Exp*)((struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*)_Tmp0)->f2->hd)->r)->f1;_Tmp3=(struct Cyc_Absyn_Exp*)((struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*)((struct Cyc_Absyn_Exp*)((struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*)_Tmp0)->f2->hd)->r)->f2->hd;_Tmp2=(struct Cyc_Absyn_Exp*)((struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*)((struct Cyc_Absyn_Exp*)((struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*)_Tmp0)->f2->hd)->r)->f2->tl->hd;{enum Cyc_Absyn_Primop p=_Tmp1;struct Cyc_Absyn_Exp*e1=_Tmp3;struct Cyc_Absyn_Exp*e2=_Tmp2;
+struct _RegionHandle*_Tmp4=r;struct Cyc_List_List*_Tmp5=Cyc_Relations_exp2relns(r,e1);return Cyc_List_rappend(_Tmp4,_Tmp5,Cyc_Relations_exp2relns(r,e2));}case 3: if(((struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*)_Tmp0)->f1==Cyc_Absyn_Not){if(((struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*)_Tmp0)->f2!=0){if(*((int*)((struct Cyc_Absyn_Exp*)((struct Cyc_List_List*)((struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*)_Tmp0)->f2)->hd)->r)==3){if(((struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*)((struct Cyc_Absyn_Exp*)((struct Cyc_List_List*)((struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*)_Tmp0)->f2)->hd)->r)->f2!=0){if(((struct Cyc_List_List*)((struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*)((struct Cyc_Absyn_Exp*)((struct Cyc_List_List*)((struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*)_Tmp0)->f2)->hd)->r)->f2)->tl!=0){if(((struct Cyc_List_List*)((struct Cyc_List_List*)((struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*)((struct Cyc_Absyn_Exp*)((struct Cyc_List_List*)((struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*)_Tmp0)->f2)->hd)->r)->f2)->tl)->tl==0){if(((struct Cyc_List_List*)((struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*)_Tmp0)->f2)->tl==0){_Tmp1=((struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*)((struct Cyc_Absyn_Exp*)((struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*)_Tmp0)->f2->hd)->r)->f1;_Tmp3=(struct Cyc_Absyn_Exp*)((struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*)((struct Cyc_Absyn_Exp*)((struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*)_Tmp0)->f2->hd)->r)->f2->hd;_Tmp2=(struct Cyc_Absyn_Exp*)((struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*)((struct Cyc_Absyn_Exp*)((struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*)_Tmp0)->f2->hd)->r)->f2->tl->hd;{enum Cyc_Absyn_Primop p=_Tmp1;struct Cyc_Absyn_Exp*e1=_Tmp3;struct Cyc_Absyn_Exp*e2=_Tmp2;
 # 606
 switch((int)p){case Cyc_Absyn_Eq:
  goto _LL14;case Cyc_Absyn_Neq: _LL14: goto _LL16;case Cyc_Absyn_Lt: _LL16: goto _LL18;case Cyc_Absyn_Lte: _LL18: goto _LL1A;case Cyc_Absyn_Gt: _LL1A: goto _LL1C;case Cyc_Absyn_Gte: _LL1C: {
 struct _tuple11 _Tmp4=Cyc_Relations_primop2relation(e1,p,e2);void*_Tmp5;enum Cyc_Relations_Relation _Tmp6;void*_Tmp7;_Tmp7=_Tmp4.f0;_Tmp6=_Tmp4.f1;_Tmp5=_Tmp4.f2;{struct Cyc_Absyn_Exp*e1=_Tmp7;enum Cyc_Relations_Relation rln=_Tmp6;struct Cyc_Absyn_Exp*e2=_Tmp5;
 union Cyc_Relations_RelnOp rop1=Cyc_Relations_RConst(0U);
 union Cyc_Relations_RelnOp rop2=Cyc_Relations_RConst(0U);
-if(Cyc_Relations_exp2relnop(e1,& rop1)&& Cyc_Relations_exp2relnop(e2,& rop2))
-return({struct Cyc_List_List*_Tmp8=_region_malloc(r,0U,sizeof(struct Cyc_List_List));({struct Cyc_Relations_Reln*_Tmp9=({struct Cyc_Relations_Reln*_TmpA=_region_malloc(r,0U,sizeof(struct Cyc_Relations_Reln));_TmpA->rop1=rop2,({enum Cyc_Relations_Relation _TmpB=Cyc_Relations_flip_relation(rln);_TmpA->relation=_TmpB;}),_TmpA->rop2=rop1;_TmpA;});_Tmp8->hd=_Tmp9;}),_Tmp8->tl=0;_Tmp8;});
+if(Cyc_Relations_exp2relnop(e1,& rop1)&& Cyc_Relations_exp2relnop(e2,& rop2)){
+struct Cyc_List_List*_Tmp8=_region_malloc(r,0U,sizeof(struct Cyc_List_List));({struct Cyc_Relations_Reln*_Tmp9=({struct Cyc_Relations_Reln*_TmpA=_region_malloc(r,0U,sizeof(struct Cyc_Relations_Reln));_TmpA->rop1=rop2,({enum Cyc_Relations_Relation _TmpB=Cyc_Relations_flip_relation(rln);_TmpA->relation=_TmpB;}),_TmpA->rop2=rop1;_TmpA;});_Tmp8->hd=_Tmp9;}),_Tmp8->tl=0;return _Tmp8;}
 goto _LL10;}}default:
  goto _LL10;}_LL10:;
 # 616
@@ -902,8 +902,8 @@ switch((int)p){case Cyc_Absyn_Eq:
 struct _tuple11 _Tmp4=Cyc_Relations_primop2relation(e1,p,e2);void*_Tmp5;enum Cyc_Relations_Relation _Tmp6;void*_Tmp7;_Tmp7=_Tmp4.f0;_Tmp6=_Tmp4.f1;_Tmp5=_Tmp4.f2;{struct Cyc_Absyn_Exp*e1=_Tmp7;enum Cyc_Relations_Relation rln=_Tmp6;struct Cyc_Absyn_Exp*e2=_Tmp5;
 union Cyc_Relations_RelnOp rop1=Cyc_Relations_RConst(0U);
 union Cyc_Relations_RelnOp rop2=Cyc_Relations_RConst(0U);
-if(Cyc_Relations_exp2relnop(e1,& rop1)&& Cyc_Relations_exp2relnop(e2,& rop2))
-return({struct Cyc_List_List*_Tmp8=_region_malloc(r,0U,sizeof(struct Cyc_List_List));({struct Cyc_Relations_Reln*_Tmp9=({struct Cyc_Relations_Reln*_TmpA=_region_malloc(r,0U,sizeof(struct Cyc_Relations_Reln));_TmpA->rop1=rop1,_TmpA->relation=rln,_TmpA->rop2=rop2;_TmpA;});_Tmp8->hd=_Tmp9;}),_Tmp8->tl=0;_Tmp8;});
+if(Cyc_Relations_exp2relnop(e1,& rop1)&& Cyc_Relations_exp2relnop(e2,& rop2)){
+struct Cyc_List_List*_Tmp8=_region_malloc(r,0U,sizeof(struct Cyc_List_List));({struct Cyc_Relations_Reln*_Tmp9=({struct Cyc_Relations_Reln*_TmpA=_region_malloc(r,0U,sizeof(struct Cyc_Relations_Reln));_TmpA->rop1=rop1,_TmpA->relation=rln,_TmpA->rop2=rop2;_TmpA;});_Tmp8->hd=_Tmp9;}),_Tmp8->tl=0;return _Tmp8;}
 goto _LL22;}}default:
  goto _LL22;}_LL22:;
 # 628
@@ -915,9 +915,9 @@ struct _tuple12 _Tmp0=Cyc_Evexp_eval_const_uint_exp(e);int _Tmp1;unsigned _Tmp2;
 if(known){
 if((int)i)return 0;else{
 # 637
-return({struct Cyc_List_List*_Tmp3=_region_malloc(r,0U,sizeof(struct Cyc_List_List));({struct Cyc_Relations_Reln*_Tmp4=({struct Cyc_Relations_Reln*_Tmp5=_region_malloc(r,0U,sizeof(struct Cyc_Relations_Reln));({union Cyc_Relations_RelnOp _Tmp6=Cyc_Relations_RConst(0U);_Tmp5->rop1=_Tmp6;}),_Tmp5->relation=3U,({union Cyc_Relations_RelnOp _Tmp6=Cyc_Relations_RConst(0U);_Tmp5->rop2=_Tmp6;});_Tmp5;});_Tmp3->hd=_Tmp4;}),_Tmp3->tl=0;_Tmp3;});}}
+struct Cyc_List_List*_Tmp3=_region_malloc(r,0U,sizeof(struct Cyc_List_List));({struct Cyc_Relations_Reln*_Tmp4=({struct Cyc_Relations_Reln*_Tmp5=_region_malloc(r,0U,sizeof(struct Cyc_Relations_Reln));({union Cyc_Relations_RelnOp _Tmp6=Cyc_Relations_RConst(0U);_Tmp5->rop1=_Tmp6;}),_Tmp5->relation=3U,({union Cyc_Relations_RelnOp _Tmp6=Cyc_Relations_RConst(0U);_Tmp5->rop2=_Tmp6;});_Tmp5;});_Tmp3->hd=_Tmp4;}),_Tmp3->tl=0;return _Tmp3;}}
 # 639
 ({struct Cyc_String_pa_PrintArg_struct _Tmp3=({struct Cyc_String_pa_PrintArg_struct _Tmp4;_Tmp4.tag=0,({
-struct _fat_ptr _Tmp5=(struct _fat_ptr)Cyc_Absynpp_exp2string(e);_Tmp4.f1=_Tmp5;});_Tmp4;});void*_Tmp4[1];_Tmp4[0]=& _Tmp3;Cyc_Warn_err(e->loc,_tag_fat("unable to convert `%s' to static relation",sizeof(char),42U),_tag_fat(_Tmp4,sizeof(void*),1));});}}
+struct _fat_ptr _Tmp5=(struct _fat_ptr)Cyc_Absynpp_exp2string(e);_Tmp4.f1=_Tmp5;});_Tmp4;});void*_Tmp4[1];_Tmp4[0]=& _Tmp3;Cyc_Warn_err(e->loc,_tag_fat("unable to convert `%s' to static relation",sizeof(char),42U),_tag_fat(_Tmp4,sizeof(void*),1));});}}{
 # 643
-return({struct Cyc_List_List*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_List_List));({struct Cyc_Relations_Reln*_Tmp1=({struct Cyc_Relations_Reln*_Tmp2=_region_malloc(r,0U,sizeof(struct Cyc_Relations_Reln));({union Cyc_Relations_RelnOp _Tmp3=Cyc_Relations_RConst(0U);_Tmp2->rop1=_Tmp3;}),_Tmp2->relation=3U,({union Cyc_Relations_RelnOp _Tmp3=Cyc_Relations_RConst(0U);_Tmp2->rop2=_Tmp3;});_Tmp2;});_Tmp0->hd=_Tmp1;}),_Tmp0->tl=0;_Tmp0;});}
+struct Cyc_List_List*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_List_List));({struct Cyc_Relations_Reln*_Tmp1=({struct Cyc_Relations_Reln*_Tmp2=_region_malloc(r,0U,sizeof(struct Cyc_Relations_Reln));({union Cyc_Relations_RelnOp _Tmp3=Cyc_Relations_RConst(0U);_Tmp2->rop1=_Tmp3;}),_Tmp2->relation=3U,({union Cyc_Relations_RelnOp _Tmp3=Cyc_Relations_RConst(0U);_Tmp2->rop2=_Tmp3;});_Tmp2;});_Tmp0->hd=_Tmp1;}),_Tmp0->tl=0;return _Tmp0;}}

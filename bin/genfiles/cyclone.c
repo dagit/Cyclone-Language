@@ -1116,7 +1116,7 @@ if((int)c==39 || Cyc_is_other_special(c))
 return s2;}}
 # 719
 static struct _fat_ptr*Cyc_sh_escape_stringptr(struct _fat_ptr*sp){
-return({struct _fat_ptr*_Tmp0=_cycalloc(sizeof(struct _fat_ptr));({struct _fat_ptr _Tmp1=Cyc_sh_escape_string(*sp);*_Tmp0=_Tmp1;});_Tmp0;});}
+struct _fat_ptr*_Tmp0=_cycalloc(sizeof(struct _fat_ptr));({struct _fat_ptr _Tmp1=Cyc_sh_escape_string(*sp);*_Tmp0=_Tmp1;});return _Tmp0;}
 # 723
 static void Cyc_process_file(struct _fat_ptr filename){
 # 725
@@ -1677,4 +1677,4 @@ return 1;}
 # 1460
 Cyc_remove_cfiles();
 # 1462
-return Cyc_compile_failure?1: 0;}}}}}}}}}
+if(Cyc_compile_failure)return 1;else{return 0;}}}}}}}}}}

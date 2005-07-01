@@ -466,7 +466,7 @@ return x->ndigits - y->ndigits;else{
 return Cyc_XP_cmp(x->ndigits,x->digits,y->digits);}}
 # 92
 struct Cyc_AP_T*Cyc_AP_new(long n){
-return({struct Cyc_AP_T*_Tmp0=Cyc_mk((int)sizeof(long));Cyc_set(_Tmp0,n);});}
+struct Cyc_AP_T*_Tmp0=Cyc_mk((int)sizeof(long));return Cyc_set(_Tmp0,n);}
 # 95
 struct Cyc_AP_T*Cyc_AP_neg(struct Cyc_AP_T*x){
 struct Cyc_AP_T*z;
@@ -614,23 +614,23 @@ return Cyc_cmp(y,x);}}}
 # 239
 struct Cyc_AP_T*Cyc_AP_addi(struct Cyc_AP_T*x,long y){
 struct Cyc_AP_T*t=Cyc_mk((int)(sizeof(unsigned long)/ sizeof(unsigned char)));
-return({struct Cyc_AP_T*_Tmp0=x;Cyc_AP_add(_Tmp0,Cyc_set(t,y));});}
+struct Cyc_AP_T*_Tmp0=x;return Cyc_AP_add(_Tmp0,Cyc_set(t,y));}
 # 243
 struct Cyc_AP_T*Cyc_AP_subi(struct Cyc_AP_T*x,long y){
 struct Cyc_AP_T*t=Cyc_mk((int)(sizeof(unsigned long)/ sizeof(unsigned char)));
-return({struct Cyc_AP_T*_Tmp0=x;Cyc_AP_sub(_Tmp0,Cyc_set(t,y));});}
+struct Cyc_AP_T*_Tmp0=x;return Cyc_AP_sub(_Tmp0,Cyc_set(t,y));}
 # 247
 struct Cyc_AP_T*Cyc_AP_muli(struct Cyc_AP_T*x,long y){
 struct Cyc_AP_T*t=Cyc_mk((int)(sizeof(unsigned long)/ sizeof(unsigned char)));
-return({struct Cyc_AP_T*_Tmp0=x;Cyc_AP_mul(_Tmp0,Cyc_set(t,y));});}
+struct Cyc_AP_T*_Tmp0=x;return Cyc_AP_mul(_Tmp0,Cyc_set(t,y));}
 # 251
 struct Cyc_AP_T*Cyc_AP_divi(struct Cyc_AP_T*x,long y){
 struct Cyc_AP_T*t=Cyc_mk((int)(sizeof(unsigned long)/ sizeof(unsigned char)));
-return({struct Cyc_AP_T*_Tmp0=x;Cyc_AP_div(_Tmp0,Cyc_set(t,y));});}
+struct Cyc_AP_T*_Tmp0=x;return Cyc_AP_div(_Tmp0,Cyc_set(t,y));}
 # 255
 int Cyc_AP_cmpi(struct Cyc_AP_T*x,long y){
 struct Cyc_AP_T*t=Cyc_mk((int)(sizeof(unsigned long)/ sizeof(unsigned char)));
-return({struct Cyc_AP_T*_Tmp0=x;Cyc_AP_cmp(_Tmp0,Cyc_set(t,y));});}
+struct Cyc_AP_T*_Tmp0=x;return Cyc_AP_cmp(_Tmp0,Cyc_set(t,y));}
 # 259
 long Cyc_AP_modi(struct Cyc_AP_T*x,long y){
 long rem;
@@ -783,4 +783,4 @@ z->sign=x->sign;
 return z;}
 # 408
 struct Cyc_AP_T*Cyc_AP_lcm(struct Cyc_AP_T*x,struct Cyc_AP_T*y){
-return({struct Cyc_AP_T*_Tmp0=x;Cyc_AP_mul(_Tmp0,({struct Cyc_AP_T*_Tmp1=y;Cyc_AP_div(_Tmp1,Cyc_AP_gcd(x,y));}));});}
+struct Cyc_AP_T*_Tmp0=x;return Cyc_AP_mul(_Tmp0,({struct Cyc_AP_T*_Tmp1=y;Cyc_AP_div(_Tmp1,Cyc_AP_gcd(x,y));}));}

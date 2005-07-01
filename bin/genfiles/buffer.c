@@ -356,9 +356,9 @@ extern struct _fat_ptr Cyc_substring(struct _fat_ptr,int,unsigned long);struct C
 struct Cyc_Buffer_t*Cyc_Buffer_create(unsigned n){
 if(n > 0U){
 struct _fat_ptr s=({unsigned _Tmp0=n + 1U;_tag_fat(_region_calloc(Cyc_Core_heap_region,Cyc_Core_unique_qual,sizeof(char),_Tmp0),sizeof(char),_Tmp0);});
-return({struct Cyc_Buffer_t*_Tmp0=_cycalloc(sizeof(struct Cyc_Buffer_t));_Tmp0->buffer=s,_Tmp0->position=0U,_Tmp0->length=n,_Tmp0->initial_buffer=_tag_fat(0,0,0);_Tmp0;});}else{
+struct Cyc_Buffer_t*_Tmp0=_cycalloc(sizeof(struct Cyc_Buffer_t));_Tmp0->buffer=s,_Tmp0->position=0U,_Tmp0->length=n,_Tmp0->initial_buffer=_tag_fat(0,0,0);return _Tmp0;}else{
 # 53
-return({struct Cyc_Buffer_t*_Tmp0=_cycalloc(sizeof(struct Cyc_Buffer_t));_Tmp0->buffer=_tag_fat(0,0,0),_Tmp0->position=0U,_Tmp0->length=0U,_Tmp0->initial_buffer=_tag_fat(0,0,0);_Tmp0;});}}
+struct Cyc_Buffer_t*_Tmp0=_cycalloc(sizeof(struct Cyc_Buffer_t));_Tmp0->buffer=_tag_fat(0,0,0),_Tmp0->position=0U,_Tmp0->length=0U,_Tmp0->initial_buffer=_tag_fat(0,0,0);return _Tmp0;}}
 # 57
 struct _fat_ptr Cyc_Buffer_contents(struct Cyc_Buffer_t*b){
 struct _fat_ptr buf=_tag_fat(0,0,0);
