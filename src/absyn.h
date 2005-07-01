@@ -503,7 +503,7 @@ namespace Absyn {
   EXTERN_ABSYN enum Primop {
     Plus, Times, Minus, Div, Mod, Eq, Neq, Gt, Lt, Gte, Lte, Not,
     Bitnot, Bitand, Bitor, Bitxor, Bitlshift, Bitlrshift, 
-    Numelts
+    Numelts, Tagof
   };
 
   // ++x, x++, --x, x-- respectively
@@ -1039,6 +1039,7 @@ namespace Absyn {
   exp_t var_exp(qvar_t, seg_t);
   exp_t varb_exp(binding_t, seg_t);
   exp_t unknownid_exp(qvar_t, seg_t);
+  exp_t tagof_exp(exp_t, seg_t);
   exp_t pragma_exp(string_t<`H>,seg_t);
   exp_t primop_exp(primop_t, list_t<exp_t,`H>, seg_t);
   exp_t prim1_exp(primop_t, exp_t, seg_t);

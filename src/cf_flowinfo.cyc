@@ -231,12 +231,15 @@ static absRval_t i_typ_to_absrval(flow_env_t fenv,
 
   switch(compress(t)) {
   case &AppType(&DatatypeFieldCon({.KnownDatatypefield=$(_,tuf)}),_):
+    // we add an extra field here corresponding to the tag
+    // to ensure that the datatype is initialized before it's used.
     if(tuf->typs == NULL)
       return leafval;
     let tqts = tuf->typs;
-    unsigned   sz = List::length(tqts);
+    unsigned   sz = List::length(tqts) + 1;
     aggrdict_t d  = new { for i < sz : fenv->unknown_all };
-    for (int i = 0; i < sz; i++) {
+    d[0] = leafval; // the tag
+    for (int i = 1; i < sz; i++) {
       d[i] = i_typ_to_absrval(fenv,false,no_init_bits_only,(*tqts->hd)[1],leafval);
       tqts = tqts->tl;
     }

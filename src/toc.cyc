@@ -1624,6 +1624,12 @@ static void exp_to_c(env_t nv, exp_t e) {
     // Translate args
     List::iter_c(exp_to_c,nv,es);
     switch (p) {
+    case Tagof:
+      // arg is a pointer to a datatype -- cast it to (unsigned int *) and then
+      // dereference it.
+      exp_t arg = es->hd;
+      e->r = deref_exp(cast_it(cstar_type(uint_type, const_tqual(0)),arg),0)->r;
+      break;
     case Numelts:
       exp_t arg = es->hd;
       switch (compress((type_t)arg->topt)) {

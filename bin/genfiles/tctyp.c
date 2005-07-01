@@ -415,7 +415,7 @@ void*Cyc_Absyn_bounds_one (void);
 void*Cyc_Absyn_aqualsof_type(void*);
 # 1033
 struct Cyc_Absyn_Exp*Cyc_Absyn_uint_exp(unsigned,unsigned);
-# 1199
+# 1200
 void Cyc_Absyn_visit_exp(int(*)(void*,struct Cyc_Absyn_Exp*),int(*)(void*,struct Cyc_Absyn_Stmt*),void*,struct Cyc_Absyn_Exp*);
 # 29 "unify.h"
 int Cyc_Unify_unify(void*,void*);

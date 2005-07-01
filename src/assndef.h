@@ -126,7 +126,7 @@ namespace AssnDef{
   extern term_t binop(Absyn::primop_t p, term_t t1, term_t t2, type_opt_t);
   extern term_t cast(type_t tp, term_t tm);
   extern term_t aggr(bool is_union, unsigned tag, List::list_t<term_t,`H>, type_opt_t tp);
-  extern term_t tagof(term_t);
+  extern term_t tagof_tm(term_t);
   extern term_t proj(term_t t, unsigned i, type_opt_t);
   extern term_t addr(vardecl_t);
   extern term_t alloc(exp_t,term_t,type_opt_t);

@@ -1079,13 +1079,21 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
     datatype Root.VarRoot vdroot = VarRoot(vd);
     return $(inflow, Dict::lookup_other(d, root_cmp, new vdroot));
 
-    // Note: none of the primops cause things to escape or do a dereference!
-    //       and they all return initialized ints of unknown value.
+    // Note: none of the primops cause things to escape and only Tagof does
+    // a dereference, and they all return initialized ints of unknown value.
   case &Primop_e(p,es):
     DEBUG_PRINT("in Rexp:Primop_e\n");
-    let $(f,r) = anal_use_ints(env,inflow,es);
-    return $(f,r);
-
+    if (p == Tagof) {
+      // same as a Deref_e, but result is an int.  We want to make
+      // sure that this is actually initialized...
+      let $(f,r) = anal_Rexp(env,false,inflow,es->hd,local_alias);
+      let $(f2,r2) = anal_derefR(env,inflow,f,es->hd,r,NULL);
+      f2 = use_Rval(env,es->hd->loc,f2,r);
+      return $(f2, env->fenv->unknown_all);
+    } else {
+      let $(f,r) = anal_use_ints(env,inflow,es);
+      return $(f,r);
+    }
   case &Increment_e(e1,_):
     let arg = List{e1,NULL};
     let $(f,_) = anal_use_ints(env,inflow,&arg);
@@ -1548,11 +1556,11 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
 
  case &Datatype_e(es,tud,_): // NULL case handled above
    let $(f,rvals) = anal_Rexps(env,inflow,es,true,true);
-   aggrdict_t aggrdict =
-     new {for i < List::length(es) :
-          ({ let temp = rvals->hd;
-          rvals = rvals->tl;
-          temp; })};
+   unsigned int sz = List::length(es) + 1;
+   aggrdict_t aggrdict = new {for i < sz : fenv->unknown_none};
+   aggrdict[0] = fenv->unknown_all;
+   for (unsigned i = 1; i < sz; i++, rvals = rvals->tl) 
+     aggrdict[i] = rvals->hd;
    return $(f, new Aggregate(UnionRInfo(false,-1),aggrdict));
 
  case &AnonStruct_e(_,_,des):

@@ -185,7 +185,7 @@ extern void print_flowdict(flowdict_t);
 extern void print_flow(flow_t);
 
 // debugging
-//#define DEBUG_FLOW
+  //#define DEBUG_FLOW
 
 #ifdef DEBUG_FLOW
 extern bool debug_msgs;

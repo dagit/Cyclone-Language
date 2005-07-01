@@ -353,9 +353,9 @@ enum Cyc_Absyn_Scope{Cyc_Absyn_Static =0U,Cyc_Absyn_Abstract =1U,Cyc_Absyn_Publi
 int Cyc_Absyn_qvar_cmp(struct _tuple0*,struct _tuple0*);
 # 898
 extern union Cyc_Absyn_Nmspace Cyc_Absyn_Loc_n;
-# 1192
+# 1193
 struct _tuple0*Cyc_Absyn_binding2qvar(void*);
-# 1198
+# 1199
 void Cyc_Absyn_visit_stmt(int(*)(void*,struct Cyc_Absyn_Exp*),int(*)(void*,struct Cyc_Absyn_Stmt*),void*,struct Cyc_Absyn_Stmt*);
 void Cyc_Absyn_visit_exp(int(*)(void*,struct Cyc_Absyn_Exp*),int(*)(void*,struct Cyc_Absyn_Stmt*),void*,struct Cyc_Absyn_Exp*);struct Cyc_Warn_String_Warn_Warg_struct{int tag;struct _fat_ptr f1;};
 # 71 "warn.h"

@@ -1091,7 +1091,7 @@ using Parse;
 %token REGION_T TAG_T REGION RNEW REGIONS 
 %token PORTON PORTOFF PRAGMA TEMPESTON TEMPESTOFF
 %token AQ_ALIASABLE  AQ_REFCNT AQ_RESTRICTED AQ_UNIQUE AQUAL_T
-%token NUMELTS VALUEOF VALUEOF_T TAGCHECK NUMELTS_QUAL THIN_QUAL
+%token NUMELTS TAGOF VALUEOF VALUEOF_T TAGCHECK NUMELTS_QUAL THIN_QUAL
 %token FAT_QUAL NOTNULL_QUAL NULLABLE_QUAL REQUIRES_QUAL ENSURES_QUAL EFFECT_QUAL
 %token THROWS_QUAL
 // Cyc:  CYCLONE qualifiers (e.g., @zeroterm, @tagged, @aqual, aquals)
@@ -2938,6 +2938,8 @@ unary_expression:
                    LOC(@1,@11))); }
 | NUMELTS '(' assignment_expression ')'
    { $$=^$(primop_exp(Numelts, list($3), LOC(@1,@4))); }
+| TAGOF '(' assignment_expression ')'
+   { $$=^$(tagof_exp($3, LOC(@1,@4))); }
 | TAGCHECK '(' postfix_expression '.' field_name ')'
    { $$=^$(new_exp(new Tagcheck_e($3,new $5),LOC(@1,@6))); }
 | TAGCHECK '(' postfix_expression PTR_OP field_name ')'

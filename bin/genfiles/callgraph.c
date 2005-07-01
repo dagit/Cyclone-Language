@@ -344,7 +344,7 @@ enum Cyc_Absyn_Scope{Cyc_Absyn_Static =0U,Cyc_Absyn_Abstract =1U,Cyc_Absyn_Publi
 # 890 "absyn.h"
 int Cyc_Absyn_qvar_cmp(struct _tuple0*,struct _tuple0*);
 int Cyc_Absyn_hash_qvar(struct _tuple0*);
-# 1198
+# 1199
 void Cyc_Absyn_visit_stmt(int(*)(void*,struct Cyc_Absyn_Exp*),int(*)(void*,struct Cyc_Absyn_Stmt*),void*,struct Cyc_Absyn_Stmt*);struct Cyc_Set_Set;
 # 51 "set.h"
 extern struct Cyc_Set_Set*Cyc_Set_empty(int(*)(void*,void*));

@@ -1052,6 +1052,7 @@ int exp_prec(exp_t e) {
     case Bitlshift:      return  90;
     case Bitlrshift:     return  80; // unlike C (see grammar)
     case Numelts:        return 140; // numelts(foo)
+    case Tagof:          return 140; // tagof(foo)
     default:             return 140;
     }
   case &AssignOp_e(...):      return  20;
@@ -1376,7 +1377,12 @@ doc_t primapp2doc(int inprec, primop_t p,list_t<exp_t> es) {
       Warn::impos("Absynpp::primapp2doc Numelts: %s with bad args",
 		  string_of_doc(ps,72));
     return cat(text("numelts("),exp2doc(es->hd),text(")"));
-  } 
+  } else if (p == (primop_t)Tagof) {
+    if (es == NULL || es->tl != NULL)
+      Warn::impos("Absynpp::primapp2doc Tagof: %s with bad args",
+		  string_of_doc(ps,72));
+    return cat(text("tagof("),exp2doc(es->hd),text(")"));
+  }
   list_t<doc_t> ds = List::map_c(exp2doc_prec,inprec,es);
   if (ds == NULL)
     Warn::impos("Absynpp::primapp2doc: %s with no args",string_of_doc(ps,72));
@@ -1409,6 +1415,7 @@ string_t prim2str(primop_t p) {
   case Bitlshift: return "<<";
   case Bitlrshift: return ">>";
   case Numelts: return "numelts";
+  case Tagof: return "tagof";
   default: return "?";
   }
 }

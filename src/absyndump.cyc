@@ -657,6 +657,10 @@ static void dumpexp_prec(int inprec, exp_t e) {
         dump("numelts(");
         dumpexp(es->hd);
         dump(")");
+      } else if (p == (primop_t)Tagof) {
+        dump("tagof(");
+        dumpexp(es->hd);
+        dump(")");
       } else {
         dump(pstr);
         dumpexp_prec(myprec,es->hd);

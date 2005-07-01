@@ -70,7 +70,7 @@ string_t term2string(term_t t) {
   switch (t) {
   case &Uint(i,_): res = aprintf("0x%x", i); break;
   case &Const(e): res = Absynpp::exp2string(e); break;
-  case &Tagof(t): res = aprintf("tagof(%s)",term2string(t)); break;
+  case &Tagof(t): res = aprintf("tagof_tm(%s)",term2string(t)); break;
   case &Select(t1,t2,_):
     res = aprintf("Sel(%s,%s)",term2string(t1),term2string(t2));
     break;
@@ -198,28 +198,31 @@ int termcmp(datatype Term @`r1 _t1, datatype Term @`r2 _t2) {
   datatype Term @`r2+`H t2 = _t2;
  LOOP:
   if (t1 == t2) return 0;
+  int c = tagof(t1) - tagof(t2);
+  if (c != 0) return c;
   switch $(t1,t2) {
-  case $(&Uint(i1,_), &Uint(i2,_)): return i1-i2;
-  case $(&Uint(...),_): return -1;
-  case $(_,&Uint(...)): return 1;
   case $(&LogicVar(vd1,i,_),&LogicVar(vd2,j,_)): 
-    if (vd1 == vd2) return (i - j);
+    int c = i - j;
+    if (c != 0) return c;
     return (int)vd1 - (int)vd2;
-  case $(&LogicVar(vd1,i,_),_): return -1;
-  case $(_,&LogicVar(vd2,j,_)): return 1;
+    //case $(&LogicVar(vd1,i,_),_): return -1;
+    //case $(_,&LogicVar(vd2,j,_)): return 1;
+  case $(&Uint(i1,_), &Uint(i2,_)): return i1-i2;
+    //case $(&Uint(...),_): return -1;
+    //case $(_,&Uint(...)): return 1;
   case $(&Const(e1),&Const(e2)): return Evexp::exp_cmp(e1,e2);
-  case $(&Const(...),_): return -1;
-  case $(_,&Const(...)): return 1;
+    //case $(&Const(...),_): return -1;
+    //case $(_,&Const(...)): return 1;
   case $(&Addr(vd1),&Addr(vd2)): return (int)vd1 - (int)vd2;
-  case $(&Addr(...),_): return -1;
-  case $(_,&Addr(...)): return 1;
+    //case $(&Addr(...),_): return -1;
+    //case $(_,&Addr(...)): return 1;
   case $(&Unop(p1,t1a,_),&Unop(p2,t2a,_)): 
     if (p1 != p2) return (int)p1 - (int)p2;
     t1 = t1a;
     t2 = t2a;
     goto LOOP;
-  case $(&Unop(...),_): return -1;
-  case $(_,&Unop(...)): return 1;
+    //case $(&Unop(...),_): return -1;
+    //case $(_,&Unop(...)): return 1;
   case $(&Binop(p1,t11,t12,tp1),&Binop(p2,t21,t22,tp2)):
     if (p1 != p2) return (int)p1 - (int)p2;
     int c = termcmp(t11,t21);
@@ -227,24 +230,24 @@ int termcmp(datatype Term @`r1 _t1, datatype Term @`r2 _t2) {
     t1 = t12;
     t2 = t22;
     goto LOOP;
-  case $(&Binop(...),_): return -1;
-  case $(_,&Binop(...)): return 1;
+    //case $(&Binop(...),_): return -1;
+    //case $(_,&Binop(...)): return 1;
   case $(&Cast(tp1,tm1),&Cast(tp2,tm2)):
     int c = Tcutil::typecmp(tp1,tp2);
     if (c != 0) return c;
     t1 = tm1;
     t2 = tm2;
     goto LOOP;
-  case $(&Cast(...),_): return -1;
-  case $(_,&Cast(...)): return 1;
+    //case $(&Cast(...),_): return -1;
+    //case $(_,&Cast(...)): return 1;
   case $(&Select(t11,t12,_),&Select(t21,t22,_)):
     int c = termcmp(t11,t21);
     if (c != 0) return c;
     t1 = t12;
     t2 = t22;
     goto LOOP;
-  case $(&Select(...),_): return -1;
-  case $(_,&Select(...)): return 1;
+    //case $(&Select(...),_): return -1;
+    //case $(_,&Select(...)): return 1;
   case $(&Update(t11,t12,t13),&Update(t21,t22,t23)):
     int c = termcmp(t11,t21);
     if (c != 0) return c;
@@ -253,43 +256,43 @@ int termcmp(datatype Term @`r1 _t1, datatype Term @`r2 _t2) {
     t1 = t13;
     t2 = t23;
     goto LOOP;
-  case $(&Update(t11,t12,t13),_): return -1;
-  case $(_,&Update(t21,t22,t23)): return 1;
+    //case $(&Update(t11,t12,t13),_): return -1;
+    //case $(_,&Update(t21,t22,t23)): return 1;
   case $(&Tagof(tm1),&Tagof(tm2)): 
     t1 = tm1;
     t2 = tm2;
     goto LOOP;
-  case $(&Tagof(...),_): return -1;
-  case $(_,&Tagof(...)): return 1;
+    //case $(&Tagof(...),_): return -1;
+    //case $(_,&Tagof(...)): return 1;
   case $(&Proj(tm1,i1,_),&Proj(tm2,i2,_)): 
     int c = i1 - i2;
     if (c != 0) return c;
     t1 = tm1;
     t2 = tm2;
     goto LOOP;
-  case $(&Proj(...),_): return -1;
-  case $(_,&Proj(...)): return 1;
+    //case $(&Proj(...),_): return -1;
+    //case $(_,&Proj(...)): return 1;
   case $(&Alloc(e1,_,i1,_),&Alloc(e2,_,i2,_)):
     if (e1 != e2) return (int)e1-(int)e2;
     else return (i1-i2);
-  case $(&Alloc(...),_): return -1;
-  case $(_,&Alloc(...)): return 1;
+    //case $(&Alloc(...),_): return -1;
+    //case $(_,&Alloc(...)): return 1;
   case $(&Offsetf(f1,tm1,_),&Offsetf(f2,tm2,_)):
     int c = strptrcmp(f1,f2);
     if (c != 0) return c;
     t1 = tm1;
     t2 = tm2;
     goto LOOP;
-  case $(&Offsetf(...),_): return -1;
-  case $(_,&Offsetf(...)): return 1;
+    //case $(&Offsetf(...),_): return -1;
+    //case $(_,&Offsetf(...)): return 1;
   case $(&Offseti(i1,tm1,_),&Offseti(i2,tm2,_)):
     int c = termcmp(tm1,tm2);
     if (c != 0) return c;
     t1 = tm1;
     t2 = tm2;
     goto LOOP;
-  case $(&Offseti(...),_): return -1;
-  case $(_,&Offseti(...)): return 1;
+    //case $(&Offseti(...),_): return -1;
+    //case $(_,&Offseti(...)): return 1;
   case $(&Aggr(is_union1,tag1,ts1,_),&Aggr(is_union2,tag2,ts2,_)):
     int c = tag1 - tag2;
     if (c != 0) return c;
@@ -302,6 +305,7 @@ int termcmp(datatype Term @`r1 _t1, datatype Term @`r2 _t2) {
     if (ts1 == ts2) return 0;
     if (ts1 == NULL) return -1;
     return 1;
+  default: Warn::impos("different terms but same codes!");
   }
 }
 
@@ -365,7 +369,10 @@ static term_t hash_cons_term(datatype Term @t) {
   let resopt = Hashtable::lookup_other_opt(h,t,termcmp,termhash);
   if (resopt == NULL) {
     let t2 = copy_term(t);
+    //int i = h->max_len;
     Hashtable::insert(h,t2,new TermHashedInfo{t2,NULL});
+    //if (i < h->max_len) 
+    // fprintf(stderr,"grew term hash table after inserting %s\n",term2string(t2))
     return t2;
   } else 
     return (*resopt)->term;
@@ -522,7 +529,7 @@ term_t datatype_aggr(unsigned tag, list_t<term_t,`H> ts, type_opt_t tp) {
 term_t union_aggr(unsigned tag, list_t<term_t,`H> ts, type_opt_t tp) {
   return aggr(true,tag,ts,tp);
 }
-term_t tagof(term_t t1) {
+term_t tagof_tm(term_t t1) {
   switch (t1) {
   case &Aggr(_,tag,...): return uint(tag);
   default: 
@@ -1033,7 +1040,7 @@ static term_t subst_term(term_dict_t dict, term_t t,
     res = offseti(s1,s2,tp);
     break;
   case &Tagof(t1):
-    res = tagof(subst_term(dict,t1,term_h));
+    res = tagof_tm(subst_term(dict,t1,term_h));
     break;
   }
   Hashtable::insert(term_h,t,res);
@@ -1123,6 +1130,8 @@ int assncmp(datatype Assn @`r1 _a1, datatype Assn @`r2 _a2) {
   datatype Assn @`r2+`H a2 = _a2;
  LOOP:
   if (a1 == a2) return 0;
+  int c = tagof(a2) - tagof(a1);
+  if (c != 0) return c;
   switch $(a1,a2) {
   case $(&And(a11,a12),&And(a21,a22)): fallthru(a11,a12,a21,a22);
   case $(&Or(a11,a12),&Or(a21,a22)): 
@@ -1137,7 +1146,7 @@ int assncmp(datatype Assn @`r1 _a1, datatype Assn @`r2 _a2) {
     c = termcmp(t11,t21);
     if (c != 0) return c;
     return termcmp(t12,t22);
-  default: return assncode(a2) - assncode(a1);
+  default: Warn::impos("assncmp:  tagof failure");
   }
 }
 
@@ -1216,8 +1225,11 @@ static assn_t hash_cons_assn(datatype Assn @a) {
     // neither was nega in the table.
     let a2 = copy_assn(a);
     let nega2 = neg_assn(a);
+    //int i = h->max_len;
     Hashtable::insert(h,a2,new AssnHashedInfo{a2,nega2,NULL,NULL});
     Hashtable::insert(h,nega2,new AssnHashedInfo{nega2,a2,NULL,NULL});
+    //if (i < h->max_len)
+    //  fprintf(stderr,"grew hash table on %s\n",assn2string(a2));
     return a2;
   } else 
     return (*resopt)->assn;

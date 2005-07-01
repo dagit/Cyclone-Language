@@ -568,16 +568,24 @@ static inline void set_dist(graph_t @g, node_t @`H i, node_t @`H j, int dist, bo
 	  term2string(i->rep),term2string(j->rep),dist);
 #endif  
   // equivalent terms are always at distance 0.
-  if (i == j && (dist < 0 || (unsigned)dist == MININT)) throw(&inconsistent);
-  if (i == j && dist > 0) return;
+  if (i == j) {
+    if (dist < 0 || (unsigned)dist == MININT) throw(&inconsistent);
+    if (dist > 0) return;
+  }
   let ij_dist = lookup_dist(i,j,is_signed);
   // if we already have a shorter path, then this constraint is redundant
-  if (ij_dist != NULL && (unsigned)*ij_dist == MININT) return;
-  if (ij_dist != NULL && (unsigned)dist != MININT && *ij_dist < dist) return;
   // otherwise, we update the weight for this edge if the edge existed
   // or add this new edge if the edge did not exist
   // we also set a mark saying that the graph changed
   // testing if the new edge weight will cause a negative cycle
+  if (ij_dist != NULL) {
+    if ((unsigned)*ij_dist == MININT) return;
+    if ((unsigned)dist != MININT && *ij_dist < dist) return;
+    *ij_dist = dist;
+  } else {
+    new_distance(i,j,is_signed,dist);
+  }
+  g->changed = true;
   let ji_dist = lookup_dist(j,i,is_signed);
   if(ji_dist != NULL){
     let $(overflow,sum)=is_signed_overflow(*ji_dist,dist);
@@ -588,9 +596,6 @@ static inline void set_dist(graph_t @g, node_t @`H i, node_t @`H j, int dist, bo
 	throw &inconsistent;
       }
   }
-  if (ij_dist != NULL) *ij_dist = dist;
-  else new_distance(i,j,is_signed,dist);
-  g->changed = true;
   return;
 }
 

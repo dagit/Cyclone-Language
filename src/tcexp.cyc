@@ -375,6 +375,27 @@ static type_t tcUnPrimop(tenv_t te, seg_t loc, type_t * topt,
     default: Warn::err2(loc,"numelts requires pointer type, not ",t);
     }
     return uint_type;
+  case Tagof:
+    // should have a @thin@numelts(1)@nozeroterm pointer to a datatype 
+    // or datatype field -- otherwise similar to a Deref_e.
+    let pinfo = fresh_pointer_type(te);
+    pinfo.ptr_atts.nullable = false_type;
+    pinfo.ptr_atts.bounds = bounds_one();
+    pinfo.ptr_atts.zero_term = false_type;
+    let p = pointer_type(pinfo);
+    if (!Unify::unify(p,t) && !silent_castable(loc,t,p)) {
+      Warn::err2(loc,"expecting @thin@numelts(1)@nozeroterm pointer type but found %s",t);
+      return uint_type;
+    }
+    let elt_type = compress(pointer_elt_type(p));
+    let rgn_type = pointer_region(p);
+    switch (elt_type) {
+    case &AppType(&DatatypeCon(...),_): break;
+    case &AppType(&DatatypeFieldCon(...),_): break;
+    default: Warn::err2(loc,"expecting pointer to datatype but found %s",elt_type);
+    }
+    check_effect_accessible(te,loc,rgn_type);
+    return uint_type;
   default: Warn::impos_loc2(loc,"Non-unary primop");
   }
 }

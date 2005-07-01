@@ -399,52 +399,8 @@ static int cmp_binding(binding_t b1, binding_t b2) {
 
 // to make comparison easier to write, returns a unique integer
 // corresponding to the constructor used.
-static unsigned int exp_case_number(exp_t e) {
-  switch (e->r) {
-  case &Const_e(...):        return 0; 
-  case &Var_e(...):          return 1;
-  case &Pragma_e(...):       return 2;
-  case &Primop_e(...):       return 3;
-  case &AssignOp_e(...):     return 4;
-  case &Increment_e(...):    return 5;
-  case &Conditional_e(...):  return 6;
-  case &And_e(...):          return 7;
-  case &Or_e(...):           return 8;
-  case &SeqExp_e(...):       return 9;
-  case &FnCall_e(...):       return 10;
-  case &Throw_e(...):        return 11;
-  case &NoInstantiate_e(...):return 12;
-  case &Instantiate_e(...):  return 13;
-  case &Cast_e(...):         return 14;
-  case &Address_e(...):      return 15;
-  case &New_e(...):          return 16;
-  case &Sizeoftype_e(...):   return 17;
-  case &Sizeofexp_e(...):    return 18;
-  case &Offsetof_e(...):     return 19;
-  case &Deref_e(...):        return 20;
-  case &AggrMember_e(...):   return 21;
-  case &AggrArrow_e(...):    return 22;
-  case &Subscript_e(...):    return 23;
-  case &CompoundLit_e(...):  return 25;
-  case &Array_e(...):        return 26;
-  case &Comprehension_e(...):return 27;
-  case &ComprehensionNoinit_e(...): return 28;
-  case &Aggregate_e(...):    return 29;
-  case &AnonStruct_e(...):   return 30;
-  case &Datatype_e(...):     return 31;
-  case &Enum_e(...):         return 32;
-  case &AnonEnum_e(...):     return 33;
-  case &Malloc_e(...):       return 34;
-  case &Swap_e(...):         return 35;
-  case &UnresolvedMem_e(...):return 36;
-  case &StmtExp_e(...):      return 37;
-  case &Tagcheck_e(...):     return 38;
-  case &Valueof_e(...):      return 39;
-  case &Asm_e(...):          return 40;
-  case &Extension_e(...):    return 41;
-  case &Assert_e(...):       return 42;
-  case &Assert_false_e(...): return 43;
-  }
+static inline unsigned int exp_case_number(exp_t e) {
+  return tagof(e->r);
 }
 
 // Used only for sorting and lookups, but tries to
@@ -576,8 +532,8 @@ int exp_cmp(exp_t e1, exp_t e2) {
   case $(&Enum_e(_,_),&Enum_e(_,_)):  
   case $(&AnonEnum_e(_,_),&AnonEnum_e(_,_)):
     return -1;
-  default: Warn::impos2("Evexp::exp_cmp, unexpected case $(",
-                        e1,",",e2,")");
+  default: Warn::impos2("Evexp::exp_cmp, unexpected case $([",e1case,"]",
+                        e1,",[",e2case,"]",e2,")");
   }
 }
 

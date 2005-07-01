@@ -673,7 +673,7 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
     // can throw an exception
     if (is_tagged && is_read) {
       // FIX: have insert_checks look for tag here...
-      let ck = eq(tagof(t),uint(i));
+      let ck = eq(tagof_tm(t),uint(i));
       update_try_assnmap(env,and_assnmap_assn(amin,not(ck)),fresh_var(Absyn::exn_type()));
       amin = and_assnmap_assn(amin,ck);
     }
@@ -691,7 +691,7 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
     let i = CfFlowInfo::get_field_index(Tcutil::pointer_elt_type((type_t)e1->topt),f);
     let $(mem,amin) = lookup_var_map(memory,amin);
     if (is_tagged && is_read) {
-      let ck = eq(tagof(select(mem,t1,NULL)),
+      let ck = eq(tagof_tm(select(mem,t1,NULL)),
                   uint(i));
       update_try_assnmap(env,and_assnmap_assn(amin,not(ck)),fresh_var(Absyn::exn_type()));
       amin = and_assnmap_assn(amin,ck);
@@ -1375,7 +1375,7 @@ static $(assn_map_t,assn_map_t) vcgen_pat(env_t env, Absyn::pat_t p,
       if (is_tagged) {
         // for tagged unions, we pretend the tag is an extra member
         // at the end of the aggregate.
-        let tag_check = eq(tagof(v),uint(i));
+        let tag_check = eq(tagof_tm(v),uint(i));
         amt = and_assnmap_assn(amt,tag_check);
         amf = or_assnmap_assn(amf,not(tag_check));
       }
@@ -1392,7 +1392,7 @@ static $(assn_map_t,assn_map_t) vcgen_pat(env_t env, Absyn::pat_t p,
     // for datatypes, we pretend we have an aggregate with the first
     // field being an integer corresponding to the constructor.
     int i = datatype_constructor_index(dd,df);
-    assn_t tag_check = eq(tagof(v),uint(i));
+    assn_t tag_check = eq(tagof_tm(v),uint(i));
     assn_map_t amt = and_assnmap_assn(amin,tag_check);
     assn_map_t amf = false_assnmap();
     for (unsigned j = 0; ps != NULL; ps=ps->tl, ++j) {

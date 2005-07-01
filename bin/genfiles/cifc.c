@@ -375,13 +375,13 @@ extern void*Cyc_Absyn_heap_rgn_type;
 extern void*Cyc_Absyn_void_type;
 # 993
 void*Cyc_Absyn_cstar_type(void*,struct Cyc_Absyn_Tqual);
-# 1122
+# 1123
 struct Cyc_Absyn_Decl*Cyc_Absyn_new_decl(void*,unsigned);
-# 1172
+# 1173
 struct Cyc_Absyn_Aggrfield*Cyc_Absyn_lookup_field(struct Cyc_List_List*,struct _fat_ptr*);
-# 1178
+# 1179
 struct Cyc_Absyn_Decl*Cyc_Absyn_lookup_decl(struct Cyc_List_List*,struct _fat_ptr*);
-# 1180
+# 1181
 struct _fat_ptr*Cyc_Absyn_decl_name(struct Cyc_Absyn_Decl*);struct Cyc___cycFILE;
 # 53 "cycboot.h"
 extern struct Cyc___cycFILE*Cyc_stderr;struct Cyc_String_pa_PrintArg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};

@@ -1312,64 +1312,31 @@ int cmp_effect_constraints(list_t<effconstr_t> ec0,
 
 static int tycon2int(tycon_t t) {
   switch (t) {
-  case &VoidCon:                      return 0;
-  case &IntCon(Unsigned,Char_sz):     return 1;
-  case &IntCon(Signed,Char_sz):       return 2;
-  case &IntCon(None,Char_sz):         return 3;
-  case &IntCon(Unsigned,Short_sz):    return 4;
-  case &IntCon(Signed,Short_sz):      return 5;
-  case &IntCon(None,Short_sz):        return 6;
-  case &IntCon(Unsigned,Int_sz):      return 7;
-  case &IntCon(Signed,Int_sz):        return 8;
-  case &IntCon(None,Int_sz):          return 9;
-  case &IntCon(Unsigned,Long_sz):     return 7;  // NB: treating long == int
-  case &IntCon(Signed,Long_sz):       return 8;
-  case &IntCon(None,Long_sz):         return 9;
-  case &IntCon(Unsigned,LongLong_sz): return 13;
-  case &IntCon(Signed,LongLong_sz):   return 14;
-  case &IntCon(None,LongLong_sz):     return 15;
-  case &FloatCon(0):                  return 16;
-  case &FloatCon(1):                  return 17;
-  case &FloatCon(_):                  return 18;
-  case &RgnHandleCon:                 return 19;
-  case &TagCon:                       return 20;
-  case &HeapCon:                      return 21;
-  case &UniqueHeapCon:                return 22;
-  case &RefCntHeapCon:                return 23;
-    //  case &AccessCon:                    return 24;
-  case &JoinCon:                      return 25;
-  case &RgnsCon:                      return 26;
-  case &TrueCon:                      return 27;
-  case &FalseCon:                     return 28;
-  case &FatCon:                       return 29;
-  case &ThinCon:                      return 30;
-  case &EnumCon(...):                 return 31;
-  case &AnonEnumCon(...):             return 32;
-  case &BuiltinCon(...):              return 33;
-  case &DatatypeCon(...):             return 34;
-  case &DatatypeFieldCon(...):        return 35;
-  case &AggrCon(...):                 return 36;
-  case &ComplexCon:                   return 37;
-  case &AqualVarCon:                  return 38;
-  case &AqualConstCon(...):           return 39;
-  case &AqualsCon:                    return 40;
-  case &AqualHandleCon:               return 41;
-  default: Warn::impos2("bad con");
+  case &IntCon(Unsigned,Char_sz):     return 501;
+  case &IntCon(Signed,Char_sz):       return 502;
+  case &IntCon(None,Char_sz):         return 503;
+  case &IntCon(Unsigned,Short_sz):    return 504;
+  case &IntCon(Signed,Short_sz):      return 505;
+  case &IntCon(None,Short_sz):        return 506;
+  case &IntCon(Unsigned,Int_sz):      return 507;
+  case &IntCon(Signed,Int_sz):        return 508;
+  case &IntCon(None,Int_sz):          return 509;
+  case &IntCon(Unsigned,Long_sz):     return 507;  // NB: treating long == int
+  case &IntCon(Signed,Long_sz):       return 508;
+  case &IntCon(None,Long_sz):         return 509;
+  case &IntCon(Unsigned,LongLong_sz): return 513;
+  case &IntCon(Signed,LongLong_sz):   return 514;
+  case &IntCon(None,LongLong_sz):     return 515;
+  case &FloatCon(0):                  return 516;
+  case &FloatCon(1):                  return 517;
+  case &FloatCon(_):                  return 518;
+  default: return tagof(t);
   }
 }
 static int type_case_number(type_t t) {
   switch(t) {
-  case &Evar(...):            return 1;
-  case &VarType(_):           return 2;
-  case &PointerType(_):       return 3;
-  case &ArrayType(_):         return 4;
-  case &FnType(_):            return 5;
-  case &AnonAggrType(...):    return 6;
-  case &TypedefType(...):     return 7;
-  case &ValueofType(_):       return 8;
-  case &TypeDeclType(...):    return 9;
-  case &TypeofType(_):        return 10;
-  case &AppType(c,_):         return 11 + tycon2int(c);
+  case &AppType(c,_):         return 1000 + tycon2int(c);
+  default: return tagof(t);
   }
 }
 static int star_cmp(int (@cmp)(`a@`r,`a@`r),`a*`r a1, `a*`r a2) {
