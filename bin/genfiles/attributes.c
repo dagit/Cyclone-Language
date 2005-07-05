@@ -339,7 +339,7 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #endif //CYC_REGION_PROFILE
 #endif //_CYC_INCLUDE_H
 
-# 118 "core.h"
+# 121 "core.h"
  int Cyc_Core_intcmp(int,int);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
 # 61 "list.h"
 extern int Cyc_List_length(struct Cyc_List_List*);

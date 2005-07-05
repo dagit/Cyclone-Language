@@ -341,9 +341,9 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 
 # 95 "core.h"
  struct _fat_ptr Cyc_Core_new_string(unsigned);struct _tuple0{void*f0;void*f1;};
-# 110
+# 113
 void*Cyc_Core_fst(struct _tuple0*);
-# 112
+# 115
 void*Cyc_Core_snd(struct _tuple0*);struct Cyc___cycFILE;
 # 51 "cycboot.h"
 extern struct Cyc___cycFILE*Cyc_stdout;

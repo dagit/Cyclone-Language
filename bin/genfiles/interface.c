@@ -343,7 +343,7 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 extern struct _fat_ptr Cyc_aprintf(struct _fat_ptr,struct _fat_ptr);
 # 100
 extern int Cyc_fprintf(struct Cyc___cycFILE*,struct _fat_ptr,struct _fat_ptr);struct Cyc_Core_Opt{void*v;};
-# 116 "core.h"
+# 119 "core.h"
 void*Cyc_Core_identity(void*);extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _fat_ptr f1;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
 # 76 "list.h"
 extern struct Cyc_List_List*Cyc_List_map(void*(*)(void*),struct Cyc_List_List*);

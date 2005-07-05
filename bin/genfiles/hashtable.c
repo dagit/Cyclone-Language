@@ -339,9 +339,9 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #endif //CYC_REGION_PROFILE
 #endif //_CYC_INCLUDE_H
  struct Cyc_Core_Not_found_exn_struct{char*tag;};
-# 151 "core.h"
+# 154 "core.h"
 extern struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val;
-# 170
+# 173
 extern struct _RegionHandle*Cyc_Core_heap_region;struct Cyc_Hashtable_Table;
 # 72 "hashtable.h"
 void Cyc_Hashtable_resize(struct Cyc_Hashtable_Table*);struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};

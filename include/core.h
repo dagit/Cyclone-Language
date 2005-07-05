@@ -92,15 +92,18 @@ typedef struct Opt<`a> *@aqual(`q) `r opt_t<`a,`r,`q>;
   /** [opt_map(f,x)] applies [f] to the value contained in option [x],
       if any, and returns the result as an option; if [x] is NULL,
       [opt_map(f,x)] returns NULL. */
- mstring_t<`H> new_string(unsigned int);
+mstring_t<`H> new_string(unsigned int x) 
+  @ensures(x <= numelts(return_value));
   /** [new_string(n)] allocates space for [n] characters on the heap
       and returns a pointer to the space.  All of the characters are
       set to NUL (0). */
- mstring_t<`r::E> rnew_string(region_t<`r>,unsigned int);
+ mstring_t<`r::E> rnew_string(region_t<`r>,unsigned int x) 
+   @ensures(x <= numelts(return_value));
   /** [rnew_string(r,n)] allocates space for [n] characters in the
       region with handle [r], and returns a pointer to the space.  All
       of the characters are set to NUL (0). */
- mstring_t<`r,`q> rqnew_string(region_t<`r>,aqual_t<`q\T>,unsigned int);
+ mstring_t<`r,`q> rqnew_string(region_t<`r>,aqual_t<`q\T>,unsigned int x)
+   @ensures(x <= numelts(return_value));
   /** [rqnew_string(r,q,n)] same as above ...except allocates with aqual(`q)*/
  bool true_f(`a);
   /** [true_f] is the constant [true] function: [true_f(x)] returns

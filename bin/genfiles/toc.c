@@ -339,17 +339,17 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #endif //CYC_REGION_PROFILE
 #endif //_CYC_INCLUDE_H
  struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};
-# 170 "core.h"
+# 173 "core.h"
 extern struct _RegionHandle*Cyc_Core_heap_region;
-# 177
+# 180
 extern unsigned Cyc_Core_unique_qual;
-# 190 "core.h"
+# 193 "core.h"
 void Cyc_Core_ufree(void*);
-# 206 "core.h"
+# 209 "core.h"
 struct _fat_ptr Cyc_Core_alias_refptr(struct _fat_ptr);struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};
-# 273
+# 276
 struct Cyc_Core_NewDynamicRegion Cyc_Core__new_rckey(unsigned,const char*,const char*,int);
-# 300 "core.h"
+# 303 "core.h"
 void Cyc_Core_free_rckey(struct Cyc_Core_DynamicRegion*);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
 # 54 "list.h"
 extern struct Cyc_List_List*Cyc_List_list(struct _fat_ptr);

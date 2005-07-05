@@ -501,6 +501,7 @@ void tcAggrdecl(tenv_t te, seg_t loc, aggrdecl_t ad) {
     rule_out_memkind(loc, q, tvs);
     // we constrain existential variables to be Aliasable if
     //   they have not yet been fixed
+    rule_out_memkind(loc, q, exist_vars);
     //    rule_out_memkind(loc, q, exist_vars, true);
 
     if(ad->kind == UnionA && !tagged)

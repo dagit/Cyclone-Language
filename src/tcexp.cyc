@@ -1855,7 +1855,10 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
     // FIX: allow other kinds
     check_type(loc,te2,lookup_type_vars(te2),&Kinds::ak,true,false,user_ex_ts->hd);
     check_no_qual(loc,user_ex_ts->hd);
-    Unify::unify(user_ex_ts->hd,ex_ts->hd);
+    if (!Unify::unify(user_ex_ts->hd,ex_ts->hd)) {
+      Warn::err2(loc,"bad instantiation of existential type");
+      Unify::explain_failure();
+    }
     user_ex_ts = user_ex_ts->tl;
     ex_ts      = ex_ts->tl;
   }
@@ -1873,10 +1876,12 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
     let inst_fieldtyp = substitute(inst,field->type);
     let ftyp = tcExpInitializer(clear_abstract_val_ok(te2),
 				&inst_fieldtyp, field_exp);   
-    if (!coerce_arg(curr_aquals_bounds(te),field_exp,inst_fieldtyp,&bogus))
+    if (!coerce_arg(curr_aquals_bounds(te),field_exp,inst_fieldtyp,&bogus)) {
+      Unify::unify(ftyp,inst_fieldtyp);
       err_and_explain(field_exp->loc,"field ",*(field->name)," of ",ad,
 		      " expects type ",inst_fieldtyp, " != ", 
-		      field_exp->topt);
+		      ftyp);
+    }
     bool nothrow_fld =  List::mem(Atts::attribute_cmp,
 				  field->attributes,
 				  &Atts::No_throw_att_val);

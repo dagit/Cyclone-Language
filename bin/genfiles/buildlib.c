@@ -339,9 +339,9 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #endif //CYC_REGION_PROFILE
 #endif //_CYC_INCLUDE_H
  struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};
-# 170 "core.h"
+# 173 "core.h"
 extern struct _RegionHandle*Cyc_Core_heap_region;
-# 318 "core.h"
+# 321 "core.h"
 void Cyc_Core_rethrow(void*);
 # 38 "cycboot.h"
 extern int Cyc_open(const char*,int,struct _fat_ptr);struct Cyc___cycFILE;

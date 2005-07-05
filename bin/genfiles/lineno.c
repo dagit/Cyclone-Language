@@ -341,7 +341,7 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 
 # 95 "core.h"
  struct _fat_ptr Cyc_Core_new_string(unsigned);
-# 118
+# 121
 int Cyc_Core_intcmp(int,int);struct Cyc___cycFILE;struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};
 # 197 "cycboot.h"
 extern int Cyc_sscanf(struct _fat_ptr,struct _fat_ptr,struct _fat_ptr);

@@ -339,13 +339,13 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #endif //CYC_REGION_PROFILE
 #endif //_CYC_INCLUDE_H
  extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _fat_ptr f1;};
-# 318 "core.h"
+# 321 "core.h"
 void Cyc_Core_rethrow(void*);
-# 322
+# 325
 const char*Cyc_Core_get_exn_name(void*);
-# 324
+# 327
 const char*Cyc_Core_get_exn_filename (void);
-# 331
+# 334
 int Cyc_Core_get_exn_lineno (void);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
 # 54 "list.h"
 extern struct Cyc_List_List*Cyc_List_list(struct _fat_ptr);

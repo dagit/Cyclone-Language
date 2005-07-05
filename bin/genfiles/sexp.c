@@ -353,7 +353,7 @@ extern int Cyc_fprintf(struct Cyc___cycFILE*,struct _fat_ptr,struct _fat_ptr);
 extern int Cyc_getc(struct Cyc___cycFILE*);
 # 222 "cycboot.h"
 extern int Cyc_ungetc(int,struct Cyc___cycFILE*);extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _fat_ptr f1;};
-# 318 "core.h"
+# 321 "core.h"
 void Cyc_Core_rethrow(void*);struct Cyc_Hashtable_Table;
 # 39 "hashtable.h"
 extern struct Cyc_Hashtable_Table*Cyc_Hashtable_create(int,int(*)(void*,void*),int(*)(void*));

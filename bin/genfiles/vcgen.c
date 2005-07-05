@@ -339,9 +339,9 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #endif //CYC_REGION_PROFILE
 #endif //_CYC_INCLUDE_H
  struct Cyc_Core_Opt{void*v;};struct _tuple0{void*f0;void*f1;};
-# 112 "core.h"
+# 115 "core.h"
 void*Cyc_Core_snd(struct _tuple0*);
-# 125
+# 128
 int Cyc_Core_ptrcmp(void*,void*);struct Cyc_Hashtable_Table;
 # 39 "hashtable.h"
 extern struct Cyc_Hashtable_Table*Cyc_Hashtable_create(int,int(*)(void*,void*),int(*)(void*));

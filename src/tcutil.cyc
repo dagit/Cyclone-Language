@@ -2284,8 +2284,10 @@ bool subtype(list_t<$(type_t,type_t)@`H,`H> assume,
       let $(_,tq1,t1) = *args1->hd;
       let $(_,tq2,t2) = *args2->hd;
       // FIX: we need to take any qualifiers into account on typedefs
-      if ((tq2.real_const && !tq1.real_const) || !subtype(assume,t2,t1))
-          return false;
+      // JGM: I'm dropping the assumptions here -- not sure it's sound
+      // to include them, and results in bad error messages...
+      if ((tq2.real_const && !tq1.real_const) || !subtype(NULL,t2,t1)) 
+        return false;
     }
     // deal with varargs
     if (f1.c_varargs != f2.c_varargs) return false;
@@ -2340,7 +2342,8 @@ bool subtype(list_t<$(type_t,type_t)@`H,`H> assume,
     }
     // otherwise okay
     return true;
-  default: return effect_subtype(t1, t2, true);
+  default: 
+    return effect_subtype(t1, t2, true);
   }
 }
 
@@ -2492,7 +2495,6 @@ coercion_t castable(seg_t loc, type_t t1, type_t t2){
       // bound of 1, is not fat, and is not zero-terminated!
       let deep_castable =
         unify(b_b,bounds_one()) && (!force_type2bool(false,zt_b));
-
       let ptrsub = quals_okay &&
         ((deep_castable && ptrsubtype(assump,t_a,t_b)) ||
          unify(t_a,t_b) || isomorphic(t_a,t_b) || unify(t_b,void_type));

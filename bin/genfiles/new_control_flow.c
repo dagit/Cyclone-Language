@@ -339,13 +339,13 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #endif //CYC_REGION_PROFILE
 #endif //_CYC_INCLUDE_H
  struct Cyc_Core_Opt{void*v;};struct _tuple0{void*f0;void*f1;};
-# 112 "core.h"
+# 115 "core.h"
 void*Cyc_Core_snd(struct _tuple0*);
-# 125
+# 128
 int Cyc_Core_ptrcmp(void*,void*);
-# 170
+# 173
 extern struct _RegionHandle*Cyc_Core_heap_region;
-# 318 "core.h"
+# 321 "core.h"
 void Cyc_Core_rethrow(void*);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
 # 54 "list.h"
 extern struct Cyc_List_List*Cyc_List_list(struct _fat_ptr);

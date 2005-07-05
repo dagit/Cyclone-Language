@@ -339,11 +339,11 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #endif //CYC_REGION_PROFILE
 #endif //_CYC_INCLUDE_H
  extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _fat_ptr f1;};
-# 170 "core.h"
+# 173 "core.h"
 extern struct _RegionHandle*Cyc_Core_heap_region;
-# 177
+# 180
 extern unsigned Cyc_Core_unique_qual;
-# 190 "core.h"
+# 193 "core.h"
 void Cyc_Core_ufree(void*);struct Cyc_Buffer_t;
 # 38 "string.h"
 extern unsigned long Cyc_strlen(struct _fat_ptr);

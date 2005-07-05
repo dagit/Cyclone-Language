@@ -6,10 +6,9 @@ include ../Makefile.inc
 # (see targets test, test_bin, and test_src in parent directory's Makefile)
 CYCBISON=cycbison$(EXE)
 ifndef devel
-CYCC=cyclone$(EXE)
 else
 CYCC=../build/boot/cyclone$(EXE)
-CYCFLAGS=-I../lib -I../include -B../build/boot -pp -save-c -g  #--vcgen
+CYCFLAGS=-I../lib -I../include -B../build/boot -pp -save-c -g --mergepaths 
 endif
 HAVE_PTHREAD=no
 # test asm doesn't work for me on cygwin

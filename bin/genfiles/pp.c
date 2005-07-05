@@ -341,9 +341,9 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
  struct Cyc_Core_Opt{void*v;};
 # 95 "core.h"
 struct _fat_ptr Cyc_Core_new_string(unsigned);
-# 116
+# 119
 void*Cyc_Core_identity(void*);
-# 118
+# 121
 int Cyc_Core_intcmp(int,int);extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};struct Cyc___cycFILE;struct Cyc_String_pa_PrintArg_struct{int tag;struct _fat_ptr f1;};
 # 100 "cycboot.h"
 extern int Cyc_fprintf(struct Cyc___cycFILE*,struct _fat_ptr,struct _fat_ptr);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};

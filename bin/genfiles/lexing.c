@@ -341,9 +341,9 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 
 # 95 "core.h"
  struct _fat_ptr Cyc_Core_new_string(unsigned);
-# 99
+# 100
 struct _fat_ptr Cyc_Core_rnew_string(struct _RegionHandle*,unsigned);
-# 170
+# 173
 extern struct _RegionHandle*Cyc_Core_heap_region;struct Cyc___cycFILE;
 # 276 "cycboot.h"
 extern int Cyc_file_string_read(struct Cyc___cycFILE*,struct _fat_ptr,int,int);struct Cyc_Lexing_lexbuf{void(*refill_buff)(struct Cyc_Lexing_lexbuf*);void*refill_state;struct _fat_ptr lex_buffer;int lex_buffer_len;int lex_abs_pos;int lex_start_pos;int lex_curr_pos;int lex_last_pos;int lex_last_action;int lex_eof_reached;};struct Cyc_Lexing_function_lexbuf_state{int(*read_fun)(struct _fat_ptr,int,void*);void*read_fun_state;};

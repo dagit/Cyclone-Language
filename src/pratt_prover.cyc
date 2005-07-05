@@ -355,9 +355,11 @@ static node_t @term2node(graph_t @`r g, term_t t) {
   node_t * @ `H+`r prev = &g->rows;
   int count = 0;
   for (let r = g->rows; r != NULL; r = r->next) {
-    ++count;
-    if (count > max_lookup) max_lookup = count;
-    int c = termcmp(t,r->rep);
+    //++count;
+    //if (count > max_lookup) max_lookup = count;
+    let rep = r->rep;
+    int c = tagof(t) - tagof(rep);
+    if (c == 0) c = termcmp(t,rep);
     if (c == 0) return r;
     if (c > 1) break;
     prev = &r->next;
