@@ -805,7 +805,7 @@ return 1;}else{
 {int i=0;for(0;(unsigned)i < 10U;++ i){
 if(!Cyc_strcmp((*((struct _tuple13*)_check_known_subscript_notnull(known_gcc_flags,10U,sizeof(struct _tuple13),i))).flag,s)){
 Cyc_add_ccarg(s);
-Cyc_gcc_optarg=known_gcc_flags[i].optargs;
+Cyc_gcc_optarg=(*((struct _tuple13*)_check_known_subscript_notnull(known_gcc_flags,10U,sizeof(struct _tuple13),i))).optargs;
 break;}}}
 # 369
 return 0;}}

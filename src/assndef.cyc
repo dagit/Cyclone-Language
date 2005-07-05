@@ -69,7 +69,7 @@ string_t term2string(term_t t) {
   string_t res;
   switch (t) {
   case &Uint(i,_): res = aprintf("0x%x", i); break;
-  case &Const(e): res = Absynpp::exp2string(e); break;
+  case &Const(e): res = aprintf("%s[%d]",Absynpp::exp2string(e),(int)e); break;
   case &Tagof(t): res = aprintf("tagof_tm(%s)",term2string(t)); break;
   case &Select(t1,t2,_):
     res = aprintf("Sel(%s,%s)",term2string(t1),term2string(t2));
@@ -113,8 +113,8 @@ string_t term2string(term_t t) {
     else 
       res = aprintf("&%s",Absynpp::qvar2string(vd->name));
     break;
-  case &Alloc(e,_,i,_):
-    res = aprintf("Alloc(%s,%d)", Absynpp::exp2string(e),i);
+  case &Alloc(e,t,i,_):
+    res = aprintf("Alloc(%s[%d],%s,%d)", Absynpp::exp2string(e),(int)e,term2string(t),i);
     break;
   case &Offsetf(field,t,_):
     res = aprintf("Offsetf(%s)+%s",*field,term2string(t));
@@ -210,7 +210,7 @@ int termcmp(datatype Term @`r1 _t1, datatype Term @`r2 _t2) {
   case $(&Uint(i1,_), &Uint(i2,_)): return i1-i2;
     //case $(&Uint(...),_): return -1;
     //case $(_,&Uint(...)): return 1;
-  case $(&Const(e1),&Const(e2)): return Evexp::exp_cmp(e1,e2);
+  case $(&Const(e1),&Const(e2)): return (int)e1-(int)e2;
     //case $(&Const(...),_): return -1;
     //case $(_,&Const(...)): return 1;
   case $(&Addr(vd1),&Addr(vd2)): return (int)vd1 - (int)vd2;
@@ -396,8 +396,9 @@ static term_set_t term_fr_logicvar(term_t t) {
   case &Uint(...): 
   case &Const(...):
   case &Addr(...):
-  case &Alloc(...):
     res = empty_term_set(); break;
+  case &Alloc(_,t1,_,_):
+    res = term_fr_logicvar(t1); break;
   case &LogicVar(...):
     res = Set::singleton(termcmp,t);
     break;
@@ -988,7 +989,12 @@ static term_t subst_term(term_dict_t dict, term_t t,
   case &Uint(...):
   case &Const(...): 
   case &Addr(...): 
-  case &Alloc(...): res = t; break;
+    res = t; break;
+  case &Alloc(e1,t1,i,tp): 
+    let s1 = subst_term(dict,t1,term_h);
+    let alloc_term = Alloc(e1,s1,i,tp);
+    res = hash_cons_term(&alloc_term);
+    break;
   case &Select(t1,t2,tp):
     let s1 = subst_term(dict,t1,term_h);
     let s2 = subst_term(dict,t2,term_h);
@@ -1489,7 +1495,17 @@ static assn_t subst_a(term_dict_t dict, assn_t a){
   Hashtable::table_t<term_t,term_t> term_h = Hashtable::create(137,Core::ptrcmp,hash_ptr);
   return subst_assn(dict,a,assn_h,term_h);
 }
+#ifdef AssnDefDebug
+static void fprint_assn(assn_t a) {
+  fprintf(stderr,"%s[%d]\n",assn2string(a),(int)a);
+}
 
+static void fprint_assncmp(assn_t a1, assn_t a2) {
+  if (assncmp(a1,a2) == 0) fprintf(stderr, "%s EQ %s\n",
+				   assn2string(a1),
+				   assn2string(a2));
+}
+#endif
 // tries to see if a can be proved from the set of primitive
 // relations in ctxt.
 static bool simple_prv(assn_set_t ctxt, assn_t a) {
@@ -1497,6 +1513,12 @@ static bool simple_prv(assn_set_t ctxt, assn_t a) {
     switch (a) {
     case &Prim(t1,p,t2): 
       if (Set::member(ctxt,a)) return true;
+#ifdef AssnDefDebug
+      fprintf(stderr,"simple_prv prim: failed\n");
+      Set::iter(fprint_assn,ctxt);
+      Set::iter_c(fprint_assncmp,a,ctxt);
+      fprintf(stderr,"simple_prv prim: %s[%d] NOT OK\n",assn2string(a),(int)a);
+#endif
       switch (p) {
       case Neq: 
         return (Set::member(ctxt,ult(t2,t1)) ||
@@ -1514,7 +1536,12 @@ static bool simple_prv(assn_set_t ctxt, assn_t a) {
     case &True: return true;
     case &False: return false;
     case &And(a1,a2): 
-      if (!simple_prv(ctxt,a1)) return false;
+      if (!simple_prv(ctxt,a1)) {
+	return false;
+      }
+#ifdef AssnDefDebug
+      fprintf(stderr,"simple_prv: and a1 OK\n");
+#endif
       a = a2; 
       continue;
     case &Or(a1,a2): 

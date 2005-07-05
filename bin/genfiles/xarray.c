@@ -427,9 +427,9 @@ void*init=_get_fat_size(xarr1->elmts,sizeof(void*))==0U?((void**)xarr2->elmts.cu
 struct Cyc_Xarray_Xarray*ans;ans=_region_malloc(r,0U,sizeof(struct Cyc_Xarray_Xarray)),ans->elmts=({unsigned _Tmp0=(unsigned)newsz;_tag_fat(({void**_Tmp1=({unsigned _Tmp2=Cyc_Core_unique_qual;_aqual_malloc(_Tmp2,_check_times(_Tmp0,sizeof(void*)));});({{unsigned _Tmp2=(unsigned)newsz;unsigned i;for(i=0;i < _Tmp2;++ i){_Tmp1[i]=init;}}0;});_Tmp1;}),sizeof(void*),_Tmp0);}),ans->num_elmts=0;
 # 121
 {int i=0;for(0;i < xarr1->num_elmts;++ i){
-Cyc_Xarray_add(ans,*((void**)_check_fat_subscript(xarr1->elmts,sizeof(void*),i)));}}
+Cyc_Xarray_add(ans,((void**)xarr1->elmts.curr)[i]);}}
 {int i=0;for(0;i < xarr2->num_elmts;++ i){
-Cyc_Xarray_add(ans,*((void**)_check_fat_subscript(xarr2->elmts,sizeof(void*),i)));}}
+Cyc_Xarray_add(ans,((void**)xarr2->elmts.curr)[i]);}}
 return ans;}}
 # 128
 struct Cyc_Xarray_Xarray*Cyc_Xarray_append(struct Cyc_Xarray_Xarray*xarr1,struct Cyc_Xarray_Xarray*xarr2){

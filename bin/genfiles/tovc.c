@@ -939,7 +939,7 @@ if(fd->param_vardecls!=0){
 struct _RegionHandle _Tmp2=_new_region(0U,"rgn");struct _RegionHandle*rgn=& _Tmp2;_push_region(rgn);
 {struct Cyc_List_List**gen_ds;gen_ds=_region_malloc(rgn,0U,sizeof(struct Cyc_List_List*)),*gen_ds=0;
 ({struct Cyc_Tovc_ToExpEnv _Tmp3=({struct Cyc_Tovc_ToExpEnv _Tmp4;_Tmp4.rgn=rgn,({
-struct Cyc_List_List*_Tmp5=Cyc_List_rcopy(rgn,(struct Cyc_List_List*)fd->param_vardecls->v);_Tmp4.all_locals=_Tmp5;}),({
+struct Cyc_List_List*_Tmp5=Cyc_List_rcopy(rgn,(struct Cyc_List_List*)_check_null(fd->param_vardecls)->v);_Tmp4.all_locals=_Tmp5;}),({
 struct Cyc_Dict_Dict _Tmp5=({struct Cyc_Dict_Dict(*_Tmp6)(struct _RegionHandle*,int(*)(struct _fat_ptr*,struct _fat_ptr*))=(struct Cyc_Dict_Dict(*)(struct _RegionHandle*,int(*)(struct _fat_ptr*,struct _fat_ptr*)))Cyc_Dict_rempty;_Tmp6;})(rgn,Cyc_strptrcmp);_Tmp4.varmap=_Tmp5;}),_Tmp4.encloser=fd->body,_Tmp4.gen_ds=gen_ds;_Tmp4;});
 # 684
 Cyc_Tovc_stmt_to_vc(_Tmp3,fd->body);});

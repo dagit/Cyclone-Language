@@ -913,7 +913,7 @@ if(Cyc_Flags_compile_for_boot){
 # 748
 int last_slash=-1;
 {int i=(int)(Cyc_strlen(_tag_fat(buf,sizeof(char),100U))- 1U);for(0;i >= 0;-- i){
-if((int)*((char*)_check_known_subscript_notnull(buf,100U,sizeof(char),i))==47){
+if((int)buf[i]==47){
 last_slash=i;
 break;}}}
 # 754
@@ -1440,7 +1440,7 @@ unsigned rwsze=97U;
 if(include_cyclone_keywords ||(*((struct _tuple28*)_check_known_subscript_notnull(Cyc_Lex_rw_array,97U,sizeof(struct _tuple28),(int)j))).f2){
 struct _fat_ptr str=(*((struct _tuple28*)_check_known_subscript_notnull(Cyc_Lex_rw_array,97U,sizeof(struct _tuple28),(int)j))).f0;
 ({struct _fat_ptr _Tmp4=str;Cyc_Lex_str_index(_Tmp4,0,(int)Cyc_strlen(str));});
-({struct Cyc_Lex_KeyWordInfo _Tmp4=({struct Cyc_Lex_KeyWordInfo _Tmp5;_Tmp5.token_index=(int)Cyc_Lex_rw_array[(int)j].f1,_Tmp5.is_c_keyword=Cyc_Lex_rw_array[(int)j].f2;_Tmp5;});*((struct Cyc_Lex_KeyWordInfo*)_check_fat_subscript(Cyc_Lex_kw_nums,sizeof(struct Cyc_Lex_KeyWordInfo),(int)i))=_Tmp4;});
+({struct Cyc_Lex_KeyWordInfo _Tmp4=({struct Cyc_Lex_KeyWordInfo _Tmp5;_Tmp5.token_index=(int)(*((struct _tuple28*)_check_known_subscript_notnull(Cyc_Lex_rw_array,97U,sizeof(struct _tuple28),(int)j))).f1,_Tmp5.is_c_keyword=(*((struct _tuple28*)_check_known_subscript_notnull(Cyc_Lex_rw_array,97U,sizeof(struct _tuple28),(int)j))).f2;_Tmp5;});*((struct Cyc_Lex_KeyWordInfo*)_check_fat_subscript(Cyc_Lex_kw_nums,sizeof(struct Cyc_Lex_KeyWordInfo),(int)i))=_Tmp4;});
 ++ i;}}}
 # 1165
 Cyc_Lex_typedef_init();
