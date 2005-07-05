@@ -60,7 +60,9 @@ void stringify(const char ?varname, FILE @f) {
     case '\\': fprintf(outf,"\\\\"); break;
     default:
       if (isprint(c)) fprintf(outf,"%c",c);
-      else fprintf(outf,"\\x%x",(unsigned char)c);
+      else
+	/* Must always use 3 digits in case next char is a digit */
+	fprintf(outf,"\\%.3o",(unsigned char)c);
     }
   }
   fprintf(outf,"\";\n");

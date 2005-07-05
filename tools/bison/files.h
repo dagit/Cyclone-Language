@@ -33,7 +33,6 @@ extern FILE *fattrs;   /* if semantic parser, output a .h file that defines YYST
 extern FILE *fattrs0;    /*contains %{...%} definitions and union declarations--wangyl*/
 extern FILE *fguard;   /* if semantic parser, output yyguard, containing all the guard code */
 extern FILE *faction;  /* output all the action code; precise form depends on which parser */
-extern FILE *fparser;  /* read the parser to copy into ftable */
 
 /* File name specified with -o for the output file, or 0 if no -o.  */
 extern char ?spec_outfile;

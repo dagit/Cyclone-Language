@@ -21,12 +21,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #if defined (VMS) & !defined (__VMS_POSIX)
 #include <ssdef.h>
 #define unlink delete
-#ifndef XPFILE
-#define XPFILE "GNU_BISON:[000000]BISON.SIMPLE"
-#endif
-#ifndef XPFILE1
-#define XPFILE1 "GNU_BISON:[000000]BISON.HAIRY"
-#endif
 #endif
 
 #include <stdio.h>
@@ -46,7 +40,6 @@ FILE *fattrs=NULL;
 FILE *fattrs0=NULL;
 FILE *fguard=NULL;
 FILE *faction=NULL;
-FILE *fparser=NULL;
 
 /* File name specified with -o for the output file, or 0 if no -o.  */
 char ?spec_outfile;
@@ -112,8 +105,6 @@ void
 openfiles()
 {
   char ?name_base;
-  register char ?cp;
-  char ?filename;
   int base_length;
   int short_base_length;
 
@@ -186,24 +177,6 @@ openfiles()
     }
 
   finput = tryopen(infile, "r");
-
-  if (! noparserflag) 
-    {
-      filename = getenv("BISON_SIMPLE");
-#ifdef MSDOS
-      /* File doesn't exist in current directory; try in INIT directory.  */
-      cp = getenv("INIT");
-      if (filename == 0 && cp != NULL)
-        {
-          filename = xmalloc(strlen(cp) + strlen(PFILE) + 2);
-          strcpy(filename, cp);
-          cp = filename + strlen(filename);
-          *cp++ = '/';
-          strcpy(cp, PFILE);
-        }
-#endif /* MSDOS */
-      fparser = tryopen(filename ? filename : strdup(PFILE), "r");
-    }
 
   if (verboseflag)
     {
@@ -295,28 +268,6 @@ void open_extra_files(void)
 {
   FILE *ftmp;
   int c;
-  char ?filename, ?cp;
-
-  if (fparser)
-    fclose((FILE @)fparser);
-
-  if (! noparserflag) 
-    {
-      filename = (char ?) getenv ("BISON_HAIRY");
-#ifdef MSDOS
-      /* File doesn't exist in current directory; try in INIT directory.  */
-      cp = getenv("INIT");
-      if (filename == 0 && cp != NULL)
-        {
-          filename = xmalloc(strlen(cp) + strlen(PFILE1) + 2);
-          strcpy(filename, cp);
-          cp = filename + strlen(filename);
-          *cp++ = '/';
-          strcpy(cp, PFILE1);
-        }
-#endif
-      fparser= tryopen(filename ? filename : strdup(PFILE1), "r");
-    }
 
 		/* JF change from inline attrs file to separate one */
   ftmp = tryopen(attrsfile, "w");
@@ -362,9 +313,6 @@ void done(int k)
 
   if (finput)
     fclose((FILE @)finput);
-
-  if (fparser)
-    fclose((FILE @)fparser);
 
   if (foutput)
     fclose((FILE @)foutput);

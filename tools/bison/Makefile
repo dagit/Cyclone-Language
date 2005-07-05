@@ -25,14 +25,10 @@ include ../../Makefile.inc
 PROG = cycbison$(EXE)
 BINDIR = $(CYCDIR)/bin
 CYC_LIB_PATH = $(BINDIR)/lib
+STRINGIFY = $(BINDIR)/stringify$(EXE)
 
 # hack so executable can find cycbison.simple
 BISONDIR=$(shell pwd)
-# names of parser files
-PFILE=cycbison.simple
-# DO NOT USE bison.hairy! NOT PORTED! (maybe someday)
-PFILE1=bison.hairy
-PFILES = -DXPFILE=\"$(BISONDIR)/$(PFILE)\" -DXPFILE1=\"$(BISONDIR)/$(PFILE1)\"
 
 LC_FLAG =
 # We put in the explicit -I and -B because install builds this tool
@@ -43,7 +39,8 @@ CYCC:=$(BINDIR)/$(CYCCOMP)
 
 SRCS = main getargs version warshall files gram \
 symtab closure LR0 reader print conflicts lex lalr reduce \
-nullable output derives
+nullable output derives \
+string_cycbison.simple
 
 O_SRCS = $(addsuffix .o, $(SRCS))
 
@@ -59,12 +56,17 @@ $(PROG): $(O_SRCS) $(CYC_LIB_PATH)/$(CYCLIB)
 
 # This file is different to pass the parser file names to the compiler.
 files.o: files.cyc
-	$(CYCC) $(CYCFLAGS) $(PFILES) -c files.cyc
+	$(CYCC) $(CYCFLAGS) -c files.cyc
+
 %.o: %.cyc $(CYCC)
 	$(CYCC) $(CYCFLAGS) -c $<
 
+string_cycbison.simple.cyc: cycbison.simple
+	$(STRINGIFY) -v cycbison_simple $< > $@
+
 clean:
 	$(RM) *.o *.c core cycbison *~ *.stackdump $(PROG)
+	$(RM) string_cycbison.simple.cyc
 
 LR0.o: system.h machine.h new.h gram.h state.h
 closure.o: system.h machine.h new.h gram.h
