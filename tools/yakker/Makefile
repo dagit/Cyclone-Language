@@ -1,7 +1,7 @@
 CYCFLAGS=
 #CYCFLAGS=-pg
 
-FILES=analyze axarray bnf ykbuf corerules cs extract fa termgrammar lex pads parse_tab parsergen pr prose stringify util yakker
+FILES=analyze axarray bnf ykbuf corerules cs extract fa termgrammar lex pads parse_tab parsergen pr prose util yakker
 
 all: yakker
 
@@ -51,20 +51,17 @@ imapp: imapp.o ykbuf.o ssl.o imap.o
 imapp.o: examples/imapp.cyc
 	cyclone -c $^ -o $@ -I.
 
-stringify: stringify.cyc
-	cyclone $^ -nogc -o $@
+string_%.cyc: %.cyc
+	stringify $< > $@
 
-string_%.cyc: %.cyc stringify
-	./stringify $< > $@
+string_%.cyc: %.str
+	stringify $< > $@
 
-string_%.cyc: %.str stringify
-	./stringify $< > $@
+prose_elim_grm.cyc: prose_elim_grm.bnf
+	stringify $< > $@
 
-prose_elim_grm.cyc: prose_elim_grm.bnf stringify
-	./stringify $< > $@
-
-corerules_grm.cyc: corerules_grm.bnf stringify
-	./stringify $< > $@
+corerules_grm.cyc: corerules_grm.bnf
+	stringify $< > $@
 
 %.d: %.cyc
 	cyclone -M -MG $< > $@
@@ -142,7 +139,6 @@ clean:
 	$(RM) string_dfa_engine1.*
 	$(RM) prose_elim_grammar.cyc
 	$(RM) prose_elim_grm.cyc corerules_grm.cyc
-	$(RM) stringify
 	$(RM) indexer indexer.cyc 1rfc_index 1rfc_index.txt
 	$(RM) wf wf.cyc
 	$(RM) http.cyc

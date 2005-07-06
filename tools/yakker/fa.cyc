@@ -47,12 +47,14 @@ static int uint_cmp(unsigned int a, unsigned int b) {
   if (a == b) return 0; else if (a<b) return -1; else return 1;
 }
 
-static Iter::iter_t<`a> iterator(Set::set_t<`a,`H> x : regions(`a) > `H) {
-  return Set::make_iter(Core::heap_region,x);
-}
-static Iter::iter_t<$(`a,`b)> dict_iter(Dict::dict_t<`a,`b,`H> x : regions($(`a,`b)) > `H) {
-  return Dict::make_iter(Core::heap_region,x);
-}
+#define iterator(x) (Set::make_iter(Core::heap_region,x))
+//static Iter::iter_t<`a> iterator(Set::set_t<`a,`H> x : regions(`a) > `H) {
+//  return Set::make_iter(Core::heap_region,x);
+//}
+#define dict_iter(x) (Dict::make_iter(Core::heap_region,x))
+//static Iter::iter_t<$(`a,`b)> dict_iter(Dict::dict_t<`a,`b,`H> x : regions($(`a,`b)) > `H) {
+//  return Dict::make_iter(Core::heap_region,x);
+//}
 
 
 /****************** NFA AND DFA COMMON DEFINITIONS ******************/
