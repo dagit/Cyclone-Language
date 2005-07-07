@@ -14,7 +14,7 @@
 
 struct ht_ht *dict = NULL;
 
-int handleInput(FILE *input,void (*hashManipFn)(char ?))
+int handleInput(FILE *input,void (*hashManipFn)(char ?`H ))
 {
     int wordbufsize = 80,i = 0;
     char ? cp, ? wordbuf;
