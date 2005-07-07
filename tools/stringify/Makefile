@@ -15,7 +15,7 @@ CYCC:=$(BINDIR)/$(CYCCOMP)
 # The -L tells the compiler to use the right libcyc.a
 
 $(PROG): stringify.cyc $(CYC_LIB_PATH)/$(CYCLIB)
-	$(CYCC) -L$(CYC_LIB_PATH) -B$(CYC_LIB_PATH)/cyc-lib $(LC_FLAG) -o $@ $< $(LDFLAGS) -nogc
+	$(CYCC) -L$(CYC_LIB_PATH) -B$(CYC_LIB_PATH)/cyc-lib $(CYCFLAGS) -o $@ $< $(LDFLAGS) -nogc
 
 clean:
 	$(RM) stringify stringify.exe
