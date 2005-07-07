@@ -876,7 +876,7 @@ if(c!=0)return c;}}
 return 0;}}
 # 697
 static struct Cyc_Sexp_Object Cyc_Sexp_next_list(struct Cyc_List_List**xs){
-struct Cyc_Sexp_Object*h=(struct Cyc_Sexp_Object*)_check_null(*xs)->hd;
+struct Cyc_Sexp_Object*h=(struct Cyc_Sexp_Object*)(*xs)->hd;
 *xs=(*xs)->tl;
 return*h;}
 # 704

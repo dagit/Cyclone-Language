@@ -555,7 +555,7 @@ buff=_fat_ptr_plus(buff,sizeof(char),offset);
 if(!(len < _get_fat_size(buff,sizeof(char))))
 ({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp0;})(_tag_fat("array bounds in trie_lookup",sizeof(char),28U),_tag_fat(0U,sizeof(void*),0));
 while(i < len){
-{union Cyc_Lex_TrieChildren _Tmp0=_check_null(t)->children;int _Tmp1;void*_Tmp2;switch(_Tmp0.One.tag){case 3: _Tmp2=_Tmp0.Many.val;{struct Cyc_Lex_Trie**arr=_Tmp2;
+{union Cyc_Lex_TrieChildren _Tmp0=t->children;int _Tmp1;void*_Tmp2;switch(_Tmp0.One.tag){case 3: _Tmp2=_Tmp0.Many.val;{struct Cyc_Lex_Trie**arr=_Tmp2;
 # 313
 int ch=Cyc_Lex_trie_char((int)*((const char*)_check_fat_subscript(buff,sizeof(char),(int)i)));
 if(*((struct Cyc_Lex_Trie**)_check_known_subscript_notnull(arr,65U,sizeof(struct Cyc_Lex_Trie*),ch))==0)
@@ -595,7 +595,7 @@ static int Cyc_Lex_str_index_body(struct _RegionHandle*d,struct _tuple29*env){
 struct _tuple29 _Tmp0=*env;int _Tmp1;int _Tmp2;struct _fat_ptr _Tmp3;void*_Tmp4;void*_Tmp5;_Tmp5=_Tmp0.f0;_Tmp4=_Tmp0.f1;_Tmp3=_Tmp0.f2;_Tmp2=_Tmp0.f3;_Tmp1=_Tmp0.f4;{struct Cyc_Lex_Trie*tree=_Tmp5;struct Cyc_Xarray_Xarray*symbols=_Tmp4;struct _fat_ptr buff=_Tmp3;int offset=_Tmp2;int len=_Tmp1;
 struct Cyc_Lex_Trie*t=Cyc_Lex_trie_lookup(d,tree,buff,offset,(unsigned)len);
 # 351
-if(_check_null(t)->shared_str==0){
+if(t->shared_str==0){
 struct _fat_ptr newstr=Cyc_Core_new_string((unsigned)(len + 1));
 ({struct _fat_ptr _Tmp6=_fat_ptr_decrease_size(newstr,sizeof(char),1U);struct _fat_ptr _Tmp7=(struct _fat_ptr)_fat_ptr_plus(buff,sizeof(char),offset);Cyc_zstrncpy(_Tmp6,_Tmp7,(unsigned long)len);});{
 int ans=({int(*_Tmp6)(struct Cyc_Xarray_Xarray*,struct _fat_ptr*)=({int(*_Tmp7)(struct Cyc_Xarray_Xarray*,struct _fat_ptr*)=(int(*)(struct Cyc_Xarray_Xarray*,struct _fat_ptr*))Cyc_Xarray_add_ind;_Tmp7;});struct Cyc_Xarray_Xarray*_Tmp7=symbols;_Tmp6(_Tmp7,({struct _fat_ptr*_Tmp8=_cycalloc(sizeof(struct _fat_ptr));*_Tmp8=newstr;_Tmp8;}));});
@@ -619,7 +619,7 @@ return Cyc_Lex_str_index(lbuf->lex_buffer,lbuf->lex_start_pos,lbuf->lex_curr_pos
 static int Cyc_Lex_insert_typedef_body(struct _RegionHandle*h,struct _tuple30*arg){
 struct _tuple30 _Tmp0=*arg;struct _fat_ptr _Tmp1;void*_Tmp2;_Tmp2=_Tmp0.f0;_Tmp1=_Tmp0.f1;{struct Cyc_Lex_Trie*t=_Tmp2;struct _fat_ptr s=_Tmp1;
 struct Cyc_Lex_Trie*t_node=Cyc_Lex_trie_lookup(h,t,s,0,_get_fat_size(s,sizeof(char))- 1U);
-_check_null(t_node)->shared_str=1;
+t_node->shared_str=1;
 return 0;}}
 # 384
 static void Cyc_Lex_insert_typedef(struct _fat_ptr*sptr){
@@ -747,17 +747,17 @@ struct Cyc_Lex_Trie*t2=({struct Cyc_Lex_Trie*(*_Tmp5)(struct Cyc_Core_DynamicReg
 ({struct Cyc_Lex_DynTrie _Tmp5=({struct Cyc_Lex_DynTrie _Tmp6;_Tmp6.dyn=dyn2,_Tmp6.t=t2;_Tmp6;});*tdefs=_Tmp5;});
 ({struct Cyc_Lex_DynTrie*_Tmp5=Cyc_Lex_typedefs_trie;struct Cyc_Lex_DynTrie*_Tmp6=tdefs;Cyc_Lex_typedefs_trie=_Tmp6;tdefs=_Tmp5;});{
 # 542
-struct Cyc_List_List*as=((struct Cyc_Binding_NSCtxt*)_check_null(Cyc_Lex_lstate)->v)->availables;for(0;as!=0;as=as->tl){
+struct Cyc_List_List*as=((struct Cyc_Binding_NSCtxt*)Cyc_Lex_lstate->v)->availables;for(0;as!=0;as=as->tl){
 void*_Tmp5=(void*)as->hd;void*_Tmp6;if(*((int*)_Tmp5)==1){_Tmp6=((struct Cyc_Binding_Using_Binding_NSDirective_struct*)_Tmp5)->f1;{struct Cyc_List_List*ns=_Tmp6;
 _Tmp6=ns;goto _LLA;}}else{_Tmp6=((struct Cyc_Binding_Namespace_Binding_NSDirective_struct*)_Tmp5)->f1;_LLA: {struct Cyc_List_List*ns=_Tmp6;
 # 546
-struct Cyc_Lex_Ldecls*ts=({struct Cyc_Lex_Ldecls*(*_Tmp7)(struct Cyc_Dict_Dict,struct Cyc_List_List*)=(struct Cyc_Lex_Ldecls*(*)(struct Cyc_Dict_Dict,struct Cyc_List_List*))Cyc_Dict_lookup;_Tmp7;})(((struct Cyc_Binding_NSCtxt*)_check_null(Cyc_Lex_lstate)->v)->ns_data,ns);
+struct Cyc_Lex_Ldecls*ts=({struct Cyc_Lex_Ldecls*(*_Tmp7)(struct Cyc_Dict_Dict,struct Cyc_List_List*)=(struct Cyc_Lex_Ldecls*(*)(struct Cyc_Dict_Dict,struct Cyc_List_List*))Cyc_Dict_lookup;_Tmp7;})(((struct Cyc_Binding_NSCtxt*)Cyc_Lex_lstate->v)->ns_data,ns);
 ({void(*_Tmp7)(void(*)(struct _fat_ptr*),struct Cyc_Set_Set*)=(void(*)(void(*)(struct _fat_ptr*),struct Cyc_Set_Set*))Cyc_Set_iter;_Tmp7;})(Cyc_Lex_insert_typedef,ts->typedefs);
 goto _LL6;}}_LL6:;}}}}}}}
 # 554
 static int Cyc_Lex_is_typedef_in_namespace(struct Cyc_List_List*ns,struct _fat_ptr*v){
-struct Cyc_List_List*ans=Cyc_Binding_resolve_rel_ns(0U,(struct Cyc_Binding_NSCtxt*)_check_null(Cyc_Lex_lstate)->v,ns);
-struct Cyc_Lex_Ldecls*ts=({struct Cyc_Lex_Ldecls*(*_Tmp0)(struct Cyc_Dict_Dict,struct Cyc_List_List*)=(struct Cyc_Lex_Ldecls*(*)(struct Cyc_Dict_Dict,struct Cyc_List_List*))Cyc_Dict_lookup;_Tmp0;})(((struct Cyc_Binding_NSCtxt*)_check_null(Cyc_Lex_lstate)->v)->ns_data,ans);
+struct Cyc_List_List*ans=Cyc_Binding_resolve_rel_ns(0U,(struct Cyc_Binding_NSCtxt*)Cyc_Lex_lstate->v,ns);
+struct Cyc_Lex_Ldecls*ts=({struct Cyc_Lex_Ldecls*(*_Tmp0)(struct Cyc_Dict_Dict,struct Cyc_List_List*)=(struct Cyc_Lex_Ldecls*(*)(struct Cyc_Dict_Dict,struct Cyc_List_List*))Cyc_Dict_lookup;_Tmp0;})(((struct Cyc_Binding_NSCtxt*)Cyc_Lex_lstate->v)->ns_data,ans);
 return({int(*_Tmp0)(struct Cyc_Set_Set*,struct _fat_ptr*)=(int(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_member;_Tmp0;})(ts->typedefs,v);}struct _tuple32{struct Cyc_List_List*f0;struct Cyc_Lex_Trie*f1;struct _fat_ptr f2;};
 # 560
 static int Cyc_Lex_is_typedef_body(struct _RegionHandle*d,struct _tuple32*env){
@@ -765,7 +765,7 @@ static int Cyc_Lex_is_typedef_body(struct _RegionHandle*d,struct _tuple32*env){
 struct _tuple32 _Tmp0=*env;struct _fat_ptr _Tmp1;void*_Tmp2;void*_Tmp3;_Tmp3=_Tmp0.f0;_Tmp2=_Tmp0.f1;_Tmp1=_Tmp0.f2;{struct Cyc_List_List*ns=_Tmp3;struct Cyc_Lex_Trie*t=_Tmp2;struct _fat_ptr s=_Tmp1;
 int len=(int)(_get_fat_size(s,sizeof(char))- 1U);
 {int i=0;for(0;i < len;++ i){
-union Cyc_Lex_TrieChildren _Tmp4=_check_null(t)->children;void*_Tmp5;int _Tmp6;switch(_Tmp4.One.tag){case 1:
+union Cyc_Lex_TrieChildren _Tmp4=t->children;void*_Tmp5;int _Tmp6;switch(_Tmp4.One.tag){case 1:
  return 0;case 2: _Tmp6=_Tmp4.One.val.f0;_Tmp5=_Tmp4.One.val.f1;if((int)_Tmp6!=(int)((const char*)s.curr)[i]){int one_ch=_Tmp6;struct Cyc_Lex_Trie*one_trie=_Tmp5;
 return 0;}else{_Tmp5=_Tmp4.One.val.f1;{struct Cyc_Lex_Trie*one_trie=_Tmp5;
 t=one_trie;goto _LL3;}}default: _Tmp5=_Tmp4.Many.val;{struct Cyc_Lex_Trie**arr=_Tmp5;
@@ -776,7 +776,7 @@ return 0;
 t=next;
 goto _LL3;}}_LL3:;}}
 # 577
-return _check_null(t)->shared_str;}}
+return t->shared_str;}}
 # 579
 static int Cyc_Lex_is_typedef(struct Cyc_List_List*ns,struct _fat_ptr*v){
 if(ns!=0)
@@ -793,29 +793,29 @@ int res=({int(*_Tmp3)(struct Cyc_Core_DynamicRegion*,struct _tuple32*,int(*)(str
 return res;}}}}
 # 595
 void Cyc_Lex_enter_namespace(struct _fat_ptr*s){
-({void(*_Tmp0)(struct Cyc_Binding_NSCtxt*,struct _fat_ptr*,int,struct Cyc_Lex_Ldecls*(*)(int))=(void(*)(struct Cyc_Binding_NSCtxt*,struct _fat_ptr*,int,struct Cyc_Lex_Ldecls*(*)(int)))Cyc_Binding_enter_ns;_Tmp0;})((struct Cyc_Binding_NSCtxt*)_check_null(Cyc_Lex_lstate)->v,s,1,Cyc_Lex_mk_empty_ldecls);{
-struct Cyc_Lex_Ldecls*ts=({struct Cyc_Lex_Ldecls*(*_Tmp0)(struct Cyc_Dict_Dict,struct Cyc_List_List*)=(struct Cyc_Lex_Ldecls*(*)(struct Cyc_Dict_Dict,struct Cyc_List_List*))Cyc_Dict_lookup;_Tmp0;})(((struct Cyc_Binding_NSCtxt*)_check_null(Cyc_Lex_lstate)->v)->ns_data,((struct Cyc_Binding_NSCtxt*)Cyc_Lex_lstate->v)->curr_ns);
+({void(*_Tmp0)(struct Cyc_Binding_NSCtxt*,struct _fat_ptr*,int,struct Cyc_Lex_Ldecls*(*)(int))=(void(*)(struct Cyc_Binding_NSCtxt*,struct _fat_ptr*,int,struct Cyc_Lex_Ldecls*(*)(int)))Cyc_Binding_enter_ns;_Tmp0;})((struct Cyc_Binding_NSCtxt*)Cyc_Lex_lstate->v,s,1,Cyc_Lex_mk_empty_ldecls);{
+struct Cyc_Lex_Ldecls*ts=({struct Cyc_Lex_Ldecls*(*_Tmp0)(struct Cyc_Dict_Dict,struct Cyc_List_List*)=(struct Cyc_Lex_Ldecls*(*)(struct Cyc_Dict_Dict,struct Cyc_List_List*))Cyc_Dict_lookup;_Tmp0;})(((struct Cyc_Binding_NSCtxt*)Cyc_Lex_lstate->v)->ns_data,((struct Cyc_Binding_NSCtxt*)Cyc_Lex_lstate->v)->curr_ns);
 # 600
 ({void(*_Tmp0)(void(*)(struct _fat_ptr*),struct Cyc_Set_Set*)=(void(*)(void(*)(struct _fat_ptr*),struct Cyc_Set_Set*))Cyc_Set_iter;_Tmp0;})(Cyc_Lex_insert_typedef,ts->typedefs);}}
 # 602
 void Cyc_Lex_leave_namespace (void){
-Cyc_Binding_leave_ns((struct Cyc_Binding_NSCtxt*)_check_null(Cyc_Lex_lstate)->v);
+Cyc_Binding_leave_ns((struct Cyc_Binding_NSCtxt*)Cyc_Lex_lstate->v);
 Cyc_Lex_recompute_typedefs();}
 # 606
 void Cyc_Lex_enter_using(struct _tuple0*q){
-struct Cyc_List_List*ns=Cyc_Binding_enter_using(0U,(struct Cyc_Binding_NSCtxt*)_check_null(Cyc_Lex_lstate)->v,q);
-struct Cyc_Lex_Ldecls*ts=({struct Cyc_Lex_Ldecls*(*_Tmp0)(struct Cyc_Dict_Dict,struct Cyc_List_List*)=(struct Cyc_Lex_Ldecls*(*)(struct Cyc_Dict_Dict,struct Cyc_List_List*))Cyc_Dict_lookup;_Tmp0;})(((struct Cyc_Binding_NSCtxt*)_check_null(Cyc_Lex_lstate)->v)->ns_data,ns);
+struct Cyc_List_List*ns=Cyc_Binding_enter_using(0U,(struct Cyc_Binding_NSCtxt*)Cyc_Lex_lstate->v,q);
+struct Cyc_Lex_Ldecls*ts=({struct Cyc_Lex_Ldecls*(*_Tmp0)(struct Cyc_Dict_Dict,struct Cyc_List_List*)=(struct Cyc_Lex_Ldecls*(*)(struct Cyc_Dict_Dict,struct Cyc_List_List*))Cyc_Dict_lookup;_Tmp0;})(((struct Cyc_Binding_NSCtxt*)Cyc_Lex_lstate->v)->ns_data,ns);
 # 611
 ({void(*_Tmp0)(void(*)(struct _fat_ptr*),struct Cyc_Set_Set*)=(void(*)(void(*)(struct _fat_ptr*),struct Cyc_Set_Set*))Cyc_Set_iter;_Tmp0;})(Cyc_Lex_insert_typedef,ts->typedefs);}
 # 613
 void Cyc_Lex_leave_using (void){
-Cyc_Binding_leave_using((struct Cyc_Binding_NSCtxt*)_check_null(Cyc_Lex_lstate)->v);
+Cyc_Binding_leave_using((struct Cyc_Binding_NSCtxt*)Cyc_Lex_lstate->v);
 # 616
 Cyc_Lex_recompute_typedefs();}
 # 619
 void Cyc_Lex_register_typedef(struct _tuple0*q){
 # 621
-struct Cyc_Lex_Ldecls*ts=({struct Cyc_Lex_Ldecls*(*_Tmp0)(struct Cyc_Dict_Dict,struct Cyc_List_List*)=(struct Cyc_Lex_Ldecls*(*)(struct Cyc_Dict_Dict,struct Cyc_List_List*))Cyc_Dict_lookup;_Tmp0;})(((struct Cyc_Binding_NSCtxt*)_check_null(Cyc_Lex_lstate)->v)->ns_data,((struct Cyc_Binding_NSCtxt*)Cyc_Lex_lstate->v)->curr_ns);
+struct Cyc_Lex_Ldecls*ts=({struct Cyc_Lex_Ldecls*(*_Tmp0)(struct Cyc_Dict_Dict,struct Cyc_List_List*)=(struct Cyc_Lex_Ldecls*(*)(struct Cyc_Dict_Dict,struct Cyc_List_List*))Cyc_Dict_lookup;_Tmp0;})(((struct Cyc_Binding_NSCtxt*)Cyc_Lex_lstate->v)->ns_data,((struct Cyc_Binding_NSCtxt*)Cyc_Lex_lstate->v)->curr_ns);
 ({struct Cyc_Set_Set*_Tmp0=({struct Cyc_Set_Set*(*_Tmp1)(struct Cyc_Set_Set*,struct _fat_ptr*)=(struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_insert;_Tmp1;})(ts->typedefs,(*q).f1);ts->typedefs=_Tmp0;});
 # 626
 Cyc_Lex_insert_typedef((*q).f1);}
@@ -1006,7 +1006,7 @@ state=(- state)- 1;}
 while(1){
 base=*((const int*)_check_known_subscript_notnull(Cyc_Lex_lex_base,200U,sizeof(int),state));
 if(base < 0)return(- base)- 1;
-backtrk=*((const int*)_check_known_subscript_notnull(Cyc_Lex_lex_backtrk,200U,sizeof(int),state));
+backtrk=Cyc_Lex_lex_backtrk[state];
 if(backtrk >= 0){
 lbuf->lex_last_pos=lbuf->lex_curr_pos;
 lbuf->lex_last_action=backtrk;}
@@ -1022,7 +1022,7 @@ if(c==-1)c=256;else{
 if(c < 0)c=256 + c;}}
 # 870
 if(*((const int*)_check_known_subscript_notnull(Cyc_Lex_lex_check,2691U,sizeof(int),base + c))==state)
-state=*((const int*)_check_known_subscript_notnull(Cyc_Lex_lex_trans,2691U,sizeof(int),base + c));else{
+state=Cyc_Lex_lex_trans[base + c];else{
 # 873
 state=*((const int*)_check_known_subscript_notnull(Cyc_Lex_lex_default,200U,sizeof(int),state));}
 if(state < 0){
@@ -1440,7 +1440,7 @@ unsigned rwsze=97U;
 if(include_cyclone_keywords ||(*((struct _tuple28*)_check_known_subscript_notnull(Cyc_Lex_rw_array,97U,sizeof(struct _tuple28),(int)j))).f2){
 struct _fat_ptr str=(*((struct _tuple28*)_check_known_subscript_notnull(Cyc_Lex_rw_array,97U,sizeof(struct _tuple28),(int)j))).f0;
 ({struct _fat_ptr _Tmp4=str;Cyc_Lex_str_index(_Tmp4,0,(int)Cyc_strlen(str));});
-({struct Cyc_Lex_KeyWordInfo _Tmp4=({struct Cyc_Lex_KeyWordInfo _Tmp5;_Tmp5.token_index=(int)(*((struct _tuple28*)_check_known_subscript_notnull(Cyc_Lex_rw_array,97U,sizeof(struct _tuple28),(int)j))).f1,_Tmp5.is_c_keyword=(*((struct _tuple28*)_check_known_subscript_notnull(Cyc_Lex_rw_array,97U,sizeof(struct _tuple28),(int)j))).f2;_Tmp5;});*((struct Cyc_Lex_KeyWordInfo*)_check_fat_subscript(Cyc_Lex_kw_nums,sizeof(struct Cyc_Lex_KeyWordInfo),(int)i))=_Tmp4;});
+({struct Cyc_Lex_KeyWordInfo _Tmp4=({struct Cyc_Lex_KeyWordInfo _Tmp5;_Tmp5.token_index=(int)Cyc_Lex_rw_array[(int)j].f1,_Tmp5.is_c_keyword=Cyc_Lex_rw_array[(int)j].f2;_Tmp5;});*((struct Cyc_Lex_KeyWordInfo*)_check_fat_subscript(Cyc_Lex_kw_nums,sizeof(struct Cyc_Lex_KeyWordInfo),(int)i))=_Tmp4;});
 ++ i;}}}
 # 1165
 Cyc_Lex_typedef_init();

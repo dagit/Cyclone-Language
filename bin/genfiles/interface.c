@@ -454,7 +454,7 @@ struct Cyc_Absyn_Datatypedecl*exn_d;exn_d=_cycalloc(sizeof(struct Cyc_Absyn_Data
 exn_d->sc=2U;
 ({struct Cyc_Dict_Dict _Tmp0=({struct Cyc_Dict_Dict(*_Tmp1)(struct Cyc_Dict_Dict,struct _tuple0*,struct Cyc_Absyn_Datatypedecl*)=(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,struct _tuple0*,struct Cyc_Absyn_Datatypedecl*))Cyc_Dict_insert;_Tmp1;})(i->exports->datatypedecls,Cyc_Absyn_exn_name,exn_d);i->exports->datatypedecls=_Tmp0;});
 # 92
-{struct Cyc_List_List*tufs=(struct Cyc_List_List*)_check_null(Cyc_Absyn_exn_tud()->fields)->v;for(0;tufs!=0;tufs=tufs->tl){
+{struct Cyc_List_List*tufs=(struct Cyc_List_List*)Cyc_Absyn_exn_tud()->fields->v;for(0;tufs!=0;tufs=tufs->tl){
 struct Cyc_Absyn_Datatypefield*exn_f;exn_f=_cycalloc(sizeof(struct Cyc_Absyn_Datatypefield)),*exn_f=*((struct Cyc_Absyn_Datatypefield*)tufs->hd);
 exn_f->sc=2U;{
 struct Cyc_Tcdecl_Xdatatypefielddecl*exn_fd;exn_fd=_cycalloc(sizeof(struct Cyc_Tcdecl_Xdatatypefielddecl)),exn_fd->base=exn_d,exn_fd->field=exn_f;
@@ -605,7 +605,7 @@ if(tud->fields==0)
 struct _fat_ptr _Tmp8=(struct _fat_ptr)Cyc_Absynpp_qvar2string(tud->name);_Tmp7.f1=_Tmp8;});_Tmp7;});void*_Tmp7[1];_Tmp7[0]=& _Tmp6;Cyc_aprintf(_tag_fat("check_public_type (datatype %s has no fields)",sizeof(char),46U),_tag_fat(_Tmp7,sizeof(void*),1));}));});{
 # 306
 struct Cyc_Absyn_Datatypefield*tuf1=0;
-{struct Cyc_List_List*fs=(struct Cyc_List_List*)_check_null(tud->fields)->v;for(0;fs!=0;fs=fs->tl){
+{struct Cyc_List_List*fs=(struct Cyc_List_List*)tud->fields->v;for(0;fs!=0;fs=fs->tl){
 if(Cyc_strptrcmp((*tuf0->name).f1,(*((struct Cyc_Absyn_Datatypefield*)fs->hd)->name).f1)==0){
 tuf1=(struct Cyc_Absyn_Datatypefield*)fs->hd;
 break;}}}

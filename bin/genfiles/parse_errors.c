@@ -360,12 +360,12 @@ if(Cyc_Flags_print_parser_state_and_token){
 exit(1);}
 # 27
 {unsigned i=0U;for(0;i < 111U;++ i){
-if((*((struct Cyc_ParseErrors_ParseState*)_check_known_subscript_notnull(Cyc_ParseErrors_msg_table,111U,sizeof(struct Cyc_ParseErrors_ParseState),(int)i))).state==state &&(*((struct Cyc_ParseErrors_ParseState*)_check_known_subscript_notnull(Cyc_ParseErrors_msg_table,111U,sizeof(struct Cyc_ParseErrors_ParseState),(int)i))).token==token){
+if((*((struct Cyc_ParseErrors_ParseState*)_check_known_subscript_notnull(Cyc_ParseErrors_msg_table,111U,sizeof(struct Cyc_ParseErrors_ParseState),(int)i))).state==state && Cyc_ParseErrors_msg_table[(int)i].token==token){
 # 30
-s=(*((struct Cyc_ParseErrors_ParseState*)_check_known_subscript_notnull(Cyc_ParseErrors_msg_table,111U,sizeof(struct Cyc_ParseErrors_ParseState),(int)i))).msg;
+s=Cyc_ParseErrors_msg_table[(int)i].msg;
 break;}else{
-if((*((struct Cyc_ParseErrors_ParseState*)_check_known_subscript_notnull(Cyc_ParseErrors_msg_table,111U,sizeof(struct Cyc_ParseErrors_ParseState),(int)i))).state==state)
-s=(*((struct Cyc_ParseErrors_ParseState*)_check_known_subscript_notnull(Cyc_ParseErrors_msg_table,111U,sizeof(struct Cyc_ParseErrors_ParseState),(int)i))).msg;}}}{
+if(Cyc_ParseErrors_msg_table[(int)i].state==state)
+s=Cyc_ParseErrors_msg_table[(int)i].msg;}}}{
 # 35
 struct _fat_ptr ts=Cyc_token2string(token);
 if((char*)ts.curr!=(char*)_tag_fat(0,0,0).curr)

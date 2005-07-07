@@ -945,7 +945,7 @@ newrs=Cyc_PrattProver_revnodes(newrs);
 newg->rows=newrs;{
 # 1030
 struct Cyc_PrattProver_Node*rs=g->rows;for(0;rs!=0;(rs=rs->next,newrs=newrs->next)){
-({struct Cyc_PrattProver_Distance*_Tmp0=Cyc_PrattProver_copy_distances(newg,rs->unsigned_distances);_check_null(newrs)->unsigned_distances=_Tmp0;});
+({struct Cyc_PrattProver_Distance*_Tmp0=Cyc_PrattProver_copy_distances(newg,rs->unsigned_distances);newrs->unsigned_distances=_Tmp0;});
 ({struct Cyc_PrattProver_Distance*_Tmp0=Cyc_PrattProver_copy_distances(newg,rs->unsigned_distances);newrs->signed_distances=_Tmp0;});}}}}}
 # 1035
 return res;}
@@ -1466,7 +1466,7 @@ a=a1;
 goto LOOP;}case 4: _Tmp2=(void*)((struct Cyc_AssnDef_Or_AssnDef_Assn_struct*)a)->f1;_Tmp1=(void*)((struct Cyc_AssnDef_Or_AssnDef_Assn_struct*)a)->f2;{void*a1=_Tmp2;void*a2=_Tmp1;
 # 1918
 unsigned n=Cyc_PrattProver_num_graphs(gs);
-if(*_check_null(total_paths)> Cyc_PrattProver_max_paths)
+if(*total_paths > Cyc_PrattProver_max_paths)
 _throw(& Cyc_PrattProver_too_large);
 # 1924
 *total_paths=*total_paths + n;

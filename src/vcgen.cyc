@@ -382,7 +382,20 @@ static $(assn_t,assn_t) okderef(term_t root, term_t i){
       break;
     }
     return $(ult(i,numelts_term(root)),&true_assn);
-  default: break;
+  default:
+    let tp = get_term_type(root);
+    if (tp != NULL) {
+      switch (Absyn::compress((type_t)tp)) {
+      case &Absyn::PointerType(p1):
+	let b1 = Tcutil::get_bounds_exp(Absyn::bounds_one(),p1.ptr_atts.bounds);
+	if (b1 != NULL)
+	  return $(ult(i,cnst((exp_t)b1)),&true_assn);
+	break;
+      default:
+	break;
+      }
+    }
+    break;
   }
   return $(ult(i,numelts_term(root)),neq(root,zero()));
 }
@@ -588,13 +601,14 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
     // vice versa.  We might be able to get away with 
     // dropping other casts (e.g., char->int) but we'll be
     // conservative now.
-    switch $(Absyn::compress(tp),Absyn::compress((type_t)e->topt)) {
+    switch $(Absyn::compress(tp),Absyn::compress((type_t)e1->topt)) {
       // these two cases allow us to drop a cast of a tag_t to int/long
       // or unsigned int/unsigned long.
-    case $(&Absyn::AppType(&Absyn::IntCon(_,Absyn::Int_sz),_),&Absyn::AppType(&Absyn::TagCon,_)):
-      return $(t,am);
-    case $(&Absyn::AppType(&Absyn::IntCon(_,Absyn::Long_sz),_),&Absyn::AppType(&Absyn::TagCon,_)):
-      return $(t,am);
+    case $(&Absyn::AppType(&Absyn::IntCon(_,Absyn::Int_sz),_),&Absyn::AppType(&Absyn::TagCon,tagtps)):
+      return $(cnst(Absyn::valueof_exp(tagtps->hd,e1->loc)),am);
+    case $(&Absyn::AppType(&Absyn::IntCon(_,Absyn::Long_sz),_),&Absyn::AppType(&Absyn::TagCon,tagtps)):
+      return $(cnst(Absyn::valueof_exp(tagtps->hd,e1->loc)),am);
+      //      return $(t,am);
       // this case lets us drop a cast when they are two integers and the
       // size is the same.
     case $(&Absyn::AppType(&Absyn::IntCon(u1,s1),_),&Absyn::AppType(&Absyn::IntCon(u2,s2),_)):
@@ -658,7 +672,6 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
     // we know the result is not NULL -- if it's a new {...} then we
     // could also calculate the numelts.
     let res =alloc(e,one(),e->topt);
-    amin = update_var_map(memory,fresh_var(NULL),amin);
     let $(mem,amin) = lookup_var_map(memory,amin);
     amin = and_assnmap_assn(amin,and(eq(select(mem,res,e1->topt),t),
 				     neq(res,zero())));
@@ -768,7 +781,6 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
       amin = vcgen_rexp(env,(exp_t)mi.rgn,amin)[1];
     let $(t,am1) = vcgen_rexp(env,mi.num_elts,amin);
     let res = alloc(e,t,e->topt);
-    am1 = update_var_map(memory,fresh_var(NULL),am1);
     let am2 = and_assnmap_assn(am1,eq(numelts_term(res),t));
     return $(res,am2);
   case &Absyn::Swap_e(e1,e2): 
@@ -1032,6 +1044,7 @@ static assn_map_t vcgen_stmt(env_t env, stmt_t s, assn_map_t amin) {
     if (!implies(amin.assn,loop_inv_assnmap.assn)) {
       Warn::err(e->loc, "cannot prove loop invariant %s from %s\n",
 		assnmap2string(loop_inv_assnmap),assnmap2string(amin));
+      env->continue_assnmap = old_continue_assnmap;
       return true_assnmap();
     }
     amin = canonical_assnmap(amin);
@@ -1062,14 +1075,13 @@ static assn_map_t vcgen_stmt(env_t env, stmt_t s, assn_map_t amin) {
 	return true_assnmap();
       }
       amin = canonical_assnmap(amin);
-//       fprintf(stderr,"amin = %s\n",assnmap2string(amin));
 //       fprintf(stderr,"amold = %s\n",assnmap2string(lookup_stmt_assnmap(env,dummy)));
-//       int i;
-//       scanf("%d",&i);
+//       fprintf(stderr,"amnow = %s\n",assnmap2string(amin));
       let $(a1,a2,map) = unify_var_maps_subst(lookup_stmt_assnmap(env,dummy),amin);
 //       fprintf(stderr,"a1 = %s\n",assn2string(a1));
 //       fprintf(stderr,"a2 = %s\n",assn2string(a2));
-//       fprintf(stderr,"map = %s\n",map2string(map));
+//       fprintf(stderr,"%s\n",map2string(map));
+//       int i;
 //       scanf("%d",&i);
       amin = AssnMap(a2,map);
       if (implies(a2,a1)) {
@@ -1120,6 +1132,7 @@ static assn_map_t vcgen_stmt(env_t env, stmt_t s, assn_map_t amin) {
     if (!implies(amin.assn,loop_inv_assnmap.assn)) {
       Warn::err(e2->loc, "cannot prove loop invariant %s from %s\n",
 		assnmap2string(loop_inv_assnmap),assnmap2string(amin));
+      env->continue_assnmap = old_continue_assnmap;
       return true_assnmap();
     }
     amin = canonical_assnmap(amin);
@@ -1150,16 +1163,11 @@ static assn_map_t vcgen_stmt(env_t env, stmt_t s, assn_map_t amin) {
 	env->continue_assnmap = old_continue_assnmap;
 	return true_assnmap();
       }
-      //      amin = canonical_assnmap(amin);
-//       fprintf(stderr,"amin = %s\n",assnmap2string(amin));
-//       fprintf(stderr,"amold = %s\n",assnmap2string(lookup_stmt_assnmap(env,dummy2)));
-//       int i;
-//       scanf("%d",&i);
+      amin = canonical_assnmap(amin);
       let $(a1,a2,map) = unify_var_maps_subst(lookup_stmt_assnmap(env,dummy2),amin);
 //       fprintf(stderr,"a1 = %s\n",assn2string(a1));
 //       fprintf(stderr,"a2 = %s\n",assn2string(a2));
 //       fprintf(stderr,"map = %s\n",map2string(map));
-//       scanf("%d",&i);
       amin = AssnMap(a2,map);
       if (implies(a2,a1)) {
 	env->continue_assnmap = old_continue_assnmap;
@@ -1197,6 +1205,7 @@ static assn_map_t vcgen_stmt(env_t env, stmt_t s, assn_map_t amin) {
     if (!implies(amin.assn,loop_inv_assnmap.assn)) {
       Warn::err(e->loc, "cannot prove loop invariant %s from %s\n",
 		assnmap2string(loop_inv_assnmap),assnmap2string(amin));
+      env->continue_assnmap = old_continue_assnmap;
       return true_assnmap();
     }
     amin = canonical_assnmap(amin);
@@ -1229,13 +1238,10 @@ static assn_map_t vcgen_stmt(env_t env, stmt_t s, assn_map_t amin) {
       amin = canonical_assnmap(amin);
 //       fprintf(stderr,"amin = %s\n",assnmap2string(amin));
 //       fprintf(stderr,"amold = %s\n",assnmap2string(lookup_stmt_assnmap(env,dummy)));
-//       int i;
-//       scanf("%d",&i);
       let $(a1,a2,map) = unify_var_maps_subst(lookup_stmt_assnmap(env,dummy),amin);
 //       fprintf(stderr,"a1 = %s\n",assn2string(a1));
 //       fprintf(stderr,"a2 = %s\n",assn2string(a2));
 //       fprintf(stderr,"map = %s\n",map2string(map));
-//       scanf("%d",&i);
       amin = AssnMap(a2,map);
       if (implies(a2,a1)) {
 	env->continue_assnmap = old_continue_assnmap;

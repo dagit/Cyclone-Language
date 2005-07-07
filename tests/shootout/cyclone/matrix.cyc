@@ -39,7 +39,7 @@ void mmult(tag_t rows,
       val = 0;
       let v1 = m1[i];
       let v3 = m3[i];
-      for (k=0; k<cols; k++) {
+      for (k=0; @assert(j<cols) && k<cols; k++) {
         let v2 = m2[k];
         val += v1[k] * v2[j];
       }

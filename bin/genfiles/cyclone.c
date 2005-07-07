@@ -805,7 +805,7 @@ return 1;}else{
 {int i=0;for(0;(unsigned)i < 10U;++ i){
 if(!Cyc_strcmp((*((struct _tuple13*)_check_known_subscript_notnull(known_gcc_flags,10U,sizeof(struct _tuple13),i))).flag,s)){
 Cyc_add_ccarg(s);
-Cyc_gcc_optarg=(*((struct _tuple13*)_check_known_subscript_notnull(known_gcc_flags,10U,sizeof(struct _tuple13),i))).optargs;
+Cyc_gcc_optarg=known_gcc_flags[i].optargs;
 break;}}}
 # 369
 return 0;}}
@@ -994,7 +994,7 @@ return 0;}}}
 static struct Cyc_List_List*Cyc_cfiles=0;
 static void Cyc_remove_cfiles (void){
 if(!Cyc_save_c_r)
-for(1;Cyc_cfiles!=0;Cyc_cfiles=_check_null(Cyc_cfiles)->tl){
+for(1;Cyc_cfiles!=0;Cyc_cfiles=Cyc_cfiles->tl){
 Cyc_remove_file(*((struct _fat_ptr*)Cyc_cfiles->hd));}}
 # 583
 static void Cyc_find_fail(struct _fat_ptr file){
@@ -1246,7 +1246,7 @@ Cyc_file_close(inter_file);
 Cyc_file_close(inter_objfile);}}}}
 # 879
 if(!Cyc_compile_failure &&(int)Cyc_Flags_stop_after_pass >= 9)
-tds=({struct Cyc_List_List*(*_Tmp0)(struct _fat_ptr,struct Cyc_List_List*,struct Cyc_List_List*(*)(struct Cyc_Hashtable_Table*,struct Cyc_List_List*),struct Cyc_Hashtable_Table*,struct Cyc_List_List*)=(struct Cyc_List_List*(*)(struct _fat_ptr,struct Cyc_List_List*,struct Cyc_List_List*(*)(struct Cyc_Hashtable_Table*,struct Cyc_List_List*),struct Cyc_Hashtable_Table*,struct Cyc_List_List*))Cyc_do_stage;_Tmp0;})(_tag_fat("translation to C",sizeof(char),17U),tds,Cyc_do_translate,_check_null(jump_tables)->pop_tables,tds);
+tds=({struct Cyc_List_List*(*_Tmp0)(struct _fat_ptr,struct Cyc_List_List*,struct Cyc_List_List*(*)(struct Cyc_Hashtable_Table*,struct Cyc_List_List*),struct Cyc_Hashtable_Table*,struct Cyc_List_List*)=(struct Cyc_List_List*(*)(struct _fat_ptr,struct Cyc_List_List*,struct Cyc_List_List*(*)(struct Cyc_Hashtable_Table*,struct Cyc_List_List*),struct Cyc_Hashtable_Table*,struct Cyc_List_List*))Cyc_do_stage;_Tmp0;})(_tag_fat("translation to C",sizeof(char),17U),tds,Cyc_do_translate,jump_tables->pop_tables,tds);
 # 883
 if(!Cyc_compile_failure &&(int)Cyc_Flags_stop_after_pass >= 10)
 tds=({struct Cyc_List_List*(*_Tmp0)(struct _fat_ptr,struct Cyc_List_List*,struct Cyc_List_List*(*)(int,struct Cyc_List_List*),int,struct Cyc_List_List*)=(struct Cyc_List_List*(*)(struct _fat_ptr,struct Cyc_List_List*,struct Cyc_List_List*(*)(int,struct Cyc_List_List*),int,struct Cyc_List_List*))Cyc_do_stage;_Tmp0;})(_tag_fat("aggregate removal",sizeof(char),18U),tds,Cyc_do_removeaggrs,1,tds);

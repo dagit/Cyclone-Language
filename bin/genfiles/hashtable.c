@@ -418,9 +418,9 @@ b->cells=l->next;
 -- b->length;
 return;}{
 # 135
-struct Cyc_Hashtable_Cell*next=l->next;for(0;_check_null(l)->next!=0;(l=l->next,next=next->next)){
+struct Cyc_Hashtable_Cell*next=l->next;for(0;l->next!=0;(l=l->next,next=next->next)){
 # 137
-if(cmp(key,_check_null(next)->key)==0){
+if(cmp(key,next->key)==0){
 l->next=next->next;
 -- b->length;
 return;}}}}
@@ -471,12 +471,12 @@ unsigned osize=_get_fat_size(odata,sizeof(struct Cyc_Hashtable_Bucket));
 unsigned nsize=2U * osize + 1U;
 struct _fat_ptr ndata=({unsigned _Tmp0=nsize;_tag_fat(_region_calloc(t->r,0U,sizeof(struct Cyc_Hashtable_Bucket),_Tmp0),sizeof(struct Cyc_Hashtable_Bucket),_Tmp0);});
 {unsigned i=0U;for(0;i < osize;++ i){
-({struct _RegionHandle*_Tmp0=t->r;struct _fat_ptr _Tmp1=ndata;int(*_Tmp2)(void*)=t->hash;Cyc_Hashtable_insert_bucket(_Tmp0,_Tmp1,_Tmp2,Cyc_Hashtable_rev_cells(((struct Cyc_Hashtable_Bucket*)odata.curr)[(int)i].cells));});}}
+({struct _RegionHandle*_Tmp0=t->r;struct _fat_ptr _Tmp1=ndata;int(*_Tmp2)(void*)=t->hash;Cyc_Hashtable_insert_bucket(_Tmp0,_Tmp1,_Tmp2,Cyc_Hashtable_rev_cells((*((struct Cyc_Hashtable_Bucket*)_check_fat_subscript(odata,sizeof(struct Cyc_Hashtable_Bucket),(int)i))).cells));});}}
 t->tab=ndata;{
 # 200
 unsigned cur_max_len=0U;
 {unsigned j=0U;for(0;j < nsize;++ j){
-unsigned k=((struct Cyc_Hashtable_Bucket*)ndata.curr)[(int)j].length;
+unsigned k=(*((struct Cyc_Hashtable_Bucket*)_check_fat_subscript(ndata,sizeof(struct Cyc_Hashtable_Bucket),(int)j))).length;
 if(k > cur_max_len)cur_max_len=k;}}
 # 205
 t->max_len=(int)(2U * cur_max_len);}}

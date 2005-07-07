@@ -62,8 +62,8 @@ DLL *list_pop_head(DLL @`H head) {
     return(next);
 }
 
-int list_equal(DLL @x, DLL @y) {
-    DLL *xp, *yp;
+int list_equal(DLL @`H x, DLL @`H y) {
+    DLL *`H xp, *`H yp;
     // first val's checked will be list lengths
     for (xp=x, yp=y; xp->next != x; xp=xp->next, yp=yp->next) {
 	if (xp->val != yp->val) return(0);
@@ -116,7 +116,7 @@ DLL @list_sequence(int from, int to) {
     return(l);
 }
 
-DLL @list_copy(DLL @x) {
+DLL @list_copy(DLL @`H x) {
     int i, j, size = list_length(x);
     DLL *xp, ?l = (DLL ?)calloc(size+1, sizeof(DLL));
     for (i=0, j=1, xp=x; i<size; i++, j++, xp=xp->next) {
@@ -130,7 +130,7 @@ DLL @list_copy(DLL @x) {
     return(l);
 }
 
-void list_reverse (DLL @head) {
+void list_reverse (DLL @`H head) {
     DLL *tmp, *p = head;
     do {
 	tmp = p->next;

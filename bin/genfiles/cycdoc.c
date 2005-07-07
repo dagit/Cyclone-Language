@@ -451,7 +451,7 @@ state=(- state)- 1;}
 while(1){
 base=*((const int*)_check_known_subscript_notnull(Cyc_lex_base,15U,sizeof(int),state));
 if(base < 0)return(- base)- 1;
-backtrk=*((const int*)_check_known_subscript_notnull(Cyc_lex_backtrk,15U,sizeof(int),state));
+backtrk=Cyc_lex_backtrk[state];
 if(backtrk >= 0){
 lbuf->lex_last_pos=lbuf->lex_curr_pos;
 lbuf->lex_last_action=backtrk;}
@@ -467,7 +467,7 @@ if(c==-1)c=256;else{
 if(c < 0)c=256 + c;}}
 # 82
 if(*((const int*)_check_known_subscript_notnull(Cyc_lex_check,266U,sizeof(int),base + c))==state)
-state=*((const int*)_check_known_subscript_notnull(Cyc_lex_trans,266U,sizeof(int),base + c));else{
+state=Cyc_lex_trans[base + c];else{
 # 85
 state=*((const int*)_check_known_subscript_notnull(Cyc_lex_default,15U,sizeof(int),state));}
 if(state < 0){

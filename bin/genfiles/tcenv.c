@@ -828,12 +828,12 @@ Cyc_Tcutil_check_unique_tvars(loc,tvs);{
 void*init_store_constraint=Cyc_Tcenv_make_init_store_constraint(tvs,0);
 # 553
 void*param_rgn=(void*)({struct Cyc_Absyn_VarType_Absyn_Type_struct*_Tmp4=_cycalloc(sizeof(struct Cyc_Absyn_VarType_Absyn_Type_struct));_Tmp4->tag=2,_Tmp4->f1=rgn0;_Tmp4;});
-{struct Cyc_List_List*vds=(struct Cyc_List_List*)_check_null(fd->param_vardecls)->v;for(0;vds!=0;vds=vds->tl){
+{struct Cyc_List_List*vds=(struct Cyc_List_List*)fd->param_vardecls->v;for(0;vds!=0;vds=vds->tl){
 ((struct Cyc_Absyn_Vardecl*)vds->hd)->rgn=param_rgn;}}
 if(fd->i.cyc_varargs!=0){
 struct Cyc_Absyn_VarargInfo _Tmp4=*fd->i.cyc_varargs;int _Tmp5;void*_Tmp6;struct Cyc_Absyn_Tqual _Tmp7;void*_Tmp8;_Tmp8=_Tmp4.name;_Tmp7=_Tmp4.tq;_Tmp6=_Tmp4.type;_Tmp5=_Tmp4.inject;{struct _fat_ptr*n=_Tmp8;struct Cyc_Absyn_Tqual tq=_Tmp7;void*t=_Tmp6;int i=_Tmp5;
 # 559
-struct Cyc_List_List*vds=(struct Cyc_List_List*)_check_null(fd->param_vardecls)->v;for(0;vds!=0;vds=vds->tl){
+struct Cyc_List_List*vds=(struct Cyc_List_List*)fd->param_vardecls->v;for(0;vds!=0;vds=vds->tl){
 struct Cyc_Absyn_Vardecl*vd=(struct Cyc_Absyn_Vardecl*)vds->hd;
 if(Cyc_strptrcmp((*vd->name).f1,_check_null(n))==0){
 ({void*_Tmp9=Cyc_Absyn_fatptr_type(t,param_rgn,Cyc_Absyn_al_qual_type,tq,Cyc_Absyn_false_type,Cyc_Absyn_false_type);vd->type=_Tmp9;});
@@ -862,12 +862,12 @@ struct Cyc_List_List*tvs;tvs=_cycalloc(sizeof(struct Cyc_List_List)),tvs->hd=rgn
 Cyc_Tcutil_check_unique_tvars(loc,tvs);{
 void*initconstr=Cyc_Tcenv_make_init_store_constraint(tvs,lc);
 void*param_rgn=(void*)({struct Cyc_Absyn_VarType_Absyn_Type_struct*_Tmp5=_cycalloc(sizeof(struct Cyc_Absyn_VarType_Absyn_Type_struct));_Tmp5->tag=2,_Tmp5->f1=rgn0;_Tmp5;});
-{struct Cyc_List_List*vds=(struct Cyc_List_List*)_check_null(fd->param_vardecls)->v;for(0;vds!=0;vds=vds->tl){
+{struct Cyc_List_List*vds=(struct Cyc_List_List*)fd->param_vardecls->v;for(0;vds!=0;vds=vds->tl){
 ((struct Cyc_Absyn_Vardecl*)vds->hd)->rgn=param_rgn;}}
 if(fd->i.cyc_varargs!=0){
 struct Cyc_Absyn_VarargInfo _Tmp5=*fd->i.cyc_varargs;int _Tmp6;void*_Tmp7;struct Cyc_Absyn_Tqual _Tmp8;void*_Tmp9;_Tmp9=_Tmp5.name;_Tmp8=_Tmp5.tq;_Tmp7=_Tmp5.type;_Tmp6=_Tmp5.inject;{struct _fat_ptr*n=_Tmp9;struct Cyc_Absyn_Tqual tq=_Tmp8;void*t=_Tmp7;int i=_Tmp6;
 # 600
-struct Cyc_List_List*vds=(struct Cyc_List_List*)_check_null(fd->param_vardecls)->v;for(0;vds!=0;vds=vds->tl){
+struct Cyc_List_List*vds=(struct Cyc_List_List*)fd->param_vardecls->v;for(0;vds!=0;vds=vds->tl){
 struct Cyc_Absyn_Vardecl*vd=(struct Cyc_Absyn_Vardecl*)vds->hd;
 if(Cyc_strptrcmp((*vd->name).f1,_check_null(n))==0){
 ({void*_TmpA=Cyc_Absyn_fatptr_type(t,param_rgn,Cyc_Absyn_al_qual_type,tq,Cyc_Absyn_false_type,Cyc_Absyn_false_type);vd->type=_TmpA;});

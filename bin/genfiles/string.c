@@ -519,7 +519,7 @@ struct Cyc_List_List*end=lens;
 {struct Cyc_List_List*p=strs;for(0;p!=0;p=p->tl){
 len=Cyc_strlen(*((struct _fat_ptr*)p->hd));
 total_len +=len;
-({struct Cyc_List_List*_Tmp1=({struct Cyc_List_List*_Tmp2=_region_malloc(temp,0U,sizeof(struct Cyc_List_List));_Tmp2->hd=(void*)len,_Tmp2->tl=0;_Tmp2;});_check_null(end)->tl=_Tmp1;});
+({struct Cyc_List_List*_Tmp1=({struct Cyc_List_List*_Tmp2=_region_malloc(temp,0U,sizeof(struct Cyc_List_List));_Tmp2->hd=(void*)len,_Tmp2->tl=0;_Tmp2;});end->tl=_Tmp1;});
 end=end->tl;}}
 # 231
 lens=lens->tl;
@@ -527,7 +527,7 @@ ans=Cyc_Core_rnew_string(r,total_len + 1U);{
 unsigned long i=0U;
 while(strs!=0){
 {struct _fat_ptr next=*((struct _fat_ptr*)strs->hd);
-len=(unsigned long)_check_null(lens)->hd;
+len=(unsigned long)lens->hd;
 ({struct _fat_ptr _Tmp1=_fat_ptr_decrease_size(_fat_ptr_plus(ans,sizeof(char),(int)i),sizeof(char),1U);struct _fat_ptr _Tmp2=(struct _fat_ptr)next;Cyc_strncpy(_Tmp1,_Tmp2,len);});
 i +=len;
 strs=strs->tl;
@@ -555,7 +555,7 @@ unsigned long list_len=0U;
 for(1;p!=0;p=p->tl){
 len=Cyc_strlen(*((struct _fat_ptr*)p->hd));
 total_len +=len;
-({struct Cyc_List_List*_Tmp1=({struct Cyc_List_List*_Tmp2=_region_malloc(temp,0U,sizeof(struct Cyc_List_List));_Tmp2->hd=(void*)len,_Tmp2->tl=0;_Tmp2;});_check_null(end)->tl=_Tmp1;});
+({struct Cyc_List_List*_Tmp1=({struct Cyc_List_List*_Tmp2=_region_malloc(temp,0U,sizeof(struct Cyc_List_List));_Tmp2->hd=(void*)len,_Tmp2->tl=0;_Tmp2;});end->tl=_Tmp1;});
 end=end->tl;
 ++ list_len;}
 # 269
@@ -564,9 +564,9 @@ unsigned long seplen=Cyc_strlen(separator);
 total_len +=(list_len - 1U)* seplen;{
 struct _fat_ptr ans=Cyc_Core_rnew_string(r,total_len + 1U);
 unsigned long i=0U;
-while(_check_null(strs)->tl!=0){
+while(strs->tl!=0){
 {struct _fat_ptr next=*((struct _fat_ptr*)strs->hd);
-len=(unsigned long)_check_null(lens)->hd;
+len=(unsigned long)lens->hd;
 ({struct _fat_ptr _Tmp1=_fat_ptr_decrease_size(_fat_ptr_plus(ans,sizeof(char),(int)i),sizeof(char),1U);struct _fat_ptr _Tmp2=(struct _fat_ptr)next;Cyc_strncpy(_Tmp1,_Tmp2,len);});
 i +=len;
 ({struct _fat_ptr _Tmp1=_fat_ptr_decrease_size(_fat_ptr_plus(ans,sizeof(char),(int)i),sizeof(char),1U);struct _fat_ptr _Tmp2=separator;Cyc_strncpy(_Tmp1,_Tmp2,seplen);});
@@ -576,7 +576,7 @@ lens=lens->tl;}
 # 275
 1U;}
 # 284
-({struct _fat_ptr _Tmp1=_fat_ptr_decrease_size(_fat_ptr_plus(ans,sizeof(char),(int)i),sizeof(char),1U);struct _fat_ptr _Tmp2=(struct _fat_ptr)*((struct _fat_ptr*)strs->hd);Cyc_strncpy(_Tmp1,_Tmp2,(unsigned long)_check_null(lens)->hd);});{
+({struct _fat_ptr _Tmp1=_fat_ptr_decrease_size(_fat_ptr_plus(ans,sizeof(char),(int)i),sizeof(char),1U);struct _fat_ptr _Tmp2=(struct _fat_ptr)*((struct _fat_ptr*)strs->hd);Cyc_strncpy(_Tmp1,_Tmp2,(unsigned long)lens->hd);});{
 struct _fat_ptr _Tmp1=ans;_npop_handler(0);return _Tmp1;}}}}}
 # 257
 ;_pop_region();}}

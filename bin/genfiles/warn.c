@@ -409,9 +409,9 @@ struct Cyc_List_List*seg_strs=Cyc_Position_strings_of_segments(Cyc_Warn_warning_
 Cyc_Warn_warning_segs=0;
 Cyc_Warn_warning_msgs=Cyc_List_imp_rev(Cyc_Warn_warning_msgs);
 while(Cyc_Warn_warning_msgs!=0){
-({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=(struct _fat_ptr)*((struct _fat_ptr*)_check_null(seg_strs)->hd);_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,_Tmp2.f1=(struct _fat_ptr)*((struct _fat_ptr*)Cyc_Warn_warning_msgs->hd);_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;Cyc_fprintf(Cyc_stderr,_tag_fat("%s: %s\n",sizeof(char),8U),_tag_fat(_Tmp2,sizeof(void*),2));});
+({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=(struct _fat_ptr)*((struct _fat_ptr*)seg_strs->hd);_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,_Tmp2.f1=(struct _fat_ptr)*((struct _fat_ptr*)Cyc_Warn_warning_msgs->hd);_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;Cyc_fprintf(Cyc_stderr,_tag_fat("%s: %s\n",sizeof(char),8U),_tag_fat(_Tmp2,sizeof(void*),2));});
 seg_strs=seg_strs->tl;
-Cyc_Warn_warning_msgs=_check_null(Cyc_Warn_warning_msgs)->tl;
+Cyc_Warn_warning_msgs=Cyc_Warn_warning_msgs->tl;
 # 69
 1U;}
 # 73

@@ -715,7 +715,7 @@ static void Cyc_CurRgn_rgnsubaggrdecl(unsigned loc,struct Cyc_CurRgn_rgnsubenv e
 Cyc_CurRgn_check_tvars(loc,ad->tvs);
 if(ad->impl!=0){
 Cyc_CurRgn_check_tvars(loc,ad->impl->exist_vars);{
-struct Cyc_List_List*fc=_check_null(ad->impl)->effconstr;
+struct Cyc_List_List*fc=ad->impl->effconstr;
 for(1;fc!=0;fc=fc->tl){
 void*_Tmp0=(void*)fc->hd;void*_Tmp1;void*_Tmp2;switch(*((int*)_Tmp0)){case 0: _Tmp2=(void*)((struct Cyc_Absyn_SingleConstraint_Absyn_EffConstraint_struct*)_Tmp0)->f1;{void*e=_Tmp2;
 Cyc_CurRgn_rgnsubtype(loc,env,e);goto _LL0;}case 1: _Tmp2=(void*)((struct Cyc_Absyn_DisjointConstraint_Absyn_EffConstraint_struct*)_Tmp0)->f1;_Tmp1=(void*)((struct Cyc_Absyn_DisjointConstraint_Absyn_EffConstraint_struct*)_Tmp0)->f2;{void*e1=_Tmp2;void*e2=_Tmp1;
