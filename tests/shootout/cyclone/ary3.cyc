@@ -20,7 +20,7 @@
 int
 main(int argc, char ??argv) {
     let n<`n> = ((argc == 2) ? atoi(argv[1]) : 1);
-    int k, @{valueof(`n)} @region(`U) x, @{valueof(`n)} @region(`U) y;
+    int k, @{valueof(`n)} \U  x, @{valueof(`n)} \U y;
     unsigned int i;
 
     START_TIME

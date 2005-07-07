@@ -371,9 +371,9 @@ extern int Cyc_strptrcmp(struct _fat_ptr*,struct _fat_ptr*);
 extern int Cyc_strncmp(struct _fat_ptr,struct _fat_ptr,unsigned long);
 # 62
 extern struct _fat_ptr Cyc_strconcat(struct _fat_ptr,struct _fat_ptr);
-# 104 "string.h"
+# 105 "string.h"
 extern struct _fat_ptr Cyc_strdup(struct _fat_ptr);
-# 109
+# 110
 extern struct _fat_ptr Cyc_substring(struct _fat_ptr,int,unsigned long);
 # 30 "filename.h"
 extern struct _fat_ptr Cyc_Filename_concat(struct _fat_ptr,struct _fat_ptr);

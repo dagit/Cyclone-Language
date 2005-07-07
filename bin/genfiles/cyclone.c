@@ -411,11 +411,11 @@ extern struct _fat_ptr Cyc_strconcat(struct _fat_ptr,struct _fat_ptr);
 extern struct _fat_ptr Cyc_strconcat_l(struct Cyc_List_List*);
 # 66
 extern struct _fat_ptr Cyc_str_sepstr(struct Cyc_List_List*,struct _fat_ptr);
-# 104 "string.h"
+# 105 "string.h"
 extern struct _fat_ptr Cyc_strdup(struct _fat_ptr);
-# 109
+# 110
 extern struct _fat_ptr Cyc_substring(struct _fat_ptr,int,unsigned long);
-# 120
+# 121
 extern struct _fat_ptr Cyc_strchr(struct _fat_ptr,char);
 # 30 "filename.h"
 extern struct _fat_ptr Cyc_Filename_concat(struct _fat_ptr,struct _fat_ptr);

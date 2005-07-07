@@ -22,7 +22,7 @@ int main(int argc, char ??argv) {
         if(MAXREAD > (size - len)) {
 	    char ? @nozeroterm buf2;
             size <<= 1;
-            if((buf2 = rrealloc(Core::unique_region,buf,size+1)) == NULL)
+            if((buf2 = rqrealloc(Core::heap_region,Core::unique_qual,buf,size+1)) == NULL)
                 return(fprintf(stderr,"realloc failed\n"),EXIT_FAILURE);
 	    Core::ufree(buf);
 	    buf = buf2;

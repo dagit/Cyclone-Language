@@ -345,7 +345,7 @@ extern struct Cyc_List_List*Cyc_List_imp_rev(struct Cyc_List_List*);struct Cyc_S
 extern int isdigit(int);
 # 38 "string.h"
 extern unsigned long Cyc_strlen(struct _fat_ptr);
-# 136 "string.h"
+# 137 "string.h"
 extern struct _fat_ptr Cyc_implode(struct Cyc_List_List*);struct Cyc_Absyn_Tqual{int print_const: 1;int q_volatile: 1;int q_restrict: 1;int real_const: 1;unsigned loc;};
 # 904 "absyn.h"
 struct Cyc_Absyn_Tqual Cyc_Absyn_const_tqual(unsigned);

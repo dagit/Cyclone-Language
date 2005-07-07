@@ -347,9 +347,9 @@ extern int isspace(int);
 extern int isalnum(int);
 # 300
 extern int isspace(int);
-# 81 "string.h"
+# 82 "string.h"
 extern struct _fat_ptr Cyc__memcpy(struct _fat_ptr,struct _fat_ptr,unsigned long,unsigned);
-# 86
+# 87
 extern struct _fat_ptr Cyc_memset(struct _fat_ptr,char,unsigned long);
 # 29 "assert.h"
 extern void*Cyc___assert_fail(struct _fat_ptr,struct _fat_ptr,unsigned);

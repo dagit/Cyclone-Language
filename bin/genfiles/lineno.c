@@ -358,9 +358,9 @@ extern int Cyc_Lexing_lexeme_end(struct Cyc_Lexing_lexbuf*);struct Cyc_List_List
 extern struct Cyc_List_List*Cyc_List_merge_sort(int(*)(void*,void*),struct Cyc_List_List*);
 # 38 "string.h"
 extern unsigned long Cyc_strlen(struct _fat_ptr);
-# 104 "string.h"
+# 105 "string.h"
 extern struct _fat_ptr Cyc_strdup(struct _fat_ptr);
-# 109
+# 110
 extern struct _fat_ptr Cyc_substring(struct _fat_ptr,int,unsigned long);struct Cyc_Lineno_Pos{struct _fat_ptr logical_file;struct _fat_ptr line;int line_no;int col;};
 # 26 "lineno.cyl"
 enum Cyc_Lineno_token_val{Cyc_Lineno_NEWLINE =0U,Cyc_Lineno_LINEDEF =1U,Cyc_Lineno_END =2U};

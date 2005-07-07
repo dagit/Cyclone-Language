@@ -74,6 +74,7 @@ extern mbuffer_t<`r> zstrncpy(mbuffer_t<`r>,buffer_t,size_t);
 
 // realloc
 extern mbuffer_t realloc(mbuffer_t<`H>, size_t);
+extern mbuffer_t<`r,`q> rqrealloc(region_t<`r>,aqual_t<`q\T>,mbuffer_t s, size_t sz);
 extern mbuffer_t<`r> rrealloc(region_t<`r>,mbuffer_t s, size_t sz);
 
 // memcpy and memmove behave like C's except that instead of

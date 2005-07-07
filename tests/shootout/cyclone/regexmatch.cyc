@@ -39,9 +39,14 @@ extern "C include" {  /* tell Cyclone that <pcre.h> is C code */
   pcre_extra *pcre_study(const pcre @code, int options, const char *`H *errptr);
   int pcre_fullinfo(const pcre @code, const pcre_extra *extra, int what,
 		    void *where);
-} export { pcre_compile, pcre_study, pcre_fullinfo, pcre_exec, pcre_init; }
+} export { pcre_compile, pcre_study, pcre_fullinfo, pcre_exec, pcre_init, pcre_malloc, pcre_free; }
 }
 
+void dummy_prevent_treeshake(int *\U `H a) __attribute((consume(1))) {
+  Core::ufree(a);
+  UnsafePcre::pcre_malloc = 0;
+  UnsafePcre::pcre_free = 0;
+}
 
 /* Make a nice wrapper for the unsafe C code */
 namespace Pcre {

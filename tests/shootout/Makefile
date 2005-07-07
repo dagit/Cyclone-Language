@@ -4,10 +4,10 @@ DIFF=~/src/cyclone_internal/benchmarks/bin/diff.pl
 
 CYCC = cyclone
 OPT = -O3
-CFLAGS = $(OPT) -DTIMING -Iinclude
-CYC_FLAGS = $(OPT) -DTIMING -Iinclude
+CFLAGS = $(OPT) -DTIMING -Iinclude 
+CYC_FLAGS = $(OPT) -DTIMING -Iinclude 
 # TO DO: only add this library for those execs that need it
-LDFLAGS = -lm -lpcre
+LDFLAGS = -lm -lpcre 
 
 #EXELANGS := gcc cyclone cyclone-port java-gcj
 EXELANGS := gcc cyclone
@@ -18,7 +18,7 @@ LANGS := $(EXELANGS) $(JAVALANGS)
 # Obsoleted: ary2
 # Cannot implement: methcall objinst (can't do width-subtyping)
 #   prodcons (no pthreads, by default)
-NOGC_BENCHMARKS := ackermann echo except fibo nestedloop random sieve sumcol wc matrix
+NOGC_BENCHMARKS := ackermann echo except fibo nestedloop random sieve sumcol wc #matrix
 NOGC_OPT_BENCHMARKS := reversefile ary3
 GC_BENCHMARKS := hash hash2 heapsort moments lists spellcheck strcat wordfreq regexmatch
 BENCHMARKS := $(NOGC_BENCHMARKS) $(NOGC_OPT_BENCHMARKS) $(GC_BENCHMARKS)

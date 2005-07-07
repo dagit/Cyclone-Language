@@ -349,7 +349,7 @@ extern struct Cyc___cycFILE*Cyc_stdout;struct Cyc_String_pa_PrintArg_struct{int 
 struct _fat_ptr Cyc_aprintf(struct _fat_ptr,struct _fat_ptr);
 # 161 "cycboot.h"
 extern int Cyc_putc(int,struct Cyc___cycFILE*);
-# 104 "string.h"
+# 105 "string.h"
 extern struct _fat_ptr Cyc_strdup(struct _fat_ptr);
 # 87 "printf.cyc"
 static struct _fat_ptr Cyc_parg2string(void*x){

@@ -382,7 +382,7 @@ extern int Cyc_strncmp(struct _fat_ptr,struct _fat_ptr,unsigned long);
 extern int Cyc_zstrptrcmp(struct _fat_ptr*,struct _fat_ptr*);
 # 73
 extern struct _fat_ptr Cyc_zstrncpy(struct _fat_ptr,struct _fat_ptr,unsigned long);
-# 109 "string.h"
+# 110 "string.h"
 extern struct _fat_ptr Cyc_substring(struct _fat_ptr,int,unsigned long);struct Cyc_Xarray_Xarray{struct _fat_ptr elmts;int num_elmts;};
 # 42 "xarray.h"
 extern void*Cyc_Xarray_get(struct Cyc_Xarray_Xarray*,int);
