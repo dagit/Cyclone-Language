@@ -210,7 +210,7 @@ int termcmp(datatype Term @`r1 _t1, datatype Term @`r2 _t2) {
   case $(&Uint(i1,_), &Uint(i2,_)): return i1-i2;
     //case $(&Uint(...),_): return -1;
     //case $(_,&Uint(...)): return 1;
-  case $(&Const(e1),&Const(e2)): return Evexp::exp_cmp(e1,e2);
+  case $(&Const(e1),&Const(e2)): return Evexp::exp_cmp(e1,e2)?(int)e1-(int)e2:0;
     //case $(&Const(...),_): return -1;
     //case $(_,&Const(...)): return 1;
   case $(&Addr(vd1),&Addr(vd2)): return (int)vd1 - (int)vd2;
