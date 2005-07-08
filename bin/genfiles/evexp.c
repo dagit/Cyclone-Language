@@ -933,7 +933,7 @@ void*_Tmp3;switch(*((int*)c)){case 23:
 if(ad->impl==0)return 0;{
 struct _RegionHandle _Tmp4=_new_region(0U,"temp");struct _RegionHandle*temp=& _Tmp4;_push_region(temp);
 {struct Cyc_List_List*inst=Cyc_List_rzip(temp,temp,ad->tvs,ts);
-{struct Cyc_List_List*fs=ad->impl->fields;for(0;fs!=0;fs=fs->tl){
+{struct Cyc_List_List*fs=_check_null(ad->impl)->fields;for(0;fs!=0;fs=fs->tl){
 if(!Cyc_Evexp_okay_szofarg(Cyc_Tcutil_rsubstitute(temp,inst,((struct Cyc_Absyn_Aggrfield*)fs->hd)->type))){
 int _Tmp5=0;_npop_handler(0);return _Tmp5;}}}{
 int _Tmp5=1;_npop_handler(0);return _Tmp5;}}
@@ -959,4 +959,4 @@ return 1;}case 9:
 # 629
 if(td==0 || td->kind==0)
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp4;_Tmp4.tag=0,_Tmp4.f1=_tag_fat("szof typedeftype ",sizeof(char),18U);_Tmp4;});struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp4=({struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp5;_Tmp5.tag=2,_Tmp5.f1=(void*)t;_Tmp5;});void*_Tmp5[2];_Tmp5[0]=& _Tmp3,_Tmp5[1]=& _Tmp4;({int(*_Tmp6)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp6;})(_tag_fat(_Tmp5,sizeof(void*),2));});
-return(int)((struct Cyc_Absyn_Kind*)td->kind->v)->kind==2;}};}
+return(int)((struct Cyc_Absyn_Kind*)_check_null(td->kind)->v)->kind==2;}};}

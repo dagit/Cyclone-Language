@@ -418,9 +418,9 @@ b->cells=l->next;
 -- b->length;
 return;}{
 # 135
-struct Cyc_Hashtable_Cell*next=l->next;for(0;l->next!=0;(l=l->next,next=next->next)){
+struct Cyc_Hashtable_Cell*next=l->next;for(0;_check_null(l)->next!=0;(l=l->next,next=next->next)){
 # 137
-if(cmp(key,next->key)==0){
+if(cmp(key,_check_null(next)->key)==0){
 l->next=next->next;
 -- b->length;
 return;}}}}

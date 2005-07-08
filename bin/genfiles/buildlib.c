@@ -546,7 +546,7 @@ static struct _fat_ptr*Cyc_current_source=0;
 static struct Cyc_List_List*Cyc_current_args=0;
 static struct Cyc_Set_Set**Cyc_current_targets=0;
 static void Cyc_add_target(struct _fat_ptr*sptr){
-Cyc_current_targets=({struct Cyc_Set_Set**_Tmp0=_cycalloc(sizeof(struct Cyc_Set_Set*));({struct Cyc_Set_Set*_Tmp1=({struct Cyc_Set_Set*(*_Tmp2)(struct Cyc_Set_Set*,struct _fat_ptr*)=(struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_insert;_Tmp2;})(*Cyc_current_targets,sptr);*_Tmp0=_Tmp1;});_Tmp0;});}struct _tuple13{struct _fat_ptr*f0;struct Cyc_Set_Set*f1;};
+Cyc_current_targets=({struct Cyc_Set_Set**_Tmp0=_cycalloc(sizeof(struct Cyc_Set_Set*));({struct Cyc_Set_Set*_Tmp1=({struct Cyc_Set_Set*(*_Tmp2)(struct Cyc_Set_Set*,struct _fat_ptr*)=(struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_insert;_Tmp2;})(*_check_null(Cyc_current_targets),sptr);*_Tmp0=_Tmp1;});_Tmp0;});}struct _tuple13{struct _fat_ptr*f0;struct Cyc_Set_Set*f1;};
 # 117
 struct _tuple13*Cyc_line(struct Cyc_Lexing_lexbuf*);
 int Cyc_macroname(struct Cyc_Lexing_lexbuf*);
@@ -671,10 +671,10 @@ lexstate=Cyc_lex_engine(lexstate,lexbuf);
 switch((int)lexstate){case 0:
 # 211 "buildlib.cyl"
  Cyc_macroname(lexbuf);
-for(1;Cyc_current_args!=0;Cyc_current_args=Cyc_current_args->tl){
-Cyc_current_targets=({struct Cyc_Set_Set**_Tmp0=_cycalloc(sizeof(struct Cyc_Set_Set*));({struct Cyc_Set_Set*_Tmp1=({struct Cyc_Set_Set*(*_Tmp2)(struct Cyc_Set_Set*,struct _fat_ptr*)=(struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_delete;_Tmp2;})(*Cyc_current_targets,(struct _fat_ptr*)Cyc_current_args->hd);*_Tmp0=_Tmp1;});_Tmp0;});}{
+for(1;Cyc_current_args!=0;Cyc_current_args=_check_null(Cyc_current_args)->tl){
+Cyc_current_targets=({struct Cyc_Set_Set**_Tmp0=_cycalloc(sizeof(struct Cyc_Set_Set*));({struct Cyc_Set_Set*_Tmp1=({struct Cyc_Set_Set*(*_Tmp2)(struct Cyc_Set_Set*,struct _fat_ptr*)=(struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_delete;_Tmp2;})(*_check_null(Cyc_current_targets),(struct _fat_ptr*)Cyc_current_args->hd);*_Tmp0=_Tmp1;});_Tmp0;});}{
 # 216
-struct _tuple13*_Tmp0=_cycalloc(sizeof(struct _tuple13));_Tmp0->f0=_check_null(Cyc_current_source),_Tmp0->f1=*Cyc_current_targets;return _Tmp0;}case 1:
+struct _tuple13*_Tmp0=_cycalloc(sizeof(struct _tuple13));_Tmp0->f0=_check_null(Cyc_current_source),_Tmp0->f1=*_check_null(Cyc_current_targets);return _Tmp0;}case 1:
 # 219 "buildlib.cyl"
  return Cyc_line(lexbuf);case 2:
 # 221
@@ -1402,7 +1402,7 @@ int Cyc_block_comment(struct Cyc_Lexing_lexbuf*lexbuf){return Cyc_block_comment_
 # 866 "buildlib.cyl"
 void Cyc_scan_type(void*,struct Cyc_Hashtable_Table*);struct _tuple18{struct Cyc_List_List*f0;struct Cyc_Absyn_Exp*f1;};
 void Cyc_scan_exp(struct Cyc_Absyn_Exp*e,struct Cyc_Hashtable_Table*dep){
-void*_Tmp0=e->r;void*_Tmp1;enum Cyc_Absyn_MallocKind _Tmp2;void*_Tmp3;void*_Tmp4;void*_Tmp5;switch(*((int*)_Tmp0)){case 1: _Tmp5=(void*)((struct Cyc_Absyn_Var_e_Absyn_Raw_exp_struct*)_Tmp0)->f1;{void*b=_Tmp5;
+void*_Tmp0=_check_null(e)->r;void*_Tmp1;enum Cyc_Absyn_MallocKind _Tmp2;void*_Tmp3;void*_Tmp4;void*_Tmp5;switch(*((int*)_Tmp0)){case 1: _Tmp5=(void*)((struct Cyc_Absyn_Var_e_Absyn_Raw_exp_struct*)_Tmp0)->f1;{void*b=_Tmp5;
 # 870
 struct _fat_ptr*v=(*Cyc_Absyn_binding2qvar(b)).f1;
 Cyc_add_target(v);
@@ -1471,7 +1471,7 @@ return;}case 19: _Tmp5=(void*)((struct Cyc_Absyn_Offsetof_e_Absyn_Raw_exp_struct
 # 935
 Cyc_scan_type(t1,dep);
 # 937
-{void*_Tmp6=(void*)f->hd;void*_Tmp7;_Tmp7=((struct Cyc_Absyn_StructField_Absyn_OffsetofField_struct*)_Tmp6)->f1;{struct _fat_ptr*fn=_Tmp7;
+{void*_Tmp6=(void*)_check_null(f)->hd;void*_Tmp7;_Tmp7=((struct Cyc_Absyn_StructField_Absyn_OffsetofField_struct*)_Tmp6)->f1;{struct _fat_ptr*fn=_Tmp7;
 Cyc_add_target(fn);goto _LL57;}_LL57:;}
 # 940
 return;}case 0:
@@ -1654,7 +1654,7 @@ struct Cyc_Absyn_Aggrfield*f=(struct Cyc_Absyn_Aggrfield*)fs->hd;
 Cyc_scan_type(f->type,dep);
 Cyc_scan_exp_opt(f->width,dep);}}{
 # 1132
-struct Cyc_List_List*fs=x->impl->fields;for(0;fs!=0;fs=fs->tl){;}}}
+struct Cyc_List_List*fs=_check_null(x->impl)->fields;for(0;fs!=0;fs=fs->tl){;}}}
 # 1136
 goto _LL0;}}case 7: _Tmp1=((struct Cyc_Absyn_Enum_d_Absyn_Raw_decl_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Enumdecl*x=_Tmp1;
 # 1138
@@ -1665,7 +1665,7 @@ if((unsigned)x->fields){
 struct Cyc_Absyn_Enumfield*f=(struct Cyc_Absyn_Enumfield*)fs->hd;
 Cyc_scan_exp_opt(f->tag,dep);}}{
 # 1147
-struct Cyc_List_List*fs=(struct Cyc_List_List*)x->fields->v;for(0;fs!=0;fs=fs->tl){;}}}
+struct Cyc_List_List*fs=(struct Cyc_List_List*)_check_null(x->fields)->v;for(0;fs!=0;fs=fs->tl){;}}}
 # 1151
 goto _LL0;}}case 8: _Tmp1=((struct Cyc_Absyn_Typedef_d_Absyn_Raw_decl_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Typedefdecl*x=_Tmp1;
 # 1153
@@ -1718,7 +1718,7 @@ old=({struct Cyc_Set_Set*(*_Tmp2)(struct Cyc_Hashtable_Table*,struct _fat_ptr*)=
 # 1205
 old=({struct Cyc_Set_Set*(*_Tmp4)(int(*)(struct _fat_ptr*,struct _fat_ptr*))=(struct Cyc_Set_Set*(*)(int(*)(struct _fat_ptr*,struct _fat_ptr*)))Cyc_Set_empty;_Tmp4;})(Cyc_strptrcmp);goto _LL35;}else{_Tmp3=_Tmp2;{void*exn=_Tmp3;_rethrow(exn);}}_LL35:;}}}{
 # 1207
-struct Cyc_Set_Set*targets=Cyc_Set_union_two(*Cyc_current_targets,old);
+struct Cyc_Set_Set*targets=Cyc_Set_union_two(*_check_null(Cyc_current_targets),old);
 ({void(*_Tmp0)(struct Cyc_Hashtable_Table*,struct _fat_ptr*,struct Cyc_Set_Set*)=(void(*)(struct Cyc_Hashtable_Table*,struct _fat_ptr*,struct Cyc_Set_Set*))Cyc_Hashtable_insert;_Tmp0;})(dep,name,targets);
 # 1210
 Cyc_current_targets=saved_targets;
@@ -2467,7 +2467,7 @@ const char*outdir=(const char*)_check_null(_untag_fat_ptr(Cyc_output_dir,sizeof(
 if(Cyc_do_setjmp && Cyc_process_setjmp(outdir))
 return 1;else{
 # 2087
-for(1;Cyc_spec_files!=0;Cyc_spec_files=Cyc_spec_files->tl){
+for(1;Cyc_spec_files!=0;Cyc_spec_files=_check_null(Cyc_spec_files)->tl){
 if(Cyc_process_specfile((const char*)Cyc_spec_files->hd,outdir)){
 Cyc_fprintf(Cyc_stderr,_tag_fat("FATAL ERROR -- QUIT!\n",sizeof(char),22U),_tag_fat(0U,sizeof(void*),0));
 exit(1);}}}

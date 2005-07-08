@@ -590,11 +590,11 @@ int Cyc_XP_fromstr(int n,struct _fat_ptr z,const char*str,int base){
 const char*p=str;
 (unsigned)p?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp0;})(_tag_fat("p",sizeof(char),2U),_tag_fat("xp.cyc",sizeof(char),7U),250U);
 base >= 2 && base <= 36?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp0;})(_tag_fat("base >= 2 && base <= 36",sizeof(char),24U),_tag_fat("xp.cyc",sizeof(char),7U),251U);
-while((int)*p && isspace((int)*p)){
+while((int)*_check_null(p)&& isspace((int)*p)){
 ({const char**_Tmp0=& p;if(*(*_Tmp0)!=0)++(*_Tmp0);else{_throw_arraybounds();}*_Tmp0;});1U;}
 if(((int)*p && isalnum((int)*p))&&(int)*((char*)_check_known_subscript_notnull(Cyc_map,75U,sizeof(char),(int)*p - 48))< base){
 int carry;
-for(1;((int)*p && isalnum((int)*p))&&(int)*((char*)_check_known_subscript_notnull(Cyc_map,75U,sizeof(char),(int)*p - 48))< base;({const char**_Tmp0=& p;if(*(*_Tmp0)!=0)++(*_Tmp0);else{_throw_arraybounds();}*_Tmp0;})){
+for(1;((int)*_check_null(p)&& isalnum((int)*p))&&(int)*((char*)_check_known_subscript_notnull(Cyc_map,75U,sizeof(char),(int)*p - 48))< base;({const char**_Tmp0=& p;if(*(*_Tmp0)!=0)++(*_Tmp0);else{_throw_arraybounds();}*_Tmp0;})){
 carry=Cyc_XP_product(n,z,z,base);
 if(carry)
 break;

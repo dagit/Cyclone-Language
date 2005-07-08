@@ -1061,6 +1061,67 @@ static term_t subst_t(term_dict_t dict,term_t t) {
   return subst_term(dict,t,term_h);
 }
 /////// assertion manipulation /////////////
+
+
+static $(string_t,unsigned) a2dag(assn_t a, int @ctr, 
+                                  Hashtable::table_t<assn_t,$(const char ?`H,unsigned)@`H> t,
+                                  list_t<const char ?`H@`H,`H> @decls)
+{
+  $(const char ?`H,unsigned)@`H* resopt = Hashtable::lookup_opt(t,a);
+  if (resopt != NULL) {
+    return **resopt;
+  }
+  let c = *ctr;
+  *ctr = c + 1;
+  const char ?name = aprintf("A%d",c);
+  const char ?s;
+  unsigned size = 1;
+  switch (a) {
+  case &True: s = "true"; break;
+  case &False: s = "false"; break;
+  case &Prim(t1,p,t2):
+    const char ?ps;
+    switch (p) {
+    case Eq: ps = "=="; break;
+    case Neq: ps = "!="; break;
+    case SLt: ps = " S< "; break;
+    case SLte: ps = " S<= "; break;
+    case ULt: ps = " U< "; break;
+    case ULte: ps = " U<= "; break;
+    default: Warn::impos("assn2string primop");
+    }
+    s = aprintf("%s%s%s",term2string(t1),ps,term2string(t2));
+    break;
+  case &Or(a1,a2):
+    let $(s1,n1) = a2dag(a1,ctr,t,decls);
+    let $(s2,n2) = a2dag(a2,ctr,t,decls);
+    s = aprintf("%s || %s",s1,s2);
+    size += (n1 + n2);
+    break;
+  case &And(a1,a2): 
+    let $(s1,n1) = a2dag(a1,ctr,t,decls);
+    let $(s2,n2) = a2dag(a2,ctr,t,decls);
+    s = aprintf("%s && %s",s1,s2);
+    size += (n1 + n2);
+    break;
+  }
+  *decls = new List{new (const char ?)(aprintf("%s = %s\n",name,s)), *decls};
+  Hashtable::insert(t,a,new $(name,size));
+  return $(name,size);
+}
+
+int assnhash(datatype Assn @a);
+
+string_t assn2dag(assn_t a) {
+  list_t<const char ?`H@`H> decls = NULL;
+  Hashtable::table_t<assn_t,$(const char ?`H,unsigned)@`H> t = 
+    Hashtable::create(221, assncmp, assnhash);
+  int ctr = 0;
+  let $(s,n) = a2dag(a,&ctr,t,&decls);
+  decls = List::imp_rev(new List{new (const char ?)(aprintf("in %s (%d nodes as tree)\n",s,n)),decls});
+  return strconcat_l(decls);
+}
+
   
 // calculate a string representation (and total tree node count) for an
 // assertion.  the prec field (precedent) is used to avoid some parens.
@@ -1584,6 +1645,10 @@ string_t<`H> map2string(nonescvar_map_t m){
 // functions related to handling assnmap as one entity
 string_t<`H> assnmap2string(assn_map_t am){
   return aprintf("%s\n%s",assn2string(am.assn),map2string(am.map));
+}
+
+string_t assnmap2dag(assn_map_t am) {
+  return aprintf("%s\n%s",assn2dag(am.assn),map2string(am.map));
 }
 
 static nonescvar_map_t empty_map() {

@@ -390,13 +390,13 @@ extern void*Cyc_AssnDef_get_term_type(void*);
 enum Cyc_AssnDef_Primreln{Cyc_AssnDef_Eq =0U,Cyc_AssnDef_Neq =1U,Cyc_AssnDef_SLt =2U,Cyc_AssnDef_SLte =3U,Cyc_AssnDef_ULt =4U,Cyc_AssnDef_ULte =5U};struct Cyc_AssnDef_Prim_AssnDef_Assn_struct{int tag;void*f1;enum Cyc_AssnDef_Primreln f2;void*f3;};struct Cyc_AssnDef_And_AssnDef_Assn_struct{int tag;void*f1;void*f2;};struct Cyc_AssnDef_Or_AssnDef_Assn_struct{int tag;void*f1;void*f2;};
 # 170
 int Cyc_AssnDef_assncmp(void*,void*);
-# 176
+# 177
 extern void*Cyc_AssnDef_and(void*,void*);
 extern void*Cyc_AssnDef_or(void*,void*);
 extern void*Cyc_AssnDef_not(void*);
-# 182
+# 183
 extern void*Cyc_AssnDef_slt(void*,void*);
-# 184
+# 185
 extern void*Cyc_AssnDef_ult(void*,void*);
 # 38 "tcutil.h"
 int Cyc_Tcutil_is_signed_type(void*);
@@ -945,7 +945,7 @@ newrs=Cyc_PrattProver_revnodes(newrs);
 newg->rows=newrs;{
 # 1030
 struct Cyc_PrattProver_Node*rs=g->rows;for(0;rs!=0;(rs=rs->next,newrs=newrs->next)){
-({struct Cyc_PrattProver_Distance*_Tmp0=Cyc_PrattProver_copy_distances(newg,rs->unsigned_distances);newrs->unsigned_distances=_Tmp0;});
+({struct Cyc_PrattProver_Distance*_Tmp0=Cyc_PrattProver_copy_distances(newg,rs->unsigned_distances);_check_null(newrs)->unsigned_distances=_Tmp0;});
 ({struct Cyc_PrattProver_Distance*_Tmp0=Cyc_PrattProver_copy_distances(newg,rs->unsigned_distances);newrs->signed_distances=_Tmp0;});}}}}}
 # 1035
 return res;}
@@ -1466,7 +1466,7 @@ a=a1;
 goto LOOP;}case 4: _Tmp2=(void*)((struct Cyc_AssnDef_Or_AssnDef_Assn_struct*)a)->f1;_Tmp1=(void*)((struct Cyc_AssnDef_Or_AssnDef_Assn_struct*)a)->f2;{void*a1=_Tmp2;void*a2=_Tmp1;
 # 1918
 unsigned n=Cyc_PrattProver_num_graphs(gs);
-if(*total_paths > Cyc_PrattProver_max_paths)
+if(*_check_null(total_paths)> Cyc_PrattProver_max_paths)
 _throw(& Cyc_PrattProver_too_large);
 # 1924
 *total_paths=*total_paths + n;

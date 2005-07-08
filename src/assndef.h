@@ -169,6 +169,7 @@ namespace AssnDef{
 
   int assncmp(datatype Assn @`r1 _a1, datatype Assn @`r2 _a2);
   
+  extern string_t assn2dag(assn_t);
   extern string_t assn2string(datatype Assn @);
   extern datatype Assn.True true_assn;
   extern datatype Assn.False false_assn;
@@ -200,6 +201,7 @@ namespace AssnDef{
   extern assn_map_t false_assnmap();
   extern assn_map_t true_assnmap();
   extern string_t map2string(nonescvar_map_t);
+  extern string_t assnmap2dag(assn_map_t);
   extern string_t assnmap2string(assn_map_t);
   
   //given a nonescvar's vardecl, retrieve its value from the mapping

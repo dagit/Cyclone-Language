@@ -697,7 +697,7 @@ return Cyc_List_rmerge(Cyc_Core_heap_region,less_eq,a,b);}char Cyc_List_Nth[4U]=
 struct Cyc_List_Nth_exn_struct Cyc_List_Nth_val={Cyc_List_Nth};
 # 466
 void*Cyc_List_nth(struct Cyc_List_List*x,int i){
-return Cyc_List_nth_tail(x,i)->hd;}
+return _check_null(Cyc_List_nth_tail(x,i))->hd;}
 # 472
 struct Cyc_List_List*Cyc_List_nth_tail(struct Cyc_List_List*x,int i){
 if(i < 0)_throw(& Cyc_List_Nth_val);
@@ -918,7 +918,7 @@ return 0;}
 # 733
 struct _fat_ptr Cyc_List_rto_array(struct _RegionHandle*r2,struct Cyc_List_List*x){
 int s=Cyc_List_length(x);
-unsigned _Tmp0=(unsigned)s;return _tag_fat(({void**_Tmp1=({struct _RegionHandle*_Tmp2=r2;_region_malloc(_Tmp2,0U,_check_times(_Tmp0,sizeof(void*)));});({{unsigned _Tmp2=(unsigned)s;unsigned i;for(i=0;i < _Tmp2;++ i){({void*_Tmp3=({void*v=x->hd;x=x->tl;v;});_Tmp1[i]=_Tmp3;});}}0;});_Tmp1;}),sizeof(void*),_Tmp0);}
+unsigned _Tmp0=(unsigned)s;return _tag_fat(({void**_Tmp1=({struct _RegionHandle*_Tmp2=r2;_region_malloc(_Tmp2,0U,_check_times(_Tmp0,sizeof(void*)));});({{unsigned _Tmp2=(unsigned)s;unsigned i;for(i=0;i < _Tmp2;++ i){({void*_Tmp3=({void*v=_check_null(x)->hd;x=x->tl;v;});_Tmp1[i]=_Tmp3;});}}0;});_Tmp1;}),sizeof(void*),_Tmp0);}
 # 738
 struct _fat_ptr Cyc_List_to_array(struct Cyc_List_List*x){
 return Cyc_List_rto_array(Cyc_Core_heap_region,x);}

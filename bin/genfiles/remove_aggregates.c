@@ -504,7 +504,7 @@ for(dles=dles->tl;dles!=0;dles=dles->tl){
 init_e=Cyc_Absyn_seq_exp(init_e,(*((struct _tuple11*)dles->hd)).f1,0U);}
 if(do_stmt_exp){
 void*(*f)(struct _tuple0*)=(unsigned)sdopt &&(int)sdopt->kind==1?Cyc_Absyn_unionq_type: Cyc_Absyn_strctq;
-({void*_Tmp6=Cyc_Absyn_stmt_exp(({struct _tuple0*_Tmp7=*v;void*_Tmp8=f(tdn);Cyc_Absyn_declare_stmt(_Tmp7,_Tmp8,0,({
+({void*_Tmp6=Cyc_Absyn_stmt_exp(({struct _tuple0*_Tmp7=*_check_null(v);void*_Tmp8=f(tdn);Cyc_Absyn_declare_stmt(_Tmp7,_Tmp8,0,({
 struct Cyc_Absyn_Stmt*_Tmp9=Cyc_Absyn_exp_stmt(init_e,0U);Cyc_Absyn_seq_stmt(_Tmp9,
 Cyc_Absyn_exp_stmt(dest,0U),0U);}),0U);}),0U)->r;
 # 183
