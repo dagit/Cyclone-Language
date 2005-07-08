@@ -30,7 +30,7 @@
 #include "pratt_prover.h"
 #include "absynpp.h"
 #include "cf_flowinfo.h"
-#include "stdio.h"
+#include <cycboot.h>
 
 #define VCGEN_DEBUG
 namespace Vcgen;
