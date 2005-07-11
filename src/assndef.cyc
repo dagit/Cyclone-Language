@@ -1154,7 +1154,7 @@ static string_t a2string(datatype Assn @a, int prec) {
   }
 }
 
-
+// Warning -- assertions are huge!  Use assn2dag instead...
 string_t assn2string(datatype Assn @a){
   return a2string(a,0);
 }
@@ -1177,16 +1177,6 @@ int assnhash(datatype Assn @a) {
     return (((unsigned int)a1 + (unsigned int)a2) >> 4) + 3;
   case &Or(a1,a2): 
     return (((unsigned int)a2 + (unsigned int)a1) >> 4) + 5;    
-  }
-}
-
-static inline int assncode(datatype Assn @a) {
-  switch (a) {
-  case &True:  return 0;
-  case &False: return 1;
-  case &Prim(...): return 2;
-  case &And(...): return 3;
-  case &Or(...): return 4;
   }
 }
 

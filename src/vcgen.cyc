@@ -1423,12 +1423,13 @@ static $(assn_map_t,assn_map_t) vcgen_pat(env_t env, Absyn::pat_t p,
     for (unsigned j = 0; ps != NULL; ps=ps->tl, ++j) {
       let p2 = ps->hd;
       let member = proj(v,j,p2->topt);
-      // FIX: path needs to be expressed using offsetof, but we really
-      // need a way to distinguish this from pointer arithmetic.
       let path = NULL;
-      if (lvalue != NULL)
+      if (lvalue != NULL) {
 	// get to the name of the datatype-field
-	path = offsetf(df->name->f1,lvalue,NULL);
+        // FIX:  need to put the type in the path...
+        let &Absyn::FieldName(field_name) = Absyn::tuple_field_designator(j);
+	path = offsetf(field_name,lvalue,NULL);
+      }
       let $(amt2,amf2) = vcgen_pat(env,p2,path,member,amt);
       amf = may_widen(env,or_assnmap_assnmap(amf,amf2));
       amt = amt2;
