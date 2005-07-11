@@ -936,7 +936,8 @@ bool subset_effect(bool may_constrain_evars, type_t e1, type_t e2) {
   // if e2 is of the form JoinEff(ev::rest) where ev is an effect evar,
   // then we can instantiate ev to JoinEff(ev'::e1) where ev' is fresh
   if(e1 == e2) return true;
-  switch (compress(e1)) {
+  e1 = compress(e1);
+  switch (e1) {
   case &AppType(&HeapCon, _): //no special treatment of the heap ... want to prevent assignment of `H to `r
     return type_in_effect(may_constrain_evars, e1, e2);
   case &AppType(&JoinCon,es):
@@ -2300,7 +2301,7 @@ bool subtype(list_t<$(type_t,type_t)@`H,`H> assume,
         return false;
     } else if (f1.cyc_varargs != NULL || f2.cyc_varargs != NULL) return false;
     // deal with effect
-    if (!subset_effect(true,(type_t)f1.effect,(type_t)f2.effect)) return false;
+    if (!subset_effect(false,(type_t)f1.effect,(type_t)f2.effect)) return false;
     // deal with region partial order
     if(cmp_effect_constraints(f1.effconstr, f2.effconstr)) return false;
     // deal with attributes that can be dropped
