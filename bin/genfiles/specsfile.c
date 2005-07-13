@@ -586,15 +586,15 @@ if(Cyc_strcmp(_tag_fat("-b",sizeof(char),3U),((struct _fat_ptr*)argv.curr)[i])==
 ((int*)bindices.curr)[i]=1;
 ++ numbindices;
 ++ i;if(i >= argc)break;
-((int*)bindices.curr)[i]=1;
+*((int*)_check_fat_subscript(bindices,sizeof(int),i))=1;
 ++ numbindices;}}}{
 # 265
 struct _fat_ptr bargs=({unsigned _Tmp0=(unsigned)(numbindices + 1);_tag_fat(({struct _fat_ptr*_Tmp1=_cycalloc(_check_times(_Tmp0,sizeof(struct _fat_ptr)));({{unsigned _Tmp2=(unsigned)(numbindices + 1);unsigned n;for(n=0;n < _Tmp2;++ n){_Tmp1[n]=_tag_fat(0,0,0);}}0;});_Tmp1;}),sizeof(struct _fat_ptr),_Tmp0);});
 struct _fat_ptr otherargs=({unsigned _Tmp0=(unsigned)(argc - numbindices);_tag_fat(({struct _fat_ptr*_Tmp1=_cycalloc(_check_times(_Tmp0,sizeof(struct _fat_ptr)));({{unsigned _Tmp2=(unsigned)(argc - numbindices);unsigned n;for(n=0;n < _Tmp2;++ n){_Tmp1[n]=_tag_fat(0,0,0);}}0;});_Tmp1;}),sizeof(struct _fat_ptr),_Tmp0);});
-({struct _fat_ptr _Tmp0=((struct _fat_ptr*)otherargs.curr)[0]=*((struct _fat_ptr*)_check_fat_subscript(argv,sizeof(struct _fat_ptr),0));((struct _fat_ptr*)bargs.curr)[0]=_Tmp0;});
+({struct _fat_ptr _Tmp0=({struct _fat_ptr _Tmp1=*((struct _fat_ptr*)_check_fat_subscript(argv,sizeof(struct _fat_ptr),0));*((struct _fat_ptr*)_check_fat_subscript(otherargs,sizeof(struct _fat_ptr),0))=_Tmp1;});*((struct _fat_ptr*)_check_fat_subscript(bargs,sizeof(struct _fat_ptr),0))=_Tmp0;});
 for(i=(j=(k=1));i < argc;++ i){
-if(((int*)bindices.curr)[i])((struct _fat_ptr*)bargs.curr)[j ++]=((struct _fat_ptr*)argv.curr)[i];else{
-((struct _fat_ptr*)otherargs.curr)[k ++]=((struct _fat_ptr*)argv.curr)[i];}}
+if(*((int*)_check_fat_subscript(bindices,sizeof(int),i)))*((struct _fat_ptr*)_check_fat_subscript(bargs,sizeof(struct _fat_ptr),j ++))=((struct _fat_ptr*)argv.curr)[i];else{
+*((struct _fat_ptr*)_check_fat_subscript(otherargs,sizeof(struct _fat_ptr),k ++))=((struct _fat_ptr*)argv.curr)[i];}}
 # 273
 Cyc_Arg_current=0;
 Cyc_Arg_parse(specs,anonfun,anonflagfun,errmsg,bargs);

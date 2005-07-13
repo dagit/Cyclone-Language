@@ -256,6 +256,9 @@ static void update_try_assnmap(env_t env, assn_map_t am, term_t exn_value){
 static assn_map_t vcgen_local_decl(env_t env, decl_t d, assn_map_t amin){
   switch (d->r) {
   case &Absyn::Var_d(vd):
+    // when declaring a variable, it's "initialized" with a random value
+    // before we actually run the initializer...
+    amin = do_assign(env,amin,addr(vd),fresh_var(vd->type));
     if (vd->initializer != NULL) {
       let $(t,am) = vcgen_rexp(env,(exp_t)vd->initializer,amin);
       am = do_assign(env,am,addr(vd),t);
@@ -436,6 +439,44 @@ static $(term_t,term_t,assn_map_t) vcgen_deref(env_t env, exp_t root,
   return $(t1,t2,am2);
 }
 
+static $(term_t res, assn_map_t amout)
+  vcgen_comprehension(env_t env, vardecl_t vd, exp_t e1, exp_t e2, 
+                      type_t res_type, assn_map_t amin) {
+  // similar to a while-loop except we evaluate e1 only once.
+  let $(t1,amin) = vcgen_rexp(env,e1,amin);
+  // start off with index 0
+  term_t v = zero();
+  amin = do_assign(env,amin,addr(vd),v);
+  while (true) {
+    amin = canonical_assnmap(amin);
+    //fprintf(stderr,"current invariant is %s\n",assnmap2string(amin));
+    let $(v2,am2) = lookup_var_map(vd,amin);
+    v = v2; amin = am2;
+    let amt = and_assnmap_assn(amin,ult(v,t1));
+    let amf = and_assnmap_assn(amin,ulte(t1,v));
+    let $(_,ambody) = vcgen_rexp(env,e2,amt);
+    // increment vd
+    let $(v2,am2) = lookup_var_map(vd,ambody);
+    ambody = do_assign(env,am2,addr(vd),plus(v2,one(),Absyn::uint_type));
+    ambody = canonical_assnmap(ambody);
+    //fprintf(stderr,"after body %s\n",assnmap2string(ambody));
+    let $(a1,a2,map) = unify_var_maps_subst(amin,ambody);
+    //fprintf(stderr,"after unify %s || %s\n",assnmap2string(AssnMap(a1,map)),
+    //        assnmap2string(AssnMap(a2,map)));
+    if (implies(a2,a1)) { 
+      //fprintf(stderr,"fixed point reached, returning %s\n",assnmap2string(amf));
+      amin = amf; 
+      break; 
+    }
+    amin = widen_assnmap(AssnMap(or(a1,a2),map));
+    //fprintf(stderr,"no fixed point, looping with %s\n",assnmap2string(amin));
+  }
+  let res = fresh_var(res_type);
+  // can add it in that numelts(res) == t1
+  amin = and_assnmap_assn(amin,eq(numelts_term(res),t1));
+  return $(res,amin);
+}
+
 static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
   if (Tcutil::is_const_exp(e)){
      // special case for pragmas
@@ -456,12 +497,19 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
          env->widen_paths = true;
        }
        return $(zero(),amin);
+     case &Absyn::Comprehension_e(...): 
+       // comprehensions are treated as "constant" when the initializer
+       // is constant, but I don't really want to allow this for now.
+       // In fact, I'm wondering if we wouldn't be better off avoiding
+       // this call all together...
+       goto ANALYZE;
      default:  break;
      }
      let $(cn, known)= Evexp::eval_const_uint_exp(e);
      if (known) return $(uint(cn), amin);
      else return $(cnst(e),amin);
   }
+ ANALYZE:
   switch (e->r) {
   case &Absyn::Const_e(c): 
   case &Absyn::Pragma_e(...):
@@ -674,14 +722,29 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
       amin = vcgen_rexp(env,(exp_t)eopt,amin)[1];
     if (qopt != NULL)
       amin = vcgen_rexp(env,(exp_t)qopt,amin)[1];
-    let $(t,amin) = vcgen_rexp(env,e1,amin);
-    // we know the result is not NULL -- if it's a new {...} then we
-    // could also calculate the numelts.
-    let res =alloc(e,one(),e->topt);
-    let $(mem,amin) = lookup_var_map(memory,amin);
-    amin = and_assnmap_assn(amin,and(eq(select(mem,res,e1->topt),t),
-				     neq(res,zero())));
-    return $(res,amin);
+    // allocation of arrays must be handled specially
+    switch (e1->r) {
+    case &Absyn::Array_e(dles):
+      let $(_,amin) = vcgen_rexp(env,e1,amin);
+      let size = uint(List::length(dles));
+      let res = alloc(e,uint(List::length(dles)),e->topt);
+      amin = and_assnmap_assn(amin,and(neq(res,zero()),
+                                       eq(numelts_term(res),size)));
+      // FIX: would like to add also that select(mem,res,i) = ith term
+      // in the array.  But this could really, really blow up the assertion.
+      return $(res,amin);
+    case &Absyn::Comprehension_e(vd,e1,e2,_):
+      let $(res,amin) = vcgen_comprehension(env,vd,e1,e2,(type_t)e->topt,amin);
+      amin = and_assnmap_assn(amin,neq(res,zero()));
+      return $(res,amin);
+    default:
+      let $(t,amin) = vcgen_rexp(env,e1,amin);
+      let res =alloc(e,one(),e->topt);
+      let $(mem,amin) = lookup_var_map(memory,amin);
+      amin = and_assnmap_assn(amin,and(eq(select(mem,res,e1->topt),t),
+                                       neq(res,zero())));
+      return $(res,amin);
+    }
   case &Absyn::Enum_e(...):
   case &Absyn::AnonEnum_e(...):
   case &Absyn::Sizeoftype_e(_):
@@ -762,24 +825,7 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
       struct_aggr(vs,e->topt);
     return $(res,amin);
   case &Absyn::Comprehension_e(vd,e1,e2,_): 
-    // similar to a while-loop except we evaluate e1 only once.
-    let $(t1,am) = vcgen_rexp(env,e1,amin);
-    // start off with index 0
-    am = do_assign(env,am,addr(vd),zero());
-    let $(v,am) = lookup_var_map(vd,am);
-    while (true) {
-      let amt = and_assnmap_assn(am,ult(v,t1));  // simulate test
-      let amf = and_assnmap_assn(am,ulte(t1,v));
-      let $(_,ambody) = vcgen_rexp(env,e2,amt);  // run body and add one
-      ambody = do_assign(env,ambody,addr(vd),plus(v,one(),vd->type));
-      if (simple_implies(ambody.assn,am.assn)) { am = amf; break; }
-      // no choice about widening here to ensure termination
-      am = widen_assnmap(or_assnmap_assnmap(ambody,am));  // widen and possibly iterate
-    }
-    let res = fresh_var(e->topt);
-    // can add it in that numelts(res) == t1
-    am = and_assnmap_assn(am,eq(numelts_term(res),t1));
-    return $(res,am);
+    return vcgen_comprehension(env,vd,e1,e2,(type_t)e->topt,amin);
   case &Absyn::ComprehensionNoinit_e(e,_,_):
     return $(fresh_var(NULL),vcgen_rexp(env,e,amin)[1]);
   case &Absyn::Malloc_e(mi):

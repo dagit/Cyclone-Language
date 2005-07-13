@@ -1250,9 +1250,9 @@ goto _LL2B;else{_Tmp9=((struct Cyc_Absyn_Datatype_e_Absyn_Raw_exp_struct*)_Tmp0)
 struct _tuple23 _TmpA=Cyc_NewControlFlow_anal_Rexps(env,inflow,es,1,1);void*_TmpB;union Cyc_CfFlowInfo_FlowInfo _TmpC;_TmpC=_TmpA.f0;_TmpB=_TmpA.f1;{union Cyc_CfFlowInfo_FlowInfo f=_TmpC;struct Cyc_List_List*rvals=_TmpB;
 unsigned sz=(unsigned)(Cyc_List_length(es)+ 1);
 struct _fat_ptr aggrdict=({unsigned _TmpD=sz;_tag_fat(({void**_TmpE=_cycalloc(_check_times(_TmpD,sizeof(void*)));({{unsigned _TmpF=sz;unsigned i;for(i=0;i < _TmpF;++ i){_TmpE[i]=fenv->unknown_none;}}0;});_TmpE;}),sizeof(void*),_TmpD);});
-((void**)aggrdict.curr)[0]=fenv->unknown_all;
+*((void**)_check_fat_subscript(aggrdict,sizeof(void*),0))=fenv->unknown_all;
 {unsigned i=1U;for(0;i < sz;(i ++,rvals=rvals->tl)){
-((void**)aggrdict.curr)[(int)i]=(void*)rvals->hd;}}{
+((void**)aggrdict.curr)[(int)i]=(void*)_check_null(rvals)->hd;}}{
 struct _tuple16 _TmpD;_TmpD.f0=f,({void*_TmpE=(void*)({struct Cyc_CfFlowInfo_Aggregate_CfFlowInfo_AbsRVal_struct*_TmpF=_cycalloc(sizeof(struct Cyc_CfFlowInfo_Aggregate_CfFlowInfo_AbsRVal_struct));_TmpF->tag=6,_TmpF->f1.is_union=0,_TmpF->f1.fieldnum=- 1,_TmpF->f2=aggrdict;_TmpF;});_TmpD.f1=_TmpE;});return _TmpD;}}}}case 41: _LL2D:
 # 1058
  goto _LL2F;case 42: _LL2F:
