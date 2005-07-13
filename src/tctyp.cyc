@@ -738,28 +738,33 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
 	(Kinds::kind_leq(expected_kind,(*k)->v) 
 	 && !Kinds::kind_leq((*k)->v,expected_kind)))
       *k = Kinds::kind_to_opt(expected_kind);
+    
     if ((env.fn_result && env.generalize_evars)) {
       if(expected_kind->kind == EffKind && !te->tempest_generalize) { 
 	*ref = heap_rgn_type;
+	break;
       }
       else if(expected_kind->kind == AqualKind && !te->tempest_generalize) { 
 	*ref = al_qual_type;
+	break;
       }
     }
-    else if (env.inst_type_evar && 
-	     expected_kind->kind == AqualKind && 
-	     !te->tempest_generalize) { 
+    
+    if (env.inst_type_evar && 
+	expected_kind->kind == AqualKind && 
+	!te->tempest_generalize) { 
       *ref = al_qual_type;
+      break;
     }
-    else if (env.generalize_evars && expected_kind->kind != BoolKind
-	     && expected_kind->kind != PtrBndKind) {
+    
+    if (env.generalize_evars && expected_kind->kind != BoolKind
+	&& expected_kind->kind != PtrBndKind) {
       // generalize evars that aren't bool or ptrbounds.
       let v = new_tvar(new Less_kb(NULL,expected_kind));
       *ref = var_type(v);
       fallthru(v);
-    } else {
-      env.free_evars = add_free_evar(env.free_evars,t,put_in_effect);
-    }
+    } 
+    env.free_evars = add_free_evar(env.free_evars,t,put_in_effect);
     break;
   case &VarType(v):
     switch (Kinds::compress_kb(v->kind)) {
