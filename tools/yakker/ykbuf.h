@@ -19,11 +19,14 @@
 #ifndef YKBUF_H
 #define YKBUF_H
 #include "ssl.h"
+#include <fn.h>
+typedef struct ykbuf ykbuf_t;
 datatype ykproducer {
   ykp_fd(int);
   ykp_ssl(SSL@);
+  ykp_p(int (@p)(ykbuf_t @), ykbuf_t @ykb);
 };
-typedef struct ykbuf {
+struct ykbuf {
   datatype ykproducer *prod;
   unsigned char
     ? @nozeroterm bot,
@@ -35,10 +38,12 @@ typedef struct ykbuf {
   int             eof;
   int             save_count;
   unsigned int    discarded;
-} ykbuf_t;
+};
 extern ykbuf_t @fd2ykbuf(int fd);
-extern ykbuf_t @string2ykbuf(const char ?s);
 extern ykbuf_t @ssl2ykbuf(SSL@`H);
+extern ykbuf_t @p2ykbuf(int (@`H p)(ykbuf_t @`H),ykbuf_t @`H ykb);
+extern ykbuf_t @string2ykbuf(const char ?s);
+
 extern void ykfill(ykbuf_t @s,unsigned int n);
 extern void ykdumpbuf(ykbuf_t @y);
 

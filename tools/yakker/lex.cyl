@@ -30,7 +30,7 @@ static unsigned int parens_to_match = 0;
 static unsigned int token_num = 0;
 static $(unsigned int,unsigned int) token_charrange = $(0,0);
 static datatype Rule.Lit bogus = Lit("");
-static struct arule abogus = {NULL,NULL,NULL,&bogus};
+static struct arule abogus = {NULL,NULL,NULL,NULL,&bogus};
 static rule_t token_charseq = &abogus;
 static const char ?token_string = "";
 int token(Lexing::Lexbuf);

@@ -19,5 +19,5 @@
 #ifndef PROSE_H
 #define PROSE_H
 #include "bnf.h"
-grammar_t prose_elim(grammar_t<`H> ds);
+void prose_elim(grammar_t<`H> ds);
 #endif

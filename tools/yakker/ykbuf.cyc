@@ -56,6 +56,21 @@ ykbuf_t @ssl2ykbuf(SSL @`H ssl) {
     .discarded=0};
   return result;
 }
+ykbuf_t @p2ykbuf(int (@`H p)(ykbuf_t @`H),ykbuf_t @`H ykb) {
+  let buf = malloc(BSIZE*sizeof(unsigned char));
+  let result = new ykbuf{
+    .prod=new ykp_p(p,ykb),
+    .bot=buf,
+    .save=NULL,
+    .mark=NULL,
+    .cur=buf,
+    .lim=buf,
+    .top=buf+BSIZE,
+    .eof=0,
+    .save_count=0,
+    .discarded=0};
+  return result;
+}
 
 // TODO: this is annoying, we have to copy the string.
 // Actually it should not be necessary because we never
@@ -151,12 +166,24 @@ void ykdumpbuf(ykbuf_t @y) {
 // Note: SSL uses int instead of size_t
 extern int SSL_read(SSL @ssl, char ? @nozeroterm buf, int count);
 
+// FIX: make p first-class polymorphic on `r?
+int ykreadp(int (@p)(ykbuf_t @`r), ykbuf_t @`r ykb,
+            unsigned char? @nozeroterm b, int n) {
+  for (int i = 0; i < n; i++) {
+    int r = p(ykb);
+    if (r < 0 || r > 255) return i;
+    *b = (unsigned char)r;
+  }
+  return n;
+}
+
 int ykread(datatype ykproducer *p, unsigned char? @nozeroterm b, int n) {
   switch (p) {
   case NULL:          return 0;
   case &ykp_fd(fd):   return read(fd,b,n);
   case &ykp_ssl(ssl): return SSL_read(ssl,b,n);
-  }
+  case &ykp_p(p,ykb): return ykreadp(p,ykb,b,n);
+ }
 }
 
 void ykfill(ykbuf_t @s,unsigned int n) {
@@ -211,7 +238,7 @@ void ykfill(ykbuf_t @s,unsigned int n) {
           perror("Read error on fill");
           // Act as if eof was encountered
           s->eof = cnt = 1;
-          s->lim = '\0';          
+          s->lim = '\0';
         }
       }
       else {                        // read fewer than TO_READ characters for some other reason

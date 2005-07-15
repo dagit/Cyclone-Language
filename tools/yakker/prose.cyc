@@ -24,51 +24,47 @@ using List;
 
 static struct Hashtable::Table<const char ?@,rule_t,`H> *prose_table;
 
-static rule_t prose_elim_rule(rule_t r) {
+static void prose_elim_rule(rule_t r) {
   switch (r->r) {
   case &Prose(x):
     let z = Hashtable::lookup_opt((_@)prose_table,new x);
     if (z == NULL) {
-      fprintf(stderr,"Warning: could not eliminate prose: <%s>\n",x);
-      return r;
+      warn("could not eliminate prose: <%s>\n",x);
+      return;
     }
-    else return *z;
+    else r->r = (*z)->r;
+    return;
   case &Symb(_,_):
   case &CharRange(_,_):
   case &Lit(_):
-    return r;
-  case &Minus(r2,r3): 
-    return MINUS_r(r,prose_elim_rule(r2),prose_elim_rule(r3));
-  case &Seq(r2,r3):
-    return SEQ_r(r,prose_elim_rule(r2),prose_elim_rule(r3));
+    return;
+  case &Minus(r2,r3): fallthru(r2,r3);
+  case &Seq(r2,r3): fallthru(r2,r3);
   case &Alt(r2,r3):
-    return ALT_r(r,prose_elim_rule(r2),prose_elim_rule(r3));
-  case &Opt(r2):
-    return OPT_r(r,prose_elim_rule(r2));
-  case &Rcount(c,r2):
-    return RCOUNT_r(r,c,prose_elim_rule(r2));
-  case &Star(m,N,r2):
-    return STAR_r(r,m,N,prose_elim_rule(r2));
-  case &Hash(m,N,r2):
-    return HASH_r(r,m,N,prose_elim_rule(r2));
+    prose_elim_rule(r2);
+    prose_elim_rule(r3);
+    return;
+  case &Opt(r2): fallthru(r2);
+  case &Rcount(_,r2): fallthru(r2);
+  case &Star(_,_,r2): fallthru(r2);
+  case &Hash(_,_,r2):
+    prose_elim_rule(r2);
+    return;
   }
 }
 
 // Annoying that this does not take a const char ?; a problem with <lexing.h>
 extern grammar_t parse_string(char ?s);
 extern const char ?prose_elim_grm;
-grammar_t prose_elim(grammar_t<`H> ds) {
+void prose_elim(grammar_t<`H> ds) {
   prose_table = Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr);
   let prose_ds = parse_string(strdup(prose_elim_grm));
   for (; prose_ds; prose_ds = prose_ds->tl) {
     let &$(n,r,a) = prose_ds->hd;
     Hashtable::insert((_@)prose_table,new n,r);
   }
-  let result = NULL;
   for (; ds; ds = ds->tl) {
     let &$(n,r,a) = ds->hd;
-    result = new List(new $(n,prose_elim_rule(r),a),result);
+    prose_elim_rule(r);
   }
-  result = imp_rev(result);
-  return result;
 }

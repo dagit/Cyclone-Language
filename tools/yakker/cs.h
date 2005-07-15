@@ -20,17 +20,6 @@
 #define CS_H
 #include "bnf.h"
 
-///* A cs is a set of 8-bit characters */
-#define BUCKETS 32
-#define MAXCSCHAR 255
-
-/* A cs is a set of 7-bit characters */
-//#define BUCKETS 16
-//#define MAXCSCHAR 127
-typedef unsigned char @{BUCKETS}@nozeroterm cs_t;
-typedef unsigned char *{BUCKETS}@nozeroterm cs_opt_t;
-/* ... but we limit things for now to 7-bit because minimization is too slow */
-
 extern void cs_intersect(cs_t a,cs_t b);
 extern void cs_union(cs_t a,cs_t b);
 extern void cs_xor(cs_t a,cs_t b);
@@ -53,7 +42,7 @@ extern int is_cs_empty(cs_t a);
 extern int is_cs_full(cs_t a);
 extern int is_cs_singleton(cs_t a);
 extern int first_of_cs(cs_t a);
-extern grammar_t minus_elim(grammar_t<`H> ds);
+extern void minus_elim(grammar_t<`H> ds);
 extern const char ?char_escape(unsigned int c);
 extern List::list_t<$(unsigned int,unsigned int)@> cs2ranges(cs_t a);
 extern rule_t cs2rule(cs_t rng);

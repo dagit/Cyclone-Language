@@ -24,9 +24,16 @@ using List;
 // Annoying that this does not take a const char ?; a problem with <lexing.h>
 extern grammar_t parse_string(char ?s);
 extern const char ?corerules_grm;
+
+static grammar_t *cr = NULL;
+grammar_t core_rules() {
+  if (!cr)
+    cr = new parse_string(strdup(corerules_grm));
+  return *cr;
+}
+
 void core_compare(grammar_t<`H> ds) {
-  // FIX: this is duplicated below.  Combine; or get rid of n and a components, not needed
-  let core_ds = parse_string(strdup(corerules_grm));
+  let core_ds = core_rules();
   let core_table = Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr);
   for (; core_ds; core_ds = core_ds->tl) {
     let &$(n,r,a) = core_ds->hd;
@@ -45,36 +52,4 @@ void core_compare(grammar_t<`H> ds) {
       break;
     }
   }
-}
-grammar_t core_augment(grammar_t<`H> ds) {
-  // FIX: this is duplicated above
-  let core_ds = parse_string(strdup(corerules_grm));
-  let core_table = Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr);
-  let core_symbols = Set::empty(strptrcmp);
-  let g = Graph::empty(strptrcmp);
-  for (; core_ds; core_ds = core_ds->tl) {
-    let &$(n,r,a) = core_ds->hd;
-    core_symbols = Set::insert(core_symbols,new n);
-    Hashtable::insert(core_table,new n,core_ds->hd);
-    let free_r = freevars_rule(r);
-    g = Graph::add_edges(g,new n,free_r);
-  }
-  g = Graph::tc(g); // (s,t) in g IFF core symbol s requires core symbol t
-  let free_core_symbols = Set::intersect(freevars(ds),core_symbols);
-  for (let s = free_core_symbols; !Set::is_empty(s); ) {
-    let cs = Set::choose(s); s = Set::delete(s,cs);
-    free_core_symbols = Set::union_two(free_core_symbols,Graph::get_targets(g,cs));
-  }
-  while (!Set::is_empty(free_core_symbols)) {
-    let freev = Set::choose(free_core_symbols);
-    free_core_symbols = Set::delete(free_core_symbols,freev);
-    let core_opt = Hashtable::lookup_opt(core_table,freev);
-    if (core_opt) {
-      ds = new List (*core_opt,ds);
-      warn("adding standard definition for free variable %s\n",*freev);
-    }
-    else
-      warn("free variable %s\n",*freev);
-  }
-  return ds;
 }

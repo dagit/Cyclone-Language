@@ -47,6 +47,13 @@ static int rule_first_line(const char ?s) {
       continue;
     case '=':
       return maybe_starts_with_id;
+    case '<':
+      if (i+2<len && s[i+1] == '"'&& s[i+2] == '>') {
+        /* defines <"> */
+        maybe_starts_with_id = 1; i += 2;
+        continue;
+      }
+      return 0;
     case c:
       if ('a' <= c && c <= 'z') { maybe_starts_with_id = 1; continue; }
       if ('A' <= c && c <= 'Z') { maybe_starts_with_id = 1; continue; }

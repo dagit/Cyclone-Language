@@ -26,38 +26,18 @@
 #include <string.h>
 
 #define EMPTYSET (Set::empty(strptrcmp))
-typedef struct Hashtable::Table<const char ?@,cs_t,`H> @cs_table_t;
-typedef struct Hashtable::Table<const char ?@,cs_t,`H> *cs_table_opt_t;
-typedef struct Hashtable::Table<const char ?@,strset_t,`H> @strset_table_t;
-typedef struct Hashtable::Table<const char ?@,unsigned int,`H> @uint_table_t;
-typedef struct Hashtable::Table<const char ?@,unsigned int,`H> *uint_table_opt_t;
 #define EMPTYTABLE (Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr))
 
 /***************************** GLOBALS *****************************/
-struct Globals {
-  strset_opt_t   maybe_empty;     // Set of symbols that may derive the empty string
-  cs_table_opt_t firstt;          // Map symbols to the first characters they may derive
-  cs_table_opt_t followt;         // Map symbols to the first characters that may follow them in a derivation
-  cs_table_opt_t mayt;            // Map symbols to characters they may derive
-  cs_table_opt_t mustt;           // Map symbols to characters they must derive
-  strset_opt_t   rec_symbols;     // Recursively defined nodes
-  strset_opt_t   rec_dep_symbols; // Nonrecursive nodes depending on recursive nodes
-  uint_table_opt_t arityt;  // Arity of symbols for printing
-};
-static struct Globals globals = {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
+static struct grammar *globals;
+
 void reset_globals() {
-  globals.maybe_empty = NULL;
-  globals.firstt = NULL;
-  globals.followt = NULL;
-  globals.mayt = NULL;
-  globals.mustt = NULL;
-  globals.rec_symbols = NULL;
-  globals.rec_dep_symbols = NULL;
-  globals.arityt = NULL;
+  globals = new grammar {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
 }
 
 void init_recursive (grammar_t ds) {
-  if (globals.rec_symbols) return;
+  if (!globals) reset_globals();
+  if (globals->rec_symbols) return;
   /* Detect recursively defined grammar symbols */
   let g = dependency_graph(ds);
   let tclosed = Graph::tc(g);
@@ -66,38 +46,38 @@ void init_recursive (grammar_t ds) {
   // int *cmp = g.rel;
   // int (@`H cmp)(str_t,str_t) = (int (@`H)(str_t,str_t))g.rel;  // STILL GIVES WARNING!
   let cmp = g.rel;
-  globals.rec_symbols = Set::empty(cmp);
-  globals.rec_dep_symbols = Set::empty(cmp);
+  globals->rec_symbols = Set::empty(cmp);
+  globals->rec_dep_symbols = Set::empty(cmp);
   let edges = Dict::to_list(tclosed);
   for (let e = edges; e; e = e->tl) {
     let &$(s,ts) = e->hd;
-    if (Set::member(ts,s)) globals.rec_symbols = Set::insert(globals.rec_symbols,s);
+    if (Set::member(ts,s)) globals->rec_symbols = Set::insert(globals->rec_symbols,s);
   }
   for (let e = edges; e; e = e->tl) {
     let &$(s,ts) = e->hd;
-    if (!Set::member(globals.rec_symbols,s) && !Set::is_empty(Set::intersect(globals.rec_symbols,ts)))
-      globals.rec_dep_symbols = Set::insert(globals.rec_dep_symbols,s);
+    if (!Set::member(globals->rec_symbols,s) && !Set::is_empty(Set::intersect(globals->rec_symbols,ts)))
+      globals->rec_dep_symbols = Set::insert(globals->rec_dep_symbols,s);
   }
-  if (globals.rec_symbols && !Set::is_empty(globals.rec_symbols)) {
+  if (globals->rec_symbols && !Set::is_empty(globals->rec_symbols)) {
     warn("the following symbols are defined recursively:");
-    fprint_strset(stderr,globals.rec_symbols);
+    fprint_strset(stderr,globals->rec_symbols);
   }
-  if (globals.rec_dep_symbols && !Set::is_empty(globals.rec_dep_symbols)) {
+  if (globals->rec_dep_symbols && !Set::is_empty(globals->rec_dep_symbols)) {
     warn("the following symbols depend on recursively-defined symbols:");
-    fprint_strset(stderr,globals.rec_dep_symbols);
+    fprint_strset(stderr,globals->rec_dep_symbols);
   }
 }
 
 strset_t recursive_symbols(grammar_t grm) {
   init_recursive(grm);
-  return (strset_t)globals.rec_symbols;
+  return (strset_t)globals->rec_symbols;
 }
 
 /**************************** EMPTYNESS ****************************/
 static int empty_rule(rule_t r) {
   switch (r->r) {
   case &Symb(x,_):
-    return Set::member(globals.maybe_empty,new x);
+    return Set::member(globals->maybe_empty,new x);
   case &Prose(x):
 //    fprintf(stderr,
 //            "Warning: cannot determine whether prose can be"
@@ -127,25 +107,26 @@ static int empty_rule(rule_t r) {
 
 /* Initializes the maybe_empty set */
 void init_maybe_empty(grammar_t grm) {
-  if (globals.maybe_empty) return;
+  if (!globals) reset_globals();
+  if (globals->maybe_empty) return;
   int before, after;
 
-  globals.maybe_empty = EMPTYSET;
+  globals->maybe_empty = EMPTYSET;
   do {
-    before = Set::cardinality(globals.maybe_empty);
+    before = Set::cardinality(globals->maybe_empty);
     for (let t = grm; t; t = t->tl) {
       let &$(n,r,_) = t->hd;
       let nptr = new n;
-      if (Set::member(globals.maybe_empty,nptr)) continue;
-      if (empty_rule(r)) globals.maybe_empty = Set::insert(globals.maybe_empty,nptr);
+      if (Set::member(globals->maybe_empty,nptr)) continue;
+      if (empty_rule(r)) globals->maybe_empty = Set::insert(globals->maybe_empty,nptr);
     }
-    after = Set::cardinality(globals.maybe_empty);
+    after = Set::cardinality(globals->maybe_empty);
   } while (before != after);
 }
 
 void report_empty_nonterminals(grammar_t grm) {
   init_maybe_empty(grm);
-  strset_t s = globals.maybe_empty;
+  strset_t s = globals->maybe_empty;
   if (Set::is_empty(s))
     fprintf(stderr,"No symbols can derive the empty string.\n");
   else {
@@ -208,29 +189,28 @@ void report_left_recursion(grammar_t grm) {
   }
   graph = Graph::tc(graph);
   /* Now, (A,B) in graph iff B appears at the left of a derivation from A */
-  let lr = EMPTYSET;
+  let N = EMPTYSET;
   for (let t = grm; t; t = t->tl) {
     let &$(n,_,_) = t->hd;
     let nptr = new n;
     let ntargets = Graph::get_targets(graph,nptr);
     if (Set::member(ntargets,nptr))
-      lr = Set::insert(lr,nptr);
+      N = Set::insert(N,nptr);
   }
-  if (Set::is_empty(lr))
+  if (Set::is_empty(N))
     fprintf(stderr,"There is no left recursion in the grammar.\n");
   else {
     fprintf(stderr,"The following symbols are left-recursive:\n");
-    while (Set::cardinality(lr) > 0) {
-      let x = Set::choose(lr);
-      lr = Set::delete(lr,x);
+    while (Set::cardinality(N) > 0) {
+      let x = Set::choose(N);
+      N = Set::delete(N,x);
       fprintf(stderr,"%s\n",*x);
     }
   }
 }
 
-
 /****************************** FIRST ******************************/
-/* globals.maybe_empty must be initialized */
+/* globals->maybe_empty must be initialized */
 void first(cs_t result, rule_t r) {
   switch (r->r) {
   case &CharRange(min,max):
@@ -249,12 +229,12 @@ void first(cs_t result, rule_t r) {
     return;
   case &Prose(x):
 //    fprintf(stderr,
-//            "Warning: cannot determine the left characters of prose:\n"
+//            "Warning: cannot determine the FIRST characters of prose:\n"
 //            "<%s>\n",
 //            x);
     return;
   case &Symb(x,_):
-    let rngptr = Hashtable::lookup_opt(globals.firstt,new x);
+    let rngptr = Hashtable::lookup_opt(globals->firstt,new x);
     if (rngptr) cs_union(result,*rngptr);
     return;
   case &Seq(r2,r3):
@@ -283,7 +263,8 @@ void first(cs_t result, rule_t r) {
 }
 
 void init_firstt(grammar_t grm) {
-  if (globals.firstt) return;
+  if (!globals) reset_globals();
+  if (globals->firstt) return;
   init_maybe_empty(grm);
   let graph = Graph::empty(strptrcmp);
   for (let t = grm; t; t = t->tl) {
@@ -294,34 +275,32 @@ void init_firstt(grammar_t grm) {
   }
   graph = Graph::tc(graph);
   /* Now, (A,B) in graph iff B appears at the left of a derivation from A */
-  globals.firstt = EMPTYTABLE;
+  globals->firstt = EMPTYTABLE;
   for (let t = grm; t; t = t->tl) {
     let &$(n,r,_) = t->hd;
     let rng = cs_empty();
     first(rng,r);
-    Hashtable::insert(globals.firstt,new n,rng);
+    Hashtable::insert(globals->firstt,new n,rng);
   }
   for (let t = grm; t; t = t->tl) {
     let &$(n,r,_) = t->hd;
     let nptr = new n;
-    let rng = Hashtable::lookup(globals.firstt,nptr);
+    let rng = Hashtable::lookup(globals->firstt,nptr);
     let targets = Graph::get_targets(graph,nptr);
     while (Set::cardinality(targets) > 0) {
       let x = Set::choose(targets);
       targets = Set::delete(targets,x);
-      let rngptr = Hashtable::lookup_opt(globals.firstt,x);
+      let rngptr = Hashtable::lookup_opt(globals->firstt,x);
       if (rngptr) /* missing symbols possible if they are not defined by the grammar */
 	cs_union(rng,*rngptr);
-      /*
-      else
-	fprintf(stderr,"Internal error: bad lookup on %s in report_first\n",*x);
-      */
     }
   }
 }
 
+/************************* RIGHT RECURSION *************************/
+
 /* right_rule(r) = { A | r =>* xA by a derivation that does not replace nonterminals } */
-static void right_rule(mset_t result, strset_t maybe_empty, rule_t r) {
+static void right_rule(mset_t result, rule_t r) {
   switch (r->r) {
   case &Symb(x,_):
     result->s = Set::insert(result->s,new x);
@@ -337,54 +316,234 @@ static void right_rule(mset_t result, strset_t maybe_empty, rule_t r) {
   case &Lit(_):
     return;
   case &Seq(r2,r3):
-    right_rule(result,maybe_empty,r3);
-    if (empty_rule(r3)) right_rule(result,maybe_empty,r2);
+    right_rule(result,r3);
+    if (empty_rule(r3)) right_rule(result,r2);
     return;
   case &Alt(r2,r3):
-    right_rule(result,maybe_empty,r2);
-    right_rule(result,maybe_empty,r3);
+    right_rule(result,r2);
+    right_rule(result,r3);
     return;
   case &Opt(r2):
-    right_rule(result,maybe_empty,r2);
+    right_rule(result,r2);
     return;
   case &Rcount(_,r2):
     // FIX: approximation, can't know whether count is 0
-    right_rule(result,maybe_empty,r2);
+    right_rule(result,r2);
     return;
   case &Star(_,&Num(0),_):
   case &Hash(_,&Num(0),_):
     return;
   case &Star(_,_,r2): fallthru(r2);
   case &Hash(_,_,r2):
-    right_rule(result,maybe_empty,r2);
+    right_rule(result,r2);
     return;
   }
 }
 
-/* right(grm) returns a mapping from nonterminals to sets of nonterminals:
- *        A -> { B | A =>* xB }
- */
-static strset_table_t right(grammar_t grm) {
+void report_right_recursion(grammar_t grm) {
   init_maybe_empty(grm);
   let graph = Graph::empty(strptrcmp);
   for (let t = grm; t; t = t->tl) {
     let result = new mset { EMPTYSET };
     let &$(n,r,_) = t->hd;
-    right_rule(result,globals.maybe_empty,r);
+    right_rule(result,r);
     graph = Graph::add_edges(graph,new n,result->s);
   }
   graph = Graph::tc(graph);
   /* Now, (A,B) in graph iff B appears at the right of a derivation from A */
-  /* Just convert the graph to a strset_table_t */
-  strset_table_t result = EMPTYTABLE;
+  let N = EMPTYSET;
+  for (let t = grm; t; t = t->tl) {
+    let &$(n,_,_) = t->hd;
+    let nptr = new n;
+    let ntargets = Graph::get_targets(graph,nptr);
+    if (Set::member(ntargets,nptr))
+      N = Set::insert(N,nptr);
+  }
+  if (Set::is_empty(N))
+    fprintf(stderr,"There is no right recursion in the grammar.\n");
+  else {
+    fprintf(stderr,"The following symbols are right-recursive:\n");
+    while (Set::cardinality(N) > 0) {
+      let x = Set::choose(N);
+      N = Set::delete(N,x);
+      fprintf(stderr,"%s\n",*x);
+    }
+  }
+}
+
+/****************************** LAST ******************************/
+/* globals->maybe_empty must be initialized */
+void last(cs_t result, rule_t r) {
+  switch (r->r) {
+  case &CharRange(min,max):
+    for (; min <= max; min++)
+      cs_insert(result,(unsigned char)min);
+    return;
+  case &Lit(x):
+    let len = strlen(x);
+    if (len > 0) {
+      let c = x[len-1];
+      cs_insert(result,toupper(c));
+      cs_insert(result,tolower(c));
+    }
+    return;
+  case &Minus(_,_):
+    fprintf(stderr, "Internal error: last is applied to Minus\n");
+    return;
+  case &Prose(x):
+//    fprintf(stderr,
+//            "Warning: cannot determine the LAST characters of prose:\n"
+//            "<%s>\n",
+//            x);
+    return;
+  case &Symb(x,_):
+    let rngptr = Hashtable::lookup_opt(globals->lastt,new x);
+    if (rngptr) cs_union(result,*rngptr);
+    return;
+  case &Seq(r2,r3):
+    last(result,r3);
+    if (empty_rule(r3)) last(result,r2);
+    return;
+  case &Alt(r2,r3):
+    last(result,r2);
+    last(result,r3);
+    return;
+  case &Opt(r2):
+    last(result,r2);
+    return;
+  case &Rcount(_,r2):
+    // FIX: approximation, can't know whether count is 0
+    last(result,r2);
+    return;
+  case &Star(_,&Num(0),_):
+  case &Hash(_,&Num(0),_):
+    return;
+  case &Star(_,_,r2): fallthru(r2);
+  case &Hash(_,_,r2):
+    last(result,r2);
+    return;
+  }
+}
+
+void init_lastt(grammar_t grm) {
+  if (!globals) reset_globals();
+  if (globals->lastt) return;
+  init_maybe_empty(grm);
+  let graph = Graph::empty(strptrcmp);
+  for (let t = grm; t; t = t->tl) {
+    let result = new mset { EMPTYSET };
+    let &$(n,r,_) = t->hd;
+    right_rule(result,r);
+    graph = Graph::add_edges(graph,new n,result->s);
+  }
+  graph = Graph::tc(graph);
+  /* Now, (A,B) in graph iff B appears at the right of a derivation from A */
+  globals->lastt = EMPTYTABLE;
+  for (let t = grm; t; t = t->tl) {
+    let &$(n,r,_) = t->hd;
+    let rng = cs_empty();
+    last(rng,r);
+    Hashtable::insert(globals->lastt,new n,rng);
+  }
   for (let t = grm; t; t = t->tl) {
     let &$(n,r,_) = t->hd;
     let nptr = new n;
+    let rng = Hashtable::lookup(globals->lastt,nptr);
     let targets = Graph::get_targets(graph,nptr);
-    Hashtable::insert(result,nptr,targets);
+    while (Set::cardinality(targets) > 0) {
+      let x = Set::choose(targets);
+      targets = Set::delete(targets,x);
+      let rngptr = Hashtable::lookup_opt(globals->lastt,x);
+      if (rngptr) /* missing symbols possible if they are not defined by the grammar */
+	cs_union(rng,*rngptr);
+      /*
+      else
+	fprintf(stderr,"Internal error: bad lookup on %s in report_last\n",*x);
+      */
+    }
   }
-  return result;
 }
+
+/*************************** WHITE EDGES ***************************/
+
+void init_white_edge_symbols(grammar_t grm) {
+  init_firstt(grm);
+  init_lastt(grm);
+  if (globals->white_edge_symbols) return;
+  let ws = string2cs(" \t\r\n");
+  let N = EMPTYSET;
+  for (let t = grm; t; t = t->tl) {
+    let &$(n,r,_) = t->hd;
+    let nptr = new n;
+    let rng1 = Hashtable::lookup(globals->firstt,nptr);
+    let rng2 = Hashtable::lookup(globals->lastt,nptr);
+    cs_intersect(rng1,ws);
+    cs_intersect(rng2,ws);
+    if (is_cs_empty(rng1) && is_cs_empty(rng2)) continue;
+    N = Set::insert(N,nptr);
+  }
+  globals->white_edge_symbols = N;
+}
+void report_white_edges(grammar_t grm) {
+  init_white_edge_symbols(grm);
+
+  //  let ws = string2cs(" \t\r\n");
+  let ws = string2cs(" ");
+  let L = EMPTYSET;
+  let R = EMPTYSET;
+  let B = EMPTYSET;
+  for (let t = grm; t; t = t->tl) {
+    let &$(n,r,_) = t->hd;
+    let nptr = new n;
+    let rng1 = Hashtable::lookup(globals->firstt,nptr);
+    let rng2 = Hashtable::lookup(globals->lastt,nptr);
+    cs_intersect(rng1,ws);
+    cs_intersect(rng2,ws);
+    if (is_cs_empty(rng1)) {
+      if (is_cs_empty(rng2)) continue;
+      R = Set::insert(R,nptr);
+    }
+    else {
+      if (is_cs_empty(rng2)) L = Set::insert(L,nptr);
+      else B = Set::insert(B,nptr);
+    }
+  }
+  if (Set::is_empty(L))
+    fprintf(stderr,"No symbols have only left white edges.\n");
+  else {
+    fprintf(stderr,"%d symbols have white edges:\n",Set::cardinality(L));
+    while (Set::cardinality(L) > 0) {
+      let x = Set::choose(L);
+      L = Set::delete(L,x);
+      fprintf(stderr,"%s\n",*x);
+    }
+  }
+  if (Set::is_empty(R))
+    fprintf(stderr,"No symbols have only right white edges.\n");
+  else {
+    fprintf(stderr,"%d symbols have only right white edges:\n",Set::cardinality(R));
+    while (Set::cardinality(R) > 0) {
+      let x = Set::choose(R);
+      R = Set::delete(R,x);
+      fprintf(stderr,"%s\n",*x);
+    }
+  }
+  if (Set::is_empty(B))
+    fprintf(stderr,"No symbols have left and right white edges.\n");
+  else {
+    fprintf(stderr,"%d symbols have left and right white edges:\n",Set::cardinality(B));
+    while (Set::cardinality(B) > 0) {
+      let x = Set::choose(B);
+      B = Set::delete(B,x);
+      fprintf(stderr,"%s\n",*x);
+    }
+  }
+}
+int white_edge_symbol(str_t s) {
+  if (!globals || !globals->white_edge_symbols) return 0;
+  return Set::member(globals->white_edge_symbols,s);
+}
+
 
 /****************************** FOLLOW ******************************/
 
@@ -397,7 +556,7 @@ static cs_t follow(rule_t r, cs_t first_right) {
     return first_right;
   case &Symb(x,_):
     let xptr = new x;
-    let rngptr = Hashtable::lookup_opt(globals.followt, xptr);
+    let rngptr = Hashtable::lookup_opt(globals->followt, xptr);
     if (rngptr) {
       let rng = cs_dup(*rngptr);
       cs_union(rng,first_right);
@@ -518,13 +677,14 @@ grammar_t follow_grammar(grammar_t grm) {
 }
 
 static void init_followt(grammar_t grm) {
-  if (globals.followt) return;
-  cs_table_opt_t save = globals.firstt;
-  globals.firstt = NULL; // need to reset this so init_firstt works
+  if (!globals) reset_globals();
+  if (globals->followt) return;
+  cs_table_opt_t save = globals->firstt;
+  globals->firstt = NULL; // need to reset this so init_firstt works
   grammar_t followgrm = follow_grammar(grm);
   init_firstt(List::append(grm,followgrm));
-  globals.followt = globals.firstt;
-  globals.firstt = save;
+  globals->followt = globals->firstt;
+  globals->firstt = save;
 }
 
 void report_first_follow(grammar_t grm) {
@@ -533,8 +693,8 @@ void report_first_follow(grammar_t grm) {
   for (let t = grm; t; t = t->tl) {
     let &$(n,r,_) = t->hd;
     let nptr = new n;
-    let firstrng = Hashtable::lookup(globals.firstt,nptr);
-    let followrng = Hashtable::lookup(globals.followt,new follow_symbol(n));
+    let firstrng = Hashtable::lookup(globals->firstt,nptr);
+    let followrng = Hashtable::lookup(globals->followt,new follow_symbol(n));
     fprintf(stderr,"FIRST (%s)   = ",n);
     cs_print(stderr,firstrng);
     fprintf(stderr,"\n");
@@ -599,7 +759,7 @@ static void must_rule(cs_t result, rule_t r) {
     return;
     return;
   case &Symb(x,_):
-    let rngptr = Hashtable::lookup_opt(globals.mustt,new x);
+    let rngptr = Hashtable::lookup_opt(globals->mustt,new x);
     if (rngptr) cs_union(result,*rngptr);
     return;
   case &Prose(_):
@@ -633,9 +793,10 @@ static void must_rule(cs_t result, rule_t r) {
     return;
   }
 }
-/* Initializes globals.mustt */
+/* Initializes globals->mustt */
 void init_mustt(grammar_t grm) {
-  if (globals.mustt) return;
+  if (!globals) reset_globals();
+  if (globals->mustt) return;
   let graph = Graph::empty(strptrcmp);
   for (let t = grm; t; t = t->tl) {
     let result = new mset { EMPTYSET };
@@ -645,22 +806,22 @@ void init_mustt(grammar_t grm) {
   }
   graph = Graph::tc(graph);
   /* Now, (A,B) in graph iff B must appear in a derivation from A */
-  globals.mustt = EMPTYTABLE;
+  globals->mustt = EMPTYTABLE;
   for (let t = grm; t; t = t->tl) {
     let &$(n,r,_) = t->hd;
     let rng = cs_empty();
     must_rule(rng,r);
-    Hashtable::insert(globals.mustt,new n,rng);
+    Hashtable::insert(globals->mustt,new n,rng);
   }
   for (let t = grm; t; t = t->tl) {
     let &$(n,r,_) = t->hd;
     let nptr = new n;
-    let rng = Hashtable::lookup(globals.mustt,nptr);
+    let rng = Hashtable::lookup(globals->mustt,nptr);
     let targets = Graph::get_targets(graph,nptr);
     while (Set::cardinality(targets) > 0) {
       let x = Set::choose(targets);
       targets = Set::delete(targets,x);
-      let rngptr = Hashtable::lookup_opt(globals.mustt,x);
+      let rngptr = Hashtable::lookup_opt(globals->mustt,x);
       if (rngptr) /* missing symbols possible if they are not defined by the grammar */
 	cs_union(rng,*rngptr);
     }
@@ -718,7 +879,7 @@ static void may_rule(cs_t result, rule_t r) {
     }
     return;
   case &Symb(x,_):
-    let rngptr = Hashtable::lookup_opt(globals.mayt,new x);
+    let rngptr = Hashtable::lookup_opt(globals->mayt,new x);
     if (rngptr) cs_union(result,*rngptr);
     return;
   case &Prose(_):
@@ -748,7 +909,8 @@ static void may_rule(cs_t result, rule_t r) {
   }
 }
 void init_mayt(grammar_t grm) {
-  if (globals.mayt) return;
+  if (!globals) reset_globals();
+  if (globals->mayt) return;
   let graph = Graph::empty(strptrcmp);
   for (let t = grm; t; t = t->tl) {
     let result = new mset { EMPTYSET };
@@ -758,22 +920,22 @@ void init_mayt(grammar_t grm) {
   }
   graph = Graph::tc(graph);
   /* Now, (A,B) in graph iff B may appear in a derivation from A */
-  globals.mayt = EMPTYTABLE;
+  globals->mayt = EMPTYTABLE;
   for (let t = grm; t; t = t->tl) {
     let &$(n,r,_) = t->hd;
     let rng = cs_empty();
     may_rule(rng,r);
-    Hashtable::insert(globals.mayt,new n,rng);
+    Hashtable::insert(globals->mayt,new n,rng);
   }
   for (let t = grm; t; t = t->tl) {
     let &$(n,r,_) = t->hd;
     let nptr = new n;
-    let rng = Hashtable::lookup(globals.mayt,nptr);
+    let rng = Hashtable::lookup(globals->mayt,nptr);
     let targets = Graph::get_targets(graph,nptr);
     while (Set::cardinality(targets) > 0) {
       let x = Set::choose(targets);
       targets = Set::delete(targets,x);
-      let rngptr = Hashtable::lookup_opt(globals.mayt,x);
+      let rngptr = Hashtable::lookup_opt(globals->mayt,x);
       if (rngptr) /* missing symbols possible if they are not defined by the grammar */
 	cs_union(rng,*rngptr);
     }
@@ -789,7 +951,7 @@ void init_mayt(grammar_t grm) {
   NOTE: least fixed point, two Symbs defined as each other are not zero arity.
    This is actually a degenerate case, as such Symbs would not define finite
    strings.  You would need an Alt above each Symb for this to work,
-   and that would cut off the arity computation. 
+   and that would cut off the arity computation.
   All other Symbs have nonzero arity.
   Now in defining the arity of a rule, handle zero arity Symbs
   as contributing 0 to the arity of the rule, and nonzero-arity Symbs as
@@ -844,7 +1006,7 @@ strgraph_t arity_graph(grammar_t ds) {
 unsigned int arity_rule(rule_t r) {
   switch (r->r) {
   case &Symb(x,_):
-    let arity_opt = Hashtable::lookup_opt(globals.arityt,new x);
+    let arity_opt = Hashtable::lookup_opt(globals->arityt,new x);
     if (arity_opt) return (*arity_opt)?1:0;
     warn("Undefined arity for %s\n",x);
     return 1;
@@ -872,8 +1034,9 @@ unsigned int arity_rule(rule_t r) {
 }
 
 void init_arityt(grammar_t ds) {
-  if (globals.arityt) return;
-  globals.arityt = EMPTYTABLE;
+  if (!globals) reset_globals();
+  if (globals->arityt) return;
+  globals->arityt = EMPTYTABLE;
 
   let g = arity_graph(ds);
   let in_order = Graph::tsort(g);
@@ -887,7 +1050,7 @@ void init_arityt(grammar_t ds) {
       let &$(m,r,_) = y->hd;
       if (strcmp(n,m) != 0) continue;
       let arity = arity_rule(r);
-      Hashtable::insert(globals.arityt,new n,arity);
+      Hashtable::insert(globals->arityt,new n,arity);
       found = 1;
       break;
     }
@@ -895,7 +1058,7 @@ void init_arityt(grammar_t ds) {
   }
 }
 
-/* CONFLICTS */
+/**************************** CONFLICTS ****************************/
 static
 void conflicts0(rule_t,rule_t);
 static
@@ -912,6 +1075,7 @@ void conflicts_alt(rule_t r,rule_t right_ctxt) {
     return;
   }
 }
+
 static grammar_t checking_conflicts_grammar;
 static
 void conflicts0(rule_t r,rule_t right_ctxt) {
@@ -995,6 +1159,7 @@ void conflicts0(rule_t r,rule_t right_ctxt) {
     return;
   }
 }
+
 void report_conflicts(grammar_t<`H> grm) {
   reset_globals();
   //  checking_conflicts_grammar = grm;
@@ -1122,7 +1287,7 @@ void report_whitespace(grammar_t<`H> grm) {
              domain = "domain" "=" <"> URI *( 1*SP URI ) <">
      When I look at this, I wonder whether a space is allowed after the first quote,
      before the first URI.
-     
+
      Can there be whitespace between a field name and the colon?  2616 says they
      "follow the same generic format as that given in Section 3.1 of RFC 822 [9].
      Each header field consists of a name followed by a colon (":") and the field value."

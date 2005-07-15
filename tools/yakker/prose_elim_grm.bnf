@@ -259,7 +259,7 @@ ALPHA | DIGIT | HYPHEN
 .
 <ASCII HT, horizontal-tab>
 =
-HT
+HTAB
 .
 <ASCII LF (linefeed)>
 =
@@ -287,7 +287,7 @@ SP
 .
 <ASCII TAB (tab)>
 =
-HT
+HTAB
 .
 <ASCII space, %x20>
 =
@@ -618,7 +618,7 @@ CR
 .
 <TELNET ASCII horizontal-tab>
 =
-HT
+HTAB
 .
 <TELNET ASCII linefeed>
 =
@@ -698,7 +698,7 @@ CR
 .
 <US-ASCII HT, horizontal-tab (9)>
 =
-HT
+HTAB
 .
 <US-ASCII LF, linefeed (10)>
 =
@@ -876,11 +876,11 @@ SP
 .
 <any ASCII character except "=", SPACE,  or TAB>
 =
-(%d0-127 - ("=" | SP | HT))
+(%d0-127 - ("=" | SP | HTAB))
 .
 <any ASCII character except "=", SPACE, or TAB>
 =
-(%d0-127 - ("=" | SP | HT))
+(%d0-127 - ("=" | SP | HTAB))
 .
 <any ASCII control           ; (  0- 37,  0.- 31.)
                      character and DEL>
@@ -919,7 +919,7 @@ SP
 .
 <any CHAR except CTLs or separators>
 =
-(CHAR - (CTL | separator))
+(CHAR - (CTL | separators))
 .
 <any CHAR except CTLs or tspecials>
 =
@@ -1533,7 +1533,7 @@ SP
 <specialbyte except
                        ":" " " tab nl>
 =
-(specialbyte - (":" | SP | HT | LF))
+(specialbyte - (":" | SP | HTAB | LF))
 .
 <start time>
 =
@@ -1608,7 +1608,7 @@ SP
                         and consisting of either *TEXT or combinations
                         of token, separators, and quoted-string>
 =
-*TEXT | *(token | tspecial | quoted-string)
+*TEXT | *(token | separators | quoted-string)
 .
 <the OCTETs making up the field-value
                         and consisting of either *TEXT or combinations

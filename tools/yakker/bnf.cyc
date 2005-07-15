@@ -20,8 +20,11 @@
 #include "bnf.h"
 #include <core.h>
 
+cs_opt_t not_cs_v = NULL;
+cs_opt_t @not_cs = &not_cs_v;
+
 rule_t arule_inj(datatype Rule @`H r) {
-  return new arule(NULL,NULL,NULL,r);
+  return new arule(NULL,NULL,NULL,NULL,r);
 }
 
 rule_t SYMB(const char ?`H x) {
@@ -68,37 +71,37 @@ rule_t MINUS(rule_t r1,rule_t r2) {
   return arule_inj(new Minus(r1,r2));
 }
 rule_t SYMB_r(rule_t r,const char ?`H x) {
-  return new arule(r->a,r->p,r->v,new Symb(x,NULL));
+  return new arule(r->a,r->p,r->v,r->css,new Symb(x,NULL));
 }
 rule_t LIT_r(rule_t r,const char ?`H x) {
-  return new arule(r->a,r->p,r->v,new Lit(x));
+  return new arule(r->a,r->p,r->v,r->css,new Lit(x));
 }
 rule_t CHARRANGE_r(rule_t r,unsigned int min,unsigned int max) {
-  return new arule(r->a,r->p,r->v,new CharRange(min,max));
+  return new arule(r->a,r->p,r->v,r->css,new CharRange(min,max));
 }
 rule_t PROSE_r(rule_t r,const char ?`H x) {
-  return new arule(r->a,r->p,r->v,new Prose(x));
+  return new arule(r->a,r->p,r->v,r->css,new Prose(x));
 }
 rule_t OPT_r(rule_t r,rule_t r1) {
-  return new arule(r->a,r->p,r->v,new Opt(r1));
+  return new arule(r->a,r->p,r->v,r->css,new Opt(r1));
 }
 rule_t SEQ_r(rule_t r,rule_t r1,rule_t r2) {
-  return new arule(r->a,r->p,r->v,new Seq(r1,r2));
+  return new arule(r->a,r->p,r->v,r->css,new Seq(r1,r2));
 }
 rule_t ALT_r(rule_t r,rule_t r1,rule_t r2) {
-  return new arule(r->a,r->p,r->v,new Alt(r1,r2));
+  return new arule(r->a,r->p,r->v,r->css,new Alt(r1,r2));
 }
 rule_t RCOUNT_r(rule_t r,const char ?`H c,rule_t r1) {
-  return new arule(r->a,r->p,r->v,new Rcount(c,r1));
+  return new arule(r->a,r->p,r->v,r->css,new Rcount(c,r1));
 }
 rule_t STAR_r(rule_t r,unsigned int m,repeat_t N,rule_t r1) {
-  return new arule(r->a,r->p,r->v,new Star(m,N,r1));
+  return new arule(r->a,r->p,r->v,r->css,new Star(m,N,r1));
 }
 rule_t HASH_r(rule_t r,unsigned int m,repeat_t N,rule_t r1) {
-  return new arule(r->a,r->p,r->v,new Hash(m,N,r1));
+  return new arule(r->a,r->p,r->v,r->css,new Hash(m,N,r1));
 }
 rule_t MINUS_r(rule_t r,rule_t r1,rule_t r2) {
-  return new arule(r->a,r->p,r->v,new Minus(r1,r2));
+  return new arule(r->a,r->p,r->v,r->css,new Minus(r1,r2));
 }
 
 int lower_prec(rule_t r1, rule_t r2) {
@@ -264,6 +267,7 @@ static int repeat_cmp(repeat_t x,repeat_t y) {
   case $(&Infinity,&Num(_)): return 1;
   }
 }
+// TODO: use character sets
 int rule_cmp(rule_t r1, rule_t r2) {
   switch $(r1->r,r2->r) {
   case $(&Symb(x,_),&Symb(y,_)): fallthru(x,y);
@@ -440,6 +444,37 @@ grammar_t get_reachable(grammar_t<`H> ds, List::list_t<const char ?@> roots) {
       result = new List::List(x->hd,result);
   }
   return result;
+}
+
+grammar_t close_definitions(grammar_t<`H> ds, List::list_t<grammar_t<`H>> e) {
+  /* try to close the rules ds using definitions from e */
+  let D = EMPTYSET; // defined
+  for (let x = ds; x; x = x->tl) {
+    let &$(n,_,_) = x->hd;
+    D = Set::insert(D,new n);
+  }
+  let U = freevars(ds); // undefined
+  /* Inefficient */
+  while (!Set::is_empty(U)) {
+    let u = Set::choose(U); U = Set::delete(U,u);
+    debugprint(1,"Looking for %s in externals...",*u);
+    for (let y = e; y; y = y->tl) {
+      for (let z = y->hd; z; z = z->tl) {
+        let &$(n,r,_) = z->hd;
+        if (strcmp(n,*u) == 0) {
+          ds = new List::List(z->hd,ds);
+          D = Set::insert(D,u);
+          let newU = Set::diff(freevars_rule(r),D);
+          U = Set::union_two(U,newU);
+          debugprint(1," found it\n");
+          goto endwhile;
+        }
+      }
+    }
+    debugprint(1," DID NOT FIND IT\n");
+  endwhile: ;
+  }
+  return ds;
 }
 
 static

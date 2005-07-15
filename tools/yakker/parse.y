@@ -174,7 +174,7 @@ rule:
 rule0:
   rule1
 | PRED rule0
-{ $$ = ^$(new arule($2->a,$1,$2->v,$2->r)); } // NB: THROW AWAY PRED FROM $2
+{ $$ = ^$(new arule($2->a,$1,$2->v,$2->css,$2->r)); } // NB: THROW AWAY PRED FROM $2
 
 rule1:
   rule2
@@ -182,13 +182,13 @@ rule1:
 | rule1 rule2
 { $$ = ^$(SEQ($1,$2));}
 | rule1 SEMACTION
-{ $$ = ^$(new arule($2,$1->p,$1->v,$1->r)); } // NB: THROW AWAY SEMACTION FROM $1
+{ $$ = ^$(new arule($2,$1->p,$1->v,$1->css,$1->r)); } // NB: THROW AWAY SEMACTION FROM $1
 
 rule2:
   rule3
 { $$ = $!1; }
 | rule2 DOLLAR ID
-{ $$ = ^$(new arule($1->a,$1->p,$3,$1->r)); } // NB: THROW AWAY VID FROM $1
+{ $$ = ^$(new arule($1->a,$1->p,$3,$1->css,$1->r)); } // NB: THROW AWAY VID FROM $1
 |     RCOUNT_T   rule3
 { $$ = ^$(RCOUNT($1,$2)); }
 |     STAR_T     rule3

@@ -19,6 +19,6 @@
 #ifndef CORERULES_H
 #define CORERULES_H
 #include "bnf.h"
+grammar_t core_rules();
 void core_compare(grammar_t<`H> ds);
-grammar_t core_augment(grammar_t<`H> ds);
 #endif

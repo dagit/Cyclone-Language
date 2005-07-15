@@ -47,7 +47,9 @@ void internal_err(string_t fmt, ... inject parg_t ap)
   pr_stderr(fmt, ap);
 }
 
-static void printstr(FILE @f,str_t x) { fprintf(f,"\"%s\"",*x); }
+static void printstr(FILE @f,str_t x) {
+  fprintf(f,"\"%s\"",*x);
+}
 void printGraph(Graph::graph_t<str_t> g) {
   Graph::print(stdout,g,printstr);
 }

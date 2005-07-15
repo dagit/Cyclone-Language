@@ -613,7 +613,7 @@ void dfa_compress(dfa_t dfa) {
   let num_edge_actions = Set::cardinality(edge_actions);
   debugprint(1,"%d ranges... ",num_edge_actions);
   unsigned int ?ranges = new {for j < num_edge_actions : 0 };
-  
+
   Dict::dict_t<unsigned int,unsigned int> action_map = Dict::empty(uint_cmp);
   for (let i = 0; !Set::is_empty(edge_actions); i++) {
     let a = Set::choose(edge_actions); // NB: we assume this is sorted
@@ -723,7 +723,7 @@ void dfa_dot(FILE @f, dfa_t dfa) {
     let lb = transitions->lb;
     cs_opt_t cs = NULL;
     for (let spans = transitions->spans; spans; spans = spans->tl) {
-      /* Figure out, for each target, what spans go there 
+      /* Figure out, for each target, what spans go there
 	 (so there is only one arrow from i to each target) */
       let ub = spans->hd->ub;
       let target = spans->hd->target;
@@ -1513,7 +1513,7 @@ dfa_t dfa_minimize0(dfa_t dfa) {
      instead of doubly-linked.
      Not suitable for unicode because space is proportional to MAXACTION. */
   unsigned int last = dfa->number_of_states * (dfa->number_of_actions + 1);
-  int ?L = new { for i < last+1 : -1 }; 
+  int ?L = new { for i < last+1 : -1 };
   L[last] = last;
 #define L_insert(i) L_insert_f(L,i)
 #define L_member(i) (L[i]>=0)
@@ -1983,7 +1983,7 @@ dfa_t lookahead_dfa(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt)
     dfa = dfa_minimize(dfa);
   }
   fprintf(stderr,"The final dfa has %u states\n",dfa->number_of_states);
-  
+
   if (debug) {
     FILE *f = fopen(dotfile("dfa2"),"w");
     if (f) { dfa_dot(f,dfa); fclose(f); }
@@ -1998,25 +1998,3 @@ dfa_t lookahead_dfa(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt)
   return dfa;
 }
 
-/***************************** TESTING *****************************/
-void test_tc(grammar_t<`H> grm) {
-  let &$(_,r,_) = grm->hd;
-  nfa_init();
-  let nfa = rule2nfa(grm,r);
-  let g1 = nfa_onestep();
-  printUintGraph(g1);
-  let g2 = Graph::tc(g1);
-  printf("------------------\n");
-  printUintGraph(g2);
-}
-void test_nfa2dfa(grammar_t<`H> grm) {
-  let &$(_,r,_) = grm->hd;
-  nfa_init();
-  let nfa = rule2nfa(grm,r);
-  //  printf("The NFA is:\n");
-  //  nfa_print();
-  //  printf("Converting to DFA:\n");
-  let dfa = nfa2dfa(nfa,Set::empty(st_cmp));
-  dfa_print(dfa);
-  //  dfa_generate1(dfa);
-}

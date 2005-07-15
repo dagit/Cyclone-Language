@@ -155,12 +155,12 @@ static rule_t nmlz_rule(rule_t r) {
   case &Alt(_,_): 
     if (is_cs(r)) return r;
     return nmlz_alt(r);
-  case &Star(_,_,&arule(_,_,_,&Symb(_,_))):
+  case &Star(_,_,&arule(_,_,_,_,&Symb(_,_))):
     return r;
   case &Star(m,N,r2):
     if (is_cs(r2)) return r;
     return STAR(m,N,nmlz_rule(r2));
-  case &Hash(_,_,&arule(_,_,_,&Symb(_,_))):
+  case &Hash(_,_,&arule(_,_,_,_,&Symb(_,_))):
     return r;
   case &Hash(m,N,r2):
     return HASH(m,N,nmlz_rule(r2));
@@ -859,9 +859,9 @@ grammar_t ws_definitions(grammar_t<`H> ds) {
 }
 /* COMBINED REGULAR EXPRESSIONS AND PADS DATATYPES */
 void pads_definitions(grammar_t<`H> ds) {
-  ds = prose_elim(ds);
-  ds = minus_elim(ds); // NB: sorts definitions
-  ds = ws_definitions(ds);
+  prose_elim(ds);
+  minus_elim(ds); // NB: sorts definitions
+  // ds = ws_definitions(ds);
   // AN UGLY TEMPORARY HACK: MAKE SURE REGEXP DOES NOT DEPEND ON PADS;
   // ALL DEFS UP TO LAST WITH REGEXP ARE REGEXP.
   {

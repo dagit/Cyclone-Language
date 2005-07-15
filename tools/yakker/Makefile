@@ -36,6 +36,10 @@ imapcl: imapcl.o ykbuf.o ssl.o imap.o
 imapcl.o: examples/imapcl.cyc
 	cyclone -c $^ -o $@ -I.
 
+# --novcgen is temporary until a bug is fixed
+imap.o: imap.cyc
+	cyclone -c $< -o $@ --novcgen
+
 imap.cyc: imap.bnf
 	./yakker -gen command -no-main -lazyfill $< > $@
 
@@ -81,52 +85,19 @@ uri_one_string.p: yakker uri_orig.bnf
 	cat $@.tmp | ./fix_hostname.pl | ./add_precord.pl URI_reference_t | cat > $@
 	$(RM) $@.tmp
 
-HTTP_NOWS=CRLF LWS quoted-pair HTTP-Version http_URL HTTP-date rfc1123-date rfc850-date asctime-date date1 date2 date3 time-http delta-seconds language-tag primary-tag subtag HEX separators LHEX ALPHA challenge Request-Line Status-Line byte-content-range-spec warn-agent warn-code warn-date warn-text warning-value Request generic-message trailer Chunked-Body chunk last-chunk Response qvalue entity-body month language-range
-HTTP_OMIT=OCTET CHAR UPALPHA LOALPHA DIGIT CTL CR LF SP HT TEXT token ctext field-content Reason-Phrase message-body md5-digest
-http.bnf: yakker ws.bnf fixup.bnf mailbox.bnf uri.bnf auth.bnf http-grammar.bnf
-	./yakker ws.bnf -subset > $@
-	./yakker fixup.bnf -subset >> $@
-	./yakker mailbox.bnf -re-on -subset mailbox -rename ctext ctext-mailbox -rename comment comment-mailbox -rename quoted-pair quoted-pair-mailbox >> $@
-	./yakker uri.bnf -re-on -subset host port relativeURI absoluteURI abs_path >> $@
-	./yakker auth.bnf -ws-on -nows $(HTTP_NOWS) \
-	  -subset authority challenge credentials -omit base64-user-pass >> $@
-	./yakker http-grammar.bnf -ws-on -nows $(HTTP_NOWS) -subset \
-	  -rename time time-http -omit $(HTTP_OMIT) >> $@
-
-http1.bnf: yakker ws.bnf fixup.bnf rfc2822.bnf rfc2396.bnf rfc2617.bnf rfc2616.bnf
-	./yakker ws.bnf -subset > $@
-	./yakker fixup.bnf -subset >> $@
-#	./yakker rfc2822.bnf -re-on -subset mailbox -rename ctext ctext-mailbox -rename comment comment-mailbox -rename quoted-pair quoted-pair-mailbox >> $@
-	./yakker rfc2822.bnf -subset mailbox -rename quoted-pair quoted-pair-mailbox -rename quoted-string quoted-string-mailbox -rename comment comment-mailbox >> $@
-	./yakker rfc2396.bnf -subset host port relativeURI absoluteURI abs_path >> $@
-	./yakker rfc2617.bnf -ws-on -nows $(HTTP_NOWS) \
-	  -subset authority challenge credentials -omit base64-user-pass \
-          >> $@
-	./yakker rfc2616.bnf -ws-on -nows $(HTTP_NOWS) -subset \
-	  -omit $(HTTP_OMIT) >> $@
-
-http-re.bnf: yakker ws.bnf fixup.bnf mailbox.bnf uri.bnf auth.bnf http-grammar.bnf
-	./yakker ws.bnf -re-on -subset > $@
-	./yakker fixup.bnf -re-on -subset >> $@
-	./yakker mailbox.bnf -re-on -subset mailbox -rename ctext ctext-mailbox -rename comment comment-mailbox -rename quoted-pair quoted-pair-mailbox -omit ccontent >> $@
-	./yakker uri.bnf -re-on -subset host port relativeURI absoluteURI abs_path >> $@
-	./yakker auth.bnf -re-on -ws-on -nows $(HTTP_NOWS) \
-	  -subset authority challenge credentials -omit base64-user-pass >> $@
-	./yakker http-grammar.bnf -re-on -ws-on -nows $(HTTP_NOWS) -subset \
-	  -rename time time-http -omit $(HTTP_OMIT) >> $@
+http.bnf: yakker rfc2616.bnf rfc2617.bnf rfc2396.bnf rfc2822.bnf rfc3501.bnf
+	./yakker rfc2616.bnf \
+	  -externals rfc2617.bnf rfc2396.bnf rfc2822.bnf rfc3501.bnf \
+	   >$@
 
 message-header.bnf: http.bnf yakker
 	./yakker $< -subset message-header > $@
 
 imap.bnf: rfc3501.bnf yakker
-	./yakker rfc3501.bnf -omit literal capability-data > $@.tmp
-	echo 'literal = "{" (number "")$$x "}" CRLF @repeat(atoi(x))CHAR8.' >> $@.tmp
-	echo 'capability-data = "CAPABILITY" *(SP capability).' >> $@.tmp
-	echo 'my-greeting = ("" greeting)$$x {greeting_hook(x);}.' >> $@.tmp
-	echo 'my-response = ("" response)$$x {response_hook(x);}.' >> $@.tmp
-	echo 'my-command = ("" command)$$x {command_hook(x);}.' >> $@.tmp
-	./yakker $@.tmp -tsort > $@
-	$(RM) $@.tmp
+	./yakker rfc3501.bnf -tsort > $@
+	echo 'my-greeting = ("" greeting)$$x {greeting_hook(x);}.' >> $@
+	echo 'my-response = ("" response)$$x {response_hook(x);}.' >> $@
+	echo 'my-command = ("" command)$$x {command_hook(x);}.' >> $@
 	echo '{ extern void greeting_hook(const char ?); }' >> $@
 	echo '{ extern void response_hook(const char ?); }' >> $@
 	echo '{ extern void command_hook(const char ?); }' >> $@
@@ -177,6 +148,13 @@ rfc%.txt:
 # Make sure the rfc%.txt files are not automatically deleted by make
 .PRECIOUS: rfc%.txt
 
+# literal needs to know about a prefixed length
+# capability-data causes an unusual conflict, avoided for now
+rfc3501.bnf: rfc3501.txt yakker
+	./yakker -extract $< -omit literal capability-data > $@
+	echo 'literal = "{" (number "")$$x "}" CRLF @repeat(atoi(x))CHAR8.' >> $@
+	echo 'capability-data = "CAPABILITY" *(SP capability).' >> $@
+
 # A1, A2, and passwd are extracted by mistake
 # Request-URI is the proper spelling (defined in rfc2616)
 # challenge is defined 3 times, the first is correct, we fix by hand
@@ -210,6 +188,8 @@ rfc2234.bnf: rfc2234.txt yakker
 
 rfc2822.bnf: rfc2822.txt yakker
 	./yakker -extract $< >$@
+	echo 'dtext = NO-WS-CTL / %d33-90 / %d94-126.' >> $@
+	echo 'qtext = NO-WS-CTL / %d33 / %d35-91 / %d93-126.' >> $@
 	echo 'ctext = NO-WS-CTL / %d33-39 / %d42-91 / %d93-126.' >> $@
 	echo 'item-value = 1*angle-addr / addr-spec / atom / domain / msg-id.' >> $@
 	echo 'obs-zone = "UT" / "GMT" / "EST" / "EDT" / "CST" / "CDT" / "MST" / "MDT" / "PST" / "PDT" / %d65-73 / %d75-90 / %d97-105 / %d107-122.' >> $@
