@@ -605,7 +605,7 @@ if(tud->fields==0)
 struct _fat_ptr _Tmp8=(struct _fat_ptr)Cyc_Absynpp_qvar2string(tud->name);_Tmp7.f1=_Tmp8;});_Tmp7;});void*_Tmp7[1];_Tmp7[0]=& _Tmp6;Cyc_aprintf(_tag_fat("check_public_type (datatype %s has no fields)",sizeof(char),46U),_tag_fat(_Tmp7,sizeof(void*),1));}));});{
 # 306
 struct Cyc_Absyn_Datatypefield*tuf1=0;
-{struct Cyc_List_List*fs=(struct Cyc_List_List*)_check_null(tud->fields)->v;for(0;fs!=0;fs=fs->tl){
+{struct Cyc_List_List*fs=(struct Cyc_List_List*)tud->fields->v;for(0;fs!=0;fs=fs->tl){
 if(Cyc_strptrcmp((*tuf0->name).f1,(*((struct Cyc_Absyn_Datatypefield*)fs->hd)->name).f1)==0){
 tuf1=(struct Cyc_Absyn_Datatypefield*)fs->hd;
 break;}}}

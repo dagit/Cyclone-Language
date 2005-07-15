@@ -29,7 +29,7 @@
 
 namespace Vcgen {
   typedef struct ExpChecks {
-    AssnDef::assn_t ctxt;
+    AssnDef::assn_map_t ctxt;
     AssnDef::assn_t bounds_check;
     AssnDef::assn_t null_check;
   } exp_checks_t;

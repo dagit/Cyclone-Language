@@ -311,6 +311,15 @@ static void add_type_info(graph_t @g, term_t term) {
     // also add x as a node to pick up any constant bounds information
     term2node(g, x);
     break;
+  case &Alloc(_,n,_,_):
+    // an allocation node -- we know it's not null and that the numelts is n
+    add_constraint(g,zero(),ULt,term); // not null
+    add_constraint(g,numelts_term(term),ULte,n);
+    break;
+  case &Addr(vd):
+    // the address of a variable -- we know it's not null
+    add_constraint(g,zero(),ULt,term);
+    break;
   default: break;
   }
   let topt = get_term_type(term);

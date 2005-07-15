@@ -483,7 +483,7 @@ int i;
 {
 int km=k + m;
 unsigned long y2=(unsigned long)({int _Tmp0=(int)*((unsigned char*)_check_fat_subscript(y,sizeof(unsigned char),m - 1))* 256U;_Tmp0 + (int)*((unsigned char*)_check_fat_subscript(y,sizeof(unsigned char),m - 2));});
-unsigned long r3=(unsigned long)(((int)*((unsigned char*)_check_fat_subscript(rem,sizeof(unsigned char),km))* 65536U + (int)((unsigned char*)rem.curr)[km - 1]* 256U)+ (int)((unsigned char*)rem.curr)[km - 2]);
+unsigned long r3=(unsigned long)({int _Tmp0=({int _Tmp1=(int)*((unsigned char*)_check_fat_subscript(rem,sizeof(unsigned char),km))* 65536U;_Tmp1 + (int)*((unsigned char*)_check_fat_subscript(rem,sizeof(unsigned char),km - 1))* 256U;});_Tmp0 + (int)*((unsigned char*)_check_fat_subscript(rem,sizeof(unsigned char),km - 2));});
 # 143
 qk=(int)(r3 / y2);
 if(qk >= 256U)

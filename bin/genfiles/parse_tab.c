@@ -1314,7 +1314,7 @@ if(tvs2!=0)
 Cyc_Warn_warn(loc,_tag_fat("bad type params, ignoring",sizeof(char),26U),_tag_fat(0U,sizeof(void*),0));
 if(exprs==0)
 ({int(*_TmpB)(unsigned,struct _fat_ptr)=(int(*)(unsigned,struct _fat_ptr))Cyc_Parse_parse_abort;_TmpB;})(loc,_tag_fat("unexpected NULL in parse!",sizeof(char),26U));{
-struct Cyc_Absyn_Vardecl*vd=Cyc_Absyn_new_vardecl(varloc,x,t2,(struct Cyc_Absyn_Exp*)_check_null(exprs)->hd);
+struct Cyc_Absyn_Vardecl*vd=Cyc_Absyn_new_vardecl(varloc,x,t2,(struct Cyc_Absyn_Exp*)exprs->hd);
 vd->tq=tq2;
 vd->sc=s;
 vd->attributes=atts2;
@@ -4336,7 +4336,7 @@ yystate=({int _Tmp1=(int)*((short*)_check_known_subscript_notnull(Cyc_yypgoto,17
 if((yystate >= 0 && yystate <= 7625)&&(int)*((short*)_check_known_subscript_notnull(Cyc_yycheck,7626U,sizeof(short),yystate))==(int)((short*)yyss.curr)[yyssp_offset])
 yystate=(int)Cyc_yytable[yystate];else{
 # 415
-yystate=(int)Cyc_yydefgoto[yyn - 170];}
+yystate=(int)*((short*)_check_known_subscript_notnull(Cyc_yydefgoto,176U,sizeof(short),yyn - 170));}
 # 417
 goto yynewstate;
 # 419

@@ -1125,10 +1125,12 @@ string_t assn2dag(assn_t a) {
   
 // calculate a string representation (and total tree node count) for an
 // assertion.  the prec field (precedent) is used to avoid some parens.
-static string_t a2string(datatype Assn @a, int prec) {
+static string_t a2string(datatype Assn @a, int inprec) {
+  int myprec = 10;
+  string_t s;
   switch (a) {
-  case &True: return "true";
-  case &False: return "false";
+  case &True: s = "true"; break;
+  case &False: s = "false"; break;
   case &Prim(t1,p,t2):
     string_t ps;
     switch (p) {
@@ -1140,23 +1142,25 @@ static string_t a2string(datatype Assn @a, int prec) {
     case ULte: ps = " U<= "; break;
     default: Warn::impos("assn2string primop");
     }
-    return aprintf("%s%s%s",term2string(t1),ps,term2string(t2));
+    s = aprintf("%s%s%s",term2string(t1),ps,term2string(t2));
+    break;
   case &Or(a1,a2): 
-    if (prec <= 5)
-      return aprintf("%s OR %s",a2string(a1,5),a2string(a2,5));
-    else 
-      return aprintf("(%s OR %s)",a2string(a1,5),a2string(a2,5));
+    myprec = 5;
+    s = aprintf("%s || %s",a2string(a1,myprec),a2string(a2,myprec));
+    break;
   case &And(a1,a2): 
-    if (prec <= 10)
-      return aprintf("%s AND %s",a2string(a1,10),a2string(a2,10));
-    else 
-      return aprintf("(%s AND %s)",a2string(a1,10),a2string(a2,10));
+    myprec = 10;
+    s = aprintf("%s && %s",a2string(a1,10),a2string(a2,10));
+    break;
   }
+  if (myprec < inprec)
+    s = aprintf("(%s)",s);
+  return s;
 }
 
 // Warning -- assertions are huge!  Use assn2dag instead...
 string_t assn2string(datatype Assn @a){
-  return a2string(a,0);
+  return a2string(a,10);
 }
 
 //////////////////////////////////////////////////////////////
@@ -1634,11 +1638,11 @@ string_t<`H> map2string(nonescvar_map_t m){
 
 // functions related to handling assnmap as one entity
 string_t<`H> assnmap2string(assn_map_t am){
-  return aprintf("%s\n%s",assn2string(am.assn),map2string(am.map));
+  return aprintf("{%s}&&\n%s",map2string(am.map),assn2string(am.assn));
 }
 
 string_t assnmap2dag(assn_map_t am) {
-  return aprintf("%s\n%s",assn2dag(am.assn),map2string(am.map));
+  return aprintf("{%s}\n%s",map2string(am.map),assn2dag(am.assn));
 }
 
 static nonescvar_map_t empty_map() {

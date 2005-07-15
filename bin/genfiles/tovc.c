@@ -763,7 +763,7 @@ vd->name=newqvar;
 struct Cyc_List_List*unresolvedmem_inits=0;
 if(vd->initializer!=0){
 Cyc_Tovc_apply_varmap(env.varmap,_check_null(vd->initializer));{
-void*_Tmp6=vd->initializer->r;void*_Tmp7;if(*((int*)_Tmp6)==35){_Tmp7=((struct Cyc_Absyn_UnresolvedMem_e_Absyn_Raw_exp_struct*)_Tmp6)->f2;{struct Cyc_List_List*dles=_Tmp7;
+void*_Tmp6=_check_null(vd->initializer)->r;void*_Tmp7;if(*((int*)_Tmp6)==35){_Tmp7=((struct Cyc_Absyn_UnresolvedMem_e_Absyn_Raw_exp_struct*)_Tmp6)->f2;{struct Cyc_List_List*dles=_Tmp7;
 # 479 "tovc.cyc"
 struct Cyc_Absyn_Exp*var=Cyc_Absyn_var_exp(vd->name,0U);
 {unsigned i=0U;for(0;dles!=0;(dles=dles->tl,++ i)){

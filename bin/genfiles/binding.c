@@ -494,7 +494,7 @@ ctxt->curr_ns=ns2;
 void Cyc_Binding_leave_ns(struct Cyc_Binding_NSCtxt*ctxt){
 if(ctxt->availables==0)
 Cyc_Warn_impos(_tag_fat("leaving topmost namespace",sizeof(char),26U),_tag_fat(0U,sizeof(void*),0));{
-void*_Tmp0=(void*)_check_null(ctxt->availables)->hd;if(*((int*)_Tmp0)==0){
+void*_Tmp0=(void*)ctxt->availables->hd;if(*((int*)_Tmp0)==0){
 # 143
 ctxt->availables=ctxt->availables->tl;
 ({struct Cyc_List_List*_Tmp1=Cyc_List_rev(_check_null(Cyc_List_rev(ctxt->curr_ns))->tl);ctxt->curr_ns=_Tmp1;});
@@ -523,7 +523,7 @@ return ns;}}
 void Cyc_Binding_leave_using(struct Cyc_Binding_NSCtxt*ctxt){
 if(ctxt->availables==0)
 Cyc_Warn_impos(_tag_fat("leaving topmost namespace as a using",sizeof(char),37U),_tag_fat(0U,sizeof(void*),0));{
-void*_Tmp0=(void*)_check_null(ctxt->availables)->hd;if(*((int*)_Tmp0)==1){
+void*_Tmp0=(void*)ctxt->availables->hd;if(*((int*)_Tmp0)==1){
 ctxt->availables=ctxt->availables->tl;goto _LL0;}else{
 Cyc_Warn_impos(_tag_fat("leaving namespace as using",sizeof(char),27U),_tag_fat(0U,sizeof(void*),0));}_LL0:;}}struct Cyc_Binding_VarRes_Binding_Resolved_struct{int tag;void*f1;};struct Cyc_Binding_AggrRes_Binding_Resolved_struct{int tag;struct Cyc_Absyn_Aggrdecl*f1;};struct Cyc_Binding_DatatypeRes_Binding_Resolved_struct{int tag;struct Cyc_Absyn_Datatypedecl*f1;struct Cyc_Absyn_Datatypefield*f2;};struct Cyc_Binding_EnumRes_Binding_Resolved_struct{int tag;struct Cyc_Absyn_Enumdecl*f1;struct Cyc_Absyn_Enumfield*f2;};struct Cyc_Binding_AnonEnumRes_Binding_Resolved_struct{int tag;void*f1;struct Cyc_Absyn_Enumfield*f2;};struct Cyc_Binding_ResolveNSEnv{struct Cyc_Dict_Dict aggrdecls;struct Cyc_Dict_Dict datatypedecls;struct Cyc_Dict_Dict enumdecls;struct Cyc_Dict_Dict typedefs;struct Cyc_Dict_Dict ordinaries;};struct Cyc_Binding_Env{int in_cinclude;int in_cyc_override;struct Cyc_Binding_NSCtxt*ns;struct Cyc_Dict_Dict*local_vars;};
 # 213 "binding.cyc"

@@ -1262,7 +1262,7 @@ void*_Tmp0=Cyc_Absyn_compress(t);void*_Tmp1;union Cyc_Absyn_AggrInfo _Tmp2;switc
 struct Cyc_Absyn_Aggrdecl*ad=Cyc_Absyn_get_known_aggrdecl(info);
 if(ad->impl==0)
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp4;_Tmp4.tag=0,_Tmp4.f1=_tag_fat("is_poly_field: type missing fields",sizeof(char),35U);_Tmp4;});void*_Tmp4[1];_Tmp4[0]=& _Tmp3;({int(*_Tmp5)(struct _fat_ptr ap)=(int(*)(struct _fat_ptr ap))Cyc_Toc_toc_impos;_Tmp5;})(_tag_fat(_Tmp4,sizeof(void*),1));});
-_Tmp1=_check_null(ad->impl)->fields;goto _LL4;}}else{goto _LL5;}case 6: _Tmp1=((struct Cyc_Absyn_AnonAggrType_Absyn_Type_struct*)_Tmp0)->f3;_LL4: {struct Cyc_List_List*fs=_Tmp1;
+_Tmp1=ad->impl->fields;goto _LL4;}}else{goto _LL5;}case 6: _Tmp1=((struct Cyc_Absyn_AnonAggrType_Absyn_Type_struct*)_Tmp0)->f3;_LL4: {struct Cyc_List_List*fs=_Tmp1;
 # 882
 struct Cyc_Absyn_Aggrfield*field=Cyc_Absyn_lookup_field(fs,f);
 if(field==0)
@@ -3835,7 +3835,7 @@ struct Cyc_Absyn_Stmt*test_tree=Cyc_Toc_compile_decision_tree(rgn,nv,& mydecls,&
 for(1;1;mybodies=mybodies->tl){
 if(mybodies==0)
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp2=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3;_Tmp3.tag=0,_Tmp3.f1=_tag_fat("letdecl_to_c: couldn't find env!",sizeof(char),33U);_Tmp3;});void*_Tmp3[1];_Tmp3[0]=& _Tmp2;({int(*_Tmp4)(struct _fat_ptr ap)=(int(*)(struct _fat_ptr ap))Cyc_Toc_toc_impos;_Tmp4;})(_tag_fat(_Tmp3,sizeof(void*),1));});{
-struct _tuple42*_Tmp2=(struct _tuple42*)_check_null(mybodies)->hd;void*_Tmp3;void*_Tmp4;_Tmp4=_Tmp2->f0;_Tmp3=_Tmp2->f2;{struct Cyc_Toc_Env*env=_Tmp4;struct Cyc_Absyn_Stmt*st=_Tmp3;
+struct _tuple42*_Tmp2=(struct _tuple42*)mybodies->hd;void*_Tmp3;void*_Tmp4;_Tmp4=_Tmp2->f0;_Tmp3=_Tmp2->f2;{struct Cyc_Toc_Env*env=_Tmp4;struct Cyc_Absyn_Stmt*st=_Tmp3;
 if(st==succ_stmt){Cyc_Toc_stmt_to_c(env,s);break;}}}}{
 # 4069
 struct Cyc_Absyn_Stmt*res=test_tree;
