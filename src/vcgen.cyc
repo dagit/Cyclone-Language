@@ -569,6 +569,7 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
     return $(t,am2);
   case &Absyn::Primop_e(_,_): Warn::impos("vcgen: bad primop");
   case &Absyn::AssignOp_e(e1,popt,e2):
+    // FIX:  for zeroterm pointers (thin or fat!), if e2 is not zero, this can fail...
     let $(t2,am1) = vcgen_rexp(env,e2,amin);
     let $(lt,am2) = vcgen_lexp(env,e1,am1);
     assn_map_t amout;
@@ -764,6 +765,9 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
       amin = vcgen_rexp(env,(exp_t)qopt,amin)[1];
     // allocation of arrays must be handled specially
     switch (e1->r) {
+      // FIX?  new "string"?   -- no, that works out okay.  But we need
+      // to fix char x[4] = "foo";  This should be treated the same as
+      // char x[4] = {'f','o','o',0}
     case &Absyn::Array_e(dles):
       let $(_,amin) = vcgen_rexp(env,e1,amin);
       let size = uint(List::length(dles));
@@ -876,6 +880,7 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
     let am2 = and_assnmap_assn(am1,and(neq(res,zero()),eq(numelts_term(res),t)));
     return $(res,am2);
   case &Absyn::Swap_e(e1,e2): 
+    // FIX?  exceptions?  e.g., x.f :=: y.g?  
     let $(lt1,am1) = vcgen_lexp(env,e1,amin);
     let $(lt2,am2) = vcgen_lexp(env,e2,am1);
     let $(t1,am3) = deref_lterm(env,lt1,am2);
@@ -1046,7 +1051,11 @@ static $(assn_map_t,assn_map_t) vcgen_test(env_t env, exp_t e, assn_map_t ain){
         at = and_assnmap_assn(at,sgte(t1,t2)); af = and_assnmap_assn(af,slt(t1,t2)); 
       }
       break;
-    default: break;
+    default: 
+      // FIX:  treat as if p(e1,e2) != 0 
+      // FIX:  p could be + and e1 could be a thin, zero-terminated pointer which throws an
+      // exception. 
+      break;
     }
     return $(at,af);
   default:
@@ -1100,6 +1109,7 @@ static assn_map_t vcgen_stmt(env_t env, stmt_t s, assn_map_t amin) {
     fallthru;
   case &Absyn::Return_s(NULL): 
     // if there is no return value, there is no ensures clause
+    // FIX?  what if we fall off a (bits-only) function?
     return false_assnmap();
   case &Absyn::IfThenElse_s(e1,s1,s2):
     let $(amt,amf) = vcgen_test(env,e1,amin);

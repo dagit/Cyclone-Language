@@ -187,12 +187,15 @@ struct Node {
   shortestpathinfo_t shortest_path_info;
 };
 
+typedef Dict::dict_t<term_t,node_t@> term_node_map_t;
+
 // A graph is essentially a pair of sparse matrices of 
 // (node_t,node_t)->distance.  We represent the matrices by having
 // a node row for each term.
 typedef struct Graph {
   struct Graph *next;
   node_t       *rows;  // we keep the rows sorted by rep order
+  term_node_map_t map; // quick lookup of node for a term
   bool         changed;
 } graph_t;
 
@@ -203,8 +206,21 @@ static unsigned num_graphs(graph_t *`H gs) {
   return c;
 }
 
+static term_node_map_t empty_map() {
+  static struct Dict::Dict<term_t,node_t@>* mt_map = NULL;
+  term_node_map_t d;
+  if (mt_map == NULL) {
+    d = Dict::empty(AssnDef::termcmp);
+    mt_map = new d;
+  } else 
+    d = *mt_map;
+  return d;
+}
+  
 // An empty graph represents the proposition "true".
-static graph_t@ true_graph() { return new Graph{NULL,NULL,false}; }
+static graph_t@ true_graph() { 
+  return new Graph{NULL,NULL,empty_map(),false}; 
+}
 
 static int constraints_added = 0;
 static int graphs_copied = 0;
@@ -361,6 +377,9 @@ static void add_type_info(graph_t @g, term_t term) {
 // to the graph.  Keep things sorted by term order.
 static node_t @term2node(graph_t @`r g, term_t t) {
   // first see if we can find it directly.
+  let nopt = Dict::lookup_opt(g->map, t);
+  if (nopt != NULL) return *nopt;
+  // couldn't find it -- insert it...
   node_t * @ `H+`r prev = &g->rows;
   int count = 0;
   for (let r = g->rows; r != NULL; r = r->next) {
@@ -383,6 +402,7 @@ static node_t @term2node(graph_t @`r g, term_t t) {
     n = new Node{*prev,t,true,true,NULL,NULL,0,0,infinity};
     break;
   }
+  Dict::insert(g->map,t,n);
   *prev = n;
   add_type_info(g,t);
   return n;
@@ -1025,13 +1045,15 @@ static graph_t *copy_graphs(graph_t *`r _gopt) {
   for (; gopt != NULL; gopt = gopt->next) {
     ++graphs_copied;
     let g = (graph_t@)gopt;
-    graph_t @newg = new Graph{.next = res,.rows = NULL,.changed=g->changed};
+    graph_t @newg = new Graph{.next = res,.rows = NULL,.map=empty_map(),
+                              .changed=g->changed};
     res = newg;
     // insert a row for each term
     node_t *newrs = NULL;
     for (let rs = g->rows; rs != NULL; rs = rs->next) {
       newrs = new Node{newrs,rs->rep,rs->broken_as_signed,
                        rs->broken_as_unsigned,NULL,NULL,0,0,infinity};
+      newg->map = Dict::insert(newg->map,rs->rep,newrs);
     }
     newrs = revnodes(newrs);
     newg->rows = newrs;
