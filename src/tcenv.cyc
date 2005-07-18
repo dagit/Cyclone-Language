@@ -445,6 +445,8 @@ tenv_t add_aquals_bound(tenv_t te, type_t aq, type_t bnd) {
 // accessible, and a region variable r is accessible if it appears in the
 // capability or outlives something in the capability.
 void check_effect_accessible_nodelay(tenv_t te, seg_t loc, type_t rgn) {
+  // we allow all effects in static expressions -- this may be unsound!
+  if (te->allow_valueof) return;
   fenv_t fe = get_fenv(te,"check_rgn_accessible");
   if (subset_effect(false, rgn, fe->capability) ||
       subset_effect(true, rgn, fe->capability))
@@ -463,6 +465,8 @@ void check_effect_accessible_nodelay(tenv_t te, seg_t loc, type_t rgn) {
 // Check that a function call's effect is contained in the current capability.
 // Do not constrain evars -- delay the check instead.
 void check_effect_accessible(tenv_t te, seg_t loc, type_t eff) {
+  // we allow all effects in static expressions -- this may be unsound!
+  if (te->allow_valueof) return;
   let &Fenv{.capability = capability, .shared = shared, .effconstr=effc, ...} = 
     get_fenv(te,"check_effect_accessible");
   if(subset_effect(false, eff, capability))

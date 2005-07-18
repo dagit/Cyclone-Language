@@ -646,6 +646,7 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
   case &Absyn::FnCall_e(e1,es,...):
     let $(f,am1) = vcgen_rexp(env,e1,amin);
     let $(ts,am2) = vcgen_rexps(env,es,am1);
+    let $(pre_memory,am2) = lookup_var_map(memory,am2);
 
     let $(args,argvds,reqopt,ensopt,thrwsopt,ret_value) = get_requires_and_ensures(e1->topt);
     // if there is a return value, create a
@@ -654,7 +655,7 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
     // checking requires assertion
     if (reqopt != NULL) {
       // subst the formal args with the actual values
-      let req_assn = subst_args(argvds,ret_value,ts,actual_ret,*reqopt);
+      let req_assn = subst_args(argvds,ret_value,ts,actual_ret,pre_memory,*reqopt);
       if (!implies(am2.assn,req_assn)) {
 	Warn::err(e->loc, "current assertion:\n%s\ndoes not satisfy the pre-condition of the function:\n%s\n",
 		  assnmap2string(am2), assn2string(req_assn));
@@ -663,17 +664,18 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
     // after the function call, all non-escaping var's value
     // should not change, so we should keep the mapping except for
     // memory
-    let am3 = update_var_map(memory,fresh_var(NULL),am2);
+    let new_memory = fresh_var(NULL);
+    let am3 = update_var_map(memory,new_memory,am2);
     // merge this with the throws assertion from the function and 
     // update the exception handler.
     if (thrwsopt != NULL) {
       let v = fresh_var(Absyn::exn_type());
-      let throws_assn = subst_args(argvds,exception_vardecl(),ts,v,*thrwsopt);
+      let throws_assn = subst_args(argvds,exception_vardecl(),ts,v,new_memory,*thrwsopt);
       update_try_assnmap(env,and_assnmap_assn(am3,throws_assn),v);
     }
     // and merge this with the ensures assertion from the function
     if (ensopt != NULL) {
-      let ens_assn = subst_args(argvds,ret_value,ts,actual_ret,*ensopt);
+      let ens_assn = subst_args(argvds,ret_value,ts,actual_ret,new_memory,*ensopt);
       am3 = and_assnmap_assn(am3,ens_assn);
     }
     // if the function is marked with attribute noreturn, then the
@@ -1562,7 +1564,9 @@ static assn_map_t vcgen_switch(env_t env, term_t v,
 
 assn_map_t clause2assn(exp_t e){
   let env = bogus_env();
-  return vcgen_test(env,e,true_assnmap()).f0;
+  let am = update_var_map(memory,fresh_var(NULL),true_assnmap());
+  let res =  vcgen_test(env,e,am).f0;
+  return res;
 }
 
 void vcgen_fundecl(Position::seg_t loc, JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd, assn_info_t assn_info){

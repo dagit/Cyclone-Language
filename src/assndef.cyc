@@ -1939,6 +1939,13 @@ extern assn_map_t *subst_vardecls(List::list_t<vardecl_opt_t> vds1,
   if (a == NULL) return NULL;
   let newmap = empty_map();
   let dict = empty_term_dict();
+  // deal with memory as if it were a variable...
+  let v = Dict::lookup_opt(a->map,memory);
+  if (v != NULL) {
+    let u = fresh_var(NULL);
+    newmap = Dict::insert(newmap,memory,u);
+    dict = Dict::insert(dict,*v,u);
+  }
   for(; vds1 != NULL && vds2 != NULL; vds1 = vds1->tl, vds2 = vds2->tl){
     if (vds1->hd != NULL && vds2->hd != NULL){
       let v = Dict::lookup_opt(a->map,(vardecl_t)vds1->hd);
@@ -1962,9 +1969,13 @@ extern assn_map_t *subst_vardecls(List::list_t<vardecl_opt_t> vds1,
 // return the assertion assn[ti/vi]
 // this function is used during vcgen for function calls
 assn_t subst_args(list_t<vardecl_opt_t> args, vardecl_opt_t res,
-		      list_t<term_t> actual_args, term_opt_t actual_res,
-		      assn_map_t am){
+                  list_t<term_t> actual_args, term_opt_t actual_res,
+                  term_t mem,
+                  assn_map_t am){
   term_dict_t dict = empty_term_dict();
+  let mem_val = Dict::lookup_opt(am.map,memory);
+  if (mem_val != NULL)
+    dict = Dict::insert(dict,*mem_val,mem);
   if (res != NULL && actual_res != NULL){
     let res_val = Dict::lookup_opt(am.map,(vardecl_t)res);
     if (res_val != NULL)

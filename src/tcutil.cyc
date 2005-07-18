@@ -2679,7 +2679,9 @@ substitute_f2($(var_opt_t,tqual_t,type_t)@`H orig_arg, type_t t) {
 }
 static list_t<type_t,`r2+`H> substs(region_t<`r>, list_t<$(tvar_t,type_t)@`r,`r>,
                                  list_t<type_t,`r2>);
-
+static list_t<exp_t,`r2+`H> substs_exps(region_t<`r>, 
+                                        list_t<$(tvar_t,type_t)@`r,`r>,
+                                        list_t<exp_t,`r2>);
 // used to copy an expression during substitution
 static exp_t copye(exp_t old, raw_exp_t r) {
   // FIX? should we be substituting through the topt?
@@ -2731,11 +2733,51 @@ exp_t rsubsexp(region_t<`r> r, list_t<$(tvar_t,type_t)@`r,`r> inst, exp_t e) {
     let new_e2 = rsubsexp(r,inst,e2);
     if (new_e1 == e1 && new_e2 == e2) return e;
     return copye(e, new SeqExp_e(new_e1,new_e2));
+  case &FnCall_e(e1,args,vai,resolved):
+    let new_e1 = rsubsexp(r,inst,e1);
+    let new_args = substs_exps(r,inst,args);
+    // FIX? vararg info
+    if (new_e1 == e1 && new_args == args) return e;
+    return copye(e, new FnCall_e(new_e1,new_args,vai,resolved));
+  case &NoInstantiate_e(e1):
+    let new_e1 = rsubsexp(r,inst,e1);
+    if (new_e1 == e1) return e;
+    return copye(e, new NoInstantiate_e(new_e1));
+  case &Instantiate_e(e1,ts):
+    let new_e1 = rsubsexp(r,inst,e1);
+    let new_ts = substs(r,inst,ts);
+    if (new_e1 == e1 && new_ts == ts) return e;
+    return copye(e, new Instantiate_e(e1,ts));
   case &Cast_e(t,e1,b,c):
     let new_e1 = rsubsexp(r,inst,e1);
     let new_typ = rsubstitute(r,inst,t);
     if (new_e1 == e1 && new_typ == t) return e;
     return copye(e, new Cast_e(new_typ,new_e1,b,c));
+  case &Address_e(e1):
+    let new_e1 = rsubsexp(r,inst,e1);
+    if (new_e1 == e1) return e;
+    return copye(e, new Address_e(new_e1));
+  case &Deref_e(e1):
+    let new_e1 = rsubsexp(r,inst,e1);
+    if (new_e1 == e1) return e;
+    return copye(e, new Deref_e(new_e1));
+  case &AggrMember_e(e1,f,it,ir):
+    let new_e1 = rsubsexp(r,inst,e1);
+    if (new_e1 == e1) return e;
+    return copye(e, new AggrMember_e(new_e1,f,it,ir));
+  case &AggrArrow_e(e1,f,it,ir):
+    let new_e1 = rsubsexp(r,inst,e1);
+    if (new_e1 == e1) return e;
+    return copye(e, new AggrArrow_e(new_e1,f,it,ir));
+  case &Subscript_e(e1,e2):
+    let new_e1 = rsubsexp(r,inst,e1);
+    let new_e2 = rsubsexp(r,inst,e2);
+    if (new_e1 == e1 && new_e2 == e2) return e;
+    return copye(e, new Subscript_e(new_e1,new_e2));
+  case &Tagcheck_e(e1,f):
+    let new_e1 = rsubsexp(r,inst,e1);
+    if (new_e1 == e1) return e;
+    return copye(e, new Tagcheck_e(e1,f));
   case &Sizeoftype_e(t):
     let new_typ = rsubstitute(r,inst,t);
     return (new_typ==t) ? e : copye(e, new Sizeoftype_e(new_typ));
@@ -2756,8 +2798,45 @@ exp_t rsubsexp(region_t<`r> r, list_t<$(tvar_t,type_t)@`r,`r> inst, exp_t e) {
     case &ValueofType(e): return e;
     default: return copye(e, new Valueof_e(new_typ));
     }
-  default: return Warn::impos2("non-type-level-expression in Tcutil::rsubsexp");
+  case &Assert_e(e1):
+    let new_e1 = rsubsexp(r,inst,e1);
+    return (new_e1==e1) ? e : copye(e, new Assert_e(new_e1));
+  case &Assert_false_e(e1):
+    let new_e1 = rsubsexp(r,inst,e1);
+    return (new_e1==e1) ? e : copye(e, new Assert_false_e(new_e1));
+  case &Array_e(...): // FIX: should be added
+  case &Comprehension_e(...): // FIX: should be added
+  case &Aggregate_e(...): // FIX: should be added
+  case &AnonStruct_e(...): // FIX: should be added
+  case &Datatype_e(...): // FIX: should be added
+  case &ComprehensionNoinit_e(...): // FIX: should be added?
+  case &CompoundLit_e(...): 
+  case &StmtExp_e(...): // FIX: should be added?
+  case &Malloc_e(...):
+  case &New_e(...):
+  case &Swap_e(...):
+  case &AssignOp_e(...):
+  case &Increment_e(...):
+  case &UnresolvedMem_e(...):
+  case &Asm_e(...):
+  case &Throw_e(...):
+    return Warn::impos2("non-type-level-expression in Tcutil::rsubsexp");
   }
+}
+
+static list_t<exp_t,`r2+`H> substs_exps(region_t<`r> rgn, 
+                                        list_t<$(tvar_t,type_t)@`r,`r> inst,
+                                        list_t<exp_t,`r2> es) {
+  if(es == NULL)
+    return NULL;
+  let old_hd = es->hd;
+  let old_tl = es->tl;
+  let new_hd = rsubsexp(rgn, inst, old_hd);
+  let new_tl = substs_exps(rgn, inst, old_tl);
+  if(old_hd == new_hd && old_tl == new_tl)
+    return es;
+  return (new List(new_hd,new_tl)); 
+  
 }
 
 static exp_opt_t rsubs_exp_opt(region_t<`r> r,
@@ -2952,8 +3031,8 @@ type_t rsubstitute(region_t<`r> rgn,
 }
 // This is just a map beefed up to avoid unnecessary allocation.
 static list_t<type_t,`r2+`H> substs(region_t<`r> rgn,
-                                 list_t<$(tvar_t,type_t)@`r,`r> inst,
-                                 list_t<type_t,`r2> ts) {
+                                    list_t<$(tvar_t,type_t)@`r,`r> inst,
+                                    list_t<type_t,`r2> ts) {
   if(ts == NULL)
     return NULL;
   let old_hd = ts->hd;

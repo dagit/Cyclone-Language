@@ -258,6 +258,7 @@ namespace AssnDef{
   // this function is used during vcgen for function calls
   extern assn_t subst_args(List::list_t<vardecl_opt_t> args, vardecl_opt_t res,
 			   List::list_t<term_t> actual_args, term_opt_t actual_res,
+                           term_t mem,
 			   assn_map_t am);
 
   void reset_hash_cons_table(void);
