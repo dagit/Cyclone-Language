@@ -141,28 +141,22 @@ static int hash_const(Absyn::cnst_t c) {
   }
 }
 
+static int hash_binding(Absyn::binding_t b) {
+  switch (b) {
+  case &Absyn::Local_b(vd): return ((unsigned)vd >> 4) + 21;
+  case &Absyn::Pat_b(vd): return ((unsigned)vd >> 4) + 23;
+  case &Absyn::Param_b(vd): return ((unsigned)vd >> 4) + 27;
+  case &Absyn::Funname_b(vd): return ((unsigned)vd >> 4) + 29;
+  case &Absyn::Global_b(vd): return ((unsigned)vd >> 4) + 31;
+  case &Absyn::Unresolved_b(q): return 1;
+  }
+}
+
 static int hash_exp(exp_t e) {
   switch (e->r) {
   case &Absyn::Const_e(c): return hash_const(c);
-  case &Absyn::Var_e(...): return 1;
-  case &Absyn::Pragma_e(...): return 2;
-  case &Absyn::Primop_e(...): return 3;
-  case &Absyn::Conditional_e(...): return 4;
-  case &Absyn::And_e(...): return 5;
-  case &Absyn::Or_e(...): return 6;
-  case &Absyn::SeqExp_e(...): return 7;
-  case &Absyn::NoInstantiate_e(...): return 8;
-  case &Absyn::Instantiate_e(...): return 9;
-  case &Absyn::Cast_e(...): return 10;
-  case &Absyn::Address_e(...): return 11;
-  case &Absyn::Sizeoftype_e(...): return 12;
-  case &Absyn::Sizeofexp_e(...): return 13;
-  case &Absyn::Offsetof_e(...): return 14;
-  case &Absyn::Enum_e(...): return 15;
-  case &Absyn::AnonEnum_e(...): return 16;
-  case &Absyn::Valueof_e(...): return 17;
-  case &Absyn::Assert_e(...): return 18;
-  default: return 19;
+  case &Absyn::Var_e(b): return hash_binding(b);
+  default: return tagof(e->r) + 1;
   }
 }
 
@@ -197,32 +191,22 @@ int termcmp(datatype Term @`r1 _t1, datatype Term @`r2 _t2) {
   datatype Term @`r1+`H t1 = _t1;
   datatype Term @`r2+`H t2 = _t2;
  LOOP:
-  if (t1 == t2) return 0;
   int c = tagof(t1) - tagof(t2);
   if (c != 0) return c;
+  if (t1 == t2) return 0;
   switch $(t1,t2) {
   case $(&LogicVar(vd1,i,_),&LogicVar(vd2,j,_)): 
     int c = i - j;
     if (c != 0) return c;
     return (int)vd1 - (int)vd2;
-    //case $(&LogicVar(vd1,i,_),_): return -1;
-    //case $(_,&LogicVar(vd2,j,_)): return 1;
   case $(&Uint(i1,_), &Uint(i2,_)): return i1-i2;
-    //case $(&Uint(...),_): return -1;
-    //case $(_,&Uint(...)): return 1;
   case $(&Const(e1),&Const(e2)): return Evexp::exp_cmp(e1,e2)?(int)e1-(int)e2:0;
-    //case $(&Const(...),_): return -1;
-    //case $(_,&Const(...)): return 1;
   case $(&Addr(vd1),&Addr(vd2)): return (int)vd1 - (int)vd2;
-    //case $(&Addr(...),_): return -1;
-    //case $(_,&Addr(...)): return 1;
   case $(&Unop(p1,t1a,_),&Unop(p2,t2a,_)): 
     if (p1 != p2) return (int)p1 - (int)p2;
     t1 = t1a;
     t2 = t2a;
     goto LOOP;
-    //case $(&Unop(...),_): return -1;
-    //case $(_,&Unop(...)): return 1;
   case $(&Binop(p1,t11,t12,tp1),&Binop(p2,t21,t22,tp2)):
     if (p1 != p2) return (int)p1 - (int)p2;
     int c = termcmp(t11,t21);
@@ -230,24 +214,18 @@ int termcmp(datatype Term @`r1 _t1, datatype Term @`r2 _t2) {
     t1 = t12;
     t2 = t22;
     goto LOOP;
-    //case $(&Binop(...),_): return -1;
-    //case $(_,&Binop(...)): return 1;
   case $(&Cast(tp1,tm1),&Cast(tp2,tm2)):
     int c = Tcutil::typecmp(tp1,tp2);
     if (c != 0) return c;
     t1 = tm1;
     t2 = tm2;
     goto LOOP;
-    //case $(&Cast(...),_): return -1;
-    //case $(_,&Cast(...)): return 1;
   case $(&Select(t11,t12,_),&Select(t21,t22,_)):
     int c = termcmp(t11,t21);
     if (c != 0) return c;
     t1 = t12;
     t2 = t22;
     goto LOOP;
-    //case $(&Select(...),_): return -1;
-    //case $(_,&Select(...)): return 1;
   case $(&Update(t11,t12,t13),&Update(t21,t22,t23)):
     int c = termcmp(t11,t21);
     if (c != 0) return c;
@@ -256,43 +234,31 @@ int termcmp(datatype Term @`r1 _t1, datatype Term @`r2 _t2) {
     t1 = t13;
     t2 = t23;
     goto LOOP;
-    //case $(&Update(t11,t12,t13),_): return -1;
-    //case $(_,&Update(t21,t22,t23)): return 1;
   case $(&Tagof(tm1),&Tagof(tm2)): 
     t1 = tm1;
     t2 = tm2;
     goto LOOP;
-    //case $(&Tagof(...),_): return -1;
-    //case $(_,&Tagof(...)): return 1;
   case $(&Proj(tm1,i1,_),&Proj(tm2,i2,_)): 
     int c = i1 - i2;
     if (c != 0) return c;
     t1 = tm1;
     t2 = tm2;
     goto LOOP;
-    //case $(&Proj(...),_): return -1;
-    //case $(_,&Proj(...)): return 1;
   case $(&Alloc(e1,_,i1,_),&Alloc(e2,_,i2,_)):
     if (e1 != e2) return (int)e1-(int)e2;
     else return (i1-i2);
-    //case $(&Alloc(...),_): return -1;
-    //case $(_,&Alloc(...)): return 1;
   case $(&Offsetf(f1,tm1,_),&Offsetf(f2,tm2,_)):
     int c = strptrcmp(f1,f2);
     if (c != 0) return c;
     t1 = tm1;
     t2 = tm2;
     goto LOOP;
-    //case $(&Offsetf(...),_): return -1;
-    //case $(_,&Offsetf(...)): return 1;
   case $(&Offseti(i1,tm1,_),&Offseti(i2,tm2,_)):
     int c = termcmp(tm1,tm2);
     if (c != 0) return c;
     t1 = tm1;
     t2 = tm2;
     goto LOOP;
-    //case $(&Offseti(...),_): return -1;
-    //case $(_,&Offseti(...)): return 1;
   case $(&Aggr(is_union1,tag1,ts1,_),&Aggr(is_union2,tag2,ts2,_)):
     int c = tag1 - tag2;
     if (c != 0) return c;
@@ -372,7 +338,7 @@ static term_t hash_cons_term(datatype Term @t) {
     //int i = h->max_len;
     Hashtable::insert(h,t2,new TermHashedInfo{t2,NULL});
     //if (i < h->max_len) 
-    // fprintf(stderr,"grew term hash table after inserting %s\n",term2string(t2))
+    //  fprintf(stderr,"grew term hash table after inserting %s due to chains %d\n",term2string(t2),i);
     return t2;
   } else 
     return (*resopt)->term;

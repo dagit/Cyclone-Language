@@ -168,19 +168,20 @@ int zstrptrcmp(stringptr_t a, stringptr_t b) {
 // to throw on bounds error
 static inline mstring_t<`r> int_strcato(mstring_t<`r> dest,buffer_t src) {
   int i;
-  size_t dsize, slen, dlen;
+  size_t dsize, slen, dlen, dplen;
 
-  dsize = numelts(dest);
   dlen = strlen(dest);
+  mstring_t<`r> dp = dest + dlen;
+  dplen = numelts(dp);
   slen = strlen(src);
   
-  if ((slen + dlen) <= dsize) {
-    @assert__(slen <= numelts(src));
+  if (slen <= dplen) {
+    @assert__(slen <= numelts(src) && slen <= numelts(dp));
     for (i = 0; i<slen; i++) {
-      dest[i+dlen] = src[i];
+      dp[i] = src[i];
     }
-    if (i+dlen < dsize)
-      dest[i+dlen] = '\000';
+    if (i < dplen)
+      dp[i] = '\000';
   }
   else
     throw new Invalid_argument("strcat");
@@ -198,12 +199,14 @@ mstring_t<`r> rstrconcat(region_t<`r> r, buffer_t a, buffer_t b) {
   unsigned alen = strlen(a);
   unsigned blen = strlen(b);
   mstring_t<`r> ans = rnew_string(r,alen+blen+1);
-  int i, j;
-  assert(alen <= numelts(ans));
-  @assert__(alen <= numelts(a));
-  for (i=0; i < alen; ++i) ans[i]   = a[i];
-  @assert__(blen <= numelts(b));
-  for (j=0; j < blen; ++j) ans[i+j] = b[j];
+  mstring_t<`r> ansb = ans + alen;
+  unsigned int i, j;
+  if (alen > numelts(ans)) throw new Core::Impossible("rstrconcat 1");
+  for (i=0; i < alen; ++i) 
+    ans[i] = a[i];
+  if (blen > numelts(ansb)) throw new Core::Impossible("rstrconcat 1");
+  for (j=0; j < blen; ++j) 
+    ansb[j] = b[j];
   return ans;
 }
 
@@ -221,12 +224,13 @@ mstring_t<`r> rstrconcat_l(region_t<`r> r,list_t<stringptr_t>strs)
     list_t<size_t,`temp> lens = 
       rnew(temp) List((size_t)0,        // save length of each string
                       NULL);            // (with junk 0 on front)
-    list_t<size_t,`temp> end = lens;   // last cons cell in 'lens'
+    List_t<size_t,`temp> end = lens;   // last cons cell in 'lens'
     for(_ p = strs; p!=NULL; p = p->tl) {
       len = strlen(*(p->hd));
       total_len += len;
-      end->tl = rnew(temp) List(len,NULL);
-      end = end->tl;
+      List_t q = rnew(temp) List(len,NULL);
+      end->tl = q;
+      end = q;
     } 
     lens = lens->tl;                      // remove junk/temporary 0
     ans = rnew_string(r,total_len+1);
@@ -255,15 +259,16 @@ mstring_t<`r> rstr_sepstr(region_t<`r> r,list_t<stringptr_t> strs, buffer_t sepa
   let p = strs;
   region temp; {
     list_t lens = rnew(temp) List((size_t)0,NULL);// see comments in strconcat_l
-    list_t end = lens;
+    List_t end = lens;
     size_t len;
     size_t total_len  = 0;
     size_t list_len   = 0;
     for(;p!=NULL;p=p->tl) {
       len = strlen(*(p->hd));
       total_len += len;
-      end->tl = rnew(temp) List(len,NULL);
-      end = end->tl;
+      List_t q = rnew(temp) List(len,NULL);
+      end->tl = q;
+      end = q;
       ++list_len;
     }
     lens = lens->tl;
@@ -292,8 +297,9 @@ mstring_t str_sepstr(list_t<stringptr_t> strs, buffer_t separator) {
 ///////////////////////// COPYING
 // Destructively copy at most n characters from src into dest
 mbuffer_t<`r> strncpy(mbuffer_t<`r> dest, buffer_t src, size_t n) {
-  int i;
-  assert(n <= numelts(dest));
+  unsigned int i;
+  if (n > numelts(src) || n > numelts(dest)) 
+    throw new Invalid_argument("strncpy");
   for (i=0; i<n; i++) {
     let srcChar = src[i];
     if (srcChar == '\000') break;
@@ -307,8 +313,9 @@ mbuffer_t<`r> strncpy(mbuffer_t<`r> dest, buffer_t src, size_t n) {
 
 // Strncpy that does not pay attention to zero chars
 mbuffer_t<`r> zstrncpy(mbuffer_t<`r> dest, buffer_t src, size_t n) {
-  assert(n <= numelts(dest) && n <= numelts(src));
-  int i;
+  if (n > numelts(dest) || n > numelts(src)) 
+    throw new Invalid_argument("zstrncpy");
+  unsigned int i;
   for (i=0; i<n; i++) 
     dest[i] = src[i];
   return dest;
@@ -442,7 +449,8 @@ mstring_t<`r> rsubstring(region_t<`r> r,buffer_t s,
   //  throw new Invalid_argument("substring");
   mstring_t ans = rnew_string(r,amt+1);
   s = s+start;
-  assert(amt < numelts(ans) && amt <= numelts(s));
+  if (amt > numelts(ans) || amt > numelts(s))
+    throw new Invalid_argument("rsubstring");
   for(size_t i=0; i<amt; ++i)
     ans[i] = s[i];
   ans[amt] = '\000';
