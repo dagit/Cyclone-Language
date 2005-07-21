@@ -90,6 +90,16 @@ void insert(table_t<`a,`b> t, `a key, `b val) {
   return NULL;
 }
 
+// same as above but uses pointer equality
+`b*`r lookup_ptr_opt(table_t<`a,`b,`r> t, `a key) {
+  let tab = t->tab;
+  let p = tab[(t->hash)(key) % numelts(tab)].cells;
+  for (; p != NULL; p = p->next) {
+    if ((int)p->key == (int)key) return &p->value;
+  }
+  return NULL;
+}
+
 // this is a hack to allow you to use a pointer in one region
 // as a key to lookup for table entries where the keys are in 
 // another region.  this is really necessary to avoid allocation
@@ -222,6 +232,10 @@ void iter_c(void f(`a,`b,`c), table_t<`a,`b> t, `c env) {
       f(iter->key,iter->value,env);
 }  
 
+unsigned int num_buckets(table_t<`a,`b> t) {
+  return numelts(t->tab);
+}
+
 // debugging
 void print_table_map(table_t<`a,`b> t, 
                      void prn_key(`a), void prn_val(`b)){
@@ -239,3 +253,16 @@ void print_table_map(table_t<`a,`b> t,
     printf("\n");
   }
 }  
+
+void print_hist(table_t<`a,`b> t) {
+  bucket_t ?odata = t->tab;
+  unsigned int osize = numelts(odata);
+  unsigned int ?counts = new {for i < osize : odata[i].length};
+  unsigned int sum = 0;
+  for (unsigned i = 0; i < osize; ++i)
+    sum += counts[i];
+  if (sum == 0) sum = 1; 
+  for (unsigned i = 0; i < osize; ++i) {
+    fprintf(stderr,"%d: %d (%g pct)\n",i,counts[i],(counts[i] / sum)*100);
+  }
+}

@@ -69,7 +69,7 @@ extern dict_t<`a,`b,`r> rempty(region_t<`r>,int (@`H cmp)(`a,`a)) @throws(false)
 /** [rempty(r,cmp)] is like [empty(cmp)] except that the dictionary is
     allocated in the region with handle [r]. */
 
-extern dict_t<`a,`b,`r+`r2> rshare(region_t<`r>,dict_t<`a,`b,`r2>) @throws(false);
+extern dict_t<`a,`b,`r+`r2> rshare(region_t<`r>,dict_t<`a,`b,`r2>);// @throws(false);
 /** [rshare(r,d)] creates a virtual copy in region [`r] of the dictionary 
     [d] that lives in region [`r2].  The internal data structures of the
     new dictionary share with the old one. */

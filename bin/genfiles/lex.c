@@ -366,11 +366,11 @@ extern int Cyc_Lexing_lexeme_end(struct Cyc_Lexing_lexbuf*);struct Cyc_List_List
 extern struct Cyc_List_List*Cyc_List_imp_rev(struct Cyc_List_List*);struct Cyc_Set_Set;
 # 51 "set.h"
 extern struct Cyc_Set_Set*Cyc_Set_empty(int(*)(void*,void*));
-# 63
+# 65
 extern struct Cyc_Set_Set*Cyc_Set_insert(struct Cyc_Set_Set*,void*);
-# 100
+# 102
 extern int Cyc_Set_member(struct Cyc_Set_Set*,void*);
-# 127
+# 129
 extern void Cyc_Set_iter(void(*)(void*),struct Cyc_Set_Set*);
 # 38 "string.h"
 extern unsigned long Cyc_strlen(struct _fat_ptr);

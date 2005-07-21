@@ -60,6 +60,8 @@ extern set_t<`a> singleton(int (@`H cmp)(`a,`a),`a x);
 extern set_t<`a> from_list(int (@`H cmp)(`a,`a),list_t<`a> l);
   /** [from_list(cmp,l)] creates a set on the heap; the elements of
       the set are the elements of the list [l]. */
+extern list_t<`a,`r> to_list(set_t<`a,`r>);
+  /** [to_list(s)] returns a list in sorted order of the elements. */
 extern set_t<`a> insert(set_t<`a,`H> s,`a elt);
   /** [insert(s,elt)] returns a set containing all the elements of
       [s], plus [elt].  The set [s] is not modified. */

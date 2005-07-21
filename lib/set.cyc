@@ -323,6 +323,10 @@ set_t<`a> from_list(int (@`H comp)(`a,`a),list_t<`a,`r> x) {
   return new Set(comp,List::length(z),z);
 }
 
+list_t<`a,`r> to_list(set_t<`a,`r> s) {
+  return s->nodes;
+}
+
 bool subset(set_t<`a> s1,set_t<`a> s2) {
   int (@comp)(`a,`a) = s1->cmp;
   list_t<`a> x1 = s1->nodes;

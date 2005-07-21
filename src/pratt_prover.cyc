@@ -26,6 +26,10 @@
 #include <dict.h>
 #include <xarray.h>
 
+namespace Hashtable {
+  extern `b*`r lookup_ptr_opt(table_t<`a,`b,`r> t, `a key);
+}
+
 using AssnDef;
 using List;
 
@@ -187,7 +191,7 @@ struct Node {
   shortestpathinfo_t shortest_path_info;
 };
 
-typedef Dict::dict_t<term_t,node_t@> term_node_map_t;
+typedef Hashtable::table_t<term_t,node_t@> term_node_map_t;
 
 // A graph is essentially a pair of sparse matrices of 
 // (node_t,node_t)->distance.  We represent the matrices by having
@@ -206,20 +210,14 @@ static unsigned num_graphs(graph_t *`H gs) {
   return c;
 }
 
-static term_node_map_t empty_map() {
-  static struct Dict::Dict<term_t,node_t@>* mt_map = NULL;
-  term_node_map_t d;
-  if (mt_map == NULL) {
-    d = Dict::empty(AssnDef::termcmp);
-    mt_map = new d;
-  } else 
-    d = *mt_map;
-  return d;
+static term_node_map_t empty_map(unsigned n) {
+  return Hashtable::create(n,Core::ptrcmp,termhash);
+  // Hashtable::create(n,termcmp,termhash);
 }
   
 // An empty graph represents the proposition "true".
 static graph_t@ true_graph() { 
-  return new Graph{NULL,NULL,empty_map(),false}; 
+  return new Graph{NULL,NULL,empty_map(17),false}; 
 }
 
 static int constraints_added = 0;
@@ -318,23 +316,24 @@ static void add_type_info(graph_t @g, term_t term) {
   //for all terms t, we should know that:
   // s[t] - 0 <= MAXINT
   // 0 - u[t] <= 0
-  set_distance(g,term,zero(),MAXINT,true);
-  set_distance(g,zero(),term,0,false);
+  let z = zero();
+  set_distance(g,term,z,MAXINT,true);
+  set_distance(g,z,term,0,false);
   switch (term) {
   case &Unop(Absyn::Numelts,x,_):
     // add term s< MAXINT and term u< MAXINT and 0 u<= term
-    set_distance(g,term,zero(),MAXINT-1,false);
+    set_distance(g,term,z,MAXINT-1,false);
     // also add x as a node to pick up any constant bounds information
     term2node(g, x);
     break;
   case &Alloc(_,n,_,_):
     // an allocation node -- we know it's not null and that the numelts is n
-    add_constraint(g,zero(),ULt,term); // not null
+    add_constraint(g,z,ULt,term); // not null
     add_constraint(g,numelts_term(term),ULte,n);
     break;
   case &Addr(vd):
     // the address of a variable -- we know it's not null
-    add_constraint(g,zero(),ULt,term);
+    add_constraint(g,z,ULt,term);
     break;
   default: break;
   }
@@ -353,12 +352,12 @@ static void add_type_info(graph_t @g, term_t term) {
       if (!Tcutil::is_nullable_pointer_type(t,false)) {
         add_constraint(g,t2,ULte,t1);
         add_constraint(g,t2,SLte,t1);
-        add_constraint(g,zero(),ULt,term);
+        add_constraint(g,z,ULt,term);
       }
     }
     switch (Absyn::compress(t)) {
     case &Absyn::AppType(&Absyn::IntCon(Absyn::Unsigned,_),_):
-      add_constraint(g,zero(),ULte,term);
+      add_constraint(g,z,ULte,term);
       break;
     case &Absyn::AppType(&Absyn::TagCon,&List{v,_}):
       switch (Absyn::compress(v)) {
@@ -377,22 +376,23 @@ static void add_type_info(graph_t @g, term_t term) {
 // to the graph.  Keep things sorted by term order.
 static node_t @term2node(graph_t @`r g, term_t t) {
   // first see if we can find it directly.
-  let nopt = Dict::lookup_opt(g->map, t);
+  let nopt = Hashtable::lookup_ptr_opt(g->map, t);
   if (nopt != NULL) return *nopt;
   // couldn't find it -- insert it...
   node_t * @ `H+`r prev = &g->rows;
-  int count = 0;
   for (let r = g->rows; r != NULL; r = r->next) {
     //++count;
     //if (count > max_lookup) max_lookup = count;
-    let rep = r->rep;
-    int c = tagof(t) - tagof(rep);
-    if (c == 0) c = termcmp(t,rep);
-    if (c == 0) return r;
+    node_t@ n = (node_t @)r;
+    let rep = n->rep;
+    let c = termcmp(t,rep);
     if (c > 1) break;
-    prev = &r->next;
+    if (c == 0) {
+      Hashtable::insert(g->map,t,n);
+      return n;
+    }
+    prev = &n->next;
   }
-  // term not directly found -- insert it in the graph.  
   node_t @n;
   switch (t){
   case &Binop(Absyn::Plus,t1,&Uint(c2,_),_):
@@ -402,7 +402,7 @@ static node_t @term2node(graph_t @`r g, term_t t) {
     n = new Node{*prev,t,true,true,NULL,NULL,0,0,infinity};
     break;
   }
-  Dict::insert(g->map,t,n);
+  Hashtable::insert(g->map,t,n);
   *prev = n;
   add_type_info(g,t);
   return n;
@@ -1045,7 +1045,8 @@ static graph_t *copy_graphs(graph_t *`r _gopt) {
   for (; gopt != NULL; gopt = gopt->next) {
     ++graphs_copied;
     let g = (graph_t@)gopt;
-    graph_t @newg = new Graph{.next = res,.rows = NULL,.map=empty_map(),
+    //let b = Hashtable::num_buckets(g->map);
+    graph_t @newg = new Graph{.next = res,.rows = NULL,.map=empty_map(17),
                               .changed=g->changed};
     res = newg;
     // insert a row for each term
@@ -1053,7 +1054,7 @@ static graph_t *copy_graphs(graph_t *`r _gopt) {
     for (let rs = g->rows; rs != NULL; rs = rs->next) {
       newrs = new Node{newrs,rs->rep,rs->broken_as_signed,
                        rs->broken_as_unsigned,NULL,NULL,0,0,infinity};
-      newg->map = Dict::insert(newg->map,rs->rep,newrs);
+      Hashtable::insert(newg->map,rs->rep,newrs);
     }
     newrs = revnodes(newrs);
     newg->rows = newrs;
@@ -1909,7 +1910,6 @@ static void add_prim($(term_t,prim_reln_t,term_t)@ p, graph_t @`H g) {
 //   graphs_change = graphs_change || old_graphs_change;
 //   return gs;
 // }
-
 
 datatype exn { TooLarge };
 datatype exn.TooLarge too_large = TooLarge;

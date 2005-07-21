@@ -763,7 +763,7 @@ goto _LL3;case Cyc_Absyn_ExternC:
  if(Cyc_Interface_check_public_datatypedecl(ae,seen,d)){
 if(d->is_extensible && d->fields!=0){
 d=({struct Cyc_Absyn_Datatypedecl*_Tmp7=_cycalloc(sizeof(struct Cyc_Absyn_Datatypedecl));*_Tmp7=*d;_Tmp7;});{
-struct Cyc_List_List*fields=(struct Cyc_List_List*)d->fields->v;
+struct Cyc_List_List*fields=(struct Cyc_List_List*)_check_null(d->fields)->v;
 d->fields=0;
 {struct Cyc_List_List*f=fields;for(0;f!=0;f=f->tl){
 Cyc_Interface_extract_xdatatypefielddecl(i,d,(struct Cyc_Absyn_Datatypefield*)f->hd);}}

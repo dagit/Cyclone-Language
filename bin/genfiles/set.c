@@ -605,11 +605,14 @@ if(y->tl!=0 && comp(y->hd,y->tl->hd)==0)
 y->tl=_check_null(y->tl)->tl;}}{
 struct Cyc_Set_Set*_Tmp0=_cycalloc(sizeof(struct Cyc_Set_Set));_Tmp0->cmp=comp,({int _Tmp1=Cyc_List_length(z);_Tmp0->cardinality=_Tmp1;}),_Tmp0->nodes=z;return _Tmp0;}}
 # 326
+struct Cyc_List_List*Cyc_Set_to_list(struct Cyc_Set_Set*s){
+return s->nodes;}
+# 330
 int Cyc_Set_subset(struct Cyc_Set_Set*s1,struct Cyc_Set_Set*s2){
 int(*comp)(void*,void*)=s1->cmp;
 struct Cyc_List_List*x1=s1->nodes;
 struct Cyc_List_List*x2=s2->nodes;
-# 331
+# 335
 while(1){
 if(x1==0)return 1;
 if(x2==0)return 0;{
@@ -619,33 +622,33 @@ return 0;
 if(i==0)
 x1=x1->tl;
 x2=x2->tl;}
-# 332
+# 336
 1U;}
-# 341
+# 345
 return 1;}
-# 344
+# 348
 struct Cyc_Set_Set*Cyc_Set_diff(struct Cyc_Set_Set*s1,struct Cyc_Set_Set*s2){
 int(*comp)(void*,void*)=s1->cmp;
 struct Cyc_List_List*x1=s1->nodes;
 struct Cyc_List_List*x2=s2->nodes;
 int card=s1->cardinality;
-# 350
+# 354
 if(x2==0)return s1;
-# 352
+# 356
 for(1;x2!=0;x2=x2->tl){
 void*elt=x2->hd;
 if(Cyc_Set_member_b(comp,x1,elt)){
 -- card;
 x1=Cyc_Set_delete_b(comp,x1,elt);}}{
-# 359
+# 363
 struct Cyc_Set_Set*_Tmp0=_cycalloc(sizeof(struct Cyc_Set_Set));_Tmp0->cmp=comp,_Tmp0->cardinality=card,_Tmp0->nodes=x1;return _Tmp0;}}
-# 362
+# 366
 int Cyc_Set_setcmp(struct Cyc_Set_Set*s1,struct Cyc_Set_Set*s2){
 if((unsigned)s1==(unsigned)s2)
 return 0;
 if(s1->cardinality!=s2->cardinality)
 return s1->cardinality - s2->cardinality;{
-# 368
+# 372
 struct Cyc_List_List*x1=s1->nodes;
 struct Cyc_List_List*x2=s2->nodes;
 int(*cmp)(void*,void*)=s1->cmp;
@@ -654,26 +657,26 @@ while(x1!=0){
 if(diff!=0)return diff;
 x1=x1->tl;
 x2=x2->tl;}
-# 372
+# 376
 1U;}
-# 377
+# 381
 return 0;}}
-# 380
+# 384
 int Cyc_Set_equals(struct Cyc_Set_Set*s1,struct Cyc_Set_Set*s2){
 return Cyc_Set_setcmp(s1,s2)==0;}char Cyc_Set_Absent[7U]="Absent";
-# 385
-struct Cyc_Set_Absent_exn_struct Cyc_Set_Absent_val={Cyc_Set_Absent};
 # 389
+struct Cyc_Set_Absent_exn_struct Cyc_Set_Absent_val={Cyc_Set_Absent};
+# 393
 void*Cyc_Set_choose(struct Cyc_Set_Set*s){
 if(s->nodes==0)_throw(& Cyc_Set_Absent_val);
 return s->nodes->hd;}
-# 394
+# 398
 int Cyc_Set_iter_f(struct Cyc_List_List**elts_left,void**dest){
 if(!((unsigned)*elts_left))
 return 0;
 *dest=(*elts_left)->hd;
 *elts_left=_check_null(*elts_left)->tl;
 return 1;}
-# 401
+# 405
 struct Cyc_Iter_Iter Cyc_Set_make_iter(struct _RegionHandle*rgn,struct Cyc_Set_Set*s){
 struct Cyc_Iter_Iter _Tmp0;({struct Cyc_List_List**_Tmp1=({struct Cyc_List_List**_Tmp2=_region_malloc(rgn,0U,sizeof(struct Cyc_List_List*));*_Tmp2=s->nodes;_Tmp2;});_Tmp0.env=_Tmp1;}),_Tmp0.next=Cyc_Set_iter_f;return _Tmp0;}

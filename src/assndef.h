@@ -86,8 +86,9 @@ namespace AssnDef{
     // represents a location created during memory allocation
     Alloc(exp_t, term_t, int, type_opt_t); 
     // given an expression e.f, and the address of e is t
-    // then the address of e.f is Offsetf(f,t)
-    Offsetf(field_name_t, term_t, type_opt_t);
+    // and f is the ith field of e's type, then the address of e.f 
+    // is Offsetf(i,t)
+    Offsetf(term_t, unsigned index, type_opt_t);
     // given an expression e1[e2], where the address of e1
     // is t1, and the right value of e2 is t2, then
     // the address of e1[e2] is Offseti(t2,t1)
@@ -130,7 +131,7 @@ namespace AssnDef{
   extern term_t proj(term_t t, unsigned i, type_opt_t);
   extern term_t addr(vardecl_t);
   extern term_t alloc(exp_t,term_t,type_opt_t);
-  extern term_t offsetf(field_name_t f, term_t t, type_opt_t);
+  extern term_t offsetf(term_t t, unsigned i, type_opt_t);
   extern term_t offseti(term_t i, term_t t, type_opt_t);
 
   // some special term constructions:
@@ -260,6 +261,10 @@ namespace AssnDef{
 			   List::list_t<term_t> actual_args, term_opt_t actual_res,
                            term_t mem,
 			   assn_map_t am);
+
+  // factors out common primitive assertions that hold in a
+  extern assn_set_opt_t widen_it(assn_t a);
+  extern assn_t widen(assn_t a);
 
   void reset_hash_cons_table(void);
 }

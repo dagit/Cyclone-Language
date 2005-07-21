@@ -403,23 +403,23 @@ extern int Cyc_List_mem(int(*)(void*,void*),struct Cyc_List_List*,void*);struct 
 int Cyc_Iter_next(struct Cyc_Iter_Iter,void*);struct Cyc_Set_Set;
 # 51 "set.h"
 extern struct Cyc_Set_Set*Cyc_Set_empty(int(*)(void*,void*));
-# 63
+# 65
 extern struct Cyc_Set_Set*Cyc_Set_insert(struct Cyc_Set_Set*,void*);
-# 75
+# 77
 extern struct Cyc_Set_Set*Cyc_Set_union_two(struct Cyc_Set_Set*,struct Cyc_Set_Set*);
-# 82
+# 84
 extern struct Cyc_Set_Set*Cyc_Set_diff(struct Cyc_Set_Set*,struct Cyc_Set_Set*);
-# 85
+# 87
 extern struct Cyc_Set_Set*Cyc_Set_delete(struct Cyc_Set_Set*,void*);
-# 94
+# 96
 extern int Cyc_Set_cardinality(struct Cyc_Set_Set*);
-# 97
+# 99
 extern int Cyc_Set_is_empty(struct Cyc_Set_Set*);
-# 100
+# 102
 extern int Cyc_Set_member(struct Cyc_Set_Set*,void*);
-# 137
+# 139
 extern void*Cyc_Set_choose(struct Cyc_Set_Set*);
-# 141
+# 143
 extern struct Cyc_Iter_Iter Cyc_Set_make_iter(struct _RegionHandle*,struct Cyc_Set_Set*);
 # 38 "string.h"
 extern unsigned long Cyc_strlen(struct _fat_ptr);

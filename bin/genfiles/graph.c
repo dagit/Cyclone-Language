@@ -347,19 +347,19 @@ extern int Cyc_List_length(struct Cyc_List_List*);struct Cyc___cycFILE;
 extern int Cyc_fprintf(struct Cyc___cycFILE*,struct _fat_ptr,struct _fat_ptr);struct Cyc_Set_Set;
 # 51 "set.h"
 extern struct Cyc_Set_Set*Cyc_Set_empty(int(*)(void*,void*));
-# 63
+# 65
 extern struct Cyc_Set_Set*Cyc_Set_insert(struct Cyc_Set_Set*,void*);
-# 75
+# 77
 extern struct Cyc_Set_Set*Cyc_Set_union_two(struct Cyc_Set_Set*,struct Cyc_Set_Set*);
-# 82
+# 84
 extern struct Cyc_Set_Set*Cyc_Set_diff(struct Cyc_Set_Set*,struct Cyc_Set_Set*);
-# 85
+# 87
 extern struct Cyc_Set_Set*Cyc_Set_delete(struct Cyc_Set_Set*,void*);
-# 97
+# 99
 extern int Cyc_Set_is_empty(struct Cyc_Set_Set*);
-# 100
+# 102
 extern int Cyc_Set_member(struct Cyc_Set_Set*,void*);
-# 137
+# 139
 extern void*Cyc_Set_choose(struct Cyc_Set_Set*);struct Cyc_Dict_T;struct Cyc_Dict_Dict{int(*rel)(void*,void*);struct _RegionHandle*r;const struct Cyc_Dict_T*t;};
 # 62 "dict.h"
 extern struct Cyc_Dict_Dict Cyc_Dict_empty(int(*)(void*,void*));

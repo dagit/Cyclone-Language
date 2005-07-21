@@ -377,15 +377,15 @@ extern struct _tuple1 Cyc_List_split(struct Cyc_List_List*);
 extern struct Cyc_List_List*Cyc_List_tabulate_c(int,void*(*)(void*,int),void*);struct Cyc_Dict_T;struct Cyc_Dict_Dict{int(*rel)(void*,void*);struct _RegionHandle*r;const struct Cyc_Dict_T*t;};struct Cyc_Set_Set;
 # 54 "set.h"
 extern struct Cyc_Set_Set*Cyc_Set_rempty(struct _RegionHandle*,int(*)(void*,void*));
-# 63
+# 65
 extern struct Cyc_Set_Set*Cyc_Set_insert(struct Cyc_Set_Set*,void*);
-# 94
+# 96
 extern int Cyc_Set_cardinality(struct Cyc_Set_Set*);
-# 97
+# 99
 extern int Cyc_Set_is_empty(struct Cyc_Set_Set*);
-# 100
+# 102
 extern int Cyc_Set_member(struct Cyc_Set_Set*,void*);
-# 137
+# 139
 extern void*Cyc_Set_choose(struct Cyc_Set_Set*);
 # 49 "string.h"
 extern int Cyc_strcmp(struct _fat_ptr,struct _fat_ptr);
@@ -1780,7 +1780,7 @@ struct _fat_ptr*_Tmp0=_cycalloc(sizeof(struct _fat_ptr));({struct _fat_ptr _Tmp1
 static struct _fat_ptr Cyc_Tcpat_descs2string(struct Cyc_List_List*ds){
 struct Cyc_List_List*ss=({struct Cyc_List_List*(*_Tmp0)(struct _fat_ptr*(*)(void*),struct Cyc_List_List*)=(struct Cyc_List_List*(*)(struct _fat_ptr*(*)(void*),struct Cyc_List_List*))Cyc_List_map;_Tmp0;})(Cyc_Tcpat_desc2stringptr,ds);
 struct _fat_ptr*comma;comma=_cycalloc(sizeof(struct _fat_ptr)),*comma=_tag_fat(",",sizeof(char),2U);
-{struct Cyc_List_List*x=ss;for(0;x!=0;x=_check_null(x)->tl){
+{struct Cyc_List_List*x=ss;for(0;x!=0;x=x->tl){
 if(x->tl!=0){
 ({struct Cyc_List_List*_Tmp0=({struct Cyc_List_List*_Tmp1=_cycalloc(sizeof(struct Cyc_List_List));_Tmp1->hd=comma,_Tmp1->tl=x->tl;_Tmp1;});x->tl=_Tmp0;});
 x=x->tl;}}}

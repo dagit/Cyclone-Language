@@ -92,7 +92,13 @@ extern void iter(void f(`a,`b), table_t<`a,`b>);
 extern void iter_c(void f(`a,`b,`c), table_t<`a,`b> t, `c env);
   /** [iter\_c(f,t,e)] calls [f(k,v,e)] for each key/value pair [(k,v)]. */
 
+  /** [num_buckets(t)] returns the current number of buckets in the
+      hash table [t].*/
+extern unsigned int num_buckets(table_t<`a,`b> t);
+
 // debugging
 extern void print_table_map(table_t<`a,`b>, void prn_key(`a), void prn_val(`b));
+
+extern void print_hist(table_t<`a,`b> t);
 }
 #endif
