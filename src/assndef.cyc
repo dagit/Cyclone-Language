@@ -110,7 +110,7 @@ string_t term2string(term_t t) {
   case &Proj(t,i,_):
     res = aprintf("#%d(%s)",i,term2string(t));
     break;
-  case &Addr(vd):
+  case &Addr(vd,_):
     if (Flags::debug_assn) 
       res = aprintf("&%s_%x",Absynpp::qvar2string(vd->name),(unsigned int)vd); 
     else 
@@ -182,7 +182,7 @@ int termhash(datatype Term @t) {
     for (; ts != NULL; ts = ts->tl)
       res = res + ((unsigned int)ts->hd >> 4);
     return res;
-  case &Addr(vd): return ((unsigned int)vd >> 4)+7;
+  case &Addr(vd,_): return ((unsigned int)vd >> 4)+7;
   case &Alloc(e,_,i,_): return ((unsigned int)e >> 4) + i;
   case &Offsetf(t,i,_): return ((unsigned int)t >> 4) + i + 11;
   case &Offseti(index,t,_): 
@@ -213,7 +213,7 @@ int termcmp(datatype Term @`r1 _t1, datatype Term @`r2 _t2) {
   case $(&Uint(i1,_), &Uint(i2,_)): return i1-i2;
   case $(&Const(e1),&Const(e2)): 
     return Evexp::exp_cmp(e1,e2)?(int)e1-(int)e2:0;
-  case $(&Addr(vd1),&Addr(vd2)): return (int)vd1 - (int)vd2;
+  case $(&Addr(vd1,_),&Addr(vd2,_)): return (int)vd1 - (int)vd2;
   case $(&Unop(p1,t1a,_),&Unop(p2,t2a,_)): 
     int c = (int)p1 - (int)p2;
     if (c != 0) return c;
@@ -286,7 +286,7 @@ static term_t copy_term(datatype Term@ t) {
   switch (t) {
   case &Uint(i,tp): return new Uint(i,tp);
   case &Const(e): return new Const(e);
-  case &Addr(vd): return new Addr(vd);
+  case &Addr(vd,tp): return new Addr(vd,tp);
   case &LogicVar(vd,i,tp): return new LogicVar(vd,i,tp);
   case &Binop(p,t1,t2,tp): return new Binop(p,t1,t2,tp);
   case &Unop(p,t,tp): return new Unop(p,t,tp);
@@ -429,7 +429,14 @@ term_t cnst(Absyn::exp_t e) {
   return hash_cons_term(&t);
 }
 term_t addr(vardecl_t vd) {
-  let t = Addr(vd);
+  type_t tp = vd->type;
+  switch (Absyn::compress(tp)) {
+  case &Absyn::ArrayType(...): break;
+  default: 
+    type_t rgn = vd->rgn ? (type_t)vd->rgn : Absyn::heap_rgn_type;
+    tp = Absyn::at_type(tp,rgn, Absyn::al_qual_type, Absyn::empty_tqual(0), Absyn::false_type, Absyn::false_type);
+  }
+  let t = Addr(vd,tp);
   return hash_cons_term(&t);
 }
 term_t logicvar(vardecl_opt_t vd,int i,type_opt_t tp) {
@@ -438,7 +445,7 @@ term_t logicvar(vardecl_opt_t vd,int i,type_opt_t tp) {
 }
 term_t update(term_t t1, term_t t2, term_t t3) {
   switch $(t1,t2) {
-  case $(&Update(m,a as &Addr(x),e1),&Addr(y)):
+  case $(&Update(m,a as &Addr(x,_),e1),&Addr(y,_)):
     // Update(Update(m,Addr(x),e1),Addr(x),t3) = Update(m,Addr(x),t3)
     if (x == y) return update(m,t2,t3);
     break;
@@ -454,9 +461,9 @@ static bool term_neq(term_t t1, term_t t2) {
  LOOP:
   if (t1 == t2) return false;
   switch $(t1,t2) {
-  case $(&Addr(x), &Addr(y)): return x != y;
-  case $(&Addr(_), &Alloc(...)): return true;
-  case $(&Alloc(...), &Addr(_)): return true;
+  case $(&Addr(x,_), &Addr(y,_)): return x != y;
+  case $(&Addr(...), &Alloc(...)): return true;
+  case $(&Alloc(...), &Addr(...)): return true;
   case $(&Alloc(exp1,tm1,i1,_),&Alloc(exp2,tm2,i2,_)):
     // distinct allocation points must be distinct
     return (exp1 != exp2);
@@ -1000,7 +1007,7 @@ type_opt_t get_term_type(term_t t) {
   case &Select(_,_,tp): return tp;
   case &Aggr(_,_,_,tp): return tp;
   case &Proj(t1,i,tp): return tp;
-  case &Addr(vd): return Absyn::uint_type;
+  case &Addr(vd,tp): return tp;
   case &Update(...): return NULL;
   case &Alloc(_,_,_,tp): return tp;
   case &Offsetf(_,_,tp): return tp;

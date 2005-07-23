@@ -223,7 +223,7 @@ static bool is_unsigned_int_exp(exp_t e){
 // otherwise, we select the address from the memory
 static $(term_t,assn_map_t) deref_lterm(env_t env, term_t lt, assn_map_t am){
   switch (lt){
-  case &Addr(vd):
+  case &Addr(vd,_):
     if (!vd->escapes) {
       return lookup_var_map(vd,am);
     }
@@ -239,7 +239,7 @@ static $(term_t,assn_map_t) deref_lterm(env_t env, term_t lt, assn_map_t am){
 // or update the nonescvar-map
 static assn_map_t do_assign(env_t env, assn_map_t am, term_t lt, term_t t){
   switch (lt) {
-  case &Addr(vd): 
+  case &Addr(vd,_): 
     if (!vd->escapes) {
       return update_var_map(vd, t, am);
     }
@@ -382,7 +382,7 @@ static $(assn_t,assn_t) okderef(term_t root, term_t i){
     return $(or(ult(i,numelts_term(root)),
 		bndck),
 	     or(neq(root,zero()),nullck));
-  case &Addr(vd):
+  case &Addr(vd,_):
     switch (Absyn::compress(vd->type)) {
     case &Absyn::ArrayType(ai):
       if (ai.num_elts != NULL) {

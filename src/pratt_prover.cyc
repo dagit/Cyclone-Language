@@ -331,7 +331,7 @@ static void add_type_info(graph_t @g, term_t term) {
     add_constraint(g,z,ULt,term); // not null
     add_constraint(g,numelts_term(term),ULte,n);
     break;
-  case &Addr(vd):
+  case &Addr(vd,_):
     // the address of a variable -- we know it's not null
     add_constraint(g,z,ULt,term);
     break;
@@ -2059,6 +2059,45 @@ static graph_t *add_type_assns(graph_t *`H gs) {
   return Set::fold(add_ptr_type_info,ptrs,gs);
 }
 
+// if c < numelts(x) then 0 < numelts(x+k) for all k < c.
+static void add_numelts_info(int dummy, graph_t @`H g) {
+  let zeronode = term2node(g,zero());
+  // look for terms of the form numelts(x+k)
+  for (let n = g->rows; n != NULL; n = n->next) {
+    switch (n->rep) {
+    case &Unop(Absyn::Numelts,&Binop(Absyn::Plus,x,&Uint(uk,_),_),_):
+      int k = (int)uk;
+      if (k > 0) {
+        // look for terms of the form numelts(x)
+        let numelts_x = numelts_term(x);
+        let n_numelts_x = term2node(g,numelts_x);
+        // c < numelts(x) same as zero() - numelts(x) U<= -(c+1)
+        let dist_opt = lookup_dist(zeronode, n_numelts_x, false);
+        if (dist_opt != NULL) {
+          int j = *dist_opt;
+          // at this point, we know -numelts(x) U<= j so numelts(x) >= -j
+          int negj = -j;
+          // if negj > 0 then we know numelts(x) > negj-1
+          if (negj > 0) {
+            int c = negj-1;
+            // if k<=c then (c-k) < numelts(x+k)
+            if (k <= c) {
+              //fprintf(stderr,"fired: %d U< %s\n",c-k,term2string(n->rep));
+              add_constraint(g,uint(c-k),ULt,n->rep);
+            }
+          }
+        }
+      }
+      break;
+    default: break;
+    }
+  }
+}
+
+static graph_t *add_numelts_info_graphs(graph_t *`H gs) {
+  return app_graphs(add_numelts_info,0,gs);
+}
+
 // check to see if an assertion is consistent using the constraint solver.
 // if it returns false, then the assertion is definitely inconsistent.
 // if it returns true, then the assertion might be consistent.
@@ -2087,6 +2126,7 @@ static bool consistent(assn_t a) {
       graphs_change = false;
       gs = associate_ud_sd_in_graphs(gs);
       gs = add_type_assns(gs);
+      gs = add_numelts_info_graphs(gs);
       gs = equality_close_graphs(gs);
       //      gs = gaussian_graphs(gs);
       //      gs = constrain_okderefs(gs);

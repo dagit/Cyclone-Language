@@ -82,7 +82,7 @@ namespace AssnDef{
     // projection off of aggr
     Proj(term_t tuple, unsigned index, type_opt_t); 
     
-    Addr(vardecl_t); // represents the address of a program variable
+    Addr(vardecl_t,type_opt_t); // represents the address of a program variable
     // represents a location created during memory allocation
     Alloc(exp_t, term_t, int, type_opt_t); 
     // given an expression e.f, and the address of e is t
