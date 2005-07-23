@@ -59,16 +59,16 @@ namespace AssnDef{
   datatype Term {
     Uint(unsigned int,type_opt_t); // a constant value known to cyclone at compile time
     Const(exp_t); // a Cyclone "constant" expression (e.g., 3, sizeof(e), etc.)
+    LogicVar(vardecl_opt_t,int,type_opt_t); // logic variable
+    Unop(Absyn::primop_t,term_t,type_opt_t); // Not, Bitnot, Numelts
+    Binop(Absyn::primop_t,term_t,term_t,type_opt_t); // all other primops
+    Cast(Absyn::type_t, term_t); // type-cast
     // represents a lookup in memory mem at location addr
     Select(term_t mem,term_t addr,type_opt_t);
     // represents the same memory function as mem, but updated so that
     // it maps address addr to value.  
     Update(term_t mem,term_t addr,term_t value);
-    // logic variable.
-    LogicVar(vardecl_opt_t,int,type_opt_t);
-    Unop(Absyn::primop_t,term_t,type_opt_t); // Not, Bitnot, Numelts
-    Binop(Absyn::primop_t,term_t,term_t,type_opt_t); // all other primops
-    Cast(Absyn::type_t, term_t); // type-cast
+
     // Unions are represented by one tagged value.  The tag records
     // the member that was last written, and we can only reduce a
     // projection when the member being read was the same as the one last
