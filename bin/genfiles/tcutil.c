@@ -614,13 +614,13 @@ int Cyc_Atts_sub_attributes(struct Cyc_List_List*,struct Cyc_List_List*);
 int Cyc_Atts_fntype_att(void*);
 # 79
 int Cyc_Atts_attribute_cmp(void*,void*);struct Cyc_Dict_T;struct Cyc_Dict_Dict{int(*rel)(void*,void*);struct _RegionHandle*r;const struct Cyc_Dict_T*t;};struct Cyc_AssnDef_AssnMap{void*assn;struct Cyc_Dict_Dict map;};
-# 203 "assndef.h"
+# 219 "assndef.h"
 extern struct Cyc_AssnDef_AssnMap Cyc_AssnDef_true_assnmap (void);
-# 228
+# 244
 extern int Cyc_AssnDef_simple_prove(void*,void*);
-# 238 "assndef.h"
+# 254 "assndef.h"
 extern void*Cyc_AssnDef_merge_assnmaps(struct Cyc_List_List*,struct Cyc_AssnDef_AssnMap,struct Cyc_List_List*,struct Cyc_AssnDef_AssnMap);
-# 251 "assndef.h"
+# 267 "assndef.h"
 extern struct Cyc_AssnDef_AssnMap*Cyc_AssnDef_subst_vardecls(struct Cyc_List_List*,struct Cyc_List_List*,struct Cyc_AssnDef_AssnMap*);
 # 43 "vcgen.h"
 extern struct Cyc_AssnDef_AssnMap Cyc_Vcgen_clause2assn(struct Cyc_Absyn_Exp*);

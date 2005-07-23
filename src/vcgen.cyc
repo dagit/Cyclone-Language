@@ -238,12 +238,11 @@ static $(term_t,assn_map_t) deref_lterm(env_t env, term_t lt, assn_map_t am){
 // based on what lt is, we will either update the content of memory,
 // or update the nonescvar-map
 static assn_map_t do_assign(env_t env, assn_map_t am, term_t lt, term_t t){
-  switch (lt) {
-  case &Addr(vd,_): 
-    if (!vd->escapes) {
-      return update_var_map(vd, t, am);
-    }
-    fallthru;
+  let $(root,fields) = split_addr(lt);
+  switch (root) {
+  case &Addr(vd,_) && !vd->escapes:
+    let $(oldv,am1) = lookup_var_map(vd,am);
+    return update_var_map(vd, apply_aggr_update(oldv,fields,t), am1);
   default:
     let $(mem,am1) = lookup_var_map(memory,am);
     return update_var_map(memory, update(mem,lt,t),am1);

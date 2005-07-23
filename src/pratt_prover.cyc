@@ -20,6 +20,7 @@
 #include "tcutil.h"
 #include "warn.h"
 #include "absynpp.h"
+#include "flags.h"
 #include <hashtable.h>
 #include <list.h>
 #include <set.h>
@@ -459,6 +460,8 @@ static bool equal_terms(graph_t @g, term_t t1, term_t t2){
       equal_terms(g,t12,t22) && equal_terms(g,t13,t23);
   case $(&Proj(t1,i1,_),&Proj(t2,i2,_)):
     return (i1 == i2) && equal_terms(g,t1,t2);
+  case $(&AggrUpdate(t1,i1,v1),&AggrUpdate(t2,i2,v2)):
+    return (i1 == i2) && equal_terms(g,t1,t2) && equal_terms(g,v1,v2);
   case $(&Aggr(is_union1,tag1,ts1,_),&Aggr(is_union2,tag2,ts2,_)):
     for (; ts1 != NULL && ts2 != NULL; ts1 = ts1->tl, ts2=ts2->tl)
       if (!equal_terms(g,ts1->hd,ts2->hd)) return false;
@@ -1509,6 +1512,16 @@ static void equality_close_graph(int dummy, graph_t @g) {
         default: continue;
         }
       break;
+    case &AggrUpdate(t11,i1,t12):
+      for (let ts = rs->next; ts != NULL; ts = ts->next) 
+        switch (ts->rep) {
+        case &AggrUpdate(t21,i2,t22) && i1 == i2:
+          if (equal_terms(g,t11,t21) && equal_terms(g,t12,t22))
+            add_eq(g,rep1,ts->rep);
+          continue;
+        default: continue;
+        }
+      break;
     case &Aggr(is_union1,tag1,ts1,_):
       for (let ts = rs->next; ts != NULL; ts = ts->next)
         switch (ts->rep) {
@@ -2098,6 +2111,8 @@ static graph_t *add_numelts_info_graphs(graph_t *`H gs) {
   return app_graphs(add_numelts_info,0,gs);
 }
 
+static bool paths_exhausted = false;
+
 // check to see if an assertion is consistent using the constraint solver.
 // if it returns false, then the assertion is definitely inconsistent.
 // if it returns true, then the assertion might be consistent.
@@ -2107,6 +2122,7 @@ static bool consistent(assn_t a) {
   
   try {
     // start with just an empty graph (true) and then add in assertion a
+    paths_exhausted = false;
     constraints_added = 0;
     graphs_copied = 0;
     max_lookup = 0;
@@ -2143,12 +2159,23 @@ static bool consistent(assn_t a) {
   } catch {
     // if the graph has too many paths in it, we'll end up here.
     // we must conservatively assume that the assertion is consistent.
-  case &TooLarge: return true;
+  case &TooLarge: 
+    paths_exhausted = true;
+    return true;
   }
 }
 
 // see if ctxt |- a by trying to prove that ctxt and not(a) is inconsistent.
 bool constraint_prove(assn_t ctxt, assn_t a) {
   assn_t b = and(ctxt,not(a));
-  return !consistent(b);
+  let res = !consistent(b);
+  if (!res && Flags::print_unprovable) {
+    fprintf(stderr,"unable to prove inconsistency of \n");
+    fprintf(stderr,"%s",assn2dag(b));
+    if (paths_exhausted) {
+      fprintf(stderr,"(paths exhausted)");
+    } 
+    fprintf(stderr,"\n");
+  }
+  return res;
 }

@@ -353,11 +353,11 @@ extern int Cyc_Flags_warn_lose_unique;
 extern int Cyc_Flags_warn_bounds_checks;
 # 64
 extern int Cyc_Flags_warn_all_null_deref;
-# 83
+# 86
 enum Cyc_Flags_C_Compilers{Cyc_Flags_Gcc_c =0U,Cyc_Flags_Vc_c =1U};
-# 97 "flags.h"
+# 100 "flags.h"
 enum Cyc_Flags_Cyclone_Passes{Cyc_Flags_Cpp =0U,Cyc_Flags_Parsing =1U,Cyc_Flags_Binding =2U,Cyc_Flags_CurrentRegion =3U,Cyc_Flags_TypeChecking =4U,Cyc_Flags_Jumps =5U,Cyc_Flags_FlowAnalysis =6U,Cyc_Flags_VCGen =7U,Cyc_Flags_CheckInsertion =8U,Cyc_Flags_Toc =9U,Cyc_Flags_AggregateRemoval =10U,Cyc_Flags_LabelRemoval =11U,Cyc_Flags_TempRename =12U,Cyc_Flags_CastRemoval =13U,Cyc_Flags_EvalOrder =14U,Cyc_Flags_CCompiler =15U,Cyc_Flags_AllPasses =16U};
-# 116
+# 119
 extern enum Cyc_Flags_Cyclone_Passes Cyc_Flags_stop_after_pass;
 # 25 "flags.cyc"
 int Cyc_Flags_compile_for_boot=0;
@@ -379,7 +379,8 @@ enum Cyc_Flags_Cyclone_Passes Cyc_Flags_stop_after_pass=Cyc_Flags_AllPasses;
 int Cyc_Flags_print_parser_state_and_token=0;
 int Cyc_Flags_allpaths=1;
 int Cyc_Flags_debug_assn=0;
-# 45
+int Cyc_Flags_print_unprovable=0;
+# 46
 void Cyc_Flags_set_all_warnings (void){
 Cyc_Flags_warn_bounds_checks=1;
 Cyc_Flags_warn_all_null_deref=1;
@@ -388,21 +389,21 @@ Cyc_Flags_warn_alias_coerce=1;
 Cyc_Flags_warn_region_coerce=1;
 Cyc_Flags_tc_aggressive_warn=1;
 Cyc_Flags_warn_override=1;}
-# 54
+# 55
 void Cyc_Flags_set_cpponly (void){
 Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < 0?Cyc_Flags_stop_after_pass: 0U;}
-# 57
+# 58
 void Cyc_Flags_set_parseonly (void){
 Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < 1?Cyc_Flags_stop_after_pass: 1U;}
-# 60
+# 61
 void Cyc_Flags_set_crgnonly (void){
 Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < 3?Cyc_Flags_stop_after_pass: 3U;}
-# 63
+# 64
 void Cyc_Flags_set_tconly (void){
 Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < 4?Cyc_Flags_stop_after_pass: 4U;}
-# 66
+# 67
 void Cyc_Flags_set_cfonly (void){
 Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < 6?Cyc_Flags_stop_after_pass: 6U;}
-# 69
+# 70
 void Cyc_Flags_set_toconly (void){
 Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < 14?Cyc_Flags_stop_after_pass: 14U;}

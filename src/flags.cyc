@@ -41,6 +41,7 @@ enum Cyclone_Passes stop_after_pass = AllPasses;
 bool print_parser_state_and_token = false;
 bool allpaths = true;
 bool debug_assn = false;
+bool print_unprovable = false;
 
 void set_all_warnings() {
   warn_bounds_checks = true;

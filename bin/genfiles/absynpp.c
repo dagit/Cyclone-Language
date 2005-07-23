@@ -431,9 +431,9 @@ void*Cyc_Kinds_compress_kb(void*);
 void*Cyc_Warn_impos(struct _fat_ptr,struct _fat_ptr);struct Cyc_Warn_String_Warn_Warg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Warn_Typ_Warn_Warg_struct{int tag;void*f1;};
 # 71
 void*Cyc_Warn_impos2(struct _fat_ptr);
-# 83 "flags.h"
+# 86 "flags.h"
 enum Cyc_Flags_C_Compilers{Cyc_Flags_Gcc_c =0U,Cyc_Flags_Vc_c =1U};
-# 87
+# 90
 extern enum Cyc_Flags_C_Compilers Cyc_Flags_c_compiler;
 # 39 "pp.h"
 extern int Cyc_PP_tex_output;struct Cyc_PP_Doc;

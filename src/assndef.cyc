@@ -110,6 +110,9 @@ string_t term2string(term_t t) {
   case &Proj(t,i,_):
     res = aprintf("#%d(%s)",i,term2string(t));
     break;
+  case &AggrUpdate(a,i,v):
+    res = aprintf("Aupd(%s,%d,%s)",term2string(a),i,term2string(v));
+    break;
   case &Addr(vd,_):
     if (Flags::debug_assn) 
       res = aprintf("&%s_%x",Absynpp::qvar2string(vd->name),(unsigned int)vd); 
@@ -182,6 +185,8 @@ int termhash(datatype Term @t) {
     for (; ts != NULL; ts = ts->tl)
       res = res + ((unsigned int)ts->hd >> 4);
     return res;
+  case &AggrUpdate(a,i,v):
+    return ((((unsigned int)a) + ((unsigned int)v)) >> 4) + i + 17;
   case &Addr(vd,_): return ((unsigned int)vd >> 4)+7;
   case &Alloc(e,_,i,_): return ((unsigned int)e >> 4) + i;
   case &Offsetf(t,i,_): return ((unsigned int)t >> 4) + i + 11;
@@ -250,6 +255,14 @@ int termcmp(datatype Term @`r1 _t1, datatype Term @`r2 _t2) {
     t1 = tm1;
     t2 = tm2;
     goto LOOP;
+  case $(&AggrUpdate(tm1,i1,v1),&AggrUpdate(tm2,i2,v2)):
+    int c = i1 - i2;
+    if (c != 0) return c;
+    c = termcmp(tm1,tm2);
+    if (c != 0) return c;
+    t1 = v1;
+    t2 = v2;
+    goto LOOP;
   case $(&Alloc(e1,_,i1,_),&Alloc(e2,_,i2,_)):
     int c = (int)e1 - (int)e2;
     if (c != 0) return c;
@@ -294,6 +307,7 @@ static term_t copy_term(datatype Term@ t) {
   case &Select(t1,t2,tp): return new Select(t1,t2,tp);
   case &Update(t1,t2,t3): return new Update(t1,t2,t3);
   case &Proj(t,i,tp): return new Proj(t,i,tp);
+  case &AggrUpdate(t,i,v): return new AggrUpdate(t,i,v);
   case &Aggr(is_union,tag,ts,tp): return new Aggr(is_union,tag,ts,tp);
   case &Alloc(e,offset,i,tp): return new Alloc(e,offset,i,tp);
   case &Offsetf(t,i,tp): return new Offsetf(t,i,tp);
@@ -377,6 +391,8 @@ static term_set_t term_fr_logicvar(term_t t) {
     break;
   case &Select(t1,t2,_):
     fallthru(t1,t2);
+  case &AggrUpdate(t1,_,t2):
+    fallthru(t1,t2);
   case &Binop(_,t1,t2,_):
     fallthru(t1,t2);
   case &Offseti(t1,t2,_):
@@ -455,6 +471,29 @@ term_t update(term_t t1, term_t t2, term_t t3) {
   return hash_cons_term(&t);
 }
 
+term_t aggr_update(term_t t1, unsigned i, term_t t2) {
+ LOOP:
+  switch (t1) {
+  case &AggrUpdate(t,j,_) && i == j: 
+    t1 = t;
+    goto LOOP;
+  case &Aggr(is_union,tag,ts,tp):
+    list_t<term_t> revnewts = NULL;
+    for (; i != 0; i--) {
+      if (ts == NULL) fallthru;
+      revnewts = new List{ts->hd,revnewts};
+      ts = ts->tl;
+    }
+    if (ts == NULL) fallthru;
+    list_t<term_t> newts = revappend(revnewts,new List{t2,ts->tl});
+    let res = aggr(is_union,tag,newts,tp);
+    return res;
+  default:
+    let t = AggrUpdate(t1,i,t2);
+    return hash_cons_term(&t);
+  }
+}
+
 // returns true when t1 and t2 can't possibly be equal (e.g., because they
 // are distinct addresses or offsetf's or allocs.)
 static bool term_neq(term_t t1, term_t t2) {
@@ -498,7 +537,7 @@ static bool term_neq(term_t t1, term_t t2) {
   }
 }
 
-static $(term_t,list_t<int>) split_addr(term_t a) {
+$(term_t,list_t<int>) split_addr(term_t a) {
   // FIX: need type information with fields
   list_t<int> fields = NULL;
   while (true) {
@@ -511,6 +550,19 @@ static $(term_t,list_t<int>) split_addr(term_t a) {
       return $(a,fields);
     }
   }
+}
+
+term_t apply_aggr_update(term_t a, list_t<int> fields, term_t v) {
+  
+  //fprintf(stderr,"applying aggr update to %s with value %s at fields ",
+  //        term2string(a),term2string(v));
+  //for (let fs = fields; fs != NULL; fs = fs->tl) fprintf(stderr,"%d ",fs->hd);
+  //fprintf(stderr,"\n");
+  if (fields == NULL) return v;
+  let res = aggr_update(a, fields->hd, 
+                        apply_aggr_update(proj(a,fields->hd,NULL),fields->tl,v));
+  //fprintf(stderr,"res = %s\n",term2string(res));
+  return res;
 }
 
 static term_t proj_fields(term_t v, list_t<int> fs) {
@@ -550,6 +602,7 @@ term_t select(term_t t1, term_t t2,type_opt_t tp) {
 // records which constructor we're dealing with.  For structs,
 // the is_union field is false, and the tag is set to -1.
 term_t proj(term_t t1, unsigned i, type_opt_t tp) {
+ LOOP:
   switch (t1) {
   case &Aggr(is_union,tag,ts,_): 
     let n = List::length(ts);
@@ -558,6 +611,10 @@ term_t proj(term_t t1, unsigned i, type_opt_t tp) {
     else if (tag == i && n >= 1)
       return ts->hd;
     else break;
+  case &AggrUpdate(t,j,t2):
+    if (i == j) return t2;
+    t1 = t;
+    goto LOOP;
   case &Select(m,a,tp2): return select(m,offsetf(a,i,tp2),tp);
   default: break;
   }
@@ -1025,6 +1082,7 @@ term_t binop(Absyn::primop_t p, term_t t1, term_t t2, type_opt_t tp) {
 }
 
 type_opt_t get_term_type(term_t t) {
+ LOOP:
   switch (t) {
   case &Uint(_,tp): return tp;
   case &Const(e): return e->topt;
@@ -1035,6 +1093,7 @@ type_opt_t get_term_type(term_t t) {
   case &Select(_,_,tp): return tp;
   case &Aggr(_,_,_,tp): return tp;
   case &Proj(t1,i,tp): return tp;
+  case &AggrUpdate(t1,_,_): t = t1; goto LOOP;
   case &Addr(vd,tp): return tp;
   case &Update(...): return NULL;
   case &Alloc(_,_,_,tp): return tp;
@@ -1107,6 +1166,11 @@ static term_t subst_term(term_dict_t dict, term_t t,
   case &Proj(t1,i,tp):
     let s1 = subst_term(dict,t1,term_h);
     res = proj(s1,i,tp);
+    break;
+  case &AggrUpdate(t1,i,t2):
+    let s1 = subst_term(dict,t1,term_h);
+    let s2 = subst_term(dict,t2,term_h);
+    res = aggr_update(s1,i,s2);
     break;
   case &Offsetf(t1,i,tp):
     let s1 = subst_term(dict,t1,term_h);
