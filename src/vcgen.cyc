@@ -515,8 +515,12 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
          env->widen_paths = true;
        }
        return $(zero(),amin);
+     case &Absyn::Aggregate_e(...):
+     case &Absyn::AnonStruct_e(...):
+     case &Absyn::Datatype_e(...):
      case &Absyn::Comprehension_e(...): 
-       // comprehensions are treated as "constant" when the initializer
+     case &Absyn::Array_e(...):
+       // these are treated as "constant" when the initializer
        // is constant, but I don't really want to allow this for now.
        // In fact, I'm wondering if we wouldn't be better off avoiding
        // this call all together...

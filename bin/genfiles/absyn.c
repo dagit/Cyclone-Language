@@ -883,15 +883,15 @@ return Cyc_Absyn_new_exp((void*)& null_const,loc);}
 # 597
 struct Cyc_Absyn_Exp*Cyc_Absyn_int_exp(enum Cyc_Absyn_Sign s,int i,unsigned seg){union Cyc_Absyn_Cnst _Tmp0=Cyc_Absyn_Int_c(s,i);return Cyc_Absyn_const_exp(_Tmp0,seg);}
 struct Cyc_Absyn_Exp*Cyc_Absyn_signed_int_exp(int i,unsigned loc){
-static struct Cyc_Absyn_Const_e_Absyn_Raw_exp_struct szero={0,{.Int_c={5,{.f0=Cyc_Absyn_Signed,.f1=0}}}};
-static struct Cyc_Absyn_Const_e_Absyn_Raw_exp_struct sone={0,{.Int_c={5,{.f0=Cyc_Absyn_Signed,.f1=1}}}};
+static struct Cyc_Absyn_Const_e_Absyn_Raw_exp_struct szero={0,{.Int_c={5,{.f0=0U,.f1=0}}}};
+static struct Cyc_Absyn_Const_e_Absyn_Raw_exp_struct sone={0,{.Int_c={5,{.f0=0U,.f1=1}}}};
 if(i==0)return Cyc_Absyn_new_exp((void*)& szero,loc);
 if(i==1)return Cyc_Absyn_new_exp((void*)& sone,loc);
 return Cyc_Absyn_int_exp(0U,i,loc);}
 # 605
 struct Cyc_Absyn_Exp*Cyc_Absyn_uint_exp(unsigned i,unsigned loc){
-static struct Cyc_Absyn_Const_e_Absyn_Raw_exp_struct uzero={0,{.Int_c={5,{.f0=Cyc_Absyn_Unsigned,.f1=0}}}};
-static struct Cyc_Absyn_Const_e_Absyn_Raw_exp_struct uone={0,{.Int_c={5,{.f0=Cyc_Absyn_Unsigned,.f1=1}}}};
+static struct Cyc_Absyn_Const_e_Absyn_Raw_exp_struct uzero={0,{.Int_c={5,{.f0=1U,.f1=0}}}};
+static struct Cyc_Absyn_Const_e_Absyn_Raw_exp_struct uone={0,{.Int_c={5,{.f0=1U,.f1=1}}}};
 if(i==0U)return Cyc_Absyn_new_exp((void*)& uzero,loc);
 if(i==1U)return Cyc_Absyn_new_exp((void*)& uone,loc);
 return Cyc_Absyn_int_exp(1U,(int)i,loc);}

@@ -661,7 +661,7 @@ inline static struct _tuple13 Cyc_PrattProver_is_signed_overflow(int c1,int c2){
 int sum=c1 + c2;
 if((~(c1 ^ c2)& (sum ^ c1))>> 31){
 # 492
-if(sum > 0){struct _tuple13 _Tmp0;_Tmp0.f0=1,_Tmp0.f1=- 1;return _Tmp0;}else{
+if(sum > 0){struct _tuple13 _Tmp0;_Tmp0.f0=1,_Tmp0.f1=-1;return _Tmp0;}else{
 struct _tuple13 _Tmp0;_Tmp0.f0=1,_Tmp0.f1=1;return _Tmp0;}}else{
 # 495
 struct _tuple13 _Tmp0;_Tmp0.f0=0,_Tmp0.f1=sum;return _Tmp0;}}

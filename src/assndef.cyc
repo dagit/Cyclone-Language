@@ -498,17 +498,43 @@ static bool term_neq(term_t t1, term_t t2) {
   }
 }
 
+static $(term_t,list_t<int>) split_addr(term_t a) {
+  // FIX: need type information with fields
+  list_t<int> fields = NULL;
+  while (true) {
+    switch (a) {
+    case &Offsetf(r,i,tp):
+      fields = new List{i,fields};
+      a = r;
+      continue;
+    default: 
+      return $(a,fields);
+    }
+  }
+}
+
+static term_t proj_fields(term_t v, list_t<int> fs) {
+  // FIX: need type information with fields
+  for (; fs != NULL; fs = fs->tl)
+    v = proj(v,fs->hd,NULL);
+  return v;
+}
+
 term_t select(term_t t1, term_t t2,type_opt_t tp) {
  LOOP:
   switch $(t1,t2) {
   case $(&Update(m,a1,v),a2):
-    // Select(Update(m,a,v),a) == v
-    if (a1 == a2) return v;
-    else if (term_neq(a1,a2)) {
+    if (term_neq(a1,a2)) {
       t1 = m;
       goto LOOP;
       // effectively: return select(m,a2,tp);
     }
+    // If a2 = offsetf(...(offsetf(offsetf(a1,i1),i2))...,in) then we can 
+    // turn this into 
+    // proj(...(proj(proj(v,i1),i2))...,in)
+    let $(root,fields) = split_addr(a2);
+    if (a1 == root) 
+      return proj_fields(v,fields);
     fallthru;
   default:
     let t = Select(t1,t2,tp);
@@ -582,8 +608,10 @@ term_t offsetf(term_t tm, unsigned int i, type_opt_t tp){
 
 term_t offseti(term_t i, term_t tm, type_opt_t tp){
   switch (tm) {
-  case &Offseti(j,t,_):
-    return offseti(plus(i,j,Absyn::sint_type),t,tp);
+  case &Offseti(j,t,tp2):
+    if (tp != NULL && tp2 != NULL && Unify::unify(tp,tp2))
+      return offseti(plus(i,j,Absyn::sint_type),t,tp);
+    fallthru;
   default:
     let t = Offseti(i,tm,tp);
     return hash_cons_term(&t);

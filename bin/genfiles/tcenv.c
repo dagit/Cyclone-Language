@@ -854,7 +854,7 @@ struct Cyc_List_List*_Tmp7=({struct Cyc_List_List*_Tmp8=_cycalloc(sizeof(struct 
 _Tmp4->capability=_Tmp5;}),_Tmp4->curr_rgn=param_rgn,({
 # 581
 void*_Tmp5=Cyc_CurRgn_curr_rgn_type();_Tmp4->curr_lifo_rgn=_Tmp5;}),
-_Tmp4->flags.in_new=Cyc_Tcenv_NoneNew,_Tmp4->flags.in_notreadctxt=0,_Tmp4->flags.in_lhs=0,_Tmp4->flags.abstract_ok=0,_Tmp4->flags.in_stmt_exp=0,_Tmp4->lastconstraint=init_store_constraint,_Tmp4->effconstr=fd->i.effconstr;return _Tmp4;}}}}}
+_Tmp4->flags.in_new=0U,_Tmp4->flags.in_notreadctxt=0,_Tmp4->flags.in_lhs=0,_Tmp4->flags.abstract_ok=0,_Tmp4->flags.in_stmt_exp=0,_Tmp4->lastconstraint=init_store_constraint,_Tmp4->effconstr=fd->i.effconstr;return _Tmp4;}}}}}
 # 588
 struct Cyc_Tcenv_Fenv*Cyc_Tcenv_nested_fenv(unsigned loc,struct Cyc_Tcenv_Fenv*old_fenv,struct Cyc_Absyn_Fndecl*fd){
 void*_Tmp0;void*_Tmp1;void*_Tmp2;void*_Tmp3;void*_Tmp4;_Tmp4=old_fenv->aquals_bounds;_Tmp3=old_fenv->type_vars;_Tmp2=old_fenv->shared;_Tmp1=old_fenv->lastconstraint;_Tmp0=old_fenv->effconstr;{struct Cyc_List_List*aqb=_Tmp4;struct Cyc_List_List*type_vars=_Tmp3;struct Cyc_Tcenv_SharedFenv*shared=_Tmp2;void*lc=_Tmp1;struct Cyc_List_List*ec_old=_Tmp0;
@@ -886,7 +886,7 @@ struct Cyc_List_List*_Tmp8=({struct Cyc_List_List*_Tmp9=_cycalloc(sizeof(struct 
 _Tmp5->capability=_Tmp6;}),_Tmp5->curr_rgn=param_rgn,({
 # 621
 void*_Tmp6=Cyc_CurRgn_curr_rgn_type();_Tmp5->curr_lifo_rgn=_Tmp6;}),
-_Tmp5->flags.in_new=Cyc_Tcenv_NoneNew,_Tmp5->flags.in_notreadctxt=0,_Tmp5->flags.in_lhs=0,_Tmp5->flags.abstract_ok=0,_Tmp5->flags.in_stmt_exp=0,_Tmp5->lastconstraint=initconstr,({
+_Tmp5->flags.in_new=0U,_Tmp5->flags.in_notreadctxt=0,_Tmp5->flags.in_lhs=0,_Tmp5->flags.abstract_ok=0,_Tmp5->flags.in_stmt_exp=0,_Tmp5->lastconstraint=initconstr,({
 # 624
 struct Cyc_List_List*_Tmp6=Cyc_List_append(fd->i.effconstr,ec_old);_Tmp5->effconstr=_Tmp6;});return _Tmp5;}}}}}
 # 627
@@ -902,7 +902,7 @@ struct Cyc_Tcenv_Fenv*_Tmp0=_cycalloc(sizeof(struct Cyc_Tcenv_Fenv));
 void*_Tmp1=Cyc_Absyn_join_eff(({struct Cyc_List_List*_Tmp2=_cycalloc(sizeof(struct Cyc_List_List));_Tmp2->hd=param_rgn,_Tmp2->tl=0;_Tmp2;}));_Tmp0->capability=_Tmp1;}),_Tmp0->curr_rgn=param_rgn,({
 # 641
 void*_Tmp1=Cyc_CurRgn_curr_rgn_type();_Tmp0->curr_lifo_rgn=_Tmp1;}),
-_Tmp0->flags.in_new=Cyc_Tcenv_NoneNew,_Tmp0->flags.in_notreadctxt=0,_Tmp0->flags.in_lhs=0,_Tmp0->flags.abstract_ok=0,_Tmp0->flags.in_stmt_exp=0,({
+_Tmp0->flags.in_new=0U,_Tmp0->flags.in_notreadctxt=0,_Tmp0->flags.in_lhs=0,_Tmp0->flags.abstract_ok=0,_Tmp0->flags.in_stmt_exp=0,({
 void*_Tmp1=(void*)({struct Cyc_Tcenv_InitialConstraint_Tcenv_StoreConstraintEnv_struct*_Tmp2=_cycalloc(sizeof(struct Cyc_Tcenv_InitialConstraint_Tcenv_StoreConstraintEnv_struct));_Tmp2->tag=0,_Tmp2->f1=0;_Tmp2;});_Tmp0->lastconstraint=_Tmp1;}),_Tmp0->effconstr=0;return _Tmp0;}}}
 # 647
 struct Cyc_Tcenv_Tenv*Cyc_Tcenv_copy_tenv_dicts(struct Cyc_Tcenv_Tenv*te){
