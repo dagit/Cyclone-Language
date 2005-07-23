@@ -503,7 +503,7 @@ continue;}case 12: _Tmp2=((struct Cyc_Absyn_Decl_s_Absyn_Raw_stmt_struct*)_Tmp0)
 void*_Tmp3=d->r;void*_Tmp4;if(*((int*)_Tmp3)==0){_Tmp4=((struct Cyc_Absyn_Var_d_Absyn_Raw_decl_struct*)_Tmp3)->f1;{struct Cyc_Absyn_Vardecl*vd=_Tmp4;
 # 181
 if((unsigned)vd->initializer)
-res=({enum Cyc_Toseqc_SideEffect _Tmp5=res;Cyc_Toseqc_join_side_effect(_Tmp5,Cyc_Toseqc_exp_effect(_check_null(vd->initializer)));});
+res=({enum Cyc_Toseqc_SideEffect _Tmp5=res;Cyc_Toseqc_join_side_effect(_Tmp5,Cyc_Toseqc_exp_effect(vd->initializer));});
 s=s1;
 continue;}}else{
 return 3U;};}case 6:
@@ -557,7 +557,7 @@ struct Cyc_Absyn_Exp*e2=Cyc_Absyn_new_exp(e1->r,e1->loc);
 e2->annot=e1->annot;
 e2->topt=e1->topt;{
 # 266
-void*t=e2->topt==0?(void*)({struct Cyc_Absyn_TypeofType_Absyn_Type_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Absyn_TypeofType_Absyn_Type_struct));_Tmp0->tag=10,_Tmp0->f1=e2;_Tmp0;}): Cyc_Toc_typ_to_c(_check_null(e2->topt));
+void*t=e2->topt==0?(void*)({struct Cyc_Absyn_TypeofType_Absyn_Type_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Absyn_TypeofType_Absyn_Type_struct));_Tmp0->tag=10,_Tmp0->f1=e2;_Tmp0;}): Cyc_Toc_typ_to_c(e2->topt);
 stmt=Cyc_Absyn_declare_stmt(v,t,e2,stmt,e->loc);
 # 270
 e1->r=ve->r;}}}}
@@ -660,7 +660,7 @@ if(vd->initializer!=0){
 # 384
 void*_Tmp7=vd->initializer->r;void*_Tmp8;if(*((int*)_Tmp7)==35){_Tmp8=((struct Cyc_Absyn_UnresolvedMem_e_Absyn_Raw_exp_struct*)_Tmp7)->f2;{struct Cyc_List_List*dles=_Tmp8;
 # 397 "toseqc.cyc"
-struct Cyc_Absyn_Stmt*laststmt=({struct Cyc_Absyn_Exp*_Tmp9=_check_null(vd->initializer);Cyc_Toseqc_exps_to_seqc(_Tmp9,
+struct Cyc_Absyn_Stmt*laststmt=({struct Cyc_Absyn_Exp*_Tmp9=vd->initializer;Cyc_Toseqc_exps_to_seqc(_Tmp9,
 ({struct Cyc_List_List*(*_TmpA)(struct Cyc_Absyn_Exp*(*)(struct _tuple13*),struct Cyc_List_List*)=(struct Cyc_List_List*(*)(struct Cyc_Absyn_Exp*(*)(struct _tuple13*),struct Cyc_List_List*))Cyc_List_map;_TmpA;})(({struct Cyc_Absyn_Exp*(*_TmpA)(struct _tuple13*)=(struct Cyc_Absyn_Exp*(*)(struct _tuple13*))Cyc_Core_snd;_TmpA;}),dles));});
 # 400
 if(laststmt==0)goto _LL24;

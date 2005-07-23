@@ -1734,8 +1734,8 @@ return(int)*((const unsigned*)t);};}
 static int Cyc_Tcutil_star_cmp(int(*cmp)(void*,void*),void*a1,void*a2){
 if(a1==a2)return 0;
 if(a1==0 && a2!=0)return -1;
-if(a1!=0 && a2==0)return 1;{
-int(*_Tmp0)(void*,void*)=cmp;void*_Tmp1=_check_null(a1);return _Tmp0(_Tmp1,_check_null(a2));}}
+if(a1!=0 && a2==0)return 1;
+return cmp(a1,a2);}
 # 1349
 static int Cyc_Tcutil_enumfield_cmp(struct Cyc_Absyn_Enumfield*e1,struct Cyc_Absyn_Enumfield*e2){
 int qc=Cyc_Absyn_qvar_cmp(e1->name,e2->name);
@@ -2103,7 +2103,7 @@ return 0;}else{_TmpD=_TmpB.f0;_TmpC=_TmpB.f1;{struct Cyc_Absyn_Exp*e1=_TmpD;stru
 # 1771
 if(!Cyc_Tcutil_force_type2bool(0,pinfo_b.ptr_atts.zero_term))
 ({struct Cyc_Warn_String_Warn_Warg_struct _TmpE=({struct Cyc_Warn_String_Warn_Warg_struct _TmpF;_TmpF.tag=0,_TmpF.f1=_tag_fat("implicit cast to shorter array",sizeof(char),31U);_TmpF;});void*_TmpF[1];_TmpF[0]=& _TmpE;Cyc_Warn_warn2(loc,_tag_fat(_TmpF,sizeof(void*),1));});
-if(!({struct Cyc_Absyn_Exp*_TmpE=_check_null(e2);Cyc_Evexp_lte_const_exp(_TmpE,_check_null(e1));}))
+if(!Cyc_Evexp_lte_const_exp(e2,e1))
 return 0;
 goto _LL7;}}}_LL7:;}
 # 1779
@@ -2748,7 +2748,7 @@ struct Cyc_Absyn_FnInfo type_info=fd->i;
 type_info.attributes=fn_type_atts;
 return(void*)({struct Cyc_Absyn_FnType_Absyn_Type_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Absyn_FnType_Absyn_Type_struct));_Tmp0->tag=5,_Tmp0->f1=type_info;_Tmp0;});}}
 # 2610
-return _check_null(fd->cached_type);}
+return fd->cached_type;}
 # 2616
 static void Cyc_Tcutil_replace_rop(struct Cyc_List_List*args,union Cyc_Relations_RelnOp*rop){
 # 2618
@@ -3574,7 +3574,7 @@ _Tmp4=(struct Cyc_List_List*)edo->fields->v;goto _LL17;}case 20: _Tmp4=((struct 
 {struct Cyc_List_List*fs2=fs;for(0;fs2!=0;fs2=fs2->tl){
 if(((struct Cyc_Absyn_Enumfield*)fs2->hd)->tag==0)
 return fs2==fs;{
-struct _tuple12 _Tmp5=Cyc_Evexp_eval_const_uint_exp(_check_null(((struct Cyc_Absyn_Enumfield*)fs2->hd)->tag));int _Tmp6;unsigned _Tmp7;_Tmp7=_Tmp5.f0;_Tmp6=_Tmp5.f1;{unsigned i=_Tmp7;int known=_Tmp6;
+struct _tuple12 _Tmp5=Cyc_Evexp_eval_const_uint_exp(((struct Cyc_Absyn_Enumfield*)fs2->hd)->tag);int _Tmp6;unsigned _Tmp7;_Tmp7=_Tmp5.f0;_Tmp6=_Tmp5.f1;{unsigned i=_Tmp7;int known=_Tmp6;
 if(known && i==0U)
 return 1;}}}}
 # 3637
@@ -3646,7 +3646,7 @@ b=Cyc_Absyn_fat_bound_type;else{
 if(convert_tag){
 if(eopt->topt==0)
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp5=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp6;_Tmp6.tag=0,_Tmp6.f1=_tag_fat("cannot convert tag without type!",sizeof(char),33U);_Tmp6;});void*_Tmp6[1];_Tmp6[0]=& _Tmp5;({int(*_Tmp7)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp7;})(_tag_fat(_Tmp6,sizeof(void*),1));});{
-void*_Tmp5=Cyc_Absyn_compress(_check_null(eopt->topt));void*_Tmp6;if(*((int*)_Tmp5)==0){if(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp5)->f1)==5){if(((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp5)->f2!=0){_Tmp6=(void*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp5)->f2->hd;{void*t=_Tmp6;
+void*_Tmp5=Cyc_Absyn_compress(eopt->topt);void*_Tmp6;if(*((int*)_Tmp5)==0){if(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp5)->f1)==5){if(((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp5)->f2!=0){_Tmp6=(void*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp5)->f2->hd;{void*t=_Tmp6;
 # 3722
 b=Cyc_Absyn_thin_bounds_exp(Cyc_Absyn_valueof_exp(t,0U));
 goto _LL5;}}else{goto _LL8;}}else{goto _LL8;}}else{_LL8:

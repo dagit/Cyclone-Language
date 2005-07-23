@@ -583,7 +583,7 @@ goto _LL10;}_LL10:;}
 # 80
 return;}}else{_Tmp4=(void*)((struct Cyc_Absyn_Aggr_p_Absyn_Raw_pat_struct*)_Tmp0)->f1;_Tmp5=((struct Cyc_Absyn_Aggr_p_Absyn_Raw_pat_struct*)_Tmp0)->f2;_Tmp3=(struct Cyc_List_List**)&((struct Cyc_Absyn_Aggr_p_Absyn_Raw_pat_struct*)_Tmp0)->f3;_Tmp1=((struct Cyc_Absyn_Aggr_p_Absyn_Raw_pat_struct*)_Tmp0)->f4;_Tmp2=((struct Cyc_Absyn_Aggr_p_Absyn_Raw_pat_struct*)_Tmp0)->f5;{void*topt=_Tmp4;int is_tuple=_Tmp5;struct Cyc_List_List**exist_ts=(struct Cyc_List_List**)_Tmp3;struct Cyc_List_List*dps=_Tmp1;int dots=_Tmp2;
 # 83
-void*_Tmp6=Cyc_Absyn_compress(_check_null(topt));void*_Tmp7;switch(*((int*)_Tmp6)){case 0: if(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp6)->f1)==24){if(((struct Cyc_Absyn_AggrCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp6)->f1)->f1.KnownAggr.tag==2){_Tmp7=((struct Cyc_Absyn_AggrCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp6)->f1)->f1.KnownAggr.val;{struct Cyc_Absyn_Aggrdecl**adp=_Tmp7;
+void*_Tmp6=Cyc_Absyn_compress(topt);void*_Tmp7;switch(*((int*)_Tmp6)){case 0: if(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp6)->f1)==24){if(((struct Cyc_Absyn_AggrCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp6)->f1)->f1.KnownAggr.tag==2){_Tmp7=((struct Cyc_Absyn_AggrCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp6)->f1)->f1.KnownAggr.val;{struct Cyc_Absyn_Aggrdecl**adp=_Tmp7;
 # 85
 struct Cyc_Absyn_Aggrdecl*ad=*adp;
 if(ad->impl==0){
@@ -1057,7 +1057,7 @@ _tag_fat("pattern contains a repeated variable",sizeof(char),37U));});
 {struct Cyc_List_List*x=ans.patvars;for(0;x!=0;x=x->tl){
 struct _tuple17*_Tmp2=(struct _tuple17*)x->hd;void*_Tmp3;void*_Tmp4;_Tmp4=_Tmp2->f0;_Tmp3=(struct Cyc_Absyn_Exp**)& _Tmp2->f1;{struct Cyc_Absyn_Vardecl**vdopt=_Tmp4;struct Cyc_Absyn_Exp**expopt=(struct Cyc_Absyn_Exp**)_Tmp3;
 if(*expopt!=0 &&*expopt!=pat_var_exp)
-({struct Cyc_Absyn_Exp*_Tmp5=Cyc_Tcutil_deep_copy_exp(1,_check_null(*expopt));*expopt=_Tmp5;});}}}
+({struct Cyc_Absyn_Exp*_Tmp5=Cyc_Tcutil_deep_copy_exp(1,*expopt);*expopt=_Tmp5;});}}}
 # 607
 return ans;}}
 # 613
@@ -1462,7 +1462,7 @@ goto _LL0;}}_LL0:;}
 static void Cyc_Tcpat_print_pat_test(void*p){
 int _Tmp0;unsigned _Tmp1;struct _fat_ptr _Tmp2;void*_Tmp3;switch(*((int*)p)){case 0: if(((struct Cyc_Tcpat_WhereTest_Tcpat_PatTest_struct*)p)->f1==0){
 Cyc_fprintf(Cyc_stderr,_tag_fat("where(NULL)",sizeof(char),12U),_tag_fat(0U,sizeof(void*),0));goto _LL0;}else{_Tmp3=((struct Cyc_Tcpat_WhereTest_Tcpat_PatTest_struct*)p)->f1;{struct Cyc_Absyn_Exp*e=_Tmp3;
-({struct Cyc_String_pa_PrintArg_struct _Tmp4=({struct Cyc_String_pa_PrintArg_struct _Tmp5;_Tmp5.tag=0,({struct _fat_ptr _Tmp6=(struct _fat_ptr)Cyc_Absynpp_exp2string(_check_null(e));_Tmp5.f1=_Tmp6;});_Tmp5;});void*_Tmp5[1];_Tmp5[0]=& _Tmp4;Cyc_fprintf(Cyc_stderr,_tag_fat("where(%s)",sizeof(char),10U),_tag_fat(_Tmp5,sizeof(void*),1));});goto _LL0;}}case 1:
+({struct Cyc_String_pa_PrintArg_struct _Tmp4=({struct Cyc_String_pa_PrintArg_struct _Tmp5;_Tmp5.tag=0,({struct _fat_ptr _Tmp6=(struct _fat_ptr)Cyc_Absynpp_exp2string(e);_Tmp5.f1=_Tmp6;});_Tmp5;});void*_Tmp5[1];_Tmp5[0]=& _Tmp4;Cyc_fprintf(Cyc_stderr,_tag_fat("where(%s)",sizeof(char),10U),_tag_fat(_Tmp5,sizeof(void*),1));});goto _LL0;}}case 1:
  Cyc_fprintf(Cyc_stderr,_tag_fat("NULL",sizeof(char),5U),_tag_fat(0U,sizeof(void*),0));goto _LL0;case 2:
  Cyc_fprintf(Cyc_stderr,_tag_fat("NOT-NULL:",sizeof(char),10U),_tag_fat(0U,sizeof(void*),0));goto _LL0;case 4: _Tmp3=((struct Cyc_Tcpat_EqAnonEnum_Tcpat_PatTest_struct*)p)->f2;{struct Cyc_Absyn_Enumfield*ef=_Tmp3;
 _Tmp3=ef;goto _LLC;}case 3: _Tmp3=((struct Cyc_Tcpat_EqEnum_Tcpat_PatTest_struct*)p)->f2;_LLC: {struct Cyc_Absyn_Enumfield*ef=_Tmp3;

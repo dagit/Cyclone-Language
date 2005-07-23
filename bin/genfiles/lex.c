@@ -884,7 +884,7 @@ struct Cyc_Lex_PosInfo*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_Lex_PosInfo))
 static void Cyc_Lex_inc_linenumber (void){
 if(Cyc_Lex_pos_info==0)
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp0=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=_tag_fat("empty position info!",sizeof(char),21U);_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;({int(*_Tmp2)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp2;})(_tag_fat(_Tmp1,sizeof(void*),1));});{
-struct Cyc_Lex_PosInfo*p=_check_null(Cyc_Lex_pos_info);
+struct Cyc_Lex_PosInfo*p=Cyc_Lex_pos_info;
 struct _fat_ptr linenums=_tag_fat(0,0,0);
 ({struct _fat_ptr _Tmp0=p->linenumpos;struct _fat_ptr _Tmp1=linenums;p->linenumpos=_Tmp1;linenums=_Tmp0;});{
 unsigned offset=p->linenumpos_offset;

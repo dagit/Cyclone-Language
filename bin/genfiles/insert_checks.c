@@ -437,7 +437,7 @@ static struct Cyc_Absyn_Exp*Cyc_InsertChecks_shared_zero_exp (void){
 static struct Cyc_Absyn_Exp*ans=0;
 if(!((unsigned)ans))
 ans=Cyc_Absyn_uint_exp(0U,0U);
-return _check_null(ans);}struct Cyc_InsertChecks_Env{struct Cyc_JumpAnalysis_Jump_Anal_Result*tables;struct Cyc_Hashtable_Table**assn_info;int in_sizeof: 1;int at_toplevel: 1;int vcgen_r: 1;};
+return ans;}struct Cyc_InsertChecks_Env{struct Cyc_JumpAnalysis_Jump_Anal_Result*tables;struct Cyc_Hashtable_Table**assn_info;int in_sizeof: 1;int at_toplevel: 1;int vcgen_r: 1;};
 # 104
 static struct Cyc_InsertChecks_Env Cyc_InsertChecks_toplevel_env(struct Cyc_JumpAnalysis_Jump_Anal_Result*tables,int do_vcgen){
 struct Cyc_InsertChecks_Env _Tmp0;_Tmp0.tables=tables,_Tmp0.assn_info=0,_Tmp0.in_sizeof=0,_Tmp0.at_toplevel=1,_Tmp0.vcgen_r=do_vcgen;return _Tmp0;}
@@ -643,7 +643,7 @@ if(((unsigned)b1 && !((unsigned)b2))&&(int)coercion==2)
 ({int(*_TmpA)(unsigned,struct _fat_ptr,struct _fat_ptr)=(int(*)(unsigned,struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos_loc;_TmpA;})(e->loc,_tag_fat("conversion mis-classified as null-check",sizeof(char),40U),_tag_fat(0U,sizeof(void*),0));}
 {struct _tuple14 _TmpA=({struct _tuple14 _TmpB;_TmpB.f0=b1,_TmpB.f1=b2;_TmpB;});if(_TmpA.f0!=0){if(_TmpA.f1!=0){
 # 408
-if(!({struct Cyc_Absyn_Exp*_TmpB=_check_null(b2);Cyc_Evexp_lte_const_exp(_TmpB,_check_null(b1));}))
+if(!Cyc_Evexp_lte_const_exp(b2,b1))
 ({int(*_TmpB)(unsigned,struct _fat_ptr,struct _fat_ptr)=(int(*)(unsigned,struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos_loc;_TmpB;})(e->loc,_tag_fat("InsertChecks: cast to maybe-shorter pointer type",sizeof(char),49U),_tag_fat(0U,sizeof(void*),0));
 # 411
 if(((n1 && !n2)&& Cyc_InsertChecks_need_null_check(nv,e1))&& Cyc_InsertChecks_need_null_check_vcgen(nv,e1)){
@@ -827,7 +827,7 @@ static void Cyc_InsertChecks_do_scs(struct Cyc_InsertChecks_Env nv,struct Cyc_Li
 # 652
 for(1;scs!=0;scs=scs->tl){
 if(((struct Cyc_Absyn_Switch_clause*)scs->hd)->where_clause!=0)
-Cyc_InsertChecks_do_exp(nv,_check_null(((struct Cyc_Absyn_Switch_clause*)scs->hd)->where_clause));
+Cyc_InsertChecks_do_exp(nv,((struct Cyc_Absyn_Switch_clause*)scs->hd)->where_clause);
 Cyc_InsertChecks_do_stmt(nv,((struct Cyc_Absyn_Switch_clause*)scs->hd)->body);}}
 # 659
 static void Cyc_InsertChecks_do_stmt(struct Cyc_InsertChecks_Env nv,struct Cyc_Absyn_Stmt*s){

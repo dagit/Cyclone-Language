@@ -633,7 +633,7 @@ Cyc_Cifc_fail_merge(0,loc,is_buildlib,ud->name,_tag_fat(": type must be a functi
 # 308
 void*cdtype;
 if(cd->cached_type!=0)
-cdtype=_check_null(cd->cached_type);else{
+cdtype=cd->cached_type;else{
 # 312
 cdtype=(void*)({struct Cyc_Absyn_FnType_Absyn_Type_struct*_Tmp3=_cycalloc(sizeof(struct Cyc_Absyn_FnType_Absyn_Type_struct));_Tmp3->tag=5,_Tmp3->f1=cd->i;_Tmp3;});}
 if(!Cyc_Cifc_c_types_ok(loc,te,cdtype,ud->type)){
@@ -723,7 +723,7 @@ Cyc_Cifc_fail_merge(1,loc,is_buildlib,cd->name,_tag_fat(": no definition for sys
 c_decl->r=user_decl->r;
 return;}
 # 428
-if(!({unsigned _Tmp3=loc;struct Cyc_Tcenv_Tenv*_Tmp4=te;void*_Tmp5=_check_null(cd->defn);Cyc_Cifc_c_types_ok(_Tmp3,_Tmp4,_Tmp5,_check_null(ud->defn));})){
+if(!Cyc_Cifc_c_types_ok(loc,te,cd->defn,ud->defn)){
 ({unsigned _Tmp3=loc;int _Tmp4=is_buildlib;struct _tuple0*_Tmp5=cd->name;Cyc_Cifc_fail_merge(0,_Tmp3,_Tmp4,_Tmp5,({struct Cyc_String_pa_PrintArg_struct _Tmp6=({struct Cyc_String_pa_PrintArg_struct _Tmp7;_Tmp7.tag=0,({struct _fat_ptr _Tmp8=(struct _fat_ptr)Cyc_Absynpp_typ2string(_check_null(ud->defn));_Tmp7.f1=_Tmp8;});_Tmp7;});struct Cyc_String_pa_PrintArg_struct _Tmp7=({struct Cyc_String_pa_PrintArg_struct _Tmp8;_Tmp8.tag=0,({struct _fat_ptr _Tmp9=(struct _fat_ptr)Cyc_Absynpp_typ2string(_check_null(cd->defn));_Tmp8.f1=_Tmp9;});_Tmp8;});void*_Tmp8[2];_Tmp8[0]=& _Tmp6,_Tmp8[1]=& _Tmp7;Cyc_aprintf(_tag_fat(": type definition %s of user definition != %s",sizeof(char),46U),_tag_fat(_Tmp8,sizeof(void*),2));}));});if(!0)return;}else{
 # 435
 cd->tvs=ud->tvs;

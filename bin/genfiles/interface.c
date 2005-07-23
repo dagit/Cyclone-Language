@@ -540,7 +540,7 @@ return 1;}
 # 231
 static int Cyc_Interface_check_public_typedefdecl(struct Cyc_Tcenv_Genv*ae,struct Cyc_Interface_Seen*seen,struct Cyc_Absyn_Typedefdecl*d){
 if(d->defn!=0)
-return Cyc_Interface_check_public_type(ae,seen,_tag_fat(0,0,0),d->name,_check_null(d->defn));
+return Cyc_Interface_check_public_type(ae,seen,_tag_fat(0,0,0),d->name,d->defn);
 return 1;}
 # 238
 static int Cyc_Interface_check_public_vardecl(struct Cyc_Tcenv_Genv*ae,struct Cyc_Interface_Seen*seen,struct Cyc_Absyn_Vardecl*d){

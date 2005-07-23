@@ -736,6 +736,7 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
         let null_check = neq(zero(),t);
         let exp_checks = new ExpChecks{.ctxt=am,.bounds_check=&true_assn,
                                        .null_check=null_check};
+        insert_exp_checks(env->assn_info, e1, exp_checks);
         update_try_assnmap(env,and_assnmap_assn(am,eq(t,zero())),fresh_var(Absyn::exn_type()));
         return $(t,and_assnmap_assn(am,null_check));
       case $(&_,NULL):  // cast to fat -- no failure possible
@@ -749,6 +750,7 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
 	let bcheck = ulte(b,numelts_term(t));
 	let exp_checks = new ExpChecks{.ctxt=am,.bounds_check=bcheck,
 				       .null_check=null_check};
+        insert_exp_checks(env->assn_info, e1, exp_checks);
 	let checks = and(null_check,bcheck);
         update_try_assnmap(env,and_assnmap_assn(am,not(checks)),fresh_var(Absyn::exn_type()));
         return $(t,and_assnmap_assn(am,checks));

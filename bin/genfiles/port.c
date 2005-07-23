@@ -1697,7 +1697,7 @@ q=vd->tq.print_const?Cyc_Port_const_ct(): Cyc_Port_notconst_ct();}
 env=Cyc_Port_add_var(env,vd->name,vd->type,q,t,vd->varloc);
 ({void*_Tmp2=t;Cyc_Port_unifies(_Tmp2,Cyc_Port_type_to_ctype(env,vd->type));});
 if((unsigned)vd->initializer){
-struct Cyc_Absyn_Exp*e=_check_null(vd->initializer);
+struct Cyc_Absyn_Exp*e=vd->initializer;
 void*t2=Cyc_Port_gen_initializer(env,vd->type,e);
 Cyc_Port_leq(t2,t);}
 # 1671
@@ -1735,7 +1735,7 @@ q2=vd->tq.print_const?Cyc_Port_const_ct(): Cyc_Port_notconst_ct();}
 Cyc_Port_unifies(q,q2);
 ({void*_Tmp7=t;Cyc_Port_unifies(_Tmp7,Cyc_Port_type_to_ctype(env,vd->type));});
 if((unsigned)vd->initializer){
-struct Cyc_Absyn_Exp*e=_check_null(vd->initializer);
+struct Cyc_Absyn_Exp*e=vd->initializer;
 ({void*_Tmp7=Cyc_Port_gen_initializer(env,vd->type,e);Cyc_Port_leq(_Tmp7,t);});}
 # 1719
 return env;}}}else{

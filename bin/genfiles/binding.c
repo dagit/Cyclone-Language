@@ -820,7 +820,7 @@ return vds;}
 # 524
 static void Cyc_Binding_resolve_function_stuff(unsigned loc,struct Cyc_Binding_Env*env,struct Cyc_Absyn_FnInfo*i){
 if(i->effect!=0)
-Cyc_Binding_resolve_type(loc,env,_check_null(i->effect));
+Cyc_Binding_resolve_type(loc,env,i->effect);
 Cyc_Binding_resolve_type(loc,env,i->ret_type);
 {struct Cyc_List_List*args=i->args;for(0;args!=0;args=args->tl){
 Cyc_Binding_resolve_type(loc,env,(*((struct _tuple8*)args->hd)).f2);}}
@@ -830,7 +830,7 @@ Cyc_Binding_resolve_effconstr(loc,env,i->effconstr);
 # 534
 Cyc_Binding_resolve_qualbnd(loc,env,i->qual_bnd);
 if(i->requires_clause!=0)
-Cyc_Binding_resolve_exp(env,_check_null(i->requires_clause));
+Cyc_Binding_resolve_exp(env,i->requires_clause);
 if(i->ensures_clause!=0 || i->throws_clause!=0){
 # 539
 struct Cyc_Dict_Dict locs=*_check_null(env->local_vars);
@@ -843,10 +843,10 @@ _Tmp4->tag=0,({void*_Tmp5=(void*)({struct Cyc_Absyn_Local_b_Absyn_Binding_struct
 *_check_null(env->local_vars)=_Tmp0;});
 # 545
 if(i->ensures_clause!=0)
-Cyc_Binding_resolve_exp(env,_check_null(i->ensures_clause));
+Cyc_Binding_resolve_exp(env,i->ensures_clause);
 # 548
 if(i->throws_clause!=0)
-Cyc_Binding_resolve_exp(env,_check_null(i->throws_clause));
+Cyc_Binding_resolve_exp(env,i->throws_clause);
 # 551
 *_check_null(env->local_vars)=locs;}}}
 # 560
@@ -926,7 +926,7 @@ Cyc_Binding_in_cinclude(env));}));});
 for(1;fs!=0;fs=fs->tl){
 struct Cyc_Absyn_Enumfield*f=(struct Cyc_Absyn_Enumfield*)fs->hd;
 if(f->tag!=0)
-Cyc_Binding_resolve_exp(env,_check_null(f->tag));
+Cyc_Binding_resolve_exp(env,f->tag);
 ({struct Cyc_Dict_Dict _Tmp3=({struct Cyc_Dict_Dict(*_Tmp4)(struct Cyc_Dict_Dict,struct _fat_ptr*,void*)=({struct Cyc_Dict_Dict(*_Tmp5)(struct Cyc_Dict_Dict,struct _fat_ptr*,void*)=(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,struct _fat_ptr*,void*))Cyc_Dict_insert;_Tmp5;});struct Cyc_Dict_Dict _Tmp5=decl_ns_data->ordinaries;struct _fat_ptr*_Tmp6=(*f->name).f1;_Tmp4(_Tmp5,_Tmp6,(void*)({struct Cyc_Binding_AnonEnumRes_Binding_Resolved_struct*_Tmp7=_cycalloc(sizeof(struct Cyc_Binding_AnonEnumRes_Binding_Resolved_struct));_Tmp7->tag=4,_Tmp7->f1=t,_Tmp7->f2=f;_Tmp7;}));});decl_ns_data->ordinaries=_Tmp3;});}
 # 673
 return;}default: if(((struct Cyc_Absyn_AppType_Absyn_Type_struct*)t)->f2==0){_LL16:
@@ -990,7 +990,7 @@ if(old_locals!=0)
 {struct Cyc_List_List*vds1=vds;for(0;vds1!=0;vds1=vds1->tl){
 if((struct Cyc_Absyn_Vardecl*)vds1->hd!=0)
 ({struct Cyc_Dict_Dict _Tmp3=({struct Cyc_Dict_Dict(*_Tmp4)(struct Cyc_Dict_Dict,struct _fat_ptr*,void*)=({struct Cyc_Dict_Dict(*_Tmp5)(struct Cyc_Dict_Dict,struct _fat_ptr*,void*)=(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,struct _fat_ptr*,void*))Cyc_Dict_insert;_Tmp5;});struct Cyc_Dict_Dict _Tmp5=*_check_null(env->local_vars);struct _fat_ptr*_Tmp6=((struct Cyc_Absyn_Vardecl*)vds1->hd)->name->f1;_Tmp4(_Tmp5,_Tmp6,(void*)({struct Cyc_Binding_VarRes_Binding_Resolved_struct*_Tmp7=_cycalloc(sizeof(struct Cyc_Binding_VarRes_Binding_Resolved_struct));
-_Tmp7->tag=0,({void*_Tmp8=(void*)({struct Cyc_Absyn_Param_b_Absyn_Binding_struct*_Tmp9=_cycalloc(sizeof(struct Cyc_Absyn_Param_b_Absyn_Binding_struct));_Tmp9->tag=3,_Tmp9->f1=_check_null((struct Cyc_Absyn_Vardecl*)vds1->hd);_Tmp9;});_Tmp7->f1=_Tmp8;});_Tmp7;}));});
+_Tmp7->tag=0,({void*_Tmp8=(void*)({struct Cyc_Absyn_Param_b_Absyn_Binding_struct*_Tmp9=_cycalloc(sizeof(struct Cyc_Absyn_Param_b_Absyn_Binding_struct));_Tmp9->tag=3,_Tmp9->f1=(struct Cyc_Absyn_Vardecl*)vds1->hd;_Tmp9;});_Tmp7->f1=_Tmp8;});_Tmp7;}));});
 # 706
 *_check_null(env->local_vars)=_Tmp3;});}}
 # 709
@@ -1161,7 +1161,7 @@ struct Cyc_List_List*argit=fd->i.args;
 struct Cyc_List_List*vdsopts=Cyc_Binding_get_fun_vardecls(1,loc,env,fd->i.args,fd->i.cyc_varargs);
 struct Cyc_List_List*vds=0;
 {struct Cyc_List_List*v=vdsopts;for(0;v!=0;v=v->tl){
-if((struct Cyc_Absyn_Vardecl*)v->hd!=0)vds=({struct Cyc_List_List*_Tmp8=_cycalloc(sizeof(struct Cyc_List_List));_Tmp8->hd=_check_null((struct Cyc_Absyn_Vardecl*)v->hd),_Tmp8->tl=vds;_Tmp8;});}}
+if((struct Cyc_Absyn_Vardecl*)v->hd!=0)vds=({struct Cyc_List_List*_Tmp8=_cycalloc(sizeof(struct Cyc_List_List));_Tmp8->hd=(struct Cyc_Absyn_Vardecl*)v->hd,_Tmp8->tl=vds;_Tmp8;});}}
 vds=Cyc_List_imp_rev(vds);
 ({struct Cyc_Core_Opt*_Tmp8=({struct Cyc_Core_Opt*_Tmp9=_cycalloc(sizeof(struct Cyc_Core_Opt));_Tmp9->v=vds;_Tmp9;});fd->param_vardecls=_Tmp8;});
 fd->i.arg_vardecls=vdsopts;
@@ -1233,7 +1233,7 @@ struct _tuple0*_Tmp5=td->name;void*_Tmp6;union Cyc_Absyn_Nmspace _Tmp7;_Tmp7=_Tm
 # 967
 struct Cyc_Binding_ResolveNSEnv*decl_ns_data=({struct Cyc_Binding_ResolveNSEnv*(*_Tmp8)(struct Cyc_Binding_NSCtxt*,union Cyc_Absyn_Nmspace)=(struct Cyc_Binding_ResolveNSEnv*(*)(struct Cyc_Binding_NSCtxt*,union Cyc_Absyn_Nmspace))Cyc_Binding_get_ns_data;_Tmp8;})(env->ns,decl_ns);
 if(td->defn!=0)
-Cyc_Binding_resolve_type(loc,env,_check_null(td->defn));
+Cyc_Binding_resolve_type(loc,env,td->defn);
 # 971
 if(!env->in_cyc_override)
 ({struct Cyc_Dict_Dict _Tmp8=({struct Cyc_Dict_Dict(*_Tmp9)(struct Cyc_Dict_Dict,struct _fat_ptr*,struct Cyc_Absyn_Typedefdecl*)=(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,struct _fat_ptr*,struct Cyc_Absyn_Typedefdecl*))Cyc_Dict_insert;_Tmp9;})(decl_ns_data->typedefs,decl_name,td);decl_ns_data->typedefs=_Tmp8;});
@@ -1261,7 +1261,7 @@ _TmpC->tag=1,_TmpC->f1=ad;_TmpC;}));});
 decl_ns_data->ordinaries=_Tmp8;});}
 # 996
 if(ad->impl!=0){
-struct Cyc_Absyn_AggrdeclImpl*_Tmp8=_check_null(ad->impl);void*_Tmp9;void*_TmpA;void*_TmpB;_TmpB=_Tmp8->qual_bnd;_TmpA=_Tmp8->fields;_Tmp9=_Tmp8->effconstr;{struct Cyc_List_List*qb=_TmpB;struct Cyc_List_List*fs=_TmpA;struct Cyc_List_List*fc=_Tmp9;
+struct Cyc_Absyn_AggrdeclImpl*_Tmp8=ad->impl;void*_Tmp9;void*_TmpA;void*_TmpB;_TmpB=_Tmp8->qual_bnd;_TmpA=_Tmp8->fields;_Tmp9=_Tmp8->effconstr;{struct Cyc_List_List*qb=_TmpB;struct Cyc_List_List*fs=_TmpA;struct Cyc_List_List*fc=_Tmp9;
 Cyc_Binding_resolve_effconstr(loc,env,fc);
 # 1000
 Cyc_Binding_resolve_qualbnd(loc,env,qb);
@@ -1290,7 +1290,7 @@ struct Cyc_List_List*fs=(struct Cyc_List_List*)ed->fields->v;for(0;fs!=0;fs=fs->
 struct Cyc_Absyn_Enumfield*f=(struct Cyc_Absyn_Enumfield*)fs->hd;
 Cyc_Binding_absolutize_decl(f->loc,env,f->name,ed->sc);
 if(f->tag!=0)
-Cyc_Binding_resolve_exp(env,_check_null(f->tag));
+Cyc_Binding_resolve_exp(env,f->tag);
 if(!env->in_cyc_override)
 ({struct Cyc_Dict_Dict _Tmp8=({struct Cyc_Dict_Dict(*_Tmp9)(struct Cyc_Dict_Dict,struct _fat_ptr*,void*)=({struct Cyc_Dict_Dict(*_TmpA)(struct Cyc_Dict_Dict,struct _fat_ptr*,void*)=(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,struct _fat_ptr*,void*))Cyc_Dict_insert;_TmpA;});struct Cyc_Dict_Dict _TmpA=decl_ns_data->ordinaries;struct _fat_ptr*_TmpB=(*f->name).f1;_Tmp9(_TmpA,_TmpB,(void*)({struct Cyc_Binding_EnumRes_Binding_Resolved_struct*_TmpC=_cycalloc(sizeof(struct Cyc_Binding_EnumRes_Binding_Resolved_struct));
 # 1032

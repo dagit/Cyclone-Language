@@ -848,7 +848,7 @@ Cyc_Absyndump_dumptvar(tv);return;}case 1: if(((struct Cyc_Absyn_Evar_Absyn_Type
 Cyc_Absyndump_dump(_tag_fat("`E",sizeof(char),3U));
 if(k==0)Cyc_Absyndump_dump(_tag_fat("K",sizeof(char),2U));else{Cyc_Absyndump_dumpkind((struct Cyc_Absyn_Kind*)k->v);}
 Cyc_Absyndump_dump(({struct Cyc_Int_pa_PrintArg_struct _Tmp4=({struct Cyc_Int_pa_PrintArg_struct _Tmp5;_Tmp5.tag=1,_Tmp5.f1=(unsigned long)i;_Tmp5;});void*_Tmp5[1];_Tmp5[0]=& _Tmp4;Cyc_aprintf(_tag_fat("%d",sizeof(char),3U),_tag_fat(_Tmp5,sizeof(void*),1));}));return;}}else{_Tmp3=((struct Cyc_Absyn_Evar_Absyn_Type_struct*)t)->f1;_Tmp2=(void*)((struct Cyc_Absyn_Evar_Absyn_Type_struct*)t)->f2;_Tmp1=((struct Cyc_Absyn_Evar_Absyn_Type_struct*)t)->f3;{struct Cyc_Core_Opt*k=_Tmp3;void*t=_Tmp2;int i=_Tmp1;
-Cyc_Absyndump_dumpntyp(_check_null(t));return;}}case 6: _Tmp0=((struct Cyc_Absyn_AnonAggrType_Absyn_Type_struct*)t)->f1;_Tmp1=((struct Cyc_Absyn_AnonAggrType_Absyn_Type_struct*)t)->f2;_Tmp3=((struct Cyc_Absyn_AnonAggrType_Absyn_Type_struct*)t)->f3;{enum Cyc_Absyn_AggrKind k=_Tmp0;int is_tuple=_Tmp1;struct Cyc_List_List*fs=_Tmp3;
+Cyc_Absyndump_dumpntyp(t);return;}}case 6: _Tmp0=((struct Cyc_Absyn_AnonAggrType_Absyn_Type_struct*)t)->f1;_Tmp1=((struct Cyc_Absyn_AnonAggrType_Absyn_Type_struct*)t)->f2;_Tmp3=((struct Cyc_Absyn_AnonAggrType_Absyn_Type_struct*)t)->f3;{enum Cyc_Absyn_AggrKind k=_Tmp0;int is_tuple=_Tmp1;struct Cyc_List_List*fs=_Tmp3;
 # 424
 if(is_tuple){
 Cyc_Absyndump_dump_char(36);
@@ -1256,7 +1256,7 @@ if(expstmt){Cyc_Absyndump_dump_char(41);Cyc_Absyndump_dump_semi();}}else{
 Cyc_Absyndump_dumpstmt(s2,expstmt,varsinblock);}
 goto _LL0;}case 3: if(((struct Cyc_Absyn_Return_s_Absyn_Raw_stmt_struct*)_Tmp0)->f1==0){
 Cyc_Absyndump_dump(_tag_fat("return;",sizeof(char),8U));goto _LL0;}else{_Tmp4=((struct Cyc_Absyn_Return_s_Absyn_Raw_stmt_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Exp*e=_Tmp4;
-Cyc_Absyndump_dump(_tag_fat("return",sizeof(char),7U));Cyc_Absyndump_dumpexp(_check_null(e));Cyc_Absyndump_dump_semi();goto _LL0;}}case 4: _Tmp4=((struct Cyc_Absyn_IfThenElse_s_Absyn_Raw_stmt_struct*)_Tmp0)->f1;_Tmp3=((struct Cyc_Absyn_IfThenElse_s_Absyn_Raw_stmt_struct*)_Tmp0)->f2;_Tmp2=((struct Cyc_Absyn_IfThenElse_s_Absyn_Raw_stmt_struct*)_Tmp0)->f3;{struct Cyc_Absyn_Exp*e=_Tmp4;struct Cyc_Absyn_Stmt*s1=_Tmp3;struct Cyc_Absyn_Stmt*s2=_Tmp2;
+Cyc_Absyndump_dump(_tag_fat("return",sizeof(char),7U));Cyc_Absyndump_dumpexp(e);Cyc_Absyndump_dump_semi();goto _LL0;}}case 4: _Tmp4=((struct Cyc_Absyn_IfThenElse_s_Absyn_Raw_stmt_struct*)_Tmp0)->f1;_Tmp3=((struct Cyc_Absyn_IfThenElse_s_Absyn_Raw_stmt_struct*)_Tmp0)->f2;_Tmp2=((struct Cyc_Absyn_IfThenElse_s_Absyn_Raw_stmt_struct*)_Tmp0)->f3;{struct Cyc_Absyn_Exp*e=_Tmp4;struct Cyc_Absyn_Stmt*s1=_Tmp3;struct Cyc_Absyn_Stmt*s2=_Tmp2;
 # 965
 Cyc_Absyndump_dump(_tag_fat("if(",sizeof(char),4U));Cyc_Absyndump_dumpexp(e);
 {void*_Tmp5=s1->r;switch(*((int*)_Tmp5)){case 2:
@@ -1564,7 +1564,7 @@ struct Cyc_Absyn_FnInfo type_info=fd->i;
 type_info.attributes=0;{
 void*t=(void*)({struct Cyc_Absyn_FnType_Absyn_Type_struct*_Tmp5=_cycalloc(sizeof(struct Cyc_Absyn_FnType_Absyn_Type_struct));_Tmp5->tag=5,_Tmp5->f1=type_info;_Tmp5;});
 if(fd->cached_type!=0){
-void*_Tmp5=Cyc_Absyn_compress(_check_null(fd->cached_type));struct Cyc_Absyn_FnInfo _Tmp6;if(*((int*)_Tmp5)==5){_Tmp6=((struct Cyc_Absyn_FnType_Absyn_Type_struct*)_Tmp5)->f1;{struct Cyc_Absyn_FnInfo i=_Tmp6;
+void*_Tmp5=Cyc_Absyn_compress(fd->cached_type);struct Cyc_Absyn_FnInfo _Tmp6;if(*((int*)_Tmp5)==5){_Tmp6=((struct Cyc_Absyn_FnType_Absyn_Type_struct*)_Tmp5)->f1;{struct Cyc_Absyn_FnInfo i=_Tmp6;
 # 1295
 ({struct Cyc_List_List*_Tmp7=Cyc_List_append(fd->i.attributes,i.attributes);fd->i.attributes=_Tmp7;});goto _LL2D;}}else{
 ({int(*_Tmp7)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp7;})(_tag_fat("function has non-function type",sizeof(char),31U),_tag_fat(0U,sizeof(void*),0));}_LL2D:;}
@@ -1593,7 +1593,7 @@ Cyc_Absyndump_dump_semi();
 goto _LL0;}case 8: _Tmp4=((struct Cyc_Absyn_Typedef_d_Absyn_Raw_decl_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Typedefdecl*td=_Tmp4;
 # 1326
 Cyc_Absyndump_dump(_tag_fat("typedef",sizeof(char),8U));{
-void*t=td->defn==0?Cyc_Absyn_new_evar(td->kind,0): _check_null(td->defn);
+void*t=td->defn==0?Cyc_Absyn_new_evar(td->kind,0): td->defn;
 ({void(*_Tmp5)(struct Cyc_Absyn_Tqual,void*,void(*)(struct Cyc_Absyn_Typedefdecl*),struct Cyc_Absyn_Typedefdecl*)=(void(*)(struct Cyc_Absyn_Tqual,void*,void(*)(struct Cyc_Absyn_Typedefdecl*),struct Cyc_Absyn_Typedefdecl*))Cyc_Absyndump_dumptqtd;_Tmp5;})(td->tq,t,Cyc_Absyndump_dumptypedefname,td);
 Cyc_Absyndump_dumpatts(td->atts);
 Cyc_Absyndump_dump_semi();

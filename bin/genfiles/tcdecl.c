@@ -874,7 +874,7 @@ if(!Cyc_Tcdecl_check_tvs(d0->tvs,d1->tvs,_tag_fat("typedef",sizeof(char),8U),v,l
 struct Cyc_List_List*inst=Cyc_Tcdecl_build_tvs_map(d0->tvs,d1->tvs);
 # 614
 if(d0->defn!=0 && d1->defn!=0){
-void*subst_defn1=Cyc_Tcutil_substitute(inst,_check_null(d1->defn));
+void*subst_defn1=Cyc_Tcutil_substitute(inst,d1->defn);
 if(!Cyc_Tcdecl_check_type(_check_null(d0->defn),subst_defn1)){
 ({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=(struct _fat_ptr)v;_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,({
 struct _fat_ptr _Tmp3=(struct _fat_ptr)Cyc_Absynpp_typ2string(subst_defn1);_Tmp2.f1=_Tmp3;});_Tmp2;});struct Cyc_String_pa_PrintArg_struct _Tmp2=({struct Cyc_String_pa_PrintArg_struct _Tmp3;_Tmp3.tag=0,({struct _fat_ptr _Tmp4=(struct _fat_ptr)Cyc_Absynpp_typ2string(_check_null(d0->defn));_Tmp3.f1=_Tmp4;});_Tmp3;});void*_Tmp3[3];_Tmp3[0]=& _Tmp0,_Tmp3[1]=& _Tmp1,_Tmp3[2]=& _Tmp2;Cyc_Tcdecl_merr(loc,msg,_tag_fat("typedef %s does not refer to the same type: %s != %s",sizeof(char),53U),_tag_fat(_Tmp3,sizeof(void*),3));});

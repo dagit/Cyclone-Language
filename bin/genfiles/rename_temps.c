@@ -402,7 +402,7 @@ struct Cyc_Absyn_Vardecl vd2=*vd;
 ({void*_Tmp5=(void*)({struct Cyc_Absyn_Var_d_Absyn_Raw_decl_struct*_Tmp6=_cycalloc(sizeof(struct Cyc_Absyn_Var_d_Absyn_Raw_decl_struct));_Tmp6->tag=0,({struct Cyc_Absyn_Vardecl*_Tmp7=({struct Cyc_Absyn_Vardecl*_Tmp8=_cycalloc(sizeof(struct Cyc_Absyn_Vardecl));*_Tmp8=vd2;_Tmp8;});_Tmp6->f1=_Tmp7;});_Tmp6;});d->r=_Tmp5;});}}
 # 79
 if((unsigned)vd->initializer)
-Cyc_RenameTemps_rename_exp(env,_check_null(vd->initializer));
+Cyc_RenameTemps_rename_exp(env,vd->initializer);
 goto _LL5;}case 1: _Tmp4=((struct Cyc_Absyn_Fn_d_Absyn_Raw_decl_struct*)_Tmp3)->f1;{struct Cyc_Absyn_Fndecl*fd=_Tmp4;
 # 84
 Cyc_RenameTemps_rename_stmt(env,fd->body);goto _LL5;}default:
@@ -432,7 +432,7 @@ struct Cyc_Absyn_Vardecl vd2=*vd;
 ({void*_Tmp2=(void*)({struct Cyc_Absyn_Var_d_Absyn_Raw_decl_struct*_Tmp3=_cycalloc(sizeof(struct Cyc_Absyn_Var_d_Absyn_Raw_decl_struct));_Tmp3->tag=0,({struct Cyc_Absyn_Vardecl*_Tmp4=({struct Cyc_Absyn_Vardecl*_Tmp5=_cycalloc(sizeof(struct Cyc_Absyn_Vardecl));*_Tmp5=vd2;_Tmp5;});_Tmp3->f1=_Tmp4;});_Tmp3;});((struct Cyc_Absyn_Decl*)tds2->hd)->r=_Tmp2;});}}
 # 113
 if((unsigned)vd->initializer)
-Cyc_RenameTemps_rename_exp(& env,_check_null(vd->initializer));
+Cyc_RenameTemps_rename_exp(& env,vd->initializer);
 goto _LL0;}case 1: _Tmp1=((struct Cyc_Absyn_Fn_d_Absyn_Raw_decl_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Fndecl*fd=_Tmp1;
 # 118
 struct Cyc_RenameTemps_Env env2=env;

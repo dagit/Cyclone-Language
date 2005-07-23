@@ -799,7 +799,7 @@ return;}
 Cyc_Tcutil_check_unique_tvars(loc,td->tvs);
 Cyc_Tcutil_add_tvar_identities(td->tvs);
 if(td->defn!=0){
-Cyc_Tctyp_check_type(loc,te,td->tvs,& Cyc_Kinds_ak,0,1,_check_null(td->defn));
+Cyc_Tctyp_check_type(loc,te,td->tvs,& Cyc_Kinds_ak,0,1,td->defn);
 ({int _Tmp0=
 Cyc_Tcutil_extract_const_from_typedef(loc,td->tq.print_const,_check_null(td->defn));
 # 300
@@ -1103,7 +1103,7 @@ if(({struct _tuple15**(*_Tmp1)(struct Cyc_Dict_Dict,struct _tuple1*)=(struct _tu
 if(f->tag==0)
 ({struct Cyc_Absyn_Exp*_Tmp1=Cyc_Absyn_uint_exp(tag_count ++,f->loc);f->tag=_Tmp1;});else{
 # 709
-if(Cyc_Tcutil_is_const_exp(_check_null(f->tag))){
+if(Cyc_Tcutil_is_const_exp(f->tag)){
 struct _tuple13 _Tmp1=Cyc_Evexp_eval_const_uint_exp(_check_null(f->tag));int _Tmp2;unsigned _Tmp3;_Tmp3=_Tmp1.f0;_Tmp2=_Tmp1.f1;{unsigned t1=_Tmp3;int known=_Tmp2;
 if(known)
 tag_count=t1 + 1U;}}}}}

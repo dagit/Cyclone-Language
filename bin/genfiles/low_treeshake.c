@@ -452,7 +452,7 @@ void*_Tmp0=((struct Cyc_Absyn_Decl*)tds->hd)->r;void*_Tmp1;switch(*((int*)_Tmp0)
 # 129
 Cyc_LowTreeShake_build_tables_type(env,vd->type);
 if(vd->initializer!=0)
-Cyc_LowTreeShake_build_tables_exp(env,_check_null(vd->initializer));
+Cyc_LowTreeShake_build_tables_exp(env,vd->initializer);
 goto _LL0;}case 1: _Tmp1=((struct Cyc_Absyn_Fn_d_Absyn_Raw_decl_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Fndecl*fd=_Tmp1;
 # 134
 ({void(*_Tmp2)(struct Cyc_Hashtable_Table*,struct _tuple0*,int)=(void(*)(struct Cyc_Hashtable_Table*,struct _tuple0*,int))Cyc_Hashtable_insert;_Tmp2;})(env->funs_defined,fd->name,1);
@@ -466,7 +466,7 @@ goto _LL0;}case 5: _Tmp1=((struct Cyc_Absyn_Aggr_d_Absyn_Raw_decl_struct*)_Tmp0)
 if(ed->fields!=0){
 struct Cyc_List_List*fs=(struct Cyc_List_List*)ed->fields->v;for(0;fs!=0;fs=fs->tl){
 if(((struct Cyc_Absyn_Enumfield*)fs->hd)->tag!=0)
-Cyc_LowTreeShake_build_tables_exp(env,_check_null(((struct Cyc_Absyn_Enumfield*)fs->hd)->tag));}}
+Cyc_LowTreeShake_build_tables_exp(env,((struct Cyc_Absyn_Enumfield*)fs->hd)->tag);}}
 goto _LL0;}case 8: _Tmp1=((struct Cyc_Absyn_Typedef_d_Absyn_Raw_decl_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Typedefdecl*td=_Tmp1;
 # 149
 Cyc_LowTreeShake_build_tables_type(env,_check_null(td->defn));goto _LL0;}default:

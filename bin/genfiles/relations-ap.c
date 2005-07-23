@@ -583,7 +583,7 @@ int Cyc_Relations_exp2relnop(struct Cyc_Absyn_Exp*e,union Cyc_Relations_RelnOp*p
 # 203
 RETRY:
  if(e->topt!=0){
-void*_Tmp0=Cyc_Absyn_compress(_check_null(e->topt));void*_Tmp1;switch(*((int*)_Tmp0)){case 0: if(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0)->f1)==5){if(((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0)->f2!=0){_Tmp1=(void*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0)->f2->hd;{void*t=_Tmp1;
+void*_Tmp0=Cyc_Absyn_compress(e->topt);void*_Tmp1;switch(*((int*)_Tmp0)){case 0: if(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0)->f1)==5){if(((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0)->f2!=0){_Tmp1=(void*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0)->f2->hd;{void*t=_Tmp1;
 # 207
 ({union Cyc_Relations_RelnOp _Tmp2=Cyc_Relations_RType(t);*p=_Tmp2;});return 1;
 goto _LL0;}}else{goto _LL5;}}else{goto _LL5;}case 8: _Tmp1=((struct Cyc_Absyn_ValueofType_Absyn_Type_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Exp*type_exp=_Tmp1;
