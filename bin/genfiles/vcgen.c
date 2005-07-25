@@ -705,7 +705,7 @@ static struct Cyc_Vcgen_ExpChecks*b=0;
 if(b==0)
 b=({struct Cyc_Vcgen_ExpChecks*_Tmp0=_cycalloc(sizeof(struct Cyc_Vcgen_ExpChecks));({struct Cyc_AssnDef_AssnMap _Tmp1=Cyc_AssnDef_true_assnmap();_Tmp0->ctxt=_Tmp1;}),_Tmp0->bounds_check=(void*)& Cyc_AssnDef_false_assn,_Tmp0->null_check=(void*)& Cyc_AssnDef_false_assn;_Tmp0;});
 # 359
-return _check_null(b);}else{
+return b;}else{
 # 361
 return*result;}}
 # 365

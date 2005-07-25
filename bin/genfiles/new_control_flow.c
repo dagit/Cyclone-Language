@@ -2406,7 +2406,7 @@ return Cyc_CfFlowInfo_BottomFL();}else{_TmpA=((struct Cyc_Absyn_Return_s_Absyn_R
 # 2591
 if(env->noreturn)
 Cyc_CfFlowInfo_aerr(s->loc,_tag_fat("`noreturn' function might return",sizeof(char),33U),_tag_fat(0U,sizeof(void*),0));{
-struct _tuple16 _TmpB=Cyc_NewControlFlow_anal_Rexp(env,1,inflow,_check_null(e),0);void*_TmpC;union Cyc_CfFlowInfo_FlowInfo _TmpD;_TmpD=_TmpB.f0;_TmpC=_TmpB.f1;{union Cyc_CfFlowInfo_FlowInfo f=_TmpD;void*r=_TmpC;
+struct _tuple16 _TmpB=Cyc_NewControlFlow_anal_Rexp(env,1,inflow,e,0);void*_TmpC;union Cyc_CfFlowInfo_FlowInfo _TmpD;_TmpD=_TmpB.f0;_TmpC=_TmpB.f1;{union Cyc_CfFlowInfo_FlowInfo f=_TmpD;void*r=_TmpC;
 f=Cyc_NewControlFlow_use_Rval(env,e->loc,f,r);
 Cyc_NewControlFlow_check_init_params(s->loc,env,f);
 Cyc_NewControlFlow_unconsume_params(env,env->noconsume_params,0,0,f,s->loc);

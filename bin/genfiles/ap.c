@@ -581,10 +581,10 @@ if(x->ndigits==1 &&(int)*((unsigned char*)_check_fat_subscript(x->digits,sizeof(
 return Cyc_AP_new(0);
 if(y->ndigits==1 &&(int)*((unsigned char*)_check_fat_subscript(y->digits,sizeof(unsigned char),0))==0)
 return Cyc_AP_new(1);
-if(x->ndigits==1 &&(int)*((unsigned char*)_check_fat_subscript(x->digits,sizeof(unsigned char),0))==1)
+if(x->ndigits==1 &&(int)((unsigned char*)x->digits.curr)[0]==1)
 return Cyc_AP_new(((int)*((unsigned char*)_check_fat_subscript(y->digits,sizeof(unsigned char),0))& 1)==0?1: x->sign);
 if((unsigned)p){
-if(y->ndigits==1 &&(int)*((unsigned char*)_check_fat_subscript(y->digits,sizeof(unsigned char),0))==1)
+if(y->ndigits==1 &&(int)((unsigned char*)y->digits.curr)[0]==1)
 z=Cyc_AP_mod(x,p);else{
 # 211
 struct Cyc_AP_T*y2=Cyc_AP_rshift(y,1);struct Cyc_AP_T*t=Cyc_AP_pow(x,y2,p);
@@ -592,7 +592,7 @@ z=Cyc_mulmod(t,t,p);
 if(!(((int)*((unsigned char*)_check_fat_subscript(y->digits,sizeof(unsigned char),0))& 1)==0))
 z=({struct Cyc_AP_T*_Tmp0=y2=Cyc_AP_mod(x,p);struct Cyc_AP_T*_Tmp1=t=z;Cyc_mulmod(_Tmp0,_Tmp1,p);});}}else{
 # 218
-if(y->ndigits==1 &&(int)*((unsigned char*)_check_fat_subscript(y->digits,sizeof(unsigned char),0))==1)
+if(y->ndigits==1 &&(int)((unsigned char*)y->digits.curr)[0]==1)
 z=Cyc_AP_addi(x,0);else{
 # 221
 struct Cyc_AP_T*y2=Cyc_AP_rshift(y,1);struct Cyc_AP_T*t=Cyc_AP_pow(x,y2,0);

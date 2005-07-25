@@ -576,6 +576,7 @@ term_t select(term_t t1, term_t t2,type_opt_t tp) {
  LOOP:
   switch $(t1,t2) {
   case $(&Update(m,a1,v),a2):
+    if (a1 == a2) return v;
     if (term_neq(a1,a2)) {
       t1 = m;
       goto LOOP;
@@ -1551,27 +1552,69 @@ assn_t prim(term_t t1, prim_reln_t p, term_t t2){
   return prim((term_t)t1,P,(term_t)t2); \
 }
 
-prim_assn(slt,SLt)
-  prim_assn(slte,SLte)
-  prim_assn(ult,ULt)
-  prim_assn(ulte,ULte)
-
 assn_t eq(term_t t1, term_t t2){
+  if (t1 == t2) return &true_assn;
+  if (term_neq(t1,t2)) return &false_assn;
   if (termcmp(t1,t2)>0) {
     t1 :=: t2;
   }
   return prim(t1,Eq,t2);
 }
 
-assn_t neq(term_t t1, term_t t2){
-  if (termcmp(t1,zero())==0)
-    return prim(zero(),ULt,t2);
-  else if (termcmp(t2,zero())==0)
-    return prim(zero(),ULt,t1);
-  if (termcmp(t1,t2)>0) {
-    t1 :=: t2;
+assn_t slt(term_t t1, term_t t2) {
+  if (t1 == t2) return &false_assn;
+  switch $(t1,t2) {
+  case $(&Uint(i,_),&Uint(j,_)): 
+    if ((int)i < (int)j) return &true_assn; else return &false_assn;
+  default: return prim(t1,SLt,t2);
   }
-  return prim(t1,Neq,t2);
+}
+
+assn_t slte(term_t t1, term_t t2) {
+  if (t1 == t2) return &true_assn;
+  if (term_neq(t1,t2)) return &false_assn;
+  switch $(t1,t2) {
+  case $(&Uint(i,_),&Uint(j,_)): 
+    if ((int)i <= (int)j) return &true_assn; else return &false_assn;
+  default: return prim(t1,SLte,t2);
+  }
+}
+
+assn_t ult(term_t t1, term_t t2) {
+  if (t1 == t2) return &false_assn;
+  switch $(t1,t2) {
+  case $(&Uint(i,_),&Uint(j,_)): 
+    if (i < j) return &true_assn; else return &false_assn;
+  default: return prim(t1,ULt,t2);
+  }
+}
+
+assn_t ulte(term_t t1, term_t t2) {
+  if (t1 == t2) return &true_assn;
+  if (term_neq(t1,t2)) return &false_assn;
+  switch $(t1,t2) {
+  case $(&Uint(i,_),&Uint(j,_)): 
+    if (i <= j) return &true_assn; else return &false_assn;
+  default: return prim(t1,ULte,t2);
+  }
+}
+
+assn_t neq(term_t t1, term_t t2){
+  if (t1 == t2) return &false_assn;
+  if (term_neq(t1,t2)) return &true_assn;
+  switch $(t1,t2) {
+  case $(&Uint(i,_),&Uint(j,_)): 
+    if (i != j) return &true_assn; else return &false_assn;
+  case $(&Uint(i,_),_) && i == 0:
+    return ult(zero(),t2);
+  case $(_,&Uint(j,_)) && j == 0:
+    return ult(zero(),t1);
+  default:
+    if (termcmp(t1,t2)>0) {
+      t1 :=: t2;
+    }
+    return prim(t1,Neq,t2);
+  }
 }
 
 assn_set_opt_t widen_it(assn_t a){

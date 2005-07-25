@@ -418,12 +418,12 @@ struct Cyc_List_List*_Tmp0=_region_malloc(rgn,0U,sizeof(struct Cyc_List_List));_
 struct Cyc_List_List*prev=n;struct Cyc_List_List*res=n;
 n=n->tl;
 while(n!=0 &&(i=cmp(n->hd,elt))< 0){
-prev=_check_null(prev)->tl;
+prev=prev->tl;
 n=n->tl;
 # 119
 1U;}
 # 122
-({struct Cyc_List_List*_Tmp0=({struct Cyc_List_List*_Tmp1=_region_malloc(rgn,0U,sizeof(struct Cyc_List_List));_Tmp1->hd=elt,_Tmp1->tl=n;_Tmp1;});_check_null(prev)->tl=_Tmp0;});
+({struct Cyc_List_List*_Tmp0=({struct Cyc_List_List*_Tmp1=_region_malloc(rgn,0U,sizeof(struct Cyc_List_List));_Tmp1->hd=elt,_Tmp1->tl=n;_Tmp1;});prev->tl=_Tmp0;});
 return res;}}}
 # 127
 void Cyc_Set_imp_insert(struct Cyc_Set_Set*s,void*elt){

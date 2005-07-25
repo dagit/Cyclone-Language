@@ -796,19 +796,19 @@ void*Cyc_Toc_void_star_type (void){
 static void*t=0;
 if(t==0)
 t=({void*_Tmp0=Cyc_Absyn_void_type;void*_Tmp1=Cyc_Absyn_heap_rgn_type;void*_Tmp2=Cyc_Absyn_al_qual_type;struct Cyc_Absyn_Tqual _Tmp3=Cyc_Absyn_empty_tqual(0U);void*_Tmp4=Cyc_Absyn_false_type;Cyc_Absyn_star_type(_Tmp0,_Tmp1,_Tmp2,_Tmp3,_Tmp4,Cyc_Absyn_false_type);});
-return _check_null(t);}
+return t;}
 # 277
 static void*Cyc_Toc_fat_ptr_type (void){
 static void*t=0;
 if(t==0)
 t=Cyc_Absyn_aggr_type(Cyc_Absyn_UnknownAggr(0U,& Cyc_Toc__fat_ptr_pr,0),0);
-return _check_null(t);}
+return t;}
 # 283
 static void*Cyc_Toc_rgn_type (void){
 static void*r=0;
 if(r==0)
 r=({void*_Tmp0=Cyc_Absyn_strct(Cyc_Toc__RegionHandle_sp);Cyc_Absyn_cstar_type(_Tmp0,Cyc_Toc_mt_tq);});
-return _check_null(r);}
+return r;}
 # 289
 static void*Cyc_Toc_aqualt_type (void){
 return Cyc_Absyn_uint_type;}
@@ -817,7 +817,7 @@ static struct Cyc_Absyn_Exp*Cyc_Toc_aliasable_qual_exp (void){
 static struct Cyc_Absyn_Exp*aq=0;
 if(aq==0)
 aq=Cyc_Absyn_uint_exp(0U,0U);
-return _check_null(aq);}
+return aq;}
 # 298
 static struct Cyc_Absyn_Stmt*Cyc_Toc_skip_stmt_dl (void){
 return Cyc_Absyn_skip_stmt(0U);}struct _tuple19{struct Cyc_List_List*f0;struct Cyc_Absyn_Exp*f1;};
@@ -3426,7 +3426,7 @@ Cyc_Toc_local_decl_to_c(nv,vd,body);goto _LL2F;}case 2: _Tmp8=((struct Cyc_Absyn
 if(Cyc_Absyn_var_may_appear_exp(vd->name,e)){
 struct Cyc_Absyn_Vardecl*new_vd=({struct _tuple1*_TmpB=Cyc_Toc_temp_var();void*_TmpC=vd->type;Cyc_Absyn_new_vardecl(0U,_TmpB,_TmpC,e);});
 ({struct Cyc_Absyn_Exp*_TmpB=Cyc_Absyn_varb_exp((void*)({struct Cyc_Absyn_Local_b_Absyn_Binding_struct*_TmpC=_cycalloc(sizeof(struct Cyc_Absyn_Local_b_Absyn_Binding_struct));_TmpC->tag=4,_TmpC->f1=new_vd;_TmpC;}),0U);vd->initializer=_TmpB;});
-_check_null(vd->initializer)->topt=new_vd->type;
+vd->initializer->topt=new_vd->type;
 ({void*_TmpB=({struct Cyc_Absyn_Decl*_TmpC=({void*_TmpD=(void*)({struct Cyc_Absyn_Var_d_Absyn_Raw_decl_struct*_TmpE=_cycalloc(sizeof(struct Cyc_Absyn_Var_d_Absyn_Raw_decl_struct));_TmpE->tag=0,_TmpE->f1=new_vd;_TmpE;});Cyc_Absyn_new_decl(_TmpD,s->loc);});struct Cyc_Absyn_Stmt*_TmpD=({
 struct Cyc_Absyn_Decl*_TmpE=({void*_TmpF=(void*)({struct Cyc_Absyn_Var_d_Absyn_Raw_decl_struct*_Tmp10=_cycalloc(sizeof(struct Cyc_Absyn_Var_d_Absyn_Raw_decl_struct));_Tmp10->tag=0,_Tmp10->f1=vd;_Tmp10;});Cyc_Absyn_new_decl(_TmpF,s->loc);});struct Cyc_Absyn_Stmt*_TmpF=body;Cyc_Absyn_decl_stmt(_TmpE,_TmpF,s->loc);});
 # 3547

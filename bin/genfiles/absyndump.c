@@ -514,7 +514,7 @@ int sz=(int)Cyc_strlen(s);
 # 137
 if(sz >= 1){
 Cyc_file_string_write(*Cyc_Absyndump_dump_file,s,0,sz);
-Cyc_Absyndump_prev_char=((const char*)s.curr)[sz - 1];}}
+Cyc_Absyndump_prev_char=*((const char*)_check_fat_subscript(s,sizeof(char),sz - 1));}}
 # 142
 static void Cyc_Absyndump_dump_char(int c){
 # 144
