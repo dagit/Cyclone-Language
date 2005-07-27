@@ -19,31 +19,40 @@ all: directories cyclone tools xml
 $(BL)/libcycboot.a: $(BB)/libcycboot.a
 	cp -p $< $@
 
+$(BL)/libcycboot_g.a: $(BB)/gdb/libcycboot.a
+	cp -p $< $@
+
 $(BL)/libcycboot_a.a: $(BB)/aprof/libcycboot.a
 	cp -p $< $@
 
-$(BL)/cyc-lib/%/libcycboot_pg.a: $(BB)/gprof/libcycboot.a
+$(BL)/libcycboot_pg.a: $(BB)/gprof/libcycboot.a
 	cp -p $< $@
 
 $(BL)/libcycboot_nocheck.a: $(BB)/nocheck/libcycboot.a
 	cp -p $< $@
 
-$(BL)/libcyc.a: $(BB)/libcyc.a
-	cp -p $< $@
+LIBCYC_PREREQS = bin/cyclone$(EXE) \
+  $(BL)/cyc-lib/cyc_include.h $(BL)/cyc-lib/$(build)/cyc_setjmp.h
 
-$(BL)/libcyc_g.a: $(BB)/gdb/libcyc.a
-	cp -p $< $@
+$(BL)/libcyc.a: $(LIBCYC_PREREQS) $(BB)/libcyc.a include-directory
+	cp -p $(BB)/libcyc.a $@
 
-$(BL)/libcyc_a.a: $(BB)/aprof/libcyc.a
-	cp -p $< $@
+$(BL)/libcyc_g.a: $(LIBCYC_PREREQS) $(BB)/gdb/libcyc.a include-directory
+	cp -p $(BB)/gdb/libcyc.a $@
 
-$(BL)/cyc-lib/%/libcyc_pg.a: $(BB)/gprof/libcyc.a
-	cp -p $< $@
+$(BL)/libcyc_a.a: $(LIBCYC_PREREQS) $(BB)/aprof/libcyc.a include-directory
+	cp -p $(BB)/aprof/libcyc.a $@
 
-$(BL)/libcyc_nocheck.a: $(BB)/nocheck/libcyc.a
-	cp -p $< $@
+$(BL)/libcyc_pg.a: $(LIBCYC_PREREQS) $(BB)/gprof/libcyc.a include-directory
+	cp -p $(BB)/gprof/libcyc.a $@
+
+$(BL)/libcyc_nocheck.a: $(LIBCYC_PREREQS) $(BB)/nocheck/libcyc.a include-directory
+	cp -p $(BB)/nocheck/libcyc.a $@
 
 $(BL)/libxml.a: $(BB)/libxml.a
+	cp -p $< $@
+
+$(BL)/libxml_g.a: $(BB)/gdb/libxml.a
 	cp -p $< $@
 
 $(BL)/libxml_a.a: $(BB)/aprof/libxml.a
@@ -56,6 +65,9 @@ $(BL)/libxml_nocheck.a: $(BB)/nocheck/libxml.a
 	cp -p $< $@
 
 $(BL)/cyc-lib/%/nogc.a: build/%/nogc.a
+	cp -p $< $@
+
+$(BL)/cyc-lib/%/nogc_g.a: build/%/gdb/nogc.a
 	cp -p $< $@
 
 $(BL)/cyc-lib/%/nogc_a.a: build/%/aprof/nogc.a
@@ -93,171 +105,47 @@ $(BL)/cyc-lib/%/runtime_cyc_g.a: build/%/gdb/runtime_cyc.a
 $(BL)/cyc-lib/%/runtime_cyc_a.a: build/%/aprof/runtime_cyc.a
 	cp -p $< $@
 
-ifeq ($(HAVE_PTHREAD),yes)
-$(BL)/cyc-lib/%/runtime_cyc_pthread.a: build/%/pthread/runtime_cyc.a
-	cp -p $< $@
-endif
-
 $(BL)/cyc-lib/%/runtime_cyc_pg.a: build/%/gprof/runtime_cyc.a
 	cp -p $< $@
 
 $(BL)/cyc-lib/%/runtime_cyc_nocheck.a: build/%/nocheck/runtime_cyc.a
 	cp -p $< $@
 
-bin/cyclone$(EXE): $(BB)/cyclone$(EXE)
+$(BL)/cyc-lib/%/runtime_cyc_pthread.a: build/%/pthread/runtime_cyc.a
+	cp -p $< $@
+
+bin/cyclone$(EXE): $(BB)/cyclone$(EXE) \
+  $(BL)/cyc-lib/cyc_include.h $(BL)/cyc-lib/$(build)/cyc_setjmp.h
 	cp $< $@
 
-bin/cyclone_a$(EXE): $(BB)/aprof/cyclone$(EXE)
+bin/cyclone_g$(EXE): $(BB)/gdb/cyclone$(EXE) \
+  $(BL)/cyc-lib/cyc_include.h $(BL)/cyc-lib/$(build)/cyc_setjmp.h
 	cp $< $@
 
-bin/cyclone_pg$(EXE): $(BB)/gprof/cyclone$(EXE)
+bin/cyclone_a$(EXE): $(BB)/aprof/cyclone$(EXE) \
+  $(BL)/cyc-lib/cyc_include.h $(BL)/cyc-lib/$(build)/cyc_setjmp.h
 	cp $< $@
 
-bin/cyclone_nocheck$(EXE): $(BB)/nocheck/cyclone$(EXE)
+bin/cyclone_pg$(EXE): $(BB)/gprof/cyclone$(EXE) \
+  $(BL)/cyc-lib/cyc_include.h $(BL)/cyc-lib/$(build)/cyc_setjmp.h
+	cp $< $@
+
+bin/cyclone_nocheck$(EXE): $(BB)/nocheck/cyclone$(EXE) \
+  $(BL)/cyc-lib/cyc_include.h $(BL)/cyc-lib/$(build)/cyc_setjmp.h
 	cp $< $@
 
 bin/cycdoc$(EXE): $(BB)/cycdoc$(EXE)
 	cp $< $@
 
-bin/buildlib$(EXE): $(BB)/buildlib$(EXE)
-	cp $< $@
+bin/buildlib$(EXE):: $(BB)/buildlib$(EXE) \
+  $(BL)/cyc-lib/cyc_include.h $(BL)/cyc-lib/$(build)/cycspecs
+	cp $(BB)/buildlib$(EXE) $@
 
-define rmake
-@mkdir -p $(@D)
-$(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base $(@F)
-endef
-
-define rmake-gdb
-@mkdir -p $(@D)
-$(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base CFLAGS="-g $(CFLAGS)" CYCFLAGS="-g $(CYCFLAGS)" $(@F)
-endef
-
-define rmake-aprof
-@mkdir -p $(@D)
-$(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base CFLAGS="-DCYC_REGION_PROFILE $(CFLAGS)" CYCFLAGS="-pa $(CYCFLAGS)" $(@F)
-endef
-
-define rmake-gprof
-@mkdir -p $(@D)
-$(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base CFLAGS="-pg $(CFLAGS)" CYCFLAGS="-pg $(CYCFLAGS)" OTHER_CYCFLAGS="-pg $(OTHER_CYCFLAGS)" $(@F)
-endef
-
-define rmake-nocheck
-@mkdir -p $(@D)
-$(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base CFLAGS="-DNO_CYC_NULL_CHECKS -DNO_CYC_BOUNDS_CHECKS $(CFLAGS)" CYCFLAGS="--nochecks $(CYCFLAGS)" $(@F)
-endef
-
-define rmake-pthread
-@mkdir -p $(@D)
-$(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base CFLAGS="-D_HAVE_PTHREAD_ $(CFLAGS)" $(@F)
-endef
-
-$(BB)/libcycboot.a:
-	+$(rmake)
-
-$(BB)/aprof/libcycboot.a:
-	+$(rmake-aprof)
-
-$(BB)/gprof/libcycboot.a:
-	+$(rmake-gprof)
-
-$(BB)/nocheck/libcycboot.a:
-	+$(rmake-nocheck)
-
-LIBCYC_PREREQS=bin/buildlib$(EXE) $(BL)/cyc-lib/$(build)/cycspecs bin/cyclone$(EXE) $(BL)/cyc-lib/cyc_include.h $(BL)/cyc-lib/$(build)/cyc_setjmp.h
-
-# NB: as a side-effect this creates the include directory
-$(BB)/libcyc.a: $(LIBCYC_PREREQS)
-	+$(rmake)
+include-directory:
 	for i in `(cd $(BB)/include; find * -type d)`;\
 	  do mkdir -p $(BL)/cyc-lib/$(build)/include/$$i; done
 	for i in `(cd $(BB)/include; find * -name '*.h')`;\
 	  do cp $(BB)/include/$$i $(BL)/cyc-lib/$(build)/include/$$i; done
-
-$(BB)/gdb/libcyc.a: $(LIBCYC_PREREQS)
-	+$(rmake-gdb)
-
-$(BB)/aprof/libcyc.a: $(LIBCYC_PREREQS)
-	+$(rmake-aprof)
-
-$(BB)/gprof/libcyc.a: $(LIBCYC_PREREQS)
-	+$(rmake-gprof)
-
-$(BB)/nocheck/libcyc.a: $(LIBCYC_PREREQS)
-	+$(rmake-nocheck)
-
-$(BB)/libxml.a: tools
-	+$(rmake)
-
-$(BB)/aprof/libxml.a: tools
-	+$(rmake-aprof)
-
-$(BB)/gprof/libxml.a: tools
-	+$(rmake-gprof)
-
-$(BB)/nocheck/libxml.a: tools
-	+$(rmake-nocheck)
-
-$(BB)/nogc.a:
-	+$(rmake)
-
-$(BB)/aprof/nogc.a:
-	+$(rmake-aprof)
-
-$(BB)/gprof/nogc.a:
-	+$(rmake-gprof)
-
-$(BB)/nocheck/nogc.a:
-	+$(rmake-nocheck)
-
-ifeq ($(HAVE_PTHREAD),yes)
-$(BB)/pthread/nogc.a:
-	+$(rmake-pthread)
-endif
-
-$(BB)/runtime_cyc.a:
-	+$(rmake)
-
-$(BB)/gdb/runtime_cyc.a:
-	+$(rmake-gdb)
-
-$(BB)/aprof/runtime_cyc.a:
-	+$(rmake-aprof)
-
-$(BB)/gprof/runtime_cyc.a:
-	+$(rmake-gprof)
-
-$(BB)/nocheck/runtime_cyc.a:
-	+$(rmake-nocheck)
-
-ifeq ($(HAVE_PTHREAD),yes)
-$(BB)/pthread/runtime_cyc.a:
-	+$(rmake-pthread)
-endif
-
-$(BB)/cyclone$(EXE): $(BL)/cyc-lib/$(build)/gc.a
-	+$(rmake)
-
-$(BB)/aprof/cyclone$(EXE): $(BL)/cyc-lib/$(build)/gc.a
-	+$(rmake-aprof)
-
-$(BB)/gprof/cyclone$(EXE): $(BL)/cyc-lib/$(build)/gc.a
-	+$(rmake-gprof)
-
-$(BB)/gdb/cyclone$(EXE): $(BL)/cyc-lib/$(build)/gc.a
-	+$(rmake-gdb)
-
-$(BB)/nocheck/cyclone$(EXE): $(BL)/cyc-lib/$(build)/gc.a
-	+$(rmake-nocheck)
-
-$(BB)/cycdoc$(EXE): $(BL)/cyc-lib/$(build)/gc.a
-	+$(rmake)
-
-$(BB)/buildlib$(EXE): $(BL)/cyc-lib/$(build)/gc.a
-	+$(rmake)
-
-$(BB)/gdb/buildlib$(EXE): $(BL)/cyc-lib/$(build)/gc.a
-	+$(rmake-gdb)
 
 # Directory structure of the installed library.  (During boot,
 # this is built in bin/lib ($(BL)).)
@@ -278,12 +166,22 @@ $(BB)/gdb/buildlib$(EXE): $(BL)/cyc-lib/$(build)/gc.a
 
 directories::
 	@mkdir -p $(BL)/cyc-lib/$(build)/include
+	@mkdir -p $(BB)
+	@mkdir -p $(BB)/include
+	@mkdir -p $(BB)/gdb
+	@mkdir -p $(BB)/aprof
+	@mkdir -p $(BB)/gprof
+	@mkdir -p $(BB)/nocheck
+ifneq ($(build),$(target))
+	@mkdir -p $(BT)
+	@mkdir -p $(BT)/include
+endif
 
 # FIX: we are not using the cycspecs file in the same way that
 # gcc specs files are used, probably there should be just one
 # entry for cyclone instead of separate entries for
 # cyclone_target_cflags, cyclone_cc, etc.
-$(BL)/cyc-lib/$(build)/cycspecs: $(CYCDIR)/config/buildspecs
+$(BL)/cyc-lib/$(build)/cycspecs: config/buildspecs
 	echo "*cyclone_target_cflags:" > $@
 	echo "  $(CFLAGS)" >> $@
 	echo "" >> $@
@@ -293,16 +191,16 @@ $(BL)/cyc-lib/$(build)/cycspecs: $(CYCDIR)/config/buildspecs
 	echo "*cyclone_inc_path:" >> $@
 	echo "  $(INC_INSTALL)" >> $@
 	echo "" >> $@
-	$(CYCDIR)/config/buildspecs >> $@
+	config/buildspecs >> $@
 
 $(BL)/cyc-lib/$(build)/cyc_setjmp.h: bin/cyc-lib/libc.cys bin/buildlib$(EXE)
 	bin/buildlib$(EXE) -B$(BL)/cyc-lib -d $(BB)/include -setjmp > $@
 
-$(BL)/cyc-lib/cyc_include.h: $(CYCDIR)/bin/cyc-lib/cyc_include.h
+$(BL)/cyc-lib/cyc_include.h: bin/cyc-lib/cyc_include.h
 	cp $< $@
 
 $(BL)/cyc-lib/$(build)/gc.a: $(GC)/.libs/libgc.a
-	cp -p -p $< $@
+	cp -p $< $@
 
 $(GC)/.libs/libgc.a:
 	$(MAKE) -C $(GC) libgc.la CC="$(CC)" CFLAGS="$(CFLAGS)"
@@ -321,13 +219,13 @@ tools: cyclone
 
 cyclone: \
   directories \
+  bin/buildlib$(EXE) \
+  bin/cyclone$(EXE) \
   $(BL)/libcycboot.a \
   $(BL)/libcyc.a \
   $(BL)/cyc-lib/$(build)/nogc.a \
   $(BL)/cyc-lib/$(build)/runtime_cyc.a \
-  bin/cyclone$(EXE) \
-  bin/cycdoc$(EXE) \
-  bin/buildlib$(EXE)
+  bin/cycdoc$(EXE)
 
 ifeq ($(HAVE_PTHREAD),yes)
 cyclone: \
@@ -336,36 +234,52 @@ cyclone: \
   $(BL)/cyc-lib/$(build)/gc_pthread.a
 endif
 
+cyclone-aprof: aprof bin/cyclone_a$(EXE)
+
 aprof: \
   $(BL)/libcycboot_a.a \
   $(BL)/libcyc_a.a \
   $(BL)/cyc-lib/$(build)/nogc_a.a \
-  $(BL)/cyc-lib/$(build)/runtime_cyc_a.a \
-  bin/cyclone_a$(EXE)
+  $(BL)/cyc-lib/$(build)/runtime_cyc_a.a
 	$(MAKE) -C tools/aprof install
 
+cyclone-gprof: gprof bin/cyclone_pg$(EXE)
+
 gprof: \
-  $(BL)/cyc-lib/$(build)/libcycboot_pg.a \
-  $(BL)/cyc-lib/$(build)/libcyc_pg.a \
+  $(BL)/libcycboot_pg.a \
+  $(BL)/libcyc_pg.a \
   $(BL)/cyc-lib/$(build)/nogc_pg.a \
-  $(BL)/cyc-lib/$(build)/runtime_cyc_pg.a \
-  bin/cyclone_pg$(EXE)
+  $(BL)/cyc-lib/$(build)/runtime_cyc_pg.a
+
+cyclone-nocheck: nocheck bin/cyclone_nocheck$(EXE)
 
 nocheck: \
   $(BL)/libcycboot_nocheck.a \
   $(BL)/libcyc_nocheck.a \
   $(BL)/cyc-lib/$(build)/nogc_nocheck.a \
-  $(BL)/cyc-lib/$(build)/runtime_cyc_nocheck.a \
-  bin/cyclone_nocheck$(EXE)
+  $(BL)/cyc-lib/$(build)/runtime_cyc_nocheck.a
+
+cyclone-gdb: gdb bin/cyclone_g$(EXE)
+
+# Currently, the -g flag to cyclone does not use these libraries.
+# We include the make rules in case we want to use them in the future.
+gdb: \
+  $(BL)/libcycboot_g.a \
+  $(BL)/libcyc_g.a \
+  $(BL)/cyc-lib/$(build)/nogc_g.a \
+  $(BL)/cyc-lib/$(build)/runtime_cyc_g.a
 
 ifndef NO_XML_LIB
-xml:     $(BL)/libxml.a
-aprof:   $(BL)/libxml_a.a
-gprof:   $(BL)/libxml_pg.a
-nocheck: $(BL)/libxml_nocheck.a
+xml:     tools $(BL)/libxml.a
+aprof:   tools $(BL)/libxml_a.a
+gprof:   tools $(BL)/libxml_pg.a
+nocheck: tools $(BL)/libxml_nocheck.a
+gdb: tools $(BL)/libxml_g.a
 endif
 
 .PHONY: all tools cyclone aprof gprof nocheck directories xml
+.PHONY: include-directory include-target-directory
+.PHONY: cyclone-aprof cyclone-gprof cyclone-nocheck
 
 ########################################################################
 # FOR BUILDING A CROSS COMPILER                                        #
@@ -374,154 +288,38 @@ endif
 # If a cross gcc is not installed you can still do some sanity
 # checks on the build process by doing
 #
-#   make target=XXXXXX TARGET_CFLAGS=-DXXXXXX BTARGET=-DZZZZZZ all aprof gprof nocheck
+#   make target=XXXXXX TARGET_CC=gcc TARGET_CFLAGS=-DXXXXXX BTARGET=-DZZZZZZ all
 #
 ifneq ($(build),$(target))
 
 $(BL)/cyc-lib/$(target)/libcycboot.a: $(BT)/libcycboot.a
 	cp -p $< $@
 
-$(BL)/cyc-lib/$(target)/libcycboot_a.a: $(BT)/aprof/libcycboot.a
-	cp -p $< $@
+LIBCYC_TARGET_PREREQS = bin/cyclone$(EXE) \
+  $(BL)/cyc-lib/cyc_include.h $(BL)/cyc-lib/$(target)/cyc_setjmp.h
 
-$(BL)/cyc-lib/$(target)/libcycboot_pg.a: $(BT)/gprof/libcycboot.a
-	cp -p $< $@
-
-$(BL)/cyc-lib/$(target)/libcycboot_nocheck.a: $(BT)/nocheck/libcycboot.a
-	cp -p $< $@
-
-$(BL)/cyc-lib/$(target)/libcyc.a: $(BT)/libcyc.a
-	cp -p $< $@
-
-$(BL)/cyc-lib/$(target)/libcyc_a.a: $(BT)/aprof/libcyc.a
-	cp -p $< $@
-
-$(BL)/cyc-lib/$(target)/libcyc_pg.a: $(BT)/gprof/libcyc.a
-	cp -p $< $@
-
-$(BL)/cyc-lib/$(target)/libcyc_nocheck.a: $(BT)/nocheck/libcyc.a
-	cp -p $< $@
+$(BL)/cyc-lib/$(target)/libcyc.a: $(LIBCYC_TARGET_PREREQS) \
+  $(BT)/libcyc.a include-target-directory
+	cp -p $(BT)/libcyc.a $@
 
 $(BL)/cyc-lib/$(target)/libxml.a: $(BT)/libxml.a
 	cp -p $< $@
 
-$(BL)/cyc-lib/$(target)/libxml_a.a: $(BT)/aprof/libxml.a
-	cp -p $< $@
-
-$(BL)/cyc-lib/$(target)/libxml_pg.a: $(BT)/gprof/libxml.a
-	cp -p $< $@
-
-$(BL)/cyc-lib/$(target)/libxml_nocheck.a: $(BT)/nocheck/libxml.a
-	cp -p $< $@
-
 BTARGET=-b $(target)
 
-define rmake-target
-@mkdir -p $(@D)
-$(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base $(@F) CC="$(TARGET_CC)" CFLAGS="$(TARGET_CFLAGS)" CYCFLAGS="$(BTARGET) $(CYCFLAGS)" BUILDLIBFLAGS="$(BTARGET)" AR="$(TARGET_AR)" RANLIB="$(TARGET_RANLIB)"
-endef
-
-define rmake-target-aprof
-@mkdir -p $(@D)
-$(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base CC="$(TARGET_CC)" CFLAGS="-DCYC_REGION_PROFILE $(TARGET_CFLAGS)" CYCFLAGS="$(BTARGET) -pa $(CYCFLAGS)" BUILDLIBFLAGS="$(BTARGET)" AR="$(TARGET_AR)" RANLIB="$(TARGET_RANLIB)" $(@F)
-endef
-
-define rmake-target-gprof
-@mkdir -p $(@D)
-$(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base CC="$(TARGET_CC)" CFLAGS="-pg $(TARGET_CFLAGS)" CYCFLAGS="$(BTARGET) -pg $(CYCFLAGS)" BUILDLIBFLAGS="$(BTARGET)" AR="$(TARGET_AR)" RANLIB="$(TARGET_RANLIB)" $(@F)
-endef
-
-define rmake-target-nocheck
-@mkdir -p $(@D)
-$(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base CC="$(TARGET_CC)" CFLAGS="-DNO_CYC_NULL_CHECKS -DNO_CYC_BOUNDS_CHECKS $(TARGET_CFLAGS)" CYCFLAGS="$(BTARGET) --nochecks $(CYCFLAGS)" BUILDLIBFLAGS="$(BTARGET)" AR="$(TARGET_AR)" RANLIB="$(TARGET_RANLIB)" $(@F)
-endef
-
-define rmake-target-pthread
-@mkdir -p $(@D)
-$(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base CC="$(TARGET_CC)" CFLAGS="-D_HAVE_PTHREAD_ $(TARGET_CFLAGS)" CYCFLAGS="$(BTARGET) $(CYCFLAGS)" BUILDLIBFLAGS="$(BTARGET)" AR="$(TARGET_AR)" RANLIB="$(TARGET_RANLIB)" $(@F)
-endef
-
-$(BT)/libcycboot.a:
-	+$(rmake-target)
-
-$(BT)/aprof/libcycboot.a:
-	+$(rmake-target-aprof)
-
-$(BT)/gprof/libcycboot.a:
-	+$(rmake-target-gprof)
-
-$(BT)/nocheck/libcycboot.a:
-	+$(rmake-target-nocheck)
-
-LIBCYC_TARGET_PREREQS=bin/buildlib$(EXE) $(BL)/cyc-lib/$(target)/cycspecs bin/cyclone$(EXE) $(BL)/cyc-lib/cyc_include.h $(BL)/cyc-lib/$(target)/cyc_setjmp.h
+bin/buildlib$(EXE):: $(BL)/cyc-lib/$(target)/cycspecs
 
 # NB: as a side-effect this creates the include directory
-$(BT)/libcyc.a: $(LIBCYC_TARGET_PREREQS)
-	+$(rmake-target)
+include-target-directory:
 	for i in `(cd $(BT)/include; find * -type d)`;\
 	  do mkdir -p $(BL)/cyc-lib/$(target)/include/$$i; done
 	for i in `(cd $(BT)/include; find * -name '*.h')`;\
 	  do cp $(BT)/include/$$i $(BL)/cyc-lib/$(target)/include/$$i; done
 
-$(BT)/aprof/libcyc.a: $(LIBCYC_TARGET_PREREQS)
-	+$(rmake-target-aprof)
-
-$(BT)/gprof/libcyc.a: $(LIBCYC_TARGET_PREREQS)
-	+$(rmake-target-gprof)
-
-$(BT)/nocheck/libcyc.a: $(LIBCYC_TARGET_PREREQS)
-	+$(rmake-target-nocheck)
-
-$(BT)/libxml.a: tools
-	+$(rmake-target)
-
-$(BT)/aprof/libxml.a: tools
-	+$(rmake-target-aprof)
-
-$(BT)/gprof/libxml.a: tools
-	+$(rmake-target-gprof)
-
-$(BT)/nocheck/libxml.a: tools
-	+$(rmake-target-nocheck)
-
-$(BT)/nogc.a:
-	+$(rmake-target)
-
-$(BT)/aprof/nogc.a:
-	+$(rmake-target-aprof)
-
-$(BT)/gprof/nogc.a:
-	+$(rmake-target-gprof)
-
-$(BT)/nocheck/nogc.a:
-	+$(rmake-target-nocheck)
-
-ifeq ($(HAVE_PTHREAD),yes)
-$(BT)/pthread/nogc.a:
-	+$(rmake-target-pthread)
-endif
-
-$(BT)/runtime_cyc.a:
-	+$(rmake-target)
-
-$(BT)/aprof/runtime_cyc.a:
-	+$(rmake-target-aprof)
-
-$(BT)/gprof/runtime_cyc.a:
-	+$(rmake-target-gprof)
-
-$(BT)/nocheck/runtime_cyc.a:
-	+$(rmake-target-nocheck)
-
-ifeq ($(HAVE_PTHREAD),yes)
-$(BT)/pthread/runtime_cyc.a:
-	+$(rmake-target-pthread)
-endif
-
 directories::
 	@mkdir -p $(BL)/cyc-lib/$(target)/include
 
-$(BL)/cyc-lib/$(target)/cycspecs: $(CYCDIR)/config/buildspecs
+$(BL)/cyc-lib/$(target)/cycspecs: config/buildspecs
 	echo "*cyclone_target_cflags:" > $@
 	echo "  $(TARGET_CFLAGS)" >> $@
 	echo "" >> $@
@@ -531,7 +329,7 @@ $(BL)/cyc-lib/$(target)/cycspecs: $(CYCDIR)/config/buildspecs
 	echo "*cyclone_inc_path:" >> $@
 	echo "  $(INC_INSTALL)" >> $@
 	echo "" >> $@
-	$(CYCDIR)/config/buildspecs $(TARGET_CC) >> $@
+	config/buildspecs $(TARGET_CC) >> $@
 
 $(BL)/cyc-lib/$(target)/cyc_setjmp.h: bin/cyc-lib/libc.cys bin/buildlib$(EXE)
 	bin/buildlib$(EXE) $(BTARGET) -B$(BL)/cyc-lib -d $(BT)/include -setjmp > $@
@@ -549,29 +347,8 @@ cyclone: \
   $(BL)/cyc-lib/$(target)/runtime_cyc_pthread.a
 endif
 
-aprof: \
-  $(BL)/cyc-lib/$(target)/libcycboot_a.a \
-  $(BL)/cyc-lib/$(target)/libcyc_a.a \
-  $(BL)/cyc-lib/$(target)/nogc_a.a \
-  $(BL)/cyc-lib/$(target)/runtime_cyc_a.a
-
-gprof: \
-  $(BL)/cyc-lib/$(target)/libcycboot_pg.a \
-  $(BL)/cyc-lib/$(target)/libcyc_pg.a \
-  $(BL)/cyc-lib/$(target)/nogc_pg.a \
-  $(BL)/cyc-lib/$(target)/runtime_cyc_pg.a
-
-nocheck: \
-  $(BL)/cyc-lib/$(target)/libcycboot_nocheck.a \
-  $(BL)/cyc-lib/$(target)/libcyc_nocheck.a \
-  $(BL)/cyc-lib/$(target)/nogc_nocheck.a \
-  $(BL)/cyc-lib/$(target)/runtime_cyc_nocheck.a
-
 ifndef NO_XML_LIB
 xml:     $(BL)/cyc-lib/$(target)/libxml.a
-aprof:   $(BL)/cyc-lib/$(target)/libxml_a.a
-gprof:   $(BL)/cyc-lib/$(target)/libxml_pg.a
-nocheck: $(BL)/cyc-lib/$(target)/libxml_nocheck.a
 endif
 
 endif
@@ -643,7 +420,7 @@ endif
 ifdef OPTBUILD
 LIBSRC_FLAGS += OPTBUILD=X
 endif
-DO_LIBSRC=$(MAKE) -r -C $(BUILDDIR) -f $(CYCDIR)/Makefile_libsrc 
+DO_LIBSRC=$(MAKE) -r -C $(BUILDDIR) -f $(CYCDIR)/Makefile_libsrc
 
 cyclone_src:
 	-mkdir -p $(BUILDDIR)
@@ -680,7 +457,7 @@ CYC_LIB_UPDATE_FILES=cyc_include.h libc.cys
 # This target compares the C files in bin/genfiles to those in src
 # Lack of difference means running the update would have no real effect.
 XS=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-cmp: 
+cmp:
 	@for i in $(BUILDDIR_UPDATE_FILES);\
 	  do (cmp -s $(GENDIR)/$$i $(BUILDDIR)/$$i\
 	      || echo $(XS) $$i CHANGED) done
@@ -696,7 +473,7 @@ cmp:
               || echo $(XS) $$i CHANGED) done
 
 # This target updates what is in bin/genfiles and include.
-# It would be "dangerous" to invoke this target if we did not have 
+# It would be "dangerous" to invoke this target if we did not have
 # version control.  Only updates changed files (makes cvs faster).
 # A backup copy is stored in UNUPDATEDIR; it can be restored by
 # issuing "make unupdate". Only the latest "update" is kept.
@@ -757,7 +534,7 @@ unupdate:
 	@echo
 
 # Test the bootstrap sequence and execute the test suite on the bootstrapped compiler;
-# if this fails, unupdate 
+# if this fails, unupdate
 safeupdate: test_src_compiler
 	@($(MAKE) update && $(MAKE) clean && $(MAKE) all && $(MAKE) test) \
            || (echo && echo "XXXXXXXXX Safe update failed; unupdating:" && echo\
@@ -814,11 +591,12 @@ clean_nogc: clean_test clean_build
 	$(MAKE) -C tools/rewrite clean
 	$(MAKE) -C tools/aprof  clean
 	$(MAKE) -C tools/errorgen clean
+	$(MAKE) -C tools/stringify clean
 	$(MAKE) -C tests        clean
 #	$(MAKE) -C doc          clean
 	$(MAKE) -C lib/xml      clean
 	$(RM) -r $(BL)
-	$(RM) $(addprefix bin/, $(addsuffix $(EXE), cyclone cyclone_a cyclone_pg cyclone_nocheck cycdoc buildlib cycbison cyclex cycflex aprof rewrite errorgen))
+	$(RM) $(addprefix bin/, $(addsuffix $(EXE), cyclone cyclone_g cyclone_a cyclone_pg cyclone_nocheck cycdoc buildlib cycbison cyclex cycflex aprof rewrite errorgen stringify))
 	$(RM) *~ amon.out
 
 clean: clean_nogc
@@ -827,3 +605,5 @@ clean: clean_nogc
 ifeq ($(HAVE_PTHREAD),yes)
 	$(RM) -r gc_pthread
 endif
+
+include Makefile_base

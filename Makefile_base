@@ -1,86 +1,465 @@
 # NB: CYCDIR, CYCC, EXEC_PREFIX imported from Makefile
 
-include $(CYCDIR)/Makefile.inc
-VPATH=$(CYCDIR)/bin/genfiles:$(CYCDIR)/lib:$(CYCDIR)/lib/xml
+VPATH=bin/genfiles:lib:lib/xml
 
-libcycboot.a: $(O_BOOT_LIBS) boot_cstubs.$(O) boot_cycstubs.$(O)
+define ARCHIVE
 	-$(RM) $@
 	$(AR) rc $@ $^
 	$(RANLIB) $@
-
-libcyc.a: include/cstubs.$(O) include/cycstubs.$(O) $(O_BOOT_LIBS) $(O_LIBS)
+endef
+define TARGET_ARCHIVE
 	-$(RM) $@
-	$(AR) rc $@ $^
-	$(RANLIB) $@
+	$(TARGET_AR) rc $@ $^
+	$(TARGET_RANLIB) $@
+endef
 
-libxml.a: xml.$(O) xmlparse_tab.$(O) xmlscan.$(O) xmldump.$(O)
-	-$(RM) $@
-	$(AR) rc $@ $^
-	$(RANLIB) $@
+########################################################################
+LIBCYCBOOT_FILES = $(O_BOOT_LIBS) boot_cstubs.$(O) boot_cycstubs.$(O)
+$(BB)/libcycboot.a: $(addprefix $(BB)/, $(LIBCYCBOOT_FILES))
+	$(ARCHIVE)
+$(BB)/gdb/libcycboot.a: $(addprefix $(BB)/gdb/, $(LIBCYCBOOT_FILES))
+	$(ARCHIVE)
+$(BB)/aprof/libcycboot.a: $(addprefix $(BB)/aprof/, $(LIBCYCBOOT_FILES))
+	$(ARCHIVE)
+$(BB)/gprof/libcycboot.a: $(addprefix $(BB)/gprof/, $(LIBCYCBOOT_FILES))
+	$(ARCHIVE)
+$(BB)/nocheck/libcycboot.a: $(addprefix $(BB)/nocheck/, $(LIBCYCBOOT_FILES))
+	$(ARCHIVE)
+ifneq ($(build),$(target))
+$(BT)/libcycboot.a: $(addprefix $(BT)/, $(LIBCYCBOOT_FILES))
+	$(TARGET_ARCHIVE)
+endif
 
-xmlparse_tab.cyc: xmlparse.y
-	$(CYCDIR)/bin/cycbison$(EXE) -d $< -o $@
-xmlparse_tab.h: xmlparse.y
-	$(CYCDIR)/bin/cycbison$(EXE) -d $< -o xmlparse_tab.cyc
-xmlscan.cyc: xmlparse_tab.h
-xmlscan.cyc: xmlscan.cyl
-	$(CYCDIR)/bin/cyclex$(EXE) $< $@
+########################################################################
+LIBCYC_FILES = include/cycstubs.$(O) include/cstubs.$(O) $(O_BOOT_LIBS) $(O_LIBS)
+$(BB)/libcyc.a: $(addprefix $(BB)/, $(LIBCYC_FILES))
+	$(ARCHIVE)
+$(BB)/gdb/libcyc.a: $(addprefix $(BB)/gdb/, $(LIBCYC_FILES))
+	$(ARCHIVE)
+$(BB)/aprof/libcyc.a: $(addprefix $(BB)/aprof/, $(LIBCYC_FILES))
+	$(ARCHIVE)
+$(BB)/gprof/libcyc.a: $(addprefix $(BB)/gprof/, $(LIBCYC_FILES))
+	$(ARCHIVE)
+$(BB)/nocheck/libcyc.a: $(addprefix $(BB)/nocheck/, $(LIBCYC_FILES))
+	$(ARCHIVE)
+ifneq ($(build),$(target))
+$(BT)/libcyc.a: $(addprefix $(BT)/, $(LIBCYC_FILES))
+	$(TARGET_ARCHIVE)
+endif
 
-# FIX: precore_c.h should be pre-req
-include/cstubs.c: include/cycstubs.cyc include/precore_c.h
+########################################################################
+LIBXML_FILES = xml.$(O) xmlparse_tab.$(O) xmlscan.$(O) xmldump.$(O)
+$(BB)/libxml.a: $(addprefix $(BB)/, $(LIBXML_FILES))
+	$(ARCHIVE)
+$(BB)/gdb/libxml.a: $(addprefix $(BB)/gdb/, $(LIBXML_FILES))
+	$(ARCHIVE)
+$(BB)/aprof/libxml.a: $(addprefix $(BB)/aprof/, $(LIBXML_FILES))
+	$(ARCHIVE)
+$(BB)/gprof/libxml.a: $(addprefix $(BB)/gprof/, $(LIBXML_FILES))
+	$(ARCHIVE)
+$(BB)/nocheck/libxml.a: $(addprefix $(BB)/nocheck/, $(LIBXML_FILES))
+	$(ARCHIVE)
+ifneq ($(build),$(target))
+$(BT)/libxml.a: $(addprefix $(BT)/, $(LIBXML_FILES))
+	$(TARGET_ARCHIVE)
+endif
 
-# FIX: the rule creates a bunch of header files but the header
-# files aren't targets, so, dependencies are wrong and make can
-# get confused.
-# NB: the -B is needed so buildlib can find the cycspecs file
-# FIX: buildlib should be pre-req
-include/cycstubs.cyc: $(CYCDIR)/bin/cyc-lib/libc.cys
-	$(CYCDIR)/bin/buildlib $(BUILDLIBFLAGS) -B$(CYCDIR)/bin/lib/cyc-lib -d $(@D) $<
+########################################################################
+$(BB)/runtime_cyc.a: $(addprefix $(BB)/, $(O_RUNTIME))
+	$(ARCHIVE)
+$(BB)/gdb/runtime_cyc.a: $(addprefix $(BB)/gdb/, $(O_RUNTIME))
+	$(ARCHIVE)
+$(BB)/aprof/runtime_cyc.a: $(addprefix $(BB)/aprof/, $(O_RUNTIME))
+	$(ARCHIVE)
+$(BB)/gprof/runtime_cyc.a: $(addprefix $(BB)/gprof/, $(O_RUNTIME))
+	$(ARCHIVE)
+$(BB)/nocheck/runtime_cyc.a: $(addprefix $(BB)/nocheck/, $(O_RUNTIME))
+	$(ARCHIVE)
+$(BB)/pthread/runtime_cyc.a: $(addprefix $(BB)/pthread/, $(O_RUNTIME))
+	$(ARCHIVE)
+ifneq ($(build),$(target))
+$(BT)/runtime_cyc.a: $(addprefix $(BT)/, $(O_RUNTIME))
+	$(TARGET_ARCHIVE)
+$(BT)/pthread/runtime_cyc.a: $(addprefix $(BT)/pthread/, $(O_RUNTIME))
+	$(TARGET_ARCHIVE)
+endif
 
-include/precore_c.h: $(CYCDIR)/include/core.h
-#  $(CYCDIR)/bin/cyclone$(EXE) \ # FIX: should be pre-req
-#  $(CYCDIR)/bin/lib/cyc-lib/$(build)/cycspecs 
-	$(CYCC) -B$(EXEC_PREFIX) -stopafter-toc -pp -D_CYC_GENERATE_PRECORE_C_ -nocyc -noremoveunused -noexpandtypedefs -nocyc_setjmp -x cyc -o $@ $<
+########################################################################
+$(BB)/nogc.$(O): malloc.c
+$(BB)/gdb/nogc.$(O): malloc.c
+$(BB)/aprof/nogc.$(O): malloc.c
+$(BB)/gprof/nogc.$(O): malloc.c
+$(BB)/nocheck/nogc.$(O): malloc.c
+$(BB)/pthread/nogc.$(O): malloc.c
+ifneq ($(build),$(target))
+$(BT)/nogc.$(O): malloc.c
+$(BT)/pthread/nogc.$(O): malloc.c
+endif
 
-nogc.a: nogc.$(O) $(CYCDIR)/bin/genfiles/malloc.c
-	-$(RM) $@
-	$(AR) rc $@ $<
-	$(RANLIB) $@
+$(BB)/nogc.a: $(BB)/nogc.$(O)
+	$(ARCHIVE)
+$(BB)/gdb/nogc.a: $(BB)/gdb/nogc.$(O)
+	$(ARCHIVE)
+$(BB)/aprof/nogc.a: $(BB)/aprof/nogc.$(O)
+	$(ARCHIVE)
+$(BB)/gprof/nogc.a: $(BB)/gprof/nogc.$(O)
+	$(ARCHIVE)
+$(BB)/nocheck/nogc.a: $(BB)/nocheck/nogc.$(O)
+	$(ARCHIVE)
+$(BB)/pthread/nogc.a: $(BB)/pthread/nogc.$(O)
+	$(ARCHIVE)
+ifneq ($(build),$(target))
+$(BT)/nogc.a: $(BT)/nogc.$(O)
+	$(TARGET_ARCHIVE)
+$(BT)/pthread/nogc.a: $(BT)/pthread/nogc.$(O)
+	$(TARGET_ARCHIVE)
+endif
 
-runtime_cyc.a: $(O_RUNTIME)
-	-$(RM) $@
-	$(AR) rc $@ $^
-	$(RANLIB) $@
+########################################################################
+# NB: we generate these files into lib/xml, rather than into
+# the build directories, because bugs in make (as with
+# install_path and nogc, below) would require an extremely
+# verbose workaround
 
-# NB: use of $(build) prevents cross compilation, but we don't know
-# how to cross compile the garbage collector anyway...
-cyclone$(EXE): $(O_SRCS) install_path.$(O) libcycboot.a runtime_cyc.a $(CYCDIR)/bin/lib/cyc-lib/$(build)/gc.a
-	$(CC) -o $@ $^ $(LDFLAGS)
+lib/xml/xmlparse_tab.cyc: lib/xml/xmlparse.y
+	bin/cycbison$(EXE) -d $< -o $@
+lib/xml/xmlparse_tab.h: lib/xml/xmlparse.y
+	bin/cycbison$(EXE) -d $< -o xmlparse_tab.cyc
+lib/xml/xmlscan.cyc: lib/xml/xmlparse_tab.h
+lib/xml/xmlscan.cyc: lib/xml/xmlscan.cyl
+	bin/cyclex$(EXE) $< $@
 
+########################################################################
 # NB: use of $(build) prevents cross compilation, but install_path is only
 # used by cyclone, cycdoc, and buildlib, which we don't cross compile.
 # FIX: the wchar stuff should be moved to the cycspecs file
-install_path.c: $(CYCDIR)/Makefile.inc
+define CREATE_INSTALL_PATH
 	 (echo "char *Carch = \"$(build)\";"; \
 	  echo "char *Cdef_lib_path = \"$(LIB_INSTALL)\";"; \
 	  echo "char *Cversion = \"$(VERSION)\";"; \
 	  echo "int Wchar_t_unsigned = $(WCHAR_T_UNSIGNED);"; \
 	  echo "int Sizeof_wchar_t = $(SIZEOF_WCHAR_T);") > $@
+endef
+$(BB)/install_path.c: Makefile.inc
+	$(CREATE_INSTALL_PATH)
+$(BB)/gdb/install_path.c: Makefile.inc
+	$(CREATE_INSTALL_PATH)
+$(BB)/aprof/install_path.c: Makefile.inc
+	$(CREATE_INSTALL_PATH)
+$(BB)/gprof/install_path.c: Makefile.inc
+	$(CREATE_INSTALL_PATH)
+$(BB)/nocheck/install_path.c: Makefile.inc
+	$(CREATE_INSTALL_PATH)
 
-cycdoc$(EXE): $(addsuffix .$(O), $(CYCDOC_SRCS)) install_path.$(O) libcycboot.a runtime_cyc.a $(CYCDIR)/bin/lib/cyc-lib/$(build)/gc.a
+########################################################################
+$(BB)/include/cstubs.o: $(BB)/include/precore_c.h
+$(BB)/gdb/include/cstubs.o: $(BB)/gdb/include/precore_c.h
+$(BB)/aprof/include/cstubs.o: $(BB)/aprof/include/precore_c.h
+$(BB)/gprof/include/cstubs.o: $(BB)/gprof/include/precore_c.h
+$(BB)/nocheck/include/cstubs.o: $(BB)/nocheck/include/precore_c.h
+ifneq ($(build),$(target))
+$(BT)/include/cstubs.o: $(BT)/include/precore_c.h
+endif
+
+########################################################################
+# FIX: the rule creates a bunch of header files but the header
+# files aren't targets, so, dependencies are wrong and make can
+# get confused.
+# NB: the -B is needed so buildlib can find the cycspecs file
+STUBS_FILES = bin/cyc-lib/libc.cys bin/buildlib$(EXE) $(BL)/cyc-lib/$(build)/cycspecs
+TARGET_STUBS_FILES = bin/cyc-lib/libc.cys bin/buildlib$(EXE) $(BL)/cyc-lib/$(target)/cycspecs
+define CREATE_STUBS
+bin/buildlib $(BUILDLIBFLAGS) -Bbin/lib/cyc-lib -d $(@D) $<
+endef
+define TARGET_CREATE_STUBS
+bin/buildlib $(BTARGET) $(BUILDLIBFLAGS) -Bbin/lib/cyc-lib -d $(@D) $<
+endef
+$(BB)/include/cycstubs.cyc: $(STUBS_FILES)
+	$(CREATE_STUBS)
+$(BB)/gdb/include/cycstubs.cyc: $(STUBS_FILES)
+	$(CREATE_STUBS)
+$(BB)/aprof/include/cycstubs.cyc: $(STUBS_FILES)
+	$(CREATE_STUBS)
+$(BB)/gprof/include/cycstubs.cyc: $(STUBS_FILES)
+	$(CREATE_STUBS)
+$(BB)/nocheck/include/cycstubs.cyc: $(STUBS_FILES)
+	$(CREATE_STUBS)
+ifneq ($(build),$(target))
+$(BT)/include/cycstubs.cyc: $(TARGET_STUBS_FILES)
+	$(TARGET_CREATE_STUBS)
+endif
+
+$(BB)/include/cstubs.c: $(STUBS_FILES)
+	$(CREATE_STUBS)
+$(BB)/gdb/include/cstubs.c: $(STUBS_FILES)
+	$(CREATE_STUBS)
+$(BB)/aprof/include/cstubs.c: $(STUBS_FILES)
+	$(CREATE_STUBS)
+$(BB)/gprof/include/cstubs.c: $(STUBS_FILES)
+	$(CREATE_STUBS)
+$(BB)/nocheck/include/cstubs.c: $(STUBS_FILES)
+	$(CREATE_STUBS)
+ifneq ($(build),$(target))
+$(BT)/include/cstubs.c: $(TARGET_STUBS_FILES)
+	$(TARGET_CREATE_STUBS)
+endif
+
+########################################################################
+PRECORE_FILES = include/core.h bin/cyclone $(BL)/cyc-lib/$(build)/cycspecs
+TARGET_PRECORE_FILES = include/core.h bin/cyclone $(BL)/cyc-lib/$(target)/cycspecs
+define CREATE_PRECORE
+$(CYCC) -B$(EXEC_PREFIX) -stopafter-toc -pp -D_CYC_GENERATE_PRECORE_C_ -nocyc -noremoveunused -noexpandtypedefs -nocyc_setjmp -x cyc -o $@ $<
+endef
+
+$(BB)/include/precore_c.h: $(PRECORE_FILES)
+	$(CREATE_PRECORE)
+$(BB)/gdb/include/precore_c.h: $(PRECORE_FILES)
+	$(CREATE_PRECORE)
+$(BB)/aprof/include/precore_c.h: $(PRECORE_FILES)
+	$(CREATE_PRECORE)
+$(BB)/gprof/include/precore_c.h: $(PRECORE_FILES)
+	$(CREATE_PRECORE)
+$(BB)/nocheck/include/precore_c.h: $(PRECORE_FILES)
+	$(CREATE_PRECORE)
+ifneq ($(build),$(target))
+$(BT)/include/precore_c.h: $(TARGET_PRECORE_FILES)
+	$(CYCC) $(BTARGET) -B$(EXEC_PREFIX) -stopafter-toc -pp -D_CYC_GENERATE_PRECORE_C_ -nocyc -noremoveunused -noexpandtypedefs -nocyc_setjmp -x cyc -o $@ $<
+endif
+
+########################################################################
+# NB: use of $(build) prevents cross compilation, but we don't know
+# how to cross compile the garbage collector anyway...
+GCFILE = $(BL)/cyc-lib/$(build)/gc.a
+LINKFILES = install_path.$(O) libcycboot.a runtime_cyc.a
+
+########################################################################
+$(BB)/cyclone$(EXE): $(addprefix $(BB)/, $(O_SRCS) $(LINKFILES)) $(GCFILE)
+	$(CC) -o $@ $^ $(LDFLAGS)
+$(BB)/gdb/cyclone$(EXE): $(addprefix $(BB)/gdb/, $(O_SRCS) $(LINKFILES)) $(GCFILE)
+	$(CC) -o $@ $^ $(LDFLAGS)
+$(BB)/aprof/cyclone$(EXE): $(addprefix $(BB)/aprof/, $(O_SRCS) $(LINKFILES)) $(GCFILE)
+	$(CC) -o $@ $^ $(LDFLAGS)
+$(BB)/gprof/cyclone$(EXE): $(addprefix $(BB)/gprof/, $(O_SRCS) $(LINKFILES)) $(GCFILE)
+	$(CC) -o $@ $^ $(LDFLAGS)
+$(BB)/nocheck/cyclone$(EXE): $(addprefix $(BB)/nocheck/, $(O_SRCS) $(LINKFILES)) $(GCFILE)
+	$(CC) -o $@ $^ $(LDFLAGS)
+
+########################################################################
+CYCDOC_FILES = $(addsuffix .$(O), $(CYCDOC_SRCS)) $(LINKFILES)
+$(BB)/cycdoc$(EXE): $(addprefix $(BB)/, $(CYCDOC_FILES)) $(GCFILE)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+$(BB)/gdb/cycdoc$(EXE): $(addprefix $(BB)/gdb/, $(CYCDOC_FILES)) $(GCFILE)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+$(BB)/aprof/cycdoc$(EXE): $(addprefix $(BB)/aprof/, $(CYCDOC_FILES)) $(GCFILE)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+$(BB)/gprof/cycdoc$(EXE): $(addprefix $(BB)/gprof/, $(CYCDOC_FILES)) $(GCFILE)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+$(BB)/nocheck/cycdoc$(EXE): $(addprefix $(BB)/nocheck/, $(CYCDOC_FILES)) $(GCFILE)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-buildlib$(EXE): $(addsuffix .$(O), $(BUILDLIB_SRCS)) install_path.$(O) libcycboot.a runtime_cyc.a $(CYCDIR)/bin/lib/cyc-lib/$(build)/gc.a
+########################################################################
+BUILDLIB_FILES = $(addsuffix .$(O), $(BUILDLIB_SRCS)) $(LINKFILES)
+$(BB)/buildlib$(EXE): $(addprefix $(BB)/, $(BUILDLIB_FILES)) $(GCFILE)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+$(BB)/gdb/buildlib$(EXE): $(addprefix $(BB)/gdb/, $(BUILDLIB_FILES)) $(GCFILE)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+$(BB)/aprof/buildlib$(EXE): $(addprefix $(BB)/aprof/, $(BUILDLIB_FILES)) $(GCFILE)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+$(BB)/gprof/buildlib$(EXE): $(addprefix $(BB)/gprof/, $(BUILDLIB_FILES)) $(GCFILE)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+$(BB)/nocheck/buildlib$(EXE): $(addprefix $(BB)/nocheck/, $(BUILDLIB_FILES)) $(GCFILE)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
+########################################################################
 # NB: the invocation
 #    $(if $(findstring $(notdir $@), $(O_NOOPT_SRCS)), , $(OPTFLAG))
 # expands to $(OPTFLAG) if the target is not in $(O_NOOPT_SRCS),
 # and to the empty string otherwise.  We use it to turn off optimization
 # for files where it is expensive (parse_tab.o).
 
-%.$(O): %.c
-	$(CC) $(CFLAGS) -c $(CPPFLAGS) $(if $(findstring $(notdir $@), $(O_NOOPT_SRCS)), , $(OPTFLAG)) $< -o $@
+########################################################################
 
-%.$(O): %.cyc 
-	$(CYCC) $(CYCFLAGS) -c -I. -Iinclude -I$(CYCDIR)/include -I$(CYCDIR)/lib/xml -B$(EXEC_PREFIX) $(if $(findstring $(notdir $@), $(O_NOOPT_SRCS)), , $(OPTFLAG)) -o $@ $<
+# Cancel implicit rule
+%.$(O): %.c
+
+########################################################################
+# For the regular compiler
+
+define REGULAR_CCARGS
+$(CFLAGS) -c $(CPPFLAGS) $(if $(findstring $(notdir $@), $(O_NOOPT_SRCS)), , $(OPTFLAG)) $< -o $@
+endef
+# for .c files in vpath
+$(BB)/%.$(O): %.c
+	$(CC) $(REGULAR_CCARGS)
+
+# others not in vpath
+# NB: can't use % in place of cstubs or install_path, seems like a bug in make
+$(BB)/include/cstubs.$(O): $(BB)/include/cstubs.c
+	$(CC) $(REGULAR_CCARGS)
+
+$(BB)/install_path.$(O): $(BB)/install_path.c
+	$(CC) $(REGULAR_CCARGS)
+
+define REGULAR_CYCARGS
+$(CYCFLAGS) -c -I$(BB)/include -Iinclude -Ilib/xml -B$(EXEC_PREFIX) $(if $(findstring $(notdir $@), $(O_NOOPT_SRCS)), , $(OPTFLAG)) -o $@ $<
+endef
+# for .cyc files in vpath
+$(BB)/%.$(O): %.cyc
+	$(CYCC) $(REGULAR_CYCARGS)
+
+# for include/cycstubs.cyc
+# NB: can't use % in place of cycstubs, seems like a bug in make
+$(BB)/include/cycstubs.$(O): $(BB)/include/cycstubs.cyc
+	$(CYCC) $(REGULAR_CYCARGS)
+
+########################################################################
+# For the aprof'd compiler
+APROF_CFLAGS = -DCYC_REGION_PROFILE
+APROF_CYCFLAGS = -pa
+
+# for .c files in vpath
+$(BB)/aprof/%.$(O): %.c
+	$(CC) $(APROF_CFLAGS) $(REGULAR_CCARGS)
+
+# others not in vpath
+# NB: can't use % in place of cstubs or install_path, seems like a bug in make
+$(BB)/aprof/include/cstubs.$(O): $(BB)/aprof/include/cstubs.c
+	$(CC) $(APROF_CFLAGS) $(REGULAR_CCARGS)
+
+$(BB)/aprof/install_path.$(O): $(BB)/aprof/install_path.c
+	$(CC) $(APROF_CFLAGS) $(REGULAR_CCARGS)
+
+# for .cyc files in vpath
+$(BB)/aprof/%.$(O): %.cyc
+	$(CYCC) $(APROF_CYCFLAGS) $(REGULAR_CYCARGS)
+
+# for include/cycstubs.cyc
+# NB: can't use % in place of cycstubs, seems like a bug in make
+$(BB)/aprof/include/cycstubs.$(O): $(BB)/aprof/include/cycstubs.cyc
+	$(CYCC) $(APROF_CYCFLAGS) $(REGULAR_CYCARGS)
+
+########################################################################
+# For the gprof'd compiler
+GPROF_CFLAGS = -pg
+GPROF_CYCFLAGS = -pa
+
+# for .c files in vpath
+$(BB)/gprof/%.$(O): %.c
+	$(CC) $(GPROF_CFLAGS) $(REGULAR_CCARGS)
+
+# others not in vpath
+# NB: can't use % in place of cstubs or install_path, seems like a bug in make
+$(BB)/gprof/include/cstubs.$(O): $(BB)/gprof/include/cstubs.c
+	$(CC) $(GPROF_CFLAGS) $(REGULAR_CCARGS)
+
+$(BB)/gprof/install_path.$(O): $(BB)/gprof/install_path.c
+	$(CC) $(GPROF_CFLAGS) $(REGULAR_CCARGS)
+
+# for .cyc files in vpath
+$(BB)/gprof/%.$(O): %.cyc
+	$(CYCC) $(GPROF_CYCFLAGS) $(REGULAR_CYCARGS)
+
+# for include/cycstubs.cyc
+# NB: can't use % in place of cycstubs, seems like a bug in make
+$(BB)/gprof/include/cycstubs.$(O): $(BB)/gprof/include/cycstubs.cyc
+	$(CYCC) $(GPROF_CYCFLAGS) $(REGULAR_CYCARGS)
+
+########################################################################
+# For the nocheck'd compiler
+NOCHECK_CFLAGS = -DNO_CYC_NULL_CHECKS -DNO_CYC_BOUNDS_CHECKS
+NOCHECK_CYCFLAGS = -nochecks
+
+# for .c files in vpath
+$(BB)/nocheck/%.$(O): %.c
+	$(CC) $(NOCHECK_CFLAGS) $(REGULAR_CCARGS)
+
+# others not in vpath
+# NB: can't use % in place of cstubs or install_path, seems like a bug in make
+$(BB)/nocheck/include/cstubs.$(O): $(BB)/nocheck/include/cstubs.c
+	$(CC) $(NOCHECK_CFLAGS) $(REGULAR_CCARGS)
+
+$(BB)/nocheck/install_path.$(O): $(BB)/nocheck/install_path.c
+	$(CC) $(NOCHECK_CFLAGS) $(REGULAR_CCARGS)
+
+# for .cyc files in vpath
+$(BB)/nocheck/%.$(O): %.cyc
+	$(CYCC) $(NOCHECK_CYCFLAGS) $(REGULAR_CYCARGS)
+
+# for include/cycstubs.cyc
+# NB: can't use % in place of cycstubs, seems like a bug in make
+$(BB)/nocheck/include/cycstubs.$(O): $(BB)/nocheck/include/cycstubs.cyc
+	$(CYCC) $(NOCHECK_CYCFLAGS) $(REGULAR_CYCARGS)
+
+########################################################################
+# For the gdb'd compiler
+GDB_CFLAGS = -g
+GDB_CYCFLAGS = -g
+
+# for .c files in vpath
+$(BB)/gdb/%.$(O): %.c
+	$(CC) $(GDB_CFLAGS) $(REGULAR_CCARGS)
+
+# others not in vpath
+# NB: can't use % in place of cstubs or install_path, seems like a bug in make
+$(BB)/gdb/include/cstubs.$(O): $(BB)/gdb/include/cstubs.c
+	$(CC) $(GDB_CFLAGS) $(REGULAR_CCARGS)
+
+$(BB)/gdb/install_path.$(O): $(BB)/gdb/install_path.c
+	$(CC) $(GDB_CFLAGS) $(REGULAR_CCARGS)
+
+# for .cyc files in vpath
+$(BB)/gdb/%.$(O): %.cyc
+	$(CYCC) $(GDB_CYCFLAGS) $(REGULAR_CYCARGS)
+
+# for include/cycstubs.cyc
+# NB: can't use % in place of cycstubs, seems like a bug in make
+$(BB)/gdb/include/cycstubs.$(O): $(BB)/gdb/include/cycstubs.cyc
+	$(CYCC) $(GDB_CYCFLAGS) $(REGULAR_CYCARGS)
+
+########################################################################
+# For the special pthread versions of nogc.a and runtime_cyc.a
+
+PTHREAD_CFLAGS = -D_HAVE_PTHREAD_
+
+# for .c files in vpath
+$(BB)/pthread/%.$(O): %.c
+	$(CC) $(PTHREAD_CFLAGS) $(REGULAR_CCARGS)
+
+########################################################################
+# For the cross compiler
+
+ifneq ($(build),$(target))
+
+define TARGET_CCARGS
+$(TARGET_CFLAGS) -c $(CPPFLAGS) $(if $(findstring $(notdir $@), $(O_NOOPT_SRCS)), , $(OPTFLAG)) $< -o $@
+endef
+# for .c files in vpath
+$(BT)/%.$(O): %.c
+	$(TARGET_CC) $(TARGET_CCARGS)
+
+# others not in vpath
+# NB: can't use % in place of cstubs or install_path, seems like a bug in make
+$(BT)/include/cstubs.$(O): $(BT)/include/cstubs.c
+	$(TARGET_CC) $(TARGET_CCARGS)
+
+$(BT)/install_path.$(O): $(BT)/install_path.c
+	$(TARGET_CC) $(TARGET_CCARGS)
+
+# for .cyc files in vpath
+$(BT)/%.$(O): %.cyc
+	$(CYCC) $(BTARGET) $(REGULAR_CYCARGS)
+
+# for include/cycstubs.cyc
+# NB: can't use % in place of cycstubs, seems like a bug in make
+$(BT)/include/cycstubs.$(O): $(BT)/include/cycstubs.cyc
+	$(CYCC) $(BTARGET) $(REGULAR_CYCARGS)
+
+# For the special pthread versions of nogc.a and runtime_cyc.a
+
+PTHREAD_CFLAGS = -D_HAVE_PTHREAD_
+
+# for .c files in vpath
+$(BT)/pthread/%.$(O): %.c
+	$(TARGET_CC) $(PTHREAD_CFLAGS) $(TARGET_CCARGS)
+
+endif
