@@ -369,41 +369,41 @@ extern struct Cyc_Set_Set*Cyc_Set_intersect(struct Cyc_Set_Set*,struct Cyc_Set_S
 # 102
 extern int Cyc_Set_member(struct Cyc_Set_Set*,void*);
 # 116
-extern void*Cyc_Set_fold(void*(*)(void*,void*),struct Cyc_Set_Set*,void*);struct Cyc_AssnDef_Uint_AssnDef_Term_struct{int tag;unsigned f1;void*f2;};struct Cyc_AssnDef_Unop_AssnDef_Term_struct{int tag;enum Cyc_Absyn_Primop f1;void*f2;void*f3;};struct Cyc_AssnDef_Binop_AssnDef_Term_struct{int tag;enum Cyc_Absyn_Primop f1;void*f2;void*f3;void*f4;};struct Cyc_AssnDef_Cast_AssnDef_Term_struct{int tag;void*f1;void*f2;};struct Cyc_AssnDef_Select_AssnDef_Term_struct{int tag;void*f1;void*f2;void*f3;};struct Cyc_AssnDef_Update_AssnDef_Term_struct{int tag;void*f1;void*f2;void*f3;};struct Cyc_AssnDef_Aggr_AssnDef_Term_struct{int tag;int f1;unsigned f2;struct Cyc_List_List*f3;void*f4;};struct Cyc_AssnDef_Proj_AssnDef_Term_struct{int tag;void*f1;unsigned f2;void*f3;};struct Cyc_AssnDef_AggrUpdate_AssnDef_Term_struct{int tag;void*f1;unsigned f2;void*f3;};struct Cyc_AssnDef_Addr_AssnDef_Term_struct{int tag;struct Cyc_Absyn_Vardecl*f1;void*f2;};struct Cyc_AssnDef_Alloc_AssnDef_Term_struct{int tag;struct Cyc_Absyn_Exp*f1;void*f2;int f3;void*f4;};struct Cyc_AssnDef_Tagof_AssnDef_Term_struct{int tag;void*f1;};
-# 102 "assndef.h"
+extern void*Cyc_Set_fold(void*(*)(void*,void*),struct Cyc_Set_Set*,void*);struct Cyc_AssnDef_Uint_AssnDef_Term_struct{int tag;unsigned f1;void*f2;};struct Cyc_AssnDef_Unop_AssnDef_Term_struct{int tag;enum Cyc_Absyn_Primop f1;void*f2;void*f3;};struct Cyc_AssnDef_Binop_AssnDef_Term_struct{int tag;enum Cyc_Absyn_Primop f1;void*f2;void*f3;void*f4;};struct Cyc_AssnDef_Cast_AssnDef_Term_struct{int tag;void*f1;void*f2;};struct Cyc_AssnDef_Select_AssnDef_Term_struct{int tag;void*f1;void*f2;void*f3;};struct Cyc_AssnDef_Update_AssnDef_Term_struct{int tag;void*f1;void*f2;void*f3;};struct Cyc_AssnDef_Aggr_AssnDef_Term_struct{int tag;int f1;unsigned f2;struct Cyc_List_List*f3;void*f4;};struct Cyc_AssnDef_Proj_AssnDef_Term_struct{int tag;void*f1;unsigned f2;void*f3;};struct Cyc_AssnDef_AggrUpdate_AssnDef_Term_struct{int tag;void*f1;unsigned f2;void*f3;};struct Cyc_AssnDef_Addr_AssnDef_Term_struct{int tag;struct Cyc_Absyn_Vardecl*f1;void*f2;};struct Cyc_AssnDef_Alloc_AssnDef_Term_struct{int tag;struct Cyc_Absyn_Exp*f1;void*f2;int f3;void*f4;};struct Cyc_AssnDef_Offseti_AssnDef_Term_struct{int tag;void*f1;void*f2;void*f3;};struct Cyc_AssnDef_Tagof_AssnDef_Term_struct{int tag;void*f1;};
+# 101 "assndef.h"
 int Cyc_AssnDef_termcmp(void*,void*);
 int Cyc_AssnDef_termhash(void*);
-# 105
+# 104
 extern struct _fat_ptr Cyc_AssnDef_term2string(void*);
-# 119
+# 118
 extern void*Cyc_AssnDef_zero (void);
-# 123
+# 122
 extern void*Cyc_AssnDef_uint(unsigned);
 extern void*Cyc_AssnDef_cnst(struct Cyc_Absyn_Exp*);
 extern void*Cyc_AssnDef_select(void*,void*,void*);
 extern void*Cyc_AssnDef_update(void*,void*,void*);
-# 128
+# 127
 extern void*Cyc_AssnDef_unop(enum Cyc_Absyn_Primop,void*,void*);
 extern void*Cyc_AssnDef_binop(enum Cyc_Absyn_Primop,void*,void*,void*);
-# 133
+# 132
 extern void*Cyc_AssnDef_proj(void*,unsigned,void*);
-# 141
+# 140
 extern void*Cyc_AssnDef_numelts_term(void*);
-# 162
+# 161
 extern void*Cyc_AssnDef_get_term_type(void*);
-# 175 "assndef.h"
+# 174 "assndef.h"
 enum Cyc_AssnDef_Primreln{Cyc_AssnDef_Eq =0U,Cyc_AssnDef_Neq =1U,Cyc_AssnDef_SLt =2U,Cyc_AssnDef_SLte =3U,Cyc_AssnDef_ULt =4U,Cyc_AssnDef_ULte =5U};struct Cyc_AssnDef_Prim_AssnDef_Assn_struct{int tag;void*f1;enum Cyc_AssnDef_Primreln f2;void*f3;};struct Cyc_AssnDef_And_AssnDef_Assn_struct{int tag;void*f1;void*f2;};struct Cyc_AssnDef_Or_AssnDef_Assn_struct{int tag;void*f1;void*f2;};
-# 187
+# 186
 int Cyc_AssnDef_assncmp(void*,void*);
-# 189
+# 188
 extern struct _fat_ptr Cyc_AssnDef_assn2dag(void*);
-# 194
+# 193
 extern void*Cyc_AssnDef_and(void*,void*);
 extern void*Cyc_AssnDef_or(void*,void*);
 extern void*Cyc_AssnDef_not(void*);
-# 200
+# 199
 extern void*Cyc_AssnDef_slt(void*,void*);
-# 202
+# 201
 extern void*Cyc_AssnDef_ult(void*,void*);
 # 38 "tcutil.h"
 int Cyc_Tcutil_is_signed_type(void*);
@@ -419,7 +419,7 @@ int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*);
 void*Cyc_Warn_impos(struct _fat_ptr,struct _fat_ptr);
 # 72 "absynpp.h"
 struct _fat_ptr Cyc_Absynpp_prim2string(enum Cyc_Absyn_Primop);
-# 79 "flags.h"
+# 83 "flags.h"
 extern int Cyc_Flags_print_unprovable;struct Cyc_Hashtable_Table;
 # 39 "hashtable.h"
 extern struct Cyc_Hashtable_Table*Cyc_Hashtable_create(int,int(*)(void*,void*),int(*)(void*));
@@ -1607,7 +1607,7 @@ static void Cyc_PrattProver_add_numelts_info(int dummy,struct Cyc_PrattProver_Gr
 struct Cyc_PrattProver_Node*zeronode=({struct Cyc_PrattProver_Graph*_Tmp0=g;Cyc_PrattProver_term2node(_Tmp0,Cyc_AssnDef_zero());});
 # 2079
 struct Cyc_PrattProver_Node*n=g->rows;for(0;n!=0;n=n->next){
-void*_Tmp0=n->rep;unsigned _Tmp1;void*_Tmp2;if(*((int*)_Tmp0)==3){if(((struct Cyc_AssnDef_Unop_AssnDef_Term_struct*)_Tmp0)->f1==Cyc_Absyn_Numelts){if(*((int*)((struct Cyc_AssnDef_Unop_AssnDef_Term_struct*)_Tmp0)->f2)==4){if(((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)((struct Cyc_AssnDef_Unop_AssnDef_Term_struct*)_Tmp0)->f2)->f1==Cyc_Absyn_Plus){if(*((int*)((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)((struct Cyc_AssnDef_Unop_AssnDef_Term_struct*)_Tmp0)->f2)->f3)==0){_Tmp2=(void*)((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)((struct Cyc_AssnDef_Unop_AssnDef_Term_struct*)_Tmp0)->f2)->f2;_Tmp1=((struct Cyc_AssnDef_Uint_AssnDef_Term_struct*)((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)((struct Cyc_AssnDef_Unop_AssnDef_Term_struct*)_Tmp0)->f2)->f3)->f1;{void*x=_Tmp2;unsigned uk=_Tmp1;
+void*_Tmp0=n->rep;unsigned _Tmp1;void*_Tmp2;if(*((int*)_Tmp0)==3){if(((struct Cyc_AssnDef_Unop_AssnDef_Term_struct*)_Tmp0)->f1==Cyc_Absyn_Numelts){if(*((int*)((struct Cyc_AssnDef_Unop_AssnDef_Term_struct*)_Tmp0)->f2)==14){if(*((int*)((struct Cyc_AssnDef_Offseti_AssnDef_Term_struct*)((struct Cyc_AssnDef_Unop_AssnDef_Term_struct*)_Tmp0)->f2)->f2)==0){_Tmp2=(void*)((struct Cyc_AssnDef_Offseti_AssnDef_Term_struct*)((struct Cyc_AssnDef_Unop_AssnDef_Term_struct*)_Tmp0)->f2)->f1;_Tmp1=((struct Cyc_AssnDef_Uint_AssnDef_Term_struct*)((struct Cyc_AssnDef_Offseti_AssnDef_Term_struct*)((struct Cyc_AssnDef_Unop_AssnDef_Term_struct*)_Tmp0)->f2)->f2)->f1;{void*x=_Tmp2;unsigned uk=_Tmp1;
 # 2082
 int k=(int)uk;
 if(k > 0){
@@ -1628,7 +1628,7 @@ if(k <= c)
 # 2099
 ({struct Cyc_PrattProver_Graph*_Tmp3=g;void*_Tmp4=Cyc_AssnDef_uint((unsigned)(c - k));Cyc_PrattProver_add_constraint(_Tmp3,_Tmp4,4U,n->rep);});}}}
 # 2104
-goto _LL0;}}else{goto _LL3;}}else{goto _LL3;}}else{goto _LL3;}}else{goto _LL3;}}else{_LL3:
+goto _LL0;}}else{goto _LL3;}}else{goto _LL3;}}else{goto _LL3;}}else{_LL3:
  goto _LL0;}_LL0:;}}
 # 2110
 static struct Cyc_PrattProver_Graph*Cyc_PrattProver_add_numelts_info_graphs(struct Cyc_PrattProver_Graph*gs){

@@ -434,9 +434,9 @@ void*Cyc_Warn_impos(struct _fat_ptr,struct _fat_ptr);struct Cyc_Warn_String_Warn
 void*Cyc_Warn_impos2(struct _fat_ptr);
 # 89 "kinds.h"
 void*Cyc_Kinds_compress_kb(void*);
-# 86 "flags.h"
+# 90 "flags.h"
 enum Cyc_Flags_C_Compilers{Cyc_Flags_Gcc_c =0U,Cyc_Flags_Vc_c =1U};
-# 90
+# 94
 extern enum Cyc_Flags_C_Compilers Cyc_Flags_c_compiler;struct _tuple16{struct _fat_ptr f0;unsigned f1;};
 # 28 "absyndump.cyc"
 extern struct _tuple16 Cyc_Lex_xlate_pos(unsigned);

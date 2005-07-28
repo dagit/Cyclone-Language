@@ -21,6 +21,10 @@
 #include <core.h>
 namespace Flags {
 
+  // print diagnostic information during compilation including
+  // results of insert_checks.
+extern bool verbose;
+
   // true for we're running the porting tool (not compiling Cyclone),
   // so use code in port.cyc and have parser include more location info
 extern bool porting_c_code;

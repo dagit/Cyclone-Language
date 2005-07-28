@@ -62,7 +62,6 @@ static bool ic_r       = false;
 static bool stop_after_objectfile_r = false;
 static bool stop_after_asmfile_r = false;
 static bool elim_se_r    = false;
-static bool v_r        = false;
 static bool save_temps_r = false;
 static bool save_c_r   = false;
 static bool nogc_r     = false;
@@ -401,7 +400,7 @@ extern "C" void CYCALLOCPROFILE_mark(const char *s);
 	    `b f(`a, list_t<Absyn::decl_t,`H>), `a env, `b onfail) {
   CYCALLOCPROFILE_mark(stage_name);
   struct timeval start, end;
-  if(v_r)
+  if(Flags::verbose)
     gettimeofday(&start,NULL);
 
   let ans;
@@ -420,7 +419,7 @@ extern "C" void CYCALLOCPROFILE_mark(const char *s);
   if (compile_failure) {
     fprintf(stderr,"\nCOMPILATION FAILED!\n");
     fflush(stderr);
-  } else if (v_r) {
+  } else if (Flags::verbose) {
     fprintf(stderr,"%s completed ",stage_name);
     gettimeofday(&end,NULL);
     end.tv_sec  -= start.tv_sec;
@@ -733,7 +732,7 @@ static void process_file(string_t<`H> filename) {
   let cfile = strconcat(make_base_filename(filename,NULL), ".c");
   let preprocfileptr = new preprocfile;
 
-  if (v_r) fprintf(stderr,"Compiling %s\n", filename);
+  if (Flags::verbose) fprintf(stderr,"Compiling %s\n", filename);
 
   // Check that the input file exists
   FILE * f0 = try_file_open(filename, "r", "input file");
@@ -793,7 +792,7 @@ static void process_file(string_t<`H> filename) {
 	            cpp, cppargs_string, stdinc_string,
                     sh_escape_string(filename), fixup_string, ofile_string);
 
-  if (v_r) fprintf(stderr,"%s\n",cmd);
+  if (Flags::verbose) fprintf(stderr,"%s\n",cmd);
   if (system((const char @)cmd) != 0) {
     compile_failure = true;
     fprintf(stderr,"\nError: preprocessing\n");
@@ -981,7 +980,7 @@ using Arg {
   option_t opt##_tuple = $(flag,isprefix,argdesc,&opt##_spec,description); \
   struct List<option_t@`H,`H> opt = {&opt##_tuple,NULL}
 
-  make_option(opt1,"-v",false,"",Set_spec,&v_r,
+  make_option(opt1,"-v",false,"",Set_spec,&Flags::verbose,
               "print compilation stages verbosely");
   make_option(opt2,"--version",false,"",
               Unit_spec,print_version,
@@ -1263,7 +1262,7 @@ int main(int argc, string_t<`H> ?`H argv) {
   // the usual "specs" because if "specs" is used, gcc uses its own
   // default file "specs" and not ours.
   let specs_file = find_in_arch_path("cycspecs");
-  if (v_r) fprintf(stderr,"Reading from specs file %s\n",specs_file);
+  if (Flags::verbose) fprintf(stderr,"Reading from specs file %s\n",specs_file);
   let specs = Specsfile::read_specs(specs_file);
 
   let args_from_specs_file = Specsfile::split_specs(Specsfile::get_spec(specs,"cyclone"));
@@ -1453,7 +1452,7 @@ int main(int argc, string_t<`H> ?`H argv) {
             cyclone_cc, target_cflags,
             ccargs_string, outfile_str,
             stdlib_string, libargs_string);
-  if (v_r) { fprintf(stderr,"%s\n",cccmd); fflush(stderr); }
+  if (Flags::verbose) { fprintf(stderr,"%s\n",cccmd); fflush(stderr); }
   if (system((const char @)cccmd) != 0) {
     fprintf(stderr,"Error: C compiler failed\n");
     compile_failure = true;

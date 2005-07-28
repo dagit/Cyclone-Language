@@ -506,7 +506,7 @@ void Cyc_Warn_warn2(unsigned,struct _fat_ptr);
 void*Cyc_Warn_impos2(struct _fat_ptr);
 # 73
 void*Cyc_Warn_impos_loc2(unsigned,struct _fat_ptr);
-# 45 "flags.h"
+# 49 "flags.h"
 extern int Cyc_Flags_tc_aggressive_warn;
 # 62 "absynpp.h"
 struct _fat_ptr Cyc_Absynpp_typ2string(void*);

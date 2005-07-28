@@ -22,6 +22,7 @@
 #include "flags.h"
 namespace Flags;
 
+bool verbose = false;
 bool compile_for_boot = false;
 bool warn_alias_coerce = false;
 bool warn_region_coerce = false;

@@ -547,7 +547,7 @@ void Cyc_Warn_err2(unsigned,struct _fat_ptr);
 void Cyc_Warn_warn2(unsigned,struct _fat_ptr);
 # 71
 void*Cyc_Warn_impos2(struct _fat_ptr);
-# 49 "flags.h"
+# 53 "flags.h"
 extern int Cyc_Flags_warn_alias_coerce;struct _tuple12{unsigned f0;int f1;};
 # 28 "evexp.h"
 extern struct _tuple12 Cyc_Evexp_eval_const_uint_exp(struct Cyc_Absyn_Exp*);
@@ -614,13 +614,13 @@ int Cyc_Atts_sub_attributes(struct Cyc_List_List*,struct Cyc_List_List*);
 int Cyc_Atts_fntype_att(void*);
 # 79
 int Cyc_Atts_attribute_cmp(void*,void*);struct Cyc_Dict_T;struct Cyc_Dict_Dict{int(*rel)(void*,void*);struct _RegionHandle*r;const struct Cyc_Dict_T*t;};struct Cyc_AssnDef_AssnMap{void*assn;struct Cyc_Dict_Dict map;};
-# 219 "assndef.h"
+# 218 "assndef.h"
 extern struct Cyc_AssnDef_AssnMap Cyc_AssnDef_true_assnmap (void);
-# 244
+# 243
 extern int Cyc_AssnDef_simple_prove(void*,void*);
-# 254 "assndef.h"
+# 253 "assndef.h"
 extern void*Cyc_AssnDef_merge_assnmaps(struct Cyc_List_List*,struct Cyc_AssnDef_AssnMap,struct Cyc_List_List*,struct Cyc_AssnDef_AssnMap);
-# 267 "assndef.h"
+# 266 "assndef.h"
 extern struct Cyc_AssnDef_AssnMap*Cyc_AssnDef_subst_vardecls(struct Cyc_List_List*,struct Cyc_List_List*,struct Cyc_AssnDef_AssnMap*);
 # 43 "vcgen.h"
 extern struct Cyc_AssnDef_AssnMap Cyc_Vcgen_clause2assn(struct Cyc_Absyn_Exp*);
@@ -1876,10 +1876,10 @@ if(args1!=0)return 1;
 if(args2!=0)return -1;
 if(f1.c_varargs && !f2.c_varargs)return 1;
 if(!f1.c_varargs && f2.c_varargs)return -1;
-if(f1.cyc_varargs!=0 & f2.cyc_varargs==0)return 1;
-if(f1.cyc_varargs==0 & f2.cyc_varargs!=0)return -1;
-if(f1.cyc_varargs!=0 & f2.cyc_varargs!=0){
-r=({struct Cyc_Absyn_Tqual _Tmp15=_check_null(f1.cyc_varargs)->tq;Cyc_Tcutil_tqual_cmp(_Tmp15,_check_null(f2.cyc_varargs)->tq);});
+if(f1.cyc_varargs!=0 && f2.cyc_varargs==0)return 1;
+if(f1.cyc_varargs==0 && f2.cyc_varargs!=0)return -1;
+if(f1.cyc_varargs!=0 && f2.cyc_varargs!=0){
+r=Cyc_Tcutil_tqual_cmp(f1.cyc_varargs->tq,f2.cyc_varargs->tq);
 if(r!=0)return r;
 r=Cyc_Tcutil_typecmp(f1.cyc_varargs->type,f2.cyc_varargs->type);
 if(r!=0)return r;

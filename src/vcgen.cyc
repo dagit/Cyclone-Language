@@ -31,6 +31,7 @@
 #include "absynpp.h"
 #include "cf_flowinfo.h"
 #include "attributes.h"
+#include "unify.h"
 #include <cycboot.h>
 
 #define VCGEN_DEBUG
@@ -376,7 +377,7 @@ static exp_t zero_exp() {
 static $(assn_t,assn_t) okderef(term_t root, term_t i){
   switch (root) {
   case &Alloc(_,size,_,_): return $(ult(i,size),&true_assn);
-  case &Offseti(i0,r,_): 
+  case &Offseti(r,i0,_): 
     let $(bndck,nullck) = okderef(r,plus(i,i0,NULL));
     return $(or(ult(i,numelts_term(root)),
 		bndck),
@@ -494,6 +495,34 @@ static $(term_t res, assn_map_t amout)
   return $(res,amin);
 }
 
+static $(term_t,assn_map_t) vcgen_binop(env_t env, type_opt_t tp_opt, 
+                                        Absyn::primop_t p,
+                                        term_t t1, term_t t2, assn_map_t am) {
+  type_t tp = (type_t)tp_opt;
+  if (Tcutil::is_pointer_type(tp)) {
+    switch (p) {
+    case Absyn::Plus:
+      // if tp is a thin, zeroterminated pointer, p is Plus, then we might
+      // have an exception here...
+      if (!env->pure_exp && Tcutil::is_zeroterm_pointer_type(tp) && 
+          !Tcutil::is_fat_pointer_type(tp))
+        update_try_assnmap(env,am,fresh_var(Absyn::exn_type()));
+      return $(offseti(t1,t2,tp),am);
+    case Absyn::Minus:
+      return $(offseti(t1,unop(Absyn::Minus,t2,Absyn::sint_type),tp),am);
+    default:
+      Warn::impos("vcgen: result has pointer type but uses bad primop");
+    }
+  }
+  // not a pointer type
+  let t = binop(p,t1,t2,tp);
+  // if the expression has type unsigned, then we may
+  // conclude t == t1%t2 u< t2;
+  if (!env->pure_exp && p == Absyn::Mod && Unify::unify(Absyn::uint_type,tp))
+    am = and_assnmap_assn(am,ult(t,t2));
+  return $(t,am);
+}
+
 static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
   if (Tcutil::is_const_exp(e)){
      // special case for pragmas
@@ -564,20 +593,7 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
     // an expression with a binary operator
     let $(t1,am1) = vcgen_rexp(env,e1,amin);
     let $(t2,am2) = vcgen_rexp(env,e2,am1);
-    // if e1 is a thin, zeroterminated pointer, p is Plus, then we might
-    // have an exception here...
-    let e1_type = (type_t)e1->topt;
-    if (!env->pure_exp && p == Absyn::Plus && 
-        Tcutil::is_zeroterm_pointer_type(e1_type) && 
-        !Tcutil::is_fat_pointer_type(e1_type))
-      update_try_assnmap(env,am2,fresh_var(Absyn::exn_type()));
-    let t = binop(p,t1,t2,e->topt);
-    // if the expression has type unsigned, then we may
-    // conclude t == t1%t2 u< t2;
-    if (!env->pure_exp && p == Absyn::Mod && is_unsigned_int_exp(e)){
-      return $(t,and_assnmap_assn(am2,ult(t,t2)));
-    }
-    return $(t,am2);
+    return vcgen_binop(env,e->topt,p,t1,t2,am2);
   case &Absyn::Primop_e(_,_): Warn::impos("vcgen: bad primop");
   case &Absyn::AssignOp_e(e1,popt,e2):
     // FIX:  for zeroterm pointers (thin or fat!), if e2 is not zero, this can fail...
@@ -586,48 +602,47 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
     assn_map_t amout;
     if (popt != NULL) {
       let $(t1,am3) = deref_lterm(env,lt,am2);
-      t2 = binop(popt->v,t1,t2,e->topt);
-      amout = do_assign(env,am3,lt,t2);
-    } else
+      let $(t2,am4) = vcgen_binop(env,e->topt,popt->v,t1,t2,am3);
+      amout = do_assign(env,am4,lt,t2);
+      return $(t2,amout);
+    } else {
       amout = do_assign(env,am2,lt,t2);
-    return $(t2,amout);
+      return $(t2,amout);
+    }
   case &Absyn::Increment_e(e,i):
     let $(lt,am1) = vcgen_lexp(env,e,amin);
     let $(t1,am2) = deref_lterm(env,lt,am1);
     term_t res, rvalue;
+    assn_map_t amout;
     switch (i) {
     case Absyn::PostInc:
+      let $(t,am) = vcgen_binop(env,e->topt,Absyn::Plus,t1,one(),am2);
       res = t1;
-      rvalue = plus(t1,one(),e->topt);
-      // if e is a thin, zeroterminated pointer, then we might
-      // have an exception here...
-      let e_type = (type_t)e->topt;
-      if (Tcutil::is_zeroterm_pointer_type(e_type) && !
-          Tcutil::is_fat_pointer_type(e_type))
-        update_try_assnmap(env,am2,fresh_var(Absyn::exn_type()));
+      rvalue = t;
+      amout = am;
       break;
     case Absyn::PreInc:
-      rvalue = plus(t1,one(),e->topt);
+      let $(t,am) = vcgen_binop(env,e->topt,Absyn::Plus,t1,one(),am2);
+      rvalue = t;
       res = rvalue;
-      // if e is a thin, zeroterminated pointer, then we might
-      // have an exception here...
-      let e_type = (type_t)e->topt;
-      if (Tcutil::is_zeroterm_pointer_type(e_type) && !
-          Tcutil::is_fat_pointer_type(e_type))
-        update_try_assnmap(env,am2,fresh_var(Absyn::exn_type()));
+      amout = am;
       break;
     case Absyn::PostDec:
+      let $(t,am) = vcgen_binop(env,e->topt,Absyn::Minus,t1,one(),am2);
       res = t1;
-      rvalue = minus(t1,one(),e->topt);
+      rvalue = t;
+      amout = am;
       break;
     case Absyn::PreDec:
-      rvalue = minus(t1,one(),e->topt);
+      let $(t,am) = vcgen_binop(env,e->topt,Absyn::Minus,t1,one(),am2);
+      rvalue = t;
       res = rvalue;
+      amout = am;
       break;
     default:
       Warn::impos("vcgen rexp increment_e");
     }
-    let amout = do_assign(env,am2,lt,rvalue);
+    amout = do_assign(env,amout,lt,rvalue);
     return $(res,amout);
   case &Absyn::Conditional_e(e1,e2,e3):
     let $(amt,amf) = vcgen_test(env,e1,amin);
@@ -701,6 +716,8 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
   case &Absyn::NoInstantiate_e(e): return vcgen_rexp(env,e,amin);
   case &Absyn::Instantiate_e(e,_): return vcgen_rexp(env,e,amin);
   case &Absyn::Cast_e(tp,e1,_,c): 
+    // FIX: when casting from zeroterm to nozeroterm, we need to
+    // decrement the numelts somehow...
     // FIX: really need to put C coercions in terms...
     let $(t,am) = vcgen_rexp(env,e1,amin);
     // we only need to retain the cast on the term if it
@@ -770,8 +787,6 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
       return $(t,am);
     }
   case &Absyn::New_e(eopt,e1,qopt):
-    // IMPROVE: could assert that the resulting value is not equal to
-    // the address of any variable...
     if (eopt != NULL)
       amin = vcgen_rexp(env,(exp_t)eopt,amin)[1];
     if (qopt != NULL)
@@ -819,9 +834,11 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
       amin = and_assnmap_assn(amin,ck);
     }
     return $(proj(t,i,e->topt),amin);
-  case &Absyn::Tagcheck_e(e1,_): 
-    // FIX!!!
-    fallthru(e);
+  case &Absyn::Tagcheck_e(e1,f): 
+    // same as asking if tagof(e1) == i where f is the ith field
+    let i = CfFlowInfo::get_field_index((type_t)e1->topt,f);
+    let $(t,am) = vcgen_rexp(env,e1,amin);
+    return vcgen_binop(env,Absyn::sint_type,Absyn::Eq,tagof_tm(t),uint(i),am);
   case &Absyn::Address_e(e1): 
     return vcgen_lexp(env,e1,amin);
   case &Absyn::Deref_e(e1): 
@@ -975,20 +992,27 @@ static $(term_t,assn_map_t) vcgen_lexp(env_t env, exp_t e, assn_map_t amin){
     // let $(t1,am1) = vcgen_rexp(env,e1,amin);
     // let $(t2,am2) = vcgen_rexp(env,e2,am1);
     let $(t1,t2,am1) = vcgen_deref(env,e1,e2,amin);
-    return $(offseti(t2,t1,e->topt),am1);
+    return $(offseti(t1,t2,e1->topt),am1);
   case &Absyn::AggrArrow_e(e1,f,...):
     // let $(t1,am1) = vcgen_rexp(env,e1,amin);
     let $(t1,t2,am1) = vcgen_deref(env,e1,zero_exp(),amin);
     let i = CfFlowInfo::get_field_index(Tcutil::pointer_elt_type((type_t)e1->topt),f);
-    return $(offsetf(t1,i,e->topt),am1);
+    // FIX -- this type doesn't seem right... and I cheated on the region.
+    let tp = Absyn::at_type((type_t)e->topt,Absyn::heap_rgn_type,Absyn::al_qual_type,Absyn::empty_tqual(0),Absyn::false_type, Absyn::false_type);    
+    return $(offsetf(t1,i,tp),am1);
   case &Absyn::AggrMember_e(e1,f,...):
     let $(t1,am1) = vcgen_lexp(env,e1,amin);
     let i = CfFlowInfo::get_field_index((type_t)e1->topt,f);
-    return $(offsetf(t1,i,e->topt),am1);
+    // FIX -- this type doesn't seem right... and I cheated on the region.
+    let tp = Absyn::at_type((type_t)e->topt,Absyn::heap_rgn_type,Absyn::al_qual_type,Absyn::empty_tqual(0),Absyn::false_type, Absyn::false_type);
+    return $(offsetf(t1,i,tp),am1);
   case &Absyn::Instantiate_e(e1,...):fallthru(e1);
   case &Absyn::NoInstantiate_e(e1):  
     return vcgen_lexp(env,e1,amin);
-  default: return $(fresh_var(e->topt),amin);
+  default: 
+    // FIX -- this type doesn't seem right... and I cheated on the region.
+    let tp = Absyn::at_type((type_t)e->topt,Absyn::heap_rgn_type,Absyn::al_qual_type,Absyn::empty_tqual(0),Absyn::false_type, Absyn::false_type);    
+    return $(fresh_var(tp),amin);
   }
 }
 
@@ -1034,6 +1058,14 @@ static $(assn_map_t,assn_map_t) vcgen_test(env_t env, exp_t e, assn_map_t ain){
   case &Absyn::Primop_e(Absyn::Not,&List(e1,_)):
     let $(at,af) = vcgen_test(env,e1,ain);
     return $(af,at);
+  case &Absyn::Tagcheck_e(e1,f):
+    // same as asking if tagof(e1) == i where f is the ith field
+    let i = uint(CfFlowInfo::get_field_index((type_t)e1->topt,f));
+    let $(t,ain) = vcgen_rexp(env,e1,ain);
+    let tt = tagof_tm(t);
+    let at = and_assnmap_assn(ain,eq(tt,i));
+    let af = and_assnmap_assn(ain,neq(tt,i));
+    return $(at,af);
   case &Absyn::Primop_e(p,&List(e1,&List(e2,NULL))):
     let $(t1,a1) = vcgen_rexp(env,e1,ain);
     let $(t2,a2) = vcgen_rexp(env,e2,a1);
@@ -1074,9 +1106,9 @@ static $(assn_map_t,assn_map_t) vcgen_test(env_t env, exp_t e, assn_map_t ain){
       }
       break;
     default: 
-      // FIX:  treat as if p(e1,e2) != 0 
-      // FIX:  p could be + and e1 could be a thin, zero-terminated pointer which throws an
-      // exception. 
+      let $(t,am) = vcgen_binop(env,e->topt,p,t1,t2,at);
+      at = and_assnmap_assn(at,ugte(t,one()));
+      af = and_assnmap_assn(af,eq(t,zero()));
       break;
     }
     return $(at,af);

@@ -412,7 +412,7 @@ void Cyc_Warn_err(unsigned,struct _fat_ptr,struct _fat_ptr);struct Cyc_Warn_Stri
 void Cyc_Warn_err2(unsigned,struct _fat_ptr);
 # 69
 void Cyc_Warn_warn2(unsigned,struct _fat_ptr);
-# 45 "flags.h"
+# 49 "flags.h"
 extern int Cyc_Flags_tc_aggressive_warn;
 # 27 "unify.h"
 void Cyc_Unify_explain_failure (void);

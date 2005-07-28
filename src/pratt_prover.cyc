@@ -2078,7 +2078,7 @@ static void add_numelts_info(int dummy, graph_t @`H g) {
   // look for terms of the form numelts(x+k)
   for (let n = g->rows; n != NULL; n = n->next) {
     switch (n->rep) {
-    case &Unop(Absyn::Numelts,&Binop(Absyn::Plus,x,&Uint(uk,_),_),_):
+    case &Unop(Absyn::Numelts,&Offseti(x,&Uint(uk,_),_),_):
       int k = (int)uk;
       if (k > 0) {
         // look for terms of the form numelts(x)

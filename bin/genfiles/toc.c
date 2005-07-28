@@ -580,11 +580,11 @@ void*Cyc_Warn_vimpos2(struct _fat_ptr);
 void*Cyc_Warn_impos2(struct _fat_ptr);
 # 73
 void*Cyc_Warn_impos_loc2(unsigned,struct _fat_ptr);
-# 30 "flags.h"
+# 34 "flags.h"
 extern int Cyc_Flags_no_regions;
-# 32
+# 36
 extern int Cyc_Flags_no_reaps;
-# 68
+# 72
 extern int Cyc_Flags_noexpand_r;
 # 29 "unify.h"
 int Cyc_Unify_unify(void*,void*);

@@ -576,9 +576,9 @@ void*Cyc_Warn_impos(struct _fat_ptr,struct _fat_ptr);struct Cyc_Warn_String_Warn
 void Cyc_Warn_err2(unsigned,struct _fat_ptr);
 # 69
 void Cyc_Warn_warn2(unsigned,struct _fat_ptr);
-# 26 "flags.h"
+# 30 "flags.h"
 extern int Cyc_Flags_porting_c_code;
-# 36
+# 40
 extern int Cyc_Flags_no_register;
 # 30 "kinds.h"
 extern struct Cyc_Absyn_Kind Cyc_Kinds_bk;

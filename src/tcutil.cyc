@@ -1504,9 +1504,9 @@ int typecmp(type_t t1, type_t t2) {
     if (args2 != NULL) return -1;
     if (f1.c_varargs && !f2.c_varargs) return 1;
     if (!f1.c_varargs && f2.c_varargs) return -1;
-    if (f1.cyc_varargs != NULL & f2.cyc_varargs == NULL) return 1;
-    if (f1.cyc_varargs == NULL & f2.cyc_varargs != NULL) return -1;
-    if (f1.cyc_varargs != NULL & f2.cyc_varargs != NULL) {
+    if (f1.cyc_varargs != NULL && f2.cyc_varargs == NULL) return 1;
+    if (f1.cyc_varargs == NULL && f2.cyc_varargs != NULL) return -1;
+    if (f1.cyc_varargs != NULL && f2.cyc_varargs != NULL) {
       r = tqual_cmp(f1.cyc_varargs->tq,f2.cyc_varargs->tq);
       if (r != 0) return r;
       r = typecmp(f1.cyc_varargs->type,f2.cyc_varargs->type);

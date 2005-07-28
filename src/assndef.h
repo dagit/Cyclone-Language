@@ -93,8 +93,7 @@ namespace AssnDef{
     Offsetf(term_t, unsigned index, type_opt_t);
     // given an expression e1[e2], where the address of e1
     // is t1, and the right value of e2 is t2, then
-    // the address of e1[e2] is Offseti(t2,t1)
-    // also, suppose e1 has pointer type 
+    // the address of e1[e2] is Offseti(t1,t2)
     Offseti(term_t, term_t, type_opt_t);
     Tagof(term_t);
   };
@@ -135,7 +134,7 @@ namespace AssnDef{
   extern term_t addr(vardecl_t);
   extern term_t alloc(exp_t,term_t,type_opt_t);
   extern term_t offsetf(term_t t, unsigned i, type_opt_t);
-  extern term_t offseti(term_t i, term_t t, type_opt_t);
+  extern term_t offseti(term_t t, term_t i, type_opt_t);
 
   // some special term constructions:
   extern term_t numelts_term(term_t t);
@@ -147,9 +146,9 @@ namespace AssnDef{
   extern term_t fresh_var(type_opt_t);
 
   // given an address term a, which could be a path of the form
-  // offsetf(...offsetf(offsetf(r,i0),i1),...,in) where r is 
-  // a "root", returns the pair $(r,list(i0,...,in)).
-  extern $(term_t root,List::list_t<int> fields) split_addr(term_t a);
+  // offsetf(...offsetf(offsetf(r,i0,tp0),i1,tp1),...,in,tpn) where r is 
+  // a "root", returns the pair $(r,list($(i0,tp0),...,$(in,tpn))).
+  extern $(term_t root,List::list_t<$(int,type_opt_t)@> fields) split_addr(term_t a);
   // given an aggregate term a and value v and path of fields 
   // i0,i1,...,in produces the result of substituting v at that
   // path in a.  In particular, produces
@@ -157,7 +156,7 @@ namespace AssnDef{
   //  aggr_update(proj(a,i0),i1,...
   //       (aggr_update(proj(...proj(proj(a,i0),i1)...,in-1)...),in,v)
   // which will hopefully reduce down to something reasonable.
-  extern term_t apply_aggr_update(term_t a, List::list_t<int> fields, term_t v);
+  extern term_t apply_aggr_update(term_t a, List::list_t<$(int,type_opt_t)@> fields, term_t v);
 
   extern type_opt_t get_term_type(term_t);
   // data structure for a polynomial a1*t1 + a2*t2 + ... + an*tn

@@ -37,19 +37,11 @@
 #include "insert_checks.h"
 #include "vcgen.h"
 #include "pratt_prover.h"
+#include "absynpp.h"
+using Absynpp;
 
-//#define PERFORMANCE_DEBUG
 // #define TIMING_DEBUG
-#ifdef PERFORMANCE_DEBUG
-#include "absynpp.h"
-using Absynpp;
-#endif
 // #define BCE_DEBUG
-#ifdef BCE_DEBUG
-#include "absynpp.h"
-using Absynpp;
-#endif
-
 
 using Absyn;
 using Warn;
@@ -71,19 +63,30 @@ datacon(Absyn::AbsynAnnot,NullAndFatBound);
 datacon(Absyn::AbsynAnnot,FatBound);
 typedef absyn_annot_t annot_t;
 
-#ifdef PERFORMANCE_DEBUG
-static unsigned total_bounds_checks      = 0;     // just statistics
-static unsigned total_null_checks = 0;
-static unsigned bounds_checks_eliminated = 0;     // just statistics
-static unsigned simple_eliminated_check = 0;
-static unsigned relations_eliminated_check = 0;
-static unsigned both_eliminated_check = 0;
-static unsigned vcgen_eliminated_check = 0;
-static unsigned type_null_checks = 0;
-static unsigned flow_null_checks = 0;
-static unsigned simple_null_checks = 0;
-static unsigned vcgen_null_checks = 0;
-#endif
+// counters for statistics
+static unsigned total_bounds_checks                  = 0;    
+static unsigned types_eliminated_bounds_checks       = 0;
+static unsigned simple_eliminated_bounds_checks      = 0;
+static unsigned constraints_eliminated_bounds_checks = 0;
+
+static unsigned total_null_checks                    = 0;
+static unsigned types_eliminated_null_checks         = 0;
+static unsigned flow_eliminated_null_checks          = 0;
+static unsigned simple_eliminated_null_checks        = 0;
+static unsigned constraints_eliminated_null_checks   = 0;
+
+static void reset_counters() {
+  total_bounds_checks                  = 0;    
+  types_eliminated_bounds_checks       = 0;
+  simple_eliminated_bounds_checks      = 0;
+  constraints_eliminated_bounds_checks = 0;
+
+  total_null_checks                    = 0;
+  types_eliminated_null_checks         = 0;
+  flow_eliminated_null_checks          = 0;
+  simple_eliminated_null_checks        = 0;
+  constraints_eliminated_null_checks   = 0;
+}
 
 static exp_t shared_zero_exp() {
   static exp_opt_t ans = NULL;
@@ -119,15 +122,11 @@ static bool need_null_check(env_t nv, exp_t e) {
   if(nv.in_sizeof) 
     return false;
   // check the type, though if the analysis is good, this should be redundant
-#ifdef PERFORMANCE_DEBUG
-  total_null_checks++;
-#endif
+  ++total_null_checks;
   switch (compress((type_t)e->topt)) {
   case &PointerType(PtrInfo(_,_,PtrAtts(_,n,...))):
     if(!Tcutil::force_type2bool(false,n)) {
-#ifdef PERFORMANCE_DEBUG
-      type_null_checks++;
-#endif
+      ++types_eliminated_null_checks;
       return false;
     }
     break;
@@ -136,18 +135,14 @@ static bool need_null_check(env_t nv, exp_t e) {
   switch(e->annot) {
   case &CfFlowInfo::UnknownZ(_): break;
   case &CfFlowInfo::NotZero(_):  
-#ifdef PERFORMANCE_DEBUG
-    flow_null_checks++;
-#endif
+    ++flow_eliminated_null_checks;
     return false;
   case &CfFlowInfo::IsZero:
     err(e->loc,"NULL pointer check will definitely fail");
     return false;
     // DJG: this next case used to be true, but false seems fine to me
   case &EmptyAnnot: 
-#ifdef PERFORMANCE_DEBUG
-    flow_null_checks++;
-#endif
+    ++flow_eliminated_null_checks;
     return false; // unreachable (e.g., under sizeof)
   default: impos_loc(e->loc,"need_null_check: unexpected annotation");
   }
@@ -173,9 +168,7 @@ static relns_t get_relns(exp_t e) {
 // just gets the common case that i is a constant and a's size is constant
 static bool simple_need_bounds_check(env_t nv, exp_t a, exp_t i) {
   if(nv.in_sizeof) return false;
-#ifdef PERFORMANCE_DEBUG
   ++total_bounds_checks;
-#endif
   if(nv.at_toplevel) // may change if allow fat-to-thin at toplevel
     impos_loc(a->loc,"InsertChecks: memory read at top-level");
 #ifdef BCE_DEBUG
@@ -194,10 +187,7 @@ static bool simple_need_bounds_check(env_t nv, exp_t a, exp_t i) {
   // if we can't evaluate them at compile-time, or i >= b, we lose.
   if (!b_known || !i_known || i >= b) return true;
   // hooray -- we can eliminate the check
-#ifdef PERFORMANCE_DEBUG
-  ++simple_eliminated_check;
-  ++bounds_checks_eliminated;
-#endif
+  ++types_eliminated_bounds_checks;
   return false;
 }
 
@@ -291,45 +281,22 @@ static void do_exp_opt(env_t nv, exp_opt_t eo) {
 static bool need_null_check_vcgen(env_t nv, exp_t a) {
   let ec = Vcgen::exp2ctxt_checks(nv.assn_info, a);
   bool res = AssnDef::simple_prove(ec->ctxt.assn,ec->null_check);
-#ifdef PERFORMANCE_DEBUG
-  if (res) simple_null_checks++;
+  if (res) ++simple_eliminated_null_checks;
   else {
-#endif
     res = PrattProver::constraint_prove(ec->ctxt.assn,ec->null_check);
-#ifdef PERFORMANCE_DEBUG
-    if (res) vcgen_null_checks++;
+    if (res) ++constraints_eliminated_null_checks;
   }
-#endif
   return !res;
 }
 static bool need_bounds_check_vcgen(env_t nv, exp_t a){
   let ec = Vcgen::exp2ctxt_checks(nv.assn_info, a);
-#ifdef TIMING_DEBUG
-  fprintf(stderr, "checking bounds with constraint for exp:\n%s\n",
-	  Absynpp::exp2string(a));
-  struct timeval start, end;
-  gettimeofday(&start,NULL);
-#endif
-  let flag = !PrattProver::constraint_prove(ec->ctxt.assn,ec->bounds_check);
-#ifdef TIMING_DEBUG
-  gettimeofday(&end,NULL);
-  end.tv_sec -= start.tv_sec;
-  end.tv_usec -= start.tv_usec;
-  if (end.tv_usec < 0) {
-    end.tv_usec += 1000000;
-    --end.tv_sec;
+  bool res = AssnDef::simple_prove(ec->ctxt.assn,ec->bounds_check);
+  if (res) ++simple_eliminated_bounds_checks;
+  else {
+    res = PrattProver::constraint_prove(ec->ctxt.assn,ec->bounds_check);
+    if (res) ++constraints_eliminated_bounds_checks;
   }
-  fprintf(stderr, "checking done in %d.%06d secs\n",
-	  end.tv_sec,end.tv_usec);
-#endif
-#ifdef BCE_DEBUG
-  fprintf(stderr,"proving %s\nfrom %s\nresult is %s\n",
-	  AssnDef::assnmap2string(ec->ctxt),
-	  AssnDef::assn2string(ec->bounds_check),
-	  flag?"True":"False");
-#endif
-
-  return flag;
+  return !res;
 }
 
 static void do_exp(env_t nv, exp_t e) {
@@ -430,7 +397,6 @@ static void do_exp(env_t nv, exp_t e) {
 	  err(e->loc,"cannot perform coercion: numelts is statically unknown");
 	// FIX: currently _untag_arr _always_ does a bounds check!
 	//      right thing: do a bounds check on e2-1 (notice -1)
-	//	++total_bounds_checks; // see comment on previous 2 lines
 	bool bds_chk = false;
 	if(!n2 && need_null_check(nv,e1) && need_null_check_vcgen(nv,e)) {
 	  if(!user_inserted)
@@ -457,29 +423,9 @@ static void do_exp(env_t nv, exp_t e) {
       //bds_ck  = need_bounds_check(nv,get_relns(e1),e1,e2);
       // try to eliminate the bounds check by just looking for constants.
       bds_ck  = simple_need_bounds_check(nv,e1,e2);
-#ifdef PERFORMANCE_DEBUG
-      //      if (!bds_ck) ++simple_eliminated_check;
-#endif
-      if (bds_ck && nv.vcgen_r) {
+      if (bds_ck && nv.vcgen_r) 
         // try to eliminate the check using the vcgen.
         bds_ck = need_bounds_check_vcgen(nv, e1);
-#ifdef PERFORMANCE_DEBUG
-        if (!bds_ck) 
-          ++bounds_checks_eliminated;
-	//else
-	//  warn(e1->loc, "vcgen failed here");
-        let old_bds_ck = need_bounds_check(nv,get_relns(e1),e1,e2);
-        if (old_bds_ck != bds_ck) {
-          if (bds_ck) {
-	    //warn(e1->loc,"relations eliminated check here, but not vcgen");
-	    ++relations_eliminated_check;
-          } else
-            ++vcgen_eliminated_check;
-        } else {
-          if (!bds_ck && !old_bds_ck) ++both_eliminated_check;
-        }
-#endif
-      }
       if (bds_ck && Flags::warn_bounds_checks)
         warn(e1->loc,"inserted bounds check (location is pointer expression)");
       exp_opt_t bd = Tcutil::get_bounds_exp(bounds_one(),b);
@@ -682,41 +628,64 @@ static void do_stmt(env_t nv, stmt_t s) {
   }
 }
 
+float percent(int i, int total) {
+  float ans = (float)1;
+  if (total != 0) {
+    ans = (float)i / (float)total;
+  }
+  return ans * 100;
+}
+
 void insert_checks(List::list_t<decl_t,`H> tds,
 		   JumpAnalysis::jump_anal_res_t tables, bool do_vcgen) {
-#ifdef PERFORMANCE_DEBUG
-  total_bounds_checks      = 0;     // just statistics
-  total_null_checks = 0;
-  bounds_checks_eliminated = 0;     // just statistics
-  simple_eliminated_check = 0;
-  relations_eliminated_check = 0;
-  both_eliminated_check = 0;
-  vcgen_eliminated_check = 0;
-  type_null_checks = 0;
-  simple_null_checks = 0;
-  vcgen_null_checks = 0;
-#endif
+  reset_counters();
   let nv = toplevel_env(tables, do_vcgen);
   for(; tds != NULL; tds = tds->tl)
     do_decl(nv,tds->hd);
-#ifdef PERFORMANCE_DEBUG
-  fprintf(stderr,"****INSERT CHECKS***********************************\n");
-  fprintf(stderr,"eliminated %d out of a total of %d bounds checks.\n",
-          bounds_checks_eliminated, total_bounds_checks);
-  fprintf(stderr,"\tbounds checks eliminated by simple: %d\n",
-          simple_eliminated_check);
-  fprintf(stderr,"\tbounds checks eliminated by both relns and vcgen: %d\n",
-          both_eliminated_check);
-  fprintf(stderr,"\tbounds checks eliminated by relns but not vcgen: %d \n",
-          relations_eliminated_check);
-  fprintf(stderr,"\tbounds checks eliminated by vcgen but not relns: %d\n",
-          vcgen_eliminated_check);
-  fprintf(stderr,"eliminated %d out of a total of %d null checks.\n",
-          type_null_checks+flow_null_checks+simple_null_checks+vcgen_null_checks,total_null_checks);
-  fprintf(stderr,"\tnull checks eliminated by types: %d\n",type_null_checks);
-  fprintf(stderr,"\tnull checks eliminated by flow analysis: %d\n",flow_null_checks);
-  fprintf(stderr,"\tnull checks eliminated by simple prover: %d\n",simple_null_checks);
-  fprintf(stderr,"\tnull checks eliminated by pratt prover: %d\n",vcgen_null_checks);
-  fprintf(stderr,"****************************************************\n");
-#endif
+
+  if (Flags::verbose) {
+    let eliminated_bounds_checks = 
+      types_eliminated_bounds_checks + 
+      simple_eliminated_bounds_checks +
+      constraints_eliminated_bounds_checks;
+    let eliminated_null_checks = 
+      types_eliminated_null_checks +
+      flow_eliminated_null_checks +
+      simple_eliminated_null_checks +
+      constraints_eliminated_null_checks;
+    fprintf(stderr,"****INSERT CHECKS***********************************\n");
+    fprintf(stderr,"eliminated %d out of a total of %d checks (%g%%).\n",
+            eliminated_bounds_checks+eliminated_null_checks,
+            total_bounds_checks+total_null_checks,
+            percent(eliminated_bounds_checks+eliminated_null_checks,
+                    total_bounds_checks+total_null_checks));
+    fprintf(stderr,"eliminated %d out of a total of %d bounds checks (%g%%).\n",
+            eliminated_bounds_checks, total_bounds_checks, 
+            percent(eliminated_bounds_checks, total_bounds_checks));
+    fprintf(stderr,"\tbounds checks eliminated by types            : %d (%g%%)\n",
+            types_eliminated_bounds_checks,
+            percent(types_eliminated_bounds_checks, total_bounds_checks));
+    fprintf(stderr,"\tbounds checks eliminated by simple prover    : %d (%g%%)\n",
+            simple_eliminated_bounds_checks,
+            percent(simple_eliminated_bounds_checks, total_bounds_checks));
+    fprintf(stderr,"\tbounds checks eliminated by constraint solver: %d (%g%%)\n",
+            constraints_eliminated_bounds_checks,
+            percent(constraints_eliminated_bounds_checks, total_bounds_checks));
+    fprintf(stderr,"eliminated %d out of a total of %d null checks (%g%%).\n",
+            eliminated_null_checks, total_null_checks,
+            percent(eliminated_null_checks, total_null_checks));
+    fprintf(stderr,"\tnull checks eliminated by types              : %d (%g%%)\n",
+            types_eliminated_null_checks,
+            percent(types_eliminated_null_checks, total_null_checks));
+    fprintf(stderr,"\tnull checks eliminated by flow analysis      : %d (%g%%)\n",
+            flow_eliminated_null_checks,
+            percent(flow_eliminated_null_checks, total_null_checks));
+    fprintf(stderr,"\tnull checks eliminated by simple prover      : %d (%g%%)\n",
+            simple_eliminated_null_checks,
+            percent(simple_eliminated_null_checks, total_null_checks));
+    fprintf(stderr,"\tnull checks eliminated by constraint solver  : %d (%g%%)\n",
+            constraints_eliminated_null_checks,
+            percent(constraints_eliminated_null_checks, total_null_checks));
+    fprintf(stderr,"****************************************************\n");
+  }
 }

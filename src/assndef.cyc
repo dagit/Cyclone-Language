@@ -68,14 +68,19 @@ using Hashtable;
 
 ///////////////////// Terms /////////////////////
 
+string_t typopt2string(type_opt_t tp) {
+  if (tp == NULL) return "NULL";
+  return Absynpp::typ2string((type_t)tp);
+}
+
 string_t term2string(term_t t) {
   string_t res;
   switch (t) {
   case &Uint(i,_): res = aprintf("0x%x", i); break;
   case &Const(e): res = aprintf("%s[%d]",Absynpp::exp2string(e),(int)e); break;
   case &Tagof(t): res = aprintf("tagof_tm(%s)",term2string(t)); break;
-  case &Select(t1,t2,_):
-    res = aprintf("Sel(%s,%s)",term2string(t1),term2string(t2));
+  case &Select(t1,t2,tp):
+    res = aprintf("Sel(%s,%s,%s)",term2string(t1),term2string(t2),typopt2string(tp));
     break;
   case &Update(t1,t2,t3):
     res = aprintf("Upd(%s,%s,%s)",term2string(t1),term2string(t2),term2string(t3));
@@ -107,7 +112,7 @@ string_t term2string(term_t t) {
     if (tag != -1) res = aprintf("tag(%d)%s",tag,res);
     if (is_union) res = aprintf("union%s",res);
     break;
-  case &Proj(t,i,_):
+  case &Proj(t,i,tp):
     res = aprintf("#%d(%s)",i,term2string(t));
     break;
   case &AggrUpdate(a,i,v):
@@ -122,8 +127,8 @@ string_t term2string(term_t t) {
   case &Alloc(e,t,i,_):
     res = aprintf("Alloc(%s[%d],%s,%d)", Absynpp::exp2string(e),(int)e,term2string(t),i);
     break;
-  case &Offsetf(t,i,_):
-    res = aprintf("Offsetf(%s,%d)",term2string(t),i);
+  case &Offsetf(t,i,tp):
+    res = aprintf("Offsetf(%s,%d,%s)",term2string(t),i,typopt2string(tp));
     break;
   case &Offseti(t1,t2,_):
     res = aprintf("%s.+.%s",term2string(t1),term2string(t2));
@@ -190,7 +195,7 @@ int termhash(datatype Term @t) {
   case &Addr(vd,_): return ((unsigned int)vd >> 4)+7;
   case &Alloc(e,_,i,_): return ((unsigned int)e >> 4) + i;
   case &Offsetf(t,i,_): return ((unsigned int)t >> 4) + i + 11;
-  case &Offseti(index,t,_): 
+  case &Offseti(t,index,_): 
     return (((unsigned int)index + (unsigned int)t) >> 4) + 13;
   case &Tagof(t): return ((unsigned)t >> 4) + 741;
   }
@@ -273,8 +278,8 @@ int termcmp(datatype Term @`r1 _t1, datatype Term @`r2 _t2) {
     t1 = tm1;
     t2 = tm2;
     goto LOOP;
-  case $(&Offseti(i1,tm1,_),&Offseti(i2,tm2,_)):
-    int c = termcmp(tm1,tm2);
+  case $(&Offseti(tm1,i1,_),&Offseti(tm2,i2,_)):
+    int c = termcmp(i1,i2);
     if (c != 0) return c;
     t1 = tm1;
     t2 = tm2;
@@ -311,7 +316,7 @@ static term_t copy_term(datatype Term@ t) {
   case &Aggr(is_union,tag,ts,tp): return new Aggr(is_union,tag,ts,tp);
   case &Alloc(e,offset,i,tp): return new Alloc(e,offset,i,tp);
   case &Offsetf(t,i,tp): return new Offsetf(t,i,tp);
-  case &Offseti(i,t,tp): return new Offseti(i,t,tp);
+  case &Offseti(t,i,tp): return new Offseti(t,i,tp);
   case &Tagof(t): return new Tagof(t);
   }
 }
@@ -460,11 +465,11 @@ term_t logicvar(vardecl_opt_t vd,int i,type_opt_t tp) {
   return hash_cons_term(&t);
 }
 term_t update(term_t t1, term_t t2, term_t t3) {
-  switch $(t1,t2) {
-  case $(&Update(m,a as &Addr(x,_),e1),&Addr(y,_)):
-    // Update(Update(m,Addr(x),e1),Addr(x),t3) = Update(m,Addr(x),t3)
-    if (x == y) return update(m,t2,t3);
-    break;
+ LOOP:
+  switch (t1) {
+  case &Update(m,t,_) && t == t2:
+    t1 = m;
+    goto LOOP;
   default: break;
   }
   let t = Update(t1,t2,t3);
@@ -478,6 +483,9 @@ term_t aggr_update(term_t t1, unsigned i, term_t t2) {
     t1 = t;
     goto LOOP;
   case &Aggr(is_union,tag,ts,tp):
+    // for unions, we only have to update one field, but also the tag
+    if (is_union) return aggr(is_union,i,list(t2),tp);
+    // for aggregates and data types, the tag remains the same...
     list_t<term_t> revnewts = NULL;
     for (; i != 0; i--) {
       if (ts == NULL) fallthru;
@@ -494,9 +502,37 @@ term_t aggr_update(term_t t1, unsigned i, term_t t2) {
   }
 }
 
-// returns true when t1 and t2 can't possibly be equal (e.g., because they
-// are distinct addresses or offsetf's or allocs.)
+static bool address_disjoint(term_t t1, term_t t2);
+
+// try to prove the two terms t1 and t2 are not equal
 static bool term_neq(term_t t1, term_t t2) {
+ LOOP:
+  switch $(t1,t2) {
+  case $(&Uint(i,_),&Uint(j,_)): return i != j;
+  case $(&Binop(Absyn::Plus,t11,t12,_),&Binop(Absyn::Plus,t21,t22,_)) && t11 == t12:
+    // t+t12 != t+t22 if t12 != t22
+    t1 = t12;
+    t2 = t22;
+    goto LOOP;
+  case $(&Binop(Absyn::Plus,t11,t12,_),t21) && t11 == t21:
+    t1 = t12;
+    t2 = zero();
+    goto LOOP;
+  case $(t11, &Binop(Absyn::Plus,t21,t22,_)) && t11 == t21:
+    t1 = zero();
+    t2 = t22;
+    goto LOOP;
+  case $(&Unop(Absyn::Bitnot,t1,_),t2) && t1 == t2: return true;
+  case $(t1,&Unop(Absyn::Bitnot,t2,_)) && t1 == t2: return true;
+  default:
+    // if they are disjoint addresses then they can't be equal
+    return address_disjoint(t1,t2);
+  }
+}
+
+// t1 and t2 are pointers and we want to argue that they are not
+// overlapping -- in particular, sel(update(m,t1,v),t2) == sel(m,t2).
+static bool address_disjoint(term_t t1, term_t t2) {
  LOOP:
   if (t1 == t2) return false;
   switch $(t1,t2) {
@@ -504,46 +540,42 @@ static bool term_neq(term_t t1, term_t t2) {
   case $(&Addr(...), &Alloc(...)): return true;
   case $(&Alloc(...), &Addr(...)): return true;
   case $(&Alloc(exp1,tm1,i1,_),&Alloc(exp2,tm2,i2,_)):
-    // distinct allocation points must be distinct
+    // distinct allocation points must be distinct regions of memory
     return (exp1 != exp2);
   case $(&Offsetf(tm1,i,_),&Offsetf(tm2,j,_)):
     // given the same root but distinct offsets, we know the addresses
-    // cannot be the same.
+    // cannot overlap.
     if (tm1 == tm2 && i != j) return true;
     t1 = tm1;
     t2 = tm2;
     goto LOOP;
-    return false;
-  case $(&Offseti(i1,tm1,_),&Offseti(i2,tm2,_)):
+  case $(&Offseti(tm1,i1,_),&Offseti(tm2,i2,_)):
     if (tm1 == tm2 && term_neq(i1,i2)) return true;
     t1 = tm1;
     t2 = tm2;
     goto LOOP;
-    return false;
   case $(&Offsetf(tm1,_,_),_): 
     t1 = tm1;
     goto LOOP;
   case $(_,&Offsetf(tm2,_,_)): 
     t2 = tm2;
     goto LOOP;
-  case $(&Offseti(_,tm1,_),_): 
+  case $(&Offseti(tm1,_,_),_): 
     t1 = tm1;
     goto LOOP;
-  case $(_,&Offseti(_,tm2,_)): 
+  case $(_,&Offseti(tm2,_,_)): 
     t2 = tm2;
     goto LOOP;
-  case $(&Uint(i,_),&Uint(j,_)): return i != j;
   default: return false;
   }
 }
 
-$(term_t,list_t<int>) split_addr(term_t a) {
-  // FIX: need type information with fields
-  list_t<int> fields = NULL;
+$(term_t,list_t<$(int,type_opt_t)@>) split_addr(term_t a) {
+  list_t<$(int,type_opt_t)@> fields = NULL;
   while (true) {
     switch (a) {
     case &Offsetf(r,i,tp):
-      fields = new List{i,fields};
+      fields = new List{new $(i,tp),fields};
       a = r;
       continue;
     default: 
@@ -552,23 +584,24 @@ $(term_t,list_t<int>) split_addr(term_t a) {
   }
 }
 
-term_t apply_aggr_update(term_t a, list_t<int> fields, term_t v) {
-  
-  //fprintf(stderr,"applying aggr update to %s with value %s at fields ",
-  //        term2string(a),term2string(v));
-  //for (let fs = fields; fs != NULL; fs = fs->tl) fprintf(stderr,"%d ",fs->hd);
-  //fprintf(stderr,"\n");
+term_t apply_aggr_update(term_t a, list_t<$(int,type_opt_t)@> fields, term_t v) {
   if (fields == NULL) return v;
-  let res = aggr_update(a, fields->hd, 
-                        apply_aggr_update(proj(a,fields->hd,NULL),fields->tl,v));
-  //fprintf(stderr,"res = %s\n",term2string(res));
+  let &$(i,tpopt) = fields->hd;
+  type_opt_t tp = NULL;
+  if (tpopt != NULL) tp = Tcutil::pointer_elt_type((type_t)tpopt);
+  let res = aggr_update(a, i,
+                        apply_aggr_update(proj(a,i,tpopt),fields->tl,v));
   return res;
 }
 
-static term_t proj_fields(term_t v, list_t<int> fs) {
-  // FIX: need type information with fields
-  for (; fs != NULL; fs = fs->tl)
-    v = proj(v,fs->hd,NULL);
+static term_t proj_fields(term_t v, list_t<$(int,type_opt_t)@> fs) {
+  for (; fs != NULL; fs = fs->tl) {
+    let &$(i,tpopt) = fs->hd;
+    if (tpopt != NULL) 
+      v = proj(v,i,Tcutil::pointer_elt_type((type_t)tpopt));
+    else 
+      v = proj(v,i,NULL);
+  }
   return v;
 }
 
@@ -577,7 +610,7 @@ term_t select(term_t t1, term_t t2,type_opt_t tp) {
   switch $(t1,t2) {
   case $(&Update(m,a1,v),a2):
     if (a1 == a2) return v;
-    if (term_neq(a1,a2)) {
+    if (address_disjoint(a1,a2)) {
       t1 = m;
       goto LOOP;
       // effectively: return select(m,a2,tp);
@@ -614,11 +647,28 @@ term_t proj(term_t t1, unsigned i, type_opt_t tp) {
     else break;
   case &AggrUpdate(t,j,t2):
     if (i == j) return t2;
+    // if t1 is a union, then we shouldn't reduce.  The last update
+    // was to field j, but we're trying to read from field i.  
+    let topt = get_term_type(t1);
+    if (topt == NULL) goto NOREDUCE;
+    switch (Absyn::compress((type_t)topt)) {
+    case &Absyn::AppType(&Absyn::AggrCon(ai),_):
+      switch (ai) {
+      case {.KnownAggr = &ad}: 
+        if (ad->kind == Absyn::UnionA) goto NOREDUCE; break;
+      case {.UnknownAggr = $(Absyn::UnionA,_,_)}: goto NOREDUCE;
+      default: break;
+      }
+      break;
+    case &Absyn::AnonAggrType(Absyn::UnionA,_,_): goto NOREDUCE;
+    default: break;
+    }
     t1 = t;
     goto LOOP;
   case &Select(m,a,tp2): return select(m,offsetf(a,i,tp2),tp);
   default: break;
   }
+ NOREDUCE:
   let t = Proj(t1,i,tp);
   return hash_cons_term(&t);
 }
@@ -641,10 +691,28 @@ term_t union_aggr(unsigned tag, list_t<term_t,`H> ts, type_opt_t tp) {
 term_t tagof_tm(term_t t1) {
   switch (t1) {
   case &Aggr(_,tag,...): return uint(tag);
-  default: 
-    let t = Tagof(t1);
-    return hash_cons_term(&t);
+  case &AggrUpdate(t,j,_):
+    // if t is a union, then the tag is j
+    let topt = get_term_type(t1);
+    if (topt == NULL) break;
+    switch (Absyn::compress((type_t)topt)) {
+    case &Absyn::AppType(&Absyn::AggrCon(ai),_):
+      switch (ai) {
+      case {.KnownAggr = &ad}: 
+        if (ad->kind == Absyn::UnionA) return uint(j);
+        break;
+      case {.UnknownAggr = $(Absyn::UnionA,_,_)}: return uint(j);
+      default: break;
+      }
+      break;
+    case &Absyn::AnonAggrType(Absyn::UnionA,_,_): return uint(j);
+    default: break;
+    }
+    break;
+  default: break;
   }
+  let t = Tagof(t1);
+  return hash_cons_term(&t);
 }
 
 term_t cast(type_t tp, term_t tm){
@@ -664,14 +732,15 @@ term_t offsetf(term_t tm, unsigned int i, type_opt_t tp){
   return hash_cons_term(&t);
 }
 
-term_t offseti(term_t i, term_t tm, type_opt_t tp){
-  switch (tm) {
-  case &Offseti(j,t,tp2):
+term_t offseti(term_t tm, term_t i, type_opt_t tp){
+  switch $(tm,i) {
+  case $(_,&Uint(0,_)): return tm;
+  case $(&Offseti(t,j,tp2),_):
     if (tp != NULL && tp2 != NULL && Unify::unify(tp,tp2))
-      return offseti(plus(i,j,Absyn::sint_type),t,tp);
+      return offseti(t,plus(i,j,Absyn::sint_type),tp);
     fallthru;
   default:
-    let t = Offseti(i,tm,tp);
+    let t = Offseti(tm,i,tp);
     return hash_cons_term(&t);
   }
 }
@@ -1572,7 +1641,6 @@ assn_t slt(term_t t1, term_t t2) {
 
 assn_t slte(term_t t1, term_t t2) {
   if (t1 == t2) return &true_assn;
-  if (term_neq(t1,t2)) return &false_assn;
   switch $(t1,t2) {
   case $(&Uint(i,_),&Uint(j,_)): 
     if ((int)i <= (int)j) return &true_assn; else return &false_assn;
@@ -1591,7 +1659,6 @@ assn_t ult(term_t t1, term_t t2) {
 
 assn_t ulte(term_t t1, term_t t2) {
   if (t1 == t2) return &true_assn;
-  if (term_neq(t1,t2)) return &false_assn;
   switch $(t1,t2) {
   case $(&Uint(i,_),&Uint(j,_)): 
     if (i <= j) return &true_assn; else return &false_assn;
@@ -1603,8 +1670,6 @@ assn_t neq(term_t t1, term_t t2){
   if (t1 == t2) return &false_assn;
   if (term_neq(t1,t2)) return &true_assn;
   switch $(t1,t2) {
-  case $(&Uint(i,_),&Uint(j,_)): 
-    if (i != j) return &true_assn; else return &false_assn;
   case $(&Uint(i,_),_) && i == 0:
     return ult(zero(),t2);
   case $(_,&Uint(j,_)) && j == 0:

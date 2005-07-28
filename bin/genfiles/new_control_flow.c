@@ -543,7 +543,7 @@ int Cyc_Tcpat_has_vars(struct Cyc_Core_Opt*);
 void Cyc_Warn_warn(unsigned,struct _fat_ptr,struct _fat_ptr);
 # 40
 void*Cyc_Warn_impos(struct _fat_ptr,struct _fat_ptr);
-# 56 "flags.h"
+# 60 "flags.h"
 extern int Cyc_Flags_warn_lose_unique;
 # 68 "absynpp.h"
 struct _fat_ptr Cyc_Absynpp_exp2string(struct Cyc_Absyn_Exp*);
