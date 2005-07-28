@@ -57,10 +57,11 @@ struct Env {
   assn_map_opt_t try_assnmap;
   // when not-null is used to record the resulting value of an expr-stmt.
   term_t* exp_stmt;
-  // used to record the result terms and assertions for a function.  Only
-  // needed when the function has an ensures clause.
-  // the return_value is represented by a logical var
-  term_opt_t res_term;
+  // used to record the result term and assertions for a function.  Only
+  // needed when the function has an ensures clause.  Upon return, we
+  // do an "assignment" to the variable result and then or in with the
+  // res_assnmap.
+  vardecl_opt_t result;
   assn_map_opt_t res_assnmap; 
   assn_map_opt_t continue_assnmap;
   // true by default: controls whether we widen assertions at join points
@@ -79,7 +80,7 @@ static int hash_ptr(`a s) { return (int)s; }
 static env_t 
 initial_env(JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd, 
 	    assn_info_t assn_info, assn_map_opt_t res_assnmap, 
-	    assn_map_opt_t try_assnmap, term_opt_t res_term) {
+	    assn_map_opt_t try_assnmap, vardecl_opt_t result) {
   let succ_table = Hashtable::lookup(tables->succ_tables,fd);
   let assn_table = Hashtable::create(57, Core::ptrcmp, hash_ptr);
   let env =  new Env{.assn_table = assn_table,
@@ -87,7 +88,7 @@ initial_env(JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd,
 		     .assn_info = assn_info,
                      .try_assnmap = try_assnmap,
                      .exp_stmt = NULL,
-                     .res_term = res_term,
+                     .result = result,
                      .res_assnmap = res_assnmap,
 		     .continue_assnmap = NULL,
                      .widen_paths = !Flags::allpaths,
@@ -107,7 +108,7 @@ static env_t bogus_env(){
 		      .assn_info = assn_info,
 		      .try_assnmap = NULL,
 		      .exp_stmt = NULL,
-		      .res_term = NULL,
+		      .result = NULL,
 		      .res_assnmap = NULL,
 		      .continue_assnmap = NULL,
                       .widen_paths = false,
@@ -1126,9 +1127,19 @@ static $(assn_map_t,assn_map_t) vcgen_test(env_t env, exp_t e, assn_map_t ain){
 }
 
 
-static void update_return(env_t env, term_opt_t t, assn_map_t a, type_opt_t tp) {
+static void update_return(env_t env, term_opt_t topt, assn_map_t a, type_opt_t tp) {
+  // optimization -- can skip false assertions
+  if (a.assn == &false_assn) return;
+  term_t t;
+  if (topt != NULL) t = (term_t)topt;
+  else t = fresh_var(tp);
   // there is no ensures clause, nothing needs to be done with the return
   if (env->res_assnmap == NULL) return;
+  if (env->result != NULL) {
+    a = do_assign(env,a,addr((vardecl_t)env->result),t);
+  }
+  a = may_widen(env,or_assnmap_assnmap(*env->res_assnmap,a));
+  *env->res_assnmap = a;
 }
 
 static exp_opt_t find_assert_e(stmt_t s) {
@@ -1167,10 +1178,9 @@ static assn_map_t vcgen_stmt(env_t env, stmt_t s, assn_map_t amin) {
   case &Absyn::Return_s(e as &_): 
     let $(t,amout) = vcgen_rexp(env,(exp_t)e,amin);
     update_return(env,t,amout,e->topt);
-    fallthru;
+    return false_assnmap();
   case &Absyn::Return_s(NULL): 
-    // if there is no return value, there is no ensures clause
-    // FIX?  what if we fall off a (bits-only) function?
+    update_return(env,NULL,amin,NULL);
     return false_assnmap();
   case &Absyn::IfThenElse_s(e1,s1,s2):
     let $(amt,amf) = vcgen_test(env,e1,amin);
@@ -1632,6 +1642,21 @@ void vcgen_fundecl(Position::seg_t loc, JumpAnalysis::jump_anal_res_t tables, Ab
   if (reqopt != NULL) {
     am = *reqopt;
   }
+  // We need to record the initial logical values for the arguments
+  // so that we can use them in the @ensures and @throws clauses.
+  // So force the varmap to have bindings for all of the arguments
+  // and record them.
+  list_t<term_t> actuals = NULL;
+  for (let as = arvds; as != NULL; as = as->tl) {
+    let vd = (vardecl_t)as->hd;
+    let $(actual,am2) = lookup_var_map(vd,am);
+    am = am2;
+    actuals = new List{actual,actuals};
+  }
+  actuals = List::imp_rev(actuals);
+  // force the varmap to have a binding for memory and record it.
+  let $(initmem,am2) = lookup_var_map(memory,am);
+
   // if we have a throws clause, then pretend like we're installing
   // a "fake" exception handler so we can check to see if the function
   // throws.
@@ -1639,27 +1664,42 @@ void vcgen_fundecl(Position::seg_t loc, JumpAnalysis::jump_anal_res_t tables, Ab
   if (thrwsopt != NULL) {
     thrws_assn = new false_assnmap();
   }
+  
   assn_map_t *result_assn = (ensopt == NULL) ? NULL : new false_assnmap();
-  term_opt_t res_term = NULL;
-  if (ensopt != NULL && ret_value != NULL) {
-    let $(t,_) = lookup_var_map(ret_value,*ensopt);
-    res_term = t;
-  }
-  let env = initial_env(tables,fd,assn_info,result_assn,thrws_assn,res_term);
-  vcgen_stmt(env,fd->body,am);
+
+  let env = initial_env(tables,fd,assn_info,result_assn,thrws_assn,ret_value);
+
+  // generate vcs for the function body
+  let amout = vcgen_stmt(env,fd->body,am);
+  // if we fall off the end of the function, we may need to update
+  // the return...
+  update_return(env,NULL,amout,NULL);
+
   // check the ensures clause
   if (ensopt != NULL) {
-    if (env->res_assnmap == NULL) Warn::impos("vcgen checking ensures");
-    if (!implies(env->res_assnmap->assn,ensopt->assn))
-      Warn::err(loc, "cannot prove the @ensures clause %s from %s",
-		assnmap2string(*ensopt),
+    assn_map_t res = *env->res_assnmap;
+    term_t res_term = fresh_var(NULL);
+    if (ret_value != NULL) {
+      let $(r,a) = lookup_var_map((vardecl_t)ret_value,res);
+      res_term = r;
+      res = a;
+    }
+    let $(new_memory,res) = lookup_var_map(memory,res);
+    let ens = subst_args(arvds,ret_value,actuals,res_term,new_memory,*ensopt);
+    if (!implies(res.assn,ens))
+      Warn::err(loc, "cannot prove the @ensures clause\n\t%s\nfrom\n\t%s",
+                assn2string(ens),
 		assnmap2string(*env->res_assnmap));
   }
   // check the throws clause
   if (thrwsopt != NULL) {
-    if (!implies(env->try_assnmap->assn,thrwsopt->assn))
-      Warn::err(loc, "cannot prove the @throws clause %s from %s",
-                assnmap2string(*thrwsopt),
+    assn_map_t res = *env->try_assnmap;
+    let $(res_term,res) = lookup_var_map(exception_vardecl(),res);
+    let $(new_memory,res) = lookup_var_map(memory,res);
+    let thr = subst_args(arvds,exception_vardecl(),actuals,res_term,new_memory,*thrwsopt);
+    if (!implies(res.assn,thr))
+      Warn::err(loc, "cannot prove the @throws clause\n\t%s\nfrom\n\t%s",
+                assn2string(thr),
                 assnmap2string(*env->try_assnmap));
   }
 }
