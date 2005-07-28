@@ -695,10 +695,12 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
     let am3 = update_var_map(memory,new_memory,am2);
     // merge this with the throws assertion from the function and 
     // update the exception handler.
+    let v = fresh_var(Absyn::exn_type());
     if (thrwsopt != NULL) {
-      let v = fresh_var(Absyn::exn_type());
       let throws_assn = subst_args(argvds,exception_vardecl(),ts,v,new_memory,*thrwsopt);
       update_try_assnmap(env,and_assnmap_assn(am3,throws_assn),v);
+    } else {
+      update_try_assnmap(env,am3,v);
     }
     // and merge this with the ensures assertion from the function
     if (ensopt != NULL) {
