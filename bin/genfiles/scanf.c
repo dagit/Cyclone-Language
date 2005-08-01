@@ -787,13 +787,13 @@ res=strtoul(buf,0,base);else{
 # 672
 res=(unsigned long)strtol(buf,0,base);}
 if(flags & 16)
-({int _Tmp0=(int)res;*Cyc_va_arg_int_ptr(*((void**)_check_fat_subscript(ap,sizeof(void*),0U)))=_Tmp0;});else{
+({int _Tmp0=(int)res;*Cyc_va_arg_int_ptr(*((void**)ap.curr))=_Tmp0;});else{
 if(flags & 4)
-({short _Tmp0=(short)res;*Cyc_va_arg_short_ptr(*((void**)_check_fat_subscript(ap,sizeof(void*),0U)))=_Tmp0;});else{
+({short _Tmp0=(short)res;*Cyc_va_arg_short_ptr(*((void**)ap.curr))=_Tmp0;});else{
 if(flags & 1)
-({int _Tmp0=(int)res;*Cyc_va_arg_int_ptr(*((void**)_check_fat_subscript(ap,sizeof(void*),0U)))=_Tmp0;});else{
+({int _Tmp0=(int)res;*Cyc_va_arg_int_ptr(*((void**)ap.curr))=_Tmp0;});else{
 # 680
-({int _Tmp0=(int)res;*Cyc_va_arg_int_ptr(*((void**)_check_fat_subscript(ap,sizeof(void*),0U)))=_Tmp0;});}}}
+({int _Tmp0=(int)res;*Cyc_va_arg_int_ptr(*((void**)ap.curr))=_Tmp0;});}}}
 _fat_ptr_inplace_plus(& ap,sizeof(void*),1);
 ++ nassigned;}
 # 684

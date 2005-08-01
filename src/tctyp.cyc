@@ -1111,15 +1111,21 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
 				 te->in_extern_c_include, 
 				 te->in_tempest,te->tempest_generalize, 
 				 te->in_extern_c_inc_repeat};
-    let $(nenv,req_assn) = check_clause(new_env,"@requires",req);
-    new_env = nenv;
-    *req_relns = new req_assn;
-    let $(nenv,ens_assn) = check_clause(new_env,"@ensures",ens);
-    new_env = nenv;
-    *ens_relns = new ens_assn;
-    let $(nenv,thrws_assn) = check_clause(new_env,"@throws",thrws);
-    new_env = nenv;
-    *thrws_relns = new thrws_assn;
+    if (req != NULL) {
+      let $(nenv,req_assn) = check_clause(new_env,"@requires",req);
+      new_env = nenv;
+      *req_relns = new req_assn;
+    }
+    if (ens != NULL) {
+      let $(nenv,ens_assn) = check_clause(new_env,"@ensures",ens);
+      new_env = nenv;
+      *ens_relns = new ens_assn;
+    }
+    if (thrws != NULL) {
+      let $(nenv,thrws_assn) = check_clause(new_env,"@throws",thrws);
+      new_env = nenv;
+      *thrws_relns = new thrws_assn;
+    }
     new_env.te = old_te;
     // finally, the effect -- usually inferred
     if (*eff != NULL) {

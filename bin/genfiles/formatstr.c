@@ -403,7 +403,7 @@ if((unsigned long)i >= len)return 0;
 flags=Cyc_List_imp_rev(flags);{
 # 69
 struct Cyc_List_List*width=0;
-c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
+c=((const char*)s.curr)[i];
 if((int)c==42){
 width=({struct Cyc_List_List*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_List_List));_Tmp0->hd=(void*)((int)c),_Tmp0->tl=width;_Tmp0;});
 ++ i;}else{

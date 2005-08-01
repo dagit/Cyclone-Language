@@ -118,14 +118,13 @@ string_t term2string(term_t t) {
   case &AggrUpdate(a,i,v):
     res = aprintf("Aupd(%s,%d,%s)",term2string(a),i,term2string(v));
     break;
-  case &Addr(vd,_):
-    if (Flags::debug_assn) 
-      res = aprintf("&%s_%x",Absynpp::qvar2string(vd->name),(unsigned int)vd); 
-    else 
-      res = aprintf("&%s",Absynpp::qvar2string(vd->name));
+  case &Addr(vd,invoke,_):
+    res = aprintf("&%s_%s_%x",Absynpp::qvar2string(vd->name),
+                  term2string(invoke),(unsigned int)vd); 
+    //res = aprintf("&%s",Absynpp::qvar2string(vd->name));
     break;
-  case &Alloc(e,t,i,_):
-    res = aprintf("Alloc(%s[%d],%s,%d)", Absynpp::exp2string(e),(int)e,term2string(t),i);
+  case &Alloc(e,id,nelts,invoke,_):
+    res = aprintf("Alloc(%d,%d,%s,%s)", (int)e,id,term2string(nelts),term2string(invoke));
     break;
   case &Offsetf(t,i,tp):
     res = aprintf("Offsetf(%s,%d,%s)",term2string(t),i,typopt2string(tp));
@@ -192,8 +191,10 @@ int termhash(datatype Term @t) {
     return res;
   case &AggrUpdate(a,i,v):
     return ((((unsigned int)a) + ((unsigned int)v)) >> 4) + i + 17;
-  case &Addr(vd,_): return ((unsigned int)vd >> 4)+7;
-  case &Alloc(e,_,i,_): return ((unsigned int)e >> 4) + i;
+  case &Addr(vd,invok,_): 
+    return (((unsigned int)invok + (unsigned int)vd) >> 4)+7;
+  case &Alloc(e,i,n,invok,_): 
+    return (((unsigned int)e + (unsigned int)n + (unsigned int)invok) >> 4)+i;
   case &Offsetf(t,i,_): return ((unsigned int)t >> 4) + i + 11;
   case &Offseti(t,index,_): 
     return (((unsigned int)index + (unsigned int)t) >> 4) + 13;
@@ -223,7 +224,12 @@ int termcmp(datatype Term @`r1 _t1, datatype Term @`r2 _t2) {
   case $(&Uint(i1,_), &Uint(i2,_)): return i1-i2;
   case $(&Const(e1),&Const(e2)): 
     return Evexp::exp_cmp(e1,e2)?(int)e1-(int)e2:0;
-  case $(&Addr(vd1,_),&Addr(vd2,_)): return (int)vd1 - (int)vd2;
+  case $(&Addr(vd1,i1,_),&Addr(vd2,i2,_)): 
+    int c = (int)vd1 - (int)vd2;
+    if (c != 0) return c;
+    t1 = i1;
+    t2 = i2;
+    goto LOOP;
   case $(&Unop(p1,t1a,_),&Unop(p2,t2a,_)): 
     int c = (int)p1 - (int)p2;
     if (c != 0) return c;
@@ -268,10 +274,16 @@ int termcmp(datatype Term @`r1 _t1, datatype Term @`r2 _t2) {
     t1 = v1;
     t2 = v2;
     goto LOOP;
-  case $(&Alloc(e1,_,i1,_),&Alloc(e2,_,i2,_)):
+  case $(&Alloc(e1,i1,n1,v1,_),&Alloc(e2,i2,n2,v2,_)):
     int c = (int)e1 - (int)e2;
     if (c != 0) return c;
-    else return (i1-i2);
+    c = i1 - i2;
+    if (c != 0) return c;
+    c = termcmp(n1,n2);
+    if (c != 0) return c;
+    t1 = v1;
+    t2 = v2;
+    goto LOOP;
   case $(&Offsetf(tm1,i1,_),&Offsetf(tm2,i2,_)):
     int c = i1 - i2;
     if (c != 0) return c;
@@ -304,7 +316,7 @@ static term_t copy_term(datatype Term@ t) {
   switch (t) {
   case &Uint(i,tp): return new Uint(i,tp);
   case &Const(e): return new Const(e);
-  case &Addr(vd,tp): return new Addr(vd,tp);
+  case &Addr(vd,t,tp): return new Addr(vd,t,tp);
   case &LogicVar(vd,i,tp): return new LogicVar(vd,i,tp);
   case &Binop(p,t1,t2,tp): return new Binop(p,t1,t2,tp);
   case &Unop(p,t,tp): return new Unop(p,t,tp);
@@ -314,7 +326,7 @@ static term_t copy_term(datatype Term@ t) {
   case &Proj(t,i,tp): return new Proj(t,i,tp);
   case &AggrUpdate(t,i,v): return new AggrUpdate(t,i,v);
   case &Aggr(is_union,tag,ts,tp): return new Aggr(is_union,tag,ts,tp);
-  case &Alloc(e,offset,i,tp): return new Alloc(e,offset,i,tp);
+  case &Alloc(e,i,n,v,tp): return new Alloc(e,i,n,v,tp);
   case &Offsetf(t,i,tp): return new Offsetf(t,i,tp);
   case &Offseti(t,i,tp): return new Offseti(t,i,tp);
   case &Tagof(t): return new Tagof(t);
@@ -373,7 +385,7 @@ static term_t hash_cons_term(datatype Term @t) {
 // computing the set of logicvars that occured
 // in a term, use the hash table to memoize the
 // result
-static term_set_t term_fr_logicvar(term_t t) {
+term_set_t term_fr_logicvar(term_t t) {
   let h = get_term_hash_cons_table();
   let thinfo = Hashtable::lookup_opt(h,t);
   // the info was computed before and stored in the table
@@ -387,13 +399,12 @@ static term_set_t term_fr_logicvar(term_t t) {
   switch (t) {
   case &Uint(...): 
   case &Const(...):
-  case &Addr(...):
     res = empty_term_set(); break;
-  case &Alloc(_,t1,_,_):
-    res = term_fr_logicvar(t1); break;
   case &LogicVar(...):
     res = Set::singleton(termcmp,t);
     break;
+  case &Alloc(_,_,t1,t2,_):
+    fallthru(t1,t2);
   case &Select(t1,t2,_):
     fallthru(t1,t2);
   case &AggrUpdate(t1,_,t2):
@@ -408,6 +419,8 @@ static term_set_t term_fr_logicvar(term_t t) {
 					term_fr_logicvar(t2)),
 			 term_fr_logicvar(t3));
     break;
+  case &Addr(_,t1,_):
+    fallthru(t1);
   case &Unop(_,t1,_):
     fallthru(t1);
   case &Proj(t1,_,_):
@@ -449,7 +462,7 @@ term_t cnst(Absyn::exp_t e) {
   let t = Const(e);
   return hash_cons_term(&t);
 }
-term_t addr(vardecl_t vd) {
+term_t addr(vardecl_t vd, term_t invok) {
   type_t tp = vd->type;
   switch (Absyn::compress(tp)) {
   case &Absyn::ArrayType(...): break;
@@ -457,7 +470,7 @@ term_t addr(vardecl_t vd) {
     type_t rgn = vd->rgn ? (type_t)vd->rgn : Absyn::heap_rgn_type;
     tp = Absyn::at_type(tp,rgn, Absyn::al_qual_type, Absyn::empty_tqual(0), Absyn::false_type, Absyn::false_type);
   }
-  let t = Addr(vd,tp);
+  let t = Addr(vd,invok,tp);
   return hash_cons_term(&t);
 }
 term_t logicvar(vardecl_opt_t vd,int i,type_opt_t tp) {
@@ -536,12 +549,16 @@ static bool address_disjoint(term_t t1, term_t t2) {
  LOOP:
   if (t1 == t2) return false;
   switch $(t1,t2) {
-  case $(&Addr(x,_), &Addr(y,_)): return x != y;
+  case $(&Addr(x,nv1,_), &Addr(y,nv2,_)): 
+    // could try to prove nv1 != nv2 but they're always vars
+    return x != y;
   case $(&Addr(...), &Alloc(...)): return true;
   case $(&Alloc(...), &Addr(...)): return true;
-  case $(&Alloc(exp1,tm1,i1,_),&Alloc(exp2,tm2,i2,_)):
+  case $(&Alloc(exp1,i1,tm1,nv1,_),&Alloc(exp2,i2,tm2,nv2,_)):
     // distinct allocation points must be distinct regions of memory
-    return (exp1 != exp2);
+    // could try to prove nv1 != nv2 but they're always vars
+    // could try to prove tm1 != tm2 but unlikely when static
+    return (exp1 != exp2 || i1 != i2);
   case $(&Offsetf(tm1,i,_),&Offsetf(tm2,j,_)):
     // given the same root but distinct offsets, we know the addresses
     // cannot overlap.
@@ -554,6 +571,8 @@ static bool address_disjoint(term_t t1, term_t t2) {
     t1 = tm1;
     t2 = tm2;
     goto LOOP;
+  // If we can prove the roots of the terms don't overlap
+  // then an offset can't overlap.
   case $(&Offsetf(tm1,_,_),_): 
     t1 = tm1;
     goto LOOP;
@@ -588,18 +607,20 @@ term_t apply_aggr_update(term_t a, list_t<$(int,type_opt_t)@> fields, term_t v) 
   if (fields == NULL) return v;
   let &$(i,tpopt) = fields->hd;
   type_opt_t tp = NULL;
-  if (tpopt != NULL) tp = Tcutil::pointer_elt_type((type_t)tpopt);
+  if (tpopt != NULL && Tcutil::is_pointer_type((type_t)tpopt)) {
+    tp = Tcutil::pointer_elt_type((type_t)tpopt);
+  }
   let res = aggr_update(a, i,
-                        apply_aggr_update(proj(a,i,tpopt),fields->tl,v));
+                        apply_aggr_update(proj(a,i,tp),fields->tl,v));
   return res;
 }
 
 static term_t proj_fields(term_t v, list_t<$(int,type_opt_t)@> fs) {
   for (; fs != NULL; fs = fs->tl) {
     let &$(i,tpopt) = fs->hd;
-    if (tpopt != NULL) 
+    if (tpopt != NULL && Tcutil::is_pointer_type((type_t)tpopt)) {
       v = proj(v,i,Tcutil::pointer_elt_type((type_t)tpopt));
-    else 
+    } else 
       v = proj(v,i,NULL);
   }
   return v;
@@ -720,9 +741,9 @@ term_t cast(type_t tp, term_t tm){
   return hash_cons_term(&t);
 }
 
-term_t alloc(exp_t e, term_t offset, type_opt_t tp){
+term_t alloc(exp_t e, term_t nelts, term_t invok, type_opt_t tp){
   static int counter = 0;
-  let t = Alloc(e,offset,counter,tp);
+  let t = Alloc(e,counter,nelts,invok,tp);
   counter++;
   return hash_cons_term(&t);
 }
@@ -1164,16 +1185,14 @@ type_opt_t get_term_type(term_t t) {
   case &Aggr(_,_,_,tp): return tp;
   case &Proj(t1,i,tp): return tp;
   case &AggrUpdate(t1,_,_): t = t1; goto LOOP;
-  case &Addr(vd,tp): return tp;
+  case &Addr(vd,_,tp): return tp;
   case &Update(...): return NULL;
-  case &Alloc(_,_,_,tp): return tp;
+  case &Alloc(_,_,_,_,tp): return tp;
   case &Offsetf(_,_,tp): return tp;
   case &Offseti(_,_,tp): return tp;
   case &Tagof(_): return Absyn::uint_type;
   }
 }
-
-typedef Dict::dict_t<term_t,term_t> term_dict_t;
 
 static term_t subst_term(term_dict_t dict, term_t t,
 			 Hashtable::table_t<term_t,term_t> term_h){
@@ -1189,11 +1208,16 @@ static term_t subst_term(term_dict_t dict, term_t t,
   switch (t){
   case &Uint(...):
   case &Const(...): 
-  case &Addr(...): 
     res = t; break;
-  case &Alloc(e1,t1,i,tp): 
+  case &Addr(vd,t1,tp): 
     let s1 = subst_term(dict,t1,term_h);
-    let alloc_term = Alloc(e1,s1,i,tp);
+    let addr_term = Addr(vd,s1,tp);
+    res = hash_cons_term(&addr_term);
+    break;
+  case &Alloc(e1,i,t1,t2,tp): 
+    let s1 = subst_term(dict,t1,term_h);
+    let s2 = subst_term(dict,t2,term_h);
+    let alloc_term = Alloc(e1,i,s1,s2,tp);
     res = hash_cons_term(&alloc_term);
     break;
   case &Select(t1,t2,tp):
@@ -1262,7 +1286,7 @@ static term_t subst_term(term_dict_t dict, term_t t,
 static int hash_ptr(`a s) { return (int) s;}
 
 
-static term_t subst_t(term_dict_t dict,term_t t) {
+term_t subst_t(term_dict_t dict,term_t t) {
   Hashtable::table_t<term_t,term_t> term_h = Hashtable::create(137,Core::ptrcmp,hash_ptr);
   return subst_term(dict,t,term_h);
 }
@@ -1566,7 +1590,7 @@ static assn_t reinsert(assn_t a) {
   }
 }
 
-static term_set_t assn_fr_logicvar(assn_t a) {
+term_set_t assn_fr_logicvar(assn_t a) {
   let h = get_assn_hash_cons_table();
   let ahinfo = Hashtable::lookup_opt(h,a);
   if (ahinfo == NULL) {
@@ -1788,7 +1812,7 @@ static assn_t subst_assn(term_dict_t dict, assn_t a,
   return res;
 } 
 
-static assn_t subst_a(term_dict_t dict, assn_t a){
+assn_t subst_a(term_dict_t dict, assn_t a){
   // create new hashtables to record the substituted result
   // with respect to this particular dict. 
   Hashtable::table_t<assn_t,assn_t> assn_h = Hashtable::create(107,Core::ptrcmp,hash_ptr);
@@ -2070,7 +2094,6 @@ static accum_t @`r foldm2(vardecl_t vd, term_t t, accum_t @`r accum){
     return accum;
   }
 }
-
 
 term_dict_t empty_term_dict() {
   static term_dict_t *term_dict = NULL;

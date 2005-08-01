@@ -1550,8 +1550,8 @@ void*_Tmp3=Cyc_Absyn_compress(last_type_field->type);void*_Tmp4;void*_Tmp5;if(*(
 if(type_bd==0 || !Cyc_Toc_is_zero(type_bd))
 return 0;{
 # 1268
-struct Cyc_Absyn_Exp*_Tmp6=({struct Cyc_Absyn_Exp*_Tmp7[2];_Tmp7[0]=
-_check_null(Cyc_Toc_array_length_exp(e2)),({
+struct Cyc_Absyn_Exp*_Tmp6=({struct Cyc_Absyn_Exp*_Tmp7[2];({
+struct Cyc_Absyn_Exp*_Tmp8=Cyc_Toc_array_length_exp(e2);_Tmp7[0]=_Tmp8;}),({
 struct Cyc_Absyn_Exp*_Tmp8=Cyc_Absyn_sizeoftype_exp(elt_type,0U);_Tmp7[1]=_Tmp8;});Cyc_Toc_fncall_exp_dl(Cyc_Toc__check_times_e,_tag_fat(_Tmp7,sizeof(struct Cyc_Absyn_Exp*),2));});
 # 1268
 return Cyc_Absyn_add_exp(_Tmp6,
@@ -2710,7 +2710,7 @@ pexp=Cyc_Toc_aqmalloc_exp(aqopt,num_elts2);}}}
 if(is_fat){
 struct Cyc_Absyn_Exp*elt_sz=(int)mknd==1?Cyc_Absyn_sizeoftype_exp(t_c,0U): Cyc_Absyn_uint_exp(1U,0U);
 struct Cyc_Absyn_Exp*rexp=({struct Cyc_Absyn_Exp*_TmpB[3];_TmpB[0]=pexp,_TmpB[1]=elt_sz,_TmpB[2]=num_elts2;Cyc_Toc_fncall_exp_dl(Cyc_Toc__tag_fat_e,_tag_fat(_TmpB,sizeof(struct Cyc_Absyn_Exp*),3));});
-struct Cyc_Absyn_Stmt*s=({struct _tuple1*_TmpB=x;void*_TmpC=Cyc_Absyn_uint_type;struct Cyc_Absyn_Exp*_TmpD=num_elts;Cyc_Absyn_declare_stmt(_TmpB,_TmpC,_TmpD,
+struct Cyc_Absyn_Stmt*s=({struct _tuple1*_TmpB=_check_null(x);void*_TmpC=Cyc_Absyn_uint_type;struct Cyc_Absyn_Exp*_TmpD=num_elts;Cyc_Absyn_declare_stmt(_TmpB,_TmpC,_TmpD,
 Cyc_Absyn_exp_stmt(rexp,0U),0U);});
 ({void*_TmpB=Cyc_Toc_stmt_exp_r(s);e->r=_TmpB;});}else{
 # 2627

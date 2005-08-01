@@ -395,7 +395,7 @@ n=n->tl;
 # 86
 1U;}
 # 90
-({struct Cyc_List_List*_Tmp0=({struct Cyc_List_List*_Tmp1=_region_malloc(rgn,0U,sizeof(struct Cyc_List_List));_Tmp1->hd=elt,_Tmp1->tl=n;_Tmp1;});_check_null(prev)->tl=_Tmp0;});
+({struct Cyc_List_List*_Tmp0=({struct Cyc_List_List*_Tmp1=_region_malloc(rgn,0U,sizeof(struct Cyc_List_List));_Tmp1->hd=elt,_Tmp1->tl=n;_Tmp1;});prev->tl=_Tmp0;});
 return result;}}}}
 # 95
 struct Cyc_Set_Set*Cyc_Set_insert(struct Cyc_Set_Set*s,void*elt){

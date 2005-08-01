@@ -327,12 +327,12 @@ static void add_type_info(graph_t @g, term_t term) {
     // also add x as a node to pick up any constant bounds information
     term2node(g, x);
     break;
-  case &Alloc(_,n,_,_):
+  case &Alloc(_,_,n,_,_):
     // an allocation node -- we know it's not null and that the numelts is n
     add_constraint(g,z,ULt,term); // not null
     add_constraint(g,numelts_term(term),ULte,n);
     break;
-  case &Addr(vd,_):
+  case &Addr(...):
     // the address of a variable -- we know it's not null
     add_constraint(g,z,ULt,term);
     break;
@@ -1927,10 +1927,6 @@ static void add_prim($(term_t,prim_reln_t,term_t)@ p, graph_t @`H g) {
 datatype exn { TooLarge };
 datatype exn.TooLarge too_large = TooLarge;
 
-//FIX: add a way for the user to control this.
-unsigned int max_paths = 17;
-unsigned int max_paths_seen = 0;
-
 // given a set of graphs gs representing A1 or A2 or ... or An
 // and given assertion a, compute the set of graphs representing
 // (A1 or A2 ... or An) and a.  This is written with explicit
@@ -1960,7 +1956,7 @@ static graph_t *cgraph(graph_t *`H gs, Set::set_t<assn_t,`H> @already_seen,
     goto LOOP;
   case &Or(a1,a2):
     let n = num_graphs(gs);
-    if (*total_paths > max_paths){
+    if (*total_paths > Flags::max_vc_paths){
       throw &too_large;
     }
     // fprintf(stderr, "num_graphs(gs) = %d, total_paths = %d\n", n, *total_paths);
@@ -1973,6 +1969,8 @@ static graph_t *cgraph(graph_t *`H gs, Set::set_t<assn_t,`H> @already_seen,
     let already_seen2 = *already_seen;
     // compute (gs and a1)
     gs1 = cgraph(gs1,&already_seen1,a1,total_paths);
+    // skip closure passes if a1 was an Or -- we've already closed.
+    switch (a1) { case &Or(...):  goto NOCLOSE1; default: break;}
     gs1 = associate_ud_sd_in_graphs(gs1);
     gs1 = break_term_in_graphs(gs1);
     // try to weed out graphs through equality closure
@@ -1980,12 +1978,15 @@ static graph_t *cgraph(graph_t *`H gs, Set::set_t<assn_t,`H> @already_seen,
     gs1 = associate_ud_sd_in_graphs(gs1);
     // at this point, we're splitting so increase the or-depth
     // compute (gs and a2)
+  NOCLOSE1:
+    switch (a2) { case &Or(...): goto NOCLOSE2; default: break;}
     gs2 = cgraph(gs2,&already_seen2,a2,total_paths);
     gs2 = associate_ud_sd_in_graphs(gs2);
     gs2 = break_term_in_graphs(gs2); 
     // try to weed out graphs through equality closure
     gs2 = equality_close_graphs(gs2);
     gs2 = associate_ud_sd_in_graphs(gs2);
+  NOCLOSE2:
     // return (gs and a1) or (gs and a2)
     *already_seen = Set::intersect(already_seen1,already_seen2);
     gs = graph_append(gs1,gs2);

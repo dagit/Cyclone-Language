@@ -1150,7 +1150,7 @@ void*_Tmp0=d->r;void*_Tmp1;void*_Tmp2;void*_Tmp3;void*_Tmp4;switch(*((int*)_Tmp0
 Cyc_Binding_resolve_and_add_vardecl(loc,env,vd);
 # 888
 if(vd->initializer!=0 && !Cyc_Binding_in_cinclude(env))
-Cyc_Binding_resolve_exp(env,_check_null(vd->initializer));
+Cyc_Binding_resolve_exp(env,vd->initializer);
 goto _LL0;}case 1: _Tmp4=((struct Cyc_Absyn_Fn_d_Absyn_Raw_decl_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Fndecl*fd=_Tmp4;
 # 893
 if(env->in_cyc_override)

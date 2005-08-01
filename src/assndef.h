@@ -58,9 +58,12 @@ namespace AssnDef{
   ***********************************************************/
   datatype Term {
     Uint(unsigned int,type_opt_t); // a constant value known to cyclone at compile time
-    Const(exp_t); // a Cyclone "constant" expression (e.g., 3, sizeof(e), etc.)
-    LogicVar(vardecl_opt_t,int,type_opt_t); // logic variable
-    Unop(Absyn::primop_t,term_t,type_opt_t); // Not, Bitnot, Numelts
+    Const(exp_t); // a Cyclone "constant" expression (e.g., sizeof(e), etc.)
+    // logic variable -- the int is the real identity -- the vardecl is
+    // intended to be used to associate the logic variable with a program
+    // variable.
+    LogicVar(vardecl_opt_t,int,type_opt_t); 
+    Unop(Absyn::primop_t,term_t,type_opt_t); // Not, Bitnot, Numelts, etc.
     Binop(Absyn::primop_t,term_t,term_t,type_opt_t); // all other primops
     Cast(Absyn::type_t, term_t); // type-cast
     // represents a lookup in memory mem at location addr
@@ -69,6 +72,8 @@ namespace AssnDef{
     // it maps address addr to value.  
     Update(term_t mem,term_t addr,term_t value);
 
+    // We combine structs, datatypes, unions, and tagged unions into
+    // one big "aggregate" term.  
     // Unions are represented by one tagged value.  The tag records
     // the member that was last written, and we can only reduce a
     // projection when the member being read was the same as the one last
@@ -76,25 +81,58 @@ namespace AssnDef{
     // For datatypes, the is_union field is false, and the tag field
     // records which constructor we're dealing with.  For structs,
     // the is_union field is false, and the tag is set to -1.
-    // an aggregate (struct, tuple, datatype, tagged union, union, etc.  
-    // the tag is only used for datatypes and tagged unions)
     Aggr(bool is_union, unsigned tag, List::list_t<term_t>,type_opt_t); 
-    // projection off of aggr
-    Proj(term_t tuple, unsigned index, type_opt_t); 
+    // projection off of aggr -- as noted above, this does not reduce
+    // when the aggr term is a union Aggr, and the tag does not match
+    // the index.  Otherwise, Proj(Aggr(_,_list(t0,t1,...,tn)),i,_) -> ti.
+    Proj(term_t aggr, unsigned index, type_opt_t); 
+    // This is a functional update on aggregates.  
     // AggrUpdate(Aggr[t1,...,ti,...,tn],i,v) --> Aggr[t1,...,v,...,tn]
+    // When a union is updated, the tag changes.
     AggrUpdate(term_t aggr, unsigned index, term_t value);
-    
-    Addr(vardecl_t,type_opt_t); // represents the address of a program variable
-    // represents a location created during memory allocation
-    Alloc(exp_t, term_t, int, type_opt_t); 
-    // given an expression e.f, and the address of e is t
-    // and f is the ith field of e's type, then the address of e.f 
-    // is Offsetf(i,t)
+    // Addr(x) represents the address of a program variable x (i.e., &x).
+    // The term invok should always be a logic variable and represents
+    // an invocation of a function.  Different invocations yield
+    // Addr(...) terms with different invok terms.  If you like,
+    // invok represents the base of the stack frame, whereas x represents
+    // some symbolic offset relative to that frame.  Given the same
+    // invok but different vardecls, we know the addresses are distinct.
+    // Addr(-) terms are really only used on escaping variables and
+    // are used as "roots" into memory.  
+    Addr(vardecl_t,term_t invok,type_opt_t); 
+    // Represents a location created during memory allocation (i.e., new,
+    // malloc, calloc, etc.)  The expression is used to distinguish
+    // distinct allocation points in the program so that we can determine
+    // when two allocation points cannot be the same value.  The nelts
+    // field determines the number of elements in the object that was
+    // allocated.  For instance, new {1,2,3} will yield an Alloc with
+    // nelts = 3.  The invok term is used as in Addr(-) to distinguish 
+    // allocation points from distinct invocations of a procedure.
+    // The id field is used to distinguish different invocations of
+    // the same allocation point.  Note that we assume Addr(-) and
+    // Alloc(-) terms are always distinct, that two Alloc terms with
+    // different expressions, different ids, or provably not equal
+    // nelts or invok are distinct.  This is actually *not* sound since
+    // the garbage collector could recycle a location and this can be
+    // observed through pointer equality, casting to an int, etc.
+    // Nevertheless, the assumption is important for reducing the
+    // selects/updates on memory and is fairly reasonable.  
+    Alloc(exp_t, int id, term_t nelts, term_t invok, type_opt_t); 
+    // When t is the address of an aggregate, Offsetf(t,i) represents
+    // the address of the ith member of the aggregate.  At source
+    // level, this is the same as (char *)t+offsetof(T,f) where T is the
+    // aggregate type and f is the ith member's name.  
     Offsetf(term_t, unsigned index, type_opt_t);
-    // given an expression e1[e2], where the address of e1
-    // is t1, and the right value of e2 is t2, then
-    // the address of e1[e2] is Offseti(t1,t2)
+    // When t is the address of an array, Offseti(t,i) represents
+    // the address of the ith element of the array.  At source
+    // level, this is the same as t+i (or (char *)t + i*sizeof(T))
+    // where T is the element type.  Note that index is a signed
+    // term.  
     Offseti(term_t, term_t, type_opt_t);
+    // When t is an aggregate, Tagof(t) reduces to the tag for that
+    // aggregate.  Recall that structs have tag -1, whereas for datatypes
+    // and (tagged) unions, the the tag determines which member of
+    // the datatype/union was last written.  
     Tagof(term_t);
   };
 
@@ -131,8 +169,8 @@ namespace AssnDef{
   extern term_t tagof_tm(term_t);
   extern term_t proj(term_t t, unsigned i, type_opt_t);
   extern term_t aggr_update(term_t t1, unsigned i, term_t t3);
-  extern term_t addr(vardecl_t);
-  extern term_t alloc(exp_t,term_t,type_opt_t);
+  extern term_t addr(vardecl_t, term_t invok);
+  extern term_t alloc(exp_t, term_t nelts, term_t invok, type_opt_t);
   extern term_t offsetf(term_t t, unsigned i, type_opt_t);
   extern term_t offseti(term_t t, term_t i, type_opt_t);
 
@@ -280,6 +318,16 @@ namespace AssnDef{
   // factors out common primitive assertions that hold in a
   extern assn_set_opt_t widen_it(assn_t a);
   extern assn_t widen(assn_t a);
+
+  // basic substitution routines for assertions and terms
+  typedef Dict::dict_t<term_t,term_t> term_dict_t;
+  extern term_dict_t empty_term_dict();
+  extern term_t subst_t(term_dict_t dict,term_t t);
+  extern assn_t subst_a(term_dict_t dict, assn_t a);
+
+  // calculate free logic variables of terms and asserts
+  extern term_set_t term_fr_logicvar(term_t t);
+  extern term_set_t assn_fr_logicvar(assn_t a);
 
   void reset_hash_cons_table(void);
 }

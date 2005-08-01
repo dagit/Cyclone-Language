@@ -622,7 +622,7 @@ if(!Cyc_Absynpp_special(s))return s;{
 # 301
 int n=(int)(_get_fat_size(s,sizeof(char))- 1U);
 # 303
-if(n > 0 &&(int)*((const char*)_check_fat_subscript(s,sizeof(char),n))==0)-- n;{
+if(n > 0 &&(int)((const char*)s.curr)[n]==0)-- n;{
 # 305
 int len=0;
 {int i=0;for(0;i <= n;++ i){

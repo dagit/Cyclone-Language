@@ -506,7 +506,7 @@ unsigned sz=Cyc_strlen(s);
 if(sz >= 1U){
 if(Cyc_Absyndump_need_space_before())
 Cyc_fputc(32,*Cyc_Absyndump_dump_file);
-Cyc_Absyndump_prev_char=((const char*)s.curr)[(int)(sz - 1U)];
+Cyc_Absyndump_prev_char=*((const char*)_check_fat_subscript(s,sizeof(char),(int)(sz - 1U)));
 Cyc_file_string_write(*Cyc_Absyndump_dump_file,s,0,(int)sz);}}
 # 134
 static void Cyc_Absyndump_dump_nospace(struct _fat_ptr s){
@@ -1256,7 +1256,7 @@ if(expstmt){Cyc_Absyndump_dump_char(41);Cyc_Absyndump_dump_semi();}}else{
 Cyc_Absyndump_dumpstmt(s2,expstmt,varsinblock);}
 goto _LL0;}case 3: if(((struct Cyc_Absyn_Return_s_Absyn_Raw_stmt_struct*)_Tmp0)->f1==0){
 Cyc_Absyndump_dump(_tag_fat("return;",sizeof(char),8U));goto _LL0;}else{_Tmp4=((struct Cyc_Absyn_Return_s_Absyn_Raw_stmt_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Exp*e=_Tmp4;
-Cyc_Absyndump_dump(_tag_fat("return",sizeof(char),7U));Cyc_Absyndump_dumpexp(e);Cyc_Absyndump_dump_semi();goto _LL0;}}case 4: _Tmp4=((struct Cyc_Absyn_IfThenElse_s_Absyn_Raw_stmt_struct*)_Tmp0)->f1;_Tmp3=((struct Cyc_Absyn_IfThenElse_s_Absyn_Raw_stmt_struct*)_Tmp0)->f2;_Tmp2=((struct Cyc_Absyn_IfThenElse_s_Absyn_Raw_stmt_struct*)_Tmp0)->f3;{struct Cyc_Absyn_Exp*e=_Tmp4;struct Cyc_Absyn_Stmt*s1=_Tmp3;struct Cyc_Absyn_Stmt*s2=_Tmp2;
+Cyc_Absyndump_dump(_tag_fat("return",sizeof(char),7U));Cyc_Absyndump_dumpexp(_check_null(e));Cyc_Absyndump_dump_semi();goto _LL0;}}case 4: _Tmp4=((struct Cyc_Absyn_IfThenElse_s_Absyn_Raw_stmt_struct*)_Tmp0)->f1;_Tmp3=((struct Cyc_Absyn_IfThenElse_s_Absyn_Raw_stmt_struct*)_Tmp0)->f2;_Tmp2=((struct Cyc_Absyn_IfThenElse_s_Absyn_Raw_stmt_struct*)_Tmp0)->f3;{struct Cyc_Absyn_Exp*e=_Tmp4;struct Cyc_Absyn_Stmt*s1=_Tmp3;struct Cyc_Absyn_Stmt*s2=_Tmp2;
 # 965
 Cyc_Absyndump_dump(_tag_fat("if(",sizeof(char),4U));Cyc_Absyndump_dumpexp(e);
 {void*_Tmp5=s1->r;switch(*((int*)_Tmp5)){case 2:

@@ -139,6 +139,14 @@ extern bool compile_for_boot;
   // error and then exit immediately.  Used for generating the message table.
 extern bool print_parser_state_and_token;
 
+  // controls the maximum size of a post-condition that will be inlined by
+  // vcgen without weakening.
+extern unsigned int max_vc_summary;  
+
+  // controls (roughly) how many distinct paths the constraint solver will
+  // explore before giving up when trying to prove a verification condition.
+extern unsigned int max_vc_paths;
+
   // sets every flag above with warn in its name
 void set_all_warnings();
 }
