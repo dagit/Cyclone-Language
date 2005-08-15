@@ -482,19 +482,19 @@ int i;
 (2 <= m && m <= k + m)&& k + m <= n?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp0;})(_tag_fat("2 <= m && m <= k+m && k+m <= n",sizeof(char),31U),_tag_fat("xp.cyc",sizeof(char),7U),137U);
 {
 int km=k + m;
-unsigned long y2=(unsigned long)((int)*((unsigned char*)_check_fat_subscript(y,sizeof(unsigned char),m - 1))* 256U + (int)((unsigned char*)y.curr)[m - 2]);
+unsigned long y2=(unsigned long)((int)((unsigned char*)y.curr)[m - 1]* 256U + (int)((unsigned char*)y.curr)[m - 2]);
 unsigned long r3=(unsigned long)(((int)((unsigned char*)rem.curr)[km]* 65536U + (int)((unsigned char*)rem.curr)[km - 1]* 256U)+ (int)((unsigned char*)rem.curr)[km - 2]);
 # 143
 qk=(int)(r3 / y2);
 if(qk >= 256U)
 qk=255U;}
 # 147
-({unsigned char _Tmp0=(unsigned char)Cyc_XP_product(m,dq,y,qk);*((unsigned char*)_check_fat_subscript(dq,sizeof(unsigned char),m))=_Tmp0;});
+({unsigned char _Tmp0=(unsigned char)Cyc_XP_product(m,dq,y,qk);((unsigned char*)dq.curr)[m]=_Tmp0;});
 for(i=m;i > 0;-- i){
-if(({int _Tmp0=(int)*((unsigned char*)_check_fat_subscript(rem,sizeof(unsigned char),i + k));_Tmp0!=(int)*((unsigned char*)_check_fat_subscript(dq,sizeof(unsigned char),i));}))
+if((int)*((unsigned char*)_check_fat_subscript(rem,sizeof(unsigned char),i + k))!=(int)((unsigned char*)dq.curr)[i])
 break;}
-if(({int _Tmp0=(int)*((unsigned char*)_check_fat_subscript(rem,sizeof(unsigned char),i + k));_Tmp0 < (int)*((unsigned char*)_check_fat_subscript(dq,sizeof(unsigned char),i));}))
-({unsigned char _Tmp0=(unsigned char)Cyc_XP_product(m,dq,y,-- qk);*((unsigned char*)_check_fat_subscript(dq,sizeof(unsigned char),m))=_Tmp0;});}
+if((int)*((unsigned char*)_check_fat_subscript(rem,sizeof(unsigned char),i + k))< (int)((unsigned char*)dq.curr)[i])
+({unsigned char _Tmp0=(unsigned char)Cyc_XP_product(m,dq,y,-- qk);((unsigned char*)dq.curr)[m]=_Tmp0;});}
 # 154
 *((unsigned char*)_check_fat_subscript(q,sizeof(unsigned char),k))=(unsigned char)qk;{
 # 156
@@ -598,7 +598,7 @@ for(1;((int)*_check_null(p)&& isalnum((int)*p))&&(int)*((char*)_check_known_subs
 carry=Cyc_XP_product(n,z,z,base);
 if(carry)
 break;
-Cyc_XP_sum(n,z,z,(int)Cyc_map[(int)*p - 48]);}
+Cyc_XP_sum(n,z,z,(int)*((char*)_check_known_subscript_notnull(Cyc_map,75U,sizeof(char),(int)*p - 48)));}
 # 262
 return carry;}else{
 # 264

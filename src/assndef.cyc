@@ -522,7 +522,7 @@ static bool term_neq(term_t t1, term_t t2) {
  LOOP:
   switch $(t1,t2) {
   case $(&Uint(i,_),&Uint(j,_)): return i != j;
-  case $(&Binop(Absyn::Plus,t11,t12,_),&Binop(Absyn::Plus,t21,t22,_)) && t11 == t12:
+  case $(&Binop(Absyn::Plus,t11,t12,_),&Binop(Absyn::Plus,t21,t22,_)) && t11 == t21:
     // t+t12 != t+t22 if t12 != t22
     t1 = t12;
     t2 = t22;
@@ -1461,6 +1461,11 @@ static assn_t copy_assn(datatype Assn@`r a){
 datatype Assn.True true_assn = True;
 datatype Assn.False false_assn = False;
 
+// computes the negation of an assertion a
+// and allocate it in the heap
+// it is called by hasn_cons_assn, so that
+// every assertion in the hashtable has
+// its negation in the table as well
 static assn_t neg_assn(datatype Assn@ a){
   switch (a) {
   case &True: return &false_assn;
@@ -1590,6 +1595,8 @@ static assn_t reinsert(assn_t a) {
   }
 }
 
+// returns the set of logicvars that are free in
+// an assertion a
 term_set_t assn_fr_logicvar(assn_t a) {
   let h = get_assn_hash_cons_table();
   let ahinfo = Hashtable::lookup_opt(h,a);
@@ -1618,6 +1625,7 @@ term_set_t assn_fr_logicvar(assn_t a) {
   return res;
 }
 
+// returns true if an logicvar lvar is free in a
 static bool logicvar_in_assn(term_t lvar, assn_t a) {
   let lvset = assn_fr_logicvar(a);
   return Set::member(lvset,lvar);
@@ -1638,11 +1646,6 @@ assn_t not(assn_t a){
 assn_t prim(term_t t1, prim_reln_t p, term_t t2){
   let ptr = Prim(t1,p,t2);
   return hash_cons_assn(&ptr);
-}
-
-// some macros and functions for rest of the primitive relations.
-#define prim_assn(p,P) assn_t p(term_t t1, term_t t2) { \
-  return prim((term_t)t1,P,(term_t)t2); \
 }
 
 assn_t eq(term_t t1, term_t t2){
@@ -1886,6 +1889,106 @@ bool simple_prove(assn_t ctxt, assn_t a) {
   return simple_prv((assn_set_t)sopt, a);
 }
 
+term_set_t assnfn_fr_logicvar(assnfn_t af) {
+  let fvs = assn_fr_logicvar(af->assn);
+  for(let as = af->actuals; as != NULL; as = as->tl)
+    fvs = Set::delete(fvs,as->hd);
+  return fvs;
+}
+
+// apply one term to an assnfn
+assnfn_t apply_term_assnfn(assnfn_t af, term_t t) {
+  let assn = af->assn;
+  let actuals = af->actuals;
+  let newaf = new AssnFn{actuals->tl,assn};
+  // if actuals->hd is not free in the assnfn, no need to do anything
+  if (! Set::member(assnfn_fr_logicvar(newaf),actuals->hd)) return newaf;
+  // get the free vars in t
+  let newactuals = NULL;
+  let dict = empty_term_dict();
+  // will substitute t for actuals->hd
+  dict = Dict::insert(dict,actuals->hd,t);
+  actuals = actuals->tl;
+  // properly alpha-vary the rest of actuals so that
+  // the free vars in t won't be captured
+  let fvs = term_fr_logicvar(t);
+  for( ; actuals != NULL; actuals = actuals->tl) {
+    if (Set::member(fvs,actuals->hd)) {
+      let v = fresh_var(get_term_type(actuals->hd));
+      dict = Dict::insert(dict,actuals->hd,v);
+      newactuals = new List {v,newactuals};
+    } else {
+      newactuals = new List {actuals->hd,newactuals};
+    }
+  }
+  let newassn = subst_a(dict,assn);
+  let newactuals = imp_rev(newactuals);
+  return new AssnFn {newactuals,newassn};
+}
+
+// apply a list of terms to an assnfn in order
+static assnfn_t apply_terms_assnfn(assnfn_t af, list_t<term_t> ts) {
+  for( ; ts != NULL; ts = ts->tl)
+    af = apply_term_assnfn(af,ts->hd);
+  return af;
+}
+
+static string_t assnfn2string(assnfn_t af) {
+  if (af->actuals == NULL) return assn2string(af->assn);
+  return aprintf("/\\ %s .\n%s",term2string(af->actuals->hd),assnfn2string(new AssnFn{af->actuals->tl,af->assn}));
+}
+string_t existassnfn2string(existassnfn_t eaf) {
+  return assnfn2string(eaf->af);
+}
+// turn an assnmap into an existassnfn,
+// where bound logicvars are the value of
+// vds.
+existassnfn_t assnmap2existassnfn(assn_map_t am, list_t<vardecl_opt_t> vds) {
+  let actuals = NULL;
+  for( ; vds != NULL; vds = vds->tl) {
+    if (vds->hd != NULL) {
+      let $(v,_) = lookup_var_map((vardecl_t)vds->hd,am);
+      switch (v) {
+      case &LogicVar(...): break;
+      default: Warn::impos("term to be bound is not a logic var");
+      };
+      actuals = new List {v,actuals};
+    } else {
+      actuals = new List {fresh_var(vds->hd == NULL ? NULL:vds->hd->type),actuals};
+    }
+  }
+  actuals = imp_rev(actuals);
+  // bound all the lambda variables
+  let af = new AssnFn{actuals,am.assn};
+  // bound all the existential variables
+  let fvs = assnfn_fr_logicvar(af);
+  return new ExistAssnFn{af,fvs};
+}
+
+existassnfn_t bound_vs_in_assn(assn_t a,list_t<term_t,`H> vs) {
+  let af = new AssnFn{vs,a};
+  let fvs = assnfn_fr_logicvar(af);
+  return new ExistAssnFn{af,fvs};
+}
+static term_dict_t@`r insertnewmap(term_t t, term_dict_t @`r dict) {
+  *dict = Dict::insert(*dict,t,fresh_var(get_term_type(t)));
+  return dict;
+}
+// given an existassnfn, instantiate all 
+// existentially bound variables with fresh
+// new vars
+static assnfn_t remove_exist_existassnfn(existassnfn_t eaf) {
+  term_dict_t dict = empty_term_dict();
+  dict = *Set::fold(insertnewmap,eaf->existvars,&dict);
+  return new AssnFn{eaf->af->actuals,subst_a(dict,eaf->af->assn)};
+}
+
+assn_t existassnfn2assn(existassnfn_t eaf,list_t<term_t> ts) {
+  let af = remove_exist_existassnfn(eaf);
+  af = apply_terms_assnfn(af,ts);
+  if (af->actuals == NULL) return af->assn;
+  Warn::impos("not enough ts to be applied to assnfn");
+}
 
 // functions related to handling the nonescvar_map
 static list_t<string_t<`H>@`H, `H> m2string(vardecl_t vd, term_t value, list_t<string_t<`H>@`H, `H> stringlist){

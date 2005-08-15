@@ -378,11 +378,6 @@ type_t copy_type(type_t t) {
     // req/ens/throws expressions to be on the safe side.
     list_t<vardecl_opt_t> argvds2 = List::map(copy_vardecl_opt,argvds);
     vardecl_opt_t ret_val2 = copy_vardecl_opt(ret_val);
-    let vds1 = new List(ret_val,argvds);
-    let vds2 = new List(ret_val2,argvds2);
-    req_rlns2 = AssnDef::subst_vardecls(vds1,vds2,req_rlns2);
-    ens_rlns2 = AssnDef::subst_vardecls(vds1,vds2,ens_rlns2);
-    thrws_rlns2 = AssnDef::subst_vardecls(vds1,vds2,thrws_rlns2);
     return new FnType(FnInfo{tvs2,effopt2,rt_tq,rt2,args2,c_varargs2,
                                cyc_varargs2,qb2,atts2,req2,req_rlns2,
                                ens2,ens_rlns2,thrws2,thrws_rlns2,ret_val2,
@@ -2307,40 +2302,47 @@ bool subtype(list_t<$(type_t,type_t)@`H,`H> assume,
     // deal with attributes that can be dropped
     if (!Atts::sub_attributes(f1.attributes,f2.attributes)) return false;
 
-    // vds1, vds2 are list of vardecls that include both arg and ret.
-    let vds1 = new List(f1.return_value,f1.arg_vardecls);
-    let vds2 = new List(f2.return_value,f2.arg_vardecls);
+    // generate list of terms (representing real values of args and memory
+    let terms = NULL;
+    
+    for(let vds = f1.arg_vardecls; vds != NULL; vds = vds->tl) {
+      terms = new List {AssnDef::fresh_var(vds->hd==NULL ? NULL:vds->hd->type),terms};
+    }
+    terms = imp_rev(terms);
+    terms = new List {AssnDef::fresh_var(NULL),terms};
+
     // check f2.requires => f1.requires
     // f1.requires_assn == NULL, then f1.requires_assn = true, 
     // no need to check f2.req => f1.req
+    
     if (f1.requires_assn != NULL) {
-      let req1 = *f1.requires_assn;
-      let req2 = f2.requires_assn ? *f2.requires_assn : AssnDef::true_assnmap();
-      let req1_assn = AssnDef::merge_assnmaps(vds2,req2,vds1,req1);
-      if (!AssnDef::simple_prove(req2.assn,req1_assn) && 
-	  !PrattProver::constraint_prove(req2.assn,req1_assn))
+      let req1 = AssnDef::existassnfn2assn(f1.requires_assn,terms);
+      let req2 = f2.requires_assn ? AssnDef::existassnfn2assn(f2.requires_assn,terms) : &AssnDef::true_assn;
+      if (!AssnDef::simple_prove(req2,req1) && 
+	  !PrattProver::constraint_prove(req2,req1))
 	return false;
     }
     // check f1.ensures => f2.ensures
     // f2.ensures_assn == NULL, then f2.ensures_assn = true,
     // no need to check f1.ens => f2.ens
     if (f2.ensures_assn != NULL) {
-      let ens2 = *f2.ensures_assn;
-      let ens1 = f1.ensures_assn ? *f1.ensures_assn : AssnDef::true_assnmap();
-      let ens2_assn = AssnDef::merge_assnmaps(vds1,ens1,vds2,ens2);
-      if (!AssnDef::simple_prove(ens1.assn,ens2_assn) && 
-	  !PrattProver::constraint_prove(ens1.assn,ens2_assn))
+      let ret_value = AssnDef::fresh_var(f1.return_value->type);
+      let terms = new List {ret_value,terms};
+      let ens2 = AssnDef::existassnfn2assn(f2.ensures_assn,terms);
+      let ens1 = f1.ensures_assn ? AssnDef::existassnfn2assn(f1.ensures_assn,terms) : &AssnDef::true_assn;
+      if (!AssnDef::simple_prove(ens1,ens2) && 
+	  !PrattProver::constraint_prove(ens1,ens2))
 	return false;
     }
     // check f1.throws => f2.throws
     if (f2.throws_assn != NULL) {
-      let thrws2 = *f2.throws_assn;
-      let thrws1 = f1.throws_assn ? *f1.throws_assn : AssnDef::true_assnmap();
-      let thrws2_assn = AssnDef::merge_assnmaps(vds1,thrws1,vds2,thrws2);
-      if (!AssnDef::simple_prove(thrws1.assn,thrws2_assn) && 
-	  !PrattProver::constraint_prove(thrws1.assn,thrws2_assn))
+      let thrws2 = AssnDef::existassnfn2assn(f2.throws_assn,terms);
+      let thrws1 = f1.throws_assn ? AssnDef::existassnfn2assn(f1.throws_assn,terms) : &AssnDef::true_assn;
+      if (!AssnDef::simple_prove(thrws1,thrws2) && 
+	  !PrattProver::constraint_prove(thrws1,thrws2))
 	return false;
     }
+
     // otherwise okay
     return true;
   default: 
@@ -2973,11 +2975,7 @@ type_t rsubstitute(region_t<`r> rgn,
     exp_opt_t req2 = rsubs_exp_opt(rgn,inst,req);
     exp_opt_t ens2 = rsubs_exp_opt(rgn,inst,ens);
     exp_opt_t thrws2 = rsubs_exp_opt(rgn,inst,thrws);
-    // re-calculate assertions -- saves having to do a type-substitution
-    // for assertions, though we have to fix up the vardecls below.
-    AssnDef::assn_map_opt_t req_assn2 = (req2 != NULL) ? new Vcgen::clause2assn((exp_t)req2) : NULL;
-    AssnDef::assn_map_opt_t ens_assn2 = (ens2 != NULL) ? new Vcgen::clause2assn((exp_t)ens2) : NULL;
-    AssnDef::assn_map_opt_t thrws_assn2 = (thrws2 != NULL) ? new Vcgen::clause2assn((exp_t)thrws2) : NULL;
+
     // At this point, we need to generate fresh vardecls for the argvds,
     // and a fresh return_value that has the appropriate substituted
     // type.  Then we need to crawl through req2, ens2, and thrws2 and
@@ -2998,11 +2996,32 @@ type_t rsubstitute(region_t<`r> rgn,
       ret_value2 = new *ret_value;
       ret_value2->type = rsubstitute(rgn,inst,ret_value2->type);
     }
+
+    AssnDef::existassnfn_opt_t req_assn2 = NULL;
+    AssnDef::existassnfn_opt_t ens_assn2 = NULL;
+    AssnDef::existassnfn_opt_t thrws_assn2 = NULL;
+
     let vds1 = new List(ret_value,argvds);
     let vds2 = new List(ret_value2,argvds2);
-    req_assn2 = AssnDef::subst_vardecls(vds1,vds2,req_assn2);
-    ens_assn2 = AssnDef::subst_vardecls(vds1,vds2,ens_assn2);
-    thrws_assn2 = AssnDef::subst_vardecls(vds1,vds2,thrws_assn2);
+    let boundvds = new List {(vardecl_opt_t)AssnDef::memory,argvds2};
+    
+    if (req2 != NULL) {
+      let req_am2 = new Vcgen::clause2assn((exp_t)req2);
+      req_am2 = AssnDef::subst_vardecls(vds1,vds2,req_am2);
+      req_assn2 = AssnDef::assnmap2existassnfn(*req_am2,boundvds);
+    }
+    if (ens2 != NULL) {
+      let ens_am2 = new Vcgen::clause2assn((exp_t)ens2);
+      ens_am2 = AssnDef::subst_vardecls(vds1,vds2,ens_am2);
+      new List {ret_value2,boundvds};
+      ens_assn2 = AssnDef::assnmap2existassnfn(*ens_am2,new List {ret_value2,boundvds});
+    }
+    if (thrws2 != NULL) {
+      let thrws_am2 = new Vcgen::clause2assn((exp_t)thrws2);
+      thrws_am2 = AssnDef::subst_vardecls(vds1,vds2,thrws_am2);
+      thrws_assn2 = AssnDef::assnmap2existassnfn(*thrws_am2,boundvds);
+    }
+
     return new FnType(FnInfo{vs,eff2,rtq,rsubstitute(rgn,inst,rtyp),args2,
 			       c_varargs,cyc_varargs2,qb2,atts,
 			       req2,req_assn2,ens2,ens_assn2,

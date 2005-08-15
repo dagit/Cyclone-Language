@@ -935,7 +935,7 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
       *eptr = uint_exp(1,0);
     }
     break;
-  case &FnType(FnInfo{*btvs,*eff,*rtq,tr,args,c_vararg,cyc_vararg,*qb,atts,req,*req_relns,ens,*ens_relns,thrws,*thrws_relns,_,_,effc}):
+  case &FnType(FnInfo{*btvs,*eff,*rtq,tr,args,c_vararg,cyc_vararg,*qb,atts,req,*req_relns,ens,*ens_relns,thrws,*thrws_relns,return_vd,arg_vds,effc}):
     // This is an unusual and complicated case because (a) we may have to
     // bind type variables here, (b) we may have to calculate the effect.
     // (c) rewrite bounds on qualifiers according to the qual_bnd field
@@ -1111,20 +1111,21 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
 				 te->in_extern_c_include, 
 				 te->in_tempest,te->tempest_generalize, 
 				 te->in_extern_c_inc_repeat};
+    let vds = new List{(vardecl_opt_t)AssnDef::memory,arg_vds};
     if (req != NULL) {
       let $(nenv,req_assn) = check_clause(new_env,"@requires",req);
       new_env = nenv;
-      *req_relns = new req_assn;
+      *req_relns = AssnDef::assnmap2existassnfn(req_assn,vds);
     }
     if (ens != NULL) {
       let $(nenv,ens_assn) = check_clause(new_env,"@ensures",ens);
       new_env = nenv;
-      *ens_relns = new ens_assn;
+      *ens_relns = AssnDef::assnmap2existassnfn(ens_assn,new List {return_vd,vds});
     }
     if (thrws != NULL) {
       let $(nenv,thrws_assn) = check_clause(new_env,"@throws",thrws);
       new_env = nenv;
-      *thrws_relns = new thrws_assn;
+      *thrws_relns = AssnDef::assnmap2existassnfn(thrws_assn,vds);
     }
     new_env.te = old_te;
     // finally, the effect -- usually inferred

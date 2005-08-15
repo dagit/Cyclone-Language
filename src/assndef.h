@@ -239,17 +239,43 @@ namespace AssnDef{
   extern assn_t ult(term_t, term_t);
   extern assn_t ulte(term_t, term_t);
 
+  // AssnFn definitions and utility functions
+  struct AssnFn {
+    List::list_t <term_t> actuals; // lambda bound vars
+    assn_t assn;             // lambda body, 
+  };
+  typedef struct AssnFn @assnfn_t, *assnfn_opt_t;
+  
+  extern assnfn_t apply_terms_assnfn(assnfn_t af, List::list_t<term_t> ts);
+  
+  typedef struct ExistAssnFn {
+    assnfn_t af;
+    term_set_t existvars;
+  } @existassnfn_t;
+  
+ 
+  extern string_t existassnfn2string(existassnfn_t);
   // a mapping from a program variable to a term,
   // you may consider this as a special kind of assertion:
   // x == t1 /\ y == t2 /\ .... for all x,y,... in the dict
   typedef Dict::dict_t<vardecl_t,term_t> nonescvar_map_t;
 
   // assertion and program variable's mapping 
-  typedef struct AssnMap{
+  struct AssnMap{
     assn_t assn;
     nonescvar_map_t map;
-  } assn_map_t;
+  };
+  typedef struct AssnMap assn_map_t,*assn_map_opt_t;
+
+  // given an assnmap, extract bound vars corresponding
+  // to vds, and turn it into an bound existassnfn
+  extern existassnfn_t assnmap2existassnfn(assn_map_t am, List::list_t<vardecl_opt_t> vds);
+
+  // given a list of logicvar vs and an assn a
+  // return exist us. lambda vs.a
+  extern existassnfn_t bound_vs_in_assn(assn_t a, List::list_t<term_t,`H> vs);
   
+  extern assn_t existassnfn2assn(existassnfn_t eaf, List::list_t<term_t> terms);
   // given an assertion, expand it with an empty map
   // and generate a new assnmap
   extern assn_map_t false_assnmap();

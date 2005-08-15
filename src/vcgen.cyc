@@ -39,49 +39,37 @@ namespace Vcgen;
 using AssnDef;
 using List;
 ///////////////////// Analysis /////////////////////
-typedef struct FnInfo {
-  term_set_t     freevars;
-  list_t<term_t> actuals;
-  term_t     result;
-  term_t     init_memory;
-  term_t     final_memory;
-  assn_t     assn;
-} @fn_info_t, *fn_info_opt_t;
 
-static struct Hashtable::Table<Absyn::qvar_t,fn_info_t> *fn_info_table;
+static struct Hashtable::Table<Absyn::qvar_t,existassnfn_t> *fn_ens_info_table;
 
 static void insert_fn_info(Absyn::fndecl_t fd, 
-                           term_t init_memory,
                            list_t<term_t,`H> actuals,
                            term_t result_term,
                            term_t final_memory,
                            assn_t a) {
-  // calculate the free logic variables of the result_term, final_memory,
-  // and assertion a.
-  let fvs1 = Set::union_two(term_fr_logicvar(result_term),
-                            term_fr_logicvar(final_memory));
-  let fvs2 = assn_fr_logicvar(a);
-  if (Set::cardinality(fvs2) > Flags::max_vc_summary) {
+  let fvs = assn_fr_logicvar(a);
+  if (Set::cardinality(fvs) > Flags::max_vc_summary) {
     a = widen(a);
-    fvs2 = assn_fr_logicvar(a);
   }
-  let fvs = Set::union_two(fvs1,fvs2);
-  // subtract out the bound variables init_memory, actuals
-  fvs = Set::delete(fvs,init_memory);
-  for (let as = actuals; as != NULL; as = as->tl)
-    fvs = Set::delete(fvs,as->hd);
-  let f = new FnInfo{.freevars = fvs,
-                     .actuals = actuals,
-                     .result = result_term,
-                     .init_memory = init_memory,
-                     .final_memory = final_memory,
-                     .assn = a};
+  let ts = new List{result_term, new List {final_memory,actuals}};
+  let newts = NULL;
+  for(; ts != NULL; ts = ts->tl) {
+    switch (ts->hd) {
+    case &LogicVar(...): newts = new List{ts->hd,newts}; break;
+    default: 
+      let v = fresh_var(get_term_type(ts->hd));
+      a = and(a,eq(v,ts->hd));
+      newts = new List{v,newts};
+      break;
+    }
+  }
+  newts = imp_rev(newts);
   Hashtable::table_t h;
-  if (fn_info_table == NULL) {
+  if (fn_ens_info_table == NULL) {
     h = Hashtable::create(37, Absyn::qvar_cmp, Absyn::hash_qvar);
-    fn_info_table = h;
-  } else h = (Hashtable::table_t)fn_info_table;
-  Hashtable::insert(h, fd->name, f);
+    fn_ens_info_table = h;
+  } else h = (Hashtable::table_t)fn_ens_info_table;
+  Hashtable::insert(h, fd->name, bound_vs_in_assn(a,newts));
 }
 
 // used to add fresh variables for bound variables to a substitution
@@ -89,18 +77,18 @@ static void add_free_var(term_dict_t @S, term_t x) {
   *S = Dict::insert(*S,x,fresh_var(get_term_type(x)));
 }
 
-static fn_info_opt_t lookup_fn_info(exp_t e) {
-  if (fn_info_table == NULL) return NULL;
-  let h = (Hashtable::table_t)fn_info_table;
+static existassnfn_opt_t lookup_fn_info(exp_t e) {
+  if (fn_ens_info_table == NULL) return NULL;
+  let h = (Hashtable::table_t)fn_ens_info_table;
   switch (e->r) {
   case &Absyn::Var_e(&Absyn::Funname_b(fd)):
-    let finfo_opt = Hashtable::lookup_opt(h,fd->name);
-    if (finfo_opt == NULL) return NULL;
-    else return *finfo_opt;
+    let fensinfo_opt = Hashtable::lookup_opt(h,fd->name);
+    if (fensinfo_opt == NULL) return NULL;
+    else return *fensinfo_opt;
   case &Absyn::Var_e(&Absyn::Global_b(vd)):
-    let finfo_opt = Hashtable::lookup_opt(h,vd->name);
-    if (finfo_opt == NULL) return NULL;
-    else return *finfo_opt;
+    let fensinfo_opt = Hashtable::lookup_opt(h,vd->name);
+    if (fensinfo_opt == NULL) return NULL;
+    else return *fensinfo_opt;
   case &Absyn::Instantiate_e(e1,...): return lookup_fn_info(e1);
   default: return NULL;
   }
@@ -374,12 +362,12 @@ static assn_map_t vcgen_local_decl(env_t env, decl_t d, assn_map_t amin){
 
 // extract the arguments, requires, and ensures clause for a function from
 // its type.
-static $(list_t<$(var_opt_t,tqual_t,type_t)@> args, list_t<vardecl_opt_t> argvds, assn_map_opt_t req, assn_map_opt_t ens, assn_map_opt_t thrws, vardecl_opt_t ret_value) get_requires_and_ensures_info(Absyn::fn_info_t @fi) {
+static $(list_t<$(var_opt_t,tqual_t,type_t)@> args, list_t<vardecl_opt_t> argvds, existassnfn_opt_t req, existassnfn_opt_t ens, existassnfn_opt_t thrws, vardecl_opt_t ret_value) get_requires_and_ensures_info(Absyn::fn_info_t @fi) {
   return $(fi->args,fi->arg_vardecls,fi->requires_assn,
            fi->ensures_assn,fi->throws_assn,fi->return_value);
 }
 
-static $(list_t<$(var_opt_t,tqual_t,type_t)@> args, list_t<vardecl_opt_t> argvds, assn_map_opt_t req, assn_map_opt_t ens, assn_map_opt_t thrws, vardecl_opt_t ret_value) get_requires_and_ensures(type_opt_t topt) {
+static $(list_t<$(var_opt_t,tqual_t,type_t)@> args, list_t<vardecl_opt_t> argvds, existassnfn_opt_t req, existassnfn_opt_t ens, existassnfn_opt_t thrws, vardecl_opt_t ret_value) get_requires_and_ensures(type_opt_t topt) {
   if (topt != NULL) {
     type_t t = Tcutil::pointer_elt_type((type_t)topt);
     switch (t) {
@@ -754,7 +742,7 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
     let $(pre_memory,am2) = lookup_var_map(memory,am2);
 
     let $(args,argvds,reqopt,ensopt,thrwsopt,ret_value) = get_requires_and_ensures(e1->topt);
-    let finfo = lookup_fn_info(e1);
+    let fensinfo = lookup_fn_info(e1);
     
     // if there is a return value, create a
     // fresh logicvar to represent it.
@@ -762,7 +750,7 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
     // checking requires assertion
     if (reqopt != NULL) {
       // subst the formal args with the actual values
-      let req_assn = subst_args(argvds,ret_value,ts,actual_ret,pre_memory,*reqopt);
+      let req_assn = existassnfn2assn(reqopt,new List(pre_memory,ts));
       if (!implies(am2.assn,req_assn)) {
 	Warn::err(e->loc, "current assertion:\n%s\ndoes not satisfy the pre-condition of the function:\n%s\n",
 		  assnmap2string(am2), assn2string(req_assn));
@@ -777,34 +765,24 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
     // update the exception handler.
     let v = fresh_var(Absyn::exn_type());
     if (thrwsopt != NULL) {
-      let throws_assn = subst_args(argvds,exception_vardecl(),ts,v,new_memory,*thrwsopt);
+      let throws_assn = existassnfn2assn(thrwsopt,new List(new_memory,ts));
       update_try_assnmap(env,and_assnmap_assn(am3,throws_assn),v);
     } else {
       update_try_assnmap(env,am3,v);
     }
     // and merge this with the ensures assertion from the function
     if (ensopt != NULL) {
-      let ens_assn = subst_args(argvds,ret_value,ts,actual_ret,new_memory,*ensopt);
+      let ens_assn = existassnfn2assn(ensopt,new List(actual_ret,new List(new_memory,ts)));
       am3 = and_assnmap_assn(am3,ens_assn);
-    } else if (finfo != NULL) {
-      // Build a substitution:  S = [ts/finfo->actuals]
-      //                            [pre_memory/finfo->init_memory]
-      //                            [freshvar/freevars]
-      // Set memory = S(finfo->final_memory)
-      // Set actual_ret = S(finfo->result)
-      // and add S(finfo->assn) to the assertion.
-      // FIX: need to also substitute fresh variables for vardecl's 
-      // in the finfo?
-      let S = empty_term_dict();
-      S = Dict::insert(S,finfo->init_memory,pre_memory);
-      for (let as = finfo->actuals; ts != NULL && as != NULL; 
-           ts = ts->tl, as = as->tl) {
-        S = Dict::insert(S,as->hd,ts->hd);
+    } else if (fensinfo != NULL) {
+      if (length(fensinfo->af->actuals) != length(ts)+2) {
+// 	fprintf(stderr,"fn = %s\n",Absynpp::exp2string(e1));
+// 	fprintf(stderr,"fensinfo = %s\n",existassnfn2string(fensinfo));
+// 	fprintf(stderr,"length of terms = %d\n",2+length(ts));
+      } else {
+	let ens_assn = existassnfn2assn(fensinfo,new List(actual_ret,new List(new_memory,ts)));
+	am3 = and_assnmap_assn(am3,ens_assn);
       }
-      Set::iter_c(add_free_var,&S,finfo->freevars);
-      am3 = update_var_map(memory,subst_t(S,finfo->final_memory),am2);
-      am3 = and_assnmap_assn(am3,subst_a(S,finfo->assn));
-      actual_ret = subst_t(S,finfo->result);
     }
     // if the function is marked with attribute noreturn, then the
     // post-condition is "false".
@@ -1744,10 +1722,6 @@ assn_map_t clause2assn(exp_t e){
 void vcgen_fundecl(Position::seg_t loc, JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd, assn_info_t assn_info){
   let $(args,arvds,reqopt,ensopt,thrwsopt,ret_value) = get_requires_and_ensures_info(&fd->i);
   assn_map_t am = true_assnmap();
-  // put in the requires clause as an assumption.
-  if (reqopt != NULL) {
-    am = *reqopt;
-  }
   // We need to record the initial logical values for the arguments
   // so that we can use them in the @ensures and @throws clauses.
   // So force the varmap to have bindings for all of the arguments
@@ -1763,6 +1737,10 @@ void vcgen_fundecl(Position::seg_t loc, JumpAnalysis::jump_anal_res_t tables, Ab
   // force the varmap to have a binding for memory and record it.
   let $(initmem,am2) = lookup_var_map(memory,am);
   am = am2;
+  // put in the requires clause as an assumption.
+  if (reqopt != NULL) {
+    am = AssnMap{existassnfn2assn(reqopt,new List{initmem,actuals}),am.map};
+  }
 
   // if we have a throws clause, then pretend like we're installing
   // a "fake" exception handler so we can check to see if the function
@@ -1786,16 +1764,17 @@ void vcgen_fundecl(Position::seg_t loc, JumpAnalysis::jump_anal_res_t tables, Ab
   update_return(env,NULL,amout,NULL);
 
   // check the ensures clause
+  assn_map_t res = *env->res_assnmap;
+  term_t res_term = fresh_var(NULL);
+  if (ret_value != NULL) {
+    let $(r,a) = lookup_var_map((vardecl_t)ret_value,res);
+    res_term = r;
+    res = a;
+  }
+  let $(new_memory,res) = lookup_var_map(memory,res);
+
   if (ensopt != NULL) {
-    assn_map_t res = *env->res_assnmap;
-    term_t res_term = fresh_var(NULL);
-    if (ret_value != NULL) {
-      let $(r,a) = lookup_var_map((vardecl_t)ret_value,res);
-      res_term = r;
-      res = a;
-    }
-    let $(new_memory,res) = lookup_var_map(memory,res);
-    let ens = subst_args(arvds,ret_value,actuals,res_term,new_memory,*ensopt);
+    let ens = existassnfn2assn(ensopt,new List{res_term,new List{new_memory,actuals}});
     if (!implies(res.assn,ens))
       Warn::err(loc, "cannot prove the @ensures clause\n\t%s\nfrom\n\t%s",
                 assn2string(ens),
@@ -1803,26 +1782,19 @@ void vcgen_fundecl(Position::seg_t loc, JumpAnalysis::jump_anal_res_t tables, Ab
   } else {
     // insert the calculated post condition in the hash table
     // so it can be used for subsequent functions.
-    // we need (a) the logic variable corresponding to the initial memory,
-    // (b) the logic variables corresponding to the arguments, 
-    // (c) the return_value from the output assnmap, and (d) the
-    // memory from the output assnmap.
-    let $(new_memory_term,res) = lookup_var_map(memory,*result_assn);
-    let $(result_term,res) = lookup_var_map((vardecl_t)ret_value,res);
-    insert_fn_info(fd, initmem, actuals, result_term, new_memory_term, res.assn);
-    
+    insert_fn_info(fd,actuals,res_term,new_memory,res.assn);
   }
 
-  // check the throws clause
-  if (thrwsopt != NULL) {
-    assn_map_t res = *env->try_assnmap;
-    let $(res_term,res) = lookup_var_map(exception_vardecl(),res);
-    let $(new_memory,res) = lookup_var_map(memory,res);
-    let thr = subst_args(arvds,exception_vardecl(),actuals,res_term,new_memory,*thrwsopt);
-    if (!implies(res.assn,thr))
-      Warn::err(loc, "cannot prove the @throws clause\n\t%s\nfrom\n\t%s",
-                assn2string(thr),
-                assnmap2string(*env->try_assnmap));
-  }
+//   // check the throws clause
+//   if (thrwsopt != NULL) {
+//     assn_map_t res = *env->try_assnmap;
+//     let $(res_term,res) = lookup_var_map(exception_vardecl(),res);
+//     let $(new_memory,res) = lookup_var_map(memory,res);
+//     let thr = subst_args(arvds,exception_vardecl(),actuals,res_term,new_memory,*thrwsopt);
+//     if (!implies(res.assn,thr))
+//       Warn::err(loc, "cannot prove the @throws clause\n\t%s\nfrom\n\t%s",
+//                 assn2string(thr),
+//                 assnmap2string(*env->try_assnmap));
+//   }
 }
 

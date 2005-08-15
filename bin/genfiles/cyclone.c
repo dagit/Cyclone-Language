@@ -1203,7 +1203,7 @@ struct Cyc_JumpAnalysis_Jump_Anal_Result*jump_tables=0;
 struct Cyc_Tcenv_Tenv*te=Cyc_Tcenv_tc_init();
 # 813
 if(!Cyc_compile_failure &&(int)Cyc_Flags_stop_after_pass >= 1)
-tds=({struct Cyc_List_List*(*_Tmp0)(struct _fat_ptr,struct Cyc_List_List*,struct Cyc_List_List*(*)(struct Cyc___cycFILE*,struct Cyc_List_List*),struct Cyc___cycFILE*,struct Cyc_List_List*)=(struct Cyc_List_List*(*)(struct _fat_ptr,struct Cyc_List_List*,struct Cyc_List_List*(*)(struct Cyc___cycFILE*,struct Cyc_List_List*),struct Cyc___cycFILE*,struct Cyc_List_List*))Cyc_do_stage;_Tmp0;})(_tag_fat("parsing",sizeof(char),8U),tds,Cyc_do_parse,in_file,tds);
+tds=({struct Cyc_List_List*(*_Tmp0)(struct _fat_ptr,struct Cyc_List_List*,struct Cyc_List_List*(*)(struct Cyc___cycFILE*,struct Cyc_List_List*),struct Cyc___cycFILE*,struct Cyc_List_List*)=(struct Cyc_List_List*(*)(struct _fat_ptr,struct Cyc_List_List*,struct Cyc_List_List*(*)(struct Cyc___cycFILE*,struct Cyc_List_List*),struct Cyc___cycFILE*,struct Cyc_List_List*))Cyc_do_stage;_Tmp0;})(_tag_fat("parsing",sizeof(char),8U),tds,Cyc_do_parse,_check_null(in_file),tds);
 # 817
 if(!Cyc_compile_failure && Cyc_Flags_porting_c_code){
 Cyc_Port_port(tds);

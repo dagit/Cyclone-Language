@@ -103,19 +103,16 @@ void explain_failure() {
 
 // e1 and e2 represent requires/ensures clauses and we're to check
 // logical equivalence.
-static bool check_logical_equivalence(list_t<vardecl_opt_t> vds1,
-                                      AssnDef::assn_map_opt_t a1opt,
-                                      list_t<vardecl_opt_t> vds2,
-                                      AssnDef::assn_map_opt_t a2opt) {
-  if (a1opt == a2opt) return true;
-  AssnDef::assn_map_t a1 = (a1opt != NULL) ? *a1opt : AssnDef::true_assnmap();
-  AssnDef::assn_map_t a2 = (a2opt != NULL) ? *a2opt : AssnDef::true_assnmap();
-  let a2_assn = AssnDef::merge_assnmaps(vds1,a1,vds2,a2);
-  return ((AssnDef::simple_prove(a1.assn,a2_assn) || 
-           PrattProver::constraint_prove(a1.assn,a2_assn))
+static bool check_logical_equivalence(list_t<AssnDef::term_t> terms,
+                                      AssnDef::existassnfn_opt_t eaf1opt,
+                                      AssnDef::existassnfn_opt_t eaf2opt) {
+  let a1 = (eaf1opt == NULL) ? (AssnDef::assn_t)&AssnDef::true_assn : AssnDef::existassnfn2assn(eaf1opt,terms);
+  let a2 = (eaf2opt == NULL) ? (AssnDef::assn_t)&AssnDef::true_assn : AssnDef::existassnfn2assn(eaf2opt,terms);
+  return ((AssnDef::simple_prove(a1,a2) || 
+           PrattProver::constraint_prove(a1,a2))
           &&
-          (AssnDef::simple_prove(a2_assn,a1.assn) || 
-           PrattProver::constraint_prove(a2_assn,a1.assn)));
+          (AssnDef::simple_prove(a2,a1) || 
+           PrattProver::constraint_prove(a2,a1)));
 }
 
 bool unify_kindbound(kindbound_t kb1, kindbound_t kb2) {
@@ -553,16 +550,17 @@ static void unify_it(type_t t1, type_t t2) {
       fail_because("function types have different effect constraints"); 
     /*     if (!Tcutil::same_rgn_po(rpo2,rpo1)) */
     /*       fail_because("function types have different region lifetime orderings"); */
-    let vds1 = new List(return_value1,argvds1);
-    let vds2 = new List(return_value2,argvds2);
-    if (!check_logical_equivalence(vds1,req_relns1,
-                                   vds2,req_relns2))
+    let terms = NULL;
+    for(let vds = argvds1; vds != NULL; vds = vds->tl)
+      terms = new List {AssnDef::fresh_var((vds->hd == NULL)? NULL:vds->hd->type),terms};
+    terms = imp_rev(terms);
+    // add in memory term
+    terms = new List {AssnDef::fresh_var(NULL),terms};
+    if (!check_logical_equivalence(terms,req_relns1,req_relns2))
       fail_because("@requires clauses not equivalent");
-    if (!check_logical_equivalence(vds1,ens_relns1,
-                                   vds2,ens_relns2))
+    if (!check_logical_equivalence(new List{AssnDef::fresh_var(NULL),terms},ens_relns1,ens_relns2))
       fail_because("@ensures clauses not equivalent");
-    if (!check_logical_equivalence(vds1,thrws_relns1,
-                                   vds2,thrws_relns2))
+    if (!check_logical_equivalence(terms,thrws_relns1,thrws_relns2))
       fail_because("@throws clauses not equivalent");
     return;
 
