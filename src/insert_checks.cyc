@@ -366,7 +366,8 @@ static void do_exp(env_t nv, exp_t e) {
       let n2 = Tcutil::force_type2bool(false,p2.ptr_atts.nullable);
       let b1 = Tcutil::get_bounds_exp(bounds_one(),p1.ptr_atts.bounds);
       let b2 = Tcutil::get_bounds_exp(bounds_one(),p2.ptr_atts.bounds);
-      if(n1 && !n2 && coercion != Null_to_NonNull)
+      //if both pointers have dynamic bounds then its ok to ignore the coercion annotation
+      if(n1 && !n2 && coercion != Null_to_NonNull && (b1 || b2)) 
 	impos_loc(e->loc,"null-check conversion mis-classified");
       else if (b1 && !b2 && coercion == Null_to_NonNull)
 	impos_loc(e->loc,"conversion mis-classified as null-check");

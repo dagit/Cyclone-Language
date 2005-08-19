@@ -1938,8 +1938,8 @@ $(decl_t,exp_t,bool) insert_alias(exp_t e, type_t e_type) {
   // the new type variable.  
   tvar_t tv = new_tvar(&eff_kb);
   switch (compress(e_type)) {
-  case &PointerType(PtrInfo{et,tq,PtrAtts{.eff=old_r,.aqual=aq,...}}):
-    switch (compress(old_r)) {
+  case &PointerType(PtrInfo{et,tq,PtrAtts{.eff=*old_r,.aqual=aq,...}}):
+    switch (compress(*old_r)) {
     case &Evar(_,*topt,_,ts): 
       let new_r = var_type(tv);
       *topt = new_r;
@@ -1959,6 +1959,7 @@ $(decl_t,exp_t,bool) insert_alias(exp_t e, type_t e_type) {
 /*       } */
 /*       break; */
     default:
+      *old_r = var_type(tv);
       break;
     }
     //similarly, alias_qual_subtype rules prevent coercion from RESTRICTED to ALIASABLE

@@ -246,6 +246,15 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
     (*res.tvars_and_effconstr_opt)[0] = 
       append((*res.tvars_and_effconstr_opt)[0],new List(new $(tv,true),NULL));
     Tctyp::check_type(p->loc,te2,lookup_type_vars(te2),&Kinds::mk,true,false,vd->type);
+    switch(vd->type) { //ensure that the top level region matches the new type variable
+    case &PointerType(PtrInfo{_,_,PtrAtts{eff,...}}):
+      let atv = var_type(tv);
+      if(!Unify::unify(eff, var_type(tv)))
+	Warn::err2(p->loc, "Mismatched effect variables in alias pattern:", eff, ", ",atv);
+      break;
+    default:
+      break;
+    }
     // Now we repeat checks for the Var_p case above (except the var's type)
     //   this is the type of the access expression
     t = any_type(lookup_type_vars(te),topt);
