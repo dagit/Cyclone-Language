@@ -171,11 +171,11 @@ ALPHA | DIGIT | "-"
 .
 <A "B" binary encoded string as defined by [RFC 2047].>
 =
-<UNDEFINED>
+"b:" base64
 .
 <A "b" encoded text value as defined in [RFC 2047]>
 =
-<UNDEFINED>
+"b:" base64
 .
 <A IANA registered iCalendar version identifier>
 =
@@ -213,11 +213,11 @@ ALPHA | DIGIT | "-"
 .
 <A single date value as defined in [MIME-DIR]>
 =
-<UNDEFINED>
+date
 .
 <A single float value as defined in [MIME-DIR]>
 =
-<UNDEFINED>
+float
 .
 <A single text  value as defined in [CCITT
                          E.163] and [CCITT X.121]>
@@ -226,11 +226,15 @@ ALPHA | DIGIT | "-"
 .
 <A single time value as defined in [MIME-DIR]>
 =
-<UNDEFINED>
+time
+.
+<A single date-time value as defined in [MIME-DIR]
+=
+date-time
 .
 <A uri value as defined in [MIME-DIR]>
 =
-<UNDEFINED>
+genericurl
 .
 <ALPHA or DIGIT>
 =
@@ -749,7 +753,7 @@ SP
 .
 <a language string as defined in RFC 1766>
 =
-<UNDEFINED>
+Language-Tag
 .
 <a publicly-defined extension token,
                registered with IANA, as specified in

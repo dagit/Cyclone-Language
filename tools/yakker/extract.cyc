@@ -81,6 +81,22 @@ static int blank_line(const char ?s) {
   return 1;
 }
 
+static int comment_line(const char ?s) {
+  let len = strlen(s);
+  for (let i = 0; i < len; i++) {
+    switch (s[i]) {
+    case ' ':
+    case '\t':
+      continue;
+    case ';':
+      return 1;
+    case c:
+      return 0;
+    }
+  }
+  return 0;
+}
+
 static int page_break(const char ?s) {
   return strlen(s) > 0 && s[0] == '\f';
 }
@@ -227,7 +243,7 @@ grammar_t extract_definitions(FILE @f) {
   let check_for_rule = 0;
   let line;
   while (line = next_line(f)) {
-    if (blank_line(*line) || page_break(*line)) {
+    if (blank_line(*line) || page_break(*line) || comment_line(*line)) {
       check_for_rule = 1;
       continue;
     }
