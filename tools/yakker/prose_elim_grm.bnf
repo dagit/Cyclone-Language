@@ -228,7 +228,7 @@ float
 =
 time
 .
-<A single date-time value as defined in [MIME-DIR]
+<A single date-time value as defined in [MIME-DIR]>
 =
 date-time
 .

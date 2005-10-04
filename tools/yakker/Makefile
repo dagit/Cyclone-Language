@@ -102,6 +102,12 @@ imap.bnf: rfc3501.bnf yakker
 	echo '{ extern void response_hook(const char ?); }' >> $@
 	echo '{ extern void command_hook(const char ?); }' >> $@
 
+vcard.bnf: rfc2426.bnf rfc2425.bnf rfc1738.bnf rfc1766.bnf rfc3501.bnf yakker
+# 1766: for Language-Tag
+# 1738: for genericurl
+# 3501: for base64
+	./yakker rfc2426.bnf -externals rfc2425.bnf rfc1738.bnf rfc1766.bnf rfc3501.bnf -tsort > $@
+
 clean:
 	$(RM) *.d *.o parse_tab.cyc parse_tab.h lex.cyc yakker
 	$(RM) in out errs parse.output
@@ -193,6 +199,27 @@ rfc2822.bnf: rfc2822.txt yakker
 	echo 'ctext = NO-WS-CTL / %d33-39 / %d42-91 / %d93-126.' >> $@
 	echo 'item-value = 1*angle-addr / addr-spec / atom / domain / msg-id.' >> $@
 	echo 'obs-zone = "UT" / "GMT" / "EST" / "EDT" / "CST" / "CDT" / "MST" / "MDT" / "PST" / "PDT" / %d65-73 / %d75-90 / %d97-105 / %d107-122.' >> $@
+
+rfc2425.bnf: rfc2425.txt yakker
+	# time-numzome should be time-numzone
+	./yakker -extract $< -omit time-numzome > $@
+	echo 'time-numzone = sign time-hour [":"] time-minute.' >> $@
+
+rfc2426.bnf: rfc2426.txt yakker
+	# value and param have multiple definitions
+	# the rename corrects a typo (but it is in a value which we omit...)
+	./yakker -extract $< -rename snd-line-value snd-inline-value -omit value param > $@
+	# these are the right definitions of value and param
+	echo 'value = *VALUE-CHAR.' >> $@
+	echo 'param = param-name "=" param-value *("," param-value).' >> $@
+	# typos prevent extraction of these
+	echo 'ESCAPED-CHAR = "\\" / "\;" / "\," / ("\" %d110) / ("\" %d78).' >> $@
+	echo 'date-time-value = date-time.' >> $@
+	echo 'snd-inline-param = ("VALUE" "=" "binary") / ("ENCODING" "=" "b") / ("TYPE" "=" *SAFE-CHAR).' >> $@
+	# fill in some missing definitions
+	echo 'uri = genericurl.' >> $@
+	echo 'word = iana-token.' >> $@
+	echo 'iana-type = iana-token.' >> $@
 
 rfc%.bnf: rfc%.txt yakker
 	./yakker -extract $< >$@
