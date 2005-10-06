@@ -62,7 +62,16 @@ rule_t RCOUNT(const char ?`H c,rule_t r1) {
   return arule_inj(new Rcount(c,r1));
 }
 rule_t STAR(unsigned int m,repeat_t N,rule_t r1) {
-  return arule_inj(new Star(m,N,r1));
+  switch (r1->r) {
+  case &Opt(r2) && !r1->a && !r1->p && !r1->v:
+    /* Some RFCs, like 1738, use notation like *[foo|bar] instead
+       of *(foo|bar).  Star(Opt(r)) is equivalent to Star(r) provided
+       we don't get rid of semantic actions, etc., and it will
+       result in a more efficient parser. */
+    return STAR(m,N,r2);
+  default:
+    return arule_inj(new Star(m,N,r1));
+  }
 }
 rule_t HASH(unsigned int m,repeat_t N,rule_t r1) {
   return arule_inj(new Hash(m,N,r1));
@@ -70,8 +79,8 @@ rule_t HASH(unsigned int m,repeat_t N,rule_t r1) {
 rule_t MINUS(rule_t r1,rule_t r2) {
   return arule_inj(new Minus(r1,r2));
 }
-rule_t SYMB_r(rule_t r,const char ?`H x) {
-  return new arule(r->a,r->p,r->v,r->css,new Symb(x,NULL));
+rule_t SYMB_r(rule_t r,const char ?`H x,const char ?`H y) {
+  return new arule(r->a,r->p,r->v,r->css,new Symb(x,y));
 }
 rule_t LIT_r(rule_t r,const char ?`H x) {
   return new arule(r->a,r->p,r->v,r->css,new Lit(x));
@@ -95,7 +104,13 @@ rule_t RCOUNT_r(rule_t r,const char ?`H c,rule_t r1) {
   return new arule(r->a,r->p,r->v,r->css,new Rcount(c,r1));
 }
 rule_t STAR_r(rule_t r,unsigned int m,repeat_t N,rule_t r1) {
-  return new arule(r->a,r->p,r->v,r->css,new Star(m,N,r1));
+  switch (r1->r) {
+  case &Opt(r2) && !r1->a && !r1->p && !r1->v:
+    /* See comment at STAR above */
+    return STAR_r(r,m,N,r2);
+  default:
+    return new arule(r->a,r->p,r->v,r->css,new Star(m,N,r1));
+  }
 }
 rule_t HASH_r(rule_t r,unsigned int m,repeat_t N,rule_t r1) {
   return new arule(r->a,r->p,r->v,r->css,new Hash(m,N,r1));
@@ -404,7 +419,7 @@ grammar_t remove_duplicates(grammar_t ds) {
       continue;
       }
       else
-        fprintf(stderr, "Warning: grammar contains multiple (different)"
+        eprintf("Warning: grammar contains multiple (different)"
                 " definitions for symbol %s\n",n1);
     }
     x = x->tl;

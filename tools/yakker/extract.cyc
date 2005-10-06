@@ -268,9 +268,9 @@ grammar_t extract_definitions(FILE @f) {
     let ds = parse_string(rule_string);
     if (debug) {
       if (ds)
-	fprintf(stderr,"Extracted rule(s) from:\n%s\n",rule_string);
+	eprintf("Extracted rule(s) from:\n%s\n",rule_string);
       else
-	fprintf(stderr,"Failed to extract rule(s) from:\n%s\n",rule_string);
+	eprintf("Failed to extract rule(s) from:\n%s\n",rule_string);
     }
     for (; ds; ds = ds->tl)
       result = new List(ds->hd,result);

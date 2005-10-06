@@ -79,8 +79,7 @@ static int empty_rule(rule_t r) {
   case &Symb(x,_):
     return Set::member(globals->maybe_empty,new x);
   case &Prose(x):
-//    fprintf(stderr,
-//            "Warning: cannot determine whether prose can be"
+//    eprintf("Warning: cannot determine whether prose can be"
 //            " the empty string:\n<%s>\n",
 //            x);
     return 0;
@@ -128,9 +127,9 @@ void report_empty_nonterminals(grammar_t grm) {
   init_maybe_empty(grm);
   strset_t s = globals->maybe_empty;
   if (Set::is_empty(s))
-    fprintf(stderr,"No symbols can derive the empty string.\n");
+    eprintf("No symbols can derive the empty string.\n");
   else {
-    fprintf(stderr,"The following symbols can derive the empty string:");
+    eprintf("The following symbols can derive the empty string:");
     fprint_strset(stderr,s);
   }
 }
@@ -144,8 +143,7 @@ static void left_rule(mset_t result, rule_t r) {
     result->s = Set::insert(result->s,new x);
     return;
   case &Prose(x):
-//    fprintf(stderr,
-//            "Warning: cannot determine the left symbols of prose:\n"
+//    eprintf("Warning: cannot determine the left symbols of prose:\n"
 //            "<%s>\n",
 //            x);
     return;
@@ -198,13 +196,13 @@ void report_left_recursion(grammar_t grm) {
       N = Set::insert(N,nptr);
   }
   if (Set::is_empty(N))
-    fprintf(stderr,"There is no left recursion in the grammar.\n");
+    eprintf("There is no left recursion in the grammar.\n");
   else {
-    fprintf(stderr,"The following symbols are left-recursive:\n");
+    eprintf("The following symbols are left-recursive:\n");
     while (Set::cardinality(N) > 0) {
       let x = Set::choose(N);
       N = Set::delete(N,x);
-      fprintf(stderr,"%s\n",*x);
+      eprintf("%s\n",*x);
     }
   }
 }
@@ -225,11 +223,10 @@ void first(cs_t result, rule_t r) {
     }
     return;
   case &Minus(_,_):
-    fprintf(stderr, "Internal error: first is applied to Minus\n");
+    eprintf( "Internal error: first is applied to Minus\n");
     return;
   case &Prose(x):
-//    fprintf(stderr,
-//            "Warning: cannot determine the FIRST characters of prose:\n"
+//    eprintf("Warning: cannot determine the FIRST characters of prose:\n"
 //            "<%s>\n",
 //            x);
     return;
@@ -306,8 +303,7 @@ static void right_rule(mset_t result, rule_t r) {
     result->s = Set::insert(result->s,new x);
     return;
   case &Prose(x):
-    fprintf(stderr,
-            "Warning: cannot determine the right symbols of prose:\n"
+    eprintf("Warning: cannot determine the right symbols of prose:\n"
             "<%s>\n",
             x);
     return;
@@ -360,13 +356,13 @@ void report_right_recursion(grammar_t grm) {
       N = Set::insert(N,nptr);
   }
   if (Set::is_empty(N))
-    fprintf(stderr,"There is no right recursion in the grammar.\n");
+    eprintf("There is no right recursion in the grammar.\n");
   else {
-    fprintf(stderr,"The following symbols are right-recursive:\n");
+    eprintf("The following symbols are right-recursive:\n");
     while (Set::cardinality(N) > 0) {
       let x = Set::choose(N);
       N = Set::delete(N,x);
-      fprintf(stderr,"%s\n",*x);
+      eprintf("%s\n",*x);
     }
   }
 }
@@ -388,11 +384,10 @@ void last(cs_t result, rule_t r) {
     }
     return;
   case &Minus(_,_):
-    fprintf(stderr, "Internal error: last is applied to Minus\n");
+    eprintf( "Internal error: last is applied to Minus\n");
     return;
   case &Prose(x):
-//    fprintf(stderr,
-//            "Warning: cannot determine the LAST characters of prose:\n"
+//    eprintf("Warning: cannot determine the LAST characters of prose:\n"
 //            "<%s>\n",
 //            x);
     return;
@@ -458,7 +453,7 @@ void init_lastt(grammar_t grm) {
 	cs_union(rng,*rngptr);
       /*
       else
-	fprintf(stderr,"Internal error: bad lookup on %s in report_last\n",*x);
+	eprintf("Internal error: bad lookup on %s in report_last\n",*x);
       */
     }
   }
@@ -475,8 +470,9 @@ void init_white_edge_symbols(grammar_t grm) {
   for (let t = grm; t; t = t->tl) {
     let &$(n,r,_) = t->hd;
     let nptr = new n;
-    let rng1 = Hashtable::lookup(globals->firstt,nptr);
-    let rng2 = Hashtable::lookup(globals->lastt,nptr);
+    // cs_dup because cs_intersect works by side effect
+    let rng1 = cs_dup(Hashtable::lookup(globals->firstt,nptr));
+    let rng2 = cs_dup(Hashtable::lookup(globals->lastt,nptr));
     cs_intersect(rng1,ws);
     cs_intersect(rng2,ws);
     if (is_cs_empty(rng1) && is_cs_empty(rng2)) continue;
@@ -495,8 +491,9 @@ void report_white_edges(grammar_t grm) {
   for (let t = grm; t; t = t->tl) {
     let &$(n,r,_) = t->hd;
     let nptr = new n;
-    let rng1 = Hashtable::lookup(globals->firstt,nptr);
-    let rng2 = Hashtable::lookup(globals->lastt,nptr);
+    // cs_dup because cs_intersect works by side effect
+    let rng1 = cs_dup(Hashtable::lookup(globals->firstt,nptr));
+    let rng2 = cs_dup(Hashtable::lookup(globals->lastt,nptr));
     cs_intersect(rng1,ws);
     cs_intersect(rng2,ws);
     if (is_cs_empty(rng1)) {
@@ -509,33 +506,33 @@ void report_white_edges(grammar_t grm) {
     }
   }
   if (Set::is_empty(L))
-    fprintf(stderr,"No symbols have only left white edges.\n");
+    eprintf("No symbols have only left white edges.\n");
   else {
-    fprintf(stderr,"%d symbols have white edges:\n",Set::cardinality(L));
+    eprintf("%d symbols have white edges:\n",Set::cardinality(L));
     while (Set::cardinality(L) > 0) {
       let x = Set::choose(L);
       L = Set::delete(L,x);
-      fprintf(stderr,"%s\n",*x);
+      eprintf("%s\n",*x);
     }
   }
   if (Set::is_empty(R))
-    fprintf(stderr,"No symbols have only right white edges.\n");
+    eprintf("No symbols have only right white edges.\n");
   else {
-    fprintf(stderr,"%d symbols have only right white edges:\n",Set::cardinality(R));
+    eprintf("%d symbols have only right white edges:\n",Set::cardinality(R));
     while (Set::cardinality(R) > 0) {
       let x = Set::choose(R);
       R = Set::delete(R,x);
-      fprintf(stderr,"%s\n",*x);
+      eprintf("%s\n",*x);
     }
   }
   if (Set::is_empty(B))
-    fprintf(stderr,"No symbols have left and right white edges.\n");
+    eprintf("No symbols have left and right white edges.\n");
   else {
-    fprintf(stderr,"%d symbols have left and right white edges:\n",Set::cardinality(B));
+    eprintf("%d symbols have left and right white edges:\n",Set::cardinality(B));
     while (Set::cardinality(B) > 0) {
       let x = Set::choose(B);
       B = Set::delete(B,x);
-      fprintf(stderr,"%s\n",*x);
+      eprintf("%s\n",*x);
     }
   }
 }
@@ -695,17 +692,12 @@ void report_first_follow(grammar_t grm) {
     let nptr = new n;
     let firstrng = Hashtable::lookup(globals->firstt,nptr);
     let followrng = Hashtable::lookup(globals->followt,new follow_symbol(n));
-    fprintf(stderr,"FIRST (%s)   = ",n);
+    eprintf("FIRST (%s)   = ",n);
     cs_print(stderr,firstrng);
-    fprintf(stderr,"\n");
-    fprintf(stderr,"FOLLOW(%s)   = ",n);
+    eprintf("\n");
+    eprintf("FOLLOW(%s)   = ",n);
     cs_print(stderr,followrng);
-    fprintf(stderr,"\n");
-    cs_intersect(firstrng,followrng);
-    if (is_cs_empty(firstrng)) continue;
-    fprintf(stderr,"-- %s NOT DISJOINT! (",n);
-    cs_print(stderr,firstrng);
-    fprintf(stderr,")\n");
+    eprintf("\n");
   }
 }
 
@@ -1099,14 +1091,21 @@ void conflicts0(rule_t r,rule_t right_ctxt) {
     }
     if (!is_cs_empty(rng_conflict)) {
       /* an LL(1) conflict */
-      fprintf(stderr,"************************************************************************\n");
+      eprintf("************************************************************************\n");
       num_conflicts_ll++;
-      fprintf(stderr,"Conflict %u\n",num_conflicts_ll);
-      fprintf(stderr,"LL(1) conflict on character(s) ");
+      eprintf("Conflict %u\n",num_conflicts_ll);
+      eprintf("LL(1) conflict on character(s) ");
       cs_print(stderr,rng_conflict);
-      fprintf(stderr," in Alt\n  ");
+      eprintf(" in Alt\n  ");
       pr_rule(stderr,SEQ(r,right_ctxt));
-      fprintf(stderr,"\n");
+      int altnum = 1;
+      for (let x = alts; x; x = x->tl) {
+        eprintf("\nAlternative %d: ",altnum++);
+        pr_rule(stderr,x->hd);
+      }
+      eprintf("\nRight context: ");
+      pr_rule(stderr,right_ctxt);
+      eprintf("\n");
       lookahead_dfa(checking_conflicts_grammar,alts,right_ctxt);
     }
     conflicts_alt(r2,right_ctxt);
@@ -1120,14 +1119,21 @@ void conflicts0(rule_t r,rule_t right_ctxt) {
     cs_intersect(rng2,rng3);
     if (!is_cs_empty(rng2)) {
       /* an LL(1) conflict */
-      fprintf(stderr,"************************************************************************\n");
+      eprintf("************************************************************************\n");
       num_conflicts_ll++;
-      fprintf(stderr,"Conflict %u\n",num_conflicts_ll);
-      fprintf(stderr,"LL(1) conflict on character(s) ");
+      eprintf("Conflict %u\n",num_conflicts_ll);
+      eprintf("LL(1) conflict on character(s) ");
       cs_print(stderr,rng2);
-      fprintf(stderr," in Opt\n  ");
+      eprintf(" in Opt\n  ");
       pr_rule(stderr,SEQ(r,right_ctxt));
-      fprintf(stderr,"\n");
+      eprintf("\n");
+      eprintf("Alternative 1: ");
+      pr_rule(stderr,r2);
+      eprintf("\nAlternative 2: ");
+      pr_rule(stderr,LIT(""));
+      eprintf("\nRight context: ");
+      pr_rule(stderr,right_ctxt);
+      eprintf("\n");
       lookahead_dfa(checking_conflicts_grammar,
 		    List::list(r2,LIT("")), // r2 first because greedy says try r2, only if fail assume ""
 		    right_ctxt);

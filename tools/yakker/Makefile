@@ -8,7 +8,7 @@ all: yakker
 yakker: analyze.o axarray.o bnf.o cs.o extract.o fa.o termgrammar.o lex.o pads.o \
   parse_tab.o parsergen.o pr.o prose.o prose_elim_grm.o string_dfa_engine1.o \
   string_dfa_engine2_1.o corerules.o corerules_grm.o \
-  util.o yakker.o
+  util.o namespaces.o yakker.o
 	cyclone $(CYCFLAGS) $^ -o $@
 
 testindexer: indexer 1rfc_index
@@ -94,7 +94,7 @@ message-header.bnf: http.bnf yakker
 	./yakker $< -subset message-header > $@
 
 imap.bnf: rfc3501.bnf yakker
-	./yakker rfc3501.bnf -tsort > $@
+	./yakker rfc3501.bnf -tsort -unnamespace > $@
 	echo 'my-greeting = ("" greeting)$$x {greeting_hook(x);}.' >> $@
 	echo 'my-response = ("" response)$$x {response_hook(x);}.' >> $@
 	echo 'my-command = ("" command)$$x {command_hook(x);}.' >> $@
@@ -106,7 +106,7 @@ vcard.bnf: rfc2426.bnf rfc2425.bnf rfc1738.bnf rfc1766.bnf rfc3501.bnf yakker
 # 1766: for Language-Tag
 # 1738: for genericurl
 # 3501: for base64
-	./yakker rfc2426.bnf -externals rfc2425.bnf rfc1738.bnf rfc1766.bnf rfc3501.bnf -tsort > $@
+	./yakker rfc2426.bnf -externals rfc2425.bnf rfc1738.bnf rfc1766.bnf rfc3501.bnf -tsort -unnamespace > $@
 
 clean:
 	$(RM) *.d *.o parse_tab.cyc parse_tab.h lex.cyc yakker
@@ -157,9 +157,11 @@ rfc%.txt:
 # literal needs to know about a prefixed length
 # capability-data causes an unusual conflict, avoided for now
 rfc3501.bnf: rfc3501.txt yakker
-	./yakker -extract $< -omit literal capability-data > $@
-	echo 'literal = "{" (number "")$$x "}" CRLF @repeat(atoi(x))CHAR8.' >> $@
-	echo 'capability-data = "CAPABILITY" *(SP capability).' >> $@
+	./yakker -extract $< -omit literal capability-data > $@.tmp
+	echo 'literal = "{" (number "")$$x "}" CRLF @repeat(atoi(x))CHAR8.' >> $@.tmp
+	echo 'capability-data = "CAPABILITY" *(SP capability).' >> $@.tmp
+	./yakker $@.tmp -namespace rfc3501 > $@
+	$(RM) $@.tmp
 
 # A1, A2, and passwd are extracted by mistake
 # Request-URI is the proper spelling (defined in rfc2616)
@@ -200,10 +202,27 @@ rfc2822.bnf: rfc2822.txt yakker
 	echo 'item-value = 1*angle-addr / addr-spec / atom / domain / msg-id.' >> $@
 	echo 'obs-zone = "UT" / "GMT" / "EST" / "EDT" / "CST" / "CDT" / "MST" / "MDT" / "PST" / "PDT" / %d65-73 / %d75-90 / %d97-105 / %d107-122.' >> $@
 
+rfc1738.bnf: rfc1738.txt yakker
+	./yakker -extract $< -namespace rfc1738 > $@
+
+rfc1766.bnf: rfc1766.txt yakker
+	./yakker -extract $< -namespace rfc1766 >$@
+
 rfc2425.bnf: rfc2425.txt yakker
 	# time-numzome should be time-numzone
-	./yakker -extract $< -omit time-numzome > $@
-	echo 'time-numzone = sign time-hour [":"] time-minute.' >> $@
+	# iana-token gets extracted twice, one defn is wrong
+	# genericurl is defined in rfc1738
+	# date-time is simply missing, note according to the text it will
+	#  be different than the one in rfc3501
+	#  We know date-time should be there because it is referred to
+	#  by rfc2426, plus examples are given in the text of rfc2425
+	./yakker -extract $< -omit time-numzome iana-token -rename genericurl rfc1738:genericurl > $@.tmp
+	echo 'iana-token = 1*(ALPHA / DIGIT / "-").' >> $@.tmp
+	echo 'time-numzone = sign time-hour [":"] time-minute.' >> $@.tmp
+	echo 'date-time = date "T" time.' >> $@.tmp
+	./yakker -namespace rfc2425 $@.tmp > $@
+	$(RM) $@.tmp
+
 
 rfc2426.bnf: rfc2426.txt yakker
 	# value and param have multiple definitions
@@ -214,10 +233,10 @@ rfc2426.bnf: rfc2426.txt yakker
 	echo 'param = param-name "=" param-value *("," param-value).' >> $@
 	# typos prevent extraction of these
 	echo 'ESCAPED-CHAR = "\\" / "\;" / "\," / ("\" %d110) / ("\" %d78).' >> $@
-	echo 'date-time-value = date-time.' >> $@
+	echo 'date-time-value = rfc2425:date-time.' >> $@
 	echo 'snd-inline-param = ("VALUE" "=" "binary") / ("ENCODING" "=" "b") / ("TYPE" "=" *SAFE-CHAR).' >> $@
 	# fill in some missing definitions
-	echo 'uri = genericurl.' >> $@
+	echo 'uri = rfc1738:genericurl.' >> $@
 	echo 'word = iana-token.' >> $@
 	echo 'iana-type = iana-token.' >> $@
 

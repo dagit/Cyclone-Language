@@ -649,23 +649,23 @@ void dfa_add_final(dfa_t dfa, st_t final, aset_t attrs) {
 }
 void dfa_print(dfa_t dfa) {
   let len = dfa->number_of_states;
-  if (len == 1) fprintf(stderr,"There is 1 state\n");
-  else fprintf(stderr,"There are %d states\n",len);
+  if (len == 1) eprintf("There is 1 state\n");
+  else eprintf("There are %d states\n",len);
   for (let i = 0; i < len; i++) {
     let transitions = Axarray::get(dfa->states,i);
-    fprintf(stderr,"%d",i);
+    eprintf("%d",i);
     if (Set::member(dfa->final_states,i)) {
-      fprintf(stderr,"::");
+      eprintf("::");
       if (!transitions) {
-        fprintf(stderr," -- final attributes");
+        eprintf(" -- final attributes");
         fprint_uintset(stderr,Hashtable::lookup(dfa->final_attrs,i));
         continue;
       }
     }
     else {
-      fprintf(stderr,": ");
+      eprintf(": ");
       if (!transitions) {
-        fprintf(stderr,"\n");
+        eprintf("\n");
         continue;
       }
     }
@@ -675,20 +675,20 @@ void dfa_print(dfa_t dfa) {
       let target = spans->hd->target;
       if (target) {
         if (lb + 1 == ub)
-          fprintf(stderr," %s->%d",
+          eprintf(" %s->%d",
                   char_escape(lb),target);
         else
-          fprintf(stderr," [%s-%s]->%d",
+          eprintf(" [%s-%s]->%d",
                   char_escape(lb),char_escape(ub-1),target);
       }
       lb = ub;
     }
     if (Set::member(dfa->final_states,i)) {
-      fprintf(stderr," -- final attributes");
+      eprintf(" -- final attributes");
       fprint_uintset(stderr,Hashtable::lookup(dfa->final_attrs,i));
     }
     else
-      fprintf(stderr,"\n");
+      eprintf("\n");
   }
 }
 /* Print the graph in dot format, for display by GraphViz */
@@ -945,9 +945,9 @@ int dfa_tiebreak(dfa_t dfa) {
     num_conflicts_dfa++;
     let f_attrs = Hashtable::lookup(dfa->final_attrs,f);
 
-    fprintf(stderr,"Some input matches these alternatives simultaneously:");
+    eprintf("Some input matches these alternatives simultaneously:");
     fprint_uintset(stderr,f_attrs);
-    fprintf(stderr,"Example: ");
+    eprintf("Example: ");
     dfa_example(stderr,dfa,spantree,f);
 
     let attrs = f_attrs;
@@ -961,11 +961,11 @@ int dfa_tiebreak(dfa_t dfa) {
     if (Set::cardinality(attrs) == 1) {
       num_conflicts_resolved++;
       let chosen = Set::choose(attrs);
-      fprintf(stderr,"Choose %u to win by prefix\n",chosen);
+      eprintf("Choose %u to win by prefix\n",chosen);
       Hashtable::insert(dfa->final_attrs,f,attrs);
       if (!leq_all(chosen,f_attrs)) {
 	num_conflicts_change_order++;
-	fprintf(stderr,"*** THIS IS A CHANGE IN ORDER\n");
+	eprintf("*** THIS IS A CHANGE IN ORDER\n");
       }
       continue;
     }
@@ -973,21 +973,21 @@ int dfa_tiebreak(dfa_t dfa) {
     if (Set::cardinality(attrs) == 1) {
       num_conflicts_resolved++;
       let chosen = Set::choose(attrs);
-      fprintf(stderr,"Choose %u to win by exclusive test\n",chosen);
+      eprintf("Choose %u to win by exclusive test\n",chosen);
       Hashtable::insert(dfa->final_attrs,f,attrs);
       if (!leq_all(chosen,f_attrs)) {
 	num_conflicts_change_order++;
-	fprintf(stderr,"*** THIS IS A CHANGE IN ORDER\n");
+	eprintf("*** THIS IS A CHANGE IN ORDER\n");
       }
       continue;
     }
     num_conflicts_unresolved++;
     let chosen = Set::choose(f_attrs); // NB: WE ASSUME THIS IS THE SMALLEST
-    fprintf(stderr,"Unable to resolve by prefix test or exclusive test (so %u wins)\n",chosen);
+    eprintf("Unable to resolve by prefix test or exclusive test (so %u wins)\n",chosen);
     Hashtable::insert(dfa->final_attrs,f,Set::singleton(att_cmp,chosen));
   }
   if (Set::cardinality(shared) == 0)
-    fprintf(stderr,"All conflicts were resolved in the lookahead dfa\n");
+    eprintf("All conflicts were resolved in the lookahead dfa\n");
   return Set::cardinality(shared);
 }
 
@@ -1106,7 +1106,7 @@ static $(act_t,nstate_t ?) transitions(nstate_t n) {
 dfa_t nfa2dfa(st_t start_state, Set::set_t<st_t,`H> final_states) {
   // nstate = set of nfa states
   // dstate = a dfa state = an int
-  //  fprintf(stderr,"NFA start state is %d\n",start_state); fflush(stderr);
+  //  eprintf("NFA start state is %d\n",start_state); fflush(stderr);
   dfa_t dfa = dfa_create();
   let n_curr_unclosed = stset2nstate(Set::singleton(st_cmp,start_state));
   let n_curr = epsilon_close(n_curr_unclosed);
@@ -1177,7 +1177,7 @@ dfa_t nfa2dfa(st_t start_state, Set::set_t<st_t,`H> final_states) {
     spans = List::imp_rev(spans);
     Axarray::set(dfa->states,d_curr,new trans(lb,spans));
   }
-  //  fprintf(stderr,"The dfa has %u states\n",dfa->number_of_states);
+  //  eprintf("The dfa has %u states\n",dfa->number_of_states);
   return dfa;
 }
 
@@ -1353,9 +1353,9 @@ dfa_t nfa_distinguish(Set::set_t<st_t,`H> start_states,
     let spantree = dfa_spantree(dfa);
     for (; gaveup; gaveup = gaveup->tl) {
       let &$(d,ivals) = gaveup->hd;
-      fprintf(stderr,"Gave up trying to distinguish alternatives");
+      eprintf("Gave up trying to distinguish alternatives");
       fprint_uintset(stderr,ivals);
-      fprintf(stderr," on the following input: ");
+      eprintf(" on the following input: ");
       dfa_example(stderr,dfa,spantree,d);
     }
   }
@@ -1401,7 +1401,7 @@ int dfa_unbounded(dfa_t dfa) {
     }
   }
   if (Set::cardinality(unbounded_attrs)) {
-    fprintf(stderr,"The following attributes may require unbounded lookahead:");
+    eprintf("The following attributes may require unbounded lookahead:");
     fprint_uintset(stderr,unbounded_attrs);
     return 1;
   }
@@ -1944,7 +1944,7 @@ dfa_t lookahead_dfa(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt)
     int err = stat("ykdebug",&sb);
     if (err && errno == ENOENT) {
       if (mkdir("ykdebug",S_IRWXU)) {
-	fprintf(stderr,"ERROR: could not create directory ykdebug\n");
+	eprintf("ERROR: could not create directory ykdebug\n");
 	exit(1);
       }
     }
@@ -1953,7 +1953,7 @@ dfa_t lookahead_dfa(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt)
       exit(1);
     }
     else if (!(sb.st_mode & S_IFDIR)) {
-      fprintf(stderr,"ERROR: ykdebug is not a directory\n");
+      eprintf("ERROR: ykdebug is not a directory\n");
       exit(1);
     }
     FILE *f = fopen(dotfile("nfa"),"w");
@@ -1962,11 +1962,11 @@ dfa_t lookahead_dfa(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt)
   interval_list = List::imp_rev(interval_list);
   let intervals = Array::from_list(interval_list);
   if (debug) {
-    fprintf(stderr,"Intervals: ");
+    eprintf("Intervals: ");
     for (let i = 0; i < numelts(intervals); i++) {
-      fprintf(stderr,"%u.",intervals[i]);
+      eprintf("%u.",intervals[i]);
     }
-    fprintf(stderr,"\n");
+    eprintf("\n");
   }
   let dfa = nfa_distinguish(start_states,final_states,intervals);
   if (debug) {
@@ -1982,7 +1982,7 @@ dfa_t lookahead_dfa(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt)
     dfa = short_circuit(dfa);
     dfa = dfa_minimize(dfa);
   }
-  fprintf(stderr,"The final dfa has %u states\n",dfa->number_of_states);
+  eprintf("The final dfa has %u states\n",dfa->number_of_states);
 
   if (debug) {
     FILE *f = fopen(dotfile("dfa2"),"w");

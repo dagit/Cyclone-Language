@@ -168,7 +168,7 @@ rule_t rule2term(rule_t r) {
     else {
       internal_err("rule2term: could not convert rule:\n");
       pr_rule(stderr,r);
-      fprintf(stderr,"\n");
+      eprintf("\n");
       return LIT("[]");
     }
 
@@ -229,7 +229,7 @@ rule_t alt2term(rule_t r) {
     if (!tag) {
       internal_err("alt2term: could not find tag:\n");
       pr_rule(stderr,r);
-      fprintf(stderr,"\n");
+      eprintf("\n");
       return r;
     }
     let args = rule2args(r);
@@ -267,7 +267,7 @@ Rule_t seq2term(rule_t r0) {
   if (len == 0) {
     internal_err("seq2term: no args in sequence:\n");
     pr_rule(stderr,r0);
-    fprintf(stderr,"\n");
+    eprintf("\n");
     return LIT("[]");
   }
 

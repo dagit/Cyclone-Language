@@ -23,14 +23,6 @@
 #include "pr.h"
 
 int html_mode = 0;
-List::list_t<$(const char ?,const char ?)@> renamings = NULL;
-static const char ?rename_pr(const char ?`H name) {
-  for (let x = renamings; x; x = x->tl) {
-    let &$(a,b) = x->hd;
-    if (strcmp(name,a) == 0) return b;
-  }
-  return name;
-}
 void pr_repeat(FILE @f,repeat_t rp) {
   switch (rp) {
   case &Num(n): fprintf(f,"%d",n); break;
@@ -59,7 +51,7 @@ void pr_rule(FILE @f,rule_t r) {
     }
     break;
   case &Symb(x,y):
-    fprintf(f,"%s",rename_pr(x));
+    fprintf(f,"%s",x);
     if (y) fprintf(f,"@(%s)",y);
     break;
   case &CharRange(low,high):
@@ -127,7 +119,7 @@ void pr_rule(FILE @f,rule_t r) {
 }
 void pr_definition(FILE @f,definition_t d) {
   let &$(n,r,a) = d; // FIX: ws
-  fprintf(f,"%s ",rename_pr(n));
+  fprintf(f,"%s ",n);
   if (a.paramtype)
     fprintf(f,"@(%s) ",a.paramtype);
   if (a.rettype)

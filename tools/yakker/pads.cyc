@@ -82,7 +82,7 @@ Set::set_t<str_t> *defined = NULL;
 static const char ?new_definition(const char ?`H n) {
   let nptr = new n;
   if (Set::member(*defined,nptr))
-    fprintf(stderr,"Warning: %s defined more than once\n",n);
+    eprintf("Warning: %s defined more than once\n",n);
   else *defined = Set::insert(*defined,nptr);
   return make_c_identifier(n);
 }
@@ -120,7 +120,7 @@ static rule_t nmlz_seq(rule_t r) {
     add_nml_definition(n,r);
     return SYMB(n);
   case &Minus(_,_): /* Assume that r is a character range */
-    fprintf(stderr,"Internal error: Minus in nmlz_seq\n");
+    eprintf("Internal error: Minus in nmlz_seq\n");
     return r;
   }
 }
@@ -144,7 +144,7 @@ static rule_t nmlz_alt(rule_t r) {
     add_nml_definition(n,r);
     return SYMB(n);
   case &Minus(_,_): /* Assume that r is a character range */
-    fprintf(stderr,"Internal error: Minus in nmlz_alt\n");
+    eprintf("Internal error: Minus in nmlz_alt\n");
     return r;
   }
 }
@@ -174,7 +174,7 @@ static rule_t nmlz_rule(rule_t r) {
   case &Lit(_):
     return r;
   case &Minus(_,_):
-    fprintf(stderr,"Internal error: Minus in nmlz_rule\n");
+    eprintf("Internal error: Minus in nmlz_rule\n");
     return r;
   }
 }
@@ -219,7 +219,7 @@ static void cvt_seq(rule_t r) {
   case &Prose(x):
     /* FIX */
     printf("  Pprose prose; /* %s */\n",x);
-    fprintf(stderr,"Warning: Pprose prose\n");
+    eprintf("Warning: Pprose prose\n");
     break;
   case &Symb(x,_):
     let y = make_c_identifier(x);
@@ -241,11 +241,11 @@ static void cvt_seq(rule_t r) {
   case &Rcount(_,_):
   case &Star(_,_,_):
   case &Hash(_,_,_):
-    fprintf(stderr,"Internal error: bad case on cvt_seq\n");
+    eprintf("Internal error: bad case on cvt_seq\n");
     cvt_seq(SYMB(cvt_and_name(r)));
     break;
   case &Minus(_,_):
-    fprintf(stderr,"Internal error: Minus in cvt_seq\n");
+    eprintf("Internal error: Minus in cvt_seq\n");
     break;
   }
 }
@@ -258,7 +258,7 @@ static void cvt_alt(rule_t r) {
   case &Prose(x):
     /* FIX */
     printf("  Pprose prose; /* %s */\n",x);
-    fprintf(stderr,"Warning: Pprose prose\n");
+    eprintf("Warning: Pprose prose\n");
     break;
   case &Symb(x,_):
     let y = make_c_identifier(x);
@@ -287,11 +287,11 @@ static void cvt_alt(rule_t r) {
   case &Rcount(_,_):
   case &Star(_,_,_):
   case &Hash(_,_,_):
-    fprintf(stderr,"Internal error: bad case on cvt_alt\n");
+    eprintf("Internal error: bad case on cvt_alt\n");
     cvt_alt(SYMB(cvt_and_name(r)));
     break;
   case &Minus(_,_):
-    fprintf(stderr,"Internal error: Minus in cvt_alt\n");
+    eprintf("Internal error: Minus in cvt_alt\n");
     break;
   }
 }
@@ -331,7 +331,7 @@ static void re_cs(rule_t r) {
     break;
   case &Lit(x):
     if (strlen(x) != 1) {
-      fprintf(stderr,"Internal error: re_cs called with bad Lit\n");
+      eprintf("Internal error: re_cs called with bad Lit\n");
       break;
     }
     printf("\\\\x%x",x[0]);
@@ -341,7 +341,7 @@ static void re_cs(rule_t r) {
     printf("[:%s:]",x_c);
     break;
   default:
-    fprintf(stderr,"Internal error: re_cs received bad argument\n");
+    eprintf("Internal error: re_cs received bad argument\n");
     break;
   }
   return;
@@ -369,7 +369,7 @@ static void cvt_cs0(rule_t r) {
     break;
   case &Lit(x):
     if (strlen(x) != 1) {
-      fprintf(stderr,"Internal error: cvt_cs0 called with bad Lit\n");
+      eprintf("Internal error: cvt_cs0 called with bad Lit\n");
       break;
     }
     if (first_range) printf("  (x == %d)\n",x[0]);
@@ -399,7 +399,7 @@ static void cvt_rule(const char ?`H name, rule_t r) {
   case &Prose(x):
     /* FIX */
     printf("Ptypedef Pprose %s_t; /* %s */\n",name,x);
-    fprintf(stderr,"Warning: %s_t defined as Pprose\n",name);
+    eprintf("Warning: %s_t defined as Pprose\n",name);
     break;
   case &Symb(x,_):
     x = make_c_identifier(x);
@@ -429,7 +429,7 @@ static void cvt_rule(const char ?`H name, rule_t r) {
            fresh_name());
     break;
   case &Rcount(c,r2):
-    fprintf(stderr,"Internal error: Rcount in cvt_alt\n");
+    eprintf("Internal error: Rcount in cvt_alt\n");
     printf("Parray %s_t {\n",name);
     cvt_alt(r2);
     printf("};\n");
@@ -475,7 +475,7 @@ static void cvt_rule(const char ?`H name, rule_t r) {
            (longest?" && Plongest":""));
     break;
   case &Minus(_,_):
-    fprintf(stderr,"Internal error: Minus in cvt_rule\n");
+    eprintf("Internal error: Minus in cvt_rule\n");
     break;
   }
 }
@@ -615,7 +615,7 @@ static void re_rule0(rule_t r) {
   switch (r->r) {
   case &Prose(x):
     printf("(\" PPROSE \")");
-    fprintf(stderr,"Warning: PPROSE\n");
+    eprintf("Warning: PPROSE\n");
     break;
   case &Symb(x,_):
     x = make_c_identifier(x);
@@ -634,7 +634,7 @@ static void re_rule0(rule_t r) {
     printf("?");
     break;
   case &Rcount(c,r2):
-    fprintf(stderr,"Internal error: Rcount in re_rule0\n");
+    eprintf("Internal error: Rcount in re_rule0\n");
     break;
   case &Seq(r2,r3):
     if (lower_prec(r2,r)) re_rule0_paren(r2); else re_rule0(r2);
@@ -670,7 +670,7 @@ static void re_rule0(rule_t r) {
     re_rule0(rr);
     break;
   case &Minus(_,_):
-    fprintf(stderr,"Internal error: Minus in re_rule0\n");
+    eprintf("Internal error: Minus in re_rule0\n");
     break;
   }
 }
@@ -726,7 +726,7 @@ static void re_rule(const char ?`H name, rule_t r) {
     printf("Ptypedef Pstring_ME(:\"/\" RE_%s \"/\":) %s_t;\n",name,name);
     break;
   case &Minus(_,_):
-    fprintf(stderr,"Internal error: Minus in re_rule\n");
+    eprintf("Internal error: Minus in re_rule\n");
     break;
   }
 }
@@ -795,7 +795,7 @@ static rule_t ws_rule(rule_t r) {
         return SEQ(r2,STAR(m?m-1:0,N,SEQ(commas_symb(),r2)));
     }
   case &Minus(_,_):
-    fprintf(stderr,"Internal error: Minus in ws_rule\n");
+    eprintf("Internal error: Minus in ws_rule\n");
     return r;
   }
 }

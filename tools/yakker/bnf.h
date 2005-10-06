@@ -72,7 +72,7 @@ rule_t STAR(unsigned int,repeat_t,rule_t);
 rule_t HASH(unsigned int,repeat_t,rule_t);
 rule_t MINUS(rule_t,rule_t);
 /* Constructors that copy the semantic action of the first argument */
-rule_t SYMB_r(rule_t,const char ?`H);
+rule_t SYMB_r(rule_t,const char ?`H,const char ?`H);
 rule_t LIT_r(rule_t,const char ?`H);
 rule_t CHARRANGE_r(rule_t,unsigned int,unsigned int);
 rule_t PROSE_r(rule_t,const char ?`H);

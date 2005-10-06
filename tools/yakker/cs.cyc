@@ -67,7 +67,7 @@ void cs_xor(cs_t a,cs_t b) {
 }
 void cs_insert(cs_t a,unsigned char x) { /* Note, have to change for Unicode */
   if (x > MAXCSCHAR) {
-    fprintf(stderr,"character sets can't hold large character %u\n",x);
+    eprintf("character sets can't hold large character %u\n",x);
     return;
   }
   a[x/8] |= (1<<(x%8));
@@ -193,14 +193,14 @@ rule_t cs2rule(cs_t rng) {
   for (let i = 0; i<BUCKETS; i++) {
     for (let j = 0; j<8; j++) {
       let new_state = (rng[i] & (1<<j)) != 0;
-      // fprintf(stderr,"%d",new_state);
+      // eprintf("%d",new_state);
       if (new_state && !state)
 	mark = i*8+j;
       else if (!new_state && state)
 	rngs = new List::List(cs_CHARRANGE(mark,i*8+j-1),rngs);
       state = new_state;
     }
-    // fprintf(stderr,"\n");
+    // eprintf("\n");
   }
   if (state)
     rngs = new List::List(cs_CHARRANGE(mark,255),rngs);
@@ -221,11 +221,11 @@ rule_t cs2rule(cs_t rng) {
 }
 
 int is_cs(rule_t r) {
-  if (!r->css) {
+  if (!r->css || !*r->css) {
     internal_err("is_cs called before cs_annot\n");
     return 0;
   }
-  else return (*r->css);
+  else return (*r->css != NULL);
 }
 
 cs_t string2cs(const char ?s) {

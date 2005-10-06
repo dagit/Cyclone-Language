@@ -63,7 +63,7 @@ ALPHA | DIGIT | "-"
                      the message body, either on a line by itself
                      or as a substring anywhere.>
 =
-<UNDEFINED>
+rfc822:message ; not quite right
 .
 <"message" as defined in RFC 822,
              with all header fields optional, and with the
@@ -73,7 +73,7 @@ ALPHA | DIGIT | "-"
              semantics of a part differ from the semantics
              of a message, as described in the text.>
 =
-<UNDEFINED>
+rfc822:message ; not quite right
 .
 <"message" as defined in RFC 822,
             with all header fields optional, and with the
@@ -81,7 +81,7 @@ ALPHA | DIGIT | "-"
             the message body, either on a line by itself
             or as a substring anywhere.>
 =
-<UNDEFINED>
+rfc822:message ; not quite right
 .
 <"message" as defined in RFC 822, with all
                    header fields optional, not starting with the
@@ -91,7 +91,7 @@ ALPHA | DIGIT | "-"
                    part differ from the semantics of a message,
                    as described in the text.>
 =
-<UNDEFINED>
+rfc822:message ; not quite right
 .
 <"{", "}", "*", and any ps-char
                                                       except ".">
@@ -171,11 +171,11 @@ ALPHA | DIGIT | "-"
 .
 <A "B" binary encoded string as defined by [RFC 2047].>
 =
-"b:" base64
+"b:" rfc3501:base64 ; RFC 3501 has it in ABNF, RFC 2047 does not
 .
 <A "b" encoded text value as defined in [RFC 2047]>
 =
-"b:" base64
+"b:" rfc3501:base64 ; RFC 3501 has it in ABNF, RFC 2047 does not
 .
 <A IANA registered iCalendar version identifier>
 =
@@ -213,11 +213,11 @@ ALPHA | DIGIT | "-"
 .
 <A single date value as defined in [MIME-DIR]>
 =
-date
+rfc2425:date
 .
 <A single float value as defined in [MIME-DIR]>
 =
-float
+rfc2425:float
 .
 <A single text  value as defined in [CCITT
                          E.163] and [CCITT X.121]>
@@ -226,7 +226,7 @@ float
 .
 <A single time value as defined in [MIME-DIR]>
 =
-time
+rfc2425:time
 .
 <A single date-time value as defined in [MIME-DIR]>
 =
@@ -234,7 +234,7 @@ date-time
 .
 <A uri value as defined in [MIME-DIR]>
 =
-genericurl
+rfc1738:genericurl
 .
 <ALPHA or DIGIT>
 =
@@ -494,7 +494,7 @@ DIGIT
 .
 <Feature tag, as defined in RFC 2506 [3]>
 =
-<UNDEFINED>
+rfc2506:Feature-tag
 .
 <HEX excluding "0">
 =
@@ -646,7 +646,7 @@ SP
 .
 <Text identifying a language, as defined in [RFC 1766]>
 =
-<UNDEFINED>
+rfc1766:Language-Tag
 .
 <The language code defined in RFC1766>
 =
@@ -659,7 +659,7 @@ SP
 <The two characters "X-" followed, with no
                        intervening white space, by any token>
 =
-<UNDEFINED>
+"X-" token ; allows both "X-" and "x-", is this correct?
 .
 <The two characters "X-" or "x-" followed, with
                  no intervening white space, by any token>
@@ -753,7 +753,7 @@ SP
 .
 <a language string as defined in RFC 1766>
 =
-Language-Tag
+rfc1766:Language-Tag
 .
 <a publicly-defined extension token,
                registered with IANA, as specified in
@@ -1184,7 +1184,7 @@ base64
 .
 <base64 of 128 bit MD5 digest as per RFC 1864>
 =
-base64
+rfc1864:base64
 .
 <bchars>
 =
@@ -1472,7 +1472,7 @@ ps-delim | (ps-char - ("/" | "="))
 .
 <registered language tag [RFC-1766]>
 =
-<UNDEFINED>
+rfc1766:Language-Tag
 .
 <repeat interval>
 =

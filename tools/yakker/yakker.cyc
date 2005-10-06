@@ -27,6 +27,7 @@
 #include "parsergen.h"
 #include "termgrammar.h"
 #include "corerules.h"
+#include "namespaces.h"
 #include <stdio.h>
 #include <string.h>
 #include <list.h>
@@ -90,6 +91,10 @@ static int check_any() {
     check_whitespace;
 }
 
+static List::list_t<$(const char ?,const char ?)@> renamings = NULL;
+static int unnamespace = 0;
+static const char ?add_namespace = NULL;
+
 #define USAGE \
 "Usage: yakker [OPTIONS] [FILES]\n"\
 "Options: -gen <sym>             generate a parser using <sym> as the start symbol\n"\
@@ -105,6 +110,8 @@ static int check_any() {
 "           -check-firstfollow     check the FIRST and FOLLOW sets\n"\
 "           -check-conflicts       check for conflicts\n"\
 "           -check-whitespace      check whitespace\n"\
+"         -namespace <sym>       use <sym> as the namespace for the grammar\n"\
+"         -unnamespace           remove any namespaces from the grammar\n"\
 "         -compare               compare two grammars\n"\
 "         -pads                  generate a PADS specification\n"\
 "         -sort                  sort the input grammar by name (case sensitive)\n"\
@@ -163,9 +170,16 @@ int main(int argc, const char ?`H?argv) {
       start_symbol = argv[i+1];
       i += 1;
     }
+    else if (strcmp("-namespace",argv[i]) == 0) {
+      if (i+1 >= argc) die();
+      add_namespace = argv[i+1];
+      fprintf(stderr,"adding namespace %s\n",add_namespace);
+      i += 1;
+    }
     else if (strcmp("-help",argv[i]) == 0) die();
     else if (strcmp("-termgrammar",argv[i]) == 0) termgrammarp = 1;
     else if (strcmp("-compare",argv[i]) == 0) compare = 1;
+    else if (strcmp("-unnamespace",argv[i]) == 0) unnamespace = 1;
     else if (strcmp("-local",argv[i]) == 0) local_lookahead = 1;
     else if (strcmp("-no-expand",argv[i]) == 0) expand_nonrec = 0;
     else if (strcmp("-d",argv[i]) == 0) debug++;
@@ -284,6 +298,23 @@ int main(int argc, const char ?`H?argv) {
   }
   fclose(f);
 
+  if (renamings) {
+    debugprint(1,"Performing renamings... ");
+    renaming_t t = Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr);
+    for (; renamings; renamings = renamings->tl) { // renamings is destroyed
+      let &$(x,y) = renamings->hd;
+      Hashtable::insert(t, new x, new y);
+    }
+    ds = rename_grammar(ds,t);
+    debugprint(1,"done\n");
+  }
+
+  if (add_namespace) {
+    debugprint(1,"Adding namespace %s... ",add_namespace);
+    ds = namespace_grammar(add_namespace,ds);
+    debugprint(1,"done\n");
+  }
+
   {
     debugprint(1,"Filtering... ");
     let filtered = NULL;
@@ -304,6 +335,11 @@ int main(int argc, const char ?`H?argv) {
   }
 
   if (extractp) {
+    if (unnamespace) {
+      debugprint(1,"Removing namespaces... ");
+      ds = unnamespace_grammar(ds);
+      debugprint(1,"done\n");
+    }
     pr_definitions(stdout,ds);
     return 0;
   }
@@ -331,6 +367,12 @@ int main(int argc, const char ?`H?argv) {
     e = List::imp_rev(e);
     e = new List::List(core_rules(),e);
     ds = close_definitions(ds,e);
+    debugprint(1,"done\n");
+  }
+
+  if (unnamespace) {
+    debugprint(1,"Removing namespaces... ");
+    ds = unnamespace_grammar(ds);
     debugprint(1,"done\n");
   }
 

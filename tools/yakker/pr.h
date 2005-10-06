@@ -20,7 +20,6 @@
 #define PR_H
 #include <list.h>
 #include "bnf.h"
-extern List::list_t<$(const char ?,const char?)@> renamings;
 extern void pr_repeat(FILE @f,repeat_t rp);
 extern void pr_rule(FILE @f,rule_t r);
 extern void pr_definition(FILE @f,definition_t d);
