@@ -480,7 +480,9 @@ extern void**Cyc_Hashtable_lookup_opt(struct Cyc_Hashtable_Table*,void*);
 # 59
 extern void**Cyc_Hashtable_lookup_other_opt(struct Cyc_Hashtable_Table*,void*,int(*)(void*,void*),int(*)(void*));
 # 82
-extern int Cyc_Hashtable_hash_string(struct _fat_ptr);struct Cyc_Hashtable_Table{struct _RegionHandle*r;int(*cmp)(void*,void*);int(*hash)(void*);int max_len;struct _fat_ptr tab;};
+extern int Cyc_Hashtable_hash_string(struct _fat_ptr);
+# 92
+extern void Cyc_Hashtable_iter_c(void(*)(void*,void*,void*),struct Cyc_Hashtable_Table*,void*);struct Cyc_Hashtable_Table{struct _RegionHandle*r;int(*cmp)(void*,void*);int(*hash)(void*);int max_len;struct _fat_ptr tab;};
 # 71 "assndef.cyc"
 struct _fat_ptr Cyc_AssnDef_typopt2string(void*tp){
 if(tp==0)return _tag_fat("NULL",sizeof(char),5U);
@@ -2351,3 +2353,16 @@ void Cyc_AssnDef_reset_hash_cons_table (void){
 # 2410
 Cyc_AssnDef_term_hash_cons_table=0;
 Cyc_AssnDef_assn_hash_cons_table=0;}
+# 2414
+static void Cyc_AssnDef_f_sizeof_hashtable(void*key,void*value,int*counter){
+++(*counter);}
+# 2418
+int Cyc_AssnDef_sizeof_hash_cons_table (void){
+int size=0;
+if(Cyc_AssnDef_term_hash_cons_table!=0)
+({void(*_Tmp0)(void(*)(void*,struct Cyc_AssnDef_TermHashedInfo*,int*),struct Cyc_Hashtable_Table*,int*)=(void(*)(void(*)(void*,struct Cyc_AssnDef_TermHashedInfo*,int*),struct Cyc_Hashtable_Table*,int*))Cyc_Hashtable_iter_c;_Tmp0;})(({void(*_Tmp0)(void*,struct Cyc_AssnDef_TermHashedInfo*,int*)=(void(*)(void*,struct Cyc_AssnDef_TermHashedInfo*,int*))Cyc_AssnDef_f_sizeof_hashtable;_Tmp0;}),Cyc_AssnDef_term_hash_cons_table,& size);
+# 2423
+if(Cyc_AssnDef_assn_hash_cons_table!=0)
+({void(*_Tmp0)(void(*)(void*,struct Cyc_AssnDef_AssnHashedInfo*,int*),struct Cyc_Hashtable_Table*,int*)=(void(*)(void(*)(void*,struct Cyc_AssnDef_AssnHashedInfo*,int*),struct Cyc_Hashtable_Table*,int*))Cyc_Hashtable_iter_c;_Tmp0;})(({void(*_Tmp0)(void*,struct Cyc_AssnDef_AssnHashedInfo*,int*)=(void(*)(void*,struct Cyc_AssnDef_AssnHashedInfo*,int*))Cyc_AssnDef_f_sizeof_hashtable;_Tmp0;}),Cyc_AssnDef_assn_hash_cons_table,& size);
+# 2426
+return size;}
