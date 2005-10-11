@@ -34,7 +34,7 @@
 #include "unify.h"
 #include <cycboot.h>
 
-#define VCGEN_DEBUG
+//#define VCGEN_DEBUG
 namespace Vcgen;
 using AssnDef;
 using List;
@@ -1719,6 +1719,21 @@ assn_map_t clause2assn(exp_t e){
   return res;
 }
 
+bool visit_size_f1(int @ counter, exp_t e){
+  (*counter)++;
+  return true;
+}
+
+bool visit_size_f2(int @ counter, stmt_t e){
+  (*counter)++;
+  return true;
+}
+int fn_body_size(stmt_t body) {
+  int size = 0;
+  Absyn::visit_stmt(visit_size_f1,visit_size_f2,&size,body);
+  return size;
+}
+
 void vcgen_fundecl(Position::seg_t loc, JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd, assn_info_t assn_info){
   let $(args,arvds,reqopt,ensopt,thrwsopt,ret_value) = get_requires_and_ensures_info(&fd->i);
   assn_map_t am = true_assnmap();
@@ -1785,6 +1800,11 @@ void vcgen_fundecl(Position::seg_t loc, JumpAnalysis::jump_anal_res_t tables, Ab
     insert_fn_info(fd,actuals,res_term,new_memory,res.assn);
   }
 
+#ifdef VCGEN_DEBUG
+  fprintf(stderr,"%s\t%d\t%d\n",Absynpp::qvar2string(fd->name),
+	  fn_body_size(fd->body),
+	  AssnDef::sizeof_hash_cons_table());
+#endif
 //   // check the throws clause
 //   if (thrwsopt != NULL) {
 //     assn_map_t res = *env->try_assnmap;

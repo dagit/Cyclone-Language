@@ -356,5 +356,7 @@ namespace AssnDef{
   extern term_set_t assn_fr_logicvar(assn_t a);
 
   void reset_hash_cons_table(void);
+  int sizeof_hash_cons_table(void);
+
 }
 #endif

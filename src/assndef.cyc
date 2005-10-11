@@ -2410,3 +2410,18 @@ void reset_hash_cons_table(void){
   term_hash_cons_table = NULL;
   assn_hash_cons_table = NULL;
 };
+
+static void f_sizeof_hashtable(`a key, `b value, int @ counter) {
+  (*counter)++;
+}
+
+int sizeof_hash_cons_table(void){
+  int size = 0;
+  if (term_hash_cons_table != NULL){
+    Hashtable::iter_c(f_sizeof_hashtable,term_hash_cons_table,&size);
+  }
+  if (assn_hash_cons_table != NULL){
+    Hashtable::iter_c(f_sizeof_hashtable,assn_hash_cons_table,&size);
+  }
+  return size;
+}
