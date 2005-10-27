@@ -23,7 +23,12 @@ typedef short     int16_t;
 typedef int       int32_t;
 typedef long long int64_t;
 #else
+#if defined(__sgi__)
+/* There's no stdint.h on SGI IRIX 6.x */
+#include <inttypes.h>
+#else
 #include <stdint.h>
+#endif
 #endif
 #include "runtime_internal.h"
 
@@ -54,7 +59,7 @@ void* _zero_arr_plus_other_fn(unsigned t,void* orig_x,unsigned orig_sz,int orig_
   case 2: DO_PLUS_FN(int16_t);
   case 4: DO_PLUS_FN(int32_t);
   case 8: DO_PLUS_FN(int64_t);
-  default: 
+  default:
     if(t==sizeof(long double))
       DO_PLUS_FN(long double);
     _throw_null_fn("runtime_zeroterm.c",__LINE__);
@@ -84,7 +89,7 @@ unsigned _get_zero_arr_size_other(unsigned t,const void* orig_x,unsigned orig_of
   case 2: DO_GET_SIZE(int16_t);
   case 4: DO_GET_SIZE(int32_t);
   case 8: DO_GET_SIZE(int64_t);
-  default: 
+  default:
     if(t==sizeof(long double))
       DO_GET_SIZE(long double);
     _throw_null_fn("runtime_zeroterm.c",__LINE__);
@@ -92,7 +97,7 @@ unsigned _get_zero_arr_size_other(unsigned t,const void* orig_x,unsigned orig_of
   }
 }
 
-/* Does in-place addition of a zero-terminated pointer (x += e and ++x).  
+/* Does in-place addition of a zero-terminated pointer (x += e and ++x).
    Note that this expands to call _zero_arr_plus_<type>_fn. */
 char* _zero_arr_inplace_plus_char_fn(char **x, int orig_i,const char *filename,unsigned lineno) {
   *x = _zero_arr_plus_char_fn(*x,1,orig_i,filename,lineno);
@@ -126,5 +131,5 @@ struct _fat_ptr _fat_ptr_decrease_size(struct _fat_ptr x,
   if (x.last_plus_one - x.base >= delta)
     x.last_plus_one -= delta;
   else x.last_plus_one = x.base;
-  return x; 
+  return x;
 }
