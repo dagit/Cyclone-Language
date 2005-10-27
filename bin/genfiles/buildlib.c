@@ -505,20 +505,18 @@ struct Cyc_Tcenv_Tenv*Cyc_Tcenv_tc_init (void);
 void Cyc_Tc_tc(struct Cyc_Tcenv_Tenv*,int,struct Cyc_List_List*);
 # 29 "binding.h"
 void Cyc_Binding_resolve_all(struct Cyc_List_List*);
-# 29 "specsfile.h"
-struct _fat_ptr Cyc_Specsfile_target_arch;
-void Cyc_Specsfile_set_target_arch(struct _fat_ptr);
-struct Cyc_List_List*Cyc_Specsfile_cyclone_exec_path;
-void Cyc_Specsfile_add_cyclone_exec_path(struct _fat_ptr);
+# 30 "specsfile.h"
+extern void Cyc_Specsfile_set_target_arch(struct _fat_ptr);
+# 32
+extern void Cyc_Specsfile_add_cyclone_exec_path(struct _fat_ptr);
 # 34
-struct Cyc_List_List*Cyc_Specsfile_read_specs(struct _fat_ptr);
+extern struct Cyc_List_List*Cyc_Specsfile_read_specs(struct _fat_ptr);
 # 36
-struct _fat_ptr Cyc_Specsfile_get_spec(struct Cyc_List_List*,struct _fat_ptr);
-struct Cyc_List_List*Cyc_Specsfile_cyclone_arch_path;
-struct _fat_ptr Cyc_Specsfile_def_lib_path;
-struct _fat_ptr Cyc_Specsfile_parse_b(struct Cyc_List_List*,void(*)(struct _fat_ptr),int(*)(struct _fat_ptr),struct _fat_ptr,struct _fat_ptr);
+extern struct _fat_ptr Cyc_Specsfile_get_spec(struct Cyc_List_List*,struct _fat_ptr);
+# 39
+extern struct _fat_ptr Cyc_Specsfile_parse_b(struct Cyc_List_List*,void(*)(struct _fat_ptr),int(*)(struct _fat_ptr),struct _fat_ptr,struct _fat_ptr);
 # 44
-struct _fat_ptr Cyc_Specsfile_find_in_arch_path(struct _fat_ptr);
+extern struct _fat_ptr Cyc_Specsfile_find_in_arch_path(struct _fat_ptr);
 # 77 "buildlib.cyl"
 extern void Cyc_Lex_lex_init(int);static char _TmpG0[4U]="gcc";
 # 87

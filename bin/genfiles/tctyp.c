@@ -537,7 +537,7 @@ void*Cyc_Warn_impos2(struct _fat_ptr);
 # 89 "flags.h"
 extern int Cyc_Flags_tovc_r;
 # 29 "currgn.h"
-struct _fat_ptr Cyc_CurRgn_curr_rgn_name;
+extern struct _fat_ptr Cyc_CurRgn_curr_rgn_name;
 # 35
 int Cyc_CurRgn_is_curr_rgn(struct Cyc_Absyn_Tvar*);
 int Cyc_CurRgn_is_not_curr_rgn(struct Cyc_Absyn_Tvar*);struct Cyc_Set_Set;

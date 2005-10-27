@@ -366,7 +366,7 @@ void*Cyc_Absyn_compress(void*);
 # 946
 extern void*Cyc_Absyn_var_type(struct Cyc_Absyn_Tvar*);
 # 29 "currgn.h"
-struct _fat_ptr Cyc_CurRgn_curr_rgn_name;
+extern struct _fat_ptr Cyc_CurRgn_curr_rgn_name;
 # 39 "tcutil.h"
 int Cyc_Tcutil_is_function_type(void*);
 # 91

@@ -415,8 +415,7 @@ extern struct Cyc_Dict_Dict Cyc_Dict_copy(struct Cyc_Dict_Dict);extern char Cyc_
 enum Cyc_Tcenv_NewStatus{Cyc_Tcenv_NoneNew =0U,Cyc_Tcenv_InNew =1U,Cyc_Tcenv_InNewAggr =2U};
 # 158
 extern void*Cyc_Tcenv_glob_curr_rgn;
-# 29 "currgn.h"
-struct _fat_ptr Cyc_CurRgn_curr_rgn_name;
+# 30 "currgn.h"
 struct Cyc_Absyn_Tvar*Cyc_CurRgn_curr_rgn_tvar (void);
 void*Cyc_CurRgn_curr_rgn_type (void);
 # 62 "absynpp.h"

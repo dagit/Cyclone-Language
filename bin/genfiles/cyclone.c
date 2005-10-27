@@ -451,9 +451,7 @@ void Cyc_Absyndump_dump_interface(struct Cyc_List_List*,struct Cyc___cycFILE*);s
 void Cyc_Binding_resolve_all(struct Cyc_List_List*);struct Cyc_Tcenv_Genv{struct Cyc_Dict_Dict aggrdecls;struct Cyc_Dict_Dict datatypedecls;struct Cyc_Dict_Dict enumdecls;struct Cyc_Dict_Dict typedefs;struct Cyc_Dict_Dict ordinaries;};struct Cyc_Tcenv_Fenv;struct Cyc_Tcenv_Tenv{struct Cyc_List_List*ns;struct Cyc_Tcenv_Genv*ae;struct Cyc_Tcenv_Fenv*le;int allow_valueof: 1;int in_extern_c_include: 1;int in_tempest: 1;int tempest_generalize: 1;int in_extern_c_inc_repeat: 1;};
 # 69 "tcenv.h"
 struct Cyc_Tcenv_Tenv*Cyc_Tcenv_tc_init (void);
-# 29 "currgn.h"
-struct _fat_ptr Cyc_CurRgn_curr_rgn_name;
-# 38
+# 38 "currgn.h"
 void Cyc_CurRgn_adjust_all(struct Cyc_List_List*);
 # 29 "tc.h"
 void Cyc_Tc_tc(struct Cyc_Tcenv_Tenv*,int,struct Cyc_List_List*);
@@ -480,8 +478,6 @@ struct Cyc_List_List*Cyc_Tovc_tovc(struct Cyc_List_List*);
 struct Cyc_List_List*Cyc_LowTreeShake_shake(struct Cyc_List_List*);struct Cyc_JumpAnalysis_Jump_Anal_Result{struct Cyc_Hashtable_Table*pop_tables;struct Cyc_Hashtable_Table*succ_tables;struct Cyc_Hashtable_Table*pat_pop_tables;};
 # 46 "jump_analysis.h"
 struct Cyc_JumpAnalysis_Jump_Anal_Result*Cyc_JumpAnalysis_jump_analysis(struct Cyc_List_List*);
-# 41 "cf_flowinfo.h"
-int Cyc_CfFlowInfo_anal_error;
 # 32 "new_control_flow.h"
 void Cyc_NewControlFlow_cf_check(struct Cyc_JumpAnalysis_Jump_Anal_Result*,struct Cyc_List_List*);
 # 40 "insert_checks.h"
@@ -559,20 +555,20 @@ extern unsigned Cyc_Flags_max_vc_paths;
 # 151
 void Cyc_Flags_set_all_warnings (void);
 # 29 "specsfile.h"
-struct _fat_ptr Cyc_Specsfile_target_arch;
-void Cyc_Specsfile_set_target_arch(struct _fat_ptr);
-struct Cyc_List_List*Cyc_Specsfile_cyclone_exec_path;
-void Cyc_Specsfile_add_cyclone_exec_path(struct _fat_ptr);
+extern struct _fat_ptr Cyc_Specsfile_target_arch;
+extern void Cyc_Specsfile_set_target_arch(struct _fat_ptr);
+extern struct Cyc_List_List*Cyc_Specsfile_cyclone_exec_path;
+extern void Cyc_Specsfile_add_cyclone_exec_path(struct _fat_ptr);
 # 34
-struct Cyc_List_List*Cyc_Specsfile_read_specs(struct _fat_ptr);
-struct _fat_ptr Cyc_Specsfile_split_specs(struct _fat_ptr);
-struct _fat_ptr Cyc_Specsfile_get_spec(struct Cyc_List_List*,struct _fat_ptr);
-struct Cyc_List_List*Cyc_Specsfile_cyclone_arch_path;
-struct _fat_ptr Cyc_Specsfile_def_lib_path;
-struct _fat_ptr Cyc_Specsfile_parse_b(struct Cyc_List_List*,void(*)(struct _fat_ptr),int(*)(struct _fat_ptr),struct _fat_ptr,struct _fat_ptr);
+extern struct Cyc_List_List*Cyc_Specsfile_read_specs(struct _fat_ptr);
+extern struct _fat_ptr Cyc_Specsfile_split_specs(struct _fat_ptr);
+extern struct _fat_ptr Cyc_Specsfile_get_spec(struct Cyc_List_List*,struct _fat_ptr);
+# 38
+extern struct _fat_ptr Cyc_Specsfile_def_lib_path;
+extern struct _fat_ptr Cyc_Specsfile_parse_b(struct Cyc_List_List*,void(*)(struct _fat_ptr),int(*)(struct _fat_ptr),struct _fat_ptr,struct _fat_ptr);
 # 44
-struct _fat_ptr Cyc_Specsfile_find_in_arch_path(struct _fat_ptr);
-struct _fat_ptr Cyc_Specsfile_find_in_exec_path(struct _fat_ptr);
+extern struct _fat_ptr Cyc_Specsfile_find_in_arch_path(struct _fat_ptr);
+extern struct _fat_ptr Cyc_Specsfile_find_in_exec_path(struct _fat_ptr);
 # 38 "cifc.h"
 void Cyc_Cifc_set_inst_tvar (void);
 # 47 "cyclone.cyc"

@@ -546,8 +546,6 @@ void Cyc_Warn_err(unsigned,struct _fat_ptr,struct _fat_ptr);
 void*Cyc_Warn_impos(struct _fat_ptr,struct _fat_ptr);
 # 8 "pratt_prover.h"
 int Cyc_PrattProver_constraint_prove(void*,void*);
-# 41 "cf_flowinfo.h"
-int Cyc_CfFlowInfo_anal_error;
 # 159 "cf_flowinfo.h"
 extern int Cyc_CfFlowInfo_get_field_index(void*,struct _fat_ptr*);
 # 52 "attributes.h"

@@ -622,7 +622,7 @@ void*Cyc_Atts_parse_format_att(unsigned,unsigned,struct _fat_ptr,struct _fat_ptr
 # 68
 int Cyc_Atts_fntype_att(void*);
 # 29 "currgn.h"
-struct _fat_ptr Cyc_CurRgn_curr_rgn_name;
+extern struct _fat_ptr Cyc_CurRgn_curr_rgn_name;
 # 31
 void*Cyc_CurRgn_curr_rgn_type (void);
 # 67 "absynpp.h"

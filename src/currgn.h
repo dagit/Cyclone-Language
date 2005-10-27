@@ -26,7 +26,7 @@ namespace CurRgn {
   using Absyn;
   using List;
 
-  string_t curr_rgn_name;
+  extern string_t curr_rgn_name;
   tvar_t curr_rgn_tvar (void); // `C
   type_t curr_rgn_type (void); // `C
 

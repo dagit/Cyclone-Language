@@ -1,0 +1,128 @@
+#include "namespaces.h"
+#include <string.h>
+#define EMPTYSET (Set::empty(strptrcmp))
+
+/* Renaming symbols in rules and grammars.
+   This does so WITHOUT paying attention to name capture, e.g.,
+   you can rename foo to bar in
+
+     foo = baz
+     bar = foo
+
+   and get
+
+     bar = baz
+     bar = bar
+*/
+static rule_t rename_rule(rule_t r,renaming_t t) {
+  switch (r->r) {
+  case &Symb(x,y):
+    try return SYMB_r(r,*Hashtable::lookup(t,new x),y);
+    catch {
+    default: return r;
+    }
+  case &Prose(_):
+  case &CharRange(_,_):
+  case &Lit(_):
+    return r;
+  case &Minus(r2,r3):
+    return MINUS_r(r,rename_rule(r2,t),rename_rule(r3,t));
+  case &Seq(r2,r3):
+    return SEQ_r(r,rename_rule(r2,t),rename_rule(r3,t));
+  case &Alt(r2,r3):
+    return ALT_r(r,rename_rule(r2,t),rename_rule(r3,t));
+  case &Opt(r2):
+    return OPT_r(r,rename_rule(r2,t));
+  case &Rcount(c,r2):
+    return RCOUNT_r(r,c,rename_rule(r2,t));
+  case &Star(m,N,r2):
+    return STAR_r(r,m,N,rename_rule(r2,t));
+  case &Hash(m,N,r2):
+    return HASH_r(r,m,N,rename_rule(r2,t));
+  }
+}
+grammar_t rename_grammar(grammar_t g, renaming_t t) {
+  let res = NULL;
+  for (let x = g; x; x = x->tl) {
+    let &$(n,r,a) = x->hd;
+    let n2;
+    try n2 = *Hashtable::lookup(t,new n);
+    catch {
+    default: n2 = n; break;
+    }
+    let y = new $(n2, rename_rule(r,t), a);
+    res = new List::List(y,res);
+  }  
+  res = List::imp_rev(res);
+  return res;
+}
+
+/* Is a symbol already namespaced? */
+static int is_namespaced(const char ?s) {
+  return (strchr(s,':') != NULL);
+}
+
+static const char ?strip_namespace(const char ?s) {
+  let t = strchr(s,':');
+  if (t) return strdup(t+1);
+  else return NULL;
+}
+
+/* Rename symbols in a grammar by adding prefix ns.
+   Only bound variables are renamed, free variables
+   are unchanged. */
+grammar_t namespace_grammar(const char ?ns, grammar_t g) {
+  let nsprefix = strconcat(ns,":");
+  renaming_t t = Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr);
+  for (let x = g; x; x = x->tl) {
+    let &$(n,_,_) = x->hd;
+    if (!is_namespaced(n)) {
+      Hashtable::insert(t, new n, new (const char ?) strconcat(nsprefix,n));
+    }
+  }
+  return rename_grammar(g,t);
+}
+
+/* Remove namespaces from a grammar.  Example:
+
+     N.foo = 'a'
+     M.bar = N.foo
+
+  becomes
+
+     foo = 'a'
+     bar = foo
+
+*/
+grammar_t unnamespace_grammar(grammar_t g) {
+  /* See whether removing a namespace will cause conflicts, e.g.,
+       foo = bar   ; (1)
+       N:foo = 'a' ; removing N would create conflict with foo (1)
+       N:bar = 'a' ; removing N would conflict with free var bar (1)
+       N:baz = 'a' ; removing N would conflict with removing M on M:baz
+       M:baz = 'a' ; removing M would conflict with removing N on N:baz
+  */
+  let avoid = freevars(g); // don't rename to these
+  let targets = EMPTYSET;  // renaming could create these
+  for (let x = g; x; x = x->tl) {
+    let &$(n,_,_) = x->hd;
+    avoid = Set::insert(avoid,new n);
+    let n2 = strip_namespace(n);
+    if (!n2) continue;
+    let n2ptr = new n2;
+    if (Set::member(targets,n2ptr))
+      avoid = Set::insert(avoid,n2ptr); // the N:baz, M:baz case -- avoid baz
+    else
+      targets = Set::insert(targets,n2ptr);
+  }
+  renaming_t t = Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr);
+  for (let x = g; x; x = x->tl) {
+    let &$(n,_,_) = x->hd;
+    let n2 = strip_namespace(n);
+    if (!n2) continue;
+    let n2ptr = new n2;
+    if (!Set::member(avoid,n2ptr))
+      Hashtable::insert(t, new n, n2ptr);
+  }
+  return rename_grammar(g,t);
+}

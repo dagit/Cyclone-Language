@@ -26,7 +26,7 @@
 
 // Note: Okasaki's dictionaries may be the wrong thing here because
 //       we're doing a lot of intersections.  I don't know what's better,
-//       but we do have all the dictionarys' domains known in advance, so 
+//       but we do have all the dictionarys' domains known in advance, so
 //       there probably is something better.
 
 // A cute hack to avoid defining the abstract syntax twice.
@@ -38,8 +38,8 @@
 
 namespace CfFlowInfo {
 
-bool anal_error;
-void aerr(Position::seg_t, string_t, ... inject parg_t)
+extern bool anal_error;
+extern void aerr(Position::seg_t, string_t, ... inject parg_t)
   __attribute__((format(printf,2,3)));
 
 // Do not ever mutate any data structures built from these -- they share a lot!
@@ -59,7 +59,7 @@ typedef datatype PathCon @ pathcon_t;
 typedef List::list_t<pathcon_t> path_t;
 
 EXTERN_CFFLOW struct Place {
-  root_t root; 
+  root_t root;
   path_t path;
   //the "path" of projections off the root -- these correspond to
   //either to dereferences (Star) or tuple offsets or field names (Dot
@@ -71,7 +71,7 @@ EXTERN_CFFLOW struct Place {
 };
 typedef struct Place @ place_t;
 
-EXTERN_CFFLOW enum InitLevel { 
+EXTERN_CFFLOW enum InitLevel {
   NoneIL, // may not be initialized
   AllIL   // initialized, and everything it points to is initialized
 };
@@ -79,7 +79,7 @@ typedef enum InitLevel initlevel_t;
 
 //////////////////////////////////////////////////////////////////////
 
-@extensible datatype Absyn::AbsynAnnot { 
+@extensible datatype Absyn::AbsynAnnot {
   EXTERN_CFFLOW IsZero;
   EXTERN_CFFLOW NotZero(Relations::relns_t);
   EXTERN_CFFLOW UnknownZ(Relations::relns_t);
@@ -117,7 +117,7 @@ EXTERN_CFFLOW datatype AbsRVal {
   Consumed(Absyn::exp_t consumer, int iteration, absRval_t oldvalue, bool local_alias);
   //the local_alias field is used for updating tryflows in the case where the
   //`U/`RC pointer is consumed by using an alias<`r> pattern. In this case, we
-  //do not want to treat the `U ptr as consumed in the catch block, nor in the try's 
+  //do not want to treat the `U ptr as consumed in the catch block, nor in the try's
   //continuation
   NamedLocation(Absyn::vardecl_t name, absRval_t actvalue);
   // A NamedLocation is simply a name for a location.  This is used to
@@ -201,8 +201,8 @@ extern bool debug_msgs;
 extern flowdict_t escape_deref(flow_env_t, flowdict_t, absRval_t);
 extern flowdict_t assign_place(flow_env_t, Position::seg_t, flowdict_t,
 			       place_t, absRval_t);
-extern flow_t join_tryflow(flow_env_t,flow_t,flow_t); 
-extern flow_t join_flow(flow_env_t,flow_t,flow_t); 
+extern flow_t join_tryflow(flow_env_t,flow_t,flow_t);
+extern flow_t join_flow(flow_env_t,flow_t,flow_t);
 extern $(flow_t,absRval_t) join_flow_and_rval(flow_env_t,
 					      $(flow_t,absRval_t),
 					      $(flow_t,absRval_t));

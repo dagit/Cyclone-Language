@@ -353,8 +353,6 @@ extern struct _fat_ptr Cyc_aprintf(struct _fat_ptr,struct _fat_ptr);
 extern int Cyc_fprintf(struct Cyc___cycFILE*,struct _fat_ptr,struct _fat_ptr);
 # 125 "tcutil.h"
 int Cyc_Tcutil_typecmp(void*,void*);
-# 41 "cf_flowinfo.h"
-int Cyc_CfFlowInfo_anal_error;
 # 7 "ap.h"
 extern struct Cyc_AP_T*Cyc_AP_zero;
 # 13

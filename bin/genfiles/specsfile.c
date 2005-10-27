@@ -382,12 +382,12 @@ extern int Cyc_Arg_current;
 # 71
 extern void Cyc_Arg_parse(struct Cyc_List_List*,void(*)(struct _fat_ptr),int(*)(struct _fat_ptr),struct _fat_ptr,struct _fat_ptr);
 # 29 "specsfile.h"
-struct _fat_ptr Cyc_Specsfile_target_arch;
+extern struct _fat_ptr Cyc_Specsfile_target_arch;
 # 31
-struct Cyc_List_List*Cyc_Specsfile_cyclone_exec_path;
+extern struct Cyc_List_List*Cyc_Specsfile_cyclone_exec_path;
 # 37
-struct Cyc_List_List*Cyc_Specsfile_cyclone_arch_path;
-struct _fat_ptr Cyc_Specsfile_def_lib_path;
+extern struct Cyc_List_List*Cyc_Specsfile_cyclone_arch_path;
+extern struct _fat_ptr Cyc_Specsfile_def_lib_path;
 # 31 "specsfile.cyc"
 extern char*Cdef_lib_path;
 extern char*Carch;
