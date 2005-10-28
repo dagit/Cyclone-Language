@@ -410,7 +410,7 @@ void*Cyc_Tcutil_rsubstitute(struct _RegionHandle*,struct Cyc_List_List*,void*);
 struct Cyc_Absyn_Exp*Cyc_Tcutil_rsubsexp(struct _RegionHandle*,struct Cyc_List_List*,struct Cyc_Absyn_Exp*);
 # 192
 int Cyc_Tcutil_is_noalias_pointer(struct Cyc_List_List*,void*,int);
-# 247
+# 250
 int Cyc_Tcutil_force_type2bool(int,void*);
 # 30 "kinds.h"
 extern struct Cyc_Absyn_Kind Cyc_Kinds_bk;

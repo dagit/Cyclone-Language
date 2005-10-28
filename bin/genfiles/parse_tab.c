@@ -609,9 +609,9 @@ int Cyc_Tcutil_is_array_type(void*);
 void*Cyc_Tcutil_copy_type(void*);
 # 212
 struct Cyc_Absyn_Tvar*Cyc_Tcutil_new_tvar(void*);
-# 240
+# 243
 void*Cyc_Tcutil_promote_array(void*,void*,void*,int);
-# 250
+# 253
 void*Cyc_Tcutil_any_bool(struct Cyc_List_List*);
 # 29 "attributes.h"
 extern struct Cyc_Absyn_Const_att_Absyn_Attribute_struct Cyc_Atts_Const_att_val;

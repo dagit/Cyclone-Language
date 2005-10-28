@@ -442,15 +442,15 @@ void Cyc_Tcutil_check_unique_tvars(unsigned,struct Cyc_List_List*);
 int Cyc_Tcutil_is_noalias_pointer_or_aggr(struct Cyc_List_List*,void*);
 # 217
 void Cyc_Tcutil_add_tvar_identities(struct Cyc_List_List*);
-# 222
+# 223
 int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*);
-# 226
+# 229
 int Cyc_Tcutil_extract_const_from_typedef(unsigned,int,void*);
-# 243
+# 246
 int Cyc_Tcutil_zeroable_type(void*);
-# 250
+# 253
 void*Cyc_Tcutil_any_bool(struct Cyc_List_List*);struct _tuple12{struct Cyc_Absyn_Tvar*f0;int f1;};
-# 268
+# 271
 struct _tuple12*Cyc_Tcutil_tvar_bool_pair(int,struct Cyc_Absyn_Tvar*);
 # 29 "kinds.h"
 extern struct Cyc_Absyn_Kind Cyc_Kinds_ak;

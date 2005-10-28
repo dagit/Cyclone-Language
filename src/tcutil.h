@@ -219,7 +219,10 @@ void add_tvar_identities(list_t<tvar_t>);
 bool is_temp_tvar(tvar_t);
 
 // returns true iff e is an expression that can be evaluated at compile time
+// by C code.
 bool is_const_exp(exp_t);
+// same as above but supports Cyclone's valueof(-)
+bool is_pure_exp(exp_t);
 
 // If t is a typedef, returns true if the typedef is const, and warns
 // if the flag declared_const is true.  Otherwise returns declared_const.

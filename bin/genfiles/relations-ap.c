@@ -394,9 +394,9 @@ struct Cyc_Absyn_Exp*Cyc_Tcutil_get_bounds_exp(void*,void*);
 struct Cyc_Absyn_Exp*Cyc_Tcutil_get_bounds_exp(void*,void*);
 # 212
 struct Cyc_Absyn_Tvar*Cyc_Tcutil_new_tvar(void*);
-# 222
+# 223
 int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*);
-# 233
+# 236
 struct Cyc_Absyn_Vardecl*Cyc_Tcutil_nonesc_vardecl(void*);
 # 33 "kinds.h"
 extern struct Cyc_Absyn_Kind Cyc_Kinds_ik;

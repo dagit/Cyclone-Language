@@ -3564,7 +3564,7 @@ void check_nonzero_bound(seg_t loc, ptrbound_t b) {
 // RENAME
 // Actually need to distinguish two kinds of constant expressions, as in ANSI C
 // This is now sort of for top-level expressions
-static bool cnst_exp(bool var_okay, exp_t e) {
+static bool cnst_exp(bool var_okay, bool valueof_okay, exp_t e) {
   let rec = cnst_exp;
   switch (e->r) {
   case &Const_e(_):
@@ -3597,42 +3597,48 @@ static bool cnst_exp(bool var_okay, exp_t e) {
     default: return var_okay;
     }
   case &Conditional_e(e1,e2,e3): 
-    return rec(false,e1) && rec(false,e2) && rec(false,e3);
-  case &SeqExp_e(e1,e2): return rec(false,e1) && rec(false,e2);
+    return rec(false,valueof_okay,e1) && rec(false,valueof_okay,e2) && 
+      rec(false,valueof_okay,e3);
+  case &SeqExp_e(e1,e2): 
+    return rec(false,valueof_okay,e1) && rec(false,valueof_okay,e2);
   case &Extension_e(e2):     fallthru(e2);
   case &NoInstantiate_e(e2): fallthru(e2);
   case &Instantiate_e(e2,_): fallthru(e2);
   case &Cast_e(_,e2,_,_):
     // FIX: We cannot allow casts w/ run-time effect b/c C will complain!
-    return cnst_exp(var_okay,e2);
-  case &Address_e(e2): return rec(true,e2);
-  case &Comprehension_e(_,e1,e2,_): return rec(false,e1) && rec(false,e2);
-  case &ComprehensionNoinit_e(e,_,_): return rec(false,e);
+    return cnst_exp(var_okay,valueof_okay,e2);
+  case &Address_e(e2): return rec(true,valueof_okay,e2);
+  case &Comprehension_e(_,e1,e2,_): 
+    return rec(false,valueof_okay,e1) && rec(false,valueof_okay,e2);
+  case &ComprehensionNoinit_e(e,_,_): return rec(false,valueof_okay,e);
   case &Array_e(des):        fallthru(des);
   case &AnonStruct_e(_,_,des): fallthru(des);
   case &Aggregate_e(_,_,des,_):
     for (; des != NULL; des = des->tl)
-      if (!cnst_exp(false,(*des->hd)[1]))
+      if (!cnst_exp(false,valueof_okay,(*des->hd)[1]))
         return false;
     return true;
   case &Primop_e(_,es): fallthru(es);
   case &Datatype_e(es,_,_):
     for (; es != NULL; es = es->tl)
-      if (!cnst_exp(false,es->hd))
+      if (!cnst_exp(false,valueof_okay,es->hd))
         return false;
     return true;
+  case &Valueof_e(...): return valueof_okay;
   case &StmtExp_e(s): // special-case b/c of gcc 3.4 bug we are avoiding
     switch(s->r) {
-    case &Exp_s(e): return cnst_exp(var_okay,e);
+    case &Exp_s(e): return cnst_exp(var_okay,valueof_okay,e);
     default: return false;
     }
   default: return false;
   }
 }
 bool is_const_exp(exp_t e) {
-  return cnst_exp(false,e);
+  return cnst_exp(false,false,e);
 }
-
+bool is_pure_exp(exp_t e) {
+  return cnst_exp(false,true,e);
+}
 static bool fields_zeroable(list_t<tvar_t>,list_t<type_t>,list_t<aggrfield_t>);
 bool zeroable_type(type_t t) {
   switch (compress(t)) {

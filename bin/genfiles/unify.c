@@ -401,11 +401,11 @@ void*Cyc_Tcutil_rsubstitute(struct _RegionHandle*,struct Cyc_List_List*,void*);
 int Cyc_Tcutil_subset_effect(int,void*,void*);
 # 209
 void*Cyc_Tcutil_normalize_effect(void*);
-# 258
+# 261
 int Cyc_Tcutil_fast_tvar_cmp(struct Cyc_Absyn_Tvar*,struct Cyc_Absyn_Tvar*);
-# 263
+# 266
 int Cyc_Tcutil_tycon_cmp(void*,void*);
-# 269
+# 272
 int Cyc_Tcutil_cmp_effect_constraints(struct Cyc_List_List*,struct Cyc_List_List*);
 # 30 "kinds.h"
 extern struct Cyc_Absyn_Kind Cyc_Kinds_bk;

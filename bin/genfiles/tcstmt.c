@@ -461,13 +461,13 @@ void*Cyc_Tcutil_fndecl2type(struct Cyc_Absyn_Fndecl*);struct _tuple13{struct Cyc
 struct _tuple13*Cyc_Tcutil_make_inst_var(struct Cyc_List_List*,struct Cyc_Absyn_Tvar*);
 # 214
 int Cyc_Tcutil_new_tvar_id (void);
-# 222
+# 223
 int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*);
-# 226
+# 229
 int Cyc_Tcutil_extract_const_from_typedef(unsigned,int,void*);
-# 236
+# 239
 struct Cyc_List_List*Cyc_Tcutil_filter_nulls(struct Cyc_List_List*);
-# 267
+# 270
 int Cyc_Tcutil_is_aliasable_qual(void*);
 # 30 "kinds.h"
 extern struct Cyc_Absyn_Kind Cyc_Kinds_bk;

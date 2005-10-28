@@ -507,13 +507,13 @@ int Cyc_Tcutil_is_noalias_path(struct Cyc_List_List*,struct Cyc_Absyn_Exp*);
 int Cyc_Tcutil_is_noalias_pointer_or_aggr(struct Cyc_List_List*,void*);
 # 212
 struct Cyc_Absyn_Tvar*Cyc_Tcutil_new_tvar(void*);
-# 222
+# 223
 int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*);
-# 240
+# 243
 void*Cyc_Tcutil_promote_array(void*,void*,void*,int);
-# 247
-int Cyc_Tcutil_force_type2bool(int,void*);
 # 250
+int Cyc_Tcutil_force_type2bool(int,void*);
+# 253
 void*Cyc_Tcutil_any_bool(struct Cyc_List_List*);
 # 29 "kinds.h"
 extern struct Cyc_Absyn_Kind Cyc_Kinds_ak;

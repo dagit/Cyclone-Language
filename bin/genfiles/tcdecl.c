@@ -388,7 +388,7 @@ int Cyc_Unify_unify(void*,void*);
 void*Cyc_Tcutil_substitute(struct Cyc_List_List*,void*);
 # 135
 struct Cyc_List_List*Cyc_Tcutil_rsubst_effconstr(struct _RegionHandle*,struct Cyc_List_List*,struct Cyc_List_List*);
-# 269
+# 272
 int Cyc_Tcutil_cmp_effect_constraints(struct Cyc_List_List*,struct Cyc_List_List*);
 # 90 "kinds.h"
 struct Cyc_Absyn_Kind*Cyc_Kinds_force_kb(void*);

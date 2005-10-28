@@ -631,9 +631,9 @@ struct Cyc_List_List*Cyc_Tcutil_resolve_aggregate_designators(struct _RegionHand
 int Cyc_Tcutil_is_zero_ptr_deref(struct Cyc_Absyn_Exp*,void**,int*,void**);
 # 189
 int Cyc_Tcutil_is_noalias_qual(void*,int);
-# 236
+# 239
 struct Cyc_List_List*Cyc_Tcutil_filter_nulls(struct Cyc_List_List*);
-# 247
+# 250
 int Cyc_Tcutil_force_type2bool(int,void*);
 # 29 "kinds.h"
 extern struct Cyc_Absyn_Kind Cyc_Kinds_ak;

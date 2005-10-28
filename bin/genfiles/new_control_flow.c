@@ -469,11 +469,11 @@ int Cyc_Tcutil_is_zero_ptr_deref(struct Cyc_Absyn_Exp*,void**,int*,void**);
 int Cyc_Tcutil_is_noalias_pointer(struct Cyc_List_List*,void*,int);
 # 202
 int Cyc_Tcutil_is_noalias_pointer_or_aggr(struct Cyc_List_List*,void*);
-# 233
-struct Cyc_Absyn_Vardecl*Cyc_Tcutil_nonesc_vardecl(void*);
 # 236
+struct Cyc_Absyn_Vardecl*Cyc_Tcutil_nonesc_vardecl(void*);
+# 239
 struct Cyc_List_List*Cyc_Tcutil_filter_nulls(struct Cyc_List_List*);
-# 264
+# 267
 struct Cyc_List_List*Cyc_Tcutil_get_aquals_bounds(struct Cyc_Absyn_Fndecl*);
 # 52 "attributes.h"
 int Cyc_Atts_is_noreturn_fn_type(void*);struct Cyc_Dict_T;struct Cyc_Dict_Dict{int(*rel)(void*,void*);struct _RegionHandle*r;const struct Cyc_Dict_T*t;};extern char Cyc_Dict_Absent[7U];struct Cyc_Dict_Absent_exn_struct{char*tag;};

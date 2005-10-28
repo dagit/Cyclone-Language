@@ -456,25 +456,25 @@ void*Cyc_Tcutil_normalize_effect(void*);
 struct Cyc_Absyn_Tvar*Cyc_Tcutil_new_tvar(void*);
 # 214
 int Cyc_Tcutil_new_tvar_id (void);
-# 222
+# 223
 int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*);
-# 226
-int Cyc_Tcutil_extract_const_from_typedef(unsigned,int,void*);
 # 229
+int Cyc_Tcutil_extract_const_from_typedef(unsigned,int,void*);
+# 232
 void Cyc_Tcutil_check_no_qual(unsigned,void*);
-# 240
+# 243
 void*Cyc_Tcutil_promote_array(void*,void*,void*,int);
-# 247
+# 250
 int Cyc_Tcutil_force_type2bool(int,void*);
-# 255
-int Cyc_Tcutil_admits_zero(void*);
 # 258
+int Cyc_Tcutil_admits_zero(void*);
+# 261
 int Cyc_Tcutil_fast_tvar_cmp(struct Cyc_Absyn_Tvar*,struct Cyc_Absyn_Tvar*);
-# 265
-void*Cyc_Tcutil_lookup_aquals(struct Cyc_List_List*,void*);struct _tuple12{struct Cyc_Absyn_Tvar*f0;int f1;};
 # 268
+void*Cyc_Tcutil_lookup_aquals(struct Cyc_List_List*,void*);struct _tuple12{struct Cyc_Absyn_Tvar*f0;int f1;};
+# 271
 struct _tuple12*Cyc_Tcutil_tvar_bool_pair(int,struct Cyc_Absyn_Tvar*);
-# 270
+# 273
 int Cyc_Tcutil_type_in_effect(int,void*,void*);
 # 29 "kinds.h"
 extern struct Cyc_Absyn_Kind Cyc_Kinds_ak;

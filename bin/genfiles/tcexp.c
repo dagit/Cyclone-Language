@@ -597,21 +597,21 @@ int Cyc_Tcutil_is_noalias_path(struct Cyc_List_List*,struct Cyc_Absyn_Exp*);
 int Cyc_Tcutil_is_noalias_pointer_or_aggr(struct Cyc_List_List*,void*);struct _tuple15{int f0;void*f1;};
 # 206
 struct _tuple15 Cyc_Tcutil_addressof_props(struct Cyc_Absyn_Exp*);
-# 222
+# 223
 int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*);
-# 229
+# 232
 void Cyc_Tcutil_check_no_qual(unsigned,void*);
-# 240
-void*Cyc_Tcutil_promote_array(void*,void*,void*,int);
 # 243
+void*Cyc_Tcutil_promote_array(void*,void*,void*,int);
+# 246
 int Cyc_Tcutil_zeroable_type(void*);
-# 247
-int Cyc_Tcutil_force_type2bool(int,void*);
 # 250
+int Cyc_Tcutil_force_type2bool(int,void*);
+# 253
 void*Cyc_Tcutil_any_bool(struct Cyc_List_List*);
-# 252
+# 255
 void*Cyc_Tcutil_any_bounds(struct Cyc_List_List*);
-# 266
+# 269
 void*Cyc_Tcutil_eval_aquals_of(struct Cyc_List_List*,void*);
 # 29 "kinds.h"
 extern struct Cyc_Absyn_Kind Cyc_Kinds_ak;

@@ -342,10 +342,11 @@ static void add_type_info(graph_t @g, term_t term) {
   if (topt != NULL) {
     type_t t = (type_t)topt;
     let eopt = Tcutil::get_type_bound(t);
-    if (eopt != NULL && Tcutil::is_const_exp((exp_t)eopt)) {
+    if (eopt != NULL && Tcutil::is_pure_exp((exp_t)eopt)) {
       term_t t1 = numelts_term(term);
       // sigh -- must get rid of a cast to int/long
       exp_t e = strip_cast((exp_t)eopt);
+      // FIX? should vcgen e...
       term_t t2 = cnst((exp_t)e);
       // FIX -- if the term is a * type, then we need to say something
       // like ((term == 0) ==> numelts(term) == 0) && 
@@ -362,9 +363,13 @@ static void add_type_info(graph_t @g, term_t term) {
       break;
     case &Absyn::AppType(&Absyn::TagCon,&List{v,_}):
       switch (Absyn::compress(v)) {
-      case &Absyn::ValueofType(e): add_eq(g,term,cnst(e)); break;
+      case &Absyn::ValueofType(e): 
+        let c = cnst(e);
+        add_eq(g,term,c); 
+        break;
       case v2: 
-        add_eq(g,term,cnst(Absyn::valueof_exp(v2,0)));
+        let c = cnst(Absyn::valueof_exp(v2,0));
+        add_eq(g,term,c);
         break;
       }
       break;

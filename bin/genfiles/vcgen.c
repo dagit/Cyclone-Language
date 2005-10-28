@@ -532,11 +532,11 @@ struct Cyc_Absyn_Exp*Cyc_Tcutil_get_bounds_exp(void*,void*);
 struct Cyc_Absyn_Exp*Cyc_Tcutil_get_type_bound(void*);
 # 81
 struct Cyc_Absyn_Exp*Cyc_Tcutil_get_bounds_exp(void*,void*);
-# 222
+# 223
 int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*);
-# 236
+# 239
 struct Cyc_List_List*Cyc_Tcutil_filter_nulls(struct Cyc_List_List*);
-# 247
+# 250
 int Cyc_Tcutil_force_type2bool(int,void*);struct _tuple16{unsigned f0;int f1;};
 # 28 "evexp.h"
 extern struct _tuple16 Cyc_Evexp_eval_const_uint_exp(struct Cyc_Absyn_Exp*);
