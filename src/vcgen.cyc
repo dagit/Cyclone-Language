@@ -1176,7 +1176,11 @@ static $(term_t,assn_map_t) vcgen_lexp(env_t env, exp_t e, assn_map_t amin){
   case &Absyn::Var_e(&Absyn::Local_b(vd)): 
     // a regular (global/local) variable, check it's not array type
     switch (Absyn::compress(vd->type)) {
-    case &Absyn::ArrayType(_): Warn::impos("array type var is not a valid l-value");
+    case &Absyn::ArrayType(ai): 
+      // when it's an array type, we treat it as if it were x[0]
+      let p = Tcutil::promote_array(vd->type,Absyn::heap_rgn_type,
+                                    Absyn::al_qual_type,false);
+      return $(offseti(myaddr(env,vd),zero(),p),amin);
     default: return $(myaddr(env,vd),amin);
     }
   case &Absyn::Var_e(&Absyn::Param_b(vd)): fallthru(vd);
