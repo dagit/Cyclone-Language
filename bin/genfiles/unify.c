@@ -184,6 +184,7 @@ void* _zero_arr_inplace_plus_post_other_fn(unsigned,void**,int,const char*,unsig
 #ifdef NO_CYC_BOUNDS_CHECKS
 #define _check_fat_subscript(arr,elt_sz,index) ((arr).curr + (elt_sz) * (index))
 #define _untag_fat_ptr(arr,elt_sz,num_elts) ((arr).curr)
+#define _untag_fat_ptr_check_bound(arr,elt_sz,num_elts) ((arr).curr)
 #define _check_fat_at_base(arr) (arr)
 #else
 #define _check_fat_subscript(arr,elt_sz,index) ({ \
@@ -193,7 +194,8 @@ void* _zero_arr_inplace_plus_post_other_fn(unsigned,void**,int,const char*,unsig
   if (_cus_ans < _cus_arr.base || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
-#define _untag_fat_ptr(arr,elt_sz,num_elts) ({ \
+#define _untag_fat_ptr(arr,elt_sz,num_elts) ((arr).curr)
+#define _untag_fat_ptr_check_bound(arr,elt_sz,num_elts) ({ \
   struct _fat_ptr _arr = (arr); \
   unsigned char *_curr = _arr.curr; \
   if ((_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one) &&\
@@ -811,7 +813,7 @@ Cyc_Unify_fail_because("second function type has too few type variables");{
 void*kb1=((struct Cyc_Absyn_Tvar*)tvs1->hd)->kind;
 void*kb2=((struct Cyc_Absyn_Tvar*)tvs2->hd)->kind;
 if(!Cyc_Unify_unify_kindbound(kb1,kb2))
-Cyc_Unify_fail_because((const char*)_untag_fat_ptr(({struct Cyc_String_pa_PrintArg_struct _Tmp2A=({struct Cyc_String_pa_PrintArg_struct _Tmp2B;_Tmp2B.tag=0,({struct _fat_ptr _Tmp2C=(struct _fat_ptr)Cyc_Absynpp_tvar2string((struct Cyc_Absyn_Tvar*)tvs1->hd);_Tmp2B.f1=_Tmp2C;});_Tmp2B;});struct Cyc_String_pa_PrintArg_struct _Tmp2B=({struct Cyc_String_pa_PrintArg_struct _Tmp2C;_Tmp2C.tag=0,({struct _fat_ptr _Tmp2D=(struct _fat_ptr)Cyc_Kinds_kind2string(Cyc_Kinds_tvar_kind((struct Cyc_Absyn_Tvar*)tvs1->hd,& Cyc_Kinds_bk));_Tmp2C.f1=_Tmp2D;});_Tmp2C;});struct Cyc_String_pa_PrintArg_struct _Tmp2C=({struct Cyc_String_pa_PrintArg_struct _Tmp2D;_Tmp2D.tag=0,({struct _fat_ptr _Tmp2E=(struct _fat_ptr)Cyc_Kinds_kind2string(Cyc_Kinds_tvar_kind((struct Cyc_Absyn_Tvar*)tvs2->hd,& Cyc_Kinds_bk));_Tmp2D.f1=_Tmp2E;});_Tmp2D;});void*_Tmp2D[3];_Tmp2D[0]=& _Tmp2A,_Tmp2D[1]=& _Tmp2B,_Tmp2D[2]=& _Tmp2C;Cyc_aprintf(_tag_fat("type var %s has different kinds %s and %s",sizeof(char),42U),_tag_fat(_Tmp2D,sizeof(void*),3));}),sizeof(char),1U));
+Cyc_Unify_fail_because((const char*)_untag_fat_ptr_check_bound(({struct Cyc_String_pa_PrintArg_struct _Tmp2A=({struct Cyc_String_pa_PrintArg_struct _Tmp2B;_Tmp2B.tag=0,({struct _fat_ptr _Tmp2C=(struct _fat_ptr)Cyc_Absynpp_tvar2string((struct Cyc_Absyn_Tvar*)tvs1->hd);_Tmp2B.f1=_Tmp2C;});_Tmp2B;});struct Cyc_String_pa_PrintArg_struct _Tmp2B=({struct Cyc_String_pa_PrintArg_struct _Tmp2C;_Tmp2C.tag=0,({struct _fat_ptr _Tmp2D=(struct _fat_ptr)Cyc_Kinds_kind2string(Cyc_Kinds_tvar_kind((struct Cyc_Absyn_Tvar*)tvs1->hd,& Cyc_Kinds_bk));_Tmp2C.f1=_Tmp2D;});_Tmp2C;});struct Cyc_String_pa_PrintArg_struct _Tmp2C=({struct Cyc_String_pa_PrintArg_struct _Tmp2D;_Tmp2D.tag=0,({struct _fat_ptr _Tmp2E=(struct _fat_ptr)Cyc_Kinds_kind2string(Cyc_Kinds_tvar_kind((struct Cyc_Absyn_Tvar*)tvs2->hd,& Cyc_Kinds_bk));_Tmp2D.f1=_Tmp2E;});_Tmp2D;});void*_Tmp2D[3];_Tmp2D[0]=& _Tmp2A,_Tmp2D[1]=& _Tmp2B,_Tmp2D[2]=& _Tmp2C;Cyc_aprintf(_tag_fat("type var %s has different kinds %s and %s",sizeof(char),42U),_tag_fat(_Tmp2D,sizeof(void*),3));}),sizeof(char),1U));
 # 490
 inst=({struct Cyc_List_List*_Tmp2A=_region_malloc(rgn,0U,sizeof(struct Cyc_List_List));({struct _tuple13*_Tmp2B=({struct _tuple13*_Tmp2C=_region_malloc(rgn,0U,sizeof(struct _tuple13));_Tmp2C->f0=(struct Cyc_Absyn_Tvar*)tvs2->hd,({void*_Tmp2D=Cyc_Absyn_var_type((struct Cyc_Absyn_Tvar*)tvs1->hd);_Tmp2C->f1=_Tmp2D;});_Tmp2C;});_Tmp2A->hd=_Tmp2B;}),_Tmp2A->tl=inst;_Tmp2A;});
 tvs1=tvs1->tl;
@@ -865,7 +867,7 @@ bad_effect=1;else{
 bad_effect=!Cyc_Unify_unify_effect(eff1,eff2);}}
 Cyc_Unify_ts_failure=({struct _tuple11 _Tmp29;_Tmp29.f0=t1,_Tmp29.f1=t2;_Tmp29;});
 if(bad_effect)
-Cyc_Unify_fail_because((const char*)_untag_fat_ptr(({struct Cyc_String_pa_PrintArg_struct _Tmp29=({struct Cyc_String_pa_PrintArg_struct _Tmp2A;_Tmp2A.tag=0,({struct _fat_ptr _Tmp2B=(struct _fat_ptr)((unsigned)eff1?Cyc_Absynpp_typ2string(eff1):(struct _fat_ptr)_tag_fat("-",sizeof(char),2U));_Tmp2A.f1=_Tmp2B;});_Tmp2A;});struct Cyc_String_pa_PrintArg_struct _Tmp2A=({struct Cyc_String_pa_PrintArg_struct _Tmp2B;_Tmp2B.tag=0,({struct _fat_ptr _Tmp2C=(struct _fat_ptr)((unsigned)eff2?Cyc_Absynpp_typ2string(eff2):(struct _fat_ptr)_tag_fat("-",sizeof(char),2U));_Tmp2B.f1=_Tmp2C;});_Tmp2B;});void*_Tmp2B[2];_Tmp2B[0]=& _Tmp29,_Tmp2B[1]=& _Tmp2A;Cyc_aprintf(_tag_fat("function effects (%s,%s) do not match",sizeof(char),38U),_tag_fat(_Tmp2B,sizeof(void*),2));}),sizeof(char),1U));
+Cyc_Unify_fail_because((const char*)_untag_fat_ptr_check_bound(({struct Cyc_String_pa_PrintArg_struct _Tmp29=({struct Cyc_String_pa_PrintArg_struct _Tmp2A;_Tmp2A.tag=0,({struct _fat_ptr _Tmp2B=(struct _fat_ptr)((unsigned)eff1?Cyc_Absynpp_typ2string(eff1):(struct _fat_ptr)_tag_fat("-",sizeof(char),2U));_Tmp2A.f1=_Tmp2B;});_Tmp2A;});struct Cyc_String_pa_PrintArg_struct _Tmp2A=({struct Cyc_String_pa_PrintArg_struct _Tmp2B;_Tmp2B.tag=0,({struct _fat_ptr _Tmp2C=(struct _fat_ptr)((unsigned)eff2?Cyc_Absynpp_typ2string(eff2):(struct _fat_ptr)_tag_fat("-",sizeof(char),2U));_Tmp2B.f1=_Tmp2C;});_Tmp2B;});void*_Tmp2B[2];_Tmp2B[0]=& _Tmp29,_Tmp2B[1]=& _Tmp2A;Cyc_aprintf(_tag_fat("function effects (%s,%s) do not match",sizeof(char),38U),_tag_fat(_Tmp2B,sizeof(void*),2));}),sizeof(char),1U));
 # 546
 if(!Cyc_Atts_equiv_fn_atts(atts2,atts1))
 Cyc_Unify_fail_because("function types have different attributes");

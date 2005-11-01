@@ -252,6 +252,9 @@ static assn_map_t vcgen_local_decl(env_t, decl_t, assn_map_t);
 #endif
 
 #ifdef VCGEN_DEBUG
+
+// vcgen_debug_xxx is used to collect all
+// post-condition assns
 static struct Hashtable::Table<assn_t,assn_t> *vcgen_debug_assn_set=NULL;
 
 static int assn_easy_cmp(assn_t a1, assn_t a2){
@@ -969,6 +972,19 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
 	let null_check = (env->pure_exp || n2) ? 
           (assn_t)&true_assn : neq(zero(),t);
 	let $(b,_) = vcgen_debug_rexp(env, (exp_t)b2, am);
+        // When we have t?ZEROTERM and are casting to
+        // t*{e2} or t@{e2} *without* the ZEROTERM, then we
+        // can't allow e2 to be the actual size of the array --
+        // it needs to be one less to ensure that you can't
+        // overwrite the trailing 0.  We achieve this by
+        // incrementing e2 by one.  That is if x has type t?Z,
+        // and we're casting it to t@{2}, then we'd better check
+        // that the size is at least 2+1=3.
+	let zt1 = Tcutil::force_type2bool(false,p1.ptr_atts.zero_term);
+	let zt2 = Tcutil::force_type2bool(false,p2.ptr_atts.zero_term);
+	if (zt1 && !zt2)
+          b = plus(b,one(),get_term_type(b));
+
 	let bcheck = ulte(b,numelts_term(t));
 	let exp_checks = new ExpChecks{.ctxt=am,.bounds_check=bcheck,
 				       .null_check=null_check};
@@ -1838,16 +1854,21 @@ assn_map_t clause2assn(exp_t e){
   let res =  vcgen_debug_test(env,e,am).f0;
   return res;
 }
+
 #ifdef VCGEN_DEBUG
+// helper function to calculate size of an expression's AST
 static bool visit_size_f1(int @ counter, exp_t e){
   (*counter)++;
   return true;
 }
 
+// helper function to calculate size of a statement's AST
 static bool visit_size_f2(int @ counter, stmt_t e){
   (*counter)++;
   return true;
 }
+
+// use visit_stmt to calculate size of function body's AST
 static int fn_body_size(stmt_t body) {
   int size = 0;
   Absyn::visit_stmt(visit_size_f1,visit_size_f2,&size,body);
@@ -1859,6 +1880,7 @@ typedef struct SetPair {
   Hashtable::table_t<term_t,term_t> term_set;
 } @setpair_t;
 
+// (recursively) collecting assertions used in VCs
 static void closure_assn_set(assn_t a, assn_t dummy, setpair_t sp) {
   if (Hashtable::lookup_opt(sp->assn_set,a)!=NULL) return;
   Hashtable::insert(sp->assn_set,a,a);
@@ -1878,6 +1900,7 @@ static void closure_assn_set(assn_t a, assn_t dummy, setpair_t sp) {
   return;
 }
 
+// (recursively) collecting terms used in VCs
 static void closure_term_set(term_t t, term_t dummy,
 			     Hashtable::table_t<term_t,term_t> term_set) {
   if (Hashtable::lookup_opt(term_set,t)!=NULL) return;
@@ -1914,15 +1937,19 @@ static void closure_term_set(term_t t, term_t dummy,
   return;
 }
 
+// helper function to count size of a hashtable
 static void f_sizeof_hashtable(`a key, `b value, int @ counter) {
   (*counter)++;
 }
 
+// calculating size of a hashtable
 static int sizeof_hashtable(Hashtable::table_t<`a,`b> t){
   int size = 0;
   Hashtable::iter_c(f_sizeof_hashtable,t,&size);
   return size;
 }
+
+// calculating number of terms and assertions used in VCs
 static int sizeof_closure_vcgen_debug_assn_set() {
   Hashtable::table_t<assn_t,assn_t> assn_set = Hashtable::create(211,assn_easy_cmp,assn_easy_hash);
   Hashtable::table_t<term_t,term_t> term_set1 = Hashtable::create(211,term_easy_cmp,term_easy_hash);
@@ -2001,6 +2028,8 @@ void vcgen_fundecl(Position::seg_t loc, JumpAnalysis::jump_anal_res_t tables, Ab
   }
 
 #ifdef VCGEN_DEBUG
+  // for each function, print out:
+  // fn name : sz of AST : sz of assns used in VCs : sz of assns used in generating VCs
   fprintf(stderr,"%s\t%d\t%d\t%d\n",
 	  Absynpp::qvar2string(fd->name),  // fn name
 	  fn_body_size(fd->body),   // size of AST

@@ -184,6 +184,7 @@ void* _zero_arr_inplace_plus_post_other_fn(unsigned,void**,int,const char*,unsig
 #ifdef NO_CYC_BOUNDS_CHECKS
 #define _check_fat_subscript(arr,elt_sz,index) ((arr).curr + (elt_sz) * (index))
 #define _untag_fat_ptr(arr,elt_sz,num_elts) ((arr).curr)
+#define _untag_fat_ptr_check_bound(arr,elt_sz,num_elts) ((arr).curr)
 #define _check_fat_at_base(arr) (arr)
 #else
 #define _check_fat_subscript(arr,elt_sz,index) ({ \
@@ -193,7 +194,8 @@ void* _zero_arr_inplace_plus_post_other_fn(unsigned,void**,int,const char*,unsig
   if (_cus_ans < _cus_arr.base || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
-#define _untag_fat_ptr(arr,elt_sz,num_elts) ({ \
+#define _untag_fat_ptr(arr,elt_sz,num_elts) ((arr).curr)
+#define _untag_fat_ptr_check_bound(arr,elt_sz,num_elts) ({ \
   struct _fat_ptr _arr = (arr); \
   unsigned char *_curr = _arr.curr; \
   if ((_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one) &&\
@@ -394,8 +396,8 @@ extern unsigned long fread(char*,unsigned long,unsigned long,struct __abstractFI
 static struct Cyc_Core_Failure_exn_struct Cyc___fread_failure={Cyc_Core_Failure,{_TmpG0,_TmpG0,_TmpG0 + 27U}};
 # 106
 unsigned long Cyc_fread(struct _fat_ptr ptr,unsigned long size,unsigned long nmemb,struct Cyc___cycFILE*f){
-if(size * nmemb > _get_fat_size(ptr,sizeof(char)))_throw(& Cyc___fread_failure);
-return fread((char*)_untag_fat_ptr(ptr,sizeof(char),1U),size,nmemb,f->file);}
+if(size * nmemb > _get_fat_size(ptr,sizeof(char)))_throw(& Cyc___fread_failure);{
+char*_Tmp0=(char*)_untag_fat_ptr_check_bound(ptr,sizeof(char),1U);unsigned long _Tmp1=size;unsigned long _Tmp2=nmemb;return fread(_Tmp0,_Tmp1,_Tmp2,f->file);}}
 # 112
 extern unsigned long fwrite(const char*,unsigned long,unsigned long,struct __abstractFILE*);static char _TmpG1[31U]="fwrite called with NULL string";
 # 114
@@ -406,8 +408,8 @@ static struct Cyc_Core_Failure_exn_struct Cyc___fwrite_failure_2={Cyc_Core_Failu
 unsigned long Cyc_fwrite(struct _fat_ptr ptr,unsigned long size,unsigned long nmemb,struct Cyc___cycFILE*f){
 if(!((unsigned)ptr.curr))_throw(& Cyc___fwrite_failure_1);else{
 # 121
-if(size * nmemb > _get_fat_size(ptr,sizeof(char)))_throw(& Cyc___fwrite_failure_2);
-return fwrite((const char*)_untag_fat_ptr(ptr,sizeof(char),1U),size,nmemb,f->file);}}
+if(size * nmemb > _get_fat_size(ptr,sizeof(char)))_throw(& Cyc___fwrite_failure_2);{
+const char*_Tmp0=(const char*)_untag_fat_ptr_check_bound(ptr,sizeof(char),1U);unsigned long _Tmp1=size;unsigned long _Tmp2=nmemb;return fwrite(_Tmp0,_Tmp1,_Tmp2,f->file);}}}
 # 127
 extern int getc(struct __abstractFILE*);
 # 129
@@ -435,7 +437,7 @@ int Cyc_putw(int x,struct Cyc___cycFILE*f){
 return putw(x,f->file);}char Cyc_FileCloseError[15U]="FileCloseError";char Cyc_FileOpenError[14U]="FileOpenError";
 # 166
 struct Cyc___cycFILE*Cyc_file_open(struct _fat_ptr fname,struct _fat_ptr mode){
-struct Cyc___cycFILE*f=({const char*_Tmp0=(const char*)_check_null(_untag_fat_ptr(fname,sizeof(char),1U));Cyc_fopen(_Tmp0,(const char*)_check_null(_untag_fat_ptr(mode,sizeof(char),1U)));});
+struct Cyc___cycFILE*f=({const char*_Tmp0=(const char*)_check_null(_untag_fat_ptr_check_bound(fname,sizeof(char),1U));Cyc_fopen(_Tmp0,(const char*)_check_null(_untag_fat_ptr_check_bound(mode,sizeof(char),1U)));});
 if(f==0){
 struct _fat_ptr fn=({unsigned _Tmp0=_get_fat_size(fname,sizeof(char))+ 1U;_tag_fat(({char*_Tmp1=_cycalloc_atomic(_check_times(_Tmp0,sizeof(char)));({{unsigned _Tmp2=_get_fat_size(fname,sizeof(char));unsigned i;for(i=0;i < _Tmp2;++ i){_Tmp1[i]=((const char*)fname.curr)[(int)i];}_Tmp1[_Tmp2]=0;}0;});_Tmp1;}),sizeof(char),_Tmp0);});
 _throw((void*)({struct Cyc_FileOpenError_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_FileOpenError_exn_struct));_Tmp0->tag=Cyc_FileOpenError,_Tmp0->f1=fn;_Tmp0;}));}
@@ -452,7 +454,7 @@ static struct Cyc_Core_Failure_exn_struct Cyc___getcwd_failure={Cyc_Core_Failure
 # 187
 struct _fat_ptr Cyc_getcwd(struct _fat_ptr buf,unsigned long size){
 if(_get_fat_size(buf,sizeof(char))< size)_throw(& Cyc___getcwd_failure);{
-char*response=getcwd((char*)_untag_fat_ptr(buf,sizeof(char),1U),size);
+char*response=({char*_Tmp0=(char*)_untag_fat_ptr_check_bound(buf,sizeof(char),1U);getcwd(_Tmp0,size);});
 if((unsigned)response)return buf;else{return _tag_fat(0,0,0);}}}
 # 194
 int Cyc_Execinfo_bt (void){

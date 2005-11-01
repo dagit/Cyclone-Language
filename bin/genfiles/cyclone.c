@@ -184,6 +184,7 @@ void* _zero_arr_inplace_plus_post_other_fn(unsigned,void**,int,const char*,unsig
 #ifdef NO_CYC_BOUNDS_CHECKS
 #define _check_fat_subscript(arr,elt_sz,index) ((arr).curr + (elt_sz) * (index))
 #define _untag_fat_ptr(arr,elt_sz,num_elts) ((arr).curr)
+#define _untag_fat_ptr_check_bound(arr,elt_sz,num_elts) ((arr).curr)
 #define _check_fat_at_base(arr) (arr)
 #else
 #define _check_fat_subscript(arr,elt_sz,index) ({ \
@@ -193,7 +194,8 @@ void* _zero_arr_inplace_plus_post_other_fn(unsigned,void**,int,const char*,unsig
   if (_cus_ans < _cus_arr.base || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
-#define _untag_fat_ptr(arr,elt_sz,num_elts) ({ \
+#define _untag_fat_ptr(arr,elt_sz,num_elts) ((arr).curr)
+#define _untag_fat_ptr_check_bound(arr,elt_sz,num_elts) ({ \
   struct _fat_ptr _arr = (arr); \
   unsigned char *_curr = _arr.curr; \
   if ((_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one) &&\
@@ -818,7 +820,7 @@ Cyc_assume_gcc_flag=0;}
 # 376
 static void Cyc_remove_file(struct _fat_ptr s){
 if(!Cyc_save_temps_r)
-remove((const char*)_check_null(_untag_fat_ptr(s,sizeof(char),1U)));}
+remove((const char*)_check_null(_untag_fat_ptr_check_bound(s,sizeof(char),1U)));}
 # 383
 int Cyc_compile_failure=0;
 # 385
@@ -836,7 +838,7 @@ extern void CYCALLOCPROFILE_mark(const char*);
 # 399
 void*Cyc_do_stage(struct _fat_ptr stage_name,struct Cyc_List_List*tds,void*(*f)(void*,struct Cyc_List_List*),void*env,void*onfail){
 # 401
-CYCALLOCPROFILE_mark((const char*)_untag_fat_ptr(stage_name,sizeof(char),1U));{
+CYCALLOCPROFILE_mark((const char*)_untag_fat_ptr_check_bound(stage_name,sizeof(char),1U));{
 struct Cyc_timeval start;struct Cyc_timeval end;
 if(Cyc_Flags_verbose)
 gettimeofday(& start,0);{
@@ -1183,7 +1185,7 @@ struct _fat_ptr cmd=({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_St
 struct _fat_ptr _Tmp5=(struct _fat_ptr)Cyc_sh_escape_string(filename);_Tmp4.f1=_Tmp5;});_Tmp4;});struct Cyc_String_pa_PrintArg_struct _Tmp4=({struct Cyc_String_pa_PrintArg_struct _Tmp5;_Tmp5.tag=0,_Tmp5.f1=(struct _fat_ptr)fixup_string;_Tmp5;});struct Cyc_String_pa_PrintArg_struct _Tmp5=({struct Cyc_String_pa_PrintArg_struct _Tmp6;_Tmp6.tag=0,_Tmp6.f1=(struct _fat_ptr)ofile_string;_Tmp6;});void*_Tmp6[6];_Tmp6[0]=& _Tmp0,_Tmp6[1]=& _Tmp1,_Tmp6[2]=& _Tmp2,_Tmp6[3]=& _Tmp3,_Tmp6[4]=& _Tmp4,_Tmp6[5]=& _Tmp5;Cyc_aprintf(_tag_fat("%s %s%s %s%s%s",sizeof(char),15U),_tag_fat(_Tmp6,sizeof(void*),6));});
 # 795
 if(Cyc_Flags_verbose)({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=(struct _fat_ptr)cmd;_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_fprintf(Cyc_stderr,_tag_fat("%s\n",sizeof(char),4U),_tag_fat(_Tmp1,sizeof(void*),1));});
-if(system((const char*)_check_null(_untag_fat_ptr(cmd,sizeof(char),1U)))!=0){
+if(system((const char*)_check_null(_untag_fat_ptr_check_bound(cmd,sizeof(char),1U)))!=0){
 Cyc_compile_failure=1;
 Cyc_fprintf(Cyc_stderr,_tag_fat("\nError: preprocessing\n",sizeof(char),23U),_tag_fat(0U,sizeof(void*),0));
 if((int)Cyc_Flags_stop_after_pass > 0)Cyc_remove_file(preprocfile);
@@ -1226,7 +1228,7 @@ if(!Cyc_compile_failure &&(int)Cyc_Flags_stop_after_pass >= 8)
 # 848
 if((!Cyc_compile_failure && Cyc_generate_interface_r)&&(int)Cyc_Flags_stop_after_pass >= 9){
 # 850
-struct Cyc___cycFILE*inter_file=Cyc_try_file_open(({const char*_Tmp0=(const char*)_check_null(_untag_fat_ptr(interfacefile,sizeof(char),1U));_tag_fat((void*)_Tmp0,sizeof(char),_get_zero_arr_size_char((void*)_Tmp0,1U));}),_tag_fat("w",sizeof(char),2U),_tag_fat("interface file",sizeof(char),15U));
+struct Cyc___cycFILE*inter_file=Cyc_try_file_open(({const char*_Tmp0=(const char*)_check_null(_untag_fat_ptr_check_bound(interfacefile,sizeof(char),1U));_tag_fat((void*)_Tmp0,sizeof(char),_get_zero_arr_size_char((void*)_Tmp0,1U));}),_tag_fat("w",sizeof(char),2U),_tag_fat("interface file",sizeof(char),15U));
 if(inter_file==0)
 Cyc_compile_failure=1;else{
 # 854
@@ -1684,7 +1686,7 @@ outfile_str=({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_
 struct _fat_ptr cccmd=({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=(struct _fat_ptr)cyclone_cc;_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,_Tmp2.f1=(struct _fat_ptr)target_cflags;_Tmp2;});struct Cyc_String_pa_PrintArg_struct _Tmp2=({struct Cyc_String_pa_PrintArg_struct _Tmp3;_Tmp3.tag=0,_Tmp3.f1=(struct _fat_ptr)ccargs_string;_Tmp3;});struct Cyc_String_pa_PrintArg_struct _Tmp3=({struct Cyc_String_pa_PrintArg_struct _Tmp4;_Tmp4.tag=0,_Tmp4.f1=(struct _fat_ptr)outfile_str;_Tmp4;});struct Cyc_String_pa_PrintArg_struct _Tmp4=({struct Cyc_String_pa_PrintArg_struct _Tmp5;_Tmp5.tag=0,_Tmp5.f1=(struct _fat_ptr)stdlib_string;_Tmp5;});struct Cyc_String_pa_PrintArg_struct _Tmp5=({struct Cyc_String_pa_PrintArg_struct _Tmp6;_Tmp6.tag=0,_Tmp6.f1=(struct _fat_ptr)libargs_string;_Tmp6;});void*_Tmp6[6];_Tmp6[0]=& _Tmp0,_Tmp6[1]=& _Tmp1,_Tmp6[2]=& _Tmp2,_Tmp6[3]=& _Tmp3,_Tmp6[4]=& _Tmp4,_Tmp6[5]=& _Tmp5;Cyc_aprintf(_tag_fat("%s %s %s%s %s%s",sizeof(char),16U),_tag_fat(_Tmp6,sizeof(void*),6));});
 # 1466
 if(Cyc_Flags_verbose){({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=(struct _fat_ptr)cccmd;_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_fprintf(Cyc_stderr,_tag_fat("%s\n",sizeof(char),4U),_tag_fat(_Tmp1,sizeof(void*),1));});Cyc_fflush(Cyc_stderr);}
-if(system((const char*)_check_null(_untag_fat_ptr(cccmd,sizeof(char),1U)))!=0){
+if(system((const char*)_check_null(_untag_fat_ptr_check_bound(cccmd,sizeof(char),1U)))!=0){
 Cyc_fprintf(Cyc_stderr,_tag_fat("Error: C compiler failed\n",sizeof(char),26U),_tag_fat(0U,sizeof(void*),0));
 Cyc_compile_failure=1;
 Cyc_remove_cfiles();

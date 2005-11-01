@@ -217,6 +217,7 @@ MAKE_VAR(_check_known_subscript_notnull);
 MAKE_VAR(_check_fat_subscript);
 MAKE_VAR(_fat_ptr);
 MAKE_VAR(_tag_fat);
+MAKE_VAR(_untag_fat_ptr_check_bound);
 MAKE_VAR(_untag_fat_ptr);
 MAKE_VAR(_check_fat_at_base);
 MAKE_VAR(_get_fat_size);
@@ -2160,15 +2161,26 @@ static void exp_to_c(env_t nv, exp_t e) {
         if (is_noalias_qual(p1.ptr_atts.aqual,false)  // p1 is unique or refcounted...
             && !is_noalias_qual(p1.ptr_atts.aqual,true)) // ...and not unique (so, refcounted)
           ptr_exp = fncall_exp_dl(_check_fat_at_base_e, ptr_exp);
-        
+
+        switch(e->annot) {
+	case &InsertChecks::FatBound:
+	case &InsertChecks::NullAndFatBound:
 	// FIX: allow bounds check to be elided
 	// cast from t ? to t* or t@ -- run-time check:
 	// for t*: (t *)_untag_arr(e1, sizeof(t), new_e2)
 	// for t@: _check_null(_untag_arr(e1, sizeof(t), new_e2))
-        ptr_exp = fncall_exp_dl(_untag_fat_ptr_e,
-                                ptr_exp,
-                                sizeoftype_exp(typ_to_c(p1.elt_type),DL),
-                                new_e2);
+	  ptr_exp = fncall_exp_dl(_untag_fat_ptr_check_bound_e,
+				  ptr_exp,
+				  sizeoftype_exp(typ_to_c(p1.elt_type),DL),
+				  new_e2);
+	  break;
+	default: 
+	  ptr_exp = fncall_exp_dl(_untag_fat_ptr_e,
+				  ptr_exp,
+				  sizeoftype_exp(typ_to_c(p1.elt_type),DL),
+				  new_e2);
+	  break;
+	}
 	did_inserted_checks = true;
 	if(do_null_check(e)) // DJG: redundant unless bound is 0?
 	  ptr_exp->r = fncall_exp_r(_check_null_e, copy_exp(ptr_exp));

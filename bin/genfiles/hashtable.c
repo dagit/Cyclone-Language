@@ -184,6 +184,7 @@ void* _zero_arr_inplace_plus_post_other_fn(unsigned,void**,int,const char*,unsig
 #ifdef NO_CYC_BOUNDS_CHECKS
 #define _check_fat_subscript(arr,elt_sz,index) ((arr).curr + (elt_sz) * (index))
 #define _untag_fat_ptr(arr,elt_sz,num_elts) ((arr).curr)
+#define _untag_fat_ptr_check_bound(arr,elt_sz,num_elts) ((arr).curr)
 #define _check_fat_at_base(arr) (arr)
 #else
 #define _check_fat_subscript(arr,elt_sz,index) ({ \
@@ -193,7 +194,8 @@ void* _zero_arr_inplace_plus_post_other_fn(unsigned,void**,int,const char*,unsig
   if (_cus_ans < _cus_arr.base || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
-#define _untag_fat_ptr(arr,elt_sz,num_elts) ({ \
+#define _untag_fat_ptr(arr,elt_sz,num_elts) ((arr).curr)
+#define _untag_fat_ptr_check_bound(arr,elt_sz,num_elts) ({ \
   struct _fat_ptr _arr = (arr); \
   unsigned char *_curr = _arr.curr; \
   if ((_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one) &&\
@@ -362,7 +364,7 @@ return Cyc_Hashtable_rcreate(Cyc_Core_heap_region,sz,cmp,hash);}
 void Cyc_Hashtable_insert(struct Cyc_Hashtable_Table*t,void*key,void*val){
 struct _fat_ptr tab=t->tab;
 unsigned bucket=({unsigned _Tmp0=(unsigned)t->hash(key);_Tmp0 % _get_fat_size(tab,sizeof(struct Cyc_Hashtable_Bucket));});
-struct Cyc_Hashtable_Bucket*b=(struct Cyc_Hashtable_Bucket*)_check_null(_untag_fat_ptr(_fat_ptr_plus(tab,sizeof(struct Cyc_Hashtable_Bucket),(int)bucket),sizeof(struct Cyc_Hashtable_Bucket),1U));
+struct Cyc_Hashtable_Bucket*b=(struct Cyc_Hashtable_Bucket*)_check_null(_untag_fat_ptr_check_bound(_fat_ptr_plus(tab,sizeof(struct Cyc_Hashtable_Bucket),(int)bucket),sizeof(struct Cyc_Hashtable_Bucket),1U));
 ({struct Cyc_Hashtable_Cell*_Tmp0=({struct Cyc_Hashtable_Cell*_Tmp1=_region_malloc(t->r,0U,sizeof(struct Cyc_Hashtable_Cell));_Tmp1->key=key,_Tmp1->value=val,_Tmp1->next=b->cells;_Tmp1;});b->cells=_Tmp0;});{
 unsigned i=b->length + 1U;
 b->length=i;
@@ -422,7 +424,7 @@ void Cyc_Hashtable_remove(struct Cyc_Hashtable_Table*t,void*key){
 struct _fat_ptr tab=t->tab;
 int(*cmp)(void*,void*)=t->cmp;
 unsigned bucket=({unsigned _Tmp0=(unsigned)t->hash(key);_Tmp0 % _get_fat_size(tab,sizeof(struct Cyc_Hashtable_Bucket));});
-struct Cyc_Hashtable_Bucket*b=(struct Cyc_Hashtable_Bucket*)_check_null(_untag_fat_ptr(_fat_ptr_plus(tab,sizeof(struct Cyc_Hashtable_Bucket),(int)bucket),sizeof(struct Cyc_Hashtable_Bucket),1U));
+struct Cyc_Hashtable_Bucket*b=(struct Cyc_Hashtable_Bucket*)_check_null(_untag_fat_ptr_check_bound(_fat_ptr_plus(tab,sizeof(struct Cyc_Hashtable_Bucket),(int)bucket),sizeof(struct Cyc_Hashtable_Bucket),1U));
 struct Cyc_Hashtable_Cell*l=b->cells;
 if(l==0)return;
 if(cmp(key,l->key)==0){

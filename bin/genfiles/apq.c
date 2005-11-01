@@ -184,6 +184,7 @@ void* _zero_arr_inplace_plus_post_other_fn(unsigned,void**,int,const char*,unsig
 #ifdef NO_CYC_BOUNDS_CHECKS
 #define _check_fat_subscript(arr,elt_sz,index) ((arr).curr + (elt_sz) * (index))
 #define _untag_fat_ptr(arr,elt_sz,num_elts) ((arr).curr)
+#define _untag_fat_ptr_check_bound(arr,elt_sz,num_elts) ((arr).curr)
 #define _check_fat_at_base(arr) (arr)
 #else
 #define _check_fat_subscript(arr,elt_sz,index) ({ \
@@ -193,7 +194,8 @@ void* _zero_arr_inplace_plus_post_other_fn(unsigned,void**,int,const char*,unsig
   if (_cus_ans < _cus_arr.base || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
-#define _untag_fat_ptr(arr,elt_sz,num_elts) ({ \
+#define _untag_fat_ptr(arr,elt_sz,num_elts) ((arr).curr)
+#define _untag_fat_ptr_check_bound(arr,elt_sz,num_elts) ({ \
   struct _fat_ptr _arr = (arr); \
   unsigned char *_curr = _arr.curr; \
   if ((_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one) &&\
@@ -391,9 +393,9 @@ struct Cyc_APQ_T*Cyc_APQ_fromstr(struct _fat_ptr str,int base){
 struct Cyc_APQ_T*q=(struct Cyc_APQ_T*)_cycalloc(sizeof(struct Cyc_APQ_T));
 struct _fat_ptr s=str;
 while((int)*((const char*)_check_fat_subscript(s,sizeof(char),0U))&&(int)*((const char*)s.curr)!=47){_fat_ptr_inplace_plus(& s,sizeof(char),1);1U;}
-({struct Cyc_AP_T*_Tmp0=Cyc_AP_fromstr((const char*)_untag_fat_ptr(str,sizeof(char),1U),base);q->n=_Tmp0;});
+({struct Cyc_AP_T*_Tmp0=({const char*_Tmp1=(const char*)_untag_fat_ptr_check_bound(str,sizeof(char),1U);Cyc_AP_fromstr(_Tmp1,base);});q->n=_Tmp0;});
 if((int)*((const char*)s.curr)){
-struct Cyc_AP_T*d=Cyc_AP_fromstr((const char*)_untag_fat_ptr(_fat_ptr_plus(s,sizeof(char),1),sizeof(char),1U),base);
+struct Cyc_AP_T*d=({const char*_Tmp0=(const char*)_untag_fat_ptr_check_bound(_fat_ptr_plus(s,sizeof(char),1),sizeof(char),1U);Cyc_AP_fromstr(_Tmp0,base);});
 if(Cyc_AP_cmp(d,Cyc_AP_zero))
 q->d=d;else{
 _throw((void*)({struct Cyc_Invalid_argument_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Invalid_argument_exn_struct));_Tmp0->tag=Cyc_Invalid_argument,_Tmp0->f1=_tag_fat("APQ_fromstr: malformed string",sizeof(char),30U);_Tmp0;}));}}else{

@@ -2014,7 +2014,8 @@ bool coerce_arg(aqualbnds_t aqb,
   if (unify(t1,t2)) 
     return true;
   // try arithmetic conversions
-  if (is_arithmetic_type(t2) && is_arithmetic_type(t1) && !is_tag_type(t1)) {
+
+  if (is_arithmetic_type(t2) && is_arithmetic_type(t1) && !is_tag_type(t2)) {
     // issue a warning if we lose precision
     if (will_lose_precision(t1,t2))
       Warn::warn2(e->loc,"integral size mismatch; ",
@@ -2035,8 +2036,11 @@ bool coerce_arg(aqualbnds_t aqb,
     unchecked_cast(e,t2,Other_coercion);
     return true;
   } 
+
   if (zero_to_null(t2,e))
     return true;
+
+
   if ((c = castable(e->loc,t1,t2)) != Unknown_coercion) {
     // if C supports the conversion, then we don't need the cast.
     if (c != No_coercion) 
@@ -2045,6 +2049,7 @@ bool coerce_arg(aqualbnds_t aqb,
       Warn::warn2(e->loc,"implicit cast from ",t1," to ",t2);
     return true;
   }
+
   return false;
 }
 

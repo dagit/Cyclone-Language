@@ -184,6 +184,7 @@ void* _zero_arr_inplace_plus_post_other_fn(unsigned,void**,int,const char*,unsig
 #ifdef NO_CYC_BOUNDS_CHECKS
 #define _check_fat_subscript(arr,elt_sz,index) ((arr).curr + (elt_sz) * (index))
 #define _untag_fat_ptr(arr,elt_sz,num_elts) ((arr).curr)
+#define _untag_fat_ptr_check_bound(arr,elt_sz,num_elts) ((arr).curr)
 #define _check_fat_at_base(arr) (arr)
 #else
 #define _check_fat_subscript(arr,elt_sz,index) ({ \
@@ -193,7 +194,8 @@ void* _zero_arr_inplace_plus_post_other_fn(unsigned,void**,int,const char*,unsig
   if (_cus_ans < _cus_arr.base || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
-#define _untag_fat_ptr(arr,elt_sz,num_elts) ({ \
+#define _untag_fat_ptr(arr,elt_sz,num_elts) ((arr).curr)
+#define _untag_fat_ptr_check_bound(arr,elt_sz,num_elts) ({ \
   struct _fat_ptr _arr = (arr); \
   unsigned char *_curr = _arr.curr; \
   if ((_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one) &&\
@@ -391,7 +393,7 @@ struct _fat_ptr newarr=({unsigned _Tmp0=(unsigned)(xarr->num_elmts * 2);_tag_fat
 {int i=1;for(0;i < xarr->num_elmts;++ i){
 ({void*_Tmp0=*((void**)_check_fat_subscript(xarr->elmts,sizeof(void*),i));*((void**)_check_fat_subscript(newarr,sizeof(void*),i))=_Tmp0;});}}
 ({struct _fat_ptr _Tmp0=xarr->elmts;struct _fat_ptr _Tmp1=newarr;xarr->elmts=_Tmp1;newarr=_Tmp0;});
-({void(*_Tmp0)(void**)=(void(*)(void**))Cyc_Core_ufree;_Tmp0;})((void**)_untag_fat_ptr(newarr,sizeof(void*),1U));}}
+({void(*_Tmp0)(void**)=({void(*_Tmp1)(void**)=(void(*)(void**))Cyc_Core_ufree;_Tmp1;});_Tmp0((void**)_untag_fat_ptr_check_bound(newarr,sizeof(void*),1U));});}}
 # 81
 *((void**)_check_fat_subscript(xarr->elmts,sizeof(void*),xarr->num_elmts ++))=a;}
 # 84
@@ -481,7 +483,7 @@ void Cyc_Xarray_reuse(struct Cyc_Xarray_Xarray*xarr){
 struct _fat_ptr newarr=_tag_fat(0,0,0);
 ({struct _fat_ptr _Tmp0=newarr;struct _fat_ptr _Tmp1=xarr->elmts;newarr=_Tmp1;xarr->elmts=_Tmp0;});
 xarr->num_elmts=0;
-({void(*_Tmp0)(void**)=(void(*)(void**))Cyc_Core_ufree;_Tmp0;})((void**)_untag_fat_ptr(newarr,sizeof(void*),1U));}
+({void(*_Tmp0)(void**)=({void(*_Tmp1)(void**)=(void(*)(void**))Cyc_Core_ufree;_Tmp1;});_Tmp0((void**)_untag_fat_ptr_check_bound(newarr,sizeof(void*),1U));});}
 # 189
 void Cyc_Xarray_delete(struct Cyc_Xarray_Xarray*xarr,int num){
 if(({int _Tmp0=num;_Tmp0 > Cyc_Xarray_length(xarr);}))
