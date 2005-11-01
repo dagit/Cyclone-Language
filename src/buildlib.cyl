@@ -112,6 +112,8 @@ static Set::set_t<stringptr_t> *current_targets = NULL;
 static void add_target(stringptr_t<`H,`H> sptr) {
   current_targets = new Set::insert(*current_targets,sptr);
 }
+static Set::set_t<stringptr_t> *headers_to_do = NULL;
+
 /* Forward declarations of lexing functions */
 typedef $(stringptr_t,Set::set_t<stringptr_t>) *line_t;
 extern line_t line(Lexbuf);
@@ -1369,7 +1371,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
   }
 
   /* Returns 1 on a fatal error (can't create files, etc.) or 0 otherwise. */
-  int process_file(const char @ filename,
+  int process_file(const char @`H filename,
                    list_t<stringptr_t<`H,`H>,`H> start_symbols,
                    list_t<userdef_t,`H> user_defs,
                    list_t<stringptr_t<`H,`H>,`H> omit_symbols,
@@ -1381,6 +1383,9 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     FILE @in_file;
     FILE @out_file;
     int errorcode = 0;
+
+    if (headers_to_do && !Set::member(*headers_to_do,new (string_t)filename))
+      return 0;
 
     fprintf(stderr,
             "********************************* %s...\n",filename);
@@ -1952,6 +1957,11 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     fprintf(stderr,"Unsupported option %s\n", s);
     badparse = true;
   }
+  static void set_header(string_t<`H> s) {
+    if (!headers_to_do)
+      headers_to_do = new Set::empty(strptrcmp);
+    *headers_to_do = Set::insert(*headers_to_do,new s);
+  }
 
   using Arg;
 
@@ -1985,6 +1995,9 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
            new $("-B",true,"<file>",
                  new Flag_spec(Specsfile::add_cyclone_exec_path),
                  "Add to the list of directories to search for compiler files"),
+           new $("-h",false," <header>",
+                 new String_spec(set_header),
+                 "Produce this header, and other -h headers only"),
            new $("-v",false,"",
                  new Set_spec(&verbose),
                  "Verbose operation"),

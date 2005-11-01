@@ -341,12 +341,8 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #endif //CYC_REGION_PROFILE
 #endif //_CYC_INCLUDE_H
 
-# 4 "ctype.h"
- extern int isalnum(int);
-# 22
-extern int isspace(int);
 # 282 "cycboot.h"
-extern int isalnum(int);
+ extern int isalnum(int);
 # 300
 extern int isspace(int);
 # 82 "string.h"
