@@ -18,6 +18,8 @@
 
 #include <stddef.h> // for size_t
 
+void GC_init () {}
+
 #ifdef CYC_REGION_PROFILE
 #undef GC_malloc
 #undef GC_malloc_atomic
@@ -96,7 +98,7 @@ GC_register_finalizer_no_order (GC_PTR obj, GC_finalization_proc fn, GC_PTR cd,
 
 #if !defined(GEEKOS)
 
-/* This is the Doug Lea allocator, rather than the platform malloc.  
+/* This is the Doug Lea allocator, rather than the platform malloc.
    At the moment, only allow this for Linux & Apple, though in principle it
    should work in general. */
 
@@ -187,7 +189,7 @@ void *GC_malloc_atomic(int x) {
 
 void *GC_realloc(void *x, size_t n) {
   size_t sz = malloc_sizeb(x,0);
-#if (defined(__linux__) && defined(__KERNEL__))  
+#if (defined(__linux__) && defined(__KERNEL__))
   void *p = (void *)realloc(x,sz,n);
 #else
   void *p = (void *)realloc(x,n);
@@ -209,11 +211,11 @@ static void* cyc_kcalloc(size_t s, int mult) {
 }
 
 void* cyc_krealloc(void *ptr, size_t oldsize, size_t newsize) {
-  if(!ptr) 
+  if(!ptr)
     return kmalloc(newsize, GFP_KERNEL);
   if(!newsize) {
     kfree(ptr);
-    return 0; //? 
+    return 0; //?
   }
   void *res = kmalloc(newsize, GFP_KERNEL);
   memcpy(res, ptr, oldsize);
@@ -225,7 +227,7 @@ void* cyc_krealloc(void *ptr, size_t oldsize, size_t newsize) {
 void *cyc_vmalloc(size_t s) {
   unsigned long adr=0;
   void *mem = __vmalloc(s, GFP_KERNEL | __GFP_HIGHMEM, PAGE_KERNEL);
-  if (mem) 
+  if (mem)
     {
       memset(mem, 0, s); /* Clear the ram out, no junk to the user */
     }
@@ -234,13 +236,13 @@ void *cyc_vmalloc(size_t s) {
 
 void cyc_vfree(void *mem) {
   unsigned long adr;
-  if (mem) 
+  if (mem)
     {
       vfree(mem);
     }
 }
 
-#else 
+#else
 
 void *cyc_vmalloc(size_t s) {
   return GC_malloc(s);
@@ -324,7 +326,7 @@ void *GC_realloc(void *x, size_t n) {
 
 void GC_free(void *x) {
   bool iflag;
-  
+
   iflag = Begin_Int_Atomic();
   brel(x);
   End_Int_Atomic(iflag);

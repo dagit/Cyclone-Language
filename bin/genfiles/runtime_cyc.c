@@ -58,7 +58,7 @@ static struct _fat_ptr Cstring_to_string(char *s) {
 }
 
 // argc is redundant
-struct _fat_argv { 
+struct _fat_argv {
   struct _fat_ptr *base;
   struct _fat_ptr *curr;
   struct _fat_ptr *last_plus_one;
@@ -85,7 +85,9 @@ extern char *_set_top_handler(); // defined in runtime_exception.c
 /* } */
 /* #endif */
 
+extern void GC_init();
 int main(int argc, char **argv) {
+  GC_init();
   // initialize region system
   int status;
   _init_regions();
