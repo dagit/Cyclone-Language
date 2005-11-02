@@ -61,7 +61,7 @@ static bool export_member(qvar_t x, list_t<$(seg_t,qvar_t,bool)@> exports) {
 
 static void tcVardecl(tenv_t te, seg_t loc, vardecl_t vd, bool check_var_init, 
                       bool in_cinclude, list_t<$(seg_t,qvar_t,bool)@>* exports){
-  let &Vardecl(sc,q,_,_,t,initializer,_,atts,_,*is_proto) = vd;
+  let &Vardecl(sc,q,_,_,t,initializer,_,atts,_,*is_proto,_) = vd;
 #ifdef DEBUG
   fprintf(stderr,"type-checking vardecl_t %s, type %s\n",*((*q)[1]), 
           Absynpp::typ2string(vd->type)); fflush(stderr);

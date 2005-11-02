@@ -20,7 +20,7 @@
 // This pass resolves binding (variables, structs, etc.)
 
 // We used to do it during type-check to save a deep-pass over the
-// abstract syntax. Now only this pass has to worry about namespaces 
+// abstract syntax. Now only this pass has to worry about namespaces
 // and relative names
 
 // The lexer also uses the namespace-management code (or will eventually)
@@ -79,7 +79,7 @@ static `a get_ns_data(nsctxt_t<`a> ctxt, Absyn::nmspace_t abs_ns) {
 //
 // It's a bit more complicated because how we lookup a relative qvar
 // depends on whether the namespace-list is empty (this has always been true)
-namespace_name_t resolve_rel_ns(seg_t loc, nsctxt_t<`a> ctxt, 
+namespace_name_t resolve_rel_ns(seg_t loc, nsctxt_t<`a> ctxt,
 				namespace_name_t rel_ns) {
   // check for result due to current namespace
   let fullname = List::append(ctxt->curr_ns,rel_ns);
@@ -120,7 +120,7 @@ static `b resolve_lookup(seg_t loc, nsctxt_t<`a> ctxt, qvar_t qv, `b lookup(`a,v
       return lookup(Dict::lookup(ctxt->ns_data,abs_ns),v);
     } catch { case &Dict::Absent: throw new BindingError; }
   case {.C_n   = ns}: fallthru(ns);
-  case {.Abs_n = ns}: 
+  case {.Abs_n = ns}:
     try return lookup(Dict::lookup(ctxt->ns_data,ns),v);
     catch { case &Dict::Absent: throw new BindingError; }
   case {.Loc_n = _}:  impos("lookup local in global");
@@ -139,7 +139,7 @@ void leave_ns(nsctxt_t ctxt) {
   if(ctxt->availables == NULL)
     impos("leaving topmost namespace");
   switch(ctxt->availables->hd) {
-  case &Namespace(_): 
+  case &Namespace(_):
     ctxt->availables = ctxt->availables->tl;
     ctxt->curr_ns = List::rev(List::rev(ctxt->curr_ns)->tl);
     break;
@@ -151,7 +151,7 @@ namespace_name_t enter_using(seg_t loc, nsctxt_t ctxt, qvar_t usename) {
   let &$(nsl,v) = usename;
   let ns;
   switch(nsl) {
-  case {.Rel_n = vs}: 
+  case {.Rel_n = vs}:
     ns = resolve_rel_ns(loc,ctxt,List::append(vs,new List(v,NULL)));
     let abs_vs = List::rev(List::rev(ns)->tl);
     (*usename)[0] = Abs_n(abs_vs,false);
@@ -165,7 +165,7 @@ namespace_name_t enter_using(seg_t loc, nsctxt_t ctxt, qvar_t usename) {
   ctxt->availables = new List(new Using(ns), ctxt->availables);
   return ns;
 }
-void leave_using(nsctxt_t ctxt) { 
+void leave_using(nsctxt_t ctxt) {
   if(ctxt->availables == NULL)
     impos("leaving topmost namespace as a using");
   switch(ctxt->availables->hd) {
@@ -193,7 +193,7 @@ datatype Resolved {
 typedef datatype Resolved @ resolved_t;
 
 static struct ResolveNSEnv {
-  dict_t<var_t,aggrdecl_t>     aggrdecls; 
+  dict_t<var_t,aggrdecl_t>     aggrdecls;
   dict_t<var_t,List_t<datatypedecl_t>> datatypedecls; // list for extensible
   dict_t<var_t,enumdecl_t>     enumdecls;
   dict_t<var_t,typedefdecl_t>  typedefs;   // we crawl through types too
@@ -268,21 +268,21 @@ static void resolve_scs(env_t,   list_t<switch_clause_t>);
 static void resolve_aggrfields(seg_t, env_t, list_t<aggrfield_t>);
 static void resolve_function_stuff(seg_t, env_t, fn_info_t @);
 static void resolve_asm_iolist(env_t, list_t<$(string_t, exp_t)@>);
-static list_t<vardecl_opt_t> get_fun_vardecls(bool, seg_t, env_t, 
-                                              list_t<$(var_opt_t,tqual_t,type_t)@>, 
+static list_t<vardecl_opt_t> get_fun_vardecls(bool, seg_t, env_t,
+                                              list_t<$(var_opt_t,tqual_t,type_t)@>,
                                               vararg_info_t*);
 //void resolve_enumfields(seg_t, env_t, list_t<enumfield_t>); // FIX: DO ME
 
 static void absolutize_decl(seg_t loc, env_t env, qvar_t qv, scope_t sc) {
   switch((*qv)[0]) {
-  case {.Rel_n = NULL}: 
+  case {.Rel_n = NULL}:
     if(at_toplevel(env))
       (*qv)[0] = Abs_n(env->ns->curr_ns, (in_cinclude(env) || sc==ExternC));
     else
       (*qv)[0] = Loc_n;
     break;
   case Nmspace{.Loc_n = _}: break;
-  case Nmspace{.Abs_n = _}: 
+  case Nmspace{.Abs_n = _}:
     if(!at_toplevel(env))
       fallthru;
     break; // happens with extensible datatypes
@@ -301,7 +301,7 @@ static void absolutize_topdecl(seg_t loc, env_t env, qvar_t qv, scope_t sc) {
 
 static void check_warn_override(seg_t loc, env_t env, qvar_t q) {
   string_t hides_what;
-  try { 
+  try {
     switch (lookup_ordinary(loc,env,q)) {
     case &VarRes(b):
       if(at_toplevel(env)) // globals can be redeclared -- leave to typechecker
@@ -344,7 +344,7 @@ static void resolve_and_add_vardecl(seg_t loc, env_t env, vardecl_t vd) {
 
 static bool resolve_visit_f1(env_t env, exp_t e) {
   switch(e->r) {
-  case &Var_e(*b): 
+  case &Var_e(*b):
     switch(*b) {
     case &Unresolved_b(q):
       try switch (lookup_ordinary(e->loc,env,q)) {
@@ -354,13 +354,13 @@ static bool resolve_visit_f1(env_t env, exp_t e) {
       case &AnonEnumRes(t,ef):    e->r = new AnonEnum_e(t,ef); break;
       case &AggrRes(ad): err2(e->loc,"bad occurrence of type name ", q); break;
       }
-      catch { 
+      catch {
       case &BindingError: err2(e->loc,"undeclared identifier ", q); break;
       }
       return false;
     default: return false; // only happens if we re-run this pass?
     }
-  case &FnCall_e(e1,es,_,*b): 
+  case &FnCall_e(e1,es,_,*b):
     *b = true;
     // careful: we cannot call resolve_exp(env,e1) yet!
     for(let es2 = es; es2 != NULL; es2 = es2->tl)
@@ -385,14 +385,14 @@ static bool resolve_visit_f1(env_t env, exp_t e) {
 	  case &AnonEnumRes(...):
 	  case &EnumRes(...):
 	    err2(e->loc, q," is an enum constructor, not a function"); return false;
-	  } catch { 
+	  } catch {
 	  case &BindingError: err2(e->loc,"undeclared identifier ",q); return false;
 	  }
 	default: return false; // only happens if we re-run this pass?
 	}
     default: resolve_exp(env,e1); return false;
     }
-  case &Aggregate_e(*tn,ts,dles,*adopt): 
+  case &Aggregate_e(*tn,ts,dles,*adopt):
     try {
       *adopt = resolve_lookup(e->loc,env->ns,*tn,lookup_aggrdecl);
       *tn = (*adopt)->name;
@@ -401,7 +401,7 @@ static bool resolve_visit_f1(env_t env, exp_t e) {
       err2(e->loc,"unbound struct/union name ", *tn);
       return true;
     }
-  case &Comprehension_e(vd,e1,e2,_): 
+  case &Comprehension_e(vd,e1,e2,_):
     resolve_exp(env,e1);
     if(at_toplevel(env)) {
       env->local_vars = new Dict::empty(strptrcmp);
@@ -420,18 +420,18 @@ static bool resolve_visit_f1(env_t env, exp_t e) {
     for(; ts != NULL; ts = ts->tl)
       resolve_type(e->loc,env,ts->hd);
     return true;
-  case &Malloc_e(MallocInfo(_,_,_,to,...)): 
+  case &Malloc_e(MallocInfo(_,_,_,to,...)):
     if(to!=NULL) fallthru(*to); else return true;
-  case &AnonStruct_e(topt,_,_): 
+  case &AnonStruct_e(topt,_,_):
     if (topt == NULL) return true;
-    fallthru((type_t)topt); 
+    fallthru((type_t)topt);
   case &AnonEnum_e(t,_): fallthru(t);
   case &CompoundLit_e(&$(_,_,t),_): fallthru(t);
   case &Valueof_e(t): fallthru(t);
   case &Offsetof_e(t,_): fallthru(t);
   case &Sizeoftype_e(t): fallthru(t);
   case &ComprehensionNoinit_e(_,t,_): fallthru(t);
-  case &Cast_e(t,...): 
+  case &Cast_e(t,...):
     resolve_type(e->loc,env,t);
     return true;
 
@@ -446,22 +446,22 @@ static bool resolve_visit_f2(env_t env, stmt_t s) {
     resolve_stmt(env,s1);
     *env->local_vars = old_locals;
     return false;
-  case &Switch_s(e,scs,_):    
-    resolve_exp(env,e);   
+  case &Switch_s(e,scs,_):
+    resolve_exp(env,e);
     resolve_scs(env,scs);
     return false;
-  case &TryCatch_s(s1,scs,_): 
-    resolve_stmt(env,s1); 
+  case &TryCatch_s(s1,scs,_):
+    resolve_stmt(env,s1);
     resolve_scs(env,scs);
     return false;
   default: return true;
   }
 }
-static void resolve_stmt(env_t env, stmt_t s) { 
+static void resolve_stmt(env_t env, stmt_t s) {
   visit_stmt(resolve_visit_f1,resolve_visit_f2,env,s);
 }
-static void resolve_exp(env_t env, exp_t e) { 
-  visit_exp(resolve_visit_f1,resolve_visit_f2,env,e); 
+static void resolve_exp(env_t env, exp_t e) {
+  visit_exp(resolve_visit_f1,resolve_visit_f2,env,e);
 }
 
 static void resolve_scs(env_t env, list_t<switch_clause_t> scs) {
@@ -489,7 +489,7 @@ static void resolve_aggrfields(seg_t loc, env_t env, list_t<aggrfield_t> fs) {
 }
 
 static list_t<vardecl_opt_t> get_fun_vardecls(bool need_va_name,
-                                              seg_t loc, env_t env, 
+                                              seg_t loc, env_t env,
                                               list_t<$(var_opt_t,tqual_t,type_t)@> args,
                                               vararg_info_t* vai) {
   // Note: we resolve the types in resolve_function_stuff after we have
@@ -501,7 +501,7 @@ static list_t<vardecl_opt_t> get_fun_vardecls(bool need_va_name,
       vds = new List{NULL,vds};
       continue;
     }
-    let vd = new_vardecl(0,new $((nmspace_t)Loc_n,a), t, NULL);
+    let vd = new_vardecl(0,new $((nmspace_t)Loc_n,a), t, NULL, NULL);
     vd->tq = tq;
     vds = new List(vd,vds);
   }
@@ -513,7 +513,7 @@ static list_t<vardecl_opt_t> get_fun_vardecls(bool need_va_name,
     } else {
       // HeapRegion is wrong -- changed by type-checker!
       let typ = fatptr_type(t, heap_rgn_type, al_qual_type, tq, false_type, false_type);
-      let vd = new_vardecl(0,new $((nmspace_t)Loc_n,(var_t)v), typ, NULL);
+      let vd = new_vardecl(0,new $((nmspace_t)Loc_n,(var_t)v), typ, NULL, NULL);
       vds = new List(vd,vds);
     }
   }
@@ -538,7 +538,7 @@ static void resolve_function_stuff(seg_t loc, env_t env, fn_info_t @i) {
     // return_value is a dummy var in scope only here
     let locs = *env->local_vars;
     let v    = new "return_value";
-    let vd   = new_vardecl(0,new $((nmspace_t)Loc_n, v), i->ret_type, NULL);
+    let vd   = new_vardecl(0,new $((nmspace_t)Loc_n, v), i->ret_type, NULL, NULL);
     i->return_value = vd;
     *env->local_vars = Dict::insert(*env->local_vars, v,
 				    new VarRes(new Local_b(vd)));
@@ -557,7 +557,7 @@ static void resolve_function_stuff(seg_t loc, env_t env, fn_info_t @i) {
 //      uses an indirection kludge that won't work as a prepass and requires
 //      thought.  So for now we just absolutize the names.
 // DO ME: see above
-static void resolve_type(seg_t loc, env_t env, type_t t) { 
+static void resolve_type(seg_t loc, env_t env, type_t t) {
   switch(t) {
   case &AppType(&DatatypeCon(*info),targs):
     for(; targs != NULL; targs = targs->tl)
@@ -568,7 +568,7 @@ static void resolve_type(seg_t loc, env_t env, type_t t) {
 	let tud = resolve_lookup(loc,env->ns,qv,lookup_datatypedecl)->hd;
 	*info = UnknownDatatype(UnknownDatatypeInfo(tud->name, b));
 	return;
-      } catch {case &BindingError: 
+      } catch {case &BindingError:
         absolutize_topdecl(loc,env,qv,Public); return;}
     case {.KnownDatatype=_}: return;
     }
@@ -579,7 +579,7 @@ static void resolve_type(seg_t loc, env_t env, type_t t) {
     case {.UnknownDatatypefield=UnknownDatatypeFieldInfo(qvd,qvf,b)}:
       // FIX?: We are doing the wrong thing in the presence of shadowing,
       //       but it is unclear we should allow field-shadowing anyway
-      try 
+      try
 	switch(lookup_ordinary(loc,env,qvf)) {
 	case &DatatypeRes(tud,tuf):
 	  let tud2 = resolve_lookup(loc,env->ns,qvd,lookup_datatypedecl)->hd;
@@ -598,7 +598,7 @@ static void resolve_type(seg_t loc, env_t env, type_t t) {
     case {.KnownDatatypefield=_}: return;
     }
 
-  case &AppType(&AggrCon(*info),targs): 
+  case &AppType(&AggrCon(*info),targs):
     for(; targs != NULL; targs = targs->tl)
       resolve_type(loc,env,targs->hd);
     switch(*info) {
@@ -612,21 +612,21 @@ static void resolve_type(seg_t loc, env_t env, type_t t) {
 	  err2(loc,"@tagged mismatch with earlier declaration");
 	*info = UnknownAggr(ak,ad->name,bo);
 	return;
-      } catch {case &BindingError: 
+      } catch {case &BindingError:
         absolutize_topdecl(loc,env,qv,Public); return;}
     case {.KnownAggr=_}: return;
     }
-  case &AppType(&EnumCon(*qv,edo),_): 
+  case &AppType(&EnumCon(*qv,edo),_):
     if(edo != NULL)
       return;
     try {
       let ed = resolve_lookup(loc,env->ns,*qv,lookup_enumdecl);
       *qv = ed->name;
       return;
-    } catch {case &BindingError: 
+    } catch {case &BindingError:
       absolutize_topdecl(loc,env,*qv,Public); return;}
 
-  case &TypedefType(*tdn,targs,*tdo,_): 
+  case &TypedefType(*tdn,targs,*tdo,_):
     for(; targs != NULL; targs = targs->tl)
       resolve_type(loc,env,targs->hd);
     try {
@@ -638,12 +638,12 @@ static void resolve_type(seg_t loc, env_t env, type_t t) {
     err2(loc,"unbound typdef name ",*tdn);
     return;
 
-  case &TypeDeclType(td,*to): 
+  case &TypeDeclType(td,*to):
     // FIX?: notice we are hoisting in a weird way
     let old_locals = env->local_vars;
     env->local_vars = NULL;
     switch(td->r) {
-    case &Aggr_td(ad): 
+    case &Aggr_td(ad):
       resolve_decl(env, new Decl(new Aggr_d(ad),td->loc)); break;
     case &Enum_td(ed):
       resolve_decl(env, new Decl(new Enum_d(ed),td->loc)); break;
@@ -656,10 +656,10 @@ static void resolve_type(seg_t loc, env_t env, type_t t) {
     // (set *to here instead of in i_check_valid_type)
 
     // recursive descent from here down
-  case &AnonAggrType(_,_,fs): 
+  case &AnonAggrType(_,_,fs):
     resolve_aggrfields(loc,env,fs);
     return;
-  case &AppType(&AnonEnumCon(fs),_): 
+  case &AppType(&AnonEnumCon(fs),_):
     // FIX: absolutize names? create declarations? what scope? DO ME
     //  share code with Enum_d once we are sure what this means!
     let decl_ns_data = get_ns_data(env->ns,Abs_n(env->ns->curr_ns,
@@ -670,7 +670,7 @@ static void resolve_type(seg_t loc, env_t env, type_t t) {
 	resolve_exp(env,(exp_t)f->tag);
       decl_ns_data->ordinaries = Dict::insert(decl_ns_data->ordinaries,(*f->name)[1],new AnonEnumRes(t,f));
     }
-    return; 
+    return;
   case &Evar(_,to,_,_): if(to != NULL) resolve_type(loc,env,(type_t)to); return;
 
   case &VarType(_):
@@ -697,7 +697,7 @@ static void resolve_type(seg_t loc, env_t env, type_t t) {
     let vds = get_fun_vardecls(false, loc, env, i->args, i->cyc_varargs);
     i->arg_vardecls = vds;
     let old_locals = env->local_vars; // non-NULL only for nested functions
-    if(old_locals != NULL) 
+    if(old_locals != NULL)
       env->local_vars = new *env->local_vars; // can refer to callers' vars
     else
       env->local_vars = new Dict::empty(strptrcmp);
@@ -718,7 +718,7 @@ static void resolve_type(seg_t loc, env_t env, type_t t) {
 static void resolve_pat(env_t env, pat_t p) { // must not be at top-level
   let &Pat(r,_,loc) = p;
   switch(r) {
-  case &UnknownId_p(qv): 
+  case &UnknownId_p(qv):
     try switch(lookup_ordinary(loc,env,qv)) {
     case &VarRes(_): break; // legal shadowing, same as BindingError
     case &AggrRes(_):
@@ -730,7 +730,7 @@ static void resolve_pat(env_t env, pat_t p) { // must not be at top-level
     case &AnonEnumRes(t,ef):
       p->r = new AnonEnum_p(t,ef); return;
     } catch { case &BindingError: break; } // a new variable
-    let vd = new_vardecl(0,qv,void_type,NULL); //type set later
+    let vd = new_vardecl(0,qv,void_type,NULL,NULL); //type set later
     resolve_and_add_vardecl(loc,env,vd);
     p->r = new Var_p(vd, new_pat(&Wild_p_val,0));
     return;
@@ -739,7 +739,7 @@ static void resolve_pat(env_t env, pat_t p) { // must not be at top-level
     for(let ps2 = ps; ps2 != NULL; ps2 = ps2->tl)
       resolve_pat(env,ps2->hd);
     try switch(lookup_ordinary(loc,env,qv)) {
-    case &VarRes(_): break; 
+    case &VarRes(_): break;
     case &AggrRes(ad):
       let new_ps = NULL;
       for(; ps != NULL; ps = ps->tl)
@@ -784,7 +784,7 @@ static void resolve_pat(env_t env, pat_t p) { // must not be at top-level
             let ad = resolve_lookup(loc,env->ns,n,lookup_aggrdecl);
             *info = KnownAggr(new ad);
           } catch {
-          case &BindingError: 
+          case &BindingError:
             err2(p->loc, n, " is an undefined aggregate");
             break;
           }
@@ -819,7 +819,7 @@ static void resolve_effconstr(seg_t loc, env_t env, list_t<effconstr_t> effc) {
     switch(effc->hd) {
     case &SingleConstraint(e):      resolve_type(loc, env, e); break;
     case &DisjointConstraint(e1, e2): fallthru(e1, e2);
-    case &SubsetConstraint(e1, e2): 
+    case &SubsetConstraint(e1, e2):
       resolve_type(loc, env, e1);
       resolve_type(loc, env, e2);
       break;
@@ -834,7 +834,7 @@ static void resolve_qualbnd(seg_t loc, env_t env, list_t<$(type_t,type_t)@> qb) 
 }
 
 //used for Dict::iter_c(f('c var_t resolved_t), 'c env, dict<var_t resolved_t 'r>)
-//adds each symbol to the export list 
+//adds each symbol to the export list
 static void export_all_symbols($(list_t<$(seg_t, qvar_t, bool)@`H,`H>@, dict_t<var_t, resolved_t>@, env_t, $(seg_t, list_t<qvar_t>)@)@ cenv,
 			       var_t name, resolved_t res) {
   let &$(exlist_ptr, out_dict, env, &$(wcloc, hidelist)) = cenv;
@@ -854,10 +854,10 @@ static void export_all_symbols($(list_t<$(seg_t, qvar_t, bool)@`H,`H>@, dict_t<v
     *out_dict = Dict::insert(*out_dict, name, res);
     break;
     //the types below are exported by default ... no need to add them
-  case &AggrRes(ad): 
+  case &AggrRes(ad):
     *out_dict = Dict::insert(*out_dict, name, res);
     break;
-  case &AnonEnumRes(t, ef): 
+  case &AnonEnumRes(t, ef):
     break;
   case &DatatypeRes(dd, df): //impos for extern C
     err(wcloc, "Unexpected binding from extern C Include");
@@ -879,7 +879,7 @@ static void resolve_decl(env_t env, decl_t d) {
   seg_t loc = d->loc;
   switch(d->r) {
 
-  case &Var_d(vd): 
+  case &Var_d(vd):
     resolve_and_add_vardecl(loc,env,vd);
     // variable is in scope of its initializer, as in C
     // for "extern C", typechecker will reject any initializer anyway
@@ -890,7 +890,7 @@ static void resolve_decl(env_t env, decl_t d) {
     break;
 
   case &Fn_d(fd): //should never be in cyc_override
-    if(env->in_cyc_override) 
+    if(env->in_cyc_override)
       err2(loc, "Function declaration not permitted within cyclone_override block");
     absolutize_decl(loc,env,fd->name,fd->sc);
     let &$(decl_ns,decl_name) = fd->name;
@@ -906,7 +906,7 @@ static void resolve_decl(env_t env, decl_t d) {
       check_warn_override(loc,env,fd->name);
 
     let old_locals = env->local_vars; // non-NULL only for nested functions
-    if(old_locals != NULL) 
+    if(old_locals != NULL)
       env->local_vars = new *env->local_vars; // can refer to callers' vars
     else
       env->local_vars = new Dict::empty(strptrcmp);
@@ -917,11 +917,11 @@ static void resolve_decl(env_t env, decl_t d) {
     }
     resolve_function_stuff(loc, env, &fd->i);
 
-    if(old_locals != NULL) { 
+    if(old_locals != NULL) {
       // in scope of inner and outer function
-      *old_locals = Dict::insert(*old_locals, decl_name, 
+      *old_locals = Dict::insert(*old_locals, decl_name,
 				 new VarRes(new Funname_b(fd)));
-      *env->local_vars = Dict::insert(*env->local_vars, decl_name, 
+      *env->local_vars = Dict::insert(*env->local_vars, decl_name,
 				      new VarRes(new Funname_b(fd)));
     } else {
       let decl_ns_data = get_ns_data(env->ns,decl_ns);
@@ -945,16 +945,16 @@ static void resolve_decl(env_t env, decl_t d) {
     resolve_pat(env,p); // resolves patterns and adds bindings
     break;
 
-  case &Letv_d(vds):  
+  case &Letv_d(vds):
     for(; vds != NULL; vds = vds->tl)
       resolve_and_add_vardecl(loc,env,vds->hd);
     break;
 
-  case &Region_d(tv,vd,open_exp_opt): 
+  case &Region_d(tv,vd,open_exp_opt):
     if(open_exp_opt != NULL)
       resolve_exp(env,(exp_t)open_exp_opt);
     resolve_and_add_vardecl(loc,env,vd);
-    break; 
+    break;
 
   case &Typedef_d(td): // DJG: I think extern_c is always false at this stage
     if (!at_toplevel(env)) {
@@ -974,7 +974,7 @@ static void resolve_decl(env_t env, decl_t d) {
     }
     break;
 
-  case &Aggr_d(ad): 
+  case &Aggr_d(ad):
     if (!at_toplevel(env)) {
       err2(loc,"nested type definitions are not yet supported");
       break;
@@ -995,14 +995,14 @@ static void resolve_decl(env_t env, decl_t d) {
     }
     if(ad->impl != NULL) {
       let &AggrdeclImpl(_,qb,fs,_,fc) = (struct AggrdeclImpl@)ad->impl;
-      resolve_effconstr(loc, env, fc); 
+      resolve_effconstr(loc, env, fc);
       //      resolve_rgnpo(loc,env,rpo);
       resolve_qualbnd(loc,env,qb);
       resolve_aggrfields(loc,env,fs);
     }
     break;
 
-  case &Enum_d(ed): 
+  case &Enum_d(ed):
     if (!at_toplevel(env)) {
       err2(loc,"nested type definitions are not yet supported");
       break;
@@ -1016,7 +1016,7 @@ static void resolve_decl(env_t env, decl_t d) {
       break;
     // otherwise just add enumdecl and absolutized fields.
     // type-chcecker ensures any redeclaration is redundant
-    if(!env->in_cyc_override) 
+    if(!env->in_cyc_override)
       decl_ns_data->enumdecls = Dict::insert(decl_ns_data->enumdecls,
 					     decl_name, ed);
     if(ed->fields != NULL)
@@ -1026,14 +1026,14 @@ static void resolve_decl(env_t env, decl_t d) {
 	absolutize_decl(f->loc,env,f->name,ed->sc);
 	if(f->tag != NULL)
 	  resolve_exp(env,(exp_t)f->tag);
-	if(!env->in_cyc_override) 
+	if(!env->in_cyc_override)
 	  decl_ns_data->ordinaries = Dict::insert(decl_ns_data->ordinaries,
-						  (*f->name)[1], 
+						  (*f->name)[1],
 						  new EnumRes(ed,f));
       }
     break;
 
-  case &Datatype_d(tud): 
+  case &Datatype_d(tud):
     // see tc.cyc, line 876 for why we do a lookup first...
     try {
       let decls = resolve_lookup(loc,env->ns,tud->name,lookup_datatypedecl);
@@ -1046,13 +1046,13 @@ static void resolve_decl(env_t env, decl_t d) {
       let decl_ns_data = get_ns_data(env->ns,decl_ns);
       decl_ns_data->datatypedecls = Dict::insert(decl_ns_data->datatypedecls,
 						 decl_name,new List(tud,decls));
-    } catch { 
-    case &BindingError: 
-      absolutize_topdecl(loc,env,tud->name,tud->sc); 
+    } catch {
+    case &BindingError:
+      absolutize_topdecl(loc,env,tud->name,tud->sc);
       let &$(decl_ns,decl_name) = tud->name;
       let decl_ns_data = get_ns_data(env->ns,decl_ns);
       // ignore abstract-after-concrete (for non-extensible)
-      if(Dict::member(decl_ns_data->datatypedecls,decl_name) 
+      if(Dict::member(decl_ns_data->datatypedecls,decl_name)
 	 && tud->fields==NULL)
 	break;
       decl_ns_data->datatypedecls = Dict::insert(decl_ns_data->datatypedecls,
@@ -1084,7 +1084,7 @@ static void resolve_decl(env_t env, decl_t d) {
 					   (*f->name)[1],
 					   new DatatypeRes(tud,f));
       }
-    break; 
+    break;
 
   case &Namespace_d(v,ds2):
     enter_ns(env->ns,v,true,mt_renv);
@@ -1097,7 +1097,7 @@ static void resolve_decl(env_t env, decl_t d) {
     leave_using(env->ns);
     break;
 
-  case &ExternC_d(ds2): 
+  case &ExternC_d(ds2):
     let old = env->in_cinclude;
     env->in_cinclude = true;
     resolve_decls(env,ds2);
@@ -1108,7 +1108,7 @@ static void resolve_decl(env_t env, decl_t d) {
     // and only resolved the binding if it is exported
     // I don't think types can be exported, just variables and functions
     // (for extern "C" it's like "export everything")
-  case &ExternCinclude_d(ds2,ovrs,*exports,hides):  //<-----need to handle wc case 
+  case &ExternCinclude_d(ds2,ovrs,*exports,hides):  //<-----need to handle wc case
     for(let exs = *exports; exs != NULL; exs = exs->tl) {
       let &$(loc,qv,_) = exs->hd;
       absolutize_decl(loc,env,qv,ExternC);
@@ -1135,7 +1135,7 @@ static void resolve_decl(env_t env, decl_t d) {
       if(*exports)
 	err((*hides)[0], "export wildcard expects empty export list");
       env->in_cinclude = old;
-      Dict::iter_c(export_all_symbols, new $(exports, &out_dict, env, hides), 
+      Dict::iter_c(export_all_symbols, new $(exports, &out_dict, env, hides),
 		   Dict::difference(new_dict, old_dict));
     } else {
       for (let exs = *exports; exs != NULL; exs = exs->tl) {
@@ -1152,7 +1152,7 @@ static void resolve_decl(env_t env, decl_t d) {
     break;
 
   case &Porton_d: // let Tc warn for now
-  case &Portoff_d: 
+  case &Portoff_d:
   case &Tempeston_d:
   case &Tempestoff_d: break;
   }

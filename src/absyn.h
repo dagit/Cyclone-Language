@@ -19,13 +19,13 @@
 #ifndef _ABSYN_H_
 #define _ABSYN_H_
 
-// These macros are useful for declaring globally shared data constructors.  
+// These macros are useful for declaring globally shared data constructors.
 #define extern_datacon(T,C) extern datatype T.C C##_val
 #define datacon(T,C) datatype T.C C##_val = C
 
 // This file defines the abstract syntax used by the Cyclone compiler
-// and related tools.  It is the crucial set of data structures that 
-// pervade the compiler.  
+// and related tools.  It is the crucial set of data structures that
+// pervade the compiler.
 
 // The abstract syntax is updated imperatively through many stages.
 // * See cyclone.cyc for the order of the stages.
@@ -61,7 +61,7 @@ namespace Absyn {
   using List;
 
   typedef Position::seg_t seg_t;
-  
+
   typedef stringptr_t field_name_t; // field names (for structs, etc.)
   typedef stringptr_t var_t;        // variables are string pointers
   typedef stringptr_t tvarname_t;   // type variables
@@ -79,7 +79,7 @@ namespace Absyn {
   // Qualified variables
   typedef $(nmspace_t,var_t) @qvar_t, *qvar_opt_t;
   typedef qvar_t typedef_name_t;
-  typedef qvar_opt_t typedef_name_opt_t; 
+  typedef qvar_opt_t typedef_name_opt_t;
 
   // typedefs -- in general, we define foo_t to be struct Foo@ or datatype Foo@
   typedef enum Scope scope_t;
@@ -87,7 +87,7 @@ namespace Absyn {
   typedef enum Size_of size_of_t;
   typedef struct Kind @kind_t;
   typedef datatype KindBound @kindbound_t;
-  typedef struct Tvar @tvar_t; 
+  typedef struct Tvar @tvar_t;
   typedef enum Sign sign_t;
   typedef enum AggrKind aggr_kind_t;
   typedef struct PtrAtts ptr_atts_t;
@@ -136,13 +136,13 @@ namespace Absyn {
   typedef struct PtrLoc *ptrloc_t;
   typedef datatype EffConstraint @effconstr_t, *effconstr_opt_t;
 
-  // scopes for declarations 
-  EXTERN_ABSYN enum Scope { 
+  // scopes for declarations
+  EXTERN_ABSYN enum Scope {
     Static,    // definition is local to the compilation unit
     Abstract,  // definition is exported only abstractly (structs only)
     Public,    // definition is exported in full glory (most things)
     Extern,    // definition is provided elsewhere
-    ExternC,   // definition is provided elsewhere by C code 
+    ExternC,   // definition is provided elsewhere by C code
     Register   // value may be stored in a register
   };
 
@@ -150,10 +150,10 @@ namespace Absyn {
   //   the print fields are printed but the real fields control the
   //   attributes with respect to type-checking.  After type-well-formedness,
   //   it should be that print_const implies real_const
-  EXTERN_ABSYN struct Tqual { 
-    bool print_const :1; 
-    bool q_volatile  :1; 
-    bool q_restrict  :1; 
+  EXTERN_ABSYN struct Tqual {
+    bool print_const :1;
+    bool q_volatile  :1;
+    bool q_restrict  :1;
     bool real_const  :1;
     seg_t loc; // only present when porting C code
   };
@@ -162,7 +162,7 @@ namespace Absyn {
   EXTERN_ABSYN enum Sign     { Signed, Unsigned, None }; // for integral types
   EXTERN_ABSYN enum AggrKind { StructA, UnionA };
 
-  EXTERN_ABSYN enum AliasQualVal { 
+  EXTERN_ABSYN enum AliasQualVal {
     Aliasable_qual,  // for types that can be aliased
     Unique_qual,     // for types that cannot be aliased
     Refcnt_qual,     // for reference counted types
@@ -171,20 +171,20 @@ namespace Absyn {
   typedef enum AliasQualVal alias_qual_val_t;
 
   //   // Used to classify kinds: Aliasable <= Top, Unique <= Top
-  //   EXTERN_ABSYN enum AliasQual { 
+  //   EXTERN_ABSYN enum AliasQual {
   //     Aliasable, // for types that can be aliased
   //     Unique,    // for types that cannot be aliased
   //     Top        // any of the above
   //   };
-   
+
   // Used to support sugar `a::B\T --> `a : RESTRICTED >= aquals(`a)
-  EXTERN_ABSYN enum AliasHint { 
+  EXTERN_ABSYN enum AliasHint {
     UniqueHint,    // for types that cannot be aliased
     RefcntHint,    // for types that cannot be aliased
     RestrictedHint,        // any of the above
     NoHint //default -- i.e aliasable
   };
-  EXTERN_ABSYN enum KindQual { 
+  EXTERN_ABSYN enum KindQual {
     // BoxKind <= MemKind <= AnyKind
     AnyKind, // kind of all types, including abstract structs
     MemKind, // excludes abstract structs
@@ -196,7 +196,7 @@ namespace Absyn {
     PtrBndKind,   // fat or thin(e) used for pointers
     AqualKind //for alias qualifier type variables
   };
-  EXTERN_ABSYN struct Kind { 
+  EXTERN_ABSYN struct Kind {
     enum KindQual  kind;
     enum AliasHint aliashint;
   };
@@ -208,8 +208,8 @@ namespace Absyn {
   //   Unknown_kb(NULL):  the tvar's kind is completely unconstrained
   //   Less_kb(NULL,k): the tvar's kind is unknown but less than k
   EXTERN_ABSYN datatype KindBound {
-    Eq_kb(kind_t);        
-    Unknown_kb(opt_t<kindbound_t>); 
+    Eq_kb(kind_t);
+    Unknown_kb(opt_t<kindbound_t>);
     Less_kb(opt_t<kindbound_t>, kind_t);
   };
 
@@ -217,7 +217,7 @@ namespace Absyn {
   EXTERN_ABSYN struct Tvar {
     tvarname_t  name;       // the user-level name of the type variable
     int         identity;   // for alpha-conversion -- unique -- -1 is error
-    kindbound_t kind;     
+    kindbound_t kind;
     type_opt_t aquals_bound; //used only by the parser, tctyp strips this out and adds to qual_bnd
   };
 
@@ -239,8 +239,8 @@ namespace Absyn {
 
   // information about a pointer type
   EXTERN_ABSYN struct PtrInfo {
-    type_t     elt_type;  // type of value to which pointer points 
-    tqual_t    elt_tq;   // qualifier **for elements** 
+    type_t     elt_type;  // type of value to which pointer points
+    tqual_t    elt_tq;   // qualifier **for elements**
     ptr_atts_t ptr_atts;
   };
 
@@ -263,8 +263,8 @@ namespace Absyn {
     // formedness of the type, these names are no longer used.  Rather,
     // the arg_vardecls are used e.g., in the requires, ensures, and
     // throws assertions.
-    list_t<$(var_opt_t,tqual_t,type_t)@>  args; 
-    // if c_varargs is true, then cyc_varargs == null, and if 
+    list_t<$(var_opt_t,tqual_t,type_t)@>  args;
+    // if c_varargs is true, then cyc_varargs == null, and if
     // cyc_varargs is non-null, then c_varargs is false.
     bool                                     c_varargs;
     vararg_info_t*                           cyc_varargs;
@@ -275,7 +275,7 @@ namespace Absyn {
     // function type attributes can include regparm(n), noreturn, const, nothrow
     // and at most one of cdecl, stdcall, and fastcall.  See gcc info
     // for documentation on attributes.
-    attributes_t                             attributes; 
+    attributes_t                             attributes;
     // pre-condition to call function as expression
     exp_opt_t                                requires_clause;
      // pre-condition after checking well-formedness
@@ -306,7 +306,7 @@ namespace Absyn {
     datatypedecl_t @KnownDatatype;              // known definition
   };
   datatype_info_t UnknownDatatype(struct UnknownDatatypeInfo);
-  datatype_info_t KnownDatatype(datatypedecl_t@`H);              
+  datatype_info_t KnownDatatype(datatypedecl_t@`H);
 
   // information for datatype Foo.Bar
   EXTERN_ABSYN struct UnknownDatatypeFieldInfo {
@@ -324,7 +324,7 @@ namespace Absyn {
   EXTERN_ABSYN @tagged union AggrInfo {
     $(aggr_kind_t,typedef_name_t,opt_t<bool> tagged) UnknownAggr;
     aggrdecl_t@ KnownAggr;
-  };  
+  };
   aggr_info_t UnknownAggr(aggr_kind_t,typedef_name_t,opt_t<bool,`H>);
   aggr_info_t KnownAggr(aggrdecl_t@`H);
 
@@ -335,11 +335,11 @@ namespace Absyn {
     booltype_t zero_term;      // true => zero-terminated
     seg_t      zt_loc;         // location of zeroterm qualifier
   };
- 
+
   // could allow datatype decls in here as well
   EXTERN_ABSYN datatype Raw_typedecl {
     Aggr_td(aggrdecl_t);
-    Enum_td(enumdecl_t); 
+    Enum_td(enumdecl_t);
     Datatype_td(datatypedecl_t);
   };
   typedef datatype Raw_typedecl @raw_type_decl_t;
@@ -357,7 +357,7 @@ namespace Absyn {
     ComplexCon; // complex ranges over intcon and floatcons only.
     RgnHandleCon; // region_t<`r> (handle for allocating).  RgnKind -> BoxKind
     TagCon;     // tag_t<t>.  IntKind -> BoxKind.
-    HeapCon;    // The heap region.  EffKind // used to be RgnKind 
+    HeapCon;    // The heap region.  EffKind // used to be RgnKind
     UniqueHeapCon;  // Short hand for the heap region with @aqual(UNIQUE). RgnKind
     RefCntHeapCon;   // Short hand for the heap region with @aqual(REFCNT). RgnKind
     //    AccessCon;  // Uses region r.  RgnKind -> EffKind //don't need this anymore REMOVE
@@ -365,13 +365,13 @@ namespace Absyn {
     RgnsCon;  // regions(t).  AnyKind -> EffKind
     TrueCon;  // BoolKind
     FalseCon; // BoolKind
-    ThinCon;  // IntKind -> PtrBndKind 
+    ThinCon;  // IntKind -> PtrBndKind
     FatCon;   // PtrBndKind
     AqualsCon;   // aquals(`a) : BoxKind -> AqualKind (aquals(`a::B))
     AqualConstCon(alias_qual_val_t); //AqualKind (RESTRICTED, UNIQUE etc.)
     AqualVarCon; // AqualKind x AqualKind -> AqualKind  (arg1: tvar, arg2: bound)
     AqualHandleCon; // AqualKind -> BoxKind  (aqual_t<`q>)
-    EnumCon(typedef_name_t,struct Enumdecl *); // MemKind 
+    EnumCon(typedef_name_t,struct Enumdecl *); // MemKind
     AnonEnumCon(list_t<enumfield_t>); // MemKind
     BuiltinCon(string_t,kind_t); // e.g., __builtin_va_list
     DatatypeCon(datatype_info_t); // e.g., datatype Foo
@@ -379,14 +379,14 @@ namespace Absyn {
     AggrCon(aggr_info_t); // e.g., union U or struct S
   };
   typedef datatype TyCon @tycon_t;
-  
+
   EXTERN_ABSYN datatype EffConstraint {
     SingleConstraint(type_t); //single(e1) used to ensure that a pointer *points into* a given region, e.g in rfree
     DisjointConstraint(type_t, type_t); //e1|e2 (useful for restrict / alias information)
     SubsetConstraint(type_t, type_t); //regions(`env)<`e, used in existential types t
   };
 
-  // Note: The last fields of AggrType, TypedefType, and the decl 
+  // Note: The last fields of AggrType, TypedefType, and the decl
   // are set by check_valid_type which most of the compiler assumes
   // has been called.  Doing so avoids the need for some code to have and use
   // a type-name environment just like variable-binding fields avoid the need
@@ -395,14 +395,14 @@ namespace Absyn {
   // FIX: May want to make this raw_type and store the kinds with the types.
   EXTERN_ABSYN datatype Type {
     // application of a type constructor to zero or more arguments
-    AppType(tycon_t, types_t); 
+    AppType(tycon_t, types_t);
    // Evars are introduced for unification or via _ by the user.
     // The kind can get filled in during well-formedness checking.
     // The type can get filled in during unification.
     // The int is used as a unique identifier for printing messages.
     // The list of tvars is the set of free type variables that can
-    // occur in the type to which the evar is constrained.  
-    Evar(opt_t<kind_t>,type_opt_t,int,opt_t<list_t<tvar_t>>); 
+    // occur in the type to which the evar is constrained.
+    Evar(opt_t<kind_t>,type_opt_t,int,opt_t<list_t<tvar_t>>);
     VarType(tvar_t); // type variables, kind induced by tvar
     PointerType(ptr_info_t); // t*, t?, t@, etc.  BoxKind when not Unknown_b
     ArrayType(array_info_t);// MemKind
@@ -417,8 +417,8 @@ namespace Absyn {
     ValueofType(exp_t);      // IntKind -- exp must be a type-level expression
     // A struct, union, or enum declaration nested within a type -- we
     // enter the declaration into the environment and then only use the
-    // type_t part from then on.  
-    TypeDeclType(type_decl_t,type_t*); 
+    // type_t part from then on.
+    TypeDeclType(type_decl_t,type_t*);
     // GCC extensions
     TypeofType(exp_t);
   };
@@ -428,11 +428,11 @@ namespace Absyn {
 
   // See GCC info pages for GCC attributes we try to support; see attributes.cyc
   EXTERN_ABSYN datatype Attribute {
-    Regparm_att(int); 
-    Stdcall_att;      
-    Cdecl_att;        
+    Regparm_att(int);
+    Stdcall_att;
+    Cdecl_att;
     Fastcall_att;
-    Noreturn_att;     
+    Noreturn_att;
     Const_att;
     Aligned_att(exp_opt_t);
     Packed_att;
@@ -447,7 +447,7 @@ namespace Absyn {
     Constructor_att;
     Destructor_att;
     No_check_memory_usage_att;
-    Format_att(enum Format_Type, 
+    Format_att(enum Format_Type,
                int,   // format string arg
                int);  // first arg to type-check
     Initializes_att(int); // param that function initializes through
@@ -462,7 +462,7 @@ namespace Absyn {
 
   // used when parsing/pretty-printing function definitions.
   EXTERN_ABSYN datatype Funcparams {
-    NoTypes(list_t<var_t>,seg_t); // K&R style.  
+    NoTypes(list_t<var_t>,seg_t); // K&R style.
     WithTypes(list_t<$(var_opt_t,tqual_t,type_t)@>, // args and types
               bool,                                    // true ==> c_varargs
               vararg_info_t *,                         // cyc_varargs
@@ -502,7 +502,7 @@ namespace Absyn {
   // Primitive operations
   EXTERN_ABSYN enum Primop {
     Plus, Times, Minus, Div, Mod, Eq, Neq, Gt, Lt, Gte, Lte, Not,
-    Bitnot, Bitand, Bitor, Bitxor, Bitlshift, Bitlrshift, 
+    Bitnot, Bitand, Bitor, Bitxor, Bitlshift, Bitlrshift,
     Numelts, Tagof
   };
 
@@ -551,8 +551,8 @@ namespace Absyn {
   EXTERN_ABSYN struct MallocInfo {
     malloc_kind_t mknd;     // determines whether this is a malloc or calloc or vmalloc
     exp_opt_t  rgn;      // for rmalloc and rcalloc only
-    exp_opt_t  aqual;    // aqual_t may be present for allocating unique or refcnt pointers 
-    type_t    *elt_type; // when [r]malloc, set by type-checker.  when 
+    exp_opt_t  aqual;    // aqual_t may be present for allocating unique or refcnt pointers
+    type_t    *elt_type; // when [r]malloc, set by type-checker.  when
                          // [r]calloc, set by parser
     exp_t      num_elts; // for [r]malloc: is the sizeof(t)*n.
                          // for [r]calloc: is just n.
@@ -577,10 +577,10 @@ namespace Absyn {
     // the vararg_call_info_t is non-null only if this is a vararg call
     // and is set during type-checking and used only for code generation.
     FnCall_e(exp_t,list_t<exp_t>,vararg_call_info_t *,bool resolved); //fn call
-    Throw_e(exp_t,bool preserve_lineinfo); // throw.  
+    Throw_e(exp_t,bool preserve_lineinfo); // throw.
     NoInstantiate_e(exp_t); // e@<>
     Instantiate_e(exp_t,types_t); // instantiation of polymorphic defn
-    // (t)e.  
+    // (t)e.
     Cast_e(type_t,exp_t,bool,coercion_t);//true bool indicates user made cast
     Address_e(exp_t); // &e
     New_e(exp_opt_t, exp_t, exp_opt_t); // first expression is region -- null is heap, 3rd is aqual_t -- null is ALIASABLE
@@ -600,16 +600,16 @@ namespace Absyn {
     Subscript_e(exp_t,exp_t); // e1[e2]
     //Tuple_e(list_t<exp_t>);   // $(e1,...,en)
     CompoundLit_e($(var_opt_t,tqual_t,type_t)@,
-                  list_t<$(list_t<designator_t>,exp_t)@>); 
+                  list_t<$(list_t<designator_t>,exp_t)@>);
     Array_e(list_t<$(list_t<designator_t>,exp_t)@>); // {.0=e1,...,.n=en}
     // {for i < e1 : e2} -- the bool tells us whether it's zero-terminated
     Comprehension_e(vardecl_t,exp_t,exp_t,bool); // much of vardecl is known
     // {for i < e1 : t} -- used for variable-sized flat arrays
-    ComprehensionNoinit_e(exp_t,type_t,bool); 
+    ComprehensionNoinit_e(exp_t,type_t,bool);
     // Foo{.x1=e1,...,.xn=en} (with optional witness types)
     Aggregate_e(typedef_name_t,
                 types_t,//witness types, maybe fewer before type-checking
-                list_t<$(list_t<designator_t>,exp_t)@>, 
+                list_t<$(list_t<designator_t>,exp_t)@>,
                 struct Aggrdecl *);
     // {.x1=e1,....,.xn=en}
     AnonStruct_e(type_opt_t, bool tuple, list_t<$(list_t<designator_t>,exp_t)@>);
@@ -617,7 +617,7 @@ namespace Absyn {
     Datatype_e(list_t<exp_t>,datatypedecl_t,datatypefield_t);
     Enum_e(enumdecl_t,enumfield_t);
     AnonEnum_e(type_t,enumfield_t);
-    // malloc(e1), rmalloc(e1,e2), calloc(e1,e2), rcalloc(e1,e2,e3).  
+    // malloc(e1), rmalloc(e1,e2), calloc(e1,e2), rcalloc(e1,e2,e3).
     Malloc_e(malloc_info_t);
     Swap_e(exp_t,exp_t); // swap(e1,e2)
     // will resolve into array, struct, etc.
@@ -634,7 +634,7 @@ namespace Absyn {
     // between the parens.
     //                    V instr  : outvars                    : invars                     :   clobbers V
     Asm_e(bool, string_t, list_t<$(string_t, exp_t)@>, list_t<$(string_t, exp_t)@>, list_t<string_t@>);
-    Extension_e(exp_t); 
+    Extension_e(exp_t);
     // implements GCC's __extension__ (...) though we just pass it through.
     Assert_e(exp_t); // a static assertion to be checked by the analysis
     Assert_false_e(exp_t); // a static assertion that shouldn't be proved by the analysis
@@ -660,9 +660,9 @@ namespace Absyn {
     Break_s;
     Continue_s;
     Goto_s(var_t);
-    For_s(exp_t,$(exp_t,stmt_t),$(exp_t,stmt_t),stmt_t); 
+    For_s(exp_t,$(exp_t,stmt_t),$(exp_t,stmt_t),stmt_t);
     // switch statement
-    Switch_s(exp_t,list_t<switch_clause_t>, Tcpat::decision_opt_t);  
+    Switch_s(exp_t,list_t<switch_clause_t>, Tcpat::decision_opt_t);
     // next case set by type-checking
     Fallthru_s(list_t<exp_t>,switch_clause_t *);
     Decl_s(decl_t,stmt_t); // declarations
@@ -681,7 +681,7 @@ namespace Absyn {
 
   // raw patterns
   EXTERN_ABSYN datatype Raw_pat {
-    Wild_p; // _ 
+    Wild_p; // _
     // for Var_p and Reference_p only name field is right until tcPat is called
     Var_p(vardecl_t,pat_t); // x as p (x when p is Wild_p)
     AliasVar_p(tvar_t, vardecl_t);  // alias <`r> T x
@@ -742,20 +742,22 @@ namespace Absyn {
     seg_t              varloc;      // declaration beginning and ending location
     tqual_t            tq;          // const, volatile, etc.
     type_t             type;        // type of variable
-    exp_opt_t          initializer; // optional initializer -- 
+    exp_opt_t          initializer; // optional initializer --
                                     // ignored for non-local/global variables
     type_opt_t         rgn;         // filled in by type-checker
     // attributes can include just about anything...but the type-checker
     // must ensure that they are properly accounted for.  For instance,
     // functions cannot be aligned or packed.  And non-functions cannot
     // have regpar(n), stdcall, cdecl, noreturn, or const attributes.
-    attributes_t       attributes; 
+    attributes_t       attributes;
     bool               escapes;     // set by type-checker -- used for simple
     // flow analyses, means that &x is taken in some way so there can be
     // aliasing. (should go away since flow analysis already does
     // a less syntactic escapes analysis)
     bool               is_proto; //used for suppression of gcc warnings ...
     //by inserting extern kw appropriately
+    exp_opt_t          rename; // optional asm expression,
+    // used by gcc for renaming ("Controlling Names Used in Assembler Code")
   };
 
   // Function declarations.
@@ -798,21 +800,21 @@ namespace Absyn {
     typedef_name_t        name; // struct name
     list_t<tvar_t>        tvs;  // type parameters
     struct AggrdeclImpl * impl; // NULL when abstract
-    attributes_t          attributes; 
-    // when expected_mem_kind is true, the aggregate must eventually be 
+    attributes_t          attributes;
+    // when expected_mem_kind is true, the aggregate must eventually be
     // defined and result in a &mk definition
-    bool                  expected_mem_kind; 
+    bool                  expected_mem_kind;
   };
 
   EXTERN_ABSYN struct Datatypefield {
-    qvar_t                     name; 
+    qvar_t                     name;
     list_t<$(tqual_t,type_t)@> typs;
     seg_t                      loc;
     scope_t                    sc; // relevant only for extensible datatypes
   };
 
   //for now, tvs cannot contain any qualifier variables, so no bounds info either
-  EXTERN_ABSYN struct Datatypedecl { 
+  EXTERN_ABSYN struct Datatypedecl {
     scope_t                      sc;
     typedef_name_t               name;
     list_t<tvar_t>               tvs;
@@ -851,7 +853,7 @@ namespace Absyn {
           exp_t, Tcpat::decision_opt_t);
     Letv_d(list_t<vardecl_t>); // multi-let
     Region_d(tvar_t,vardecl_t,exp_opt_t); // region declaration
-    // region<`r> h; or region<`r> h = open(k);  
+    // region<`r> h; or region<`r> h = open(k);
     Aggr_d(aggrdecl_t);    // [struct|union] Foo { ... }
     Datatype_d(datatypedecl_t);    // datatype Bar { ... }
     Enum_d(enumdecl_t);        // enum Baz { ... }
@@ -886,7 +888,7 @@ namespace Absyn {
   // Operations and Constructors for Abstract Syntax
   ///////////////////////////////////////////////////////////////////
 
-  // compare variables 
+  // compare variables
   int qvar_cmp(qvar_t, qvar_t);
   int hash_qvar(qvar_t);
   int varlist_cmp(list_t<var_t>, list_t<var_t>);
@@ -898,7 +900,7 @@ namespace Absyn {
   extern nmspace_t Loc_n;
   nmspace_t Rel_n(list_t<var_t,`H>);
   // Abs_n(ns) when C_scope is false, C_n(ns) when C_scope is true
-  nmspace_t Abs_n(list_t<var_t,`H>, bool C_scope); 
+  nmspace_t Abs_n(list_t<var_t,`H>, bool C_scope);
 
   ///////////////////////// Qualifiers ////////////////////////////
   tqual_t const_tqual(seg_t);
@@ -990,7 +992,7 @@ namespace Absyn {
   // t @`r (bounds = Upper(1)
   type_t at_type(type_t, rgntype_t, aqualtype_t,tqual_t, booltype_t zero_term, booltype_t rel);
   // t*`H
-  type_t cstar_type(type_t, tqual_t); 
+  type_t cstar_type(type_t, tqual_t);
   // t?`r
   type_t fatptr_type(type_t t, type_t rgn, aqualtype_t, tqual_t, booltype_t zt, booltype_t rel);
   // structs
@@ -1000,14 +1002,14 @@ namespace Absyn {
   // unions
   type_t union_type(var_t name);
   // arrays
-  type_t array_type(type_t elt_type, tqual_t, exp_opt_t num_elts, 
+  type_t array_type(type_t elt_type, tqual_t, exp_opt_t num_elts,
 		    booltype_t zero_term, seg_t ztloc);
   // datatypes, datatype fields, and aggregates
   type_t datatype_type(datatype_info_t, types_t args);
   type_t datatype_field_type(datatype_field_info_t,types_t args);
   type_t aggr_type(aggr_info_t, types_t args);
   //type for aquals(`a::B)::Q
-  type_t aqualsof_type(type_t); 
+  type_t aqualsof_type(type_t);
 
   /////////////////////////////// Constants //////////////////////////
   cnst_t Char_c(sign_t,char);
@@ -1081,7 +1083,7 @@ namespace Absyn {
   exp_t array_exp(list_t<exp_t,`H>, seg_t);
   exp_t valueof_exp(type_t, seg_t);
   exp_t asm_exp(bool, string_t<`H>, list_t<$(string_t<`H>,exp_t)@`H,`H>,
-		list_t<$(string_t<`H>,exp_t)@`H,`H>, 
+		list_t<$(string_t<`H>,exp_t)@`H,`H>,
 		list_t<string_t<`H>@`H,`H>, seg_t);
   exp_t extension_exp(exp_t, seg_t);
   exp_t assert_exp(exp_t,seg_t);
@@ -1107,7 +1109,7 @@ namespace Absyn {
   stmt_t for_stmt(exp_t,exp_t,exp_t,stmt_t,seg_t);
   stmt_t switch_stmt(exp_t, list_t<switch_clause_t,`H>, seg_t);
   stmt_t fallthru_stmt(list_t<exp_t,`H>, seg_t);
-  stmt_t decl_stmt(decl_t, stmt_t, seg_t); 
+  stmt_t decl_stmt(decl_t, stmt_t, seg_t);
   stmt_t declare_stmt(qvar_t,type_t,exp_opt_t init,stmt_t,seg_t);
   stmt_t label_stmt(var_t,stmt_t,seg_t);
   stmt_t do_stmt(stmt_t,exp_t,seg_t);
@@ -1123,9 +1125,9 @@ namespace Absyn {
   decl_t new_decl(raw_decl_t,seg_t);
   decl_t let_decl(pat_t,exp_t,seg_t);
   decl_t letv_decl(list_t<vardecl_t,`H>, seg_t);
-  decl_t region_decl(tvar_t,vardecl_t,exp_opt_t open_exp, seg_t); 
+  decl_t region_decl(tvar_t,vardecl_t,exp_opt_t open_exp, seg_t);
   decl_t alias_decl(tvar_t,vardecl_t,exp_t,seg_t);
-  vardecl_t new_vardecl(seg_t varloc, qvar_t, type_t, exp_opt_t init);
+  vardecl_t new_vardecl(seg_t varloc, qvar_t, type_t, exp_opt_t init, exp_opt_t rename);
   vardecl_t static_vardecl(qvar_t, type_t, exp_opt_t init);
   struct AggrdeclImpl @ aggrdecl_impl(list_t<tvar_t,`H> exists,
 				      // list_t<$(type_t,type_t)@`H,`H> po,
@@ -1139,26 +1141,26 @@ namespace Absyn {
   type_decl_t aggr_tdecl(aggr_kind_t, scope_t, typedef_name_t,
 			 list_t<tvar_t,`H>, struct AggrdeclImpl *`H,
 			 attributes_t, seg_t);
-  decl_t struct_decl(scope_t, typedef_name_t, list_t<tvar_t,`H>, 
+  decl_t struct_decl(scope_t, typedef_name_t, list_t<tvar_t,`H>,
 		     struct AggrdeclImpl *`H, attributes_t, seg_t);
-  decl_t union_decl(scope_t, typedef_name_t, list_t<tvar_t,`H>, 
+  decl_t union_decl(scope_t, typedef_name_t, list_t<tvar_t,`H>,
 		    struct AggrdeclImpl *`H, attributes_t, seg_t);
   decl_t datatype_decl(scope_t, typedef_name_t, list_t<tvar_t,`H>,
-		       opt_t<list_t<datatypefield_t,`H>,`H>, 
+		       opt_t<list_t<datatypefield_t,`H>,`H>,
 		       bool is_extensible, seg_t);
-  type_decl_t datatype_tdecl(scope_t, typedef_name_t, 
+  type_decl_t datatype_tdecl(scope_t, typedef_name_t,
 			     list_t<tvar_t,`H>,
-			     opt_t<list_t<datatypefield_t,`H>,`H>, 
+			     opt_t<list_t<datatypefield_t,`H>,`H>,
 			     bool is_extensible, seg_t);
 
   type_t function_type(list_t<tvar_t,`H> tvs,type_opt_t eff_typ,
-		       tqual_t ret_tqual, type_t ret_type, 
+		       tqual_t ret_tqual, type_t ret_type,
 		       list_t<$(var_opt_t,tqual_t,type_t)@`H,`H> args,
 		       bool c_varargs, vararg_info_t *`H cyc_varargs,
 		       //		       list_t<$(type_t,type_t)@`H,`H> rgn_po,
 		       list_t<effconstr_t,`H> effconstr,
 		       list_t<$(type_t,type_t)@`H,`H> qb,
-		       attributes_t, 
+		       attributes_t,
 		       exp_opt_t requires_clause, exp_opt_t ensures_clause,
                        exp_opt_t throws_clause);
   // turn t f(t1,...,tn) into t (@f)(t1,...,tn) -- when fresh_evar is

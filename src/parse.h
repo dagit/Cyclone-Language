@@ -49,7 +49,7 @@ using List {
     list_t<type_modifier_t<`yy>,`yy> tms;
   };
   typedef struct Declarator<`yy> declarator_t<`yy>;
-  typedef flat_list_t<$(declarator_t<`yy>,exp_opt_t),`yy> declarator_list_t<`yy>;
+  typedef flat_list_t<$(declarator_t<`yy>,exp_opt_t,exp_opt_t),`yy> declarator_list_t<`yy>;
   typedef flat_list_t<declarator_t<`yy>,`r> declarators_t<`r,`yy>;
 
   enum Storage_class {

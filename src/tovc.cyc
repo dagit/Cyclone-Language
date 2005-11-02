@@ -22,10 +22,10 @@
 // StmtExp.  Note RemoveAggrs removed most array initializers.
 //
 // Caveats:
-//  * It hoists declarations out a bit.  So lifetimes may be slightly 
+//  * It hoists declarations out a bit.  So lifetimes may be slightly
 //    different, but you'll never notice (gcc hoists anyway instead of
 //    constantly pushing/popping the stack).
-//  * It gensyms functions for anything complicated, including the 
+//  * It gensyms functions for anything complicated, including the
 //    translation of comprehensions and array initializers
 //  * This is just a hack for Dan to push a device driver into Win2000.
 
@@ -45,7 +45,7 @@
 //     expression (the generated functions don't return values)
 //     Fortunately, you can have (f(), 3) where f() has type void.
 // A final complication when creating functions is the translation to C
-//  doesn't set var bindings, so we collect up the vardecls so we can get 
+//  doesn't set var bindings, so we collect up the vardecls so we can get
 //  the types we need.  Bleach.
 
 // FIX: Does the wrong thing if return appears in a StmtExp.  Similar for
@@ -79,7 +79,7 @@ int elim_array_initializers = 1; // a flag
 static struct BoxingEnv<`r,`r2> {
   region_t<`r> rgn;
   list_t<vardecl_t,`r> all_locals; // for getting type info for freevars
-  Dict::dict_t<var_t,exp_t,`r> varmap; 
+  Dict::dict_t<var_t,exp_t,`r> varmap;
   list_t<vardecl_t,`r> boundvars;  // do not box these
   Set::set_t<vardecl_t,`r> @`r2 freevars; // params to generated function
 };
@@ -88,7 +88,7 @@ typedef struct BoxingEnv<`r,`r2> boxingenv_t<`r,`r2>; // not boxed
 struct ToExpEnv<`r> {
   region_t<`r> rgn;
   list_t<vardecl_t,`r> all_locals; // for getting type info for freevars
-  Dict::dict_t<var_t,exp_t,`r> varmap; 
+  Dict::dict_t<var_t,exp_t,`r> varmap;
   stmt_t encloser; // where to put hoisted locals
   list_t<decl_t>@`r gen_ds; // for generated functions
 };
@@ -123,20 +123,20 @@ static exp_opt_t box_free_vars_exp(boxingenv_t env, exp_t e) {
 	let vd = env.all_locals->hd;
 	if (strptrcmp(v,(*vd->name)[1])==0) {
 	  *env.freevars = Set::rinsert(env.rgn,*env.freevars,vd);
-	  // don't deref if it's a stack-allocated array 
+	  // don't deref if it's a stack-allocated array
 	  switch (vd->type) {
 	  case &ArrayType(_): return NULL;
 	  default: return deref_exp(var_exp(vd->name,DL),DL);
 	  }
 	}
       }
-      
-      //FJS: if its a local var that does hit either of the previous cases 
+
+      //FJS: if its a local var that does hit either of the previous cases
       //     (bound or free), throw exception
       for (; env.all_locals != NULL; env.all_locals = env.all_locals->tl)
 	if (strptrcmp(v,(*env.all_locals->hd->name)[1])==0)
 	  Warn::impos2("unbound variable ",*v," found in box_free_vars_exp");
-      
+
       //FJS: if it's neither a local var or a global var, assume it is from the header file
       //     (eg. _get_zero_arr_size_char)
       return NULL;
@@ -238,7 +238,7 @@ static exp_opt_t box_free_vars_exp(boxingenv_t env, exp_t e) {
     BOX_EXP_AND_UPDATE(env,*e1);
     return NULL;
 
-  case &Sizeoftype_e(_): 
+  case &Sizeoftype_e(_):
   case &Offsetof_e(_,_):
   case &Enum_e(...):   return NULL;
 
@@ -258,23 +258,23 @@ static void box_free_vars_stmt(boxingenv_t env, stmt_t s) {
   // with a lot less here, but may as well get it right the first time. :-)
   while(true)
     switch (s->r) {
-    case &Skip_s: return;        
-    case &Break_s: 
-      Warn::warn(s->loc,"break in eliminated statement expression");   
+    case &Skip_s: return;
+    case &Break_s:
+      Warn::warn(s->loc,"break in eliminated statement expression");
       return;
-    case &Continue_s: 
-      Warn::warn(s->loc,"continue in eliminated statement expression");   
+    case &Continue_s:
+      Warn::warn(s->loc,"continue in eliminated statement expression");
       // FIX: reject if goto is to a different function (a pain to detect)
       //  (Similarly a label that has gotos from different functions)
       return;
-    case &Goto_s(_):   
-      Warn::warn(s->loc,"goto in eliminated statement expression");   
+    case &Goto_s(_):
+      Warn::warn(s->loc,"goto in eliminated statement expression");
       return;
     case &Label_s(_,s2):
       s = s2;
       continue;
     case &Return_s(*eopt):
-      Warn::warn(s->loc,"return in eliminated statement expression");   
+      Warn::warn(s->loc,"return in eliminated statement expression");
       // FIX: reject this -- it won't be in the right function.
       if (*eopt != NULL) {
 	let ei = box_free_vars_exp(env,(exp_t)*eopt);
@@ -349,22 +349,22 @@ static exp_t stmt_to_fun(toexpenv_t env, stmt_t s, type_t rettype) {
   box_free_vars_stmt(boxenv,s);
   list_t<$(var_opt_t,tqual_t,type_t)@> params = NULL;
   list_t<exp_t> args = NULL;
-  
+
   let iter = Set::make_iter(Core::heap_region, freevars);
   // having to initialize is a pain :-(
   let vd = new Vardecl(Public,exn_name,0,empty_tqual(0),void_type,
-		       NULL,NULL,NULL,false,false);
+		       NULL,NULL,NULL,false,false,NULL);
     // don't box if it's a stack-allocated array
   while(Iter::next(iter,&vd))
     switch (vd->type) {
-    case &ArrayType(ArrayInfo{elt_type,_,_,_,_}): 
-      params = new List(new $((*vd->name)[1], vd->tq, 
+    case &ArrayType(ArrayInfo{elt_type,_,_,_,_}):
+      params = new List(new $((*vd->name)[1], vd->tq,
 			      cstar_type(elt_type,empty_tqual(0))),
 			params);
-      args = new List(var_exp(vd->name,DL), args); 
+      args = new List(var_exp(vd->name,DL), args);
       break;
-    default: 
-      params = new List(new $((*vd->name)[1], vd->tq, 
+    default:
+      params = new List(new $((*vd->name)[1], vd->tq,
 			      cstar_type(vd->type,empty_tqual(0))),
 			params);
       args = new List(address_exp(var_exp(vd->name,DL),DL), args);
@@ -417,14 +417,14 @@ static void apply_varmap(Dict::dict_t<var_t,exp_t> varmap, exp_t e) {
   case &Address_e(e1):        fallthru(e1);
   case &Sizeofexp_e(e1):      fallthru(e1);
   case &Deref_e(e1):          fallthru(e1);
-  case &AggrMember_e(e1,...):   fallthru(e1); 
+  case &AggrMember_e(e1,...):   fallthru(e1);
   case &AggrArrow_e(e1,...):    fallthru(e1);
   case &Increment_e(e1,_):
     apply_varmap(varmap,e1);
     return;
 
-  case &Sizeoftype_e(_):  
-  case &Offsetof_e(_,_): 
+  case &Sizeoftype_e(_):
+  case &Offsetof_e(_,_):
   case &Enum_e(...): return;
 
   case &UnresolvedMem_e(_,dles):
@@ -439,15 +439,15 @@ static void apply_varmap(Dict::dict_t<var_t,exp_t> varmap, exp_t e) {
 static exp_t stmt_to_exp(toexpenv_t env, stmt_t s) {
   switch (s->r) {
   case &Skip_s: return true_exp(DL);
-  case &Exp_s(e): 
+  case &Exp_s(e):
     apply_varmap(env.varmap,e);
     return e;
-  case &Seq_s(s1,s2): 
+  case &Seq_s(s1,s2):
     // don't inline to avoid order of evaluation differences (but we're l-r now)
     let s1_new = stmt_to_exp(env,s1);
     let s2_new = stmt_to_exp(env,s2);
     return seq_exp(s1_new, s2_new, DL);
-  case &IfThenElse_s(e,s1,s2): 
+  case &IfThenElse_s(e,s1,s2):
     apply_varmap(env.varmap,e);
     // don't inline to avoid order of evaluation differences (but we're l-r now)
     let s1_new = stmt_to_exp(env,s1);
@@ -475,7 +475,7 @@ static exp_t stmt_to_exp(toexpenv_t env, stmt_t s) {
           //   (x[0] = 1, x[1] = 2, x[2] = 3);
           // FIX??: this does not handle the case of nested unresolvedmems, not sure
           // if Toc generates these.
-        case &UnresolvedMem_e(_,dles): 
+        case &UnresolvedMem_e(_,dles):
           let var = var_exp(vd->name,DL);
           for (unsigned i=0; dles != NULL; dles = dles->tl, ++i)
             unresolvedmem_inits = new List(assign_exp(subscript_exp(var,uint_exp(i,DL),DL),
@@ -501,7 +501,7 @@ static exp_t stmt_to_exp(toexpenv_t env, stmt_t s) {
       return e;
     default: Warn::impos2("bad local decl in Tovc::stmt_to_exp");
     }
-  default: 
+  default:
     return stmt_to_fun(env,s,void_type);
   }
 }
@@ -537,14 +537,14 @@ static void exp_to_vc(toexpenv_t env, exp_t e) {
   case &Address_e(e1):       fallthru(e1);
   case &Sizeofexp_e(e1):     fallthru(e1);
   case &Deref_e(e1):         fallthru(e1);
-  case &AggrMember_e(e1,...):  fallthru(e1); 
+  case &AggrMember_e(e1,...):  fallthru(e1);
   case &AggrArrow_e(e1,...):   fallthru(e1);
   case &Increment_e(e1,_):
     exp_to_vc(env, e1);
     return;
 
-  case &Sizeoftype_e(_):  
-  case &Offsetof_e(_,_): 
+  case &Sizeoftype_e(_):
+  case &Offsetof_e(_,_):
   case &AnonEnum_e(...):
   case &Enum_e(...): return;
 
@@ -575,9 +575,9 @@ static void stmt_to_vc(toexpenv_t env, stmt_t s) {
   while(true) {
     env.encloser = s;
     switch (s->r) {
-    case &Skip_s:         
-    case &Break_s:    
-    case &Continue_s: 
+    case &Skip_s:
+    case &Break_s:
+    case &Continue_s:
     case &Goto_s(_):   return;
     case &Label_s(_,s2):
       s = s2;
@@ -624,7 +624,7 @@ static void stmt_to_vc(toexpenv_t env, stmt_t s) {
       case &Var_d(vd):
         if (elim_array_initializers) {
           // first thing we do is compile-away array initializers b/c they
-          // might not have int constants as elements.  (Technically, 
+          // might not have int constants as elements.  (Technically,
           // it's a C++ and gcc extension.  Who knew?)
           // FIX: ignores designators (assumes sorted already)
           switch (compress(vd->type)) {
@@ -676,7 +676,7 @@ list_t<decl_t> tovc(list_t<decl_t> old_ds) {
                              // parts of the fndecl have already had these cleared by toc,
                              // but not this field.  Since fndecl2typ uses the cached
                              // type if possible, we need to clear it.
-      // FIX: if the param_vardecls are NULL then it's a good sign that 
+      // FIX: if the param_vardecls are NULL then it's a good sign that
       // this was an extern "C include" function, so I'm leaving it alone...
       if (fd->param_vardecls != NULL) { // else case will fallthru
         region rgn;
@@ -685,28 +685,29 @@ list_t<decl_t> tovc(list_t<decl_t> old_ds) {
 			    rcopy(rgn,fd->param_vardecls->v),
 			    Dict::rempty(rgn,strptrcmp),
 			    fd->body,
-			    gen_ds), 
+			    gen_ds),
 		   fd->body);
 	if (*gen_ds != NULL) {
-	  vardecl_t vd = new Vardecl {fd->sc, fd->name, 0,const_tqual(0), 
-				      Tcutil::fndecl2type(fd), NULL, NULL, 
-				      fd->i.attributes, false,(fd->body!=NULL)};
+	  vardecl_t vd = new Vardecl {fd->sc, fd->name, 0,const_tqual(0),
+				      Tcutil::fndecl2type(fd), NULL, NULL,
+				      fd->i.attributes, false,(fd->body!=NULL),
+                                      NULL};
 	  new_ds = new List(new_decl(new Var_d(vd),DL),new_ds);
 	  new_ds = append(*gen_ds,new_ds);
 	}
       }
       fallthru;
-    case &Var_d(_):         
-    case &Let_d(...): 
-    case &Letv_d(_):        
+    case &Var_d(_):
+    case &Let_d(...):
+    case &Letv_d(_):
     case &Region_d(...):
     case &Aggr_d(_):
     case &Datatype_d(_):
-    case &Enum_d(_):        
+    case &Enum_d(_):
     case &Typedef_d(_): new_ds = new List(next_d, new_ds); break;
     case &Namespace_d(...):
-    case &Using_d(...):    
-    case &ExternC_d(...):  
+    case &Using_d(...):
+    case &ExternC_d(...):
     case &ExternCinclude_d(...):
     case &Porton_d:
     case &Portoff_d:

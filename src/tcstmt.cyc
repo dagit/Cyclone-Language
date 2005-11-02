@@ -50,7 +50,7 @@ static qvar_t stmt_temp_var() { // COUNTER
   static int counter = 0;
   return new $(Loc_n,new (string_t)aprintf("_tmpS%X",counter++));
 }
-// For pattern-matches, 
+// For pattern-matches,
 // if e is not a variable expression, add an assignment and recurse.
 // This is needed for interpreting patterns cleanly in the flow analysis.
 static bool make_var_exp(exp_t@ eptr, stmt_t s0) {
@@ -64,7 +64,7 @@ static bool make_var_exp(exp_t@ eptr, stmt_t s0) {
     default: done = true;
     }
   let e = *eptr;
-  let vd = new_vardecl(0, stmt_temp_var(), new_evar(NULL,NULL), NULL);
+  let vd = new_vardecl(0, stmt_temp_var(), new_evar(NULL,NULL), NULL, NULL);
   let d = let_decl(new_pat(new Var_p(vd, new_pat(&Wild_p_val,e->loc)),e->loc),
 		   e, s0->loc);
   s0->r = decl_stmt(d,new_stmt(s0->r,s0->loc),s0->loc)->r;
@@ -84,7 +84,7 @@ static void pattern_synth(seg_t loc, tenv_t te, tcpat_result_t pat_res,
   for (; rgns != NULL; rgns=rgns->tl)
     te = add_region(te,new VarType(rgns->hd),false,false);
   te = new_effect_constraints(te, ecs, loc); //use this instead
-  //  te = new_outlives_constraints(te,ecs,loc); //remove this 
+  //  te = new_outlives_constraints(te,ecs,loc); //remove this
   if(new_block)
     te = Tcenv::new_block(loc,te);
   let ropt = Tcenv::curr_rgn(te);
@@ -125,13 +125,13 @@ static bool is_case_default(switch_clause_t c) {
 // Note: With these adjacency rules, you can't just throw skip statements in
 //       anywhere because they end regions.
 void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
-  
+
   switch (s0->r) {
 
   case &Skip_s: return;
 
-  case &Exp_s(e): 
-    tcExp(te,NULL,e); 
+  case &Exp_s(e):
+    tcExp(te,NULL,e);
     if (!in_stmt_exp(te))
       simplify_unused_result_exp(e);
     return;
@@ -151,7 +151,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
           Warn::err2(s0->loc,"must return a value of type ",t);
       }
       return;
-    } 
+    }
     // don't introduce alias expressions here; would be useless
     tcExp(te,&t,eopt);
     if (!coerce_arg(curr_aquals_bounds(te),eopt,t,NULL)) {
@@ -162,7 +162,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     return;
 
   case &IfThenElse_s(e,s1,s2):
-    tcTest(te,e,"if statement"); 
+    tcTest(te,e,"if statement");
     tcStmt(te,s1,true);
     tcStmt(te,s2,true);
     return;
@@ -185,11 +185,11 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     tcTest(te,e,"do loop");
     return;
 
-  case &Break_s:    
+  case &Break_s:
   case &Continue_s:
   case &Goto_s(_):  return;
 
-  case &Label_s(l,s): 
+  case &Label_s(l,s):
     // We make new_block false because we explicitly create a new block here
     // Note: NewControlFlow requires we add the label with s, not s0 !!
     let tv = new Tvar(new (string_t)aprintf("`%s",*l),
@@ -223,7 +223,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     return;
 
   case &Switch_s(*exp,scs0,*dtp):
-    
+
     if(make_var_exp(exp,s0)) {
       tcStmt(te,s0,new_block);
       return;
@@ -253,7 +253,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	  te = clear_fallthru(te);
 	else {
 	  let vs = imp_rev(filter_nulls(List::split(next_pattern->patvars)[0]));
-	  let new_tvs = next_pattern->tvars_and_effconstr_opt==NULL ? NULL 
+	  let new_tvs = next_pattern->tvars_and_effconstr_opt==NULL ? NULL
 	                 : map(fst,(*next_pattern->tvars_and_effconstr_opt)[0]);
 	  te = set_fallthru(te, new_tvs, vs, scs->tl->hd);
 	}
@@ -262,7 +262,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 
       let p = scs->hd->pattern;
       if (!Unify::unify((type_t)p->topt,t)) { // allow silent_castable?
-	Warn::err2(scs->hd->loc, 
+	Warn::err2(scs->hd->loc,
 		   "switch on type ",t," but case expects type ",p->topt);
 	Unify::explain_failure();
       }
@@ -270,7 +270,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	check_pat_regions(te,p,&this_pattern);
 
       scs->hd->pat_vars = new Opt(this_pattern.patvars);
-      pattern_synth(scs->hd->loc, te, this_pattern, scs->hd->body, 
+      pattern_synth(scs->hd->loc, te, this_pattern, scs->hd->body,
 		    scs->hd->where_clause, true);
     }
     check_switch_exhaustive(s0->loc,te,scs0,dtp);
@@ -284,13 +284,13 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     s->r = new_stmt(new Seq_s(new_stmt(s->r,s->loc), skip_stmt(s->loc)),
 		    s->loc)->r;
     tcStmt(te,s,true);
-    
+
     if(!List::exists(is_case_default, *scs0)) {
       // add a default case that re-throws the exception
       qvar_t def_v = new $(Loc_n,new "exn");
-      let vd = new_vardecl(0,def_v,void_type,0);
+      let vd = new_vardecl(0,def_v,void_type,0,NULL);
       let def_pat = new_pat(new Var_p(vd, new_pat(&Wild_p_val,0)),0);
-      let def_stmt = 
+      let def_stmt =
 	exp_stmt(new_exp(new Throw_e(varb_exp(new Local_b(vd),0),true),0),0);
       let def_clause = new Switch_clause{def_pat, NULL, NULL, def_stmt, 0};
       *scs0 = List::append(*scs0,list(def_clause));
@@ -309,7 +309,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	this_pattern = tcPat(te,scs->hd->pattern,&exception_type,NULL);
       } else
 	this_pattern = *next_pattern;
-      
+
       if(scs->tl != NULL) {
 	next_pattern = new tcPat(te,scs->tl->hd->pattern,&exception_type,NULL);
 	if(next_pattern->tvars_and_effconstr_opt != NULL
@@ -317,7 +317,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	  te = clear_fallthru(te);
 	else {
 	  let vs = imp_rev(filter_nulls(List::split(next_pattern->patvars)[0]));
-	  let new_tvs = next_pattern->tvars_and_effconstr_opt==NULL ? NULL 
+	  let new_tvs = next_pattern->tvars_and_effconstr_opt==NULL ? NULL
 	                 : map(fst,(*next_pattern->tvars_and_effconstr_opt)[0]);
 	  te = set_fallthru(te, new_tvs, vs, scs->tl->hd);
 	}
@@ -326,7 +326,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 
       let p = scs->hd->pattern;
       if (!Unify::unify((type_t)p->topt,exception_type)) { // allow silent_castable?
-	Warn::err2(scs->hd->loc, "switch on type ",exception_type, 
+	Warn::err2(scs->hd->loc, "switch on type ",exception_type,
 		   " but case expects type ",p->topt);
 	Unify::explain_failure();
       }
@@ -334,7 +334,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	check_pat_regions(te,p,&this_pattern);
 
       scs->hd->pat_vars = new Opt(this_pattern.patvars);
-      pattern_synth(scs->hd->loc, te, this_pattern, scs->hd->body, 
+      pattern_synth(scs->hd->loc, te, this_pattern, scs->hd->body,
 		    scs->hd->where_clause, true);
     }
     check_catch_overlap(s0->loc,te,*scs0,dtp);
@@ -349,23 +349,23 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       let curr_bl = Tcenv::curr_rgn(te);
       bool is_local;
       switch (sc) {
-      case Static: 
-      case Extern: 
+      case Static:
+      case Extern:
       case ExternC: vd->escapes = true; is_local = false; break;
       case Abstract:
-	Warn::err2(d->loc,"bad abstract scope for local variable"); 
+	Warn::err2(d->loc,"bad abstract scope for local variable");
 	fallthru;
-      case Register: 
-      case Public: 
+      case Register:
+      case Public:
       default: is_local = true; break;
       }
       // side effect
       *rgn_ptr = is_local ? curr_bl : heap_rgn_type;
       switch (compress(t)) {
-      case &FnType(_) && is_local: 
+      case &FnType(_) && is_local:
 	// this is really an "extern" function declaration
 	vd->escapes = true;
-	sc = Extern; 
+	sc = Extern;
 	is_local = false;
 	break;
       case &ArrayType(ai):
@@ -411,14 +411,14 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       }
       tcStmt(te,s,false);
       return;
-          
+
     case &Let_d(p,*vds,*exp,*dtp):
       // don't bother binding *exp to a var if *exp or p is just a var
       switch (p->r) {
-      case &Var_p(...): 
-      case &AliasVar_p(...): 
+      case &Var_p(...):
+      case &AliasVar_p(...):
       case &UnknownId_p(...): break;
-      default: 
+      default:
 	if(make_var_exp(exp,s0)) {
 	  tcStmt(te,s0,new_block);
 	  return;
@@ -445,7 +445,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       check_let_pat_exhaustive(p->loc,te,p,dtp);
       pattern_synth(s0->loc, te, pat_res, s, NULL, false);
       return;
-      
+
     case &Letv_d(vds):
       let curr_bl = Tcenv::curr_rgn(te);
       for (; vds != NULL; vds = vds->tl) {
@@ -467,7 +467,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       *rgn_ptr = curr_bl; // side effect
       type_t rgn_typ;
       if (open_exp_opt) {
-	// the open expression should have type 
+	// the open expression should have type
 	// struct Core::DynamicRegion<`r1::R> @aqual(RESTRICTED) @`r2
 	let drname = new $(Abs_n(list(new "Core"),false), new "DynamicRegion");
 	let outer_rgn = new_evar(new Opt(&Kinds::ek), NULL);
@@ -478,7 +478,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	Tctyp::check_type(s0->loc,te,lookup_type_vars(te),&Kinds::mk,
 			  true,false,exp_type);
 	let key_typ = tcExp(te,&exp_type,open_exp_opt);
-	if (!Unify::unify(exp_type,key_typ) && 
+	if (!Unify::unify(exp_type,key_typ) &&
 	    !coerce_assign(curr_aquals_bounds(te),open_exp_opt,exp_type))
 	  Warn::err2(s0->loc,"expected ",exp_type," but found ",key_typ);
 /* 	if (!Unify::unify(outer_rgn,unique_rgn_type) &&  */
@@ -498,7 +498,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       tcStmt(te2,s,false);
       return;
 
-    case &Fn_d(fd): 
+    case &Fn_d(fd):
       if (fd->sc != Public)
 	Warn::err2(d->loc,"bad storage class for inner function");
       Atts::check_fndecl_atts(d->loc,fd->i.attributes,true);
@@ -506,11 +506,12 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       type_t t = fndecl2type(fd);
       fd->i.attributes = Atts::transfer_fn_type_atts(t,fd->i.attributes);
       let curr_bl = Tcenv::curr_rgn(te); //curr rgn pointers are always aliasable
-      vardecl_t vd = new Vardecl {fd->sc, fd->name, 0,const_tqual(0), 
-				  at_type(t,curr_bl,al_qual_type,empty_tqual(0), 
+      vardecl_t vd = new Vardecl {fd->sc, fd->name, 0,const_tqual(0),
+				  at_type(t,curr_bl,al_qual_type,empty_tqual(0),
 					  false_type, false_type),
 				  NULL, curr_bl, NULL, false,
-				  (fd->body!=NULL)};
+				  (fd->body!=NULL),
+                                  NULL};
       fd->fn_vardecl = vd;
       fenv_t old_fenv = (fenv_t)te->le;
       te->le = nested_fenv(d->loc,old_fenv,fd);
@@ -537,7 +538,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
   }
 }
 
-//When the attribute no_throw is set, the function body must 
+//When the attribute no_throw is set, the function body must
 //be a try block with a default handler
 //The only statements that precede the try block can be calls to
 //no_throw functions, with constant arguments, or passing arguments as is
@@ -574,7 +575,7 @@ static bool ensure_no_throw_exp(exp_t e) {
     if(!res) //should be impossible at this point
       return false;
     bool fname_ok = false;
-    switch(fname->r) { 
+    switch(fname->r) {
     case &Instantiate_e(e1, ts): fname_ok = ensure_no_throw_exp(e1);    break;
     case &Var_e(b):              fname_ok = ensure_no_throw_exp(fname); break;
     default: break; //fname must be a Var_e or Inst_e
@@ -645,7 +646,7 @@ static bool nothrow_visit_f1(bool@ env, exp_t e) {
 static bool nothrow_visit_f2(bool@ env, stmt_t s) {
   // decl case is conservative in case of nested functions
   switch(s->r) {
-  case &TryCatch_s(...): 
+  case &TryCatch_s(...):
     *env = *env && check_catchall_handler(s); return false;
   default: return true;
   }

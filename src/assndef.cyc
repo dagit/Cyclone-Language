@@ -809,7 +809,8 @@ using Absyn {
     .rgn = NULL,
     .attributes = NULL,
     .escapes = false,
-    .is_proto = false
+    .is_proto = false,
+    .rename = NULL
   };
   vardecl_t memory = &memory_struct;
 
@@ -826,7 +827,8 @@ using Absyn {
     .rgn = NULL,
     .attributes = NULL,
     .escapes = false,
-    .is_proto = false
+    .is_proto = false,
+    .rename = NULL
   };
 
   vardecl_t exception_vardecl() {

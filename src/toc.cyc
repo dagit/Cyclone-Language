@@ -532,7 +532,7 @@ add_struct_type_body<`r2,`r3,`d,`r>(region_t<`d> d,
         let t2 = ts2->hd;
         switch (type_kind(t)) {
         case &Kind{.kind = EffKind, _}:continue;//Effects/regions won't appear in C types
-	  //        case &Kind{.kind = RgnKind, _}: 
+	  //        case &Kind{.kind = RgnKind, _}:
         default:
           // Check if they're the same before translating them to C
           if (Unify::unify(t,t2) || Unify::unify(typ_to_c(t),typ_to_c(t2)))
@@ -1029,11 +1029,11 @@ static void set_lhs(env_t<`r> e, bool b) {
   *lhs = b;
 }
 
-static env_t<`r+`r2> share_env(region_t<`r> r, env_t<`r2> e) { 
+static env_t<`r+`r2> share_env(region_t<`r> r, env_t<`r2> e) {
   let &Env{b,c,f,t,lhs,_} = e;
   return rnew(r) Env{b,c,f,t,lhs,r};
 }
- 
+
 // env for loop body: break and continue labels are set to null,
 // exception handler pop counters for break and continue are zeroed
 static env_t<`r+`r2> loop_env(region_t<`r> r, env_t<`r2> e){
@@ -1411,7 +1411,7 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
   }
   let x = temp_var();                // build ptr_type x = ea + eb;
   TOC_RGN(nv, rgn2) {
-    let x_vd = new Vardecl {Public,x,0,mt_tq,c_fat_ptr_type,xinit,NULL,NULL,false,false};
+    let x_vd = new Vardecl {Public,x,0,mt_tq,c_fat_ptr_type,xinit,NULL,NULL,false,false,NULL};
     let x_bnd = new Local_b(x_vd);     // build *x -- need to translate here
     let x_exp = varb_exp(x_bnd,DL);  // to check the bound and for NULL
     x_exp->topt = fat_ptr_type;
@@ -1420,7 +1420,7 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
     deref_x->annot = &InsertChecks::NullAndFatBound_val; //check bound and NULL
     exp_to_c(nv,deref_x);
     let y = temp_var();                // build elt_type y = *x;
-    let y_vd = new Vardecl {Public,y,0,mt_tq,c_elt_type,deref_x,NULL,NULL,false,false};
+    let y_vd = new Vardecl {Public,y,0,mt_tq,c_elt_type,deref_x,NULL,NULL,false,false,NULL};
     let y_bnd = new Local_b(y_vd);
     exp_t z_init = e2;                 // build y op e2 and translate
     if (popt != NULL) {
@@ -1432,7 +1432,7 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
     }
     exp_to_c(nv,z_init);
     let z = temp_var();                // build z = y op e2;
-    let z_vd = new Vardecl {Public,z,0,mt_tq,c_elt_type,z_init,NULL,NULL,false,false};
+    let z_vd = new Vardecl {Public,z,0,mt_tq,c_elt_type,z_init,NULL,NULL,false,false,NULL};
     let z_bnd = new Local_b(z_vd);
     // build y == zero and translate -- here, we need to know what
     // the element type is to generate the right zero.
@@ -1675,7 +1675,7 @@ static void exp_to_c(env_t nv, exp_t e) {
           e->r = fncall_exp_r(_fat_ptr_plus_e,
 			     e1,sizeoftype_exp(typ_to_c(elt_type),DL),e2);
         else if (force_type2bool(false,zt)) {
-	  if(isCharStar(e1)) 
+	  if(isCharStar(e1))
 	    e->r = fncall_exp_r(_zero_arr_plus_char_e,e1,eopt,e2);
 	  else
 	    e->r = fncall_exp_r(_zero_arr_plus_other_e,
@@ -2134,7 +2134,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	    let s = exp_stmt(tg_exp,DL);
 	    s = declare_stmt(x,typ_to_c(old_t2),e1,s,DL);
 	    e->r = stmt_exp_r(s);
-	  } else 
+	  } else
 	    e->r = fncall_exp_r(_tag_fat_e,e1,arg2,arg3);
 	} else
 	  // build the t ? struct
@@ -2154,7 +2154,7 @@ static void exp_to_c(env_t nv, exp_t e) {
         if (zt1 && !zt2)
           new_e2 = add_exp(b2,uint_exp(1,DL),DL);
 	let ptr_exp = e1;
-        
+
         // ?`RC to *`RC requires current to be at base, else arraybounds
 /*         if (is_noalias_region(p1.ptr_atts.rgn,false)  // p1 is unique or refcounted... */
 /*             && !is_noalias_region(p1.ptr_atts.rgn,true)) // ...and not unique (so, refcounted) */
@@ -2174,7 +2174,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 				  sizeoftype_exp(typ_to_c(p1.elt_type),DL),
 				  new_e2);
 	  break;
-	default: 
+	default:
 	  ptr_exp = fncall_exp_dl(_untag_fat_ptr_e,
 				  ptr_exp,
 				  sizeoftype_exp(typ_to_c(p1.elt_type),DL),
@@ -2261,7 +2261,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       if(rgnopt != NULL) {
 	exp_to_c(nv,rgnopt);
 	mexp = rmalloc_exp(rgnopt,
-			   (qual == NULL ? aliasable_qual_exp() : qual), 
+			   (qual == NULL ? aliasable_qual_exp() : qual),
 			   mexp);
       }
       else {
@@ -2269,7 +2269,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       }
     }
     e->annot = new NewInfo(mexp,cstar_type(elt_typ,mt_tq));
-    if(is_fat_ptr(old_typ)) 
+    if(is_fat_ptr(old_typ))
       e->r = fncall_exp_dl(_tag_fat_e,copy_exp(e),
 			   sizeoftype_exp(elt_typ,DL),
 			   (lenexp ? lenexp : uint_exp(1,DL)))->r;
@@ -2530,8 +2530,8 @@ static void exp_to_c(env_t nv, exp_t e) {
               exp_to_c(nv,fieldexp);
               // must cast when the types don't match up -- except when
               // the last type is of abstract kind, for then we should've
-              // generated a specialized struct...  
-              if (!Unify::unify(fieldtyp,void_type) && 
+              // generated a specialized struct...
+              if (!Unify::unify(fieldtyp,void_type) &&
                   !Unify::unify(fieldtyp, fieldexp_typ))
                 // unless they are both arithmetic types -- C can handle this.
                 if (!is_arithmetic_type(fieldtyp) ||
@@ -2621,10 +2621,10 @@ static void exp_to_c(env_t nv, exp_t e) {
 	  if(mknd == Vmalloc) {
 	    pexp = rvmalloc_exp(rgnopt, num_elts2);
 	  } else {
-	    let fn_e = (inline_call ? rmalloc_inline_exp : rmalloc_exp);	    
+	    let fn_e = (inline_call ? rmalloc_inline_exp : rmalloc_exp);
 	    pexp = fn_e(rgnopt, (aqopt == NULL ? aliasable_qual_exp() : aqopt), num_elts2);
 	  }
-	} 
+	}
 	else
 	  pexp = aqmalloc_exp(aqopt, num_elts2);
       }
@@ -2954,11 +2954,11 @@ static stmt_opt_t extract_pattern_vars(region_t<`rgn> rgn, env_t<`rgn> @nv,
       // and found nothing (available), so we create a new vardecl
       vardecl_t new_vd;
       if(can_use_voidstar(ctype)) {
-          new_vd = new_vardecl(DL, temp_var(), void_star_type(), NULL);
+          new_vd = new_vardecl(DL, temp_var(), void_star_type(), NULL, NULL);
           *newdecls = rnew(rgn) List{rnew(rgn) $(vd,new_vd,ctype,false),
                                      *newdecls};
       } else {
-          new_vd = new_vardecl(DL, temp_var(), ctype, NULL);
+          new_vd = new_vardecl(DL, temp_var(), ctype, NULL, NULL);
           *newdecls = rnew(rgn) List{rnew(rgn) $(vd,new_vd,ctype,false),
                                      *newdecls};
       }
@@ -2985,11 +2985,11 @@ static stmt_opt_t extract_pattern_vars(region_t<`rgn> rgn, env_t<`rgn> @nv,
 
       vardecl_t new_vd;
       if(can_use_voidstar(ctype)) {
-          new_vd = new_vardecl(DL, temp_var(), void_star_type(), NULL);
+          new_vd = new_vardecl(DL, temp_var(), void_star_type(), NULL, NULL);
           *newdecls = rnew(rgn) List{rnew(rgn) $(vd,new_vd,ctype,true),
                                      *newdecls};
       } else {
-          new_vd = new_vardecl(DL, temp_var(), ctype, NULL);
+          new_vd = new_vardecl(DL, temp_var(), ctype, NULL, NULL);
           *newdecls = rnew(rgn) List{rnew(rgn) $(vd,new_vd,ctype,false),
                                      *newdecls};
       }
@@ -3020,11 +3020,11 @@ static stmt_opt_t extract_pattern_vars(region_t<`rgn> rgn, env_t<`rgn> @nv,
 
       vardecl_t new_vd;
       if(can_use_voidstar(ctype)) {
-          new_vd = new_vardecl(DL, temp_var(), void_star_type(), NULL);
+          new_vd = new_vardecl(DL, temp_var(), void_star_type(), NULL, NULL);
           *newdecls = rnew(rgn) List{rnew(rgn) $(vd,new_vd,ctype,true),
                                      *newdecls};
       } else {
-          new_vd = new_vardecl(DL, temp_var(), ctype, NULL);
+          new_vd = new_vardecl(DL, temp_var(), ctype, NULL, NULL);
           *newdecls = rnew(rgn) List{rnew(rgn) $(vd,new_vd,ctype,false),
                                      *newdecls};
       }
@@ -3064,7 +3064,7 @@ static stmt_opt_t extract_pattern_vars(region_t<`rgn> rgn, env_t<`rgn> @nv,
     }
     return s;
 
-  case &Datatype_p(_,_,ps,_): 
+  case &Datatype_p(_,_,ps,_):
     stmt_opt_t s = NULL;
     for(int cnt = 1; ps != NULL; ps = ps->tl, ++cnt) {
       let p2  = ps->hd;
@@ -3162,9 +3162,9 @@ static void subst_pattern_vars(patdecls_t env, exp_t e) {
   case &AggrArrow_e(e,...): fallthru(e);
   case &ComprehensionNoinit_e(e,...): fallthru(e);
   case &Address_e(e): subst_pattern_vars(env,e); break;
-  case &AssignOp_e(e1,_,e2): 
-    subst_pattern_vars(env,e1); 
-    subst_pattern_vars(env,e2); 
+  case &AssignOp_e(e1,_,e2):
+    subst_pattern_vars(env,e1);
+    subst_pattern_vars(env,e2);
     break;
   case &FnCall_e(e,es,_,_): subst_pattern_vars(env,e); fallthru(es);
   case &Primop_e(_,es): List::iter_c(subst_pattern_vars,env,es); break;
@@ -3450,7 +3450,7 @@ static void xlate_switch(env_t<`r> nv, stmt_t whole_s,
     // overwrite original switch with new code.
     if(!already_var)
       res = declare_stmt(v,typ_to_c((type_t)e->topt),e,res,DL);
-    whole_s->r = res->r; 
+    whole_s->r = res->r;
     return;
   }
 }
@@ -3553,7 +3553,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
         switch (p->r) {
         case &Var_p(vd, &Pat{.r = &Wild_p, ...}):
 	  if(var_may_appear_exp(vd->name,e)) {
-	    let new_vd = new_vardecl(DL, temp_var(), vd->type, e);
+	    let new_vd = new_vardecl(DL, temp_var(), vd->type, e, NULL);
 	    vd->initializer = varb_exp(new Local_b(new_vd),DL);
 	    vd->initializer->topt = new_vd->type;
 	    s->r = decl_stmt(new_decl(new Var_d(new_vd),s->loc),
@@ -3926,7 +3926,7 @@ static int xdatatypedecl_to_c_body<`d,`r>(region_t<`d> d,
       exp_opt_t initopt = NULL;
       if (f->sc != Extern)
         initopt = string_exp(*fn,DL);
-      let tag_decl = new_vardecl(0,f->name, tag_typ, initopt);
+      let tag_decl = new_vardecl(0,f->name, tag_typ, initopt, NULL);
       tag_decl->sc = f->sc;
       result_decls = new List(new_decl(new Var_d(tag_decl),DL),result_decls);
       *xdatatypes_so_far =
@@ -3949,7 +3949,7 @@ static int xdatatypedecl_to_c_body<`d,`r>(region_t<`d> d,
     case &false:
       if (f->sc != Extern) {
         let initopt = string_exp(*fn,DL);
-        let tag_decl = new_vardecl(0,f->name, tag_typ, initopt);
+        let tag_decl = new_vardecl(0,f->name, tag_typ, initopt, NULL);
         tag_decl->sc = f->sc;
         result_decls = new List(new_decl(new Var_d(tag_decl),DL),result_decls);
         *xdatatypes_so_far = Dict::insert(*xdatatypes_so_far, f->name, true);
@@ -4067,7 +4067,7 @@ static stmt_t letdecl_to_c(env_t<`r> nv, pat_t p, Tcpat::decision_opt_t dopt,
   /*   list_t<$(env_t<`rgn+`r>,var_t,stmt_t)@`rgn+`r,`rgn+`r> mybodies = NULL; */
   // compile the pattern -- this essentially generates
   // if e matches p then <skip> else _throw_match()
-  stmt_t test_tree = compile_decision_tree((region_t<`rgn+`r>)rgn, nv, &mydecls, 
+  stmt_t test_tree = compile_decision_tree((region_t<`rgn+`r>)rgn, nv, &mydecls,
 					   &mybodies, dopt, lscs, v);
   // translate the body of the let under the env we get out of match
   // compilation.
@@ -4127,7 +4127,7 @@ static bool types_to_c_f2(bool ignore, stmt_t s) {
     break;
   case &Fallthru_s(...):
     // in C code, this is implicit, so we replace it with a skip
-    s->r = new Skip_s; 
+    s->r = new Skip_s;
     return false;
   default: break;
   }
@@ -4229,7 +4229,7 @@ void init() {
   let ts;
   {region h = open(dyn);
   ts = empty_toc_state(h);}
-  toc_state = qunew TocStateWrap{dyn, ts}; 
+  toc_state = qunew TocStateWrap{dyn, ts};
   result_decls = NULL;
   tuple_type_counter = 0;
   temp_var_counter = 0;
@@ -4249,8 +4249,8 @@ void init() {
     &_untag_fat_ptr_str,
     &_check_fat_at_base_str,
     &_get_fat_size_str,
-    &_get_zero_arr_size_char_str, 
-    &_get_zero_arr_size_other_str, 
+    &_get_zero_arr_size_char_str,
+    &_get_zero_arr_size_other_str,
     &_fat_ptr_plus_str,
     &_zero_arr_plus_char_str,
     &_zero_arr_plus_other_str,

@@ -93,7 +93,7 @@ typedef string_t<`r> dump_string_t<`r>;
 static void dumploc(Position::seg_t); // dumps a #line directive
 
 // set by dumpdecllist2file (this module is not re-entrant)
-FILE @@ dump_file = &stdout; 
+FILE @@ dump_file = &stdout;
 static char prev_char = 'x';
 
 static bool need_space_before() {
@@ -157,7 +157,7 @@ static void dumploc(Position::seg_t loc) {
     fprintf(*dump_file,"\n");
   else if (f == last_file)
     fprintf(*dump_file,"\n# %d\n",d);
-  else 
+  else
     fprintf(*dump_file,"\n# %d %s\n",d,f);
   // pos = 1;
   last_file = f;
@@ -182,7 +182,7 @@ static void dump_sep(void f(`a), list_t<`a> l, dump_string_t sep) {
     return;
   for(; l->tl != NULL; l = l->tl) {
     f(l->hd);
-    dump_nospace(sep); 
+    dump_nospace(sep);
   }
   f(l->hd);
 }
@@ -191,7 +191,7 @@ static void dump_sep_c(void f(`b,`a), `b env, list_t<`a> l, dump_string_t sep) {
     return;
   for(; l->tl != NULL; l = l->tl) {
     f(env,l->hd);
-    dump_nospace(sep); 
+    dump_nospace(sep);
   }
   f(env,l->hd);
 }
@@ -223,7 +223,7 @@ static void dumpqvar(qvar_t v) {
   case {.Rel_n = x}: nsl = x; break;
   case {.C_n = x}:   break; // do _not_ print C namespaces
   case {.Abs_n = x}:
-    if (qvar_to_Cids || add_cyc_prefix) 
+    if (qvar_to_Cids || add_cyc_prefix)
       prefix = &Absynpp::cyc_stringptr;
     nsl = x;
     break;
@@ -284,14 +284,14 @@ static void dumptvar(tvar_t tv) {
     default: dump_nospace("K"); break;
     }
     dump_nospace(n+1);
-  } else 
+  } else
     dump(n);
 }
 static void dumpkindedtvar(tvar_t tv) {
   dumptvar(tv);
   switch (Kinds::compress_kb(tv->kind)) {
-  case &Unknown_kb(_): 
-  case &Less_kb(...):  
+  case &Unknown_kb(_):
+  case &Less_kb(...):
   case &Eq_kb(&Kind(BoxKind,_)): break;
   case &Eq_kb(k): dump("::"); dumpkind(k); break;
   }
@@ -324,8 +324,8 @@ static void dump_noncallconv(attributes_t atts) {
   bool hasatt = false;
   for(_ atts2 = atts; atts2 != NULL; atts2 = atts2->tl)
     switch(atts->hd) {
-    case &Stdcall_att:  
-    case &Cdecl_att:    
+    case &Stdcall_att:
+    case &Cdecl_att:
     case &Fastcall_att: break;
     default: hasatt = true; break;
     }
@@ -334,8 +334,8 @@ static void dump_noncallconv(attributes_t atts) {
   dump("__declspec(");
   for (; atts != NULL; atts = atts->tl)
     switch(atts->hd) {
-    case &Stdcall_att:  
-    case &Cdecl_att:    
+    case &Stdcall_att:
+    case &Cdecl_att:
     case &Fastcall_att: break;
     default: dump(Absynpp::attribute2string(atts->hd)); break;
     }
@@ -410,14 +410,14 @@ static $(tqual_t,type_t)@ aggrfield2arg(aggrfield_t f) {
 static void dumpntyp(type_t t) {
   switch (t) {
     // The first three cases never turn up in normalized types.
-  case &ArrayType(_): 
-  case &FnType(_): 
+  case &ArrayType(_):
+  case &FnType(_):
   case &PointerType(_): return;
   case &AppType(&VoidCon,_): dump("void"); return;
   case &VarType(tv): dumptvar(tv); return; // FIX: may want explicit kinds
-  case &Evar(k,NULL,i,_): 
-    dump("`E"); 
-    if (k == NULL) dump("K"); else dumpkind(k->v); 
+  case &Evar(k,NULL,i,_):
+    dump("`E");
+    if (k == NULL) dump("K"); else dumpkind(k->v);
     dump(aprintf("%d",i)); return;
   case &Evar(k,t,i,_): dumpntyp((type_t)t); return; // shouldn't happen!
   case &AnonAggrType(k,is_tuple,fs):
@@ -440,7 +440,7 @@ static void dumpntyp(type_t t) {
       switch(tu_info) {
       case {.UnknownDatatype = UnknownDatatypeInfo(n,is_x)}: fallthru(n,is_x);
       case {.KnownDatatype = & &Datatypedecl(_,n,_,_,is_x)}:
-	if(is_x) dump("@extensible"); 
+	if(is_x) dump("@extensible");
 	dump("datatype"); dumpqvar(n); dumptps(ts);
 	break;
       }
@@ -472,12 +472,12 @@ static void dumpntyp(type_t t) {
     case &IntCon(Unsigned, Long_sz):  dump("unsigned long");  return;
     case &IntCon(Unsigned, LongLong_sz): dump("unsigned"); fallthru;
     case &IntCon(None,   LongLong_sz):
-    case &IntCon(Signed, LongLong_sz): 
+    case &IntCon(Signed, LongLong_sz):
       switch(Flags::c_compiler) {
       case Flags::Gcc_c: dump("long long"); return;
       default:           dump("__int64");   return;
       }
-    case &FloatCon(i): 
+    case &FloatCon(i):
       switch(i) {
       case 0:  dump("float");       return;
       case 1:  dump("double");      return;
@@ -485,7 +485,7 @@ static void dumpntyp(type_t t) {
       }
     case &AggrCon(info):
       let $(k,n) = aggr_kinded_name(info);
-      dumpaggr_kind(k); dumpqvar(n); dumptps(ts); 
+      dumpaggr_kind(k); dumpqvar(n); dumptps(ts);
       return;
     case &EnumCon(n,_):    dump("enum"); dumpqvar(n); return;
     case &AnonEnumCon(fs): dump("enum{"); dumpenumfields(fs); dump("}"); return;
@@ -544,17 +544,17 @@ static void dump_qualbnd(list_t<$(type_t,type_t)@> qual_bnd) {
   dump_sep(dump_qb_elt,qual_bnd,",");
 }
 static void dumpfunargs(list_t<$(var_opt_t,tqual_t,type_t)@> args,
-			bool c_varargs, vararg_info_t *cyc_varargs, 
+			bool c_varargs, vararg_info_t *cyc_varargs,
 			type_opt_t effopt, list_t<effconstr_t> effc,
 			list_t<$(type_t,type_t)@> qual_bnd,
 			exp_opt_t req, exp_opt_t ens, exp_opt_t thrws) {
-  if(args == NULL && !c_varargs && cyc_varargs == NULL && 
+  if(args == NULL && !c_varargs && cyc_varargs == NULL &&
      effopt == NULL && effc == NULL) {
     dump("(void)"); //when compiling for the linux kernel, expect -Wstrict-prototypes
   }
   else {
     group(dumpfunarg,args,"(","",",");
-    if (c_varargs || cyc_varargs != NULL) 
+    if (c_varargs || cyc_varargs != NULL)
       dump(",...");
     if (cyc_varargs != NULL) {
       if (cyc_varargs->inject) dump(" inject ");
@@ -626,7 +626,7 @@ static void dumpexp_prec(int inprec, exp_t e) {
     dump_nospace("(");
   switch (e->r) {
   case &Const_e({.Char_c = $(sg,ch)}):
-    dump_char('\''); dump_nospace(Absynpp::char_escape(ch)); dump_char('\''); 
+    dump_char('\''); dump_nospace(Absynpp::char_escape(ch)); dump_char('\'');
     break;
   case &Const_e({.Wchar_c = s}):           dump(aprintf("L\'%s\'",s)); break;
   case &Const_e({.Short_c = $(sg,s)}):     dump(aprintf("%d",s));      break;
@@ -646,7 +646,7 @@ static void dumpexp_prec(int inprec, exp_t e) {
 
   case &Var_e(b): dumpqvar(binding2qvar(b)); break;
 
-  case &Pragma_e(p): 
+  case &Pragma_e(p):
     dump("__cyclone_pragma__("); dump_nospace(p); dump_char(')'); break;
 
   case &Primop_e(p,es):
@@ -673,7 +673,7 @@ static void dumpexp_prec(int inprec, exp_t e) {
       case Neq: dump_nospace(pstr); break;
       default: // avoids problems, eg. "y/*z" and "x--3"
 	dump(pstr);
-	dump_char(' '); 
+	dump_char(' ');
       }
       dumpexp_prec(myprec,es->tl->hd);
       break;
@@ -715,7 +715,7 @@ static void dumpexp_prec(int inprec, exp_t e) {
     dumploc(e->loc);
     // DJG: as a hack to avoid piles of parens for aggregate initialization
     // we pass our precedence - 1 recursively -- sound because , is associative
-    dumpexp_prec(myprec-1,e1); dump_char(','); dumpexp_prec(myprec-1,e2); 
+    dumpexp_prec(myprec-1,e1); dump_char(','); dumpexp_prec(myprec-1,e2);
     break;
 
   case &FnCall_e(e1,es,...):
@@ -725,7 +725,7 @@ static void dumpexp_prec(int inprec, exp_t e) {
     // JGM: can't dump locations inside macro arguments, so we turn this
     // off if the location of the function call (or the function itself) is 0.
     bool old_generate_line_directives = generate_line_directives;
-    generate_line_directives = 
+    generate_line_directives =
       old_generate_line_directives && !(e->loc == 0) && !(e1->loc == 0);
     dumpexps_prec(20,es);
     dump_nospace(")");
@@ -744,7 +744,7 @@ static void dumpexp_prec(int inprec, exp_t e) {
 
   case &Address_e(e1):   dump_char('&');   dumpexp_prec(myprec,e1);     break;
   case &Deref_e(e1):     dump_char('*');   dumpexp_prec(myprec,e1);     break;
-  case &New_e(ropt,e1,qual):  
+  case &New_e(ropt,e1,qual):
     // FIX: use ropt!
     if(ropt) {
       dump("rnew(");dumpexp_prec(140, ropt);
@@ -754,7 +754,7 @@ static void dumpexp_prec(int inprec, exp_t e) {
       dump_char(')');
     }
     else {
-      dump("new");      
+      dump("new");
       if(qual) {
 	dump_char('(');dumpexp_prec(140, qual);dump_char(')');
       }
@@ -770,7 +770,7 @@ static void dumpexp_prec(int inprec, exp_t e) {
     dump("@assert("); dumpexp(e1); dump_char(')'); break;
   case &Assert_false_e(e1):
     dump("@assert_false("); dumpexp(e1); dump_char(')'); break;
-    
+
   case &Asm_e(vol,t,o,i,cl):
     dump("__asm__");
     if (vol) dump(" volatile ");
@@ -788,7 +788,7 @@ static void dumpexp_prec(int inprec, exp_t e) {
     if(cl) {
       int ncol = (i ? 2 : o ? 1 : 0);
       for(int cols = 0;cols < 3 -ncol;cols++)
-	dump_nospace(" :");	
+	dump_nospace(" :");
       while(cl) {
 	dump_char('"');
 	dump_nospace(Absynpp::string_escape(*cl->hd));
@@ -803,7 +803,7 @@ static void dumpexp_prec(int inprec, exp_t e) {
 
   case &Tagcheck_e(e,f):
     dump("tagcheck("); dumpexp(e); dump_char('.'); dump_nospace(*f);
-    dump_char(')'); 
+    dump_char(')');
     break;
 
   case &Offsetof_e(t,l):
@@ -844,11 +844,11 @@ static void dumpexp_prec(int inprec, exp_t e) {
     group(dumpde,des,"","}",",");
     break;
 
-  case &AnonStruct_e(_,is_tuple,des): 
+  case &AnonStruct_e(_,is_tuple,des):
     if (is_tuple) {
       dump("$("); dumpexps_prec(20,map(snd,des)); dump_char(')');
     } else {
-      group(dumpde,des,"{","}",","); 
+      group(dumpde,des,"{","}",",");
     }
     break;
   case &Enum_e(_,ef):        fallthru(ef);
@@ -866,19 +866,19 @@ static void dumpexp_prec(int inprec, exp_t e) {
         dump("rcalloc("); dumpexp(ropt); dump(",");
 	if(aqopt != NULL) {
 	  dumpexp(aqopt); dump(",");
-	} 
+	}
       }else {
 	if(aqopt != NULL) {
 	  dump("qcalloc("); dumpexp(aqopt); dump(",");
-	} 
-	else 
+	}
+	else
 	  dump("calloc(");
       }
       dumpexp(e); dump(","); dumpexp(sizeoftype_exp(*topt,0)); dump(")");
-    } 
+    }
     else {
       if (ropt != NULL) {
-	dump((mknd == Vmalloc ? "rvmalloc(" : inline_call ? "rmalloc_inline(" : "rmalloc(")); 
+	dump((mknd == Vmalloc ? "rvmalloc(" : inline_call ? "rmalloc_inline(" : "rmalloc("));
         dumpexp(ropt); dump(",");
 	if(aqopt != NULL) {
 	  dumpexp(aqopt); dump(",");
@@ -891,10 +891,10 @@ static void dumpexp_prec(int inprec, exp_t e) {
 	  dump("malloc(");
       }
       // see comments in absyn.h
-      if (topt != NULL) 
+      if (topt != NULL)
         dumpexp(times_exp(sizeoftype_exp(*topt,0),e,0));
-      else 
-        dumpexp(e); 
+      else
+        dumpexp(e);
       dump(")");
     }
     break;
@@ -921,7 +921,7 @@ static void dumpswitchclauses(list_t<switch_clause_t> scs,
                               list_t<qvar_t,`H> varsinblock) {
   for(; scs != NULL; scs = scs->tl) {
     let c = scs->hd;
-    if(c->where_clause == NULL && c->pattern->r == (raw_pat_t)&Wild_p_val) 
+    if(c->where_clause == NULL && c->pattern->r == (raw_pat_t)&Wild_p_val)
       dump("default:");
     else {
       dump("case");
@@ -934,7 +934,7 @@ static void dumpswitchclauses(list_t<switch_clause_t> scs,
     }
     if (Absynpp::is_declaration(c->body)) {
       dump(" {"); dumpstmt(c->body,false,NULL), dump_char('}');
-    } else 
+    } else
       dumpstmt(c->body,false,varsinblock);
   }
 }
@@ -962,10 +962,10 @@ static void dumpstmt(stmt_t s,bool expstmt,list_t<qvar_t,`H> varsinblock) {
   case &Return_s(NULL): dump("return;"); break;
   case &Return_s(e):    dump("return"); dumpexp((exp_t)e); dump_semi(); break;
   case &IfThenElse_s(e,s1,s2):
-    dump("if("); dumpexp(e); 
+    dump("if("); dumpexp(e);
     switch(s1->r) {
     case &Seq_s(...):
-    case &Decl_s(...): 
+    case &Decl_s(...):
     case &IfThenElse_s(...):
     case &Label_s(...):
       dump_nospace("){"); dumpstmt(s1,false,NULL); dump_char('}'); break;
@@ -986,7 +986,7 @@ static void dumpstmt(stmt_t s,bool expstmt,list_t<qvar_t,`H> varsinblock) {
     dump_nospace("){"); dumpstmt(s1,false,NULL); dump_char('}');
     break;
   case &Do_s(s1,$(e,_)):
-    dump("do{"); dumpstmt(s1,false,NULL); 
+    dump("do{"); dumpstmt(s1,false,NULL);
     dump_nospace("}while("); dumpexp(e); dump_nospace(");");
     break;
 
@@ -1000,20 +1000,20 @@ static void dumpstmt(stmt_t s,bool expstmt,list_t<qvar_t,`H> varsinblock) {
     dump_char('}');
     break;
   case &TryCatch_s(s1,ss,_):
-    dump("try"); dumpstmt(s1,false,varsinblock); 
+    dump("try"); dumpstmt(s1,false,varsinblock);
     dump("catch{");
     dumpswitchclauses(ss,varsinblock); dump_char('}');
     break;
 
-  case &Decl_s(d,s1): 
+  case &Decl_s(d,s1):
     let $(newblock,newvarsinblock) = Absynpp::shadows(d,varsinblock);
     if (newblock) {
       if (expstmt) dump("({"); else dump("{");
-      dumpdecl(d); 
+      dumpdecl(d);
       dumpstmt(s1,expstmt,NULL);
       if (expstmt) dump_nospace("});"); else dump("}");
     } else {
-      dumpdecl(d); dumpstmt(s1,expstmt,newvarsinblock); 
+      dumpdecl(d); dumpstmt(s1,expstmt,newvarsinblock);
     }
     break;
 
@@ -1022,9 +1022,9 @@ static void dumpstmt(stmt_t s,bool expstmt,list_t<qvar_t,`H> varsinblock) {
     // labels.  This next case forces an explicit block to be written.
     // It is verbose for Cyclone; maybe it should be controlled by a flag.
     if(Absynpp::is_declaration(s1)) {
-      dump_str(x); 
-      if (expstmt) dump_nospace(": ({"); else dump_nospace(": {"); 
-      dumpstmt(s1,expstmt,NULL); 
+      dump_str(x);
+      if (expstmt) dump_nospace(": ({"); else dump_nospace(": {");
+      dumpstmt(s1,expstmt,NULL);
       if (expstmt) dump_nospace("});"); else dump_char('}');
     } else {
       dump_str(x); dump_char(':'); dumpstmt(s1,expstmt,varsinblock);
@@ -1059,15 +1059,15 @@ static void dumppat(pat_t p) {
   case &Var_p(vd,&Pat{.r = &Wild_p,...}):       dumpqvar(vd->name); break;
   case &Reference_p(vd,p2): dump("*"); fallthru(vd,p2);
   case &Var_p(vd,p2):       dumpqvar(vd->name); dump(" as "); dumppat(p2);break;
-  case &AliasVar_p(tv,vd): 
+  case &AliasVar_p(tv,vd):
     dump("alias"); dump("<"); dumptvar(tv); dump(">" );
     dumpvardecl(vd,p->loc,false);
     break;
   case &Pointer_p(p2):    dump("&"); dumppat(p2); break;
-  case &TagInt_p(tv,vd): 
+  case &TagInt_p(tv,vd):
     dumpqvar(vd->name); dump_char('<'); dumptvar(tv); dump_char('>'); break;
   case &UnknownId_p(q):  dumpqvar(q); break;
-  case &UnknownCall_p(q,ps,dots): 
+  case &UnknownCall_p(q,ps,dots):
     dumpqvar(q); group(dumppat,ps,"(",pat_term(dots),","); break;
   case &Aggr_p(topt,is_tuple,exists,dps,dots):
     if (is_tuple) {
@@ -1086,14 +1086,14 @@ static void dumppat(pat_t p) {
     }
     break;
   case &Datatype_p(_,tuf,ps,dots):
-    dumpqvar(tuf->name); 
+    dumpqvar(tuf->name);
     if (ps != NULL) group(dumppat,ps,"(",pat_term(dots),",");
     break;
   case &Exp_p(e): dumpexp(e); break;
   }
 }
 
-static void dumpdatatypefield(datatypefield_t ef) { 
+static void dumpdatatypefield(datatypefield_t ef) {
   dumpqvar(ef->name);
   if(ef->typs != NULL)
     dumpargs(ef->typs);
@@ -1172,13 +1172,13 @@ static bool is_char_ptr(type_t t) {
 }
 
 static void dumpvardecl(vardecl_t vd,Position::seg_t loc,bool do_semi) {
-  let &Vardecl{sc,name,varloc,tq,type,initializer,_,atts,_,is_proto} = vd;
+  let &Vardecl{sc,name,varloc,tq,type,initializer,_,atts,_,is_proto,rename} = vd;
   switch(Flags::c_compiler){
   case Flags::Gcc_c:
     // hack to avoid writing so many useless externs:
     if(sc == Extern && qvar_to_Cids)
       switch(compress(type)) {
-      case &FnType(_): 
+      case &FnType(_):
 	if(!is_proto) //finer grained control -- write extern only if not a proto, makes -Wall happier
 	  dumpscope(sc);
 	break;
@@ -1217,6 +1217,8 @@ static void dumpvardecl(vardecl_t vd,Position::seg_t loc,bool do_semi) {
     break;
   }
 
+  if (rename != NULL) dumpexp(rename);
+
   if(initializer != NULL) {
     dump_char('='); dumpexp(initializer);
   }
@@ -1253,7 +1255,7 @@ static void dump_enumdecl(enumdecl_t ed) {
 static void dump_datatypedecl(datatypedecl_t dd) {
   let &Datatypedecl(sc,name,tvs,fields,is_x) = dd;
   dumpscope(sc);
-  if (is_x) 
+  if (is_x)
     dump("@extensible ");
   dump("datatype "); dumpqvar(name); dumptvars(tvs);
   if(fields != NULL) {
@@ -1279,7 +1281,7 @@ static void dumpdecl(decl_t d) {
     case Flags::Vc_c: dumpatts(fd->i.attributes); break;
     default: break;
     }
-    if(fd->is_inline) 
+    if(fd->is_inline)
       switch(Flags::c_compiler){
       case Flags::Vc_c: dump("__inline"); break;
       default:   dump("inline");   break;
@@ -1298,7 +1300,7 @@ static void dumpdecl(decl_t d) {
 
     switch(Flags::c_compiler){
     case Flags::Gcc_c: dumptqtd(empty_tqual(0), t, dump_atts_qvar,fd); break;
-    default:    dumptqtd(empty_tqual(0), t, dump_callconv_fdqvar,fd); break;  
+    default:    dumptqtd(empty_tqual(0), t, dump_callconv_fdqvar,fd); break;
     }
     dump_char('{');
     dumpstmt(fd->body,false,NULL);
@@ -1330,11 +1332,11 @@ static void dumpdecl(decl_t d) {
     dump_semi();
       //}
     break;
-  case &Namespace_d(v,tdl): 
+  case &Namespace_d(v,tdl):
     dump("namespace"); dump_str(v); dump_braced_decls(tdl); break;
-  case &Using_d(q,tdl): 
+  case &Using_d(q,tdl):
     dump("using"); dumpqvar(q); dump_braced_decls(tdl); break;
-  case &ExternC_d(tdl): 
+  case &ExternC_d(tdl):
     dump("extern \"C\" "); dump_braced_decls(tdl); break;
   case &ExternCinclude_d(tdl,ovrs,exs,wc):
     dump("extern \"C include\" "); dump_braced_decls(tdl);
@@ -1367,7 +1369,7 @@ static void dump_upperbound(exp_t e) {
   }
 }
 
-static void dumptms(bool is_char_ptr, list_t<type_modifier_t> tms, 
+static void dumptms(bool is_char_ptr, list_t<type_modifier_t> tms,
 		    void f(`a), `a a) {
   if(tms == NULL) {
     f(a);
@@ -1381,12 +1383,12 @@ static void dumptms(bool is_char_ptr, list_t<type_modifier_t> tms,
     case &AppType(&FatCon,_): dump_char('?'); break;
     case &AppType(&ThinCon,&List{&ValueofType(e),_}):
       dump_char(type2bool(true,nullable)? '*' : '@'); dump_upperbound(e); break;
-    default: 
+    default:
       dump_char(type2bool(true,nullable)? '*' : '@');
     }
     if(!qvar_to_Cids)
       switch(compress(aq)) {
-      case &AppType(&AqualConstCon(aqv), _): 
+      case &AppType(&AqualConstCon(aqv), _):
 	switch(aqv) {
 	case Aliasable_qual: break;
 	default:
@@ -1397,7 +1399,7 @@ static void dumptms(bool is_char_ptr, list_t<type_modifier_t> tms,
 	dump("@aqual(");dumpntyp(tv->hd);dump(")");
 	break;
       case &Evar(...):
-	dump("@aqual(");dumpntyp(aq);dump(")"); 
+	dump("@aqual(");dumpntyp(aq);dump(")");
 	break;
       default:
 	Warn::impos2("unexpected alias qualifier", aq);
@@ -1431,19 +1433,19 @@ static void dumptms(bool is_char_ptr, list_t<type_modifier_t> tms,
     if(next_is_pointer)
       dump_char(')');
     switch(tms->hd) {
-    case &Carray_mod(zeroterm,_): 
-      dump("[]"); 
+    case &Carray_mod(zeroterm,_):
+      dump("[]");
       if (type2bool(false,zeroterm)) dump("@zeroterm");
       break;
     case &ConstArray_mod(e,zeroterm,_):
-      dump_char('['); dumpexp(e); dump_char(']'); 
+      dump_char('['); dumpexp(e); dump_char(']');
       if (type2bool(false,zeroterm)) dump("@zeroterm");
       break;
     case &Function_mod(&WithTypes(args,c_varargs,cyc_varargs,effopt,effc,qb,req,ens,thrws)):
       dumpfunargs(args,c_varargs,cyc_varargs,effopt,effc,qb,req,ens,thrws); break;
     case &Function_mod(&NoTypes(sl,_)):
       group(dump_str,sl,"(",")",","); break;
-    case &TypeParams_mod(ts,_,print_kinds): 
+    case &TypeParams_mod(ts,_,print_kinds):
       if (print_kinds) dumpkindedtvars(ts); else dumptvars(ts); break;
     case &Attributes_mod(_,atts): dumpatts(atts); break;
     case &Pointer_mod(_,_): Warn::impos("dumptms");
@@ -1499,7 +1501,7 @@ static void dump_decl_interface(decl_t d) {
     if (ad->sc == Static) return;
     struct AggrdeclImpl *impl = ad->impl;
     if (ad->sc == Abstract) ad->impl = NULL;
-    dump_aggrdecl(ad); 
+    dump_aggrdecl(ad);
     ad->impl = impl;
     dump(";\n");
     break;
@@ -1511,7 +1513,7 @@ static void dump_decl_interface(decl_t d) {
       dump("\n");
     }
     break;
-  case &Namespace_d(v,ds): 
+  case &Namespace_d(v,ds):
     dump("namespace ");
     dump_str(v);
     dump("{\n");
@@ -1529,7 +1531,7 @@ static void dump_decl_interface(decl_t d) {
       dump_decl_interface(ds->hd);
     dump("}\n");
     break;
-  case &ExternCinclude_d(ds,ovrs,exs,wc): 
+  case &ExternCinclude_d(ds,ovrs,exs,wc):
     /* omit these for now
     dump("extern \"C include\" {");
     for(; ds != NULL; ds = ds->tl)

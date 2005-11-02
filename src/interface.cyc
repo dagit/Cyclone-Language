@@ -87,7 +87,7 @@ i_t final() {
   // add definition of @extensible datatype exn
   let exn_d = new *exn_tud();
   exn_d->sc = Public;
-  i->exports->datatypedecls = Dict::insert(i->exports->datatypedecls, exn_name, 
+  i->exports->datatypedecls = Dict::insert(i->exports->datatypedecls, exn_name,
 					   exn_d);
   for(let tufs = exn_tud()->fields->v; tufs != NULL; tufs = tufs->tl) {
     let exn_f = new *tufs->hd;
@@ -95,7 +95,7 @@ i_t final() {
     let exn_fd = new Tcdecl::Xdatatypefielddecl(exn_d, exn_f);
     i->exports->xdatatypefielddecls = Dict::insert(i->exports->xdatatypefielddecls,
 						   tufs->hd->name, exn_fd);
-  }    
+  }
   //polyvios: removed main() from the final interface, because of the various forms main(...) can have
   /*  // add requirement of function main
   qvar_t qmain = new $(Nmspace{.Abs_n = NULL}, new ((string_t)"main"));
@@ -110,6 +110,7 @@ i_t final() {
 								       empty_tqual(0),false_conref)),
 						      NULL)),
 				    false, NULL, NULL, NULL, NULL, NULL),
+		       NULL,
 		       NULL);
   vd->sc = Extern;
   i->exports->vardecls = Dict::insert(i->exports->vardecls, qmain, vd);
@@ -125,7 +126,7 @@ i_t final() {
  *   and Abstract (here structs are always incomplete)
  * _ possible scopes in imports are : Extern and ExternC
  * _ no var is initialized, there are no functions either (only prototypes)
- * _ the same object cannot be both in exports and in imports 
+ * _ the same object cannot be both in exports and in imports
  *   (except @extensible datatype)
  * _ fields of @extensible datatypes are sorted by name
  *
@@ -153,13 +154,13 @@ static void body_err(string_t sc, qvar_t n) {
 static void static_err(string_t obj1,qvar_t name1,string_t obj2,qvar_t name2) {
   if (obj1 != NULL)
     err(aprintf("declaration of %s %s relies on static %s %s",
-		obj1, Absynpp::qvar2string(name1), 
+		obj1, Absynpp::qvar2string(name1),
 		obj2, Absynpp::qvar2string(name2)));
 }
 static void abstract_err(string_t obj1,qvar_t name1,string_t obj2,qvar_t name2){
   if (obj1 != NULL)
     err(aprintf("declaration of %s %s relies on fields of abstract %s %s",
-		obj1, Absynpp::qvar2string(name1), 
+		obj1, Absynpp::qvar2string(name1),
 		obj2, Absynpp::qvar2string(name2)));
 }
 
@@ -179,11 +180,11 @@ static seen_t new_seen() {
 /* --- functions that actually perform the check --- */
 static bool check_public_type(genv_t, seen_t, string_t, qvar_t, type_t);
 
-static bool check_public_type_list(genv_t ae, seen_t seen, string_t obj, 
+static bool check_public_type_list(genv_t ae, seen_t seen, string_t obj,
 				   qvar_t name, type_t (@f)(`a), list_t<`a> l) {
   let res = true;
   for (; l != NULL; l = l->tl)
-    if (! check_public_type(ae, seen, obj, name, f(l->hd))) 
+    if (! check_public_type(ae, seen, obj, name, f(l->hd)))
       res = false;
   return res;
 }
@@ -195,7 +196,7 @@ static bool check_public_aggrdecl(genv_t ae, seen_t seen, aggrdecl_t d) {
   seen->aggrs = Dict::insert(seen->aggrs, d->name, res); // necessary for recursive datas
   if (d->impl != NULL)
     for(let fs = d->impl->fields; fs != NULL; fs=fs->tl)
-      if (!check_public_type(ae, seen, "type", d->name, fs->hd->type)) 
+      if (!check_public_type(ae, seen, "type", d->name, fs->hd->type))
 	res = false;
 
   seen->aggrs = Dict::insert(seen->aggrs, d->name, res); // save the result
@@ -217,7 +218,7 @@ static bool check_public_datatypedecl(genv_t ae, seen_t seen, datatypedecl_t d){
   if (d->fields != NULL)
     for(let fs = d->fields->v; fs != NULL; fs=fs->tl)
       if (!check_public_type_list(ae, seen, "datatype", d->name,
-				  get_type1, fs->hd->typs)) 
+				  get_type1, fs->hd->typs))
 	res = false;
 
   seen->datatypes = Dict::insert(seen->datatypes, d->name, res); // save result
@@ -268,7 +269,7 @@ static bool check_public_type(genv_t ae, seen_t seen, string_t obj, qvar_t name,
   case &AppType(&EnumCon(name, _),_):
     enumdecl_t ed;
     try ed = *Dict::lookup(ae->enumdecls, name);
-    catch { case &Dict::Absent: 
+    catch { case &Dict::Absent:
       invalid_arg(aprintf("check_public_type (can't find enum %s)",
 			  Absynpp::qvar2string(name)));
     }
@@ -281,7 +282,7 @@ static bool check_public_type(genv_t ae, seen_t seen, string_t obj, qvar_t name,
   case &AppType(&DatatypeCon({.KnownDatatype = &tud0}),targs):
     datatypedecl_t tud;
     try tud = *Dict::lookup(ae->datatypedecls, tud0->name);
-    catch { case &Dict::Absent: 
+    catch { case &Dict::Absent:
       invalid_arg(aprintf("check_public_type (can't find datatype %s)",
 			  Absynpp::qvar2string(tud0->name)));
     }
@@ -299,7 +300,7 @@ static bool check_public_type(genv_t ae, seen_t seen, string_t obj, qvar_t name,
       invalid_arg(aprintf("check_public_type (can't find datatype %s and search its fields)",
 			  Absynpp::qvar2string(tud0->name)));
     }
-    if (tud->fields == NULL) 
+    if (tud->fields == NULL)
       invalid_arg(aprintf("check_public_type (datatype %s has no fields)",
 			  Absynpp::qvar2string(tud->name)));
 
@@ -309,8 +310,8 @@ static bool check_public_type(genv_t ae, seen_t seen, string_t obj, qvar_t name,
 	  tuf1 = fs->hd;
 	  break;
       }
-  
-    if (tuf1 == NULL) 
+
+    if (tuf1 == NULL)
       invalid_arg(aprintf("check_public_type (can't find datatypefield %s)",
 			  Absynpp::qvar2string(tuf0->name)));
 
@@ -364,12 +365,12 @@ static void extract_aggrdecl($(ienv_t,ienv_t,bool,genv_t,seen_t,i_t) @ env,
     if (check_public_aggrdecl(ae, seen, d))
       exp->aggrdecls = Dict::insert(exp->aggrdecls, x, d);
     break;
-  case ExternC: 
+  case ExternC:
   case Extern:
-    if (check_public_aggrdecl(ae, seen, d)) 
+    if (check_public_aggrdecl(ae, seen, d))
       imp->aggrdecls = Dict::insert(imp->aggrdecls, x, d);
     break;
-  case Register: 
+  case Register:
   default:
     invalid_arg("add_aggrdecl");
     break;
@@ -424,11 +425,11 @@ extract_xdatatypefielddecl(i_t i, datatypedecl_t d, datatypefield_t f) {
   }
 
   env->xdatatypefielddecls =
-    Dict::insert(env->xdatatypefielddecls, f->name, 
+    Dict::insert(env->xdatatypefielddecls, f->name,
 		 new Tcdecl::Xdatatypefielddecl(d, f));
 }
 
-static void extract_datatypedecl($(ienv_t,ienv_t,bool,genv_t,seen_t,i_t) @ env, 
+static void extract_datatypedecl($(ienv_t,ienv_t,bool,genv_t,seen_t,i_t) @ env,
 				 qvar_t x, datatypedecl_t@ dp) {
   let &$(imp, exp, check_complete_defs, ae, seen, i) = env;
   let d = *dp;
@@ -477,7 +478,7 @@ static void extract_datatypedecl($(ienv_t,ienv_t,bool,genv_t,seen_t,i_t) @ env,
       imp->datatypedecls = Dict::insert(imp->datatypedecls, x, d);
     }
     break;
-  case Register: 
+  case Register:
   default:
     invalid_arg("add_datatypedecl");
     break;
@@ -494,7 +495,7 @@ static void extract_typedef($(ienv_t, ienv_t, bool, genv_t, seen_t, i_t) @ env,
 static void extract_ordinarie($(ienv_t,ienv_t,bool,genv_t,seen_t,i_t) @ env,
 			      qvar_t x, $(binding_t,bool)@ v) {
   let &$(imp, exp, check_complete_defs, ae, seen, _) = env;
-  
+
   switch((*v)[0]) {
   case &Funname_b(fd):
     let vd = new Vardecl{
@@ -507,7 +508,8 @@ static void extract_ordinarie($(ienv_t,ienv_t,bool,genv_t,seen_t,i_t) @ env,
       .rgn = NULL,
       .attributes = NULL,
       .escapes = false,
-      .is_proto = (fd->body != NULL)
+      .is_proto = (fd->body != NULL),
+      .rename = NULL
     };
     check_complete_defs = false; // the body of the function has been defined
     fallthru(vd);
@@ -521,7 +523,7 @@ static void extract_ordinarie($(ienv_t,ienv_t,bool,genv_t,seen_t,i_t) @ env,
       if (check_complete_defs && Tcutil::is_function_type(d->type))
 	body_err("static", d->name);
       break;
-    case Register: 
+    case Register:
     case Abstract: invalid_arg("extract_ordinarie");
     case Public:
       if (check_complete_defs && Tcutil::is_function_type(d->type))
@@ -599,7 +601,7 @@ static list_t<decl_t, `H> filterstatics(list_t<decl_t, `H> accum, decl_t d) {
     case &Fn_d(fd):
       if(fd->sc == Static) return accum;
       if(fd->sc == ExternC) return accum;
-      let vd = new_vardecl(0,fd->name, (type_t)fd->cached_type, NULL);
+      let vd = new_vardecl(0,fd->name, (type_t)fd->cached_type, NULL, NULL);
       vd->sc = fd->sc;
       return new List(new_decl(new Var_d(vd),0), accum);
     case &Aggr_d(a):
@@ -627,7 +629,7 @@ static list_t<decl_t, `H> filterstatics(list_t<decl_t, `H> accum, decl_t d) {
     case &ExternC_d(...):
     case &ExternCinclude_d(...):
     case &Porton_d:
-    case &Portoff_d: 
+    case &Portoff_d:
     case &Tempeston_d:
     case &Tempestoff_d: return accum;
   }
@@ -745,15 +747,15 @@ bool is_subinterface(i_t i1, i_t i2, $(string_t<`H>, string_t<`H>) * info) {
   try {
     let res = true;
     string_t * msg = NULL;
-  
+
     if (info != NULL)
       msg = new ((string_t)aprintf("checking inclusion of %s exports into %s exports,", (*info)[0], (*info)[1]));
     if (!incl_ienv(i1->exports, i2->exports, msg)) res = false;
-    
+
     if (info != NULL)
       msg = new ((string_t)aprintf("checking inclusion of %s imports into %s imports,", (*info)[1], (*info)[0]));
     if (!incl_ienv(i2->imports, i1->imports, msg)) res = false;
-    
+
     return res;
   } catch { case &Tcdecl::Incompatible: return false; }
 }
@@ -773,7 +775,7 @@ void compat_merge_dict_f($(bool,
   `a @ y;
   try {
     let y1 = Dict::lookup(dic1, x);
-    
+
     // try to merge y1 and y2 into y
     let yt = merge_f(y1, y2, 0, msg);
     if (!yt) {
@@ -785,7 +787,7 @@ void compat_merge_dict_f($(bool,
     y = y2;
     break;
   }
-  
+
   try {
     let ye = Dict::lookup(excl, x);
 
@@ -809,7 +811,7 @@ Dict::dict_t<qvar_t, `a::A @> *
 compat_merge_dict(Dict::dict_t<qvar_t, `a @`H,`H> dic1,
 		  Dict::dict_t<qvar_t, `a @`H,`H> dic2,
 		  Dict::dict_t<qvar_t, `a @`H,`H> excl,
-		  `a * (@merge_f)(`a @`H, `a @`H, 
+		  `a * (@merge_f)(`a @`H, `a @`H,
 				  Position::seg_t, string_t<`H> *`H),
 		  string_t<`H> t,
 		  string_t<`H> *`H msg) {
@@ -841,7 +843,7 @@ void disj_merge_dict_f($(bool, Dict::dict_t<qvar_t,`a,`H>,
 		       qvar_t x, `a y) {
   let &$(*res, *res_dic, dic1, t, msg) = env;
   if (Dict::member(dic1, x)) {
-    check_err(msg, aprintf("%s %s is exported more than once", t, 
+    check_err(msg, aprintf("%s %s is exported more than once", t,
 			   Absynpp::qvar2string(x)));
     *res = false;
   } else if(*res)
@@ -850,7 +852,7 @@ void disj_merge_dict_f($(bool, Dict::dict_t<qvar_t,`a,`H>,
 
 Dict::dict_t<qvar_t, `a>* disj_merge_dict(Dict::dict_t<qvar_t, `a,`H> dic1,
 					  Dict::dict_t<qvar_t, `a,`H> dic2,
-					  string_t<`H> t, 
+					  string_t<`H> t,
 					  string_t<`H> *`H msg) {
   let env = $(true, dic1, dic1, t, msg);
   Dict::iter_c(disj_merge_dict_f, &env, dic2);
@@ -858,13 +860,13 @@ Dict::dict_t<qvar_t, `a>* disj_merge_dict(Dict::dict_t<qvar_t, `a,`H> dic1,
 }
 
 struct Ienv * disj_merge_ienv(ienv_t ie1, ienv_t ie2, string_t<`H> *`H msg) {
-  let r1 = compat_merge_dict(ie1->aggrdecls, ie2->aggrdecls, 
+  let r1 = compat_merge_dict(ie1->aggrdecls, ie2->aggrdecls,
 			     Dict::empty(qvar_cmp),
 			     Tcdecl::merge_aggrdecl, "type", msg);
   let r2 = disj_merge_dict(ie1->datatypedecls,ie2->datatypedecls,"datatype",msg);
   let r3 = disj_merge_dict(ie1->enumdecls, ie2->enumdecls, "enum", msg);
   /* special case for typedefs */
-  let r4 = compat_merge_dict(ie1->typedefdecls, ie2->typedefdecls, 
+  let r4 = compat_merge_dict(ie1->typedefdecls, ie2->typedefdecls,
 			     Dict::empty(qvar_cmp),
 			     Tcdecl::merge_typedefdecl, "typedef", msg);
   let r5 = disj_merge_dict(ie1->vardecls, ie2->vardecls, "variable", msg);
@@ -882,14 +884,14 @@ struct I * merge(i_t i1, i_t i2, $(string_t<`H>, string_t<`H>) * info) {
     string_t * msg = NULL;
 
     if (info != NULL)
-      msg = new ((string_t)aprintf("merging exports of %s and %s,", 
+      msg = new ((string_t)aprintf("merging exports of %s and %s,",
 				   (*info)[0], (*info)[1]));
 
     let exp = disj_merge_ienv(i1->exports, i2->exports, msg);
     if (exp == NULL) return NULL;
 
     if (info != NULL)
-      msg = new ((string_t)aprintf("merging imports of %s and %s,", 
+      msg = new ((string_t)aprintf("merging imports of %s and %s,",
 				   (*info)[0], (*info)[1]));
 
     let imp = compat_merge_ienv(i1->imports, i2->imports, exp, msg);
@@ -980,7 +982,7 @@ static list_t<decl_t> add_aggrdecl(qvar_t x,aggrdecl_t d,list_t<decl_t,`H> tds) 
   return new List(new_decl(new Aggr_d(d), 0),tds);
 }
 
-static list_t<decl_t> add_aggrdecl_header(qvar_t x, aggrdecl_t d, 
+static list_t<decl_t> add_aggrdecl_header(qvar_t x, aggrdecl_t d,
 					  list_t<decl_t,`H> tds) {
   d = new *d;
   d->impl = NULL;
@@ -1006,7 +1008,7 @@ static datatypefield_t rewrite_datatypefield(datatypefield_t f) {
   return f;
 }
 
-static list_t<decl_t> add_datatypedecl_header(qvar_t x, datatypedecl_t d, 
+static list_t<decl_t> add_datatypedecl_header(qvar_t x, datatypedecl_t d,
 					    list_t<decl_t,`H> tds) {
   d = new *d;
   //d->fields = NULL;
@@ -1019,7 +1021,7 @@ static list_t<decl_t> add_enumdecl(qvar_t x,enumdecl_t d,list_t<decl_t,`H> tds) 
   return new List(new_decl(new Enum_d(d), 0),tds);
 }
 
-static list_t<decl_t> add_enumdecl_header(qvar_t x, enumdecl_t d, 
+static list_t<decl_t> add_enumdecl_header(qvar_t x, enumdecl_t d,
 					  list_t<decl_t,`H> tds) {
   d = new *d;
   d->fields = NULL;
@@ -1027,7 +1029,7 @@ static list_t<decl_t> add_enumdecl_header(qvar_t x, enumdecl_t d,
   return new List(new_decl(new Enum_d(d), 0),tds);
 }
 
-static list_t<decl_t> add_typedef(qvar_t x, typedefdecl_t d, 
+static list_t<decl_t> add_typedef(qvar_t x, typedefdecl_t d,
 				  list_t<decl_t,`H> tds) {
   return new List(new_decl(new Typedef_d(d), 0),tds);
 }
@@ -1036,7 +1038,7 @@ static list_t<decl_t> add_vardecl(qvar_t x, vardecl_t d, list_t<decl_t,`H> tds) 
   return new List(new_decl(new Var_d(d), 0),tds);
 }
 
-static list_t<decl_t> add_xdatatypefielddecl(qvar_t x, xdatatypefielddecl_t d, 
+static list_t<decl_t> add_xdatatypefielddecl(qvar_t x, xdatatypefielddecl_t d,
 					   list_t<decl_t,`H> tds) {
   let &Tcdecl::Xdatatypefielddecl(b,f)=d;
   b = new *b;
@@ -1119,12 +1121,12 @@ void print(i_t i, FILE @ f) {
 /* ------ parsing a text file ------ */
 
 // WARNING: Position::reset_position must be called before using parse
-i_t parse(FILE @`H f) { 
+i_t parse(FILE @`H f) {
   Lex::lex_init();
   let tds = Parse::parse_file(f);
   Binding::resolve_all(tds);
   let te  = Tcenv::tc_init();
-  Tc::tc(te,false,tds);// no "Cyc" prefix, no default initializer 
+  Tc::tc(te,false,tds);// no "Cyc" prefix, no default initializer
   return gen_extract(te->ae, false, tds); //don't check that definitions are complete
 }
 
@@ -1133,7 +1135,7 @@ i_t parse(FILE @`H f) {
 
 // Mathieu : so far, there's nothing binary here, but let's pretend it is :-)
 void save(i_t i, FILE @ f) {
-  print(i, f);  
+  print(i, f);
 }
 
   // XXX need to create the dual of all of the write functions above
