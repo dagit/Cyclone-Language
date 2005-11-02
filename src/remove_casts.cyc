@@ -79,7 +79,11 @@ static bool remove_visit_f1(bool ignore, exp_t e) {
 	s = s2;
 	continue;
       case &Decl_s(_,s1): s=s1; continue; //FIX (optional): skipping initializer
-      default: break;
+	//this "return false" below used to be a "break", but this
+	//causes an infinite loop in extern C code that uses StmtExps
+	//that don't end in an Exp_s this should never be reached in
+	//Cyclone code
+      default: return false; 
       }
     return false;
   default: return true;

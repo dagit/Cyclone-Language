@@ -403,6 +403,11 @@ static inline unsigned int exp_case_number(exp_t e) {
   return tagof(e->r);
 }
 
+static int unify_and_cmp(type_t t1, type_t t2) {
+  if(Unify::unify(t1,t2)) return 0;
+  return Tcutil::typecmp(t1,t2);
+}
+
 // Used only for sorting and lookups, but tries to
 // evaluate constant expressions -- ideally, this should never fail...
 int exp_cmp(exp_t e1, exp_t e2) {
@@ -444,22 +449,22 @@ int exp_cmp(exp_t e1, exp_t e2) {
 	return c2;
     }
     return 0; // list lengths must be the same -- it's the same primop
-  case $(&Sizeoftype_e(t1), &Sizeoftype_e(t2)):  
-    return Tcutil::typecmp(t1,t2);
+  case $(&Sizeoftype_e(t1), &Sizeoftype_e(t2)): 
+    return unify_and_cmp(t1,t2);
   case $(&Sizeoftype_e(t1), &Sizeofexp_e(e2a)):
     let e2atopt = e2a->topt;
     if(e2atopt == NULL) {
       Warn::err2(e2->loc, "cannot handle sizeof(exp) here -- use sizeof(type)");
       return 0;
     }
-    return Tcutil::typecmp(t1,e2atopt);
+    return unify_and_cmp(t1, e2atopt);
   case $(&Sizeofexp_e(e1a), &Sizeoftype_e(t2)):
     let e1atopt = e1a->topt;
     if(e1atopt == NULL) {
       Warn::err2(e1->loc, "cannot handle sizeof(exp) here -- use sizeof(type)");
       return 0;
     }
-    return Tcutil::typecmp(e1atopt,t2);
+    return unify_and_cmp(e1atopt,t2);
   case $(&Sizeofexp_e(e1a), &Sizeofexp_e(e2a)):
     let e1atopt = e1a->topt;
     let e2atopt = e2a->topt;
@@ -470,9 +475,9 @@ int exp_cmp(exp_t e1, exp_t e2) {
       Warn::err2(e2->loc, "cannot handle sizeof(exp) here -- use sizeof(type)");
       return 0;
     }
-    return Tcutil::typecmp(e1atopt,e2atopt);
+    return unify_and_cmp(e1atopt,e2atopt);
   case $(&Offsetof_e(t1,f1), &Offsetof_e(t2,f2)):
-    let c1 = Tcutil::typecmp(t1,t2);
+    let c1 = unify_and_cmp(t1,t2);
     if(c1 != 0) return c1;
     let l1 = List::length(f1);
     let l2 = List::length(f2);
@@ -487,29 +492,29 @@ int exp_cmp(exp_t e1, exp_t e2) {
       }
     return 0;
   case $(&Cast_e(t1,e1a,_,_), &Cast_e(t2,e2a,_,_)):
-    let c1 = Tcutil::typecmp(t1,t2);
+    let c1 = unify_and_cmp(t1,t2);
     if(c1 != 0) return c1;
     return exp_cmp(e1a,e2a);
   case $(&Valueof_e(t1), &Valueof_e(t2)):
-    if (Unify::unify(t1,t2)) return 0;
-    return Tcutil::typecmp(t1,t2);
+    return unify_and_cmp(t1,t2);
   case $(&Extension_e(e1),&Extension_e(e2)): fallthru(e1,e2);
   case $(&NoInstantiate_e(e1),&NoInstantiate_e(e2)): 
     return exp_cmp(e1,e2);
   case $(&Instantiate_e(e1,t1),&Instantiate_e(e2,t2)):
     let c1 = exp_cmp(e1,e2);
-    if (c1 != 0) return c1;
-    return list_cmp(Tcutil::typecmp, t1, t2);
+    if (c1 != 0) return c1; 
+    return list_cmp(unify_and_cmp, t1, t2);
   case $(&Address_e(e1),&Address_e(e2)): return exp_cmp(e1,e2);
   case $(&ComprehensionNoinit_e(e1,t1,b1),&ComprehensionNoinit_e(e2,t2,b2)):
     let c1 = (b1 - b2);
     if (c1 != 0) return c1;
-    c1 = Tcutil::typecmp(t1,t2);
+    c1 = unify_and_cmp(t1,t2);
     if (c1 != 0) return c1;
     return exp_cmp(e1,e2);
   case $(&AnonStruct_e(t1,_,des1),&AnonStruct_e(t2,_,des2)):
     int c1 = 0;
-    if (t1 != NULL && t2 != NULL) c1 = Tcutil::typecmp((type_t)t1,(type_t)t2);
+    if (t1 != NULL && t2 != NULL) 
+      c1 = unify_and_cmp((type_t)t1,(type_t)t2);
     else if (t1 == NULL) c1 = -1;
     else if (t2 == NULL) c1 = 1;
     if (c1 != 0) return c1;
@@ -519,7 +524,7 @@ int exp_cmp(exp_t e1, exp_t e2) {
   case $(&Aggregate_e(_,ts1,des1,ad1),&Aggregate_e(_,ts2,des2,ad2)):
     let c1 = (int)ad1 - (int)ad2;
     if (c1 != 0) return c1;
-    c1 = list_cmp(Tcutil::typecmp, ts1, ts2);
+    c1 = list_cmp(unify_and_cmp, ts1, ts2);
     if (c1 != 0) return c1;
     return list_cmp(designator_exp_cmp,des1,des1);
   case $(&Datatype_e(es1,dd1,df1),&Datatype_e(es2,dd2,df2)):
