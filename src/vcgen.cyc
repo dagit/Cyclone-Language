@@ -34,7 +34,24 @@
 #include "unify.h"
 #include <cycboot.h>
 
-//#define VCGEN_DEBUG
+// VCGEN_PROFILE, when defined, will count the size
+// of the code AST, as well as the size of assertions
+// generated (in two ways, (a) directly count the
+// hash table that stores all the assertions ever
+// used; (b) only count assertions in the hash table
+// that describe program states at some program points,
+// ignoring intermediate assertions generated during
+// loop-invariants calculation
+// we would also stop recording summaries of functions
+// when profiling this information
+
+// #define VCGEN_PROFILE
+
+// NO_TRY_ASSNMAP, when defined, will not accumulate
+// assertion information for any exceptions thrown
+// this will give a more accurate account of the profiling
+
+// #define NO_TRY_ASSNMAP
 
 namespace Vcgen;
 using AssnDef;
@@ -240,7 +257,7 @@ static $(assn_map_t,assn_map_t) vcgen_pat(env_t env, Absyn::pat_t p,
 static assn_map_t vcgen_switch(env_t, term_t, list_t<switch_clause_t>, assn_map_t);
 static assn_map_t vcgen_local_decl(env_t, decl_t, assn_map_t);
 
-#ifndef VCGEN_DEBUG
+#ifndef VCGEN_PROFILE
 #define vcgen_debug_stmt vcgen_stmt
 #define vcgen_debug_rexp vcgen_rexp
 #define vcgen_debug_rexps vcgen_rexps
@@ -251,7 +268,7 @@ static assn_map_t vcgen_local_decl(env_t, decl_t, assn_map_t);
 #define vcgen_debug_local_decl vcgen_local_decl
 #endif
 
-#ifdef VCGEN_DEBUG
+#ifdef VCGEN_PROFILE
 
 // vcgen_debug_xxx is used to collect all
 // post-condition assns
@@ -857,7 +874,7 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
     let $(pre_memory,am2) = lookup_var_map(memory,am2);
 
     let $(args,argvds,reqopt,ensopt,thrwsopt,ret_value) = get_requires_and_ensures(e1->topt);
-#ifdef VCGEN_DEBUG
+#ifdef VCGEN_PROFILE
     existassnfn_opt_t fensinfo = NULL;
 #else
     let fensinfo = lookup_fn_info(e1);
@@ -1710,6 +1727,22 @@ static assn_map_t vcgen_stmt(env_t env, stmt_t s, assn_map_t amin) {
     }
     return false_assnmap(); // see above
   case &Absyn::TryCatch_s(s,scs,dtree):
+#ifdef NO_TRY_ASSNMAP
+    let old_try_assnmap = env->try_assnmap;
+    // install new try/catch-handler assertion
+    env->try_assnmap = NULL;
+    // run vcgen on the body -- this will update the env->shared->try_assn
+    // with assertions of any state that might throw an exn.
+    let am1 = vcgen_debug_stmt(env,s,amin);
+    // restore the old handler's assertion.
+    let new_try_assnmap = true_assnmap();
+    env->try_assnmap = old_try_assnmap;
+    // analyze the catch handlers and merge with the body to get
+    // the final output.
+    let $(exc,am2) = lookup_var_map(exception_vardecl(),am1);
+    let am3 = vcgen_debug_switch(env,exc,scs,new_try_assnmap);
+    return may_widen(env,or_assnmap_assnmap(am1,am2));
+#else
     let old_try_assnmap = env->try_assnmap;
     // install new try/catch-handler assertion
     env->try_assnmap = new (false_assnmap());
@@ -1724,6 +1757,7 @@ static assn_map_t vcgen_stmt(env_t env, stmt_t s, assn_map_t amin) {
     let $(exc,am2) = lookup_var_map(exception_vardecl(),am1);
     let am3 = vcgen_debug_switch(env,exc,scs,new_try_assnmap);
     return may_widen(env,or_assnmap_assnmap(am1,am2));
+#endif
   }
 }
 
@@ -1855,7 +1889,7 @@ assn_map_t clause2assn(exp_t e){
   return res;
 }
 
-#ifdef VCGEN_DEBUG
+#ifdef VCGEN_PROFILE
 // helper function to calculate size of an expression's AST
 static bool visit_size_f1(int @ counter, exp_t e){
   (*counter)++;
@@ -2027,7 +2061,7 @@ void vcgen_fundecl(Position::seg_t loc, JumpAnalysis::jump_anal_res_t tables, Ab
     insert_fn_info(fd,actuals,res_term,new_memory,res.assn);
   }
 
-#ifdef VCGEN_DEBUG
+#ifdef VCGEN_PROFILE
   // for each function, print out:
   // fn name : sz of AST : sz of assns used in VCs : sz of assns used in generating VCs
   fprintf(stderr,"%s\t%d\t%d\t%d\n",

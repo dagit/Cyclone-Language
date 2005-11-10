@@ -38,6 +38,7 @@
 #include "vcgen.h"
 #include "pratt_prover.h"
 #include "absynpp.h"
+#include "callgraph.h"
 using Absynpp;
 
 // #define TIMING_DEBUG
@@ -645,6 +646,14 @@ void insert_checks(List::list_t<decl_t,`H> tds,
 		   JumpAnalysis::jump_anal_res_t tables, bool do_vcgen) {
   reset_counters();
   let nv = toplevel_env(tables, do_vcgen);
+  // start processing toplevel declarations in insert_checks
+  // we would like to reorder the declarations so that 
+  // we process function callees first and the callers 
+  // so that we can use summary from functions
+
+  //  fprintf(stderr,"insert_checks:\n%s\n",Absynpp::decllist2string(tds));
+  let cg = Callgraph::compute_callgraph(tds);
+  //  Callgraph::print_callgraph(stderr,cg);
   for(; tds != NULL; tds = tds->tl)
     do_decl(nv,tds->hd);
 

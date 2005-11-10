@@ -57,6 +57,7 @@ static bool visit_cg_f1($(fndefns_t,fndecl_set_t)@ env, exp_t e) {
     // we don't want to enter any extern "C include" functions --
     // these don't occur in the fds set.
     s = Set::insert(s,Hashtable::lookup(fds,name));
+    // inserted an edge
     *env = $(fds,s);
   } catch { case &Core::Not_found: break; }
   return false;
@@ -67,6 +68,7 @@ static bool visit_cg_f2($(fndefns_t,fndecl_set_t)@ env, stmt_t s) {
 static fndecl_set_t cg_stmt(fndefns_t fds, stmt_t e, fndecl_set_t s) {
   let env = $(fds,s);
   visit_stmt(visit_cg_f1,visit_cg_f2,&env,e);
+  let $(_,s) = env;
   return s;
 }
 
