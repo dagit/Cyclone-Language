@@ -248,13 +248,13 @@ void print_graph(graph_t @g) {
     for (let rs = g->rows; rs != NULL; rs = rs->next) {
       let &Node{_,rep,_,_,uds,sds,_,_,_} = (node_t@)rs;
       let s = term2string(rep);
-      fprintf(stderr,"row %s:",s);
-      if (uds == NULL) fprintf(stderr,"\n");
-      print_shortestpathinfo(rs->shortest_path_info);
-      fprintf(stderr,"unsigned shortest dist from S: %d\n",
-	      rs->unsigneddistFromS);
-      fprintf(stderr,"signed shortest dist from S: %d\n",
-	      rs->signeddistFromS);
+      //fprintf(stderr,"row %s:",s);
+      //if (uds == NULL) fprintf(stderr,"\n");
+      //print_shortestpathinfo(rs->shortest_path_info);
+      //fprintf(stderr,"unsigned shortest dist from S: %d\n",
+      //      rs->unsigneddistFromS);
+      //fprintf(stderr,"signed shortest dist from S: %d\n",
+      //      rs->signeddistFromS);
       for (; uds != NULL; uds = uds->next)
         fprintf(stderr,"  %s - %s U<= %d\n ",s,
                 term2string(uds->target->rep),uds->dist);
@@ -1211,6 +1211,164 @@ static $(bool, unsigned,term_opt_t) subst_term_with_const(graph_t @g, term_t t) 
   return $(false,0xbad,newterm);
 }
 
+// The idea here is that if we can replace t2 by t1, then we might
+// be able to do more reductions.  For now, we only replace variables.
+static bool better_term(term_t t1, term_t t2) {
+ loop:
+  switch $(t1,t2) {
+  // logic variables provide no info -- any term is better.  Pick
+  // some ordering on the variables so that we can break ties.
+  case $(&LogicVar(...),&LogicVar(...)): return (int)t1 < (int)t2;
+  case $(_,&LogicVar(...)): return true;
+  case $(&LogicVar(...),_): return false;
+  case $(&Uint(...),_): return true;
+  case $(_,&Uint(...)): return false;
+  case $(&Addr(...),_): return true;
+  case $(_,&Addr(...)): return false;
+  case $(&Alloc(...),_): return true;
+  case $(_,&Alloc(...)): return false;
+  case $(&Offsetf(t1a,_,_),&Offsetf(t2a,_,_)): t1=t1a; t2=t2a; goto loop;
+  case $(&Offseti(t1a,t1b,_),&Offseti(t2a,t2b,_)):
+    if (!better_term(t1a,t2a)) return false;
+    t1=t1b; t2=t2b; goto loop;
+  case $(&Tagof(t1a),&Tagof(t2a)):  t1=t1a; t2=t2a; goto loop;
+  default: return false;
+  }
+}
+
+// returns true if t1 occurs within t2.  
+static bool occurs(term_t t1, term_t t2) {
+ loop:
+  if (t1 == t2) return true;
+  switch (t2) {
+  case &Unop(_,s,_): t2 = s; goto loop;
+  case &Binop(_,s1,s2,_): if (occurs(t1,s1)) return true; t2 = s2; goto loop;
+  case &Cast(_,s): t2 = s; goto loop;
+  case &Select(s1,s2,_): if (occurs(t1,s1)) return true; t2 = s2; goto loop;
+  case &Update(s1,s2,s3): if (occurs(t1,s1) || occurs(t2,s2)) return true;
+    t2 = s3; goto loop;
+  case &Aggr(_,_,ss,_):
+    for (; ss != NULL; ss = ss->tl) if (occurs(t1,ss->hd)) return true;
+    return false;
+  case &Proj(s,_,_): t2 = s; goto loop;
+  case &AggrUpdate(s1,_,s2): 
+    if (occurs(t1,s1)) return true; t2 = s2; goto loop;
+  case &Addr(_,s,_): t2 = s; goto loop;
+  case &Alloc(_,_,s1,s2,_): 
+    if (occurs(t1,s1)) return true; t2 = s2; goto loop;
+  case &Offsetf(s,_,_): t2 = s; goto loop;
+  case &Offseti(s1,s2,_): if (occurs(t1,s1)) return true; t2 = s2; goto loop;
+  case &Tagof(s): t2 = s; goto loop;
+  default: return false;
+  }
+}
+
+static term_t lookup_eq(Hashtable::table_t<term_t,term_t> eq, term_t t) {
+  while (true) {
+    let topt = Hashtable::lookup_opt(eq,t);
+    if (topt == NULL || *topt == t) return t;
+    t = *topt;
+  }
+}
+
+static void subst_close_graph(int dummy, graph_t @g) {
+  // Build a table that maps a term t to the "best" term that it
+  // is equal to.  See above for definition of best.  Then augment
+  // the graph by substituting the best term for t throughout the
+  // graph.
+  Hashtable::table_t<term_t,term_t> eq = Hashtable::create(33,termcmp,termhash);
+  bool changed = false;
+  for (let rs = g->rows; rs != NULL; rs = rs->next) {
+    let t1 = rs->rep;
+    let best = t1;
+    // find the "best" term that t1 is equal to.
+    for (let ts = g->rows; ts != NULL; ts = ts->next) {
+      let t2 = ts->rep;
+      if (better_term(t2,best) && equal_nodes(rs,ts) && !occurs(t1,t2)) 
+        best = t2;
+    }
+    if (best != t1) {
+      changed = true;
+      Hashtable::insert(eq,t1,best);
+    }
+  }
+  if (!changed) return;
+  // Now substitute in each term in the graph.  
+  for (let rs = g->rows; rs != NULL; rs = rs->next) {
+    let t = rs->rep;
+    switch (t) {
+    case &Unop(p,t1,type):
+      let newt1 = lookup_eq(eq,t1);
+      if (t1 != newt1) add_eq(g,t,unop(p,newt1,type));
+      break;
+    case &Proj(t1,i,type):
+      let newt1 = lookup_eq(eq,t1);
+      if (t1 != newt1) add_eq(g,t,proj(newt1,i,type));
+      break;
+    case &Binop(p,t1,t2,type):
+      let newt1 = lookup_eq(eq,t1);
+      let newt2 = lookup_eq(eq,t2);
+      if (t1 != newt1 || t2 != newt2) 
+        add_eq(g,t,binop(p,newt1,newt2,type));
+      break;
+    case &Select(t1,t2,type):
+      let newt1 = lookup_eq(eq,t1);
+      let newt2 = lookup_eq(eq,t2);
+      if (t1 != newt1 || t2 != newt2) add_eq(g,t,select(newt1,newt2,type));
+      break;
+    case &Update(t1,t2,t3):
+      let newt1 = lookup_eq(eq,t1);
+      let newt2 = lookup_eq(eq,t2);
+      let newt3 = lookup_eq(eq,t3);
+      if (t1 != newt1 || t2 != newt2 || t3 != newt3) 
+        add_eq(g,t,update(newt1,newt2,newt3));
+      break;
+    case &Cast(type,t1):
+      let newt1 = lookup_eq(eq,t1);
+      if (t1 != newt1) add_eq(g,t,cast(type,newt1));
+      break;
+    case &Aggr(is_union,tag,terms,topt):
+      list_t<term_t> new_terms = NULL; 
+      bool change = false;
+      for (let ts = terms; ts != NULL; ts = ts->tl) {
+        let t = ts->hd;
+        let newt = lookup_eq(eq,t);
+        if (t != newt) change = true;
+        new_terms = new List{newt,new_terms};
+      }
+      if (change) {
+        add_eq(g,t,aggr(is_union,tag,List::imp_rev(new_terms),topt));
+      }
+      break;
+    case &AggrUpdate(t1,i,t2):
+      let newt1 = lookup_eq(eq,t1);
+      let newt2 = lookup_eq(eq,t2);
+      if (t1 != newt1 || t2 != newt2) 
+        add_eq(g,t,aggr_update(newt1,i,newt2));
+      break;
+    case &Offsetf(t1,i,topt):
+      let newt1 = lookup_eq(eq,t1);
+      if (t1 != newt1) add_eq(g,t,offsetf(newt1,i,topt));
+      break;
+    case &Offseti(t1,t2,topt):
+      let newt1 = lookup_eq(eq,t1);
+      let newt2 = lookup_eq(eq,t2);
+      if (t1 != newt1 || t2 != newt2) 
+        add_eq(g,t,offseti(newt1,newt2,topt));
+      break;
+    case &Tagof(t1):
+      let newt1 = lookup_eq(eq,t1);
+      if (t1 != newt1) add_eq(g,t,tagof_tm(newt1));
+      break;
+    default: break;      
+    }
+  }
+}
+
+static graph_t *subst_close_graphs(graph_t *`H gs) {
+  return app_graphs(subst_close_graph,0,gs);
+}
+
 // JGM: this is just too expensive to run this naively, so I'm
 // not using it now.  
 static void congruence_close_graph(int dummy, graph_t @g) {
@@ -1463,8 +1621,9 @@ static void equality_close_graph(int dummy, graph_t @g) {
       for (let ts = rs->next; ts != NULL; ts = ts->next) 
         switch (ts->rep) {
         case &Binop(p2,t21,t22,_) && p1 == p2:
-          if (equal_terms(g,t11,t21) && equal_terms(g,t12,t22))
+          if (equal_terms(g,t11,t21) && equal_terms(g,t12,t22)) {
             add_eq(g,rep1,ts->rep);
+          }
           continue;
         default: continue;
         }
@@ -1473,7 +1632,10 @@ static void equality_close_graph(int dummy, graph_t @g) {
       for (let ts = rs->next; ts != NULL; ts = ts->next)
         switch (ts->rep) {
         case &Unop(p2,t2,_) && p1 == p2:
-          if (equal_terms(g,t1,t2)) add_eq(g,rep1,ts->rep); continue;
+          if (equal_terms(g,t1,t2)) {
+            add_eq(g,rep1,ts->rep); 
+          }
+          continue;
         default: continue;
         }
       break;
@@ -1481,8 +1643,9 @@ static void equality_close_graph(int dummy, graph_t @g) {
       for (let ts = rs->next; ts != NULL; ts = ts->next)
         switch (ts->rep) {
         case &Cast(tp2,t2):
-          if (Tcutil::typecmp(tp1,tp2) == 0 && equal_terms(g,t1,t2)) 
+          if (Tcutil::typecmp(tp1,tp2) == 0 && equal_terms(g,t1,t2)) {
             add_eq(g,rep1,ts->rep); 
+          }
           continue;
         default: continue;
         }
@@ -1491,8 +1654,9 @@ static void equality_close_graph(int dummy, graph_t @g) {
       for (let ts = rs->next; ts != NULL; ts = ts->next) 
         switch (ts->rep) {
         case &Select(t21,t22,_):
-          if (equal_terms(g,t11,t21) && equal_terms(g,t12,t22))
+          if (equal_terms(g,t11,t21) && equal_terms(g,t12,t22)) {
             add_eq(g,rep1,ts->rep);
+          }
           continue;
         default: continue;
         }
@@ -1502,8 +1666,9 @@ static void equality_close_graph(int dummy, graph_t @g) {
         switch (ts->rep) {
         case &Update(t21,t22,t23):
           if (equal_terms(g,t11,t21) && equal_terms(g,t12,t22) && 
-              equal_terms(g,t13,t23))
+              equal_terms(g,t13,t23)) {
             add_eq(g,rep1,ts->rep);
+          }
           continue;
         default: continue;
         }
@@ -1512,7 +1677,9 @@ static void equality_close_graph(int dummy, graph_t @g) {
       for (let ts = rs->next; ts != NULL; ts = ts->next)
         switch (ts->rep) {
         case &Proj(t2,i2,_):
-          if (i1 == i2 && equal_terms(g,t1,t2)) add_eq(g,rep1,ts->rep); 
+          if (i1 == i2 && equal_terms(g,t1,t2)) {
+            add_eq(g,rep1,ts->rep); 
+          }
           continue;
         default: continue;
         }
@@ -1521,8 +1688,9 @@ static void equality_close_graph(int dummy, graph_t @g) {
       for (let ts = rs->next; ts != NULL; ts = ts->next) 
         switch (ts->rep) {
         case &AggrUpdate(t21,i2,t22) && i1 == i2:
-          if (equal_terms(g,t11,t21) && equal_terms(g,t12,t22))
+          if (equal_terms(g,t11,t21) && equal_terms(g,t12,t22)) {
             add_eq(g,rep1,ts->rep);
+          }
           continue;
         default: continue;
         }
@@ -1533,7 +1701,9 @@ static void equality_close_graph(int dummy, graph_t @g) {
         case &Aggr(is_union2,tag2,ts2,_) && tag1 == tag2:
           for (; ts1 != NULL && ts2 != NULL; ts1=ts1->tl, ts2=ts2->tl) 
             if (!equal_terms(g,ts1->hd,ts2->hd)) break;
-          if (ts1 == ts2 && is_union1 == is_union2) add_eq(g,rep1,ts->rep);
+          if (ts1 == ts2 && is_union1 == is_union2) {
+            add_eq(g,rep1,ts->rep);
+          }
           continue;
         default: continue;
         }
@@ -1542,7 +1712,9 @@ static void equality_close_graph(int dummy, graph_t @g) {
       for (let ts = rs->next; ts != NULL; ts = ts->next)
         switch (ts->rep) {
         case &Tagof(t2): 
-          if (equal_terms(g,t1,t2)) add_eq(g,rep1,ts->rep);
+          if (equal_terms(g,t1,t2)) {
+            add_eq(g,rep1,ts->rep);
+          }
           continue;
         default: continue;
         }
@@ -1978,8 +2150,9 @@ static graph_t *cgraph(graph_t *`H gs, Set::set_t<assn_t,`H> @already_seen,
     switch (a1) { case &Or(...):  goto NOCLOSE1; default: break;}
     gs1 = associate_ud_sd_in_graphs(gs1);
     gs1 = break_term_in_graphs(gs1);
-    // try to weed out graphs through equality closure
-    gs1 = equality_close_graphs(gs1);
+    gs1 = subst_close_graphs(gs1);
+    // Equality closure doesn't do anything useful...
+    //gs1 = equality_close_graphs(gs1);
     gs1 = associate_ud_sd_in_graphs(gs1);
     // at this point, we're splitting so increase the or-depth
     // compute (gs and a2)
@@ -1988,8 +2161,9 @@ static graph_t *cgraph(graph_t *`H gs, Set::set_t<assn_t,`H> @already_seen,
     gs2 = cgraph(gs2,&already_seen2,a2,total_paths);
     gs2 = associate_ud_sd_in_graphs(gs2);
     gs2 = break_term_in_graphs(gs2); 
-    // try to weed out graphs through equality closure
-    gs2 = equality_close_graphs(gs2);
+    gs2 = subst_close_graphs(gs2);
+    // Equality closure doesn't do anything useful...
+    // gs2 = equality_close_graphs(gs2);
     gs2 = associate_ud_sd_in_graphs(gs2);
   NOCLOSE2:
     // return (gs and a1) or (gs and a2)
@@ -2149,7 +2323,8 @@ static bool consistent(assn_t a) {
       gs = associate_ud_sd_in_graphs(gs);
       gs = add_type_assns(gs);
       gs = add_numelts_info_graphs(gs);
-      gs = equality_close_graphs(gs);
+      //gs = subst_close_graphs(gs);
+      // gs = equality_close_graphs(gs);
       //      gs = gaussian_graphs(gs);
       //      gs = constrain_okderefs(gs);
       gs = break_term_in_graphs(gs);

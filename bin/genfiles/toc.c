@@ -3175,7 +3175,7 @@ struct _tuple39 _Tmp8=*((struct _tuple39*)ds->hd);int _Tmp9;void*_TmpA;void*_Tmp
 ({struct Cyc_List_List*_TmpD=({struct Cyc_List_List*_TmpE=_region_malloc(rgn,0U,sizeof(struct Cyc_List_List));({struct _tuple40*_TmpF=({struct _tuple40*_Tmp10=_region_malloc(rgn,0U,sizeof(struct _tuple40));_Tmp10->f0=oldv,_Tmp10->f1=newv;_Tmp10;});_TmpE->hd=_TmpF;}),_TmpE->tl=*decls;_TmpE;});*decls=_TmpD;});
 if(cast)({struct Cyc_Absyn_Exp*_TmpD=({void*_TmpE=oldvt;Cyc_Toc_cast_it(_TmpE,Cyc_Absyn_varb_exp((void*)({struct Cyc_Absyn_Local_b_Absyn_Binding_struct*_TmpF=_cycalloc(sizeof(struct Cyc_Absyn_Local_b_Absyn_Binding_struct));_TmpF->tag=4,_TmpF->f1=newv;_TmpF;}),0U));});oldv->initializer=_TmpD;});else{
 ({struct Cyc_Absyn_Exp*_TmpD=Cyc_Absyn_varb_exp((void*)({struct Cyc_Absyn_Local_b_Absyn_Binding_struct*_TmpE=_cycalloc(sizeof(struct Cyc_Absyn_Local_b_Absyn_Binding_struct));_TmpE->tag=4,_TmpE->f1=newv;_TmpE;}),0U);oldv->initializer=_TmpD;});}
-_check_null(oldv->initializer)->topt=newv->type;
+oldv->initializer->topt=newv->type;
 # 3231
 oldv->type=oldvt;
 res=({struct Cyc_Absyn_Decl*_TmpD=({struct Cyc_Absyn_Decl*_TmpE=_cycalloc(sizeof(struct Cyc_Absyn_Decl));({void*_TmpF=(void*)({struct Cyc_Absyn_Var_d_Absyn_Raw_decl_struct*_Tmp10=_cycalloc(sizeof(struct Cyc_Absyn_Var_d_Absyn_Raw_decl_struct));_Tmp10->tag=0,_Tmp10->f1=oldv;_Tmp10;});_TmpE->r=_TmpF;}),_TmpE->loc=0U;_TmpE;});Cyc_Absyn_decl_stmt(_TmpD,res,0U);});}}}
@@ -3249,7 +3249,7 @@ struct _tuple39 _TmpE=*((struct _tuple39*)ds->hd);int _TmpF;void*_Tmp10;void*_Tm
 ({struct Cyc_List_List*_Tmp13=({struct Cyc_List_List*_Tmp14=_region_malloc(rgn,0U,sizeof(struct Cyc_List_List));({struct _tuple40*_Tmp15=({struct _tuple40*_Tmp16=_region_malloc(rgn,0U,sizeof(struct _tuple40));_Tmp16->f0=oldv,_Tmp16->f1=newv;_Tmp16;});_Tmp14->hd=_Tmp15;}),_Tmp14->tl=*decls;_Tmp14;});*decls=_Tmp13;});
 if(cast)({struct Cyc_Absyn_Exp*_Tmp13=({void*_Tmp14=oldvt;Cyc_Toc_cast_it(_Tmp14,Cyc_Absyn_varb_exp((void*)({struct Cyc_Absyn_Local_b_Absyn_Binding_struct*_Tmp15=_cycalloc(sizeof(struct Cyc_Absyn_Local_b_Absyn_Binding_struct));_Tmp15->tag=4,_Tmp15->f1=newv;_Tmp15;}),0U));});oldv->initializer=_Tmp13;});else{
 ({struct Cyc_Absyn_Exp*_Tmp13=Cyc_Absyn_varb_exp((void*)({struct Cyc_Absyn_Local_b_Absyn_Binding_struct*_Tmp14=_cycalloc(sizeof(struct Cyc_Absyn_Local_b_Absyn_Binding_struct));_Tmp14->tag=4,_Tmp14->f1=newv;_Tmp14;}),0U);oldv->initializer=_Tmp13;});}
-_check_null(oldv->initializer)->topt=newv->type;
+oldv->initializer->topt=newv->type;
 # 3320
 oldv->type=oldvt;
 r=({struct Cyc_Absyn_Decl*_Tmp13=({struct Cyc_Absyn_Decl*_Tmp14=_cycalloc(sizeof(struct Cyc_Absyn_Decl));({void*_Tmp15=(void*)({struct Cyc_Absyn_Var_d_Absyn_Raw_decl_struct*_Tmp16=_cycalloc(sizeof(struct Cyc_Absyn_Var_d_Absyn_Raw_decl_struct));_Tmp16->tag=0,_Tmp16->f1=oldv;_Tmp16;});_Tmp14->r=_Tmp15;}),_Tmp14->loc=0U;_Tmp14;});Cyc_Absyn_decl_stmt(_Tmp13,r,0U);});}}}
@@ -3926,9 +3926,9 @@ c_name=({struct _tuple1*_Tmp2=_cycalloc(sizeof(struct _tuple1));({union Cyc_Absy
 if(vd->initializer!=0){
 if((int)vd->sc==4)vd->sc=2U;
 if(cinclude)
-Cyc_Toc_exptypes_to_c(_check_null(vd->initializer));else{
+Cyc_Toc_exptypes_to_c(vd->initializer);else{
 # 4163
-Cyc_Toc_exp_to_c(nv,_check_null(vd->initializer));}}
+Cyc_Toc_exp_to_c(nv,vd->initializer);}}
 # 4165
 vd->name=c_name;
 ({enum Cyc_Absyn_Scope _Tmp2=Cyc_Toc_scope_to_c(vd->sc);vd->sc=_Tmp2;});

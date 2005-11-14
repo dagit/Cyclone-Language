@@ -2192,7 +2192,7 @@ if((int)((const char*)s.curr)[1]==48)i=2;else{
 if(((int)((const char*)s.curr)[1]==120 && l >= 3U)&&(int)((const char*)s.curr)[2]==48)i=3;else{
 return 0;}}
 for(1;(unsigned long)i < l;++ i){
-if((int)((const char*)s.curr)[i]!=48)return 0;}
+if((int)*((const char*)_check_fat_subscript(s,sizeof(char),i))!=48)return 0;}
 return 1;}
 # 1888
 return 0;}default: goto _LLF;}case 2: _LLA:
