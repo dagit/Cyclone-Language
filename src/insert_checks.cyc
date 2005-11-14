@@ -39,6 +39,7 @@
 #include "pratt_prover.h"
 #include "absynpp.h"
 #include "callgraph.h"
+#include <graph.h>
 using Absynpp;
 
 // #define TIMING_DEBUG
@@ -534,11 +535,8 @@ static void do_exp(env_t nv, exp_t e) {
   }
 }
 
-static void do_decl(env_t nv, decl_t d) {
-  switch(d->r) {
-  case &Var_d(vd): do_exp_opt(nv,vd->initializer); break;
-  case &Fn_d(fd): 
-    let nv = fn_body_env(nv);
+static void do_fndecl(env_t env, fndecl_t fd) {
+    let nv = fn_body_env(env);
     nv.assn_info = Vcgen::new_assn_info();
     if (nv.vcgen_r) {
 #ifdef TIMING_DEBUG
@@ -547,7 +545,7 @@ static void do_decl(env_t nv, decl_t d) {
       struct timeval start, end;
       gettimeofday(&start,NULL);
 #endif
-      Vcgen::vcgen_fundecl(d->loc, nv.tables, fd, nv.assn_info);
+      Vcgen::vcgen_fundecl(0, nv.tables, fd, nv.assn_info);
 #ifdef TIMING_DEBUG
       gettimeofday(&end,NULL);
       end.tv_sec -= start.tv_sec;
@@ -577,6 +575,11 @@ static void do_decl(env_t nv, decl_t d) {
     //fprintf(stderr,"insert checks for %s:  %d.%06d secs\n",
     //        Absynpp::qvar2string(fd->name),end.tv_sec,end.tv_usec);
 #endif
+}
+static void do_decl(env_t nv, decl_t d) {
+  switch(d->r) {
+  case &Var_d(vd): do_exp_opt(nv,vd->initializer); break;
+  case &Fn_d(fd): 
     break;//forgets if in sizeof
   case &Let_d(_,_,e,_): do_exp(nv,e); break;    
   case &Letv_d(_): break;
@@ -651,11 +654,13 @@ void insert_checks(List::list_t<decl_t,`H> tds,
   // we process function callees first and the callers 
   // so that we can use summary from functions
 
-  //  fprintf(stderr,"insert_checks:\n%s\n",Absynpp::decllist2string(tds));
   let cg = Callgraph::compute_callgraph(tds);
-  //  Callgraph::print_callgraph(stderr,cg);
   for(; tds != NULL; tds = tds->tl)
     do_decl(nv,tds->hd);
+  let fds = Graph::tsort(cg);
+  fds = List::imp_rev(fds);
+  for(; fds != NULL; fds = fds->tl)
+    do_fndecl(nv,fds->hd);
 
   if (Flags::verbose) {
     let eliminated_bounds_checks = 

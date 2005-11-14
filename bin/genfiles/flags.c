@@ -383,7 +383,7 @@ int Cyc_Flags_print_parser_state_and_token=0;
 int Cyc_Flags_allpaths=1;
 int Cyc_Flags_debug_assn=0;
 int Cyc_Flags_print_unprovable=0;
-unsigned Cyc_Flags_max_vc_summary=500U;
+unsigned Cyc_Flags_max_vc_summary=20U;
 unsigned Cyc_Flags_max_vc_paths=33U;
 # 49
 void Cyc_Flags_set_all_warnings (void){

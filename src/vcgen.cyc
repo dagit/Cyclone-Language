@@ -47,6 +47,11 @@
 
 // #define VCGEN_PROFILE
 
+// NO_FUN_SUMMARY, when defined, will not use
+// summary of functions
+
+// #define NO_FUN_SUMMARY
+
 // NO_TRY_ASSNMAP, when defined, will not accumulate
 // assertion information for any exceptions thrown
 // this will give a more accurate account of the profiling
@@ -874,7 +879,7 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
     let $(pre_memory,am2) = lookup_var_map(memory,am2);
 
     let $(args,argvds,reqopt,ensopt,thrwsopt,ret_value) = get_requires_and_ensures(e1->topt);
-#ifdef VCGEN_PROFILE
+#ifdef NO_FUN_SUMMARY
     existassnfn_opt_t fensinfo = NULL;
 #else
     let fensinfo = lookup_fn_info(e1);
