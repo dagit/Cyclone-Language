@@ -863,7 +863,7 @@ c=(int)*((char*)_check_fat_subscript(p,sizeof(char),0U));
 if(c!=101 && c!=69){
 _IO_ungetc(c,fp);
 _fat_ptr_inplace_plus(& p,sizeof(char),-1);
-c=(int)*((char*)_check_fat_subscript(p,sizeof(char),0U));}
+c=(int)*((char*)p.curr);}
 # 761
 _IO_ungetc(c,fp);}
 # 763

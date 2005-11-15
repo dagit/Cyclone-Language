@@ -460,7 +460,7 @@ m=Cyc_XP_length(m,y);
 if(m==1){
 if((int)*((unsigned char*)_check_fat_subscript(y,sizeof(unsigned char),0))==0)
 return 0;
-({unsigned char _Tmp0=(unsigned char)Cyc_XP_quotient(nx,q,x,(int)((unsigned char*)y.curr)[0]);*((unsigned char*)_check_fat_subscript(r,sizeof(unsigned char),0))=_Tmp0;});
+({unsigned char _Tmp0=(unsigned char)Cyc_XP_quotient(nx,q,x,(int)((unsigned char*)y.curr)[0]);((unsigned char*)r.curr)[0]=_Tmp0;});
 if(_get_fat_size(r,sizeof(unsigned char))> 1U)
 ({struct _fat_ptr _Tmp0=_fat_ptr_plus((struct _fat_ptr)r,sizeof(char),1);Cyc_memset(_Tmp0,'\000',(unsigned long)(my - 1));});}else{
 if(m > n){

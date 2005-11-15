@@ -419,11 +419,11 @@ if((unsigned long)i >= len)return 0;
 width=Cyc_List_imp_rev(width);{
 # 85
 struct Cyc_List_List*precision=0;
-c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
+c=((const char*)s.curr)[i];
 if((int)c==46){
 precision=({struct Cyc_List_List*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_List_List));_Tmp0->hd=(void*)((int)c),_Tmp0->tl=precision;_Tmp0;});
 if((unsigned long)++ i >= len)return 0;
-c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
+c=((const char*)s.curr)[i];
 if((int)c==42){
 precision=({struct Cyc_List_List*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_List_List));_Tmp0->hd=(void*)((int)c),_Tmp0->tl=precision;_Tmp0;});
 ++ i;}else{
@@ -437,18 +437,18 @@ if((unsigned long)i >= len)return 0;
 precision=Cyc_List_imp_rev(precision);{
 # 106
 struct Cyc_List_List*lenmod=0;
-c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
+c=((const char*)s.curr)[i];
 switch((int)c){case 104:
 # 110
  lenmod=({struct Cyc_List_List*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_List_List));_Tmp0->hd=(void*)((int)c),_Tmp0->tl=lenmod;_Tmp0;});
 if((unsigned long)++ i >= len)return 0;
-c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
+c=((const char*)s.curr)[i];
 if((int)c==104){lenmod=({struct Cyc_List_List*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_List_List));_Tmp0->hd=(void*)((int)c),_Tmp0->tl=lenmod;_Tmp0;});++ i;}
 goto _LLD;case 108:
 # 116
  lenmod=({struct Cyc_List_List*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_List_List));_Tmp0->hd=(void*)((int)c),_Tmp0->tl=lenmod;_Tmp0;});
 if((unsigned long)++ i >= len)return 0;
-c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
+c=((const char*)s.curr)[i];
 if((int)c==108){lenmod=({struct Cyc_List_List*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_List_List));_Tmp0->hd=(void*)((int)c),_Tmp0->tl=lenmod;_Tmp0;});++ i;}
 goto _LLD;case 106:
  goto _LL15;case 122: _LL15:
@@ -463,7 +463,7 @@ goto _LLD;default:
 if((unsigned long)i >= len)return 0;
 lenmod=Cyc_List_imp_rev(lenmod);
 # 134
-c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
+c=((const char*)s.curr)[i];
 switch((int)c){case 100:
  goto _LL20;case 105: _LL20:
  goto _LL22;case 111: _LL22:
@@ -745,7 +745,7 @@ goto _LL0;default:
 if((unsigned long)i >= len)return 0;
 lenmod=Cyc_List_imp_rev(lenmod);
 # 411
-c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
+c=((const char*)s.curr)[i];
 switch((int)c){case 100:
  goto _LL13;case 105: _LL13:
  goto _LL15;case 111: _LL15:

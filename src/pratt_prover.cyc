@@ -74,6 +74,10 @@ The algorithm that we use here is roughly as follows:
 
    (5) If all of the graphs are found to be inconsistent, then we know A is false.
 
+   (6) A number of ad hoc passes are added to further find inconsistencies.
+       For instance, we have a pass that looks for X == T in the graph and
+       substitutes T for X in the rest of the graph.
+
 In practice, we incrementally convert the assertion to graphs and try to 
 prune inconsistent graphs as early as possible.  This avoids building graphs 
 proportional to the DNF which could be exponential in the size of A.
@@ -85,9 +89,8 @@ then we clone the list of graphs and compute Ai && (G1 || ... || Gn) and
 A2 && (G1 || ... || Gn), appending the resulting lists of graphs that
 remain consistent.
 
-We currently perform the all-paths closure in a graph each time we add a 
-primitive constraint.  We currently perform the other closure operations when 
-we hit a disjunction (or at the end).  These allow us to prune graphs 
+We currently perform the all-paths and other closure operations in a graph 
+when we hit a disjunction (or at the end.)  These allow us to prune graphs 
 relatively frequently and thus keep the space overheads reasonable.  It is 
 not clear how often we should do closure, since on the one hand, they are 
 relatively expensive passes, but on the other hand, they help to eliminate 
@@ -162,7 +165,7 @@ typedef struct Node node_t;
 
 
 // An entry in the sparse matrix -- records the target node of the
-// edge and the distance as a (signed) integer.  It is important to
+// edge and the distance as a (signed) integer.  
 typedef struct Distance {
   struct Distance *next;
   node_t @target;
@@ -379,7 +382,7 @@ static void add_type_info(graph_t @g, term_t term) {
 }
 
 // Given a term, look up its row and if not found, then add the term 
-// to the graph.  Keep things sorted by term order.
+// to the graph.  
 static node_t @term2node(graph_t @`r g, term_t t) {
   // first see if we can find it directly.
   let nopt = Hashtable::lookup_ptr_opt(g->map, t);
@@ -516,90 +519,6 @@ static void new_distance(node_t @`H source, node_t @`H target, bool is_signed, i
   }
 }
 
-// Tries to set the distance between two terms it and jt to dist, and
-// update the shortest paths between any two nodes in the graph.  Returns
-// normally iff the resulting graph is consistent with this new constraint,
-// and throws Inconsistent otherwise.  
-// Care must be taken when computing shortest paths to ensure that we
-// don't end up with an overflow or underflow.
-/***************************************************************************
-static void set_dist(graph_t @g, node_t @`H i, node_t @`H j, int dist, bool is_signed) {
-  // equivalent terms are always at distance 0.
-  if (i == j && dist < 0) throw(&inconsistent);
-  if (i == j && dist > 0) return;
-  let ij_dist = lookup_dist(i,j,is_signed);
-  // if we already have a shorter path, then this constraint is redundant
-  if (ij_dist != NULL && *ij_dist < dist) return;
-  let ji_dist = lookup_dist(j,i,is_signed);
-  // if  j --n--> i --dist--> j  and n+dist is negative, contradiction.
-  if (ji_dist != NULL) {
-    let $(_,sum) = is_signed_overflow(*ji_dist,dist);
-    if (sum < 0) throw(&inconsistent); // there is a negative loop 
-  }
-  for (let k = g->rows; k != NULL; k = k->next) {
-    let ki_dist = lookup_dist(k,i,is_signed);
-    if (ki_dist == NULL) continue; // no new path through ij
-    let ds = is_signed ? j->signed_distances : j->unsigned_distances;
-    // we're going to iterate through the j edges (ds), but must be sure
-    // to include the "phantom" j->j edge.  So we sort of fake this out
-    // for the first iteration of the loop.  See the CONTINUE label for
-    // how we pull off the next target.  
-    let l = j;
-    static int z = 0;
-    let jl_dist = &z;
-    while (true) {
-      {
-      // skip nodes equal to k
-      if (k == l) goto CONTINUE;
-      let kl_dist = lookup_dist(k,l,is_signed);
-      // if kl_dist is already MININT, no need to update.
-      if (kl_dist != NULL && (unsigned)*kl_dist == MININT) goto CONTINUE;
-      // computing w(kj) = w(ki) + w(ij)
-      $(bool,int) final_sum;
-      let $(of1,sum1) = is_signed_overflow(*ki_dist,dist);
-      if (!of1) { // computing w(kl) = w(kj) + w(jl)
-        final_sum = is_signed_overflow(sum1,*jl_dist);
-      } else {
-        // now we know that ki_dist, ij_dist have the same sign
-        // that's the only way the sum can cause overflow
-        let $(of1,sum1) = is_signed_overflow(*ki_dist,*jl_dist);
-        if (!of1) {
-          // FIX?  original code had sum here...
-          final_sum = is_signed_overflow(sum1,dist);
-        } else {
-          // now we know that ki_dist, ij_dist, jl_dist have the same sign
-          // that's the only way both of1's are true.  If dist < 0 then
-          // it must be an underflow, and if > 0 it must be an overflow.
-          final_sum = $(true,dist < 0 ? -1 : 1);
-        }
-      }
-      let $(final_overflow,sum) = final_sum;
-      // either there is no overflow in computing the sums, or there is
-      // an underflow, so the true_sum < MININT
-      if (!final_overflow) {
-        // old k->l distance is infinite -- try adding a new edge.
-        if (kl_dist == NULL) new_distance(k,l,is_signed,sum);
-        // old k->l distance is greater than new dist -- update edge.
-        else if (*kl_dist > sum) {
-	  *kl_dist = sum;
-	}
-      } else if (sum < 0) {//underflow happened
-	if (kl_dist == NULL) new_distance(k,l,is_signed,MININT);
-	else {
-	  *kl_dist = MININT;
-	}
-      }
-      }
-    CONTINUE:
-      if (ds == NULL) break;
-      l = ds->target;
-      jl_dist = &ds->dist;
-      ds = ds->next;
-    }
-  }
-}
-**********************************************************************/
-
 static inline void set_dist(graph_t @g, node_t @`H i, node_t @`H j, int dist, bool is_signed) {
 #ifdef PROVER_DEBUG
   fprintf(stderr,"adding %s dist: %s --> %s (%d)\n",
@@ -638,44 +557,6 @@ static inline void set_dist(graph_t @g, node_t @`H i, node_t @`H j, int dist, bo
   return;
 }
 
-// computing all pair shortest paths using the naive set dist
-// algorithm we had before
-/******************************************************************
-static void naive_all_pair_shortest_paths(int dummy, graph_t @g){
-#ifdef PROVER_DEBUG
-  fprintf(stderr,"using naive algorithm to compute shortest path\n");
-#endif
-  int n = 0;
-  for(let node = g->rows; node != NULL; node = node->next){
-    n++;
-  }
-  for(int m = 0; m < n; m++){
-    for(let node = g->rows; node != NULL; node = node->next){
-      for(let dists = node->unsigned_distances; dists != NULL; dists = dists->next){
-	for(let target_dists = dists->target->unsigned_distances; 
-	    target_dists != NULL; target_dists = target_dists->next){
-	  let $(overflow,sum) = is_signed_overflow(dists->dist,target_dists->dist);
-	  if (!overflow)
-	    set_dist(g,node,target_dists->target,sum,false);
-	  else if (sum < 0) //underflow
-	    set_dist(g,node,target_dists->target,MININT,false);
-	}
-      }
-      for(let dists = node->signed_distances; dists != NULL; dists = dists->next){
-	for(let target_dists = dists->target->signed_distances; 
-	    target_dists != NULL; target_dists = target_dists->next){
-	  let $(overflow,sum) = is_signed_overflow(dists->dist,target_dists->dist);
-	  if (!overflow)
-	    set_dist(g,node,target_dists->target,sum,true);
-	  else if (sum < 0) //underflow
-	    set_dist(g,node,target_dists->target,MININT,true);
-	}
-      }
-    }
-  }
-  return;
-}
-********************************************************************/
 static int num_of_nodes(graph_t @g){
   int n = 0;
   for(let node = g->rows; node != NULL; node = node->next){
@@ -684,14 +565,14 @@ static int num_of_nodes(graph_t @g){
   return n;
 }
 
-// Given a graph with negative weight, throws Inconsistent when
+// Given a graph throws Inconsistent when
 // the algorithm detects a negative weight cycle.
-// the idea is to use bellman-ford algorithm for single-source
-// shortest path algorithm.
-// we add an extra node S to the graph, and add edges with weight 0
-// from S to all the nodes in the graph.  then we compute the
+// the idea is to use the bellman-ford algorithm for single-source
+// shortest paths.
+// We add an extra node S to the graph, and add edges with weight 0
+// from S to all the nodes in the graph.  Then we compute the
 // shortest path from S to all the nodes in the graph,
-// if there is a negative cycle in the graph, it should be reachable
+// If there is a negative cycle in the graph, it should be reachable
 // from S and bellman-ford algorithm will be able to detect it
 static void bellman_ford(int dummy,graph_t @g){
 #ifdef PROVER_DEBUG
@@ -935,7 +816,7 @@ static void johnson(int dummy, graph_t @`H g){
   print_graph(g);
 #endif
   // no inconsistency thrown so there is no negative weight cycle
-  // reweighs all the edges in the garph to make their weight nonnegative
+  // reweighs all the edges in the graph to make their weight nonnegative
   for(let node = g->rows; node != NULL; node = node->next){
     int du_unsigned = node->unsigneddistFromS;
     distance_t *pre_dists, *dists;
@@ -1046,7 +927,8 @@ static node_t *revnodes(node_t *`H n) {
   return first;
 }
 
-// Produce a copy of the list of graphs.
+// Produce a copy of the list of graphs.  Used to checkpoint the
+// state of the prover when we hit a disjunction.
 static graph_t *copy_graphs(graph_t *`r _gopt) {
   graph_t *res = NULL;
   graph_t *`r+`H gopt = _gopt;
@@ -1211,6 +1093,7 @@ static $(bool, unsigned,term_opt_t) subst_term_with_const(graph_t @g, term_t t) 
   return $(false,0xbad,newterm);
 }
 
+// Used in substitution closure below.
 // The idea here is that if we can replace t2 by t1, then we might
 // be able to do more reductions.  For now, we only replace variables.
 static bool better_term(term_t t1, term_t t2) {
@@ -1221,12 +1104,20 @@ static bool better_term(term_t t1, term_t t2) {
   case $(&LogicVar(...),&LogicVar(...)): return (int)t1 < (int)t2;
   case $(_,&LogicVar(...)): return true;
   case $(&LogicVar(...),_): return false;
-  case $(&Uint(...),_): return true;
+  // ints are always better than other terms.
+  case $(&Uint(i,_),&Uint(j,_)): 
+    if (i != j) throw &inconsistent; else return false;
+  case $(&Uint(...),_): return false;
   case $(_,&Uint(...)): return false;
+  // addresses are like constants, so they are better than other terms.
+  case $(&Addr(...),&Addr(...)): return false;
   case $(&Addr(...),_): return true;
   case $(_,&Addr(...)): return false;
+  // same with allocation points
+  case $(&Alloc(...),&Alloc(...)): return false;
   case $(&Alloc(...),_): return true;
   case $(_,&Alloc(...)): return false;
+  // if the sub-terms are better, then this term is better.
   case $(&Offsetf(t1a,_,_),&Offsetf(t2a,_,_)): t1=t1a; t2=t2a; goto loop;
   case $(&Offseti(t1a,t1b,_),&Offseti(t2a,t2b,_)):
     if (!better_term(t1a,t2a)) return false;
@@ -1263,6 +1154,7 @@ static bool occurs(term_t t1, term_t t2) {
   }
 }
 
+// given the mapping from terms to better terms, find t's best term.
 static term_t lookup_eq(Hashtable::table_t<term_t,term_t> eq, term_t t) {
   while (true) {
     let topt = Hashtable::lookup_opt(eq,t);
@@ -1271,6 +1163,8 @@ static term_t lookup_eq(Hashtable::table_t<term_t,term_t> eq, term_t t) {
   }
 }
 
+// Substitute better terms where possible in the graph.  In particular,
+// should replace a variable X with T when we have X==T.
 static void subst_close_graph(int dummy, graph_t @g) {
   // Build a table that maps a term t to the "best" term that it
   // is equal to.  See above for definition of best.  Then augment
@@ -1369,364 +1263,152 @@ static graph_t *subst_close_graphs(graph_t *`H gs) {
   return app_graphs(subst_close_graph,0,gs);
 }
 
-// JGM: this is just too expensive to run this naively, so I'm
-// not using it now.  
-static void congruence_close_graph(int dummy, graph_t @g) {
+static bool address_disjoint(graph_t @g, term_t a1, term_t a2);
+
+// Try to prove that two terms are definitely not equal.
+static bool neq_terms(graph_t @g, term_t t1, term_t t2) {
+  switch $(t1,t2) {
+  case $(&Uint(i,...),&Uint(j,...)): return i != j;
+  case $(t,&Uint(i,...)): fallthru(i,t);
+  case $(&Uint(i,...),t):
+    // t < i         or   i < t,        same as  
+    // t - 0 < i     or   0 - t < -i,   same as
+    // t - 0 <= i-1  or   0 - t <= -(i+1)
+    let n = term2node(g,t);
+    let z = term2node(g,zero());
+    let nzud = lookup_dist(n,z,false);
+    if (i != MININT && nzud != NULL && *nzud < ((int)i-1)) return true;
+    let nzsd = lookup_dist(n,z,true);
+    if (i != MININT && nzsd != NULL && *nzsd < ((int)i-1)) return true;
+    let znud = lookup_dist(z,n,false);
+    if (i != MAXINT && znud != NULL && *znud < -((int)i+1)) return true;
+    let znsd = lookup_dist(z,n,true);
+    if (i != MAXINT && znsd != NULL && *znsd < -((int)i+1)) return true;    
+    return false;
+  default:
+    // check that t1 - t2 <= -c  &&  c > 0
+    //    t1 - t2 <= -c  ==>
+    //    t1 <= t2 - c   ==>
+    //    t1 < t2
+    let n1 = term2node(g,t1);
+    let n2 = term2node(g,t2);
+    let n12ud = lookup_dist(n1,n2,false);
+    if (n12ud != NULL && *n12ud < -1) return true;
+    let n21ud = lookup_dist(n2,n1,false);
+    if (n21ud != NULL && *n21ud < -1) return true;
+    let n12sd = lookup_dist(n1,n2,true);
+    if (n12sd != NULL && *n12sd < -1) return true;
+    let n21sd = lookup_dist(n2,n1,true);
+    if (n21sd != NULL && *n21sd < -1) return true;
+    return address_disjoint(g,t1,t2);
+  }
+}
+
+// return true if a1 and a2 represent addresses to non-overlapping
+// regions of memory.  For now, we can only prove this when a1 and a2
+// have distinct roots (addresses of program variables, alloc points)
+// or the same root but different offsets.  This is similar to a
+// function in assndef.cyc with the same name, but it can leverage
+// the graph to prove inequalities.
+static bool address_disjoint(graph_t @g, term_t a1, term_t a2) {
+ LOOP:
+  switch $(a1,a2) {
+  case $(&Addr(x,_,_),&Addr(y,_,_)): return x != y;
+  case $(&Addr(...),&Alloc(...)): return true;
+  case $(&Alloc(...),&Addr(...)): return true;
+  case $(&Alloc(e1,i1,t1,nv1,_),&Alloc(e2,i2,t2,nv2,_)):
+    return (e1 != e2 || i1 != i2 || neq_terms(g,t1,t2));
+  case $(&Offsetf(t1,i1,_),&Offsetf(t2,i2,_)):
+    if (equal_terms(g,t1,t2) && i1 != i2) return true;
+    a1 = t1; a2 = t2; goto LOOP;
+  case $(&Offsetf(t1,...),_): a1 = t1; goto LOOP;
+  case $(_,&Offsetf(t2,...)): a2 = t2; goto LOOP;
+  case $(&Offseti(t1,t2,_),&Offseti(t3,t4,_)):
+    if (equal_terms(g,t1,t3) && neq_terms(g,t2,t4)) return true;
+    a1 = t1; a2 = t2; goto LOOP;
+  case $(&Offseti(t1,...),_): a1 = t1; goto LOOP;
+  case $(_,&Offseti(t2,...)): a2 = t2; goto LOOP;
+  default: return false;
+  }
+}
+
+// Try to reduce as many terms as possible using the graph to 
+// establish [in]equalities.
+static void reduce_terms(int dummy, graph_t @g) {
   for (let rs = g->rows; rs != NULL; rs = rs->next) {
     let t = rs->rep;
     switch (t) {
-    case &Unop(p,t1,type):
-      let t1node = term2node(g,t1);
-      for (let ts = g->rows; ts != NULL; ts = ts->next)
-        if (t1node != ts && equal_nodes(ts,t1node)) 
-          add_eq(g,t,unop(p,ts->rep,type));
+    case &Select(&Update(m,a1,v),a2,topt):
+      // select(update(m,a,v,a)) --> v
+      if (equal_terms(g,a1,a2)) 
+        add_eq(g,t,v); 
+      // select(update(m,a1,v),a2) --> select(m,a2) when a1 disjoint a2
+      else if (address_disjoint(g,a1,a2)) 
+        add_eq(g,t,select(m,a2,topt)); 
+      // FIX: could search for other Update terms equal to Update(m,a1,v)
       break;
-    case &Proj(t1,i,type):
-      let t1node = term2node(g,t1);
-      for (let ts = g->rows; ts != NULL; ts = ts->next)
-        if (t1node != ts && equal_nodes(ts,t1node)) 
-          add_eq(g,t,proj(ts->rep,i,type));
+    case &Update(&Update(m,a1,v1),a2,v2):
+      // update(update(m,a,v1),a,v2) --> update(m,a,v2)
+      if (equal_terms(g,a1,a2))
+        add_eq(g,t,update(m,a2,v2)); 
+      // update(update(m,a1,v1),a2,v2) -->
+      //   update(update(m,a2,v2),a1,v1) when a1 disjoint a2 && a1 < a2
+      else if (address_disjoint(g,a1,a2) && termcmp(a1,a2) < 0)
+        add_eq(g,t,update(update(m,a2,v2),a1,v1)); 
+      // FIX: could search for other Update terms equal to Update(m,a1,v)
       break;
-    case &Binop(p,t1,t2,type):
-      // FIX:  really ought to have an inner loop to get all combinations
-      // of terms in the graph...
-      let t1node = term2node(g,t1);
-      let t2node = term2node(g,t2);
-      for (let ts = g->rows; ts != NULL; ts = ts->next) {
-        if (t1node != ts && equal_nodes(ts,t1node)) 
-          add_eq(g,t,binop(p,ts->rep,t2,type));
-        if (t2node != ts && equal_nodes(ts,t2node))
-          add_eq(g,t,binop(p,t1,ts->rep,type));
+    case &Proj(t1,i,topt):
+      // see if we can find an aggregate equal to t1
+      for (let ts = g->rows; ts != NULL; ts=ts->next) {
+        let u = ts->rep;
+        switch (u) {
+        case &Aggr(...): 
+          if (eq_nodes(rs,ts,false)) { 
+            add_eq(g,t,proj(u,i,topt)); goto Found1;
+          }
+          break;
+        default: break;
+        }
       }
+    Found1:
       break;
-    case &Select(t1,t2,type):
-      // FIX:  really ought to have an inner loop to get all combinations
-      // of terms in the graph...
-      let t1node = term2node(g,t1);
-      let t2node = term2node(g,t2);
-      for (let ts = g->rows; ts != NULL; ts = ts->next) {
-        if (t1node != ts && equal_nodes(ts,t1node)) 
-          add_eq(g,t,select(ts->rep,t2,type));
-        if (t2node != ts && equal_nodes(ts,t2node))
-          add_eq(g,t,select(t1,ts->rep,type));
+    case &AggrUpdate(t1,i,t2):
+      // see if we can find an aggregate equal to t1
+      for (let ts = g->rows; ts != NULL; ts=ts->next) {
+        let u = ts->rep;
+        switch (u) {
+        case &Aggr(...): 
+          if (eq_nodes(rs,ts,false)) { 
+            add_eq(g,t,aggr_update(u,i,t2)); goto Found2;
+          }
+          break;
+        default: break;
+        }
       }
-      break;
-    case &Update(t1,t2,t3):
-      // FIX:  really ought to have two inner loops to get all combinations
-      // of terms in the graph...
-      let t1node = term2node(g,t1);
-      let t2node = term2node(g,t2);
-      let t3node = term2node(g,t3);
-      for (let ts = g->rows; ts != NULL; ts = ts->next) {
-        if (t1node != ts && equal_nodes(ts,t1node)) 
-          add_eq(g,t,update(ts->rep,t2,t3));
-        if (t2node != ts && equal_nodes(ts,t2node))
-          add_eq(g,t,update(t1,ts->rep,t3));
-        if (t3node != ts && equal_nodes(ts,t3node))
-          add_eq(g,t,update(t1,t2,ts->rep));
-      }
-      break;
-    default: break;
-    }
-  }
-}
-
-// Not currently used because too expensive
-static graph_t *congruence_close_graphs(graph_t *`H gs) {
-  return app_graphs(congruence_close_graph,0,gs);
-}
-
-
-// try to perform gaussian elimination on the given matrix -- not
-// the smartest implementation, but simple.
-static void simplify_matrix(unsigned Rows, unsigned Columns,int ??M) {
-  for (unsigned c = 0; c < Columns; c++) {
-    // try to find a row with a non-zero element in column c and swap it
-    // with row c.
-    unsigned r;
-    for (r = 0; r < Rows; r++) {
-      if (M[r][c] != 0) break;
-    }
-    // if we didn't find a row for that term, skip it.
-    if (r >= Rows) continue;
-    // now in M[r] we should have {0,0,0,...,i_c,i_c+1,...,i_c+n}
-    // we want to subtract the right multiple from all other rows.
-    for (unsigned r2 = 0; r2 < Rows; r2++) {
-      if (r2 == r || M[r2][c] == 0) continue;
-      let kr2 = M[r2][c];
-      let kr = M[r][c];
-      // row r2 := kr*(row r2) - kr2*(row r)
-      for (unsigned i = 0; i < Columns + 1; i++) 
-        M[r2][i] = (kr*M[r2][i]) - (kr2*M[r][i]);
-    }
-  }
-}
-
-// print out a matrix
-static void print_matrix(unsigned R, unsigned C, Xarray::xarray_t<term_t> ts,
-                         int ??M) {
-  for (unsigned i = 0; i < R; ++i) {
-    bool found_column = false;
-    for (unsigned j = 0; j < C; ++j) {
-      let v = M[i][j];
-      if (v == 0) continue;
-      if (found_column) fprintf(stderr," + ");
-      found_column = true;
-      fprintf(stderr,"%d*%s",v,term2string(Xarray::get(ts,j)));
-    }
-    if (!found_column) fprintf(stderr,"0");
-    fprintf(stderr," == %d\n",M[i][C]);
-  }
-}
-
-// print out the polynomial representation of a term
-static void print_poly(list_t<$(int,term_t)@> ts, unsigned c) {
-  if (ts == NULL) fprintf(stderr,"0");
-  else {
-    for (; ts != NULL; ts = ts->tl) {
-      let $(i,t) = *ts->hd;
-      fprintf(stderr,"%d*%s",i,term2string(t));
-      if (ts->tl != NULL) fprintf(stderr," + ");
-    }
-  }
-  fprintf(stderr," == %d\n",-c);
-}
-
-// Extract a set of equations for the terms in the graph, reduce them
-// to their polynomial form, and then try to solve the equations using
-// gaussian elimination.  Then add the resulting equations back to the
-// graph.
-// static void gaussian_terms(int unused, graph_t @g) {
-//   // for each terms T1 == T2, compute polynomials T1 = P1+c1 and T2 = P2+c2
-//   // and place in P1-P2 + c1-c2 == 0 in the list S, representing a row in a 
-//   // matrix.  While we're doing this, assign each primitive term in the
-//   // polynomials an index.
-//   list_t<$(list_t<$(int,term_t)@>,unsigned int)@> S = NULL;
-//   Hashtable::table_t<term_t,int> term_index = 
-//     Hashtable::create(33,termcmp,termhash);
-//   Xarray::xarray_t<term_t> index_term = Xarray::create_empty();
-//   unsigned int Cols = 0;
-//   unsigned int Rows = 0;
-//   for (let rs = g->rows; rs != NULL; rs = rs->next) {
-//     for (let ts = rs->next; ts != NULL; ts = ts->next) 
-//       if (eq_nodes(rs,ts,false)) {
-// //         //fprintf(stderr,"adding %s == %s to matrix\n",term2string(rs->rep),
-// //         //        term2string(ts->rep));
-// //         let $(r_terms,r_c) = term2poly(rs->rep);
-// //         //fprintf(stderr,"poly1: "); print_poly(r_terms,r_c);
-// //         let $(t_terms,t_c) = term2poly(ts->rep);
-// //         //fprintf(stderr,"poly2: "); print_poly(t_terms,t_c);
-// //         let terms = merge_poly(r_terms,-1,t_terms);
-// //         // add each primitive term to the hashtable
-// 	let $(terms,c) = AssnDef::flatten_plus(minus(rs->rep,ts->rep,NULL));
-//         for (let x = terms; x != NULL; x=x->tl) {
-//           let $(_,t) = *x->hd;
-//           let iopt = Hashtable::lookup_opt(term_index,t);
-//           if (iopt == NULL) {
-//             Hashtable::insert(term_index,t,Cols);
-//             Xarray::add(index_term,t);
-//             Cols++;
-//           }
-//         }
-//         Rows++;
-//         //print_poly(terms,c);
-//         S = new List{new $(terms,c),S};
-//       }
-//   }
-//   // we want to convert the sparse matrix to a dense one to simplify
-//   // processing.
-//   int ?? M = new {for i < Rows : new {for j < Cols+1 : 0}};
-//   for (unsigned int r = 0; r < Rows; S = S->tl, ++r) {
-//     let $(its,c) = *S->hd;
-//     let row = M[r];
-//     row[Cols] = c;
-//     for (; its != NULL; its = its->tl) {
-//       let $(v,t) = *its->hd;
-//       let column = Hashtable::lookup(term_index,t);
-//       row[column] = v;
-//     }
-//   }
-
-//   // DEBUGGING:
-//   // print mapping from primitive terms to indices
-//   //fprintf(stderr,"Initial matrix:\n"); fflush(stderr);
-//   //print_matrix(Rows,Cols,index_term,M);
-
-//   // try to solve for the primitive terms
-//   simplify_matrix(Rows,Cols,M);
-
-//   //fprintf(stderr,"After simplification matrix:\n"); fflush(stderr);
-//   //print_matrix(Rows,Cols,index_term,M);
-
-//   simplify_matrix(Rows,Cols,M);
-
-//   // add the resulting equations to the graph
-//   for (unsigned r = 0; r < Rows; ++r) {
-//     let row = M[r];
-//     let c = uint(-row[Cols]);
-//     let t = uint(0);
-//     // add in all of the positive values first
-//     for (unsigned j = 0; j < Cols; ++j) {
-//       let v = row[j];
-//       if (v > 0) {
-//         let term = Xarray::get(index_term,j);
-//         for (; v != 0; v--)
-//           t = plus(t,term,Absyn::uint_type);
-//       }
-//     }
-//     // add all of the negative values to c
-//     for (unsigned j = 0; j < Cols; ++j) {
-//       let v = row[j];
-//       if (v < 0) {
-//         let term = Xarray::get(index_term,j);
-//         for (; v != 0; v++)
-//           c = plus(c,term,Absyn::uint_type);
-//       }
-//     }
-//     //fprintf(stderr,"adding equation %s = %s\n",term2string(t),term2string(c));
-//     add_eq(g,t,c);
-//   }
-// }
-
-// static graph_t *gaussian_graphs(graph_t *`H gs) {
-//   //bool old_graphs_change = graphs_change;
-//   //graphs_change = false;
-//   gs = app_graphs(gaussian_terms,0,gs);
-//   //if (graphs_change) {
-//   //  fprintf(stderr,"gaussian_graphs eliminated graph\n");
-//   //}
-//   //graphs_change = graphs_change || old_graphs_change;
-//   return gs;
-// }
-
-// JGM: I've renamed this "equality_close" instead of "congruence_close"
-// since we don't really generate all of the congruent terms...
-// If we have two nodes with representatives of the form Prim(p,[t11,...,tn1])
-// and Prim(p,[t12,...,tn2]) and the sub-terms ti1 and ti2 map to equivalent
-// nodes, then we should equate these two terms.  We're relying on the fact
-// that the rows are sorted in term order so that leaves are processed before
-// compound terms.
-
-// FIX: for a given term (e.g., Unop(p,t)) we want to find all of the
-// terms t' equivalent to t and add the constraint Unop(p,t) = Unop(p,t').
-// This code only *unifies* existing terms.  The right thing to do is
-// to generate equivalence classes on existing nodes (essentially what's
-// going on here in a very ineffecient way) and then make a pass over
-// the equivalence classes, generating the congruences.  
-static void equality_close_graph(int dummy, graph_t @g) {
-  for (let rs = g->rows; rs != NULL; rs = rs->next) {
-    let rep1 = rs->rep;
-    switch (rep1) {
-    case &Binop(p1,t11,t12,_):
-      for (let ts = rs->next; ts != NULL; ts = ts->next) 
-        switch (ts->rep) {
-        case &Binop(p2,t21,t22,_) && p1 == p2:
-          if (equal_terms(g,t11,t21) && equal_terms(g,t12,t22)) {
-            add_eq(g,rep1,ts->rep);
-          }
-          continue;
-        default: continue;
-        }
-      break;
-    case &Unop(p1,t1,_):
-      for (let ts = rs->next; ts != NULL; ts = ts->next)
-        switch (ts->rep) {
-        case &Unop(p2,t2,_) && p1 == p2:
-          if (equal_terms(g,t1,t2)) {
-            add_eq(g,rep1,ts->rep); 
-          }
-          continue;
-        default: continue;
-        }
-      break;
-    case &Cast(tp1,t1):
-      for (let ts = rs->next; ts != NULL; ts = ts->next)
-        switch (ts->rep) {
-        case &Cast(tp2,t2):
-          if (Tcutil::typecmp(tp1,tp2) == 0 && equal_terms(g,t1,t2)) {
-            add_eq(g,rep1,ts->rep); 
-          }
-          continue;
-        default: continue;
-        }
-      break;
-    case &Select(t11,t12,_):
-      for (let ts = rs->next; ts != NULL; ts = ts->next) 
-        switch (ts->rep) {
-        case &Select(t21,t22,_):
-          if (equal_terms(g,t11,t21) && equal_terms(g,t12,t22)) {
-            add_eq(g,rep1,ts->rep);
-          }
-          continue;
-        default: continue;
-        }
-      break;
-    case &Update(t11,t12,t13):
-      for (let ts = rs->next; ts != NULL; ts = ts->next) 
-        switch (ts->rep) {
-        case &Update(t21,t22,t23):
-          if (equal_terms(g,t11,t21) && equal_terms(g,t12,t22) && 
-              equal_terms(g,t13,t23)) {
-            add_eq(g,rep1,ts->rep);
-          }
-          continue;
-        default: continue;
-        }
-      break;
-    case &Proj(t1,i1,_):
-      for (let ts = rs->next; ts != NULL; ts = ts->next)
-        switch (ts->rep) {
-        case &Proj(t2,i2,_):
-          if (i1 == i2 && equal_terms(g,t1,t2)) {
-            add_eq(g,rep1,ts->rep); 
-          }
-          continue;
-        default: continue;
-        }
-      break;
-    case &AggrUpdate(t11,i1,t12):
-      for (let ts = rs->next; ts != NULL; ts = ts->next) 
-        switch (ts->rep) {
-        case &AggrUpdate(t21,i2,t22) && i1 == i2:
-          if (equal_terms(g,t11,t21) && equal_terms(g,t12,t22)) {
-            add_eq(g,rep1,ts->rep);
-          }
-          continue;
-        default: continue;
-        }
-      break;
-    case &Aggr(is_union1,tag1,ts1,_):
-      for (let ts = rs->next; ts != NULL; ts = ts->next)
-        switch (ts->rep) {
-        case &Aggr(is_union2,tag2,ts2,_) && tag1 == tag2:
-          for (; ts1 != NULL && ts2 != NULL; ts1=ts1->tl, ts2=ts2->tl) 
-            if (!equal_terms(g,ts1->hd,ts2->hd)) break;
-          if (ts1 == ts2 && is_union1 == is_union2) {
-            add_eq(g,rep1,ts->rep);
-          }
-          continue;
-        default: continue;
-        }
+    Found2:
       break;
     case &Tagof(t1):
-      for (let ts = rs->next; ts != NULL; ts = ts->next)
-        switch (ts->rep) {
-        case &Tagof(t2): 
-          if (equal_terms(g,t1,t2)) {
-            add_eq(g,rep1,ts->rep);
+      // see if we can find an aggregate equal to t1
+      for (let ts = g->rows; ts != NULL; ts=ts->next) {
+        let u = ts->rep;
+        switch (u) {
+        case &Aggr(...): 
+          if (eq_nodes(rs,ts,false)) { 
+            add_eq(g,t,tagof_tm(u)); goto Found3;
           }
-          continue;
-        default: continue;
+          break;
+        default: break;
         }
+      }
+    Found3:
       break;
     default: break;
     }
   }
 }
 
-// run equality closure on a set of graphs and weed out the disjuncts
-static graph_t *equality_close_graphs(graph_t *`H gs) {
-  return app_graphs(equality_close_graph,0,gs);
+static graph_t *reduce_close_graphs(graph_t *`H gs) {
+  return app_graphs(reduce_terms,0,gs);
 }
 
 //find out if s[t] = s[t1+c2] =? s[t1] + c2
@@ -2005,102 +1687,6 @@ static void add_prim($(term_t,prim_reln_t,term_t)@ p, graph_t @`H g) {
     add_constraint(g,t1,p,t2);
 }
 
-// given a term (presumably of pointer type), try to split it into
-// a base pointer term plus offset.  Worst case is you get $(t,0)
-// back.  This also tries to factor out additions and subtractions
-// of common terms by converting the term to a polynomial representation.
-// So, for instance, if you have (p + numelts(p)) - (numelts(p) - j)
-// you should get out p + j.  However, it's likely to get confused
-// if we have a pointer subtraction in here...
-// static $(term_t base, term_t offset) find_ptr_base(term_t t) {
-//   let $(ts,c) = flatten_plus(t);
-//   //fprintf(stderr,"term %s splits into polynomial 0x%x",term2string(t),c);
-//   //for (let us=ts; us!=NULL; us=us->tl) {
-//   //  let $(i,u) = *us->hd;
-//   //  fprintf(stderr," + %d*%s",i,term2string(u));
-//   //}
-//   //fprintf(stderr,"\n");
-//   term_t base = zero();
-//   term_t offset = uint(c);
-//   bool found_base = false;
-//   for (; ts != NULL; ts=ts->tl) {
-//     let $(i,s) = *ts->hd;
-//     let stype = get_term_type(s);
-//     if (i > 0 && stype != NULL && Tcutil::is_pointer_type((type_t)stype)) {
-//       // if we have two potential base pointers, then we're not sure
-//       // how things line up so be conservative and don't split.
-//       if (found_base) return $(t,zero());
-//       //fprintf(stderr,"type of %s is %s\n",term2string(s),Absynpp::typ2string((type_t)stype));
-//       found_base = true;
-//       base = s;
-//       i = i - 1;
-//     }
-//     if (i > 0) {
-//       for (let j = 0; j < i; j++) offset = plus(offset,s,Absyn::uint_type);
-//     } else if (i < 0) {
-//       for (let j = 0; j > i; j--) offset = minus(offset,s,Absyn::uint_type);
-//     }
-//   }
-//   if (!found_base) return $(t,zero());
-//   return $(base,offset);
-// }
-
-// The semantics of Okderef(t) is as follows:
-//    Okderef(t) U<= 0  iff All t1,t2.t!=t1+t2 || t2 U>= numelts(t1)
-// In other words, Okderef(t) is true (i.e., non-zero) when there's
-// some way to break t into a base pointer t1 and offset t2 such that 
-// t2 U< numelts(t1), and thus is false (i.e., zero) when there's
-// no way to break it into terms such as this.  
-//
-// In the closure pass below, we look for Okderef(t) terms in the
-// graph such that Okderef(t) U<= 0 and t=t1+t2 where t1 is a pointer-type,
-// indicating that we think it's not okay to dereference t1+t2.  We
-// then add a constraint t2 U>= numelts(t1) hoping to achieve a
-// contradiction.  
-// static void constrain_okderef(int unused, graph_t @`H g) {
-//   let zn = term2node(g,zero());
-//   for (let rs = g->rows; rs != NULL; rs = rs->next) {
-//     switch (rs->rep) {
-//     case &Okderef(t2):
-//       //fprintf(stderr,"found okderef(%s)\n",term2string(t2));
-//       let dist = lookup_dist(rs, zn, false);
-//       if (dist == NULL || *dist != 0) {
-//         //string_t s = dist ? (string_t)aprintf("%d",*dist) : "<inf>";
-//         //fprintf(stderr,"okderef(%s) - 0 != 0, rather %s\n",term2string(t2),s);
-//         continue;
-//       }
-//       //fprintf(stderr,"okderef(%s) - 0 == 0\n",term2string(t2));
-//       let t2node = term2node(g,t2);
-//       // find any t3 == t2 and try to do the following:
-//       for (let ts = g->rows; ts != NULL; ts = ts->next) {
-//         if (eq_nodes(t2node,ts,false)) {
-//           let $(base,offset) = find_ptr_base(ts->rep);
-//           //fprintf(stderr,"splitting %s == %s into %s + %s\n",
-//           //        term2string(t2),term2string(ts->rep),
-//           //        term2string(base),term2string(offset));
-//           //fprintf(stderr,"adding constraint numelts(%s) U<= %s\n",
-//           //        term2string(base),term2string(offset));
-//           add_constraint(g, numelts_term(base), ULte, offset);
-//           //fprintf(stderr,"no inconsistency\n");
-//         }
-//       }
-//       break;
-//     default: break;
-//     }
-//   }
-// }
-
-// static graph_t *constrain_okderefs(graph_t *`H gs) {
-//   bool old_graphs_change = graphs_change;
-//   graphs_change = false;
-//   gs = app_graphs(constrain_okderef,0,gs);
-//   //if (graphs_change) {
-//   //  fprintf(stderr,"constrain_okderefs eliminated graph\n");
-//   //}
-//   graphs_change = graphs_change || old_graphs_change;
-//   return gs;
-// }
-
 datatype exn { TooLarge };
 datatype exn.TooLarge too_large = TooLarge;
 
@@ -2110,11 +1696,6 @@ datatype exn.TooLarge too_large = TooLarge;
 // tail-calls to be as fast as possible.  If we end up with two
 // many disjuncts, then we throw an exception to back out of the
 // whole thing.  
-//
-// JGM: what we should probably do is delay pushing in the Or nodes
-// until we've gotten all of the And, Prim, True, and False nodes
-// pushed into the graphs.  That way we're more likely to hit an
-// inconsistency early.
 static graph_t *cgraph(graph_t *`H gs, Set::set_t<assn_t,`H> @already_seen,
                        assn_t a, unsigned *total_paths) {
  LOOP:
@@ -2151,8 +1732,8 @@ static graph_t *cgraph(graph_t *`H gs, Set::set_t<assn_t,`H> @already_seen,
     gs1 = associate_ud_sd_in_graphs(gs1);
     gs1 = break_term_in_graphs(gs1);
     gs1 = subst_close_graphs(gs1);
-    // Equality closure doesn't do anything useful...
-    //gs1 = equality_close_graphs(gs1);
+    // Reduce closure doesn't result in any extra checks being eliminated
+    // gs1 = reduce_close_graphs(gs1);
     gs1 = associate_ud_sd_in_graphs(gs1);
     // at this point, we're splitting so increase the or-depth
     // compute (gs and a2)
@@ -2162,8 +1743,8 @@ static graph_t *cgraph(graph_t *`H gs, Set::set_t<assn_t,`H> @already_seen,
     gs2 = associate_ud_sd_in_graphs(gs2);
     gs2 = break_term_in_graphs(gs2); 
     gs2 = subst_close_graphs(gs2);
-    // Equality closure doesn't do anything useful...
-    // gs2 = equality_close_graphs(gs2);
+    // Reduce closure doesn't result in any extra checks being eliminated
+    // gs2 = reduce_close_graphs(gs2);
     gs2 = associate_ud_sd_in_graphs(gs2);
   NOCLOSE2:
     // return (gs and a1) or (gs and a2)
@@ -2184,10 +1765,6 @@ static graph_t *cgraph(graph_t *`H gs, Set::set_t<assn_t,`H> @already_seen,
     // and unsigned.)
     a = and(or(slt(t1,t2),slt(t2,t1)),or(ult(t1,t2),ult(t2,t1)));
     goto LOOP;
-    //case &Prim(t1,Eq,t2):
-    // explode t1 == t2 into t1 <= t2 and t2 <= t1 (both signed and unsigned)
-    //a = and(and(and(slte(t1,t2),slte(t2,t1)),ulte(t1,t2)),ulte(t2,t1));
-    //goto LOOP;
   case &Prim(t1,p,t2):
     // add the primitive relation to each graph, pruning out the
     // inconsistent ones.
@@ -2324,9 +1901,6 @@ static bool consistent(assn_t a) {
       gs = add_type_assns(gs);
       gs = add_numelts_info_graphs(gs);
       //gs = subst_close_graphs(gs);
-      // gs = equality_close_graphs(gs);
-      //      gs = gaussian_graphs(gs);
-      //      gs = constrain_okderefs(gs);
       gs = break_term_in_graphs(gs);
       gs = associate_ud_sd_in_graphs(gs);
     }
@@ -2348,6 +1922,8 @@ static bool consistent(assn_t a) {
 
 // see if ctxt |- a by trying to prove that ctxt and not(a) is inconsistent.
 bool constraint_prove(assn_t ctxt, assn_t a) {
+  // try weakening ctxt first:
+  if (!consistent(and(widen(ctxt),not(a)))) return true;
   assn_t b = and(ctxt,not(a));
   let res = !consistent(b);
   if (!res && Flags::print_unprovable) {
