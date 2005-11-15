@@ -20,6 +20,7 @@
 #include "absynpp.h"
 #include <set.h>
 #include <hashtable.h>
+#include <string.h>
 
 // code for constructing a callgraph -- more properly, we construct a
 // callgraph_t that for each (defined) function f, maps f to the set
@@ -72,7 +73,10 @@ static fndecl_set_t cg_stmt(fndefns_t fds, stmt_t e, fndecl_set_t s) {
   return s;
 }
 
-static int fndecl_cmp(fndecl_t fd1, fndecl_t fd2) {return (int)fd1 - (int)fd2;}
+static int fndecl_cmp(fndecl_t fd1, fndecl_t fd2) {
+  return strcmp(Absynpp::qvar2string(fd1->name),
+		Absynpp::qvar2string(fd2->name));
+}
 static int hash_fndecl(fndecl_t fd) { return (int)fd; }
 
 static callgraph_t cg_topdecls(fndefns_t fds, callgraph_t cg, list_t<decl_t> ds) {

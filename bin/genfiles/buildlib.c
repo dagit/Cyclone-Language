@@ -2468,7 +2468,7 @@ const char*outdir=(const char*)_check_null(_untag_fat_ptr_check_bound(Cyc_output
 if(Cyc_do_setjmp && Cyc_process_setjmp(outdir))
 return 1;else{
 # 2088
-for(1;Cyc_spec_files!=0;Cyc_spec_files=_check_null(Cyc_spec_files)->tl){
+for(1;Cyc_spec_files!=0;Cyc_spec_files=Cyc_spec_files->tl){
 if(Cyc_process_specfile((const char*)Cyc_spec_files->hd,outdir)){
 Cyc_fprintf(Cyc_stderr,_tag_fat("FATAL ERROR -- QUIT!\n",sizeof(char),22U),_tag_fat(0U,sizeof(void*),0));
 exit(1);}}}
