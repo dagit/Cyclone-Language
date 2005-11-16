@@ -377,7 +377,7 @@ static exp_t stmt_to_fun(toexpenv_t env, stmt_t s, type_t rettype) {
 						 rettype,params,false,
 						 NULL,NULL,NULL,NULL,NULL,
                                                  NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-					  NULL,NULL,NULL,Static)),DL),
+					  NULL,NULL,NULL,Static,false)),DL),
 	     *env.gen_ds);
   return fncall_exp(var_exp(funname,DL), args, DL);
 }

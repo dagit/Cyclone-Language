@@ -773,6 +773,7 @@ namespace Absyn {
     opt_t<list_t<vardecl_t>>   param_vardecls;// so we can use pointer equality
     struct Vardecl            *fn_vardecl; // used only for inner functions
     scope_t    orig_scope; //after toc, this field is used to flag extern C functions ... ignore bodies
+    bool       escapes;
   };
 
   EXTERN_ABSYN struct Aggrfield {

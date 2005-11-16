@@ -645,6 +645,77 @@ float percent(int i, int total) {
   return ans * 100;
 }
 
+
+static bool visit_esc_fn_exp(Hashtable::table_t<exp_t,exp_t> env,
+			       exp_t e) {
+  switch(e->r) {
+  case &Var_e(&Funname_b(fd)):
+    // not a function call position expression
+    // fn escapes
+    if (!Hashtable::lookup_opt(env,e)){
+      fd->escapes = true;
+    }
+    break;
+  case &FnCall_e(e1,...):
+    switch(e1->r){
+    case &NoInstantiate_e(f):fallthru(f);
+    case &Instantiate_e(f,_):
+      Hashtable::insert(env,f,f);
+      break;
+    default:
+      Hashtable::insert(env,e1,e1);
+      break;
+    }
+    break;
+  default:
+    break;
+  }
+  return true;
+}
+
+static bool visit_esc_fn_stmt(Hashtable::table_t<exp_t,exp_t> env,
+				stmt_t s) {
+  return true;
+}
+
+static int exp_hash(exp_t e) { return (int)e;}
+static void mark_escaped_fns(List::list_t<decl_t> ds) {
+  for(; ds != NULL; ds = ds->tl) {
+    let table = Hashtable::create(313,Core::ptrcmp,exp_hash);
+    switch(ds->hd->r) {
+    case &Var_d(vd): 
+      if (vd->initializer != NULL) {
+	Absyn::visit_exp(visit_esc_fn_exp,visit_esc_fn_stmt,table,vd->initializer);
+      }
+      break;
+    case &Fn_d(fd):
+      Absyn::visit_stmt(visit_esc_fn_exp,visit_esc_fn_stmt,table,fd->body);
+      break;
+    case &Let_d(_,_,e,_): 
+      Absyn::visit_exp(visit_esc_fn_exp,visit_esc_fn_stmt,table,e);
+      break;
+    case &Letv_d(_): break;
+    case &Region_d(_,_,eo): 
+      if (eo != NULL) {
+	Absyn::visit_exp(visit_esc_fn_exp,visit_esc_fn_stmt,table,eo);
+      }
+      break;
+    case &Aggr_d(...):
+    case &Datatype_d(...):
+    case &Enum_d(...):
+    case &Typedef_d(...): 
+    case &Porton_d:
+    case &Portoff_d:
+    case &Tempeston_d:
+    case &Tempestoff_d:
+    case &ExternCinclude_d(...): break;
+    case &ExternC_d(ds): fallthru(ds);
+    case &Using_d(_,ds): fallthru(ds);
+    case &Namespace_d(_,ds):
+	mark_escaped_fns(ds);
+    }
+  }
+}
 void insert_checks(List::list_t<decl_t,`H> tds,
 		   JumpAnalysis::jump_anal_res_t tables, bool do_vcgen) {
   reset_counters();
@@ -655,6 +726,8 @@ void insert_checks(List::list_t<decl_t,`H> tds,
   // so that we can use summary from functions
 
   let cg = Callgraph::compute_callgraph(tds);
+  //  Callgraph::print_callgraph(stderr,cg);
+  mark_escaped_fns(tds);
   for(; tds != NULL; tds = tds->tl)
     do_decl(nv,tds->hd);
   let fds = Graph::tsort(cg);

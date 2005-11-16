@@ -74,8 +74,7 @@ static fndecl_set_t cg_stmt(fndefns_t fds, stmt_t e, fndecl_set_t s) {
 }
 
 static int fndecl_cmp(fndecl_t fd1, fndecl_t fd2) {
-  return strcmp(Absynpp::qvar2string(fd1->name),
-		Absynpp::qvar2string(fd2->name));
+  return Absyn::qvar_cmp(fd1->name,fd2->name);
 }
 static int hash_fndecl(fndecl_t fd) { return (int)fd; }
 

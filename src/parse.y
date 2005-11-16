@@ -605,7 +605,7 @@ static fndecl_t make_function(region_t<`yy> yy,
     i.attributes=append(i.attributes,out_atts);
     return new Fndecl {.sc=sc,.is_inline=is_inline,.name=d.id,.body=body, .i=i,
 		       .cached_type=NULL,.param_vardecls=NULL,.fn_vardecl=NULL,
-		       .orig_scope=sc};
+		       .orig_scope=sc,.escapes=false};
   default: parse_abort(loc,"declarator is not a function prototype");
   }
 }

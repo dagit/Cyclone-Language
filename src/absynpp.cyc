@@ -243,7 +243,6 @@ struct Params tc_params_r =
     .curr_namespace = NULL
   };
 
-
 static void curr_namespace_add(var_t v) {
   curr_namespace = imp_append(curr_namespace, new List(v, NULL));
 }
