@@ -486,7 +486,7 @@ Cyc_JumpAnalysis_anal_stmt(env,s1);
 goto _LL0;}case 11: _Tmp6=((struct Cyc_Absyn_Fallthru_s_Absyn_Raw_stmt_struct*)_Tmp0)->f1;_Tmp5=((struct Cyc_Absyn_Fallthru_s_Absyn_Raw_stmt_struct*)_Tmp0)->f2;{struct Cyc_List_List*es=_Tmp6;struct Cyc_Absyn_Switch_clause**clauseopt=_Tmp5;
 # 202
 Cyc_JumpAnalysis_anal_exps(env,es);
-({struct Cyc_List_List*_Tmp7=({struct Cyc_List_List*_Tmp8=_cycalloc(sizeof(struct Cyc_List_List));({struct _tuple12*_Tmp9=({struct _tuple12*_TmpA=_cycalloc(sizeof(struct _tuple12));_TmpA->f0=s,({void*_TmpB=(void*)({struct Cyc_JumpAnalysis_Fallthru_j_JumpAnalysis_Jumpee_struct*_TmpC=_cycalloc(sizeof(struct Cyc_JumpAnalysis_Fallthru_j_JumpAnalysis_Jumpee_struct));_TmpC->tag=4,_TmpC->f1=*_check_null(clauseopt);_TmpC;});_TmpA->f1=_TmpB;});_TmpA;});_Tmp8->hd=_Tmp9;}),_Tmp8->tl=env.fenv->jumpers;_Tmp8;});env.fenv->jumpers=_Tmp7;});
+({struct Cyc_List_List*_Tmp7=({struct Cyc_List_List*_Tmp8=_cycalloc(sizeof(struct Cyc_List_List));({struct _tuple12*_Tmp9=({struct _tuple12*_TmpA=_cycalloc(sizeof(struct _tuple12));_TmpA->f0=s,({void*_TmpB=(void*)({struct Cyc_JumpAnalysis_Fallthru_j_JumpAnalysis_Jumpee_struct*_TmpC=_cycalloc(sizeof(struct Cyc_JumpAnalysis_Fallthru_j_JumpAnalysis_Jumpee_struct));_TmpC->tag=4,_TmpC->f1=*clauseopt;_TmpC;});_TmpA->f1=_TmpB;});_TmpA;});_Tmp8->hd=_Tmp9;}),_Tmp8->tl=env.fenv->jumpers;_Tmp8;});env.fenv->jumpers=_Tmp7;});
 # 205
 goto _LL0;}case 10: _Tmp6=((struct Cyc_Absyn_Switch_s_Absyn_Raw_stmt_struct*)_Tmp0)->f1;_Tmp5=((struct Cyc_Absyn_Switch_s_Absyn_Raw_stmt_struct*)_Tmp0)->f2;{struct Cyc_Absyn_Exp*e=_Tmp6;struct Cyc_List_List*scs=_Tmp5;
 # 207

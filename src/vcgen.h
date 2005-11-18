@@ -34,11 +34,13 @@ namespace Vcgen {
     AssnDef::assn_t null_check;
   } exp_checks_t;
   typedef Hashtable::table_t<Absyn::exp_t, exp_checks_t@> *assn_info_t;
-  assn_info_t new_assn_info();
+  typedef Hashtable::table_t<Absyn::qvar_t,List::list_t<AssnDef::existassnfn_t>> fn_precond_info_t;
   extern void vcgen_fundecl(Position::seg_t loc,
                             JumpAnalysis::jump_anal_res_t tables, 
 			    Absyn::fndecl_t fd,
-			    assn_info_t assn_info);
+			    assn_info_t assn_info,
+			    fn_precond_info_t fn_precond_info,
+			    bool use_precond);
   exp_checks_t@ exp2ctxt_checks(assn_info_t,Absyn::exp_t);
   extern AssnDef::assn_map_t clause2assn(Absyn::exp_t);
 }

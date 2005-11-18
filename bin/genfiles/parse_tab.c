@@ -709,7 +709,7 @@ if(Cyc_zstrcmp(id,_tag_fat("single",sizeof(char),7U)))
 # 225
 static void*Cyc_Parse_effect_from_atomic(struct Cyc_List_List*effs){
 if(Cyc_List_length(effs)==1)
-return(void*)_check_null(effs)->hd;else{
+return(void*)effs->hd;else{
 # 229
 return Cyc_Absyn_join_eff(effs);}}
 # 232
@@ -920,7 +920,7 @@ if(tms==0)return 0;{
 void*_Tmp0=(void*)tms->hd;void*_Tmp1;if(*((int*)_Tmp0)==3){_Tmp1=(void*)((struct Cyc_Absyn_Function_mod_Absyn_Type_modifier_struct*)_Tmp0)->f1;{void*args=_Tmp1;
 # 512
 if(tms->tl==0 ||
- Cyc_Parse_is_typeparam((void*)tms->tl->hd)&& _check_null(tms->tl)->tl==0){
+ Cyc_Parse_is_typeparam((void*)tms->tl->hd)&& tms->tl->tl==0){
 # 515
 void*_Tmp2;if(*((int*)args)==1){
 # 517
@@ -1179,9 +1179,7 @@ if(tags!=0)
 struct Cyc_Absyn_Tqual _Tmp10=Cyc_Absyn_empty_tqual(tq.loc);void*_Tmp11=
 Cyc_Absyn_function_type(typvars,eff,tq,t,args2,c_vararg,cyc_vararg,effc,qb,fn_atts,req,ens,thrw);
 # 820
-struct Cyc_List_List*_Tmp12=new_atts;return Cyc_Parse_apply_tms(_Tmp10,_Tmp11,_Tmp12,
-# 825
-_check_null(tms)->tl);}}}}}else{_Tmp6=((struct Cyc_Absyn_NoTypes_Absyn_Funcparams_struct*)args)->f2;{unsigned loc=_Tmp6;
+struct Cyc_List_List*_Tmp12=new_atts;return Cyc_Parse_apply_tms(_Tmp10,_Tmp11,_Tmp12,tms->tl);}}}}}else{_Tmp6=((struct Cyc_Absyn_NoTypes_Absyn_Funcparams_struct*)args)->f2;{unsigned loc=_Tmp6;
 # 827
 ({int(*_Tmp10)(unsigned,struct _fat_ptr)=(int(*)(unsigned,struct _fat_ptr))Cyc_Parse_parse_abort;_Tmp10;})(loc,_tag_fat("function declaration without parameter types",sizeof(char),45U));}};}case 4: _Tmp5=((struct Cyc_Absyn_TypeParams_mod_Absyn_Type_modifier_struct*)_Tmp0)->f1;_Tmp4=((struct Cyc_Absyn_TypeParams_mod_Absyn_Type_modifier_struct*)_Tmp0)->f2;{struct Cyc_List_List*ts=_Tmp5;unsigned loc=_Tmp4;
 # 834
@@ -1316,7 +1314,7 @@ struct Cyc_List_List*_Tmp4=decls;_npop_handler(0);return _Tmp4;}}{
 struct Cyc_List_List*decls=0;
 {struct Cyc_List_List*ds=fields;for(0;ds!=0;(
 # 1010
-ds=ds->tl,exprs=_check_null(exprs)->tl,renames=_check_null(renames)->tl)){
+ds=ds->tl,exprs=exprs->tl,renames=renames->tl)){
 struct _tuple15*_Tmp4=(struct _tuple15*)ds->hd;void*_Tmp5;void*_Tmp6;void*_Tmp7;struct Cyc_Absyn_Tqual _Tmp8;void*_Tmp9;unsigned _TmpA;_TmpA=_Tmp4->f0;_Tmp9=_Tmp4->f1;_Tmp8=_Tmp4->f2;_Tmp7=_Tmp4->f3;_Tmp6=_Tmp4->f4;_Tmp5=_Tmp4->f5;{unsigned varloc=_TmpA;struct _tuple0*x=_Tmp9;struct Cyc_Absyn_Tqual tq2=_Tmp8;void*t2=_Tmp7;struct Cyc_List_List*tvs2=_Tmp6;struct Cyc_List_List*atts2=_Tmp5;
 if(tvs2!=0)
 Cyc_Warn_warn(loc,_tag_fat("bad type params, ignoring",sizeof(char),26U),_tag_fat(0U,sizeof(void*),0));

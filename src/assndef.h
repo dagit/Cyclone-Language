@@ -271,9 +271,9 @@ namespace AssnDef{
   // to vds, and turn it into an bound existassnfn
   extern existassnfn_t assnmap2existassnfn(assn_map_t am, List::list_t<vardecl_opt_t> vds);
 
-  // given a list of logicvar vs and an assn a
-  // return exist us. lambda vs.a
-  extern existassnfn_t bound_vs_in_assn(assn_t a, List::list_t<term_t,`H> vs);
+  // given a list of terms and an assn a
+  // return exist us. lambda vs.a/\vi==ti(i=0,...n)
+  extern existassnfn_t bound_ts_in_assn(assn_t a, List::list_t<term_t,`H> vs);
   
   extern assn_t existassnfn2assn(existassnfn_t eaf, List::list_t<term_t> terms);
   // given an assertion, expand it with an empty map

@@ -490,7 +490,7 @@ void*_Tmp0;int _Tmp1;enum Cyc_Absyn_AggrKind _Tmp2;void*_Tmp3;switch(*((int*)cty
  Cyc_Tctyp_check_valid_toplevel_type(loc,te,ctyp);
 {void*_Tmp4;if(*((int*)ctyp)==7){_Tmp4=(void*)((struct Cyc_Absyn_TypedefType_Absyn_Type_struct*)ctyp)->f4;{void*to=_Tmp4;
 # 122
-return _check_null(to);}}else{
+return to;}}else{
 # 124
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp5=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp6;_Tmp6.tag=0,_Tmp6.f1=_tag_fat("Impos",sizeof(char),6U);_Tmp6;});void*_Tmp6[1];_Tmp6[0]=& _Tmp5;Cyc_Warn_err2(loc,_tag_fat(_Tmp6,sizeof(void*),1));});
 goto _LL17;}_LL17:;}
@@ -522,7 +522,7 @@ return ctyp;}case 6: _Tmp2=((struct Cyc_Absyn_AnonAggrType_Absyn_Type_struct*)ct
 # 154
 if(is_tuple){
 Cyc_Tctyp_check_valid_toplevel_type(loc,te,ctyp);
-for(1;flst!=0;flst=_check_null(flst)->tl){
+for(1;flst!=0;flst=flst->tl){
 void**elt_type=&((struct Cyc_Absyn_Aggrfield*)flst->hd)->type;
 ({void*_Tmp4=({unsigned _Tmp5=loc;struct Cyc_Tcenv_Tenv*_Tmp6=te;Cyc_Cifc_expand_c_type(_Tmp5,_Tmp6,Cyc_Toc_typ_to_c(*elt_type));});*elt_type=_Tmp4;});
 flst=flst->tl;}}
@@ -949,7 +949,7 @@ return Cyc_Cifc_update_tvars(te,tv_ovrs,ai->elt_type,enclosing_decl,instantiate)
 return 0;}
 # 685
 static int Cyc_Cifc_update_fninfo_usage(unsigned loc,struct Cyc_Tcenv_Tenv*te,struct Cyc_List_List*tv_ovrs,struct Cyc_Absyn_FnInfo*fi,struct Cyc_Absyn_Decl*enclosing_decl){
-struct _tuple13*ad=Cyc_Cifc_update_tvars(te,tv_ovrs,_check_null(fi)->ret_type,enclosing_decl,0);
+struct _tuple13*ad=Cyc_Cifc_update_tvars(te,tv_ovrs,fi->ret_type,enclosing_decl,0);
 # 688
 struct Cyc_List_List*argit=fi->args;
 struct Cyc_List_List*added_tvars=(unsigned)ad?(*ad).f0: 0;
@@ -988,9 +988,9 @@ return change;}
 # 723
 static struct Cyc_List_List*Cyc_Cifc_remove_cur(struct Cyc_List_List*head,struct Cyc_List_List*cur,struct Cyc_List_List*prev){
 if((unsigned)prev)
-prev->tl=_check_null(cur)->tl;else{
+prev->tl=cur->tl;else{
 # 727
-head=_check_null(cur)->tl;}
+head=cur->tl;}
 # 729
 return head;}
 # 732
@@ -1100,7 +1100,7 @@ Cyc_Cifc_opt_inst_tvar=0;{
 int changed=0;
 {void*_Tmp0=encloser->r;void*_Tmp1;if(*((int*)_Tmp0)==8){_Tmp1=((struct Cyc_Absyn_Typedef_d_Absyn_Raw_decl_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Typedefdecl*td_decl=_Tmp1;
 # 846
-struct _tuple13*new_old_tvars=Cyc_Cifc_add_tvars_to_type(te,encloser,_check_null(td_decl->defn),tv_ovrs);
+struct _tuple13*new_old_tvars=Cyc_Cifc_add_tvars_to_type(te,encloser,td_decl->defn,tv_ovrs);
 if((unsigned)new_old_tvars){
 void*_Tmp2;void*_Tmp3;if(new_old_tvars!=0){_Tmp3=new_old_tvars->f0;_Tmp2=new_old_tvars->f1;{struct Cyc_List_List*nt=_Tmp3;struct Cyc_List_List*ot=_Tmp2;
 while((unsigned)ot){

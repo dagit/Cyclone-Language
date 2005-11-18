@@ -577,7 +577,7 @@ static void Cyc_Absynpp_curr_namespace_add(struct _fat_ptr*v){
 Cyc_Absynpp_curr_namespace=({struct Cyc_List_List*_Tmp0=Cyc_Absynpp_curr_namespace;Cyc_List_imp_append(_Tmp0,({struct Cyc_List_List*_Tmp1=_cycalloc(sizeof(struct Cyc_List_List));_Tmp1->hd=v,_Tmp1->tl=0;_Tmp1;}));});}
 # 250
 static void Cyc_Absynpp_suppr_last(struct Cyc_List_List**l){
-if(_check_null(*l)->tl==0)
+if((*l)->tl==0)
 *l=0;else{
 # 254
 Cyc_Absynpp_suppr_last(&(*l)->tl);}}

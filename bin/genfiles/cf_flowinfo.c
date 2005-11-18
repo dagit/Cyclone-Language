@@ -564,7 +564,7 @@ struct _RegionHandle _Tmp0=_new_region(0U,"temp");struct _RegionHandle*temp=& _T
 {struct Cyc_List_List*inst=0;
 for(1;tvs!=0;(tvs=tvs->tl,targs=targs->tl)){
 struct Cyc_Absyn_Tvar*tv=(struct Cyc_Absyn_Tvar*)tvs->hd;
-void*t=(void*)_check_null(targs)->hd;
+void*t=(void*)targs->hd;
 {struct Cyc_Absyn_Kind*_Tmp1=Cyc_Kinds_tvar_kind(tv,& Cyc_Kinds_bk);if(((struct Cyc_Absyn_Kind*)_Tmp1)->kind==Cyc_Absyn_EffKind)
 # 212
 continue;else{
@@ -594,7 +594,7 @@ unsigned sz=(unsigned)(Cyc_List_length(tqts)+ 1);
 struct _fat_ptr d=({unsigned _Tmp5=sz;_tag_fat(({void**_Tmp6=_cycalloc(_check_times(_Tmp5,sizeof(void*)));({{unsigned _Tmp7=sz;unsigned i;for(i=0;i < _Tmp7;++ i){_Tmp6[i]=fenv->unknown_all;}}0;});_Tmp6;}),sizeof(void*),_Tmp5);});
 *((void**)_check_fat_subscript(d,sizeof(void*),0))=leafval;
 {int i=1;for(0;(unsigned)i < sz;++ i){
-({void*_Tmp5=Cyc_CfFlowInfo_i_typ_to_absrval(fenv,0,no_init_bits_only,(*((struct _tuple15*)_check_null(tqts)->hd)).f1,leafval);((void**)d.curr)[i]=_Tmp5;});
+({void*_Tmp5=Cyc_CfFlowInfo_i_typ_to_absrval(fenv,0,no_init_bits_only,(*((struct _tuple15*)tqts->hd)).f1,leafval);((void**)d.curr)[i]=_Tmp5;});
 tqts=tqts->tl;}}
 # 246
 return(void*)({struct Cyc_CfFlowInfo_Aggregate_CfFlowInfo_AbsRVal_struct*_Tmp5=_cycalloc(sizeof(struct Cyc_CfFlowInfo_Aggregate_CfFlowInfo_AbsRVal_struct));_Tmp5->tag=6,_Tmp5->f1.is_union=0,_Tmp5->f1.fieldnum=-1,_Tmp5->f2=d;_Tmp5;});}}}else{goto _LLD;}case 24: _Tmp3=((struct Cyc_Absyn_AggrCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0)->f1)->f1;_Tmp4=((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0)->f2;{union Cyc_Absyn_AggrInfo info=_Tmp3;struct Cyc_List_List*targs=_Tmp4;
@@ -838,7 +838,7 @@ this_ans=1U;else{
 # 544
 ({struct Cyc_List_List*_Tmp4=({struct Cyc_List_List*_Tmp5=_cycalloc(sizeof(struct Cyc_List_List));_Tmp5->hd=p,_Tmp5->tl=env->seen;_Tmp5;});env->seen=_Tmp4;});
 this_ans=({struct Cyc_CfFlowInfo_InitlevelEnv*_Tmp4=env;Cyc_CfFlowInfo_initlevel_rec(_Tmp4,Cyc_CfFlowInfo_lookup_place(env->d,p),1U);});
-env->seen=_check_null(env->seen)->tl;}
+env->seen=env->seen->tl;}
 # 548
 goto _LL0;}case 5: _Tmp3=(void*)((struct Cyc_CfFlowInfo_UniquePtr_CfFlowInfo_AbsRVal_struct*)r)->f1;{void*r=_Tmp3;
 this_ans=Cyc_CfFlowInfo_initlevel_rec(env,r,1U);goto _LL0;}default:

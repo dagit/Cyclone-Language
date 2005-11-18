@@ -100,27 +100,37 @@ static exp_t shared_zero_exp() {
 static struct Env {
   JumpAnalysis::jump_anal_res_t tables;
   Vcgen::assn_info_t assn_info;
+  Vcgen::fn_precond_info_t fn_precond_info;
+  bool use_precond :1;
   bool in_sizeof   :1;
   bool at_toplevel :1;
   bool vcgen_r     :1;
 };
 
 typedef struct Env env_t; // not a pointer
+
+static int hash_ptr(`a s) { return (int)s; }
+
 static env_t toplevel_env(JumpAnalysis::jump_anal_res_t tables, bool do_vcgen) { 
-  return Env(tables, NULL,false,true, do_vcgen);
+  let fn_precond_info = Hashtable::create(313,Absyn::qvar_cmp,Absyn::hash_qvar);
+  return Env(tables,NULL,fn_precond_info,false,false,true, do_vcgen);
 }
 
 static env_t fn_body_env(env_t nv) {
-  return Env(nv.tables, nv.assn_info, false,false, nv.vcgen_r);
+  return Env(nv.tables, nv.assn_info,nv.fn_precond_info, nv.use_precond, false,false, nv.vcgen_r);
 }
 
 static env_t enter_sizeof(env_t nv) {
-  return Env(nv.tables, nv.assn_info,true,nv.at_toplevel, nv.vcgen_r);
+  return Env(nv.tables, nv.assn_info,nv.fn_precond_info,nv.use_precond,true,nv.at_toplevel, nv.vcgen_r);
 }
 
 // for warning and statistics purposes, call need_*_check, only if true
 // result _will_ cause an inserted check
 static bool need_null_check(env_t nv, exp_t e) {
+  // if we are using collected preconditions,
+  // this is second pass, we've lost the flow info
+  // in our annotation.
+  if (nv.use_precond) return false;
   if(nv.in_sizeof) 
     return false;
   // check the type, though if the analysis is good, this should be redundant
@@ -337,7 +347,8 @@ static void do_exp(env_t nv, exp_t e) {
     // * thin non-zt pointer: no, this never would have type-checked
     // * fat-pointer: no, out-of-bounds is okay (affects curr, not base)
     // * thin zt pointer: yes! (and toc.cyc also always checks for *e2 != 0)
-    if(Tcutil::get_type_bound((type_t)e2->topt) != NULL
+    if(e->annot != &NoCheck_val && 
+       Tcutil::get_type_bound((type_t)e2->topt) != NULL
        && Tcutil::is_zeroterm_pointer_type((type_t)e2->topt) 
        && need_null_check(nv,e2) && need_null_check_vcgen(nv,e2)) {
       if (Flags::warn_all_null_deref)
@@ -397,21 +408,44 @@ static void do_exp(env_t nv, exp_t e) {
 	  err(e->loc,"cannot coerce fat-pointer to thin-pointer at toplevel");
 	// FIX: shouldn't the type-checker catch this? Does it?
 
-	bool bds_chk = need_bounds_check_vcgen(nv,e1);
+	// check if we have eliminated the bound check in earlier pass
+	bool bds_ck,null_ck;
+	switch (e->annot) {
+	case &NoCheck: 
+	  bds_ck = false; 
+	  null_ck = false; 
+	  break;
+	case &FatBound:
+	  bds_ck = true;
+	  null_ck = false;
+	  break;
+	case &ThinBound(_):
+	  bds_ck = true;
+	  null_ck = false;
+	  break;
+	case &NullOnly:
+	  bds_ck = false;
+	  null_ck = true;
+	  break;
+	default:
+	  bds_ck = true;
+	  null_ck = true;
+	}
+	if (bds_ck)  bds_ck = need_bounds_check_vcgen(nv,e1);
 	// only if we do need bounds check we will ensure the
 	// bound is statically known
-	if (bds_chk) {
+	if (bds_ck) {
 	  if(!Evexp::c_can_eval((exp_t)b2))
 	    err(e->loc,"cannot perform coercion: numelts is statically unknown");
 	}
 	// otherwise we can get away with statically unknown numelts
-	if(!n2 && need_null_check(nv,e1) && need_null_check_vcgen(nv,e)) {
+	if(null_ck && !n2 && need_null_check(nv,e1) && need_null_check_vcgen(nv,e)) {
 	  if(!user_inserted)
 	    warn(e->loc,"inserted null check due to implicit "
 		 "cast from *@fat (?) to @ type");
-	  e->annot = bds_chk ? (annot_t)&NullAndFatBound_val : &NullOnly_val;
+	  e->annot = bds_ck ? (annot_t)&NullAndFatBound_val : &NullOnly_val;
 	} else
-	  e->annot = bds_chk ? (annot_t)&FatBound_val : &NoCheck_val;
+	  e->annot = bds_ck ? (annot_t)&FatBound_val : &NoCheck_val;
 	break;
       case $(NULL,NULL): e->annot = &NoCheck_val; break;
       }
@@ -426,10 +460,32 @@ static void do_exp(env_t nv, exp_t e) {
   case &Subscript_e(e1,e2): 
     switch(compress((type_t)e1->topt)) {
     case &PointerType(PtrInfo(ta,tq,PtrAtts(rgn,n,b,zt,_,_,_))):
-      bool bds_ck;
-      //bds_ck  = need_bounds_check(nv,get_relns(e1),e1,e2);
+      bool bds_ck,null_ck;
+      switch (e->annot) {
+      case &NoCheck: 
+	bds_ck = false; 
+	null_ck = false; 
+	break;
+      case &FatBound:
+	bds_ck = true;
+	null_ck = false;
+	break;
+      case &ThinBound(_):
+	bds_ck = true;
+	null_ck = false;
+	break;
+      case &NullOnly:
+	bds_ck = false;
+	null_ck = true;
+	break;
+      default:
+	bds_ck = true;
+	null_ck = true;
+      }
+      // bds_ck  = need_bounds_check(nv,get_relns(e1),e1,e2);
       // try to eliminate the bounds check by just looking for constants.
-      bds_ck  = simple_need_bounds_check(nv,e1,e2);
+      if (bds_ck)
+	bds_ck  = simple_need_bounds_check(nv,e1,e2);
       if (bds_ck && nv.vcgen_r) 
         // try to eliminate the check using the vcgen.
         bds_ck = need_bounds_check_vcgen(nv, e1);
@@ -437,16 +493,17 @@ static void do_exp(env_t nv, exp_t e) {
         warn(e1->loc,"inserted bounds check (location is pointer expression)");
       exp_opt_t bd = Tcutil::get_bounds_exp(bounds_one(),b);
       bool fat_ptr = (bd == NULL);
-      bool null_ck;
       // FIX:  I'm not sure this is right anymore!
       // we do not need to do a null check if e1 is a fat pointer
       // and we were able to prove that e2 is in bounds.  
-      if (fat_ptr && !bds_ck) {
-        null_ck = false;
-      } else {
-        null_ck = need_null_check(nv,e1) && need_null_check_vcgen(nv,e1);
-        if (null_ck && Flags::warn_all_null_deref)
-          warn(e->loc,"inserted null check");
+      if (null_ck){
+	if (fat_ptr && !bds_ck) {
+	  null_ck = false;
+	} else {
+	  null_ck = need_null_check(nv,e1) && need_null_check_vcgen(nv,e1);
+	  if (null_ck && Flags::warn_all_null_deref)
+	    warn(e->loc,"inserted null check");
+	}
       }
       if(bds_ck) {
 	if(bd) { // thin pointer
@@ -536,8 +593,10 @@ static void do_exp(env_t nv, exp_t e) {
 }
 
 static void do_fndecl(env_t env, fndecl_t fd) {
+  if(fd->escapes && env.use_precond) return;
+  else {
     let nv = fn_body_env(env);
-    nv.assn_info = Vcgen::new_assn_info();
+    nv.assn_info = new Hashtable::create(57,Core::ptrcmp,hash_ptr);
     if (nv.vcgen_r) {
 #ifdef TIMING_DEBUG
       //      relations_eliminated_check = 0;
@@ -545,7 +604,7 @@ static void do_fndecl(env_t env, fndecl_t fd) {
       struct timeval start, end;
       gettimeofday(&start,NULL);
 #endif
-      Vcgen::vcgen_fundecl(0, nv.tables, fd, nv.assn_info);
+      Vcgen::vcgen_fundecl(0, nv.tables, fd, nv.assn_info,nv.fn_precond_info,nv.use_precond);
 #ifdef TIMING_DEBUG
       gettimeofday(&end,NULL);
       end.tv_sec -= start.tv_sec;
@@ -575,6 +634,7 @@ static void do_fndecl(env_t env, fndecl_t fd) {
     //fprintf(stderr,"insert checks for %s:  %d.%06d secs\n",
     //        Absynpp::qvar2string(fd->name),end.tv_sec,end.tv_usec);
 #endif
+  }
 }
 static void do_decl(env_t nv, decl_t d) {
   switch(d->r) {
@@ -678,10 +738,9 @@ static bool visit_esc_fn_stmt(Hashtable::table_t<exp_t,exp_t> env,
   return true;
 }
 
-static int exp_hash(exp_t e) { return (int)e;}
 static void mark_escaped_fns(List::list_t<decl_t> ds) {
   for(; ds != NULL; ds = ds->tl) {
-    let table = Hashtable::create(313,Core::ptrcmp,exp_hash);
+    let table = Hashtable::create(313,Core::ptrcmp,hash_ptr);
     switch(ds->hd->r) {
     case &Var_d(vd): 
       if (vd->initializer != NULL) {
@@ -689,6 +748,8 @@ static void mark_escaped_fns(List::list_t<decl_t> ds) {
       }
       break;
     case &Fn_d(fd):
+      // if function is not static, it could be called from other files
+      if (fd->sc != Static) fd->escapes = true;
       Absyn::visit_stmt(visit_esc_fn_exp,visit_esc_fn_stmt,table,fd->body);
       break;
     case &Let_d(_,_,e,_): 
@@ -727,14 +788,32 @@ void insert_checks(List::list_t<decl_t,`H> tds,
 
   let cg = Callgraph::compute_callgraph(tds);
   //  Callgraph::print_callgraph(stderr,cg);
+
+  // go through every decls in the file
+  // and find out if a function escapes
   mark_escaped_fns(tds);
+
+  // this round we do not do any analysis with functions
   for(; tds != NULL; tds = tds->tl)
     do_decl(nv,tds->hd);
-  let fds = Graph::tsort(cg);
-  fds = List::imp_rev(fds);
-  for(; fds != NULL; fds = fds->tl)
+
+  // sort the functions
+  let cg_fds = Graph::tsort(cg);
+
+  // analyze the functions (use summaries)
+  // also collecting all caller's information for
+  // a non-escaping function
+  for(let fds = List::rev(cg_fds); fds != NULL; fds = fds->tl)
     do_fndecl(nv,fds->hd);
 
+  // this time only analyze functions that
+  // do not escape, use collected caller info
+  // in previous round
+  nv.use_precond = true;
+  for(let fds = cg_fds; fds != NULL; fds = fds->tl)
+    do_fndecl(nv,fds->hd);
+
+  
   if (Flags::verbose) {
     let eliminated_bounds_checks = 
       types_eliminated_bounds_checks + 

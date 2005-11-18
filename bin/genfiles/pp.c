@@ -647,7 +647,7 @@ struct Cyc_PP_Out*_Tmp0=_cycalloc(sizeof(struct Cyc_PP_Out));_Tmp0->newcc=newcc,
 static struct Cyc_PP_Doc*Cyc_PP_long_cats(struct Cyc_List_List*doclist){
 # 375
 struct Cyc_List_List*orig=doclist;
-struct Cyc_PP_Doc*d=(struct Cyc_PP_Doc*)_check_null(doclist)->hd;
+struct Cyc_PP_Doc*d=(struct Cyc_PP_Doc*)doclist->hd;
 doclist=doclist->tl;{
 int mw=d->mw;
 int mwo=d->mw;

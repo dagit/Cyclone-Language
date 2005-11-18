@@ -52,6 +52,10 @@
 
 // #define NO_FUN_SUMMARY
 
+// NO_FUN_PRECOND, when defined, will not use
+// collected precondition for non-escaping static
+// functions
+#define NO_FUN_PRECOND
 // NO_TRY_ASSNMAP, when defined, will not accumulate
 // assertion information for any exceptions thrown
 // this will give a more accurate account of the profiling
@@ -74,25 +78,35 @@ static void insert_fn_info(Absyn::fndecl_t fd,
   if (Set::cardinality(fvs) > Flags::max_vc_summary) {
     a = widen(a);
   }
-  let ts = new List{result_term, new List {final_memory,actuals}};
-  let newts = NULL;
-  for(; ts != NULL; ts = ts->tl) {
-    switch (ts->hd) {
-    case &LogicVar(...): newts = new List{ts->hd,newts}; break;
-    default:
-      let v = fresh_var(get_term_type(ts->hd));
-      a = and(a,eq(v,ts->hd));
-      newts = new List{v,newts};
-      break;
-    }
-  }
-  newts = imp_rev(newts);
   Hashtable::table_t h;
   if (fn_ens_info_table == NULL) {
     h = Hashtable::create(37, Absyn::qvar_cmp, Absyn::hash_qvar);
     fn_ens_info_table = h;
   } else h = (Hashtable::table_t)fn_ens_info_table;
-  Hashtable::insert(h, fd->name, bound_vs_in_assn(a,newts));
+  Hashtable::insert(h, fd->name, bound_ts_in_assn(a,new List{result_term, new List{final_memory,actuals}}));
+}
+
+static void insert_fn_precond_info(fn_precond_info_t fn_precond_info,exp_t e,assn_t a, term_t mem, list_t<term_t,`H> actuals) {
+  let fvs = assn_fr_logicvar(a);
+  if (Set::cardinality(fvs) > Flags::max_vc_summary) {
+    a = widen(a);
+  }
+  let eaf = bound_ts_in_assn(a,new List{mem,actuals});
+  let h = fn_precond_info;
+  switch (e->r) {
+  case &Absyn::Var_e(&Absyn::Funname_b(fd)):
+    // don't do anything with an escaping function.
+    if (fd->escapes) break;
+    let eafs_opt = Hashtable::lookup_opt(h,fd->name);
+    if (eafs_opt == NULL)
+      Hashtable::insert(h,fd->name,new List{eaf,NULL});
+    else 
+      Hashtable::insert(h,fd->name,new List{eaf,*eafs_opt});
+    break;
+  case &Absyn::Instantiate_e(e1,...): insert_fn_precond_info(h,e1,a,mem,actuals);break;
+  case &Absyn::NoInstantiate_e(e1): insert_fn_precond_info(h,e1,a,mem,actuals); break;
+  default: break;
+  }
 }
 
 // used to add fresh variables for bound variables to a substitution
@@ -100,7 +114,7 @@ static void add_free_var(term_dict_t @S, term_t x) {
   *S = Dict::insert(*S,x,fresh_var(get_term_type(x)));
 }
 
-static existassnfn_opt_t lookup_fn_info(exp_t e) {
+static existassnfn_opt_t lookup_fn_summary_info(exp_t e) {
   if (fn_ens_info_table == NULL) return NULL;
   let h = (Hashtable::table_t)fn_ens_info_table;
   switch (e->r) {
@@ -112,7 +126,7 @@ static existassnfn_opt_t lookup_fn_info(exp_t e) {
     let fensinfo_opt = Hashtable::lookup_opt(h,vd->name);
     if (fensinfo_opt == NULL) return NULL;
     else return *fensinfo_opt;
-  case &Absyn::Instantiate_e(e1,...): return lookup_fn_info(e1);
+  case &Absyn::Instantiate_e(e1,...): return lookup_fn_summary_info(e1);
   default: return NULL;
   }
 }
@@ -129,6 +143,9 @@ struct Env {
   // a mapping from expressions to assertions to be proved
   // in insert_checks to ensure operation is safe.
   assn_info_t assn_info;
+  // a mapping from fndecl to list of existassnfn
+  // collected for non-escaping static function
+  fn_precond_info_t fn_precond_info;
   // the assertion accumulated for the current exception handler if any
   assn_map_opt_t try_assnmap;
   // when not-null is used to record the resulting value of an expr-stmt.
@@ -156,13 +173,15 @@ static int hash_ptr(`a s) { return (int)s; }
 // the analysis for a function
 static env_t
 initial_env(JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd,
-	    assn_info_t assn_info, assn_map_opt_t res_assnmap,
+	    assn_info_t assn_info, fn_precond_info_t fn_precond_info,
+	    assn_map_opt_t res_assnmap,
 	    assn_map_opt_t try_assnmap, vardecl_opt_t result) {
   let succ_table = Hashtable::lookup(tables->succ_tables,fd);
   let assn_table = Hashtable::create(57, Core::ptrcmp, hash_ptr);
   let env =  new Env{.assn_table = assn_table,
                      .succ_table = succ_table,
 		     .assn_info = assn_info,
+		     .fn_precond_info = fn_precond_info,
                      .try_assnmap = try_assnmap,
                      .exp_stmt = NULL,
                      .result = result,
@@ -181,9 +200,11 @@ static env_t bogus_env(){
   let succ_table = Hashtable::create(1,Core::ptrcmp,hash_ptr);
   let assn_table = Hashtable::create(1,Core::ptrcmp,hash_ptr);
   let assn_info = new Hashtable::create(1, Core::ptrcmp, hash_ptr);
+  let fn_precond_info = Hashtable::create(1, Core::ptrcmp, hash_ptr);
   env_t env = new Env{.assn_table = assn_table,
 		      .succ_table = succ_table,
 		      .assn_info = assn_info,
+		      .fn_precond_info = fn_precond_info,
 		      .try_assnmap = NULL,
 		      .exp_stmt = NULL,
 		      .result = NULL,
@@ -542,12 +563,6 @@ static int cmp_index($(int,`a)@ x,$(int,`a)@ y) {
   return x->f0 - y->f0;
 }
 
-// functions related to maintain the information passed to insert_checks
-assn_info_t new_assn_info(void){
-  let assn_info =  Hashtable::create(57, Core::ptrcmp, hash_ptr);
-  return new assn_info;
-}
-
 exp_checks_t @ exp2ctxt_checks(assn_info_t assn_info, Absyn::exp_t e){
   let result = Hashtable::lookup_opt(*assn_info, e);
   if (result == NULL){
@@ -882,7 +897,10 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
 #ifdef NO_FUN_SUMMARY
     existassnfn_opt_t fensinfo = NULL;
 #else
-    let fensinfo = lookup_fn_info(e1);
+    // we are going to collect assns at caller's site for 
+    // static non-escaping functions
+    insert_fn_precond_info(env->fn_precond_info,e1,am2.assn,pre_memory,ts);
+    let fensinfo = lookup_fn_summary_info(e1);
 #endif
 
     // if there is a return value, create a
@@ -2000,7 +2018,8 @@ static int sizeof_closure_vcgen_debug_assn_set() {
 }
 
 #endif
-void vcgen_fundecl(Position::seg_t loc, JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd, assn_info_t assn_info){
+void vcgen_fundecl(Position::seg_t loc, JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd, 
+		   assn_info_t assn_info, fn_precond_info_t fn_precond_info, bool use_precond){
   let $(args,arvds,reqopt,ensopt,thrwsopt,ret_value) = get_requires_and_ensures_info(&fd->i);
   assn_map_t am = true_assnmap();
   // We need to record the initial logical values for the arguments
@@ -2018,11 +2037,33 @@ void vcgen_fundecl(Position::seg_t loc, JumpAnalysis::jump_anal_res_t tables, Ab
   // force the varmap to have a binding for memory and record it.
   let $(initmem,am2) = lookup_var_map(memory,am);
   am = am2;
+  let args = new List{initmem,actuals};
   // put in the requires clause as an assumption.
   if (reqopt != NULL) {
-    am = AssnMap{existassnfn2assn(reqopt,new List{initmem,actuals}),am.map};
+    am = AssnMap{existassnfn2assn(reqopt,args),am.map};
+  } 
+#ifndef NO_FUN_PRECOND
+  else if (!fd->escapes && use_precond) {
+    let preconds_opt = Hashtable::lookup_opt(fn_precond_info,fd->name);
+    assn_t a = &false_assn;
+    if (preconds_opt != NULL) {
+      for(let preconds = *preconds_opt; preconds != NULL; preconds = preconds->tl){
+	// some hack to get rid of the trouble from functions with varargs
+	if (length(preconds->hd->af->actuals) != length(args)) {
+	  a = &true_assn;
+	  break;
+	} else {
+	  a = or(a,existassnfn2assn(preconds->hd,args));
+	}
+      }
+    }
+    let fvs = assn_fr_logicvar(a);
+    if (Set::cardinality(fvs) > Flags::max_vc_summary) {
+      a = widen(a);
+    }
+    am = AssnMap{a,am.map};
   }
-
+#endif
   // if we have a throws clause, then pretend like we're installing
   // a "fake" exception handler so we can check to see if the function
   // throws.
@@ -2036,7 +2077,7 @@ void vcgen_fundecl(Position::seg_t loc, JumpAnalysis::jump_anal_res_t tables, Ab
     let v = new $((Absyn::nmspace_t)Absyn::Loc_n, new "return_value");
     ret_value = Absyn::new_vardecl(0,v,fd->i.ret_type,NULL,NULL);
   }
-  let env = initial_env(tables,fd,assn_info,result_assn,thrws_assn,ret_value);
+  let env = initial_env(tables,fd,assn_info,fn_precond_info,result_assn,thrws_assn,ret_value);
 
   // generate vcs for the function body
   let amout = vcgen_debug_stmt(env,fd->body,am);

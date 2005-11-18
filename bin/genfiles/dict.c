@@ -806,7 +806,7 @@ const struct Cyc_Dict_T*t=*((const struct Cyc_Dict_T**)_check_fat_subscript(stac
 if((unsigned)t->left)
 ((const struct Cyc_Dict_T**)stack.curr)[++ ind]=t->left;
 if((unsigned)t->right)
-((const struct Cyc_Dict_T**)stack.curr)[++ ind]=t->right;
+*((const struct Cyc_Dict_T**)_check_fat_subscript(stack,sizeof(const struct Cyc_Dict_T*),++ ind))=t->right;
 *indp=ind;
 return 1;}}}
 # 579

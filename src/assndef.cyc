@@ -1967,11 +1967,47 @@ existassnfn_t assnmap2existassnfn(assn_map_t am, list_t<vardecl_opt_t> vds) {
   return new ExistAssnFn{af,fvs};
 }
 
-existassnfn_t bound_vs_in_assn(assn_t a,list_t<term_t,`H> vs) {
+// if the terms are not of the form logicvars,
+// we need to add assertions vi==ti and
+// then do bound the vs in assn and extract
+// all other free logicvars as exists
+existassnfn_t bound_ts_in_assn(assn_t a,list_t<term_t,`H> ts) {
+  // collecting vs
+  list_t<term_t,`H> vs = NULL;
+  for(; ts != NULL; ts = ts->tl) {
+    switch (ts->hd) {
+    case &LogicVar(...): 
+      // must ensure that the logicvar is not already
+      // used as an argument earlier
+      bool occured = false;
+      for(let xs = vs; xs != NULL; xs = xs->tl) {
+	if (termcmp(ts->hd,xs->hd) == 0){
+	  occured = true;
+	  break;
+	}
+      }
+      if (!occured) vs = new List{ts->hd,vs};
+      else {
+	let v = fresh_var(get_term_type(ts->hd));
+	a = and(a,eq(v,ts->hd));
+	vs = new List{v,vs};
+      }
+      break;
+    default:
+      let v = fresh_var(get_term_type(ts->hd));
+      a = and(a,eq(v,ts->hd));
+      vs = new List{v,vs};
+      break;
+    }
+  }
+  vs = imp_rev(vs);
+  // bound vs in lambda a
   let af = new AssnFn{vs,a};
+  // bound the rest of the freevars in exists
   let fvs = assnfn_fr_logicvar(af);
   return new ExistAssnFn{af,fvs};
 }
+
 static term_dict_t@`r insertnewmap(term_t t, term_dict_t @`r dict) {
   *dict = Dict::insert(*dict,t,fresh_var(get_term_type(t)));
   return dict;
@@ -2143,13 +2179,13 @@ static accum_t @`r foldm1(vardecl_t vd, term_t t, accum_t @`r accum){
   case $(&LogicVar(...),&LogicVar(...)):
     if (!logicvar_in_assn(t,accum->a2) && !logicvar_in_map(t,accum->m2)){
       // t is logicvar and does not occur in am2
-      accum->a2 = and(eq(t,*t2),accum->a2);
+      accum->a2 = and(accum->a2,eq(t,*t2));
       accum->m2 = Dict::insert(accum->m2,vd,t);
       accum->m = Dict::insert(accum->m,vd,t);
       return accum;
     } else if (!logicvar_in_assn(*t2,accum->a1) && !logicvar_in_map(*t2,accum->m1)) {
       // *t2 is logicvar and does not occur in am1
-      accum->a1 = and(eq(t,*t2),accum->a1);
+      accum->a1 = and(accum->a1,eq(t,*t2));
       accum->m1 = Dict::insert(accum->m1,vd,*t2);
       accum->m = Dict::insert(accum->m,vd,*t2);
       return accum;
@@ -2158,7 +2194,7 @@ static accum_t @`r foldm1(vardecl_t vd, term_t t, accum_t @`r accum){
   case $(&LogicVar(...),_):
     if (!logicvar_in_assn(t,accum->a2) && !logicvar_in_map(t,accum->m2)){
       // t is logicvar and does not occur in am2
-      accum->a2 = and(eq(t,*t2),accum->a2);
+      accum->a2 = and(accum->a2,eq(t,*t2));
       accum->m2 = Dict::insert(accum->m2,vd,t);
       accum->m = Dict::insert(accum->m,vd,t);
       return accum;
@@ -2167,7 +2203,7 @@ static accum_t @`r foldm1(vardecl_t vd, term_t t, accum_t @`r accum){
   case $(_,&LogicVar(...)):
     if (!logicvar_in_assn(*t2,accum->a1) && !logicvar_in_map(*t2,accum->m1)) {
       // *t2 is logicvar and does not occur in am1
-      accum->a1 = and(eq(t,*t2),accum->a1);
+      accum->a1 = and(accum->a1,eq(t,*t2));
       accum->m1 = Dict::insert(accum->m1,vd,*t2);
       accum->m = Dict::insert(accum->m,vd,*t2);
       return accum;
@@ -2177,8 +2213,8 @@ static accum_t @`r foldm1(vardecl_t vd, term_t t, accum_t @`r accum){
     break;
   }
   let v = fresh_var(vd->type);
-  accum->a1 = and(eq(v,t),accum->a1);
-  accum->a2 = and(eq(v,*t2),accum->a2);
+  accum->a1 = and(accum->a1,eq(v,t));
+  accum->a2 = and(accum->a2,eq(v,*t2));
   accum->m1 = Dict::insert(accum->m1,vd,v);
   accum->m2 = Dict::insert(accum->m2,vd,v);
   accum->m = Dict::insert(accum->m,vd,v);
