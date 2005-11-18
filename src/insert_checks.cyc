@@ -101,6 +101,7 @@ static struct Env {
   JumpAnalysis::jump_anal_res_t tables;
   Vcgen::assn_info_t assn_info;
   Vcgen::fn_precond_info_t fn_precond_info;
+  unsigned int pass_counter;
   bool use_precond :1;
   bool in_sizeof   :1;
   bool at_toplevel :1;
@@ -113,24 +114,24 @@ static int hash_ptr(`a s) { return (int)s; }
 
 static env_t toplevel_env(JumpAnalysis::jump_anal_res_t tables, bool do_vcgen) { 
   let fn_precond_info = Hashtable::create(313,Absyn::qvar_cmp,Absyn::hash_qvar);
-  return Env(tables,NULL,fn_precond_info,false,false,true, do_vcgen);
+  return Env(tables,NULL,fn_precond_info,1,false,false,true, do_vcgen);
 }
 
 static env_t fn_body_env(env_t nv) {
-  return Env(nv.tables, nv.assn_info,nv.fn_precond_info, nv.use_precond, false,false, nv.vcgen_r);
+  return Env(nv.tables, nv.assn_info, nv.fn_precond_info, nv.pass_counter, nv.use_precond, false,false, nv.vcgen_r);
 }
 
 static env_t enter_sizeof(env_t nv) {
-  return Env(nv.tables, nv.assn_info,nv.fn_precond_info,nv.use_precond,true,nv.at_toplevel, nv.vcgen_r);
+  return Env(nv.tables, nv.assn_info, nv.fn_precond_info, nv.pass_counter, nv.use_precond,true,nv.at_toplevel, nv.vcgen_r);
 }
 
 // for warning and statistics purposes, call need_*_check, only if true
 // result _will_ cause an inserted check
 static bool need_null_check(env_t nv, exp_t e) {
-  // if we are using collected preconditions,
-  // this is second pass, we've lost the flow info
-  // in our annotation.
-  if (nv.use_precond) return false;
+  // this is not the first pass any more, 
+  // we've lost the flow info in our annotation.
+  // we will not do any check elimination with flow info
+  if (nv.pass_counter > 1) return false;
   if(nv.in_sizeof) 
     return false;
   // check the type, though if the analysis is good, this should be redundant
@@ -311,6 +312,33 @@ static bool need_bounds_check_vcgen(env_t nv, exp_t a){
   return !res;
 }
 
+// return bds_ck and null_ck based on the annotation of exp
+static $(bool,bool) need_bound_null_check_annot(exp_t e) {
+  bool bds_ck,null_ck;
+  switch (e->annot) {
+  case &NoCheck: 
+    bds_ck = false; 
+    null_ck = false; 
+    break;
+  case &FatBound:
+    bds_ck = true;
+    null_ck = false;
+    break;
+  case &ThinBound(_):
+    bds_ck = true;
+    null_ck = false;
+    break;
+  case &NullOnly:
+    bds_ck = false;
+    null_ck = true;
+    break;
+  default:
+    bds_ck = true;
+    null_ck = true;
+  }
+  return $(bds_ck,null_ck);
+}
+
 static void do_exp(env_t nv, exp_t e) {
   switch(e->r) {
   case &Asm_e(...):  //can do better -- check input expressions initialized
@@ -409,28 +437,7 @@ static void do_exp(env_t nv, exp_t e) {
 	// FIX: shouldn't the type-checker catch this? Does it?
 
 	// check if we have eliminated the bound check in earlier pass
-	bool bds_ck,null_ck;
-	switch (e->annot) {
-	case &NoCheck: 
-	  bds_ck = false; 
-	  null_ck = false; 
-	  break;
-	case &FatBound:
-	  bds_ck = true;
-	  null_ck = false;
-	  break;
-	case &ThinBound(_):
-	  bds_ck = true;
-	  null_ck = false;
-	  break;
-	case &NullOnly:
-	  bds_ck = false;
-	  null_ck = true;
-	  break;
-	default:
-	  bds_ck = true;
-	  null_ck = true;
-	}
+	let $(bds_ck,null_ck) = need_bound_null_check_annot(e);
 	if (bds_ck)  bds_ck = need_bounds_check_vcgen(nv,e1);
 	// only if we do need bounds check we will ensure the
 	// bound is statically known
@@ -460,28 +467,7 @@ static void do_exp(env_t nv, exp_t e) {
   case &Subscript_e(e1,e2): 
     switch(compress((type_t)e1->topt)) {
     case &PointerType(PtrInfo(ta,tq,PtrAtts(rgn,n,b,zt,_,_,_))):
-      bool bds_ck,null_ck;
-      switch (e->annot) {
-      case &NoCheck: 
-	bds_ck = false; 
-	null_ck = false; 
-	break;
-      case &FatBound:
-	bds_ck = true;
-	null_ck = false;
-	break;
-      case &ThinBound(_):
-	bds_ck = true;
-	null_ck = false;
-	break;
-      case &NullOnly:
-	bds_ck = false;
-	null_ck = true;
-	break;
-      default:
-	bds_ck = true;
-	null_ck = true;
-      }
+      let $(bds_ck,null_ck) = need_bound_null_check_annot(e);
       // bds_ck  = need_bounds_check(nv,get_relns(e1),e1,e2);
       // try to eliminate the bounds check by just looking for constants.
       if (bds_ck)
@@ -593,6 +579,8 @@ static void do_exp(env_t nv, exp_t e) {
 }
 
 static void do_fndecl(env_t env, fndecl_t fd) {
+  // if we are doing a round that uses preconditions
+  // we don't do anything if the function escapes
   if(fd->escapes && env.use_precond) return;
   else {
     let nv = fn_body_env(env);
@@ -604,6 +592,8 @@ static void do_fndecl(env_t env, fndecl_t fd) {
       struct timeval start, end;
       gettimeofday(&start,NULL);
 #endif
+      if (env.use_precond && env.pass_counter <= 1) 
+	impos("Trying to use preconditions in vcgen at the first pass\n");
       Vcgen::vcgen_fundecl(0, nv.tables, fd, nv.assn_info,nv.fn_precond_info,nv.use_precond);
 #ifdef TIMING_DEBUG
       gettimeofday(&end,NULL);
@@ -810,6 +800,7 @@ void insert_checks(List::list_t<decl_t,`H> tds,
   // do not escape, use collected caller info
   // in previous round
   nv.use_precond = true;
+  nv.pass_counter++;
   for(let fds = cg_fds; fds != NULL; fds = fds->tl)
     do_fndecl(nv,fds->hd);
 

@@ -1731,7 +1731,7 @@ static graph_t *cgraph(graph_t *`H gs, Set::set_t<assn_t,`H> @already_seen,
     switch (a1) { case &Or(...):  goto NOCLOSE1; default: break;}
     gs1 = associate_ud_sd_in_graphs(gs1);
     gs1 = break_term_in_graphs(gs1);
-    gs1 = subst_close_graphs(gs1);
+    //    gs1 = subst_close_graphs(gs1);
     // Reduce closure doesn't result in any extra checks being eliminated
     // gs1 = reduce_close_graphs(gs1);
     gs1 = associate_ud_sd_in_graphs(gs1);
@@ -1742,7 +1742,7 @@ static graph_t *cgraph(graph_t *`H gs, Set::set_t<assn_t,`H> @already_seen,
     gs2 = cgraph(gs2,&already_seen2,a2,total_paths);
     gs2 = associate_ud_sd_in_graphs(gs2);
     gs2 = break_term_in_graphs(gs2); 
-    gs2 = subst_close_graphs(gs2);
+    //    gs2 = subst_close_graphs(gs2);
     // Reduce closure doesn't result in any extra checks being eliminated
     // gs2 = reduce_close_graphs(gs2);
     gs2 = associate_ud_sd_in_graphs(gs2);

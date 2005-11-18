@@ -1615,7 +1615,6 @@ gs1=Cyc_PrattProver_cgraph(gs1,& already_seen1,a1,total_paths);
 if(*((int*)a1)==4)goto NOCLOSE1;else{goto _LL11;}_LL11:;
 gs1=Cyc_PrattProver_associate_ud_sd_in_graphs(gs1);
 gs1=Cyc_PrattProver_break_term_in_graphs(gs1);
-gs1=Cyc_PrattProver_subst_close_graphs(gs1);
 # 1737
 gs1=Cyc_PrattProver_associate_ud_sd_in_graphs(gs1);
 # 1740
@@ -1624,7 +1623,6 @@ NOCLOSE1:
 gs2=Cyc_PrattProver_cgraph(gs2,& already_seen2,a2,total_paths);
 gs2=Cyc_PrattProver_associate_ud_sd_in_graphs(gs2);
 gs2=Cyc_PrattProver_break_term_in_graphs(gs2);
-gs2=Cyc_PrattProver_subst_close_graphs(gs2);
 # 1748
 gs2=Cyc_PrattProver_associate_ud_sd_in_graphs(gs2);
 NOCLOSE2:
