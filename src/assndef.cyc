@@ -2463,3 +2463,93 @@ int sizeof_hash_cons_table(void){
   }
   return size;
 }
+
+term_table_t empty_term_table() {
+  return Hashtable::create(33, termcmp, termhash);
+}
+
+term_t subst_table(term_table_t table, term_t t) {
+  let sopt = Hashtable::lookup_opt(table,t);
+  if (sopt != NULL) return *sopt;
+  switch (t){
+  case &LogicVar(...): break;
+  case &Uint(...): break;
+  case &Const(...): break;
+  case &Addr(vd,t1,tp): 
+    let s1 = subst_table(table,t1);
+    if (s1 != t1) {
+      let a = Addr(vd,s1,tp);
+      t = hash_cons_term(&a);
+    }
+    break;
+  case &Alloc(e1,i,t1,t2,tp): 
+    let s1 = subst_table(table,t1);
+    let s2 = subst_table(table,t2);
+    if (s1 != t1 || s2 != t2) {
+      let a = Alloc(e1,i,s1,s2,tp);
+      t = hash_cons_term(&a);
+    }
+    break;
+  case &Select(t1,t2,tp):
+    let s1 = subst_table(table,t1);
+    let s2 = subst_table(table,t2);
+    if (s1 != t1 || s2 != t2) t = select(s1,s2,tp);
+    break;
+  case &Update(t1,t2,t3):
+    let s1 = subst_table(table,t1);
+    let s2 = subst_table(table,t2);
+    let s3 = subst_table(table,t3);
+    if (s1 != t1 || s2 != t2 || s3 != t3) t = update(s1,s2,s3);
+    break;
+  case &Unop(p,t1,tp):
+    let s1 = subst_table(table,t1);
+    if (s1 != t1) t = unop(p,s1,tp);
+    break;
+  case &Binop(p,t1,t2,tp):
+    let s1 = subst_table(table,t1);
+    let s2 = subst_table(table,t2);
+    if (s1 != t1 || s2 != t2) t = binop(p,s1,s2,tp);
+    break;
+  case &Cast(tp,t1):
+    let s1 = subst_table(table,t1);
+    if (s1 != t1) t = cast(tp,s1);
+    break;
+  case &Aggr(b,tag,tlist,tp):
+    let slist = NULL;
+    bool changed = false;
+    for(;tlist != NULL; tlist = tlist->tl){
+      let t1 = tlist->hd;
+      let s1 = subst_table(table,t1);
+      if (s1 != t1) changed = true;
+      slist = new List(s1,slist);
+    }
+    if (changed) {
+      List::imp_rev(slist);
+      t = aggr(b,tag,slist,tp);
+    }
+    break;
+  case &Proj(t1,i,tp):
+    let s1 = subst_table(table,t1);
+    if (s1 != t1) t = proj(s1,i,tp);
+    break;
+  case &AggrUpdate(t1,i,t2):
+    let s1 = subst_table(table,t1);
+    let s2 = subst_table(table,t2);
+    if (s1 != t1 || s2 != t2) t = aggr_update(s1,i,s2);
+    break;
+  case &Offsetf(t1,i,tp):
+    let s1 = subst_table(table,t1);
+    if (s1 != t1) t = offsetf(s1,i,tp);
+    break;
+  case &Offseti(t1,t2,tp):
+    let s1 = subst_table(table,t1);
+    let s2 = subst_table(table,t2);
+    if (s1 != t1 || s2 != t2) t = offseti(s1,s2,tp);
+    break;
+  case &Tagof(t1):
+    let s1 = subst_table(table,t1);
+    if (s1 != t1) t = tagof_tm(s1);
+    break;
+  }
+  return t;
+}

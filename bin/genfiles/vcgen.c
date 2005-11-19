@@ -436,88 +436,88 @@ struct Cyc_Absyn_Aggrdecl*Cyc_Absyn_get_known_aggrdecl(union Cyc_Absyn_AggrInfo)
 struct _fat_ptr*Cyc_Absyn_designatorlist_to_fieldname(struct Cyc_List_List*);struct Cyc_JumpAnalysis_Jump_Anal_Result{struct Cyc_Hashtable_Table*pop_tables;struct Cyc_Hashtable_Table*succ_tables;struct Cyc_Hashtable_Table*pat_pop_tables;};struct Cyc_Set_Set;
 # 96 "set.h"
 extern int Cyc_Set_cardinality(struct Cyc_Set_Set*);struct Cyc_AssnDef_Uint_AssnDef_Term_struct{int tag;unsigned f1;void*f2;};struct Cyc_AssnDef_Addr_AssnDef_Term_struct{int tag;struct Cyc_Absyn_Vardecl*f1;void*f2;void*f3;};struct Cyc_AssnDef_Alloc_AssnDef_Term_struct{int tag;struct Cyc_Absyn_Exp*f1;int f2;void*f3;void*f4;void*f5;};struct Cyc_AssnDef_Offseti_AssnDef_Term_struct{int tag;void*f1;void*f2;void*f3;};
-# 148 "assndef.h"
+# 149 "assndef.h"
 extern struct Cyc_Absyn_Vardecl*Cyc_AssnDef_memory;
-# 153
+# 154
 extern struct Cyc_Absyn_Vardecl*Cyc_AssnDef_exception_vardecl (void);
-# 156
+# 157
 extern void*Cyc_AssnDef_zero (void);
 extern void*Cyc_AssnDef_one (void);
-# 160
+# 161
 extern void*Cyc_AssnDef_uint(unsigned);
 extern void*Cyc_AssnDef_cnst(struct Cyc_Absyn_Exp*);
 extern void*Cyc_AssnDef_select(void*,void*,void*);
 extern void*Cyc_AssnDef_update(void*,void*,void*);
-# 165
+# 166
 extern void*Cyc_AssnDef_unop(enum Cyc_Absyn_Primop,void*,void*);
 extern void*Cyc_AssnDef_binop(enum Cyc_Absyn_Primop,void*,void*,void*);
 extern void*Cyc_AssnDef_cast(void*,void*);
-# 169
+# 170
 extern void*Cyc_AssnDef_tagof_tm(void*);
 extern void*Cyc_AssnDef_proj(void*,unsigned,void*);
-# 172
+# 173
 extern void*Cyc_AssnDef_addr(struct Cyc_Absyn_Vardecl*,void*);
 extern void*Cyc_AssnDef_alloc(struct Cyc_Absyn_Exp*,void*,void*,void*);
 extern void*Cyc_AssnDef_offsetf(void*,unsigned,void*);
 extern void*Cyc_AssnDef_offseti(void*,void*,void*);
-# 178
+# 179
 extern void*Cyc_AssnDef_numelts_term(void*);
 extern void*Cyc_AssnDef_plus(void*,void*,void*);
-# 181
+# 182
 extern void*Cyc_AssnDef_struct_aggr(struct Cyc_List_List*,void*);
 extern void*Cyc_AssnDef_datatype_aggr(unsigned,struct Cyc_List_List*,void*);
 extern void*Cyc_AssnDef_union_aggr(unsigned,struct Cyc_List_List*,void*);
 extern void*Cyc_AssnDef_fresh_var(void*);struct _tuple13{void*f0;struct Cyc_List_List*f1;};
-# 189
+# 190
 extern struct _tuple13 Cyc_AssnDef_split_addr(void*);
-# 197
+# 198
 extern void*Cyc_AssnDef_apply_aggr_update(void*,struct Cyc_List_List*,void*);
-# 199
+# 200
 extern void*Cyc_AssnDef_get_term_type(void*);struct Cyc_AssnDef_True_AssnDef_Assn_struct{int tag;};struct Cyc_AssnDef_False_AssnDef_Assn_struct{int tag;};
-# 227 "assndef.h"
+# 228 "assndef.h"
 extern struct _fat_ptr Cyc_AssnDef_assn2string(void*);
 extern struct Cyc_AssnDef_True_AssnDef_Assn_struct Cyc_AssnDef_true_assn;
 extern struct Cyc_AssnDef_False_AssnDef_Assn_struct Cyc_AssnDef_false_assn;
-# 231
+# 232
 extern void*Cyc_AssnDef_and(void*,void*);
 extern void*Cyc_AssnDef_or(void*,void*);
 extern void*Cyc_AssnDef_not(void*);
-# 235
+# 236
 extern void*Cyc_AssnDef_eq(void*,void*);
 extern void*Cyc_AssnDef_neq(void*,void*);
 extern void*Cyc_AssnDef_slt(void*,void*);
 extern void*Cyc_AssnDef_slte(void*,void*);
 extern void*Cyc_AssnDef_ult(void*,void*);
 extern void*Cyc_AssnDef_ulte(void*,void*);struct Cyc_AssnDef_AssnFn{struct Cyc_List_List*actuals;void*assn;};struct Cyc_AssnDef_ExistAssnFn{struct Cyc_AssnDef_AssnFn*af;struct Cyc_Set_Set*existvars;};struct Cyc_AssnDef_AssnMap{void*assn;struct Cyc_Dict_Dict map;};
-# 276
+# 277
 extern struct Cyc_AssnDef_ExistAssnFn*Cyc_AssnDef_bound_ts_in_assn(void*,struct Cyc_List_List*);
-# 278
+# 279
 extern void*Cyc_AssnDef_existassnfn2assn(struct Cyc_AssnDef_ExistAssnFn*,struct Cyc_List_List*);
-# 281
+# 282
 extern struct Cyc_AssnDef_AssnMap Cyc_AssnDef_false_assnmap (void);
 extern struct Cyc_AssnDef_AssnMap Cyc_AssnDef_true_assnmap (void);
-# 284
+# 285
 extern struct _fat_ptr Cyc_AssnDef_assnmap2dag(struct Cyc_AssnDef_AssnMap);
 extern struct _fat_ptr Cyc_AssnDef_assnmap2string(struct Cyc_AssnDef_AssnMap);struct _tuple14{void*f0;struct Cyc_AssnDef_AssnMap f1;};
-# 288
+# 289
 extern struct _tuple14 Cyc_AssnDef_lookup_var_map(struct Cyc_Absyn_Vardecl*,struct Cyc_AssnDef_AssnMap);
 extern struct Cyc_AssnDef_AssnMap Cyc_AssnDef_update_var_map(struct Cyc_Absyn_Vardecl*,void*,struct Cyc_AssnDef_AssnMap);struct _tuple15{void*f0;void*f1;struct Cyc_Dict_Dict f2;};
-# 292
+# 293
 extern struct _tuple15 Cyc_AssnDef_unify_var_maps_subst(struct Cyc_AssnDef_AssnMap,struct Cyc_AssnDef_AssnMap);
 extern struct Cyc_AssnDef_AssnMap Cyc_AssnDef_canonical_assnmap(struct Cyc_AssnDef_AssnMap);
-# 297
+# 298
 extern struct Cyc_AssnDef_AssnMap Cyc_AssnDef_or_assnmap_assnmap(struct Cyc_AssnDef_AssnMap,struct Cyc_AssnDef_AssnMap);
-# 299
+# 300
 extern struct Cyc_AssnDef_AssnMap Cyc_AssnDef_widen_assnmap(struct Cyc_AssnDef_AssnMap);
-# 302
+# 303
 extern struct Cyc_AssnDef_AssnMap Cyc_AssnDef_or_assnmap_assn(struct Cyc_AssnDef_AssnMap,void*);
-# 305
+# 306
 extern struct Cyc_AssnDef_AssnMap Cyc_AssnDef_and_assnmap_assn(struct Cyc_AssnDef_AssnMap,void*);
-# 307
+# 308
 extern int Cyc_AssnDef_simple_prove(void*,void*);
-# 346 "assndef.h"
+# 347 "assndef.h"
 extern void*Cyc_AssnDef_widen(void*);
-# 356
+# 362
 extern struct Cyc_Set_Set*Cyc_AssnDef_assn_fr_logicvar(void*);struct Cyc_Vcgen_ExpChecks{struct Cyc_AssnDef_AssnMap ctxt;void*bounds_check;void*null_check;};
 # 41 "tcutil.h"
 int Cyc_Tcutil_is_pointer_type(void*);

@@ -616,19 +616,19 @@ int Cyc_Atts_sub_attributes(struct Cyc_List_List*,struct Cyc_List_List*);
 int Cyc_Atts_fntype_att(void*);
 # 79
 int Cyc_Atts_attribute_cmp(void*,void*);struct Cyc_Dict_T;struct Cyc_Dict_Dict{int(*rel)(void*,void*);struct _RegionHandle*r;const struct Cyc_Dict_T*t;};struct Cyc_Set_Set;
-# 148 "assndef.h"
+# 149 "assndef.h"
 extern struct Cyc_Absyn_Vardecl*Cyc_AssnDef_memory;
-# 184
+# 185
 extern void*Cyc_AssnDef_fresh_var(void*);struct Cyc_AssnDef_True_AssnDef_Assn_struct{int tag;};
-# 228 "assndef.h"
+# 229 "assndef.h"
 extern struct Cyc_AssnDef_True_AssnDef_Assn_struct Cyc_AssnDef_true_assn;struct Cyc_AssnDef_AssnFn{struct Cyc_List_List*actuals;void*assn;};struct Cyc_AssnDef_ExistAssnFn{struct Cyc_AssnDef_AssnFn*af;struct Cyc_Set_Set*existvars;};struct Cyc_AssnDef_AssnMap{void*assn;struct Cyc_Dict_Dict map;};
-# 272
+# 273
 extern struct Cyc_AssnDef_ExistAssnFn*Cyc_AssnDef_assnmap2existassnfn(struct Cyc_AssnDef_AssnMap,struct Cyc_List_List*);
-# 278
+# 279
 extern void*Cyc_AssnDef_existassnfn2assn(struct Cyc_AssnDef_ExistAssnFn*,struct Cyc_List_List*);
-# 307
+# 308
 extern int Cyc_AssnDef_simple_prove(void*,void*);
-# 330 "assndef.h"
+# 331 "assndef.h"
 extern struct Cyc_AssnDef_AssnMap*Cyc_AssnDef_subst_vardecls(struct Cyc_List_List*,struct Cyc_List_List*,struct Cyc_AssnDef_AssnMap*);
 # 45 "vcgen.h"
 extern struct Cyc_AssnDef_AssnMap Cyc_Vcgen_clause2assn(struct Cyc_Absyn_Exp*);

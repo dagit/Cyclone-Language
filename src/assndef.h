@@ -27,6 +27,7 @@
 #include <dict.h>
 #include <string.h>
 #include <set.h>
+#include <hashtable.h>
 namespace AssnDef{
   typedef Absyn::type_t type_t;
   typedef Absyn::type_opt_t type_opt_t;
@@ -351,9 +352,15 @@ namespace AssnDef{
   extern term_t subst_t(term_dict_t dict,term_t t);
   extern assn_t subst_a(term_dict_t dict, assn_t a);
 
+  // ditto but using a hash-table instead
+  typedef Hashtable::table_t<term_t,term_t> term_table_t;
+  extern term_table_t empty_term_table();
+  extern term_t subst_table(term_table_t table, term_t t);
+
   // calculate free logic variables of terms and asserts
   extern term_set_t term_fr_logicvar(term_t t);
   extern term_set_t assn_fr_logicvar(assn_t a);
+
 
   void reset_hash_cons_table(void);
   int sizeof_hash_cons_table(void);

@@ -543,11 +543,11 @@ extern struct _fat_ptr Cyc_CurRgn_curr_rgn_name;
 # 35
 int Cyc_CurRgn_is_curr_rgn(struct Cyc_Absyn_Tvar*);
 int Cyc_CurRgn_is_not_curr_rgn(struct Cyc_Absyn_Tvar*);struct Cyc_Set_Set;
-# 148 "assndef.h"
+# 149 "assndef.h"
 extern struct Cyc_Absyn_Vardecl*Cyc_AssnDef_memory;struct Cyc_AssnDef_AssnFn{struct Cyc_List_List*actuals;void*assn;};struct Cyc_AssnDef_ExistAssnFn{struct Cyc_AssnDef_AssnFn*af;struct Cyc_Set_Set*existvars;};struct Cyc_AssnDef_AssnMap{void*assn;struct Cyc_Dict_Dict map;};
-# 272 "assndef.h"
+# 273 "assndef.h"
 extern struct Cyc_AssnDef_ExistAssnFn*Cyc_AssnDef_assnmap2existassnfn(struct Cyc_AssnDef_AssnMap,struct Cyc_List_List*);
-# 282
+# 283
 extern struct Cyc_AssnDef_AssnMap Cyc_AssnDef_true_assnmap (void);
 # 45 "vcgen.h"
 extern struct Cyc_AssnDef_AssnMap Cyc_Vcgen_clause2assn(struct Cyc_Absyn_Exp*);struct Cyc_Tctyp_CVTEnv{unsigned loc;struct Cyc_Tcenv_Tenv*te;struct Cyc_List_List*kind_env;int fn_result;int def_aliasable;int inst_type_evar;int generalize_evars;int allow_aqual_bounds;struct Cyc_List_List*free_vars;struct Cyc_List_List*free_evars;struct Cyc_List_List*free_qualvars;};
