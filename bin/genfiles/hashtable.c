@@ -530,7 +530,7 @@ Cyc_printf(_tag_fat("\n",sizeof(char),2U),_tag_fat(0U,sizeof(void*),0));}}
 void Cyc_Hashtable_print_hist(struct Cyc_Hashtable_Table*t){
 struct _fat_ptr odata=t->tab;
 unsigned osize=_get_fat_size(odata,sizeof(struct Cyc_Hashtable_Bucket));
-struct _fat_ptr counts=({unsigned _Tmp0=osize;_tag_fat(({unsigned*_Tmp1=_cycalloc_atomic(_check_times(_Tmp0,sizeof(unsigned)));({{unsigned _Tmp2=osize;unsigned i;for(i=0;i < _Tmp2;++ i){_Tmp1[i]=(*((struct Cyc_Hashtable_Bucket*)_check_fat_subscript(odata,sizeof(struct Cyc_Hashtable_Bucket),(int)i))).length;}}0;});_Tmp1;}),sizeof(unsigned),_Tmp0);});
+struct _fat_ptr counts=({unsigned _Tmp0=osize;_tag_fat(({unsigned*_Tmp1=_cycalloc_atomic(_check_times(_Tmp0,sizeof(unsigned)));({{unsigned _Tmp2=osize;unsigned i;for(i=0;i < _Tmp2;++ i){_Tmp1[i]=((struct Cyc_Hashtable_Bucket*)odata.curr)[(int)i].length;}}0;});_Tmp1;}),sizeof(unsigned),_Tmp0);});
 unsigned sum=0U;
 {unsigned i=0U;for(0;i < osize;++ i){
 sum +=((unsigned*)counts.curr)[(int)i];}}

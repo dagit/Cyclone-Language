@@ -1628,6 +1628,8 @@ static void add_prim($(term_t,prim_reln_t,term_t)@ p, graph_t @`H g) {
 datatype exn { TooLarge };
 datatype exn.TooLarge too_large = TooLarge;
 
+
+/* OLD INCONSISTENCY CODE: not currently used. 
 // given a set of graphs gs representing A1 or A2 or ... or An
 // and given assertion a, compute the set of graphs representing
 // (A1 or A2 ... or An) and a.  This is written with explicit
@@ -1712,6 +1714,7 @@ static graph_t *cgraph(graph_t *`H gs, Set::set_t<assn_t,`H> @already_seen,
   }
   return gs;
 }
+*/
 
 static Set::set_t<term_t> get_pointer_terms(term_t t,Set::set_t<term_t,`H> s) {
  LOOP:
@@ -1806,8 +1809,129 @@ static graph_t *add_numelts_info_graphs(graph_t *`H gs) {
   return app_graphs(add_numelts_info,0,gs);
 }
 
+// returns true only if [a] can be proven to be inconsistent (i.e., false)
+static bool inconsist(assn_t a) {
+  // we start with the graph "true"
+  graph_t @g = true_graph();
+  // ands is the list of assn's we need to "and" into the graph if we
+  // haven't yet found an inconsistency.
+  list_t<assn_t,`H> ands = NULL;
+  // ors is a list of checkpoints -- graphs and their ands lists that
+  // we also need to prove as being inconsistent.
+  list_t<$(graph_t@`H, list_t<assn_t,`H>)@`H> ors = NULL;
+  // this records the length of the ors
+  int paths = 0;
+  // we have two loops here to avoid setting an exception handler
+  // on each iteration.  This setup allows us to set an exception
+  // handler only when we manage to succeed in proving a graph is
+  // inconsistent.
+  while (true) {
+    try {
+      while (true) {
+        switch (a) {
+        case &And(a1,a2):
+          // push a1 on the ands, and process a2.  The order is
+          // important here because we're more likely to find an
+          // inconsistency in a2 than in a1, because of the way
+          // that we add assertions to the right.
+          a = a2;
+          ands = new List{a1,ands};
+          continue;
+        case &Or(a1,a2):
+          // check that we haven't got too many pending graphs to explore
+          paths++;
+          if (paths > Flags::max_vc_paths) {
+            // we've already got too many paths -- widen the assertion
+            a = widen(a);
+            paths --;
+            continue;
+          }
+          // copy the graph and record that we need to and in a2::ands
+          // to g and prove that both paths are inconsistent.  Then
+          // proceed to process a1.
+          graph_t @g2 = (graph_t@)copy_graphs(g);
+          ors = new List{new $(g2,new List{a2,ands}),ors};
+          a = a1;
+          continue;
+        case &Prim(&Uint(0,_),Neq,t2): fallthru(t2);
+        case &Prim(t1,Neq,&Uint(0,_)):
+          // special case:  when we have unsigned terms (or memories)
+          // then we can treat t1 != 0 as t1 > 0.  This avoids generating
+          // a bunch of paths.
+          type_opt_t topt = AssnDef::get_term_type(t1);
+          if (topt == NULL || Tcutil::is_signed_type((type_t)topt))
+            fallthru(t1,zero());
+          a = ult(zero(),t1);
+          continue;
+        case &Prim(t1,Neq,t2):
+          // explode t1 != t2 into (t1 < t2) || (t2 < t1)
+          a = and(or(slt(t1,t2),slt(t2,t1)),or(ult(t1,t2),ult(t2,t1)));
+          continue;
+        case &Prim(t1,p,t2): 
+          if (p == Eq) 
+            // adds t1 <= t2 and t2 <= t1 -- throws Inconsistent if
+            // the resulting graph is detected as inconsistent locally.
+            add_eq(g,t1,t2);
+          else
+            // adds the constraint -- throws Inconsistent if
+            // the resulting graph is detected as inconsistent locally.
+            add_constraint(g,t1,p,t2);
+          // if we got here, we think the graph is still consistent,
+          // so we need to continue adding in the rest of the ands.
+          fallthru;
+        case &True: 
+          // if we have more ands to add to the graph, process them first.
+          if (ands != NULL) {
+            a = ands->hd;
+            ands = ands->tl;
+            continue;
+          }
+          // otherwise, we're done adding all of the constraints from the
+          // assertion into the graph and still haven't found an 
+          // inconsistency.  So work hard to try to find one now.
+          // All of these functions will throw Inconsistent if they
+          // detect an inconsistency.
+          // We might be better off running this periodically, say after
+          // we've added some number of primitive constraints.  But this
+          // minimizes the total work in the case that we can't prove
+          // something...
+          associate_ud_sd_in_graph(0,g);
+          break_term_in_graph(0,g);
+          subst_close_graph(0,g);
+          johnson(0,g);
+          add_type_assns(g);
+          add_numelts_info(0,g);
+          break_term_in_graph(0,g);
+          associate_ud_sd_in_graph(0,g);
+          // Too bad.  The graph appears to be consistent.  We might as well
+          // return false now.
+          return false;
+        case &False: throw &inconsistent;
+          // we have g && false which is immediately inconsistent.
+        }
+      }
+    } catch {
+      // we've detected that g is inconsistent regardless of what's
+      // in ands.  So throw g away and start processing the or's.
+    case &Inconsistent:
+      if (ors == NULL) 
+        // we're in luck -- no more graphs to prove inconsistent.
+        return true;
+      // more graphs to prove as inconsistent.  Pop one off of the ors
+      // stack and proceed.
+      let &$(g2,ands2) = ors->hd;
+      g = g2;
+      ands = ands2;
+      a = &true_assn;
+      ors = ors->tl;
+      break;
+    }
+  }
+}
+
 static bool paths_exhausted = false;
 
+/* OLD CONSISTENCY CHECKING CODE 
 // check to see if an assertion is consistent using the constraint solver.
 // if it returns false, then the assertion is definitely inconsistent.
 // if it returns true, then the assertion might be consistent.
@@ -1864,6 +1988,24 @@ bool constraint_prove(assn_t ctxt, assn_t a) {
   if (!consistent(and(widen(ctxt),not(a)))) return true;
   assn_t b = and(ctxt,not(a));
   let res = !consistent(b);
+  if (!res && Flags::print_unprovable) {
+    fprintf(stderr,"unable to prove inconsistency of \n");
+    fprintf(stderr,"%s",assn2dag(b));
+    if (paths_exhausted) {
+      fprintf(stderr,"(paths exhausted)");
+    } 
+    fprintf(stderr,"\n");
+  }
+  return res;
+}
+*/
+
+bool constraint_prove(assn_t ctxt, assn_t a) {
+  // try weakening ctxt first:
+  let nota = not(a);
+  if (inconsist(and(widen(ctxt),nota))) return true;
+  assn_t b = and(ctxt,nota);
+  let res = inconsist(b);
   if (!res && Flags::print_unprovable) {
     fprintf(stderr,"unable to prove inconsistency of \n");
     fprintf(stderr,"%s",assn2dag(b));

@@ -658,7 +658,7 @@ return r;}case 6: _Tmp1=((struct Cyc_CfFlowInfo_Aggregate_CfFlowInfo_AbsRVal_str
 # 322
 unsigned sz=_get_fat_size(d,sizeof(void*));
 int change=0;
-struct _fat_ptr d2=({unsigned _Tmp6=sz;_tag_fat(({void**_Tmp7=_cycalloc(_check_times(_Tmp6,sizeof(void*)));({{unsigned _Tmp8=sz;unsigned i;for(i=0;i < _Tmp8;++ i){_Tmp7[i]=*((void**)_check_fat_subscript(d,sizeof(void*),(int)i));}}0;});_Tmp7;}),sizeof(void*),_Tmp6);});
+struct _fat_ptr d2=({unsigned _Tmp6=sz;_tag_fat(({void**_Tmp7=_cycalloc(_check_times(_Tmp6,sizeof(void*)));({{unsigned _Tmp8=sz;unsigned i;for(i=0;i < _Tmp8;++ i){_Tmp7[i]=((void**)d.curr)[(int)i];}}0;});_Tmp7;}),sizeof(void*),_Tmp6);});
 {int i=0;for(0;(unsigned)i < sz;++ i){
 ({void*_Tmp6=Cyc_CfFlowInfo_make_unique_unconsumed(fenv,*((void**)_check_fat_subscript(d,sizeof(void*),i)));*((void**)_check_fat_subscript(d2,sizeof(void*),i))=_Tmp6;});
 if(((void**)d2.curr)[i]!=((void**)d.curr)[i])

@@ -718,7 +718,7 @@ s=_fat_ptr_plus(s,sizeof(char),start);
 if(amt > _get_fat_size(ans,sizeof(char))|| amt > _get_fat_size(s,sizeof(char)))
 _throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp0->tag=Cyc_Core_Invalid_argument,_Tmp0->f1=_tag_fat("rsubstring",sizeof(char),11U);_Tmp0;}));
 {unsigned long i=0U;for(0;i < amt;++ i){
-({struct _fat_ptr _Tmp0=_fat_ptr_plus(ans,sizeof(char),(int)i);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=*((const char*)_check_fat_subscript(s,sizeof(char),(int)i));if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});}}
+({struct _fat_ptr _Tmp0=_fat_ptr_plus(ans,sizeof(char),(int)i);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=((const char*)s.curr)[(int)i];if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});}}
 ({struct _fat_ptr _Tmp0=_fat_ptr_plus(ans,sizeof(char),(int)amt);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2='\000';if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
 return ans;}
 # 460
@@ -844,7 +844,7 @@ unsigned asize=_get_fat_size(accept,sizeof(char));
 {unsigned long i=0U;for(0;i < len;++ i){
 int j;
 for(j=0;(unsigned)j < asize;++ j){
-if((int)*((const char*)_check_fat_subscript(b,sizeof(char),(int)i))==(int)((const char*)accept.curr)[j])
+if((int)((const char*)b.curr)[(int)i]==(int)((const char*)accept.curr)[j])
 break;}
 if((unsigned)j==asize)
 return i;}}
@@ -860,7 +860,7 @@ unsigned asize=_get_fat_size(accept,sizeof(char));
 {unsigned long i=0U;for(0;i < len;++ i){
 int j;
 for(j=0;(unsigned)j < asize;++ j){
-if((int)*((const char*)_check_fat_subscript(b,sizeof(char),(int)i))==(int)((const char*)accept.curr)[j])return i;}}}
+if((int)((const char*)b.curr)[(int)i]==(int)((const char*)accept.curr)[j])return i;}}}
 # 630
 return len;}
 # 637

@@ -4290,7 +4290,7 @@ struct _fat_ptr f=Cyc_yyget_String_tok(& yyyvsp[0].v);
 int l=(int)Cyc_strlen(f);
 int i=1;
 if(l > 0){
-char c=((const char*)f.curr)[l - 1];
+char c=*((const char*)_check_fat_subscript(f,sizeof(char),l - 1));
 if((int)c==102 ||(int)c==70)i=0;else{
 if((int)c==108 ||(int)c==76)i=2;}}
 # 3118

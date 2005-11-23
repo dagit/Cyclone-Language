@@ -771,7 +771,7 @@ break;}}
 if(flags & 128){
 if((char*)p.curr > buf){
 _fat_ptr_inplace_plus(& p,sizeof(char),-1);
-_IO_ungetc((int)*((char*)_check_fat_subscript(p,sizeof(char),0U)),fp);}
+_IO_ungetc((int)*((char*)p.curr),fp);}
 # 658
 goto match_failure;}
 # 660
@@ -859,7 +859,7 @@ _IO_ungetc((int)*((char*)_check_fat_subscript(p,sizeof(char),0U)),fp);
 goto match_failure;}
 # 754
 _fat_ptr_inplace_plus(& p,sizeof(char),-1);
-c=(int)*((char*)_check_fat_subscript(p,sizeof(char),0U));
+c=(int)*((char*)p.curr);
 if(c!=101 && c!=69){
 _IO_ungetc(c,fp);
 _fat_ptr_inplace_plus(& p,sizeof(char),-1);

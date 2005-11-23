@@ -757,13 +757,13 @@ if(x->sign==-1){
 ({struct _fat_ptr _Tmp0=_fat_ptr_plus(str,sizeof(char),1);int _Tmp1=size - 1;int _Tmp2=base;int _Tmp3=x->ndigits;Cyc_XP_tostr(_Tmp0,_Tmp1,_Tmp2,_Tmp3,q);});}else{
 # 387
 Cyc_XP_tostr(str,size,base,x->ndigits,q);}
-return(char*)_untag_fat_ptr(str,sizeof(char),1U);}
+return(char*)_untag_fat_ptr_check_bound(str,sizeof(char),1U);}
 # 390
 struct Cyc_AP_T*Cyc_AP_gcd(struct Cyc_AP_T*x,struct Cyc_AP_T*y){
 struct Cyc_AP_T*z;struct Cyc_AP_T*tmp;
 (unsigned)x?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp0;})(_tag_fat("x",sizeof(char),2U),_tag_fat("ap.cyc",sizeof(char),7U),392U);
 (unsigned)y?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp0;})(_tag_fat("y",sizeof(char),2U),_tag_fat("ap.cyc",sizeof(char),7U),393U);
-while(!(_check_null(y)->ndigits==1 &&(int)*((unsigned char*)_check_fat_subscript(y->digits,sizeof(unsigned char),0))==0)){
+while(!(y->ndigits==1 &&(int)*((unsigned char*)_check_fat_subscript(y->digits,sizeof(unsigned char),0))==0)){
 tmp=Cyc_AP_mod(x,y);
 x=y;
 y=tmp;

@@ -666,7 +666,7 @@ static void*Cyc_Toc_unimp(struct _fat_ptr str){
 # 71
 static void*Cyc_Toc_toc_impos(struct _fat_ptr ap){
 void*toc=(void*)({struct Cyc_Warn_String_Warn_Warg_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Warn_String_Warn_Warg_struct));_Tmp0->tag=0,_Tmp0->f1=_tag_fat("Toc: ",sizeof(char),6U);_Tmp0;});
-struct _fat_ptr args=({unsigned _Tmp0=_get_fat_size(ap,sizeof(void*))+ 1U;_tag_fat(({void**_Tmp1=_cycalloc(_check_times(_Tmp0,sizeof(void*)));({{unsigned _Tmp2=_get_fat_size(ap,sizeof(void*))+ 1U;unsigned i;for(i=0;i < _Tmp2;++ i){i==0U?_Tmp1[i]=toc:(_Tmp1[i]=*((void**)_check_fat_subscript(ap,sizeof(void*),(int)(i - 1U))));}}0;});_Tmp1;}),sizeof(void*),_Tmp0);});
+struct _fat_ptr args=({unsigned _Tmp0=_get_fat_size(ap,sizeof(void*))+ 1U;_tag_fat(({void**_Tmp1=_cycalloc(_check_times(_Tmp0,sizeof(void*)));({{unsigned _Tmp2=_get_fat_size(ap,sizeof(void*))+ 1U;unsigned i;for(i=0;i < _Tmp2;++ i){i==0U?_Tmp1[i]=toc:(_Tmp1[i]=((void**)ap.curr)[(int)(i - 1U)]);}}0;});_Tmp1;}),sizeof(void*),_Tmp0);});
 Cyc_Warn_vimpos2(args);}
 # 77
 struct _fat_ptr Cyc_Toc_globals={(void*)0,(void*)0,(void*)(0 + 0)};
@@ -2529,8 +2529,8 @@ if(typ_fields==0)goto _LL7;
 for(1;_check_null(typ_fields)->tl!=0;typ_fields=typ_fields->tl){
 ;}{
 struct Cyc_Absyn_Aggrfield*last_typ_field=(struct Cyc_Absyn_Aggrfield*)typ_fields->hd;
-struct Cyc_List_List*fields=Cyc_Tcutil_resolve_aggregate_designators(Cyc_Core_heap_region,e->loc,dles,sd->kind,
-_check_null(sd->impl)->fields);
+struct Cyc_List_List*fields=Cyc_Tcutil_resolve_aggregate_designators(Cyc_Core_heap_region,e->loc,dles,sd->kind,sd->impl->fields);
+# 2411
 if(!Cyc_Toc_is_toplevel(nv)){
 void*_TmpB=Cyc_Absyn_compress(old_typ);void*_TmpC;if(*((int*)_TmpB)==0){if(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_TmpB)->f1)==24){_TmpC=((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_TmpB)->f2;{struct Cyc_List_List*param_ts=_TmpC;
 # 2415

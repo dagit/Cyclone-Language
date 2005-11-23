@@ -936,7 +936,7 @@ Cyc_sround(_Tmp0,& expcnt,_Tmp1,_Tmp2,'\000',signp);});}
 for(1;prec --;({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus_post(& t,sizeof(char),1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2='0';if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;})){;}
 # 877
 if(gformat && !(flags & 8)){
-while((char*)t.curr > (char*)startp.curr &&(int)*((char*)_check_fat_subscript(_fat_ptr_inplace_plus(& t,sizeof(char),-1),sizeof(char),0U))==48){1U;}
+while((char*)t.curr > (char*)startp.curr &&(int)*((char*)_fat_ptr_inplace_plus(& t,sizeof(char),-1).curr)==48){1U;}
 if((int)*((char*)t.curr)==46)
 _fat_ptr_inplace_plus(& t,sizeof(char),-1);
 _fat_ptr_inplace_plus(& t,sizeof(char),1);}
