@@ -2231,7 +2231,7 @@ yychar1=yychar > 0 && yychar <= 398?(int)*((short*)_check_known_subscript_notnul
 yyn +=yychar1;
 if((yyn < 0 || yyn > 8264)||(int)*((short*)_check_known_subscript_notnull(Cyc_yycheck,8265U,sizeof(short),yyn))!=yychar1)goto yydefault;
 # 302
-yyn=(int)Cyc_yytable[yyn];
+yyn=(int)*((short*)_check_known_subscript_notnull(Cyc_yytable,8265U,sizeof(short),yyn));
 # 309
 if(yyn < 0){
 # 311

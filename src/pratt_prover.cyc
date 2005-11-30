@@ -951,7 +951,7 @@ static graph_t *copy_graphs(graph_t *`r _gopt) {
     // process each row again adding in distance edges
     for (let rs = g->rows; rs != NULL; rs = rs->next, newrs=newrs->next){
       newrs->unsigned_distances = copy_distances(newg,rs->unsigned_distances);
-      newrs->signed_distances = copy_distances(newg,rs->unsigned_distances);
+      newrs->signed_distances = copy_distances(newg,rs->signed_distances);
     }
   }
   return res;
