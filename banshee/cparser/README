@@ -1,0 +1,48 @@
+This directory contains a points-to analysis application based on a C
+front-end written by David Gay.
+
+To build the application, type 'make points-to' in the parent
+directory. If all goes well, this will create the file parser.exe. 
+
+parser.exe expects preprocessed code. To run the analysis on a whole
+program (with multiple source files) simply list the files on the
+command line. parser.exe also understands wildcards, so, e.g.,
+
+./parser.exe path_to_preprocessed_sources/*.c
+
+will invoke the parser on an entire directory of C files. 
+
+There are also several other executables that may be of interest:
+
+parser.exe: Andersen's analysis, using the specialized banshee engine
+parser_ns.exe: Andersen's analysis, using the nonspecialized banshee engine
+parser_sg.exe: Steensgaard's analysis
+parser_sg_nt.exe: Steensgaard's analysis, no tags* 
+
+There are some useful flags to tweak the analysis. All of these
+executables recognize the same set of flags. For some analyses, the
+flags will have no effect:
+
+-fno-model-strings: Don't model the effects of strings 
+-fprint-results: Print out the resulting points-to sets
+-fprint-memusage: Print memory usage. This may not work on some platforms 
+-fno-cycle-elim: Disable cycle elimination
+-fno-proj-merge: Disable projection merging
+-ffield-based: Field-based analysis (experimental)
+-fprint-constraints: Print out the generated constraints
+-fparse-only: Just parse
+
+There are other flags that may or may not work, if you want to look at
+them, see toplev.c.
+
+
+* 'No tags' means that sets of abstract locations aren't collected
+during the analysis. This is a bit faster, but you can't look at
+points-to sets. What you can do is compute aliasing information by
+checking locations for equality. If all you want is to check whether
+some expressions alias, this is sufficient. If you want points-to
+sets, you have to run parser_sg.exe. Note that I haven't bothered to
+code up an alias query interface as of yet.
+
+See the file COPYRIGHT for licensing information.
+

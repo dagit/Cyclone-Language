@@ -1,0 +1,63 @@
+#    This file is part of the RC compiler.
+#    Copyright (C) 2000-2001 The Regents of the University of California.
+# 
+# RC is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+# 
+# RC is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with RC; see the file COPYING.  If not, write to
+# the Free Software Foundation, 59 Temple Place - Suite 330,
+# Boston, MA 02111-1307, USA.
+
+O = mobj/
+CC = gcc
+
+ifndef RLIB
+region_dir = ../libcompat
+else
+region_dir = ../rlib
+endif
+
+ifdef DEBUG
+CFLAGS = -g -pg -Wall -Wno-char-subscripts -I. -I$(region_dir) -I../engine -I../andersen -Ddeletes= -Dtraditional= -Dsameregion=  -Dparentptr= -DUSEMALLOC $(ARCH_FLAGS) $(EXTRACFLAGS) -Itests/rc/original  -fno-strict-aliasing 
+CFLAGS_SG = -g -pg -Wall -Wno-char-subscripts -I. -I$(region_dir) -I../engine -I../steensgaard -Ddeletes= -Dtraditional= -Dsameregion=  -Dparentptr= -DUSEMALLOC $(ARCH_FLAGS) $(EXTRACFLAGS) -Itests/rc/original  -fno-strict-aliasing
+else
+CFLAGS = -Wall -Wno-char-subscripts -I. -I$(region_dir) -I../engine -I../andersen -Ddeletes= -Dtraditional= -Dsameregion=  -Dparentptr= -DUSEMALLOC -O3 $(ARCH_FLAGS) $(EXTRACFLAGS) -Itests/rc/original  -fno-strict-aliasing 
+CFLAGS_SG = -Wall -Wno-char-subscripts -I. -I$(region_dir) -I../engine -I../steensgaard -Ddeletes= -Dtraditional= -Dsameregion=  -Dparentptr= -DUSEMALLOC -O3 $(ARCH_FLAGS) $(EXTRACFLAGS) -Itests/rc/original  -fno-strict-aliasing 
+endif
+
+ifndef NO_BANSHEE_ROLLBACK
+CFLAGS := -DBANSHEE_ROLLBACK ${CFLAGS}
+endif
+
+EXTRA_OBJS =  
+
+all: parser.exe parser_st.exe parser_ns.exe parser_sg.exe parser_sg_nt.exe
+
+include Makefile.base
+
+parser.exe: $(OBJS) #../engine/libengine.a $(region_dir)/libregions.a
+	$(CC) $(CFLAGS) -o parser.exe $(LDFLAGS) $(OBJS) ../andersen/andersen_terms.o ../andersen/andersen.o $(EXTRALIBS) -L$(region_dir) -L../engine -lregions -lengine -lm
+
+parser_st.exe: $(OBJS) #../engine/libengine.a $(region_dir)/libregions.a
+	$(CC) $(CFLAGS) -o parser_st.exe $(LDFLAGS) $(OBJS) ../andersen/andersen_terms_st.o ../andersen/andersen.o $(EXTRALIBS) -L$(region_dir) -L../engine -lregions -lengine -lm
+
+parser_ns.exe: $(OBJS) #../engine/libengine.a $(region_dir)/libregions.a
+	$(CC) $(CFLAGS) -DNONSPEC -o parser_ns.exe $(LDFLAGS) $(OBJS)  ../andersen/andersen_terms_nonspec.o ../andersen/andersen.o $(EXTRALIBS) -L$(region_dir) -L../engine -lregions -lnsengine -lm
+
+parser_sg.exe: $(OBJS) #../engine/libengine.a $(region_dir)/libregions.a
+	$(CC) $(CFLAGS_SG) -o parser_sg.exe $(LDFLAGS) $(OBJS) ../steensgaard/steensgaard_terms.o ../steensgaard/steensgaard.o $(EXTRALIBS) -L$(region_dir) -L../engine -lregions -lengine -lm
+
+parser_sg_nt.exe: $(OBJS) #../engine/libengine.a $(region_dir)/libregions.a
+	$(CC) $(CFLAGS_SG) -o parser_sg_nt.exe $(LDFLAGS) $(OBJS) ../steensgaard/steensgaard_terms_notag.o ../steensgaard/steensgaard_notag.o $(EXTRALIBS) -L$(region_dir) -L../engine -lregions -lengine -lm
+
+
+clean:
+	rm -f $(OBJS) parser.exe parser_st.exe parser_ns.exe parser_sg.exe parser_sg_nt.exe *~

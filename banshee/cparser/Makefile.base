@@ -1,0 +1,96 @@
+#    This file is part of the RC compiler.
+#    Copyright (C) 2000-2001 The Regents of the University of California.
+# 
+# RC is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+# 
+# RC is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with RC; see the file COPYING.  If not, write to
+# the Free Software Foundation, 59 Temple Place - Suite 330,
+# Boston, MA 02111-1307, USA.
+
+OBJS = $(O)AST.o $(O)AST_utils.o $(O)array.o $(O)bitset.o $(O)builtins.o $(O)c-parse.tab.o $(O)c-lex.o \
+       $(O)callcc1.o $(O)cfg.o $(O)constants.o $(O)cval.o $(O)dd_list.o $(O)edit.o \
+       $(O)env.o $(O)errors.o $(O)expr.o $(O)fix.o $(O)input.o $(O)live.o \
+       $(O)mbchar.o $(O)optrc.o $(O)rc.o $(O)semantics.o $(O)stats.o $(O)stmt.o $(O)toplev.o \
+       $(O)types.o $(O)unparse.o $(O)util.o $(O)vars.o $(O)chkopt.o \
+       $(O)graph.o $(O)sd_list.o $(O)temps.o $(O)analysis.o \
+       $(O)dhash.o $(EXTRA_OBJS)
+
+AST_H = AST.h AST_types.h AST_defs.h
+
+HDRS = AST_utils.h array.h bitset.h builtins.h c-lex.h c-parse.h c-gperf.h c-parse.tab.h callcc1.h \
+       cfg.h chkopt.h config.h constants.h cstring.h cval.h dd_list.h decls.h edit.h \
+       env.h errors.h expr.h fix.h flags.h live.h optrc.h parser.h rc.h \
+       semantics.h stats.h stmt.h temps.h types.h unparse.h util.h \
+       vars.h qualifiers.h analysis.h dhash.h $(AST_H)
+
+c-parse.tab.c c-parse.tab.h: c-parse.y
+	bison -d c-parse.y
+
+AST_defs.c AST_defs.h AST_types.h: nodetypes.def build-types.el build-basics.el
+	emacs -batch -load build-types.el
+
+AST_parent.c: nodetypes.def build-parent.el build-basics.el
+	emacs -batch -load build-parent.el
+
+AST_print.c: nodetypes.def build-print.el build-basics.el
+	emacs -batch -load build-print.el
+
+c-gperf.h: c-parse.gperf qualifiers.h
+	m4 c-parse.gperf | grep -v '^$$' | \
+	gperf -p -j1 -i 1 -g -o -t -G -N is_reserved_word -k1,3,$$ >c-gperf.h
+
+$(OBJS): $(O)%.o: %.c
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+$(O)analysis.o: analysis.c $(HDRS)
+$(O)c-lex.o: c-lex.c $(HDRS)
+$(O)c-parse.tab.o: c-parse.tab.c $(HDRS)
+$(O)toplev.o: toplev.c $(HDRS)
+$(O)AST.o: AST.c AST_defs.c AST_parent.c AST_print.c $(HDRS)
+$(O)AST_utils.o: AST_utils.c $(HDRS)
+$(O)types.o: types.c $(HDRS)
+$(O)input.o: input.c $(HDRS)
+$(O)util.o: util.c $(HDRS)
+$(O)semantics.o: semantics.c $(HDRS)
+$(O)unparse.o: unparse.c $(HDRS)
+$(O)env.o: env.c $(HDRS)
+$(O)errors.o: errors.c $(HDRS)
+$(O)callcc1.o: callcc1.c $(HDRS)
+$(O)cval.o: cval.c $(HDRS)
+$(O)expr.o: expr.c $(HDRS)
+$(O)constants.o: constants.c $(HDRS)
+$(O)stmt.o: stmt.c $(HDRS)
+$(O)rc.o: rc.c $(HDRS)
+$(O)optrc.o: optrc.c $(HDRS)
+$(O)chkopt.o: chkopt.c $(HDRS)
+$(O)edit.o: edit.c $(HDRS)
+$(O)fix.o: fix.c $(HDRS)
+$(O)cfg.o: cfg.c $(HDRS)
+$(O)live.o: live.c $(HDRS)
+$(O)vars.o: vars.c $(HDRS)
+$(O)builtins.o: builtins.c $(HDRS)
+$(O)stats.o: stats.c $(HDRS)
+$(O)temps.o: temps.c $(HDRS)
+$(O)dhash.o: dhash.c $(HDRS)
+$(O)array.o: array.c $(HDRS)
+$(O)graph.o: graph.c $(HDRS)
+$(O)dd_list.o: dd_list.c dd_list.h 
+$(O)sd_list.o: sd_list.c sd_list.h
+$(O)bitset.o: bitset.c bitset.h config.h cstring.h
+$(O)mbchar.o: mbchar.c mbchar.h
+
+$(O)mincut.o: optrc.c $(HDRS)
+	$(CC) -DTEST $(CFLAGS) -c -o $(O)mincut.o optrc.c
+
+tags:
+	etags *.[ch]
+

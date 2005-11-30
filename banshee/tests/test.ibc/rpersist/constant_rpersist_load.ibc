@@ -1,0 +1,5 @@
+!rload
+'v:setIF
+'u <= 'v
+!tlb 'u
+!tlb 'v

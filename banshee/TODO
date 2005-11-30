@@ -1,0 +1,299 @@
+TODO -*- outline -*-	
+
+
+* Miscellaneous Tasks
+** update manual
+** RELEASE
+** dependencies aren't quite right: autogenerate header dependencies
+
+* Supporting backtracking
+
+Backtracking adds limited incremental support to the system. The idea
+is that you can "pop" off some number of constraints, effectively
+undo-ing them. The undo is stack-like: you cannot delete a constraint
+unless you also delete every constraint that was added after.
+
+This is not as powerful as a fully incremental analysis, but it should
+be fairly easy to implement. The basic idea is to keep a counter of
+the top-level constraints. Inclusion calls return this counter to the
+user. To pop a constraint, the user calls backtrack(n), which will
+effectively roll back the constraint system to its state just prior to
+the addition of the nth constraint. Note that this will only rollback
+the constraints; normal terms created after the addition of the nth
+constraint remain valid. However, some terms actually add constraints,
+and for these, those terms will be invalid.
+
+Internally, this is implemented with a map that associates a list of
+bounds with each counter n. When a backtrack is requested, any bound
+whose counter is greater than n is deleted.
+
+This scheme is complicated by some of the optimizations. For instance,
+cycle elimination unifies variables, and undoing a discovered cycle
+may force us to undo a union-find operation. With projection merging
+we also need to deal with ubprojs. I don't think cons hashing will
+cause a problem, but some thought should be invested here.
+
+For mixed constraints, there must be a global "clock" that advances
+with each constraint added for ANY sort. So backtracking is a
+system-wide property. You cannot backtrack an individual sort.
+
+so, here are the subtasks:
+
+** Implement backtracking in union-find
+       
+DONE.
+ 
+The implementation of backtracking is based on a stack-based algorithm
+due to Westbrook and Tarjan. There is a more general algorithm that
+allows one to do arbitrary deunions (see Mannila and Ukkonen "Time
+Parameter and Arbitrary Deunions in the Set Union Problem" or Galil
+and Italiano "Data Structures and Algorithms for Disjoint Set Union
+Problems").
+
+There are three kinds of operations that may lead to backtrack. They
+are: union, unify, and update.
+ 
+Union and unify are similar operations, except that unify takes a
+user-defined function pointer (the combine_fn_ptr) and uses this to
+select/create the info stored in the ecr. Undoing either of these
+involves storing in the union stack the new ecr's old info, as well as
+a pointer to the former root. Find operations store old pointers in
+the former root's node stack, following Westbrook and Tarjan.
+
+Update is a slightly different operation. To rollback an update, we
+store in the union stack the root (it remains a root after the update)
+and the old info. When we do a backtrack operation, we can tell
+whether we were dealing with a union/unify or update because the
+'nonroot' field of the stack entry will actually be a root in the
+latter case. All we have to do is restore the old info. In the first
+two cases 'nonroot' will be a nonroot as we expect.
+
+Also, now note that the args to combine_fn_ptr in ufind.h are
+const. The idea is that combine shouldn't destructively update its
+arguments, rather it should merely select one of the two, or create a
+new info that represents a join of the two existing infos. However,
+the original infos must remain unchanged for the purposes of
+undoing.
+
+** Add rollback control structure
+
+DONE.	
+
+Control flow for rollback proceeds in the following manner--
+  
+         1) Each toplevel constraint calls banshee_clock_tick()
+         2) Each internal constraint calls banshee_check_rollback() to
+            see if there is a rollback control structure associated 
+            with the current banshee time. If not, this is the first
+            constraint of this sort induced from the current toplevel
+            constraint, so build a rollback structure and call 
+            banshee_register_rollback. As changes are made to the 
+            constraint graph, store them in the registered rollback 
+            structure.
+         3) When banshee_backtrack is called, the current time is popped
+            off the clock stack, and we dispatch on the sort kinds, calling
+            sort_kind_rollback(banshee_rollback_info) which executes the
+            rollback code for each sort
+
+    
+** Differentiate between toplevel and internal constraints, add tick()
+
+DONE.
+
+** Rollback support for each sort
+
+DONE.
+ 
+       PROBLEM: How do we handle union-find rollbacks? Is it always OK
+       to unroll all unifications first? This is probably the solution we 
+       have to adopt.
+
+       What about identity? Suppose the user asserts e1 == e2,
+       followed by e2 == e3. If after the first union operation, e1 is
+       chosen as the equivalence class representative, then the second
+       constraint may appear as e1 == e3. Really, whether or not the
+       constraints are solved online should be transparent to the
+       interface, and operations should all be fixed to maintain this
+       illusion. Identity is more of a concern with incremental
+       analysis than rollback.
+
+       What about internal constraints added due to the creation of
+       terms (e.g. proj)? We don't ever want to undo these. One
+       approach would be to add a notion of an internal constraint
+       that cannot be undone. But then how should the constraints
+       induced by the creation of proj be handled? 
+
+       New strategy: any terms that create constraints also call tick()...
+       then rollback will invalidate these terms, and they must be
+       rebuilt.
+  
+       General list of things to keep track of:
+        
+        --- Unifications
+        --- Addition of bounds
+        --- Cache entries (e.g. ubproj)
+        --- Row additions
+        --- Lists of conditional unifiers
+
+       Support each of the following sorts:
+
+*** Term
+
+DONE.
+
+Just change pending representation to bounds
+
+*** FlowRow
+
+DONE.
+           Keep track of:
+           -x- normalization (non destructive)
+           -x- contour instantiation (probably don't have to do
+	 	                      anything, see fv_set_contour)
+           -x- bounds additions (need to register)
+           -x- fv_set_alias (unset alias)
+           -x- fv_set_contour should automatically be undone (ufind)
+           -x- contour unifications should automatically be undone (ufind)
+
+*** SetIF
+
+DONE.
+
+   -x- Make cycle elimination support rollback
+ 
+       Really just undo unifications and repair bounds
+     
+   -x- Make projection merging support rollback
+      
+       -x- Remove entries from ub_projs
+
+*** SetST
+
+DONE.
+
+By ignoring, so not really done.
+
+** Other data structure modifications for rollback
+
+*** Add rollback support to bounds
+  
+DONE.
+
+Not really rollback support, but deletion support.
+
+* Add serialization support
+
+** Things to serialize:
+
+- The backtracking stack
+- The ufind stack (ugg.... how is this going to happen)
+- Terms in the hashcons table (e.g. setif_hash)?
+- Extra state (e.g. stamp.c)
+
+** Serialization API notes
+
+Basically, we want to serialize the constraint graph, while providing
+some mechanism to save a client-specified mapping to particular nodes
+(gen_e's) in the graph. The mapping will be a list of hash tables. For
+example:
+
+"Local vars"  --> hash table mapping strings of var names to gen_e's
+"Global vars" --> ...
+
+Each entry in the list needs to provide a key
+serialization/deserialization function. Then the serialization
+function will do the following:
+
+-- Save all utility state (stamps, etc.)
+-- Serialize all the backtracking state. This will encode the edges between
+   terms
+-- Remember to save all the union/find relationships! These must be
+   undo-able after deserialization
+-- Keep track of all of the stamps that have already been written to disk,
+   so that they are not written twice 
+-- Serialize all of the terms listed as entry points according to the list
+   of hash tables
+-- Could also save the hashcons tables (e.g. setif_hash)
+
+bool banshee_save(FILE *f, hash_table_list entry_points)
+{
+  stamp_save(f);
+  setif_save(f);
+  flowrow_save(f);
+  ...
+  entry_point_save(f, entry_points);
+}
+
+Deserialization is symmetric, and its semantics will involve a
+reset. That is, loading a constraint system will wipe out the current
+constraints. This is in contrast to BANE, which allows a stack of
+constraint systems.
+
+** Serializing union-find elements
+
+-- Add a function serialize_uf_element, that takes a fun pointer 
+   called serialize_info_fn. Serialize kind, rank, info,
+   etc. 
+
+** Serialization format
+
+-- (3) int: count1, count2, and count3 from stamp module
+-- (1) unsigned long, n: Number of entry point hash tables
+-- (n) of the following:
+       -- (1) unsigned long, k: Number of elements in current table
+       -- (k) key,value pairs, where key is given by user specified
+          serialization function, and each value is a gen_e
+
+* Modify Andersen's to support backtracking
+
+** Write a backtracking test harness for Andersen's
+
+DONE.
+
+This will include some minimal changes to cparser, plus a small test
+harness written in python. Here's how this will work:
+
+- The test harness will take as argument a list of files and an
+integer indicating what size prefix of the list to analyze. The
+harness will then call cparser twice:
+  
+   -- The first time, only the prefix will be analyzed, and the
+      points-to count written to disk.
+   -- The second time, all files will be analyzed, but then the cparser
+      will backtrack up to the specified prefix. Then the points-to 
+      count will be written to disk. 
+   -- The script will compare these points-to counts and report an error
+      if they differ at all.
+   -- A delta test harness can then be written on top of this to find
+      the minimal prefix under which the backtracking analysis fails.
+
+** Incorporate backtracking tests into build process
+
+DONE.
+
+* iBanshee interpreter
+
+** Allow programs to be read from files
+
+*** Add a command line flag to read from files
+
+DONE.
+
+*** Add a !load command
+
+!load should act somewhat differently, it shouldn't YYACCEPT at line ends,
+nor should there be any prompt output
+
+** Test cases for iBanshee
+
+*** Update build process to check iBanshee build
+
+DONE.
+
+*** Add tests for iBanshee
+
+DONE.
+
+*** Add tests for iBanshee with backtracking
+
+DONE.

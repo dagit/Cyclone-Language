@@ -1,0 +1,194 @@
+#!@pathperl@
+
+#    This file is part of the RC compiler.
+#    Copyright (C) 2000-2001 The Regents of the University of California.
+# 
+# RC is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+# 
+# RC is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with RC; see the file COPYING.  If not, write to
+# the Free Software Foundation, 59 Temple Place - Suite 330,
+# Boston, MA 02111-1307, USA.
+
+
+# Configuration
+$prefix = "@prefix@";
+$exec_prefix = "@exec_prefix@";
+$RCDIR = "@libdir@/rc";
+
+# Runtime configuration
+$machine = `gcc -dumpmachine`; chop $machine;
+$cc1path = `gcc -print-prog-name=cc1`; chop $cc1path;
+$ENV{"CC1PATH"} = $cc1path;
+$cpath = $ENV{"COMPILER_PATH"};
+$cpath = ":" . $cpath if $cpath ne "";
+$ENV{"COMPILER_PATH"} = "$RCDIR/$machine$cpath";
+
+# Have fun with the arguments
+
+$linking = 1;
+$rclib_base = "regions-std";
+
+for ($i = 0; $i <= $#ARGV; $i++) {
+    $_ = $ARGV[$i];
+    if (/^-/) {
+	if (/^-x/) {
+	    ($i, $lang) = &extractarg($i);
+	    $c_selected = $other_selected = 0;
+	    if ($lang eq "none") {
+	    }
+	    elsif ($lang eq "c" || $lang eq "cpp-output") {
+		$c_selected = 1;
+	    }
+	    else {
+		$other_selected = 1;
+	    }
+	}
+	elsif (/^-M/) {
+	    $make_gen = 1;
+	    $linking = 0;
+	}
+	elsif (/^-c/ || /^-E/ || /^-S/) {
+	    $linking = 0;
+	}
+	elsif (/^-rclib=/) {
+	    $rclib_specified = $_;
+	    $rclib_specified =~ s/^-rclib=//;
+	    if ($rclib_specified eq "") {
+		print STDERR "No file specified with -rclib=\n";
+		exit 2;
+	    }
+	}
+	elsif (/^-frc-/) {
+	    if (/^-frc-norc$/) {
+		$norc = 1;
+		$rclib_base = "regions-norc";
+	    }
+	    elsif (/^-frc-nolocals$/) {
+		$nolocals = 1;
+	    }
+	    elsif (/^-frc-pairs$/) {
+		$rc_pairs = 1;
+		$rclib_base = "regions-pairs";
+	    }
+	    elsif (/^-frc-local-assign$/) {
+		$locals_assign = 1;
+	    }
+	    elsif (/^-frc-local-opt$/) {
+		$locals_opt = 1;
+	    }
+	    elsif (/^-frc-noqchecks$/) {
+		$noqchecks = 1;
+	    }
+	    elsif (/^-frc-qopt$/) {
+		$qopt = 1;
+	    }
+	    elsif (/^-frc-stats$/) {
+		$rclib_stats = $stats = 1;
+	    }
+	    elsif (/^-frc-profile$/) {
+		$rclib_stats = $profile = 1;
+	    }
+	}
+	elsif (/^-o$/) {
+	    # skip filename argument
+	    $i++;
+	}
+    } 
+    elsif ($c_selected) {
+	$have_c_files = 1;
+    }
+    elsif ($other_selected) {
+	$have_other_files = 1;
+    }
+    elsif (/\.c$/ || /\.i$/) {
+	$have_c_files = 1;
+    }
+    elsif (!/\.o$/) { # Could use a config option for suffix
+	$have_other_files = 1;
+    }
+}
+
+&fail("rcc does not support mixed C and other language compilation. Sorry.") 
+    if $have_other_files && $have_c_files;
+&fail("-frc-norc and -frc-pairs are incompatible") if $norc && $rc_pairs;
+&fail("-frc-norc and -frc-nolocals are incompatible") if $norc && $nolocals;
+&fail("-frc-norc and -frc-stats are incompatible") if $norc && $stats;
+&fail("-frc-norc and -frc-profile are incompatible") if $norc && $profile;
+&fail("-frc-local-assign and -frc-local-opt are incompatible") 
+    if $locals_assign && $locals_opt;
+&fail("-frc-noqchecks and -frc-qopt are incompatible") if $noqchecks && $qopt;
+&fail("-frc-stats and -frc-profile are incompatible") if $stats && $profile;
+
+
+if ($have_c_files) {
+    push (@extraopts, "-include");
+    push (@extraopts, "$RCDIR/regions.h");
+    if ($rc_pairs) {
+	push (@extraopts, "-DRCPAIRS");
+    } else {
+	push (@extraopts, "-DSAFE_ADJUSTFN");
+	push (@extraopts, "-frc-safe-adjustfn");
+    }
+    push (@extraopts, "-I$RCDIR");
+}
+
+if ($linking) {
+    if ($rclib_specified) {
+	$rclib = $rclib_specified;
+    }
+    else {
+	$rclib = "$rclib_base";
+	$rclib = $rclib . "-stats" if $rclib_stats;
+	$rclib = $rclib . ".o";
+    }
+    push (@extraopts, &find_file($rclib));
+}
+
+unshift @ARGV, "gcc";
+unshift @extraopts, @ARGV;
+
+#print join(' ', @extraopts);
+#print "\n";
+exec { "gcc" } @extraopts;
+print STDERR "Couldn't execute gcc\n";
+exit 2;
+
+sub extractarg {
+    local ($i) = @_;
+
+    if (length($ARGV[$i]) == 2) {
+	$arg = $ARGV[++$i];
+    }
+    else {
+	$arg = substr($ARGV[$i], 2);
+    }
+    return ($i, $arg);
+}
+
+sub fail {
+    print STDERR "$_[0]\n";
+    exit 2;
+}
+
+sub find_file {
+    local ($file) = @_;
+
+    return $file if substr($file, 0, 1) eq "/";
+	
+    $try = "$RCDIR/$machine/$file";
+    return $try if -f $try;
+
+    $try = "$RCDIR/$file";
+    return $try if -f $try;
+
+    return $file;
+}

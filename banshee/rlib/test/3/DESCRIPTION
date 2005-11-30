@@ -1,0 +1,2 @@
+This test allocates a long list of triples; this one is good for checking alignment problems not caught by allocating
+pairs.

@@ -1,0 +1,23 @@
+NOTES
+-----
+
+Files shared by cqual/banshee:
+
+array.[c,h]
+bool.h
+buffer.[c,h]
+compiler.h
+hash.[c,h]  --> synchronized 4/19
+util.c/util.h vs. utils.c/utils.h --> replace util.[h,c]
+
+termhash --> need to synchronize
+
+
+-----
+
+
+Member functions are modeled by the 'method' type. Here are some C++
+features that we won't be able to handle with the current definition
+of 'method':
+  -- C++ pointer to member functions
+  -- Exceptions

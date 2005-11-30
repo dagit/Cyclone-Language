@@ -1,0 +1,12 @@
+'z:row(setIF)
+'t:setIF
+'u:setIF
+'v:setIF
+a:setIF
+b:setIF
+c:setIF
+<l_1=a, l_2=b, l_3=c> <= <l_1='t, l_2='u | 'z>
+'z <= <l_3='v>
+!tlb 't
+!tlb 'u
+!tlb 'v

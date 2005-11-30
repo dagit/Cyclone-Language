@@ -1,0 +1,160 @@
+#!/usr/bin/perl -w
+# query cvs for history information, and present it in
+# a reasonable format
+
+use strict 'subs';
+
+sub usage {
+  print(<<"EOF");
+
+usage: $0 [options]
+Prints CVS history information in a nicer format than CVS does.
+
+options:
+  -d <cvsroot>: specify CVS root; can also use CVSROOT env var
+  -D <date>:    show history starting from <date>, for example
+                '2002-04-1 08:00' is April 1st 2002, 8am
+  -p <project>: name the repository, aka project, to search
+                (defaults to contents of CVS/Repository)
+  -l:           (lowercase ell) do not get log information
+                (log info displayed only if -p not used)
+EOF
+}
+
+
+sub diagnostic {
+  #print STDERR (@_);
+}
+
+
+# defaults
+$showLog = 1;
+
+# read arguments
+my $i = 0;
+while ($i < @ARGV) {
+  my $arg = $ARGV[$i++];
+
+  if ($arg eq "-d") {
+    $cvsroot = $ARGV[$i++];
+  }
+  elsif ($arg eq "-D") {
+    $startDate = $ARGV[$i++];
+  }
+  elsif ($arg eq "-p") {
+    $repository = $ARGV[$i++];
+    $showLog = 0;
+  }
+  elsif ($arg eq "-l") {
+    $showLog = 0;
+  }
+  else {
+    usage();
+    die("unknown option: $arg\n");
+  }
+}
+
+
+# get repository, aka the project name
+if (!defined($repository) && -f "CVS/Repository") {
+  $repository = `cat CVS/Repository`;
+  chomp($repository);
+}
+if (!defined($repository)) {
+  die("you have to specify a repository name with -p\n");
+}
+
+# use very early date if none specified
+if (!defined($startDate)) {
+  $startDate = "1980-01-01 00:01";
+}
+
+# The timezone to pass to cvs history.
+my $timezone = `date +%z`;      # returns things like "-800"
+chomp($timezone);
+
+
+# query CVS for the history information
+$cmd = "cvs";
+if (defined($cvsroot)) {
+  $cmd .= " -d $cvsroot";
+}
+$cmd .= " history -c -a -D \"$startDate\" -z $timezone -p $repository";
+diagnostic("running: $cmd\n");
+@history = `$cmd`;
+
+# I want to collect all the activities from a particular time,
+# so keep track of which time we're on
+$curWhen = "";
+
+# parse the lines of output
+for ($i=0; $i < @history; $i++) {
+  my $line = $history[$i];
+  chomp($line);
+  my ($kind, $when, $who, $rev, $file, $dir) =     # taken from mk-reports.pl
+    ($line =~ m|^(.) (\d\d\d\d-\d\d-\d\d \d\d:\d\d .\d\d\d\d) (\S+)\s+([\d.]+)\s+(\S+)\s+(\S+)|);
+
+  if (!defined($kind)) {
+    # history line I don't understand
+    diagnostic("history line not understood: $line\n");
+    next;
+  }
+
+  # put $dir and $file together, and strip repository name
+  $file = "$dir/$file";          # concat
+  $file =~ s,^$repository/,,;    # strip
+
+  if ($curWhen ne $when) {
+    # starting new section; print info
+    $curWhen = $when;
+    print("\n$when\n");
+
+    # get log information about this
+    if ($showLog) {
+      $cmd = "cvs log -r$rev $file";
+      diagnostic("running: $cmd\n");
+      @loglines = `$cmd`;
+
+      # the log output produces lots of junk at the top; skip it
+      # also don't print the last line which is lots of '='s
+      my $skipping = 1;
+      for (my $j=0; $j+1 < @loglines; $j++) {
+        if ($skipping) {
+          if ($loglines[$j] !~ m/^date: /) {
+            # not there yet
+          }
+          else {
+            # found it; start printing at next line
+            $skipping = 0;
+          }
+          next;
+        }
+
+        print("$loglines[$j]");   # already has newline
+      }
+    }
+  }
+
+  # print action information
+  print("  ");
+  if ($kind eq "A") {
+    print("added:    ");
+  }
+  elsif ($kind eq "M") {
+    print("modified: ");
+  }
+  elsif ($kind eq "R") {
+    print("removed:  ");
+  }
+  else {
+    print("$kind:        ");    # unknown action
+  }
+
+  print("$file ($rev)\n");
+}
+
+
+
+
+
+

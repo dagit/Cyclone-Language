@@ -1,0 +1,46 @@
+The bug is in the interaction of gproj with projection merging. The
+temporary fix has been to disable projection merging when gproj is
+used.
+
+Known buggy graphs:
+
+51 nodes, seed 9598, global density 5 (relevant_min2.tmp) 50 nodes,
+seed 42, global density 1 (relevant_min.tmp) <--- redo since
+relevant_nodes was commented out
+
+43 nodes, seed 24382, global density 5 has a diffedge bug
+
+-- There is a bug in the makefile: you get errors if you don't build libcompat in ../libcompat first
+
+xx Deal with tracking information in some consistent way in both mr-dyck and dyck
+     -> make_untracked_dyck_node
+     -> make_tracked_empty_dyck_node
+     -> make_tracked_universal_dyck_node
+
+Ughh. These tag semantics aren't as clean as I would like. And with PN
+reachability enabled, the set constraints solver won't automatically
+discover inconsistent qualifier relations anyway.
+
+xx Test the tag semantics
+
+
+xx Register a callback function when the constraint system is found to
+   be inconsistent. This callback function can be used to print user
+   errors when inconsistent qualifier constraints are found
+
+-- Figure out some way to efficiently check PN paths and call the
+   above callback function during reachability. The trick will be to
+   cut down the number of queries asked. Specialize this to the $tainted
+   $untainted example if necessary
+
+-- Fix a bug in the constraint algorithm with constraints like _ <= 0 and 1 <= _
+
+-- Debugging the MR implementation: print the closed CFL graph and
+   find out when the first erroneous CFL edge is added.
+
+  An edge x --A--> y is represented by A(y) <= x
+
+  So walk over every node, print its transitive lower bounds, and
+print out the closed graph. Do the same for the isomorphism, and then
+diff the edges. Finally, timestamp the edges and find the *first*
+erroneous edge that was added according to timestamps.

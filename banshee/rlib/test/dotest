@@ -1,0 +1,19 @@
+#!/usr/bin/perl
+
+$success = 1;
+
+opendir(CUR,".");
+foreach $i (@ARGV) {
+    last unless chdir("$i");
+    system("make -s test");
+    $r1 = `./test`;
+    if (!($r1 eq "OK\n")) {
+	print STDOUT "$i: $r1\n";
+	$success = 0;
+    }
+    chdir("..");
+}
+if ($success == 1) {
+    print STDOUT "All tests passed.\n"; 
+}
+

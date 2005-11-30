@@ -1,0 +1,10 @@
+This test is just test 1, but allocates a very long list of pairs.  
+
+There is also a timer program for checking performance.  The timer program simply
+deserializes and then serializes a large heap.  There are options for performing
+only the deserialization or both steps, from which the time of either can be
+computed.  Run the driver program with any argument and it will print the 
+address of the data in the serialized heap; this number needs to be incorporated
+into timer.c. 
+
+

@@ -1,0 +1,107 @@
+This is banshee, a toolkit for constructing constraint-based program
+analyses.  See the user manual in docs/banshee.ps for a complete
+description of banshee.
+
+This is a beta release of banshee. Although banshee has been designed
+to solve many kinds of constraints, it has only been extensively
+tested on Andersen's-style points-to analysis.
+
+To build banshee, the following must be installed: 
+
+ --- ocaml (see http://caml.inria.fr)
+ --- gcc (should be standard)
+ --- indent (should be standard)
+ --- python (should be standard)
+
+You can then build banshee by typing 'make' or 'gmake' at the command
+line in this directory. If everything succeeds, the following targets
+will be built:
+
+ --- engine/libnsengine.a
+
+ --- engine/libengine.a
+
+ --- bin/banshee.exe
+
+ --- bin/ibanshee.exe
+
+The first library is the nonspecialized constraint resolution
+library. Link with this library if your application does not use the
+code generator. The interface for this library is defined in
+engine/nonspec.h.
+
+The second library should be linked with applications that use the
+banshee code generator (bin/banshee.exe). Interfaces for this library
+are created by the code generator. See the user manual for more
+information.
+
+iBanshee (bin/ibanshee.exe) is an interpreter that allows you to
+interactively define constraints and inspect solutions.
+
+'make' will also build the user manual (docs/banshee.ps) a suite of
+small test applications (see tests/README) and the points-to analysis
+application (see cparser/README). Currently, the manual is extremely
+out of date. This will hopefully be remedied soon.
+
+Other useful make targets:
+
+ --- 'make check' will verify your build.
+
+ --- 'make banshee' will build banshee without building any test
+     applications
+
+ --- 'make docs' will just build the documentation
+
+ --- 'make points-to' will build the points-to analysis application
+     and dependencies
+
+ --- 'make ibanshee' will build the iBanshee interpreter and dependencies
+
+banshee should build and run on Linux, FreeBSD, Windows (with cygwin)
+and MacOS X. On FreeBSD, make sure to use 'gmake' instead of 'make'
+
+banshee is distributed under the BSD license, with the exception of
+the following files:
+
+ --- engine/malloc.c: see file for license
+
+ --- codegen/OCamlMakefile: see
+     http://www.ai.univie.ac.at/~markus/home/ocaml_sources.html for
+     license
+
+ --- cparser: GPL, see cparser/COPYRIGHT
+
+Note that the cparser is a separate application, no code from cparser
+is linked into banshee itself.
+
+See the COPYRIGHT file for more details.
+
+If backspace doesn't delete in ibanshee.exe, try:
+stty erase ^?
+before invoking ibanshee.exe.
+
+Known bugs:
+
+ --- Projection merging and the DyckCFL API don't work properly (the
+     bug has to do with group projections and merging). TURN OFF
+     projection merging if using the DyckCFL API with globals. If
+     you're not using globals, this won't matter, because group
+     projections won't be used. Projection merging doesn't improve the
+     DyckCFL library's performance, anyway.
+
+ --- Banshee ships with two region-based memory management libraries:
+     libcompat and rlib. There is a serious performance bug with
+     rlib. Unfortunately, region-based persistence
+     (serialization/deserialization) is only supported with rlib. You
+     can use rlib by doing: 'make clean all RLIB=1'. Region persistence
+     is otherwise unsupported.
+
+ --- Hashset (hashset.c) sometimes doesn't terminate. By default,
+     banshee doesn't use hashset: it uses a bounds representation based
+     on hash.c (hash_bounds.c, as opposed to the hashset based
+     bounds.c). However, the hashset-based bounds representation is
+     about twice as fast as the hash-based bounds representation. If
+     you want to try out the hashset-based bounds representation, do
+     'make clean all check NO_HASH_BOUNDS=1'.
+
+Send bug reports to jkodumal@cs.berkeley.edu.

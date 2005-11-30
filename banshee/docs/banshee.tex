@@ -1,0 +1,684 @@
+% Copyright (c) 2000-2004
+%      The Regents of the University of California.  All rights reserved.
+%
+% Redistribution and use in source and binary forms, with or without
+% modification, are permitted provided that the following conditions
+% are met:
+% 1. Redistributions of source code must retain the above copyright
+%    notice, this list of conditions and the following disclaimer.
+% 2. Redistributions in binary form must reproduce the above copyright
+%    notice, this list of conditions and the following disclaimer in the
+%    documentation and/or other materials provided with the distribution.
+% 3. Neither the name of the University nor the names of its contributors
+%    may be used to endorse or promote products derived from this software
+%    without specific prior written permission.
+%
+% THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+% ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+% IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+% ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+% FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+% DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+% OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+% HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+% LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+% OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+% SUCH DAMAGE.
+
+\documentclass{article}
+\usepackage{fullpage}
+\usepackage{makeidx}
+\usepackage{latexsym}
+
+\def\kw#1{\hbox{\tt #1}}
+
+
+\newcommand{\bane}{\textsc{Bane}}
+\newcommand{\banshee}{\textsc{Banshee}}
+\newcommand{\pam}{\textsc{Pam}}
+\newcommand{\FlowTerm}{\textsf{FlowTerm}}
+\newcommand{\Term}{\textsf{Term}}
+\newcommand{\Set}{\textsf{Set}}
+\newcommand{\Row}{\textsf{Row}}
+\newcommand{\SetIF}{\textsf{SetIF}}
+\newcommand{\SetST}{\textsf{SetST}}
+\newcommand{\FlowRow}{\textsf{FlowRow}}
+\newcommand{\TermRow}{\textsf{TermRow}}
+\newcommand{\SetIFRow}{\textsf{SetIFRow}}
+\newcommand{\SetSTRow}{\textsf{SetSTRow}}
+\newcommand{\SortGen}{\textsf{SortGen}}
+\newcommand{\exprid}{\emph{exprid}}
+
+\newcommand{\aset}[1]{\{#1\}}
+\newcommand{\id}[1]{{\it #1\/}}
+\newcommand{\bra}[1]{\langle {#1} \rangle}
+\newcommand{\sembox}[1]{\hfill \normalfont \mbox{\fbox{\(#1\)}}}
+\newcommand{\fracc}[2]{\begin{eqnarray} \frac{\begin{array}{c} #1
+    \end{array}}{\begin{array}{c} #2 \end{array}} \end{eqnarray}}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{observation}[theorem]{Observation}
+\newtheorem{fact}[theorem]{Fact}
+\newtheorem{algorithm}[theorem]{Algorithm}
+
+\newenvironment{example}[1][{}]{\begin{exampleI}[#1]\upshape}
+{\end{exampleI}}
+
+\newcommand{\ie}{\emph{ie.}}
+\newcommand{\lexpr}{\alpha\;\mathit{lexpr}}
+\newcommand{\rexpr}{\alpha\;\mathit{rexpr}}
+\newcommand{\lrexpr}{\alpha\;\mathit{lrexpr}}
+
+\newcommand{\ProjPat}{\textsf{ProjPat}}
+
+\newcommand{\widewedge}{\ \wedge\ }
+\newcommand{\vartypeindex}{\index{variable!type@\texttt{'a variable}}%
+\index{variable!type}}
+\newcommand{\exprtypeindex}{\index{expression!type@\texttt{'a expr}}%
+\index{expression!type}}
+\newcommand{\sorttypeindex}{\index{sort!type@\texttt{'a sort}}%
+\index{sort!type}}
+\newcommand{\monotypeindex}{\index{mono expression!type@\texttt{'a mexpr}}%
+\index{mono expression!type}}
+\newcommand{\signtypeindex}{\index{signature!type@\texttt{'a sign}}%
+\index{signature!type}}
+\newcommand{\constructortypeindex}{\index{constructor!type@\texttt{'a constructor}}%
+\index{constructor!type}}
+\newcommand{\genEindex}{\index{embedded expression!type@\texttt{genE}}%
+\index{embedded expression!type}}
+
+\newcommand{\contra}[1]{\overline{#1}}
+
+\title{Banshee User Manual}
+\author{John Kodumal}
+
+\makeindex
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+
+This document describes \banshee{}, a toolkit for constructing
+constraint-based program analyses. \banshee{}, like its predecessor
+\bane{} \cite{aiken:tic98}, is based on \emph{mixed constraints},
+allowing users to design their own ad-hoc analysis formalisms by
+mixing standard, well understood constraint languages
+\cite{aiken:sas97}. \banshee{}'s main innovation is its use of an
+analysis specification language to \emph{specialize} the constraint
+resolution engine for specific program analyses. This approach yields
+several distinct advantages over previous toolkits:
+\begin{itemize}
+\item \textbf{Cleaner user interfaces.} Given an analysis
+  specification, \banshee{} creates a compact interface tailored to
+  the analysis.
+\item \textbf{Better type safety.} Constraints are typically subject
+  to a set of \emph{well-formedness} conditions. In previous toolkits,
+  these conditions were checked dynamically. In \banshee{} more of
+  these conditions are checked statically, reducing the possibility of
+  run-time errors.
+\item \textbf{Improved performance.} \banshee{} applications realize a
+  performance gain as an effect of reducing these dynamic checks and
+  generating specialized C code.
+\item \textbf{Better extensibility.} The system can easily be extended
+  to handle new constraint formalisms.
+\end{itemize}
+
+This manual is divided into four sections (in addition to this
+introduction).  The first section provides installation
+instructions. The second section gives an informal description of the
+interfaces generated by \banshee{}.  The third section describes
+implementation details of the system that are relevant to
+end-users. The fourth section provides instructions for adding
+extensions to the system. This section will be useful to users who
+need to customize the built-in constraint formalisms or add new
+formalisms to the system.
+
+\section{Installation Procedure}
+
+\subsection{Prerequisites}
+\banshee{} requires both GCC (the GNU C compiler) and Objective Caml
+(an implementation of the Caml functional programming language). GCC
+can be obtained from \texttt{http://gcc.gnu.org}. The latest Objective
+Caml distribution can be obtained from \texttt{http://caml.inria.fr}.
+
+\subsection{Installing}
+
+First, verify that \texttt{ocamlc} and \texttt{gcc} are in your path. 
+To unpack \banshee{}, execute the following command:
+$$
+\texttt{tar xzf banshee-0.9.tar.gz}
+$$
+
+To build \banshee{}, simply run GNU make in the proper directory:
+$$
+\texttt{cd banshee-0.9;}~\texttt{make}
+$$
+
+If the build procedure succeeds, two executable files will be present in the \texttt{banshee-0.9/bin} directory: \texttt{banshee}, the specialized engine generator, and
+\texttt{lambda-test}, a small test program illustrating type inference for the lambda calculus.
+
+Next, we discuss the interfaces generated by \banshee{}.
+
+\section{Banshee Application Programmer Interfaces}
+
+\banshee{} interfaces are generated from engine specification files, which 
+have the extension \texttt{.spec}. To generate an interface and a specialized 
+engine:
+$$
+\texttt{banshee}~file\texttt{.spec}~[outfile]
+$$
+The code generator produces \textit{outfile}\texttt{.c}, the specialized 
+engine, and \textit{outfile}\texttt{.h}, the interface. If \textit{outfile} 
+is not specified, \textit{file}\texttt{.c} and \textit{file}\texttt{.h} are 
+produced.
+
+\subsection{Specification Language}
+
+Specification files consist of a single \textit{specification}, drawn from
+the following grammar:
+$$
+\begin{array}{lrl}
+  \id{specification} &\kw{::=}& \kw{specification} ~\id{spcid} ~\kw{:}~ \id{hdrid} ~\kw{=} ~\kw{spec} ~\id{dataspec}~ \kw{end} \\
+  \id{dataspec} & \kw{::=} & 
+  \!\!\begin{array}[t]{rl}\kw{data} \!\!\! & \id{exprid}_1 ~\kw{:}~ \id{sort}_1 \bra{\id{sortopts}} 
+               ~\bra{\kw{=} ~\id{conspec}_1}_1 \cdots \\ 
+               \kw{and}\!\!\! & \id{exprid}_n ~\kw{:}~ \id{sort}_n \bra{\id{sortopts}} ~\bra{\kw{=} ~\id{conspec}_n}_n 
+       \end{array} \\
+  & | & \id{dataspec}_1 ~ \id{dataspec}_2 \\
+  \id{conspec} & \kw{::=} & \id{conid} ~\bra{\kw{of} ~\id{consig}} \\
+               & | & \id{conspec}_1~\kw{|} ~\id{conspec}_2 \\ 
+ \id{consig} & \kw{::=} & \id{bconsig}_0~\kw{*} \cdots \kw{*}~\id{bconsig}_n \\
+  \id{bconsig} & \kw{::=} & \bra{\kw{-}~|~\kw{+}} ~\id{exprid} \\ 
+  \id{sortopts} & \kw{::=} & \kw{[} \id{option_1} \kw{,} \cdots \kw{,}\id{option_n} \kw{]} \\
+  \id{sort} & \kw{::=} & \kw{term} ~~|~~ \kw{setIF} ~~|~~ \kw{setST} ~~|~~ \kw{row(}\id{exprid}\kw{)}  \\ 
+ 
+
+\end{array}
+$$
+
+Expression identifiers (\textit{exprid}), constructor identifiers 
+(\textit{conid}), specification identifiers (\textit{spcid}), and header 
+identifiers (\textit{hdrid}) must only be used once in a \texttt{.spec} file. 
+Identifiers consist of an upper- or lowercase letter followed by a sequence 
+of letters, digits, or underscores ('\texttt{\_}').
+
+\subsection{Sorts}
+
+\banshee{} provides multiple \emph{sorts} of expressions and constraint 
+languages. A sort in \banshee{} is a particular combination of
+\begin{itemize}
+        \item a language of expressions,
+        \item a constraint relation between expressions,
+        \item a solution space,
+        \item and a resolution algorithm
+\end{itemize}
+
+Currently, there are three base sorts provided by \banshee{}.
+\begin{description}
+ 	\item[\texttt{term}]: The \Term{} sort provides equality
+        constraints between terms. The solution space depends on the
+        constructors used. Without \Set{} constructors embedded in
+        \Term{} constructors, the solution space is regular
+        trees. Otherwise, it is sets of regular trees with common
+        prefixes for the \Term{} part of the solution. The resolution
+        algorithm is essentially Robinson's unification algorithm.
+  	
+	The \Term{} sort also provides conditional equality
+        constraints~(\cite{steensgaard:popl96} \cite{henglein:lfp92}). 
+	A conditional equality
+        constraint $t_1 \leq t_2$ is satisfied if either $t_1 = 0$, or
+        $t_1 = t_2$. 
+
+	\item[\texttt{setIF}]: The \SetIF{} sort provides inclusion
+        constraints between set expressions. The solution space is
+        sets of regular trees. 
+
+	\item[\texttt{setST}]: The \SetST{} sort provides an alternative
+        implementation of inclusion constraints between set expressions based 
+	on a different constraint graph representation. This sort uses 
+	the sub-transitive resolution algorithm described in ~\cite{heintze:pldi01}. Currently, this sort is not well-tested; users should use the \SetIF{} sort instead.
+\end{description}
+
+For each base sort, there is a corresponding \textit{row}. Rows of base sort
+\textit{b} are finite maps from labels to expressions of sort \textit{b}.
+
+We plan to add more sorts in the near future.
+
+\subsection{Constructors}
+
+Constructors are building blocks for expressions. Each constructor has
+a signature specifying its sort, its arity, the argument sorts, and the 
+variance of each argument.  A signature for an $n$-ary constructor $c$ can be 
+written
+$$
+   c : \iota_1 \cdots \iota_n \rightarrow s
+$$
+where $s\in S$ is the sort of the constructor, chosen from the set of
+sorts $S$. The argument sorts $\iota_i$ have the form $s_i\in S$ or
+$\contra{s_i}\in S$. The first case specifies a covariant argument of
+sort $s_i$, and the second case specifies a contravariant argument of
+sort $s_i$.
+
+As an example, consider two set constructors \texttt{nil} and
+\texttt{cons} for representing lists with the following signatures:
+$$
+\begin{array}{rcl}
+        \texttt{nil} & : & \SetIF\\
+        \texttt{cons} & : & \SetIF\; \SetIF\rightarrow \SetIF
+\end{array}
+$$
+
+These constructors would be defined in the engine specification language as follows:
+
+\begin{verbatim}
+data list : setIF = nil 
+                  | cons of +elt * +list
+and  elt : setIF
+\end{verbatim}
+Note that engine specifications use \texttt{+}/\texttt{-} to denote 
+covariance and contravariance, respectively. % TODO-- nonvariance??
+
+We refer to these list constructors as a running example throughout this 
+manual.
+
+\subsection{Expressions}
+
+Each sort defines a particular language of expressions, parameterized by a set
+of constructors. In the following, we assume that \texttt{exprid} is an 
+expression identifier declared in an engine specification, and \texttt{conid} 
+is a constructor identifier. Given a data 
+specification \kw{data} \id{exprid} \kw{:} \id{sort}, expressions
+of data type \id{exprid} have an opaque C type \kw{exprid}. Because of this 
+convention, an expression's C type also defines the sort of that expression.
+
+As an example, consider the list constructors defined above. The generated
+interface will contain the following type declarations:
+
+\begin{verbatim}
+typedef struct list_ *list;
+typedef struct elt_ *elt;
+\end{verbatim}
+
+Functions for building list expressions will return \texttt{list}, while 
+functions for building element expressions will return \texttt{elt}. In this 
+way, an expression's C type also encodes its sort.
+
+\subsubsection{Variables}
+
+Fresh variables are generated with a function \texttt{exprid\_fresh} :
+\begin{verbatim}
+ exprid exprid_fresh(const char *name);
+\end{verbatim}
+
+\banshee{} does not make a type distinction between variables and other 
+expressions. Variable representations (in particular, variable names) may 
+change internally as a consequence of optimizations performed by the 
+constraint resolution algorithms. Analysis designers may find it useful to
+define an external mapping between names and variables.
+
+If \texttt{name} is \texttt{NULL}, the fresh variable is given the name
+\texttt{fv}.
+
+\subsubsection{Constructor Expressions}
+
+Given a constructor specification, there is a function to build the 
+corresponding constructor expression. Recall the list constructors example.
+For these constructors, \banshee{} will create an interface containing the 
+following two functions:
+\begin{verbatim}
+list nil(void);
+list cons(elt e1, list e2);
+\end{verbatim}
+
+Note how the function declarations match the signatures of the two 
+constructors. Checking argument sorts and arity reduces to type checking, 
+eliminating the need for dynamic checks. 
+
+\subsubsection{Constants}
+
+One disadvantage to \banshee{}'s engine specification approach is that 
+arbitrary new constructor signatures cannot be generated at runtime. 
+We have observed that in most analyses, arbitrary constructors are used
+in a restricted fashion. Typically, analyses require an arbitrary set
+of \emph{nullary} constructors, or constants, often used as label sets.
+
+\banshee{} exploits this observation by allowing constants to be
+defined dynamically.
+\begin{verbatim}
+exprid exprid_constant(const char *c);
+\end{verbatim}
+
+\texttt{exprid\_constant} creates a new constant named \texttt{c}. 
+Equality of constants is by name (string equality).
+
+\subsubsection{Zero and One}
+
+Expressions 0 and 1 denote the empty and universal set in the underlying 
+analysis domain. Each \id{exprid} declared in the engine specification 
+provides the following two functions:
+
+\begin{verbatim}
+exprid exprid_zero(void);
+exprid exprid_one(void);
+\end{verbatim}
+
+\subsubsection{Set Operations}
+
+Sort \Set{} provides functions for forming unions and intersections of 
+expressions:
+\begin{verbatim}
+exprid exprid_union(exprid_list exps);
+exprid exprid_inter(exprid_list exps);
+\end{verbatim}
+In addition, the \Set{} sorts provide projection and projection-pattern 
+operations. For an $n$-ary constructor, \banshee{} will declare $n$ projection 
+functions and $n$ projection-pattern functions. For example, the \texttt{cons}
+constructor will have the following projection and projection pattern 
+functions:
+\begin{verbatim}
+list cons_proj0(list e);
+list cons_proj1(list e);
+list cons_pat0(list e);
+list cons_pat1(list e);
+\end{verbatim}
+The \texttt{cons\_pat0} operation returns a \emph{sink} \ProjPat{}$(cons,0,e)$.
+The rewrite rule for
+$$
+   c(e_1,e_2,\cdots,e_n) \subseteq \ProjPat{}(c,i,e) 
+$$
+adds a constraint $e_i \subseteq e$. For more details, see \cite{su:popl00}.
+
+The \texttt{cons\_proj}\emph{i} function returns an expression 
+representing the projection of the \emph{i}$^th$ field of a 
+\texttt{cons} expression.
+
+\subsubsection{Rows}
+
+Rows are finite maps from labels (C strings) to expressions. They are
+similar to record types in ML, except that rows can be open, meaning
+not all fields are known \emph{a priori}. Rows are built via the following 
+functions:
+
+\begin{verbatim}
+  exprid_field exprid_make_field(const char *label,exprid' e);
+  exprid exprid_row(exprid_map m, exprid rest);
+  exprid exprid_abs(void);
+  exprid exprid_wild(void);
+\end{verbatim}
+
+Note that \texttt{exprid\_map} is a list of \texttt{exprid\_field} elements.
+
+\subsection{Constraints}
+For any sort, two kinds of constraints can be asserted between expressions,
+inclusion ($e_1 \subseteq e_2$) and equality ($e_1 = e_2$). Each \id{exprid}
+declared in the engine specification yields two functions for expressing 
+constraints:
+\begin{verbatim}
+void exprid_inclusion(exprid e1, exprid e2);
+void exprid_unify(exprid e1, exprid e2);
+\end{verbatim}
+
+Both expressions in a constraint must be of the same sort, a condition 
+enforced statically by the C type system. Besides being well-sorted, 
+expressions in constraints must be compatible with the constraint context.
+There are three distinct contexts: L-contexts, R-contexts, and LR-contexts.
+Expressions appearing on the right of an inclusion constraint must be 
+R-compatible. Constraints appearing on either side of a constraint must be 
+LR-compatible. Context compatibility is defined as follows.
+ 
+\begin{itemize}
+\item If an expression is LR-compatible, it is also L- and
+R-compatible. An expression that is both L- and R-compatible is LR-compatible. 
+\item $0$, $1$, and nullary constructors are LR-compatible
+\item A variable $v$ is LR-compatible, unless there exists a
+constraint $v=e$. In the latter case, $v$ is as compatible
+as $e$.
+\item A constructed expression $c(e_1,\ldots,e_n)$ is
+        \begin{itemize}
+        \item L-compatible if covariant arguments are L-compatible and
+        contravariant arguments are R-compatible.
+        \item R-compatible if covariant arguments are R-compatible and
+        contravariant arguments are L-compatible.
+        \end{itemize}
+\item A row $\{l_1=e_1,\ldots,l_n=e_n \mid e\}$ is 
+        \begin{itemize}
+        \item L-compatible if $e_1..e_n$ and $e$ are L-compatible.
+        \item R-compatible if $e_1..e_n$ and $e$ are R-compatible.
+        \end{itemize}
+\item An intersection $e_1 \cap e_2$ is R-compatible if $e_1$ and $e_2$ are R-compatible.
+       
+\item A union $e_1 \cup e_2$ is L-compatible if $e_1$ and $e_2$ are L-compatible.
+      
+\item A \ProjPat{}$(c,i,e)$ expression is R-compatible if $e$ is
+R-compatible.
+\end{itemize}
+
+Context compatibility is not checked by \banshee{}. The reason not all
+expressions are valid in all contexts comes from limitations on the
+form of set constraints that can be solved with \banshee{}. If
+incompatible constraints are asserted, constraint solving may  
+fail.
+
+\subsection{Solutions}
+
+Solutions are inspected through a variety of means. Constructor expressions
+can be decomposed via the function \texttt{conid\_decon}:
+\begin{verbatim}
+  struct conid_decon conid_decon(exprid e);
+\end{verbatim} 
+If $e = conid(e_1,\ldots,e_n)$, then \texttt{conid\_decon}$(e)$ 
+returns a struct containing the fields $e_1,\ldots,e_n$. Constants 
+cannot be deconstructed.
+
+\subsubsection{Sets} 
+
+For \Set{} sorts, minimal solutions are usually of interest.
+\begin{verbatim}
+ exprid_list exprid_tlb(exprid e);
+\end{verbatim}
+The function \texttt{exprid\_tlb} computes the transitive lower bound
+of an L-compatible \Set{} expression. Only the first constructor level
+of the solution is computed. 
+
+\texttt{exprid\_tlb} computes a minimal solution. If no contravariant 
+constructors are involved, the solution is least. This solution is valid
+for all constraints created up to the \texttt{tlb} call; once another 
+constraint is added, the solution is invalid, and the transitive lower bounds
+must be recomputed.
+
+\subsubsection{Terms}
+For \Term{} sorts, the equivalence class representative (ECR) of a term is 
+usually of interest:
+
+\begin{verbatim}
+exprid exprid_ecr(exprid e);
+\end{verbatim}
+
+The function \texttt{exprid\_ecr} does not recursively compute the ECR of 
+subexpressions.
+
+\subsubsection{Rows}
+
+For \Row{} sorts, functions are provided to decompose rows:
+
+\begin{verbatim}
+exprid' exprid_extract(const char *label,exprid row);
+exprid_map exprid_extract_fields(exprid row);
+exprid exprid_extract_rest(exprid row);
+\end{verbatim}
+
+\subsection{Strictness}
+
+\banshee{} assumes all constructors are non-strict. For example, given a 
+binary set constructor $c : \Set{}\; \Set \rightarrow \Set$ the standard 
+rewrite step for
+$$
+  c(e_1,e_2) \subseteq c(e'_1,e'_2)
+$$
+adds constraints $e_1 \subseteq e'_1 \wedge e_2\subseteq e'_2$, whether 
+or not $e_1$ and $e_2$ are empty. 
+
+\section{Implementation Details}
+
+\subsection{Object Creation, Internal State, and Memory Management}
+
+In \banshee{}, variables are \emph{generative}, in the sense 
+that each time a variable is created, a fresh instance is obtained, 
+distinct from all other instances. All expressions built through \banshee{} are hash-consed. Each sort maintains a hash-table containing expressions that have been built so far. \banshee{} maintains a total order on all expressions, though no facility is available outside the engine to compare expressions.
+
+\banshee{} is a stateful system. Internally, the state consists of a set of 
+expression hash-tables, counters maintaining a total order on expressions, 
+and a separate hash-table for strings. Two functions exist to manage \banshee{}'s state. The \texttt{init} function must be called before any other call to the system. The \texttt{reset} function resets all internal state, and re-initializes the engine (thus, \texttt{init} should only be called once).
+
+When the system is reset, all expressions created up to the point of the reset 
+become invalid (their memory is reclaimed). The behavior of the system is 
+undefined if an expression created before a reset is accessed after the reset.
+
+\banshee{} uses a region-based memory allocation scheme~\cite{gay:pldi01}. 
+\banshee{} applications can use regions, but are free to use 
+\texttt{malloc} as well. \banshee{} has not been tested with the Boehm-Weiser
+garbage collector or any other memory management suite.
+
+All \banshee{} functions permit arguments to be stack-allocated; where 
+necessary, internal copies of arguments are made. In particular, string or 
+array arguments can safely be allocated on the stack.
+
+\subsection{Data Structures}
+
+Some functions take lists as arguments or return lists. \banshee{}
+uses the C preprocessor to provide a template-like type safe list package. 
+List operations are described in \texttt{list.h}.
+
+\section{Adding New Sorts}
+
+\banshee{}'s architecture is highly modular; new sorts can be added with 
+minimal effort and a small set of localized changes to the existing system.
+
+Adding a new sort is a three-stage process: first, the engine back-end must be
+written, second, a code generator for the new sort must be written, and third,
+the engine specification language must be extended to recognize the new sort.
+
+\banshee{}'s code generator has been designed to minimize this third task as 
+much as possible. In most cases, only one local change in the lexer is 
+required to handle the new sort in the engine specification language.
+
+\subsection{Code Generator}
+
+The output of the code generator is a C header file (an interface to a specialized constraint resolution engine) and a C source file (the actual specialized engine) 
+Code generation is factored into individual modules called  
+\emph{sort generotors} that generate code for particular sorts.
+
+\subsubsection{Sort Generators}
+
+Sort generators must adhere to the following interface:
+
+\begin{verbatim}
+class type sort_gen = 
+  object
+    method get_name : string
+    method gen_sort_ops : Cgen.file -> Cgen.header -> exprid -> unit
+    method gen_con_ops : Cgen.file -> Cgen.header -> exprid * databody -> unit
+    method init : exprid -> Cgen.statement list
+    method reset : exprid -> Cgen.statement list
+  end
+\end{verbatim}
+
+We discuss each of these methods in turn. Note that \texttt{Cgen.file} and 
+\texttt{Cgen.header} are essentially output streams for printing formatted C 
+source and header files. 
+
+\begin{description}
+\item[\texttt{get\_name}:] Returns the name of the sort.
+\item[\texttt{gen\_sort\_ops}:] Given an expression identifier, this method 
+should output sort operations that do not depend on constructor declarations
+(e.g., operations for building non-constructor expressions). The set of sort 
+operations must at least define the methods listed in in the next section 
+(``Other Required Functions'').
+\item[\texttt{gen\_con\_ops}:] Given an expression identifier and a set of 
+constructor declarations, this method should output functions for manipulating
+constructor expressions.
+\item[\texttt{init}:] Given an expression identifier, this method should return
+a set of C statements that initialize the sort.
+\item[\texttt{reset}:] Given an expression identifier, this method should 
+return a set of C statements that reset the sort.
+\end{description}
+
+\subsubsection{Other Required Functions}
+
+Besides matching the \texttt{sort\_gen} interface, sort generators must at 
+least implement the following methods:
+
+\begin{description}
+\item[\texttt{exprid exprid\_fresh\_small(const char *name)} :] Create a fresh
+variable \emph{v} such that \emph{o(v)} is less than \emph{o(v')} for any
+variable \emph{v'} created thus far.
+\item[\texttt{exprid exprid\_fresh\_large(const char *name)} :] Create a fresh
+variable \emph{v} such that \emph{o(v)} is greater than \emph{o(v')} for any
+variable \emph{v'} created thus far.
+\item[\texttt{void exprid\_inclusion\_contra(exprid e1,exprid e2)} :] Inclusion
+for a contravariant field.
+\item[\texttt{bool exprid\_is\_var(exprid e)} :] Query an expression to determine whether it is a variable.
+\item[\texttt{bool exprid\_get\_stamp(exprid e)} :] Return \emph{o(e)}.
+\end{description}
+
+These methods should be present in the specialized engine, but need not be 
+exposed in the interface (hence, they should be static).
+
+\subsection{Lexer/Parser Modifications}
+
+At a minimum, the lexer must be updated to recognize the new sort. For a new
+sort \emph{s}, the lexer should be modified to recognize
+the string \emph{s} as a keyword, and return a token whose lexeme is a new 
+instance of the appropriate sort generator class. The new sort name \emph{s} 
+must not conflict with any existing keywords in the specification language.
+
+If the new sort builds specialized expressions other than basic data 
+constructors, the parser must be extended to handle these.
+
+
+\begin{thebibliography}{foo}
+
+\bibitem[AF97]{aiken:sas97} Alexander Aiken and Manuel F\"ahndrich. In {\em Fourth International Static Analyses Symposium}, Paris, France, September 1997.
+
+\bibitem[AF98]{aiken:tic98} Alexander Aiken, Manuel F\"ahndrich, Jeffrey S. Foster, and Zhendong Su. In {\em Second International Workshop on Types in Compilation}, Kyoto, Japan, March 1998, pages 78--??.
+
+\bibitem[GA01]{gay:pldi01} David Gay and Alexander Aiken.  \newblock
+{Language Support for Regions}.  \newblock In {\em Proceedings of the
+2001 ACM SIGPLAN Conference on Programming Language Design and
+Implementation}, Snowbird, Utah, June 2001, pages 70--80.
+
+\bibitem[HE92]{henglein:lfp92} Fritz Henglein. \newblock 
+{Global Tagging Optimization by Type Inference}. \newblock In {\em Proceedings
+of the 1992 ACM Conference on LISP and Functional Programming}, San Francisco,
+CA, June 1992, pages 205--215.
+
+\bibitem[HT01]{heintze:pldi01} Nevin Heintze and Olivier Tardieu. \newblock
+{Ultra-fast Aliasing Analysis Using CLA: A Million Lines of Code in a Second}.
+\newblock In {\em Proceedings of the
+2001 ACM SIGPLAN Conference on Programming Language Design and
+Implementation}, Snowbird, Utah, June 2001, pages 254--263.
+
+\bibitem[ST96]{steensgaard:popl96} Bjarne Steensgaard. \newblock
+{Points-to Analysis in Almost Linear Time}. \newblock In {\em Conference 
+Record of the 23rd Annual ACM Symposium on Principles of Programming 
+Languages}, pages 32--41.
+
+\bibitem[SFA00]{su:popl00} Zhendong Su, Manuel F\"ahndrich, and Alexander Aiken. \newblock
+{Projection Merging: Reducing Redundancies in Inclusion Constraint Graphs}. 
+\newblock In {\em Proceedings of the 27th Annual ACM Symposium on Principles of Programming Languages}, pages 81--95.
+
+\end{thebibliography}
+
+\end{document}
+
+
+
+
+
+
+
+

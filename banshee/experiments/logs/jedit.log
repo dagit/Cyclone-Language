@@ -1,0 +1,790 @@
+
+2001-07-03 06:31 -0700
+  modified: jeditshell/JEditLauncher.cpp (1.2)
+
+2001-07-03 06:36 -0700
+  modified: jeditshell/jeditshell.dep (1.2)
+  modified: jeditshell/jeditshell.dsp (1.2)
+  modified: jeditshell/jeditshell.mak (1.2)
+  modified: jeditshell/jedinstl/jedinstl.dep (1.2)
+  modified: jeditshell/jeditinit/jeditinit.dep (1.2)
+  modified: jeditshell/jeditinit/jeditinit.dsp (1.2)
+  modified: jeditshell/jeditinit/jeditinit.mak (1.2)
+  modified: jeditshell/testInstall/testInstall.mak (1.2)
+
+2001-07-03 07:45 -0700
+  modified: jeditshell/ScriptWriter.h (1.2)
+  modified: jeditshell/ScriptWriter.cpp (1.2)
+  modified: jeditshell/jeditshell_p.c (1.2)
+  modified: jeditshell/jeditshell_i.c (1.2)
+  modified: jeditshell/jeditshell.h (1.2)
+
+2001-07-14 14:35 -0700
+  modified: jeditshell/JEditLauncher.cpp (1.3)
+  modified: jeditshell/JEditLauncher.h (1.2)
+  modified: jeditshell/ScriptWriter.cpp (1.3)
+  modified: jeditshell/ServConn.cpp (1.2)
+  modified: jeditshell/jeditshell.cpp (1.2)
+  modified: jeditshell/jeditshell.dsp (1.3)
+  modified: jeditshell/jeditshell.h (1.3)
+  modified: jeditshell/jeditshell.idl (1.2)
+  modified: jeditshell/jeditshell.mak (1.3)
+  modified: jeditshell/jeditshell.rc (1.2)
+  modified: jeditshell/jeditshell_i.c (1.3)
+  modified: jeditshell/jeditshell_p.c (1.3)
+  modified: jeditshell/versions.h (1.2)
+  modified: jeditshell/jedinstl/InstallData.cpp (1.2)
+  modified: jeditshell/jedinstl/InstallData.h (1.2)
+  modified: jeditshell/jedinstl/JELInstaller.cpp (1.2)
+  modified: jeditshell/jeditinit/jeditinit.cpp (1.2)
+  modified: jeditshell/jeditinit/jeditinit.rc (1.2)
+  modified: jeditshell/jeditinit/jeditinitDlg.h (1.2)
+  modified: jeditshell/jinit/jinit.c (1.2)
+  modified: jeditshell/testInstall/testInstall.cpp (1.2)
+
+2001-07-14 18:52 -0700
+  modified: jeditshell/jedinstl/JELInstaller.cpp (1.3)
+
+2001-07-15 05:12 -0700
+  modified: jeditshell/doc/guide_html.dsl (1.2)
+  modified: jeditshell/doc/launcher-guide.sgml (1.2)
+  modified: jeditshell/doc/launcher.sgml (1.2)
+
+2001-07-15 05:13 -0700
+  modified: jeditshell/html/launcher-guide.html (1.2)
+
+2001-07-15 05:17 -0700
+  modified: jeditshell/doc/launcher.sgml (1.3)
+
+2001-07-15 06:11 -0700
+  added:    jeditshell/IJEditLauncher32.rgs (1.1)
+
+2001-07-18 07:20 -0700
+  added:    jeditshell/FileList.cpp (1.1)
+  added:    jeditshell/FileList.h (1.1)
+  modified: jeditshell/JEditLauncher.cpp (1.4)
+  modified: jeditshell/JEditLauncher.h (1.3)
+  modified: jeditshell/ScriptWriter.cpp (1.4)
+  modified: jeditshell/ScriptWriter.h (1.3)
+  modified: jeditshell/ServConn.cpp (1.3)
+  modified: jeditshell/StdAfx.h (1.2)
+  modified: jeditshell/jeditshell.cpp (1.3)
+  modified: jeditshell/jeditshell.dsp (1.4)
+  modified: jeditshell/jeditshell.h (1.4)
+  modified: jeditshell/jeditshell.idl (1.3)
+  modified: jeditshell/jeditshell.mak (1.4)
+  modified: jeditshell/jeditshell_i.c (1.4)
+  modified: jeditshell/jeditshell_p.c (1.4)
+  modified: jeditshell/jedinstl/InstallData.cpp (1.3)
+  modified: jeditshell/jedinstl/InstallData.h (1.3)
+  modified: jeditshell/jedinstl/JELInstaller.cpp (1.4)
+  modified: jeditshell/jedinstl/jedinstl.rc (1.2)
+  modified: jeditshell/jedinstl/resource.h (1.2)
+
+2001-07-18 19:41 -0700
+  modified: jeditshell/doc/guide_html.dsl (1.3)
+  modified: jeditshell/doc/launcher-guide.sgml (1.3)
+  modified: jeditshell/doc/launcher.sgml (1.4)
+
+2001-07-18 19:42 -0700
+  modified: jeditshell/FileList.cpp (1.2)
+  modified: jeditshell/JEditLauncher.cpp (1.5)
+  modified: jeditshell/ScriptWriter.cpp (1.5)
+  modified: jeditshell/ServConn.cpp (1.4)
+  modified: jeditshell/jeditshell.h (1.5)
+  modified: jeditshell/jeditshell_i.c (1.5)
+  modified: jeditshell/jeditshell_p.c (1.5)
+  modified: jeditshell/html/launcher-guide.html (1.3)
+
+2001-07-19 06:56 -0700
+  modified: jeditshell/jeditshell.dep (1.3)
+  modified: jeditshell/jeditshell.mak (1.5)
+  modified: jeditshell/jedinstl/InstallData.cpp (1.4)
+  modified: jeditshell/jedinstl/jedinstl.dep (1.3)
+  modified: jeditshell/jeditinit/jeditinit.dep (1.3)
+  modified: jeditshell/jeditinit/jeditinit.mak (1.3)
+  modified: jeditshell/jinit/jinit.dep (1.2)
+  modified: jeditshell/testInstall/testInstall.dep (1.2)
+
+2001-07-20 07:27 -0700
+  added:    jeditshell/get_registry.pl (1.1)
+
+2001-07-20 09:48 -0700
+  modified: jeditshell/ScriptWriter.h (1.4)
+  modified: jeditshell/ScriptWriter.cpp (1.6)
+
+2001-07-21 18:33 -0700
+  modified: jeditshell/JEditLauncher.cpp (1.6)
+  modified: jeditshell/ScriptWriter.cpp (1.7)
+
+2001-07-24 07:50 -0700
+  modified: jeditshell/FileList.cpp (1.3)
+  modified: jeditshell/FileList.h (1.2)
+  modified: jeditshell/JEditLauncher.cpp (1.7)
+  modified: jeditshell/JEditLauncher.h (1.4)
+  modified: jeditshell/ScriptWriter.cpp (1.8)
+  modified: jeditshell/jeditshell.h (1.6)
+  modified: jeditshell/jeditshell.idl (1.4)
+  modified: jeditshell/jeditshell_i.c (1.6)
+  modified: jeditshell/jeditshell_p.c (1.6)
+
+2001-07-24 12:58 -0700
+  modified: jeditshell/ScriptWriter.cpp (1.9)
+  modified: jeditshell/jeditshell.h (1.7)
+  modified: jeditshell/jeditshell.rc (1.3)
+  modified: jeditshell/jeditshell_i.c (1.7)
+  modified: jeditshell/jeditshell_p.c (1.7)
+  modified: jeditshell/doc/guide_html.dsl (1.4)
+  modified: jeditshell/doc/launcher.sgml (1.5)
+  modified: jeditshell/html/launcher-guide.html (1.4)
+
+2001-07-25 12:53 -0700
+  modified: jeditshell/jedinstl/InstallData.cpp (1.5)
+  modified: jeditshell/jedinstl/InstallData.h (1.4)
+  modified: jeditshell/jedinstl/JELInstaller.cpp (1.5)
+
+2001-07-25 13:06 -0700
+  modified: jeditshell/jedinstl/InstallData.h (1.5)
+  modified: jeditshell/jedinstl/JELInstaller.cpp (1.6)
+
+2001-07-25 13:10 -0700
+  modified: jeditshell/JEditLauncher.cpp (1.8)
+
+2001-07-26 07:22 -0700
+  added:    jeditshell/scriptserver/ScriptServer.cpp (1.1)
+  added:    jeditshell/scriptserver/ScriptServer.h (1.1)
+  added:    jeditshell/scriptserver/ScriptServer.idl (1.1)
+  added:    jeditshell/scriptserver/ScriptServer_i.c (1.1)
+  added:    jeditshell/scriptserver/ScriptServer_p.c (1.1)
+  added:    jeditshell/scriptserver/dlldata.c (1.1)
+  added:    jeditshell/scriptserver/scrsrvps.def (1.1)
+  added:    jeditshell/scriptserver/scrsrvps.mk (1.1)
+
+2001-07-30 08:57 -0700
+  removed:  jeditshell/scriptserver/scrsrvps.mk (1.2)
+  removed:  jeditshell/scriptserver/scrsrvps.def (1.2)
+  removed:  jeditshell/scriptserver/ScriptServer_p.c (1.2)
+  removed:  jeditshell/scriptserver/ScriptServer_i.c (1.2)
+  removed:  jeditshell/scriptserver/ScriptServer.idl (1.2)
+  removed:  jeditshell/scriptserver/ScriptServer.h (1.2)
+  removed:  jeditshell/scriptserver/ScriptServer.cpp (1.2)
+  removed:  jeditshell/scriptserver/dlldata.c (1.2)
+
+2001-07-30 09:00 -0700
+  added:    jeditshell/jeditlauncher/StdAfx.h (1.1)
+  added:    jeditshell/jeditlauncher/StdAfx.cpp (1.1)
+  added:    jeditshell/jeditlauncher/ServConn.h (1.1)
+  added:    jeditshell/jeditlauncher/ServConn.cpp (1.1)
+  added:    jeditshell/jeditlauncher/ScriptWriter.h (1.1)
+  added:    jeditshell/jeditlauncher/ScriptWriter.cpp (1.1)
+  added:    jeditshell/jeditlauncher/ScriptServer.h (1.1)
+  added:    jeditshell/jeditlauncher/ScriptServer.cpp (1.1)
+  added:    jeditshell/jeditlauncher/Resource.h (1.1)
+  added:    jeditshell/jeditlauncher/JELauncher.h (1.1)
+  added:    jeditshell/jeditlauncher/JELauncher.cpp (1.1)
+  added:    jeditshell/jeditlauncher/jeditlauncherps.mk (1.1)
+  added:    jeditshell/jeditlauncher/jeditlauncherps.def (1.1)
+  added:    jeditshell/jeditlauncher/jeditlauncher_p.c (1.1)
+  added:    jeditshell/jeditlauncher/jeditlauncher_i.c (1.1)
+  added:    jeditshell/jeditlauncher/jeditlauncher.rc (1.1)
+  added:    jeditshell/jeditlauncher/jeditlauncher.mak (1.1)
+  added:    jeditshell/jeditlauncher/jeditlauncher.idl (1.1)
+  added:    jeditshell/jeditlauncher/jeditlauncher.h (1.1)
+  added:    jeditshell/jeditlauncher/jeditlauncher.cpp (1.1)
+  added:    jeditshell/jeditlauncher/jeditlau.bin (1.1)
+  added:    jeditshell/jeditlauncher/FileList.h (1.1)
+  added:    jeditshell/jeditlauncher/FileList.cpp (1.1)
+  added:    jeditshell/jeditlauncher/dlldata.c (1.1)
+
+2001-07-30 10:27 -0700
+  modified: jeditshell/FileList.cpp (1.4)
+  modified: jeditshell/FileList.h (1.3)
+  modified: jeditshell/JEditLauncher.cpp (1.9)
+  modified: jeditshell/JEditLauncher.h (1.5)
+  modified: jeditshell/Resource.h (1.2)
+  modified: jeditshell/StdAfx.h (1.3)
+  modified: jeditshell/dlldata.c (1.2)
+  modified: jeditshell/get_registry.pl (1.2)
+  modified: jeditshell/jeditshell.cpp (1.4)
+  modified: jeditshell/jeditshell.dep (1.4)
+  modified: jeditshell/jeditshell.dsp (1.5)
+  modified: jeditshell/jeditshell.dsw (1.2)
+  modified: jeditshell/jeditshell.h (1.8)
+  modified: jeditshell/jeditshell.idl (1.5)
+  modified: jeditshell/jeditshell.mak (1.6)
+  modified: jeditshell/jeditshell.rc (1.4)
+  modified: jeditshell/jeditshell_i.c (1.8)
+  modified: jeditshell/jeditshell_p.c (1.8)
+  modified: jeditshell/jedinstl/jedinstl.dep (1.4)
+  modified: jeditshell/jeditinit/jeditinit.cpp (1.3)
+  modified: jeditshell/jeditinit/jeditinit.dep (1.4)
+  modified: jeditshell/jeditinit/jeditinit.rc (1.3)
+  modified: jeditshell/jeditinit/resource.h (1.2)
+  modified: jeditshell/jeditlauncher/jeditlauncher.h (1.2)
+  modified: jeditshell/jeditlauncher/jeditlauncher_i.c (1.2)
+  modified: jeditshell/jeditlauncher/jeditlauncher_p.c (1.2)
+  modified: jeditshell/jinit/jinit.dep (1.3)
+  modified: jeditshell/jinit/jinit.dsp (1.2)
+  modified: jeditshell/jinit/jinit.mak (1.2)
+  modified: jeditshell/testInstall/testInstall.dep (1.3)
+
+2001-07-30 10:34 -0700
+  removed:  jeditshell/FileList.h (1.4)
+  removed:  jeditshell/FileList.cpp (1.5)
+  removed:  jeditshell/dlldatax.h (1.2)
+  removed:  jeditshell/dlldatax.c (1.2)
+  removed:  jeditshell/dlldata.c (1.3)
+  removed:  jeditshell/IJEditLauncher32.rgs (1.2)
+  removed:  jeditshell/IJEditLauncher31.rgs (1.2)
+  removed:  jeditshell/IJEditLauncher.h (1.2)
+  removed:  jeditshell/IJEditLauncher.cpp (1.2)
+  removed:  jeditshell/JEditLauncher.h (1.6)
+  removed:  jeditshell/JEditLauncher.cpp (1.10)
+  removed:  jeditshell/ServConn.h (1.2)
+  removed:  jeditshell/ServConn.cpp (1.5)
+  removed:  jeditshell/ScriptWriter.h (1.5)
+  removed:  jeditshell/ScriptWriter.cpp (1.10)
+
+2001-07-30 11:34 -0700
+  added:    jeditshell/IJEditCtxMenu.rgs (1.1)
+
+2001-07-30 11:38 -0700
+  modified: jeditshell/jeditlauncher/JELauncher.h (1.2)
+
+2001-07-30 11:41 -0700
+  modified: jeditshell/jeditlauncher/jeditlauncher.h (1.3)
+  modified: jeditshell/jeditlauncher/jeditlauncher.idl (1.2)
+
+2001-07-30 11:56 -0700
+  modified: jeditshell/jeditinit/jeditinit.cpp (1.4)
+
+2001-07-30 13:03 -0700
+  added:    jeditshell/doc/launcher-app.xml (1.1)
+
+2001-07-30 13:04 -0700
+  modified: jeditshell/doc/launcher.sgml (1.6)
+  modified: jeditshell/doc/launcher-guide.sgml (1.4)
+
+2001-07-31 16:31 -0700
+  added:    jeditshell/jedinstl/JELRegInstaller.h (1.1)
+  added:    jeditshell/jedinstl/JELRegInstaller.cpp (1.1)
+  modified: jeditshell/jedinstl/JELInstaller.h (1.2)
+  modified: jeditshell/jedinstl/JELInstaller.cpp (1.7)
+  modified: jeditshell/jedinstl/jedinstl.rc (1.3)
+  modified: jeditshell/jedinstl/jedinstl.mak (1.2)
+
+2001-07-31 16:32 -0700
+  modified: jeditshell/jedinstl/jedinstl.dsp (1.2)
+  modified: jeditshell/jedinstl/jedinstl.cpp (1.2)
+  modified: jeditshell/jedinstl/InstallData.h (1.6)
+  modified: jeditshell/jedinstl/InstallData.cpp (1.6)
+
+2001-07-31 16:42 -0700
+  modified: jeditshell/jedinstl/jedinstl.dep (1.5)
+  modified: jeditshell/jeditinit/jeditinit.mak (1.4)
+
+2001-07-31 16:43 -0700
+  modified: jeditshell/jeditlauncher/jeditlauncher.h (1.4)
+  modified: jeditshell/jeditlauncher/jeditlauncher.idl (1.3)
+  modified: jeditshell/jeditlauncher/jeditlauncher.mak (1.2)
+  modified: jeditshell/jeditlauncher/jeditlauncher_i.c (1.3)
+  modified: jeditshell/jeditlauncher/jeditlauncher_p.c (1.3)
+  modified: jeditshell/jeditinit/jeditinit.dep (1.5)
+  modified: jeditshell/html/launcher-guide.html (1.5)
+
+2001-07-31 16:44 -0700
+  modified: jeditshell/testInstall/testInstall.mak (1.3)
+  modified: jeditshell/testInstall/testInstall.cpp (1.3)
+
+2001-07-31 16:45 -0700
+  modified: jeditshell/IJEditCtxMenu.rgs (1.2)
+  modified: jeditshell/get_registry.pl (1.3)
+  modified: jeditshell/jeditshell.dep (1.5)
+  modified: jeditshell/jeditshell.h (1.9)
+  modified: jeditshell/jeditshell.mak (1.7)
+  modified: jeditshell/jeditshell_i.c (1.9)
+  modified: jeditshell/jeditshell_p.c (1.9)
+
+2001-08-01 07:53 -0700
+  modified: jeditshell/jedinstl/InstallData.cpp (1.7)
+  modified: jeditshell/jedinstl/InstallData.h (1.7)
+  modified: jeditshell/jedinstl/JELRegInstaller.cpp (1.2)
+  modified: jeditshell/jedinstl/JELRegInstaller.h (1.2)
+  modified: jeditshell/jedinstl/jedinstl.rc (1.4)
+  modified: jeditshell/jedinstl/resource.h (1.3)
+
+2001-08-01 07:54 -0700
+  modified: jeditshell/testInstall/testInstall.cpp (1.4)
+
+2001-08-01 07:57 -0700
+  modified: jeditshell/get_registry.pl (1.4)
+
+2001-08-01 21:43 -0700
+  modified: jeditshell/jeditshell.rc (1.5)
+  modified: jeditshell/jedinstl/DeferFileOps.cpp (1.2)
+  modified: jeditshell/jedinstl/InstallData.h (1.8)
+  modified: jeditshell/jedinstl/JELInstaller.cpp (1.8)
+  modified: jeditshell/jedinstl/JELRegInstaller.cpp (1.3)
+  modified: jeditshell/jedinstl/JELRegInstaller.h (1.3)
+  modified: jeditshell/jedinstl/jedinstl.rc (1.5)
+  modified: jeditshell/jedinstl/resource.h (1.4)
+  modified: jeditshell/jeditinit/jeditinit.cpp (1.5)
+  modified: jeditshell/jeditlauncher/ScriptWriter.cpp (1.2)
+  modified: jeditshell/jeditlauncher/ScriptWriter.h (1.2)
+  modified: jeditshell/jeditlauncher/jeditlauncher.mak (1.3)
+
+2001-08-03 14:24 -0700
+  modified: jeditshell/jeditlauncher/ScriptWriter.cpp (1.3)
+  modified: jeditshell/jeditlauncher/jeditlauncher.rc (1.2)
+
+2001-08-04 10:19 -0700
+  modified: jeditshell/jeditshell.dsw (1.3)
+  modified: jeditshell/jedinstl/DeferFileOps.cpp (1.3)
+  modified: jeditshell/jedinstl/JELInstaller.cpp (1.9)
+  modified: jeditshell/jedinstl/JELInstaller.h (1.3)
+  modified: jeditshell/jedinstl/JELRegInstaller.cpp (1.4)
+  modified: jeditshell/jedinstl/jedinstl.cpp (1.3)
+  modified: jeditshell/jedinstl/jedinstl.def (1.2)
+  modified: jeditshell/jedinstl/jedinstl.rc (1.6)
+  modified: jeditshell/jedinstl/resource.h (1.5)
+  modified: jeditshell/jeditinit/jeditinit.cpp (1.6)
+  modified: jeditshell/jinit/jinit.c (1.3)
+  added:    jeditshell/unlaunch/resource.h (1.1)
+  added:    jeditshell/unlaunch/unlaunch.c (1.1)
+  added:    jeditshell/unlaunch/unlaunch.dsp (1.1)
+  added:    jeditshell/unlaunch/unlaunch.ico (1.1)
+  added:    jeditshell/unlaunch/unlaunch.mak (1.1)
+  added:    jeditshell/unlaunch/unlaunch.rc (1.1)
+
+2001-08-04 10:23 -0700
+  modified: jeditshell/jedinstl/JELInstaller.cpp (1.10)
+
+2001-08-04 16:12 -0700
+  modified: jeditshell/doc/launcher-guide.sgml (1.5)
+  modified: jeditshell/doc/launcher.sgml (1.7)
+  modified: jeditshell/html/launcher-guide.html (1.6)
+  modified: jeditshell/unlaunch/unlaunch.dsp (1.2)
+  modified: jeditshell/unlaunch/unlaunch.mak (1.2)
+
+2001-08-04 20:11 -0700
+  added:    jeditshell/jeditlauncher/jeditlauncher.rgs (1.1)
+
+2001-08-07 12:12 -0700
+  added:    jeditshell/jeditlauncher/jeditlauncher.dsp (1.1)
+  added:    jeditshell/jeditlauncher/jeditlauncher.dep (1.1)
+
+2001-08-14 13:46 -0700
+  modified: jeditshell/jcmd/jcmd.c (1.2)
+
+2001-08-16 16:00 -0700
+  modified: jeditshell/jcmd/jcmd.c (1.3)
+
+2001-08-21 06:58 -0700
+  modified: jeditshell/jedinstl/jedinstl.dep (1.6)
+  modified: jeditshell/jedinstl/jedinstl.mak (1.3)
+  modified: jeditshell/jedinstl/jedinstl.rc (1.7)
+
+2001-08-21 06:59 -0700
+  modified: jeditshell/jeditinit/jeditinit.dep (1.6)
+  modified: jeditshell/jeditinit/jeditinit.rc (1.4)
+
+2001-08-22 19:05 -0700
+  modified: jeditshell/jinit/jinit.c (1.4)
+
+2001-08-24 12:22 -0700
+  modified: jeditshell/jeditinit/jeditinit.cpp (1.7)
+  modified: jeditshell/jeditinit/jeditinit.dsp (1.3)
+
+2001-08-24 17:29 -0700
+  modified: jeditshell/jeditinit/jeditinit.cpp (1.8)
+
+2001-08-24 17:31 -0700
+  modified: jeditshell/jeditlauncher/ScriptWriter.cpp (1.4)
+  modified: jeditshell/jeditlauncher/ScriptWriter.h (1.3)
+  modified: jeditshell/jeditlauncher/jeditlauncher.dep (1.2)
+  modified: jeditshell/jeditlauncher/jeditlauncher.h (1.5)
+  modified: jeditshell/jeditlauncher/jeditlauncher.mak (1.4)
+  modified: jeditshell/jeditlauncher/jeditlauncher_i.c (1.4)
+  modified: jeditshell/jeditlauncher/jeditlauncher_p.c (1.4)
+
+2001-08-26 07:46 -0700
+  modified: jeditshell/unlaunch/unlaunch.c (1.2)
+
+2001-08-28 07:36 -0700
+  modified: jeditshell/jeditinit/jeditinit.cpp (1.9)
+
+2001-08-28 07:38 -0700
+  modified: jeditshell/jeditlauncher/FileList.cpp (1.2)
+  modified: jeditshell/jeditlauncher/JELauncher.cpp (1.2)
+  modified: jeditshell/jeditlauncher/JELauncher.h (1.3)
+  modified: jeditshell/jeditlauncher/ScriptWriter.cpp (1.5)
+  modified: jeditshell/jeditlauncher/StdAfx.h (1.2)
+  modified: jeditshell/jeditlauncher/jeditlauncher.dep (1.3)
+  modified: jeditshell/jeditlauncher/jeditlauncher.dsp (1.2)
+  modified: jeditshell/jeditlauncher/jeditlauncher.mak (1.5)
+
+2001-08-28 11:51 -0700
+  modified: jeditshell/doc/launcher-guide.sgml (1.6)
+  modified: jeditshell/doc/launcher.sgml (1.8)
+
+2001-08-28 12:11 -0700
+  modified: jeditshell/doc/launcher.sgml (1.9)
+
+2001-08-28 12:25 -0700
+  modified: jeditshell/html/launcher-guide.html (1.7)
+
+2001-08-28 12:36 -0700
+  modified: jeditshell/jedinstl/JELRegInstaller.cpp (1.5)
+  modified: jeditshell/jedinstl/jedinstl.dep (1.7)
+  modified: jeditshell/jedinstl/jedinstl.mak (1.4)
+
+2001-08-28 12:37 -0700
+  modified: jeditshell/jeditinit/jeditinit.cpp (1.10)
+  modified: jeditshell/jeditinit/jeditinit.dep (1.7)
+  modified: jeditshell/jeditinit/jeditinit.mak (1.5)
+  modified: jeditshell/jeditlauncher/ScriptWriter.cpp (1.6)
+  modified: jeditshell/jeditlauncher/jeditlauncher.dsp (1.3)
+  modified: jeditshell/jeditlauncher/jeditlauncher.h (1.6)
+  modified: jeditshell/jeditlauncher/jeditlauncher.mak (1.6)
+  modified: jeditshell/jeditlauncher/jeditlauncher_i.c (1.5)
+  modified: jeditshell/jeditlauncher/jeditlauncher_p.c (1.5)
+  modified: jeditshell/jinit/jinit.dep (1.4)
+  modified: jeditshell/jinit/jinit.dsp (1.3)
+  modified: jeditshell/jinit/jinit.mak (1.3)
+  modified: jeditshell/unlaunch/unlaunch.mak (1.3)
+
+2001-08-28 12:38 -0700
+  modified: jeditshell/testInstall/testInstall.mak (1.4)
+  modified: jeditshell/jeditshell.dep (1.6)
+  modified: jeditshell/jeditshell.dsw (1.4)
+  modified: jeditshell/jeditshell.mak (1.8)
+
+2001-08-31 21:29 -0700
+  modified: jeditshell/doc/launcher-guide.sgml (1.7)
+  modified: jeditshell/doc/launcher.sgml (1.10)
+  modified: jeditshell/html/launcher-guide.html (1.8)
+  modified: jeditshell/jedinstl/JELRegInstaller.cpp (1.6)
+
+2001-09-01 12:34 -0700
+  modified: jeditshell/jedinstl/JELRegInstaller.cpp (1.7)
+
+2001-09-05 04:24 -0700
+  modified: jeditshell/jeditlauncher/JELauncher.cpp (1.3)
+  modified: jeditshell/jeditlauncher/JELauncher.h (1.4)
+  added:    jeditshell/jeditlauncher/RegistryParser.cpp (1.1)
+  added:    jeditshell/jeditlauncher/RegistryParser.h (1.1)
+  modified: jeditshell/jeditlauncher/ScriptServer.cpp (1.2)
+  modified: jeditshell/jeditlauncher/ScriptServer.h (1.2)
+  modified: jeditshell/jeditlauncher/ScriptWriter.cpp (1.7)
+  modified: jeditshell/jeditlauncher/ScriptWriter.h (1.4)
+  modified: jeditshell/jeditlauncher/ServConn.cpp (1.2)
+  modified: jeditshell/jeditlauncher/ServConn.h (1.2)
+  modified: jeditshell/jeditlauncher/jeditlauncher.dep (1.4)
+  modified: jeditshell/jeditlauncher/jeditlauncher.dsp (1.4)
+  modified: jeditshell/jeditlauncher/jeditlauncher.mak (1.7)
+
+2001-09-05 04:28 -0700
+  modified: jeditshell/jeditinit/jeditinitDlg.cpp (1.2)
+
+2001-09-05 04:31 -0700
+  modified: jeditshell/jeditinit/jeditinitDlg.cpp (1.3)
+
+2001-09-05 04:32 -0700
+  modified: jeditshell/jeditinit/jeditinit.rc (1.5)
+
+2001-09-07 08:20 -0700
+  modified: jeditshell/jedinstl/JELInstaller.cpp (1.11)
+  modified: jeditshell/jedinstl/JELInstaller.h (1.4)
+  modified: jeditshell/jedinstl/JELRegInstaller.cpp (1.8)
+  modified: jeditshell/jedinstl/jedinstl.dsp (1.3)
+  modified: jeditshell/jedinstl/jedinstl.mak (1.5)
+
+2001-09-07 08:25 -0700
+  modified: jeditshell/jeditlauncher/ServConn.cpp (1.3)
+
+2001-09-07 18:17 -0700
+  modified: jeditshell/jedinstl/JELRegInstaller.cpp (1.9)
+  modified: jeditshell/jedinstl/jedinstl.mak (1.6)
+  modified: jeditshell/jedinstl/jedinstl.dep (1.8)
+
+2001-09-07 18:18 -0700
+  modified: jeditshell/jeditlauncher/jeditlauncher.mak (1.8)
+
+2001-09-08 12:08 -0700
+  modified: jeditshell/jedinstl/JELRegInstaller.cpp (1.10)
+
+2001-09-09 14:29 -0700
+  modified: jeditshell/jcmd/jcmd.c (1.4)
+
+2001-09-09 14:30 -0700
+  added:    jeditshell/jcmd/jcmd.mak (1.1)
+
+2001-09-10 14:41 -0700
+  modified: jeditshell/jcmd/jcmd.c (1.5)
+
+2001-09-11 06:20 -0700
+  modified: jeditshell/jedinstl/JELRegInstaller.cpp (1.11)
+
+2001-09-12 07:23 -0700
+  added:    jeditshell/jcmd/jcmd.h (1.1)
+  modified: jeditshell/jcmd/jcmd.c (1.6)
+
+2001-09-12 07:27 -0700
+  modified: jeditshell/jcmd/jcmd.c (1.7)
+
+2001-09-12 15:54 -0700
+  modified: jeditshell/jcmd/jcmd.c (1.8)
+
+2001-09-13 04:17 -0700
+  added:    jeditshell/jcmd/jcmd.zip (1.1)
+
+2001-09-13 07:37 -0700
+  added:    jeditshell/jcmd/JcmdProcess.java (1.1)
+
+2001-09-13 09:39 -0700
+  modified: jeditshell/jcmd/JcmdProcess.java (1.2)
+
+2001-09-13 09:44 -0700
+  modified: jeditshell/jcmd/JcmdProcess.java (1.3)
+
+2001-09-13 09:47 -0700
+  modified: jeditshell/jcmd/JcmdProcess.java (1.4)
+
+2001-09-13 09:51 -0700
+  modified: jeditshell/jcmd/JcmdProcess.java (1.5)
+
+2001-09-13 09:53 -0700
+  modified: jeditshell/jcmd/JcmdProcess.java (1.6)
+
+2001-09-15 18:39 -0700
+  added:    jeditshell/jcmd/JcmdProcessTest.java (1.1)
+  modified: jeditshell/jcmd/JcmdProcess.java (1.7)
+
+2001-09-16 15:57 -0700
+  modified: jeditshell/jcmd/JcmdProcess.java (1.8)
+
+2001-09-16 15:58 -0700
+  modified: jeditshell/jcmd/JcmdProcessTest.java (1.2)
+
+2001-09-16 15:59 -0700
+  modified: jeditshell/jcmd/jcmd.h (1.2)
+  modified: jeditshell/jcmd/jcmd.c (1.9)
+
+2001-09-17 13:46 -0700
+  modified: jeditshell/jcmd/jcmd.zip (1.2)
+
+2001-09-17 14:11 -0700
+  modified: jeditshell/jcmd/JcmdProcessTest.java (1.3)
+
+2001-09-20 08:13 -0700
+  modified: jeditshell/jeditlauncher/JELauncher.cpp (1.4)
+
+2001-09-20 08:14 -0700
+  modified: jeditshell/jeditinit/jeditinit.cpp (1.11)
+
+2001-09-21 14:05 -0700
+  added:    jeditshell/regfix.pl (1.1)
+
+2001-09-24 03:40 -0700
+  modified: jeditshell/jeditshell.dsw (1.5)
+  added:    jeditshell/jedinstl/InstallerLog.cpp (1.1)
+  added:    jeditshell/jedinstl/InstallerLog.h (1.1)
+  modified: jeditshell/jeditlauncher/jeditlauncher.dep (1.5)
+  modified: jeditshell/jeditlauncher/jeditlauncher.dsp (1.5)
+  modified: jeditshell/jeditlauncher/jeditlauncher.h (1.7)
+  modified: jeditshell/jeditlauncher/jeditlauncher.mak (1.9)
+  modified: jeditshell/jeditlauncher/jeditlauncher_i.c (1.6)
+  modified: jeditshell/jeditlauncher/jeditlauncher_p.c (1.6)
+
+2001-12-07 18:17 -0700
+  added:    jeditshell/get_registry.vbs (1.1)
+
+2001-12-09 06:54 -0700
+  modified: jeditshell/jeditlauncher/JELauncher.cpp (1.5)
+  modified: jeditshell/jeditlauncher/ServConn.cpp (1.4)
+  modified: jeditshell/jeditlauncher/jeditlauncher.dsp (1.6)
+  modified: jeditshell/jeditlauncher/jeditlauncher.mak (1.10)
+
+2001-12-27 17:05 -0700
+  added:    jeditshell/logtest/logtest.cpp (1.1)
+
+2001-12-27 17:51 -0700
+  modified: jeditshell/logtest/logtest.cpp (1.2)
+
+2001-12-28 09:54 -0700
+  modified: jeditshell/logtest/logtest.cpp (1.3)
+
+2001-12-28 09:56 -0700
+  added:    jeditshell/ltslog/ltslog.h (1.1)
+  added:    jeditshell/ltslog/ltslog.cpp (1.1)
+
+2001-12-30 01:37 -0700
+  removed:  jeditshell/html/html-manifest (1.2)
+  removed:  jeditshell/html/index.html (1.2)
+  modified: jeditshell/html/launcher-guide.html (1.9)
+
+2001-12-30 01:38 -0700
+  added:    jeditshell/doc/launcher.xml (1.1)
+  removed:  jeditshell/doc/launcher.sgml (1.11)
+  added:    jeditshell/doc/launcher-guide.xsl (1.1)
+  added:    jeditshell/doc/launcher-guide.xml (1.1)
+  removed:  jeditshell/doc/launcher-guide.sgml (1.8)
+  removed:  jeditshell/doc/launcher-guide.css (1.2)
+  removed:  jeditshell/doc/launcher-app.xml (1.2)
+  removed:  jeditshell/doc/guide_html.dsl (1.5)
+
+2001-12-30 01:46 -0700
+  modified: jeditshell/ltslog/ltslog.h (1.2)
+  modified: jeditshell/ltslog/ltslog.cpp (1.2)
+
+2001-12-30 01:47 -0700
+  modified: jeditshell/jeditinit/jeditinit.cpp (1.12)
+  modified: jeditshell/jeditinit/jeditinit.rc (1.6)
+  modified: jeditshell/jeditinit/resource.h (1.3)
+
+2001-12-30 01:48 -0700
+  modified: jeditshell/jedinstl/InstallerLog.cpp (1.2)
+  modified: jeditshell/jedinstl/InstallerLog.h (1.2)
+  modified: jeditshell/jedinstl/JELInstaller.cpp (1.12)
+  modified: jeditshell/jedinstl/JELRegInstaller.cpp (1.12)
+
+2002-01-18 12:09 -0700
+  modified: jeditshell/doc/launcher.xml (1.2)
+
+2002-01-18 12:31 -0700
+  modified: jeditshell/get_registry.vbs (1.2)
+  modified: jeditshell/jeditshell.dsw (1.6)
+  modified: jeditshell/jeditlauncher/FileList.cpp (1.3)
+  modified: jeditshell/jeditlauncher/JELauncher.cpp (1.6)
+  modified: jeditshell/jeditlauncher/JELauncher.h (1.5)
+  added:    jeditshell/jeditlauncher/LauncherLog.cpp (1.1)
+  added:    jeditshell/jeditlauncher/LauncherLog.h (1.1)
+  modified: jeditshell/jeditlauncher/ScriptWriter.cpp (1.8)
+  modified: jeditshell/jeditlauncher/ServConn.cpp (1.5)
+  modified: jeditshell/ltslog/ltslog.cpp (1.3)
+
+2002-01-18 12:44 -0700
+  modified: jeditshell/jeditlauncher/jeditlauncher.mak (1.11)
+  modified: jeditshell/jeditlauncher/jeditlauncher.dsp (1.7)
+
+2002-01-18 12:48 -0700
+  modified: jeditshell/jeditlauncher/JELauncher.h (1.6)
+  modified: jeditshell/jeditlauncher/JELauncher.cpp (1.7)
+
+2002-01-18 15:34 -0700
+  modified: jeditshell/jeditlauncher/ServConn.h (1.3)
+  modified: jeditshell/jeditlauncher/ServConn.cpp (1.6)
+
+2002-01-21 23:02 -0700
+  modified: jeditshell/ltslog/ltslog.cpp (1.4)
+
+2002-01-21 23:03 -0700
+  modified: jeditshell/jedinstl/InstallData.cpp (1.8)
+  modified: jeditshell/jedinstl/InstallData.h (1.9)
+  modified: jeditshell/jedinstl/JELInstaller.cpp (1.13)
+  modified: jeditshell/jedinstl/JELRegInstaller.cpp (1.13)
+  modified: jeditshell/jedinstl/JELRegInstaller.h (1.4)
+  modified: jeditshell/jedinstl/jedinstl.dep (1.9)
+  modified: jeditshell/jedinstl/jedinstl.dsp (1.4)
+  modified: jeditshell/jedinstl/jedinstl.h (1.2)
+  modified: jeditshell/jedinstl/jedinstl.mak (1.7)
+  modified: jeditshell/jedinstl/jedinstl.rc (1.8)
+  modified: jeditshell/jeditinit/jeditinit.cpp (1.13)
+  modified: jeditshell/jeditinit/jeditinit.dep (1.8)
+  modified: jeditshell/jeditinit/jeditinitDlg.h (1.3)
+
+2002-01-21 23:04 -0700
+  modified: jeditshell/jeditlauncher/JELauncher.h (1.7)
+  modified: jeditshell/jeditlauncher/RegistryParser.cpp (1.2)
+  modified: jeditshell/jeditlauncher/Resource.h (1.2)
+  modified: jeditshell/jeditlauncher/jeditlauncher.cpp (1.2)
+  modified: jeditshell/jeditlauncher/jeditlauncher.dep (1.6)
+  modified: jeditshell/jeditlauncher/jeditlauncher.h (1.8)
+  modified: jeditshell/jeditlauncher/jeditlauncher.idl (1.4)
+  modified: jeditshell/jeditlauncher/jeditlauncher.mak (1.12)
+  modified: jeditshell/jeditlauncher/jeditlauncher.rc (1.3)
+  modified: jeditshell/jeditlauncher/jeditlauncher.rgs (1.2)
+  modified: jeditshell/jeditlauncher/jeditlauncher_i.c (1.7)
+  modified: jeditshell/jeditlauncher/jeditlauncher_p.c (1.7)
+
+2002-01-21 23:09 -0700
+  modified: jeditshell/doc/launcher.xml (1.3)
+  modified: jeditshell/html/launcher-guide.html (1.10)
+
+2002-01-22 12:06 -0700
+  modified: jeditshell/Resource.h (1.3)
+  modified: jeditshell/jeditshell.mak (1.9)
+  modified: jeditshell/versions.h (1.3)
+  modified: jeditshell/doc/launcher-guide.xml (1.2)
+  modified: jeditshell/jeditlauncher/FileList.cpp (1.4)
+  modified: jeditshell/jeditlauncher/JELauncher.cpp (1.8)
+  modified: jeditshell/jeditlauncher/RegistryParser.cpp (1.3)
+  modified: jeditshell/jeditlauncher/ScriptWriter.cpp (1.9)
+  modified: jeditshell/jeditlauncher/ServConn.cpp (1.7)
+  modified: jeditshell/jeditlauncher/ServConn.h (1.4)
+  modified: jeditshell/jeditlauncher/jeditlauncher.dsp (1.8)
+  modified: jeditshell/jeditlauncher/jeditlauncher.h (1.9)
+  modified: jeditshell/jeditlauncher/jeditlauncher.mak (1.13)
+  modified: jeditshell/jeditlauncher/jeditlauncher_i.c (1.8)
+  modified: jeditshell/jeditlauncher/jeditlauncher_p.c (1.8)
+
+2002-01-22 13:07 -0700
+  modified: jeditshell/get_registry.vbs (1.3)
+
+2002-01-23 09:05 -0700
+  modified: jeditshell/jedinstl/InstallData.cpp (1.9)
+  modified: jeditshell/jedinstl/JELInstaller.cpp (1.14)
+
+2002-01-23 11:57 -0700
+  modified: jeditshell/jedinstl/JELInstaller.cpp (1.15)
+
+2002-01-31 18:41 -0700
+  modified: jeditshell/jeditlauncher/ScriptWriter.cpp (1.10)
+
+2002-02-18 20:33 -0700
+  modified: jeditshell/jedinstl/InstallData.cpp (1.10)
+  modified: jeditshell/jedinstl/InstallData.h (1.10)
+  modified: jeditshell/jedinstl/JELInstaller.cpp (1.16)
+  modified: jeditshell/jedinstl/JELRegInstaller.cpp (1.14)
+  modified: jeditshell/jedinstl/jedinstl.rc (1.9)
+  modified: jeditshell/jeditlauncher/jeditlauncher.rc (1.4)
+
+2002-02-20 22:34 -0700
+  modified: jeditshell/jeditlauncher/ServConn.cpp (1.8)
+  modified: jeditshell/jeditlauncher/ScriptWriter.cpp (1.11)
+  modified: jeditshell/jeditlauncher/ScriptServer.h (1.3)
+  modified: jeditshell/jeditlauncher/JELauncher.cpp (1.9)
+  modified: jeditshell/jeditlauncher/jeditlauncher.rc (1.5)
+
+2002-03-10 13:36 -0700
+  added:    jeditshell/jedidiff/jedidiff.mak (1.1)
+  added:    jeditshell/jedidiff/jedidiff.dsp (1.1)
+  added:    jeditshell/jedidiff/jedidiff.dep (1.1)
+  added:    jeditshell/jedidiff/jedidiff.c (1.1)
+
+2002-03-11 04:47 -0700
+  modified: jeditshell/jedidiff/jedidiff.mak (1.2)
+  modified: jeditshell/jedidiff/jedidiff.dsp (1.2)
+  modified: jeditshell/jedidiff/jedidiff.c (1.2)
+
+2002-03-24 09:56 -0700
+  modified: jeditshell/jeditlauncher/FileList.cpp (1.5)
+  modified: jeditshell/jeditlauncher/JELauncher.cpp (1.10)
+  modified: jeditshell/jeditlauncher/JELauncher.h (1.8)
+  modified: jeditshell/jeditlauncher/ScriptServer.cpp (1.3)
+  modified: jeditshell/jeditlauncher/ScriptServer.h (1.4)
+  modified: jeditshell/jeditlauncher/ServConn.cpp (1.9)
+  modified: jeditshell/jeditlauncher/ServConn.h (1.5)
+  modified: jeditshell/jeditlauncher/jeditlauncher.rc (1.6)
+
+2002-03-24 14:09 -0700
+  modified: jeditshell/jeditinit/jeditinit.cpp (1.14)
+  modified: jeditshell/jeditinit/jeditinit.rc (1.7)
+  modified: jeditshell/jeditinit/resource.h (1.4)
+
+2002-03-24 18:00 -0700
+  modified: jeditshell/jeditinit/jeditinit.rc (1.8)
+
+2003-11-19 04:16 -0700
+  modified: jeditshell/jedinstl/JELInstaller.cpp (1.17)
+  modified: jeditshell/jedinstl/JELInstaller.h (1.5)

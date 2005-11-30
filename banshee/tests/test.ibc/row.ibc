@@ -1,0 +1,9 @@
+'u:setIF
+'v:setIF
+c:setIF
+d:setIF
+foo = <a='u, b='v>
+bar = <a=c, b=d>
+bar<=foo
+!tlb 'u
+!tlb 'v

@@ -1,0 +1,60 @@
+#    This file is part of the RC compiler.
+#    Copyright (C) 2000-2001 The Regents of the University of California.
+# 
+# RC is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+# 
+# RC is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with RC; see the file COPYING.  If not, write to
+# the Free Software Foundation, 59 Temple Place - Suite 330,
+# Boston, MA 02111-1307, USA.
+
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+bindir = @bindir@
+libexecdir = @libdir@/rc/@gccmachine@
+
+INSTALL = @INSTALL@
+install_data = @INSTALL_DATA@
+install_program = @INSTALL_PROGRAM@
+
+O = obj/
+CC = gcc
+CFLAGS = @CFLAGS@ -g -Wall -Wno-char-subscripts -I. -Ddeletes= -Dtraditional= -Dsameregion= -Dparentptr= -Ilibcompat
+
+EXTRA_OBJS = 
+
+all: rc1
+	(cd lib; $(MAKE))
+
+include Makefile.base
+
+rc1: $(OBJS) libcompat/regions.o
+	$(CC) -o rc1 $(LDFLAGS) $(OBJS) libcompat/regions.o -lm
+
+mincut: $(O)mincut.o libcompat/regions.o
+	$(CC) -o mincut $(O)mincut.o libcompat/regions.o
+
+libcompat/regions.o:
+	(cd libcompat; make)
+
+
+clean:
+	rm -f obj/* robj/* mobj/* rc1
+	(cd libcompat; make clean)
+	(cd lib; make clean)
+
+install: all
+	$(INSTALL) -d $(bindir) $(libexecdir)
+	$(install_program) rcc $(bindir) 
+	mv rc1 cc1
+	$(install_program) cc1 $(libexecdir) 
+	mv cc1 rc1
+	(cd lib; $(MAKE) install)

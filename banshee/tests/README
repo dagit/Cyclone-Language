@@ -1,0 +1,12 @@
+This directory contains a small set of test applications for banshee.
+The applications include:
+
+lambda.exe :              A small lambda calculus type inference problem.
+dyckcfl-test.exe :        A small Dyck-CFL reachability problem.
+dyckcfl-random-test.exe : Checks correctness of the CFL reachability
+                          code on random graphs.
+
+In addition, the directory test.programs/ contains a number of large
+benchmark programs for the points-to analysis. The directory test.cor/
+contains the correct output for these programs. pta_test.mk is a
+Makefile that tests your build against the correct output.

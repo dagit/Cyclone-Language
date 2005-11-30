@@ -1,0 +1,41 @@
+% Copyright (c) 2000-2004
+%      The Regents of the University of California.  All rights reserved.
+%
+% Redistribution and use in source and binary forms, with or without
+% modification, are permitted provided that the following conditions
+% are met:
+% 1. Redistributions of source code must retain the above copyright
+%    notice, this list of conditions and the following disclaimer.
+% 2. Redistributions in binary form must reproduce the above copyright
+%    notice, this list of conditions and the following disclaimer in the
+%    documentation and/or other materials provided with the distribution.
+% 3. Neither the name of the University nor the names of its contributors
+%    may be used to endorse or promote products derived from this software
+%    without specific prior written permission.
+%
+% THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+% ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+% IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+% ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+% FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+% DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+% OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+% HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+% LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+% OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+% SUCH DAMAGE.
+
+
+specification rca_types : RCA_TYPES = 
+   spec
+    data rlabel_t : set
+    data rca : set = ref of +rlabel_t * -rca * +rca
+               |   lam of +rlabel_t * -rcaArgs * +rca * +rca 
+	       |   obj of +rlabel_t * +dispatchT  * -setFields * +getFields
+	       |   mbr of +rlabel_t * -rcaArgs * +rca * +rca
+     and rcaArgs : row(rca)
+     and getFields : row(rca) % read a field from an object
+     and setFields : row(rca) % write a field of an object
+     and dispatchT : row(rca) % dispatchT must only contain mbr's
+   end	
+

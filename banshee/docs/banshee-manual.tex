@@ -1,0 +1,378 @@
+% Copyright (c) 2000-2005
+%      The Regents of the University of California.  All rights reserved.
+%
+% Redistribution and use in source and binary forms, with or without
+% modification, are permitted provided that the following conditions
+% are met:
+% 1. Redistributions of source code must retain the above copyright
+%    notice, this list of conditions and the following disclaimer.
+% 2. Redistributions in binary form must reproduce the above copyright
+%    notice, this list of conditions and the following disclaimer in the
+%    documentation and/or other materials provided with the distribution.
+% 3. Neither the name of the University nor the names of its contributors
+%    may be used to endorse or promote products derived from this software
+%    without specific prior written permission.
+%
+% THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+% ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+% IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+% ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+% FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+% DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+% OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+% HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+% LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+% OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+% SUCH DAMAGE.
+
+\documentclass{article}
+\usepackage{fullpage}
+
+\newcommand{\bane}{\textsc{Bane}}
+\newcommand{\banshee}{\textsc{Banshee}}
+\newcommand{\ibanshee}{\textsc{IBanshee}}
+\newcommand{\contra}[1]{\overline{#1}}
+\newcommand{\file}[1]{\texttt{\textbf{[#1]}}}
+\newcommand{\cmd}[1]{\texttt{\textbf{#1}}}
+\newcommand{\var}[1]{\mathcal{#1}}
+\newtheorem{example}{Example}
+
+
+\title{Banshee Tutorial and User Manual}
+\author{John Kodumal}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+
+\banshee{} is a highly optimized toolkit for constructing
+constraint-based program analyses. \banshee{}, like its predecessor
+\bane{} \cite{aiken:tic98}, is based on \emph{mixed constraints},
+allowing users to design their own ad-hoc analysis formalisms by
+mixing standard, well understood constraint languages
+\cite{aiken:sas97}. \banshee{}'s main innovation is its use of an
+analysis specification language to \emph{specialize} the constraint
+resolution engine for specific program analyses. This approach yields
+several distinct advantages over previous toolkits:
+\begin{itemize}
+\item \textbf{Cleaner user interfaces.} Given an analysis
+  specification, \banshee{} creates a compact interface tailored to
+  the analysis.
+\item \textbf{Better type safety.} Constraints are typically subject
+  to a set of \emph{well-formedness} conditions. In previous toolkits,
+  these conditions were checked dynamically. In \banshee{} more of
+  these conditions are checked statically, reducing the possibility of
+  run-time errors.
+\item \textbf{Improved performance.} \banshee{} applications realize a
+  performance gain as an effect of reducing these dynamic checks and
+  generating specialized C code.
+\item \textbf{Better extensibility.} The system can easily be extended
+  to handle new constraint formalisms.
+\end{itemize}
+
+Other novel features in \banshee{} include an efficient implementation
+of persistence (constraint systems can be quickly saved/loaded), and a
+backtracking capability (constraint systems can be ``rolled back'' to
+any previous state).
+
+There are a number of ways for an analysis designer to use
+\banshee{}. These will be explained in detail later, but we provide an
+overview here:
+\begin{itemize}
+\item \textbf{As a specialized library.} Here, the analysis designer
+  writes a short specification file describing the constraint language
+  needed for her analysis. The \banshee{} code generator
+  \file{bin/banshee.exe} is invoked on this file and produces a specialized
+  constraint solver interface. The analysis client and the specialized
+  interface are then linked with a backend C library
+  \file{engine/libengine.a}.
+\item \textbf{As a generic library.} Here, the analysis designer
+  simply links their client to a C library
+  \file{engine/libnsengine.a}. This library has a generic
+  (nonspecialized) interface \file{engine/nonspec.h}. The advantages
+  and disadvantages of these first two approaches will be explained in
+  a later section (Section ????).
+\item \textbf{As an interpreter.} \banshee{} now comes with an
+  interpreter, \ibanshee{} \file{bin/ibanshee.exe}. \ibanshee{} allows
+  the designer to interact with \banshee{} by typing in constraints
+  directly. This is a handy tool for learning about set
+  constraints. It's also a low overhead way of interfacing with
+  \banshee{}, especially if the analysis client is written in a
+  language other than C.
+\item \textbf{As a context-free language reachability engine.}
+  \banshee{} also includes a wrapper API \file{dyckcfl/dyckcfl.h} that
+  implements a very efficient reduction from a restricted class of
+  context-free language reachability to set constraints. Many program
+  analysis problems fall into this restricted class, so we have
+  implemented an API to express these problems.
+\end{itemize}
+
+\section{Building \banshee{}}
+
+\subsection{Prerequisites}
+Here is a list of the software packages required to build \banshee{}:
+
+\begin{itemize}
+\item Objective Caml version 3.0.8.2 or later (available at
+  http://caml.inria.fr)
+\item GCC, the Gnu Compiler Collection, version 3.3 or later. Earlier
+  versions may work as well (should be standard)
+\item Python, version 2.3.3 or later (should be standard)
+\item indent (should be standard)
+\item etags (should be standard)
+\end{itemize}
+
+\subsection{Building}
+
+You can then build banshee by typing 'make' or 'gmake' at the command
+line at the top level in the source tree. If everything succeeds, the
+following targets will be built:
+
+\begin{itemize}
+\item \file{bin/banshee.exe}, the \banshee{} code generator, and
+  \file{engine/libengine.a}, the backend constraint library. These
+  targets are required to use \banshee{} as a specialized engine.
+\item \file{engine/libnsengine.a}, the nonspecialized constraint
+  library. This target is required to use \banshee{} as a generic
+  constraint library or context-free language reachability engine.
+\item \file{bin/ibanshee.exe}. This target is \ibanshee{}, the
+  \banshee{} interpreter.
+\item \file{dyckcfl/dyckcfl.o}. This object file is required (in
+  addition to \file{engine/libnsengine.a} to use \banshee{} as a
+  context-free language reachability engine.
+\end{itemize}
+
+\cmd{make} will also build the user manual (this document,
+\file{docs/banshee.ps}) a suite of small test applications (see
+\file{tests/README}) and the points-to analysis application (see
+\file{cparser/README}).
+
+There are other potentially useful make targets:
+
+\begin{itemize}
+\item \cmd{make check} will verify your build. 
+\item \cmd{make banshee} will build banshee without building any test
+  applications.
+\item \cmd{make docs} will just build the documentation.
+\item \cmd{make points-to} will build the points-to analysis
+  application and any dependencies.
+\item \cmd{make ibanshee} will build \ibanshee{} and any dependencies.
+\end{itemize}
+
+\banshee{} should build and run on Linux, FreeBSD, Windows (with
+cygwin) and MacOS X. On FreeBSD, make sure to use 'gmake' instead of
+'make'.
+
+\section{Tutorial}
+
+In this section, we give a brief tutorial and gentle introduction to
+set constraints using \ibanshee{}. We'll explain the basic formalism
+and demonstrate how to express some simple problems in
+\ibanshee{}. For those who have some familiarity with set constraints,
+this tutorial covers the simple term-set model of set constraints. The
+complete \banshee{} system supports a much richer model--- we refer
+the interested reader to \cite{Manuel's thesis ????} for further
+details.
+
+\subsection{Terms}
+
+We'll begin our discussion with a few definitions. A \emph{ranked
+  alphabet} is a finite set of constructors and a function
+$arity(...)$ that maps each constructor to a natural number (the
+\emph{arity} of the constructor). We use $c,d,e,\ldots$ to range over
+constructors. $0$-ary constructors are called \emph{constants}. We
+also assume that there is a special set of constants called
+\emph{variables} which are disjoint from our ranked alphabet. We'll
+use $\var{X}, \var{Y}, \var{Z}, \ldots$ to range over variables.
+
+Think of a ranked alphabet as a set of building blocks for making
+\emph{terms} (or trees). 
+
+\begin{example}
+Suppose our alphabet is the set of constructors:
+\[
+f,g,c
+\]
+with $arity(f) =2$, $arity(g) = 1$, $arity(c) = 0$. This alphabet
+defines a set of terms over $f,g,c$, which we can build in the natural
+way. Examples of terms are $f(\var{X},\var{Y}), f(g(c()),c())$,
+$f(c(),c())$, $g(f(c(),c()))$. The last three terms are \emph{ground
+  terms}, which are terms that don't contain any variables. As
+shorthand, we'll often use $c$ instead of $c()$ for constants.
+\end{example}
+
+More formally, the set of \emph{terms} over a ranked alphabet and set
+of variables is defined inductively:
+\begin{itemize}
+\item $\var{X},\var{Y},\var{Z},\ldots$ are all terms
+\item $c$ is a term if $arity(c) = 0$
+\item $f(t_1,\ldots,t_n)$ is a term if $arity(f) = n$ and
+  $t_1,\ldots,t_n$ are terms
+\end{itemize}
+
+\subsection{Expressing terms in \ibanshee{}}
+
+Before proceeding further, we'll pause and explain how to declare
+constructors and variables in \ibanshee{}. Both constructors and
+variables must be declared before using them. \ibanshee{} constructors
+must begin with an upper or lower case letter, followed by a string of
+letters, numbers, or underscores. Declaring a constant is
+simple \footnote{The \texttt{[0] >} is \ibanshee{}'s prompt. If you
+  want to try these examples out, type the remainder of each line
+  after the prompt.}:
+
+\begin{verbatim}
+[0] > c : setIF
+constructor: c
+\end{verbatim}
+Here, we've created a constant $c$. The colon followed by
+\texttt{setIF} is a \emph{sort} declaration in \ibanshee{}. Think of a
+sort as a type (like an int or float) in a conventional programming
+language. Since we're focusing on set constraints for now, we'll defer
+our explanation the other sorts that \banshee{} provides. For now,
+everything we make will be of sort \texttt{setIF}.
+
+Declaring an $n$-ary constructor is slightly more involved, because we
+need to tell \ibanshee{} the constructor's arity. We do so with a
+comma separated list of sort declarations:
+
+\begin{verbatim}
+[0] > f(+setIF,+setIF)
+constructor: f
+\end{verbatim}
+
+This declares a binary constructor $f$. Notice the plus signs before
+the sort declarations in this example. These are \emph{variance}
+declarations. We'll defer discussion of variance declarations until
+later, as well. For now, we'll just restrict ourselves to
+\emph{positive} variances, which are specified with \texttt{+}.
+
+Variables are declared just as constants. However, \ibanshee{}
+syntactically distinguishes variables from constructors by forcing you
+to begin each variable name with a tick (\texttt{'}). So for example:
+
+\begin{verbatim}
+[0] > 'x : setIF
+var: 'x
+\end{verbatim}
+
+declares a variable called \texttt{'x}.
+
+Note that \ibanshee{} only asks you to declare constructors and
+variables. There is no need to declare other terms explicitly. In
+other words, once you've defined \texttt{f} and \texttt{'x} as in the
+preceeding examples, you can refer to a term like $\texttt{f('x,'x)}$
+without declaring it first. Of course, we have yet to explain how to
+do anything useful with terms... so without further ado, let's talk
+about constraints!
+
+\subsection{Set constraints}
+
+Set constraints are inclusion relations between terms. A set
+constraint is a relation of the form $t_1 \subseteq t_2$, where $t_1$
+and $t_2$ are terms. A system of set constraints is a finite
+conjunction of set constraints. A solution $S$ of a system of
+constraints is a mapping from variables to sets of ground terms such
+that all inclusion relations are satisfied. Let's see an example:
+
+\begin{example}
+Suppose that we have $f,g,c$ as constructors with $arity(f) = 2$,
+$arity(g) = 1$, and $arity(c) = 0$ as before. Now consider the
+following system of constraints:
+\[
+f(\var{X},g(\var{X})) \subseteq f(\var{Y},\var{Y})
+\]
+\[
+c \subseteq \var{X}
+\]
+A solution to this system of constraints is $S$ where $S(\var{X}) =
+{c}$, $S(\var{Y}) = {c,g(c)}$. You can see that this solution
+satisfies the inclusion constraints by substituting in for the
+variables.
+\end{example}
+
+A system of constraints may have no solutions, one solution, or many
+solutions. Often we will want the least solution or the greatest
+solution. For the simple model of constraints explained here, the
+least and greatest solutions will be unique (assuming there are any
+solutions at all!). In the previous example, the solution $S$ is
+least.
+
+\subsection{Set constraints in \ibanshee{}}
+
+Creating a system of constraints in \ibanshee{} is
+straightforward. After defining a set of constructors and variables,
+you can build terms over those constructors and variables and add
+constraints. We'll continue with an \ibanshee{} program that
+corresponds to the previous example:
+
+\begin{verbatim}
+[0] > f(+setIF,+setIF):setIF
+constructor: f
+[0] > c : setIF
+constructor: c
+[0] > g(+setIF) : setIF
+constructor: g
+[0] > 'x : setIF
+var: 'x
+[0] > 'y : setIF
+var: 'y
+[0] > f('x,g('x)) <= f('y,'y)
+[1] > c <= 'x
+\end{verbatim}
+
+Now that we have defined our constraint system, we'll probably want to
+inspect the solutions of the constraints. We can do so using
+\ibanshee{}'s query commands. \ibanshee{} commands always begin with
+\texttt{!}. The first command is \texttt{!tlb}, which stands for
+\emph{transitive lower bounds}. This command allows you to read off
+the least solution of the constraints:
+
+\begin{verbatim}
+[2] > !tlb 'x
+{c}
+[2] > !tlb 'y
+{c, g('x)}
+\end{verbatim}
+
+With a little investigation we see that this is exactly the least
+solution. But why doesn't \ibanshee{} explicitly compute it? In other
+words, why doesn't \ibanshee{} report that \texttt{'y} maps to the
+ground set \texttt{\{c,g(c)\}}? Another example is in order. 
+
+\begin{example}
+Consider the following constraint system: 
+\[
+g(\var{X}) \subseteq \var{X}
+\]
+\[
+c \subseteq \var{X}
+\]
+There is a solution for $\var{X}$, namely $\var{X} = \{c, g(c),
+g(g(c)),\ldots\}$. However, there are no finite solutions for
+$\var{X}$.
+\end{example}
+
+Thus, it may not be possible for \banshee{} to explicitly compute a
+set of ground terms as a solution for a given variable. A little more
+machinery is required to understand solutions and fully explain what
+the \texttt{!tlb} command computes. A complete discussion is beyond
+the scope of this tutorial, and we refer the reader to
+\cite{heintze:thesis} for a thorough discussion. Briefly, it turns out
+that each set variable describes a \emph{regular tree language} and
+that solutions of set constraints can be viewed as collections of
+regular tree grammars. The solution for $\var{X}$ in the previous
+example corresponds to the regular tree grammar
+\[
+X \Rightarrow c
+\]
+\[
+X \Rightarrow g(X)
+\]
+and we see that the \texttt{!tlb} command essentially returns the
+right-hand sides of the grammar productions corresponding to the
+solution for a given variable.
+
+
+\end{document}

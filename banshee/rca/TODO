@@ -1,0 +1,43 @@
+Makefile:
+
+points to/ RCA/ and exception analaysis:
+
+RCA: points to more refined
+
+exception: RCA points-to
+
+TODO ****
+
+1. Field sensitivity
+   modify ast walk to get the correct field
+
+   normalization:
+   
+   f.g.h = z.x.y
+
+   write(h,read(g,f)) = read(y,read(x,z))
+
+2. Think about ref level assignment
+
+3. Class representation
+
+   Rip out the functionality in :
+   bool RCAVisitor::visitTypeSpecifier(TypeSpecifier *spec)
+ 
+   and move it into declarator (each syntactic instance of a class)
+
+4. Modeling of exceptions is too imprecise. We want to model scope
+   properly.
+
+
+5/27/03 Bug in specification semantic analyzer : a type can be used in
+a constructor signature, but not defined in the specification. An example:
+
+ specification rca_types : RCA_TYPES = 
+   spec
+    data rca : set = ref of +foo
+   end	
+
+Banshee never checks that foo is defined
+
+

@@ -1,0 +1,61 @@
+-*- outline -*-
+
+* FlowGraphNodeFactory
+ 
+** Override AbstractJimpleValueSwitch methods
+
+*** DONE caseThis 
+
+Just create a RefTypeNode
+
+*** DONE caseParm
+
+*** DONE caseRet
+
+*** caseArray
+
+*** caseArrayRef
+
+*** caseCastExpr
+
+*** caseCaughtExceptionRef
+
+*** caseInstanceFieldRef
+
+*** DONE caseLocal
+
+*** caseNewArrayExpr
+
+*** DONE caseNewExpr
+
+*** caseNewMultiArrayExpr
+
+*** caseParameterRef
+
+*** caseStaticFieldRef
+
+*** caseStringConstant
+
+*** caseThisRef
+
+*** caseNullConstant
+
+*** caseClassConstant
+
+*** defaultCase
+
+** Implement handleStmt
+
+** Implement setCurrentMethod
+
+* FlowGraph
+
+** Implement the soot.PointsToAnalysis interface
+
+** Implement makeRefTypeNode
+
+** Implement makeAbslocNode
+
+* MethodFlowGraph
+
+** Implement getCurrentMethod

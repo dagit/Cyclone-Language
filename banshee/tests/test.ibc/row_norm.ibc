@@ -1,0 +1,14 @@
+'w:setIF
+'x:setIF
+'y:setIF
+'z:setIF
+a:setIF
+b:setIF
+c:setIF
+d:setIF
+foo = <l1='w, l2='x | <l3='y, l4='z>>
+<l1=a,l2=b,l3=c,l4=d><=foo
+!tlb 'w
+!tlb 'x
+!tlb 'y
+!tlb 'z

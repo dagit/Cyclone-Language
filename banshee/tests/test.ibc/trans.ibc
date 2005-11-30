@@ -1,0 +1,13 @@
+a: setIF
+b: setIF
+'x: setIF
+'y: setIF
+c(+setIF,+setIF) : setIF
+'u : setIF 
+'v : setIF
+c(a,b) <= 'x
+'x <= 'y
+'y <= c('u,'v)
+!tlb 'u
+!tlb 'v
+

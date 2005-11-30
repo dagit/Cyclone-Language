@@ -1,0 +1,31 @@
+#!/usr/bin/perl
+# mylatex, a script for running latex intelligently
+# Version 1.0, Jeffrey S. Foster, January 6, 2002
+
+die "slatex, a smart latex\nusage: slatex <file>\n" if ($#ARGV != 0);
+
+@texfile = split('\.', $ARGV[0]);
+$file = $texfile[0];
+
+# Process the file once
+system("latex $file.tex");
+
+# Run bibtex if there were any undefined citations.  Note that
+# we only do this once
+$undefined = system("grep 'Citation.*undefined' $file.log > /dev/null");
+if ($undefined == 0) {
+    system("bibtex -min-crossrefs=9 $file");
+}
+
+while (1) {
+    # Compute a checksum of all the auxiliary files
+    system("md5sum *.aux *.lof *.lot *.toc *.bbl > .cache.new 2>&1");
+    if (-e ".cache.$file" &&
+	system("diff .cache.$file .cache.new > /dev/null") != 256) {
+	# no changes
+	last;
+    }
+    rename(".cache.new", ".cache.$file") ||
+	die "rename .cache.new .cache.$file failed";
+    system("latex $file.tex");
+}

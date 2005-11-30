@@ -1,0 +1,90 @@
+-*- outline -*-
+
+* Remember
+
+When running Soot, make sure to use -w, or the whole program phases won't be run
+
+* Getting the latest nightly:
+
+curl http://www.sable.mcgill.ca/soot/nightly/sootall-$rev.tar.gz > sootall.tar.gz
+
+* Setting up the classpath
+
+(e.g., for soot version 2014)
+
+export SOOTREV=2014
+
+export CLASSPATH=$CLASSPATH:/Users/jkodumal/work/soot-nightly/soot-$SOOTREV/classes:/Users/jkodumal/work/soot-nightly/polyglot-1.3/classes:/Users/jkodumal/work/soot-nightly/jasmin-$SOOTREV/classes:/Users/jkodumal/work/soot-nightly/polyglot-1.3/cup-classes
+
+Also, for Mac OS X:
+
+add /System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK/Classes/classes.jar
+
+(and possibly others!) to the classpath
+
+BUT DON'T SET -cp as a soot command line option, otherwise it won't read the current classpath
+
+* Running points-to analyses
+
+See the phase options tutorial: http://www.sable.mcgill.ca/soot/tutorial/phase/index.html
+
+Flags: 
+
+-w (whole program mode)
+-main-class CLASS (set the main class for whole program mode)
+
+three different pta frameworks:
+cg.spark (spark framework)
+cg.cha  (class hierarchy analysis)
+cg.paddle (paddle [BDD-based] framework)
+
+so eg 
+
+java soot.Main foo -p cg.spark option:value,option:value,option:value
+
+java soot.Main foo -cp classpath -p cg.spark enabled:true 
+
+Also, you probably need to increase the java heap size:
+
+java -Xmx400m
+
+So:
+
+java -Xmx400m soot.Main -w -p cg.spark enabled:true Main
+
+runs spark
+
+* PTA
+
+** soot.jimple.spark.builder.MethodNodeFactory 
+
+has the switch on Jimple kinds (extends AbstractJimpleValueSwitch)
+is created by MethodPAG in soot.jimple.spark.pag
+
+** apply(soot.jimple.spark.builder.MethodNodeFactory.this) 
+
+visits a subvalue in a statement (switch visitor pattern)
+
+** useful Soot tutorial
+
+http://www.cs.rutgers.edu/~ryder/516/sp03/projects/soot1.html
+
+** Soot types
+
+soot.type, each soot.Value has one
+soot.RefLikeType are the types classes, arrays, null type
+
+soot.RefType has a method getSootClass() navigates to the original Soot type world
+
+** On-the-fly call graph construction
+
+The ContextInsensitiveBuilder does an initial call to
+spark.solver.OnFlyCallGraph.build(). Subsequently, the solver
+(something that implements spark.solver.Propagate) calls
+OnFlyCallGraph.build().
+
+OnFlyCallGraph.build() calls the following;
+
+*** processReachables
+
+*** processCallEdges

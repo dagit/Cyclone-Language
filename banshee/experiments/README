@@ -1,0 +1,150 @@
+-*- outline -*-	
+
+* Introduction
+
+This directory contains data and scripts used to run backtracking and
+persistence experiments with banshee.
+
+
+* Working with CVS Repositories
+
+** Possible Projects
+
+For our purposes, projects should be:
+
+-- Written entirely in C
+-- Large ( 10k+ CVS commits)
+-- Hosted from SourceForge
+
+Here are some possible projects that meet these criteria:
+
+-- Cqual
+-- Gaim: instant messenger client 13k+ commits
+-- Gift: file sharing protocol, 8k+ cvs commits
+-- OpenVPN: tunnelling application, 1334 commits
+
+** Getting local copies of CVS repositories from SourceForge
+
+Use the following URL to get a nightly CVS snapshot. Note, these are
+complete copies of the CVS repositories. Replace projectname with the
+appropriate string:
+
+http://cvs.sourceforge.net/cvstarballs/projectname-cvsroot.tar.bz2
+
+** Generating logs
+
+./my-cvs-history -d /path/to/cvs/repository -p projectname > logname
+
+* Preprocessing Source
+
+The cparser frontend requires source code to be
+preprocessed. Acquiring preprocessed source can be somewhat tricky,
+because some files may be generated (e.g. by flex, bison, or other
+tools). Moreover, we require an approach that does not require ANY
+modifications whatsoever, because things like makefiles will be
+checked out on each commit, and any changes we make won't
+persist. Here we outline a few possible approaches...
+
+NOTE: Build projects in the same fully qualified directory:
+preprocessed source may contain the fully qualified path + filename
+
+** gcc -P -save-temps
+
+Compile the project as follows:
+
+make CC="gcc -P -save-temps"
+
+NOTE: now ./configure with CC="/full_path_to/gcc_subst.py" then:
+
+make CC="/full_path_to/gcc_subst.py -P -save-temps"
+
+This will leave the preprocessed files as .i files in the source
+directories. The '-P' option will suppress line directives, which
+cause cparser to spit out warnings. 
+
+The drawback of this approach is that it will actually compile
+everything, instead of just stopping after the preprocessing
+phase. This will be far too slow for the larger projects...
+
+** gcc -E
+
+This doesn't really drop into the build process as desired, as it
+dumps preprocessed files to stdout. Using in conjunction with -o
+should work, but some Makefiles use -c but don't explicitly specify an
+output file with -o. 
+
+Could potentially get this to work with a spec file
+
+** What files have been modified?
+
+We really need to produce .i files and md5 them to know for sure
+what's been modified. Here's a clean way to do this:
+
+diff <(md5 filename1) <(md5 filename2) >/dev/null
+
+Recall that diff returns 0 on identical files, 1 otherwise
+
+This uses a bash feature called process substitution, which may not be
+available on some platforms.
+
+Run 'find' recursively on two entire directory structures:
+
+find . -name "*.i"
+
+* The test harness
+
+The test harness must maintain some additional state-- namely the
+ordered list of files analyzed paired with a banshee time (this is the
+time after each file has been analyzed)
+
+** Simulate only
+
+We can also run simulations (no analysis is actually performed), as follows:
+
+For C programs:
+
+./run-bt-experiment.py --analysis "../cparser/parser_ns.exe -fno-points-to"
+
+ ./run-bt-experiment.py --analysis "../cparser/parser_ns.exe -fno-points-to" --start-with 0 --end-with 2 
+
+** Simulate only java projects
+
+./run-bt-experiment.py -d ~/work/local_repositories/azureus --ext ".java" --analysis "./no_analysis.py" -c "./no_compile.sh" -p azureus2 --start-with 0 --end-with 2 -o out/azureus.out -l logs/azureus2.log
+
+
+* Cqual early
+
+This is the commit where cqual switches to automake
+2002-05-28 21:39 -0700
+
+This is a commit where cqual configures (still doesn't build):
+aclocal
+autoconf
+automake
+./configure
+make
+
+2002-05-29 14:41 -0700
+
+
+"2002-10-27 14:40" This works with
+
+aclocal
+autoconf
+automake
+./configure CC="/usr/local/gcc-2.95.3/bin/gcc"
+make CC="/usr/local/gcc-2.95.3/bin/gcc"
+
+running the analysis:
+
+export GCC_SUBST
+./run-bt-experiment.py -c ./default_compile.sh -d /home/cs/jfoster/cvsroot/ -p cqual -l logs/cqual.log -o cqual_run.out -e --start-with 0 --end-with 10 
+
+./configure CC="/moa/sc1/jkodumal/work/banshee/experiments/gcc_subst.py" 
+
+* Linux kernel 2.4
+
+* Todo
+
+-- update the regions so that region serialization times are accurate
+-- possibly reverse the list of modifieds pushed onto the stack

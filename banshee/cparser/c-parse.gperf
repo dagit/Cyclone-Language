@@ -1,0 +1,66 @@
+%{
+/* Command-line: gperf -p -j1 -i 1 -g -o -t -N is_reserved_word -k1,3,$ c-parse.gperf  */ 
+%}
+struct resword { char *name; short token; enum rid rid; };
+%%
+__alignof, ALIGNOF, NORID
+__alignof__, ALIGNOF, NORID
+__asm, ASM_KEYWORD, NORID
+__asm__, ASM_KEYWORD, NORID
+__attribute, ATTRIBUTE, NORID
+__attribute__, ATTRIBUTE, NORID
+__complex, TYPESPEC, RID_COMPLEX
+__complex__, TYPESPEC, RID_COMPLEX
+__const, TYPE_QUAL, const_qualifier
+__const__, TYPE_QUAL, const_qualifier
+__extension__, EXTENSION, NORID
+__imag, IMAGPART, NORID
+__imag__, IMAGPART, NORID
+__inline, SCSPEC, RID_INLINE
+__inline__, SCSPEC, RID_INLINE
+__label__, LABEL, NORID
+__real, REALPART, NORID
+__real__, REALPART, NORID
+__signed, TYPESPEC, RID_SIGNED
+__signed__, TYPESPEC, RID_SIGNED
+__typeof, TYPEOF, NORID
+__typeof__, TYPEOF, NORID
+__volatile, TYPE_QUAL, volatile_qualifier
+__volatile__, TYPE_QUAL, volatile_qualifier
+__builtin_va_arg, VA_ARG, NORID
+asm, ASM_KEYWORD, NORID
+auto, SCSPEC, RID_AUTO
+break, BREAK, NORID
+case, CASE, NORID
+char, TYPESPEC, RID_CHAR
+continue, CONTINUE, NORID
+default, DEFAULT, NORID
+do, DO, NORID
+double, TYPESPEC, RID_DOUBLE
+else, ELSE, NORID
+enum, ENUM, NORID
+extern, SCSPEC, RID_EXTERN
+float, TYPESPEC, RID_FLOAT
+for, FOR, NORID
+goto, GOTO, NORID
+if, IF, NORID
+inline, SCSPEC, RID_INLINE
+int, TYPESPEC, RID_INT
+long, TYPESPEC, RID_LONG
+register, SCSPEC, RID_REGISTER
+return, RETURN, NORID
+short, TYPESPEC, RID_SHORT
+signed, TYPESPEC, RID_SIGNED
+sizeof, SIZEOF, NORID
+static, SCSPEC, RID_STATIC
+struct, STRUCT, NORID
+switch, SWITCH, NORID
+typedef, SCSPEC, RID_TYPEDEF
+typeof, TYPEOF, NORID
+union, UNION, NORID
+unsigned, TYPESPEC, RID_UNSIGNED
+void, TYPESPEC, RID_VOID
+while, WHILE, NORID
+
+define(Q, `$1, $2, $3')
+include(qualifiers.h)

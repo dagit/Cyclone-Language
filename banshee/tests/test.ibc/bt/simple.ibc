@@ -1,0 +1,15 @@
+a:setIF
+b:setIF
+c(+setIF,+setIF):setIF
+'x:setIF
+'y:setIF
+'z:setIF
+c(a,b)<='x
+'x <= c('y,'z)
+!tlb 'x
+!tlb 'y
+!tlb 'z
+!undo 1
+!tlb 'x
+!tlb 'y
+!tlb 'z

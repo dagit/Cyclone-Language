@@ -1,0 +1,6 @@
+'u:setIF
+d:setIF
+c(+setIF) : setIF
+c(d) <= 'u
+!tlb 'u
+!rsave

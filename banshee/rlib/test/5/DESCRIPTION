@@ -1,0 +1,3 @@
+This test covers serialization/deserialization of multiple regions.  Three regions, one with a linked
+list of pairs, another with a linked list of triples, and a third with a linked list of quintuples, are
+allocated, serialized, unserialized, and compared with the original lists.

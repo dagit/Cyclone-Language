@@ -1,0 +1,12 @@
+constructor: a
+constructor: b
+constructor: c
+var: 'x
+var: 'y
+var: 'z
+{c(a,b)}
+{a}
+{b}
+{c(a,b)}
+{}
+{}

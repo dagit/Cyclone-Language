@@ -1,0 +1,8 @@
+var: 'u
+var: 'v
+constructor: c
+constructor: d
+foo: <a : 'u,b : 'v | 'rest>
+bar: <a : c,b : d | 'rest>
+{c}
+{d}

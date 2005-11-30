@@ -1,0 +1,10 @@
+var: 'z
+var: 't
+var: 'u
+var: 'v
+constructor: a
+constructor: b
+constructor: c
+{a}
+{b}
+{c}
