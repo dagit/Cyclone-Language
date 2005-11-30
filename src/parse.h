@@ -19,9 +19,11 @@
 #ifndef _PARSE_H_
 #define _PARSE_H_
 #include "absyn.h"
+#include "bansheeif.h"
 using Core {
 namespace Parse {
   List::list_t<Absyn::decl_t> parse_file(FILE @`H);
+  List::list_t<$(Absyn::type_t, List::list_t<BansheeIf::constraint_t>)@> parse_constraint_file(FILE @`H f);
   extern datatype exn {extern Exit};
 }
   string_t token2string(int token);
@@ -56,6 +58,15 @@ using List {
     Typedef_sc, Extern_sc, ExternC_sc, Static_sc, Auto_sc, Register_sc, 
       Abstract_sc, None_sc
   };
+
+    enum ConstraintOps {
+      C_AND_OP,
+      C_OR_OP,
+      C_NOT_OP,
+      C_EQ_OP,
+      C_INCL_OP
+    };
+
   typedef enum Storage_class storage_class_t;
   extern struct Declaration_spec {
     storage_class_t  sc;

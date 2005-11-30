@@ -35,6 +35,12 @@ extern bool no_regions;
 
 extern bool no_reaps;
 
+extern bool infstats;
+extern bool override_fat;
+extern bool interproc;
+extern bool resolve;
+extern bool no_merge;
+extern bool tags;
   // if true, the parser ignores the "register" scope, simply translating
   // it as public (the default)
 extern bool no_register;

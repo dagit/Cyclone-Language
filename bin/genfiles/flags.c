@@ -341,25 +341,25 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #endif //CYC_REGION_PROFILE
 #endif //_CYC_INCLUDE_H
 
-# 43 "flags.h"
+# 49 "flags.h"
  extern int Cyc_Flags_warn_override;
-# 49
+# 55
 extern int Cyc_Flags_tc_aggressive_warn;
-# 53
+# 59
 extern int Cyc_Flags_warn_alias_coerce;
-# 57
+# 63
 extern int Cyc_Flags_warn_region_coerce;
-# 60
+# 66
 extern int Cyc_Flags_warn_lose_unique;
-# 64
+# 70
 extern int Cyc_Flags_warn_bounds_checks;
-# 68
+# 74
 extern int Cyc_Flags_warn_all_null_deref;
-# 90
+# 96
 enum Cyc_Flags_C_Compilers{Cyc_Flags_Gcc_c =0U,Cyc_Flags_Vc_c =1U};
-# 104 "flags.h"
+# 110 "flags.h"
 enum Cyc_Flags_Cyclone_Passes{Cyc_Flags_Cpp =0U,Cyc_Flags_Parsing =1U,Cyc_Flags_Binding =2U,Cyc_Flags_CurrentRegion =3U,Cyc_Flags_TypeChecking =4U,Cyc_Flags_Jumps =5U,Cyc_Flags_FlowAnalysis =6U,Cyc_Flags_VCGen =7U,Cyc_Flags_CheckInsertion =8U,Cyc_Flags_Toc =9U,Cyc_Flags_AggregateRemoval =10U,Cyc_Flags_LabelRemoval =11U,Cyc_Flags_TempRename =12U,Cyc_Flags_CastRemoval =13U,Cyc_Flags_EvalOrder =14U,Cyc_Flags_CCompiler =15U,Cyc_Flags_AllPasses =16U};
-# 123
+# 129
 extern enum Cyc_Flags_Cyclone_Passes Cyc_Flags_stop_after_pass;
 # 25 "flags.cyc"
 int Cyc_Flags_verbose=0;
@@ -371,6 +371,12 @@ enum Cyc_Flags_C_Compilers Cyc_Flags_c_compiler=Cyc_Flags_Gcc_c;
 int Cyc_Flags_porting_c_code=0;
 int Cyc_Flags_no_regions=0;
 int Cyc_Flags_no_reaps=0;
+int Cyc_Flags_infstats=0;
+int Cyc_Flags_override_fat=0;
+int Cyc_Flags_resolve=0;
+int Cyc_Flags_interproc=0;
+int Cyc_Flags_no_merge=0;
+int Cyc_Flags_tags=0;
 int Cyc_Flags_no_register=0;
 int Cyc_Flags_noexpand_r=0;
 int Cyc_Flags_warn_bounds_checks=0;
@@ -385,7 +391,7 @@ int Cyc_Flags_debug_assn=0;
 int Cyc_Flags_print_unprovable=0;
 unsigned Cyc_Flags_max_vc_summary=500U;
 unsigned Cyc_Flags_max_vc_paths=33U;
-# 49
+# 55
 void Cyc_Flags_set_all_warnings (void){
 Cyc_Flags_warn_bounds_checks=1;
 Cyc_Flags_warn_all_null_deref=1;
@@ -394,21 +400,21 @@ Cyc_Flags_warn_alias_coerce=1;
 Cyc_Flags_warn_region_coerce=1;
 Cyc_Flags_tc_aggressive_warn=1;
 Cyc_Flags_warn_override=1;}
-# 58
+# 64
 void Cyc_Flags_set_cpponly (void){
 Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < 0?Cyc_Flags_stop_after_pass: 0U;}
-# 61
+# 67
 void Cyc_Flags_set_parseonly (void){
 Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < 1?Cyc_Flags_stop_after_pass: 1U;}
-# 64
+# 70
 void Cyc_Flags_set_crgnonly (void){
 Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < 3?Cyc_Flags_stop_after_pass: 3U;}
-# 67
+# 73
 void Cyc_Flags_set_tconly (void){
 Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < 4?Cyc_Flags_stop_after_pass: 4U;}
-# 70
+# 76
 void Cyc_Flags_set_cfonly (void){
 Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < 6?Cyc_Flags_stop_after_pass: 6U;}
-# 73
+# 79
 void Cyc_Flags_set_toconly (void){
 Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < 14?Cyc_Flags_stop_after_pass: 14U;}

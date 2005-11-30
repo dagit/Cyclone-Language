@@ -178,6 +178,7 @@ static $(string_t,short,bool) rw_array[] = {
   $("new", NEW, false),
   $("NULL", NULL_kw, false),
   $("numelts", NUMELTS, false),
+  $("__noinference__", NOINFERENCE, false),
   $("offsetof", OFFSETOF, true),
   $("__cyclone_port_on__", PORTON, false),
   $("__cyclone_port_off__", PORTOFF, false),
@@ -772,6 +773,7 @@ static void process_directive(char ?line) {
 // translate an absolute character offset to a file and line number given
 // position information.  If it's an invalid offset (e.g. 0) return $(NULL,0).
 $(const char ?, unsigned int) xlate_pos(seg_t char_offset) {
+  char_offset = (char_offset >> 8);
   for (pinfo_opt_t p = pos_info; p != NULL; p = p->next) {
     seg_t first_char_offset = p->linenumpos[0];
     if (char_offset < first_char_offset && p->next != NULL) continue;

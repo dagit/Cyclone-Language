@@ -27,6 +27,7 @@ namespace Binding {
   using Dict;
 
   void resolve_all(list_t<Absyn::decl_t,`H> tds);
+  list_t<Absyn::exp_t> resolve_all_interproc(list_t<Absyn::decl_t,`H> tds);
 
   // only the lexer needs the rest of this
   typedef list_t<Absyn::var_t> namespace_name_t;

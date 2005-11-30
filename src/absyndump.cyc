@@ -415,10 +415,20 @@ static void dumpntyp(type_t t) {
   case &PointerType(_): return;
   case &AppType(&VoidCon,_): dump("void"); return;
   case &VarType(tv): dumptvar(tv); return; // FIX: may want explicit kinds
-  case &Evar(k,NULL,i,_):
-    dump("`E");
-    if (k == NULL) dump("K"); else dumpkind(k->v);
+  case &Cvar(k,NULL,i,_,name,...): 
+    dump("`C_"); 
+    if (k == NULL) dump("K"); else dumpkind(k->v); 
+    dump("_");
+    if(name) 
+      dump(name);
+    else 
+      dump(aprintf("%d",i)); 
+    return;
+  case &Evar(k,NULL,i,_): 
+    dump("`E"); 
+    if (k == NULL) dump("K"); else dumpkind(k->v); 
     dump(aprintf("%d",i)); return;
+  case &Cvar(k,t,i,...): dumpntyp((type_t)t); return; // shouldn't happen!
   case &Evar(k,t,i,_): dumpntyp((type_t)t); return; // shouldn't happen!
   case &AnonAggrType(k,is_tuple,fs):
     if (is_tuple) {
@@ -504,6 +514,8 @@ static void dumpntyp(type_t t) {
     case &FatCon:    dump("@fat");   return;
     case &AqualConstCon(v): dump_aqual_val(v); return;
     case &AqualsCon: dump("aquals(");dumptyp(ts->hd);dump(")");return;
+    case &AqualHandleCon: dump("aqual_t<");dumptyp(ts->hd);dump(">");return;
+    case &AqualVarCon: dumptyp(ts->hd);return;
     default: Warn::impos2("bad type constructor");
     }
   }

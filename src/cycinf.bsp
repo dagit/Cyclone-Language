@@ -1,0 +1,11 @@
+
+specification cycinf : CYCINF = 
+ spec
+  data ptrbnd : term = atomic
+                     | numelts of intbound
+  and  intbound : term = eq of intlit
+                       | geq of intlit
+  and  intlit : term
+  and  zeroterm : term
+  and  effect : setIF
+ end

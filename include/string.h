@@ -18,7 +18,7 @@
 
 #ifndef _STRING_H_
 #define _STRING_H_
-
+__noinference__ {
 #include <core.h>
 #include <list.h>
 #include <cycboot.h> // for size_t
@@ -135,5 +135,5 @@ extern mstring_t<`H> strtok (mstring_t<`H> s, string_t delim);
 extern List::list_t<int>    explode(buffer_t s);
 extern List::list_t<int,`r> rexplode(region_t<`r>,buffer_t s);
 extern mstring_t      implode(List::list_t<int> c);
-
+}
 #endif

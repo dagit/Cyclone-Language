@@ -33,6 +33,8 @@
 #include "flags.h"
 #include "binding.h"
 #include "cifc.h"
+#include "tcutil.h"
+#include "bansheeif.h"
 
 using List;
 using Absyn;
@@ -210,6 +212,12 @@ static struct Env {
 };
 typedef struct Env@ env_t;
 
+static void dump_local_entry(var_t v, resolved_t r) {
+  printf("%s resolved\n", *v);
+}
+static void dump_local_dict(env_t env) {
+  Dict::iter(dump_local_entry, *env->local_vars);
+}
 static inline bool in_cinclude(env_t env) {
   return env->in_cinclude;
 }
@@ -342,13 +350,15 @@ static void resolve_and_add_vardecl(seg_t loc, env_t env, vardecl_t vd) {
   }
 }
 
+void interproc_binding_handler(seg_t loc, env_t env, exp_t e);
+
 static bool resolve_visit_f1(env_t env, exp_t e) {
   switch(e->r) {
   case &Var_e(*b):
     switch(*b) {
     case &Unresolved_b(q):
       try switch (lookup_ordinary(e->loc,env,q)) {
-      case &VarRes(bnd):          *b = bnd; break;
+      case &VarRes(bnd):          *b = bnd; 	    interproc_binding_handler(e->loc, env, e); break;
       case &DatatypeRes(tud,tuf): e->r = new Datatype_e(NULL,tud,tuf); break;
       case &EnumRes(ed,ef):       e->r = new Enum_e(ed,ef); break;
       case &AnonEnumRes(t,ef):    e->r = new AnonEnum_e(t,ef); break;
@@ -370,7 +380,10 @@ static bool resolve_visit_f1(env_t env, exp_t e) {
 	switch (*b) {
 	case &Unresolved_b(q):
 	  try switch (lookup_ordinary(e1->loc,env,q)) {
-	  case &VarRes(bnd): *b = bnd; return false;
+	  case &VarRes(bnd): 
+	    *b = bnd; 
+	    interproc_binding_handler(e1->loc, env, e1);
+	    return false;
 	  case &AggrRes(ad):
 	    let dles = NULL;
 	    for(; es != NULL; es = es->tl)
@@ -385,8 +398,10 @@ static bool resolve_visit_f1(env_t env, exp_t e) {
 	  case &AnonEnumRes(...):
 	  case &EnumRes(...):
 	    err2(e->loc, q," is an enum constructor, not a function"); return false;
-	  } catch {
-	  case &BindingError: err2(e->loc,"undeclared identifier ",q); return false;
+	  } catch { 
+	  case &BindingError: 
+	    interproc_binding_handler(e1->loc, env, e1);
+	    return false;
 	  }
 	default: return false; // only happens if we re-run this pass?
 	}
@@ -670,9 +685,15 @@ static void resolve_type(seg_t loc, env_t env, type_t t) {
 	resolve_exp(env,(exp_t)f->tag);
       decl_ns_data->ordinaries = Dict::insert(decl_ns_data->ordinaries,(*f->name)[1],new AnonEnumRes(t,f));
     }
-    return;
-  case &Evar(_,to,_,_): if(to != NULL) resolve_type(loc,env,(type_t)to); return;
-
+    return; 
+  case &Cvar(_,to,...): 
+    if (Flags::resolve) { //Cvar names are already set by parser when in --resolve mode
+      BansheeIf::register_toplevel_cvar(t);
+      break;
+    }
+    else 
+      fallthru(to); //binding needs to be smarter with Cvars
+  case &Evar(_,to,...): if(to != NULL) resolve_type(loc,env,(type_t)to); return;
   case &VarType(_):
   case &AppType(_,NULL): return;
   case &AppType(c,ts):
@@ -1169,3 +1190,45 @@ void resolve_all(list_t<Absyn::decl_t,`H> tds) {
   resolve_decls(env, tds);
 }
 
+static list_t<exp_t> extern_functions;
+static bool enable_interproc = false;
+
+void interproc_binding_handler(seg_t loc, env_t env, exp_t e) {
+  switch(e->r) {
+  case &Var_e(b):
+    switch (b) {
+    case &Unresolved_b(q):
+      //still require prototypes for binding ... 
+      //otherwise it is a mess dealing with reordering the decls
+      //inside namespaces etc. 
+      err2(e->loc,"undeclared identifier ",q);  
+      return;
+    case &Global_b(vd): //binding resolved to prototype
+      if(enable_interproc && Tcutil::is_function_type(vd->type)) {
+	extern_functions = new List{e, extern_functions};
+      }
+      break;    
+    case &Funname_b(_)://ok ... bound to definition
+    case &Param_b(_)://ok ... function ptr
+    case &Local_b(_)://ok ... local fnptr
+    case &Pat_b(_)://ok ... local ptr
+      break;
+    }
+    break;
+  default:
+    if(enable_interproc)
+      impos2("Interproc binding got unsupported expression: ", e);
+    break;
+  }
+}
+
+list_t<exp_t> resolve_all_interproc(list_t<Absyn::decl_t,`H> tds) {
+  enable_interproc = true;  
+  extern_functions = NULL;
+  let env = new Env(false,false,mt_nsctxt(true,mt_renv),NULL);
+  resolve_decl(env, new Decl(new Datatype_d(exn_tud()),0));
+  resolve_decls(env, tds);
+  let ret = NULL;
+  ret :=: extern_functions;
+  return ret;
+}

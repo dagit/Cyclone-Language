@@ -52,7 +52,6 @@ dict_t<`a,`b> singleton(int (@`H comp)(`a,`a), `a key, `b data) @throws(false) {
 }
 
 dict_t<`a,`b,`r+`r2> rshare(region_t<`r> r, dict_t<`a,`b,`r2> d) {
-//@throws(false) {
   struct T<`a,`b,`r2> const * t = d.t;
   struct T<`a,`b,`r+`r2> const * t2 = t;
   return Dict{d.rel, r, t2};

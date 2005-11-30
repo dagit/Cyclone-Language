@@ -18,7 +18,7 @@
 
 #ifndef _CORE_H_
 #define _CORE_H_
-
+__noinference__{
 /*** \subsection{\texttt{<core.h>}} */
 /*** The file \texttt{<core.h>} defines some types and functions
      outside of any namespace, and also defines a namespace Core.
@@ -375,5 +375,5 @@ struct ThinRes<`a::A,`r>{
 }
 
 #endif
-
+}
 #endif

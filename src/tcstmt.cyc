@@ -25,6 +25,7 @@
 #include "tcexp.h"
 #include "tcpat.h"
 #include "tcstmt.h"
+#include "subtype.h"
 using Core;
 using List;
 using Absyn;
@@ -261,8 +262,9 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	te = clear_fallthru(te);
 
       let p = scs->hd->pattern;
-      if (!Unify::unify((type_t)p->topt,t)) { // allow silent_castable?
-	Warn::err2(scs->hd->loc,
+      let _c = Subtype::coercible_exact(scs->hd->loc,t,p->topt);
+      if (_c == Unknown_coercion) {//!Unify::unify((type_t)p->topt,exception_type)) { // allow silent_castable?
+	Warn::err2(scs->hd->loc, 
 		   "switch on type ",t," but case expects type ",p->topt);
 	Unify::explain_failure();
       }
@@ -325,8 +327,9 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	te = clear_fallthru(te);
 
       let p = scs->hd->pattern;
-      if (!Unify::unify((type_t)p->topt,exception_type)) { // allow silent_castable?
-	Warn::err2(scs->hd->loc, "switch on type ",exception_type,
+      let _c = Subtype::coercible_exact(scs->hd->loc,exception_type,p->topt);
+      if (_c == Unknown_coercion) {//!Unify::unify((type_t)p->topt,exception_type)) { // allow silent_castable?
+	Warn::err2(scs->hd->loc, "switch on type ",exception_type, 
 		   " but case expects type ",p->topt);
 	Unify::explain_failure();
       }

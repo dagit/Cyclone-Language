@@ -1,0 +1,1040 @@
+#include <stdio.h>
+#include <assert.h>
+#include <hashtable.h>
+#include <position.h>
+#include "interproc.h"
+#include "binding.h"
+#include "absynpp.h"
+#include "string.h"
+#include "cyclone.h" //for do_parse
+#include "warn.h"
+#include "callgraph.h"
+#include "tcutil.h" 
+#include "parse.h"
+#include "flags.h"
+
+using Hashtable;
+using List;
+using Absyn;
+using Core;
+using Graph;
+namespace Tcutil {
+  void deconstruct_type(type_t t);
+}
+namespace Interproc;
+
+datatype exn { 
+  Unresolved_sym(exp_t);
+  Rebinding;
+};
+
+static datatype exn.Rebinding Rebinding_val = Rebinding;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Interface to CYCTAGS; records which symbols are defined and which are externs
+////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////
+// Creating a CYCTAGS file : --tags option
+///////////////////////////////////////////
+#define TAGS "CYCTAGS"
+static FILE *tagsFile=NULL;
+
+static FILE *try_file_open(string_t filename, string_t mode, string_t msg_part) {
+  try return fopen(filename,mode);
+  catch { default:
+    fprintf(stderr, "\nError: couldn't open %s %s\n", msg_part, filename);
+    fflush(stderr);
+    return NULL;
+  }
+}
+
+static mstring_t namespace2string(list_t<var_t> ns) {
+  mstring_t a = str_sepstr(ns, "::");
+  if(strlen(a)) {
+    return strconcat(a, "::");
+  }
+  return a;
+}
+
+static void dump_decl_tags(list_t<var_t,`H> ns, string_t sourcefile, list_t<decl_t> tds) {
+  for(;tds;tds=tds->tl) {
+    switch(tds->hd->r) {
+    case &Fn_d(fd):
+      fprintf(tagsFile, "^%s%s^%s^function^0\n", namespace2string(ns),
+	      Absynpp::fullqvar2string(fd->name), 
+	      sourcefile);
+      break;
+    case &Namespace_d(n, l):
+      dump_decl_tags(List::append(ns, new List{n,NULL}), sourcefile, l);
+      break;
+    case &Using_d(n, l):
+      dump_decl_tags(ns, sourcefile, l);
+      break;
+    default:
+      break;
+    }
+  }
+}
+
+//dumps only fucntion decls
+void dump_tags(string_t sourcefile, list_t<decl_t> tds) {
+  if(!tagsFile) {
+    tagsFile = try_file_open(TAGS, "w", TAGS);
+    if(!tagsFile) {
+      Warn::err(0, "Could not open TAGS file");
+      return;
+    }
+  }
+  dump_decl_tags(NULL, sourcefile, tds);
+}
+void close_tags_file() {
+  if(tagsFile) {
+    fclose(tagsFile);
+  }
+}
+
+////////////////////////////////////////
+//Reading a CYCTAGS file
+////////////////////////////////////////
+typedef list_t<$(string_t<`H>, list_t<Absyn::decl_t,`H>)@> filedecls_t;
+static struct Table<mstringptr_t, mstringptr_t> *`H tagmap = NULL;
+
+static void print_filedecls(filedecls_t fd) {
+  for(;fd;fd=fd->tl) {
+    fprintf(stderr, "Decls for file %s::\n", fd->hd->f0);
+  }
+}
+
+static void skip_whitespace(FILE @f) {
+  int c = getc(f);
+  while (c == ' ' || c == '\t' || c == '\n') {
+    c = getc(f);
+  }
+  ungetc(c,f);
+}  
+static char ?grabline(FILE @f) {
+  static char buf[1000]@nozeroterm;
+  int c= 0;
+  int i = 0;
+  char ?@nozeroterm bufp = (char ?@nozeroterm)buf;
+  skip_whitespace(f);
+  try {
+    c = getc(f);
+    while (c != '\n' && c != EOF) {
+      bufp[i++] = (char)c;
+      c = getc(f);
+    }
+    if (c == EOF) return NULL;
+    ungetc(c,f);
+    bufp[i] = '\0';
+    return strdup(bufp);
+  } catch {
+  default: fprintf(stderr,"grabline failed\n"); break;
+  }
+  return NULL;
+}
+
+static int mstrptrcmp(mstringptr_t m1, mstringptr_t m2) {
+  return strcmp(*m1, *m2);
+}
+static int hash_mstringptr(mstringptr_t m1) {
+  return hash_string(*m1);
+}
+
+static void print_string(mstringptr_t s) {
+  printf("<%s>:%d", *s, hash_mstringptr(s));
+}
+
+static bool init_tagmap_from_decls(mstringptr_t<`H,`H> source, list_t<decl_t> ds) {
+  for(;ds;ds=ds->tl) {
+    switch(ds->hd->r) {
+    case &Fn_d(fd):
+      Hashtable::insert(tagmap, 
+			new aprintf("%s", Absynpp::fullqvar2string(fd->name)), 
+			source);
+      break;
+    case &Using_d(_,l): fallthru(l);
+    case &Namespace_d(_,l):
+      init_tagmap_from_decls(source, l);
+      break;
+    default:
+      break;
+    }
+  }
+  return true;
+}
+
+
+static bool init_tagmap(filedecls_t ftds) {
+  if(tagmap)
+    return true;
+  FILE *tags = try_file_open(TAGS,"r", TAGS);
+  if(!tags) {
+    if(!ftds)
+      return false;
+    tagmap = Hashtable::create(11, mstrptrcmp, hash_mstringptr);
+    return init_tagmap_from_decls(new aprintf("%s", ftds->hd->f0), ftds->hd->f1);
+  }
+  tagmap = Hashtable::create(11, mstrptrcmp, hash_mstringptr);
+  char ?line; 
+  while(line=grabline(tags)) {
+    if(line[0] != '^') 
+      continue;
+    let symname = new aprintf("%s",strtok(line, "^@"));
+    let filename = new aprintf("%s",strtok(NULL, "^@"));
+    let symtype = strtok(NULL, "^@");
+    if(!strcmp(symtype, "function")) {
+      //      fprintf(stderr, "Inserting <%s>:%d --> <%s>:%d\n", *symname, hash_mstringptr(symname), 
+      //	      *filename, hash_mstringptr(filename));
+      Hashtable::insert(tagmap, symname, filename);
+    }
+  }
+  fclose(tags);
+  return true;
+}
+
+//May throw Not_found ... caller must handle
+static string_t locate_qvar(qvar_t qv, filedecls_t ftds) {
+  if(!tagmap && !init_tagmap(ftds)) {
+    throw &Core::Not_found_val;
+  }
+  //get rid of this allocation
+  mstringptr_t qvname = new aprintf("%s", Absynpp::fullqvar2string(qv));
+  return *(Hashtable::lookup(tagmap, qvname));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Locating definitions -- client of CYCTAGS
+////////////////////////////////////////////////////////////////////////////////
+static bool cmp_filenames(stringptr_t fname, $(string_t, `a)@ ftd) {
+  return !strcmp(*fname, ftd->f0);
+}
+
+//if filename has not already been parsed, open filename and parse decls
+//append the decls to the ftds list
+//returns false if the file could not be parsed/opened
+static $(bool, filedecls_t) add_filedecls(string_t<`H> filename, filedecls_t ftds) {
+  if(List::exists_c(cmp_filenames, &filename, ftds)) 
+    return $(true, NULL);
+  let decls = Cyclone::parse_file(filename);
+  if(!decls) {
+    return $(false, NULL);
+  }
+  _ newl = new List{new $(filename, decls), NULL};
+  List::imp_append(ftds, newl);
+  //  fprintf(stderr, "++++++++++++++++++++++++++++++++++++++++\n");
+  //  print_filedecls(ftds);
+  //  fprintf(stderr, "++++++++++++++++++++++++++++++++++++++++\n");
+  return $(true, newl);
+}
+
+//ARGS::
+//es: expressions that have been identified as externs or prototype bindings by Binding
+//ftds: assoc list of <filename, decls>; points to the head of a worklist
+//RETURNS:
+//bool: flag signalling success
+//filedecls_t: head of the newly added decls; reachable from ftds 
+//            (if we are in no_merge mode, this is always null)
+//list_t<exp_t>: externs for which a definition was found; these will be rebound
+static $(bool,filedecls_t,list_t<exp_t>) locate_externs(list_t<exp_t> es, filedecls_t ftds) {
+  _ newdecls = NULL;
+  list_t<exp_t> located=NULL;
+  for(;es != NULL; es = es->tl) {
+    string_t filename = NULL;
+    switch(es->hd->r) {
+    case &Var_e(b):
+      switch(b) {
+      case &Unresolved_b(q): //no prototype present ...resolve directly to the definition
+	if(Flags::no_merge)
+	  throw new Unresolved_sym(es->hd);
+	try {
+	  filename = locate_qvar(q,ftds); 
+	  located = new List{es->hd, located};
+	}catch {
+	case &Not_found: throw new Unresolved_sym(es->hd);
+	}
+	break;
+      case &Global_b(vd):
+	try {
+	  filename = locate_qvar(vd->name,ftds);
+	  if(Flags::no_merge) { 
+	    if(!strcmp(filename, ftds->hd->f0)) {
+	      //if this is fwd decls within the same file then do the normal rebinding
+	      located = new List{es->hd, located};
+	      continue; 
+	    }
+	    else {
+	      //otherwise, if the defn of this decl is available in TAGS but is in a different file
+	      //leave the binding as it is but insert named Cvars into the type to support
+	      //incremental inference
+	      Tcutil::introduce_cvars(vd->type);
+	      filename=NULL;
+	      continue; //don't attempt to parse the file 
+	    }
+	  }
+	  else {
+	    located = new List{es->hd, located};
+	    //falls thru at the end of the switch to parse filename
+	  }
+	}
+	catch { 
+	case &Not_found:  //this is really an extern ... rebinding is impossible
+	  continue;
+	}
+	break;
+      default:
+	Warn::impos2("locate_externs: Unexpected expression", es->hd);
+	break;
+      }
+      break;
+    default:
+      Warn::impos2("locate_externs: Unexpected expression", es->hd);
+      break;
+    }
+    //filename should be non-null here
+    assert(filename && !Flags::no_merge);
+    let $(b, newl) = add_filedecls(filename, ftds);
+    if(!b) //could not parse -- fatal
+      return $(false, NULL, NULL);
+    if(!newdecls) 
+      newdecls = newl;
+  }
+  return $(true, newdecls, located);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Handling of plain --inf mode (not incremental)
+//
+// This basically ensures that Cvars that appear in function prototypes
+// match those that appear in the definitions. Expressions remain bound to the 
+// prototypes.
+///////////////////////////////////////////////////////////////////////////////
+//insert all function declarations in decls into the hashtable
+static void build_fndecl_tab(table_t<qvar_t, fndecl_t> fdt, list_t<decl_t,`H> decls) {
+  for(_ ds=decls;ds;ds=ds->tl) { //build dictionary of function defintions
+    switch(ds->hd->r) {
+    case &Fn_d(fd): //what about nested function definitions?? Those should already have been bound correctly, right?
+      Hashtable::insert(fdt, fd->name, fd);
+      break;
+    case &Namespace_d(_, l): fallthru(l);
+    case &Using_d(_, l):
+      build_fndecl_tab(fdt, l); break;
+    default:
+      break;
+    }
+  }
+}
+//helper function to handle the error cases of ensure_cvar_id
+static void remove_cvars(type_t t) {
+  switch(t) {
+  case &PointerType(PtrInfo{ta,_,PtrAtts{_,_,*b,...}}):
+    if(Tcutil::is_cvar_type(*b)) {
+      *b =  bounds_one();
+    }
+    remove_cvars(ta);
+    return;
+  case &FnType(*i):
+    remove_cvars(i->ret_type);
+    for(_ args = i->args;args;args=args->tl) {
+      remove_cvars(args->hd->f2);
+    }
+    return;
+  case &AppType(_,ts): fallthru(ts);
+  case &TypedefType(_,ts,...): 
+    for(;ts;ts=ts->tl) remove_cvars(ts->hd);
+    return;
+  case &AnonAggrType(_,true, fields): //only tuples for now
+    for(;fields;fields=fields->tl) {
+      remove_cvars(fields->hd->type);
+    }
+    return;
+  default:
+    return;
+  }
+}
+//make the pointer bounds in dest share with the bounds in src
+//does the real work of imp_update_prototypes
+static void ensure_cvar_identity(seg_t loc, type_t dest, type_t src) {
+  switch($(dest, src)) {
+  case $(&PointerType(PtrInfo{tD,_,PtrAtts{_,_,*bD,...}}), &PointerType(PtrInfo{tS,_,PtrAtts{_,_,*bS,...}})):
+    if(Tcutil::is_cvar_type(*bS))
+      *bD = *bS;
+    ensure_cvar_identity(loc, tD, tS);
+    return;
+  case $(&FnType(*iD),&FnType(*iS)):
+    ensure_cvar_identity(loc, iD->ret_type, iS->ret_type);
+    if(List::length(iD->args) != List::length(iS->args))
+      throw &Rebinding_val;
+    for(_ argD = iD->args, argS = iS->args;
+	argD && argS; argD=argD->tl, argS=argS->tl) {
+      ensure_cvar_identity(loc, argD->hd->f2, argS->hd->f2);
+    }
+    return;
+  case $(&TypedefType(nameD,tD,...),&TypedefType(nameS,tS,...)): 
+    if(List::length(tD) != List::length(tS)) {
+/*       if(!qvar_cmp(nameD, nameS)) */
+/* 	throw &Rebinding_val; */
+      //different names ... and we can't yet compress out the Cvars
+      //to be safe, for now just make sure that all Cvars in tS are removed
+      Warn::warn2(loc, "Typedef names could not be resolved yet; removing any constraint variables from ", src);
+      for(;tS;tS=tS->tl) //tD should not have an Cvars anyway
+	remove_cvars(tS->hd);
+      return;
+    }
+    fallthru(tD, tS);
+  case $(&AppType(_,tD),&AppType(_,tS)): 
+    if(List::length(tD) != List::length(tS))
+      throw &Rebinding_val;
+    for(;tD&&tS;tD=tD->tl,tS=tS->tl) 
+      ensure_cvar_identity(loc, tD->hd, tS->hd);
+    return;
+  case $(&AnonAggrType(_,true, fieldD),&AnonAggrType(_,true, fieldS)):
+    if(List::length(fieldD) != List::length(fieldS))
+      throw &Rebinding_val;
+    for(;fieldD&&fieldS;fieldD=fieldD->tl,fieldS=fieldS->tl) 
+      ensure_cvar_identity(loc, fieldD->hd->type,fieldS->hd->type);
+    return;
+  default:
+    return;
+  }
+}
+//for each prototype in decls, make sure that the Cvar's in the
+//corresponding definition (if present) match the Cvars that appear in
+//the prototype
+static void imp_update_prototypes(list_t<decl_t> decls, 
+				  table_t<qvar_t, fndecl_t> fndecl_tab) {
+  for(;decls;decls=decls->tl) {
+    switch(decls->hd->r) {
+    case &Var_d(vd):
+      _ fd;
+      try {
+	fd = Hashtable::lookup(fndecl_tab, vd->name);
+      }
+      catch { 
+      case &Not_found: continue; //not a prototype, or a this is an extern function
+      }
+      try {
+	ensure_cvar_identity(decls->hd->loc, vd->type, new FnType(fd->i));
+      }catch {
+      case &Rebinding:  //this really is a type error, but it is caught early here
+	Warn::err2(decls->hd->loc, "Incompatible types in declarations: ", vd->type, new FnType(fd->i));
+	break;
+      }
+      break;
+    case &Namespace_d(_, l): fallthru(l);
+    case &Using_d(_,l):
+      imp_update_prototypes(l, fndecl_tab);
+      break;
+    default:
+      break;
+    }
+  }
+}
+static list_t<decl_t> update_prototype_cvars(list_t<exp_t> exts, list_t<decl_t,`H> decls) {
+  region<`r> r;
+  table_t<qvar_t, fndecl_t, `r> fndecl_tab = rcreate(r, 101, qvar_cmp, hash_qvar);
+  build_fndecl_tab(fndecl_tab, decls);
+  //update the function prototypes so that we have Cvar sharing
+  imp_update_prototypes(decls, fndecl_tab);
+  return decls;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Was once used only in --inf --nomerge mode; now used in plain --inf mode too
+//
+// Enforces a naming convention on Cvars based on the location within
+// a decl and type
+//
+// Note: this does not *insert* Cvars anywhere. It only assigns names to Cvars
+// that already appear. The previous pass locate_externs/update_prototype_cvars
+// (along with the parser) does the Cvar insertion.
+//
+////////////////////////////////////////////////////////////////////////////////
+static char _prefix[1024]@zeroterm;
+static int myhash_stringptr(char ?@ a) {
+  return hash_string(*a);
+}
+static int mystrptrcmp(char ?@ a, const char ?@ b) {
+  return strcmp(*a,*b);
+}
+static void print_strptr(stringptr_t a) {
+  printf("%s(%d)", *a, hash_stringptr(a));
+}
+static void print_type(type_t a) {
+  printf("%s", Absynpp::typ2string(a));
+}
+static void dump_table(table_t<stringptr_t, type_t> cvmap) {
+  print_table_map(cvmap, print_strptr, print_type);
+}
+//for Cvars at every level in t, use prefix and index to generate a name
+//returns a list of all the cvars that were added to t
+//is_local is used for debugging; local Cvars have a negative id (Cvars start out negative)
+static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxpos) {
+  //hash consing for Cvars
+  static struct Table<stringptr_t, type_t> *cvmap = NULL;
+  if(!cvmap) {
+    cvmap = Hashtable::create(101, strptrcmp, hash_stringptr);
+  }
+  list_t<type_t> ret=NULL;
+  switch(compress(t)) {
+  case &PointerType(PtrInfo{elt,_,PtrAtts{_,_,*bd,...}}):
+    ret = cvars_in_type(elt, index+1, is_local, pfxpos);
+    switch(*bd) {
+    case &Cvar(_,_,*id,_,*name,...):
+      assert(pfxpos < 1000);
+      sprintf(_prefix+pfxpos, "_%d", index); 
+      string_t nn = aprintf("%s", _prefix);
+      //      char ?tmppfx = _prefix;
+      let val = Hashtable::lookup_other_opt(cvmap, &nn, strptrcmp, hash_stringptr);
+      if(val) {
+	*bd = *val;
+      }
+      else {
+	*name = nn;
+	ret = new List{*bd, ret};      
+	if(!is_local)
+	  *id = -(*id); //toggle id sign to indicate that the name is set ... used only for testing/assertion
+	Hashtable::insert(cvmap, new nn, *bd);
+      }
+      _prefix[pfxpos] = '\0';
+      break;
+    default:
+      break;
+    }
+    break;
+  case &ArrayType(ArrayInfo(elt, ...)):
+    ret = cvars_in_type(elt, index+1, is_local, pfxpos);
+    break;
+  case &AnonAggrType(_,_,af):
+    int findex = 0;
+    for(;af;af=af->tl) {
+      switch(af->hd) {
+      case &Aggrfield{_,_,t,...}:
+	assert(pfxpos < 980);
+	sprintf(_prefix+pfxpos, "_%d_AA%d", index, findex++);  //aprintf("%s_%d_AA%d", prefix, index, findex++), 
+	ret = List::append(cvars_in_type(t, 0, is_local, strlen(_prefix)), ret);
+	break;
+      }
+    }
+    _prefix[pfxpos] = '\0';
+    break;
+  case &AppType(&DatatypeCon(DatatypeInfo{.KnownDatatype=&dtd}), ts):
+    if(dtd->fields->v) {
+      let fs = dtd->fields->v;
+      int findex = 0;
+      string_t dtn = Absynpp::fullqvar2string(dtd->name);
+      assert(pfxpos < 900);
+      for(;fs;fs=fs->tl) {
+	let ft = fs->hd->typs;
+	int finner = 0;
+	for(;ft;ft=ft->tl) {
+	  let &$(_,t) = ft->hd;
+	  sprintf(_prefix+pfxpos, "_%d_DD%s_DF%d_%d", index, dtn, findex, finner++);
+	  //aprintf("%s_%d_DD%s_DF%d_%d", prefix, index, dtn, findex, finner++)
+	  ret = List::append(cvars_in_type(t, 0, is_local, strlen(_prefix)), ret);
+	}
+	findex++;
+      }
+      _prefix[pfxpos] = '\0';
+    }
+    break;
+  case &AppType(&AggrCon(AggrInfo{.KnownAggr=&ad}), ts):
+    let adn=Absynpp::fullqvar2string(ad->name);
+    int findex =0;
+    if(ad->impl) {
+      assert(pfxpos < 900);
+      for(_ fs = ad->impl->fields; fs; fs= fs->tl) {
+	sprintf(_prefix+pfxpos, "_%d_AD%s_AF%d", index, adn, findex++);
+	//	aprintf("%s_%d_AD%s_AF%d", prefix, index, adn, findex++)
+	ret = List::append(cvars_in_type(fs->hd->type, 0, is_local, strlen(_prefix)), ret);
+      }
+      _prefix[pfxpos]='\0';
+    }
+    break;
+  case &FnType(*fi):
+    //    aprintf("%", prefix, index);
+    assert(pfxpos < 900);
+    sprintf(_prefix+pfxpos, "_%d_FR", index);
+    ret = List::append(cvars_in_type(fi->ret_type, 0,is_local,strlen(_prefix)), ret);
+    int argix = 0;
+    for(_ args = fi->args; args;args=args->tl) {
+      let &$(_,_,t) = args->hd;
+      sprintf(_prefix+pfxpos, "_%d_ARG%d", index, argix++);
+      //      aprintf("%s_%d_ARG%d", prefix, index, argix++)
+      ret = List::append(cvars_in_type(t, 0, is_local, strlen(_prefix)), ret);      
+    }
+    _prefix[pfxpos]='\0';    
+    break;
+  case &TypedefType(tdn, ts, tdef, topt):
+    if(tdef && tdef->defn) {
+      assert(pfxpos < 900);
+      //      aprintf("%s_%d_TD%s", prefix, index, Absynpp::fullqvar2string(tdn))
+      sprintf(_prefix+pfxpos,"_%d_TD%s", index, Absynpp::fullqvar2string(tdn));
+      ret = List::append(cvars_in_type(tdef->defn, 0,is_local,strlen(_prefix)), 
+			 ret);
+      _prefix[pfxpos]='\0';    
+    }
+    break;
+  case &TypeDeclType(td, to): //*to should be null
+    switch(td->r) {
+    case &Aggr_td(ad):
+      ret = List::append(cvars_in_type(app_type(new AggrCon(KnownAggr(new ad))),0,is_local,pfxpos),
+			 ret);
+      break;
+    case &Datatype_td(tud):
+      ret = List::append(cvars_in_type(app_type(new DatatypeCon(KnownDatatype(new tud))),0,is_local,pfxpos),
+			 ret);
+      break;
+    default: //no cvars in an enum anyway
+      break;
+    }
+    break;
+  default:
+    break;
+    //  case &AppType(&DatatypeFieldCon({.KnownDatatypeField = $(_,dfi), ts): //not a top level decla
+  }
+  return ret;
+}
+
+//functions for visiting an exp and stmt
+static bool exp_noop(`a a, exp_t b) { 
+  switch(b->r) {
+  case &Cast_e(t, ...):
+    Tcutil::replace_cvars(t, bounds_one());
+    break;
+  default:
+    break;
+  }
+  return true;
+}
+
+//string_t is the prefix
+//int is used to generate unique prefixes
+static bool cvars_in_local_decl($(string_t, int, void (@)(list_t<type_t,`H>,`inner), `inner)@ env, stmt_t s) {
+  let &$(pfx, *count, fn, inner_env) = env;
+  switch(s->r) {
+  case &Decl_s(d, s1):
+    switch(d->r) {
+    case &Var_d(vd): 
+      sprintf(_prefix, "%s_%d", pfx, (*count)++);
+      let cvars = cvars_in_type(vd->type, 0, true, strlen(_prefix)); 
+      //drop the list of cvars ... these are fresh and do not require any binding
+      //but, we will need to resolve these on the second pass
+      //so the closure should contain more than just the prefix
+      fn(cvars, inner_env);
+      break;
+    case &Let_d(p, ...):
+      switch(p->r) {
+      case &AliasVar_p(_, vd):
+	sprintf(_prefix, "%s_%d", pfx, (*count)++);
+	let cvars = cvars_in_type(vd->type, 0, true, strlen(_prefix)); 
+	//drop the list of cvars ... these are fresh and do not require any binding
+	//but, we will need to resolve these on the second pass
+	//so the closure should contain more than just the prefix
+	fn(cvars, inner_env);
+	break;
+      default:
+	break;
+      }
+      break;
+    default:
+      break;
+    }
+    break;
+  default:
+    break;
+  }
+  return true;
+}
+
+//This function is passed as the closure to function above
+//Constraints associated with local Cvars were generated on a previous compilation
+//Dump these so that we can recheck the code properly
+static void remove_local_constraints(list_t<type_t> cvars, int ignore) {
+  for(;cvars;cvars=cvars->tl){
+    BansheeIf::reset_local_cvar(cvars->hd);
+  }
+}
+
+/**
+ * If a decl contains an unconstrained cvar then record this cvar in the list
+ * This also establishes a naming convention for Cvars
+ * All relevant constraints on this Cvar are extracted from the BansheeIf
+ * (Cvars that appear in local variables are not recorded in the return type)
+ */
+static list_t<type_t> assign_cvar_names(list_t<decl_t> ds){
+  list_t ret = NULL;
+  for(;ds;ds=ds->tl) {
+    switch(ds->hd->r) { 
+    case &Namespace_d(_,l): fallthru(l);
+    case &Using_d(_,l): ret = List::append(ret, assign_cvar_names(l)); break;
+    case &Var_d(vd): 
+      sprintf(_prefix, "%s", Absynpp::fullqvar2string(vd->name));
+      ret = List::append(cvars_in_type(vd->type, 0, false, strlen(_prefix)),
+			 ret);
+      break;
+    case &Fn_d(fd):    
+      let fdname = Absynpp::fullqvar2string(fd->name);
+      sprintf(_prefix, "%s", fdname);
+      if(Tcutil::is_main(fd->name)) { //main's 2nd arg must be ??
+	let args = fd->i.args;
+	if(args && args->tl) {
+	  Tcutil::replace_cvars(args->tl->hd->f2, Absyn::fat_bound_type);
+	}
+      }
+      else {
+	ret = List::append(cvars_in_type(new FnType(fd->i), 0, false, strlen(_prefix)),
+			   ret);
+      }
+      //need to give names to Cvars that appear in the body of the function
+      let env = new $(fdname, 0, remove_local_constraints, 0);
+      Absyn::visit_stmt(exp_noop, cvars_in_local_decl, env, fd->body);
+      break;
+    case &Aggr_d(ad):    // [struct|union] Foo { ... 
+      ret = List::append(cvars_in_type(app_type(new AggrCon(KnownAggr(new ad))),0,false,0),
+			 ret);
+      break;
+    case &Datatype_d(dd):
+      ret = List::append(cvars_in_type(app_type(new DatatypeCon(KnownDatatype(new dd))),0,false,0),
+			 ret);
+      break;
+    case &Typedef_d(td):  // typedef t n
+      ret = List::append(cvars_in_type(typedef_type(td->name, NULL, td, NULL), 0, false,0), 
+			 ret);
+      break;
+    default:
+      break;
+    }
+  }
+  return ret;
+}
+
+static list_t<$(type_t, list_t<BansheeIf::constraint_t>)@> parse_constraint_graph() {
+  let cfilename = "./.cych/cvars";
+  let file = try_file_open(cfilename, "r", "constraint file");
+  if(!file) {
+    Warn::warn(0, "Unable to initialize constraint graph");
+    return 0; 
+  }
+  Position::reset_position(cfilename); // necessary for good error messages!
+  let ret = Parse::parse_constraint_file(file);
+  fclose(file);
+  return ret;
+}
+static int read_constraint_graph() {
+  let cg = parse_constraint_graph();
+  BansheeIf::init_toplevel_cvars(cg);
+  return 0;
+}
+
+static void print_cvarlist(list_t<type_t> l) {
+  for(;l;l=l->tl)
+    Tcutil::deconstruct_type(l->hd);
+}
+
+//sets names on Cvars that appear in top-level decls
+//initializes BansheeIf's constraint map
+//compresses out any top level Cvars that have been previously constrained
+static void bind_cvars(list_t<decl_t> ds) {
+  if(!Flags::no_merge || read_constraint_graph()) {//no prior constraint graph was found 
+    BansheeIf::init_toplevel_cvars(NULL); //degenerate initialization 
+  }
+  list_t<type_t> cvars = assign_cvar_names(ds);
+  for(;cvars;cvars=cvars->tl) { //these are all top level cvars
+    switch(cvars->hd) {
+    case &Cvar(ok, *topt, id, *bv, name, ...): //at this stage *topt must be null
+      assert(*topt==0);
+      assert(id>0);
+      assert(*bv==0);
+      //this will either set topt, or it will set *bv. If this refers
+      //to a previously persisted Cvar then all related constraints
+      //will be added to banshee.
+      BansheeIf::register_toplevel_cvar(cvars->hd); 
+      break;
+    default:
+      Warn::impos("Unexpected type in cvar list");
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//public interface
+////////////////////////////////////////////////////////////////////////////////
+void emit_decls(string_t<`H> filename, list_t<decl_t> ds) {
+  //first dump the constraint graph
+  let file = try_file_open("./.cych/cvars", "w", "constraint file");
+  if(!file) {
+    Warn::warn(0, "Unable to open constrant file");
+    return; 
+  }
+  BansheeIf::persist_cvarmap(file);
+  fclose(file);
+  //then pretty print the *Cyclone* decls 
+  let outname = aprintf("./.cych/%s", filename);
+  let outfile = try_file_open(outname, "w", "output file");
+  Absynpp::set_params(&Absynpp::cycinf_params_r);
+  Absynpp::decllist2file(ds, outfile);
+  return;
+}
+
+//--resolve mode
+list_t<decl_t> binding_cvar_resolution(list_t<decl_t, `H> tds) {
+  if(!Flags::resolve) {
+    Warn::impos("Cvar resolution is only supported with --resolve");
+  }
+  if(read_constraint_graph()) {
+    Warn::err(0, "Failed to read constraint graph; cannot resolve Cvars");
+  }
+  Binding::resolve_all(tds);
+  BansheeIf::resolve_or_default(thinconst());
+  return tds; 
+}
+
+int cmp_stats($(const char*, const char*)@ a, $(const char*, const char*)@ b) {
+  return strcmp(a->f1, b->f1);
+}
+
+//--inf mode
+list_t<decl_t> resolve_all(string_t<`H> filename, list_t<decl_t, `H> tds) {
+  _ orig = tds;
+  list_t<$(string_t, list_t<Absyn::decl_t, `H>)@,`H> first = NULL, worklist=NULL;
+  first = new List{new $(filename, tds), NULL};
+  list_t<exp_t> all_located_fnsyms=NULL;
+  do {
+    if(worklist) {
+      tds = worklist->hd->f1;
+      worklist = worklist->tl;
+    }
+    let externs = Binding::resolve_all_interproc(tds);
+    if(externs) {
+      try {
+	let $(b, nd, rext) = locate_externs(externs, first);
+	if(!b) //error should have been signalled elsewhere
+	  return tds;
+	if(!worklist) {
+	  worklist = nd;
+	}
+	all_located_fnsyms = List::imp_append(rext, all_located_fnsyms);
+      }catch {
+      case &Unresolved_sym(e):
+	Warn::err2(e->loc, "Undefined symbol", e);
+	return false;
+      }
+    }
+  } while(worklist);
+  _ prev = first->hd->f1;
+  _ all_decls = orig;
+  for(_ it = first->tl; it; it=it->tl) {
+    all_decls = List::imp_append(all_decls, it->hd->f1);
+  }
+  //parser inserts Cvars on all pointer types, but ignores identities
+/*   all_decls = update_prototype_cvars(all_located_fnsyms, all_decls); */
+/*   if(Flags::no_merge) */
+  bind_cvars(all_decls); 
+  return all_decls;
+}
+
+void inference_statistics() {
+  let graph = parse_constraint_graph();
+  if(BansheeIf::add_all_constraints(graph)) {
+    fprintf(stderr, "Inconsistent constraint graph\n");
+    return;
+  }
+  list_t<$(const char*,const char*, bool)@> thins=NULL;
+  list_t<$(const char*,const char*, bool)@> fats=NULL;
+  for(;graph;graph=graph->tl) {
+    let &$(t, _) = graph->hd;
+    switch(t) {
+    case &Cvar(_,_,_,_,name,loc,origfat):
+      switch(compress(t)) {
+      case &Cvar(...):
+      case &AppType(&ThinCon, _):
+	thins = new List{new $(name,loc,origfat), thins};
+	break;
+      case &AppType(&FatCon, _):
+	fats = new List{new $(name,loc,origfat), fats};
+	break;
+      default:
+	break;
+      }
+      break;
+    default:
+      break;
+    }
+  }
+  fats=  List::merge_sort(cmp_stats, fats);
+  thins=  List::merge_sort(cmp_stats, thins);
+  fprintf(stderr, "******************************FAT POINTERS******************************\n");
+  for(;fats;fats = fats->tl) {
+    fprintf(stderr, "%s %50s", fats->hd->f1, fats->hd->f0);
+    if(!fats->hd->f2)
+      fprintf(stderr, " --EXTRA");
+    fprintf(stderr, "\n");
+  }
+  fprintf(stderr, "******************************THIN POINTERS******************************\n");
+  for(;thins;thins = thins->tl) {
+    fprintf(stderr, "%s %50s", thins->hd->f1, thins->hd->f0);
+    if(thins->hd->f2)
+      fprintf(stderr, " --ORIG-FAT");
+    fprintf(stderr, "\n");
+  }
+  fprintf(stderr, "***********************************DONE*************************************\n");
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+// DEAD CODE ... may be resurrected
+////////////////////////////////////////////////////////////////////////////////
+
+/* static vardecl_t fndecl_to_vardecl(fndecl_t fd) { */
+/*   let nt = Tcutil::copy_type(new FnType(fd->i)); */
+/*   return new Vardecl(fd->sc, fd->name, 0, empty_tqual(0),  */
+/* 		     nt, */
+/* 		     NULL, NULL, NULL, false, true); */
+/* } */
+
+/* static void make_prototype(list_t<decl_t,`H> *protos, decl_t fndecl) { */
+/*   switch(fndecl->r) { */
+/*   case &Fn_d(fd): */
+/*     let d = new Decl(new Var_d(fndecl_to_vardecl(fd)), */
+/* 		     fndecl->loc); */
+/*     *protos = new List{d, *protos}; */
+/*     break; */
+/*   default: */
+/*     return; */
+/*   } */
+/* } */
+
+/* static list_t<decl_t> extract_prototypes(Graph::graph_t<decl_t> _scc) { */
+/*   list_t<decl_t,`H> protos= NULL; */
+/*   list_t<$(decl_t, Set::set_t<decl_t>)@> scchead = Dict::to_list(_scc); */
+/*   for(_ scc = scchead;scc;scc=scc->tl) { */
+/*     let &$(src, targets) = scc->hd; */
+/*     if(Set::cardinality(targets) <= 1) */
+/*       continue; */
+/*     bool seen = false; */
+/*     for(_ in=scchead; in!=scc; in=in->tl) { //seen this scc before? */
+/*       if(Graph::is_edge(_scc, src, in->hd->f0)) { */
+/* 	seen = true; */
+/* 	break; */
+/*       } */
+/*     } */
+/*     if(!seen) */
+/*       Set::iter_c(make_prototype, &protos, targets); */
+/*   } */
+/*   return protos; */
+/* } */
+
+
+/* //get rid of using decls... we've already bound names properly */
+/* //this makes it easier to make the typechecker go in callgraph order */
+/* static list_t<decl_t> strip_using(list_t<decl_t,`H> _ds) { */
+/*   _ ds = _ds; */
+/*   while(ds) { */
+/*     switch(ds->hd->r) { */
+/*     case &Using_d(_, l):  */
+/*       l = strip_using(l); */
+/*       if(l) { */
+/* 	List::imp_append(l, ds->tl); */
+/* 	_ tmp = ds->tl; */
+/* 	ds->hd = l->hd; */
+/* 	ds->tl = l->tl; */
+/* 	ds = tmp; */
+/* 	break; */
+/*       } */
+/*       fallthru; */
+/*     default: */
+/*       ds = ds->tl; */
+/*       break; */
+/*     } */
+/*   } */
+/*   return _ds; */
+/* } */
+
+/* static bool is_not_fndecl(decl_t d) { */
+/*   switch(d->r) { */
+/*   case &Fn_d(...): return false; */
+/*   default: return true; */
+/*   } */
+/* } */
+
+/* static list_t<decl_t> rearrange_decls(list_t<decl_t,`H> fds,  */
+/* 				      list_t<decl_t,`H> ds,  */
+/* 				      list_t<decl_t,`H> protos) { */
+/*   ds = strip_using(ds); */
+/*   ds = List::filter(is_not_fndecl, ds); */
+/*   fds = List::imp_rev(fds); */
+/*   protos = List::imp_append(protos, fds); */
+/*   return List::imp_append(ds,protos); */
+/* } */
+
+
+/* static void rebind_to_protos(list_t<exp_t> exts, list_t<decl_t,`H> protos) { */
+/*   if(!protos) return; */
+/*   region<`r> r; */
+/*   table_t<qvar_t, binding_t, `r> fndecl_tab = rcreate(r, 101, qvar_cmp, hash_qvar); */
+/*   for(_ ds=protos;ds;ds=ds->tl) { //build dictionary of function defintions */
+/*     switch(ds->hd->r) { */
+/*     case &Var_d(vd): //what about nested function definitions?? Those should already have been bound correctly, right? */
+/*       Hashtable::insert(fndecl_tab, vd->name, new Global_b(vd)); */
+/*       break; */
+/*     default: */
+/*       break; */
+/*     } */
+/*   } */
+
+/*   for(;exts;exts=exts->tl) { //exts were previously bound to function decls */
+/*     switch(exts->hd->r) { //bind them to the newly generated prototypes */
+/*     case &Var_e(*b): */
+/*       switch(*b) { */
+/*       case &Funname_b(fd):  */
+/* 	try { */
+/* 	  *b = Hashtable::lookup(fndecl_tab, fd->name); */
+/* 	}catch { */
+/* 	case &Core::Not_found: break; */
+/* 	} */
+/* 	continue; */
+/*       default: */
+/* 	break; */
+/*       } */
+/*       fallthru; */
+/*     default: */
+/*       Warn::impos2("Unexpected expression in rebind_to_protos", exts->hd); */
+/*     } */
+/*   } */
+/* } */
+
+
+/* static void update_prototypes(list_t<decl_t> decls,  */
+/* 			      table_t<qvar_t, fndecl_t> fndecl_tab,  */
+/* 			      table_t<qvar_t, vardecl_t> fnvd_tab) { */
+/*   for(_ ds=decls;ds;ds=ds->tl) {  */
+/*     switch(ds->hd->r) { */
+/*     case &Var_d(*vd): //what about nested function definitions?? Those should already have been bound correctly, right? */
+/*       try { */
+/* 	let fvd = Hashtable::lookup(fnvd_tab, (*vd)->name); //found a match  ... so this must be a prototype  */
+/* 	*vd = fvd; //all expression are bound to this prototype  */
+/* 	Hashtable::remove(fnvd_tab, (*vd)->name); //so that other prototype decls don't share  */
+/*       }catch { */
+/*       case &Not_found:  //this could still be a function  */
+/* 	try { */
+/* 	  let fd = Hashtable::lookup(fndecl_tab, (*vd)->name); */
+/* 	  *vd = fndecl_to_vardecl(fd); */
+/* 	}catch { */
+/* 	case &Not_found: //ok, this is definitely not a function prototype */
+/* 	  break; */
+/* 	} */
+/* 	break; */
+/*       } */
+/*       break; */
+/*     case &Namespace_d(_,l): fallthru(l); */
+/*     case &Using_d(_,l): */
+/*       update_prototypes(l, fndecl_tab, fnvd_tab); */
+/*       break; */
+/*     default: */
+/*       break; */
+/*     } */
+/*   }   */
+/* } */

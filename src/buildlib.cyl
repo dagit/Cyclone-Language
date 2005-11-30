@@ -1072,6 +1072,9 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     case &TypeDeclType(&{.r = &Datatype_td(dd),...},_):
       fprintf(stderr,"Error: unexpected Datatype declaration\n");
       exit(1); return;
+    case &Cvar(...):
+      fprintf(stderr,"Error: unexpected Cvar\n");
+      exit(1); return;
     case &Evar(_,_,_,_):
       fprintf(stderr,"Error: unexpected Evar\n");
       exit(1); return;
@@ -1618,6 +1621,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       else if (ifdefmacro[j] != '_' && ifdefmacro[j] != '/')
         ifdefmacro[j] = (char)toupper(ifdefmacro[j]);
     }
+    if(!do_setjmp)
+      fprintf(out_file, "__noinference__{\n");
     fprintf(out_file,
             "#ifndef %s\n"
             "#define %s\n",
@@ -1770,6 +1775,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       }
     }
     fprintf(out_file,"#endif\n");
+    if(!do_setjmp)
+      fprintf(out_file, "}\n"); //__noinference__
     if (do_setjmp) return 0; // Don't print C and Cyclone stubs files
     else fclose(out_file);
 

@@ -441,7 +441,7 @@ int j=i;
 while(((unsigned)j < _get_fat_size(line,sizeof(char))&&(int)((char*)line.curr)[j]>= 48)&&(int)((char*)line.curr)[j]<= 57){++ j;1U;}
 if((unsigned)i==_get_fat_size(line,sizeof(char))){struct _tuple0*_Tmp2=0;_npop_handler(0);return _Tmp2;}{
 int number=0;
-if(({struct Cyc_IntPtr_sa_ScanfArg_struct _Tmp2=({struct Cyc_IntPtr_sa_ScanfArg_struct _Tmp3;_Tmp3.tag=2,_Tmp3.f1=& number;_Tmp3;});void*_Tmp3[1];_Tmp3[0]=& _Tmp2;({struct _fat_ptr _Tmp4=(struct _fat_ptr)Cyc_substring((struct _fat_ptr)line,i,(unsigned long)(j - i));struct _fat_ptr _Tmp5=_tag_fat("%d",sizeof(char),3U);Cyc_sscanf(_Tmp4,_Tmp5,_tag_fat(_Tmp3,sizeof(void*),1));});})!=1){
+if(({struct Cyc_IntPtr_sa_ScanfArg_struct _Tmp2=({struct Cyc_IntPtr_sa_ScanfArg_struct _Tmp3;_Tmp3.tag=2,_Tmp3.f1=& number;_Tmp3;});void*_Tmp3[1];_Tmp3[0]=& _Tmp2;({struct _fat_ptr _Tmp4=Cyc_substring(line,i,(unsigned long)(j - i));struct _fat_ptr _Tmp5=_tag_fat("%d",sizeof(char),3U);Cyc_sscanf(_Tmp4,_Tmp5,_tag_fat(_Tmp3,sizeof(void*),1));});})!=1){
 struct _tuple0*_Tmp2=0;_npop_handler(0);return _Tmp2;}
 while((unsigned)j < _get_fat_size(line,sizeof(char))&&(int)((char*)line.curr)[j]!=34){++ j;1U;}{
 int k=++ j;
@@ -491,10 +491,10 @@ line=(*fno).f1;}}
 # 121
 while(places!=0 &&((int)next==2 || eol > (*((struct _tuple1*)places->hd)).f0)){
 {struct Cyc_Lineno_Pos*p=(*((struct _tuple1*)places->hd)).f1;
-({struct _fat_ptr _Tmp2=(struct _fat_ptr)Cyc_strdup((struct _fat_ptr)source_file);p->logical_file=_Tmp2;});
+({struct _fat_ptr _Tmp2=Cyc_strdup(source_file);p->logical_file=_Tmp2;});
 p->line=this_line;
 p->line_no=line;
-({int _Tmp2=(int)({unsigned long _Tmp3=Cyc_strlen((struct _fat_ptr)this_line);_Tmp3 - (unsigned long)(eol - (*((struct _tuple1*)places->hd)).f0);});p->col=_Tmp2;});
+({int _Tmp2=(int)({unsigned long _Tmp3=Cyc_strlen(this_line);_Tmp3 - (unsigned long)(eol - (*((struct _tuple1*)places->hd)).f0);});p->col=_Tmp2;});
 if(p->col < 0)p->col=0;
 places=places->tl;}
 # 122

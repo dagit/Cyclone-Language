@@ -28,6 +28,7 @@
 #include "unify.h"
 #include "assndef.h"
 #include "pratt_prover.h"
+#include "bansheeif.h"
 using Core;
 using List;
 using Absyn;
@@ -210,12 +211,33 @@ void occurs(type_t evar,region_t<`r> r,list_t<tvar_t,`r> env,type_t t) {
   }
 }
 
-static void unify_it(type_t t1, type_t t2);
+static void unify_it(type_t t1, type_t t2, 
+		     bool (@f)(`env, Absyn::type_t, Absyn::type_t),
+		     `env);
 
+static bool cvar_default(int a, type_t t1, type_t t2) {
+  return false;
+}
 // unify types t1 and t2, returning true iff the unification succeeds
 bool unify(type_t t1, type_t t2) {
   try {
-    unify_it(t1,t2);
+    unify_it(t1,t2,cvar_default,0);
+    return true;
+  } catch { 
+  case &Unify: 
+#ifdef DEBUG
+    fprintf(stderr, "Unification of <%s,%s> failed because %s\n", 
+	    Absynpp::typ2string(t1), Absynpp::typ2string(t2), failure_reason);
+#endif
+    return false; 
+  }
+}
+
+bool unify_c(type_t t1, type_t t2,
+	     bool (@f)(`env, Absyn::type_t, Absyn::type_t),
+	     `env e) {
+  try {
+    unify_it(t1,t2,f,e);
     return true;
   } catch { 
   case &Unify: 
@@ -228,9 +250,11 @@ bool unify(type_t t1, type_t t2) {
 }
 
 // unify two lists of types
-static void unify_list(list_t<type_t> t1, list_t<type_t> t2) {
+static void unify_list(list_t<type_t> t1, list_t<type_t> t2,
+		       bool (@f)(`env, Absyn::type_t, Absyn::type_t),
+		       `env e) {
   for (; t1 != NULL && t2 != NULL; t1 = t1->tl, t2 = t2->tl)
-    unify_it(t1->hd,t2->hd);
+    unify_it(t1->hd,t2->hd,f,e);
   if (t1 != NULL || t2 != NULL)
     throw &Unify_val;
 }
@@ -284,12 +308,14 @@ static bool unify_const_exp_opt(exp_opt_t e1, exp_opt_t e2) {
 }
 
 // the real work of unification
-static void unify_it(type_t t1, type_t t2) {
+static void unify_it(type_t t1, type_t t2, 
+		     bool (@cvaruf)(`env, Absyn::type_t, Absyn::type_t),
+		     `env env) {
   ts_failure = $(t1,t2);
   failure_reason = NULL;
   t1 = compress(t1);
   t2 = compress(t2);
-  if (t1 == t2) return;
+  if (t1 == t2) return; //handles basic Cvar case
   switch ($(t2,t1)) {
   case $(&Evar(*kind1opt,*t2r,_,*s1opt),&Evar(*kind2opt,_,_,*s2opt)):
     if(Kinds::kind_leq((*kind1opt)->v,(*kind2opt)->v))
@@ -344,8 +370,11 @@ static void unify_it(type_t t1, type_t t2) {
     case &PointerType(pinfo) && kind1->v->kind == BoxKind:
       let c = compress(pinfo.ptr_atts.bounds);
       switch (c) {
+      case &Cvar(...): //we must constraint this to a boxed kind
+	BansheeIf::add_constraint(0,BansheeIf::equality_constraint(c, thinconst()));
+	fallthru;
       case &Evar(...):
-	if (!unify(c,bounds_one())) fallthru;
+	if (!unify_c(c,bounds_one(),cvaruf,env)) fallthru;
 	*ref1_ref = t2;
 	return;
       default: 
@@ -358,7 +387,13 @@ static void unify_it(type_t t1, type_t t2) {
     }
 
   case $(&Evar(...),_): // t2 is an evar, t1 is not, so swap
-    unify_it(t2,t1); return;
+    unify_it(t2,t1,cvaruf,env); return;
+  case $(&Cvar(...), _):
+  case $(_, &Cvar(...)):
+    if(!cvaruf(env, t2, t1)) {
+      fail_because("constraint variables could not be unified");
+    }
+    break;
     /*   case $(&AppType(&AccessCon,_), _): */
     /*   case $(_, &AppType(&AccessCon,_)): */
   case $(&AppType(&JoinCon,_), _):
@@ -379,7 +414,7 @@ static void unify_it(type_t t1, type_t t2) {
   case $(&AppType(&AqualConstCon(_),_), &AppType(&AqualVarCon, &List{&VarType(...), _})): //2'
     fail_because("(abstracted type variable doesn't unify with constant)");
   case $(&AppType(&AqualConstCon(_),_), &AppType(&AqualVarCon, &List{&Evar(...), _})): //3'
-    unify_it(t2, t1);
+    unify_it(t2, t1,cvaruf,env);
     break;
   case $(&AppType(&AqualVarCon, &List{&Evar(k,*ref, ...), bnd}), &AppType(&AqualConstCon(aqv),_)): //case 3
     if(!Kinds::kind_eq(k->v, &Kinds::aqk))
@@ -395,7 +430,7 @@ static void unify_it(type_t t1, type_t t2) {
       fail_because("(aquals(`a) variables are not the same)");
     break;
   case $(&AppType(&AqualVarCon, &List{&VarType(...),_}), &AppType(&AqualVarCon, &List{&Evar(...), _})): //5'
-    unify_it(t2, t1);
+    unify_it(t2, t1,cvaruf,env);
     break;
   case $(&AppType(&AqualVarCon, &List{&Evar(k, *ref, _, s2_opt), _}), &AppType(&AqualVarCon, &List{&VarType(tv),bnd}))://case 5
     //check that tv is legal in the evar's environment
@@ -406,7 +441,7 @@ static void unify_it(type_t t1, type_t t2) {
     *ref = t1;//bounds checking for fncall_e, aggregate_e done externally
     break;
   case $(&AppType(&AqualVarCon, &List{ev2 as &Evar(...),_}), &AppType(&AqualVarCon, &List{ev1 as &Evar(...),_}))://case 6
-    unify_it(ev1, ev2);
+    unify_it(ev1, ev2,cvaruf,env);
     /*     if(id1 != id2) {      //need to check s2opt and s1opt */
     /*       if(!Kinds::kind_eq(k2->v, k1->v)) //force kinds to be the *same* */
     /* 	fail_because("(incompatible kinds)"); */
@@ -416,7 +451,7 @@ static void unify_it(type_t t1, type_t t2) {
   case $(&AppType(c1,ts1),&AppType(c2,ts2)):
     if (Tcutil::tycon_cmp(c1,c2) != 0) 
       fail_because("different type constructors");
-    unify_list(ts1,ts2);
+    unify_list(ts1,ts2,cvaruf,env);
     return;
 
   case $(&VarType(tv2),&VarType(tv1)):
@@ -427,21 +462,21 @@ static void unify_it(type_t t1, type_t t2) {
 
   case $(&PointerType(PtrInfo(t2a,tqual2a,PtrAtts(rgn2,null2a,b2,zt2,_,rel2,aq2))),
          &PointerType(PtrInfo(t1a,tqual1a,PtrAtts(rgn1,null1a,b1,zt1,_,rel1,aq1)))):
-    unify_it(t1a,t2a);
-    unify_it(rgn2,rgn1); // the whole reason regions are "types"
+    unify_it(t1a,t2a,cvaruf,env);
+    unify_it(rgn2,rgn1,cvaruf,env); // the whole reason regions are "types"
     let orig_failure = failure_reason;
-    unify_it(aq2, aq1);
+    unify_it(aq2, aq1,cvaruf,env);
 
-    if (!unify(zt1,zt2)) {
+    if (!unify_c(zt1,zt2,cvaruf,env)) {
       ts_failure = $(t1,t2);
       fail_because("not both zero terminated");
     }
-    if (!unify(rel1,rel2)) {
+    if (!unify_c(rel1,rel2,cvaruf,env)) {
       ts_failure = $(t1,t2);
       fail_because("not both autoreleased");
     }
     unify_tqual(tqual1a,t1a,tqual2a,t2a);
-    if (!unify(b1,b2)) {
+    if (!unify_c(b1,b2,cvaruf,env)) {
       ts_failure = $(t1,t2);
       fail_because("different pointer bounds");
     }
@@ -452,7 +487,7 @@ static void unify_it(type_t t1, type_t t2) {
       return;
     default: 
       failure_reason = "incompatible pointer types";
-      unify_it(null1a,null2a);
+      unify_it(null1a,null2a,cvaruf,env);
       return;
     }
 
@@ -463,10 +498,10 @@ static void unify_it(type_t t1, type_t t2) {
 
   case $(&ArrayType(ArrayInfo{t2a,tq2a,e1,zt1,_}),
          &ArrayType(ArrayInfo{t1a,tq1a,e2,zt2,_})):
-    unify_it(t1a,t2a);
+    unify_it(t1a,t2a,cvaruf,env);
     unify_tqual(tq1a,t1a,tq2a,t2a);
     failure_reason = "not both zero terminated";
-    unify_it(zt1,zt2);
+    unify_it(zt1,zt2,cvaruf,env);
     if(!unify_const_exp_opt(e1,e2))
       fail_because("different array sizes");
     return;
@@ -502,16 +537,16 @@ static void unify_it(type_t t1, type_t t2) {
                                                             c_vararg2,cyc_vararg2,qb2,
                                                             atts2,req2,req_relns2,
                                                             ens2,ens_relns2,thrws2,thrws_relns2,return_value2,argvds2,effc2}));
-      unify_it(newftype1,newftype2);
+      unify_it(newftype1,newftype2,cvaruf,env);
       return;
     }
     }
-    unify_it(rt1,rt2);
+  unify_it(rt1,rt2,cvaruf,env);
     unify_tqual(rt_tq1,rt1,rt_tq2,rt2);
     for (; args1!=NULL && args2!=NULL; args1 = args1->tl, args2 = args2->tl) {
       let $(_,tqa,ta) = *args1->hd;
       let $(_,tqb,tb) = *args2->hd;
-      unify_it(ta,tb);
+      unify_it(ta,tb,cvaruf,env);
       unify_tqual(tqa,ta,tqb,tb);
     }
     ts_failure = $(t1,t2);
@@ -525,7 +560,7 @@ static void unify_it(type_t t1, type_t t2) {
     case $(NULL,_):
     case $(_,NULL): fail_because("only one function type takes varargs");
     case $(&VarargInfo{n1,tq1,tp1,i1}, &VarargInfo{n2,tq2,tp2,i2}):
-      unify_it(tp1,tp2);
+      unify_it(tp1,tp2,cvaruf,env);
       unify_tqual(tq1,tp1,tq2,tp2);
       if (i1 != i2)
         fail_because("only one function type injects varargs");
@@ -572,7 +607,7 @@ static void unify_it(type_t t1, type_t t2) {
       let f2 = fs2->hd;
       if (strptrcmp(f1->name,f2->name) != 0)
         fail_because("different member names");
-      unify_it(f1->type, f2->type);
+      unify_it(f1->type, f2->type,cvaruf,env);
       unify_tqual(f1->tq, f1->type, f2->tq, f2->type);
       ts_failure = $(t1,t2);
       if (!Atts::same_atts(f1->attributes,f2->attributes))
@@ -590,8 +625,9 @@ static void unify_it(type_t t1, type_t t2) {
     if (td1 != td2)
       fail_because("different abstract typedefs");
     failure_reason = "type parameters to typedef differ";
-    unify_list(ts1,ts2);
+    unify_list(ts1,ts2,cvaruf,env);
     return;
   default: throw &Unify_val; // caller in charge failure_reason
   }
 }
+

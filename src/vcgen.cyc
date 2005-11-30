@@ -616,7 +616,7 @@ static $(assn_t,assn_t) okderef(term_t root, term_t i){
     if (tp != NULL) {
       switch (Absyn::compress((type_t)tp)) {
       case &Absyn::PointerType(p1):
-	let b1 = Tcutil::get_bounds_exp(Absyn::bounds_one(),p1.ptr_atts.bounds);
+	let b1 = Tcutil::get_bounds_exp_constrain(Absyn::bounds_one(),p1.ptr_atts.bounds,true);
         let b2 = Tcutil::is_nullable_pointer_type(tp,false);
         let nullck = b2 ? neq(root,zero()) : &true_assn;
 	if (b1 != NULL)
@@ -989,8 +989,8 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
     case $(&Absyn::PointerType(p2),&Absyn::PointerType(p1)):
       let n1 = Tcutil::force_type2bool(false,p1.ptr_atts.nullable);
       let n2 = Tcutil::force_type2bool(false,p2.ptr_atts.nullable);
-      let b1 = Tcutil::get_bounds_exp(Absyn::bounds_one(),p1.ptr_atts.bounds);
-      let b2 = Tcutil::get_bounds_exp(Absyn::bounds_one(),p2.ptr_atts.bounds);
+      let b1 = Tcutil::get_bounds_exp_constrain(Absyn::bounds_one(),p1.ptr_atts.bounds, true);
+      let b2 = Tcutil::get_bounds_exp_constrain(Absyn::bounds_one(),p2.ptr_atts.bounds, true);
       switch $(b1,b2) {
       case $(&_, &_) && !env->pure_exp:
         // Both thin pointers -- type-checker should ensure that

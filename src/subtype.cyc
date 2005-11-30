@@ -1,0 +1,920 @@
+/* Generating subtyping constraints for types
+   Copyright (C) 2005 Nikhil Swamy
+   This file is part of the Cyclone compiler.
+
+   The Cyclone compiler is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   The Cyclone compiler is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with the Cyclone compiler; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+#include "absyn.h"
+#include "bansheeif.h"
+#include "subtype.h"
+#include "tcutil.h"
+#include "unify.h"
+#include "kinds.h"
+#include "evexp.h"
+#include "attributes.h"
+#include "pratt_prover.h"
+#include "warn.h"
+
+using Core;
+using Absyn;
+using BansheeIf;
+using List;
+using Tcutil;
+
+namespace Subtype;
+
+static coercion_t join_coercion(coercion_t c1, coercion_t c2) {
+  if(c1 == c2) return c1;
+  switch ($(c1, c2)) {
+  case $(Unknown_coercion, _):
+  case $(_, Unknown_coercion): return Unknown_coercion;
+  case $(No_coercion, o): fallthru(o);
+  case $(o, No_coercion): return o;
+  case $(Null_to_NonNull, Other_coercion):
+  case $(Other_coercion, Null_to_NonNull): return Null_to_NonNull;
+  default: return Unknown_coercion;
+  }
+}
+// defined below
+//the bool in the return type signals whether the coercion should be done silently or not
+//if constraints are present, everything is treated as non-silent ...
+//the whole warning thing needs to be refined ... just as we kill checks, we should kill warnings
+//too depending on the solution of the constraints
+static $(coercion_t, list_t<constraint_t>) ptrsubtype(list_t<$(type_t,type_t)@`H,`H>,
+							    type_t, type_t);
+static $(coercion_t, list_t<constraint_t>) effect_subtype(type_t t1, type_t t2, bool) ;
+static $(coercion_t, list_t<constraint_t>, bool) constraint_subtype(type_t t1, type_t t2, 
+								    bool genconstr<`r::E>(list_t<constraint_t,`H>@`r,
+											  enum KindQual,
+											  type_t, type_t),
+								    bool allow_deep_subtype, bool allow_coercion);
+
+static list_t<$(tqual_t,type_t)@`r,`r> flatten_type(region_t<`r>,bool,type_t);
+
+static list_t<$(tqual_t,type_t)@`r,`r>
+  flatten_type_f($(list_t<$(tvar_t,type_t)@`r,`r>,
+                  region_t<`r>, bool)@ env,aggrfield_t x){
+  let $(inst,r,flatten) = *env;
+  let t = (inst == NULL) ? x->type : Tcutil::rsubstitute(r,inst,x->type);
+  let ts = flatten_type(r,flatten,t);
+  if (List::length(ts) == 1)
+    return rnew(r) List{rnew(r) $(x->tq,t),NULL};
+  return ts;
+}
+
+static list_t<$(tqual_t,type_t)@`r,`r> 
+flatten_type(region_t<`r> r, bool flatten, type_t t1) {
+  if (flatten) {
+    t1 = compress(t1);
+    switch (t1) {
+    case &AppType(&VoidCon,_): return NULL;
+    case &AppType(&AggrCon({.KnownAggr = &ad}),ts):
+      // FIX: too strict with existentials and constraints??
+      if(ad->kind==UnionA || ad->impl==NULL
+         || ad->impl->exist_vars != NULL || ad->impl->effconstr != NULL)
+        return rnew(r) List(rnew(r) $(empty_tqual(0),t1),NULL);
+      let inst = List::rzip(r,r,ad->tvs,ts);
+      $(list_t<_,`r>,region_t<`r>,bool) env = $(inst,r,flatten);
+      switch (ad->impl->fields) {
+      case NULL: return NULL;
+      case &List{hd,tl}:
+        let hd2 = flatten_type_f(&env,hd);
+        env[2] = false;
+        let tl2 = List::rmap_c(r,flatten_type_f,&env,tl);
+        let tts = rnew(r) List{hd2,tl2};
+        return List::rflatten(r,tts);
+      }
+    case &AnonAggrType(StructA,_,fs):
+      $(list_t<_,`r>,region_t<`r>,bool) env = $(NULL,r,flatten);
+      switch (fs) {
+      case NULL: return NULL;
+      case &List{hd,tl}:
+        let hd2 = flatten_type_f(&env,hd);
+        env[2] = false;
+        let tl2 = List::rmap_c(r,flatten_type_f,&env,tl);
+        let tts = rnew(r) List{hd2,tl2};
+        return rflatten(r,tts);
+      }
+    default: break;
+    }
+  }
+  return rnew(r) List(rnew(r) $(empty_tqual(0),t1),NULL);
+}
+
+
+//compress handles aquals(`a) case too
+bool check_aqual_bounds(aqualbnds_t aquals_bnd, 
+			aqualtype_t aq, aqualtype_t bnd) {
+  switch ($(compress(aq), compress(bnd))) {
+  case $(&AppType(&AqualConstCon(v_sub), _), &AppType(&AqualConstCon(v_sup), _)):
+    return (v_sup==v_sub || v_sup==Restricted_qual);
+  case $(&AppType(&AqualVarCon, tv_sub), &AppType(&AqualConstCon(v_sup), _)):
+    return check_aqual_bounds(aquals_bnd, tv_sub->tl->hd, bnd);
+  case $(&AppType(&AqualsCon, _),  &AppType(&AqualConstCon(v_sup), _)):
+    try { 
+      let aq_bound = List::assoc_cmp(Tcutil::typecmp, aquals_bnd, aq);
+      return check_aqual_bounds(aquals_bnd, aq_bound, bnd);
+    }catch {
+    case &Not_found:
+      return false; 
+    }
+  default: 
+    Warn::impos2("check_aqual_bounds expects a constant bound; got ", aq, ",", bnd);
+  }
+}
+
+//can't use unify ... don't want side effects
+//If aquals(`a) is present force identities to be the same
+//otherwise dependencies to outer scopes gets ugly
+//Note:: Eventually this should generate constraints too
+bool alias_qual_subtype(aqualtype_t aq_sub, aqualtype_t aq_sup) {
+  switch ($(compress(aq_sub), compress(aq_sup))) {
+  case $(&AppType(&AqualConstCon(v_sub), _), &AppType(&AqualConstCon(v_sup), _))://c,c
+    return ((v_sup==v_sub || v_sup==Restricted_qual)
+	    ||(v_sup == Aliasable_qual && (v_sub == Unique_qual || v_sub == Refcnt_qual || v_sub == Restricted_qual)));
+  case $(&AppType(&AqualVarCon, &List(&VarType(tv1), _)), &AppType(&AqualVarCon, &List(&VarType(tv2), _)))://v,v
+    return (tv2->identity == tv1->identity);
+  case $(&AppType(&AqualVarCon, &List(&AppType(&AqualsCon, &List{tv1, NULL}), _)), 
+	 &AppType(&AqualVarCon, &List(&AppType(&AqualsCon, &List{tv2, NULL}), _))): //v,v
+    return (Tcutil::typecmp(tv1, tv2)==0);
+  case $(&AppType(&AqualVarCon, &List(&VarType(tv1), bnd1)), &AppType(&AqualVarCon, &List(&Evar(k, ...), bnd2)))://v,e
+    return (Kinds::kind_eq(Kinds::tvar_kind(tv1,&Kinds::aqk), k->v) && alias_qual_subtype(bnd1->hd, bnd2->hd));
+  case $(&AppType(&AqualVarCon, &List(&Evar(k1, ...), bnd1)), &AppType(&AqualVarCon, &List(&VarType(tv2), bnd2)))://e,v
+    return (Kinds::kind_eq(k1->v, Kinds::tvar_kind(tv2, &Kinds::aqk)) && check_aqual_bounds(NULL, bnd2->hd, bnd1->hd));//fix NULL
+  case $(&AppType(&AqualVarCon, &List(&Evar(k1, ...), bnd1)), &AppType(&AqualVarCon, &List(&Evar(k2, ...), bnd2)))://e,e
+    return (Kinds::kind_eq(k1->v, k2->v) && alias_qual_subtype(bnd1->hd, bnd2->hd));
+    //  case $(&AppType(&AqualVarCon, tv_sub), &AppType(&AqualVarCon, tv_sup)): 
+    //    return (unify(tv_sub->hd, tv_sup->hd) && alias_qual_subtype(tv_sub->tl->hd, tv_sup->tl->hd));
+    //we can use an @aqual(`q <= C) in place of C ... 
+  case $(&AppType(&AqualVarCon, &List(&VarType(tv), bnd)), &AppType(&AqualConstCon(v_sup),_))://v,c
+    return alias_qual_subtype(bnd->hd, aq_sup);
+  case $(&AppType(&AqualVarCon, &List(&Evar(k, ...), bnd)), &AppType(&AqualConstCon(v_sup),_))://e,c
+    return (Kinds::kind_eq(k->v, &Kinds::aqk) && check_aqual_bounds(NULL, aq_sup, bnd->hd));//, aq_sup));//fix NULL
+    //but not C in place of @aqual(`q <= C) (VarType does not unify with AqualConst, but Evar does)
+  case $(&AppType(&AqualConstCon(v_sub),_), &AppType(&AqualVarCon, &List(&VarType(tv), ...)))://c,v
+    return false;
+  case $(&AppType(&AqualConstCon(v_sub),_), &AppType(&AqualVarCon, &List(&Evar(k, ...), bnd)))://c,e
+    return (Kinds::kind_eq(k->v, &Kinds::aqk) && alias_qual_subtype(aq_sub, bnd->hd));
+  default:
+    return false;
+  }
+}
+
+static bool isomorphic(type_t t1, type_t t2) {
+  switch ($(compress(t1),compress(t2))) {
+  case $(&AppType(&IntCon(_,b1),_), &AppType(&IntCon(_, b2),_)):
+    return b1 == b2 || (b1 == Int_sz && b2 == Long_sz) ||
+      (b1 == Long_sz && b2 == Int_sz);
+  default: return false;
+  }
+}
+
+#define SUBTYPE_FAIL $(Unknown_coercion, NULL)
+#define CSUB_FAIL $(Unknown_coercion, NULL, false)
+
+static $(coercion_t, list_t<constraint_t>) effect_inst_subtype(types_t l1, types_t l2) {
+  coercion_t subtypes = No_coercion;
+  list_t<constraint_t> retc = NULL;
+  for(;l1 != NULL && l2 != NULL && subtypes; l1 = l1->tl, l2=l2->tl) {
+    if(Tcutil::type_kind(l1->hd)==&Kinds::ek && Tcutil::type_kind(l2->hd) == &Kinds::ek) {
+      subtypes = Tcutil::subset_effect(false, l1->hd, l2->hd);
+    }
+    else {
+      let $(s, c) = effect_subtype(l1->hd, l2->hd, false);
+      subtypes = s;
+      retc = List::imp_append(retc, c);
+    }
+  }
+  if(l1==NULL ^ l2 ==NULL)
+    subtypes = Unknown_coercion;
+  return $(subtypes, retc);
+}
+
+//this allows us to treat foo_t<`a::E> as a subtype of foo_t<`a+`b>
+static $(coercion_t, list_t<constraint_t>) effect_subtype(type_t t1, type_t t2, bool top_level) {
+  switch($(compress(t1), compress(t2))){
+  case $(&AppType(&AggrCon({.KnownAggr = &ad1}), l1),&AppType(&AggrCon({.KnownAggr = &ad2}), l2)): 
+    return (qvar_cmp(ad1->name, ad2->name)==0) ? effect_inst_subtype(l1, l2) : SUBTYPE_FAIL;
+  case $(&AppType(&DatatypeCon({.KnownDatatype = &dd1}), l1), &AppType(&DatatypeCon({.KnownDatatype = &dd2}), l2)):
+    return (qvar_cmp(dd1->name, dd2->name)==0) ? effect_inst_subtype(l1, l2) : SUBTYPE_FAIL;
+  case $(&AppType(&DatatypeFieldCon({.KnownDatatypefield = $(dd1, df1)}), l1),
+	 &AppType(&DatatypeFieldCon({.KnownDatatypefield = $(dd2, df2)}), l2)):
+    return ((qvar_cmp(dd1->name, dd2->name)==0) && (qvar_cmp(df1->name, df2->name)==0)) ?   effect_inst_subtype(l1, l2) : SUBTYPE_FAIL;
+  case $(&AppType(&DatatypeFieldCon({.KnownDatatypefield = $(dd1,df1)}),l1),
+         &AppType(&DatatypeCon({.KnownDatatype = &dd2}), l2)):
+    if(top_level && (dd1 == dd2 || qvar_cmp(dd1->name,dd2->name) == 0)) {
+      let $(s, c) = effect_inst_subtype(l1, l2);
+      if(s != Unknown_coercion) {
+	return $(Other_coercion, c);
+      }
+    }
+    return SUBTYPE_FAIL;
+  case $(&TypedefType(n1, l1, ...), &TypedefType(n2, l2, ...)): 
+    return (qvar_cmp(n1, n2)==0) ? effect_inst_subtype(l1, l2) : SUBTYPE_FAIL;
+  case $(&PointerType(PtrInfo(t_a, q_a, PtrAtts(eff_a,null_a,b_a,zt_a,_,_,aq_a))), 
+	 &PointerType(PtrInfo(t_b, q_b, PtrAtts(eff_b,null_b,b_b,zt_b,_,_,aq_b)))):
+    if(Tcutil::subset_effect(false, eff_a, eff_b)) {
+      let $(s, c) = effect_subtype(t_a, t_b, false);
+      if(s != Unknown_coercion) {
+	if(equal_tqual(q_a, q_b) &&  Unify::unify(null_a, null_b) &&
+	   Unify::unify(zt_a, zt_b) && Unify::unify(aq_a, aq_b)) {
+	  if(Unify::unify(b_a, b_b)) {
+	    return $(No_coercion, c);
+	  }
+	  else {
+	    let cba = Tcutil::ptrbnd_cvar_equivalent(b_a);
+	    let cbb = Tcutil::ptrbnd_cvar_equivalent(b_b);
+	    if(cba && cbb) {
+	      return $(No_coercion, new List{equality_constraint(cba, cbb), c});
+	    }
+	  }
+	}
+      }
+    }
+    return SUBTYPE_FAIL;
+  default: 
+    return $((Tcutil::typecmp(t1, t2)==0) ? No_coercion : Unknown_coercion, NULL);
+  }
+}
+
+static $(coercion_t, list_t<constraint_t>) force_equivalence(type_t t1, type_t t2);
+//maybe this should be moved into Unify ... with an additional parameter to force Cvar unification
+static $(coercion_t, list_t<constraint_t>) 
+     force_pointer_equivalence(type_t t1, type_t t2) {
+  list_t<constraint_t> retc = NULL;
+  switch ($(compress(t1), compress(t2))) {
+  case $(&PointerType(PtrInfo(t1a,tqual1a,PtrAtts(eff1,null1a,b1,zt1,_,rel1,aq1))),
+	 &PointerType(PtrInfo(t2a,tqual2a,PtrAtts(eff2,null2a,b2,zt2,_,rel2,aq2)))):
+    if(Unify::unify(b1, b2)) { 
+      //unification was already attempted on t1, t2
+      //if the bounds unify then the unification failure was either 
+      //because of one of the other fields ... in which case these cannot be forced equivalent
+      //Or, because of a bounds expression in the pointer element
+      if(equal_tqual(tqual1a,tqual2a) &&  Unify::unify(eff1,eff2) &&
+	 Unify::unify(null1a,null2a) &&  Unify::unify(zt1,zt2) &&
+	 Unify::unify(rel1,rel2) &&  Unify::unify(aq1,aq2)) {
+	if(Unify::unify(t1a, t2a))
+	  return $(No_coercion, NULL);
+	return force_equivalence(t1a, t2a);
+      }
+      //t1 t2 failed to unify because of something other than the bounds expression
+      return SUBTYPE_FAIL;
+    }
+    else {
+      _ bb1 = ptrbnd_cvar_equivalent(b1);
+      _ bb2 = ptrbnd_cvar_equivalent(b2);
+      if(bb1 && bb2) {
+	if(equal_tqual(tqual1a,tqual2a) &&  Unify::unify(eff1,eff2) &&
+	   Unify::unify(null1a,null2a) &&  Unify::unify(zt1,zt2) &&
+	   Unify::unify(rel1,rel2) &&  Unify::unify(aq1,aq2)) {
+	  let bbc = equality_constraint(bb1, bb2);
+	  if(Unify::unify(t1a, t2a)) 
+	    return $(No_coercion, new List{bbc, NULL});
+	  let $(c, retc1) = force_equivalence(t1a, t2a);
+	  if(c != Unknown_coercion)
+	    return $(No_coercion, new List{bbc, retc1});	  
+	}
+      }
+      return SUBTYPE_FAIL;
+    }
+  default:
+    return SUBTYPE_FAIL;
+  }
+}
+
+static bool unify_cvar(list_t<constraint_t,`H> *env, type_t t1, type_t t2) {
+  if(is_cvar_type(t1) || is_cvar_type(t2)) {
+    _ cv1 = Tcutil::ptrbnd_cvar_equivalent(t1);
+    _ cv2 = Tcutil::ptrbnd_cvar_equivalent(t2);
+    if(cv1 && cv2) {
+      *env = new List{equality_constraint(cv1, cv2), *env};
+      return true;
+    }
+  }
+  return false;
+}
+
+static $(coercion_t, list_t<constraint_t>)
+     force_equivalence(type_t t1, type_t t2) {
+  list_t<constraint_t,`H> retc = NULL;
+  if(Unify::unify_c(t1, t2, unify_cvar, &retc)) {
+    return $(No_coercion, retc);
+  }
+  return SUBTYPE_FAIL;
+}
+
+static bool gen_equality_constraint(List::list_t<BansheeIf::constraint_t,`H> @retc, 
+				    enum KindQual,
+				    Absyn::type_t t1, 
+				    Absyn::type_t t2);
+  
+/*   list_t<constraint_t> retc = NULL; */
+/*   list_t<$(tqual_t,type_t)@>  t1f = flatten_type(Core::heap_region, true, t1); */
+/*   list_t<$(tqual_t,type_t)@>  t2f = flatten_type(Core::heap_region, true, t2); */
+/*   if(List::length(t1f) != List::length(t2f))  */
+/*     return SUBTYPE_FAIL; */
+/*   for(;t1f&&t2f;t1f=t1f->tl,t2f=t2f->tl) { */
+/*     let &$(t1q, t1a) = t1f->hd; */
+/*     let &$(t2q, t2a) = t2f->hd; */
+/*     if(!equal_tqual(t1q, t2q)) */
+/*       return SUBTYPE_FAIL; */
+/*     if(!Unify::unify(t1a, t2a)) { */
+/*       if(is_pointer_type(compress(t1a))) { */
+/* 	let $(c, l) = force_pointer_equivalence(t1a, t2a); */
+/* 	if(c == Unknown_coercion) */
+/* 	  return SUBTYPE_FAIL; */
+/* 	retc = List::imp_append(retc,l); */
+/*       } */
+/*       else   */
+/* 	return SUBTYPE_FAIL; */
+/*     } */
+/*   } */
+/*   return $(No_coercion, retc); */
+/* } */
+
+
+// FIX: the subtyping environment needs to take into account the
+// qualifiers on the pointers.
+static $(coercion_t, list_t<constraint_t>) subtype_impl(list_t<$(type_t,type_t)@`H,`H> assume,
+							type_t t1, type_t t2) {
+  list_t<constraint_t> retc = NULL;
+  if (Unify::unify(t1,t2)) return $(No_coercion,NULL);
+  for (_ a = assume; a != NULL; a = a->tl) 
+    if (Unify::unify(t1,(*a->hd)[0]) && Unify::unify(t2,(*a->hd)[1]))
+      return $(No_coercion,NULL);
+  t1 = compress(t1);
+  t2 = compress(t2);
+  switch ($(t1,t2)) {
+    // the following allows us to cast an unsigned int pointer to an int
+    // pointer and vice versa.  This is okay because the types are isomorphic.
+   case $(&PointerType(PtrInfo(t_a, q_a, PtrAtts(rt_a,null_a,b_a,zt_a,_,rel_a,aq_a))),
+          &PointerType(PtrInfo(t_b, q_b, PtrAtts(rt_b,null_b,b_b,zt_b,_,rel_b,aq_b)))):
+     coercion_t coerce = No_coercion;
+    // if t1 is const then t2 must be const
+    if (q_a.real_const && !q_b.real_const)
+      return SUBTYPE_FAIL;
+    // if t1 is * then t2 must be *
+    if (!Unify::unify(null_a,null_b)) {
+      if(type2bool(false,null_a) && !type2bool(false,null_b))
+	return SUBTYPE_FAIL;
+      //@ -> * is a No_coercion
+    }
+    // if t1 is not zero-terminated, then t2 must not be zero-terminated
+    if (!Unify::unify(zt_a,zt_b)
+        && !type2bool(false,zt_a) && type2bool(false,zt_b))  
+      return SUBTYPE_FAIL;
+    // if t1 is not autoreleased, then t2 must not be autoreleased
+    if (Unify::unify(rel_a,rel_b)
+        && !type2bool(false,rel_a) && type2bool(false,rel_b))
+      return SUBTYPE_FAIL;
+    // rt_a must outlive rt_b
+    if (!Unify::unify(rt_a,rt_b) && !(subtype_impl(assume, rt_a, rt_b).f0) && //only way for this to work is using the assume list
+	!Tcutil::subset_effect(false, rt_a, rt_b)) {
+      return SUBTYPE_FAIL;
+    }
+    if (!Unify::unify(aq_a, aq_b) && !alias_qual_subtype(aq_a, aq_b) && 
+	!subtype_impl(assume, aq_a, aq_b).f0)
+      return SUBTYPE_FAIL;
+
+    // need to check that the bounds match up
+    if (!Unify::unify(b_a,b_b)) {
+      if(!is_cvar_type(b_a) && !is_cvar_type(b_b)) {
+	let e1 = Tcutil::get_bounds_exp(bounds_one(),b_a);
+	let e2 = Tcutil::get_bounds_exp(bounds_one(),b_b);
+	if (e1 != e2) {
+	  if (e1 == NULL || e2 == NULL || !Evexp::lte_const_exp(e2,e1)) 
+	    return SUBTYPE_FAIL;
+	}
+      }
+      else {
+	//might need a way to defer adding the constraint to the graph 
+	//let the caller decide if the subtyping constraint is necessary
+	let cva = Tcutil::ptrbnd_cvar_equivalent(b_a);
+	let cvb = Tcutil::ptrbnd_cvar_equivalent(b_b);
+	if(cva && cvb) {
+	  retc = new List{equality_constraint(cva, cvb), retc};
+	}
+	else  //no way to constrain the types
+	  return SUBTYPE_FAIL;
+      } 
+    }
+    // check that qualifiers are the same or that t2's is at least const
+    // (or it's element type is abstract).
+    if (!q_b.real_const && q_a.real_const)
+      if (!Kinds::kind_leq(&Kinds::ak,Tcutil::type_kind(t_b)))
+        return SUBTYPE_FAIL;
+    // Note, we can only allow ptrsubtype when the second pointer has a
+    // bound of 1, is not fat, and is not zero-terminated!
+    if(isomorphic(t_a, t_b)) {
+      return $(coerce, retc);
+    }
+    {
+      let $(s, c, _) = constraint_subtype(t_a, t_b, gen_equality_constraint<>, false, false);
+      if(s==No_coercion) {//effectively unified modulo satisfaction of constraints
+	retc = List::imp_append(retc, c);
+	return $(No_coercion, retc);
+      }
+    }
+    //elements might still be subtypes ... but must be *{1} and cannot be zeroterm
+    let deep_subtype = !force_type2bool(false,zt_b);
+    if(deep_subtype && !Unify::unify(b_b,bounds_one())) { //if we can't unify
+      coerce = join_coercion(coerce, Other_coercion);
+      let cbb = Tcutil::ptrbnd_cvar_equivalent(b_b);
+      if(cbb){ //then try to constrain
+	retc = new List{equality_constraint(cbb, thinconst()), retc};
+      }
+      else 
+	deep_subtype = false;
+    }
+    if(deep_subtype) {
+      let $(s, c) = ptrsubtype(new List(new $(t1,t2),assume), t_a, t_b);
+      if(s == No_coercion) {
+	return $(No_coercion, List::imp_append(retc, c));
+      }
+    }
+    else {
+      let $(s, c) = force_equivalence(t_a, t_b);
+      if(s != Unknown_coercion)
+	return $(No_coercion, List::imp_append(retc, c));
+    }
+    return SUBTYPE_FAIL;
+  case $(&AppType(&DatatypeFieldCon({.KnownDatatypefield = $(dd1,df)}),ts1), 
+	 &AppType(&DatatypeCon({.KnownDatatype = &dd2}), ts2)):
+    // we're casting a datatype field to a datatype which is okay
+    // when they match up.
+    // check they're the same datatype
+    if (dd1 != dd2 && qvar_cmp(dd1->name,dd2->name) != 0) return SUBTYPE_FAIL;
+    // check that type parameters are the same
+    if (List::length(ts1) != List::length(ts2)) return SUBTYPE_FAIL;
+    for (; ts1 != NULL; ts1 = ts1->tl, ts2 = ts2->tl) {
+      let $(s, c, _) = constraint_subtype(ts1->hd, ts2->hd, gen_equality_constraint<>, false, false);    
+      if(s != Unknown_coercion) {
+	retc = List::imp_append(retc, c);
+      }
+      else {
+	//maybe these are effect subtypes 
+	let $(es,ec) = effect_subtype(t1, t2, true);
+	if(es == Unknown_coercion)
+	  return SUBTYPE_FAIL;
+	retc = List::imp_append(retc, ec); //drop the constraint_subtype constraints on the floor
+      }
+    }
+    return $(Other_coercion, retc);
+  case $(&FnType(f1), &FnType(f2)):
+    if (f1.tvars != NULL || f2.tvars != NULL) {
+      let tvs1 = f1.tvars;
+      let tvs2 = f2.tvars;
+      if (List::length(tvs1) != List::length(tvs2)) return SUBTYPE_FAIL;
+      list_t<$(tvar_t,type_t)@> inst = NULL;
+      while (tvs1 != NULL) {
+	if (!Unify::unify_kindbound(tvs1->hd->kind, tvs2->hd->kind)) return SUBTYPE_FAIL;
+	inst = new List(new$(tvs2->hd, var_type(tvs1->hd)),inst);
+	tvs1 = tvs1->tl;
+	tvs2 = tvs2->tl;
+      }
+      if (tvs2 != NULL)
+	return SUBTYPE_FAIL;
+      if (inst != NULL) {
+	f1.tvars = NULL;
+	f2.tvars = NULL;
+	let newftype2 = Tcutil::rsubstitute(Core::heap_region, inst, new FnType(f2));
+	return subtype_impl(assume,new FnType(f1),newftype2);
+      }
+    }
+    // covariant subtyping on results
+    let $(s, c) = subtype_impl(assume,f1.ret_type,f2.ret_type);
+    if (!s) return SUBTYPE_FAIL;
+    retc = List::imp_append(retc, c);
+    let args1 = f1.args;
+    let args2 = f2.args;
+    // argument lengths must match?  Perhaps C allows one to call
+    // a function with extra arguments?  I don't think so...
+    if (List::length(args1) != List::length(args2)) return SUBTYPE_FAIL;
+    // contravariant subtyping on arguments
+    for (; args1 != NULL; args1 = args1->tl, args2 = args2->tl) {
+      let $(_,tq1,t1) = *args1->hd;
+      let $(_,tq2,t2) = *args2->hd;
+      // FIX: we need to take any qualifiers into account on typedefs
+      if ((tq2.real_const && !tq1.real_const))
+	return SUBTYPE_FAIL;
+      // JGM: I'm dropping the assumptions here -- not sure it's sound
+      // to include them, and results in bad error messages...
+      let $(s, c) = subtype_impl(NULL,t2,t1);
+      if(s == Unknown_coercion)
+	return SUBTYPE_FAIL;
+      retc = List::imp_append(retc, c);
+    }
+    // deal with varargs
+    if (f1.c_varargs != f2.c_varargs) return SUBTYPE_FAIL;
+    if (f1.cyc_varargs != NULL && f2.cyc_varargs != NULL) {
+      let v1 = *f1.cyc_varargs;
+      let v2 = *f2.cyc_varargs;
+      // FIX: we need to take any qualifiers into account on typedefs
+      if (v2.tq.real_const && !v1.tq.real_const)
+        return SUBTYPE_FAIL;
+      let $(s, c) = subtype_impl(assume,v2.type,v1.type);
+      if(s == Unknown_coercion)
+	return SUBTYPE_FAIL;
+      retc = List::imp_append(retc, c);
+    } else if (f1.cyc_varargs != NULL || f2.cyc_varargs != NULL) return SUBTYPE_FAIL;
+    // deal with effect
+    if (!Tcutil::subset_effect(false,(type_t)f1.effect,(type_t)f2.effect)) return SUBTYPE_FAIL;
+    // deal with region partial order
+    if(cmp_effect_constraints(f1.effconstr, f2.effconstr)) return SUBTYPE_FAIL;
+    // deal with attributes that can be dropped
+    if (!Atts::sub_attributes(f1.attributes,f2.attributes)) return SUBTYPE_FAIL;
+    // generate list of terms (representing real values of args and memory
+    let terms = NULL;
+
+    for(let vds = f1.arg_vardecls; vds != NULL; vds = vds->tl) {
+      terms = new List {AssnDef::fresh_var(vds->hd==NULL ? NULL:vds->hd->type),terms};
+    }
+    terms = imp_rev(terms);
+    terms = new List {AssnDef::fresh_var(NULL),terms};
+
+/*     // vds1, vds2 are list of vardecls that include both arg and ret. */
+/*     let vds1 = new List(f1.return_value,f1.arg_vardecls); */
+/*     let vds2 = new List(f2.return_value,f2.arg_vardecls); */
+    // check f2.requires => f1.requires
+    // f1.requires_assn == NULL, then f1.requires_assn = true, 
+    // no need to check f2.req => f1.req
+    if (f1.requires_assn != NULL) {
+      let req1 = AssnDef::existassnfn2assn(f1.requires_assn,terms);
+      let req2 = f2.requires_assn ? AssnDef::existassnfn2assn(f2.requires_assn,terms) : &AssnDef::true_assn;
+      if (!AssnDef::simple_prove(req2,req1) &&
+	  !PrattProver::constraint_prove(req2,req1))
+	return SUBTYPE_FAIL;
+    }
+    // check f1.ensures => f2.ensures
+    // f2.ensures_assn == NULL, then f2.ensures_assn = true,
+    // no need to check f1.ens => f2.ens
+    if (f2.ensures_assn != NULL) {
+      let ret_value = AssnDef::fresh_var(f1.return_value->type);
+      let terms = new List {ret_value,terms};
+      let ens2 = AssnDef::existassnfn2assn(f2.ensures_assn,terms);
+      let ens1 = f1.ensures_assn ? AssnDef::existassnfn2assn(f1.ensures_assn,terms) : &AssnDef::true_assn;
+      if (!AssnDef::simple_prove(ens1,ens2) &&
+	  !PrattProver::constraint_prove(ens1,ens2))
+	return SUBTYPE_FAIL;
+    }
+    // check f1.throws => f2.throws
+    if (f2.throws_assn != NULL) {
+      let thrws2 = AssnDef::existassnfn2assn(f2.throws_assn,terms);
+      let thrws1 = f1.throws_assn ? AssnDef::existassnfn2assn(f1.throws_assn,terms) : &AssnDef::true_assn;
+      if (!AssnDef::simple_prove(thrws1,thrws2) &&
+	  !PrattProver::constraint_prove(thrws1,thrws2))
+	return SUBTYPE_FAIL;
+    }
+    // otherwise okay
+    return $(No_coercion, retc);
+  default: 
+    let $(s, c) = effect_subtype(t1, t2, true);
+    if(s != Unknown_coercion) 
+      return $(s, c);
+    return force_equivalence(t1, t2);
+  }
+}
+
+bool subtype(seg_t loc, list_t<$(type_t,type_t)@`H,`H> assume,
+	     type_t t1, type_t t2) {
+  let $(r, c) = subtype_impl(assume, t1, t2);
+  if(r == No_coercion) {
+    return List::forall_c(add_constraint, loc, c);
+  }
+  return false;
+}
+
+
+// is t1* <= t2*?
+//   we flatten t1 and t2 into structurally equivalent tuple types
+//   (and thus ignore field names, associativity of nested tuples and
+//   structs, etc.) and then check that t1 is a width extension of t2
+//   and for each field, either (a) both t1 and t2 have qualifier "const"
+//   and the t1 field is a subtype of the t2 field, or (b) t1 = t2.
+static $(coercion_t, list_t<constraint_t>) 
+     ptrsubtype(list_t<$(type_t,type_t)@`H,`H> assume, type_t t1, type_t t2) {
+  list_t<$(tqual_t,type_t)@> tqs1 = flatten_type(Core::heap_region,true,t1);
+  list_t<$(tqual_t,type_t)@> tqs2 = flatten_type(Core::heap_region,true,t2);
+  list_t<constraint_t> retc=NULL;
+  coercion_t coerce = No_coercion;
+  for (; tqs2 != NULL; tqs2 = tqs2->tl, tqs1 = tqs1->tl) {
+    if (tqs1 == NULL) return SUBTYPE_FAIL;
+    let &$(tq1,t1a) = tqs1->hd;
+    let &$(tq2,t2a) = tqs2->hd;
+    if (tq1.real_const && !tq2.real_const) return SUBTYPE_FAIL;
+    if (Unify::unify(t1a,t2a) || isomorphic(t1a,t2a)) //prefer to unify first
+      continue;    
+    if ((tq2.real_const || Kinds::kind_leq(&Kinds::ak,Tcutil::type_kind(t2a)))) {
+      let $(s, c) = subtype_impl(assume, t1a, t2a);
+      coerce = join_coercion(s, coerce);
+      if(coerce != Unknown_coercion) {
+	retc = List::imp_append(retc, c);
+	continue;
+      }
+    }
+    else {
+      let $(s, c) = force_equivalence(t1a,t2a);
+      coerce = join_coercion(s, coerce);
+      if(coerce != Unknown_coercion) {
+	retc = List::imp_append(retc, c);
+	continue;
+      }
+    }
+    return SUBTYPE_FAIL;
+  }
+  return $(coerce, retc);
+}
+
+
+
+//this is used in the default case, typically as a replacement for coerce_arg
+//These constraints represent the case of assignment, or function arguments
+static bool gen_default_constraint(list_t<constraint_t,`H> @retc, enum KindQual k, type_t _t1, type_t _t2) {
+  switch (k) {
+  case PtrBndKind:
+    switch($(compress(_t1),compress(_t2))) {
+    case $(&PointerType(PtrInfo(_,_,PtrAtts(_,_,t1,z1,...))), &PointerType(PtrInfo(_,_,PtrAtts(_,_,t2,z2,...)))):
+      t1=compress(t1); t2=compress(t2);
+      if(!is_cvar_type(t1) && !is_cvar_type(t2))
+	return false;
+      let ct1 = ptrbnd_cvar_equivalent(t1);
+      let ct2 = ptrbnd_cvar_equivalent(t2);
+      //here we want in order of precedence
+      // (b1 == b2 || (b1 = *{x} ==> b2 = *{<=x}) || b2 = ? || b1 = ?) 
+      // Since we can coerce in both directions, 
+      // the constraints generated here are checks rather than actual restrictions
+      // Restrictions on bounds end up being introduced when typechecking 
+      // things like new expressions, arithmetic expressions etc.
+      _ c = NULL;
+      if(ct1 && ct2 && ct2 != thinconst()) {
+	//if ct1 is thin then the implication constraint cannot only be satified if the guard does not fire
+	//But since we can reasonably coerce a zeroterm to a fat pointer there's no need to fail
+	//if we t1 is a zeroterm pointer.
+	//if t1 is a thin nonzeroterm, and t2 eventually is constrained to fat then we should fail
+	if(ct1 != thinconst() || !type2bool(false, z1)) {
+	  c = implication_constraint(cmpeq_constraint(ct2, fatconst()),
+				     equality_constraint(ct1, ct2));	  
+	}
+	//      c = cond_equality_constraint(ct2, ct1);
+	/*       c = //not doing numelts just yet, so no implication constraint here */
+	/* 	check_constraint(or_constraint(cmpeq_constraint(ct1, ct2), */
+	/* 				       or_constraint(cmpeq_constraint(ct2, fatconst()), */
+	/* 						     cmpeq_constraint(ct1, fatconst())))); */
+      }
+      else { //can't both be null
+	//so we either have something like
+	//int *b; ... int *{65} a = b; or
+	//int *{65} a; ... int *b = a;
+	//in the first case we must to force b to be fat ... the second case we don't care
+	if(!ct2) { 
+	  c = equality_constraint(ct1, fatconst());
+	}
+      }
+      if(c)
+	*retc = new List{c, *retc};
+      //it is possible that t1 and t2 remain unconstrained thus causing the check to fail
+      //in that case we should constrain either t2 or t1 to @fat
+      return true;
+    default:
+      Warn::impos("Non pointer type in gen constraint");
+    }
+  default:
+    return false;
+  }
+}
+
+static bool gen_equality_constraint(list_t<constraint_t,`H> @retc, 
+				    enum KindQual k,
+				    type_t _t1, type_t _t2) {
+  switch (k) {
+  case PtrBndKind:
+    switch($(_t1, _t2)) {
+    case $(&PointerType(PtrInfo(_,_,PtrAtts(_,_,t1,...))), &PointerType(PtrInfo(_,_,PtrAtts(_,_,t2,...)))):
+      let cv1 = Tcutil::ptrbnd_cvar_equivalent(t1);
+      let cv2 = Tcutil::ptrbnd_cvar_equivalent(t2);
+      if(cv1 && cv2) {
+	*retc = new List{equality_constraint(cv1, cv2), *retc};
+	return true;
+      }
+      return false;
+    default:
+      Warn::impos("Non pointer type in gen constraint");
+    }
+  default: 
+    return false;
+  }
+}
+
+
+//for now constraint generation is supported for pointer types only
+//Eventually we would want to add support for subtyping constraints on 
+//arbitrary types.
+static $(coercion_t, list_t<constraint_t>, bool) 
+     constraint_subtype(type_t t1, type_t t2, 
+			bool genconstr<`r::E>(list_t<constraint_t,`H>@`r,
+					      enum KindQual, //which type of Cvar should we constrain
+					      type_t, type_t),
+			bool allow_deep_subtype,
+			bool allow_coercion) {
+  //							coercion_t *coercion) {
+  if(Unify::unify(t1,t2)) { //exact match ... can never happen if constraint variables are present
+    return $(No_coercion,NULL,true);   //fallback to regular case if not in --inf mode
+  }
+  t1 = compress(t1);
+  t2 = compress(t2);
+  switch (t2) {
+  case &AppType(&VoidCon,_): return $(No_coercion, NULL, true);
+  // we can cast t1 to an int if t1 is a boxed type.
+  case &AppType(&IntCon(_,Int_sz),_):
+  case &AppType(&IntCon(_,Long_sz),_):
+    if (type_kind(t1)->kind == BoxKind) return $(Other_coercion, NULL, false);
+    if (is_pointer_type(t1)) {
+      let cv1 = get_pointer_bounds(t1);
+      if(is_cvar_type(cv1)) {
+	return $(Other_coercion,new List{equality_constraint(ptrbnd_cvar_equivalent(cv1),thinconst()), NULL}, false);
+      }
+    }
+    break;
+  default: break;
+  }
+
+  list_t<constraint_t,`H> retc = NULL;
+  coercion_t coerce = No_coercion;
+  switch($(t1,t2)) {
+  case $(&PointerType(PtrInfo(t1a,tqual1a,PtrAtts(eff1,null1a,b1,zt1,_,rel1,aq1))),&PointerType(PtrInfo(t2a,tqual2a,PtrAtts(eff2,null2a,b2,zt2,_,rel2,aq2)))):
+    if(!Unify::unify(null1a, null2a) && force_type2bool(false,null1a) && !force_type2bool(false,null2a)) {
+      if(allow_coercion)  //changed during writeup ... retest
+	coerce = Null_to_NonNull;
+      else
+	return CSUB_FAIL;
+    }
+    if (!tqual2a.real_const && tqual1a.real_const) {
+      return CSUB_FAIL;
+    }
+    if (!Unify::unify(eff1, eff2) &&
+	!Tcutil::subset_effect(false, eff1, eff2) && 
+	!genconstr(&retc, EffKind, t1, t2)) {//eff1, eff2)) { //eff1 <= eff2
+      return CSUB_FAIL;
+    }
+    //can coerce nullable in either direction ... with possible failure
+    if(!Unify::unify(aq1, aq2) && !alias_qual_subtype(aq1, aq2) && 
+       !genconstr(&retc, AqualKind, t1, t2)) {//aq1, aq2)) { //aq1 <: aq2
+      return CSUB_FAIL;
+    }
+    if(!Unify::unify(rel1, rel2)  && !type2bool(false, rel2)) {
+      return CSUB_FAIL;
+    }
+    //now comes the interesting part
+    //need a way to specify the context to genconstr ... 
+    //booltype_t could either be zeroterm, or nullable, or nullable; 
+    //each of which generates a different constraint
+    //maybe further specialize booltype_t to disambiguate
+    if(!Unify::unify(zt1, zt2) && type2bool(true, zt2) && !genconstr(&retc, BoolKind, t1, t2)) {//zt1, zt2)) { 
+      //Generating an equality constraint is a simplification ... 
+      //we really want (zt1=zt2 || zt2=nozeroterm)
+      //in the second case, the coercion makes sure that the 
+      //bound is adjusted to prevent overwriting the zero
+      
+      //Note that this is independent of the bounds ... 
+      //(?@zeroterm -> ?@nozeroterm) isn't allowed at the top-level ... but the codegen takes care of that
+      //(*{x}@zeroterm -> *{<=x}@nozeroterm) -- t2 bounds must be <= t1 bounds, but this is is irrespective of zeroterm
+      //(?@zeroterm -> *{1}@nozeroterm -- fat to thin requires bound of t2 to be one ... but this is irrespective of zeroterm
+      //(*{x}@zeroterm -> ?@nozeroterm) -- no problem
+      return CSUB_FAIL;
+    }
+    bool silent = true;
+    if(!Unify::unify(b1, b2)) {
+      if(!is_cvar_type(b1) && !is_cvar_type(b2)) {
+	let e1 = Tcutil::get_bounds_exp(bounds_one(),b1);
+	let e2 = Tcutil::get_bounds_exp(bounds_one(),b2);
+	if (e1 && e2) {
+	  if(!Evexp::lte_const_exp(e2,e1)) 
+	    return CSUB_FAIL;
+	  silent = true;
+	}
+	else if(e2) { //all other coercions to non-fat pointers are reported
+	  silent = false; 
+	}
+      }
+      else{
+	if (!genconstr(&retc, PtrBndKind, t1, t2)) {//b1, b2)) {
+	  return CSUB_FAIL;
+	}
+	//	silent = false;
+      }
+      coerce = join_coercion(coerce, Other_coercion);
+    }
+    if(Unify::unify(t1a, t2a) || isomorphic(t1a, t2a))
+      return $(coerce, retc, silent);
+    if((is_bits_only_type(t1a) && is_char_type(t2a)
+	&& !force_type2bool(false,zt2)
+	&& (tqual2a.real_const || !tqual1a.real_const)))
+      return $(coerce, retc, silent);
+    let $(s, c) = effect_subtype(t1a, t2a, true);
+    if(s != Unknown_coercion) { //should only generate equality constraints ... so allow_deep is immaterial
+      return $(join_coercion(s, coerce), List::imp_append(retc, c), silent);
+    }
+    if(allow_deep_subtype) {
+      let $(s, c) = ptrsubtype(NULL, t1a, t2a); //this should generate constraints as well on the nested bounds if any
+      if(s!=Unknown_coercion && !type2bool(true, zt2)) {
+	//b2 = {1}
+	//zt2=false
+	if(Unify::unify(b2, bounds_one())) {
+	  return $(join_coercion(s, coerce), List::imp_append(retc, c), true);
+	}
+	if(is_cvar_type(b2)) {
+	  let cb2 = Tcutil::ptrbnd_cvar_equivalent(b2);
+	  if(cb2) {
+	    c = new List{equality_constraint(cb2, thinconst()),c};
+	    return $(join_coercion(coerce, Other_coercion), List::imp_append(retc, c), silent);
+	  }
+	}
+      }
+    }
+    return CSUB_FAIL;
+  case $(&ArrayType(ArrayInfo{t1a,tq1a,e1,zt1,_}),&ArrayType(ArrayInfo{t2a,tq2a,e2,zt2,_})):
+    if(!Unify::unify(zt1,zt2)) return CSUB_FAIL;
+    if(e1==NULL || e2==NULL) return CSUB_FAIL;
+    if(!Evexp::same_uint_const_exp((exp_t)e1,(exp_t)e2)) return CSUB_FAIL;
+    if(!Unify::unify(t1a,t2a)) return CSUB_FAIL; //this could use some constraints
+    // FIX: we need to take qualifiers into account on typedefs
+    return $((!tq1a.real_const || tq2a.real_const), retc, true);
+    // can cast a numeric type or bool to any numeric type
+  case $(&AppType(&EnumCon(_,ed1),_), _):
+    // can also cast an enum to a shorter enum
+    switch(t2) {
+    case &AppType(&EnumCon(_,ed2),_):
+      if(ed1->fields != NULL && ed2->fields != NULL
+	 && length(ed1->fields->v) >= length(ed2->fields->v))
+	return $(No_coercion, NULL, true);
+      break;
+    default: break;
+    }
+    fallthru;
+  case $(&AppType(&IntCon(_,_),_), _):
+  case $(&AppType(&FloatCon(_),_), _):
+    return Tcutil::is_strict_arithmetic_type(t2) ? $(No_coercion, NULL, true) : CSUB_FAIL;
+    // region_t<`r1> <= region_t<`r2> when `r1 outlives `r2
+  case $(&AppType(&RgnHandleCon,&List(r1,_)), &AppType(&RgnHandleCon,&List(r2,_))):
+    if (Tcutil::subset_effect(false, r1, r2))  {
+      return $(No_coercion, NULL, true);
+    }
+    fallthru;
+  default: 
+    //as a last resort force equality constraints on all Cvar's in types ..
+    //this is required basically for anonymous aggregate types 
+    let $(s, c)  = force_equivalence(t1,t2);
+    return $(s, c, true);
+  }
+}
+
+
+static Absyn::coercion_t internal_coercible_c(seg_t loc, bool warn, 
+					      Absyn::type_t t1, Absyn::type_t t2, 
+					      bool genconstr<`r::E>(List::list_t<BansheeIf::constraint_t,`H>@`r,
+								    enum KindQual,
+								    Absyn::type_t, Absyn::type_t),
+					      bool allow_deep_subtype, bool allow_coercion) {
+  let $(s, c, b) = constraint_subtype(t1, t2, genconstr<>, allow_deep_subtype, allow_coercion);
+  if(s == Unknown_coercion)
+    return s;
+  if(List::forall_c(add_constraint, loc, c)) {
+    if(!b && warn) 
+      Warn::warn2(loc,"implicit cast from ", t1, " to ", t2);
+    return s;
+  }
+  return Unknown_coercion;
+}
+
+static Absyn::coercion_t coercible_c(Absyn::seg_t loc, Absyn::type_t t1, Absyn::type_t t2, 
+				     bool genconstr<`r::E>(List::list_t<BansheeIf::constraint_t,`H>@`r,
+							   enum KindQual,
+							   Absyn::type_t, Absyn::type_t),
+				     bool allow_deep_subtype) {
+  return internal_coercible_c(loc,false,t1, t2, genconstr<>, allow_deep_subtype, true);
+}
+
+coercion_t coercible(Absyn::seg_t loc, type_t t1, type_t t2) {
+  return internal_coercible_c(loc,false,t1, t2, gen_default_constraint<>, true, true);
+}
+
+coercion_t coercible_warn(Absyn::seg_t loc, type_t t1, type_t t2) {
+  return internal_coercible_c(loc,true,t1, t2,gen_default_constraint<>, true, true);
+}
+
+coercion_t coercible_exact(Absyn::seg_t loc, type_t t1, type_t t2) {
+  return internal_coercible_c(loc,false,t1, t2, gen_equality_constraint<>, false, false);
+}

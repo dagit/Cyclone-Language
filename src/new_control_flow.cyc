@@ -590,13 +590,13 @@ static $(flow_t,absRval_t) anal_derefR(analenv_t env, flow_t inflow,
         break;
       case &AddressOf(p):
         update_relns(e,false,relns);
-        if (index == NULL && Tcutil::is_bound_one(bd))
+        if (index == NULL && Tcutil::is_bound_one(bd,false))
           return $(f,lookup_place(outdict,p));
         break;
       case &UniquePtr(r):
         // FIX:  -- the unique pointer could be not-null.
         update_relns(e,true,relns);
-        if (index == NULL && Tcutil::is_bound_one(bd))
+        if (index == NULL && Tcutil::is_bound_one(bd,false))
           return $(f,r);
         break;
       case &Zero:
@@ -648,12 +648,15 @@ static relns_t add_subscript_reln(relns_t<`H> relns, exp_t e1, exp_t e2) {
     break;
   default: break;
   }
-  // if e1 has type T*{n},T@{n}, or T[n], then add e2 < n to the relations.
-  exp_opt_t bound = Tcutil::get_type_bound((type_t)e1->topt);
-  if (bound != NULL) {
-    reln_op_t rbound = RConst(0); // dummy value
-    if (exp2relnop(bound,&rbound))
-      relns = add_relation(Core::heap_region, n2, Rlt, rbound, relns);
+  // if e1 has type T*{n},T@{n}, or T[n], then add e2 < n to the relations
+  let bnd = Tcutil::get_pointer_bounds(e1->topt);
+  if(!bnd || !Tcutil::is_cvar_type(bnd)) {
+    exp_opt_t bound = Tcutil::get_type_bound((type_t)e1->topt); //constrains
+    if (bound != NULL) {
+      reln_op_t rbound = RConst(0); // dummy value
+      if (exp2relnop(bound,&rbound))
+	relns = add_relation(Core::heap_region, n2, Rlt, rbound, relns);
+    }
   }
   return relns;
 }
@@ -1723,7 +1726,7 @@ static $(flow_t,absLval_t) anal_derefL(analenv_t env,
     case {.ReachableFL = $(outdict,relns)}:
       // FIX: determine notzero as appropriate
       let $(r,names) = unname_rval(r);
-      retry: switch(r) {
+    retry: switch(r) {
       case &NamedLocation(...): 
 	Warn::impos("named location in anal_derefL");
       case &NotZeroAll:
@@ -1748,12 +1751,12 @@ static $(flow_t,absLval_t) anal_derefL(analenv_t env,
 	  }
 	}
 	// Assumes the caller has the place
-	if(Tcutil::is_bound_one(bd)) return $(f, UnknownL());
+	if(Tcutil::is_bound_one(bd,true)) return $(f, UnknownL());
 	break;
 	
       case &AddressOf(&Place(root,path2)):
 	e->annot = new NotZero(relns);
-	if(Tcutil::is_bound_one(bd))
+	if(Tcutil::is_bound_one(bd,false))
 	  return $(f, PlaceL(new Place(root, append(path2,path))));
 	break;
       case &Zero:
@@ -1762,7 +1765,7 @@ static $(flow_t,absLval_t) anal_derefL(analenv_t env,
 	// FIX: should I have this case here?
 //       case &Esc(il): fallthru;
       case &UnknownR(il): 
-	if (Tcutil::is_bound_one(bd))
+	if (Tcutil::is_bound_one(bd,false))
 	  f = notzero(env,inflow,f,e,il,names);
 	e->annot = new UnknownZ(relns);
 	break;

@@ -1,0 +1,1114 @@
+/* Interface to the Banshee constraint solving engine.
+   Copyright (C) 2004 Nikhil Swamy
+   This file is part of the Cyclone compiler.
+
+   The Cyclone compiler is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   The Cyclone compiler is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with the Cyclone compiler; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+/* This is the banshee specification for the types of constraint variables
+specification -- quoted from cycinf.bsp
+
+specification cycinf : CYCINF = 
+ spec
+  data ptrbnd : term = atomic
+                     | numelts of intbound
+  and  intbound : term = eq of intlit
+                       | geq of intlit
+  and  intlit : term
+  and  zeroterm : term
+  and  effect : setIF
+ end
+*/
+#define BANSHEEIF_CYC
+
+#include <stdio.h>
+#include <hashtable.h>
+#include <assert.h>
+#include <list.h>
+#include <string.h>
+#include <position.h>
+#include "absyn.h"
+#include "warn.h"
+#include "kinds.h"
+#include "absynpp.h"
+#include "bansheeif.h"
+#include "tcutil.h"
+#include "flags.h"
+
+//hacks for testing
+#ifdef BANTEST
+namespace Evexp {
+  $(unsigned int,bool) eval_const_uint_exp(Absyn::exp_t e) {
+    return $(0, false);
+  }
+}
+
+namespace Tcutil {
+  bool is_temp_tvar(Absyn::tvar_t t) { return false; }
+}
+#endif
+
+namespace Banshee {
+  extern "C include" {
+
+#ifdef BANTEST
+    int Wchar_t_unsigned = 0;
+    int Sizeof_wchar_t = 0;
+#endif    
+    //this is adapted from cycinf.h 
+    //it includes stdlib/stdio etc. which causes a mess
+    //so, just the relevant defs are extracted here
+    typedef struct ptrbnd_* ptrbnd;
+    typedef struct effect_* effect;
+    typedef struct zeroterm_* zeroterm;
+    typedef struct intlit_* intlit;
+    typedef struct intbound_* intbound;
+
+    struct list;
+    
+    void cycinf_init(void);
+  
+    typedef struct list *ptrbnd_list;
+    ptrbnd ptrbnd_list_head(ptrbnd_list);
+    ptrbnd_list ptrbnd_list_tail(ptrbnd_list);
+    ptrbnd ptrbnd_zero(void);
+    ptrbnd ptrbnd_one(void);
+    ptrbnd ptrbnd_wild(void);
+    ptrbnd ptrbnd_fresh(const char *name);
+    ptrbnd ptrbnd_constant(const char *name) ;
+    bool ptrbnd_is_constant(ptrbnd e,const char *name);
+    void ptrbnd_unify(ptrbnd e1, ptrbnd e2) ;
+    void ptrbnd_cunify(ptrbnd e1,ptrbnd e2) ;
+    ptrbnd ptrbnd_ecr(ptrbnd e) ;
+    int ptrbnd_cmp(const ptrbnd e1,const ptrbnd e2);
+    bool ptrbnd_eq(ptrbnd e1, ptrbnd e2);
+    ptrbnd atomic(void);
+    bool ptrbnd_is_atomic(ptrbnd arg1);
+    bool ptrbnd_is_numelts(ptrbnd e);
+    ptrbnd numelts(intbound arg1);
+    struct numelts_decon numelts_decon(ptrbnd arg1);
+    struct numelts_decon
+    {
+      intbound f0;
+    };
+    //    void ptrbnd_print(CFILE* arg1,ptrbnd arg2);
+    //    extern bool flag_merge_projections;
+    //    extern bool flag_eliminate_cycles;
+
+    //    DECLARE_LIST(effect_list,effect);
+    typedef struct list *effect_list;
+    effect effect_list_head(effect_list);
+    effect_list effect_list_tail(effect_list);
+    effect effect_zero(void);
+    effect effect_one(void);
+    effect effect_wild(void);
+    effect effect_fresh(const char *name);
+    effect effect_union(effect_list exprs);
+    effect effect_inter(effect_list exprs);
+    effect effect_constant(const char *name);
+    bool effect_eq(effect e1, effect e2);
+    int effect_cmp(const effect e1,const effect e2);
+    bool effect_is_constant(effect e,const char *name);
+    void effect_inclusion(effect e1,effect e2);
+    void effect_unify(effect e1,effect e2);
+    effect_list effect_tlb(effect e);
+    //    void effect_print(FILE* arg1,effect arg2);
+
+    void cycinf_reset(void);
+    void cycinf_stats(FILE * arg1);
+    void cycinf_print_graph(FILE * arg1);
+    void cycinf_dump_graph();//stdout
+    //    void cycinf_serialize(FILE * arg1,hash_table * arg2,unsigned long arg3);
+    //    hash_table * cycinf_deserialize(FILE * arg1);
+    void cycinf_region_serialize(FILE * arg1);
+    //    void cycinf_region_deserialize(translation arg1,FILE * arg2);
+  }
+  export { * }
+}
+
+using Absyn;
+using List;
+using Hashtable;
+using Core;
+namespace BansheeIf {
+
+datatype BansheeVar {
+  BvarPtrBnd(Banshee::ptrbnd);
+  BvarEffect(Banshee::effect);
+  BvarZeroterm(Banshee::zeroterm);
+  BvarIntlit(Banshee::intlit);
+  BvarIntbound(Banshee::intbound);
+};
+static list_t<$(cvartype_t, Banshee::ptrbnd)@> pbconsts;
+static list_t<$(cvartype_t, Banshee::effect)@> effconsts;
+
+bool banshee_init() {
+  Banshee::cycinf_init();
+  return true;
+}
+
+void add_variable(cvartype_t cvar) {
+  switch(cvar) {
+  case &Cvar(ok, _, _, *bv, name,...):
+    if(*bv)
+      Warn::impos2("add_variable: Multiple add");
+    switch(ok->v) {
+    case &Kind{PtrBndKind, _}:
+      *bv = new BvarPtrBnd(Banshee::ptrbnd_fresh(name));
+      break;
+    case &Kind{EffKind, _}:
+      *bv = new BvarEffect(Banshee::effect_fresh(name));
+      break;
+/*     case &Kind{BoolKind, _}: */
+/*       *bv = new BvarZeroterm(zeroterm_fresh(NULL)); */
+/*       break; */
+    default:
+      Warn::impos2("add_variable: Unsupported or null cvar kind");      
+    }
+    break;
+  default:
+      Warn::impos2("add_variable: Bad type", cvar);      
+  }
+}
+
+void add_constant(string_t name, cvartype_t cvar) {
+  switch(cvar) {
+  case &Cvar(ok, _, _, *bv,...):
+    if(*bv)
+      Warn::impos2("add_constant: Multiple add");
+    switch(ok->v) {
+    case &Kind{PtrBndKind, _}:
+      _ pbc = Banshee::ptrbnd_constant(name);
+      *bv = new BvarPtrBnd(pbc);
+      pbconsts = new List{new $(cvar, pbc), pbconsts};
+      break;
+    case &Kind{EffKind, _}:
+      _ effc = Banshee::effect_constant(name);
+      *bv = new BvarEffect(effc);
+      effconsts = new List{new $(cvar, effc), effconsts};
+      break;
+/*     case &Kind{BoolKind, _}: */
+/*       *bv = new BvarZeroterm(zeroterm_constant(name)); */
+/*       break; */
+    default:
+      Warn::impos2("add_constant: Unsupported or null cvar kind");      
+    }
+    break;
+  default:
+    Warn::impos2("add_constant: Bad type", cvar);      
+  }
+}
+
+typedef enum ConstraintOperator {
+  AndOp,
+  OrOp,
+  NegOp,
+  EqOp,
+  SubsetOp
+} cop_t;
+
+//typedef datatype Constraint *constraint_opt_t;
+datatype Constraint {
+  CheckConstraint(constraint_t,seg_t);
+  ComparisonConstraint(cop_t, cvartype_t, cvartype_t,seg_t);
+  EqualityConstraint(cvartype_t, cvartype_t, bool,seg_t);
+  InclusionConstraint(cvartype_t, cvartype_t,seg_t);
+  ImplicationConstraint(constraint_t, constraint_t,seg_t);
+  CompositeConstraint(cop_t, constraint_t, constraint_opt_t,seg_t);
+};
+ 
+//note that these are simply constructors.
+//adding a constraint to the graph requires a seprate call to insert_constraint
+ constraint_t check_constraint(constraint_t c) {
+   return new CheckConstraint(c,0);
+ }
+ 
+constraint_t cmpeq_constraint(cvartype_t t1, cvartype_t t2) {
+  switch($(t1, t2)) {
+  case $(&Cvar(_,_,_,*bv1,...),&Cvar(_,_,_,*bv2,...)):
+    if(*bv1 == NULL)       add_variable(t1);
+    if(*bv2 == NULL)       add_variable(t2);
+    return new ComparisonConstraint(EqOp, t1, t2,0);
+  default:
+    Warn::impos2("cmpeq_constraint: Bad types for constraint - ", t1, t2);
+  }  
+}
+constraint_t cmpsubset_constraint(cvartype_t t1, cvartype_t t2) {
+  Warn::impos2("cmpsubset_constraint: Not yet supported");
+  switch($(t1, t2)) {
+  case $(&Cvar(_,_,_,*bv1,...),&Cvar(_,_,_,*bv2,...)): //need to make sure these are of setIF sort
+    if(*bv1 == NULL)       add_variable(t1);
+    if(*bv2 == NULL)       add_variable(t2);
+    return new ComparisonConstraint(SubsetOp, t1, t2,0);
+  default:
+    Warn::impos2("cmpsubset_constraint: Bad types for constraint - ", t1, t2);
+  }
+}
+
+static constraint_t internal_equality_constraint(cvartype_t t1, cvartype_t t2, bool c) {
+  switch($(t1, t2)) {
+  case $(&Cvar(_,_,_,*bv1,...),&Cvar(_,_,_,*bv2,...)):
+    if(*bv1 == NULL)       add_variable(t1);
+    if(*bv2 == NULL)       add_variable(t2);
+    return new EqualityConstraint(t1, t2, c,0);
+  default:
+    Warn::impos2("equality_constraint: Bad types for constraint - ", t1, t2);
+  }
+}
+
+constraint_t equality_constraint(cvartype_t t1, cvartype_t t2) {
+  return internal_equality_constraint(t1, t2, false);
+}
+
+constraint_t cond_equality_constraint(cvartype_t t1, cvartype_t t2) {
+  return internal_equality_constraint(t1, t2, true);
+}
+
+constraint_t inclusion_constraint(cvartype_t t1, cvartype_t t2) {
+  switch($(t1, t2)) {
+  case $(&Cvar(_,_,_,*bv1,...),&Cvar(_,_,_,*bv2,...)):
+    if(*bv1 == NULL)       add_variable(t1);
+    if(*bv2 == NULL)       add_variable(t2);
+    switch($(*bv1, *bv2)) { //try using tagof here instead
+    case $(&BvarEffect(_), &BvarEffect(_)):
+      return new EqualityConstraint(t1, t2,false,0);
+    default:
+      Warn::impos2("inclusion_constraint: Term sort doesn't permit inclusion constraints");
+    }
+  default:
+    Warn::impos2("inclusion_constraint: Bad types for constraint - ", t1, t2);
+  }
+}
+
+constraint_t implication_constraint(constraint_t t1, constraint_t t2) {
+  return new ImplicationConstraint(t1, t2,0);
+}
+
+static constraint_t composite_constraint(cop_t op, constraint_t t1, constraint_opt_t t2) {
+  switch(op) {
+  case NegOp:
+    if(t2 != NULL)
+      Warn::impos2("composite_constraint: Neg constraint is unary");
+    return new CompositeConstraint(op, t1, NULL,0);
+  default:
+    if(!t1 || !t2)
+      Warn::impos2("composite_constraint: Binary constraint missing argument");
+    return new CompositeConstraint(op, t1, t2,0);
+  }
+}
+ 
+ constraint_t and_constraint(constraint_t c1,  constraint_t c2) {
+   return composite_constraint(AndOp, c1, c2);
+ }
+ constraint_t not_constraint(constraint_t b){ 
+   return composite_constraint(NegOp, b, NULL);
+ }
+ constraint_t or_constraint(constraint_t c1,  constraint_t c2) {
+   return composite_constraint(OrOp, c1, c2);
+ }
+
+ constraint_t neg_constraint(constraint_t c1) {
+   return composite_constraint(NegOp, c1, NULL);
+ }
+
+ static type_opt_t match_ptrbnd_constant(Banshee::ptrbnd pb) {
+   for(_ l = pbconsts; l; l=l->tl) {
+     if(Banshee::ptrbnd_eq(l->hd->f1, pb)) {
+       return l->hd->f0;
+     }
+   }
+   return NULL;
+ }
+ static bool is_constant(cvartype_t t) {
+   switch(t) {
+   case &Cvar(_,_,id,...):
+     return (id==0);
+   default:
+     return false;
+   }
+ }
+
+ 
+ static string_t op2string(cop_t op) {
+   switch(op) {
+   case AndOp: return "A";
+   case OrOp: return "V";
+   case NegOp: return "!";
+   case EqOp: return "=";
+   case SubsetOp: return "<";
+   default: return "ERR";
+   }
+ }
+
+
+/*  string_t constraint2string(constraint_t c) { */
+/*    switch(c) { */
+/*    case &CheckConstraint(c1): return aprintf("check(%s)", constraint2string(c1)); */
+/*    case &ComparisonConstraint(op, t1, t2): return aprintf("%s %s %s", Absynpp::typ2string(t1), op2string(op), Absynpp::typ2string(t2)); */
+/*    case &EqualityConstraint(t1, t2, b):  */
+/*      if(b) { */
+/*        _ t1s = Absynpp::typ2string(t1); */
+/*        _ t2s = Absynpp::typ2string(t2); */
+/*        return aprintf("(%s != 0) ==> (%s = %s)", t1s, t1s, t2s); */
+/*      } */
+/*      else */
+/*        return aprintf("%s = %s", Absynpp::typ2string(t1),  Absynpp::typ2string(t2)); */
+/*    case &InclusionConstraint(t1, t2): return aprintf("%s <= %s", Absynpp::typ2string(t1),  Absynpp::typ2string(t2)); */
+/*    case &ImplicationConstraint(c1, c2): return aprintf("%s ==> %s", constraint2string(c1),  constraint2string(c2)); */
+/*    case &CompositeConstraint(op, c1, c2):  return aprintf("(%s) %s (%s)", constraint2string(c1), op2string(op), constraint2string(c2)); */
+/*    } */
+/*  } */
+
+ static string_t cvar2string(type_t t1, bool xc) {
+   if(Tcutil::is_cvar_type(t1) || (!xc && !is_constant(t1)))
+     return Absynpp::typ2string(t1);
+   return aprintf("\"%s\"", Absynpp::typ2string(compress(t1)));
+ }
+
+ static const char* cvarloc(type_t cv) {
+   switch(cv) {
+   case &Cvar(_,_,_,_,_,l,...): return l;
+   default: return NULL;
+   }
+ }
+
+ static const char* cvarorigfat(type_t cv) {
+   switch(cv) {
+   case &Cvar(_,_,_,_,_,_,o): return (o ? "true" : "false");
+   default: return NULL;
+   }
+ }
+
+ static string_t _constraint2string(constraint_t c, bool xcvar) {
+   switch(c) {
+   case &CheckConstraint(c1,_): return aprintf("!(%s)", _constraint2string(c1,xcvar));
+   case &ComparisonConstraint(op, t1, t2,_): return aprintf("^(%s, %s, %s)", op2string(op), cvar2string(t1,xcvar), cvar2string(t2,xcvar));
+   case &EqualityConstraint(t1, t2, b,_): 
+     if(b) {
+       return aprintf("?(%s,%s)", cvar2string(t1,xcvar),  cvar2string(t2,xcvar));
+     }
+     else
+       return aprintf("=(%s, %s)", cvar2string(t1,xcvar),  cvar2string(t2,xcvar));
+   case &InclusionConstraint(t1, t2,_): return aprintf("<(%s,%s)", cvar2string(t1,xcvar),  cvar2string(t2,xcvar));
+   case &ImplicationConstraint(c1, c2,_): return aprintf(">(%s,%s)", _constraint2string(c1,xcvar),  _constraint2string(c2,xcvar));
+   case &CompositeConstraint(op, c1, c2,_):  return aprintf("+(%s,%s,%s)", _constraint2string(c1,xcvar), 
+							  op2string(op), _constraint2string(c2,xcvar));
+   }
+ }
+ string_t constraint2string(constraint_t c) {
+   return _constraint2string(c, true);
+ }
+
+ static void print_constraints(list_t<constraint_t> c) {
+   for(;c;c=c->tl) {
+     fprintf(stderr, "%s\n", constraint2string(c->hd));
+   }
+ }
+
+
+#define FAILED 0
+#define ADDED 1
+#define DELAYED 2
+
+static int nodelay_add_constraint(constraint_t c) {
+  switch(c) {
+  case &EqualityConstraint(t1 as &Cvar(_,_,_,bv1,...), t2 as &Cvar(_,_,_,bv2,...), b,_):
+    switch($(bv1, bv2)) {
+    case $(&BvarPtrBnd(pb1),&BvarPtrBnd(pb2)):
+      let ecr1 = Banshee::ptrbnd_ecr(pb1);
+      let ecr2 = Banshee::ptrbnd_ecr(pb2);
+      if(!Banshee::ptrbnd_eq(ecr1, ecr2) && 
+	 match_ptrbnd_constant(ecr1) &&
+	 match_ptrbnd_constant(ecr2)) {
+	//need to resolve for proper error message
+	resolve(t1); 
+	resolve(t2);
+#ifndef BANTEST
+	Warn::err2(0, "Unsatisfiable constraint ", _constraint2string(c,false));
+#else
+	fprintf(stderr, "Unsatisfiable constraint %s \n", _constraint2string(c,false));
+#endif
+	return FAILED;
+      }
+      if(Flags::verbose)
+	fprintf(stderr, "***Added\n");
+      if(b) {
+	Banshee::ptrbnd_cunify(pb1, pb2);
+      }
+      else {
+	Banshee::ptrbnd_unify(pb1, pb2);
+      }
+      return ADDED;
+    default: 
+      Warn::impos("Kind not yet supported");
+    }
+    break;
+  case &CompositeConstraint(op, c1, c2,_):
+    if(op != AndOp) 
+      Warn::impos("Disjunctions and negations require a delay");
+    return (nodelay_add_constraint(c1) &&
+	    nodelay_add_constraint(c2));
+  case &InclusionConstraint(bv1, bv2,_):
+    Warn::impos("setIF sort not yet supported");    
+  default:
+    Warn::impos("No implications allowed");
+  }
+}
+
+static bool requires_delay(constraint_t c) {
+  switch(c) {
+  case &CheckConstraint(...):
+  case &ComparisonConstraint(...):
+  case &ImplicationConstraint(...):
+    return true;
+  case &CompositeConstraint(op, c1, c2,_):
+    return (op != AndOp || requires_delay(c1) || requires_delay(c2));
+  default:
+    return false;
+  }
+}
+
+static list_t<constraint_t> delayed_constraints;
+ 
+//if false then c is definitely unsatisfiable
+//true means c is either satisifiable, or delayed
+static int internal_add_constraint(constraint_t c) {
+  if(requires_delay(c)) {
+    delayed_constraints = new List{c, delayed_constraints};
+    return DELAYED; 
+  }
+  return nodelay_add_constraint(c);
+}
+ 
+static int insert_into_map(constraint_t c); //fwd decl
+static void add_location(seg_t loc, constraint_t c) {
+  switch(c) {
+  case &CheckConstraint(_,*l): fallthru(l);
+  case &ComparisonConstraint(_,_,_,*l): fallthru(l);
+  case &EqualityConstraint(_,_,_,*l): fallthru(l);
+  case &InclusionConstraint(_,_,*l): fallthru(l);
+  case &ImplicationConstraint(_,_,*l): fallthru(l);
+  case &CompositeConstraint(_,_,_,*l): *l=loc;
+  }
+}
+bool add_constraint(seg_t loc, constraint_t c) {
+  add_location(loc, c);
+  insert_into_map(c);
+  if(Flags::verbose)
+    fprintf(stderr, "-- (%s) Adding constraint : %s \t", Position::string_of_loc(loc), _constraint2string(c,false));
+  let ret = (internal_add_constraint(c) != FAILED);
+  if(Flags::verbose)
+    fprintf(stderr, "\n");
+  return ret;
+}
+
+static bool eval_guard(constraint_t g) {
+  switch(g) {
+  case &ComparisonConstraint(op, &Cvar(_,_,_,bv1,...), &Cvar(_,_,_,bv2,...),_):
+    if(op != EqOp)
+      Warn::impos("Unsupported comparison operator");
+    switch($(bv1, bv2)){
+    case $(&BvarPtrBnd(pb1), &BvarPtrBnd(pb2)):
+      return Banshee::ptrbnd_eq(pb1, pb2);
+    default:
+      return false;
+    }
+  case &CompositeConstraint(op, c1, c2,_):
+    bool c1g = eval_guard(c1);
+    bool c2g = (op!=AndOp && op!=OrOp) ? false : eval_guard(c2);
+    switch(op) {
+    case AndOp: return c1g && c2g;
+    case OrOp: return c1g || c2g;
+    case NegOp: return !c1g;
+    default: return false;
+    }
+  case &ImplicationConstraint(c1, c2,_):
+    if(!eval_guard(c1))
+      return true;
+    return eval_guard(c2);
+  default:
+    return false; //impos
+  }
+}
+
+int discharge_implications() {
+  bool changed = false;
+  do {
+    list_t<constraint_t> prev = NULL;
+    _ l = delayed_constraints; 
+    bool first = true;
+    changed = false;
+    while(l) {
+      switch(l->hd) {
+      case &ImplicationConstraint(c1, c2,_):
+	if(eval_guard(c1)) {
+	  int result = internal_add_constraint(c2);
+	  if(result == FAILED) return FAILED;
+	  if(result == ADDED) changed = true;
+	  //	  changed = delayed;
+	  if(first) {
+	    if(result == DELAYED) {//delayed_constraints has been moved
+	      delayed_constraints->tl = delayed_constraints->tl->tl;
+	      first = false;
+	    }
+	    else
+	      delayed_constraints = delayed_constraints->tl;
+	  }
+	  else if(prev)
+	    prev->tl = l->tl;
+	  _ tmp = l;
+	  l = l->tl;
+	  tmp->tl = NULL;
+	}
+	else {
+	  prev = l;
+	  l = l->tl;
+	  first = false;
+	}
+	break;
+      case &CheckConstraint(c1,_):
+	//further delay check constraints until convergence
+	first = false;
+	prev =l;
+	l = l->tl;
+	/* 	if(eval_guard(c1)) { //check is satisfied ... so remove it */
+	/* 	  if(first) */
+	/* 	} */
+	/* 	else { //wait until convergence before reporting failure */
+	/* 	} */
+	/* 	if(!eval_guard(c1)) { */
+	/* 	  Warn::err2(0, "Constraint could not be satisfied: ", constraint2string(c1)); */
+	/* 	} */
+	break;
+      default:
+	Warn::impos("Malformed delayed constraint; only implications permitted");
+      }
+    }
+  } while(changed);
+  
+  for(_ dc=delayed_constraints;dc;dc=dc->tl) {
+    switch(dc->hd) {
+    case &CheckConstraint(c1,_):
+      if(!eval_guard(c1)) { 
+	Warn::err2(0, "Constraint could not be proved: ", constraint2string(dc->hd));
+      }
+      break;
+    default:
+      break;
+    }
+  }
+  return ADDED;
+}
+
+bool resolve(cvartype_t cvar) {
+  switch(cvar) {
+  case &Cvar(_, *t, _, bv,...):
+    if(*t)
+      return true;
+    switch(bv) {
+    case &BvarPtrBnd(pb):
+      let pb2 = Banshee::ptrbnd_ecr(pb);
+      _ tmp = match_ptrbnd_constant(pb2); 
+      if(tmp) {
+	*t = tmp;
+	return true;
+      }
+      return false;
+    case &BvarEffect(ef):
+      let efl = Banshee::effect_tlb(ef);
+      list_t<type_t> set = NULL;
+      for(;efl;efl = Banshee::effect_list_tail(efl)) {
+	for(_ l=effconsts;l;l=l->tl) {
+	  if(Banshee::effect_eq(l->hd->f1, Banshee::effect_list_head(efl))){ 
+	    set = new List(l->hd->f0, set);
+	  }
+	}
+      }
+      if(set) 
+	*t = join_eff(set);
+      else
+	return false;
+      break;
+    default:
+      Warn::impos("Attempt to resolve a variable that was never added");
+    }
+    break;
+  default:
+    Warn::impos2("Bad type to resolve; expect Cvar only", cvar);
+  }
+}
+
+//PERSISTENCE STUFF 
+//the bool flag indicates which Cvars are to be persisted 
+//the others are cvars that appear local variables 
+//Need to have the cvar in both the key and the value ... makes it
+//easier to reintroduce Cvars
+typedef enum CvarRecordState {
+  LOCAL, //these are not to be persisted
+  PERSIST_INIT,  //these are in the table, but are either elevated locals, or ignored globals
+  PERSIST_INPROCESS, //intermediate state while globals are being activated
+  PERSIST_REINTRO,//active globals
+  PERSIST_DONE //these are already persisted
+} cvarstate_t;
+
+static struct Table<type_t, $(type_t, list_t<constraint_t>, cvarstate_t)@> *cvarmap;
+static list_t<constraint_t> lookup_cvar_constraints(type_t t) {
+  if(cvarmap) {
+    try {
+      return Hashtable::lookup(cvarmap, t)->f1;
+    }catch {
+    case &Core::Not_found: 
+      return NULL;
+    }
+  }
+  return NULL;
+}
+
+static int cvarcmp(type_t c1, type_t c2) {
+  switch($(c1, c2)) {
+  case $(&Cvar(_,_,_,_,n1,...),&Cvar(_,_,_,_,n2,...)):
+    return strcmp(n1, n2);
+  default:
+    Warn::impos("Expecting cvar types only");
+  }
+}
+
+static bool cvareq(type_t c1, type_t c2) {
+  switch($(c1, c2)) {
+  case $(&Cvar(_,_,_,b1,n1,...),&Cvar(_,_,_,b2,n2,...)):
+    return (!strcmp(n1, n2));
+  default:
+    Warn::impos("Expecting cvar types only");
+  }
+}
+
+static int cvarhash(type_t c) {
+  switch(c) {
+  case &Cvar(_,_,_,b1,name,...):
+    //    return (int)b1;
+    return hash_string(name);
+  default:
+    Warn::impos("Expecting cvar types only");
+  }
+}
+
+static bool not_in_list(list_t<type_t,`H> l, type_t e) {
+  return !List::exists_c(cvareq, e, l);
+}
+
+static list_t<type_t> cvars_in_constraint(constraint_t c) { 
+  switch(c) {
+  case &ComparisonConstraint(_, cv1, cv2,_): fallthru(cv1, cv2);
+  case &EqualityConstraint(cv1, cv2, ...): fallthru(cv1, cv2);
+  case &InclusionConstraint(cv1, cv2,_): 
+    list_t<type_t> ret = NULL;
+    if(!is_constant(cv1))//Tcutil::is_cvar_type(cv1))
+      ret = list(cv1);
+    if(cvarcmp(cv1, cv2) && !is_constant(cv2))//Tcutil::is_cvar_type(cv2))
+      ret = new List(cv2, ret);
+    return ret;
+  case &CheckConstraint(c1,_):  return cvars_in_constraint(c1);
+  case &ImplicationConstraint(c1, c2,_): fallthru(c1, c2);
+  case &CompositeConstraint(_, c1, c2,_): 
+    let l1 = cvars_in_constraint(c1);
+    return List::append(l1, List::filter_c(not_in_list, l1, cvars_in_constraint(c2)));
+  }
+}
+
+static void init_map() {
+  if(!cvarmap) {
+    cvarmap = Hashtable::create(101, cvarcmp, cvarhash);
+  }
+} 
+
+static bool constraint_eq(constraint_t c1, constraint_t c2) {
+  switch($(c1, c2)) {
+  case $(&EqualityConstraint(cv11, cv12, f1,_),&EqualityConstraint(cv21, cv22, f2,_)): 
+    if(f1 == f2)
+      return (cvareq(cv11, cv21) && cvareq(cv12, cv22));
+    return false;
+  case $(&ComparisonConstraint(op1, cv11, cv12,_),&ComparisonConstraint(op2, cv21, cv22,_)): 
+    if(op1 == op2)
+      fallthru(cv11, cv12, cv21, cv22);
+    return false;
+  case $(&InclusionConstraint(cv11, cv12,_),&InclusionConstraint(cv21, cv22,_)): 
+    return (cvareq(cv11, cv21) && cvareq(cv12, cv22));
+  case $(&CheckConstraint(c11,_),&CheckConstraint(c21,_)):     
+    return constraint_eq(c11, c21);
+  case $(&ImplicationConstraint(c11, c12,_),&ImplicationConstraint(c21, c22,_)):
+    return constraint_eq(c11, c21) && constraint_eq(c12, c22);
+  case $(&CompositeConstraint(op1, c11, c12,_),&CompositeConstraint(op2, c21, c22,_)):
+    return (op1 == op2 && constraint_eq(c11, c21) && (c12 ? constraint_eq(c12, c22) : c22==NULL));
+  default:
+    return false;
+  }
+}
+
+ static int constraint_cmp(constraint_t c1,  constraint_t c2) {
+   return !constraint_eq(c1, c2);
+ }
+ static int hash_constraint(constraint_t c) {
+   return Hashtable::hash_string(constraint2string(c));
+ }
+ 
+static int insert_into_map(constraint_t c) {
+  init_map();
+  int added = 0;
+  for(list_t<type_t> cvars = cvars_in_constraint(c); cvars; cvars=cvars->tl) {
+    try {
+      let &$(_, *oc, _) = Hashtable::lookup(cvarmap, cvars->hd);
+      if(!exists_c(constraint_eq, c, *oc)) {//already present 
+	*oc = new List{c, *oc};
+	added++;
+      }
+    }catch { //Cvar not already in table means that it appears in a local decl only
+    case &Not_found: 
+      switch(cvars->hd) { //elaborate assertion just to sanity check
+      case &Cvar(_,_,id,...):
+	assert(id < 0);
+	break;
+      default:
+	assert(0);
+	break;
+      }
+      Hashtable::insert(cvarmap, cvars->hd, new $(cvars->hd, new List{c,NULL}, LOCAL));
+      break;
+    }
+  }
+  return added;
+}
+
+
+static type_opt_t eval_equality_constraint(type_t cvar, list_t<constraint_t> lc) { 
+  if(lc && !lc->tl) { //lc is a singleton
+    switch(lc->hd) {
+    case &EqualityConstraint(c1, c2, false,_):
+      if(!cvarcmp(cvar, c1))
+	return compress(c2);
+      if(!cvarcmp(cvar, c2))
+	return compress(c1);
+      fallthru;
+    default:
+      return NULL;
+    }
+  }
+  return NULL;
+}
+
+
+static void reintroduce_cvar(type_t _cvar) {
+  _ val;
+  try {
+    val = Hashtable::lookup(cvarmap, _cvar);
+  }catch {
+  case &Not_found:
+    Warn::impos2("Constraint graph refers to an undefined constraint variable", _cvar);
+  }
+  let &$(cv, cnstr, *state) = val;
+  //this is either already fully added, or
+  //partially added and still on the stack
+  if(*state != PERSIST_INIT)  return;
+  *state = PERSIST_INPROCESS;
+  switch(cv) {
+  case &Cvar(ok,topt,id,*bv,name,pos,...):
+    if(!*bv) { //a cvar that's already in the table should have a bvar unless it has no constraints
+      assert(cnstr==0);
+      add_variable(cv);       
+    }
+    /*     if(!*bv)  */
+    /*       add_variable(cv); */
+    for(;cnstr;cnstr=cnstr->tl) {
+      if(internal_add_constraint(cnstr->hd) == FAILED)
+	Warn::impos("Failed to reintroduce a constraint");
+      if(Flags::verbose)
+	fprintf(stderr, "-- Reintro'd constraint : %s \n",  _constraint2string(cnstr->hd,false));
+      //closure
+      let cvars = cvars_in_constraint(cnstr->hd);
+      List::iter(reintroduce_cvar, cvars);
+    }
+    *state = PERSIST_REINTRO;
+    break;
+  default:
+    Warn::impos("Unexpected type");
+  }
+  return;
+}
+
+static void copy_cvar_fields(cvartype_t src, cvartype_t dest) {
+  switch ($(src, dest)) {
+  case $(&Cvar(ok, topt, id, bv, name, pos, of), &Cvar(*okd, *toptd, *idd, *bvd, *named, *posd, *ofd)):
+    *okd = ok; *toptd = topt; *idd = id; *bvd=bv;*named=name;*posd=pos; *ofd=of;
+    break;
+  default:
+    break;
+  }
+}
+
+static void persist_cvar_entry(type_t ig, $(type_t, list_t<constraint_t>, cvarstate_t)@ entry, $(FILE @, bool)@ env) {
+  let &$(f, *changed) = env;
+  let &$(cv, cs, *state) = entry;
+  assert(*state != PERSIST_INPROCESS);
+  if(*state == LOCAL || *state == PERSIST_DONE)
+    return;
+  //  assert((state == PERSIST_INIT || state == PERSIST_REINTRO));
+  fprintf(f, "%s \"%s\", \"%s\" (", cvar2string(cv,false), cvarloc(cv), cvarorigfat(cv));
+  //  bool is_cvar = Tcutil::is_cvar_type(cv);
+  for(;cs;cs=cs->tl) {
+    //    if(is_cvar) {
+    fprintf(f, "%s", _constraint2string(cs->hd,false));
+    if(cs->tl)
+      fprintf(f, ";");
+    //    }
+    let cvars = cvars_in_constraint(cs->hd);
+    for(;cvars;cvars=cvars->tl) {
+      try {
+	let &$(cv, cs, *state) = Hashtable::lookup(cvarmap, cvars->hd);
+	if(*state == LOCAL) {//this local reaches a global ... so it should be persisted too
+	  *state = PERSIST_INIT;
+	  *changed = true;
+	}
+      }catch {
+      case &Not_found: Warn::impos("Constraint refers to an undeclared Cvar");
+      }
+    }
+  }
+/*   if(!is_cvar) {//this has already been resolved ... so only persist a single equality constraint */
+/*     switch(cv) { */
+/*     case &Cvar(ok,_,_,_,name): */
+/*       let cvnew = cvar_type_name(ok, name); */
+/*       let eqc = internal_equality_constraint(cvnew, Tcutil::ptrbnd_cvar_equivalent(compress(cv)), false); */
+/*       fprintf(f, "%s", constraint2string(eqc));      */
+/*       break; */
+/*     default: */
+/*       return; //impos */
+/*     } */
+/*   } */
+  fprintf(f,")\n");
+  *state = PERSIST_DONE;
+}
+
+static void constrain_locals(type_t cvar, $(type_t, list_t<constraint_t>, cvarstate_t)@ val) {
+  if(val->f2 != LOCAL)
+    return;
+  if(Tcutil::is_cvar_type(cvar)) {
+    if(internal_add_constraint(equality_constraint(cvar, thinconst()))==FAILED) {
+      Warn::impos("Failed to add a default constraint on a local constraint variable");
+    }
+  }
+}
+
+//public interface for persistence stuff
+void persist_cvarmap(FILE @f) {
+  discharge_implications(); //ensure consistency
+  assert(cvarmap != 0);
+  fprintf(f, "# 1 \"cvars\"\n");
+  let env = new $(f, false);
+  do {
+    env->f1 = false;
+    Hashtable::iter_c(persist_cvar_entry, cvarmap, env);
+  }while(env->f1);
+  //all remaining LOCAL Cvars can be constrained to their defaults
+  Hashtable::iter(constrain_locals, cvarmap);
+}
+
+static void remove_constraint(constraint_t c) {
+  let cvars = cvars_in_constraint(c);
+  bool tabOk = false;
+  for(;cvars;cvars=cvars->tl) {
+    tabOk = false;
+    try {
+      let &$(_, *constr, _) = Hashtable::lookup(cvarmap, cvars->hd);
+      tabOk = true;
+      *constr = List::delete_cmp(constraint_cmp, *constr, c); //both of these throw Not_found :(
+    }catch {
+    case &Not_found: 
+      if(!tabOk)
+	Warn::impos("remove_constraint: Constraint refers to an undeclared Cvar");
+      break;
+    }
+  }
+}
+ 
+void reset_local_cvar(type_t cvar) {
+  assert(cvarmap != 0);
+  try {
+    let &$(_, *constr, _) = Hashtable::lookup(cvarmap, cvar);
+    let l = *constr; *constr = NULL;
+    for(;l;l=l->tl) {
+      remove_constraint(l->hd);
+    }
+  } catch {
+  case &Not_found: 
+    Hashtable::insert(cvarmap, cvar, new $(cvar, NULL, LOCAL));
+    break;
+  }
+}
+
+//cvar might be in the map already from the compilation of a prior unit
+//or, cvar might be a new constraint variable altogether
+//In the first case, the data from the map has to be passed on to Banshee 
+//In the second case, a new cvar is added to banshee
+void register_toplevel_cvar(type_t cvar) {
+  assert(cvarmap != 0);
+  switch(cvar) {
+  case &Cvar(ok, *topt, id, *bv, name,...):
+    try {
+      let &$(cv, constr, p) = Hashtable::lookup(cvarmap,  cvar);
+      assert(p); //it better be already entered as a toplevel Cvar too
+      if(Flags::resolve) {
+	/* *topt = eval_equality_constraint(cvar, constr); */
+	/* 	if(*topt) //its already been resolved when compiling a prior unit ... so just compress and continue */
+	/* 	  return; */
+	reintroduce_cvar(cv);
+      }
+      copy_cvar_fields(cv, cvar);
+    }catch {
+    case &Not_found: //easy case: this is a new top-level cvar 
+      add_variable(cvar); 
+      Hashtable::insert(cvarmap, cvar, new $(cvar, NULL, PERSIST_INIT)); //flag it as a toplevel cvar
+      break;
+    }
+    break;
+  default:
+    Warn::impos("expected cvar only");
+  }
+}
+
+static void default_unconstrained_cvar(type_t cv, $(type_t, list_t<constraint_t>, cvarstate_t)@ entry, type_t def) {
+  if(entry->f2 == PERSIST_REINTRO) {
+    if(Tcutil::is_cvar_type(cv)) { //cv still unconstrained
+      if(internal_add_constraint(equality_constraint(cv, def)) == FAILED)
+	Warn::err2(0, "Resolution failed while applying default to Cvar: ", cv);
+    }
+  }
+}
+ 
+void resolve_or_default(type_t def) {
+  if(discharge_implications())
+    return;
+  Hashtable::iter_c(default_unconstrained_cvar, cvarmap, def);
+  discharge_implications(); //once more to catch effects of defaults
+}
+
+//called by Interproc after the peristed constraint graph has been
+//read into the assoc list. Each of the Cvars that appear here are 
+//top level Cvars and should be persisted to the .cych/cvars file
+void init_toplevel_cvars(list_t<$(type_t, list_t<constraint_t,`H>)@> assoc) {
+  init_map();
+  for(;assoc;assoc=assoc->tl) {
+    let &$(cvar, lc) = assoc->hd;
+    //these are added to Banshee lazily since some of the cvars may
+    //be irrelevant to the unit we are now compiling
+    Hashtable::insert(cvarmap, cvar, new $(cvar, lc, PERSIST_INIT)); 
+  }
+}
+
+ int add_all_constraints(list_t<$(type_t, list_t<constraint_t,`H>)@> g) {
+   for(;g; g=g->tl) {
+     let &$(_, c) = g->hd;
+     for(;c;c=c->tl) {
+       if(internal_add_constraint(c->hd) == FAILED)
+	 return -1;
+     }
+   }
+   if(discharge_implications()==FAILED)
+     return -1;
+   return 0;
+ }
+
+static void print_cvar(type_t c) {
+  fprintf(stderr, "%s", cvar2string(c,false));
+}
+ static void print_cvarmapval($(type_t, list_t<constraint_t>, cvarstate_t)@ val) {
+   for(_ l = val->f1;l;l=l->tl) {
+     fprintf(stderr, "%s, ", constraint2string(l->hd));
+   }
+ }
+
+ static void dump_cvarmap() {
+  assert(cvarmap);
+  Hashtable::print_table_map(cvarmap, print_cvar, print_cvarmapval);
+ }
+ 
+ static void flush_one_variable(type_t cvar, $(type_t, list_t<constraint_t>, cvarstate_t)@ val) {
+   let &$(_, l, _) = val;
+   for(;l;l=l->tl) {
+     if(internal_add_constraint(l->hd) == FAILED) {
+       Warn::impos("Inconsistent constraint graph while flushing");
+     }
+   }
+ }
+
+ void flush_all_constraints() {
+   if(!cvarmap) {
+     return;
+   }
+   Hashtable::iter(flush_one_variable, cvarmap);
+   discharge_implications();
+ }
+}//namespace BansheeIf
+
+
+#ifdef BANTEST
+using BansheeIf;
+//for testing
+int main() {
+  banshee_init();
+  cvartype_t t1 = cvar_type(&Kinds::ptrbko);
+  cvartype_t t2 = cvar_type(&Kinds::ptrbko);
+  cvartype_t t3 = cvar_type(&Kinds::ptrbko);
+
+  add_variable(t1);
+  add_variable(t2);
+  add_variable(t3);
+  
+  _ fat = fatconst();
+  _ thin = thinconst();
+  
+  _ c1 = equality_constraint(fat, t1);
+  _ c2 = equality_constraint(thin, t1);
+  add_constraint(0,c1);  
+  add_constraint(0,c2);
+/*   _ c2 = equality_constraint(thin, t2); */
+  
+/*   _ c3 = implication_constraint(cmpeq_constraint(t1, fat),  */
+/* 				equality_constraint(t3, t2)); */
+/*   add_constraint(c1); */
+/*   add_constraint(c2); */
+/*   add_constraint(c3); */
+  Banshee::cycinf_dump_graph();
+  printf("Type t1 prior to resolution :: %s\n", Absynpp::typ2string(t1));
+  printf("Type t2 prior to resolution :: %s\n", Absynpp::typ2string(t2));
+  printf("Type t3 prior to resolution :: %s\n", Absynpp::typ2string(t3));
+
+  resolve(t1); 
+  if(resolve(t2)) 
+    printf("resolve of t2 returned true!\n");
+  else
+    printf("resolve of t2 returned false!\n");
+  
+  printf("Type t1 after resolution :: %s\n", Absynpp::typ2string(t1));
+  printf("Type t2 after resolution :: %s\n", Absynpp::typ2string(t2));
+  printf("Type t3 after resolution :: %s\n", Absynpp::typ2string(t3));
+
+  discharge_implications();
+
+  resolve(t3);
+  printf("Type t3 after discharge:: %s\n", Absynpp::typ2string(t3));
+  Banshee::cycinf_dump_graph();
+  //  Warn::flush_warnings();
+  return 0;
+}
+#endif

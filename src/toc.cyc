@@ -149,7 +149,7 @@ static toc_state_t toc_state = NULL;
 // dynamic region.
 static `res use_toc_state(`a arg,
                           `res f<`d,`r>(region_t<`d>,
-                                        $(struct TocState<`d>@`d,`a)@`r)) {
+					$(struct TocState<`d>@`d,`a)@`r)) {
   toc_state_t ts = NULL;
   ts :=: toc_state;
   let TocStateWrap{<`dyn> dyn, s} = *ts;
@@ -705,6 +705,7 @@ static bool is_pointer_or_boxed_tvar(type_t t) {
 type_t typ_to_c(type_t t) {
   switch (t) {
   case &AppType(&VoidCon,_): return t;
+  case &Cvar(...): return void_star_type(); //Cvar's are purely Cyclone types
   case &Evar(_,*t2,_,_):
     if (*t2 != NULL)
       return typ_to_c((type_t)(*t2));
@@ -722,7 +723,7 @@ type_t typ_to_c(type_t t) {
     // t2? maps to struct fat_ptr.
     // t2* and t2@ map to t2*.  Regions and zero-term are irrelevant.
     t2 = typ_to_c(t2);
-    if (get_bounds_exp(fat_bound_type,bnds) == NULL)
+    if (get_bounds_exp_constrain(bounds_one(),bnds,true) == NULL)
       return fat_ptr_type();
     return star_type(t2,heap_rgn_type,al_qual_type,tq,false_type,false_type);
   case &AppType(&IntCon(_,_),_):
@@ -1109,7 +1110,7 @@ static bool ptr_use_to_c(env_t nv, exp_t ptr, absyn_annot_t annot,
   case &PointerType(PtrInfo{ta,tq,PtrAtts(_,_,b,zt,...)}):
     switch(annot) {
     case &InsertChecks::NoCheck:
-      if(!get_bounds_exp(bounds_one(),b)) {
+      if(!get_bounds_exp_constrain(bounds_one(),b,true)) {
         // must make sure to update the type on any modified expression
         // so that toseq knows how to deal with it.
         let newt = cstar_type(typ_to_c(ta),tq);
@@ -1119,7 +1120,7 @@ static bool ptr_use_to_c(env_t nv, exp_t ptr, absyn_annot_t annot,
       ans = false;
       break;
     case &InsertChecks::NullOnly:
-      if(!get_bounds_exp(bounds_one(),b)) {
+      if(!get_bounds_exp_constrain(bounds_one(),b,true)) {
         // rewrite e to be e.curr
         let newt = cstar_type(typ_to_c(ta),tq);
 	ptr->r = cast_it_r(newt,member_exp(new_exp(ptr->r,DL),curr_sp,DL));
@@ -1635,7 +1636,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       exp_t arg = es->hd;
       switch (compress((type_t)arg->topt)) {
       case &PointerType(PtrInfo(elt_type,_,PtrAtts(_,nbl,bound,zt,...))):
-        let eopt = get_bounds_exp(bounds_one(),bound);
+        let eopt = get_bounds_exp_constrain(bounds_one(),bound,true);
         if (eopt == NULL)
           // retrieve (last_plus_one - curr) via runtime call
 	  e->r = fncall_exp_r(_get_fat_size_e,
@@ -1668,7 +1669,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	unimp("can't do pointer arithmetic at top-level");
       switch (compress(old_types->hd)) {
       case &PointerType(PtrInfo(elt_type,_,PtrAtts(_,_,b,zt,...))):
-        let eopt = get_bounds_exp(bounds_one(),b);
+        let eopt = get_bounds_exp_constrain(bounds_one(),b,true);
 	exp_t e1 = es->hd;
 	exp_t e2 = es->tl->hd;
         if (eopt == NULL)
@@ -2063,8 +2064,8 @@ static void exp_to_c(env_t nv, exp_t e) {
     // a few Cyclone casts are translated into C effects other than casts:
     switch ($(compress(old_t2),compress(new_typ))) {
     case $(&PointerType(p1),&PointerType(p2)):
-      let b1  = get_bounds_exp(bounds_one(),p1.ptr_atts.bounds);
-      let b2  = get_bounds_exp(bounds_one(),p2.ptr_atts.bounds);
+      let b1  = get_bounds_exp_constrain(bounds_one(),p1.ptr_atts.bounds,true);
+      let b2  = get_bounds_exp_constrain(bounds_one(),p2.ptr_atts.bounds,true);
       let zt1 = force_type2bool(false,p1.ptr_atts.zero_term);
       let zt2 = force_type2bool(false,p2.ptr_atts.zero_term);
       switch($(b1,b2)) {
@@ -2200,7 +2201,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       }
       break;
     case $(&PointerType(p1), &AppType(&IntCon(_,_),_)):
-      switch(get_bounds_exp(bounds_one(),p1.ptr_atts.bounds)) {
+      switch(get_bounds_exp_constrain(bounds_one(),p1.ptr_atts.bounds,true)) {
       case NULL: // cast t? to int -- cast curr field to int
 	e1->r = aggrmember_exp_r(new_exp(e1->r,e1->loc),curr_sp);
 	e1->topt = new_typ_c;

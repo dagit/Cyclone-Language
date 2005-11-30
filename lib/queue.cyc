@@ -145,8 +145,8 @@ void remove(queue_t<`a,`r> q,`a v) {
 		  bool (@f)(`b,`a *`U), `b env) {
 
   region g;
-  queue_t<`a *,`g> saveq = rcreate(g);
-  `a *x = NULL;
+  queue_t<`a *\U,`g> saveq = rcreate(g);
+  `a *\U x = NULL;
   bool ok = false;
 
   // look for a matching queue element

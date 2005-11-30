@@ -21,6 +21,9 @@ O=@OBJEXT@
 LDFLAGS=@LDFLAGS@
 SIZEOF_WCHAR_T=@ac_cv_sizeof_wchar_t@
 WCHAR_T_UNSIGNED=@WCHAR_T_UNSIGNED@
+BANSHEE=@abs_srcdir@/banshee
+BANSHEEENGINEDIR=$(BANSHEE)/engine
+BANSHEEREGIONDIR=$(BANSHEE)/libcompat
 
 HAVE_PTHREAD=@HAVE_PTHREAD@
 
@@ -89,6 +92,8 @@ CYCLONE_H:=ap.h\
 	gc_ifc.h\
 	getopt.h\
 	hashtable.h\
+	interproc.h\
+	bansheeif.h\
 	iter.h\
 	lexing.h\
 	lineno.h\
@@ -108,7 +113,12 @@ CYCLONE_H:=ap.h\
 	xarray.h\
 	xp.h\
 	warn.h\
-        flags.h
+        flags.h\
+	subtype.h
+
+#need this in CYCLONE_SRCS
+BANSHEE_IF:=bansheeif
+BANSHEE_STUB:=bansheeif_stub
 
 CYCLONE_SRCS:=absyn\
 	 warn\
@@ -134,6 +144,7 @@ CYCLONE_SRCS:=absyn\
          tc\
 	 currgn\
          binding\
+	 interproc\
          pratt-ap\
          jump_analysis\
          cf_flowinfo\
@@ -151,6 +162,7 @@ CYCLONE_SRCS:=absyn\
 	 rename_temps\
 	 remove_casts\
          interface\
+	 subtype\
 	 cifc\
 	 tcdecl\
          port\
@@ -191,7 +203,9 @@ CYCDOC_SRCS:=cycdoc\
 	cf_flowinfo\
 	formatstr\
 	evexp\
-	absynpp
+	subtype\
+	absynpp\
+	$(BANSHEE_STUB)
 
 BUILDLIB_SRCS:=buildlib\
         specsfile\
@@ -228,7 +242,9 @@ BUILDLIB_SRCS:=buildlib\
 	insert_checks\
 	cf_flowinfo\
         toc\
-	absyn
+	subtype\
+	absyn\
+	$(BANSHEE_STUB)
 
 NOOPT_SRCS:= #parse_tab parse_tab_a parse_tab_pg
 
@@ -249,16 +265,17 @@ CYCLIB:=libcyc.$(A)
 CYCBOOTLIB:=libcycboot.$(A)
 CYCCOMP:=cyclone$(EXE)
 
-C_SRCS:=$(addsuffix .c, $(CYCLONE_SRCS))
+C_SRCS:=$(addsuffix .c, $(CYCLONE_SRCS) $(BANSHEE_STUB) $(BANSHEE_IF))
 C_BOOT_LIBS:=$(addsuffix .c, $(CYCLONE_BOOT_LIBS))
 C_LIBS:=$(addsuffix .c, $(CYCLONE_LIBS))
-O_SRCS:=$(addsuffix .$(O), $(CYCLONE_SRCS))
+O_SRCS:=$(addsuffix .$(O), $(CYCLONE_SRCS) $(BANSHEE_STUB))
+BANSHEE_O_SRCS:=$(addsuffix .$(O), $(CYCLONE_SRCS) $(BANSHEE_IF))
 O_BOOT_LIBS:=$(addsuffix .$(O), $(CYCLONE_BOOT_LIBS))
 O_LIBS:=$(addsuffix .$(O), $(CYCLONE_LIBS))
-A_SRCS:=$(addsuffix _a.$(O), $(CYCLONE_SRCS))
+A_SRCS:=$(addsuffix _a.$(O), $(CYCLONE_SRCS) $(BANSHEE_STUB))
 A_BOOT_LIBS:=$(addsuffix _a.$(O), $(CYCLONE_BOOT_LIBS))
 A_LIBS:=$(addsuffix _a.$(O), $(CYCLONE_LIBS))
-PG_SRCS:=$(addsuffix _pg.$(O), $(CYCLONE_SRCS))
+PG_SRCS:=$(addsuffix _pg.$(O), $(CYCLONE_SRCS) $(BANSHEE_STUB))
 PG_BOOT_LIBS:=$(addsuffix _pg.$(O), $(CYCLONE_BOOT_LIBS))
 PG_LIBS:=$(addsuffix _pg.$(O), $(CYCLONE_LIBS))
 NOCHECK_BOOT_LIBS:=$(addsuffix _nocheck.$(O), $(CYCLONE_BOOT_LIBS))
@@ -270,4 +287,4 @@ PG_RUNTIME:=$(addsuffix _pg.$(O), $(RUNTIME))
 O_NOOPT_SRCS:=$(addsuffix .$(O),$(NOOPT_SRCS))
 OPTFLAG:=-O
 
-UPDATE_SRCS:=$(addsuffix .c, $(CYCLONE_SRCS) cycdoc buildlib)
+UPDATE_SRCS:=$(addsuffix .c, $(CYCLONE_SRCS) $(BANSHEE_STUB) $(BANSHEE_IF) cycdoc buildlib)

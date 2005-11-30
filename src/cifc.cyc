@@ -44,6 +44,7 @@ bool opt_inst_tvar = false;
 
 static string_t get_type_kind(type_t t) {
   switch(t) {
+  case &Cvar(...): return "Cvar";
   case &AppType(...): return "AppType"; 
   case &Evar(...):  return "Evar";  
   case &VarType(...): return "Vartype";  // type variables, kind induced by tvar
@@ -177,6 +178,8 @@ static type_t expand_c_type(seg_t loc, tenv_t te, type_t ctyp) {
     return ctyp;
   case &VarType(...):
     //    fprintf(stderr, "Got var type %s\n", Absynpp::typ2string(ctyp));
+    return ctyp;
+  case &Cvar(...):
     return ctyp;
   }
 }
@@ -752,6 +755,7 @@ static void deconstruct_type(type_t t) {
     }
     fprintf(stderr, ">\n");
     break;
+  case &Cvar(...):     fprintf(stderr, "Got Cvar\n"); break;
   case &Evar(...):
     fprintf(stderr, "Got Evar\n"); break;
   case &VarType(tv):

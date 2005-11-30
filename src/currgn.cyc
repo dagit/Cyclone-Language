@@ -176,6 +176,7 @@ static void rgnsubtype(Position::seg_t loc, struct rgnsubenv env, type_t type) {
       rgnsubexpopt(env,fs->hd->requires_clause);
     }
     return;
+  case &Cvar(_,r,...): fallthru(r);
   case &Evar(_,r,_,_):
     if (r != NULL) rgnsubtype(loc,env,r);
     return;

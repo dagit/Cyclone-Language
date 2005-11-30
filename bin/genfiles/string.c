@@ -534,7 +534,7 @@ unsigned long i=0U;
 while(strs!=0){
 {struct _fat_ptr next=*((struct _fat_ptr*)strs->hd);
 len=(unsigned long)_check_null(lens)->hd;
-({struct _fat_ptr _Tmp1=_fat_ptr_decrease_size(_fat_ptr_plus(ans,sizeof(char),(int)i),sizeof(char),1U);struct _fat_ptr _Tmp2=(struct _fat_ptr)next;Cyc_strncpy(_Tmp1,_Tmp2,len);});
+({struct _fat_ptr _Tmp1=_fat_ptr_decrease_size(_fat_ptr_plus(ans,sizeof(char),(int)i),sizeof(char),1U);struct _fat_ptr _Tmp2=next;Cyc_strncpy(_Tmp1,_Tmp2,len);});
 i +=len;
 strs=strs->tl;
 lens=lens->tl;}
@@ -574,7 +574,7 @@ unsigned long i=0U;
 while(_check_null(strs)->tl!=0){
 {struct _fat_ptr next=*((struct _fat_ptr*)strs->hd);
 len=(unsigned long)_check_null(lens)->hd;
-({struct _fat_ptr _Tmp1=_fat_ptr_decrease_size(_fat_ptr_plus(ans,sizeof(char),(int)i),sizeof(char),1U);struct _fat_ptr _Tmp2=(struct _fat_ptr)next;Cyc_strncpy(_Tmp1,_Tmp2,len);});
+({struct _fat_ptr _Tmp1=_fat_ptr_decrease_size(_fat_ptr_plus(ans,sizeof(char),(int)i),sizeof(char),1U);struct _fat_ptr _Tmp2=next;Cyc_strncpy(_Tmp1,_Tmp2,len);});
 i +=len;
 ({struct _fat_ptr _Tmp1=_fat_ptr_decrease_size(_fat_ptr_plus(ans,sizeof(char),(int)i),sizeof(char),1U);struct _fat_ptr _Tmp2=separator;Cyc_strncpy(_Tmp1,_Tmp2,seplen);});
 i +=seplen;
@@ -583,7 +583,7 @@ lens=lens->tl;}
 # 280
 1U;}
 # 289
-({struct _fat_ptr _Tmp1=_fat_ptr_decrease_size(_fat_ptr_plus(ans,sizeof(char),(int)i),sizeof(char),1U);struct _fat_ptr _Tmp2=(struct _fat_ptr)*((struct _fat_ptr*)strs->hd);Cyc_strncpy(_Tmp1,_Tmp2,(unsigned long)_check_null(lens)->hd);});{
+({struct _fat_ptr _Tmp1=_fat_ptr_decrease_size(_fat_ptr_plus(ans,sizeof(char),(int)i),sizeof(char),1U);struct _fat_ptr _Tmp2=*((struct _fat_ptr*)strs->hd);Cyc_strncpy(_Tmp1,_Tmp2,(unsigned long)_check_null(lens)->hd);});{
 struct _fat_ptr _Tmp1=ans;_npop_handler(0);return _Tmp1;}}}}}
 # 261
 ;_pop_region();}}
@@ -896,7 +896,7 @@ return token;}}
 struct Cyc_List_List*Cyc_rexplode(struct _RegionHandle*r,struct _fat_ptr s){
 struct Cyc_List_List*result=0;
 {int i=(int)(Cyc_strlen(s)- 1U);for(0;i >= 0;-- i){
-result=({struct Cyc_List_List*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_List_List));_Tmp0->hd=(void*)((int)*((const char*)_check_fat_subscript(s,sizeof(char),i))),_Tmp0->tl=result;_Tmp0;});}}
+result=({struct Cyc_List_List*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_List_List));_Tmp0->hd=(void*)*((const char*)_check_fat_subscript(s,sizeof(char),i)),_Tmp0->tl=result;_Tmp0;});}}
 return result;}
 # 681
 struct Cyc_List_List*Cyc_explode(struct _fat_ptr s){

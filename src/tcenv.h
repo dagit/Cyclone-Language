@@ -40,7 +40,6 @@ extern struct Genv {
   Dict::dict_t<qvar_t,aggrdecl_t@>     aggrdecls;
   Dict::dict_t<qvar_t,datatypedecl_t@> datatypedecls;
   Dict::dict_t<qvar_t,enumdecl_t@>     enumdecls;
-  // no indirection b/c no redeclaration
   Dict::dict_t<qvar_t,typedefdecl_t>   typedefs; 
   // bool for tree-shaking, binding_t really only for interface.cyc (FIX)
   Dict::dict_t<qvar_t,$(binding_t,bool)@> ordinaries;

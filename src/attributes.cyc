@@ -71,7 +71,8 @@ attribute_t parse_nullary_att(seg_t loc, string_t<`H> s) {
     $("no_check_memory_usage", &Atts::No_check_memory_usage_att_val),
     $("pure",&Atts::Pure_att_val),
     $("always_inline",&Atts::Always_inline_att_val),
-    $("no_throw",&Atts::No_throw_att_val)
+    $("no_throw",&Atts::No_throw_att_val),
+    $("nothrow",&Atts::No_throw_att_val)
     };
   // drop the surrounding __ in s, if it's there
   if(numelts(s) > 4 && s[0]=='_' && s[1]=='_'
@@ -231,7 +232,7 @@ void fnTypeAttsOK(seg_t loc, type_t t) {
 	case &PointerType(PtrInfo(_,_,PtrAtts(_,nullable,bd,zt,_,_,_))):
 	  if(Tcutil::force_type2bool(false,nullable))
 	    Warn::err2(loc,s," non-null pointers");
-	  if(!Tcutil::is_bound_one(bd))
+	  if(!Tcutil::is_bound_one(bd,true))
 	    Warn::err2(loc,s," pointers of size 1");
 	  if(Tcutil::force_type2bool(false,zt))
 	    Warn::err2(loc,s," pointers to non-zero-terminated arrays");

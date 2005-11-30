@@ -55,6 +55,10 @@ namespace Tcpat {
   extern datatype Decision;  // see tcpat.h
   typedef datatype Decision *decision_opt_t;
 }
+namespace BansheeIf {
+  extern datatype BansheeVar;
+  typedef datatype BansheeVar *bvar_t;
+}
 
 namespace Absyn {
   using Core;
@@ -98,7 +102,7 @@ namespace Absyn {
   typedef union DatatypeFieldInfo datatype_field_info_t;
   typedef union AggrInfo aggr_info_t;
   typedef struct ArrayInfo array_info_t;
-  typedef datatype Type @type_t, @rgntype_t, @booltype_t, @ptrbound_t, @aqualtype_t, @efftype_t;
+  typedef datatype Type @type_t, @rgntype_t, @booltype_t, @ptrbound_t, @aqualtype_t, @efftype_t, @cvartype_t;
   typedef datatype Type *type_opt_t;
   typedef list_t<type_t,`H> types_t;
   typedef list_t<$(type_t,type_t)@> aqualbnds_t;
@@ -135,6 +139,7 @@ namespace Absyn {
   typedef enum Coercion coercion_t;
   typedef struct PtrLoc *ptrloc_t;
   typedef datatype EffConstraint @effconstr_t, *effconstr_opt_t;
+  //  typedef datatype ConstraintVar @cvar_t, *cvar_opt_t;
 
   // scopes for declarations
   EXTERN_ABSYN enum Scope {
@@ -349,6 +354,14 @@ namespace Absyn {
   };
   typedef struct TypeDecl @type_decl_t;
 
+  EXTERN_ABSYN datatype CvarConstants {
+    FatConst; //PtrBndKind 
+    ThinConst; //PtrBndKnd
+    UniqueConst; //AqualKind
+    RefcntConst; //AqualKind
+  };
+  typedef datatype CvarConstants @cvarconst_t;
+
   // Type Constructors that don't require any special treatment
   EXTERN_ABSYN datatype TyCon {
     VoidCon;// MemKind
@@ -395,8 +408,8 @@ namespace Absyn {
   // FIX: May want to make this raw_type and store the kinds with the types.
   EXTERN_ABSYN datatype Type {
     // application of a type constructor to zero or more arguments
-    AppType(tycon_t, types_t);
-   // Evars are introduced for unification or via _ by the user.
+    AppType(tycon_t, types_t); 
+    // Evars are introduced for unification or via _ by the user.
     // The kind can get filled in during well-formedness checking.
     // The type can get filled in during unification.
     // The int is used as a unique identifier for printing messages.
@@ -404,6 +417,12 @@ namespace Absyn {
     // occur in the type to which the evar is constrained.
     Evar(opt_t<kind_t>,type_opt_t,int,opt_t<list_t<tvar_t>>);
     VarType(tvar_t); // type variables, kind induced by tvar
+    //Constraints for inference -- introduced by parser in --inf mode
+    //kind filled in by tctyp
+    //type_opt_t is used if the variable is unified with a constant
+    //int is a unique id for printing only; referential equality fixed during binding
+    //char* is a name derived from the context used when persisting the constraint graph
+    Cvar(opt_t<kind_t>, type_opt_t, int, BansheeIf::bvar_t, const char*, const char*, bool);
     PointerType(ptr_info_t); // t*, t?, t@, etc.  BoxKind when not Unknown_b
     ArrayType(array_info_t);// MemKind
     FnType(fn_info_t); // MemKind
@@ -956,13 +975,13 @@ namespace Absyn {
     valueof_type(exp_t),
     typeof_type(exp_t),
     //    access_eff(type_t),
-    join_eff(list_t<type_t,`H>),
+    join_eff(types_t),
     regionsof_eff(type_t),
     enum_type(typedef_name_t, struct Enumdecl *`H),
     anon_enum_type(list_t<enumfield_t,`H>),
     builtin_type(string_t<`H>, kind_t),
     tuple_type(list_t<$(tqual_t,type_t)@`H,`H> tqts),
-    typedef_type(typedef_name_t,list_t<type_t,`H>,struct Typedefdecl*`H ,type_opt_t);
+    typedef_type(typedef_name_t,types_t,struct Typedefdecl*`H ,type_opt_t);
 
   // usefule for avoiding allocation/creation of a tuple field name
   datatype Designator.FieldName @ tuple_field_designator(int i);
@@ -982,6 +1001,10 @@ namespace Absyn {
   ptrbound_t thin_bounds_exp(exp_t);
   ptrbound_t thin_bounds_int(unsigned int);
   ptrbound_t bounds_one(); // thin_bounds_int(1) (good for sharing)
+  cvartype_t cvar_type(opt_t<kind_t,`H>);
+  cvartype_t cvar_type_name(opt_t<kind_t,`H>, string_t<`H>);
+  cvartype_t fatconst();
+  cvartype_t thinconst();//, uniqueconst, refcntconst;
   // pointer types
   type_t pointer_type(struct PtrInfo);
   // t *{e}`r
@@ -1069,7 +1092,7 @@ namespace Absyn {
   exp_t throw_exp(exp_t, seg_t);
   exp_t rethrow_exp(exp_t, seg_t);
   exp_t noinstantiate_exp(exp_t, seg_t);
-  exp_t instantiate_exp(exp_t, list_t<type_t,`H>, seg_t);
+  exp_t instantiate_exp(exp_t, types_t, seg_t);
   exp_t cast_exp(type_t, exp_t, bool user_cast, coercion_t, seg_t);
   exp_t address_exp(exp_t, seg_t);
   exp_t sizeoftype_exp(type_t t, seg_t);

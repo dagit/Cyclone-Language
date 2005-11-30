@@ -84,7 +84,8 @@ namespace Pcre {
 
 /* Open up the safe Pcre namespace for the client */
 using Pcre;
-  
+void *(*pcre_malloc)(size_t);  
+void (*pcre_free)(void *);
 #include "timer.h"
 
 #define MAXLINES   100

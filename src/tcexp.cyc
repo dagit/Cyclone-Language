@@ -37,6 +37,8 @@
 #include "tctyp.h"
 #include "tcexp.h"
 #include "attributes.h"
+#include "subtype.h"
+#include "bansheeif.h"
 
 using Core;
 using List;
@@ -256,7 +258,8 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
     case &PointerType(_):
       // maybe it's going in a different region, but region subtyping
       // should take care of that
-      if (!Unify::unify(*topt,t) &&silent_castable(loc,t,*topt)){
+      let c = Subtype::coercible(e->loc, t, *topt); //includes non-silent casts now
+      if (c != Unknown_coercion && c != No_coercion) {
 	e->topt = t;
 	unchecked_cast(e, *topt, Other_coercion);
 	return *topt;
@@ -368,9 +371,16 @@ static type_t tcUnPrimop(tenv_t te, seg_t loc, type_t * topt,
   case Numelts: // DJG: array-type impossible because of promote_array
     switch (t) {
     case &PointerType(PtrInfo(_,_,PtrAtts(_,_,b,...))):
-      let eopt = get_bounds_exp(fat_bound_type,b);
-      if (eopt != NULL && !Evexp::c_can_eval(eopt) && !allow_valueof)
-	Warn::err2(loc,"cannot use numelts on a pointer with abstract bounds");
+      if(is_cvar_type(b)) { 
+	//numelts on *{1} pointer is pointless :P, though not unsound
+	//so this constraint is heuristic
+	BansheeIf::add_constraint(loc,BansheeIf::equality_constraint(ptrbnd_cvar_equivalent(b), fatconst()));
+      }
+      else {
+	let eopt = get_bounds_exp(fat_bound_type,b);
+	if (eopt != NULL && !Evexp::c_can_eval(eopt) && !allow_valueof)
+	  Warn::err2(loc,"cannot use numelts on a pointer with abstract bounds");
+      }
       break;
     default: Warn::err2(loc,"numelts requires pointer type, not ",t);
     }
@@ -383,10 +393,26 @@ static type_t tcUnPrimop(tenv_t te, seg_t loc, type_t * topt,
     pinfo.ptr_atts.bounds = bounds_one();
     pinfo.ptr_atts.zero_term = false_type;
     let p = pointer_type(pinfo);
-    if (!Unify::unify(p,t) && !silent_castable(loc,t,p)) {
+    if(is_pointer_type(t)) {
+/*       let b = get_pointer_bounds(t); */
+/*       if(is_cvar_type(b)) { */
+/* 	if(!BansheeIf::add_constraint(BansheeIf::equality_constraint(b, thinconst()))) { */
+/* 	  Warn::err2(loc,"Unable to constrain pointer bound to @thin@numelts(1)@nozeroterm: ",t); */
+/* 	  return uint_type;	 */
+/* 	} */
+/*       } */
+/*       else { */
+      let coercion = Subtype::coercible_exact(loc,t,p);
+      if(coercion == Unknown_coercion) {
+	Warn::err2(loc,"expecting @thin@numelts(1)@nozeroterm pointer type but found %s",t);
+	return uint_type;
+      }
+    }
+    else {
       Warn::err2(loc,"expecting @thin@numelts(1)@nozeroterm pointer type but found %s",t);
       return uint_type;
     }
+
     let elt_type = compress(pointer_elt_type(p));
     let rgn_type = pointer_region(p);
     switch (elt_type) {
@@ -433,15 +459,24 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
       Warn::err2(e1->loc,"can't do arithmetic on unique pointer");
     if (!coerce_sint_type(e2))
       Warn::err2(e2->loc,"expecting int but found ",t2);
-    let eopt = get_bounds_exp(fat_bound_type,b);
-    if (eopt == NULL) 
-      return t1;
-    // if we have a zero-terminated array, warn that this could
-    // be expensive, since coercing to a fat pointer involves a loop.
-    if (force_type2bool(false,zt)) {
-      let $(i,known) = Evexp::eval_const_uint_exp(eopt);
-      if (known && i == 1)
-        Warn::warn2(e1->loc, "pointer arithmetic on thin, zero-terminated pointer may be expensive.");
+    if(!is_cvar_type(b)) { //user constrained, or already resolved 
+      let eopt = get_bounds_exp(fat_bound_type,b);
+      if (eopt == NULL) 
+	return t1;
+      // if we have a zero-terminated array, warn that this could
+      // be expensive, since coercing to a fat pointer involves a loop.
+      if (force_type2bool(false,zt)) { 
+	//we don't have a way of issuing this warning if the bounds is still unconstrained
+	let $(i,known) = Evexp::eval_const_uint_exp(eopt);
+	if (known && i == 1)
+	  Warn::warn2(e1->loc, "pointer arithmetic on thin, zero-terminated pointer may be expensive.");
+      }
+    }
+    else {
+      //We heuristically require t1 to be fat ... 
+      //revisit once we start inferring numelts as well; probably need a disjunction constraint
+      if(!BansheeIf::add_constraint(e1->loc,BansheeIf::equality_constraint(b, fatconst()))) 
+	Warn::err2(e1->loc, "Unable to determine bound on pointer type ", t1);
     }
     // we have to allow pointer arithmetic that might go out of bounds
     // here.  Consider:
@@ -463,62 +498,78 @@ static booltype_t relqual(type_t t) {
   default: return false_type;
   }
 }
+
 // Minus needs to support a fat pointer and an int, and two pointers
 // of any flavor.
-static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
+// We need the expected type now to properly resolve overloading while
+// doing inference
+static type_t tcMinus(tenv_t te, type_t *topt, exp_t e1, exp_t e2) {
   type_t t1 = (type_t)e1->topt;
   type_t t2 = (type_t)e2->topt;
   type_t t1_elt = void_type;
   type_t t2_elt = void_type;
-  if (is_fat_pointer_type_elt(t1,&t1_elt)) {
-    if (is_fat_pointer_type_elt(t2,&t2_elt)) {
-      if (!Unify::unify(t1_elt, t2_elt))
-	err_and_explain(e1->loc,"pointer arithmetic on values of different ",
-			"types (",t1," != ",t2,")");
-      return sint_type;
-    } 
-    if (is_pointer_type(t2)) {
-      if (!Unify::unify(t1_elt, pointer_elt_type(t2)))
-	err_and_explain(e1->loc,"pointer arithmetic on values of different ",
-			"types(",t1," != ",t2,")");
-      // t2 is thin, coerce t1 to thin and return int
-      Warn::warn2(e1->loc,"coercing fat pointer to thin pointer for subtraction");
-      unchecked_cast(e1, star_type(t1_elt,pointer_region(t1), pointer_aqual(t1),
-				   empty_tqual(0), false_type, relqual(t1)), 
-                     Other_coercion);
-      return sint_type;
-    } 
-    if (!Kinds::kind_leq(type_kind(t1_elt),&Kinds::mk))
-      Warn::err2(e1->loc,"can't perform arithmetic on abstract pointer type");
-    if (is_noalias_pointer(curr_aquals_bounds(te),t1,true))
-      Warn::err2(e1->loc,"can't perform arithmetic on unique pointer");
-    if (!coerce_sint_type(e2))
-      err_and_explain(e2->loc,"expecting ",t1," or int but found ",t2);
-    return t1;
+  
+  if(!is_pointer_type(t1)) {
+    if(is_pointer_type(t2))
+      unchecked_cast(e2, sint_type, Other_coercion);
+    return tcArithBinop(te, e1, e2, is_numeric);	
   }
-
-  if (is_pointer_type(t1)) { // t1 must be thin
-    if (is_pointer_type(t2) && Unify::unify(pointer_elt_type(t1),
-					    pointer_elt_type(t2))) {
-      if (is_fat_pointer_type(t2)) { 
-        Warn::warn2(e1->loc,"coercing fat pointer to thin pointer for subtraction");
-        unchecked_cast(e2, star_type(pointer_elt_type(t2),
-				     pointer_region(t2), pointer_aqual(t2),
-				     empty_tqual(0), false_type, relqual(t2)), 
-                       Other_coercion);
+  
+  //t1 is a pointer
+  if(!is_pointer_type(t2)) { //t2 is an arithmetic type ...
+    //what about if topt is NULL?? ... treating it as if it is a pointer... can coerce to arith later
+    if((topt && is_pointer_type(*topt)) || !topt) { //the result is a pointer type, so t1 should be fat
+      if(!is_fat_pointer_type(t1)) {
+	let pb = get_pointer_bounds(t1);
+	if(!is_cvar_type(pb) ||
+	   !BansheeIf::add_constraint(e1->loc,BansheeIf::equality_constraint(pb, fatconst()))) {
+	  Warn::err2(e1->loc, "Expected fat pointer type but got ", t1);
+	}
       }
-      Warn::warn2(e1->loc,"thin pointer subtraction!");
+      return t1;
+    }
+    else { //the result is an arithmetic type ... t1 should be thin //fixed bug during writeup .. retest
+      if(is_fat_pointer_type(t1) ||
+	 (is_cvar_type(get_pointer_bounds(t2)) &&
+	  !BansheeIf::add_constraint(e1->loc,BansheeIf::equality_constraint(get_pointer_bounds(t1), 
+									    thinconst())))) {
+	Warn::err2(e1->loc, "Expected thin pointer type but got ", t2);
+      }
+      unchecked_cast(e1, sint_type, Other_coercion);
+      unchecked_cast(e2, sint_type, Other_coercion);
       return sint_type;
     }
-    Warn::warn2(e1->loc,"coercing thin pointer to integer for subtraction");
-    unchecked_cast(e1, sint_type, Other_coercion);
   }
-  if (is_pointer_type(t2)) {
-    Warn::warn2(e1->loc,"coercing pointer to integer for subtraction");
-    unchecked_cast(e2, sint_type, Other_coercion);
+  //both are pointers -- the result must be arithmetic
+  //pointer element types must be identical
+  let t1_elt = pointer_elt_type(t1);
+  let t2_elt = pointer_elt_type(t2);
+  let coercion = Subtype::coercible_exact(e1->loc,t1_elt, t2_elt);
+  if(coercion == Unknown_coercion) 
+    err_and_explain(e1->loc,"pointer arithmetic on values of different ",
+		    "types (",t1," != ",t2,")");			  
+  //ignore return value of Other_coercion ... 
+  //constraints will force the types to be identical
+  if (!Kinds::kind_leq(type_kind(t1_elt),&Kinds::mk))
+    Warn::err2(e1->loc,"can't perform arithmetic on abstract pointer type");
+  if (is_noalias_pointer(curr_aquals_bounds(te),t1,true))
+    Warn::err2(e1->loc,"can't perform arithmetic on unique pointer");
+  
+/*   unchecked_cast(e1, sint_type, Other_coercion); */
+/*   unchecked_cast(e2, sint_type, Other_coercion); */
+  return sint_type;
+}
+
+static bool force_thin(type_t t1, type_t t2) {
+  switch($(t1, t2)) {
+  case $(&PointerType(PtrInfo{_,_,PtrAtts{_,_,bd,...}}), _): fallthru(bd);
+  case $(_, &PointerType(PtrInfo{_,_,PtrAtts{_,_,bd,...}})):
+    if(is_cvar_type(bd)) {
+
+    }
+  default:
+    return false;
   }
-                             
-  return tcArithBinop(te, e1, e2, is_numeric);
 }
 
 static type_t tcCmpBinop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
@@ -529,31 +580,44 @@ static type_t tcCmpBinop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
     return sint_type;
   }
   // okay if same types and boxed
-  if ((type_kind(t1)->kind == BoxKind) ||
-      (Unify::unify(t1,new_evar(&Kinds::bko,lookup_opt_type_vars(te))))) {
-    if (Unify::unify(t1,t2))
-      return sint_type;
-    // okay if t1 can be silently cast to t2 or vice versa
-    if (silent_castable(loc,t2,t1)) {
-      unchecked_cast(e2,t1, Other_coercion);
-      return sint_type;
-    } 
-    if (silent_castable(loc,t1,t2)) {
-      unchecked_cast(e1,t2, Other_coercion);
-      return sint_type;
-    } 
+  let bd =  Tcutil::get_pointer_bounds(t1);
+  if ((!bd || !is_cvar_type(bd)) &&
+      ((type_kind(t1)->kind == BoxKind) ||
+       (Unify::unify(t1,new_evar(&Kinds::bko,lookup_opt_type_vars(te)))))) {
     if (zero_to_null(t2,e1) || zero_to_null(t1,e2))
       return sint_type;
+    //Note: previously only "silent" casts were allowed. 
+    //now that distinction is gone ... can do very coarse approximation using No_coercion
+    let c=Subtype::coercible(loc,t1, t2);
+    if(c==Unknown_coercion) {
+      c = Subtype::coercible(loc,t2, t1); 
+      if(c != Unknown_coercion) {
+	unchecked_cast(e2, t1, c);
+	return sint_type;
+      }
+    }
+    else {
+      unchecked_cast(e1, t2, c);
+      return sint_type;
+    }
   }
   // support comparisons on pointers (which can be MemKind) and
   //   region handles
   switch ($(compress(t1), compress(t2))) {
   case $(&PointerType(PtrInfo{t1a,_,_}),&PointerType(PtrInfo{t2a,_,_})):
-    if (Unify::unify(t1a,t2a)) 
-      return sint_type; 
+    if(Subtype::coercible_exact(loc,t1a, t2a) != Unknown_coercion) { //forces t1a = t2a, no coercions allowed
+      return sint_type;
+    }
     break;
   case $(&AppType(&RgnHandleCon,_),&AppType(&RgnHandleCon,_)): return sint_type;
-  default: break;
+  default: 
+    if(bd && is_cvar_type(bd)){ 
+      if(BansheeIf::add_constraint(loc,BansheeIf::equality_constraint(bd,thinconst()))) {
+	//retry ... this can happen only once
+	return tcCmpBinop(te, loc, e1, e2);
+      }
+    }
+    break;
   }
   // FIX? not right if we did not call unify
   err_and_explain(loc,"comparison not allowed between ",t1," and ",t2);
@@ -566,7 +630,7 @@ static type_t tcBinPrimop(tenv_t te, seg_t loc, type_t * topt,
                           primop_t p, exp_t e1, exp_t e2) {
   switch (p) {
   case Plus:  return tcPlus(te,e1,e2);
-  case Minus: return tcMinus(te,e1,e2);
+  case Minus: return tcMinus(te, topt, e1,e2);
 
   case Times:
   case Div: return tcArithBinop(te,e1,e2,is_numeric);
@@ -733,14 +797,23 @@ static type_t tcIncrement(tenv_t te, seg_t loc, type_t * topt,
   type_t t = (type_t)e->topt;
   // FIX: this is not right -- for instance, it allows incrementing an enum!!
   if (!is_numeric(e)) {
+    let pb = get_pointer_bounds(t);
     type_t telt = void_type;
-    if (is_fat_pointer_type_elt(t,&telt) ||
-        (is_zero_pointer_type_elt(t,&telt) && (i == PreInc || i == PostInc))) {
+    if(is_cvar_type(pb)){
+      //      if(!is_zero_pointer_type_elt(t,&telt)) { //retest
+      if(!BansheeIf::add_constraint(e->loc,BansheeIf::equality_constraint(pb,fatconst()))){
+	Warn::err2(e->loc,"constraint failure: expecting arithmetic or ? type but found ",t);	
+      }
+      //      }
+    }
+    else if (is_fat_pointer_type_elt(t,&telt) ||
+	     (is_zero_pointer_type_elt(t,&telt) && (i == PreInc || i == PostInc))) {
       if (!Kinds::kind_leq(type_kind(telt),&Kinds::mk))
         Warn::err(e->loc,"can't perform arithmetic on abstract pointer type");
       if (is_noalias_pointer(curr_aquals_bounds(te),t,true))
         Warn::err(e->loc,"can't perform arithmetic on unique pointer");
-    } else
+    } 
+    else
       Warn::err2(e->loc,"expecting arithmetic or ? type but found ",t);
   }
   return t;
@@ -888,17 +961,17 @@ static void check_all_aqual_bounds(seg_t loc, tenv_t te,
       //      *ref = bnd;
       break;
     case &AppType(&AqualVarCon, &List{&Evar(_, *ref, _, _), ebnd}):  //still unconstrained, but has a bound
-      if(!Tcutil::check_aqual_bounds(NULL, ebnd->hd, bnd) && //make sure the evar can be instantiated to the upper bound
-         !Tcutil::check_aqual_bounds(NULL, bnd, ebnd->hd)) //the bnds are incompatible -- like (ALIASABLE,UNIQUE)
+      if(!Subtype::check_aqual_bounds(NULL, ebnd->hd, bnd) && //make sure the evar can be instantiated to the upper bound
+         !Subtype::check_aqual_bounds(NULL, bnd, ebnd->hd)) //the bnds are incompatible -- like (ALIASABLE,UNIQUE)
 	Warn::err2(loc, "alias qualifier bounds violated: ", ebnd->hd, " <> ", bnd); 
       break;
     case &AppType(&AqualsCon, &List{&Evar(...), _}): //uninstantiated aquals(`a) -- assume default ALIASABLE
       //shouldn't we add this assumption to the env's aquals_bounds?
-      if(!Tcutil::check_aqual_bounds(Tcenv::curr_aquals_bounds(te), al_qual_type, bnd)) 
+      if(!Subtype::check_aqual_bounds(Tcenv::curr_aquals_bounds(te), al_qual_type, bnd)) 
 	Warn::err2(loc, "alias qualifier bounds violated: ", qvc, " <> ", bnd);       
       break;
     default:
-      if(!Tcutil::check_aqual_bounds(Tcenv::curr_aquals_bounds(te), qvc, bnd)) 
+      if(!Subtype::check_aqual_bounds(Tcenv::curr_aquals_bounds(te), qvc, bnd)) 
 	Warn::err2(loc, "alias qualifier bounds violated: ", qvc, " <> ", bnd); 
       break;
     }
@@ -1168,7 +1241,8 @@ static type_t tcThrow(tenv_t te, seg_t loc, type_t * topt, exp_t e) {
   bool bogus = false;
   let exception_type = exn_type();
   tcExp(te,&exception_type,e);
-  if (!castable(loc,(type_t)e->topt,exception_type))
+  //!castable(loc,(type_t)e->topt,exception_type))
+  if (Subtype::coercible(loc,e->topt, exception_type) == Unknown_coercion) 
     Warn::err2(loc,"expected ",exception_type," but found ",e->topt);
   if (topt != NULL) 
     return *topt;
@@ -1230,35 +1304,50 @@ static type_t tcCast(tenv_t te, seg_t loc, type_t * topt, type_t t, exp_t e,
   check_no_qual(loc,t);
   tcExp(te,&t,e);
   type_t t2 = (type_t)e->topt;
-  if (silent_castable(loc,t2,t)) {
-    *c = No_coercion;
-  } else {
-    coercion_t crc = castable(loc,t2,t);
-    if (crc != Unknown_coercion)
-      *c = crc;
-    else if (zero_to_null(t,e))
-      *c = No_coercion;
-    else {
-      // extra unify needed to get the right reason for the failure
-      Unify::unify(t2,t);
-      let result = expr_err(te,loc,&t,"cannot cast ",t2," to ",t);
-      Unify::explain_failure();
-      return result;
-    }
+  let cc = Subtype::coercible(loc,t2, t);
+  if(cc == Unknown_coercion) {
+    let result = expr_err(te,loc,&t,"cannot cast ",t2," to ",t);
+    return result;
   }
+  *c = cc;
+  /*   if (silent_castable(loc,t2,t)) { */
+  /*     *c = No_coercion; */
+  /*   } else { */
+  /*     coercion_t crc = castable(loc,t2,t); */
+  /*     if (crc != Unknown_coercion) */
+  /*       *c = crc; */
+  /*     else if (zero_to_null(t,e)) */
+  /*       *c = No_coercion; */
+  /*     else { */
+  /*       // extra unify needed to get the right reason for the failure */
+  /*       Unify::unify(t2,t); */
+  /*       let result = expr_err(te,loc,&t,"cannot cast ",t2," to ",t); */
+  /*       Unify::explain_failure(); */
+  /*       return result; */
+  /*     } */
+  /*   } */
+  
   // special case -- if e is a m/calloc of size more than 1 and t is a * type
   // issue a warning -- this is a good sign that it's a legacy cast which will
   // lose information.
   switch ($(e->r, compress(t))) {
-  case $(&Malloc_e(MallocInfo{_,_,_,_,_,fat_result,_}),
-         &PointerType(PtrInfo{_,_,PtrAtts{_,nbl,bds,zt,_,rel,_}})):
+  case $(&Malloc_e(MallocInfo{_,_,_,_,_,fat_result,_}),&PointerType(PtrInfo{_,_,PtrAtts{_,nbl,bds,zt,_,rel,_}})):
     // malloc must be fat and t must be a NOZEROTERM, *{1} type
-    if (fat_result && !force_type2bool(false,zt) && force_type2bool(false,nbl)
-	&& !force_type2bool(false,rel)){
-      let eopt = get_bounds_exp(bounds_one(),bds);
-      if (eopt != NULL)  // FIX: DJG: looks fishy should e be eopt on next line?
-        if (Evexp::eval_const_uint_exp(e)[0] == 1)
-          Warn::warn(loc,"cast from ? pointer to * pointer will lose size information");
+    if (fat_result && !force_type2bool(false,zt) && force_type2bool(false,nbl) && !force_type2bool(false,rel)){
+      if(!is_cvar_type(bds)) {
+	let eopt = get_bounds_exp(bounds_one(),bds);
+	if (eopt != NULL) {  // FIX: DJG: looks fishy should e be eopt on next line? ...for sure!!
+	  if (Evexp::eval_const_uint_exp(eopt)[0] == 1) {
+	    Warn::warn(loc,"cast from ? pointer to * pointer will lose size information");
+	  }
+	}
+      }
+      else { //bds is as yet unconstrained ... make it fat 
+	if(!BansheeIf::add_constraint(loc,BansheeIf::equality_constraint(ptrbnd_cvar_equivalent(bds),
+								     fatconst()))) {
+	  Warn::err2(loc, "Unable to constrain pointer bound", t);
+	}
+      }
     }
     fallthru;
   default: return t;
@@ -1518,23 +1607,28 @@ static type_t tcSubscript(tenv_t te_orig, seg_t loc, type_t * topt,
   // should've been coerced to pointers
   switch (t1) {
   case &PointerType(PtrInfo(t,tq,PtrAtts(rt,_,b,zt,_,_,_))):
+    if(is_cvar_type(b) && 
+       !BansheeIf::add_constraint(loc,BansheeIf::equality_constraint(b, fatconst()))) { 
+      //this is heuristic, same as in tcPlus
+      Warn::err2(loc, "Unable to determine bound on pointer type ", t1);
+    }
     // for zero-terminated, thin pointers we warn when doing subscripting
     // to remind the user that this is an expensive operation.
     if (force_type2bool(false,zt)) {
-      bool emit_warning = false;
-      let eopt = get_bounds_exp(fat_bound_type,b);
+      bool emit_warning = false; //b should no longer be a cvar_type ... but could be once the heuristics are gone
+      let eopt = get_bounds_exp(fat_bound_type,b); 
       if (eopt != NULL) {
-        let e3 = (exp_t)eopt;
-        let $(i,known_i) = Evexp::eval_const_uint_exp(e3);
-        if (known_i && i == 1) emit_warning = true;
+	let e3 = (exp_t)eopt;
+	let $(i,known_i) = Evexp::eval_const_uint_exp(e3);
+	if (known_i && i == 1) emit_warning = true;
 	if (is_const_exp(e2)) {
 	  let $(j,known_j) = Evexp::eval_const_uint_exp(e2);
 	  if (known_j) {
-	    let $(j,knownj) = Evexp::eval_const_uint_exp(e3);
-	    if (known_i && j > i && i != 1) 
-              Warn::err(loc,"subscript will fail at run-time");
+	      let $(j,knownj) = Evexp::eval_const_uint_exp(e3);
+	      if (known_i && j > i && i != 1) 
+		Warn::err(loc,"subscript will fail at run-time");
+	    }
 	  }
-	}
       }
       if (emit_warning)
 	Warn::warn(e2->loc, "subscript on thin, zero-terminated pointer could be expensive.");
@@ -2046,6 +2140,9 @@ static type_t mallocRgn(type_t rgn) {
 /*   } */
 }
 
+//e is the numelts expression
+//t is the element type 
+//mknd identifies malloc/calloc etc
 static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt, exp_opt_t @aqopt,
                        type_t *`H @t, exp_t @e, malloc_kind_t @mknd, bool @is_fat) {
   // by default, we allocate heap pointers unless the topt tells us
@@ -2075,7 +2172,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt, exp
       rgn = mallocRgn(optrgn);
     }
   }
-  //similarly for the aqual -- default is unique
+  //similarly for the aqual -- default is aliasable
   _ aqual_type = al_qual_type;
   if (*aqopt != NULL) {
     type_t expected_type =
@@ -2218,25 +2315,35 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt, exp
       }
       // here, we're seeing if what's expected is T@{e}.  If so, we
       // check to see if e is the same as upper_exp or its type.
-      let eopt = get_bounds_exp(bounds_one(),b);
-      if (eopt != NULL && !one_elt) {
-        let upper_exp = eopt;
-        let is_constant = Evexp::c_can_eval(num_elts);
-        if (is_constant && Evexp::same_uint_const_exp(upper_exp,num_elts)) {
-          *is_fat = false;
-          return atb_type(elt_type,rgn,aqual_type,empty_tqual(0),b,zero_term,false_type);
-        }
-        switch (compress((type_t)num_elts->topt)) {
-        case &AppType(&TagCon,&List(tagtyp,_)):
-          let tagtyp_exp = cast_exp(uint_type,valueof_exp(tagtyp,0),false,
-                                    No_coercion,0);
-          if (Evexp::same_uint_const_exp(tagtyp_exp,upper_exp)) {
-            *is_fat = false;
-            return atb_type(elt_type,rgn,aqual_type,empty_tqual(0),b,zero_term,false_type);
-          }
-          break;
-        default: break;
-        }
+      if(!is_cvar_type(b)) { 
+	let eopt = get_bounds_exp(bounds_one(),b);
+	if (eopt != NULL && !one_elt) {
+	  let upper_exp = eopt;
+	  let is_constant = Evexp::c_can_eval(num_elts);
+	  if (is_constant && Evexp::same_uint_const_exp(upper_exp,num_elts)) {
+	    *is_fat = false;
+	    return atb_type(elt_type,rgn,aqual_type,empty_tqual(0),b,zero_term,false_type);
+	  }
+	  switch (compress((type_t)num_elts->topt)) {
+	  case &AppType(&TagCon,&List(tagtyp,_)):
+	    let tagtyp_exp = cast_exp(uint_type,valueof_exp(tagtyp,0),false,
+				      No_coercion,0);
+	    if (Evexp::same_uint_const_exp(tagtyp_exp,upper_exp)) {
+	      *is_fat = false;
+	      return atb_type(elt_type,rgn,aqual_type,empty_tqual(0),b,zero_term,false_type);
+	    }
+	    break;
+	  default: break;
+	  }
+	}
+      }
+      else if(*mknd==Malloc && !Tcutil::is_bits_only_type(elt_type)) {
+	//a fat pointer cannot be properly initialized by malloc
+	//we can either set *mknd to Calloc, or force the pointer to thin
+	if(!BansheeIf::add_constraint(loc,BansheeIf::equality_constraint(ptrbnd_cvar_equivalent(b),
+									 thinconst()))) {
+	  Warn::err2(loc, "Unable to constrain pointer bound", *topt);
+	}
       }
       break;
     default: break;
@@ -2271,7 +2378,8 @@ static type_t tcSwap(tenv_t te, seg_t loc, type_t * topt,
   // Make sure the elements are writable
   check_writable(te, e1);
   check_writable(te, e2);
-  if (!Unify::unify(t1,t2))
+  //  if (!Unify::unify(t1,t2))
+  if(Subtype::coercible_exact(loc,t1, t2) == Unknown_coercion)
     return expr_err(te,loc,topt,"type mismatch: ",t1," != ",t2);
   return void_type;
 }
@@ -2358,22 +2466,6 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     case &AppType(&AqualHandleCon, &List{aq,_}):
       aqual = aq;
       break;
-/*     case &AppType(&AqualHandleCon, &List{&AppType(&AqualConstCon(aqv), NULL),_}): //ok */
-/*       switch(aqv) { */
-/*       case Aliasable_qual:  break; */
-/*       case Unique_qual:     aqual = un_qual_type; break; */
-/*       case Refcnt_qual:     aqual = rc_qual_type; break; */
-/*       case Restricted_qual: aqual = rtd_qual_type; break; */
-/*       default:  */
-/* 	Warn::impos("Unexpected alias qualifier"); */
-/*       } */
-/*       break; */
-/*     case &AppType(&AqualHandleCon, &List{aqv as &AppType(&AqualVarCon, _), _}): */
-/*       aqual = aqv; */
-/*       break; */
-/*     case &AppType(&AqualHandleCon, &List{aqv as &VarType(_), _}): */
-/*       aqual = aqual_var_type(aqv, Tcutil::lookup_aquals(curr_aquals_bounds(te), aqv)); */
-/*       break; */
     default:
       Warn::err2((*qual_hndl)->loc,"expecting aqual_t type but found ",
 		 qhndl_type);
@@ -2402,13 +2494,14 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     if (!is_array_type(res_typ))
       Warn::impos2("tcNew: comprehension returned non-array type");
     res_typ = promote_array(res_typ,rgn,aqual,true);
-    if (topt != NULL)
-      if (!Unify::unify(*topt,res_typ) 
-	  && silent_castable(loc,res_typ,*topt)) {
+    if (topt != NULL) {
+      let c = Subtype::coercible(loc,res_typ, *topt); //includes non-silent casts now
+      if(c != Unknown_coercion && c != No_coercion) {
 	e->topt = res_typ;
 	unchecked_cast(e, *topt, Other_coercion);
-	res_typ = *topt;
+	res_typ = *topt;      
       }
+    }
     return res_typ;
   case &UnresolvedMem_e(nopt,des):
     e1->r = new Array_e(des);
@@ -2430,19 +2523,20 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     if (!is_array_type(res_typ))
       Warn::impos2("tcExpNoPromote on Array_e returned non-array type");
     res_typ = promote_array(res_typ,rgn,aqual,false);
-    if (topt != NULL)
+    if (topt != NULL) {
       // try unifying res_typ and topt -- if that fails, then see if we
       // can cast res_typ to topt, and insert the cast so that the code
       // generator knows what to do.
-      if (!Unify::unify(*topt,res_typ) 
-	  && silent_castable(loc,res_typ,*topt)) {
+      let c = Subtype::coercible(loc, res_typ, *topt);
+      if (c != Unknown_coercion && c != No_coercion) {
 	e->topt = res_typ;
 	unchecked_cast(e, *topt, Other_coercion);
 	res_typ = *topt;
       }
+    }
     return res_typ;
   case &Const_e({.String_c = _}):
-    // here I'm going to guess that the user wants a char *@ instead of
+    // here I'm going to guess that the user wants a char ?@ instead of
     // a char @{n}@.  They can get the char@{n}@ by using a cast.  This
     // is a total hack...
     let topt2 = atb_type(char_type, rgn, aqual, const_tqual(0),
@@ -2487,14 +2581,16 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     pi.ptr_atts.zero_term = false_type;
     pi.ptr_atts.autoreleased = false_type;
     type_t res_typ = pointer_type(pi);
-    if (topt != NULL && !Unify::unify(*topt,res_typ) &&
-	silent_castable(loc,res_typ,*topt)) {
+    if (topt != NULL) {
+      let c = Subtype::coercible(loc,res_typ, *topt);
+      if( c != Unknown_coercion && c != No_coercion) {
 	e->topt = res_typ;
-	unchecked_cast(e,*topt,Other_coercion);
-	res_typ = *topt;
+	unchecked_cast(e,*topt,c);
+	res_typ = *topt;	
+      }
     }
     return res_typ;
-  }
+  } //emacs does a weird indent because of the block label
   }
 }
 

@@ -4,7 +4,6 @@
 #include "flags.h"
 #define ALL_PARSE_H
 #include "parse.h"
-
 namespace ParseErrors {
   struct ParseState { int state; int token; const char ?msg; };
 

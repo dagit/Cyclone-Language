@@ -349,7 +349,7 @@ extern struct _fat_ptr Cyc_strconcat(struct _fat_ptr,struct _fat_ptr);
 extern struct _fat_ptr Cyc_substring(struct _fat_ptr,int,unsigned long);
 # 35 "filename.cyc"
 struct _fat_ptr Cyc_Filename_concat(struct _fat_ptr s1,struct _fat_ptr s2){
-struct _fat_ptr _Tmp0=(struct _fat_ptr)s1;return Cyc_strconcat(_Tmp0,Cyc_strconcat(_tag_fat("/",sizeof(char),2U),s2));}
+struct _fat_ptr _Tmp0=s1;return Cyc_strconcat(_Tmp0,Cyc_strconcat(_tag_fat("/",sizeof(char),2U),s2));}
 # 39
 struct _fat_ptr Cyc_Filename_chop_extension(struct _fat_ptr filename){
 int i=(int)(_get_fat_size(filename,sizeof(char))- 1U);

@@ -23,13 +23,14 @@
 
 namespace Position {
   using Core;
-
+  
   extern void reset_position(string_t<`H>);
   extern void set_position_file(string_t<`H>);
   extern string_t get_position_file();
 
   //////// Location Tracking /////////
   typedef unsigned int seg_t; 
+  extern seg_t loc_to_seg(unsigned int);
   extern seg_t  segment_join(seg_t,seg_t);
   extern bool   segment_equals(seg_t,seg_t);
   extern mstring_t string_of_loc(unsigned int);

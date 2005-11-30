@@ -23,12 +23,14 @@
 #include "warn.h"
 #include "flags.h"
 #include "kinds.h"
+#include "bansheeif.h"
 #include <string.h>
 #include <hashtable.h>
 #include "evexp.h"
 #include <xarray.h>
 using Core;
 using List;
+using BansheeIf;
 namespace Absyn;
 
 // return a negative, zero, or positive int according to whether the
@@ -211,6 +213,30 @@ static datacon(TyCon,RgnsCon);
 static datacon(TyCon,ThinCon);
 static datacon(TyCon,JoinCon);
 static datacon(TyCon,AqualsCon);
+
+static int cvar_index = 3;
+cvartype_t cvar_type(opt_t<kind_t,`H> ok) {
+  return new Cvar(ok, NULL, -(cvar_index++), NULL, NULL,NULL,false);
+}
+cvartype_t cvar_type_name(opt_t<kind_t,`H> ok, string_t<`H> a) {
+  return new Cvar(ok, NULL, cvar_index++, NULL, a,NULL,false);
+}
+cvartype_t fatconst() {
+  static type_opt_t _fatconst = NULL;
+  if(_fatconst)
+    return _fatconst;
+  _fatconst = new Cvar(&Kinds::ptrbko, fat_bound_type, 0, NULL, "fatconst", "constant",true);
+  BansheeIf::add_constant("fat", _fatconst);
+  return _fatconst;
+}
+cvartype_t thinconst() {
+  static type_opt_t _thinconst = NULL;
+  if(_thinconst)
+    return _thinconst;
+  _thinconst = new Cvar(&Kinds::ptrbko, bounds_one(), 0, NULL, "thinconst", "constant",false);
+  BansheeIf::add_constant("thin", _thinconst);
+  return _thinconst;
+}
 
 type_t aqual_constant(alias_qual_val_t v)  {
   switch(v) {
@@ -397,22 +423,6 @@ qvar_t datatype_scanf_arg_qvar() {
 // doing dynamic region profiling we correctly tally the stuff stored
 // in the unique region
 // FIX: must correspond with def in core.h; should have just one def
-
-/* qvar_t uniquergn_qvar() {  */
-/*   static qvar_opt_t q = NULL; */
-/*   if(q==NULL) */
-/*     q = new $(Abs_n(new List(new "Core",NULL), false), new "unique_region"); */
-/*   return (qvar_t)q; */
-/* } */
-/* exp_t uniquergn_exp() { */
-/*   let t  = rgn_handle_type(unique_rgn_type); */
-/*   let vd = new_vardecl(0,uniquergn_qvar(),t,NULL,NULL); */
-/*   vd->sc = Extern; */
-/*   return new Exp{.topt = t, .loc = 0, .annot = &EmptyAnnot_val,  */
-/* 		 .r = new Var_e(new Global_b(vd))}; */
-/* } */
-
-
 qvar_t uniqueaqual_qvar() {
   static qvar_opt_t q = NULL;
   if(q==NULL)
@@ -503,6 +513,12 @@ type_t compress(type_t t) {
   switch (t) {
   case &Evar(_,NULL,_,_):
   case &TypedefType(_,_,_,NULL): return t;
+  case &Cvar(_, *t2, _, bv, ...):     
+    if(bv)
+      BansheeIf::resolve(t);
+    if(!*t2)
+      return t;
+    fallthru(t2);
   case &TypedefType(_,_,_,*topt_ref): fallthru(topt_ref);
   case &Evar(_,*t2opt_ref,_,_): // TRICKY
     type_t ta = (type_t)(*t2opt_ref);
@@ -1154,6 +1170,23 @@ bool type2bool(bool def, type_t t) {
   default: return def;
   }
 }
+
+/* void visit_type(bool (@f)(`a,type_t) `a env, type_t t) { */
+/*   switch(t) { */
+/*   case &AppType(_, ts): */
+/*   case &Evar(_,t,...): */
+/*   case &VarType(...): */
+/*   case &Cvar(_,t,...): */
+/*   case &PointerType(PtrInfo{ta,_,PtrAtts{e,n,b,z,_,a,q}}): */
+/*   case &ArrayType(ArrayInfo{ta,_,_,z,_}): */
+/*   case &FnType(FnInfo{_,e,_,ret,args,_,cycv,qb,_,_,_,_,_,_,_,_,fc}): */
+/*   case &AnonAggrType(aggr_kind_t,bool tuple,list_t<aggrfield_t>): */
+/*   case &TypedefType(typedef_name_t,types_t,struct Typedefdecl *,type_opt_t): */
+/*   case &TypeDeclType(type_decl_t,type_t*): */
+/*   case &ValueofType(e): fallthru(e); */
+/*   case &TypeofType(e): */
+/*   } */
+/* } */
 
 // clients can short-circuit by throwing an exception
 // and they return false to say "do not recur"; they put their answer in env

@@ -4,6 +4,7 @@ export CYCDIR CYCC EXEC_PREFIX
 CYCC=$(CYCDIR)/bin/cyclone$(EXE)
 EXEC_PREFIX=$(CYCDIR)/bin/lib/cyc-lib
 GC=gc
+BANSHEE=banshee
 # Target directories:
 # BB is where object files for the standard build are put
 # BT is where object files for a cross build are put
@@ -15,6 +16,8 @@ BT=build/$(target)
 BL=bin/lib
 
 all: directories cyclone tools xml
+
+cyclone-inf: banshee_engine directories cyclone-inf-inner 
 
 $(BL)/libcycboot.a: $(BB)/libcycboot.a
 	cp -p $< $@
@@ -113,6 +116,10 @@ $(BL)/cyc-lib/%/runtime_cyc_nocheck.a: build/%/nocheck/runtime_cyc.a
 
 $(BL)/cyc-lib/%/runtime_cyc_pthread.a: build/%/pthread/runtime_cyc.a
 	cp -p $< $@
+
+bin/cyclone-inf$(EXE): $(BB)/cyclone-inf$(EXE) \
+  $(BL)/cyc-lib/cyc_include.h $(BL)/cyc-lib/$(build)/cyc_setjmp.h
+	cp $< $@
 
 bin/cyclone$(EXE): $(BB)/cyclone$(EXE) \
   $(BL)/cyc-lib/cyc_include.h $(BL)/cyc-lib/$(build)/cyc_setjmp.h
@@ -226,6 +233,14 @@ cyclone: \
   $(BL)/cyc-lib/$(build)/nogc.a \
   $(BL)/cyc-lib/$(build)/runtime_cyc.a \
   bin/cycdoc$(EXE)
+
+banshee_engine: 
+	$(MAKE) -C $(BANSHEE) 
+
+cyclone-inf-inner: \
+  directories \
+  bin/buildlib$(EXE) \
+  bin/cyclone-inf$(EXE) 
 
 ifeq ($(HAVE_PTHREAD),yes)
 cyclone: \
@@ -374,7 +389,7 @@ inc_install inc_uninstall:
 endif
 ifdef BIN_INSTALL
 bin_install:
-	$(SHELL) config/cyc_install bin/cyclone$(EXE) bin/cycbison$(EXE) bin/cyclex$(EXE) bin/cycflex$(EXE) bin/rewrite$(EXE) bin/aprof$(EXE) bin/errorgen$(EXE) bin/stringify$(EXE) $(BIN_INSTALL)
+	$(SHELL) config/cyc_install bin/cyclone$(EXE) bin/cyclone-inf$(EXE) bin/cycbison$(EXE) bin/cyclex$(EXE) bin/cycflex$(EXE) bin/rewrite$(EXE) bin/aprof$(EXE) bin/errorgen$(EXE) bin/stringify$(EXE) $(BIN_INSTALL)
 bin_uninstall:
 	$(SHELL) config/cyc_install -u $(BIN_INSTALL)
 else
@@ -449,7 +464,7 @@ UNUPDATEDIR=unupdate
 BUILDDIR_UPDATE_FILES=$(UPDATE_SRCS) $(C_BOOT_LIBS) precore_c.h boot_cycstubs.c
 
 # The update files that go from "lib" to GENDIR.
-LIB_UPDATE_FILES=boot_cstubs.c nogc.c malloc.c $(C_RUNTIME) runtime_internal.h bget.h
+LIB_UPDATE_FILES=boot_cstubs.c nogc.c malloc.c cycinf.c $(C_RUNTIME) runtime_internal.h bget.h
 
 # The update files that go from "lib" to "bin/cyc-lib".
 CYC_LIB_UPDATE_FILES=cyc_include.h libc.cys
@@ -600,6 +615,7 @@ clean_nogc: clean_test clean_build
 	$(RM) *~ amon.out
 
 clean: clean_nogc
+	$(MAKE) clean -C $(BANSHEE)
 	$(MAKE) clean -C $(GC)
 	$(RM) $(GC)/*.exe $(GC)/base_lib $(GC)/*.obj $(GC)/gc.lib
 ifeq ($(HAVE_PTHREAD),yes)

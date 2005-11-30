@@ -43,8 +43,8 @@ using List;
 using Absyn;
 namespace Interface;
 
-typedef Tcenv::genv_t genv_t;
 typedef Tcdecl::xdatatypefielddecl_t xdatatypefielddecl_t;
+typedef Tcenv::genv_t genv_t;
 
 /* ------ definition of an interface ------- */
 

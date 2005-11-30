@@ -235,6 +235,8 @@ LINKFILES = install_path.$(O) libcycboot.a runtime_cyc.a
 ########################################################################
 $(BB)/cyclone$(EXE): $(addprefix $(BB)/, $(O_SRCS) $(LINKFILES)) $(GCFILE)
 	$(CC) -o $@ $^ $(LDFLAGS)
+$(BB)/cyclone-inf$(EXE): $(addprefix $(BB)/, $(BANSHEE_O_SRCS) cycinf.o $(LINKFILES)) $(GCFILE)
+	$(CC) -o $@ $^ $(LDFLAGS) -L$(BANSHEEREGIONDIR) -L$(BANSHEEENGINEDIR)  -lengine -lregions -lm 
 $(BB)/gdb/cyclone$(EXE): $(addprefix $(BB)/gdb/, $(O_SRCS) $(LINKFILES)) $(GCFILE)
 	$(CC) -o $@ $^ $(LDFLAGS)
 $(BB)/aprof/cyclone$(EXE): $(addprefix $(BB)/aprof/, $(O_SRCS) $(LINKFILES)) $(GCFILE)
@@ -303,6 +305,13 @@ $(BB)/install_path.$(O): $(BB)/install_path.c
 define REGULAR_CYCARGS
 $(CYCFLAGS) -c -I$(BB)/include -Iinclude -Ilib/xml -B$(EXEC_PREFIX) $(if $(findstring $(notdir $@), $(O_NOOPT_SRCS)), , $(OPTFLAG)) -o $@ $<
 endef
+
+#special rule for this file to build using the Banshee include path
+BANSHEE_CFLAGS=-I$(BANSHEEENGINEDIR) -I$(BANSHEEREGIONDIR) -Ddeletes= -Dtraditional= \
+	         -Dsameregion= -Dparentptr= -Wall -Werror
+$(BB)/cycinf.o: cycinf.c
+	$(CC) $(BANSHEE_CFLAGS) -c $^ -o $@
+
 # for .cyc files in vpath
 $(BB)/%.$(O): %.cyc
 	$(CYCC) $(REGULAR_CYCARGS)

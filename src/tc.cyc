@@ -34,6 +34,7 @@
 #include "tc.h"
 #include "cifc.h"
 #include "toc.h"
+#include "bansheeif.h"
 using Core;
 using List;
 using Absyn;
@@ -160,14 +161,6 @@ static void tcVardecl(tenv_t te, seg_t loc, vardecl_t vd, bool check_var_init,
 				      new $(new Global_b(vd), false));
 }
 
-static bool is_main(qvar_t n) {
-  let &$(nms,v) = n;
-  switch (nms) {
-  case {.Abs_n = NULL}: return (strcmp(*v,"main") == 0);
-  default: return false;
-  }
-}
-
 static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
                      list_t<$(seg_t,qvar_t,bool)@>* exports) {
   qvar_t q = fd->name;
@@ -234,7 +227,7 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
   if(nothrow && !Tcstmt::ensure_no_throw_stmt(fd->body))
     Warn::err2(loc, "Function ", fd->name, " has attribute no_throw but may throw an exception");
   // look for main and check that it has a good type
-  if (is_main(q)) {
+  if (Tcutil::is_main(q)) {
     // result type should be int
     switch (compress(fd->i.ret_type)) {
     case &AppType(&VoidCon,_): 
@@ -282,17 +275,9 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
   }
 }
 
-static void tcTypedefdecl(tenv_t te, seg_t loc, typedefdecl_t td) {
-  qvar_t q = td->name;
-#ifdef DEBUG
-  fprintf(stderr,"type-checking typedefdecl %s",*((*q)[1])); fflush(stderr);
-#endif
-  // check for redeclaration (never allowed, apparently)
-  if (Dict::member(te->ae->typedefs,q)) {
-    Warn::err2(loc,"redeclaration of typedef ",q);
-    return;
-  }
-  // reject ill-formed type
+
+//what are typedef attributes??  Why are they not checked here?
+static void tcOneTypedef(tenv_t te, seg_t loc, typedefdecl_t td) {    
   check_unique_tvars(loc,td->tvs);
   add_tvar_identities(td->tvs);
   if (td->defn != NULL) {
@@ -306,20 +291,80 @@ static void tcTypedefdecl(tenv_t te, seg_t loc, typedefdecl_t td) {
     switch (Kinds::compress_kb(tvs->hd->kind)) {
     case &Unknown_kb(*f): 
       if (td->defn != NULL)
-        Warn::warn2(loc,"type variable ",tvs->hd, " is not used in typedef");
+	Warn::warn2(loc,"type variable ",tvs->hd, " is not used in typedef");
       *f = new Opt(Kinds::kind_to_bound(&Kinds::bk)); break;
     case &Less_kb(*f,k):
-      // treat region kinds specially; unconstrained region kinds
-      //   should be made Aliasable
-//       if (k->kind == RgnKind && k->aliasqual == Top)
-// 	*f = new Opt(kind_to_bound(new Kind(RgnKind,Aliasable)));
-//       else
-	*f = new Opt(Kinds::kind_to_bound(k));
+      *f = new Opt(Kinds::kind_to_bound(k));
       break;
     default: continue;
     }
-  // add to environment
-  te->ae->typedefs = Dict::insert(te->ae->typedefs,q,td);
+}
+
+/* static typedefdecl_t merge_typedef_decls (tenv_t te, seg_t loc, typedefdecl_t tdold, typedefdecl_t td) { */
+/*   tcOneTypedef(te, loc, td); */
+/*   //now make sure the decls are consistent */
+/*   switch($(tdold->defn, td->defn)) { */
+/*   case $(NULL, NULL): //ok to be still abstract  */
+/*     break; */
+/*   case $(NULL, d): //can make a previous abstract decl concrete */
+/*     break;  */
+/*   case $(d1, d2): */
+/*     if(!Unify::unify(d1, d2)) { */
+/*       Warn::err2(loc, "Incompatible typedef redeclaration"); */
+/*       return NULL; */
+/*     } */
+/*     break; */
+/*   case $(d, NULL): //cannot make it abstract after a decl */
+/*     Warn::err2(loc, "Cannot make a previously declared typedef abstract"); */
+/*     return NULL; */
+/*   } */
+
+/*   for(_ tvs1=tdold->tvs, tvs2=tdold->tvs;tvs1 && tvs2; tvs1=tvs1->tl,tvs2=tvs2->tl) { */
+/*     switch($(Kinds::compress_kb(tvs1->hd->kind),Kinds::compress_kb(tvs2->hd->kind))){ */
+/*     case $(&Eq_kb(k1), &Eq_kb(k2)): */
+/*       if(!Kinds::kind_eq(k1, k2)) { */
+/* 	Warn::err2(loc, "Typedef redeclaration: kind mismatch"); */
+/* 	return NULL; */
+/*       } */
+/*       break; */
+/*     default: //kinds of both should have been fixed already */
+/*       Warn::impos("Typedef redeclaration: kinds are not fixed"); */
+/*     } */
+/*   } */
+/*   if(tvs1 || tvs2) { */
+/*     Warn::err2(loc, "Typedef redeclared with wrong number of type variables"); */
+/*     return NULL; */
+/*   } */
+/*   if(!equal_tqual(tdold->tq, td->tq)) { */
+/*     Warn::err2(loc, "Typedef redeclaration: qualifier mismatch"); */
+/*     return NULL; */
+/*   } */
+/*   return td; */
+/* } */
+
+static void tcTypedefdecl(tenv_t te, seg_t loc, typedefdecl_t td) {
+  qvar_t q = td->name;
+#ifdef DEBUG
+  fprintf(stderr,"type-checking typedefdecl %s",*((*q)[1])); fflush(stderr);
+#endif
+  // redeclaration is ok, if it can be parsed properly, and if the types are compatible
+  switch(Dict::lookup_opt(te->ae->typedefs,q)) {
+  case NULL:
+    // reject ill-formed type
+    tcOneTypedef(te, loc, td);
+    // add to environment
+    te->ae->typedefs = Dict::insert(te->ae->typedefs,q,td);
+    break;
+  case tdold: //allow specialization 
+    te->ae->typedefs = Dict::delete(te->ae->typedefs,q);
+    tcOneTypedef(te,loc,td);
+    string_t msg = "Typedef redeclaration";
+    let td2 = Tcdecl::merge_typedefdecl(td,*tdold,loc,&msg);
+    if(td2) {
+      te->ae->typedefs = Dict::insert(te->ae->typedefs,q, td2);
+    }
+    break;
+  }
 }
 
 static void tcAggrImpl(tenv_t te, seg_t loc, 
@@ -870,13 +915,9 @@ static void tc_decls(tenv_t te, list_t<decl_t,`H> ds0,
 
 void tc(tenv_t te, bool check_var_init, list_t<decl_t,`H> ds) {
   Absynpp::set_params(&Absynpp::tc_params_r);
-  let cg = Callgraph::compute_callgraph(ds);
-  //fprintf(stderr,"Callgraph:\n");
-  //Callgraph::print_callgraph(stderr, cg);
-  let scc = Graph::scc(cg);
-  //fprintf(stderr,"Connected components:\n");
-  //Callgraph::print_callgraph(stderr, scc);
   tc_decls(te,ds,false,check_var_init,NULL);
+  /*   if(Flags::interproc && !Flags::no_merge)  //delay implications until the --resolve stage */
+  /*     BansheeIf::discharge_implications(); */
 }
 
 // for tree-shaking (so we don't include the world)

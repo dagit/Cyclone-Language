@@ -443,7 +443,7 @@ xself->vtable->print(xself,p);
 p->print(p->env,_tag_fat(")",sizeof(char),2U));}}
 # 102
 static void Cyc_Sexp_printfile(struct Cyc___cycFILE*f,struct _fat_ptr s){
-({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=(struct _fat_ptr)s;_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_fprintf(f,_tag_fat("%s",sizeof(char),3U),_tag_fat(_Tmp1,sizeof(void*),1));});}
+({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=s;_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_fprintf(f,_tag_fat("%s",sizeof(char),3U),_tag_fat(_Tmp1,sizeof(void*),1));});}
 # 107
 void Cyc_Sexp_tofile(struct Cyc___cycFILE*f,struct Cyc_Sexp_Object x){
 struct Cyc_Sexp_Printer p=({struct Cyc_Sexp_Printer _Tmp0;_Tmp0.env=f,_Tmp0.print=Cyc_Sexp_printfile;_Tmp0;});
@@ -522,7 +522,7 @@ p->error(p->env,ch,_tag_fat("unexpected tag",sizeof(char),15U));}
 # 223
 static void Cyc_Sexp_file_error(struct Cyc___cycFILE*f,int ch,struct _fat_ptr msg){
 # 226
-({struct Cyc_Int_pa_PrintArg_struct _Tmp0=({struct Cyc_Int_pa_PrintArg_struct _Tmp1;_Tmp1.tag=1,_Tmp1.f1=(unsigned long)ch;_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,_Tmp2.f1=(struct _fat_ptr)msg;_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;Cyc_fprintf(Cyc_stderr,_tag_fat("found '%c'.  %s\n",sizeof(char),17U),_tag_fat(_Tmp2,sizeof(void*),2));});
+({struct Cyc_Int_pa_PrintArg_struct _Tmp0=({struct Cyc_Int_pa_PrintArg_struct _Tmp1;_Tmp1.tag=1,_Tmp1.f1=(unsigned long)ch;_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,_Tmp2.f1=msg;_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;Cyc_fprintf(Cyc_stderr,_tag_fat("found '%c'.  %s\n",sizeof(char),17U),_tag_fat(_Tmp2,sizeof(void*),2));});
 Cyc_fclose(f);
 _throw((void*)({struct Cyc_Core_Failure_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Failure_exn_struct));_Tmp0->tag=Cyc_Core_Failure,_Tmp0->f1=_tag_fat("Sexp::file2object error",sizeof(char),24U);_Tmp0;}));}
 # 232
@@ -558,11 +558,11 @@ return 0;}
 # 276
 static void Cyc_Sexp_string_error(struct Cyc_Sexp_StringEnv*env,int ch,struct _fat_ptr msg){
 # 279
-({struct Cyc_Int_pa_PrintArg_struct _Tmp0=({struct Cyc_Int_pa_PrintArg_struct _Tmp1;_Tmp1.tag=1,_Tmp1.f1=(unsigned long)ch;_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,_Tmp2.f1=(struct _fat_ptr)msg;_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;Cyc_fprintf(Cyc_stderr,_tag_fat("found '%c', %s\n",sizeof(char),16U),_tag_fat(_Tmp2,sizeof(void*),2));});
+({struct Cyc_Int_pa_PrintArg_struct _Tmp0=({struct Cyc_Int_pa_PrintArg_struct _Tmp1;_Tmp1.tag=1,_Tmp1.f1=(unsigned long)ch;_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,_Tmp2.f1=msg;_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;Cyc_fprintf(Cyc_stderr,_tag_fat("found '%c', %s\n",sizeof(char),16U),_tag_fat(_Tmp2,sizeof(void*),2));});
 _throw((void*)({struct Cyc_Core_Failure_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Failure_exn_struct));_Tmp0->tag=Cyc_Core_Failure,_Tmp0->f1=_tag_fat("Sexp::string2object error",sizeof(char),26U);_Tmp0;}));}
 # 284
 struct Cyc_Sexp_Object Cyc_Sexp_fromstring(struct _fat_ptr str){
-struct Cyc_Sexp_StringEnv env=({struct Cyc_Sexp_StringEnv _Tmp0;_Tmp0.str=str,({unsigned long _Tmp1=Cyc_strlen((struct _fat_ptr)str);_Tmp0.length=_Tmp1;}),_Tmp0.offset=0U;_Tmp0;});
+struct Cyc_Sexp_StringEnv env=({struct Cyc_Sexp_StringEnv _Tmp0;_Tmp0.str=str,({unsigned long _Tmp1=Cyc_strlen(str);_Tmp0.length=_Tmp1;}),_Tmp0.offset=0U;_Tmp0;});
 struct Cyc_Sexp_Parser p=({struct Cyc_Sexp_Parser _Tmp0;_Tmp0.env=& env,_Tmp0.getc=Cyc_Sexp_string_getc,_Tmp0.ungetc=Cyc_Sexp_string_ungetc,_Tmp0.error=Cyc_Sexp_string_error;_Tmp0;});
 # 289
 return Cyc_Sexp_parse(& p);}

@@ -27,7 +27,10 @@ namespace Unify {
 void explain_failure();
 bool unify_kindbound(Absyn::kindbound_t, Absyn::kindbound_t);
 bool unify(Absyn::type_t, Absyn::type_t);
-
+bool unify_c(Absyn::type_t, Absyn::type_t, 
+	     bool (@f)(`env, Absyn::type_t, Absyn::type_t),
+	     `env);
+  
   // only here for Tcutil -- still fleshing out interface
   void occurs(Absyn::type_t evar,region_t<`r> r,
 	      List::list_t<Absyn::tvar_t,`r> env,Absyn::type_t t);

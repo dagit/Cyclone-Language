@@ -43,6 +43,9 @@
 #include "specsfile.h"
 #include "cifc.h"
 #include "cyclone.h"
+#include "interproc.h"
+#include "bansheeif.h"
+
 namespace Port {
   void port(List::list_t<Absyn::decl_t>);
 }
@@ -137,6 +140,7 @@ static list_t<stringptr_t> cppargs = NULL;
 static void add_cpparg(string_t<`H> s) {
   cppargs = new List(new s,cppargs);
 }
+
 
 static void add_cpp_and_ccarg(string_t<`H> s) {
   add_cpparg(s);
@@ -277,6 +281,65 @@ static void set_noreaps() {
   // to make core.h macros for dynamic regions work properly
   Flags::no_reaps = true;
   add_cpparg("-D_CYC_INTERNAL_DISABLE_REAPS");
+}
+
+static bool binit_done = false;
+
+static void set_resolve() {
+  if(!binit_done) {
+    binit_done = true;
+    if(BansheeIf::banshee_init()) {
+      Flags::resolve = true;
+    }
+    else {
+      Warn::warn(0, "Interprocedural inference is not supported by this build of Cyclone; ignoring --inf option");
+    }
+  }
+}
+
+static void set_interproc() {
+  if(!binit_done) {
+    binit_done = true;
+    if(BansheeIf::banshee_init()) {
+      Flags::interproc = true;
+    }
+    else {
+      Warn::warn(0, "Interprocedural inference is not supported by this build of Cyclone; ignoring --inf option");
+    }
+  }
+}
+static void set_ovfat() {
+  if(Flags::interproc && !Flags::resolve)
+    Flags::override_fat = true;
+  if(Flags::resolve)
+    Warn::warn(0, "Incompatible options --ovfat and --resolve");
+}
+static void set_infstats() {
+  set_interproc();
+  Flags::infstats = true;
+  Warn::warn(0, "--infstats causes all other options to be ignored");
+}
+
+static void set_nomerge() {
+  if(!binit_done) {
+    binit_done = true;
+    if(BansheeIf::banshee_init()) {
+      Flags::interproc = true;
+      Flags::no_merge = true;
+    }
+    else {
+      Warn::warn(0, "Interprocedural inference is not supported by this build of Cyclone; ignoring --nomerge option");
+    }
+  }
+  else if(Flags::interproc) {
+    Flags::no_merge = true;
+    Flags::stop_after_pass = Flags::FlowAnalysis;
+  }
+}
+
+static void set_tags() {
+  Flags::tags=true;
+  Flags::stop_after_pass = Flags::Parsing;
 }
 
 static void set_pg() {
@@ -452,6 +515,14 @@ list_t<Absyn::decl_t> do_parse(FILE @`H f, list_t<Absyn::decl_t,`H> ignore) {
 bool do_binding(bool ignore, list_t<Absyn::decl_t,`H> tds) {
   Binding::resolve_all(tds);
   return true;
+}
+  
+list_t<Absyn::decl_t> do_interproc_binding(string_t<`H> @filename, list_t<Absyn::decl_t,`H> tds) {
+  return Interproc::resolve_all(*filename, tds);
+}
+
+list_t<Absyn::decl_t> do_interproc_resolution(bool ig, list_t<Absyn::decl_t,`H> tds) {
+  return Interproc::binding_cvar_resolution(tds);
 }
 
 bool do_adjust(bool ignore, list_t<Absyn::decl_t,`H> tds) {
@@ -718,100 +789,118 @@ static string_t sh_escape_string(string_t<`H> s) {
 static stringptr_t sh_escape_stringptr(stringptr_t<`H,`H> sp) {
   return new sh_escape_string(*sp);
 }
+static string_t get_cppargs_string() {
+  static string_t cppargs_string = NULL;
+  if(cppargs_string == NULL) 
+    cppargs_string = 
+      str_sepstr(new List(new (string_t)"",
+			  List::map(sh_escape_stringptr,rev(cppargs))),
+		 " ");
+  return cppargs_string;
+}
+namespace Cyclone {
+  list_t<Absyn::decl_t> parse_file(string_t<`H> filename) {
+    let basename = make_base_filename(filename, output_file);
+    let preprocfile = strconcat(basename, ".cyp");
+    // MWH: we do the c file relative to the input file, rather than the
+    // output file as for the rest, because setting the ccargs earlier
+    // may not have seen the -o option at that time
+    let preprocfileptr = new preprocfile;
 
+    if (Flags::verbose) fprintf(stderr,"Compiling %s\n", filename);
+
+    // Check that the input file exists
+    FILE * f0 = try_file_open(filename, "r", "input file");
+    if (compile_failure || !f0)
+      return NULL;
+    fclose(f0);
+
+    // Run the preprocessor, by building and running a command-line
+    // Pass -I and -D things onto preprocessor.
+  
+    let cppargs_string = get_cppargs_string();
+
+    // About the cyclone include path---this path is specified with the
+    // following order (where the earlier in the order, the first place we look
+    // for the file):
+    // 1) command line arguments (with -I and -B)
+    // 2) environment var (CYCLONE_INCLUDE_PATH)
+    // 3) hardwired in the build (by setting def_inc_path and def_lib_path)
+    let stdinc_dirs = add_subdir(Specsfile::cyclone_exec_path,Specsfile::target_arch);
+    stdinc_dirs = add_subdir(stdinc_dirs,"include");
+    if (strlen(def_inc_path) > 0)
+      stdinc_dirs = new List(new def_inc_path, stdinc_dirs);
+    let cyclone_include_path = getenv("CYCLONE_INCLUDE_PATH");
+    if (cyclone_include_path != NULL)
+      stdinc_dirs = append(split_by_char(cyclone_include_path,':'), stdinc_dirs);
+    string_t stdinc_string =
+      str_sepstr(new List(new (string_t)"",
+			  List::map(sh_escape_stringptr,stdinc_dirs)),
+		 " -I");
+    string_t ofile_string;
+    if (Flags::stop_after_pass <= Flags::Cpp)
+      ofile_string = (output_file==NULL) ? "" : aprintf(" > %s", *output_file);
+    else 
+      ofile_string = aprintf(" > %s", sh_escape_string(preprocfile));
+
+    string_t fixup_string;
+    if (produce_dependencies) {
+      // Both of the below hacks can probably be eliminated when we move
+      // to gcc 3.0
+      if (dependencies_target == NULL)
+	// Hack to fix up dependency output of gcc 2.95: the target of
+	// the dependency produced by cpp will be something like foo.cyc.o,
+	// but we want it to be foo.o.
+	fixup_string = " | sed 's/^\\(.*\\)\\.cyc\\.o:/\\1.o:/'";
+      else 
+	// Hack to handle the -MT flag, which is not supported in gcc 2.95
+	// Note, we should probably make sure any special characters in
+	// *dependencies_target are escaped, but WE DON'T.
+	fixup_string = aprintf(" | sed 's/^.*\\.cyc\\.o:/%s:/'",
+			       *dependencies_target);
+    } else 
+      fixup_string = "";
+
+    let cmd = aprintf("%s %s%s %s%s%s",
+		      cpp, cppargs_string, stdinc_string,
+		      sh_escape_string(filename), fixup_string, ofile_string);
+
+    if (Flags::verbose) fprintf(stderr,"%s\n",cmd);
+    if (system((const char @)cmd) != 0) {
+      compile_failure = true;
+      fprintf(stderr,"\nError: preprocessing\n");
+      if (Flags::stop_after_pass > Flags::Cpp) remove_file(preprocfile);
+      return NULL;
+    }
+    if (Flags::stop_after_pass <= Flags::Cpp) return NULL;
+    
+    // Run the stages of the Cyclone compiler
+    Position::reset_position(preprocfile); // necessary for good error messages!
+    FILE * in_file  = try_file_open(preprocfile,"r","file");
+
+    list_t<Absyn::decl_t> tds = NULL;
+
+    // Parsing
+    if(!compile_failure && Flags::stop_after_pass >= Flags::Parsing)
+      tds = do_stage("parsing", tds, do_parse, (FILE@)in_file, tds);
+    return tds;
+  }
+}
 static void process_file(string_t<`H> filename) {
-
   let basename = make_base_filename(filename, output_file);
   let preprocfile = strconcat(basename, ".cyp");
   let interfacefile = (specified_interface != NULL) ?
                         specified_interface : strconcat(basename, ".cyci");
   let interfaceobjfile = strconcat(basename, ".cycio");
-  // MWH: we do the c file relative to the input file, rather than the
-  // output file as for the rest, because setting the ccargs earlier
-  // may not have seen the -o option at that time
   let cfile = strconcat(make_base_filename(filename,NULL), ".c");
-  let preprocfileptr = new preprocfile;
 
-  if (Flags::verbose) fprintf(stderr,"Compiling %s\n", filename);
+  let tds = Cyclone::parse_file(filename);
 
-  // Check that the input file exists
-  FILE * f0 = try_file_open(filename, "r", "input file");
-  if (compile_failure || !f0)
-    return;
-  fclose(f0);
-
-  // Run the preprocessor, by building and running a command-line
-  // Pass -I and -D things onto preprocessor.
-  
-  let cppargs_string =
-    str_sepstr(new List(new (string_t)"",
-                        List::map(sh_escape_stringptr,rev(cppargs))),
-               " ");
-  // About the cyclone include path---this path is specified with the
-  // following order (where the earlier in the order, the first place we look
-  // for the file):
-  // 1) command line arguments (with -I and -B)
-  // 2) environment var (CYCLONE_INCLUDE_PATH)
-  // 3) hardwired in the build (by setting def_inc_path and def_lib_path)
-  let stdinc_dirs = add_subdir(Specsfile::cyclone_exec_path,Specsfile::target_arch);
-  stdinc_dirs = add_subdir(stdinc_dirs,"include");
-  if (strlen(def_inc_path) > 0)
-    stdinc_dirs = new List(new def_inc_path, stdinc_dirs);
-  let cyclone_include_path = getenv("CYCLONE_INCLUDE_PATH");
-  if (cyclone_include_path != NULL)
-    stdinc_dirs = append(split_by_char(cyclone_include_path,':'), stdinc_dirs);
-  string_t stdinc_string =
-    str_sepstr(new List(new (string_t)"",
-                        List::map(sh_escape_stringptr,stdinc_dirs)),
-               " -I");
-  string_t ofile_string;
-  if (Flags::stop_after_pass <= Flags::Cpp)
-    ofile_string = (output_file==NULL) ? "" : aprintf(" > %s", *output_file);
-  else 
-    ofile_string = aprintf(" > %s", sh_escape_string(preprocfile));
-
-  string_t fixup_string;
-  if (produce_dependencies) {
-    // Both of the below hacks can probably be eliminated when we move
-    // to gcc 3.0
-    if (dependencies_target == NULL)
-      // Hack to fix up dependency output of gcc 2.95: the target of
-      // the dependency produced by cpp will be something like foo.cyc.o,
-      // but we want it to be foo.o.
-      fixup_string = " | sed 's/^\\(.*\\)\\.cyc\\.o:/\\1.o:/'";
-    else 
-      // Hack to handle the -MT flag, which is not supported in gcc 2.95
-      // Note, we should probably make sure any special characters in
-      // *dependencies_target are escaped, but WE DON'T.
-      fixup_string = aprintf(" | sed 's/^.*\\.cyc\\.o:/%s:/'",
-			     *dependencies_target);
-  } else 
-    fixup_string = "";
-
-  let cmd = aprintf("%s %s%s %s%s%s",
-	            cpp, cppargs_string, stdinc_string,
-                    sh_escape_string(filename), fixup_string, ofile_string);
-
-  if (Flags::verbose) fprintf(stderr,"%s\n",cmd);
-  if (system((const char @)cmd) != 0) {
-    compile_failure = true;
-    fprintf(stderr,"\nError: preprocessing\n");
-    if (Flags::stop_after_pass > Flags::Cpp) remove_file(preprocfile);
+  if(!compile_failure && Flags::tags) {
+    Interproc::dump_tags(filename, tds);
+    remove_file(preprocfile);
     return;
   }
-  if (Flags::stop_after_pass <= Flags::Cpp) return;
-
-  // Run the stages of the Cyclone compiler
-  Position::reset_position(preprocfile); // necessary for good error messages!
-  FILE * in_file  = try_file_open(preprocfile,"r","file");
-
-  list_t<Absyn::decl_t> tds = NULL;
-  let jump_tables = NULL;
-  let te = Tcenv::tc_init(); 
-
-  // Parsing
-  if(!compile_failure && Flags::stop_after_pass >= Flags::Parsing)
-    tds = do_stage("parsing", tds, do_parse, (FILE@)in_file, tds);
 
   // Porting
   if (!compile_failure && Flags::porting_c_code) {
@@ -820,9 +909,22 @@ static void process_file(string_t<`H> filename) {
     return;
   }
 
+
   // Binding resolution
-  if(!compile_failure && Flags::stop_after_pass >= Flags::Binding)
-    do_stage("binding", tds, do_binding, true, true);
+  if(!compile_failure && Flags::stop_after_pass >= Flags::Binding) {
+    if (Flags::interproc) {
+      tds = do_stage("interproc_binding", tds, do_interproc_binding, &filename, NULL);
+    }
+    else if(Flags::resolve) {
+      tds = do_stage("interproc_resolution", tds, do_interproc_resolution, true, NULL);
+    }
+    else {
+      do_stage("binding", tds, do_binding, true, true); 
+    }
+  }
+
+  let jump_tables = NULL;
+  let te = Tcenv::tc_init(); 
 
   // Current-Region Metavariable substitution
   if(!compile_failure && Flags::stop_after_pass >= Flags::CurrentRegion)
@@ -873,6 +975,14 @@ static void process_file(string_t<`H> filename) {
       }
     }
   }
+  if(Flags::interproc || Flags::resolve) {
+    BansheeIf::discharge_implications();
+    if(Position::error_p()) {
+      compile_failure = true;
+      fprintf(stderr,"\nCOMPILATION FAILED!\n");
+      fflush(stderr);
+    }
+  }
 
   // Translation to C
   if(!compile_failure && Flags::stop_after_pass >= Flags::Toc)
@@ -892,7 +1002,7 @@ static void process_file(string_t<`H> filename) {
     Toc::finish();
   // Removal of unused declarations (optional optimization) FIX: make flag 
   if(!compile_failure && Flags::stop_after_pass >= Flags::Toc)
-    tds = do_stage("low treehsaking", tds, do_lowtreeshake, true, tds);
+    tds = do_stage("low treeshaking", tds, do_lowtreeshake, true, tds);
   // renaming of temporaries
   if(!compile_failure && Flags::stop_after_pass >= Flags::TempRename)
     tds = do_stage("renaming temporaries",tds,do_temprename,true,tds);
@@ -902,6 +1012,11 @@ static void process_file(string_t<`H> filename) {
   if (!compile_failure && (Flags::tovc_r || elim_se_r))
     tds = do_stage("post-pass to VC", tds, do_tovc, true, tds);
 
+  if(!compile_failure && Flags::interproc && Flags::no_merge) {
+    //dumps unresolved cvars + constraint graph to .cych/cvars
+    //dumps decls to .cych/<filename>.cyc
+    Interproc::emit_decls(filename, tds);
+  }
   if(!compile_failure) // errors trump warnings
     Warn::flush_warnings(); // cannot do after preprocfile is removed
   remove_file(preprocfile);
@@ -913,25 +1028,27 @@ static void process_file(string_t<`H> filename) {
     return;
   }
 
-  // jcheney: we make a (empty) .c file even if the .cyc file produced no decls
-  FILE *out_file;
-  if (Flags::stop_after_pass <= Flags::FlowAnalysis) {
-    if (output_file != NULL)
+  if(!Flags::no_merge) {
+    // jcheney: we make a (empty) .c file even if the .cyc file produced no decls
+    FILE *out_file;
+    if (Flags::stop_after_pass <= Flags::FlowAnalysis) {
+      if (output_file != NULL)
+	out_file = try_file_open(*output_file,"w","output file");
+      else
+	out_file = stdout;
+    } else if (Flags::stop_after_pass < Flags::CCompiler && output_file != NULL)
       out_file = try_file_open(*output_file,"w","output file");
     else
-      out_file = stdout;
-  } else if (Flags::stop_after_pass < Flags::CCompiler && output_file != NULL)
-    out_file = try_file_open(*output_file,"w","output file");
-  else
-    out_file = try_file_open(cfile,"w","output file");
-
-  if (compile_failure || !out_file) return;
-
-  if (!noprint_r) {
-    let env = new $((FILE@)out_file,cfile);
-    tds = do_stage("printing", tds, do_print, env, tds);
-    file_close(out_file);
-    cfiles = new List(new strdup(cfile),cfiles);
+      out_file = try_file_open(cfile,"w","output file");
+    
+    if (compile_failure || !out_file) return;
+    
+    if (!noprint_r) {
+      let env = new $((FILE@)out_file,cfile);
+      tds = do_stage("printing", tds, do_print, env, tds);
+      file_close(out_file);
+      cfiles = new List(new strdup(cfile),cfiles);
+    }
   }
 }
 
@@ -1233,6 +1350,24 @@ using Arg {
               "controls the maximum size of post-conditions inlined by vcgen");
   make_option(opt84,"--max_vc_paths",false,"",Int_spec,set_max_vc_paths,
               "controls the maximum number of paths explored by constraint solver");
+  make_option(opt85,"--inf",false,"",
+              Unit_spec,set_interproc,
+              "Use interprocedural type inference");
+  make_option(opt86,"--nomerge",false,"",
+              Unit_spec,set_nomerge,
+              "Do not merge multiple files into one");
+  make_option(opt87,"--resolve",false,"",
+              Unit_spec,set_resolve,
+              "Resolve constraint variables");
+  make_option(opt88,"--ovfat",false,"",
+              Unit_spec,set_ovfat,
+              "Override '?' annotations in the source with constraint variables");
+  make_option(opt89,"--infstats",false,"",
+              Unit_spec,set_infstats,
+              "Dump statistics for the result of inference -- reads .cych/cvars");
+  make_option(opt90,"--tags",false,"",
+              Unit_spec,set_tags,
+              "Generate a TAGS file for use with interprocedural type inference");
 
   struct List<option_t@`H,`H>@`H global_options[] = {
             &opt1, &opt2, &opt3, &opt4, &opt5, &opt6, &opt7, &opt8, &opt9,
@@ -1245,8 +1380,7 @@ using Arg {
     &opt50,&opt51,&opt52,&opt53,&opt54,&opt55,&opt56,&opt57,&opt58,&opt59,
     &opt60,&opt61,&opt62,&opt63,&opt64,&opt65,&opt66,&opt67,&opt68,&opt69,
 	    &opt70,&opt71,&opt72,&opt73,&opt74,&opt75,&opt76,&opt77,&opt78,&opt79,
-              &opt80,&opt81,&opt82,&opt83,&opt84
-            
+            &opt80,&opt81,&opt82,&opt83,&opt84,&opt85,&opt86,&opt87,&opt88,&opt89
   };
 
   void print_options() {
@@ -1289,6 +1423,12 @@ int main(int argc, string_t<`H> ?`H argv) {
   // Finally parse the other command-line arguments
   Arg::current = 0;
   Arg::parse(options, add_other, add_other_flag, optstring, otherargs);
+  if(Flags::infstats) {
+    Lex::lex_init(true); // must forget typedefs, may as well flush symbols too
+    Lex::pos_init();
+    Interproc::inference_statistics();
+    return;
+  }
   if (strcmp(cpp,"") == 0) {
     // If cpp string is not explicitly set, use the default.
     // NB the -w suppresses preprocessor warnings.  It's needed
@@ -1332,6 +1472,9 @@ int main(int argc, string_t<`H> ?`H argv) {
   } catch {case x:
     if (compile_failure) return 1;
     Core::rethrow(x);
+  }
+  if(Flags::tags) {
+    Interproc::close_tags_file();
   }
 
   if (Flags::stop_after_pass < Flags::CCompiler) return 0;
@@ -1474,3 +1617,4 @@ int main(int argc, string_t<`H> ?`H argv) {
 
   return compile_failure ? 1 : 0;
 }
+

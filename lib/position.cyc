@@ -23,6 +23,7 @@ using Core;
 using List;
 namespace Position;
 
+static $(string_t, unsigned int) seg_to_loc(seg_t seg);
 // When set to true, uses format:
 //   <filename>:<lineno>:<message>
 // and otherwise uses format
@@ -30,7 +31,9 @@ namespace Position;
 bool use_gcc_style_location = true;
 
 /////////// Location tracking ///////////
-static string_t source = ""; // initialized by overall control
+static unsigned int curmask = 0;
+static list_t<$(string_t, unsigned int)@> sourcemask = NULL;
+//static string_t source = ""; // initialized by overall control
 
 seg_t segment_join(seg_t s1, seg_t s2) { 
   if(s1 == 0) return s2;
@@ -41,8 +44,9 @@ bool segment_equals(seg_t s1, seg_t s2) {
   return (s1 == s2);
 }
 
-mstring_t string_of_loc(unsigned loc) {
-  Lineno::pos_t pos = Lineno::pos_of_abs(source,loc);
+mstring_t string_of_loc(unsigned int seg) {
+  let $(source, loc) = seg_to_loc(seg);
+  Lineno::pos_t pos = Lineno::pos_of_abs(source, loc);
   if (use_gcc_style_location) 
     return aprintf("%s:%d",pos->logical_file,pos->line_no);
   return aprintf("%s:(%d:%d)",pos->logical_file,pos->line_no,pos->col);
@@ -91,6 +95,7 @@ struct Error {
   string_t     desc;
 };
 error_t mk_err(seg_t l, string_t<`H> desc) {
+  let $(source, loc) = seg_to_loc(l);
   return new Error(source, l, desc);
 }
 
@@ -119,13 +124,52 @@ void post_error(error_t e) {
 }
 
 //////////// Overall Control ///////////
-void reset_position(string_t<`H> s)    { source = s; error_b = false; }
-void set_position_file(string_t<`H> s) { source = s; error_b = false; }
-string_t get_position_file() { return source; }
-
+void reset_position(string_t<`H> s)    { 
+  sourcemask = new List{ new $(s, curmask++), sourcemask};
+  error_b = false; 
+}
+void set_position_file(string_t<`H> s) { 
+  reset_position(s);
+  //  source = s; error_b = false; 
+}
+string_t get_position_file() { 
+  if(sourcemask) 
+    return sourcemask->hd->f0; 
+  return ""; 
+}
 string_t get_line_directive(seg_t s) {
-  Lineno::pos_t pos_s = Lineno::pos_of_abs(source,s);
-  if(pos_s != NULL)  
-    return aprintf("\n#line %d \"%s\"\n", pos_s->line_no, pos_s->logical_file);
+  let $(source, loc) = seg_to_loc(s);
+  if(source) {
+    Lineno::pos_t pos_s = Lineno::pos_of_abs(source,loc);
+    if(pos_s != NULL)  
+      return aprintf("\n#line %d \"%s\"\n", pos_s->line_no, pos_s->logical_file);
+  }
   return NULL;
+}
+
+#define N_MASK_BITS 8
+
+seg_t loc_to_seg(unsigned int loc) {
+  unsigned int mask = sourcemask ? sourcemask->hd->f1 : 0;
+  seg_t res = ((loc << N_MASK_BITS) | (mask & 0x000000ff));
+  //fprintf(stderr, "Got loc %u, mask %u, returning %u", loc, mask, res);
+  return res;
+}
+
+static $(string_t, unsigned int) seg_to_loc(seg_t seg) {
+  bool can_retry = true;
+ retry:
+  unsigned smask = (seg & 0x000000ff);
+  string_t source = NULL;
+  for(_ sm = sourcemask; sm != NULL; sm = sm->tl) {
+    if(smask == sm->hd->f1) {
+      return $(sm->hd->f0, (seg >> N_MASK_BITS));
+    }
+  }
+  if(can_retry) {
+    can_retry = false;
+    seg=loc_to_seg(seg);
+    goto retry;
+  }
+  return $("", seg);
 }

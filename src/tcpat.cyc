@@ -28,6 +28,8 @@
 #include "tcexp.h"
 #include "tcpat.h"
 #include "evexp.h"
+#include "subtype.h"
+
 using Core;
 using List;
 using Set;
@@ -632,7 +634,7 @@ static bool try_alias_coerce(tenv_t tenv, type_t old_type, type_t new_type,
                                                pold.ptr_atts.ptrloc,
 				               pnew.ptr_atts.autoreleased,
 					       pold.ptr_atts.aqual}});
-    return (subtype(assump, ptry, new_type) && 
+    return (Subtype::subtype(initializer->loc,assump, ptry, new_type) && 
             coerce_assign(curr_aquals_bounds(tenv),initializer, ptry));
   default: return false;
   }
@@ -661,7 +663,7 @@ static void check_alias_coercion(tenv_t tenv, seg_t loc, type_t old_type,
   default: Warn::err2(loc,"alias requires pointer type"); break;
   }
   
-  if (subtype(assump, old_type, new_type) 
+  if (Subtype::subtype(loc,assump, old_type, new_type) 
       //JGM: the following line would be valid if we could somehow
       //get the coercion applied to the right expression instead of
       //this access expression that is passed in for initializer.

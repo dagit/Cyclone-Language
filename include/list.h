@@ -18,7 +18,7 @@
 
 #ifndef _LIST_H_
 #define _LIST_H_
-
+__noinference__{
 #include <core.h>
 
 namespace List {
@@ -401,5 +401,6 @@ namespace List {
                                  `b env, list_t<`a> x);
   /** [rfilter_c] is a version of [rfilter] where the function
       argument requires a closure as its first argument. */
+}
 }
 #endif

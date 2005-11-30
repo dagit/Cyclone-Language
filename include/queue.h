@@ -68,7 +68,7 @@ extern `a peek(queue_t<`a>);
 extern void clear(queue_t<`a::B\T>);
   /** [clear(q)] removes all elements from [q]. */
 
-extern void remove(queue_t<`a>,`a);
+extern void remove(queue_t<`a,`r>,`a);
   /** [remove(q,x)] removes the first occurence of element [x] from [q], 
       if present. **/
 

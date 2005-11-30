@@ -34,6 +34,7 @@ bool is_any_int_type(type_t);    // char, short, int, etc.
 bool is_any_float_type(type_t);  // any size or sign
 bool is_integral_type(type_t);   // any_int or tag_t or enum
 bool is_arithmetic_type(type_t); // integral or any_float
+bool is_strict_arithmetic_type(type_t); // any int or any_float
 bool is_tag_type(type_t);        // true iff tag_t<...>
 bool is_signed_type(type_t);     // signed
 bool is_function_type(type_t);   // function type
@@ -46,7 +47,7 @@ bool is_boxed(type_t);           // boxed type
 bool is_fat_ptr(type_t); // fat pointer type
 bool is_zeroterm_pointer_type(type_t); // @zeroterm pointer type
 bool is_nullable_pointer_type(type_t, bool def); // nullable pointer type
-bool is_bound_one(ptrbound_t);         
+bool is_bound_one(ptrbound_t,bool);         
 // returns true if this is a t ? -- side effect unconstrained bounds
 bool is_fat_pointer_type(type_t);
 // returns true iff t contains only "bits" and no pointers or datatypes. 
@@ -67,6 +68,7 @@ type_t pointer_aqual(type_t t);
 // For a thin bound, returns the associated expression, and for a fat 
 // bound, returns null.  If b is unconstrained, then sets it to def.
 exp_opt_t get_bounds_exp(ptrbound_t def, ptrbound_t b);
+exp_opt_t get_bounds_exp_constrain(ptrbound_t def, ptrbound_t b, bool c);
 // Extracts the number of elements for an array or pointer type.
 // If the bounds are unconstrained, then sets them to @thin@numelts(1).
 exp_opt_t get_type_bound(type_t);
@@ -100,23 +102,25 @@ void unchecked_cast(exp_t, type_t, coercion_t);
 bool coerce_uint_type(exp_t);
 bool coerce_sint_type(exp_t);
 bool coerce_to_bool(exp_t);
-
-bool coerce_arg(aqualbnds_t, exp_t, type_t, bool* alias_coercion); 
+  
+  bool coerce_arg(aqualbnds_t, exp_t, type_t, bool* alias_coercion); 
 bool coerce_assign(aqualbnds_t, exp_t, type_t);
 bool coerce_list(aqualbnds_t, type_t, list_t<exp_t>);
 // true when expressions of type t1 can be implicitly cast to t2
-bool silent_castable(seg_t,type_t,type_t);
-// true when expressions of type t1 can be cast to t2 -- call silent first
-coercion_t castable(seg_t,type_t,type_t);
-// true when t1 is a subtype of t2 under the given list of subtype assumptions
-bool subtype(list_t<$(type_t,type_t)@`H,`H> assume, 
-	     type_t t1, type_t t2);
-bool alias_qual_subtype(aqualtype_t sub, aqualtype_t sup);
-bool check_aqual_bounds(aqualbnds_t aqb, aqualtype_t sub, aqualtype_t bnd);
-  // if t is a nullable pointer type and e is 0, changes e to null 
-bool zero_to_null(type_t, exp_t);
 
-// used to alias the given expression, assumed to have non-Aliasable type
+// bool silent_castable(seg_t,type_t,type_t);
+// // true when expressions of type t1 can be cast to t2 -- call silent first
+//   coercion_t castable(seg_t,type_t,type_t);
+//   // true when t1 is a subtype of t2 under the given list of subtype assumptions
+
+// bool subtype(list_t<$(type_t,type_t)@`H,`H> assume, 
+// 	     type_t t1, type_t t2);
+// bool alias_qual_subtype(aqualtype_t sub, aqualtype_t sup);
+// bool check_aqual_bounds(aqualbnds_t aqb, aqualtype_t sub, aqualtype_t bnd);
+// if t is a nullable pointer type and e is 0, changes e to null 
+bool zero_to_null(type_t, exp_t);
+  
+  // used to alias the given expression, assumed to have non-Aliasable type
 $(decl_t,exp_t,bool) insert_alias(exp_t e, type_t e_typ);
 
 type_t max_arithmetic_type(type_t, type_t);
@@ -265,11 +269,19 @@ type_t any_bounds(list_t<tvar_t,`H>);
   //  bool same_rgn_po(list_t<$(type_t,type_t)@>, list_t<$(type_t,type_t)@>);
   int tycon_cmp(tycon_t,tycon_t);
   aqualbnds_t get_aquals_bounds(fndecl_t fd);
+  type_opt_t lookup_aquals_opt(aqualbnds_t aquals_map, type_t t);
   type_t lookup_aquals(aqualbnds_t aquals_map, type_t t);
   type_opt_t eval_aquals_of(aqualbnds_t aquals_map, type_t t);
   bool is_aliasable_qual(aqualtype_t aq);
   $(tvar_t, bool)@ tvar_bool_pair(bool b, tvar_t t);
   int cmp_effect_constraints(list_t<effconstr_t> ec0,list_t<effconstr_t> ec1);
   bool type_in_effect(bool may_constrain_evars, type_t t, type_t e);
+
+  bool is_cvar_type(type_t);
+  type_opt_t ptrbnd_cvar_equivalent(type_t);
+  type_opt_t get_pointer_bounds(type_t ptrtype);
+  void introduce_cvars(type_t);
+  void replace_cvars(type_t, type_t);
+  bool is_main(qvar_t);
 }
 #endif

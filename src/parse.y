@@ -52,6 +52,7 @@ extern void yyprint(int, union YYSTYPE<`yy>);
 
 #include <lexing.h>
 #include <string.h>
+#include <hashtable.h>
 #include "warn.h"
 #include "flags.h"
 #include "kinds.h"
@@ -62,9 +63,13 @@ extern void yyprint(int, union YYSTYPE<`yy>);
 #define IS_PARSE_Y
 #define ALL_PARSE_H
 #include "parse.h"
+#include "position.h"
+#include "bansheeif.h"
 using Core;
 using List;
 using Absyn;
+using BansheeIf;
+using Hashtable;
 
 // Typedef processing must be split between the parser and lexer.
 // These functions are called by the parser to communicate typedefs
@@ -86,8 +91,8 @@ namespace Lex {
 #define YYLEX_ARG yylex_buf,&yylval,&yylloc
 #define YYPARSE_PARAM_ARG region_t<`yy> yyr, Lexing::Lexbuf<Lexing::Function_lexbuf_state<FILE@>> yylex_buf
 
-#define LOC(s,e) (s.first_line)
-#define SLOC(s) (s.first_line)
+#define LOC(s,e) (Position::loc_to_seg(s.first_line))
+#define SLOC(s) (Position::loc_to_seg(s.first_line))
 #define DL 0
 
 namespace Parse {
@@ -98,7 +103,7 @@ namespace Parse {
 
   // flattened lists
   struct FlatList<`a::A,`r> { struct FlatList<`a,`r> *`r tl; `a hd; };
-
+  
   // imperatively reverse a flattened list
   flat_list_t<`a,`r> flat_imp_rev(flat_list_t<`a,`r> x) {
     if (x == NULL) return x;
@@ -173,7 +178,9 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
 
 ////////////////// global state (we're not re-entrant) ////////////////
 static list_t<decl_t> parse_result = NULL;
-
+static list_t<$(type_t, list_t<constraint_t,`H>)@`H,`H> constraint_graph = NULL;
+static bool inside_function_definition = false;
+static int inside_noinference_block = 0;
 static `a parse_abort(seg_t loc, string_t<`H> msg) __attribute__((noreturn)) {
   Warn::err2(loc,msg);
   throw new Exit;
@@ -555,7 +562,6 @@ static list_t<type_modifier_t<`yy>,`yy>
   default: return rnew(yy) List(tms->hd,oldstyle2newstyle(yy,tms->tl,tds,loc));
   }
 }
-
 // make a top-level function declaration out of a declaration-specifier
 // (return type, etc.), a declarator (the function name and args),
 // a declaration list (for old-style function definitions), and a statement.
@@ -565,7 +571,6 @@ static fndecl_t make_function(region_t<`yy> yy,
   // Handle old-style parameter declarations
   if (tds!=NULL)
     d = Declarator(d.id, d.varloc, oldstyle2newstyle(yy,d.tms,tds,loc));
-
   scope_t sc = Public;
   type_specifier_t tss = empty_spec(loc);
   tqual_t tq = empty_tqual(0);
@@ -595,11 +600,15 @@ static fndecl_t make_function(region_t<`yy> yy,
 
   switch (fn_type) { // fn_type had better be a FnType
   case &FnType(i):
-    for(let args2 = i.args; args2 != NULL; args2 = args2->tl)
+    for(let args2 = i.args; args2 != NULL; args2 = args2->tl) {
       if((*args2->hd)[0] == NULL) {
 	Warn::err(loc,"missing argument variable in function prototype");
 	(*args2->hd)[0] = new "?";
       }
+    }
+    //     if(Flags::interproc) {
+    //       Tcutil::introduce_cvars(fn_type);
+    //     }
     // We don't fill in the cached type here because we may need
     // to figure out the bound type variables and the effect.
     i.attributes=append(i.attributes,out_atts);
@@ -1082,6 +1091,72 @@ static $(exp_opt_t,exp_opt_t,exp_opt_t) join_assns($(exp_opt_t,exp_opt_t,exp_opt
   let t = join_assn(t1,t2);
   return $(r,e,t);
 }
+
+static type_t assign_cvar_pos(string_t<`H> posstr, bool ovfat, type_t cv) {
+  switch(cv) {
+  case &Cvar(_,_,_,_,_,*pos, *ov):
+    *pos = posstr;
+    *ov = ovfat;
+    return cv;
+  default:
+    return cv;
+  }
+}
+
+static type_t typevar2cvar(string_t<`H> s) {
+  //`C_<kind>_<name>
+  //hash consing for Cvars
+  static struct Table<stringptr_t, type_t> *cvmap = NULL;
+  if(!cvmap)
+    cvmap =create(101, strptrcmp, hash_stringptr);
+  try { //sharing of Cvars is important
+    return Hashtable::lookup(cvmap, new s);
+  } catch {
+  case &Not_found:
+    let kind = strchr(s, '_');
+    let name = strchr(kind+1, '_');
+    name++;
+    if(!strncmp(kind, "_PTRBND", 7)) {
+      let t =  cvar_type_name(&Kinds::ptrbko, name);
+      Hashtable::insert(cvmap, new s, t);
+      return t;
+    }
+    else { //unknown kind for now
+      parse_abort(0, "Constraint variable unknown kind");
+    }
+  }
+}
+
+  //cvar constants
+static type_t str2type(seg_t loc, string_t<`H> s) {
+  if(!strcmp(s, "@fat")) {
+    return Tcutil::ptrbnd_cvar_equivalent(fat_bound_type);
+  }
+  else if(!strcmp(s, "@thin @numelts{valueof_t(1U)}")){ 
+    return Tcutil::ptrbnd_cvar_equivalent(bounds_one());
+  }
+  parse_abort(loc, aprintf("Unknown type constant:: %s", s));
+}
+  
+static constraint_t composite_constraint(enum ConstraintOps op, constraint_t t1, constraint_opt_t t2) {
+  switch(op) {
+  case C_AND_OP: return and_constraint(t1, t2);
+  case C_OR_OP: return or_constraint(t1, t2);
+  case C_NOT_OP: return not_constraint(t1);
+  default: //bad op
+    parse_abort(0, "Unexpected operator for composite constraint");
+  }
+}
+  
+static constraint_t comparison_constraint(enum ConstraintOps op, type_t t1,  type_t t2) {
+  switch(op) {
+  case C_EQ_OP: return cmpeq_constraint(t1, t2);
+  case C_INCL_OP: return inclusion_constraint(t1, t2);
+  default: //bad op
+    parse_abort(0, "Unexpected operator for composite constraint");
+  }
+}
+  
 } // end namespace Parse
 using Parse;
 %}
@@ -1095,7 +1170,7 @@ using Parse;
 %token BUILTIN_VA_LIST EXTENSION COMPLEX
 // Cyc:  CYCLONE additional keywords
 %token NULL_kw LET THROW TRY CATCH EXPORT OVERRIDE HIDE
-%token NEW QNEW ABSTRACT FALLTHRU USING NAMESPACE DATATYPE
+%token NEW QNEW ABSTRACT FALLTHRU USING NAMESPACE NOINFERENCE DATATYPE
 %token MALLOC RMALLOC RVMALLOC RMALLOC_INLINE QMALLOC CALLOC QCALLOC RCALLOC SWAP
 %token REGION_T TAG_T REGION RNEW REGIONS
 %token PORTON PORTOFF PRAGMA TEMPESTON TEMPESTOFF
@@ -1156,7 +1231,7 @@ using Parse;
 %type <qvar_t> QUAL_IDENTIFIER QUAL_TYPEDEF_NAME
 %type <qvar_t> qual_opt_identifier qual_opt_typedef
 %type <qvar_t> using_action struct_union_name
-%type <stmt_t> statement labeled_statement compound_statement block_item_list
+%type <stmt_t> statement labeled_statement compound_statement fndef_compound_statement block_item_list
 %type <stmt_t> expression_statement selection_statement iteration_statement
 %type <stmt_t> jump_statement
 %type <list_t<switch_clause_t,`H>> switch_clauses
@@ -1232,9 +1307,23 @@ using Parse;
 %type <$(string_t<`H>, exp_t)@`H> asm_io_elt
 %type <exp_maker_fun_t> relational_op equality_op
 %type <primop_t> additive_op multiplicative_op
-
-%start prog
+%type <enum ConstraintOps> c_op
+%type <list_t<$(type_t, list_t<BansheeIf::constraint_t,`H>)@`H,`H>> all_constraints
+%type <list_t<BansheeIf::constraint_t,`H>> constraint_list constraint_list_opt
+%type <BansheeIf::constraint_t> constraint
+%type <type_t> tvar_or_string
+%type <int> prog_or_constraints
+%start prog_or_constraints
 %%
+
+prog_or_constraints:
+  prog {$$=^$(0);}
+| all_constraints 
+{
+  $$ = ^$(1);
+  constraint_graph = $1;
+}
+;
 
 prog:
   translation_unit
@@ -1260,6 +1349,8 @@ translation_unit:
     }
 | namespace_action '{' translation_unit unnamespace_action translation_unit
     { $$=^$(new List(new Decl(new Namespace_d(new $1,$3),LOC(@1,@4)),$5)); }
+| noinference_action '{' translation_unit unnoinference_action translation_unit
+    { $$=^$(List::append($3, $5)); }
 | extern_c_action '{' translation_unit end_extern_c override_opt export_list_opt hide_list_opt translation_unit
     { let is_c_include = $1;
       list_t<decl_t> cycdecls = $5;
@@ -1361,10 +1452,34 @@ optional_semi:
 |
 ;
 
+//added some state so that we know we're in the inside of function definition
+//this affects the introduction of Cvar in pointer types 
+// function_definition:
+//   declarator start_function fndef_compound_statement optional_semi end_function
+//     { $$=^$(make_function(yyr,NULL,$1,NULL,$3,LOC(@1,@3))); }
+// | declaration_specifiers declarator start_function compound_statement optional_semi end_function
+//     { let d = $1;
+//       $$=^$(make_function(yyr,&d,$2,NULL,$4,LOC(@1,@4))); }
+// /* 2 shift-reduce conflicts come up because of the next two rules and
+//    the final rule of function_definition2.  A declarator can be followed
+//    by an attribute to become a declarator, and a declaration list can
+//    begin with an attribute.  The default action of shift means the
+//    attribute will end up attached to the declarator, which is probably
+//    not the right decision.  However, this only comes up with old-style
+//    function definitions, and, both attributes following declarators and
+//    attributes beginning declarations are needed; so we ignore the issue for now
+// */
+// |  declarator declaration_list start_function compound_statement optional_semi end_function
+//     { $$=^$(make_function(yyr,NULL,$1,$2,$4,LOC(@1,@4))); }
+// |  declaration_specifiers declarator declaration_list start_function compound_statement optional_semi end_function
+//     { let d = $1;
+//     $$=^$(make_function(yyr,&d,$2,$3,$5,LOC(@1,@5))); }
+// ;
+
 function_definition:
-  declarator compound_statement optional_semi
+  declarator fndef_compound_statement optional_semi
     { $$=^$(make_function(yyr,NULL,$1,NULL,$2,LOC(@1,@2))); }
-| declaration_specifiers declarator compound_statement optional_semi
+| declaration_specifiers declarator fndef_compound_statement optional_semi
     { let d = $1;
       $$=^$(make_function(yyr,&d,$2,NULL,$3,LOC(@1,@3))); }
 /* 2 shift-reduce conflicts come up because of the next two rules and
@@ -1376,9 +1491,9 @@ function_definition:
    function definitions, and, both attributes following declarators and
    attributes beginning declarations are needed; so we ignore the issue for now
 */
-| declarator declaration_list compound_statement optional_semi
+| declarator declaration_list fndef_compound_statement optional_semi
     { $$=^$(make_function(yyr,NULL,$1,$2,$3,LOC(@1,@3))); }
-| declaration_specifiers declarator declaration_list compound_statement optional_semi
+| declaration_specifiers declarator declaration_list fndef_compound_statement optional_semi
     { let d = $1;
       $$=^$(make_function(yyr,&d,$2,$3,$4,LOC(@1,@4))); }
 ;
@@ -1406,7 +1521,12 @@ namespace_action:
 unnamespace_action:
   '}' { Lex::leave_namespace(); }
 ;
-
+noinference_action: 
+  NOINFERENCE {++inside_noinference_block;}
+;
+unnoinference_action:
+  '}' {--inside_noinference_block;}
+;
 /***************************** DECLARATIONS *****************************/
 declaration:
   declaration_specifiers ';'
@@ -1990,13 +2110,22 @@ aqual_opt:
 pointer_null_and_bound:
   '*' pointer_bound
    { // avoid putting location info on here when not porting C code??
-     $$=^$(new $(SLOC(@1),true_type,(parsing_tempest ? fat_bound_type : $2))); }
-| '@' pointer_bound { $$=^$(new $(SLOC(@1), false_type, $2)); }
-| '?'               { $$=^$(new $(SLOC(@1), true_type,  fat_bound_type)); }
+     $$=^$(new $(SLOC(@1),true_type,(parsing_tempest ? fat_bound_type : assign_cvar_pos(Position::string_of_segment(SLOC(@1)),false,$2)))); }
+| '@' pointer_bound { $$=^$(new $(SLOC(@1), false_type, assign_cvar_pos(Position::string_of_segment(SLOC(@1)),false,$2))); }
+| '?'               { $$=^$((Flags::override_fat && inside_noinference_block==0 && Flags::interproc) ?
+			    new $(SLOC(@1),true_type,assign_cvar_pos(Position::string_of_segment(SLOC(@1)),true,cvar_type(&Kinds::ptrbko))): 
+			    new $(SLOC(@1),true_type,  fat_bound_type)); }
 
 pointer_bound:
-/* empty */ { $$=^$(bounds_one()); }
+/* empty */ { $$=^$((Flags::interproc && (inside_noinference_block==0)) ? cvar_type(&Kinds::ptrbko) : bounds_one()); }
 | '{' assignment_expression '}' { $$=^$(thin_bounds_exp($2)); }
+| '{' TYPE_VAR '}' 
+{ 
+  if (!Flags::resolve) 
+    parse_abort(0, "Type variable not permitted in pointer bound");
+  $$=^$(typevar2cvar($2));
+}
+;
 
 zeroterm_qual_opt:
 /* empty */       { $$ = ^$(Tcutil::any_bool(NULL)); }
@@ -2436,6 +2565,20 @@ expression_statement:
   ';'            { $$=^$(skip_stmt(SLOC(@1))); }
 | expression ';' { $$=^$(exp_stmt($1,LOC(@1,@2))); }
 //| error ';'      { $$=^$(skip_stmt(SLOC(@1))); }
+;
+
+start_fndef_block:
+'{' {inside_function_definition=true;}
+;
+
+end_fndef_block:
+'}' {inside_function_definition=false;}
+;
+
+fndef_compound_statement:
+  start_fndef_block end_fndef_block  { $$=^$(skip_stmt(LOC(@1,@2))); }
+| start_fndef_block block_item_list end_fndef_block { $$=$!2; }
+//| '{' error '}'           { $$=^$(skip_stmt(LOC(@1,@2))); }
 ;
 
 compound_statement:
@@ -3141,6 +3284,45 @@ field_name:
 right_angle:
   '>'      {}
 | RIGHT_OP { yylex_buf->lex_curr_pos -= 1; }
+
+//grammar for parsing a constraint graph
+all_constraints:
+{$$ = ^$(NULL);}
+| TYPE_VAR STRING ',' STRING '(' constraint_list_opt ')'  all_constraints
+{ $$ = ^$(new List(new $(assign_cvar_pos($2, (strcmp($4, "true")==0), typevar2cvar($1)), $6), $8)); }
+;
+
+constraint_list_opt:
+{$$ = ^$(NULL);}
+| constraint_list {$$ =^$($1);}
+;
+
+constraint_list:
+constraint {$$ = ^$(new List($1, NULL));}
+| constraint ';' constraint_list {$$ = ^$(new List($1, $3));}
+;
+ 
+tvar_or_string:
+  TYPE_VAR {$$ = ^$(typevar2cvar($1));}
+| STRING {$$ = ^$(str2type(SLOC(@1),$1));}
+;
+
+constraint:
+  '!' '(' constraint ')' {$$ = ^$(BansheeIf::check_constraint($3));}
+| '^' '(' c_op ',' tvar_or_string ',' tvar_or_string ')' {$$ = ^$(comparison_constraint($3, $5, $7));}
+| '?' '(' tvar_or_string ','  tvar_or_string ')' {$$ = ^$(BansheeIf::cond_equality_constraint($3, $5));}
+| '=' '(' tvar_or_string ','  tvar_or_string ')' {$$ = ^$(BansheeIf::equality_constraint($3, $5));}
+| '<' '(' tvar_or_string ','  tvar_or_string ')' {$$ = ^$(BansheeIf::inclusion_constraint($3, $5));}
+| '>' '(' constraint ','  constraint ')' {$$ = ^$(BansheeIf::implication_constraint($3, $5));}
+| '+' '(' c_op ',' constraint  ','  constraint  ')' {$$ = ^$(composite_constraint($3, $5, $7));}
+  ;
+c_op:
+  'A' {$$ = ^$(C_AND_OP);}
+| 'V' {$$ = ^$(C_OR_OP);}
+| '!' {$$ = ^$(C_NOT_OP);}
+| '=' {$$ = ^$(C_EQ_OP);}
+| '<' {$$ = ^$(C_INCL_OP);}
+;
 %%
 
 void yyprint(int i, union YYSTYPE<`yy> v) {
@@ -3174,5 +3356,12 @@ list_t<decl_t> parse_file(FILE @`H f) {
   region yyr;
   yyparse(yyr,Lexing::from_file(f));
   return parse_result;
+}
+
+list_t<$(type_t, list_t<constraint_t>)@> parse_constraint_file(FILE @`H f) {
+  constraint_graph = NULL;
+  region yyr;
+  yyparse(yyr,Lexing::from_file(f));
+  return constraint_graph;
 }
 }

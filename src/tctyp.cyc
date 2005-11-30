@@ -30,11 +30,13 @@
 #include "tctyp.h"
 #include "currgn.h"
 #include "vcgen.h"
+#include "bansheeif.h"
 using List;
 using Core;
 using Warn; // put Warn first so Absyn shadows
 using Absyn;
 using Tcutil;
+using BansheeIf;
 namespace Tctyp;
 
 // bool indicates whether the element should go in an effect
@@ -497,7 +499,7 @@ static cvtenv_t i_check_type_app(cvtenv_t env, kind_t expected_kind,
     if(length(ts) != 2) 
       impos2("aquals expects two arguments");
     env = i_check_type(env, &Kinds::aqk, ts->hd,false, false);
-    let ctx_bnd = Tcutil::lookup_aquals(Tcenv::curr_aquals_bounds(env.te), ts->hd);
+    let ctx_bnd = Tcutil::lookup_aquals_opt(Tcenv::curr_aquals_bounds(env.te), ts->hd);
     if(ctx_bnd) {
       ts->tl->hd = ctx_bnd;
     }
@@ -732,6 +734,15 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
     env = i_check_type_app(env,expected_kind,c,targsp,
 			   put_in_effect,allow_abs_aggr,t);
     break;
+  case &Cvar(*k,_,_,_,name,...): //need to merge cvars across decls etc.
+    if(name == NULL) {
+      err2(loc, "Unnamed Cvar ", t);
+    }
+    if ((*k == NULL) || //fix the kind ... identical to Evar case
+	(Kinds::kind_leq(expected_kind,(*k)->v) 
+	 && !Kinds::kind_leq((*k)->v,expected_kind)))
+      *k = Kinds::kind_to_opt(expected_kind);
+    break;
   case &Evar(*k,*ref,_,_):
     // if we have some latitude with moving the type var, do it here
     if ((*k == NULL) ||
@@ -806,16 +817,10 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
     *topt = new new_typ;
     return i_check_type(env,expected_kind,new_typ,put_in_effect,allow_abs_aggr);
 
-  case &PointerType(PtrInfo(t1,*tqp,PtrAtts(*eff_type,nullable,b,zt,_,rel,*aq))): //bind free_qualvars for apptype/aqual_t too
+  case &PointerType(PtrInfo(t1,*tqp,PtrAtts(*eff_type,nullable,*b,zt,_,rel,*aq))): //bind free_qualvars for apptype/aqual_t too
     // FIX: check that tqual is valid?
-    /*     kind_t rgnk; */
-    /*     switch (expected_kind->aliasqual) { */
-    /*     case Aliasable:    rgnk = &Kinds::rk;  break; */
-    /*     case Unique:       rgnk = &Kinds::rk; break; */
-    /*     case Top: default: rgnk = &Kinds::rk; break; */
-    /*     } */
     _ override_aq = *aq;
-    switch(*eff_type) {
+    switch(*eff_type) {//strip out the `U, `RC shorthands 
     case &AppType(&UniqueHeapCon, _):
       *eff_type = heap_rgn_type;
       override_aq = un_qual_type;
@@ -827,19 +832,6 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
     default: 
       break; //no other cases are possible on a pointer
     }
-    /*     switch(*rgn_type) { //strip out the `U, `RC shorthands */
-    /*     case &AppType(&UniqueHeapCon, _): */
-    /*       *rgn_type = heap_rgn_type; */
-    /*       override_aq = un_qual_type; */
-    /*       break; */
-    /*     case &AppType(&RefCntHeapCon, _): */
-    /*       *rgn_type = heap_rgn_type; */
-    /*       override_aq = rc_qual_type; */
-    /*       break; */
-    /*     default: */
-    /*       break; */
-    /*     } */
-
     if(override_aq != *aq) {
       switch(*aq) {
       case &AppType(&AqualVarCon, &List(&Evar(...), bnd)):
@@ -849,11 +841,14 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
       }
       *aq = override_aq;
     }
+    if(expected_kind->kind == BoxKind && is_cvar_type(*b)) { //@fat makes the pointer a memkind
+      *b = bounds_one(); 
+    }
     env = i_check_type(env,&Kinds::ak,t1,true,true);//allow AnyKind under ptr
     env = i_check_type(env,&Kinds::ek,*eff_type,true, true);
     env = i_check_type(env,&Kinds::boolk,  zt,      false,true);
     env = i_check_type(env,&Kinds::boolk,  nullable,false,true);
-    env = i_check_type(env,&Kinds::ptrbk,  b,       false,allow_abs_aggr);
+    env = i_check_type(env,&Kinds::ptrbk,  *b,       false,allow_abs_aggr);
     env = i_check_type(env,&Kinds::boolk,  rel,     false,true);
     switch(*aq) {
     case &AppType(&AqualVarCon, &List(&Evar(...), bnd)): //introduced for unification, need to adjust bound 
@@ -875,13 +870,15 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
     bool is_zero_terminated = type2bool(false,zt);
     if (is_zero_terminated  && !admits_zero(t1))
       err2(loc,"cannot have a pointer to zero-terminated ",t1," elements");
-
+    
     // check the bound -- unify with bounds one to force bound to zero
-    let e = get_bounds_exp(bounds_one(),b);
-    if (e != NULL) {
-      let $(sz,known) = Evexp::eval_const_uint_exp(e);
-      if (is_zero_terminated && (!known || sz < 1))
-        err2(loc,"zero-terminated pointer cannot point to empty sequence");
+    if(!is_cvar_type(*b)) {
+      let e = get_bounds_exp(bounds_one(),*b);
+      if (e != NULL) {
+	let $(sz,known) = Evexp::eval_const_uint_exp(e);
+	if (is_zero_terminated && (!known || sz < 1))
+	  err2(loc,"zero-terminated pointer cannot point to empty sequence");
+      }
     }
     break;
   case &ValueofType(e):
@@ -1052,11 +1049,27 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
 	  if (!is_char_type(et)) 
 	    err2(loc,"format descriptor is not a string");
 	  else {
-	    let e = get_bounds_exp(bounds_one(),b);
-	    if (e == NULL && c_vararg)
-	      err2(loc,"format descriptor is not a char * type"); 
-	    else if (e != NULL && !c_vararg)
-	      err2(loc,"format descriptor is not a char ? type"); 
+	    if(!is_cvar_type(b)) {
+	      let e = get_bounds_exp(bounds_one(),b);
+	      if (e == NULL && c_vararg)
+		err2(loc,"format descriptor is not a char * type"); 
+	      else if (e != NULL && !c_vararg)
+		err2(loc,"format descriptor is not a char ? type"); 
+	    }
+	    else {
+	      if(c_vararg) {
+		if(!add_constraint(loc,equality_constraint(ptrbnd_cvar_equivalent(b),
+							   thinconst()))) {
+		  err2(loc,"format descriptor is not a char ? type"); 
+		}
+	      }
+	      else {
+		if(!add_constraint(loc,equality_constraint(ptrbnd_cvar_equivalent(b),
+							   fatconst()))) {
+		  err2(loc,"format descriptor is not a char * type"); 		  
+		}
+	      }
+	    }
 	  }
 	  break;
 	default: err2(loc,"format descriptor is not a string type"); break;

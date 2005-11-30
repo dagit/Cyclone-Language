@@ -18,7 +18,10 @@
    Suite 330, Boston, MA 02111-1307, USA. */
 #ifndef _CYCLONE_H_
 #define _CYCLONE_H_
-namespace Cyclone {
+#include <core.h>
+#include <list.h>
 
+namespace Cyclone {
+  List::list_t<Absyn::decl_t> parse_file(string_t<`H> filename);
 }
 #endif

@@ -45,6 +45,7 @@ extern struct Params {
   bool generate_line_directives;
   bool use_curr_namespace;
   list_t<var_t> curr_namespace;
+  bool gen_clean_cyclone;
 };
 
 // used by cycdoc to suppress printing extern, etc.
@@ -52,7 +53,7 @@ extern struct Params {
 
 void set_params(struct Params@);
 
-extern struct Params cyc_params_r, cyci_params_r, c_params_r, tc_params_r;
+extern struct Params cyc_params_r, cycinf_params_r, cyci_params_r, c_params_r, tc_params_r;
 
 void decllist2file(list_t<decl_t>, FILE @);
 
@@ -68,6 +69,7 @@ string_t cnst2string(cnst_t);
 string_t exp2string(exp_t);
 string_t stmt2string(stmt_t);
 string_t qvar2string(qvar_t);
+string_t fullqvar2string(qvar_t);
 string_t decllist2string(list_t<decl_t>);
 string_t prim2string(primop_t);
 string_t pat2string(pat_t);

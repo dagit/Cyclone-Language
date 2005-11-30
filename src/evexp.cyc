@@ -612,6 +612,7 @@ bool okay_szofarg(type_t t) {
       return true;
     }
   case &VarType(tv): return Kinds::tvar_kind(tv,&Kinds::bk)->kind == BoxKind;
+  case &Cvar(...): return false; //revisit this as we add more Cvar kinds
   case &Evar(&Opt{&Kind(BoxKind,_)},...): return true; // Possible?
   case &Evar(...): return false;
 

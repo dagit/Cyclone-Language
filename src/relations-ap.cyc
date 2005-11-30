@@ -407,7 +407,7 @@ static reln_op_t reduce_relnop(reln_op_t rop) {
       // major subtlety!  the vardecl's type might have been translated
       // to C in which case the bound is not accurate...
       if (b == Absyn::bounds_one()) break;
-      let eopt = Tcutil::get_bounds_exp(Absyn::fat_bound_type,b);
+      let eopt = Tcutil::get_bounds_exp_constrain(Absyn::fat_bound_type,b,true);
       if (eopt != NULL) {
         let e = (Absyn::exp_t)eopt;
         reln_op_t rop2 = rop;

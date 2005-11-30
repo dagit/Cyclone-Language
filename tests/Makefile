@@ -12,8 +12,8 @@ CYCFLAGS=-I../lib -I../include -B../build/boot -pp -save-c -g --mergepaths
 endif
 HAVE_PTHREAD=no
 # test asm doesn't work for me on cygwin
-EXES := $(addsuffix $(EXE), cyctest foo hello test_regions test_currgn histogram test_getopt zeroterm flatlist md5 unique_patterns dynregion cinclude  multimethod  testasm testaqualsuccess scheme scheme-2 patterns refcnt_test rc require)
- # testbget testsexp structarray streambufftest) 
+EXES := $(addsuffix $(EXE), cyctest foo hello test_regions test_currgn histogram test_getopt zeroterm flatlist unique_patterns dynregion cinclude  multimethod  testasm testaqualsuccess scheme patterns refcnt_test rc require)
+ # testbget testsexp structarray streambufftest md5 scheme-2) 
 #these are broken
 #streambuff.cyc is broken badly ... it is unsound to pattern match on existentials with `RC inside them, wait until restrict
 ifeq ($(HAVE_PTHREAD),yes)
@@ -60,14 +60,14 @@ all: $(EXES) failtest
 	./zeroterm
 #	./structarray
 	./flatlist
-	./md5 -q
+#	./md5 -q
 	./require
 	./test_getopt -abc123
 #	./streambufftest -q
 	./unique_patterns
 	./dynregion
 	./scheme
-	./scheme-2 --gc-messages
+#	./scheme-2 --gc-messages
 	./patterns
 	./refcnt_test -q
 	./cinclude

@@ -405,8 +405,8 @@ static void do_exp(env_t nv, exp_t e) {
     case $(&PointerType(p1),&PointerType(p2)):
       let n1 = Tcutil::force_type2bool(false,p1.ptr_atts.nullable);
       let n2 = Tcutil::force_type2bool(false,p2.ptr_atts.nullable);
-      let b1 = Tcutil::get_bounds_exp(bounds_one(),p1.ptr_atts.bounds);
-      let b2 = Tcutil::get_bounds_exp(bounds_one(),p2.ptr_atts.bounds);
+      let b1 = Tcutil::get_bounds_exp_constrain(bounds_one(),p1.ptr_atts.bounds,true);
+      let b2 = Tcutil::get_bounds_exp_constrain(bounds_one(),p2.ptr_atts.bounds,true);
       //if both pointers have dynamic bounds then its ok to ignore the coercion annotation
       if(n1 && !n2 && coercion != Null_to_NonNull && (b1 || b2)) 
 	impos_loc(e->loc,"null-check conversion mis-classified");
@@ -477,7 +477,7 @@ static void do_exp(env_t nv, exp_t e) {
         bds_ck = need_bounds_check_vcgen(nv, e1);
       if (bds_ck && Flags::warn_bounds_checks)
         warn(e1->loc,"inserted bounds check (location is pointer expression)");
-      exp_opt_t bd = Tcutil::get_bounds_exp(bounds_one(),b);
+      exp_opt_t bd = Tcutil::get_bounds_exp_constrain(bounds_one(),b,true);
       bool fat_ptr = (bd == NULL);
       // FIX:  I'm not sure this is right anymore!
       // we do not need to do a null check if e1 is a fat pointer
