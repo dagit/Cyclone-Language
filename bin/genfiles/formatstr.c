@@ -777,7 +777,7 @@ struct Cyc_List_List*typs=0;
 int i;
 {struct _RegionHandle _Tmp0=_new_region(0U,"temp");struct _RegionHandle*temp=& _Tmp0;_push_region(temp);
 for(i=0;(unsigned long)i < len;++ i){
-if((int)((const char*)s.curr)[i]!=37)continue;{
+if((int)*((const char*)_check_fat_subscript(s,sizeof(char),i))!=37)continue;{
 struct Cyc_Core_Opt*x=Cyc_Formatstr_parse_inputformat(temp,s,i + 1);
 if(x==0){
 struct Cyc_List_List*_Tmp1=({struct Cyc_List_List*(*_Tmp2)(unsigned,struct _fat_ptr,struct _fat_ptr ap)=(struct Cyc_List_List*(*)(unsigned,struct _fat_ptr,struct _fat_ptr ap))Cyc_Formatstr_err_null;_Tmp2;})(loc,_tag_fat("bad format string",sizeof(char),18U),_tag_fat(0U,sizeof(void*),0));_npop_handler(0);return _Tmp1;}{

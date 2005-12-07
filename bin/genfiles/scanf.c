@@ -422,7 +422,7 @@ static short basefix[17U]={10,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
 nassigned=0;
 nread=0;
 for(1;1;1){
-c=(int)*((const char*)_fat_ptr_inplace_plus_post(& fmt,sizeof(char),1).curr);
+c=(int)*((const char*)_check_fat_subscript(_fat_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0U));
 if(c==0)
 goto done;
 if(isspace(c)){
