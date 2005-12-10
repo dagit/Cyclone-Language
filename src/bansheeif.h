@@ -24,7 +24,7 @@ namespace BansheeIf {
   constraint_t cmpeq_constraint(Absyn::cvartype_t t1, Absyn::cvartype_t t2);
   constraint_t check_constraint(constraint_t);
   string_t constraint2string(constraint_t);
-
+  constraint_t add_location(string_t<`H>, constraint_t);
   bool add_constraint(Absyn::seg_t, constraint_t);
   int discharge_implications();
   bool resolve(Absyn::cvartype_t);

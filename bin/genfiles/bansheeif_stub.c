@@ -369,3 +369,5 @@ void Cyc_BansheeIf_register_toplevel_cvar(void*cvar){;}
 void Cyc_BansheeIf_persist_cvarmap(struct Cyc___cycFILE*f){;}
 # 35
 void Cyc_BansheeIf_resolve_or_default(void*t){;}
+# 37
+void*Cyc_BansheeIf_add_location(struct _fat_ptr loc,void*c){return c;}

@@ -712,7 +712,7 @@ char sign='\000';
 int carry;
 (unsigned)p.curr?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp0;})(_tag_fat("p",sizeof(char),2U),_tag_fat("ap.cyc",sizeof(char),7U),341U);
 base >= 2 && base <= 36?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp0;})(_tag_fat("base >= 2 && base <= 36",sizeof(char),24U),_tag_fat("ap.cyc",sizeof(char),7U),342U);
-while((int)*((const char*)_check_fat_subscript(p,sizeof(char),0U))&& isspace((int)*((const char*)p.curr))){
+while((int)*((const char*)p.curr)&& isspace((int)*((const char*)p.curr))){
 _fat_ptr_inplace_plus(& p,sizeof(char),1);1U;}
 if((int)*((const char*)p.curr)==45 ||(int)*((const char*)p.curr)==43)
 sign=*((const char*)_fat_ptr_inplace_plus_post(& p,sizeof(char),1).curr);

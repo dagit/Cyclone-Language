@@ -33,5 +33,7 @@ namespace BansheeIf {
   void persist_cvarmap(FILE @f){}
 
   void resolve_or_default(Absyn::type_t t){}
+
+  constraint_t add_location(string_t<`H> loc, constraint_t c) { return c; }
 }
 

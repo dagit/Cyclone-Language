@@ -236,7 +236,7 @@ static $(bool, filedecls_t) add_filedecls(string_t<`H> filename, filedecls_t ftd
 //RETURNS:
 //bool: flag signalling success
 //filedecls_t: head of the newly added decls; reachable from ftds 
-//            (if we are in no_merge mode, this is always null)
+//	    (if we are in no_merge mode, this is always null)
 //list_t<exp_t>: externs for which a definition was found; these will be rebound
 static $(bool,filedecls_t,list_t<exp_t>) locate_externs(list_t<exp_t> es, filedecls_t ftds) {
   _ newdecls = NULL;
@@ -531,7 +531,7 @@ static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxp
 	int finner = 0;
 	for(;ft;ft=ft->tl) {
 	  let &$(_,t) = ft->hd;
-	  sprintf(_prefix+pfxpos, "_%d_DD%s_DF%d_%d", index, dtn, findex, finner++);
+	  sprintf(_prefix+pfxpos, "DD%dI%s_DF%d_%d", strlen(dtn), dtn, findex, finner++);
 	  //aprintf("%s_%d_DD%s_DF%d_%d", prefix, index, dtn, findex, finner++)
 	  ret = List::append(cvars_in_type(t, 0, is_local, strlen(_prefix)), ret);
 	}
@@ -546,7 +546,7 @@ static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxp
     if(ad->impl) {
       assert(pfxpos < 900);
       for(_ fs = ad->impl->fields; fs; fs= fs->tl) {
-	sprintf(_prefix+pfxpos, "_%d_AD%s_AF%d", index, adn, findex++);
+	sprintf(_prefix+pfxpos, "AD%dI%s_AF%d", strlen(adn), adn, findex++);
 	//	aprintf("%s_%d_AD%s_AF%d", prefix, index, adn, findex++)
 	ret = List::append(cvars_in_type(fs->hd->type, 0, is_local, strlen(_prefix)), ret);
       }
@@ -571,7 +571,8 @@ static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxp
     if(tdef && tdef->defn) {
       assert(pfxpos < 900);
       //      aprintf("%s_%d_TD%s", prefix, index, Absynpp::fullqvar2string(tdn))
-      sprintf(_prefix+pfxpos,"_%d_TD%s", index, Absynpp::fullqvar2string(tdn));
+      let tn = Absynpp::fullqvar2string(tdn);
+      sprintf(_prefix+pfxpos,"TD%dI%s", strlen(tn), tn);
       ret = List::append(cvars_in_type(tdef->defn, 0,is_local,strlen(_prefix)), 
 			 ret);
       _prefix[pfxpos]='\0';    
@@ -618,7 +619,10 @@ static bool cvars_in_local_decl($(string_t, int, void (@)(list_t<type_t,`H>,`inn
   case &Decl_s(d, s1):
     switch(d->r) {
     case &Var_d(vd): 
-      sprintf(_prefix, "%s_%d", pfx, (*count)++);
+      let ln = Absynpp::fullqvar2string(vd->name);
+      sprintf(_prefix, "%dI%s_%dI%s_%d", strlen(pfx),
+	      pfx, strlen(ln), ln,
+       (*count)++);
       let cvars = cvars_in_type(vd->type, 0, true, strlen(_prefix)); 
       //drop the list of cvars ... these are fresh and do not require any binding
       //but, we will need to resolve these on the second pass
@@ -628,7 +632,8 @@ static bool cvars_in_local_decl($(string_t, int, void (@)(list_t<type_t,`H>,`inn
     case &Let_d(p, ...):
       switch(p->r) {
       case &AliasVar_p(_, vd):
-	sprintf(_prefix, "%s_%d", pfx, (*count)++);
+	let an = Absynpp::fullqvar2string(vd->name);
+	sprintf(_prefix, "%dI%s_%dI%s_%d", strlen(pfx), pfx, strlen(an), an, (*count)++);
 	let cvars = cvars_in_type(vd->type, 0, true, strlen(_prefix)); 
 	//drop the list of cvars ... these are fresh and do not require any binding
 	//but, we will need to resolve these on the second pass
@@ -671,13 +676,14 @@ static list_t<type_t> assign_cvar_names(list_t<decl_t> ds){
     case &Namespace_d(_,l): fallthru(l);
     case &Using_d(_,l): ret = List::append(ret, assign_cvar_names(l)); break;
     case &Var_d(vd): 
-      sprintf(_prefix, "%s", Absynpp::fullqvar2string(vd->name));
+      let tn =Absynpp::fullqvar2string(vd->name);
+      sprintf(_prefix, "%dI%s", strlen(tn), tn);
       ret = List::append(cvars_in_type(vd->type, 0, false, strlen(_prefix)),
 			 ret);
       break;
     case &Fn_d(fd):    
       let fdname = Absynpp::fullqvar2string(fd->name);
-      sprintf(_prefix, "%s", fdname);
+      sprintf(_prefix, "%dI%s", strlen(fdname), fdname);
       if(Tcutil::is_main(fd->name)) { //main's 2nd arg must be ??
 	let args = fd->i.args;
 	if(args && args->tl) {
@@ -837,13 +843,16 @@ list_t<decl_t> resolve_all(string_t<`H> filename, list_t<decl_t, `H> tds) {
 }
 
 void inference_statistics() {
+  fprintf(stderr, "Looking for constraint variables...\n");
   let graph = parse_constraint_graph();
   if(BansheeIf::add_all_constraints(graph)) {
     fprintf(stderr, "Inconsistent constraint graph\n");
     return;
   }
-  list_t<$(const char*,const char*, bool)@> thins=NULL;
-  list_t<$(const char*,const char*, bool)@> fats=NULL;
+  //list_t<$(const char*,const char*, bool)@> thins=NULL;
+  //list_t<$(const char*,const char*, bool)@> fats=NULL;
+  list_t<$(const char*,const char*, bool, bool)@> ips=NULL;
+  int nips = 0;
   for(;graph;graph=graph->tl) {
     let &$(t, _) = graph->hd;
     switch(t) {
@@ -851,10 +860,12 @@ void inference_statistics() {
       switch(compress(t)) {
       case &Cvar(...):
       case &AppType(&ThinCon, _):
-	thins = new List{new $(name,loc,origfat), thins};
+	ips = new List{new $(name,loc,false,origfat), ips};
+	nips++;
 	break;
       case &AppType(&FatCon, _):
-	fats = new List{new $(name,loc,origfat), fats};
+	ips = new List{new $(name,loc,true,origfat), ips};
+	nips++;
 	break;
       default:
 	break;
@@ -864,9 +875,18 @@ void inference_statistics() {
       break;
     }
   }
-  fats=  List::merge_sort(cmp_stats, fats);
-  thins=  List::merge_sort(cmp_stats, thins);
-  fprintf(stderr, "******************************FAT POINTERS******************************\n");
+  fprintf(stderr, "Found %d of them.\n", nips);
+  //fats=  List::merge_sort(cmp_stats, fats);
+  //thins=  List::merge_sort(cmp_stats, thins);
+  ips=List::merge_sort(cmp_stats, ips);
+  fprintf(stderr, "%-49s %-30s %-4s %-4s\n", "Constraint variable", "Location, file:line", "Orig", "Inf");
+  fprintf(stderr, "------------------------------------------------------------------------------------------\n");
+  for(;ips;ips = ips->tl) {
+    const char *origtype = (ips->hd->f3) ? "fat" : "thin";
+    const char *inftype = (ips->hd->f2) ? "fat" : "thin";
+    fprintf(stderr, "C_PTRBND_%-40s %-30s %-4s %-4s\n", ips->hd->f0, ips->hd->f1, origtype, inftype);
+  }
+  /*fprintf(stderr, "******************************FAT POINTERS******************************\n");
   for(;fats;fats = fats->tl) {
     fprintf(stderr, "%s %50s", fats->hd->f1, fats->hd->f0);
     if(!fats->hd->f2)
@@ -880,7 +900,9 @@ void inference_statistics() {
       fprintf(stderr, " --ORIG-FAT");
     fprintf(stderr, "\n");
   }
-  fprintf(stderr, "***********************************DONE*************************************\n");
+  fprintf(stderr, "***********************************DONE*************************************\n");*/
+  fprintf(stderr, "------------------------------------------------------------------------------------------\n");
+  fprintf(stderr, "That's all folks.\n");
 }
 
 

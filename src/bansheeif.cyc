@@ -221,18 +221,18 @@ typedef enum ConstraintOperator {
 
 //typedef datatype Constraint *constraint_opt_t;
 datatype Constraint {
-  CheckConstraint(constraint_t,seg_t);
-  ComparisonConstraint(cop_t, cvartype_t, cvartype_t,seg_t);
-  EqualityConstraint(cvartype_t, cvartype_t, bool,seg_t);
-  InclusionConstraint(cvartype_t, cvartype_t,seg_t);
-  ImplicationConstraint(constraint_t, constraint_t,seg_t);
-  CompositeConstraint(cop_t, constraint_t, constraint_opt_t,seg_t);
+  CheckConstraint(constraint_t,string_t);
+  ComparisonConstraint(cop_t, cvartype_t, cvartype_t,string_t);
+  EqualityConstraint(cvartype_t, cvartype_t, bool,string_t);
+  InclusionConstraint(cvartype_t, cvartype_t,string_t);
+  ImplicationConstraint(constraint_t, constraint_t,string_t);
+  CompositeConstraint(cop_t, constraint_t, constraint_opt_t,string_t);
 };
  
 //note that these are simply constructors.
 //adding a constraint to the graph requires a seprate call to insert_constraint
  constraint_t check_constraint(constraint_t c) {
-   return new CheckConstraint(c,0);
+   return new CheckConstraint(c,NULL);
  }
  
 constraint_t cmpeq_constraint(cvartype_t t1, cvartype_t t2) {
@@ -240,7 +240,7 @@ constraint_t cmpeq_constraint(cvartype_t t1, cvartype_t t2) {
   case $(&Cvar(_,_,_,*bv1,...),&Cvar(_,_,_,*bv2,...)):
     if(*bv1 == NULL)       add_variable(t1);
     if(*bv2 == NULL)       add_variable(t2);
-    return new ComparisonConstraint(EqOp, t1, t2,0);
+    return new ComparisonConstraint(EqOp, t1, t2,NULL);
   default:
     Warn::impos2("cmpeq_constraint: Bad types for constraint - ", t1, t2);
   }  
@@ -251,7 +251,7 @@ constraint_t cmpsubset_constraint(cvartype_t t1, cvartype_t t2) {
   case $(&Cvar(_,_,_,*bv1,...),&Cvar(_,_,_,*bv2,...)): //need to make sure these are of setIF sort
     if(*bv1 == NULL)       add_variable(t1);
     if(*bv2 == NULL)       add_variable(t2);
-    return new ComparisonConstraint(SubsetOp, t1, t2,0);
+    return new ComparisonConstraint(SubsetOp, t1, t2,NULL);
   default:
     Warn::impos2("cmpsubset_constraint: Bad types for constraint - ", t1, t2);
   }
@@ -262,7 +262,7 @@ static constraint_t internal_equality_constraint(cvartype_t t1, cvartype_t t2, b
   case $(&Cvar(_,_,_,*bv1,...),&Cvar(_,_,_,*bv2,...)):
     if(*bv1 == NULL)       add_variable(t1);
     if(*bv2 == NULL)       add_variable(t2);
-    return new EqualityConstraint(t1, t2, c,0);
+    return new EqualityConstraint(t1, t2, c,NULL);
   default:
     Warn::impos2("equality_constraint: Bad types for constraint - ", t1, t2);
   }
@@ -283,7 +283,7 @@ constraint_t inclusion_constraint(cvartype_t t1, cvartype_t t2) {
     if(*bv2 == NULL)       add_variable(t2);
     switch($(*bv1, *bv2)) { //try using tagof here instead
     case $(&BvarEffect(_), &BvarEffect(_)):
-      return new EqualityConstraint(t1, t2,false,0);
+      return new EqualityConstraint(t1, t2,false,NULL);
     default:
       Warn::impos2("inclusion_constraint: Term sort doesn't permit inclusion constraints");
     }
@@ -293,7 +293,7 @@ constraint_t inclusion_constraint(cvartype_t t1, cvartype_t t2) {
 }
 
 constraint_t implication_constraint(constraint_t t1, constraint_t t2) {
-  return new ImplicationConstraint(t1, t2,0);
+  return new ImplicationConstraint(t1, t2,NULL);
 }
 
 static constraint_t composite_constraint(cop_t op, constraint_t t1, constraint_opt_t t2) {
@@ -301,11 +301,11 @@ static constraint_t composite_constraint(cop_t op, constraint_t t1, constraint_o
   case NegOp:
     if(t2 != NULL)
       Warn::impos2("composite_constraint: Neg constraint is unary");
-    return new CompositeConstraint(op, t1, NULL,0);
+    return new CompositeConstraint(op, t1, NULL,NULL);
   default:
     if(!t1 || !t2)
       Warn::impos2("composite_constraint: Binary constraint missing argument");
-    return new CompositeConstraint(op, t1, t2,0);
+    return new CompositeConstraint(op, t1, t2,NULL);
   }
 }
  
@@ -391,20 +391,23 @@ static constraint_t composite_constraint(cop_t op, constraint_t t1, constraint_o
    }
  }
 
- static string_t _constraint2string(constraint_t c, bool xcvar) {
+ static string_t _constraint2string(constraint_t c, bool xcvar) { 
    switch(c) {
-   case &CheckConstraint(c1,_): return aprintf("!(%s)", _constraint2string(c1,xcvar));
-   case &ComparisonConstraint(op, t1, t2,_): return aprintf("^(%s, %s, %s)", op2string(op), cvar2string(t1,xcvar), cvar2string(t2,xcvar));
-   case &EqualityConstraint(t1, t2, b,_): 
+   case &CheckConstraint(c1,loc): return aprintf("\"%s\"!(%s)", loc, _constraint2string(c1,xcvar));
+   case &ComparisonConstraint(op, t1, t2,loc): return aprintf("\"%s\"^(%s,%s,%s)", loc, op2string(op), cvar2string(t1,xcvar), cvar2string(t2,xcvar));
+   case &EqualityConstraint(t1, t2, b,loc): 
      if(b) {
-       return aprintf("?(%s,%s)", cvar2string(t1,xcvar),  cvar2string(t2,xcvar));
+       return aprintf("\"%s\"?(%s,%s)", loc, cvar2string(t1,xcvar),  cvar2string(t2,xcvar));
      }
      else
-       return aprintf("=(%s, %s)", cvar2string(t1,xcvar),  cvar2string(t2,xcvar));
-   case &InclusionConstraint(t1, t2,_): return aprintf("<(%s,%s)", cvar2string(t1,xcvar),  cvar2string(t2,xcvar));
-   case &ImplicationConstraint(c1, c2,_): return aprintf(">(%s,%s)", _constraint2string(c1,xcvar),  _constraint2string(c2,xcvar));
-   case &CompositeConstraint(op, c1, c2,_):  return aprintf("+(%s,%s,%s)", _constraint2string(c1,xcvar), 
-							  op2string(op), _constraint2string(c2,xcvar));
+       return aprintf("\"%s\"=(%s,%s)", loc, cvar2string(t1,xcvar),  cvar2string(t2,xcvar));
+   case &InclusionConstraint(t1, t2,loc): return aprintf("\"%s\"<(%s,%s)", loc,
+							 cvar2string(t1,xcvar),  cvar2string(t2,xcvar));
+   case &ImplicationConstraint(c1, c2,loc): return aprintf("\"%s\">(%s,%s)", loc, _constraint2string(c1,xcvar), _constraint2string(c2,xcvar));
+							   
+   case &CompositeConstraint(op, c1, c2,loc):  return aprintf("\"%s\"+(%s,%s,%s)", loc,
+							      _constraint2string(c1,xcvar), 
+							      op2string(op), _constraint2string(c2,xcvar));
    }
  }
  string_t constraint2string(constraint_t c) {
@@ -493,18 +496,21 @@ static int internal_add_constraint(constraint_t c) {
 }
  
 static int insert_into_map(constraint_t c); //fwd decl
-static void add_location(seg_t loc, constraint_t c) {
-  switch(c) {
-  case &CheckConstraint(_,*l): fallthru(l);
-  case &ComparisonConstraint(_,_,_,*l): fallthru(l);
-  case &EqualityConstraint(_,_,_,*l): fallthru(l);
-  case &InclusionConstraint(_,_,*l): fallthru(l);
-  case &ImplicationConstraint(_,_,*l): fallthru(l);
-  case &CompositeConstraint(_,_,_,*l): *l=loc;
-  }
-}
+
+ constraint_t add_location(string_t<`H> loc, constraint_t c) {
+   switch(c) {
+   case &CheckConstraint(_,*l): fallthru(l);
+   case &ComparisonConstraint(_,_,_,*l): fallthru(l);
+   case &EqualityConstraint(_,_,_,*l): fallthru(l);
+   case &InclusionConstraint(_,_,*l): fallthru(l);
+   case &ImplicationConstraint(_,_,*l): fallthru(l);
+   case &CompositeConstraint(_,_,_,*l): *l=loc;
+   }
+   return c;
+ }
+
 bool add_constraint(seg_t loc, constraint_t c) {
-  add_location(loc, c);
+  add_location(Position::string_of_loc(loc), c);
   insert_into_map(c);
   if(Flags::verbose)
     fprintf(stderr, "-- (%s) Adding constraint : %s \t", Position::string_of_loc(loc), _constraint2string(c,false));

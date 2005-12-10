@@ -1,3 +1,4 @@
+
 /* Parser.
    Copyright (C) 2001 Greg Morrisett, AT&T
    This file is part of the Cyclone compiler.
@@ -3308,13 +3309,13 @@ tvar_or_string:
 ;
 
 constraint:
-  '!' '(' constraint ')' {$$ = ^$(BansheeIf::check_constraint($3));}
-| '^' '(' c_op ',' tvar_or_string ',' tvar_or_string ')' {$$ = ^$(comparison_constraint($3, $5, $7));}
-| '?' '(' tvar_or_string ','  tvar_or_string ')' {$$ = ^$(BansheeIf::cond_equality_constraint($3, $5));}
-| '=' '(' tvar_or_string ','  tvar_or_string ')' {$$ = ^$(BansheeIf::equality_constraint($3, $5));}
-| '<' '(' tvar_or_string ','  tvar_or_string ')' {$$ = ^$(BansheeIf::inclusion_constraint($3, $5));}
-| '>' '(' constraint ','  constraint ')' {$$ = ^$(BansheeIf::implication_constraint($3, $5));}
-| '+' '(' c_op ',' constraint  ','  constraint  ')' {$$ = ^$(composite_constraint($3, $5, $7));}
+  STRING '!' '(' constraint ')' {$$ = ^$(BansheeIf::add_location($1, BansheeIf::check_constraint($4)));}
+| STRING '^' '(' c_op ',' tvar_or_string ',' tvar_or_string ')' {$$ = ^$(BansheeIf::add_location($1, comparison_constraint($4, $6, $8)));}
+| STRING '?' '(' tvar_or_string ','  tvar_or_string ')' {$$ = ^$(BansheeIf::add_location($1,BansheeIf::cond_equality_constraint($4, $6)));}
+| STRING '=' '(' tvar_or_string ','  tvar_or_string ')' {$$ = ^$(BansheeIf::add_location($1, BansheeIf::equality_constraint($4, $6)));}
+| STRING '<' '(' tvar_or_string ','  tvar_or_string ')' {$$ = ^$(BansheeIf::add_location($1,BansheeIf::inclusion_constraint($4, $6)));}
+| STRING '>' '(' constraint ','  constraint ')' {$$ = ^$(BansheeIf::add_location($1,BansheeIf::implication_constraint($4, $6)));}
+| STRING '+' '(' c_op ',' constraint  ','  constraint  ')' {$$ = ^$(BansheeIf::add_location($1,composite_constraint($4, $6, $8)));}
   ;
 c_op:
   'A' {$$ = ^$(C_AND_OP);}
