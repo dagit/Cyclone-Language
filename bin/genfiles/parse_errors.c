@@ -349,8 +349,6 @@ extern void exit(int);
 void Cyc_Warn_err(unsigned,struct _fat_ptr,struct _fat_ptr);
 # 146 "flags.h"
 extern int Cyc_Flags_print_parser_state_and_token;
-# 236 "stdio.h"
-extern int Cyc_printf(struct _fat_ptr,struct _fat_ptr);
 # 29 "parse.h"
 struct _fat_ptr Cyc_token2string(int);struct Cyc_Yyltype{int timestamp;int first_line;int first_column;int last_line;int last_column;};
 # 100 "parse_tab.h"

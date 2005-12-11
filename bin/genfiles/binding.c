@@ -436,8 +436,6 @@ extern int Cyc_Flags_resolve;
 extern int Cyc_Flags_warn_override;struct Cyc_Binding_Namespace_Binding_NSDirective_struct{int tag;struct Cyc_List_List*f1;};struct Cyc_Binding_Using_Binding_NSDirective_struct{int tag;struct Cyc_List_List*f1;};struct Cyc_Binding_NSCtxt{struct Cyc_List_List*curr_ns;struct Cyc_List_List*availables;struct Cyc_Dict_Dict ns_data;};
 # 40 "tcutil.h"
 int Cyc_Tcutil_is_function_type(void*);
-# 236 "stdio.h"
-extern int Cyc_printf(struct _fat_ptr,struct _fat_ptr);
 # 35 "bansheeif.h"
 void Cyc_BansheeIf_register_toplevel_cvar(void*);char Cyc_Binding_BindingError[13U]="BindingError";struct Cyc_Binding_BindingError_exn_struct{char*tag;};
 # 60 "binding.cyc"

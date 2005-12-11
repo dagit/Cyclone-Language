@@ -654,13 +654,7 @@ void*Cyc_CurRgn_curr_rgn_type (void);
 struct _fat_ptr Cyc_Absynpp_cnst2string(union Cyc_Absyn_Cnst);
 struct _fat_ptr Cyc_Absynpp_exp2string(struct Cyc_Absyn_Exp*);
 struct _fat_ptr Cyc_Absynpp_stmt2string(struct Cyc_Absyn_Stmt*);
-struct _fat_ptr Cyc_Absynpp_qvar2string(struct _tuple0*);struct Cyc___cycFILE;
-# 93 "stdio.h"
-extern struct Cyc___cycFILE*Cyc_stderr;
-# 120 "stdio.h"
-extern struct _fat_ptr Cyc_aprintf(struct _fat_ptr,struct _fat_ptr);
-# 154
-extern int Cyc_fprintf(struct Cyc___cycFILE*,struct _fat_ptr,struct _fat_ptr);
+struct _fat_ptr Cyc_Absynpp_qvar2string(struct _tuple0*);
 # 17 "bansheeif.h"
 void*Cyc_BansheeIf_equality_constraint(void*,void*);
 void*Cyc_BansheeIf_cond_equality_constraint(void*,void*);

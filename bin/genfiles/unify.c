@@ -437,15 +437,7 @@ extern void*Cyc_AssnDef_existassnfn2assn(struct Cyc_AssnDef_ExistAssnFn*,struct 
 # 308
 extern int Cyc_AssnDef_simple_prove(void*,void*);
 # 8 "pratt_prover.h"
-int Cyc_PrattProver_constraint_prove(void*,void*);struct Cyc___cycFILE;
-# 93 "stdio.h"
-extern struct Cyc___cycFILE*Cyc_stderr;
-# 120 "stdio.h"
-extern struct _fat_ptr Cyc_aprintf(struct _fat_ptr,struct _fat_ptr);
-# 138
-extern int Cyc_fflush(struct Cyc___cycFILE*);
-# 154
-extern int Cyc_fprintf(struct Cyc___cycFILE*,struct _fat_ptr,struct _fat_ptr);
+int Cyc_PrattProver_constraint_prove(void*,void*);
 # 17 "bansheeif.h"
 void*Cyc_BansheeIf_equality_constraint(void*,void*);
 # 28

@@ -340,13 +340,7 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #define _cyccalloc_atomic(n,s) _profile_GC_calloc_atomic(n,s,__FILE__,__FUNCTION__,__LINE__)
 #endif //CYC_REGION_PROFILE
 #endif //_CYC_INCLUDE_H
- struct Cyc___cycFILE;
-# 93 "stdio.h"
-extern struct Cyc___cycFILE*Cyc_stderr;struct Cyc_String_pa_PrintArg_struct{int tag;struct _fat_ptr f1;};
-# 120
-extern struct _fat_ptr Cyc_aprintf(struct _fat_ptr,struct _fat_ptr);
-# 154
-extern int Cyc_fprintf(struct Cyc___cycFILE*,struct _fat_ptr,struct _fat_ptr);struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};struct Cyc_Hashtable_Table;
+ struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};struct Cyc_Hashtable_Table;
 # 39 "hashtable.h"
 extern struct Cyc_Hashtable_Table*Cyc_Hashtable_create(int,int(*)(void*,void*),int(*)(void*));
 # 50
@@ -376,8 +370,8 @@ extern struct Cyc_List_List*Cyc_List_delete_cmp(int(*)(void*,void*),struct Cyc_L
 # 394
 extern struct Cyc_List_List*Cyc_List_filter_c(int(*)(void*,void*),void*,struct Cyc_List_List*);struct Cyc___cycFILE;
 # 53 "cycboot.h"
-extern struct Cyc___cycFILE*Cyc_stderr;
-# 73 "cycboot.h"
+extern struct Cyc___cycFILE*Cyc_stderr;struct Cyc_String_pa_PrintArg_struct{int tag;struct _fat_ptr f1;};
+# 73
 extern struct _fat_ptr Cyc_aprintf(struct _fat_ptr,struct _fat_ptr);
 # 100
 extern int Cyc_fprintf(struct Cyc___cycFILE*,struct _fat_ptr,struct _fat_ptr);
@@ -411,169 +405,169 @@ int Cyc_Tcutil_is_cvar_type(void*);
 extern int Cyc_Flags_verbose;
 # 41
 extern int Cyc_Flags_resolve;struct list;
-# 81 "bansheeif.cyc"
+# 80 "bansheeif.cyc"
 extern void cycinf_init (void);
-# 89
+# 88
 extern struct ptrbnd_*ptrbnd_fresh(const char*);
 extern struct ptrbnd_*ptrbnd_constant(const char*);
-# 92
+# 91
 extern void ptrbnd_unify(struct ptrbnd_*,struct ptrbnd_*);
 extern void ptrbnd_cunify(struct ptrbnd_*,struct ptrbnd_*);
 extern struct ptrbnd_*ptrbnd_ecr(struct ptrbnd_*);
-# 96
+# 95
 extern int ptrbnd_eq(struct ptrbnd_*,struct ptrbnd_*);struct numelts_decon{struct intbound_*f0;};
-# 112
+# 111
 extern struct effect_*effect_list_head(struct list*);
 extern struct list*effect_list_tail(struct list*);
-# 117
+# 116
 extern struct effect_*effect_fresh(const char*);
-# 120
+# 119
 extern struct effect_*effect_constant(const char*);
 extern int effect_eq(struct effect_*,struct effect_*);
-# 126
+# 125
 extern struct list*effect_tlb(struct effect_*);struct Cyc_BansheeIf_BvarPtrBnd_BansheeIf_BansheeVar_struct{int tag;struct ptrbnd_*f1;};struct Cyc_BansheeIf_BvarEffect_BansheeIf_BansheeVar_struct{int tag;struct effect_*f1;};
-# 154
+# 153
 static struct Cyc_List_List*Cyc_BansheeIf_pbconsts;
 static struct Cyc_List_List*Cyc_BansheeIf_effconsts;
-# 157
+# 156
 int Cyc_BansheeIf_banshee_init (void){
 cycinf_init();
 return 1;}
-# 162
+# 161
 void Cyc_BansheeIf_add_variable(void*cvar){
 const char*_Tmp0;void*_Tmp1;void*_Tmp2;if(*((int*)cvar)==3){_Tmp2=((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)cvar)->f1;_Tmp1=(void**)&((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)cvar)->f4;_Tmp0=((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)cvar)->f5;{struct Cyc_Core_Opt*ok=_Tmp2;void**bv=(void**)_Tmp1;const char*name=_Tmp0;
-# 165
+# 164
 if((unsigned)*bv)
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp4;_Tmp4.tag=0,_Tmp4.f1=_tag_fat("add_variable: Multiple add",sizeof(char),27U);_Tmp4;});void*_Tmp4[1];_Tmp4[0]=& _Tmp3;({int(*_Tmp5)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp5;})(_tag_fat(_Tmp4,sizeof(void*),1));});
 {struct Cyc_Absyn_Kind*_Tmp3=(struct Cyc_Absyn_Kind*)_check_null(ok)->v;switch((int)((struct Cyc_Absyn_Kind*)_Tmp3)->kind){case Cyc_Absyn_PtrBndKind:
-# 169
+# 168
 ({void*_Tmp4=(void*)({struct Cyc_BansheeIf_BvarPtrBnd_BansheeIf_BansheeVar_struct*_Tmp5=_cycalloc(sizeof(struct Cyc_BansheeIf_BvarPtrBnd_BansheeIf_BansheeVar_struct));_Tmp5->tag=0,({struct ptrbnd_*_Tmp6=ptrbnd_fresh(name);_Tmp5->f1=_Tmp6;});_Tmp5;});*bv=_Tmp4;});
 goto _LL5;case Cyc_Absyn_EffKind:
-# 172
+# 171
 ({void*_Tmp4=(void*)({struct Cyc_BansheeIf_BvarEffect_BansheeIf_BansheeVar_struct*_Tmp5=_cycalloc(sizeof(struct Cyc_BansheeIf_BvarEffect_BansheeIf_BansheeVar_struct));_Tmp5->tag=1,({struct effect_*_Tmp6=effect_fresh(name);_Tmp5->f1=_Tmp6;});_Tmp5;});*bv=_Tmp4;});
 goto _LL5;default:
-# 178
+# 177
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp4=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp5;_Tmp5.tag=0,_Tmp5.f1=_tag_fat("add_variable: Unsupported or null cvar kind",sizeof(char),44U);_Tmp5;});void*_Tmp5[1];_Tmp5[0]=& _Tmp4;({int(*_Tmp6)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp6;})(_tag_fat(_Tmp5,sizeof(void*),1));});}_LL5:;}
-# 180
+# 179
 goto _LL0;}}else{
-# 182
+# 181
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp4;_Tmp4.tag=0,_Tmp4.f1=_tag_fat("add_variable: Bad type",sizeof(char),23U);_Tmp4;});struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp4=({struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp5;_Tmp5.tag=2,_Tmp5.f1=(void*)cvar;_Tmp5;});void*_Tmp5[2];_Tmp5[0]=& _Tmp3,_Tmp5[1]=& _Tmp4;({int(*_Tmp6)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp6;})(_tag_fat(_Tmp5,sizeof(void*),2));});}_LL0:;}struct _tuple11{void*f0;struct ptrbnd_*f1;};struct _tuple12{void*f0;struct effect_*f1;};
-# 186
+# 185
 void Cyc_BansheeIf_add_constant(struct _fat_ptr name,void*cvar){
 void*_Tmp0;void*_Tmp1;if(*((int*)cvar)==3){_Tmp1=((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)cvar)->f1;_Tmp0=(void**)&((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)cvar)->f4;{struct Cyc_Core_Opt*ok=_Tmp1;void**bv=(void**)_Tmp0;
-# 189
+# 188
 if((unsigned)*bv)
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp2=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3;_Tmp3.tag=0,_Tmp3.f1=_tag_fat("add_constant: Multiple add",sizeof(char),27U);_Tmp3;});void*_Tmp3[1];_Tmp3[0]=& _Tmp2;({int(*_Tmp4)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp4;})(_tag_fat(_Tmp3,sizeof(void*),1));});
 {struct Cyc_Absyn_Kind*_Tmp2=(struct Cyc_Absyn_Kind*)_check_null(ok)->v;switch((int)((struct Cyc_Absyn_Kind*)_Tmp2)->kind){case Cyc_Absyn_PtrBndKind:  {
-# 193
+# 192
 struct ptrbnd_*pbc=ptrbnd_constant((const char*)_untag_fat_ptr_check_bound(name,sizeof(char),1U));
 ({void*_Tmp3=(void*)({struct Cyc_BansheeIf_BvarPtrBnd_BansheeIf_BansheeVar_struct*_Tmp4=_cycalloc(sizeof(struct Cyc_BansheeIf_BvarPtrBnd_BansheeIf_BansheeVar_struct));_Tmp4->tag=0,_Tmp4->f1=pbc;_Tmp4;});*bv=_Tmp3;});
 Cyc_BansheeIf_pbconsts=({struct Cyc_List_List*_Tmp3=_cycalloc(sizeof(struct Cyc_List_List));({struct _tuple11*_Tmp4=({struct _tuple11*_Tmp5=_cycalloc(sizeof(struct _tuple11));_Tmp5->f0=cvar,_Tmp5->f1=pbc;_Tmp5;});_Tmp3->hd=_Tmp4;}),_Tmp3->tl=Cyc_BansheeIf_pbconsts;_Tmp3;});
 goto _LL5;}case Cyc_Absyn_EffKind:  {
-# 198
+# 197
 struct effect_*effc=effect_constant((const char*)_untag_fat_ptr_check_bound(name,sizeof(char),1U));
 ({void*_Tmp3=(void*)({struct Cyc_BansheeIf_BvarEffect_BansheeIf_BansheeVar_struct*_Tmp4=_cycalloc(sizeof(struct Cyc_BansheeIf_BvarEffect_BansheeIf_BansheeVar_struct));_Tmp4->tag=1,_Tmp4->f1=effc;_Tmp4;});*bv=_Tmp3;});
 Cyc_BansheeIf_effconsts=({struct Cyc_List_List*_Tmp3=_cycalloc(sizeof(struct Cyc_List_List));({struct _tuple12*_Tmp4=({struct _tuple12*_Tmp5=_cycalloc(sizeof(struct _tuple12));_Tmp5->f0=cvar,_Tmp5->f1=effc;_Tmp5;});_Tmp3->hd=_Tmp4;}),_Tmp3->tl=Cyc_BansheeIf_effconsts;_Tmp3;});
 goto _LL5;}default:
-# 206
+# 205
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp4;_Tmp4.tag=0,_Tmp4.f1=_tag_fat("add_constant: Unsupported or null cvar kind",sizeof(char),44U);_Tmp4;});void*_Tmp4[1];_Tmp4[0]=& _Tmp3;({int(*_Tmp5)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp5;})(_tag_fat(_Tmp4,sizeof(void*),1));});}_LL5:;}
-# 208
+# 207
 goto _LL0;}}else{
-# 210
+# 209
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp2=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3;_Tmp3.tag=0,_Tmp3.f1=_tag_fat("add_constant: Bad type",sizeof(char),23U);_Tmp3;});struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp3=({struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp4;_Tmp4.tag=2,_Tmp4.f1=(void*)cvar;_Tmp4;});void*_Tmp4[2];_Tmp4[0]=& _Tmp2,_Tmp4[1]=& _Tmp3;({int(*_Tmp5)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp5;})(_tag_fat(_Tmp4,sizeof(void*),2));});}_LL0:;}
-# 214
+# 213
 enum Cyc_BansheeIf_ConstraintOperator{Cyc_BansheeIf_AndOp =0U,Cyc_BansheeIf_OrOp =1U,Cyc_BansheeIf_NegOp =2U,Cyc_BansheeIf_EqOp =3U,Cyc_BansheeIf_SubsetOp =4U};struct Cyc_BansheeIf_CheckConstraint_BansheeIf_Constraint_struct{int tag;void*f1;struct _fat_ptr f2;};struct Cyc_BansheeIf_ComparisonConstraint_BansheeIf_Constraint_struct{int tag;enum Cyc_BansheeIf_ConstraintOperator f1;void*f2;void*f3;struct _fat_ptr f4;};struct Cyc_BansheeIf_EqualityConstraint_BansheeIf_Constraint_struct{int tag;void*f1;void*f2;int f3;struct _fat_ptr f4;};struct Cyc_BansheeIf_InclusionConstraint_BansheeIf_Constraint_struct{int tag;void*f1;void*f2;struct _fat_ptr f3;};struct Cyc_BansheeIf_ImplicationConstraint_BansheeIf_Constraint_struct{int tag;void*f1;void*f2;struct _fat_ptr f3;};struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct{int tag;enum Cyc_BansheeIf_ConstraintOperator f1;void*f2;void*f3;struct _fat_ptr f4;};
-# 234
+# 233
 void*Cyc_BansheeIf_check_constraint(void*c){
 return(void*)({struct Cyc_BansheeIf_CheckConstraint_BansheeIf_Constraint_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_BansheeIf_CheckConstraint_BansheeIf_Constraint_struct));_Tmp0->tag=0,_Tmp0->f1=c,_Tmp0->f2=_tag_fat(0,0,0);_Tmp0;});}struct _tuple13{void*f0;void*f1;};
-# 238
+# 237
 void*Cyc_BansheeIf_cmpeq_constraint(void*t1,void*t2){
 struct _tuple13 _Tmp0=({struct _tuple13 _Tmp1;_Tmp1.f0=t1,_Tmp1.f1=t2;_Tmp1;});void*_Tmp1;void*_Tmp2;if(*((int*)_Tmp0.f0)==3){if(*((int*)_Tmp0.f1)==3){_Tmp2=(void**)&((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)_Tmp0.f0)->f4;_Tmp1=(void**)&((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)_Tmp0.f1)->f4;{void**bv1=(void**)_Tmp2;void**bv2=(void**)_Tmp1;
-# 241
+# 240
 if(*bv1==0)Cyc_BansheeIf_add_variable(t1);
 if(*bv2==0)Cyc_BansheeIf_add_variable(t2);
 return(void*)({struct Cyc_BansheeIf_ComparisonConstraint_BansheeIf_Constraint_struct*_Tmp3=_cycalloc(sizeof(struct Cyc_BansheeIf_ComparisonConstraint_BansheeIf_Constraint_struct));_Tmp3->tag=1,_Tmp3->f1=3U,_Tmp3->f2=t1,_Tmp3->f3=t2,_Tmp3->f4=_tag_fat(0,0,0);_Tmp3;});}}else{goto _LL3;}}else{_LL3:
-# 245
+# 244
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp4;_Tmp4.tag=0,_Tmp4.f1=_tag_fat("cmpeq_constraint: Bad types for constraint - ",sizeof(char),46U);_Tmp4;});struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp4=({struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp5;_Tmp5.tag=2,_Tmp5.f1=(void*)t1;_Tmp5;});struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp5=({struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp6;_Tmp6.tag=2,_Tmp6.f1=(void*)t2;_Tmp6;});void*_Tmp6[3];_Tmp6[0]=& _Tmp3,_Tmp6[1]=& _Tmp4,_Tmp6[2]=& _Tmp5;({int(*_Tmp7)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp7;})(_tag_fat(_Tmp6,sizeof(void*),3));});};}
-# 248
+# 247
 void*Cyc_BansheeIf_cmpsubset_constraint(void*t1,void*t2){
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp0=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=_tag_fat("cmpsubset_constraint: Not yet supported",sizeof(char),40U);_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;({int(*_Tmp2)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp2;})(_tag_fat(_Tmp1,sizeof(void*),1));});{
 struct _tuple13 _Tmp0=({struct _tuple13 _Tmp1;_Tmp1.f0=t1,_Tmp1.f1=t2;_Tmp1;});void*_Tmp1;void*_Tmp2;if(*((int*)_Tmp0.f0)==3){if(*((int*)_Tmp0.f1)==3){_Tmp2=(void**)&((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)_Tmp0.f0)->f4;_Tmp1=(void**)&((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)_Tmp0.f1)->f4;{void**bv1=(void**)_Tmp2;void**bv2=(void**)_Tmp1;
-# 252
+# 251
 if(*bv1==0)Cyc_BansheeIf_add_variable(t1);
 if(*bv2==0)Cyc_BansheeIf_add_variable(t2);
 return(void*)({struct Cyc_BansheeIf_ComparisonConstraint_BansheeIf_Constraint_struct*_Tmp3=_cycalloc(sizeof(struct Cyc_BansheeIf_ComparisonConstraint_BansheeIf_Constraint_struct));_Tmp3->tag=1,_Tmp3->f1=4U,_Tmp3->f2=t1,_Tmp3->f3=t2,_Tmp3->f4=_tag_fat(0,0,0);_Tmp3;});}}else{goto _LL3;}}else{_LL3:
-# 256
+# 255
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp4;_Tmp4.tag=0,_Tmp4.f1=_tag_fat("cmpsubset_constraint: Bad types for constraint - ",sizeof(char),50U);_Tmp4;});struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp4=({struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp5;_Tmp5.tag=2,_Tmp5.f1=(void*)t1;_Tmp5;});struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp5=({struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp6;_Tmp6.tag=2,_Tmp6.f1=(void*)t2;_Tmp6;});void*_Tmp6[3];_Tmp6[0]=& _Tmp3,_Tmp6[1]=& _Tmp4,_Tmp6[2]=& _Tmp5;({int(*_Tmp7)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp7;})(_tag_fat(_Tmp6,sizeof(void*),3));});};}}
-# 260
+# 259
 static void*Cyc_BansheeIf_internal_equality_constraint(void*t1,void*t2,int c){
 struct _tuple13 _Tmp0=({struct _tuple13 _Tmp1;_Tmp1.f0=t1,_Tmp1.f1=t2;_Tmp1;});void*_Tmp1;void*_Tmp2;if(*((int*)_Tmp0.f0)==3){if(*((int*)_Tmp0.f1)==3){_Tmp2=(void**)&((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)_Tmp0.f0)->f4;_Tmp1=(void**)&((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)_Tmp0.f1)->f4;{void**bv1=(void**)_Tmp2;void**bv2=(void**)_Tmp1;
-# 263
+# 262
 if(*bv1==0)Cyc_BansheeIf_add_variable(t1);
 if(*bv2==0)Cyc_BansheeIf_add_variable(t2);
 return(void*)({struct Cyc_BansheeIf_EqualityConstraint_BansheeIf_Constraint_struct*_Tmp3=_cycalloc(sizeof(struct Cyc_BansheeIf_EqualityConstraint_BansheeIf_Constraint_struct));_Tmp3->tag=2,_Tmp3->f1=t1,_Tmp3->f2=t2,_Tmp3->f3=c,_Tmp3->f4=_tag_fat(0,0,0);_Tmp3;});}}else{goto _LL3;}}else{_LL3:
-# 267
+# 266
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp4;_Tmp4.tag=0,_Tmp4.f1=_tag_fat("equality_constraint: Bad types for constraint - ",sizeof(char),49U);_Tmp4;});struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp4=({struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp5;_Tmp5.tag=2,_Tmp5.f1=(void*)t1;_Tmp5;});struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp5=({struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp6;_Tmp6.tag=2,_Tmp6.f1=(void*)t2;_Tmp6;});void*_Tmp6[3];_Tmp6[0]=& _Tmp3,_Tmp6[1]=& _Tmp4,_Tmp6[2]=& _Tmp5;({int(*_Tmp7)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp7;})(_tag_fat(_Tmp6,sizeof(void*),3));});};}
-# 271
+# 270
 void*Cyc_BansheeIf_equality_constraint(void*t1,void*t2){
 return Cyc_BansheeIf_internal_equality_constraint(t1,t2,0);}
-# 275
+# 274
 void*Cyc_BansheeIf_cond_equality_constraint(void*t1,void*t2){
 return Cyc_BansheeIf_internal_equality_constraint(t1,t2,1);}
-# 279
+# 278
 void*Cyc_BansheeIf_inclusion_constraint(void*t1,void*t2){
 struct _tuple13 _Tmp0=({struct _tuple13 _Tmp1;_Tmp1.f0=t1,_Tmp1.f1=t2;_Tmp1;});void*_Tmp1;void*_Tmp2;if(*((int*)_Tmp0.f0)==3){if(*((int*)_Tmp0.f1)==3){_Tmp2=(void**)&((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)_Tmp0.f0)->f4;_Tmp1=(void**)&((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)_Tmp0.f1)->f4;{void**bv1=(void**)_Tmp2;void**bv2=(void**)_Tmp1;
-# 282
+# 281
 if(*bv1==0)Cyc_BansheeIf_add_variable(t1);
 if(*bv2==0)Cyc_BansheeIf_add_variable(t2);{
 struct _tuple13 _Tmp3=({struct _tuple13 _Tmp4;_Tmp4.f0=*bv1,_Tmp4.f1=*bv2;_Tmp4;});if(_Tmp3.f0!=0){if(*((int*)_Tmp3.f0)==1){if(_Tmp3.f1!=0){if(*((int*)_Tmp3.f1)==1)
-# 286
+# 285
 return(void*)({struct Cyc_BansheeIf_EqualityConstraint_BansheeIf_Constraint_struct*_Tmp4=_cycalloc(sizeof(struct Cyc_BansheeIf_EqualityConstraint_BansheeIf_Constraint_struct));_Tmp4->tag=2,_Tmp4->f1=t1,_Tmp4->f2=t2,_Tmp4->f3=0,_Tmp4->f4=_tag_fat(0,0,0);_Tmp4;});else{goto _LL8;}}else{goto _LL8;}}else{goto _LL8;}}else{_LL8:
-# 288
+# 287
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp4=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp5;_Tmp5.tag=0,_Tmp5.f1=_tag_fat("inclusion_constraint: Term sort doesn't permit inclusion constraints",sizeof(char),69U);_Tmp5;});void*_Tmp5[1];_Tmp5[0]=& _Tmp4;({int(*_Tmp6)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp6;})(_tag_fat(_Tmp5,sizeof(void*),1));});};}}}else{goto _LL3;}}else{_LL3:
-# 291
+# 290
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp4;_Tmp4.tag=0,_Tmp4.f1=_tag_fat("inclusion_constraint: Bad types for constraint - ",sizeof(char),50U);_Tmp4;});struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp4=({struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp5;_Tmp5.tag=2,_Tmp5.f1=(void*)t1;_Tmp5;});struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp5=({struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp6;_Tmp6.tag=2,_Tmp6.f1=(void*)t2;_Tmp6;});void*_Tmp6[3];_Tmp6[0]=& _Tmp3,_Tmp6[1]=& _Tmp4,_Tmp6[2]=& _Tmp5;({int(*_Tmp7)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp7;})(_tag_fat(_Tmp6,sizeof(void*),3));});};}
-# 295
+# 294
 void*Cyc_BansheeIf_implication_constraint(void*t1,void*t2){
 return(void*)({struct Cyc_BansheeIf_ImplicationConstraint_BansheeIf_Constraint_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_BansheeIf_ImplicationConstraint_BansheeIf_Constraint_struct));_Tmp0->tag=4,_Tmp0->f1=t1,_Tmp0->f2=t2,_Tmp0->f3=_tag_fat(0,0,0);_Tmp0;});}
-# 299
+# 298
 static void*Cyc_BansheeIf_composite_constraint(enum Cyc_BansheeIf_ConstraintOperator op,void*t1,void*t2){
 if(op==Cyc_BansheeIf_NegOp){
-# 302
+# 301
 if(t2!=0)
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp0=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=_tag_fat("composite_constraint: Neg constraint is unary",sizeof(char),46U);_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;({int(*_Tmp2)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp2;})(_tag_fat(_Tmp1,sizeof(void*),1));});
 return(void*)({struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct));_Tmp0->tag=5,_Tmp0->f1=op,_Tmp0->f2=t1,_Tmp0->f3=0,_Tmp0->f4=_tag_fat(0,0,0);_Tmp0;});}else{
-# 306
+# 305
 if(!((unsigned)t1)|| !((unsigned)t2))
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp0=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=_tag_fat("composite_constraint: Binary constraint missing argument",sizeof(char),57U);_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;({int(*_Tmp2)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp2;})(_tag_fat(_Tmp1,sizeof(void*),1));});
 return(void*)({struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct));_Tmp0->tag=5,_Tmp0->f1=op,_Tmp0->f2=t1,_Tmp0->f3=t2,_Tmp0->f4=_tag_fat(0,0,0);_Tmp0;});};}
-# 312
+# 311
 void*Cyc_BansheeIf_and_constraint(void*c1,void*c2){
 return Cyc_BansheeIf_composite_constraint(0U,c1,c2);}
-# 315
+# 314
 void*Cyc_BansheeIf_not_constraint(void*b){
 return Cyc_BansheeIf_composite_constraint(2U,b,0);}
-# 318
+# 317
 void*Cyc_BansheeIf_or_constraint(void*c1,void*c2){
 return Cyc_BansheeIf_composite_constraint(1U,c1,c2);}
-# 322
+# 321
 void*Cyc_BansheeIf_neg_constraint(void*c1){
 return Cyc_BansheeIf_composite_constraint(2U,c1,0);}
-# 326
+# 325
 static void*Cyc_BansheeIf_match_ptrbnd_constant(struct ptrbnd_*pb){
 {struct Cyc_List_List*l=Cyc_BansheeIf_pbconsts;for(0;(unsigned)l;l=l->tl){
 if(ptrbnd_eq(((struct _tuple11*)l->hd)->f1,pb))
 return((struct _tuple11*)l->hd)->f0;}}
-# 332
+# 331
 return 0;}
-# 334
+# 333
 static int Cyc_BansheeIf_is_constant(void*t){
 int _Tmp0;if(*((int*)t)==3){_Tmp0=((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)t)->f3;{int id=_Tmp0;
-# 337
+# 336
 return id==0;}}else{
-# 339
+# 338
 return 0;};}
-# 344
+# 343
 static struct _fat_ptr Cyc_BansheeIf_op2string(enum Cyc_BansheeIf_ConstraintOperator op){
 switch((int)op){case Cyc_BansheeIf_AndOp:
  return _tag_fat("A",sizeof(char),2U);case Cyc_BansheeIf_OrOp:
@@ -582,108 +576,108 @@ switch((int)op){case Cyc_BansheeIf_AndOp:
  return _tag_fat("=",sizeof(char),2U);case Cyc_BansheeIf_SubsetOp:
  return _tag_fat("<",sizeof(char),2U);default:
  return _tag_fat("ERR",sizeof(char),4U);};}
-# 374 "bansheeif.cyc"
+# 373 "bansheeif.cyc"
 static struct _fat_ptr Cyc_BansheeIf_cvar2string(void*t1,int xc){
 if(Cyc_Tcutil_is_cvar_type(t1)|| !xc && !Cyc_BansheeIf_is_constant(t1))
 return Cyc_Absynpp_typ2string(t1);{
 struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,({struct _fat_ptr _Tmp2=Cyc_Absynpp_typ2string(Cyc_Absyn_compress(t1));_Tmp1.f1=_Tmp2;});_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;return Cyc_aprintf(_tag_fat("\"%s\"",sizeof(char),5U),_tag_fat(_Tmp1,sizeof(void*),1));}}
-# 380
+# 379
 static const char*Cyc_BansheeIf_cvarloc(void*cv){
 const char*_Tmp0;if(*((int*)cv)==3){_Tmp0=((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)cv)->f6;{const char*l=_Tmp0;
 return l;}}else{
 return 0;};}
-# 387
+# 386
 static const char*Cyc_BansheeIf_cvarorigfat(void*cv){
 int _Tmp0;if(*((int*)cv)==3){_Tmp0=((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)cv)->f7;{int o=_Tmp0;
 if(o)return"true";else{return"false";}}}else{
 return 0;};}
-# 394
+# 393
 static struct _fat_ptr Cyc_BansheeIf__constraint2string(void*c,int xcvar){
 int _Tmp0;void*_Tmp1;enum Cyc_BansheeIf_ConstraintOperator _Tmp2;struct _fat_ptr _Tmp3;void*_Tmp4;switch(*((int*)c)){case 0: _Tmp4=(void*)((struct Cyc_BansheeIf_CheckConstraint_BansheeIf_Constraint_struct*)c)->f1;_Tmp3=((struct Cyc_BansheeIf_CheckConstraint_BansheeIf_Constraint_struct*)c)->f2;{void*c1=_Tmp4;struct _fat_ptr loc=_Tmp3;
 struct Cyc_String_pa_PrintArg_struct _Tmp5=({struct Cyc_String_pa_PrintArg_struct _Tmp6;_Tmp6.tag=0,_Tmp6.f1=loc;_Tmp6;});struct Cyc_String_pa_PrintArg_struct _Tmp6=({struct Cyc_String_pa_PrintArg_struct _Tmp7;_Tmp7.tag=0,({struct _fat_ptr _Tmp8=Cyc_BansheeIf__constraint2string(c1,xcvar);_Tmp7.f1=_Tmp8;});_Tmp7;});void*_Tmp7[2];_Tmp7[0]=& _Tmp5,_Tmp7[1]=& _Tmp6;return Cyc_aprintf(_tag_fat("\"%s\"!(%s)",sizeof(char),10U),_tag_fat(_Tmp7,sizeof(void*),2));}case 1: _Tmp2=((struct Cyc_BansheeIf_ComparisonConstraint_BansheeIf_Constraint_struct*)c)->f1;_Tmp4=(void*)((struct Cyc_BansheeIf_ComparisonConstraint_BansheeIf_Constraint_struct*)c)->f2;_Tmp1=(void*)((struct Cyc_BansheeIf_ComparisonConstraint_BansheeIf_Constraint_struct*)c)->f3;_Tmp3=((struct Cyc_BansheeIf_ComparisonConstraint_BansheeIf_Constraint_struct*)c)->f4;{enum Cyc_BansheeIf_ConstraintOperator op=_Tmp2;void*t1=_Tmp4;void*t2=_Tmp1;struct _fat_ptr loc=_Tmp3;
 struct Cyc_String_pa_PrintArg_struct _Tmp5=({struct Cyc_String_pa_PrintArg_struct _Tmp6;_Tmp6.tag=0,_Tmp6.f1=loc;_Tmp6;});struct Cyc_String_pa_PrintArg_struct _Tmp6=({struct Cyc_String_pa_PrintArg_struct _Tmp7;_Tmp7.tag=0,({struct _fat_ptr _Tmp8=Cyc_BansheeIf_op2string(op);_Tmp7.f1=_Tmp8;});_Tmp7;});struct Cyc_String_pa_PrintArg_struct _Tmp7=({struct Cyc_String_pa_PrintArg_struct _Tmp8;_Tmp8.tag=0,({struct _fat_ptr _Tmp9=Cyc_BansheeIf_cvar2string(t1,xcvar);_Tmp8.f1=_Tmp9;});_Tmp8;});struct Cyc_String_pa_PrintArg_struct _Tmp8=({struct Cyc_String_pa_PrintArg_struct _Tmp9;_Tmp9.tag=0,({struct _fat_ptr _TmpA=Cyc_BansheeIf_cvar2string(t2,xcvar);_Tmp9.f1=_TmpA;});_Tmp9;});void*_Tmp9[4];_Tmp9[0]=& _Tmp5,_Tmp9[1]=& _Tmp6,_Tmp9[2]=& _Tmp7,_Tmp9[3]=& _Tmp8;return Cyc_aprintf(_tag_fat("\"%s\"^(%s,%s,%s)",sizeof(char),16U),_tag_fat(_Tmp9,sizeof(void*),4));}case 2: _Tmp4=(void*)((struct Cyc_BansheeIf_EqualityConstraint_BansheeIf_Constraint_struct*)c)->f1;_Tmp1=(void*)((struct Cyc_BansheeIf_EqualityConstraint_BansheeIf_Constraint_struct*)c)->f2;_Tmp0=((struct Cyc_BansheeIf_EqualityConstraint_BansheeIf_Constraint_struct*)c)->f3;_Tmp3=((struct Cyc_BansheeIf_EqualityConstraint_BansheeIf_Constraint_struct*)c)->f4;{void*t1=_Tmp4;void*t2=_Tmp1;int b=_Tmp0;struct _fat_ptr loc=_Tmp3;
-# 399
+# 398
 if(b){
 struct Cyc_String_pa_PrintArg_struct _Tmp5=({struct Cyc_String_pa_PrintArg_struct _Tmp6;_Tmp6.tag=0,_Tmp6.f1=loc;_Tmp6;});struct Cyc_String_pa_PrintArg_struct _Tmp6=({struct Cyc_String_pa_PrintArg_struct _Tmp7;_Tmp7.tag=0,({struct _fat_ptr _Tmp8=Cyc_BansheeIf_cvar2string(t1,xcvar);_Tmp7.f1=_Tmp8;});_Tmp7;});struct Cyc_String_pa_PrintArg_struct _Tmp7=({struct Cyc_String_pa_PrintArg_struct _Tmp8;_Tmp8.tag=0,({struct _fat_ptr _Tmp9=Cyc_BansheeIf_cvar2string(t2,xcvar);_Tmp8.f1=_Tmp9;});_Tmp8;});void*_Tmp8[3];_Tmp8[0]=& _Tmp5,_Tmp8[1]=& _Tmp6,_Tmp8[2]=& _Tmp7;return Cyc_aprintf(_tag_fat("\"%s\"?(%s,%s)",sizeof(char),13U),_tag_fat(_Tmp8,sizeof(void*),3));}else{
-# 403
+# 402
 struct Cyc_String_pa_PrintArg_struct _Tmp5=({struct Cyc_String_pa_PrintArg_struct _Tmp6;_Tmp6.tag=0,_Tmp6.f1=loc;_Tmp6;});struct Cyc_String_pa_PrintArg_struct _Tmp6=({struct Cyc_String_pa_PrintArg_struct _Tmp7;_Tmp7.tag=0,({struct _fat_ptr _Tmp8=Cyc_BansheeIf_cvar2string(t1,xcvar);_Tmp7.f1=_Tmp8;});_Tmp7;});struct Cyc_String_pa_PrintArg_struct _Tmp7=({struct Cyc_String_pa_PrintArg_struct _Tmp8;_Tmp8.tag=0,({struct _fat_ptr _Tmp9=Cyc_BansheeIf_cvar2string(t2,xcvar);_Tmp8.f1=_Tmp9;});_Tmp8;});void*_Tmp8[3];_Tmp8[0]=& _Tmp5,_Tmp8[1]=& _Tmp6,_Tmp8[2]=& _Tmp7;return Cyc_aprintf(_tag_fat("\"%s\"=(%s,%s)",sizeof(char),13U),_tag_fat(_Tmp8,sizeof(void*),3));}}case 3: _Tmp4=(void*)((struct Cyc_BansheeIf_InclusionConstraint_BansheeIf_Constraint_struct*)c)->f1;_Tmp1=(void*)((struct Cyc_BansheeIf_InclusionConstraint_BansheeIf_Constraint_struct*)c)->f2;_Tmp3=((struct Cyc_BansheeIf_InclusionConstraint_BansheeIf_Constraint_struct*)c)->f3;{void*t1=_Tmp4;void*t2=_Tmp1;struct _fat_ptr loc=_Tmp3;
 struct Cyc_String_pa_PrintArg_struct _Tmp5=({struct Cyc_String_pa_PrintArg_struct _Tmp6;_Tmp6.tag=0,_Tmp6.f1=loc;_Tmp6;});struct Cyc_String_pa_PrintArg_struct _Tmp6=({struct Cyc_String_pa_PrintArg_struct _Tmp7;_Tmp7.tag=0,({
 struct _fat_ptr _Tmp8=Cyc_BansheeIf_cvar2string(t1,xcvar);_Tmp7.f1=_Tmp8;});_Tmp7;});struct Cyc_String_pa_PrintArg_struct _Tmp7=({struct Cyc_String_pa_PrintArg_struct _Tmp8;_Tmp8.tag=0,({struct _fat_ptr _Tmp9=Cyc_BansheeIf_cvar2string(t2,xcvar);_Tmp8.f1=_Tmp9;});_Tmp8;});void*_Tmp8[3];_Tmp8[0]=& _Tmp5,_Tmp8[1]=& _Tmp6,_Tmp8[2]=& _Tmp7;return Cyc_aprintf(_tag_fat("\"%s\"<(%s,%s)",sizeof(char),13U),_tag_fat(_Tmp8,sizeof(void*),3));}case 4: _Tmp4=(void*)((struct Cyc_BansheeIf_ImplicationConstraint_BansheeIf_Constraint_struct*)c)->f1;_Tmp1=(void*)((struct Cyc_BansheeIf_ImplicationConstraint_BansheeIf_Constraint_struct*)c)->f2;_Tmp3=((struct Cyc_BansheeIf_ImplicationConstraint_BansheeIf_Constraint_struct*)c)->f3;{void*c1=_Tmp4;void*c2=_Tmp1;struct _fat_ptr loc=_Tmp3;
 struct Cyc_String_pa_PrintArg_struct _Tmp5=({struct Cyc_String_pa_PrintArg_struct _Tmp6;_Tmp6.tag=0,_Tmp6.f1=loc;_Tmp6;});struct Cyc_String_pa_PrintArg_struct _Tmp6=({struct Cyc_String_pa_PrintArg_struct _Tmp7;_Tmp7.tag=0,({struct _fat_ptr _Tmp8=Cyc_BansheeIf__constraint2string(c1,xcvar);_Tmp7.f1=_Tmp8;});_Tmp7;});struct Cyc_String_pa_PrintArg_struct _Tmp7=({struct Cyc_String_pa_PrintArg_struct _Tmp8;_Tmp8.tag=0,({struct _fat_ptr _Tmp9=Cyc_BansheeIf__constraint2string(c2,xcvar);_Tmp8.f1=_Tmp9;});_Tmp8;});void*_Tmp8[3];_Tmp8[0]=& _Tmp5,_Tmp8[1]=& _Tmp6,_Tmp8[2]=& _Tmp7;return Cyc_aprintf(_tag_fat("\"%s\">(%s,%s)",sizeof(char),13U),_tag_fat(_Tmp8,sizeof(void*),3));}default: _Tmp2=((struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct*)c)->f1;_Tmp4=(void*)((struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct*)c)->f2;_Tmp1=(void*)((struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct*)c)->f3;_Tmp3=((struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct*)c)->f4;{enum Cyc_BansheeIf_ConstraintOperator op=_Tmp2;void*c1=_Tmp4;void*c2=_Tmp1;struct _fat_ptr loc=_Tmp3;
-# 408
+# 407
 struct Cyc_String_pa_PrintArg_struct _Tmp5=({struct Cyc_String_pa_PrintArg_struct _Tmp6;_Tmp6.tag=0,_Tmp6.f1=loc;_Tmp6;});struct Cyc_String_pa_PrintArg_struct _Tmp6=({struct Cyc_String_pa_PrintArg_struct _Tmp7;_Tmp7.tag=0,({
 struct _fat_ptr _Tmp8=Cyc_BansheeIf__constraint2string(c1,xcvar);_Tmp7.f1=_Tmp8;});_Tmp7;});struct Cyc_String_pa_PrintArg_struct _Tmp7=({struct Cyc_String_pa_PrintArg_struct _Tmp8;_Tmp8.tag=0,({
 struct _fat_ptr _Tmp9=Cyc_BansheeIf_op2string(op);_Tmp8.f1=_Tmp9;});_Tmp8;});struct Cyc_String_pa_PrintArg_struct _Tmp8=({struct Cyc_String_pa_PrintArg_struct _Tmp9;_Tmp9.tag=0,({struct _fat_ptr _TmpA=Cyc_BansheeIf__constraint2string(c2,xcvar);_Tmp9.f1=_TmpA;});_Tmp9;});void*_Tmp9[4];_Tmp9[0]=& _Tmp5,_Tmp9[1]=& _Tmp6,_Tmp9[2]=& _Tmp7,_Tmp9[3]=& _Tmp8;return Cyc_aprintf(_tag_fat("\"%s\"+(%s,%s,%s)",sizeof(char),16U),_tag_fat(_Tmp9,sizeof(void*),4));}};}
-# 413
+# 412
 struct _fat_ptr Cyc_BansheeIf_constraint2string(void*c){
 return Cyc_BansheeIf__constraint2string(c,1);}
-# 417
+# 416
 static void Cyc_BansheeIf_print_constraints(struct Cyc_List_List*c){
 for(1;(unsigned)c;c=c->tl){
 ({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,({struct _fat_ptr _Tmp2=Cyc_BansheeIf_constraint2string((void*)c->hd);_Tmp1.f1=_Tmp2;});_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_fprintf(Cyc_stderr,_tag_fat("%s\n",sizeof(char),4U),_tag_fat(_Tmp1,sizeof(void*),1));});}}
-# 428
+# 427
 static int Cyc_BansheeIf_nodelay_add_constraint(void*c){
 enum Cyc_BansheeIf_ConstraintOperator _Tmp0;int _Tmp1;void*_Tmp2;void*_Tmp3;void*_Tmp4;void*_Tmp5;switch(*((int*)c)){case 2: if(*((int*)((struct Cyc_BansheeIf_EqualityConstraint_BansheeIf_Constraint_struct*)c)->f1)==3){if(*((int*)((struct Cyc_BansheeIf_EqualityConstraint_BansheeIf_Constraint_struct*)c)->f2)==3){_Tmp5=(void*)((struct Cyc_BansheeIf_EqualityConstraint_BansheeIf_Constraint_struct*)c)->f1;_Tmp4=(void*)((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)((struct Cyc_BansheeIf_EqualityConstraint_BansheeIf_Constraint_struct*)c)->f1)->f4;_Tmp3=(void*)((struct Cyc_BansheeIf_EqualityConstraint_BansheeIf_Constraint_struct*)c)->f2;_Tmp2=(void*)((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)((struct Cyc_BansheeIf_EqualityConstraint_BansheeIf_Constraint_struct*)c)->f2)->f4;_Tmp1=((struct Cyc_BansheeIf_EqualityConstraint_BansheeIf_Constraint_struct*)c)->f3;{void*t1=_Tmp5;void*bv1=_Tmp4;void*t2=_Tmp3;void*bv2=_Tmp2;int b=_Tmp1;
-# 431
+# 430
 {struct _tuple13 _Tmp6=({struct _tuple13 _Tmp7;_Tmp7.f0=bv1,_Tmp7.f1=bv2;_Tmp7;});void*_Tmp7;void*_Tmp8;if(_Tmp6.f0!=0){if(*((int*)_Tmp6.f0)==0){if(_Tmp6.f1!=0){if(*((int*)_Tmp6.f1)==0){_Tmp8=((struct Cyc_BansheeIf_BvarPtrBnd_BansheeIf_BansheeVar_struct*)_Tmp6.f0)->f1;_Tmp7=((struct Cyc_BansheeIf_BvarPtrBnd_BansheeIf_BansheeVar_struct*)_Tmp6.f1)->f1;{struct ptrbnd_*pb1=_Tmp8;struct ptrbnd_*pb2=_Tmp7;
-# 433
+# 432
 struct ptrbnd_*ecr1=ptrbnd_ecr(pb1);
 struct ptrbnd_*ecr2=ptrbnd_ecr(pb2);
 if((!ptrbnd_eq(ecr1,ecr2)&&(unsigned)
 Cyc_BansheeIf_match_ptrbnd_constant(ecr1))&&(unsigned)
 Cyc_BansheeIf_match_ptrbnd_constant(ecr2)){
-# 439
+# 438
 Cyc_BansheeIf_resolve(t1);
 Cyc_BansheeIf_resolve(t2);
-# 442
+# 441
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp9=({struct Cyc_Warn_String_Warn_Warg_struct _TmpA;_TmpA.tag=0,_TmpA.f1=_tag_fat("Unsatisfiable constraint ",sizeof(char),26U);_TmpA;});struct Cyc_Warn_String_Warn_Warg_struct _TmpA=({struct Cyc_Warn_String_Warn_Warg_struct _TmpB;_TmpB.tag=0,({struct _fat_ptr _TmpC=Cyc_BansheeIf__constraint2string(c,0);_TmpB.f1=_TmpC;});_TmpB;});void*_TmpB[2];_TmpB[0]=& _Tmp9,_TmpB[1]=& _TmpA;Cyc_Warn_err2(0U,_tag_fat(_TmpB,sizeof(void*),2));});
-# 446
+# 445
 return 0;}
-# 448
+# 447
 if(Cyc_Flags_verbose)
 Cyc_fprintf(Cyc_stderr,_tag_fat("***Added\n",sizeof(char),10U),_tag_fat(0U,sizeof(void*),0));
 if(b)
 ptrbnd_cunify(pb1,pb2);else{
-# 454
+# 453
 ptrbnd_unify(pb1,pb2);}
-# 456
+# 455
 return 1;}}else{goto _LLC;}}else{goto _LLC;}}else{goto _LLC;}}else{_LLC:
-# 458
+# 457
 ({int(*_Tmp9)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp9;})(_tag_fat("Kind not yet supported",sizeof(char),23U),_tag_fat(0U,sizeof(void*),0));};}
-# 460
+# 459
 goto _LL0;}}else{goto _LL7;}}else{goto _LL7;}case 5: _Tmp0=((struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct*)c)->f1;_Tmp5=(void*)((struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct*)c)->f2;_Tmp4=(void*)((struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct*)c)->f3;{enum Cyc_BansheeIf_ConstraintOperator op=_Tmp0;void*c1=_Tmp5;void*c2=_Tmp4;
-# 462
+# 461
 if((int)op!=0)
 ({int(*_Tmp6)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp6;})(_tag_fat("Disjunctions and negations require a delay",sizeof(char),43U),_tag_fat(0U,sizeof(void*),0));
 return Cyc_BansheeIf_nodelay_add_constraint(c1)&&
  Cyc_BansheeIf_nodelay_add_constraint(c2);}case 3: _Tmp5=(void*)((struct Cyc_BansheeIf_InclusionConstraint_BansheeIf_Constraint_struct*)c)->f1;_Tmp4=(void*)((struct Cyc_BansheeIf_InclusionConstraint_BansheeIf_Constraint_struct*)c)->f2;{void*bv1=_Tmp5;void*bv2=_Tmp4;
-# 467
+# 466
 ({int(*_Tmp6)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp6;})(_tag_fat("setIF sort not yet supported",sizeof(char),29U),_tag_fat(0U,sizeof(void*),0));}default: _LL7:
-# 469
+# 468
 ({int(*_Tmp6)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp6;})(_tag_fat("No implications allowed",sizeof(char),24U),_tag_fat(0U,sizeof(void*),0));}_LL0:;}
-# 473
+# 472
 static int Cyc_BansheeIf_requires_delay(void*c){
 void*_Tmp0;void*_Tmp1;enum Cyc_BansheeIf_ConstraintOperator _Tmp2;switch(*((int*)c)){case 0:
  goto _LL4;case 1: _LL4:
  goto _LL6;case 4: _LL6:
-# 478
+# 477
  return 1;case 5: _Tmp2=((struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct*)c)->f1;_Tmp1=(void*)((struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct*)c)->f2;_Tmp0=(void*)((struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct*)c)->f3;{enum Cyc_BansheeIf_ConstraintOperator op=_Tmp2;void*c1=_Tmp1;void*c2=_Tmp0;
-# 480
+# 479
 return((int)op!=0 || Cyc_BansheeIf_requires_delay(c1))|| Cyc_BansheeIf_requires_delay(c2);}default:
-# 482
+# 481
  return 0;};}
-# 486
+# 485
 static struct Cyc_List_List*Cyc_BansheeIf_delayed_constraints;
-# 490
+# 489
 static int Cyc_BansheeIf_internal_add_constraint(void*c){
 if(Cyc_BansheeIf_requires_delay(c)){
 Cyc_BansheeIf_delayed_constraints=({struct Cyc_List_List*_Tmp0=_cycalloc(sizeof(struct Cyc_List_List));_Tmp0->hd=c,_Tmp0->tl=Cyc_BansheeIf_delayed_constraints;_Tmp0;});
 return 2;}
-# 495
+# 494
 return Cyc_BansheeIf_nodelay_add_constraint(c);}
-# 498
+# 497
 static int Cyc_BansheeIf_insert_into_map(void*);
-# 500
+# 499
 void*Cyc_BansheeIf_add_location(struct _fat_ptr loc,void*c){
 {void*_Tmp0;switch(*((int*)c)){case 0: _Tmp0=(struct _fat_ptr*)&((struct Cyc_BansheeIf_CheckConstraint_BansheeIf_Constraint_struct*)c)->f2;{struct _fat_ptr*l=_Tmp0;
 _Tmp0=l;goto _LL4;}case 1: _Tmp0=(struct _fat_ptr*)&((struct Cyc_BansheeIf_ComparisonConstraint_BansheeIf_Constraint_struct*)c)->f4;_LL4: {struct _fat_ptr*l=_Tmp0;
@@ -692,9 +686,9 @@ _Tmp0=l;goto _LL8;}case 3: _Tmp0=(struct _fat_ptr*)&((struct Cyc_BansheeIf_Inclu
 _Tmp0=l;goto _LLA;}case 4: _Tmp0=(struct _fat_ptr*)&((struct Cyc_BansheeIf_ImplicationConstraint_BansheeIf_Constraint_struct*)c)->f3;_LLA: {struct _fat_ptr*l=_Tmp0;
 _Tmp0=l;goto _LLC;}default: _Tmp0=(struct _fat_ptr*)&((struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct*)c)->f4;_LLC: {struct _fat_ptr*l=(struct _fat_ptr*)_Tmp0;
 *l=loc;}};}
-# 509
+# 508
 return c;}
-# 512
+# 511
 int Cyc_BansheeIf_add_constraint(unsigned loc,void*c){
 ({struct _fat_ptr _Tmp0=Cyc_Position_string_of_loc(loc);Cyc_BansheeIf_add_location(_Tmp0,c);});
 Cyc_BansheeIf_insert_into_map(c);
@@ -704,18 +698,18 @@ int ret=Cyc_BansheeIf_internal_add_constraint(c)!=0;
 if(Cyc_Flags_verbose)
 Cyc_fprintf(Cyc_stderr,_tag_fat("\n",sizeof(char),2U),_tag_fat(0U,sizeof(void*),0));
 return ret;}}
-# 523
+# 522
 static int Cyc_BansheeIf_eval_guard(void*g){
 void*_Tmp0;void*_Tmp1;enum Cyc_BansheeIf_ConstraintOperator _Tmp2;switch(*((int*)g)){case 1: if(*((int*)((struct Cyc_BansheeIf_ComparisonConstraint_BansheeIf_Constraint_struct*)g)->f2)==3){if(*((int*)((struct Cyc_BansheeIf_ComparisonConstraint_BansheeIf_Constraint_struct*)g)->f3)==3){_Tmp2=((struct Cyc_BansheeIf_ComparisonConstraint_BansheeIf_Constraint_struct*)g)->f1;_Tmp1=(void*)((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)((struct Cyc_BansheeIf_ComparisonConstraint_BansheeIf_Constraint_struct*)g)->f2)->f4;_Tmp0=(void*)((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)((struct Cyc_BansheeIf_ComparisonConstraint_BansheeIf_Constraint_struct*)g)->f3)->f4;{enum Cyc_BansheeIf_ConstraintOperator op=_Tmp2;void*bv1=_Tmp1;void*bv2=_Tmp0;
-# 526
+# 525
 if((int)op!=3)
 ({int(*_Tmp3)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp3;})(_tag_fat("Unsupported comparison operator",sizeof(char),32U),_tag_fat(0U,sizeof(void*),0));{
 struct _tuple13 _Tmp3=({struct _tuple13 _Tmp4;_Tmp4.f0=bv1,_Tmp4.f1=bv2;_Tmp4;});void*_Tmp4;void*_Tmp5;if(_Tmp3.f0!=0){if(*((int*)_Tmp3.f0)==0){if(_Tmp3.f1!=0){if(*((int*)_Tmp3.f1)==0){_Tmp5=((struct Cyc_BansheeIf_BvarPtrBnd_BansheeIf_BansheeVar_struct*)_Tmp3.f0)->f1;_Tmp4=((struct Cyc_BansheeIf_BvarPtrBnd_BansheeIf_BansheeVar_struct*)_Tmp3.f1)->f1;{struct ptrbnd_*pb1=_Tmp5;struct ptrbnd_*pb2=_Tmp4;
-# 530
+# 529
 return ptrbnd_eq(pb1,pb2);}}else{goto _LLC;}}else{goto _LLC;}}else{goto _LLC;}}else{_LLC:
-# 532
+# 531
  return 0;};}}}else{goto _LL7;}}else{goto _LL7;}case 5: _Tmp2=((struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct*)g)->f1;_Tmp1=(void*)((struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct*)g)->f2;_Tmp0=(void*)((struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct*)g)->f3;{enum Cyc_BansheeIf_ConstraintOperator op=_Tmp2;void*c1=_Tmp1;void*c2=_Tmp0;
-# 535
+# 534
 int c1g=Cyc_BansheeIf_eval_guard(c1);
 int c2g=(int)op!=0 &&(int)op!=1?0: Cyc_BansheeIf_eval_guard(c2);
 switch((int)op){case Cyc_BansheeIf_AndOp:
@@ -723,13 +717,13 @@ switch((int)op){case Cyc_BansheeIf_AndOp:
  return c1g || c2g;case Cyc_BansheeIf_NegOp:
  return !c1g;default:
  return 0;};}case 4: _Tmp1=(void*)((struct Cyc_BansheeIf_ImplicationConstraint_BansheeIf_Constraint_struct*)g)->f1;_Tmp0=(void*)((struct Cyc_BansheeIf_ImplicationConstraint_BansheeIf_Constraint_struct*)g)->f2;{void*c1=_Tmp1;void*c2=_Tmp0;
-# 544
+# 543
 if(!Cyc_BansheeIf_eval_guard(c1))
 return 1;
 return Cyc_BansheeIf_eval_guard(c2);}default: _LL7:
-# 548
+# 547
  return 0;};}
-# 552
+# 551
 int Cyc_BansheeIf_discharge_implications (void){
 int changed=0;
 do{
@@ -739,128 +733,128 @@ int first=1;
 changed=0;
 while((unsigned)l){
 {void*_Tmp0=(void*)l->hd;void*_Tmp1;void*_Tmp2;switch(*((int*)_Tmp0)){case 4: _Tmp2=(void*)((struct Cyc_BansheeIf_ImplicationConstraint_BansheeIf_Constraint_struct*)_Tmp0)->f1;_Tmp1=(void*)((struct Cyc_BansheeIf_ImplicationConstraint_BansheeIf_Constraint_struct*)_Tmp0)->f2;{void*c1=_Tmp2;void*c2=_Tmp1;
-# 562
+# 561
 if(Cyc_BansheeIf_eval_guard(c1)){
 int result=Cyc_BansheeIf_internal_add_constraint(c2);
 if(result==0)return 0;
 if(result==1)changed=1;
-# 567
+# 566
 if(first){
 if(result==2){
 Cyc_BansheeIf_delayed_constraints->tl=_check_null(_check_null(Cyc_BansheeIf_delayed_constraints)->tl)->tl;
 first=0;}else{
-# 573
+# 572
 Cyc_BansheeIf_delayed_constraints=_check_null(Cyc_BansheeIf_delayed_constraints)->tl;}}else{
-# 575
+# 574
 if((unsigned)prev)
 prev->tl=l->tl;}{
 struct Cyc_List_List*tmp=l;
 l=l->tl;
 tmp->tl=0;}}else{
-# 582
+# 581
 prev=l;
 l=l->tl;
 first=0;}
-# 586
+# 585
 goto _LL0;}case 0: _Tmp2=(void*)((struct Cyc_BansheeIf_CheckConstraint_BansheeIf_Constraint_struct*)_Tmp0)->f1;{void*c1=_Tmp2;
-# 589
+# 588
 first=0;
 prev=l;
 l=l->tl;
-# 600 "bansheeif.cyc"
+# 599 "bansheeif.cyc"
 goto _LL0;}default:
-# 602
+# 601
 ({int(*_Tmp3)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp3;})(_tag_fat("Malformed delayed constraint; only implications permitted",sizeof(char),58U),_tag_fat(0U,sizeof(void*),0));}_LL0:;}
-# 560 "bansheeif.cyc"
+# 559 "bansheeif.cyc"
 1U;}}while(changed);
-# 607 "bansheeif.cyc"
+# 606 "bansheeif.cyc"
 {struct Cyc_List_List*dc=Cyc_BansheeIf_delayed_constraints;for(0;(unsigned)dc;dc=dc->tl){
 void*_Tmp0=(void*)dc->hd;void*_Tmp1;if(*((int*)_Tmp0)==0){_Tmp1=(void*)((struct Cyc_BansheeIf_CheckConstraint_BansheeIf_Constraint_struct*)_Tmp0)->f1;{void*c1=_Tmp1;
-# 610
+# 609
 if(!Cyc_BansheeIf_eval_guard(c1))
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp2=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3;_Tmp3.tag=0,_Tmp3.f1=_tag_fat("Constraint could not be proved: ",sizeof(char),33U);_Tmp3;});struct Cyc_Warn_String_Warn_Warg_struct _Tmp3=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp4;_Tmp4.tag=0,({struct _fat_ptr _Tmp5=Cyc_BansheeIf_constraint2string((void*)dc->hd);_Tmp4.f1=_Tmp5;});_Tmp4;});void*_Tmp4[2];_Tmp4[0]=& _Tmp2,_Tmp4[1]=& _Tmp3;Cyc_Warn_err2(0U,_tag_fat(_Tmp4,sizeof(void*),2));});
-# 613
+# 612
 goto _LL7;}}else{
-# 615
+# 614
 goto _LL7;}_LL7:;}}
-# 618
+# 617
 return 1;}
-# 621
+# 620
 int Cyc_BansheeIf_resolve(void*cvar){
 void*_Tmp0;void*_Tmp1;if(*((int*)cvar)==3){_Tmp1=(void**)&((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)cvar)->f2;_Tmp0=(void*)((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)cvar)->f4;{void**t=(void**)_Tmp1;void*bv=_Tmp0;
-# 624
+# 623
 if((unsigned)*t)
 return 1;
 {void*_Tmp2;if(bv!=0)switch(*((int*)bv)){case 0: _Tmp2=((struct Cyc_BansheeIf_BvarPtrBnd_BansheeIf_BansheeVar_struct*)bv)->f1;{struct ptrbnd_*pb=_Tmp2;
-# 628
+# 627
 struct ptrbnd_*pb2=ptrbnd_ecr(pb);
 void*tmp=Cyc_BansheeIf_match_ptrbnd_constant(pb2);
 if((unsigned)tmp){
 *t=tmp;
 return 1;}
-# 634
+# 633
 return 0;}case 1: _Tmp2=((struct Cyc_BansheeIf_BvarEffect_BansheeIf_BansheeVar_struct*)bv)->f1;{struct effect_*ef=_Tmp2;
-# 636
+# 635
 struct list*efl=effect_tlb(ef);
 struct Cyc_List_List*set=0;
 for(1;(unsigned)efl;efl=effect_list_tail(efl)){
 struct Cyc_List_List*l=Cyc_BansheeIf_effconsts;for(0;(unsigned)l;l=l->tl){
 if(({struct effect_*_Tmp3=((struct _tuple12*)l->hd)->f1;effect_eq(_Tmp3,effect_list_head(efl));}))
 set=({struct Cyc_List_List*_Tmp3=_cycalloc(sizeof(struct Cyc_List_List));_Tmp3->hd=((struct _tuple12*)l->hd)->f0,_Tmp3->tl=set;_Tmp3;});}}
-# 645
+# 644
 if((unsigned)set)
 ({void*_Tmp3=Cyc_Absyn_join_eff(set);*t=_Tmp3;});else{
-# 648
+# 647
 return 0;}
 goto _LL5;}default: goto _LLA;}else{_LLA:
-# 651
+# 650
 ({int(*_Tmp3)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp3;})(_tag_fat("Attempt to resolve a variable that was never added",sizeof(char),51U),_tag_fat(0U,sizeof(void*),0));}_LL5:;}
-# 653
+# 652
 goto _LL0;}}else{
-# 655
+# 654
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp2=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3;_Tmp3.tag=0,_Tmp3.f1=_tag_fat("Bad type to resolve; expect Cvar only",sizeof(char),38U);_Tmp3;});struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp3=({struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp4;_Tmp4.tag=2,_Tmp4.f1=(void*)cvar;_Tmp4;});void*_Tmp4[2];_Tmp4[0]=& _Tmp2,_Tmp4[1]=& _Tmp3;({int(*_Tmp5)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp5;})(_tag_fat(_Tmp4,sizeof(void*),2));});}_LL0:;}
-# 664
+# 663
 enum Cyc_BansheeIf_CvarRecordState{Cyc_BansheeIf_LOCAL =0U,Cyc_BansheeIf_PERSIST_INIT =1U,Cyc_BansheeIf_PERSIST_INPROCESS =2U,Cyc_BansheeIf_PERSIST_REINTRO =3U,Cyc_BansheeIf_PERSIST_DONE =4U};
-# 672
+# 671
 static struct Cyc_Hashtable_Table*Cyc_BansheeIf_cvarmap;struct _tuple14{void*f0;struct Cyc_List_List*f1;enum Cyc_BansheeIf_CvarRecordState f2;};
 static struct Cyc_List_List*Cyc_BansheeIf_lookup_cvar_constraints(void*t){
 if((unsigned)Cyc_BansheeIf_cvarmap){
 struct _handler_cons _Tmp0;_push_handler(& _Tmp0);{int _Tmp1=0;if(setjmp(_Tmp0.handler))_Tmp1=1;if(!_Tmp1){
 {struct Cyc_List_List*_Tmp2=({struct _tuple14*(*_Tmp3)(struct Cyc_Hashtable_Table*,void*)=(struct _tuple14*(*)(struct Cyc_Hashtable_Table*,void*))Cyc_Hashtable_lookup;_Tmp3;})(Cyc_BansheeIf_cvarmap,t)->f1;_npop_handler(0);return _Tmp2;};_pop_handler();}else{void*_Tmp2=(void*)Cyc_Core_get_exn_thrown();void*_Tmp3;if(((struct Cyc_Core_Not_found_exn_struct*)_Tmp2)->tag==Cyc_Core_Not_found)
-# 679
+# 678
 return 0;else{_Tmp3=_Tmp2;{void*exn=_Tmp3;_rethrow(exn);}};}}}
-# 682
+# 681
 return 0;}
-# 685
+# 684
 static int Cyc_BansheeIf_cvarcmp(void*c1,void*c2){
 struct _tuple13 _Tmp0=({struct _tuple13 _Tmp1;_Tmp1.f0=c1,_Tmp1.f1=c2;_Tmp1;});const char*_Tmp1;const char*_Tmp2;if(*((int*)_Tmp0.f0)==3){if(*((int*)_Tmp0.f1)==3){_Tmp2=((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)_Tmp0.f0)->f5;_Tmp1=((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)_Tmp0.f1)->f5;{const char*n1=_Tmp2;const char*n2=_Tmp1;
-# 688
+# 687
 return Cyc_strcmp(({const char*_Tmp3=n1;_tag_fat((void*)_Tmp3,sizeof(char),_get_zero_arr_size_char((void*)_Tmp3,1U));}),({const char*_Tmp3=n2;_tag_fat((void*)_Tmp3,sizeof(char),_get_zero_arr_size_char((void*)_Tmp3,1U));}));}}else{goto _LL3;}}else{_LL3:
-# 690
+# 689
 ({int(*_Tmp3)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp3;})(_tag_fat("Expecting cvar types only",sizeof(char),26U),_tag_fat(0U,sizeof(void*),0));};}
-# 694
+# 693
 static int Cyc_BansheeIf_cvareq(void*c1,void*c2){
 struct _tuple13 _Tmp0=({struct _tuple13 _Tmp1;_Tmp1.f0=c1,_Tmp1.f1=c2;_Tmp1;});const char*_Tmp1;void*_Tmp2;const char*_Tmp3;void*_Tmp4;if(*((int*)_Tmp0.f0)==3){if(*((int*)_Tmp0.f1)==3){_Tmp4=(void*)((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)_Tmp0.f0)->f4;_Tmp3=((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)_Tmp0.f0)->f5;_Tmp2=(void*)((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)_Tmp0.f1)->f4;_Tmp1=((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)_Tmp0.f1)->f5;{void*b1=_Tmp4;const char*n1=_Tmp3;void*b2=_Tmp2;const char*n2=_Tmp1;
-# 697
+# 696
 return !Cyc_strcmp(({const char*_Tmp5=n1;_tag_fat((void*)_Tmp5,sizeof(char),_get_zero_arr_size_char((void*)_Tmp5,1U));}),({const char*_Tmp5=n2;_tag_fat((void*)_Tmp5,sizeof(char),_get_zero_arr_size_char((void*)_Tmp5,1U));}));}}else{goto _LL3;}}else{_LL3:
-# 699
+# 698
 ({int(*_Tmp5)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp5;})(_tag_fat("Expecting cvar types only",sizeof(char),26U),_tag_fat(0U,sizeof(void*),0));};}
-# 703
+# 702
 static int Cyc_BansheeIf_cvarhash(void*c){
 const char*_Tmp0;void*_Tmp1;if(*((int*)c)==3){_Tmp1=(void*)((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)c)->f4;_Tmp0=((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)c)->f5;{void*b1=_Tmp1;const char*name=_Tmp0;
-# 707
+# 706
 return Cyc_Hashtable_hash_string(({const char*_Tmp2=name;_tag_fat((void*)_Tmp2,sizeof(char),_get_zero_arr_size_char((void*)_Tmp2,1U));}));}}else{
-# 709
+# 708
 ({int(*_Tmp2)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp2;})(_tag_fat("Expecting cvar types only",sizeof(char),26U),_tag_fat(0U,sizeof(void*),0));};}
-# 713
+# 712
 static int Cyc_BansheeIf_not_in_list(struct Cyc_List_List*l,void*e){
 return !Cyc_List_exists_c(Cyc_BansheeIf_cvareq,e,l);}
-# 717
+# 716
 static struct Cyc_List_List*Cyc_BansheeIf_cvars_in_constraint(void*c){
 void*_Tmp0;void*_Tmp1;switch(*((int*)c)){case 1: _Tmp1=(void*)((struct Cyc_BansheeIf_ComparisonConstraint_BansheeIf_Constraint_struct*)c)->f2;_Tmp0=(void*)((struct Cyc_BansheeIf_ComparisonConstraint_BansheeIf_Constraint_struct*)c)->f3;{void*cv1=_Tmp1;void*cv2=_Tmp0;
 _Tmp1=cv1;_Tmp0=cv2;goto _LL4;}case 2: _Tmp1=(void*)((struct Cyc_BansheeIf_EqualityConstraint_BansheeIf_Constraint_struct*)c)->f1;_Tmp0=(void*)((struct Cyc_BansheeIf_EqualityConstraint_BansheeIf_Constraint_struct*)c)->f2;_LL4: {void*cv1=_Tmp1;void*cv2=_Tmp0;
 _Tmp1=cv1;_Tmp0=cv2;goto _LL6;}case 3: _Tmp1=(void*)((struct Cyc_BansheeIf_InclusionConstraint_BansheeIf_Constraint_struct*)c)->f1;_Tmp0=(void*)((struct Cyc_BansheeIf_InclusionConstraint_BansheeIf_Constraint_struct*)c)->f2;_LL6: {void*cv1=_Tmp1;void*cv2=_Tmp0;
-# 722
+# 721
 struct Cyc_List_List*ret=0;
 if(!Cyc_BansheeIf_is_constant(cv1))
 ret=({void*_Tmp2[1];_Tmp2[0]=cv1;Cyc_List_list(_tag_fat(_Tmp2,sizeof(void*),1));});
@@ -869,41 +863,41 @@ ret=({struct Cyc_List_List*_Tmp2=_cycalloc(sizeof(struct Cyc_List_List));_Tmp2->
 return ret;}case 0: _Tmp1=(void*)((struct Cyc_BansheeIf_CheckConstraint_BansheeIf_Constraint_struct*)c)->f1;{void*c1=_Tmp1;
 return Cyc_BansheeIf_cvars_in_constraint(c1);}case 4: _Tmp1=(void*)((struct Cyc_BansheeIf_ImplicationConstraint_BansheeIf_Constraint_struct*)c)->f1;_Tmp0=(void*)((struct Cyc_BansheeIf_ImplicationConstraint_BansheeIf_Constraint_struct*)c)->f2;{void*c1=_Tmp1;void*c2=_Tmp0;
 _Tmp1=c1;_Tmp0=c2;goto _LLC;}default: _Tmp1=(void*)((struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct*)c)->f2;_Tmp0=(void*)((struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct*)c)->f3;_LLC: {void*c1=_Tmp1;void*c2=_Tmp0;
-# 731
+# 730
 struct Cyc_List_List*l1=Cyc_BansheeIf_cvars_in_constraint(c1);
 struct Cyc_List_List*_Tmp2=l1;return Cyc_List_append(_Tmp2,({struct Cyc_List_List*(*_Tmp3)(int(*)(struct Cyc_List_List*,void*),struct Cyc_List_List*,struct Cyc_List_List*)=({struct Cyc_List_List*(*_Tmp4)(int(*)(struct Cyc_List_List*,void*),struct Cyc_List_List*,struct Cyc_List_List*)=(struct Cyc_List_List*(*)(int(*)(struct Cyc_List_List*,void*),struct Cyc_List_List*,struct Cyc_List_List*))Cyc_List_filter_c;_Tmp4;});struct Cyc_List_List*_Tmp4=l1;_Tmp3(Cyc_BansheeIf_not_in_list,_Tmp4,Cyc_BansheeIf_cvars_in_constraint(c2));}));}};}
-# 736
+# 735
 static void Cyc_BansheeIf_init_map (void){
 if(!((unsigned)Cyc_BansheeIf_cvarmap))
 Cyc_BansheeIf_cvarmap=Cyc_Hashtable_create(101,Cyc_BansheeIf_cvarcmp,Cyc_BansheeIf_cvarhash);}
-# 742
+# 741
 static int Cyc_BansheeIf_constraint_eq(void*c1,void*c2){
 struct _tuple13 _Tmp0=({struct _tuple13 _Tmp1;_Tmp1.f0=c1,_Tmp1.f1=c2;_Tmp1;});enum Cyc_BansheeIf_ConstraintOperator _Tmp1;enum Cyc_BansheeIf_ConstraintOperator _Tmp2;int _Tmp3;void*_Tmp4;void*_Tmp5;int _Tmp6;void*_Tmp7;void*_Tmp8;switch(*((int*)_Tmp0.f0)){case 2: if(*((int*)_Tmp0.f1)==2){_Tmp8=(void*)((struct Cyc_BansheeIf_EqualityConstraint_BansheeIf_Constraint_struct*)_Tmp0.f0)->f1;_Tmp7=(void*)((struct Cyc_BansheeIf_EqualityConstraint_BansheeIf_Constraint_struct*)_Tmp0.f0)->f2;_Tmp6=((struct Cyc_BansheeIf_EqualityConstraint_BansheeIf_Constraint_struct*)_Tmp0.f0)->f3;_Tmp5=(void*)((struct Cyc_BansheeIf_EqualityConstraint_BansheeIf_Constraint_struct*)_Tmp0.f1)->f1;_Tmp4=(void*)((struct Cyc_BansheeIf_EqualityConstraint_BansheeIf_Constraint_struct*)_Tmp0.f1)->f2;_Tmp3=((struct Cyc_BansheeIf_EqualityConstraint_BansheeIf_Constraint_struct*)_Tmp0.f1)->f3;{void*cv11=_Tmp8;void*cv12=_Tmp7;int f1=_Tmp6;void*cv21=_Tmp5;void*cv22=_Tmp4;int f2=_Tmp3;
-# 745
+# 744
 if(f1==f2)
 return Cyc_BansheeIf_cvareq(cv11,cv21)&& Cyc_BansheeIf_cvareq(cv12,cv22);
 return 0;}}else{goto _LLD;}case 1: if(*((int*)_Tmp0.f1)==1){_Tmp2=((struct Cyc_BansheeIf_ComparisonConstraint_BansheeIf_Constraint_struct*)_Tmp0.f0)->f1;_Tmp8=(void*)((struct Cyc_BansheeIf_ComparisonConstraint_BansheeIf_Constraint_struct*)_Tmp0.f0)->f2;_Tmp7=(void*)((struct Cyc_BansheeIf_ComparisonConstraint_BansheeIf_Constraint_struct*)_Tmp0.f0)->f3;_Tmp1=((struct Cyc_BansheeIf_ComparisonConstraint_BansheeIf_Constraint_struct*)_Tmp0.f1)->f1;_Tmp5=(void*)((struct Cyc_BansheeIf_ComparisonConstraint_BansheeIf_Constraint_struct*)_Tmp0.f1)->f2;_Tmp4=(void*)((struct Cyc_BansheeIf_ComparisonConstraint_BansheeIf_Constraint_struct*)_Tmp0.f1)->f3;{enum Cyc_BansheeIf_ConstraintOperator op1=_Tmp2;void*cv11=_Tmp8;void*cv12=_Tmp7;enum Cyc_BansheeIf_ConstraintOperator op2=_Tmp1;void*cv21=_Tmp5;void*cv22=_Tmp4;
-# 749
+# 748
 if((int)op1==(int)op2){
 _Tmp8=cv11;_Tmp7=cv12;_Tmp5=cv21;_Tmp4=cv22;goto _LL6;}
 return 0;}}else{goto _LLD;}case 3: if(*((int*)_Tmp0.f1)==3){_Tmp8=(void*)((struct Cyc_BansheeIf_InclusionConstraint_BansheeIf_Constraint_struct*)_Tmp0.f0)->f1;_Tmp7=(void*)((struct Cyc_BansheeIf_InclusionConstraint_BansheeIf_Constraint_struct*)_Tmp0.f0)->f2;_Tmp5=(void*)((struct Cyc_BansheeIf_InclusionConstraint_BansheeIf_Constraint_struct*)_Tmp0.f1)->f1;_Tmp4=(void*)((struct Cyc_BansheeIf_InclusionConstraint_BansheeIf_Constraint_struct*)_Tmp0.f1)->f2;_LL6: {void*cv11=_Tmp8;void*cv12=_Tmp7;void*cv21=_Tmp5;void*cv22=_Tmp4;
-# 753
+# 752
 return Cyc_BansheeIf_cvareq(cv11,cv21)&& Cyc_BansheeIf_cvareq(cv12,cv22);}}else{goto _LLD;}case 0: if(*((int*)_Tmp0.f1)==0){_Tmp8=(void*)((struct Cyc_BansheeIf_CheckConstraint_BansheeIf_Constraint_struct*)_Tmp0.f0)->f1;_Tmp7=(void*)((struct Cyc_BansheeIf_CheckConstraint_BansheeIf_Constraint_struct*)_Tmp0.f1)->f1;{void*c11=_Tmp8;void*c21=_Tmp7;
-# 755
+# 754
 return Cyc_BansheeIf_constraint_eq(c11,c21);}}else{goto _LLD;}case 4: if(*((int*)_Tmp0.f1)==4){_Tmp8=(void*)((struct Cyc_BansheeIf_ImplicationConstraint_BansheeIf_Constraint_struct*)_Tmp0.f0)->f1;_Tmp7=(void*)((struct Cyc_BansheeIf_ImplicationConstraint_BansheeIf_Constraint_struct*)_Tmp0.f0)->f2;_Tmp5=(void*)((struct Cyc_BansheeIf_ImplicationConstraint_BansheeIf_Constraint_struct*)_Tmp0.f1)->f1;_Tmp4=(void*)((struct Cyc_BansheeIf_ImplicationConstraint_BansheeIf_Constraint_struct*)_Tmp0.f1)->f2;{void*c11=_Tmp8;void*c12=_Tmp7;void*c21=_Tmp5;void*c22=_Tmp4;
-# 757
+# 756
 return Cyc_BansheeIf_constraint_eq(c11,c21)&& Cyc_BansheeIf_constraint_eq(c12,c22);}}else{goto _LLD;}default: if(*((int*)_Tmp0.f1)==5){_Tmp2=((struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct*)_Tmp0.f0)->f1;_Tmp8=(void*)((struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct*)_Tmp0.f0)->f2;_Tmp7=(void*)((struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct*)_Tmp0.f0)->f3;_Tmp1=((struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct*)_Tmp0.f1)->f1;_Tmp5=(void*)((struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct*)_Tmp0.f1)->f2;_Tmp4=(void*)((struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct*)_Tmp0.f1)->f3;{enum Cyc_BansheeIf_ConstraintOperator op1=_Tmp2;void*c11=_Tmp8;void*c12=_Tmp7;enum Cyc_BansheeIf_ConstraintOperator op2=_Tmp1;void*c21=_Tmp5;void*c22=_Tmp4;
-# 759
+# 758
 return((int)op1==(int)op2 && Cyc_BansheeIf_constraint_eq(c11,c21))&&((unsigned)c12?Cyc_BansheeIf_constraint_eq(c12,_check_null(c22)): c22==0);}}else{_LLD:
-# 761
+# 760
  return 0;}};}
-# 765
+# 764
 static int Cyc_BansheeIf_constraint_cmp(void*c1,void*c2){
 return !Cyc_BansheeIf_constraint_eq(c1,c2);}
-# 768
+# 767
 static int Cyc_BansheeIf_hash_constraint(void*c){
 return Cyc_Hashtable_hash_string(Cyc_BansheeIf_constraint2string(c));}
-# 772
+# 771
 static int Cyc_BansheeIf_insert_into_map(void*c){
 Cyc_BansheeIf_init_map();{
 int added=0;
@@ -913,92 +907,92 @@ struct _handler_cons _Tmp0;_push_handler(& _Tmp0);{int _Tmp1=0;if(setjmp(_Tmp0.h
 if(!Cyc_List_exists_c(Cyc_BansheeIf_constraint_eq,c,*oc)){
 ({struct Cyc_List_List*_Tmp4=({struct Cyc_List_List*_Tmp5=_cycalloc(sizeof(struct Cyc_List_List));_Tmp5->hd=c,_Tmp5->tl=*oc;_Tmp5;});*oc=_Tmp4;});
 ++ added;}}}
-# 777
+# 776
 ;_pop_handler();}else{void*_Tmp2=(void*)Cyc_Core_get_exn_thrown();void*_Tmp3;if(((struct Cyc_Core_Not_found_exn_struct*)_Tmp2)->tag==Cyc_Core_Not_found){
-# 784
+# 783
 {void*_Tmp4=(void*)cvars->hd;int _Tmp5;if(*((int*)_Tmp4)==3){_Tmp5=((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)_Tmp4)->f3;{int id=_Tmp5;
-# 786
-id < 0?0:({int(*_Tmp6)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp6;})(_tag_fat("id < 0",sizeof(char),7U),_tag_fat("bansheeif.cyc",sizeof(char),14U),786U);
+# 785
+id < 0?0:({int(*_Tmp6)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp6;})(_tag_fat("id < 0",sizeof(char),7U),_tag_fat("bansheeif.cyc",sizeof(char),14U),785U);
 goto _LL8;}}else{
-# 789
-0?0:({int(*_Tmp6)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp6;})(_tag_fat("0",sizeof(char),2U),_tag_fat("bansheeif.cyc",sizeof(char),14U),789U);
+# 788
+0?0:({int(*_Tmp6)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp6;})(_tag_fat("0",sizeof(char),2U),_tag_fat("bansheeif.cyc",sizeof(char),14U),788U);
 goto _LL8;}_LL8:;}
-# 792
+# 791
 ({void(*_Tmp4)(struct Cyc_Hashtable_Table*,void*,struct _tuple14*)=({void(*_Tmp5)(struct Cyc_Hashtable_Table*,void*,struct _tuple14*)=(void(*)(struct Cyc_Hashtable_Table*,void*,struct _tuple14*))Cyc_Hashtable_insert;_Tmp5;});struct Cyc_Hashtable_Table*_Tmp5=Cyc_BansheeIf_cvarmap;void*_Tmp6=(void*)cvars->hd;_Tmp4(_Tmp5,_Tmp6,({struct _tuple14*_Tmp7=_cycalloc(sizeof(struct _tuple14));_Tmp7->f0=(void*)cvars->hd,({struct Cyc_List_List*_Tmp8=({struct Cyc_List_List*_Tmp9=_cycalloc(sizeof(struct Cyc_List_List));_Tmp9->hd=c,_Tmp9->tl=0;_Tmp9;});_Tmp7->f1=_Tmp8;}),_Tmp7->f2=0U;_Tmp7;}));});
 goto _LL3;}else{_Tmp3=_Tmp2;{void*exn=_Tmp3;_rethrow(exn);}}_LL3:;}}}}
-# 796
+# 795
 return added;}}
-# 800
+# 799
 static void*Cyc_BansheeIf_eval_equality_constraint(void*cvar,struct Cyc_List_List*lc){
 if((unsigned)lc && !((unsigned)lc->tl)){
 void*_Tmp0=(void*)lc->hd;void*_Tmp1;void*_Tmp2;if(*((int*)_Tmp0)==2){if(((struct Cyc_BansheeIf_EqualityConstraint_BansheeIf_Constraint_struct*)_Tmp0)->f3==0){_Tmp2=(void*)((struct Cyc_BansheeIf_EqualityConstraint_BansheeIf_Constraint_struct*)_Tmp0)->f1;_Tmp1=(void*)((struct Cyc_BansheeIf_EqualityConstraint_BansheeIf_Constraint_struct*)_Tmp0)->f2;{void*c1=_Tmp2;void*c2=_Tmp1;
-# 804
+# 803
 if(!Cyc_BansheeIf_cvarcmp(cvar,c1))
 return Cyc_Absyn_compress(c2);
 if(!Cyc_BansheeIf_cvarcmp(cvar,c2))
 return Cyc_Absyn_compress(c1);
 goto _LL4;}}else{goto _LL3;}}else{_LL3: _LL4:
-# 810
+# 809
  return 0;};}
-# 813
+# 812
 return 0;}
-# 817
+# 816
 static void Cyc_BansheeIf_reintroduce_cvar(void*_cvar){
 struct _tuple14*val;
 {struct _handler_cons _Tmp0;_push_handler(& _Tmp0);{int _Tmp1=0;if(setjmp(_Tmp0.handler))_Tmp1=1;if(!_Tmp1){
 val=({struct _tuple14*(*_Tmp2)(struct Cyc_Hashtable_Table*,void*)=(struct _tuple14*(*)(struct Cyc_Hashtable_Table*,void*))Cyc_Hashtable_lookup;_Tmp2;})(_check_null(Cyc_BansheeIf_cvarmap),_cvar);;_pop_handler();}else{void*_Tmp2=(void*)Cyc_Core_get_exn_thrown();void*_Tmp3;if(((struct Cyc_Core_Not_found_exn_struct*)_Tmp2)->tag==Cyc_Core_Not_found)
-# 823
+# 822
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp4=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp5;_Tmp5.tag=0,_Tmp5.f1=_tag_fat("Constraint graph refers to an undefined constraint variable",sizeof(char),60U);_Tmp5;});struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp5=({struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp6;_Tmp6.tag=2,_Tmp6.f1=(void*)_cvar;_Tmp6;});void*_Tmp6[2];_Tmp6[0]=& _Tmp4,_Tmp6[1]=& _Tmp5;({int(*_Tmp7)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp7;})(_tag_fat(_Tmp6,sizeof(void*),2));});else{_Tmp3=_Tmp2;{void*exn=_Tmp3;_rethrow(exn);}};}}}{
-# 825
+# 824
 void*_Tmp0;void*_Tmp1;void*_Tmp2;_Tmp2=val->f0;_Tmp1=val->f1;_Tmp0=(enum Cyc_BansheeIf_CvarRecordState*)& val->f2;{void*cv=_Tmp2;struct Cyc_List_List*cnstr=_Tmp1;enum Cyc_BansheeIf_CvarRecordState*state=(enum Cyc_BansheeIf_CvarRecordState*)_Tmp0;
-# 828
+# 827
 if((int)*state!=1)return;
 *state=2U;
 {const char*_Tmp3;const char*_Tmp4;void*_Tmp5;int _Tmp6;void*_Tmp7;void*_Tmp8;if(*((int*)cv)==3){_Tmp8=((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)cv)->f1;_Tmp7=(void*)((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)cv)->f2;_Tmp6=((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)cv)->f3;_Tmp5=(void**)&((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)cv)->f4;_Tmp4=((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)cv)->f5;_Tmp3=((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)cv)->f6;{struct Cyc_Core_Opt*ok=_Tmp8;void*topt=_Tmp7;int id=_Tmp6;void**bv=(void**)_Tmp5;const char*name=_Tmp4;const char*pos=_Tmp3;
-# 832
+# 831
 if(!((unsigned)*bv)){
-cnstr==0?0:({int(*_Tmp9)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp9;})(_tag_fat("cnstr==0",sizeof(char),9U),_tag_fat("bansheeif.cyc",sizeof(char),14U),833U);
+cnstr==0?0:({int(*_Tmp9)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp9;})(_tag_fat("cnstr==0",sizeof(char),9U),_tag_fat("bansheeif.cyc",sizeof(char),14U),832U);
 Cyc_BansheeIf_add_variable(cv);}
-# 838
+# 837
 for(1;(unsigned)cnstr;cnstr=cnstr->tl){
 if(Cyc_BansheeIf_internal_add_constraint((void*)cnstr->hd)==0)
 ({int(*_Tmp9)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp9;})(_tag_fat("Failed to reintroduce a constraint",sizeof(char),35U),_tag_fat(0U,sizeof(void*),0));
 if(Cyc_Flags_verbose)
 ({struct Cyc_String_pa_PrintArg_struct _Tmp9=({struct Cyc_String_pa_PrintArg_struct _TmpA;_TmpA.tag=0,({struct _fat_ptr _TmpB=Cyc_BansheeIf__constraint2string((void*)cnstr->hd,0);_TmpA.f1=_TmpB;});_TmpA;});void*_TmpA[1];_TmpA[0]=& _Tmp9;Cyc_fprintf(Cyc_stderr,_tag_fat("-- Reintro'd constraint : %s \n",sizeof(char),31U),_tag_fat(_TmpA,sizeof(void*),1));});{
-# 844
+# 843
 struct Cyc_List_List*cvars=Cyc_BansheeIf_cvars_in_constraint((void*)cnstr->hd);
 Cyc_List_iter(Cyc_BansheeIf_reintroduce_cvar,cvars);}}
-# 847
+# 846
 *state=3U;
 goto _LL8;}}else{
-# 850
+# 849
 ({int(*_Tmp9)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp9;})(_tag_fat("Unexpected type",sizeof(char),16U),_tag_fat(0U,sizeof(void*),0));}_LL8:;}
-# 852
+# 851
 return;}}}
-# 855
+# 854
 static void Cyc_BansheeIf_copy_cvar_fields(void*src,void*dest){
 struct _tuple13 _Tmp0=({struct _tuple13 _Tmp1;_Tmp1.f0=src,_Tmp1.f1=dest;_Tmp1;});void*_Tmp1;void*_Tmp2;void*_Tmp3;void*_Tmp4;void*_Tmp5;void*_Tmp6;void*_Tmp7;int _Tmp8;const char*_Tmp9;const char*_TmpA;void*_TmpB;int _TmpC;void*_TmpD;void*_TmpE;if(*((int*)_Tmp0.f0)==3){if(*((int*)_Tmp0.f1)==3){_TmpE=((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)_Tmp0.f0)->f1;_TmpD=(void*)((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)_Tmp0.f0)->f2;_TmpC=((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)_Tmp0.f0)->f3;_TmpB=(void*)((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)_Tmp0.f0)->f4;_TmpA=((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)_Tmp0.f0)->f5;_Tmp9=((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)_Tmp0.f0)->f6;_Tmp8=((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)_Tmp0.f0)->f7;_Tmp7=(struct Cyc_Core_Opt**)&((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)_Tmp0.f1)->f1;_Tmp6=(void**)&((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)_Tmp0.f1)->f2;_Tmp5=(int*)&((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)_Tmp0.f1)->f3;_Tmp4=(void**)&((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)_Tmp0.f1)->f4;_Tmp3=(const char**)&((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)_Tmp0.f1)->f5;_Tmp2=(const char**)&((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)_Tmp0.f1)->f6;_Tmp1=(int*)&((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)_Tmp0.f1)->f7;{struct Cyc_Core_Opt*ok=_TmpE;void*topt=_TmpD;int id=_TmpC;void*bv=_TmpB;const char*name=_TmpA;const char*pos=_Tmp9;int of=_Tmp8;struct Cyc_Core_Opt**okd=(struct Cyc_Core_Opt**)_Tmp7;void**toptd=(void**)_Tmp6;int*idd=(int*)_Tmp5;void**bvd=(void**)_Tmp4;const char**named=(const char**)_Tmp3;const char**posd=(const char**)_Tmp2;int*ofd=(int*)_Tmp1;
-# 858
+# 857
 *okd=ok;*toptd=topt;*idd=id;*bvd=bv;*named=name;*posd=pos;*ofd=of;
 goto _LL0;}}else{goto _LL3;}}else{_LL3:
-# 861
+# 860
  goto _LL0;}_LL0:;}struct _tuple15{struct Cyc___cycFILE*f0;int f1;};
-# 865
+# 864
 static void Cyc_BansheeIf_persist_cvar_entry(void*ig,struct _tuple14*entry,struct _tuple15*env){
 void*_Tmp0;void*_Tmp1;_Tmp1=env->f0;_Tmp0=(int*)& env->f1;{struct Cyc___cycFILE*f=_Tmp1;int*changed=(int*)_Tmp0;
 void*_Tmp2;void*_Tmp3;void*_Tmp4;_Tmp4=entry->f0;_Tmp3=entry->f1;_Tmp2=(enum Cyc_BansheeIf_CvarRecordState*)& entry->f2;{void*cv=_Tmp4;struct Cyc_List_List*cs=_Tmp3;enum Cyc_BansheeIf_CvarRecordState*state=(enum Cyc_BansheeIf_CvarRecordState*)_Tmp2;
-(int)*state!=2?0:({int(*_Tmp5)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp5;})(_tag_fat("*state != PERSIST_INPROCESS",sizeof(char),28U),_tag_fat("bansheeif.cyc",sizeof(char),14U),868U);
+(int)*state!=2?0:({int(*_Tmp5)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp5;})(_tag_fat("*state != PERSIST_INPROCESS",sizeof(char),28U),_tag_fat("bansheeif.cyc",sizeof(char),14U),867U);
 if((int)*state==0 ||(int)*state==4)
 return;
-# 872
+# 871
 ({struct Cyc_String_pa_PrintArg_struct _Tmp5=({struct Cyc_String_pa_PrintArg_struct _Tmp6;_Tmp6.tag=0,({struct _fat_ptr _Tmp7=Cyc_BansheeIf_cvar2string(cv,0);_Tmp6.f1=_Tmp7;});_Tmp6;});struct Cyc_String_pa_PrintArg_struct _Tmp6=({struct Cyc_String_pa_PrintArg_struct _Tmp7;_Tmp7.tag=0,({struct _fat_ptr _Tmp8=({const char*_Tmp9=Cyc_BansheeIf_cvarloc(cv);_tag_fat((void*)_Tmp9,sizeof(char),_get_zero_arr_size_char((void*)_Tmp9,1U));});_Tmp7.f1=_Tmp8;});_Tmp7;});struct Cyc_String_pa_PrintArg_struct _Tmp7=({struct Cyc_String_pa_PrintArg_struct _Tmp8;_Tmp8.tag=0,({struct _fat_ptr _Tmp9=({const char*_TmpA=Cyc_BansheeIf_cvarorigfat(cv);_tag_fat((void*)_TmpA,sizeof(char),_get_zero_arr_size_char((void*)_TmpA,1U));});_Tmp8.f1=_Tmp9;});_Tmp8;});void*_Tmp8[3];_Tmp8[0]=& _Tmp5,_Tmp8[1]=& _Tmp6,_Tmp8[2]=& _Tmp7;Cyc_fprintf(f,_tag_fat("%s \"%s\", \"%s\" (",sizeof(char),16U),_tag_fat(_Tmp8,sizeof(void*),3));});
-# 874
+# 873
 for(1;(unsigned)cs;cs=cs->tl){
-# 876
+# 875
 ({struct Cyc_String_pa_PrintArg_struct _Tmp5=({struct Cyc_String_pa_PrintArg_struct _Tmp6;_Tmp6.tag=0,({struct _fat_ptr _Tmp7=Cyc_BansheeIf__constraint2string((void*)cs->hd,0);_Tmp6.f1=_Tmp7;});_Tmp6;});void*_Tmp6[1];_Tmp6[0]=& _Tmp5;Cyc_fprintf(f,_tag_fat("%s",sizeof(char),3U),_tag_fat(_Tmp6,sizeof(void*),1));});
 if((unsigned)cs->tl)
 Cyc_fprintf(f,_tag_fat(";",sizeof(char),2U),_tag_fat(0U,sizeof(void*),0));{
-# 880
+# 879
 struct Cyc_List_List*cvars=Cyc_BansheeIf_cvars_in_constraint((void*)cs->hd);
 for(1;(unsigned)cvars;cvars=cvars->tl){
 struct _handler_cons _Tmp5;_push_handler(& _Tmp5);{int _Tmp6=0;if(setjmp(_Tmp5.handler))_Tmp6=1;if(!_Tmp6){
@@ -1006,32 +1000,32 @@ struct _handler_cons _Tmp5;_push_handler(& _Tmp5);{int _Tmp6=0;if(setjmp(_Tmp5.h
 if((int)*state==0){
 *state=1U;
 *changed=1;}}}
-# 883
+# 882
 ;_pop_handler();}else{void*_Tmp7=(void*)Cyc_Core_get_exn_thrown();void*_Tmp8;if(((struct Cyc_Core_Not_found_exn_struct*)_Tmp7)->tag==Cyc_Core_Not_found)
-# 889
+# 888
 ({int(*_Tmp9)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp9;})(_tag_fat("Constraint refers to an undeclared Cvar",sizeof(char),40U),_tag_fat(0U,sizeof(void*),0));else{_Tmp8=_Tmp7;{void*exn=_Tmp8;_rethrow(exn);}};}}}}}
-# 904 "bansheeif.cyc"
+# 903 "bansheeif.cyc"
 Cyc_fprintf(f,_tag_fat(")\n",sizeof(char),3U),_tag_fat(0U,sizeof(void*),0));
 *state=4U;}}}
-# 908
+# 907
 static void Cyc_BansheeIf_constrain_locals(void*cvar,struct _tuple14*val){
 if((int)val->f2!=0)
 return;
 if(Cyc_Tcutil_is_cvar_type(cvar)){
 if(Cyc_BansheeIf_internal_add_constraint(({void*_Tmp0=cvar;Cyc_BansheeIf_equality_constraint(_Tmp0,Cyc_Absyn_thinconst());}))==0)
 ({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp0;})(_tag_fat("Failed to add a default constraint on a local constraint variable",sizeof(char),66U),_tag_fat(0U,sizeof(void*),0));}}
-# 919
+# 918
 void Cyc_BansheeIf_persist_cvarmap(struct Cyc___cycFILE*f){
 Cyc_BansheeIf_discharge_implications();
-Cyc_BansheeIf_cvarmap!=0?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp0;})(_tag_fat("cvarmap != 0",sizeof(char),13U),_tag_fat("bansheeif.cyc",sizeof(char),14U),921U);
+Cyc_BansheeIf_cvarmap!=0?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp0;})(_tag_fat("cvarmap != 0",sizeof(char),13U),_tag_fat("bansheeif.cyc",sizeof(char),14U),920U);
 Cyc_fprintf(f,_tag_fat("# 1 \"cvars\"\n",sizeof(char),13U),_tag_fat(0U,sizeof(void*),0));{
 struct _tuple15*env;env=_cycalloc(sizeof(struct _tuple15)),env->f0=f,env->f1=0;
 do{
 env->f1=0;
 ({void(*_Tmp0)(void(*)(void*,struct _tuple14*,struct _tuple15*),struct Cyc_Hashtable_Table*,struct _tuple15*)=(void(*)(void(*)(void*,struct _tuple14*,struct _tuple15*),struct Cyc_Hashtable_Table*,struct _tuple15*))Cyc_Hashtable_iter_c;_Tmp0;})(Cyc_BansheeIf_persist_cvar_entry,_check_null(Cyc_BansheeIf_cvarmap),env);}while(env->f1);
-# 929
+# 928
 ({void(*_Tmp0)(void(*)(void*,struct _tuple14*),struct Cyc_Hashtable_Table*)=(void(*)(void(*)(void*,struct _tuple14*),struct Cyc_Hashtable_Table*))Cyc_Hashtable_iter;_Tmp0;})(Cyc_BansheeIf_constrain_locals,_check_null(Cyc_BansheeIf_cvarmap));}}
-# 932
+# 931
 static void Cyc_BansheeIf_remove_constraint(void*c){
 struct Cyc_List_List*cvars=Cyc_BansheeIf_cvars_in_constraint(c);
 int tabOk=0;
@@ -1041,99 +1035,99 @@ struct _handler_cons _Tmp0;_push_handler(& _Tmp0);{int _Tmp1=0;if(setjmp(_Tmp0.h
 {struct _tuple14*_Tmp2=({struct _tuple14*(*_Tmp3)(struct Cyc_Hashtable_Table*,void*)=(struct _tuple14*(*)(struct Cyc_Hashtable_Table*,void*))Cyc_Hashtable_lookup;_Tmp3;})(Cyc_BansheeIf_cvarmap,(void*)cvars->hd);void*_Tmp3;_Tmp3=(struct Cyc_List_List**)& _Tmp2->f1;{struct Cyc_List_List**constr=(struct Cyc_List_List**)_Tmp3;
 tabOk=1;
 ({struct Cyc_List_List*_Tmp4=Cyc_List_delete_cmp(Cyc_BansheeIf_constraint_cmp,*constr,c);*constr=_Tmp4;});}}
-# 938
+# 937
 ;_pop_handler();}else{void*_Tmp2=(void*)Cyc_Core_get_exn_thrown();void*_Tmp3;if(((struct Cyc_Core_Not_found_exn_struct*)_Tmp2)->tag==Cyc_Core_Not_found){
-# 943
+# 942
 if(!tabOk)
 ({int(*_Tmp4)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp4;})(_tag_fat("remove_constraint: Constraint refers to an undeclared Cvar",sizeof(char),59U),_tag_fat(0U,sizeof(void*),0));
 goto _LL3;}else{_Tmp3=_Tmp2;{void*exn=_Tmp3;_rethrow(exn);}}_LL3:;}}}}}
-# 950
+# 949
 void Cyc_BansheeIf_reset_local_cvar(void*cvar){
-Cyc_BansheeIf_cvarmap!=0?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp0;})(_tag_fat("cvarmap != 0",sizeof(char),13U),_tag_fat("bansheeif.cyc",sizeof(char),14U),951U);{
+Cyc_BansheeIf_cvarmap!=0?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp0;})(_tag_fat("cvarmap != 0",sizeof(char),13U),_tag_fat("bansheeif.cyc",sizeof(char),14U),950U);{
 struct _handler_cons _Tmp0;_push_handler(& _Tmp0);{int _Tmp1=0;if(setjmp(_Tmp0.handler))_Tmp1=1;if(!_Tmp1){
 {struct _tuple14*_Tmp2=({struct _tuple14*(*_Tmp3)(struct Cyc_Hashtable_Table*,void*)=(struct _tuple14*(*)(struct Cyc_Hashtable_Table*,void*))Cyc_Hashtable_lookup;_Tmp3;})(Cyc_BansheeIf_cvarmap,cvar);void*_Tmp3;_Tmp3=(struct Cyc_List_List**)& _Tmp2->f1;{struct Cyc_List_List**constr=(struct Cyc_List_List**)_Tmp3;
 struct Cyc_List_List*l=*constr;*constr=0;
 for(1;(unsigned)l;l=l->tl){
 Cyc_BansheeIf_remove_constraint((void*)l->hd);}}}
-# 953
+# 952
 ;_pop_handler();}else{void*_Tmp2=(void*)Cyc_Core_get_exn_thrown();void*_Tmp3;if(((struct Cyc_Core_Not_found_exn_struct*)_Tmp2)->tag==Cyc_Core_Not_found){
-# 960
+# 959
 ({void(*_Tmp4)(struct Cyc_Hashtable_Table*,void*,struct _tuple14*)=({void(*_Tmp5)(struct Cyc_Hashtable_Table*,void*,struct _tuple14*)=(void(*)(struct Cyc_Hashtable_Table*,void*,struct _tuple14*))Cyc_Hashtable_insert;_Tmp5;});struct Cyc_Hashtable_Table*_Tmp5=_check_null(Cyc_BansheeIf_cvarmap);void*_Tmp6=cvar;_Tmp4(_Tmp5,_Tmp6,({struct _tuple14*_Tmp7=_cycalloc(sizeof(struct _tuple14));_Tmp7->f0=cvar,_Tmp7->f1=0,_Tmp7->f2=0U;_Tmp7;}));});
 goto _LL3;}else{_Tmp3=_Tmp2;{void*exn=_Tmp3;_rethrow(exn);}}_LL3:;}}}}
-# 969
+# 968
 void Cyc_BansheeIf_register_toplevel_cvar(void*cvar){
-Cyc_BansheeIf_cvarmap!=0?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp0;})(_tag_fat("cvarmap != 0",sizeof(char),13U),_tag_fat("bansheeif.cyc",sizeof(char),14U),970U);{
+Cyc_BansheeIf_cvarmap!=0?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp0;})(_tag_fat("cvarmap != 0",sizeof(char),13U),_tag_fat("bansheeif.cyc",sizeof(char),14U),969U);{
 const char*_Tmp0;void*_Tmp1;int _Tmp2;void*_Tmp3;void*_Tmp4;if(*((int*)cvar)==3){_Tmp4=((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)cvar)->f1;_Tmp3=(void**)&((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)cvar)->f2;_Tmp2=((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)cvar)->f3;_Tmp1=(void**)&((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)cvar)->f4;_Tmp0=((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)cvar)->f5;{struct Cyc_Core_Opt*ok=_Tmp4;void**topt=(void**)_Tmp3;int id=_Tmp2;void**bv=(void**)_Tmp1;const char*name=_Tmp0;
-# 973
+# 972
 {struct _handler_cons _Tmp5;_push_handler(& _Tmp5);{int _Tmp6=0;if(setjmp(_Tmp5.handler))_Tmp6=1;if(!_Tmp6){
 {struct _tuple14*_Tmp7=({struct _tuple14*(*_Tmp8)(struct Cyc_Hashtable_Table*,void*)=(struct _tuple14*(*)(struct Cyc_Hashtable_Table*,void*))Cyc_Hashtable_lookup;_Tmp8;})(Cyc_BansheeIf_cvarmap,cvar);enum Cyc_BansheeIf_CvarRecordState _Tmp8;void*_Tmp9;void*_TmpA;_TmpA=_Tmp7->f0;_Tmp9=_Tmp7->f1;_Tmp8=_Tmp7->f2;{void*cv=_TmpA;struct Cyc_List_List*constr=_Tmp9;enum Cyc_BansheeIf_CvarRecordState p=_Tmp8;
-(int)p?0:({int(*_TmpB)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_TmpB;})(_tag_fat("p",sizeof(char),2U),_tag_fat("bansheeif.cyc",sizeof(char),14U),975U);
+(int)p?0:({int(*_TmpB)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_TmpB;})(_tag_fat("p",sizeof(char),2U),_tag_fat("bansheeif.cyc",sizeof(char),14U),974U);
 if(Cyc_Flags_resolve)
-# 980
+# 979
 Cyc_BansheeIf_reintroduce_cvar(cv);
-# 982
+# 981
 Cyc_BansheeIf_copy_cvar_fields(cv,cvar);}}
-# 974
+# 973
 ;_pop_handler();}else{void*_Tmp7=(void*)Cyc_Core_get_exn_thrown();void*_Tmp8;if(((struct Cyc_Core_Not_found_exn_struct*)_Tmp7)->tag==Cyc_Core_Not_found){
-# 985
+# 984
 Cyc_BansheeIf_add_variable(cvar);
 ({void(*_Tmp9)(struct Cyc_Hashtable_Table*,void*,struct _tuple14*)=({void(*_TmpA)(struct Cyc_Hashtable_Table*,void*,struct _tuple14*)=(void(*)(struct Cyc_Hashtable_Table*,void*,struct _tuple14*))Cyc_Hashtable_insert;_TmpA;});struct Cyc_Hashtable_Table*_TmpA=_check_null(Cyc_BansheeIf_cvarmap);void*_TmpB=cvar;_Tmp9(_TmpA,_TmpB,({struct _tuple14*_TmpC=_cycalloc(sizeof(struct _tuple14));_TmpC->f0=cvar,_TmpC->f1=0,_TmpC->f2=1U;_TmpC;}));});
 goto _LL8;}else{_Tmp8=_Tmp7;{void*exn=_Tmp8;_rethrow(exn);}}_LL8:;}}}
-# 989
+# 988
 goto _LL0;}}else{
-# 991
+# 990
 ({int(*_Tmp5)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp5;})(_tag_fat("expected cvar only",sizeof(char),19U),_tag_fat(0U,sizeof(void*),0));}_LL0:;}}
-# 995
+# 994
 static void Cyc_BansheeIf_default_unconstrained_cvar(void*cv,struct _tuple14*entry,void*def){
 if((int)entry->f2==3){
 if(Cyc_Tcutil_is_cvar_type(cv)){
 if(Cyc_BansheeIf_internal_add_constraint(Cyc_BansheeIf_equality_constraint(cv,def))==0)
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp0=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=_tag_fat("Resolution failed while applying default to Cvar: ",sizeof(char),51U);_Tmp1;});struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp1=({struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp2;_Tmp2.tag=2,_Tmp2.f1=(void*)cv;_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;Cyc_Warn_err2(0U,_tag_fat(_Tmp2,sizeof(void*),2));});}}}
-# 1004
+# 1003
 void Cyc_BansheeIf_resolve_or_default(void*def){
 if(Cyc_BansheeIf_discharge_implications())
 return;
 ({void(*_Tmp0)(void(*)(void*,struct _tuple14*,void*),struct Cyc_Hashtable_Table*,void*)=(void(*)(void(*)(void*,struct _tuple14*,void*),struct Cyc_Hashtable_Table*,void*))Cyc_Hashtable_iter_c;_Tmp0;})(Cyc_BansheeIf_default_unconstrained_cvar,_check_null(Cyc_BansheeIf_cvarmap),def);
 Cyc_BansheeIf_discharge_implications();}struct _tuple16{void*f0;struct Cyc_List_List*f1;};
-# 1014
+# 1013
 void Cyc_BansheeIf_init_toplevel_cvars(struct Cyc_List_List*assoc){
 Cyc_BansheeIf_init_map();
 for(1;(unsigned)assoc;assoc=assoc->tl){
 struct _tuple16*_Tmp0=(struct _tuple16*)assoc->hd;void*_Tmp1;void*_Tmp2;_Tmp2=_Tmp0->f0;_Tmp1=_Tmp0->f1;{void*cvar=_Tmp2;struct Cyc_List_List*lc=_Tmp1;
-# 1020
+# 1019
 ({void(*_Tmp3)(struct Cyc_Hashtable_Table*,void*,struct _tuple14*)=({void(*_Tmp4)(struct Cyc_Hashtable_Table*,void*,struct _tuple14*)=(void(*)(struct Cyc_Hashtable_Table*,void*,struct _tuple14*))Cyc_Hashtable_insert;_Tmp4;});struct Cyc_Hashtable_Table*_Tmp4=_check_null(Cyc_BansheeIf_cvarmap);void*_Tmp5=cvar;_Tmp3(_Tmp4,_Tmp5,({struct _tuple14*_Tmp6=_cycalloc(sizeof(struct _tuple14));_Tmp6->f0=cvar,_Tmp6->f1=lc,_Tmp6->f2=1U;_Tmp6;}));});}}}
-# 1024
+# 1023
 int Cyc_BansheeIf_add_all_constraints(struct Cyc_List_List*g){
 for(1;(unsigned)g;g=g->tl){
 struct _tuple16*_Tmp0=(struct _tuple16*)g->hd;void*_Tmp1;_Tmp1=_Tmp0->f1;{struct Cyc_List_List*c=_Tmp1;
 for(1;(unsigned)c;c=c->tl){
 if(Cyc_BansheeIf_internal_add_constraint((void*)c->hd)==0)
 return -1;}}}
-# 1032
+# 1031
 if(Cyc_BansheeIf_discharge_implications()==0)
 return -1;
 return 0;}
-# 1037
+# 1036
 static void Cyc_BansheeIf_print_cvar(void*c){
 ({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,({struct _fat_ptr _Tmp2=Cyc_BansheeIf_cvar2string(c,0);_Tmp1.f1=_Tmp2;});_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_fprintf(Cyc_stderr,_tag_fat("%s",sizeof(char),3U),_tag_fat(_Tmp1,sizeof(void*),1));});}
-# 1040
+# 1039
 static void Cyc_BansheeIf_print_cvarmapval(struct _tuple14*val){
 struct Cyc_List_List*l=val->f1;for(0;(unsigned)l;l=l->tl){
 ({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,({struct _fat_ptr _Tmp2=Cyc_BansheeIf_constraint2string((void*)l->hd);_Tmp1.f1=_Tmp2;});_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_fprintf(Cyc_stderr,_tag_fat("%s, ",sizeof(char),5U),_tag_fat(_Tmp1,sizeof(void*),1));});}}
-# 1046
+# 1045
 static void Cyc_BansheeIf_dump_cvarmap (void){
-(unsigned)Cyc_BansheeIf_cvarmap?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp0;})(_tag_fat("cvarmap",sizeof(char),8U),_tag_fat("bansheeif.cyc",sizeof(char),14U),1047U);
+(unsigned)Cyc_BansheeIf_cvarmap?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp0;})(_tag_fat("cvarmap",sizeof(char),8U),_tag_fat("bansheeif.cyc",sizeof(char),14U),1046U);
 ({void(*_Tmp0)(struct Cyc_Hashtable_Table*,void(*)(void*),void(*)(struct _tuple14*))=(void(*)(struct Cyc_Hashtable_Table*,void(*)(void*),void(*)(struct _tuple14*)))Cyc_Hashtable_print_table_map;_Tmp0;})(Cyc_BansheeIf_cvarmap,Cyc_BansheeIf_print_cvar,Cyc_BansheeIf_print_cvarmapval);}
-# 1051
+# 1050
 static void Cyc_BansheeIf_flush_one_variable(void*cvar,struct _tuple14*val){
 void*_Tmp0;_Tmp0=val->f1;{struct Cyc_List_List*l=_Tmp0;
 for(1;(unsigned)l;l=l->tl){
 if(Cyc_BansheeIf_internal_add_constraint((void*)l->hd)==0)
 ({int(*_Tmp1)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp1;})(_tag_fat("Inconsistent constraint graph while flushing",sizeof(char),45U),_tag_fat(0U,sizeof(void*),0));}}}
-# 1060
+# 1059
 void Cyc_BansheeIf_flush_all_constraints (void){
 if(!((unsigned)Cyc_BansheeIf_cvarmap))
 return;
-# 1064
+# 1063
 ({void(*_Tmp0)(void(*)(void*,struct _tuple14*),struct Cyc_Hashtable_Table*)=(void(*)(void(*)(void*,struct _tuple14*),struct Cyc_Hashtable_Table*))Cyc_Hashtable_iter;_Tmp0;})(Cyc_BansheeIf_flush_one_variable,Cyc_BansheeIf_cvarmap);
 Cyc_BansheeIf_discharge_implications();}

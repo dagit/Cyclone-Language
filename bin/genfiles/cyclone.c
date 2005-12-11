@@ -436,34 +436,7 @@ extern int Cyc_Position_use_gcc_style_location;
 # 48
 extern int Cyc_Position_max_errors;
 # 50
-extern int Cyc_Position_error_p (void);struct Cyc___cycFILE;
-# 91 "stdio.h"
-extern struct Cyc___cycFILE*Cyc_stdout;
-# 93
-extern struct Cyc___cycFILE*Cyc_stderr;
-# 120 "stdio.h"
-extern struct _fat_ptr Cyc_aprintf(struct _fat_ptr,struct _fat_ptr);
-# 129
-extern int Cyc_fclose(struct Cyc___cycFILE*);
-# 134
-extern int Cyc_feof(struct Cyc___cycFILE*);
-# 138
-extern int Cyc_fflush(struct Cyc___cycFILE*);
-# 152
-extern struct Cyc___cycFILE*Cyc_fopen(const char*,const char*);
-# 154
-extern int Cyc_fprintf(struct Cyc___cycFILE*,struct _fat_ptr,struct _fat_ptr);
-# 162
-extern unsigned long Cyc_fread(struct _fat_ptr,unsigned long,unsigned long,struct Cyc___cycFILE*);
-# 211
-extern unsigned long Cyc_fwrite(struct _fat_ptr,unsigned long,unsigned long,struct Cyc___cycFILE*);
-# 236
-extern int Cyc_printf(struct _fat_ptr,struct _fat_ptr);
-# 252
-extern int remove(const char*);
-# 360 "stdio.h"
-extern struct Cyc___cycFILE*Cyc_file_open(struct _fat_ptr,struct _fat_ptr);
-extern void Cyc_file_close(struct Cyc___cycFILE*);
+extern int Cyc_Position_error_p (void);
 # 13 "bansheeif.h"
 int Cyc_BansheeIf_banshee_init (void);
 # 29

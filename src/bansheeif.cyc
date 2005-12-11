@@ -33,7 +33,6 @@ specification cycinf : CYCINF =
 */
 #define BANSHEEIF_CYC
 
-#include <stdio.h>
 #include <hashtable.h>
 #include <assert.h>
 #include <list.h>

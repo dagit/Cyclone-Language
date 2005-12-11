@@ -417,8 +417,6 @@ extern struct Cyc_Absyn_Kind Cyc_Kinds_ek;
 extern struct Cyc_Core_Opt Cyc_Kinds_mko;
 # 59
 extern struct Cyc_Core_Opt Cyc_Kinds_ptrbko;
-# 120 "stdio.h"
-extern struct _fat_ptr Cyc_aprintf(struct _fat_ptr,struct _fat_ptr);
 # 14 "bansheeif.h"
 void Cyc_BansheeIf_add_constant(struct _fat_ptr,void*);
 # 30

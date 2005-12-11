@@ -1,9 +1,9 @@
 #ifndef _BANSHEE_IF_H_
 #define _BANSHEE_IF_H_
-#include <stdio.h>
 #include "absyn.h"
-#include "core.h"
-#include "list.h"
+#include <core.h>
+#include <list.h>
+#include <cycboot.h>
 
 namespace BansheeIf {
   extern datatype Constraint;

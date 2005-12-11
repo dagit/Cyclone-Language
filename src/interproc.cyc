@@ -1,11 +1,10 @@
-#include <stdio.h>
 #include <assert.h>
 #include <hashtable.h>
 #include <position.h>
+#include <string.h>
 #include "interproc.h"
 #include "binding.h"
 #include "absynpp.h"
-#include "string.h"
 #include "cyclone.h" //for do_parse
 #include "warn.h"
 #include "callgraph.h"
@@ -29,6 +28,11 @@ datatype exn {
 };
 
 static datatype exn.Rebinding Rebinding_val = Rebinding;
+
+parg_t ? make_parg( ... inject parg_t<`H> ap) {
+  parg_t<`H> ? ret = new {for i < numelts(ap) : ap[i]};
+  return ret;
+}
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -484,7 +488,7 @@ static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxp
     switch(*bd) {
     case &Cvar(_,_,*id,_,*name,...):
       assert(pfxpos < 1000);
-      sprintf(_prefix+pfxpos, "_%d", index); 
+      vsprintf(_prefix+pfxpos, "_%d", make_parg(index)); 
       string_t nn = aprintf("%s", _prefix);
       //      char ?tmppfx = _prefix;
       let val = Hashtable::lookup_other_opt(cvmap, &nn, strptrcmp, hash_stringptr);
@@ -513,7 +517,7 @@ static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxp
       switch(af->hd) {
       case &Aggrfield{_,_,t,...}:
 	assert(pfxpos < 980);
-	sprintf(_prefix+pfxpos, "_%d_AA%d", index, findex++);  //aprintf("%s_%d_AA%d", prefix, index, findex++), 
+	vsprintf(_prefix+pfxpos, "_%d_AA%d", make_parg(index, findex++));  //aprintf("%s_%d_AA%d", prefix, index, findex++), 
 	ret = List::append(cvars_in_type(t, 0, is_local, strlen(_prefix)), ret);
 	break;
       }
@@ -531,7 +535,7 @@ static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxp
 	int finner = 0;
 	for(;ft;ft=ft->tl) {
 	  let &$(_,t) = ft->hd;
-	  sprintf(_prefix+pfxpos, "DD%dI%s_DF%d_%d", strlen(dtn), dtn, findex, finner++);
+	  vsprintf(_prefix+pfxpos, "DD%dI%s_DF%d_%d", make_parg(strlen(dtn), dtn, findex, finner++));
 	  //aprintf("%s_%d_DD%s_DF%d_%d", prefix, index, dtn, findex, finner++)
 	  ret = List::append(cvars_in_type(t, 0, is_local, strlen(_prefix)), ret);
 	}
@@ -546,7 +550,7 @@ static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxp
     if(ad->impl) {
       assert(pfxpos < 900);
       for(_ fs = ad->impl->fields; fs; fs= fs->tl) {
-	sprintf(_prefix+pfxpos, "AD%dI%s_AF%d", strlen(adn), adn, findex++);
+	vsprintf(_prefix+pfxpos, "AD%dI%s_AF%d", make_parg(strlen(adn), adn, findex++));
 	//	aprintf("%s_%d_AD%s_AF%d", prefix, index, adn, findex++)
 	ret = List::append(cvars_in_type(fs->hd->type, 0, is_local, strlen(_prefix)), ret);
       }
@@ -556,12 +560,12 @@ static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxp
   case &FnType(*fi):
     //    aprintf("%", prefix, index);
     assert(pfxpos < 900);
-    sprintf(_prefix+pfxpos, "_%d_FR", index);
+    vsprintf(_prefix+pfxpos, "_%d_FR", make_parg(index));
     ret = List::append(cvars_in_type(fi->ret_type, 0,is_local,strlen(_prefix)), ret);
     int argix = 0;
     for(_ args = fi->args; args;args=args->tl) {
       let &$(_,_,t) = args->hd;
-      sprintf(_prefix+pfxpos, "_%d_ARG%d", index, argix++);
+      vsprintf(_prefix+pfxpos, "_%d_ARG%d", make_parg(index, argix++));
       //      aprintf("%s_%d_ARG%d", prefix, index, argix++)
       ret = List::append(cvars_in_type(t, 0, is_local, strlen(_prefix)), ret);      
     }
@@ -572,7 +576,7 @@ static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxp
       assert(pfxpos < 900);
       //      aprintf("%s_%d_TD%s", prefix, index, Absynpp::fullqvar2string(tdn))
       let tn = Absynpp::fullqvar2string(tdn);
-      sprintf(_prefix+pfxpos,"TD%dI%s", strlen(tn), tn);
+      vsprintf(_prefix+pfxpos,"TD%dI%s", make_parg(strlen(tn), tn));
       ret = List::append(cvars_in_type(tdef->defn, 0,is_local,strlen(_prefix)), 
 			 ret);
       _prefix[pfxpos]='\0';    
@@ -613,16 +617,15 @@ static bool exp_noop(`a a, exp_t b) {
 
 //string_t is the prefix
 //int is used to generate unique prefixes
-static bool cvars_in_local_decl($(string_t, int, void (@)(list_t<type_t,`H>,`inner), `inner)@ env, stmt_t s) {
+static bool cvars_in_local_decl($(string_t<`H>, int, void (@)(list_t<type_t,`H>,`inner), `inner)@ env, stmt_t s) {
   let &$(pfx, *count, fn, inner_env) = env;
   switch(s->r) {
   case &Decl_s(d, s1):
     switch(d->r) {
     case &Var_d(vd): 
       let ln = Absynpp::fullqvar2string(vd->name);
-      sprintf(_prefix, "%dI%s_%dI%s_%d", strlen(pfx),
-	      pfx, strlen(ln), ln,
-       (*count)++);
+      vsprintf(_prefix, "%dI%s_%dI%s_%d", 
+	       make_parg(strlen(pfx), pfx, strlen(ln), ln,(*count)++));
       let cvars = cvars_in_type(vd->type, 0, true, strlen(_prefix)); 
       //drop the list of cvars ... these are fresh and do not require any binding
       //but, we will need to resolve these on the second pass
@@ -633,7 +636,7 @@ static bool cvars_in_local_decl($(string_t, int, void (@)(list_t<type_t,`H>,`inn
       switch(p->r) {
       case &AliasVar_p(_, vd):
 	let an = Absynpp::fullqvar2string(vd->name);
-	sprintf(_prefix, "%dI%s_%dI%s_%d", strlen(pfx), pfx, strlen(an), an, (*count)++);
+	vsprintf(_prefix, "%dI%s_%dI%s_%d", make_parg(strlen(pfx), pfx, strlen(an), an, (*count)++));
 	let cvars = cvars_in_type(vd->type, 0, true, strlen(_prefix)); 
 	//drop the list of cvars ... these are fresh and do not require any binding
 	//but, we will need to resolve these on the second pass
@@ -677,13 +680,13 @@ static list_t<type_t> assign_cvar_names(list_t<decl_t> ds){
     case &Using_d(_,l): ret = List::append(ret, assign_cvar_names(l)); break;
     case &Var_d(vd): 
       let tn =Absynpp::fullqvar2string(vd->name);
-      sprintf(_prefix, "%dI%s", strlen(tn), tn);
+      vsprintf(_prefix, "%dI%s", make_parg(strlen(tn), tn));
       ret = List::append(cvars_in_type(vd->type, 0, false, strlen(_prefix)),
 			 ret);
       break;
     case &Fn_d(fd):    
       let fdname = Absynpp::fullqvar2string(fd->name);
-      sprintf(_prefix, "%dI%s", strlen(fdname), fdname);
+      vsprintf(_prefix, "%dI%s", make_parg(strlen(fdname), fdname));
       if(Tcutil::is_main(fd->name)) { //main's 2nd arg must be ??
 	let args = fd->i.args;
 	if(args && args->tl) {
