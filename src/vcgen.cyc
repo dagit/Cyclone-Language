@@ -815,10 +815,16 @@ static assn_map_t vcgen_loop(env_t env, exp_opt_t e1infor, stmt_opt_t s1indo,
   // these two steps are accomplished with canonical_assnmap and
   // unify_var_maps_subst
   while (true) {
+    //fprintf(stderr,"amin = %s\n",assnmap2string(amin));
     amin = canonical_assnmap(amin);
+    //fprintf(stderr,"canonical amin = %s\n",assnmap2string(amin));
     // merge(and widen) incoming flow with existing info on the loop
     let amold = lookup_stmt_assnmap(env,dummy);
-    amin = widen_assnmap(or_assnmap_assnmap(amold,amin));
+    //fprintf(stderr,"amold = %s\n",assnmap2string(amold));
+    amin = or_assnmap_assnmap(amold,amin);
+    //fprintf(stderr,"or with amold = %s\n",assnmap2string(amin));
+    amin = widen_assnmap(amin);
+    //fprintf(stderr,"widen or with amold = %s\n",assnmap2string(amin));
     replace_stmt_assnmap(env,dummy,amin);
     // combine the incoming flow with loop invariant
     if (loop_inv_exp != NULL) {
@@ -827,8 +833,10 @@ static assn_map_t vcgen_loop(env_t env, exp_opt_t e1infor, stmt_opt_t s1indo,
     // combine the incoming flow with the cond
     let $(amt,amf) = vcgen_test(env,cond,amin);
     amin = vcgen_stmt(env,body,amt);
+    //fprintf(stderr,"after body amin = %s\n",assnmap2string(amin));
     // merging in flow from continue statement
     amin = or_assnmap_assnmap(amin,*env->continue_assnmap);
+    //fprintf(stderr,"after merging with continue amin = %s\n",assnmap2string(amin));
     // if it's a for statement, evaluate e3 which is the
     // destination of the continue statement
     if (e3infor != NULL) {
@@ -855,6 +863,7 @@ static assn_map_t vcgen_loop(env_t env, exp_opt_t e1infor, stmt_opt_t s1indo,
     // now merging the old assnmap (which must be canonical) with new one
     let $(a1,a2,map) = unify_var_maps_subst(lookup_stmt_assnmap(env,dummy),amin);
     amin = AssnMap(a2,map);
+    //fprintf(stderr,"after unify_var_maps_subst amin = %s\n",assnmap2string(amin));
     // if we can prove the old one, we are done with the iteration
     if (implies(a2,a1)) {
       env->continue_assnmap = old_continue_assnmap;

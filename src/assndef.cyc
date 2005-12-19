@@ -478,11 +478,30 @@ term_t logicvar(vardecl_opt_t vd,int i,type_opt_t tp) {
   return hash_cons_term(&t);
 }
 term_t update(term_t t1, term_t t2, term_t t3) {
- LOOP:
+ LOOP1:
+  // if t2 = a.fi then we want to turn this into
+  // update(t1, a, aggr_update(select(t1,a), i, t3))
+  // JGM: this might be a bad idea -- the select could reduce
+  // to a large aggregate (which is fine because it will share)
+  // but then the aggregate update will reduce and change the
+  // aggregate (breaking the sharing...).  
+  switch (t2) {
+  case &Offsetf(a,i,tp):
+    t2 = a;
+    type_opt_t tpopt = NULL;
+    if (tp != NULL && Tcutil::is_pointer_type((type_t)tp))
+      tpopt = Tcutil::pointer_elt_type((type_t)tp);
+    t3 = aggr_update(select(t1,a,tp),i,t3);
+    goto LOOP1;
+  default:
+    break;
+  }
+  // if t1 == update(m,t2,_) then reduce to update(m,t2,t3).
+ LOOP2:
   switch (t1) {
   case &Update(m,t,_) && t == t2:
     t1 = m;
-    goto LOOP;
+    goto LOOP2;
   default: break;
   }
   let t = Update(t1,t2,t3);
@@ -492,9 +511,18 @@ term_t update(term_t t1, term_t t2, term_t t3) {
 term_t aggr_update(term_t t1, unsigned i, term_t t2) {
  LOOP:
   switch (t1) {
-  case &AggrUpdate(t,j,_) && i == j: 
-    t1 = t;
-    goto LOOP;
+  case &AggrUpdate(t,j,t3):
+    if (i == j) {
+      // aggr_update(aggr_update(t,i,_),i,t2) == aggr_update(t,i,t2)
+      t1 = t;
+      goto LOOP;
+    } 
+    if (i < j) {
+      // aggr_update(aggr_update(t,j,t3),i,t2) == 
+      //    aggr_update(aggr_update(t,i,t2),j,t3)
+      return aggr_update(aggr_update(t,i,t2),j,t3);
+    }
+    break;
   case &Aggr(is_union,tag,ts,tp):
     // for unions, we only have to update one field, but also the tag
     if (is_union) return aggr(is_union,i,list(t2),tp);
@@ -510,9 +538,10 @@ term_t aggr_update(term_t t1, unsigned i, term_t t2) {
     let res = aggr(is_union,tag,newts,tp);
     return res;
   default:
-    let t = AggrUpdate(t1,i,t2);
-    return hash_cons_term(&t);
+    break;
   }
+  let t = AggrUpdate(t1,i,t2);
+  return hash_cons_term(&t);
 }
 
 static bool address_disjoint(term_t t1, term_t t2);
@@ -2140,6 +2169,96 @@ static bool logicvar_in_map(term_t lv, nonescvar_map_t m) {
   return Dict::fold_c(logicvar_in_map_internal,lv,m,false);
 }
 
+// if ta = f(t1,...,tn) and tb = f(u1,...,un) then return
+//     f(v1,...,vn) where vi = unify_term(ti,ui)
+// if ta and tb do not unify, then pick a fresh variable x and
+//    add x==ta to the accumulator's a1, and x==tb to a2, and
+//    return x.
+// 
+static term_t unify_term(accum_t @`r accum, term_t ta, term_t tb) {
+  if (ta == tb) return ta;
+  switch $(ta,tb) {
+  case $(&Unop(pa,ta1,topta),&Unop(pb,tb1,toptb)) && pa == pb:
+    let t1 = unify_term(accum,ta1,tb1);
+    return unop(pa,t1,topta);
+  case $(&Binop(pa,ta1,ta2,topta),&Binop(pb,tb1,tb2,toptb)) && pa == pb:
+    let t1 = unify_term(accum,ta1,tb1);
+    let t2 = unify_term(accum,ta2,tb2);
+    return binop(pa,t1,t2,topta);
+  case $(&Cast(atype,ta1),&Cast(btype,tb1)):
+    if (!Unify::unify(atype,btype)) break;
+    let t1 = unify_term(accum,ta1,tb1);
+    return cast(atype,t1);
+  case $(&Select(ma,aa,ta),&Select(mb,ab,tb)):
+    let m = unify_term(accum,ma,mb);
+    let a = unify_term(accum,aa,ab);
+    return select(m,a,ta);
+  case $(&Update(ma,aa,va),&Update(mb,ab,vb)):
+    if (aa == ab) {
+      let m = unify_term(accum,ma,mb);
+      let v = unify_term(accum,va,vb);
+      return update(m,aa,v);
+    } else {
+      let t1 = update(update(ma,ab,select(ma,ab,get_term_type(vb))),aa,va);
+      let t2 = update(update(mb,ab,vb),aa,select(update(mb,ab,vb),aa,get_term_type(va)));
+      return unify_term(accum,t1,t2);
+    }
+    /*
+    let m = unify_term(accum,ma,mb);
+    let a = unify_term(accum,aa,ab);
+    let v = unify_term(accum,va,vb);
+    return update(m,a,v);
+    */
+  case $(&Aggr(aisu, atag, ats, atopt),&Aggr(bisu, btag, bts, btopt)):
+    if (aisu != bisu || atag != btag || length(ats) != length(bts)) break;
+    let ts = NULL;
+    for (; ats != NULL && bts != NULL; ats=ats->tl, bts=bts->tl)
+      ts = new List{unify_term(accum,ats->hd,bts->hd),ts};
+    return aggr(aisu,atag,imp_rev(ts),atopt);
+  case $(&Proj(at,ai,atopt),&Proj(bt,bi,btopt)) && ai == bi:
+    let t = unify_term(accum,at,bt);
+    return proj(t,ai,atopt);
+  case $(&AggrUpdate(at,ai,av),&AggrUpdate(bt,bi,bv)):
+    if (ai == bi) {
+      let t = unify_term(accum,at,bt);
+      let v = unify_term(accum,av,bv);
+      return aggr_update(t,ai,v);
+    } else {
+      let t1 = aggr_update(aggr_update(ta,bi,proj(ta,bi,get_term_type(bv))),ai,av);
+      let t2 = aggr_update(aggr_update(tb,bi,bv),ai,proj(aggr_update(tb,bi,bv),ai,get_term_type(av)));
+      return unify_term(accum,t1,t2);
+    }
+  case $(&Addr(ax,ai,atopt),&Addr(bx,bi,btopt)) && (int)ax == (int)bx:
+    let i = unify_term(accum,ai,bi);
+    return addr(ax,i);
+  // FIX: we should make the "id" field of Alloc's a term instead of
+  // an int.  In particular, VCGen should have a mapping from alloc
+  // fields to a term counter that we increment each time we allocate.
+  case $(&Offsetf(at,ai,atopt),&Offsetf(bt,bi,btopt)) && ai == bi:
+    let t = unify_term(accum,at,bt);
+    return offsetf(t,ai,atopt);
+  case $(&Offseti(at,ai,atopt),&Offseti(bt,bi,btopt)):
+    let t = unify_term(accum,at,bt);
+    let i = unify_term(accum,ai,bi);
+    return offseti(t,i,atopt);
+  case $(&Tagof(at),&Tagof(bt)):
+    let t = unify_term(accum,at,bt);
+    return tagof_tm(t);
+  default: break;
+  }
+  type_opt_t topta = get_term_type(ta);
+  type_opt_t toptb = get_term_type(tb);
+  type_opt_t topt = NULL;
+  if (topta != NULL && toptb != NULL && Unify::unify((type_t)topta,
+                                                     (type_t)toptb))
+    topt = topta;
+  let v = fresh_var(topt);
+  accum->a1 = and(accum->a1,eq(v,ta));
+  accum->a2 = and(accum->a2,eq(v,tb));
+  return v;
+
+}
+
 // helper function used when we are folding in am1.map
 // for each vd in am1.map, we look it up in am2.map and
 // adjust the new map and assertions accordingly
@@ -2212,12 +2331,10 @@ static accum_t @`r foldm1(vardecl_t vd, term_t t, accum_t @`r accum){
   default:
     break;
   }
-  let v = fresh_var(vd->type);
-  accum->a1 = and(accum->a1,eq(v,t));
-  accum->a2 = and(accum->a2,eq(v,*t2));
-  accum->m1 = Dict::insert(accum->m1,vd,v);
-  accum->m2 = Dict::insert(accum->m2,vd,v);
-  accum->m = Dict::insert(accum->m,vd,v);
+  let newt = unify_term(accum,t,*t2);
+  accum->m1 = Dict::insert(accum->m1,vd,newt);
+  accum->m2 = Dict::insert(accum->m2,vd,newt);
+  accum->m = Dict::insert(accum->m,vd,newt);
   return accum;
 }
 

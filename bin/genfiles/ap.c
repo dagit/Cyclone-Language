@@ -712,7 +712,7 @@ char sign='\000';
 int carry;
 (unsigned)p.curr?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp0;})(_tag_fat("p",sizeof(char),2U),_tag_fat("ap.cyc",sizeof(char),7U),341U);
 base >= 2 && base <= 36?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp0;})(_tag_fat("base >= 2 && base <= 36",sizeof(char),24U),_tag_fat("ap.cyc",sizeof(char),7U),342U);
-while((int)*((const char*)_check_fat_subscript(p,sizeof(char),0U))&& isspace((int)*((const char*)p.curr))){
+while((int)*((const char*)p.curr)&& isspace((int)*((const char*)p.curr))){
 _fat_ptr_inplace_plus(& p,sizeof(char),1);1U;}
 if((int)*((const char*)p.curr)==45 ||(int)*((const char*)p.curr)==43)
 sign=*((const char*)_fat_ptr_inplace_plus_post(& p,sizeof(char),1).curr);
@@ -731,7 +731,7 @@ for(k=1;1 << k < base;++ k){
 z=Cyc_mk((k * n + 7 & 4294967288U)/ 8);
 p=({const char*_Tmp0=start;_tag_fat((void*)_Tmp0,sizeof(char),_get_zero_arr_size_char((void*)_Tmp0,1U));});}
 # 362
-carry=Cyc_XP_fromstr(z->size,z->digits,(const char*)_untag_fat_ptr(p,sizeof(char),1U),base);
+carry=({int _Tmp0=z->size;struct _fat_ptr _Tmp1=z->digits;const char*_Tmp2=(const char*)_untag_fat_ptr_check_bound(p,sizeof(char),1U);Cyc_XP_fromstr(_Tmp0,_Tmp1,_Tmp2,base);});
 # 364
 carry==0?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp0;})(_tag_fat("carry == 0",sizeof(char),11U),_tag_fat("ap.cyc",sizeof(char),7U),364U);
 Cyc_normalize(z,z->size);

@@ -378,7 +378,7 @@ static type_t tcUnPrimop(tenv_t te, seg_t loc, type_t * topt,
       }
       else {
 	let eopt = get_bounds_exp(fat_bound_type,b);
-	if (eopt != NULL && !Evexp::c_can_eval(eopt) && !allow_valueof)
+	if (eopt != NULL && !Evexp::c_can_eval(eopt) && !te->allow_valueof)
 	  Warn::err2(loc,"cannot use numelts on a pointer with abstract bounds");
       }
       break;
