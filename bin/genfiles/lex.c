@@ -572,7 +572,7 @@ if(one_ch==(int)*((const char*)_check_fat_subscript(buff,sizeof(char),(int)i)))
 t=one_trie;else{
 # 325
 struct Cyc_Lex_Trie**arr=({unsigned _Tmp3=65U;({struct Cyc_Lex_Trie**_Tmp4=({struct _RegionHandle*_Tmp5=r;_region_malloc(_Tmp5,0U,_check_times(_Tmp3,sizeof(struct Cyc_Lex_Trie*)));});({{unsigned _Tmp5=65U;unsigned j;for(j=0;j < _Tmp5;++ j){_Tmp4[j]=0;}}0;});_Tmp4;});});
-*((struct Cyc_Lex_Trie**)({typeof(arr )_Tmp3=arr;_check_known_subscript_notnull(_Tmp3,65U,sizeof(struct Cyc_Lex_Trie*),Cyc_Lex_trie_char(one_ch));}))=one_trie;{
+*((struct Cyc_Lex_Trie**)({struct Cyc_Lex_Trie**_Tmp3=arr;_check_known_subscript_notnull(_Tmp3,65U,sizeof(struct Cyc_Lex_Trie*),Cyc_Lex_trie_char(one_ch));}))=one_trie;{
 int ch=Cyc_Lex_trie_char((int)((const char*)buff.curr)[(int)i]);
 ({struct Cyc_Lex_Trie*_Tmp3=({struct Cyc_Lex_Trie*_Tmp4=_region_malloc(r,0U,sizeof(struct Cyc_Lex_Trie));({union Cyc_Lex_TrieChildren _Tmp5=Cyc_Lex_Zero();_Tmp4->children=_Tmp5;}),_Tmp4->shared_str=0;_Tmp4;});*((struct Cyc_Lex_Trie**)_check_known_subscript_notnull(arr,65U,sizeof(struct Cyc_Lex_Trie*),ch))=_Tmp3;});
 ({union Cyc_Lex_TrieChildren _Tmp3=Cyc_Lex_Many(arr);t->children=_Tmp3;});
@@ -774,7 +774,7 @@ union Cyc_Lex_TrieChildren _Tmp4=_check_null(t)->children;void*_Tmp5;int _Tmp6;s
 return 0;}else{_Tmp5=_Tmp4.One.val.f1;{struct Cyc_Lex_Trie*one_trie=_Tmp5;
 t=one_trie;goto _LL3;}}default: _Tmp5=_Tmp4.Many.val;{struct Cyc_Lex_Trie**arr=_Tmp5;
 # 572
-struct Cyc_Lex_Trie*next=*((struct Cyc_Lex_Trie**)({typeof(arr )_Tmp7=arr;_check_known_subscript_notnull(_Tmp7,65U,sizeof(struct Cyc_Lex_Trie*),Cyc_Lex_trie_char((int)*((const char*)_check_fat_subscript(s,sizeof(char),i))));}));
+struct Cyc_Lex_Trie*next=*((struct Cyc_Lex_Trie**)({struct Cyc_Lex_Trie**_Tmp7=arr;_check_known_subscript_notnull(_Tmp7,65U,sizeof(struct Cyc_Lex_Trie*),Cyc_Lex_trie_char((int)*((const char*)_check_fat_subscript(s,sizeof(char),i))));}));
 if(next==0)
 return 0;
 t=next;

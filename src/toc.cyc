@@ -1093,11 +1093,16 @@ static bool do_null_check(exp_t e) {
 // shared by exp_to_c cases for Subscript_e, AggrArrow_e, and Deref_e
 // translates and mutates ptr by adding necessary checks
 // input: no index means 0 (usually leads to smaller code than actually using 0)
-// result: true means the index has **already been calculated in mutated ptr**
-//         (result is irrelevant to caller when index is NULL)
-static bool ptr_use_to_c(env_t nv, exp_t ptr, absyn_annot_t annot,
-			 exp_opt_t index) {
-  bool  ans;
+// result: DIRECT_DEREF means the index has **already been calculated in mutated ptr** so
+//         caller should drop the index and just do a dereference.  Drop subscript just
+//         means that caller shouldn't do a dereference and should drop subscript.
+//         LEAVE_SUBSCRIPT means to leave the expression as a subscript operation.
+//   (result is irrelevant to caller when index is NULL)
+enum PTR_ANS { DIRECT_DEREF, DROP_SUBSCRIPT, LEAVE_SUBSCRIPT};
+
+static enum PTR_ANS ptr_use_to_c(env_t nv, exp_t ptr, absyn_annot_t annot,
+                                 exp_opt_t index) {
+  enum PTR_ANS  ans;
   let   old_lhs = in_lhs(nv);
   let   old_typ = compress((type_t)ptr->topt);
   let   new_typ = typ_to_c(old_typ);
@@ -1117,7 +1122,7 @@ static bool ptr_use_to_c(env_t nv, exp_t ptr, absyn_annot_t annot,
 	ptr->r = cast_it_r(newt,member_exp(new_exp(ptr->r,DL),curr_sp,DL));
         ptr->topt = newt;
       }
-      ans = false;
+      ans = LEAVE_SUBSCRIPT;
       break;
     case &InsertChecks::NullOnly:
       if(!get_bounds_exp_constrain(bounds_one(),b,true)) {
@@ -1134,7 +1139,7 @@ static bool ptr_use_to_c(env_t nv, exp_t ptr, absyn_annot_t annot,
       }
       // _check_null(e)
       ptr->r=fncall_exp_dl(_check_null_e,new_exp(ptr->r,0))->r;
-      ans = false;
+      ans = LEAVE_SUBSCRIPT;
       break;
     case &InsertChecks::NullAndFatBound: fallthru; // null check comes for free
     case &InsertChecks::FatBound:
@@ -1147,7 +1152,7 @@ static bool ptr_use_to_c(env_t nv, exp_t ptr, absyn_annot_t annot,
 					     sizeoftype_exp(ta1,DL),
 					     ind));
       ptr->topt = newt;
-      ans = true;
+      ans = DIRECT_DEREF;
       break;
     case &InsertChecks::NullAndThinBound(bd):
       fn_e = _check_known_subscript_null_e;
@@ -1161,17 +1166,31 @@ static bool ptr_use_to_c(env_t nv, exp_t ptr, absyn_annot_t annot,
       let $(i,valid) = Evexp::eval_const_uint_exp(bd);
       if(!valid || i != 1 || !is_zeroterm_pointer_type((type_t)ptr->topt)) {
 	// ((ta1*)_fn_e(e1, esz, sizeof(ta1), ind)
-	ptr->r = cast_it_r(cstar_type(ta1,tq),
-			   fncall_exp_dl(fn_e, new_exp(ptr->r,DL),
-					 bd, sizeoftype_exp(ta1,DL), ind));
-	ans = true;
+        // JGM: must do something different when ta1 is an array type.
+        let newp = new_exp(ptr->r,DL);
+        switch (Absyn::compress(ta1)) {
+        case &ArrayType(ainfo):
+          newp->topt = cstar_type(ainfo.elt_type,tq);
+          ptr->r = cast_it_r(cstar_type(ainfo.elt_type,tq),
+                             fncall_exp_dl(fn_e, newp,
+                                           bd, times_exp(ainfo.num_elts,sizeoftype_exp(ainfo.elt_type,DL),0), ind));
+          ans = DROP_SUBSCRIPT;
+          break;
+        default:
+          newp->topt = cstar_type(ta1,tq);
+          ptr->r = cast_it_r(cstar_type(ta1,tq),
+                             fncall_exp_dl(fn_e, newp,
+                                           bd, sizeoftype_exp(ta1,DL), ind));
+          ans = DIRECT_DEREF;
+          break;
+        }
       } else {
 	// special case: null-check suffices when ind is zero
 	if(is_zero(bd)) {
 	  if(fn_e == _check_known_subscript_null_e)
 	    // _check_null(e))
 	    ptr->r = fncall_exp_dl(_check_null_e, new_exp(ptr->r,0))->r;
-	  ans = false;
+	  ans = LEAVE_SUBSCRIPT;
 	} else {
 	  // get the right run-time function (always does a null-check)
 	  // *((ta2)_zero_arr_plus(e1, esz, e2)
@@ -1183,7 +1202,7 @@ static bool ptr_use_to_c(env_t nv, exp_t ptr, absyn_annot_t annot,
 			       fncall_exp_dl(_zero_arr_plus_other_e,
 					     sizeoftype_exp(pointer_elt_type(typ_to_c(old_typ)),DL),
 					     new_exp(ptr->r,0),bd,ind));
-	  ans = true;
+	  ans = DIRECT_DEREF;
 	}
       }
       break;
@@ -2320,9 +2339,11 @@ static void exp_to_c(env_t nv, exp_t e) {
     break;
   case &Subscript_e(e1,e2):
     did_inserted_checks = true;
-    bool index_used = ptr_use_to_c(nv,e1,e->annot,e2);
-    if(index_used)
+    enum PTR_ANS res = ptr_use_to_c(nv,e1,e->annot,e2);
+    if(res == DIRECT_DEREF)
       e->r = deref_exp_r(e1);
+    else if (res == DROP_SUBSCRIPT)
+      e->r = e1->r;
     break;
   case &Array_e(dles0):
     // We now leave this to RemoveAggrs, which converts this to assignments
