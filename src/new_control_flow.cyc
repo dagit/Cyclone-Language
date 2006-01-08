@@ -2064,7 +2064,10 @@ static $(flow_t,flow_t) anal_primop_test(analenv_t env, flow_t inflow,
 
     // bypass any non-relational primop
     switch (p) {
-    case Eq: case Neq: case Gt: case Gte: case Lt: case Lte: break;
+    case Eq: case Neq: 
+    case Gt: case Gte: case Lt: case Lte: 
+    case UGt: case UGte: case ULt: case ULte: 
+      break;
     default: return $(ft,ff);
     }
 

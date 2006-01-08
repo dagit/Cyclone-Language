@@ -116,7 +116,9 @@ static $(cnst_t,bool) eval_const_binprimop(primop_t p,exp_t e1,exp_t e2) {
   default: return $(cn1,false);
   }
   switch (p) {
+  case UDiv:
   case Div:
+  case UMod:
   case Mod:
     if(i2 != 0)
       break;
@@ -139,21 +141,33 @@ static $(cnst_t,bool) eval_const_binprimop(primop_t p,exp_t e1,exp_t e2) {
   case $(Minus,    false): i3 = i1 -  i2; use_i3 = true; break;
   case $(Div,      false): i3 = i1 /  i2; use_i3 = true; break;
   case $(Mod,      false): i3 = i1 %  i2; use_i3 = true; break;
+  case $(Div, _): Warn::impos("evexp: signed division on unsigned args!");
+  case $(Mod, _): Warn::impos("evexp: signed mod on unsigned args!");
   case $(Plus,      true): u3 = u1 +  u2; use_u3 = true; break;
   case $(Times,     true): u3 = u1 *  u2; use_u3 = true; break;
   case $(Minus,     true): u3 = u1 -  u2; use_u3 = true; break;
-  case $(Div,       true): u3 = u1 /  u2; use_u3 = true; break;
-  case $(Mod,       true): u3 = u1 %  u2; use_u3 = true; break;
+  case $(UDiv,      true): u3 = u1 /  u2; use_u3 = true; break;
+  case $(UMod,      true): u3 = u1 %  u2; use_u3 = true; break;
+  case $(UDiv, _): Warn::impos("evexp: unsigned division on signed args!");
+  case $(UMod, _): Warn::impos("evexp: unsigned mod on signed args!");
   case $(Eq,           _): b3 = i1 == i2; use_b3 = true; break;
   case $(Neq,          _): b3 = i1 != i2; use_b3 = true; break;
   case $(Gt,       false): b3 = i1 >  i2; use_b3 = true; break;
   case $(Lt,       false): b3 = i1 <  i2; use_b3 = true; break;
   case $(Gte,      false): b3 = i1 >= i2; use_b3 = true; break;
   case $(Lte,      false): b3 = i1 <= i2; use_b3 = true; break;
-  case $(Gt,        true): b3 = u1 >  u2; use_b3 = true; break;
-  case $(Lt,        true): b3 = u1 <  u2; use_b3 = true; break;
-  case $(Gte,       true): b3 = u1 >= u2; use_b3 = true; break;
-  case $(Lte,       true): b3 = u1 <= u2; use_b3 = true; break;
+  case $(Gt,  _): 
+  case $(Lt,  _): 
+  case $(Gte, _): 
+  case $(Lte, _): Warn::impos("evexp: signed comparison on unsigned args!");
+  case $(UGt,       true): b3 = u1 >  u2; use_b3 = true; break;
+  case $(ULt,       true): b3 = u1 <  u2; use_b3 = true; break;
+  case $(UGte,      true): b3 = u1 >= u2; use_b3 = true; break;
+  case $(ULte,      true): b3 = u1 <= u2; use_b3 = true; break;
+  case $(UGt,  _): 
+  case $(ULt,  _): 
+  case $(UGte, _): 
+  case $(ULte, _): Warn::impos("evexp: unsigned comparison on signed args!");
   case $(Bitand,       _): u3 = u1 &  u2; use_u3 = true; break;
   case $(Bitor,        _): u3 = u1 |  u2; use_u3 = true; break;
   case $(Bitxor,       _): u3 = u1 ^  u2; use_u3 = true; break;

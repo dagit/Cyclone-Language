@@ -1342,7 +1342,8 @@ static ctype_t gen_primop(cenv_t env, primop_t p, list_t<ctype_t> args) {
     }
   case Times: case Div: case Mod: case Eq: case Neq: case Lt: case Gt:
   case Lte: case Gte: case Bitand: case Bitor: case Bitxor: case Bitlshift:
-  case Bitlrshift:
+  case Bitlrshift: case UDiv: case UMod: case ULt: case UGt: case ULte: 
+  case UGte:
     leq(arg1,arith_ct());
     leq(arg2s->hd,arith_ct());
     return arith_ct();

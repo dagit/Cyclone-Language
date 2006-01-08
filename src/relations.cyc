@@ -546,6 +546,10 @@ $(Absyn::exp_t,relation_t,Absyn::exp_t) primop2relation(Absyn::exp_t e1,Absyn::p
   case Absyn::Lte: return $(e1,Rlte,e2);
   case Absyn::Gt: return $(e2,Rlt,e1);
   case Absyn::Gte: return $(e2,Rlte,e1);
+  case Absyn::ULt: return $(e1,Rlt,e2);
+  case Absyn::ULte: return $(e1,Rlte,e2);
+  case Absyn::UGt: return $(e2,Rlt,e1);
+  case Absyn::UGte: return $(e2,Rlte,e1);
   default: Tcutil::impos("primop2relation");
   }
 }
@@ -584,7 +588,9 @@ relns_t<`r> exp2relns(region_t<`r> r, Absyn::exp_t e) {
   case &And_e(e1,e2): return rappend(r,exp2relns(r,e1),exp2relns(r,e2));
   case &Primop_e(Not,&List{&Exp{.r = &Primop_e(p,&List(e1,&List(e2,NULL))),...},NULL}):
     switch (p) {
-    case Eq: case Neq: case Lt: case Lte: case Gt: case Gte:
+    case Eq: case Neq: 
+    case Lt: case Lte: case Gt: case Gte:
+    case ULt: case ULte: case UGt: case UGte:
       let $(e1,rln,e2) = primop2relation(e1,p,e2);
       reln_op_t rop1 = RConst(0); // dummy value
       reln_op_t rop2 = RConst(0); // dummy value
@@ -596,7 +602,9 @@ relns_t<`r> exp2relns(region_t<`r> r, Absyn::exp_t e) {
     break;
   case &Primop_e(p,&List(e1,&List(e2,NULL))):
     switch (p) {
-    case Eq: case Neq: case Lt: case Lte: case Gt: case Gte:
+    case Eq: case Neq: 
+    case Lt: case Lte: case Gt: case Gte:
+    case ULt: case ULte: case UGt: case UGte:
       let $(e1,rln,e2) = primop2relation(e1,p,e2);
       reln_op_t rop1 = RConst(0); // dummy value
       reln_op_t rop2 = RConst(0); // dummy value

@@ -1127,13 +1127,19 @@ int exp_prec(exp_t e) {
     case Times:          return 110;
     case Minus:          return 100;
     case Div:
-    case Mod:            return 110;
+    case UDiv:
+    case Mod: 
+    case UMod:           return 110;
     case Eq:
     case Neq:            return  70;
     case Gt:
     case Lt:
     case Gte:
-    case Lte:            return  80;
+    case Lte:
+    case UGt:
+    case ULt:
+    case UGte:
+    case ULte:            return  80;
     case Not:
     case Bitnot:         return 130;
     case Bitand:         return  60;
@@ -1518,13 +1524,19 @@ string_t prim2str(primop_t p) {
   case Plus: return "+";
   case Times: return "*";
   case Minus: return "-";
+  case UDiv:
   case Div: return "/";
+  case UMod:
   case Mod: return (print_for_cycdoc?"\\%":"%");
   case Eq: return "==";
   case Neq: return "!=";
+  case UGt:
   case Gt: return ">";
+  case ULt:
   case Lt: return "<";
+  case UGte:
   case Gte: return ">=";
+  case ULte:
   case Lte: return "<=";
   case Not: return "!";
   case Bitnot: return "~";

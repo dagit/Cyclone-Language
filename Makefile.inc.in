@@ -246,7 +246,9 @@ BUILDLIB_SRCS:=buildlib\
 	absyn\
 	$(BANSHEE_STUB)
 
-NOOPT_SRCS:= #parse_tab parse_tab_a parse_tab_pg
+# We can't optimize these files because the use try/catch and GCC 4.x
+# and our implementation of try/catch do not get along.
+NOOPT_SRCS:= parse_tab parse_tab_a parse_tab_pg pratt_prover binding callgraph cifc cyclone interface tc tcenv tcexp tcpat tctyp tcutil toc unify
 
 # Add XML library .h files to CYCLONE_H
 ifndef NO_XML_LIB

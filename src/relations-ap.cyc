@@ -566,6 +566,10 @@ $(Absyn::exp_t,relation_t,Absyn::exp_t) primop2relation(Absyn::exp_t e1,Absyn::p
   case Absyn::Lte: return $(e1,Rlte,e2);
   case Absyn::Gt: return $(e2,Rlt,e1);
   case Absyn::Gte: return $(e2,Rlte,e1);
+  case Absyn::ULt: return $(e1,Rlt,e2);
+  case Absyn::ULte: return $(e1,Rlte,e2);
+  case Absyn::UGt: return $(e2,Rlt,e1);
+  case Absyn::UGte: return $(e2,Rlte,e1);
   default: Warn::impos("primop2relation");
   }
 }

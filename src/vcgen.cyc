@@ -735,7 +735,7 @@ static $(term_t,assn_map_t) vcgen_binop(env_t env, type_opt_t tp_opt,
   let t = binop(p,t1,t2,tp);
   // if the expression has type unsigned, then we may
   // conclude t == t1%t2 u< t2;
-  if (!env->pure_exp && p == Absyn::Mod && Unify::unify(Absyn::uint_type,tp))
+  if (!env->pure_exp && p == Absyn::UMod && Unify::unify(Absyn::uint_type,tp))
     am = and_assnmap_assn(am,ult(t,t2));
   return $(t,am);
 }
@@ -806,6 +806,22 @@ static assn_map_t vcgen_loop(env_t env, exp_opt_t e1infor, stmt_opt_t s1indo,
     return true_assnmap();
   }
 
+  // Before entering the loop, force all program variables that
+  // change in the body of the loop to be bound to fresh variables.
+  // This eliminates any dependency between these values and those
+  // that happen to be loop-invariant.
+  vardecl_set_t changed = calc_changed_vars_exp(cond);
+  changed = Set::union_two(changed,calc_changed_vars_stmt(body));
+  if (e3infor != NULL) 
+    changed = Set::union_two(changed,calc_changed_vars_exp((exp_t)e3infor));
+#ifdef VCGEN_DEBUG_LOOP
+  fprintf(stderr,"before loop amin = %s\n",assnmap2string(amin));
+#endif
+  amin = force_canonical(changed,amin);
+#ifdef VCGEN_DEBUG_LOOP
+  fprintf(stderr,"force_canonical amin = %s\n",assnmap2string(amin));
+#endif  
+
   // now comes the tricky part, in order to ensure matching mapping
   // for non-escaping vars at the end of each iteration, we do two
   // things, first we make sure the initial mapping is of the form
@@ -815,16 +831,26 @@ static assn_map_t vcgen_loop(env_t env, exp_opt_t e1infor, stmt_opt_t s1indo,
   // these two steps are accomplished with canonical_assnmap and
   // unify_var_maps_subst
   while (true) {
-    //fprintf(stderr,"amin = %s\n",assnmap2string(amin));
+#ifdef VCGEN_DEBUG_LOOP
+    fprintf(stderr,"amin = %s\n",assnmap2string(amin));
+#endif
     amin = canonical_assnmap(amin);
-    //fprintf(stderr,"canonical amin = %s\n",assnmap2string(amin));
+#ifdef VCGEN_DEBUG_LOOP
+    fprintf(stderr,"canonical amin = %s\n",assnmap2string(amin));
+#endif
     // merge(and widen) incoming flow with existing info on the loop
     let amold = lookup_stmt_assnmap(env,dummy);
-    //fprintf(stderr,"amold = %s\n",assnmap2string(amold));
+#ifdef VCGEN_DEBUG_LOOP
+    fprintf(stderr,"amold = %s\n",assnmap2string(amold));
+#endif
     amin = or_assnmap_assnmap(amold,amin);
-    //fprintf(stderr,"or with amold = %s\n",assnmap2string(amin));
+#ifdef VCGEN_DEBUG_LOOP
+    fprintf(stderr,"or with amold = %s\n",assnmap2string(amin));
+#endif
     amin = widen_assnmap(amin);
-    //fprintf(stderr,"widen or with amold = %s\n",assnmap2string(amin));
+#ifdef VCGEN_DEBUG_LOOP
+    fprintf(stderr,"widen or with amold = %s\n",assnmap2string(amin));
+#endif
     replace_stmt_assnmap(env,dummy,amin);
     // combine the incoming flow with loop invariant
     if (loop_inv_exp != NULL) {
@@ -833,10 +859,14 @@ static assn_map_t vcgen_loop(env_t env, exp_opt_t e1infor, stmt_opt_t s1indo,
     // combine the incoming flow with the cond
     let $(amt,amf) = vcgen_test(env,cond,amin);
     amin = vcgen_stmt(env,body,amt);
-    //fprintf(stderr,"after body amin = %s\n",assnmap2string(amin));
+#ifdef VCGEN_DEBUG_LOOP
+    fprintf(stderr,"after body amin = %s\n",assnmap2string(amin));
+#endif
     // merging in flow from continue statement
     amin = or_assnmap_assnmap(amin,*env->continue_assnmap);
-    //fprintf(stderr,"after merging with continue amin = %s\n",assnmap2string(amin));
+#ifdef VCGEN_DEBUG_LOOP
+    fprintf(stderr,"after merging with continue amin = %s\n",assnmap2string(amin));
+#endif
     // if it's a for statement, evaluate e3 which is the
     // destination of the continue statement
     if (e3infor != NULL) {
@@ -863,7 +893,9 @@ static assn_map_t vcgen_loop(env_t env, exp_opt_t e1infor, stmt_opt_t s1indo,
     // now merging the old assnmap (which must be canonical) with new one
     let $(a1,a2,map) = unify_var_maps_subst(lookup_stmt_assnmap(env,dummy),amin);
     amin = AssnMap(a2,map);
-    //fprintf(stderr,"after unify_var_maps_subst amin = %s\n",assnmap2string(amin));
+#ifdef VCGEN_DEBUG_LOOP
+    fprintf(stderr,"after unify_var_maps_subst amin = %s\n",assnmap2string(amin));
+#endif
     // if we can prove the old one, we are done with the iteration
     if (implies(a2,a1)) {
       env->continue_assnmap = old_continue_assnmap;
@@ -1471,34 +1503,22 @@ static $(assn_map_t,assn_map_t) vcgen_test(env_t env, exp_t e, assn_map_t ain){
       break;
     case Absyn::Neq:
       at = and_assnmap_assn(at,neq(t1,t2)); af = and_assnmap_assn(af,eq(t1,t2)); break;
+    case Absyn::ULt:
+      at = and_assnmap_assn(at,ult(t1,t2));  af = and_assnmap_assn(af,ugte(t1,t2)); break;
     case Absyn::Lt:
-      if (unsigned_comparison(e1,e2)) {
-        at = and_assnmap_assn(at,ult(t1,t2));  af = and_assnmap_assn(af,ugte(t1,t2));
-      } else {
-        at = and_assnmap_assn(at,slt(t1,t2));  af = and_assnmap_assn(af,sgte(t1,t2));
-      }
-      break;
+      at = and_assnmap_assn(at,slt(t1,t2));  af = and_assnmap_assn(af,sgte(t1,t2)); break;
+    case Absyn::ULte:
+      at = and_assnmap_assn(at,ulte(t1,t2)); af = and_assnmap_assn(af,ugt(t1,t2)); break;
     case Absyn::Lte:
-      if (unsigned_comparison(e1,e2)) {
-        at = and_assnmap_assn(at,ulte(t1,t2)); af = and_assnmap_assn(af,ugt(t1,t2));
-      } else {
-        at = and_assnmap_assn(at,slte(t1,t2)); af = and_assnmap_assn(af,sgt(t1,t2));
-      }
-      break;
+      at = and_assnmap_assn(at,slte(t1,t2)); af = and_assnmap_assn(af,sgt(t1,t2)); break;
+    case Absyn::UGt:
+      at = and_assnmap_assn(at,ugt(t1,t2));  af = and_assnmap_assn(af,ulte(t1,t2)); break;
     case Absyn::Gt:
-      if (unsigned_comparison(e1,e2)) {
-        at = and_assnmap_assn(at,ugt(t1,t2));  af = and_assnmap_assn(af,ulte(t1,t2));
-      } else {
-        at = and_assnmap_assn(at,sgt(t1,t2));  af = and_assnmap_assn(af,slte(t1,t2));
-      }
-      break;
+      at = and_assnmap_assn(at,sgt(t1,t2));  af = and_assnmap_assn(af,slte(t1,t2)); break;
+    case Absyn::UGte:
+      at = and_assnmap_assn(at,ugte(t1,t2)); af = and_assnmap_assn(af,ult(t1,t2)); break;
     case Absyn::Gte:
-      if (unsigned_comparison(e1,e2)) {
-        at = and_assnmap_assn(at,ugte(t1,t2)); af = and_assnmap_assn(af,ult(t1,t2));
-      } else {
-        at = and_assnmap_assn(at,sgte(t1,t2)); af = and_assnmap_assn(af,slt(t1,t2));
-      }
-      break;
+      at = and_assnmap_assn(at,sgte(t1,t2)); af = and_assnmap_assn(af,slt(t1,t2)); break;
     default:
       let $(t,am) = vcgen_binop(env,e->topt,p,t1,t2,at);
       at = and_assnmap_assn(at,ugte(t,one()));

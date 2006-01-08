@@ -1726,7 +1726,9 @@ static void exp_to_c(env_t nv, exp_t e) {
 			      prim1_exp(Minus,e2,DL));
       }
       break;
-    case Eq: case Neq: case Gt: case Gte: case Lt: case Lte:
+    case Eq: case Neq: 
+    case Gt: case Gte: case Lt: case Lte:
+    case UGt: case UGte: case ULt: case ULte:
       // need to extract .curr field of fat arrays for comparisons
       exp_t e1 = es->hd;
       exp_t e2 = es->tl->hd;

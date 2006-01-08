@@ -851,7 +851,7 @@ static void Cyc_Sexp_print_tuple(struct _tuple10*self,struct Cyc_Sexp_Printer*p)
 struct _fat_ptr vs=self->v;
 unsigned n=_get_fat_size(vs,sizeof(struct Cyc_Sexp_Object));
 unsigned i=0U;for(0;i < n;++ i){
-Cyc_Sexp_print(p,*((struct Cyc_Sexp_Object*)_check_fat_subscript(vs,sizeof(struct Cyc_Sexp_Object),(int)i)));}}
+Cyc_Sexp_print(p,((struct Cyc_Sexp_Object*)vs.curr)[(int)i]);}}
 # 669
 static int Cyc_Sexp_hash_tuple(struct _tuple10*x){
 unsigned res=0U;
@@ -872,7 +872,7 @@ unsigned ny=_get_fat_size(ys,sizeof(struct Cyc_Sexp_Object));
 if(nx < ny)return -1;
 if(nx > ny)return 1;
 {unsigned i=0U;for(0;i < nx;++ i){
-int c=({struct Cyc_Sexp_Object _Tmp0=*((struct Cyc_Sexp_Object*)_check_fat_subscript(xs,sizeof(struct Cyc_Sexp_Object),(int)i));Cyc_Sexp_cmp(_Tmp0,*((struct Cyc_Sexp_Object*)_check_fat_subscript(ys,sizeof(struct Cyc_Sexp_Object),(int)i)));});
+int c=Cyc_Sexp_cmp(((struct Cyc_Sexp_Object*)xs.curr)[(int)i],((struct Cyc_Sexp_Object*)ys.curr)[(int)i]);
 if(c!=0)return c;}}
 # 693
 return 0;}}

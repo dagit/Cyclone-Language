@@ -476,7 +476,7 @@ static void do_exp(env_t nv, exp_t e) {
         // try to eliminate the check using the vcgen.
         bds_ck = need_bounds_check_vcgen(nv, e1);
       if (bds_ck && Flags::warn_bounds_checks)
-        warn(e1->loc,"inserted bounds check (location is pointer expression)");
+        warn(e1->loc,"inserted bounds check at %s",Absynpp::exp2string(e));
       exp_opt_t bd = Tcutil::get_bounds_exp_constrain(bounds_one(),b,true);
       bool fat_ptr = (bd == NULL);
       // FIX:  I'm not sure this is right anymore!

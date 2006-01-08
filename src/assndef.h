@@ -44,6 +44,8 @@ namespace AssnDef{
   typedef Absyn::var_opt_t var_opt_t;
   typedef Absyn::tqual_t tqual_t;
 
+  typedef Set::set_t<vardecl_t> vardecl_set_t;
+
   ////////////// Term Definition and Manipulation////////////
 
   typedef datatype Term @term_t;
@@ -292,6 +294,7 @@ namespace AssnDef{
   extern $(assn_t,assn_t,nonescvar_map_t) unify_var_maps(assn_map_t,assn_map_t);
   extern $(assn_t,assn_t,nonescvar_map_t) unify_var_maps_subst(assn_map_t,assn_map_t);
   extern assn_map_t canonical_assnmap(assn_map_t);
+  extern assn_map_t force_canonical(vardecl_set_t vd, assn_map_t am);
   // merging (or) two assertions with nonescvar mapping.
   // (A /\ x == t1) \/ (B /\ x == t2) merge into
   // (A /\ v == t1 \/ B /\ v == t2) /\ x == v
@@ -361,6 +364,10 @@ namespace AssnDef{
   extern term_set_t term_fr_logicvar(term_t t);
   extern term_set_t assn_fr_logicvar(assn_t a);
 
+  // returns the set of non-escaping program variables whose value
+  // might change in a given piece of code.  
+  extern vardecl_set_t calc_changed_vars_stmt(stmt_t s);
+  extern vardecl_set_t calc_changed_vars_exp(exp_t e);
 
   void reset_hash_cons_table(void);
   int sizeof_hash_cons_table(void);

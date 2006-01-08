@@ -988,7 +988,11 @@ static bool is_relation(Absyn::primop_t p){
   case Absyn::Gt:
   case Absyn::Lt:
   case Absyn::Gte:
-  case Absyn::Lte: return true;
+  case Absyn::Lte: 
+  case Absyn::UGt:
+  case Absyn::ULt:
+  case Absyn::UGte:
+  case Absyn::ULte: return true;
   default: return false;
   }
 }
@@ -1001,8 +1005,10 @@ static unsigned eval_binop(Absyn::primop_t p, unsigned c1, unsigned c2){
   case Absyn::Plus: return c1 + c2;
   case Absyn::Times: return c1 * c2;
   case Absyn::Minus: return c1 - c2;
-  case Absyn::Div: return c1/c2;  /* FIX: c2 == 0? */
-  case Absyn::Mod: return c1 % c2; /* FIX: c2 == 0? */
+  case Absyn::UDiv: return c1/c2;  /* FIX: c2 == 0? */
+  case Absyn::UMod: return c1 % c2; /* FIX: c2 == 0? */
+  case Absyn::Div: return (int)c1 / (int)c2;
+  case Absyn::Mod: return (int)c1 % (int)c2;
   case Absyn::Eq: return c1 == c2;
   case Absyn::Neq: return c1 != c2;
   case Absyn::Bitand: return c1 & c2;
@@ -1029,7 +1035,7 @@ static unsigned eval_unop(Absyn::primop_t p, unsigned c){
 static $(bool, unsigned int) eq_node_const(node_t @`H n, node_t @`H z, bool is_signed){
   let n2z = lookup_dist(n,z,is_signed);
   let z2n = lookup_dist(z,n,is_signed);
-  if (n2z != NULL && z2n != NULL && *z2n == *n2z) return $(true, *n2z);
+  if (n2z != NULL && z2n != NULL && -(*z2n) == *n2z) return $(true, *n2z);
   return $(false,0xBAD);
 }
 
@@ -1104,10 +1110,7 @@ static inline bool better_term(term_t t1, term_t t2) {
   case $(&LogicVar(_,i,_),&LogicVar(_,j,_)): return i < j;
   case $(_,&LogicVar(...)): return true;
   case $(&LogicVar(...),_): return false;
-    /*
-  // ints are always better than other terms.
-  case $(&Uint(i,_),&Uint(j,_)): 
-    if (i != j) throw &inconsistent; else return false;
+  case $(&Uint(_,_),&Uint(_,_)): return false;
   case $(&Uint(...),_): return true;
   case $(_,&Uint(...)): return false;
   // addresses are like constants, so they are better than other terms.
@@ -1123,8 +1126,6 @@ static inline bool better_term(term_t t1, term_t t2) {
   case $(&Offseti(t1a,t1b,_),&Offseti(t2a,t2b,_)):
     if (!better_term(t1a,t2a)) return false;
     t1=t1b; t2=t2b; goto loop;
-  case $(&Tagof(t1a),&Tagof(t2a)):  t1=t1a; t2=t2a; goto loop;
-    */
   default: return false;
   }
 }
@@ -1164,15 +1165,27 @@ static void subst_close_graph(int dummy, graph_t @g) {
   // the graph by substituting the best term for t throughout the
   // graph unless the best term includes the term we're substituting
   // for (else we get an infinite loop.)
+  let z_node = term2node(g,zero());
   term_table_t eq = empty_term_table();
   bool changed = false;
   for (let rs = g->rows; rs != NULL; rs = rs->next) {
     let t1 = rs->rep;
     let best = t1;
+    // see if t1 is equal to some integer 
+    let dzero = lookup_dist(rs, z_node, false);
+    let zerod = lookup_dist(z_node, rs, false);
+    if (dzero != NULL && zerod != NULL && *dzero == -(*zerod))
+      best = uint(*dzero);
+    else {
+      dzero = lookup_dist(rs, z_node, true);
+      zerod = lookup_dist(z_node, rs, true);
+      if (dzero != NULL && zerod != NULL && *dzero == -(*zerod))
+        best = uint(*dzero);
+    }
     // find the "best" term that t1 is equal to.
     for (let ts = g->rows; ts != NULL; ts = ts->next) {
       let t2 = ts->rep;
-      if (better_term(t2,best) && eq_nodes(rs,ts,false) && !occurs(t1,t2)) 
+      if (better_term(t2,best) && eq_nodes(rs,ts,false) && !occurs(best,t2)) 
         best = t2;
     }
     // apply the substitution to the best term
@@ -1181,6 +1194,9 @@ static void subst_close_graph(int dummy, graph_t @g) {
     // map t1 to best in the substitution.  
     if (!occurs(t1,best)) {
       changed = true;
+#ifdef PROVER_DEBUG
+      fprintf(stderr,"substituting %s for %s\n",term2string(best),term2string(t1));
+#endif PROVER_DEBUG
       Hashtable::insert(eq,t1,best);
     }
   }
@@ -1193,7 +1209,9 @@ static void subst_close_graph(int dummy, graph_t @g) {
   for (let rs = g->rows; rs != NULL; rs = rs->next) {
     let t = rs->rep;
     let t2 = subst_table(eq,t);
-    if (t != t2) add_eq(g,t,t2);
+    if (t != t2) {
+      add_eq(g,t,t2);
+    }
   }
 }
 
@@ -1895,14 +1913,50 @@ static bool inconsist(assn_t a) {
           // we've added some number of primitive constraints.  But this
           // minimizes the total work in the case that we can't prove
           // something...
+#ifdef PROVER_DEBUG
+          fprintf(stderr,"about to close graph\n");
+          print_graph(g);
+#endif
           associate_ud_sd_in_graph(0,g);
+#ifdef PROVER_DEBUG
+          fprintf(stderr,"after associate_ud_sd\n");
+          print_graph(g);
+#endif
           break_term_in_graph(0,g);
+#ifdef PROVER_DEBUG
+          fprintf(stderr,"after break_term\n");
+          print_graph(g);
+#endif
           subst_close_graph(0,g);
+#ifdef PROVER_DEBUG
+          fprintf(stderr,"after subst_close\n");
+          print_graph(g);
+#endif
           johnson(0,g);
+#ifdef PROVER_DEBUG
+          fprintf(stderr,"after johnson\n");
+          print_graph(g);
+#endif
           add_type_assns(g);
+#ifdef PROVER_DEBUG
+          fprintf(stderr,"after add_type_assns\n");
+          print_graph(g);
+#endif
           add_numelts_info(0,g);
+#ifdef PROVER_DEBUG
+          fprintf(stderr,"after 2nd break_term\n");
+          print_graph(g);
+#endif
           break_term_in_graph(0,g);
+#ifdef PROVER_DEBUG
+          fprintf(stderr,"after 2nd associate_ud_sd\n");
+          print_graph(g);
+#endif
           associate_ud_sd_in_graph(0,g);
+#ifdef PROVER_DEBUG
+          fprintf(stderr,"unable to prove inconsistency of graph:\n");
+          print_graph(g);
+#endif
           // Too bad.  The graph appears to be consistent.  We might as well
           // return false now.
           return false;

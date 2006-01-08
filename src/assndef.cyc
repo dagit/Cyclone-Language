@@ -1156,6 +1156,11 @@ term_t binop(Absyn::primop_t p, term_t t1, term_t t2, type_opt_t tp) {
     case Absyn::Bitxor: return uint(i ^ j);
     case Absyn::Bitlshift: return uint(i << j);
     case Absyn::Bitlrshift: return uint(i >> j);
+    case Absyn::Div: if (j != 0) return uint((int)i / (int)j); break;
+    case Absyn::UDiv: if (j != 0) return uint(i / j); break;
+    case Absyn::Mod: if (j != 0) return uint((int)i % (int)j); break;
+    case Absyn::UMod: if (j != 0) return uint(i % j); break;
+    case Absyn::Times: return uint(i * j);
     default: break;
     }
     break;
@@ -2457,6 +2462,29 @@ assn_map_t canonical_assnmap(assn_map_t am) {
   Dict::fold(fold_canonical,am.map,accum);
   return AssnMap (accum->assn,accum->map);
 }
+
+static nonescvar_map_t@`r force_it($(assn_t,vardecl_set_t)@env, vardecl_t vd, term_t t, nonescvar_map_t @`r accum) {
+  if (Set::member(env->f1,vd)) {
+    let new_term = fresh_var(vd->type);
+    env->f0 = and(env->f0,eq(new_term,t));
+    *accum = Dict::insert(*accum,vd,new_term);
+  } else {
+    *accum = Dict::insert(*accum,vd,t);
+  }
+  return accum;
+}
+
+// similar to above but forces everything to be a fresh variable.
+assn_map_t force_canonical(vardecl_set_t vds, assn_map_t am) {
+  vds = Set::insert(vds,memory);
+  vds = Set::insert(vds,exception_vardecl());
+  let assn = am.assn;
+  let env = $(assn,vds);
+  let map = empty_map();
+  Dict::fold_c(force_it, &env, am.map, &map);
+  return AssnMap(env.f0,map);
+}
+
 // given two assertion_map a1, a2, where the nonescvarmap 
 // only maps vardecls to logical vars of the form:
 // a1 = assn1, x1=v1(or NULL) ,x2=v2(or NULL),...
@@ -2669,4 +2697,92 @@ term_t subst_table(term_table_t table, term_t t) {
     break;
   }
   return t;
+}
+
+
+// calculates (conservatively) the set of non-escaping variables 
+// that get changed by an expression or statement.  We use the
+// visitors so these functions only have to look locally -- the
+// rest of the recursion is handled by the visitors.
+static void changed_lhs(vardecl_set_t@ vds, exp_t e) {
+  switch (e->r) {
+  case &Absyn::Var_e(&Absyn::Param_b(vd)): fallthru(vd);
+  case &Absyn::Var_e(&Absyn::Local_b(vd)): fallthru(vd);
+  case &Absyn::Var_e(&Absyn::Pat_b(vd)):
+    *vds = Set::insert(*vds, vd);
+    break;
+  default: break;
+  }
+}
+
+static void changed_pat(vardecl_set_t@ vds, Absyn::pat_t p) {
+ LOOP:
+  switch (p->r) {
+  case &Absyn::Reference_p(vd, p1): fallthru(vd,p1);
+  case &Absyn::Var_p(vd, p1): Set::insert(*vds,vd); p = p1; goto LOOP; 
+  case &Absyn::TagInt_p(_,vd): fallthru(vd);
+  case &Absyn::AliasVar_p(_, vd): Set::insert(*vds,vd); break;
+  case &Absyn::Pointer_p(p1): p=p1; goto LOOP;
+  case &Absyn::Aggr_p(_,_,_,dlps,_):
+    for (; dlps != NULL; dlps = dlps->tl) 
+      changed_pat(vds,dlps->hd->f1);
+    break;
+  case &Absyn::Datatype_p(_,_,ps,_):
+    for (; ps != NULL; ps = ps->tl) 
+      changed_pat(vds,ps->hd);
+    break;
+  default: break;
+  }
+}
+
+static bool changed_exp(vardecl_set_t@ vds, exp_t e) {
+  switch (e->r) {
+  case &Absyn::AssignOp_e(e,_,_): fallthru(e);
+  case &Absyn::Increment_e(e,_) :
+    changed_lhs(vds,e);
+    break;
+  case &Absyn::Comprehension_e(vd,...):
+    *vds = Set::insert(*vds,vd);
+    break;
+  case &Absyn::Swap_e(e1,e2):
+    changed_lhs(vds,e1);
+    changed_lhs(vds,e2);
+    break;
+  default: break;
+  }
+  return true;
+}
+
+static bool changed_stmt(vardecl_set_t@ vds, stmt_t s) {
+  switch (s->r) {
+  case &Absyn::Decl_s(d,_):
+    switch (d->r) {
+    case &Absyn::Var_d(vd)       : fallthru(vd);
+    case &Absyn::Region_d(_,vd,_): *vds = Set::insert(*vds,vd); break;
+    case &Absyn::Let_d(p,...): 
+      changed_pat(vds,p); break;
+    case &Absyn::Letv_d(vds2):
+      *vds = Set::union_two(*vds, Set::from_list(Core::ptrcmp, vds2)); break;
+    default: break;
+    }
+    break;
+  case &Absyn::Switch_s(_,scs,_)  : fallthru(scs); 
+  case &Absyn::TryCatch_s(_,scs,_):
+    for (; scs != NULL; scs = scs->tl) 
+      changed_pat(vds,scs->hd->pattern);
+    break;
+  default: break;
+  }
+  return true;
+}
+
+vardecl_set_t calc_changed_vars_exp(exp_t e) {
+  vardecl_set_t vds = Set::empty(Core::ptrcmp);
+  Absyn::visit_exp(changed_exp, changed_stmt, &vds, e);
+  return vds;
+}
+vardecl_set_t calc_changed_vars_stmt(stmt_t s) {
+  vardecl_set_t vds = Set::empty(Core::ptrcmp);
+  Absyn::visit_stmt(changed_exp, changed_stmt, &vds, s);
+  return vds;
 }

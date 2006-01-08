@@ -518,11 +518,13 @@ namespace Absyn {
     string_t Wstring_c;
   };
 
-  // Primitive operations
+  // Primitive operations (default is signed unless marked otherwise)
+  // All operations start off as signed -- it's up to the type-checker
+  // to rewrite them to be unsigned if necessary.  
   EXTERN_ABSYN enum Primop {
     Plus, Times, Minus, Div, Mod, Eq, Neq, Gt, Lt, Gte, Lte, Not,
     Bitnot, Bitand, Bitor, Bitxor, Bitlshift, Bitlrshift,
-    Numelts, Tagof
+    Numelts, Tagof, UDiv, UMod, UGt, ULt, UGte, ULte
   };
 
   // ++x, x++, --x, x-- respectively
@@ -1074,12 +1076,17 @@ namespace Absyn {
   exp_t add_exp(exp_t, exp_t, seg_t);
   exp_t times_exp(exp_t, exp_t, seg_t);
   exp_t divide_exp(exp_t, exp_t, seg_t);
+  exp_t udivide_exp(exp_t, exp_t, seg_t);
   exp_t eq_exp(exp_t, exp_t, seg_t);
   exp_t neq_exp(exp_t, exp_t, seg_t);
   exp_t gt_exp(exp_t, exp_t, seg_t);
   exp_t lt_exp(exp_t, exp_t, seg_t);
   exp_t gte_exp(exp_t, exp_t, seg_t);
   exp_t lte_exp(exp_t, exp_t, seg_t);
+  exp_t ugt_exp(exp_t, exp_t, seg_t);
+  exp_t ult_exp(exp_t, exp_t, seg_t);
+  exp_t ugte_exp(exp_t, exp_t, seg_t);
+  exp_t ulte_exp(exp_t, exp_t, seg_t);
   exp_t assignop_exp(exp_t, opt_t<primop_t,`H>, exp_t, seg_t);
   exp_t assign_exp(exp_t, exp_t, seg_t);
   exp_t increment_exp(exp_t, incrementor_t, seg_t);

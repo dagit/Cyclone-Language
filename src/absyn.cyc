@@ -670,12 +670,17 @@ exp_t swap_exp(exp_t e1, exp_t e2, seg_t loc) {
 exp_t add_exp(exp_t e1,exp_t e2,seg_t loc)   {return prim2_exp(Plus,e1,e2,loc);}
 exp_t times_exp(exp_t e1,exp_t e2,seg_t loc){return prim2_exp(Times,e1,e2,loc);}
 exp_t divide_exp(exp_t e1,exp_t e2,seg_t loc){return prim2_exp(Div,e1,e2,loc);}
+exp_t udivide_exp(exp_t e1,exp_t e2,seg_t loc){return prim2_exp(UDiv,e1,e2,loc);}
 exp_t eq_exp(exp_t e1,  exp_t e2, seg_t loc) {return prim2_exp(Eq,e1,e2,loc);}
 exp_t neq_exp(exp_t e1, exp_t e2, seg_t loc) {return prim2_exp(Neq,e1,e2,loc);}
 exp_t gt_exp(exp_t e1,  exp_t e2, seg_t loc) {return prim2_exp(Gt,e1,e2,loc);}
 exp_t lt_exp(exp_t e1,  exp_t e2, seg_t loc) {return prim2_exp(Lt,e1,e2,loc);}
 exp_t gte_exp(exp_t e1, exp_t e2, seg_t loc) {return prim2_exp(Gte,e1,e2,loc);}
 exp_t lte_exp(exp_t e1, exp_t e2, seg_t loc) {return prim2_exp(Lte,e1,e2,loc);}
+exp_t ugt_exp(exp_t e1,  exp_t e2, seg_t loc) {return prim2_exp(UGt,e1,e2,loc);}
+exp_t ult_exp(exp_t e1,  exp_t e2, seg_t loc) {return prim2_exp(ULt,e1,e2,loc);}
+exp_t ugte_exp(exp_t e1, exp_t e2, seg_t loc) {return prim2_exp(UGte,e1,e2,loc);}
+exp_t ulte_exp(exp_t e1, exp_t e2, seg_t loc) {return prim2_exp(ULte,e1,e2,loc);}
 
 exp_t assignop_exp(exp_t e1, opt_t<primop_t,`H> popt, exp_t e2, seg_t loc) {
   return new_exp(new AssignOp_e(e1,popt,e2),loc);
