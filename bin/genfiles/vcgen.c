@@ -1866,4 +1866,14 @@ if(!Cyc_Vcgen_implies(res.assn,ens))
 struct _fat_ptr _TmpF=Cyc_AssnDef_assn2string(ens);_TmpE.f1=_TmpF;});_TmpE;});struct Cyc_String_pa_PrintArg_struct _TmpE=({struct Cyc_String_pa_PrintArg_struct _TmpF;_TmpF.tag=0,({
 struct _fat_ptr _Tmp10=Cyc_AssnDef_assnmap2string(*_check_null(env->res_assnmap));_TmpF.f1=_Tmp10;});_TmpF;});void*_TmpF[2];_TmpF[0]=& _TmpD,_TmpF[1]=& _TmpE;Cyc_Warn_err(loc,_tag_fat("cannot prove the @ensures clause\n\t%s\nfrom\n\t%s",sizeof(char),46U),_tag_fat(_TmpF,sizeof(void*),2));});}else{
 # 2041
-Cyc_Vcgen_insert_fn_info(fd,actuals,res_term,new_memory,res.assn);}}}}}}}}}}}}
+Cyc_Vcgen_insert_fn_info(fd,actuals,res_term,new_memory,res.assn);}
+# 2055 "vcgen.cyc"
+if(thrwsopt!=0){
+struct Cyc_AssnDef_AssnMap res=*_check_null(env->try_assnmap);
+# 2058
+struct _tuple14 _TmpD=Cyc_AssnDef_lookup_var_map(Cyc_AssnDef_memory,res);struct Cyc_AssnDef_AssnMap _TmpE;void*_TmpF;_TmpF=_TmpD.f0;_TmpE=_TmpD.f1;{void*new_memory=_TmpF;struct Cyc_AssnDef_AssnMap res=_TmpE;
+void*thr=({struct Cyc_AssnDef_ExistAssnFn*_Tmp10=thrwsopt;Cyc_AssnDef_existassnfn2assn(_Tmp10,({struct Cyc_List_List*_Tmp11=_cycalloc(sizeof(struct Cyc_List_List));_Tmp11->hd=new_memory,_Tmp11->tl=actuals;_Tmp11;}));});
+if(!Cyc_Vcgen_implies(res.assn,thr))
+({struct Cyc_String_pa_PrintArg_struct _Tmp10=({struct Cyc_String_pa_PrintArg_struct _Tmp11;_Tmp11.tag=0,({
+struct _fat_ptr _Tmp12=Cyc_AssnDef_assn2string(thr);_Tmp11.f1=_Tmp12;});_Tmp11;});struct Cyc_String_pa_PrintArg_struct _Tmp11=({struct Cyc_String_pa_PrintArg_struct _Tmp12;_Tmp12.tag=0,({
+struct _fat_ptr _Tmp13=Cyc_AssnDef_assnmap2string(*_check_null(env->try_assnmap));_Tmp12.f1=_Tmp13;});_Tmp12;});void*_Tmp12[2];_Tmp12[0]=& _Tmp10,_Tmp12[1]=& _Tmp11;Cyc_Warn_err(loc,_tag_fat("cannot prove the @throws clause\n\t%s\nfrom\n\t%s",sizeof(char),45U),_tag_fat(_Tmp12,sizeof(void*),2));});}}}}}}}}}}}}}

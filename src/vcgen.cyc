@@ -2051,16 +2051,16 @@ void vcgen_fundecl(Position::seg_t loc, JumpAnalysis::jump_anal_res_t tables, Ab
 	  AssnDef::sizeof_hash_cons_table()); // size of hashtable for assn_t and term_t
   vcgen_debug_assn_set = NULL;
 #endif
-//   // check the throws clause
-//   if (thrwsopt != NULL) {
-//     assn_map_t res = *env->try_assnmap;
-//     let $(res_term,res) = lookup_var_map(exception_vardecl(),res);
-//     let $(new_memory,res) = lookup_var_map(memory,res);
-//     let thr = subst_args(arvds,exception_vardecl(),actuals,res_term,new_memory,*thrwsopt);
-//     if (!implies(res.assn,thr))
-//       Warn::err(loc, "cannot prove the @throws clause\n\t%s\nfrom\n\t%s",
-//                 assn2string(thr),
-//                 assnmap2string(*env->try_assnmap));
-//   }
+  // check the throws clause
+  if (thrwsopt != NULL) {
+    assn_map_t res = *env->try_assnmap;
+    //    let $(res_term,res) = lookup_var_map(exception_vardecl(),res);
+    let $(new_memory,res) = lookup_var_map(memory,res);
+    let thr = existassnfn2assn(thrwsopt,new List{new_memory,actuals});
+    if (!implies(res.assn,thr))
+      Warn::err(loc, "cannot prove the @throws clause\n\t%s\nfrom\n\t%s",
+                assn2string(thr),
+                assnmap2string(*env->try_assnmap));
+  }
 }
 
