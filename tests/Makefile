@@ -12,8 +12,8 @@ CYCFLAGS=-I../lib -I../include -B../build/boot -pp -save-c -g --mergepaths
 endif
 HAVE_PTHREAD=no
 # test asm doesn't work for me on cygwin
-EXES := $(addsuffix $(EXE), cyctest foo hello test_regions test_currgn histogram test_getopt zeroterm flatlist unique_patterns dynregion cinclude  multimethod  testasm testaqualsuccess scheme patterns refcnt_test rc require)
- # testbget testsexp structarray streambufftest md5 scheme-2) 
+EXES := $(addsuffix $(EXE), cyctest foo hello test_regions scheme-2 test_currgn histogram test_getopt zeroterm flatlist unique_patterns dynregion cinclude  multimethod  testasm testaqualsuccess scheme patterns refcnt_test rc require md5 streambufftest testbget test_large_vc_terms)
+ # testsexp structarray streambufftest ) 
 #these are broken
 #streambuff.cyc is broken badly ... it is unsound to pattern match on existentials with `RC inside them, wait until restrict
 ifeq ($(HAVE_PTHREAD),yes)
@@ -60,14 +60,14 @@ all: $(EXES) failtest
 	./zeroterm
 #	./structarray
 	./flatlist
-#	./md5 -q
+	./md5 -q
 	./require
 	./test_getopt -abc123
-#	./streambufftest -q
+	./streambufftest -q
 	./unique_patterns
 	./dynregion
 	./scheme
-#	./scheme-2 --gc-messages
+	./scheme-2 --gc-messages
 	./patterns
 	./refcnt_test -q
 	./cinclude
@@ -75,7 +75,7 @@ all: $(EXES) failtest
 #	./testsexp
 	./rc
 	./testasm
-#	./testbget
+	./testbget
 ifeq ($(HAVE_PTHREAD),yes)
 	./testexn
 endif
@@ -122,10 +122,10 @@ streambufftest$(EXE): streambufftest.o streambuff.o
 streambufftest.o: streambufftest.cyc
 	$(CYCC) $(CYCFLAGS) -c $^
 
-testbget: ../lib/bget.c ../lib/bget.h testbget.c
+testbget$(EXE): ../lib/bget.c ../lib/bget.h testbget.c
 	gcc -I../lib ../lib/bget.c testbget.c -lm -o testbget
 
-scheme-2: scheme-2.cyc
+scheme-2$(EXE): scheme-2.cyc
 	$(CYCC) $(CYCFLAGS) $^ -nogc -lm -o $@ 
 
 ifeq ($(HAVE_PTHREAD),yes)
@@ -142,7 +142,7 @@ endif
 	$(CYCC) $(CYCFLAGS) $(LDFLAGS) -o $@ $^
 
 clean:
-	$(RM) $(addsuffix .[oc], hello bytes cyctest foo histogram test_getopt typeref test_regions test_currgn unique_test zeroterm structarray flatlist md5 require streambufftest streambuff refcnt_test dynregion md5driver scheme scheme-2 unique_patterns cinclude testasm testexn multimethod testaqualsuccess)
+	$(RM) $(addsuffix .[oc], hello bytes cyctest foo histogram test_getopt typeref test_regions test_currgn unique_test zeroterm structarray flatlist md5 require streambufftest streambuff refcnt_test dynregion md5driver scheme scheme-2 unique_patterns cinclude testasm testexn multimethod testaqualsuccess test_large_vc_terms)
 # testsexp)
 	$(RM) foo_tab.* unsafe_cast.o pcredemo.o pcredemo.c pcredemo md5driver.o 
 	$(RM) $(EXES) fail1.tmp fail2.tmp fail3.tmp fail4.tmp taf.tmp tad.tmp
