@@ -844,7 +844,7 @@ unsigned asize=_get_fat_size(accept,sizeof(char));
 {unsigned long i=0U;for(0;i < len;++ i){
 int j;
 for(j=0;(unsigned)j < asize;++ j){
-if((int)*((const char*)_check_fat_subscript(b,sizeof(char),(int)i))==(int)((const char*)accept.curr)[j])
+if((int)((const char*)b.curr)[(int)i]==(int)((const char*)accept.curr)[j])
 break;}
 if((unsigned)j==asize)
 return i;}}
@@ -860,7 +860,7 @@ unsigned asize=_get_fat_size(accept,sizeof(char));
 {unsigned long i=0U;for(0;i < len;++ i){
 int j;
 for(j=0;(unsigned)j < asize;++ j){
-if((int)*((const char*)_check_fat_subscript(b,sizeof(char),(int)i))==(int)((const char*)accept.curr)[j])return i;}}}
+if((int)((const char*)b.curr)[(int)i]==(int)((const char*)accept.curr)[j])return i;}}}
 # 630
 return len;}
 # 637
