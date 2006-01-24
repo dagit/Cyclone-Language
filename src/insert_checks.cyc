@@ -42,7 +42,7 @@
 #include <graph.h>
 using Absynpp;
 
-// #define TIMING_DEBUG
+// #define TIMING_DEBUG 1
 // #define BCE_DEBUG
 
 using Absyn;
@@ -438,7 +438,9 @@ static void do_exp(env_t nv, exp_t e) {
 
 	// check if we have eliminated the bound check in earlier pass
 	let $(bds_ck,null_ck) = need_bound_null_check_annot(e);
-	if (bds_ck)  bds_ck = need_bounds_check_vcgen(nv,e1);
+	if (bds_ck) {
+          bds_ck = need_bounds_check_vcgen(nv,e1);
+        }
 	// only if we do need bounds check we will ensure the
 	// bound is statically known
 	if (bds_ck) {
@@ -770,12 +772,12 @@ static void mark_escaped_fns(List::list_t<decl_t> ds) {
 void insert_checks(List::list_t<decl_t,`H> tds,
 		   JumpAnalysis::jump_anal_res_t tables, bool do_vcgen) {
   reset_counters();
+
   let nv = toplevel_env(tables, do_vcgen);
   // start processing toplevel declarations in insert_checks
   // we would like to reorder the declarations so that 
   // we process function callees first and the callers 
   // so that we can use summary from functions
-
   let cg = Callgraph::compute_callgraph(tds);
   //  Callgraph::print_callgraph(stderr,cg);
 

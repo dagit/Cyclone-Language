@@ -387,7 +387,9 @@ static node_t @term2node(graph_t @`r g, term_t t) {
   // first see if we can find it directly.
   let nopt = Hashtable::lookup_ptr_opt(g->map, t);
   if (nopt != NULL) return *nopt;
-  // couldn't find it -- insert it...
+  // couldn't find it -- insert it...but only if it's not too large.
+  if (term_size(t) > Flags::max_vc_term_size) 
+    t = fresh_var(get_term_type(t));
   node_t * @ `H+`r prev = &g->rows;
   for (let r = g->rows; r != NULL; r = r->next) {
     //++count;
@@ -1131,30 +1133,41 @@ static inline bool better_term(term_t t1, term_t t2) {
 }
 
 // returns true if t1 occurs within t2.  
-static bool occurs(term_t t1, term_t t2) {
+static bool occurs_i(term_t t1, term_t t2, Set::set_t<term_t,`H> @seen) {
  loop:
   if (t1 == t2) return true;
+  if (Set::member(*seen,t2)) return false;
+  *seen = Set::insert(*seen,t2);
   switch (t2) {
   case &Unop(_,s,_): t2 = s; goto loop;
-  case &Binop(_,s1,s2,_): if (occurs(t1,s1)) return true; t2 = s2; goto loop;
+  case &Binop(_,s1,s2,_): 
+    if (occurs_i(t1,s1,seen)) return true; t2 = s2; goto loop;
   case &Cast(_,s): t2 = s; goto loop;
-  case &Select(s1,s2,_): if (occurs(t1,s1)) return true; t2 = s2; goto loop;
-  case &Update(s1,s2,s3): if (occurs(t1,s1) || occurs(t2,s2)) return true;
+  case &Select(s1,s2,_): 
+    if (occurs_i(t1,s1,seen)) return true; t2 = s2; goto loop;
+  case &Update(s1,s2,s3): 
+    if (occurs_i(t1,s1,seen) || occurs_i(t2,s2,seen)) return true;
     t2 = s3; goto loop;
   case &Aggr(_,_,ss,_):
-    for (; ss != NULL; ss = ss->tl) if (occurs(t1,ss->hd)) return true;
+    for (; ss != NULL; ss = ss->tl) if (occurs_i(t1,ss->hd,seen)) return true;
     return false;
   case &Proj(s,_,_): t2 = s; goto loop;
   case &AggrUpdate(s1,_,s2): 
-    if (occurs(t1,s1)) return true; t2 = s2; goto loop;
+    if (occurs_i(t1,s1,seen)) return true; t2 = s2; goto loop;
   case &Addr(_,s,_): t2 = s; goto loop;
   case &Alloc(_,_,s1,s2,_): 
-    if (occurs(t1,s1)) return true; t2 = s2; goto loop;
+    if (occurs_i(t1,s1,seen)) return true; t2 = s2; goto loop;
   case &Offsetf(s,_,_): t2 = s; goto loop;
-  case &Offseti(s1,s2,_): if (occurs(t1,s1)) return true; t2 = s2; goto loop;
+  case &Offseti(s1,s2,_): 
+    if (occurs_i(t1,s1,seen)) return true; t2 = s2; goto loop;
   case &Tagof(s): t2 = s; goto loop;
   default: return false;
   }
+}
+
+static bool occurs(term_t t1, term_t t2) {
+  let seen = Set::empty(termcmp);
+  return occurs_i(t1,t2,&seen);
 }
 
 // Substitute better terms where possible in the graph.  In particular,
@@ -1165,6 +1178,7 @@ static void subst_close_graph(int dummy, graph_t @g) {
   // the graph by substituting the best term for t throughout the
   // graph unless the best term includes the term we're substituting
   // for (else we get an infinite loop.)
+  
   let z_node = term2node(g,zero());
   term_table_t eq = empty_term_table();
   bool changed = false;
@@ -1174,19 +1188,21 @@ static void subst_close_graph(int dummy, graph_t @g) {
     // see if t1 is equal to some integer 
     let dzero = lookup_dist(rs, z_node, false);
     let zerod = lookup_dist(z_node, rs, false);
-    if (dzero != NULL && zerod != NULL && *dzero == -(*zerod))
+    if (dzero != NULL && zerod != NULL && *dzero == -(*zerod)) {
       best = uint(*dzero);
-    else {
+    } else {
       dzero = lookup_dist(rs, z_node, true);
       zerod = lookup_dist(z_node, rs, true);
-      if (dzero != NULL && zerod != NULL && *dzero == -(*zerod))
+      if (dzero != NULL && zerod != NULL && *dzero == -(*zerod)) {
         best = uint(*dzero);
+      } 
     }
     // find the "best" term that t1 is equal to.
     for (let ts = g->rows; ts != NULL; ts = ts->next) {
       let t2 = ts->rep;
-      if (better_term(t2,best) && eq_nodes(rs,ts,false) && !occurs(best,t2)) 
+      if (better_term(t2,best) && eq_nodes(rs,ts,false) && !occurs(best,t2)) {
         best = t2;
+      } 
     }
     // apply the substitution to the best term
     best = subst_table(eq,best);
@@ -1194,9 +1210,6 @@ static void subst_close_graph(int dummy, graph_t @g) {
     // map t1 to best in the substitution.  
     if (!occurs(t1,best)) {
       changed = true;
-#ifdef PROVER_DEBUG
-      fprintf(stderr,"substituting %s for %s\n",term2string(best),term2string(t1));
-#endif PROVER_DEBUG
       Hashtable::insert(eq,t1,best);
     }
   }
@@ -1647,93 +1660,6 @@ datatype exn { TooLarge };
 datatype exn.TooLarge too_large = TooLarge;
 
 
-/* OLD INCONSISTENCY CODE: not currently used. 
-// given a set of graphs gs representing A1 or A2 or ... or An
-// and given assertion a, compute the set of graphs representing
-// (A1 or A2 ... or An) and a.  This is written with explicit
-// tail-calls to be as fast as possible.  If we end up with two
-// many disjuncts, then we throw an exception to back out of the
-// whole thing.  
-static graph_t *cgraph(graph_t *`H gs, Set::set_t<assn_t,`H> @already_seen,
-                       assn_t a, unsigned *total_paths) {
- LOOP:
-  if (gs == NULL) return gs; // already inconsistent
-  //fprintf(stderr,"inserting assertion %s into \n",assn2string(a));
-  //print_graphs(gs);
-  // if we've already added in this assertion, return the graphs
-  if (Set::member(*already_seen,a)) {++already_seen_hits; return gs;}
-  *already_seen = Set::insert(*already_seen,a);
-  switch (a) {
-  case &True: break;         // gs and true == gs
-  case &False: gs = NULL; break; // gs and false == false
-  case &And(a1,a2): 
-    gs = cgraph(gs,already_seen,a2,total_paths);// gs and (a1 and a2) == (gs and a2) and a1
-    a = a1;
-    goto LOOP;
-  case &Or(a1,a2):
-    let n = num_graphs(gs);
-    if (*total_paths > Flags::max_vc_paths){
-      throw &too_large;
-    }
-    // fprintf(stderr, "num_graphs(gs) = %d, total_paths = %d\n", n, *total_paths);
-    // must copy the graphs since we mutate them in place
-    *total_paths = *total_paths + n;
-    gs = app_graphs(johnson,0,gs);
-    graph_t *gs1 = gs;
-    graph_t *gs2 = copy_graphs(gs);
-    let already_seen1 = *already_seen;
-    let already_seen2 = *already_seen;
-    // compute (gs and a1)
-    gs1 = cgraph(gs1,&already_seen1,a1,total_paths);
-    // skip closure passes if a1 was an Or -- we've already closed.
-    switch (a1) { case &Or(...):  goto NOCLOSE1; default: break;}
-    gs1 = associate_ud_sd_in_graphs(gs1);
-    gs1 = break_term_in_graphs(gs1);
-    gs1 = subst_close_graphs(gs1);
-    // Reduce closure doesn't result in any extra checks being eliminated
-    // gs1 = reduce_close_graphs(gs1);
-    gs1 = associate_ud_sd_in_graphs(gs1);
-    // at this point, we're splitting so increase the or-depth
-    // compute (gs and a2)
-  NOCLOSE1:
-    switch (a2) { case &Or(...): goto NOCLOSE2; default: break;}
-    gs2 = cgraph(gs2,&already_seen2,a2,total_paths);
-    gs2 = associate_ud_sd_in_graphs(gs2);
-    gs2 = break_term_in_graphs(gs2); 
-    gs2 = subst_close_graphs(gs2);
-    // Reduce closure doesn't result in any extra checks being eliminated
-    // gs2 = reduce_close_graphs(gs2);
-    gs2 = associate_ud_sd_in_graphs(gs2);
-  NOCLOSE2:
-    // return (gs and a1) or (gs and a2)
-    *already_seen = Set::intersect(already_seen1,already_seen2);
-    gs = graph_append(gs1,gs2);
-    break;
-  case &Prim(&Uint(0,_),Neq,t2): fallthru(t2);
-  case &Prim(t1,Neq,&Uint(0,_)):
-    // when doing an unsigned or pointer comparison against 0, we know
-    // that 0 < t1.  So use this instead of introducing a disjunction.
-    type_opt_t topt = AssnDef::get_term_type(t1);
-    if (topt == NULL || Tcutil::is_signed_type((type_t)topt))
-      fallthru(t1,zero());
-    a = ult(zero(),t1);
-    goto LOOP;
-  case &Prim(t1,Neq,t2): 
-    // must handle neq specially as t1 < t2 or t2 < t1 (both signed
-    // and unsigned.)
-    a = and(or(slt(t1,t2),slt(t2,t1)),or(ult(t1,t2),ult(t2,t1)));
-    goto LOOP;
-  case &Prim(t1,p,t2):
-    // add the primitive relation to each graph, pruning out the
-    // inconsistent ones.
-    let env = $(t1,p,t2);
-    gs = app_graphs(add_prim,&env,gs);
-    break;
-  }
-  return gs;
-}
-*/
-
 static Set::set_t<term_t> get_pointer_terms(term_t t,Set::set_t<term_t,`H> s) {
  LOOP:
   let topt = get_term_type(t);
@@ -1886,14 +1812,16 @@ static bool inconsist(assn_t a) {
           a = and(or(slt(t1,t2),slt(t2,t1)),or(ult(t1,t2),ult(t2,t1)));
           continue;
         case &Prim(t1,p,t2): 
-          if (p == Eq) 
+
+          if (p == Eq) {
             // adds t1 <= t2 and t2 <= t1 -- throws Inconsistent if
             // the resulting graph is detected as inconsistent locally.
             add_eq(g,t1,t2);
-          else
+          } else {
             // adds the constraint -- throws Inconsistent if
             // the resulting graph is detected as inconsistent locally.
             add_constraint(g,t1,p,t2);
+          }
           // if we got here, we think the graph is still consistent,
           // so we need to continue adding in the rest of the ands.
           fallthru;
@@ -1926,6 +1854,7 @@ static bool inconsist(assn_t a) {
 #ifdef PROVER_DEBUG
           fprintf(stderr,"after break_term\n");
           print_graph(g);
+          fprintf(stderr,"about to subst_close\n");
 #endif
           subst_close_graph(0,g);
 #ifdef PROVER_DEBUG
@@ -1984,75 +1913,6 @@ static bool inconsist(assn_t a) {
 }
 
 static bool paths_exhausted = false;
-
-/* OLD CONSISTENCY CHECKING CODE 
-// check to see if an assertion is consistent using the constraint solver.
-// if it returns false, then the assertion is definitely inconsistent.
-// if it returns true, then the assertion might be consistent.
-static bool consistent(assn_t a) {
-  //fprintf(stderr,"checking consistency of: \n");
-  //fprintf(stderr,"%s",AssnDef::dag2string(a));
-  
-  try {
-    // start with just an empty graph (true) and then add in assertion a
-    paths_exhausted = false;
-    constraints_added = 0;
-    graphs_copied = 0;
-    max_lookup = 0;
-    already_seen_hits = 0;
-    assn_set_t already_seen = Set::empty(assncmp);
-    unsigned total_paths = 1;
-    graph_t *gs = cgraph(true_graph(),&already_seen,a,&total_paths);
-
-    //fprintf(stderr,"constraints added = %d\n",constraints_added);
-    //fprintf(stderr,"graphs_copied = %d\n",graphs_copied);
-    //fprintf(stderr,"max_lookup = %d\n",max_lookup);
-    //fprintf(stderr,"already_seen_hits = %d\n",already_seen_hits);
-    // run closure passes to weed out graphs
-    graphs_change = true;
-    while (graphs_change && gs != NULL) {
-      gs = app_graphs(johnson,0,gs);
-      graphs_change = false;
-      gs = associate_ud_sd_in_graphs(gs);
-      gs = add_type_assns(gs);
-      gs = add_numelts_info_graphs(gs);
-      // gs = subst_close_graphs(gs);
-      gs = break_term_in_graphs(gs);
-      gs = associate_ud_sd_in_graphs(gs);
-    }
-    //if (gs != NULL) {
-    //  fprintf(stderr,"final graphs:\n");
-    //  print_graphs(gs);
-    //}
-    // if we get back an empty list of disjuncts (false) then
-    // the graph is not consistent.
-    return (gs != NULL);
-  } catch {
-    // if the graph has too many paths in it, we'll end up here.
-    // we must conservatively assume that the assertion is consistent.
-  case &TooLarge: 
-    paths_exhausted = true;
-    return true;
-  }
-}
-
-// see if ctxt |- a by trying to prove that ctxt and not(a) is inconsistent.
-bool constraint_prove(assn_t ctxt, assn_t a) {
-  // try weakening ctxt first:
-  if (!consistent(and(widen(ctxt),not(a)))) return true;
-  assn_t b = and(ctxt,not(a));
-  let res = !consistent(b);
-  if (!res && Flags::print_unprovable) {
-    fprintf(stderr,"unable to prove inconsistency of \n");
-    fprintf(stderr,"%s",assn2dag(b));
-    if (paths_exhausted) {
-      fprintf(stderr,"(paths exhausted)");
-    } 
-    fprintf(stderr,"\n");
-  }
-  return res;
-}
-*/
 
 bool constraint_prove(assn_t ctxt, assn_t a) {
   // try weakening ctxt first:

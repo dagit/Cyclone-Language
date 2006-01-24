@@ -73,36 +73,45 @@ string_t typopt2string(type_opt_t tp) {
   return Absynpp::typ2string((type_t)tp);
 }
 
-string_t term2string(term_t t) {
+static string_t term2string_i(term_t t, Set::set_t<term_t,`H> @seen, int @depth) {
   string_t res;
+  bool seen_it = false;
+  if (*depth == 0)
+    return "<depth>";
+  *depth = *depth - 1;
+  if (Set::member(*seen,t)) {
+    seen_it = true;
+  }
+  let old_seen = *seen;
+  *seen = Set::insert(old_seen,t);
   switch (t) {
   case &Uint(i,_): res = aprintf("0x%x", i); break;
   case &Const(e): res = aprintf("%s[%d]",Absynpp::exp2string(e),(int)e); break;
-  case &Tagof(t): res = aprintf("tagof_tm(%s)",term2string(t)); break;
+  case &Tagof(t): res = aprintf("tagof_tm(%s)",term2string_i(t,seen,depth)); break;
   case &Select(t1,t2,tp):
-    res = aprintf("Sel(%s,%s,%s)",term2string(t1),term2string(t2),typopt2string(tp));
+    res = aprintf("Sel(%s,%s,%s)",term2string_i(t1,seen,depth),term2string_i(t2,seen,depth),typopt2string(tp));
     break;
   case &Update(t1,t2,t3):
-    res = aprintf("Upd(%s,%s,%s)",term2string(t1),term2string(t2),term2string(t3));
+    res = aprintf("Upd(%s,%s,%s)",term2string_i(t1,seen,depth),term2string_i(t2,seen,depth),term2string_i(t3,seen,depth));
     break;
   case &LogicVar(NULL,i,_): res = aprintf("_X%d",i); break;
   case &LogicVar(vd,i,_): 
     res = aprintf("_%s%d",Absynpp::qvar2string(vd->name),i); break;
   case &Unop(p,t1,_):
-    res = aprintf("%s(%s)",Absynpp::prim2string(p),term2string(t1)); break;
+    res = aprintf("%s(%s)",Absynpp::prim2string(p),term2string_i(t1,seen,depth)); break;
   case &Binop(p,t1,t2,_):
-    res = aprintf("(%s%s%s)",term2string(t1),Absynpp::prim2string(p),
-                  term2string(t2));
+    res = aprintf("(%s%s%s)",term2string_i(t1,seen,depth),Absynpp::prim2string(p),
+                  term2string_i(t2,seen,depth));
     break;
   case &Cast(tp,tm):
-    res = aprintf("(%s)%s",Absynpp::typ2string(tp),term2string(tm)); break;
+    res = aprintf("(%s)%s",Absynpp::typ2string(tp),term2string_i(tm,seen,depth)); break;
   case &Aggr(is_union,tag,tms,_):
     static string_t lb = "{";
     static string_t rb = "}";
     static string_t comma = ",";
     list_t<stringptr_t> ss = new List{&lb,NULL};
     for (; tms != NULL; tms = tms->tl) {
-      let s = term2string(tms->hd);
+      let s = term2string_i(tms->hd,seen,depth);
       ss = new List{new s,ss};
       if (tms->tl != NULL) ss = new List{&comma,ss};
     }
@@ -113,27 +122,36 @@ string_t term2string(term_t t) {
     if (is_union) res = aprintf("union%s",res);
     break;
   case &Proj(t,i,tp):
-    res = aprintf("#%d(%s)",i,term2string(t));
+    res = aprintf("#%d(%s)",i,term2string_i(t,seen,depth));
     break;
   case &AggrUpdate(a,i,v):
-    res = aprintf("Aupd(%s,%d,%s)",term2string(a),i,term2string(v));
+    res = aprintf("Aupd(%s,%d,%s)",term2string_i(a,seen,depth),i,term2string_i(v,seen,depth));
     break;
   case &Addr(vd,invoke,_):
     res = aprintf("&%s_%s_%x",Absynpp::qvar2string(vd->name),
-                  term2string(invoke),(unsigned int)vd); 
+                  term2string_i(invoke,seen,depth),(unsigned int)vd); 
     //res = aprintf("&%s",Absynpp::qvar2string(vd->name));
     break;
   case &Alloc(e,id,nelts,invoke,_):
-    res = aprintf("Alloc(%d,%d,%s,%s)", (int)e,id,term2string(nelts),term2string(invoke));
+    res = aprintf("Alloc(%d,%d,%s,%s)", (int)e,id,term2string_i(nelts,seen,depth),term2string_i(invoke,seen,depth));
     break;
   case &Offsetf(t,i,tp):
-    res = aprintf("Offsetf(%s,%d,%s)",term2string(t),i,typopt2string(tp));
+    res = aprintf("Offsetf(%s,%d,%s)",term2string_i(t,seen,depth),i,typopt2string(tp));
     break;
   case &Offseti(t1,t2,_):
-    res = aprintf("%s.+.%s",term2string(t1),term2string(t2));
+    res = aprintf("%s.+.%s",term2string_i(t1,seen,depth),term2string_i(t2,seen,depth));
     break;
   }
+  *seen = old_seen;
+  *depth = *depth + 1;
+  if (seen_it) res = aprintf("<loop: %s>\n",res);
   return res;
+}
+
+string_t term2string(term_t t) {
+  let s = Set::empty(termcmp);
+  let d = 100;
+  return term2string_i(t, &s, &d);
 }
 
 static int hash_const(Absyn::cnst_t c) {
@@ -312,24 +330,53 @@ int termcmp(datatype Term @`r1 _t1, datatype Term @`r2 _t2) {
   }
 }
 
-static term_t copy_term(datatype Term@ t) {
+static term_t copy_term(datatype Term@ t, unsigned @size) {
   switch (t) {
-  case &Uint(i,tp): return new Uint(i,tp);
-  case &Const(e): return new Const(e);
-  case &Addr(vd,t,tp): return new Addr(vd,t,tp);
-  case &LogicVar(vd,i,tp): return new LogicVar(vd,i,tp);
-  case &Binop(p,t1,t2,tp): return new Binop(p,t1,t2,tp);
-  case &Unop(p,t,tp): return new Unop(p,t,tp);
-  case &Cast(tp,t): return new Cast(tp,t);
-  case &Select(t1,t2,tp): return new Select(t1,t2,tp);
-  case &Update(t1,t2,t3): return new Update(t1,t2,t3);
-  case &Proj(t,i,tp): return new Proj(t,i,tp);
-  case &AggrUpdate(t,i,v): return new AggrUpdate(t,i,v);
-  case &Aggr(is_union,tag,ts,tp): return new Aggr(is_union,tag,ts,tp);
-  case &Alloc(e,i,n,v,tp): return new Alloc(e,i,n,v,tp);
-  case &Offsetf(t,i,tp): return new Offsetf(t,i,tp);
-  case &Offseti(t,i,tp): return new Offseti(t,i,tp);
-  case &Tagof(t): return new Tagof(t);
+  case &Uint(i,tp): *size = 1; return new Uint(i,tp);
+  case &Const(e): *size = 1; return new Const(e);
+  case &Addr(vd,t,tp): 
+    *size = 1 + term_size(t);
+    return new Addr(vd,t,tp);
+  case &LogicVar(vd,i,tp): 
+    *size = 1;
+    return new LogicVar(vd,i,tp);
+  case &Binop(p,t1,t2,tp): 
+    *size = 1 + term_size(t1) + term_size(t2);
+    return new Binop(p,t1,t2,tp);
+  case &Unop(p,t,tp): 
+    *size = 1 + term_size(t);
+    return new Unop(p,t,tp);
+  case &Cast(tp,t): 
+    *size = 1 + term_size(t);
+    return new Cast(tp,t);
+  case &Select(t1,t2,tp): 
+    *size = 1 + term_size(t1) + term_size(t2);
+    return new Select(t1,t2,tp);
+  case &Update(t1,t2,t3): 
+    *size = 1 + term_size(t1) + term_size(t2) + term_size(t3);
+    return new Update(t1,t2,t3);
+  case &Proj(t,i,tp): 
+    *size = 1 + term_size(t);
+    return new Proj(t,i,tp);
+  case &AggrUpdate(t,i,v): 
+    *size = 1 + term_size(t) + term_size(v);
+    return new AggrUpdate(t,i,v);
+  case &Aggr(is_union,tag,ts,tp): 
+    *size = 1;
+    for (let p = ts; p != NULL; p = p->tl) *size += term_size(p->hd);
+    return new Aggr(is_union,tag,ts,tp);
+  case &Alloc(e,i,n,v,tp): 
+    *size = 1 + term_size(v) + term_size(n);
+    return new Alloc(e,i,n,v,tp);
+  case &Offsetf(t,i,tp): 
+    *size = 1 + term_size(t);
+    return new Offsetf(t,i,tp);
+  case &Offseti(t,i,tp): 
+    *size = 1 + term_size(t) + term_size(i);
+    return new Offseti(t,i,tp);
+  case &Tagof(t): 
+    *size = 1 + term_size(t);
+    return new Tagof(t);
   }
 }
 
@@ -346,6 +393,7 @@ static term_set_t empty_term_set() {
 
 typedef struct TermHashedInfo {
   term_t term;
+  unsigned size;
   term_set_t *free_logicvar_set;
 } @term_hashed_info_t;
 
@@ -360,8 +408,8 @@ get_term_hash_cons_table(){
     h = Hashtable::create(221, termcmp, termhash);
     term_hash_cons_table = h;
     term_set_t tst = empty_term_set();
-    Hashtable::insert(h,&zero_value,new TermHashedInfo{&zero_value,new tst});
-    Hashtable::insert(h,&one_value,new TermHashedInfo{&one_value,new tst});
+    Hashtable::insert(h,&zero_value,new TermHashedInfo{&zero_value,1,new tst});
+    Hashtable::insert(h,&one_value,new TermHashedInfo{&one_value,1,new tst});
   } else {
     h = (Hashtable::table_t)term_hash_cons_table;
   }
@@ -372,14 +420,27 @@ static term_t hash_cons_term(datatype Term @t) {
   let h = get_term_hash_cons_table();
   let resopt = Hashtable::lookup_other_opt(h,t,termcmp,termhash);
   if (resopt == NULL) {
-    let t2 = copy_term(t);
+    unsigned size = 0;
+    let t2 = copy_term(t,&size);
     //int i = h->max_len;
-    Hashtable::insert(h,t2,new TermHashedInfo{t2,NULL});
+    Hashtable::insert(h,t2,new TermHashedInfo{t2,size,NULL});
     //if (i < h->max_len) 
     //  fprintf(stderr,"grew term hash table after inserting %s due to chains %d\n",term2string(t2),i);
     return t2;
   } else 
     return (*resopt)->term;
+}
+
+// compute and cache the size of a term
+unsigned term_size(term_t t) {
+  let h = get_term_hash_cons_table();
+  let resopt = Hashtable::lookup_opt(h,t);
+  if (resopt == NULL) {
+    hash_cons_term(t);
+    return term_size(t);
+  }
+  let res = *resopt;
+  return res->size;
 }
 
 // computing the set of logicvars that occured
@@ -1932,43 +1993,6 @@ term_set_t assnfn_fr_logicvar(assnfn_t af) {
   return fvs;
 }
 
-// apply one term to an assnfn
-assnfn_t apply_term_assnfn(assnfn_t af, term_t t) {
-  let assn = af->assn;
-  let actuals = af->actuals;
-  let newaf = new AssnFn{actuals->tl,assn};
-  // if actuals->hd is not free in the assnfn, no need to do anything
-  if (! Set::member(assnfn_fr_logicvar(newaf),actuals->hd)) return newaf;
-  // get the free vars in t
-  let newactuals = NULL;
-  let dict = empty_term_dict();
-  // will substitute t for actuals->hd
-  dict = Dict::insert(dict,actuals->hd,t);
-  actuals = actuals->tl;
-  // properly alpha-vary the rest of actuals so that
-  // the free vars in t won't be captured
-  let fvs = term_fr_logicvar(t);
-  for( ; actuals != NULL; actuals = actuals->tl) {
-    if (Set::member(fvs,actuals->hd)) {
-      let v = fresh_var(get_term_type(actuals->hd));
-      dict = Dict::insert(dict,actuals->hd,v);
-      newactuals = new List {v,newactuals};
-    } else {
-      newactuals = new List {actuals->hd,newactuals};
-    }
-  }
-  let newassn = subst_a(dict,assn);
-  let newactuals = imp_rev(newactuals);
-  return new AssnFn {newactuals,newassn};
-}
-
-// apply a list of terms to an assnfn in order
-static assnfn_t apply_terms_assnfn(assnfn_t af, list_t<term_t> ts) {
-  for( ; ts != NULL; ts = ts->tl)
-    af = apply_term_assnfn(af,ts->hd);
-  return af;
-}
-
 static string_t assnfn2string(assnfn_t af) {
   if (af->actuals == NULL) return assn2string(af->assn);
   return aprintf("/\\ %s .\n%s",term2string(af->actuals->hd),assnfn2string(new AssnFn{af->actuals->tl,af->assn}));
@@ -2046,20 +2070,23 @@ static term_dict_t@`r insertnewmap(term_t t, term_dict_t @`r dict) {
   *dict = Dict::insert(*dict,t,fresh_var(get_term_type(t)));
   return dict;
 }
-// given an existassnfn, instantiate all 
-// existentially bound variables with fresh
-// new vars
-static assnfn_t remove_exist_existassnfn(existassnfn_t eaf) {
-  term_dict_t dict = empty_term_dict();
-  dict = *Set::fold(insertnewmap,eaf->existvars,&dict);
-  return new AssnFn{eaf->af->actuals,subst_a(dict,eaf->af->assn)};
-}
 
+// instantiate existentially bound variables with fresh variables
+// and subsitute ts for the formal parameters. 
 assn_t existassnfn2assn(existassnfn_t eaf,list_t<term_t> ts) {
-  let af = remove_exist_existassnfn(eaf);
-  af = apply_terms_assnfn(af,ts);
-  if (af->actuals == NULL) return af->assn;
-  Warn::impos("not enough ts to be applied to assnfn");
+  term_dict_t dict = empty_term_dict();
+  // pick fresh variables for the existentially bound ones
+  dict = *Set::fold(insertnewmap,eaf->existvars,&dict);
+  let vs = eaf->af->actuals;
+  let a = eaf->af->assn;
+  // associate ts with formal arguments
+  for (; vs != NULL && ts != NULL; vs = vs->tl, ts = ts->tl) 
+    dict = Dict::insert(dict, vs->hd, ts->hd);
+  if (vs != NULL || ts != NULL) 
+    Warn::impos("wrong number of arguments to existassnfn2assn");
+  // apply substitution to assertion -- there's no danger of capture
+  // here since a can't have any bound variables.
+  return subst_a(dict, a);
 }
 
 // functions related to handling the nonescvar_map
@@ -2615,6 +2642,7 @@ term_table_t empty_term_table() {
 
 term_t subst_table(term_table_t table, term_t t) {
   let sopt = Hashtable::lookup_opt(table,t);
+  let told = t;
   if (sopt != NULL) return *sopt;
   switch (t){
   case &LogicVar(...): break;
@@ -2696,6 +2724,7 @@ term_t subst_table(term_table_t table, term_t t) {
     if (s1 != t1) t = tagof_tm(s1);
     break;
   }
+  Hashtable::insert(table,told,t);
   return t;
 }
 

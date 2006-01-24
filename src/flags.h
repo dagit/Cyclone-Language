@@ -153,6 +153,10 @@ extern unsigned int max_vc_summary;
   // explore before giving up when trying to prove a verification condition.
 extern unsigned int max_vc_paths;
 
+
+  // controls how big terms can grow before we abstract them into a variable
+  // within the prover.
+extern unsigned int max_vc_term_size;
   // sets every flag above with warn in its name
 void set_all_warnings();
 }

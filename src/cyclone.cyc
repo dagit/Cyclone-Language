@@ -1085,6 +1085,9 @@ static void set_max_vc_summary(int n) {
 static void set_max_vc_paths(int n) {
   Flags::max_vc_paths = n;
 }
+static void set_max_vc_term_size(int n) {
+  Flags::max_vc_term_size = n;
+}
 
 extern "C" void GC_blacklist_warn_clear();
 //extern "C" int GC_dont_gc;
@@ -1368,6 +1371,9 @@ using Arg {
   make_option(opt90,"--tags",false,"",
               Unit_spec,set_tags,
               "Generate a TAGS file for use with interprocedural type inference");
+  make_option(opt91,"--max_vc_term_size",false,"",Int_spec,set_max_vc_term_size,
+              "controls the maximum size of terms considered by the constraint solver");
+
 
   struct List<option_t@`H,`H>@`H global_options[] = {
             &opt1, &opt2, &opt3, &opt4, &opt5, &opt6, &opt7, &opt8, &opt9,
@@ -1380,7 +1386,7 @@ using Arg {
     &opt50,&opt51,&opt52,&opt53,&opt54,&opt55,&opt56,&opt57,&opt58,&opt59,
     &opt60,&opt61,&opt62,&opt63,&opt64,&opt65,&opt66,&opt67,&opt68,&opt69,
 	    &opt70,&opt71,&opt72,&opt73,&opt74,&opt75,&opt76,&opt77,&opt78,&opt79,
-            &opt80,&opt81,&opt82,&opt83,&opt84,&opt85,&opt86,&opt87,&opt88,&opt89
+              &opt80,&opt81,&opt82,&opt83,&opt84,&opt85,&opt86,&opt87,&opt88,&opt89,&opt90,&opt91
   };
 
   void print_options() {

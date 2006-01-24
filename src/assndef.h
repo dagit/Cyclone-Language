@@ -139,9 +139,9 @@ namespace AssnDef{
     Tagof(term_t);
   };
 
-  int termcmp(datatype Term @`r1 _t1, datatype Term @`r2 _t2);
-  int termhash(datatype Term @t);
-
+  extern int termcmp(datatype Term @`r1 _t1, datatype Term @`r2 _t2);
+  extern int termhash(datatype Term @t);
+  extern unsigned term_size(term_t t); 
   extern string_t term2string(term_t t);
 
 
