@@ -6,6 +6,7 @@ include ../Makefile.inc
 # (see targets test, test_bin, and test_src in parent directory's Makefile)
 CYCBISON=cycbison$(EXE)
 ifndef devel
+CYCC=../bin/cyclone$(EXE)
 else
 CYCC=../build/boot/cyclone$(EXE)
 CYCFLAGS=-I../lib -I../include -B../build/boot -pp -save-c -g --mergepaths 
