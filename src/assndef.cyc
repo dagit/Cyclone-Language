@@ -718,25 +718,27 @@ static term_t proj_fields(term_t v, list_t<$(int,type_opt_t)@> fs) {
 
 term_t select(term_t t1, term_t t2,type_opt_t tp) {
  LOOP:
-  switch $(t1,t2) {
-  case $(&Update(m,a1,v),a2):
-    if (a1 == a2) return v;
-    if (address_disjoint(a1,a2)) {
+  switch (t1) {
+  case &Update(m,a1,v):
+    if (a1 == t2) return v;
+    if (address_disjoint(a1,t2)) {
       t1 = m;
       goto LOOP;
-      // effectively: return select(m,a2,tp);
+      // effectively: return select(m,t2,tp);
     }
-    // If a2 = offsetf(...(offsetf(offsetf(a1,i1),i2))...,in) then we can 
-    // turn this into 
-    // proj(...(proj(proj(v,i1),i2))...,in)
-    let $(root,fields) = split_addr(a2);
-    if (a1 == root) 
-      return proj_fields(v,fields);
-    fallthru;
-  default:
-    let t = Select(t1,t2,tp);
-    return hash_cons_term(&t);
+    break;
+  default: break;
   }
+  let $(root,fields) = split_addr(t2);
+  if (fields != NULL) {
+    let topt = get_term_type(t1);
+    if (topt != NULL && Tcutil::is_pointer_type((type_t)topt)) {
+      topt = Tcutil::pointer_elt_type((type_t)topt);
+    }
+    return proj_fields(select(t1,root,topt),fields);
+  }
+  let t = Select(t1,t2,tp);
+  return hash_cons_term(&t);
 }
 
 // Unions are represented by one tagged value.  The tag records
@@ -776,7 +778,7 @@ term_t proj(term_t t1, unsigned i, type_opt_t tp) {
     }
     t1 = t;
     goto LOOP;
-  case &Select(m,a,tp2): return select(m,offsetf(a,i,tp2),tp);
+    //case &Select(m,a,tp2): return select(m,offsetf(a,i,tp2),tp);
   default: break;
   }
  NOREDUCE:

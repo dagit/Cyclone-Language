@@ -898,7 +898,7 @@ if(offset >= n){
 # 727
 struct _fat_ptr newlinenums=({unsigned _Tmp0=n * 2U;_tag_fat(_region_calloc(Cyc_Core_heap_region,Cyc_Core_unique_qual,sizeof(unsigned),_Tmp0),sizeof(unsigned),_Tmp0);});
 {unsigned i=0U;for(0;i < n;++ i){
-({unsigned _Tmp0=*((unsigned*)_check_fat_subscript(linenums,sizeof(unsigned),(int)i));*((unsigned*)_check_fat_subscript(newlinenums,sizeof(unsigned),(int)i))=_Tmp0;});}}
+*((unsigned*)_check_fat_subscript(newlinenums,sizeof(unsigned),(int)i))=((unsigned*)linenums.curr)[(int)i];}}
 ({struct _fat_ptr _Tmp0=linenums;struct _fat_ptr _Tmp1=newlinenums;linenums=_Tmp1;newlinenums=_Tmp0;});
 # 732
 ({void(*_Tmp0)(unsigned*)=({void(*_Tmp1)(unsigned*)=(void(*)(unsigned*))Cyc_Core_ufree;_Tmp1;});_Tmp0((unsigned*)_untag_fat_ptr_check_bound(newlinenums,sizeof(unsigned),1U));});}

@@ -1204,13 +1204,15 @@ static void subst_close_graph(int dummy, graph_t @g) {
         best = t2;
       } 
     }
-    // apply the substitution to the best term
-    best = subst_table(eq,best);
-    // check that t1 doesn't occur in the best term.  If so, then
-    // map t1 to best in the substitution.  
-    if (!occurs(t1,best)) {
-      changed = true;
-      Hashtable::insert(eq,t1,best);
+    if (t1 != best) {
+      // apply the substitution to the best term
+      best = subst_table(eq,best);
+      // check that t1 doesn't occur in the best term.  If so, then
+      // map t1 to best in the substitution.  
+      if (!occurs(t1,best)) {
+        changed = true;
+        Hashtable::insert(eq,t1,best);
+      }
     }
   }
   if (!changed) return;
@@ -1219,12 +1221,12 @@ static void subst_close_graph(int dummy, graph_t @g) {
   // new nodes to the graph, from the co-domain of the substitution.  
   // However, the substitution applied to that co-domain should yield
   // the same term, so we won't loop forever.  
-  for (let rs = g->rows; rs != NULL; rs = rs->next) {
-    let t = rs->rep;
+  for (let rs2 = g->rows; rs2 != NULL; rs2 = rs2->next) {
+    let t = rs2->rep;
     let t2 = subst_table(eq,t);
     if (t != t2) {
       add_eq(g,t,t2);
-    }
+    } 
   }
 }
 
@@ -1860,6 +1862,11 @@ static bool inconsist(assn_t a) {
 #ifdef PROVER_DEBUG
           fprintf(stderr,"after subst_close\n");
           print_graph(g);
+#endif
+          //reduce_terms(0,g);
+#ifdef PROVER_DEBUG
+          //fprintf(stderr,"after reduce\n");
+          //print_graph(g);
 #endif
           johnson(0,g);
 #ifdef PROVER_DEBUG
