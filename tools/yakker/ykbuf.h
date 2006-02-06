@@ -19,7 +19,6 @@
 #ifndef YKBUF_H
 #define YKBUF_H
 #include "ssl.h"
-#include <fn.h>
 typedef struct ykbuf ykbuf_t;
 datatype ykproducer {
   ykp_fd(int);
@@ -47,6 +46,25 @@ extern ykbuf_t @string2ykbuf(const char ?s);
 extern void ykfill(ykbuf_t @s,unsigned int n);
 extern void ykdumpbuf(ykbuf_t @y);
 
+/* The functions below are not needed by yakker output but are
+   convenient to put here. */
+
 extern void compress_whitespace(char ?x);
+
+/* ykbgets(s,size,ykb) reads in at most one less than size characters
+   from ykb and stores them into the buffer pointed to by s.  Reading
+   stops after an EOF or a newline.  If a newline is read, it is
+   stored into the buffer.  A 0 is stored after the last character in
+   the buffer.
+   Replacement for fgets(s,size,f).
+*/
+extern char ?`r ykbgets(char ?`r s, int size, ykbuf_t @ykb);
+
+/* ykbread(s,n,ykb) reads n characters from ykb, storing them in s.  It
+   returns the number of characters read.  If an error or EOF occurs
+   it returns a short count or 0.
+   Replacement for fread(s,1,n,f).
+*/
+extern size_t ykbread(char ?s, size_t n, ykbuf_t @ykb);
 
 #endif
