@@ -73,6 +73,9 @@ extern bool warn_bounds_checks;
   // is inserted into the generated C code
 extern bool warn_all_null_deref;
 
+  // true for printing a warning whenever a (dynamic) assert might fail
+extern bool warn_assert;
+
   // true for do not expand typedefs to their definitions when generating
   // C code
 extern bool noexpand_r;

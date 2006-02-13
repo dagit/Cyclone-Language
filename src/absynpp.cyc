@@ -54,6 +54,7 @@ doc_t funargs2doc(list_t<$(var_opt_t,tqual_t,type_t)@> args,
 		  type_opt_t effopt,
 		  list_t<effconstr_t> rgn_po,
 		  list_t<$(type_t,type_t)@> qb,
+                  exp_opt_t checks,
 		  exp_opt_t requires, exp_opt_t ensures, exp_opt_t thrws);
 doc_t datatypefields2doc(list_t<datatypefield_t>);
 doc_t enumfields2doc(list_t<enumfield_t>);
@@ -654,8 +655,8 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
   case &Function_mod(args):
     if (next_is_pointer(tms->tl)) rest = p_rest;
     switch (args) {
-    case &WithTypes(args2,c_varargs,cyc_varargs,effopt,effc,qb,req,ens,thrws):
-      return cat(rest,funargs2doc(args2,c_varargs,cyc_varargs,effopt,effc,qb,req,ens,thrws));
+    case &WithTypes(args2,c_varargs,cyc_varargs,effopt,effc,qb,chk,req,ens,thrws):
+      return cat(rest,funargs2doc(args2,c_varargs,cyc_varargs,effopt,effc,qb,chk,req,ens,thrws));
     case &NoTypes(sl,loc):
       return cat(rest,group("(",")",",",List::map(textptr,sl)));
     }
@@ -983,6 +984,7 @@ doc_t funargs2doc(list_t<$(var_opt_t,tqual_t,type_t)@> args,bool c_varargs,
                   vararg_info_t *cyc_varargs, type_opt_t effopt,
                   list_t<effconstr_t> effc,
                   list_t<$(type_t,type_t)@> qb,
+                  exp_opt_t chk,
 		  exp_opt_t req,exp_opt_t ens,exp_opt_t thrws) {
 
   let arg_docs = List::map(funarg2doc,args);
@@ -1006,6 +1008,8 @@ doc_t funargs2doc(list_t<$(var_opt_t,tqual_t,type_t)@> args,bool c_varargs,
     arg_doc = cat(arg_doc, sep, qualbnd2doc(qb));
   }
   let res = cat(text("("),arg_doc,text(")"));
+  if (chk != NULL)
+    res = cat(res,text(" @checks("),exp2doc(chk),text(")"));
   if (req != NULL)
     res = cat(res,text(" @requires("),exp2doc(req),text(")"));
   if (ens != NULL)
@@ -1329,7 +1333,12 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
     break;
   case &Sizeoftype_e(t): s = cat(text("sizeof("), typ2doc(t), text(")")); break;
   case &Sizeofexp_e(e1): s = cat(text("sizeof("),exp2doc(e1), text(")")); break;
-  case &Assert_e(e):     s = cat(text("@assert("),exp2doc(e),text(")"));  break;
+  case &Assert_e(e,static_only):     
+    if (static_only)
+      s = cat(text("@assert("),exp2doc(e),text(")"));  
+    else 
+      s = cat(text("assert("),exp2doc(e),text(")"));  
+    break;
   case &Assert_false_e(e): s = cat(text("@assert_false("),exp2doc(e),text(")"));  break;
   case &Extension_e(e):
     s = cat(text("__extension__("),exp2doc(e),text(")")); break;
@@ -2089,7 +2098,7 @@ $(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r> r,
     return $(tq3, t3, tml3);
 
   case &FnType(FnInfo{typvars,effopt,t2qual,t2,args,c_varargs,cyc_varargs,
-                        qb,fn_atts,req,_,ens,_,thrws,_,_,_,effc}):
+                        qb,fn_atts,chk,_,req,_,ens,_,thrws,_,_,_,effc}):
     if (! print_all_tvars) {
       // don't print default effects
       // WARNING: this is our criterion to detect default effect,
@@ -2124,13 +2133,13 @@ $(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r> r,
       tms = rnew(r) List(rnew(r)
                          Function_mod(rnew(r) WithTypes(args,c_varargs,
                                                         cyc_varargs,effopt,
-                                                        effc,qb,req,ens,thrws)),tms);
+                                                        effc,qb,chk,req,ens,thrws)),tms);
       break;
     default:
       tms = rnew(r) List(rnew(r)
                          Function_mod(rnew(r) WithTypes(args,c_varargs,
                                                         cyc_varargs,effopt,
-							effc,qb,req,ens,thrws)),tms);
+							effc,qb,chk,req,ens,thrws)),tms);
       for(; fn_atts != NULL; fn_atts = fn_atts->tl)
 	switch(fn_atts->hd) {
 	case &Stdcall_att:

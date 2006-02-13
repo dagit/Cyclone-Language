@@ -1373,6 +1373,9 @@ using Arg {
               "Generate a TAGS file for use with interprocedural type inference");
   make_option(opt91,"--max_vc_term_size",false,"",Int_spec,set_max_vc_term_size,
               "controls the maximum size of terms considered by the constraint solver");
+  make_option(opt92,"--warnassert", false, "",
+              Set_spec,&Flags::warn_assert,
+              "Warn when an assert might fail at run-time");
 
 
   struct List<option_t@`H,`H>@`H global_options[] = {
@@ -1386,7 +1389,7 @@ using Arg {
     &opt50,&opt51,&opt52,&opt53,&opt54,&opt55,&opt56,&opt57,&opt58,&opt59,
     &opt60,&opt61,&opt62,&opt63,&opt64,&opt65,&opt66,&opt67,&opt68,&opt69,
 	    &opt70,&opt71,&opt72,&opt73,&opt74,&opt75,&opt76,&opt77,&opt78,&opt79,
-              &opt80,&opt81,&opt82,&opt83,&opt84,&opt85,&opt86,&opt87,&opt88,&opt89,&opt90,&opt91
+              &opt80,&opt81,&opt82,&opt83,&opt84,&opt85,&opt86,&opt87,&opt88,&opt89,&opt90,&opt91,&opt92
   };
 
   void print_options() {

@@ -547,6 +547,8 @@ static void resolve_function_stuff(seg_t loc, env_t env, fn_info_t @i) {
   resolve_effconstr(loc, env, i->effconstr);
   //  resolve_rgnpo(loc,env,i->rgn_po);
   resolve_qualbnd(loc, env, i->qual_bnd);
+  if(i->checks_clause != NULL)
+    resolve_exp(env,(exp_t)i->checks_clause);
   if(i->requires_clause != NULL)
     resolve_exp(env,(exp_t)i->requires_clause);
   if(i->ensures_clause != NULL || i->throws_clause != NULL) {

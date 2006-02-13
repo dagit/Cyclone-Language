@@ -49,6 +49,7 @@ bool print_parser_state_and_token = false;
 bool allpaths = true;
 bool debug_assn = false;
 bool print_unprovable = false;
+bool warn_assert = false;
 unsigned int max_vc_summary = 500;
 unsigned int max_vc_paths = 33;
 unsigned int max_vc_term_size = 100000;
@@ -61,6 +62,7 @@ void set_all_warnings() {
   warn_region_coerce = true;
   tc_aggressive_warn = true;
   warn_override = true;
+  warn_assert = true;
 }
 void set_cpponly() {
   stop_after_pass = stop_after_pass < Cpp ? stop_after_pass : Cpp;

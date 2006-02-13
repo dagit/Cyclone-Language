@@ -250,6 +250,7 @@ MAKE_VAR(_pop_region);
 MAKE_VAR(_throw_arraybounds);
 MAKE_VAR(_throw_match);
 MAKE_VAR(_rethrow);
+MAKE_VAR(_throw_assert);
 
 #undef MAKE_STRING
 #undef MAKE_VAR
@@ -742,7 +743,7 @@ type_t typ_to_c(type_t t) {
       new_args = List::imp_append(new_args,new List(vararg,NULL));
     }
     return new FnType(FnInfo{NULL,NULL,tq2,typ_to_c(t2),new_args,
-                               c_vararg,NULL,NULL,new_atts,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL});
+                               c_vararg,NULL,NULL,new_atts,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL});
   case &AnonAggrType(k,_,fs):
     // similar to tuple translation (introduce sharing to appease C)
     // but we have full aggrfields to deal with
@@ -1636,7 +1637,17 @@ static void exp_to_c(env_t nv, exp_t e) {
     break;
   case &Const_e(_): break;
   case &Var_e(_):   break;
-  case &Assert_e(_): e->r = int_exp(Signed,1,DL)->r; break;
+  case &Assert_e(e1,static_only): 
+    if (static_only)
+      e->r = int_exp(Signed,1,DL)->r; 
+    else {
+      // turn this into:  e1 ? 1 : throw_match()
+      exp_to_c(nv,e1);
+      e->r = conditional_exp(e1,int_exp(Signed,1,DL),
+                             array_to_ptr_cast(typ_to_c(old_typ),
+                                               fncall_exp_dl(_throw_assert_e),DL),DL)->r;
+    }
+    break;
   case &Assert_false_e(_): e->r = int_exp(Signed,0,DL)->r; break;
   case &Extension_e(e1): exp_to_c(nv,e1); break;
   case &Primop_e(p,es):
@@ -3716,6 +3727,7 @@ static void fndecl_to_c(env_t nv, fndecl_t f, bool cinclude) {
   f->i.effect = NULL;
   //  f->i.rgn_po = NULL;
   f->i.qual_bnd = NULL;
+  f->i.checks_clause = NULL;
   f->i.requires_clause = NULL;
   f->i.ensures_clause  = NULL;
   f->i.throws_clause = NULL;
@@ -4300,7 +4312,8 @@ void init() {
     &_fast_region_malloc_str,
     &_region_vmalloc_str,
     &_aqual_malloc_str,
-    &_aqual_calloc_str
+    &_aqual_calloc_str,
+    &_throw_assert_str
   };
 }
 

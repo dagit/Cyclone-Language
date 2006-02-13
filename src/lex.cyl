@@ -137,6 +137,7 @@ static $(string_t,short,bool) rw_array[] = {
   $("__attribute", ATTRIBUTE, true),
   $("__asm__", ASM_TOK, true),
   $("__asm", ASM_TOK, true),
+  $("assert", ASSERT, false),
   $("asm", ASM_TOK, true),
   $("abstract", ABSTRACT, false),
   $("auto", AUTO, true),
@@ -263,6 +264,9 @@ static int do_possible_qualifier(Lexbuf lexbuf) {
     if(len == 6 &&  strncmp(b, "effect", 6)==0) return EFFECT_QUAL;
     if(len == 7 && strncmp(b,"ensures",7)==0) return ENSURES_QUAL;
     if(len == 10 && strncmp(b,"extensible",10)==0) return EXTENSIBLE_QUAL;
+    break;
+  case 'c':
+    if (len == 6 && strncmp(b, "checks", 6)==0) return CHECKS_QUAL;
     break;
   case 'r':
     if(len == 8 && strncmp(b,"requires",8)==0) return REQUIRES_QUAL;

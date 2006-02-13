@@ -506,8 +506,8 @@ static void unify_it(type_t t1, type_t t2,
       fail_because("different array sizes");
     return;
 
-  case $(&FnType(FnInfo{tvs2,eff2,rt_tq2,rt2,args2,c_vararg2,cyc_vararg2,qb2,atts2,req2,req_relns2,ens2,ens_relns2,thrws2,thrws_relns2,return_value2,argvds2,effc2}),
-         &FnType(FnInfo{tvs1,eff1,rt_tq1,rt1,args1,c_vararg1,cyc_vararg1,qb1,atts1,req1,req_relns1,ens1,ens_relns1,thrws1,thrws_relns1,return_value1,argvds1,effc1})):
+  case $(&FnType(FnInfo{tvs2,eff2,rt_tq2,rt2,args2,c_vararg2,cyc_vararg2,qb2,atts2,chk2,chk_relns2,req2,req_relns2,ens2,ens_relns2,thrws2,thrws_relns2,return_value2,argvds2,effc2}),
+         &FnType(FnInfo{tvs1,eff1,rt_tq1,rt1,args1,c_vararg1,cyc_vararg1,qb1,atts1,chk1,chk_relns1,req1,req_relns1,ens1,ens_relns1,thrws1,thrws_relns1,return_value1,argvds1,effc1})):
     { region rgn; 
     list_t<$(tvar_t,type_t)@`rgn,`rgn> inst = NULL;
     while (tvs1 != NULL) {
@@ -530,12 +530,12 @@ static void unify_it(type_t t1, type_t t2,
       fail_because("second function type has too many type variables");
     if (inst != NULL) {
       let newftype1 = new FnType(FnInfo{NULL,eff1,rt_tq1,rt1,args1,c_vararg1,
-				   cyc_vararg1,qb1,atts1,req1,req_relns1,ens1,
+				   cyc_vararg1,qb1,atts1,chk1,chk_relns1,req1,req_relns1,ens1,
                                         ens_relns1,thrws1,thrws_relns1,return_value1,argvds1,effc1});
       let newftype2 = Tcutil::rsubstitute(rgn, inst,
                                           new FnType(FnInfo{NULL,eff2,rt_tq2,rt2,args2,
                                                             c_vararg2,cyc_vararg2,qb2,
-                                                            atts2,req2,req_relns2,
+                                                            atts2,chk2,chk_relns2,req2,req_relns2,
                                                             ens2,ens_relns2,thrws2,thrws_relns2,return_value2,argvds2,effc2}));
       unify_it(newftype1,newftype2,cvaruf,env);
       return;
@@ -587,13 +587,19 @@ static void unify_it(type_t t1, type_t t2,
     /*       fail_because("function types have different region lifetime orderings"); */
     let terms = NULL;
     for(let vds = argvds1; vds != NULL; vds = vds->tl)
-      terms = new List {AssnDef::fresh_var((vds->hd == NULL)? NULL:vds->hd->type),terms};
+      terms = new List {AssnDef::fresh_var((vds->hd == NULL ? NULL : vds->hd),(vds->hd == NULL)? NULL:vds->hd->type),terms};
     terms = imp_rev(terms);
     // add in memory term
-    terms = new List {AssnDef::fresh_var(NULL),terms};
+    terms = new List {AssnDef::fresh_var(NULL,NULL),terms};
+    // FIX:  @checks clauses must really, really be equivalent in
+    // terms of the memory they produce, not just the assertion...
+    // perhaps the thing to do is have not only a chk_relns but
+    // also chk_term (representing the output memory).
+    if (!check_logical_equivalence(terms,chk_relns1,chk_relns2))
+      fail_because("@check clauses not equivalent");
     if (!check_logical_equivalence(terms,req_relns1,req_relns2))
       fail_because("@requires clauses not equivalent");
-    if (!check_logical_equivalence(new List{AssnDef::fresh_var(NULL),terms},ens_relns1,ens_relns2))
+    if (!check_logical_equivalence(new List{AssnDef::fresh_var(NULL,NULL),terms},ens_relns1,ens_relns2))
       fail_because("@ensures clauses not equivalent");
     if (!check_logical_equivalence(terms,thrws_relns1,thrws_relns2))
       fail_because("@throws clauses not equivalent");

@@ -649,7 +649,7 @@ static relns_t add_subscript_reln(relns_t<`H> relns, exp_t e1, exp_t e2) {
   default: break;
   }
   // if e1 has type T*{n},T@{n}, or T[n], then add e2 < n to the relations
-  let bnd = Tcutil::get_pointer_bounds(e1->topt);
+  let bnd = Tcutil::get_pointer_bounds((type_t)e1->topt);
   if(!bnd || !Tcutil::is_cvar_type(bnd)) {
     exp_opt_t bound = Tcutil::get_type_bound((type_t)e1->topt); //constrains
     if (bound != NULL) {
@@ -1056,9 +1056,13 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
   case &Const_e({.Wstring_c = _}):
   case &Var_e(&Funname_b(_)):    return $(inflow, fenv->notzeroall);
 
+  case &Assert_e(e1,static_only):
+    if (static_only) fallthru;
+    let $(f1t,f1f) = anal_test(env,inflow,e1);
+    return $(f1t,fenv->notzeroall);
+
   case &Datatype_e(NULL,_,_): // FIX: distinguish zero/non-zero
   case &Const_e(_):
-  case &Assert_e(_):
   case &Assert_false_e(_):
   case &Sizeofexp_e(_): // note: the exp is NOT evaluated
   case &Sizeoftype_e(_):

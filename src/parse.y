@@ -554,7 +554,7 @@ static list_t<type_modifier_t<`yy>,`yy>
 	}
 	return
 	  rnew(yy) List(rnew(yy) Function_mod(rnew(yy) WithTypes(imp_rev(rev_new_params),
-						  false,NULL,NULL,NULL,NULL,NULL,NULL,NULL)),
+						  false,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)),
 		   NULL);
       }
     }
@@ -749,7 +749,7 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
                      array_type(t,tq,e,zeroterm,ztloc),atts,tms->tl);
   case &Function_mod(args): {
     switch (args) {
-    case &WithTypes(args2,c_vararg,cyc_vararg,eff,effc,qb,req,ens,thrw):
+    case &WithTypes(args2,c_vararg,cyc_vararg,eff,effc,qb,chks,req,ens,thrw):
       list_t<tvar_t> typvars = NULL;
       // function type attributes seen thus far get put in the function type
       attributes_t fn_atts = NULL, new_atts = NULL;
@@ -830,7 +830,7 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
       return apply_tms(empty_tqual(tq.loc),
 		       function_type(typvars,eff,tq,t,args2,
                                      c_vararg,cyc_vararg,effc,qb,fn_atts,
-                                     req,ens,thrw),
+                                     chks,req,ens,thrw),
 		       new_atts,
 		       tms->tl);
     case &NoTypes(_,loc):
@@ -1084,19 +1084,20 @@ static exp_opt_t join_assn(exp_opt_t e1, exp_opt_t e2) {
   else if (e1 != NULL) return e1;
   else return e2;
 }
-static $(exp_opt_t,exp_opt_t,exp_opt_t) join_assns($(exp_opt_t,exp_opt_t,exp_opt_t) a1, $(exp_opt_t,exp_opt_t,exp_opt_t) a2) {
-  let $(r1,e1,t1) = a1;
-  let $(r2,e2,t2) = a2;
+static $(exp_opt_t,exp_opt_t,exp_opt_t,exp_opt_t) join_assns($(exp_opt_t,exp_opt_t,exp_opt_t,exp_opt_t) a1, $(exp_opt_t,exp_opt_t,exp_opt_t,exp_opt_t) a2) {
+  let $(c1,r1,e1,t1) = a1;
+  let $(c2,r2,e2,t2) = a2;
+  let c = join_assn(c1,c2);
   let r = join_assn(r1,r2);
   let e = join_assn(e1,e2);
   let t = join_assn(t1,t2);
-  return $(r,e,t);
+  return $(c,r,e,t);
 }
 
 static type_t assign_cvar_pos(string_t<`H> posstr, bool ovfat, type_t cv) {
   switch(cv) {
   case &Cvar(_,_,_,_,_,*pos, *ov):
-    *pos = posstr;
+    *pos = (const char *)posstr;
     *ov = ovfat;
     return cv;
   default:
@@ -1141,8 +1142,8 @@ static type_t str2type(seg_t loc, string_t<`H> s) {
   
 static constraint_t composite_constraint(enum ConstraintOps op, constraint_t t1, constraint_opt_t t2) {
   switch(op) {
-  case C_AND_OP: return and_constraint(t1, t2);
-  case C_OR_OP: return or_constraint(t1, t2);
+  case C_AND_OP: return and_constraint(t1, (constraint_t)t2);
+  case C_OR_OP: return or_constraint(t1, (constraint_t)t2);
   case C_NOT_OP: return not_constraint(t1);
   default: //bad op
     parse_abort(0, "Unexpected operator for composite constraint");
@@ -1173,6 +1174,7 @@ using Parse;
 %token NULL_kw LET THROW TRY CATCH EXPORT OVERRIDE HIDE
 %token NEW QNEW ABSTRACT FALLTHRU USING NAMESPACE NOINFERENCE DATATYPE
 %token MALLOC RMALLOC RVMALLOC RMALLOC_INLINE QMALLOC CALLOC QCALLOC RCALLOC SWAP
+%token ASSERT
 %token REGION_T TAG_T REGION RNEW REGIONS
 %token PORTON PORTOFF PRAGMA TEMPESTON TEMPESTOFF
 %token AQ_ALIASABLE  AQ_REFCNT AQ_RESTRICTED AQ_UNIQUE AQUAL_T
@@ -1180,7 +1182,7 @@ using Parse;
 %token FAT_QUAL NOTNULL_QUAL NULLABLE_QUAL REQUIRES_QUAL ENSURES_QUAL EFFECT_QUAL
 %token THROWS_QUAL
 // Cyc:  CYCLONE qualifiers (e.g., @zeroterm, @tagged, @aqual, aquals)
-%token REGION_QUAL NOZEROTERM_QUAL ZEROTERM_QUAL TAGGED_QUAL ASSERT_QUAL ASSERT_FALSE_QUAL ALIAS_QUAL AQUALS
+%token REGION_QUAL NOZEROTERM_QUAL ZEROTERM_QUAL TAGGED_QUAL ASSERT_QUAL ASSERT_FALSE_QUAL ALIAS_QUAL AQUALS CHECKS_QUAL
 %token EXTENSIBLE_QUAL AUTORELEASED_QUAL
 // double and triple-character tokens
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
@@ -1298,8 +1300,8 @@ using Parse;
 %type <pointer_qual_t<`yy>> pointer_qual
 %type <pointer_quals_t<`yy>> pointer_quals
 %type <exp_opt_t> requires_clause_opt open_opt
-%type <$(exp_opt_t,exp_opt_t,exp_opt_t)> requires_and_ensures_and_throws_opt
-%type <$(exp_opt_t,exp_opt_t,exp_opt_t)> requires_and_ensures_and_throws
+%type <$(exp_opt_t,exp_opt_t,exp_opt_t,exp_opt_t)> chk_req_ens_thr_opt
+%type <$(exp_opt_t,exp_opt_t,exp_opt_t,exp_opt_t)> chk_req_ens_thr
 %type <raw_exp_t> asm_expr
 %type <$(list_t<$(string_t<`H>, exp_t)@`H, `H>, list_t<$(string_t<`H>, exp_t)@`H, `H>, list_t<string_t<`H>@`H, `H>)@`H> asm_out_opt
 %type <$(list_t<$(string_t<`H>, exp_t)@`H, `H>, list_t<string_t<`H>@`H, `H>)@`H> asm_in_opt
@@ -1987,10 +1989,10 @@ direct_declarator:
 | direct_declarator '[' assignment_expression ']' zeroterm_qual_opt
 { $$=^$(Declarator($1.id, $1.varloc,
                        rnew(yyr) List(rnew(yyr) ConstArray_mod($3,$5,SLOC(@5)),$1.tms)));}
-| direct_declarator '(' parameter_type_list ')' requires_and_ensures_and_throws_opt
+| direct_declarator '(' parameter_type_list ')' chk_req_ens_thr_opt
     { let &$(lis,b,c,eff,ec,qb) = $3;
-      let $(req,ens,thrws) = $5;
-      $$=^$(Declarator($1.id, $1.varloc,rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(lis,b,c,eff,ec,qb,req,ens,thrws)),$1.tms)));
+      let $(chk,req,ens,thrws) = $5;
+      $$=^$(Declarator($1.id, $1.varloc,rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(lis,b,c,eff,ec,qb,chk,req,ens,thrws)),$1.tms)));
     }
 | direct_declarator '(' identifier_list ')'
     { $$=^$(Declarator($1.id, $1.varloc, rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) NoTypes($3,LOC(@1,@4))),$1.tms))); }
@@ -2026,11 +2028,11 @@ direct_declarator_withtypedef:
     $$=^$(Declarator(one.id, one.varloc,
                        rnew(yyr) List(rnew(yyr) ConstArray_mod($3,$5,SLOC(@5)),
                                 one.tms)));}
-| direct_declarator_withtypedef '(' parameter_type_list ')' requires_and_ensures_and_throws_opt
+| direct_declarator_withtypedef '(' parameter_type_list ')' chk_req_ens_thr_opt
     { let &$(lis,b,c,eff,ec,qb) = $3;
-      let $(req,ens,thrws) = $5;
+      let $(chk,req,ens,thrws) = $5;
       let one=$1;
-      $$=^$(Declarator(one.id, one.varloc, rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(lis,b,c,eff,ec,qb,req,ens,thrws)),one.tms)));
+      $$=^$(Declarator(one.id, one.varloc, rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(lis,b,c,eff,ec,qb,chk,req,ens,thrws)),one.tms)));
     }
 | direct_declarator_withtypedef '(' identifier_list ')'
     { let one=$1;
@@ -2215,14 +2217,14 @@ effconstr_qualbnd:
 | effconstr_elt ',' effconstr_qualbnd
   {
     let rest = $3;
-    let &$(rpo, _) = rest;
+    let $(rpo, _) = *rest;
     (*rest)[0] = new List($1, rpo);
     $$ = ^$(rest);
   }
 | qual_bnd_elt ',' effconstr_qualbnd
   {
     let rest = $3;
-    let &$(_, qb) = rest;
+    let $(_, qb) = *rest;
     (*rest)[1] = new List($1, qb);
     $$ = ^$(rest);
   }
@@ -2504,16 +2506,16 @@ direct_abstract_declarator:
     { $$=^$(Abstractdeclarator(rnew(yyr) List(rnew(yyr) ConstArray_mod($3,$5,SLOC(@5)),
                                             $1.tms)));
     }
-| '(' parameter_type_list ')' requires_and_ensures_and_throws_opt
+| '(' parameter_type_list ')' chk_req_ens_thr_opt
     { let &$(lis,b,c,eff,ec,qb) = $2;
-      let $(req,ens,thrws) = $4;
-      $$=^$(Abstractdeclarator(rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(lis,b,c,eff,ec,qb,req,ens,thrws)),NULL)));
+      let $(chk,req,ens,thrws) = $4;
+      $$=^$(Abstractdeclarator(rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(lis,b,c,eff,ec,qb,chk,req,ens,thrws)),NULL)));
     }
-| direct_abstract_declarator '(' parameter_type_list ')' requires_and_ensures_and_throws_opt
+| direct_abstract_declarator '(' parameter_type_list ')' chk_req_ens_thr_opt
     { let &$(lis,b,c,eff,ec,qb) = $3;
-      let $(req,ens,thrws) = $5;
+      let $(chk,req,ens,thrws) = $5;
       $$=^$(Abstractdeclarator(rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(lis,
-                                                                           b,c,eff,ec,qb,req,ens,thrws)),$1.tms)));
+                                                                           b,c,eff,ec,qb,chk,req,ens,thrws)),$1.tms)));
     }
 /* Cyc: new */
 | direct_abstract_declarator '<' type_name_list right_angle
@@ -2526,24 +2528,28 @@ direct_abstract_declarator:
     }
 ;
 
-requires_and_ensures_and_throws:
-  REQUIRES_QUAL '(' constant_expression ')'
-{ $$ = ^$($($3,NULL,NULL)); }
+chk_req_ens_thr:
+  CHECKS_QUAL '(' constant_expression ')'
+{ $$ = ^$($($3,NULL,NULL,NULL)); }
+| REQUIRES_QUAL '(' constant_expression ')'
+{ $$ = ^$($(NULL,$3,NULL,NULL)); }
 | ENSURES_QUAL '(' constant_expression ')'
-{ $$ = ^$($(NULL,$3,NULL)); }
+{ $$ = ^$($(NULL,NULL,$3,NULL)); }
 | THROWS_QUAL '(' constant_expression ')'
-{ $$ = ^$($(NULL,NULL,$3)); }
-| REQUIRES_QUAL '(' constant_expression ')' requires_and_ensures_and_throws
-{ $$ = ^$(join_assns($($3,NULL,NULL),$5)); }
-| ENSURES_QUAL '(' constant_expression ')' requires_and_ensures_and_throws
-{ $$ = ^$(join_assns($(NULL,$3,NULL),$5)); }
-| THROWS_QUAL '(' constant_expression ')' requires_and_ensures_and_throws
-{ $$ = ^$(join_assns($(NULL,NULL,$3),$5)); }
+{ $$ = ^$($(NULL,NULL,NULL,$3)); }
+| CHECKS_QUAL '(' constant_expression ')' chk_req_ens_thr
+{ $$ = ^$(join_assns($($3,NULL,NULL,NULL),$5)); }
+| REQUIRES_QUAL '(' constant_expression ')' chk_req_ens_thr
+{ $$ = ^$(join_assns($(NULL,$3,NULL,NULL),$5)); }
+| ENSURES_QUAL '(' constant_expression ')' chk_req_ens_thr
+{ $$ = ^$(join_assns($(NULL,NULL,$3,NULL),$5)); }
+| THROWS_QUAL '(' constant_expression ')' chk_req_ens_thr
+{ $$ = ^$(join_assns($(NULL,NULL,NULL,$3),$5)); }
 ;
 
-requires_and_ensures_and_throws_opt:
-  /* empty */                               { $$=  ^$($(NULL,NULL,NULL)); }
-| requires_and_ensures_and_throws           { $$=$!1; }
+chk_req_ens_thr_opt:
+  /* empty */               { $$=  ^$($(NULL,NULL,NULL,NULL)); }
+| chk_req_ens_thr           { $$=$!1; }
 ;
 
 /***************************** STATEMENTS *****************************/
@@ -3104,7 +3110,8 @@ unary_expression:
      $$=^$(valueof_exp(t, LOC(@1,@4))); }
 | ASM_TOK   asm_expr         { $$=^$(new_exp($2, SLOC(@1))); }
 | EXTENSION unary_expression { $$=^$(extension_exp($2,LOC(@1,@3))); }
-| ASSERT_QUAL '(' assignment_expression ')' { $$=^$(assert_exp($3,LOC(@1,@4)));}
+| ASSERT '(' assignment_expression ')' { $$=^$(assert_exp($3,false,LOC(@1,@4)));}
+| ASSERT_QUAL '(' assignment_expression ')' { $$=^$(assert_exp($3,true,LOC(@1,@4)));}
 | ASSERT_FALSE_QUAL '(' assignment_expression ')' { $$=^$(assert_false_exp($3,LOC(@1,@4)));}
 ;
 

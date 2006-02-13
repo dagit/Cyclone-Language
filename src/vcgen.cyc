@@ -111,7 +111,7 @@ static void insert_fn_precond_info(fn_precond_info_t fn_precond_info,exp_t e,ass
 
 // used to add fresh variables for bound variables to a substitution
 static void add_free_var(term_dict_t @S, term_t x) {
-  *S = Dict::insert(*S,x,fresh_var(get_term_type(x)));
+  *S = Dict::insert(*S,x,fresh_var(NULL,get_term_type(x)));
 }
 
 static existassnfn_opt_t lookup_fn_summary_info(exp_t e) {
@@ -189,7 +189,7 @@ initial_env(JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd,
 		     .continue_assnmap = NULL,
                      .widen_paths = !Flags::allpaths,
                      .pure_exp = false,
-                     .invoke = fresh_var(NULL)};
+                     .invoke = fresh_var(NULL,NULL)};
   return env;
 }
 
@@ -212,7 +212,7 @@ static env_t bogus_env(){
 		      .continue_assnmap = NULL,
                       .widen_paths = false,
                       .pure_exp = true,
-                      .invoke = fresh_var(NULL)};
+                      .invoke = fresh_var(NULL,NULL)};
   return env;
 }
 
@@ -487,7 +487,7 @@ static assn_map_t vcgen_local_decl(env_t env, decl_t d, assn_map_t amin){
   case &Absyn::Var_d(vd):
     // when declaring a variable, it's "initialized" with a random value
     // before we actually run the initializer...
-    amin = do_assign(env,amin,myaddr(env,vd),fresh_var(vd->type));
+    amin = do_assign(env,amin,myaddr(env,vd),fresh_var(vd,vd->type));
     if (vd->initializer != NULL) {
       let $(t,am) = vcgen_debug_rexp(env,(exp_t)vd->initializer,amin);
       am = do_assign(env,am,myaddr(env,vd),t);
@@ -501,7 +501,7 @@ static assn_map_t vcgen_local_decl(env_t env, decl_t d, assn_map_t amin){
     // the value of the exception, in the future we should
     // construct a proper exception datatype value
     if (amf.assn != &false_assn)
-      update_try_assnmap(env,amf,fresh_var(Absyn::exn_type()));
+      update_try_assnmap(env,amf,fresh_var(NULL,Absyn::exn_type()));
     return amt;
   case &Absyn::Letv_d(vds):
     // no need to go through the vds because they have
@@ -520,12 +520,12 @@ static assn_map_t vcgen_local_decl(env_t env, decl_t d, assn_map_t amin){
 
 // extract the arguments, requires, and ensures clause for a function from
 // its type.
-static $(list_t<$(var_opt_t,tqual_t,type_t)@> args, list_t<vardecl_opt_t> argvds, existassnfn_opt_t req, existassnfn_opt_t ens, existassnfn_opt_t thrws, vardecl_opt_t ret_value) get_requires_and_ensures_info(Absyn::fn_info_t @fi) {
-  return $(fi->args,fi->arg_vardecls,fi->requires_assn,
+static $(list_t<$(var_opt_t,tqual_t,type_t)@> args, list_t<vardecl_opt_t> argvds, existassnfn_opt_t chk, existassnfn_opt_t req, existassnfn_opt_t ens, existassnfn_opt_t thrws, vardecl_opt_t ret_value) get_requires_and_ensures_info(Absyn::fn_info_t @fi) {
+  return $(fi->args,fi->arg_vardecls,fi->checks_assn,fi->requires_assn,
            fi->ensures_assn,fi->throws_assn,fi->return_value);
 }
 
-static $(list_t<$(var_opt_t,tqual_t,type_t)@> args, list_t<vardecl_opt_t> argvds, existassnfn_opt_t req, existassnfn_opt_t ens, existassnfn_opt_t thrws, vardecl_opt_t ret_value) get_requires_and_ensures(type_opt_t topt) {
+static $(list_t<$(var_opt_t,tqual_t,type_t)@> args, list_t<vardecl_opt_t> argvds, existassnfn_opt_t chk, existassnfn_opt_t req, existassnfn_opt_t ens, existassnfn_opt_t thrws, vardecl_opt_t ret_value) get_requires_and_ensures(type_opt_t topt) {
   if (topt != NULL) {
     type_t t = Tcutil::pointer_elt_type((type_t)topt);
     switch (t) {
@@ -533,7 +533,7 @@ static $(list_t<$(var_opt_t,tqual_t,type_t)@> args, list_t<vardecl_opt_t> argvds
     default: break;
     }
   }
-  return $(NULL,NULL,NULL,NULL,NULL,NULL);
+  return $(NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 }
 
 static unsigned datatype_constructor_index(Absyn::datatypedecl_t dd,
@@ -663,7 +663,7 @@ static $(term_t,term_t,assn_map_t) vcgen_deref(env_t env, exp_t root,
       term_numelts = vcgen_debug_rexp(env,(exp_t)eopt, true_assnmap())[0];
       bnds_check_sufficient = ult(t2, term_numelts);
     }
-    update_try_assnmap(env,and_assnmap_assn(am2,or(not(bnds_check_sufficient),not(null_check))),fresh_var(Absyn::exn_type()));
+    update_try_assnmap(env,and_assnmap_assn(am2,or(not(bnds_check_sufficient),not(null_check))),fresh_var(NULL,Absyn::exn_type()));
     // associate these checks with the expression for insert_checks
     let exp_checks = new ExpChecks{.ctxt=am2,.bounds_check=bnds_check,
                                    .null_check=null_check};
@@ -706,7 +706,7 @@ static $(term_t res, assn_map_t amout)
     amin = widen_assnmap(AssnMap(or(a1,a2),map));
     //fprintf(stderr,"no fixed point, looping with %s\n",assnmap2string(amin));
   }
-  let res = fresh_var(res_type);
+  let res = fresh_var(NULL,res_type);
   // can add it in that numelts(res) == t1
   amin = and_assnmap_assn(amin,eq(numelts_term(res),t1));
   return $(res,amin);
@@ -723,7 +723,7 @@ static $(term_t,assn_map_t) vcgen_binop(env_t env, type_opt_t tp_opt,
       // have an exception here...
       if (!env->pure_exp && Tcutil::is_zeroterm_pointer_type(tp) &&
           !Tcutil::is_fat_pointer_type(tp))
-        update_try_assnmap(env,am,fresh_var(Absyn::exn_type()));
+        update_try_assnmap(env,am,fresh_var(NULL,Absyn::exn_type()));
       return $(offseti(t1,t2,tp),am);
     case Absyn::Minus:
       return $(offseti(t1,unop(Absyn::Minus,t2,Absyn::sint_type),tp),am);
@@ -738,6 +738,57 @@ static $(term_t,assn_map_t) vcgen_binop(env_t env, type_opt_t tp_opt,
   if (!env->pure_exp && p == Absyn::UMod && Unify::unify(Absyn::uint_type,tp))
     am = and_assnmap_assn(am,ult(t,t2));
   return $(t,am);
+}
+
+static bool visit_pure_stmt(bool @env, stmt_t s) {
+  if (!env) return false;
+  switch (s->r) {
+  case &Absyn::Return_s(...):
+  case &Absyn::While_s(...): 
+  case &Absyn::Break_s: 
+  case &Absyn::Continue_s:
+  case &Absyn::Goto_s(...):
+  case &Absyn::For_s(...):
+  case &Absyn::Do_s(...):
+  case &Absyn::TryCatch_s(...): *env = false; return false;
+  default: return true;
+  }
+}
+
+static bool visit_pure_exp(bool @env, exp_t e) {
+  if (!env) return false;
+  switch (e->r) {
+  case &Absyn::Primop_e(p,_): 
+    if (p == Absyn::Div || p == Absyn::Mod) break;
+    return true;
+  case &Absyn::Cast_e(_,_,_,c):
+    switch (c) {
+    case Absyn::No_coercion: return true;
+    default: break;
+    }
+    break;
+  case &Absyn::AggrMember_e(_,_,is_tagged,_) && is_tagged: break;
+  case &Absyn::Assert_e(_,static_only) && !static_only: break;
+  case &Absyn::AssignOp_e(...): 
+  case &Absyn::Increment_e(...):
+  case &Absyn::FnCall_e(...): 
+  case &Absyn::Throw_e(...):
+  case &Absyn::Deref_e(_):
+  case &Absyn::AggrArrow_e(...):
+  case &Absyn::Subscript_e(...):
+  case &Absyn::Swap_e(...):
+  case &Absyn::Asm_e(...):
+  case &Absyn::Extension_e(...): break;
+  default: return true;
+  }
+  *env = false;
+  return false;
+}
+
+static bool is_pure_exp(exp_t e) {
+  bool env = true;
+  Absyn::visit_exp(visit_pure_exp,visit_pure_stmt,&env,e);
+  return env;
 }
 
 // vcgen_loop deals with For_s, While_s, and Do_s
@@ -772,7 +823,7 @@ static assn_map_t vcgen_loop(env_t env, exp_opt_t e1infor, stmt_opt_t s1indo,
   switch (cond->r) {
   case &Absyn::And_e(eleft, eright):
     switch (eleft->r){
-    case &Absyn::Assert_e(eassn):
+    case &Absyn::Assert_e(eassn,static_only) && static_only:
       loop_inv_exp = eassn;
       cond = eright;
       break;
@@ -801,7 +852,7 @@ static assn_map_t vcgen_loop(env_t env, exp_opt_t e1infor, stmt_opt_t s1indo,
   // failed to satisfy the invariant, reset the continue_assnmap
   if (!implies(amin.assn,loop_inv_assnmap.assn)) {
     Warn::err(cond->loc, "cannot prove loop invariant %s from %s\n",
-	      assnmap2string(loop_inv_assnmap),assnmap2string(amin));
+	      assn2string(loop_inv_assnmap.assn),assnmap2string(amin));
     env->continue_assnmap = old_continue_assnmap;
     return true_assnmap();
   }
@@ -886,7 +937,7 @@ static assn_map_t vcgen_loop(env_t env, exp_opt_t e1infor, stmt_opt_t s1indo,
       loop_inv_assnmap = AssnMap(&true_assn,amin.map);
     if (!implies(amin.assn,loop_inv_assnmap.assn)) {
       Warn::err(cond->loc, "cannot prove loop invariant %s from %s\n",
-		assnmap2string(loop_inv_assnmap),assnmap2string(amin));
+		assn2string(loop_inv_assnmap.assn),assnmap2string(amin));
       env->continue_assnmap = old_continue_assnmap;
       return true_assnmap();
     }
@@ -952,7 +1003,7 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
     // current memory if the var can escape,
     // otherwise the r-value is recorded in nonescvar_map
     let vdopt = bind2vardecl(b);
-    if (vdopt == NULL) return $(fresh_var(NULL),amin);
+    if (vdopt == NULL) return $(fresh_var(NULL,NULL),amin);
     let vd = (vardecl_t)vdopt;
     if (vd->escapes){
       let $(mem,am1) = lookup_var_map(memory,amin);
@@ -1031,21 +1082,21 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
     let $(amt,amf) = vcgen_debug_test(env,e1,amin);
     let $(t1,amt) = vcgen_debug_rexp(env,e2,amt);
     let $(t2,amf) = vcgen_debug_rexp(env,e3,amf);
-    let v = fresh_var(e->topt);
+    let v = fresh_var(NULL,e->topt);
     amt = and_assnmap_assn(amt,eq(v,t1));
     amf = and_assnmap_assn(amf,eq(v,t2));
     return $(v,may_widen(env,or_assnmap_assnmap(amt,amf)));
   case &Absyn::And_e(e1,e2):
     let $(amt,amf) = vcgen_debug_test(env,e1,amin);
     let $(t,amt) = vcgen_debug_rexp(env,e2,amt);
-    let v = fresh_var(e->topt);
+    let v = fresh_var(NULL,e->topt);
     amt = and_assnmap_assn(amt,eq(v,t));
     amf = and_assnmap_assn(amf,eq(v,zero()));
     return $(v,may_widen(env,or_assnmap_assnmap(amt,amf)));
   case &Absyn::Or_e(e1,e2):
     let $(amt,amf) = vcgen_debug_test(env,e1,amin);
     let $(t,amf) = vcgen_debug_rexp(env,e2,amf);
-    let v = fresh_var(e->topt);
+    let v = fresh_var(NULL,e->topt);
     amt = and_assnmap_assn(amt,neq(v,zero()));
     amf = and_assnmap_assn(amf,eq(v,t));
     return $(v,may_widen(env,or_assnmap_assnmap(amt,amf)));
@@ -1056,7 +1107,7 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
     let $(f,am1) = vcgen_debug_rexp(env,e1,amin);
     let $(ts,am2) = vcgen_debug_rexps(env,es,am1);
     let $(pre_memory,am2) = lookup_var_map(memory,am2);
-    let $(args,argvds,reqopt,ensopt,thrwsopt,ret_value) = get_requires_and_ensures(e1->topt);
+    let $(args,argvds,checkopt,reqopt,ensopt,thrwsopt,ret_value) = get_requires_and_ensures(e1->topt);
 #ifdef NO_FUN_SUMMARY
     existassnfn_opt_t fensinfo = NULL;
 #else
@@ -1068,7 +1119,7 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
 
     // if there is a return value, create a
     // fresh logicvar to represent it.
-    term_t actual_ret = fresh_var(e->topt);
+    term_t actual_ret = fresh_var(NULL,e->topt);
     // checking requires assertion
     if (reqopt != NULL) {
       // subst the formal args with the actual values
@@ -1081,11 +1132,11 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
     // after the function call, all non-escaping var's value
     // should not change, so we should keep the mapping except for
     // memory
-    let new_memory = fresh_var(NULL);
+    let new_memory = fresh_var(memory,NULL);
     let am3 = update_var_map(memory,new_memory,am2);
     // merge this with the throws assertion from the function and
     // update the exception handler.
-    let v = fresh_var(Absyn::exn_type());
+    let v = fresh_var(NULL,Absyn::exn_type());
     if (thrwsopt != NULL) {
       let throws_assn = existassnfn2assn(thrwsopt,new List(new_memory,ts));
       update_try_assnmap(env,and_assnmap_assn(am3,throws_assn),v);
@@ -1114,7 +1165,7 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
   case &Absyn::Throw_e(e,_):
     let $(t,am1) = vcgen_debug_rexp(env,e,amin);
     update_try_assnmap(env,am1,t);
-    return $(fresh_var(NULL),false_assnmap());
+    return $(fresh_var(NULL,NULL),false_assnmap());
   case &Absyn::NoInstantiate_e(e): return vcgen_debug_rexp(env,e,amin);
   case &Absyn::Instantiate_e(e,_): return vcgen_debug_rexp(env,e,amin);
   case &Absyn::Cast_e(tp,e1,_,c):
@@ -1149,6 +1200,15 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
       s2 = (s2 == Absyn::Long_sz? Absyn::Int_sz:s2);
       if (s1 == s2) return $(t,am);
       break;
+    case $(&Absyn::AppType(&Absyn::IntCon(_,Absyn::Int_sz),_),&Absyn::PointerType(pi)): fallthru(pi);
+    case $(&Absyn::AppType(&Absyn::IntCon(_,Absyn::Long_sz),_),&Absyn::PointerType(pi)):
+      if (Tcutil::get_bounds_exp_constrain(Absyn::bounds_one(),pi.ptr_atts.bounds,true) != NULL) {
+        // casting a thin pointer to an (unsigned) int/long is okay -- we want
+        // to drop the cast here because it loses information about whether
+        // or not the term is null.
+        return $(t,am);
+      }
+      break;
     case $(&Absyn::PointerType(p2),&Absyn::PointerType(p1)):
       let n1 = Tcutil::force_type2bool(false,p1.ptr_atts.nullable);
       let n2 = Tcutil::force_type2bool(false,p2.ptr_atts.nullable);
@@ -1164,7 +1224,7 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
           let exp_checks = new ExpChecks{.ctxt=am,.bounds_check=&true_assn,
                                          .null_check=null_check};
           insert_exp_checks(env->assn_info, e1, exp_checks);
-          update_try_assnmap(env,and_assnmap_assn(am,eq(t,zero())),fresh_var(Absyn::exn_type()));
+          update_try_assnmap(env,and_assnmap_assn(am,eq(t,zero())),fresh_var(NULL,Absyn::exn_type()));
           return $(t,and_assnmap_assn(am,null_check));
         } else return $(t,am);
       case $(&_,NULL):  // cast to fat -- no failure possible
@@ -1193,7 +1253,7 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
 				       .null_check=null_check};
         insert_exp_checks(env->assn_info, e1, exp_checks);
 	let checks = and(null_check,bcheck);
-        update_try_assnmap(env,and_assnmap_assn(am,not(checks)),fresh_var(Absyn::exn_type()));
+        update_try_assnmap(env,and_assnmap_assn(am,not(checks)),fresh_var(NULL,Absyn::exn_type()));
         return $(t,and_assnmap_assn(am,checks));
       case $(_,_): // fat to fat -- no failure possible
         return $(t,am);
@@ -1204,7 +1264,7 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
       return $(cast(tp,t),am);
     } else {
       // FIX:  we really need to interpret the casts appropriately.
-      update_try_assnmap(env,amin,fresh_var(Absyn::exn_type())); // coercion could fail
+      update_try_assnmap(env,amin,fresh_var(NULL,Absyn::exn_type())); // coercion could fail
       return $(t,am);
     }
   case &Absyn::New_e(eopt,e1,qopt):
@@ -1251,7 +1311,7 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
     if (!env->pure_exp && is_tagged && is_read) {
       // FIX: have insert_checks look for tag here...
       let ck = eq(tagof_tm(t),uint(i));
-      update_try_assnmap(env,and_assnmap_assn(amin,not(ck)),fresh_var(Absyn::exn_type()));
+      update_try_assnmap(env,and_assnmap_assn(amin,not(ck)),fresh_var(NULL,Absyn::exn_type()));
       amin = and_assnmap_assn(amin,ck);
     }
     return $(proj(t,i,e->topt),amin);
@@ -1273,7 +1333,7 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
     if (!env->pure_exp && is_tagged && is_read) {
       let ck = eq(tagof_tm(select(mem,t1,NULL)),
                   uint(i));
-      update_try_assnmap(env,and_assnmap_assn(amin,not(ck)),fresh_var(Absyn::exn_type()));
+      update_try_assnmap(env,and_assnmap_assn(amin,not(ck)),fresh_var(NULL,Absyn::exn_type()));
       amin = and_assnmap_assn(amin,ck);
     }
     let elt_type = Tcutil::pointer_elt_type((type_t)e1->topt);
@@ -1295,7 +1355,7 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
       let &$(_,e) = dles->hd;
       amin = (vcgen_debug_rexp(env,e,amin))[1];
     }
-    return $(fresh_var(NULL),amin);
+    return $(fresh_var(NULL,NULL),amin);
   case &Absyn::Aggregate_e(_,_,dles,_): fallthru(dles);
   case &Absyn::AnonStruct_e(_,_,dles):
     let atype = (type_t)e->topt;
@@ -1323,7 +1383,7 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
   case &Absyn::Comprehension_e(vd,e1,e2,_):
     return vcgen_comprehension(env,vd,e1,e2,(type_t)e->topt,amin);
   case &Absyn::ComprehensionNoinit_e(e,_,_):
-    return $(fresh_var(NULL),vcgen_debug_rexp(env,e,amin)[1]);
+    return $(fresh_var(NULL,NULL),vcgen_debug_rexp(env,e,amin)[1]);
   case &Absyn::Malloc_e(mi):
     if (mi.rgn != NULL)
       amin = vcgen_debug_rexp(env,(exp_t)mi.rgn,amin)[1];
@@ -1339,17 +1399,17 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
     let $(t2,am4) = deref_lterm(env,lt2,am3);
     let am5 = do_assign(env,am4,lt1,t2);
     let am6 = do_assign(env,am5,lt2,t1);
-    return $(fresh_var(NULL),am6);
+    return $(fresh_var(NULL,NULL),am6);
   case &Absyn::StmtExp_e(s):
     let old_exp_stmt = env->exp_stmt;
-    env->exp_stmt = new fresh_var(NULL);
+    env->exp_stmt = new fresh_var(NULL,NULL);
     let amout = vcgen_debug_stmt(env,s,amin);
     let t = *(env->exp_stmt);
     env->exp_stmt = old_exp_stmt;
     return $(t,amout);
-  case &Absyn::Asm_e(...): return $(fresh_var(NULL),amin);
+  case &Absyn::Asm_e(...): return $(fresh_var(NULL,NULL),amin);
   case &Absyn::Extension_e(e): return vcgen_debug_rexp(env,e,amin);
-  case &Absyn::Assert_e(e1):
+  case &Absyn::Assert_e(e1,static_only) && static_only:
     let old_widen_paths = env->widen_paths;
     let old_pure_exp = env->pure_exp;
     env->widen_paths = false;
@@ -1359,8 +1419,23 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
     env->pure_exp = old_pure_exp;
     if (!implies(amin.assn,amt.assn))
       Warn::err(e->loc, "cannot prove @assert(%s)\nfrom\n %s",
-                assnmap2string(amt), assnmap2string(amin));
+                assn2string(amt.assn), assnmap2string(amin));
     return $(one(),and_assnmap_assn(amin,amt.assn));
+  case &Absyn::Assert_e(e1,*static_only):
+    // a dynamic assertion is treated similar to 
+    //   if (!e1) throw(_)
+    let $(amt,amf) = vcgen_debug_test(env,e1,amin);
+    // if amf implies false *and* if e1 is pure then we can omit the check.  
+    if (implies(amf.assn,&false_assn)) {
+      if (is_pure_exp(e1))
+        *static_only = true;
+    } else {
+      if (Flags::warn_assert)
+        Warn::warn2(e->loc, "assert(",e1,") might fail at run-time");
+      let v = fresh_var(NULL,Absyn::exn_type());
+      update_try_assnmap(env,amf,v);
+    }
+    return $(one(),amt);
   case &Absyn::Assert_false_e(e1):
     let old_widen_paths = env->widen_paths;
     let old_pure_exp = env->pure_exp;
@@ -1437,7 +1512,7 @@ static $(term_t,assn_map_t) vcgen_lexp(env_t env, exp_t e, assn_map_t amin){
   default:
     // FIX -- this type doesn't seem right... and I cheated on the region.
     let tp = Absyn::at_type((type_t)e->topt,Absyn::heap_rgn_type,Absyn::al_qual_type,Absyn::empty_tqual(0),Absyn::false_type, Absyn::false_type);
-    return $(fresh_var(tp),amin);
+    return $(fresh_var(NULL,tp),amin);
   }
 }
 
@@ -1544,7 +1619,7 @@ static void update_return(env_t env, term_opt_t topt, assn_map_t a, type_opt_t t
   if (a.assn == &false_assn) return;
   term_t t;
   if (topt != NULL) t = (term_t)topt;
-  else t = fresh_var(tp);
+  else t = fresh_var(NULL,tp);
   // there is no ensures clause, nothing needs to be done with the return
   if (env->res_assnmap == NULL) return;
   if (env->result != NULL) {
@@ -1557,7 +1632,7 @@ static void update_return(env_t env, term_opt_t topt, assn_map_t a, type_opt_t t
 static exp_opt_t find_assert_e(stmt_t s) {
   while (true) {
     switch (s->r) {
-    case &Absyn::Exp_s(&Absyn::Exp{.r = &Absyn::Assert_e(e),...}): return e;
+    case &Absyn::Exp_s(&Absyn::Exp{.r = &Absyn::Assert_e(e,static_only),...}) && static_only: return e;
     case &Absyn::Seq_s(sa,_): s = sa; continue;
     default: return NULL;
     }
@@ -1676,7 +1751,7 @@ static assn_map_t vcgen_stmt(env_t env, stmt_t s, assn_map_t amin) {
         let $(amt,_) = vcgen_debug_test(env,label_assn,AssnMap{&true_assn,amin.map});
         if (!implies(amin.assn,amt.assn))
           Warn::err(s->loc, "cannot prove @assert(%s)\nfrom %s",
-                    assnmap2string(amt), assnmap2string(amin));
+                    assn2string(amt.assn), assnmap2string(amin));
         break;
       default: Warn::impos("vcgen goto");
       }
@@ -1840,7 +1915,7 @@ static assn_map_t vcgen_switch(env_t env, term_t v,
 
 assn_map_t clause2assn(exp_t e){
   let env = bogus_env();
-  let am = update_var_map(memory,fresh_var(NULL),true_assnmap());
+  let am = update_var_map(memory,fresh_var(NULL,NULL),true_assnmap());
   let res =  vcgen_debug_test(env,e,am).f0;
   return res;
 }
@@ -1953,7 +2028,7 @@ static int sizeof_closure_vcgen_debug_assn_set() {
 #endif
 void vcgen_fundecl(Position::seg_t loc, JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd, 
 		   assn_info_t assn_info, fn_precond_info_t fn_precond_info, bool use_precond){
-  let $(args,arvds,reqopt,ensopt,thrwsopt,ret_value) = get_requires_and_ensures_info(&fd->i);
+  let $(args,arvds,checkopt,reqopt,ensopt,thrwsopt,ret_value) = get_requires_and_ensures_info(&fd->i);
   assn_map_t am = true_assnmap();
   // We need to record the initial logical values for the arguments
   // so that we can use them in the @ensures and @throws clauses.
@@ -1971,6 +2046,10 @@ void vcgen_fundecl(Position::seg_t loc, JumpAnalysis::jump_anal_res_t tables, Ab
   let $(initmem,am2) = lookup_var_map(memory,am);
   am = am2;
   let args = new List{initmem,actuals};
+  // put in the checks clause as an assumption.
+  if (checkopt != NULL) {
+    am = AssnMap{existassnfn2assn(checkopt,args),am.map};
+  }
   // put in the requires clause as an assumption.
   if (reqopt != NULL) {
     am = AssnMap{existassnfn2assn(reqopt,args),am.map};
@@ -2020,7 +2099,7 @@ void vcgen_fundecl(Position::seg_t loc, JumpAnalysis::jump_anal_res_t tables, Ab
 
   // check the ensures clause
   assn_map_t res = *env->res_assnmap;
-  term_t res_term = fresh_var(NULL);
+  term_t res_term = fresh_var(NULL,NULL);
   if (ret_value != NULL) {
     let $(r,a) = lookup_var_map((vardecl_t)ret_value,res);
     res_term = r;

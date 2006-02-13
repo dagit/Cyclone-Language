@@ -86,17 +86,26 @@ static string_t term2string_i(term_t t, Set::set_t<term_t,`H> @seen, int @depth)
   *seen = Set::insert(old_seen,t);
   switch (t) {
   case &Uint(i,_): res = aprintf("0x%x", i); break;
-  case &Const(e): res = aprintf("%s[%d]",Absynpp::exp2string(e),(int)e); break;
+  case &Const(e): res = aprintf("%s",Absynpp::exp2string(e)); break;
   case &Tagof(t): res = aprintf("tagof_tm(%s)",term2string_i(t,seen,depth)); break;
   case &Select(t1,t2,tp):
-    res = aprintf("Sel(%s,%s,%s)",term2string_i(t1,seen,depth),term2string_i(t2,seen,depth),typopt2string(tp));
+    //res = aprintf("Sel(%s,%s,%s)",term2string_i(t1,seen,depth),term2string_i(t2,seen,depth),typopt2string(tp));
+    res = aprintf("Sel(%s,%s)",term2string_i(t1,seen,depth),term2string_i(t2,seen,depth));
     break;
   case &Update(t1,t2,t3):
     res = aprintf("Upd(%s,%s,%s)",term2string_i(t1,seen,depth),term2string_i(t2,seen,depth),term2string_i(t3,seen,depth));
     break;
-  case &LogicVar(NULL,i,_): res = aprintf("_X%d",i); break;
-  case &LogicVar(vd,i,_): 
-    res = aprintf("_%s%d",Absynpp::qvar2string(vd->name),i); break;
+  case &LogicVar(NULL,i,topt): 
+    //if (topt != NULL)
+    //  res = aprintf("_X%d<%s>",i,Absynpp::typ2string((type_t)topt)); 
+    //else 
+      res = aprintf("_X%d",i); 
+    break;
+  case &LogicVar(vd,i,topt): 
+    //if (topt != NULL)
+    //  res = aprintf("_%s%d<%s>",Absynpp::qvar2string(vd->name),i,Absynpp::typ2string((type_t)topt)); 
+    //else 
+      res = aprintf("_%s%d",Absynpp::qvar2string(vd->name),i); break;
   case &Unop(p,t1,_):
     res = aprintf("%s(%s)",Absynpp::prim2string(p),term2string_i(t1,seen,depth)); break;
   case &Binop(p,t1,t2,_):
@@ -128,9 +137,9 @@ static string_t term2string_i(term_t t, Set::set_t<term_t,`H> @seen, int @depth)
     res = aprintf("Aupd(%s,%d,%s)",term2string_i(a,seen,depth),i,term2string_i(v,seen,depth));
     break;
   case &Addr(vd,invoke,_):
-    res = aprintf("&%s_%s_%x",Absynpp::qvar2string(vd->name),
-                  term2string_i(invoke,seen,depth),(unsigned int)vd); 
-    //res = aprintf("&%s",Absynpp::qvar2string(vd->name));
+    //res = aprintf("&%s_%s_%x",Absynpp::qvar2string(vd->name),
+    //              term2string_i(invoke,seen,depth),(unsigned int)vd); 
+    res = aprintf("&%s",Absynpp::qvar2string(vd->name));
     break;
   case &Alloc(e,id,nelts,invoke,_):
     res = aprintf("Alloc(%d,%d,%s,%s)", (int)e,id,term2string_i(nelts,seen,depth),term2string_i(invoke,seen,depth));
@@ -857,9 +866,9 @@ term_t offseti(term_t tm, term_t i, type_opt_t tp){
     return hash_cons_term(&t);
   }
 }
-term_t fresh_var(type_opt_t tp){
+term_t fresh_var(vardecl_opt_t vd,type_opt_t tp){
   static int counter = 0;
-  let t = logicvar(NULL,counter,tp);
+  let t = logicvar(vd,counter,tp);
   counter++;
   return t;
 }
@@ -2016,7 +2025,12 @@ existassnfn_t assnmap2existassnfn(assn_map_t am, list_t<vardecl_opt_t> vds) {
       };
       actuals = new List {v,actuals};
     } else {
-      actuals = new List {fresh_var(vds->hd == NULL ? NULL:vds->hd->type),actuals};
+      term_t x;
+      if (vds->hd == NULL) 
+        x = fresh_var(NULL,NULL);
+      else 
+        x = fresh_var(vds->hd,vds->hd->type);
+      actuals = new List {x,actuals};
     }
   }
   actuals = imp_rev(actuals);
@@ -2048,13 +2062,13 @@ existassnfn_t bound_ts_in_assn(assn_t a,list_t<term_t,`H> ts) {
       }
       if (!occured) vs = new List{ts->hd,vs};
       else {
-	let v = fresh_var(get_term_type(ts->hd));
+	let v = fresh_var(NULL,get_term_type(ts->hd));
 	a = and(a,eq(v,ts->hd));
 	vs = new List{v,vs};
       }
       break;
     default:
-      let v = fresh_var(get_term_type(ts->hd));
+      let v = fresh_var(NULL,get_term_type(ts->hd));
       a = and(a,eq(v,ts->hd));
       vs = new List{v,vs};
       break;
@@ -2069,7 +2083,7 @@ existassnfn_t bound_ts_in_assn(assn_t a,list_t<term_t,`H> ts) {
 }
 
 static term_dict_t@`r insertnewmap(term_t t, term_dict_t @`r dict) {
-  *dict = Dict::insert(*dict,t,fresh_var(get_term_type(t)));
+  *dict = Dict::insert(*dict,t,fresh_var(NULL,get_term_type(t)));
   return dict;
 }
 
@@ -2142,7 +2156,7 @@ assn_map_t true_assnmap(){
 $(term_t,assn_map_t) lookup_var_map(vardecl_t vd, assn_map_t am){
   term_t *t = Dict::lookup_opt(am.map,vd);
   if (t != NULL) return $(*t,am);
-  let newt = fresh_var(vd->type);
+  let newt = fresh_var(vd,vd->type);
   let newm = Dict::insert(am.map,vd,newt);
   return $(newt, AssnMap{am.assn,newm});
 }
@@ -2171,7 +2185,7 @@ assn_map_t and_assnmap_assn(assn_map_t am, assn_t a){
 
 term_t merge(vardecl_t vd, term_t t1, term_t t2){
   if (t1 == t2) return t1;
-  else return fresh_var(vd->type);
+  else return fresh_var(vd,vd->type);
 }
 
 static term_t subst_term_internal($(Hashtable::table_t<term_t,term_t>, term_dict_t) @env, term_t t) {
@@ -2286,7 +2300,7 @@ static term_t unify_term(accum_t @`r accum, term_t ta, term_t tb) {
   if (topta != NULL && toptb != NULL && Unify::unify((type_t)topta,
                                                      (type_t)toptb))
     topt = topta;
-  let v = fresh_var(topt);
+  let v = fresh_var(NULL,topt);
   accum->a1 = and(accum->a1,eq(v,ta));
   accum->a2 = and(accum->a2,eq(v,tb));
   return v;
@@ -2312,7 +2326,7 @@ static accum_t @`r foldm1(vardecl_t vd, term_t t, accum_t @`r accum){
     default:
       break;
     }
-    let v = fresh_var(vd->type);
+    let v = fresh_var(vd,vd->type);
     accum->a1 = and(accum->a1,eq(v,t));
     accum->m1 = Dict::insert(accum->m1,vd,v);
     accum->m2 = Dict::insert(accum->m2,vd,v);
@@ -2382,7 +2396,7 @@ static accum_t @`r foldm2(vardecl_t vd, term_t t, accum_t @`r accum){
 //     accum->m = Dict::insert(accum->m,vd,t);
 //     return accum;
   default:
-    let v = fresh_var(vd->type);
+    let v = fresh_var(vd,vd->type);
     accum->a2 = and(eq(v,t),accum->a2);
     accum->m = Dict::insert(accum->m,vd,v);
     return accum;
@@ -2424,7 +2438,7 @@ static term_dict_t @collect_subst(nonescvar_map_t @map2, vardecl_t vd, term_t va
     if (Dict::lookup_opt(*dict,value) == NULL) {
       if (v != NULL && *v == value) 
 	return new Dict::insert(*dict,value,*v);
-      return new Dict::insert(*dict,value,fresh_var(vd->type));
+      return new Dict::insert(*dict,value,fresh_var(vd,vd->type));
     }
     break;
   default:
@@ -2475,7 +2489,7 @@ static canonical_am_accum_t fold_canonical(vardecl_t vd, term_t value, canonical
   default:
     break;
   }
-  let v = fresh_var(vd->type);
+  let v = fresh_var(vd,vd->type);
   accum->used_lvars = Set::insert(accum->used_lvars,v);
   accum->map = Dict::insert(accum->map,vd,v);
   accum->assn = and(accum->assn,eq(v,value));
@@ -2494,7 +2508,7 @@ assn_map_t canonical_assnmap(assn_map_t am) {
 
 static nonescvar_map_t@`r force_it($(assn_t,vardecl_set_t)@env, vardecl_t vd, term_t t, nonescvar_map_t @`r accum) {
   if (Set::member(env->f1,vd)) {
-    let new_term = fresh_var(vd->type);
+    let new_term = fresh_var(vd,vd->type);
     env->f0 = and(env->f0,eq(new_term,t));
     *accum = Dict::insert(*accum,vd,new_term);
   } else {
@@ -2567,7 +2581,7 @@ extern assn_map_t *subst_vardecls(List::list_t<vardecl_opt_t> vds1,
   // deal with memory as if it were a variable...
   let v = Dict::lookup_opt(a->map,memory);
   if (v != NULL) {
-    let u = fresh_var(NULL);
+    let u = fresh_var(memory,NULL);
     newmap = Dict::insert(newmap,memory,u);
     dict = Dict::insert(dict,*v,u);
   }
@@ -2575,7 +2589,7 @@ extern assn_map_t *subst_vardecls(List::list_t<vardecl_opt_t> vds1,
     if (vds1->hd != NULL && vds2->hd != NULL){
       let v = Dict::lookup_opt(a->map,(vardecl_t)vds1->hd);
       if (v != NULL) {
-	let u = fresh_var(vds2->hd->type);
+	let u = fresh_var(vds2->hd,vds2->hd->type);
 	// map yi to a new logicvar ui,
 	newmap = Dict::insert(newmap,(vardecl_t)vds2->hd,u);
 	// add pair vi,ui into the dict for substitution

@@ -376,7 +376,7 @@ type_t copy_type(type_t t) {
   case &ArrayType(ArrayInfo{et,tq,eo,zt,ztl}):
     return new ArrayType(ArrayInfo{copy_type(et),tq,deep_copy_exp_opt(true,eo),
 				     copy_type(zt),ztl});
-  case &FnType(FnInfo{tvs,effopt,rt_tq,rt,args,c_varargs,cyc_varargs,qb,atts,req,
+  case &FnType(FnInfo{tvs,effopt,rt_tq,rt,args,c_varargs,cyc_varargs,qb,atts,chk,chk_rlns,req,
 			req_rlns,ens,ens_rlns,thrws,thrws_rlns,ret_val,argvds,effc}):
     let tvs2 = map(copy_tvar,tvs);
     type_opt_t effopt2 = (effopt == NULL) ? NULL : copy_type(effopt);
@@ -389,6 +389,8 @@ type_t copy_type(type_t t) {
     let effc2 = map(copy_effconstr, effc);
     let qb2 = map(copy_type_pair,qb);
     let atts2 = atts;
+    let chk2 = deep_copy_exp_opt(true,chk);
+    let chk_rlns2 = chk_rlns;
     let req2 = deep_copy_exp_opt(true,req);
     let req_rlns2 = req_rlns;
     let ens2 = deep_copy_exp_opt(true,ens);
@@ -402,7 +404,8 @@ type_t copy_type(type_t t) {
     list_t<vardecl_opt_t> argvds2 = List::map(copy_vardecl_opt,argvds);
     vardecl_opt_t ret_val2 = copy_vardecl_opt(ret_val);
     return new FnType(FnInfo{tvs2,effopt2,rt_tq,rt2,args2,c_varargs2,
-                               cyc_varargs2,qb2,atts2,req2,req_rlns2,
+                               cyc_varargs2,qb2,atts2,chk2,chk_rlns2,
+                               req2,req_rlns2,
                                ens2,ens_rlns2,thrws2,thrws_rlns2,ret_val2,
                                argvds2,effc2});
   case &AnonAggrType(k,b,fs): return new AnonAggrType(k,b,map(copy_field,fs));
@@ -533,7 +536,7 @@ exp_t deep_copy_exp(bool preserve_types, exp_t e) {
     new_e = new_exp(new Tagcheck_e(DC(pt,e1),fn),e->loc); break;
   case &Valueof_e(t):     new_e = valueof_exp(copy_type(t),e->loc); break;
   case &Asm_e(v,t,o,i,c): new_e = asm_exp(v,t,o,i,c,e->loc); break;
-  case &Assert_e(e1):     new_e = assert_exp(e1,e->loc); break;
+  case &Assert_e(e1,s): new_e = assert_exp(e1,s,e->loc); break;
   case &Assert_false_e(e1): new_e = assert_false_exp(e1,e->loc); break;
   }
   // types/annotations are shared
@@ -793,7 +796,10 @@ static type_t dummy_fntype(type_t eff) {
                                  .ret_type=void_type,
 				 .args=NULL,.c_varargs=false,
                                  .cyc_varargs=NULL,.qual_bnd=NULL,
-                                 .attributes = NULL, .requires_clause = NULL,
+                                 .attributes = NULL, 
+                                 .checks_clause = NULL,
+                                 .checks_assn = NULL,
+                                 .requires_clause = NULL,
                                  .requires_assn = NULL,
                                  .ensures_clause = NULL,
                                  .ensures_assn = NULL,
@@ -1081,7 +1087,7 @@ static type_t close_effect(type_t eff, list_t<effconstr_t,`H> effconstr) {
     _ can = canonical_join_effect(eff);
     if(can) {
       type_opt_t t = close_canonical_join(eff, effconstr);
-      if(t != eff)
+      if(t != (type_opt_t)eff)
 	return (type_t)t;
     }
     //matching the whole thing failed ... maybe we can match the components
@@ -1548,6 +1554,8 @@ int typecmp(type_t t1, type_t t2) {
 /*     if (rpo2 != NULL) return -1; */
     if(cmp_effect_constraints(f1.effconstr, f2.effconstr)) 
       return 1;
+    r = star_cmp(Evexp::uint_exp_cmp,f1.checks_clause,f2.checks_clause);
+    if (r != 0) return r;
     r = star_cmp(Evexp::uint_exp_cmp,f1.requires_clause,f2.requires_clause);
     if (r != 0) return r;
     r = star_cmp(Evexp::uint_exp_cmp,f1.ensures_clause,f2.ensures_clause);
@@ -2261,9 +2269,9 @@ exp_t rsubsexp(region_t<`r> r, list_t<$(tvar_t,type_t)@`r,`r> inst, exp_t e) {
     case &ValueofType(e): return e;
     default: return copye(e, new Valueof_e(new_typ));
     }
-  case &Assert_e(e1):
+  case &Assert_e(e1,s):
     let new_e1 = rsubsexp(r,inst,e1);
-    return (new_e1==e1) ? e : copye(e, new Assert_e(new_e1));
+    return (new_e1==e1) ? e : copye(e, new Assert_e(new_e1,s));
   case &Assert_false_e(e1):
     let new_e1 = rsubsexp(r,inst,e1);
     return (new_e1==e1) ? e : copye(e, new Assert_false_e(new_e1));
@@ -2409,7 +2417,7 @@ type_t rsubstitute(region_t<`r> rgn,
       return t;
     return pointer_type(PtrInfo(new_t1,tq,PtrAtts(new_r,n,new_b,new_zt,NULL,new_rel,new_aq)));
   case &FnType(FnInfo{vs,eff,rtq,rtyp,args,c_varargs,cyc_varargs,qb,atts,
-                        req,_,ens,_,thrws,_,ret_value,argvds,effconstr}): //sub the qb also ... need it for delayed checking
+                      chk,_,req,_,ens,_,thrws,_,ret_value,argvds,effconstr}): //sub the qb also ... need it for delayed checking
     if (skip_fntypes) return t;
     // FIX: capture??? 
     for (let p = vs; p != NULL; p = p->tl)
@@ -2433,13 +2441,14 @@ type_t rsubstitute(region_t<`r> rgn,
     let effconstr2 = rsubst_effconstr(rgn, inst, effconstr);
     //    list_t<$(type_t,type_t)@> rgn_po2 = rsubst_rgnpo(rgn,inst,rgn_po);
     list_t<$(type_t,type_t)@> qb2 = rsubst_type_assoc(rgn,inst,qb);
+    exp_opt_t chk2 = rsubs_exp_opt(rgn,inst,chk);
     exp_opt_t req2 = rsubs_exp_opt(rgn,inst,req);
     exp_opt_t ens2 = rsubs_exp_opt(rgn,inst,ens);
     exp_opt_t thrws2 = rsubs_exp_opt(rgn,inst,thrws);
 
     // At this point, we need to generate fresh vardecls for the argvds,
     // and a fresh return_value that has the appropriate substituted
-    // type.  Then we need to crawl through req2, ens2, and thrws2 and
+    // type.  Then we need to crawl through chk2, req2, ens2, and thrws2 and
     // substitute these fresh vars for the old ones.
     list_t<vardecl_opt_t> argvds2 = NULL;
     for (let avs = argvds; avs != NULL; avs = avs->tl) {
@@ -2458,6 +2467,7 @@ type_t rsubstitute(region_t<`r> rgn,
       ret_value2->type = rsubstitute(rgn,inst,ret_value2->type);
     }
 
+    AssnDef::existassnfn_opt_t chk_assn2 = NULL;
     AssnDef::existassnfn_opt_t req_assn2 = NULL;
     AssnDef::existassnfn_opt_t ens_assn2 = NULL;
     AssnDef::existassnfn_opt_t thrws_assn2 = NULL;
@@ -2466,6 +2476,11 @@ type_t rsubstitute(region_t<`r> rgn,
     let vds2 = new List(ret_value2,argvds2);
     let boundvds = new List {(vardecl_opt_t)AssnDef::memory,argvds2};
 
+    if (chk2 != NULL) {
+      let chk_am2 = new Vcgen::clause2assn((exp_t)chk2);
+      chk_am2 = AssnDef::subst_vardecls(vds1,vds2,chk_am2);
+      chk_assn2 = AssnDef::assnmap2existassnfn(*chk_am2,boundvds);
+    }
     if (req2 != NULL) {
       let req_am2 = new Vcgen::clause2assn((exp_t)req2);
       req_am2 = AssnDef::subst_vardecls(vds1,vds2,req_am2);
@@ -2484,6 +2499,7 @@ type_t rsubstitute(region_t<`r> rgn,
     }
     return new FnType(FnInfo{vs,eff2,rtq,rsubstitute(rgn,inst,rtyp),args2,
 			       c_varargs,cyc_varargs2,qb2,atts,
+                               chk2,chk_assn2,
 			       req2,req_assn2,ens2,ens_assn2,
                                thrws2,thrws_assn2,ret_value2,argvds2,effconstr2});
   case &AnonAggrType(k,b,fs):
@@ -3306,7 +3322,7 @@ static void deconstruct_tycon(tycon_t tc) {
 }
 
 void deconstruct_type(type_t t) {
-  fprintf(stderr, "Type 0x%x %s is ...", t, Absynpp::typ2string(t));
+  fprintf(stderr, "Type 0x%x %s is ...", (unsigned int)t, Absynpp::typ2string(t));
   switch(t) { 
   case &AppType(tc, ts): 
     fprintf(stderr, " AppType with constructor "); deconstruct_tycon(tc);

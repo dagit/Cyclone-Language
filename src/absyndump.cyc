@@ -558,7 +558,7 @@ static void dump_qualbnd(list_t<$(type_t,type_t)@> qual_bnd) {
 static void dumpfunargs(list_t<$(var_opt_t,tqual_t,type_t)@> args,
 			bool c_varargs, vararg_info_t *cyc_varargs,
 			type_opt_t effopt, list_t<effconstr_t> effc,
-			list_t<$(type_t,type_t)@> qual_bnd,
+			list_t<$(type_t,type_t)@> qual_bnd, exp_opt_t chk,
 			exp_opt_t req, exp_opt_t ens, exp_opt_t thrws) {
   if(args == NULL && !c_varargs && cyc_varargs == NULL &&
      effopt == NULL && effc == NULL) {
@@ -583,6 +583,9 @@ static void dumpfunargs(list_t<$(var_opt_t,tqual_t,type_t)@> args,
       dump_char(sep); dump_qualbnd(qual_bnd);
     }
     dump_char(')');
+  }
+  if (chk != NULL) {
+    dump(" @checks("); dumpexp(chk); dump_char(')');
   }
   if (req != NULL) {
     dump(" @requires("); dumpexp(req); dump_char(')');
@@ -778,8 +781,12 @@ static void dumpexp_prec(int inprec, exp_t e) {
 
   case &Extension_e(e1):
     dump("__extension__("); dumpexp(e1); dump_char(')'); break;
-  case &Assert_e(e1):
-    dump("@assert("); dumpexp(e1); dump_char(')'); break;
+  case &Assert_e(e1,static_only):
+    if (static_only)
+      dump("@assert("); 
+    else 
+      dump("assert("); 
+    dumpexp(e1); dump_char(')'); break;
   case &Assert_false_e(e1):
     dump("@assert_false("); dumpexp(e1); dump_char(')'); break;
 
@@ -1453,8 +1460,8 @@ static void dumptms(bool is_char_ptr, list_t<type_modifier_t> tms,
       dump_char('['); dumpexp(e); dump_char(']');
       if (type2bool(false,zeroterm)) dump("@zeroterm");
       break;
-    case &Function_mod(&WithTypes(args,c_varargs,cyc_varargs,effopt,effc,qb,req,ens,thrws)):
-      dumpfunargs(args,c_varargs,cyc_varargs,effopt,effc,qb,req,ens,thrws); break;
+    case &Function_mod(&WithTypes(args,c_varargs,cyc_varargs,effopt,effc,qb,chk,req,ens,thrws)):
+      dumpfunargs(args,c_varargs,cyc_varargs,effopt,effc,qb,chk,req,ens,thrws); break;
     case &Function_mod(&NoTypes(sl,_)):
       group(dump_str,sl,"(",")",","); break;
     case &TypeParams_mod(ts,_,print_kinds):

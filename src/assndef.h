@@ -184,7 +184,7 @@ namespace AssnDef{
   extern term_t struct_aggr(List::list_t<term_t,`H>, type_opt_t tp);
   extern term_t datatype_aggr(unsigned tag, List::list_t<term_t,`H>, type_opt_t tp);
   extern term_t union_aggr(unsigned tag, List::list_t<term_t,`H>, type_opt_t tp);
-  extern term_t fresh_var(type_opt_t);
+  extern term_t fresh_var(vardecl_opt_t,type_opt_t);
 
   // given an address term a, which could be a path of the form
   // offsetf(...offsetf(offsetf(r,i0,tp0),i1,tp1),...,in,tpn) where r is 

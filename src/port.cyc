@@ -1016,7 +1016,10 @@ static type_t main_type() {
                               .ret_type = sint_type,
                               .args = list(arg1,arg2), .c_varargs = false,
                               .cyc_varargs = NULL, .qual_bnd=NULL,
-                              .attributes = NULL, .requires_clause = NULL,
+                              .attributes = NULL, 
+                              .checks_clause = NULL,
+                              .checks_assn = NULL,
+                              .requires_clause = NULL,
                               .requires_assn = NULL,
                               .ensures_clause = NULL, .arg_vardecls = NULL,
                               .ensures_assn = NULL, .throws_clause = NULL,
@@ -1735,7 +1738,7 @@ static cenv_t gen_topdecl(cenv_t env, decl_t d) {
     let args = fd->i.args;
     let targs = map(make_targ,args);
     let fntype =
-      new FnType(FnInfo{NULL,NULL,empty_tqual(0),rettype,targs,false,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL});
+      new FnType(FnInfo{NULL,NULL,empty_tqual(0),rettype,targs,false,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL});
     // Note:  we do not set the cpos to FnRes_pos here because we want
     // to get constraint variables for the regions
     let fn_env = set_cpos(env,FnBody_pos);

@@ -245,7 +245,7 @@ static void rgnsubexp(struct rgnsubenv env, exp_t e) {
   case &AggrArrow_e(e1,...):  fallthru(e1);
   case &Tagcheck_e(e1,...):   fallthru(e1);
   case &Increment_e(e1,_):    fallthru(e1);
-  case &Assert_e(e1):         fallthru(e1);
+  case &Assert_e(e1,_):       fallthru(e1);
   case &Assert_false_e(e1):         fallthru(e1);
   case &Deref_e(e1):          fallthru(e1);
   case &Address_e(e1):        fallthru(e1);

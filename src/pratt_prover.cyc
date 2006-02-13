@@ -389,7 +389,7 @@ static node_t @term2node(graph_t @`r g, term_t t) {
   if (nopt != NULL) return *nopt;
   // couldn't find it -- insert it...but only if it's not too large.
   if (term_size(t) > Flags::max_vc_term_size) 
-    t = fresh_var(get_term_type(t));
+    t = fresh_var(NULL,get_term_type(t));
   node_t * @ `H+`r prev = &g->rows;
   for (let r = g->rows; r != NULL; r = r->next) {
     //++count;
@@ -1112,6 +1112,7 @@ static inline bool better_term(term_t t1, term_t t2) {
   case $(&LogicVar(_,i,_),&LogicVar(_,j,_)): return i < j;
   case $(_,&LogicVar(...)): return true;
   case $(&LogicVar(...),_): return false;
+
   case $(&Uint(_,_),&Uint(_,_)): return false;
   case $(&Uint(...),_): return true;
   case $(_,&Uint(...)): return false;
@@ -1170,9 +1171,18 @@ static bool occurs(term_t t1, term_t t2) {
   return occurs_i(t1,t2,&seen);
 }
 
+static inline bool is_var_term(term_t t) {
+  switch (t) {
+  case &LogicVar(...): return true;
+  default: return false;
+  }
+}
+
 // Substitute better terms where possible in the graph.  In particular,
-// should replace a variable X with T when we have X==T.
-static void subst_close_graph(int dummy, graph_t @g) {
+// should replace a variable X with T when we have X==T.  When vars_only
+// is true, only considers substituting for variables (and not larger
+// terms.)
+static void subst_close_graph(bool vars_only, graph_t @g) {
   // Build a table that maps a term t to the "best" term that it
   // is equal to.  See above for definition of best.  Then augment
   // the graph by substituting the best term for t throughout the
@@ -1184,6 +1194,7 @@ static void subst_close_graph(int dummy, graph_t @g) {
   bool changed = false;
   for (let rs = g->rows; rs != NULL; rs = rs->next) {
     let t1 = rs->rep;
+    if (vars_only && !is_var_term(t1)) continue;
     let best = t1;
     // see if t1 is equal to some integer 
     let dzero = lookup_dist(rs, z_node, false);
@@ -1211,6 +1222,9 @@ static void subst_close_graph(int dummy, graph_t @g) {
       // map t1 to best in the substitution.  
       if (!occurs(t1,best)) {
         changed = true;
+#ifdef PROVER_DEBUG
+        fprintf(stderr,"mapping %s to %s\n",term2string(t1),term2string(best));
+#endif PROVER_DEBUG
         Hashtable::insert(eq,t1,best);
       }
     }
@@ -1858,15 +1872,16 @@ static bool inconsist(assn_t a) {
           print_graph(g);
           fprintf(stderr,"about to subst_close\n");
 #endif
+          subst_close_graph(true,g);
           subst_close_graph(0,g);
 #ifdef PROVER_DEBUG
           fprintf(stderr,"after subst_close\n");
           print_graph(g);
 #endif
-          //reduce_terms(0,g);
+          reduce_terms(0,g);
 #ifdef PROVER_DEBUG
-          //fprintf(stderr,"after reduce\n");
-          //print_graph(g);
+          fprintf(stderr,"after reduce\n");
+          print_graph(g);
 #endif
           johnson(0,g);
 #ifdef PROVER_DEBUG

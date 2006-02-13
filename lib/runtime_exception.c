@@ -24,6 +24,9 @@
 char Cyc_Null_Exception[] = "Cyc_Null_Exception";
 struct Cyc_Null_Exception_exn_struct Cyc_Null_Exception_struct = { Cyc_Null_Exception };
 struct Cyc_Null_Exception_exn_struct * Cyc_Null_Exception_val = &Cyc_Null_Exception_struct;
+char Cyc_Assert[] = "Cyc_Assert_Exception";
+struct Cyc_Assert_exn_struct Cyc_Assert_Exception_struct = { Cyc_Assert };
+struct Cyc_Assert_exn_struct * Cyc_Assert_Exception_val = &Cyc_Assert_Exception_struct;
 char Cyc_Array_bounds[] = "Cyc_Array_bounds";
 struct Cyc_Array_bounds_exn_struct Cyc_Array_bounds_struct = { Cyc_Array_bounds };
 struct Cyc_Array_bounds_exn_struct * Cyc_Array_bounds_val = &Cyc_Array_bounds_struct;
@@ -219,4 +222,7 @@ void* _throw_bad_reapalloc_fn(const char *filename, unsigned lineno) {
 }
 void* _throw_match_fn(const char *filename, unsigned lineno) {
   return _throw_fn(Cyc_Match_Exception_val,filename,lineno);
+}
+void* _throw_assert_fn(const char *filename, unsigned lineno) {
+  return _throw_fn(Cyc_Assert_Exception_val,filename,lineno);
 }

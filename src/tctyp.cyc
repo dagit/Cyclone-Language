@@ -932,7 +932,7 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
       *eptr = uint_exp(1,0);
     }
     break;
-  case &FnType(FnInfo{*btvs,*eff,*rtq,tr,args,c_vararg,cyc_vararg,*qb,atts,req,*req_relns,ens,*ens_relns,thrws,*thrws_relns,return_vd,arg_vds,effc}):
+  case &FnType(FnInfo{*btvs,*eff,*rtq,tr,args,c_vararg,cyc_vararg,*qb,atts,chk,*chk_relns,req,*req_relns,ens,*ens_relns,thrws,*thrws_relns,return_vd,arg_vds,effc}):
     // This is an unusual and complicated case because (a) we may have to
     // bind type variables here, (b) we may have to calculate the effect.
     // (c) rewrite bounds on qualifiers according to the qual_bnd field
@@ -1125,6 +1125,13 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
 				 te->in_tempest,te->tempest_generalize, 
 				 te->in_extern_c_inc_repeat};
     let vds = new List{(vardecl_opt_t)AssnDef::memory,arg_vds};
+    if (chk != NULL) {
+      if (c_vararg || cyc_vararg)
+        err2(loc,"we do not yet support @checks on vararg functions");
+      let $(nenv,chk_assn) = check_clause(new_env,"@checks",chk);
+      new_env = nenv;
+      *chk_relns = AssnDef::assnmap2existassnfn(chk_assn,vds);
+    }
     if (req != NULL) {
       let $(nenv,req_assn) = check_clause(new_env,"@requires",req);
       new_env = nenv;

@@ -219,7 +219,7 @@ cvartype_t cvar_type(opt_t<kind_t,`H> ok) {
   return new Cvar(ok, NULL, -(cvar_index++), NULL, NULL,NULL,false);
 }
 cvartype_t cvar_type_name(opt_t<kind_t,`H> ok, string_t<`H> a) {
-  return new Cvar(ok, NULL, cvar_index++, NULL, a,NULL,false);
+  return new Cvar(ok, NULL, cvar_index++, NULL,(const char *)a,NULL,false);
 }
 cvartype_t fatconst() {
   static type_opt_t _fatconst = NULL;
@@ -227,7 +227,7 @@ cvartype_t fatconst() {
     return _fatconst;
   _fatconst = new Cvar(&Kinds::ptrbko, fat_bound_type, 0, NULL, "fatconst", "constant",true);
   BansheeIf::add_constant("fat", _fatconst);
-  return _fatconst;
+  return (cvartype_t)_fatconst;
 }
 cvartype_t thinconst() {
   static type_opt_t _thinconst = NULL;
@@ -235,7 +235,7 @@ cvartype_t thinconst() {
     return _thinconst;
   _thinconst = new Cvar(&Kinds::ptrbko, bounds_one(), 0, NULL, "thinconst", "constant",false);
   BansheeIf::add_constant("thin", _thinconst);
-  return _thinconst;
+  return (cvartype_t)_thinconst;
 }
 
 type_t aqual_constant(alias_qual_val_t v)  {
@@ -789,8 +789,8 @@ exp_t asm_exp(bool volatile_kw, string_t<`H> tmpl,
 exp_t extension_exp(exp_t e, seg_t loc) {
   return new_exp(new Extension_e(e), loc);
 }
-exp_t assert_exp(exp_t e, seg_t loc) {
-  return new_exp(new Assert_e(e), loc);
+exp_t assert_exp(exp_t e, bool static_only, seg_t loc) {
+  return new_exp(new Assert_e(e,static_only), loc);
 }
 exp_t assert_false_exp(exp_t e, seg_t loc) {
   return new_exp(new Assert_false_e(e),loc);
@@ -973,7 +973,8 @@ type_t function_type(list_t<tvar_t,`H> tvs, type_opt_t eff_type,
                      bool c_varargs, vararg_info_t *`H cyc_varargs,
                      list_t<effconstr_t,`H> effc,
 		     list_t<$(type_t,type_t)@`H,`H> qb,
-                     attributes_t atts, exp_opt_t req, exp_opt_t ens,
+                     attributes_t atts, 
+                     exp_opt_t chks, exp_opt_t req, exp_opt_t ens,
                      exp_opt_t thrws) {
   for(let args2 = args; args2 != NULL; args2 = args2->tl)
     (*args2->hd)[2] = pointer_expand((*args2->hd)[2], true);
@@ -987,6 +988,8 @@ type_t function_type(list_t<tvar_t,`H> tvs, type_opt_t eff_type,
 			      //                              .rgn_po = NULL,
                               .qual_bnd = qb,
                               .attributes=atts,
+                              .checks_clause = chks,
+                              .checks_assn = NULL,
                               .requires_clause = req,
                               .requires_assn = NULL,
                               .ensures_clause = ens,
@@ -1210,7 +1213,7 @@ void visit_exp(bool (@f1)(`a,exp_t), bool (@f2)(`a,stmt_t), `a env, exp_t e) {
   case &Sizeoftype_e(...): break;
 
   case &Extension_e(e1):               fallthru(e1);
-  case &Assert_e(e1):                  fallthru(e1);
+  case &Assert_e(e1,_):                fallthru(e1);
   case &Assert_false_e(e1):            fallthru(e1);
   case &Increment_e(e1,_):             fallthru(e1);
   case &Throw_e(e1,_):                 fallthru(e1);

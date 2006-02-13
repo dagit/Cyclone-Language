@@ -540,14 +540,23 @@ static $(coercion_t, list_t<constraint_t>) subtype_impl(list_t<$(type_t,type_t)@
     let terms = NULL;
 
     for(let vds = f1.arg_vardecls; vds != NULL; vds = vds->tl) {
-      terms = new List {AssnDef::fresh_var(vds->hd==NULL ? NULL:vds->hd->type),terms};
+      terms = new List {AssnDef::fresh_var(vds->hd,vds->hd==NULL ? NULL:vds->hd->type),terms};
     }
     terms = imp_rev(terms);
-    terms = new List {AssnDef::fresh_var(NULL),terms};
+    terms = new List {AssnDef::fresh_var(NULL,NULL),terms};
 
 /*     // vds1, vds2 are list of vardecls that include both arg and ret. */
 /*     let vds1 = new List(f1.return_value,f1.arg_vardecls); */
 /*     let vds2 = new List(f2.return_value,f2.arg_vardecls); */
+
+    // check f2.checks => f1.checks
+    if (f1.checks_assn != NULL) {
+      let chk1 = AssnDef::existassnfn2assn(f1.checks_assn,terms);
+      let chk2 = f2.checks_assn ? AssnDef::existassnfn2assn(f2.checks_assn,terms) : &AssnDef::true_assn;
+      if (!AssnDef::simple_prove(chk2,chk1) &&
+	  !PrattProver::constraint_prove(chk2,chk1))
+	return SUBTYPE_FAIL;
+    }
     // check f2.requires => f1.requires
     // f1.requires_assn == NULL, then f1.requires_assn = true, 
     // no need to check f2.req => f1.req
@@ -562,7 +571,7 @@ static $(coercion_t, list_t<constraint_t>) subtype_impl(list_t<$(type_t,type_t)@
     // f2.ensures_assn == NULL, then f2.ensures_assn = true,
     // no need to check f1.ens => f2.ens
     if (f2.ensures_assn != NULL) {
-      let ret_value = AssnDef::fresh_var(f1.return_value->type);
+      let ret_value = AssnDef::fresh_var(f1.return_value,f1.return_value->type);
       let terms = new List {ret_value,terms};
       let ens2 = AssnDef::existassnfn2assn(f2.ensures_assn,terms);
       let ens1 = f1.ensures_assn ? AssnDef::existassnfn2assn(f1.ensures_assn,terms) : &AssnDef::true_assn;

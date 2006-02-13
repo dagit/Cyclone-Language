@@ -39,6 +39,7 @@
 #include "attributes.h"
 #include "subtype.h"
 #include "bansheeif.h"
+#include "tcpat.h"
 
 using Core;
 using List;
@@ -1058,10 +1059,35 @@ static void inst_with_joineff(type_t ptrrgn_evar, type_t curr_rgn,
   }
 }
 
+static bool substitute_vars_exp(list_t<$(vardecl_opt_t,exp_t)@> subst,exp_t e) {
+  switch (e->r) {
+  case &Var_e(&Param_b(vd)): fallthru(vd);
+  case &Var_e(&Local_b(vd)): fallthru(vd);
+  case &Var_e(&Pat_b(vd)):
+    for (let s = subst; s != NULL; s = s->tl) {
+      let $(vdopt,e2) = *s->hd;
+      if (vdopt == NULL) continue;
+      if (qvar_cmp(vdopt->name,vd->name) == 0) {
+        e->r = e2->r;
+        return false;
+      }
+    }
+    break;
+  default: break;
+  }
+  return true;
+}
+
+static bool substitute_vars_stmt(list_t<$(vardecl_opt_t,exp_t)@> subst,stmt_t e) {
+  return true;
+}
+
 
 // e(es)
-static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
-		       list_t<exp_t> args,
+static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,
+                       exp_t call,
+                       exp_t e,
+		       list_t<exp_t,`H> args,
 		       vararg_call_info_t *`H @vararg_call_info,
 		       list_t<int,`H> @alias_arg_exps) {
   // if e is a vararg function then we need to declare a new local
@@ -1087,10 +1113,11 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
     // type with the current one (as known by the environment)
     t1 = CurRgn::instantiate(compress(t1),Tcenv::curr_lifo_rgn(te));
     switch (t1) {
-      case &FnType(FnInfo{tvars,eff,res_tq,res_typ,args_info,c_vararg,
-                            cyc_vararg,qb,atts,req,req_relns,ens,ens_relns,thrws,thrws_relns,ret_var,_,effc}):
+      case &FnType(FnInfo{tvars,eff,res_tq,res_typ,orig_args_info,c_vararg,
+                            cyc_vararg,qb,atts,chk,chk_relns,req,req_relns,ens,ens_relns,thrws,thrws_relns,ret_var,arg_vardecls,effc}):
 	if(tvars != NULL || effc != NULL)
 	  Warn::err(e->loc,"function should have been instantiated prior to use -- probably a compiler bug");
+      let args_info = orig_args_info;
       // unify the result type with the expected type to get better
       // information while type-checking the arguments.
       if (topt != NULL) Unify::unify(res_typ,*topt);
@@ -1261,6 +1288,84 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
 	// Check that the effect of the function is compatible with the 
 	// current capability.  May be delayed.
 	Tcenv::check_effect_accessible(te, loc, (type_t)eff);
+      }
+      // finally, if the @checks clause is non-empty, then we need
+      // to insert the check.  Suppose we have a call f(e1,...,en)
+      // where f is declared f(t1 x1,...,tn xn) @checks(e).  Then
+      // we rewrite to:
+      // ({ $(t1,...,tn) temp = $(e1,...,en);
+      //    let $(z1,...,zn) = temp;
+      //    assert(e[zi/xi]);
+      //    f(z1,...,zn); })
+      // This reifies the @check as an explicit assert which can
+      // hopefully be eliminated downstream.  By picking fresh names
+      // z1,...,zn for each parameter, we don't have to worry about 
+      // the funny case when f didn't actually give a name for a parameter
+      // (e.g., because it's not used in the @checks clause.)  However,
+      // we must then substitute the zi for the xi in the clause e.
+      // Care has to be taken to construct a term that's as if it
+      // were valid after type-checking.  In particular, we have to
+      // make sure to put types on all of the expressions, and call
+      // the pattern match compiler so it will construct a decision
+      // tree, otherwise the downstream passes will get confused.
+      if (chk != NULL) {
+        list_t<vardecl_t> vds = NULL;
+        list_t<$(tqual_t,type_t)@> ts = NULL;
+        list_t<exp_t> new_args = NULL;
+        // create a variable declaration (and free variable) for each argument
+        int i = 0;
+        for (let ainfo = orig_args_info; ainfo != NULL; ainfo=ainfo->tl, i++) {
+          let &$(_,tq,t) = ainfo->hd;
+          ts = new List{new $(tq,t),ts};
+          var_t ux = new ((const char ?)aprintf("arg%d",i));
+          qvar_t x = new $(Loc_n, ux);
+          let vd = new_vardecl(loc,x,t,NULL,NULL);
+          vds = new List{vd,vds};
+          let new_arg = varb_exp(new Pat_b(vd),loc);
+          new_arg->topt = t;
+          new_args = new List{new_arg,new_args};
+        }
+        new_args = List::imp_rev(new_args);
+        ts = List::imp_rev(ts);
+        vds = List::imp_rev(vds);
+        // create a tuple pattern out of the list of variables
+        list_t<$(list_t<designator_t>,pat_t)@> ps = NULL;
+        for (let vs = vds; vs != NULL; vs = vs->tl) {
+          let p = new_pat(new Var_p(vs->hd,new_pat(&Wild_p_val,loc)),loc);
+          p->topt = vs->hd->type;
+          ps = new List{new $(NULL,p),ps};
+        }
+        ps = List::imp_rev(ps);
+        let tup_type = tuple_type(ts);
+        pat_t tup_pat = new_pat(new Aggr_p(tup_type,true,NULL,ps,false),loc);
+        tup_pat->topt = tup_type;
+        exp_t tup_exp = tuple_exp(args,loc);
+        tup_exp->topt = tup_type;
+        exp_t subst_chk = deep_copy_exp(true,(exp_t)chk);
+        // need to substitute new variables for parameters
+        list_t<$(vardecl_opt_t,exp_t)@> subst = NULL;
+        for (let es = new_args; arg_vardecls != NULL; 
+             arg_vardecls=arg_vardecls->tl, es=es->tl) {
+          subst = new List{new $(arg_vardecls->hd,es->hd),subst};
+        }
+        visit_exp(substitute_vars_exp, substitute_vars_stmt, subst, subst_chk);
+        exp_t asrt = assert_exp(subst_chk,false,loc);
+        asrt->topt = sint_type;
+        exp_t fncall = fncall_exp(e,new_args,loc);
+        fncall->topt = res_typ;
+        let tempvd = new_vardecl(loc,new $(Loc_n,new "temp"), tup_type,
+                                 tup_exp,NULL);
+        let tempexp = varb_exp(new Local_b(tempvd),loc);
+        tempexp->topt = tup_type;
+        let pat_res = Tcpat::tcPat(te,tup_pat,&tup_type,NULL);
+        let dp = NULL;
+        Tcpat::check_let_pat_exhaustive(loc,te,tup_pat,&dp);
+        raw_decl_t rd = new Let_d(tup_pat,new Opt(pat_res.patvars),tempexp,dp);
+        stmt_t s = decl_stmt(new_decl(rd,loc),
+                             seq_stmt(exp_stmt(asrt,loc),
+                                      exp_stmt(fncall,loc),loc),loc);
+        s = decl_stmt(new_decl(new Var_d(tempvd),loc),s,loc);
+        call->r = new StmtExp_e(s);
       }
       return res_typ;
     default: 
@@ -2449,10 +2554,15 @@ static type_t tcTagcheck(tenv_t te, seg_t loc, type_t * topt, exp_t e, field_nam
   return uint_type;
 }
 
-static type_t tcAssert(tenv_t te, seg_t loc, exp_t e) {
-  tcTest(te,e,"@assert");
-  if (!no_side_effects_exp(e))
-    Warn::err2(loc,"@assert expression may have side effects");
+static type_t tcAssert(tenv_t te, seg_t loc, exp_t e, bool static_only) {
+  if (static_only) {
+    // FIX:  this should allow more things to be introduced into e,
+    // such as quantifiers, or whatever we need to express a static
+    // assertion.
+    tcTest(allow_valueof(te),e,"@assert");
+  } else {
+    tcTest(te,e,"assert");
+  }
   return sint_type;
 }
 
@@ -2790,7 +2900,7 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
       fn_exp = e;
       break;
     }
-    t = tcFnCall(te,loc,topt,e1,es,vci,&alias_arg_exps);
+    t = tcFnCall(te,loc,topt,e,e1,es,vci,&alias_arg_exps);
     if (alias_arg_exps != NULL && ok) {
       alias_arg_exps = imp_rev(alias_arg_exps);
       if(insert_alias_stmts(te, e, fn_exp, alias_arg_exps))
@@ -2846,8 +2956,8 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
   case &Swap_e(e1,e2):   t = tcSwap(te,loc,topt,e1,e2); break;
   case &Tagcheck_e(e,f): t = tcTagcheck(te,loc,topt,e,f); break;
   case &Extension_e(e1): t = tcExp(te,topt,e1); break;
-  case &Assert_e(e):     t = tcAssert(te,loc,e); break;
-  case &Assert_false_e(e): t = tcAssert(te,loc,e); break;
+  case &Assert_e(e,static_only): t = tcAssert(te,loc,e,static_only); break;
+  case &Assert_false_e(e): t = tcAssert(te,loc,e,true); break;
   case &Valueof_e(t2):
     if (!te->allow_valueof)
       Warn::err2(e->loc,"valueof(-) can only occur within types");

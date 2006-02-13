@@ -281,6 +281,10 @@ namespace Absyn {
     // and at most one of cdecl, stdcall, and fastcall.  See gcc info
     // for documentation on attributes.
     attributes_t                             attributes;
+    // a check to perform before calling the function
+    exp_opt_t                                checks_clause;
+    // checks clause after checking well-formedness
+    AssnDef::existassnfn_opt_t               checks_assn;
     // pre-condition to call function as expression
     exp_opt_t                                requires_clause;
      // pre-condition after checking well-formedness
@@ -489,6 +493,7 @@ namespace Absyn {
 	      // list_t<$(type_t,type_t)@>,               // region partial order
 	      list_t<effconstr_t>,                      //effect constraints
               list_t<$(type_t,type_t)@>,               // qualifier bounds
+              exp_opt_t,                               // checks clause
               exp_opt_t,                               // requires clause
               exp_opt_t,                               // ensures clause
               exp_opt_t);                              // throws clause
@@ -657,7 +662,11 @@ namespace Absyn {
     Asm_e(bool, string_t, list_t<$(string_t, exp_t)@>, list_t<$(string_t, exp_t)@>, list_t<string_t@>);
     Extension_e(exp_t);
     // implements GCC's __extension__ (...) though we just pass it through.
-    Assert_e(exp_t); // a static assertion to be checked by the analysis
+    Assert_e(exp_t, bool static_only);
+    // an assertion -- if the expression is includes assertion features
+    // that cannot be evaluated dynamically, then the expression must
+    // be resolved statically.  If the expression includes effects, then
+    // it will never be optimized away.  
     Assert_false_e(exp_t); // a static assertion that shouldn't be proved by the analysis
   };
   // expression with auxiliary information
@@ -1117,7 +1126,7 @@ namespace Absyn {
 		list_t<$(string_t<`H>,exp_t)@`H,`H>,
 		list_t<string_t<`H>@`H,`H>, seg_t);
   exp_t extension_exp(exp_t, seg_t);
-  exp_t assert_exp(exp_t,seg_t);
+  exp_t assert_exp(exp_t,bool static_only,seg_t);
   exp_t assert_false_exp(exp_t,seg_t);
   exp_t unresolvedmem_exp(opt_t<typedef_name_t,`H>,
 			  list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H>,
@@ -1192,7 +1201,9 @@ namespace Absyn {
 		       list_t<effconstr_t,`H> effconstr,
 		       list_t<$(type_t,type_t)@`H,`H> qb,
 		       attributes_t,
-		       exp_opt_t requires_clause, exp_opt_t ensures_clause,
+                       exp_opt_t checks_clause,
+		       exp_opt_t requires_clause, 
+                       exp_opt_t ensures_clause,
                        exp_opt_t throws_clause);
   // turn t f(t1,...,tn) into t (@f)(t1,...,tn) -- when fresh_evar is
   // true, generates a fresh evar for the region of f else uses `H

@@ -497,7 +497,7 @@ void check_effect_constraints(tenv_t te, seg_t loc, list_t<effconstr_t,`H> ec) {
     }
     return;
   }
-  let &Fenv{.effconstr = env_ec, .shared = shared, ...} = te->le;
+  let Fenv{.effconstr = env_ec, .shared = shared, ...} = *te->le;
   if(!satisfies_effect_constraints(loc, ec, env_ec)) {
     shared->delayed_constraint_checks =
       new List(new $(ec,env_ec,loc), shared->delayed_constraint_checks);
