@@ -383,42 +383,42 @@ extern int Cyc_AssnDef_termcmp(void*,void*);
 extern int Cyc_AssnDef_termhash(void*);
 extern unsigned Cyc_AssnDef_term_size(void*);
 extern struct _fat_ptr Cyc_AssnDef_term2string(void*);
-# 159
+# 160
 extern void*Cyc_AssnDef_zero (void);
-# 163
+# 164
 extern void*Cyc_AssnDef_uint(unsigned);
 extern void*Cyc_AssnDef_cnst(struct Cyc_Absyn_Exp*);
 extern void*Cyc_AssnDef_select(void*,void*,void*);
 extern void*Cyc_AssnDef_update(void*,void*,void*);
-# 169
+# 170
 extern void*Cyc_AssnDef_binop(enum Cyc_Absyn_Primop,void*,void*,void*);
-# 172
+# 173
 extern void*Cyc_AssnDef_tagof_tm(void*);
 extern void*Cyc_AssnDef_proj(void*,unsigned,void*);
 extern void*Cyc_AssnDef_aggr_update(void*,unsigned,void*);
-# 181
+# 182
 extern void*Cyc_AssnDef_numelts_term(void*);
-# 187
+# 188
 extern void*Cyc_AssnDef_fresh_var(struct Cyc_Absyn_Vardecl*,void*);
-# 202
+# 203
 extern void*Cyc_AssnDef_get_term_type(void*);
-# 215 "assndef.h"
+# 216 "assndef.h"
 enum Cyc_AssnDef_Primreln{Cyc_AssnDef_Eq =0U,Cyc_AssnDef_Neq =1U,Cyc_AssnDef_SLt =2U,Cyc_AssnDef_SLte =3U,Cyc_AssnDef_ULt =4U,Cyc_AssnDef_ULte =5U};struct Cyc_AssnDef_True_AssnDef_Assn_struct{int tag;};struct Cyc_AssnDef_Prim_AssnDef_Assn_struct{int tag;void*f1;enum Cyc_AssnDef_Primreln f2;void*f3;};struct Cyc_AssnDef_And_AssnDef_Assn_struct{int tag;void*f1;void*f2;};struct Cyc_AssnDef_Or_AssnDef_Assn_struct{int tag;void*f1;void*f2;};
-# 229
+# 230
 extern struct _fat_ptr Cyc_AssnDef_assn2dag(void*);
-# 231
+# 232
 extern struct Cyc_AssnDef_True_AssnDef_Assn_struct Cyc_AssnDef_true_assn;
-# 234
+# 235
 extern void*Cyc_AssnDef_and(void*,void*);
 extern void*Cyc_AssnDef_or(void*,void*);
 extern void*Cyc_AssnDef_not(void*);
-# 240
+# 241
 extern void*Cyc_AssnDef_slt(void*,void*);
-# 242
+# 243
 extern void*Cyc_AssnDef_ult(void*,void*);
-# 350 "assndef.h"
+# 351 "assndef.h"
 extern void*Cyc_AssnDef_widen(void*);
-# 360
+# 361
 extern struct Cyc_Hashtable_Table*Cyc_AssnDef_empty_term_table (void);
 extern void*Cyc_AssnDef_subst_table(struct Cyc_Hashtable_Table*,void*);
 # 39 "tcutil.h"

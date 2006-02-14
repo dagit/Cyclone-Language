@@ -896,7 +896,9 @@ term_t numelts_term(term_t t) {
 // Need to fake up vardecls for the "memory" and "exception"
 using Absyn {
   static string_t memory_var = "#Mem";
+  static string_t pre_memory_var = "#Pre_Mem";
   static $(nmspace_t,var_t) memvar = $(Nmspace{.Loc_n = 0},&memory_var);
+  static $(nmspace_t,var_t) pre_memvar = $(Nmspace{.Loc_n = 0},&pre_memory_var);
   static datatype TyCon.VoidCon void_con = VoidCon;
   static datatype Type.AppType vd_type = AppType(&void_con,NULL);
 
@@ -914,6 +916,20 @@ using Absyn {
     .rename = NULL
   };
   vardecl_t memory = &memory_struct;
+  struct Absyn::Vardecl pre_memory_struct = {
+    .sc = Absyn::Public,
+    .name = &pre_memvar,
+    .varloc = 0,
+    .tq = {0,0,0,0,0},
+    .type = &vd_type,
+    .initializer = NULL,
+    .rgn = NULL,
+    .attributes = NULL,
+    .escapes = false,
+    .is_proto = false,
+    .rename = NULL
+  };
+  vardecl_t pre_memory = &pre_memory_struct;
 
   static string_t exception_var = "#Exn";
   static $(nmspace_t,var_t) exnvar = $(Nmspace{.Loc_n = 0},&exception_var);

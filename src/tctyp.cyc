@@ -1137,6 +1137,8 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
       new_env = nenv;
       *req_relns = AssnDef::assnmap2existassnfn(req_assn,vds);
     }
+    // for ens and thrws, the list is ret::new_memory::pre_memory::args
+    let vds = new List{(vardecl_opt_t)AssnDef::memory,new List{(vardecl_opt_t)AssnDef::pre_memory,arg_vds}};
     if (ens != NULL) {
       let $(nenv,ens_assn) = check_clause(new_env,"@ensures",ens);
       new_env = nenv;

@@ -432,13 +432,13 @@ int Cyc_Kinds_kind_eq(struct Cyc_Absyn_Kind*,struct Cyc_Absyn_Kind*);
 int Cyc_Atts_same_atts(struct Cyc_List_List*,struct Cyc_List_List*);
 # 58
 int Cyc_Atts_equiv_fn_atts(struct Cyc_List_List*,struct Cyc_List_List*);struct Cyc_Set_Set;
-# 187 "assndef.h"
+# 188 "assndef.h"
 extern void*Cyc_AssnDef_fresh_var(struct Cyc_Absyn_Vardecl*,void*);struct Cyc_AssnDef_True_AssnDef_Assn_struct{int tag;};
-# 231 "assndef.h"
+# 232 "assndef.h"
 extern struct Cyc_AssnDef_True_AssnDef_Assn_struct Cyc_AssnDef_true_assn;struct Cyc_AssnDef_AssnFn{struct Cyc_List_List*actuals;void*assn;};struct Cyc_AssnDef_ExistAssnFn{struct Cyc_AssnDef_AssnFn*af;struct Cyc_Set_Set*existvars;};
-# 281
+# 282
 extern void*Cyc_AssnDef_existassnfn2assn(struct Cyc_AssnDef_ExistAssnFn*,struct Cyc_List_List*);
-# 311
+# 312
 extern int Cyc_AssnDef_simple_prove(void*,void*);
 # 8 "pratt_prover.h"
 int Cyc_PrattProver_constraint_prove(void*,void*);
@@ -921,12 +921,14 @@ if(!Cyc_Unify_check_logical_equivalence(terms,chk_relns1,chk_relns2))
 Cyc_Unify_fail_because("@check clauses not equivalent");
 if(!Cyc_Unify_check_logical_equivalence(terms,req_relns1,req_relns2))
 Cyc_Unify_fail_because("@requires clauses not equivalent");
+# 603
+terms=({struct Cyc_List_List*_Tmp2D=_cycalloc(sizeof(struct Cyc_List_List));({void*_Tmp2E=Cyc_AssnDef_fresh_var(0,0);_Tmp2D->hd=_Tmp2E;}),_Tmp2D->tl=terms;_Tmp2D;});
 if(!({struct Cyc_List_List*_Tmp2D=({struct Cyc_List_List*_Tmp2E=_cycalloc(sizeof(struct Cyc_List_List));({void*_Tmp2F=Cyc_AssnDef_fresh_var(0,0);_Tmp2E->hd=_Tmp2F;}),_Tmp2E->tl=terms;_Tmp2E;});struct Cyc_AssnDef_ExistAssnFn*_Tmp2E=ens_relns1;Cyc_Unify_check_logical_equivalence(_Tmp2D,_Tmp2E,ens_relns2);}))
 Cyc_Unify_fail_because("@ensures clauses not equivalent");
 if(!Cyc_Unify_check_logical_equivalence(terms,thrws_relns1,thrws_relns2))
 Cyc_Unify_fail_because("@throws clauses not equivalent");
 return;}}}}else{goto _LL37;}case 7: if(*((int*)_Tmp0.f1)==7){_Tmp2=((struct Cyc_Absyn_AnonAggrType_Absyn_Type_struct*)_Tmp0.f0)->f1;_Tmp1A=((struct Cyc_Absyn_AnonAggrType_Absyn_Type_struct*)_Tmp0.f0)->f2;_Tmp2C=((struct Cyc_Absyn_AnonAggrType_Absyn_Type_struct*)_Tmp0.f0)->f3;_Tmp1=((struct Cyc_Absyn_AnonAggrType_Absyn_Type_struct*)_Tmp0.f1)->f1;_Tmp11=((struct Cyc_Absyn_AnonAggrType_Absyn_Type_struct*)_Tmp0.f1)->f2;_Tmp2B=((struct Cyc_Absyn_AnonAggrType_Absyn_Type_struct*)_Tmp0.f1)->f3;{enum Cyc_Absyn_AggrKind k2=_Tmp2;int tup2=_Tmp1A;struct Cyc_List_List*fs2=_Tmp2C;enum Cyc_Absyn_AggrKind k1=_Tmp1;int tup1=_Tmp11;struct Cyc_List_List*fs1=_Tmp2B;
-# 609
+# 611
 if((int)k1!=(int)k2)
 Cyc_Unify_fail_because("struct and union type");
 for(1;fs1!=0 && fs2!=0;(fs1=fs1->tl,fs2=fs2->tl)){
@@ -943,11 +945,11 @@ if(!Cyc_Unify_unify_const_exp_opt(f1->width,f2->width))
 Cyc_Unify_fail_because("different bitfield widths on member");
 if(!Cyc_Unify_unify_const_exp_opt(f1->requires_clause,f2->requires_clause))
 Cyc_Unify_fail_because("different @requires clauses on member");}
-# 626
+# 628
 if(fs1!=0 || fs2!=0)
 Cyc_Unify_fail_because("different number of members");
 return;}}else{goto _LL37;}case 8: if(*((int*)_Tmp0.f1)==8){_Tmp2C=((struct Cyc_Absyn_TypedefType_Absyn_Type_struct*)_Tmp0.f0)->f2;_Tmp2B=((struct Cyc_Absyn_TypedefType_Absyn_Type_struct*)_Tmp0.f0)->f3;_Tmp2A=((struct Cyc_Absyn_TypedefType_Absyn_Type_struct*)_Tmp0.f1)->f2;_Tmp29=((struct Cyc_Absyn_TypedefType_Absyn_Type_struct*)_Tmp0.f1)->f3;{struct Cyc_List_List*ts1=_Tmp2C;struct Cyc_Absyn_Typedefdecl*td1=_Tmp2B;struct Cyc_List_List*ts2=_Tmp2A;struct Cyc_Absyn_Typedefdecl*td2=_Tmp29;
-# 631
+# 633
 if(td1!=td2)
 Cyc_Unify_fail_because("different abstract typedefs");
 Cyc_Unify_failure_reason="type parameters to typedef differ";

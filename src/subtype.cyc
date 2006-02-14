@@ -543,6 +543,7 @@ static $(coercion_t, list_t<constraint_t>) subtype_impl(list_t<$(type_t,type_t)@
       terms = new List {AssnDef::fresh_var(vds->hd,vds->hd==NULL ? NULL:vds->hd->type),terms};
     }
     terms = imp_rev(terms);
+    // adding the pre_memory into terms
     terms = new List {AssnDef::fresh_var(NULL,NULL),terms};
 
 /*     // vds1, vds2 are list of vardecls that include both arg and ret. */
@@ -572,6 +573,8 @@ static $(coercion_t, list_t<constraint_t>) subtype_impl(list_t<$(type_t,type_t)@
     // no need to check f1.ens => f2.ens
     if (f2.ensures_assn != NULL) {
       let ret_value = AssnDef::fresh_var(f1.return_value,f1.return_value->type);
+      // adding new_memory into terms list
+      let terms = new List {AssnDef::fresh_var(NULL,NULL),terms};
       let terms = new List {ret_value,terms};
       let ens2 = AssnDef::existassnfn2assn(f2.ensures_assn,terms);
       let ens1 = f1.ensures_assn ? AssnDef::existassnfn2assn(f1.ensures_assn,terms) : &AssnDef::true_assn;

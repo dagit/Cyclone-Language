@@ -589,7 +589,7 @@ static void unify_it(type_t t1, type_t t2,
     for(let vds = argvds1; vds != NULL; vds = vds->tl)
       terms = new List {AssnDef::fresh_var((vds->hd == NULL ? NULL : vds->hd),(vds->hd == NULL)? NULL:vds->hd->type),terms};
     terms = imp_rev(terms);
-    // add in memory term
+    // add in pre_memory term
     terms = new List {AssnDef::fresh_var(NULL,NULL),terms};
     // FIX:  @checks clauses must really, really be equivalent in
     // terms of the memory they produce, not just the assertion...
@@ -599,6 +599,8 @@ static void unify_it(type_t t1, type_t t2,
       fail_because("@check clauses not equivalent");
     if (!check_logical_equivalence(terms,req_relns1,req_relns2))
       fail_because("@requires clauses not equivalent");
+    // add in new_memory term
+    terms = new List {AssnDef::fresh_var(NULL,NULL),terms};
     if (!check_logical_equivalence(new List{AssnDef::fresh_var(NULL,NULL),terms},ens_relns1,ens_relns2))
       fail_because("@ensures clauses not equivalent");
     if (!check_logical_equivalence(terms,thrws_relns1,thrws_relns2))

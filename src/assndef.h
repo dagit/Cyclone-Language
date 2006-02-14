@@ -149,6 +149,7 @@ namespace AssnDef{
   // write to an escaping variable, we substitute a fresh logic variable
   // for this vardecl.
   extern vardecl_t memory;
+  extern vardecl_t pre_memory;
   // a distinguished program variable representing the exception that 
   // was thrown.  it's a function because we have to call a
   // function to create a exn_type which can't be used in initializng

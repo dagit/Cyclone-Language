@@ -70,7 +70,7 @@ using List;
 static struct Hashtable::Table<Absyn::qvar_t,existassnfn_t> *fn_ens_info_table;
 
 static void insert_fn_info(Absyn::fndecl_t fd,
-                           list_t<term_t,`H> actuals,
+                           list_t<term_t,`H> pre_memory_and_actuals,
                            term_t result_term,
                            term_t final_memory,
                            assn_t a) {
@@ -83,7 +83,7 @@ static void insert_fn_info(Absyn::fndecl_t fd,
     h = Hashtable::create(37, Absyn::qvar_cmp, Absyn::hash_qvar);
     fn_ens_info_table = h;
   } else h = (Hashtable::table_t)fn_ens_info_table;
-  Hashtable::insert(h, fd->name, bound_ts_in_assn(a,new List{result_term, new List{final_memory,actuals}}));
+  Hashtable::insert(h, fd->name, bound_ts_in_assn(a,new List{result_term, new List{final_memory,pre_memory_and_actuals}}));
 }
 
 static void insert_fn_precond_info(fn_precond_info_t fn_precond_info,exp_t e,assn_t a, term_t mem, list_t<term_t,`H> actuals) {
@@ -1121,9 +1121,10 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
     // fresh logicvar to represent it.
     term_t actual_ret = fresh_var(NULL,e->topt);
     // checking requires assertion
+    let pre_memory_and_ts = new List(pre_memory,ts);
     if (reqopt != NULL) {
       // subst the formal args with the actual values
-      let req_assn = existassnfn2assn(reqopt,new List(pre_memory,ts));
+      let req_assn = existassnfn2assn(reqopt,pre_memory_and_ts);
       if (!implies(am2.assn,req_assn)) {
 	Warn::err(e->loc, "current assertion:\n%s\ndoes not satisfy the pre-condition of the function:\n%s\n",
 		  assnmap2string(am2), assn2string(req_assn));
@@ -1138,22 +1139,22 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
     // update the exception handler.
     let v = fresh_var(NULL,Absyn::exn_type());
     if (thrwsopt != NULL) {
-      let throws_assn = existassnfn2assn(thrwsopt,new List(new_memory,ts));
+      let throws_assn = existassnfn2assn(thrwsopt,new List(new_memory,pre_memory_and_ts));
       update_try_assnmap(env,and_assnmap_assn(am3,throws_assn),v);
     } else {
       update_try_assnmap(env,am3,v);
     }
     // and merge this with the ensures assertion from the function
     if (ensopt != NULL) {
-      let ens_assn = existassnfn2assn(ensopt,new List(actual_ret,new List(new_memory,ts)));
+      let ens_assn = existassnfn2assn(ensopt,new List(actual_ret,new List(new_memory,pre_memory_and_ts)));
       am3 = and_assnmap_assn(am3,ens_assn);
     } else if (fensinfo != NULL) {
-      if (length(fensinfo->af->actuals) != length(ts)+2) {
+      if (length(fensinfo->af->actuals) != length(ts)+3) {
 // 	fprintf(stderr,"fn = %s\n",Absynpp::exp2string(e1));
 // 	fprintf(stderr,"fensinfo = %s\n",existassnfn2string(fensinfo));
 // 	fprintf(stderr,"length of terms = %d\n",2+length(ts));
       } else {
-	let ens_assn = existassnfn2assn(fensinfo,new List(actual_ret,new List(new_memory,ts)));
+	let ens_assn = existassnfn2assn(fensinfo,new List(actual_ret,new List(new_memory,pre_memory_and_ts)));
 	am3 = and_assnmap_assn(am3,ens_assn);
       }
     }
@@ -2028,6 +2029,7 @@ static int sizeof_closure_vcgen_debug_assn_set() {
 #endif
 void vcgen_fundecl(Position::seg_t loc, JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd, 
 		   assn_info_t assn_info, fn_precond_info_t fn_precond_info, bool use_precond){
+
   let $(args,arvds,checkopt,reqopt,ensopt,thrwsopt,ret_value) = get_requires_and_ensures_info(&fd->i);
   assn_map_t am = true_assnmap();
   // We need to record the initial logical values for the arguments
@@ -2044,7 +2046,9 @@ void vcgen_fundecl(Position::seg_t loc, JumpAnalysis::jump_anal_res_t tables, Ab
   actuals = List::imp_rev(actuals);
   // force the varmap to have a binding for memory and record it.
   let $(initmem,am2) = lookup_var_map(memory,am);
+  let am2 = update_var_map(pre_memory,initmem,am2);
   am = am2;
+
   let args = new List{initmem,actuals};
   // put in the checks clause as an assumption.
   if (checkopt != NULL) {
@@ -2106,9 +2110,10 @@ void vcgen_fundecl(Position::seg_t loc, JumpAnalysis::jump_anal_res_t tables, Ab
     res = a;
   }
   let $(new_memory,res) = lookup_var_map(memory,res);
-
+  let $(pre_mem,res) = lookup_var_map(pre_memory,res);
+  let pre_memory_and_actuals = new List(pre_mem,actuals);
   if (ensopt != NULL) {
-    let ens = existassnfn2assn(ensopt,new List{res_term,new List{new_memory,actuals}});
+    let ens = existassnfn2assn(ensopt,new List{res_term,new List{new_memory,pre_memory_and_actuals}});
     if (!implies(res.assn,ens))
       Warn::err(loc, "cannot prove the @ensures clause\n\t%s\nfrom\n\t%s",
                 assn2string(ens),
@@ -2116,7 +2121,7 @@ void vcgen_fundecl(Position::seg_t loc, JumpAnalysis::jump_anal_res_t tables, Ab
   } else {
     // insert the calculated post condition in the hash table
     // so it can be used for subsequent functions.
-    insert_fn_info(fd,actuals,res_term,new_memory,res.assn);
+    insert_fn_info(fd,pre_memory_and_actuals,res_term,new_memory,res.assn);
   }
 
 #ifdef VCGEN_PROFILE
@@ -2134,7 +2139,7 @@ void vcgen_fundecl(Position::seg_t loc, JumpAnalysis::jump_anal_res_t tables, Ab
     assn_map_t res = *env->try_assnmap;
     //    let $(res_term,res) = lookup_var_map(exception_vardecl(),res);
     let $(new_memory,res) = lookup_var_map(memory,res);
-    let thr = existassnfn2assn(thrwsopt,new List{new_memory,actuals});
+    let thr = existassnfn2assn(thrwsopt,new List{new_memory,pre_memory_and_actuals});
     if (!implies(res.assn,thr))
       Warn::err(loc, "cannot prove the @throws clause\n\t%s\nfrom\n\t%s",
                 assn2string(thr),

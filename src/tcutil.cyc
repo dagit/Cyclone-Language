@@ -2486,10 +2486,11 @@ type_t rsubstitute(region_t<`r> rgn,
       req_am2 = AssnDef::subst_vardecls(vds1,vds2,req_am2);
       req_assn2 = AssnDef::assnmap2existassnfn(*req_am2,boundvds);
     }
+    let boundvds = new List {(vardecl_opt_t)AssnDef::memory,
+			     new List{(vardecl_opt_t)AssnDef::pre_memory,argvds2}};
     if (ens2 != NULL) {
       let ens_am2 = new Vcgen::clause2assn((exp_t)ens2);
       ens_am2 = AssnDef::subst_vardecls(vds1,vds2,ens_am2);
-      new List {ret_value2,boundvds};
       ens_assn2 = AssnDef::assnmap2existassnfn(*ens_am2,new List {ret_value2,boundvds});
     }
     if (thrws2 != NULL) {
