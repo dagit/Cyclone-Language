@@ -123,7 +123,7 @@ BANSHEE_STUB:=bansheeif_stub
 CYCLONE_SRCS:=absyn\
 	 warn\
          flags\
- 	 kinds\
+         kinds\
          parse_tab\
          parse_errors\
          lex\
@@ -272,6 +272,7 @@ C_BOOT_LIBS:=$(addsuffix .c, $(CYCLONE_BOOT_LIBS))
 C_LIBS:=$(addsuffix .c, $(CYCLONE_LIBS))
 O_SRCS:=$(addsuffix .$(O), $(CYCLONE_SRCS) $(BANSHEE_STUB))
 BANSHEE_O_SRCS:=$(addsuffix .$(O), $(CYCLONE_SRCS) $(BANSHEE_IF))
+ALL_O_SRCS:=$(addsuffix .$(O), $(CYCLONE_SRCS) $(BANSHEE_STUB) $(BANSHEE_IF))
 O_BOOT_LIBS:=$(addsuffix .$(O), $(CYCLONE_BOOT_LIBS))
 O_LIBS:=$(addsuffix .$(O), $(CYCLONE_LIBS))
 A_SRCS:=$(addsuffix _a.$(O), $(CYCLONE_SRCS) $(BANSHEE_STUB))

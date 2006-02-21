@@ -110,7 +110,7 @@ ifdef NOREGIONS
 OTHER_CYCFLAGS += -noregions
 endif
 
-$(CYCCOMP): $(O_SRCS) install_path.$(O) $(LIBR)
+$(CYCCOMP): $(ALL_O_SRCS) install_path.$(O) $(LIBR)
 	$(CYCC) -o $@ -v -compile-for-boot -L. -B. -B$(CYCDIR)/bin/lib/cyc-lib $(OTHER_CYCFLAGS) $(O_SRCS) install_path.$(O) $(LDFLAGS)
 
 cycdoc$(EXE): $(addsuffix .$(O), $(CYCDOC_SRCS)) install_path.$(O) $(LIBR)
