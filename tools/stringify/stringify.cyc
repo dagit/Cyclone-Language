@@ -37,6 +37,7 @@
  */
 #define CYCLONE_OUTPUT 0
 #define C_OUTPUT 1
+#define MACRO_OUTPUT 2
 int output_style = CYCLONE_OUTPUT;
 int cyclone_style_string = 1;
 FILE *outf = NULL;
@@ -45,16 +46,28 @@ void stringify(const char ?varname, FILE @f) {
   if (!outf) outf = stdout;
   if (output_style == CYCLONE_OUTPUT)
     fprintf(outf,"const char ?%s =\n\"",varname);
-  else
+  else if (output_style == C_OUTPUT)
     fprintf(outf,"const char %s[] =\n\"",varname);
+  else if (output_style == MACRO_OUTPUT)
+    fprintf(outf,"#define %s \\\n\"",varname);
+  else {
+    fprintf(stderr,"stringify: internal error (unexpected output type)\n");
+    exit(1);
+  }
   int c;
   while ( (c = fgetc(f)) != EOF) {
     switch (c) {
-    case '\n': fprintf(outf,"\\n\"\n\""); break;
+    case '\n': 
+      if (output_style == MACRO_OUTPUT)
+        fprintf(outf,"\\n\"\\\n\"");
+      else
+        fprintf(outf,"\\n\"\n\"");
+      break;
     case '\a': fprintf(outf,"\\a"); break;
     case '\b': fprintf(outf,"\\b"); break;
     case '\f': fprintf(outf,"\\f"); break;
     case '\r': fprintf(outf,"\\r"); break;
+    case '\t': fprintf(outf,"\\t"); break;
     case '\v': fprintf(outf,"\\v"); break;
     case '"': fprintf(outf,"\\\""); break;
     case '\\': fprintf(outf,"\\\\"); break;
@@ -65,7 +78,9 @@ void stringify(const char ?varname, FILE @f) {
 	fprintf(outf,"\\%.3o",(unsigned char)c);
     }
   }
-  fprintf(outf,"\";\n");
+  fprintf(outf,"\"\n");
+  if (output_style != MACRO_OUTPUT)
+    fprintf(outf,";\n");
 }
 void stringify_file(const char ?varname,const char ?filename) {
   let f = fopen(filename,"r");
@@ -81,6 +96,7 @@ void usage() __attribute__((__noreturn__)) {
   fprintf(stderr,"Options: -v variable\n");
   fprintf(stderr,"         -c           Output for C\n");
   fprintf(stderr,"         -cyclone     Output for Cyclone (default)\n");
+  fprintf(stderr,"         -macro       Output #define\n");
   fprintf(stderr,"Input defaults to stdin unless file is given.\n");
   fprintf(stderr,"The name of the string comes from the input file name, or -v.\n");
   exit(1);
@@ -97,6 +113,9 @@ int main(int argc, char ??argv) {
     }
     else if (strcmp(arg,"-cyclone") == 0) {
       output_style = CYCLONE_OUTPUT;
+    }
+    else if (strcmp(arg,"-macro") == 0) {
+      output_style = MACRO_OUTPUT;
     }
     else if (strcmp(arg,"-v") == 0) {
       i++; if (i >= argc) usage();
