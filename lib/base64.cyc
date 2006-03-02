@@ -1,0 +1,140 @@
+/**********************************************************************/
+/* base64.ml                                                          */
+/* Trevor Jim                                                         */
+/*                                                                    */
+/* Conversions from and to base 64 encoding, as described in the      */
+/* Internet Engineering Task Force RFC-1521.                          */
+/*                                                                    */
+/* exception Base64                                                   */
+/* base64string_of_nat : Nat.nat -> string                            */
+/* nat_of_base64string : string -> Nat.nat                            */
+/*                                                                    */
+/**********************************************************************/
+
+#include <string.h>
+#include "base64.h"
+
+#ifdef BASE64_TEST
+const char ? ex1 = "Man is distinguished, not only by his reason, but by this singular passion from other animals, which is a lust of the mind, that by a perseverance of delight in the continued and indefatigable generation of knowledge, exceeds the short vehemence of any carnal pleasure.";
+
+int main() {
+  printf("1: '%s'\n",ex1);
+  printf("2: %s\n",Base64::aencode_zeroterm(ex1));
+  printf("3: '%s'\n",Base64::adecode(Base64::aencode(ex1)));
+  printf("4: '%s'\n",Base64::adecode(Base64::aencode_zeroterm(ex1)));
+  return 0;
+}
+#endif
+
+namespace Base64;
+
+static char encode_map[] = 
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+  "abcdefghijklmnopqrstuvwxyz"
+  "0123456789+/";
+
+unsigned int encoding_length(unsigned int len) {
+  return 4 * ((len / 3) + ((len % 3)?1:0));
+}
+
+int encode(const char ?@nozeroterm src,
+           char ?dest,
+           unsigned int src_len) {
+  try {
+    unsigned int i = 0;
+    unsigned int j = 0;
+    while (i < src_len) {
+      let b1 = src[i++];
+      let b2 = (i < src_len)?src[i]:0; i++;
+      let b3 = (i < src_len)?src[i]:0; i++;
+      let r = (b1<<16)|(b2<<8)|b3;
+      let a = r>>18;
+      let b = (r>>12)&0x3f;
+      let c = (r>>6)&0x3f;
+      let d = r&0x3f;
+      dest[j++] = encode_map[a];
+      dest[j++] = encode_map[b];
+      dest[j++] = encode_map[c];
+      dest[j++] = encode_map[d];
+    }
+    for (let k = i - src_len; k; k--) {
+      dest[j - k] = '=';
+    }
+    return 0;
+  } catch {
+  default: return 1;
+  }
+}
+
+static char ?encode_n(const char ?@nozeroterm src,unsigned int src_len) {
+  if (!src) return NULL;
+  if (!src_len) return NULL;
+  let dest_len = encoding_length(src_len);
+  char ?dest = calloc(dest_len+1,sizeof(char)); // NB: zeroterm dest
+  if (encode(src,dest,src_len)) return NULL;
+  else return dest;
+}
+
+char ?aencode(const char ?@nozeroterm src) {
+  if (!src) return NULL;
+  let src_len = numelts(src);
+  return encode_n(src,src_len);
+}
+
+char ?aencode_zeroterm(const char ?src) {
+  if (!src) return NULL;
+  let src_len = strlen(src);
+  return encode_n(src,src_len);
+}
+
+static int
+decode_char(char c) {
+  if ('A' <= c && c <= 'Z') return c - 'A';
+  if ('a' <= c && c <= 'z') return c - 'a' + 26;
+  if ('0' <= c && c <= '9') return (c - '0') + 52;
+  if (c == '+') return 62;
+  if (c == '/') return 63;
+  if (c == '=') return 0;
+  return -1;
+}
+
+unsigned int decoding_length(const char ?src) {
+  let len = strlen(src);
+  if (!len) return 0;
+  if (len % 4) return 0;
+  let pad = 0;
+  if (src[len] == '=') {
+    pad++; if (src[len-1] == '=') pad++;
+  }
+  return (len / 4) * 3 - pad;
+}
+
+/* decode(src) returns the base64 decoding of src.
+   It returns NULL on error. */
+int decode(const char ?src, char?@nozeroterm dest) {
+  let src_len = strlen(src); // NB: expects zeroterm src
+  let dest_len = decoding_length(src);
+  unsigned int i = 0;
+  unsigned int j = 0;
+  while (i < src_len) {
+    let a = decode_char(src[i++]); if (a < 0) return 1;
+    let b = decode_char(src[i++]); if (b < 0) return 1;
+    let c = decode_char(src[i++]); if (c < 0) return 1;
+    let d = decode_char(src[i++]); if (d < 0) return 1;
+    int r = (a<<18)|(b<<12)|(c<<6)|d;
+    dest[j++] = (char)(r>>16);
+    if (j > dest_len) break;
+    dest[j++] = (char)((r>>8)&0xff);
+    if (j > dest_len) break;
+    dest[j++] = (char)(r&0xff);
+  }
+  return 0;
+}
+
+char ?@nozeroterm adecode(const char ?src) {
+  let dest_len = decoding_length(src);
+  if (!dest_len) return NULL;
+  char ?@nozeroterm dest = malloc(dest_len);
+  if (decode(src,dest)) return NULL;
+  else return dest;
+}

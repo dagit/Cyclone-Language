@@ -64,6 +64,7 @@ CYCLONE_BOOT_LIBS:=ap\
 
 # other bits of the standard library
 CYCLONE_LIBS:=array\
+        base64\
         bitvec\
 	execinfo\
         getopt\
@@ -78,6 +79,7 @@ CYCLONE_H:=ap.h\
 	arg.h\
 	array.h\
 	assert.h\
+        base64.h\
 	binding.h\
 	bitvec.h\
 	buffer.h\
