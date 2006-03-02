@@ -33,7 +33,7 @@ typedef struct arule *Rule_t;
 datatype Rule {
   Symb(const char ?,const char ?); // grammar symbol, params
   Lit(const char ?);
-  CharRange(unsigned int,unsigned int);
+  CharRange(unsigned int,unsigned int); // inclusive range [l,u]
   Prose(const char ?);
   Opt(rule_t);
   Seq(rule_t,rule_t);

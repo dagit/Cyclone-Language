@@ -182,39 +182,52 @@ int ykread(datatype ykproducer *p, unsigned char? @nozeroterm b, int n) {
  }
 }
 
+void ykdiscard(ykbuf_t @s) {
+  // @ensures(s->save == NULL || s->save == s->bot)
+  int cnt;
+  if (s->save) {
+    // discard chars from bot to save, keep chars from save to lim
+    cnt = s->save - s->bot;
+    if (cnt) {
+      memcpy(s->bot, s->save, s->lim - s->save);
+      s->save = s->bot;
+      s->mark -= cnt;
+      s->cur -= cnt;
+      s->lim -= cnt;
+      s->discarded += cnt;
+    }
+  }
+}
+
+void ykreserve(ykbuf_t @s,unsigned int TO_READ) {
+  if ((s->top - s->lim) < TO_READ)
+    ykdiscard(s);
+  if ((s->top - s->lim) < TO_READ) {
+    unsigned char ?@nozeroterm buf =
+      malloc(((s->lim - s->bot) + TO_READ)*sizeof(unsigned char));
+    // TODO: error when malloc returns 0
+    memcpy(buf, s->bot, s->lim - s->bot);
+    if (s->save) s->save = buf;
+    s->mark = &buf[s->mark - s->bot];
+    // s->mark = buf + (s->mark - s->bot);
+    s->cur = &buf[s->cur - s->bot];
+    //      cursor = buf + (cursor - s->bot);
+    s->lim = &buf[s->lim - s->bot];
+    s->top = &s->lim[TO_READ];
+    // TODO: free(s->bot);
+    s->bot = buf;
+  }
+}
+
 void ykfill(ykbuf_t @s,unsigned int n) {
   if (n < (s->lim - s->cur)) return;
   if (!s->eof) {
     int TO_READ = n - (s->lim - s->cur);
     if (TO_READ < BSIZE) TO_READ = BSIZE;
-    int cnt;
-    if (s->save) {
-      // discard chars from bot to save, keep chars from save to lim
-      cnt = s->save - s->bot;
-      if (cnt) {
-        memcpy(s->bot, s->save, s->lim - s->save);
-        s->save = s->bot;
-        s->mark -= cnt;
-        s->cur -= cnt;
-        s->lim -= cnt;
-        s->discarded += cnt;
-      }
-    }
-    // Invariant: (s->save == NULL || s->save == s->bot)
     // We want to read in TO_READ chars.  Resize the buffer if not enough space.
-    if ((s->top - s->lim) < TO_READ) {
-      unsigned char ?@nozeroterm buf = malloc(((s->lim - s->bot) + TO_READ)*sizeof(unsigned char));
-      memcpy(buf, s->bot, s->lim - s->bot);
-      if (s->save) s->save = buf;
-      s->mark = &buf[s->mark - s->bot];
-      // s->mark = buf + (s->mark - s->bot);
-      s->cur = &buf[s->cur - s->bot];
-      //      cursor = buf + (cursor - s->bot);
-      s->lim = &buf[s->lim - s->bot];
-      s->top = &s->lim[TO_READ];
-      // TODO: free(s->bot);
-      s->bot = buf;
-    }
+    ykreserve(s,TO_READ);
+
+    int cnt;
     // Read in TO_READ characters
   YKREADLOOP:
     if ((cnt = ykread(s->prod, s->lim, TO_READ)) != TO_READ) {
@@ -276,20 +289,47 @@ void compress_whitespace(char ?x) {
 int ykindex(ykbuf_t @s,unsigned char c,unsigned int n) {
   int idx = 0;
 
-  for (unsigned int lim = s->lim - s->cur; idx < lim && idx < n; idx++) {
-    if (s->cur[idx] == c) return idx;
-  }
-  if (idx == n) return idx;
-
-  ykfill(s,n-idx);
-
+  /* Look in the current buffer first */
   for (unsigned int lim = s->lim - s->cur; idx < lim && idx < n; idx++) {
     if (s->cur[idx] == c) return idx;
   }
   if (idx == n) return idx;
   if (s->eof) return -1;
-  else /* impossible */
-    return -2;
+
+  ykreserve(s,n-idx);
+  int cnt;
+  unsigned int TO_READ = n-idx;
+  while (1) {
+    if ((cnt = ykread(s->prod, s->lim, TO_READ)) != TO_READ) {
+      if (!cnt) {   /* end-of-file */
+        s->eof = 1;
+        s->lim[cnt++] = '\0'; // Invariant: cnt < TO_READ
+        return -1;
+      }
+      else if (cnt < 0) {
+        if (errno == EINTR)
+          continue; /* interrupt occurred during a slow read */
+        else if (errno == EAGAIN)
+          continue; /* read from non-blocking fd, no data available */
+        else {      /* some other error */
+          perror("Read error on fill");
+          // Act as if eof was encountered
+          s->eof = cnt = 1;
+          s->lim = '\0';
+          return -1;
+        }
+      }
+      else {        /* read fewer than TO_READ characters for some other reason */
+        s->lim += cnt;
+        TO_READ -= cnt;
+        for (unsigned int lim = s->lim - s->cur; idx < lim && idx < n; idx++) {
+          if (s->cur[idx] == c) return idx;
+        }
+        if (idx == n) return idx;
+        continue;
+      }
+    }
+  }
 }
 
 /* ykbgets(s,size,ykb) reads in at most one less than size characters
@@ -300,7 +340,7 @@ int ykindex(ykbuf_t @s,unsigned char c,unsigned int n) {
    Replacement for fgets(s,size,f).
 */
 #define YKCURSOR ykb->cur
-char ?`r ykbgets(char ?`r s, int size, ykbuf_t @ykb) {
+char ?@nozeroterm`r ykbgets(char ?@nozeroterm`r s, int size, ykbuf_t @ykb) {
   if (size <= 1) return NULL;
   let idx = ykindex(ykb,'\n',size-1);
   if (idx == -1) return NULL; /* EOF */
@@ -316,10 +356,51 @@ char ?`r ykbgets(char ?`r s, int size, ykbuf_t @ykb) {
    it returns a short count or 0.
    Replacement for fread(s,1,n,f).
 */
-size_t ykbread(char ?s, size_t n, ykbuf_t @ykb) {
-  ykfill(ykb,n);
-  size_t numread = ykb->lim - ykb->cur;
-  if (numread > n) numread = n;
-  for (int i = 0; i < numread; i++) s[i] = *YKCURSOR++; /* TODO: use memcpy */
-  return numread;
+size_t ykbread(char ?@nozeroterm s, size_t n, ykbuf_t @ykb) {
+  let bsize = ykb->lim - ykb->cur;
+  if (bsize >= n) {
+    for (int i = 0; i < n; i++) s[i] = *YKCURSOR++; /* TODO: use memcpy */
+    return n;
+  }
+  if (ykb->eof) {
+    for (int i = 0; i < bsize; i++) s[i] = *YKCURSOR++; /* TODO: use memcpy */
+    return bsize;
+  }
+  ykreserve(ykb,n-bsize);
+  int cnt;
+  unsigned int TO_READ = n-bsize;
+  while (1) {
+    if ((cnt = ykread(ykb->prod, ykb->lim, TO_READ)) == TO_READ) {
+      for (int i = 0; i < cnt; i++) s[i] = *YKCURSOR++; /* TODO: use memcpy */
+      return cnt;
+    }
+    else {
+      if (!cnt) {   /* end-of-file */
+        ykb->eof = 1;
+        ykb->lim[cnt++] = '\0'; // Invariant: cnt < TO_READ
+        for (int i = 0; i < bsize; i++) s[i] = *YKCURSOR++; /* TODO: use memcpy */
+        return bsize;
+      }
+      else if (cnt < 0) {
+        if (errno == EINTR)
+          continue; /* interrupt occurred during a slow read */
+        else if (errno == EAGAIN)
+          continue; /* read from non-blocking fd, no data available */
+        else {      /* some other error */
+          perror("Read error on fill");
+          // Act as if eof was encountered
+          ykb->eof = cnt = 1;
+          ykb->lim = '\0';
+          for (int i = 0; i < bsize; i++) s[i] = *YKCURSOR++; /* TODO: use memcpy */
+          return bsize;
+        }
+      }
+      else {        /* read fewer than TO_READ characters for some other reason */
+        ykb->lim += cnt;
+        TO_READ -= cnt;
+        bsize += cnt;
+        continue;
+      }
+    }
+  }
 }

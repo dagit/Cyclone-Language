@@ -55,6 +55,13 @@ imapp: imapp.o ykbuf.o ssl.o imap.o
 imapp.o: examples/imapp.cyc
 	cyclone -c $^ -o $@ -I.
 
+#
+markdown: markdown.o ykbuf.o ssl.o bnf.o extract.o pr.o parse_tab.o util.o lex.o axarray.o
+	cyclone $^ -o $@ -lssl -lcrypto
+
+markdown.cyc: examples/markdown.yk yakker
+	./yakker -no-main -gen elim-cr-line -d $< > $@
+
 string_%.cyc: %.cyc
 	stringify $< > $@
 
@@ -120,6 +127,7 @@ clean:
 	$(RM) wf wf.cyc
 	$(RM) http.cyc
 	$(RM) imapp imapcl imapp.key imapp.cert
+	$(RM) markdown.cyc markdown
 
 %.p: %.bnf yakker
 	./yakker -pads $< > $@

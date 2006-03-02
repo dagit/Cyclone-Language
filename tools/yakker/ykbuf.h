@@ -58,13 +58,13 @@ extern void compress_whitespace(char ?x);
    the buffer.
    Replacement for fgets(s,size,f).
 */
-extern char ?`r ykbgets(char ?`r s, int size, ykbuf_t @ykb);
+extern char ?@nozeroterm`r ykbgets(char ?@nozeroterm`r s, int size, ykbuf_t @ykb);
 
 /* ykbread(s,n,ykb) reads n characters from ykb, storing them in s.  It
    returns the number of characters read.  If an error or EOF occurs
    it returns a short count or 0.
    Replacement for fread(s,1,n,f).
 */
-extern size_t ykbread(char ?s, size_t n, ykbuf_t @ykb);
+extern size_t ykbread(char ?@nozeroterm s, size_t n, ykbuf_t @ykb);
 
 #endif
