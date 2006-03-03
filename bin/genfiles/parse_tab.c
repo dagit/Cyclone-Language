@@ -753,7 +753,7 @@ if(Cyc_zstrcmp(id,_tag_fat("single",sizeof(char),7U)))
 # 233
 static void*Cyc_Parse_effect_from_atomic(struct Cyc_List_List*effs){
 if(Cyc_List_length(effs)==1)
-return(void*)effs->hd;else{
+return(void*)_check_null(effs)->hd;else{
 # 237
 return Cyc_Absyn_join_eff(effs);}}
 # 240
@@ -964,7 +964,7 @@ if(tms==0)return 0;{
 void*_Tmp0=(void*)tms->hd;void*_Tmp1;if(*((int*)_Tmp0)==3){_Tmp1=(void*)((struct Cyc_Absyn_Function_mod_Absyn_Type_modifier_struct*)_Tmp0)->f1;{void*args=_Tmp1;
 # 520
 if(tms->tl==0 ||
- Cyc_Parse_is_typeparam((void*)tms->tl->hd)&& tms->tl->tl==0){
+ Cyc_Parse_is_typeparam((void*)tms->tl->hd)&& _check_null(tms->tl)->tl==0){
 # 523
 void*_Tmp2;if(*((int*)args)==1){
 # 525
@@ -1222,7 +1222,9 @@ if(tags!=0)
 struct Cyc_Absyn_Tqual _Tmp11=Cyc_Absyn_empty_tqual(tq.loc);void*_Tmp12=
 Cyc_Absyn_function_type(typvars,eff,tq,t,args2,c_vararg,cyc_vararg,effc,qb,fn_atts,chks,req,ens,thrw);
 # 830
-struct Cyc_List_List*_Tmp13=new_atts;return Cyc_Parse_apply_tms(_Tmp11,_Tmp12,_Tmp13,tms->tl);}}}}}else{_Tmp6=((struct Cyc_Absyn_NoTypes_Absyn_Funcparams_struct*)args)->f2;{unsigned loc=_Tmp6;
+struct Cyc_List_List*_Tmp13=new_atts;return Cyc_Parse_apply_tms(_Tmp11,_Tmp12,_Tmp13,
+# 835
+_check_null(tms)->tl);}}}}}else{_Tmp6=((struct Cyc_Absyn_NoTypes_Absyn_Funcparams_struct*)args)->f2;{unsigned loc=_Tmp6;
 # 837
 ({int(*_Tmp11)(unsigned,struct _fat_ptr)=(int(*)(unsigned,struct _fat_ptr))Cyc_Parse_parse_abort;_Tmp11;})(loc,_tag_fat("function declaration without parameter types",sizeof(char),45U));}};}case 4: _Tmp5=((struct Cyc_Absyn_TypeParams_mod_Absyn_Type_modifier_struct*)_Tmp0)->f1;_Tmp4=((struct Cyc_Absyn_TypeParams_mod_Absyn_Type_modifier_struct*)_Tmp0)->f2;{struct Cyc_List_List*ts=_Tmp5;unsigned loc=_Tmp4;
 # 844
@@ -1357,7 +1359,7 @@ struct Cyc_List_List*_Tmp4=decls;_npop_handler(0);return _Tmp4;}}{
 struct Cyc_List_List*decls=0;
 {struct Cyc_List_List*ds=fields;for(0;ds!=0;(
 # 1020
-ds=ds->tl,exprs=exprs->tl,renames=renames->tl)){
+ds=ds->tl,exprs=_check_null(exprs)->tl,renames=_check_null(renames)->tl)){
 struct _tuple15*_Tmp4=(struct _tuple15*)ds->hd;void*_Tmp5;void*_Tmp6;void*_Tmp7;struct Cyc_Absyn_Tqual _Tmp8;void*_Tmp9;unsigned _TmpA;_TmpA=_Tmp4->f0;_Tmp9=_Tmp4->f1;_Tmp8=_Tmp4->f2;_Tmp7=_Tmp4->f3;_Tmp6=_Tmp4->f4;_Tmp5=_Tmp4->f5;{unsigned varloc=_TmpA;struct _tuple0*x=_Tmp9;struct Cyc_Absyn_Tqual tq2=_Tmp8;void*t2=_Tmp7;struct Cyc_List_List*tvs2=_Tmp6;struct Cyc_List_List*atts2=_Tmp5;
 if(tvs2!=0)
 Cyc_Warn_warn(loc,_tag_fat("bad type params, ignoring",sizeof(char),26U),_tag_fat(0U,sizeof(void*),0));
@@ -1450,24 +1452,24 @@ struct _fat_ptr name=Cyc_strchr(_fat_ptr_plus(kind,sizeof(char),1),'_');
 _fat_ptr_inplace_plus(& name,sizeof(char),1);
 if(!Cyc_strncmp(kind,_tag_fat("_PTRBND",sizeof(char),8U),7U)){
 void*t=Cyc_Absyn_cvar_type_name(& Cyc_Kinds_ptrbko,name);
-({void(*_Tmp4)(struct Cyc_Hashtable_Table*,struct _fat_ptr*,void*)=({void(*_Tmp5)(struct Cyc_Hashtable_Table*,struct _fat_ptr*,void*)=(void(*)(struct Cyc_Hashtable_Table*,struct _fat_ptr*,void*))Cyc_Hashtable_insert;_Tmp5;});struct Cyc_Hashtable_Table*_Tmp5=cvmap;struct _fat_ptr*_Tmp6=({struct _fat_ptr*_Tmp7=_cycalloc(sizeof(struct _fat_ptr));*_Tmp7=s;_Tmp7;});_Tmp4(_Tmp5,_Tmp6,t);});
+({void(*_Tmp4)(struct Cyc_Hashtable_Table*,struct _fat_ptr*,void*)=({void(*_Tmp5)(struct Cyc_Hashtable_Table*,struct _fat_ptr*,void*)=(void(*)(struct Cyc_Hashtable_Table*,struct _fat_ptr*,void*))Cyc_Hashtable_insert;_Tmp5;});struct Cyc_Hashtable_Table*_Tmp5=_check_null(cvmap);struct _fat_ptr*_Tmp6=({struct _fat_ptr*_Tmp7=_cycalloc(sizeof(struct _fat_ptr));*_Tmp7=s;_Tmp7;});_Tmp4(_Tmp5,_Tmp6,t);});
 return t;}else{
 # 1127
 ({int(*_Tmp4)(unsigned,struct _fat_ptr)=(int(*)(unsigned,struct _fat_ptr))Cyc_Parse_parse_abort;_Tmp4;})(0U,_tag_fat("Constraint variable unknown kind",sizeof(char),33U));}}else{_Tmp3=_Tmp2;{void*exn=_Tmp3;_rethrow(exn);}};}}}}
 # 1133
 static void*Cyc_Parse_str2type(unsigned loc,struct _fat_ptr s){
 if(!Cyc_strcmp(s,_tag_fat("@fat",sizeof(char),5U)))
-return Cyc_Tcutil_ptrbnd_cvar_equivalent(Cyc_Absyn_fat_bound_type);else{
+return _check_null(Cyc_Tcutil_ptrbnd_cvar_equivalent(Cyc_Absyn_fat_bound_type));else{
 # 1137
 if(!Cyc_strcmp(s,_tag_fat("@thin @numelts{valueof_t(1U)}",sizeof(char),30U)))
-return Cyc_Tcutil_ptrbnd_cvar_equivalent(Cyc_Absyn_bounds_one());}
+return _check_null(Cyc_Tcutil_ptrbnd_cvar_equivalent(Cyc_Absyn_bounds_one()));}
 # 1140
 ({int(*_Tmp0)(unsigned,struct _fat_ptr)=({int(*_Tmp1)(unsigned,struct _fat_ptr)=(int(*)(unsigned,struct _fat_ptr))Cyc_Parse_parse_abort;_Tmp1;});unsigned _Tmp1=loc;_Tmp0(_Tmp1,({struct Cyc_String_pa_PrintArg_struct _Tmp2=({struct Cyc_String_pa_PrintArg_struct _Tmp3;_Tmp3.tag=0,_Tmp3.f1=s;_Tmp3;});void*_Tmp3[1];_Tmp3[0]=& _Tmp2;Cyc_aprintf(_tag_fat("Unknown type constant:: %s",sizeof(char),27U),_tag_fat(_Tmp3,sizeof(void*),1));}));});}
 # 1143
 static void*Cyc_Parse_composite_constraint(enum Cyc_Parse_ConstraintOps op,void*t1,void*t2){
 switch((int)op){case Cyc_Parse_C_AND_OP:
- return Cyc_BansheeIf_and_constraint(t1,t2);case Cyc_Parse_C_OR_OP:
- return Cyc_BansheeIf_or_constraint(t1,t2);case Cyc_Parse_C_NOT_OP:
+ return Cyc_BansheeIf_and_constraint(t1,_check_null(t2));case Cyc_Parse_C_OR_OP:
+ return Cyc_BansheeIf_or_constraint(t1,_check_null(t2));case Cyc_Parse_C_NOT_OP:
  return Cyc_BansheeIf_not_constraint(t1);default:
 # 1149
 ({int(*_Tmp0)(unsigned,struct _fat_ptr)=(int(*)(unsigned,struct _fat_ptr))Cyc_Parse_parse_abort;_Tmp0;})(0U,_tag_fat("Unexpected operator for composite constraint",sizeof(char),45U));};}

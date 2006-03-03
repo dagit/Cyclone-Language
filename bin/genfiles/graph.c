@@ -556,7 +556,7 @@ if(cmp(top,v)!=0 ||
 goto _LL0;}}_LL0:;}
 # 289
 {int hnow=Cyc_List_length(ts->cstack);for(0;hnow > hsaved;-- hnow){
-int X=(int)ts->cstack->hd;
+int X=(int)_check_null(ts->cstack)->hd;
 ts->cstack=ts->cstack->tl;
 if(!({int(*_Tmp0)(struct Cyc_Set_Set*,int)=(int(*)(struct Cyc_Set_Set*,int))Cyc_Set_member;_Tmp0;})(csCnew->Succ,X)){
 struct Cyc_Set_Set*s=({struct Cyc_Set_Set*(*_Tmp0)(struct Cyc_Set_Set*,int)=(struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*,int))Cyc_Set_insert;_Tmp0;})(csCnew->Succ,X);
@@ -630,13 +630,13 @@ void*top=s->hd;
 component=Cyc_Set_insert(component,top);
 if(cmp(top,x)==0)break;}}
 # 378
-for(1;(unsigned)*S;*S=(*S)->tl){
+for(1;(unsigned)*S;*S=_check_null(*S)->tl){
 void*top=(*S)->hd;
 ({struct Cyc_Dict_Dict _Tmp0=({struct Cyc_Dict_Dict(*_Tmp1)(struct Cyc_Dict_Dict,void*,unsigned)=(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,void*,unsigned))Cyc_Dict_insert;_Tmp1;})(*N,top,4294967295U);*N=_Tmp0;});
 ({struct Cyc_Dict_Dict _Tmp0=Cyc_Graph_add_node(*output,top);*output=_Tmp0;});
 ({struct Cyc_Dict_Dict _Tmp0=Cyc_Graph_add_edges(*output,top,component);*output=_Tmp0;});
 if(cmp(top,x)==0){
-*S=(*S)->tl;
+*S=_check_null(*S)->tl;
 break;}}}}
 # 390
 struct Cyc_Dict_Dict Cyc_Graph_scc(struct Cyc_Dict_Dict input){
@@ -677,12 +677,12 @@ void*top=s->hd;
 component=Cyc_Set_insert(component,top);
 if(cmp(top,x)==0)break;}}
 # 432
-for(1;(unsigned)*S;*S=(*S)->tl){
+for(1;(unsigned)*S;*S=_check_null(*S)->tl){
 void*top=(*S)->hd;
 ({struct Cyc_Dict_Dict _Tmp0=({struct Cyc_Dict_Dict(*_Tmp1)(struct Cyc_Dict_Dict,void*,unsigned)=(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,void*,unsigned))Cyc_Dict_insert;_Tmp1;})(*N,top,4294967295U);*N=_Tmp0;});
 ({struct Cyc_List_List*_Tmp0=({struct Cyc_List_List*_Tmp1=_cycalloc(sizeof(struct Cyc_List_List));_Tmp1->hd=top,_Tmp1->tl=*output;_Tmp1;});*output=_Tmp0;});
 if(cmp(top,x)==0){
-*S=(*S)->tl;
+*S=_check_null(*S)->tl;
 break;}}}}
 # 443
 struct Cyc_List_List*Cyc_Graph_tsort(struct Cyc_Dict_Dict input){

@@ -795,7 +795,7 @@ Cyc_Tcutil_add_tvar_identities(td->tvs);
 if(td->defn!=0){
 Cyc_Tctyp_check_type(loc,te,td->tvs,& Cyc_Kinds_ak,0,1,td->defn);
 ({int _Tmp0=
-Cyc_Tcutil_extract_const_from_typedef(loc,td->tq.print_const,td->defn);
+Cyc_Tcutil_extract_const_from_typedef(loc,td->tq.print_const,_check_null(td->defn));
 # 285
 td->tq.real_const=_Tmp0;});}{
 # 290
@@ -874,7 +874,7 @@ struct Cyc_Tcenv_Tenv*te2=Cyc_Tcenv_allow_valueof(te);
 Cyc_Tcexp_tcExp(te2,0,requires_clause);
 if(!Cyc_Tcutil_is_integral(requires_clause))
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp8=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp9;_Tmp9.tag=0,_Tmp9.f1=
-_tag_fat("@requires clause has type ",sizeof(char),27U);_Tmp9;});struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp9=({struct Cyc_Warn_Typ_Warn_Warg_struct _TmpA;_TmpA.tag=2,_TmpA.f1=(void*)requires_clause->topt;_TmpA;});struct Cyc_Warn_String_Warn_Warg_struct _TmpA=({struct Cyc_Warn_String_Warn_Warg_struct _TmpB;_TmpB.tag=0,_TmpB.f1=
+_tag_fat("@requires clause has type ",sizeof(char),27U);_Tmp9;});struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp9=({struct Cyc_Warn_Typ_Warn_Warg_struct _TmpA;_TmpA.tag=2,_TmpA.f1=(void*)_check_null(requires_clause->topt);_TmpA;});struct Cyc_Warn_String_Warn_Warg_struct _TmpA=({struct Cyc_Warn_String_Warn_Warg_struct _TmpB;_TmpB.tag=0,_TmpB.f1=
 _tag_fat(" instead of integral type",sizeof(char),26U);_TmpB;});void*_TmpB[3];_TmpB[0]=& _Tmp8,_TmpB[1]=& _Tmp9,_TmpB[2]=& _TmpA;Cyc_Warn_err2(requires_clause->loc,_tag_fat(_TmpB,sizeof(void*),3));});else{
 # 430
 ({unsigned _Tmp8=requires_clause->loc;struct Cyc_Tcenv_Tenv*_Tmp9=te;struct Cyc_List_List*_TmpA=flagged_tvs;struct Cyc_List_List**_TmpB=qb;Cyc_Tctyp_check_type_with_bounds(_Tmp8,_Tmp9,_TmpA,_TmpB,& Cyc_Kinds_ik,0,0,(void*)({struct Cyc_Absyn_ValueofType_Absyn_Type_struct*_TmpC=_cycalloc(sizeof(struct Cyc_Absyn_ValueofType_Absyn_Type_struct));

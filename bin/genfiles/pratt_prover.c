@@ -999,7 +999,7 @@ newrs=Cyc_PrattProver_revnodes(newrs);
 newg->rows=newrs;{
 # 954
 struct Cyc_PrattProver_Node*rs=g->rows;for(0;rs!=0;(rs=rs->next,newrs=newrs->next)){
-({struct Cyc_PrattProver_Distance*_Tmp0=Cyc_PrattProver_copy_distances(newg,rs->unsigned_distances);newrs->unsigned_distances=_Tmp0;});
+({struct Cyc_PrattProver_Distance*_Tmp0=Cyc_PrattProver_copy_distances(newg,rs->unsigned_distances);_check_null(newrs)->unsigned_distances=_Tmp0;});
 ({struct Cyc_PrattProver_Distance*_Tmp0=Cyc_PrattProver_copy_distances(newg,rs->signed_distances);newrs->signed_distances=_Tmp0;});}}}}}
 # 959
 return res;}
@@ -1654,7 +1654,7 @@ a=Cyc_AssnDef_widen(a);
 -- paths;
 continue;}{
 # 1812
-struct Cyc_PrattProver_Graph*g2=Cyc_PrattProver_copy_graphs(g);
+struct Cyc_PrattProver_Graph*g2=_check_null(Cyc_PrattProver_copy_graphs(g));
 ors=({struct Cyc_List_List*_Tmp5=_cycalloc(sizeof(struct Cyc_List_List));({struct _tuple18*_Tmp6=({struct _tuple18*_Tmp7=_cycalloc(sizeof(struct _tuple18));_Tmp7->f0=g2,({struct Cyc_List_List*_Tmp8=({struct Cyc_List_List*_Tmp9=_cycalloc(sizeof(struct Cyc_List_List));_Tmp9->hd=a2,_Tmp9->tl=ands;_Tmp9;});_Tmp7->f1=_Tmp8;});_Tmp7;});_Tmp5->hd=_Tmp6;}),_Tmp5->tl=ors;_Tmp5;});
 a=a1;
 continue;}}case 2: if(*((int*)((struct Cyc_AssnDef_Prim_AssnDef_Assn_struct*)a)->f1)==0){if(((struct Cyc_AssnDef_Uint_AssnDef_Term_struct*)((struct Cyc_AssnDef_Prim_AssnDef_Assn_struct*)a)->f1)->f1==0){if(((struct Cyc_AssnDef_Prim_AssnDef_Assn_struct*)a)->f2==Cyc_AssnDef_Neq){_Tmp4=(void*)((struct Cyc_AssnDef_Prim_AssnDef_Assn_struct*)a)->f3;{void*t2=_Tmp4;

@@ -673,15 +673,15 @@ if(laststmt==0)goto _LL24;
 # 406
 {void*_Tmp9=laststmt->r;void*_TmpA;if(*((int*)_Tmp9)==1){_TmpA=((struct Cyc_Absyn_Exp_s_Absyn_Raw_stmt_struct*)_Tmp9)->f1;{struct Cyc_Absyn_Exp*initexp=_TmpA;
 # 408
-{void*_TmpB=vd->initializer->r;void*_TmpC;if(*((int*)_TmpB)==36){_TmpC=((struct Cyc_Absyn_StmtExp_e_Absyn_Raw_exp_struct*)_TmpB)->f1;{struct Cyc_Absyn_Stmt*s3=_TmpC;
+{void*_TmpB=_check_null(vd->initializer)->r;void*_TmpC;if(*((int*)_TmpB)==36){_TmpC=((struct Cyc_Absyn_StmtExp_e_Absyn_Raw_exp_struct*)_TmpB)->f1;{struct Cyc_Absyn_Stmt*s3=_TmpC;
 # 410
 vd->initializer=initexp;
 laststmt->r=s->r;
 s->r=s3->r;
 goto _LL2E;}}else{
 # 415
-({struct Cyc_Warn_String_Warn_Warg_struct _TmpD=({struct Cyc_Warn_String_Warn_Warg_struct _TmpE;_TmpE.tag=0,_TmpE.f1=_tag_fat("exps_to_seqc updated to non-stmt-exp |",sizeof(char),39U);_TmpE;});struct Cyc_Warn_Exp_Warn_Warg_struct _TmpE=({struct Cyc_Warn_Exp_Warn_Warg_struct _TmpF;_TmpF.tag=4,_TmpF.f1=vd->initializer;_TmpF;});struct Cyc_Warn_String_Warn_Warg_struct _TmpF=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp10;_Tmp10.tag=0,_Tmp10.f1=
-_tag_fat("|",sizeof(char),2U);_Tmp10;});void*_Tmp10[3];_Tmp10[0]=& _TmpD,_Tmp10[1]=& _TmpE,_Tmp10[2]=& _TmpF;({
+({struct Cyc_Warn_String_Warn_Warg_struct _TmpD=({struct Cyc_Warn_String_Warn_Warg_struct _TmpE;_TmpE.tag=0,_TmpE.f1=_tag_fat("exps_to_seqc updated to non-stmt-exp |",sizeof(char),39U);_TmpE;});struct Cyc_Warn_Exp_Warn_Warg_struct _TmpE=({struct Cyc_Warn_Exp_Warn_Warg_struct _TmpF;_TmpF.tag=4,_TmpF.f1=
+_check_null(vd->initializer);_TmpF;});struct Cyc_Warn_String_Warn_Warg_struct _TmpF=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp10;_Tmp10.tag=0,_Tmp10.f1=_tag_fat("|",sizeof(char),2U);_Tmp10;});void*_Tmp10[3];_Tmp10[0]=& _TmpD,_Tmp10[1]=& _TmpE,_Tmp10[2]=& _TmpF;({
 # 415
 int(*_Tmp11)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp11;})(_tag_fat(_Tmp10,sizeof(void*),3));});}_LL2E:;}
 # 418
@@ -694,7 +694,7 @@ int(*_TmpF)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_TmpF;})(_
 # 423
 goto _LL24;}}else{
 # 426
-Cyc_Toseqc_exp_to_seqc(vd->initializer);
+Cyc_Toseqc_exp_to_seqc(_check_null(vd->initializer));
 goto _LL24;}_LL24:;}
 # 429
 s=s2;

@@ -2099,7 +2099,7 @@ return fvs;}
 # 2023
 static struct _fat_ptr Cyc_AssnDef_assnfn2string(struct Cyc_AssnDef_AssnFn*af){
 if(af->actuals==0)return Cyc_AssnDef_assn2string(af->assn);{
-struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,({struct _fat_ptr _Tmp2=Cyc_AssnDef_term2string((void*)af->actuals->hd);_Tmp1.f1=_Tmp2;});_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,({struct _fat_ptr _Tmp3=Cyc_AssnDef_assnfn2string(({struct Cyc_AssnDef_AssnFn*_Tmp4=_cycalloc(sizeof(struct Cyc_AssnDef_AssnFn));_Tmp4->actuals=af->actuals->tl,_Tmp4->assn=af->assn;_Tmp4;}));_Tmp2.f1=_Tmp3;});_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;return Cyc_aprintf(_tag_fat("/\\ %s .\n%s",sizeof(char),11U),_tag_fat(_Tmp2,sizeof(void*),2));}}
+struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,({struct _fat_ptr _Tmp2=Cyc_AssnDef_term2string((void*)af->actuals->hd);_Tmp1.f1=_Tmp2;});_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,({struct _fat_ptr _Tmp3=Cyc_AssnDef_assnfn2string(({struct Cyc_AssnDef_AssnFn*_Tmp4=_cycalloc(sizeof(struct Cyc_AssnDef_AssnFn));_Tmp4->actuals=_check_null(af->actuals)->tl,_Tmp4->assn=af->assn;_Tmp4;}));_Tmp2.f1=_Tmp3;});_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;return Cyc_aprintf(_tag_fat("/\\ %s .\n%s",sizeof(char),11U),_tag_fat(_Tmp2,sizeof(void*),2));}}
 # 2027
 struct _fat_ptr Cyc_AssnDef_existassnfn2string(struct Cyc_AssnDef_ExistAssnFn*eaf){
 return Cyc_AssnDef_assnfn2string(eaf->af);}

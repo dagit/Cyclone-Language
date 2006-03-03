@@ -475,7 +475,7 @@ if(((struct Cyc_Absyn_Enumfield*)fs->hd)->tag!=0)
 Cyc_LowTreeShake_build_tables_exp(env,((struct Cyc_Absyn_Enumfield*)fs->hd)->tag);}}
 goto _LL0;}case 8: _Tmp1=((struct Cyc_Absyn_Typedef_d_Absyn_Raw_decl_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Typedefdecl*td=_Tmp1;
 # 149
-Cyc_LowTreeShake_build_tables_type(env,td->defn);goto _LL0;}default:
+Cyc_LowTreeShake_build_tables_type(env,_check_null(td->defn));goto _LL0;}default:
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp2=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3;_Tmp3.tag=0,_Tmp3.f1=_tag_fat("LowTreeShake: top-level Cyclone decl",sizeof(char),37U);_Tmp3;});void*_Tmp3[1];_Tmp3[0]=& _Tmp2;({int(*_Tmp4)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp4;})(_tag_fat(_Tmp3,sizeof(void*),1));});}_LL0:;}}
 # 154
 static void Cyc_LowTreeShake_process_worklist(struct Cyc_LowTreeShake_Env*env){

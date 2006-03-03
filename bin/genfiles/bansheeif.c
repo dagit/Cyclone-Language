@@ -611,7 +611,7 @@ struct Cyc_String_pa_PrintArg_struct _Tmp5=({struct Cyc_String_pa_PrintArg_struc
 # 407
 struct Cyc_String_pa_PrintArg_struct _Tmp5=({struct Cyc_String_pa_PrintArg_struct _Tmp6;_Tmp6.tag=0,_Tmp6.f1=loc;_Tmp6;});struct Cyc_String_pa_PrintArg_struct _Tmp6=({struct Cyc_String_pa_PrintArg_struct _Tmp7;_Tmp7.tag=0,({
 struct _fat_ptr _Tmp8=Cyc_BansheeIf__constraint2string(c1,xcvar);_Tmp7.f1=_Tmp8;});_Tmp7;});struct Cyc_String_pa_PrintArg_struct _Tmp7=({struct Cyc_String_pa_PrintArg_struct _Tmp8;_Tmp8.tag=0,({
-struct _fat_ptr _Tmp9=Cyc_BansheeIf_op2string(op);_Tmp8.f1=_Tmp9;});_Tmp8;});struct Cyc_String_pa_PrintArg_struct _Tmp8=({struct Cyc_String_pa_PrintArg_struct _Tmp9;_Tmp9.tag=0,({struct _fat_ptr _TmpA=Cyc_BansheeIf__constraint2string(c2,xcvar);_Tmp9.f1=_TmpA;});_Tmp9;});void*_Tmp9[4];_Tmp9[0]=& _Tmp5,_Tmp9[1]=& _Tmp6,_Tmp9[2]=& _Tmp7,_Tmp9[3]=& _Tmp8;return Cyc_aprintf(_tag_fat("\"%s\"+(%s,%s,%s)",sizeof(char),16U),_tag_fat(_Tmp9,sizeof(void*),4));}};}
+struct _fat_ptr _Tmp9=Cyc_BansheeIf_op2string(op);_Tmp8.f1=_Tmp9;});_Tmp8;});struct Cyc_String_pa_PrintArg_struct _Tmp8=({struct Cyc_String_pa_PrintArg_struct _Tmp9;_Tmp9.tag=0,({struct _fat_ptr _TmpA=Cyc_BansheeIf__constraint2string(_check_null(c2),xcvar);_Tmp9.f1=_TmpA;});_Tmp9;});void*_Tmp9[4];_Tmp9[0]=& _Tmp5,_Tmp9[1]=& _Tmp6,_Tmp9[2]=& _Tmp7,_Tmp9[3]=& _Tmp8;return Cyc_aprintf(_tag_fat("\"%s\"+(%s,%s,%s)",sizeof(char),16U),_tag_fat(_Tmp9,sizeof(void*),4));}};}
 # 412
 struct _fat_ptr Cyc_BansheeIf_constraint2string(void*c){
 return Cyc_BansheeIf__constraint2string(c,1);}
@@ -654,7 +654,7 @@ goto _LL0;}}else{goto _LL7;}}else{goto _LL7;}case 5: _Tmp0=((struct Cyc_BansheeI
 if((int)op!=0)
 ({int(*_Tmp6)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp6;})(_tag_fat("Disjunctions and negations require a delay",sizeof(char),43U),_tag_fat(0U,sizeof(void*),0));
 return Cyc_BansheeIf_nodelay_add_constraint(c1)&&
- Cyc_BansheeIf_nodelay_add_constraint(c2);}case 3: _Tmp5=(void*)((struct Cyc_BansheeIf_InclusionConstraint_BansheeIf_Constraint_struct*)c)->f1;_Tmp4=(void*)((struct Cyc_BansheeIf_InclusionConstraint_BansheeIf_Constraint_struct*)c)->f2;{void*bv1=_Tmp5;void*bv2=_Tmp4;
+ Cyc_BansheeIf_nodelay_add_constraint(_check_null(c2));}case 3: _Tmp5=(void*)((struct Cyc_BansheeIf_InclusionConstraint_BansheeIf_Constraint_struct*)c)->f1;_Tmp4=(void*)((struct Cyc_BansheeIf_InclusionConstraint_BansheeIf_Constraint_struct*)c)->f2;{void*bv1=_Tmp5;void*bv2=_Tmp4;
 # 466
 ({int(*_Tmp6)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp6;})(_tag_fat("setIF sort not yet supported",sizeof(char),29U),_tag_fat(0U,sizeof(void*),0));}default: _LL7:
 # 468
@@ -667,7 +667,7 @@ void*_Tmp0;void*_Tmp1;enum Cyc_BansheeIf_ConstraintOperator _Tmp2;switch(*((int*
 # 477
  return 1;case 5: _Tmp2=((struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct*)c)->f1;_Tmp1=(void*)((struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct*)c)->f2;_Tmp0=(void*)((struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct*)c)->f3;{enum Cyc_BansheeIf_ConstraintOperator op=_Tmp2;void*c1=_Tmp1;void*c2=_Tmp0;
 # 479
-return((int)op!=0 || Cyc_BansheeIf_requires_delay(c1))|| Cyc_BansheeIf_requires_delay(c2);}default:
+return((int)op!=0 || Cyc_BansheeIf_requires_delay(c1))|| Cyc_BansheeIf_requires_delay(_check_null(c2));}default:
 # 481
  return 0;};}
 # 485
@@ -715,7 +715,7 @@ return ptrbnd_eq(pb1,pb2);}}else{goto _LLC;}}else{goto _LLC;}}else{goto _LLC;}}e
  return 0;};}}}else{goto _LL7;}}else{goto _LL7;}case 5: _Tmp2=((struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct*)g)->f1;_Tmp1=(void*)((struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct*)g)->f2;_Tmp0=(void*)((struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct*)g)->f3;{enum Cyc_BansheeIf_ConstraintOperator op=_Tmp2;void*c1=_Tmp1;void*c2=_Tmp0;
 # 534
 int c1g=Cyc_BansheeIf_eval_guard(c1);
-int c2g=(int)op!=0 &&(int)op!=1?0: Cyc_BansheeIf_eval_guard(c2);
+int c2g=(int)op!=0 &&(int)op!=1?0: Cyc_BansheeIf_eval_guard(_check_null(c2));
 switch((int)op){case Cyc_BansheeIf_AndOp:
  return c1g && c2g;case Cyc_BansheeIf_OrOp:
  return c1g || c2g;case Cyc_BansheeIf_NegOp:
@@ -869,7 +869,7 @@ return Cyc_BansheeIf_cvars_in_constraint(c1);}case 4: _Tmp1=(void*)((struct Cyc_
 _Tmp1=c1;_Tmp0=c2;goto _LLC;}default: _Tmp1=(void*)((struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct*)c)->f2;_Tmp0=(void*)((struct Cyc_BansheeIf_CompositeConstraint_BansheeIf_Constraint_struct*)c)->f3;_LLC: {void*c1=_Tmp1;void*c2=_Tmp0;
 # 730
 struct Cyc_List_List*l1=Cyc_BansheeIf_cvars_in_constraint(c1);
-struct Cyc_List_List*_Tmp2=l1;return Cyc_List_append(_Tmp2,({struct Cyc_List_List*(*_Tmp3)(int(*)(struct Cyc_List_List*,void*),struct Cyc_List_List*,struct Cyc_List_List*)=({struct Cyc_List_List*(*_Tmp4)(int(*)(struct Cyc_List_List*,void*),struct Cyc_List_List*,struct Cyc_List_List*)=(struct Cyc_List_List*(*)(int(*)(struct Cyc_List_List*,void*),struct Cyc_List_List*,struct Cyc_List_List*))Cyc_List_filter_c;_Tmp4;});struct Cyc_List_List*_Tmp4=l1;_Tmp3(Cyc_BansheeIf_not_in_list,_Tmp4,Cyc_BansheeIf_cvars_in_constraint(c2));}));}};}
+struct Cyc_List_List*_Tmp2=l1;return Cyc_List_append(_Tmp2,({struct Cyc_List_List*(*_Tmp3)(int(*)(struct Cyc_List_List*,void*),struct Cyc_List_List*,struct Cyc_List_List*)=({struct Cyc_List_List*(*_Tmp4)(int(*)(struct Cyc_List_List*,void*),struct Cyc_List_List*,struct Cyc_List_List*)=(struct Cyc_List_List*(*)(int(*)(struct Cyc_List_List*,void*),struct Cyc_List_List*,struct Cyc_List_List*))Cyc_List_filter_c;_Tmp4;});struct Cyc_List_List*_Tmp4=l1;_Tmp3(Cyc_BansheeIf_not_in_list,_Tmp4,Cyc_BansheeIf_cvars_in_constraint(_check_null(c2)));}));}};}
 # 735
 static void Cyc_BansheeIf_init_map (void){
 if(!((unsigned)Cyc_BansheeIf_cvarmap))
@@ -907,7 +907,7 @@ Cyc_BansheeIf_init_map();{
 int added=0;
 {struct Cyc_List_List*cvars=Cyc_BansheeIf_cvars_in_constraint(c);for(0;(unsigned)cvars;cvars=cvars->tl){
 struct _handler_cons _Tmp0;_push_handler(& _Tmp0);{int _Tmp1=0;if(setjmp(_Tmp0.handler))_Tmp1=1;if(!_Tmp1){
-{struct _tuple14*_Tmp2=({struct _tuple14*(*_Tmp3)(struct Cyc_Hashtable_Table*,void*)=(struct _tuple14*(*)(struct Cyc_Hashtable_Table*,void*))Cyc_Hashtable_lookup;_Tmp3;})(Cyc_BansheeIf_cvarmap,(void*)cvars->hd);void*_Tmp3;_Tmp3=(struct Cyc_List_List**)& _Tmp2->f1;{struct Cyc_List_List**oc=(struct Cyc_List_List**)_Tmp3;
+{struct _tuple14*_Tmp2=({struct _tuple14*(*_Tmp3)(struct Cyc_Hashtable_Table*,void*)=(struct _tuple14*(*)(struct Cyc_Hashtable_Table*,void*))Cyc_Hashtable_lookup;_Tmp3;})(_check_null(Cyc_BansheeIf_cvarmap),(void*)cvars->hd);void*_Tmp3;_Tmp3=(struct Cyc_List_List**)& _Tmp2->f1;{struct Cyc_List_List**oc=(struct Cyc_List_List**)_Tmp3;
 if(!Cyc_List_exists_c(Cyc_BansheeIf_constraint_eq,c,*oc)){
 ({struct Cyc_List_List*_Tmp4=({struct Cyc_List_List*_Tmp5=_cycalloc(sizeof(struct Cyc_List_List));_Tmp5->hd=c,_Tmp5->tl=*oc;_Tmp5;});*oc=_Tmp4;});
 ++ added;}}}
@@ -1036,7 +1036,7 @@ int tabOk=0;
 for(1;(unsigned)cvars;cvars=cvars->tl){
 tabOk=0;{
 struct _handler_cons _Tmp0;_push_handler(& _Tmp0);{int _Tmp1=0;if(setjmp(_Tmp0.handler))_Tmp1=1;if(!_Tmp1){
-{struct _tuple14*_Tmp2=({struct _tuple14*(*_Tmp3)(struct Cyc_Hashtable_Table*,void*)=(struct _tuple14*(*)(struct Cyc_Hashtable_Table*,void*))Cyc_Hashtable_lookup;_Tmp3;})(Cyc_BansheeIf_cvarmap,(void*)cvars->hd);void*_Tmp3;_Tmp3=(struct Cyc_List_List**)& _Tmp2->f1;{struct Cyc_List_List**constr=(struct Cyc_List_List**)_Tmp3;
+{struct _tuple14*_Tmp2=({struct _tuple14*(*_Tmp3)(struct Cyc_Hashtable_Table*,void*)=(struct _tuple14*(*)(struct Cyc_Hashtable_Table*,void*))Cyc_Hashtable_lookup;_Tmp3;})(_check_null(Cyc_BansheeIf_cvarmap),(void*)cvars->hd);void*_Tmp3;_Tmp3=(struct Cyc_List_List**)& _Tmp2->f1;{struct Cyc_List_List**constr=(struct Cyc_List_List**)_Tmp3;
 tabOk=1;
 ({struct Cyc_List_List*_Tmp4=Cyc_List_delete_cmp(Cyc_BansheeIf_constraint_cmp,*constr,c);*constr=_Tmp4;});}}
 # 937

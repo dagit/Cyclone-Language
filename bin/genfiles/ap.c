@@ -414,24 +414,24 @@ return z;}
 # 40
 static struct Cyc_AP_T*Cyc_set(struct Cyc_AP_T*z,long n){
 if(n==Cyc_long_min)
-Cyc_XP_fromint(z->size,z->digits,(unsigned)Cyc_long_max + 1U);else{
+Cyc_XP_fromint(_check_null(z)->size,z->digits,(unsigned)Cyc_long_max + 1U);else{
 if(n < 0)
 Cyc_XP_fromint(z->size,z->digits,(unsigned long)(- n));else{
 # 46
-Cyc_XP_fromint(z->size,z->digits,(unsigned long)n);}}
+Cyc_XP_fromint(_check_null(z)->size,z->digits,(unsigned long)n);}}
 z->sign=n < 0?-1: 1;
 return Cyc_normalize(z,z->size);}
 # 50
 static struct Cyc_AP_T*Cyc_normalize(struct Cyc_AP_T*z,int n){
-({int _Tmp0=Cyc_XP_length(n,z->digits);z->ndigits=_Tmp0;});
+({int _Tmp0=Cyc_XP_length(n,_check_null(z)->digits);z->ndigits=_Tmp0;});
 return z;}
 # 54
 static struct Cyc_AP_T*Cyc_add(struct Cyc_AP_T*z,struct Cyc_AP_T*x,struct Cyc_AP_T*y){
-int n=y->ndigits;
-if(x->ndigits < n)
+int n=_check_null(y)->ndigits;
+if(_check_null(x)->ndigits < n)
 return Cyc_add(z,y,x);else{
 if(x->ndigits > n){
-int carry=Cyc_XP_add(n,z->digits,x->digits,y->digits,0);
+int carry=Cyc_XP_add(n,_check_null(z)->digits,x->digits,y->digits,0);
 # 61
 ({unsigned char _Tmp0=(unsigned char)({int _Tmp1=x->ndigits - n;struct _fat_ptr _Tmp2=
 _fat_ptr_plus(z->digits,sizeof(unsigned char),n);
@@ -441,13 +441,13 @@ _fat_ptr_plus(x->digits,sizeof(unsigned char),n);
 # 61
 Cyc_XP_sum(_Tmp1,_Tmp2,_Tmp3,carry);});*((unsigned char*)_check_fat_subscript(z->digits,sizeof(unsigned char),z->size - 1))=_Tmp0;});}else{
 # 64
-({unsigned char _Tmp0=(unsigned char)Cyc_XP_add(n,z->digits,x->digits,y->digits,0);*((unsigned char*)_check_fat_subscript(z->digits,sizeof(unsigned char),n))=_Tmp0;});}}
+({unsigned char _Tmp0=(unsigned char)Cyc_XP_add(n,_check_null(z)->digits,x->digits,y->digits,0);*((unsigned char*)_check_fat_subscript(z->digits,sizeof(unsigned char),n))=_Tmp0;});}}
 # 66
 return Cyc_normalize(z,z->size);}
 # 68
 static struct Cyc_AP_T*Cyc_sub(struct Cyc_AP_T*z,struct Cyc_AP_T*x,struct Cyc_AP_T*y){
-int borrow;int n=y->ndigits;
-borrow=Cyc_XP_sub(n,z->digits,x->digits,y->digits,0);
+int borrow;int n=_check_null(y)->ndigits;
+borrow=({int _Tmp0=n;struct _fat_ptr _Tmp1=_check_null(z)->digits;struct _fat_ptr _Tmp2=_check_null(x)->digits;Cyc_XP_sub(_Tmp0,_Tmp1,_Tmp2,y->digits,0);});
 # 72
 if(x->ndigits > n)
 borrow=({int _Tmp0=x->ndigits - n;struct _fat_ptr _Tmp1=_fat_ptr_plus(z->digits,sizeof(unsigned char),n);struct _fat_ptr _Tmp2=
@@ -464,7 +464,7 @@ z=Cyc_AP_mod(xy,p);
 return z;}
 # 83
 static int Cyc_cmp(struct Cyc_AP_T*x,struct Cyc_AP_T*y){
-if(x->ndigits!=y->ndigits)
+if(({int _Tmp0=_check_null(x)->ndigits;_Tmp0!=_check_null(y)->ndigits;}))
 return x->ndigits - y->ndigits;else{
 # 87
 return Cyc_XP_cmp(x->ndigits,x->digits,y->digits);}}

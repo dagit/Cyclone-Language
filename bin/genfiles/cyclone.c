@@ -894,7 +894,7 @@ Cyc_assume_gcc_flag=0;}
 # 439
 static void Cyc_remove_file(struct _fat_ptr s){
 if(!Cyc_save_temps_r)
-remove((const char*)_untag_fat_ptr_check_bound(s,sizeof(char),1U));}
+remove((const char*)_check_null(_untag_fat_ptr_check_bound(s,sizeof(char),1U)));}
 # 446
 int Cyc_compile_failure=0;
 # 448
@@ -1079,7 +1079,7 @@ return 0;}}}
 static struct Cyc_List_List*Cyc_cfiles=0;
 static void Cyc_remove_cfiles (void){
 if(!Cyc_save_c_r)
-for(1;Cyc_cfiles!=0;Cyc_cfiles=Cyc_cfiles->tl){
+for(1;Cyc_cfiles!=0;Cyc_cfiles=_check_null(Cyc_cfiles)->tl){
 Cyc_remove_file(*((struct _fat_ptr*)Cyc_cfiles->hd));}}
 # 653
 static void Cyc_find_fail(struct _fat_ptr file){
@@ -1325,14 +1325,14 @@ if(!Cyc_compile_failure &&(int)Cyc_Flags_stop_after_pass >= 5)
 jump_tables=({struct Cyc_JumpAnalysis_Jump_Anal_Result*(*_Tmp0)(struct _fat_ptr,struct Cyc_List_List*,struct Cyc_JumpAnalysis_Jump_Anal_Result*(*)(int,struct Cyc_List_List*),int,struct Cyc_JumpAnalysis_Jump_Anal_Result*)=(struct Cyc_JumpAnalysis_Jump_Anal_Result*(*)(struct _fat_ptr,struct Cyc_List_List*,struct Cyc_JumpAnalysis_Jump_Anal_Result*(*)(int,struct Cyc_List_List*),int,struct Cyc_JumpAnalysis_Jump_Anal_Result*))Cyc_do_stage;_Tmp0;})(_tag_fat("jump checking",sizeof(char),14U),tds,Cyc_do_jumpanalysis,1,0);
 # 942
 if(!Cyc_compile_failure &&(int)Cyc_Flags_stop_after_pass >= 6)
-tds=({struct Cyc_List_List*(*_Tmp0)(struct _fat_ptr,struct Cyc_List_List*,struct Cyc_List_List*(*)(struct Cyc_JumpAnalysis_Jump_Anal_Result*,struct Cyc_List_List*),struct Cyc_JumpAnalysis_Jump_Anal_Result*,struct Cyc_List_List*)=(struct Cyc_List_List*(*)(struct _fat_ptr,struct Cyc_List_List*,struct Cyc_List_List*(*)(struct Cyc_JumpAnalysis_Jump_Anal_Result*,struct Cyc_List_List*),struct Cyc_JumpAnalysis_Jump_Anal_Result*,struct Cyc_List_List*))Cyc_do_stage;_Tmp0;})(_tag_fat("control-flow checking",sizeof(char),22U),tds,Cyc_do_cfcheck,jump_tables,tds);
+tds=({struct Cyc_List_List*(*_Tmp0)(struct _fat_ptr,struct Cyc_List_List*,struct Cyc_List_List*(*)(struct Cyc_JumpAnalysis_Jump_Anal_Result*,struct Cyc_List_List*),struct Cyc_JumpAnalysis_Jump_Anal_Result*,struct Cyc_List_List*)=(struct Cyc_List_List*(*)(struct _fat_ptr,struct Cyc_List_List*,struct Cyc_List_List*(*)(struct Cyc_JumpAnalysis_Jump_Anal_Result*,struct Cyc_List_List*),struct Cyc_JumpAnalysis_Jump_Anal_Result*,struct Cyc_List_List*))Cyc_do_stage;_Tmp0;})(_tag_fat("control-flow checking",sizeof(char),22U),tds,Cyc_do_cfcheck,_check_null(jump_tables),tds);
 # 946
 if(!Cyc_compile_failure &&(int)Cyc_Flags_stop_after_pass >= 8)
-({int(*_Tmp0)(struct _fat_ptr,struct Cyc_List_List*,int(*)(struct Cyc_JumpAnalysis_Jump_Anal_Result*,struct Cyc_List_List*),struct Cyc_JumpAnalysis_Jump_Anal_Result*,int)=(int(*)(struct _fat_ptr,struct Cyc_List_List*,int(*)(struct Cyc_JumpAnalysis_Jump_Anal_Result*,struct Cyc_List_List*),struct Cyc_JumpAnalysis_Jump_Anal_Result*,int))Cyc_do_stage;_Tmp0;})(_tag_fat("check insertion",sizeof(char),16U),tds,Cyc_do_insert_checks,jump_tables,1);
+({int(*_Tmp0)(struct _fat_ptr,struct Cyc_List_List*,int(*)(struct Cyc_JumpAnalysis_Jump_Anal_Result*,struct Cyc_List_List*),struct Cyc_JumpAnalysis_Jump_Anal_Result*,int)=(int(*)(struct _fat_ptr,struct Cyc_List_List*,int(*)(struct Cyc_JumpAnalysis_Jump_Anal_Result*,struct Cyc_List_List*),struct Cyc_JumpAnalysis_Jump_Anal_Result*,int))Cyc_do_stage;_Tmp0;})(_tag_fat("check insertion",sizeof(char),16U),tds,Cyc_do_insert_checks,_check_null(jump_tables),1);
 # 950
 if((!Cyc_compile_failure && Cyc_generate_interface_r)&&(int)Cyc_Flags_stop_after_pass >= 9){
 # 952
-struct Cyc___cycFILE*inter_file=({struct _fat_ptr _Tmp0=({const char*_Tmp1=(const char*)_untag_fat_ptr_check_bound(interfacefile,sizeof(char),1U);_tag_fat((void*)_Tmp1,sizeof(char),_get_zero_arr_size_char((void*)_Tmp1,1U));});struct _fat_ptr _Tmp1=_tag_fat("w",sizeof(char),2U);Cyc_try_file_open(_Tmp0,_Tmp1,_tag_fat("interface file",sizeof(char),15U));});
+struct Cyc___cycFILE*inter_file=Cyc_try_file_open(({const char*_Tmp0=(const char*)_check_null(_untag_fat_ptr_check_bound(interfacefile,sizeof(char),1U));_tag_fat((void*)_Tmp0,sizeof(char),_get_zero_arr_size_char((void*)_Tmp0,1U));}),_tag_fat("w",sizeof(char),2U),_tag_fat("interface file",sizeof(char),15U));
 if(inter_file==0)
 Cyc_compile_failure=1;else{
 # 956
@@ -1362,7 +1362,7 @@ Cyc_fprintf(Cyc_stderr,_tag_fat("\nCOMPILATION FAILED!\n",sizeof(char),22U),_tag
 Cyc_fflush(Cyc_stderr);}}
 # 988
 if(!Cyc_compile_failure &&(int)Cyc_Flags_stop_after_pass >= 9)
-tds=({struct Cyc_List_List*(*_Tmp0)(struct _fat_ptr,struct Cyc_List_List*,struct Cyc_List_List*(*)(struct Cyc_Hashtable_Table*,struct Cyc_List_List*),struct Cyc_Hashtable_Table*,struct Cyc_List_List*)=(struct Cyc_List_List*(*)(struct _fat_ptr,struct Cyc_List_List*,struct Cyc_List_List*(*)(struct Cyc_Hashtable_Table*,struct Cyc_List_List*),struct Cyc_Hashtable_Table*,struct Cyc_List_List*))Cyc_do_stage;_Tmp0;})(_tag_fat("translation to C",sizeof(char),17U),tds,Cyc_do_translate,jump_tables->pop_tables,tds);
+tds=({struct Cyc_List_List*(*_Tmp0)(struct _fat_ptr,struct Cyc_List_List*,struct Cyc_List_List*(*)(struct Cyc_Hashtable_Table*,struct Cyc_List_List*),struct Cyc_Hashtable_Table*,struct Cyc_List_List*)=(struct Cyc_List_List*(*)(struct _fat_ptr,struct Cyc_List_List*,struct Cyc_List_List*(*)(struct Cyc_Hashtable_Table*,struct Cyc_List_List*),struct Cyc_Hashtable_Table*,struct Cyc_List_List*))Cyc_do_stage;_Tmp0;})(_tag_fat("translation to C",sizeof(char),17U),tds,Cyc_do_translate,_check_null(jump_tables)->pop_tables,tds);
 # 992
 if(!Cyc_compile_failure &&(int)Cyc_Flags_stop_after_pass >= 10)
 tds=({struct Cyc_List_List*(*_Tmp0)(struct _fat_ptr,struct Cyc_List_List*,struct Cyc_List_List*(*)(int,struct Cyc_List_List*),int,struct Cyc_List_List*)=(struct Cyc_List_List*(*)(struct _fat_ptr,struct Cyc_List_List*,struct Cyc_List_List*(*)(int,struct Cyc_List_List*),int,struct Cyc_List_List*))Cyc_do_stage;_Tmp0;})(_tag_fat("aggregate removal",sizeof(char),18U),tds,Cyc_do_removeaggrs,1,tds);
