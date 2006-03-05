@@ -445,6 +445,7 @@ clean_src_inf:
 	$(DO_SRCINF) clean_src_inf
 
 cyclone_src_inf: cyclone-inf
+	-mkdir -p $(BUILDDIR)
 	$(DO_SRCINF) all
 
 cyclone_src:
