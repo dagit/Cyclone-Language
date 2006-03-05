@@ -374,7 +374,7 @@ if(Cyc_ParseErrors_msg_table[(int)i].state==state)
 s=Cyc_ParseErrors_msg_table[(int)i].msg;}}}{
 # 34
 struct _fat_ptr ts=Cyc_token2string(token);
-if((char*)ts.curr!=(char*)_tag_fat(0,0,0).curr)
+if((char*)ts.curr!=0)
 ({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=s;_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,({struct _fat_ptr _Tmp3=Cyc_token2string(token);_Tmp2.f1=_Tmp3;});_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;Cyc_Warn_err((unsigned)Cyc_yylloc.first_line,_tag_fat("%s (found %s instead)",sizeof(char),22U),_tag_fat(_Tmp2,sizeof(void*),2));});else{
 # 38
 ({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=s;_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_Warn_err((unsigned)Cyc_yylloc.first_line,_tag_fat("%s ",sizeof(char),4U),_tag_fat(_Tmp1,sizeof(void*),1));});}}}

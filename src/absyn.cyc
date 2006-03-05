@@ -31,6 +31,7 @@
 using Core;
 using List;
 using BansheeIf;
+using Hashtable;
 namespace Absyn;
 
 // return a negative, zero, or positive int according to whether the
@@ -1179,23 +1180,6 @@ bool type2bool(bool def, type_t t) {
   }
 }
 
-/* void visit_type(bool (@f)(`a,type_t) `a env, type_t t) { */
-/*   switch(t) { */
-/*   case &AppType(_, ts): */
-/*   case &Evar(_,t,...): */
-/*   case &VarType(...): */
-/*   case &Cvar(_,t,...): */
-/*   case &PointerType(PtrInfo{ta,_,PtrAtts{e,n,b,z,_,a,q}}): */
-/*   case &ArrayType(ArrayInfo{ta,_,_,z,_}): */
-/*   case &FnType(FnInfo{_,e,_,ret,args,_,cycv,qb,_,_,_,_,_,_,_,_,fc}): */
-/*   case &AnonAggrType(aggr_kind_t,bool tuple,list_t<aggrfield_t>): */
-/*   case &TypedefType(typedef_name_t,types_t,struct Typedefdecl *,type_opt_t): */
-/*   case &TypeDeclType(type_decl_t,type_t*): */
-/*   case &ValueofType(e): fallthru(e); */
-/*   case &TypeofType(e): */
-/*   } */
-/* } */
-
 // clients can short-circuit by throwing an exception
 // and they return false to say "do not recur"; they put their answer in env
 void visit_stmt(bool (@)(`a,exp_t), bool (@)(`a,stmt_t), `a, stmt_t);
@@ -1335,6 +1319,138 @@ void visit_stmt(bool (@f1)(`a,exp_t), bool (@f2)(`a,stmt_t), `a env, stmt_t s){
    visit_scs(f1,f2,env,scs);
    break;
   }
+}
+
+static void i_visit_type(bool (@f)(`a, type_t), `a env, type_t t, table_t<type_t, int>);
+static void i_visit_tycon_types(bool (@f)(`a, type_t), `a env, tycon_t t, table_t<type_t, int> seen) {
+  switch(t) {
+  case &DatatypeFieldCon({.KnownDatatypefield = $(dtd, dtf)}):
+    let ts = dtf->typs;
+    for(;ts;ts=ts->tl){
+      let &$(_,t) = ts->hd;
+      i_visit_type(f, env, t,seen);
+    }
+    fallthru (dtd);
+  case &DatatypeCon({.KnownDatatype = &dtd}):
+    if(dtd->fields) {
+      let fs = dtd->fields->v;
+      for(;fs;fs=fs->tl) {
+	let ts = fs->hd->typs;
+	for(;ts;ts=ts->tl){
+	  let &$(_,t) = ts->hd;
+	  i_visit_type(f, env, t,seen);
+	}
+      }
+    }
+    break;
+  case &AggrCon({.KnownAggr = &ad}):
+    if(ad->impl) {
+      let qbl = ad->impl->qual_bnd;
+      for(;qbl;qbl =qbl->tl) {
+	let &$(t1,t2) = qbl->hd;
+	i_visit_type(f,env,t1,seen);      
+	i_visit_type(f,env,t2,seen);
+      }
+      let afl = ad->impl->fields;
+      for(;afl;afl=afl->tl) {
+	i_visit_type(f, env, afl->hd->type,seen);
+      }
+    }
+    break;
+  default:
+    break;
+  }
+}
+//walk over the structure of a type
+static void i_visit_type(bool (@f)(`a, type_t), `a env, type_t t, table_t<type_t, int> seen) {
+  if(Hashtable::lookup_opt(seen, t))
+    return;
+  Hashtable::insert(seen, t, 1);
+  if(!f(env, t))
+    return;
+  switch(t) {
+  case &AppType(tc, ts): 
+    i_visit_tycon_types(f, env, tc,seen);
+    for(;ts;ts=ts->tl) 
+      i_visit_type(f, env, ts->hd,seen);
+    break; 
+  case &Cvar(_, to, ...): fallthru (to);
+  case &Evar(_,to,_,_): 
+    if(to) 
+      i_visit_type(f, env, (type_t)to,seen);
+    break;
+  case &VarType(_): break;
+  case &PointerType(PtrInfo{ta, _, PtrAtts{e,n,b,z,_,r,a}}): 
+    i_visit_type(f, env, ta,seen);
+    i_visit_type(f, env, e,seen);
+    i_visit_type(f, env, n,seen);
+    i_visit_type(f, env, b,seen);
+    i_visit_type(f, env, z,seen);
+    i_visit_type(f, env, r,seen);
+    i_visit_type(f, env, a,seen);
+    break;
+  case &ArrayType(ArrayInfo{ta,_,_,z,_}): 
+    i_visit_type(f, env, ta,seen);
+    i_visit_type(f, env, z,seen);
+    break;
+  case &FnType(FnInfo{_,e,_,r,args,_,va,qb,_,_,_,_,_,_,_,_,_,_,vd,fc}): 
+    i_visit_type(f, env, e,seen);     i_visit_type(f, env, r,seen);
+    for(;args;args=args->tl) {
+      let &$(_,_,at) = args->hd; i_visit_type(f, env, at,seen);
+    }
+    if(va) i_visit_type(f, env, va->type,seen);
+    for(;qb;qb=qb->tl) {
+      let &$(t1,t2) = qb->hd; i_visit_type(f, env, t1,seen); i_visit_type(f, env, t2,seen);
+    }
+    for(;vd;vd=vd->tl) {
+      if(vd->hd) {
+	i_visit_type(f,env,vd->hd->type,seen);
+	if(vd->hd->rgn)
+	  i_visit_type(f,env,vd->hd->rgn,seen);
+      }
+    }
+    for(;fc;fc=fc->tl) {
+      switch(fc->hd) {
+      case &SingleConstraint(tc):
+	i_visit_type(f,env,tc,seen); break;
+      case &DisjointConstraint(tc1,tc2): fallthru (tc1,tc2);
+      case &SubsetConstraint(tc1,tc2): 
+	i_visit_type(f,env,tc1,seen); i_visit_type(f,env,tc2,seen); 
+	break;
+      }
+    }
+    break;
+  case &AnonAggrType(_,_,afl): 
+    for(;afl;afl=afl->tl) {
+      i_visit_type(f, env, afl->hd->type,seen);
+    }
+    break;
+  case &TypedefType(_,ts,tdef,to): 
+    for(;ts;ts=ts->tl) 
+      i_visit_type(f, env, ts->hd,seen);
+    if(tdef && tdef->defn) 
+      i_visit_type(f, env, tdef->defn,seen);
+    if(to) 
+      i_visit_type(f, env, to,seen);    
+    break;
+  case &TypeDeclType(_,tptr): 
+    if(tptr && *tptr) 
+      i_visit_type(f, env, *tptr, seen);
+    break;
+  case &ValueofType(_): 
+  case &TypeofType(_): break;
+  }
+}
+int cmp_ptr(`a a, `a b) {
+  return (unsigned int)a - (unsigned int)b;
+}
+int hash_ptr(`a a){
+  return (unsigned int)a;
+}
+void visit_type(bool (@f)(`a, type_t), `a env, type_t t) {
+  region r;
+  Hashtable::table_t<type_t, int> seen = Hashtable::rcreate(r, 20, cmp_ptr, hash_ptr);
+  i_visit_type(f, env, t, seen);
 }
 
 // FIX?: rules out statement expressions

@@ -35,20 +35,16 @@ namespace Tcdecl;
 
 datatype exn {Incompatible};
 datatype exn.Incompatible Incompatible_val = Incompatible;
-
-void merr(seg_t loc,string_t<`r2> * msg1,string_t fmt, ... inject parg_t<`r> ap)
-     //     	  : {`r2} > `r)
+void merr(seg_t loc,string_t<`r2> * msg1,string_t fmt, ... inject parg_t<`r+`r2+`H> ap)
   __attribute__((format(printf,3,4)))
 {
-  if (msg1 == NULL)
-    throw &Incompatible_val;
   string_t fmt2;
   if (strlen(*msg1) == 0) 
     fmt2 = strconcat("%s", fmt);
   else 
     fmt2 = strconcat("%s ", fmt);
   parg_t<`r+`r2+`H> ? ap2 = new {for i < numelts(ap)+1 : 
-				 i==0 ? ((parg_t<`r+`r2+`H>)(new String_pa((string_t<`r2>)(*msg1)))) : ap[i-1]};
+				 i==0 ? ((parg_t<`r+`r2+`H>)(new String_pa((string_t<`r+`r2+`H>)(*msg1)))) : ap[i-1]};
   Position::post_error(Position::mk_err(loc,vrprintf(heap_region,fmt2,ap2)));
 }
 
@@ -87,9 +83,9 @@ $(scope_t, bool) merge_scope(scope_t s0, scope_t s1, string_t t, string_t v,
   return $(s1, true);
 }
 
-static bool check_type(type_t t0, type_t t1) {
+static bool check_type(seg_t loc, type_t t0, type_t t1) {
   // FIX: we should not use unification for this
-  return Unify::unify(t0, t1);
+  return Unify::unify_and_constrain(loc, t0, t1);
 }
 
 // FIX?: Why do we not use Evexp for this?
@@ -215,7 +211,7 @@ struct Aggrdecl * merge_aggrdecl(aggrdecl_t d0, aggrdecl_t d1,
       }
       if (req0 != NULL && req1 != NULL) {
         type_t subst_w1 = Tcutil::substitute(inst, new ValueofType(req1));
-        if (!check_type(new ValueofType(req0),subst_w1)) {
+        if (!check_type(loc,new ValueofType(req0),subst_w1)) {
           merr(loc, msg, "type %s : mismatch on @requires clauses: %s != %s",
                v, exp2string(req0), exp2string(req1));
           res = false;
@@ -227,7 +223,7 @@ struct Aggrdecl * merge_aggrdecl(aggrdecl_t d0, aggrdecl_t d1,
       }
 
       type_t subst_t1 = Tcutil::substitute(inst, t1);
-      if(! check_type(t0, subst_t1)) {
+      if(! check_type(loc,t0, subst_t1)) {
 	merr(loc, msg, "type %s : type mismatch on field %s: %s != %s", 
 	     v, *fn0, typ2string(t0), typ2string(subst_t1));
         Unify::explain_failure();
@@ -301,7 +297,7 @@ merge_datatypefield(datatypefield_t f0, datatypefield_t f1,
     }
     type_t subst_t1 = Tcutil::substitute(inst, (*typs1->hd)[1]);
     // and be the same type
-    if (! check_type((*typs0->hd)[1], subst_t1)) {
+    if (! check_type(loc,(*typs0->hd)[1], subst_t1)) {
       merr(loc, msg, "%s %s, field %s: parameter type mismatch %s != %s",
 	   t, v, name, typ2string((*typs0->hd)[1]), typ2string(subst_t1));
       Unify::explain_failure();
@@ -547,7 +543,7 @@ check_var_or_fn_decl(scope_t sc0, type_t t0, tqual_t tq0, attributes_t atts0,
   if (! res_scope) res = false;
 
   // check type
-  if (! check_type(t0, t1)) {
+  if (! check_type(loc,t0,t1)){
     let s1 = typ2string(t0);
     let s2 = typ2string(t1);
     if (strlen(s1) + strlen(s2) + strlen(t) + strlen(v) + 
@@ -613,7 +609,7 @@ struct Typedefdecl * merge_typedefdecl(typedefdecl_t d0, typedefdecl_t d1,
   // check types
   if (d0->defn != NULL && d1->defn != NULL) {
     type_t subst_defn1 = Tcutil::substitute(inst, (type_t)d1->defn);
-    if(! check_type((type_t)d0->defn, subst_defn1)) {
+    if(! check_type(loc,(type_t)d0->defn, subst_defn1)) {
       merr(loc,msg,"typedef %s does not refer to the same type: %s != %s",
            v, typ2string(subst_defn1), typ2string((type_t)d0->defn));
       return NULL;

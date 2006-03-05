@@ -18,7 +18,7 @@
 
 #ifndef _CYCBOOT_H_
 #define _CYCBOOT_H_
-
+__noinference__{
 /***** <sys/type.h> *****/
 #ifndef _size_t_def_
 #define _size_t_def_
@@ -338,5 +338,5 @@ extern int file_string_write(FILE @, const char ?src, int src_offset,
 /***** <limits.h> -- needed for ap.cyc *****/
   extern const long long_max, long_min;
 
-
+}
 #endif

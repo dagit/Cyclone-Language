@@ -561,20 +561,6 @@ static type_t tcMinus(tenv_t te, type_t *topt, exp_t e1, exp_t e2) {
   return sint_type;
 }
 
-/* JGM: no longer called
-static bool force_thin(type_t t1, type_t t2) {
-  switch($(t1, t2)) {
-  case $(&PointerType(PtrInfo{_,_,PtrAtts{_,_,bd,...}}), _): fallthru(bd);
-  case $(_, &PointerType(PtrInfo{_,_,PtrAtts{_,_,bd,...}})):
-    if(is_cvar_type(bd)) {
-
-    }
-  default:
-    return false;
-  }
-}
-*/
-
 static type_t tcCmpBinop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
   type_t t1 = compress((type_t)e1->topt);
   type_t t2 = compress((type_t)e2->topt);
@@ -582,11 +568,7 @@ static type_t tcCmpBinop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
     arith_convert(te, e1, e2);
     return sint_type;
   }
-  // okay if same types and boxed
-  let bd =  Tcutil::get_pointer_bounds(t1);
-  if ((!bd || !is_cvar_type(bd)) &&
-      ((type_kind(t1)->kind == BoxKind) ||
-       (Unify::unify(t1,new_evar(&Kinds::bko,lookup_opt_type_vars(te)))))) {
+  if ((type_kind(t1)->kind == BoxKind) && (type_kind(t2)->kind == BoxKind)) {
     if (zero_to_null(t2,e1) || zero_to_null(t1,e2))
       return sint_type;
     //Note: previously only "silent" casts were allowed. 
@@ -607,17 +589,24 @@ static type_t tcCmpBinop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
   // support comparisons on pointers (which can be MemKind) and
   //   region handles
   switch ($(compress(t1), compress(t2))) {
+  case $(&AppType(&RgnHandleCon,_),&AppType(&RgnHandleCon,_)): return sint_type;
   case $(&PointerType(PtrInfo{t1a,_,_}),&PointerType(PtrInfo{t2a,_,_})):
-    if(Subtype::coercible_exact(loc,t1a, t2a) != Unknown_coercion) { //forces t1a = t2a, no coercions allowed
+    if((Subtype::coercible_exact(loc,t1a, t2a) != Unknown_coercion) ||
+       (Subtype::coercible_exact(loc,t2a, t1a) != Unknown_coercion)){ //forces t1a = t2a, no coercions allowed
       return sint_type;
     }
-    break;
-  case $(&AppType(&RgnHandleCon,_),&AppType(&RgnHandleCon,_)): return sint_type;
+    fallthru;
   default: 
-    if(bd && is_cvar_type(bd)){ 
-      if(BansheeIf::add_constraint(loc,BansheeIf::equality_constraint(bd,thinconst()))) {
-	//retry ... this can happen only once
-	return tcCmpBinop(te, loc, e1, e2);
+    let c= Subtype::coercible(loc, t1, t2);
+    if(c != Unknown_coercion) {
+      unchecked_cast(e1, t2, c);
+      return sint_type;
+    }
+    else {
+      c = Subtype::coercible(loc, t2, t1);
+      if(c != Unknown_coercion) {
+	unchecked_cast(e2, t1, c);
+	return sint_type;
       }
     }
     break;
@@ -834,7 +823,7 @@ static type_t tcIncrement(tenv_t te, seg_t loc, type_t * topt,
   if (!is_numeric(e)) {
     let pb = get_pointer_bounds(t);
     type_t telt = void_type;
-    if(is_cvar_type(pb)){
+    if(pb && is_cvar_type(pb)){
       //      if(!is_zero_pointer_type_elt(t,&telt)) { //retest
       if(!BansheeIf::add_constraint(e->loc,BansheeIf::equality_constraint(pb,fatconst()))){
 	Warn::err2(e->loc,"constraint failure: expecting arithmetic or ? type but found ",t);	
@@ -1013,22 +1002,69 @@ static void check_all_aqual_bounds(seg_t loc, tenv_t te,
   }
 }
 
-static list_t<$(tvar_t, type_t)@> fresh_effect_evars(tenv_t te, list_t<$(tvar_t, type_t)@`H,`H> inst) {
+datatype exn { Found_evar; };
+static datatype exn.Found_evar Found_evar_val = Found_evar;
+
+static bool contains_free_evar(`a env, type_t t) {
+  switch(compress(t)) {
+  case &Evar(...): 
+    throw &Found_evar_val;
+  default:
+    break;
+  }
+  return true;
+}
+
+static list_t<$(tvar_t, type_t)@> fresh_effect_evars(tenv_t te, 
+						     list_t<$(tvar_t, type_t)@`H,`H> inst,
+						     list_t<$(tvar_t, type_t)@`H,`H> orig){
+  if(length(inst) != length(orig))
+    Warn::impos("injection orig and inst must have same length");
+  type_t currrgn = curr_rgn(te);
   list_t<$(tvar_t, type_t)@`H,`H> fresh = NULL;
-  for(_ i = inst; i!=NULL; i=i->tl) {
-    let &$(tv, *t) = i->hd;
-    switch(Kinds::tvar_kind_opt(tv)) {
+  for(; inst && orig; inst = inst->tl, orig=orig->tl) {
+    let &$(otv, ot) = orig->hd;
+    switch(Kinds::tvar_kind_opt(otv)) {
     case Opt{NULL}: Warn::impos("Tvar kind must be set by now"); return NULL;
     case Opt{k}: 
       if(Kinds::kind_eq(k, &Kinds::ek)) {
-	switch(*t) {
-	case &Evar(...):
-	  *t =  new_evar(&Kinds::eko, lookup_opt_type_vars(te));
-	  fresh = new List{i->hd, fresh}; 
+	let cot = normalize_effect(ot);
+	let &$(_, *t) = inst->hd;
+	switch(cot) {
+	case &Evar(...): //easy case; atomic effect
+	  *t =  join_eff(list(currrgn, new_evar(&Kinds::eko, lookup_opt_type_vars(te))));
+	  fresh = new List{inst->hd, fresh}; 
 	  break;
-	default:
+	default: //non-atomic effect may still not be fully constrained e.g `EExxx + `r etc.
+	  int dummy=0;
+	  try 
+	    visit_type(contains_free_evar, dummy, cot);
+	  catch {
+	  case &Found_evar:  //not yet fully constrained yet ... could be 
+	    list_t inst_effect = new List{currrgn, NULL};
+	    switch(cot) { //already normalized
+	    case &AppType(&JoinCon, ts):
+	      for(;ts;ts=ts->tl) {
+		switch(ts->hd) {
+		case &Evar(...): break;
+		default: 
+		  inst_effect = new List{ts->hd, inst_effect};
+		  break;
+		}
+	      }
+	      break;
+	    default:
+	      Warn::impos("!evar && Contains evar => JoinCon");
+	    }
+	    inst_effect = new List{new_evar(&Kinds::eko, lookup_opt_type_vars(te)),
+				   inst_effect};
+	    *t =  join_eff(inst_effect);
+	    fresh = new List{inst->hd, fresh}; 
+	    break;
+	  }
 	  break;
 	}
+	break;
       }
       break;
     }
@@ -1036,27 +1072,22 @@ static list_t<$(tvar_t, type_t)@> fresh_effect_evars(tenv_t te, list_t<$(tvar_t,
   return fresh;
 }
 
-static void inst_with_joineff(type_t ptrrgn_evar, type_t curr_rgn,
-			      list_t<$(tvar_t, type_t)@> orig, 
+static bool inst_with_joineff(list_t<$(tvar_t, type_t)@> orig, 
 			      table_t<tvar_t, types_t> inst_effects) {
-  bool found_ptrrgn = false;
+  bool found = false;
   for(;orig != NULL; orig = orig->tl) {
-    let &$(tv, origev) = orig->hd;
+    let &$(tv, origrgn) = orig->hd;
     try {
       let l = lookup(inst_effects, tv);
-      if(ptrrgn_evar == origev) {
-	found_ptrrgn = true;
-	l = new List{curr_rgn, l};
-      }
-      Unify::unify(origev, join_eff(l));
+      found = true;
+      if(!Unify::unify(origrgn, normalize_effect(join_eff(l))))
+	return false;
     }
     catch {
     case &Not_found: break;
     }
   }
-  if (!found_ptrrgn) {
-    Unify::unify(ptrrgn_evar, curr_rgn);
-  }
+  return found;
 }
 
 static bool substitute_vars_exp(list_t<$(vardecl_opt_t,exp_t)@> subst,exp_t e) {
@@ -1233,8 +1264,11 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,
 	      //              Unify::unify(pointer_region(vt),curr_rgn(te));
 
 	      let inst = List::zip(td->tvs,targs);
+	      let orig = List::zip(td->tvs,targs);
 	      Hashtable::table_t<tvar_t, list_t<type_t>> inst_effects = 
 		Hashtable::create(10, tvar_cmp, tvar_id);
+	      bool empty_inst_effects = true;
+	      let espos = es;
 	      for (; es != NULL; es = es->tl) {
 		vci->num_varargs++;
 		exp_t e1 = es->hd;
@@ -1243,7 +1277,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,
 		  tcExp(te,NULL,e1);
 		  check_consume(e1->loc,curr_aquals_bounds(te),(type_t)e1->topt,e1);
 		}
-		let fresh = fresh_effect_evars(te, inst);
+		let fresh = fresh_effect_evars(te, inst, orig);
 		let f = tcInjection(te,e1,pointer_elt_type(vt),inst,fields);
 		if (f != NULL)
 		  vci->injectors =
@@ -1261,14 +1295,28 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,
 		    case &Not_found: l = NULL; break;
 		    }
 		    Hashtable::insert(inst_effects, tv, new List{cf, l});
+		    empty_inst_effects= false;
 		    break;
 		  }
 		}
 	      }
-	      inst_with_joineff(pointer_region(vt), curr_rgn(te),
-				List::zip(td->tvs, targs), inst_effects);
-	      //	      substitute(inst, vt);
-	      //	      Unify::unify(pointer_region(vt), join_eff(inst_effects));
+	      if(empty_inst_effects)
+		break;
+	      if(inst_with_joineff(orig, inst_effects)) {
+		//need to check each field in the injection again to make sure that 
+		//the widening of the effect did not violate any subtyping requirements
+		let es = espos; let prevInjectors = vci->injectors;
+		if(length(prevInjectors) != length(es))
+		  fallthru;
+		for(;es && prevInjectors;es=es->tl, prevInjectors = prevInjectors->tl) {
+		  exp_t e1 = es->hd;
+		  let f = tcInjection(te, e1,pointer_elt_type(vt), orig, fields);
+		  if(f == NULL || f != prevInjectors->hd)
+		    fallthru;
+		}
+	      }
+	      else 
+		fallthru;
 	      break;
 	    default: Warn::err2(loc,"bad inject vararg type"); break;
 	    }
@@ -1449,22 +1497,6 @@ static type_t tcCast(tenv_t te, seg_t loc, type_t * topt, type_t t, exp_t e,
     return result;
   }
   *c = cc;
-  /*   if (silent_castable(loc,t2,t)) { */
-  /*     *c = No_coercion; */
-  /*   } else { */
-  /*     coercion_t crc = castable(loc,t2,t); */
-  /*     if (crc != Unknown_coercion) */
-  /*       *c = crc; */
-  /*     else if (zero_to_null(t,e)) */
-  /*       *c = No_coercion; */
-  /*     else { */
-  /*       // extra unify needed to get the right reason for the failure */
-  /*       Unify::unify(t2,t); */
-  /*       let result = expr_err(te,loc,&t,"cannot cast ",t2," to ",t); */
-  /*       Unify::explain_failure(); */
-  /*       return result; */
-  /*     } */
-  /*   } */
   
   // special case -- if e is a m/calloc of size more than 1 and t is a * type
   // issue a warning -- this is a good sign that it's a legacy cast which will
@@ -2154,7 +2186,7 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
 }
 
 static type_t tcAnonStruct(tenv_t te, seg_t loc, type_t *topt, exp_t orig,
-                           type_opt_t *ts,
+                           type_opt_t @ts,
                            bool is_tuple,
                            list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H> args) {
   type_t struct_type;
@@ -2212,7 +2244,13 @@ static type_t tcAnonStruct(tenv_t te, seg_t loc, type_t *topt, exp_t orig,
 			field_exp->topt);
     }
     break;
-  default: Warn::impos2("tcAnonStruct: wrong type ",struct_type," for exp ",orig);
+  default: 
+    if(*ts == NULL && topt != NULL && *topt != NULL) { 
+      //because of a wrong expected type ... which we should report an error as usual
+      return tcAnonStruct(te, loc, NULL, orig, ts, is_tuple, args);
+    }
+    else
+      Warn::impos2("tcAnonStruct: wrong type ",struct_type," for exp ",orig);
   }
   return struct_type;
 }
@@ -2273,10 +2311,6 @@ static bool check_malloc_type(bool allow_zero, seg_t loc,
 static type_t mallocRgn(type_t rgn) {
   // assumes that kind(rgn) == RgnKind
   return heap_rgn_type;
-/* /\*   switch (type_kind(compress(rgn))->aliasqual) { *\/ */
-/* /\*   case Unique: return unique_rgn_type; *\/ */
-/* /\*   default:     return heap_rgn_type; *\/ */
-/*   } */
 }
 
 //e is the numelts expression

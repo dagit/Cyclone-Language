@@ -282,6 +282,8 @@ type_t any_bounds(list_t<tvar_t,`H>);
   type_opt_t get_pointer_bounds(type_t ptrtype);
   void introduce_cvars(type_t);
   void replace_cvars(type_t, type_t);
+  void revert_cvars(type_t);
   bool is_main(qvar_t);
+  int tqual_cmp(tqual_t tq1, tqual_t tq2);
 }
 #endif

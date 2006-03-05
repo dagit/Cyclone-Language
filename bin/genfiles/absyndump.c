@@ -534,7 +534,7 @@ if(loc==0U)return;
 if(!Cyc_Absyndump_generate_line_directives)return;{
 # 154
 struct _tuple16 _Tmp0=Cyc_Lex_xlate_pos(loc);unsigned _Tmp1;struct _fat_ptr _Tmp2;_Tmp2=_Tmp0.f0;_Tmp1=_Tmp0.f1;{struct _fat_ptr f=_Tmp2;unsigned d=_Tmp1;
-if((char*)f.curr==(char*)_tag_fat(0,0,0).curr ||(char*)f.curr==(char*)last_file.curr && d==last_line)return;
+if((char*)f.curr==0 ||(char*)f.curr==(char*)last_file.curr && d==last_line)return;
 if((char*)f.curr==(char*)last_file.curr && d==last_line + 1U)
 Cyc_fprintf(*Cyc_Absyndump_dump_file,_tag_fat("\n",sizeof(char),2U),_tag_fat(0U,sizeof(void*),0));else{
 if((char*)f.curr==(char*)last_file.curr)
@@ -1015,11 +1015,11 @@ Cyc_Absyndump_dump(_tag_fat("__cyclone_pragma__(",sizeof(char),20U));Cyc_Absyndu
 struct _fat_ptr pstr=Cyc_Absynpp_prim2str(p);
 {int _TmpD=Cyc_List_length(es);switch((int)_TmpD){case 1:
 # 671
- if((int)p==(int)18U){
+ if((int)p==18){
 Cyc_Absyndump_dump(_tag_fat("numelts(",sizeof(char),9U));
 Cyc_Absyndump_dumpexp((struct Cyc_Absyn_Exp*)_check_null(es)->hd);
 Cyc_Absyndump_dump(_tag_fat(")",sizeof(char),2U));}else{
-if((int)p==(int)19U){
+if((int)p==19){
 Cyc_Absyndump_dump(_tag_fat("tagof(",sizeof(char),7U));
 Cyc_Absyndump_dumpexp((struct Cyc_Absyn_Exp*)_check_null(es)->hd);
 Cyc_Absyndump_dump(_tag_fat(")",sizeof(char),2U));}else{

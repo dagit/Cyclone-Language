@@ -376,12 +376,12 @@ const struct Cyc_Dict_T*t2=t;
 struct Cyc_Dict_Dict _Tmp0;_Tmp0.rel=d.rel,_Tmp0.r=r,_Tmp0.t=t2;return _Tmp0;}
 # 60
 int Cyc_Dict_is_empty(struct Cyc_Dict_Dict d){
-return d.t==(const struct Cyc_Dict_T*)0;}
+return d.t==0;}
 # 64
 int Cyc_Dict_member(struct Cyc_Dict_Dict d,void*key){
 int(*rel)(void*,void*)=d.rel;
 const struct Cyc_Dict_T*t=d.t;
-while(t!=(const struct Cyc_Dict_T*)0){
+while(t!=0){
 {int i=rel(key,t->key_val.f0);
 if(i < 0)t=t->left;else{
 if(i > 0)t=t->right;else{
@@ -394,7 +394,7 @@ return 0;}
 void*Cyc_Dict_lookup(struct Cyc_Dict_Dict d,void*key){
 int(*rel)(void*,void*)=d.rel;
 const struct Cyc_Dict_T*t=d.t;
-while(t!=(const struct Cyc_Dict_T*)0){
+while(t!=0){
 {int i=rel(key,t->key_val.f0);
 if(i < 0)t=t->left;else{
 if(i > 0)t=t->right;else{
@@ -406,7 +406,7 @@ _throw(& Cyc_Dict_Absent_val);}
 # 88
 void*Cyc_Dict_lookup_other(struct Cyc_Dict_Dict d,int(*cmp)(void*,void*),void*key){
 const struct Cyc_Dict_T*t=d.t;
-while(t!=(const struct Cyc_Dict_T*)0){
+while(t!=0){
 {int i=cmp(key,t->key_val.f0);
 if(i < 0)t=t->left;else{
 if(i > 0)t=t->right;else{
@@ -419,7 +419,7 @@ _throw(& Cyc_Dict_Absent_val);}
 void**Cyc_Dict_lookup_opt(struct Cyc_Dict_Dict d,void*key){
 int(*rel)(void*,void*)=d.rel;
 const struct Cyc_Dict_T*t=d.t;
-while(t!=(const struct Cyc_Dict_T*)0){
+while(t!=0){
 {int i=rel(key,t->key_val.f0);
 if(i < 0)t=t->left;else{
 if(i > 0)t=t->right;else{
@@ -432,7 +432,7 @@ return 0;}
 int Cyc_Dict_lookup_bool(struct Cyc_Dict_Dict d,void*key,void**ans_place){
 int(*rel)(void*,void*)=d.rel;
 const struct Cyc_Dict_T*t=d.t;
-while(t!=(const struct Cyc_Dict_T*)0){
+while(t!=0){
 {int i=rel(key,t->key_val.f0);
 if(i < 0)t=t->left;else{
 if(i > 0)t=t->right;else{
@@ -483,75 +483,75 @@ return d;}
 # 172
 static void*Cyc_Dict_fold_tree(void*(*f)(void*,void*,void*),const struct Cyc_Dict_T*t,void*accum){
 void*_Tmp0;void*_Tmp1;const struct Cyc_Dict_T*_Tmp2;const struct Cyc_Dict_T*_Tmp3;_Tmp3=t->left;_Tmp2=t->right;_Tmp1=(void*)t->key_val.f0;_Tmp0=(void*)t->key_val.f1;{const struct Cyc_Dict_T*left=_Tmp3;const struct Cyc_Dict_T*right=_Tmp2;void*key=_Tmp1;void*val=_Tmp0;
-if(left!=(const struct Cyc_Dict_T*)0)accum=Cyc_Dict_fold_tree(f,left,accum);
+if(left!=0)accum=Cyc_Dict_fold_tree(f,left,accum);
 accum=f(key,val,accum);
-if(right!=(const struct Cyc_Dict_T*)0)accum=Cyc_Dict_fold_tree(f,right,accum);
+if(right!=0)accum=Cyc_Dict_fold_tree(f,right,accum);
 return accum;}}
 # 180
 void*Cyc_Dict_fold(void*(*f)(void*,void*,void*),struct Cyc_Dict_Dict d,void*accum){
 const struct Cyc_Dict_T*t=d.t;
-if(t==(const struct Cyc_Dict_T*)0)
+if(t==0)
 return accum;
 return Cyc_Dict_fold_tree(f,t,accum);}
 # 187
 static void*Cyc_Dict_fold_tree_c(void*(*f)(void*,void*,void*,void*),void*env,const struct Cyc_Dict_T*t,void*accum){
 # 189
 void*_Tmp0;void*_Tmp1;const struct Cyc_Dict_T*_Tmp2;const struct Cyc_Dict_T*_Tmp3;_Tmp3=t->left;_Tmp2=t->right;_Tmp1=(void*)t->key_val.f0;_Tmp0=(void*)t->key_val.f1;{const struct Cyc_Dict_T*left=_Tmp3;const struct Cyc_Dict_T*right=_Tmp2;void*key=_Tmp1;void*val=_Tmp0;
-if(left!=(const struct Cyc_Dict_T*)0)
+if(left!=0)
 accum=Cyc_Dict_fold_tree_c(f,env,left,accum);
 accum=f(env,key,val,accum);
-if(right!=(const struct Cyc_Dict_T*)0)
+if(right!=0)
 accum=Cyc_Dict_fold_tree_c(f,env,right,accum);
 return accum;}}
 # 198
 void*Cyc_Dict_fold_c(void*(*f)(void*,void*,void*,void*),void*env,struct Cyc_Dict_Dict d,void*accum){
 const struct Cyc_Dict_T*t=d.t;
-if(t==(const struct Cyc_Dict_T*)0)
+if(t==0)
 return accum;
 return Cyc_Dict_fold_tree_c(f,env,t,accum);}
 # 205
 static void Cyc_Dict_app_tree(void*(*f)(void*,void*),const struct Cyc_Dict_T*t){
 void*_Tmp0;void*_Tmp1;const struct Cyc_Dict_T*_Tmp2;const struct Cyc_Dict_T*_Tmp3;_Tmp3=t->left;_Tmp2=t->right;_Tmp1=(void*)t->key_val.f0;_Tmp0=(void*)t->key_val.f1;{const struct Cyc_Dict_T*left=_Tmp3;const struct Cyc_Dict_T*right=_Tmp2;void*key=_Tmp1;void*val=_Tmp0;
-if(left!=(const struct Cyc_Dict_T*)0)Cyc_Dict_app_tree(f,left);
+if(left!=0)Cyc_Dict_app_tree(f,left);
 f(key,val);
-if(right!=(const struct Cyc_Dict_T*)0)Cyc_Dict_app_tree(f,right);}}
+if(right!=0)Cyc_Dict_app_tree(f,right);}}
 # 212
 void Cyc_Dict_app(void*(*f)(void*,void*),struct Cyc_Dict_Dict d){
 const struct Cyc_Dict_T*t=d.t;
-if(t!=(const struct Cyc_Dict_T*)0)
+if(t!=0)
 Cyc_Dict_app_tree(f,t);}
 # 218
 static void Cyc_Dict_app_tree_c(void*(*f)(void*,void*,void*),void*env,const struct Cyc_Dict_T*t){
 void*_Tmp0;void*_Tmp1;const struct Cyc_Dict_T*_Tmp2;const struct Cyc_Dict_T*_Tmp3;_Tmp3=t->left;_Tmp2=t->right;_Tmp1=(void*)t->key_val.f0;_Tmp0=(void*)t->key_val.f1;{const struct Cyc_Dict_T*left=_Tmp3;const struct Cyc_Dict_T*right=_Tmp2;void*key=_Tmp1;void*val=_Tmp0;
-if(left!=(const struct Cyc_Dict_T*)0)Cyc_Dict_app_tree_c(f,env,left);
+if(left!=0)Cyc_Dict_app_tree_c(f,env,left);
 f(env,key,val);
-if(right!=(const struct Cyc_Dict_T*)0)Cyc_Dict_app_tree_c(f,env,right);}}
+if(right!=0)Cyc_Dict_app_tree_c(f,env,right);}}
 # 225
 void Cyc_Dict_app_c(void*(*f)(void*,void*,void*),void*env,struct Cyc_Dict_Dict d){
 const struct Cyc_Dict_T*t=d.t;
-if(t!=(const struct Cyc_Dict_T*)0)
+if(t!=0)
 Cyc_Dict_app_tree_c(f,env,t);}
 # 231
 static void Cyc_Dict_iter_tree(void(*f)(void*,void*),const struct Cyc_Dict_T*t){
 void*_Tmp0;void*_Tmp1;const struct Cyc_Dict_T*_Tmp2;const struct Cyc_Dict_T*_Tmp3;_Tmp3=t->left;_Tmp2=t->right;_Tmp1=(void*)t->key_val.f0;_Tmp0=(void*)t->key_val.f1;{const struct Cyc_Dict_T*left=_Tmp3;const struct Cyc_Dict_T*right=_Tmp2;void*key=_Tmp1;void*val=_Tmp0;
-if(left!=(const struct Cyc_Dict_T*)0)Cyc_Dict_iter_tree(f,left);
+if(left!=0)Cyc_Dict_iter_tree(f,left);
 f(key,val);
-if(right!=(const struct Cyc_Dict_T*)0)Cyc_Dict_iter_tree(f,right);}}
+if(right!=0)Cyc_Dict_iter_tree(f,right);}}
 # 238
 void Cyc_Dict_iter(void(*f)(void*,void*),struct Cyc_Dict_Dict d){
 const struct Cyc_Dict_T*t=d.t;
-if(t!=(const struct Cyc_Dict_T*)0)
+if(t!=0)
 Cyc_Dict_iter_tree(f,t);}
 # 244
 static void Cyc_Dict_iter_tree_c(void(*f)(void*,void*,void*),void*env,const struct Cyc_Dict_T*t){
 void*_Tmp0;void*_Tmp1;const struct Cyc_Dict_T*_Tmp2;const struct Cyc_Dict_T*_Tmp3;_Tmp3=t->left;_Tmp2=t->right;_Tmp1=(void*)t->key_val.f0;_Tmp0=(void*)t->key_val.f1;{const struct Cyc_Dict_T*left=_Tmp3;const struct Cyc_Dict_T*right=_Tmp2;void*key=_Tmp1;void*val=_Tmp0;
-if(left!=(const struct Cyc_Dict_T*)0)Cyc_Dict_iter_tree_c(f,env,left);
+if(left!=0)Cyc_Dict_iter_tree_c(f,env,left);
 f(env,key,val);
-if(right!=(const struct Cyc_Dict_T*)0)Cyc_Dict_iter_tree_c(f,env,right);}}
+if(right!=0)Cyc_Dict_iter_tree_c(f,env,right);}}
 # 251
 void Cyc_Dict_iter_c(void(*f)(void*,void*,void*),void*env,struct Cyc_Dict_Dict d){
 const struct Cyc_Dict_T*t=d.t;
-if(t!=(const struct Cyc_Dict_T*)0)
+if(t!=0)
 Cyc_Dict_iter_tree_c(f,env,t);}
 # 257
 static void Cyc_Dict_count_elem(int*cnt,void*a,void*b){
@@ -593,7 +593,7 @@ struct _tuple4 env=({struct _tuple4 _Tmp0;_Tmp0.f0=f,_Tmp0.f1=d2,_Tmp0.f2=inner_
 return({void*(*_Tmp0)(void*(*)(struct _tuple4*,void*,void*,void*),struct _tuple4*,struct Cyc_Dict_Dict,void*)=(void*(*)(void*(*)(struct _tuple4*,void*,void*,void*),struct _tuple4*,struct Cyc_Dict_Dict,void*))Cyc_Dict_fold_c;_Tmp0;})(Cyc_Dict_fold2_c_f,& env,d1,accum);}
 # 308
 static const struct Cyc_Dict_T*Cyc_Dict_copy_tree(struct _RegionHandle*r2,const struct Cyc_Dict_T*t){
-if(t==(const struct Cyc_Dict_T*)0)return 0;else{
+if(t==0)return 0;else{
 # 311
 struct Cyc_Dict_T _Tmp0=*t;struct _tuple0 _Tmp1;const struct Cyc_Dict_T*_Tmp2;const struct Cyc_Dict_T*_Tmp3;enum Cyc_Dict_Color _Tmp4;_Tmp4=_Tmp0.color;_Tmp3=_Tmp0.left;_Tmp2=_Tmp0.right;_Tmp1=_Tmp0.key_val;{enum Cyc_Dict_Color c=_Tmp4;const struct Cyc_Dict_T*left=_Tmp3;const struct Cyc_Dict_T*right=_Tmp2;struct _tuple0 pr=_Tmp1;
 const struct Cyc_Dict_T*new_left=Cyc_Dict_copy_tree(r2,left);
@@ -609,14 +609,14 @@ return Cyc_Dict_rcopy(Cyc_Core_heap_region,d);}
 static const struct Cyc_Dict_T*Cyc_Dict_map_tree(struct _RegionHandle*r,void*(*f)(void*),const struct Cyc_Dict_T*t){
 # 328
 void*_Tmp0;void*_Tmp1;const struct Cyc_Dict_T*_Tmp2;const struct Cyc_Dict_T*_Tmp3;enum Cyc_Dict_Color _Tmp4;_Tmp4=t->color;_Tmp3=t->left;_Tmp2=t->right;_Tmp1=(void*)t->key_val.f0;_Tmp0=(void*)t->key_val.f1;{enum Cyc_Dict_Color c=_Tmp4;const struct Cyc_Dict_T*left=_Tmp3;const struct Cyc_Dict_T*right=_Tmp2;void*key=_Tmp1;void*val=_Tmp0;
-const struct Cyc_Dict_T*new_left=left==(const struct Cyc_Dict_T*)0?0: Cyc_Dict_map_tree(r,f,left);
+const struct Cyc_Dict_T*new_left=left==0?0: Cyc_Dict_map_tree(r,f,left);
 void*new_val=f(val);
-const struct Cyc_Dict_T*new_right=right==(const struct Cyc_Dict_T*)0?0: Cyc_Dict_map_tree(r,f,right);
+const struct Cyc_Dict_T*new_right=right==0?0: Cyc_Dict_map_tree(r,f,right);
 struct Cyc_Dict_T*_Tmp5=_region_malloc(r,0U,sizeof(struct Cyc_Dict_T));_Tmp5->color=c,_Tmp5->left=new_left,_Tmp5->right=new_right,_Tmp5->key_val.f0=key,_Tmp5->key_val.f1=new_val;return _Tmp5;}}
 # 335
 struct Cyc_Dict_Dict Cyc_Dict_rmap(struct _RegionHandle*r,void*(*f)(void*),struct Cyc_Dict_Dict d){
 const struct Cyc_Dict_T*t=d.t;
-if(t==(const struct Cyc_Dict_T*)0){
+if(t==0){
 struct Cyc_Dict_Dict _Tmp0;_Tmp0.rel=d.rel,_Tmp0.r=r,_Tmp0.t=0;return _Tmp0;}{
 struct Cyc_Dict_Dict _Tmp0;_Tmp0.rel=d.rel,_Tmp0.r=r,({const struct Cyc_Dict_T*_Tmp1=Cyc_Dict_map_tree(r,f,t);_Tmp0.t=_Tmp1;});return _Tmp0;}}
 # 342
@@ -627,16 +627,16 @@ static const struct Cyc_Dict_T*Cyc_Dict_map_tree_c(struct _RegionHandle*r,void*(
 # 348
 void*_Tmp0;void*_Tmp1;const struct Cyc_Dict_T*_Tmp2;const struct Cyc_Dict_T*_Tmp3;enum Cyc_Dict_Color _Tmp4;_Tmp4=t->color;_Tmp3=t->left;_Tmp2=t->right;_Tmp1=(void*)t->key_val.f0;_Tmp0=(void*)t->key_val.f1;{enum Cyc_Dict_Color c=_Tmp4;const struct Cyc_Dict_T*left=_Tmp3;const struct Cyc_Dict_T*right=_Tmp2;void*key=_Tmp1;void*val=_Tmp0;
 const struct Cyc_Dict_T*new_left=
-left==(const struct Cyc_Dict_T*)0?0: Cyc_Dict_map_tree_c(r,f,env,left);
+left==0?0: Cyc_Dict_map_tree_c(r,f,env,left);
 void*new_val=f(env,val);
 const struct Cyc_Dict_T*new_right=
-right==(const struct Cyc_Dict_T*)0?0: Cyc_Dict_map_tree_c(r,f,env,right);
+right==0?0: Cyc_Dict_map_tree_c(r,f,env,right);
 struct Cyc_Dict_T*_Tmp5=_region_malloc(r,0U,sizeof(struct Cyc_Dict_T));_Tmp5->color=c,_Tmp5->left=new_left,_Tmp5->right=new_right,_Tmp5->key_val.f0=key,_Tmp5->key_val.f1=new_val;return _Tmp5;}}
 # 357
 struct Cyc_Dict_Dict Cyc_Dict_rmap_c(struct _RegionHandle*r,void*(*f)(void*,void*),void*env,struct Cyc_Dict_Dict d){
 # 359
 const struct Cyc_Dict_T*t=d.t;
-if(t==(const struct Cyc_Dict_T*)0){
+if(t==0){
 struct Cyc_Dict_Dict _Tmp0;_Tmp0.rel=d.rel,_Tmp0.r=r,_Tmp0.t=0;return _Tmp0;}{
 struct Cyc_Dict_Dict _Tmp0;_Tmp0.rel=d.rel,_Tmp0.r=r,({const struct Cyc_Dict_T*_Tmp1=Cyc_Dict_map_tree_c(r,f,env,t);_Tmp0.t=_Tmp1;});return _Tmp0;}}
 # 365
@@ -644,20 +644,20 @@ struct Cyc_Dict_Dict Cyc_Dict_map_c(void*(*f)(void*,void*),void*env,struct Cyc_D
 return Cyc_Dict_rmap_c(Cyc_Core_heap_region,f,env,d);}
 # 369
 struct _tuple0*Cyc_Dict_rchoose(struct _RegionHandle*r,struct Cyc_Dict_Dict d){
-if(d.t==(const struct Cyc_Dict_T*)0)
+if(d.t==0)
 _throw(& Cyc_Dict_Absent_val);{
 struct _tuple0*_Tmp0=_region_malloc(r,0U,sizeof(struct _tuple0));_Tmp0->f0=d.t->key_val.f0,_Tmp0->f1=d.t->key_val.f1;return _Tmp0;}}
 # 375
 static int Cyc_Dict_forall_tree_c(int(*f)(void*,void*,void*),void*env,const struct Cyc_Dict_T*t){
 void*_Tmp0;void*_Tmp1;const struct Cyc_Dict_T*_Tmp2;const struct Cyc_Dict_T*_Tmp3;_Tmp3=t->left;_Tmp2=t->right;_Tmp1=(void*)t->key_val.f0;_Tmp0=(void*)t->key_val.f1;{const struct Cyc_Dict_T*left=_Tmp3;const struct Cyc_Dict_T*right=_Tmp2;void*key=_Tmp1;void*val=_Tmp0;
 return
-((left==(const struct Cyc_Dict_T*)0 || Cyc_Dict_forall_tree_c(f,env,left))&&
+((left==0 || Cyc_Dict_forall_tree_c(f,env,left))&&
  f(env,key,val))&&(
-right==(const struct Cyc_Dict_T*)0 || Cyc_Dict_forall_tree_c(f,env,right));}}
+right==0 || Cyc_Dict_forall_tree_c(f,env,right));}}
 # 383
 int Cyc_Dict_forall_c(int(*f)(void*,void*,void*),void*env,struct Cyc_Dict_Dict d){
 const struct Cyc_Dict_T*t=d.t;
-if(t==(const struct Cyc_Dict_T*)0)
+if(t==0)
 return 1;
 return Cyc_Dict_forall_tree_c(f,env,t);}struct _tuple5{int(*f0)(void*,void*,void*);struct Cyc_Dict_Dict f1;};
 # 390
@@ -688,8 +688,8 @@ return d1;}
 struct Cyc_Dict_Dict Cyc_Dict_union_two_c(void*(*f)(void*,void*,void*,void*),void*env,struct Cyc_Dict_Dict d1,struct Cyc_Dict_Dict d2){
 # 424
 if((int)d1.t==(int)d2.t)return d1;
-if(d1.t==(const struct Cyc_Dict_T*)0)return d2;
-if(d2.t==(const struct Cyc_Dict_T*)0)return d1;{
+if(d1.t==0)return d2;
+if(d2.t==0)return d1;{
 struct _tuple6 fenvpair=({struct _tuple6 _Tmp0;_Tmp0.f0=f,_Tmp0.f1=env;_Tmp0;});
 ({struct Cyc_Dict_Dict*(*_Tmp0)(struct Cyc_Dict_Dict*(*)(struct _tuple6*,void*,void*,struct Cyc_Dict_Dict*),struct _tuple6*,struct Cyc_Dict_Dict,struct Cyc_Dict_Dict*)=(struct Cyc_Dict_Dict*(*)(struct Cyc_Dict_Dict*(*)(struct _tuple6*,void*,void*,struct Cyc_Dict_Dict*),struct _tuple6*,struct Cyc_Dict_Dict,struct Cyc_Dict_Dict*))Cyc_Dict_fold_c;_Tmp0;})(Cyc_Dict_union_f,& fenvpair,d2,& d1);
 return d1;}}
@@ -697,7 +697,7 @@ return d1;}}
 struct Cyc_Dict_Dict Cyc_Dict_intersect_c(void*(*f)(void*,void*,void*,void*),void*env,struct Cyc_Dict_Dict d1,struct Cyc_Dict_Dict d2){
 # 435
 const struct Cyc_Dict_T*t2=d2.t;
-if(t2==(const struct Cyc_Dict_T*)0)return d2;
+if(t2==0)return d2;
 if((int)d1.t==(int)t2)return d2;{
 const struct Cyc_Dict_T*ans_tree=0;
 struct _RegionHandle _Tmp0=_new_region(0U,"temp");struct _RegionHandle*temp=& _Tmp0;_push_region(temp);{
@@ -709,8 +709,8 @@ while(ind!=-1){
 if((unsigned)(ind + 2)>= _get_fat_size(queue,sizeof(const struct Cyc_Dict_T*)))
 queue=({unsigned _Tmp6=_get_fat_size(queue,sizeof(const struct Cyc_Dict_T*))* 2U;_tag_fat(({const struct Cyc_Dict_T**_Tmp7=({struct _RegionHandle*_Tmp8=temp;_region_malloc(_Tmp8,0U,_check_times(_Tmp6,sizeof(const struct Cyc_Dict_T*)));});({{unsigned _Tmp8=_get_fat_size(queue,sizeof(const struct Cyc_Dict_T*))* 2U;unsigned i;for(i=0;i < _Tmp8;++ i){i < _get_fat_size(queue,sizeof(const struct Cyc_Dict_T*))?_Tmp7[i]=((const struct Cyc_Dict_T**)queue.curr)[(int)i]:(_Tmp7[i]=t2);}}0;});_Tmp7;}),sizeof(const struct Cyc_Dict_T*),_Tmp6);});
 # 448
-if(l!=(const struct Cyc_Dict_T*)0)*((const struct Cyc_Dict_T**)_check_fat_subscript(queue,sizeof(const struct Cyc_Dict_T*),++ ind))=l;
-if(r!=(const struct Cyc_Dict_T*)0)*((const struct Cyc_Dict_T**)_check_fat_subscript(queue,sizeof(const struct Cyc_Dict_T*),++ ind))=r;
+if(l!=0)*((const struct Cyc_Dict_T**)_check_fat_subscript(queue,sizeof(const struct Cyc_Dict_T*),++ ind))=l;
+if(r!=0)*((const struct Cyc_Dict_T**)_check_fat_subscript(queue,sizeof(const struct Cyc_Dict_T*),++ ind))=r;
 if(Cyc_Dict_member(d1,k))
 ans_tree=({struct _RegionHandle*_Tmp6=d2.r;int(*_Tmp7)(void*,void*)=d2.rel;struct _tuple0 _Tmp8=({struct _tuple0 _Tmp9;_Tmp9.f0=k,({void*_TmpA=({void*(*_TmpB)(void*,void*,void*,void*)=f;void*_TmpC=env;void*_TmpD=k;void*_TmpE=Cyc_Dict_lookup(d1,k);_TmpB(_TmpC,_TmpD,_TmpE,v);});_Tmp9.f1=_TmpA;});_Tmp9;});Cyc_Dict_ins(_Tmp6,_Tmp7,_Tmp8,ans_tree);});}}
 # 444
@@ -817,7 +817,7 @@ struct Cyc_Iter_Iter Cyc_Dict_make_iter(struct _RegionHandle*rgn,struct Cyc_Dict
 # 581
 int half_max_size=1;
 const struct Cyc_Dict_T*t=d.t;
-while(t!=(const struct Cyc_Dict_T*)0){
+while(t!=0){
 t=t->left;
 ++ half_max_size;
 # 584

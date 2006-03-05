@@ -249,6 +249,28 @@ bool unify_c(type_t t1, type_t t2,
   }
 }
 
+using BansheeIf {
+  static bool unify_cvar(list_t<constraint_t,`H> *env, type_t t1, type_t t2) {
+    if(Tcutil::is_cvar_type(t1) || Tcutil::is_cvar_type(t2)) {
+      _ cv1 = Tcutil::ptrbnd_cvar_equivalent(t1);
+      _ cv2 = Tcutil::ptrbnd_cvar_equivalent(t2);
+      if(cv1 && cv2) {
+	*env = new List{equality_constraint(cv1, cv2), *env};
+	return true;
+      }
+    }
+    return false;
+  }
+
+  bool unify_and_constrain(seg_t loc, type_t t1, type_t t2) {
+    list_t<constraint_t,`H> constraints = NULL;
+    if(unify_c(t1, t2, unify_cvar, &constraints)) {
+      return List::forall_c(add_constraint, loc, constraints);
+    }
+    return false;
+  }
+}
+
 // unify two lists of types
 static void unify_list(list_t<type_t> t1, list_t<type_t> t2,
 		       bool (@f)(`env, Absyn::type_t, Absyn::type_t),

@@ -705,9 +705,9 @@ static int linenumber = 1;
 
 // when we see a new # nnn <file> directive, we create a new filepos entry
 static pinfo_t<`r+`H> rnew_filepos(region_t<`r> r,
-                                const char ?`H filename, 
+                                const char ?`r+`H filename, 
                                 unsigned int starting_line, 
-                                pinfo_opt_t<`r> next) {
+                                pinfo_opt_t<`r+`H> next) {
   seg_t ?`U linenumpos = qcalloc(heap_region, unique_qual, 10, sizeof(seg_t));//rcalloc(unique_region, 10, sizeof(seg_t));
   linenumpos[0] = yylloc.first_line;
   return rnew(r) PosInfo{.next = next, .starting_line = starting_line,

@@ -369,7 +369,7 @@ struct Cyc_Buffer_t*_Tmp0=_cycalloc(sizeof(struct Cyc_Buffer_t));_Tmp0->buffer=_
 struct _fat_ptr Cyc_Buffer_contents(struct Cyc_Buffer_t*b){
 struct _fat_ptr buf=_tag_fat(0,0,0);
 ({struct _fat_ptr _Tmp0=buf;struct _fat_ptr _Tmp1=b->buffer;buf=_Tmp1;b->buffer=_Tmp0;});
-if((char*)buf.curr==(char*)_tag_fat(0,0,0).curr)
+if((char*)buf.curr==0)
 return _tag_fat(0,0,0);{
 struct _fat_ptr res=Cyc_substring(buf,0,b->position);
 ({struct _fat_ptr _Tmp0=buf;struct _fat_ptr _Tmp1=b->buffer;buf=_Tmp1;b->buffer=_Tmp0;});
@@ -386,7 +386,7 @@ return buf;}
 int Cyc_Buffer_restore(struct Cyc_Buffer_t*b,struct _fat_ptr buf){
 int len=(int)Cyc_strlen(buf);
 ({struct _fat_ptr _Tmp0=buf;struct _fat_ptr _Tmp1=b->buffer;buf=_Tmp1;b->buffer=_Tmp0;});
-if((char*)buf.curr!=(char*)_tag_fat(0,0,0).curr){
+if((char*)buf.curr!=0){
 ({struct _fat_ptr _Tmp0=buf;struct _fat_ptr _Tmp1=b->buffer;buf=_Tmp1;b->buffer=_Tmp0;});
 ({void(*_Tmp0)(char*)=({void(*_Tmp1)(char*)=(void(*)(char*))Cyc_Core_ufree;_Tmp1;});_Tmp0((char*)_untag_fat_ptr_check_bound(buf,sizeof(char),1U + 1U));});
 return 0;}
@@ -403,7 +403,7 @@ b->position=0U;}
 # 97
 void Cyc_Buffer_reset(struct Cyc_Buffer_t*b){
 b->position=0U;
-if((char*)b->initial_buffer.curr!=(char*)_tag_fat(0,0,0).curr){
+if((char*)b->initial_buffer.curr!=0){
 struct _fat_ptr buf=_tag_fat(0,0,0);
 ({struct _fat_ptr _Tmp0=b->initial_buffer;struct _fat_ptr _Tmp1=buf;b->initial_buffer=_Tmp1;buf=_Tmp0;});
 b->length=_get_fat_size(buf,sizeof(char))- 1U;
@@ -424,7 +424,7 @@ if(b->length!=0U){
 struct _fat_ptr _Tmp0;_Tmp0=new_buffer;{struct _fat_ptr x=_Tmp0;
 ({struct _fat_ptr _Tmp1=_fat_ptr_decrease_size(x,sizeof(char),1U);struct _fat_ptr _Tmp2=b->buffer;Cyc_strncpy(_Tmp1,_Tmp2,b->position);});}}
 # 121
-if((char*)b->initial_buffer.curr==(char*)_tag_fat(0,0,0).curr)
+if((char*)b->initial_buffer.curr==0)
 ({struct _fat_ptr _Tmp0=b->initial_buffer;struct _fat_ptr _Tmp1=b->buffer;b->initial_buffer=_Tmp1;b->buffer=_Tmp0;});
 ({struct _fat_ptr _Tmp0=b->buffer;struct _fat_ptr _Tmp1=new_buffer;b->buffer=_Tmp1;new_buffer=_Tmp0;});
 ({void(*_Tmp0)(char*)=({void(*_Tmp1)(char*)=(void(*)(char*))Cyc_Core_ufree;_Tmp1;});_Tmp0((char*)_untag_fat_ptr_check_bound(new_buffer,sizeof(char),1U + 1U));});

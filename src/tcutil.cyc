@@ -888,6 +888,8 @@ static bool variable_in_effect(bool may_constrain_evars, tvar_t v, type_t e) {
   case &Evar(k,*p,_,s):
     if (k == NULL || k->v->kind != EffKind)
       Warn::impos2("effect evar has wrong kind");
+    if(!may_constrain_evars)
+      return false;
     // we found a non-canonical evar -- we can grow it to include v
     // but this may cause problems later on with other constraints.
     let ev = new_evar(&Kinds::eko,s);
@@ -1426,7 +1428,7 @@ int tycon_cmp(tycon_t t1, tycon_t t2) {
   }
 }
 
-static int tqual_cmp(tqual_t tq1, tqual_t tq2) {
+int tqual_cmp(tqual_t tq1, tqual_t tq2) {
   let i1 = tq1.real_const + (tq1.q_volatile << 1) + (tq1.q_restrict << 2);
   let i2 = tq2.real_const + (tq2.q_volatile << 1) + (tq2.q_restrict << 2);
   return intcmp(i1,i2);
@@ -2148,11 +2150,18 @@ substitute_f2($(var_opt_t,tqual_t,type_t)@`H orig_arg, type_t t) {
   if (t == t_orig) return orig_arg;
   return new $(vopt_orig,tq_orig,t);
 }
-static list_t<type_t,`r2+`H> substs(region_t<`r>, list_t<$(tvar_t,type_t)@`r,`r>,
-                                 list_t<type_t,`r2>);
-static list_t<exp_t,`r2+`H> substs_exps(region_t<`r>, 
+/* static list_t<type_t,`r2+`H> substs(region_t<`r>, list_t<$(tvar_t,type_t)@`r,`r>, */
+/* 				    list_t<type_t,`r2>); */
+/* static list_t<exp_t,`r2+`H> substs_exps(region_t<`r>,  */
+/*                                         list_t<$(tvar_t,type_t)@`r,`r>, */
+/*                                         list_t<exp_t,`r2>); */
+static list_t<type_t,`r2> substs(region_t<`r>, list_t<$(tvar_t,type_t)@`r,`r>,
+				region_t<`r2>, list_t<type_t,`r2>);
+static list_t<exp_t,`H> substs_exps(region_t<`r>, 
                                         list_t<$(tvar_t,type_t)@`r,`r>,
-                                        list_t<exp_t,`r2>);
+                                        list_t<exp_t,`H>);
+// used to copy an expression during substitution
+
 // used to copy an expression during substitution
 static exp_t copye(exp_t old, raw_exp_t r) {
   // FIX? should we be substituting through the topt?
@@ -2216,7 +2225,7 @@ exp_t rsubsexp(region_t<`r> r, list_t<$(tvar_t,type_t)@`r,`r> inst, exp_t e) {
     return copye(e, new NoInstantiate_e(new_e1));
   case &Instantiate_e(e1,ts):
     let new_e1 = rsubsexp(r,inst,e1);
-    let new_ts = substs(r,inst,ts);
+    let new_ts = substs(r,inst,heap_region,ts);
     if (new_e1 == e1 && new_ts == ts) return e;
     return copye(e, new Instantiate_e(e1,ts));
   case &Cast_e(t,e1,b,c):
@@ -2295,9 +2304,9 @@ exp_t rsubsexp(region_t<`r> r, list_t<$(tvar_t,type_t)@`r,`r> inst, exp_t e) {
   }
 }
 
-static list_t<exp_t,`r2+`H> substs_exps(region_t<`r> rgn, 
-                                        list_t<$(tvar_t,type_t)@`r,`r> inst,
-                                        list_t<exp_t,`r2> es) {
+static list_t<exp_t,`H> substs_exps(region_t<`r> rgn, 
+				    list_t<$(tvar_t,type_t)@`r,`r> inst,
+				    list_t<exp_t,`H> es) {
   if(es == NULL)
     return NULL;
   let old_hd = es->hd;
@@ -2346,8 +2355,8 @@ list_t<$(type_t,type_t)@> rsubst_type_assoc(region_t<`r> rgn,
 					    list_t<$(tvar_t,type_t)@`r,`r> inst,
 					    list_t<$(type_t,type_t)@`H,`H> rgn_po) {
   let $(rpo1a,rpo1b) = List::rsplit(rgn,rgn,rgn_po);
-  let rpo2a = substs(rgn,inst,rpo1a);
-  let rpo2b = substs(rgn,inst,rpo1b);
+  let rpo2a = substs(rgn,inst,rgn,rpo1a);
+  let rpo2b = substs(rgn,inst,rgn,rpo1b);
   return (rpo2a == rpo1a && rpo2b == rpo1b) ? rgn_po : List::zip(rpo2a,rpo2b);
 }
 
@@ -2398,7 +2407,7 @@ type_t rsubstitute(region_t<`r> rgn,
     try return List::assoc_cmp(tvar_cmp,inst,v);
     catch {case &Not_found: return t;}
   case &TypedefType(n,ts,td,topt):
-    let new_ts = substs(rgn,inst,ts);
+    let new_ts = substs(rgn,inst,heap_region,ts);
     return (new_ts == ts) ? t : new TypedefType(n,new_ts,td,topt);
   case &ArrayType(ArrayInfo{t1,tq,e,zt,ztl}):
     let new_t1 = rsubstitute(rgn,inst,t1);
@@ -2425,7 +2434,7 @@ type_t rsubstitute(region_t<`r> rgn,
     let $(qs,ts) = List::rsplit(rgn,rgn,
 				List::rmap_c(rgn,substitute_f1,rgn,args));
     let args2 = args; //inst contains all abstracted tvars and their corresponding var_type's
-    let ts2 = substs(rgn,inst,ts); //ts is the types of all the arguments
+    let ts2 = substs(rgn,inst,rgn,ts); //ts is the types of all the arguments
     if (ts2 != ts) //ts2 are the argtyps with free tvars replaced with the abstracted var_type's from inst
       args2 = List::map2(substitute_f2, args, ts2); //args list with new types
     type_opt_t eff2 = (eff==NULL) ? NULL : rsubstitute(rgn,inst,eff);
@@ -2513,7 +2522,7 @@ type_t rsubstitute(region_t<`r> rgn,
 /*     return aqual_var_type(rsubstitute(rgn, inst,ts->hd),  */
 /* 			  rsubstitute(rgn, inst,ts->tl->hd)); */
   case &AppType(c,ts):
-    let new_ts = substs(rgn,inst,ts);
+    let new_ts = substs(rgn,inst,heap_region,ts);
     return (ts==new_ts) ? t : new AppType(c,new_ts);
   case &ValueofType(e):
     let new_e = rsubsexp(rgn,inst,e);
@@ -2527,18 +2536,19 @@ type_t rsubstitute(region_t<`r> rgn,
   }
 }
 // This is just a map beefed up to avoid unnecessary allocation.
-static list_t<type_t,`r2+`H> substs(region_t<`r> rgn,
-                                    list_t<$(tvar_t,type_t)@`r,`r> inst,
-                                    list_t<type_t,`r2> ts) {
+static list_t<type_t,`r2> substs(region_t<`r> rgn,
+				 list_t<$(tvar_t,type_t)@`r,`r> inst,
+				 region_t<`r2> rgn2,
+				 list_t<type_t,`r2> ts) {
   if(ts == NULL)
     return NULL;
   let old_hd = ts->hd;
   let old_tl = ts->tl;
   let new_hd = rsubstitute(rgn, inst, old_hd);
-  let new_tl = substs(rgn, inst, old_tl);
+  let new_tl = substs(rgn, inst, rgn2, old_tl);
   if(old_hd == new_hd && old_tl == new_tl)
     return ts;
-  return (new List(new_hd,new_tl)); 
+  return (rnew (rgn2) List(new_hd,new_tl)); 
 }
 
 type_t substitute(list_t<$(tvar_t,type_t)@`H,`H> inst, type_t t) {
@@ -3275,6 +3285,25 @@ static void replace_cvar_fn(type_t *b, type_t env) {
   }
 }
 
+static void revert_one_cvar(type_t *b, int ignore) {
+  switch(*b) {
+  case &Cvar(_,_,_,_,_,_, ovfat):
+    if(!ovfat) {
+      *b = bounds_one();
+    }
+    else {
+      *b = fat_bound_type;
+    }
+    break;
+  default:
+    break;
+  }
+}
+
+void revert_cvars(type_t t) {
+  visit_for_cvars(t, revert_one_cvar<>, 0);
+}
+
 void introduce_cvars(type_t t) {
   visit_for_cvars(t, introduce_cvar_fn<>, bounds_one());
 }
@@ -3292,6 +3321,7 @@ bool is_main(qvar_t n) {
   }
 }
 
+//These next two are for debugging the structure of a type
 static void deconstruct_tycon(tycon_t tc) {
   switch(tc) { 
   case &ComplexCon: fprintf(stderr, "ComplexCon"); break;// MemKind
@@ -3390,8 +3420,11 @@ void deconstruct_type(type_t t) {
     break;
   case &AnonAggrType(...):
     fprintf(stderr, "Got AnonAggrType\n"); break;
-  case &TypedefType(...):
-    fprintf(stderr, "Got TypedefType\n"); break;
+  case &TypedefType(name, in, d, topt):
+    fprintf(stderr, "Got TypedefType\n"); 
+    if(topt)
+      deconstruct_type(topt);
+    break;
   case &ValueofType(...):
     fprintf(stderr, "Got ValueofType\n"); break;
   case &TypeDeclType(...):

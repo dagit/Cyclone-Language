@@ -268,6 +268,7 @@ RUNTIME:=runtime_cyc \
 CYCLIB:=libcyc.$(A)
 CYCBOOTLIB:=libcycboot.$(A)
 CYCCOMP:=cyclone$(EXE)
+CYCINFCOMP:=cyclone-inf$(EXE)
 
 C_SRCS:=$(addsuffix .c, $(CYCLONE_SRCS) $(BANSHEE_STUB) $(BANSHEE_IF))
 C_BOOT_LIBS:=$(addsuffix .c, $(CYCLONE_BOOT_LIBS))

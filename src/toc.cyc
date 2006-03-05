@@ -1627,7 +1627,8 @@ static void exp_to_c(env_t nv, exp_t e) {
     // call unless at top-level
     // note: we don't need the element type b/c the length is 0 (so we lie)
     let zero = signed_int_exp(0,DL);
-    if(is_fat_pointer_type(old_typ)) {
+    
+    if(get_bounds_exp_constrain(bounds_one(),(type_t)get_pointer_bounds(old_typ), true) == NULL) {
       if(is_toplevel(nv))
 	e->r = make_toplevel_dyn_arr(old_typ, zero, zero)->r;
       else

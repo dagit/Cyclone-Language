@@ -147,7 +147,7 @@ void a24(int *`U x) __attribute__((consume(1))) {
 }
 void a25() {
   // aliased pattern expression is not an l-value
-  let alias<`r>int *`r x = rnew (Core::unique_region) 1;
+  let alias<`r>int *`r x = unew 1;
 }
 void a26(int *`U x) {
   // cannot track unique pointers through multiple assignments
@@ -159,8 +159,8 @@ void a27(int *`U x) __attribute__((consume(1))) {
   // attempts to copy a consumed value
   Core::ufree(x);
 }
-typedef _::UR uregion;
-typedef int @ @region(uregion) uptr;
+
+typedef int @\U uptr;
 extern void uptrfree(uptr);
 void a28(uptr x) __attribute__((consume(1))) {
   let y = x;

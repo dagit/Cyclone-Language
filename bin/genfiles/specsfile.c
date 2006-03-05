@@ -506,7 +506,7 @@ CLEANUP_AND_RETURN:
 return result;}
 # 148
 struct _fat_ptr Cyc_Specsfile_split_specs(struct _fat_ptr cmdline){
-if((char*)cmdline.curr==(char*)_tag_fat(0,0,0).curr)return _tag_fat(0,0,0);{
+if((char*)cmdline.curr==0)return _tag_fat(0,0,0);{
 unsigned long n=Cyc_strlen(cmdline);
 struct Cyc_List_List*l=0;
 char buf[4096U];
@@ -605,10 +605,10 @@ if(*((int*)_check_fat_subscript(bindices,sizeof(int),i)))*((struct _fat_ptr*)_ch
 Cyc_Arg_current=0;
 Cyc_Arg_parse(specs,anonfun,anonflagfun,errmsg,bargs);
 # 278
-if((char*)Cyc_Specsfile_target_arch.curr==(char*)_tag_fat(0,0,0).curr)Cyc_Specsfile_target_arch=({char*_Tmp0=Carch;_tag_fat((void*)_Tmp0,sizeof(char),_get_zero_arr_size_char((void*)_Tmp0,1U));});{
+if((char*)Cyc_Specsfile_target_arch.curr==0)Cyc_Specsfile_target_arch=({char*_Tmp0=Carch;_tag_fat((void*)_Tmp0,sizeof(char),_get_zero_arr_size_char((void*)_Tmp0,1U));});{
 # 287 "specsfile.cyc"
 struct _fat_ptr cyclone_exec_prefix=({char*_Tmp0=getenv("CYCLONE_EXEC_PREFIX");_tag_fat((void*)_Tmp0,sizeof(char),_get_zero_arr_size_char((void*)_Tmp0,1U));});
-if((char*)cyclone_exec_prefix.curr!=(char*)_tag_fat(0,0,0).curr)
+if((char*)cyclone_exec_prefix.curr!=0)
 Cyc_Specsfile_cyclone_exec_path=({struct Cyc_List_List*_Tmp0=_cycalloc(sizeof(struct Cyc_List_List));({struct _fat_ptr*_Tmp1=({struct _fat_ptr*_Tmp2=_cycalloc(sizeof(struct _fat_ptr));*_Tmp2=cyclone_exec_prefix;_Tmp2;});_Tmp0->hd=_Tmp1;}),_Tmp0->tl=Cyc_Specsfile_cyclone_exec_path;_Tmp0;});
 Cyc_Specsfile_def_lib_path=({char*_Tmp0=Cdef_lib_path;_tag_fat((void*)_Tmp0,sizeof(char),_get_zero_arr_size_char((void*)_Tmp0,1U));});
 if(Cyc_strlen(Cyc_Specsfile_def_lib_path)> 0U)
@@ -626,10 +626,10 @@ if(f==0)return 0;else{
 Cyc_fclose(f);return 1;}}
 # 310
 static struct _fat_ptr*Cyc_Specsfile_find(struct Cyc_List_List*dirs,struct _fat_ptr file){
-if((char*)file.curr==(char*)_tag_fat(0,0,0).curr)return 0;
+if((char*)file.curr==0)return 0;
 for(1;dirs!=0;dirs=dirs->tl){
 struct _fat_ptr dir=*((struct _fat_ptr*)dirs->hd);
-if((char*)dir.curr==(char*)_tag_fat(0,0,0).curr || Cyc_strlen(dir)==0U)continue;{
+if((char*)dir.curr==0 || Cyc_strlen(dir)==0U)continue;{
 struct _fat_ptr s=Cyc_Filename_concat(dir,file);
 if(Cyc_Specsfile_file_exists(s)){struct _fat_ptr*_Tmp0=_cycalloc(sizeof(struct _fat_ptr));*_Tmp0=s;return _Tmp0;}}}
 # 318
@@ -639,7 +639,7 @@ static struct _fat_ptr Cyc_Specsfile_sprint_list(struct Cyc_List_List*dirs){
 struct _fat_ptr tmp=_tag_fat("",sizeof(char),1U);
 for(1;dirs!=0;dirs=dirs->tl){
 struct _fat_ptr dir=*((struct _fat_ptr*)dirs->hd);
-if((char*)dir.curr==(char*)_tag_fat(0,0,0).curr || Cyc_strlen(dir)==0U)continue;
+if((char*)dir.curr==0 || Cyc_strlen(dir)==0U)continue;
 dir=Cyc_strconcat(dir,_tag_fat(":",sizeof(char),2U));
 tmp=Cyc_strconcat(dir,tmp);}
 # 330

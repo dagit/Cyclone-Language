@@ -2,6 +2,7 @@
 #include <hashtable.h>
 #include <position.h>
 #include <string.h>
+#include <filename.h>
 #include "interproc.h"
 #include "binding.h"
 #include "absynpp.h"
@@ -34,6 +35,16 @@ parg_t ? make_parg( ... inject parg_t<`H> ap) {
   return ret;
 }
 
+static string_t<`H> *cych_pfx = NULL;
+void set_inference_prefix(string_t<`H> pfx) {
+  cych_pfx = new pfx;
+}
+static string_t get_inference_prefix() {
+  if(cych_pfx == NULL)
+    cych_pfx = new ".";
+  return *cych_pfx; 
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // Interface to CYCTAGS; records which symbols are defined and which are externs
@@ -46,10 +57,10 @@ parg_t ? make_parg( ... inject parg_t<`H> ap) {
 static FILE *tagsFile=NULL;
 
 static FILE *try_file_open(string_t filename, string_t mode, string_t msg_part) {
-  try return fopen(filename,mode);
-  catch { default:
-    fprintf(stderr, "\nError: couldn't open %s %s\n", msg_part, filename);
-    fflush(stderr);
+  try return fopen((const char@)filename, (const char@)mode);
+  catch { 
+  default:
+    Warn::err(0, "Couldn't open %s %s", msg_part, filename);
     return NULL;
   }
 }
@@ -66,7 +77,7 @@ static void dump_decl_tags(list_t<var_t,`H> ns, string_t sourcefile, list_t<decl
   for(;tds;tds=tds->tl) {
     switch(tds->hd->r) {
     case &Fn_d(fd):
-      fprintf(tagsFile, "^%s%s^%s^function^0\n", namespace2string(ns),
+      fprintf((FILE@)tagsFile, "^%s%s^%s^function^0\n", namespace2string(ns),
 	      Absynpp::fullqvar2string(fd->name), 
 	      sourcefile);
       break;
@@ -155,7 +166,7 @@ static bool init_tagmap_from_decls(mstringptr_t<`H,`H> source, list_t<decl_t> ds
   for(;ds;ds=ds->tl) {
     switch(ds->hd->r) {
     case &Fn_d(fd):
-      Hashtable::insert(tagmap, 
+      Hashtable::insert((table_t)tagmap, 
 			new aprintf("%s", Absynpp::fullqvar2string(fd->name)), 
 			source);
       break;
@@ -192,7 +203,7 @@ static bool init_tagmap(filedecls_t ftds) {
     if(!strcmp(symtype, "function")) {
       //      fprintf(stderr, "Inserting <%s>:%d --> <%s>:%d\n", *symname, hash_mstringptr(symname), 
       //	      *filename, hash_mstringptr(filename));
-      Hashtable::insert(tagmap, symname, filename);
+      Hashtable::insert((table_t)tagmap, symname, filename);
     }
   }
   fclose(tags);
@@ -206,7 +217,7 @@ static string_t locate_qvar(qvar_t qv, filedecls_t ftds) {
   }
   //get rid of this allocation
   mstringptr_t qvname = new aprintf("%s", Absynpp::fullqvar2string(qv));
-  return *(Hashtable::lookup(tagmap, qvname));
+  return *(Hashtable::lookup((table_t)tagmap, qvname));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -477,17 +488,18 @@ static void dump_table(table_t<stringptr_t, type_t> cvmap) {
 //is_local is used for debugging; local Cvars have a negative id (Cvars start out negative)
 static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxpos) {
   //hash consing for Cvars
-  static struct Table<stringptr_t, type_t> *cvmap = NULL;
-  if(!cvmap) {
-    cvmap = Hashtable::create(101, strptrcmp, hash_stringptr);
+  static struct Table<stringptr_t, type_t> *scvmap = NULL;
+  assert(pfxpos < 900);
+  if(!scvmap) {
+    scvmap = Hashtable::create(101, strptrcmp, hash_stringptr);
   }
+  table_t<stringptr_t, type_t> cvmap = (table_t)scvmap;
   list_t<type_t> ret=NULL;
   switch(compress(t)) {
   case &PointerType(PtrInfo{elt,_,PtrAtts{_,_,*bd,...}}):
     ret = cvars_in_type(elt, index+1, is_local, pfxpos);
     switch(*bd) {
     case &Cvar(_,_,*id,_,*name,...):
-      assert(pfxpos < 1000);
       vsprintf(_prefix+pfxpos, "_%d", make_parg(index)); 
       string_t nn = aprintf("%s", _prefix);
       //      char ?tmppfx = _prefix;
@@ -496,7 +508,7 @@ static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxp
 	*bd = *val;
       }
       else {
-	*name = nn;
+	*name = (const char*)nn;
 	ret = new List{*bd, ret};      
 	if(!is_local)
 	  *id = -(*id); //toggle id sign to indicate that the name is set ... used only for testing/assertion
@@ -516,7 +528,6 @@ static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxp
     for(;af;af=af->tl) {
       switch(af->hd) {
       case &Aggrfield{_,_,t,...}:
-	assert(pfxpos < 980);
 	vsprintf(_prefix+pfxpos, "_%d_AA%d", make_parg(index, findex++));  //aprintf("%s_%d_AA%d", prefix, index, findex++), 
 	ret = List::append(cvars_in_type(t, 0, is_local, strlen(_prefix)), ret);
 	break;
@@ -525,11 +536,10 @@ static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxp
     _prefix[pfxpos] = '\0';
     break;
   case &AppType(&DatatypeCon(DatatypeInfo{.KnownDatatype=&dtd}), ts):
-    if(dtd->fields->v) {
+    if(dtd->fields){
       let fs = dtd->fields->v;
       int findex = 0;
       string_t dtn = Absynpp::fullqvar2string(dtd->name);
-      assert(pfxpos < 900);
       for(;fs;fs=fs->tl) {
 	let ft = fs->hd->typs;
 	int finner = 0;
@@ -544,11 +554,21 @@ static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxp
       _prefix[pfxpos] = '\0';
     }
     break;
-  case &AppType(&AggrCon(AggrInfo{.KnownAggr=&ad}), ts):
+  case &AppType(&AggrCon(AggrInfo{.UnknownAggr=$(ak,n,_)}), ts):     
+    let adn=Absynpp::fullqvar2string(n);
+    int findex =0;
+    if(ts) {
+      vsprintf(_prefix+pfxpos, "_%dAP%dI%s_", make_parg(index, strlen(adn), adn));
+      for(int ix=0;ts;ts=ts->tl, ix++) {
+	ret= List::append(cvars_in_type(ts->hd, ix, is_local, strlen(_prefix)), ret);
+      }
+      _prefix[pfxpos]='\0';
+    }
+    break;
+  case &AppType(&AggrCon(AggrInfo{.KnownAggr=&ad}), ts):     //only happens when an aggrdecl is massaged into a type below
     let adn=Absynpp::fullqvar2string(ad->name);
     int findex =0;
     if(ad->impl) {
-      assert(pfxpos < 900);
       for(_ fs = ad->impl->fields; fs; fs= fs->tl) {
 	vsprintf(_prefix+pfxpos, "AD%dI%s_AF%d", make_parg(strlen(adn), adn, findex++));
 	//	aprintf("%s_%d_AD%s_AF%d", prefix, index, adn, findex++)
@@ -559,7 +579,6 @@ static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxp
     break;
   case &FnType(*fi):
     //    aprintf("%", prefix, index);
-    assert(pfxpos < 900);
     vsprintf(_prefix+pfxpos, "_%d_FR", make_parg(index));
     ret = List::append(cvars_in_type(fi->ret_type, 0,is_local,strlen(_prefix)), ret);
     int argix = 0;
@@ -572,15 +591,18 @@ static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxp
     _prefix[pfxpos]='\0';    
     break;
   case &TypedefType(tdn, ts, tdef, topt):
+    let tn = Absynpp::fullqvar2string(tdn);
     if(tdef && tdef->defn) {
-      assert(pfxpos < 900);
-      //      aprintf("%s_%d_TD%s", prefix, index, Absynpp::fullqvar2string(tdn))
-      let tn = Absynpp::fullqvar2string(tdn);
       vsprintf(_prefix+pfxpos,"TD%dI%s", make_parg(strlen(tn), tn));
-      ret = List::append(cvars_in_type(tdef->defn, 0,is_local,strlen(_prefix)), 
+      ret = List::append(cvars_in_type((type_t)tdef->defn, 0,is_local,strlen(_prefix)), 
 			 ret);
       _prefix[pfxpos]='\0';    
     }
+    for(int ix=0;ts;ts=ts->tl,ix++){
+      vsprintf(_prefix+pfxpos,"TD%dI%s_ARG%d", make_parg(strlen(tn), tn, ix));
+      ret = List::append(cvars_in_type(ts->hd, 0, is_local, strlen(_prefix)), ret);
+    }
+    _prefix[pfxpos]='\0';    
     break;
   case &TypeDeclType(td, to): //*to should be null
     switch(td->r) {
@@ -607,7 +629,7 @@ static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxp
 static bool exp_noop(`a a, exp_t b) { 
   switch(b->r) {
   case &Cast_e(t, ...):
-    Tcutil::replace_cvars(t, bounds_one());
+    Tcutil::revert_cvars(t);//assume annotations in a cast are intentional
     break;
   default:
     break;
@@ -721,7 +743,7 @@ static list_t<type_t> assign_cvar_names(list_t<decl_t> ds){
 }
 
 static list_t<$(type_t, list_t<BansheeIf::constraint_t>)@> parse_constraint_graph() {
-  let cfilename = "./.cych/cvars";
+  let cfilename = aprintf("%s/.cych/cvars", get_inference_prefix());// "./.cych/cvars";
   let file = try_file_open(cfilename, "r", "constraint file");
   if(!file) {
     Warn::warn(0, "Unable to initialize constraint graph");
@@ -773,7 +795,8 @@ static void bind_cvars(list_t<decl_t> ds) {
 ////////////////////////////////////////////////////////////////////////////////
 void emit_decls(string_t<`H> filename, list_t<decl_t> ds) {
   //first dump the constraint graph
-  let file = try_file_open("./.cych/cvars", "w", "constraint file");
+  let cvar_filename = aprintf("%s/.cych/cvars", get_inference_prefix());
+  let file = try_file_open(cvar_filename, "w", "constraint file");
   if(!file) {
     Warn::warn(0, "Unable to open constrant file");
     return; 
@@ -781,10 +804,12 @@ void emit_decls(string_t<`H> filename, list_t<decl_t> ds) {
   BansheeIf::persist_cvarmap(file);
   fclose(file);
   //then pretty print the *Cyclone* decls 
-  let outname = aprintf("./.cych/%s", filename);
+  let outname = aprintf("%s/.cych/%s", get_inference_prefix(), Filename::basename(filename));
   let outfile = try_file_open(outname, "w", "output file");
+  if(!outfile)
+    return;
   Absynpp::set_params(&Absynpp::cycinf_params_r);
-  Absynpp::decllist2file(ds, outfile);
+  Absynpp::decllist2file(ds, (FILE@)outfile);
   return;
 }
 

@@ -661,7 +661,7 @@ struct _fat_ptr b=Cyc_va_arg_string(ap);_fat_ptr_inplace_plus(& ap,sizeof(void*)
 which_cp=3;cp3=b;
 if(prec >= 0){
 struct _fat_ptr p=Cyc_my_nzmemchr(cp3,'\000',prec);
-if((char*)p.curr!=(char*)_tag_fat(0,0,0).curr){
+if((char*)p.curr!=0){
 size=(p.curr - cp3.curr)/ sizeof(char);
 if(size > prec)
 size=prec;}else{

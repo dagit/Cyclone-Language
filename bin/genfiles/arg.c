@@ -391,7 +391,7 @@ l=l->tl;}
 _throw((void*)({struct Cyc_Core_Not_found_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Not_found_exn_struct));_Tmp0->tag=Cyc_Core_Not_found;_Tmp0;}));}
 # 89
 static struct _fat_ptr Cyc_Arg_Justify_break_line(struct Cyc_Buffer_t*b,int howmuch,struct _fat_ptr s){
-if((char*)s.curr==(char*)_tag_fat(0,0,0).curr)return _tag_fat(0,0,0);
+if((char*)s.curr==0)return _tag_fat(0,0,0);
 if(howmuch < 0)howmuch=0;{
 unsigned long len=Cyc_strlen(s);
 len <= _get_fat_size(s,sizeof(char))?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp0;})(_tag_fat("len <= numelts(s)",sizeof(char),18U),_tag_fat("arg.cyc",sizeof(char),8U),93U);
@@ -418,8 +418,8 @@ return whatsleft;}}}}
 # 127
 void Cyc_Arg_Justify_justify_b(struct Cyc_Buffer_t*b,int indent,int margin,struct _fat_ptr item,struct _fat_ptr desc){
 # 129
-if((char*)item.curr!=(char*)_tag_fat(0,0,0).curr)Cyc_Buffer_add_string(b,item);
-if((char*)desc.curr==(char*)_tag_fat(0,0,0).curr)return;
+if((char*)item.curr!=0)Cyc_Buffer_add_string(b,item);
+if((char*)desc.curr==0)return;
 if(indent < 0)indent=0;
 if(margin < 0)margin=0;{
 # 135
@@ -440,9 +440,9 @@ return;}
 # 151
 Cyc_Buffer_add_string(b,itemsep);
 # 153
-while((char*)desc.curr!=(char*)_tag_fat(0,0,0).curr){
+while((char*)desc.curr!=0){
 desc=Cyc_Arg_Justify_break_line(b,margin - indent,desc);
-if((char*)desc.curr!=(char*)_tag_fat(0,0,0).curr)
+if((char*)desc.curr!=0)
 Cyc_Buffer_add_string(b,indentstr);else{
 # 158
 Cyc_Buffer_add_string(b,_tag_fat("\n",sizeof(char),2U));}
@@ -499,11 +499,11 @@ Cyc_Arg_args=orig_args;{
 int initpos=Cyc_Arg_current;
 unsigned l=_get_fat_size(Cyc_Arg_args,sizeof(struct _fat_ptr));
 # 214
-if((char*)((struct _fat_ptr*)_check_fat_subscript(Cyc_Arg_args,sizeof(struct _fat_ptr),(int)(l - 1U)))->curr==(char*)_tag_fat(0,0,0).curr)l=l - 1U;
+if((char*)((struct _fat_ptr*)_check_fat_subscript(Cyc_Arg_args,sizeof(struct _fat_ptr),(int)(l - 1U)))->curr==0)l=l - 1U;
 ++ Cyc_Arg_current;
 while((unsigned)Cyc_Arg_current < l){
 {struct _fat_ptr s=*((struct _fat_ptr*)_check_fat_subscript(Cyc_Arg_args,sizeof(struct _fat_ptr),Cyc_Arg_current));
-if(((char*)s.curr!=(char*)_tag_fat(0,0,0).curr && _get_fat_size(s,sizeof(char))>= 1U)&&(int)((const char*)s.curr)[0]==45){
+if(((char*)s.curr!=0 && _get_fat_size(s,sizeof(char))>= 1U)&&(int)((const char*)s.curr)[0]==45){
 void*action;
 {struct _handler_cons _Tmp0;_push_handler(& _Tmp0);{int _Tmp1=0;if(setjmp(_Tmp0.handler))_Tmp1=1;if(!_Tmp1){action=Cyc_Arg_lookup(speclist,s);;_pop_handler();}else{void*_Tmp2=(void*)Cyc_Core_get_exn_thrown();void*_Tmp3;if(((struct Cyc_Core_Not_found_exn_struct*)_Tmp2)->tag==Cyc_Core_Not_found){
 # 224

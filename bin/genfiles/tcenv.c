@@ -584,7 +584,7 @@ return le->flags.in_stmt_exp;}
 const struct _tuple11*const Cyc_Tcenv_process_fallthru(struct Cyc_Tcenv_Tenv*te,struct Cyc_Absyn_Stmt*s,struct Cyc_Absyn_Switch_clause***clauseopt){
 # 291
 const struct _tuple11*ans=Cyc_Tcenv_get_fenv(te,_tag_fat("process_fallthru",sizeof(char),17U))->ctrl_env;
-if(ans!=(const struct _tuple11*)0)
+if(ans!=0)
 ({struct Cyc_Absyn_Switch_clause**_Tmp0=({struct Cyc_Absyn_Switch_clause**_Tmp1=_cycalloc(sizeof(struct Cyc_Absyn_Switch_clause*));*_Tmp1=(*ans).f0;_Tmp1;});*clauseopt=_Tmp0;});
 return ans;}
 # 297

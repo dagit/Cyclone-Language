@@ -6,6 +6,7 @@
 
 
 namespace Interproc {
+  void set_inference_prefix(string_t<`H>);
   void dump_tags(string_t sourcefile, List::list_t<Absyn::decl_t>);
   void close_tags_file();
   List::list_t<Absyn::decl_t> resolve_all(string_t<`H> filename, List::list_t<Absyn::decl_t,`H> tds);

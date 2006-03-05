@@ -113,6 +113,7 @@ static void pattern_synth(seg_t loc, tenv_t te, tcpat_result_t pat_res,
 static bool is_case_default(switch_clause_t c) {
   switch(c->pattern->r) {
   case &Wild_p: return true;
+  case &Var_p(_, &Pat{&Wild_p, ...}): return true;
   default:      return false;
   }
 }
@@ -262,7 +263,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	te = clear_fallthru(te);
 
       let p = scs->hd->pattern;
-      let _c = Subtype::coercible_exact(scs->hd->loc,t,p->topt);
+      let _c = Subtype::coercible_exact(scs->hd->loc,t,(type_t)p->topt);
       if (_c == Unknown_coercion) {//!Unify::unify((type_t)p->topt,exception_type)) { // allow silent_castable?
 	Warn::err2(scs->hd->loc, 
 		   "switch on type ",t," but case expects type ",p->topt);
@@ -327,7 +328,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	te = clear_fallthru(te);
 
       let p = scs->hd->pattern;
-      let _c = Subtype::coercible_exact(scs->hd->loc,exception_type,p->topt);
+      let _c = Subtype::coercible_exact(scs->hd->loc,exception_type,(type_t)p->topt);
       if (_c == Unknown_coercion) {//!Unify::unify((type_t)p->topt,exception_type)) { // allow silent_castable?
 	Warn::err2(scs->hd->loc, "switch on type ",exception_type, 
 		   " but case expects type ",p->topt);

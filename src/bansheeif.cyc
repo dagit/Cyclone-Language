@@ -58,7 +58,7 @@ namespace Tcutil {
   bool is_temp_tvar(Absyn::tvar_t t) { return false; }
 }
 #endif
-
+__noinference__ {
 namespace Banshee {
   extern "C include" {
 
@@ -69,6 +69,12 @@ namespace Banshee {
     //this is adapted from cycinf.h 
     //it includes stdlib/stdio etc. which causes a mess
     //so, just the relevant defs are extracted here
+    struct ptrbnd_;
+    struct effect_;
+    struct zeroterm_;
+    struct intlit_;
+    struct intbound_;
+
     typedef struct ptrbnd_* ptrbnd;
     typedef struct effect_* effect;
     typedef struct zeroterm_* zeroterm;
@@ -96,7 +102,7 @@ namespace Banshee {
     ptrbnd atomic(void);
     bool ptrbnd_is_atomic(ptrbnd arg1);
     bool ptrbnd_is_numelts(ptrbnd e);
-    ptrbnd numelts(intbound arg1);
+    //    ptrbnd numelts(intbound arg1);
     struct numelts_decon numelts_decon(ptrbnd arg1);
     struct numelts_decon
     {
@@ -136,7 +142,7 @@ namespace Banshee {
   }
   export { * }
 }
-
+}
 using Absyn;
 using List;
 using Hashtable;
@@ -163,6 +169,8 @@ void add_variable(cvartype_t cvar) {
   case &Cvar(ok, _, _, *bv, name,...):
     if(*bv)
       Warn::impos2("add_variable: Multiple add");
+    if(name == NULL)
+      Warn::impos2("add_variable: empty name");
     switch(ok->v) {
     case &Kind{PtrBndKind, _}:
       *bv = new BvarPtrBnd(Banshee::ptrbnd_fresh(name));
@@ -645,7 +653,7 @@ bool resolve(cvartype_t cvar) {
 	*t = join_eff(set);
       else
 	return false;
-      break;
+      return true;
     default:
       Warn::impos("Attempt to resolve a variable that was never added");
     }

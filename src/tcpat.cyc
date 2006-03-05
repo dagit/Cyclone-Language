@@ -506,7 +506,7 @@ DONT_PROMOTE:
           // must unify here or the type we gave pat won't ever get checked
           // against the exp we're matching against.  Even if we succeed now,
           // we could be constraining so as to catch an error later.
-          if (!Unify::unify((type_t)pat->topt,inst_fieldtyp))
+          if (!Unify::unify_and_constrain(p->loc,(type_t)pat->topt,inst_fieldtyp))
             Warn::err2(p->loc,"field ",*field->name," of ",ad,
                        " pattern expects type ",inst_fieldtyp," != ",
                        (type_t)pat->topt);
@@ -539,7 +539,7 @@ DONT_PROMOTE:
           // must unify here or the type we gave pat won't ever get checked
           // against the exp we're matching against.  Even if we succeed now,
           // we could be constraining so as to catch an error later.
-          if (!Unify::unify((type_t)pat->topt,fieldtyp))
+          if (!Unify::unify_and_constrain(p->loc,(type_t)pat->topt,fieldtyp))
             Warn::err2(p->loc,"field ",*field->name,
                        " pattern expects type ",fieldtyp," != ",
                        (type_t)pat->topt);
@@ -578,7 +578,7 @@ DONT_PROMOTE:
       // must unify here or the type we gave pat won't ever get checked
       // against the exp we're matching against.  Even if we succeed now,
       // we could be constraining so as to catch an error later.
-      if (!Unify::unify((type_t)p2->topt,field_typ))
+      if (!Unify::unify_and_constrain(p2->loc,(type_t)p2->topt,field_typ))
 	Warn::err2(p2->loc, tuf->name," expects argument type ",field_typ,
 		   " not ",(type_t)p2->topt);
     }

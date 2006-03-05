@@ -112,6 +112,7 @@ static bool print_externC_stmts;
 // used when instantiating evars
 static bool print_full_evars;
 static bool gen_clean_cyclone; //evars should not explicitly appear in Cyclone output
+static bool inside_function_type = false;
 
 // Flag controlling whether to insert #line directives in c output
 static bool generate_line_directives;
@@ -416,10 +417,45 @@ static bool emptydoc(doc_t a) {
   return (strlen(string_of_doc(a,PP_WIDTH)) == 0);
 }
 
-doc_t tps2doc(list_t<type_t> ts) {
+
+static doc_t tps2doc(list_t<type_t,`H> ts) {
+  if(gen_clean_cyclone && !inside_function_type) {
+    bool foundEvar = false;
+    list_t<type_t> cleanTs = NULL;
+    for(_ ts2 = ts; !foundEvar && ts2;ts2=ts2->tl) {
+      switch(ts2->hd) {
+      case &Evar(...):
+	foundEvar = true;
+	break;
+      default:
+/* 	if(foundEvar) { */
+/* 	  Warn::impos("Found non-evar after an evar in a type application"); */
+/* 	} */
+	cleanTs = new List{ts2->hd, cleanTs};
+	break;
+      }
+    }
+    ts = List::imp_rev(cleanTs);
+  }
   let l =List::map(typ2doc,ts);
-  if(gen_clean_cyclone && List::forall(emptydoc, l))
-    return nil_doc();
+  if(gen_clean_cyclone) {
+    list_t prev = NULL;
+    bool foundEmptyDoc = false;
+    for(_ ll = l; ll;ll=ll->tl) {
+      if(!emptydoc(ll->hd)) {
+	if(foundEmptyDoc) {
+	  Warn::impos("Found non-empty doc after an empty doc");
+	}
+ 	prev = ll;	
+      }
+      else {
+	foundEmptyDoc = true;
+      }
+    }
+    if(prev == NULL)
+      return nil_doc();
+    prev->tl = NULL;
+  }		  
   return egroup("<",">",",",l);
 }
 
@@ -441,8 +477,8 @@ doc_t tvar2doc(tvar_t tv) {
 
 doc_t ktvar2doc(tvar_t tv) {
   switch (Kinds::compress_kb(tv->kind)) {
-  case &Unknown_kb(_):
-  case &Eq_kb(&Kind(BoxKind,_)): return tvar2doc(tv);
+  case &Unknown_kb(_):return tvar2doc(tv);
+    //  case &Eq_kb(&Kind(BoxKind,_)): 
   case &Less_kb(_,k): fallthru(k);
   case &Eq_kb(k):     return cat(tvar2doc(tv), text("::"), kind2doc(k));
   }
@@ -452,7 +488,7 @@ doc_t ktvars2doc(list_t<tvar_t> tvs) {
   return egroup("<",">",",",List::map(ktvar2doc,tvs));
 }
 doc_t tvars2doc(list_t<tvar_t> tvs) {
-  let f = print_all_kinds ? ktvar2doc : tvar2doc;
+  let f = (print_all_kinds || gen_clean_cyclone) ? ktvar2doc : tvar2doc;
   return egroup("<",">",",",List::map(f,tvs));
 }
 
@@ -639,43 +675,68 @@ static doc_t aqual_val2doc(alias_qual_val_t aqv) {
   }
 }
 
+static bool is_function_tms(list_t<type_modifier_t> tms) {
+  if(tms == NULL) return false;
+  switch(tms->hd) {
+  case &Function_mod(...): return true;
+  default: return is_function_tms(tms->tl);
+  }
+}
+
 doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
   if (tms==NULL) return d;
+  bool save_ift = inside_function_type;
+  if(gen_clean_cyclone && is_function_tms(tms)) {
+    inside_function_type = true;
+  }
   doc_t rest = dtms2doc(false,d,tms->tl);
   doc_t p_rest = cat(text("("),rest,text(")"));
+  _ s;
   switch (tms->hd) {
   case &Carray_mod(zeroterm,_):
     if (next_is_pointer(tms->tl)) rest = p_rest;
-    return cat(rest,type2bool(false,zeroterm) ?
-               text("[]@zeroterm") : text("[]"));
+    s=cat(rest,type2bool(false,zeroterm) ?               text("[]@zeroterm") : text("[]"));
+    inside_function_type = save_ift; return s;
   case &ConstArray_mod(e,zeroterm,_):
     if (next_is_pointer(tms->tl)) rest = p_rest;
-    return cat(rest, text("["), exp2doc(e),
-               type2bool(false,zeroterm) ? text("]@zeroterm") : text("]"));
+    s = cat(rest, text("["), exp2doc(e),
+	    type2bool(false,zeroterm) ? text("]@zeroterm") : text("]"));
+    inside_function_type = save_ift; return s;
   case &Function_mod(args):
     if (next_is_pointer(tms->tl)) rest = p_rest;
     switch (args) {
     case &WithTypes(args2,c_varargs,cyc_varargs,effopt,effc,qb,chk,req,ens,thrws):
-      return cat(rest,funargs2doc(args2,c_varargs,cyc_varargs,effopt,effc,qb,chk,req,ens,thrws));
+      s = cat(rest,funargs2doc(args2,c_varargs,cyc_varargs,effopt,effc,qb,chk,req,ens,thrws));
+      inside_function_type = save_ift; return s;
     case &NoTypes(sl,loc):
-      return cat(rest,group("(",")",",",List::map(textptr,sl)));
+      s = cat(rest,group("(",")",",",List::map(textptr,sl)));
+      inside_function_type = save_ift; return s;
     }
   case &Attributes_mod(_, atts):
     switch(Flags::c_compiler){
     case Flags::Gcc_c:
       if (next_is_pointer(tms->tl))
 	rest = p_rest;
-      return cat(rest, atts2doc(atts));
+      s=cat(rest, atts2doc(atts));
+      inside_function_type = save_ift; return s;
     default:
-     if(next_is_pointer(tms->tl))
-       return cat(callconv2doc(atts), rest);
-     return rest;
+      if(next_is_pointer(tms->tl)) {
+	s=cat(callconv2doc(atts), rest);
+	inside_function_type = save_ift;
+	return s;
+      }
+     inside_function_type = save_ift; return rest;
     }
   case &TypeParams_mod(ts,loc,print_kinds):
     if (next_is_pointer(tms->tl)) rest = p_rest;
-    if (print_kinds)
-      return cat(rest, ktvars2doc(ts));
-    return cat(rest, tvars2doc(ts));
+    if (print_kinds) {
+      s=cat(rest, ktvars2doc(ts));
+      inside_function_type = save_ift;
+      return s;
+    }
+    s = cat(rest, tvars2doc(ts));
+    inside_function_type = save_ift; 
+    return s;
 
     // FIX? What about attributes that we parse before tq2??
   case &Pointer_mod(PtrAtts(rgn,nullable,bd,zt,_,rel,aq),tq2):
@@ -749,7 +810,7 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
 	reld = text("@autoreleased");
     }
     bool was_evar = false;
-    if(gen_clean_cyclone) { //ugly hack :(
+    if(gen_clean_cyclone && !inside_function_type) { //ugly hack :(
       switch(rgn) {
       case &Evar(...): //this could have block region names in it, which will not be bound
 	was_evar = true;
@@ -772,7 +833,9 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
     doc_t spacer0 = (reld != mt && ztd != mt) ? text(" ") : mt;
     doc_t spacer1 = (tqd != mt && (ztd != mt || rgd != mt || reld != mt)) ? text(" ") : mt;
     doc_t spacer2 = (rest != mt) ? text(" ") : mt;
-    return cat(ptr,aqd,ztd,spacer0,reld,rgd,spacer1,tqd,spacer2,rest);
+    s=cat(ptr,aqd,ztd,spacer0,reld,rgd,spacer1,tqd,spacer2,rest);
+    inside_function_type = save_ift; 
+    return s;
   }
 }
 
@@ -1032,7 +1095,10 @@ string_t qvar2string(qvar_t q) {
       prefix = x;
     break;
   case {.C_n = x}:
-    match = use_curr_namespace && list_prefix(strptrcmp, x, curr_namespace);
+    if(gen_clean_cyclone)
+      fallthru(x);
+    else
+      match = use_curr_namespace && list_prefix(strptrcmp, x, curr_namespace);
     // No namespace prefixes in the C namespace.
     break;
   case {.Abs_n = x}:
@@ -1063,7 +1129,7 @@ string_t fullqvar2string(qvar_t q) {
     prefix = x;
     break;
   }
-  return str_sepstr(List::append(prefix, new List((*q)[1],NULL)),"::");
+  return str_sepstr(List::append(prefix, new List((*q)[1],NULL)),"_");
 }
 
 
@@ -1233,13 +1299,35 @@ static doc_t asm_iolist_doc(list_t<$(string_t<`H>, exp_t)@> o, list_t<$(string_t
   return s;
 }
 
+datatype exn { Implicit_region };
+datatype exn.Implicit_region Implicit_region_val = Implicit_region;
+
+static bool may_contain_implicit_regions(bool *res, type_t t) {
+  if(Tcutil::type_kind(t)==&Kinds::ek) {
+    switch(compress(t)) {
+    case &VarType(tv):
+      if(Tcutil::is_temp_tvar(tv)) {
+	*res = true;
+	throw &Implicit_region_val;
+      }
+      break;
+    default:
+      break;
+    }
+  }
+  return true;
+}
+
 static bool is_clean_cast(type_t nt, exp_t e) {
   switch($(nt, e->topt)) {
   case $(&AppType(&IntCon(...), _), &PointerType(p1)):
     switch(p1.ptr_atts.bounds) {
     case &Cvar(...):
     case &AppType(&FatCon, ...):
-      return false;
+      return false; 
+      //these casts get inserted using unchecked_cast; for instance
+      //if((unsigned int) (char ?)a) ... which is not legal
+      //so don't print these out... they will get reintroduced in the --resolve pass
     default: return true;
     }
   default:
@@ -1247,7 +1335,15 @@ static bool is_clean_cast(type_t nt, exp_t e) {
     case &NoInstantiate_e(...):
       return false;
     default:
-      return true;      
+      bool br = false;
+      try {
+	visit_type(may_contain_implicit_regions, &br, nt);
+	return true;
+      }
+      catch {
+      case &Implicit_region:
+	return false;
+      }
     }
   }
 }
@@ -1303,7 +1399,14 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
       s=cat(text("("), s, text(")"), text("<>"));
     }
     break;
-  case &Instantiate_e(e1,_): s = exp2doc_prec(inprec,e1); break;
+  case &Instantiate_e(e1,ts): 
+    s = exp2doc_prec(inprec,e1); 
+    if(gen_clean_cyclone) {
+      let inst = tps2doc(ts);
+      if(!emptydoc(inst))
+	s=cat(text("("), s, text(")"), text("@"), inst);
+    }
+    break;
   case &Cast_e(t,e1,u,c): 
     let castStr = nil_doc();
     bool printType = true;
@@ -1506,12 +1609,12 @@ doc_t cnst2doc(cnst_t c) {
 
 doc_t primapp2doc(int inprec, primop_t p,list_t<exp_t> es) {
   doc_t ps = prim2doc(p);
-  if (p == (primop_t)Numelts) {
+  if (p == Numelts) {
     if (es == NULL || es->tl != NULL)
       Warn::impos("Absynpp::primapp2doc Numelts: %s with bad args",
 		  string_of_doc(ps,72));
     return cat(text("numelts("),exp2doc(es->hd),text(")"));
-  } else if (p == (primop_t)Tagof) {
+  } else if (p == Tagof) {
     if (es == NULL || es->tl != NULL)
       Warn::impos("Absynpp::primapp2doc Tagof: %s with bad args",
 		  string_of_doc(ps,72));
@@ -1694,7 +1797,7 @@ doc_t pat2doc(pat_t p) {
   case &Wild_p: return text("_");
   case &Null_p: return text("NULL");
   case &Int_p(sg,i):
-    if (sg != (sign_t)Unsigned)
+    if (sg != Unsigned)
       return text(aprintf("%d",i));
     return text(aprintf("%u",i));
   case &Char_p(ch): return text(aprintf("'%s'",char_escape(ch)));
@@ -1834,6 +1937,7 @@ doc_t aggrdecl2doc(aggrdecl_t ad) {
                qvar2bolddoc(ad->name),
                ktvars2doc(ad->tvs));
   return cat(scope2doc(ad->sc),
+	     (ad->impl->tagged ? text("@tagged ") : blank_doc()),
 	     aggr_kind2doc(ad->kind),
 	     qvar2bolddoc(ad->name),
 	     ktvars2doc(ad->tvs),
@@ -2099,7 +2203,7 @@ $(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r> r,
 
   case &FnType(FnInfo{typvars,effopt,t2qual,t2,args,c_varargs,cyc_varargs,
                         qb,fn_atts,chk,_,req,_,ens,_,thrws,_,_,_,effc}):
-    if (! print_all_tvars) {
+  if (! print_all_tvars) {
       // don't print default effects
       // WARNING: this is our criterion to detect default effect,
       // so it'd better be right

@@ -139,7 +139,7 @@ namespace Scheme {
   // S ::= nil | F::S
   @tagged union Frame<`r> {
     exp_t<`H>*@notnull@numelts(2)`r if_frame; // if [] e2 e3
-    $(exp_t<`H>*@notnull@fat`r,
+    $(exp_t<`H>*@notnull@fat`r+`H,
       unsigned int,
       value_t<`r>*@notnull@fat`r) apply_frame; //(v1 ... vi-1 [] ei+1 ... en)
     $(unsigned int depth,
@@ -2591,7 +2591,7 @@ void apply_vals(region_t<`r> r,
 static _INLINE void
 eval_apply_frame(region_t<`r> r,
 		 state_ptr_t<`r> state,
-		 exp_t<`H>?`r es,
+		 exp_t<`H>?`r+`H es,
 		 unsigned int i,
 		 value_t<`r>?`r vs) _ALWAYS_INLINE {
   while(i < numelts(es)) {
@@ -2615,7 +2615,7 @@ eval_apply_frame(region_t<`r> r,
 	vs[i] = obj;
 	break;
       default: // push a new frame
-	let frame = Frame{.apply_frame = $(es,i,vs)};
+	union Frame<`r> frame = Frame{.apply_frame = $(es,i,vs)};
 	push_frame(r,state,frame);
 	state->result.expr = es[i];
 	return;
@@ -2659,7 +2659,8 @@ eval_exp(region_t<`r> r,
     case &Apply_e(es):
       // push "[] e2 ... en" on stack and evaluate e1
       value_t<`r>? vs = RNEW(r, {for i < numelts(es) : NULL});
-      eval_apply_frame((region_t<`r+`H>)r,state,es,0,vs);
+      //      eval_apply_frame((region_t<`r+`H>)r,state,es,0,vs);
+      eval_apply_frame(r,state,es,0,vs);
       break;
     case &If_e(e1,e2,e3):
       // push "if [] e2 e3" on stack and evaluate e1

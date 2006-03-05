@@ -1,0 +1,33 @@
+include $(CYCDIR)/Makefile.inc
+CYCC:=$(CYCDIR)/bin/$(CYCINFCOMP)
+
+INF_PFX=./inf
+INF_ALL_TMP_SRCS=$(addprefix $(INF_PFX)/.cych/, $(ALL_O_SRCS:.o=.cyc))
+INF_ALL_C_SRCS=$(addprefix $(INF_PFX)/.cyco/, $(ALL_O_SRCS:.o=.c))
+INFFLAGS=--inf --nomerge --ovfat -detailedlocation -infpfx $(INF_PFX)
+RESFLAGS=--resolve -stopafter-toc -infpfx $(INF_PFX) -detailedlocation 
+INC_PATH:=. include $(CYCDIR)/lib $(CYCDIR)/src $(CYCDIR)/include
+LIB_PATH:=$(CYCDIR)/lib
+CYCFLAGS += $(addprefix -I, $(INC_PATH)) -B. -B$(LIB_PATH) 
+
+clean_src_inf:
+	rm -rf $(INF_PFX)
+
+inf_dirs:
+	mkdir -p $(INF_PFX)/.cych
+	mkdir -p $(INF_PFX)/.cyco
+	touch $(INF_PFX)/.cych/parse_tab.cyc
+	touch $(INF_PFX)/.cych/lex.cyc
+
+#
+
+all: inf_dirs $(INF_ALL_TMP_SRCS) $(INF_ALL_C_SRCS)
+
+$(INF_PFX)/.cych/%.cyc: $(CYCDIR)/src/%.cyc $(CYCC) 
+	$(CYCC) $(INFFLAGS) $(CYCFLAGS) -D__FILE2__=\"$(notdir $<)\" $<
+
+$(INF_PFX)/.cyco/%.c: $(INF_PFX)/.cych/%.cyc
+	$(CYCC) --manyerrors $(RESFLAGS) $(CYCFLAGS) -D__FILE2__=\"$(notdir $<)\" $< -o $@
+
+inf_stats:
+	$(CYCC) -infpfx $(INF_PFX) --infstats 2>&1

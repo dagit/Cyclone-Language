@@ -239,7 +239,6 @@ banshee_engine:
 
 cyclone-inf-inner: \
   directories \
-  bin/buildlib$(EXE) \
   bin/cyclone-inf$(EXE) 
 
 ifeq ($(HAVE_PTHREAD),yes)
@@ -437,9 +436,21 @@ LIBSRC_FLAGS += OPTBUILD=X
 endif
 DO_LIBSRC=$(MAKE) -r -C $(BUILDDIR) -f $(CYCDIR)/Makefile_libsrc
 
+DO_SRCINF=$(MAKE) -r -C $(BUILDDIR) -f $(CYCDIR)/Makefile_srcinf
+
+src_inf_stats:
+	$(DO_SRCINF) inf_stats
+
+clean_src_inf:
+	$(DO_SRCINF) clean_src_inf
+
+cyclone_src_inf: cyclone-inf
+	$(DO_SRCINF) all
+
 cyclone_src:
 	-mkdir -p $(BUILDDIR)
 	$(DO_LIBSRC) all
+
 lib_src:
 	-mkdir -p $(BUILDDIR)
 	$(DO_LIBSRC) libs

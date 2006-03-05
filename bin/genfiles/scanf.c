@@ -947,7 +947,7 @@ goto _LL0;}_LL0:;}}
 static int Cyc_string_getc(struct _fat_ptr*sptr){
 char c;
 struct _fat_ptr s=*sptr;
-if(((char*)s.curr==(char*)_tag_fat(0,0,0).curr || _get_fat_size(s,sizeof(char))==0U)||(int)(c=((const char*)s.curr)[0])==0)return -1;
+if(((char*)s.curr==0 || _get_fat_size(s,sizeof(char))==0U)||(int)(c=((const char*)s.curr)[0])==0)return -1;
 ({struct _fat_ptr _Tmp0=_fat_ptr_plus(s,sizeof(char),1);*sptr=_Tmp0;});
 return(int)c;}
 # 904
@@ -959,7 +959,7 @@ return 0;}
 static int Cyc_string_peekc(struct _fat_ptr*sptr){
 char c;
 struct _fat_ptr s=*sptr;
-if(((char*)s.curr==(char*)_tag_fat(0,0,0).curr || _get_fat_size(s,sizeof(char))==0U)||(int)(c=((const char*)s.curr)[0])==0)return -1;
+if(((char*)s.curr==0 || _get_fat_size(s,sizeof(char))==0U)||(int)(c=((const char*)s.curr)[0])==0)return -1;
 return(int)c;}
 # 917
 int Cyc_vsscanf(struct _fat_ptr src1,struct _fat_ptr fmt,struct _fat_ptr ap){

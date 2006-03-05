@@ -668,11 +668,11 @@ static void dumpexp_prec(int inprec, exp_t e) {
     let pstr = Absynpp::prim2str(p);
     switch (List::length(es)) {
     case 1:
-      if (p == (primop_t)Numelts) {
+      if (p == Numelts) {
         dump("numelts(");
         dumpexp(es->hd);
         dump(")");
-      } else if (p == (primop_t)Tagof) {
+      } else if (p == Tagof) {
         dump("tagof(");
         dumpexp(es->hd);
         dump(")");

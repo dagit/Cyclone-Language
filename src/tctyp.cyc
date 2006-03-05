@@ -726,6 +726,27 @@ static void update_qualifier_bounds(seg_t loc, cvtenv_t env,
   constrain_vars(loc, env, List::filter(aqualvar_unconstrained ,freeqvs), qb, def, false);
 }
 
+//check definition against expected kind ... if it contains cvars these may get constrained
+static void check_constrain_ptrbnd(seg_t loc, type_t t, kind_t expected_kind) {
+  if(expected_kind->kind == BoxKind) {
+    switch(compress(t)) {
+    case &PointerType(PtrInfo(_,_,PtrAtts(_,_,*b,...))): //bind free_qualvars for apptype/aqual_t too
+      if(is_cvar_type(*b)) { //@fat makes the pointer a memkind
+	if(!BansheeIf::add_constraint(loc, BansheeIf::equality_constraint(*b, thinconst()))) {
+	  err2(loc,"type ",t," has kind ",type_kind(t),
+	       " but as used here needs kind ",expected_kind);
+	}
+	else {
+	  assert(compress(*b) == bounds_one());
+	}
+      }
+      break;
+    default:
+      break;
+    }
+  }
+}
+
 static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
 			     bool put_in_effect, bool allow_abs_aggr) {
   let CVTEnv(loc,te,...) = env;
@@ -841,9 +862,7 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
       }
       *aq = override_aq;
     }
-    if(expected_kind->kind == BoxKind && is_cvar_type(*b)) { //@fat makes the pointer a memkind
-      *b = bounds_one(); 
-    }
+    check_constrain_ptrbnd(loc, t, expected_kind);
     env = i_check_type(env,&Kinds::ak,t1,true,true);//allow AnyKind under ptr
     env = i_check_type(env,&Kinds::ek,*eff_type,true, true);
     env = i_check_type(env,&Kinds::boolk,  zt,      false,true);
@@ -1021,8 +1040,12 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
 	  case &AppType(&DatatypeCon(...),_):
 	    if (force_type2bool(false,zt))
 	      err2(loc,"can't inject into a zeroterm pointer");
-	    if (!Unify::unify(bounds_one(),bs)) 
-	      err2(loc,"can't inject into a fat pointer to datatype");
+	    if (!Unify::unify(bounds_one(),bs)) {
+	      if(!is_cvar_type(bs) ||
+		 !BansheeIf::add_constraint(loc, BansheeIf::equality_constraint(bs, thinconst()))) {
+		err2(loc,"can't inject into a fat pointer to datatype");
+	      }
+	    }
 	    break;
 	  default: err2(loc,"can't inject a non-datatype type"); break;
 	  }
@@ -1058,13 +1081,13 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
 	    }
 	    else {
 	      if(c_vararg) {
-		if(!add_constraint(loc,equality_constraint(ptrbnd_cvar_equivalent(b),
+		if(!add_constraint(loc,equality_constraint((type_t)ptrbnd_cvar_equivalent(b),
 							   thinconst()))) {
 		  err2(loc,"format descriptor is not a char ? type"); 
 		}
 	      }
 	      else {
-		if(!add_constraint(loc,equality_constraint(ptrbnd_cvar_equivalent(b),
+		if(!add_constraint(loc,equality_constraint((type_t)ptrbnd_cvar_equivalent(b),
 							   fatconst()))) {
 		  err2(loc,"format descriptor is not a char * type"); 		  
 		}
@@ -1153,8 +1176,8 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
     // finally, the effect -- usually inferred
     if (*eff != NULL) {
       new_env = i_check_type(new_env,&Kinds::ek,(type_t)(*eff),true,true);
-      if(!type_in_effect(false, heap_rgn_type, *eff)) {
-	*eff = normalize_effect(join_eff(list(heap_rgn_type, *eff)));
+      if(!type_in_effect(false, heap_rgn_type, (type_t)*eff)) {
+	*eff = normalize_effect(join_eff(list(heap_rgn_type, (type_t)*eff)));
       }
     }
     else {
@@ -1170,9 +1193,11 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
 	case &Less_kb(_,&Kind(BoolKind,_)):
 	case &Less_kb(_,&Kind(PtrBndKind,_)):
 	case &Less_kb(_,&Kind(IntKind,_)):
+	case &Less_kb(_,&Kind(AqualKind,_)):
 	case &Eq_kb(&Kind(BoolKind,_)): 
 	case &Eq_kb(&Kind(PtrBndKind,_)): 
-	case &Eq_kb(&Kind(IntKind,_)): break;
+	case &Eq_kb(&Kind(IntKind,_)): 
+	case &Eq_kb(&Kind(AqualKind,_)): break;
 	case &Less_kb(*f,&Kind(EffKind,_)):
 	  *f = Kinds::kind_to_bound_opt(&Kinds::ek); fallthru;
 	case &Eq_kb(&Kind(EffKind,_)):
@@ -1190,8 +1215,12 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
 	if (!put_in_eff) continue; // skip variables that shouldn't go in effs
 	switch (type_kind(tv)) {
 	  //	case &Kind(RgnKind,_): effect = new List(access_eff(tv), effect); break;
+	case &Kind(IntKind,_): 
+	case &Kind(BoolKind, _):
+	case &Kind(PtrBndKind, _):
+	case &Kind(AqualKind, _):
+	  break;
 	case &Kind(EffKind,_): effect = new List(tv, effect); break;
-	case &Kind(IntKind,_): break;
 	default: effect = new List(regionsof_eff(tv), effect); break;
 	}
       }
@@ -1287,6 +1316,7 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
     env = check_type_inst(env,targs_ref,td->tvs,
 			  expected_kind,allow_abs_aggr,tdn,td);
     if (td->defn != NULL) { // don't use zip in case we had too many args
+      check_constrain_ptrbnd(loc, (type_t)td->defn, expected_kind);
       list_t<$(tvar_t,type_t)@> inst = NULL;
       let tvs = td->tvs;
       let ts = *targs_ref;
@@ -1296,9 +1326,10 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
     }
     break;
   }
-  if (!Kinds::kind_leq(type_kind(t), expected_kind))
+  if (!Kinds::kind_leq(type_kind(t), expected_kind)) {
     err2(loc,"type ",t," has kind ",type_kind(t),
 	 " but as used here needs kind ",expected_kind);
+  }
   return env;
 }
 

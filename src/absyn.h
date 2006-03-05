@@ -1243,6 +1243,8 @@ namespace Absyn {
   void visit_stmt(bool (@)(`a,exp_t), bool (@)(`a,stmt_t), `a, stmt_t);
   void visit_exp(bool (@)(`a,exp_t), bool (@)(`a,stmt_t), `a, exp_t);
 
+  // for visiting types
+  void visit_type(bool (@f)(`a, type_t), `a env, type_t t);
   // for recurring through exps to process statement-exps
   void do_nested_statement(exp_t, `a, void (@f)(`a, stmt_t), bool do_szeof);
 

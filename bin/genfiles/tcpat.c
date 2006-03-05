@@ -478,6 +478,8 @@ void Cyc_Warn_warn2(unsigned,struct _fat_ptr);
 void*Cyc_Warn_impos2(struct _fat_ptr);
 # 29 "unify.h"
 int Cyc_Unify_unify(void*,void*);
+# 33
+int Cyc_Unify_unify_and_constrain(unsigned,void*,void*);
 # 36 "tcutil.h"
 int Cyc_Tcutil_is_arithmetic_type(void*);
 # 42
@@ -969,7 +971,7 @@ if((unsigned)access_exp)
 new_access_exp=Cyc_Absyn_aggrmember_exp(access_exp,field->name,0U);
 res=({struct Cyc_Tcpat_TcPatResult _TmpF=res;Cyc_Tcpat_combine_results(_TmpF,Cyc_Tcpat_tcPatRec(te2,pat,& inst_fieldtyp,rgn_pat,allow_ref_pat,new_access_exp));});
 # 509
-if(!Cyc_Unify_unify(_check_null(pat->topt),inst_fieldtyp))
+if(!Cyc_Unify_unify_and_constrain(p->loc,_check_null(pat->topt),inst_fieldtyp))
 ({struct Cyc_Warn_String_Warn_Warg_struct _TmpF=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp10;_Tmp10.tag=0,_Tmp10.f1=_tag_fat("field ",sizeof(char),7U);_Tmp10;});struct Cyc_Warn_String_Warn_Warg_struct _Tmp10=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp11;_Tmp11.tag=0,_Tmp11.f1=*field->name;_Tmp11;});struct Cyc_Warn_String_Warn_Warg_struct _Tmp11=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp12;_Tmp12.tag=0,_Tmp12.f1=_tag_fat(" of ",sizeof(char),5U);_Tmp12;});struct Cyc_Warn_Aggrdecl_Warn_Warg_struct _Tmp12=({struct Cyc_Warn_Aggrdecl_Warn_Warg_struct _Tmp13;_Tmp13.tag=6,_Tmp13.f1=ad;_Tmp13;});struct Cyc_Warn_String_Warn_Warg_struct _Tmp13=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp14;_Tmp14.tag=0,_Tmp14.f1=
 _tag_fat(" pattern expects type ",sizeof(char),23U);_Tmp14;});struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp14=({struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp15;_Tmp15.tag=2,_Tmp15.f1=(void*)inst_fieldtyp;_Tmp15;});struct Cyc_Warn_String_Warn_Warg_struct _Tmp15=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp16;_Tmp16.tag=0,_Tmp16.f1=_tag_fat(" != ",sizeof(char),5U);_Tmp16;});struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp16=({struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp17;_Tmp17.tag=2,_Tmp17.f1=(void*)
 _check_null(pat->topt);_Tmp17;});void*_Tmp17[8];_Tmp17[0]=& _TmpF,_Tmp17[1]=& _Tmp10,_Tmp17[2]=& _Tmp11,_Tmp17[3]=& _Tmp12,_Tmp17[4]=& _Tmp13,_Tmp17[5]=& _Tmp14,_Tmp17[6]=& _Tmp15,_Tmp17[7]=& _Tmp16;Cyc_Warn_err2(p->loc,_tag_fat(_Tmp17,sizeof(void*),8));});
@@ -1002,7 +1004,7 @@ if((unsigned)access_exp)
 new_access_exp=Cyc_Absyn_aggrmember_exp(access_exp,field->name,0U);
 res=({struct Cyc_Tcpat_TcPatResult _TmpF=res;Cyc_Tcpat_combine_results(_TmpF,Cyc_Tcpat_tcPatRec(te,pat,& fieldtyp,rgn_pat,allow_ref_pat,new_access_exp));});
 # 542
-if(!Cyc_Unify_unify(_check_null(pat->topt),fieldtyp))
+if(!Cyc_Unify_unify_and_constrain(p->loc,_check_null(pat->topt),fieldtyp))
 ({struct Cyc_Warn_String_Warn_Warg_struct _TmpF=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp10;_Tmp10.tag=0,_Tmp10.f1=_tag_fat("field ",sizeof(char),7U);_Tmp10;});struct Cyc_Warn_String_Warn_Warg_struct _Tmp10=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp11;_Tmp11.tag=0,_Tmp11.f1=*field->name;_Tmp11;});struct Cyc_Warn_String_Warn_Warg_struct _Tmp11=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp12;_Tmp12.tag=0,_Tmp12.f1=
 _tag_fat(" pattern expects type ",sizeof(char),23U);_Tmp12;});struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp12=({struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp13;_Tmp13.tag=2,_Tmp13.f1=(void*)fieldtyp;_Tmp13;});struct Cyc_Warn_String_Warn_Warg_struct _Tmp13=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp14;_Tmp14.tag=0,_Tmp14.f1=_tag_fat(" != ",sizeof(char),5U);_Tmp14;});struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp14=({struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp15;_Tmp15.tag=2,_Tmp15.f1=(void*)
 _check_null(pat->topt);_Tmp15;});void*_Tmp15[6];_Tmp15[0]=& _TmpF,_Tmp15[1]=& _Tmp10,_Tmp15[2]=& _Tmp11,_Tmp15[3]=& _Tmp12,_Tmp15[4]=& _Tmp13,_Tmp15[5]=& _Tmp14;Cyc_Warn_err2(p->loc,_tag_fat(_Tmp15,sizeof(void*),6));});
@@ -1039,7 +1041,7 @@ if((unsigned)access_exp)
 Cyc_Tcpat_set_vd(0,access_exp,& res.patvars,Cyc_Absyn_char_type);
 res=({struct Cyc_Tcpat_TcPatResult _Tmp6=res;Cyc_Tcpat_combine_results(_Tmp6,Cyc_Tcpat_tcPatRec(te,p2,& field_typ,rgn_pat,allow_ref_pat,0));});
 # 581
-if(!Cyc_Unify_unify(_check_null(p2->topt),field_typ))
+if(!Cyc_Unify_unify_and_constrain(p2->loc,_check_null(p2->topt),field_typ))
 ({struct Cyc_Warn_Qvar_Warn_Warg_struct _Tmp6=({struct Cyc_Warn_Qvar_Warn_Warg_struct _Tmp7;_Tmp7.tag=1,_Tmp7.f1=tuf->name;_Tmp7;});struct Cyc_Warn_String_Warn_Warg_struct _Tmp7=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp8;_Tmp8.tag=0,_Tmp8.f1=_tag_fat(" expects argument type ",sizeof(char),24U);_Tmp8;});struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp8=({struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp9;_Tmp9.tag=2,_Tmp9.f1=(void*)field_typ;_Tmp9;});struct Cyc_Warn_String_Warn_Warg_struct _Tmp9=({struct Cyc_Warn_String_Warn_Warg_struct _TmpA;_TmpA.tag=0,_TmpA.f1=
 _tag_fat(" not ",sizeof(char),6U);_TmpA;});struct Cyc_Warn_Typ_Warn_Warg_struct _TmpA=({struct Cyc_Warn_Typ_Warn_Warg_struct _TmpB;_TmpB.tag=2,_TmpB.f1=(void*)_check_null(p2->topt);_TmpB;});void*_TmpB[5];_TmpB[0]=& _Tmp6,_TmpB[1]=& _Tmp7,_TmpB[2]=& _Tmp8,_TmpB[3]=& _Tmp9,_TmpB[4]=& _TmpA;Cyc_Warn_err2(p2->loc,_tag_fat(_TmpB,sizeof(void*),5));});}
 # 585
