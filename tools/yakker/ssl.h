@@ -58,7 +58,7 @@ extern int SSL_write(SSL @, const char ? @nozeroterm, int);
 // Unsafe so disabled for now; needs consume
 //  extern "C" void SSL_CTX_free(SSL_CTX @ctx);
 #define SSL_CTX_free(x) (0)
-extern "C" void ERR_print_errors_fp(FILE @fp);
+extern void ERR_print_errors_fp(FILE @fp);
 extern "C" int SSL_get_error(SSL @ssl, int ret);
 extern "C" BIO *BIO_new_socket(int sock, int close_flag);
 extern "C" int SSL_accept(SSL *ssl);

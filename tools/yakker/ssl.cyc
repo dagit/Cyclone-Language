@@ -37,3 +37,21 @@ int SSL_write(SSL @ssl, const char ? @nozeroterm buf, int count) {
   if (count > numelts(buf)) throw &__SSL_write_failure;
   return Cssl::SSL_write(ssl, (const char @ @nozeroterm)buf, count);
 }
+
+// From libc.cys
+namespace Cstdio {
+  extern "C" struct __abstractFILE;
+  typedef struct __abstractFILE __cFILE;
+}
+abstract struct __cycFILE { // must match defn in c stub
+  Cstdio::__cFILE *file;
+};
+
+namespace Cstdio {
+  extern "C" void ERR_print_errors_fp(__cFILE @);
+}
+void ERR_print_errors_fp(FILE @f) {
+  if (!f->file) /* File was closed */
+    return;
+  else Cstdio::ERR_print_errors_fp(f->file);
+}
