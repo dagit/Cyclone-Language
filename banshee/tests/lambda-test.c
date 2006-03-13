@@ -53,7 +53,7 @@ int main()
   l_type_unify(f1,f2);
   l_type_print(stdout,f2);
   puts("");
-  lambda_print_graph(stdout);
+
 
  
   return 0;

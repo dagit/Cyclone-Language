@@ -1,4 +1,6 @@
-TODO -*- outline -*-	
+-*- outline -*-	
+
+TODO 
 
 
 * Miscellaneous Tasks
@@ -297,3 +299,269 @@ DONE.
 *** Add tests for iBanshee with backtracking
 
 DONE.
+
+* Banshee Region Hacking
+
+DONE.
+
+All of this.
+
+** Eliminating rlib
+
+Currently, banshee includes two different versions of the region
+library: libcompat and rlib. rlib has serious scalability issues, but
+includes support for region persistence. To deal with this problem, I
+allow users to build banshee with either library. Thus, it is possible
+to have a scalable constraint solver or fast persistence support, but
+not both. Obviously, this is not ideal.
+
+Before the first release, it would be nice to eliminate rlib entirely
+by porting the region persistence code to libcompat. Since banshee has
+a pretty thorough test suite, and it is possible to swap region
+libraries simply by recompiling, this should be a reasonable task.
+
+This document contains some information that will be useful for
+hacking banshee, libcompat, and rlib.
+
+** Checking out banshee
+
+Check out banshee as a developer (do not use anonymous access). This
+grants you check-in privileges.
+
+export CVS_RSH=ssh 
+cvs -z3 -d:ext:aiken@cvs.sourceforge.net:/cvsroot/banshee co -P banshee
+
+If you have any problems, the following page may help:
+
+http://sourceforge.net/cvs/?group_id=95375
+
+** Building banshee
+
+I don't use autoconf/automake at all. I maintain platform independence
+by testing check-ins on each platform. I've been pretty lax about
+this, though. At a minimum I'll make sure that everything builds on
+moa before you do any hacking.
+
+There are a number of build options. These are set by passing variable
+definitions to make at the command line. Multiple options can be
+combined, e.g.:
+
+'gmake clean all check DEBUG=1 RLIB=1'
+
+will build using rlib and with debugging symbols.
+
+*** Default build process
+
+The vanilla build command is (use 'gmake' or 'make' depending on the
+platform):
+
+'gmake clean all check'
+
+If all goes well, the last line of output will read:
+
+SUCCESS: All check targets passed.
+
+*** Build with rlib 
+
+By default, banshee builds and uses libcompat. To use rlib, define
+RLIB=1, e.g.:
+
+'gmake clean all check RLIB=1'
+
+*** Build with debugging symbols
+
+If you want to use GDB, define DEBUG=1, e.g.:
+
+'gmake all DEBUG=1'
+
+*** Run the region persistence unit tests
+
+Since libcompat doesn't currently support region persistence, the
+region persistence unit tests are not included in the default check
+target (unless RLIB=1). I have added these as a separate target:
+
+'gmake rpersist_check'
+
+will run just the region persistence unit tests. Eventually, we want
+to be able to run:
+
+'gmake clean all check rpersist_check'
+
+without failing.
+
+** The region persistence unit tests
+
+Currently, there are three tests
+
+*** region-persist-test.exe
+
+gmake -C tests check/region-persist-test.exe
+
+The source is in tests/region-persist-test.c. This just creates a
+large linked list of nodes, serializes them, deserializes them, and
+verifies that the satellite data was deserialized properly.
+
+*** ibanshee-rpersist
+
+gmake -C tests -f ibanshee_test.mk ibanshee-rpersist
+
+ibanshee has two commands, !rsave and !rload, to save/load constraint
+systems using region serialization. This test suite runs a few
+ibanshee programs that do saving and loading. In contrast to the
+region-persist-test.exe unit test, this test will actually serialize
+and deserialize banshee objects. The test files are in
+tests/test.ibc/rpersist. The correct output is in
+tests/test.ibc.cor/rpersist.
+
+*** pta-rpersist-regr
+
+gmake -C tests -f pta_test.mk pta-rpersist-regr
+
+This is the most comprehensive test. It actually runs a small python
+script (tests/andersen-rpersist-test.py). Given a list of files, this
+script runs andersen's analysis on each prefix of that list,
+serializes that partial analysis, deserializes, completes the analysis
+on the list suffix, then verifies that the points-to sets are always
+the same. For example, if a program consists of files A, B, and C,
+this script will do the following:
+
+1. analyze A, serialize A, deserialize A, analyze B, analyze C, check
+points-to sets
+
+2. analyze A, analyze B, serialize A+B, deserialize A+B, analyze C,
+check points-to sets
+
+3. analyze A, analyze B, analyze C, serialize A+B+C, deserialize
+A+B+C, check points-to sets
+
+Some of the smaller test programs for andersen's analysis are included
+with banshee. These are in tests/test.programs. By default, the
+pta_test.mk makefile will run the python script on
+ML-typecheck.preproc, which has 11 files.
+
+** Serialization code in libcompat
+
+libcompat/regions.h and rlib/regions.h define the interfaces to the
+region library. For compatibility reasons, I've added declarations for
+the region serialization code to libcompat/regions.h, with dummy
+implementations in libcompat/regions.c. The relevant declarations are:
+
+typedef void *translation;
+typedef int (*Updater)(translation, void *);
+void delete_translation(translation);
+extern int serialize(region *r, char *datafile, char *statefile); 
+extern translation deserialize(char *, char *, Updater *, region);
+extern void update_pointer(translation, void **);
+extern void *translate_pointer(translation, void *);
+
+So it should suffice to replace the dummy definitions of these in
+regions.c.
+
+** Checking in
+
+I like to maintain the invariant that anything checked in to the CVS
+repository builds with: 
+
+'gmake clean all check'
+
+
+* Annotations
+
+** Modifications to setif-sort
+
+*** Check subsumption
+
+sv_add_lb and sv_add_ub should be replaced with calls to subsumed(...)
+followed by calls to bounds add.
+
+*** Compute the transition
+
+Calls to setif_inclusion should call transition(...) to compute the
+new annotation.
+
+*** Change inclusion signature
+
+DONE.
+
+Calls to setif_inclusion need a new argument, the annotation. 
+
+*** Change bounds interface
+
+Modify the interface bounds.h to add an annotation parameter. The
+logic in bounds will be extremely simple, delegating operations like
+subsumption check to external functions.
+
+Bounds scanning must also return both the bound and the *list* of
+annotations associated with that bound. Use a list so that seeing
+whether a given bound is even present is constant time (hashing).
+
+Delegate search through the list to the annotations interface.
+
+Bounds scanner needs fields to be set in bounds.h for all concrete
+implementations.
+
+*** Create function pointers
+
+DONE.
+
+There should be settable function pointers for the transition
+function, the equality check function, the empty annotation check
+function, and the subsumption function. 
+
+The default implementations should assert that all annotations are
+empty and do the following:
+
+x 1. Create an empty_annotation variable, set it to null
+
+x 2. Create the following default implementations:
+
+x subsumption: check that the annotation is empty, check bounds
+
+x transition: check that the annotations are empty, propagate the empty
+annotation
+
+x equality check: check that annotations are empty, return TRUE
+
+x empty annotation check: check that the annotation is empty
+
+*** Update con_match functions
+
+Both in the code generator and in nonspec
+
+*** Cycle elimination
+???
+
+*** Projection merging
+???
+
+*** Change the flow for equal exps
+
+Need to handle
+
+'x <=_a 'x
+
+*** Add a print annotation function
+
+A simple function that allows you to print an annotation
+
+** Regular annotations
+
+Given e <=_r x <=_r' e', we need to compute the concatenation rr',
+prune, then check for subsumption (does there exist r'' with rr' <=
+r''). If rr' passes prining and subsumption, we need to add the new
+edge and propagate it.
+
+Assume (wlog) we have some atomic constraints x <=_r e, x <=_r' e ...
+We need a representation that allows us to quickly determine whether x
+<=_r'' e is present.
+
+*** Subsumption
+ 
+Need to cheaply compute r <= r' for union-free regular languages r and r'
+
+*** Transition
+
+For x <=_r x', use kleene star.
+Otherwise, use concatenation.
+
+*** Pruning

@@ -34,16 +34,16 @@ endif
 FILTEREDOBJS += malloc.o
 NONSPEC_OBJ = nonspec.o
 
-ifndef RLIB
+#ifndef RLIB
 region_dir = ../libcompat
-else
-region_dir = ../rlib
-endif
+#else
+#region_dir = ../rlib
+#endif
 
 CC = gcc
 
 CFLAGS = -I. -I$(region_dir) -Ddeletes= -Dtraditional= -Dsameregion= \
-	 -Dparentptr= -Wall -Werror -fno-strict-aliasing -fno-common 
+	 -Dparentptr= -Wall -Werror -fno-strict-aliasing -fno-common
 
 ifndef NO_BANSHEE_ROLLBACK
 CFLAGS := -DBANSHEE_ROLLBACK ${CFLAGS}
@@ -51,9 +51,9 @@ endif
 
 #HDRS = $(wildcard *.h)
 
-HDRS = array.h banshee.h banshee_persist_kinds.h banshee_region_persist_kinds.h bool.h bounds.h buffer.h compiler.h cstring.h flow-var.h flowrow-sort.h hash.h hashset.h jcollection.h linkage.h list.h nonspec.h persist.h setif-sort.h setif-var.h setst-sort.h setst-var.h stamp.h term-sort.h term-var.h termhash.h ufind.h usage.h utils.h
+HDRS = annotations.h array.h banshee.h banshee_persist_kinds.h banshee_region_persist_kinds.h bfix.h bool.h bounds.h buffer.h compiler.h cstring.h flow-var.h flowrow-sort.h hash.h hashset.h jcollection.h linkage.h list.h nonspec.h persist.h regexp.h setif-sort.h setif-var.h setst-sort.h setst-var.h stamp.h term-sort.h term-var.h termhash.h ufind.h usage.h utils.h
 
-COBJS = array.c banshee.c banshee_persist_kinds.c banshee_region_persist_kinds.c bounds.c buffer.c flow-var.c flowrow-sort.c hash.c hash_bounds.c hashset.c jcollection.c list.c malloc.c nonspec.c persist.c setif-sort.c setif-var.c setst-sort.c setst-var.c stamp.c term-sort.c term-var.c termhash.c ufind.c usage.c utils.c
+COBJS = array.c banshee.c banshee_persist_kinds.c banshee_region_persist_kinds.c bfix.c bounds.c buffer.c epsilon-annotations.c flow-var.c flowrow-sort.c hash.c hash_bounds.c hashset.c jcollection.c list.c malloc.c nonspec.c persist.c regexp.c setif-sort.c setif-var.c setst-sort.c setst-var.c stamp.c term-sort.c term-var.c termhash.c ufind.c usage.c utils.c
 
 NFOBJS = $(patsubst %.c,%.o,$(COBJS))
 

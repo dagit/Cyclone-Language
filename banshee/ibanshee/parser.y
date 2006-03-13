@@ -156,7 +156,6 @@ Commands         : !help\n\
                    !tlb e\n\
                    !ecr e\n\
                    !undo [i]\n\
-                   !time\n\
                    !trace [i]\n\
                    !quit\n\
                    !save \"filename\"\n\

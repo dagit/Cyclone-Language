@@ -19,11 +19,11 @@
 O = mobj/
 CC = gcc
 
-ifndef RLIB
+#ifndef RLIB
 region_dir = ../libcompat
-else
-region_dir = ../rlib
-endif
+#else
+#region_dir = ../rlib
+#endif
 
 ifdef DEBUG
 CFLAGS = -g -pg -Wall -Wno-char-subscripts -I. -I$(region_dir) -I../engine -I../andersen -Ddeletes= -Dtraditional= -Dsameregion=  -Dparentptr= -DUSEMALLOC $(ARCH_FLAGS) $(EXTRACFLAGS) -Itests/rc/original  -fno-strict-aliasing 

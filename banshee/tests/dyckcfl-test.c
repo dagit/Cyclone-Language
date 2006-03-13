@@ -33,7 +33,17 @@
 #include "dyckcfl.h"
 #include "mr_dyckcfl.h"
 
-bool test_dyck_clustering = FALSE;
+bool test_dyck_clustering = TRUE;
+bool test_dyck_contra = TRUE;
+
+static void myassert(int a) {
+	if (!a) {
+		printf("myassertion failed");
+		assert(0);
+		exit(1);
+	}
+}
+
 
 static void test_dyck_isomorphism()
 {
@@ -41,6 +51,7 @@ static void test_dyck_isomorphism()
   int indices[2] = {0,1};
   dyck_node nodes[2] = {NULL,NULL};
   dyck_node c0,c1,c2,c3,c4,c5;
+  dyck_node e0,e1,e2,e3,e4,e5;
 //   flag_dyck_print_constraints = 1;
   
   d0 = make_tagged_dyck_node("d0");
@@ -82,69 +93,92 @@ static void test_dyck_isomorphism()
     make_dyck_close_edge_for_cluster(c3,c5,1);
   }
 
+  if (test_dyck_contra) {
+    e0 = make_tagged_dyck_node("e0");
+    e1 = make_tagged_dyck_node("e1");
+    e2 = make_tagged_dyck_node("e2");
+    e3 = make_tagged_dyck_node("e3");
+    e4 = make_tagged_dyck_node("e4");
+    e5 = make_tagged_dyck_node("e5");
+    
+    make_dyck_contra_open_edge(e0,e1,1);
+    make_dyck_contra_open_edge(e4,e1,2);
+    make_dyck_subtype_edge(e1,e2);
+    make_dyck_contra_close_edge(e2,e3,1);   
+    make_dyck_contra_close_edge(e2,e5,2);
+  }
+
   dyck_finished_adding();	// we've finished building the graph
 
-  assert(dyck_check_reaches(d1,d1)); // check that reflexivity works
-  assert(dyck_check_reaches(d1,d2)); // check that subtyping alone works
-  assert(dyck_check_reaches(d0,d3)); // check that an open/close matching works
-  assert(dyck_check_reaches(d5,d4)); // check another open/close matching
 
-  assert(!dyck_check_reaches(d0,d4)); // make sure that (_1 )_2 doesn't work
-  assert(!dyck_check_reaches(d5,d3)); // make sure that (_2 )_1 doesn't work
-  assert(!dyck_check_reaches(d0,d2)); // we're only doing matched reachability
-  assert(!dyck_check_reaches(d5,d2)); // we're only doing matched reachability 
+  myassert(dyck_check_reaches(d1,d1)); // check that reflexivity works
+  myassert(dyck_check_reaches(d1,d2)); // check that subtyping alone works
+  myassert(dyck_check_reaches(d0,d3)); // check that an open/close matching works
+  myassert(dyck_check_reaches(d5,d4)); // check another open/close matching
 
-  assert(!dyck_check_reaches(d0,d6)); // make sure nothing reaches d6 except d6
-  assert(!dyck_check_reaches(d1,d6));
-  assert(!dyck_check_reaches(d2,d6));
-  assert(!dyck_check_reaches(d3,d6));
-  assert(!dyck_check_reaches(d4,d6));
-  assert(!dyck_check_reaches(d5,d6));
-  assert(dyck_check_reaches(d6,d6));
+  myassert(!dyck_check_reaches(d0,d4)); // make sure that (_1 )_2 doesn't work
+  myassert(!dyck_check_reaches(d5,d3)); // make sure that (_2 )_1 doesn't work
+  myassert(!dyck_check_reaches(d0,d2)); // we're only doing matched reachability
+  myassert(!dyck_check_reaches(d5,d2)); // we're only doing matched reachability 
+
+  myassert(!dyck_check_reaches(d0,d6)); // make sure nothing reaches d6 except d6
+  myassert(!dyck_check_reaches(d1,d6));
+  myassert(!dyck_check_reaches(d2,d6));
+  myassert(!dyck_check_reaches(d3,d6));
+  myassert(!dyck_check_reaches(d4,d6));
+  myassert(!dyck_check_reaches(d5,d6));
+  myassert(dyck_check_reaches(d6,d6));
 
   // PN reachability checking
-  assert(dyck_check_pn_reaches(d1,d1)); // check that reflexivity works
-  assert(dyck_check_pn_reaches(d1,d2)); // check that subtyping alone works
-  assert(dyck_check_pn_reaches(d0,d3));	// check that an open/close matching works
-  assert(dyck_check_pn_reaches(d5,d4)); // check another open/close matching
+  myassert(dyck_check_pn_reaches(d1,d1)); // check that reflexivity works
+  myassert(dyck_check_pn_reaches(d1,d2)); // check that subtyping alone works
+  myassert(dyck_check_pn_reaches(d0,d3));	// check that an open/close matching works
+  myassert(dyck_check_pn_reaches(d5,d4)); // check another open/close matching
 
-  assert(!dyck_check_pn_reaches(d0,d4)); // make sure that (_1 )_2 doesn't work
-  assert(!dyck_check_pn_reaches(d5,d3)); // make sure that (_2 )_1 doesn't work
-  assert(dyck_check_pn_reaches(d5,d2)); // check n reachability
-  assert(dyck_check_pn_reaches(d0,d2)); // check n reachability
-  assert(dyck_check_pn_reaches(d1,d3)); // check p reachability
-  assert(dyck_check_pn_reaches(d2,d4)); // check p reachability
-  assert(dyck_check_pn_reaches(d2,d3));	// check p reachability
-  assert(dyck_check_pn_reaches(d2,d4)); // check p reachability
+  myassert(!dyck_check_pn_reaches(d0,d4)); // make sure that (_1 )_2 doesn't work
+  myassert(!dyck_check_pn_reaches(d5,d3)); // make sure that (_2 )_1 doesn't work
+  myassert(dyck_check_pn_reaches(d5,d2)); // check n reachability
+  myassert(dyck_check_pn_reaches(d0,d2)); // check n reachability
+  myassert(dyck_check_pn_reaches(d1,d3)); // check p reachability
+  myassert(dyck_check_pn_reaches(d2,d4)); // check p reachability
+  myassert(dyck_check_pn_reaches(d2,d3));	// check p reachability
+  myassert(dyck_check_pn_reaches(d2,d4)); // check p reachability
 
-  assert(dyck_check_pn_reaches(d7,d3)); // check pn reachability
-  assert(dyck_check_pn_reaches(d7,d2)); // check pn reachability
+  myassert(dyck_check_pn_reaches(d7,d3)); // check pn reachability
+  myassert(dyck_check_pn_reaches(d7,d2)); // check pn reachability
 
   // Global reachability checking
-  assert(dyck_check_reaches(d0,d8)); // should reach by a match
-  assert(dyck_check_reaches(d5,d8)); // should reach by a match
-  assert(dyck_check_pn_reaches(d0,d9)); // pn reachability using a global
-  assert(dyck_check_pn_reaches(d5,d9));	// pn reachability using a global
-  assert(!dyck_check_reaches(d7,d9)); // no matched reachability, even through global
-  assert(!dyck_check_reaches(d0,d9)); // no matched reachability using a global
-  assert(!dyck_check_reaches(d5,d9)); // no matched reachability using a global
-
+  myassert(dyck_check_reaches(d0,d8)); // should reach by a match
+  myassert(dyck_check_reaches(d5,d8)); // should reach by a match
+  myassert(dyck_check_pn_reaches(d0,d9)); // pn reachability using a global
+  myassert(dyck_check_pn_reaches(d5,d9));	// pn reachability using a global
+  myassert(!dyck_check_reaches(d7,d9)); // no matched reachability, even through global
+  //myassert(!dyck_check_reaches(d0,d9)); // no matched reachability using a global
+  //myassert(!dyck_check_reaches(d5,d9)); // no matched reachability using a global
+  myassert(dyck_check_reaches(d8,d9)); // check for promotion of p reachability to matched
 
   if (test_dyck_clustering) {
-    assert(dyck_check_reaches(c0,c4));
-    assert(dyck_check_reaches(c1,c5));
-    assert(!dyck_check_reaches(c0,c5));
-    assert(!dyck_check_reaches(c1,c4));
-    assert(!dyck_check_reaches(c0,c2));
-    assert(!dyck_check_reaches(c1,c2));
-    assert(!dyck_check_reaches(c0,c3));
-    assert(!dyck_check_reaches(c1,c3));
+    myassert(dyck_check_reaches(c0,c4));
+    myassert(dyck_check_reaches(c1,c5));
+    myassert(!dyck_check_reaches(c0,c5));
+    myassert(!dyck_check_reaches(c1,c4));
+    myassert(!dyck_check_reaches(c0,c2));
+    myassert(!dyck_check_reaches(c1,c2));
+    myassert(!dyck_check_reaches(c0,c3));
+    myassert(!dyck_check_reaches(c1,c3));
+  }
+
+  if (test_dyck_contra) {
+    myassert(dyck_check_reaches(e3,e0));
+    myassert(dyck_check_reaches(e5,e4));
+    myassert(!dyck_check_reaches(e3,e4));
+    myassert(!dyck_check_reaches(e5,e0));
   }
 
   // Print the closed graph
 /*   { */
 /*     FILE *f = fopen("closed_graph.dot","w"); */
-/*     assert(f); */
+/*     myassert(f); */
 /*     dyck_print_closed_graph(f); */
 /*     fclose(f); */
 /*   } */
@@ -185,49 +219,49 @@ static void test_dyck_reduction()
 
   mr_dyck_finished_adding();	// we've finished building the graph
 
-  assert(mr_dyck_check_reaches(d1,d1)); // check that reflexivity works
-  assert(mr_dyck_check_reaches(d1,d2)); // check that subtyping alone works
-  assert(mr_dyck_check_reaches(d0,d3));	// check that an open/close matching works
-  assert(mr_dyck_check_reaches(d5,d4)); // check another open/close matching
+  myassert(mr_dyck_check_reaches(d1,d1)); // check that reflexivity works
+  myassert(mr_dyck_check_reaches(d1,d2)); // check that subtyping alone works
+  myassert(mr_dyck_check_reaches(d0,d3));	// check that an open/close matching works
+  myassert(mr_dyck_check_reaches(d5,d4)); // check another open/close matching
   
-  assert(!mr_dyck_check_reaches(d0,d4)); // make sure that (_1 )_2 doesn't work
-  assert(!mr_dyck_check_reaches(d5,d3)); // make sure that (_2 )_1 doesn't work
-  assert(!mr_dyck_check_reaches(d0,d2)); // we're only doing matched reachability
-  assert(!mr_dyck_check_reaches(d5,d2)); // we're only doing matched reachability 
+  myassert(!mr_dyck_check_reaches(d0,d4)); // make sure that (_1 )_2 doesn't work
+  myassert(!mr_dyck_check_reaches(d5,d3)); // make sure that (_2 )_1 doesn't work
+  myassert(!mr_dyck_check_reaches(d0,d2)); // we're only doing matched reachability
+  myassert(!mr_dyck_check_reaches(d5,d2)); // we're only doing matched reachability 
 
-//   assert(!mr_dyck_check_reaches(d10,d11)); // only matched reachability
+//   myassert(!mr_dyck_check_reaches(d10,d11)); // only matched reachability
 
   // PN reachability checking
-  assert(mr_dyck_check_pn_reaches(d1,d1)); // check that reflexivity works
-  assert(mr_dyck_check_pn_reaches(d1,d2)); // check that subtyping alone works
-  assert(mr_dyck_check_pn_reaches(d0,d3)); // check that an open/close matching works
-  assert(mr_dyck_check_pn_reaches(d5,d4)); // check another open/close matching
+  myassert(mr_dyck_check_pn_reaches(d1,d1)); // check that reflexivity works
+  myassert(mr_dyck_check_pn_reaches(d1,d2)); // check that subtyping alone works
+  myassert(mr_dyck_check_pn_reaches(d0,d3)); // check that an open/close matching works
+  myassert(mr_dyck_check_pn_reaches(d5,d4)); // check another open/close matching
 
-  assert(!mr_dyck_check_pn_reaches(d0,d4)); // make sure that (_1 )_2 doesn't work
-  assert(!mr_dyck_check_pn_reaches(d5,d3)); // make sure that (_2 )_1 doesn't work
-  assert(mr_dyck_check_pn_reaches(d5,d2)); // check n reachability
-  assert(mr_dyck_check_pn_reaches(d0,d2)); // check n reachability
-  assert(mr_dyck_check_pn_reaches(d1,d3)); // check p reachability
-  assert(mr_dyck_check_pn_reaches(d2,d4)); // check p reachability
-  assert(mr_dyck_check_pn_reaches(d2,d3)); // check p reachability
-  assert(mr_dyck_check_pn_reaches(d2,d4)); // check p reachability
+  myassert(!mr_dyck_check_pn_reaches(d0,d4)); // make sure that (_1 )_2 doesn't work
+  myassert(!mr_dyck_check_pn_reaches(d5,d3)); // make sure that (_2 )_1 doesn't work
+  myassert(mr_dyck_check_pn_reaches(d5,d2)); // check n reachability
+  myassert(mr_dyck_check_pn_reaches(d0,d2)); // check n reachability
+  myassert(mr_dyck_check_pn_reaches(d1,d3)); // check p reachability
+  myassert(mr_dyck_check_pn_reaches(d2,d4)); // check p reachability
+  myassert(mr_dyck_check_pn_reaches(d2,d3)); // check p reachability
+  myassert(mr_dyck_check_pn_reaches(d2,d4)); // check p reachability
 
-  assert(mr_dyck_check_pn_reaches(d7,d3)); // check pn reachability
-  assert(mr_dyck_check_pn_reaches(d7,d2)); // check pn reachability
+  myassert(mr_dyck_check_pn_reaches(d7,d3)); // check pn reachability
+  myassert(mr_dyck_check_pn_reaches(d7,d2)); // check pn reachability
 
   // Global reachability checking
-  assert(mr_dyck_check_reaches(d0,d8)); // should reach by a match
-  assert(mr_dyck_check_reaches(d5,d8)); // should reach by a match
-  assert(mr_dyck_check_pn_reaches(d0,d9)); // pn reachability using a global
-  assert(mr_dyck_check_pn_reaches(d5,d9)); // pn reachability using a global
-  assert(!mr_dyck_check_reaches(d7,d9)); // no matched reachability, even through global
-  assert(!mr_dyck_check_reaches(d0,d9)); // no matched reachability using a global
-  assert(!mr_dyck_check_reaches(d5,d9)); // no matched reachability using a global
+  myassert(mr_dyck_check_reaches(d0,d8)); // should reach by a match
+  myassert(mr_dyck_check_reaches(d5,d8)); // should reach by a match
+  myassert(mr_dyck_check_pn_reaches(d0,d9)); // pn reachability using a global
+  myassert(mr_dyck_check_pn_reaches(d5,d9)); // pn reachability using a global
+  myassert(!mr_dyck_check_reaches(d7,d9)); // no matched reachability, even through global
+  //myassert(!mr_dyck_check_reaches(d0,d9)); // no matched reachability using a global
+  //myassert(!mr_dyck_check_reaches(d5,d9)); // no matched reachability using a global
 
   // Print the closed graph
 /*   { */
 /*     FILE *f = fopen("mr_closed_graph.dot","w"); */
-/*     assert(f); */
+/*     myassert(f); */
 /*     mr_dyck_print_closed_graph(f); */
 /*     fclose(f); */
 /*   } */

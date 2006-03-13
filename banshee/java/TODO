@@ -59,3 +59,7 @@ Just create a RefTypeNode
 * MethodFlowGraph
 
 ** Implement getCurrentMethod
+
+* RefTypeNode
+
+** Implement getField

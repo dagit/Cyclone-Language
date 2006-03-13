@@ -29,7 +29,8 @@
  */
 package conflux.flowgraph;
 
-import soot.Type;
+import soot.*;
+import java.util.*;
 
 /**
  * Node representing reference type (class or array) in a flow graph
@@ -37,8 +38,23 @@ import soot.Type;
  * @author John Kodumal
  */
 public class RefTypeNode extends FlowGraphNode  {
+    private Map fieldMap = new HashMap(4);
+
 
     public RefTypeNode(String name, Type type) {
 	super(name, type, false);
+    }
+
+    /** Finds or creates the RefTypeNode associated with field f of
+     * this node */
+    // TODO
+    public RefTypeNode getField(SootField f) {
+	RefTypeNode result = fieldMap.get(f);
+	if (result == null) {
+	    result = new RefTypeNode(f.toString(), f.getType);
+	    //addFieldReadEdge();
+	    //addFieldWriteEdge();
+			    
+	}
     }
 }

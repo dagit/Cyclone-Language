@@ -40,8 +40,14 @@
 #include "hashset.h"
 #include "list.h"
 #include "hash.h"
+#include "annotations.h"
 
 EXTERN_C_BEGIN
+
+typedef struct annotated_bound_ {
+  gen_e e;
+  annotations a;
+} annotated_bound;
 
 typedef struct bounds_ *bounds;
 
@@ -59,6 +65,12 @@ struct bounds_scanner_ {
 }; /* Opaque type: do not edit the fields!  */
 
 typedef struct bounds_scanner_ bounds_scanner;
+
+struct annotated_bounds_scanner_ {
+  // TODO -- fill in these fields for annotated bounds implementation
+}; /* Opaque type: do not edit the fields  */
+
+typedef struct annotated_bounds_scanner_ annotated_bounds_scanner;
 
 /* Init/reset bounds module */
 void bounds_init();
@@ -96,6 +108,15 @@ void bounds_set(bounds, gen_e_list);
 int bounds_size(bounds);
 
 stamp bounds_stamp(bounds);
+
+/* Support for annotated bounds */
+
+/* Add an annotated bound */
+bool annotated_bounds_add(bounds, gen_e, annotation, stamp);
+
+void annotated_bounds_scan(bounds, annotated_bounds_scanner *);
+
+bool annotated_bounds_next(annotated_bounds_scanner *, annotated_bound *);
 
 EXTERN_C_END
 

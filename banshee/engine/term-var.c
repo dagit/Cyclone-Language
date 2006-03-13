@@ -102,7 +102,7 @@ char *tv_get_name(term_var v)
   return tv_get_v_ecr(v)->name;
 }
 
-const bounds tv_get_pending(term_var v)
+bounds tv_get_pending(term_var v)
 {
   return tv_get_v_ecr(v)->pending;
 }

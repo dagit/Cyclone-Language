@@ -100,6 +100,21 @@ void make_dyck_subtype_edge(dyck_node n1, dyck_node n2);
 // Make an (_{index} edge between n1 and n2
 void make_dyck_open_edge(dyck_node n1, dyck_node n2, int index);
 
+// Make an (_{index} contravariant edge between n1 and n2
+void make_dyck_contra_open_edge(dyck_node n1, dyck_node n2, int index);
+
+// Make an )_{index} contravariant edge between n1 and n2
+void make_dyck_contra_close_edge(dyck_node n1, dyck_node n2, int index);
+
+// Make an (_{index} co/contravariant edge between n1 and n2
+// void make_dyck_cocontra_open_edge(dyck_node n1, dyck_node n2, int index);
+
+// Make )_{index} to match a covariant (_{index} made with cocontra_open_edge
+// void make_dyck_co_close_edge(dyck_node n1, dyck_node n2, int index);
+
+// Make )_{index} to match a contravariant (_{index} made with cocontra_close_edge
+// void make_dyck_contra_close_edge(dyck_node n1, dyck_node n2, int index);
+
 // Make an )_{index} edge between n1 and n2
 void make_dyck_close_edge(dyck_node n1, dyck_node n2, int index);
 

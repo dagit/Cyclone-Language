@@ -1106,21 +1106,22 @@ sort_kind flowrow_base_sort(gen_e e)
 #endif /* NONSPEC */
 
 
+static const char *fef_name;
+
+static bool fef_field_eq(const flowrow_field f) {
+	return (! strcmp(f->label,fef_name));
+}
+
 gen_e flowrow_extract_field(const char *name, gen_e e)
 {
-  
-  bool field_eq(const flowrow_field f)
-    {
-      return (! strcmp(f->label,name));
-    }
+  fef_name = name;
   
   if (flowrow_is_row(e))
     {
       flowrow_map fields = flowrow_get_fields(e);
-      flowrow_field f = flowrow_map_find(fields,field_eq);
+      flowrow_field f = flowrow_map_find(fields,fef_field_eq);
 
-      if (f)
-	return f->expr;
+      if (f) return f->expr;
     }
   return NULL;
 }

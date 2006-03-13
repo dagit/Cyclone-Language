@@ -189,13 +189,17 @@ gen_e st_get_ub_proj(setst_var v, get_proj_fn_ptr get_proj)
   return get_proj(bounds_exprs(st_get_sinks(v)));
 }
 
-void st_repair_bounds(setst_var v1)
-{
+static setst_var rb_v1;
+
   bool neq(const setst_var v2)
     {
-      return (! (st_get_stamp(v1) == st_get_stamp(v2)));
+      return (! (st_get_stamp(rb_v1) == st_get_stamp(v2)));
     }
   
+void st_repair_bounds(setst_var v1)
+{
+  rb_v1 = v1;
+	
   setst_var_list lbs = 
     setst_var_list_filter2((setst_var_list)bounds_exprs(st_get_lbs(v1)),neq);
   bounds_set(get_info(v1)->lbs,(gen_e_list)lbs);

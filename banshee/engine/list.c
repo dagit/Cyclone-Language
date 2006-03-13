@@ -491,16 +491,18 @@ void *sort_linked_list(void *p, unsigned index,
 }
 
 
+static comparator_fn ls_cmp;
+
+static int compare(const void *node1, const void *node2)
+{
+      return ls_cmp(((struct list_node_ *)node1)->data,
+		 ((struct list_node_ *)node2)->data);
+}
 
 struct list *list_sort(struct list *l, comparator_fn cmp)
 {
-  int compare(const void *node1, const void *node2)
-    {
-      return cmp(((struct list_node_ *)node1)->data,
-		 ((struct list_node_ *)node2)->data);
-    }
-  
-  long pcount;
+  unsigned long pcount;
+  ls_cmp = cmp;
   l->head = sort_linked_list(l->head,1,compare,&pcount);
   l->tail = fetch_tail(l->head);
   assert(pcount == l->length);

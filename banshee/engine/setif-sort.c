@@ -105,6 +105,13 @@ setif_rollback_info setif_current_rollback_info = NULL;
 term_hash setif_hash;
 struct setif_stats setif_stats;
 
+/* Annotation declarations */
+annotation empty_annotation = NULL; 
+/* transition_fn transition = NULL; */
+/* empty_annotation_fn is_empty_annotation = NULL; */
+/* subsumption_fn subsumed = NULL; */
+/* eq_annotation_fn eq_annotation = NULL; */
+
 stamp setif_get_stamp(gen_e e) 
 {
 #ifdef NONSPEC
@@ -221,21 +228,19 @@ gen_e_list setif_get_inter(gen_e e)
   return ( (setif_inter_) e)->exprs;
 }
 
-static setif_var_list search_ubs(region r, setif_var v1, setif_var goal)
-{
-  bool found;
-  setif_var_list cycle;
-  
-  void search_ubs_aux(setif_var v)
-    {
-      assert(! found);
+static bool ubs_found;
+static setif_var_list ubs_cycle;
+static setif_var ubs_goal;
 
-      if (sv_eq(v,goal))
+void search_ubs_aux(setif_var v) {
+      assert(! ubs_found);
+
+      if (sv_eq(v,ubs_goal))
 	{
-	  found = TRUE;
+	  ubs_found = TRUE;
 	  return;
 	}
-      else if (sv_lt(v,goal))
+      else if (sv_lt(ubs_goal,v))
 	{
 	  return;
 	}
@@ -251,41 +256,44 @@ static setif_var_list search_ubs(region r, setif_var v1, setif_var goal)
 	    if (setif_is_var(ub))
 	      {
 		search_ubs_aux((setif_var)ub);
-		if (found)
+		if (ubs_found)
 		  {
-		    setif_var_list_cons(v,cycle);
+		    setif_var_list_cons(v,ubs_cycle);
 		    return;
 		  }
 	      }
 	  }
 	}
-    }
-
-  found = FALSE;
-  cycle = new_setif_var_list(r);
-  search_ubs_aux(v1);
-
-  return cycle;
 }
 
-static setif_var_list search_lbs(region r, setif_var v1, setif_var goal)
+static setif_var_list search_ubs(region r, setif_var v1, setif_var goal)
 {
-  bool found;
-  setif_var_list cycle;
  
-  void search_lbs_aux(setif_var v)
-    {
-      assert (! found);
-      if (sv_eq(v,goal))
+  ubs_found = FALSE;
+  ubs_cycle = new_setif_var_list(r);
+  ubs_goal = goal;
+  search_ubs_aux(v1);
+
+  return ubs_cycle;
+}
+
+static bool lbs_found;
+static setif_var_list lbs_cycle;
+static setif_var lbs_goal;
+
+void search_lbs_aux(setif_var v)
+  {
+    assert (! lbs_found);
+    if (sv_eq(v,lbs_goal))
 	{
-	  found = TRUE;
+	  lbs_found = TRUE;
 	  return;
 	}
-      else if (sv_lt(v,goal))
+    else if (sv_lt(v,lbs_goal))
 	{
 	  return;
 	}
-      else
+    else
 	{
 	  bounds_scanner scan;
 	  gen_e lb;
@@ -297,22 +305,26 @@ static setif_var_list search_lbs(region r, setif_var v1, setif_var goal)
 	    if (setif_is_var(lb))
 	      {
 		search_lbs_aux((setif_var)lb);
-		if (found)
+		if (lbs_found)
 		  {
-		    setif_var_list_cons(v,cycle);
+		    setif_var_list_cons(v,lbs_cycle);
 		    return;
 		  }
 	      }
 	  }
 	}
 	
-    }
+  }
 
-  found = FALSE;
-  cycle = new_setif_var_list(r);
+static setif_var_list search_lbs(region r, setif_var v1, setif_var goal)
+{
+
+  lbs_found = FALSE;
+  lbs_cycle = new_setif_var_list(r);
+  lbs_goal = goal;
   search_lbs_aux(v1);
 
-  return cycle; 
+  return lbs_cycle; 
 }
 
 static setif_var_list cycle_detect(region r,setif_var v1,setif_var v2)
@@ -412,10 +424,15 @@ void setif_register_ub_proj(gen_e_list ub_projs, gen_e e) {
 }
 
 void setif_inclusion(con_match_fn_ptr con_match, res_proj_fn_ptr res_proj, 
-		     gen_e_pr_fn_ptr pr, gen_e e1, gen_e e2) deletes
+		     gen_e_pr_fn_ptr pr, gen_e e1, gen_e e2) 
 {
-  
-  void collapse_cycle_lower(region r, setif_var witness, 
+  setif_annotated_inclusion(con_match,res_proj, pr, e1, e2, empty_annotation);
+}
+
+
+void collapse_cycle_lower(con_match_fn_ptr con_match, 
+			       res_proj_fn_ptr res_proj, 
+			       gen_e_pr_fn_ptr pr, region r, setif_var witness, 
 			    setif_var_list cycle) deletes
     {
       gen_e lb;
@@ -442,8 +459,10 @@ void setif_inclusion(con_match_fn_ptr con_match, res_proj_fn_ptr res_proj,
       assert(sv_get_stamp(witness) == lowest);
       
       bounds_scan(b,&scan_bounds);
+      /* TODO -- what annotation? */
       while (bounds_next(&scan_bounds,&lb))
-	setif_inclusion(con_match,res_proj,pr,lb, (gen_e) witness);
+	setif_annotated_inclusion(con_match,res_proj,pr,lb, (gen_e) witness,
+				  empty_annotation);
       
       bounds_delete(b);
       lazy_invalidate_tlb_cache();
@@ -451,8 +470,11 @@ void setif_inclusion(con_match_fn_ptr con_match, res_proj_fn_ptr res_proj,
       setif_stats.cycles_collapsed_backward++;
       setif_stats.cycles_length_backward += setif_var_list_length(cycle);
     }
-  
-  void collapse_cycle_upper(region r, setif_var witness,
+
+
+  void collapse_cycle_upper(con_match_fn_ptr con_match, 
+				       res_proj_fn_ptr res_proj, 
+				       gen_e_pr_fn_ptr pr, region r, setif_var witness,
 			    setif_var_list cycle) deletes
     {
       gen_e ub;
@@ -485,8 +507,10 @@ void setif_inclusion(con_match_fn_ptr con_match, res_proj_fn_ptr res_proj,
       assert(sv_get_stamp(witness) == lowest);
 
       bounds_scan(b,&scan_bounds);
+      /* TODO --- what annotation? */
       while (bounds_next(&scan_bounds,&ub))
-	setif_inclusion(con_match,res_proj,pr,(gen_e) witness, ub);
+	setif_annotated_inclusion(con_match,res_proj,pr,(gen_e) witness, ub,
+				  empty_annotation);
 	
       bounds_delete(b);
       lazy_invalidate_tlb_cache();
@@ -494,8 +518,10 @@ void setif_inclusion(con_match_fn_ptr con_match, res_proj_fn_ptr res_proj,
       setif_stats.cycles_collapsed_forward++;
       setif_stats.cycles_length_backward += setif_var_list_length(cycle);
     }
-  
-  void update_lower_bound(setif_var v, gen_e e) deletes
+
+  void update_lower_bound(	con_match_fn_ptr con_match, 
+				       res_proj_fn_ptr res_proj, 
+				       gen_e_pr_fn_ptr pr,setif_var v, gen_e e) deletes
     {
       if (sv_add_lb(v,e,setif_get_stamp(e)))
 	{
@@ -511,6 +537,8 @@ void setif_inclusion(con_match_fn_ptr con_match, res_proj_fn_ptr res_proj,
 	  gen_e_list_scanner scan;
 	  gen_e ub;
 	  bounds_scanner scan_bounds;
+	  /* TODO -- need to set a_prime during the bounds lookup */
+	  //annotation a_prime = empty_annotation;
 	  
 	  if (setif_is_var(e))
 	    setif_stats.added_succ++;
@@ -523,8 +551,10 @@ void setif_inclusion(con_match_fn_ptr con_match, res_proj_fn_ptr res_proj,
 
 	  bounds_scan(sv_get_ubs(v),&scan_bounds);
 	  while(bounds_next(&scan_bounds,&ub))
-	    setif_inclusion(con_match,res_proj,pr,e,ub);
+	    setif_annotated_inclusion(con_match,res_proj,pr,e, ub,
+				      empty_annotation);
 	  
+	  /* TODO--- what here? */
 	  gen_e_list_scan(sv_get_ub_projs(v),&scan);
 	  while (gen_e_list_next(&scan,&ub))
 	    setif_inclusion(con_match,res_proj,pr,e,ub);
@@ -533,7 +563,9 @@ void setif_inclusion(con_match_fn_ptr con_match, res_proj_fn_ptr res_proj,
       
     }
 
-  void update_upper_bound(setif_var v, gen_e e) deletes
+void update_upper_bound(con_match_fn_ptr con_match, 
+				       res_proj_fn_ptr res_proj, 
+				       gen_e_pr_fn_ptr pr, setif_var v, gen_e e) deletes
     {
       if (sv_add_ub(v,e,setif_get_stamp(e)))
 	{
@@ -559,6 +591,7 @@ void setif_inclusion(con_match_fn_ptr con_match, res_proj_fn_ptr res_proj,
 	  lazy_invalidate_tlb_cache();
 	  
 	  bounds_scan(sv_get_lbs(v),&scan);
+	  /* TODO */
 	  while (bounds_next(&scan,&lb))
 	    setif_inclusion(con_match,res_proj,pr,lb,e);
 
@@ -566,6 +599,14 @@ void setif_inclusion(con_match_fn_ptr con_match, res_proj_fn_ptr res_proj,
       
     }
 
+void setif_annotated_inclusion(con_match_fn_ptr con_match, 
+			       res_proj_fn_ptr res_proj, 
+			       gen_e_pr_fn_ptr pr, gen_e e1, gen_e e2,
+			       annotation a) deletes
+{
+
+
+  
 /*    pr(stdout,e1); */
 /*    fprintf(stdout,"<="); */
 /*    pr(stdout,e2); */
@@ -604,7 +645,7 @@ void setif_inclusion(con_match_fn_ptr con_match, res_proj_fn_ptr res_proj,
       gen_e_list_scan(exprs,&scan);
       while (gen_e_list_next(&scan,&temp))
 	{
-	  setif_inclusion(con_match,res_proj,pr,temp,e2);
+	  setif_annotated_inclusion(con_match,res_proj,pr,temp,e2,a);
 	}
 
       return;
@@ -620,7 +661,7 @@ void setif_inclusion(con_match_fn_ptr con_match, res_proj_fn_ptr res_proj,
       gen_e_list_scan(exprs,&scan);
       while (gen_e_list_next(&scan,&temp))
 	{
-	  setif_inclusion(con_match,res_proj,pr,e1,temp);
+	  setif_annotated_inclusion(con_match,res_proj,pr,e1,temp,a);
 	}
 
       return;
@@ -640,18 +681,18 @@ void setif_inclusion(con_match_fn_ptr con_match, res_proj_fn_ptr res_proj,
 	      setif_var_list cycle = cycle_detect(scratch,v1,v2);
 	      
 	      if (! setif_var_list_empty(cycle))
-		collapse_cycle_upper(scratch,v1,cycle);
+		collapse_cycle_upper(con_match,res_proj,pr,scratch,v1,cycle);
 	      else
-		update_lower_bound(v2,e1);
+		update_lower_bound(con_match,res_proj,pr,v2,e1);
 	      
 	      deleteregion(scratch);
 	    }
 	  
 	  else 
-	    update_lower_bound(v2,e1);
+	    update_lower_bound(con_match,res_proj,pr,v2,e1);
 	}
       else // e1 is a source
-	update_lower_bound(v2,e1);
+	update_lower_bound(con_match,res_proj,pr,v2,e1);
     }
 
   else if ( r_inductive(e1,e2) ) /* 'x <= _ */
@@ -668,22 +709,23 @@ void setif_inclusion(con_match_fn_ptr con_match, res_proj_fn_ptr res_proj,
 	      setif_var_list cycle = cycle_detect_rev(scratch,v1,v2);
 	      
 	      if (! setif_var_list_empty(cycle))
-		collapse_cycle_lower(scratch,v2,cycle);
+		collapse_cycle_lower(con_match,res_proj,pr,
+		scratch,v2,cycle);
 	      else
-		update_upper_bound(v1,e2);
+		update_upper_bound(con_match,res_proj,pr,v1,e2);
 	      
 	      deleteregion(scratch);
 	    }
       
 	  else
-	    update_upper_bound(v1,e2);
+	    update_upper_bound(con_match,res_proj,pr,v1,e2);
 	}
       else // e2 is a sink
 	{
 	  if (flag_merge_projections && res_proj(v1,e2))
 	    return;
 	  else
-	    update_upper_bound(v1,e2);
+	    update_upper_bound(con_match,res_proj,pr,v1,e2);
 	}
     }
 
@@ -886,7 +928,7 @@ gen_e setif_inter(gen_e_list exprs) deletes
 	  struct setif_inter_ *u = 
 	    ralloc(setif_inter_region,struct setif_inter_);
 	  
-	  u->type = UNION_TYPE;
+	  u->type = INTER_TYPE;
 	  u->st = stamp_fresh();
 	  u->exprs = filtered;
 #ifdef NONSPEC
@@ -950,6 +992,43 @@ char *setif_get_constant_name(gen_e e)
   return ((setif_constant_)e)->name;
 }
 
+/* Default implementation of annotations */
+
+/* bool default_is_empty_annotation(annotation a) { */
+/*   return a == empty_annotation; */
+/* } */
+
+/* bool default_eq_annotation(annotation a1, annotation a2) { */
+/*   assert (a1 == a2); */
+
+/*   return TRUE; */
+/* } */
+
+/* annotation default_transition(gen_e e1, annotation a1, annotation a2, gen_e e2) { */
+/*   return empty_annotation; */
+/* } */
+
+/* bool default_subsumed(gen_e e1, annotation a1, gen_e e2) { */
+/*   assert (is_empty_annotation(a1)); */
+
+/*   if (l_inductive(e1,e2)) { /\* _ <= 'x *\/ */
+/*     if (sv_is_lb((setif_var)e2, setif_get_stamp(e1))) */
+/*       return TRUE; */
+/*     else return FALSE; */
+/*   } */
+/*   else if (r_inductive(e1,e2)) { /\* 'x <= _ *\/ */
+/*     if (sv_is_ub((setif_var)e1, setif_get_stamp(e2))) */
+/*       return TRUE; */
+/*     else return FALSE; */
+/*   } */
+/*   else { // error! this should be an atomic constraint */
+/*     // handle_error 		/\* TODO -- add internal_error to error kinds *\/ */
+/*     assert(FALSE); */
+/*     return TRUE; */
+/*   } */
+
+/* } */
+
 void setif_init(void)
 {
   setif_term_region = newregion();
@@ -986,6 +1065,11 @@ void setif_init(void)
 #endif
   wild->st = WILD_TYPE;
   wild->type = WILD_TYPE;  
+
+/*   transition = default_transition; */
+/*   subsumed = default_subsumed; */
+/*   is_empty_annotation = default_is_empty_annotation; */
+/*   eq_annotation = default_eq_annotation; */
 }
 
 
@@ -1677,3 +1761,4 @@ int update_setif_rollback_info(translation t, void *m)
   
   return sizeof(struct setif_rollback_info_);
 }
+

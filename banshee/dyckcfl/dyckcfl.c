@@ -80,6 +80,8 @@ static hash_table constant_to_node_map = NULL;
 static hash_table clustered_indices = NULL;
 static hash_table unclustered_indices = NULL;
 static hash_table built_constructors = NULL; 
+static hash_table built_contra_constructors = NULL;
+/* static hash_table built_co_contra_constructors = NULL; */
 static region dyckregion = NULL;
 static dyck_state state;
 static constructor p_constructor = NULL;
@@ -109,25 +111,54 @@ static void my_call_setif_inclusion(gen_e e1, gen_e e2)
   call_setif_inclusion(e1,e2);
 }
 
-static constructor get_constructor(int index) 
-{
+static constructor get_constructor_aux(int index, vnc_kind vnc) {
   constructor result = NULL;
+  hash_table built = (vnc == vnc_pos) ? built_constructors : built_contra_constructors;
   
-  sig_elt c_sig[1] = {{vnc_pos,setif_sort}};
+  sig_elt c_sig[1] = {{vnc,setif_sort}};
 
   // Check the hash to see if the constructor has been built yet
   // If not, build the constructor
-  if (!hash_table_lookup(built_constructors,(void *)index,(hash_data *)&result)) {
+  if (!hash_table_lookup(built,(void *)index,(hash_data *)&result)) {
     result = make_constructor(CONS_OPEN,setif_sort,c_sig,1);
-    // Make it part of the n group
-    cons_group_add(n_group,result);
+    // TODO : Should we make the contra part of the n group?
+    if (vnc == vnc_pos) cons_group_add(n_group,result);
     // Hash it so that it can be be retrieved later
-    hash_table_insert(built_constructors,(void *)index,result);
+    hash_table_insert(built,(void *)index,result);
   }
 
-  assert(hash_table_lookup(built_constructors,(void *)index,NULL));
+  assert(hash_table_lookup(built,(void *)index,NULL));
   assert(result);
   return result;
+
+}
+
+/* static constructor get_co_contra_constructor(int index) { */
+/*   constructor result = NULL; */
+/*   hash_table built = built_co_contra_constructors; */
+  
+/*   sig_elt c_sig[2] = {{vnc_pos,setif_sort},{vnc_neg,setif_sort}}; */
+
+/*   // Check the hash to see if the constructor has been built yet */
+/*   // If not, build the constructor */
+/*   if (!hash_table_lookup(built,(void *)index,(hash_data *)&result)) { */
+/*     result = make_constructor(CONS_OPEN,setif_sort,c_sig,2); */
+/*     // Hash it so that it can be be retrieved later */
+/*     hash_table_insert(built,(void *)index,result); */
+/*   } */
+
+/*   assert(hash_table_lookup(built,(void *)index,NULL)); */
+/*   assert(result); */
+/*   return result; */
+/* } */
+
+static constructor get_constructor(int index) 
+{
+  return get_constructor_aux(index, vnc_pos);
+}
+
+static constructor get_contra_constructor(int index) {
+  return get_constructor_aux(index, vnc_neg);
 }
 
 /*****************************************************************************
@@ -155,6 +186,8 @@ void dyck_init(bool pn)
   clustered_indices = make_hash_table(dyckregion, 32, ptr_hash, ptr_eq);
   unclustered_indices = make_hash_table(dyckregion, 32, ptr_hash, ptr_eq);
   built_constructors = make_hash_table(dyckregion, 32, ptr_hash, ptr_eq);
+  /* built_co_contra_constructors = make_hash_table(dyckregion, 32, ptr_hash, ptr_eq); */
+  built_contra_constructors = make_hash_table(dyckregion, 32, ptr_hash, ptr_eq);
   constant_to_node_map = make_hash_table(dyckregion, 32, ptr_hash, ptr_eq);
   p_constructor = make_constructor(CONS_CLOSE,setif_sort,p_sig,1);
   all_nodes = new_dyck_node_list(dyckregion);
@@ -167,6 +200,8 @@ void dyck_reset(void)
   clustered_indices = NULL;
   unclustered_indices = NULL;
   built_constructors = NULL;
+  /* built_co_contra_constructors = NULL; */
+  built_contra_constructors = NULL;
   dyckregion = NULL;
   pn_reach = FALSE;
   p_constructor = NULL;
@@ -253,6 +288,7 @@ void mark_dyck_node_global(dyck_node n)
   assert(n);
   assert(state == dyck_inited);
 
+  my_call_setif_inclusion(setif_group_cons_expr(n_group,&(n->node_variable),1),n->node_variable); 		
   my_call_setif_inclusion(n->node_variable,setif_group_proj_pat(n_group,-1,n->node_variable));
 }
 
@@ -280,6 +316,35 @@ void make_dyck_open_edge(dyck_node n1, dyck_node n2, int index)
 #endif
 }
 
+// Make an (_{index} contravariant edge between n1 and n2
+void make_dyck_contra_open_edge(dyck_node n1, dyck_node n2, int index) {
+  gen_e exps[1];
+  constructor c = get_contra_constructor(index);
+  assert(state == dyck_inited);
+  exps[0] = n1->node_variable;
+  // Make the constructed term and add the inclusion constraint
+  my_call_setif_inclusion(constructor_expr(c,exps,1), n2->node_variable);
+
+#ifdef DYCK_DOT_DEBUG
+  fprintf(dotfile,"\"%s\" -> \"%s\" [label=\"(^%d\"];\n",n1->unique_name,n2->unique_name,index);
+#endif
+
+}
+
+// Make an (_{index} co/contravariant edge between n1 and n2
+/* void make_dyck_cocontra_open_edge(dyck_node n1, dyck_node n2, int index) { */
+/*   gen_e exps[2]; */
+/*   constructor c = get_co_contra_constructor(index); */
+/*   assert(state == dyck_inited); */
+/*   exps[0] = n1->node_variable; */
+/*   exps[1] = n1->node_variable; */
+/*   my_call_setif_inclusion(constructor_expr(c,exps,2), n2->node_variable); */
+
+/* #ifdef DYCK_DOT_DEBUG */
+/*   fprintf(dotfile,"\"%s\" -> \"%s\" [label=\"(^%d_%d\"];\n",n1->unique_name,n2->unique_name,index); */
+/* #endif */
+/* } */
+
 // n-edges for pn reachability (until a better method is devised)
 static void make_dyck_p_edge(dyck_node n1, dyck_node n2)
 {
@@ -304,6 +369,43 @@ void make_dyck_close_edge(dyck_node n1, dyck_node n2, int index)
   fprintf(dotfile,"\"%s\" -> \"%s\" [label=\")_%d\"];\n",n1->unique_name,n2->unique_name,index);
 #endif
 }
+
+void make_dyck_contra_close_edge(dyck_node n1, dyck_node n2, int index) 
+{
+  constructor c = get_contra_constructor(index);
+  assert(state == dyck_inited);
+  my_call_setif_inclusion(n1->node_variable,setif_proj_pat(c, 0, n2->node_variable));
+  /* TODO : check */
+  // if (pn_reach) make_dyck_p_edge(n1, n2);
+
+#ifdef DYCK_DOT_DEBUG
+  fprintf(dotfile,"\"%s\" -> \"%s\" [label=\")^%d\"];\n",n1->unique_name,n2->unique_name,index);
+#endif
+}
+
+
+// Make )_{index} to match a covariant (_{index} made with cocontra_open_edge
+/* void make_dyck_co_close_edge(dyck_node n1, dyck_node n2, int index) { */
+/*   constructor c = get_co_contra_constructor(index); */
+/*   assert(state == dyck_inited); */
+/*   my_call_setif_inclusion(n1->node_variable, setif_proj_pat(c, 0, n2->node_variable)); */
+/*   if (pn_reach) make_dyck_p_edge(n1, n2); */
+/* #ifdef DYCK_DOT_DEBUG */
+/*   fprintf(dotfile,"\"%s\" -> \"%s\" [label=\")_%d\"];\n", n1->unique_name, n2->unique_name,index); */
+/* #endif */
+/* } */
+
+// Make )_{index} to match a contravariant (_{index} made with cocontra_close_edge
+/* void make_dyck_contra_close_edge(dyck_node n1, dyck_node n2, int index) { */
+/*   constructor c = get_co_contra_constructor(index); */
+/*   assert(state == dyck_inited); */
+/*   my_call_setif_inclusion(n1->node_variable, setif_proj_pat(c, 1, n2->node_variable)); */
+/*   if (pn_reach) make_dyck_p_edge(n1, n2); */
+/* #ifdef DYCK_DOT_DEBUG */
+/*   fprintf(dotfile,"\"%s\" -> \"%s\" [label=\")^%d\"];\n", n1->unique_name, n2->unique_name,index); */
+/* #endif */
+/* } */
+
 
 // FIX: Clusters must be the same size. 
 void make_clustered_dyck_open_edges(dyck_node n1s[], dyck_node n2,
@@ -555,6 +657,7 @@ bool dyck_check_pn_reaches(dyck_node n1, dyck_node n2)
   region scratch = NULL;
   hash_table visited = NULL;
   hash_table visited_p = NULL;
+  bool result;
 
   assert (state == dyck_query);
 
@@ -564,10 +667,11 @@ bool dyck_check_pn_reaches(dyck_node n1, dyck_node n2)
   visited = make_hash_table(scratch, 32, ptr_hash, ptr_eq);
   visited_p = make_hash_table(scratch, 32, ptr_hash, ptr_eq);
 
-  return dyck_check_pn_reaches_aux(n1->node_constant,n2->node_variable,visited,
+  result = dyck_check_pn_reaches_aux(n1->node_constant,n2->node_variable,visited,
 				   visited_p, FALSE, NULL);
-
   deleteregion(scratch);
+
+  return result;
 }
 
 dyck_node_list dyck_reaches(dyck_node n)
@@ -622,8 +726,6 @@ dyck_node_list dyck_pn_reaches(dyck_node n)
   return all_constants;
 }
 
-
-
 // Print (in dot format) a representation of the closed CFL graph, w/o
 // PN edges
 void dyck_print_closed_graph(FILE *f)
@@ -656,6 +758,9 @@ void dyck_print_closed_graph(FILE *f)
   }
   fprintf(f,"\n}");
 }
+
+
+
 
 // // Return the list of nodes that reach this one
 // string_list dyck_get_reaches_list(dyck_node n)

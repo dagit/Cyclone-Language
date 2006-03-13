@@ -25,17 +25,17 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-ifndef RLIB
+#ifndef RLIB
 region_dir = ../libcompat
-else
-region_dir = ../rlib
-endif
+#else
+#region_dir = ../rlib
+#endif
 
 all: ibanshee.exe
 
 ibanshee.exe: parser.tab.c lex.yy.c
 	gcc -DNONSPEC -Ddeletes= -Dtraditional= -Dsameregion= \
-	 -Dparentptr=  -o ibanshee.exe lex.yy.c parser.tab.c -I../engine -I$(region_dir) -L../engine -L$(region_dir) -lnsengine -lregions -lfl -g -pg
+	 -Dparentptr=  -o ibanshee.exe lex.yy.c parser.tab.c -I../engine -I$(region_dir) -L../engine -L$(region_dir) -lnsengine -lregions -lfl 
 	cp ibanshee.exe ../bin
 
 parser.tab.c: parser.y

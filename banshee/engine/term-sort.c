@@ -230,7 +230,7 @@ bool term_eq(gen_e e1, gen_e e2)
 }
 
 
-static void term_register_rollback(void) 
+void term_register_rollback(void) 
 {
 #ifdef BANSHEE_ROLLBACK
   term_current_rollback_info = 

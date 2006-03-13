@@ -39,7 +39,7 @@ TARGETS = libregions.a
 
 all: $(TARGETS) 
 
-regions.o: regions.c pages.c alloc.c regions.h
+regions.o: serialize.c regions.c pages.c alloc.c regions.h
 	gcc -c $(CFLAGS) -o regions.o regions.c
 
 profile.o: 

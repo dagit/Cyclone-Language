@@ -117,16 +117,24 @@ extern char *__rc_file;
 #include "profile.h"
 #endif
 
+struct translation {
+  region reg;
+  void **map;
+};
+
 /*
-  The (dummy) interface for serialization/deserialization.
+  The interface for serialization/deserialization.
 */
-typedef void *translation;
+typedef struct translation *translation;
 typedef int (*Updater)(translation, void *);
 void delete_translation(translation);
 extern int serialize(region *r, char *datafile, char *statefile); 
 extern translation deserialize(char *, char *, Updater *, region);
 extern void update_pointer(translation, void **);
 extern void *translate_pointer(translation, void *);
+
+#define TRANSLATEPOINTER(m,a) ((*(m->map + (((unsigned int) a) >> SHIFT))) + (((unsigned int) a) & 0x00001FFF))
+#define UPDATEPOINTER(map,loc) *(loc) = TRANSLATEPOINTER(map,loc)
 
 EXTERN_C_END
 

@@ -896,12 +896,20 @@ static expr_type analyze_expression(expression e) deletes
       {
 	conditional c = CAST(conditional, e);
 	expr_type cond, arg1, arg2;
+	type c_type;
 	
 	cond = promote_to_ptr(analyze_expression(c->condition));
 	arg1 = promote_to_ptr(analyze_expression(c->arg1));
 	arg2 = promote_to_ptr(analyze_expression(c->arg2));
 	
-	return (expr_type){pta_join(arg1.t_type,arg2.t_type),arg2.c_type};
+	if (type_pointer(arg1.c_type) && type_integer(arg2.c_type))
+	  c_type = arg1.c_type;
+	else if (type_pointer(arg2.c_type) && type_integer(arg1.c_type))
+	  c_type = arg2.c_type;
+	else
+	  c_type = arg1.c_type;
+
+	return (expr_type){pta_join(arg1.t_type,arg2.t_type),c_type};
       }
       break;
     case kind_function_call:

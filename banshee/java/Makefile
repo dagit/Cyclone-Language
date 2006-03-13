@@ -27,6 +27,8 @@
 
 OS:=$(shell uname)
 
+CC = gcc
+
 #ifeq ($(OS), Darwin)
 #	jni_dir = /System/Library/Frameworks/JavaVM.framework/Headers 
 # TODO --- this is not a platform agnostic way of finding the jni headers
@@ -34,11 +36,11 @@ OS:=$(shell uname)
 	jni_dir = $(JAVA_HOME)/include/
 #endif
 
-ifndef RLIB
+#ifndef RLIB
 region_dir = ../libcompat
-else
-region_dir = ../rlib
-endif
+#else
+#region_dir = ../rlib
+#endif
 
 engine_dir = ../engine
 
@@ -49,19 +51,22 @@ all: java jdyckcfl
 .PHONY: java jdyckcfl check
 
 java:
-	javac `find . -name \*.java`
+	javac `find jbanshee -name \*.java`
+
+conflux: java
+	javac `find conflux -name \*.java`
 
 jdyckcfl: java 
-	javah -jni banshee.dyckcfl.UnsafeDyckCFL
+	javah -jni jbanshee.dyckcfl.UnsafeDyckCFL
 	$(CC) -c -I. -I$(dyckcfl_dir) -I$(engine_dir) -I$(region_dir) -I$(jni_dir) -Ddeletes= \
 	-Dtraditional= -Dsameregion= -Dparentptr= -DNONSPEC -Wall \
-	banshee/dyckcfl/UnsafeDyckCFLImp.c
+	jbanshee/dyckcfl/UnsafeDyckCFLImp.c
 	$(CC) -dynamiclib -o libjdyckcfl.jnilib $(dyckcfl_dir)/dyckcfl.o UnsafeDyckCFLImp.o $(engine_dir)/libnsengine.a $(region_dir)/libregions.a -framework JavaVM
 
 check: java jdyckcfl
-	java banshee.dyckcfl.UnsafeDyckCFL
+	java jbanshee.dyckcfl.UnsafeDyckCFL
 
 clean:
-	rm -f *.o libjdyckcfl.jnilib banshee_dyckcfl_UnsafeDyckCFL.h 
+	rm -f *.o libjdyckcfl.jnilib jbanshee_dyckcfl_UnsafeDyckCFL.h 
 	rm -f `find . -name \*.class`
 	rm -f `find . -name \*~`

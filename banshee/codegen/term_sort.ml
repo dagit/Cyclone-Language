@@ -72,8 +72,8 @@ class termsort_gen =
          void EXPRID_unify(EXPRID e1, EXPRID e2) ;\n\
          void EXPRID_cunify(EXPRID e1,EXPRID e2) ;\n\
 	 EXPRID EXPRID_ecr(EXPRID e) ;\n
-         int EXPRID_cmp(const EXPRID e1,const EXPRID e2);\n
-         bool EXPRID_eq(EXPRID e1, EXPRID e2);\n"
+         EXPRID EXPRID_cmp(const EXPRID e1,const EXPRID e2);\n
+         EXPRID EXPRID_eq(EXPRID e1, EXPRID e2);\n"
       in
       let file_decl = 
         "DECLARE_OPAQUE_LIST(EXPRID_list,gen_e);\n\

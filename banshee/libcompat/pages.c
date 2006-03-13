@@ -73,6 +73,8 @@ struct page
 
   unsigned int free : 1;
 
+  char *available;  /* next available location on the page */
+
   /* Only in free pages not in the single_pages list */
   struct page *previous;
 };

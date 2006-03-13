@@ -27,11 +27,17 @@
 
 banshee_bindir = ../bin
 
-ALL = banshee.ps banshee-manual.ps
+ALL = banshee.ps banshee-manual.pdf
 PAPERTYPE = letter
 SOURCES = banshee.tex banshee-manual.tex
 
 all: $(ALL)
+
+banshee-manual.pdf: banshee-manual.tex banshee-manual.bib
+	pdflatex $(@:.pdf=.tex)
+	bibtex banshee-manual
+	pdflatex $(@:.pdf=.tex)
+	pdflatex $(@:.pdf=.tex)
 
 %.ps: %.dvi 
 	dvips -P cmz -t $(PAPERTYPE) $< -o $@
@@ -40,4 +46,4 @@ all: $(ALL)
 	$(banshee_bindir)/slatex $(@:.dvi=.tex)
 
 clean:
-	-rm -f *.aux *.dvi *.log *.bbl *.blg *.ps *.pdf *.toc *.lof *.lot *.xyc .cache* .cache.new *~ *.idx
+	-rm -f *.aux *.dvi *.log *.bbl *.blg *.ps banshee-manual.pdf *.toc *.lof *.lot *.xyc .cache* .cache.new *~ *.idx

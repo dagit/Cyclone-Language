@@ -49,23 +49,27 @@ void alloc_block(region r, struct allocator *a, struct ablock *blk,
 
   /* Can't use last byte of page (pointers to the byte after an object are
      valid) */
-  if (mem2 + s2 >= blk->end)
+  if (mem2 + s2 >= blk->base + blksize)
     {
       if (blksize == RPAGESIZE)
 	{
 	  newp = alloc_single_page(a->pages);
 	  a->pages = newp;
 	  blk->allocfrom = (char *)newp + offsetof(struct page, previous);
+	  newp->available = blk->allocfrom;
 	  set_region(newp, 1, r);
+	  /* Have to clear the entire page to ensure that serialization/deserialization work. */
+	  clear((char *) blk->allocfrom, ((char *)newp + blksize) - (char *)blk->allocfrom);
 	}
       else
 	{
 	  newp = alloc_pages(blksize >> RPAGELOG, a->bigpages);
 	  a->bigpages = newp;
 	  blk->allocfrom = (char *)newp + offsetof(struct page, previous);
+	  newp->available = blk->allocfrom;
 	  set_region(newp, blksize >> RPAGELOG, r);
 	}
-      blk->end = (char *)newp + blksize;
+      blk->base = (char *)newp;
 
       if (needsclear)
 	preclear(blk->allocfrom, blksize - (blk->allocfrom - (char *)newp));
@@ -75,6 +79,7 @@ void alloc_block(region r, struct allocator *a, struct ablock *blk,
 
   ASSERT_INUSE(blk->end - blksize, r);
   blk->allocfrom = mem2 + s2;
+  ((struct page *) blk->base)->available = blk->allocfrom;
 
   *p1 = mem1;
   *p2 = mem2;
@@ -98,13 +103,14 @@ void qalloc(region r, struct allocator *a, void **p1, int s1, int a1,
 
     /* Can't use last byte of page (pointers to the byte after an object are
        valid) */
-    if (mem2 + s2 < a->page.end)
+    if (mem2 + s2 < a->page.base + RPAGESIZE)
       {
-	ASSERT_INUSE(blk->end - blksize, r);
+	ASSERT_INUSE(blk->base, r);
 	a->page.allocfrom = mem2 + s2;
 
 	*p1 = mem1;
 	*p2 = mem2;
+	((struct page *) a->page.base)->available = a->page.allocfrom;
 	return;
       }
   }
@@ -115,6 +121,7 @@ void qalloc(region r, struct allocator *a, void **p1, int s1, int a1,
 		  needsclear);
       return;
     }
+  /*
 #if K >= 2
   if (n <= RPAGESIZE)
     {
@@ -131,6 +138,7 @@ void qalloc(region r, struct allocator *a, void **p1, int s1, int a1,
       return;
     }
 #endif
+  */
 
   /* We would have - 1 after RPAGESIZE, but we need to add 1 to make the
      last byte of the object live in the same region */
@@ -143,8 +151,12 @@ void qalloc(region r, struct allocator *a, void **p1, int s1, int a1,
   mem = (char *)p + offsetof(struct page, previous);
   *p1 = PALIGN(mem, a1);
   *p2 = PALIGN((char *)*p1 + s1, a2);
-  if (needsclear)
-    preclear(*p2, s2);
+  p->available = ((char *) *p2) + s2;
+  /*  if (needsclear)
+      preclear(*p2, s2); */
+  /* For big pages, we have to ensure that the entire page is cleared, even if that involves clearing memory beyond the
+     number of bytes requested.  Otherwise, deserialization might fail. */
+  clear(*p2, ((char *)p + npages * RPAGESIZE) - (char *) *p2); 
 }
 
 void free_all_pages(region r, struct allocator *a)

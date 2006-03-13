@@ -553,12 +553,24 @@ static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxp
       }
       _prefix[pfxpos] = '\0';
     }
-    break;
-  case &AppType(&AggrCon(AggrInfo{.UnknownAggr=$(ak,n,_)}), ts):     
-    let adn=Absynpp::fullqvar2string(n);
-    int findex =0;
+    fallthru (dtd->name, ts);
+  case &AppType(&DatatypeCon(DatatypeInfo{.UnknownDatatype=UnknownDatatypeInfo{n, _}}), ts):
     if(ts) {
+      let adn=Absynpp::fullqvar2string(n);
       vsprintf(_prefix+pfxpos, "_%dAP%dI%s_", make_parg(index, strlen(adn), adn));
+      for(int ix=0;ts;ts=ts->tl, ix++) {
+	ret= List::append(cvars_in_type(ts->hd, ix, is_local, strlen(_prefix)), ret);
+      }
+      _prefix[pfxpos]='\0';
+    }
+    break;
+  case &AppType(&DatatypeFieldCon(DatatypeFieldInfo{.KnownDatatypefield=$(dd,dfd)}), ts): 
+    Warn::impos("Unexpected DatatypeFieldCon in interproc cvar naming");
+  case &AppType(&DatatypeFieldCon(DatatypeFieldInfo{.UnknownDatatypefield = UnknownDatatypeFieldInfo(dn,dfn,_)}), ts): 
+    if(ts) {
+      let sdn=Absynpp::fullqvar2string(dn);
+      let sdfn=Absynpp::fullqvar2string(dfn);
+      vsprintf(_prefix+pfxpos, "_%dAP%dI%s_%s_", make_parg(index, strlen(sdn)+strlen(sdfn)+1, sdn, sdfn));
       for(int ix=0;ts;ts=ts->tl, ix++) {
 	ret= List::append(cvars_in_type(ts->hd, ix, is_local, strlen(_prefix)), ret);
       }
@@ -571,14 +583,23 @@ static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxp
     if(ad->impl) {
       for(_ fs = ad->impl->fields; fs; fs= fs->tl) {
 	vsprintf(_prefix+pfxpos, "AD%dI%s_AF%d", make_parg(strlen(adn), adn, findex++));
-	//	aprintf("%s_%d_AD%s_AF%d", prefix, index, adn, findex++)
 	ret = List::append(cvars_in_type(fs->hd->type, 0, is_local, strlen(_prefix)), ret);
+      }
+      _prefix[pfxpos]='\0';
+    }
+    fallthru (ad->name, ts);
+  case &AppType(&AggrCon(AggrInfo{.UnknownAggr=$(_,n,_)}), ts):     
+    let adn=Absynpp::fullqvar2string(n);
+    int findex =0;
+    if(ts) {
+      vsprintf(_prefix+pfxpos, "_%dAP%dI%s_", make_parg(index, strlen(adn), adn));
+      for(int ix=0;ts;ts=ts->tl, ix++) {
+	ret= List::append(cvars_in_type(ts->hd, ix, is_local, strlen(_prefix)), ret);
       }
       _prefix[pfxpos]='\0';
     }
     break;
   case &FnType(*fi):
-    //    aprintf("%", prefix, index);
     vsprintf(_prefix+pfxpos, "_%d_FR", make_parg(index));
     ret = List::append(cvars_in_type(fi->ret_type, 0,is_local,strlen(_prefix)), ret);
     int argix = 0;
@@ -620,7 +641,6 @@ static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxp
     break;
   default:
     break;
-    //  case &AppType(&DatatypeFieldCon({.KnownDatatypeField = $(_,dfi), ts): //not a top level decla
   }
   return ret;
 }

@@ -60,9 +60,10 @@
 
 /* Types defined here MUST be larger than LARGEST_BUILTIN_TYPE (banshee.h). */
 #define GROUP_PROJ_PAT_TYPE 11
+#define GROUP_CONS_EXPR_TYPE 12
 
 /* Update this whenever a new term type is defined. It MUST be even. */
-#define NUM_EXTRA_TYPES 2
+#define NUM_EXTRA_TYPES 4
 
 typedef enum 
 {
@@ -141,11 +142,22 @@ typedef struct cons_expr_
   constructor c;
 } * cons_expr;
 
+
+// the union of all the cons exprs in the given group. hence, only l-compatible
+typedef struct gcons_expr_
+{
+   sort_kind sort;
+   int type;
+   stamp st;
+   gen_e *exps;
+   cons_group g;
+} *gcons_expr;
+
 struct decon
 {
-  char *name;
+  const char *name;
   int arity;
-  gen_e *elems;
+  const gen_e *elems;
 };
 
 struct nonspec_stats_
@@ -215,6 +227,12 @@ static bool type_is_pat(int type)
 static bool type_is_cons_expr(int type)
 {
  return ( !(type % 2) && (type >= smallest_special_type) );
+}
+
+static bool setif_is_gcons_expr(gen_e e)
+{
+	int type = ((setif_term)e)->type;
+	return type == GROUP_CONS_EXPR_TYPE;
 }
 
 static bool setif_is_pat(gen_e e)
@@ -389,6 +407,21 @@ static bool gpat_match(cons_expr ce, gproj_pat pat)
 {
   assert(ce->c->groups);
   return cons_group_list_member(ce->c->groups,pat->g);
+}
+
+static bool gcons_match(gcons_expr ge, proj_pat pat)
+{
+  assert(pat->c->groups);
+  return cons_group_list_member(pat->c->groups,ge->g);
+}
+
+// group proj / group cons match case
+static bool gcons_gpat_match(gcons_expr ge, gproj_pat gpat)
+{
+   // TODO: this should check if there is a constructor in the intersection of
+   // the two groups. For now I just assume that constructor groups are
+   // disjoint
+  return (gpat->g == ge->g);
 }
 
 /*
@@ -577,13 +610,10 @@ gen_e setst_proj_pat(constructor c, int i, gen_e e)
   return make_proj_pat(c,i,e);
 }
 
-/* for proj, sort(e) must be setif */
-gen_e setif_proj(constructor c, int i, gen_e e) 
-{
-  setif_var v;
-  gen_e proj_var, proj;
+static constructor sp_c;
+static int sp_i;
 
-  gen_e nonspec_get_proj(gen_e_list arg1)
+static gen_e nonspec_get_proj(gen_e_list arg1)
     {
       proj_pat pat;
       gen_e_list_scanner scan;
@@ -594,11 +624,20 @@ gen_e setif_proj(constructor c, int i, gen_e e)
 	{
 	  if (! setif_is_pat(temp) ) continue;
 	  pat = (proj_pat)temp;
-	  if ( pat_match(pat->type,c->type) && i == pat->i )
+	  if ( pat_match(pat->type,sp_c->type) && sp_i == pat->i )
 	    return pat->exp;
 	}
       return NULL;
     }
+
+/* for proj, sort(e) must be setif */
+gen_e setif_proj(constructor c, int i, gen_e e) 
+{
+  setif_var v;
+  gen_e proj_var, proj;
+
+  sp_c = c;
+  sp_i = i;
 
   banshee_clock_tick();
 
@@ -693,8 +732,78 @@ gen_e setst_proj(constructor c, int i, gen_e e)
 
 static void setif_con_match(gen_e e1, gen_e e2)
 {
+   // case where e1 is a gcons expr 
+   if (setif_is_gcons_expr(e1) && setif_is_pat(e2) && 
+       gcons_match((gcons_expr)e1,(proj_pat)e2) ) {
+		gcons_expr gc = (gcons_expr)e1;
+		proj_pat p = (proj_pat)e2;
+		int i = p->i;
+		assert(i < gc->g->arity);
+		
+		if (gc->g->sig[i].variance == vnc_pos) {
+			call_inclusion_ind(gc->exps[i], p->exp);
+		}
+		else if (gc->g->sig[i].variance == vnc_neg) {
+			call_inclusion_ind(p->exp, gc->exps[i]);
+		}
+		else call_unify_ind(gc->exps[i], p->exp);
+ 	}
+   // and e2 is a gproj pat
+   if (setif_is_gcons_expr(e1) && setif_is_gpat(e2) && 
+       gcons_gpat_match((gcons_expr)e1, (gproj_pat)e2)) {
+	  	gcons_expr gc = (gcons_expr)e1;
+	    gproj_pat p = (gproj_pat)e2;
+	    int i = p->i;
+
+	    assert(i == -1 || i < gc->g->arity);
+
+	    // Calling with i == -1 makes the projection operate over every subterm (this is for clustering)
+	    // FIX : check, if this term exists w/ i == -1, it subsumes other pats
+	    // should they be created?
+	    if (i == -1) {
+	      int j;
+
+	      for (j = 0; j < gc->g->arity; j++) {
+		if (gc->g->sig[j].variance == vnc_pos)
+		  call_inclusion_ind(gc->exps[j],p->exp);
+		else if (gc->g->sig[i].variance == vnc_neg)
+		  call_inclusion_ind(p->exp,gc->exps[j]);
+		else
+		  call_unify_ind(gc->exps[j],p->exp);
+	      }
+	    }
+	    else {
+	      if (gc->g->sig[i].variance == vnc_pos)
+		call_inclusion_ind(gc->exps[i],p->exp);
+	      else if (gc->g->sig[i].variance == vnc_neg)
+		call_inclusion_ind(p->exp,gc->exps[i]);
+	      else
+		call_unify_ind(gc->exps[i],p->exp);
+	    }
+   }
+   // and e2 is a cons expr
+   else if (setif_is_gcons_expr(e1) && setif_is_cons_expr(e2))	{
+	   gcons_expr gc = (gcons_expr)e1;
+	   cons_expr c = (cons_expr)e2;
+	   if (!cons_group_list_member(c->c->groups,gc->g)) {
+		handle_error(e1,e2,bek_cons_mismatch);
+		}
+	   else {
+		  int i;
+		  for (i = 0; i < c->arity; i++)
+		    {
+		      if (c->sig[i].variance == vnc_pos)
+			call_inclusion_ind(gc->exps[i],c->exps[i]);
+		      else if (c->sig[i].variance == vnc_neg)
+			call_inclusion_ind(c->exps[i],gc->exps[i]);
+		      else
+			call_unify_ind(gc->exps[i],c->exps[i]);
+		    }
+		}
+	}
+	
   // Case where e1 is a constructor expression and e2 is a gproj_pat
-  if (setif_is_cons_expr(e1) && setif_is_gpat(e2) && 
+  else if (setif_is_cons_expr(e1) && setif_is_gpat(e2) && 
       gpat_match((cons_expr)e1, (gproj_pat)e2) ) {
     cons_expr c = (cons_expr)e1;
     gproj_pat p = (gproj_pat)e2;
@@ -702,7 +811,7 @@ static void setif_con_match(gen_e e1, gen_e e2)
 
     assert(i == -1 || i < c->arity);
 
-    // Calling with i == -1 makes the projection operate over every subterm
+    // Calling with i == -1 makes the projection operate over every subterm (this is for clustering)
     // FIX : check, if this term exists w/ i == -1, it subsumes other pats
     // should they be created?
     if (i == -1) {
@@ -824,56 +933,68 @@ static void setst_con_match(gen_e e1, gen_e e2)
     } 
 }
 
-// given x <= proj(c,i,e)
-// proj_merge(region,e,get_proj_i_arg,fresh_large_fn_ptr,
-// sort_inclusion_fn_ptr,set_inclusion)
-static bool setif_res_proj(setif_var v1,gen_e e2)
-{
-  if (setif_is_pat(e2) ) {
-    proj_pat projection_pat;
-  
 
-    gen_e setif_get_proj(gen_e_list arg1)
-      {
+static constructor rp_c;
+static int rp_i;
+static sort_kind rp_s;
+static int rp_type;
+
+static  gen_e setif_get_proj(gen_e_list arg1)
+{
 	gen_e_list_scanner scan;
 	gen_e temp;
 	proj_pat pat;
-	
+
 	gen_e_list_scan(arg1,&scan);
 	while(gen_e_list_next(&scan,&temp))
-	  {
-	    if (!setif_is_pat(temp)) continue;
-	    pat = (proj_pat)temp;
-	    if ( pat->type == ((setif_term)e2)->type && 
-		 pat->i == ((proj_pat)e2)->i)
-	      return pat->exp;
-	  }
+	{
+		if (!setif_is_pat(temp)) continue;
+		pat = (proj_pat)temp;
+		if ( pat->type == rp_type && 
+			pat->i == rp_i)
+			return pat->exp;
+	}
 	return NULL;
-      }
-    
-    gen_e fresh_large(const char *name)
-      {
-	return get_proj_var( ((proj_pat)e2)->exp->sort,TRUE);
-      }
-    
-    void sort_inclusion(gen_e e1, gen_e e2)
-      {
-	if ( projection_pat->variance == vnc_pos )
-	  call_inclusion_ind(e1,e2);
-	else if ( projection_pat->variance == vnc_neg)
-	  call_inclusion_ind(e2,e1);
-	else 
-	  call_unify_ind(e1,e2);
-      }
-    
-    gen_e proj_con(gen_e e)
-      {
-	return make_proj_pat( ((proj_pat)e2)->c, ((proj_pat)e2)->i,e);
-      }
-    
-    projection_pat = (proj_pat)e2;
+}
+
+static gen_e fresh_large(const char *name)
+{
+	return get_proj_var(rp_s,TRUE);
+}
+
+static void sort_inclusion_contra(gen_e e1, gen_e e2) {
+	call_inclusion_ind(e2,e1);
+}
+
+static gen_e proj_con(gen_e e)
+{
+	return make_proj_pat( rp_c, rp_i,e);
+}
+// given x <= proj(c,i,e)
+// proj_merge(region,e,get_proj_i_arg,fresh_large_fn_ptr,
+// sort_inclusion_fn_ptr,set_inclusion)
+static bool setif_res_proj(setif_var v1, gen_e e2)
+{
+  if (setif_is_pat(e2) ) {
+    proj_pat projection_pat = (proj_pat)e2; 
+	incl_fn_ptr sort_inclusion;
+	rp_c = projection_pat->c;
+	rp_i = projection_pat->i;
+	rp_s = projection_pat->exp->sort;
+	rp_type = projection_pat->type;
+	
+	if (projection_pat->variance == vnc_pos) {
+		sort_inclusion = call_inclusion_ind;
+	}
+	else if (projection_pat->variance == vnc_neg) {
+		sort_inclusion = sort_inclusion_contra;
+	}
+	else {
+		sort_inclusion = call_unify_ind;
+	}
+  
     return setif_proj_merge(v1,((proj_pat)e2)->exp,
-			    setif_get_proj,proj_con,
+			    setif_get_proj, proj_con,
 			    fresh_large,sort_inclusion,
 			    setif_inclusion_ind);
   }
@@ -1195,10 +1316,10 @@ static struct decon deconstruct_expr_aux(constructor c,gen_e e)
 	if ( setif_is_cons_expr(e) && check_cons_match(c,((setif_term)e)->type) )
 	  {
 	    cons_expr ce = (cons_expr)e;
-	    gen_e *elems = rarrayalloc(banshee_ptr_region,ce->arity,
-				       gen_e);
-	    memcpy(elems,ce->exps,sizeof(gen_e)*ce->arity);
-	    return (struct decon){ce->name,ce->arity,elems};
+	    //gen_e *elems = rarrayalloc(banshee_ptr_region,ce->arity,
+		//		       gen_e);
+	    //memcpy(elems,ce->exps,sizeof(gen_e)*ce->arity);
+	    return (struct decon){ce->name,ce->arity,ce->exps};
 	  }
 	else goto NONE;
       }
@@ -1208,10 +1329,10 @@ static struct decon deconstruct_expr_aux(constructor c,gen_e e)
 	if ( setst_is_cons_expr(e) && check_cons_match(c,((setst_term)e)->type) )
 	  {
 	    cons_expr ce = (cons_expr)e;
-	    gen_e *elems = rarrayalloc(banshee_ptr_region,ce->arity,
-				       gen_e);
-	    memcpy(elems,ce->exps,sizeof(gen_e)*ce->arity);
-	    return (struct decon){ce->name,ce->arity,elems};
+	    //gen_e *elems = rarrayalloc(banshee_ptr_region,ce->arity,
+	//			       gen_e);
+	   // memcpy(elems,ce->exps,sizeof(gen_e)*ce->arity);
+	    return (struct decon){ce->name,ce->arity,ce->exps};
 	  }
 	else goto NONE;
       }
@@ -1625,6 +1746,64 @@ void cons_group_add(cons_group g, constructor c)
   assert(c->groups);
   cons_group_list_cons(g,c->groups);
 }
+
+// TODO
+static gen_e make_group_cons_expr(cons_group g, gen_e *exps, int arity) {
+  gcons_expr result;
+  int i;
+  get_stamp_fn_ptr get_stamp;
+  // TODO don't hardcode the sort
+  term_hash sort_hash = get_sort_hash(setif_sort);
+
+  stamp *st = rarrayalloc(banshee_nonptr_region,arity + 2,stamp);
+  st[0] = GROUP_CONS_EXPR_TYPE;
+  st[1] = g->gid;
+
+  // Dynamic arity check
+  if(arity != g->arity)
+    {
+      fail("Signature mismatch\n");
+      return NULL;
+    }
+  // Dynamic sort checks
+  for (i = 0; i < arity; i++)
+    {
+      if ( g->sig[i].sort != exps[i]->sort)
+	{
+	  fail("Signature mismatch\n");
+	  return NULL;
+	}
+      get_stamp = get_sort_stamp(g->sig[i].sort);
+      st[i+2] = get_stamp(exps[i]);
+    }
+
+  // Hash-consing of terms
+  if (!(result = (gcons_expr)term_hash_find(sort_hash,st,arity+2)) 
+      || arity == 0 )
+    {
+      gen_e *e = rarrayalloc(banshee_ptr_region,arity,gen_e);
+
+      if (arity) memcpy(e,exps,sizeof(gen_e)*arity);
+      else e = NULL;
+
+      result = ralloc(cons_expr_region,struct gcons_expr_);  
+      result->type = st[0];
+      result->st = stamp_fresh();
+      // TODO don't hardcode the sort
+      result->sort = setif_sort;
+      result->exps = exps;
+      result->g = g;
+
+      term_hash_insert(sort_hash,(gen_e)result,st,arity+2);
+    }
+
+  return (gen_e)result;
+}
+
+gen_e setif_group_cons_expr(cons_group g, gen_e *exps, int arity) {
+	return make_group_cons_expr(g, exps, arity);
+}
+
 
 static gen_e make_group_proj_pat(cons_group g, int i, gen_e e)
 {

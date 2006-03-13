@@ -36,7 +36,8 @@
   #include "regions.h"
   #include "parser.tab.h"
   #include "hash.h"
-  
+
+  void flush_lexer() { YY_FLUSH_BUFFER; }
 %}
 
 %option always-interactive
@@ -86,5 +87,3 @@ TICK [\']
 %%
 
 yyerror( char *msg ) { fprintf( stderr, "%s\n", msg ); }
-
-void flush_lexer() { YY_FLUSH_BUFFER; }

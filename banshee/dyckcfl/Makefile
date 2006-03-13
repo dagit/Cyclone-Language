@@ -33,11 +33,11 @@
 #	jni_dir = /usr/local/java/include/
 #endif
 
-ifndef RLIB
+#ifndef RLIB
 region_dir = ../libcompat
-else
-region_dir = ../rlib
-endif
+#else
+#region_dir = ../rlib
+#endif
 
 engine_dir = ../engine
 banshee_bindir = ../bin

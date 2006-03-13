@@ -645,14 +645,11 @@ static bool cycle_detect(setst_var goal, setst_var_list path,
     }
 }
 */
-
-gen_e_list setst_tlb(gen_e e,incl_fn_ptr setst_incl) deletes
-{
-  static jcoll tlb_aux(gen_e e,int path_len,setst_var_list path) deletes
+static jcoll st_tlb_aux(gen_e e,int path_len,setst_var_list path) deletes
     {
       if (setst_is_var(e))
 	{
-	  setst_var_list cycle;
+	  setst_var_list cycle = NULL;
 	  setst_var v = (setst_var)e;
 	  if ( flag_eliminate_cycles_st && cycle_detect(v,path,&cycle) )
 	    {
@@ -686,7 +683,7 @@ gen_e_list setst_tlb(gen_e e,incl_fn_ptr setst_incl) deletes
 		  while (bounds_next(&b_scan,&lb))
 		    {
 		      setst_var_list_cons(v,path);
-		      jcoll_list_cons(tlb_aux(lb,++path_len,path),
+		      jcoll_list_cons(st_tlb_aux(lb,++path_len,path),
 				      jvars);
 		      setst_var_list_tail(path); 
 		    }
@@ -711,7 +708,7 @@ gen_e_list setst_tlb(gen_e e,incl_fn_ptr setst_incl) deletes
 	  gen_e_list_scan(setst_get_union(e),&scan);
 	  while (gen_e_list_next(&scan,&temp))
 	    {
-	      jcoll_list_cons(tlb_aux(temp,++path_len,path),jexprs);
+	      jcoll_list_cons(st_tlb_aux(temp,++path_len,path),jexprs);
 	    }
 
 	  return jcoll_jjoin(tlb_dict,jexprs);
@@ -722,14 +719,14 @@ gen_e_list setst_tlb(gen_e e,incl_fn_ptr setst_incl) deletes
 	  return NULL;
 	}
     }
-  
-  static gen_e_list tlb(gen_e e)
+
+static gen_e_list st_tlb(gen_e e)
     {
       return jcoll_flatten(tlb_dict,
-			   tlb_aux(e,1,new_setst_var_list(tlb_cache_region)) );
+			   st_tlb_aux(e,1,new_setst_var_list(tlb_cache_region)) );
     }
-  
-  static void match_sinks()
+
+static void match_sinks(incl_fn_ptr setst_incl)
     {
       gen_e_list_scanner tlb_scanner;
       bounds_scanner sink_scanner;
@@ -741,7 +738,7 @@ gen_e_list setst_tlb(gen_e e,incl_fn_ptr setst_incl) deletes
       
       while (setst_var_list_next(&var_scanner,&v))
 	{
-	  gen_e_list tlbs = tlb((gen_e)v);
+	  gen_e_list tlbs = st_tlb((gen_e)v);
 	  bounds snks = st_get_sinks(v);
 	  
 	  if(bounds_empty(snks))
@@ -778,7 +775,7 @@ gen_e_list setst_tlb(gen_e e,incl_fn_ptr setst_incl) deletes
 	}
     }
   
-  static void iterate(void)
+static void iterate(incl_fn_ptr setst_incl)
     {
       setst_var_list_scanner var_scanner;
       setst_var v; 
@@ -792,23 +789,25 @@ gen_e_list setst_tlb(gen_e e,incl_fn_ptr setst_incl) deletes
 	}
   
       invalidate_tlb_cache();
-      match_sinks();
+      match_sinks(setst_incl);
 
       /*  fprintf(stderr,"Iterations : %d\n",++iterations); */
       
       if (setst_changed)
-	iterate();
+	iterate(setst_incl);
     }
   
 
+gen_e_list setst_tlb(gen_e e,incl_fn_ptr setst_incl) deletes
+{
   if (! setst_changed)
     {
-      return tlb(e);
+      return st_tlb(e);
     }
   else
     {
-      iterate();
-      return tlb(e);
+      iterate(setst_incl);
+      return st_tlb(e);
     }
   
 }

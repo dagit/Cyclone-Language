@@ -26,11 +26,11 @@
 # SUCH DAMAGE.
 
 
-ifndef RLIB
+#ifndef RLIB
 region_dir = ../libcompat
-else
-region_dir = ../rlib
-endif
+#else
+#region_dir = ../rlib
+#endif
 
 engine_dir = ../engine
 banshee_bindir = ../bin

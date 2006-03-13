@@ -65,7 +65,7 @@ enum rid
 
 #define NORID RID_UNUSED
 
-extern char *traditional token_buffer;	/* Pointer to token buffer.  */
+// extern char *traditional token_buffer;	/* Pointer to token buffer.  */
 extern bool in_system_header;	/* TRUE while in system header file */
 
 int yylex(void);

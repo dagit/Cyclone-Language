@@ -10,9 +10,15 @@ New Banshee Manual
 
 ** Sets
 
+*** expressions
+
 ** Terms
 
+*** expressions
+
 ** Flowrows
+
+*** expressions
 
 * Using Banshee
 
@@ -21,7 +27,7 @@ New Banshee Manual
 ** Syntax
 ** Inspecting solutions
 
-*. Using the nonspecialized engine (libnsengine.a)
+* Using the nonspecialized engine (libnsengine.a)
  
 ** API (nonspec.h)
 ** Linking
@@ -36,3 +42,6 @@ New Banshee Manual
 
 * Adding New Sorts to Banshee
     
+* Appendices
+** Copyright
+** Bugs

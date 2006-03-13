@@ -41,11 +41,16 @@ import soot.util.*;
  */
 public class FlowGraph implements PointsToAnalysis {
 
-    // A map from Locals to FlowGraphNodes
+    // A map from Locals to RefTypeNodes
     private LargeNumberedMap localToNodeMap = 
 	new LargeNumberedMap(Scene.v().getLocalNumberer());
+    // A map from identifier objects to RefTypeNodes
     private Map identToNodeMap = 
 	new HashMap(1024);
+    // A map from identifier objects to AbslocNodes
+    Map identToAbslocMap =
+	new HashMap(1024);
+    
 
     // TODO PointsToAnalysis interface
 
@@ -123,17 +128,22 @@ public class FlowGraph implements PointsToAnalysis {
 	
     }
 
-    // TODO
     public FlowGraphNode makeAbslocNode(Object ident, Type typ,
 					SootMethod enclosingMethod) {
-	return null;
+	FlowGraphNode result = (FlowGraphNode)identToAbslocMap.get(ident);
+	if (result == null) {
+	    identToAbslocMap.put(ident,
+				 result = new AbslocNode(ident.toString(),
+							 type));
+	}
+	return result;
     }
 
     // Make the field ref, and draw the labeled edges back to the base
     // TODO
     public FlowGraphNode makeFieldRefNode(FlowGraphNode base, SootField field,
-					  SootMethod method) {
-	return null;
+					  SootMethod enclosingMethod) {
+	return base.getField(field);
     }
-    
+
 }

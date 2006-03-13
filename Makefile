@@ -235,7 +235,7 @@ cyclone: \
   bin/cycdoc$(EXE)
 
 banshee_engine: 
-	$(MAKE) -C $(BANSHEE) 
+	$(MAKE) CC=$(CC) -C $(BANSHEE) banshee
 
 cyclone-inf-inner: \
   directories \

@@ -28,7 +28,6 @@ Commands : !help
            !tlb e
            !ecr e
            !undo [i]
-           !time
            !trace [i]
            !quit
            !save filename

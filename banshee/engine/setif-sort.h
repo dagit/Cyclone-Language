@@ -35,6 +35,7 @@
 #include "banshee.h"
 #include "termhash.h"
 #include "setif-var.h"
+#include "annotations.h"
 
 EXTERN_C_BEGIN
 
@@ -60,6 +61,13 @@ typedef gen_e (*proj_con_fn_ptr) (gen_e) deletes;
 stamp setif_get_stamp(gen_e e);
 void setif_inclusion(con_match_fn_ptr,res_proj_fn_ptr, gen_e_pr_fn_ptr,
 		     gen_e, gen_e) deletes;
+
+void setif_annotated_inclusion(con_match_fn_ptr,res_proj_fn_ptr, 
+			       gen_e_pr_fn_ptr,
+			       gen_e, gen_e, 
+			       annotation) deletes;
+
+
 
 bool setif_proj_merge(setif_var v, gen_e se, get_proj_fn_ptr get_proj,
 		      proj_con_fn_ptr make_proj,fresh_large_fn_ptr fresh_var,
@@ -122,6 +130,12 @@ void setif_set_fields(void);
 /* Region persistence */
 void write_module_setif(FILE *f);
 void update_module_setif(translation t, FILE *f);
+
+/* Annotated constraints */
+/* extern transition_fn transition; */
+/* extern empty_annotation_fn is_empty_annotation; */
+/* extern subsumption_fn subsumed; */
+/* extern eq_annotation_fn eq_annotation; */
 
 /* Stats */
 extern struct setif_stats setif_stats;

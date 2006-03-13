@@ -1,17 +1,21 @@
 This is banshee, a toolkit for constructing constraint-based program
-analyses.  See the user manual in docs/banshee.ps for a complete
-description of banshee.
+analyses.  See the user manual in docs/banshee-manual.pdf for a
+complete description of banshee.
 
-This is a beta release of banshee. Although banshee has been designed
-to solve many kinds of constraints, it has only been extensively
-tested on Andersen's-style points-to analysis.
+This is a beta release of banshee. As such, there may be bugs in the
+system.
 
-To build banshee, the following must be installed: 
+To build banshee, the following must be installed:
 
  --- ocaml (see http://caml.inria.fr)
- --- gcc (should be standard)
- --- indent (should be standard)
- --- python (should be standard)
+ --- gcc
+ --- python 
+ --- indent 
+ --- etags
+ --- flex
+ --- bison
+
+With the exception of ocaml, these programs should be standard.
 
 You can then build banshee by typing 'make' or 'gmake' at the command
 line in this directory. If everything succeeds, the following targets
@@ -38,10 +42,10 @@ information.
 iBanshee (bin/ibanshee.exe) is an interpreter that allows you to
 interactively define constraints and inspect solutions.
 
-'make' will also build the user manual (docs/banshee.ps) a suite of
-small test applications (see tests/README) and the points-to analysis
-application (see cparser/README). Currently, the manual is extremely
-out of date. This will hopefully be remedied soon.
+'make' will also build the user manual (docs/banshee-manual.pdf) a
+suite of small test applications (see tests/README) and the points-to
+analysis application (see cparser/README). Currently, the manual is
+incomplete. This will hopefully be remedied soon.
 
 Other useful make targets:
 
@@ -58,7 +62,7 @@ Other useful make targets:
  --- 'make ibanshee' will build the iBanshee interpreter and dependencies
 
 banshee should build and run on Linux, FreeBSD, Windows (with cygwin)
-and MacOS X. On FreeBSD, make sure to use 'gmake' instead of 'make'
+and MacOS X. On FreeBSD, make sure to use 'gmake' instead of 'make'.
 
 banshee is distributed under the BSD license, with the exception of
 the following files:
@@ -89,13 +93,6 @@ Known bugs:
      projections won't be used. Projection merging doesn't improve the
      DyckCFL library's performance, anyway.
 
- --- Banshee ships with two region-based memory management libraries:
-     libcompat and rlib. There is a serious performance bug with
-     rlib. Unfortunately, region-based persistence
-     (serialization/deserialization) is only supported with rlib. You
-     can use rlib by doing: 'make clean all RLIB=1'. Region persistence
-     is otherwise unsupported.
-
  --- Hashset (hashset.c) sometimes doesn't terminate. By default,
      banshee doesn't use hashset: it uses a bounds representation based
      on hash.c (hash_bounds.c, as opposed to the hashset based
@@ -103,5 +100,11 @@ Known bugs:
      about twice as fast as the hash-based bounds representation. If
      you want to try out the hashset-based bounds representation, do
      'make clean all check NO_HASH_BOUNDS=1'.
+
+ --- Andersen's analysis requires pre-processed source files. We
+     recommend pre-processing with gcc-2.95, as pre-processing with
+     later versions of GCC may produce output that our C front-end
+     cannot parse. Thanks to Stephen McCamant for this suggestion.
+
 
 Send bug reports to jkodumal@cs.berkeley.edu.

@@ -528,8 +528,8 @@ static void encode_productions(void)
       encode_SKC_production(next_node,next_index);
       // encode each n --)_i--> n production (on global nodes)
       if (next_node->global) {
-	//	make_mr_dyck_open_edge(next_node,next_node,next_index);
- 	make_mr_dyck_close_edge(next_node,next_node,next_index);
+		make_mr_dyck_open_edge(next_node,next_node,next_index);
+ 		make_mr_dyck_close_edge(next_node,next_node,next_index);
       }
     }
   }

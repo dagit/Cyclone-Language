@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1999-2001
  *      The Regents of the University of California.  All rights reserved.
- *
+ n*
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -44,7 +44,7 @@
 #include <string.h>
 
 #define RPAGESIZE (1 << RPAGELOG)
-#define K 2
+#define K 4
 #define MAXPAGE (1ULL << (RMAXMEMLOG - RPAGELOG))
 
 #define PAGENB(x) (((__rcintptr)(x) >> RPAGELOG) & ((1ULL << RMAXMEMLOG) - 1))
@@ -52,11 +52,11 @@
 #define ALIGN(x, n) (((x) + ((n) - 1)) & ~((n) - 1))
 #define PALIGN(x, n) ((void *)ALIGN((__rcintptr)(x), n))
 #ifdef __GNUC__
-#define RALIGNMENT __alignof(double)
+#define RALIGNMENT __alignof(unsigned long)
 #define PTRALIGNMENT __alignof(void *)
 #define ALIGNMENT_LONG __alignof(unsigned long)
 #else
-#define RALIGNMENT 8
+#define RALIGNMENT 4
 #define PTRALIGNMENT 4
 #define ALIGNMENT_LONG 4
 #endif
@@ -64,7 +64,7 @@
 typedef unsigned long __rcintptr;
 
 struct ablock {
-  char *end, *allocfrom;
+  char *base, *allocfrom;
 };
 
 struct allocator {
@@ -104,6 +104,7 @@ static inline void clear(void *start, __rcintptr size)
 
 #include "pages.c"
 #include "alloc.c"
+#include "serialize.c"
 
 static void nochildren(region r)
 {
@@ -128,7 +129,7 @@ static void link_region(region r, region parent)
   parent->children = r;
 }
 
-static int rstart;
+static int rstart = 0;
 
 void initregion(region r)
 {
@@ -136,7 +137,7 @@ void initregion(region r)
     (char *)r - rstart - offsetof(struct page, previous);
 
   /* Start using page with region header as a pointer-containing page */
-  r->normal.page.end = first + RPAGESIZE;
+  r->normal.page.base = first;
   r->normal.page.allocfrom = (char *)(r + 1);
 
   /* Guarantee failure for all other blocks */
@@ -162,7 +163,7 @@ region newsubregion(region parent)
   preclear(first + offsetof(struct page, pagecount), RPAGESIZE - offsetof(struct page, pagecount));
 
   /* stagger regions across cache lines a bit */
-  rstart += 64;
+ rstart = 0; /* was 64, but changed to 0 to allow serialization/deserialization */
 #if RPAGESIZE < 1024
 #error RPAGESIZE must be at least 1024, or change the next if.
 #endif
@@ -170,14 +171,14 @@ region newsubregion(region parent)
   r = (region)(first + rstart + offsetof(struct page, previous));
   postclear(r, sizeof *r);
   initregion(r);
-
+  ((struct page *) first)->available = r->normal.page.allocfrom;
   if (parent)
     link_region(r, parent);
 
   return r;
 }
 
-inline char *__rc_rstralloc(region r, size_t size)
+/* inline */ char *__rc_rstralloc(region r, size_t size)
 {
   void *mem, *dummy;
 
@@ -262,14 +263,15 @@ inline void *__rc_typed_ralloc(region r, size_t size, type_t t)
 void *__rc_ralloc_small0(region r, size_t size)
 {
   char *mem2;
-  
+
   mem2 = PALIGN(r->normal.page.allocfrom, RALIGNMENT);
-  if (mem2 + size >= r->normal.page.end)
+  if (mem2 + size >= r->normal.page.base + RPAGESIZE)
     return __rc_typed_ralloc(r, size, 0);
 
   record_alloc(size);
 
   r->normal.page.allocfrom = mem2 + size;
+  ((struct page *) r->normal.page.base)->available = r->normal.page.allocfrom;
   postclear(mem2, size);
 
   return mem2;
@@ -338,7 +340,7 @@ void region_init(void)
 
   else
     {
-      rstart = -64; /* Save 64 bytes of memory! (sometimes ;-)) */
+      /* rstart = -64; Save 64 bytes of memory! (sometimes ;-)) REMOVED aa */
       init_pages();
       permanent = newregion();
       if (getenv("REGIONSTATS"))
@@ -422,26 +424,3 @@ void findrrefs(region r, region from)
     findrefs(r, (char *)&p->previous, (char *)p + p->pagecount * RPAGESIZE);
 }
 
-
-void delete_translation(translation d)
-{
-}
-
-int serialize(region *r, char *datafile, char *statefile)
-{
-  return 0;
-}
-
-translation deserialize(char *a, char *b, Updater *c, region d)
-{
-  return NULL;
-}
-
-void update_pointer(translation t, void **obj)
-{
-}
-
-void *translate_pointer(translation t, void *obj)
-{
-  return NULL;
-}

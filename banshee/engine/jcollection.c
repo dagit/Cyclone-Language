@@ -255,17 +255,15 @@ static void jcoll_app(jcoll_dict d, japp_fn_ptr app, jcoll j) deletes
   hs_delete(hash);
   deleteregion(scratch_rgn);
 }
+ 
+static gen_e_list jf_accum;
+  
+static void jcoll_accum(void *e) {
+	gen_e_list_cons((gen_e) e, jf_accum);
+}
 
 gen_e_list jcoll_flatten(jcoll_dict d, jcoll j) deletes
 {
-  
-  gen_e_list accum;
-  
-  void jcoll_accum(void *e)
-    {
-      gen_e_list_cons((gen_e) e,accum);
-    }
-  
   if (j == NULL)
     return new_gen_e_list(d->r);
 
@@ -275,15 +273,15 @@ gen_e_list jcoll_flatten(jcoll_dict d, jcoll j) deletes
       {
 	jcoll_single single = (jcoll_single)j;
 	
-	accum = new_gen_e_list(d->r);
-	gen_e_list_cons(single->entry,accum);
+	jf_accum = new_gen_e_list(d->r);
+	gen_e_list_cons(single->entry,jf_accum);
       }
       break;
     case j_chain:
       {
 	jcoll_chain chain = (jcoll_chain)j;
 	/* accum = gen_e_list_copy(r,chain->entries); */
-	accum = chain->entries;
+	jf_accum = chain->entries;
       }
       break;
     case j_join:
@@ -294,16 +292,16 @@ gen_e_list jcoll_flatten(jcoll_dict d, jcoll j) deletes
 	  return join->cache;
 	else
 	  {
-	    accum = new_gen_e_list(d->r);
+	    jf_accum = new_gen_e_list(d->r);
 	    jcoll_app(d, jcoll_accum,j);
 	    
-	    gen_e_list_append(join->cache,accum /* gen_e_list_copy(r,accum)*/);
+	    gen_e_list_append(join->cache,jf_accum /* gen_e_list_copy(r,accum)*/);
 	  }
       }
       break;
     }
 
-  return accum;
+  return jf_accum;
 }
 
 jcoll_dict jcoll_create_dict(region r,get_stamp_fn_ptr get_stamp)

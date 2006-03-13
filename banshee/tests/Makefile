@@ -25,11 +25,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-ifndef RLIB
 region_dir = ../libcompat
-else
-region_dir = ../rlib
-endif
 
 engine_dir = ../engine
 dyckcfl_dir = ../dyckcfl
@@ -55,12 +51,8 @@ endif
 TAGFILES = $(wildcard *.c) $(wildcard *.h)
 
 EXES = lambda-test.exe dyckcfl-random-test.exe \
-       uf-bt-test.exe persist-test.exe dyckcfl-test.exe
-
-# tests that only pass if rlib is used (won't work with libcompat)
-ifdef RLIB
-EXES := ${EXES} region-persist-test.exe
-endif
+       uf-bt-test.exe persist-test.exe dyckcfl-test.exe regexp-test.exe \
+	region-persist-test.exe
 
 TARGETS =  $(EXES) 
 
@@ -71,10 +63,10 @@ all: $(TARGETS)
 lambda-test.exe: lambda-test.c $(LAMBDA_EXTRA_OBJS) $(ENGINE_LIB) $(REGION_LIB)
 	$(CC) $(CFLAGS) -I$(lambda_dir) -o $@ $(LAMBDA_EXTRA_OBJS) $< -L$(region_dir) -L$(engine_dir) -lengine -lregions -lm
 
-dyckcfl-test.exe: dyckcfl-test.c $(DYCKCFL_EXTRA_OBJS) $(ENGINE_LIB) $(REGION_LIB)
+dyckcfl-test.exe: dyckcfl-test.c $(DYCKCFL_EXTRA_OBJS) $(NSENGINE_LIB) $(REGION_LIB)
 	$(CC) $(CFLAGS) -I$(dyckcfl_dir) -DNONSPEC -o $@ $(DYCKCFL_EXTRA_OBJS) $< -L$(region_dir) -L$(engine_dir) -lnsengine -lregions -lm 
 
-dyckcfl-random-test.exe: dyckcfl-random-test.c $(DYCKCFL_EXTRA_OBJS) $(ENGINE_LIB) $(REGION_LIB)
+dyckcfl-random-test.exe: dyckcfl-random-test.c $(DYCKCFL_EXTRA_OBJS) $(NSENGINE_LIB) $(REGION_LIB)
 	$(CC) $(CFLAGS) -I$(dyckcfl_dir) -DNONSPEC -o $@ $(DYCKCFL_EXTRA_OBJS) $< -L$(region_dir) -L$(engine_dir) -lnsengine -lregions -lm
 
 uf-bt-test.exe: uf-bt-test.c $(ENGINE_LIB) $(REGION_LIB)
@@ -82,6 +74,9 @@ uf-bt-test.exe: uf-bt-test.c $(ENGINE_LIB) $(REGION_LIB)
 
 persist-test.exe: persist-test.c $(ENGINE_LIB) $(REGION_LIB)
 	$(CC) $(CFLAGS) -o $@ $< -L$(region_dir) -L$(engine_dir) -lengine -lregions -lm
+
+regexp-test.exe: regexp-test.c $(NSENGINE_LIB) $(REGION_LIB)
+	$(CC) $(CFLAGS) -o $@ $< -L$(region_dir) -L$(engine_dir) -lnsengine -lregions -lm
 
 region-persist-test.exe: region-persist-test.c $(ENGINE_LIB) $(PERSISTENT_REGION_OBJ)
 	$(CC) $(CFLAGS) -o $@ $< -L$(region_dir) -L$(engine_dir) -lengine -lregions 
@@ -104,7 +99,7 @@ $(ENGINE_LIB):
 	$(MAKE) -C ../engine libengine.a
 
 $(PERSISTENT_REGION_OBJ):
-	$(MAKE) -C ../rlib
+	$(MAKE) -C ../libcompat
 
 TAGS: 
 	etags $(TAGFILES)
@@ -117,4 +112,4 @@ check/%:
 
 
 clean:
-	rm -f *.o $(TARGETS) *.exe *.dot *~
+	rm -f *.o $(TARGETS) *.exe *.dot *.out *~
