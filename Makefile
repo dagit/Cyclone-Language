@@ -224,6 +224,9 @@ tools: cyclone
 	$(MAKE) -C tools/rewrite install
 	$(MAKE) -C tools/errorgen install
 
+otherlibs: cyclone
+	@test ! \( -e "$(LIBPCRE)" \) -a \( -z "$(LIBPCRE)" \) || $(MAKE) -C otherlibs/pcre install
+
 cyclone: \
   directories \
   bin/buildlib$(EXE) \
@@ -622,6 +625,7 @@ clean_nogc: clean_test clean_build
 	$(MAKE) -C tests        clean
 #	$(MAKE) -C doc          clean
 	$(MAKE) -C lib/xml      clean
+	$(MAKE) -C otherlibs/pcre clean
 	$(RM) -r $(BL)
 	$(RM) $(addprefix bin/, $(addsuffix $(EXE), cyclone cyclone_g cyclone_a cyclone_pg cyclone_nocheck cycdoc buildlib cycbison cyclex cycflex aprof rewrite errorgen stringify))
 	$(RM) *~ amon.out

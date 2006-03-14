@@ -1,0 +1,483 @@
+pcre.h:
+include {
+PCRE_ANCHORED
+PCRE_AUTO_CALLOUT
+PCRE_CASELESS
+PCRE_CONFIG_LINK_SIZE
+PCRE_CONFIG_MATCH_LIMIT
+PCRE_CONFIG_NEWLINE
+PCRE_CONFIG_POSIX_MALLOC_THRESHOLD
+PCRE_CONFIG_STACKRECURSE
+PCRE_CONFIG_UNICODE_PROPERTIES
+PCRE_CONFIG_UTF8
+PCRE_DFA_RESTART
+PCRE_DFA_SHORTEST
+PCRE_DOLLAR_ENDONLY
+PCRE_DOTALL
+PCRE_ERROR_BADCOUNT
+PCRE_ERROR_BADMAGIC
+PCRE_ERROR_BADOPTION
+PCRE_ERROR_BADPARTIAL
+PCRE_ERROR_BADUTF8
+PCRE_ERROR_BADUTF8_OFFSET
+PCRE_ERROR_CALLOUT
+PCRE_ERROR_DFA_RECURSE
+PCRE_ERROR_DFA_UCOND
+PCRE_ERROR_DFA_UITEM
+PCRE_ERROR_DFA_UMLIMIT
+PCRE_ERROR_DFA_WSSIZE
+PCRE_ERROR_INTERNAL
+PCRE_ERROR_MATCHLIMIT
+PCRE_ERROR_NOMATCH
+PCRE_ERROR_NOMEMORY
+PCRE_ERROR_NOSUBSTRING
+PCRE_ERROR_NULL
+PCRE_ERROR_PARTIAL
+PCRE_ERROR_UNKNOWN_NODE
+PCRE_EXTENDED
+PCRE_EXTRA
+PCRE_EXTRA_CALLOUT_DATA
+PCRE_EXTRA_MATCH_LIMIT
+PCRE_EXTRA_STUDY_DATA
+PCRE_EXTRA_TABLES
+PCRE_FIRSTLINE
+PCRE_INFO_BACKREFMAX
+PCRE_INFO_CAPTURECOUNT
+PCRE_INFO_DEFAULT_TABLES
+PCRE_INFO_FIRSTBYTE
+PCRE_INFO_FIRSTCHAR
+PCRE_INFO_FIRSTTABLE
+PCRE_INFO_LASTLITERAL
+PCRE_INFO_NAMECOUNT
+PCRE_INFO_NAMEENTRYSIZE
+PCRE_INFO_NAMETABLE
+PCRE_INFO_OPTIONS
+PCRE_INFO_SIZE
+PCRE_INFO_STUDYSIZE
+PCRE_MAJOR
+PCRE_MINOR
+PCRE_MULTILINE
+PCRE_NO_AUTO_CAPTURE
+PCRE_NOTBOL
+PCRE_NOTEMPTY
+PCRE_NOTEOL
+PCRE_NO_UTF8_CHECK
+PCRE_PARTIAL
+PCRE_UNGREEDY
+PCRE_UTF8
+pcre
+pcre_extra
+pcre_callout_block
+size_t
+}
+hstub pcre_compile {
+  struct pcre_table; // abstract, must be constructed by pcre_maketables().
+  typedef struct pcre_table pcre_table_t;
+  extern "C"
+  // TODO: the table is retained in the return value
+  pcre *pcre_compile(const char @pattern, int options,
+                     const char **errptr, int @erroffset,
+                     const pcre_table_t *tableptr);
+}
+hstub pcre_compile2 {
+  extern "C"
+  // TODO: the table is retained in the return value
+  pcre *pcre_compile2(const char @pattern, int options,
+                      int *errorcodeptr,
+                      const char **errptr, int @erroffset,
+                      const pcre_table_t *tableptr);
+}
+hstub pcre_study {
+  extern "C"
+  pcre_extra *pcre_study(const pcre @code, int options,
+                         const char *`H @errptr);
+}
+hstub pcre_exec {
+  int pcre_exec(const pcre @code, const pcre_extra *extra,
+                const char ?subject, int length,
+                int startoffset, int options,
+                int ?ovector, int ovecsize)
+    @requires(numelts(subject)>=length && numelts(ovector)>=ovecsize);
+}
+cycstub pcre_exec {
+  namespace Cpcre {
+    extern "C"
+    int pcre_exec(const pcre @code, const pcre_extra *extra,
+                  const char *subject, int length,
+                  int startoffset, int options,
+                  int *ovector, int ovecsize);
+  }
+  int pcre_exec(const pcre @code, const pcre_extra *extra,
+                const char ?subject, int length,
+                int startoffset, int options,
+                int ?ovector, int ovecsize)
+    @requires(numelts(subject)>=length && numelts(ovector)>=ovecsize) {
+    return Cpcre::pcre_exec(code,extra,
+                            (const char *)subject,
+                            length,startoffset,options,
+                            (int *)ovector,
+                            ovecsize);
+  }
+}
+hstub pcre_dfa_exec {
+  int pcre_dfa_exec(const pcre @code, const pcre_extra *extra,
+                    const char ?subject, int length,
+                    int startoffset, int options,
+                    int ?ovector, int ovecsize,
+                    int ?workspace, int wscount)
+    @requires(numelts(subject)>=length && numelts(ovector)>=ovecsize
+              && numelts(workspace)>=wscount && wscount>=20);
+}
+cycstub pcre_dfa_exec {
+  namespace Cpcre {
+    extern "C"
+    int pcre_dfa_exec(const pcre @code, const pcre_extra *extra,
+                      const char *subject, int length,
+                      int startoffset, int options,
+                      int *ovector, int ovecsize,
+                      int *workspace, int wscount);
+  }
+  int pcre_dfa_exec(const pcre @code, const pcre_extra *extra,
+                    const char ?subject, int length,
+                    int startoffset, int options,
+                    int ?ovector, int ovecsize,
+                    int ?workspace, int wscount)
+    @requires(numelts(subject)>=length && numelts(ovector)>=ovecsize
+              && numelts(workspace)>=wscount && wscount>=20) {
+    return Cpcre::pcre_dfa_exec(code,extra,
+                                (const char *)subject,
+                                length,startoffset,options,
+                                (int *)ovector,
+                                ovecsize,
+                                (int *)workspace,
+                                wscount);
+  }
+}
+hstub pcre_copy_named_substring {
+  int pcre_copy_named_substring(const pcre @code,
+                                const char ?subject, int ?ovector,
+                                int stringcount, const char @stringname,
+                                char ?buffer, int buffersize);
+}
+cycstub pcre_copy_named_substring {
+  int pcre_copy_named_substring(const pcre @code,
+                                const char ?subject, int ?ovector,
+                                int stringcount, const char @stringname,
+                                char ?buffer, int buffersize) {
+    let stringnumber = pcre_get_stringnumber(code,stringname);
+    if (stringnumber < 0)
+      return PCRE_ERROR_NOSUBSTRING;
+    return pcre_copy_substring(subject,ovector,stringcount,stringnumber,
+                               buffer,buffersize);
+  }
+}
+
+hstub pcre_copy_substring {
+  int pcre_copy_substring(const char ?subject, int ?ovector,
+                          int stringcount, int stringnumber, char ?buffer,
+                          int buffersize);
+}
+cycstub pcre_copy_substring {
+  /* The C version of this is quite unsafe so we do it all in Cyclone. */
+  int pcre_copy_substring(const char ?subject, int ?ovector,
+                          int stringcount, int stringnumber, char ?buffer,
+                          int buffersize) {
+    if (stringcount <= 0 || stringnumber < 0)
+      return PCRE_ERROR_NOSUBSTRING; /* bad parameters */
+
+    if (stringnumber >= stringcount)
+      return PCRE_ERROR_NOSUBSTRING; /* substring did not match */
+
+    if (2*(stringnumber+1) > numelts(ovector))
+      return PCRE_ERROR_NOSUBSTRING; /* substring did not match */
+
+    let start = ovector[2*stringnumber];
+    let len = ovector[2*stringnumber+1];
+
+    if (start < 0 || len < 0) {
+      /* This particular substring did not actually match anything,
+         even though the pattern as a whole matched.  Return NULL. */
+      if (numelts(buffer) == 0)
+        return PCRE_ERROR_NOMEMORY; /* not enough buffer */
+      buffer[0] = '\0';
+      return 0; /* length of returned string */ 
+    }
+    if (numelts(buffer) < len + 1)
+        return PCRE_ERROR_NOMEMORY; /* not enough buffer */
+    if (buffersize < len + 1)
+        return PCRE_ERROR_NOMEMORY; /* not enough buffer */
+    if (numelts(subject) < start+len)
+      /* It's not clear what to return here; the subject and the
+         ovector do not match up. */
+      return PCRE_ERROR_NOSUBSTRING; /* not enough subject */
+    for (int i = 0; i < len; i++)
+      buffer[i] = subject[start+i];
+    buffer[len] = '\0';
+    return len; /* length of returned string */
+  }
+}
+
+hstub pcre_get_named_substring {
+  int pcre_get_named_substring(const pcre @code,
+                               const char ?subject, int ?ovector,
+                               int stringcount, const char @stringname,
+                               const char ?`H@stringptr);
+}
+cycstub pcre_get_named_substring {
+  int pcre_get_named_substring(const pcre @code,
+                               const char ?subject, int ?ovector,
+                               int stringcount, const char @stringname,
+                               const char ?`H@stringptr) {
+    let stringnumber = pcre_get_stringnumber(code,stringname);
+    if (stringnumber < 0)
+      return PCRE_ERROR_NOSUBSTRING;
+    return pcre_get_substring(subject,ovector,stringcount,stringnumber,
+                              stringptr);
+  }
+}
+
+hstub pcre_get_stringnumber {
+  extern "C"
+  int pcre_get_stringnumber(const pcre @code,
+                            const char @name);
+}
+
+hstub pcre_get_substring {
+  int pcre_get_substring(const char ?subject, int ?ovector,
+                         int stringcount, int stringnumber,
+                         const char ?`H@stringptr);
+}
+cycstub pcre_get_substring {
+  /* The C version of this is quite unsafe so we do it all in Cyclone. */
+  /* Note this will not quite match the API as the string is not
+     allocated using pcre_malloc. */
+  /* TODO: share the error checking code with pcre_copy_substring. */
+  int pcre_get_substring(const char ?subject, int ?ovector,
+                         int stringcount, int stringnumber,
+                         const char ?`H@stringptr) {
+    if (stringcount <= 0 || stringnumber < 0)
+      return PCRE_ERROR_NOSUBSTRING; /* bad parameters */
+
+    if (stringnumber >= stringcount)
+      return PCRE_ERROR_NOSUBSTRING; /* substring did not match */
+
+    if (2*(stringnumber+1) > numelts(ovector))
+      return PCRE_ERROR_NOSUBSTRING; /* substring did not match */
+
+    let start = ovector[2*stringnumber];
+    let len = ovector[2*stringnumber+1];
+
+    if (start < 0 || len < 0) {
+      /* This particular substring did not actually match anything,
+         even though the pattern as a whole matched.  Return the empty
+         string. */
+      *stringptr = (const char ?)"";
+      return 0; /* length of returned string */ 
+    }
+    if (numelts(subject) < start+len)
+      /* It's not clear what to return here; the subject and the
+         ovector do not match up. */
+      return PCRE_ERROR_NOSUBSTRING; /* not enough subject */
+    char ?buffer = calloc(len+1,sizeof(char));
+    if (!buffer)
+      return PCRE_ERROR_NOMEMORY;
+    for (int i = 0; i < len; i++)
+      buffer[i] = subject[start+i];
+    buffer[len] = '\0';
+    *stringptr = (const char ?)buffer;
+    return len; /* length of returned string */
+  }
+}
+
+hstub pcre_get_substring_list {
+  int pcre_get_substring_list(const char ?subject,
+                              int ?ovector, int stringcount,
+                              const char ?`H?`H@listptr);
+}
+cycstub pcre_get_substring_list {
+#include <string.h>
+  /* The memory returned does not have the same structure as that
+     specified by the pcre documentation, which says that it should be
+     in a single contiguous block of memory. */
+  int pcre_get_substring_list(const char ?subject,
+                              int ?ovector, int stringcount,
+                              const char ?`H?`H@listptr) {
+
+    if (stringcount <= 0)
+      /* bad parameters.  pcre docs say the only error return for this
+         function is PCRE_ERROR_NOMEMORY, so that's what we return. */
+      return PCRE_ERROR_NOMEMORY;
+
+    if (2*stringcount > numelts(ovector))
+      /* bad parameters.  pcre docs say the only error return for this
+         function is PCRE_ERROR_NOMEMORY, so that's what we return. */
+      return PCRE_ERROR_NOMEMORY;
+
+    let res = calloc(stringcount+1,sizeof(const char ?`H)); // +1 for final NULL
+    if (!res)
+      return PCRE_ERROR_NOMEMORY;
+
+    let sublen = numelts(subject);
+    for (let i = 0; i < stringcount; i++) {
+      let start = ovector[2*i];
+      let len = ovector[2*i+1];
+      if (start < 0 || len < 0)
+        continue;
+      if (sublen < start+len)
+        continue; /* This could be considered an error, but we ignore it */
+      res[i] = substring(subject,start,len);
+    }
+    *listptr = res;
+    return 0;
+  }
+}
+
+hstub pcre_free_substring {
+  // TODO
+  // void pcre_free_substring(const char *stringptr);
+}
+
+hstub pcre_free_substring_list {
+  // TODO
+  // void pcre_free_substring_list(const char **stringptr);
+}
+
+hstub pcre_maketables {
+  // TODO: memory management of returned value
+  extern "C"
+  const pcre_table_t *pcre_maketables(void);
+}
+hstub pcre_fullinfo {
+  extern datatype PcreInfo<`r::E> {
+    PI_int(int @`r);
+    PI_table(unsigned char @@numelts(32)@nozeroterm);
+    PI_options(unsigned long int @`r);
+    PI_size(size_t @`r);
+  };
+  typedef datatype PcreInfo<`r> @`r PI<`r>;
+  int pcre_fullinfo(const pcre @code, const pcre_extra *extra,
+                    int what, ... inject PI);
+}
+cstub {
+#include <pcre.h>
+}
+cstub pcre_fullinfo {
+  int pcre_fullinfo_int(const pcre *a,const pcre_extra *b,int c,int *d) {
+    return pcre_fullinfo(a,b,c,d);
+  }
+  int pcre_fullinfo_table(const pcre *a,const pcre_extra *b,int c,unsigned char * d) {
+    return pcre_fullinfo(a,b,c,d);
+  }
+  int pcre_fullinfo_options(const pcre *a,const pcre_extra *b,int c,unsigned long int *d) {
+    return pcre_fullinfo(a,b,c,d);
+  }
+  int pcre_fullinfo_size(const pcre *a,const pcre_extra *b,int c,size_t *d) {
+    return pcre_fullinfo(a,b,c,d);
+  }
+}
+cycstub pcre_fullinfo {
+  namespace Cpcre {
+    extern "C" int pcre_fullinfo_int(const pcre @,const pcre_extra *,int,int @);
+    extern "C" int pcre_fullinfo_table(const pcre @,const pcre_extra *,int,unsigned char @@numelts(32)@nozeroterm);
+    extern "C" int pcre_fullinfo_options(const pcre @,const pcre_extra *,int,unsigned long int @);
+    extern "C" int pcre_fullinfo_size(const pcre @,const pcre_extra *,int,size_t @);
+  }
+  int pcre_fullinfo(const pcre @code, const pcre_extra *extra,
+                    int what, ... inject PI pi_array) {
+    if (numelts(pi_array) != 1)
+      return PCRE_ERROR_BADOPTION;
+    if (what == PCRE_INFO_NAMETABLE)
+      // TODO: not supported yet
+      return PCRE_ERROR_BADOPTION;
+    switch (pi_array[0]) {
+    case &PI_int(x):
+      switch (what) {
+      case PCRE_INFO_BACKREFMAX:
+      case PCRE_INFO_CAPTURECOUNT:
+      case PCRE_INFO_FIRSTBYTE:
+        //      case PCRE_INFO_FIRSTCHAR: // synonym for above, comment out to avoid redundant case error
+      case PCRE_INFO_LASTLITERAL:
+      case PCRE_INFO_NAMECOUNT:
+      case PCRE_INFO_NAMEENTRYSIZE:
+        return Cpcre::pcre_fullinfo_int(code,extra,what,x);
+      default:
+        return PCRE_ERROR_BADOPTION;
+      }
+    case &PI_table(x):
+      switch (what) {
+      case PCRE_INFO_DEFAULT_TABLES:
+      case PCRE_INFO_FIRSTTABLE:
+        return Cpcre::pcre_fullinfo_table(code,extra,what,x);
+      default:
+        return PCRE_ERROR_BADOPTION;
+      }
+    case &PI_options(x):
+      switch (what) {
+      case PCRE_INFO_OPTIONS:
+        return Cpcre::pcre_fullinfo_options(code,extra,what,x);
+      default:
+        return PCRE_ERROR_BADOPTION;
+      }
+    case &PI_size(x):
+      switch (what) {
+      case PCRE_INFO_SIZE:
+      case PCRE_INFO_STUDYSIZE:
+        return Cpcre::pcre_fullinfo_size(code,extra,what,x);
+      default:
+        return PCRE_ERROR_BADOPTION;
+      }
+    }
+  }
+}
+
+hstub pcre_info {
+  extern "C"
+  int pcre_info(const pcre @code, int *optptr, int *firstcharptr);
+}
+
+hstub pcre_refcount {
+  extern "C"
+  int pcre_refcount(pcre @code, int adjust);
+}
+
+hstub pcre_config {
+  extern "C"
+  int pcre_config(int what, int @where);
+}
+
+hstub pcre_version {
+  extern "C"
+  char *pcre_version(void);
+}
+
+hstub pcre_malloc {
+  // TODO
+  // void *(*pcre_malloc)(size_t);
+}
+
+hstub pcre_free {
+  // TODO
+  // void (*pcre_free)(void *);
+}
+
+hstub pcre_stack_malloc {
+  // TODO
+  // void *(*pcre_stack_malloc)(size_t);
+}
+
+hstub pcre_stack_free {
+  // TODO
+  // void (*pcre_stack_free)(void *);
+}
+
+hstub pcre_callout {
+  // TODO
+
+  // The problem here is that the pcre_callout_block has fields which
+  // cannot be used safely, e.g., a thin pointer to an ovector with a
+  // separate length field.  We have to change the typing of the
+  // structure to get things to be safe.
+
+  //  extern int (*pcre_callout)(pcre_callout_block *);
+}
+;
