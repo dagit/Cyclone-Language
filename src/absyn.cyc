@@ -226,7 +226,7 @@ cvartype_t fatconst() {
   static type_opt_t _fatconst = NULL;
   if(_fatconst)
     return _fatconst;
-  _fatconst = new Cvar(&Kinds::ptrbko, fat_bound_type, 0, NULL, "fatconst", "constant",true);
+  _fatconst = new Cvar(&Kinds::ptrbko, fat_bound_type, 1, NULL, "fatconst", "constant",true);
   BansheeIf::add_constant("fat", _fatconst);
   return (cvartype_t)_fatconst;
 }
@@ -234,7 +234,7 @@ cvartype_t thinconst() {
   static type_opt_t _thinconst = NULL;
   if(_thinconst)
     return _thinconst;
-  _thinconst = new Cvar(&Kinds::ptrbko, bounds_one(), 0, NULL, "thinconst", "constant",false);
+  _thinconst = new Cvar(&Kinds::ptrbko, bounds_one(), 2, NULL, "thinconst", "constant",false);
   BansheeIf::add_constant("thin", _thinconst);
   return (cvartype_t)_thinconst;
 }

@@ -341,7 +341,7 @@ static constraint_t composite_constraint(cop_t op, constraint_t t1, constraint_o
  static bool is_constant(cvartype_t t) {
    switch(t) {
    case &Cvar(_,_,id,...):
-     return (id==0);
+     return (id==1 || id==2);
    default:
      return false;
    }
@@ -790,7 +790,7 @@ static int insert_into_map(constraint_t c) {
     case &Not_found: 
       switch(cvars->hd) { //elaborate assertion just to sanity check
       case &Cvar(_,_,id,...):
-	assert(id < 0);
+	assert(id == 0);
 	break;
       default:
 	assert(0);

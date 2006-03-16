@@ -570,7 +570,7 @@ return 0;}
 static int Cyc_BansheeIf_is_constant(void*t){
 int _Tmp0;if(*((int*)t)==3){_Tmp0=((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)t)->f3;{int id=_Tmp0;
 # 344
-return id==0;}}else{
+return id==1 || id==2;}}else{
 # 346
 return 0;};}
 # 351
@@ -918,13 +918,13 @@ if(!Cyc_List_exists_c(Cyc_BansheeIf_constraint_eq,c,*oc)){
 # 791
 {void*_Tmp4=(void*)cvars->hd;int _Tmp5;if(*((int*)_Tmp4)==3){_Tmp5=((struct Cyc_Absyn_Cvar_Absyn_Type_struct*)_Tmp4)->f3;{int id=_Tmp5;
 # 793
-id < 0?0:({int(*_Tmp6)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp6;})(_tag_fat("id < 0",sizeof(char),7U),_tag_fat("bansheeif.cyc",sizeof(char),14U),793U);
+id==0?0:({int(*_Tmp6)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp6;})(_tag_fat("id == 0",sizeof(char),8U),_tag_fat("bansheeif.cyc",sizeof(char),14U),793U);
 goto _LL8;}}else{
 # 796
 0?0:({int(*_Tmp6)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp6;})(_tag_fat("0",sizeof(char),2U),_tag_fat("bansheeif.cyc",sizeof(char),14U),796U);
 goto _LL8;}_LL8:;}
 # 799
-({void(*_Tmp4)(struct Cyc_Hashtable_Table*,void*,struct _tuple14*)=({void(*_Tmp5)(struct Cyc_Hashtable_Table*,void*,struct _tuple14*)=(void(*)(struct Cyc_Hashtable_Table*,void*,struct _tuple14*))Cyc_Hashtable_insert;_Tmp5;});struct Cyc_Hashtable_Table*_Tmp5=Cyc_BansheeIf_cvarmap;void*_Tmp6=(void*)cvars->hd;_Tmp4(_Tmp5,_Tmp6,({struct _tuple14*_Tmp7=_cycalloc(sizeof(struct _tuple14));_Tmp7->f0=(void*)cvars->hd,({struct Cyc_List_List*_Tmp8=({struct Cyc_List_List*_Tmp9=_cycalloc(sizeof(struct Cyc_List_List));_Tmp9->hd=c,_Tmp9->tl=0;_Tmp9;});_Tmp7->f1=_Tmp8;}),_Tmp7->f2=0U;_Tmp7;}));});
+({void(*_Tmp4)(struct Cyc_Hashtable_Table*,void*,struct _tuple14*)=({void(*_Tmp5)(struct Cyc_Hashtable_Table*,void*,struct _tuple14*)=(void(*)(struct Cyc_Hashtable_Table*,void*,struct _tuple14*))Cyc_Hashtable_insert;_Tmp5;});struct Cyc_Hashtable_Table*_Tmp5=_check_null(Cyc_BansheeIf_cvarmap);void*_Tmp6=(void*)cvars->hd;_Tmp4(_Tmp5,_Tmp6,({struct _tuple14*_Tmp7=_cycalloc(sizeof(struct _tuple14));_Tmp7->f0=(void*)cvars->hd,({struct Cyc_List_List*_Tmp8=({struct Cyc_List_List*_Tmp9=_cycalloc(sizeof(struct Cyc_List_List));_Tmp9->hd=c,_Tmp9->tl=0;_Tmp9;});_Tmp7->f1=_Tmp8;}),_Tmp7->f2=0U;_Tmp7;}));});
 goto _LL3;}else{_Tmp3=_Tmp2;{void*exn=_Tmp3;_rethrow(exn);}}_LL3:;}}}}
 # 803
 return added;}}

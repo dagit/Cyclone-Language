@@ -608,7 +608,7 @@ void*Cyc_Absyn_fatconst (void){
 static void*_fatconst=0;
 if((unsigned)_fatconst)
 return _fatconst;
-_fatconst=(void*)({struct Cyc_Absyn_Cvar_Absyn_Type_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Absyn_Cvar_Absyn_Type_struct));_Tmp0->tag=3,_Tmp0->f1=& Cyc_Kinds_ptrbko,_Tmp0->f2=Cyc_Absyn_fat_bound_type,_Tmp0->f3=0,_Tmp0->f4=0,_Tmp0->f5="fatconst",_Tmp0->f6="constant",_Tmp0->f7=1;_Tmp0;});
+_fatconst=(void*)({struct Cyc_Absyn_Cvar_Absyn_Type_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Absyn_Cvar_Absyn_Type_struct));_Tmp0->tag=3,_Tmp0->f1=& Cyc_Kinds_ptrbko,_Tmp0->f2=Cyc_Absyn_fat_bound_type,_Tmp0->f3=1,_Tmp0->f4=0,_Tmp0->f5="fatconst",_Tmp0->f6="constant",_Tmp0->f7=1;_Tmp0;});
 Cyc_BansheeIf_add_constant(_tag_fat("fat",sizeof(char),4U),_fatconst);
 return _check_null(_fatconst);}
 # 233
@@ -616,7 +616,7 @@ void*Cyc_Absyn_thinconst (void){
 static void*_thinconst=0;
 if((unsigned)_thinconst)
 return _thinconst;
-_thinconst=(void*)({struct Cyc_Absyn_Cvar_Absyn_Type_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Absyn_Cvar_Absyn_Type_struct));_Tmp0->tag=3,_Tmp0->f1=& Cyc_Kinds_ptrbko,({void*_Tmp1=Cyc_Absyn_bounds_one();_Tmp0->f2=_Tmp1;}),_Tmp0->f3=0,_Tmp0->f4=0,_Tmp0->f5="thinconst",_Tmp0->f6="constant",_Tmp0->f7=0;_Tmp0;});
+_thinconst=(void*)({struct Cyc_Absyn_Cvar_Absyn_Type_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Absyn_Cvar_Absyn_Type_struct));_Tmp0->tag=3,_Tmp0->f1=& Cyc_Kinds_ptrbko,({void*_Tmp1=Cyc_Absyn_bounds_one();_Tmp0->f2=_Tmp1;}),_Tmp0->f3=2,_Tmp0->f4=0,_Tmp0->f5="thinconst",_Tmp0->f6="constant",_Tmp0->f7=0;_Tmp0;});
 Cyc_BansheeIf_add_constant(_tag_fat("thin",sizeof(char),5U),_thinconst);
 return _check_null(_thinconst);}
 # 242

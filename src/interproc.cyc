@@ -500,6 +500,8 @@ static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxp
     ret = cvars_in_type(elt, index+1, is_local, pfxpos);
     switch(*bd) {
     case &Cvar(_,_,*id,_,*name,...):
+      if(*id >= 0) //name already set ... skip
+	break;
       vsprintf(_prefix+pfxpos, "_%d", make_parg(index)); 
       string_t nn = aprintf("%s", _prefix);
       //      char ?tmppfx = _prefix;
@@ -512,6 +514,8 @@ static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxp
 	ret = new List{*bd, ret};      
 	if(!is_local)
 	  *id = -(*id); //toggle id sign to indicate that the name is set ... used only for testing/assertion
+	else
+	  *id = 0; 
 	Hashtable::insert(cvmap, new nn, *bd);
       }
       _prefix[pfxpos] = '\0';
@@ -543,10 +547,10 @@ static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxp
       for(;fs;fs=fs->tl) {
 	let ft = fs->hd->typs;
 	int finner = 0;
+	string_t fn = Absynpp::fullqvar2string(fs->hd->name);
 	for(;ft;ft=ft->tl) {
 	  let &$(_,t) = ft->hd;
-	  vsprintf(_prefix+pfxpos, "DD%dI%s_DF%d_%d", make_parg(strlen(dtn), dtn, findex, finner++));
-	  //aprintf("%s_%d_DD%s_DF%d_%d", prefix, index, dtn, findex, finner++)
+	  vsprintf(_prefix+pfxpos, "DD%dI%s_DF%dI%s_%d", make_parg(strlen(dtn), dtn, strlen(fn), fn, finner++));
 	  ret = List::append(cvars_in_type(t, 0, is_local, strlen(_prefix)), ret);
 	}
 	findex++;
@@ -557,9 +561,9 @@ static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxp
   case &AppType(&DatatypeCon(DatatypeInfo{.UnknownDatatype=UnknownDatatypeInfo{n, _}}), ts):
     if(ts) {
       let adn=Absynpp::fullqvar2string(n);
-      vsprintf(_prefix+pfxpos, "_%dAP%dI%s_", make_parg(index, strlen(adn), adn));
       for(int ix=0;ts;ts=ts->tl, ix++) {
-	ret= List::append(cvars_in_type(ts->hd, ix, is_local, strlen(_prefix)), ret);
+	vsprintf(_prefix+pfxpos, "_%dDD%dI%s_DDARG%d", make_parg(index, strlen(adn), adn, ix));
+	ret= List::append(cvars_in_type(ts->hd, 0, is_local, strlen(_prefix)), ret);
       }
       _prefix[pfxpos]='\0';
     }
@@ -570,9 +574,9 @@ static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxp
     if(ts) {
       let sdn=Absynpp::fullqvar2string(dn);
       let sdfn=Absynpp::fullqvar2string(dfn);
-      vsprintf(_prefix+pfxpos, "_%dAP%dI%s_%s_", make_parg(index, strlen(sdn)+strlen(sdfn)+1, sdn, sdfn));
       for(int ix=0;ts;ts=ts->tl, ix++) {
-	ret= List::append(cvars_in_type(ts->hd, ix, is_local, strlen(_prefix)), ret);
+	vsprintf(_prefix+pfxpos, "_%dDD%dI%s_DF%dI%s_DFARG%d", make_parg(index, strlen(sdn), sdn, strlen(sdfn), sdfn, ix));
+	ret= List::append(cvars_in_type(ts->hd, 0, is_local, strlen(_prefix)), ret);
       }
       _prefix[pfxpos]='\0';
     }
@@ -592,9 +596,9 @@ static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxp
     let adn=Absynpp::fullqvar2string(n);
     int findex =0;
     if(ts) {
-      vsprintf(_prefix+pfxpos, "_%dAP%dI%s_", make_parg(index, strlen(adn), adn));
       for(int ix=0;ts;ts=ts->tl, ix++) {
-	ret= List::append(cvars_in_type(ts->hd, ix, is_local, strlen(_prefix)), ret);
+	vsprintf(_prefix+pfxpos, "_%dAD%dI%s_ADARG%d", make_parg(index, strlen(adn), adn, ix));
+	ret= List::append(cvars_in_type(ts->hd, 0, is_local, strlen(_prefix)), ret);
       }
       _prefix[pfxpos]='\0';
     }
@@ -620,7 +624,7 @@ static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxp
       _prefix[pfxpos]='\0';    
     }
     for(int ix=0;ts;ts=ts->tl,ix++){
-      vsprintf(_prefix+pfxpos,"TD%dI%s_ARG%d", make_parg(strlen(tn), tn, ix));
+      vsprintf(_prefix+pfxpos,"_%dTD%dI%s_TDARG%d", make_parg(index, strlen(tn), tn, ix));
       ret = List::append(cvars_in_type(ts->hd, 0, is_local, strlen(_prefix)), ret);
     }
     _prefix[pfxpos]='\0';    
