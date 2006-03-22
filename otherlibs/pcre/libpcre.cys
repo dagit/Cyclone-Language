@@ -480,4 +480,250 @@ hstub pcre_callout {
 
   //  extern int (*pcre_callout)(pcre_callout_block *);
 }
+
+hstub {
+#include <list.h>
+#include <buffer.h>
+  unsigned int pcre_ovector_len(pcre @re);
+  void add_replacement(Buffer::T buf, const char ?s, int ?ovector, const char ?r);
+  char ?pcre_s_g(const char ?s,const char ?p,const char ?r,int options);
+  char ?pcre_s(const char ?s,const char ?p,const char ?r,int options);
+  int pcre_m(const char ?s,const char ?p,int options);
+  char ?pcre_chomp(const char ?s);
+  List::list_t<char ?@> pcre_split(const char ?p,int options,const char ?s);
+}
+
+hstub {
+  /* Like perl's s/foo/bar/g */
+#define PCRE_S_EG(s,p,r,options) ({                                     \
+      let _s = s;                                                       \
+      pcre *_re; const char *_err = NULL; int _erroff;                  \
+                                                                        \
+      _re = pcre_compile(p, options, &_err, &_erroff, NULL);            \
+      if (!_re) { fprintf(stderr,"Error at position %d:\n%s\n",_erroff,p); exit(1); } \
+                                                                        \
+      let _buf = Buffer::create(10);                                    \
+      let _slen = strlen(_s);                                           \
+      let _olen = pcre_ovector_len(_re);                                \
+      int ?_ovector = new {for i < _olen : 0};                          \
+      int _startoffset = 0;                                             \
+                                                                        \
+      while (_startoffset <= _slen && /* = to try to match empty string at end */ \
+             pcre_exec(_re,NULL,_s,_slen,_startoffset,0,_ovector,_olen) >= 0) { \
+        let _start = _ovector[0];                                       \
+        let _after = _ovector[1];                                       \
+        if (_start < 0 || _after < 0) break;                            \
+        Buffer::add_substring(_buf,_s,_startoffset,_start-_startoffset); /* string before match */ \
+        r; /* replacement text */                                       \
+        /* now set up for the next search */                            \
+        _startoffset = _after;                                          \
+        if (_startoffset == _start) {                                   \
+          /* (original _startoffset) <= _start == _after, i.e., the pattern \
+             matched the empty string.  We need to advance to the next  \
+             character so that the empty string does not match again    \
+             (avoid the infinite loop). */                              \
+          Buffer::add_char(_buf,_s[_startoffset]);                      \
+          _startoffset++;                                               \
+        }                                                               \
+      }                                                                 \
+      Buffer::add_string(_buf,_s+_startoffset); /* no matches in the remainder, add it to the result */ \
+      Buffer::contents(_buf);                                           \
+    })
+
+#define REPLACE(x) add_replacement(_buf,_s,_ovector,x)
+#define STRING(x) Buffer::add_string(_buf,x);
+#define DOLLAR(x) ({ int _start = _ovector[2*(x)]; int _after = _ovector[2*(x)+1]; \
+      (_start < 0 || _after < 0) ? strdup("") : substring(_s,_start,_after-_start); })
+}
+cycstub {
+  /* Return the size needed for an ovector for a given regular expression. */
+  unsigned int pcre_ovector_len(pcre @re) {
+    unsigned int olen;
+    int rc = pcre_fullinfo(re,NULL,PCRE_INFO_CAPTURECOUNT,&olen);
+    return 3*(olen+1);
+  }
+
+  /* Add a replacement to a buffer.  The replacement supports the Perl
+     constructs $`, $&, $', $1, ... */
+  /* Array_bounds if backref number is too high */
+  void
+    add_replacement(Buffer::T buf, const char ?s, int ?ovector, const char ?r) {
+    let len = strlen(r);
+    char c;
+    for (let i = 0; i<len; i++) {
+      c = r[i];
+      if (c != '$') { Buffer::add_char(buf,c); continue; }
+
+      i++;
+      if (i>=len) {
+        Buffer::add_char(buf,'$');
+        return;
+      }
+      c = r[i];
+      switch (c) {
+      case '`':
+        Buffer::add_substring(buf,s,0,ovector[0]);
+        break;
+      case '\'':
+        Buffer::add_string(buf,s+ovector[1]); // assumes s zero terminated
+        break;
+      case '&':
+        Buffer::add_substring(buf,s,ovector[0],ovector[1]-ovector[0]);
+        break;
+      default:
+        if (c < '0' || '9' < c) { /* Not a Number */
+          Buffer::add_char(buf,'$');
+          Buffer::add_char(buf,c);
+          break;
+        }
+        /* A number (back reference) */
+        int backref = 0;
+        int backreflen = 0;
+        for (; r[i+backreflen]; backreflen++) {
+          let d = r[i+backreflen];
+          if (!isdigit(d)) break;
+          backref = backref*10 + (d - '0');
+        }
+        /* backref holds the converted backref number, i+backlen
+           is the index of the first non-digit character */
+        /* Don't use sscanf because of a cyclone problem with linking
+           order (-lpcre ends up after -lcyc, barfs) */
+        /* TODO: check that backref is valid, give useful message otherwise */
+        let start = ovector[backref*2];
+        let after = ovector[backref*2+1];
+        if (start < 0 || after < 0) continue; /* did not actually match */
+        Buffer::add_substring(buf,s,start,after-start);
+        i += backreflen-1; /* -1 because for loop does i++ */
+        break;
+      }
+    }
+  }
+
+  char ?pcre_s_g(const char ?s,const char ?p,const char ?r,int options) {
+    return PCRE_S_EG(s,p,REPLACE(r),options);
+  }
+
+  //char ?pcre_s_g(const char ?s,const char ?p,const char ?r,int options) {
+  //  pcre *_re; const char *_err = NULL; int _erroff;
+  //
+  //  _re = pcre_compile(p, options, &_err, &_erroff, NULL);
+  //
+  //  let _buf = Buffer::create(10);
+  //  let _slen = strlen(s);
+  //  let _olen = pcre_ovector_len(_re);
+  //  int ?_ovector = new {for i < _olen : 0};
+  //  int _startoffset = 0;
+  //
+  //  while (_startoffset <= _slen && /* = to try to match empty string at end */
+  //         pcre_exec(_re,NULL,s,_slen,_startoffset,0,_ovector,_olen) >= 0) {
+  //    let _start = _ovector[0];
+  //    let _after = _ovector[1];
+  //    if (_start < 0 || _after < 0) break;
+  //    Buffer::add_substring(_buf,s,_startoffset,_start-_startoffset); /* string before match */
+  //    add_replacement(_buf,s,_ovector,r); /* replacement text */
+  //    /* now set up for the next search */
+  //    _startoffset = _after;
+  //    if (_startoffset == _start) {
+  //      /* (original _startoffset) <= _start == _after, i.e., the pattern
+  //         matched the empty string.  We need to advance to the next
+  //         character so that the empty string does not match again
+  //         (avoid the infinite loop). */
+  //      Buffer::add_char(_buf,s[_startoffset]);
+  //      _startoffset++;
+  //    }
+  //  }
+  //  Buffer::add_string(_buf,s+_startoffset); /* no matches in the remainder, add it to the result */
+  //  return Buffer::contents(_buf);
+  //}
+
+  char ?pcre_s(const char ?s,const char ?p,const char ?r,int options) {
+    pcre *re; const char *err = NULL; int erroff;
+
+    re = pcre_compile(p, options, &err, &erroff, NULL);
+    if (!re) {
+      fprintf(stderr,"Error at position %d:\n%s\n",erroff,p);
+      exit(1);
+    }
+
+    let slen = strlen(s);
+    let buf = Buffer::create(slen);
+    let olen = pcre_ovector_len(re);
+    int ?ovector = new {for i < olen : 0};
+
+    if (pcre_exec(re,NULL,s,slen,0,0,ovector,olen) >= 0) {
+      let start = ovector[0];
+      let after = ovector[1];
+      if (start < 0 || after < 0) {
+        return strdup(s);
+      }
+      Buffer::add_substring(buf,s,0,start);
+      add_replacement(buf,s,ovector,r);
+      Buffer::add_string(buf,s+after);
+      return Buffer::contents(buf);
+    }
+    else
+      return strdup(s);
+  }
+
+  int pcre_m(const char ?s,const char ?p,int options) {
+    pcre *re; const char *err = NULL; int erroff;
+
+    re = pcre_compile(p, options, &err, &erroff, NULL);
+    if (!re) {
+      fprintf(stderr,"Error at position %d:\n%s\n",erroff,p);
+      exit(1);
+    }
+
+    let slen = strlen(s);
+    let olen = pcre_ovector_len(re);
+    int ?ovector = new {for i < olen : 0};
+
+    return (0 <= pcre_exec(re,NULL,s,slen,0,0,ovector,olen));
+  }
+
+  /* TODO: maybe this should work by side effect rather than return a new string */
+  char ?pcre_chomp(const char ?s) {
+    return pcre_s(s,"\n$","",0);
+  }
+
+  List::list_t<char ?@> pcre_split(const char ?p,int options,const char ?s) {
+    pcre *re; const char *err = NULL; int erroff;
+
+    re = pcre_compile(p, options, &err, &erroff, NULL);
+    if (!re) {
+      fprintf(stderr,"Error at position %d:\n%s\n",erroff,p);
+      exit(1);
+    }
+
+    List::list_t<char ?`H@`H> res = NULL;
+    let slen = strlen(s);
+    let olen = pcre_ovector_len(re);
+    int ?ovector = new {for i < olen : 0};
+    int startoffset = 0;
+    int was_empty_match = 0;
+
+    while (startoffset <= slen && /* = to try to match empty string at end */
+           pcre_exec(re,NULL,s,slen,startoffset+was_empty_match,
+                     0,ovector,olen) >= 0) {
+      let start = ovector[0];
+      let after = ovector[1];
+      if (start < 0 || after < 0) break;
+      res = new List::List(new substring(s,startoffset,start-startoffset),res);
+      startoffset = after;
+      if (startoffset == start) {
+        /* (original _startoffset) <= _start == _after, i.e., the pattern
+           matched the empty string.  We need to advance to the next
+           character so that the empty string does not match again
+           (avoid the infinite loop). */
+        was_empty_match = 1;
+      }
+      else
+        was_empty_match = 0;
+    }
+    if (startoffset < slen)
+      res = new List::List(new strdup(s+startoffset),res);
+    res = List::imp_rev(res);
+    return res;
+  }
+}
 ;
