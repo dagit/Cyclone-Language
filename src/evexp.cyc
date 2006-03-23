@@ -171,8 +171,22 @@ static $(cnst_t,bool) eval_const_binprimop(primop_t p,exp_t e1,exp_t e2) {
   case $(Bitand,       _): u3 = u1 &  u2; use_u3 = true; break;
   case $(Bitor,        _): u3 = u1 |  u2; use_u3 = true; break;
   case $(Bitxor,       _): u3 = u1 ^  u2; use_u3 = true; break;
-  case $(Bitlshift,    _): u3 = u1 << u2; use_u3 = true; break;
-  case $(Bitlrshift,   _): u3 = u1 >> u2; use_u3 = true; break;
+  case $(Bitlshift,    _): 
+    if(s2 == Signed && i2 < 0)
+      Warn::warn(e2->loc, "left shift count is negative");
+    //for lshift doesn't make a diff whether we use signed or unsigned;
+    //typechecker treats this as signed, so we stick with that here
+    i3 = i1 << i2; use_i3 = true; break;
+  case $(Bitlrshift,   _): //the semantics of rshift for signed is different than unsigned
+    if(s2 == Signed && i2 < 0)
+      Warn::warn(e2->loc, "right shift count is negative");
+    if(s1 == Signed) {
+      i3 = i1 >> i2; use_i3 = true;
+    }
+    else {
+      u3 = u1 >> i2; use_u3 = true;
+    }
+    break;
   default: Warn::err2(e1->loc, "bad constant expression"); return $(cn1,true);
   }
   if(use_i3) return $(Int_c(Signed,   i3),       true);

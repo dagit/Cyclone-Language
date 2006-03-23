@@ -388,17 +388,17 @@ int Cyc_XP_add(int n,struct _fat_ptr z,struct _fat_ptr x,struct _fat_ptr y,int c
 int i;
 for(i=0;i < n;++ i){
 ({int _Tmp0=({int _Tmp1=(int)*((unsigned char*)_check_fat_subscript(x,sizeof(unsigned char),i));_Tmp1 + (int)*((unsigned char*)_check_fat_subscript(y,sizeof(unsigned char),i));});carry +=_Tmp0;});
-*((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i))=(unsigned char)(carry % 256U);
-carry /=256U;}
+*((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i))=(unsigned char)(carry % 256);
+carry /=256;}
 # 47
 return carry;}
 # 49
 int Cyc_XP_sub(int n,struct _fat_ptr z,struct _fat_ptr x,struct _fat_ptr y,int borrow){
 int i;
 for(i=0;i < n;++ i){
-int d=({int _Tmp0=((int)*((unsigned char*)_check_fat_subscript(x,sizeof(unsigned char),i))+ 256U)- borrow;_Tmp0 - (int)*((unsigned char*)_check_fat_subscript(y,sizeof(unsigned char),i));});
-*((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i))=(unsigned char)(d % 256U);
-borrow=1 - d / 256U;}
+int d=({int _Tmp0=((int)*((unsigned char*)_check_fat_subscript(x,sizeof(unsigned char),i))+ 256)- borrow;_Tmp0 - (int)*((unsigned char*)_check_fat_subscript(y,sizeof(unsigned char),i));});
+*((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i))=(unsigned char)(d % 256);
+borrow=1 - d / 256;}
 # 56
 return borrow;}
 # 58
@@ -406,17 +406,17 @@ int Cyc_XP_sum(int n,struct _fat_ptr z,struct _fat_ptr x,int y){
 int i;
 for(i=0;i < n;++ i){
 y +=(int)*((unsigned char*)_check_fat_subscript(x,sizeof(unsigned char),i));
-*((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i))=(unsigned char)(y % 256U);
-y /=256U;}
+*((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i))=(unsigned char)(y % 256);
+y /=256;}
 # 65
 return y;}
 # 67
 int Cyc_XP_diff(int n,struct _fat_ptr z,struct _fat_ptr x,int y){
 int i;
 for(i=0;i < n;++ i){
-int d=((int)*((unsigned char*)_check_fat_subscript(x,sizeof(unsigned char),i))+ 256U)- y;
-*((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i))=(unsigned char)(d % 256U);
-y=1 - d / 256U;}
+int d=((int)*((unsigned char*)_check_fat_subscript(x,sizeof(unsigned char),i))+ 256)- y;
+*((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i))=(unsigned char)(d % 256);
+y=1 - d / 256;}
 # 74
 return y;}
 # 76
@@ -424,8 +424,8 @@ int Cyc_XP_neg(int n,struct _fat_ptr z,struct _fat_ptr x,int carry){
 int i;
 for(i=0;i < n;++ i){
 carry +=(int)~(*((unsigned char*)_check_fat_subscript(x,sizeof(unsigned char),i)));
-*((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i))=(unsigned char)(carry % 256U);
-carry /=256U;}
+*((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i))=(unsigned char)(carry % 256);
+carry /=256;}
 # 83
 return carry;}
 # 85
@@ -484,12 +484,12 @@ int i;
 (2 <= m && m <= k + m)&& k + m <= n?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp0;})(_tag_fat("2 <= m && m <= k+m && k+m <= n",sizeof(char),31U),_tag_fat("xp.cyc",sizeof(char),7U),137U);
 {
 int km=k + m;
-unsigned long y2=(unsigned long)((int)*((unsigned char*)_check_fat_subscript(y,sizeof(unsigned char),m - 1))* 256U + (int)((unsigned char*)y.curr)[m - 2]);
-unsigned long r3=(unsigned long)({int _Tmp0=({int _Tmp1=(int)*((unsigned char*)_check_fat_subscript(rem,sizeof(unsigned char),km))* 65536U;_Tmp1 + (int)*((unsigned char*)_check_fat_subscript(rem,sizeof(unsigned char),km - 1))* 256U;});_Tmp0 + (int)*((unsigned char*)_check_fat_subscript(rem,sizeof(unsigned char),km - 2));});
+unsigned long y2=(unsigned long)((int)*((unsigned char*)_check_fat_subscript(y,sizeof(unsigned char),m - 1))* 256 + (int)((unsigned char*)y.curr)[m - 2]);
+unsigned long r3=(unsigned long)({int _Tmp0=({int _Tmp1=(int)*((unsigned char*)_check_fat_subscript(rem,sizeof(unsigned char),km))* 65536;_Tmp1 + (int)*((unsigned char*)_check_fat_subscript(rem,sizeof(unsigned char),km - 1))* 256;});_Tmp0 + (int)*((unsigned char*)_check_fat_subscript(rem,sizeof(unsigned char),km - 2));});
 # 143
 qk=(int)(r3 / y2);
-if(qk >= 256U)
-qk=255U;}
+if(qk >= 256)
+qk=255;}
 # 147
 ({unsigned char _Tmp0=(unsigned char)Cyc_XP_product(m,dq,y,qk);*((unsigned char*)_check_fat_subscript(dq,sizeof(unsigned char),m))=_Tmp0;});
 for(i=m;i > 0;-- i){

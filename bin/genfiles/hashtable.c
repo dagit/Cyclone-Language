@@ -449,7 +449,7 @@ int ans=0;
 int sz=(int)_get_fat_size(s,sizeof(char));
 int shift=0;
 {unsigned i=0U;for(0;i < (unsigned)sz;++ i){
-ans=ans ^ (int)((const char*)s.curr)[(int)i]<< shift;
+ans=ans ^ (int)(((const char*)s.curr)[(int)i]<< shift);
 shift +=8;
 if(shift==32)
 shift=0;}}

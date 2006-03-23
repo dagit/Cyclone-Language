@@ -702,7 +702,7 @@ res=({union Cyc_Absyn_Cnst _Tmp0;_Tmp0.LongLong_c.tag=6U,_Tmp0.LongLong_c.val.f0
 long long n=0;
 {int i=0;for(0;i < len;++ i){
 n=({long long _Tmp0=n * (long long)base;_Tmp0 + (long long)Cyc_Lex_int_of_char(*((char*)_check_fat_subscript(buff,sizeof(char),i)));});}}{
-unsigned long long x=(unsigned long long)n >> 32U;
+unsigned long long x=(unsigned long long)n >> 32;
 if(x!=4294967295U && x!=0U){
 if(declared_size &&(int)size==2)
 Cyc_Lex_err(_tag_fat("integer constant too large",sizeof(char),27U),lbuf);
@@ -946,7 +946,7 @@ return;}}
 Cyc_Lex_pos_info=Cyc_Lex_rnew_filepos(Cyc_Core_heap_region,filename,(unsigned)Cyc_Lex_linenumber,Cyc_Lex_pos_info);}struct _tuple32{struct _fat_ptr f0;unsigned f1;};
 # 779
 struct _tuple32 Cyc_Lex_xlate_pos(unsigned char_offset){
-char_offset=char_offset >> 8U;
+char_offset=char_offset >> 8;
 {struct Cyc_Lex_PosInfo*p=Cyc_Lex_pos_info;for(0;p!=0;p=p->next){
 unsigned first_char_offset=*((unsigned*)_check_fat_subscript(p->linenumpos,sizeof(unsigned),0));
 if(char_offset < first_char_offset && p->next!=0)continue;{

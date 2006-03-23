@@ -2675,7 +2675,9 @@ static void exp_to_c(env_t nv, exp_t e) {
       e->r = cast_it_r(typ_to_c(e->topt),pexp);
     // necessary so a later pass does not remove the cast we put in 1 line up
     // (the cast is usually, but not always, unnecessary)
-    e->topt = void_star_type();
+    // NS: but this breaks when the toseqc pass for evaluation order converts an assignment 
+    // to an element of an array of fat ptrs
+    //    e->topt = void_star_type();
     break;
 
   case &Swap_e(e1,e2):

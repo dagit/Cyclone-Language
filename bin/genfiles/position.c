@@ -453,7 +453,7 @@ return _tag_fat(0,0,0);}}
 # 152
 unsigned Cyc_Position_loc_to_seg(unsigned loc){
 unsigned mask=(unsigned)Cyc_Position_sourcemask?((struct _tuple0*)Cyc_Position_sourcemask->hd)->f1: 0U;
-unsigned res=loc << 8U | mask & 255U;
+unsigned res=loc << 8 | mask & 255U;
 # 156
 return res;}
 # 159
@@ -464,7 +464,7 @@ unsigned smask=seg & 255U;
 struct _fat_ptr source=_tag_fat(0,0,0);
 {struct Cyc_List_List*sm=Cyc_Position_sourcemask;for(0;sm!=0;sm=sm->tl){
 if(smask==((struct _tuple0*)sm->hd)->f1){
-struct _tuple0 _Tmp0;_Tmp0.f0=((struct _tuple0*)sm->hd)->f0,_Tmp0.f1=seg >> 8U;return _Tmp0;}}}
+struct _tuple0 _Tmp0;_Tmp0.f0=((struct _tuple0*)sm->hd)->f0,_Tmp0.f1=seg >> 8;return _Tmp0;}}}
 # 169
 if(can_retry){
 can_retry=0;

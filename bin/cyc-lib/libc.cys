@@ -4791,6 +4791,12 @@ hstub {
   /*
     extern "C" int waitid(idtype_t, id_t, siginfo_t @, int);
   */
+  //__extension__ and __typeof are not supported by Cyclone
+#undef __WAIT_INT
+#ifndef __WAIT_INT
+#define __WAIT_INT(status) (({ union { typeof(status) __in; int __i; } __u; __u.__in = (status); __u.__i; }))
+#endif
+
 }
 hstub wait {
   extern "C" pid_t wait(int *);

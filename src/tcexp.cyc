@@ -529,7 +529,7 @@ static type_t tcMinus(tenv_t te, type_t *topt, exp_t e1, exp_t e2) {
       }
       return t1;
     }
-    else { //the result is an arithmetic type ... t1 should be thin //fixed bug during writeup .. retest
+    else { //the result is an arithmetic type ... t1 should be thin 
       if(is_fat_pointer_type(t1) ||
 	 (is_cvar_type(get_pointer_bounds(t2)) &&
 	  !BansheeIf::add_constraint(e1->loc,BansheeIf::equality_constraint(get_pointer_bounds(t1), 
@@ -555,9 +555,24 @@ static type_t tcMinus(tenv_t te, type_t *topt, exp_t e1, exp_t e2) {
     Warn::err2(e1->loc,"can't perform arithmetic on abstract pointer type");
   if (is_noalias_pointer(curr_aquals_bounds(te),t1,true))
     Warn::err2(e1->loc,"can't perform arithmetic on unique pointer");
+
+  //(fat - thin), or (thin - fat) requires coercing the fat to a thin
+  if(!(is_fat_pointer_type(t1) ^ is_fat_pointer_type(t2)))
+    return sint_type;
+
+  if(is_fat_pointer_type(t1)) {
+    unchecked_cast(e1, star_type(pointer_elt_type(t1),
+				 pointer_region(t1), pointer_aqual(t1),
+				 empty_tqual(0), false_type, relqual(t1)), 
+		   Other_coercion);
+  }
+  else {
+    unchecked_cast(e2, star_type(pointer_elt_type(t2),
+				 pointer_region(t2), pointer_aqual(t2),
+				 empty_tqual(0), false_type, relqual(t2)), 
+		   Other_coercion);
+  }
   
-/*   unchecked_cast(e1, sint_type, Other_coercion); */
-/*   unchecked_cast(e2, sint_type, Other_coercion); */
   return sint_type;
 }
 
@@ -630,23 +645,32 @@ static type_t tcBinPrimop(tenv_t te, seg_t loc, type_t * topt,
     // if the result is unsigned, then this was an unsigned division
     let res = tcArithBinop(te,e1,e2,is_numeric);
     switch (compress(res)) {
-    case &AppType(&IntCon(Unsigned,_),_): *p = UDiv; return res;
+    case &AppType(&IntCon(Unsigned,_),_):
+      *p = UDiv; return res;
     default: return res;
     }
+    
   case UMod:
   case Mod:
     // if the result is unsigned, then this was an unsigned mod
     let res = tcArithBinop(te,e1,e2,is_integral);
     switch (compress(res)) {
-    case &AppType(&IntCon(Unsigned,_),_): *p = UMod; return res;
+    case &AppType(&IntCon(Unsigned,_),_):
+      *p = UMod; return res;
     default: return res;
     }
+
   case Bitand:
   case Bitor:
   case Bitxor:
+    return tcArithBinop(te, e1, e2, is_integral);
   case Bitlshift:
-  case Bitlrshift: return tcArithBinop(te,e1,e2,is_integral);
-
+  case Bitlrshift:  
+    if(!is_integral(e1))
+      return expr_err(te,e1->loc,NULL, "type ",e1->topt," cannot be used with << or >>");
+    if (!is_integral(e2)) 
+      return expr_err(te,e2->loc,NULL, "type ",e2->topt," cannot be used with << or >>");
+    return e1->topt; //type of l/rshift is the type of the first argument; no coercion
     // Note: comparing pointers relies on memory-manager properties
     //       (but darned useful for dictionaries)
   case Eq:
@@ -966,8 +990,13 @@ static struct Datatypefield *tcInjection(tenv_t te,exp_t e,type_t tu,
     // I hate doing this because it has side-effects, but oh well...
     // MWH: ignores potential to insert alias coercions
     bool bogus = false;
-    if (coerce_arg(curr_aquals_bounds(te),e,t2,&bogus))
+    //used to be this: but zerotonull coercions are bad coerce_arg(curr_aquals_bounds(te),e,t2,&bogus))
+    let crc = Subtype::coercible_warn(e->loc, e->topt, t2);
+    if (crc != Unknown_coercion) {
+      if(crc != No_coercion) 
+	unchecked_cast(e, t2, crc);
       return fields->hd;
+    }
   }
   Warn::err2(e->loc,"can't find a field in ",tu," to inject value of type ",t1);
   return NULL;

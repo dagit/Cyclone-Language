@@ -612,7 +612,7 @@ Cyc_Sexp_perror(p,ch,_tag_fat("expecting hex digit",sizeof(char),20U));}
 # 359
 static unsigned Cyc_Sexp_nibble(unsigned i,unsigned x){
 for(1;i > 0U;-- i){
-x=x >> 4U;}
+x=x >> 4;}
 return x & 15U;}
 # 366
 static unsigned long long Cyc_Sexp_parse_longlong(struct Cyc_Sexp_Parser*p){
@@ -620,14 +620,14 @@ unsigned long long res=0U;
 {unsigned i=0U;for(0;i < 16U;++ i){
 int ch=Cyc_Sexp_pgetc(p);
 unsigned long long v=(unsigned long long)Cyc_Sexp_hex2value(p,ch);
-res=res << 4U | v;}}
+res=res << 4 | v;}}
 # 373
 return res;}
 # 377
 static void Cyc_Sexp_print_ulonglong(struct _tuple6*self,struct Cyc_Sexp_Printer*p){
 # 379
 unsigned long long x=self->v;
-({void(*_Tmp0)(void*,struct _fat_ptr)=p->print;void*_Tmp1=p->env;_Tmp0(_Tmp1,({struct Cyc_Int_pa_PrintArg_struct _Tmp2=({struct Cyc_Int_pa_PrintArg_struct _Tmp3;_Tmp3.tag=1,_Tmp3.f1=(unsigned)(x >> 32U);_Tmp3;});struct Cyc_Int_pa_PrintArg_struct _Tmp3=({struct Cyc_Int_pa_PrintArg_struct _Tmp4;_Tmp4.tag=1,_Tmp4.f1=(unsigned)x;_Tmp4;});void*_Tmp4[2];_Tmp4[0]=& _Tmp2,_Tmp4[1]=& _Tmp3;Cyc_aprintf(_tag_fat("%08x%08x",sizeof(char),9U),_tag_fat(_Tmp4,sizeof(void*),2));}));});}
+({void(*_Tmp0)(void*,struct _fat_ptr)=p->print;void*_Tmp1=p->env;_Tmp0(_Tmp1,({struct Cyc_Int_pa_PrintArg_struct _Tmp2=({struct Cyc_Int_pa_PrintArg_struct _Tmp3;_Tmp3.tag=1,_Tmp3.f1=(unsigned)(x >> 32);_Tmp3;});struct Cyc_Int_pa_PrintArg_struct _Tmp3=({struct Cyc_Int_pa_PrintArg_struct _Tmp4;_Tmp4.tag=1,_Tmp4.f1=(unsigned)x;_Tmp4;});void*_Tmp4[2];_Tmp4[0]=& _Tmp2,_Tmp4[1]=& _Tmp3;Cyc_aprintf(_tag_fat("%08x%08x",sizeof(char),9U),_tag_fat(_Tmp4,sizeof(void*),2));}));});}
 # 383
 static struct _tuple6*Cyc_Sexp_parse_ulonglong(struct Cyc_Sexp_Parser*p){
 return Cyc_Sexp_mk_ulonglong(Cyc_Sexp_parse_longlong(p));}
@@ -657,7 +657,7 @@ unsigned res=0U;
 {unsigned i=0U;for(0;i < 8U;++ i){
 int ch=Cyc_Sexp_pgetc(p);
 unsigned v=Cyc_Sexp_hex2value(p,ch);
-res=res << 4U | v;}}
+res=res << 4 | v;}}
 # 418
 return res;}
 # 421
@@ -680,7 +680,7 @@ unsigned res=0U;
 {unsigned i=0U;for(0;i < 4U;++ i){
 int ch=Cyc_Sexp_pgetc(p);
 unsigned v=Cyc_Sexp_hex2value(p,ch);
-res=res << 4U | v;}}
+res=res << 4 | v;}}
 # 447
 return(unsigned short)res;}
 # 451
@@ -705,7 +705,7 @@ unsigned res=0U;
 {unsigned i=0U;for(0;i < 2U;++ i){
 int ch=Cyc_Sexp_pgetc(p);
 unsigned v=Cyc_Sexp_hex2value(p,ch);
-res=res << 4U | v;}}
+res=res << 4 | v;}}
 # 479
 return(unsigned char)res;}
 # 482
@@ -756,7 +756,7 @@ return(int)((unsigned)Cyc_Sexp_double2longlong(self->v));}
 static void Cyc_Sexp_print_double(struct _tuple9*self,struct Cyc_Sexp_Printer*p){
 double d=self->v;
 unsigned long long x=Cyc_Sexp_double2longlong(d);
-({void(*_Tmp0)(void*,struct _fat_ptr)=p->print;void*_Tmp1=p->env;_Tmp0(_Tmp1,({struct Cyc_Int_pa_PrintArg_struct _Tmp2=({struct Cyc_Int_pa_PrintArg_struct _Tmp3;_Tmp3.tag=1,_Tmp3.f1=(unsigned)(x >> 32U);_Tmp3;});struct Cyc_Int_pa_PrintArg_struct _Tmp3=({struct Cyc_Int_pa_PrintArg_struct _Tmp4;_Tmp4.tag=1,_Tmp4.f1=(unsigned)x;_Tmp4;});void*_Tmp4[2];_Tmp4[0]=& _Tmp2,_Tmp4[1]=& _Tmp3;Cyc_aprintf(_tag_fat("%08x%08x",sizeof(char),9U),_tag_fat(_Tmp4,sizeof(void*),2));}));});}
+({void(*_Tmp0)(void*,struct _fat_ptr)=p->print;void*_Tmp1=p->env;_Tmp0(_Tmp1,({struct Cyc_Int_pa_PrintArg_struct _Tmp2=({struct Cyc_Int_pa_PrintArg_struct _Tmp3;_Tmp3.tag=1,_Tmp3.f1=(unsigned)(x >> 32);_Tmp3;});struct Cyc_Int_pa_PrintArg_struct _Tmp3=({struct Cyc_Int_pa_PrintArg_struct _Tmp4;_Tmp4.tag=1,_Tmp4.f1=(unsigned)x;_Tmp4;});void*_Tmp4[2];_Tmp4[0]=& _Tmp2,_Tmp4[1]=& _Tmp3;Cyc_aprintf(_tag_fat("%08x%08x",sizeof(char),9U),_tag_fat(_Tmp4,sizeof(void*),2));}));});}
 # 548
 static struct _tuple9*Cyc_Sexp_parse_double(struct Cyc_Sexp_Parser*p){
 return Cyc_Sexp_mk_double(Cyc_Sexp_longlong2double(Cyc_Sexp_parse_longlong(p)));}
@@ -863,7 +863,7 @@ struct _fat_ptr vs=x->v;
 unsigned n=_get_fat_size(vs,sizeof(struct Cyc_Sexp_Object));
 {unsigned i=0U;for(0;i < n;++ i){
 struct Cyc_Sexp_Object _Tmp0=((struct Cyc_Sexp_Object*)vs.curr)[(int)i];void*_Tmp1;_Tmp1=_Tmp0.self;{struct Cyc_Sexp_Obj*v=_Tmp1;
-res=res << 8U | (unsigned)v & 255U;}}}
+res=res << 8 | (unsigned)v & 255U;}}}
 # 677
 return(int)res;}
 # 681
