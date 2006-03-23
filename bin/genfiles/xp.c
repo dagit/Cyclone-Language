@@ -364,7 +364,7 @@ static char Cyc_map[75U]={'\000','\001','\002','\003','\004','\005','\006','\a',
 unsigned long Cyc_XP_fromint(int n,struct _fat_ptr z,unsigned long u){
 int i=0;
 do{
-*((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i ++))=(unsigned char)(u % 256U);}while(
+*((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i ++))=(unsigned char)(u % 256U);1U;}while(
 (u /=256U)> 0U && i < n);
 for(1;i < n;++ i){
 *((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i))='\000';}
@@ -612,11 +612,14 @@ int i=0;
 (unsigned)str.curr?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp0;})(_tag_fat("str",sizeof(char),4U),_tag_fat("xp.cyc",sizeof(char),7U),270U);
 base >= 2 && base <= 36?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp0;})(_tag_fat("base >= 2 && base <= 36",sizeof(char),24U),_tag_fat("xp.cyc",sizeof(char),7U),271U);
 do{
-int r=Cyc_XP_quotient(n,x,x,base);
+{int r=Cyc_XP_quotient(n,x,x,base);
 i < size?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp0;})(_tag_fat("i < size",sizeof(char),9U),_tag_fat("xp.cyc",sizeof(char),7U),274U);
 ({struct _fat_ptr _Tmp0=_fat_ptr_plus(str,sizeof(char),i ++);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=((const char*)Cyc_digits.curr)[r];if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
 while(n > 1 &&(int)((unsigned char*)x.curr)[n - 1]==0){
--- n;1U;}}while(
+-- n;1U;}}
+# 273
+1U;}while(
+# 278
 n > 1 ||(int)((unsigned char*)x.curr)[0]!=0);
 i < size?0:({int(*_Tmp0)(struct _fat_ptr,struct _fat_ptr,unsigned)=(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;_Tmp0;})(_tag_fat("i < size",sizeof(char),9U),_tag_fat("xp.cyc",sizeof(char),7U),279U);
 ({struct _fat_ptr _Tmp0=_fat_ptr_plus(str,sizeof(char),i);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2='\000';if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});

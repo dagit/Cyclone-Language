@@ -45,6 +45,8 @@ using Absynpp;
 // #define TIMING_DEBUG 1
 // #define BCE_DEBUG
 
+#define NO_FUN_PRECOND
+
 using Absyn;
 using Warn;
 using Core;
@@ -114,7 +116,13 @@ static int hash_ptr(`a s) { return (int)s; }
 
 static env_t toplevel_env(JumpAnalysis::jump_anal_res_t tables, bool do_vcgen) { 
   let fn_precond_info = Hashtable::create(313,Absyn::qvar_cmp,Absyn::hash_qvar);
-  return Env(tables,NULL,fn_precond_info,1,false,false,true, do_vcgen);
+  return Env(tables,NULL,
+	     fn_precond_info,
+	     1, // first pass
+	     false, // do not use_precond
+	     false, // not in sizeof
+	     true, // at top level
+	     do_vcgen);
 }
 
 static env_t fn_body_env(env_t nv) {
@@ -804,11 +812,12 @@ void insert_checks(List::list_t<decl_t,`H> tds,
   // this time only analyze functions that
   // do not escape, use collected caller info
   // in previous round
+#ifndef NO_FUN_PRECOND
   nv.use_precond = true;
   nv.pass_counter++;
   for(let fds = cg_fds; fds != NULL; fds = fds->tl)
     do_fndecl(nv,fds->hd);
-
+#endif
   
   if (Flags::verbose) {
     let eliminated_bounds_checks = 

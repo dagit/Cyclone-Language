@@ -522,7 +522,7 @@ for(n=0;((unsigned)n < fmt_sz &&(ch=(int)*((const char*)_check_fat_subscript(fmt
 fmt=_fat_ptr_plus(fmt,sizeof(char),n);
 # 355
 if((n=(fmt.curr - fmark.curr)/ sizeof(char))!=0){
-do{if(({int _Tmp0=Cyc__IO_sputn(ioputc,ioputc_env,(struct _fat_ptr)fmark,n);_Tmp0!=n;}))goto error;}while(0);
+do{if(({int _Tmp0=Cyc__IO_sputn(ioputc,ioputc_env,(struct _fat_ptr)fmark,n);_Tmp0!=n;}))goto error;1U;}while(0);
 ret +=n;}
 # 359
 if(ch==0)
@@ -583,7 +583,9 @@ goto rflag;case 49:
  n=0;
 do{
 n=10 * n + (ch - 48);
-ch=(int)*((const char*)_check_fat_subscript(_fat_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0U));}while((unsigned)(ch - 48)<= 9U);
+ch=(int)*((const char*)_check_fat_subscript(_fat_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0U));
+# 430
+1U;}while((unsigned)(ch - 48)<= 9U);
 # 433
 width=n;
 goto reswitch;case 76:
@@ -698,7 +700,9 @@ switch((int)base){case Cyc_OCT:
 # 574
  do{
 ({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus(& cp,sizeof(char),-1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=(char)((_ulong & 7U)+ 48U);if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
-_ulong >>=3U;}while((int)_ulong);
+_ulong >>=3U;
+# 575
+1U;}while((int)_ulong);
 # 579
 if(flags & 8 &&(int)*((char*)_check_fat_subscript(cp,sizeof(char),0U))!=48)
 ({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus(& cp,sizeof(char),-1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2='0';if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
@@ -719,7 +723,9 @@ xdigs=_tag_fat("0123456789ABCDEF",sizeof(char),17U);else{
 xdigs=_tag_fat("0123456789abcdef",sizeof(char),17U);}
 do{
 ({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus(& cp,sizeof(char),-1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=*((const char*)_check_fat_subscript(xdigs,sizeof(char),(int)(_ulong & 15U)));if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
-_ulong >>=4U;}while((int)_ulong);
+_ulong >>=4U;
+# 598
+1U;}while((int)_ulong);
 # 601
 goto _LL4F;default:
 # 603
@@ -755,11 +761,11 @@ if(({int _Tmp0=Cyc__IO_padn(ioputc,ioputc_env,' ',width - fieldsz);_Tmp0 < width
 # 659
 if((int)sign){
 ({struct _fat_ptr _Tmp0=_fat_ptr_plus(_tag_fat(sign_string,sizeof(char),2U),sizeof(char),0);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=sign;if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
-do{if(Cyc__IO_sputn(ioputc,ioputc_env,_tag_fat(sign_string,sizeof(char),2U),1)!=1)goto error;}while(0);}else{
+do{if(Cyc__IO_sputn(ioputc,ioputc_env,_tag_fat(sign_string,sizeof(char),2U),1)!=1)goto error;1U;}while(0);}else{
 if(flags & 64){
 ox[0]='0';
 ox[1]=(char)ch;
-do{if(Cyc__IO_nzsputn(ioputc,ioputc_env,_tag_fat(ox,sizeof(char),2U),2)!=2)goto error;}while(0);}}
+do{if(Cyc__IO_nzsputn(ioputc,ioputc_env,_tag_fat(ox,sizeof(char),2U),2)!=2)goto error;1U;}while(0);}}
 # 669
 if((flags & 48U)==32){
 if(({int _Tmp0=Cyc__IO_padn(ioputc,ioputc_env,'0',width - fieldsz);_Tmp0 < width - fieldsz;}))goto error;}
@@ -767,11 +773,11 @@ if(({int _Tmp0=Cyc__IO_padn(ioputc,ioputc_env,'0',width - fieldsz);_Tmp0 < width
 if(({int _Tmp0=Cyc__IO_padn(ioputc,ioputc_env,'0',dpad);_Tmp0 < dpad;}))goto error;
 # 676
 if(which_cp==0)
-do{if(({int _Tmp0=Cyc__IO_sputn(ioputc,ioputc_env,(struct _fat_ptr)cp,size);_Tmp0!=size;}))goto error;}while(0);else{
+do{if(({int _Tmp0=Cyc__IO_sputn(ioputc,ioputc_env,(struct _fat_ptr)cp,size);_Tmp0!=size;}))goto error;1U;}while(0);else{
 if(which_cp==2)
-do{if(({int _Tmp0=Cyc__IO_sputn(ioputc,ioputc_env,(struct _fat_ptr)cp2,size);_Tmp0!=size;}))goto error;}while(0);else{
+do{if(({int _Tmp0=Cyc__IO_sputn(ioputc,ioputc_env,(struct _fat_ptr)cp2,size);_Tmp0!=size;}))goto error;1U;}while(0);else{
 if(which_cp==3)
-do{if(({int _Tmp0=Cyc__IO_nzsputn(ioputc,ioputc_env,(struct _fat_ptr)cp3,size);_Tmp0!=size;}))goto error;}while(0);}}
+do{if(({int _Tmp0=Cyc__IO_nzsputn(ioputc,ioputc_env,(struct _fat_ptr)cp3,size);_Tmp0!=size;}))goto error;1U;}while(0);}}
 # 684
 if(({int _Tmp0=Cyc__IO_padn(ioputc,ioputc_env,'0',fpprec);_Tmp0 < fpprec;}))goto error;
 # 687
@@ -799,7 +805,7 @@ exp=- exp;
 t=_fat_ptr_plus(expbuf,sizeof(char),308);
 if(exp > 9){
 do{
-({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus(& t,sizeof(char),-1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=(char)(exp % 10 + 48);if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});}while((exp /=10)> 9);
+({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus(& t,sizeof(char),-1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=(char)(exp % 10 + 48);if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});1U;}while((exp /=10)> 9);
 # 718
 ({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus(& t,sizeof(char),-1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=(char)(exp + 48);if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
 for(1;({char*_Tmp0=(char*)t.curr;_Tmp0 < (char*)_fat_ptr_plus(expbuf,sizeof(char),308).curr;});({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus_post(& p,sizeof(char),1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=*((char*)_fat_ptr_inplace_plus_post(& t,sizeof(char),1).curr);if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;})){;}}else{
@@ -882,7 +888,10 @@ if(fract!=0.0){
 if(prec)
 do{
 fract=modf(fract * (double)10,& tmp);
-({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus_post(& t,sizeof(char),1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=(char)((int)tmp + 48);if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});}while(
+({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus_post(& t,sizeof(char),1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=(char)((int)tmp + 48);if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
+# 815
+1U;}while(
+# 817
 -- prec && fract!=0.0);
 if(fract!=0.0)
 startp=({double _Tmp0=fract;struct _fat_ptr _Tmp1=startp;struct _fat_ptr _Tmp2=
@@ -929,7 +938,10 @@ if(fract!=0.0){
 if(prec)
 do{
 fract=modf(fract * (double)10,& tmp);
-({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus_post(& t,sizeof(char),1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=(char)((int)tmp + 48);if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});}while(
+({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus_post(& t,sizeof(char),1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=(char)((int)tmp + 48);if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
+# 866
+1U;}while(
+# 868
 -- prec && fract!=0.0);
 if(fract!=0.0)
 startp=({double _Tmp0=fract;struct _fat_ptr _Tmp1=startp;struct _fat_ptr _Tmp2=
@@ -975,7 +987,10 @@ if(prec){
 # 931
 do{
 fract=modf(fract * (double)10,& tmp);
-({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus_post(& t,sizeof(char),1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=(char)((int)tmp + 48);if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});}while(
+({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus_post(& t,sizeof(char),1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=(char)((int)tmp + 48);if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
+# 932
+1U;}while(
+# 934
 tmp==0.0 && !expcnt);
 while(-- prec && fract!=0.0){
 fract=modf(fract * (double)10,& tmp);

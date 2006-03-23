@@ -733,7 +733,7 @@ return Cyc_BansheeIf_eval_guard(c2);}default: _LL7:
 int Cyc_BansheeIf_discharge_implications (void){
 int changed=0;
 do{
-struct Cyc_List_List*prev=0;
+{struct Cyc_List_List*prev=0;
 struct Cyc_List_List*l=Cyc_BansheeIf_delayed_constraints;
 int first=1;
 changed=0;
@@ -772,7 +772,9 @@ goto _LL0;}default:
 # 609
 ({int(*_Tmp3)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;_Tmp3;})(_tag_fat("Malformed delayed constraint; only implications permitted",sizeof(char),58U),_tag_fat(0U,sizeof(void*),0));}_LL0:;}
 # 567 "bansheeif.cyc"
-1U;}}while(changed);
+1U;}}
+# 562
+1U;}while(changed);
 # 614 "bansheeif.cyc"
 {struct Cyc_List_List*dc=Cyc_BansheeIf_delayed_constraints;for(0;(unsigned)dc;dc=dc->tl){
 void*_Tmp0=(void*)dc->hd;void*_Tmp1;if(*((int*)_Tmp0)==0){_Tmp1=(void*)((struct Cyc_BansheeIf_CheckConstraint_BansheeIf_Constraint_struct*)_Tmp0)->f1;{void*c1=_Tmp1;
@@ -1028,7 +1030,9 @@ Cyc_fprintf(f,_tag_fat("# 1 \"cvars\"\n",sizeof(char),13U),_tag_fat(0U,sizeof(vo
 struct _tuple15*env;env=_cycalloc(sizeof(struct _tuple15)),env->f0=f,env->f1=0;
 do{
 env->f1=0;
-({void(*_Tmp0)(void(*)(void*,struct _tuple14*,struct _tuple15*),struct Cyc_Hashtable_Table*,struct _tuple15*)=(void(*)(void(*)(void*,struct _tuple14*,struct _tuple15*),struct Cyc_Hashtable_Table*,struct _tuple15*))Cyc_Hashtable_iter_c;_Tmp0;})(Cyc_BansheeIf_persist_cvar_entry,_check_null(Cyc_BansheeIf_cvarmap),env);}while(env->f1);
+({void(*_Tmp0)(void(*)(void*,struct _tuple14*,struct _tuple15*),struct Cyc_Hashtable_Table*,struct _tuple15*)=(void(*)(void(*)(void*,struct _tuple14*,struct _tuple15*),struct Cyc_Hashtable_Table*,struct _tuple15*))Cyc_Hashtable_iter_c;_Tmp0;})(Cyc_BansheeIf_persist_cvar_entry,_check_null(Cyc_BansheeIf_cvarmap),env);
+# 932
+1U;}while(env->f1);
 # 936
 ({void(*_Tmp0)(void(*)(void*,struct _tuple14*),struct Cyc_Hashtable_Table*)=(void(*)(void(*)(void*,struct _tuple14*),struct Cyc_Hashtable_Table*))Cyc_Hashtable_iter;_Tmp0;})(Cyc_BansheeIf_constrain_locals,_check_null(Cyc_BansheeIf_cvarmap));}}
 # 939

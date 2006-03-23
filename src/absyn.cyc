@@ -851,6 +851,13 @@ stmt_t for_stmt(exp_t e1,exp_t e2,exp_t e3,stmt_t s,seg_t loc) {
 		  loc);
 }
 stmt_t do_stmt(stmt_t s, exp_t e, seg_t loc) {
+  // vcgen need to make sure that break is
+  // always a forward jump statement
+  // but a sole switch inside while, break
+  // would be pointing to the
+  // while(...) unless we add
+  // a dummy after switch.
+  s = seq_stmt(s,exp_stmt(uint_exp(1,s->loc),s->loc),s->loc);
   return new_stmt(new Do_s(s,$(e,skip_stmt(e->loc))), loc);
 }
 stmt_t switch_stmt(exp_t e, list_t<switch_clause_t,`H> scs, seg_t loc) {

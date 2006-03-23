@@ -1250,7 +1250,10 @@ some_change=1;}
 # 886 "cifc.cyc"
 1U;}
 # 1010 "cifc.cyc"
-tv_ovrs=changed_decls;}}while(
+tv_ovrs=changed_decls;}
+# 881 "cifc.cyc"
+1U;}while(
+# 1011 "cifc.cyc"
 some_change && ++ niter < 10U);
 if(niter >= 10U){
 ({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,({

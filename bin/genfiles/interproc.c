@@ -1196,7 +1196,9 @@ all_located_fnsyms=Cyc_List_imp_append(rext,all_located_fnsyms);}}
 ;_pop_handler();}else{void*_Tmp2=(void*)Cyc_Core_get_exn_thrown();void*_Tmp3;if(((struct Cyc_Interproc_Unresolved_sym_exn_struct*)_Tmp2)->tag==Cyc_Interproc_Unresolved_sym){_Tmp3=((struct Cyc_Interproc_Unresolved_sym_exn_struct*)_Tmp2)->f1;{struct Cyc_Absyn_Exp*e=_Tmp3;
 # 880
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp4=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp5;_Tmp5.tag=0,_Tmp5.f1=_tag_fat("Undefined symbol",sizeof(char),17U);_Tmp5;});struct Cyc_Warn_Exp_Warn_Warg_struct _Tmp5=({struct Cyc_Warn_Exp_Warn_Warg_struct _Tmp6;_Tmp6.tag=4,_Tmp6.f1=e;_Tmp6;});void*_Tmp6[2];_Tmp6[0]=& _Tmp4,_Tmp6[1]=& _Tmp5;Cyc_Warn_err2(e->loc,_tag_fat(_Tmp6,sizeof(void*),2));});
-return 0;}}else{_Tmp3=_Tmp2;{void*exn=_Tmp3;_rethrow(exn);}};}}}}}while((unsigned)worklist);{
+return 0;}}else{_Tmp3=_Tmp2;{void*exn=_Tmp3;_rethrow(exn);}};}}}}
+# 864
+1U;}while((unsigned)worklist);{
 # 885
 struct Cyc_List_List*prev=((struct _tuple11*)first->hd)->f1;
 struct Cyc_List_List*all_decls=orig;
