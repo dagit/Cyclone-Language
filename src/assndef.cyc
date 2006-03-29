@@ -250,7 +250,7 @@ int termcmp(datatype Term @`r1 _t1, datatype Term @`r2 _t2) {
     return (int)vd1 - (int)vd2;
   case $(&Uint(i1,_), &Uint(i2,_)): return i1-i2;
   case $(&Const(e1),&Const(e2)): 
-    return Evexp::exp_cmp(e1,e2)?(int)e1-(int)e2:0;
+    return Evexp::exp_cmp(e1,e2);
   case $(&Addr(vd1,i1,_),&Addr(vd2,i2,_)): 
     int c = (int)vd1 - (int)vd2;
     if (c != 0) return c;

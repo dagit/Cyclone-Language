@@ -664,7 +664,7 @@ if(c!=0)return c;
 return(int)vd1 - (int)vd2;}}else{goto _LL21;}case 0: if(*((int*)_Tmp0.f1)==0){_Tmp2=((struct Cyc_AssnDef_Uint_AssnDef_Term_struct*)_Tmp0.f0)->f1;_Tmp1=((struct Cyc_AssnDef_Uint_AssnDef_Term_struct*)_Tmp0.f1)->f1;{unsigned i1=_Tmp2;unsigned i2=_Tmp1;
 return(int)(i1 - i2);}}else{goto _LL21;}case 1: if(*((int*)_Tmp0.f1)==1){_TmpB=((struct Cyc_AssnDef_Const_AssnDef_Term_struct*)_Tmp0.f0)->f1;_TmpA=((struct Cyc_AssnDef_Const_AssnDef_Term_struct*)_Tmp0.f1)->f1;{struct Cyc_Absyn_Exp*e1=_TmpB;struct Cyc_Absyn_Exp*e2=_TmpA;
 # 253
-if(Cyc_Evexp_exp_cmp(e1,e2))return(int)e1 - (int)e2;else{return 0;}}}else{goto _LL21;}case 11: if(*((int*)_Tmp0.f1)==11){_TmpB=((struct Cyc_AssnDef_Addr_AssnDef_Term_struct*)_Tmp0.f0)->f1;_TmpA=(void*)((struct Cyc_AssnDef_Addr_AssnDef_Term_struct*)_Tmp0.f0)->f2;_Tmp9=((struct Cyc_AssnDef_Addr_AssnDef_Term_struct*)_Tmp0.f1)->f1;_Tmp7=(void*)((struct Cyc_AssnDef_Addr_AssnDef_Term_struct*)_Tmp0.f1)->f2;{struct Cyc_Absyn_Vardecl*vd1=_TmpB;void*i1=_TmpA;struct Cyc_Absyn_Vardecl*vd2=_Tmp9;void*i2=_Tmp7;
+return Cyc_Evexp_exp_cmp(e1,e2);}}else{goto _LL21;}case 11: if(*((int*)_Tmp0.f1)==11){_TmpB=((struct Cyc_AssnDef_Addr_AssnDef_Term_struct*)_Tmp0.f0)->f1;_TmpA=(void*)((struct Cyc_AssnDef_Addr_AssnDef_Term_struct*)_Tmp0.f0)->f2;_Tmp9=((struct Cyc_AssnDef_Addr_AssnDef_Term_struct*)_Tmp0.f1)->f1;_Tmp7=(void*)((struct Cyc_AssnDef_Addr_AssnDef_Term_struct*)_Tmp0.f1)->f2;{struct Cyc_Absyn_Vardecl*vd1=_TmpB;void*i1=_TmpA;struct Cyc_Absyn_Vardecl*vd2=_Tmp9;void*i2=_Tmp7;
 # 255
 int c=(int)vd1 - (int)vd2;
 if(c!=0)return c;
