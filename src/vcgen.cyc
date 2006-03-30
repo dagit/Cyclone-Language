@@ -768,7 +768,7 @@ static bool visit_pure_exp(bool @env, exp_t e) {
     }
     break;
   case &Absyn::AggrMember_e(_,_,is_tagged,_) && is_tagged: break;
-  case &Absyn::Assert_e(_,static_only) && !static_only: break;
+  case &Absyn::Assert_e(_,static_only,_) && !static_only: break;
   case &Absyn::AssignOp_e(...): 
   case &Absyn::Increment_e(...):
   case &Absyn::FnCall_e(...): 
@@ -823,7 +823,7 @@ static assn_map_t vcgen_loop(env_t env, exp_opt_t e1infor, stmt_opt_t s1indo,
   switch (cond->r) {
   case &Absyn::And_e(eleft, eright):
     switch (eleft->r){
-    case &Absyn::Assert_e(eassn,static_only) && static_only:
+    case &Absyn::Assert_e(eassn,static_only,_) && static_only:
       loop_inv_exp = eassn;
       cond = eright;
       break;
@@ -1410,7 +1410,7 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
     return $(t,amout);
   case &Absyn::Asm_e(...): return $(fresh_var(NULL,NULL),amin);
   case &Absyn::Extension_e(e): return vcgen_debug_rexp(env,e,amin);
-  case &Absyn::Assert_e(e1,static_only) && static_only:
+  case &Absyn::Assert_e(e1,static_only,_) && static_only:
     let old_widen_paths = env->widen_paths;
     let old_pure_exp = env->pure_exp;
     env->widen_paths = false;
@@ -1422,15 +1422,18 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
       Warn::err(e->loc, "cannot prove @assert(%s)\nfrom\n %s",
                 assn2string(amt.assn), assnmap2string(amin));
     return $(one(),and_assnmap_assn(amin,amt.assn));
-  case &Absyn::Assert_e(e1,*static_only):
+  case &Absyn::Assert_e(e1,_,*do_check):
     // a dynamic assertion is treated similar to 
     //   if (!e1) throw(_)
     let $(amt,amf) = vcgen_debug_test(env,e1,amin);
     // if amf implies false *and* if e1 is pure then we can omit the check.  
     if (implies(amf.assn,&false_assn)) {
       if (is_pure_exp(e1))
-        *static_only = true;
+        *do_check = false;
+      else 
+        *do_check = true;
     } else {
+      *do_check = true;
       if (Flags::warn_assert)
         Warn::warn2(e->loc, "assert(",e1,") might fail at run-time");
       let v = fresh_var(NULL,Absyn::exn_type());
@@ -1633,7 +1636,7 @@ static void update_return(env_t env, term_opt_t topt, assn_map_t a, type_opt_t t
 static exp_opt_t find_assert_e(stmt_t s) {
   while (true) {
     switch (s->r) {
-    case &Absyn::Exp_s(&Absyn::Exp{.r = &Absyn::Assert_e(e,static_only),...}) && static_only: return e;
+    case &Absyn::Exp_s(&Absyn::Exp{.r = &Absyn::Assert_e(e,static_only,_),...}) && static_only: return e;
     case &Absyn::Seq_s(sa,_): s = sa; continue;
     default: return NULL;
     }

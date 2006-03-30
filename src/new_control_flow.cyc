@@ -1056,7 +1056,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
   case &Const_e({.Wstring_c = _}):
   case &Var_e(&Funname_b(_)):    return $(inflow, fenv->notzeroall);
 
-  case &Assert_e(e1,static_only):
+  case &Assert_e(e1,static_only,_):
     if (static_only) fallthru;
     let $(f1t,f1f) = anal_test(env,inflow,e1);
     return $(f1t,fenv->notzeroall);

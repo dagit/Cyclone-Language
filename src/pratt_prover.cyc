@@ -1828,7 +1828,6 @@ static bool inconsist(assn_t a) {
           a = and(or(slt(t1,t2),slt(t2,t1)),or(ult(t1,t2),ult(t2,t1)));
           continue;
         case &Prim(t1,p,t2): 
-
           if (p == Eq) {
             // adds t1 <= t2 and t2 <= t1 -- throws Inconsistent if
             // the resulting graph is detected as inconsistent locally.
@@ -1872,11 +1871,14 @@ static bool inconsist(assn_t a) {
           print_graph(g);
           fprintf(stderr,"about to subst_close\n");
 #endif
+          // first substitute out variables for better terms
           subst_close_graph(true,g);
-          subst_close_graph(0,g);
+          // then substitute "better" terms for other better terms
+          subst_close_graph(false,g);
 #ifdef PROVER_DEBUG
           fprintf(stderr,"after subst_close\n");
           print_graph(g);
+          fprintf(stderr,"about to reduce\n");
 #endif
           reduce_terms(0,g);
 #ifdef PROVER_DEBUG

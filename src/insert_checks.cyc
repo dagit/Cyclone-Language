@@ -550,7 +550,7 @@ static void do_exp(env_t nv, exp_t e) {
     do_exp(nv,sizeexp);
     break;
 
-  case &Assert_e(e1,_):      fallthru(e1);
+  case &Assert_e(e1,...):    fallthru(e1);
   case &Extension_e(e1):     fallthru(e1);
   case &Throw_e(e1,_):       fallthru(e1);
   case &NoInstantiate_e(e1): fallthru(e1);

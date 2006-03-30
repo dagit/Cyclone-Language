@@ -662,11 +662,11 @@ namespace Absyn {
     Asm_e(bool, string_t, list_t<$(string_t, exp_t)@>, list_t<$(string_t, exp_t)@>, list_t<string_t@>);
     Extension_e(exp_t);
     // implements GCC's __extension__ (...) though we just pass it through.
-    Assert_e(exp_t, bool static_only);
-    // an assertion -- if the expression is includes assertion features
-    // that cannot be evaluated dynamically, then the expression must
-    // be resolved statically.  If the expression includes effects, then
-    // it will never be optimized away.  
+    Assert_e(exp_t, bool static_only, bool do_check);
+    // an assertion -- static_only indicates @assert, otherwise assert(...).
+    // The flag do_check is set during vcgen and used in the code generator
+    // to determine whether or not an assert(...) is actually needed at
+    // run-time.
     Assert_false_e(exp_t); // a static assertion that shouldn't be proved by the analysis
   };
   // expression with auxiliary information

@@ -725,6 +725,55 @@ static term_t proj_fields(term_t v, list_t<$(int,type_opt_t)@> fs) {
   return v;
 }
 
+// returns true when a type t consists of a pointer, aggregate of (only)
+// pointers, or an array of pointers.
+static bool only_pointers(type_t t) {
+  switch (Absyn::compress(t)) {
+  case &Absyn::PointerType(...): return true;
+  case &Absyn::ArrayType(ai): return only_pointers(ai.elt_type);
+  case &Absyn::AppType(&Absyn::AggrCon({.KnownAggr = &ad}),ts):
+    if (ad->impl == NULL) return false;
+    let subst = List::zip(ad->tvs,ts);
+    for (let fs = ad->impl->fields; fs != NULL; fs = fs->tl) {
+      let t = Tcutil::substitute(subst,fs->hd->type);
+      if (!only_pointers(t)) return false;
+    }
+    return true;
+  case &Absyn::AnonAggrType(_,_,fs):
+    for (; fs != NULL; fs = fs->tl) 
+      if (!only_pointers(fs->hd->type)) return false;
+    return true;
+  default: return false;
+  }
+}
+
+// returns true when a type t consists of integral values (not pointers.)
+static bool only_bits(type_t t) {
+  switch (Absyn::compress(t)) {
+  case &Absyn::AppType(&Absyn::VoidCon,_):
+  case &Absyn::AppType(&Absyn::IntCon(...),_):
+  case &Absyn::AppType(&Absyn::FloatCon(...),_):
+  case &Absyn::AppType(&Absyn::EnumCon(...),_):
+  case &Absyn::AppType(&Absyn::AnonEnumCon(...),_):
+  case &Absyn::AppType(&Absyn::TagCon,_):
+  case &Absyn::AppType(&Absyn::ComplexCon,_): return true;
+  case &Absyn::ArrayType(ai): return only_bits(ai.elt_type);
+  case &Absyn::AppType(&Absyn::AggrCon({.KnownAggr = &ad}),ts):
+    if (ad->impl == NULL) return false;
+    let subst = List::zip(ad->tvs,ts);
+    for (let fs = ad->impl->fields; fs != NULL; fs = fs->tl) {
+      let t = Tcutil::substitute(subst,fs->hd->type);
+      if (!only_bits(t)) return false;
+    }
+    return true;
+  case &Absyn::AnonAggrType(_,_,fs):
+    for (; fs != NULL; fs = fs->tl) 
+      if (!only_bits(fs->hd->type)) return false;
+    return true;
+  default: return false;
+  }
+}
+
 term_t select(term_t t1, term_t t2,type_opt_t tp) {
  LOOP:
   switch (t1) {
@@ -734,6 +783,33 @@ term_t select(term_t t1, term_t t2,type_opt_t tp) {
       t1 = m;
       goto LOOP;
       // effectively: return select(m,t2,tp);
+    }
+    // if the update was of "bits only" and we're reading out pointers,
+    // then the update and the select commute.  So we look at the type
+    // information to try to reduce.  Note that there's a more general
+    // notion of type-based non-interference but it's pretty complicated
+    // and requires flattening out the types and seeing if one's suffixes
+    // are a prefix of the other and vice versa.
+    if (tp != NULL) {
+      let tp = (type_t)tp;
+      if (only_pointers(tp)) {
+        type_opt_t vtopt = get_term_type(v);
+        if (vtopt != NULL) {
+          type_t vt = (type_t)vtopt;
+          if (only_bits(vt)) {
+            t1 = m; 
+            goto LOOP;
+          }
+        }
+        let a1opt = get_term_type(a1);
+        if (a1opt != NULL && Tcutil::is_pointer_type((type_t)a1opt)) {
+          type_t vt = Tcutil::pointer_elt_type((type_t)a1opt);
+          if (only_bits(vt)) {
+            t1 = m;
+            goto LOOP;
+          }
+        }
+      }
     }
     break;
   default: break;
@@ -842,11 +918,14 @@ term_t cast(type_t tp, term_t tm){
   return hash_cons_term(&t);
 }
 
+term_t raw_alloc(exp_t e, int id, term_t nelts, term_t invok, type_opt_t tp){
+  let t = Alloc(e,id,nelts,invok,tp);
+  return hash_cons_term(&t);
+}
+
 term_t alloc(exp_t e, term_t nelts, term_t invok, type_opt_t tp){
   static int counter = 0;
-  let t = Alloc(e,counter,nelts,invok,tp);
-  counter++;
-  return hash_cons_term(&t);
+  return raw_alloc(e,counter++,nelts,invok,tp);
 }
 
 term_t offsetf(term_t tm, unsigned int i, type_opt_t tp){

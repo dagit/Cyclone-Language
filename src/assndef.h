@@ -175,6 +175,7 @@ namespace AssnDef{
   extern term_t aggr_update(term_t t1, unsigned i, term_t t3);
   extern term_t addr(vardecl_t, term_t invok);
   extern term_t alloc(exp_t, term_t nelts, term_t invok, type_opt_t);
+  extern term_t raw_alloc(exp_t, int id, term_t nelts, term_t invok, type_opt_t);
   extern term_t offsetf(term_t t, unsigned i, type_opt_t);
   extern term_t offseti(term_t t, term_t i, type_opt_t);
 

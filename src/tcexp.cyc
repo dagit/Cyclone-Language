@@ -3019,7 +3019,7 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
   case &Swap_e(e1,e2):   t = tcSwap(te,loc,topt,e1,e2); break;
   case &Tagcheck_e(e,f): t = tcTagcheck(te,loc,topt,e,f); break;
   case &Extension_e(e1): t = tcExp(te,topt,e1); break;
-  case &Assert_e(e,static_only): t = tcAssert(te,loc,e,static_only); break;
+  case &Assert_e(e,static_only,_): t = tcAssert(te,loc,e,static_only); break;
   case &Assert_false_e(e): t = tcAssert(te,loc,e,true); break;
   case &Valueof_e(t2):
     if (!te->allow_valueof)

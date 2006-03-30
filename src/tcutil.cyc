@@ -536,7 +536,7 @@ exp_t deep_copy_exp(bool preserve_types, exp_t e) {
     new_e = new_exp(new Tagcheck_e(DC(pt,e1),fn),e->loc); break;
   case &Valueof_e(t):     new_e = valueof_exp(copy_type(t),e->loc); break;
   case &Asm_e(v,t,o,i,c): new_e = asm_exp(v,t,o,i,c,e->loc); break;
-  case &Assert_e(e1,s): new_e = assert_exp(e1,s,e->loc); break;
+  case &Assert_e(e1,s,_): new_e = assert_exp(e1,s,e->loc); break;
   case &Assert_false_e(e1): new_e = assert_false_exp(e1,e->loc); break;
   }
   // types/annotations are shared
@@ -2278,9 +2278,9 @@ exp_t rsubsexp(region_t<`r> r, list_t<$(tvar_t,type_t)@`r,`r> inst, exp_t e) {
     case &ValueofType(e): return e;
     default: return copye(e, new Valueof_e(new_typ));
     }
-  case &Assert_e(e1,s):
+  case &Assert_e(e1,s,dc):
     let new_e1 = rsubsexp(r,inst,e1);
-    return (new_e1==e1) ? e : copye(e, new Assert_e(new_e1,s));
+    return (new_e1==e1) ? e : copye(e, new Assert_e(new_e1,s,dc));
   case &Assert_false_e(e1):
     let new_e1 = rsubsexp(r,inst,e1);
     return (new_e1==e1) ? e : copye(e, new Assert_false_e(new_e1));

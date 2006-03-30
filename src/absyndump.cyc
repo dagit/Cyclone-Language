@@ -781,7 +781,7 @@ static void dumpexp_prec(int inprec, exp_t e) {
 
   case &Extension_e(e1):
     dump("__extension__("); dumpexp(e1); dump_char(')'); break;
-  case &Assert_e(e1,static_only):
+  case &Assert_e(e1,static_only,_):
     if (static_only)
       dump("@assert("); 
     else 

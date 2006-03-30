@@ -1436,7 +1436,7 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
     break;
   case &Sizeoftype_e(t): s = cat(text("sizeof("), typ2doc(t), text(")")); break;
   case &Sizeofexp_e(e1): s = cat(text("sizeof("),exp2doc(e1), text(")")); break;
-  case &Assert_e(e,static_only):     
+  case &Assert_e(e,static_only,_):     
     if (static_only)
       s = cat(text("@assert("),exp2doc(e),text(")"));  
     else 
