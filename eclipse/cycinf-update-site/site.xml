@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/cycinf_0.8.1.jar" id="cycinf" version="0.8.1"/>
+</site>

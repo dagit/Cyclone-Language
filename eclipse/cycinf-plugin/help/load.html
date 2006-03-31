@@ -1,0 +1,25 @@
+<html>
+<head><title>Loading inference data</title></head>
+<body>
+<h1>Loading inference data</h1>
+
+<p>The Cyclone with Inference compiler produces a record of the inference decisions it makes and the constraints that led to them.  The primary purpose of the cycinf-plugin is to show you, the programmer, what the compiler decided to do when it saw your code, and <em>why</em>.  That way, you can modify your code to reduce the amount of runtime overhead, which currently takes the form of fat pointers, incurred for the sake of type safety.</p>
+
+<p>Just as the compiler compiles a folder of code all at once, the plugin loads a folder's <em>inference data</em> all at once; this includes decisions and constraints.  To load inference data for a folder (which must already be built), right-click it (e.g. in the <em>Navigator</em>) and select <em>Cyclone</em> -&gt; <em>Load Inference Data Now</em>.  A progress dialog will appear.  When loading is finished, look in <em>All Decisions</em> for the decisions.</p>
+
+<h2><em>Watch Inference Data</em></h2>
+
+<p>You can also check <em>Watch Inference Data</em> on a folder, in which case the plugin will try to reload the folder's inference data automatically every time it changes.  Specifically, the plugin watches the <code>.cych/cvars</code> file, or at least how Eclipse perceives the file.  (Occasionally Eclipse fails to notice a change in the workspace and you get a "Resource is out of sync with the filesystem" error; if this happens, refresh the affected files or folders in the <em>Navigator</em>.)  To avoid being confused by a build in progress, the plugin will wait until 2 seconds pass without a change to <code>cvars</code> before reloading.</p>
+
+<h2>Keeping inference data</h2>
+
+<p>At one time, the cycinf-plugin can hold one batch of inference data for each folder in the Eclipse workspace.  Whenever you click on a folder, whether in the <em>Resource Navigator</em> or elsewhere, the <em>All Decisions</em> and <em>All Constraints</em> views will show the inference data for that folder; if inference data has not been loaded yet, they will show a message to that effect and will show the actual data once it is loaded.</p>
+
+<p>Inference data is not saved between runs of Eclipse.  It doesn't make much sense for Eclipse to cache inference data in a workspace metadata file when the information is available in a file of the project.  However, what might be added in the future is persistence of <em>Watch Inference Data</em> between runs, in which case the plugin would automatically load inference data for all folders with this option checked when Eclipse starts.</p>
+
+<h2>How the views react</h2>
+
+<p>When new inference data on a folder becomes available, all the inference-related views take it into account.  <em>All Decisions</em> and <em>All Constraints</em> refresh if they happened to be showing that folder, which will be the case if you just right-clicked it to select <em>Load Inference Data Now</em> but might not be the case if the update was automatic.  When possible, the <em>Reasoning</em> and <em>Decision Mentions</em> views stay on the same decision across updates; the <em>Constraint Structure</em> view always clears because I couldn't think of a useful way to match constraints across updates.</p>
+
+</body>
+</html>

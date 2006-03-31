@@ -1,0 +1,52 @@
+#include <stdio.h>
+
+int numbers[5] = {12345, 67890, 1324354657, 314159, 271828};
+int *firstNumber = numbers;
+int *lastNumber;
+
+int *second;
+int *third;
+int *fourth;
+
+struct MyTreeNode<`a, `b> {
+	`a value1;
+	`b value2;
+	struct MyTreeNode<`a, `b> *left, *right;
+};
+
+typedef struct MyTreeNode<`a, `b> ***tdfoo<`a, `b>;
+typedef $(`a, `a *`r) bar<`a, `r>;
+
+datatype Foo<`a> { Case1(`a); };
+int *blahblah;
+datatype Foo<int**> *test;
+//datatype Foo.Case1<int**> case1val = Case1(&blahblah);
+struct MyTreeNode<int**, int*******> foo1;
+struct MyTreeNode<int**, int*******> *baar;
+tdfoo<int**, int*******> myvar1, *myvar2;
+bar<bar<bar<int **>>> myvar3;
+
+struct Mystruct<`a, `b, `c> {
+	bar<`a> first;
+	bar<$(bar<`c>, bar<`b>, bar<`c>)> second;
+	struct Mystruct<bar<`a> *, bar<`b> *, bar<`c> *> *third;
+};
+
+int main() {
+	test = new Case1(&blahblah);
+	
+	third = second;
+	fourth = third;
+	fourth + 1;
+	
+	bar<int *> bahhh;
+	bahhh.f0 = firstNumber;
+	bahhh.f1 = &bahhh.f0;
+	int *fifth = NULL;
+	fifth + 1;
+	
+	lastNumber = firstNumber + 4;
+	for (int *a = firstNumber; a <= lastNumber; a++)
+		printf("Here's a number for you: %d\n", *a);
+	return 0;
+}

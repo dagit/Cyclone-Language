@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="cycinf"
+      label="Cyclone with Inference Development Tools"
+      version="0.8.1"
+      provider-name="Matt McCutchen &lt;hashproduct@verizon.net&gt;">
+
+   <description>
+      Contains the Cyclone with Inference Plugin, which reads and interprets inference decisions made by the Cyclone with Inference compiler.
+   </description>
+
+   <copyright>
+      Matt McCutchen waives all intellectual property interests in and disclaims all liability for this content.
+   </copyright>
+
+   <license>
+      Matt McCutchen waives all intellectual property interests in and disclaims all liability for this content.
+   </license>
+
+   <plugin
+         id="cycinf"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>

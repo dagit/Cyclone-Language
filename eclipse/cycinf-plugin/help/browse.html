@@ -1,0 +1,57 @@
+<html>
+<head><title>Browsing inference data</title></head>
+<body>
+<h1>Browsing inference data</h1>
+
+<h2>Generalities</h2>
+
+<p>The cycinf-plugin comes with five inference-related views:</p>
+
+<ul>
+<li><em>All Decisions</em></li>
+<li><em>All Constraints</em></li>
+<li><em>Decision Mentions</em></li>
+<li><em>Constraint Structure</em></li>
+<li><em>Reasoning</em></li>
+</ul>
+
+<p>The views all "listen" to one another and to clicks on markers (see below).  If you select a decision in any view (even a mention of a decision in <em>Constraint Structure</em>) or click a decision marker, <em>All Decisions</em> and <em>Decision Mentions</em> will both reveal the decision.  Constraints work similarly.  A double-click on a decision or constraint in a view jumps to its source location.  Note the different behavior of <em>Reasoning</em> discussed below.</p>
+
+<p>The <em>Cyclone Inference Browsing</em> perspective includes these five views and some other common Eclipse views.  Its layout should facilitate "seeing everything at once" as you determine why the compiler did what it did and what to do about it.  You can open this perspective through <em>Window</em> -&gt; <em>Open Perspective</em> or the icon at the left of the perspectives toolbar.</p>
+
+<h2>Pointer-kind inference--or more?</h2>
+
+<p>The Cyclone compiler currently performs only one kind of inference: pointer kinds (thin or fat).  Other kinds might be added in the future.  However, I kept the cycinf-plugin generic and confined mentions of pointer-kind inference as much as possible.  This would make it possible to support a new kind of inference easily in the future.  As a result, the plugin's UI sticks to the abstract terminology of "cvar", "constraint", "decision", etc.</p>
+
+<h2>Markers</h2>
+
+<p>In addition to the five views, which are discussed individually below, the plugin places markers on each source file that appear in the left margin and in the code when you open the file in an editor.  Each decision or constraint gets a highlight (green or red, respectively) at the source location provided by the compiler; the location is rarely exact, but it is nearly always close enough to be useful.  Clicking on a marker in the margin will select the relevant decision or constraint in all views.  The markers appear no matter what editor you use on your source files, but clicking on them only works in the Cyclone Editor.</p>
+
+<h2><em>All Decisions</em></h2>
+
+<p>This view contains a list of all the inference decisions in the folder you most recently selected (or of the decision you most recently selected).  Each decision assigns a value to a cvar (currently a pointer kind to a pointer); the view shows an English description of the cvar, its raw name, the chosen value, and the source location.  This view is one of only a few places you'll see raw cvar names.</p>
+
+<h2><em>All Constraints</em></h2>
+
+<p>This view is mostly similar to <em>All Decisions</em> but shows constraints.  Since one rarely wants a list of all constraints in the program and the constraints are shown as rather cryptic raw constraint expressions, this view is rarely useful; the <em>Inference Browsing</em> perspective hides it behind <em>All Decisions</em>.  However, since I wrote the view, I thought I might as well make it available.</p>
+
+<h2><em>Decision Mentions</em></h2>
+
+<p>This view shows all references to a decision (selected in another view) from constraints.  Each constraint is listed by raw expression, but clicking a constraint shows its structure with the reference to the decision highlighted.  The filtered, multilevel display in <em>Reasoning</em> is generally more useful, so <em>Decision Mentions</em> is hidden by default.</p>
+
+<h2><em>Constraint Structure</em></h2>
+
+<p>This view shows the structure of a constraint (selected in another view) in great detail.  Almost every constraint is or contains an <em>assignment constraint</em> that sets a cvar to a certain value (for pointer-kind inference, generally a pointer kind to "fat").  An assignment constraint often has a guard, meaning that it only takes effect if the guard is satisfied.  The only type of guard that is currently used is an equality comparison.  Whatever source locations the compiler provides for various parts of the constraint are shown; currently the compiler provides a location for each top-level constraint but not for constraints that appear as pieces of a larger expression.</p>
+
+<p>The constraint structure view includes some additional information that helps you see the reasoning that took place.  Whether each guard is satisfied is marked.  Whether each constraint is in effect is also marked.  Note that, if a constraint's guard is not satisfied, the constraint's top level is always "in effect" even though the guarded sub-constraint is not.</p>
+
+<p>The view does not try to interpret constraints in light of pointer kinds, but pointer-kind inference leads to constraints of a few specific forms you will come to recognize.  An operation on a pointer <code>x</code> that requires fat information, i.e. arithmetic, will generate a constraint "<code>x</code> is fat".  An assignment <code>x = y</code> will generate "if <code>x</code> is fat then <code>y</code> has the same kind of <code>x</code>" (really, "then <code>y</code> is fat") because <code>y</code> needs to have fat information to provide to <code>x</code> in the assignment.</p>
+
+<h2><em>Reasoning</em></h2>
+
+<p>This view was the last one I wrote, and, incidentally, it ultimately determined what operations the plugin's models of decisions and constraints would have to support.  It attempts to provide insight into <em>why</em> a certain pointer is fat.</p>
+
+<p>This view behaves differently from the others because of its special purpose.  A double-click on a decision in another view shows the decision in <em>Reasoning</em> (and also reveals the source location of the pointer).  The <em>Reasoning</em> view shows the decision's cvar explanation, the value, and "inside", all constraints that took effect on the cvar, causing it to have the value it does.  Inside each constraint is a list of all the <em>other</em> decisions it depends on in order to show why it took effect.  Inside each of <em>these</em> decisions is a list of constraints, and so on.  In the case of pointer-kind inference, successive levels of the tree view show successive steps in the program's data flow.  To make navigation quicker, a single click in <em>Reasoning</em> jumps to the source location.</p>
+
+</body>
+</html>

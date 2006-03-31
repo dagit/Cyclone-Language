@@ -1,0 +1,90 @@
+Cyclone with Inference Plugin
+
+By Matt McCutchen
+hashproduct@verizon.net
+http://hashproduct.metaesthetics.net/
+
+The Cyclone with Inference Plugin ("cycinf-plugin") is a tool for use with the
+Cyclone with Inference compiler, which must be installed separately.  The plugin
+loads the inference decisions the compiler made on your code and presents them
+in several Eclipse views so you can see what happened and improve your program.
+
+I, Matt McCutchen, wrote this plugin under the auspices of Cyclone developers
+Nik Swamy and Michael Hicks of the University of Maryland.  Please send
+questions or comments about the plugin to me.
+
+In this folder you will find the following Eclipse projects:
+  - cycinf-plugin: the Eclipse plugin project with source code
+  - cycinf-feature: a corresponding Eclipse "feature", which has metadata used
+    to package the plugin
+  - cycinf-update-site: a prebuilt Eclipse update site containing the plugin
+  - cycinf-sample: a simple Cyclone with Inference project on which the plugin
+    may be tested
+
+__________________
+Running the Plugin
+
+You can either run the plugin in a second instance of Eclipse (which will have
+its own workspace) or install it into your main instance of Eclipse.
+
+To run in a second instance:
+ 1. Import cycinf-plugin into your main Eclipse's workspace:
+        Right-click in the Navigator -> "Import" -> "Existing Projects into
+        Workspace".  "Browse" for root directory.  Enter the cycinf-plugin
+        folder and press OK.  Press Finish.
+ 2. Run the plugin as an Eclipse Application:
+        Right-click cycinf-plugin in the Navigator, "Run As", "Eclipse
+        Application".
+ 3. The second Eclipse will appear.  A second workspace will be created
+    automatically for its use; the workspace is usually at ~/runtime-workspace .
+
+To install into your main instance:
+ 1. Launch the Update Manager:
+        Help -> Software Updates -> Find and Install...
+ 2. "Search for new features to install"
+ 3. Register the update site:
+        "New Local Site..." and browse for cycinf-update-site.  Press OK.  Name
+        the site if you wish and press OK.
+ 4. Check only cycinf-update-site.  Finish.
+ 5. Expand and check Cyclone with Inference Development Tools.  Next.
+ 6. Tell Eclipse you accept the license agreement (there is none).
+ 7. Select an installation location if you wish.  Finish.
+ 8. You will be asked whether you want to install the software even though it is
+    unsigned.  If so, Install.
+ 9. Restart Eclipse to activate the plugin.
+
+________________
+Using the Plugin
+
+Once you have a running Eclipse (whether main or second) with the plugin, import
+the sample project, cycinf-sample, into the workspace (note importing procedure
+above).  Switch to the Cyclone Inference Browsing perspective (Window -> Open
+Perspective -> Other -> Cyclone Inference Browsing).  Then load inference data
+for cycinf-sample: right-click it in the Navigator -> Cyclone -> Load Inference
+Data Now.
+
+The plugin comes with several pages of help.  They are available in Eclipse's
+online help system (Help -> Help Contents) as a book "Cyclone with Inference
+Plugin", or you can find them in cycinf-plugin/help .  Read them for more
+information.
+
+_____________________
+Developing the Plugin
+
+If you wish to develop the plugin, import and work on cycinf-plugin in your main
+Eclipse and use the procedure for running in a second Eclipse.  You must quit
+and re-run the second Eclipse for changes to the plugin's code to take effect.
+The Java source files are in several packages inside cycinf-plugin/src .
+
+You can even rebuild the update site to take into account your changes:
+  - Import cycinf-feature and cycinf-update-site.
+  - Tick the version numbers in cycinf-plugin/plugin.xml and
+    cycinf-feature/feature.xml .
+  - Open cycinf-update-site/site.xml .  Right-click the old cycinf feature in
+    the list box and remove it.  Then Add Feature and select the new cycinf
+    feature.
+  - Right-click cycinf-update-site/site.xml in the Navigator.  PDE Tools ->
+    Build Site.
+
+If you're going to do serious development, I would be happy to explain the
+organization of the source code.

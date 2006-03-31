@@ -1,0 +1,33 @@
+<html>
+<head><title>Setting up and building a project</title></head>
+<body>
+<h1>Setting up and building a project</h1>
+
+<h2>Background: The Cyclone with Inference build process</h2>
+
+<p>The Cyclone with Inference compiler, <code>cyclone-inf</code>, compiles a folder worth of code in two stages.  First, it scans each source file looking for pointers subject to inference, introducing a "constraint variable" for each, and for pieces of code that impose constraints on those cvars.  It writes a summary of the constraints and cvars to the <code>cvars</code> file and a new source file annotated with the cvars into in its work area (the <code>.cych</code> subdirectory).</p>
+
+<p>On the second pass, the compiler reads the <code>cvars</code> file and makes a decision on each cvar; currently, it decides whether to make each pointer thin or fat.  Then it rereads the annotated source files and substitutes in the decisions it made; the resulting ordinary Cyclone code goes to the downstream components of the compiler.</p>
+
+<h2>Creating a project</h2>
+
+<p>Cyclone with Inference currently does not have its own project type.  Use a <em>Standard C Project</em> as your Cyclone project; you'll get the C toolkit's integration with <code>make</code> and other features, such as running executables, that are useful for Cyclone as well as C.</p>
+
+<p>Note that the compiler compiles and performs inference on a folder of code at a time; it knows nothing about Eclipse projects.  An Eclipse project usually consists of a single folder of code at the top level.  However, if you wish, you may put several folders into the same project; the cycinf-plugin and the compiler will treat each folder independently.  However, extra work will be required to set up recursive building.</p>
+
+<h2>Files and editors</h2>
+
+<p>Cyclone source files use the .cyc extension; the .cyh extension is recommended for Cyclone header files to distinguish them from C header files.  .cyc and .cyh files will open in the Cyclone Editor, which is integrated with the inference-related features but lacks many of the niceties of the C editor, such as syntax coloring.  You may want to use the C editor to write and edit Cyclone files (ignoring "syntax errors" caused by Cyclone-specific constructs) and the Cyclone editor when you are examining the results of inference.</p>
+
+<h2>The plugin's <code>make</code>-based build system</h2>
+
+<p>The Cyclone plugin includes two <code>Makefiles</code> that are helpful for building Cyclone projects.  If you right-click a project and select <em>Cyclone</em> -&gt; <em>Set Up Make Building</em>, the plugin will write the cycinf <code>make</code> library (<code>cycinf.mk</code>) and a simple template <code>Makefile</code> into the project; you must enter the names of your source files into the <code>Makefile</code>.  You can then use the C plugin's <code>make</code> builder, which is integrated with Eclipse's project building system, so the ordinary Eclipse menu options and shortcuts will build your Cyclone with Inference project.  The <em>C Build Console</em> will show the output of <code>make</code> and <code>cyclone-inf</code>.</p>
+
+<p>Right now, <code>cyclone-inf</code>'s support for recompiling single files is unreliable, so the build system essentially recompiles everything whenever any source file changes.  <code>cycinf.mk</code> may be changed in the future in response to improvements to the compiler.  <em>Set Up Make Building</em> always writes the newest <code>cycinf.mk</code> but does not overwrite <code>Makefile</code> if it exists.</p>
+
+<h2>Automatic building</h2>
+
+<p>If you like automatic building, configure your <code>make</code> projects (including cycinf projects) for it by enabling <em>Build on resource save (Auto Build)</em>.  This option is found in the new project wizard and in the <em>C/C++ Make Project</em> page of the project properties.  Then enable automatic building for the workspace by checking <em>Project</em> -&gt; <em>Build Automatically</em>; the Cyclone compiler will be called up whenever you save a file.  If you combine automatic building with <em>Watch Inference Data</em> (discussed later), you can see the effects of a program change on inference decisions in seconds.</p>
+
+</body>
+</html>

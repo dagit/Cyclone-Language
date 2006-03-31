@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+   <extension
+         id="DecisionMarker"
+         name="Cyclone inference decision"
+         point="org.eclipse.core.resources.markers">
+      <persistent value="false"/>
+      <super type="org.eclipse.core.resources.textmarker"/>
+   </extension>
+   <extension
+         id="ConstraintMarker"
+         name="Cyclone inference constraint"
+         point="org.eclipse.core.resources.markers">
+      <persistent value="false"/>
+      <super type="org.eclipse.core.resources.textmarker"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors.annotationTypes">
+      <type
+            markerType="cycinf.DecisionMarker"
+            name="cycinf.DecisionAnnotation"
+            super="org.eclipse.ui.workbench.texteditor.info"/>
+      <type
+            markerType="cycinf.ConstraintMarker"
+            name="cycinf.ConstraintAnnotation"
+            super="org.eclipse.ui.workbench.texteditor.info"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors.markerAnnotationSpecification">
+      <specification
+            annotationType="cycinf.DecisionAnnotation"
+            colorPreferenceKey="infdecision.color"
+            colorPreferenceValue="64,255,64"
+            highlightPreferenceKey="infdecision.highlight"
+            highlightPreferenceValue="true"
+            icon="icons/decision-marker.png"
+            includeOnPreferencePage="true"
+            isGoToNextNavigationTarget="true"
+            isGoToNextNavigationTargetKey="infdecision.navigation.next"
+            isGoToPreviousNavigationTarget="true"
+            isGoToPreviousNavigationTargetKey="infdecision.navigation.previous"
+            label="Cyclone inference decision"
+            overviewRulerPreferenceKey="infdecision.overviewruler"
+            overviewRulerPreferenceValue="true"
+            showInNextPrevDropdownToolbarAction="true"
+            showInNextPrevDropdownToolbarActionKey="infdecision.navigation.dropdown"
+            textPreferenceKey="infdecision.text"
+            textPreferenceValue="true"
+            textStylePreferenceKey="infdecision.text.style"
+            textStylePreferenceValue="NONE"
+            verticalRulerPreferenceKey="infdecision.verticalruler"
+            verticalRulerPreferenceValue="true"/>
+      <specification
+            annotationType="cycinf.ConstraintAnnotation"
+            colorPreferenceKey="infconstraint.color"
+            colorPreferenceValue="255,128,128"
+            highlightPreferenceKey="infconstraint.highlight"
+            highlightPreferenceValue="true"
+            icon="icons/constraint-marker.png"
+            includeOnPreferencePage="true"
+            isGoToNextNavigationTarget="true"
+            isGoToNextNavigationTargetKey="infconstraint.navigation.next"
+            isGoToPreviousNavigationTarget="true"
+            isGoToPreviousNavigationTargetKey="infconstraint.navigation.previous"
+            label="Cyclone inference constraint"
+            overviewRulerPreferenceKey="infconstraint.overviewruler"
+            overviewRulerPreferenceValue="true"
+            showInNextPrevDropdownToolbarAction="true"
+            showInNextPrevDropdownToolbarActionKey="infconstraint.navigation.dropdown"
+            textPreferenceKey="infconstraint.text"
+            textPreferenceValue="true"
+            textStylePreferenceKey="infconstraint.text.style"
+            textStylePreferenceValue="NONE"
+            verticalRulerPreferenceKey="infconstraint.verticalruler"
+            verticalRulerPreferenceValue="true"/>
+   </extension>
+
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            id="cycinf.ResourceMenuContrib"
+            objectClass="org.eclipse.core.resources.IResource"
+            adaptable="true">
+         <menu
+               id="cycinf.ResourceMenu"
+               label="Cyclone">
+            <groupMarker name="ResourceMenuMarker"/>
+         </menu>
+         <action
+               class="cycinf.build.SetUpMakeAction"
+               enablesFor="1"
+               id="cycinf.SetUpMakeAction"
+               label="Set Up Make Building"
+               menubarPath="cycinf.ResourceMenu/ResourceMenuMarker"
+               style="push">
+            <selection class="org.eclipse.core.resources.IContainer"/>
+         </action>
+         <action
+               class="cycinf.infstats.WatchInfstatsAction"
+               enablesFor="1"
+               id="cycinf.WatchInfstatsAction"
+               label="Watch Inference Data"
+               menubarPath="cycinf.ResourceMenu/ResourceMenuMarker"
+               style="toggle">
+            <selection class="org.eclipse.core.resources.IContainer"/>
+         </action>
+         <action
+               class="cycinf.infstats.LoadInfstatsAction"
+               enablesFor="1"
+               id="cycinf.LoadInfstatsAction"
+               label="Load Inference Data Now"
+               menubarPath="cycinf.ResourceMenu/ResourceMenuMarker"
+               style="push">
+            <selection class="org.eclipse.core.resources.IContainer"/>
+         </action>
+      </objectContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="cycinf.ui.InfBrowsingPerspective"
+            icon="icons/examining.png"
+            id="cycinf.InfBrowsingPerspective"
+            name="Cyclone Inference Browsing"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension targetID="cycinf.InfBrowsingPerspective">
+         <perspectiveShortcut id="org.eclipse.ui.resourcePerspective"/>
+         <viewShortcut id="cycinf.DecisionsView"/>
+         <viewShortcut id="cycinf.ConstraintsView"/>
+         <viewShortcut id="cycinf.DecisionView"/>
+         <viewShortcut id="cycinf.ConstraintView"/>
+         <viewShortcut id="cycinf.ReasoningView"/>
+         <viewShortcut id="org.eclipse.ui.views.ResourceNavigator"/>
+         <viewShortcut id="org.eclipse.ui.views.ProblemView"/>
+         <viewShortcut id="org.eclipse.ui.console.ConsoleView"/>
+      </perspectiveExtension>
+      <perspectiveExtension targetID="org.eclipse.ui.resourcePerspective">
+         <perspectiveShortcut id="cycinf.InfBrowsingPerspective"/>
+      </perspectiveExtension>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            id="cycinf.cycloneViews"
+            name="Cyclone"/>
+      <view
+            allowMultiple="true"
+            category="cycinf.cycloneViews"
+            class="cycinf.ui.DecisionsView"
+            icon="icons/decisions-view.png"
+            id="cycinf.DecisionsView"
+            name="All Decisions"/>
+      <view
+            allowMultiple="true"
+            category="cycinf.cycloneViews"
+            class="cycinf.ui.ConstraintsView"
+            icon="icons/constraints-view.png"
+            id="cycinf.ConstraintsView"
+            name="All Constraints"/>
+      <view
+            allowMultiple="true"
+            category="cycinf.cycloneViews"
+            class="cycinf.ui.DecisionView"
+            icon="icons/decision-view.png"
+            id="cycinf.DecisionView"
+            name="Decision Mentions"/>
+      <view
+            allowMultiple="true"
+            category="cycinf.cycloneViews"
+            class="cycinf.ui.ConstraintView"
+            icon="icons/constraint-view.png"
+            id="cycinf.ConstraintView"
+            name="Constraint Structure"/>
+      <view
+            allowMultiple="true"
+            category="cycinf.cycloneViews"
+            class="cycinf.ui.ReasoningView"
+            icon="icons/examining.png"
+            id="cycinf.ReasoningView"
+            name="Reasoning"/>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.contentTypes">
+      <content-type
+            base-type="org.eclipse.core.runtime.text"
+            file-extensions="cyc"
+            id="CycloneSourceFile"
+            name="Cyclone Source File"
+            priority="normal"/>
+      <content-type
+            base-type="cycinf.CycloneSourceFile"
+            file-extensions="cyh"
+            id="CycloneHeaderFile"
+            name="Cyclone Header File"
+            priority="normal"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="cycinf.ui.CycloneEditor"
+            contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
+            icon="icons/cyclone-source-file.png"
+            id="cycinf.CycloneEditor"
+            name="Cyclone Editor"><!-- I don't really want an icon but it seems to be half-required -->
+         <contentTypeBinding contentTypeId="cycinf.CycloneSourceFile"/>
+         <contentTypeBinding contentTypeId="cycinf.CycloneHeaderFile"/>
+      </editor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editorActions">
+      <editorContribution
+            id="cycinf.CycloneEditorActions"
+            targetID="cycinf.CycloneEditor">
+         <action
+               actionID="RulerClick"
+               class="cycinf.ui.CycinfSelectRulerActionDelegate"
+               helpContextId="org.eclipse.ui.bookmark_action_context"
+               id="cycinf.SelectRulerAction"
+               label="RulerClick-dummy"
+               style="push"/>
+         <action
+               actionID="RulerDoubleClick"
+               class="org.eclipse.ui.texteditor.BookmarkRulerAction"
+               id="org.eclipse.ui.texteditor.BookmarkRulerAction"
+               label="RulerDoubleClick-dummy"
+               style="push"/>
+      </editorContribution>
+   </extension>
+   <extension
+         point="org.eclipse.help.toc">
+      <toc
+            file="help/toc.xml"
+            primary="true"/>
+   </extension>
+   <!--<extension
+         id="CycinfProjectNature"
+         name="Cyclone with Inference Nature"
+         point="org.eclipse.core.resources.natures">
+      <runtime>
+         <run class="cycinf.CycinfProjectNature"/>
+      </runtime>
+      <requires-nature id="org.eclipse.cdt.make.core.makeNature"/>
+   </extension>-->
+   <!--<extension
+         point="org.eclipse.ui.newWizards">
+      <wizard
+            canFinishEarly="false"
+            class="cycinf.CycinfProjectNewWizard"
+            finalPerspective="cycinf.InfBrowsingPerspective"
+            hasPages="true"
+            id="cycinf.CycinfProjectNewWizard"
+            name="Cyclone with Inference project"
+            project="true"/>
+   </extension>-->
+
+</plugin>

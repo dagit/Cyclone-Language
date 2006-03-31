@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?NLS TYPE="org.eclipse.help.toc"?>
+
+<toc topic="help/index.html" label="Cyclone with Inference Plugin">
+	<topic href="help/project.html" label="Setting up and building a project"/>
+	<topic href="help/load.html" label="Loading inference data"/>
+	<topic href="help/browse.html" label="Browsing inference data"/>
+</toc>
