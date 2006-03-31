@@ -1,51 +1,6 @@
 \section{Pointers with Restricted Aliasing}
 \label{sec:aliasfree}
 
-
-%% \item[The unique region] All of the regions mentioned thus far only permit
-%%   deallocation \emph{en masse.}  Cyclone also defines the \emph{unique
-%%   region}, whose type is denoted \texttt{`U}, which allows objects to be
-%%   deallocated individually, using the function \texttt{ufree}.  For freeing
-%%   objects to be safe, we only allow access to objects in \texttt{`U} via
-%%   \emph{unique pointers}.  That is, only a single pointer may be used to
-%%   access the object at any given time; this trivially guarantees that if the
-%%   object is freed through its unique pointer, no other access to the object
-%%   beyond that point is possible.  Objects that become unreachable but are
-%%   not freed manually will be freed by the garbage collector (assuming it's
-%%   not removed with \texttt{-nogc}).
-
-%% \item[The reference-counted region] The reference-counted region, denoted
-%%   \texttt{`RC}, also permits freeing individual objects.  Unlike the unique
-%%   region, multiple pointers to a single object are permitted, the number of
-%%   which is tracked dynamically via a hidden reference count stored with the
-%%   object.  Additional pointers to an object are created explicitly via a
-%%   call to \texttt{alias\_refptr}, which increases the reference count.
-%%   Individual pointers are removed via a call to \texttt{drop\_refptr}; when
-%%   the last pointer is removed (i.e. the reference count is 0), the object is
-%%   freed.  Like the unique region, objects that become unreachable will be
-%%   freed by the garbage collector.
-%% \end{description}
-
-
-%% Unique pointers can be allocated just as with the heap, but the context must
-%% make clear that a unique pointer is desired.  For example, in the following
-%% the variable \texttt{temp} is allocated in the heap:
-%% \begin{alltt}
-%%   t * temp = malloc(sizeof(t));
-%% \end{alltt}
-%% Modifying it slightly, we allocate into the unique region instead:
-%% \begin{alltt}
-%%   t *`U temp  =        malloc(sizeof(t));
-%%   t *   temp2 = (t *`U)malloc(sizeof(t));
-%% \end{alltt}
-%% Unfortunately, our type inference system for allocation is overly simple, so
-%% you can't do something like:
-%% \begin{alltt}
-%%   t * temp = malloc(sizeof(t));
-%%   ufree(temp);
-%% \end{alltt}
-%% In an ideal world, the fact that \texttt{temp} was passed to \texttt{ufree}
-%% would signal that it is a unique pointer, rather than a heap pointer.
 \subsection{Introduction}
 
 The main benefit of the regions described thus far is also their
@@ -119,19 +74,27 @@ mentioned in section~\ref{sec:pointers}. The four alias qualifiers are:
 \end{description}
 
 \subsection{Allocation and Freeing}
+\label{sec:allocandfree}
 
 Unique and reference-counted pointers can be allocated in any
-region. As such, the allocation mechanism for these pointers is
-similar to that used for region allocation described in the previous
-section. The allocation function rely on handles for alias qualifiers
-which are of type {\tt aqual\_t<`q::Q>}. Here {\tt `q} is a type
-variable of alias qualifier kind and may be instantiated with the
-alias qualifiers above. The Cyclone libraries provide the following global
-variables:
+region. However, to support freeing individual objects from a region
+we use a special allocator (see Section~\ref{sec:bget}) that maintains
+additional metadata. We use the term ``reap'' to refer to regions from
+which individual objects can be deleted. Any region can contain
+objects that can be individually freed. Thus all regions are in fact
+reaps. 
+
+The allocation mechanism for unique and reference-counted pointers
+follows a pattern similar to that used for normal region allocation
+described in the previous section. The allocation functions rely on
+handles for alias qualifiers which are of type {\tt
+aqual\_t<`q::Q>}. Here {\tt `q} is a type variable of alias qualifier
+kind and may be instantiated with the alias qualifiers above. The
+Cyclone libraries provide the following global variables:
 \begin{verbatim}
  aqual_t<ALIASABLE> Core::aliasable_qual
- aqual_t<UNIQUE> Core::unique_qual} 
- aqual_t<REFCNT> Core::refcnt_qual} 
+ aqual_t<UNIQUE> Core::unique_qual
+ aqual_t<REFCNT> Core::refcnt_qual 
 \end{verbatim}
 
 which are handles for the aliasable, unique and reference-counted
@@ -156,12 +119,12 @@ The {\tt qnew} functions allocate in the {\tt `H} region, i.e. the
 \item \texttt{rnew({\it rgn-identifier, aq-identifier}){\it
     array-initializer}} 
 
-To allocate a unique object in a region other than the heap the {\tt
-rnew} functions can be used. For instance,
+To allocate an alias-free object in a region other than the heap the
+{\tt rnew} functions can be used. For instance,
 
 \begin{verbatim}
   {
-    region<`r> r;
+    region r;
     int @@aqual(UNIQUE) `r a = rnew(r, Core::unique_qual) 0;
   }
 \end{verbatim}
@@ -184,7 +147,7 @@ omitted, it defaults to {\tt ALIASABLE}.
 \end{itemize}
 
 Since there is no handle for the restricted qualifier, {\tt
-  RESTRICTED} qualified pointers are purely abstract. As with normal
+  RESTRICTED} qualified pointers cannot be allocated. As with normal
   region allocation, we use very simple type inference to ease the
   burden of writing qualifiers on types. For instance,
 \begin{verbatim}
@@ -197,10 +160,12 @@ alias-free pointers.
 
 \begin{itemize}
 \item \texttt{Core::ufree({\it ptr})}
-  To free a heap resident unique pointer {\tt ufree} is used. 
+  To free a heap directed unique pointer {\tt ufree} is used. 
 
-\item \texttt{Core::rufree({\it rgn-identifier, ptr})} To free a
-unique pointer from an arbitrary region {\tt rufree} is used. 
+\item \texttt{Core::rufree({\it rgn-handle, ptr})} To free a
+unique pointer from a reap {\tt rufree} is used. A constraint on the
+effect qualifiers that appear on the arguments of this function is
+described in Section~\ref{sec:singleconstraint}.
 
 \item \texttt{Core::drop\_refptr({\it ptr})}
 To reduce the reference count on a heap resident reference counted
@@ -208,7 +173,7 @@ object {\tt drop\_refptr} is used. The {\it ptr} can no longer be
 dereferenced following this call. If the reference count on the object
 reaches zero then the object is freed automatically.
 
-\item \texttt{Core::rdrop\_refptr({\it rgn-identifier, ptr})} To reduce
+\item \texttt{Core::rdrop\_refptr({\it rgn-handle, ptr})} To reduce
 the reference count on a reference counted object in an arbitrary
 region {\tt rdrop\_refptr} is used.
 
@@ -481,7 +446,8 @@ This routine returns a copy of its argument, which is itself not consumed.
 Furthermore, the reference count will be incremented by one.  Reference
 counts are reduced explicitly by the routine \texttt{drop\_refptr}:
 \begin{verbatim}
-  void drop_refptr(`a::TA ?@aqual(REFCNT) ptr) __attribute((consume(1)));
+  void drop_refptr(`a::TA ?@aqual(REFCNT) ptr) 
+                         __attribute((consume(1)));
 \end{verbatim}
 In the case that the provided object's reference count is 1 (and is thus
 dropped to zero), the provided pointer is freed.  The flow analysis will
@@ -554,7 +520,7 @@ counted elements might be constructed as follows:
 \begin{verbatim}
   int *rc_int = qnew(Core::refcnt_qual) 0;
   int *rc_int2 = qnew(Core::refcnt_qual) 1;
-  list_t<int*@aqual(REFCNT),Core::heap_region,Core::unique_qual> l =
+  list_t<int*@aqual(REFCNT),`H,UNIQUE> l =
       rnew(Core::heap_region, Core::unique_qual) 
           List{rc_int, 
 	       rnew(Core::heap_region, Core::unique_qual) 
@@ -648,33 +614,6 @@ fresh region \texttt{`r}: one for each element of the list.  This allows
 storing an alias in an element reachable from the original expression
 \texttt{l}, so that when the block is exited, this alias escapes.
 
-
-%% To prevent this, we only allow ``deep'' aliasing when the aliased pointers
-%% are immutable.  For example, if we have a list structure whose tail pointers
-%% are \texttt{const}, call it \texttt{clist\_t}, we rule out the above code
-%% because the assignment to \texttt{x->tl} would be forbidden.  Here is an
-%% example implementation of a \texttt{length} function that is amenable to
-%% deep aliasing:
-%% \begin{alltt}
-%%   int length(clist\_t<`a,`r> l) \{
-%%     int len = 0;
-%%     while (l != NULL) \{
-%%       len++;
-%%       l = l->tl;
-%%     \}
-%%     return len;
-%%   \}
-
-%%   int foo() \{
-%%     list\_t<int,@aqual(UNIQUE)> l = new List(1,new List(2,NULL));
-%%     let alias <`r>clist\_t<int,`r> x = l;
-%%     return length(x);
-%%   \}
-%% \end{alltt}
-%% Here, the \texttt{length} function works on constant lists, and the
-%% \texttt{foo} function aliases a unique, mutable list \texttt{l} to call
-%% \texttt{length}.
-
 For improved programmer convenience, the Cyclone typechecker
 optimistically inserts \texttt{alias} blocks around function-call
 arguments that are unique pointers when the formal-parameter type is
@@ -692,6 +631,170 @@ Right now, \texttt{alias} inference in Cyclone is fairly primitive,
 but could be extended to more contexts.  We plan to improve this
 feature in future releases.
 
+
+\subsection{Dynamic Regions}
+\label{sec:dynamic-regions}
+
+Dynamic regions combine reference-counted or unique pointers and lexical
+regions together to essentially create reference-counted or unique
+\emph{regions}; that is, the region is completely first class, and can be
+created or freed at conceptually any program point.  This is done by
+representing a dynamic region as a unique (or reference-counted) pointer to
+an abstract struct \texttt{DynamicRegion} (which internally just contains
+the handle to a lexical region).  The unique (or ref-counted) pointer is
+called the \emph{key}.  The key serves as a run-time \emph{capability} that
+grants access to the region.  At run-time, a key can be presented to a
+special \texttt{open} primitive, described later, that grants lexical access
+to the region.
+        
+The operation \texttt{new\_ukey()} creates a fresh dynamic region and
+returns a unique key for the region; \texttt{new\_rckey()} creates a
+fresh dynamic region and returns a ref-counted key for the region.
+The operations \texttt{free\_ukey()} and \texttt{free\_rckey()} are
+used to destroy unique and ref-counted keys respectively.  The
+\texttt{free\_ukey()} operation reclaims the key's region, as well as
+the storage for the key.  The \texttt{free\_rckey()} operation
+decrements the reference count, and if it's zero, reclaims the key's
+region as well as the storage for the key.  Because ref-counted keys
+are pointers, you can use \texttt{alias\_refptr} to make a copy of a
+ref-counted key.  (Obviously, you can't make a copy of a unique key.)
+By the same token, you can pass a ref-counted key to
+\texttt{drop\_refptr} (and you can pass a unique key to
+\texttt{ufree}), but doing so won't actually deallocate the region,
+but rather only the key. To obtain a dynamic \emph{reap} (i.e. a
+dynamic region that supports the deletion of individual objects) use
+\texttt{new\_reap\_ukey} and \texttt{new\_reap\_rckey} instead.
+
+Given a key $k$, a user can access the contents of its region by temporarily
+`opening the region' within a lexical scope.  This is done with the syntax
+\verb+region+ $r$ \verb+= open+ $k$.  That is, within the remainder of the
+current scope, the region handle $r$ can be used to access $k$'s region.
+The key $k$ is temporarily consumed throughout the scope, and then
+unconsumed at its conclusion.  This prevents you from opening up the dynamic
+region, and then freeing it while it's still in use.  Note that
+\texttt{open} is very similar to \texttt{alias} in this way.
+
+Here is a small example of the use of dynamic regions.
+\begin{verbatim}
+int main() {
+  // Create a new dynamic region
+  let NewDynamicRegion{<`r> key} = new_ukey();
+
+  // At this point, we refer to the region `r to
+  // specify types, but we cannot actually access
+  // `r (i.e. it's not in our "static capability,"
+  // a concept explained later)
+
+  list_t<int,`r> x = NULL;
+
+  // We can access x by opening the region, which
+  // temporarily consumes the key
+  { region h = open(key);
+    x = rnew(h) List(3,x);
+  }
+
+  // Now we can access the key again, but not x.
+  // So we have to open the region to increment
+  // its contents
+  { region h = open(key);
+    int i = x->hd + 1;
+    x = rnew (h) List(i,x);
+  }
+
+  // Finally, destroy the key and the region
+  free_ukey(key);
+}
+\end{verbatim}
+First, we allocate a new unique key and open it up, to reveal the name of
+the key's region (\texttt{`r}), and the key itself.  Because \texttt{`r} is
+now in scope, we can declare a variable \texttt{x} that refers to it.
+However, because the key \texttt{key} must be opened before \texttt{`r}
+becomes accessible, we cannot actually do anything with \texttt{x} yet (like
+dereference it).
+
+Next, we open up the region using \texttt{key}, assigning its handle to the
+vairable \texttt{h}.  Now, \texttt{key} is inaccessible (consumed) in the
+surrounding block, which prevents us from doing anything that might cause it
+to be freed while it's in use.  We can use \texttt{h} to allocate into
+\texttt{`r}, so we allocate a list element and store it in \texttt{x}.
+
+At the conclusion of the \texttt{block}, the region \texttt{`r} becomes
+inaccessible again, so once again we cannot dereference \texttt{x}.
+However, \texttt{key} can now be accessed again, so we can open it again in
+the following block, to add a new list cell to \texttt{x}.  At the
+conclusion of this block, \texttt{key} is unconsumed once again, so we
+legally call \texttt{free\_ukey}.  This frees the key and the region
+\texttt{`r}.
+
+You can "share" a dynamic region key by placing it in some shared data
+structure, like a global variable.  Of course, you'll then have to swap with
+NULL to get it in and out of the shared data structure, as the following
+code demonstrates:
+\begin{verbatim}
+struct MyContainer { <`r>
+  uregion_key_t<`r> key;
+  list_t<int,`r> data;
+} *\U `H global = NULL;
+
+int main() {
+  // allocate a dynamic region, and create a list
+  let NewDynamicRegion{<`r> key} = new_ukey();
+  list_t<int,`r> x = NULL;
+  { region h = open(key);
+    x = rnew(h) List(3,x);
+  }
+
+  // Stick the key and list in a global data
+  // structure. We've now lost direct access to
+  // the key and x.
+  global = new MyContainer{key,x};
+
+  // But we can regain it by swapping for the
+  // container.
+  struct MyContainer *@aqual(UNIQUE) p = NULL;
+  global :=: p;
+
+  // Now we can use it as above
+  let MyContainer{<`r2> key2, data2} = *p;
+  list_t<int,`r2> d = data2;
+  { region h = open(key2);
+    int i = d->hd + 1;
+    d = rnew (h) List(i,d);
+  }
+}
+\end{verbatim}
+Here, we define a global variable having type \texttt{MyContainer}, which
+consists of a key and some data into that key's region.  The main function
+allocates a unique as before, and allocates some data into its region.  Then
+we create a container for that key and data, and store it into the global
+variable; this consumes \texttt{key}, making it inaccessible, and
+effectively preventing access of \texttt{x} as well.
+
+But we can then get the container back out of the global variable by
+swapping its contents with NULL.  Then we can open up the container, and use
+the key and data as before.  This way, a single dynamic region can be used
+by many different functions in the program.  They simply swap out the global
+when they need it, operate on it, and then swap in the result.
+
+One problem with using this technique with unique keys arises when you need
+to open the same region multiple times.  The problem, of course, is that if
+you swap in NULL, then whoever tries to swap it out will fail.  In other
+words, you can't really do recursive opens with UNIQUE keys.  However, you can
+do this with REFCNT keys!  Swap out the key, make a copy of it, swap it back
+in, and use the copy for the open (making sure to destroy the copy after the
+open).
+  
+One disadvantage of dynamic regions, which is inherited from unique and
+reference-counted pointers, is that if you put a key in some shared storage
+in a region `r, then it is not the case that when `r is deallocated that the
+key will be destroyed automatically.  It's up to you to do the right thing
+or let the GC eventually collect it.  In the long run, the right thing to do
+is add a finalizer interface for regions so that we can register a routine
+to deallocate a dynamic region whenever we put it in a shared data
+structure.  The same goes for any unique pointer --- we ought to have a way
+to register a finalizer.  This is on our To-do list.
+
+
 \subsection{Defaults and Shorthands}
 
 As described so far, the notation for alias qualifiers is extremely
@@ -704,14 +807,17 @@ The shorthand notation is as follows:
 
 \begin{description}
 \item[Alias Qualifier Specifier] The strings \verb+ \A, \U, \RC, \T+
-  can be used as substitutes for {\tt ALIASABLE, UNIQUE, REFCNT,} and
-  {\tt RESTRICTED} respectively. For example each of the following
-  three forms are equivalent.
+  can be used as substitutes for \verb+@aqual(ALIASABLE)+,
+  \verb+@aqual(UNIQUE)+, \verb+@aqual(REFCNT)+, and
+  \verb+@aqual(RESTRICTED)+ respectively. For example
   \begin{verbatim}
-    void foo(int *\T a, int *\U b)
-    void foo(int *@aqual(\T) a, int *@aqual(\U) b)
-    void foo(int *@aqual(RESTRICTED) a, int *@aqual(UNIQUE) b)
+    void cons(int *\T a, int *\U b)
   \end{verbatim} 
+  is equivalent to 
+  \begin{verbatim}
+    void cmp(int *@aqual(RESTRICTED) a, int *@aqual(UNIQUE) b)
+  \end{verbatim}
+
   
 \item[Type Variable Bound] The bound on a type variable, as shown
   previously, generally appears together with the effects in a
@@ -722,9 +828,9 @@ The shorthand notation is as follows:
   function type; i.e. bounds may not appear within a local variable
   declaration, typedefs etc. If the type variable is of alias
   qualifier kind (kind Q) then this is interpreted as a qualifier
-  bound. If the variable is of boxed kind then it is interpreted as an
-  aquals bound. For instance, the function {\tt rqcopy} above can be
-  written as
+  bound. If the variable is of boxed, memory or abstract kind (::B,
+  ::M, or ::A) then it is interpreted as an aquals bound. For
+  instance, the function {\tt rqcopy} above can be written as
   
   \begin{verbatim}
   list_t<`a,`r,`q> rqcopy(region_t<`r> r,aqual_t<`q\T> q,
@@ -816,157 +922,80 @@ The default qualifier bounds are as follows:
 
 \end{description}
 
-\subsection{Region Allocator Implementation}
+\subsection{Subtyping for Effect Qualifier and Reaps}
+\label{sec:singleconstraint}
 
+We mentioned in Section~\ref{sec:allocandfree} that there was more to
+the type of \texttt{Core::rufree}. The full type of the function is
+given below.
+
+\begin{verbatim}
+ void rufree(region_t<`r> h, `a::A\T *\U `r ptr 
+             : single(`r))  __attribute__((noliveunique(2)));
+\end{verbatim}
+
+This type states that \verb+rufree+ expects a handle into region `r as
+its first argument. The `r effect qualifier on the second argument is
+meant to indicate that \texttt{ptr} is a pointer into the region `r,
+the handle of which is the first argument. The \verb+\U+ qualifier
+indicates that \texttt{ptr} must be a \emph{unique} pointer into that
+region. The type of the element that is pointed to by \texttt{ptr} can
+be anything at all (\verb+`a::A+)`, and may itself contain unique or
+reference-counted pointers, as indicated by the qualifier bound
+\verb+\T+
+
+The attribute \verb+noliveunique+ that appears in the type is a
+variant of the \verb+consume+ attribute shown earlier. This attribute
+states that after the call to the \texttt{rufree}, the pointer passed
+as the second parameter is consumed. Furthermore, if the element
+pointed to by \texttt{ptr} contains a live unique pointer, then
+Cyclone issues a warning. The reason is that since \texttt{ptr} is the
+only pointer to the underlying element, if this element contains a
+unique or reference-counted pointer, then the last reference to those
+pointers are lost leading to a memory leak.
+
+The last component of the type of \texttt{rufree} is the
+\verb+single(`r)+ constraint. The effect qualifier annotation of
+`r on both the handle as well as the pointer is meant to force the
+pointer to point into the region of the provided handle. However, in
+the presence of subtyping over effect qualifiers (as described in
+Section~\ref{sec:effectqualifiers}) the annotations on the parameters
+alone don't suffice to enforce this invariant. This is illustrated by
+the example below.
+
+\begin{verbatim}
+void bad_rufree(region_t<`r>, `a *\U `r); 
+void foo() {
+  region r;
+  int *`r ptr = rnew(r) 1;
+  region_t<`r+`H> a = Core::heap_region;
+  bad_rufree(a, ptr);
+}
+\end{verbatim}
+
+Subtyping of effect qualifiers means that it is permissble to treat
+\verb+int *`r+ as \verb^int*`r+`H^ and so the call to
+\verb+bad_rufree+ typechecks even though pointer \texttt{ptr} does not
+point into the region for which \texttt{a} is the handle.
+
+To avoid this behavior, the \texttt{single(`r)} constraint is used to
+limit subtyping on the effect qualifier variable \texttt{`r}. In
+particular, an effect qualifier variable that appears in a
+\texttt{single(`r)} constraint is guaranteed to always be instantiated
+with a \emph{single} region name, and not a set of region names. 
+
+\subsection{Reap Allocator Implementation}
+\label{sec:bget}
 To support deallocation of objects within a region the allocator must
 maintain some meta-data associated with each object. The current
 implementation uses a version of the bget allocator adapted for use
-with regions. When deallocation is rare, bget behaves much like a
+with reaps. When deallocation is rare, bget behaves much like a
 simple pointer bumping allocator and we expect performance to be
 competitive. However, the metadata does consume two additional header
 words for each object allocated.
 
-If your application does not free objects from a region then you
-\emph{might} get better performance by disabling the bget
-allocator. This is possible by compiling your program with the {\tt
--noreaps} option. With this flag the region library does not use bget,
-and consequently does not consume any additional header words for
-allocation. Operations such as {\tt rufree} have no effect when this
-option is chosen.
-
-
-%% \subsubsection{Polymorphism}
-%% \label{sec:poly-allocate}
-
-%% As described in \sectionref{sec:common-use}, we can write functions that
-%% take as arguments a region handle to allocate into.  For example, we wrote a
-%% function \texttt{rcopy} that copies a list into some region \texttt{`r2}.
-%% However, we didn't provide the full story that accounts for the unique
-%% region.  In particular, consider the following function:
-%% \begin{alltt}
-%%   $(int @`r, int @`r) make\_pair(region\_t<`r> rgn) \{
-%%     int @x = rnew (rgn) 1;
-%%     return $(x, x);
-%%   \}
-%% \end{alltt}
-%% This function will return a pair of pointers to the same object.  If we pass
-%% in something other than the unique region, this function will behave
-%% properly:
-%% \begin{alltt}
-%%   $(int @,int@) pair = make\_pair(heap_region);
-%% \end{alltt}
-%% However, things can go badly wrong if we pass in the unique region instead:
-%% \begin{alltt}
-%%   $(int @@aqual(UNIQUE),int @@aqual(UNIQUE)) pair = make\_pair(unique_region);
-%%   ufree(pair[0]);
-%%   int x = pair[1]; // error! dereferences freed pointer
-%% \end{alltt}
-%% The problem is that \texttt{make\_pair} creates an alias; if we pass in the
-%% unique region for \texttt{rgn}, we can free one of these aliases (e.g. the
-%% pointer via the first element of the pair), but then dereference the other
-%% (i.e. via the second pair element).
-
-%% To prevent this behavior, we have to classify the different kinds of regions
-%% that we support: aliasable regions, whose pointers can be freely aliased,
-%% and unique regions, whose pointers cannot be aliased, and can form part of
-%% unique paths.  To do this, we define \emph{kinds} R for aliasable regions
-%% and UR for unique ones.  We can then classify a polymorphic region variable
-%% with the proper kind.  This allows us to change the \texttt{make\_pair}
-%% function as follows:
-%% \begin{alltt}
-%%   $(int @`r, int @`r) make\_pair(region\_t<`r::R> rgn) \{
-%%     int @x = rnew (rgn) 1;
-%%     return $(x, x);
-%%   \}
-%% \end{alltt}
-%% Now we have specified specifically that \texttt{`r} must be an aliasable
-%% region (in fact, when not specified, this is the default for function
-%% parameters).  As such, the illegal code above will not typecheck because we
-%% are attempting to instantiate a unique region (having kind UR) for an
-%% aliasable one, which is disallowed.
-
-%% For generality, we introduce a third region kind TR (which stands for ``top
-%% region''); TR is a ``super-kind'' of R and UR, meaning that types having TR
-%% kind can be used in places expecting types of R or UR kind.  This also means
-%% that we cannot allow pointers into a TR-kinded region to be aliased, nor can
-%% we assume they do not have aliases (and so they cannot safely form part of a
-%% unique path).  This is because we might instantiate either the unique region
-%% (whose pointers cannot be aliased) or an aliasable region (whose pointers
-%% might be aliased) in place of the TR-kinded variable.
-
-%% We can now generalize the \texttt{rcopy} example above:
-%% \begin{verbatim}
-%%   struct List<`a,`r::TR>{`a hd; struct List<`a,`r> *`r tl;};
-%%   typedef struct List<`a,`r> *`r list_t<`a,`r>;
-
-%%   // return a fresh copy of the list in r2
-%%   list_t<`a,`r2> rcopy(region_t<`r2::TR> r2, list_t<`a> x) {
-%%     if (x == NULL) return NULL;
-%%     else {
-%%       list_t rest = rcopy(r2,x->tl);
-%%       return rnew(r2) List{.hd=x->hd,.tl=rest};
-%%     }
-%%   }
-%%   list_t<`a> copy(list_t<`a> x) {
-%%     return rcopy(heap_region, x);
-%%   }
-%% \end{verbatim}
-%% We have made three key changes to the prior version of \texttt{rcopy}:
-%% \begin{enumerate}
-%% \item The definition of \texttt{List} has been generalized so that its
-%%   \texttt{`r} region variable now has kind TR.  This implies that lists can
-%%   point into any region, whether unique or aliasable.  Actually, we need not
-%%   include the ::TR kind annotation on region type variables in typedefs;
-%%   this is the default (since it allows instantation of any region
-%%   parameter).
-%% \item The region handle \texttt{r2} now has kind TR, rather than the default
-%%   R.  This means that we can pass in any region handle, and thus copy a list
-%%   into any kind of region.
-%% \item We have made \texttt{rcopy}'s implementation recursive.  This was
-%%   necessary to avoid creating aliases to the newly created list.  In
-%%   particular, if we were to have used a \texttt{prev} pointer as in the
-%%   version from \sectionref{sec:common-use}, we would have two pointers to
-%%   the last-copied element: the \texttt{tl} field of the element before it in
-%%   the list, and the current iterator variable \texttt{prev}.  The use of
-%%   recursion allows us to iterate to the end of the list and construct it
-%%   back to front, in which no aliases are required.  The cost is we need to
-%%   do extra stack allocation.  This example illustrates that it is sometimes
-%%   difficult to program using no-alias pointers.  This is why, in cases other
-%%   than allocation, we would prefer to use the \texttt{alias} construct to
-%%   allow temporary aliasing.
-%% \end{enumerate}
-
-%% In addition to needing polymorphism for region allocation, for the same
-%% reasons we need polymorphism for arbitrary values which might be pointers
-%% into either unique or aliasable regions.  For example, consider the
-%% following code analogous to the \texttt{make\_pair} function above:
-%% \begin{verbatim}
-%%   $(`a,`a) pair(`a x) {
-%%     return $(x,x);
-%%   }
-%% \end{verbatim}
-%% Now consider what happens if we call \texttt{pair} with a unique pointer:
-%% \begin{verbatim}
-%%   int @@aqual(UNIQUE) p = new 1;
-%%   $(int @@aqual(UNIQUE),int @@aqual(UNIQUE)) pair = pair(p);
-%%   ufree(pair[0]);
-%%   int x = pair[1]; // error! dereferences freed pointer
-%% \end{verbatim}%$ <-- help syntax highlighting
-%% Again, the problem is that we have not restricted the kinds of things that
-%% can be used to instantiate polymorphic variables.  We extend our solution
-%% for region kinds, above, to all of Cyclone's kinds.  For example, Cyclone's
-%% ``box-kind'' B, which classifies word-sized values, must be extended so that
-%% B refers to aliasable word-sized values, while UB refers to non-aliasable
-%% word-sized values, and TB is the super-kind of both.  A similar extension
-%% occurs for kind M (memory-kinds, having arbitrary size), and kind A
-%% (any-kinds, for abstract, arbitrary-sized data).  With this, we can fix the
-%% \texttt{pair} function to be:
-%% \begin{verbatim}
-%%   $(`a,`a) pair(`a::B x) {
-%%     return $(x,x);
-%%   }
-%% \end{verbatim}
-%% This would prevent the call to \texttt{pair(p)} in the code snippet above.
-%% Actually, as with regions, aliasable kinds are the default, so the
-%% \texttt{::B} can be elided.
-
+For normal regions (i.e. those declared as \texttt{region r}, or those
+created using \texttt{new\_ukey}, or \texttt{new\_rckey}) the simple
+pointer-bumping allocator is used. Thus, if your application does not
+use reaps at all, then the overhead due to bget therefore does not
+apply.

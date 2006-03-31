@@ -266,14 +266,14 @@ top-level declarations.
 % \end{faqa}
 
 \begin{faqa}{faq:kinds}{What do \texttt{`a::B}, \texttt{`a::M},
-\texttt{`a::A}, \texttt{`a::R}, \texttt{`a::UR}, \texttt{`a::TR} and
-\texttt{`a::E} mean?}  Types are divided into different groups, which we
-call \emph{kinds}.  There are four ``normal'' kinds: B (for Box), M (for Memory), A
-(for Any), and E (for Effect); and three ``region'' kinds: R (for Region),
-UR (for unique region), and TR (for either regular or unique region).  The
-notation \textit{typevar}\texttt{::}\textit{kind} says that a type variable
-belongs to a kind.  A type variable can only be instantiated by types that
-belong to its kind.
+\texttt{`a::A}, \texttt{`a::R}, \texttt{`a::Q} and \texttt{`a::E}
+mean?}  Types are divided into different groups, which we call
+\emph{kinds}.  There are six kinds: B (for Box), M (for Memory), A
+(for Any), E (for Effect), R (for Region), and Q (for
+alias-Qualifier).  The notation
+\textit{typevar}\texttt{::}\textit{kind} says that a type variable
+belongs to a kind.  A type variable can only be instantiated by types
+that belong to its kind.
 
 Box types include \texttt{int}, \texttt{long}, \texttt{region_t},
 \texttt{tag_t}, enums, and non-\texttt{@fat} pointers.  Memory types
@@ -281,13 +281,11 @@ include all box types, \texttt{void}, \texttt{char}, \texttt{short},
 \texttt{long long}, \texttt{float}, \texttt{double}, arrays, tuples,
 \texttt{datatype} and \texttt{@extensible datatype} variants,
 \texttt{@fat} pointers, and non-abstract structs and unions.  Any
-types include all types that don't have kind R, UR, TR, or E.  For the
-region types, R indicates ``normal'' regions like the heap, stack, and
-dynamic regions; UR indicates the unique region (i.e. only `U or an
-alias of it has kind UR); and TR indicates either; UR and TR kinds are
-used generally only in certain region-polymorphic functions; see
-\sectionref{sec:poly-allocate}.  Effect types are sets of regions
-(these are explained elsewhere).
+types include all types that don't have kind R, E or Q.  For the
+region types, R indicates regions like the heap, stack, and dynamic
+regions; Q indicates alias qualifiers like ALIASABLE, UNIQUE, REFCNT
+or RESTRICTED; Effect types are sets of regions (these are explained
+elsewhere).
 \end{faqa}
 
 \begin{faqa}{faq:nokinds}{What does it mean when type variables don't have explicit kinds?}

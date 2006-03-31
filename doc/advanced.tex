@@ -60,11 +60,11 @@ bound type variables.
 Useful examples invariably use function pointers.  For a realistic
 library, see fn.cyc in the distribution.  Here is a smaller (and
 sillier) example; see the following two sections for an
-explanation of why the \texttt{regions(`a) > `r} stuff is necessary.
+explanation of why the \texttt{regions(`a) <= `r} stuff is necessary.
 \begin{verbatim}
   int f1(int x, int y) { return x+y; }
   int f2(string x, int y) {printf("%s",x); return y; }
-  struct T<`r::R> {<`a> : regions(`a) > `r 
+  struct T<`r::E> {<`a> : regions(`a) <= `r 
     `a f1; 
     int f(`a, int); 
   };
@@ -87,30 +87,33 @@ explicit types above are for sake of explanation; in practice, we tend
 to rely heavily on type inference when using these advanced typing
 constructs.
 
-\subsection{The Truth About Effects, Capabilities, and Region Bounds}
+\subsection{The Truth About Effects, Capabilities and Effect Subset Constraints}
 
 An \emph{effect} or \emph{capability} is a set of (compile-time)
 region names.  We use \emph{effect} to refer to the region names that
 must be ``live'' for some expression to type-check and
 \emph{capability} to refer to the region names that are ``live'' at
-some program point.  A \emph{region bound} indicates that all the
-regions in a set outlive one particular region.  Each program point
-has a set of ``known region bounds''.  
+some program point.  A \emph{effect subset constraint} indicates that
+all region names that appear in one effect qualifier also appear in
+another effect qualifier. Each program point has a set of ``known
+effect subset relations''.
 
-The intuition is that a program point's capability and region bounds
-must imply that an expression's effect describes live regions, else
-the expression does not type-check.  As we'll see, default effects for
-functions were carefully designed so that most Cyclone code runs no
-risk of such an ``effect check'' ever failing.  But using existential
-types effectively requires a more complete understanding of the
-system, though perhaps not as complete as this section presents.
+The intuition is that a program point's capability and subset
+relations must imply that an expression's effect describes live
+regions, else the expression does not type-check.  As we'll see,
+default effects for functions were carefully designed so that most
+Cyclone code runs no risk of such an ``effect check'' ever failing.
+But using existential types effectively requires a more complete
+understanding of the system, though perhaps not as complete as this
+section presents.
 
 The form of effects or capabilities is described as follows:
 \begin{itemize}
 \item \texttt{\{\}} is the empty set.  At most the heap region
   is accessed by an expression having this effect.
-\item \texttt{\{`r\}} is the set containing exactly the region name
-  \texttt{`r}.
+\item \texttt{`r} is the set containing the indivisible effect
+  \texttt{`r}. This effect variable can be isntantiated with a set
+  consisting of one or more region names. 
 \item \texttt{e1 + e2} is the set containing the effects e1 and e2.
   That is, we write \texttt{+} for set-union.
 \item \texttt{regions(t)}, where \texttt{t} is a type is the set
@@ -125,28 +128,32 @@ sense that it stands for a set of regions that cannot be further
 decomposed without knowing \texttt{`a}.  The primary uses of
 \texttt{regions(t)} are descibed below.
 
-The form of a region bound is \texttt{e > r} where \texttt{e} is an
-effect and \texttt{r} is a region name.
+The form of an effect subset constraint is \texttt{e1 <= e2} where
+\texttt{e1} and \texttt{e2} are both effects.
 
 We now describe the capability at each program point.  On function
 entry, the capability is the function's effect (typically the regions
 of the parameters and result, but fully described below).  In
 a local block or a growable-region statement, the capability is the
 capability of the enclosing context plus the block/statement's region
-name.
+name. 
 
-The known region bounds at a program point are described similarly: On
-function entry, the bounds are the function prototype's explicit
-bounds (typically none, but fully described below).  In a local block
-or a growable-region statement, we add \texttt{e > `r} where
-\texttt{e} is the capability of the enclosing context and \texttt{`r}
-is the block/statement's region name.  That is, we add that the set of
-region names for the enclosing context describes only regions that
-will outlive the region described by \texttt{`r}.  (As usual, the
-compiler generates \texttt{`r} in the common case that none is
-explicitly provided.)  Creating a dynamic region does not introduce
-any region bounds, but opening one does.  Creating a
-\texttt{resettable} growable region does not introduce any bounds.
+The known effect subset relation at a program point are only those
+that are mentioned in the type of the function within which the
+program point occurs.
+
+%% The known region bounds at a program point are described similarly: On
+%% function entry, the bounds are the function prototype's explicit
+%% bounds (typically none, but fully described below).  In a local block
+%% or a growable-region statement, we add \texttt{e > `r} where
+%% \texttt{e} is the capability of the enclosing context and \texttt{`r}
+%% is the block/statement's region name.  That is, we add that the set of
+%% region names for the enclosing context describes only regions that
+%% will outlive the region described by \texttt{`r}.  (As usual, the
+%% compiler generates \texttt{`r} in the common case that none is
+%% explicitly provided.)  Creating a dynamic region does not introduce
+%% any region bounds, but opening one does.  Creating a
+%% \texttt{resettable} growable region does not introduce any bounds.
 
 We can now describe an expression's effect: If it reads or writes to
 memory described by a region name \texttt{`r}, then the effect
@@ -173,25 +180,25 @@ be live, but with the explicit effect \texttt{\{\}} it would not.
 However, dangling pointers can be created only when using existential
 types, so the difference is rarely noticed.
 
-By default, a function (type) has no region bounds.  That is, the
-function does not assume any ``outlives'' relationships among the
-regions it accesses.  Adding explicit outlives relationships enables
-more subtyping in the callee and more stringent requirements at the
-call site (namely that the relationship holds).
+By default, a function (type) has no effect subset constraints.  That
+is, the function assumes no relationship between all the effect
+variables that appear in its type. Adding explicit subset
+relationships enables more subtyping in the callee and more stringent
+requirements at the call site (namely that the relationship holds).
 
-We can describe when a capability \texttt{e} and a set of region
-bounds \texttt{b} imply an effect, although your intuition probably
-suffices.  A ``normalized effect'' is either \texttt{\{\}} or unions
-of ``atomic effects'', where an atomic effect is either
-\texttt{\{`r\}} or \texttt{regions(`a)}.  For any effect \texttt{e1},
-we can easily compute an equivalent normalized effect \texttt{e2}.
-Now, \texttt{e} and \texttt{b} imply \texttt{e1} if they imply every
-\texttt{\{`r\}} and \texttt{regions(`a)} in \texttt{e2}.  To imply
-\texttt{\{`r\}} (or \texttt{regions(`a)}), we need \texttt{\{`r\}} (or
-\texttt{regions(`a)}) to be in (a normalized effect of) \texttt{e}) or
-for \texttt{b} to contain some \texttt{e3 > `r2} such that \texttt{e}
-and \texttt{b} imply \texttt{`r2} and \texttt{e3} and \texttt{b} imply
-\texttt{\{`r\}} (or \texttt{regions(`a)}).  Or something like that.
+We can describe when a capability \texttt{e} and a set of effect
+ subset relations \texttt{s} imply an effect, although your intuition
+ probably suffices.  A ``normalized effect'' is either \texttt{\{\}}
+ or unions of ``atomic effects'', where an atomic effect is either
+ \texttt{\{`r\}} or \texttt{regions(`a)}.  For any effect \texttt{e1},
+ we can easily compute an equivalent normalized effect \texttt{e2}.
+ Now, \texttt{e} and \texttt{s} imply \texttt{e1} if they imply every
+ \texttt{\{`r\}} and \texttt{regions(`a)} in \texttt{e2}.  To imply
+ \texttt{\{`r\}} (or \texttt{regions(`a)}), we need \texttt{\{`r\}}
+ (or \texttt{regions(`a)}) to be in (a normalized effect of)
+ \texttt{e}) or for \texttt{b} to contain some \texttt{`r <= `r2} such
+ that \texttt{e} and \texttt{b} imply \texttt{`r2}. Or something like
+ that.
 
 All of these complications are unnecessary except for existential
 types, to which we now return.  Explicit bounds are usually necessary
@@ -199,7 +206,7 @@ to make values of existential types usable.  To see why, consider the
 example from the previous section, with the \texttt{struct}
 declaration changed to remove the explicit bound:
 \begin{verbatim}  
-struct T<`r::R> {<`a> : regions(`a) > `r 
+struct T {<`a> 
   `a f1; 
   int f(`a, int); 
 };
@@ -209,7 +216,7 @@ struct T<`r::R> {<`a> : regions(`a) > `r
 \texttt{g} will not type-check because the (default) effect for
 \texttt{f} includes \texttt{regions(`b)}, which cannot be established
 at the call site.  But with the bound, we know that
-  \texttt{regions(`b) > `H}, which is sufficient to prove the call
+  \texttt{regions(`b) <=`H}, which is sufficient to prove the call
   won't read through any dangling pointers.
 
 \subsection{Interprocedural Memory Initialization}
