@@ -4954,7 +4954,7 @@ hstub clock_gettime {
   extern "C" int clock_gettime(clockid_t, struct timespec @);
 }
 hstub clock_nanosleep {
-  extern "C" int clock_nanosleep(clockid_t, itn, const struct timespec @,
+  extern "C" int clock_nanosleep(clockid_t, int, const struct timespec @,
                                  struct timespec @);
 }
 hstub clock_settime {
