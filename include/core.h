@@ -192,7 +192,7 @@ extern region_t<`H> heap_region;
   /** [unew] and [umalloc] are for allocating uniquely-pointed-to data. */
  void ufree(`a::A\T *@aqual(UNIQUE) `H ptr) __attribute__((noliveunique(1)));
   /** [ufree] frees a unique pointer. */
- void rufree(region_t<`r> h, `a::A\T *@aqual(UNIQUE) `r ptr) __attribute__((noliveunique(2)));
+ void rufree(region_t<`r> h, `a::A\T *@aqual(UNIQUE) `r ptr : single(`r)) __attribute__((noliveunique(2)));
 
   //extern region_t<`RC> refcnt_region;
   /** [refcnt_region] is the region handle of the reference-counted
