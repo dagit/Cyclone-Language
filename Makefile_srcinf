@@ -6,7 +6,8 @@ INF_ALL_TMP_SRCS=$(addprefix $(INF_PFX)/.cych/, $(ALL_O_SRCS:.o=.cyc))
 INF_ALL_C_SRCS=$(addprefix $(INF_PFX)/.cyco/, $(ALL_O_SRCS:.o=.c))
 INFFLAGS=--inf --nomerge --ovfat -detailedlocation -infpfx $(INF_PFX)
 RESFLAGS=--resolve -stopafter-toc -infpfx $(INF_PFX) -detailedlocation 
-INC_PATH:=. include $(CYCDIR)/lib $(CYCDIR)/src $(CYCDIR)/include
+BBDIR:=$(CYCDIR)/build/boot
+INC_PATH:=$(BBDIR) $(BBDIR)/include $(CYCDIR)/lib $(CYCDIR)/src $(CYCDIR)/include
 LIB_PATH:=$(CYCDIR)/lib
 CYCFLAGS += $(addprefix -I, $(INC_PATH)) -B. -B$(LIB_PATH) 
 

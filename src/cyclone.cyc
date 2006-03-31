@@ -1019,7 +1019,8 @@ static void process_file(string_t<`H> filename) {
   }
   if(!compile_failure) // errors trump warnings
     Warn::flush_warnings(); // cannot do after preprocfile is removed
-  remove_file(preprocfile);
+  if(Flags::stop_after_pass > Flags::Cpp)
+    remove_file(preprocfile);
   if(uncaught_exn != NULL) {// cannot use rethrow b/c file and line is wrong now
     let &$(e,fn,line) = (_@)uncaught_exn;
     fprintf(stderr,"uncaught exception: %s from %s, line %d\n",
@@ -1028,27 +1029,30 @@ static void process_file(string_t<`H> filename) {
     return;
   }
 
-  if(!Flags::no_merge) {
-    // jcheney: we make a (empty) .c file even if the .cyc file produced no decls
-    FILE *out_file;
-    if (Flags::stop_after_pass <= Flags::FlowAnalysis) {
-      if (output_file != NULL)
-	out_file = try_file_open(*output_file,"w","output file");
-      else
-	out_file = stdout;
-    } else if (Flags::stop_after_pass < Flags::CCompiler && output_file != NULL)
+  if(Flags::interproc && !Flags::resolve)
+    return;
+  // jcheney: we make a (empty) .c file even if the .cyc file produced no decls
+  FILE *out_file;
+  if (Flags::stop_after_pass <= Flags::Cpp) {//no tds to be printed
+    return;
+  }
+  if (Flags::stop_after_pass <= Flags::FlowAnalysis) {
+    if (output_file != NULL)
       out_file = try_file_open(*output_file,"w","output file");
     else
-      out_file = try_file_open(cfile,"w","output file");
-    
-    if (compile_failure || !out_file) return;
-    
-    if (!noprint_r) {
-      let env = new $((FILE@)out_file,cfile);
-      tds = do_stage("printing", tds, do_print, env, tds);
-      file_close(out_file);
-      cfiles = new List(new strdup(cfile),cfiles);
-    }
+      out_file = stdout;
+  } else if (Flags::stop_after_pass < Flags::CCompiler && output_file != NULL)
+    out_file = try_file_open(*output_file,"w","output file");
+  else
+    out_file = try_file_open(cfile,"w","output file");
+  
+  if (compile_failure || !out_file) return;
+  
+  if (!noprint_r) {
+    let env = new $((FILE@)out_file,cfile);
+    tds = do_stage("printing", tds, do_print, env, tds);
+    file_close(out_file);
+    cfiles = new List(new strdup(cfile),cfiles);
   }
 }
 
