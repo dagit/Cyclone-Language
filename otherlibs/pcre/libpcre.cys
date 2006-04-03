@@ -670,8 +670,9 @@ cycstub {
 
     re = pcre_compile(p, options, &err, &erroff, NULL);
     if (!re) {
-      fprintf(stderr,"Error at position %d:\n%s\n",erroff,p);
-      exit(1);
+      // TODO: return a better error
+      // fprintf(stderr,"Error at position %d:\n%s\n",erroff,p);
+      return 0;
     }
 
     let slen = strlen(s);
