@@ -948,6 +948,7 @@ grp.h:
 cpp {
   #if defined(__APPLE__) || defined(__linux__) || defined(__FreeBSD__)
   #include <sys/types.h> // defines gid_t
+  #include <unistd.h> // defines initgroups on APPLE
   #endif
 }
 include {
