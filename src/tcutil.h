@@ -285,5 +285,6 @@ type_t any_bounds(list_t<tvar_t,`H>);
   void revert_cvars(type_t);
   bool is_main(qvar_t);
   int tqual_cmp(tqual_t tq1, tqual_t tq2);
+  bool will_lose_precision(type_t, type_t);
 }
 #endif

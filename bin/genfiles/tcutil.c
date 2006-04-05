@@ -1941,7 +1941,7 @@ return Cyc_List_list_cmp(Cyc_Tcutil_typecmp,ts1,ts2);}}}else{goto _LL17;}case 3:
 return Cyc_strcmp(({const char*_Tmp19=n1;_tag_fat((void*)_Tmp19,sizeof(char),_get_zero_arr_size_char((void*)_Tmp19,1U));}),({const char*_Tmp19=n2;_tag_fat((void*)_Tmp19,sizeof(char),_get_zero_arr_size_char((void*)_Tmp19,1U));}));}}else{goto _LL17;}default: _LL17:
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp19=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp1A;_Tmp1A.tag=0,_Tmp1A.f1=_tag_fat("Unmatched case in typecmp",sizeof(char),26U);_Tmp1A;});void*_Tmp1A[1];_Tmp1A[0]=& _Tmp19;({int(*_Tmp1B)(struct _fat_ptr)=(int(*)(struct _fat_ptr))Cyc_Warn_impos2;_Tmp1B;})(_tag_fat(_Tmp1A,sizeof(void*),1));});};}}}
 # 1595
-static int Cyc_Tcutil_will_lose_precision(void*t1,void*t2){
+int Cyc_Tcutil_will_lose_precision(void*t1,void*t2){
 struct _tuple15 _Tmp0=({struct _tuple15 _Tmp1;({void*_Tmp2=Cyc_Absyn_compress(t1);_Tmp1.f0=_Tmp2;}),({void*_Tmp2=Cyc_Absyn_compress(t2);_Tmp1.f1=_Tmp2;});_Tmp1;});void*_Tmp1;void*_Tmp2;if(*((int*)_Tmp0.f0)==0){if(*((int*)_Tmp0.f1)==0){_Tmp2=(void*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0.f0)->f1;_Tmp1=(void*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp0.f1)->f1;{void*c1=_Tmp2;void*c2=_Tmp1;
 # 1598
 struct _tuple15 _Tmp3=({struct _tuple15 _Tmp4;_Tmp4.f0=c1,_Tmp4.f1=c2;_Tmp4;});int _Tmp4;int _Tmp5;switch(*((int*)_Tmp3.f0)){case 2: switch(*((int*)_Tmp3.f1)){case 2: _Tmp5=((struct Cyc_Absyn_FloatCon_Absyn_TyCon_struct*)_Tmp3.f0)->f1;_Tmp4=((struct Cyc_Absyn_FloatCon_Absyn_TyCon_struct*)_Tmp3.f1)->f1;{int i1=_Tmp5;int i2=_Tmp4;

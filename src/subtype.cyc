@@ -594,7 +594,6 @@ static $(coercion_t, list_t<constraint_t>, bool)
 			bool genconstr<`r::E>(list_t<constraint_t,`H>@`r,
 					      enum KindQual, //which type of Cvar should we constrain
 					      type_t, type_t),
-			bool allow_deep_subtype,
 			bool allow_coercion) { 
   if(Unify::unify(t1,t2)) { //exact match ... can never happen if constraint variables are present
     return $(No_coercion,NULL,true);   //fallback to regular case if not in --inf mode
@@ -756,26 +755,34 @@ static Absyn::coercion_t internal_coercible_c(seg_t loc, bool warn,
 					      bool genconstr<`r::E>(List::list_t<BansheeIf::constraint_t,`H>@`r,
 								    enum KindQual,
 								    Absyn::type_t, Absyn::type_t),
-					      bool allow_deep_subtype, bool allow_coercion) {
-  let $(s, c, b) = constraint_subtype(t1, t2, genconstr<>, allow_deep_subtype, allow_coercion);
+					      bool allow_coercion) {
+
+  let $(s, c, b) = constraint_subtype(t1, t2, genconstr<>, allow_coercion);
   if(s == Unknown_coercion)
     return s;
   if(List::forall_c(add_constraint, loc, c)) {
-    if(!b && warn) 
-      Warn::warn2(loc,"implicit cast from ", t1, " to ", t2);
+    if(!b && warn) {
+      if(is_arithmetic_type(t1) && is_arithmetic_type(t2)) {
+	if(will_lose_precision(t1,t2)) {
+	  Warn::warn2(loc, "integral size mismatch; ", t1, " -> ", t2, " conversion supplied");
+	}
+      }
+      else
+	Warn::warn2(loc,"implicit cast from ", t1, " to ", t2);
+    }
     return s;
   }
   return Unknown_coercion;
 }
 
 coercion_t coercible(Absyn::seg_t loc, type_t t1, type_t t2) {
-  return internal_coercible_c(loc,false,t1, t2, gen_default_constraint<>, false, true);
+  return internal_coercible_c(loc,false,t1, t2, gen_default_constraint<>, true);
 }
 
 coercion_t coercible_warn(Absyn::seg_t loc, type_t t1, type_t t2) {
-  return internal_coercible_c(loc,true,t1, t2,gen_default_constraint<>, false, true);
+  return internal_coercible_c(loc,true,t1, t2,gen_default_constraint<>,  true);
 }
 
 coercion_t coercible_exact(Absyn::seg_t loc, type_t t1, type_t t2) {
-  return internal_coercible_c(loc,false,t1, t2, gen_equality_constraint<>, false, false);
+  return internal_coercible_c(loc,false,t1, t2, gen_equality_constraint<>, false);
 }

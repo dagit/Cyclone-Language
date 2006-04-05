@@ -1592,7 +1592,7 @@ int typecmp(type_t t1, type_t t2) {
 
 // we're about to convert a value of type t1 to type t2 (both arithmetic types)
 // return true if we will potentially lose precision
-static bool will_lose_precision(type_t t1, type_t t2) {
+bool will_lose_precision(type_t t1, type_t t2) {
   switch ($(compress(t1),compress(t2))) {
   case $(&AppType(c1,_),&AppType(c2,_)):
     switch $(c1,c2) {
