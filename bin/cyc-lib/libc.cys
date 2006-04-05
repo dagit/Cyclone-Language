@@ -4853,13 +4853,44 @@ LOG_NDELAY
 LOG_NOWAIT
 LOG_PERROR
 }
-hstub {
+hstub closelog {
 extern "C" void closelog (void);
+}
+hstub setlogmask {
 extern "C" int setlogmask (int);
-  // This declares a not quite printf like function, we need to write
-  // it in Cyclone.
-  // void openlog (const char *, int, int);
-  // void syslog (int, const char *, ...);
+}
+hstub openlog {
+extern "C" void openlog(const char @, int, int);
+}
+hstub syslog {
+  extern void syslog(int, const char ?,... inject parg_t)
+    __attribute__((format(printf,2,3)));
+  extern void vsyslog(int, const char ?, parg_t ? ap)
+    __attribute__((format(printf,2,0)));
+}
+cstub syslog {
+  #include <syslog.h>
+  void __syslog_str(int x, const char *y) {
+    syslog(x,"%s",y);
+  }
+}
+cycstub syslog {
+  namespace Csyslog {
+    extern "C" void __syslog_str(int, const char @);
+  }
+  /* TODO: this does not handle %m */
+  void syslog(int x,const char ?y, ... inject parg_t z)
+    __attribute__((format(printf,2,3))) {
+    region r;
+    let m = vrprintf(r,y,z);
+    Csyslog::__syslog_str(x,m);
+  }
+  void vsyslog(int x,const char ?y, parg_t ? z)
+    __attribute__((format(printf,2,0))) {
+    region r;
+    let m = vrprintf(r,y,z);
+    Csyslog::__syslog_str(x,m);
+  }
 }
 ;
 
