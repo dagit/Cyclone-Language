@@ -2,7 +2,7 @@
 <feature
       id="cycinf"
       label="Cyclone with Inference Development Tools"
-      version="0.8.1"
+      version="0.8.2"
       provider-name="Matt McCutchen &lt;hashproduct@verizon.net&gt;">
 
    <description>

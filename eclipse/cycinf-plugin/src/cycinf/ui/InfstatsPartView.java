@@ -112,25 +112,6 @@ public abstract class InfstatsPartView<Element extends BelongsToInfstats> extend
 		theTableViewer.setContentProvider(new ViewContentProvider());
 		theTableViewer.setLabelProvider(new ViewLabelProvider());
 		getSite().setSelectionProvider(theTableViewer);
-		globalSelectionListener = new GlobalSelectionListener<Object>(this) {
-			@Override
-			protected Object wantObject(Object o) {
-				return (o instanceof IContainer) ? o : marshallElementFrom(o);
-			}
-			@Override
-			protected void selectObjects(List<Object> objects) {
-				/* We could have a lot of IContainers and a lot of Elements here...
-				 * We show the infstats of the first IContainer or Element and then
-				 * select all Elements in that infstats. */
-				Object first = objects.get(0);
-				DirTracker dt = (first instanceof IContainer)
-					? InfstatsManager.getManager().getTrackerFor((IContainer) first)
-					: ((BelongsToInfstats) first).getOwningInfstats().getDir();
-				useDirectory(dt);
-				theTableViewer.setSelection(new StructuredSelection(objects), true);
-			}
-		};
-		getSite().getPage().addPostSelectionListener(globalSelectionListener);
 		Table theTable = theTableViewer.getTable();
 		
 		setUpTableColumns(theTable);
@@ -173,6 +154,31 @@ public abstract class InfstatsPartView<Element extends BelongsToInfstats> extend
 		theTableViewer.getControl().setLayoutData(ifd);
 		
 		label.setText("Empty.  Click a folder in the Navigator.");
+		
+		/*
+		 * Now that we're initialized, we can start listening for folder.
+		 * selections.  If a folder is already selected, the
+		 * GlobalSelectionListener will notify us as it is being constructed.
+		 */
+		globalSelectionListener = new GlobalSelectionListener<Object>(this) {
+			@Override
+			protected Object wantObject(Object o) {
+				return (o instanceof IContainer) ? o : marshallElementFrom(o);
+			}
+			@Override
+			protected void selectObjects(List<Object> objects) {
+				/* We could have a lot of IContainers and a lot of Elements here...
+				 * We show the infstats of the first IContainer or Element and then
+				 * select all Elements in that infstats. */
+				Object first = objects.get(0);
+				DirTracker dt = (first instanceof IContainer)
+					? InfstatsManager.getManager().getTrackerFor((IContainer) first)
+					: ((BelongsToInfstats) first).getOwningInfstats().getDir();
+				useDirectory(dt);
+				theTableViewer.setSelection(new StructuredSelection(objects), true);
+			}
+		};
+		getSite().getPage().addPostSelectionListener(globalSelectionListener);
 	}
 	
 	void useDirectory(DirTracker newDir) {
@@ -214,7 +220,10 @@ public abstract class InfstatsPartView<Element extends BelongsToInfstats> extend
 	
 	@Override
 	public void dispose() {
-		super.dispose();
+		// We're about to be disposed: we no longer care about new folders/data
 		globalSelectionListener.unregister();
+		if (dir != null)
+			dir.deleteObserver(infstatsObserver);
+		super.dispose();
 	}
 }
