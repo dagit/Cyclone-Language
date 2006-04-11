@@ -2139,7 +2139,7 @@ void vcgen_fundecl(Position::seg_t loc, JumpAnalysis::jump_anal_res_t tables, Ab
 
 #ifdef VCGEN_PROFILE
   gettimeofday(&endtime,NULL);
-  unsigned totaltime = (endtime.tv_sec - begintime.tv_sec)*1000 + (endtime.tv_usec - begintime.tv_usec);
+  unsigned totaltime = (endtime.tv_sec - begintime.tv_sec)*1000000 + (endtime.tv_usec - begintime.tv_usec);
   // for each function, print out:
   // fn name : sz of AST : sz of assns used in VCs : sz of assns used in generating VCs : total time
   fprintf(stderr,"%s\t%d\t%d\t%d\t%u\n",
