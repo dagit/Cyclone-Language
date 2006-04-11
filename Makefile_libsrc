@@ -194,8 +194,19 @@ precore_c.h: core.h $(CYCC) cyc_include.h cycspecs
 # compiler special file cyc_setjmp.h will be used instead).
 cycstubs.c: cycstubs.cyc $(CYCC) cyc_include.h cyc_setjmp.h cycspecs
 	$(CYCC) -c -o $@ $(CYCFLAGS) -D__FILE2__=\"$(notdir $<)\" -stopafter-toc $<
+ifdef VCGEN_PROFILE
+ifdef USE_SUBST
+parse_tab.c: parse_tab.cyc cyc_include.h cyc_setjmp.h cycspecs
+	$(NOSUBSTCYCC) -c -o $@ -compile-for-boot $(CYCFLAGS) -D__FILE2__=\"$(notdir $<)\" -stopafter-toc $< &>$(addsuffix .raw, $(basename $(notdir $<)))
+toc.c: toc.cyc cyc_include.h cyc_setjmp.h cycspecs
+	$(NOSUBSTCYCC) -c -o $@ -compile-for-boot $(CYCFLAGS) -D__FILE2__=\"$(notdir $<)\" -stopafter-toc $< &>$(addsuffix .raw, $(basename $(notdir $<)))
+endif
+%.c: %.cyc $(CYCC) cyc_include.h cyc_setjmp.h cycspecs
+	$(CYCC) -c -o $@ -compile-for-boot $(CYCFLAGS) -D__FILE2__=\"$(notdir $<)\" -stopafter-toc $< &>$(addsuffix .raw, $(basename $(notdir $<)))
+else
 %.c: %.cyc $(CYCC) cyc_include.h cyc_setjmp.h cycspecs
 	$(CYCC) -c -o $@ -compile-for-boot $(CYCFLAGS) -D__FILE2__=\"$(notdir $<)\" -stopafter-toc $<
+endif
 %.$(O): %.cyc $(CYCC) cyc_include.h cyc_setjmp.h cycspecs
 	$(CYCC) -c -o $@ -compile-for-boot $(CYCFLAGS) -D__FILE2__=\"$(notdir $<)\" $<
 

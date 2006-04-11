@@ -62,6 +62,11 @@
 
 // #define NO_TRY_ASSNMAP
 
+#ifdef VCGEN_PROFILE
+#include <sys/time.h>
+extern "C" int gettimeofday(struct timeval *tv,void *tz);
+#endif
+
 namespace Vcgen;
 using AssnDef;
 using List;
@@ -1919,7 +1924,9 @@ static assn_map_t vcgen_switch(env_t env, term_t v,
 
 assn_map_t clause2assn(exp_t e){
   let env = bogus_env();
-  let am = update_var_map(memory,fresh_var(NULL,NULL),true_assnmap());
+  //  let am = update_var_map(memory,fresh_var(NULL,NULL),true_assnmap());
+  let am = true_assnmap();
+  let $(_,am) = lookup_var_map(memory,am); //force memory to have a binding
   let res =  vcgen_debug_test(env,e,am).f0;
   return res;
 }
@@ -2032,7 +2039,10 @@ static int sizeof_closure_vcgen_debug_assn_set() {
 #endif
 void vcgen_fundecl(Position::seg_t loc, JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd, 
 		   assn_info_t assn_info, fn_precond_info_t fn_precond_info, bool use_precond){
-
+#ifdef VCGEN_PROFILE
+  struct timeval begintime,endtime;
+  gettimeofday(&begintime,NULL);
+#endif
   let $(args,arvds,checkopt,reqopt,ensopt,thrwsopt,ret_value) = get_requires_and_ensures_info(&fd->i);
   assn_map_t am = true_assnmap();
   // We need to record the initial logical values for the arguments
@@ -2128,13 +2138,16 @@ void vcgen_fundecl(Position::seg_t loc, JumpAnalysis::jump_anal_res_t tables, Ab
   }
 
 #ifdef VCGEN_PROFILE
+  gettimeofday(&endtime,NULL);
+  unsigned totaltime = (endtime.tv_sec - begintime.tv_sec)*1000 + (endtime.tv_usec - begintime.tv_usec);
   // for each function, print out:
-  // fn name : sz of AST : sz of assns used in VCs : sz of assns used in generating VCs
-  fprintf(stderr,"%s\t%d\t%d\t%d\n",
+  // fn name : sz of AST : sz of assns used in VCs : sz of assns used in generating VCs : total time
+  fprintf(stderr,"%s\t%d\t%d\t%d\t%u\n",
 	  Absynpp::qvar2string(fd->name),  // fn name
 	  fn_body_size(fd->body),   // size of AST
-	  sizeof_closure_vcgen_debug_assn_set(), // size of useful of assns
-	  AssnDef::sizeof_hash_cons_table()); // size of hashtable for assn_t and term_t
+	  sizeof_closure_vcgen_debug_assn_set(), // size of useful assns
+	  AssnDef::sizeof_hash_cons_table(), // size of hashtable for assn_t and term_t
+	  totaltime); // total time used in vcgen for this function
   vcgen_debug_assn_set = NULL;
 #endif
   // check the throws clause

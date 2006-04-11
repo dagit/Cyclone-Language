@@ -34,6 +34,8 @@
 #include <dict.h>
 #include <set.h>
 
+// #define USE_SUBST_VCGEN
+
 namespace Hashtable {
   using List;
   struct Cell<`a,`b,`r> {
@@ -2259,8 +2261,22 @@ $(term_t,assn_map_t) lookup_var_map(vardecl_t vd, assn_map_t am){
 
 // update the nonescvar_map to associate vd with a new term newt
 assn_map_t update_var_map(vardecl_t vd,term_t newt,assn_map_t am){
+#ifndef USE_SUBST_VCGEN
   let newm = Dict::insert(am.map,vd,newt);
   return AssnMap{am.assn,newm};
+#else
+  let $(t,am) = lookup_var_map(vd,am);
+  switch (t) {
+  case &LogicVar(vd_opt,_,typ_opt): 
+    let dict = Dict::insert(empty_term_dict(),t,fresh_var(vd_opt,typ_opt));
+    let newa = subst_a(dict,am.assn);
+    newt = subst_t(dict,newt);
+    newa = and(newa,eq(newt,t));
+    return AssnMap{newa,am.map};
+  default:
+    Warn::impos("simulating subst in vcgen, all var should map to a logic var");
+  }
+#endif
 }
 
 // widen the assn part of an assnmap
