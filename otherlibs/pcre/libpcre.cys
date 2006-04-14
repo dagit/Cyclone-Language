@@ -489,7 +489,8 @@ hstub {
   char ?pcre_s_g(const char ?s,const char ?p,const char ?r,int options);
   char ?pcre_s(const char ?s,const char ?p,const char ?r,int options);
   int pcre_m(const char ?s,const char ?p,int options);
-  char ?pcre_chomp(const char ?s);
+  int pcre_chomp(char ?s);
+  int pcre_chop(char ?s);
   List::list_t<char ?@> pcre_split(const char ?p,int options,const char ?s);
 }
 
@@ -682,9 +683,22 @@ cycstub {
     return (0 <= pcre_exec(re,NULL,s,slen,0,0,ovector,olen));
   }
 
-  /* TODO: maybe this should work by side effect rather than return a new string */
-  char ?pcre_chomp(const char ?s) {
-    return pcre_s(s,"\n$","",0);
+  /* NB: we don't emulate Perl's "paragraph mode" */
+  int pcre_chomp(char ?s) {
+    let len = strlen(s);
+    if (len>0 && s[len-1] == '\n') {
+      s[len-1] = '\0';
+      return 1;
+    }
+    else return 0;
+  }
+
+  int pcre_chop(char ?s) {
+    let len = strlen(s);
+    if (!len) return 0;
+    let old = s[len-1];
+    s[len-1] = '\0';
+    return old;
   }
 
   List::list_t<char ?@> pcre_split(const char ?p,int options,const char ?s) {
