@@ -2,8 +2,8 @@ include ../../Makefile.inc
 BINDIR = $(CYCDIR)/bin
 CYC_LIB_PATH = $(BINDIR)/lib
 override CYCFLAGS += -I$(CYCDIR)/include $(LC_FLAG)
-BUILDLIB=$(BINDIR)/buildlib
-CYCC=$(BINDIR)/$(CYCCOMP) 
+BUILDLIB=$(BINDIR)/buildlib -B$(CYC_LIB_PATH)/cyc-lib
+CYCC=$(BINDIR)/$(CYCCOMP) -B$(CYC_LIB_PATH)/cyc-lib
 
 libpcre.a: libpcre.cys cycstubs.o cstubs.o
 	cp $(LIBPCRE) $@
