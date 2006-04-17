@@ -223,6 +223,7 @@ tools: cyclone
 	$(MAKE) -C tools/flex install
 	$(MAKE) -C tools/rewrite install
 	$(MAKE) -C tools/errorgen install
+	$(MAKE) -C tools/yakker cyclone-install
 
 otherlibs: cyclone
 	@test ! \( -e "$(LIBPCRE)" \) -a \( -z "$(LIBPCRE)" \) || $(MAKE) -C otherlibs/pcre install
@@ -391,7 +392,7 @@ inc_install inc_uninstall:
 endif
 ifdef BIN_INSTALL
 bin_install:
-	$(SHELL) config/cyc_install bin/cyclone$(EXE) bin/cyclone-inf$(EXE) bin/cycbison$(EXE) bin/cyclex$(EXE) bin/cycflex$(EXE) bin/rewrite$(EXE) bin/aprof$(EXE) bin/errorgen$(EXE) bin/stringify$(EXE) $(BIN_INSTALL)
+	$(SHELL) config/cyc_install bin/cyclone$(EXE) bin/cyclone-inf$(EXE) bin/cycbison$(EXE) bin/cyclex$(EXE) bin/cycflex$(EXE) bin/rewrite$(EXE) bin/aprof$(EXE) bin/errorgen$(EXE) bin/stringify$(EXE) bin/yakker$(EXE) $(BIN_INSTALL)
 bin_uninstall:
 	$(SHELL) config/cyc_install -u $(BIN_INSTALL)
 else

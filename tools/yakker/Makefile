@@ -1,44 +1,56 @@
 CYCFLAGS=
 #CYCFLAGS=-pg
 
+BINDIR=../../bin
+CYC_LIB_PATH = $(BINDIR)/lib
+CYCLONE=$(BINDIR)/cyclone -I../../include -B$(BINDIR)/lib/cyc-lib
+CYCBISON=$(BINDIR)/cycbison
+CYCLEX=$(BINDIR)/cyclex
+STRINGIFY=$(BINDIR)/stringify
+
 FILES=analyze axarray bnf ykbuf corerules cs extract fa termgrammar lex pads parse_tab parsergen pr prose util yakker
 
 all: yakker
+
+cyclone-install: $(BINDIR)/yakker
+
+$(BINDIR)/yakker: yakker
+	cp $< $@
 
 yakker: analyze.o axarray.o bnf.o cs.o extract.o fa.o termgrammar.o lex.o pads.o \
   parse_tab.o parsergen.o pr.o prose.o prose_elim_grm.o string_dfa_engine1.o \
   string_dfa_engine2_1.o corerules.o corerules_grm.o \
   util.o namespaces.o yakker.o
-	cyclone $(CYCFLAGS) $^ -o $@
+	$(CYCLONE) $(CYCFLAGS) -L$(CYC_LIB_PATH) $^ -o $@
 
 testindexer: indexer 1rfc_index
 	./indexer < 1rfc_index
 
 indexer: indexer.o ykbuf.o ssl.o bnf.o extract.o pr.o parse_tab.o util.o lex.o
-	cyclone $^ -o $@ -lssl -lcrypto
+	$(CYCLONE) $^ -o $@ -lssl -lcrypto
 
 # --novcgen is temporary until a bug is fixed
 indexer.o: indexer.cyc
-	cyclone -c $< -o $@ --novcgen
+	$(CYCLONE) -c $< -o $@ --novcgen
 
 indexer.cyc: examples/indexer.yk yakker
 	./yakker -gen entry-list $< > $@
 
 wf: wf.o ykbuf.o ssl.o
-	cyclone $^ -o $@ -lssl -lcrypto
+	$(CYCLONE) $^ -o $@ -lssl -lcrypto
 
 wf.cyc: examples/wf.yk yakker
 	./yakker -gen file $< > $@
 
 imapcl: imapcl.o ykbuf.o ssl.o imap.o
-	cyclone $^ -o $@ -lssl -lcrypto
+	$(CYCLONE) $^ -o $@ -lssl -lcrypto
 
 imapcl.o: examples/imapcl.cyc
-	cyclone -c $^ -o $@ -I.
+	$(CYCLONE) -c $^ -o $@ -I.
 
 # --novcgen is temporary until a bug is fixed
 imap.o: imap.cyc
-	cyclone -c $< -o $@ --novcgen
+	$(CYCLONE) -c $< -o $@ --novcgen
 
 imap.cyc: imap.bnf
 	./yakker -gen command -no-main -lazyfill $< > $@
@@ -50,32 +62,32 @@ imapp.cert: imapp.key
 	openssl req -new -key $< -x509 -subj /C=aa/ST=b/L=c/O=d/OU=e/CN=shoebox.research.att.com > $@
 
 imapp: imapp.o ykbuf.o ssl.o imap.o
-	cyclone $^ -o $@ -lssl -lcrypto
+	$(CYCLONE) $^ -o $@ -lssl -lcrypto
 
 imapp.o: examples/imapp.cyc
-	cyclone -c $^ -o $@ -I.
+	$(CYCLONE) -c $^ -o $@ -I.
 
 #
 markdown: markdown.o ykbuf.o ssl.o bnf.o extract.o pr.o parse_tab.o util.o lex.o axarray.o
-	cyclone $^ -o $@ -lssl -lcrypto
+	$(CYCLONE) $^ -o $@ -lssl -lcrypto
 
 markdown.cyc: examples/markdown.yk yakker
 	./yakker -no-main -gen elim-cr-line -d $< > $@
 
 string_%.cyc: %.cyc
-	stringify $< > $@
+	$(STRINGIFY) $< > $@
 
 string_%.cyc: %.str
-	stringify $< > $@
+	$(STRINGIFY) $< > $@
 
 prose_elim_grm.cyc: prose_elim_grm.bnf
-	stringify $< > $@
+	$(STRINGIFY) $< > $@
 
 corerules_grm.cyc: corerules_grm.bnf
-	stringify $< > $@
+	$(STRINGIFY) $< > $@
 
 %.d: %.cyc
-	cyclone -M -MG $< > $@
+	$(CYCLONE) -M -MG $< > $@
 
 -include $(addsuffix .d, $(FILES))
 .SECONDARY: parse_tab.cyc
@@ -133,18 +145,18 @@ clean:
 	./yakker -pads $< > $@
 
 %.o: %.cyc
-	cyclone $(CYCFLAGS) -c $<
+	$(CYCLONE) $(CYCFLAGS) -c $<
 
 %_tab.cyc: %.y
-	cycbison -d $<
-#	cycbison -d --debug --verbose $<
+	$(CYCBISON) -d $<
+#	$(CYCBISON) -d --debug --verbose $<
 
 %_tab.h: %.y
-	cycbison -d $<
-#	cycbison -d --debug --verbose $<
+	$(CYCBISON) -d $<
+#	$(CYCBISON) -d --debug --verbose $<
 
 %.cyc: %.cyl
-	cyclex $< $@
+	$(CYCLEX) $< $@
 
 rfc%.txt:
 	curl -O http://www.ietf.org/rfc/$@
@@ -250,5 +262,3 @@ rfc2426.bnf: rfc2426.txt yakker
 
 rfc%.bnf: rfc%.txt yakker
 	./yakker -extract $< >$@
-
-
