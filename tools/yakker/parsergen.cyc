@@ -527,6 +527,12 @@ void gen(grammar_t<`H> grm, const char ?`H start_symbol,
          "datatype exn { Parse_error };\n"
          "datatype exn.Parse_error Parse_error_val = Parse_error;\n");
 
+  /* Print first textblob.  Needed in case it defines typedefs used by parsing functions. */
+  if (textblobs) {
+    printf("%s\n",*textblobs->hd);
+    textblobs = textblobs->tl;
+  }
+
   /* Print forward definitions of parsing functions */
   for (let x = grm; x; x = x->tl) {
     let &$(n,r,a) = x->hd;

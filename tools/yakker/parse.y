@@ -44,6 +44,7 @@ void yyerror(const char ?s, int state, int token) {
 }
 static grammar_t parse_result = NULL;
 List::list_t<const char ?@> textblobs = NULL;
+static int after_definition = 0;
 int ws_on = 0;
 int re_on = 0;
 static int ws_for_id(const char ?id) {
@@ -114,11 +115,14 @@ grammar: definitions
 definitions:
 { $$ = ^$(NULL); }
 | definition definitions
-{ $$ = ^$(new List($1,$2)); }
+{ after_definition = 1;
+  $$ = ^$(new List($1,$2)); }
 | directive definitions
 { $$ = $!2; }
 | SEMACTION definitions
-{ textblobs = new List::List(new $1,textblobs);
+{ if (after_definition && !textblobs)
+    textblobs = new List::List(new "",textblobs);
+  textblobs = new List::List(new $1,textblobs);
   $$ = $!2; }
 
 definition:
@@ -258,6 +262,8 @@ grammar_t parse_file(FILE @`H f) {
   parse_result = NULL;
   yyparse(Lexing::from_file(f));
   textblobs = List::imp_rev(textblobs);
+  if (!textblobs)
+    textblobs = new List::List(new "",textblobs);
   //  get_newlines(f);
   return parse_result;
 }
@@ -267,5 +273,7 @@ grammar_t parse_string(char ?s) {
   parse_result = NULL;
   yyparse(Lexing::from_string(s));
   textblobs = List::imp_rev(textblobs);
+  if (!textblobs)
+    textblobs = new List::List(new "",textblobs);
   return parse_result;
 }
