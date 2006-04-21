@@ -148,11 +148,14 @@ bin/buildlib$(EXE):: $(BB)/buildlib$(EXE) \
   $(BL)/cyc-lib/cyc_include.h $(BL)/cyc-lib/$(build)/cycspecs
 	cp $(BB)/buildlib$(EXE) $@
 
+# NB: the cp -p is used to preserve the time on the include files,
+# which are prereqs of some .o files, namely, in tools/yakker.
+# Without -p, those .o files would be out of date on every make.
 include-directory:
 	for i in `(cd $(BB)/include; find * -type d)`;\
 	  do mkdir -p $(BL)/cyc-lib/$(build)/include/$$i; done
 	for i in `(cd $(BB)/include; find * -name '*.h')`;\
-	  do cp $(BB)/include/$$i $(BL)/cyc-lib/$(build)/include/$$i; done
+	  do cp -p $(BB)/include/$$i $(BL)/cyc-lib/$(build)/include/$$i; done
 
 # Directory structure of the installed library.  (During boot,
 # this is built in bin/lib ($(BL)).)
@@ -332,7 +335,7 @@ include-target-directory:
 	for i in `(cd $(BT)/include; find * -type d)`;\
 	  do mkdir -p $(BL)/cyc-lib/$(target)/include/$$i; done
 	for i in `(cd $(BT)/include; find * -name '*.h')`;\
-	  do cp $(BT)/include/$$i $(BL)/cyc-lib/$(target)/include/$$i; done
+	  do cp -p $(BT)/include/$$i $(BL)/cyc-lib/$(target)/include/$$i; done
 
 directories::
 	@mkdir -p $(BL)/cyc-lib/$(target)/include

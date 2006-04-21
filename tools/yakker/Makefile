@@ -262,3 +262,5 @@ rfc2426.bnf: rfc2426.txt yakker
 
 rfc%.bnf: rfc%.txt yakker
 	./yakker -extract $< >$@
+
+.PHONY: cyclone-install

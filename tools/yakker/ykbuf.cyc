@@ -92,6 +92,24 @@ ykbuf_t @string2ykbuf(const char ?s) {
     .discarded=0};
   return result;
 }
+ykbuf_t @data2ykbuf(const char ?@nozeroterm s) {
+  let len = numelts(s);
+  let buf = malloc((len+1)*sizeof(char));
+  memcpy(buf,s,len);
+  buf[len] = '\0';
+  let result = new ykbuf{
+    .prod=NULL,
+    .bot=buf,
+    .save=NULL,
+    .mark=NULL,
+    .cur=buf,
+    .lim=buf,
+    .top=buf+BSIZE,
+    .eof=1,
+    .save_count=0,
+    .discarded=0};
+  return result;
+}
 
 /*
   bot points to the memory object obtained from malloc.
@@ -220,46 +238,45 @@ void ykreserve(ykbuf_t @s,unsigned int TO_READ) {
 }
 
 void ykfill(ykbuf_t @s,unsigned int n) {
-  if (n < (s->lim - s->cur)) return;
-  if (!s->eof) {
-    int TO_READ = n - (s->lim - s->cur);
-    if (TO_READ < BSIZE) TO_READ = BSIZE;
-    // We want to read in TO_READ chars.  Resize the buffer if not enough space.
-    ykreserve(s,TO_READ);
+  if (s->eof || n < (s->lim - s->cur)) return;
+  int TO_READ = n - (s->lim - s->cur);
+  if (TO_READ < BSIZE) TO_READ = BSIZE; // Don't read little chunks
+  // We want to read in TO_READ chars.  Resize the buffer if not enough space.
+  ykreserve(s,TO_READ);
 
-    int cnt;
-    // Read in TO_READ characters
-  YKREADLOOP:
-    if ((cnt = ykread(s->prod, s->lim, TO_READ)) != TO_READ) {
-      if (!cnt) {                   // end-of-file
+  int cnt;
+  // Read in TO_READ characters
+  while (1) {
+    cnt = ykread(s->prod, s->lim, TO_READ);
+    if (cnt > 0) {
+      s->lim += cnt;
+      if (n < (s->lim - s->cur)) return; // TO_READ was larger than n
+      TO_READ -= cnt;
+      if (TO_READ == 0) return;
+      continue;
+    }
+    else if (!cnt) {            // end-of-file
+      s->eof = 1;
+      *s->lim = '\0';
+      return;
+    }
+    else { // (cnt < 0)
+      if (errno == EINTR)       // interrupt occurred during a slow read
+        continue;
+      else if (errno == EAGAIN) // read from non-blocking fd, no data available
+        // TODO: maybe we should change the fill API to allow a return here?
+        continue;
+      else {                    // some other error
+        perror("Read error on fill");
+        // Act as if eof was encountered
         s->eof = 1;
-        s->lim[cnt++] = '\0'; // Invariant: cnt < TO_READ
-      }
-      else if (cnt < 0) {
-        if (errno == EINTR) {       // interrupt occurred during a slow read
-          goto YKREADLOOP;
-        }
-        else if (errno == EAGAIN) { // read from non-blocking fd, no data available
-          // TODO: maybe we should change the fill API to allow a return here?
-          goto YKREADLOOP;
-        }
-        else {                      // some other error
-          perror("Read error on fill");
-          // Act as if eof was encountered
-          s->eof = cnt = 1;
-          s->lim = '\0';
-        }
-      }
-      else {                        // read fewer than TO_READ characters for some other reason
-        s->lim += cnt;
-        if (n < (s->lim - s->cur)) return; // TO_READ was larger than n
-        TO_READ -= cnt;
-        goto YKREADLOOP;
+        *s->lim = '\0';
+        return;
       }
     }
-    s->lim += cnt;
   }
 }
+
 
 /* This has nothing to do with buffers but it's convenient to stick it here. */
 void compress_whitespace(char ?x) {
@@ -300,33 +317,35 @@ int ykindex(ykbuf_t @s,unsigned char c,unsigned int n) {
   int cnt;
   unsigned int TO_READ = n-idx;
   while (1) {
-    if ((cnt = ykread(s->prod, s->lim, TO_READ)) != TO_READ) {
-      if (!cnt) {   /* end-of-file */
-        s->eof = 1;
-        s->lim[cnt++] = '\0'; // Invariant: cnt < TO_READ
+    /* Invariants:
+       TO_READ == n-idx > 0
+    */
+    cnt = ykread(s->prod, s->lim, TO_READ);
+    if (cnt > 0) {
+      s->lim += cnt;
+      TO_READ -= cnt;
+      for (unsigned int lim = s->lim - s->cur; idx < lim && idx < n; idx++) {
+        if (s->cur[idx] == c) return idx;
+      }
+      if (idx == n) return idx;
+      continue;
+    }
+    else if (!cnt) {   /* end-of-file */
+      s->eof = 1;
+      *s->lim = '\0'; // Zero-terminate.  TO_READ>0 so there should be space
+      return -1;
+    }
+    else { // (cnt < 0)
+      if (errno == EINTR)
+        continue; /* interrupt occurred during a slow read */
+      else if (errno == EAGAIN)
+        continue; /* read from non-blocking fd, no data available */
+      else {      /* some other error */
+        perror("Read error on fill");
+        // Act as if eof was encountered
+        s->eof = cnt = 1;
+        *s->lim = '\0';
         return -1;
-      }
-      else if (cnt < 0) {
-        if (errno == EINTR)
-          continue; /* interrupt occurred during a slow read */
-        else if (errno == EAGAIN)
-          continue; /* read from non-blocking fd, no data available */
-        else {      /* some other error */
-          perror("Read error on fill");
-          // Act as if eof was encountered
-          s->eof = cnt = 1;
-          s->lim = '\0';
-          return -1;
-        }
-      }
-      else {        /* read fewer than TO_READ characters for some other reason */
-        s->lim += cnt;
-        TO_READ -= cnt;
-        for (unsigned int lim = s->lim - s->cur; idx < lim && idx < n; idx++) {
-          if (s->cur[idx] == c) return idx;
-        }
-        if (idx == n) return idx;
-        continue;
       }
     }
   }
@@ -357,7 +376,7 @@ char ?@nozeroterm`r ykbgets(char ?@nozeroterm`r s, int size, ykbuf_t @ykb) {
    Replacement for fread(s,1,n,f).
 */
 size_t ykbread(char ?@nozeroterm s, size_t n, ykbuf_t @ykb) {
-  let bsize = ykb->lim - ykb->cur;
+  let bsize = ykb->lim - ykb->cur; // characters currently in buffer
   if (bsize >= n) {
     for (int i = 0; i < n; i++) s[i] = *YKCURSOR++; /* TODO: use memcpy */
     return n;
@@ -366,40 +385,47 @@ size_t ykbread(char ?@nozeroterm s, size_t n, ykbuf_t @ykb) {
     for (int i = 0; i < bsize; i++) s[i] = *YKCURSOR++; /* TODO: use memcpy */
     return bsize;
   }
-  ykreserve(ykb,n-bsize);
+  ykreserve(ykb,n-bsize); // bsize < n, reserve space to read the rest
   int cnt;
   unsigned int TO_READ = n-bsize;
   while (1) {
+    /* Invariants:
+       TO_READ == n-bsize > 0
+       bsize == (ykb->lim - ykb->cur)
+     */
     if ((cnt = ykread(ykb->prod, ykb->lim, TO_READ)) == TO_READ) {
-      for (int i = 0; i < cnt; i++) s[i] = *YKCURSOR++; /* TODO: use memcpy */
-      return cnt;
+      /* We've read all we need, there should be n characters in the buffer */
+      ykb->lim += cnt;
+      //      TO_READ -= cnt; // TO_READ == 0
+      //      bsize += cnt;   // bsize == n == (ykb->lim - ykb->cur)
+      for (int i = 0; i < n; i++) s[i] = *YKCURSOR++; /* TODO: use memcpy */
+      return n;
     }
-    else {
-      if (!cnt) {   /* end-of-file */
+    else if (cnt > 0) {
+      /* read fewer than TO_READ characters for some other reason */
+      ykb->lim += cnt;
+      TO_READ -= cnt;
+      bsize += cnt;
+      continue;
+    }
+    else if (!cnt) {   /* end-of-file */
+      ykb->eof = 1;
+      *ykb->lim = '\0'; // Zero-terminate.  TO_READ>0 so there should be space
+      for (int i = 0; i < bsize; i++) s[i] = *YKCURSOR++; /* TODO: use memcpy */
+      return bsize;
+    }
+    else { /* (cnt < 0) */
+      if (errno == EINTR)
+        continue; /* interrupt occurred during a slow read */
+      else if (errno == EAGAIN)
+        continue; /* read from non-blocking fd, no data available */
+      else {      /* some other error */
+        perror("Read error on fill");
+        // Act as if eof was encountered
         ykb->eof = 1;
-        ykb->lim[cnt++] = '\0'; // Invariant: cnt < TO_READ
+        ykb->lim = '\0';
         for (int i = 0; i < bsize; i++) s[i] = *YKCURSOR++; /* TODO: use memcpy */
         return bsize;
-      }
-      else if (cnt < 0) {
-        if (errno == EINTR)
-          continue; /* interrupt occurred during a slow read */
-        else if (errno == EAGAIN)
-          continue; /* read from non-blocking fd, no data available */
-        else {      /* some other error */
-          perror("Read error on fill");
-          // Act as if eof was encountered
-          ykb->eof = cnt = 1;
-          ykb->lim = '\0';
-          for (int i = 0; i < bsize; i++) s[i] = *YKCURSOR++; /* TODO: use memcpy */
-          return bsize;
-        }
-      }
-      else {        /* read fewer than TO_READ characters for some other reason */
-        ykb->lim += cnt;
-        TO_READ -= cnt;
-        bsize += cnt;
-        continue;
       }
     }
   }

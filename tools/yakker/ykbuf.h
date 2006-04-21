@@ -42,6 +42,7 @@ extern ykbuf_t @fd2ykbuf(int fd);
 extern ykbuf_t @ssl2ykbuf(SSL@`H);
 extern ykbuf_t @p2ykbuf(int (@`H p)(ykbuf_t @`H),ykbuf_t @`H ykb);
 extern ykbuf_t @string2ykbuf(const char ?s);
+extern ykbuf_t @data2ykbuf(const char ?@nozeroterm s);
 
 extern void ykfill(ykbuf_t @s,unsigned int n);
 extern void ykdumpbuf(ykbuf_t @y);
