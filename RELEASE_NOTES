@@ -2,6 +2,50 @@ Cyclone Release Notes:
 
 This file explains some of the changes that occurred in between releases.
 ----------------------------------------------------------------------
+Changes going from Version 0.8.1 dated June 2004, to version 1.0 dated
+April 2006.
+
+* vcgen is much improved --- includes @assert, interprocedural
+summaries, @no_throw clauses on function ... 
+
+* The form of region qualifiers is changed to include sets of region
+names. Removed the outlives relation on regions in favor of "effect
+constraints" that encode subset constraints. 
+
+* Primitive support for an inference mode that does a whole-program
+analysis to infer fat/thin pointer qualifier. This includes an eclipse
+plugin mode.
+
+** many many bug fixes.
+----------------------------------------------------------------------
+Changes going from Version 0.8.1 dated June 2004, to version 0.9 dated
+May 2005.
+
+* Support for reaps using @aqual() qualifiers on pointers. Alias
+restricted pointers can now refer toany region. See SCP Special Issue
+on Memory Management.
+
+* function attribute noconsume replaced by consume which is implied by
+  noliveunique
+
+* autorelease pools for reference counting
+
+* current region `C means you don't have to pass around region handles
+as much as previously.
+
+* support for Tempest mode -- uses fat pointers by default
+
+* "extern "C include" { ... } cyclone_override { ... }" construct
+that provides an alternative means of interfacing with C. 
+
+* support for gcc-style asm expressions 
+
+* variable names are preserved through code generation to make working
+with gdb easier.
+
+** many many bug fixes.
+
+----------------------------------------------------------------------
 Changes going from Version 0.8 dated May 2004, to version 0.8.1 dated
 June 2004.
 
