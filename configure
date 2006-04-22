@@ -268,8 +268,8 @@ SHELL=${CONFIG_SHELL-/bin/sh}
 # Identity of this package.
 PACKAGE_NAME='cyclone'
 PACKAGE_TARNAME='-cyclone-'
-PACKAGE_VERSION='0.8.2'
-PACKAGE_STRING='cyclone 0.8.2'
+PACKAGE_VERSION='1.0'
+PACKAGE_STRING='cyclone 1.0'
 PACKAGE_BUGREPORT='cyclone-bugs-l@lists.cs.cornell.edu'
 
 # Factoring default headers for most tests.
