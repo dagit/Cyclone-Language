@@ -1,7 +1,9 @@
+include ../../Makefile.inc
 CYCFLAGS=
 #CYCFLAGS=-pg
 
-BINDIR=../../bin
+PROG=yakker$(EXE)
+BINDIR=$(CYCDIR)/bin
 CYC_LIB_PATH = $(BINDIR)/lib
 CYCLONE=$(BINDIR)/cyclone -I../../include -B$(BINDIR)/lib/cyc-lib
 CYCBISON=$(BINDIR)/cycbison
@@ -10,14 +12,14 @@ STRINGIFY=$(BINDIR)/stringify
 
 FILES=analyze axarray bnf ykbuf corerules cs extract fa termgrammar lex pads parse_tab parsergen pr prose util yakker
 
-all: yakker
+all: $(PROG)
 
-cyclone-install: $(BINDIR)/yakker
+cyclone-install: $(BINDIR)/$(PROG)
 
-$(BINDIR)/yakker: yakker
+$(BINDIR)/$(PROG): $(PROG)
 	cp $< $@
 
-yakker: analyze.o axarray.o bnf.o cs.o extract.o fa.o termgrammar.o lex.o pads.o \
+$(PROG): analyze.o axarray.o bnf.o cs.o extract.o fa.o termgrammar.o lex.o pads.o \
   parse_tab.o parsergen.o pr.o prose.o prose_elim_grm.o string_dfa_engine1.o \
   string_dfa_engine2_1.o corerules.o corerules_grm.o \
   util.o namespaces.o yakker.o
@@ -128,7 +130,7 @@ vcard.bnf: rfc2426.bnf rfc2425.bnf rfc1738.bnf rfc1766.bnf rfc3501.bnf yakker
 	./yakker rfc2426.bnf -externals rfc2425.bnf rfc1738.bnf rfc1766.bnf rfc3501.bnf -tsort -unnamespace > $@
 
 clean:
-	$(RM) *.d *.o parse_tab.cyc parse_tab.h lex.cyc yakker
+	$(RM) *.d *.o parse_tab.cyc parse_tab.h lex.cyc $(PROG)
 	$(RM) in out errs parse.output
 	$(RM) http.bnf http.p message-header.bnf message-header.p
 	$(RM) imap.bnf imap.cyc rfc3501.bnf rfc2234.bnf rfc3501.txt rfc2234.txt
