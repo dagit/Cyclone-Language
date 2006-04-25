@@ -550,13 +550,13 @@ void*Cyc_Kinds_copy_kindbound(void*);
 # 83
 struct Cyc_Absyn_Kind*Cyc_Kinds_tvar_kind(struct Cyc_Absyn_Tvar*,struct Cyc_Absyn_Kind*);
 struct Cyc_Core_Opt Cyc_Kinds_tvar_kind_opt(struct Cyc_Absyn_Tvar*);
-# 40 "warn.h"
+# 48 "warn.h"
 void*Cyc_Warn_impos(struct _fat_ptr,struct _fat_ptr);struct Cyc_Warn_String_Warn_Warg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Warn_Typ_Warn_Warg_struct{int tag;void*f1;};struct Cyc_Warn_Exp_Warn_Warg_struct{int tag;struct Cyc_Absyn_Exp*f1;};struct Cyc_Warn_Int_Warn_Warg_struct{int tag;int f1;};
-# 67
+# 75
 void Cyc_Warn_err2(unsigned,struct _fat_ptr);
-# 69
+# 77
 void Cyc_Warn_warn2(unsigned,struct _fat_ptr);
-# 71
+# 79
 void*Cyc_Warn_impos2(struct _fat_ptr);
 # 59 "flags.h"
 extern int Cyc_Flags_warn_alias_coerce;struct _tuple12{unsigned f0;int f1;};

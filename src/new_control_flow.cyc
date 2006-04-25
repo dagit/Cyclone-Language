@@ -2915,7 +2915,7 @@ static void check_fun(JumpAnalysis::jump_anal_res_t tables, fndecl_t fd) {
     // this can happen due to cascading errors -- but be sure we found
     // an error first.
   case &Dict::Absent: 
-    if (Position::num_errors > 0)
+    if (Warn::num_errors > 0)
       break;
     else Core::rethrow(new Dict::Absent);
   }

@@ -428,9 +428,9 @@ struct _fat_ptr Cyc_Absynpp_typ2string(void*);
 struct _fat_ptr Cyc_Absynpp_exp2string(struct Cyc_Absyn_Exp*);
 # 71
 struct _fat_ptr Cyc_Absynpp_qvar2string(struct _tuple0*);
-# 33 "warn.h"
+# 41 "warn.h"
 void Cyc_Warn_verr(unsigned,struct _fat_ptr,struct _fat_ptr);
-# 40
+# 48
 void*Cyc_Warn_impos(struct _fat_ptr,struct _fat_ptr);
 # 41 "cf_flowinfo.h"
 extern int Cyc_CfFlowInfo_anal_error;struct Cyc_CfFlowInfo_VarRoot_CfFlowInfo_Root_struct{int tag;struct Cyc_Absyn_Vardecl*f1;};struct Cyc_CfFlowInfo_MallocPt_CfFlowInfo_Root_struct{int tag;struct Cyc_Absyn_Exp*f1;void*f2;};struct Cyc_CfFlowInfo_InitParam_CfFlowInfo_Root_struct{int tag;int f1;void*f2;};struct Cyc_CfFlowInfo_Dot_CfFlowInfo_PathCon_struct{int tag;int f1;};struct Cyc_CfFlowInfo_Place{void*root;struct Cyc_List_List*path;};

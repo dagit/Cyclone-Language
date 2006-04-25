@@ -9,7 +9,7 @@
 #include "cyclone.h" //for do_parse
 #include "warn.h"
 #include "callgraph.h"
-#include "tcutil.h" 
+#include "tcutil.h"
 #include "parse.h"
 #include "flags.h"
 
@@ -23,7 +23,7 @@ namespace Tcutil {
 }
 namespace Interproc;
 
-datatype exn { 
+datatype exn {
   Unresolved_sym(exp_t);
   Rebinding;
 };
@@ -42,7 +42,7 @@ void set_inference_prefix(string_t<`H> pfx) {
 static string_t get_inference_prefix() {
   if(cych_pfx == NULL)
     cych_pfx = new ".";
-  return *cych_pfx; 
+  return *cych_pfx;
 }
 
 
@@ -58,7 +58,7 @@ static FILE *tagsFile=NULL;
 
 static FILE *try_file_open(string_t filename, string_t mode, string_t msg_part) {
   try return fopen((const char@)filename, (const char@)mode);
-  catch { 
+  catch {
   default:
     Warn::err(0, "Couldn't open %s %s", msg_part, filename);
     return NULL;
@@ -78,7 +78,7 @@ static void dump_decl_tags(list_t<var_t,`H> ns, string_t sourcefile, list_t<decl
     switch(tds->hd->r) {
     case &Fn_d(fd):
       fprintf((FILE@)tagsFile, "^%s%s^%s^function^0\n", namespace2string(ns),
-	      Absynpp::fullqvar2string(fd->name), 
+	      Absynpp::fullqvar2string(fd->name),
 	      sourcefile);
       break;
     case &Namespace_d(n, l):
@@ -128,7 +128,7 @@ static void skip_whitespace(FILE @f) {
     c = getc(f);
   }
   ungetc(c,f);
-}  
+}
 static char ?grabline(FILE @f) {
   static char buf[1000]@nozeroterm;
   int c= 0;
@@ -166,8 +166,8 @@ static bool init_tagmap_from_decls(mstringptr_t<`H,`H> source, list_t<decl_t> ds
   for(;ds;ds=ds->tl) {
     switch(ds->hd->r) {
     case &Fn_d(fd):
-      Hashtable::insert((table_t)tagmap, 
-			new aprintf("%s", Absynpp::fullqvar2string(fd->name)), 
+      Hashtable::insert((table_t)tagmap,
+			new aprintf("%s", Absynpp::fullqvar2string(fd->name)),
 			source);
       break;
     case &Using_d(_,l): fallthru(l);
@@ -193,15 +193,15 @@ static bool init_tagmap(filedecls_t ftds) {
     return init_tagmap_from_decls(new aprintf("%s", ftds->hd->f0), ftds->hd->f1);
   }
   tagmap = Hashtable::create(11, mstrptrcmp, hash_mstringptr);
-  char ?line; 
+  char ?line;
   while(line=grabline(tags)) {
-    if(line[0] != '^') 
+    if(line[0] != '^')
       continue;
     let symname = new aprintf("%s",strtok(line, "^@"));
     let filename = new aprintf("%s",strtok(NULL, "^@"));
     let symtype = strtok(NULL, "^@");
     if(!strcmp(symtype, "function")) {
-      //      fprintf(stderr, "Inserting <%s>:%d --> <%s>:%d\n", *symname, hash_mstringptr(symname), 
+      //      fprintf(stderr, "Inserting <%s>:%d --> <%s>:%d\n", *symname, hash_mstringptr(symname),
       //	      *filename, hash_mstringptr(filename));
       Hashtable::insert((table_t)tagmap, symname, filename);
     }
@@ -231,7 +231,7 @@ static bool cmp_filenames(stringptr_t fname, $(string_t, `a)@ ftd) {
 //append the decls to the ftds list
 //returns false if the file could not be parsed/opened
 static $(bool, filedecls_t) add_filedecls(string_t<`H> filename, filedecls_t ftds) {
-  if(List::exists_c(cmp_filenames, &filename, ftds)) 
+  if(List::exists_c(cmp_filenames, &filename, ftds))
     return $(true, NULL);
   let decls = Cyclone::parse_file(filename);
   if(!decls) {
@@ -250,7 +250,7 @@ static $(bool, filedecls_t) add_filedecls(string_t<`H> filename, filedecls_t ftd
 //ftds: assoc list of <filename, decls>; points to the head of a worklist
 //RETURNS:
 //bool: flag signalling success
-//filedecls_t: head of the newly added decls; reachable from ftds 
+//filedecls_t: head of the newly added decls; reachable from ftds
 //	    (if we are in no_merge mode, this is always null)
 //list_t<exp_t>: externs for which a definition was found; these will be rebound
 static $(bool,filedecls_t,list_t<exp_t>) locate_externs(list_t<exp_t> es, filedecls_t ftds) {
@@ -265,7 +265,7 @@ static $(bool,filedecls_t,list_t<exp_t>) locate_externs(list_t<exp_t> es, filede
 	if(Flags::no_merge)
 	  throw new Unresolved_sym(es->hd);
 	try {
-	  filename = locate_qvar(q,ftds); 
+	  filename = locate_qvar(q,ftds);
 	  located = new List{es->hd, located};
 	}catch {
 	case &Not_found: throw new Unresolved_sym(es->hd);
@@ -274,11 +274,11 @@ static $(bool,filedecls_t,list_t<exp_t>) locate_externs(list_t<exp_t> es, filede
       case &Global_b(vd):
 	try {
 	  filename = locate_qvar(vd->name,ftds);
-	  if(Flags::no_merge) { 
+	  if(Flags::no_merge) {
 	    if(!strcmp(filename, ftds->hd->f0)) {
 	      //if this is fwd decls within the same file then do the normal rebinding
 	      located = new List{es->hd, located};
-	      continue; 
+	      continue;
 	    }
 	    else {
 	      //otherwise, if the defn of this decl is available in TAGS but is in a different file
@@ -286,7 +286,7 @@ static $(bool,filedecls_t,list_t<exp_t>) locate_externs(list_t<exp_t> es, filede
 	      //incremental inference
 	      Tcutil::introduce_cvars(vd->type);
 	      filename=NULL;
-	      continue; //don't attempt to parse the file 
+	      continue; //don't attempt to parse the file
 	    }
 	  }
 	  else {
@@ -294,7 +294,7 @@ static $(bool,filedecls_t,list_t<exp_t>) locate_externs(list_t<exp_t> es, filede
 	    //falls thru at the end of the switch to parse filename
 	  }
 	}
-	catch { 
+	catch {
 	case &Not_found:  //this is really an extern ... rebinding is impossible
 	  continue;
 	}
@@ -313,7 +313,7 @@ static $(bool,filedecls_t,list_t<exp_t>) locate_externs(list_t<exp_t> es, filede
     let $(b, newl) = add_filedecls(filename, ftds);
     if(!b) //could not parse -- fatal
       return $(false, NULL, NULL);
-    if(!newdecls) 
+    if(!newdecls)
       newdecls = newl;
   }
   return $(true, newdecls, located);
@@ -323,7 +323,7 @@ static $(bool,filedecls_t,list_t<exp_t>) locate_externs(list_t<exp_t> es, filede
 // Handling of plain --inf mode (not incremental)
 //
 // This basically ensures that Cvars that appear in function prototypes
-// match those that appear in the definitions. Expressions remain bound to the 
+// match those that appear in the definitions. Expressions remain bound to the
 // prototypes.
 ///////////////////////////////////////////////////////////////////////////////
 //insert all function declarations in decls into the hashtable
@@ -357,7 +357,7 @@ static void remove_cvars(type_t t) {
     }
     return;
   case &AppType(_,ts): fallthru(ts);
-  case &TypedefType(_,ts,...): 
+  case &TypedefType(_,ts,...):
     for(;ts;ts=ts->tl) remove_cvars(ts->hd);
     return;
   case &AnonAggrType(_,true, fields): //only tuples for now
@@ -387,7 +387,7 @@ static void ensure_cvar_identity(seg_t loc, type_t dest, type_t src) {
       ensure_cvar_identity(loc, argD->hd->f2, argS->hd->f2);
     }
     return;
-  case $(&TypedefType(nameD,tD,...),&TypedefType(nameS,tS,...)): 
+  case $(&TypedefType(nameD,tD,...),&TypedefType(nameS,tS,...)):
     if(List::length(tD) != List::length(tS)) {
 /*       if(!qvar_cmp(nameD, nameS)) */
 /* 	throw &Rebinding_val; */
@@ -399,16 +399,16 @@ static void ensure_cvar_identity(seg_t loc, type_t dest, type_t src) {
       return;
     }
     fallthru(tD, tS);
-  case $(&AppType(_,tD),&AppType(_,tS)): 
+  case $(&AppType(_,tD),&AppType(_,tS)):
     if(List::length(tD) != List::length(tS))
       throw &Rebinding_val;
-    for(;tD&&tS;tD=tD->tl,tS=tS->tl) 
+    for(;tD&&tS;tD=tD->tl,tS=tS->tl)
       ensure_cvar_identity(loc, tD->hd, tS->hd);
     return;
   case $(&AnonAggrType(_,true, fieldD),&AnonAggrType(_,true, fieldS)):
     if(List::length(fieldD) != List::length(fieldS))
       throw &Rebinding_val;
-    for(;fieldD&&fieldS;fieldD=fieldD->tl,fieldS=fieldS->tl) 
+    for(;fieldD&&fieldS;fieldD=fieldD->tl,fieldS=fieldS->tl)
       ensure_cvar_identity(loc, fieldD->hd->type,fieldS->hd->type);
     return;
   default:
@@ -418,7 +418,7 @@ static void ensure_cvar_identity(seg_t loc, type_t dest, type_t src) {
 //for each prototype in decls, make sure that the Cvar's in the
 //corresponding definition (if present) match the Cvars that appear in
 //the prototype
-static void imp_update_prototypes(list_t<decl_t> decls, 
+static void imp_update_prototypes(list_t<decl_t> decls,
 				  table_t<qvar_t, fndecl_t> fndecl_tab) {
   for(;decls;decls=decls->tl) {
     switch(decls->hd->r) {
@@ -427,7 +427,7 @@ static void imp_update_prototypes(list_t<decl_t> decls,
       try {
 	fd = Hashtable::lookup(fndecl_tab, vd->name);
       }
-      catch { 
+      catch {
       case &Not_found: continue; //not a prototype, or a this is an extern function
       }
       try {
@@ -502,7 +502,7 @@ static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxp
     case &Cvar(_,_,*id,_,*name,...):
       if(*id >= 0) //name already set ... skip
 	break;
-      vsprintf(_prefix+pfxpos, "_%d", make_parg(index)); 
+      vsprintf(_prefix+pfxpos, "_%d", make_parg(index));
       string_t nn = aprintf("%s", _prefix);
       //      char ?tmppfx = _prefix;
       let val = Hashtable::lookup_other_opt(cvmap, &nn, strptrcmp, hash_stringptr);
@@ -511,11 +511,11 @@ static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxp
       }
       else {
 	*name = (const char*)nn;
-	ret = new List{*bd, ret};      
+	ret = new List{*bd, ret};
 	if(!is_local)
 	  *id = -(*id); //toggle id sign to indicate that the name is set ... used only for testing/assertion
 	else
-	  *id = 0; 
+	  *id = 0;
 	Hashtable::insert(cvmap, new nn, *bd);
       }
       _prefix[pfxpos] = '\0';
@@ -532,7 +532,7 @@ static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxp
     for(;af;af=af->tl) {
       switch(af->hd) {
       case &Aggrfield{_,_,t,...}:
-	vsprintf(_prefix+pfxpos, "_%d_AA%d", make_parg(index, findex++));  //aprintf("%s_%d_AA%d", prefix, index, findex++), 
+	vsprintf(_prefix+pfxpos, "_%d_AA%d", make_parg(index, findex++));  //aprintf("%s_%d_AA%d", prefix, index, findex++),
 	ret = List::append(cvars_in_type(t, 0, is_local, strlen(_prefix)), ret);
 	break;
       }
@@ -568,9 +568,9 @@ static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxp
       _prefix[pfxpos]='\0';
     }
     break;
-  case &AppType(&DatatypeFieldCon(DatatypeFieldInfo{.KnownDatatypefield=$(dd,dfd)}), ts): 
+  case &AppType(&DatatypeFieldCon(DatatypeFieldInfo{.KnownDatatypefield=$(dd,dfd)}), ts):
     Warn::impos("Unexpected DatatypeFieldCon in interproc cvar naming");
-  case &AppType(&DatatypeFieldCon(DatatypeFieldInfo{.UnknownDatatypefield = UnknownDatatypeFieldInfo(dn,dfn,_)}), ts): 
+  case &AppType(&DatatypeFieldCon(DatatypeFieldInfo{.UnknownDatatypefield = UnknownDatatypeFieldInfo(dn,dfn,_)}), ts):
     if(ts) {
       let sdn=Absynpp::fullqvar2string(dn);
       let sdfn=Absynpp::fullqvar2string(dfn);
@@ -592,7 +592,7 @@ static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxp
       _prefix[pfxpos]='\0';
     }
     fallthru (ad->name, ts);
-  case &AppType(&AggrCon(AggrInfo{.UnknownAggr=$(_,n,_)}), ts):     
+  case &AppType(&AggrCon(AggrInfo{.UnknownAggr=$(_,n,_)}), ts):
     let adn=Absynpp::fullqvar2string(n);
     int findex =0;
     if(ts) {
@@ -611,23 +611,23 @@ static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxp
       let &$(_,_,t) = args->hd;
       vsprintf(_prefix+pfxpos, "_%d_ARG%d", make_parg(index, argix++));
       //      aprintf("%s_%d_ARG%d", prefix, index, argix++)
-      ret = List::append(cvars_in_type(t, 0, is_local, strlen(_prefix)), ret);      
+      ret = List::append(cvars_in_type(t, 0, is_local, strlen(_prefix)), ret);
     }
-    _prefix[pfxpos]='\0';    
+    _prefix[pfxpos]='\0';
     break;
   case &TypedefType(tdn, ts, tdef, topt):
     let tn = Absynpp::fullqvar2string(tdn);
     if(tdef && tdef->defn) {
       vsprintf(_prefix+pfxpos,"TD%dI%s", make_parg(strlen(tn), tn));
-      ret = List::append(cvars_in_type((type_t)tdef->defn, 0,is_local,strlen(_prefix)), 
+      ret = List::append(cvars_in_type((type_t)tdef->defn, 0,is_local,strlen(_prefix)),
 			 ret);
-      _prefix[pfxpos]='\0';    
+      _prefix[pfxpos]='\0';
     }
     for(int ix=0;ts;ts=ts->tl,ix++){
       vsprintf(_prefix+pfxpos,"_%dTD%dI%s_TDARG%d", make_parg(index, strlen(tn), tn, ix));
       ret = List::append(cvars_in_type(ts->hd, 0, is_local, strlen(_prefix)), ret);
     }
-    _prefix[pfxpos]='\0';    
+    _prefix[pfxpos]='\0';
     break;
   case &TypeDeclType(td, to): //*to should be null
     switch(td->r) {
@@ -650,7 +650,7 @@ static list_t<type_t> cvars_in_type(type_t t, int index, bool is_local, int pfxp
 }
 
 //functions for visiting an exp and stmt
-static bool exp_noop(`a a, exp_t b) { 
+static bool exp_noop(`a a, exp_t b) {
   switch(b->r) {
   case &Cast_e(t, ...):
     Tcutil::revert_cvars(t);//assume annotations in a cast are intentional
@@ -668,11 +668,11 @@ static bool cvars_in_local_decl($(string_t<`H>, int, void (@)(list_t<type_t,`H>,
   switch(s->r) {
   case &Decl_s(d, s1):
     switch(d->r) {
-    case &Var_d(vd): 
+    case &Var_d(vd):
       let ln = Absynpp::fullqvar2string(vd->name);
-      vsprintf(_prefix, "%dI%s_%dI%s_%d", 
+      vsprintf(_prefix, "%dI%s_%dI%s_%d",
 	       make_parg(strlen(pfx), pfx, strlen(ln), ln,(*count)++));
-      let cvars = cvars_in_type(vd->type, 0, true, strlen(_prefix)); 
+      let cvars = cvars_in_type(vd->type, 0, true, strlen(_prefix));
       //drop the list of cvars ... these are fresh and do not require any binding
       //but, we will need to resolve these on the second pass
       //so the closure should contain more than just the prefix
@@ -683,7 +683,7 @@ static bool cvars_in_local_decl($(string_t<`H>, int, void (@)(list_t<type_t,`H>,
       case &AliasVar_p(_, vd):
 	let an = Absynpp::fullqvar2string(vd->name);
 	vsprintf(_prefix, "%dI%s_%dI%s_%d", make_parg(strlen(pfx), pfx, strlen(an), an, (*count)++));
-	let cvars = cvars_in_type(vd->type, 0, true, strlen(_prefix)); 
+	let cvars = cvars_in_type(vd->type, 0, true, strlen(_prefix));
 	//drop the list of cvars ... these are fresh and do not require any binding
 	//but, we will need to resolve these on the second pass
 	//so the closure should contain more than just the prefix
@@ -721,16 +721,16 @@ static void remove_local_constraints(list_t<type_t> cvars, int ignore) {
 static list_t<type_t> assign_cvar_names(list_t<decl_t> ds){
   list_t ret = NULL;
   for(;ds;ds=ds->tl) {
-    switch(ds->hd->r) { 
+    switch(ds->hd->r) {
     case &Namespace_d(_,l): fallthru(l);
     case &Using_d(_,l): ret = List::append(ret, assign_cvar_names(l)); break;
-    case &Var_d(vd): 
+    case &Var_d(vd):
       let tn =Absynpp::fullqvar2string(vd->name);
       vsprintf(_prefix, "%dI%s", make_parg(strlen(tn), tn));
       ret = List::append(cvars_in_type(vd->type, 0, false, strlen(_prefix)),
 			 ret);
       break;
-    case &Fn_d(fd):    
+    case &Fn_d(fd):
       let fdname = Absynpp::fullqvar2string(fd->name);
       vsprintf(_prefix, "%dI%s", make_parg(strlen(fdname), fdname));
       if(Tcutil::is_main(fd->name)) { //main's 2nd arg must be ??
@@ -747,7 +747,7 @@ static list_t<type_t> assign_cvar_names(list_t<decl_t> ds){
       let env = new $(fdname, 0, remove_local_constraints, 0);
       Absyn::visit_stmt(exp_noop, cvars_in_local_decl, env, fd->body);
       break;
-    case &Aggr_d(ad):    // [struct|union] Foo { ... 
+    case &Aggr_d(ad):    // [struct|union] Foo { ...
       ret = List::append(cvars_in_type(app_type(new AggrCon(KnownAggr(new ad))),0,false,0),
 			 ret);
       break;
@@ -756,7 +756,7 @@ static list_t<type_t> assign_cvar_names(list_t<decl_t> ds){
 			 ret);
       break;
     case &Typedef_d(td):  // typedef t n
-      ret = List::append(cvars_in_type(typedef_type(td->name, NULL, td, NULL), 0, false,0), 
+      ret = List::append(cvars_in_type(typedef_type(td->name, NULL, td, NULL), 0, false,0),
 			 ret);
       break;
     default:
@@ -771,9 +771,9 @@ static list_t<$(type_t, list_t<BansheeIf::constraint_t>)@> parse_constraint_grap
   let file = try_file_open(cfilename, "r", "constraint file");
   if(!file) {
     Warn::warn(0, "Unable to initialize constraint graph");
-    return 0; 
+    return 0;
   }
-  Position::reset_position(cfilename); // necessary for good error messages!
+  Warn::reset(cfilename); // necessary for good error messages!
   let ret = Parse::parse_constraint_file(file);
   fclose(file);
   return ret;
@@ -793,8 +793,8 @@ static void print_cvarlist(list_t<type_t> l) {
 //initializes BansheeIf's constraint map
 //compresses out any top level Cvars that have been previously constrained
 static void bind_cvars(list_t<decl_t> ds) {
-  if(!Flags::no_merge || read_constraint_graph()) {//no prior constraint graph was found 
-    BansheeIf::init_toplevel_cvars(NULL); //degenerate initialization 
+  if(!Flags::no_merge || read_constraint_graph()) {//no prior constraint graph was found
+    BansheeIf::init_toplevel_cvars(NULL); //degenerate initialization
   }
   list_t<type_t> cvars = assign_cvar_names(ds);
   for(;cvars;cvars=cvars->tl) { //these are all top level cvars
@@ -806,7 +806,7 @@ static void bind_cvars(list_t<decl_t> ds) {
       //this will either set topt, or it will set *bv. If this refers
       //to a previously persisted Cvar then all related constraints
       //will be added to banshee.
-      BansheeIf::register_toplevel_cvar(cvars->hd); 
+      BansheeIf::register_toplevel_cvar(cvars->hd);
       break;
     default:
       Warn::impos("Unexpected type in cvar list");
@@ -823,11 +823,11 @@ void emit_decls(string_t<`H> filename, list_t<decl_t> ds) {
   let file = try_file_open(cvar_filename, "w", "constraint file");
   if(!file) {
     Warn::warn(0, "Unable to open constrant file");
-    return; 
+    return;
   }
   BansheeIf::persist_cvarmap(file);
   fclose(file);
-  //then pretty print the *Cyclone* decls 
+  //then pretty print the *Cyclone* decls
   let outname = aprintf("%s/.cych/%s", get_inference_prefix(), Filename::basename(filename));
   let outfile = try_file_open(outname, "w", "output file");
   if(!outfile)
@@ -847,7 +847,7 @@ list_t<decl_t> binding_cvar_resolution(list_t<decl_t, `H> tds) {
   }
   Binding::resolve_all(tds);
   BansheeIf::resolve_or_default(thinconst());
-  return tds; 
+  return tds;
 }
 
 int cmp_stats($(const char*, const char*)@ a, $(const char*, const char*)@ b) {
@@ -890,7 +890,7 @@ list_t<decl_t> resolve_all(string_t<`H> filename, list_t<decl_t, `H> tds) {
   //parser inserts Cvars on all pointer types, but ignores identities
 /*   all_decls = update_prototype_cvars(all_located_fnsyms, all_decls); */
 /*   if(Flags::no_merge) */
-  bind_cvars(all_decls); 
+  bind_cvars(all_decls);
   return all_decls;
 }
 

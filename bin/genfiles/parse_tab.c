@@ -589,15 +589,15 @@ struct Cyc_Absyn_Decl*Cyc_Absyn_datatype_decl(enum Cyc_Absyn_Scope,struct _tuple
 struct Cyc_Absyn_TypeDecl*Cyc_Absyn_datatype_tdecl(enum Cyc_Absyn_Scope,struct _tuple0*,struct Cyc_List_List*,struct Cyc_Core_Opt*,int,unsigned);
 # 1196
 void*Cyc_Absyn_function_type(struct Cyc_List_List*,void*,struct Cyc_Absyn_Tqual,void*,struct Cyc_List_List*,int,struct Cyc_Absyn_VarargInfo*,struct Cyc_List_List*,struct Cyc_List_List*,struct Cyc_List_List*,struct Cyc_Absyn_Exp*,struct Cyc_Absyn_Exp*,struct Cyc_Absyn_Exp*,struct Cyc_Absyn_Exp*);
-# 29 "warn.h"
+# 37 "warn.h"
 void Cyc_Warn_warn(unsigned,struct _fat_ptr,struct _fat_ptr);
-# 35
+# 43
 void Cyc_Warn_err(unsigned,struct _fat_ptr,struct _fat_ptr);
-# 40
+# 48
 void*Cyc_Warn_impos(struct _fat_ptr,struct _fat_ptr);struct Cyc_Warn_String_Warn_Warg_struct{int tag;struct _fat_ptr f1;};
-# 67
+# 75
 void Cyc_Warn_err2(unsigned,struct _fat_ptr);
-# 69
+# 77
 void Cyc_Warn_warn2(unsigned,struct _fat_ptr);
 # 30 "flags.h"
 extern int Cyc_Flags_porting_c_code;

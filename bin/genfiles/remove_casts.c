@@ -356,7 +356,7 @@ struct Cyc_Absyn_Stmt*Cyc_Absyn_return_stmt(struct Cyc_Absyn_Exp*,unsigned);
 # 1243
 void Cyc_Absyn_visit_stmt(int(*)(void*,struct Cyc_Absyn_Exp*),int(*)(void*,struct Cyc_Absyn_Stmt*),void*,struct Cyc_Absyn_Stmt*);
 void Cyc_Absyn_visit_exp(int(*)(void*,struct Cyc_Absyn_Exp*),int(*)(void*,struct Cyc_Absyn_Stmt*),void*,struct Cyc_Absyn_Exp*);
-# 46 "warn.h"
+# 54 "warn.h"
 void*Cyc_Warn_impos_loc(unsigned,struct _fat_ptr,struct _fat_ptr);
 # 29 "remove_casts.cyc"
 static int Cyc_RemoveCasts_remove_visit_f1(int,struct Cyc_Absyn_Exp*);

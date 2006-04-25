@@ -454,11 +454,11 @@ extern void*Cyc_AssnDef_existassnfn2assn(struct Cyc_AssnDef_ExistAssnFn*,struct 
 extern int Cyc_AssnDef_simple_prove(void*,void*);
 # 8 "pratt_prover.h"
 int Cyc_PrattProver_constraint_prove(void*,void*);
-# 40 "warn.h"
+# 48 "warn.h"
 void*Cyc_Warn_impos(struct _fat_ptr,struct _fat_ptr);struct Cyc_Warn_String_Warn_Warg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Warn_Typ_Warn_Warg_struct{int tag;void*f1;};
-# 69
+# 77
 void Cyc_Warn_warn2(unsigned,struct _fat_ptr);
-# 71
+# 79
 void*Cyc_Warn_impos2(struct _fat_ptr);struct _tuple11{enum Cyc_Absyn_Coercion f0;enum Cyc_Absyn_Coercion f1;};
 # 40 "subtype.cyc"
 static enum Cyc_Absyn_Coercion Cyc_Subtype_join_coercion(enum Cyc_Absyn_Coercion c1,enum Cyc_Absyn_Coercion c2){

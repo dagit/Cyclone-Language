@@ -434,9 +434,9 @@ extern struct Cyc_Absyn_Fastcall_att_Absyn_Attribute_struct Cyc_Atts_Fastcall_at
 extern struct Cyc_Absyn_Unused_att_Absyn_Attribute_struct Cyc_Atts_Unused_att_val;struct _tuple15{unsigned f0;int f1;};
 # 28 "evexp.h"
 extern struct _tuple15 Cyc_Evexp_eval_const_uint_exp(struct Cyc_Absyn_Exp*);
-# 40 "warn.h"
+# 48 "warn.h"
 void*Cyc_Warn_impos(struct _fat_ptr,struct _fat_ptr);struct Cyc_Warn_String_Warn_Warg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Warn_Typ_Warn_Warg_struct{int tag;void*f1;};
-# 71
+# 79
 void*Cyc_Warn_impos2(struct _fat_ptr);
 # 89 "kinds.h"
 void*Cyc_Kinds_compress_kb(void*);

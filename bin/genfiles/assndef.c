@@ -421,7 +421,7 @@ void*Cyc_Tcutil_pointer_elt_type(void*);
 int Cyc_Tcutil_typecmp(void*,void*);
 # 132
 void*Cyc_Tcutil_substitute(struct Cyc_List_List*,void*);
-# 40 "warn.h"
+# 48 "warn.h"
 void*Cyc_Warn_impos(struct _fat_ptr,struct _fat_ptr);struct Cyc_Dict_T;struct Cyc_Dict_Dict{int(*rel)(void*,void*);struct _RegionHandle*r;const struct Cyc_Dict_T*t;};
 # 62 "dict.h"
 extern struct Cyc_Dict_Dict Cyc_Dict_empty(int(*)(void*,void*));

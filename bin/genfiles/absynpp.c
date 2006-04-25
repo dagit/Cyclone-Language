@@ -439,9 +439,9 @@ extern struct Cyc_Absyn_Kind Cyc_Kinds_ek;
 struct _fat_ptr Cyc_Kinds_kind2string(struct Cyc_Absyn_Kind*);
 # 89
 void*Cyc_Kinds_compress_kb(void*);
-# 40 "warn.h"
+# 48 "warn.h"
 void*Cyc_Warn_impos(struct _fat_ptr,struct _fat_ptr);struct Cyc_Warn_String_Warn_Warg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Warn_Typ_Warn_Warg_struct{int tag;void*f1;};
-# 71
+# 79
 void*Cyc_Warn_impos2(struct _fat_ptr);
 # 40 "flags.h"
 extern int Cyc_Flags_interproc;

@@ -98,39 +98,20 @@ error_t mk_err(seg_t l, string_t<`H> desc) {
   let $(source, loc) = seg_to_loc(l);
   return new Error(source, l, desc);
 }
-
-static bool error_b = false;
-bool error_p() { return error_b; }
-
-bool first_error = true;
-
-int num_errors = 0;
-int max_errors = 10;
-
-void post_error(error_t e) {
-  error_b = true;
-  fflush(stdout);
-  if (first_error) {
-    fprintf(stderr, "\n");
-    first_error = false; // FIX: not reset to true for each file!
-  }
-  // why are we not using the source stored in e????
-  if(num_errors <=max_errors)
-    fprintf(stderr, "%s: %s\n", string_of_segment(e->seg), e->desc);
-  if(num_errors == max_errors)
-    fprintf(stderr, "Too many error messages!\n");
-  fflush(stderr);
-  num_errors++;
+seg_t get_seg(error_t e) {
+  return e->seg;
+}
+string_t get_desc(error_t e) {
+  return e->desc;
 }
 
 //////////// Overall Control ///////////
 void reset_position(string_t<`H> s)    { 
   sourcemask = new List{ new $(s, curmask++), sourcemask};
-  error_b = false; 
 }
 void set_position_file(string_t<`H> s) { 
   reset_position(s);
-  //  source = s; error_b = false; 
+  //  source = s;
 }
 string_t get_position_file() { 
   if(sourcemask) 

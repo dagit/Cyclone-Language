@@ -1120,7 +1120,7 @@ void print(i_t i, FILE @ f) {
 
 /* ------ parsing a text file ------ */
 
-// WARNING: Position::reset_position must be called before using parse
+// WARNING: Warn::reset must be called before using parse
 i_t parse(FILE @`H f) {
   Lex::lex_init();
   let tds = Parse::parse_file(f);

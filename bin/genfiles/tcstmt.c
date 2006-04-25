@@ -439,13 +439,13 @@ struct Cyc_Absyn_Vardecl*Cyc_Absyn_new_vardecl(unsigned,struct _tuple2*,void*,st
 int Cyc_Absyn_no_side_effects_exp(struct Cyc_Absyn_Exp*);
 # 1243
 void Cyc_Absyn_visit_stmt(int(*)(void*,struct Cyc_Absyn_Exp*),int(*)(void*,struct Cyc_Absyn_Stmt*),void*,struct Cyc_Absyn_Stmt*);
-# 40 "warn.h"
+# 48 "warn.h"
 void*Cyc_Warn_impos(struct _fat_ptr,struct _fat_ptr);struct Cyc_Warn_String_Warn_Warg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Warn_Typ_Warn_Warg_struct{int tag;void*f1;};struct Cyc_Warn_TypOpt_Warn_Warg_struct{int tag;void*f1;};struct Cyc_Warn_Vardecl_Warn_Warg_struct{int tag;struct Cyc_Absyn_Vardecl*f1;};
-# 67
+# 75
 void Cyc_Warn_err2(unsigned,struct _fat_ptr);
-# 69
+# 77
 void Cyc_Warn_warn2(unsigned,struct _fat_ptr);
-# 71
+# 79
 void*Cyc_Warn_impos2(struct _fat_ptr);
 # 27 "unify.h"
 void Cyc_Unify_explain_failure (void);

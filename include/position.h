@@ -41,13 +41,11 @@ namespace Position {
   struct Error;
   typedef struct Error @error_t;
   extern error_t mk_err(seg_t,string_t<`H>);
+  extern seg_t get_seg(error_t);
+  extern string_t get_desc(error_t);
 
   //////// Error Reporting ///////////
   extern bool use_gcc_style_location;
-  extern int num_errors;
-  extern int max_errors;
-  extern void post_error(error_t);
-  extern bool error_p();
 
   // Line number translation //
   // Returns a string which can be inserted into the output c file

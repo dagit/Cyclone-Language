@@ -374,9 +374,7 @@ extern struct Cyc_List_List*Cyc_List_imp_append(struct Cyc_List_List*,struct Cyc
 # 210
 extern struct Cyc_List_List*Cyc_List_merge_sort(int(*)(void*,void*),struct Cyc_List_List*);
 # 261
-extern int Cyc_List_exists_c(int(*)(void*,void*),void*,struct Cyc_List_List*);
-# 27 "position.h"
-extern void Cyc_Position_reset_position(struct _fat_ptr);struct Cyc___cycFILE;
+extern int Cyc_List_exists_c(int(*)(void*,void*),void*,struct Cyc_List_List*);struct Cyc___cycFILE;
 # 53 "cycboot.h"
 extern struct Cyc___cycFILE*Cyc_stderr;struct Cyc_String_pa_PrintArg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};
 # 73
@@ -452,17 +450,19 @@ struct _fat_ptr Cyc_Absynpp_typ2string(void*);
 struct _fat_ptr Cyc_Absynpp_fullqvar2string(struct _tuple0*);
 # 25 "cyclone.h"
 struct Cyc_List_List*Cyc_Cyclone_parse_file(struct _fat_ptr);
-# 29 "warn.h"
+# 27 "warn.h"
+extern void Cyc_Warn_reset(struct _fat_ptr);
+# 37
 void Cyc_Warn_warn(unsigned,struct _fat_ptr,struct _fat_ptr);
-# 35
+# 43
 void Cyc_Warn_err(unsigned,struct _fat_ptr,struct _fat_ptr);
-# 40
+# 48
 void*Cyc_Warn_impos(struct _fat_ptr,struct _fat_ptr);struct Cyc_Warn_String_Warn_Warg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Warn_Typ_Warn_Warg_struct{int tag;void*f1;};struct Cyc_Warn_Exp_Warn_Warg_struct{int tag;struct Cyc_Absyn_Exp*f1;};
-# 67
+# 75
 void Cyc_Warn_err2(unsigned,struct _fat_ptr);
-# 69
+# 77
 void Cyc_Warn_warn2(unsigned,struct _fat_ptr);
-# 71
+# 79
 void*Cyc_Warn_impos2(struct _fat_ptr);
 # 280 "tcutil.h"
 int Cyc_Tcutil_is_cvar_type(void*);
@@ -1108,7 +1108,7 @@ if(!((unsigned)file)){
 Cyc_Warn_warn(0U,_tag_fat("Unable to initialize constraint graph",sizeof(char),38U),_tag_fat(0U,sizeof(void*),0));
 return 0;}
 # 776
-Cyc_Position_reset_position(cfilename);{
+Cyc_Warn_reset(cfilename);{
 struct Cyc_List_List*ret=Cyc_Parse_parse_constraint_file(file);
 Cyc_fclose(file);
 return ret;}}

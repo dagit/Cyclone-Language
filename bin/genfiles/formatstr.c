@@ -372,7 +372,7 @@ extern void*Cyc_Absyn_true_type;extern void*Cyc_Absyn_false_type;
 void*Cyc_Absyn_at_type(void*,void*,void*,struct Cyc_Absyn_Tqual,void*,void*);
 # 1032
 void*Cyc_Absyn_fatptr_type(void*,void*,void*,struct Cyc_Absyn_Tqual,void*,void*);
-# 33 "warn.h"
+# 41 "warn.h"
 void Cyc_Warn_verr(unsigned,struct _fat_ptr,struct _fat_ptr);
 # 257 "tcutil.h"
 void*Cyc_Tcutil_any_bool(struct Cyc_List_List*);

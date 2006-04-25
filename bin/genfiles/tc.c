@@ -412,11 +412,11 @@ extern struct Cyc_Absynpp_Params Cyc_Absynpp_tc_params_r;
 struct _fat_ptr Cyc_Absynpp_typ2string(void*);
 # 71
 struct _fat_ptr Cyc_Absynpp_qvar2string(struct _tuple1*);
-# 35 "warn.h"
+# 43 "warn.h"
 void Cyc_Warn_err(unsigned,struct _fat_ptr,struct _fat_ptr);struct Cyc_Warn_String_Warn_Warg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Warn_Qvar_Warn_Warg_struct{int tag;struct _tuple1*f1;};struct Cyc_Warn_Typ_Warn_Warg_struct{int tag;void*f1;};struct Cyc_Warn_Tvar_Warn_Warg_struct{int tag;struct Cyc_Absyn_Tvar*f1;};struct Cyc_Warn_Kind_Warn_Warg_struct{int tag;struct Cyc_Absyn_Kind*f1;};struct Cyc_Warn_Vardecl_Warn_Warg_struct{int tag;struct Cyc_Absyn_Vardecl*f1;};
-# 67
+# 75
 void Cyc_Warn_err2(unsigned,struct _fat_ptr);
-# 69
+# 77
 void Cyc_Warn_warn2(unsigned,struct _fat_ptr);
 # 55 "flags.h"
 extern int Cyc_Flags_tc_aggressive_warn;

@@ -67,6 +67,7 @@
 #include <arg.h>
 #include <buffer.h>
 #include "absynpp.h"
+#include "warn.h"
 #include "parse.h"
 #include "tc.h"
 #include "cifc.h"
@@ -1109,7 +1110,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       if (x->i.cyc_varargs != NULL)
         scan_type(x->i.cyc_varargs->type,dep);
       if (x->is_inline)
-        fprintf(stderr,"Warning: ignoring inline function\n");
+        log("Warning: ignoring inline function %s\n",*v);
       break;
     case &Aggr_d(x):
       let &$(_,v) = x->name;
@@ -1450,17 +1451,20 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
           str_sepstr(new List(new (string_t)"",
                               List::map(sh_escape_stringptr,rev(cppargs))),
                      " ");
-        char @cmd = (char @)aprintf("%s %s %s -E -dM -o %s -x c %s",
+        // TJIM: dangerous...
+        char @cmd = (char @)aprintf("%s %s %s -E -dM -o %s -x c %s %s",
 				    cyclone_cc,target_cflags,
-                                    cppargs_string,macrosfile,cppinfile);
+                                    cppargs_string,macrosfile,cppinfile,
+                                    verbose?"":"-w");
         if (verbose)
           fprintf(stderr,"%s\n",cmd);
         if (!system(cmd)) {
           /* No error in creating the file of macros, so go ahead and create
              the file of declarations */
-          cmd = (char @)aprintf("%s %s %s -E -o %s -x c %s",
+          cmd = (char @)aprintf("%s %s %s -E -o %s -x c %s %s",
 				cyclone_cc,target_cflags,
-                                cppargs_string,declsfile,cppinfile);
+                                cppargs_string,declsfile,cppinfile,
+                                verbose?"":"-w");
           if (verbose)
             fprintf(stderr,"%s\n",cmd);
           system(cmd); // if err, no declsfile created, and we'll handle later
@@ -1518,13 +1522,26 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     if (!maybe) return 1;
     if (verbose) fprintf(stderr,"Parsing declarations...");
     in_file = (FILE@)maybe;
-    Position::reset_position(filtereddeclsfile);
+    Warn::reset(filtereddeclsfile);
     Lex::lex_init(false);// must forget typedefs, may as well flush symbols too
-    let decls = Parse::parse_file(in_file);
-    Lex::lex_init(false); // garbage collect those big tries
-    fclose(in_file);
-    if (verbose) fprintf(stderr,"done.\n");
-    //JGM:remove(filtereddeclsfile);
+    Warn::print_warnings = verbose; // people get worked up if they see errors during the build
+    let decls = NULL;
+    try {
+      decls = Parse::parse_file(in_file);
+      Warn::print_warnings = 1;
+      Lex::lex_init(false); // garbage collect those big tries
+      fclose(in_file);
+      if (verbose) fprintf(stderr,"done.\n");
+      //JGM:remove(filtereddeclsfile);
+    } catch {
+    case x:
+      Warn::print_warnings = 1;
+      Lex::lex_init(false); // garbage collect those big tries
+      fclose(in_file);
+      if (verbose) fprintf(stderr,"exception thrown.\n");
+      rethrow(x);
+      break;
+    }
 
     for (let d = decls; d != NULL; d = d->tl)
       scan_decl(d->hd,t);
@@ -1812,21 +1829,21 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
 
     } catch {
     case &Core::Impossible(s):
-      fprintf(stderr,"Got Core::Impossible(%s)\n",s); break;
+      log("Got Core::Impossible(%s)\n",s); break;
     case &Dict::Absent:
-      fprintf(stderr,"Got Dict::Absent\n"); break;
+      log("Got Dict::Absent\n"); break;
     case &Core::Failure(s):
-      fprintf(stderr,"Got Core::Failure(%s)\n",s); break;
+      log("Got Core::Failure(%s)\n",s); break;
     case &Invalid_argument(s):
-      fprintf(stderr,"Got Invalid_argument(%s)\n",s); break;
+      log("Got Invalid_argument(%s)\n",s); break;
     case &Not_found:
-      fprintf(stderr,"Got Not_found\n"); break;
+      log("Got Not_found\n"); break;
     case &NO_SUPPORT(s):
-      fprintf(stderr,"No support because %s\n",s); break;
+      log("No support because %s\n",s); break;
     case &Lexing::Error(s):
-      fprintf(stderr,"Got a lexing error %s\n",s); break;
+      log("Got a lexing error %s\n",s); break;
     case x:
-      fprintf(stderr,"Got unknown exception\n");
+      log("Got unknown exception\n");
       rethrow(x);
     }
       /* We could get here because of a throw NO_SUPPORT or because of
@@ -1842,8 +1859,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
               "#error -- %s is not supported on this platform\n",
               filename);
       fclose(out_file);
-      fprintf(stderr,"Warning: %s will not be supported on this platform\n",
-              filename);
+      //      fprintf(stderr,"Warning: %s will not be supported on this platform\n",
+      //              filename);
       log("Not supported on this platform\n");
 
       /* Delete intermediate files; some may not exist but we ignore that */

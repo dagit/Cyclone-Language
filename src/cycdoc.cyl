@@ -25,6 +25,7 @@
 #include <arg.h>
 #include "parse.h"
 #include "absynpp.h"
+#include "warn.h"
 namespace Lex {
   extern void lex_init(bool use_cyclone_keywords);
 }
@@ -295,7 +296,7 @@ rule token "$(int,comment_t)*" = parse
       return;
     }
     /* Parse the file into a list of declarations */
-    Position::reset_position(preprocfile);
+    Warn::reset(preprocfile);
     FILE @in_file = (FILE@)fopen(preprocfile,"r");
     Lex::lex_init(true); // must forget typedefs, may as well flush symbols too
     let decls = Parse::parse_file(in_file);

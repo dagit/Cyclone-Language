@@ -24,6 +24,14 @@
 #include "absyn.h"
 
 namespace Warn {
+  extern void reset(string_t<`H>);
+  extern int print_warnings;
+
+  extern int num_errors;
+  extern int max_errors;
+  //  extern void post_error(error_t);
+  extern bool error_p();
+
   void vwarn(Position::seg_t, string_t fmt, parg_t ?);
 
   void warn(Position::seg_t, string_t fmt, ... inject parg_t)
@@ -40,7 +48,7 @@ namespace Warn {
   `a impos(string_t fmt, ... inject parg_t)
     __attribute__((format(printf,1,2), noreturn));
 
-  `a vimpos_loc(Position::seg_t, string_t fmt, parg_t ?) 
+  `a vimpos_loc(Position::seg_t, string_t fmt, parg_t ?)
     __attribute__((noreturn));
 
   `a impos_loc(Position::seg_t, string_t fmt, ... inject parg_t)

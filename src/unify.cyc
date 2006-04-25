@@ -29,6 +29,7 @@
 #include "assndef.h"
 #include "pratt_prover.h"
 #include "bansheeif.h"
+#include "warn.h"
 using Core;
 using List;
 using Absyn;
@@ -51,7 +52,7 @@ static void fail_because(const char*`H reason) __attribute__((noreturn)) {
 // occurred -- this augments the high-level information with
 // low-level specific details.
 void explain_failure() {
-  if(Position::num_errors >= Position::max_errors) 
+  if(Warn::num_errors >= Warn::max_errors)
     return;
   fflush(stderr);
 
@@ -109,10 +110,10 @@ static bool check_logical_equivalence(list_t<AssnDef::term_t> terms,
                                       AssnDef::existassnfn_opt_t eaf2opt) {
   let a1 = (eaf1opt == NULL) ? (AssnDef::assn_t)&AssnDef::true_assn : AssnDef::existassnfn2assn(eaf1opt,terms);
   let a2 = (eaf2opt == NULL) ? (AssnDef::assn_t)&AssnDef::true_assn : AssnDef::existassnfn2assn(eaf2opt,terms);
-  return ((AssnDef::simple_prove(a1,a2) || 
+  return ((AssnDef::simple_prove(a1,a2) ||
            PrattProver::constraint_prove(a1,a2))
           &&
-          (AssnDef::simple_prove(a2,a1) || 
+          (AssnDef::simple_prove(a2,a1) ||
            PrattProver::constraint_prove(a2,a1)));
 }
 
@@ -126,8 +127,8 @@ bool unify_kindbound(kindbound_t kb1, kindbound_t kb2) {
       return true;
     }
     fallthru(k1,x,k2);
-  case $(&Eq_kb(k1), &Less_kb(*x,k2)): 
-    if (!Kinds::kind_leq(k1,k2)) 
+  case $(&Eq_kb(k1), &Less_kb(*x,k2)):
+    if (!Kinds::kind_leq(k1,k2))
       return false;
     *x = new Opt(kb1);
     return true;
@@ -148,7 +149,7 @@ void occurs(type_t evar,region_t<`r> r,list_t<tvar_t,`r> env,type_t t) {
       fail_because("type variable would escape scope");
     break;
   case &Evar(_,rg,_,*sopt):
-    if (t == evar) 
+    if (t == evar)
       fail_because("occurs check");
     if (rg != NULL)
       Warn::impos2("occurs check: constrained Evar in compressed type");
@@ -156,7 +157,7 @@ void occurs(type_t evar,region_t<`r> r,list_t<tvar_t,`r> env,type_t t) {
     bool problem = false;
     for (_ s = (*sopt)->v; s != NULL && !problem; s = s->tl)
       if (!List::mem(Tcutil::fast_tvar_cmp,env,s->hd))
-	problem = true; 
+	problem = true;
     // for sopt to be a subset of env
     if (problem) {
       let result = NULL;
@@ -175,14 +176,14 @@ void occurs(type_t evar,region_t<`r> r,list_t<tvar_t,`r> env,type_t t) {
     occurs(evar,r,env,pinfo.ptr_atts.autoreleased);
     break;
     // FIX: shouldn't we check for occurrence within the bound?
-  case &ArrayType(ArrayInfo{t2,_,_,zt,_}): 
-    occurs(evar,r,env,t2); 
+  case &ArrayType(ArrayInfo{t2,_,_,zt,_}):
+    occurs(evar,r,env,t2);
     occurs(evar,r,env,zt);
     break;
   // FIX: shouldn't we check for occurrence within requires and ensures clauses?
   case &FnType(FnInfo{tvs,eff,rt_tq,rt,args,_,cyc_varargs,rgn_po,...}):
     env = List::rappend(r,tvs,env);
-    if (eff != NULL) 
+    if (eff != NULL)
       occurs(evar,r,env,eff);
     occurs(evar,r,env,rt);
     for(; args != NULL; args = args->tl)
@@ -201,7 +202,7 @@ void occurs(type_t evar,region_t<`r> r,list_t<tvar_t,`r> env,type_t t) {
       occurs(evar,r,env,fs->hd->type);
     break;
   case &TypedefType(_,ts,_,_): fallthru(ts);
-  case &AppType(_,ts): 
+  case &AppType(_,ts):
     for (; ts != NULL; ts = ts->tl)
       occurs(evar,r,env,ts->hd);
     break;
@@ -211,7 +212,7 @@ void occurs(type_t evar,region_t<`r> r,list_t<tvar_t,`r> env,type_t t) {
   }
 }
 
-static void unify_it(type_t t1, type_t t2, 
+static void unify_it(type_t t1, type_t t2,
 		     bool (@f)(`env, Absyn::type_t, Absyn::type_t),
 		     `env);
 
@@ -223,13 +224,13 @@ bool unify(type_t t1, type_t t2) {
   try {
     unify_it(t1,t2,cvar_default,0);
     return true;
-  } catch { 
-  case &Unify: 
+  } catch {
+  case &Unify:
 #ifdef DEBUG
-    fprintf(stderr, "Unification of <%s,%s> failed because %s\n", 
+    fprintf(stderr, "Unification of <%s,%s> failed because %s\n",
 	    Absynpp::typ2string(t1), Absynpp::typ2string(t2), failure_reason);
 #endif
-    return false; 
+    return false;
   }
 }
 
@@ -239,13 +240,13 @@ bool unify_c(type_t t1, type_t t2,
   try {
     unify_it(t1,t2,f,e);
     return true;
-  } catch { 
-  case &Unify: 
+  } catch {
+  case &Unify:
 #ifdef DEBUG
-    fprintf(stderr, "Unification of <%s,%s> failed because %s\n", 
+    fprintf(stderr, "Unification of <%s,%s> failed because %s\n",
 	    Absynpp::typ2string(t1), Absynpp::typ2string(t2), failure_reason);
 #endif
-    return false; 
+    return false;
   }
 }
 
@@ -330,7 +331,7 @@ static bool unify_const_exp_opt(exp_opt_t e1, exp_opt_t e2) {
 }
 
 // the real work of unification
-static void unify_it(type_t t1, type_t t2, 
+static void unify_it(type_t t1, type_t t2,
 		     bool (@cvaruf)(`env, Absyn::type_t, Absyn::type_t),
 		     `env env) {
   ts_failure = $(t1,t2);
@@ -384,7 +385,7 @@ static void unify_it(type_t t1, type_t t2,
     if (Kinds::kind_leq(kind2,kind1->v)) {
       *ref1_ref = t2;
       return;
-    } 
+    }
     // this is a special hack to deal with the fact that a boxed evar
     // can't unify with a pointer type where we don't know whether or
     // not it's a ? pointer vs. a * or @ pointer.
@@ -399,11 +400,11 @@ static void unify_it(type_t t1, type_t t2,
 	if (!unify_c(c,bounds_one(),cvaruf,env)) fallthru;
 	*ref1_ref = t2;
 	return;
-      default: 
+      default:
         ts_failure = $(t1,t2);
         fail_because("kinds are incompatible");
       }
-    default: 
+    default:
       ts_failure = $(t1,t2);
       fail_because("kinds are incompatible");
     }
@@ -422,7 +423,7 @@ static void unify_it(type_t t1, type_t t2,
   case $(_, &AppType(&JoinCon,_)):
   case $(&AppType(&RgnsCon,_), _):
   case $(_, &AppType(&RgnsCon,_)):
-    if (!unify_effect(t1,t2)) 
+    if (!unify_effect(t1,t2))
       fail_because("effects don't unify");
     return;
 
@@ -471,14 +472,14 @@ static void unify_it(type_t t1, type_t t2,
     /*     } */
     break;
   case $(&AppType(c1,ts1),&AppType(c2,ts2)):
-    if (Tcutil::tycon_cmp(c1,c2) != 0) 
+    if (Tcutil::tycon_cmp(c1,c2) != 0)
       fail_because("different type constructors");
     unify_list(ts1,ts2,cvaruf,env);
     return;
 
   case $(&VarType(tv2),&VarType(tv1)):
     // identities should be resolved
-    if (tv2->identity != tv1->identity) 
+    if (tv2->identity != tv1->identity)
       fail_because("variable types are not the same");
     return;
 
@@ -504,10 +505,10 @@ static void unify_it(type_t t1, type_t t2,
     }
     // Don't force the nullable's to be the same when the bounds are dyn.
     switch (compress(b1)) {
-    case &AppType(&FatCon,_): 
+    case &AppType(&FatCon,_):
       failure_reason = orig_failure;
       return;
-    default: 
+    default:
       failure_reason = "incompatible pointer types";
       unify_it(null1a,null2a,cvaruf,env);
       return;
@@ -530,10 +531,10 @@ static void unify_it(type_t t1, type_t t2,
 
   case $(&FnType(FnInfo{tvs2,eff2,rt_tq2,rt2,args2,c_vararg2,cyc_vararg2,qb2,atts2,chk2,chk_relns2,req2,req_relns2,ens2,ens_relns2,thrws2,thrws_relns2,return_value2,argvds2,effc2}),
          &FnType(FnInfo{tvs1,eff1,rt_tq1,rt1,args1,c_vararg1,cyc_vararg1,qb1,atts1,chk1,chk_relns1,req1,req_relns1,ens1,ens_relns1,thrws1,thrws_relns1,return_value1,argvds1,effc1})):
-    { region rgn; 
+    { region rgn;
     list_t<$(tvar_t,type_t)@`rgn,`rgn> inst = NULL;
     while (tvs1 != NULL) {
-      if (tvs2 == NULL) 
+      if (tvs2 == NULL)
 	fail_because("second function type has too few type variables");
       let kb1 = tvs1->hd->kind;
       let kb2 = tvs2->hd->kind;
@@ -594,17 +595,17 @@ static void unify_it(type_t t1, type_t t2,
       bad_effect = false;
     else if(eff1==NULL || eff2==NULL)
       bad_effect = true;
-    else 
+    else
       bad_effect = !unify_effect(eff1,eff2);
     ts_failure = $(t1,t2);
     if(bad_effect)
-      fail_because(aprintf("function effects (%s,%s) do not match", eff1 ? Absynpp::typ2string(eff1) : (string_t)"-",  
+      fail_because(aprintf("function effects (%s,%s) do not match", eff1 ? Absynpp::typ2string(eff1) : (string_t)"-",
 			   eff2 ? Absynpp::typ2string(eff2) : (string_t)"-"));
     if (!Atts::equiv_fn_atts(atts2,atts1))
       fail_because("function types have different attributes");
     //replace this with effect constraint comparison
     if(Tcutil::cmp_effect_constraints(effc1, effc2))
-      fail_because("function types have different effect constraints"); 
+      fail_because("function types have different effect constraints");
     /*     if (!Tcutil::same_rgn_po(rpo2,rpo1)) */
     /*       fail_because("function types have different region lifetime orderings"); */
     let terms = NULL;
@@ -631,7 +632,7 @@ static void unify_it(type_t t1, type_t t2,
 
   case $(&AnonAggrType(k2,tup2,fs2), &AnonAggrType(k1,tup1,fs1)):
     if(k1 != k2)
-      fail_because("struct and union type"); 
+      fail_because("struct and union type");
     for (; fs1 != NULL && fs2 != NULL; fs1 = fs1->tl, fs2 = fs2->tl) {
       let f1 = fs1->hd;
       let f2 = fs2->hd;
@@ -647,7 +648,7 @@ static void unify_it(type_t t1, type_t t2,
       if(!unify_const_exp_opt(f1->requires_clause,f2->requires_clause))
         fail_because("different @requires clauses on member");
     }
-    if (fs1 != NULL || fs2 != NULL) 
+    if (fs1 != NULL || fs2 != NULL)
       fail_because("different number of members");
     return;
 
@@ -660,4 +661,3 @@ static void unify_it(type_t t1, type_t t2,
   default: throw &Unify_val; // caller in charge failure_reason
   }
 }
-

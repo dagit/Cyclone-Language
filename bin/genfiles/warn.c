@@ -353,14 +353,18 @@ extern struct Cyc_List_List*Cyc_List_list(struct _fat_ptr);
 extern struct Cyc_List_List*Cyc_List_imp_rev(struct Cyc_List_List*);
 # 184
 extern struct Cyc_List_List*Cyc_List_append(struct Cyc_List_List*,struct Cyc_List_List*);
-# 38 "position.h"
+# 27 "position.h"
+extern void Cyc_Position_reset_position(struct _fat_ptr);
+# 37
+extern struct _fat_ptr Cyc_Position_string_of_segment(unsigned);
 extern struct Cyc_List_List*Cyc_Position_strings_of_segments(struct Cyc_List_List*);struct Cyc_Position_Error;
 # 43
 extern struct Cyc_Position_Error*Cyc_Position_mk_err(unsigned,struct _fat_ptr);
-# 49
-extern void Cyc_Position_post_error(struct Cyc_Position_Error*);
-extern int Cyc_Position_error_p (void);struct Cyc___cycFILE;
-# 53 "cycboot.h"
+extern unsigned Cyc_Position_get_seg(struct Cyc_Position_Error*);
+extern struct _fat_ptr Cyc_Position_get_desc(struct Cyc_Position_Error*);struct Cyc___cycFILE;
+# 51 "cycboot.h"
+extern struct Cyc___cycFILE*Cyc_stdout;
+# 53
 extern struct Cyc___cycFILE*Cyc_stderr;struct Cyc_String_pa_PrintArg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};
 # 73
 extern struct _fat_ptr Cyc_aprintf(struct _fat_ptr,struct _fat_ptr);
@@ -368,7 +372,9 @@ extern struct _fat_ptr Cyc_aprintf(struct _fat_ptr,struct _fat_ptr);
 extern int Cyc_fflush(struct Cyc___cycFILE*);
 # 100
 extern int Cyc_fprintf(struct Cyc___cycFILE*,struct _fat_ptr,struct _fat_ptr);
-# 232 "cycboot.h"
+# 224 "cycboot.h"
+extern int Cyc_vfprintf(struct Cyc___cycFILE*,struct _fat_ptr,struct _fat_ptr);
+# 232
 extern struct _fat_ptr Cyc_vrprintf(struct _RegionHandle*,struct _fat_ptr,struct _fat_ptr);
 # 38 "string.h"
 extern unsigned long Cyc_strlen(struct _fat_ptr);
@@ -393,67 +399,111 @@ struct _fat_ptr Cyc_Absynpp_kindbound2string(void*);
 # 69
 struct _fat_ptr Cyc_Absynpp_exp2string(struct Cyc_Absyn_Exp*);
 struct _fat_ptr Cyc_Absynpp_stmt2string(struct Cyc_Absyn_Stmt*);
-struct _fat_ptr Cyc_Absynpp_qvar2string(struct _tuple0*);struct Cyc_Warn_String_Warn_Warg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Warn_Qvar_Warn_Warg_struct{int tag;struct _tuple0*f1;};struct Cyc_Warn_Typ_Warn_Warg_struct{int tag;void*f1;};struct Cyc_Warn_TypOpt_Warn_Warg_struct{int tag;void*f1;};struct Cyc_Warn_Exp_Warn_Warg_struct{int tag;struct Cyc_Absyn_Exp*f1;};struct Cyc_Warn_Stmt_Warn_Warg_struct{int tag;struct Cyc_Absyn_Stmt*f1;};struct Cyc_Warn_Aggrdecl_Warn_Warg_struct{int tag;struct Cyc_Absyn_Aggrdecl*f1;};struct Cyc_Warn_Tvar_Warn_Warg_struct{int tag;struct Cyc_Absyn_Tvar*f1;};struct Cyc_Warn_KindBound_Warn_Warg_struct{int tag;void*f1;};struct Cyc_Warn_Kind_Warn_Warg_struct{int tag;struct Cyc_Absyn_Kind*f1;};struct Cyc_Warn_Attribute_Warn_Warg_struct{int tag;void*f1;};struct Cyc_Warn_Vardecl_Warn_Warg_struct{int tag;struct Cyc_Absyn_Vardecl*f1;};struct Cyc_Warn_Int_Warn_Warg_struct{int tag;int f1;};
-# 30 "warn.cyc"
+struct _fat_ptr Cyc_Absynpp_qvar2string(struct _tuple0*);
+# 28 "warn.h"
+extern int Cyc_Warn_print_warnings;
+# 30
+extern int Cyc_Warn_num_errors;
+extern int Cyc_Warn_max_errors;struct Cyc_Warn_String_Warn_Warg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Warn_Qvar_Warn_Warg_struct{int tag;struct _tuple0*f1;};struct Cyc_Warn_Typ_Warn_Warg_struct{int tag;void*f1;};struct Cyc_Warn_TypOpt_Warn_Warg_struct{int tag;void*f1;};struct Cyc_Warn_Exp_Warn_Warg_struct{int tag;struct Cyc_Absyn_Exp*f1;};struct Cyc_Warn_Stmt_Warn_Warg_struct{int tag;struct Cyc_Absyn_Stmt*f1;};struct Cyc_Warn_Aggrdecl_Warn_Warg_struct{int tag;struct Cyc_Absyn_Aggrdecl*f1;};struct Cyc_Warn_Tvar_Warn_Warg_struct{int tag;struct Cyc_Absyn_Tvar*f1;};struct Cyc_Warn_KindBound_Warn_Warg_struct{int tag;void*f1;};struct Cyc_Warn_Kind_Warn_Warg_struct{int tag;struct Cyc_Absyn_Kind*f1;};struct Cyc_Warn_Attribute_Warn_Warg_struct{int tag;void*f1;};struct Cyc_Warn_Vardecl_Warn_Warg_struct{int tag;struct Cyc_Absyn_Vardecl*f1;};struct Cyc_Warn_Int_Warn_Warg_struct{int tag;int f1;};
+# 32 "warn.cyc"
+int Cyc_Warn_print_warnings=1;
+static int Cyc_Warn_pr(struct _fat_ptr fmt,struct _fat_ptr ap){
+# 36
+if(Cyc_Warn_print_warnings)
+return Cyc_vfprintf(Cyc_stderr,fmt,ap);else{
+# 39
+return 0;}}
+# 41
+static int Cyc_Warn_flush (void){
+return Cyc_fflush(Cyc_stderr);}
+# 45
 static struct Cyc_List_List*Cyc_Warn_warning_segs=0;
 static struct Cyc_List_List*Cyc_Warn_warning_msgs=0;
-# 51
+# 66
 void Cyc_Warn_vwarn(unsigned loc,struct _fat_ptr fmt,struct _fat_ptr ap){
 struct _fat_ptr msg=Cyc_vrprintf(Cyc_Core_heap_region,fmt,ap);
 Cyc_Warn_warning_segs=({struct Cyc_List_List*_Tmp0=_cycalloc(sizeof(struct Cyc_List_List));_Tmp0->hd=(void*)loc,_Tmp0->tl=Cyc_Warn_warning_segs;_Tmp0;});
 Cyc_Warn_warning_msgs=({struct Cyc_List_List*_Tmp0=_cycalloc(sizeof(struct Cyc_List_List));({struct _fat_ptr*_Tmp1=({struct _fat_ptr*_Tmp2=_cycalloc(sizeof(struct _fat_ptr));*_Tmp2=msg;_Tmp2;});_Tmp0->hd=_Tmp1;}),_Tmp0->tl=Cyc_Warn_warning_msgs;_Tmp0;});}
-# 57
+# 72
 void Cyc_Warn_warn(unsigned loc,struct _fat_ptr fmt,struct _fat_ptr ap){
-# 59
+# 74
 Cyc_Warn_vwarn(loc,fmt,ap);}
-# 61
+# 76
 void Cyc_Warn_flush_warnings (void){
 if(Cyc_Warn_warning_segs==0)
 return;
-Cyc_fprintf(Cyc_stderr,_tag_fat("***Warnings***\n",sizeof(char),16U),_tag_fat(0U,sizeof(void*),0));{
+Cyc_Warn_pr(_tag_fat("***Warnings***\n",sizeof(char),16U),_tag_fat(0U,sizeof(void*),0));{
 struct Cyc_List_List*seg_strs=Cyc_Position_strings_of_segments(Cyc_Warn_warning_segs);
 Cyc_Warn_warning_segs=0;
 Cyc_Warn_warning_msgs=Cyc_List_imp_rev(Cyc_Warn_warning_msgs);
 while(Cyc_Warn_warning_msgs!=0){
-({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=*((struct _fat_ptr*)_check_null(seg_strs)->hd);_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,_Tmp2.f1=*((struct _fat_ptr*)Cyc_Warn_warning_msgs->hd);_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;Cyc_fprintf(Cyc_stderr,_tag_fat("%s: %s\n",sizeof(char),8U),_tag_fat(_Tmp2,sizeof(void*),2));});
+({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=*((struct _fat_ptr*)_check_null(seg_strs)->hd);_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,_Tmp2.f1=*((struct _fat_ptr*)Cyc_Warn_warning_msgs->hd);_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;Cyc_Warn_pr(_tag_fat("%s: %s\n",sizeof(char),8U),_tag_fat(_Tmp2,sizeof(void*),2));});
 seg_strs=seg_strs->tl;
 Cyc_Warn_warning_msgs=_check_null(Cyc_Warn_warning_msgs)->tl;
-# 69
+# 84
 1U;}
-# 73
-Cyc_fprintf(Cyc_stderr,_tag_fat("**************\n",sizeof(char),16U),_tag_fat(0U,sizeof(void*),0));
-Cyc_fflush(Cyc_stderr);}}
-# 77
+# 88
+Cyc_Warn_pr(_tag_fat("**************\n",sizeof(char),16U),_tag_fat(0U,sizeof(void*),0));
+Cyc_Warn_flush();}}
+# 92
+static int Cyc_Warn_error_b=0;
+# 94
+void Cyc_Warn_reset(struct _fat_ptr f){
+Cyc_Position_reset_position(f);
+Cyc_Warn_error_b=0;}
+# 99
+int Cyc_Warn_error_p (void){return Cyc_Warn_error_b;}
+# 101
+int Cyc_Warn_first_error=1;
+# 103
+int Cyc_Warn_num_errors=0;
+int Cyc_Warn_max_errors=10;
+# 106
+void Cyc_Warn_post_error(struct Cyc_Position_Error*e){
+if(!Cyc_Warn_print_warnings)return;
+Cyc_Warn_error_b=1;
+Cyc_fflush(Cyc_stdout);
+if(Cyc_Warn_first_error){
+Cyc_fprintf(Cyc_stderr,_tag_fat("\n",sizeof(char),2U),_tag_fat(0U,sizeof(void*),0));
+Cyc_Warn_first_error=0;}
+# 115
+if(Cyc_Warn_num_errors <= Cyc_Warn_max_errors)
+({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,({struct _fat_ptr _Tmp2=Cyc_Position_string_of_segment(Cyc_Position_get_seg(e));_Tmp1.f1=_Tmp2;});_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,({struct _fat_ptr _Tmp3=Cyc_Position_get_desc(e);_Tmp2.f1=_Tmp3;});_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;Cyc_fprintf(Cyc_stderr,_tag_fat("%s: %s\n",sizeof(char),8U),_tag_fat(_Tmp2,sizeof(void*),2));});
+if(Cyc_Warn_num_errors==Cyc_Warn_max_errors)
+Cyc_fprintf(Cyc_stderr,_tag_fat("Too many error messages!\n",sizeof(char),26U),_tag_fat(0U,sizeof(void*),0));
+Cyc_fflush(Cyc_stderr);
+++ Cyc_Warn_num_errors;}
+# 123
 void Cyc_Warn_verr(unsigned loc,struct _fat_ptr fmt,struct _fat_ptr ap){
-Cyc_Position_post_error(({unsigned _Tmp0=loc;Cyc_Position_mk_err(_Tmp0,Cyc_vrprintf(Cyc_Core_heap_region,fmt,ap));}));}
-# 81
+Cyc_Warn_post_error(({unsigned _Tmp0=loc;Cyc_Position_mk_err(_Tmp0,Cyc_vrprintf(Cyc_Core_heap_region,fmt,ap));}));}
+# 127
 void Cyc_Warn_err(unsigned loc,struct _fat_ptr fmt,struct _fat_ptr ap){
-# 83
+# 129
 Cyc_Warn_verr(loc,fmt,ap);}
-# 86
+# 132
 void*Cyc_Warn_vimpos(struct _fat_ptr fmt,struct _fat_ptr ap){
 struct _fat_ptr msg=Cyc_vrprintf(Cyc_Core_heap_region,fmt,ap);
-if(!Cyc_Position_error_p()){
-({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=msg;_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_fprintf(Cyc_stderr,_tag_fat("Compiler Error: %s\n",sizeof(char),20U),_tag_fat(_Tmp1,sizeof(void*),1));});
-Cyc_fflush(Cyc_stderr);}
-# 92
+if(!Cyc_Warn_error_p()){
+({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=msg;_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_Warn_pr(_tag_fat("Compiler Error: %s\n",sizeof(char),20U),_tag_fat(_Tmp1,sizeof(void*),1));});
+Cyc_Warn_flush();}
+# 138
 _throw((void*)({struct Cyc_Core_Impossible_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Impossible_exn_struct));_Tmp0->tag=Cyc_Core_Impossible,_Tmp0->f1=msg;_Tmp0;}));}
-# 95
+# 141
 void*Cyc_Warn_impos(struct _fat_ptr fmt,struct _fat_ptr ap){
-# 97
+# 143
 Cyc_Warn_vimpos(fmt,ap);}
-# 100
+# 146
 void*Cyc_Warn_vimpos_loc(unsigned loc,struct _fat_ptr fmt,struct _fat_ptr ap){
-if(!Cyc_Position_error_p()){
-Cyc_fprintf(Cyc_stderr,_tag_fat("Compiler Error: \n",sizeof(char),18U),_tag_fat(0U,sizeof(void*),0));
+if(!Cyc_Warn_error_p()){
+Cyc_Warn_pr(_tag_fat("Compiler Error: \n",sizeof(char),18U),_tag_fat(0U,sizeof(void*),0));
 Cyc_Warn_verr(loc,fmt,ap);}
-# 105
+# 151
 _throw((void*)({struct Cyc_Core_Impossible_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Impossible_exn_struct));_Tmp0->tag=Cyc_Core_Impossible,_Tmp0->f1=_tag_fat("Compiler Error",sizeof(char),15U);_Tmp0;}));}
-# 108
+# 154
 void*Cyc_Warn_impos_loc(unsigned loc,struct _fat_ptr fmt,struct _fat_ptr ap){
-# 110
+# 156
 Cyc_Warn_vimpos_loc(loc,fmt,ap);}
-# 113
+# 159
 static struct _fat_ptr Cyc_Warn_args2string(struct _fat_ptr args){
 struct Cyc_List_List*lst=0;
 int curr_line_len=0;
@@ -475,7 +525,7 @@ s=Cyc_Absynpp_kindbound2string(kb);goto _LL0;}case 10: _Tmp2=(void*)((struct Cyc
 s=Cyc_Absynpp_attribute2string(a);goto _LL0;}case 11: _Tmp2=((struct Cyc_Warn_Vardecl_Warn_Warg_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Vardecl*vd=_Tmp2;
 s=Cyc_Absynpp_qvar2string(vd->name);goto _LL0;}default: _Tmp1=((struct Cyc_Warn_Int_Warn_Warg_struct*)_Tmp0)->f1;{int i=_Tmp1;
 s=({struct Cyc_Int_pa_PrintArg_struct _Tmp4=({struct Cyc_Int_pa_PrintArg_struct _Tmp5;_Tmp5.tag=1,_Tmp5.f1=(unsigned long)i;_Tmp5;});void*_Tmp5[1];_Tmp5[0]=& _Tmp4;Cyc_aprintf(_tag_fat("%d",sizeof(char),3U),_tag_fat(_Tmp5,sizeof(void*),1));});goto _LL0;}}_LL0:;}{
-# 135
+# 181
 int s_len=(int)Cyc_strlen(s);
 if(s_len >= 80){
 lst=({struct Cyc_List_List*_Tmp0=({struct _fat_ptr*_Tmp1[3];({struct _fat_ptr*_Tmp2=({struct _fat_ptr*_Tmp3=_cycalloc(sizeof(struct _fat_ptr));*_Tmp3=_tag_fat("\n",sizeof(char),2U);_Tmp3;});_Tmp1[0]=_Tmp2;}),({struct _fat_ptr*_Tmp2=({struct _fat_ptr*_Tmp3=_cycalloc(sizeof(struct _fat_ptr));*_Tmp3=s;_Tmp3;});_Tmp1[1]=_Tmp2;}),({struct _fat_ptr*_Tmp2=({struct _fat_ptr*_Tmp3=_cycalloc(sizeof(struct _fat_ptr));*_Tmp3=_tag_fat("\n",sizeof(char),2U);_Tmp3;});_Tmp1[2]=_Tmp2;});Cyc_List_list(_tag_fat(_Tmp1,sizeof(struct _fat_ptr*),3));});Cyc_List_append(_Tmp0,lst);});
@@ -483,46 +533,46 @@ curr_line_len=0;}else{
 if(curr_line_len + s_len >= 80){
 lst=({struct Cyc_List_List*_Tmp0=({struct _fat_ptr*_Tmp1[2];({struct _fat_ptr*_Tmp2=({struct _fat_ptr*_Tmp3=_cycalloc(sizeof(struct _fat_ptr));*_Tmp3=_tag_fat("\n",sizeof(char),2U);_Tmp3;});_Tmp1[0]=_Tmp2;}),({struct _fat_ptr*_Tmp2=({struct _fat_ptr*_Tmp3=_cycalloc(sizeof(struct _fat_ptr));*_Tmp3=s;_Tmp3;});_Tmp1[1]=_Tmp2;});Cyc_List_list(_tag_fat(_Tmp1,sizeof(struct _fat_ptr*),2));});Cyc_List_append(_Tmp0,lst);});
 curr_line_len=s_len;}else{
-# 143
+# 189
 lst=({struct Cyc_List_List*_Tmp0=_cycalloc(sizeof(struct Cyc_List_List));({struct _fat_ptr*_Tmp1=({struct _fat_ptr*_Tmp2=_cycalloc(sizeof(struct _fat_ptr));*_Tmp2=s;_Tmp2;});_Tmp0->hd=_Tmp1;}),_Tmp0->tl=lst;_Tmp0;});
 curr_line_len +=s_len;}}}}}
-# 147
+# 193
 return Cyc_strconcat_l(Cyc_List_imp_rev(lst));}
-# 149
+# 195
 void Cyc_Warn_verr2(unsigned loc,struct _fat_ptr args){
-Cyc_Position_post_error(({unsigned _Tmp0=loc;Cyc_Position_mk_err(_Tmp0,Cyc_Warn_args2string(args));}));}
-# 152
+Cyc_Warn_post_error(({unsigned _Tmp0=loc;Cyc_Position_mk_err(_Tmp0,Cyc_Warn_args2string(args));}));}
+# 198
 void Cyc_Warn_err2(unsigned loc,struct _fat_ptr args){
 Cyc_Warn_verr2(loc,args);}
-# 155
+# 201
 void Cyc_Warn_vwarn2(unsigned loc,struct _fat_ptr args){
 struct _fat_ptr msg=Cyc_Warn_args2string(args);
 Cyc_Warn_warning_segs=({struct Cyc_List_List*_Tmp0=_cycalloc(sizeof(struct Cyc_List_List));_Tmp0->hd=(void*)loc,_Tmp0->tl=Cyc_Warn_warning_segs;_Tmp0;});
 Cyc_Warn_warning_msgs=({struct Cyc_List_List*_Tmp0=_cycalloc(sizeof(struct Cyc_List_List));({struct _fat_ptr*_Tmp1=({struct _fat_ptr*_Tmp2=_cycalloc(sizeof(struct _fat_ptr));*_Tmp2=msg;_Tmp2;});_Tmp0->hd=_Tmp1;}),_Tmp0->tl=Cyc_Warn_warning_msgs;_Tmp0;});}
-# 160
+# 206
 void Cyc_Warn_warn2(unsigned loc,struct _fat_ptr args){
 Cyc_Warn_vwarn2(loc,args);}
-# 163
+# 209
 void*Cyc_Warn_vimpos2(struct _fat_ptr args){
 struct _fat_ptr msg=Cyc_Warn_args2string(args);
-if(!Cyc_Position_error_p()){
-({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=msg;_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_fprintf(Cyc_stderr,_tag_fat("Compiler Error: %s\n",sizeof(char),20U),_tag_fat(_Tmp1,sizeof(void*),1));});
-Cyc_fflush(Cyc_stderr);}
-# 169
+if(!Cyc_Warn_error_p()){
+({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=msg;_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_Warn_pr(_tag_fat("Compiler Error: %s\n",sizeof(char),20U),_tag_fat(_Tmp1,sizeof(void*),1));});
+Cyc_Warn_flush();}
+# 215
 _throw((void*)({struct Cyc_Core_Impossible_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Impossible_exn_struct));_Tmp0->tag=Cyc_Core_Impossible,_Tmp0->f1=msg;_Tmp0;}));}
-# 171
+# 217
 void*Cyc_Warn_impos2(struct _fat_ptr args){
 Cyc_Warn_vimpos2(args);}
-# 174
+# 220
 void*Cyc_Warn_vimpos_loc2(unsigned loc,struct _fat_ptr args){
 struct _fat_ptr msg=Cyc_Warn_args2string(args);
-if(!Cyc_Position_error_p()){
-Cyc_fprintf(Cyc_stderr,_tag_fat("Compiler Error: \n",sizeof(char),18U),_tag_fat(0U,sizeof(void*),0));
+if(!Cyc_Warn_error_p()){
+Cyc_Warn_pr(_tag_fat("Compiler Error: \n",sizeof(char),18U),_tag_fat(0U,sizeof(void*),0));
 Cyc_Warn_verr2(loc,args);
-Cyc_fflush(Cyc_stderr);}
-# 181
+Cyc_Warn_flush();}
+# 227
 _throw((void*)({struct Cyc_Core_Impossible_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Impossible_exn_struct));_Tmp0->tag=Cyc_Core_Impossible,_Tmp0->f1=msg;_Tmp0;}));}
-# 183
+# 229
 void*Cyc_Warn_impos_loc2(unsigned loc,struct _fat_ptr args){
-# 185
+# 231
 Cyc_Warn_vimpos_loc2(loc,args);}

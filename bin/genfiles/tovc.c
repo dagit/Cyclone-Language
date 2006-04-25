@@ -429,9 +429,9 @@ struct Cyc_Absyn_Decl*Cyc_Absyn_new_decl(void*,unsigned);
 struct _tuple0*Cyc_Absyn_binding2qvar(void*);
 # 160 "tcutil.h"
 void*Cyc_Tcutil_fndecl2type(struct Cyc_Absyn_Fndecl*);
-# 29 "warn.h"
+# 37 "warn.h"
 void Cyc_Warn_warn(unsigned,struct _fat_ptr,struct _fat_ptr);struct Cyc_Warn_String_Warn_Warg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Warn_Exp_Warn_Warg_struct{int tag;struct Cyc_Absyn_Exp*f1;};struct Cyc_Warn_Stmt_Warn_Warg_struct{int tag;struct Cyc_Absyn_Stmt*f1;};
-# 71
+# 79
 void*Cyc_Warn_impos2(struct _fat_ptr);
 # 41 "toc.h"
 struct _tuple0*Cyc_Toc_temp_var (void);

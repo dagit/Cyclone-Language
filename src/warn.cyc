@@ -27,6 +27,21 @@ using Absynpp;
 
 namespace Warn;
 
+/* We want to be able to turn of warnings sometimes, e.g., when using
+   buildlib uses the parser. */
+int print_warnings = 1;
+static int pr(const char ? fmt, ... inject parg_t ap)
+  __attribute__((format(printf,1,2)))
+{
+  if (print_warnings)
+    return vfprintf(stderr,fmt,ap);
+  else
+    return 0;
+}
+static int flush() {
+  return fflush(stderr);
+}
+
 static list_t<seg_t>       warning_segs = NULL;
 static list_t<stringptr_t> warning_msgs = NULL;
 
@@ -61,21 +76,52 @@ void warn(seg_t loc, string_t fmt, ... inject parg_t ap)
 void flush_warnings() {
   if(warning_segs == NULL)
     return;
-  fprintf(stderr,"***Warnings***\n");
+  pr("***Warnings***\n");
   let seg_strs = Position::strings_of_segments(warning_segs);
   warning_segs = NULL;
   warning_msgs = imp_rev(warning_msgs);
   while(warning_msgs != NULL) {
-    fprintf(stderr,"%s: %s\n", *(seg_strs->hd), *(warning_msgs->hd));
+    pr("%s: %s\n", *(seg_strs->hd), *(warning_msgs->hd));
     seg_strs     = seg_strs->tl;
     warning_msgs = warning_msgs->tl;
   }
-  fprintf(stderr,"**************\n");
+  pr("**************\n");
+  flush();
+}
+
+static bool error_b = false;
+
+void reset(string_t<`H> f) {
+  Position::reset_position(f);
+  error_b = false; 
+}
+
+bool error_p() { return error_b; }
+
+bool first_error = true;
+
+int num_errors = 0;
+int max_errors = 10;
+
+void post_error(Position::error_t e) {
+  if (!print_warnings) return;
+  error_b = true;
+  fflush(stdout);
+  if (first_error) {
+    fprintf(stderr, "\n");
+    first_error = false; // FIX: not reset to true for each file!
+  }
+  // why are we not using the source stored in e????
+  if(num_errors <=max_errors)
+    fprintf(stderr, "%s: %s\n", Position::string_of_segment(Position::get_seg(e)), Position::get_desc(e));
+  if(num_errors == max_errors)
+    fprintf(stderr, "Too many error messages!\n");
   fflush(stderr);
+  num_errors++;
 }
 
 void verr(seg_t loc, string_t fmt, parg_t ? ap) {
- Position::post_error(Position::mk_err(loc,vrprintf(Core::heap_region,fmt,ap)));
+ post_error(Position::mk_err(loc,vrprintf(Core::heap_region,fmt,ap)));
 }
 
 void err(seg_t loc, string_t fmt, ... inject parg_t ap)
@@ -85,11 +131,11 @@ void err(seg_t loc, string_t fmt, ... inject parg_t ap)
 
 `a vimpos(string_t fmt, parg_t ? ap) __attribute__((noreturn)) {
   string_t msg = vrprintf(Core::heap_region,fmt,ap);
-  if (!Position::error_p()) {
-    fprintf(stderr,"Compiler Error: %s\n",msg);
-    fflush(stderr);
+  if (!error_p()) {
+    pr("Compiler Error: %s\n",msg);
+    flush();
   }
-  throw new Core::Impossible(msg);  
+  throw new Core::Impossible(msg);
 }
 
 `a impos(string_t fmt, ... inject parg_t ap)
@@ -98,11 +144,11 @@ void err(seg_t loc, string_t fmt, ... inject parg_t ap)
 }
 
 `a vimpos_loc(seg_t loc, string_t fmt, parg_t ? ap) __attribute__((noreturn)) {
-  if (!Position::error_p()) {
-    fprintf(stderr,"Compiler Error: \n");
+  if (!error_p()) {
+    pr("Compiler Error: \n");
     verr(loc,fmt,ap);
   }
-  throw new Core::Impossible("Compiler Error");  
+  throw new Core::Impossible("Compiler Error");
 }
 
 `a impos_loc(seg_t loc, string_t fmt, ... inject parg_t ap)
@@ -140,14 +186,14 @@ static string_t args2string(warg_t ? args) {
       lst = append(list(new "\n", new s), lst);
       curr_line_len = s_len;
     } else {
-      lst = new List(new s,lst); 
+      lst = new List(new s,lst);
       curr_line_len += s_len;
     }
   }
   return strconcat_l(imp_rev(lst));
 }
 void verr2(seg_t loc, warg_t ? args) {
-  Position::post_error(Position::mk_err(loc,args2string(args)));
+  post_error(Position::mk_err(loc,args2string(args)));
 }
 void err2(seg_t loc, ... inject warg_t args) {
   verr2(loc,args);
@@ -162,25 +208,25 @@ void warn2(seg_t loc, ... inject warg_t args) {
 }
 `a vimpos2(warg_t ? args) __attribute__((noreturn)) {
   let msg = args2string(args);
-  if (!Position::error_p()) {
-    fprintf(stderr,"Compiler Error: %s\n",msg);
-    fflush(stderr);
+  if (!error_p()) {
+    pr("Compiler Error: %s\n",msg);
+    flush();
   }
-  throw new Core::Impossible(msg);  
+  throw new Core::Impossible(msg);
 }
 `a impos2(... inject warg_t args) __attribute__((noreturn)) {
   vimpos2(args);
 }
 `a vimpos_loc2(Position::seg_t loc,warg_t ? args) __attribute__((noreturn)) {
   let msg = args2string(args);
-  if (!Position::error_p()) {
-    fprintf(stderr,"Compiler Error: \n");
+  if (!error_p()) {
+    pr("Compiler Error: \n");
     verr2(loc,args);
-    fflush(stderr);
+    flush();
   }
-  throw new Core::Impossible(msg);  
+  throw new Core::Impossible(msg);
 }
-`a impos_loc2(Position::seg_t loc,... inject warg_t args) 
+`a impos_loc2(Position::seg_t loc,... inject warg_t args)
   __attribute__((noreturn)) {
   vimpos_loc2(loc,args);
 }

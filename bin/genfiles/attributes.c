@@ -385,11 +385,11 @@ int Cyc_Tcutil_is_bound_one(void*,int);
 int Cyc_Tcutil_is_noalias_pointer(struct Cyc_List_List*,void*,int);
 # 254
 int Cyc_Tcutil_force_type2bool(int,void*);
-# 35 "warn.h"
+# 43 "warn.h"
 void Cyc_Warn_err(unsigned,struct _fat_ptr,struct _fat_ptr);struct Cyc_Warn_String_Warn_Warg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Warn_Attribute_Warn_Warg_struct{int tag;void*f1;};struct Cyc_Warn_Vardecl_Warn_Warg_struct{int tag;struct Cyc_Absyn_Vardecl*f1;};
-# 67
+# 75
 void Cyc_Warn_err2(unsigned,struct _fat_ptr);
-# 71
+# 79
 void*Cyc_Warn_impos2(struct _fat_ptr);
 # 25 "attributes.h"
 extern struct Cyc_Absyn_Stdcall_att_Absyn_Attribute_struct Cyc_Atts_Stdcall_att_val;

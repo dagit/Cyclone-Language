@@ -431,7 +431,7 @@ struct Cyc_Absyn_Exp*Cyc_Tcutil_get_type_bound(void*);
 int Cyc_Tcutil_typecmp(void*,void*);
 # 229
 int Cyc_Tcutil_is_pure_exp(struct Cyc_Absyn_Exp*);
-# 40 "warn.h"
+# 48 "warn.h"
 void*Cyc_Warn_impos(struct _fat_ptr,struct _fat_ptr);
 # 74 "absynpp.h"
 struct _fat_ptr Cyc_Absynpp_prim2string(enum Cyc_Absyn_Primop);

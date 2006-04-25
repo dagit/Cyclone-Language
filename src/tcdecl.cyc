@@ -24,6 +24,7 @@
 #include "attributes.h"
 #include "absynpp.h"
 #include "tcdecl.h"
+#include "warn.h"
 using Core;
 using List;
 using Absyn;
@@ -45,7 +46,7 @@ void merr(seg_t loc,string_t<`r2> * msg1,string_t fmt, ... inject parg_t<`r+`r2+
     fmt2 = strconcat("%s ", fmt);
   parg_t<`r+`r2+`H> ? ap2 = new {for i < numelts(ap)+1 : 
 				 i==0 ? ((parg_t<`r+`r2+`H>)(new String_pa((string_t<`r+`r2+`H>)(*msg1)))) : ap[i-1]};
-  Position::post_error(Position::mk_err(loc,vrprintf(heap_region,fmt2,ap2)));
+  Warn::verr(loc,fmt2,ap2);
 }
 
 ///////// functions for merging /////////

@@ -413,7 +413,7 @@ void*Cyc_Absyn_pointer_expand(void*,int);
 void Cyc_Absyn_visit_stmt(int(*)(void*,struct Cyc_Absyn_Exp*),int(*)(void*,struct Cyc_Absyn_Stmt*),void*,struct Cyc_Absyn_Stmt*);struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};
 # 73 "cycboot.h"
 extern struct _fat_ptr Cyc_aprintf(struct _fat_ptr,struct _fat_ptr);struct Cyc_Warn_String_Warn_Warg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Warn_Typ_Warn_Warg_struct{int tag;void*f1;};struct Cyc_Warn_Int_Warn_Warg_struct{int tag;int f1;};
-# 71 "warn.h"
+# 79 "warn.h"
 void*Cyc_Warn_impos2(struct _fat_ptr);
 # 32 "kinds.h"
 extern struct Cyc_Absyn_Kind Cyc_Kinds_ek;

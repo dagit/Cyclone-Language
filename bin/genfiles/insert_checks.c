@@ -409,13 +409,13 @@ extern struct _tuple12 Cyc_Evexp_eval_const_uint_exp(struct Cyc_Absyn_Exp*);
 extern int Cyc_Evexp_c_can_eval(struct Cyc_Absyn_Exp*);
 # 42 "evexp.h"
 extern int Cyc_Evexp_lte_const_exp(struct Cyc_Absyn_Exp*,struct Cyc_Absyn_Exp*);
-# 29 "warn.h"
+# 37 "warn.h"
 void Cyc_Warn_warn(unsigned,struct _fat_ptr,struct _fat_ptr);
-# 35
+# 43
 void Cyc_Warn_err(unsigned,struct _fat_ptr,struct _fat_ptr);
-# 40
+# 48
 void*Cyc_Warn_impos(struct _fat_ptr,struct _fat_ptr);
-# 46
+# 54
 void*Cyc_Warn_impos_loc(unsigned,struct _fat_ptr,struct _fat_ptr);
 # 26 "flags.h"
 extern int Cyc_Flags_verbose;

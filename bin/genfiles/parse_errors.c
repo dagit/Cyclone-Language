@@ -349,7 +349,7 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 extern int Cyc_printf(struct _fat_ptr,struct _fat_ptr);
 # 319 "cycboot.h"
 extern void exit(int);
-# 35 "warn.h"
+# 43 "warn.h"
 void Cyc_Warn_err(unsigned,struct _fat_ptr,struct _fat_ptr);
 # 149 "flags.h"
 extern int Cyc_Flags_print_parser_state_and_token;

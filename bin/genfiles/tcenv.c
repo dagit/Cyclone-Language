@@ -403,7 +403,7 @@ void Cyc_Tcutil_add_tvar_identity(struct Cyc_Absyn_Tvar*);
 void Cyc_Tcutil_add_tvar_identities(struct Cyc_List_List*);
 # 271
 struct Cyc_List_List*Cyc_Tcutil_get_aquals_bounds(struct Cyc_Absyn_Fndecl*);struct Cyc_Warn_String_Warn_Warg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Warn_Typ_Warn_Warg_struct{int tag;void*f1;};
-# 67 "warn.h"
+# 75 "warn.h"
 void Cyc_Warn_err2(unsigned,struct _fat_ptr);
 # 32 "kinds.h"
 extern struct Cyc_Absyn_Kind Cyc_Kinds_ek;

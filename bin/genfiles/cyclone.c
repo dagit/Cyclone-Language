@@ -433,14 +433,8 @@ extern struct _fat_ptr Cyc_Filename_dirname(struct _fat_ptr);
 extern struct _fat_ptr Cyc_Filename_basename(struct _fat_ptr);
 # 46
 extern int Cyc_Filename_check_suffix(struct _fat_ptr,struct _fat_ptr);
-# 27 "position.h"
-extern void Cyc_Position_reset_position(struct _fat_ptr);
-# 46
+# 48 "position.h"
 extern int Cyc_Position_use_gcc_style_location;
-# 48
-extern int Cyc_Position_max_errors;
-# 50
-extern int Cyc_Position_error_p (void);
 # 13 "bansheeif.h"
 int Cyc_BansheeIf_banshee_init (void);
 # 29
@@ -508,9 +502,15 @@ struct Cyc_Interface_I*Cyc_Interface_parse(struct Cyc___cycFILE*);
 void Cyc_Interface_save(struct Cyc_Interface_I*,struct Cyc___cycFILE*);
 # 84
 struct Cyc_Interface_I*Cyc_Interface_load(struct Cyc___cycFILE*);
-# 29 "warn.h"
-void Cyc_Warn_warn(unsigned,struct _fat_ptr,struct _fat_ptr);
+# 27 "warn.h"
+extern void Cyc_Warn_reset(struct _fat_ptr);
 # 31
+extern int Cyc_Warn_max_errors;
+# 33
+extern int Cyc_Warn_error_p (void);
+# 37
+void Cyc_Warn_warn(unsigned,struct _fat_ptr,struct _fat_ptr);
+# 39
 void Cyc_Warn_flush_warnings (void);
 # 26 "flags.h"
 extern int Cyc_Flags_verbose;
@@ -648,7 +648,7 @@ Cyc_add_ccarg(_tag_fat("-DGCC_C",sizeof(char),8U));}}}
 # 107
 void Cyc_set_port_c_code (void){
 Cyc_Flags_porting_c_code=1;
-Cyc_Position_max_errors=65535;
+Cyc_Warn_max_errors=65535;
 Cyc_save_c_r=1;
 Cyc_Flags_set_parseonly();}
 # 114
@@ -692,7 +692,7 @@ static void Cyc_add_idirafter(struct _fat_ptr s){
 Cyc_add_cpparg(({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=s;_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_aprintf(_tag_fat("-idirafter %s",sizeof(char),14U),_tag_fat(_Tmp1,sizeof(void*),1));}));}
 # 166
 static void Cyc_set_many_errors (void){
-Cyc_Position_max_errors=65535;}static char _TmpG1[20U]="_see_cycspecs_file_";
+Cyc_Warn_max_errors=65535;}static char _TmpG1[20U]="_see_cycspecs_file_";
 # 170
 static struct _fat_ptr Cyc_def_inc_path={_TmpG1,_TmpG1,_TmpG1 + 20U};
 # 173
@@ -922,14 +922,14 @@ void*ans;
 {struct _handler_cons _Tmp0;_push_handler(& _Tmp0);{int _Tmp1=0;if(setjmp(_Tmp0.handler))_Tmp1=1;if(!_Tmp1){ans=f(env,tds);;_pop_handler();}else{void*_Tmp2=(void*)Cyc_Core_get_exn_thrown();void*_Tmp3;_Tmp3=_Tmp2;{void*x=_Tmp3;
 # 472
 ans=onfail;
-if(Cyc_Position_error_p())
+if(Cyc_Warn_error_p())
 goto _LL0;
 Cyc_compile_failure=1;
 ({struct Cyc_String_pa_PrintArg_struct _Tmp4=({struct Cyc_String_pa_PrintArg_struct _Tmp5;_Tmp5.tag=0,_Tmp5.f1=stage_name;_Tmp5;});void*_Tmp5[1];_Tmp5[0]=& _Tmp4;Cyc_fprintf(Cyc_stderr,_tag_fat("COMPILER STAGE %s (unexpected exception) \n",sizeof(char),43U),_tag_fat(_Tmp5,sizeof(void*),1));});
 Cyc_uncaught_exn=({struct _tuple14*_Tmp4=_cycalloc(sizeof(struct _tuple14));_Tmp4->f0=x,({const char*_Tmp5=Cyc_Core_get_exn_filename();_Tmp4->f1=_Tmp5;}),({int _Tmp5=Cyc_Core_get_exn_lineno();_Tmp4->f2=_Tmp5;});_Tmp4;});
 goto _LL0;}_LL0:;}}}
 # 480
-if(Cyc_Position_error_p())
+if(Cyc_Warn_error_p())
 Cyc_compile_failure=1;
 if(Cyc_compile_failure){
 Cyc_fprintf(Cyc_stderr,_tag_fat("\nCOMPILATION FAILED!\n",sizeof(char),22U),_tag_fat(0U,sizeof(void*),0));
@@ -1275,7 +1275,7 @@ return 0;}
 # 875
 if((int)Cyc_Flags_stop_after_pass <= 0)return 0;
 # 878
-Cyc_Position_reset_position(preprocfile);{
+Cyc_Warn_reset(preprocfile);{
 struct Cyc___cycFILE*in_file=Cyc_try_file_open(preprocfile,_tag_fat("r",sizeof(char),2U),_tag_fat("file",sizeof(char),5U));
 # 881
 struct Cyc_List_List*tds=0;
@@ -1348,7 +1348,7 @@ struct Cyc___cycFILE*inter_objfile=Cyc_try_file_open(interfaceobjfile,_tag_fat("
 if(inter_objfile==0)
 Cyc_compile_failure=1;else{
 # 969
-Cyc_Position_reset_position(interfacefile);{
+Cyc_Warn_reset(interfacefile);{
 struct _tuple15 int_env=({struct _tuple15 _Tmp0;_Tmp0.f0=te,_Tmp0.f1=inter_file,_Tmp0.f2=inter_objfile;_Tmp0;});
 tds=({struct Cyc_List_List*(*_Tmp0)(struct _fat_ptr,struct Cyc_List_List*,struct Cyc_List_List*(*)(struct _tuple15*,struct Cyc_List_List*),struct _tuple15*,struct Cyc_List_List*)=(struct Cyc_List_List*(*)(struct _fat_ptr,struct Cyc_List_List*,struct Cyc_List_List*(*)(struct _tuple15*,struct Cyc_List_List*),struct _tuple15*,struct Cyc_List_List*))Cyc_do_stage;_Tmp0;})(_tag_fat("interface checking",sizeof(char),19U),tds,Cyc_do_interface,& int_env,tds);
 if(inter_file!=0)
@@ -1357,7 +1357,7 @@ Cyc_file_close(inter_objfile);}}}}
 # 978
 if(Cyc_Flags_interproc || Cyc_Flags_resolve){
 Cyc_BansheeIf_discharge_implications();
-if(Cyc_Position_error_p()){
+if(Cyc_Warn_error_p()){
 Cyc_compile_failure=1;
 Cyc_fprintf(Cyc_stderr,_tag_fat("\nCOMPILATION FAILED!\n",sizeof(char),22U),_tag_fat(0U,sizeof(void*),0));
 Cyc_fflush(Cyc_stderr);}}
@@ -1445,7 +1445,7 @@ Cyc_compile_failure=1;
 Cyc_remove_cfiles();
 exit(1);}
 # 1076
-Cyc_Position_reset_position(nf);{
+Cyc_Warn_reset(nf);{
 struct Cyc_Interface_I*i=Cyc_Interface_load(f);
 Cyc_file_close(f);
 return i;}}}}

@@ -59,7 +59,7 @@ using List;
 typedef Hashtable::table_t<`a,`b> table_t<`a,`b>;
 
 static bool pp_r       = false; // FLAGS ALL HERE (care about static?)
-static bool noshake_r  = false; 
+static bool noshake_r  = false;
 static bool noprint_r  = false;
 static bool ic_r       = false;
 static bool stop_after_objectfile_r = false;
@@ -106,7 +106,7 @@ void set_c_compiler(string_t<`H> s){
 
 void set_port_c_code() {
   Flags::porting_c_code = true;
-  Position::max_errors = 65535; // allow a lot of errors
+  Warn::max_errors = 65535; // allow a lot of errors
   save_c_r = true; // save temp files
   Flags::set_parseonly();
 }
@@ -164,7 +164,7 @@ static void add_idirafter(string_t<`H> s) {
 }
 
 static void set_many_errors() {
-  Position::max_errors = 65535;
+  Warn::max_errors = 65535;
 }
 
 static const char ?def_inc_path = "_see_cycspecs_file_";
@@ -277,7 +277,7 @@ static void set_pa() {
 }
 
 static void set_noreaps() {
-  // if reaps are disable add -D_CYC_INTERNAL_DISABLE_REAPS 
+  // if reaps are disable add -D_CYC_INTERNAL_DISABLE_REAPS
   // to make core.h macros for dynamic regions work properly
   Flags::no_reaps = true;
   add_cpparg("-D_CYC_INTERNAL_DISABLE_REAPS");
@@ -470,14 +470,14 @@ extern "C" void CYCALLOCPROFILE_mark(const char *s);
   try ans = f(env,tds);
   catch { case x:
     ans = onfail;
-    if (Position::error_p())
+    if (Warn::error_p())
       break;
     compile_failure = true;
     fprintf(stderr,"COMPILER STAGE %s (unexpected exception) \n",stage_name);
     uncaught_exn = new $(x,get_exn_filename(),get_exn_lineno());
     break;
   }
-  if (Position::error_p())
+  if (Warn::error_p())
     compile_failure = true;
   if (compile_failure) {
     fprintf(stderr,"\nCOMPILATION FAILED!\n");
@@ -516,7 +516,7 @@ bool do_binding(bool ignore, list_t<Absyn::decl_t,`H> tds) {
   Binding::resolve_all(tds);
   return true;
 }
-  
+
 list_t<Absyn::decl_t> do_interproc_binding(string_t<`H> @filename, list_t<Absyn::decl_t,`H> tds) {
   return Interproc::resolve_all(*filename, tds);
 }
@@ -533,7 +533,7 @@ bool do_adjust(bool ignore, list_t<Absyn::decl_t,`H> tds) {
 list_t<Absyn::decl_t> do_typecheck(Tcenv::tenv_t te,
 				   list_t<Absyn::decl_t,`H> tds){
   Tc::tc(te, true, tds);
-  if (!noshake_r) 
+  if (!noshake_r)
     tds = Tc::treeshake(te,tds);
   return tds;
 }
@@ -791,8 +791,8 @@ static stringptr_t sh_escape_stringptr(stringptr_t<`H,`H> sp) {
 }
 static string_t get_cppargs_string() {
   static string_t cppargs_string = NULL;
-  if(cppargs_string == NULL) 
-    cppargs_string = 
+  if(cppargs_string == NULL)
+    cppargs_string =
       str_sepstr(new List(new (string_t)"",
 			  List::map(sh_escape_stringptr,rev(cppargs))),
 		 " ");
@@ -817,7 +817,7 @@ namespace Cyclone {
 
     // Run the preprocessor, by building and running a command-line
     // Pass -I and -D things onto preprocessor.
-  
+
     let cppargs_string = get_cppargs_string();
 
     // About the cyclone include path---this path is specified with the
@@ -840,7 +840,7 @@ namespace Cyclone {
     string_t ofile_string;
     if (Flags::stop_after_pass <= Flags::Cpp)
       ofile_string = (output_file==NULL) ? "" : aprintf(" > %s", *output_file);
-    else 
+    else
       ofile_string = aprintf(" > %s", sh_escape_string(preprocfile));
 
     string_t fixup_string;
@@ -852,13 +852,13 @@ namespace Cyclone {
 	// the dependency produced by cpp will be something like foo.cyc.o,
 	// but we want it to be foo.o.
 	fixup_string = " | sed 's/^\\(.*\\)\\.cyc\\.o:/\\1.o:/'";
-      else 
+      else
 	// Hack to handle the -MT flag, which is not supported in gcc 2.95
 	// Note, we should probably make sure any special characters in
 	// *dependencies_target are escaped, but WE DON'T.
 	fixup_string = aprintf(" | sed 's/^.*\\.cyc\\.o:/%s:/'",
 			       *dependencies_target);
-    } else 
+    } else
       fixup_string = "";
 
     let cmd = aprintf("%s %s%s %s%s%s",
@@ -873,9 +873,9 @@ namespace Cyclone {
       return NULL;
     }
     if (Flags::stop_after_pass <= Flags::Cpp) return NULL;
-    
+
     // Run the stages of the Cyclone compiler
-    Position::reset_position(preprocfile); // necessary for good error messages!
+    Warn::reset(preprocfile); // necessary for good error messages!
     FILE * in_file  = try_file_open(preprocfile,"r","file");
 
     list_t<Absyn::decl_t> tds = NULL;
@@ -919,12 +919,12 @@ static void process_file(string_t<`H> filename) {
       tds = do_stage("interproc_resolution", tds, do_interproc_resolution, true, NULL);
     }
     else {
-      do_stage("binding", tds, do_binding, true, true); 
+      do_stage("binding", tds, do_binding, true, true);
     }
   }
 
   let jump_tables = NULL;
-  let te = Tcenv::tc_init(); 
+  let te = Tcenv::tc_init();
 
   // Current-Region Metavariable substitution
   if(!compile_failure && Flags::stop_after_pass >= Flags::CurrentRegion)
@@ -945,7 +945,7 @@ static void process_file(string_t<`H> filename) {
   // check-insertion
   if(!compile_failure && Flags::stop_after_pass >= Flags::CheckInsertion)
     do_stage("check insertion", tds, do_insert_checks, (_@)jump_tables, true);
-    
+
   // Generate interface file
   if (!compile_failure && generate_interface_r
       && Flags::stop_after_pass >= Flags::Toc) {
@@ -966,7 +966,7 @@ static void process_file(string_t<`H> filename) {
       if (inter_objfile == NULL)
         compile_failure = true;
       else {
-	Position::reset_position(interfacefile);
+	Warn::reset(interfacefile);
 	let int_env = $(te, inter_file, (FILE @)inter_objfile);
 	tds = do_stage("interface checking", tds, do_interface, &int_env, tds);
 	if(inter_file != NULL)
@@ -977,7 +977,7 @@ static void process_file(string_t<`H> filename) {
   }
   if(Flags::interproc || Flags::resolve) {
     BansheeIf::discharge_implications();
-    if(Position::error_p()) {
+    if(Warn::error_p()) {
       compile_failure = true;
       fprintf(stderr,"\nCOMPILATION FAILED!\n");
       fflush(stderr);
@@ -1000,7 +1000,7 @@ static void process_file(string_t<`H> filename) {
   // Clean up state common to last three passes
   if(!compile_failure && Flags::stop_after_pass >= Flags::Toc)
     Toc::finish();
-  // Removal of unused declarations (optional optimization) FIX: make flag 
+  // Removal of unused declarations (optional optimization) FIX: make flag
   if(!compile_failure && Flags::stop_after_pass >= Flags::Toc)
     tds = do_stage("low treeshaking", tds, do_lowtreeshake, true, tds);
   // renaming of temporaries
@@ -1045,9 +1045,9 @@ static void process_file(string_t<`H> filename) {
     out_file = try_file_open(*output_file,"w","output file");
   else
     out_file = try_file_open(cfile,"w","output file");
-  
+
   if (compile_failure || !out_file) return;
-  
+
   if (!noprint_r) {
     let env = new $((FILE@)out_file,cfile);
     tds = do_stage("printing", tds, do_print, env, tds);
@@ -1073,7 +1073,7 @@ static interface_t read_cycio(string_t<`H> @ n) {
     remove_cfiles();
     exit(1);
   }
-  Position::reset_position(nf); /* in case of parsing problems */
+  Warn::reset(nf); /* in case of parsing problems */
   let i = Interface::load(f);
   file_close(f);
   return i;
@@ -1632,4 +1632,3 @@ int main(int argc, string_t<`H> ?`H argv) {
 
   return compile_failure ? 1 : 0;
 }
-

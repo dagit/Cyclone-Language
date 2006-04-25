@@ -386,9 +386,9 @@ int Cyc_Tcutil_new_tvar_id (void);
 extern struct Cyc_Absyn_Kind Cyc_Kinds_ek;
 # 77 "kinds.h"
 void*Cyc_Kinds_kind_to_bound(struct Cyc_Absyn_Kind*);
-# 40 "warn.h"
+# 48 "warn.h"
 void*Cyc_Warn_impos(struct _fat_ptr,struct _fat_ptr);struct Cyc_Warn_String_Warn_Warg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Warn_Tvar_Warn_Warg_struct{int tag;struct Cyc_Absyn_Tvar*f1;};
-# 67
+# 75
 void Cyc_Warn_err2(unsigned,struct _fat_ptr);
 # 33 "currgn.cyc"
 static struct Cyc_Absyn_Tvar*Cyc_CurRgn_curr_tvar=0;
