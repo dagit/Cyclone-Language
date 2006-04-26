@@ -1438,7 +1438,10 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
     x_exp->topt = fat_ptr_type;
     let deref_x = deref_exp(x_exp,DL);
     deref_x->topt = elt_type;
-    deref_x->annot = &InsertChecks::NullAndFatBound_val; //check bound and NULL
+    // if e1 is a fat pointer indexing of the form e11[e12] and
+    // then *(e11+e12) should have the same kind of check as e11[e12]
+    if (is_fat) deref_x->annot = e1->annot; //check bound and NULL only if e1 needed to
+    else deref_x->annot = &InsertChecks::NullAndFatBound_val; // check bound and NULL
     exp_to_c(nv,deref_x);
     let y = temp_var();                // build elt_type y = *x;
     let y_vd = new Vardecl {Public,y,0,mt_tq,c_elt_type,deref_x,NULL,NULL,false,false,NULL};

@@ -600,7 +600,7 @@ goto rflag;case 108:
 goto rflag;case 99:
 # 445
  cp=_tag_fat(buf,sizeof(char),349U);
-({struct _fat_ptr _Tmp0=cp;char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=(char)Cyc_va_arg_int(ap);if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});_fat_ptr_inplace_plus(& ap,sizeof(void*),1);
+({struct _fat_ptr _Tmp0=cp;char _Tmp1=*((char*)_Tmp0.curr);char _Tmp2=(char)Cyc_va_arg_int(ap);if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});_fat_ptr_inplace_plus(& ap,sizeof(void*),1);
 size=1;
 sign='\000';
 goto _LL0;case 68:
@@ -627,7 +627,7 @@ if(prec==-1)
 prec=6;}
 # 480
 cp=_tag_fat(buf,sizeof(char),349U);
-({struct _fat_ptr _Tmp0=cp;char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2='\000';if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
+({struct _fat_ptr _Tmp0=cp;char _Tmp1=*((char*)_Tmp0.curr);char _Tmp2='\000';if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
 size=({double _Tmp0=_double;int _Tmp1=prec;int _Tmp2=flags;int _Tmp3=ch;struct _fat_ptr _Tmp4=cp;Cyc___cvt_double(_Tmp0,_Tmp1,_Tmp2,& softsign,_Tmp3,_Tmp4,
 # 484
 _fat_ptr_plus(_tag_fat(buf,sizeof(char),349U),sizeof(char),(int)(sizeof(buf)- 1U)));});
@@ -740,7 +740,7 @@ skipsize:
 goto done;
 # 614
 cp=_tag_fat(buf,sizeof(char),349U);
-({struct _fat_ptr _Tmp0=cp;char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=(char)ch;if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
+({struct _fat_ptr _Tmp0=cp;char _Tmp1=*((char*)_Tmp0.curr);char _Tmp2=(char)ch;if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
 size=1;
 sign='\000';
 goto _LL0;}_LL0:;
@@ -796,22 +796,22 @@ static struct _fat_ptr Cyc_exponent(struct _fat_ptr p,int exp,int fmtch){
 struct _fat_ptr t;
 char expbuffer[309U];({{unsigned _Tmp0=308U;unsigned i;for(i=0;i < _Tmp0;++ i){expbuffer[i]='0';}expbuffer[_Tmp0]=0;}0;});{
 struct _fat_ptr expbuf=_tag_fat(expbuffer,sizeof(char),309U);
-({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus_post(& p,sizeof(char),1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=(char)fmtch;if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
+({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus_post(& p,sizeof(char),1);char _Tmp1=*((char*)_Tmp0.curr);char _Tmp2=(char)fmtch;if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
 if(exp < 0){
 exp=- exp;
-({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus_post(& p,sizeof(char),1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2='-';if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});}else{
+({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus_post(& p,sizeof(char),1);char _Tmp1=*((char*)_Tmp0.curr);char _Tmp2='-';if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});}else{
 # 712
-({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus_post(& p,sizeof(char),1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2='+';if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});}
+({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus_post(& p,sizeof(char),1);char _Tmp1=*((char*)_Tmp0.curr);char _Tmp2='+';if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});}
 t=_fat_ptr_plus(expbuf,sizeof(char),308);
 if(exp > 9){
 do{
-({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus(& t,sizeof(char),-1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=(char)(exp % 10 + 48);if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});1U;}while((exp /=10)> 9);
+({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus(& t,sizeof(char),-1);char _Tmp1=*((char*)_Tmp0.curr);char _Tmp2=(char)(exp % 10 + 48);if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});1U;}while((exp /=10)> 9);
 # 718
-({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus(& t,sizeof(char),-1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=(char)(exp + 48);if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
-for(1;({char*_Tmp0=(char*)t.curr;_Tmp0 < (char*)_fat_ptr_plus(expbuf,sizeof(char),308).curr;});({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus_post(& p,sizeof(char),1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=*((char*)_fat_ptr_inplace_plus_post(& t,sizeof(char),1).curr);if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;})){;}}else{
+({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus(& t,sizeof(char),-1);char _Tmp1=*((char*)_Tmp0.curr);char _Tmp2=(char)(exp + 48);if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
+for(1;({char*_Tmp0=(char*)t.curr;_Tmp0 < (char*)_fat_ptr_plus(expbuf,sizeof(char),308).curr;});({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus_post(& p,sizeof(char),1);char _Tmp1=*((char*)_Tmp0.curr);char _Tmp2=*((char*)_fat_ptr_inplace_plus_post(& t,sizeof(char),1).curr);if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;})){;}}else{
 # 722
-({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus_post(& p,sizeof(char),1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2='0';if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
-({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus_post(& p,sizeof(char),1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=(char)(exp + 48);if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});}
+({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus_post(& p,sizeof(char),1);char _Tmp1=*((char*)_Tmp0.curr);char _Tmp2='0';if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
+({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus_post(& p,sizeof(char),1);char _Tmp1=*((char*)_Tmp0.curr);char _Tmp2=(char)(exp + 48);if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});}
 # 725
 return p;}}
 # 728
@@ -829,10 +829,10 @@ if((int)*((char*)_check_fat_subscript(end,sizeof(char),0U))==46)
 _fat_ptr_inplace_plus(& end,sizeof(char),-1);
 if((int)({struct _fat_ptr _Tmp0=end;char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=_Tmp1 + 1;if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;})<= 57)
 break;
-({struct _fat_ptr _Tmp0=end;char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2='0';if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
+({struct _fat_ptr _Tmp0=end;char _Tmp1=*((char*)_Tmp0.curr);char _Tmp2='0';if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
 if((char*)end.curr==(char*)start.curr){
 if((unsigned)exp){
-({struct _fat_ptr _Tmp0=end;char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2='1';if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
+({struct _fat_ptr _Tmp0=end;char _Tmp1=*((char*)_Tmp0.curr);char _Tmp2='1';if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
 ++(*exp);}else{
 # 751
 ({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus(& end,sizeof(char),-1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2='1';if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});

@@ -787,7 +787,7 @@ _IO_ungetc(c,fp);}
 if((flags & 8)==0){
 unsigned long res;
 # 668
-({struct _fat_ptr _Tmp0=p;char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2='\000';if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
+({struct _fat_ptr _Tmp0=p;char _Tmp1=*((char*)_Tmp0.curr);char _Tmp2='\000';if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
 if(use_strtoul)
 res=strtoul(buf,0,base);else{
 # 672

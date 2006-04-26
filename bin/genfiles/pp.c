@@ -472,9 +472,9 @@ return nlb;}else{
 # 168
 int total=3 + i;
 struct _fat_ptr nlb=Cyc_Core_new_string((unsigned)(total + 1));
-({struct _fat_ptr _Tmp4=_fat_ptr_plus(nlb,sizeof(char),0);char _Tmp5=*((char*)_check_fat_subscript(_Tmp4,sizeof(char),0U));char _Tmp6='\\';if(_get_fat_size(_Tmp4,sizeof(char))==1U &&(_Tmp5==0 && _Tmp6!=0))_throw_arraybounds();*((char*)_Tmp4.curr)=_Tmp6;});
-({struct _fat_ptr _Tmp4=_fat_ptr_plus(nlb,sizeof(char),1);char _Tmp5=*((char*)_check_fat_subscript(_Tmp4,sizeof(char),0U));char _Tmp6='\\';if(_get_fat_size(_Tmp4,sizeof(char))==1U &&(_Tmp5==0 && _Tmp6!=0))_throw_arraybounds();*((char*)_Tmp4.curr)=_Tmp6;});
-({struct _fat_ptr _Tmp4=_fat_ptr_plus(nlb,sizeof(char),2);char _Tmp5=*((char*)_check_fat_subscript(_Tmp4,sizeof(char),0U));char _Tmp6='\n';if(_get_fat_size(_Tmp4,sizeof(char))==1U &&(_Tmp5==0 && _Tmp6!=0))_throw_arraybounds();*((char*)_Tmp4.curr)=_Tmp6;});
+({struct _fat_ptr _Tmp4=_fat_ptr_plus(nlb,sizeof(char),0);char _Tmp5=*((char*)_Tmp4.curr);char _Tmp6='\\';if(_get_fat_size(_Tmp4,sizeof(char))==1U &&(_Tmp5==0 && _Tmp6!=0))_throw_arraybounds();*((char*)_Tmp4.curr)=_Tmp6;});
+({struct _fat_ptr _Tmp4=_fat_ptr_plus(nlb,sizeof(char),1);char _Tmp5=*((char*)_Tmp4.curr);char _Tmp6='\\';if(_get_fat_size(_Tmp4,sizeof(char))==1U &&(_Tmp5==0 && _Tmp6!=0))_throw_arraybounds();*((char*)_Tmp4.curr)=_Tmp6;});
+({struct _fat_ptr _Tmp4=_fat_ptr_plus(nlb,sizeof(char),2);char _Tmp5=*((char*)_Tmp4.curr);char _Tmp6='\n';if(_get_fat_size(_Tmp4,sizeof(char))==1U &&(_Tmp5==0 && _Tmp6!=0))_throw_arraybounds();*((char*)_Tmp4.curr)=_Tmp6;});
 {int j=3;for(0;j < total;++ j){
 ({struct _fat_ptr _Tmp4=_fat_ptr_plus(nlb,sizeof(char),j);char _Tmp5=*((char*)_check_fat_subscript(_Tmp4,sizeof(char),0U));char _Tmp6='~';if(_get_fat_size(_Tmp4,sizeof(char))==1U &&(_Tmp5==0 && _Tmp6!=0))_throw_arraybounds();*((char*)_Tmp4.curr)=_Tmp6;});}}
 ({void(*_Tmp4)(struct Cyc_Hashtable_Table*,int,struct _fat_ptr*)=({void(*_Tmp5)(struct Cyc_Hashtable_Table*,int,struct _fat_ptr*)=(void(*)(struct Cyc_Hashtable_Table*,int,struct _fat_ptr*))Cyc_Hashtable_insert;_Tmp5;});struct Cyc_Hashtable_Table*_Tmp5=(struct Cyc_Hashtable_Table*)_check_null(Cyc_PP_bhashtbl)->v;int _Tmp6=i;_Tmp4(_Tmp5,_Tmp6,({unsigned _Tmp7=1;({struct _fat_ptr*_Tmp8=_cycalloc(_check_times(_Tmp7,sizeof(struct _fat_ptr)));_Tmp8[0]=nlb;_Tmp8;});}));});
