@@ -873,7 +873,7 @@ void**val=({void**(*_Tmp8)(struct Cyc_Hashtable_Table*,struct _fat_ptr*,int(*)(s
 if((unsigned)val)
 *bd=*val;else{
 # 513
-*name=(const char*)_untag_fat_ptr(nn,sizeof(char),1U);
+({const char*_Tmp8=(const char*)_untag_fat_ptr_check_bound(nn,sizeof(char),1U);*name=_Tmp8;});
 ret=({struct Cyc_List_List*_Tmp8=_cycalloc(sizeof(struct Cyc_List_List));_Tmp8->hd=*bd,_Tmp8->tl=ret;_Tmp8;});
 if(!is_local)
 *id=-*id;else{

@@ -2230,12 +2230,12 @@ if(yychar <= 0){
 yychar1=0;
 yychar=0;}else{
 # 282
-yychar1=yychar > 0 && yychar <= 400?(int)*((short*)_check_known_subscript_notnull(Cyc_yytranslate,401U,sizeof(short),yychar)): 363;}
+yychar1=yychar > 0 && yychar <= 400?(int)Cyc_yytranslate[yychar]: 363;}
 # 299 "cycbison.simple"
 yyn +=yychar1;
-if((yyn < 0 || yyn > 8241)||(int)*((short*)_check_known_subscript_notnull(Cyc_yycheck,8242U,sizeof(short),yyn))!=yychar1)goto yydefault;
+if((yyn < 0 || yyn > 8241)||(int)Cyc_yycheck[yyn]!=yychar1)goto yydefault;
 # 302
-yyn=(int)*((short*)_check_known_subscript_notnull(Cyc_yytable,8242U,sizeof(short),yyn));
+yyn=(int)Cyc_yytable[yyn];
 # 309
 if(yyn < 0){
 # 311
@@ -4488,7 +4488,7 @@ struct _fat_ptr f=Cyc_yyget_String_tok(& yyyvsp[0].v);
 int l=(int)Cyc_strlen(f);
 int i=1;
 if(l > 0){
-char c=*((const char*)_check_fat_subscript(f,sizeof(char),l - 1));
+char c=((const char*)f.curr)[l - 1];
 if((int)c==102 ||(int)c==70)i=0;else{
 if((int)c==108 ||(int)c==76)i=2;}}
 # 3269
@@ -4605,7 +4605,7 @@ p[1].l.last_column=p[0].l.last_column;}else{
 yyn=(int)*((short*)_check_known_subscript_notnull(Cyc_yyr1,624U,sizeof(short),yyn));
 # 411
 yystate=({int _Tmp1=(int)*((short*)_check_known_subscript_notnull(Cyc_yypgoto,188U,sizeof(short),yyn - 175));_Tmp1 + (int)*((short*)_check_fat_subscript(yyss,sizeof(short),yyssp_offset));});
-if((yystate >= 0 && yystate <= 8241)&&(int)*((short*)_check_known_subscript_notnull(Cyc_yycheck,8242U,sizeof(short),yystate))==(int)((short*)yyss.curr)[yyssp_offset])
+if((yystate >= 0 && yystate <= 8241)&&(int)Cyc_yycheck[yystate]==(int)((short*)yyss.curr)[yyssp_offset])
 yystate=(int)Cyc_yytable[yystate];else{
 # 415
 yystate=(int)*((short*)_check_known_subscript_notnull(Cyc_yydefgoto,188U,sizeof(short),yyn - 175));}
@@ -4681,7 +4681,7 @@ yyerrhandle:
 if(yyn==-32768)goto yyerrdefault;
 # 525
 yyn +=1;
-if((yyn < 0 || yyn > 8241)||(int)*((short*)_check_known_subscript_notnull(Cyc_yycheck,8242U,sizeof(short),yyn))!=1)goto yyerrdefault;
+if((yyn < 0 || yyn > 8241)||(int)Cyc_yycheck[yyn]!=1)goto yyerrdefault;
 # 528
 yyn=(int)Cyc_yytable[yyn];
 if(yyn < 0){
@@ -4718,7 +4718,7 @@ if(token==387)
 return Cyc_Lex_token_string;
 if(token==396)
 return Cyc_Absynpp_qvar2string(Cyc_Lex_token_qvar);{
-int z=token > 0 && token <= 400?(int)*((short*)_check_known_subscript_notnull(Cyc_yytranslate,401U,sizeof(short),token)): 363;
+int z=token > 0 && token <= 400?(int)Cyc_yytranslate[token]: 363;
 if((unsigned)z < 363U)
 return*((struct _fat_ptr*)_check_known_subscript_notnull(Cyc_yytname,363U,sizeof(struct _fat_ptr),z));
 return _tag_fat(0,0,0);}}

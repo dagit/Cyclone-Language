@@ -1486,11 +1486,11 @@ static int range_of_term(graph_t @g, node_t @`H t){
   // 0 - u[t] <= MININT, so u[t] > MAXINT
   let dist = lookup_dist(zero_node,t,false);
   if (dist != NULL && (unsigned) *dist == MININT)
-    return 1;
+    return -1;
   // u[t] - 0 <= MAXINT, so u[t] <= MAXINT
   let dist = lookup_dist(t,zero_node,false);
   if (dist != NULL && (unsigned) *dist <= MAXINT)
-    return -1;
+    return 1;
   // 0 - s[t] <= 0, so s[t] >= 0
   let dist = lookup_dist(zero_node,t,true);
   if (dist != NULL && *dist <= 0) 

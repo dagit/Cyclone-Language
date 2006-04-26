@@ -647,7 +647,7 @@ if(n > 0 &&(int)((const char*)s.curr)[n]==0)-- n;{
 # 335
 int len=0;
 {int i=0;for(0;i <= n;++ i){
-char _Tmp0=((const char*)s.curr)[i];char _Tmp1;switch((int)_Tmp0){case 7:
+char _Tmp0=*((const char*)_check_fat_subscript(s,sizeof(char),i));char _Tmp1;switch((int)_Tmp0){case 7:
  goto _LL4;case 8: _LL4:
  goto _LL6;case 12: _LL6:
  goto _LL8;case 10: _LL8:

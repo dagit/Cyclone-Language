@@ -924,7 +924,7 @@ if(Cyc_Flags_compile_for_boot){
 # 753
 int last_slash=-1;
 {int i=(int)(Cyc_strlen(_tag_fat(buf,sizeof(char),100U))- 1U);for(0;i >= 0;-- i){
-if((int)buf[i]==47){
+if((int)*((char*)_check_known_subscript_notnull(buf,100U,sizeof(char),i))==47){
 last_slash=i;
 break;}}}
 # 759
