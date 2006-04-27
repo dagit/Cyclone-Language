@@ -2079,9 +2079,9 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
-GCC_VERSION=`$CC --version`
+GCC_VERSION=`$CC -dumpversion`
 case "$GCC_VERSION" in
-  gcc*4.*)
+  4.*)
     echo "**********************************************************************"
     echo "***"
     echo "*** CONFIGURATION FAILED"

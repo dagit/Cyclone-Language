@@ -52,7 +52,7 @@ CYCTESTS=arg_suite.h				\
   union_suite.h					\
   xarray_suite.h
 
-all: $(EXES) failtest 
+all: $(EXES) 
 	./test_regions
 	./test_currgn
 	./cyctest
@@ -77,6 +77,7 @@ all: $(EXES) failtest
 	./rc
 	./testasm
 	./testbget
+#	failtest 
 ifeq ($(HAVE_PTHREAD),yes)
 	./testexn
 endif

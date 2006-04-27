@@ -55,9 +55,9 @@ if [[ "$CC" = "" ]]; then
 CFLAGS=    # prevents AC_PROG_CC from setting CFLAGS=-g -O2
 AC_PROG_CC(gcc-3.4 gcc-3.3 gcc-3.2 gcc-3.1 gcc-3.0 gcc)
 
-GCC_VERSION=`$CC --version`
+GCC_VERSION=`$CC -dumpversion`
 case "$GCC_VERSION" in
-  gcc*4.*)
+  4.*)
     echo "**********************************************************************"
     echo "***"
     echo "*** CONFIGURATION FAILED"
