@@ -1,5 +1,5 @@
 AC_INIT([[cyclone]],
-        [[0.8.2]],
+        [[1.0]],
         [[cyclone-bugs-l@lists.cs.cornell.edu]])
 # Look into the config subdir to find config.guess, config.sub, install-sh
 AC_CONFIG_AUX_DIR(config)
@@ -46,9 +46,37 @@ case "$build_os" in
 esac
 AC_SUBST(abs_srcdir)
 
+
+# GCC check
+# If CC is set explicitly, then don't force check for 3.4 etc.
+if [[ "$CC" = "" ]]; then
+
 # Figure out compiler characteristics
 CFLAGS=    # prevents AC_PROG_CC from setting CFLAGS=-g -O2
+AC_PROG_CC(gcc-3.4 gcc-3.3 gcc-3.2 gcc-3.1 gcc-3.0 gcc)
+
+GCC_VERSION=`$CC --version`
+case "$GCC_VERSION" in
+  gcc*4.*)
+    echo "**********************************************************************"
+    echo "***"
+    echo "*** CONFIGURATION FAILED"
+    echo "***"
+    echo "*** It looks like your C compiler is gcc, version 4."
+    echo "*** Cyclone does not work with version 4 of gcc."
+    echo "*** Please try gcc version 3."
+    echo "*** (You can install gcc version 3 without removing gcc version 4.)"
+    echo "***"
+    echo "*** See http://cyclone.thelanguage.org/wiki/GCC for more information."
+    echo "***"
+    echo "**********************************************************************"
+    exit 1
+  ;;
+esac
+
+else
 AC_PROG_CC
+fi # end of GCC check
 
 # Special cases -- these are for compiling the bin/genfiles
 if [[ "$build_vendor" = "apple" ]]; then
