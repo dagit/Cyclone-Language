@@ -625,6 +625,7 @@ clean_nogc: clean_test clean_build
 	$(MAKE) -C tools/aprof  clean
 	$(MAKE) -C tools/errorgen clean
 	$(MAKE) -C tools/stringify clean
+	$(MAKE) -C tools/yakker clean
 	$(MAKE) -C tests        clean
 #	$(MAKE) -C doc          clean
 	$(MAKE) -C lib/xml      clean
