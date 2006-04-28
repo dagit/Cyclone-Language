@@ -141,23 +141,16 @@ void foo() { $(; } /* expecting TYPE_LIST, EXPRESSION_LIST, or ')' */
 void foo() { $(x; } /* expecting ')' */
 void foo() { 3 ? 42; } /* missing ':' EXPRESSION */
 void foo() { 3 ?; /* missing EXPRESSION or extra '?' */
-void foo() { 3 + ; } /* missing EXPRESSION or extra '+' */
-void foo() { 3 - ; } /* missing EXPRESSION or extra '-' */
-void foo() { 3 * ; } /* missing EXPRESSION or extra '*' */
-void foo() { 3 / ; } /* missing EXPRESSION or extra '/' */
+void foo() { 3 + ; } /* missing EXPRESSION or extra operator */
+void foo() { 3 * ; } /* missing EXPRESSION or extra operator */
 void foo() { 3 | ; } /* missing EXPRESSION or extra '|' */
 void foo() { 3 & ; } /* missing EXPRESSION or extra '&' */
 void foo() { 3 ^ ; } /* missing EXPRESSION or extra '^' */
 void foo() { &; } /* missing EXPRESSION or extra '&' */
-void foo() { 3 ==; } /* missing EXPRESSION or extra '==' */
-void foo() { 3 !=; } /* missing EXPRESSION or extra '!=' */
-void foo() { 3 <; } /* missing EXPRESSION or extra '<' */
-void foo() { 3 <=; } /* missing EXPRESSION or extra '<=' */
-void foo() { 3 >; } /* missing EXPRESSION or extra '>' */
-void foo() { 3 >=; } /* missing EXPRESSION or extra '>=' */
+void foo() { 3 ==; } /* missing EXPRESSION or extra operator */
+void foo() { 3 <; } /* missing EXPRESSION or extra operator */
 void foo() { 3 >>; } /* missing EXPRESSION or extra '>>' */
 void foo() { 3 <<; } /* missing EXPRESSION or extra '<<' */
-void foo() { 3 %; } /* missing EXPRESSION or extra '%' */
 void foo() { 3 = int; } /* expecting EXPRESSION */
 void foo() { ++int; } /* expecting EXPRESSION */
 void foo() { x[int; } /* expecting EXPRESSION */ 
