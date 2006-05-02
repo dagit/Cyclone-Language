@@ -2,7 +2,7 @@ Cyclone Release Notes:
 
 This file explains some of the changes that occurred in between releases.
 ----------------------------------------------------------------------
-Changes going from Version 0.8.1 dated June 2004, to version 1.0 dated
+Changes going from Version 0.9 dated May 2005, to version 1.0 dated
 April 2006.
 
 * vcgen is much improved --- includes @assert, interprocedural
