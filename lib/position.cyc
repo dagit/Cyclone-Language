@@ -31,9 +31,7 @@ static $(string_t, unsigned int) seg_to_loc(seg_t seg);
 bool use_gcc_style_location = true;
 
 /////////// Location tracking ///////////
-static unsigned int curmask = 0;
-static list_t<$(string_t, unsigned int)@> sourcemask = NULL;
-//static string_t source = ""; // initialized by overall control
+static string_t source = ""; // initialized by overall control
 
 seg_t segment_join(seg_t s1, seg_t s2) { 
   if(s1 == 0) return s2;
@@ -106,18 +104,10 @@ string_t get_desc(error_t e) {
 }
 
 //////////// Overall Control ///////////
-void reset_position(string_t<`H> s)    { 
-  sourcemask = new List{ new $(s, curmask++), sourcemask};
-}
-void set_position_file(string_t<`H> s) { 
-  reset_position(s);
-  //  source = s;
-}
-string_t get_position_file() { 
-  if(sourcemask) 
-    return sourcemask->hd->f0; 
-  return ""; 
-}
+void reset_position(string_t<`H> s)    { source = s; }
+void set_position_file(string_t<`H> s) { source = s; }
+string_t get_position_file() { return source; }
+
 string_t get_line_directive(seg_t s) {
   let $(source, loc) = seg_to_loc(s);
   if(source) {
@@ -128,29 +118,10 @@ string_t get_line_directive(seg_t s) {
   return NULL;
 }
 
-#define N_MASK_BITS 8
-
 seg_t loc_to_seg(unsigned int loc) {
-  unsigned int mask = sourcemask ? sourcemask->hd->f1 : 0;
-  seg_t res = ((loc << N_MASK_BITS) | (mask & 0x000000ff));
-  //fprintf(stderr, "Got loc %u, mask %u, returning %u", loc, mask, res);
-  return res;
+  return loc;
 }
 
 static $(string_t, unsigned int) seg_to_loc(seg_t seg) {
-  bool can_retry = true;
- retry:
-  unsigned smask = (seg & 0x000000ff);
-  string_t source = NULL;
-  for(_ sm = sourcemask; sm != NULL; sm = sm->tl) {
-    if(smask == sm->hd->f1) {
-      return $(sm->hd->f0, (seg >> N_MASK_BITS));
-    }
-  }
-  if(can_retry) {
-    can_retry = false;
-    seg=loc_to_seg(seg);
-    goto retry;
-  }
-  return $("", seg);
+  return $(source, seg);
 }
