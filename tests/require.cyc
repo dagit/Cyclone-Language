@@ -4,7 +4,7 @@
 // they are simple conjunction of predicates that compare static
 // expressions, including valueof(`i) where `i is an integer-kinded
 // type variable.  Here's a simple example:
-union U<`tag> {
+union U<`tag::I> {
   int i    @requires(valueof(`tag) == 1 + 0 - 2 + 2);  
   int *j   @requires(valueof(`tag) > 1);
   const char ?k  @requires(valueof(`tag) < 1);
@@ -25,16 +25,16 @@ union U<valueof_t(1)> foo() {
 
 // Here's an example where we return a different U depending upon
 // what a tag is.
-union U<`i> bar(tag_t<`i> i) {
-  union U<`i> res;
-  if (i == 1)
-    res = U{.i = 42};
-  else if (i < 1)
-    res.k = "Hello";
-  else
-    res = U{.j = new 3};
-  return res;
-}
+// union U<`i> bar(tag_t<`i> i) {
+//   union U<`i> res;
+//   if (i == 0)
+//     res = U{.i = 42};
+//   else if (i == 2)
+//     res.k = "Hello";
+//   else if (i == 1)
+//     res = U{.j = new 3};
+//   return res;
+// }
     
 // You can package up a U value with a run-time representation of the
 // tag, using an existential to hide the type-name for the tag:
@@ -53,12 +53,12 @@ void print_tu(tu_t tu) {
   let TaggedU{<`i> tag,value} = tu;
   if (tag == 1) 
     printf("it's an int: %d\n",value->i);
-  else if (tag == 2)
-    printf("it's a special int pointer: %d\n",*(value->j));
-  else if (tag > 1)
-    printf("it's a normal int pointer: %d\n",*(value->j));
-  else 
-    printf("it's a string: %s\n",value->k);
+//   else if (tag == 2)
+//     printf("it's a special int pointer: %d\n",*(value->j));
+//   else if (tag > 1)
+//     printf("it's a normal int pointer: %d\n",*(value->j));
+//   else 
+//     printf("it's a string: %s\n",value->k);
 }
 
 tu_t create_int(int i) {

@@ -21,7 +21,6 @@
 #include "warn.h"
 #include "absynpp.h"
 #include "evexp.h"
-#include "relations-ap.h"
 #include "tcutil.h"
 #include "kinds.h"
 #include "attributes.h"

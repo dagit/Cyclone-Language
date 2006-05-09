@@ -19,6 +19,7 @@
 #include <set.h>
 #include <dict.h>
 #include <string.h>
+#include "absyn.h"
 #include "tcutil.h"
 #include "kinds.h"
 #include "absynpp.h"
@@ -44,6 +45,8 @@ void aerr(Position::seg_t loc, string_t fmt, ... inject parg_t ap)
 
 ////////////////////////// Shared Constants //////////////////////////
 datacon(Absyn::AbsynAnnot,IsZero);
+datacon(Absyn::AbsynAnnot,NotZero);
+datacon(Absyn::AbsynAnnot,UnknownZ);
 absLval_t PlaceL(place_t x) {
   return AbsLVal{.PlaceL = x};
 }
@@ -51,8 +54,8 @@ absLval_t UnknownL() {
   return AbsLVal{.UnknownL = 0};
 }
 flow_t BottomFL() { return FlowInfo{.BottomFL = 0}; }
-flow_t ReachableFL(flowdict_t fd,Relations::relns_t<`H> r) {
-  return FlowInfo{.ReachableFL = $(fd,r) };
+flow_t ReachableFL(flowdict_t fd) {
+  return FlowInfo{.ReachableFL = fd};
 }
 
 flow_env_t new_flow_env() {
@@ -69,7 +72,6 @@ flow_env_t new_flow_env() {
               .dummy_place = new Place(new MallocPt(&dummy_exp,void_type),NULL)
             };
 }
-
 // creates a string to identify the given place in error messages
 string_t place_err_string(place_t place) {
   let Place{root,fields} = *place;
@@ -507,7 +509,9 @@ static initlevel_t initlevel_approx(absRval_t r) {
   case &Zero:
   case &NotZeroAll:    return AllIL;
   case &Consumed(_,_,r,_): return NoneIL;
-  default: Warn::impos("initlevel_approx");
+  default: 
+    print_absrval(r);
+    Warn::impos("initlevel_approx");
   }
 }
 static initlevel_t initlevel_rec(struct InitlevelEnv @ env,
@@ -922,16 +926,15 @@ flow_t join_tryflow(flow_env_t fenv, flow_t newflow, flow_t oldflow){
   switch($(newflow,oldflow)) {
   case $({.BottomFL = _},_): return oldflow;
   case $(_,{.BottomFL = _}): return newflow;
-  case $({.ReachableFL = $(d1,r1)}, {.ReachableFL = $(d2,r2)}):
+  case $({.ReachableFL = d1}, {.ReachableFL = d2}):
     // A lot of computation to avoid allocation, but profiling suggests
     // that's the right thing to do.
-    if(d1.t == d2.t && r1 == r2) return newflow;
+    if(d1.t == d2.t) return newflow;
     if(flow_lessthan_approx(newflow,oldflow)) return oldflow;
     if(flow_lessthan_approx(oldflow,newflow)) return newflow;
     let env     = JoinEnv(fenv, new EscPile(NULL),d1,d2,true);
     let outdict = Dict::intersect_c(join_absRval_tryflow,&env,d1,d2);
-    let r       = Relations::join_relns(Core::heap_region,r1,r2);
-    return ReachableFL(escape_these(fenv, env.pile, outdict),r);
+    return ReachableFL(escape_these(fenv, env.pile, outdict));
   }
 }
 
@@ -940,16 +943,15 @@ flow_t join_flow(flow_env_t fenv, flow_t f1, flow_t f2){
   switch($(f1,f2)) {
   case $({.BottomFL = _},_): return f2;
   case $(_,{.BottomFL = _}): return f1;
-  case $({.ReachableFL = $(d1,r1)}, {.ReachableFL = $(d2,r2)}):
+  case $({.ReachableFL = d1}, {.ReachableFL = d2}):
     // A lot of computation to avoid allocation, but profiling suggests
     // that's the right thing to do.
-    if(d1.t == d2.t && r1 == r2)    return f1;
+    if(d1.t == d2.t)    return f1;
     if(flow_lessthan_approx(f1,f2)) return f2;
     if(flow_lessthan_approx(f2,f1)) return f1;
     let env     = JoinEnv(fenv, new EscPile(NULL),d1,d2,false);
     let outdict = Dict::intersect_c(join_absRval,&env,d1,d2);
-    let r       = Relations::join_relns(Core::heap_region,r1,r2);
-    return ReachableFL(escape_these(fenv, env.pile, outdict),r);
+    return ReachableFL(escape_these(fenv, env.pile, outdict));
   }
 }
 
@@ -964,14 +966,13 @@ $(flow_t,absRval_t) join_flow_and_rval(flow_env_t fenv,
   switch($(f1,f2,outflow)) {
   case $({.BottomFL = _},_,_): return $(outflow,r2);
   case $(_,{.BottomFL = _},_): return $(outflow,r1);
-  case $({.ReachableFL = $(d1,_)},{.ReachableFL = $(d2,_)},
-	 {.ReachableFL = $(outd,relns)}):
+  case $({.ReachableFL = d1},{.ReachableFL = d2},
+	 {.ReachableFL = outd}):
     if(absRval_lessthan_approx(0,r1,r2)) return $(outflow,r2);
     if(absRval_lessthan_approx(0,r2,r1)) return $(outflow,r1);
     let env  = JoinEnv(fenv, new EscPile(NULL),d1,d2,false);
     let outr = join_absRval(&env,0,r1,r2);
-    return $(ReachableFL(escape_these(fenv, env.pile,outd),
-			 relns), outr);
+    return $(ReachableFL(escape_these(fenv, env.pile,outd)), outr);
   default: Warn::impos("join_flow_and_rval: BottomFL outflow");
   }
 }
@@ -1028,10 +1029,9 @@ bool flow_lessthan_approx(flow_t f1, flow_t f2) {
   switch($(f1,f2)) {
   case $({.BottomFL = _},_): return true;
   case $(_,{.BottomFL = _}): return false;
-  case $({.ReachableFL = $(d1,r1)},{.ReachableFL = $(d2,r2)}):
-    if(d1.t == d2.t && r1 == r2) return true;
-    return Dict::forall_intersect(absRval_lessthan_approx,d1,d2) &&
-      Relations::relns_approx(r1,r2);
+  case $({.ReachableFL = d1},{.ReachableFL = d2}):
+    if(d1.t == d2.t) return true;
+    return Dict::forall_intersect(absRval_lessthan_approx,d1,d2);
   }
 }
 
@@ -1150,11 +1150,9 @@ void print_flowdict(flowdict_t d) {
 void print_flow(flow_t f) {
   switch (f) {
   case {.BottomFL = _}: fprintf(stderr,"  BottomFL\n"); break;
-  case {.ReachableFL = $(fd,rlns)}:
+  case {.ReachableFL = fd}:
     fprintf(stderr,"  ReachableFL:\n");
     print_flowdict(fd);
-    fprintf(stderr,"\n  Relations: ");
-    Relations::print_relns(stderr,rlns);
     fprintf(stderr,"\n");
     break;
   }

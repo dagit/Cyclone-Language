@@ -22,7 +22,6 @@
 #include <set.h>
 #include <dict.h>
 #include "absyn.h"
-#include "relations-ap.h"
 
 // Note: Okasaki's dictionaries may be the wrong thing here because
 //       we're doing a lot of intersections.  I don't know what's better,
@@ -81,10 +80,12 @@ typedef enum InitLevel initlevel_t;
 
 @extensible datatype Absyn::AbsynAnnot {
   EXTERN_CFFLOW IsZero;
-  EXTERN_CFFLOW NotZero(Relations::relns_t);
-  EXTERN_CFFLOW UnknownZ(Relations::relns_t);
+  EXTERN_CFFLOW NotZero;
+  EXTERN_CFFLOW UnknownZ;
 };
 extern_datacon(Absyn::AbsynAnnot,IsZero);
+extern_datacon(Absyn::AbsynAnnot,NotZero);
+extern_datacon(Absyn::AbsynAnnot,UnknownZ);
 
 EXTERN_CFFLOW @tagged union AbsLVal {
   place_t PlaceL;
@@ -136,11 +137,11 @@ EXTERN_CFFLOW datatype AbsRVal {
 // join takes the intersection of the dictionaries.
 EXTERN_CFFLOW @tagged union FlowInfo {
   int BottomFL; // int unused
-  $(flowdict_t,Relations::relns_t) ReachableFL;
+  flowdict_t ReachableFL;
 };
 typedef union FlowInfo flow_t;
 extern flow_t BottomFL();
-extern flow_t ReachableFL(flowdict_t,Relations::relns_t<`H>);
+extern flow_t ReachableFL(flowdict_t);
 
   // FIX: get rid of this since we heap-allocate!
 EXTERN_CFFLOW struct FlowEnv {

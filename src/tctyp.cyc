@@ -24,7 +24,6 @@
 #include "evexp.h"
 #include "tcexp.h"
 #include "tc.h"
-#include "relations-ap.h"
 #include "warn.h"
 #include "flags.h"
 #include "tctyp.h"

@@ -36,6 +36,7 @@
 */
 #include <string.h>
 //#include "rgnorder.h"
+#include "absyn.h"
 #include "tcutil.h"
 #include "warn.h"
 #include "kinds.h"

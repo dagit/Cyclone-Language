@@ -136,7 +136,6 @@ CYCLONE_SRCS:=absyn\
 	 attributes\
          tcutil\
          tctyp\
-         relations-ap\
          tcstmt\
          tcpat\
          tcexp\
@@ -147,7 +146,6 @@ CYCLONE_SRCS:=absyn\
 	 currgn\
          binding\
 	 interproc\
-         pratt-ap\
          jump_analysis\
          cf_flowinfo\
          new_control_flow\
@@ -183,7 +181,6 @@ CYCDOC_SRCS:=cycdoc\
 	tcutil\
 	kinds\
 	tctyp\
-        relations-ap\
 	tcenv\
 	tcexp\
 	currgn\
@@ -195,7 +192,6 @@ CYCDOC_SRCS:=cycdoc\
 	toc\
 	cifc\
 	tcdecl\
-        pratt-ap\
         jump_analysis\
 	new_control_flow\
         assndef\
@@ -222,7 +218,6 @@ BUILDLIB_SRCS:=buildlib\
 	tcutil\
 	tctyp\
 	absynpp\
-        relations-ap\
         callgraph\
 	tc\
 	cifc\
@@ -235,7 +230,6 @@ BUILDLIB_SRCS:=buildlib\
 	evexp\
 	tcenv\
 	tcpat\
-        pratt-ap\
         jump_analysis\
 	new_control_flow\
 	assndef\

@@ -40,6 +40,7 @@ namespace PrattProver;
 #define MAXINT (0x7FFFFFFF)
 #define MININT (-MAXINT-1)
 #define MAXUINT (0xFFFFFFFF)
+#define intsize_minus_one (31)
 //#define PROVER_DEBUG
 
 /**********************************************************************
@@ -497,10 +498,9 @@ static graph_t *graph_append(graph_t *`H g1, graph_t *`H g2) {
 //checking if the sum or difference of two signed integers overflowed
 //assuming size of intger as sizeofint (32),assumming the highest bit
 //as the sign bit.
-#define sizeofint 32;
 static inline $(bool, int) is_signed_overflow(int c1, int c2){
   int sum = c1 + c2;
-  if ((~(c1 ^ c2) & (sum ^ c1)) >> 31){
+  if ((~(c1 ^ c2) & (sum ^ c1)) >> intsize_minus_one){
     //overflow happened
     if (sum > 0) return $(true,-1); //an underflow
     else return $(true,1); //an overflow

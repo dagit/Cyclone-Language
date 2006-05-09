@@ -19,7 +19,6 @@
 #ifndef _TCUTIL_H_
 #define _TCUTIL_H_
 
-#include "relations-ap.h"
 //#include "rgnorder.h"
 
 namespace Tcutil {
@@ -260,8 +259,6 @@ type_t any_bounds(list_t<tvar_t,`H>);
 
   // This stuff is used only by tctyp -- still fleshing out these boundaries
   bool admits_zero(type_t);
-  void replace_rops(list_t<$(var_opt_t,tqual_t,type_t)@>, 
-		    Relations::reln_t);
   int fast_tvar_cmp(tvar_t,tvar_t);
 
   // This stuff is used only by unify and tcutil

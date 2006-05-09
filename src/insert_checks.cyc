@@ -50,7 +50,6 @@ using Absynpp;
 using Absyn;
 using Warn;
 using Core;
-using Relations;
 namespace InsertChecks;
 
 @extensible datatype Absyn::AbsynAnnot {
@@ -184,8 +183,8 @@ static bool need_null_check(env_t nv, exp_t e, exp_t e0) {
   default: impos_loc(e->loc,"need_null_check: non-pointer type");
   }
   switch(e->annot) {
-  case &CfFlowInfo::UnknownZ(_): break;
-  case &CfFlowInfo::NotZero(_):  
+  case &CfFlowInfo::UnknownZ: break;
+  case &CfFlowInfo::NotZero:  
     ++flow_eliminated_null_checks;
     return false;
   case &CfFlowInfo::IsZero:
@@ -204,16 +203,6 @@ static bool need_null_check(env_t nv, exp_t e, exp_t e0) {
   //if(Flags::warn_all_null_deref)
   //  warn(e->loc,"inserted null check");
   return true;
-}
-
-static relns_t get_relns(exp_t e) {
-  switch (e->annot) {
-  case &CfFlowInfo::UnknownZ(r): return r;
-  case &CfFlowInfo::NotZero(r):  return r;
-  case &CfFlowInfo::IsZero: return NULL; // need_null_check will report error
-  case &EmptyAnnot: return NULL;
-  default: impos_loc(e->loc,"get_relns: unexpected annotation");
-  }
 }
 
 // just gets the common case that i is a constant and a's size is constant
@@ -240,85 +229,6 @@ static bool simple_need_bounds_check(env_t nv, exp_t a, exp_t i) {
   // hooray -- we can eliminate the check
   ++types_eliminated_bounds_checks;
   return false;
-}
-
-// NOT CURRENTLY USED -- around for comparison's sake.
-// return false if we can prove from relns that i < numelts(a)
-//  FIX: doesn't deal with the case where i is a constant and a's size
-//  can be found.
-static bool need_bounds_check(env_t nv, relns_t<`H> relns, exp_t a, exp_t i) {
-  if(nv.in_sizeof)
-    return false;
-  if(nv.at_toplevel) // may change if allow fat-to-thin at toplevel
-    impos_loc(a->loc,"InsertChecks: memory read at top-level");
-#ifdef BCE_DEBUG
-  fprintf(stderr,"bounds check on %s:%s and %s\n",exp2string(a),
-          typ2string((type_t)a->topt),exp2string(i));
-  fprintf(stderr,"relns: ["); print_relns(stderr,relns);
-  fprintf(stderr,"]\n");
-#endif
-  bool bd_valid = false; reln_op_t rop_bd = RConst(0);
-  bool a_valid  = false; reln_op_t rop_a  = RConst(0);
-  bool i_valid  = false; reln_op_t rop_i  = RConst(0);
-  bool z_valid  = false; reln_op_t rop_z  = RConst(0);
-
-  // if a's type is T*{e}, T@{e}, or T[e] then e may be a good rop_bd
-  exp_opt_t bound = Tcutil::get_type_bound((type_t)a->topt);
-  if (bound != NULL)
-    bd_valid = exp2relnop(bound,&rop_bd);
-  // if a is an unescaped variable, its size is a good rop_a
-  switch (a->r) {
-  case &Var_e(b):
-    let x = Tcutil::nonesc_vardecl(b);
-    if (x != NULL) {
-      a_valid = true;
-      rop_a = RNumelts(x);
-    }
-    break;
-  default: break;
-  }
-  // i may be good
-  i_valid = exp2relnop(i,&rop_i);
-  // if i is not good, maybe z is
-  if(!i_valid) {
-  inner_loop:
-    switch(i->r) {
-    case &Cast_e(t,e2,_,_): i = e2; goto inner_loop;
-    case &Primop_e(Mod,&List::List(e1,&List::List(e2,_))): // we have x[e1 % e2]
-      z_valid = exp2relnop(e2,&rop_z); break; //if e2 <= numelts(x) then it's ok
-    default: break;
-    }
-  }
-
-  // add the relations we can and check for inconsistency
-  reln_op_t rop_left;
-#ifdef BCE_DEBUG
-    fprintf(stderr,"bd_valid=%d, a_valid=%d, i_valid=%d, z_valid=%d\n",bd_valid,a_valid,i_valid,z_valid);
-#endif BCE_DEBUG
-  if(!bd_valid && !a_valid)
-    return true;
-  if(bd_valid && a_valid) {
-    relns = add_relation(heap_region,rop_bd,Rlte,rop_a,relns);
-    rop_left = rop_a;
-  } else if(a_valid) 
-    rop_left = rop_a;
-  else 
-    rop_left = rop_bd;
-  
-  if     (i_valid) relns = add_relation(heap_region,rop_left,Rlte,rop_i,relns);
-  else if(z_valid) relns = add_relation(heap_region,rop_left,Rlt, rop_z,relns);
-  else             return true;
-#ifdef BCE_DEBUG
-  fprintf(stderr,"checking consistency of: "); 
-  print_relns(stderr,relns);
-#endif
-  bool ans = consistent_relations(relns); 
-#ifdef BCE_DEBUG
-  fprintf(stderr," -- answer is %s\n",ans ? "true" : "false");
-#endif
-  //if(Flags::warn_bounds_checks && ans)
-  //  warn(a->loc,"(old relns) inserted bounds check (location is pointer expression)");
-  return ans;
 }
 
 static void do_stmt(env_t,stmt_t);

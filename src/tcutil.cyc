@@ -24,7 +24,6 @@
 #include "flags.h"
 #include "evexp.h"
 #include "unify.h"
-#include "relations-ap.h"
 #include "tcutil.h"
 #include "attributes.h"
 #include "assndef.h"
@@ -2081,58 +2080,6 @@ type_t fndecl2type(fndecl_t fd) {
     return new FnType(type_info);
   }
   return (type_t)fd->cached_type;
-}
-
-// given a list of arguments for a function type, replace occurrences
-// of the variables in the relational operand with the parameter number.
-// As a special case, we have to replace "return_value" with RResult.
-static void replace_rop(list_t<$(var_opt_t,tqual_t,type_t)@> args, 
-                        Relations::reln_op_t@ rop) {
-  switch (*rop) {
-  case {.RVar = vd}: 
-    let $(nmspace,var) = *vd->name;
-    if (!tagcheck(nmspace.Loc_n)) break;
-    if (strcmp(*var,"return_value") == 0) {
-      *rop = Relations::RReturn();
-      break;
-    }
-    unsigned int c = 0;
-    for (let a = args; a != NULL; a = a->tl, c++) {
-      let &$(vopt,_,_) = a->hd;
-      if (vopt != NULL && strcmp(*var,*vopt) == 0) {
-	*rop = Relations::RParam(c);
-	break;
-      }
-    }
-    break;
-  case {.RNumelts = vd}:
-    let $(nmspace,var) = *vd->name;
-    if (!tagcheck(nmspace.Loc_n)) break;
-    unsigned int c = 0;
-    for (let a = args; a != NULL; a = a->tl, c++) {
-      let &$(vopt,_,_) = a->hd;
-      if (vopt != NULL && strcmp(*var,*vopt) == 0) {
-	*rop = Relations::RParamNumelts(c);
-	break;
-      }
-    }
-    break;
-  default: break;
-  }
-}
-
-void replace_rops(list_t<$(var_opt_t,tqual_t,type_t)@> args, 
-		  Relations::reln_t r) {
-  replace_rop(args,&r->rop1);
-  replace_rop(args,&r->rop2);
-}
-
-static Relations::relns_t 
-extract_relns(list_t<$(var_opt_t,tqual_t,type_t)@> args, exp_opt_t e) {
-  if (e == NULL) return NULL;
-  let relns = Relations::exp2relns(heap_region, e);
-  List::iter_c(replace_rops, args, relns);
-  return relns;
 }
 
 // Substitution stuff

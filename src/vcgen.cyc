@@ -1546,7 +1546,7 @@ static bool unsigned_comparison(exp_t e1, exp_t e2) {
 
 // generating assnmap for when e evaluates to true and when e evalutes to false
 static $(assn_map_t,assn_map_t) vcgen_test(env_t env, exp_t e, assn_map_t ain){
-    switch (e->r) {
+  switch (e->r) {
   case &Absyn::Conditional_e(e1,e2,e3):
     let $(a1t,a1f) = vcgen_debug_test(env,e1,ain);
     let $(a2t,a2f) = vcgen_debug_test(env,e2,a1t);
@@ -1609,6 +1609,20 @@ static $(assn_map_t,assn_map_t) vcgen_test(env_t env, exp_t e, assn_map_t ain){
       break;
     }
     return $(at,af);
+  case &Absyn::Cast_e(tp,e1,_,_):
+    switch $(Absyn::compress(tp),Absyn::compress((type_t)e1->topt)) {
+      // this case lets us drop a cast when they are two integers and the
+      // size is the same.
+    case $(&Absyn::AppType(&Absyn::IntCon(u1,s1),_),&Absyn::AppType(&Absyn::IntCon(u2,s2),_)):
+      //wangyl: a hack to tell compiler that long and int have the same size
+      //FIX: this is machine dependent!
+      s1 = (s1 == Absyn::Long_sz? Absyn::Int_sz:s1);
+      s2 = (s2 == Absyn::Long_sz? Absyn::Int_sz:s2);
+      if (s1 == s2) return vcgen_debug_test(env,e1,ain);
+      break;
+    default: break;
+    }
+    fallthru();
   default:
     let $(t,aout) = vcgen_debug_rexp(env,e,ain);
     switch (t) {

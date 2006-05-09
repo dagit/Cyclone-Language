@@ -42,11 +42,6 @@
 #include <list.h>
 #include <position.h>
 
-namespace Relations {
-  struct Reln; // see relations-ap.h
-  typedef struct Reln@`r reln_t<`r>;
-  typedef List::list_t<reln_t<`r>,`r> relns_t<`r>;
-}
 namespace AssnDef { // see assndef.h
   extern struct ExistAssnFn;
   typedef struct ExistAssnFn *existassnfn_opt_t;

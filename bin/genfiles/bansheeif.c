@@ -383,15 +383,15 @@ extern int Cyc_fprintf(struct Cyc___cycFILE*,struct _fat_ptr,struct _fat_ptr);
 extern int Cyc_strcmp(struct _fat_ptr,struct _fat_ptr);
 # 36 "position.h"
 extern struct _fat_ptr Cyc_Position_string_of_loc(unsigned);
-# 186 "absyn.h"
+# 181 "absyn.h"
 enum Cyc_Absyn_AliasHint{Cyc_Absyn_UniqueHint =0U,Cyc_Absyn_RefcntHint =1U,Cyc_Absyn_RestrictedHint =2U,Cyc_Absyn_NoHint =3U};
-# 192
+# 187
 enum Cyc_Absyn_KindQual{Cyc_Absyn_AnyKind =0U,Cyc_Absyn_MemKind =1U,Cyc_Absyn_BoxKind =2U,Cyc_Absyn_EffKind =3U,Cyc_Absyn_IntKind =4U,Cyc_Absyn_BoolKind =5U,Cyc_Absyn_PtrBndKind =6U,Cyc_Absyn_AqualKind =7U};struct Cyc_Absyn_Kind{enum Cyc_Absyn_KindQual kind;enum Cyc_Absyn_AliasHint aliashint;};struct Cyc_Absyn_Cvar_Absyn_Type_struct{int tag;struct Cyc_Core_Opt*f1;void*f2;int f3;void*f4;const char*f5;const char*f6;int f7;};
-# 944 "absyn.h"
+# 939 "absyn.h"
 void*Cyc_Absyn_compress(void*);
-# 979
+# 974
 extern void*Cyc_Absyn_join_eff(struct Cyc_List_List*);
-# 1018
+# 1013
 void*Cyc_Absyn_thinconst (void);
 # 48 "warn.h"
 void*Cyc_Warn_impos(struct _fat_ptr,struct _fat_ptr);struct Cyc_Warn_String_Warn_Warg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Warn_Typ_Warn_Warg_struct{int tag;void*f1;};
@@ -403,7 +403,7 @@ void*Cyc_Warn_impos2(struct _fat_ptr);
 struct _fat_ptr Cyc_Absynpp_typ2string(void*);
 # 30 "bansheeif.h"
 int Cyc_BansheeIf_resolve(void*);
-# 280 "tcutil.h"
+# 277 "tcutil.h"
 int Cyc_Tcutil_is_cvar_type(void*);
 # 26 "flags.h"
 extern int Cyc_Flags_verbose;

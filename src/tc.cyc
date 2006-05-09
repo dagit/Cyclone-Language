@@ -30,11 +30,13 @@
 #include "evexp.h"
 #include "tcdecl.h"
 #include "callgraph.h"
-#include "relations-ap.h"
 #include "tc.h"
 #include "cifc.h"
 #include "toc.h"
 #include "bansheeif.h"
+#include "assndef.h"
+#include "pratt_prover.h"
+#include "vcgen.h"
 using Core;
 using List;
 using Absyn;
@@ -391,8 +393,7 @@ static void tcAggrImpl(tenv_t te, seg_t loc,
   }
 
   list_t<field_name_t, `uprev_rgn> prev_fields = NULL;
-  list_t<Relations::relns_t<`uprev_rgn>,`uprev_rgn> prev_relations = NULL;
-
+  list_t<AssnDef::assn_t, `uprev_rgn> prev_requires = NULL;
   for (let fs = fields; fs != NULL; fs = fs->tl) {
     let &Aggrfield(fn,tq,t,width,atts,requires_clause) = fs->hd;
     //NKS -- check atts here
@@ -429,24 +430,26 @@ static void tcAggrImpl(tenv_t te, seg_t loc,
       else {
 	check_type_with_bounds(requires_clause->loc,te,flagged_tvs, qb,
 			       &Kinds::ik,false,false,new ValueofType(requires_clause));
-        // convert the requires expression to a CNF formula
-	let relns = Relations::exp2relns(uprev_rgn,requires_clause);
-
-	// warn if the relations aren't consistent
-	//if (!Relations::consistent_relations(relns))
-	//Warn::err2(requires_clause->loc,"@requires clause may be unsatisfiable");
+//         // convert the requires expression to a CNF formula
+	let assnmap = Vcgen::clause2assn(requires_clause);
+	let req_assn = assnmap.assn;
+// 	// warn if the relations aren't consistent
+	if (PrattProver::constraint_prove(req_assn,&AssnDef::false_assn))
+	    Warn::err2(requires_clause->loc,"@requires clause may be unsatisfiable");
 
 	// run through all of the previous formulae and see if
 	// this one is consistent with those.  If so, there may
 	// be an overlap and we must reject.
-	for (let p = prev_relations; p != NULL; p = p->tl)
-	  if (Relations::consistent_relations(rappend(uprev_rgn,relns,p->hd)))
+	for (let p = prev_requires; p != NULL; p = p->tl)
+	  if (!PrattProver::constraint_prove(req_assn,AssnDef::not(p->hd))) {
+	    
 	    Warn::err2(requires_clause->loc,
-		       "@requires clause may overlap with previous clauses");
-	prev_relations = rnew(uprev_rgn) List(relns,prev_relations);
+		       "@requires clause ",AssnDef::assn2string(req_assn), " may overlap with previous clauses ",AssnDef::assn2string(p->hd));
+	  }
+	prev_requires = rnew(uprev_rgn) List(req_assn,prev_requires);
       }
     } else /* no requires clause */
-      if (prev_relations != NULL)
+      if (prev_requires != NULL)
 	Warn::err2(loc,"if one field has a @requires clause, they all must");
   }
 }
