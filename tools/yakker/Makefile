@@ -76,6 +76,12 @@ markdown: markdown.o ykbuf.o ssl.o bnf.o extract.o pr.o parse_tab.o util.o lex.o
 markdown.cyc: examples/markdown.yk yakker
 	./yakker -no-main -gen elim-cr-line -d $< > $@
 
+boxextract: boxextract.o ykbuf.o ssl.o
+	$(CYCLONE) $^ -o $@ -lssl -lcrypto
+
+boxextract.cyc: boxextract.yk yakker
+	./yakker -gen lines $< > $@
+
 string_%.cyc: %.cyc
 	$(STRINGIFY) $< > $@
 

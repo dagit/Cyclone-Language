@@ -1,0 +1,27 @@
+box-separator  = "|" | "/" | "!" .
+rule-character = "-" | "=" | "+" | SP .
+
+top = (*WSP "+" *rule-character "+" *WSP)$x LF
+{
+  in_box = 1;
+  printf("%s\n",x);
+}.
+
+mid1 = (*WSP box-separator *(CHAR - LF))$x LF
+{
+  if (in_box) printf("%s\n",x); // 1 
+}.
+
+mid2 = (*(CHAR - LF) box-separator *WSP)$x LF
+{
+  if (in_box) printf("%s\n",x); // 2
+}.
+
+other = *(CHAR - LF) LF { if (in_box) { printf("\n######################################################################\n\n"); in_box = 0; } } .
+
+line = top | mid1 | mid2 | other .
+lines = 1*line [%d12] .
+
+{
+  static int in_box = 0;
+}
