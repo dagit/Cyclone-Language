@@ -40,7 +40,7 @@ namespace PrattProver;
 #define MAXINT (0x7FFFFFFF)
 // use static int instead of define here
 // to avoid a c warning about 0x80000000 being unsigned only
-static int MININT = (0x80000000);
+static const int MININT = (0x80000000);
 #define MAXUINT (0xFFFFFFFFU)
 #define intsize_minus_one (31)
 #define longlongsize_minus_one (63)
