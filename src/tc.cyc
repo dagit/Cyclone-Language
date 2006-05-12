@@ -230,6 +230,11 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
     Warn::err2(loc, "Function ", fd->name, " has attribute no_throw but may throw an exception");
   // look for main and check that it has a good type
   if (Tcutil::is_main(q)) {
+    // checking there is no checks_clause or requires_clause
+    if (fd->i.checks_clause != NULL) 
+      Warn::err2(loc,"main declared with a @check clause");
+    if (fd->i.requires_clause != NULL)
+      Warn::err2(loc,"main declared with a @requires clause");
     // result type should be int
     switch (compress(fd->i.ret_type)) {
     case &AppType(&VoidCon,_): 
