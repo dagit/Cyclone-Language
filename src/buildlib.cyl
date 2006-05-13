@@ -465,6 +465,12 @@ and slurp = parse /* returns 1 if more to do, 0 if all done */
 | "__attribute__ ((__mode__ (__word__)))" /* Used in linux in sys/types.h */
 { log("Warning: use of mode word deleted\n");
   return 1; }
+| "__attribute__ ((__deprecated__))"
+{ log("Warning: use of __attribute__ ((__deprecated__)) deleted\n");
+  return 1; }
+| "__attribute__ ((__transparent_union__))"
+{ log("Warning: use of __attribute__ ((__transparent_union__)) deleted\n");
+  return 1; }
 | "__inline__" /* Used in cygwin in stdio.h */
 { fputs("inline",(FILE @)slurp_out); return 1; }
 | "__inline" /* Used in OS X */
