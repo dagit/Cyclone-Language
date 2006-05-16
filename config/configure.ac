@@ -46,18 +46,37 @@ case "$build_os" in
 esac
 AC_SUBST(abs_srcdir)
 
-
-# GCC check
-# If CC is set explicitly, then don't force check for 3.4 etc.
-if [[ "$CC" = "" ]]; then
-
 # Figure out compiler characteristics
+# NB: AC_PROG_CC has side effects at autoconf time (!!!) as well as at
+#     configure time, so we have to take care if we need to use it twice,
+#     like we do here.  By trail and error I find it is OK to use it at
+#     toplevel, then at configure time unset a bunch of variables so that
+#     it works correctly a second time inside a conditional.
+#     
 CFLAGS=    # prevents AC_PROG_CC from setting CFLAGS=-g -O2
-AC_PROG_CC(gcc-3.4 gcc-3.3 gcc-3.2 gcc-3.1 gcc-3.0 gcc)
-
+AC_PROG_CC
 GCC_VERSION=`$CC -dumpversion`
+
+# GCC version 4 won't work for Cyclone yet
 case "$GCC_VERSION" in
-  4.*)
+4*)
+echo "**** gcc version 4 won't work for Cyclone, looking for gcc version 3"
+echo "**** (See http://cyclone.thelanguage.org/wiki/GCC for more information.)"
+unset CC
+unset ac_cv_prog_CC
+unset ac_cv_c_compiler_gnu
+unset ac_cv_prog_ac_ct_CC
+unset ac_cv_prog_cc_g
+unset ac_cv_prog_cc_stdc
+AC_PROG_CC(gcc-3.4 gcc-3.3 gcc-3.2 gcc-3.1 gcc-3.0)
+GCC_VERSION=`$CC -dumpversion`
+;;
+esac
+
+case "$GCC_VERSION" in
+4*)
+# This is just a sanity check, the last AC_PROG_CC should have failed
+# already if gcc 3 was not found
     echo "**********************************************************************"
     echo "***"
     echo "*** CONFIGURATION FAILED"
@@ -71,12 +90,8 @@ case "$GCC_VERSION" in
     echo "***"
     echo "**********************************************************************"
     exit 1
-  ;;
+;;
 esac
-
-else
-AC_PROG_CC
-fi # end of GCC check
 
 # Special cases -- these are for compiling the bin/genfiles
 if [[ "$build_vendor" = "apple" ]]; then
@@ -123,6 +138,11 @@ if [[ "$target" = "arm-gba-elf" ]]; then
   TARGET_CFLAGS="-mthumb -mthumb-interwork"
   TARGET_AR="arm-elf-ar"
   TARGET_RANLIB="arm-elf-ranlib"
+fi
+if [[ "$target" = "arm-maemo-elf" ]]; then
+  TARGET_CC="/scratchbox/compilers/arm-linux-gcc3.4.cs-glibc2.3/bin/arm-linux-gcc"
+  TARGET_AR="/scratchbox/compilers/arm-linux-gcc3.4.cs-glibc2.3/bin/arm-linux-ar"
+  TARGET_RANLIB="/scratchbox/compilers/arm-linux-gcc3.4.cs-glibc2.3/bin/arm-linux-ranlib"
 fi
 AC_SUBST(TARGET_CC)
 AC_SUBST(TARGET_AR)
