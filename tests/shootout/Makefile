@@ -3,9 +3,9 @@ include ../../Makefile.inc
 DIFF=~/src/cyclone_internal/benchmarks/bin/diff.pl
 
 CYCC = cyclone
-OPT = -O3
-CFLAGS = $(OPT) -DTIMING -Iinclude 
-CYC_FLAGS = $(OPT) -DTIMING -Iinclude 
+OPT = -O3 -funroll-loops
+CFLAGS = $(OPT) -fomit-frame-pointer -DTIMING -Iinclude 
+CYC_FLAGS = $(OPT) -DTIMING -Iinclude -save-c
 # TO DO: only add this library for those execs that need it
 LDFLAGS = -lm -lpcre 
 
@@ -18,15 +18,15 @@ LANGS := $(EXELANGS) $(JAVALANGS)
 # Obsoleted: ary2
 # Cannot implement: methcall objinst (can't do width-subtyping)
 #   prodcons (no pthreads, by default)
-NOGC_BENCHMARKS := ackermann echo except fibo nestedloop random sieve sumcol wc #matrix
+NOGC_BENCHMARKS := ackermann except fibo nestedloop random sieve sumcol wc #matrix echo
 NOGC_OPT_BENCHMARKS := reversefile ary3
-GC_BENCHMARKS := hash hash2 heapsort moments lists spellcheck strcat wordfreq regexmatch
+GC_BENCHMARKS := hash hash2 heapsort moments lists spellcheck strcat wordfreq # regexmatch
 BENCHMARKS := $(NOGC_BENCHMARKS) $(NOGC_OPT_BENCHMARKS) $(GC_BENCHMARKS)
 ifeq ($(HAVE_PTHREAD),yes)
 BENCHMARKS += prodcons
 endif
 
-DIFF_BENCHMARKS=ackermann echo except fibo nestedloop random sieve sumcol wc matrix reversefile ary3 hash hash2 heapsort moments lists spellcheck strcat wordfreq prodcons
+DIFF_BENCHMARKS=ackermann except fibo nestedloop random sieve sumcol wc matrix reversefile ary3 hash hash2 heapsort moments lists spellcheck strcat wordfreq prodcons # echo
 
 N = 11
 

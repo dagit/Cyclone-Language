@@ -33,7 +33,7 @@ cat - | awk \
 	     else print "long endMS, startMS = System.currentTimeMillis();";
               next }
  /@END/    { print "endMS = System.currentTimeMillis() - startMS;";
-	     print "double diff = (endMS / 1000) + ((endMS \% 1000) * 0.001);";
+	     print "double diff = (endMS / 1000) + ((endMS % 1000) * 0.001);";
              if (dowarm) {
 	       print "if (print) { System.err.println(diff); break; } else print = true; }\n"; }
              else print "System.err.println(diff);";
@@ -45,7 +45,7 @@ else
 cat - | awk \
 '/@START/  { print "long endMS, startMS = System.currentTimeMillis();"; next }
  /@END/    { print "endMS = System.currentTimeMillis() - startMS;";
-	     print "double diff = (endMS / 1000) + ((endMS \% 1000) * 0.001);";
+	     print "double diff = (endMS / 1000) + ((endMS % 1000) * 0.001);";
 	     print "System.err.println(diff);"; next }
 	   { print }'
 
