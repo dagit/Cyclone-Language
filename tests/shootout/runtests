@@ -31,6 +31,7 @@ function getargs {
   case "$1" in
     ackermann) echo 8;;
     ary3) echo 7000;;
+    binarytrees) echo 10;;
     echo) echo 100000;;
     except) echo 200000;;
     fibo) echo 32;;

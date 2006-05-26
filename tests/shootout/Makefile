@@ -1,17 +1,20 @@
 include ../../Makefile.inc
 
+GCC=gcc
+#GCC=gcc-3.4
+
 DIFF=~/src/cyclone_internal/benchmarks/bin/diff.pl
 
 CYCC = cyclone
-OPT = -O3 -funroll-loops
-CFLAGS = $(OPT) -fomit-frame-pointer -DTIMING -Iinclude 
+OPT = -O3 -funroll-loops -fomit-frame-pointer
+CFLAGS = $(OPT) -DTIMING -Iinclude 
 CYC_FLAGS = $(OPT) -DTIMING -Iinclude -save-c
 # TO DO: only add this library for those execs that need it
 LDFLAGS = -lm -lpcre 
 
 #EXELANGS := gcc cyclone cyclone-port java-gcj
 EXELANGS := gcc cyclone
-JAVALANGS :=  java
+JAVALANGS := # java
 LANGS := $(EXELANGS) $(JAVALANGS)
 
 # Skipped: hello
@@ -20,7 +23,7 @@ LANGS := $(EXELANGS) $(JAVALANGS)
 #   prodcons (no pthreads, by default)
 NOGC_BENCHMARKS := ackermann except fibo nestedloop random sieve sumcol wc #matrix echo
 NOGC_OPT_BENCHMARKS := reversefile ary3
-GC_BENCHMARKS := hash hash2 heapsort moments lists spellcheck strcat wordfreq # regexmatch
+GC_BENCHMARKS := binarytrees hash hash2 heapsort moments lists spellcheck strcat wordfreq # regexmatch
 BENCHMARKS := $(NOGC_BENCHMARKS) $(NOGC_OPT_BENCHMARKS) $(GC_BENCHMARKS)
 ifeq ($(HAVE_PTHREAD),yes)
 BENCHMARKS += prodcons
@@ -87,7 +90,7 @@ $(CYCHIST): cychist.cyc
 #	SRCS=$(DIFF) gcc/$*.gcc cyclone/$*.cyc > $@
 
 %$(EXE): %.gcc
-	gcc $(CFLAGS) -o $@ -x c $^ $(LDFLAGS)
+	$(GCC) $(CFLAGS) -o $@ -x c $^ $(LDFLAGS)
 
 java/%.java: java-start/%.java
 	./inserttimer --warmup < $^ > $@
