@@ -4268,8 +4268,9 @@ static void local_decl_to_c(env_t nv,vardecl_t vd,stmt_t s) {
           toc_impos("can't initialize zero-terminated array -- size unknown");
         let lhs = subscript_exp(set_type(var_exp(vd->name,DL),
                                          typ_to_c_array(old_typ)),
+                                set_type(
                                 add_exp(num_elts_opt,
-                                        set_type(signed_int_exp(-1,DL),sint_type),DL),
+                                        set_type(signed_int_exp(-1,DL),sint_type),DL),sint_type),
                                 DL);
         let rhs = set_type(signed_int_exp(0,DL),sint_type);
         s->r = seq_stmt_r(exp_stmt(assign_exp(lhs,rhs,DL),DL),

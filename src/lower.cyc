@@ -208,6 +208,7 @@ static void emit_label(env_t env, var_t label, seg_t loc) {
 
 // The translation functions.
 static exp_t lower_rhs(env_t env, bool effect_only, bool has_target, exp_t e);
+static exp_t lower_rhs_subs(env_t env, exp_t e);
 static exp_t lower_lhs(env_t env, exp_t e);
 static bool  lower_stmt(env_t env, stmt_t s);
 static void  lower_cond(env_t env, exp_t e, var_t truelab, var_t falselab, seg_t loc);
@@ -561,9 +562,9 @@ static exp_t lower_rhs(env_t env, bool effect_only, bool has_target, exp_t e) {
     res = aggrarrow_exp(lower_rhs(env,false,false,e1),f,e->loc);
     break;
   case &Subscript_e(e1,e2):
-    // Hmmm.  We might want to eliminate in favor of e1+e2.
-    res = subscript_exp(lower_rhs(env,false,false,e1),
-                        lower_rhs(env,false,false,e2),e->loc);
+    // To clean up issues with multi-dimensional arrays, we keep
+    // nested subscripts in the generated code.
+    res = lower_rhs_subs(env,e);
     break;
   case &Enum_e(ed,ef): return e;
   case &AnonEnum_e(tp,ef): return e;
@@ -650,6 +651,17 @@ static exp_t lower_rhs(env_t env, bool effect_only, bool has_target, exp_t e) {
   } 
 }
 
+// We have problems eliminating multi-dimensional array subscripts
+// so here we just leave them in.
+static exp_t lower_rhs_subs(env_t env, exp_t e) {
+  switch (e->r) {
+  case &Subscript_e(e1,e2):
+    return subscript_exp(lower_rhs_subs(env,e1),
+                         lower_rhs(env,false,false,e2),e->loc);
+  default: return lower_rhs(env,false,false,e);
+  }
+}
+
 // Here, we don't have the luxury of generating temps since we need
 // the address of a variable etc.  
 static exp_t lower_lhs(env_t env, exp_t e) {
@@ -660,23 +672,27 @@ static exp_t lower_lhs(env_t env, exp_t e) {
   case &AggrMember_e(e1,f,it,ir):
     return aggrmember_exp(lower_lhs(env,e1),f,e->loc);
   case &Subscript_e(e1,e2):
+    // hack -- we have problems with multi-dimensional arrays as LHS's.
+    return lower_rhs_subs(env,e);
+    /*
     let $(vd,res) = fresh_var(env, e1);
     // e1 might involve a cast -- if so, we can eliminate it here.
     switch (e1->r) {
     case &Cast_e(t,e11,...):
       let $(vd2,res2) = fresh_var(env,e11);
-      emit_assign(env,res2,lower_lhs(env,e11),e->loc);
+      emit_assign(env,res2,lower_rhs(env,false,true,e11),e->loc);
       let $(vd3,res3) = fresh_var(env,e1);
       emit_assign(env,res3,cast_exp(t,res2,false,No_coercion,e1->loc),e1->loc);
       emit_assign(env,res,add_exp(res3,
                                   lower_rhs(env,false,false,e2),e->loc),e->loc);
       break;
     default:
-      emit_assign(env,res,add_exp(lower_lhs(env,e1),
+      emit_assign(env,res,add_exp(lower_rhs(env,false,false,e1),
                                   lower_rhs(env,false,false,e2),e->loc),e->loc);
       break;
     }
     return deref_exp(res,e->loc);
+    */
   case &AggrArrow_e(e1,f,it,ir):
     return aggrarrow_exp(lower_rhs(env,false,false,e1),f,e->loc);
   case &Deref_e(e1):

@@ -417,7 +417,7 @@ int use_strtoul=0;
 # 213
 char ccltab[256U];
 # 215
-char buf[351U];{unsigned _T138=350U;unsigned i;i=0;_TLB: if(i < _T138)goto _TL9;else{goto _TLA;}_TL9: _T1=i;_T0=buf + _T1;*_T0='0';i=i + 1;goto _TLB;_TLA: _T2=buf + _T138;*_T2=0;}{
+char buf[351U];{unsigned _T138=350U;unsigned i;i=0;_TLB: if(i < _T138)goto _TL9;else{goto _TLA;}_TL9: _T0=buf;_T1=i;_T0[_T1]='0';i=i + 1;goto _TLB;_TLA: _T2=buf;_T2[_T138]=0;}{
 # 217
 int seen_eof=0;
 # 220

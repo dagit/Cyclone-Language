@@ -976,9 +976,9 @@ _T7->v=hd;_T6=(struct Cyc_Core_Opt*)_T7;}return _T6;_TL137:;}goto _TL134;_TL136:
 # 729
  return 0;}
 # 733
-struct _fat_ptr Cyc_List_rto_array(struct _RegionHandle*r2,struct Cyc_List_List*x){struct _fat_ptr _T0;int _T1;void**_T2;struct _RegionHandle*_T3;unsigned _T4;int _T5;void**_T6;unsigned _T7;void*_T8;struct Cyc_List_List*_T9;struct Cyc_List_List*_TA;
-int s=Cyc_List_length(x);_T1=s;{unsigned _TB=(unsigned)_T1;_T3=r2;_T4=_check_times(_TB,sizeof(void*));{void**_TC=_region_malloc(_T3,0U,_T4);_T5=s;{unsigned _TD=(unsigned)_T5;unsigned i;i=0;_TL13C: if(i < _TD)goto _TL13A;else{goto _TL13B;}_TL13A: _T7=i;_T6=_TC + _T7;_T9=
-_check_null(x);{void*v=_T9->hd;_TA=x;x=_TA->tl;_T8=v;}*_T6=_T8;i=i + 1;goto _TL13C;_TL13B:;}_T2=(void**)_TC;}_T0=_tag_fat(_T2,sizeof(void*),_TB);}return _T0;}
+struct _fat_ptr Cyc_List_rto_array(struct _RegionHandle*r2,struct Cyc_List_List*x){struct _fat_ptr _T0;int _T1;void**_T2;struct _RegionHandle*_T3;unsigned _T4;int _T5;unsigned _T6;void*_T7;struct Cyc_List_List*_T8;struct Cyc_List_List*_T9;
+int s=Cyc_List_length(x);_T1=s;{unsigned _TA=(unsigned)_T1;_T3=r2;_T4=_check_times(_TA,sizeof(void*));{void**_TB=_region_malloc(_T3,0U,_T4);_T5=s;{unsigned _TC=(unsigned)_T5;unsigned i;i=0;_TL13C: if(i < _TC)goto _TL13A;else{goto _TL13B;}_TL13A: _T6=i;_T8=
+_check_null(x);{void*v=_T8->hd;_T9=x;x=_T9->tl;_T7=v;}_TB[_T6]=_T7;i=i + 1;goto _TL13C;_TL13B:;}_T2=(void**)_TB;}_T0=_tag_fat(_T2,sizeof(void*),_TA);}return _T0;}
 # 738
 struct _fat_ptr Cyc_List_to_array(struct Cyc_List_List*x){struct _fat_ptr _T0;_T0=
 Cyc_List_rto_array(Cyc_Core_heap_region,x);return _T0;}

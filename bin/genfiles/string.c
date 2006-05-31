@@ -598,30 +598,30 @@ _fat_ptr_plus(_T36,sizeof(char),_T38);_T3A=_fat_ptr_decrease_size(_T39,sizeof(ch
 struct _fat_ptr Cyc_str_sepstr(struct Cyc_List_List*strs,struct _fat_ptr separator){struct _fat_ptr _T0;_T0=
 Cyc_rstr_sepstr(Cyc_Core_heap_region,strs,separator);return _T0;}
 # 299
-struct _fat_ptr Cyc_strncpy(struct _fat_ptr dest,struct _fat_ptr src,unsigned long n){unsigned long _T0;struct _fat_ptr _T1;unsigned _T2;unsigned long _T3;struct _fat_ptr _T4;unsigned _T5;struct Cyc_Core_Invalid_argument_exn_struct*_T6;void*_T7;struct _fat_ptr _T8;unsigned char*_T9;const char*_TA;unsigned _TB;int _TC;char _TD;int _TE;char*_TF;unsigned char*_T10;char*_T11;unsigned _T12;int _T13;char*_T14;unsigned char*_T15;char*_T16;unsigned _T17;int _T18;struct _fat_ptr _T19;
+struct _fat_ptr Cyc_strncpy(struct _fat_ptr dest,struct _fat_ptr src,unsigned long n){unsigned long _T0;struct _fat_ptr _T1;unsigned _T2;unsigned long _T3;struct _fat_ptr _T4;unsigned _T5;struct Cyc_Core_Invalid_argument_exn_struct*_T6;void*_T7;struct _fat_ptr _T8;unsigned char*_T9;const char*_TA;unsigned _TB;int _TC;char _TD;int _TE;struct _fat_ptr _TF;unsigned char*_T10;char*_T11;unsigned _T12;int _T13;struct _fat_ptr _T14;unsigned char*_T15;char*_T16;unsigned _T17;int _T18;struct _fat_ptr _T19;
 unsigned i;_T0=n;_T1=src;_T2=
 _get_fat_size(_T1,sizeof(char));if(_T0 > _T2)goto _TL75;else{goto _TL76;}_TL76: _T3=n;_T4=dest;_T5=_get_fat_size(_T4,sizeof(char));if(_T3 > _T5)goto _TL75;else{goto _TL73;}
 _TL75:{struct Cyc_Core_Invalid_argument_exn_struct*_T1A=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_T1A->tag=Cyc_Core_Invalid_argument;_T1A->f1=_tag_fat("strncpy",sizeof(char),8U);_T6=(struct Cyc_Core_Invalid_argument_exn_struct*)_T1A;}_T7=(void*)_T6;_throw(_T7);goto _TL74;_TL73: _TL74:
  i=0U;_TL7A: if(i < n)goto _TL78;else{goto _TL79;}
 _TL78: _T8=src;_T9=_T8.curr;_TA=(const char*)_T9;_TB=i;_TC=(int)_TB;{char srcChar=_TA[_TC];_TD=srcChar;_TE=(int)_TD;
-if(_TE!=0)goto _TL7B;goto _TL79;_TL7B:
- _T10=dest.curr;_T11=(char*)_T10;_T12=i;_T13=(int)_T12;_TF=_T11 + _T13;*_TF=srcChar;}
+if(_TE!=0)goto _TL7B;goto _TL79;_TL7B: _TF=dest;_T10=_TF.curr;_T11=(char*)_T10;_T12=i;_T13=(int)_T12;
+_T11[_T13]=srcChar;}
 # 303
 i=i + 1;goto _TL7A;_TL79:
 # 308
  _TL80: if(i < n)goto _TL7E;else{goto _TL7F;}
-_TL7E: _T15=dest.curr;_T16=(char*)_T15;_T17=i;_T18=(int)_T17;_T14=_T16 + _T18;*_T14='\000';
+_TL7E: _T14=dest;_T15=_T14.curr;_T16=(char*)_T15;_T17=i;_T18=(int)_T17;_T16[_T18]='\000';
 # 308
 i=i + 1;goto _TL80;_TL7F: _T19=dest;
 # 311
 return _T19;}
 # 315
-struct _fat_ptr Cyc_zstrncpy(struct _fat_ptr dest,struct _fat_ptr src,unsigned long n){unsigned long _T0;struct _fat_ptr _T1;unsigned _T2;unsigned long _T3;struct _fat_ptr _T4;unsigned _T5;struct Cyc_Core_Invalid_argument_exn_struct*_T6;void*_T7;char*_T8;unsigned char*_T9;char*_TA;unsigned _TB;int _TC;struct _fat_ptr _TD;unsigned char*_TE;const char*_TF;unsigned _T10;int _T11;struct _fat_ptr _T12;_T0=n;_T1=dest;_T2=
+struct _fat_ptr Cyc_zstrncpy(struct _fat_ptr dest,struct _fat_ptr src,unsigned long n){unsigned long _T0;struct _fat_ptr _T1;unsigned _T2;unsigned long _T3;struct _fat_ptr _T4;unsigned _T5;struct Cyc_Core_Invalid_argument_exn_struct*_T6;void*_T7;struct _fat_ptr _T8;unsigned char*_T9;char*_TA;unsigned _TB;int _TC;struct _fat_ptr _TD;unsigned char*_TE;const char*_TF;unsigned _T10;int _T11;struct _fat_ptr _T12;_T0=n;_T1=dest;_T2=
 _get_fat_size(_T1,sizeof(char));if(_T0 > _T2)goto _TL83;else{goto _TL84;}_TL84: _T3=n;_T4=src;_T5=_get_fat_size(_T4,sizeof(char));if(_T3 > _T5)goto _TL83;else{goto _TL81;}
 _TL83:{struct Cyc_Core_Invalid_argument_exn_struct*_T13=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_T13->tag=Cyc_Core_Invalid_argument;_T13->f1=_tag_fat("zstrncpy",sizeof(char),9U);_T6=(struct Cyc_Core_Invalid_argument_exn_struct*)_T13;}_T7=(void*)_T6;_throw(_T7);goto _TL82;_TL81: _TL82: {
 unsigned i;
 i=0U;_TL88: if(i < n)goto _TL86;else{goto _TL87;}
-_TL86: _T9=dest.curr;_TA=(char*)_T9;_TB=i;_TC=(int)_TB;_T8=_TA + _TC;_TD=src;_TE=_TD.curr;_TF=(const char*)_TE;_T10=i;_T11=(int)_T10;*_T8=_TF[_T11];
+_TL86: _T8=dest;_T9=_T8.curr;_TA=(char*)_T9;_TB=i;_TC=(int)_TB;_TD=src;_TE=_TD.curr;_TF=(const char*)_TE;_T10=i;_T11=(int)_T10;_TA[_TC]=_TF[_T11];
 # 319
 i=i + 1;goto _TL88;_TL87: _T12=dest;
 # 321

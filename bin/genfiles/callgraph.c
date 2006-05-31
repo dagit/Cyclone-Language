@@ -437,8 +437,8 @@ struct Cyc_Dict_Dict(*_TA)(int(*)(struct Cyc_Absyn_Fndecl*,struct Cyc_Absyn_Fnde
 cg=Cyc_Callgraph_cg_topdecls(fd,cg,ds);_T9=cg;
 return _T9;}}}
 # 119
-static void Cyc_Callgraph_print_fndecl(struct Cyc___cycFILE*f,struct Cyc_Absyn_Fndecl*fd){struct Cyc_String_pa_PrintArg_struct _T0;struct Cyc_Absyn_Fndecl*_T1;struct _tuple0*_T2;void**_T3;struct Cyc___cycFILE*_T4;struct _fat_ptr _T5;struct _fat_ptr _T6;{struct Cyc_String_pa_PrintArg_struct _T7;_T7.tag=0;_T1=fd;_T2=_T1->name;
-_T7.f1=Cyc_Absynpp_qvar2string(_T2);_T0=_T7;}{struct Cyc_String_pa_PrintArg_struct _T7=_T0;void*_T8[1];_T3=_T8 + 0;*_T3=& _T7;_T4=f;_T5=_tag_fat("%s ",sizeof(char),4U);_T6=_tag_fat(_T8,sizeof(void*),1);Cyc_fprintf(_T4,_T5,_T6);}}
+static void Cyc_Callgraph_print_fndecl(struct Cyc___cycFILE*f,struct Cyc_Absyn_Fndecl*fd){struct Cyc_String_pa_PrintArg_struct _T0;struct Cyc_Absyn_Fndecl*_T1;struct _tuple0*_T2;struct Cyc___cycFILE*_T3;struct _fat_ptr _T4;struct _fat_ptr _T5;{struct Cyc_String_pa_PrintArg_struct _T6;_T6.tag=0;_T1=fd;_T2=_T1->name;
+_T6.f1=Cyc_Absynpp_qvar2string(_T2);_T0=_T6;}{struct Cyc_String_pa_PrintArg_struct _T6=_T0;void*_T7[1];_T7[0]=& _T6;_T3=f;_T4=_tag_fat("%s ",sizeof(char),4U);_T5=_tag_fat(_T7,sizeof(void*),1);Cyc_fprintf(_T3,_T4,_T5);}}
 # 123
 void Cyc_Callgraph_print_callgraph(struct Cyc___cycFILE*f,struct Cyc_Dict_Dict cg){void(*_T0)(struct Cyc___cycFILE*,struct Cyc_Dict_Dict,void(*)(struct Cyc___cycFILE*,struct Cyc_Absyn_Fndecl*));void(*_T1)(struct Cyc___cycFILE*,struct Cyc_Dict_Dict,void(*)(struct Cyc___cycFILE*,void*));struct Cyc___cycFILE*_T2;struct Cyc_Dict_Dict _T3;_T1=Cyc_Graph_print;{
 void(*_T4)(struct Cyc___cycFILE*,struct Cyc_Dict_Dict,void(*)(struct Cyc___cycFILE*,struct Cyc_Absyn_Fndecl*))=(void(*)(struct Cyc___cycFILE*,struct Cyc_Dict_Dict,void(*)(struct Cyc___cycFILE*,struct Cyc_Absyn_Fndecl*)))_T1;_T0=_T4;}_T2=f;_T3=cg;_T0(_T2,_T3,Cyc_Callgraph_print_fndecl);}

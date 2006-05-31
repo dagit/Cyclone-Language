@@ -468,9 +468,9 @@ static void Cyc_CurRgn_rgnsubds(struct Cyc_CurRgn_rgnsubenv,struct Cyc_List_List
 static void Cyc_CurRgn_rgnsubdtdecl(unsigned,struct Cyc_CurRgn_rgnsubenv,struct Cyc_Absyn_Datatypedecl*);
 static void Cyc_CurRgn_rgnsubaggrdecl(unsigned,struct Cyc_CurRgn_rgnsubenv,struct Cyc_Absyn_Aggrdecl*);
 # 142
-static void Cyc_CurRgn_check_tvar(unsigned loc,struct Cyc_Absyn_Tvar*tv){struct Cyc_Absyn_Tvar*_T0;struct Cyc_Absyn_Tvar*_T1;int _T2;struct Cyc_Warn_String_Warn_Warg_struct _T3;struct Cyc_Warn_Tvar_Warn_Warg_struct _T4;void**_T5;void**_T6;unsigned _T7;struct _fat_ptr _T8;_T0=tv;_T1=
-_check_null(Cyc_CurRgn_curr_tvar);_T2=Cyc_Absyn_tvar_cmp(_T0,_T1);if(_T2!=0)goto _TL15;{struct Cyc_Warn_String_Warn_Warg_struct _T9;_T9.tag=0;
-_T9.f1=_tag_fat("Cannot abstract special type variable ",sizeof(char),39U);_T3=_T9;}{struct Cyc_Warn_String_Warn_Warg_struct _T9=_T3;{struct Cyc_Warn_Tvar_Warn_Warg_struct _TA;_TA.tag=7;_TA.f1=_check_null(Cyc_CurRgn_curr_tvar);_T4=_TA;}{struct Cyc_Warn_Tvar_Warn_Warg_struct _TA=_T4;void*_TB[2];_T5=_TB + 0;*_T5=& _T9;_T6=_TB + 1;*_T6=& _TA;_T7=loc;_T8=_tag_fat(_TB,sizeof(void*),2);Cyc_Warn_err2(_T7,_T8);}}goto _TL16;_TL15: _TL16:;}
+static void Cyc_CurRgn_check_tvar(unsigned loc,struct Cyc_Absyn_Tvar*tv){struct Cyc_Absyn_Tvar*_T0;struct Cyc_Absyn_Tvar*_T1;int _T2;struct Cyc_Warn_String_Warn_Warg_struct _T3;struct Cyc_Warn_Tvar_Warn_Warg_struct _T4;unsigned _T5;struct _fat_ptr _T6;_T0=tv;_T1=
+_check_null(Cyc_CurRgn_curr_tvar);_T2=Cyc_Absyn_tvar_cmp(_T0,_T1);if(_T2!=0)goto _TL15;{struct Cyc_Warn_String_Warn_Warg_struct _T7;_T7.tag=0;
+_T7.f1=_tag_fat("Cannot abstract special type variable ",sizeof(char),39U);_T3=_T7;}{struct Cyc_Warn_String_Warn_Warg_struct _T7=_T3;{struct Cyc_Warn_Tvar_Warn_Warg_struct _T8;_T8.tag=7;_T8.f1=_check_null(Cyc_CurRgn_curr_tvar);_T4=_T8;}{struct Cyc_Warn_Tvar_Warn_Warg_struct _T8=_T4;void*_T9[2];_T9[0]=& _T7;_T9[1]=& _T8;_T5=loc;_T6=_tag_fat(_T9,sizeof(void*),2);Cyc_Warn_err2(_T5,_T6);}}goto _TL16;_TL15: _TL16:;}
 # 146
 static void Cyc_CurRgn_check_tvars(unsigned loc,struct Cyc_List_List*tvs){unsigned _T0;struct Cyc_List_List*_T1;void*_T2;struct Cyc_Absyn_Tvar*_T3;struct Cyc_List_List*_T4;
 _TL1A: if(tvs!=0)goto _TL18;else{goto _TL19;}

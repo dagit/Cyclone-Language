@@ -440,13 +440,13 @@ extern int putw(int,struct __abstractFILE*);
 int Cyc_putw(int x,struct Cyc___cycFILE*f){int _T0;struct Cyc___cycFILE*_T1;struct __abstractFILE*_T2;int _T3;_T0=x;_T1=f;_T2=_T1->file;_T3=
 putw(_T0,_T2);return _T3;}char Cyc_FileCloseError[15U]="FileCloseError";char Cyc_FileOpenError[14U]="FileOpenError";
 # 166
-struct Cyc___cycFILE*Cyc_file_open(struct _fat_ptr fname,struct _fat_ptr mode){struct _fat_ptr _T0;char*_T1;char*_T2;const char*_T3;struct _fat_ptr _T4;char*_T5;char*_T6;const char*_T7;struct _fat_ptr _T8;struct _fat_ptr _T9;unsigned _TA;char*_TB;unsigned _TC;struct _fat_ptr _TD;char*_TE;unsigned _TF;struct _fat_ptr _T10;unsigned char*_T11;const char*_T12;unsigned _T13;int _T14;char*_T15;struct Cyc_FileOpenError_exn_struct*_T16;void*_T17;struct Cyc___cycFILE*_T18;_T0=fname;_T1=_untag_fat_ptr_check_bound(_T0,sizeof(char),1U);_T2=_check_null(_T1);_T3=(const char*)_T2;_T4=mode;_T5=_untag_fat_ptr_check_bound(_T4,sizeof(char),1U);_T6=_check_null(_T5);_T7=(const char*)_T6;{
+struct Cyc___cycFILE*Cyc_file_open(struct _fat_ptr fname,struct _fat_ptr mode){struct _fat_ptr _T0;char*_T1;char*_T2;const char*_T3;struct _fat_ptr _T4;char*_T5;char*_T6;const char*_T7;struct _fat_ptr _T8;struct _fat_ptr _T9;unsigned _TA;char*_TB;unsigned _TC;struct _fat_ptr _TD;unsigned _TE;struct _fat_ptr _TF;unsigned char*_T10;const char*_T11;unsigned _T12;int _T13;struct Cyc_FileOpenError_exn_struct*_T14;void*_T15;struct Cyc___cycFILE*_T16;_T0=fname;_T1=_untag_fat_ptr_check_bound(_T0,sizeof(char),1U);_T2=_check_null(_T1);_T3=(const char*)_T2;_T4=mode;_T5=_untag_fat_ptr_check_bound(_T4,sizeof(char),1U);_T6=_check_null(_T5);_T7=(const char*)_T6;{
 struct Cyc___cycFILE*f=Cyc_fopen(_T3,_T7);
 if(f!=0)goto _TLD;_T9=fname;_TA=
-_get_fat_size(_T9,sizeof(char));{unsigned _T19=_TA + 1U;_TC=_check_times(_T19,sizeof(char));{char*_T1A=_cycalloc_atomic(_TC);_TD=fname;{unsigned _T1B=_get_fat_size(_TD,sizeof(char));unsigned i;i=0;_TL12: if(i < _T1B)goto _TL10;else{goto _TL11;}_TL10: _TF=i;_TE=_T1A + _TF;_T10=fname;_T11=_T10.curr;_T12=(const char*)_T11;_T13=i;_T14=(int)_T13;*_TE=_T12[_T14];i=i + 1;goto _TL12;_TL11: _T15=_T1A + _T1B;*_T15=0;}_TB=(char*)_T1A;}_T8=_tag_fat(_TB,sizeof(char),_T19);}{struct _fat_ptr fn=_T8;{struct Cyc_FileOpenError_exn_struct*_T19=_cycalloc(sizeof(struct Cyc_FileOpenError_exn_struct));_T19->tag=Cyc_FileOpenError;
-_T19->f1=fn;_T16=(struct Cyc_FileOpenError_exn_struct*)_T19;}_T17=(void*)_T16;_throw(_T17);}goto _TLE;_TLD: _TLE: _T18=f;
+_get_fat_size(_T9,sizeof(char));{unsigned _T17=_TA + 1U;_TC=_check_times(_T17,sizeof(char));{char*_T18=_cycalloc_atomic(_TC);_TD=fname;{unsigned _T19=_get_fat_size(_TD,sizeof(char));unsigned i;i=0;_TL12: if(i < _T19)goto _TL10;else{goto _TL11;}_TL10: _TE=i;_TF=fname;_T10=_TF.curr;_T11=(const char*)_T10;_T12=i;_T13=(int)_T12;_T18[_TE]=_T11[_T13];i=i + 1;goto _TL12;_TL11: _T18[_T19]=0;}_TB=(char*)_T18;}_T8=_tag_fat(_TB,sizeof(char),_T17);}{struct _fat_ptr fn=_T8;{struct Cyc_FileOpenError_exn_struct*_T17=_cycalloc(sizeof(struct Cyc_FileOpenError_exn_struct));_T17->tag=Cyc_FileOpenError;
+_T17->f1=fn;_T14=(struct Cyc_FileOpenError_exn_struct*)_T17;}_T15=(void*)_T14;_throw(_T15);}goto _TLE;_TLD: _TLE: _T16=f;
 # 172
-return _T18;}}
+return _T16;}}
 # 175
 struct Cyc_FileCloseError_exn_struct Cyc_FileCloseError_val={Cyc_FileCloseError};
 void Cyc_file_close(struct Cyc___cycFILE*f){int _T0;struct Cyc_FileCloseError_exn_struct*_T1;struct Cyc_FileCloseError_exn_struct*_T2;_T0=

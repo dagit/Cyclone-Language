@@ -371,10 +371,10 @@ _T2->elmts=x;_T2->num_elmts=0;_T0=(struct Cyc_Xarray_Xarray*)_T2;}return _T0;}
 # 45
 struct Cyc_Xarray_Xarray*Cyc_Xarray_create_empty (void){struct Cyc_Xarray_Xarray*_T0;_T0=Cyc_Xarray_rcreate_empty(Cyc_Core_heap_region);return _T0;}
 # 48
-struct Cyc_Xarray_Xarray*Cyc_Xarray_rcreate(struct _RegionHandle*r,int len,void*a){struct Cyc_Core_Invalid_argument_exn_struct*_T0;void*_T1;struct Cyc_Xarray_Xarray*_T2;struct _RegionHandle*_T3;struct _fat_ptr _T4;int _T5;void**_T6;unsigned _T7;unsigned _T8;int _T9;void**_TA;unsigned _TB;
-if(len >= 0)goto _TL8;{struct Cyc_Core_Invalid_argument_exn_struct*_TC=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_TC->tag=Cyc_Core_Invalid_argument;
-_TC->f1=_tag_fat("xarrays must have a non-negative size buffer",sizeof(char),45U);_T0=(struct Cyc_Core_Invalid_argument_exn_struct*)_TC;}_T1=(void*)_T0;_throw(_T1);goto _TL9;_TL8: _TL9: _T3=r;{struct Cyc_Xarray_Xarray*_TC=_region_malloc(_T3,0U,sizeof(struct Cyc_Xarray_Xarray));_T5=len;{unsigned _TD=(unsigned)_T5;_T7=Cyc_Core_unique_qual;_T8=_check_times(_TD,sizeof(void*));{void**_TE=_aqual_malloc(_T7,_T8);_T9=len;{unsigned _TF=(unsigned)_T9;unsigned i;i=0;_TLD: if(i < _TF)goto _TLB;else{goto _TLC;}_TLB: _TB=i;_TA=_TE + _TB;
-*_TA=a;i=i + 1;goto _TLD;_TLC:;}_T6=(void**)_TE;}_T4=_tag_fat(_T6,sizeof(void*),_TD);}_TC->elmts=_T4;_TC->num_elmts=0;_T2=(struct Cyc_Xarray_Xarray*)_TC;}return _T2;}
+struct Cyc_Xarray_Xarray*Cyc_Xarray_rcreate(struct _RegionHandle*r,int len,void*a){struct Cyc_Core_Invalid_argument_exn_struct*_T0;void*_T1;struct Cyc_Xarray_Xarray*_T2;struct _RegionHandle*_T3;struct _fat_ptr _T4;int _T5;void**_T6;unsigned _T7;unsigned _T8;int _T9;unsigned _TA;
+if(len >= 0)goto _TL8;{struct Cyc_Core_Invalid_argument_exn_struct*_TB=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_TB->tag=Cyc_Core_Invalid_argument;
+_TB->f1=_tag_fat("xarrays must have a non-negative size buffer",sizeof(char),45U);_T0=(struct Cyc_Core_Invalid_argument_exn_struct*)_TB;}_T1=(void*)_T0;_throw(_T1);goto _TL9;_TL8: _TL9: _T3=r;{struct Cyc_Xarray_Xarray*_TB=_region_malloc(_T3,0U,sizeof(struct Cyc_Xarray_Xarray));_T5=len;{unsigned _TC=(unsigned)_T5;_T7=Cyc_Core_unique_qual;_T8=_check_times(_TC,sizeof(void*));{void**_TD=_aqual_malloc(_T7,_T8);_T9=len;{unsigned _TE=(unsigned)_T9;unsigned i;i=0;_TLD: if(i < _TE)goto _TLB;else{goto _TLC;}_TLB: _TA=i;
+_TD[_TA]=a;i=i + 1;goto _TLD;_TLC:;}_T6=(void**)_TD;}_T4=_tag_fat(_T6,sizeof(void*),_TC);}_TB->elmts=_T4;_TB->num_elmts=0;_T2=(struct Cyc_Xarray_Xarray*)_TB;}return _T2;}
 # 54
 struct Cyc_Xarray_Xarray*Cyc_Xarray_create(int len,void*a){struct Cyc_Xarray_Xarray*_T0;_T0=
 Cyc_Xarray_rcreate(Cyc_Core_heap_region,len,a);return _T0;}
@@ -388,64 +388,64 @@ return _T3;}}
 struct Cyc_Xarray_Xarray*Cyc_Xarray_singleton(int len,void*a){struct Cyc_Xarray_Xarray*_T0;_T0=
 Cyc_Xarray_rsingleton(Cyc_Core_heap_region,len,a);return _T0;}
 # 69
-void Cyc_Xarray_add(struct Cyc_Xarray_Xarray*xarr,void*a){struct Cyc_Xarray_Xarray*_T0;int _T1;unsigned _T2;struct Cyc_Xarray_Xarray*_T3;struct _fat_ptr _T4;unsigned _T5;struct Cyc_Xarray_Xarray*_T6;int _T7;struct Cyc_Xarray_Xarray*_T8;void**_T9;void**_TA;unsigned _TB;unsigned _TC;void**_TD;unsigned _TE;struct _fat_ptr _TF;struct Cyc_Xarray_Xarray*_T10;int _T11;int _T12;void**_T13;unsigned _T14;unsigned _T15;struct Cyc_Xarray_Xarray*_T16;int _T17;int _T18;void**_T19;unsigned _T1A;struct Cyc_Xarray_Xarray*_T1B;struct _fat_ptr _T1C;unsigned char*_T1D;void**_T1E;int _T1F;struct Cyc_Xarray_Xarray*_T20;int _T21;struct _fat_ptr _T22;int _T23;char*_T24;void**_T25;struct Cyc_Xarray_Xarray*_T26;struct _fat_ptr _T27;int _T28;char*_T29;void**_T2A;struct Cyc_Xarray_Xarray*_T2B;struct Cyc_Xarray_Xarray*_T2C;void(*_T2D)(void**);void(*_T2E)(void*);struct _fat_ptr _T2F;char*_T30;void**_T31;struct Cyc_Xarray_Xarray*_T32;struct _fat_ptr _T33;struct Cyc_Xarray_Xarray*_T34;int _T35;int _T36;char*_T37;void**_T38;_T0=xarr;_T1=_T0->num_elmts;_T2=(unsigned)_T1;_T3=xarr;_T4=_T3->elmts;_T5=
+void Cyc_Xarray_add(struct Cyc_Xarray_Xarray*xarr,void*a){struct Cyc_Xarray_Xarray*_T0;int _T1;unsigned _T2;struct Cyc_Xarray_Xarray*_T3;struct _fat_ptr _T4;unsigned _T5;struct Cyc_Xarray_Xarray*_T6;int _T7;struct Cyc_Xarray_Xarray*_T8;void**_T9;void**_TA;unsigned _TB;unsigned _TC;unsigned _TD;struct _fat_ptr _TE;struct Cyc_Xarray_Xarray*_TF;int _T10;int _T11;void**_T12;unsigned _T13;unsigned _T14;struct Cyc_Xarray_Xarray*_T15;int _T16;int _T17;unsigned _T18;struct Cyc_Xarray_Xarray*_T19;struct _fat_ptr _T1A;unsigned char*_T1B;void**_T1C;int _T1D;struct Cyc_Xarray_Xarray*_T1E;int _T1F;struct _fat_ptr _T20;int _T21;char*_T22;void**_T23;struct Cyc_Xarray_Xarray*_T24;struct _fat_ptr _T25;int _T26;char*_T27;void**_T28;struct Cyc_Xarray_Xarray*_T29;struct Cyc_Xarray_Xarray*_T2A;void(*_T2B)(void**);void(*_T2C)(void*);struct _fat_ptr _T2D;char*_T2E;void**_T2F;struct Cyc_Xarray_Xarray*_T30;struct _fat_ptr _T31;struct Cyc_Xarray_Xarray*_T32;int _T33;int _T34;char*_T35;void**_T36;_T0=xarr;_T1=_T0->num_elmts;_T2=(unsigned)_T1;_T3=xarr;_T4=_T3->elmts;_T5=
 _get_fat_size(_T4,sizeof(void*));if(_T2!=_T5)goto _TL10;_T6=xarr;_T7=_T6->num_elmts;
-if(_T7!=0)goto _TL12;_T8=xarr;{unsigned _T39=10U;_TB=Cyc_Core_unique_qual;_TC=_check_times(_T39,sizeof(void*));{void**_T3A=_aqual_malloc(_TB,_TC);{unsigned _T3B=10U;unsigned i;i=0;_TL17: if(i < _T3B)goto _TL15;else{goto _TL16;}_TL15: _TE=i;_TD=_T3A + _TE;
-*_TD=a;i=i + 1;goto _TL17;_TL16:;}_TA=(void**)_T3A;}_T9=_TA;}_T8->elmts=_tag_fat(_T9,sizeof(void*),10U);goto _TL13;
+if(_T7!=0)goto _TL12;_T8=xarr;{unsigned _T37=10U;_TB=Cyc_Core_unique_qual;_TC=_check_times(_T37,sizeof(void*));{void**_T38=_aqual_malloc(_TB,_TC);{unsigned _T39=10U;unsigned i;i=0;_TL17: if(i < _T39)goto _TL15;else{goto _TL16;}_TL15: _TD=i;
+_T38[_TD]=a;i=i + 1;goto _TL17;_TL16:;}_TA=(void**)_T38;}_T9=_TA;}_T8->elmts=_tag_fat(_T9,sizeof(void*),10U);goto _TL13;
 # 74
-_TL12: _T10=xarr;_T11=_T10->num_elmts;_T12=_T11 * 2;{unsigned _T39=(unsigned)_T12;_T14=Cyc_Core_unique_qual;_T15=_check_times(_T39,sizeof(void*));{void**_T3A=_aqual_malloc(_T14,_T15);_T16=xarr;_T17=_T16->num_elmts;_T18=_T17 * 2;{unsigned _T3B=(unsigned)_T18;unsigned i;i=0;_TL1B: if(i < _T3B)goto _TL19;else{goto _TL1A;}_TL19: _T1A=i;_T19=_T3A + _T1A;_T1B=xarr;_T1C=_T1B->elmts;_T1D=_T1C.curr;_T1E=(void**)_T1D;*_T19=_T1E[0];i=i + 1;goto _TL1B;_TL1A:;}_T13=(void**)_T3A;}_TF=_tag_fat(_T13,sizeof(void*),_T39);}{struct _fat_ptr newarr=_TF;{
-int i=1;_TL1F: _T1F=i;_T20=xarr;_T21=_T20->num_elmts;if(_T1F < _T21)goto _TL1D;else{goto _TL1E;}
-_TL1D: _T22=newarr;_T23=i;_T24=_check_fat_subscript(_T22,sizeof(void*),_T23);_T25=(void**)_T24;_T26=xarr;_T27=_T26->elmts;_T28=i;_T29=_check_fat_subscript(_T27,sizeof(void*),_T28);_T2A=(void**)_T29;*_T25=*_T2A;
+_TL12: _TF=xarr;_T10=_TF->num_elmts;_T11=_T10 * 2;{unsigned _T37=(unsigned)_T11;_T13=Cyc_Core_unique_qual;_T14=_check_times(_T37,sizeof(void*));{void**_T38=_aqual_malloc(_T13,_T14);_T15=xarr;_T16=_T15->num_elmts;_T17=_T16 * 2;{unsigned _T39=(unsigned)_T17;unsigned i;i=0;_TL1B: if(i < _T39)goto _TL19;else{goto _TL1A;}_TL19: _T18=i;_T19=xarr;_T1A=_T19->elmts;_T1B=_T1A.curr;_T1C=(void**)_T1B;_T38[_T18]=_T1C[0];i=i + 1;goto _TL1B;_TL1A:;}_T12=(void**)_T38;}_TE=_tag_fat(_T12,sizeof(void*),_T37);}{struct _fat_ptr newarr=_TE;{
+int i=1;_TL1F: _T1D=i;_T1E=xarr;_T1F=_T1E->num_elmts;if(_T1D < _T1F)goto _TL1D;else{goto _TL1E;}
+_TL1D: _T20=newarr;_T21=i;_T22=_check_fat_subscript(_T20,sizeof(void*),_T21);_T23=(void**)_T22;_T24=xarr;_T25=_T24->elmts;_T26=i;_T27=_check_fat_subscript(_T25,sizeof(void*),_T26);_T28=(void**)_T27;*_T23=*_T28;
 # 75
-i=i + 1;goto _TL1F;_TL1E:;}_T2B=xarr;{
+i=i + 1;goto _TL1F;_TL1E:;}_T29=xarr;{
 # 77
-struct _fat_ptr _T39=_T2B->elmts;struct _fat_ptr _T3A=newarr;_T2C=xarr;_T2C->elmts=_T3A;newarr=_T39;}_T2E=Cyc_Core_ufree;{
-void(*_T39)(void**)=(void(*)(void**))_T2E;_T2D=_T39;}_T2F=newarr;_T30=_untag_fat_ptr_check_bound(_T2F,sizeof(void*),1U);_T31=(void**)_T30;_T2D(_T31);}_TL13: goto _TL11;_TL10: _TL11: _T32=xarr;_T33=_T32->elmts;_T34=xarr;_T35=_T34->num_elmts;
+struct _fat_ptr _T37=_T29->elmts;struct _fat_ptr _T38=newarr;_T2A=xarr;_T2A->elmts=_T38;newarr=_T37;}_T2C=Cyc_Core_ufree;{
+void(*_T37)(void**)=(void(*)(void**))_T2C;_T2B=_T37;}_T2D=newarr;_T2E=_untag_fat_ptr_check_bound(_T2D,sizeof(void*),1U);_T2F=(void**)_T2E;_T2B(_T2F);}_TL13: goto _TL11;_TL10: _TL11: _T30=xarr;_T31=_T30->elmts;_T32=xarr;_T33=_T32->num_elmts;
 # 81
-_T34->num_elmts=_T35 + 1;_T36=_T35;_T37=_check_fat_subscript(_T33,sizeof(void*),_T36);_T38=(void**)_T37;*_T38=a;}
+_T32->num_elmts=_T33 + 1;_T34=_T33;_T35=_check_fat_subscript(_T31,sizeof(void*),_T34);_T36=(void**)_T35;*_T36=a;}
 # 84
 int Cyc_Xarray_add_ind(struct Cyc_Xarray_Xarray*xarr,void*a){struct Cyc_Xarray_Xarray*_T0;int _T1;int _T2;
 Cyc_Xarray_add(xarr,a);_T0=xarr;_T1=_T0->num_elmts;_T2=_T1 - 1;
 return _T2;}
 # 89
-struct _fat_ptr Cyc_Xarray_rto_array(struct _RegionHandle*r,struct Cyc_Xarray_Xarray*xarr){struct Cyc_Xarray_Xarray*_T0;int _T1;void**_T2;void**_T3;struct _RegionHandle*_T4;unsigned _T5;struct _fat_ptr _T6;struct _fat_ptr _T7;struct Cyc_Xarray_Xarray*_T8;int _T9;void**_TA;struct _RegionHandle*_TB;unsigned _TC;struct Cyc_Xarray_Xarray*_TD;int _TE;void**_TF;unsigned _T10;struct Cyc_Xarray_Xarray*_T11;struct _fat_ptr _T12;unsigned _T13;int _T14;char*_T15;void**_T16;struct _fat_ptr _T17;_T0=xarr;_T1=_T0->num_elmts;
-if(_T1!=0)goto _TL20;{unsigned _T18=0;_T4=r;_T5=_check_times(_T18,sizeof(void*));{void**_T19=_region_malloc(_T4,0U,_T5);*_T19=0;_T3=(void**)_T19;}_T2=_T3;}_T6=
-_tag_fat(_T2,sizeof(void*),0U);return _T6;_TL20: _T8=xarr;_T9=_T8->num_elmts;{unsigned _T18=(unsigned)_T9;_TB=r;_TC=_check_times(_T18,sizeof(void*));{void**_T19=_region_malloc(_TB,0U,_TC);_TD=xarr;_TE=_TD->num_elmts;{unsigned _T1A=(unsigned)_TE;unsigned i;i=0;_TL25: if(i < _T1A)goto _TL23;else{goto _TL24;}_TL23: _T10=i;_TF=_T19 + _T10;_T11=xarr;_T12=_T11->elmts;_T13=i;_T14=(int)_T13;_T15=_check_fat_subscript(_T12,sizeof(void*),_T14);_T16=(void**)_T15;
-*_TF=*_T16;i=i + 1;goto _TL25;_TL24:;}_TA=(void**)_T19;}_T7=_tag_fat(_TA,sizeof(void*),_T18);}{struct _fat_ptr ans=_T7;_T17=ans;
-return _T17;}}
+struct _fat_ptr Cyc_Xarray_rto_array(struct _RegionHandle*r,struct Cyc_Xarray_Xarray*xarr){struct Cyc_Xarray_Xarray*_T0;int _T1;void**_T2;void**_T3;struct _RegionHandle*_T4;unsigned _T5;struct _fat_ptr _T6;struct _fat_ptr _T7;struct Cyc_Xarray_Xarray*_T8;int _T9;void**_TA;struct _RegionHandle*_TB;unsigned _TC;struct Cyc_Xarray_Xarray*_TD;int _TE;unsigned _TF;struct Cyc_Xarray_Xarray*_T10;struct _fat_ptr _T11;unsigned _T12;int _T13;char*_T14;void**_T15;struct _fat_ptr _T16;_T0=xarr;_T1=_T0->num_elmts;
+if(_T1!=0)goto _TL20;{unsigned _T17=0;_T4=r;_T5=_check_times(_T17,sizeof(void*));{void**_T18=_region_malloc(_T4,0U,_T5);*_T18=0;_T3=(void**)_T18;}_T2=_T3;}_T6=
+_tag_fat(_T2,sizeof(void*),0U);return _T6;_TL20: _T8=xarr;_T9=_T8->num_elmts;{unsigned _T17=(unsigned)_T9;_TB=r;_TC=_check_times(_T17,sizeof(void*));{void**_T18=_region_malloc(_TB,0U,_TC);_TD=xarr;_TE=_TD->num_elmts;{unsigned _T19=(unsigned)_TE;unsigned i;i=0;_TL25: if(i < _T19)goto _TL23;else{goto _TL24;}_TL23: _TF=i;_T10=xarr;_T11=_T10->elmts;_T12=i;_T13=(int)_T12;_T14=_check_fat_subscript(_T11,sizeof(void*),_T13);_T15=(void**)_T14;
+_T18[_TF]=*_T15;i=i + 1;goto _TL25;_TL24:;}_TA=(void**)_T18;}_T7=_tag_fat(_TA,sizeof(void*),_T17);}{struct _fat_ptr ans=_T7;_T16=ans;
+return _T16;}}
 # 96
 struct _fat_ptr Cyc_Xarray_to_array(struct Cyc_Xarray_Xarray*xarr){struct _fat_ptr _T0;_T0=
 Cyc_Xarray_rto_array(Cyc_Core_heap_region,xarr);return _T0;}
 # 100
-struct Cyc_Xarray_Xarray*Cyc_Xarray_rfrom_array(struct _RegionHandle*r,struct _fat_ptr arr){struct _fat_ptr _T0;unsigned _T1;struct Cyc_Xarray_Xarray*_T2;struct _RegionHandle*_T3;struct Cyc_Xarray_Xarray*_T4;struct _fat_ptr _T5;struct _fat_ptr _T6;void**_T7;unsigned _T8;unsigned _T9;struct _fat_ptr _TA;void**_TB;unsigned _TC;struct _fat_ptr _TD;unsigned char*_TE;void**_TF;unsigned _T10;int _T11;struct Cyc_Xarray_Xarray*_T12;struct _fat_ptr _T13;unsigned _T14;struct Cyc_Xarray_Xarray*_T15;_T0=arr;_T1=
+struct Cyc_Xarray_Xarray*Cyc_Xarray_rfrom_array(struct _RegionHandle*r,struct _fat_ptr arr){struct _fat_ptr _T0;unsigned _T1;struct Cyc_Xarray_Xarray*_T2;struct _RegionHandle*_T3;struct Cyc_Xarray_Xarray*_T4;struct _fat_ptr _T5;struct _fat_ptr _T6;void**_T7;unsigned _T8;unsigned _T9;struct _fat_ptr _TA;unsigned _TB;struct _fat_ptr _TC;unsigned char*_TD;void**_TE;unsigned _TF;int _T10;struct Cyc_Xarray_Xarray*_T11;struct _fat_ptr _T12;unsigned _T13;struct Cyc_Xarray_Xarray*_T14;_T0=arr;_T1=
 _get_fat_size(_T0,sizeof(void*));if(_T1!=0U)goto _TL26;_T2=
 Cyc_Xarray_rcreate_empty(r);return _T2;_TL26: {
-struct Cyc_Xarray_Xarray*ans;_T3=r;ans=_region_malloc(_T3,0U,sizeof(struct Cyc_Xarray_Xarray));_T4=ans;_T6=arr;{unsigned _T16=
-_get_fat_size(_T6,sizeof(void*));_T8=Cyc_Core_unique_qual;_T9=_check_times(_T16,sizeof(void*));{void**_T17=_aqual_malloc(_T8,_T9);_TA=arr;{unsigned _T18=_get_fat_size(_TA,sizeof(void*));unsigned i;i=0;_TL2B: if(i < _T18)goto _TL29;else{goto _TL2A;}_TL29: _TC=i;_TB=_T17 + _TC;_TD=arr;_TE=_TD.curr;_TF=(void**)_TE;_T10=i;_T11=(int)_T10;*_TB=_TF[_T11];i=i + 1;goto _TL2B;_TL2A:;}_T7=(void**)_T17;}_T5=_tag_fat(_T7,sizeof(void*),_T16);}_T4->elmts=_T5;_T12=ans;_T13=arr;_T14=
-_get_fat_size(_T13,sizeof(void*));_T12->num_elmts=(int)_T14;_T15=ans;
-return _T15;}}
+struct Cyc_Xarray_Xarray*ans;_T3=r;ans=_region_malloc(_T3,0U,sizeof(struct Cyc_Xarray_Xarray));_T4=ans;_T6=arr;{unsigned _T15=
+_get_fat_size(_T6,sizeof(void*));_T8=Cyc_Core_unique_qual;_T9=_check_times(_T15,sizeof(void*));{void**_T16=_aqual_malloc(_T8,_T9);_TA=arr;{unsigned _T17=_get_fat_size(_TA,sizeof(void*));unsigned i;i=0;_TL2B: if(i < _T17)goto _TL29;else{goto _TL2A;}_TL29: _TB=i;_TC=arr;_TD=_TC.curr;_TE=(void**)_TD;_TF=i;_T10=(int)_TF;_T16[_TB]=_TE[_T10];i=i + 1;goto _TL2B;_TL2A:;}_T7=(void**)_T16;}_T5=_tag_fat(_T7,sizeof(void*),_T15);}_T4->elmts=_T5;_T11=ans;_T12=arr;_T13=
+_get_fat_size(_T12,sizeof(void*));_T11->num_elmts=(int)_T13;_T14=ans;
+return _T14;}}
 # 109
 struct Cyc_Xarray_Xarray*Cyc_Xarray_from_array(struct _fat_ptr arr){struct Cyc_Xarray_Xarray*_T0;_T0=
 Cyc_Xarray_rfrom_array(Cyc_Core_heap_region,arr);return _T0;}
 # 114
-struct Cyc_Xarray_Xarray*Cyc_Xarray_rappend(struct _RegionHandle*r,struct Cyc_Xarray_Xarray*xarr1,struct Cyc_Xarray_Xarray*xarr2){struct Cyc_Xarray_Xarray*_T0;struct _fat_ptr _T1;unsigned _T2;struct Cyc_Xarray_Xarray*_T3;struct _fat_ptr _T4;unsigned _T5;unsigned _T6;struct Cyc_Xarray_Xarray*_T7;void*_T8;struct Cyc_Xarray_Xarray*_T9;struct _fat_ptr _TA;unsigned _TB;struct Cyc_Xarray_Xarray*_TC;struct _fat_ptr _TD;unsigned char*_TE;void**_TF;struct Cyc_Xarray_Xarray*_T10;struct _fat_ptr _T11;unsigned char*_T12;void**_T13;struct _RegionHandle*_T14;struct Cyc_Xarray_Xarray*_T15;struct _fat_ptr _T16;int _T17;void**_T18;unsigned _T19;unsigned _T1A;int _T1B;void**_T1C;unsigned _T1D;struct Cyc_Xarray_Xarray*_T1E;int _T1F;struct Cyc_Xarray_Xarray*_T20;int _T21;struct Cyc_Xarray_Xarray*_T22;struct Cyc_Xarray_Xarray*_T23;struct _fat_ptr _T24;int _T25;char*_T26;void**_T27;void*_T28;int _T29;struct Cyc_Xarray_Xarray*_T2A;int _T2B;struct Cyc_Xarray_Xarray*_T2C;struct Cyc_Xarray_Xarray*_T2D;struct _fat_ptr _T2E;int _T2F;char*_T30;void**_T31;void*_T32;struct Cyc_Xarray_Xarray*_T33;_T0=xarr1;_T1=_T0->elmts;_T2=
+struct Cyc_Xarray_Xarray*Cyc_Xarray_rappend(struct _RegionHandle*r,struct Cyc_Xarray_Xarray*xarr1,struct Cyc_Xarray_Xarray*xarr2){struct Cyc_Xarray_Xarray*_T0;struct _fat_ptr _T1;unsigned _T2;struct Cyc_Xarray_Xarray*_T3;struct _fat_ptr _T4;unsigned _T5;unsigned _T6;struct Cyc_Xarray_Xarray*_T7;void*_T8;struct Cyc_Xarray_Xarray*_T9;struct _fat_ptr _TA;unsigned _TB;struct Cyc_Xarray_Xarray*_TC;struct _fat_ptr _TD;unsigned char*_TE;void**_TF;struct Cyc_Xarray_Xarray*_T10;struct _fat_ptr _T11;unsigned char*_T12;void**_T13;struct _RegionHandle*_T14;struct Cyc_Xarray_Xarray*_T15;struct _fat_ptr _T16;int _T17;void**_T18;unsigned _T19;unsigned _T1A;int _T1B;unsigned _T1C;struct Cyc_Xarray_Xarray*_T1D;int _T1E;struct Cyc_Xarray_Xarray*_T1F;int _T20;struct Cyc_Xarray_Xarray*_T21;struct Cyc_Xarray_Xarray*_T22;struct _fat_ptr _T23;int _T24;char*_T25;void**_T26;void*_T27;int _T28;struct Cyc_Xarray_Xarray*_T29;int _T2A;struct Cyc_Xarray_Xarray*_T2B;struct Cyc_Xarray_Xarray*_T2C;struct _fat_ptr _T2D;int _T2E;char*_T2F;void**_T30;void*_T31;struct Cyc_Xarray_Xarray*_T32;_T0=xarr1;_T1=_T0->elmts;_T2=
 _get_fat_size(_T1,sizeof(void*));_T3=xarr2;_T4=_T3->elmts;_T5=_get_fat_size(_T4,sizeof(void*));_T6=_T2 + _T5;{int newsz=(int)_T6;
 if(newsz!=0)goto _TL2C;_T7=
 Cyc_Xarray_rcreate_empty(r);return _T7;_TL2C: _T9=xarr1;_TA=_T9->elmts;_TB=
 _get_fat_size(_TA,sizeof(void*));if(_TB!=0U)goto _TL2E;_TC=xarr2;_TD=_TC->elmts;_TE=_TD.curr;_TF=(void**)_TE;_T8=_TF[0];goto _TL2F;_TL2E: _T10=xarr1;_T11=_T10->elmts;_T12=_T11.curr;_T13=(void**)_T12;_T8=_T13[0];_TL2F: {void*init=_T8;
-struct Cyc_Xarray_Xarray*ans;_T14=r;ans=_region_malloc(_T14,0U,sizeof(struct Cyc_Xarray_Xarray));_T15=ans;_T17=newsz;{unsigned _T34=(unsigned)_T17;_T19=Cyc_Core_unique_qual;_T1A=_check_times(_T34,sizeof(void*));{void**_T35=_aqual_malloc(_T19,_T1A);_T1B=newsz;{unsigned _T36=(unsigned)_T1B;unsigned i;i=0;_TL33: if(i < _T36)goto _TL31;else{goto _TL32;}_TL31: _T1D=i;_T1C=_T35 + _T1D;*_T1C=init;i=i + 1;goto _TL33;_TL32:;}_T18=(void**)_T35;}_T16=_tag_fat(_T18,sizeof(void*),_T34);}_T15->elmts=_T16;_T1E=ans;
-_T1E->num_elmts=0;{
-int i=0;_TL37: _T1F=i;_T20=xarr1;_T21=_T20->num_elmts;if(_T1F < _T21)goto _TL35;else{goto _TL36;}
-_TL35: _T22=ans;_T23=xarr1;_T24=_T23->elmts;_T25=i;_T26=_check_fat_subscript(_T24,sizeof(void*),_T25);_T27=(void**)_T26;_T28=*_T27;Cyc_Xarray_add(_T22,_T28);
+struct Cyc_Xarray_Xarray*ans;_T14=r;ans=_region_malloc(_T14,0U,sizeof(struct Cyc_Xarray_Xarray));_T15=ans;_T17=newsz;{unsigned _T33=(unsigned)_T17;_T19=Cyc_Core_unique_qual;_T1A=_check_times(_T33,sizeof(void*));{void**_T34=_aqual_malloc(_T19,_T1A);_T1B=newsz;{unsigned _T35=(unsigned)_T1B;unsigned i;i=0;_TL33: if(i < _T35)goto _TL31;else{goto _TL32;}_TL31: _T1C=i;_T34[_T1C]=init;i=i + 1;goto _TL33;_TL32:;}_T18=(void**)_T34;}_T16=_tag_fat(_T18,sizeof(void*),_T33);}_T15->elmts=_T16;_T1D=ans;
+_T1D->num_elmts=0;{
+int i=0;_TL37: _T1E=i;_T1F=xarr1;_T20=_T1F->num_elmts;if(_T1E < _T20)goto _TL35;else{goto _TL36;}
+_TL35: _T21=ans;_T22=xarr1;_T23=_T22->elmts;_T24=i;_T25=_check_fat_subscript(_T23,sizeof(void*),_T24);_T26=(void**)_T25;_T27=*_T26;Cyc_Xarray_add(_T21,_T27);
 # 121
 i=i + 1;goto _TL37;_TL36:;}{
 # 123
-int i=0;_TL3B: _T29=i;_T2A=xarr2;_T2B=_T2A->num_elmts;if(_T29 < _T2B)goto _TL39;else{goto _TL3A;}
-_TL39: _T2C=ans;_T2D=xarr2;_T2E=_T2D->elmts;_T2F=i;_T30=_check_fat_subscript(_T2E,sizeof(void*),_T2F);_T31=(void**)_T30;_T32=*_T31;Cyc_Xarray_add(_T2C,_T32);
+int i=0;_TL3B: _T28=i;_T29=xarr2;_T2A=_T29->num_elmts;if(_T28 < _T2A)goto _TL39;else{goto _TL3A;}
+_TL39: _T2B=ans;_T2C=xarr2;_T2D=_T2C->elmts;_T2E=i;_T2F=_check_fat_subscript(_T2D,sizeof(void*),_T2E);_T30=(void**)_T2F;_T31=*_T30;Cyc_Xarray_add(_T2B,_T31);
 # 123
-i=i + 1;goto _TL3B;_TL3A:;}_T33=ans;
+i=i + 1;goto _TL3B;_TL3A:;}_T32=ans;
 # 125
-return _T33;}}}
+return _T32;}}}
 # 128
 struct Cyc_Xarray_Xarray*Cyc_Xarray_append(struct Cyc_Xarray_Xarray*xarr1,struct Cyc_Xarray_Xarray*xarr2){struct Cyc_Xarray_Xarray*_T0;_T0=
 Cyc_Xarray_rappend(Cyc_Core_heap_region,xarr1,xarr2);return _T0;}
@@ -474,34 +474,34 @@ _TL49: _T3=env;_T4=xarr;_T5=_T4->elmts;_T6=i;_T7=_check_fat_subscript(_T5,sizeof
 # 148
 i=i + 1;goto _TL4B;_TL4A:;}
 # 152
-struct Cyc_Xarray_Xarray*Cyc_Xarray_rmap(struct _RegionHandle*r,void*(*f)(void*),struct Cyc_Xarray_Xarray*xarr){struct Cyc_Xarray_Xarray*_T0;int _T1;struct Cyc_Xarray_Xarray*_T2;struct _RegionHandle*_T3;struct Cyc_Xarray_Xarray*_T4;struct _fat_ptr _T5;struct Cyc_Xarray_Xarray*_T6;struct _fat_ptr _T7;void**_T8;unsigned _T9;unsigned _TA;struct Cyc_Xarray_Xarray*_TB;struct _fat_ptr _TC;void**_TD;unsigned _TE;struct Cyc_Xarray_Xarray*_TF;struct _fat_ptr _T10;unsigned char*_T11;void**_T12;void*_T13;struct Cyc_Xarray_Xarray*_T14;struct Cyc_Xarray_Xarray*_T15;int _T16;struct Cyc_Xarray_Xarray*_T17;int _T18;struct Cyc_Xarray_Xarray*_T19;struct _fat_ptr _T1A;int _T1B;char*_T1C;void**_T1D;struct Cyc_Xarray_Xarray*_T1E;struct _fat_ptr _T1F;int _T20;char*_T21;void**_T22;void*_T23;struct Cyc_Xarray_Xarray*_T24;_T0=xarr;_T1=_T0->num_elmts;
+struct Cyc_Xarray_Xarray*Cyc_Xarray_rmap(struct _RegionHandle*r,void*(*f)(void*),struct Cyc_Xarray_Xarray*xarr){struct Cyc_Xarray_Xarray*_T0;int _T1;struct Cyc_Xarray_Xarray*_T2;struct _RegionHandle*_T3;struct Cyc_Xarray_Xarray*_T4;struct _fat_ptr _T5;struct Cyc_Xarray_Xarray*_T6;struct _fat_ptr _T7;void**_T8;unsigned _T9;unsigned _TA;struct Cyc_Xarray_Xarray*_TB;struct _fat_ptr _TC;unsigned _TD;struct Cyc_Xarray_Xarray*_TE;struct _fat_ptr _TF;unsigned char*_T10;void**_T11;void*_T12;struct Cyc_Xarray_Xarray*_T13;struct Cyc_Xarray_Xarray*_T14;int _T15;struct Cyc_Xarray_Xarray*_T16;int _T17;struct Cyc_Xarray_Xarray*_T18;struct _fat_ptr _T19;int _T1A;char*_T1B;void**_T1C;struct Cyc_Xarray_Xarray*_T1D;struct _fat_ptr _T1E;int _T1F;char*_T20;void**_T21;void*_T22;struct Cyc_Xarray_Xarray*_T23;_T0=xarr;_T1=_T0->num_elmts;
 if(_T1!=0)goto _TL4C;_T2=Cyc_Xarray_rcreate_empty(r);return _T2;_TL4C: {
 # 155
-struct Cyc_Xarray_Xarray*ans;_T3=r;ans=_region_malloc(_T3,0U,sizeof(struct Cyc_Xarray_Xarray));_T4=ans;_T6=xarr;_T7=_T6->elmts;{unsigned _T25=
-_get_fat_size(_T7,sizeof(void*));_T9=Cyc_Core_unique_qual;_TA=_check_times(_T25,sizeof(void*));{void**_T26=_aqual_malloc(_T9,_TA);_TB=xarr;_TC=_TB->elmts;{unsigned _T27=_get_fat_size(_TC,sizeof(void*));unsigned i;i=0;_TL51: if(i < _T27)goto _TL4F;else{goto _TL50;}_TL4F: _TE=i;_TD=_T26 + _TE;_TF=xarr;_T10=_TF->elmts;_T11=_T10.curr;_T12=(void**)_T11;_T13=_T12[0];*_TD=f(_T13);i=i + 1;goto _TL51;_TL50:;}_T8=(void**)_T26;}_T5=_tag_fat(_T8,sizeof(void*),_T25);}_T4->elmts=_T5;_T14=ans;_T15=xarr;
-_T14->num_elmts=_T15->num_elmts;{
-int i=1;_TL55: _T16=i;_T17=xarr;_T18=_T17->num_elmts;if(_T16 < _T18)goto _TL53;else{goto _TL54;}
-_TL53: _T19=ans;_T1A=_T19->elmts;_T1B=i;_T1C=_check_fat_subscript(_T1A,sizeof(void*),_T1B);_T1D=(void**)_T1C;_T1E=xarr;_T1F=_T1E->elmts;_T20=i;_T21=_check_fat_subscript(_T1F,sizeof(void*),_T20);_T22=(void**)_T21;_T23=*_T22;*_T1D=f(_T23);
+struct Cyc_Xarray_Xarray*ans;_T3=r;ans=_region_malloc(_T3,0U,sizeof(struct Cyc_Xarray_Xarray));_T4=ans;_T6=xarr;_T7=_T6->elmts;{unsigned _T24=
+_get_fat_size(_T7,sizeof(void*));_T9=Cyc_Core_unique_qual;_TA=_check_times(_T24,sizeof(void*));{void**_T25=_aqual_malloc(_T9,_TA);_TB=xarr;_TC=_TB->elmts;{unsigned _T26=_get_fat_size(_TC,sizeof(void*));unsigned i;i=0;_TL51: if(i < _T26)goto _TL4F;else{goto _TL50;}_TL4F: _TD=i;_TE=xarr;_TF=_TE->elmts;_T10=_TF.curr;_T11=(void**)_T10;_T12=_T11[0];_T25[_TD]=f(_T12);i=i + 1;goto _TL51;_TL50:;}_T8=(void**)_T25;}_T5=_tag_fat(_T8,sizeof(void*),_T24);}_T4->elmts=_T5;_T13=ans;_T14=xarr;
+_T13->num_elmts=_T14->num_elmts;{
+int i=1;_TL55: _T15=i;_T16=xarr;_T17=_T16->num_elmts;if(_T15 < _T17)goto _TL53;else{goto _TL54;}
+_TL53: _T18=ans;_T19=_T18->elmts;_T1A=i;_T1B=_check_fat_subscript(_T19,sizeof(void*),_T1A);_T1C=(void**)_T1B;_T1D=xarr;_T1E=_T1D->elmts;_T1F=i;_T20=_check_fat_subscript(_T1E,sizeof(void*),_T1F);_T21=(void**)_T20;_T22=*_T21;*_T1C=f(_T22);
 # 158
-i=i + 1;goto _TL55;_TL54:;}_T24=ans;
+i=i + 1;goto _TL55;_TL54:;}_T23=ans;
 # 160
-return _T24;}}
+return _T23;}}
 # 163
 struct Cyc_Xarray_Xarray*Cyc_Xarray_map(void*(*f)(void*),struct Cyc_Xarray_Xarray*xarr){struct _RegionHandle*_T0;void*(*_T1)(void*);struct Cyc_Xarray_Xarray*_T2;struct Cyc_Xarray_Xarray*_T3;_T0=Cyc_Core_heap_region;_T1=f;_T2=xarr;_T3=
 Cyc_Xarray_rmap(_T0,_T1,_T2);return _T3;}
 # 167
-struct Cyc_Xarray_Xarray*Cyc_Xarray_rmap_c(struct _RegionHandle*r,void*(*f)(void*,void*),void*env,struct Cyc_Xarray_Xarray*xarr){struct Cyc_Xarray_Xarray*_T0;int _T1;struct Cyc_Xarray_Xarray*_T2;struct _RegionHandle*_T3;struct Cyc_Xarray_Xarray*_T4;struct _fat_ptr _T5;struct Cyc_Xarray_Xarray*_T6;struct _fat_ptr _T7;void**_T8;unsigned _T9;unsigned _TA;struct Cyc_Xarray_Xarray*_TB;struct _fat_ptr _TC;void**_TD;unsigned _TE;void*_TF;struct Cyc_Xarray_Xarray*_T10;struct _fat_ptr _T11;unsigned char*_T12;void**_T13;void*_T14;struct Cyc_Xarray_Xarray*_T15;struct Cyc_Xarray_Xarray*_T16;int _T17;struct Cyc_Xarray_Xarray*_T18;int _T19;struct Cyc_Xarray_Xarray*_T1A;struct _fat_ptr _T1B;int _T1C;char*_T1D;void**_T1E;void*_T1F;struct Cyc_Xarray_Xarray*_T20;struct _fat_ptr _T21;int _T22;char*_T23;void**_T24;void*_T25;struct Cyc_Xarray_Xarray*_T26;_T0=xarr;_T1=_T0->num_elmts;
+struct Cyc_Xarray_Xarray*Cyc_Xarray_rmap_c(struct _RegionHandle*r,void*(*f)(void*,void*),void*env,struct Cyc_Xarray_Xarray*xarr){struct Cyc_Xarray_Xarray*_T0;int _T1;struct Cyc_Xarray_Xarray*_T2;struct _RegionHandle*_T3;struct Cyc_Xarray_Xarray*_T4;struct _fat_ptr _T5;struct Cyc_Xarray_Xarray*_T6;struct _fat_ptr _T7;void**_T8;unsigned _T9;unsigned _TA;struct Cyc_Xarray_Xarray*_TB;struct _fat_ptr _TC;unsigned _TD;void*_TE;struct Cyc_Xarray_Xarray*_TF;struct _fat_ptr _T10;unsigned char*_T11;void**_T12;void*_T13;struct Cyc_Xarray_Xarray*_T14;struct Cyc_Xarray_Xarray*_T15;int _T16;struct Cyc_Xarray_Xarray*_T17;int _T18;struct Cyc_Xarray_Xarray*_T19;struct _fat_ptr _T1A;int _T1B;char*_T1C;void**_T1D;void*_T1E;struct Cyc_Xarray_Xarray*_T1F;struct _fat_ptr _T20;int _T21;char*_T22;void**_T23;void*_T24;struct Cyc_Xarray_Xarray*_T25;_T0=xarr;_T1=_T0->num_elmts;
 if(_T1!=0)goto _TL56;_T2=Cyc_Xarray_rcreate_empty(r);return _T2;_TL56: {
 # 170
-struct Cyc_Xarray_Xarray*ans;_T3=r;ans=_region_malloc(_T3,0U,sizeof(struct Cyc_Xarray_Xarray));_T4=ans;_T6=xarr;_T7=_T6->elmts;{unsigned _T27=
-_get_fat_size(_T7,sizeof(void*));_T9=Cyc_Core_unique_qual;_TA=_check_times(_T27,sizeof(void*));{void**_T28=_aqual_malloc(_T9,_TA);_TB=xarr;_TC=_TB->elmts;{unsigned _T29=_get_fat_size(_TC,sizeof(void*));unsigned i;i=0;_TL5B: if(i < _T29)goto _TL59;else{goto _TL5A;}_TL59: _TE=i;_TD=_T28 + _TE;_TF=env;_T10=xarr;_T11=_T10->elmts;_T12=_T11.curr;_T13=(void**)_T12;_T14=_T13[0];*_TD=f(_TF,_T14);i=i + 1;goto _TL5B;_TL5A:;}_T8=(void**)_T28;}_T5=_tag_fat(_T8,sizeof(void*),_T27);}_T4->elmts=_T5;_T15=ans;_T16=xarr;
-_T15->num_elmts=_T16->num_elmts;{
-int i=1;_TL5F: _T17=i;_T18=xarr;_T19=_T18->num_elmts;if(_T17 < _T19)goto _TL5D;else{goto _TL5E;}
-_TL5D: _T1A=ans;_T1B=_T1A->elmts;_T1C=i;_T1D=_check_fat_subscript(_T1B,sizeof(void*),_T1C);_T1E=(void**)_T1D;_T1F=env;_T20=xarr;_T21=_T20->elmts;_T22=i;_T23=_check_fat_subscript(_T21,sizeof(void*),_T22);_T24=(void**)_T23;_T25=*_T24;*_T1E=f(_T1F,_T25);
+struct Cyc_Xarray_Xarray*ans;_T3=r;ans=_region_malloc(_T3,0U,sizeof(struct Cyc_Xarray_Xarray));_T4=ans;_T6=xarr;_T7=_T6->elmts;{unsigned _T26=
+_get_fat_size(_T7,sizeof(void*));_T9=Cyc_Core_unique_qual;_TA=_check_times(_T26,sizeof(void*));{void**_T27=_aqual_malloc(_T9,_TA);_TB=xarr;_TC=_TB->elmts;{unsigned _T28=_get_fat_size(_TC,sizeof(void*));unsigned i;i=0;_TL5B: if(i < _T28)goto _TL59;else{goto _TL5A;}_TL59: _TD=i;_TE=env;_TF=xarr;_T10=_TF->elmts;_T11=_T10.curr;_T12=(void**)_T11;_T13=_T12[0];_T27[_TD]=f(_TE,_T13);i=i + 1;goto _TL5B;_TL5A:;}_T8=(void**)_T27;}_T5=_tag_fat(_T8,sizeof(void*),_T26);}_T4->elmts=_T5;_T14=ans;_T15=xarr;
+_T14->num_elmts=_T15->num_elmts;{
+int i=1;_TL5F: _T16=i;_T17=xarr;_T18=_T17->num_elmts;if(_T16 < _T18)goto _TL5D;else{goto _TL5E;}
+_TL5D: _T19=ans;_T1A=_T19->elmts;_T1B=i;_T1C=_check_fat_subscript(_T1A,sizeof(void*),_T1B);_T1D=(void**)_T1C;_T1E=env;_T1F=xarr;_T20=_T1F->elmts;_T21=i;_T22=_check_fat_subscript(_T20,sizeof(void*),_T21);_T23=(void**)_T22;_T24=*_T23;*_T1D=f(_T1E,_T24);
 # 173
-i=i + 1;goto _TL5F;_TL5E:;}_T26=ans;
+i=i + 1;goto _TL5F;_TL5E:;}_T25=ans;
 # 175
-return _T26;}}
+return _T25;}}
 # 178
 struct Cyc_Xarray_Xarray*Cyc_Xarray_map_c(void*(*f)(void*,void*),void*env,struct Cyc_Xarray_Xarray*xarr){struct _RegionHandle*_T0;void*(*_T1)(void*,void*);void*_T2;struct Cyc_Xarray_Xarray*_T3;struct Cyc_Xarray_Xarray*_T4;_T0=Cyc_Core_heap_region;_T1=f;_T2=env;_T3=xarr;_T4=
 Cyc_Xarray_rmap_c(_T0,_T1,_T2,_T3);return _T4;}
