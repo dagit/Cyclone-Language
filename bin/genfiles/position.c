@@ -360,64 +360,67 @@ int Cyc_Position_use_gcc_style_location=1;static char _TmpG0[1U]="";
 # 34
 static struct _fat_ptr Cyc_Position_source={_TmpG0,_TmpG0,_TmpG0 + 1U};
 # 36
-unsigned Cyc_Position_segment_join(unsigned s1,unsigned s2){
-if(s1==0U)return s2;
-if(s2==0U)return s1;
-return s1;}
+unsigned Cyc_Position_segment_join(unsigned s1,unsigned s2){unsigned _T0;unsigned _T1;unsigned _T2;
+if(s1!=0U)goto _TL0;_T0=s2;return _T0;_TL0:
+ if(s2!=0U)goto _TL2;_T1=s1;return _T1;_TL2: _T2=s1;
+return _T2;}
 # 41
-int Cyc_Position_segment_equals(unsigned s1,unsigned s2){
-return s1==s2;}
+int Cyc_Position_segment_equals(unsigned s1,unsigned s2){int _T0;_T0=s1==s2;
+return _T0;}
 # 45
-struct _fat_ptr Cyc_Position_string_of_loc(unsigned seg){
-struct _tuple0 _Tmp0=Cyc_Position_seg_to_loc(seg);unsigned _Tmp1;struct _fat_ptr _Tmp2;_Tmp2=_Tmp0.f0;_Tmp1=_Tmp0.f1;{struct _fat_ptr source=_Tmp2;unsigned loc=_Tmp1;
-struct Cyc_Lineno_Pos*pos=Cyc_Lineno_pos_of_abs(source,(int)loc);
-if(Cyc_Position_use_gcc_style_location){
-struct Cyc_String_pa_PrintArg_struct _Tmp3=({struct Cyc_String_pa_PrintArg_struct _Tmp4;_Tmp4.tag=0,_Tmp4.f1=pos->logical_file;_Tmp4;});struct Cyc_Int_pa_PrintArg_struct _Tmp4=({struct Cyc_Int_pa_PrintArg_struct _Tmp5;_Tmp5.tag=1,_Tmp5.f1=(unsigned long)pos->line_no;_Tmp5;});void*_Tmp5[2];_Tmp5[0]=& _Tmp3,_Tmp5[1]=& _Tmp4;return Cyc_aprintf(_tag_fat("%s:%d",sizeof(char),6U),_tag_fat(_Tmp5,sizeof(void*),2));}{
-struct Cyc_String_pa_PrintArg_struct _Tmp3=({struct Cyc_String_pa_PrintArg_struct _Tmp4;_Tmp4.tag=0,_Tmp4.f1=pos->logical_file;_Tmp4;});struct Cyc_Int_pa_PrintArg_struct _Tmp4=({struct Cyc_Int_pa_PrintArg_struct _Tmp5;_Tmp5.tag=1,_Tmp5.f1=(unsigned long)pos->line_no;_Tmp5;});struct Cyc_Int_pa_PrintArg_struct _Tmp5=({struct Cyc_Int_pa_PrintArg_struct _Tmp6;_Tmp6.tag=1,_Tmp6.f1=(unsigned long)pos->col;_Tmp6;});void*_Tmp6[3];_Tmp6[0]=& _Tmp3,_Tmp6[1]=& _Tmp4,_Tmp6[2]=& _Tmp5;return Cyc_aprintf(_tag_fat("%s:(%d:%d)",sizeof(char),11U),_tag_fat(_Tmp6,sizeof(void*),3));}}}
+struct _fat_ptr Cyc_Position_string_of_loc(unsigned seg){struct _fat_ptr _T0;unsigned _T1;int _T2;int _T3;struct _fat_ptr _T4;struct Cyc_String_pa_PrintArg_struct _T5;struct Cyc_Lineno_Pos*_T6;struct Cyc_Int_pa_PrintArg_struct _T7;struct Cyc_Lineno_Pos*_T8;int _T9;void**_TA;void**_TB;struct _fat_ptr _TC;struct _fat_ptr _TD;struct _fat_ptr _TE;struct Cyc_String_pa_PrintArg_struct _TF;struct Cyc_Lineno_Pos*_T10;struct Cyc_Int_pa_PrintArg_struct _T11;struct Cyc_Lineno_Pos*_T12;int _T13;struct Cyc_Int_pa_PrintArg_struct _T14;struct Cyc_Lineno_Pos*_T15;int _T16;void**_T17;void**_T18;void**_T19;struct _fat_ptr _T1A;struct _fat_ptr _T1B;
+struct _tuple0 _T1C=Cyc_Position_seg_to_loc(seg);unsigned _T1D;struct _fat_ptr _T1E;_T1E=_T1C.f0;_T1D=_T1C.f1;{struct _fat_ptr source=_T1E;unsigned loc=_T1D;_T0=source;_T1=loc;_T2=(int)_T1;{
+struct Cyc_Lineno_Pos*pos=Cyc_Lineno_pos_of_abs(_T0,_T2);_T3=Cyc_Position_use_gcc_style_location;
+if(!_T3)goto _TL4;{struct Cyc_String_pa_PrintArg_struct _T1F;_T1F.tag=0;_T6=pos;
+_T1F.f1=_T6->logical_file;_T5=_T1F;}{struct Cyc_String_pa_PrintArg_struct _T1F=_T5;{struct Cyc_Int_pa_PrintArg_struct _T20;_T20.tag=1;_T8=pos;_T9=_T8->line_no;_T20.f1=(unsigned long)_T9;_T7=_T20;}{struct Cyc_Int_pa_PrintArg_struct _T20=_T7;void*_T21[2];_TA=_T21 + 0;*_TA=& _T1F;_TB=_T21 + 1;*_TB=& _T20;_TC=_tag_fat("%s:%d",sizeof(char),6U);_TD=_tag_fat(_T21,sizeof(void*),2);_T4=Cyc_aprintf(_TC,_TD);}}return _T4;_TL4:{struct Cyc_String_pa_PrintArg_struct _T1F;_T1F.tag=0;_T10=pos;
+_T1F.f1=_T10->logical_file;_TF=_T1F;}{struct Cyc_String_pa_PrintArg_struct _T1F=_TF;{struct Cyc_Int_pa_PrintArg_struct _T20;_T20.tag=1;_T12=pos;_T13=_T12->line_no;_T20.f1=(unsigned long)_T13;_T11=_T20;}{struct Cyc_Int_pa_PrintArg_struct _T20=_T11;{struct Cyc_Int_pa_PrintArg_struct _T21;_T21.tag=1;_T15=pos;_T16=_T15->col;_T21.f1=(unsigned long)_T16;_T14=_T21;}{struct Cyc_Int_pa_PrintArg_struct _T21=_T14;void*_T22[3];_T17=_T22 + 0;*_T17=& _T1F;_T18=_T22 + 1;*_T18=& _T20;_T19=_T22 + 2;*_T19=& _T21;_T1A=_tag_fat("%s:(%d:%d)",sizeof(char),11U);_T1B=_tag_fat(_T22,sizeof(void*),3);_TE=Cyc_aprintf(_T1A,_T1B);}}}return _TE;}}}
 # 53
-static struct _fat_ptr Cyc_Position_string_of_pos_pr(struct Cyc_Lineno_Pos*pos){
-if(Cyc_Position_use_gcc_style_location){
-struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=pos->logical_file;_Tmp1;});struct Cyc_Int_pa_PrintArg_struct _Tmp1=({struct Cyc_Int_pa_PrintArg_struct _Tmp2;_Tmp2.tag=1,_Tmp2.f1=(unsigned long)pos->line_no;_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;return Cyc_aprintf(_tag_fat("%s:%d",sizeof(char),6U),_tag_fat(_Tmp2,sizeof(void*),2));}{
-struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=pos->logical_file;_Tmp1;});struct Cyc_Int_pa_PrintArg_struct _Tmp1=({struct Cyc_Int_pa_PrintArg_struct _Tmp2;_Tmp2.tag=1,_Tmp2.f1=(unsigned long)pos->line_no;_Tmp2;});struct Cyc_Int_pa_PrintArg_struct _Tmp2=({struct Cyc_Int_pa_PrintArg_struct _Tmp3;_Tmp3.tag=1,_Tmp3.f1=(unsigned long)pos->col;_Tmp3;});void*_Tmp3[3];_Tmp3[0]=& _Tmp0,_Tmp3[1]=& _Tmp1,_Tmp3[2]=& _Tmp2;return Cyc_aprintf(_tag_fat("%s:(%d:%d)",sizeof(char),11U),_tag_fat(_Tmp3,sizeof(void*),3));}}
+static struct _fat_ptr Cyc_Position_string_of_pos_pr(struct Cyc_Lineno_Pos*pos){int _T0;struct _fat_ptr _T1;struct Cyc_String_pa_PrintArg_struct _T2;struct Cyc_Lineno_Pos*_T3;struct Cyc_Int_pa_PrintArg_struct _T4;struct Cyc_Lineno_Pos*_T5;int _T6;void**_T7;void**_T8;struct _fat_ptr _T9;struct _fat_ptr _TA;struct _fat_ptr _TB;struct Cyc_String_pa_PrintArg_struct _TC;struct Cyc_Lineno_Pos*_TD;struct Cyc_Int_pa_PrintArg_struct _TE;struct Cyc_Lineno_Pos*_TF;int _T10;struct Cyc_Int_pa_PrintArg_struct _T11;struct Cyc_Lineno_Pos*_T12;int _T13;void**_T14;void**_T15;void**_T16;struct _fat_ptr _T17;struct _fat_ptr _T18;_T0=Cyc_Position_use_gcc_style_location;
+if(!_T0)goto _TL6;{struct Cyc_String_pa_PrintArg_struct _T19;_T19.tag=0;_T3=pos;
+_T19.f1=_T3->logical_file;_T2=_T19;}{struct Cyc_String_pa_PrintArg_struct _T19=_T2;{struct Cyc_Int_pa_PrintArg_struct _T1A;_T1A.tag=1;_T5=pos;_T6=_T5->line_no;_T1A.f1=(unsigned long)_T6;_T4=_T1A;}{struct Cyc_Int_pa_PrintArg_struct _T1A=_T4;void*_T1B[2];_T7=_T1B + 0;*_T7=& _T19;_T8=_T1B + 1;*_T8=& _T1A;_T9=_tag_fat("%s:%d",sizeof(char),6U);_TA=_tag_fat(_T1B,sizeof(void*),2);_T1=Cyc_aprintf(_T9,_TA);}}return _T1;_TL6:{struct Cyc_String_pa_PrintArg_struct _T19;_T19.tag=0;_TD=pos;
+_T19.f1=_TD->logical_file;_TC=_T19;}{struct Cyc_String_pa_PrintArg_struct _T19=_TC;{struct Cyc_Int_pa_PrintArg_struct _T1A;_T1A.tag=1;_TF=pos;_T10=_TF->line_no;_T1A.f1=(unsigned long)_T10;_TE=_T1A;}{struct Cyc_Int_pa_PrintArg_struct _T1A=_TE;{struct Cyc_Int_pa_PrintArg_struct _T1B;_T1B.tag=1;_T12=pos;_T13=_T12->col;_T1B.f1=(unsigned long)_T13;_T11=_T1B;}{struct Cyc_Int_pa_PrintArg_struct _T1B=_T11;void*_T1C[3];_T14=_T1C + 0;*_T14=& _T19;_T15=_T1C + 1;*_T15=& _T1A;_T16=_T1C + 2;*_T16=& _T1B;_T17=_tag_fat("%s:(%d:%d)",sizeof(char),11U);_T18=_tag_fat(_T1C,sizeof(void*),3);_TB=Cyc_aprintf(_T17,_T18);}}}return _TB;}
 # 59
-struct _fat_ptr Cyc_Position_string_of_segment(unsigned s){
-return Cyc_Position_string_of_loc(s);}
+struct _fat_ptr Cyc_Position_string_of_segment(unsigned s){struct _fat_ptr _T0;_T0=
+Cyc_Position_string_of_loc(s);return _T0;}
 # 63
-static struct Cyc_Lineno_Pos*Cyc_Position_new_pos (void){
-struct Cyc_Lineno_Pos*_Tmp0=_cycalloc(sizeof(struct Cyc_Lineno_Pos));_Tmp0->logical_file=_tag_fat("",sizeof(char),1U),({struct _fat_ptr _Tmp1=Cyc_Core_new_string(0U);_Tmp0->line=_Tmp1;}),_Tmp0->line_no=0,_Tmp0->col=0;return _Tmp0;}
+static struct Cyc_Lineno_Pos*Cyc_Position_new_pos (void){struct Cyc_Lineno_Pos*_T0;{struct Cyc_Lineno_Pos*_T1=_cycalloc(sizeof(struct Cyc_Lineno_Pos));
+_T1->logical_file=_tag_fat("",sizeof(char),1U);_T1->line=Cyc_Core_new_string(0U);_T1->line_no=0;_T1->col=0;_T0=(struct Cyc_Lineno_Pos*)_T1;}return _T0;}
 # 67
-struct Cyc_List_List*Cyc_Position_strings_of_segments(struct Cyc_List_List*segs){
+struct Cyc_List_List*Cyc_Position_strings_of_segments(struct Cyc_List_List*segs){struct Cyc_List_List*_T0;struct _fat_ptr*_T1;struct Cyc_List_List*_T2;void*_T3;unsigned _T4;struct Cyc_List_List*_T5;struct Cyc_List_List*_T6;
 # 69
 struct Cyc_List_List*ans=0;
-for(1;segs!=0;segs=segs->tl){
-ans=({struct Cyc_List_List*_Tmp0=_cycalloc(sizeof(struct Cyc_List_List));({struct _fat_ptr*_Tmp1=({struct _fat_ptr*_Tmp2=_cycalloc(sizeof(struct _fat_ptr));({struct _fat_ptr _Tmp3=Cyc_Position_string_of_segment((unsigned)segs->hd);*_Tmp2=_Tmp3;});_Tmp2;});_Tmp0->hd=_Tmp1;}),_Tmp0->tl=ans;_Tmp0;});}
-return ans;}struct Cyc_Position_Error{struct _fat_ptr source;unsigned seg;struct _fat_ptr desc;};
+_TLB: if(segs!=0)goto _TL9;else{goto _TLA;}
+_TL9:{struct Cyc_List_List*_T7=_cycalloc(sizeof(struct Cyc_List_List));{struct _fat_ptr*_T8=_cycalloc(sizeof(struct _fat_ptr));_T2=segs;_T3=_T2->hd;_T4=(unsigned)_T3;*_T8=Cyc_Position_string_of_segment(_T4);_T1=(struct _fat_ptr*)_T8;}_T7->hd=_T1;_T7->tl=ans;_T0=(struct Cyc_List_List*)_T7;}ans=_T0;_T5=segs;
+# 70
+segs=_T5->tl;goto _TLB;_TLA: _T6=ans;
+# 72
+return _T6;}struct Cyc_Position_Error{struct _fat_ptr source;unsigned seg;struct _fat_ptr desc;};
 # 95 "position.cyc"
-struct Cyc_Position_Error*Cyc_Position_mk_err(unsigned l,struct _fat_ptr desc){
-struct _tuple0 _Tmp0=Cyc_Position_seg_to_loc(l);unsigned _Tmp1;struct _fat_ptr _Tmp2;_Tmp2=_Tmp0.f0;_Tmp1=_Tmp0.f1;{struct _fat_ptr source=_Tmp2;unsigned loc=_Tmp1;
-struct Cyc_Position_Error*_Tmp3=_cycalloc(sizeof(struct Cyc_Position_Error));_Tmp3->source=source,_Tmp3->seg=l,_Tmp3->desc=desc;return _Tmp3;}}
+struct Cyc_Position_Error*Cyc_Position_mk_err(unsigned l,struct _fat_ptr desc){struct Cyc_Position_Error*_T0;
+struct _tuple0 _T1=Cyc_Position_seg_to_loc(l);unsigned _T2;struct _fat_ptr _T3;_T3=_T1.f0;_T2=_T1.f1;{struct _fat_ptr source=_T3;unsigned loc=_T2;{struct Cyc_Position_Error*_T4=_cycalloc(sizeof(struct Cyc_Position_Error));
+_T4->source=source;_T4->seg=l;_T4->desc=desc;_T0=(struct Cyc_Position_Error*)_T4;}return _T0;}}
 # 99
-unsigned Cyc_Position_get_seg(struct Cyc_Position_Error*e){
-return e->seg;}
+unsigned Cyc_Position_get_seg(struct Cyc_Position_Error*e){struct Cyc_Position_Error*_T0;unsigned _T1;_T0=e;_T1=_T0->seg;
+return _T1;}
 # 102
-struct _fat_ptr Cyc_Position_get_desc(struct Cyc_Position_Error*e){
-return e->desc;}
+struct _fat_ptr Cyc_Position_get_desc(struct Cyc_Position_Error*e){struct Cyc_Position_Error*_T0;struct _fat_ptr _T1;_T0=e;_T1=_T0->desc;
+return _T1;}
 # 107
 void Cyc_Position_reset_position(struct _fat_ptr s){Cyc_Position_source=s;}
 void Cyc_Position_set_position_file(struct _fat_ptr s){Cyc_Position_source=s;}
-struct _fat_ptr Cyc_Position_get_position_file (void){return Cyc_Position_source;}
+struct _fat_ptr Cyc_Position_get_position_file (void){struct _fat_ptr _T0;_T0=Cyc_Position_source;return _T0;}
 # 111
-struct _fat_ptr Cyc_Position_get_line_directive(unsigned s){
-struct _tuple0 _Tmp0=Cyc_Position_seg_to_loc(s);unsigned _Tmp1;struct _fat_ptr _Tmp2;_Tmp2=_Tmp0.f0;_Tmp1=_Tmp0.f1;{struct _fat_ptr source=_Tmp2;unsigned loc=_Tmp1;
-if((unsigned)source.curr){
-struct Cyc_Lineno_Pos*pos_s=Cyc_Lineno_pos_of_abs(source,(int)loc);
-if(pos_s!=0){
-struct Cyc_Int_pa_PrintArg_struct _Tmp3=({struct Cyc_Int_pa_PrintArg_struct _Tmp4;_Tmp4.tag=1,_Tmp4.f1=(unsigned long)pos_s->line_no;_Tmp4;});struct Cyc_String_pa_PrintArg_struct _Tmp4=({struct Cyc_String_pa_PrintArg_struct _Tmp5;_Tmp5.tag=0,_Tmp5.f1=pos_s->logical_file;_Tmp5;});void*_Tmp5[2];_Tmp5[0]=& _Tmp3,_Tmp5[1]=& _Tmp4;return Cyc_aprintf(_tag_fat("\n#line %d \"%s\"\n",sizeof(char),16U),_tag_fat(_Tmp5,sizeof(void*),2));}}
+struct _fat_ptr Cyc_Position_get_line_directive(unsigned s){struct _fat_ptr _T0;char*_T1;unsigned _T2;struct _fat_ptr _T3;unsigned _T4;int _T5;struct _fat_ptr _T6;struct Cyc_Int_pa_PrintArg_struct _T7;struct Cyc_Lineno_Pos*_T8;int _T9;struct Cyc_String_pa_PrintArg_struct _TA;struct Cyc_Lineno_Pos*_TB;void**_TC;void**_TD;struct _fat_ptr _TE;struct _fat_ptr _TF;struct _fat_ptr _T10;
+struct _tuple0 _T11=Cyc_Position_seg_to_loc(s);unsigned _T12;struct _fat_ptr _T13;_T13=_T11.f0;_T12=_T11.f1;{struct _fat_ptr source=_T13;unsigned loc=_T12;_T0=source;_T1=_T0.curr;_T2=(unsigned)_T1;
+if(!_T2)goto _TLC;_T3=source;_T4=loc;_T5=(int)_T4;{
+struct Cyc_Lineno_Pos*pos_s=Cyc_Lineno_pos_of_abs(_T3,_T5);
+if(pos_s==0)goto _TLE;{struct Cyc_Int_pa_PrintArg_struct _T14;_T14.tag=1;_T8=pos_s;_T9=_T8->line_no;
+_T14.f1=(unsigned long)_T9;_T7=_T14;}{struct Cyc_Int_pa_PrintArg_struct _T14=_T7;{struct Cyc_String_pa_PrintArg_struct _T15;_T15.tag=0;_TB=pos_s;_T15.f1=_TB->logical_file;_TA=_T15;}{struct Cyc_String_pa_PrintArg_struct _T15=_TA;void*_T16[2];_TC=_T16 + 0;*_TC=& _T14;_TD=_T16 + 1;*_TD=& _T15;_TE=_tag_fat("\n#line %d \"%s\"\n",sizeof(char),16U);_TF=_tag_fat(_T16,sizeof(void*),2);_T6=Cyc_aprintf(_TE,_TF);}}return _T6;_TLE:;}goto _TLD;_TLC: _TLD: _T10=
 # 118
-return _tag_fat(0,0,0);}}
+_tag_fat(0,0,0);return _T10;}}
 # 121
-unsigned Cyc_Position_loc_to_seg(unsigned loc){
-return loc;}
+unsigned Cyc_Position_loc_to_seg(unsigned loc){unsigned _T0;_T0=loc;
+return _T0;}
 # 125
-static struct _tuple0 Cyc_Position_seg_to_loc(unsigned seg){
-struct _tuple0 _Tmp0;_Tmp0.f0=Cyc_Position_source,_Tmp0.f1=seg;return _Tmp0;}
+static struct _tuple0 Cyc_Position_seg_to_loc(unsigned seg){struct _tuple0 _T0;{struct _tuple0 _T1;
+_T1.f0=Cyc_Position_source;_T1.f1=seg;_T0=_T1;}return _T0;}

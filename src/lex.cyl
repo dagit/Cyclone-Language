@@ -101,9 +101,9 @@ static dyn_trie_t typedefs_trie = NULL;//int field true iff path is a typedef
 static int comment_depth = 0;
 
 // These needn't be set by lex_init -- they're set while finding a token.
-static cnst_t             token_int     = Cnst{.Int_c = $(Signed,0)};
+static cnst_t             token_int     = Cnst{.Null_c = 0};
 static string_t           bogus_string  = "*bogus*";
-static $(nmspace_t,var_t) token_id_pair = $(Nmspace{.Loc_n = 0}, &bogus_string);
+static $(nmspace_t,var_t) token_id_pair = $(Nmspace{.Abs_n = NULL}, &bogus_string);
 static char               token_char    = '\000';
 string_t                  token_string  = "";
 qvar_t                    token_qvar    = &token_id_pair;

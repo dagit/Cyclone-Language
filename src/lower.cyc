@@ -1,0 +1,812 @@
+/* Translate Cyclone abstract syntax to C abstract syntax.
+   Copyright (C) 2006 Greg Morrisett, AT&T
+   This file is part of the Cyclone compiler.
+
+   The Cyclone compiler is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   The Cyclone compiler is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with the Cyclone compiler; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+// This file translates the C code, which may have lots of GCC'isms
+// down to a very low-level representation suitable for other C compilers
+// and possibly lower-level intermediate representations such as .NET
+// or C--.  In particular, the translation eliminates nested expressions
+// and essentially A-normalizes the resulting code, binding every
+// computation to a temporary variable (and thus forcing evaluation-
+// order to be left-to-right.)  
+
+#include "absyn.h"
+#include "warn.h"
+#include "absynpp.h"
+#include "lower.h"
+#include "toc.h"
+#include "unify.h"
+#include <string.h>
+
+namespace Lower;
+using Absyn;
+using List;
+
+// Translation Environment
+typedef struct Env {
+  // a list of primitive statements generated so far (in reverse order)
+  list_t<stmt_t> stmts;
+  // a list of temps that need to be declared
+  list_t<vardecl_t> temps;
+  // used in a statement expression -- the last expression is assigned
+  // into this lvalue.
+  exp_opt_t assign_last_exp;
+  // used to implement break in loops and switches
+  var_opt_t break_label;
+  // used to implement continue in loops
+  var_opt_t continue_label;
+} @env_t;
+
+// Create an empty environment
+static env_t new_env() {
+  return new Env{.stmts = NULL, 
+                 .temps = NULL,
+                 .assign_last_exp = NULL,
+                 .break_label = NULL,
+                 .continue_label = NULL
+                 };
+}
+
+static stmt_t rev_seq_stmts(list_t<stmt_t> ss) {
+  if (ss == NULL) return skip_stmt(0);
+  stmt_t res = ss->hd;
+  for (ss = ss->tl; ss != NULL; ss = ss->tl) {
+    let s = ss->hd;
+    switch (s->r) {
+    case &Skip_s: continue;
+    case &Label_s(x,&Stmt{.r = &Skip_s,...}): 
+      res = label_stmt(x,res,s->loc);
+      continue;
+    default: res = seq_stmt(s,res,s->loc);
+    }
+  }
+  return res;
+}
+
+// Debugging
+static void print_env(env_t env) {
+  fprintf(stderr,"env->stmts:\n");
+  for (let ss = List::rev(env->stmts); ss != NULL; ss = ss->tl) {
+    fprintf(stderr,"%s\n",Absynpp::stmt2string(ss->hd));
+  }
+  fprintf(stderr,"-------------\n\n");
+}
+
+// Generate an assignment with the type info on it.
+static stmt_t assign_it(exp_t e1, exp_t e2, seg_t loc) {
+  let e = assign_exp(e1,e2,loc);
+  e->topt = e1->topt;
+  return exp_stmt(e,loc);
+}
+
+static exp_opt_t get_assign_last_exp(env_t env) {
+  return env->assign_last_exp;
+}
+static void set_assign_last_exp(env_t env, exp_opt_t e) {
+  env->assign_last_exp = e;
+}
+static var_opt_t get_break_label(env_t env) {
+  return env->break_label;
+}
+static var_opt_t get_continue_label(env_t env) {
+  return env->continue_label;
+}
+static $(var_opt_t c_lab,var_opt_t b_lab) get_loop_labels(env_t env) {
+  return $(env->continue_label, env->break_label);
+}
+static env_t set_loop_labels(env_t env, var_opt_t continue_lab, var_opt_t break_lab) {
+  env->continue_label = continue_lab;
+  env->break_label = break_lab;
+  return env;
+}
+static list_t<stmt_t> prev_stmts(env_t env) {
+  return env->stmts;
+}
+static void set_prev_stmts(env_t env, list_t<stmt_t,`H> ss) {
+  env->stmts = ss;
+}
+
+// Generate a fresh label
+static var_t new_label(env_t env) {
+  static unsigned int counter = 0;
+  unsigned c = counter++;
+  return new (string_t)aprintf("_TL%X",c);
+}
+
+// Toc inserts certain identifiers that correspond to macros in
+// cyc_include.h.  We don't know their types so we have to skip
+// over them.
+static bool is_macro(qvar_t x) {
+  switch (x) {
+  case &$({.Loc_n = _},v):
+      let n = numelts(Toc::globals);
+      for (int i = 0; i < n; i++)
+        if (strptrcmp(v,Toc::globals[i]) == 0) return true;
+      break;
+  default: break;
+  }
+  return false;
+}
+
+// Generate a temp whose type is taken from e.  Because Toc isn't
+// very good about putting types on everything, some heuristics are
+// used to create the type.
+static $(vardecl_t,exp_t) fresh_var(env_t env, exp_t e) {
+  type_t t;
+ LOOP:
+  if (e->topt == NULL) {
+    bool ism = false;
+    switch (e->r) {
+    case &Var_e(b): 
+      if (is_macro(binding2qvar(b))) ism = true; break;
+      switch (b) {
+      case &Global_b(vd): fallthru(vd);
+      case &Param_b(vd):  fallthru(vd);
+      case &Local_b(vd):  fallthru(vd);
+      case &Pat_b(vd): e->topt = vd->type; goto LOOP;
+      default: break;
+      }
+      break;
+    case &Sizeoftype_e(...): ism = true; break;
+    case &Const_e(...): ism = true; break;
+    case &Pragma_e(...): ism = true; break;
+    case &Instantiate_e(...): ism = true; break;
+    default: break;
+    }
+    if (!ism) 
+      Warn::warn(e->loc,"expression missing type: %s",Absynpp::exp2string(e));
+    t = typeof_type(e);
+  } else {
+    t = (type_t)e->topt;
+  }
+  // must promote array and function types to pointer types
+  switch (compress(t)) {
+  case &ArrayType(ArrayInfo{t2,tq,...}):
+    t = star_type(t2,heap_rgn_type,al_qual_type,tq,false_type,false_type);
+    break;
+  case &FnType(...):
+    let tq = Tqual(false,false,false,false,0);
+    t = star_type(t,heap_rgn_type,al_qual_type,tq,false_type,false_type);
+    break;
+  default: break;
+  }
+  qvar_t v = Toc::temp_var();
+  let vd = new_vardecl(0,v,t,NULL,NULL);
+  exp_t e = var_exp(v,0);
+  e->topt = t;
+  env->temps = new List{vd,env->temps};
+  return $(vd,e);
+}
+
+// Emit a statement.
+static void emit_stmt(env_t env, stmt_t s) {
+  env->stmts = new List{s,env->stmts};
+}
+// Emit an assignment statement.
+static void emit_assign(env_t env, exp_t lhs, exp_t rhs, seg_t loc) {
+  emit_stmt(env, assign_it(lhs,rhs,loc));
+}
+// Emit a label.
+static void emit_label(env_t env, var_t label, seg_t loc) {
+  emit_stmt(env,label_stmt(label,skip_stmt(0),loc));
+}
+
+// The translation functions.
+static exp_t lower_rhs(env_t env, bool effect_only, bool has_target, exp_t e);
+static exp_t lower_lhs(env_t env, exp_t e);
+static bool  lower_stmt(env_t env, stmt_t s);
+static void  lower_cond(env_t env, exp_t e, var_t truelab, var_t falselab, seg_t loc);
+static var_opt_t lower_true(env_t env, exp_t e, var_t falselab, seg_t loc);
+
+
+// Emits statements into the environment.  Returns true if the
+// statement might fall-through to any next statement, and false
+// otherwise (e.g., upon return, goto, break, continue.)  The
+// result is used to avoid generating some labels in the output,
+// such as join-points in conditionals.
+static bool lower_stmt(env_t env, stmt_t s) {
+  //fprintf(stderr,"lower_stmt(%s)",Absynpp::stmt2string(s));
+  //print_env(env);
+ LOOP:
+  switch (s->r) {
+  case &Skip_s: return true;
+  case &Exp_s(e): 
+    switch (get_assign_last_exp(env)) {
+    case NULL: lower_rhs(env, true, false, e); break;
+    case v: 
+      set_assign_last_exp(env,NULL);
+      emit_assign(env,v,lower_rhs(env,false,true,e),0); 
+      break;
+    }
+    return true;
+  case &Seq_s(s1,s2):
+    let eopt = get_assign_last_exp(env);
+    set_assign_last_exp(env,NULL);
+    lower_stmt(env, s1);
+    set_assign_last_exp(env,eopt);
+    s = s2;
+    goto LOOP;
+  case &Return_s(e):
+    if (e != NULL) {
+      let v = lower_rhs(env,false,false,e);
+      emit_stmt(env, return_stmt(v,s->loc));
+    } else {
+      emit_stmt(env, return_stmt(NULL,s->loc));
+    }
+    return false;
+  case &IfThenElse_s(e,s1,s2):
+    let $(f_lab,j_lab) = $(new_label(env),new_label(env));
+    let t_lab_opt = lower_true(env,e,f_lab,s->loc);
+    if (t_lab_opt != NULL) emit_label(env,(var_t)t_lab_opt,s1->loc);
+    let a = lower_stmt(env,s1);
+    if (a)
+      emit_stmt(env,goto_stmt(j_lab,0));
+    emit_label(env,f_lab,s2->loc);
+    let b = lower_stmt(env,s2);
+    if (a || b) {
+      emit_label(env,j_lab,0); return true;
+    } 
+    return false;
+  case &While_s($(e,_),s1):
+    let $(c_lab,t_lab,b_lab) = $(new_label(env),new_label(env),new_label(env));
+    emit_label(env,c_lab,e->loc);
+    lower_cond(env,e,t_lab,b_lab,s->loc);
+    emit_label(env,t_lab,s1->loc);
+    let $(old_c_lab,old_b_lab) = get_loop_labels(env);
+    lower_stmt(set_loop_labels(env,c_lab,b_lab),
+               seq_stmt(s1,goto_stmt(c_lab,0),0));
+    emit_label(env,b_lab,0);
+    set_loop_labels(env,old_c_lab,old_b_lab);
+    return true;
+  case &Break_s:
+    emit_stmt(env,goto_stmt((var_t)get_break_label(env),0));
+    return false;
+  case &Continue_s:
+    emit_stmt(env,goto_stmt((var_t)get_continue_label(env),0));
+    return false;
+  case &Goto_s(x):
+    emit_stmt(env,goto_stmt(x,0));
+    return false;
+  case &For_s(e1,$(e2,_),$(e3,_),s1):
+    lower_rhs(env,true,false,e1);
+    let $(c_lab,t_lab,b_lab) = $(new_label(env),new_label(env),new_label(env));
+    let l_lab = new_label(env);
+    emit_label(env,l_lab,e2->loc);
+    lower_cond(env,e2,t_lab,b_lab,s->loc);
+    emit_label(env,t_lab,s1->loc);
+    let $(old_c_lab,old_b_lab) = get_loop_labels(env);
+    lower_stmt(set_loop_labels(env,c_lab,b_lab),
+               seq_stmt(s1,label_stmt(c_lab,
+                                      seq_stmt(exp_stmt(e3,e3->loc),
+                                               goto_stmt(l_lab,0),0),0),0));
+    set_loop_labels(env,old_c_lab,old_b_lab);
+    emit_label(env,b_lab,0);
+    return true;
+  case &Switch_s(e,scs,_):
+    let b_lab = new_label(env);
+    let v = lower_rhs(env,false,false,e);
+    let prev = prev_stmts(env);
+    let $(old_c_lab,old_b_lab) = get_loop_labels(env);
+    env = set_loop_labels(env,old_c_lab,b_lab);
+    list_t<switch_clause_t> newscs = NULL;
+    for (; scs != NULL; scs = scs->tl) {
+      let &Switch_clause{pat,pvs,w,body,loc} = scs->hd;
+      set_prev_stmts(env,NULL);
+      lower_stmt(env,body);
+      let new_body = rev_seq_stmts(prev_stmts(env));
+      // counting on where-clause being null, and pattern being a simple
+      // expression.
+      let newsc = new Switch_clause{pat,pvs,w,new_body,loc};
+      newscs = new List{newsc,newscs};
+    }
+    set_prev_stmts(env,prev);
+    set_loop_labels(env,old_c_lab,old_b_lab);
+    emit_stmt(env,switch_stmt(v,List::imp_rev(newscs),s->loc));
+    emit_label(env,b_lab,0);
+    return true;
+  case &Decl_s(d,s1):
+    switch (d->r) {
+    case &Var_d(vd): 
+      let newvd = new *vd;
+      // Must skip static declarations -- they can't be A-normalized
+      // any more than top-level initializers.
+      if (vd->sc != Static)
+        if (newvd->initializer != NULL) {
+          let e = (exp_t)newvd->initializer;
+          newvd->initializer = lower_rhs(env,false,true,e);
+        }
+      let p = prev_stmts(env);
+      set_prev_stmts(env,NULL);
+      let a = lower_stmt(env,s1);
+      let body = rev_seq_stmts(prev_stmts(env));
+      set_prev_stmts(env,p);
+      emit_stmt(env,decl_stmt(new Decl{new Var_d(newvd),d->loc},body,0));
+      return a;
+    case &Fn_d(fd): Warn::impos("Fn decl in lower_stmt");
+    case &Aggr_d(ad): Warn::impos("Aggregate decl in lower_stmt");
+    case &Enum_d(ed): Warn::impos("Enum decl in lower_stmt");
+    case &Using_d(...): Warn::impos("Using decl in lower");
+    case &ExternC_d(...): Warn::impos("Extern-C decl in lower");
+    case &ExternCinclude_d(...): Warn::impos("Extern-C include in lower");
+    case &Porton_d: Warn::impos("Porton in lower");
+    case &Portoff_d: Warn::impos("Portoff in lower");
+    case &Tempeston_d: Warn::impos("Tempeston in lower");
+    case &Tempestoff_d: Warn::impos("Tempestoff in lower");
+    case &Datatype_d(...): Warn::impos("Datatype_d in lower");
+    case &Let_d(...): Warn::impos("Let_d in lower");
+    case &Letv_d(...): Warn::impos("Letv_d in lower");
+    case &Region_d(...): Warn::impos("Region_d in lower");
+    case &Typedef_d(...): Warn::impos("Typedef_d in lower");
+    case &Namespace_d(...):Warn::impos("Namespace_d in lower");
+    }
+    break;
+  case &Label_s(x,s1):
+    emit_label(env,x,s->loc);
+    return lower_stmt(env,s1);
+  case &Do_s(s1,$(e,_)):
+    let $(c_lab,b_lab) = $(new_label(env),new_label(env));
+    emit_label(env,c_lab,s1->loc);
+    let $(old_c_lab,old_b_lab) = get_loop_labels(env);
+    lower_stmt(set_loop_labels(env,c_lab,b_lab),s1);
+    set_loop_labels(env,old_c_lab,old_b_lab);
+    lower_cond(env,e,c_lab,b_lab,s->loc);
+    emit_label(env,b_lab,0);
+    return true;
+  case &Fallthru_s(...): Warn::impos("fallthru in lower.cyc");
+  case &TryCatch_s(...): Warn::impos("try-catch in lower.cyc");
+  }
+}
+
+// Determines whether a variable is a temp or not.  We know that
+// temps don't escape so we can avoid copying them into another
+// temp.
+static bool is_temp(qvar_t qv) {
+  let v = *((*qv)[1]);
+  return (numelts(v) > 4)
+    && (v[0] == '_') && (v[1] == 't') && (v[2] == 'm') && (v[3] == 'p');
+}
+
+// Lower a list of expressions -- we should get back constants,
+// read-only variables, or temps from this.  However, we can actually
+// return non-read-only variables if there's no possible side-
+// effect in the list.  That avoids copying things in to temps.
+static list_t<exp_t> lower_rhs_list(env_t env, list_t<exp_t,`H> es) {
+  // avoid generating temps for arguments to functions or primops
+  // when the arguments are already constants or variables.  
+  bool no_eff = true;
+  for (let es2 = es; no_eff && es2 != NULL; es2 = es2->tl) {
+    switch (es2->hd->r) {
+    case &Const_e(_): case &Var_e(_): continue;
+    default: no_eff = false; break;
+    }
+  }
+  if (no_eff) return es;
+  let res = NULL;
+  for (; es != NULL; es = es->tl) 
+    res = new List{lower_rhs(env,false,false,es->hd),res};
+  return List::imp_rev(res);
+}
+
+// only dealing with target-langauge results.
+static bool might_have_effect(exp_t e) {
+  switch (e->r) {
+  case &AssignOp_e(...): return true;
+  case &FnCall_e(...): return true;
+  case &Asm_e(...): return true;
+  default: return false;
+  }
+}
+
+// Lower a rhs-expression.  In essence, we're A-normalizing the
+// expression by generating temps as necessary.  The flag effect_only
+// means that the caller doesn't really care what the result value
+// is and will discard it.  That allows us to avoid generating a temp
+// for things like procedure calls or assignments where the result
+// isn't used, and in turn, that's important to avoid generating
+// temps of type "void".  
+static exp_t lower_rhs(env_t env, bool effect_only, bool has_target, exp_t e) {
+  exp_t res;
+  if (e->topt != NULL && Unify::unify(e->topt,void_type)) effect_only = true;
+  switch (e->r) {
+  case &Const_e(_) : return e;
+  case &Pragma_e(_): return uint_exp(1,e->loc);
+  case &Var_e(&Funname_b(...)): return e;
+  case &Var_e(b):    
+    // Note, a temp is already a "value", but a C variable is not --
+    // since it might be side effected.  So we have to bind the
+    // result to a temp and return the temp in that case.
+    let q = binding2qvar(b);
+    if (is_macro(q) || is_temp(q)) return e;
+    res = e;
+    break;
+  case &Primop_e(p,es):
+    let vs = lower_rhs_list(env,es);
+    res = primop_exp(p,vs,e->loc);
+    break;
+  case &AssignOp_e(e1,popt,e2):
+    //fprintf(stderr,"assignop: %s : %s := %s : %s\n",
+    //      Absynpp::exp2string(e1),Absynpp::typ2string(e1->topt),
+    //      Absynpp::exp2string(e2),Absynpp::typ2string(e2->topt));
+    let v1 = lower_lhs(env,e1);
+    if (popt != NULL) {
+      let v2 = lower_rhs(env,false,false,e2);
+      emit_assign(env,v1,prim2_exp(popt->v,copy_exp(v1),v2,0),e->loc);
+      res = copy_exp(v1);
+    } else {
+      let v2 = lower_rhs(env,false,true,e2);
+      emit_assign(env,v1,v2,e->loc);
+      res = copy_exp(v1);
+    }
+    break;
+  case &Increment_e(e1,incr):
+    let v1 = lower_lhs(env, e1);
+    switch (incr) {
+    case PostInc && effect_only:
+    case PreInc:
+      emit_assign(env,v1,add_exp(copy_exp(v1),signed_int_exp(1,0),e->loc),e->loc);
+      res = copy_exp(v1);
+      break;
+    case PostDec && effect_only:
+    case PreDec:
+      emit_assign(env,v1,add_exp(copy_exp(v1),signed_int_exp(-1,0),e->loc),e->loc);
+      res = copy_exp(v1);
+      break;
+    case PostInc:
+      let $(vd,temp) = fresh_var(env,e);
+      emit_assign(env,temp,v1,0);
+      emit_assign(env,v1,add_exp(copy_exp(temp),signed_int_exp(1,0),e->loc),e->loc);
+      res = copy_exp(temp);
+      break;
+    default:
+      let $(vd,temp) = fresh_var(env,e);
+      emit_assign(env,temp,v1,0);
+      emit_assign(env,v1,add_exp(copy_exp(temp),signed_int_exp(-1,0),e->loc),e->loc);
+      res = copy_exp(temp);
+      break;
+    }
+    break;
+  case &Conditional_e(e1,e2,e3):
+    if (effect_only) {
+      lower_stmt(env,ifthenelse_stmt(e1,exp_stmt(e2,0),exp_stmt(e3,0),e->loc));
+      return uint_exp(0,0);
+    } else {
+      let $(vd,temp) = fresh_var(env,e);
+      lower_stmt(env, 
+                 ifthenelse_stmt(e1,
+                                 assign_it(temp,e2,0),
+                                 assign_it(copy_exp(temp),e3,0),e->loc));
+      return copy_exp(temp);
+    }
+  case &And_e(e1,e2):
+    if (effect_only) {
+      lower_stmt(env,ifthenelse_stmt(e1,exp_stmt(e2,0),
+                                     exp_stmt(false_exp(0),0),e->loc));
+      return uint_exp(0,0);
+    } else {
+      let $(vd,temp) = fresh_var(env,e);
+      lower_stmt(env,
+                 ifthenelse_stmt(e1,
+                                 assign_it(temp,e2,0),
+                                 assign_it(copy_exp(temp),
+                                           false_exp(0),0),e->loc));
+      return copy_exp(temp);
+    }
+  case &Or_e(e1,e2):
+    if (effect_only) {
+      lower_stmt(env,ifthenelse_stmt(e1,exp_stmt(true_exp(0),0),
+                                     exp_stmt(e2,0),e->loc));
+      return uint_exp(0,0);
+    } else {
+      let $(vd,temp) = fresh_var(env,e);
+      lower_stmt(env,
+                 ifthenelse_stmt(e1,
+                                 assign_it(temp,true_exp(0),0),
+                                 assign_it(copy_exp(temp),e2,0),
+                                 e->loc));
+      return copy_exp(temp);
+    }
+  case &SeqExp_e(e1,e2):
+    lower_rhs(env, true, false, e1);
+    res = lower_rhs(env, effect_only, has_target, e2);
+    // we've already spit out the effect in the recursive call
+    if (effect_only) return res;
+    break;
+  case &FnCall_e(e1,es,vai,_):
+    exp_t v1;
+  LOOP:
+    switch (e1->r) {
+    case &Instantiate_e(e2,...): 
+      e1 = e2; goto LOOP;
+    case &Var_e(...): v1 = e1; break;
+    default: v1 = lower_rhs(env, false, false, e1); break;
+    }
+    let vs = lower_rhs_list(env,es);
+    res = fncall_exp(v1,vs,e->loc);
+    break;
+  case &Cast_e(t,e1,b,c):
+    res = cast_exp(t,lower_rhs(env,effect_only,false,e1),b,c,e->loc);
+    break;
+  case &Address_e(e1):
+    res = address_exp(lower_lhs(env,e1),e->loc);
+    break;
+  case &Sizeoftype_e(t): return e;
+    break;
+    // FIX:  need to lower e but for now, we punt...
+  case &Sizeofexp_e(...): res = e; break;
+  case &Offsetof_e(t,fs): res = e; break;
+  case &Deref_e(e1): 
+    res = deref_exp(lower_rhs(env,false,false,e1),e->loc); break;
+  case &AggrMember_e(e1,f,it,ir):
+    // Hmmm.  It's not clear that we want to break apart
+    // e.f1.f2.f3...fn
+    res = aggrmember_exp(lower_rhs(env,false,false,e1),f,e->loc);
+    break;
+  case &AggrArrow_e(e1,f,it,ir):
+    // Hmmm.  We might eliminate e.f in favor of *(e.f).  
+    res = aggrarrow_exp(lower_rhs(env,false,false,e1),f,e->loc);
+    break;
+  case &Subscript_e(e1,e2):
+    // Hmmm.  We might want to eliminate in favor of e1+e2.
+    res = subscript_exp(lower_rhs(env,false,false,e1),
+                        lower_rhs(env,false,false,e2),e->loc);
+    break;
+  case &Enum_e(ed,ef): return e;
+  case &AnonEnum_e(tp,ef): return e;
+  case &StmtExp_e(s):
+    let eopt = get_assign_last_exp(env);
+    if (effect_only) {
+      set_assign_last_exp(env,NULL);
+      lower_stmt(env,s);
+      set_assign_last_exp(env,eopt);
+      return uint_exp(0,0);
+    } else {
+      // We generate a temp x and enter it in the environment.  lower_stmt
+      // will then assign the final-expression's value to x.
+      let $(vd,temp) = fresh_var(env,e);
+      set_assign_last_exp(env,temp);
+      lower_stmt(env,s);
+      set_assign_last_exp(env,eopt);
+      return copy_exp(temp);
+    }
+    break;
+  case &Instantiate_e(e,_): return lower_rhs(env,effect_only,has_target,e);
+  case &UnresolvedMem_e(tdn,dles):
+    // all of the initializers are treated as unresolved mems by Toc
+    // and RemoveAggregates.  Note that we *do not* bind these to a
+    // temp because they only appear in initialization contexts where
+    // they are bound to variables.  Also note that this wouldn't
+    // be correct to bind them to a temp because of arrays.
+    let dles2 = NULL;
+    for (; dles != NULL; dles = dles->tl) {
+      let $(ds,e) = *dles->hd;
+      let v = lower_rhs(env,false,false,e);
+      dles2 = new List{new $(ds,v),dles2};
+    }
+    return unresolvedmem_exp(tdn,List::imp_rev(dles2),e->loc);
+  case &Asm_e(...): res = e; break;
+  case &NoInstantiate_e(_):
+    Warn::impos("no instantiate expression in lower_rhs (%s)",Absynpp::exp2string(e));
+  case &Array_e(dles): 
+    Warn::impos("array in lower_rhs");
+  case &Aggregate_e(tdn,ts,es,ad):
+    Warn::impos("aggregate in lower_rhs");
+  case &AnonStruct_e(topt,tuple,dles):
+    Warn::impos("anonstrct in lower_rhs");
+    // All of the forms below should've been eliminated by Toc.
+  case &Malloc_e(...):
+    Warn::impos("malloc expression in lower_rhs (%s)",Absynpp::exp2string(e));
+  case &CompoundLit_e(...):
+    Warn::impos("compoundlit expression in lower_rhs (%s)",Absynpp::exp2string(e));
+  case &Tagcheck_e(...):
+    Warn::impos("tagcheck expression in lower_rhs (%s)",Absynpp::exp2string(e));
+  case &Valueof_e(...):
+    Warn::impos("valueof expression in lower_rhs (%s)",Absynpp::exp2string(e));
+  case &Extension_e(...):
+    Warn::impos("extension expression in lower_rhs (%s)",Absynpp::exp2string(e));
+  case &Assert_e(...):
+  case &Assert_false_e(...):
+    Warn::impos("assert expression in lower_rhs (%s)",Absynpp::exp2string(e));
+  case &Swap_e(...):
+    Warn::impos("swap expression in lower_rhs (%s)",Absynpp::exp2string(e));
+  case &Datatype_e(...):
+    Warn::impos("datatype expression in lower_rhs (%s)",Absynpp::exp2string(e));
+  case &Comprehension_e(...):
+  case &ComprehensionNoinit_e(...):
+    Warn::impos("comprehension expression in lower_rhs (%s)",Absynpp::exp2string(e));
+  case &Throw_e(...):
+    Warn::impos("throw expression in lower_rhs (%s)",Absynpp::exp2string(e));
+  case &New_e(...):
+    Warn::impos("new expression in lower_rhs (%s)",Absynpp::exp2string(e));
+  }
+  if (effect_only) {
+    if (might_have_effect(res)) 
+      emit_stmt(env,exp_stmt(res,0));
+    return res;
+  } else {
+    // bind res to a temp and return the temp.  Note that
+    // effect-free expressions have already returned, thus by-passing this.
+    if (!has_target) {
+      let $(vd,temp) = fresh_var(env,e);
+      emit_assign(env,temp,res,0);
+      return temp;
+    } else {
+      return res;
+    }
+  } 
+}
+
+// Here, we don't have the luxury of generating temps since we need
+// the address of a variable etc.  
+static exp_t lower_lhs(env_t env, exp_t e) {
+  switch (e->r) {
+  case &Var_e(_): return e;
+  case &Instantiate_e(e,_): return lower_lhs(env,e);
+  case &NoInstantiate_e(e): return lower_lhs(env,e);
+  case &AggrMember_e(e1,f,it,ir):
+    return aggrmember_exp(lower_lhs(env,e1),f,e->loc);
+  case &Subscript_e(e1,e2):
+    let $(vd,res) = fresh_var(env, e1);
+    // e1 might involve a cast -- if so, we can eliminate it here.
+    switch (e1->r) {
+    case &Cast_e(t,e11,...):
+      let $(vd2,res2) = fresh_var(env,e11);
+      emit_assign(env,res2,lower_lhs(env,e11),e->loc);
+      let $(vd3,res3) = fresh_var(env,e1);
+      emit_assign(env,res3,cast_exp(t,res2,false,No_coercion,e1->loc),e1->loc);
+      emit_assign(env,res,add_exp(res3,
+                                  lower_rhs(env,false,false,e2),e->loc),e->loc);
+      break;
+    default:
+      emit_assign(env,res,add_exp(lower_lhs(env,e1),
+                                  lower_rhs(env,false,false,e2),e->loc),e->loc);
+      break;
+    }
+    return deref_exp(res,e->loc);
+  case &AggrArrow_e(e1,f,it,ir):
+    return aggrarrow_exp(lower_rhs(env,false,false,e1),f,e->loc);
+  case &Deref_e(e1):
+    return deref_exp(lower_rhs(env,false,false,e1),e->loc);
+  case &Cast_e(t,e1,...):
+    // warn when we have a silly cast...
+    if (e1->topt == NULL || !Unify::unify(t,(type_t)e1->topt)) 
+      Warn::warn(e->loc,"cast on lhs %s : %s --> %s\n",
+                 Absynpp::exp2string(e1), 
+                 Absynpp::typ2string((type_t)e1->topt),
+                 Absynpp::typ2string(t));
+    return lower_lhs(env,e1);
+  default:
+    Warn::impos("lower_lhs applied to %s\n",Absynpp::exp2string(e));
+  }
+}
+
+static $(primop_t,list_t<exp_t>) negate(primop_t p, list_t<exp_t,`H> vs, seg_t loc) {
+  switch (p) {
+  case Eq  : return $(Neq,vs);
+  case Neq : return $(Eq,vs);
+  case Gt  : return $(Lte,vs);
+  case Lt  : return $(Gte,vs);
+  case Gte : return $(Lt,vs);
+  case Lte : return $(Gt,vs);
+  case UGt : return $(ULte,vs);
+  case ULt : return $(UGte,vs);
+  case UGte: return $(ULt,vs);
+  case ULte: return $(UGt,vs);
+  default  : return $(Not,new List{primop_exp(p,vs,loc),NULL});
+  }
+}
+
+// an optimized version of lower_cond (see below) which by
+// default doesn't expect to generate a true label.  Returns
+// the true label if it decides that in fact it needs one.
+static var_opt_t lower_true(env_t env, exp_t e, var_t falselab, seg_t loc) {
+  switch (e->r) {
+  case &And_e(e1,e2):
+    let topt = lower_true(env,e1,falselab,loc);
+    if (topt != NULL) emit_label(env,(var_t)topt,0);
+    topt = lower_true(env,e2,falselab,loc);
+    return topt;
+  case &Or_e(e1,e2):
+    let truelab = new_label(env);
+    lower_cond(env,e,truelab,falselab,loc);
+    return truelab;
+  case &Primop_e(Not,&List{e1,NULL}):
+    let truelab = new_label(env);
+    lower_cond(env,e1,falselab,truelab,loc);
+    return truelab;
+  case &Primop_e(p,es):
+    let vs = lower_rhs_list(env,es);
+    let $(p,vs) = negate(p,vs,e->loc);
+    emit_stmt(env,ifthenelse_stmt(primop_exp(p,vs,e->loc),
+                                  goto_stmt(falselab,0),skip_stmt(0),loc));
+    //emit_stmt(env,ifthenelse_stmt(prim1_exp(Not,primop_exp(p,vs,e->loc),0),
+    //                              goto_stmt(falselab,0),skip_stmt(0),0));
+    return NULL;
+  default:
+    let v = lower_rhs(env,false,false,e);
+    emit_stmt(env,ifthenelse_stmt(prim1_exp(Not,v,0),
+                                  goto_stmt(falselab,0),skip_stmt(0),loc));
+    return NULL;
+  }
+}
+
+// Specialization of lower_rhs so that we can do conditionals reasonably
+// efficiently instead of binding the result to a temp.
+static void lower_cond(env_t env, exp_t e, var_t truelab, var_t falselab, seg_t loc) {
+  switch (e->r) {
+  case &And_e(e1,e2):
+    let x = new_label(env);
+    lower_cond(env,e1,x,falselab,loc);
+    emit_label(env,x,0);
+    lower_cond(env,e2,truelab,falselab,loc);
+    break;
+  case &Or_e(e1,e2):
+    let x = new_label(env);
+    lower_cond(env,e1,truelab,x,loc);
+    emit_label(env,x,0);
+    lower_cond(env,e2,truelab,falselab,loc);
+    break;
+  case &Primop_e(Not,&List{e1,NULL}):
+    lower_cond(env,e1,falselab,truelab,loc);
+    break;
+  case &Primop_e(p,es):
+    let vs = lower_rhs_list(env,es);
+    emit_stmt(env,ifthenelse_stmt(primop_exp(p,vs,e->loc),
+                              goto_stmt(truelab,0),goto_stmt(falselab,0),loc));
+    break;
+  default:
+    emit_stmt(env,ifthenelse_stmt(lower_rhs(env,false,false,e),
+                              goto_stmt(truelab,0),goto_stmt(falselab,0),loc));
+    break;
+  }
+}
+
+static fndecl_t lower_fn(fndecl_t fd) {
+  let fd = new (*fd);
+  let env = new_env();
+  lower_stmt(env,fd->body);
+  let body = rev_seq_stmts(prev_stmts(env));
+  for (let ts = env->temps; ts != NULL; ts = ts->tl)
+    body = decl_stmt(new Decl{.r=new Var_d(ts->hd),.loc = 0},body,0);
+  fd->body = body;
+  return fd;
+}
+
+static list_t<decl_t> anormalize(list_t<decl_t> ds) {
+  list_t<decl_t> res = NULL;
+  for (; ds != NULL; ds = ds->tl) {
+    let d = ds->hd;
+    switch (d->r) {
+    case &Fn_d(fd): 
+      // skip extern C bodies.
+      if (fd->orig_scope != ExternC)
+        res = new List{new Decl{.r = new Fn_d(lower_fn(fd)),
+                                .loc = d->loc},res}; 
+      else
+        res = new List{d,res};
+      break;
+    default: res = new List{d,res}; break;
+    }
+  }
+  return List::imp_rev(res);
+}
+
+list_t<decl_t> lower(list_t<decl_t,`H> ds) {
+  // lower the code to A-normal form
+  ds = anormalize(ds);
+  return ds;
+}

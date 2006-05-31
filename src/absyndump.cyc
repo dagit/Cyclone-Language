@@ -14,10 +14,11 @@
 
    You should have received a copy of the GNU General Public License
    along with the Cyclone compiler; see the file COPYING. If not,
-   write to the Free Software Foundation, Inc., 59 Temple Place -
+/* write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
 
 #include <string.h>
+#include <dict.h>
 #include "absynpp.h"
 #include "attributes.h"
 #include "evexp.h"
@@ -76,7 +77,7 @@ static void dumpntyp(type_t);
 static void dumpexp(exp_t);
 static void dumpexp_prec(int,exp_t);
 static void dumppat(pat_t);
-static void dumpstmt(stmt_t,bool expstmt,list_t<qvar_t,`H>);
+static void dumpstmt(stmt_t,bool expstmt,Dict::dict_t<qvar_t,qvar_t,`H>);
 static void dumpvardecl(vardecl_t,Position::seg_t,bool do_semi);
 static void dump_aggrdecl(aggrdecl_t);
 static void dump_enumdecl(enumdecl_t);
@@ -95,6 +96,16 @@ static void dumploc(Position::seg_t); // dumps a #line directive
 // set by dumpdecllist2file (this module is not re-entrant)
 FILE @@ dump_file = &stdout;
 static char prev_char = 'x';
+
+static Dict::dict_t<qvar_t,qvar_t,`H>* mt_set_value = NULL;
+static Dict::dict_t<qvar_t,qvar_t,`H> mt_set() {
+  if (mt_set_value == NULL) {
+    let s = Dict::empty(qvar_cmp);
+    mt_set_value = new s;
+    return s;
+  }
+  return *mt_set_value;
+}
 
 static bool need_space_before() {
   switch(prev_char) {
@@ -148,8 +159,10 @@ static void dump_char(int c) { // no space
 static void dumploc(Position::seg_t loc) {
   static const char ?last_file = "";
   static unsigned last_line = 0;
-  if(loc == 0) return;
+  static unsigned last_loc = 0;
   if(!generate_line_directives) return;
+  if(loc == 0 || loc == last_loc) return;
+  last_loc = loc;
   //let s = Position::get_line_directive(loc);
   let $(f,d) = Lex::xlate_pos(loc);
   if (f == NULL || ((f == last_file) && (d == last_line))) return;
@@ -925,7 +938,7 @@ static void dumpexp_prec(int inprec, exp_t e) {
     group(dumpde, des, "{","}",","); break;
 
   case &StmtExp_e(s):
-    dump_nospace("({"); dumpstmt(s,true,NULL); dump_nospace("})"); break;
+    dump_nospace("({"); dumpstmt(s,true,mt_set()); dump_nospace("})"); break;
   }
   if(inprec >= myprec && ((inprec != 140) || myprec != 140))
     //  if(inprec >= myprec)
@@ -937,7 +950,7 @@ static void dumpexp(exp_t e) {
 }
 
 static void dumpswitchclauses(list_t<switch_clause_t> scs,
-                              list_t<qvar_t,`H> varsinblock) {
+                              Dict::dict_t<qvar_t,qvar_t,`H> varsinblock) {
   for(; scs != NULL; scs = scs->tl) {
     let c = scs->hd;
     if(c->where_clause == NULL && c->pattern->r == (raw_pat_t)&Wild_p_val)
@@ -952,13 +965,23 @@ static void dumpswitchclauses(list_t<switch_clause_t> scs,
       dump_nospace(":");
     }
     if (Absynpp::is_declaration(c->body)) {
-      dump(" {"); dumpstmt(c->body,false,NULL), dump_char('}');
+      dump(" {"); dumpstmt(c->body,false,mt_set()), dump_char('}');
     } else
       dumpstmt(c->body,false,varsinblock);
   }
 }
 
-static void dumpstmt(stmt_t s,bool expstmt,list_t<qvar_t,`H> varsinblock) {
+static $(bool, Dict::dict_t<qvar_t,qvar_t,`H>) shadows(decl_t d, Dict::dict_t<qvar_t,qvar_t,`H> s) {
+  switch (d->r) {
+  case &Var_d(vd):
+    if (Dict::member(s,vd->name)) return $(true,Dict::singleton(qvar_cmp,vd->name,vd->name));
+    return $(false,Dict::insert(s,vd->name,vd->name));
+  default: return $(false,s);
+  }
+}
+
+static void dumpstmt(stmt_t s,bool expstmt,Dict::dict_t<qvar_t,qvar_t,`H> varsinblock) {
+ LOOP:
   dumploc(s->loc);
   switch(s->r) {
   case &Skip_s:   dump_semi(); break;
@@ -967,17 +990,25 @@ static void dumpstmt(stmt_t s,bool expstmt,list_t<qvar_t,`H> varsinblock) {
     // of blocks, so we force some explicit blocks to be written below.
     // It is verbose for Cyclone; maybe it should be controlled by a flag.
   case &Seq_s(s1,s2):
-    if(Absynpp::is_declaration(s1)) {
-      dump_char('{'); dumpstmt(s1,false,NULL); dump_char('}');
-    } else
-      dumpstmt(s1,false,varsinblock);
-    if(Absynpp::is_declaration(s2)) {
-      if (expstmt) dump_char('(');
-      dump_char('{'); dumpstmt(s2,expstmt,NULL); dump_char('}');
-      if (expstmt) { dump_char(')'); dump_semi(); }
-    } else
-      dumpstmt(s2,expstmt,varsinblock);
-    break;
+    while (true) {
+      if(Absynpp::is_declaration(s1)) {
+        dump_char('{'); dumpstmt(s1,false,mt_set()); dump_char('}');
+      } else
+        dumpstmt(s1,false,varsinblock);
+      switch (s2->r) {
+      case &Seq_s(s3,s4):
+        dumploc(s3->loc);
+        s1 = s3; s2 = s4; continue;
+      default:
+        if(Absynpp::is_declaration(s2)) {
+          if (expstmt) dump_char('(');
+          dump_char('{'); dumpstmt(s2,expstmt,mt_set()); dump_char('}');
+          if (expstmt) { dump_char(')'); dump_semi(); }
+        } else
+          dumpstmt(s2,expstmt,varsinblock);
+        return;
+      }
+    }
   case &Return_s(NULL): dump("return;"); break;
   case &Return_s(e):    dump("return"); dumpexp((exp_t)e); dump_semi(); break;
   case &IfThenElse_s(e,s1,s2):
@@ -987,25 +1018,25 @@ static void dumpstmt(stmt_t s,bool expstmt,list_t<qvar_t,`H> varsinblock) {
     case &Decl_s(...):
     case &IfThenElse_s(...):
     case &Label_s(...):
-      dump_nospace("){"); dumpstmt(s1,false,NULL); dump_char('}'); break;
+      dump_nospace("){"); dumpstmt(s1,false,mt_set()); dump_char('}'); break;
     default: dump_char(')'); dumpstmt(s1,false,varsinblock);
     }
     switch (s2->r) {
     case &Skip_s: break;
-    default: dump("else{"); dumpstmt(s2,false,NULL); dump_char('}'); break;
+    default: dump("else{"); dumpstmt(s2,false,mt_set()); dump_char('}'); break;
     }
     break;
 
   case &While_s($(e,_),s1):
     dump("while("); dumpexp(e); dump_nospace("){");
-    dumpstmt(s1,false,NULL); dump_char('}');
+    dumpstmt(s1,false,mt_set()); dump_char('}');
     break;
   case &For_s(e1,$(e2,_),$(e3,_),s1):
     dump("for("); dumpexp(e1);dump_semi(); dumpexp(e2);dump_semi(); dumpexp(e3);
-    dump_nospace("){"); dumpstmt(s1,false,NULL); dump_char('}');
+    dump_nospace("){"); dumpstmt(s1,false,mt_set()); dump_char('}');
     break;
   case &Do_s(s1,$(e,_)):
-    dump("do{"); dumpstmt(s1,false,NULL);
+    dump("do{"); dumpstmt(s1,false,mt_set());
     dump_nospace("}while("); dumpexp(e); dump_nospace(");");
     break;
 
@@ -1025,14 +1056,28 @@ static void dumpstmt(stmt_t s,bool expstmt,list_t<qvar_t,`H> varsinblock) {
     break;
 
   case &Decl_s(d,s1):
-    let $(newblock,newvarsinblock) = Absynpp::shadows(d,varsinblock);
+    let $(newblock,newvarsinblock) = shadows(d,varsinblock);
     if (newblock) {
       if (expstmt) dump("({"); else dump("{");
       dumpdecl(d);
-      dumpstmt(s1,expstmt,NULL);
+      dumpstmt(s1,expstmt,mt_set());
       if (expstmt) dump_nospace("});"); else dump("}");
     } else {
-      dumpdecl(d); dumpstmt(s1,expstmt,newvarsinblock);
+      while (true) {
+        dumpdecl(d); 
+        switch (s1->r) {
+        case &Decl_s(d2,s2):
+          let $(newblock,newvarsinblock2)= shadows(d2,newvarsinblock);
+          if (!newblock) {
+            dumploc(s1->loc);
+            newvarsinblock = newvarsinblock2;
+            d = d2; s1 = s2; continue;
+          }
+          fallthru;
+        default:
+          dumpstmt(s1,expstmt,newvarsinblock); return;
+        }
+      }
     }
     break;
 
@@ -1043,10 +1088,12 @@ static void dumpstmt(stmt_t s,bool expstmt,list_t<qvar_t,`H> varsinblock) {
     if(Absynpp::is_declaration(s1)) {
       dump_str(x);
       if (expstmt) dump_nospace(": ({"); else dump_nospace(": {");
-      dumpstmt(s1,expstmt,NULL);
+      dumpstmt(s1,expstmt,mt_set());
       if (expstmt) dump_nospace("});"); else dump_char('}');
     } else {
-      dump_str(x); dump_char(':'); dumpstmt(s1,expstmt,varsinblock);
+      dump_str(x); dump_char(':'); 
+      s = s1;
+      goto LOOP;
     }
     break;
 
@@ -1322,7 +1369,7 @@ static void dumpdecl(decl_t d) {
     default:    dumptqtd(empty_tqual(0), t, dump_callconv_fdqvar,fd); break;
     }
     dump_char('{');
-    dumpstmt(fd->body,false,NULL);
+    dumpstmt(fd->body,false,mt_set());
     dump_char('}');
     break;
   case &Var_d(vd):      dumpvardecl(vd,d->loc,true);           break;

@@ -43,9 +43,9 @@ T APQ_fromstr(const char ? str, int base) {
   T q = malloc(sizeof(struct T));
   let s = str;
   while (*s && *s != '/') s++;
-  q->n = AP_fromstr(str, base);
+  q->n = AP_fromstr((const char *)str, base);
   if (*s) {
-    let d = AP_fromstr(s + 1, base);
+    let d = AP_fromstr((const char *)(s + 1), base);
     if (AP_cmp(d, AP_zero))
       q->d = d;
     else throw new Invalid_argument("APQ_fromstr: malformed string");

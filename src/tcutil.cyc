@@ -586,7 +586,7 @@ kind_t type_kind(type_t t) {
   case &VarType(tv):    return Kinds::tvar_kind(tv,&Kinds::bk);
   case &AppType(c,ts):
     switch (c) {
-    case &VoidCon:      return &Kinds::mk;
+    case &VoidCon:       return &Kinds::mk;
     case &IntCon(_,sz): 
       return (sz==Int_sz || sz==Long_sz) ? &Kinds::bk : &Kinds::mk;
     case &ComplexCon:
@@ -1749,8 +1749,8 @@ type_opt_t get_pointer_bounds(type_t ptrtype) {
 // if the pointer bound is an evar, constrains to def
 exp_opt_t get_bounds_exp_constrain(ptrbound_t def, ptrbound_t b, bool c) {
   if(is_cvar_type(b) && c) {
-    if(!BansheeIf::add_constraint(0,BansheeIf::equality_constraint(ptrbnd_cvar_equivalent(b),
-								   ptrbnd_cvar_equivalent(def)))) {
+    if(!BansheeIf::add_constraint(0,BansheeIf::equality_constraint((cvartype_t)ptrbnd_cvar_equivalent(b),
+								   (cvartype_t)ptrbnd_cvar_equivalent(def)))) {
       Warn::impos2("get_bounds_exp -- unable to constrain cvar ",b);      
     }
   }
@@ -1887,7 +1887,7 @@ $(decl_t,exp_t,bool) insert_alias(exp_t e, type_t e_type) {
   bool success = true;
   // generate a fresh variable to alias the given expression to
   static int counter = 0;
-  qvar_t v = new $(Loc_n, new ((string_t)aprintf("__aliasvar%d",counter++)));
+  qvar_t v = new $(Loc_n(), new ((string_t)aprintf("__aliasvar%d",counter++)));
   vardecl_t vd = new_vardecl(0,v,e_type,e,NULL);
   exp_t ve = varb_exp(new Local_b(vd),e->loc);
   // generate a fresh region variable for it and make the type
@@ -2942,7 +2942,7 @@ $(bool,type_t) addressof_props(exp_t e) {
 void check_bound(seg_t loc, unsigned int i, ptrbound_t b, bool do_warn) {
   if(is_cvar_type(b)) {
     if(i > 1) {
-      if(!BansheeIf::add_constraint(loc,BansheeIf::equality_constraint(ptrbnd_cvar_equivalent(b),
+      if(!BansheeIf::add_constraint(loc,BansheeIf::equality_constraint((cvartype_t)ptrbnd_cvar_equivalent(b),
 								       fatconst()))) {
 	(do_warn ? Warn::warn2 : Warn::err2)(loc,"cannot infer an appropriate bound");
       }

@@ -375,7 +375,7 @@ static type_t tcUnPrimop(tenv_t te, seg_t loc, type_t * topt,
       if(is_cvar_type(b)) { 
 	//numelts on *{1} pointer is pointless :P, though not unsound
 	//so this constraint is heuristic
-	BansheeIf::add_constraint(loc,BansheeIf::equality_constraint(ptrbnd_cvar_equivalent(b), fatconst()));
+	BansheeIf::add_constraint(loc,BansheeIf::equality_constraint((cvartype_t)ptrbnd_cvar_equivalent(b), fatconst()));
       }
       else {
 	let eopt = get_bounds_exp(fat_bound_type,b);
@@ -523,7 +523,7 @@ static type_t tcMinus(tenv_t te, type_t *topt, exp_t e1, exp_t e2) {
       if(!is_fat_pointer_type(t1)) {
 	let pb = get_pointer_bounds(t1);
 	if(!is_cvar_type(pb) ||
-	   !BansheeIf::add_constraint(e1->loc,BansheeIf::equality_constraint(pb, fatconst()))) {
+	   !BansheeIf::add_constraint(e1->loc,BansheeIf::equality_constraint((cvartype_t)pb, fatconst()))) {
 	  Warn::err2(e1->loc, "Expected fat pointer type but got ", t1);
 	}
       }
@@ -532,7 +532,7 @@ static type_t tcMinus(tenv_t te, type_t *topt, exp_t e1, exp_t e2) {
     else { //the result is an arithmetic type ... t1 should be thin 
       if(is_fat_pointer_type(t1) ||
 	 (is_cvar_type(get_pointer_bounds(t2)) &&
-	  !BansheeIf::add_constraint(e1->loc,BansheeIf::equality_constraint(get_pointer_bounds(t1), 
+	  !BansheeIf::add_constraint(e1->loc,BansheeIf::equality_constraint((cvartype_t)get_pointer_bounds(t1), 
 									    thinconst())))) {
 	Warn::err2(e1->loc, "Expected thin pointer type but got ", t2);
       }
@@ -670,7 +670,7 @@ static type_t tcBinPrimop(tenv_t te, seg_t loc, type_t * topt,
       return expr_err(te,e1->loc,NULL, "type ",e1->topt," cannot be used with << or >>");
     if (!is_integral(e2)) 
       return expr_err(te,e2->loc,NULL, "type ",e2->topt," cannot be used with << or >>");
-    return e1->topt; //type of l/rshift is the type of the first argument; no coercion
+    return (type_t)e1->topt; //type of l/rshift is the type of the first argument; no coercion
     // Note: comparing pointers relies on memory-manager properties
     //       (but darned useful for dictionaries)
   case Eq:
@@ -991,7 +991,7 @@ static struct Datatypefield *tcInjection(tenv_t te,exp_t e,type_t tu,
     // MWH: ignores potential to insert alias coercions
     bool bogus = false;
     //used to be this: but zerotonull coercions are bad coerce_arg(curr_aquals_bounds(te),e,t2,&bogus))
-    let crc = Subtype::coercible_warn(e->loc, e->topt, t2);
+    let crc = Subtype::coercible_warn(e->loc, (type_t)e->topt, t2);
     if (crc != Unknown_coercion) {
       if(crc != No_coercion) 
 	unchecked_cast(e, t2, crc);
@@ -1244,14 +1244,14 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,
 	}
       }
       if (args_info != NULL) 
-	Warn::err2(loc,"too few arguments for function");
+	Warn::err2(loc,"too few arguments for function ",e);
       // if we have left-over arguments, then check for varargs
       else if (es != NULL || c_vararg || cyc_vararg != NULL) {
 	if(c_vararg)
 	  for(; es != NULL; es = es->tl)
 	    tcExp(te, NULL, es->hd);
 	else if(cyc_vararg == NULL)
-	  Warn::err2(loc, "too many arguments for function");
+	  Warn::err2(loc, "too many arguments for function ",e);
 	else {
 	  let VarargInfo{_,_,vt,inject} = *cyc_vararg;
 	  let vci = new VarargCallInfo {.num_varargs = 0,
@@ -1395,7 +1395,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,
           let &$(_,tq,t) = ainfo->hd;
           ts = new List{new $(tq,t),ts};
           var_t ux = new ((const char ?)aprintf("arg%d",i));
-          qvar_t x = new $(Loc_n, ux);
+          qvar_t x = new $(Loc_n(), ux);
           let vd = new_vardecl(loc,x,t,NULL,NULL);
           vds = new List{vd,vds};
           let new_arg = varb_exp(new Pat_b(vd),loc);
@@ -1430,7 +1430,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,
         asrt->topt = sint_type;
         exp_t fncall = fncall_exp(e,new_args,loc);
         fncall->topt = res_typ;
-        let tempvd = new_vardecl(loc,new $(Loc_n,new "temp"), tup_type,
+        let tempvd = new_vardecl(loc,new $(Loc_n(),new "temp"), tup_type,
                                  tup_exp,NULL);
         let tempexp = varb_exp(new Local_b(tempvd),loc);
         tempexp->topt = tup_type;
@@ -1458,7 +1458,7 @@ static type_t tcThrow(tenv_t te, seg_t loc, type_t * topt, exp_t e) {
   let exception_type = exn_type();
   tcExp(te,&exception_type,e);
   //!castable(loc,(type_t)e->topt,exception_type))
-  if (Subtype::coercible(loc,e->topt, exception_type) == Unknown_coercion) 
+  if (Subtype::coercible(loc,(type_t)e->topt, exception_type) == Unknown_coercion) 
     Warn::err2(loc,"expected ",exception_type," but found ",e->topt);
   if (topt != NULL) 
     return *topt;
@@ -1543,7 +1543,7 @@ static type_t tcCast(tenv_t te, seg_t loc, type_t * topt, type_t t, exp_t e,
 	}
       }
       else { //bds is as yet unconstrained ... make it fat 
-	if(!BansheeIf::add_constraint(loc,BansheeIf::equality_constraint(ptrbnd_cvar_equivalent(bds),
+	if(!BansheeIf::add_constraint(loc,BansheeIf::equality_constraint((cvartype_t)ptrbnd_cvar_equivalent(bds),
 								     fatconst()))) {
 	  Warn::err2(loc, "Unable to constrain pointer bound", t);
 	}
@@ -2164,6 +2164,15 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
   // make sure each argument has the right type
   list_t<$(aggrfield_t,exp_t)@> fields =
     resolve_aggregate_designators(heap_region,loc,args,ad->kind,ad->impl->fields);
+  // if this is a top-level union or tagged union, give an error if the
+  // field being defined isn't the first one (oh the joys of C...)
+  if (te->le == NULL && ad->kind == UnionA) {
+    let &$(f,_) = fields->hd; // should have one field
+    let fs = ad->impl->fields;
+    if (fs == NULL || f != fs->hd) {
+      Warn::err2(loc,"you can only initialize a union at top-level with the first member");
+    }
+  }
   for(; fields != NULL; fields = fields->tl) {
     bool bogus = false;
     let &$(field,field_exp) = fields->hd;
@@ -2542,7 +2551,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt, exp
       else if(*mknd==Malloc && !Tcutil::is_bits_only_type(elt_type)) {
 	//a fat pointer cannot be properly initialized by malloc
 	//we can either set *mknd to Calloc, or force the pointer to thin
-	if(!BansheeIf::add_constraint(loc,BansheeIf::equality_constraint(ptrbnd_cvar_equivalent(b),
+	if(!BansheeIf::add_constraint(loc,BansheeIf::equality_constraint((cvartype_t)ptrbnd_cvar_equivalent(b),
 									 thinconst()))) {
 	  Warn::err2(loc, "Unable to constrain pointer bound", *topt);
 	}

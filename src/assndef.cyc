@@ -978,8 +978,8 @@ term_t numelts_term(term_t t) {
 using Absyn {
   static string_t memory_var = "#Mem";
   static string_t pre_memory_var = "#Pre_Mem";
-  static $(nmspace_t,var_t) memvar = $(Nmspace{.Loc_n = 0},&memory_var);
-  static $(nmspace_t,var_t) pre_memvar = $(Nmspace{.Loc_n = 0},&pre_memory_var);
+  static $(nmspace_t,var_t) memvar = $(Nmspace{.Abs_n = NULL},&memory_var);
+  static $(nmspace_t,var_t) pre_memvar = $(Nmspace{.Abs_n = NULL},&pre_memory_var);
   static datatype TyCon.VoidCon void_con = VoidCon;
   static datatype Type.AppType vd_type = AppType(&void_con,NULL);
 
@@ -1013,7 +1013,7 @@ using Absyn {
   vardecl_t pre_memory = &pre_memory_struct;
 
   static string_t exception_var = "#Exn";
-  static $(nmspace_t,var_t) exnvar = $(Nmspace{.Loc_n = 0},&exception_var);
+  static $(nmspace_t,var_t) exnvar = $(Nmspace{.Abs_n = NULL},&exception_var);
 
   struct Absyn::Vardecl exception_struct = {
     .sc = Absyn::Public,

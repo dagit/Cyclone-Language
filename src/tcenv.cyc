@@ -525,7 +525,7 @@ storeconstraint_t make_init_store_constraint(list_t<tvar_t> tvs, storeconstraint
   list_t<type_t> es = NULL;
   for(;tvs!=NULL;tvs=tvs->tl) {
     let Core::Opt{k} = Kinds::tvar_kind_opt(tvs->hd);
-    if(k == &Kinds::ek)
+    if(k == (struct Kind *)&Kinds::ek)
       es = new List(var_type(tvs->hd), es);
   }
   switch(sc) {

@@ -1120,7 +1120,7 @@ static type_t typevar2cvar(string_t<`H> s) {
     name++;
     if(!strncmp(kind, "_PTRBND", 7)) {
       let t =  cvar_type_name(&Kinds::ptrbko, name);
-      Hashtable::insert(cvmap, new s, t);
+      Hashtable::insert((_ @)cvmap, new s, t);
       return t;
     }
     else { //unknown kind for now
@@ -1132,10 +1132,10 @@ static type_t typevar2cvar(string_t<`H> s) {
   //cvar constants
 static type_t str2type(seg_t loc, string_t<`H> s) {
   if(!strcmp(s, "@fat")) {
-    return Tcutil::ptrbnd_cvar_equivalent(fat_bound_type);
+    return (type_t)Tcutil::ptrbnd_cvar_equivalent(fat_bound_type);
   }
   else if(!strcmp(s, "@thin @numelts{valueof_t(1U)}")){ 
-    return Tcutil::ptrbnd_cvar_equivalent(bounds_one());
+    return (type_t)Tcutil::ptrbnd_cvar_equivalent(bounds_one());
   }
   parse_abort(loc, aprintf("Unknown type constant:: %s", s));
 }
@@ -1553,7 +1553,7 @@ declaration:
   { tvar_ok($3,SLOC(@3));
     tvar_t tv = new Tvar(new $3,-1,Kinds::kind_to_bound(&Kinds::ek),NULL);
     type_t t  = var_type(tv);
-    vardecl_t vd = new_vardecl(SLOC(@5), new $(Loc_n,new $5),rgn_handle_type(t),NULL,NULL);
+    vardecl_t vd = new_vardecl(SLOC(@5), new $(Loc_n(),new $5),rgn_handle_type(t),NULL,NULL);
     $$ = ^$(new List(region_decl(tv,vd,NULL,LOC(@1,@6)),NULL));
   }
 /* region h;  and region h = open(k); */
@@ -1562,7 +1562,7 @@ declaration:
     tvar_ok($2,SLOC(@2));
     tvar_t tv = new Tvar(new tvstring, -1, Kinds::kind_to_bound(&Kinds::ek),NULL);
     type_t t = var_type(tv);
-    vardecl_t vd = new_vardecl(SLOC(@2), new $(Loc_n,new $2),rgn_handle_type(t),NULL,NULL);
+    vardecl_t vd = new_vardecl(SLOC(@2), new $(Loc_n(),new $2),rgn_handle_type(t),NULL,NULL);
     $$ = ^$(new List(region_decl(tv,vd,$3,LOC(@1,@4)),NULL));
   }
 ;
@@ -2408,7 +2408,7 @@ array_initializer:
 | '{' initializer_list ',' '}'
     { $$=^$(new_exp(new UnresolvedMem_e(NULL,List::imp_rev($2)),LOC(@1,@4))); }
 | '{' FOR IDENTIFIER '<' expression ':' expression '}'
-    { let vd = new_vardecl(SLOC(@3),new $(Loc_n,new $3), uint_type,
+    { let vd = new_vardecl(SLOC(@3),new $(Loc_n(),new $3), uint_type,
                            uint_exp(0,SLOC(@3)),NULL);
       // make the index variable const
       vd->tq.real_const = true;
@@ -2823,7 +2823,7 @@ pattern:
 | IDENTIFIER IDENTIFIER pattern
     { if (strcmp($2,"as") != 0)
         Warn::err(SLOC(@2),"expecting `as'");
-      $$=^$(new_pat(new Var_p(new_vardecl(SLOC(@1),new $(Loc_n, new $1),void_type,NULL,NULL),
+      $$=^$(new_pat(new Var_p(new_vardecl(SLOC(@1),new $(Loc_n(), new $1),void_type,NULL,NULL),
                               $3),SLOC(@1)));
     }
 | IDENTIFIER '<' TYPE_VAR '>' type_name IDENTIFIER
@@ -2832,7 +2832,7 @@ pattern:
       let location = LOC(@1,@6);
       tvar_ok($3,location);
       tvar_t tv = new Tvar(new $3,-1,new Eq_kb(&Kinds::ek),NULL);
-      vardecl_t vd = new_vardecl(SLOC(@1),new $(Loc_n, new $6),
+      vardecl_t vd = new_vardecl(SLOC(@1),new $(Loc_n(), new $6),
 				 type_name_to_type($5,SLOC(@5)),NULL,NULL);
       $$ = ^$(new_pat(new AliasVar_p(tv,vd),location));
     }
@@ -2842,7 +2842,7 @@ pattern:
       let location = LOC(@1,@6);
       tvar_ok($3,location);
       tvar_t tv = new Tvar(new $3,-1,new Eq_kb(&Kinds::ek),NULL);
-      vardecl_t vd = new_vardecl(SLOC(@1),new $(Loc_n, new $6),
+      vardecl_t vd = new_vardecl(SLOC(@1),new $(Loc_n(), new $6),
 				 type_name_to_type($5,SLOC(@5)),NULL,NULL);
       $$ = ^$(new_pat(new AliasVar_p(tv,vd),location));
       }
@@ -2869,27 +2869,27 @@ pattern:
 | AND_OP pattern /* to allow &&p */
     { $$=^$(new_pat(new Pointer_p(new_pat(new Pointer_p($2),LOC(@1,@2))),LOC(@1,@2))); }
 | '*' IDENTIFIER
-    { $$=^$(new_pat(new Reference_p(new_vardecl(SLOC(@1), new $(Loc_n, new $2),
+    { $$=^$(new_pat(new Reference_p(new_vardecl(SLOC(@1), new $(Loc_n(), new $2),
 						void_type,NULL,NULL),
                                     new_pat(&Wild_p_val,SLOC(@2))),
 		    LOC(@1,@2))); }
 | '*' IDENTIFIER IDENTIFIER pattern
     { if (strcmp($3,"as") != 0)
         Warn::err(SLOC(@3),"expecting `as'");
-      $$=^$(new_pat(new Reference_p(new_vardecl(SLOC(@1),new $(Loc_n, new $2),
+      $$=^$(new_pat(new Reference_p(new_vardecl(SLOC(@1),new $(Loc_n(), new $2),
 						void_type,NULL,NULL),
                                     $4),LOC(@1,@2)));
     }
 | IDENTIFIER '<' TYPE_VAR '>'
    { let tag = id2type($3,Kinds::kind_to_bound(&Kinds::ik),NULL,SLOC(@3));
      $$=^$(new_pat(new TagInt_p(typ2tvar(SLOC(@3),tag),
-				new_vardecl(SLOC(@1),new $(Loc_n,new $1),
+				new_vardecl(SLOC(@1),new $(Loc_n(),new $1),
 					    tag_type(tag),NULL,NULL)),
 		   LOC(@1,@4))); }
 | IDENTIFIER '<' '_' '>'
    { let tv = Tcutil::new_tvar(Kinds::kind_to_bound(&Kinds::ik));
      $$=^$(new_pat(new TagInt_p(tv,
-				new_vardecl(SLOC(@1), new $(Loc_n,new $1),
+				new_vardecl(SLOC(@1), new $(Loc_n(),new $1),
 					    tag_type(var_type(tv)),NULL,NULL)),
 		   LOC(@1,@4))); }
 ;

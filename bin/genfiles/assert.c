@@ -354,9 +354,11 @@ extern int Cyc_fprintf(struct Cyc___cycFILE*,struct _fat_ptr,struct _fat_ptr);
 # 319 "cycboot.h"
 extern void exit(int);
 # 26 "assert.cyc"
-void*Cyc___assert_fail(struct _fat_ptr assertion,struct _fat_ptr file,unsigned line){
+void*Cyc___assert_fail(struct _fat_ptr assertion,struct _fat_ptr file,unsigned line){struct Cyc_String_pa_PrintArg_struct _T0;struct Cyc_Int_pa_PrintArg_struct _T1;struct Cyc_String_pa_PrintArg_struct _T2;void**_T3;void**_T4;void**_T5;struct Cyc___cycFILE*_T6;struct _fat_ptr _T7;struct _fat_ptr _T8;{struct Cyc_String_pa_PrintArg_struct _T9;_T9.tag=0;
+# 31
+_T9.f1=file;_T0=_T9;}{struct Cyc_String_pa_PrintArg_struct _T9=_T0;{struct Cyc_Int_pa_PrintArg_struct _TA;_TA.tag=1;_TA.f1=line;_T1=_TA;}{struct Cyc_Int_pa_PrintArg_struct _TA=_T1;{struct Cyc_String_pa_PrintArg_struct _TB;_TB.tag=0;_TB.f1=assertion;_T2=_TB;}{struct Cyc_String_pa_PrintArg_struct _TB=_T2;void*_TC[3];_T3=_TC + 0;*_T3=& _T9;_T4=_TC + 1;*_T4=& _TA;_T5=_TC + 2;*_T5=& _TB;_T6=Cyc_stderr;_T7=
 # 30
-({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=file;_Tmp1;});struct Cyc_Int_pa_PrintArg_struct _Tmp1=({struct Cyc_Int_pa_PrintArg_struct _Tmp2;_Tmp2.tag=1,_Tmp2.f1=line;_Tmp2;});struct Cyc_String_pa_PrintArg_struct _Tmp2=({struct Cyc_String_pa_PrintArg_struct _Tmp3;_Tmp3.tag=0,_Tmp3.f1=assertion;_Tmp3;});void*_Tmp3[3];_Tmp3[0]=& _Tmp0,_Tmp3[1]=& _Tmp1,_Tmp3[2]=& _Tmp2;Cyc_fprintf(Cyc_stderr,_tag_fat("%s:%u: Assertion `%s' failed.\n",sizeof(char),31U),_tag_fat(_Tmp3,sizeof(void*),3));});
+_tag_fat("%s:%u: Assertion `%s' failed.\n",sizeof(char),31U);_T8=_tag_fat(_TC,sizeof(void*),3);Cyc_fprintf(_T6,_T7,_T8);}}}
 # 32
 Cyc_fflush(Cyc_stderr);
 exit(-1);}

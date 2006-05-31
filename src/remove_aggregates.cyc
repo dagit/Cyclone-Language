@@ -38,16 +38,14 @@
 #include "toc.h" // for temp_var and NewInfo
 #include "tcutil.h" // for is_array
 #include "remove_aggregates.h"
+#include "absynpp.h"
+#include "flags.h"
 using Core;
 using List;
 using Absyn;
 namespace RemoveAggrs;
 
 #define DL 0
-
-static void massage_toplevel_aggr(exp_opt_t e) {
-  // DO ME -- still being done in toc.cyc (may intersperse with non-toplevel?)
-}
 
 // same as aggrmember_e(e,f,DL) but when e is a deref_e(e1), replaces with
 // aggrarrow_e(e1,f,DL) (copied from toc.cyc)
@@ -71,7 +69,8 @@ static struct Env { // a tagged union or datatype may be better
   exp_opt_t dest; // where to assign the result (often NULL)
 };
 typedef struct Env env_t;
-static env_t other_env = Env(Other,NULL);
+static env_t other_env = {Other,NULL};
+
 static env_t no_init(env_t env) {
   return env.ctxt == Initializer ? other_env : env;
 }
@@ -134,16 +133,22 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
       // for less output, try to special case initializers: t x = new e;
       if(env.ctxt == Initializer && can_use_initializer((exp_t)env.dest,typ)) {
 	remove_aggrs_exp(Env(NewDest,env.dest),e1);
-	e->r = seq_exp(assign_exp((exp_t)env.dest,mexp,DL),
+	e->r = seq_exp(set_type(assign_exp((exp_t)env.dest,mexp,DL),
+                                (type_t)env.dest->topt),
 		       e1,DL)->r;
+        e->topt = e1->topt;
 	res = UsedInitializer; 
 	break;
       }
       let xvar = Toc::temp_var();
-      let xexp = var_exp(xvar,DL);
+      let xexp = set_type(var_exp(xvar,DL),typ);
       remove_aggrs_exp(Env(NewDest,xexp), e1); 
+      let body_exp = xexp;
+      if (e->topt != NULL)
+        body_exp = set_type(cast_exp((type_t)e->topt,xexp,false,
+                                     No_coercion,DL),(type_t)e->topt);
       let s = declare_stmt(xvar,typ,mexp,
-			   seq_stmt(exp_stmt(e1,DL),exp_stmt(xexp,DL),DL),DL);
+			   seq_stmt(exp_stmt(e1,DL),exp_stmt(body_exp,DL),DL),DL);
       e->r = stmt_exp(s,DL)->r;
       break;
     default: Warn::impos("removeAggrs: toc did not set a new-destination");
@@ -155,20 +160,23 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
     bool do_stmt_exp = (env.ctxt != AggrField && env.ctxt != NewDest);
     exp_t dest;
     qvar_t * v;
+    let f = sdopt && sdopt->kind==UnionA ? unionq_type : strctq;
+    let ty = f(tdn);
     if(do_stmt_exp) {
       v  = new Toc::temp_var();
-      dest = var_exp(*v,DL);
+      dest = set_type(var_exp(*v,DL),ty);
     } else {
       v = NULL;
       dest = (exp_t)env.dest;
       if(env.ctxt == NewDest)
-	dest = deref_exp(dest,DL);
+	dest = set_type(deref_exp(dest,DL),ty);
     }
     // FIX: need different code for tagged unions ??!!
     for(let dles2=dles; dles2 != NULL; dles2 = dles2->tl) {
       let &$(ds,field_exp) = dles2->hd;
       let f = designatorlist_to_fieldname(ds);
-      let field_dest = member_exp(copy_exp(dest),f,DL);
+      let field_dest = set_type(member_exp(copy_exp(dest),f,DL),
+                                (type_t)field_exp->topt);
       remove_aggrs_exp(Env(AggrField,field_dest),field_exp);
     }
     // note: we must preserve left-to-right since we're linearizing here
@@ -176,16 +184,20 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
       Warn::impos("zero-field aggregate");
     }
     exp_t init_e = (*dles->hd)[1];
-    for(dles=dles->tl; dles!=NULL; dles=dles->tl)
-      init_e = seq_exp(init_e,(*dles->hd)[1],DL);
+    for(dles=dles->tl; dles!=NULL; dles=dles->tl) {
+      let e2 = (*dles->hd)[1];
+      if (e2->topt == NULL)
+        Warn::impos2("expression ",(exp_t)e2," missing type!");
+      init_e = set_type(seq_exp(init_e,e2,DL),(type_t)e2->topt);
+    }
     if(do_stmt_exp) {
-      let f = sdopt && sdopt->kind==UnionA ? unionq_type : strctq;
-      e->r = stmt_exp(declare_stmt(*v,f(tdn),NULL,
+      e->r = stmt_exp(declare_stmt(*v,ty,NULL,
 				   seq_stmt(exp_stmt(init_e,DL),
 					    exp_stmt(dest,DL), DL),DL),DL)->r;
     } else {
       e->r = init_e->r; // nested aggregate case, so result ignored
-      e->topt = NULL;   // being careful b/c the type is wrong
+      e->topt = init_e->topt;
+      //e->topt = NULL;   // being careful b/c the type is wrong
     }
     break;
 
@@ -194,7 +206,7 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
   case &Array_e(dles): 
     res = WasArray;
     if(dles==NULL) { // result ignored
-      *e = *signed_int_exp(0,DL);
+      *e = *set_type(signed_int_exp(0,DL),sint_type);
       break;
     }
     switch(env.ctxt) {
@@ -203,20 +215,31 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
     }
     did_assign = true;
     exp_t dest = (exp_t)env.dest;
+    type_t dest_type;
+    switch (compress((type_t)dest->topt)) {
+    case &ArrayType(ai): dest_type = cstar_type(ai.elt_type,ai.tq); break;
+    default: dest_type = (type_t)dest->topt; break;
+    }
     // FIX: wrong if we ever actually support nontrivial array designators
     int i=0;
     for(let dles2=dles; dles2 != NULL; dles2=dles2->tl, ++i) {
       // ignore designators b/c type-checker ensured they are trivial
       // (only repeat the fact that we have the ith element)
       let &$(_,field_exp) = dles2->hd;
-      let fielddest = subscript_exp(copy_exp(dest),signed_int_exp(i,DL),DL);
+      let fielddest = set_type(subscript_exp(copy_exp(dest),
+                                             set_type(signed_int_exp(i,DL),
+                                                      sint_type),DL),
+                               dest_type);
       remove_aggrs_exp(Env(AggrField,fielddest),field_exp);
     }
     exp_t init_e = (*dles->hd)[1];
-    for(dles=dles->tl; dles!=NULL; dles=dles->tl)
-      init_e = seq_exp(init_e,(*dles->hd)[1],DL);
+    for(dles=dles->tl; dles!=NULL; dles=dles->tl) {
+      let e2 = (*dles->hd)[1];
+      init_e = set_type(seq_exp(init_e,e2,DL),(type_t)e2->topt);
+    }
     e->r = init_e->r; // result ignored
-    e->topt = NULL;   // being careful b/c the type is wrong
+    e->topt = init_e->topt;
+    //e->topt = NULL;   // being careful b/c the type is wrong
     break;
 
   case &Comprehension_e(vd,bd,body,zero_term):
@@ -229,10 +252,19 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
     }
     qvar_t max  = Toc::temp_var();
     qvar_t i    = vd->name;
-    exp_t  ea   = assign_exp(var_exp(i,DL),signed_int_exp(0,DL),DL);
-    exp_t  eb   = lt_exp(var_exp(i,DL),var_exp(max,DL),DL);
-    exp_t  ec   = increment_exp(var_exp(i,DL),PreInc,DL);
-    exp_t  lval = subscript_exp((exp_t)env.dest,var_exp(i,DL),DL);
+    exp_t  ea   = assign_exp(set_type(var_exp(i,DL),sint_type),
+                             set_type(signed_int_exp(0,DL),sint_type),DL);
+    exp_t  eb   = lt_exp(set_type(var_exp(i,DL),uint_type),
+                         set_type(var_exp(max,DL),uint_type),DL);
+    exp_t  ec   = increment_exp(set_type(var_exp(i,DL),uint_type),PreInc,DL);
+    exp_t dest  = (exp_t)env.dest;
+    type_t dest_type;
+    switch (compress((type_t)dest->topt)) {
+    case &ArrayType(ai): dest_type = cstar_type(ai.elt_type,ai.tq); break;
+    default: dest_type = (type_t)dest->topt;
+    }
+    exp_t  lval = subscript_exp((exp_t)env.dest,set_type(var_exp(i,DL),uint_type),DL);
+    set_type(lval,dest_type);
     remove_aggrs_exp(Env(AggrField,copy_exp(lval)),body);
     stmt_t s = for_stmt(ea,eb,ec,exp_stmt(body,DL),DL);
     if(zero_term) { 
@@ -243,16 +275,16 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
       // occurrence of lhs above.
       // FIX: I removed a cast of the 0 -- may lead to gcc warnings
       exp_t ex = assign_exp(subscript_exp(copy_exp((exp_t)env.dest),
-					  var_exp(max,DL),DL),
-                            signed_int_exp(0,DL),DL);
+					  set_type(var_exp(max,DL),sint_type),DL),
+                            set_type(signed_int_exp(0,DL),sint_type),DL);
       s = seq_stmt(s,exp_stmt(ex,DL),DL);
     }
     // Note the generated code for an initializer is a bit uglier than necessary
     noarray_remove_aggrs_exp(other_env,bd);
     e->r = stmt_exp(seq_stmt(declare_stmt(max,uint_type,bd,
 			     declare_stmt(i,uint_type,NULL,s,DL),DL),
-			     exp_stmt(signed_int_exp(0,DL),DL),DL),DL)->r;
-    e->topt = NULL;
+			     exp_stmt(set_type(signed_int_exp(0,DL),sint_type),DL),DL),DL)->r;
+    e->topt = sint_type;
     break;
 
   case &ComprehensionNoinit_e(bd,...): 
@@ -316,8 +348,10 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
   }
   if(env.ctxt == AggrField && !did_assign)
     e->r = assign_exp((exp_t)env.dest,copy_exp(e),DL)->r;
-  if(env.ctxt == NewDest && !did_assign)
-    e->r = assign_exp(deref_exp((exp_t)env.dest,DL),copy_exp(e),DL)->r;
+  if(env.ctxt == NewDest && !did_assign) {
+    e->r = assign_exp(set_type(deref_exp((exp_t)env.dest,DL),(type_t)e->topt),
+                      copy_exp(e),DL)->r;
+  }
   return Result(res);
 }
 
@@ -325,20 +359,17 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
 // is just recursive descent, except for array-initializers
 // for tests, we use other_env -- WholeStmt would be fine, but 
 // assignments to comprehensions cannot appear so there is no point
-static bool remove_aggrs_stmt_f1(bool ignore, exp_t e) {
+static bool remove_aggrs_stmt_f1(int bogus, exp_t e) {
   remove_aggrs_exp(other_env,e);
   return false;
 }
-static bool remove_aggrs_stmt_f2(bool ignore, stmt_t s) {
+static bool remove_aggrs_stmt_f2(int bogus, stmt_t s) {
   switch(s->r) {
   case &Decl_s(d,s2):
     remove_aggrs_stmt(s2);
     switch(d->r) {
     case &Var_d(vd):
-      if(vd->sc == Static) {
-	massage_toplevel_aggr(vd->initializer);
-	return false;
-      }
+      if(vd->sc == Static) return false;
       // NOTE: It is probably okay not to compile away array-initializers
       // in most cases, but a comprehension inside an array would not
       // work correctly (e.g., {{for i < 7: 0}, {for i < 7: 0}}
@@ -365,9 +396,8 @@ static bool remove_aggrs_stmt_f2(bool ignore, stmt_t s) {
   }
 }
 static void remove_aggrs_stmt(stmt_t s) {
-  visit_stmt(remove_aggrs_stmt_f1,remove_aggrs_stmt_f2,true,s);
+  visit_stmt(remove_aggrs_stmt_f1,remove_aggrs_stmt_f2,0,s);
 }
-
 
 list_t<decl_t> remove_aggrs(list_t<decl_t,`H> ds) {
   for(let ds2 = ds; ds2 != NULL; ds2 = ds2->tl)
@@ -376,7 +406,7 @@ list_t<decl_t> remove_aggrs(list_t<decl_t,`H> ds) {
       if(fd->orig_scope != ExternC) //ignore extern C bodies
 	remove_aggrs_stmt(fd->body); 
       break;
-    case &Var_d(vd): massage_toplevel_aggr(vd->initializer); break;
+    case &Var_d(...): 
     case &Aggr_d(_): 
     case &Enum_d(_): // assuming no aggregates in tag-expressions
     case &Typedef_d(_): break;

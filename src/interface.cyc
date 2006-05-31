@@ -794,7 +794,7 @@ void compat_merge_dict_f($(bool,
     // check that y is included in ye
     // otherwise it means that we are trying to guess fields of an abstract structure
     let yt = merge_f(ye, y, 0, msg);
-    if (yt != ye) {
+    if (yt != (_ *)ye) {
       if (yt) // if yt is NULL, the error came from the merging
 	check_err(msg, aprintf("abstract %s %s is being imported as non-abstract",
 			       t, Absynpp::qvar2string(x)));

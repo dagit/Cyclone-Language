@@ -349,7 +349,7 @@ T AP_fromstr(const char *str, int base) {
 		int k, n = 0;
 		for ( ; *p == '0' && p[1] == '0'; p++)
 			;
-		start = p;
+		start = (const char @)p;
 		for ( ; (  '0' <= *p && *p <= '9' && *p < '0' + base
 			|| 'a' <= *p && *p <= 'z' && *p < 'a' + base - 10
 			|| 'A' <= *p && *p <= 'Z' && *p < 'A' + base - 10); p++)
@@ -359,7 +359,7 @@ T AP_fromstr(const char *str, int base) {
 		z = mk(((k*n + 7)&~7)/8);
 		p = start;
 	}
-	carry = XP_fromstr(z->size, z->digits, p,
+	carry = XP_fromstr(z->size, z->digits, (const char *)p,
 		base);
 	assert(carry == 0);
 	normalize(z, z->size);
@@ -385,7 +385,7 @@ char *AP_tostr(T x, int base) {
 		XP_tostr(str + 1, size - 1, base, x->ndigits, q);
 	} else
 		XP_tostr(str, size, base, x->ndigits, q);
-	return str;
+	return (char *)str;
 }
 T AP_gcd(T x, T y) {
 	T z, tmp;

@@ -108,7 +108,7 @@ int main(int argc, const char ?`H ? argv) {
     int j = system((const char @)command);
     // read in the output from the compiler which should be of the form
     // parse error: state [%d], token [%d]
-    char buf[100]@zeroterm; 
+    //char buf[100]@zeroterm; 
     tmp = fopen((const char @)tmpname2,"r");
     if (tmp == NULL) error("unable to open %s!",tmpname2);
     int state, token;

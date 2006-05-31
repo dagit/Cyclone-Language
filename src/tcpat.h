@@ -68,15 +68,15 @@ extern datatype PatTest {
   EqFloat(string_t,int);
   EqConst(unsigned int);
   EqDatatypeTag(int, datatypedecl_t, datatypefield_t);
-  EqTaggedUnion(field_name_t,int);
+  EqTaggedUnion(type_t,field_name_t,int);
   EqExtensibleDatatype(datatypedecl_t, datatypefield_t);
 };
 typedef datatype PatTest@ pat_test_t;
 extern datatype Access {
   Dummy;  // used to deal with the dummy tuple we create for handling where clauses
-  Deref;
-  DatatypeField(datatypedecl_t, datatypefield_t, unsigned);
-  AggrField(type_t aggrtype, bool tagged, stringptr_t);
+  Deref(type_t res_type);
+  DatatypeField(datatypedecl_t, datatypefield_t, unsigned, type_t res_type);
+  AggrField(type_t aggrtype, bool tagged, stringptr_t, type_t res_type);
 };
 typedef datatype Access@ access_t;
 

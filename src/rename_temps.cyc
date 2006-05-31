@@ -22,6 +22,7 @@
 
 #include <dict.h>
 #include "warn.h"
+#include "absynpp.h"
 #include "rename_temps.h"
 using Absyn;
 namespace RenameTemps;
@@ -38,16 +39,16 @@ static bool is_temp_var(qvar_t qv) {
     && (v[0] == '_') && (v[1] == 't') && (v[2] == 'm') && (v[3] == 'p');
 }
 static binding_t toplevel_temp_var(int i) {
-  return new Unresolved_b (new $(Loc_n,new (string_t)aprintf("_TmpG%X",i)));
+  return new Unresolved_b (new $(Loc_n(),new (string_t)aprintf("_TmpG%X",i)));
 }
 static binding_t local_temp_var(int i) { 
   static datatype Binding* memo_arr[256]= {for i < 256: NULL}; // fast common case
   if(i < 256) {
     if(memo_arr[i] == NULL)
-      memo_arr[i] = new Unresolved_b(new $(Loc_n,new (string_t)aprintf("_Tmp%X",i)));
+      memo_arr[i] = new Unresolved_b(new $(Loc_n(),new (string_t)aprintf("_T%X",i)));
     return (binding_t)memo_arr[i];
   }
-  return new Unresolved_b(new $(Loc_n,new (string_t)aprintf("_Tmp%X",i)));
+  return new Unresolved_b(new $(Loc_n(),new (string_t)aprintf("_T%X",i)));
 }
 
 static void rename_exp(env_t, exp_t);
@@ -56,37 +57,66 @@ static bool rename_visit_f1(env_t env, exp_t e) {
   switch(e->r) {
   case &Var_e(*b):
     let qv = binding2qvar(*b);
-    if(is_temp_var(qv))
-      *b = Dict::lookup(env->d,qv);
+    if(is_temp_var(qv)) {
+      try {
+        *b = Dict::lookup(env->d,qv);
+      } catch {
+      case _: 
+        fprintf(stderr,"can't find var %s!!!\n",Absynpp::exp2string(e));
+        break;
+      }
+    }
     return false;
   default: return true;
   }
 }
+
+// output code contains long lists of declarations and long lists
+// of sequenced statments.  To avoid stack-overflow, we iterate
+// over these.
 static bool rename_visit_f2(env_t env, stmt_t s) {
   switch(s->r) {
   case &Decl_s(d,s1):
     let old_env = *env;
-    switch(d->r) {
-    case &Var_d(vd): 
-      if(is_temp_var(vd->name)) {
-	let v = local_temp_var(env->next_num++);
-	env->d = Dict::insert(env->d,vd->name,v);
-	let vd2 = *vd;
-	vd2.name = binding2qvar(v);
-	d->r = new Var_d(new vd2);
+    while (true) {
+      switch(d->r) {
+      case &Var_d(vd): 
+        if(is_temp_var(vd->name)) {
+          let v = local_temp_var(env->next_num++);
+          env->d = Dict::insert(env->d,vd->name,v);
+          let vd2 = *vd;
+          vd2.name = binding2qvar(v);
+          d->r = new Var_d(new vd2);
+        }
+        // global initializers won't have local declarations
+        if(vd->initializer)
+          rename_exp(env,(exp_t)vd->initializer);
+        break;
+      case &Fn_d(fd): 
+        // assuming arguments and functions can't be temporaries
+        rename_stmt(env,fd->body); break;
+      default: Warn::impos2("RenameTemps: local decl not a var or function");
       }
-      // global initializers won't have local declarations
-      if(vd->initializer)
-	rename_exp(env,(exp_t)vd->initializer);
-      break;
-    case &Fn_d(fd): 
-      // assuming arguments and functions can't be temporaries
-      rename_stmt(env,fd->body); break;
-    default: Warn::impos2("RenameTemps: local decl not a var or function");
+      switch (s1->r) {
+      case &Decl_s(d2,s2): d = d2; s1 = s2; continue;
+      default: 
+        visit_stmt(rename_visit_f1,rename_visit_f2,env,s1);
+        *env = old_env;
+        return false;
+      }
     }
-    rename_stmt(env,s1);
-    *env = old_env;
-    return false;
+  case &Seq_s(s1,s2):
+    while (true) {
+      rename_stmt(env,s1);
+    LOOP2:
+      switch (s2->r) {
+      case &Seq_s(s3,s4):
+        s1 = s3; s2 = s4; continue;
+      case &Label_s(_,s3):
+        s2 = s3; goto LOOP2;
+      default: rename_stmt(env,s2); return false;
+      }
+    }
   default: return true;
   }
 }

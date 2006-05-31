@@ -1737,7 +1737,7 @@ doc_t stmt2doc(stmt_t st, bool stmtexp, list_t<qvar_t,`H> varsinblock, bool prev
 	       text(") "),
 	       block(false,stmt2doc(s1,false,NULL,true)),
 	       print_else ?
-	       cat(line_doc(),
+	       cat(// line_doc(),
 		   text("else "),
 		   block(false,stmt2doc(s2,false,NULL,true)))
 	       : nil_doc());

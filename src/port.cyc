@@ -1034,7 +1034,7 @@ static ctype_t type_to_ctype(cenv_t env, type_t t);
 static cenv_t initial_cenv() {
   let e = empty_cenv();
   // enter main so that we trick it into having the right type
-  e = add_var(e, new $(Loc_n,new "main"), main_type(), const_ct(),
+  e = add_var(e, new $(Loc_n(),new "main"), main_type(), const_ct(),
               type_to_ctype(e, main_type()),0);
   return e;
 }
@@ -1133,7 +1133,7 @@ static cenv_t gen_localdecl(cenv_t env, decl_t d,bool takeaddress);
 static bool is_char(cenv_t env, type_t t) {
   switch (t) {
   case &TypedefType(n,_,_,_):
-    (*n)[0] = Loc_n;
+    (*n)[0] = Loc_n();
     return is_char(env,lookup_typedef(env,n));
   case &AppType(&IntCon(_,Char_sz),_): return true;
   default: return false;
@@ -1144,7 +1144,7 @@ static bool is_char(cenv_t env, type_t t) {
 static ctype_t type_to_ctype(cenv_t env, type_t t) {
   switch (t) {
   case &TypedefType(n,_,_,_):
-    (*n)[0] = Loc_n;
+    (*n)[0] = Loc_n();
     return lookup_typedef_ctype(env,n);
   case &AppType(&VoidCon,_): return void_ct();
   case &PointerType(PtrInfo{et,tq,PtrAtts{r,n,b,zt,loc,_,_}}):
@@ -1268,11 +1268,11 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
   case &AppType(&AggrCon(ai),_):
     switch (ai) {
     case {.UnknownAggr = $(StructA,n,_)}:
-      (*n)[0] = Loc_n;
+      (*n)[0] = Loc_n();
       let p = lookup_struct_decl(env,n);
       return known_aggr_ct(p);
     case {.UnknownAggr = $(_,n,_)}:
-      (*n)[0] = Loc_n;
+      (*n)[0] = Loc_n();
       let p = lookup_union_decl(env,n);
       return known_aggr_ct(p);
     case {.KnownAggr = adp}:
@@ -1290,7 +1290,7 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
   case &AppType(&AnonEnumCon(fs),_):
     // add in an enum declaration
     for (; fs; fs = fs->tl) {
-      (*fs->hd->name)[0] = Loc_n;
+      (*fs->hd->name)[0] = Loc_n();
       env = add_var(env, fs->hd->name, sint_type, const_ct(), arith_ct(),0);
     }
     return arith_ct();
@@ -1363,7 +1363,7 @@ static $(ctype_t qual,ctype_t type) gen_lhs(cenv_t env, exp_t e, bool takeaddres
   switch (e->r) {
   case &Var_e(b):
     let x = binding2qvar(b);
-    (*x)[0] = Loc_n;
+    (*x)[0] = Loc_n();
     let $(p,loc)= lookup_var(env,x);
     register_localvar_usage(env,loc,e->loc,takeaddress);
     return p;
@@ -1423,7 +1423,7 @@ static ctype_t gen_exp(bool takeaddress,cenv_t env, exp_t e) {
   case &Const_e({.Null_c = _}):  return zero_ct();
   case &Var_e(b):       
     let x = binding2qvar(b);
-    (*x)[0] = Loc_n;
+    (*x)[0] = Loc_n();
     let $(p,loc) = lookup_var(env,x);
     let $(_,t) = p;
     if (isfn(env,x)) {
@@ -1599,7 +1599,7 @@ static ctype_t gen_initializer(cenv_t env, type_t t, exp_t e) {
   LOOP:
     switch (t) {
     case &TypedefType(n,_,_,_):
-      (*n)[0] = Loc_n;
+      (*n)[0] = Loc_n();
       t = lookup_typedef(env,n); goto LOOP;
     case &ArrayType(ArrayInfo{et,_,_,zt,ztl}):
       let v = var();
@@ -1614,7 +1614,7 @@ static ctype_t gen_initializer(cenv_t env, type_t t, exp_t e) {
       }
       return array_ct(v,q,z);
     case &AppType(&AggrCon({.UnknownAggr = $(StructA, n, _)}),_):
-      (*n)[0] = Loc_n;
+      (*n)[0] = Loc_n();
       let $(ad,_) = *lookup_struct_decl(env,n);
       if (ad == NULL) impos("struct is not yet defined");
       fallthru(ad);
@@ -1635,7 +1635,7 @@ static ctype_t gen_initializer(cenv_t env, type_t t, exp_t e) {
   LOOP2:
     switch (t) {
     case &TypedefType(n,_,_,_):
-      (*n)[0] = Loc_n;
+      (*n)[0] = Loc_n();
       t = lookup_typedef(env,n); goto LOOP2;
     case &ArrayType(_): return array_ct(arith_ct(), const_ct(), zterm_ct());
     default: return gen_exp(false,env,e);
@@ -1664,7 +1664,7 @@ static cenv_t gen_localdecl(cenv_t env, decl_t d, bool fromglobal) {
     } else {
       q = vd->tq.print_const ? const_ct() : notconst_ct();
     }
-    (*vd->name)[0] = Loc_n;
+    (*vd->name)[0] = Loc_n();
     env = add_var(env, vd->name, vd->type, q, t,vd->varloc);
     unifies(t, type_to_ctype(env, vd->type));
     if (vd->initializer) {
@@ -1693,7 +1693,7 @@ static cenv_t gen_topdecl(cenv_t env, decl_t d) {
     env->gcenv->porting = false;
     return env;
   case &Var_d(vd):
-    (*vd->name)[0] = Loc_n;
+    (*vd->name)[0] = Loc_n();
 #ifdef PORT_DEBUG
     fprintf(stderr,"processing var decl %s\n",qvar2string(vd->name));
 #endif
@@ -1728,7 +1728,7 @@ static cenv_t gen_topdecl(cenv_t env, decl_t d) {
     #ifdef PORT_DEBUG
     fprintf(stderr,"processing fn decl %s\n",qvar2string(fd->name));
     #endif
-    (*fd->name)[0] = Loc_n;
+    (*fd->name)[0] = Loc_n();
     $(type_t, $(ctype_t,ctype_t)@,seg_t) *predeclared = NULL;
 
     if (declared_var(env,fd->name)) {
@@ -1772,12 +1772,12 @@ static cenv_t gen_topdecl(cenv_t env, decl_t d) {
 #ifdef PORT_DEBUG
     fprintf(stderr,"fntype is %s\n",ctype2string(true,ctype));
 #endif
-    (*fd->name)[0] = Loc_n;
+    (*fd->name)[0] = Loc_n();
     fn_env = add_var(fn_env, fd->name, fntype, const_ct(), ctype,0);
     add_return_type(fn_env,c_rettype);
     for (let xs = c_args; xs; xs = xs->tl) {
       let $(x,t,q,ct) = *xs->hd;
-      fn_env = add_var(fn_env, new $(Loc_n,(_@)x), t, q, ct,0);
+      fn_env = add_var(fn_env, new $(Loc_n(),(_@)x), t, q, ct,0);
     }
     gen_stmt(fn_env,fd->body);
 #ifdef PORT_DEBUG
@@ -1818,7 +1818,7 @@ static cenv_t gen_topdecl(cenv_t env, decl_t d) {
     // FIX: what about typedef qualifier?
     let t = (type_t)td->defn;
     let ct = type_to_ctype(env,t);
-    (*td->name)[0] = Loc_n;
+    (*td->name)[0] = Loc_n();
     add_typedef(env, td->name, t, ct);
     return env;
   case &Aggr_d(ad):
@@ -1827,7 +1827,7 @@ static cenv_t gen_topdecl(cenv_t env, decl_t d) {
             (ad->kind == StructA) ? "struct" : "union",qvar2string(ad->name));
 #endif
     let name = ad->name;
-    (*ad->name)[0] = Loc_n;
+    (*ad->name)[0] = Loc_n();
     $(struct Aggrdecl @,cfields_t) @previous;
     cfields_t curr = NULL;
     switch (ad->kind) {
@@ -1875,11 +1875,11 @@ static cenv_t gen_topdecl(cenv_t env, decl_t d) {
 #ifdef PORT_DEBUG
     fprintf(stderr,"processing enum decl %s\n",qvar2string(ed->name));
 #endif
-    (*ed->name)[0] = Loc_n;
+    (*ed->name)[0] = Loc_n();
     // just insert the enum's identifiers as constant arithmetic values
     if (ed->fields)
       for(let fs = ed->fields->v; fs; fs = fs->tl) {
-        (*fs->hd->name)[0] = Loc_n;
+        (*fs->hd->name)[0] = Loc_n();
         env = add_var(env, fs->hd->name, enum_type(ed->name,ed),
                       const_ct(), arith_ct(),0);
       }

@@ -479,7 +479,7 @@ static cvtenv_t i_check_type_app(cvtenv_t env, kind_t expected_kind,
     // zero-arity constructors
   case &IntCon(...): case &FloatCon(...): case &VoidCon:
   case &RefCntHeapCon: case &UniqueHeapCon: case &HeapCon:
-  case &FalseCon: case &TrueCon: case &FatCon:
+  case &FalseCon: case &TrueCon: case &FatCon: 
   case &BuiltinCon(...): 
     if (ts != NULL) 
       impos2(new AppType(c,ts)," applied to argument(s)");

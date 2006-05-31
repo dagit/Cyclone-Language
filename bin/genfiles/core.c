@@ -354,39 +354,39 @@ struct _fat_ptr Cyc_Core_autorelease_handle(struct _RegionHandle*,struct _fat_pt
 # 31 "core.cyc"
 struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val={Cyc_Core_Not_found};char Cyc_Core_Unreachable[12U]="Unreachable";
 # 34
-struct Cyc_Core_Opt*Cyc_Core_opt_map(void*(*f)(void*),struct Cyc_Core_Opt*o){
-if(o==0)return 0;else{struct Cyc_Core_Opt*_Tmp0=_aqual_malloc(Cyc_Core_unique_qual,sizeof(struct Cyc_Core_Opt));({void*_Tmp1=f(o->v);_Tmp0->v=_Tmp1;});return _Tmp0;}}
+struct Cyc_Core_Opt*Cyc_Core_opt_map(void*(*f)(void*),struct Cyc_Core_Opt*o){struct Cyc_Core_Opt*_T0;struct Cyc_Core_Opt*_T1;unsigned _T2;struct Cyc_Core_Opt*_T3;void*_T4;
+if(o!=0)goto _TL0;_T0=0;goto _TL1;_TL0: _T2=Cyc_Core_unique_qual;{struct Cyc_Core_Opt*_T5=_aqual_malloc(_T2,sizeof(struct Cyc_Core_Opt));_T3=o;_T4=_T3->v;_T5->v=f(_T4);_T1=(struct Cyc_Core_Opt*)_T5;}_T0=_T1;_TL1: return _T0;}
 # 38
-struct _fat_ptr Cyc_Core_new_string(unsigned i){
-unsigned _Tmp0=i;return _tag_fat(_cyccalloc_atomic(sizeof(char),_Tmp0),sizeof(char),_Tmp0);}
+struct _fat_ptr Cyc_Core_new_string(unsigned i){struct _fat_ptr _T0;void*_T1;{unsigned _T2=i;_T1=_cyccalloc_atomic(sizeof(char),_T2);_T0=_tag_fat(_T1,sizeof(char),_T2);}
+return _T0;}
 # 42
-struct _fat_ptr Cyc_Core_rnew_string(struct _RegionHandle*r,unsigned i){
-unsigned _Tmp0=i;return _tag_fat(_region_calloc(r,0U,sizeof(char),_Tmp0),sizeof(char),_Tmp0);}
+struct _fat_ptr Cyc_Core_rnew_string(struct _RegionHandle*r,unsigned i){struct _fat_ptr _T0;struct _RegionHandle*_T1;void*_T2;{unsigned _T3=i;_T1=r;_T2=_region_calloc(_T1,0U,sizeof(char),_T3);_T0=_tag_fat(_T2,sizeof(char),_T3);}
+return _T0;}
 # 45
-struct _fat_ptr Cyc_Core_rqnew_string(struct _RegionHandle*r,unsigned q,unsigned i){
-unsigned _Tmp0=i;return _tag_fat(_region_calloc(r,q,sizeof(char),_Tmp0),sizeof(char),_Tmp0);}
+struct _fat_ptr Cyc_Core_rqnew_string(struct _RegionHandle*r,unsigned q,unsigned i){struct _fat_ptr _T0;struct _RegionHandle*_T1;unsigned _T2;void*_T3;{unsigned _T4=i;_T1=r;_T2=q;_T3=_region_calloc(_T1,_T2,sizeof(char),_T4);_T0=_tag_fat(_T3,sizeof(char),_T4);}
+return _T0;}
 # 49
 int Cyc_Core_true_f(void*x){return 1;}
 int Cyc_Core_false_f(void*x){return 0;}
 # 52
-int Cyc_Core_intcmp(int a,int b){return a - b;}
-int Cyc_Core_charcmp(char a,char b){return(int)a - (int)b;}
+int Cyc_Core_intcmp(int a,int b){int _T0;_T0=a - b;return _T0;}
+int Cyc_Core_charcmp(char a,char b){char _T0;int _T1;char _T2;int _T3;int _T4;_T0=a;_T1=(int)_T0;_T2=b;_T3=(int)_T2;_T4=_T1 - _T3;return _T4;}
 int Cyc_Core_nptrcmp(void*a,void*b){
-if(a==b)return 0;
-if(a > b)return 1;
-return -1;}
+if(a!=b)goto _TL2;return 0;_TL2:
+ if(a <= b)goto _TL4;return 1;_TL4:
+ return -1;}
 # 59
-int Cyc_Core_ptrcmp(void*a,void*b){
-return Cyc_Core_nptrcmp(a,b);}struct _tuple0{void*f0;void*f1;};
+int Cyc_Core_ptrcmp(void*a,void*b){int _T0;_T0=
+Cyc_Core_nptrcmp(a,b);return _T0;}struct _tuple0{void*f0;void*f1;};
 # 63
-void*Cyc_Core_fst(struct _tuple0*pair){return(*pair).f0;}
-void*Cyc_Core_snd(struct _tuple0*pair){return(*pair).f1;}struct _tuple1{void*f0;void*f1;void*f2;};
-void*Cyc_Core_third(struct _tuple1*triple){return(*triple).f2;}
+void*Cyc_Core_fst(struct _tuple0*pair){struct _tuple0*_T0;struct _tuple0 _T1;void*_T2;_T0=pair;_T1=*_T0;_T2=_T1.f0;return _T2;}
+void*Cyc_Core_snd(struct _tuple0*pair){struct _tuple0*_T0;struct _tuple0 _T1;void*_T2;_T0=pair;_T1=*_T0;_T2=_T1.f1;return _T2;}struct _tuple1{void*f0;void*f1;void*f2;};
+void*Cyc_Core_third(struct _tuple1*triple){struct _tuple1*_T0;struct _tuple1 _T1;void*_T2;_T0=triple;_T1=*_T0;_T2=_T1.f2;return _T2;}
 # 67
-void*Cyc_Core_identity(void*x){return x;}
+void*Cyc_Core_identity(void*x){void*_T0;_T0=x;return _T0;}
 # 69
-struct _fat_ptr Cyc_Core_autorelease(struct _fat_ptr ptr){
-struct _RegionHandle*_Tmp0=Cyc_Core_current_handle();return Cyc_Core_autorelease_handle(_Tmp0,ptr);}
+struct _fat_ptr Cyc_Core_autorelease(struct _fat_ptr ptr){struct _RegionHandle*_T0;struct _fat_ptr _T1;struct _fat_ptr _T2;_T0=
+Cyc_Core_current_handle();_T1=ptr;_T2=Cyc_Core_autorelease_handle(_T0,_T1);return _T2;}
 # 76
 struct _fat_ptr Cyc_Core_mkfat(void*arr,unsigned s,unsigned n){
 # 78

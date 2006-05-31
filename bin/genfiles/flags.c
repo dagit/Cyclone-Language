@@ -410,20 +410,20 @@ Cyc_Flags_tc_aggressive_warn=1;
 Cyc_Flags_warn_override=1;
 Cyc_Flags_warn_assert=1;}
 # 67
-void Cyc_Flags_set_cpponly (void){
-Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < 0?Cyc_Flags_stop_after_pass: 0U;}
+void Cyc_Flags_set_cpponly (void){enum Cyc_Flags_Cyclone_Passes _T0;enum Cyc_Flags_Cyclone_Passes _T1;int _T2;_T1=Cyc_Flags_stop_after_pass;_T2=(int)_T1;
+if(_T2 >= 0)goto _TL0;_T0=Cyc_Flags_stop_after_pass;goto _TL1;_TL0: _T0=0U;_TL1: Cyc_Flags_stop_after_pass=_T0;}
 # 70
-void Cyc_Flags_set_parseonly (void){
-Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < 1?Cyc_Flags_stop_after_pass: 1U;}
+void Cyc_Flags_set_parseonly (void){enum Cyc_Flags_Cyclone_Passes _T0;enum Cyc_Flags_Cyclone_Passes _T1;int _T2;_T1=Cyc_Flags_stop_after_pass;_T2=(int)_T1;
+if(_T2 >= 1)goto _TL2;_T0=Cyc_Flags_stop_after_pass;goto _TL3;_TL2: _T0=1U;_TL3: Cyc_Flags_stop_after_pass=_T0;}
 # 73
-void Cyc_Flags_set_crgnonly (void){
-Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < 3?Cyc_Flags_stop_after_pass: 3U;}
+void Cyc_Flags_set_crgnonly (void){enum Cyc_Flags_Cyclone_Passes _T0;enum Cyc_Flags_Cyclone_Passes _T1;int _T2;_T1=Cyc_Flags_stop_after_pass;_T2=(int)_T1;
+if(_T2 >= 3)goto _TL4;_T0=Cyc_Flags_stop_after_pass;goto _TL5;_TL4: _T0=3U;_TL5: Cyc_Flags_stop_after_pass=_T0;}
 # 76
-void Cyc_Flags_set_tconly (void){
-Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < 4?Cyc_Flags_stop_after_pass: 4U;}
+void Cyc_Flags_set_tconly (void){enum Cyc_Flags_Cyclone_Passes _T0;enum Cyc_Flags_Cyclone_Passes _T1;int _T2;_T1=Cyc_Flags_stop_after_pass;_T2=(int)_T1;
+if(_T2 >= 4)goto _TL6;_T0=Cyc_Flags_stop_after_pass;goto _TL7;_TL6: _T0=4U;_TL7: Cyc_Flags_stop_after_pass=_T0;}
 # 79
-void Cyc_Flags_set_cfonly (void){
-Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < 6?Cyc_Flags_stop_after_pass: 6U;}
+void Cyc_Flags_set_cfonly (void){enum Cyc_Flags_Cyclone_Passes _T0;enum Cyc_Flags_Cyclone_Passes _T1;int _T2;_T1=Cyc_Flags_stop_after_pass;_T2=(int)_T1;
+if(_T2 >= 6)goto _TL8;_T0=Cyc_Flags_stop_after_pass;goto _TL9;_TL8: _T0=6U;_TL9: Cyc_Flags_stop_after_pass=_T0;}
 # 82
-void Cyc_Flags_set_toconly (void){
-Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < 14?Cyc_Flags_stop_after_pass: 14U;}
+void Cyc_Flags_set_toconly (void){enum Cyc_Flags_Cyclone_Passes _T0;enum Cyc_Flags_Cyclone_Passes _T1;int _T2;_T1=Cyc_Flags_stop_after_pass;_T2=(int)_T1;
+if(_T2 >= 14)goto _TLA;_T0=Cyc_Flags_stop_after_pass;goto _TLB;_TLA: _T0=14U;_TLB: Cyc_Flags_stop_after_pass=_T0;}

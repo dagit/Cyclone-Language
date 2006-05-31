@@ -78,12 +78,16 @@ int tvar_cmp(tvar_t tv1, tvar_t tv2) {
 int tvar_id(tvar_t tv) {
   return tv->identity;
 }
-nmspace_t Loc_n = Nmspace{.Loc_n = 0};
+nmspace_t Loc_n() {
+  return Nmspace{.Loc_n = 0};
+}
 nmspace_t Abs_n(list_t<var_t,`H> x, bool C_scope) {
   return C_scope ? Nmspace{.C_n = x} : Nmspace{.Abs_n = x};
 }
 nmspace_t Rel_n(list_t<var_t,`H> x) { return Nmspace{.Rel_n = x}; }
-nmspace_t rel_ns_null = Nmspace{.Rel_n = NULL};
+nmspace_t rel_ns_null() {
+  return Nmspace{.Rel_n = NULL};
+}
 
 bool is_qvar_qualified(qvar_t qv) {
   switch((*qv)[0]) {
@@ -497,7 +501,7 @@ type_t typedef_type(typedef_name_t n,types_t args,
 //          the aggrdecl field.  Beware using them anywhere else!
 // (Probably we should require setting the third field even in Toc.)
 static type_t aggregate_type(aggr_kind_t k, var_t name) {
-  return new AppType(new AggrCon(UnknownAggr(k, new $(rel_ns_null,name), NULL)),NULL);
+  return new AppType(new AggrCon(UnknownAggr(k, new $(rel_ns_null(),name), NULL)),NULL);
 }
 type_t strct(var_t name)     { return aggregate_type(StructA,name); }
 type_t union_typ(var_t name) { return aggregate_type(UnionA,name);  }
@@ -807,6 +811,12 @@ exp_t unresolvedmem_exp(opt_t<typedef_name_t,`H> n,
                         list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H> dles,
                         seg_t loc) {
   return new_exp(new UnresolvedMem_e(n,dles),loc);
+}
+
+// used to put types on various expressions that we build
+exp_t set_type(exp_t e, type_t t) {
+  e->topt = t;
+  return e;
 }
 ///////////////////////// Statements ///////////////////////////////
 stmt_t new_stmt(raw_stmt_t s, seg_t loc) {
@@ -1191,6 +1201,7 @@ bool type2bool(bool def, type_t t) {
 // and they return false to say "do not recur"; they put their answer in env
 void visit_stmt(bool (@)(`a,exp_t), bool (@)(`a,stmt_t), `a, stmt_t);
 void visit_exp(bool (@f1)(`a,exp_t), bool (@f2)(`a,stmt_t), `a env, exp_t e) {
+ LOOP:
   if (!f1(env,e))
     return;
   switch(e->r) {
@@ -1217,7 +1228,9 @@ void visit_exp(bool (@f1)(`a,exp_t), bool (@f2)(`a,stmt_t), `a env, exp_t e) {
   case &ComprehensionNoinit_e(e1,_,_): fallthru(e1);
   case &Tagcheck_e(e1, _):             fallthru(e1);
   case &Sizeofexp_e(e1):               fallthru(e1);
-  case &AggrArrow_e(e1,...): visit_exp(f1,f2,env,e1); return;
+  case &AggrArrow_e(e1,...): 
+    e = e1;
+    goto LOOP;
 
   case &AssignOp_e(e1,_,e2): fallthru(e1,e2);
   case &And_e(e1,e2):        fallthru(e1,e2);
@@ -1226,17 +1239,20 @@ void visit_exp(bool (@f1)(`a,exp_t), bool (@f2)(`a,stmt_t), `a env, exp_t e) {
   case &Subscript_e(e1,e2):  fallthru(e1,e2);
   case &Swap_e(e1,e2):       fallthru(e1,e2);
   case &Comprehension_e(_,e1,e2,_):
-    visit_exp(f1,f2,env,e1); visit_exp(f1,f2,env,e2); return;
+    visit_exp(f1,f2,env,e1); 
+    e = e2;
+    goto LOOP;
 
   case &Conditional_e(e1,e2,e3):
-    visit_exp(f1,f2,env,e1); visit_exp(f1,f2,env,e2); visit_exp(f1,f2,env,e3);
-    return;
+    visit_exp(f1,f2,env,e1); visit_exp(f1,f2,env,e2); 
+    e = e3; 
+    goto LOOP;
 
   case &FnCall_e(e1,lexp,...):
     for(; lexp != NULL; lexp = lexp->tl)
       visit_exp(f1,f2,env,lexp->hd);
-    visit_exp(f1,f2,env,e1);
-    break;
+    e = e1;
+    goto LOOP;
 
   case &Array_e(ldt):            fallthru(ldt);
   case &CompoundLit_e(_, ldt):   fallthru(ldt);
@@ -1259,8 +1275,8 @@ void visit_exp(bool (@f1)(`a,exp_t), bool (@f2)(`a,stmt_t), `a env, exp_t e) {
     // e3 is qualifier literal -- null is ALIASABLE
     if(e1!=NULL) visit_exp(f1,f2,env,e1);
     if(e3!=NULL) visit_exp(f1,f2,env,e3);
-    visit_exp(f1,f2,env,e2);
-    break;
+    e = e2;
+    goto LOOP;
 
   case &StmtExp_e(s): visit_stmt(f1,f2,env,s); break;
 
@@ -1280,51 +1296,69 @@ static void visit_scs(bool (@f1)(`a,exp_t), bool (@f2)(`a,stmt_t), `a env,
     visit_stmt(f1,f2,env,scs->hd->body);
   }
 }
+// JGM: rewrote to use an explicit stack so that this doesn't consume as 
+// much stack space when we have a deeply nested statement.  
 void visit_stmt(bool (@f1)(`a,exp_t), bool (@f2)(`a,stmt_t), `a env, stmt_t s){
-  if (!f2(env,s))
-    return;
-  switch(s->r) {
-  case &Skip_s:
-  case &Break_s:
-  case &Continue_s:
-  case &Goto_s(_):
-  case &Return_s(NULL): break;
-  case &Return_s(e): fallthru((exp_t)e);
-  case &Exp_s(e): visit_exp(f1,f2,env,e); break;
-  case &IfThenElse_s(e1,s1,s2): visit_exp(f1,f2,env,e1); fallthru(s1,s2);
-  case &Seq_s(s1,s2): visit_stmt(f1,f2,env,s1); visit_stmt(f1,f2,env,s2); break;
-  case &While_s($(e,_),s1): fallthru(s1,e);
-  case &Do_s(s1,$(e,_)): visit_exp(f1,f2,env,e); visit_stmt(f1,f2,env,s1);break;
-  case &For_s(e1,$(e2,_),$(e3,_),s1):
-    visit_exp(f1,f2,env,e1); visit_exp(f1,f2,env,e2); visit_exp(f1,f2,env,e3);
-    visit_stmt(f1,f2,env,s1);
-    break;
-  case &Fallthru_s(es,_):
-    for(; es!=NULL; es=es->tl)
-      visit_exp(f1,f2,env,es->hd);
-    break;
-  case &Decl_s(d,s1):
-    switch(d->r) {
-    case &Var_d(vd):
-      if(vd->initializer != NULL)
-	visit_exp(f1,f2,env,(exp_t)vd->initializer);
-      break;
-    case &Fn_d(fd): visit_stmt(f1,f2,env,fd->body); break;
-    case &Let_d(_,_,e,_): visit_exp(f1,f2,env,e); break;
-    case &Region_d(_,_,eo): if(eo) visit_exp(f1,f2,env,eo); break;
-    default: break;
+  list_t<stmt_t> stack = NULL; 
+  while (true) {
+    if (f2(env,s)) {
+      switch(s->r) {
+      case &Skip_s:
+      case &Break_s:
+      case &Continue_s:
+      case &Goto_s(_):
+      case &Return_s(NULL): break;
+      case &Return_s(e): fallthru((exp_t)e);
+      case &Exp_s(e): visit_exp(f1,f2,env,e); break;
+      case &IfThenElse_s(e1,s1,s2): 
+        visit_exp(f1,f2,env,e1); fallthru(s1,s2);
+      case &Seq_s(s1,s2): 
+        stack = new List{s2, stack};
+        s = s1;
+        continue;
+      case &While_s($(e,_),s1): fallthru(s1,e);
+      case &Do_s(s1,$(e,_)): 
+        visit_exp(f1,f2,env,e);
+        s = s1;
+        continue;
+      case &For_s(e1,$(e2,_),$(e3,_),s1):
+        visit_exp(f1,f2,env,e1); visit_exp(f1,f2,env,e2); 
+        visit_exp(f1,f2,env,e3);
+        s = s1;
+        continue;
+      case &Fallthru_s(es,_):
+        for(; es!=NULL; es=es->tl)
+          visit_exp(f1,f2,env,es->hd);
+        break;
+      case &Decl_s(d,s1):
+        switch(d->r) {
+        case &Var_d(vd):
+          if(vd->initializer != NULL)
+            visit_exp(f1,f2,env,(exp_t)vd->initializer);
+          break;
+        case &Fn_d(fd): visit_stmt(f1,f2,env,fd->body); break;
+        case &Let_d(_,_,e,_): visit_exp(f1,f2,env,e); break;
+        case &Region_d(_,_,eo): if(eo) visit_exp(f1,f2,env,eo); break;
+        default: break;
+        }
+        s = s1;
+        continue;
+      case &Label_s(_,s1): 
+        s = s1;
+        continue;
+      case &Switch_s(e,scs,_):
+        visit_exp(f1,f2,env,e);
+        visit_scs(f1,f2,env,scs);
+        break;
+      case &TryCatch_s(s1,scs,_):
+        visit_stmt(f1,f2,env,s1);
+        visit_scs(f1,f2,env,scs);
+        break;
+      }
     }
-    visit_stmt(f1,f2,env,s1);
-    break;
- case &Label_s(_,s1): visit_stmt(f1,f2,env,s1); break;
- case &Switch_s(e,scs,_):
-   visit_exp(f1,f2,env,e);
-   visit_scs(f1,f2,env,scs);
-   break;
- case &TryCatch_s(s1,scs,_):
-   visit_stmt(f1,f2,env,s1);
-   visit_scs(f1,f2,env,scs);
-   break;
+    if (stack == NULL) return;
+    s = stack->hd;
+    stack = stack->tl;
   }
 }
 
@@ -1401,7 +1435,9 @@ static void i_visit_type(bool (@f)(`a, type_t), `a env, type_t t, table_t<type_t
     i_visit_type(f, env, z,seen);
     break;
   case &FnType(FnInfo{_,e,_,r,args,_,va,qb,_,_,_,_,_,_,_,_,_,_,vd,fc}): 
-    i_visit_type(f, env, e,seen);     i_visit_type(f, env, r,seen);
+    if (e != NULL)
+      i_visit_type(f, env, (type_t)e,seen);     
+    i_visit_type(f, env, r,seen);
     for(;args;args=args->tl) {
       let &$(_,_,at) = args->hd; i_visit_type(f, env, at,seen);
     }

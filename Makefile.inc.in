@@ -116,7 +116,9 @@ CYCLONE_H:=ap.h\
 	xp.h\
 	warn.h\
         flags.h\
+        lower.h\
 	subtype.h
+
 
 #need this in CYCLONE_SRCS
 BANSHEE_IF:=bansheeif
@@ -165,6 +167,7 @@ CYCLONE_SRCS:=absyn\
 	 subtype\
 	 cifc\
 	 tcdecl\
+         lower\
          port\
          specsfile\
 	 cyclone

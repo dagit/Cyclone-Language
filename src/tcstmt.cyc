@@ -49,7 +49,7 @@ static void simplify_unused_result_exp(exp_t e) {
 
 static qvar_t stmt_temp_var() { // COUNTER
   static int counter = 0;
-  return new $(Loc_n,new (string_t)aprintf("_tmpS%X",counter++));
+  return new $(Loc_n(),new (string_t)aprintf("_tmpS%X",counter++));
 }
 // For pattern-matches,
 // if e is not a variable expression, add an assignment and recurse.
@@ -290,7 +290,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 
     if(!List::exists(is_case_default, *scs0)) {
       // add a default case that re-throws the exception
-      qvar_t def_v = new $(Loc_n,new "exn");
+      qvar_t def_v = new $(Loc_n(),new "exn");
       let vd = new_vardecl(0,def_v,void_type,0,NULL);
       let def_pat = new_pat(new Var_p(vd, new_pat(&Wild_p_val,0)),0);
       let def_stmt =

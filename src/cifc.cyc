@@ -120,7 +120,7 @@ static type_t expand_c_type(seg_t loc, tenv_t te, type_t ctyp) {
     switch(ctyp) {
     case &TypedefType(_,_,_,to):
       //      fprintf(stderr, "%s\n", Absynpp::typ2string(to));
-      return to;
+      return (type_t)to;
     default:
       err2(loc, "Impos");
       break;
@@ -847,7 +847,7 @@ static bool update_typedef_decl(tenv_t te, decl_t encloser, list_t<decl_t, `H> t
   bool changed = false;
   switch(encloser->r) { 
   case &Typedef_d(td_decl):
-    let new_old_tvars = add_tvars_to_type(te, encloser, td_decl->defn, tv_ovrs);
+    let new_old_tvars = add_tvars_to_type(te, encloser, (type_t)td_decl->defn, tv_ovrs);
     if(new_old_tvars) {
       let &$(nt, ot) = new_old_tvars;
       while(ot) {

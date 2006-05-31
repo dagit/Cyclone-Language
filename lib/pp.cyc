@@ -263,7 +263,7 @@ doc_t nil_doc() {
 // This is made a function because non-constant initializers not allowed
 doc_t blank_doc() {
   if (blank_doc_opt == NULL) 
-    blank_doc_opt = new Opt(text(""));
+    blank_doc_opt = new Opt(text(" "));
   return blank_doc_opt->v;
 }
 

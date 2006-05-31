@@ -2117,7 +2117,7 @@ void vcgen_fundecl(Position::seg_t loc, JumpAnalysis::jump_anal_res_t tables, Ab
 
   assn_map_t *result_assn = new false_assnmap();
   if (ret_value == NULL) {
-    let v = new $((Absyn::nmspace_t)Absyn::Loc_n, new "return_value");
+    let v = new $((Absyn::nmspace_t)Absyn::Loc_n(), new "return_value");
     ret_value = Absyn::new_vardecl(0,v,fd->i.ret_type,NULL,NULL);
   }
   let env = initial_env(tables,fd,assn_info,fn_precond_info,result_assn,thrws_assn,ret_value);

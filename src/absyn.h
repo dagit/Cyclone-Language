@@ -68,8 +68,8 @@ namespace Absyn {
 
   // Name spaces
   EXTERN_ABSYN @tagged union Nmspace {
-    list_t<var_t> Rel_n; // Relative name
     list_t<var_t> Abs_n; // Absolute name in Cyclone namespace
+    list_t<var_t> Rel_n; // Relative name
     list_t<var_t> C_n;   // Absolute name in C namespace
     int Loc_n;  // Local name, int is not used
   };
@@ -923,7 +923,7 @@ namespace Absyn {
 
   ///////////////////////// Namespaces ////////////////////////////
   bool is_qvar_qualified(qvar_t);
-  extern nmspace_t Loc_n;
+  nmspace_t Loc_n();
   nmspace_t Rel_n(list_t<var_t,`H>);
   // Abs_n(ns) when C_scope is false, C_n(ns) when C_scope is true
   nmspace_t Abs_n(list_t<var_t,`H>, bool C_scope);
@@ -971,7 +971,7 @@ namespace Absyn {
   // bool types
   extern booltype_t true_type, false_type;
   // misc constructors
-  extern type_t void_type,
+  extern type_t void_type, ctor_type,
     var_type(tvar_t),
     tag_type(type_t),
     rgn_handle_type(rgntype_t),
@@ -1129,6 +1129,9 @@ namespace Absyn {
 
   qvar_t uniqueaqual_qvar();
   exp_t uniqueaqual_exp(); // refers to the unique region in Core::
+
+  // set the type of an expression
+  exp_t set_type(exp_t, type_t);
 
   /////////////////////////// Statements ///////////////////////////////
   stmt_t new_stmt(raw_stmt_t,seg_t);

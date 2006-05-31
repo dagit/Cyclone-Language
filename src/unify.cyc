@@ -538,7 +538,8 @@ static void unify_it(type_t t1, type_t t2,
       let kb1 = tvs1->hd->kind;
       let kb2 = tvs2->hd->kind;
       if (!unify_kindbound(kb1,kb2))
-	fail_because(aprintf("type var %s has different kinds %s and %s",
+	fail_because((const char *)
+                     aprintf("type var %s has different kinds %s and %s",
 			     Absynpp::tvar2string(tvs1->hd),
 			     Kinds::kind2string(Kinds::tvar_kind(tvs1->hd,
 								 &Kinds::bk)),
@@ -598,7 +599,7 @@ static void unify_it(type_t t1, type_t t2,
       bad_effect = !unify_effect(eff1,eff2);
     ts_failure = $(t1,t2);
     if(bad_effect)
-      fail_because(aprintf("function effects (%s,%s) do not match", eff1 ? Absynpp::typ2string(eff1) : (string_t)"-",
+      fail_because((const char *)aprintf("function effects (%s,%s) do not match", eff1 ? Absynpp::typ2string(eff1) : (string_t)"-",
 			   eff2 ? Absynpp::typ2string(eff2) : (string_t)"-"));
     if (!Atts::equiv_fn_atts(atts2,atts1))
       fail_because("function types have different attributes");

@@ -846,7 +846,7 @@ datatype PatTest {
   EqFloat(string_t,int);
   EqConst(unsigned int);
   EqDatatypeTag(int,datatypedecl_t,datatypefield_t);
-  EqTaggedUnion(field_name_t,int);
+  EqTaggedUnion(type_t,field_name_t,int);
   EqExtensibleDatatype(datatypedecl_t,datatypefield_t);
 };
 datatype PatTest.EqNull EqNull_val = EqNull;
@@ -854,12 +854,11 @@ datatype PatTest.NeqNull NeqNull_val = NeqNull;
 
 datatype Access {
   Dummy;
-  Deref;
-  DatatypeField(datatypedecl_t, datatypefield_t, unsigned);
-  AggrField(type_t aggrtype, bool tagged, stringptr_t);
+  Deref(type_t res_type);
+  DatatypeField(datatypedecl_t, datatypefield_t, unsigned, type_t res_type);
+  AggrField(type_t aggrtype, bool tagged, stringptr_t, type_t res_type);
 };
 datatype Access.Dummy Dummy_val = Dummy;
-datatype Access.Deref Deref_val = Deref;
 
 @tagged union PatOrWhere {
   pat_t     pattern;
@@ -959,7 +958,7 @@ static pat_test_t get_pat_test(union PatOrWhere pw) {
         if (!ad->impl->tagged) 
           Warn::impos2("non-tagged aggregate in pattern test");
         switch ((*dlps->hd)[0]->hd) {
-        case &FieldName(f): return new EqTaggedUnion(f,get_member_offset(ad,f));
+        case &FieldName(f): return new EqTaggedUnion(atype,f,get_member_offset(ad,f));
         default: Warn::impos2("no field name in tagged union pattern");
         }
       default: Warn::impos2("non-tagged aggregate in pattern test");
@@ -1152,10 +1151,10 @@ typedef list_t<$(con_t,list_t<term_desc_t>)@> context_t;
 static bool same_access(access_t a1, access_t a2) {
   switch $(a1,a2) {
   case $(&Dummy,&Dummy): return true;
-  case $(&Deref,&Deref): return true;
-  case $(&DatatypeField(_,df1,i1),&DatatypeField(_,df2,i2)): 
+  case $(&Deref(_),&Deref(_)): return true;
+  case $(&DatatypeField(_,df1,i1,_),&DatatypeField(_,df2,i2,_)): 
     return (df1 == df2) && (i1 == i2);
-  case $(&AggrField(_,b1,f1), &AggrField(_,b2,f2)):
+  case $(&AggrField(_,b1,f1,_), &AggrField(_,b2,f2,_)):
     return (b1 == b2) && (strptrcmp(f1,f2) == 0);
   default: return false;
   }
@@ -1206,10 +1205,10 @@ static void print_con(con_t c) {
 static void print_access(access_t a) {
   switch (a) {
   case &Dummy: fprintf(stderr,"DUMMY"); break;
-  case &Deref: fprintf(stderr,"*"); break;
-  case &DatatypeField(_,f,i):
+  case &Deref(_): fprintf(stderr,"*"); break;
+  case &DatatypeField(_,f,i,_):
     fprintf(stderr,"%s[%d]",qvar2string(f->name),i); break;
-  case &AggrField(_,tagged, f):
+  case &AggrField(_,tagged, f, _):
     if (tagged)
       fprintf(stderr,".tagunion");
     fprintf(stderr,".%s",*f);
@@ -1228,7 +1227,7 @@ static void print_pat_test(pat_test_t p) {
   case &EqFloat(s,_): fprintf(stderr,"%s",s); break;
   case &EqConst(i): fprintf(stderr,"%d",i); break;
   case &EqDatatypeTag(i,_,_): fprintf(stderr,"datatypetag(%d)",i); break;
-  case &EqTaggedUnion(f,i): fprintf(stderr,"uniontag[%s](%d)",*f,i); break;
+  case &EqTaggedUnion(_,f,i): fprintf(stderr,"uniontag[%s](%d)",*f,i); break;
   case &EqExtensibleDatatype(_,f):
     fprintf(stderr,"datatypefield(%s)",qvar2string(f->name));
   }
@@ -1409,11 +1408,14 @@ static access_t get_access(union PatOrWhere pw, int i) {
   case {.where_clause = _}: return &Dummy_val;
   case {.pattern = p}:
     switch (p->r) {
-    case &Pointer_p(...): 
+    case &Pointer_p(p2): 
       if (i != 0) 
         Warn::impos("get_access on pointer pattern with offset %d\n",i);
-      return &Deref_val;
-    case &Datatype_p(tud,tuf,...): return new DatatypeField(tud,tuf,i);
+      return new Deref((type_t)p2->topt);
+    case &Datatype_p(tud,tuf,args,...): 
+      let orig_i = i;
+      for (; i != 0; args = args->tl, i--);
+      return new DatatypeField(tud,tuf,orig_i,(type_t)args->hd->topt);
     case &Aggr_p(atype,_,_,dlps,_):
       list_t<aggrfield_t> fields;
       bool is_tagged = false;
@@ -1431,14 +1433,28 @@ static access_t get_access(union PatOrWhere pw, int i) {
       if (is_tagged) {
         switch ((*dlps->hd)[0]) {
         case &List{&FieldName(f),NULL}:
-          return new AggrField(atype,is_tagged,f);
+          return new AggrField(atype,is_tagged,f,(type_t)dlps->hd->f1->topt);
         default: 
 	  Warn::impos("get_access on bad aggr pattern: %s",pat2string(p));
         }
       }
       let orig_i = i;
       for (; i != 0; i--) fields = fields->tl;
-      return new AggrField(atype,is_tagged,fields->hd->name);
+      let name = fields->hd->name;
+      let field_type = void_type; 
+      for (; dlps != 0; dlps = dlps->tl) {
+        switch (dlps->hd->f0) {
+        case &List{&FieldName(f),NULL}:
+          if (strptrcmp(f,name) != 0) continue;
+          field_type = (type_t)dlps->hd->f1->topt; 
+          break;
+        default: 
+          Warn::impos("get_access bad designator list");
+        }
+        break;
+      }
+      if (dlps == 0) Warn::impos("get_access can't find field %s",(string_t)*name);
+      return new AggrField(atype,is_tagged,fields->hd->name,field_type);
     default: Warn::impos("get_access on bad pattern: %s",pat2string(p));
     }
   }

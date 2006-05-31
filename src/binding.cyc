@@ -287,7 +287,7 @@ static void absolutize_decl(seg_t loc, env_t env, qvar_t qv, scope_t sc) {
     if(at_toplevel(env))
       (*qv)[0] = Abs_n(env->ns->curr_ns, (in_cinclude(env) || sc==ExternC));
     else
-      (*qv)[0] = Loc_n;
+      (*qv)[0] = Loc_n();
     break;
   case Nmspace{.Loc_n = _}: break;
   case Nmspace{.Abs_n = _}:
@@ -516,7 +516,7 @@ static list_t<vardecl_opt_t> get_fun_vardecls(bool need_va_name,
       vds = new List{NULL,vds};
       continue;
     }
-    let vd = new_vardecl(0,new $((nmspace_t)Loc_n,a), t, NULL, NULL);
+    let vd = new_vardecl(0,new $((nmspace_t)Loc_n(),a), t, NULL, NULL);
     vd->tq = tq;
     vds = new List(vd,vds);
   }
@@ -528,7 +528,7 @@ static list_t<vardecl_opt_t> get_fun_vardecls(bool need_va_name,
     } else {
       // HeapRegion is wrong -- changed by type-checker!
       let typ = fatptr_type(t, heap_rgn_type, al_qual_type, tq, false_type, false_type);
-      let vd = new_vardecl(0,new $((nmspace_t)Loc_n,(var_t)v), typ, NULL, NULL);
+      let vd = new_vardecl(0,new $((nmspace_t)Loc_n(),(var_t)v), typ, NULL, NULL);
       vds = new List(vd,vds);
     }
   }
@@ -555,7 +555,7 @@ static void resolve_function_stuff(seg_t loc, env_t env, fn_info_t @i) {
     // return_value is a dummy var in scope only here
     let locs = *env->local_vars;
     let v    = new "return_value";
-    let vd   = new_vardecl(0,new $((nmspace_t)Loc_n, v), i->ret_type, NULL, NULL);
+    let vd   = new_vardecl(0,new $((nmspace_t)Loc_n(), v), i->ret_type, NULL, NULL);
     i->return_value = vd;
     *env->local_vars = Dict::insert(*env->local_vars, v,
 				    new VarRes(new Local_b(vd)));

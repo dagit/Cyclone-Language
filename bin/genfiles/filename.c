@@ -352,60 +352,57 @@ extern struct _fat_ptr Cyc_strconcat(struct _fat_ptr,struct _fat_ptr);
 # 110 "string.h"
 extern struct _fat_ptr Cyc_substring(struct _fat_ptr,int,unsigned long);
 # 35 "filename.cyc"
-struct _fat_ptr Cyc_Filename_concat(struct _fat_ptr s1,struct _fat_ptr s2){
-struct _fat_ptr _Tmp0=s1;return Cyc_strconcat(_Tmp0,Cyc_strconcat(_tag_fat("/",sizeof(char),2U),s2));}
+struct _fat_ptr Cyc_Filename_concat(struct _fat_ptr s1,struct _fat_ptr s2){struct _fat_ptr _T0;struct _fat_ptr _T1;struct _fat_ptr _T2;struct _fat_ptr _T3;struct _fat_ptr _T4;_T0=s1;_T1=
+_tag_fat("/",sizeof(char),2U);_T2=s2;_T3=Cyc_strconcat(_T1,_T2);_T4=Cyc_strconcat(_T0,_T3);return _T4;}
 # 39
-struct _fat_ptr Cyc_Filename_chop_extension(struct _fat_ptr filename){
-int i=(int)(_get_fat_size(filename,sizeof(char))- 1U);
-while(i >= 0 &&(int)*((const char*)_check_fat_subscript(filename,sizeof(char),i))!=46){
--- i;1U;}
-if(i < 0)
-_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp0->tag=Cyc_Core_Invalid_argument,_Tmp0->f1=_tag_fat("chop_extension",sizeof(char),15U);_Tmp0;}));
-return Cyc_substring(filename,0,(unsigned long)i);}
+struct _fat_ptr Cyc_Filename_chop_extension(struct _fat_ptr filename){struct _fat_ptr _T0;unsigned _T1;unsigned _T2;struct _fat_ptr _T3;int _T4;char*_T5;const char*_T6;char _T7;int _T8;struct Cyc_Core_Invalid_argument_exn_struct*_T9;void*_TA;struct _fat_ptr _TB;int _TC;unsigned long _TD;struct _fat_ptr _TE;_T0=filename;_T1=
+_get_fat_size(_T0,sizeof(char));_T2=_T1 - 1U;{int i=(int)_T2;
+_TL0: if(i >= 0)goto _TL3;else{goto _TL2;}_TL3: _T3=filename;_T4=i;_T5=_check_fat_subscript(_T3,sizeof(char),_T4);_T6=(const char*)_T5;_T7=*_T6;_T8=(int)_T7;if(_T8!=46)goto _TL1;else{goto _TL2;}
+_TL1: i=i + -1;goto _TL0;_TL2:
+ if(i >= 0)goto _TL4;{struct Cyc_Core_Invalid_argument_exn_struct*_TF=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_TF->tag=Cyc_Core_Invalid_argument;
+_TF->f1=_tag_fat("chop_extension",sizeof(char),15U);_T9=(struct Cyc_Core_Invalid_argument_exn_struct*)_TF;}_TA=(void*)_T9;_throw(_TA);goto _TL5;_TL4: _TL5: _TB=filename;_TC=i;_TD=(unsigned long)_TC;_TE=
+Cyc_substring(_TB,0,_TD);return _TE;}}
 # 50
-struct _fat_ptr Cyc_Filename_dirname(struct _fat_ptr filename){
-int i=(int)(_get_fat_size(filename,sizeof(char))- 1U);
-while(i >= 0 &&(int)*((const char*)_check_fat_subscript(filename,sizeof(char),i))!=47){
--- i;1U;}
-if(i < 0)return Cyc_Core_new_string(0U);
-return Cyc_substring(filename,0,(unsigned long)i);}
+struct _fat_ptr Cyc_Filename_dirname(struct _fat_ptr filename){struct _fat_ptr _T0;unsigned _T1;unsigned _T2;struct _fat_ptr _T3;int _T4;char*_T5;const char*_T6;char _T7;int _T8;struct _fat_ptr _T9;struct _fat_ptr _TA;int _TB;unsigned long _TC;struct _fat_ptr _TD;_T0=filename;_T1=
+_get_fat_size(_T0,sizeof(char));_T2=_T1 - 1U;{int i=(int)_T2;
+_TL6: if(i >= 0)goto _TL9;else{goto _TL8;}_TL9: _T3=filename;_T4=i;_T5=_check_fat_subscript(_T3,sizeof(char),_T4);_T6=(const char*)_T5;_T7=*_T6;_T8=(int)_T7;if(_T8!=47)goto _TL7;else{goto _TL8;}
+_TL7: i=i + -1;goto _TL6;_TL8:
+ if(i >= 0)goto _TLA;_T9=Cyc_Core_new_string(0U);return _T9;_TLA: _TA=filename;_TB=i;_TC=(unsigned long)_TB;_TD=
+Cyc_substring(_TA,0,_TC);return _TD;}}
 # 59
-struct _fat_ptr Cyc_Filename_basename(struct _fat_ptr filename){
-int i=(int)(_get_fat_size(filename,sizeof(char))- 1U);
-while(i >= 0 &&(int)*((const char*)_check_fat_subscript(filename,sizeof(char),i))!=47){
--- i;1U;}
-return Cyc_substring(filename,i + 1,_get_fat_size(filename,sizeof(char))- (unsigned)(i + 1));}
+struct _fat_ptr Cyc_Filename_basename(struct _fat_ptr filename){struct _fat_ptr _T0;unsigned _T1;unsigned _T2;struct _fat_ptr _T3;int _T4;char*_T5;const char*_T6;char _T7;int _T8;struct _fat_ptr _T9;int _TA;struct _fat_ptr _TB;unsigned _TC;int _TD;unsigned _TE;unsigned _TF;struct _fat_ptr _T10;_T0=filename;_T1=
+_get_fat_size(_T0,sizeof(char));_T2=_T1 - 1U;{int i=(int)_T2;
+_TLC: if(i >= 0)goto _TLF;else{goto _TLE;}_TLF: _T3=filename;_T4=i;_T5=_check_fat_subscript(_T3,sizeof(char),_T4);_T6=(const char*)_T5;_T7=*_T6;_T8=(int)_T7;if(_T8!=47)goto _TLD;else{goto _TLE;}
+_TLD: i=i + -1;goto _TLC;_TLE: _T9=filename;_TA=i + 1;_TB=filename;_TC=
+_get_fat_size(_TB,sizeof(char));_TD=i + 1;_TE=(unsigned)_TD;_TF=_TC - _TE;_T10=Cyc_substring(_T9,_TA,_TF);return _T10;}}
 # 66
-int Cyc_Filename_check_suffix(struct _fat_ptr filename,struct _fat_ptr suffix){
-int i=(int)(_get_fat_size(filename,sizeof(char))- 1U);
-int j=(int)(_get_fat_size(suffix,sizeof(char))- 1U);
-while(i >= 0 && j >= 0){
-if(({int _Tmp0=(int)*((const char*)_check_fat_subscript(filename,sizeof(char),i --));_Tmp0!=(int)*((const char*)_check_fat_subscript(suffix,sizeof(char),j --));}))return 0;1U;}
-if(j >= 0)return 0;
-return 1;}
+int Cyc_Filename_check_suffix(struct _fat_ptr filename,struct _fat_ptr suffix){struct _fat_ptr _T0;unsigned _T1;unsigned _T2;struct _fat_ptr _T3;unsigned _T4;unsigned _T5;struct _fat_ptr _T6;int _T7;int _T8;char*_T9;const char*_TA;char _TB;int _TC;struct _fat_ptr _TD;int _TE;int _TF;char*_T10;const char*_T11;char _T12;int _T13;_T0=filename;_T1=
+_get_fat_size(_T0,sizeof(char));_T2=_T1 - 1U;{int i=(int)_T2;_T3=suffix;_T4=
+_get_fat_size(_T3,sizeof(char));_T5=_T4 - 1U;{int j=(int)_T5;
+_TL10: if(i >= 0)goto _TL13;else{goto _TL12;}_TL13: if(j >= 0)goto _TL11;else{goto _TL12;}
+_TL11: _T6=filename;_T7=i;i=_T7 + -1;_T8=_T7;_T9=_check_fat_subscript(_T6,sizeof(char),_T8);_TA=(const char*)_T9;_TB=*_TA;_TC=(int)_TB;_TD=suffix;_TE=j;j=_TE + -1;_TF=_TE;_T10=_check_fat_subscript(_TD,sizeof(char),_TF);_T11=(const char*)_T10;_T12=*_T11;_T13=(int)_T12;if(_TC==_T13)goto _TL14;return 0;_TL14: goto _TL10;_TL12:
+ if(j < 0)goto _TL16;return 0;_TL16:
+ return 1;}}}
 # 75
-struct _fat_ptr Cyc_Filename_gnuify(struct _fat_ptr filename){
-int has_drive_name=_get_fat_size(filename,sizeof(char))> 1U &&(int)((const char*)filename.curr)[1]==58;
+struct _fat_ptr Cyc_Filename_gnuify(struct _fat_ptr filename){int _T0;struct _fat_ptr _T1;unsigned _T2;struct _fat_ptr _T3;unsigned char*_T4;const char*_T5;char _T6;int _T7;int _T8;struct _fat_ptr _T9;unsigned _TA;unsigned _TB;struct _fat_ptr _TC;int _TD;unsigned _TE;char*_TF;unsigned _T10;int _T11;char*_T12;unsigned _T13;char*_T14;struct _fat_ptr _T15;unsigned char*_T16;char*_T17;char _T18;struct _fat_ptr _T19;char*_T1A;char*_T1B;unsigned _T1C;unsigned char*_T1D;char*_T1E;unsigned _T1F;unsigned char*_T20;char*_T21;struct _fat_ptr _T22;char*_T23;char*_T24;struct _fat_ptr _T25;unsigned char*_T26;const char*_T27;unsigned _T28;unsigned char*_T29;char*_T2A;struct _fat_ptr _T2B;unsigned _T2C;struct _fat_ptr _T2D;int _T2E;unsigned _T2F;char*_T30;unsigned _T31;int _T32;char*_T33;unsigned _T34;char*_T35;struct _fat_ptr _T36;int _T37;int _T38;char*_T39;const char*_T3A;struct _fat_ptr _T3B;int _T3C;int _T3D;char*_T3E;char*_T3F;char _T40;char _T41;int _T42;unsigned _T43;unsigned char*_T44;char*_T45;struct _fat_ptr _T46;_T1=filename;_T2=
+_get_fat_size(_T1,sizeof(char));if(_T2 <= 1U)goto _TL18;_T3=filename;_T4=_T3.curr;_T5=(const char*)_T4;_T6=_T5[1];_T7=(int)_T6;_T0=_T7==58;goto _TL19;_TL18: _T0=0;_TL19: {int has_drive_name=_T0;
 int i;int j;
 struct _fat_ptr ans;
-int ans_sz;
-if(has_drive_name){
-ans_sz=(int)(_get_fat_size(filename,sizeof(char))+ 1U);
-ans=({unsigned _Tmp0=(unsigned)ans_sz + 1U;_tag_fat(({char*_Tmp1=_cycalloc_atomic(_check_times(_Tmp0,sizeof(char)));({{unsigned _Tmp2=(unsigned)ans_sz;unsigned k;for(k=0;k < _Tmp2;++ k){_Tmp1[k]='\000';}_Tmp1[_Tmp2]=0;}0;});_Tmp1;}),sizeof(char),_Tmp0);});
-({struct _fat_ptr _Tmp0=_fat_ptr_plus(ans,sizeof(char),0);char _Tmp1=*((char*)_Tmp0.curr);char _Tmp2=({struct _fat_ptr _Tmp3=_fat_ptr_plus(ans,sizeof(char),1);char _Tmp4=*((char*)_check_fat_subscript(_Tmp3,sizeof(char),0U));char _Tmp5='/';if(_get_fat_size(_Tmp3,sizeof(char))==1U &&(_Tmp4==0 && _Tmp5!=0))_throw_arraybounds();*((char*)_Tmp3.curr)=_Tmp5;});if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
-({struct _fat_ptr _Tmp0=_fat_ptr_plus(ans,sizeof(char),2);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=((const char*)filename.curr)[0];if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
+int ans_sz;_T8=has_drive_name;
+if(!_T8)goto _TL1A;_T9=filename;_TA=
+_get_fat_size(_T9,sizeof(char));_TB=_TA + 1U;ans_sz=(int)_TB;_TD=ans_sz;_TE=(unsigned)_TD;{unsigned _T47=_TE + 1U;_T10=_check_times(_T47,sizeof(char));{char*_T48=_cycalloc_atomic(_T10);_T11=ans_sz;{unsigned _T49=(unsigned)_T11;unsigned k;k=0;_TL1F: if(k < _T49)goto _TL1D;else{goto _TL1E;}_TL1D: _T13=k;_T12=_T48 + _T13;
+*_T12='\000';k=k + 1;goto _TL1F;_TL1E: _T14=_T48 + _T49;*_T14=0;}_TF=(char*)_T48;}_TC=_tag_fat(_TF,sizeof(char),_T47);}ans=_TC;_T15=ans;{struct _fat_ptr _T47=_fat_ptr_plus(_T15,sizeof(char),0);_T16=_T47.curr;_T17=(char*)_T16;{char _T48=*_T17;_T19=ans;{struct _fat_ptr _T49=_fat_ptr_plus(_T19,sizeof(char),1);_T1A=_check_fat_subscript(_T49,sizeof(char),0U);_T1B=(char*)_T1A;{char _T4A=*_T1B;char _T4B='/';_T1C=_get_fat_size(_T49,sizeof(char));if(_T1C!=1U)goto _TL20;if(_T4A!=0)goto _TL20;if(_T4B==0)goto _TL20;_throw_arraybounds();goto _TL21;_TL20: _TL21: _T1D=_T49.curr;_T1E=(char*)_T1D;*_T1E=_T4B;_T18=*_T1E;}}{char _T49=_T18;_T1F=_get_fat_size(_T47,sizeof(char));if(_T1F!=1U)goto _TL22;if(_T48!=0)goto _TL22;if(_T49==0)goto _TL22;_throw_arraybounds();goto _TL23;_TL22: _TL23: _T20=_T47.curr;_T21=(char*)_T20;*_T21=_T49;}}}_T22=ans;{struct _fat_ptr _T47=_fat_ptr_plus(_T22,sizeof(char),2);_T23=_check_fat_subscript(_T47,sizeof(char),0U);_T24=(char*)_T23;{char _T48=*_T24;_T25=filename;_T26=_T25.curr;_T27=(const char*)_T26;{char _T49=_T27[0];_T28=_get_fat_size(_T47,sizeof(char));if(_T28!=1U)goto _TL24;if(_T48!=0)goto _TL24;if(_T49==0)goto _TL24;_throw_arraybounds();goto _TL25;_TL24: _TL25: _T29=_T47.curr;_T2A=(char*)_T29;*_T2A=_T49;}}}
+# 85
 i=3;
-j=2;}else{
+j=2;goto _TL1B;
 # 88
-ans_sz=(int)_get_fat_size(filename,sizeof(char));
-ans=({unsigned _Tmp0=(unsigned)ans_sz + 1U;_tag_fat(({char*_Tmp1=_cycalloc_atomic(_check_times(_Tmp0,sizeof(char)));({{unsigned _Tmp2=(unsigned)ans_sz;unsigned k;for(k=0;k < _Tmp2;++ k){_Tmp1[k]='\000';}_Tmp1[_Tmp2]=0;}0;});_Tmp1;}),sizeof(char),_Tmp0);});
+_TL1A: _T2B=filename;_T2C=_get_fat_size(_T2B,sizeof(char));ans_sz=(int)_T2C;_T2E=ans_sz;_T2F=(unsigned)_T2E;{unsigned _T47=_T2F + 1U;_T31=_check_times(_T47,sizeof(char));{char*_T48=_cycalloc_atomic(_T31);_T32=ans_sz;{unsigned _T49=(unsigned)_T32;unsigned k;k=0;_TL29: if(k < _T49)goto _TL27;else{goto _TL28;}_TL27: _T34=k;_T33=_T48 + _T34;
+*_T33='\000';k=k + 1;goto _TL29;_TL28: _T35=_T48 + _T49;*_T35=0;}_T30=(char*)_T48;}_T2D=_tag_fat(_T30,sizeof(char),_T47);}ans=_T2D;
 i=0;
-j=0;}
+j=0;_TL1B:
 # 93
-while(i < ans_sz){
-{char c=*((const char*)_check_fat_subscript(filename,sizeof(char),j ++));
-({struct _fat_ptr _Tmp0=_fat_ptr_plus(ans,sizeof(char),i ++);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=(int)c==92?'/': c;if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});}
-# 94
-1U;}
+ _TL2A: if(i < ans_sz)goto _TL2B;else{goto _TL2C;}
+_TL2B: _T36=filename;_T37=j;j=_T37 + 1;_T38=_T37;_T39=_check_fat_subscript(_T36,sizeof(char),_T38);_T3A=(const char*)_T39;{char c=*_T3A;_T3B=ans;_T3C=i;
+i=_T3C + 1;_T3D=_T3C;{struct _fat_ptr _T47=_fat_ptr_plus(_T3B,sizeof(char),_T3D);_T3E=_check_fat_subscript(_T47,sizeof(char),0U);_T3F=(char*)_T3E;{char _T48=*_T3F;_T41=c;_T42=(int)_T41;if(_T42!=92)goto _TL2D;_T40='/';goto _TL2E;_TL2D: _T40=c;_TL2E: {char _T49=_T40;_T43=_get_fat_size(_T47,sizeof(char));if(_T43!=1U)goto _TL2F;if(_T48!=0)goto _TL2F;if(_T49==0)goto _TL2F;_throw_arraybounds();goto _TL30;_TL2F: _TL30: _T44=_T47.curr;_T45=(char*)_T44;*_T45=_T49;}}}}goto _TL2A;_TL2C: _T46=ans;
 # 97
-return ans;}
+return _T46;}}

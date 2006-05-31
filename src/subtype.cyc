@@ -543,7 +543,7 @@ static bool gen_default_constraint(list_t<constraint_t,`H> @retc, enum KindQual 
 	//int *{65} a; ... int *b = a;
 	//in the first case we must to force b to be fat ... the second case we don't care
 	if(!ct2) { 
-	  c = equality_constraint(ct1, fatconst());
+	  c = equality_constraint((cvartype_t)ct1, fatconst());
 	}
       }
       if(c)
@@ -609,7 +609,7 @@ static $(coercion_t, list_t<constraint_t>, bool)
     if (is_pointer_type(t1)) {
       let cv1 = (type_t)get_pointer_bounds(t1);
       if(is_cvar_type(cv1)) {
-	return $(Other_coercion,new List{equality_constraint(ptrbnd_cvar_equivalent(cv1),thinconst()), NULL}, false);
+	return $(Other_coercion,new List{equality_constraint((cvartype_t)ptrbnd_cvar_equivalent(cv1),thinconst()), NULL}, false);
       }
     }
     break;

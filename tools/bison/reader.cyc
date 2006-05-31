@@ -1189,15 +1189,12 @@ print_union_decl()
   if (union_typename!=NULL)
     vars = rprintf(pr,"<%s>",union_typename);
   fprintf((FILE @)fattrs0,
-//          "\nunion YYSTYPE %s;\n"
-          "@tagged union YYSTYPE %s\n{",
-//          vars,
+          "@tagged union YYSTYPE %s\n{\n  int YYINITIALSVAL;",
           vars);
   for(; l1 != NULL; l1 = l1->tl){
     fprintf((FILE @)fattrs0,"\n  %s %s;",
             l1->str, l1->nth);
   }
-  fprintf((FILE @)fattrs0,"\n  int YYINITIALSVAL;");
   fprintf((FILE @)fattrs0,"\n};\n");
   if(union_typename != NULL)
     fprintf((FILE @)fattrs0,"\n#define YYSTYPEVARS %s\n",vars);
@@ -1210,12 +1207,12 @@ print_union_decl()
     fprintf((FILE @)fdefines,"\nextern @tagged union YYSTYPE %s",
             vars);
     fprintf((FILE @)fdefines,"\n{");
+    fprintf((FILE @)fdefines,"\n  int  YYINITIALSVAL;");
     l1 = seen_destructors;
     for(; l1 != NULL; l1 = l1->tl){
       fprintf((FILE @)fdefines,"\n  %s %s;",
               l1->str, l1->nth);
     }
-    fprintf((FILE @)fdefines,"\n  int  YYINITIALSVAL;");
     fprintf((FILE @)fdefines,"\n};\n");
     //    fprintf((FILE @)fattrs0, "
   }

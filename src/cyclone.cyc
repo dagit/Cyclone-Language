@@ -45,6 +45,7 @@
 #include "cyclone.h"
 #include "interproc.h"
 #include "bansheeif.h"
+#include "lower.h"
 
 namespace Port {
   void port(List::list_t<Absyn::decl_t>);
@@ -82,6 +83,7 @@ static bool generate_interface_r = false;
 static bool toseqc_r = true;
 static bool pthread_r = false;
 static bool vcgen_r  = true;
+static bool nolower_r = false;
 
 // Arguments to pass to the C compiler
 static list_t<stringptr_t> ccargs = NULL;
@@ -461,7 +463,7 @@ extern "C" void CYCALLOCPROFILE_mark(const char *s);
 
 `b do_stage(string_t stage_name, list_t<Absyn::decl_t,`H> tds,
 	    `b f(`a, list_t<Absyn::decl_t,`H>), `a env, `b onfail) {
-  CYCALLOCPROFILE_mark(stage_name);
+  CYCALLOCPROFILE_mark((const char *)stage_name);
   struct timeval start, end;
   if(Flags::verbose)
     gettimeofday(&start,NULL);
@@ -589,6 +591,9 @@ list_t<Absyn::decl_t> do_temprename(bool ignore,list_t<Absyn::decl_t,`H> tds) {
 list_t<Absyn::decl_t> do_castremove(bool ignore,list_t<Absyn::decl_t,`H> tds) {
   return RemoveCasts::remove_casts(tds);
 }
+list_t<Absyn::decl_t> do_lower(bool ignore,list_t<Absyn::decl_t,`H> tds) {
+  return Lower::lower(tds);
+}
 
 list_t<Absyn::decl_t> do_toseqc(bool ignore, list_t<Absyn::decl_t,`H> tds) {
   return Toseqc::toseqc(tds);
@@ -598,7 +603,9 @@ list_t<Absyn::decl_t> do_tovc(bool ignore, list_t<Absyn::decl_t> tds) {
   return Tovc::tovc(tds);
 }
 list_t<Absyn::decl_t> do_lowtreeshake(bool ignore,list_t<Absyn::decl_t,`H> tds){
-  return LowTreeShake::shake(tds);
+  if (!noshake_r)
+    return LowTreeShake::shake(tds);
+  else return tds;
 }
 
 static string_t cyc_setjmp = NULL;
@@ -991,26 +998,32 @@ static void process_file(string_t<`H> filename) {
   // Removal of aggregates (necessary for comprehensions and to avoid GCC bug)
   if(!compile_failure && Flags::stop_after_pass >= Flags::AggregateRemoval)
     tds = do_stage("aggregate removal",tds,do_removeaggrs,true,tds);
+
+  // Lower the C code
+  if (!compile_failure && !nolower_r)
+    tds = do_stage("lowering C code",tds,do_lower,true,tds);
+
   // Removal of unused labels (optional optimization good b/c of patterns)
   if(!compile_failure && Flags::stop_after_pass >= Flags::LabelRemoval)
     tds = do_stage("unused label removal",tds,do_removelabs,true,tds);
   // Translation to left-to-right evaluation order
-  if(!compile_failure && toseqc_r && Flags::stop_after_pass >= Flags::EvalOrder)
-    tds = do_stage("L-to-R evaluation order", tds, do_toseqc, true, tds);
+  //if(!compile_failure && toseqc_r && Flags::stop_after_pass >= Flags::EvalOrder)
+  //tds = do_stage("L-to-R evaluation order", tds, do_toseqc, true, tds);
   // Clean up state common to last three passes
   if(!compile_failure && Flags::stop_after_pass >= Flags::Toc)
     Toc::finish();
   // Removal of unused declarations (optional optimization) FIX: make flag
-  if(!compile_failure && Flags::stop_after_pass >= Flags::Toc)
+  if(!compile_failure && Flags::stop_after_pass >= Flags::EvalOrder)
     tds = do_stage("low treeshaking", tds, do_lowtreeshake, true, tds);
   // renaming of temporaries
   if(!compile_failure && Flags::stop_after_pass >= Flags::TempRename)
     tds = do_stage("renaming temporaries",tds,do_temprename,true,tds);
+  // remove casts where possible
   if(!compile_failure && Flags::stop_after_pass >= Flags::CastRemoval)
     tds = do_stage("removing casts",tds,do_castremove,true,tds);
  // removal of gcc extensions (tovc is an antiquated name)
-  if (!compile_failure && (Flags::tovc_r || elim_se_r))
-    tds = do_stage("post-pass to VC", tds, do_tovc, true, tds);
+  //if (!compile_failure && (Flags::tovc_r || elim_se_r))
+  //tds = do_stage("post-pass to VC", tds, do_tovc, true, tds);
 
   if(!compile_failure && Flags::interproc && Flags::no_merge) {
     //dumps unresolved cvars + constraint graph to .cych/cvars
@@ -1383,19 +1396,21 @@ using Arg {
   make_option(opt93,"-infpfx",false," <dir>",
 	      String_spec,Interproc::set_inference_prefix,
               "Give a directory within which inference temporary files will be stored.");
+  make_option(opt94,"--no-lower",false, "",
+              Set_spec,&nolower_r,
+              "Do not lower the C code.");
 
   struct List<option_t@`H,`H>@`H global_options[] = {
             &opt1, &opt2, &opt3, &opt4, &opt5, &opt6, &opt7, &opt8, &opt9,
     &opt10,&opt11,&opt12,&opt13,&opt14,&opt15,&opt16,&opt17,&opt18,&opt19,
     &opt20,&opt21,&opt22,&opt23,&opt24,&opt25,&opt26,&opt27,&opt28,&opt29,
-    &opt30,&opt31,&opt32,
-              //&opt74,&opt75, // used to go here for some reason
-                         &opt33,&opt34,&opt35,&opt36,&opt37,&opt38,&opt39,
+    &opt30,&opt31,&opt32,&opt33,&opt34,&opt35,&opt36,&opt37,&opt38,&opt39,
     &opt41,&opt42,&opt43,&opt44,&opt45,&opt46,&opt47,&opt48,&opt49,
     &opt50,&opt51,&opt52,&opt53,&opt54,&opt55,&opt56,&opt57,&opt58,&opt59,
     &opt60,&opt61,&opt62,&opt63,&opt64,&opt65,&opt66,&opt67,&opt68,&opt69,
-	    &opt70,&opt71,&opt72,&opt73,&opt74,&opt75,&opt76,&opt77,&opt78,&opt79,
-	    &opt80,&opt81,&opt82,&opt83,&opt84,&opt85,&opt86,&opt87,&opt88,&opt89,&opt90,&opt91,&opt92,&opt93
+    &opt70,&opt71,&opt72,&opt73,&opt74,&opt75,&opt76,&opt77,&opt78,&opt79,
+    &opt80,&opt81,&opt82,&opt83,&opt84,&opt85,&opt86,&opt87,&opt88,&opt89,
+    &opt90,&opt91,&opt92,&opt93,&opt94
   };
 
   void print_options() {
@@ -1442,7 +1457,7 @@ int main(int argc, string_t<`H> ?`H argv) {
     Lex::lex_init(true); // must forget typedefs, may as well flush symbols too
     Lex::pos_init();
     Interproc::inference_statistics();
-    return;
+    return 0;
   }
   if (strcmp(cpp,"") == 0) {
     // If cpp string is not explicitly set, use the default.
