@@ -562,26 +562,26 @@ _TL1F: c=Cyc_getc(f);goto _TL1E;_TL20:
 # 130
  Cyc_ungetc(c,f);}
 # 132
-static struct _fat_ptr Cyc_Interproc_grabline(struct Cyc___cycFILE*f){char*_T0;struct _handler_cons*_T1;int*_T2;int _T3;struct _fat_ptr _T4;int _T5;int _T6;char*_T7;char*_T8;int _T9;struct _fat_ptr _TA;int _TB;char*_TC;char*_TD;void*_TE;struct Cyc___cycFILE*_TF;struct _fat_ptr _T10;struct _fat_ptr _T11;struct _fat_ptr _T12;
+static struct _fat_ptr Cyc_Interproc_grabline(struct Cyc___cycFILE*f){char*_T0;struct _handler_cons*_T1;int*_T2;int _T3;int _T4;int _T5;struct _fat_ptr _T6;int _T7;int _T8;char*_T9;char*_TA;int _TB;int _TC;int _TD;struct _fat_ptr _TE;int _TF;char*_T10;char*_T11;void*_T12;struct Cyc___cycFILE*_T13;struct _fat_ptr _T14;struct _fat_ptr _T15;struct _fat_ptr _T16;
 static char buf[1000U];
 int c=0;
 int i=0;_T0=buf;{
 struct _fat_ptr bufp=_tag_fat(_T0,sizeof(char),1000U);
-Cyc_Interproc_skip_whitespace(f);{struct _handler_cons _T13;_T1=& _T13;_push_handler(_T1);{int _T14=0;_T2=_T13.handler;_T3=setjmp(_T2);if(!_T3)goto _TL23;_T14=1;goto _TL24;_TL23: _TL24: if(_T14)goto _TL25;else{goto _TL27;}_TL27:
+Cyc_Interproc_skip_whitespace(f);{struct _handler_cons _T17;_T1=& _T17;_push_handler(_T1);{int _T18=0;_T2=_T17.handler;_T3=setjmp(_T2);if(!_T3)goto _TL23;_T18=1;goto _TL24;_TL23: _TL24: if(_T18)goto _TL25;else{goto _TL27;}_TL27:
 # 139
  c=Cyc_getc(f);
-_TL28: if(c!=10)goto _TL2B;else{goto _TL2A;}_TL2B: if(c!=-1)goto _TL29;else{goto _TL2A;}
-_TL29: _T4=bufp;_T5=i;i=_T5 + 1;_T6=_T5;_T7=_check_fat_subscript(_T4,sizeof(char),_T6);_T8=(char*)_T7;_T9=c;*_T8=(char)_T9;
-c=Cyc_getc(f);goto _TL28;_TL2A:
+_TL28: if(c!=10)goto _TL2B;else{goto _TL2A;}_TL2B: _T4=c;_T5=- 1;if(_T4!=_T5)goto _TL29;else{goto _TL2A;}
+_TL29: _T6=bufp;_T7=i;i=_T7 + 1;_T8=_T7;_T9=_check_fat_subscript(_T6,sizeof(char),_T8);_TA=(char*)_T9;_TB=c;*_TA=(char)_TB;
+c=Cyc_getc(f);goto _TL28;_TL2A: _TC=c;_TD=- 1;
 # 144
- if(c!=-1)goto _TL2C;{struct _fat_ptr _T15=_tag_fat(0,0,0);_npop_handler(0);return _T15;}_TL2C:
- Cyc_ungetc(c,f);_TA=bufp;_TB=i;_TC=_check_fat_subscript(_TA,sizeof(char),_TB);_TD=(char*)_TC;
-*_TD='\000';{struct _fat_ptr _T15=
-Cyc_strdup(bufp);_npop_handler(0);return _T15;}_pop_handler();goto _TL26;_TL25: _TE=Cyc_Core_get_exn_thrown();{void*_T15=(void*)_TE;_TF=Cyc_stderr;_T10=
+if(_TC!=_TD)goto _TL2C;{struct _fat_ptr _T19=_tag_fat(0,0,0);_npop_handler(0);return _T19;}_TL2C:
+ Cyc_ungetc(c,f);_TE=bufp;_TF=i;_T10=_check_fat_subscript(_TE,sizeof(char),_TF);_T11=(char*)_T10;
+*_T11='\000';{struct _fat_ptr _T19=
+Cyc_strdup(bufp);_npop_handler(0);return _T19;}_pop_handler();goto _TL26;_TL25: _T12=Cyc_Core_get_exn_thrown();{void*_T19=(void*)_T12;_T13=Cyc_stderr;_T14=
 # 149
-_tag_fat("grabline failed\n",sizeof(char),17U);_T11=_tag_fat(0U,sizeof(void*),0);Cyc_fprintf(_TF,_T10,_T11);goto _LL0;_LL0:;}_TL26:;}}_T12=
+_tag_fat("grabline failed\n",sizeof(char),17U);_T15=_tag_fat(0U,sizeof(void*),0);Cyc_fprintf(_T13,_T14,_T15);goto _LL0;_LL0:;}_TL26:;}}_T16=
 # 151
-_tag_fat(0,0,0);return _T12;}}
+_tag_fat(0,0,0);return _T16;}}
 # 154
 static int Cyc_Interproc_mstrptrcmp(struct _fat_ptr*m1,struct _fat_ptr*m2){struct _fat_ptr*_T0;struct _fat_ptr _T1;struct _fat_ptr*_T2;struct _fat_ptr _T3;int _T4;_T0=m1;_T1=*_T0;_T2=m2;_T3=*_T2;_T4=
 Cyc_strcmp(_T1,_T3);return _T4;}

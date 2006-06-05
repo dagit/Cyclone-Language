@@ -676,7 +676,7 @@ static struct Cyc_List_List*Cyc_Tcdecl_merge_xdatatype_fields(struct Cyc_List_Li
 # 346
 struct Cyc_List_List**f2sp;f2sp=_cycalloc(sizeof(struct Cyc_List_List*));_T0=f2sp;*_T0=0;{
 struct Cyc_List_List**next=f2sp;
-int cmp=-1;
+int cmp=- 1;
 # 350
 _TL89: if(f0s!=0)goto _TL8A;else{goto _TL88;}_TL8A: if(f1s!=0)goto _TL87;else{goto _TL88;}
 _TL87: _TL8B: if(f0s!=0)goto _TL8E;else{goto _TL8D;}_TL8E: _T1=f0s;_T2=_T1->hd;_T3=(struct Cyc_Absyn_Datatypefield*)_T2;_T4=_T3->name;_T5=f1s;_T6=_T5->hd;_T7=(struct Cyc_Absyn_Datatypefield*)_T6;_T8=_T7->name;cmp=Cyc_Absyn_qvar_cmp(_T4,_T8);_T9=cmp;if(_T9 < 0)goto _TL8C;else{goto _TL8D;}

@@ -1227,7 +1227,7 @@ static struct _fat_ptr*Cyc_Interface_us_p=(struct _fat_ptr*)& Cyc_Interface_us;
 # 1000
 static struct _tuple12*Cyc_Interface_rewrite_datatypefield_type(struct _tuple12*x){struct _tuple12*_T0;struct Cyc_Absyn_VarType_Absyn_Type_struct*_T1;struct Cyc_Absyn_Tvar*_T2;struct Cyc_Absyn_Kind*_T3;struct Cyc_Absyn_Kind*_T4;{struct _tuple12*_T5=_cycalloc(sizeof(struct _tuple12));
 _T5->f0=Cyc_Absyn_empty_tqual(0U);{struct Cyc_Absyn_VarType_Absyn_Type_struct*_T6=_cycalloc(sizeof(struct Cyc_Absyn_VarType_Absyn_Type_struct));_T6->tag=2;{struct Cyc_Absyn_Tvar*_T7=_cycalloc(sizeof(struct Cyc_Absyn_Tvar));
-_T7->name=Cyc_Interface_us_p;_T7->identity=-1;_T3=& Cyc_Kinds_bk;_T4=(struct Cyc_Absyn_Kind*)_T3;_T7->kind=Cyc_Kinds_kind_to_bound(_T4);_T7->aquals_bound=0;_T2=(struct Cyc_Absyn_Tvar*)_T7;}_T6->f1=_T2;_T1=(struct Cyc_Absyn_VarType_Absyn_Type_struct*)_T6;}_T5->f1=(void*)_T1;_T0=(struct _tuple12*)_T5;}
+_T7->name=Cyc_Interface_us_p;_T7->identity=- 1;_T3=& Cyc_Kinds_bk;_T4=(struct Cyc_Absyn_Kind*)_T3;_T7->kind=Cyc_Kinds_kind_to_bound(_T4);_T7->aquals_bound=0;_T2=(struct Cyc_Absyn_Tvar*)_T7;}_T6->f1=_T2;_T1=(struct Cyc_Absyn_VarType_Absyn_Type_struct*)_T6;}_T5->f1=(void*)_T1;_T0=(struct _tuple12*)_T5;}
 # 1001
 return _T0;}
 # 1005

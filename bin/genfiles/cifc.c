@@ -1149,7 +1149,7 @@ return _T8A;}
 # 1020
 static void Cyc_Cifc_i_clear_vartype_ids(void*t){void*_T0;int*_T1;unsigned _T2;void*_T3;struct Cyc_Absyn_Tvar*_T4;void*_T5;struct Cyc_List_List*_T6;unsigned _T7;struct Cyc_List_List*_T8;void*_T9;struct Cyc_List_List*_TA;void*_TB;struct Cyc_Absyn_PtrInfo _TC;void*_TD;void*_TE;struct Cyc_Absyn_ArrayInfo _TF;void*_T10;void*_T11;struct Cyc_Absyn_FnInfo _T12;void*_T13;struct Cyc_Absyn_FnInfo _T14;struct Cyc_List_List*_T15;unsigned _T16;struct Cyc_List_List*_T17;void*_T18;struct Cyc_List_List*_T19;void*_T1A;void*_T1B;struct Cyc_List_List*_T1C;unsigned _T1D;struct Cyc_List_List*_T1E;void*_T1F;struct Cyc_List_List*_T20;struct Cyc_Absyn_FnInfo _T21;struct Cyc_Absyn_ArrayInfo _T22;struct Cyc_Absyn_PtrInfo _T23;struct Cyc_List_List*_T24;void*_T25;_T0=t;_T1=(int*)_T0;_T2=*_T1;switch(_T2){case 2: _T3=t;{struct Cyc_Absyn_VarType_Absyn_Type_struct*_T26=(struct Cyc_Absyn_VarType_Absyn_Type_struct*)_T3;_T25=_T26->f1;}{struct Cyc_Absyn_Tvar*tv=_T25;_T4=tv;
 # 1023
-_T4->identity=-1;goto _LL0;}case 0: _T5=t;{struct Cyc_Absyn_AppType_Absyn_Type_struct*_T26=(struct Cyc_Absyn_AppType_Absyn_Type_struct*)_T5;_T24=_T26->f2;}{struct Cyc_List_List*ts=_T24;
+_T4->identity=- 1;goto _LL0;}case 0: _T5=t;{struct Cyc_Absyn_AppType_Absyn_Type_struct*_T26=(struct Cyc_Absyn_AppType_Absyn_Type_struct*)_T5;_T24=_T26->f2;}{struct Cyc_List_List*ts=_T24;
 # 1026
 _TL17F: _T6=ts;_T7=(unsigned)_T6;if(_T7)goto _TL180;else{goto _TL181;}
 _TL180: _T8=ts;_T9=_T8->hd;Cyc_Cifc_i_clear_vartype_ids(_T9);_TA=ts;

@@ -53,6 +53,7 @@ bool warn_assert = false;
 unsigned int max_vc_summary = 500;
 unsigned int max_vc_paths = 33;
 unsigned int max_vc_term_size = 100000;
+bool better_widen = false;
 
 void set_all_warnings() {
   warn_bounds_checks = true;

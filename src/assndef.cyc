@@ -29,6 +29,7 @@
 #include "warn.h"
 #include "assndef.h"
 #include "unify.h"
+#include "pratt_prover.h"
 #include <hashtable.h>
 #include <list.h>
 #include <dict.h>
@@ -99,15 +100,15 @@ static string_t term2string_i(term_t t, Set::set_t<term_t,`H> @seen, int @depth)
     break;
   case &LogicVar(NULL,i,topt): 
     //if (topt != NULL)
-    //  res = aprintf("_X%d<%s>",i,Absynpp::typ2string((type_t)topt)); 
+    //res = aprintf("_X%d<%s>",i,Absynpp::typ2string((type_t)topt)); 
     //else 
-      res = aprintf("_X%d",i); 
+    res = aprintf("_X%d",i); 
     break;
   case &LogicVar(vd,i,topt): 
     //if (topt != NULL)
-    //  res = aprintf("_%s%d<%s>",Absynpp::qvar2string(vd->name),i,Absynpp::typ2string((type_t)topt)); 
+    //res = aprintf("_%s%d<%s>",Absynpp::qvar2string(vd->name),i,Absynpp::typ2string((type_t)topt)); 
     //else 
-      res = aprintf("_%s%d",Absynpp::qvar2string(vd->name),i); break;
+    res = aprintf("_%s%d",Absynpp::qvar2string(vd->name),i); break;
   case &Unop(p,t1,_):
     res = aprintf("%s(%s)",Absynpp::prim2string(p),term2string_i(t1,seen,depth)); break;
   case &Binop(p,t1,t2,_):
@@ -199,35 +200,65 @@ static int hash_exp(exp_t e) {
   }
 }
 
+// adapted from http://burtleburtle.net/bob/c/lookup2.c
+// combines two 32-bit hash keys into a single hash key.
+unsigned combine(unsigned k1, unsigned k2)
+{
+   register unsigned a,b,c,len;
+
+   a = b = 0x9e3779b9;  /* the golden ratio; an arbitrary value */
+   c = k2 + 4;
+   a+=k1;
+   a -= b; a -= c; a ^= (c>>13); 
+   b -= c; b -= a; b ^= (a<<8); 
+   c -= a; c -= b; c ^= (b>>13); 
+   a -= b; a -= c; a ^= (c>>12);  
+   b -= c; b -= a; b ^= (a<<16); 
+   c -= a; c -= b; c ^= (b>>5); 
+   a -= b; a -= c; a ^= (c>>3);  
+   b -= c; b -= a; b ^= (a<<10); 
+   c -= a; c -= b; c ^= (b>>15); 
+   return c;
+}
+
 int termhash(datatype Term @t) {
+  unsigned k = tagof(t) << 16;
   switch (t) {
-  case &Uint(i,_): return i;
-  case &Const(e): return hash_exp(e) + 61;
-  case &LogicVar(vd,i,_): return ((unsigned int)vd >> 4) + (i+1);
-  case &Unop(p,t1,_): return p + ((unsigned int)t1 >> 4) + 1;
+  case &Uint(i,_): return combine(k,i);
+  case &Const(e): return combine(hash_exp(e),k);
+  case &LogicVar(vd,i,_): 
+    return combine((unsigned int)vd,combine(k,i));
+  case &Unop(p,t1,_): 
+    return combine((unsigned int)t1,p+k);
   case &Binop(p,t1,t2,_):
-    return p + (((unsigned int)t1 + (unsigned int)t2) >> 4);
-  case &Cast(_,t): return termhash(t) + 1;
+    return combine((unsigned)t1,combine((unsigned)t2,p+k));
+  case &Cast(_,t): 
+    return combine((unsigned)t,k);
   case &Select(t1,t2,_):
-    return (((unsigned int)t1 + (unsigned int)t2) >> 4) + 2;
+    return combine((unsigned)t1,combine((unsigned)t2,k));
   case &Update(t1,t2,t3):
-    return (((unsigned int)t1 + (unsigned int)t2 + (unsigned int)t3) >> 4) + 3;
-  case &Proj(t,i,_): return ((unsigned int)t >> 4) + i + 23;
+    return combine((unsigned)t1,combine((unsigned)t2,
+                                        combine((unsigned)t3,k)));
+  case &Proj(t,i,_): 
+    return combine((unsigned)t,k+i);
   case &Aggr(is_union,tag,ts,_):
-    unsigned int res = 37+tag+is_union;
+    unsigned int res = k+tag+is_union;
     for (; ts != NULL; ts = ts->tl)
-      res = res + ((unsigned int)ts->hd >> 4);
+      res = combine((unsigned)ts->hd,res);
     return res;
   case &AggrUpdate(a,i,v):
-    return ((((unsigned int)a) + ((unsigned int)v)) >> 4) + i + 17;
+    return combine((unsigned)a,combine((unsigned)v,i+k));
   case &Addr(vd,invok,_): 
-    return (((unsigned int)invok + (unsigned int)vd) >> 4)+7;
+    return combine((unsigned)invok,combine((unsigned)vd,k));
   case &Alloc(e,i,n,invok,_): 
-    return (((unsigned int)e + (unsigned int)n + (unsigned int)invok) >> 4)+i;
-  case &Offsetf(t,i,_): return ((unsigned int)t >> 4) + i + 11;
+    return combine((unsigned)e,combine((unsigned)n,
+                                       combine((unsigned) invok,k+i)));
+  case &Offsetf(t,i,_): 
+    return combine((unsigned)t,k+i);
   case &Offseti(t,index,_): 
-    return (((unsigned int)index + (unsigned int)t) >> 4) + 13;
-  case &Tagof(t): return ((unsigned)t >> 4) + 741;
+    return combine((unsigned)t,combine((unsigned)index,k));
+  case &Tagof(t): 
+    return combine((unsigned)t,k);
   }
 }
 
@@ -239,18 +270,38 @@ int termcmp(datatype Term @`r1 _t1, datatype Term @`r2 _t2) {
   if (c != 0) return c;
   if (t1 == t2) return 0;
   switch $(t1,t2) {
+  case $(&LogicVar(vd1,i,_),&LogicVar(vd2,j,_)): 
+    int c = i - j;
+    if (c != 0) return c;
+    return (int)vd1 - (int)vd2;
+  case $(&Uint(i1,_), &Uint(i2,_)): 
+    return i1-i2;
+  case $(&Proj(tm1,i1,_),&Proj(tm2,i2,_)): 
+    int c = i1 - i2;
+    if (c != 0) return c;
+    t1 = tm1;
+    t2 = tm2;
+    goto LOOP;
   case $(&Binop(p1,t11,t12,tp1),&Binop(p2,t21,t22,tp2)):
     int c = (int)p1 - (int)p2;
+    if (c != 0) return c;    
     c = termcmp(t11,t21);
     if (c != 0) return c;
     t1 = t12;
     t2 = t22;
     goto LOOP;
-  case $(&LogicVar(vd1,i,_),&LogicVar(vd2,j,_)): 
-    int c = i - j;
+  case $(&Select(t11,t12,_),&Select(t21,t22,_)):
+    int c = termcmp(t11,t21);
     if (c != 0) return c;
-    return (int)vd1 - (int)vd2;
-  case $(&Uint(i1,_), &Uint(i2,_)): return i1-i2;
+    t1 = t12;
+    t2 = t22;
+    goto LOOP;
+  case $(&Unop(p1,t1a,_),&Unop(p2,t2a,_)): 
+    int c = (int)p1 - (int)p2;
+    if (c != 0) return c;
+    t1 = t1a;
+    t2 = t2a;
+    goto LOOP;
   case $(&Const(e1),&Const(e2)): 
     return Evexp::exp_cmp(e1,e2);
   case $(&Addr(vd1,i1,_),&Addr(vd2,i2,_)): 
@@ -259,23 +310,11 @@ int termcmp(datatype Term @`r1 _t1, datatype Term @`r2 _t2) {
     t1 = i1;
     t2 = i2;
     goto LOOP;
-  case $(&Unop(p1,t1a,_),&Unop(p2,t2a,_)): 
-    int c = (int)p1 - (int)p2;
-    if (c != 0) return c;
-    t1 = t1a;
-    t2 = t2a;
-    goto LOOP;
-  case $(&Cast(tp1,tm1),&Cast(tp2,tm2)):
-    int c = Tcutil::typecmp(tp1,tp2);
+  case $(&Offseti(tm1,i1,_),&Offseti(tm2,i2,_)):
+    int c = termcmp(i1,i2);
     if (c != 0) return c;
     t1 = tm1;
     t2 = tm2;
-    goto LOOP;
-  case $(&Select(t11,t12,_),&Select(t21,t22,_)):
-    int c = termcmp(t11,t21);
-    if (c != 0) return c;
-    t1 = t12;
-    t2 = t22;
     goto LOOP;
   case $(&Update(t11,t12,t13),&Update(t21,t22,t23)):
     int c = termcmp(t11,t21);
@@ -285,16 +324,6 @@ int termcmp(datatype Term @`r1 _t1, datatype Term @`r2 _t2) {
     t1 = t13;
     t2 = t23;
     goto LOOP;
-  case $(&Tagof(tm1),&Tagof(tm2)): 
-    t1 = tm1;
-    t2 = tm2;
-    goto LOOP;
-  case $(&Proj(tm1,i1,_),&Proj(tm2,i2,_)): 
-    int c = i1 - i2;
-    if (c != 0) return c;
-    t1 = tm1;
-    t2 = tm2;
-    goto LOOP;
   case $(&AggrUpdate(tm1,i1,v1),&AggrUpdate(tm2,i2,v2)):
     int c = i1 - i2;
     if (c != 0) return c;
@@ -303,24 +332,12 @@ int termcmp(datatype Term @`r1 _t1, datatype Term @`r2 _t2) {
     t1 = v1;
     t2 = v2;
     goto LOOP;
-  case $(&Alloc(e1,i1,n1,v1,_),&Alloc(e2,i2,n2,v2,_)):
-    int c = (int)e1 - (int)e2;
-    if (c != 0) return c;
-    c = i1 - i2;
-    if (c != 0) return c;
-    c = termcmp(n1,n2);
-    if (c != 0) return c;
-    t1 = v1;
-    t2 = v2;
-    goto LOOP;
-  case $(&Offsetf(tm1,i1,_),&Offsetf(tm2,i2,_)):
-    int c = i1 - i2;
-    if (c != 0) return c;
+  case $(&Tagof(tm1),&Tagof(tm2)): 
     t1 = tm1;
     t2 = tm2;
     goto LOOP;
-  case $(&Offseti(tm1,i1,_),&Offseti(tm2,i2,_)):
-    int c = termcmp(i1,i2);
+  case $(&Offsetf(tm1,i1,_),&Offsetf(tm2,i2,_)):
+    int c = i1 - i2;
     if (c != 0) return c;
     t1 = tm1;
     t2 = tm2;
@@ -337,6 +354,22 @@ int termcmp(datatype Term @`r1 _t1, datatype Term @`r2 _t2) {
     if (ts1 == ts2) return 0;
     if (ts1 == NULL) return -1;
     return 1;
+  case $(&Alloc(e1,i1,n1,v1,_),&Alloc(e2,i2,n2,v2,_)):
+    int c = (int)e1 - (int)e2;
+    if (c != 0) return c;
+    c = i1 - i2;
+    if (c != 0) return c;
+    c = termcmp(n1,n2);
+    if (c != 0) return c;
+    t1 = v1;
+    t2 = v2;
+    goto LOOP;
+  case $(&Cast(tp1,tm1),&Cast(tp2,tm2)):
+    int c = Tcutil::typecmp(tp1,tp2);
+    if (c != 0) return c;
+    t1 = tm1;
+    t2 = tm2;
+    goto LOOP;
   default: Warn::impos("different terms but same codes!");
   }
 }
@@ -433,19 +466,37 @@ static term_t hash_cons_term(datatype Term @t) {
   if (resopt == NULL) {
     unsigned size = 0;
     let t2 = copy_term(t,&size);
-    //int i = h->max_len;
+    /*
+    let b = h->tab[termhash(t) % numelts(h->tab)];
+    if (b.length >= h->max_len) {
+      fprintf(stderr,"growing term hash table after inserting %s due to chains %d\n",term2string(t2),b.length);     
+      let p = b.cells;
+      fprintf(stderr,"terms that has to %x are:\n",termhash(t));
+      for (; p != NULL; p = p->next) {
+        fprintf(stderr,"%s, ",term2string(p->key));
+      }
+      fprintf(stderr,"\n");
+    } 
+    */
     Hashtable::insert(h,t2,new TermHashedInfo{t2,size,NULL});
-    //if (i < h->max_len) 
-    //  fprintf(stderr,"grew term hash table after inserting %s due to chains %d\n",term2string(t2),i);
     return t2;
   } else 
     return (*resopt)->term;
 }
 
+static `a*`r lookup_term_opt(Hashtable::table_t<term_t,`a,`r> h, datatype Term @t) {
+  let tab = h->tab;
+  let p = tab[termhash(t) % numelts(tab)].cells;
+  for (; p != NULL; p = p->next) {
+    if (termcmp(p->key,t) == 0) return &p->value;
+  }
+  return NULL;
+}
+
 // compute and cache the size of a term
 unsigned term_size(term_t t) {
   let h = get_term_hash_cons_table();
-  let resopt = Hashtable::lookup_opt(h,t);
+  let resopt = lookup_term_opt(h,t);
   if (resopt == NULL) {
     hash_cons_term(t);
     return term_size(t);
@@ -459,11 +510,11 @@ unsigned term_size(term_t t) {
 // result
 term_set_t term_fr_logicvar(term_t t) {
   let h = get_term_hash_cons_table();
-  let thinfo = Hashtable::lookup_opt(h,t);
+  let thinfo = lookup_term_opt(h,t);
   // the info was computed before and stored in the table
   if (thinfo == NULL) {
     t = hash_cons_term(t);
-    thinfo = Hashtable::lookup_opt(h,t);
+    thinfo = lookup_term_opt(h,t);
   }
   if ((*thinfo)->free_logicvar_set != NULL)
     return *(*thinfo)->free_logicvar_set;
@@ -1488,8 +1539,7 @@ static term_t subst_term(term_dict_t dict, term_t t,
   return res;
 }
 
-static int hash_ptr(`a s) { return (int) s;}
-
+static int hash_ptr(`a s) { return (int)s; }
 
 term_t subst_t(term_dict_t dict,term_t t) {
   Hashtable::table_t<term_t,term_t> term_h = Hashtable::create(137,Core::ptrcmp,hash_ptr);
@@ -1611,11 +1661,11 @@ int assnhash(datatype Assn @a) {
   case &False: return 0;
   case &True: return 1;
   case &Prim(t1,p,t2): 
-    return termhash(t1) + p + termhash(t2);
+    return combine(termhash(t1),combine(termhash(t2),p));
   case &And(a1,a2): 
-    return (((unsigned int)a1 + (unsigned int)a2) >> 4) + 3;
+    return combine((unsigned)a1,(unsigned)a2 + 1);
   case &Or(a1,a2): 
-    return (((unsigned int)a2 + (unsigned int)a1) >> 4) + 5;    
+    return combine((unsigned)a1,(unsigned)a2);
   }
 }
 
@@ -1942,8 +1992,28 @@ assn_set_opt_t widen_it(assn_t a){
       s = s2;
     else if (s2 == NULL)
       s = s1;
-    else
+    else {
+      // s starts off as the common conjuncts from a1 and a2
       s = Set::intersect((assn_set_t)s1,(assn_set_t)s2);
+      // now run through each literal P in s1 that didn't make it into s,
+      // and see if a2 implies P.  If so, add it into s.  
+      if (Flags::better_widen) {
+        let s1diff = Set::diff((assn_set_t)s1,s);
+        if (!Set::is_empty(s1diff)) {
+          let other_s = PrattProver::filter_implies(s2,s1);
+          if (other_s != NULL) {
+            let diff = Set::diff((assn_set_t)s1, (assn_set_t)other_s);
+            s = Set::union_two(s,diff);
+          } else {
+            // at this point, we know that a2 must be inconsistent --- so
+            // we want to update a2's widened_set to be equivalent to false.
+            let a2hinfo = Hashtable::lookup(h,a2);
+            *a2hinfo->widened_set = NULL;
+            s = s1;
+          }
+        }
+      }
+    }
     break;
   case &Prim(t1,p,t2):
     s = Set::singleton(assncmp,a);
@@ -2744,6 +2814,7 @@ assn_t subst_args(list_t<vardecl_opt_t> args, vardecl_opt_t res,
 void reset_hash_cons_table(void){
   //fprintf(stderr,"term hash table:\n");
   //Hashtable::print_hist(term_hash_cons_table);
+  
   term_hash_cons_table = NULL;
   assn_hash_cons_table = NULL;
 };
@@ -2942,3 +3013,38 @@ vardecl_set_t calc_changed_vars_stmt(stmt_t s) {
   Absyn::visit_stmt(changed_exp, changed_stmt, &vds, s);
   return vds;
 }
+
+// rewrites a into the form A1 && A2 && ... && An where the Ai's
+// are either primitives or disjunctions.  Returns NULL to represent
+// false, empty-set to represent true.
+static assn_set_opt_t flatten_it(assn_t a) {
+  switch (a) {
+  case &True: return Set::empty(assncmp);
+  case &False: return NULL;
+  case &And(a1,a2): 
+    let s1 = flatten_it(a1);
+    if (s1 == NULL) return NULL;
+    let s2 = flatten_it(a2);
+    if (s2 == NULL) return NULL;
+    return Set::union_two((assn_set_t)s1,(assn_set_t)s2);
+  default: 
+    return Set::singleton(assncmp,a);
+  }
+}
+
+// A little better than the simpler prover:  Tries to show a1 ==> a2
+//    We first widen a1 and then filter out of a2 all of the stuff that
+//    can be easily proven from widen(a1).  If the filtered a2 is non-empty,
+//    then we invoke the heavyweight constraint solver.  
+bool better_prove(assn_t a1, assn_t a2) {
+  let w1 = widen_it(a1);
+  if (w1 == NULL) return true;
+  let w2 = flatten_it(a2);
+  if (w2 != NULL) {
+    let diff = PrattProver::filter_implies((assn_set_t)w1,(assn_set_t)w2);
+    if (diff == NULL || Set::is_empty((assn_set_t)diff)) return true;
+    a2 = Set::fold(AssnDef::and,(assn_set_t)diff,&true_assn);
+  }
+  return PrattProver::constraint_prove(a1,a2);
+}
+

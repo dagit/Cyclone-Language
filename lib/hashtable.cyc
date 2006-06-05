@@ -201,7 +201,7 @@ static void insert_bucket(region_t<`r> r,
 void resize(table_t<`a,`b,`r> t) {
   bucket_t<`a,`b,`r> ?odata = t->tab;
   unsigned int    osize     = numelts(odata);
-  unsigned int    nsize     = 2 * osize + 1;
+  unsigned int    nsize     = 2 * osize + 7;
   bucket_t<`a,`b,`r> ?ndata = rcalloc(t->r,nsize,sizeof(bucket_t));
   for (unsigned int i = 0; i<osize; i++)
     insert_bucket(t->r,ndata,t->hash,rev_cells(odata[i].cells));
@@ -212,7 +212,7 @@ void resize(table_t<`a,`b,`r> t) {
     let k = ndata[j].length;
     if (k > cur_max_len) cur_max_len = k;
   }
-  t->max_len = 2 * cur_max_len;
+  t->max_len = (3 * cur_max_len) / 2;
 }
 
 // Iterating over a hashtable

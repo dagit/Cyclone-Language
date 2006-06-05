@@ -34,11 +34,29 @@ using BansheeIf;
 using Hashtable;
 namespace Absyn;
 
+static int mystrcmp(string_t s1, string_t s2) {
+  const char *p1opt = (const char *)s1;
+  const char *p2opt = (const char *)s2;
+  if (p1opt == p2opt) return 0;
+  const char @p1 = (const char @)p1opt;
+  const char @p2 = (const char @)p2opt;
+  while (true) {
+    char c1 = *p1;
+    char c2 = *p2;
+    int diff = c1 - c2;
+    if (diff != 0) return diff;
+    if (c1 == 0) return 0;
+    ++p1;
+    ++p2;
+  }
+}
+
 // return a negative, zero, or positive int according to whether the
 // first string list is less than, equal to, or greater than the second
 static int strlist_cmp(list_t<stringptr_t> ss1, list_t<stringptr_t> ss2) {
+  if ((int)ss1 == (int)ss2) return 0;
   for (; ss1 != NULL && ss2 != NULL; ss1 = ss1->tl, ss2 = ss2->tl) {
-    int i = strptrcmp(ss1->hd,ss2->hd);
+    int i = mystrcmp(*ss1->hd,*ss2->hd);
     if (i != 0) return i;
   }
   if (ss1 != NULL) return 1;
@@ -53,7 +71,7 @@ int qvar_cmp(qvar_t q1, qvar_t q2) {
   if (q1 == q2) return 0;
   let &$(n1,v1) = q1;
   let &$(n2,v2) = q2;
-  int i = strptrcmp(v1,v2);
+  int i = mystrcmp(*v1,*v2);
   if (i != 0) return i;
   switch ($(n1,n2)) {
   case $({.Loc_n = _},{.Loc_n = _}): return 0;

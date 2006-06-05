@@ -494,10 +494,9 @@ static void do_exp(env_t nv, exp_t e) {
       do_exp(nv,(*dles->hd)[1]);
     break;
   case &StmtExp_e(s):  e->annot = &NoCheck_val; do_stmt(nv,s); break;
-
+  case &Valueof_e(_):  e->annot = &NoCheck_val; break;
   case &UnresolvedMem_e(_,_):
-  case &CompoundLit_e(_,_):
-  case &Valueof_e(_): impos_loc(e->loc,"InsertChecks, unexpected exp form");
+  case &CompoundLit_e(_,_): impos_loc(e->loc,"InsertChecks, unexpected exp form");
   }
 }
 

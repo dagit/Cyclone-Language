@@ -162,6 +162,10 @@ extern unsigned int max_vc_paths;
 extern unsigned int max_vc_term_size;
   // sets every flag above with warn in its name
 void set_all_warnings();
+
+  // when set to true, does a better job in vcgen for calculating
+  // loop invariants.
+extern bool better_widen;
 }
 
 #endif

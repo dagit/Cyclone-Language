@@ -1210,16 +1210,16 @@ struct Cyc_Tcpat_Dummy_Tcpat_Access_struct Cyc_Tcpat_Dummy_val={0};struct _union
 union Cyc_Tcpat_Name_value Cyc_Tcpat_Name_v(struct _fat_ptr s){union Cyc_Tcpat_Name_value _T0;{union Cyc_Tcpat_Name_value _T1;_T1.Name_v.tag=1U;_T1.Name_v.val=s;_T0=_T1;}return _T0;}
 union Cyc_Tcpat_Name_value Cyc_Tcpat_Int_v(int i){union Cyc_Tcpat_Name_value _T0;{union Cyc_Tcpat_Name_value _T1;_T1.Int_v.tag=2U;_T1.Int_v.val=i;_T0=_T1;}return _T0;}struct Cyc_Tcpat_Con_s{union Cyc_Tcpat_Name_value name;int arity;int*span;union Cyc_Tcpat_PatOrWhere orig_pat;};struct Cyc_Tcpat_Any_Tcpat_Simple_pat_struct{int tag;};struct Cyc_Tcpat_Con_Tcpat_Simple_pat_struct{int tag;struct Cyc_Tcpat_Con_s*f1;struct Cyc_List_List*f2;};
 # 891
-static int Cyc_Tcpat_compare_con(struct Cyc_Tcpat_Con_s*c1,struct Cyc_Tcpat_Con_s*c2){struct Cyc_Tcpat_Con_s*_T0;struct _union_Name_value_Name_v _T1;unsigned _T2;struct _union_Name_value_Name_v _T3;struct Cyc_Tcpat_Con_s*_T4;struct _union_Name_value_Name_v _T5;unsigned _T6;struct _union_Name_value_Name_v _T7;int _T8;struct _union_Name_value_Int_v _T9;struct Cyc_Tcpat_Con_s*_TA;struct _union_Name_value_Name_v _TB;unsigned _TC;struct _union_Name_value_Int_v _TD;int _TE;_T0=c1;{
-union Cyc_Tcpat_Name_value _TF=_T0->name;int _T10;struct _fat_ptr _T11;_T1=_TF.Name_v;_T2=_T1.tag;if(_T2!=1)goto _TL138;_T3=_TF.Name_v;_T11=_T3.val;{struct _fat_ptr n1=_T11;_T4=c2;{
+static int Cyc_Tcpat_compare_con(struct Cyc_Tcpat_Con_s*c1,struct Cyc_Tcpat_Con_s*c2){struct Cyc_Tcpat_Con_s*_T0;struct _union_Name_value_Name_v _T1;unsigned _T2;struct _union_Name_value_Name_v _T3;struct Cyc_Tcpat_Con_s*_T4;struct _union_Name_value_Name_v _T5;unsigned _T6;struct _union_Name_value_Name_v _T7;int _T8;int _T9;struct _union_Name_value_Int_v _TA;struct Cyc_Tcpat_Con_s*_TB;struct _union_Name_value_Name_v _TC;unsigned _TD;struct _union_Name_value_Int_v _TE;int _TF;_T0=c1;{
+union Cyc_Tcpat_Name_value _T10=_T0->name;int _T11;struct _fat_ptr _T12;_T1=_T10.Name_v;_T2=_T1.tag;if(_T2!=1)goto _TL138;_T3=_T10.Name_v;_T12=_T3.val;{struct _fat_ptr n1=_T12;_T4=c2;{
 # 894
-union Cyc_Tcpat_Name_value _T12=_T4->name;struct _fat_ptr _T13;_T5=_T12.Name_v;_T6=_T5.tag;if(_T6!=1)goto _TL13A;_T7=_T12.Name_v;_T13=_T7.val;{struct _fat_ptr n2=_T13;_T8=
-Cyc_strcmp(n1,n2);return _T8;}_TL13A:
- return -1;;}}goto _TL139;_TL138: _T9=_TF.Int_v;_T10=_T9.val;{int i1=_T10;_TA=c2;{
+union Cyc_Tcpat_Name_value _T13=_T4->name;struct _fat_ptr _T14;_T5=_T13.Name_v;_T6=_T5.tag;if(_T6!=1)goto _TL13A;_T7=_T13.Name_v;_T14=_T7.val;{struct _fat_ptr n2=_T14;_T8=
+Cyc_strcmp(n1,n2);return _T8;}_TL13A: _T9=- 1;
+return _T9;;}}goto _TL139;_TL138: _TA=_T10.Int_v;_T11=_TA.val;{int i1=_T11;_TB=c2;{
 # 899
-union Cyc_Tcpat_Name_value _T12=_TA->name;int _T13;_TB=_T12.Name_v;_TC=_TB.tag;if(_TC!=1)goto _TL13C;
-return 1;_TL13C: _TD=_T12.Int_v;_T13=_TD.val;{int i2=_T13;_TE=i1 - i2;
-return _TE;};}}_TL139:;}}
+union Cyc_Tcpat_Name_value _T13=_TB->name;int _T14;_TC=_T13.Name_v;_TD=_TC.tag;if(_TD!=1)goto _TL13C;
+return 1;_TL13C: _TE=_T13.Int_v;_T14=_TE.val;{int i2=_T14;_TF=i1 - i2;
+return _TF;};}}_TL139:;}}
 # 907
 static struct Cyc_Set_Set*Cyc_Tcpat_empty_con_set (void){struct Cyc_Set_Set*(*_T0)(struct _RegionHandle*,int(*)(struct Cyc_Tcpat_Con_s*,struct Cyc_Tcpat_Con_s*));struct Cyc_Set_Set*(*_T1)(struct _RegionHandle*,int(*)(void*,void*));struct _RegionHandle*_T2;struct Cyc_Set_Set*_T3;_T1=Cyc_Set_rempty;{
 struct Cyc_Set_Set*(*_T4)(struct _RegionHandle*,int(*)(struct Cyc_Tcpat_Con_s*,struct Cyc_Tcpat_Con_s*))=(struct Cyc_Set_Set*(*)(struct _RegionHandle*,int(*)(struct Cyc_Tcpat_Con_s*,struct Cyc_Tcpat_Con_s*)))_T1;_T0=_T4;}_T2=Cyc_Core_heap_region;_T3=_T0(_T2,Cyc_Tcpat_compare_con);return _T3;}

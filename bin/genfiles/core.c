@@ -371,10 +371,10 @@ int Cyc_Core_false_f(void*x){return 0;}
 # 52
 int Cyc_Core_intcmp(int a,int b){int _T0;_T0=a - b;return _T0;}
 int Cyc_Core_charcmp(char a,char b){char _T0;int _T1;char _T2;int _T3;int _T4;_T0=a;_T1=(int)_T0;_T2=b;_T3=(int)_T2;_T4=_T1 - _T3;return _T4;}
-int Cyc_Core_nptrcmp(void*a,void*b){
+int Cyc_Core_nptrcmp(void*a,void*b){int _T0;
 if(a!=b)goto _TL2;return 0;_TL2:
- if(a <= b)goto _TL4;return 1;_TL4:
- return -1;}
+ if(a <= b)goto _TL4;return 1;_TL4: _T0=- 1;
+return _T0;}
 # 59
 int Cyc_Core_ptrcmp(void*a,void*b){int _T0;_T0=
 Cyc_Core_nptrcmp(a,b);return _T0;}struct _tuple0{void*f0;void*f1;};

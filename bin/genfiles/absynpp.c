@@ -1349,10 +1349,10 @@ static struct Cyc_PP_Doc*Cyc_Absynpp_offsetof_field_to_doc(void*f){void*_T0;stru
 # 1179
 Cyc_PP_textptr(n);return _T1;};}
 # 1190 "absynpp.cyc"
-int Cyc_Absynpp_exp_prec(struct Cyc_Absyn_Exp*e){struct Cyc_Absyn_Exp*_T0;int*_T1;unsigned _T2;enum Cyc_Absyn_Primop _T3;int _T4;int _T5;int _T6;_T0=e;{
-void*_T7=_T0->r;struct Cyc_Absyn_Exp*_T8;enum Cyc_Absyn_Primop _T9;_T1=(int*)_T7;_T2=*_T1;switch(_T2){case 0: goto _LL4;case 1: _LL4:
+int Cyc_Absynpp_exp_prec(struct Cyc_Absyn_Exp*e){struct Cyc_Absyn_Exp*_T0;int*_T1;unsigned _T2;enum Cyc_Absyn_Primop _T3;int _T4;int _T5;int _T6;int _T7;_T0=e;{
+void*_T8=_T0->r;struct Cyc_Absyn_Exp*_T9;enum Cyc_Absyn_Primop _TA;_T1=(int*)_T8;_T2=*_T1;switch(_T2){case 0: goto _LL4;case 1: _LL4:
 # 1193
- return 10000;case 3:{struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*_TA=(struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*)_T7;_T9=_TA->f1;}{enum Cyc_Absyn_Primop p=_T9;_T3=p;_T4=(int)_T3;switch(_T4){case Cyc_Absyn_Plus:
+ return 10000;case 3:{struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*_TB=(struct Cyc_Absyn_Primop_e_Absyn_Raw_exp_struct*)_T8;_TA=_TB->f1;}{enum Cyc_Absyn_Primop p=_TA;_T3=p;_T4=(int)_T3;switch(_T4){case Cyc_Absyn_Plus:
 # 1196
  return 100;case Cyc_Absyn_Times:
  return 110;case Cyc_Absyn_Minus:
@@ -1378,13 +1378,13 @@ void*_T7=_T0->r;struct Cyc_Absyn_Exp*_T8;enum Cyc_Absyn_Primop _T9;_T1=(int*)_T7
  return 130;case 6:
  return 30;case 7:
  return 35;case 8:
- return 30;case 9:
- return -10;case 10:
+ return 30;case 9: _T5=- 10;
+return _T5;case 10:
  return 140;case 2:
  return 140;case 11:
- return 130;case 12:{struct Cyc_Absyn_NoInstantiate_e_Absyn_Raw_exp_struct*_TA=(struct Cyc_Absyn_NoInstantiate_e_Absyn_Raw_exp_struct*)_T7;_T8=_TA->f1;}{struct Cyc_Absyn_Exp*e2=_T8;_T5=
-Cyc_Absynpp_exp_prec(e2);return _T5;}case 13:{struct Cyc_Absyn_Instantiate_e_Absyn_Raw_exp_struct*_TA=(struct Cyc_Absyn_Instantiate_e_Absyn_Raw_exp_struct*)_T7;_T8=_TA->f1;}{struct Cyc_Absyn_Exp*e2=_T8;_T6=
-Cyc_Absynpp_exp_prec(e2);return _T6;}case 14:
+ return 130;case 12:{struct Cyc_Absyn_NoInstantiate_e_Absyn_Raw_exp_struct*_TB=(struct Cyc_Absyn_NoInstantiate_e_Absyn_Raw_exp_struct*)_T8;_T9=_TB->f1;}{struct Cyc_Absyn_Exp*e2=_T9;_T6=
+Cyc_Absynpp_exp_prec(e2);return _T6;}case 13:{struct Cyc_Absyn_Instantiate_e_Absyn_Raw_exp_struct*_TB=(struct Cyc_Absyn_Instantiate_e_Absyn_Raw_exp_struct*)_T8;_T9=_TB->f1;}{struct Cyc_Absyn_Exp*e2=_T9;_T7=
+Cyc_Absynpp_exp_prec(e2);return _T7;}case 14:
  return 120;case 16:
  return 15;case 15: goto _LL24;case 17: _LL24: goto _LL26;case 18: _LL26: goto _LL28;case 38: _LL28: goto _LL2A;case 39: _LL2A: goto _LL2C;case 37: _LL2C: goto _LL2E;case 19: _LL2E: goto _LL30;case 20: _LL30: goto _LL32;case 41: _LL32: goto _LL34;case 42: _LL34: goto _LL36;case 40: _LL36:
 # 1247

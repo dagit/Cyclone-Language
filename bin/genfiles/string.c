@@ -398,7 +398,7 @@ _TL10: if(1)goto _TL11;else{goto _TLF;}_TL11: _T8=i;_T9=(unsigned)_T8;_TA=minsz;
 _TLE: _TB=s1;_TC=_TB.curr;_TD=(const char*)_TC;_TE=i;{char c1=_TD[_TE];_TF=s2;_T10=_TF.curr;_T11=(const char*)_T10;_T12=i;{
 char c2=_T11[_T12];_T13=c1;_T14=(int)_T13;
 if(_T14!=0)goto _TL12;_T16=c2;_T17=(int)_T16;
-if(_T17!=0)goto _TL14;_T15=0;goto _TL15;_TL14: _T15=-1;_TL15: return _T15;_TL12: _T18=c2;_T19=(int)_T18;
+if(_T17!=0)goto _TL14;_T15=0;goto _TL15;_TL14: _T15=- 1;_TL15: return _T15;_TL12: _T18=c2;_T19=(int)_T18;
 if(_T19!=0)goto _TL16;return 1;_TL16: _T1A=c1;_T1B=(int)_T1A;_T1C=c2;_T1D=(int)_T1C;{
 int diff=_T1B - _T1D;
 if(diff==0)goto _TL18;_T1E=diff;return _T1E;_TL18:;}}}
@@ -406,7 +406,7 @@ if(diff==0)goto _TL18;_T1E=diff;return _T1E;_TL18:;}}}
 i=i + 1;goto _TL10;_TLF:
 # 76
  if(sz1!=sz2)goto _TL1A;return 0;_TL1A:
- if(sz1 >= sz2)goto _TL1C;_T20=s2;_T21=_T20.curr;_T22=(const char*)_T21;_T23=i;_T24=_T22[_T23];_T25=(int)_T24;if(_T25!=0)goto _TL1E;_T1F=0;goto _TL1F;_TL1E: _T1F=-1;_TL1F: return _T1F;_TL1C: _T27=s1;_T28=_T27.curr;_T29=(const char*)_T28;_T2A=i;_T2B=_T29[_T2A];_T2C=(int)_T2B;
+ if(sz1 >= sz2)goto _TL1C;_T20=s2;_T21=_T20.curr;_T22=(const char*)_T21;_T23=i;_T24=_T22[_T23];_T25=(int)_T24;if(_T25!=0)goto _TL1E;_T1F=0;goto _TL1F;_TL1E: _T1F=- 1;_TL1F: return _T1F;_TL1C: _T27=s1;_T28=_T27.curr;_T29=(const char*)_T28;_T2A=i;_T2B=_T29[_T2A];_T2C=(int)_T2B;
 # 79
 if(_T2C!=0)goto _TL20;_T26=0;goto _TL21;_TL20: _T26=1;_TL21: return _T26;}}}}
 # 82
@@ -443,7 +443,7 @@ return 0;_TL2E: _T6=a;{
 unsigned long as=_get_fat_size(_T6,sizeof(char));_T7=b;{
 unsigned long bs=_get_fat_size(_T7,sizeof(char));
 unsigned long min_length=Cyc_umin(as,bs);
-int i=-1;
+int i=- 1;
 # 127
 _TL30: i=i + 1;_T8=i;_T9=(unsigned long)_T8;_TA=min_length;_TB=_T9 < _TA;_TC=_TB;if(_TC)goto _TL31;else{goto _TL32;}
 _TL31: _TD=a;_TE=_TD.curr;_TF=(const char*)_TE;_T10=i;_T11=_TF[_T10];_T12=(int)_T11;_T13=b;_T14=_T13.curr;_T15=(const char*)_T14;_T16=i;_T17=_T15[_T16];_T18=(int)_T17;{int diff=_T12 - _T18;
@@ -452,7 +452,7 @@ return _T19;_TL33:;}goto _TL30;_TL32: _T1A=as;_T1B=(int)_T1A;_T1C=bs;_T1D=(int)_
 # 132
 return _T1E;}}}
 # 135
-int Cyc_zstrncmp(struct _fat_ptr s1,struct _fat_ptr s2,unsigned long n){struct _fat_ptr _T0;struct _fat_ptr _T1;int _T2;unsigned long _T3;unsigned long _T4;struct _fat_ptr _T5;unsigned char*_T6;const char*_T7;int _T8;char _T9;int _TA;struct _fat_ptr _TB;unsigned char*_TC;const char*_TD;int _TE;char _TF;int _T10;struct _fat_ptr _T11;unsigned char*_T12;const char*_T13;int _T14;char _T15;int _T16;struct _fat_ptr _T17;unsigned char*_T18;const char*_T19;int _T1A;char _T1B;int _T1C;
+int Cyc_zstrncmp(struct _fat_ptr s1,struct _fat_ptr s2,unsigned long n){struct _fat_ptr _T0;struct _fat_ptr _T1;int _T2;unsigned long _T3;unsigned long _T4;struct _fat_ptr _T5;unsigned char*_T6;const char*_T7;int _T8;char _T9;int _TA;struct _fat_ptr _TB;unsigned char*_TC;const char*_TD;int _TE;char _TF;int _T10;int _T11;struct _fat_ptr _T12;unsigned char*_T13;const char*_T14;int _T15;char _T16;int _T17;struct _fat_ptr _T18;unsigned char*_T19;const char*_T1A;int _T1B;char _T1C;int _T1D;int _T1E;
 if(n > 0U)goto _TL35;return 0;_TL35: _T0=s1;{
 # 138
 unsigned long s1size=_get_fat_size(_T0,sizeof(char));_T1=s2;{
@@ -461,17 +461,17 @@ unsigned long min_size=Cyc_umin(s1size,s2size);
 unsigned long bound=Cyc_umin(n,min_size);{
 # 145
 int i=0;_TL3A: _T2=i;_T3=(unsigned long)_T2;_T4=bound;if(_T3 < _T4)goto _TL38;else{goto _TL39;}
-_TL38: _T5=s1;_T6=_T5.curr;_T7=(const char*)_T6;_T8=i;_T9=_T7[_T8];_TA=(int)_T9;_TB=s2;_TC=_TB.curr;_TD=(const char*)_TC;_TE=i;_TF=_TD[_TE];_T10=(int)_TF;if(_TA >= _T10)goto _TL3B;
-return -1;_TL3B: _T11=s2;_T12=_T11.curr;_T13=(const char*)_T12;_T14=i;_T15=_T13[_T14];_T16=(int)_T15;_T17=s1;_T18=_T17.curr;_T19=(const char*)_T18;_T1A=i;_T1B=_T19[_T1A];_T1C=(int)_T1B;
-if(_T16 >= _T1C)goto _TL3D;
+_TL38: _T5=s1;_T6=_T5.curr;_T7=(const char*)_T6;_T8=i;_T9=_T7[_T8];_TA=(int)_T9;_TB=s2;_TC=_TB.curr;_TD=(const char*)_TC;_TE=i;_TF=_TD[_TE];_T10=(int)_TF;if(_TA >= _T10)goto _TL3B;_T11=- 1;
+return _T11;_TL3B: _T12=s2;_T13=_T12.curr;_T14=(const char*)_T13;_T15=i;_T16=_T14[_T15];_T17=(int)_T16;_T18=s1;_T19=_T18.curr;_T1A=(const char*)_T19;_T1B=i;_T1C=_T1A[_T1B];_T1D=(int)_T1C;
+if(_T17 >= _T1D)goto _TL3D;
 return 1;_TL3D:
 # 145
  i=i + 1;goto _TL3A;_TL39:;}
 # 151
 if(min_size > bound)goto _TL3F;
 return 0;_TL3F:
- if(s1size >= s2size)goto _TL41;
-return -1;_TL41:
+ if(s1size >= s2size)goto _TL41;_T1E=- 1;
+return _T1E;_TL41:
  return 1;}}}
 # 159
 int Cyc_zstrptrcmp(struct _fat_ptr*a,struct _fat_ptr*b){struct _fat_ptr*_T0;int _T1;struct _fat_ptr*_T2;int _T3;struct _fat_ptr*_T4;struct _fat_ptr _T5;struct _fat_ptr*_T6;struct _fat_ptr _T7;int _T8;_T0=a;_T1=(int)_T0;_T2=b;_T3=(int)_T2;
@@ -965,7 +965,7 @@ inline static int Cyc_casecmp(struct _fat_ptr s1,unsigned long len1,struct _fat_
 # 700
 unsigned long min_length=Cyc_umin(len1,len2);
 # 704
-int i=-1;
+int i=- 1;
 _TL130: i=i + 1;_T0=i;_T1=(unsigned long)_T0;_T2=min_length;_T3=_T1 < _T2;_T4=_T3;if(_T4)goto _TL131;else{goto _TL132;}
 _TL131: _T5=s1;_T6=_T5.curr;_T7=(const char*)_T6;_T8=i;_T9=_T7[_T8];_TA=(int)_T9;_TB=toupper(_TA);_TC=s2;_TD=_TC.curr;_TE=(const char*)_TD;_TF=i;_T10=_TE[_TF];_T11=(int)_T10;_T12=toupper(_T11);{int diff=_TB - _T12;
 if(diff==0)goto _TL133;_T13=diff;

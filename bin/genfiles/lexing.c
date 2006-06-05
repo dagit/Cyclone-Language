@@ -400,7 +400,7 @@ struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_function(int(*read_fun)(struct _fat_ptr
 _T2->refill_buff=Cyc_Lexing_lex_refill;{struct Cyc_Lexing_function_lexbuf_state*_T3=_cycalloc(sizeof(struct Cyc_Lexing_function_lexbuf_state));
 _T3->read_fun=read_fun;_T3->read_fun_state=read_fun_state;_T1=(struct Cyc_Lexing_function_lexbuf_state*)_T3;}_T2->refill_state=_T1;
 _T2->lex_buffer=Cyc_Core_new_string(8193U);
-_T2->lex_buffer_len=8192;_T2->lex_abs_pos=-8192;
+_T2->lex_buffer_len=8192;_T2->lex_abs_pos=- 8192;
 _T2->lex_start_pos=8192;_T2->lex_curr_pos=8192;_T2->lex_last_pos=8192;
 _T2->lex_last_action=0;
 _T2->lex_eof_reached=0;_T0=(struct Cyc_Lexing_lexbuf*)_T2;}

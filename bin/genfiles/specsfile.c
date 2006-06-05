@@ -409,7 +409,7 @@ if(len > 2U)goto _TL0;return;_TL0: _T0=s;_T1=len - 2U;_T2=
 Cyc_substring(_T0,2,_T1);{struct _fat_ptr dir=_T2;{struct Cyc_List_List*_T5=_cycalloc(sizeof(struct Cyc_List_List));{struct _fat_ptr*_T6=_cycalloc(sizeof(struct _fat_ptr));
 *_T6=dir;_T4=(struct _fat_ptr*)_T6;}_T5->hd=_T4;_T5->tl=Cyc_Specsfile_cyclone_exec_path;_T3=(struct Cyc_List_List*)_T5;}Cyc_Specsfile_cyclone_exec_path=_T3;}}struct _tuple0{struct _fat_ptr*f0;struct _fat_ptr*f1;};
 # 57
-struct Cyc_List_List*Cyc_Specsfile_read_specs(struct _fat_ptr file){struct _fat_ptr _T0;char*_T1;char*_T2;const char*_T3;struct Cyc_String_pa_PrintArg_struct _T4;struct Cyc___cycFILE*_T5;struct _fat_ptr _T6;struct _fat_ptr _T7;int _T8;struct Cyc_String_pa_PrintArg_struct _T9;struct Cyc_Int_pa_PrintArg_struct _TA;int _TB;struct Cyc___cycFILE*_TC;struct _fat_ptr _TD;struct _fat_ptr _TE;struct Cyc_String_pa_PrintArg_struct _TF;struct Cyc___cycFILE*_T10;struct _fat_ptr _T11;struct _fat_ptr _T12;char*_T13;int _T14;char*_T15;char*_T16;char*_T17;int _T18;char*_T19;char*_T1A;int _T1B;struct Cyc_String_pa_PrintArg_struct _T1C;struct Cyc___cycFILE*_T1D;struct _fat_ptr _T1E;struct _fat_ptr _T1F;int _T20;struct Cyc_List_List*_T21;struct _tuple0*_T22;struct _fat_ptr*_T23;char*_T24;struct _fat_ptr _T25;struct _fat_ptr _T26;struct _fat_ptr*_T27;struct _fat_ptr _T28;struct _fat_ptr _T29;char*_T2A;int _T2B;char*_T2C;int _T2D;char*_T2E;char*_T2F;char*_T30;int _T31;char*_T32;char*_T33;int _T34;struct Cyc_String_pa_PrintArg_struct _T35;struct Cyc_String_pa_PrintArg_struct _T36;char*_T37;struct Cyc___cycFILE*_T38;struct _fat_ptr _T39;struct _fat_ptr _T3A;struct Cyc_List_List*_T3B;struct _tuple0*_T3C;struct _fat_ptr*_T3D;char*_T3E;struct _fat_ptr _T3F;struct _fat_ptr _T40;struct _fat_ptr*_T41;char*_T42;struct _fat_ptr _T43;struct _fat_ptr _T44;struct Cyc_List_List*_T45;
+struct Cyc_List_List*Cyc_Specsfile_read_specs(struct _fat_ptr file){struct _fat_ptr _T0;char*_T1;char*_T2;const char*_T3;struct Cyc_String_pa_PrintArg_struct _T4;struct Cyc___cycFILE*_T5;struct _fat_ptr _T6;struct _fat_ptr _T7;int _T8;int _T9;int _TA;struct Cyc_String_pa_PrintArg_struct _TB;struct Cyc_Int_pa_PrintArg_struct _TC;int _TD;struct Cyc___cycFILE*_TE;struct _fat_ptr _TF;struct _fat_ptr _T10;int _T11;int _T12;struct Cyc_String_pa_PrintArg_struct _T13;struct Cyc___cycFILE*_T14;struct _fat_ptr _T15;struct _fat_ptr _T16;char*_T17;int _T18;char*_T19;char*_T1A;char*_T1B;int _T1C;char*_T1D;char*_T1E;int _T1F;struct Cyc_String_pa_PrintArg_struct _T20;struct Cyc___cycFILE*_T21;struct _fat_ptr _T22;struct _fat_ptr _T23;int _T24;struct Cyc_List_List*_T25;struct _tuple0*_T26;struct _fat_ptr*_T27;char*_T28;struct _fat_ptr _T29;struct _fat_ptr _T2A;struct _fat_ptr*_T2B;struct _fat_ptr _T2C;struct _fat_ptr _T2D;char*_T2E;int _T2F;int _T30;int _T31;char*_T32;int _T33;char*_T34;char*_T35;char*_T36;int _T37;char*_T38;char*_T39;int _T3A;struct Cyc_String_pa_PrintArg_struct _T3B;struct Cyc_String_pa_PrintArg_struct _T3C;char*_T3D;struct Cyc___cycFILE*_T3E;struct _fat_ptr _T3F;struct _fat_ptr _T40;struct Cyc_List_List*_T41;struct _tuple0*_T42;struct _fat_ptr*_T43;char*_T44;struct _fat_ptr _T45;struct _fat_ptr _T46;struct _fat_ptr*_T47;char*_T48;struct _fat_ptr _T49;struct _fat_ptr _T4A;int _T4B;int _T4C;struct Cyc_List_List*_T4D;
 struct Cyc_List_List*result=0;
 int c;
 int i;
@@ -417,8 +417,8 @@ char strname[256U];
 char strvalue[4096U];_T0=file;_T1=_untag_fat_ptr_check_bound(_T0,sizeof(char),1U);_T2=_check_null(_T1);_T3=(const char*)_T2;{
 struct Cyc___cycFILE*spec_file=Cyc_fopen(_T3,"r");
 # 65
-if(spec_file!=0)goto _TL2;{struct Cyc_String_pa_PrintArg_struct _T46;_T46.tag=0;
-_T46.f1=file;_T4=_T46;}{struct Cyc_String_pa_PrintArg_struct _T46=_T4;void*_T47[1];_T47[0]=& _T46;_T5=Cyc_stderr;_T6=_tag_fat("Error opening spec file %s\n",sizeof(char),28U);_T7=_tag_fat(_T47,sizeof(void*),1);Cyc_fprintf(_T5,_T6,_T7);}
+if(spec_file!=0)goto _TL2;{struct Cyc_String_pa_PrintArg_struct _T4E;_T4E.tag=0;
+_T4E.f1=file;_T4=_T4E;}{struct Cyc_String_pa_PrintArg_struct _T4E=_T4;void*_T4F[1];_T4F[0]=& _T4E;_T5=Cyc_stderr;_T6=_tag_fat("Error opening spec file %s\n",sizeof(char),28U);_T7=_tag_fat(_T4F,sizeof(void*),1);Cyc_fprintf(_T5,_T6,_T7);}
 Cyc_fflush(Cyc_stderr);
 return 0;_TL2:
 # 71
@@ -426,82 +426,82 @@ return 0;_TL2:
 _TL5: _TL7: if(1)goto _TL8;else{goto _TL9;}
 _TL8: c=Cyc_fgetc(spec_file);_T8=
 isspace(c);if(!_T8)goto _TLA;goto _TL7;_TLA:
- if(c!=42)goto _TLC;goto _TL9;_TLC:
- if(c==-1)goto _TLE;{struct Cyc_String_pa_PrintArg_struct _T46;_T46.tag=0;
+ if(c!=42)goto _TLC;goto _TL9;_TLC: _T9=c;_TA=- 1;
+if(_T9==_TA)goto _TLE;{struct Cyc_String_pa_PrintArg_struct _T4E;_T4E.tag=0;
 # 79
-_T46.f1=file;_T9=_T46;}{struct Cyc_String_pa_PrintArg_struct _T46=_T9;{struct Cyc_Int_pa_PrintArg_struct _T47;_T47.tag=1;_TB=c;_T47.f1=(unsigned long)_TB;_TA=_T47;}{struct Cyc_Int_pa_PrintArg_struct _T47=_TA;void*_T48[2];_T48[0]=& _T46;_T48[1]=& _T47;_TC=Cyc_stderr;_TD=
+_T4E.f1=file;_TB=_T4E;}{struct Cyc_String_pa_PrintArg_struct _T4E=_TB;{struct Cyc_Int_pa_PrintArg_struct _T4F;_T4F.tag=1;_TD=c;_T4F.f1=(unsigned long)_TD;_TC=_T4F;}{struct Cyc_Int_pa_PrintArg_struct _T4F=_TC;void*_T50[2];_T50[0]=& _T4E;_T50[1]=& _T4F;_TE=Cyc_stderr;_TF=
 # 78
-_tag_fat("Error reading spec file %s: unexpected character '%c'\n",sizeof(char),55U);_TE=_tag_fat(_T48,sizeof(void*),2);Cyc_fprintf(_TC,_TD,_TE);}}
+_tag_fat("Error reading spec file %s: unexpected character '%c'\n",sizeof(char),55U);_T10=_tag_fat(_T50,sizeof(void*),2);Cyc_fprintf(_TE,_TF,_T10);}}
 # 80
 Cyc_fflush(Cyc_stderr);goto _TLF;_TLE: _TLF: goto CLEANUP_AND_RETURN;goto _TL7;_TL9:
 # 84
  JUST_AFTER_STAR:
  i=0;
 _TL10: if(1)goto _TL11;else{goto _TL12;}
-_TL11: c=Cyc_fgetc(spec_file);
-if(c!=-1)goto _TL13;{struct Cyc_String_pa_PrintArg_struct _T46;_T46.tag=0;
+_TL11: c=Cyc_fgetc(spec_file);_T11=c;_T12=- 1;
+if(_T11!=_T12)goto _TL13;{struct Cyc_String_pa_PrintArg_struct _T4E;_T4E.tag=0;
 # 91
-_T46.f1=file;_TF=_T46;}{struct Cyc_String_pa_PrintArg_struct _T46=_TF;void*_T47[1];_T47[0]=& _T46;_T10=Cyc_stderr;_T11=
+_T4E.f1=file;_T13=_T4E;}{struct Cyc_String_pa_PrintArg_struct _T4E=_T13;void*_T4F[1];_T4F[0]=& _T4E;_T14=Cyc_stderr;_T15=
 # 90
-_tag_fat("Error reading spec file %s: unexpected EOF\n",sizeof(char),44U);_T12=_tag_fat(_T47,sizeof(void*),1);Cyc_fprintf(_T10,_T11,_T12);}
+_tag_fat("Error reading spec file %s: unexpected EOF\n",sizeof(char),44U);_T16=_tag_fat(_T4F,sizeof(void*),1);Cyc_fprintf(_T14,_T15,_T16);}
 # 92
 Cyc_fflush(Cyc_stderr);goto CLEANUP_AND_RETURN;_TL13:
 # 95
- if(c!=58)goto _TL15;_T13=strname;_T14=i;_T15=_check_known_subscript_notnull(_T13,256U,sizeof(char),_T14);_T16=(char*)_T15;
-*_T16='\000';goto _TL12;_TL15: _T17=strname;_T18=i;_T19=_check_known_subscript_notnull(_T17,256U,sizeof(char),_T18);_T1A=(char*)_T19;_T1B=c;
+ if(c!=58)goto _TL15;_T17=strname;_T18=i;_T19=_check_known_subscript_notnull(_T17,256U,sizeof(char),_T18);_T1A=(char*)_T19;
+*_T1A='\000';goto _TL12;_TL15: _T1B=strname;_T1C=i;_T1D=_check_known_subscript_notnull(_T1B,256U,sizeof(char),_T1C);_T1E=(char*)_T1D;_T1F=c;
 # 99
-*_T1A=(char)_T1B;
+*_T1E=(char)_T1F;
 i=i + 1;
-if(i < 256)goto _TL17;{struct Cyc_String_pa_PrintArg_struct _T46;_T46.tag=0;
+if(i < 256)goto _TL17;{struct Cyc_String_pa_PrintArg_struct _T4E;_T4E.tag=0;
 # 104
-_T46.f1=file;_T1C=_T46;}{struct Cyc_String_pa_PrintArg_struct _T46=_T1C;void*_T47[1];_T47[0]=& _T46;_T1D=Cyc_stderr;_T1E=
+_T4E.f1=file;_T20=_T4E;}{struct Cyc_String_pa_PrintArg_struct _T4E=_T20;void*_T4F[1];_T4F[0]=& _T4E;_T21=Cyc_stderr;_T22=
 # 103
-_tag_fat("Error reading spec file %s: string name too long\n",sizeof(char),50U);_T1F=_tag_fat(_T47,sizeof(void*),1);Cyc_fprintf(_T1D,_T1E,_T1F);}
+_tag_fat("Error reading spec file %s: string name too long\n",sizeof(char),50U);_T23=_tag_fat(_T4F,sizeof(void*),1);Cyc_fprintf(_T21,_T22,_T23);}
 # 105
 Cyc_fflush(Cyc_stderr);goto CLEANUP_AND_RETURN;_TL17: goto _TL10;_TL12:
 # 109
  _TL19: if(1)goto _TL1A;else{goto _TL1B;}
-_TL1A: c=Cyc_fgetc(spec_file);_T20=
-isspace(c);if(!_T20)goto _TL1C;goto _TL19;_TL1C: goto _TL1B;goto _TL19;_TL1B:
+_TL1A: c=Cyc_fgetc(spec_file);_T24=
+isspace(c);if(!_T24)goto _TL1C;goto _TL19;_TL1C: goto _TL1B;goto _TL19;_TL1B:
 # 114
- if(c!=42)goto _TL1E;{struct Cyc_List_List*_T46=_cycalloc(sizeof(struct Cyc_List_List));{struct _tuple0*_T47=_cycalloc(sizeof(struct _tuple0));{struct _fat_ptr*_T48=_cycalloc(sizeof(struct _fat_ptr));_T24=strname;_T25=
+ if(c!=42)goto _TL1E;{struct Cyc_List_List*_T4E=_cycalloc(sizeof(struct Cyc_List_List));{struct _tuple0*_T4F=_cycalloc(sizeof(struct _tuple0));{struct _fat_ptr*_T50=_cycalloc(sizeof(struct _fat_ptr));_T28=strname;_T29=
 # 116
-_tag_fat(_T24,sizeof(char),256U);_T26=Cyc_strdup(_T25);*_T48=_T26;_T23=(struct _fat_ptr*)_T48;}_T47->f0=_T23;{struct _fat_ptr*_T48=_cycalloc(sizeof(struct _fat_ptr));_T28=
-_tag_fat("",sizeof(char),1U);_T29=Cyc_strdup(_T28);*_T48=_T29;_T27=(struct _fat_ptr*)_T48;}_T47->f1=_T27;_T22=(struct _tuple0*)_T47;}
+_tag_fat(_T28,sizeof(char),256U);_T2A=Cyc_strdup(_T29);*_T50=_T2A;_T27=(struct _fat_ptr*)_T50;}_T4F->f0=_T27;{struct _fat_ptr*_T50=_cycalloc(sizeof(struct _fat_ptr));_T2C=
+_tag_fat("",sizeof(char),1U);_T2D=Cyc_strdup(_T2C);*_T50=_T2D;_T2B=(struct _fat_ptr*)_T50;}_T4F->f1=_T2B;_T26=(struct _tuple0*)_T4F;}
 # 116
-_T46->hd=_T22;
-_T46->tl=result;_T21=(struct Cyc_List_List*)_T46;}
+_T4E->hd=_T26;
+_T4E->tl=result;_T25=(struct Cyc_List_List*)_T4E;}
 # 116
-result=_T21;goto JUST_AFTER_STAR;_TL1E: _T2A=strvalue;_T2B=c;
+result=_T25;goto JUST_AFTER_STAR;_TL1E: _T2E=strvalue;_T2F=c;
 # 121
-_T2A[0]=(char)_T2B;
+_T2E[0]=(char)_T2F;
 i=1;
 _TL20: if(1)goto _TL21;else{goto _TL22;}
-_TL21: c=Cyc_fgetc(spec_file);
-if(c==-1)goto _TL25;else{goto _TL27;}_TL27: if(c==10)goto _TL25;else{goto _TL26;}_TL26: if(c==13)goto _TL25;else{goto _TL23;}_TL25: _T2C=strvalue;_T2D=i;_T2E=_check_known_subscript_notnull(_T2C,4096U,sizeof(char),_T2D);_T2F=(char*)_T2E;*_T2F='\000';goto _TL22;_TL23: _T30=strvalue;_T31=i;_T32=_check_known_subscript_notnull(_T30,4096U,sizeof(char),_T31);_T33=(char*)_T32;_T34=c;
-*_T33=(char)_T34;
+_TL21: c=Cyc_fgetc(spec_file);_T30=c;_T31=- 1;
+if(_T30==_T31)goto _TL25;else{goto _TL27;}_TL27: if(c==10)goto _TL25;else{goto _TL26;}_TL26: if(c==13)goto _TL25;else{goto _TL23;}_TL25: _T32=strvalue;_T33=i;_T34=_check_known_subscript_notnull(_T32,4096U,sizeof(char),_T33);_T35=(char*)_T34;*_T35='\000';goto _TL22;_TL23: _T36=strvalue;_T37=i;_T38=_check_known_subscript_notnull(_T36,4096U,sizeof(char),_T37);_T39=(char*)_T38;_T3A=c;
+*_T39=(char)_T3A;
 i=i + 1;
-if(i < 4096)goto _TL28;{struct Cyc_String_pa_PrintArg_struct _T46;_T46.tag=0;
+if(i < 4096)goto _TL28;{struct Cyc_String_pa_PrintArg_struct _T4E;_T4E.tag=0;
 # 131
-_T46.f1=file;_T35=_T46;}{struct Cyc_String_pa_PrintArg_struct _T46=_T35;{struct Cyc_String_pa_PrintArg_struct _T47;_T47.tag=0;_T37=strname;_T47.f1=_tag_fat(_T37,sizeof(char),256U);_T36=_T47;}{struct Cyc_String_pa_PrintArg_struct _T47=_T36;void*_T48[2];_T48[0]=& _T46;_T48[1]=& _T47;_T38=Cyc_stderr;_T39=
+_T4E.f1=file;_T3B=_T4E;}{struct Cyc_String_pa_PrintArg_struct _T4E=_T3B;{struct Cyc_String_pa_PrintArg_struct _T4F;_T4F.tag=0;_T3D=strname;_T4F.f1=_tag_fat(_T3D,sizeof(char),256U);_T3C=_T4F;}{struct Cyc_String_pa_PrintArg_struct _T4F=_T3C;void*_T50[2];_T50[0]=& _T4E;_T50[1]=& _T4F;_T3E=Cyc_stderr;_T3F=
 # 130
-_tag_fat("Error reading spec file %s: value of %s too long\n",sizeof(char),50U);_T3A=_tag_fat(_T48,sizeof(void*),2);Cyc_fprintf(_T38,_T39,_T3A);}}
+_tag_fat("Error reading spec file %s: value of %s too long\n",sizeof(char),50U);_T40=_tag_fat(_T50,sizeof(void*),2);Cyc_fprintf(_T3E,_T3F,_T40);}}
 # 132
-Cyc_fflush(Cyc_stderr);goto CLEANUP_AND_RETURN;_TL28: goto _TL20;_TL22:{struct Cyc_List_List*_T46=_cycalloc(sizeof(struct Cyc_List_List));{struct _tuple0*_T47=_cycalloc(sizeof(struct _tuple0));{struct _fat_ptr*_T48=_cycalloc(sizeof(struct _fat_ptr));_T3E=strname;_T3F=
+Cyc_fflush(Cyc_stderr);goto CLEANUP_AND_RETURN;_TL28: goto _TL20;_TL22:{struct Cyc_List_List*_T4E=_cycalloc(sizeof(struct Cyc_List_List));{struct _tuple0*_T4F=_cycalloc(sizeof(struct _tuple0));{struct _fat_ptr*_T50=_cycalloc(sizeof(struct _fat_ptr));_T44=strname;_T45=
 # 137
-_tag_fat(_T3E,sizeof(char),256U);_T40=Cyc_strdup(_T3F);*_T48=_T40;_T3D=(struct _fat_ptr*)_T48;}_T47->f0=_T3D;{struct _fat_ptr*_T48=_cycalloc(sizeof(struct _fat_ptr));_T42=strvalue;_T43=
-_tag_fat(_T42,sizeof(char),4096U);_T44=Cyc_strdup(_T43);*_T48=_T44;_T41=(struct _fat_ptr*)_T48;}_T47->f1=_T41;_T3C=(struct _tuple0*)_T47;}
+_tag_fat(_T44,sizeof(char),256U);_T46=Cyc_strdup(_T45);*_T50=_T46;_T43=(struct _fat_ptr*)_T50;}_T4F->f0=_T43;{struct _fat_ptr*_T50=_cycalloc(sizeof(struct _fat_ptr));_T48=strvalue;_T49=
+_tag_fat(_T48,sizeof(char),4096U);_T4A=Cyc_strdup(_T49);*_T50=_T4A;_T47=(struct _fat_ptr*)_T50;}_T4F->f1=_T47;_T42=(struct _tuple0*)_T4F;}
 # 137
-_T46->hd=_T3C;
-_T46->tl=result;_T3B=(struct Cyc_List_List*)_T46;}
+_T4E->hd=_T42;
+_T4E->tl=result;_T41=(struct Cyc_List_List*)_T4E;}
 # 137
-result=_T3B;
+result=_T41;_T4B=c;_T4C=- 1;
 # 139
-if(c!=-1)goto _TL2A;goto CLEANUP_AND_RETURN;_TL2A: goto _TL4;_TL6:
+if(_T4B!=_T4C)goto _TL2A;goto CLEANUP_AND_RETURN;_TL2A: goto _TL4;_TL6:
 # 142
  CLEANUP_AND_RETURN:
- Cyc_fclose(spec_file);_T45=result;
-return _T45;}}
+ Cyc_fclose(spec_file);_T4D=result;
+return _T4D;}}
 # 148
 struct _fat_ptr Cyc_Specsfile_split_specs(struct _fat_ptr cmdline){struct _fat_ptr _T0;unsigned char*_T1;char*_T2;struct _fat_ptr _T3;int _T4;unsigned long _T5;unsigned long _T6;struct _fat_ptr _T7;unsigned char*_T8;const char*_T9;int _TA;char _TB;int _TC;struct _fat_ptr _TD;unsigned char*_TE;const char*_TF;int _T10;char _T11;int _T12;int _T13;int _T14;unsigned long _T15;unsigned long _T16;struct _fat_ptr _T17;unsigned char*_T18;const char*_T19;int _T1A;char _T1B;int _T1C;struct _fat_ptr _T1D;unsigned char*_T1E;const char*_T1F;int _T20;char _T21;int _T22;int _T23;struct _fat_ptr _T24;unsigned char*_T25;const char*_T26;int _T27;char _T28;int _T29;int _T2A;unsigned long _T2B;unsigned long _T2C;struct _fat_ptr _T2D;unsigned char*_T2E;const char*_T2F;int _T30;char _T31;int _T32;char*_T33;int _T34;char*_T35;char*_T36;struct _fat_ptr _T37;unsigned char*_T38;const char*_T39;int _T3A;char*_T3B;int _T3C;char*_T3D;char*_T3E;struct _fat_ptr _T3F;unsigned char*_T40;const char*_T41;int _T42;char*_T43;int _T44;char*_T45;char*_T46;struct Cyc_List_List*_T47;struct _fat_ptr*_T48;char*_T49;struct _fat_ptr _T4A;struct _fat_ptr _T4B;struct Cyc_List_List*_T4C;struct _fat_ptr*_T4D;struct _fat_ptr _T4E;struct _fat_ptr _T4F;struct _fat_ptr*_T50;unsigned _T51;struct _fat_ptr _T52;unsigned _T53;struct _fat_ptr _T54;unsigned char*_T55;struct _fat_ptr**_T56;unsigned _T57;int _T58;struct _fat_ptr*_T59;struct _fat_ptr _T5A;_T0=cmdline;_T1=_T0.curr;_T2=(char*)_T1;
 if(_T2!=0)goto _TL2C;_T3=_tag_fat(0,0,0);return _T3;_TL2C: {

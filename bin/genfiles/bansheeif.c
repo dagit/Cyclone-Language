@@ -1071,19 +1071,19 @@ void(*_TD)(struct Cyc_Hashtable_Table*,void*,struct _tuple14*)=(void(*)(struct C
 # 1023
 assoc=_T9->tl;goto _TL193;_TL192:;}
 # 1031
-int Cyc_BansheeIf_add_all_constraints(struct Cyc_List_List*g){struct Cyc_List_List*_T0;unsigned _T1;struct Cyc_List_List*_T2;void*_T3;struct Cyc_List_List*_T4;unsigned _T5;struct Cyc_List_List*_T6;void*_T7;int _T8;struct Cyc_List_List*_T9;struct Cyc_List_List*_TA;int _TB;
+int Cyc_BansheeIf_add_all_constraints(struct Cyc_List_List*g){struct Cyc_List_List*_T0;unsigned _T1;struct Cyc_List_List*_T2;void*_T3;struct Cyc_List_List*_T4;unsigned _T5;struct Cyc_List_List*_T6;void*_T7;int _T8;int _T9;struct Cyc_List_List*_TA;struct Cyc_List_List*_TB;int _TC;int _TD;
 _TL197: _T0=g;_T1=(unsigned)_T0;if(_T1)goto _TL195;else{goto _TL196;}
-_TL195: _T2=g;_T3=_T2->hd;{struct _tuple16*_TC=(struct _tuple16*)_T3;struct Cyc_List_List*_TD;{struct _tuple16 _TE=*_TC;_TD=_TE.f1;}{struct Cyc_List_List*c=_TD;
+_TL195: _T2=g;_T3=_T2->hd;{struct _tuple16*_TE=(struct _tuple16*)_T3;struct Cyc_List_List*_TF;{struct _tuple16 _T10=*_TE;_TF=_T10.f1;}{struct Cyc_List_List*c=_TF;
 _TL19B: _T4=c;_T5=(unsigned)_T4;if(_T5)goto _TL199;else{goto _TL19A;}
-_TL199: _T6=c;_T7=_T6->hd;_T8=Cyc_BansheeIf_internal_add_constraint(_T7);if(_T8!=0)goto _TL19C;
-return -1;_TL19C: _T9=c;
+_TL199: _T6=c;_T7=_T6->hd;_T8=Cyc_BansheeIf_internal_add_constraint(_T7);if(_T8!=0)goto _TL19C;_T9=- 1;
+return _T9;_TL19C: _TA=c;
 # 1034
-c=_T9->tl;goto _TL19B;_TL19A:;}}_TA=g;
+c=_TA->tl;goto _TL19B;_TL19A:;}}_TB=g;
 # 1032
-g=_TA->tl;goto _TL197;_TL196: _TB=
+g=_TB->tl;goto _TL197;_TL196: _TC=
 # 1039
-Cyc_BansheeIf_discharge_implications();if(_TB!=0)goto _TL19E;
-return -1;_TL19E:
+Cyc_BansheeIf_discharge_implications();if(_TC!=0)goto _TL19E;_TD=- 1;
+return _TD;_TL19E:
  return 0;}
 # 1044
 static void Cyc_BansheeIf_print_cvar(void*c){struct Cyc_String_pa_PrintArg_struct _T0;struct Cyc___cycFILE*_T1;struct _fat_ptr _T2;struct _fat_ptr _T3;{struct Cyc_String_pa_PrintArg_struct _T4;_T4.tag=0;

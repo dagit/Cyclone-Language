@@ -310,7 +310,10 @@ namespace AssnDef{
   // some new assertion
   extern assn_map_t and_assnmap_assn(assn_map_t, assn_t);
   
+  // Try to show ctxt ==> a.  The simple prover is very fast but stupid.
+  // The better prover invokes the constraint solver.
   extern bool simple_prove(assn_t ctxt, assn_t a);
+  extern bool better_prove(assn_t ctxt, assn_t a);
  
   // given two assertion_map a1, a2, where the nonescvarmap 
   // only maps vardecls to logical vars of the form:

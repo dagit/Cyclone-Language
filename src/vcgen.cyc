@@ -399,25 +399,11 @@ static assn_map_t vcgen_debug_local_decl(env_t env, decl_t d, assn_map_t amin){
 }
 #endif
 
-static bool simple_implies(assn_t a1, assn_t a2){
-  return AssnDef::simple_prove(a1,a2);
-}
-
-
 // these implies are used to compute loop invariant
 // in while, for, do loops as well as comprehensions
 static bool implies(assn_t a1, assn_t a2){
-  return simple_implies(a1,a2) || PrattProver::constraint_prove(a1,a2);
+  return simple_prove(a1,a2) || better_prove(a1,a2);
 }
-
-// static bool implies_assnmap(assn_map_t am1, assn_map_t am2){
-//   // am1 and am2 might have different var_maps,
-//   // unify_var_maps would generate two new assertions
-//   // and a mapping such that am1 <=> AssnMap(a1,map) and
-//   // AssnMap(a2,map) <=> am2
-//   let $(a1,a2,map) = unify_var_maps(am1,am2);
-//   return simple_implies(a1,a2) || PrattProver::constraint_prove(a1,a2);
-// }
 
 // helper function, retrieve the vardecl from a binding.
 static struct Absyn::Vardecl *bind2vardecl(Absyn::binding_t b) {
@@ -961,6 +947,7 @@ static assn_map_t vcgen_loop(env_t env, exp_opt_t e1infor, stmt_opt_t s1indo,
 }
 
 static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
+  /*
   if (Tcutil::is_const_exp(e)){
      // special case for pragmas
      switch (e->r) {
@@ -987,6 +974,8 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
      case &Absyn::Array_e(...):
      case &Absyn::Cast_e(...):
      case &Absyn::Address_e(...):
+     case &Absyn::Primop_e(Absyn::Numelts,...):
+     case &Absyn::Var_e(...):
        // these are treated as "constant" when the initializer
        // is constant, but I don't really want to allow this for now.
        // In fact, I'm wondering if we wouldn't be better off avoiding
@@ -999,10 +988,28 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
      else return $(cnst(e),amin);
   }
  ANALYZE:
+  */
   switch (e->r) {
-  case &Absyn::Const_e(c):
-  case &Absyn::Pragma_e(...):
-    Warn::impos("Const_e Pragma_e are const_exps\n");
+  case &Absyn::Const_e(c): 
+    let $(cn,known) = Evexp::eval_const_uint_exp(e);
+    if (known) return $(uint(cn), amin);
+    else return $(cnst(e),amin);
+  case &Absyn::Pragma_e(s):
+    if (strcmp(s,"print_assn") == 0) {
+      let seg_str = Position::string_of_segment(e->loc);
+      fprintf(stderr,"%s: %s\n",seg_str,assnmap2string(amin));
+    }
+    if (strcmp(s,"print_dag") == 0) {
+      let seg_str = Position::string_of_segment(e->loc);
+      fprintf(stderr,"%s: %s\n",seg_str,assnmap2dag(amin));
+    }
+    if (strcmp(s,"all_paths") == 0) {
+      env->widen_paths = false;
+    }
+    if (strcmp(s,"one_path") == 0) {
+      env->widen_paths = true;
+    }
+    return $(zero(),amin);
   case &Absyn::Var_e(b):
     // a variable's r-value would be a select from
     // current memory if the var can escape,
@@ -1309,7 +1316,10 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
   case &Absyn::Sizeoftype_e(_):
   case &Absyn::Sizeofexp_e(_):
   case &Absyn::Valueof_e(_):
-  case &Absyn::Offsetof_e(_,_): return $(cnst(e),amin);
+  case &Absyn::Offsetof_e(_,_): 
+    let $(cn,known) = Evexp::eval_const_uint_exp(e);
+    if (known) return $(uint(cn),amin);
+    return $(cnst(e),amin);
   case &Absyn::AggrMember_e(e1,f,is_tagged,is_read):
     let $(t,amin) = vcgen_debug_rexp(env,e1,amin);
     let i = CfFlowInfo::get_field_index((type_t)e1->topt,f);

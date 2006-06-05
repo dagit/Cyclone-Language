@@ -1020,7 +1020,7 @@ Cyc_List_imp_rev(res);return _T2;}
 struct Cyc_List_List*Cyc_List_tabulate_c(int n,void*(*f)(void*,int),void*env){struct _RegionHandle*_T0;int _T1;void*(*_T2)(void*,int);void*_T3;struct Cyc_List_List*_T4;_T0=Cyc_Core_heap_region;_T1=n;_T2=f;_T3=env;_T4=
 Cyc_List_rtabulate_c(_T0,_T1,_T2,_T3);return _T4;}
 # 777
-int Cyc_List_list_cmp(int(*cmp)(void*,void*),struct Cyc_List_List*l1,struct Cyc_List_List*l2){struct Cyc_List_List*_T0;unsigned _T1;struct Cyc_List_List*_T2;unsigned _T3;struct Cyc_List_List*_T4;void*_T5;struct Cyc_List_List*_T6;void*_T7;int _T8;struct Cyc_List_List*_T9;struct Cyc_List_List*_TA;
+int Cyc_List_list_cmp(int(*cmp)(void*,void*),struct Cyc_List_List*l1,struct Cyc_List_List*l2){struct Cyc_List_List*_T0;unsigned _T1;struct Cyc_List_List*_T2;unsigned _T3;struct Cyc_List_List*_T4;void*_T5;struct Cyc_List_List*_T6;void*_T7;int _T8;struct Cyc_List_List*_T9;struct Cyc_List_List*_TA;int _TB;
 _TL14C: if(l1!=0)goto _TL14D;else{goto _TL14B;}_TL14D: if(l2!=0)goto _TL14A;else{goto _TL14B;}
 # 780
 _TL14A: _T0=l1;_T1=(unsigned)_T0;_T2=l2;_T3=(unsigned)_T2;if(_T1!=_T3)goto _TL14E;
@@ -1033,8 +1033,8 @@ l1=_T9->tl;_TA=l2;l2=_TA->tl;goto _TL14C;_TL14B:
 # 786
  if(l1==0)goto _TL152;
 return 1;_TL152:
- if(l2==0)goto _TL154;
-return -1;_TL154:
+ if(l2==0)goto _TL154;_TB=- 1;
+return _TB;_TL154:
  return 0;}
 # 794
 int Cyc_List_list_prefix(int(*cmp)(void*,void*),struct Cyc_List_List*l1,struct Cyc_List_List*l2){struct Cyc_List_List*_T0;unsigned _T1;struct Cyc_List_List*_T2;unsigned _T3;struct Cyc_List_List*_T4;void*_T5;struct Cyc_List_List*_T6;void*_T7;int _T8;struct Cyc_List_List*_T9;struct Cyc_List_List*_TA;int _TB;
