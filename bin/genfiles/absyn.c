@@ -446,7 +446,7 @@ extern struct Cyc_Xarray_Xarray*Cyc_Xarray_create_empty (void);
 # 69
 extern int Cyc_Xarray_add_ind(struct Cyc_Xarray_Xarray*,void*);
 # 37 "absyn.cyc"
-static int Cyc_Absyn_mystrcmp(struct _fat_ptr s1,struct _fat_ptr s2){struct _fat_ptr _T0;char*_T1;struct _fat_ptr _T2;char*_T3;const char*_T4;const char*_T5;char _T6;int _T7;char _T8;int _T9;int _TA;char _TB;int _TC;const char*_TD;int _TE;const char*_TF;int _T10;_T0=s1;_T1=_untag_fat_ptr_check_bound(_T0,sizeof(char),1U);{
+static int Cyc_Absyn_mystrcmp(struct _fat_ptr s1,struct _fat_ptr s2){struct _fat_ptr _T0;unsigned char*_T1;struct _fat_ptr _T2;unsigned char*_T3;const char*_T4;const char*_T5;char _T6;int _T7;char _T8;int _T9;int _TA;char _TB;int _TC;const char*_TD;int _TE;const char*_TF;int _T10;_T0=s1;_T1=_untag_fat_ptr_check_bound(_T0,sizeof(char),1U);{
 const char*p1opt=(const char*)_T1;_T2=s2;_T3=_untag_fat_ptr_check_bound(_T2,sizeof(char),1U);{
 const char*p2opt=(const char*)_T3;
 if(p1opt!=p2opt)goto _TL0;return 0;_TL0: {
@@ -620,7 +620,7 @@ static int Cyc_Absyn_cvar_index=3;
 void*Cyc_Absyn_cvar_type(struct Cyc_Core_Opt*ok){struct Cyc_Absyn_Cvar_Absyn_Type_struct*_T0;int _T1;int _T2;void*_T3;{struct Cyc_Absyn_Cvar_Absyn_Type_struct*_T4=_cycalloc(sizeof(struct Cyc_Absyn_Cvar_Absyn_Type_struct));_T4->tag=3;
 _T4->f1=ok;_T4->f2=0;_T1=Cyc_Absyn_cvar_index;Cyc_Absyn_cvar_index=_T1 + 1;_T2=_T1;_T4->f3=- _T2;_T4->f4=0;_T4->f5=0;_T4->f6=0;_T4->f7=0;_T0=(struct Cyc_Absyn_Cvar_Absyn_Type_struct*)_T4;}_T3=(void*)_T0;return _T3;}
 # 244
-void*Cyc_Absyn_cvar_type_name(struct Cyc_Core_Opt*ok,struct _fat_ptr a){struct Cyc_Absyn_Cvar_Absyn_Type_struct*_T0;int _T1;struct _fat_ptr _T2;char*_T3;void*_T4;{struct Cyc_Absyn_Cvar_Absyn_Type_struct*_T5=_cycalloc(sizeof(struct Cyc_Absyn_Cvar_Absyn_Type_struct));_T5->tag=3;
+void*Cyc_Absyn_cvar_type_name(struct Cyc_Core_Opt*ok,struct _fat_ptr a){struct Cyc_Absyn_Cvar_Absyn_Type_struct*_T0;int _T1;struct _fat_ptr _T2;unsigned char*_T3;void*_T4;{struct Cyc_Absyn_Cvar_Absyn_Type_struct*_T5=_cycalloc(sizeof(struct Cyc_Absyn_Cvar_Absyn_Type_struct));_T5->tag=3;
 _T5->f1=ok;_T5->f2=0;_T1=Cyc_Absyn_cvar_index;Cyc_Absyn_cvar_index=_T1 + 1;_T5->f3=_T1;_T5->f4=0;_T2=a;_T3=_untag_fat_ptr_check_bound(_T2,sizeof(char),1U);_T5->f5=(const char*)_T3;_T5->f6=0;_T5->f7=0;_T0=(struct Cyc_Absyn_Cvar_Absyn_Type_struct*)_T5;}_T4=(void*)_T0;return _T4;}
 # 247
 void*Cyc_Absyn_fatconst (void){void*_T0;unsigned _T1;void*_T2;struct Cyc_Absyn_Cvar_Absyn_Type_struct*_T3;struct Cyc_Core_Opt*_T4;struct _fat_ptr _T5;void*_T6;void*_T7;
@@ -1400,7 +1400,7 @@ decls=_T9->tl;goto _TLC3;_TLC2:
 # 1126
  return 0;}static char _TmpG5[3U]="f0";
 # 1129
-struct _fat_ptr*Cyc_Absyn_fieldname(int i){struct _fat_ptr _T0;int _T1;unsigned _T2;unsigned _T3;struct _fat_ptr _T4;int _T5;struct _fat_ptr**_T6;unsigned _T7;int _T8;unsigned _T9;struct _fat_ptr _TA;unsigned _TB;int _TC;char*_TD;struct _fat_ptr**_TE;unsigned _TF;struct _fat_ptr*_T10;struct _fat_ptr _T11;struct Cyc_Int_pa_PrintArg_struct _T12;unsigned _T13;int _T14;struct _fat_ptr _T15;struct _fat_ptr _T16;struct _fat_ptr _T17;int _T18;char*_T19;struct _fat_ptr**_T1A;struct _fat_ptr*_T1B;
+struct _fat_ptr*Cyc_Absyn_fieldname(int i){struct _fat_ptr _T0;int _T1;unsigned _T2;unsigned _T3;struct _fat_ptr _T4;int _T5;struct _fat_ptr**_T6;unsigned _T7;int _T8;unsigned _T9;struct _fat_ptr _TA;unsigned _TB;int _TC;unsigned char*_TD;struct _fat_ptr**_TE;unsigned _TF;struct _fat_ptr*_T10;struct _fat_ptr _T11;struct Cyc_Int_pa_PrintArg_struct _T12;unsigned _T13;int _T14;struct _fat_ptr _T15;struct _fat_ptr _T16;struct _fat_ptr _T17;int _T18;unsigned char*_T19;struct _fat_ptr**_T1A;struct _fat_ptr*_T1B;
 # 1131
 static struct _fat_ptr f0={_TmpG5,_TmpG5,_TmpG5 + 3U};
 static struct _fat_ptr*field_names_v[1U]={(struct _fat_ptr*)& f0};

@@ -529,14 +529,21 @@ static exp_t lower_rhs(env_t env, bool effect_only, bool has_target, exp_t e) {
     break;
   case &FnCall_e(e1,es,vai,_):
     exp_t v1;
+    bool is_setjmp = false;
   LOOP:
     switch (e1->r) {
     case &Instantiate_e(e2,...): 
       e1 = e2; goto LOOP;
+    case &Var_e(&Unresolved_b(&$(_,n))): 
+      // because setjmp's argument is of different types on different
+      // platforms, we avoid lowering that particular call.
+      if (strcmp(*n,"setjmp") == 0) is_setjmp = true;
+      fallthru;
     case &Var_e(...): v1 = e1; break;
     default: v1 = lower_rhs(env, false, false, e1); break;
     }
-    let vs = lower_rhs_list(env,es);
+    list_t<exp_t> vs;
+    if (is_setjmp) vs = es; else vs = lower_rhs_list(env,es);
     res = fncall_exp(v1,vs,e->loc);
     break;
   case &Cast_e(t,e1,b,c):

@@ -375,7 +375,7 @@ struct _fat_ptr res=Cyc_substring(_T6,0,_T8);{
 struct _fat_ptr _TC=buf;_T9=b;{struct _fat_ptr _TD=_T9->buffer;buf=_TD;_TA=b;_TA->buffer=_TC;}}_TB=res;
 return _TB;}}
 # 67
-struct _fat_ptr Cyc_Buffer_extract(struct Cyc_Buffer_t*b){struct Cyc_Buffer_t*_T0;struct Cyc_Buffer_t*_T1;struct _fat_ptr _T2;struct Cyc_Buffer_t*_T3;unsigned _T4;int _T5;char*_T6;char*_T7;unsigned _T8;unsigned char*_T9;char*_TA;struct Cyc_Buffer_t*_TB;struct Cyc_Buffer_t*_TC;struct _fat_ptr _TD;
+struct _fat_ptr Cyc_Buffer_extract(struct Cyc_Buffer_t*b){struct Cyc_Buffer_t*_T0;struct Cyc_Buffer_t*_T1;struct _fat_ptr _T2;struct Cyc_Buffer_t*_T3;unsigned _T4;int _T5;unsigned char*_T6;char*_T7;unsigned _T8;unsigned char*_T9;char*_TA;struct Cyc_Buffer_t*_TB;struct Cyc_Buffer_t*_TC;struct _fat_ptr _TD;
 struct _fat_ptr buf=_tag_fat(0,0,0);{
 struct _fat_ptr _TE=buf;_T0=b;{struct _fat_ptr _TF=_T0->buffer;buf=_TF;_T1=b;_T1->buffer=_TE;}}_T2=buf;_T3=b;_T4=_T3->position;_T5=(int)_T4;{struct _fat_ptr _TE=_fat_ptr_plus(_T2,sizeof(char),_T5);_T6=_check_fat_subscript(_TE,sizeof(char),0U);_T7=(char*)_T6;{char _TF=*_T7;char _T10='\000';_T8=_get_fat_size(_TE,sizeof(char));if(_T8!=1U)goto _TL4;if(_TF!=0)goto _TL4;if(_T10==0)goto _TL4;_throw_arraybounds();goto _TL5;_TL4: _TL5: _T9=_TE.curr;_TA=(char*)_T9;*_TA=_T10;}}_TB=b;
 # 71
@@ -383,7 +383,7 @@ _TB->position=0U;_TC=b;
 _TC->length=0U;_TD=buf;
 return _TD;}
 # 76
-int Cyc_Buffer_restore(struct Cyc_Buffer_t*b,struct _fat_ptr buf){unsigned long _T0;struct Cyc_Buffer_t*_T1;struct Cyc_Buffer_t*_T2;struct _fat_ptr _T3;unsigned char*_T4;char*_T5;struct Cyc_Buffer_t*_T6;struct Cyc_Buffer_t*_T7;void(*_T8)(char*);void(*_T9)(void*);struct _fat_ptr _TA;unsigned _TB;char*_TC;char*_TD;struct Cyc_Buffer_t*_TE;struct Cyc_Buffer_t*_TF;int _T10;_T0=
+int Cyc_Buffer_restore(struct Cyc_Buffer_t*b,struct _fat_ptr buf){unsigned long _T0;struct Cyc_Buffer_t*_T1;struct Cyc_Buffer_t*_T2;struct _fat_ptr _T3;unsigned char*_T4;char*_T5;struct Cyc_Buffer_t*_T6;struct Cyc_Buffer_t*_T7;void(*_T8)(char*);void(*_T9)(void*);struct _fat_ptr _TA;unsigned _TB;unsigned char*_TC;char*_TD;struct Cyc_Buffer_t*_TE;struct Cyc_Buffer_t*_TF;int _T10;_T0=
 Cyc_strlen(buf);{int len=(int)_T0;{
 struct _fat_ptr _T11=buf;_T1=b;{struct _fat_ptr _T12=_T1->buffer;buf=_T12;_T2=b;_T2->buffer=_T11;}}_T3=buf;_T4=_T3.curr;_T5=(char*)_T4;
 if(_T5==0)goto _TL6;{
@@ -401,7 +401,7 @@ return _T1;}
 void Cyc_Buffer_clear(struct Cyc_Buffer_t*b){struct Cyc_Buffer_t*_T0;_T0=b;
 _T0->position=0U;}
 # 97
-void Cyc_Buffer_reset(struct Cyc_Buffer_t*b){struct Cyc_Buffer_t*_T0;struct Cyc_Buffer_t*_T1;struct _fat_ptr _T2;unsigned char*_T3;char*_T4;struct Cyc_Buffer_t*_T5;struct Cyc_Buffer_t*_T6;struct Cyc_Buffer_t*_T7;struct _fat_ptr _T8;unsigned _T9;struct Cyc_Buffer_t*_TA;struct Cyc_Buffer_t*_TB;void(*_TC)(char*);void(*_TD)(void*);struct _fat_ptr _TE;unsigned _TF;char*_T10;char*_T11;_T0=b;
+void Cyc_Buffer_reset(struct Cyc_Buffer_t*b){struct Cyc_Buffer_t*_T0;struct Cyc_Buffer_t*_T1;struct _fat_ptr _T2;unsigned char*_T3;char*_T4;struct Cyc_Buffer_t*_T5;struct Cyc_Buffer_t*_T6;struct Cyc_Buffer_t*_T7;struct _fat_ptr _T8;unsigned _T9;struct Cyc_Buffer_t*_TA;struct Cyc_Buffer_t*_TB;void(*_TC)(char*);void(*_TD)(void*);struct _fat_ptr _TE;unsigned _TF;unsigned char*_T10;char*_T11;_T0=b;
 _T0->position=0U;_T1=b;_T2=_T1->initial_buffer;_T3=_T2.curr;_T4=(char*)_T3;
 if(_T4==0)goto _TL8;{
 struct _fat_ptr buf=_tag_fat(0,0,0);_T5=b;{
@@ -412,7 +412,7 @@ void(*_T12)(char*)=(void(*)(char*))_TD;_TC=_T12;}_TE=buf;_TF=1U + 1U;_T10=_untag
 # 106
  return;}
 # 109
-static void Cyc_Buffer_resize(struct Cyc_Buffer_t*b,unsigned more){struct Cyc_Buffer_t*_T0;unsigned _T1;struct Cyc_Buffer_t*_T2;unsigned _T3;unsigned _T4;unsigned _T5;unsigned long _T6;struct _fat_ptr _T7;struct _RegionHandle*_T8;unsigned _T9;void*_TA;struct Cyc_Buffer_t*_TB;unsigned _TC;struct _fat_ptr _TD;struct _fat_ptr _TE;struct Cyc_Buffer_t*_TF;struct _fat_ptr _T10;struct Cyc_Buffer_t*_T11;unsigned _T12;struct Cyc_Buffer_t*_T13;struct _fat_ptr _T14;unsigned char*_T15;char*_T16;struct Cyc_Buffer_t*_T17;struct Cyc_Buffer_t*_T18;struct Cyc_Buffer_t*_T19;struct Cyc_Buffer_t*_T1A;struct Cyc_Buffer_t*_T1B;struct Cyc_Buffer_t*_T1C;void(*_T1D)(char*);void(*_T1E)(void*);struct _fat_ptr _T1F;unsigned _T20;char*_T21;char*_T22;struct Cyc_Buffer_t*_T23;_T0=b;{
+static void Cyc_Buffer_resize(struct Cyc_Buffer_t*b,unsigned more){struct Cyc_Buffer_t*_T0;unsigned _T1;struct Cyc_Buffer_t*_T2;unsigned _T3;unsigned _T4;unsigned _T5;unsigned long _T6;struct _fat_ptr _T7;struct _RegionHandle*_T8;unsigned _T9;void*_TA;struct Cyc_Buffer_t*_TB;unsigned _TC;struct _fat_ptr _TD;struct _fat_ptr _TE;struct Cyc_Buffer_t*_TF;struct _fat_ptr _T10;struct Cyc_Buffer_t*_T11;unsigned _T12;struct Cyc_Buffer_t*_T13;struct _fat_ptr _T14;unsigned char*_T15;char*_T16;struct Cyc_Buffer_t*_T17;struct Cyc_Buffer_t*_T18;struct Cyc_Buffer_t*_T19;struct Cyc_Buffer_t*_T1A;struct Cyc_Buffer_t*_T1B;struct Cyc_Buffer_t*_T1C;void(*_T1D)(char*);void(*_T1E)(void*);struct _fat_ptr _T1F;unsigned _T20;unsigned char*_T21;char*_T22;struct Cyc_Buffer_t*_T23;_T0=b;{
 unsigned long len=_T0->length;
 if(len!=0U)goto _TLA;_T1=1U;goto _TLB;_TLA: _T1=len;_TLB: {unsigned long new_len=_T1;
 struct _fat_ptr new_buffer;
@@ -431,7 +431,7 @@ void(*_T24)(char*)=(void(*)(char*))_T1E;_T1D=_T24;}_T1F=new_buffer;_T20=1U + 1U;
 _T23->length=new_len;
 return;}}}
 # 129
-void Cyc_Buffer_add_char(struct Cyc_Buffer_t*b,char c){struct Cyc_Buffer_t*_T0;unsigned _T1;int _T2;unsigned _T3;struct Cyc_Buffer_t*_T4;unsigned _T5;struct Cyc_Buffer_t*_T6;struct _fat_ptr _T7;int _T8;char*_T9;char*_TA;unsigned _TB;unsigned char*_TC;char*_TD;struct Cyc_Buffer_t*_TE;int _TF;_T0=b;_T1=_T0->position;{
+void Cyc_Buffer_add_char(struct Cyc_Buffer_t*b,char c){struct Cyc_Buffer_t*_T0;unsigned _T1;int _T2;unsigned _T3;struct Cyc_Buffer_t*_T4;unsigned _T5;struct Cyc_Buffer_t*_T6;struct _fat_ptr _T7;int _T8;unsigned char*_T9;char*_TA;unsigned _TB;unsigned char*_TC;char*_TD;struct Cyc_Buffer_t*_TE;int _TF;_T0=b;_T1=_T0->position;{
 int pos=(int)_T1;_T2=pos;_T3=(unsigned)_T2;_T4=b;_T5=_T4->length;
 if(_T3 < _T5)goto _TL13;Cyc_Buffer_resize(b,1U);goto _TL14;_TL13: _TL14: _T6=b;_T7=_T6->buffer;_T8=pos;{struct _fat_ptr _T10=_fat_ptr_plus(_T7,sizeof(char),_T8);_T9=_check_fat_subscript(_T10,sizeof(char),0U);_TA=(char*)_T9;{char _T11=*_TA;char _T12=c;_TB=_get_fat_size(_T10,sizeof(char));if(_TB!=1U)goto _TL15;if(_T11!=0)goto _TL15;if(_T12==0)goto _TL15;_throw_arraybounds();goto _TL16;_TL15: _TL16: _TC=_T10.curr;_TD=(char*)_TC;*_TD=_T12;}}_TE=b;_TF=pos + 1;
 # 133

@@ -1190,7 +1190,7 @@ static enum PTR_ANS ptr_use_to_c(env_t nv, exp_t ptr, absyn_annot_t annot,
                          set_type(fncall_exp_dl(_check_fat_subscript_e,
                                                 copy_exp(ptr),
                                                 sizeoftype_exp(ta1,DL),
-                                                ind),cstar_type(char_type,mt_tq)));
+                                                ind),cstar_type(uchar_type,mt_tq)));
       ptr->topt = newt;
       ans = DIRECT_DEREF;
       break;
@@ -2311,7 +2311,7 @@ static void exp_to_c(env_t nv, exp_t e) {
                                    ptr_exp,
                                    set_type(sizeoftype_exp(typ_to_c(p1.elt_type),DL),
                                             uint_type),
-                                   new_e2),cstar_type(char_type,mt_tq));
+                                   new_e2),cstar_type(uchar_type,mt_tq));
 	  break;
 	default:
 	  ptr_exp = 
@@ -2319,7 +2319,7 @@ static void exp_to_c(env_t nv, exp_t e) {
                                    ptr_exp,
                                    set_type(sizeoftype_exp(typ_to_c(p1.elt_type),DL),
                                             uint_type),
-                                   new_e2),cstar_type(char_type,mt_tq));
+                                   new_e2),cstar_type(uchar_type,mt_tq));
 	  break;
 	}
 	did_inserted_checks = true;
@@ -2346,7 +2346,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       switch(get_bounds_exp_constrain(bounds_one(),p1.ptr_atts.bounds,true)) {
       case NULL: // cast t? to char *
 	e1->r = aggrmember_exp_r(copy_exp(e1),curr_sp);
-	e1->topt = cstar_type(char_type, mt_tq);
+	e1->topt = cstar_type(uchar_type, mt_tq);
 	break;
       default: break;
       }

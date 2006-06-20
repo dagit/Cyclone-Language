@@ -410,7 +410,7 @@ void Cyc_Position_reset_position(struct _fat_ptr s){Cyc_Position_source=s;}
 void Cyc_Position_set_position_file(struct _fat_ptr s){Cyc_Position_source=s;}
 struct _fat_ptr Cyc_Position_get_position_file (void){struct _fat_ptr _T0;_T0=Cyc_Position_source;return _T0;}
 # 111
-struct _fat_ptr Cyc_Position_get_line_directive(unsigned s){struct _fat_ptr _T0;char*_T1;unsigned _T2;struct _fat_ptr _T3;unsigned _T4;int _T5;struct _fat_ptr _T6;struct Cyc_Int_pa_PrintArg_struct _T7;struct Cyc_Lineno_Pos*_T8;int _T9;struct Cyc_String_pa_PrintArg_struct _TA;struct Cyc_Lineno_Pos*_TB;struct _fat_ptr _TC;struct _fat_ptr _TD;struct _fat_ptr _TE;
+struct _fat_ptr Cyc_Position_get_line_directive(unsigned s){struct _fat_ptr _T0;unsigned char*_T1;unsigned _T2;struct _fat_ptr _T3;unsigned _T4;int _T5;struct _fat_ptr _T6;struct Cyc_Int_pa_PrintArg_struct _T7;struct Cyc_Lineno_Pos*_T8;int _T9;struct Cyc_String_pa_PrintArg_struct _TA;struct Cyc_Lineno_Pos*_TB;struct _fat_ptr _TC;struct _fat_ptr _TD;struct _fat_ptr _TE;
 struct _tuple0 _TF=Cyc_Position_seg_to_loc(s);unsigned _T10;struct _fat_ptr _T11;_T11=_TF.f0;_T10=_TF.f1;{struct _fat_ptr source=_T11;unsigned loc=_T10;_T0=source;_T1=_T0.curr;_T2=(unsigned)_T1;
 if(!_T2)goto _TLC;_T3=source;_T4=loc;_T5=(int)_T4;{
 struct Cyc_Lineno_Pos*pos_s=Cyc_Lineno_pos_of_abs(_T3,_T5);

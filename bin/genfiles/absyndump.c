@@ -653,7 +653,7 @@ Cyc_Absynpp_kind2string(ka);Cyc_Absyndump_dump(_T0);}
 static void Cyc_Absyndump_dumptps(struct Cyc_List_List*ts){void(*_T0)(void*);struct Cyc_List_List*_T1;struct _fat_ptr _T2;struct _fat_ptr _T3;struct _fat_ptr _T4;_T0=Cyc_Absyndump_dumptyp;_T1=ts;_T2=
 _tag_fat("<",sizeof(char),2U);_T3=_tag_fat(">",sizeof(char),2U);_T4=_tag_fat(",",sizeof(char),2U);Cyc_Absyndump_egroup(_T0,_T1,_T2,_T3,_T4);}
 # 290
-static void Cyc_Absyndump_dumptvar(struct Cyc_Absyn_Tvar*tv){struct Cyc_Absyn_Tvar*_T0;struct _fat_ptr*_T1;struct _fat_ptr _T2;char*_T3;const char*_T4;char _T5;int _T6;struct _fat_ptr _T7;struct Cyc_Absyn_Tvar*_T8;void*_T9;int*_TA;unsigned _TB;struct _fat_ptr _TC;struct _fat_ptr _TD;struct _fat_ptr _TE;_T0=tv;_T1=_T0->name;{
+static void Cyc_Absyndump_dumptvar(struct Cyc_Absyn_Tvar*tv){struct Cyc_Absyn_Tvar*_T0;struct _fat_ptr*_T1;struct _fat_ptr _T2;unsigned char*_T3;const char*_T4;char _T5;int _T6;struct _fat_ptr _T7;struct Cyc_Absyn_Tvar*_T8;void*_T9;int*_TA;unsigned _TB;struct _fat_ptr _TC;struct _fat_ptr _TD;struct _fat_ptr _TE;_T0=tv;_T1=_T0->name;{
 struct _fat_ptr n=*_T1;_T2=n;_T3=_check_fat_subscript(_T2,sizeof(char),0);_T4=(const char*)_T3;_T5=*_T4;_T6=(int)_T5;
 if(_T6!=35)goto _TL40;_T7=
 _tag_fat("`G",sizeof(char),3U);Cyc_Absyndump_dump(_T7);_T8=tv;_T9=_T8->kind;{

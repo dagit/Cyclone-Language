@@ -426,7 +426,7 @@ _T3->lex_eof_reached=1;_T0=(struct Cyc_Lexing_lexbuf*)_T3;}
 # 132
 return _T0;}
 # 140
-struct _fat_ptr Cyc_Lexing_rlexeme(struct _RegionHandle*r,struct Cyc_Lexing_lexbuf*lbuf){struct Cyc_Lexing_lexbuf*_T0;int _T1;struct Cyc_Lexing_lexbuf*_T2;int _T3;struct _RegionHandle*_T4;int _T5;unsigned _T6;struct _fat_ptr _T7;struct _fat_ptr _T8;struct Cyc_Lexing_lexbuf*_T9;struct _fat_ptr _TA;struct Cyc_Lexing_lexbuf*_TB;int _TC;struct _fat_ptr _TD;int _TE;unsigned long _TF;struct _fat_ptr _T10;int _T11;char*_T12;char*_T13;unsigned _T14;unsigned char*_T15;char*_T16;struct _fat_ptr _T17;_T0=lbuf;_T1=_T0->lex_curr_pos;_T2=lbuf;_T3=_T2->lex_start_pos;{
+struct _fat_ptr Cyc_Lexing_rlexeme(struct _RegionHandle*r,struct Cyc_Lexing_lexbuf*lbuf){struct Cyc_Lexing_lexbuf*_T0;int _T1;struct Cyc_Lexing_lexbuf*_T2;int _T3;struct _RegionHandle*_T4;int _T5;unsigned _T6;struct _fat_ptr _T7;struct _fat_ptr _T8;struct Cyc_Lexing_lexbuf*_T9;struct _fat_ptr _TA;struct Cyc_Lexing_lexbuf*_TB;int _TC;struct _fat_ptr _TD;int _TE;unsigned long _TF;struct _fat_ptr _T10;int _T11;unsigned char*_T12;char*_T13;unsigned _T14;unsigned char*_T15;char*_T16;struct _fat_ptr _T17;_T0=lbuf;_T1=_T0->lex_curr_pos;_T2=lbuf;_T3=_T2->lex_start_pos;{
 int len=_T1 - _T3;_T4=r;_T5=len + 1;_T6=(unsigned)_T5;{
 struct _fat_ptr s=Cyc_Core_rnew_string(_T4,_T6);_T7=s;_T8=
 _fat_ptr_decrease_size(_T7,sizeof(char),1U);_T9=lbuf;_TA=_T9->lex_buffer;_TB=lbuf;_TC=_TB->lex_start_pos;_TD=_fat_ptr_plus(_TA,sizeof(char),_TC);_TE=len;_TF=(unsigned long)_TE;Cyc_zstrncpy(_T8,_TD,_TF);_T10=s;_T11=len;{struct _fat_ptr _T18=_fat_ptr_plus(_T10,sizeof(char),_T11);_T12=_check_fat_subscript(_T18,sizeof(char),0U);_T13=(char*)_T12;{char _T19=*_T13;char _T1A='\000';_T14=_get_fat_size(_T18,sizeof(char));if(_T14!=1U)goto _TL6;if(_T19!=0)goto _TL6;if(_T1A==0)goto _TL6;_throw_arraybounds();goto _TL7;_TL6: _TL7: _T15=_T18.curr;_T16=(char*)_T15;*_T16=_T1A;}}_T17=s;
@@ -436,7 +436,7 @@ return _T17;}}}
 struct _fat_ptr Cyc_Lexing_lexeme(struct Cyc_Lexing_lexbuf*lbuf){struct _fat_ptr _T0;_T0=
 Cyc_Lexing_rlexeme(Cyc_Core_heap_region,lbuf);return _T0;}
 # 151
-char Cyc_Lexing_lexeme_char(struct Cyc_Lexing_lexbuf*lbuf,int i){struct Cyc_Lexing_lexbuf*_T0;struct _fat_ptr _T1;struct Cyc_Lexing_lexbuf*_T2;int _T3;int _T4;int _T5;char*_T6;char*_T7;char _T8;_T0=lbuf;_T1=_T0->lex_buffer;_T2=lbuf;_T3=_T2->lex_start_pos;_T4=i;_T5=_T3 + _T4;_T6=_check_fat_subscript(_T1,sizeof(char),_T5);_T7=(char*)_T6;_T8=*_T7;
+char Cyc_Lexing_lexeme_char(struct Cyc_Lexing_lexbuf*lbuf,int i){struct Cyc_Lexing_lexbuf*_T0;struct _fat_ptr _T1;struct Cyc_Lexing_lexbuf*_T2;int _T3;int _T4;int _T5;unsigned char*_T6;char*_T7;char _T8;_T0=lbuf;_T1=_T0->lex_buffer;_T2=lbuf;_T3=_T2->lex_start_pos;_T4=i;_T5=_T3 + _T4;_T6=_check_fat_subscript(_T1,sizeof(char),_T5);_T7=(char*)_T6;_T8=*_T7;
 return _T8;}
 # 154
 int Cyc_Lexing_lexeme_start(struct Cyc_Lexing_lexbuf*lbuf){struct Cyc_Lexing_lexbuf*_T0;int _T1;struct Cyc_Lexing_lexbuf*_T2;int _T3;int _T4;_T0=lbuf;_T1=_T0->lex_abs_pos;_T2=lbuf;_T3=_T2->lex_start_pos;_T4=_T1 + _T3;
