@@ -1001,13 +1001,14 @@ static exp_t make_toplevel_dyn_arr(type_t t, exp_t sz, exp_t e) {
     type_t    vd_typ = array_type(char_type,mt_tq,sz,false_type,DL);
     vardecl_t vd     = static_vardecl(x,vd_typ,e);
     result_decls = new List(new_decl(new Var_d(vd),DL),result_decls);
-    xexp = set_type(var_exp(x,DL),cstar_type(char_type,mt_tq));
-    xplussz = set_type(add_exp(xexp,sz,DL),cstar_type(char_type,mt_tq));
+    xexp = cast_it(cstar_type(uchar_type,mt_tq),
+                   set_type(var_exp(x,DL),cstar_type(char_type,mt_tq)));
+    xplussz = set_type(add_exp(xexp,sz,DL),cstar_type(uchar_type,mt_tq));
     break;
   default:
-    xexp = set_type(cast_it(void_star_type(),e),void_star_type());
+    xexp = cast_it(void_star_type(),e);
     // Note: If e is NULL, element size of 0 is fine!
-    xplussz = cast_it(void_star_type(),add_exp(e,sz,DL));
+    xplussz = cast_it(void_star_type(),add_exp(copy_exp(e),sz,DL));
     break;
   }
   return unresolvedmem_exp(NULL,list(new $(NULL,xexp),

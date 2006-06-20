@@ -741,12 +741,12 @@ if(!_T5)goto _TL4B;_T4=Cyc_Absyn_ushort_type;goto _TL4C;_TL4B: _T4=Cyc_Absyn_ssh
 # 396
 if(!_T7)goto _TL4D;_T6=Cyc_Absyn_uint_type;goto _TL4E;_TL4D: _T6=Cyc_Absyn_sint_type;_TL4E: return _T6;};}static char _TmpG0[4U]="exn";
 # 401
-static struct _fat_ptr Cyc_Absyn_exn_str={_TmpG0,_TmpG0,_TmpG0 + 4U};
+static struct _fat_ptr Cyc_Absyn_exn_str={(unsigned char*)_TmpG0,(unsigned char*)_TmpG0,(unsigned char*)_TmpG0 + 4U};
 static struct _tuple0 Cyc_Absyn_exn_name_v={.f0={.Abs_n={1,0}},.f1=(struct _fat_ptr*)& Cyc_Absyn_exn_str};
 struct _tuple0*Cyc_Absyn_exn_name=& Cyc_Absyn_exn_name_v;static char _TmpG1[15U]="Null_Exception";static char _TmpG2[13U]="Array_bounds";static char _TmpG3[16U]="Match_Exception";static char _TmpG4[10U]="Bad_alloc";
 # 405
 struct Cyc_Absyn_Datatypedecl*Cyc_Absyn_exn_tud (void){int _T0;unsigned _T1;struct Cyc_List_List*_T2;struct Cyc_Absyn_Datatypefield*_T3;struct _tuple0*_T4;struct _fat_ptr*_T5;struct _fat_ptr*_T6;int _T7;struct Cyc_Absyn_Datatypedecl*_T8;struct Cyc_Core_Opt*_T9;struct Cyc_Absyn_Datatypedecl*_TA;
-static struct _fat_ptr builtin_exns[4U]={{_TmpG1,_TmpG1,_TmpG1 + 15U},{_TmpG2,_TmpG2,_TmpG2 + 13U},{_TmpG3,_TmpG3,_TmpG3 + 16U},{_TmpG4,_TmpG4,_TmpG4 + 10U}};
+static struct _fat_ptr builtin_exns[4U]={{(unsigned char*)_TmpG1,(unsigned char*)_TmpG1,(unsigned char*)_TmpG1 + 15U},{(unsigned char*)_TmpG2,(unsigned char*)_TmpG2,(unsigned char*)_TmpG2 + 13U},{(unsigned char*)_TmpG3,(unsigned char*)_TmpG3,(unsigned char*)_TmpG3 + 16U},{(unsigned char*)_TmpG4,(unsigned char*)_TmpG4,(unsigned char*)_TmpG4 + 10U}};
 # 408
 static struct Cyc_Absyn_Datatypedecl*tud_opt=0;
 if(tud_opt!=0)goto _TL4F;{
@@ -1402,7 +1402,7 @@ decls=_T9->tl;goto _TLC3;_TLC2:
 # 1129
 struct _fat_ptr*Cyc_Absyn_fieldname(int i){struct _fat_ptr _T0;int _T1;unsigned _T2;unsigned _T3;struct _fat_ptr _T4;int _T5;struct _fat_ptr**_T6;unsigned _T7;int _T8;unsigned _T9;struct _fat_ptr _TA;unsigned _TB;int _TC;unsigned char*_TD;struct _fat_ptr**_TE;unsigned _TF;struct _fat_ptr*_T10;struct _fat_ptr _T11;struct Cyc_Int_pa_PrintArg_struct _T12;unsigned _T13;int _T14;struct _fat_ptr _T15;struct _fat_ptr _T16;struct _fat_ptr _T17;int _T18;unsigned char*_T19;struct _fat_ptr**_T1A;struct _fat_ptr*_T1B;
 # 1131
-static struct _fat_ptr f0={_TmpG5,_TmpG5,_TmpG5 + 3U};
+static struct _fat_ptr f0={(unsigned char*)_TmpG5,(unsigned char*)_TmpG5,(unsigned char*)_TmpG5 + 3U};
 static struct _fat_ptr*field_names_v[1U]={(struct _fat_ptr*)& f0};
 static struct _fat_ptr field_names={(void*)field_names_v,(void*)field_names_v,(void*)(field_names_v + 1U)};_T0=field_names;{
 unsigned fsz=_get_fat_size(_T0,sizeof(struct _fat_ptr*));_T1=i;_T2=(unsigned)_T1;_T3=fsz;

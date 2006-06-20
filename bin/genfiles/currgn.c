@@ -394,7 +394,7 @@ void Cyc_Warn_err2(unsigned,struct _fat_ptr);
 static struct Cyc_Absyn_Tvar*Cyc_CurRgn_curr_tvar=0;
 static void*Cyc_CurRgn_curr_rgn_typ=0;static char _TmpG0[3U]="`C";
 # 36
-struct _fat_ptr Cyc_CurRgn_curr_rgn_name={_TmpG0,_TmpG0,_TmpG0 + 3U};
+struct _fat_ptr Cyc_CurRgn_curr_rgn_name={(unsigned char*)_TmpG0,(unsigned char*)_TmpG0,(unsigned char*)_TmpG0 + 3U};
 # 38
 struct Cyc_Absyn_Tvar*Cyc_CurRgn_curr_rgn_tvar (void){struct Cyc_Absyn_Tvar*_T0;struct _fat_ptr*_T1;struct Cyc_Absyn_Kind*_T2;struct Cyc_Absyn_Kind*_T3;struct Cyc_Absyn_Tvar*_T4;
 if(Cyc_CurRgn_curr_tvar!=0)goto _TL0;{struct Cyc_Absyn_Tvar*_T5=_cycalloc(sizeof(struct Cyc_Absyn_Tvar));{struct _fat_ptr*_T6=_cycalloc(sizeof(struct _fat_ptr));

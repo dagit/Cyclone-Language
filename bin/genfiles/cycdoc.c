@@ -561,7 +561,7 @@ static struct Cyc_List_List*Cyc_cycargs=0;
 static void Cyc_add_cycarg(struct _fat_ptr s){struct Cyc_List_List*_T0;struct _fat_ptr*_T1;{struct Cyc_List_List*_T2=_cycalloc(sizeof(struct Cyc_List_List));{struct _fat_ptr*_T3=_cycalloc(sizeof(struct _fat_ptr));
 *_T3=s;_T1=(struct _fat_ptr*)_T3;}_T2->hd=_T1;_T2->tl=Cyc_cycargs;_T0=(struct Cyc_List_List*)_T2;}Cyc_cycargs=_T0;}static char _TmpG0[8U]="cyclone";
 # 140
-static struct _fat_ptr Cyc_cyclone_file={_TmpG0,_TmpG0,_TmpG0 + 8U};
+static struct _fat_ptr Cyc_cyclone_file={(unsigned char*)_TmpG0,(unsigned char*)_TmpG0,(unsigned char*)_TmpG0 + 8U};
 static void Cyc_set_cyclone_file(struct _fat_ptr s){
 Cyc_cyclone_file=s;}
 # 146

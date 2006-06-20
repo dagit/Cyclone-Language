@@ -358,7 +358,7 @@ extern void*Cyc___assert_fail(struct _fat_ptr,struct _fat_ptr,unsigned);
 # 15 "xp.h"
 int Cyc_XP_quotient(int,struct _fat_ptr,struct _fat_ptr,int);static char _TmpG0[37U]="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 # 7 "xp.cyc"
-static struct _fat_ptr Cyc_digits={_TmpG0,_TmpG0,_TmpG0 + 37U};
+static struct _fat_ptr Cyc_digits={(unsigned char*)_TmpG0,(unsigned char*)_TmpG0,(unsigned char*)_TmpG0 + 37U};
 static char Cyc_map[75U]={'\000','\001','\002','\003','\004','\005','\006','\a','\b','\t','$','$','$','$','$','$','$','\n','\v','\f','\r','\016','\017','\020','\021','\022','\023','\024','\025','\026','\027','\030','\031','\032','\033','\034','\035','\036','\037',' ','!','"','#','$','$','$','$','$','$','\n','\v','\f','\r','\016','\017','\020','\021','\022','\023','\024','\025','\026','\027','\030','\031','\032','\033','\034','\035','\036','\037',' ','!','"','#'};
 # 17
 unsigned long Cyc_XP_fromint(int n,struct _fat_ptr z,unsigned long u){struct _fat_ptr _T0;int _T1;int _T2;unsigned char*_T3;unsigned char*_T4;unsigned long _T5;unsigned long _T6;struct _fat_ptr _T7;int _T8;unsigned char*_T9;unsigned char*_TA;unsigned long _TB;

@@ -358,7 +358,7 @@ static struct _tuple0 Cyc_Position_seg_to_loc(unsigned);
 # 31
 int Cyc_Position_use_gcc_style_location=1;static char _TmpG0[1U]="";
 # 34
-static struct _fat_ptr Cyc_Position_source={_TmpG0,_TmpG0,_TmpG0 + 1U};
+static struct _fat_ptr Cyc_Position_source={(unsigned char*)_TmpG0,(unsigned char*)_TmpG0,(unsigned char*)_TmpG0 + 1U};
 # 36
 unsigned Cyc_Position_segment_join(unsigned s1,unsigned s2){unsigned _T0;unsigned _T1;unsigned _T2;
 if(s1!=0U)goto _TL0;_T0=s2;return _T0;_TL0:

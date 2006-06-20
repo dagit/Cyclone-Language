@@ -554,9 +554,9 @@ _tag_fat("(%s%s%s)",sizeof(char),9U);_T55=_tag_fat(_TCB,sizeof(void*),3);_T50=Cy
 # 119
 _TC8.f1=Cyc_Absynpp_typ2string(tp);_T5A=_TC8;}{struct Cyc_String_pa_PrintArg_struct _TC8=_T5A;{struct Cyc_String_pa_PrintArg_struct _TC9;_TC9.tag=0;_TC9.f1=Cyc_AssnDef_term2string_i(tm,seen,depth);_T5B=_TC9;}{struct Cyc_String_pa_PrintArg_struct _TC9=_T5B;void*_TCA[2];_TCA[0]=& _TC8;_TCA[1]=& _TC9;_T5C=_tag_fat("(%s)%s",sizeof(char),7U);_T5D=_tag_fat(_TCA,sizeof(void*),2);_T59=Cyc_aprintf(_T5C,_T5D);}}res=_T59;goto _LL0;}case 8: _T5E=t;{struct Cyc_AssnDef_Aggr_AssnDef_Term_struct*_TC8=(struct Cyc_AssnDef_Aggr_AssnDef_Term_struct*)_T5E;_TC3=_TC8->f1;_TC7=_TC8->f2;_TC6=_TC8->f3;}{int is_union=_TC3;unsigned tag=_TC7;struct Cyc_List_List*tms=_TC6;
 # 121
-static struct _fat_ptr lb={_TmpG2,_TmpG2,_TmpG2 + 2U};
-static struct _fat_ptr rb={_TmpG1,_TmpG1,_TmpG1 + 2U};
-static struct _fat_ptr comma={_TmpG0,_TmpG0,_TmpG0 + 2U};
+static struct _fat_ptr lb={(unsigned char*)_TmpG2,(unsigned char*)_TmpG2,(unsigned char*)_TmpG2 + 2U};
+static struct _fat_ptr rb={(unsigned char*)_TmpG1,(unsigned char*)_TmpG1,(unsigned char*)_TmpG1 + 2U};
+static struct _fat_ptr comma={(unsigned char*)_TmpG0,(unsigned char*)_TmpG0,(unsigned char*)_TmpG0 + 2U};
 struct Cyc_List_List*ss;ss=_cycalloc(sizeof(struct Cyc_List_List));_T5F=ss;_T60=& lb;_T5F->hd=(struct _fat_ptr*)_T60;_T61=ss;_T61->tl=0;
 _TLC: if(tms!=0)goto _TLA;else{goto _TLB;}
 _TLA: _T62=tms;_T63=_T62->hd;_T64=seen;_T65=depth;{struct _fat_ptr s=Cyc_AssnDef_term2string_i(_T63,_T64,_T65);{struct Cyc_List_List*_TC8=_cycalloc(sizeof(struct Cyc_List_List));{struct _fat_ptr*_TC9=_cycalloc(sizeof(struct _fat_ptr));
@@ -1271,8 +1271,8 @@ Cyc_AssnDef_hash_cons_term(_TD);return _TE;}}
 void*Cyc_AssnDef_numelts_term(void*t){void*_T0;_T0=
 Cyc_AssnDef_unop(18U,t,Cyc_Absyn_uint_type);return _T0;}static char _TmpG3[5U]="#Mem";
 # 1030
-static struct _fat_ptr Cyc_AssnDef_memory_var={_TmpG3,_TmpG3,_TmpG3 + 5U};static char _TmpG4[9U]="#Pre_Mem";
-static struct _fat_ptr Cyc_AssnDef_pre_memory_var={_TmpG4,_TmpG4,_TmpG4 + 9U};
+static struct _fat_ptr Cyc_AssnDef_memory_var={(unsigned char*)_TmpG3,(unsigned char*)_TmpG3,(unsigned char*)_TmpG3 + 5U};static char _TmpG4[9U]="#Pre_Mem";
+static struct _fat_ptr Cyc_AssnDef_pre_memory_var={(unsigned char*)_TmpG4,(unsigned char*)_TmpG4,(unsigned char*)_TmpG4 + 9U};
 static struct _tuple0 Cyc_AssnDef_memvar={.f0={.Abs_n={1,0}},.f1=(struct _fat_ptr*)& Cyc_AssnDef_memory_var};
 static struct _tuple0 Cyc_AssnDef_pre_memvar={.f0={.Abs_n={1,0}},.f1=(struct _fat_ptr*)& Cyc_AssnDef_pre_memory_var};
 static struct Cyc_Absyn_VoidCon_Absyn_TyCon_struct Cyc_AssnDef_void_con={0};
@@ -1285,7 +1285,7 @@ struct Cyc_Absyn_Vardecl Cyc_AssnDef_pre_memory_struct={Cyc_Absyn_Public,& Cyc_A
 # 1064
 struct Cyc_Absyn_Vardecl*Cyc_AssnDef_pre_memory=(struct Cyc_Absyn_Vardecl*)& Cyc_AssnDef_pre_memory_struct;static char _TmpG5[5U]="#Exn";
 # 1066
-static struct _fat_ptr Cyc_AssnDef_exception_var={_TmpG5,_TmpG5,_TmpG5 + 5U};
+static struct _fat_ptr Cyc_AssnDef_exception_var={(unsigned char*)_TmpG5,(unsigned char*)_TmpG5,(unsigned char*)_TmpG5 + 5U};
 static struct _tuple0 Cyc_AssnDef_exnvar={.f0={.Abs_n={1,0}},.f1=(struct _fat_ptr*)& Cyc_AssnDef_exception_var};
 # 1069
 struct Cyc_Absyn_Vardecl Cyc_AssnDef_exception_struct={Cyc_Absyn_Public,& Cyc_AssnDef_exnvar,0U,{0,0,0,0,0U},(void*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)& Cyc_AssnDef_vd_type),0,0,0,0,0,0};

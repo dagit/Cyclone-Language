@@ -525,10 +525,10 @@ static int Cyc_Absynpp_expand_typedefs;
 # 71
 static int Cyc_Absynpp_qvar_to_Cids;static char _TmpG0[4U]="Cyc";
 # 73
-struct _fat_ptr Cyc_Absynpp_cyc_string={_TmpG0,_TmpG0,_TmpG0 + 4U};
+struct _fat_ptr Cyc_Absynpp_cyc_string={(unsigned char*)_TmpG0,(unsigned char*)_TmpG0,(unsigned char*)_TmpG0 + 4U};
 struct _fat_ptr*Cyc_Absynpp_cyc_stringptr=(struct _fat_ptr*)& Cyc_Absynpp_cyc_string;static char _TmpG1[14U]="__NoCycPrefix";
 # 77
-static struct _fat_ptr Cyc_Absynpp_nocyc_str={_TmpG1,_TmpG1,_TmpG1 + 14U};
+static struct _fat_ptr Cyc_Absynpp_nocyc_str={(unsigned char*)_TmpG1,(unsigned char*)_TmpG1,(unsigned char*)_TmpG1 + 14U};
 static struct _fat_ptr*Cyc_Absynpp_nocyc_strptr=(struct _fat_ptr*)& Cyc_Absynpp_nocyc_str;
 # 81
 static int Cyc_Absynpp_add_cyc_prefix;
@@ -683,9 +683,9 @@ i=i + 1;goto _TL28;_TL27:;}_TE4=t;
 return _TE4;}}}}static char _TmpG2[6U]="const";static char _TmpG3[9U]="volatile";static char _TmpG4[9U]="restrict";
 # 382
 struct Cyc_PP_Doc*Cyc_Absynpp_tqual2doc(struct Cyc_Absyn_Tqual tq){struct Cyc_Absyn_Tqual _T0;int _T1;struct Cyc_List_List*_T2;struct _fat_ptr*_T3;struct Cyc_Absyn_Tqual _T4;int _T5;struct Cyc_List_List*_T6;struct _fat_ptr*_T7;struct Cyc_Absyn_Tqual _T8;int _T9;struct Cyc_List_List*_TA;struct _fat_ptr*_TB;struct _fat_ptr _TC;struct _fat_ptr _TD;struct _fat_ptr _TE;struct Cyc_List_List*(*_TF)(struct Cyc_PP_Doc*(*)(struct _fat_ptr*),struct Cyc_List_List*);struct Cyc_List_List*(*_T10)(void*(*)(void*),struct Cyc_List_List*);struct Cyc_PP_Doc*(*_T11)(struct _fat_ptr*);struct Cyc_List_List*_T12;struct Cyc_List_List*_T13;struct Cyc_PP_Doc*_T14;
-static struct _fat_ptr restrict_string={_TmpG4,_TmpG4,_TmpG4 + 9U};
-static struct _fat_ptr volatile_string={_TmpG3,_TmpG3,_TmpG3 + 9U};
-static struct _fat_ptr const_string={_TmpG2,_TmpG2,_TmpG2 + 6U};
+static struct _fat_ptr restrict_string={(unsigned char*)_TmpG4,(unsigned char*)_TmpG4,(unsigned char*)_TmpG4 + 9U};
+static struct _fat_ptr volatile_string={(unsigned char*)_TmpG3,(unsigned char*)_TmpG3,(unsigned char*)_TmpG3 + 9U};
+static struct _fat_ptr const_string={(unsigned char*)_TmpG2,(unsigned char*)_TmpG2,(unsigned char*)_TmpG2 + 6U};
 struct Cyc_List_List*l=0;_T0=tq;_T1=_T0.q_restrict;
 if(!_T1)goto _TL5A;{struct Cyc_List_List*_T15=_cycalloc(sizeof(struct Cyc_List_List));_T3=& restrict_string;_T15->hd=(struct _fat_ptr*)_T3;_T15->tl=l;_T2=(struct Cyc_List_List*)_T15;}l=_T2;goto _TL5B;_TL5A: _TL5B: _T4=tq;_T5=_T4.q_volatile;
 if(!_T5)goto _TL5C;{struct Cyc_List_List*_T15=_cycalloc(sizeof(struct Cyc_List_List));_T7=& volatile_string;_T15->hd=(struct _fat_ptr*)_T7;_T15->tl=l;_T6=(struct Cyc_List_List*)_T15;}l=_T6;goto _TL5D;_TL5C: _TL5D: _T8=tq;_T9=_T8.print_const;

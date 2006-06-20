@@ -527,8 +527,8 @@ extern struct _fat_ptr Cyc_Specsfile_find_in_arch_path(struct _fat_ptr);
 # 78 "buildlib.cyl"
 extern void Cyc_Lex_lex_init(int);static char _TmpG0[4U]="gcc";
 # 88
-static struct _fat_ptr Cyc_cyclone_cc={_TmpG0,_TmpG0,_TmpG0 + 4U};static char _TmpG1[1U]="";
-static struct _fat_ptr Cyc_target_cflags={_TmpG1,_TmpG1,_TmpG1 + 1U};
+static struct _fat_ptr Cyc_cyclone_cc={(unsigned char*)_TmpG0,(unsigned char*)_TmpG0,(unsigned char*)_TmpG0 + 4U};static char _TmpG1[1U]="";
+static struct _fat_ptr Cyc_target_cflags={(unsigned char*)_TmpG1,(unsigned char*)_TmpG1,(unsigned char*)_TmpG1 + 1U};
 # 91
 static int Cyc_do_setjmp=0;
 static int Cyc_verbose=0;
@@ -598,7 +598,7 @@ int Cyc_numdef=0;
 # 173
 static struct Cyc_List_List*Cyc_cppargs=0;static char _TmpG2[14U]="BUILDLIB_sym_";
 # 175
-struct _fat_ptr Cyc_user_prefix={_TmpG2,_TmpG2,_TmpG2 + 14U};
+struct _fat_ptr Cyc_user_prefix={(unsigned char*)_TmpG2,(unsigned char*)_TmpG2,(unsigned char*)_TmpG2 + 14U};
 static struct _fat_ptr*Cyc_add_user_prefix(struct _fat_ptr*symbol){struct _fat_ptr _T0;struct _fat_ptr*_T1;struct _fat_ptr _T2;struct _fat_ptr _T3;struct _fat_ptr*_T4;_T0=Cyc_user_prefix;_T1=symbol;_T2=*_T1;_T3=
 Cyc_strconcat(_T0,_T2);{struct _fat_ptr s=_T3;{struct _fat_ptr*_T5=_cycalloc(sizeof(struct _fat_ptr));
 *_T5=s;_T4=(struct _fat_ptr*)_T5;}return _T4;}}
@@ -2317,7 +2317,7 @@ return 1;_TL223:
 # 1948
  return 0;}}}static char _TmpG3[13U]="BUILDLIB.OUT";
 # 1952
-static struct _fat_ptr Cyc_output_dir={_TmpG3,_TmpG3,_TmpG3 + 13U};
+static struct _fat_ptr Cyc_output_dir={(unsigned char*)_TmpG3,(unsigned char*)_TmpG3,(unsigned char*)_TmpG3 + 13U};
 static void Cyc_set_output_dir(struct _fat_ptr s){
 Cyc_output_dir=s;}
 # 1956

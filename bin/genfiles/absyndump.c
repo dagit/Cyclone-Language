@@ -465,7 +465,7 @@ static int Cyc_Absyndump_generate_line_directives;
 # 52
 static int Cyc_Absyndump_to_VC;static char _TmpG0[14U]="__NoCycPrefix";
 # 54
-static struct _fat_ptr Cyc_Absyndump_nocyc_str={_TmpG0,_TmpG0,_TmpG0 + 14U};
+static struct _fat_ptr Cyc_Absyndump_nocyc_str={(unsigned char*)_TmpG0,(unsigned char*)_TmpG0,(unsigned char*)_TmpG0 + 14U};
 static struct _fat_ptr*Cyc_Absyndump_nocyc_strptr=(struct _fat_ptr*)& Cyc_Absyndump_nocyc_str;
 # 57
 void Cyc_Absyndump_set_params(struct Cyc_Absynpp_Params*fs){struct Cyc_Absynpp_Params*_T0;struct Cyc_Absynpp_Params*_T1;struct Cyc_Absynpp_Params*_T2;struct Cyc_Absynpp_Params*_T3;struct Cyc_Absynpp_Params*_T4;_T0=fs;
@@ -532,7 +532,7 @@ Cyc_fputc(_T0,_T2);_T3=c;
 Cyc_Absyndump_prev_char=(char)_T3;}static char _TmpG1[1U]="";
 # 159
 static void Cyc_Absyndump_dumploc(unsigned loc){int _T0;struct _fat_ptr _T1;unsigned char*_T2;char*_T3;struct _fat_ptr _T4;unsigned char*_T5;char*_T6;struct _fat_ptr _T7;unsigned char*_T8;char*_T9;struct _fat_ptr _TA;unsigned char*_TB;char*_TC;struct _fat_ptr _TD;unsigned char*_TE;char*_TF;unsigned _T10;unsigned _T11;struct Cyc___cycFILE**_T12;struct Cyc___cycFILE*_T13;struct _fat_ptr _T14;struct _fat_ptr _T15;struct _fat_ptr _T16;unsigned char*_T17;char*_T18;struct _fat_ptr _T19;unsigned char*_T1A;char*_T1B;struct Cyc_Int_pa_PrintArg_struct _T1C;unsigned _T1D;int _T1E;struct Cyc___cycFILE**_T1F;struct Cyc___cycFILE*_T20;struct _fat_ptr _T21;struct _fat_ptr _T22;struct Cyc_Int_pa_PrintArg_struct _T23;unsigned _T24;int _T25;struct Cyc_String_pa_PrintArg_struct _T26;struct Cyc___cycFILE**_T27;struct Cyc___cycFILE*_T28;struct _fat_ptr _T29;struct _fat_ptr _T2A;
-static struct _fat_ptr last_file={_TmpG1,_TmpG1,_TmpG1 + 1U};
+static struct _fat_ptr last_file={(unsigned char*)_TmpG1,(unsigned char*)_TmpG1,(unsigned char*)_TmpG1 + 1U};
 static unsigned last_line=0U;
 static unsigned last_loc=0U;_T0=Cyc_Absyndump_generate_line_directives;
 if(_T0)goto _TL9;else{goto _TLB;}_TLB: return;_TL9:

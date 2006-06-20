@@ -542,7 +542,7 @@ int Cyc_PrattProver_constraint_prove(void*,void*);
 # 45 "vcgen.h"
 extern struct Cyc_AssnDef_AssnMap Cyc_Vcgen_clause2assn(struct Cyc_Absyn_Exp*);static char _TmpG0[1U]="";
 # 49 "tc.cyc"
-static struct _fat_ptr Cyc_Tc_tc_msg_c={_TmpG0,_TmpG0,_TmpG0 + 1U};
+static struct _fat_ptr Cyc_Tc_tc_msg_c={(unsigned char*)_TmpG0,(unsigned char*)_TmpG0,(unsigned char*)_TmpG0 + 1U};
 static struct _fat_ptr*Cyc_Tc_tc_msg=(struct _fat_ptr*)& Cyc_Tc_tc_msg_c;struct _tuple14{unsigned f0;struct _tuple1*f1;int f2;};
 # 52
 static int Cyc_Tc_export_member(struct _tuple1*x,struct Cyc_List_List*exports){struct Cyc_List_List*_T0;void*_T1;struct _tuple1*_T2;struct _tuple14*_T3;struct _tuple14 _T4;struct _tuple1*_T5;int _T6;int _T7;struct _tuple14*_T8;struct Cyc_List_List*_T9;

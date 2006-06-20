@@ -1222,7 +1222,7 @@ _TB->f1=d;_T8=(struct Cyc_Absyn_Aggr_d_Absyn_Raw_decl_struct*)_TB;}_T9=(void*)_T
 static struct Cyc_List_List*Cyc_Interface_add_datatypedecl(struct _tuple0*x,struct Cyc_Absyn_Datatypedecl*d,struct Cyc_List_List*tds){struct Cyc_List_List*_T0;struct Cyc_Absyn_Datatype_d_Absyn_Raw_decl_struct*_T1;void*_T2;{struct Cyc_List_List*_T3=_cycalloc(sizeof(struct Cyc_List_List));{struct Cyc_Absyn_Datatype_d_Absyn_Raw_decl_struct*_T4=_cycalloc(sizeof(struct Cyc_Absyn_Datatype_d_Absyn_Raw_decl_struct));_T4->tag=6;
 _T4->f1=d;_T1=(struct Cyc_Absyn_Datatype_d_Absyn_Raw_decl_struct*)_T4;}_T2=(void*)_T1;_T3->hd=Cyc_Absyn_new_decl(_T2,0U);_T3->tl=tds;_T0=(struct Cyc_List_List*)_T3;}return _T0;}static char _TmpG0[2U]="_";
 # 997
-static struct _fat_ptr Cyc_Interface_us={_TmpG0,_TmpG0,_TmpG0 + 2U};
+static struct _fat_ptr Cyc_Interface_us={(unsigned char*)_TmpG0,(unsigned char*)_TmpG0,(unsigned char*)_TmpG0 + 2U};
 static struct _fat_ptr*Cyc_Interface_us_p=(struct _fat_ptr*)& Cyc_Interface_us;
 # 1000
 static struct _tuple12*Cyc_Interface_rewrite_datatypefield_type(struct _tuple12*x){struct _tuple12*_T0;struct Cyc_Absyn_VarType_Absyn_Type_struct*_T1;struct Cyc_Absyn_Tvar*_T2;struct Cyc_Absyn_Kind*_T3;struct Cyc_Absyn_Kind*_T4;{struct _tuple12*_T5=_cycalloc(sizeof(struct _tuple12));
