@@ -47,6 +47,10 @@ namespace RemoveAggrs;
 
 #define DL 0
 
+static exp_t deep_copy(exp_t e) {
+  return Tcutil::deep_copy_exp(true, e);
+}
+
 // same as aggrmember_e(e,f,DL) but when e is a deref_e(e1), replaces with
 // aggrarrow_e(e1,f,DL) (copied from toc.cyc)
 static exp_t member_exp(exp_t e, field_name_t f, seg_t loc) {
@@ -175,7 +179,7 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
     for(let dles2=dles; dles2 != NULL; dles2 = dles2->tl) {
       let &$(ds,field_exp) = dles2->hd;
       let f = designatorlist_to_fieldname(ds);
-      let field_dest = set_type(member_exp(copy_exp(dest),f,DL),
+      let field_dest = set_type(member_exp(deep_copy(dest),f,DL),
                                 (type_t)field_exp->topt);
       remove_aggrs_exp(Env(AggrField,field_dest),field_exp);
     }
@@ -226,7 +230,7 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
       // ignore designators b/c type-checker ensured they are trivial
       // (only repeat the fact that we have the ith element)
       let &$(_,field_exp) = dles2->hd;
-      let fielddest = set_type(subscript_exp(copy_exp(dest),
+      let fielddest = set_type(subscript_exp(deep_copy(dest),
                                              set_type(signed_int_exp(i,DL),
                                                       sint_type),DL),
                                dest_type);
@@ -265,7 +269,7 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
     }
     exp_t  lval = subscript_exp((exp_t)env.dest,set_type(var_exp(i,DL),uint_type),DL);
     set_type(lval,dest_type);
-    remove_aggrs_exp(Env(AggrField,copy_exp(lval)),body);
+    remove_aggrs_exp(Env(AggrField,deep_copy(lval)),body);
     stmt_t s = for_stmt(ea,eb,ec,exp_stmt(body,DL),DL);
     if(zero_term) { 
       // used to be in toc.cyc; has nothing to do with aggregate removal
@@ -274,7 +278,7 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
       // NB: we use new_exp here for the lhs to avoid sharing with the
       // occurrence of lhs above.
       // FIX: I removed a cast of the 0 -- may lead to gcc warnings
-      exp_t ex = assign_exp(subscript_exp(copy_exp((exp_t)env.dest),
+      exp_t ex = assign_exp(subscript_exp(deep_copy((exp_t)env.dest),
 					  set_type(var_exp(max,DL),sint_type),DL),
                             set_type(signed_int_exp(0,DL),sint_type),DL);
       s = seq_stmt(s,exp_stmt(ex,DL),DL);
@@ -311,7 +315,7 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
     did_assign = true; // b/c we pass env for e2 and e3
     noarray_remove_aggrs_exp(other_env,e1);
     noarray_remove_aggrs_exp(no_init(env),e2);
-    let env3 = Env(env.ctxt, (env.dest==NULL ? NULL : copy_exp(env.dest)));
+    let env3 = Env(env.ctxt, (env.dest==NULL ? NULL : deep_copy(env.dest)));
     noarray_remove_aggrs_exp(no_init(env3),e3); // avoid sharing dest!
     break;
 
@@ -347,10 +351,10 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
   default: Warn::impos2("bad exp after translation to C: ",e);
   }
   if(env.ctxt == AggrField && !did_assign)
-    e->r = assign_exp((exp_t)env.dest,copy_exp(e),DL)->r;
+    e->r = assign_exp((exp_t)env.dest,deep_copy(e),DL)->r;
   if(env.ctxt == NewDest && !did_assign) {
     e->r = assign_exp(set_type(deref_exp((exp_t)env.dest,DL),(type_t)e->topt),
-                      copy_exp(e),DL)->r;
+                      deep_copy(e),DL)->r;
   }
   return Result(res);
 }

@@ -490,9 +490,9 @@ void Cyc_Tcutil_deconstruct_type(void*);char Cyc_Interproc_Rebinding[10U]="Rebin
 # 31
 static struct Cyc_Interproc_Rebinding_exn_struct Cyc_Interproc_Rebinding_val={Cyc_Interproc_Rebinding};
 # 33
-struct _fat_ptr Cyc_Interproc_make_parg(struct _fat_ptr ap){struct _fat_ptr _T0;struct _fat_ptr _T1;void**_T2;unsigned _T3;struct _fat_ptr _T4;unsigned _T5;struct _fat_ptr _T6;unsigned char*_T7;void**_T8;unsigned _T9;int _TA;struct _fat_ptr _TB;_T1=ap;{unsigned _TC=
-_get_fat_size(_T1,sizeof(void*));_T3=_check_times(_TC,sizeof(void*));{void**_TD=_cycalloc(_T3);_T4=ap;{unsigned _TE=_get_fat_size(_T4,sizeof(void*));unsigned i;i=0;_TL3: if(i < _TE)goto _TL1;else{goto _TL2;}_TL1: _T5=i;_T6=ap;_T7=_T6.curr;_T8=(void**)_T7;_T9=i;_TA=(int)_T9;_TD[_T5]=_T8[_TA];i=i + 1;goto _TL3;_TL2:;}_T2=(void**)_TD;}_T0=_tag_fat(_T2,sizeof(void*),_TC);}{struct _fat_ptr ret=_T0;_TB=ret;
-return _TB;}}
+struct _fat_ptr Cyc_Interproc_make_parg(struct _fat_ptr ap){struct _fat_ptr _T0;struct _fat_ptr _T1;void**_T2;unsigned _T3;unsigned _T4;struct _fat_ptr _T5;unsigned char*_T6;void**_T7;unsigned _T8;int _T9;struct _fat_ptr _TA;_T1=ap;{unsigned _TB=
+_get_fat_size(_T1,sizeof(void*));_T3=_check_times(_TB,sizeof(void*));{void**_TC=_cycalloc(_T3);{unsigned _TD=_TB;unsigned i;i=0;_TL3: if(i < _TD)goto _TL1;else{goto _TL2;}_TL1: _T4=i;_T5=ap;_T6=_T5.curr;_T7=(void**)_T6;_T8=i;_T9=(int)_T8;_TC[_T4]=_T7[_T9];i=i + 1;goto _TL3;_TL2:;}_T2=(void**)_TC;}_T0=_tag_fat(_T2,sizeof(void*),_TB);}{struct _fat_ptr ret=_T0;_TA=ret;
+return _TA;}}
 # 38
 static struct _fat_ptr*Cyc_Interproc_cych_pfx=0;
 void Cyc_Interproc_set_inference_prefix(struct _fat_ptr pfx){struct _fat_ptr*_T0;{struct _fat_ptr*_T1=_cycalloc(sizeof(struct _fat_ptr));

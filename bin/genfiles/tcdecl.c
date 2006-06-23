@@ -410,17 +410,17 @@ struct _fat_ptr Cyc_Absynpp_scope2string(enum Cyc_Absyn_Scope);extern char Cyc_T
 void Cyc_Warn_verr(unsigned,struct _fat_ptr,struct _fat_ptr);char Cyc_Tcdecl_Incompatible[13U]="Incompatible";
 # 38 "tcdecl.cyc"
 struct Cyc_Tcdecl_Incompatible_exn_struct Cyc_Tcdecl_Incompatible_val={Cyc_Tcdecl_Incompatible};
-void Cyc_Tcdecl_merr(unsigned loc,struct _fat_ptr*msg1,struct _fat_ptr fmt,struct _fat_ptr ap){struct _fat_ptr*_T0;struct _fat_ptr _T1;unsigned long _T2;struct _fat_ptr _T3;struct _fat_ptr _T4;struct _fat_ptr _T5;struct _fat_ptr _T6;struct _fat_ptr _T7;struct _fat_ptr _T8;unsigned _T9;void**_TA;unsigned _TB;struct _fat_ptr _TC;unsigned _TD;unsigned _TE;struct Cyc_String_pa_PrintArg_struct*_TF;struct _fat_ptr*_T10;struct _fat_ptr _T11;unsigned _T12;struct _fat_ptr _T13;unsigned char*_T14;void**_T15;unsigned _T16;int _T17;
+void Cyc_Tcdecl_merr(unsigned loc,struct _fat_ptr*msg1,struct _fat_ptr fmt,struct _fat_ptr ap){struct _fat_ptr*_T0;struct _fat_ptr _T1;unsigned long _T2;struct _fat_ptr _T3;struct _fat_ptr _T4;struct _fat_ptr _T5;struct _fat_ptr _T6;struct _fat_ptr _T7;struct _fat_ptr _T8;unsigned _T9;void**_TA;unsigned _TB;unsigned _TC;struct Cyc_String_pa_PrintArg_struct*_TD;struct _fat_ptr*_TE;struct _fat_ptr _TF;unsigned _T10;struct _fat_ptr _T11;unsigned char*_T12;void**_T13;unsigned _T14;int _T15;
 # 42
 struct _fat_ptr fmt2;_T0=
 _check_null(msg1);_T1=*_T0;_T2=Cyc_strlen(_T1);if(_T2!=0U)goto _TL0;_T3=
 _tag_fat("%s",sizeof(char),3U);_T4=fmt;fmt2=Cyc_strconcat(_T3,_T4);goto _TL1;
 # 46
 _TL0: _T5=_tag_fat("%s ",sizeof(char),4U);_T6=fmt;fmt2=Cyc_strconcat(_T5,_T6);_TL1: _T8=ap;_T9=
-_get_fat_size(_T8,sizeof(void*));{unsigned _T18=_T9 + 1U;_TB=_check_times(_T18,sizeof(void*));{void**_T19=_cycalloc(_TB);_TC=ap;_TD=_get_fat_size(_TC,sizeof(void*));{unsigned _T1A=_TD + 1U;unsigned i;i=0;_TL5: if(i < _T1A)goto _TL3;else{goto _TL4;}_TL3:
- if(i!=0U)goto _TL6;_TE=i;{struct Cyc_String_pa_PrintArg_struct*_T1B=_cycalloc(sizeof(struct Cyc_String_pa_PrintArg_struct));_T1B->tag=0;_T10=msg1;_T11=*_T10;_T1B->f1=_T11;_TF=(struct Cyc_String_pa_PrintArg_struct*)_T1B;}_T19[_TE]=(void*)_TF;goto _TL7;_TL6: _T12=i;_T13=ap;_T14=_T13.curr;_T15=(void**)_T14;_T16=i - 1U;_T17=(int)_T16;_T19[_T12]=_T15[_T17];_TL7: i=i + 1;goto _TL5;_TL4:;}_TA=(void**)_T19;}_T7=
+_get_fat_size(_T8,sizeof(void*));{unsigned _T16=_T9 + 1U;_TB=_check_times(_T16,sizeof(void*));{void**_T17=_cycalloc(_TB);{unsigned _T18=_T16;unsigned i;i=0;_TL5: if(i < _T18)goto _TL3;else{goto _TL4;}_TL3:
+ if(i!=0U)goto _TL6;_TC=i;{struct Cyc_String_pa_PrintArg_struct*_T19=_cycalloc(sizeof(struct Cyc_String_pa_PrintArg_struct));_T19->tag=0;_TE=msg1;_TF=*_TE;_T19->f1=_TF;_TD=(struct Cyc_String_pa_PrintArg_struct*)_T19;}_T17[_TC]=(void*)_TD;goto _TL7;_TL6: _T10=i;_T11=ap;_T12=_T11.curr;_T13=(void**)_T12;_T14=i - 1U;_T15=(int)_T14;_T17[_T10]=_T13[_T15];_TL7: i=i + 1;goto _TL5;_TL4:;}_TA=(void**)_T17;}_T7=
 # 47
-_tag_fat(_TA,sizeof(void*),_T18);}{struct _fat_ptr ap2=_T7;
+_tag_fat(_TA,sizeof(void*),_T16);}{struct _fat_ptr ap2=_T7;
 # 49
 Cyc_Warn_verr(loc,fmt2,ap2);}}
 # 54

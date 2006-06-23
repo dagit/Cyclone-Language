@@ -2983,7 +2983,9 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
   case &Instantiate_e(e2,ts):  t = tcInstantiate(te,loc,topt,e2,ts); break;
   case &Cast_e(t1,e1,_,*c):    t = tcCast(te,loc,topt,t1,e1,c); break;
   case &Address_e(e1):         t = tcAddress(te,loc,e,topt,e1); break;
-  case &New_e(*rgn_handle,e1,*qual_hndl): t = tcNew(te,loc,topt,rgn_handle,qual_hndl,e,e1); break;
+  case &New_e(*rgn_handle,e1,*qual_hndl): 
+    t = tcNew(te,loc,topt,rgn_handle,qual_hndl,e,e1); 
+    break;
   case &Sizeofexp_e(e1):       fallthru(tcExpNoPromote(te, NULL, e1));
   case &Sizeoftype_e(t1):      t = tcSizeof(te,loc,topt,t1); break;
   case &Offsetof_e(t1,l):      t = tcOffsetof(te,loc,topt,t1,l); break;

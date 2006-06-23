@@ -31,6 +31,7 @@
 #include "lower.h"
 #include "toc.h"
 #include "unify.h"
+#include "tcutil.h"
 #include <string.h>
 
 namespace Lower;
@@ -76,6 +77,10 @@ static stmt_t rev_seq_stmts(list_t<stmt_t> ss) {
     }
   }
   return res;
+}
+
+static exp_t deep_copy(exp_t e) {
+  return Tcutil::deep_copy_exp(true,e);
 }
 
 // Debugging
@@ -446,12 +451,12 @@ static exp_t lower_rhs(env_t env, bool effect_only, bool has_target, exp_t e) {
     let v1 = lower_lhs(env,e1);
     if (popt != NULL) {
       let v2 = lower_rhs(env,false,false,e2);
-      emit_assign(env,v1,prim2_exp(popt->v,copy_exp(v1),v2,0),e->loc);
-      res = copy_exp(v1);
+      emit_assign(env,v1,prim2_exp(popt->v,deep_copy(v1),v2,0),e->loc);
+      res = deep_copy(v1);
     } else {
       let v2 = lower_rhs(env,false,true,e2);
       emit_assign(env,v1,v2,e->loc);
-      res = copy_exp(v1);
+      res = deep_copy(v1);
     }
     break;
   case &Increment_e(e1,incr):
@@ -459,25 +464,25 @@ static exp_t lower_rhs(env_t env, bool effect_only, bool has_target, exp_t e) {
     switch (incr) {
     case PostInc && effect_only:
     case PreInc:
-      emit_assign(env,v1,add_exp(copy_exp(v1),signed_int_exp(1,0),e->loc),e->loc);
-      res = copy_exp(v1);
+      emit_assign(env,v1,add_exp(deep_copy(v1),signed_int_exp(1,0),e->loc),e->loc);
+      res = deep_copy(v1);
       break;
     case PostDec && effect_only:
     case PreDec:
-      emit_assign(env,v1,add_exp(copy_exp(v1),signed_int_exp(-1,0),e->loc),e->loc);
-      res = copy_exp(v1);
+      emit_assign(env,v1,add_exp(deep_copy(v1),signed_int_exp(-1,0),e->loc),e->loc);
+      res = deep_copy(v1);
       break;
     case PostInc:
       let $(vd,temp) = fresh_var(env,e);
       emit_assign(env,temp,v1,0);
-      emit_assign(env,v1,add_exp(copy_exp(temp),signed_int_exp(1,0),e->loc),e->loc);
-      res = copy_exp(temp);
+      emit_assign(env,v1,add_exp(deep_copy(temp),signed_int_exp(1,0),e->loc),e->loc);
+      res = deep_copy(temp);
       break;
     default:
       let $(vd,temp) = fresh_var(env,e);
       emit_assign(env,temp,v1,0);
-      emit_assign(env,v1,add_exp(copy_exp(temp),signed_int_exp(-1,0),e->loc),e->loc);
-      res = copy_exp(temp);
+      emit_assign(env,v1,add_exp(deep_copy(temp),signed_int_exp(-1,0),e->loc),e->loc);
+      res = deep_copy(temp);
       break;
     }
     break;
@@ -490,8 +495,8 @@ static exp_t lower_rhs(env_t env, bool effect_only, bool has_target, exp_t e) {
       lower_stmt(env, 
                  ifthenelse_stmt(e1,
                                  assign_it(temp,e2,0),
-                                 assign_it(copy_exp(temp),e3,0),e->loc));
-      return copy_exp(temp);
+                                 assign_it(deep_copy(temp),e3,0),e->loc));
+      return deep_copy(temp);
     }
   case &And_e(e1,e2):
     if (effect_only) {
@@ -503,9 +508,9 @@ static exp_t lower_rhs(env_t env, bool effect_only, bool has_target, exp_t e) {
       lower_stmt(env,
                  ifthenelse_stmt(e1,
                                  assign_it(temp,e2,0),
-                                 assign_it(copy_exp(temp),
+                                 assign_it(deep_copy(temp),
                                            false_exp(0),0),e->loc));
-      return copy_exp(temp);
+      return deep_copy(temp);
     }
   case &Or_e(e1,e2):
     if (effect_only) {
@@ -517,9 +522,9 @@ static exp_t lower_rhs(env_t env, bool effect_only, bool has_target, exp_t e) {
       lower_stmt(env,
                  ifthenelse_stmt(e1,
                                  assign_it(temp,true_exp(0),0),
-                                 assign_it(copy_exp(temp),e2,0),
+                                 assign_it(deep_copy(temp),e2,0),
                                  e->loc));
-      return copy_exp(temp);
+      return deep_copy(temp);
     }
   case &SeqExp_e(e1,e2):
     lower_rhs(env, true, false, e1);
@@ -589,7 +594,7 @@ static exp_t lower_rhs(env_t env, bool effect_only, bool has_target, exp_t e) {
       set_assign_last_exp(env,temp);
       lower_stmt(env,s);
       set_assign_last_exp(env,eopt);
-      return copy_exp(temp);
+      return deep_copy(temp);
     }
     break;
   case &Instantiate_e(e,_): return lower_rhs(env,effect_only,has_target,e);

@@ -437,6 +437,7 @@ copy_eds(bool preserve_types,$(list_t<designator_t>,exp_t)@ e) {
 	       deep_copy_exp(preserve_types,(*e)[1]));
 }
 // does a deep copy, but not of vardecls, bindings
+stmt_t deep_copy_stmt(bool preserve_types, stmt_t s);
 exp_t deep_copy_exp(bool preserve_types, exp_t e) {
   let DC = deep_copy_exp;
   exp_t new_e;
@@ -529,8 +530,9 @@ exp_t deep_copy_exp(bool preserve_types, exp_t e) {
     if (nopt != NULL) nopt1 = new Opt(nopt->v);
     new_e = new_exp(new UnresolvedMem_e(nopt1,map_c(copy_eds,pt,eds)),e->loc);
     break;
-  case &StmtExp_e(_):
-    throw new Core::Failure("deep_copy: statement expressions unsupported");
+  case &StmtExp_e(s):
+    new_e = stmt_exp(deep_copy_stmt(pt,s),e->loc);
+    break;
   case &Tagcheck_e(e1, fn): 
     new_e = new_exp(new Tagcheck_e(DC(pt,e1),fn),e->loc); break;
   case &Valueof_e(t):     new_e = valueof_exp(copy_type(t),e->loc); break;
@@ -544,6 +546,79 @@ exp_t deep_copy_exp(bool preserve_types, exp_t e) {
     new_e->annot = e->annot;
   }
   return new_e;
+}
+
+static pat_t deep_copy_pattern(bool preserve_types, pat_t p) {
+  pat_t new_p = new (*p);
+  // FIX!!! need to copy pattern
+  return new_p;
+}
+
+static switch_clause_t deep_copy_switch_clause(bool preserve_types,
+                                               switch_clause_t sc) {
+  let new_sc = new (*sc);
+  new_sc->pattern = deep_copy_pattern(preserve_types,new_sc->pattern);
+  if (new_sc->where_clause != NULL) {
+    new_sc->where_clause = deep_copy_exp(preserve_types,
+                                         (exp_t)new_sc->where_clause);
+  }
+  new_sc->body = deep_copy_stmt(preserve_types,new_sc->body);
+  return new_sc;
+}
+
+static decl_t deep_copy_decl(bool preserve_types, decl_t d) {
+  // FIX!!! need to copy declaration and somehow fix up bindings!
+  let new_d = new (*d);
+  return new_d;
+}
+
+stmt_t deep_copy_stmt(bool preserve_types, stmt_t s) {
+  let DS = deep_copy_stmt;
+  let DE = deep_copy_exp;
+  let pt = preserve_types;
+  stmt_t new_s;
+  switch (s->r) {
+  case &Skip_s: new_s = skip_stmt(s->loc); break;
+  case &Exp_s(e): new_s = exp_stmt(DE(pt,e),s->loc); break;
+  case &Seq_s(s1,s2): new_s = seq_stmt(DS(pt,s1),DS(pt,s2),s->loc); break;
+  case &Return_s(eopt):
+    if (eopt == NULL)
+      new_s = return_stmt(NULL,s->loc);
+    else
+      new_s = return_stmt(DE(pt,(exp_t)eopt),s->loc);
+    break;
+  case &IfThenElse_s(e,s1,s2):
+    new_s = ifthenelse_stmt(DE(pt,e),DS(pt,s1),DS(pt,s2),s->loc);
+    break;
+  case &While_s($(e1,_),s2): 
+    new_s = while_stmt(DE(pt,e1),DS(pt,s2),s->loc); break;
+  case &Break_s: new_s = break_stmt(s->loc); break;
+  case &Continue_s: new_s = continue_stmt(s->loc); break;
+  case &Goto_s(x): new_s = goto_stmt(x,s->loc); break;
+  case &For_s(e1,$(e2,_),$(e3,_),s4):
+    new_s = for_stmt(DE(pt,e1),DE(pt,e2),DE(pt,e3),DS(pt,s4),s->loc);
+    break;
+  case &Switch_s(e,scs,tdopt):
+    new_s = switch_stmt(DE(pt,e),map_c(deep_copy_switch_clause,pt,scs),s->loc);
+    break;
+  case &Fallthru_s(es,scp):
+    new_s = fallthru_stmt(map_c(DE,pt,es),s->loc);
+    break;
+  case &Decl_s(d,s1):
+    new_s = decl_stmt(deep_copy_decl(pt,d),DS(pt,s1),s->loc); 
+    break;
+  case &Label_s(x,s1):
+    new_s = label_stmt(x,DS(pt,s1),s->loc);
+    break;
+  case &Do_s(s1,$(e,_)):
+    new_s = do_stmt(DS(pt,s1),DE(pt,e),s->loc);
+    break;
+  case &TryCatch_s(s1,scs,tdopt):
+    new_s = trycatch_stmt(DS(pt,s1),map_c(deep_copy_switch_clause,pt,scs),
+                          s->loc);
+    break;
+  }
+  return new_s;
 }
 
 // figures out the kind of a field in a struct or union; used

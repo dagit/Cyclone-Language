@@ -1400,21 +1400,21 @@ decls=_T9->tl;goto _TLC3;_TLC2:
 # 1126
  return 0;}static char _TmpG5[3U]="f0";
 # 1129
-struct _fat_ptr*Cyc_Absyn_fieldname(int i){struct _fat_ptr _T0;int _T1;unsigned _T2;unsigned _T3;struct _fat_ptr _T4;int _T5;struct _fat_ptr**_T6;unsigned _T7;int _T8;unsigned _T9;struct _fat_ptr _TA;unsigned _TB;int _TC;unsigned char*_TD;struct _fat_ptr**_TE;unsigned _TF;struct _fat_ptr*_T10;struct _fat_ptr _T11;struct Cyc_Int_pa_PrintArg_struct _T12;unsigned _T13;int _T14;struct _fat_ptr _T15;struct _fat_ptr _T16;struct _fat_ptr _T17;int _T18;unsigned char*_T19;struct _fat_ptr**_T1A;struct _fat_ptr*_T1B;
+struct _fat_ptr*Cyc_Absyn_fieldname(int i){struct _fat_ptr _T0;int _T1;unsigned _T2;unsigned _T3;struct _fat_ptr _T4;int _T5;struct _fat_ptr**_T6;unsigned _T7;unsigned _T8;struct _fat_ptr _T9;unsigned _TA;int _TB;unsigned char*_TC;struct _fat_ptr**_TD;unsigned _TE;struct _fat_ptr*_TF;struct _fat_ptr _T10;struct Cyc_Int_pa_PrintArg_struct _T11;unsigned _T12;int _T13;struct _fat_ptr _T14;struct _fat_ptr _T15;struct _fat_ptr _T16;int _T17;unsigned char*_T18;struct _fat_ptr**_T19;struct _fat_ptr*_T1A;
 # 1131
 static struct _fat_ptr f0={(unsigned char*)_TmpG5,(unsigned char*)_TmpG5,(unsigned char*)_TmpG5 + 3U};
 static struct _fat_ptr*field_names_v[1U]={(struct _fat_ptr*)& f0};
 static struct _fat_ptr field_names={(void*)field_names_v,(void*)field_names_v,(void*)(field_names_v + 1U)};_T0=field_names;{
 unsigned fsz=_get_fat_size(_T0,sizeof(struct _fat_ptr*));_T1=i;_T2=(unsigned)_T1;_T3=fsz;
-if(_T2 < _T3)goto _TLC7;_T5=i + 1;{unsigned _T1C=(unsigned)_T5;_T7=_check_times(_T1C,sizeof(struct _fat_ptr*));{struct _fat_ptr**_T1D=_cycalloc(_T7);_T8=i + 1;{unsigned _T1E=(unsigned)_T8;unsigned j;j=0;_TLCC: if(j < _T1E)goto _TLCA;else{goto _TLCB;}_TLCA:
+if(_T2 < _T3)goto _TLC7;_T5=i + 1;{unsigned _T1B=(unsigned)_T5;_T7=_check_times(_T1B,sizeof(struct _fat_ptr*));{struct _fat_ptr**_T1C=_cycalloc(_T7);{unsigned _T1D=_T1B;unsigned j;j=0;_TLCC: if(j < _T1D)goto _TLCA;else{goto _TLCB;}_TLCA:
 # 1138
- if(j >= fsz)goto _TLCD;_T9=j;_TA=field_names;_TB=j;_TC=(int)_TB;_TD=_check_fat_subscript(_TA,sizeof(struct _fat_ptr*),_TC);_TE=(struct _fat_ptr**)_TD;_T1D[_T9]=*_TE;goto _TLCE;_TLCD: _TF=j;{struct _fat_ptr*_T1F=_cycalloc(sizeof(struct _fat_ptr));{struct Cyc_Int_pa_PrintArg_struct _T20;_T20.tag=1;_T13=j;_T14=(int)_T13;_T20.f1=(unsigned long)_T14;_T12=_T20;}{struct Cyc_Int_pa_PrintArg_struct _T20=_T12;void*_T21[1];_T21[0]=& _T20;_T15=_tag_fat("f%d",sizeof(char),4U);_T16=_tag_fat(_T21,sizeof(void*),1);_T11=Cyc_aprintf(_T15,_T16);}*_T1F=_T11;_T10=(struct _fat_ptr*)_T1F;}_T1D[_TF]=_T10;_TLCE: j=j + 1;goto _TLCC;_TLCB:;}_T6=(struct _fat_ptr**)_T1D;}_T4=
+ if(j >= fsz)goto _TLCD;_T8=j;_T9=field_names;_TA=j;_TB=(int)_TA;_TC=_check_fat_subscript(_T9,sizeof(struct _fat_ptr*),_TB);_TD=(struct _fat_ptr**)_TC;_T1C[_T8]=*_TD;goto _TLCE;_TLCD: _TE=j;{struct _fat_ptr*_T1E=_cycalloc(sizeof(struct _fat_ptr));{struct Cyc_Int_pa_PrintArg_struct _T1F;_T1F.tag=1;_T12=j;_T13=(int)_T12;_T1F.f1=(unsigned long)_T13;_T11=_T1F;}{struct Cyc_Int_pa_PrintArg_struct _T1F=_T11;void*_T20[1];_T20[0]=& _T1F;_T14=_tag_fat("f%d",sizeof(char),4U);_T15=_tag_fat(_T20,sizeof(void*),1);_T10=Cyc_aprintf(_T14,_T15);}*_T1E=_T10;_TF=(struct _fat_ptr*)_T1E;}_T1C[_TE]=_TF;_TLCE: j=j + 1;goto _TLCC;_TLCB:;}_T6=(struct _fat_ptr**)_T1C;}_T4=
 # 1137
-_tag_fat(_T6,sizeof(struct _fat_ptr*),_T1C);}
+_tag_fat(_T6,sizeof(struct _fat_ptr*),_T1B);}
 # 1136
-field_names=_T4;goto _TLC8;_TLC7: _TLC8: _T17=field_names;_T18=i;_T19=_check_fat_subscript(_T17,sizeof(struct _fat_ptr*),_T18);_T1A=(struct _fat_ptr**)_T19;_T1B=*_T1A;
+field_names=_T4;goto _TLC8;_TLC7: _TLC8: _T16=field_names;_T17=i;_T18=_check_fat_subscript(_T16,sizeof(struct _fat_ptr*),_T17);_T19=(struct _fat_ptr**)_T18;_T1A=*_T19;
 # 1139
-return _T1B;}}struct _tuple16{enum Cyc_Absyn_AggrKind f0;struct _tuple0*f1;};
+return _T1A;}}struct _tuple16{enum Cyc_Absyn_AggrKind f0;struct _tuple0*f1;};
 # 1142
 struct _tuple16 Cyc_Absyn_aggr_kinded_name(union Cyc_Absyn_AggrInfo info){union Cyc_Absyn_AggrInfo _T0;struct _union_AggrInfo_UnknownAggr _T1;unsigned _T2;union Cyc_Absyn_AggrInfo _T3;struct _union_AggrInfo_UnknownAggr _T4;struct _tuple2 _T5;union Cyc_Absyn_AggrInfo _T6;struct _union_AggrInfo_UnknownAggr _T7;struct _tuple2 _T8;struct _tuple16 _T9;union Cyc_Absyn_AggrInfo _TA;struct _union_AggrInfo_KnownAggr _TB;struct Cyc_Absyn_Aggrdecl**_TC;struct _tuple16 _TD;struct _tuple0*_TE;enum Cyc_Absyn_AggrKind _TF;_T0=info;_T1=_T0.UnknownAggr;_T2=_T1.tag;if(_T2!=1)goto _TLCF;_T3=info;_T4=_T3.UnknownAggr;_T5=_T4.val;_TF=_T5.f0;_T6=info;_T7=_T6.UnknownAggr;_T8=_T7.val;_TE=_T8.f1;{enum Cyc_Absyn_AggrKind ak=_TF;struct _tuple0*n=_TE;{struct _tuple16 _T10;
 # 1144

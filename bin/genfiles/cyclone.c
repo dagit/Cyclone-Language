@@ -1185,7 +1185,7 @@ return _TA;_TLA6:
  if(single_quotes!=0)goto _TLA8;{struct _fat_ptr*_T38[3];{struct _fat_ptr*_T39=_cycalloc(sizeof(struct _fat_ptr));
 *_T39=_tag_fat("'",sizeof(char),2U);_TC=(struct _fat_ptr*)_T39;}_T38[0]=_TC;{struct _fat_ptr*_T39=_cycalloc(sizeof(struct _fat_ptr));_TE=s;*_T39=_TE;_TD=(struct _fat_ptr*)_T39;}_T38[1]=_TD;{struct _fat_ptr*_T39=_cycalloc(sizeof(struct _fat_ptr));*_T39=_tag_fat("'",sizeof(char),2U);_TF=(struct _fat_ptr*)_T39;}_T38[2]=_TF;_T10=_tag_fat(_T38,sizeof(struct _fat_ptr*),3);_TB=Cyc_List_list(_T10);}_T11=Cyc_strconcat_l(_TB);return _T11;_TLA8: _T12=len;_T13=single_quotes;_T14=(unsigned long)_T13;_T15=_T12 + _T14;_T16=other_special;_T17=(unsigned long)_T16;{
 # 784
-unsigned long len2=_T15 + _T17;_T19=len2 + 1U;{unsigned _T38=_T19 + 1U;_T1B=_check_times(_T38,sizeof(char));{char*_T39=_cycalloc_atomic(_T1B);{unsigned _T3A=len2 + 1U;unsigned i;i=0;_TLAD: if(i < _T3A)goto _TLAB;else{goto _TLAC;}_TLAB: _T1C=i;
+unsigned long len2=_T15 + _T17;_T19=len2 + 1U;{unsigned _T38=_T19 + 1U;_T1B=_check_times(_T38,sizeof(char));{char*_T39=_cycalloc_atomic(_T1B);{unsigned _T3A=_T38;unsigned i;i=0;_TLAD: if(i < _T3A)goto _TLAB;else{goto _TLAC;}_TLAB: _T1C=i;
 _T39[_T1C]='\000';i=i + 1;goto _TLAD;_TLAC: _T39[_T3A]=0;}_T1A=(char*)_T39;}_T18=_tag_fat(_T1A,sizeof(char),_T38);}{struct _fat_ptr s2=_T18;
 int i=0;
 int j=0;

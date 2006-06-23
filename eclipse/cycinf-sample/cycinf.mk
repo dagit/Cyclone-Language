@@ -7,7 +7,7 @@
 # Individual Cyclone projects may override these defaults
 
 CYCINF=cyclone-inf
-INFFLAGS=--inf --nomerge --ovfat -detailedlocation
+INFFLAGS=--inf --nomerge --ovfat -detailedlocation --nolower
 RESFLAGS=--resolve
 CFLAGS=
 
