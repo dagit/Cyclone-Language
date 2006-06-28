@@ -439,6 +439,8 @@ namespace Absyn {
     TypeDeclType(type_decl_t,type_t*);
     // GCC extensions
     TypeofType(exp_t);
+    // A subset (aka comprehension) type. 
+    SubsetType(vardecl_t vd, exp_t where, AssnDef::existassnfn_opt_t assn);
   };
 
   // Used in attributes below.

@@ -1498,6 +1498,9 @@ static void i_visit_type(bool (@f)(`a, type_t), `a env, type_t t, table_t<type_t
     if(tptr && *tptr) 
       i_visit_type(f, env, *tptr, seen);
     break;
+  case &SubsetType(vd,e,aopt):
+    i_visit_type(f, env, vd->type, seen);
+    break;
   case &ValueofType(_): 
   case &TypeofType(_): break;
   }

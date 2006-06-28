@@ -421,6 +421,11 @@ type_t copy_type(type_t t) {
   case &TypeDeclType(&{.r = &Datatype_td(dd),...},_):
     let targs = map(tvar2type,dd->tvs);
     return datatype_type(UnknownDatatype(UnknownDatatypeInfo{dd->name,false}),targs);
+  case &SubsetType(vd,w,a):
+    vardecl_t vd2 = (vardecl_t)copy_vardecl_opt(vd);
+    exp_t w2 = deep_copy_exp(true,w);
+    let a2 = a;
+    return new SubsetType(vd2,w2,a2);
   }
 }
 
@@ -659,6 +664,7 @@ kind_t type_kind(type_t t) {
   case &Cvar(k,...): fallthru(k);
   case &Evar(k,...):    return k->v;
   case &VarType(tv):    return Kinds::tvar_kind(tv,&Kinds::bk);
+  case &SubsetType(vd,_,_): return type_kind(vd->type);
   case &AppType(c,ts):
     switch (c) {
     case &VoidCon:       return &Kinds::mk;
@@ -770,6 +776,7 @@ static type_t rgns_of(type_t t) {
   case &AppType(_,NULL): return empty_effect;
   case &AppType(&JoinCon,_): return t;
   case &AppType(_,ts): return normalize_effect(join_eff(map(rgns_of,ts)));
+  case &SubsetType(vd,...): return rgns_of(vd->type);
   case &Cvar(...):
   case &Evar(...):
   case &VarType(_):
@@ -2555,6 +2562,11 @@ type_t rsubstitute(region_t<`r> rgn,
   case &TypeDeclType(...): 
     if (skip_fntypes) return t;
     Warn::impos2("found typedecltype in rsubs");
+  case &SubsetType(vd,e,a):
+    let vd2 = new *vd;
+    vd2->type = rsubstitute(rgn,inst,vd->type);
+    let e2 = (exp_t)rsubsexp(rgn,inst,e);
+    return new SubsetType(vd,e,a);
   }
 }
 // This is just a map beefed up to avoid unnecessary allocation.
@@ -2945,21 +2957,29 @@ $(bool,type_t) addressof_props(exp_t e) {
   case &AggrMember_e(e1,f,is_tagged,_):
     // disallow & on @tagged union members -- see Dan's ESOP paper
     if (is_tagged) return bogus_ans;
+    // force pointers that peek under a subset type to be read-only
+    bool subset = false;
+    type_t e1t = (type_t)e1->topt;
     // we have an unboxed thing, so we inherit e2's region
     // must check that f isn't a bitfield.
-    switch (compress((type_t)e1->topt)) {
+  LOOP1:
+    switch (compress(e1t)) {
+    case &SubsetType(vd,...): 
+      subset = true;
+      e1t = vd->type;
+      goto LOOP1;
     case &AnonAggrType(_,_,fs):
       let finfo = lookup_field(fs,f);
       if(finfo != NULL && finfo->width == NULL) {
         let $(c,t) = addressof_props(e1);
-	return $(finfo->tq.real_const || c, t);
+	return $(subset || finfo->tq.real_const || c, t);
       }
       return bogus_ans;
     case &AppType(&AggrCon({.KnownAggr = &ad}),_):
       let finfo = lookup_decl_field(ad,f);
       if(finfo != NULL && finfo->width == NULL) {
         let $(c,t) = addressof_props(e1);
-	return $(finfo->tq.real_const || c, t);
+	return $(subset || finfo->tq.real_const || c, t);
       }
       return bogus_ans;
     default: return bogus_ans;
@@ -2967,12 +2987,19 @@ $(bool,type_t) addressof_props(exp_t e) {
   case &AggrArrow_e(e1,f,is_tagged,_):
     // disallow & on @tagged union members -- see Dan's ESOP paper
     if (is_tagged) return bogus_ans;
+    // force pointers that peek under a subset type to be read-only
+    bool subset = false;
     // we have a boxed thing, so the region is in the pointer-type.
     // must check that f isn't a bitfield. 
     switch (compress((type_t)e1->topt)) {
     case &PointerType(PtrInfo(t1,_,PtrAtts(r,...))):
       struct Aggrfield * finfo;
+    LOOP2:
       switch (compress(t1)) {
+      case &SubsetType(vd,...):
+        subset = true;
+        t1 = vd->type;
+        goto LOOP2;
       case &AnonAggrType(_,_,fs):
 	finfo = lookup_field(fs,f); break;
       case &AppType(&AggrCon({.KnownAggr = &ad}),_):
@@ -2980,7 +3007,7 @@ $(bool,type_t) addressof_props(exp_t e) {
       default: return bogus_ans;
       }
       if(finfo != NULL && finfo->width == NULL)
-	return $(finfo->tq.real_const, r);
+	return $(subset || finfo->tq.real_const, r);
       return bogus_ans;
     default: return bogus_ans;
     }
@@ -3453,6 +3480,8 @@ void deconstruct_type(type_t t) {
     fprintf(stderr, "Got TypeDeclType\n"); break;
   case &TypeofType(...):
     fprintf(stderr, "Got TypeofType\n"); break;
+  case &SubsetType(vd,e,a):
+    fprintf(stderr, "Got SubsetType\n"); break;
   }
 }
 

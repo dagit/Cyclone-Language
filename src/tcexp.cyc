@@ -111,6 +111,7 @@ void resolve_unresolved_mem(seg_t loc, type_t * topt, exp_t e,
   }
 
   type_t t = *topt;
+ loop:
   switch (compress(t)) {
   case &AppType(&AggrCon(info),_):
     switch(info) {
@@ -120,6 +121,7 @@ void resolve_unresolved_mem(seg_t loc, type_t * topt, exp_t e,
     break;
   case &ArrayType(ArrayInfo{at,aq,...}): e->r = new Array_e(des); break;
   case &AnonAggrType(_,it,_):  e->r = new AnonStruct_e(t,it,des); break;
+  case &SubsetType(vd,...): t = vd->type; goto loop;
   default:                  e->r = new Array_e(des);        break;//do something
   }
 }
@@ -1779,8 +1781,18 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
 			   exp_t e, field_name_t f,
                            bool @is_tagged, bool @is_read) {
   // As per K&R, don't promote e from array to pointer type
-  tcExpNoPromote(enter_abstract_val_ok(te),NULL,e);
-  return tcAggrMember2(te,loc,topt,(type_t)e->topt,f,is_tagged,is_read);
+  type_t t2 = tcExpNoPromote(enter_abstract_val_ok(te),NULL,e);
+  // if e is a subset-type then we can promote it to the underlying type...
+  while (true) {
+    switch (compress(t2)) {
+    case &SubsetType(vd,...): 
+      t2 = vd->type;
+      continue;
+    default: break;
+    }
+    break;
+  }
+  return tcAggrMember2(te,loc,topt,t2,f,is_tagged,is_read);
 }
 
 // e->f
@@ -1789,6 +1801,13 @@ static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt,
                           bool @is_tagged, bool @is_read) {
   // it's up to tcAggrMember2 to deal with values of kind A
   type_t t2 = tcDeref(enter_abstract_val_ok(te),loc,NULL,NULL,e);
+  while (true) {
+    switch (compress(t2)) {
+    case &SubsetType(vd,...): t2 = vd->type; continue;
+    default: break;
+    }
+    break;
+  }
   return tcAggrMember2(te,loc,topt,t2,f,is_tagged,is_read);
 }
 
@@ -2126,8 +2145,11 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
   // return Opt{int@}, where Opt{int*} is expected
   // Here, the coercion on the field level will succeed, but fail for the 
   // aggregate as a whole
-  if (topt != NULL)
-    switch (compress(*topt)) {
+  if (topt != NULL) {
+    type_t tp = *topt;
+  loop:
+    switch (compress(tp)) {
+    case &SubsetType(vd,...): tp = vd->type; goto loop;
     case &AppType(&AggrCon({.KnownAggr = adptr2}),all_typs2):
       if(*adptr2 != *adptr)
   	fallthru;
@@ -2135,11 +2157,11 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
   	   ats = ats->tl, all_typs2=all_typs2->tl) {
   	Unify::unify(ats->hd,all_typs2->hd);
       }
-      res_typ = *topt;
+      res_typ = tp;
       break;
     default: res_typ = aggr_type(KnownAggr(adptr),all_typs);
     }
-  else
+  } else
     res_typ = aggr_type(KnownAggr(adptr),all_typs);
 
   // integrate any witnesses the programmer wrote explicitly
@@ -2231,8 +2253,10 @@ static type_t tcAnonStruct(tenv_t te, seg_t loc, type_t *topt, exp_t orig,
   if (*ts != NULL) struct_type = (type_t)*ts;
   else if (topt != NULL) struct_type = *topt;
   else struct_type = new_evar(&Kinds::mko,lookup_opt_type_vars(te));
-  
+
+ loop:
   switch (compress(struct_type)) {
+  case &SubsetType(vd,...): struct_type = vd->type; goto loop;
   case &AppType(&AggrCon(ainfo),ts):
     // we guessed wrong in resolving things -- this is actually a Aggregate_e
     typedef_name_t name;
@@ -2811,10 +2835,32 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
 }
 
 // The default: type-check and promote any array types to pointer types
+// and any subset types to their underlying types unless topt says not to.
 type_t tcExp(tenv_t te, type_t * topt, exp_t e) {
   type_t t = tcExpNoPromote(te, topt, e);
   if (is_array_type(t))
     e->topt = t = promote_array(t,addressof_props(e)[1],al_qual_type,false);
+  while (true) {
+    switch (compress(t)) {
+    case &SubsetType(vd,...): 
+      if (topt == NULL) {
+        t = vd->type;
+        unchecked_cast(e,t,No_coercion);
+        continue;
+      } else {
+        switch (compress(*topt)) {
+        case &SubsetType(...): break;
+        default: 
+          t = vd->type;
+          unchecked_cast(e,t,No_coercion);
+          continue;
+        }
+      }
+      break;
+    default: break;
+    }
+    break;
+  }
   return t;
 }
 

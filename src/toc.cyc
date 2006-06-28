@@ -858,6 +858,7 @@ type_t typ_to_c(type_t t) {
   case &TypeDeclType(&{.r = &Datatype_td(dd),...},t):
     datatypedecl_to_c(dd);
     return typ_to_c(*t);
+  case &SubsetType(vd,...): return typ_to_c(vd->type);
   }
 }
 
@@ -916,7 +917,9 @@ static bool atomic_type(type_t t) {
 
 // returns true when field f of the struct/union t has type void*.
 static bool is_poly_field(type_t t, field_name_t f) {
+ loop:
   switch (compress(t)) {
+  case &SubsetType(vd,...): t = vd->type; goto loop;
   case &AppType(&AggrCon(info),_):
     let ad = get_known_aggrdecl(info);
     if (ad->impl == NULL)
@@ -2598,7 +2601,9 @@ static void exp_to_c(env_t nv, exp_t e) {
     let fields = resolve_aggregate_designators(heap_region, e->loc, dles,
 					       sd->kind, sd->impl->fields);
     if(!is_toplevel(nv)) {
+    loop:
       switch(compress(old_typ)) {
+      case &SubsetType(vd,...): old_typ = vd->type; goto loop;
       case &AppType(&AggrCon(_),param_ts):
 	// now translate the fields, with special cases noted as they occur
 	for(let fields2=fields; fields2!=NULL; fields2=fields2->tl) {

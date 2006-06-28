@@ -97,7 +97,9 @@ int get_field_index_fs(list_t<aggrfield_t> fs, field_name_t f) {
 }
 
 int get_field_index(type_t t, field_name_t f) {
+ loop:
   switch (compress(t)) {
+  case &SubsetType(vd,...): t = vd->type; goto loop;
   case &AppType(&AggrCon(info),_):
     let fs = get_known_aggrdecl(info)->impl->fields;
     fallthru(fs);
@@ -228,10 +230,12 @@ static aggrdict_t substitute_aggrfields_to_aggrdict(flow_env_t fenv,
 static absRval_t i_typ_to_absrval(flow_env_t fenv,
 				  bool allow_zeroterm, bool no_init_bits_only,
 				  type_t t, absRval_t leafval) {
+ loop:
   // we treat bits-only unions as always initialized
   if (is_nontagged_nonrequire_union_type(t)) return fenv->unknown_all;
 
   switch(compress(t)) {
+  case &SubsetType(vd,...): t = vd->type; goto loop;
   case &AppType(&DatatypeFieldCon({.KnownDatatypefield=$(_,tuf)}),_):
     // we add an extra field here corresponding to the tag
     // to ensure that the datatype is initialized before it's used.

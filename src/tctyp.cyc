@@ -725,6 +725,36 @@ static void update_qualifier_bounds(seg_t loc, cvtenv_t env,
   constrain_vars(loc, env, List::filter(aqualvar_unconstrained ,freeqvs), qb, def, false);
 }
 
+static bool may_access_mem_visit_exp(bool @mam, exp_t e) {
+  switch (e->r) {
+  case &AssignOp_e(...):
+  case &Increment_e(...):
+  case &FnCall_e(...):
+  case &Throw_e(...):
+  case &New_e(...):
+  case &Deref_e(...):
+  case &AggrArrow_e(...):
+  case &Subscript_e(...):
+  case &Malloc_e(...):
+  case &Swap_e(...):
+  case &Asm_e(...):
+    *mam = true;
+    return false;
+  default: return !(*mam);
+  }
+}
+static bool may_access_mem_visit_stmt(bool @mam, stmt_t s) {
+  *mam = true;
+  return false;
+}
+
+// check to see if an expression may access memory 
+static bool may_access_memory(exp_t e) {
+  bool mam = false;
+  visit_exp(may_access_mem_visit_exp,may_access_mem_visit_stmt,&mam,e);
+  return mam;
+}
+
 //check definition against expected kind ... if it contains cvars these may get constrained
 static void check_constrain_ptrbnd(seg_t loc, type_t t, kind_t expected_kind) {
   if(expected_kind->kind == BoxKind) {
@@ -1300,6 +1330,25 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
 	env = i_check_type_level_exp(requires_clause,env);
       }
     }
+    break;
+
+  case &SubsetType(vd,e,*a):
+    env = i_check_type(env,expected_kind,vd->type,put_in_effect,allow_abs_aggr);
+    list_t<$(var_opt_t,tqual_t,type_t)@> args = 
+      new List{new $(vd->name->f1, vd->tq, vd->type), NULL};
+    let fenv = Tcenv::bogus_fenv(void_type, args);
+    let old_te = env.te;
+    env.te = new Tcenv::Tenv{te->ns,te->ae,fenv,true,
+                             te->in_extern_c_include,
+                             te->in_tempest,te->tempest_generalize,
+                             te->in_extern_c_inc_repeat};
+    let vds = new List{(vardecl_opt_t)vd,NULL};
+    if (may_access_memory(e))
+      err2(e->loc,"@subset predicate cannot refer to contents of memory");
+    let $(nenv,assn) = check_clause(env,"@subset",e);
+    env = nenv;
+    *a = AssnDef::assnmap2existassnfn(assn,vds);
+    env.te = old_te;
     break;
 
   case &TypedefType(tdn,*targs_ref,*tdopt,*toptp):

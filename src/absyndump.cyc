@@ -457,6 +457,13 @@ static void dumpntyp(type_t t) {
   case &TypedefType(n,ts,...): dumpqvar(n), dumptps(ts);                 return;
   case &ValueofType(e):       dump("valueof_t("); dumpexp(e); dump(")"); return;
   case &TypeofType(e):        dump("typeof("); dumpexp(e); dump(")");    return;
+  case &SubsetType(vd,e,_):
+    dump("@subset(");
+    dumpvardecl(vd,0,false);
+    dump(" | ");
+    dumpexp(e);
+    dump(")");
+    return;
   case &AppType(c,ts):
     switch(c) {
     case &DatatypeCon(tu_info):

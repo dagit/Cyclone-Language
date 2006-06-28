@@ -1,0 +1,29 @@
+typedef @subset(int x | x >= 0) nonneg_t;
+
+struct Pair { nonneg_t x,y; };
+
+struct Pair pair(nonneg_t x) {
+  return Pair{x,x};
+}
+
+struct Pair pair2(int x) {
+  if (x >= 0)
+    return Pair{x,x};
+  else
+    return Pair{0,0};
+}
+
+typedef @subset(struct Pair p | p.x >= p.y) ordered_pair_t;
+
+nonneg_t g(ordered_pair_t p) {
+  let xp = &p.x;
+  return *xp;
+}
+
+int main() {
+  ordered_pair_t p = Pair{1,0};
+  nonneg_t x = g(p);
+  return x;
+}
+
+

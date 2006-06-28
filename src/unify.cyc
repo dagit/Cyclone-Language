@@ -508,8 +508,10 @@ static void unify_it(type_t t1, type_t t2,
       failure_reason = orig_failure;
       return;
     default:
-      failure_reason = "incompatible pointer types";
-      unify_it(null1a,null2a,cvaruf,env);
+      if (!unify_c(null1a,null2a,cvaruf,env)) {
+        ts_failure = $(t1,t2);
+        fail_because("one pointer may be NULL while the other cannot");
+      }
       return;
     }
 
@@ -657,6 +659,14 @@ static void unify_it(type_t t1, type_t t2,
       fail_because("different abstract typedefs");
     failure_reason = "type parameters to typedef differ";
     unify_list(ts1,ts2,cvaruf,env);
+    return;
+
+  case $(&SubsetType(vd1,_,a1), &SubsetType(vd2,_,a2)):
+    if (!unify(vd1->type,vd2->type))
+      fail_because("@subset types have distinct base types");
+    let t = AssnDef::fresh_var(vd1,vd1->type);
+    if (!check_logical_equivalence(new List{t,NULL},a1,a2))
+      fail_because("@subset predicates are not equivalent");
     return;
   default: throw &Unify_val; // caller in charge failure_reason
   }

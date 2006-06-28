@@ -540,7 +540,9 @@ static unsigned datatype_constructor_index(Absyn::datatypedecl_t dd,
 
 static $(bool is_tagged,Absyn::aggr_kind_t,list_t<Absyn::aggrfield_t>)
   get_aggr_info(type_t t) {
+  loop:
   switch (Absyn::compress(t)) {
+  case &Absyn::SubsetType(vd,...): t = vd->type; goto loop;
   case &Absyn::AppType(&Absyn::AggrCon(info),_):
     let ad = Absyn::get_known_aggrdecl(info);
     return $(ad->impl->tagged, ad->kind, ad->impl->fields);
@@ -946,7 +948,7 @@ static assn_map_t vcgen_loop(env_t env, exp_opt_t e1infor, stmt_opt_t s1indo,
   }
 }
 
-static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
+static $(term_t,assn_map_t) vcgen_rexp_inner(env_t env, exp_t e, assn_map_t amin){
   /*
   if (Tcutil::is_const_exp(e)){
      // special case for pragmas
@@ -1190,6 +1192,8 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
       if (known) return $(uint(cn), amin);
     }
     let $(t,am) = vcgen_debug_rexp(env,e1,amin);
+    // if the types are the same, then we can drop the cast
+    if (Unify::unify(tp,((type_t)e1->topt))) return $(t,am);
     // we only need to retain the cast on the term if it
     // changes the size of the value.  In particular, we
     // can drop a cast from an int to an unsigned int and
@@ -1197,6 +1201,22 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
     // dropping other casts (e.g., char->int) but we'll be
     // conservative now.
     switch $(Absyn::compress(tp),Absyn::compress((type_t)e1->topt)) {
+      // this is a cast that the type-checker was already able to
+      // establish as okay.
+    case $(&Absyn::SubsetType(_,_,af),_) && c == Absyn::No_coercion:
+      return $(t,am);
+      // this is a cast that forgets subset information
+    case $(_,&Absyn::SubsetType(_,_,af)) && c == Absyn::No_coercion:
+      return $(t,am);
+      // these are casts that we must be able to prove
+    case $(&Absyn::SubsetType(vd,_,af),_):
+      // we apply the assertion function to the term t and then check
+      // that am.assn implies the resulting assertion.
+      let check = existassnfn2assn((existassnfn_t)af, new List(t,NULL));
+      if (!implies(am.assn,check))
+        Warn::err(e->loc, "cannot prove that @subset predicate\n\t%s\nholds from\n\t%s",assn2string(check), assnmap2string(amin));
+      am.assn = and(am.assn,check);
+      return $(t,am);
       // these two cases allow us to drop a cast of a tag_t to int/long
       // or unsigned int/unsigned long.
     case $(&Absyn::AppType(&Absyn::IntCon(_,Absyn::Int_sz),_),&Absyn::AppType(&Absyn::TagCon,tagtps)):
@@ -1468,6 +1488,20 @@ static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin){
                 assnmap2string(amt), assnmap2string(amin));
     return $(one(),amin);;
   }
+}
+
+// add in any information from subset types to the assertion
+static $(term_t,assn_map_t) vcgen_rexp(env_t env, exp_t e, assn_map_t amin) {
+  let $(t,am) = vcgen_rexp_inner(env,e,amin);
+  switch (Absyn::compress((type_t)e->topt)) {
+  case &Absyn::SubsetType(_,_,af):
+    let terms = List{t,NULL};
+    let assn = existassnfn2assn((existassnfn_t)af, &terms);
+    am.assn = and(am.assn,assn);
+    break;
+  default: break;
+  }
+  return $(t,am);
 }
 
 static $(list_t<term_t>,assn_map_t) vcgen_rexps(env_t env, list_t<exp_t> es, assn_map_t amin){

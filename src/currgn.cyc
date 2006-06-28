@@ -156,6 +156,10 @@ static void rgnsubtype(Position::seg_t loc, struct rgnsubenv env, type_t type) {
   case &VarType(v):            
     if (env.toplevel) check_tvar(loc,v); return;
   case &TypedefType(_,ts,...): rgnsubtypes(loc,env,ts); return;
+  case &SubsetType(vd,e,...):
+    rgnsubtype(loc,env,vd->type);
+    rgnsubexpopt(env,e);
+    return;
   case &ArrayType(ArrayInfo{t1,_,e,zt,_}):
     rgnsubtype(loc,env,t1);
     rgnsubexpopt(env,e);

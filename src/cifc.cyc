@@ -56,6 +56,7 @@ static string_t get_type_kind(type_t t) {
   case &ValueofType(...): return "Valueoftype";       // IntKind -- exp must be a type-level expression
   case &TypeDeclType(...): return "Typedecltype";  
   case &TypeofType(...): return "Typeoftype"; 
+  case &SubsetType(...): return "Subsettype";
   }
 }
 
@@ -178,6 +179,11 @@ static type_t expand_c_type(seg_t loc, tenv_t te, type_t ctyp) {
     return ctyp;
   case &VarType(...):
     //    fprintf(stderr, "Got var type %s\n", Absynpp::typ2string(ctyp));
+    return ctyp;
+  case &SubsetType(vd,...):
+    //    fprintf(stderr, "Got subset type %s\n", Absynpp::typ2string(ctyp));
+    Tctyp::check_valid_toplevel_type(loc,te,ctyp);
+    vd->type = expand_c_type(loc, te, Toc::typ_to_c(vd->type));
     return ctyp;
   case &Cvar(...):
     return ctyp;
@@ -799,6 +805,8 @@ static void deconstruct_type(type_t t) {
     fprintf(stderr, "Got TypeDeclType\n"); break;
   case &TypeofType(...):
     fprintf(stderr, "Got TypeofType\n"); break;
+  case &SubsetType(...):
+    fprintf(stderr, "Got SubsetType\n"); break;
   }
 }
 

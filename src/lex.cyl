@@ -282,6 +282,9 @@ static int do_possible_qualifier(Lexbuf lexbuf) {
     if(len == 12 && strncmp(b,"assert_false",12)==0) return ASSERT_FALSE_QUAL;
     if(len == 12 && strncmp(b,"autoreleased",12)==0) return AUTORELEASED_QUAL;
     break;
+  case 's':
+    if(len == 6 && strncmp(b,"subset",6)==0) return SUBSET_QUAL;
+    break;
   default: break;
  }
   lexbuf->lex_curr_pos = lexbuf->lex_start_pos + 1; // HACK

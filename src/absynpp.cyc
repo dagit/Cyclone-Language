@@ -1005,6 +1005,9 @@ doc_t ntyp2doc(type_t t) {
   case &AppType(&FatCon,_):   return text("@fat");
   case &AppType(&TrueCon,_):  return text("@true");
   case &AppType(&FalseCon,_): return text("@false");
+  case &SubsetType(vd,e,_):
+    return cat(text("@subset"),text("("),
+               vardecl2doc(vd,false),text(" | "),exp2doc(e),text(")"));
   }
 }
 
@@ -2005,8 +2008,8 @@ doc_t decl2doc(decl_t d) {
       switch(Flags::c_compiler) {
       case Flags::Gcc_c:  inlinedoc = text("inline ");    break;
       default:            inlinedoc = text("__inline ");  break;
-      }
-    else
+      } 
+   else
       inlinedoc = nil_doc();
     doc_t scopedoc  = scope2doc(fd->sc);
     doc_t beforenamedoc;

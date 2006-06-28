@@ -732,7 +732,18 @@ static void resolve_type(seg_t loc, env_t env, type_t t) {
     resolve_function_stuff(loc, env, i);
     env->local_vars = old_locals;
     return;
-
+  case &SubsetType(vd,e,_):
+    resolve_type(loc,env,vd->type);
+    let old_locals = env->local_vars;
+    if (old_locals != NULL)
+      env->local_vars = new *env->local_vars;
+    else
+      env->local_vars = new Dict::empty(strptrcmp);
+    *env->local_vars = 
+      Dict::insert(*env->local_vars,vd->name->f1,new VarRes(new Param_b(vd)));
+    resolve_exp(env,e);
+    env->local_vars = old_locals;
+    return;
   case &ValueofType(e): fallthru(e);
   case &TypeofType(e): resolve_exp(env,e); return;
   }

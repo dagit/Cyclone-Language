@@ -1000,7 +1000,7 @@ static void process_file(string_t<`H> filename) {
     tds = do_stage("aggregate removal",tds,do_removeaggrs,true,tds);
 
   // Lower the C code
-  if (!compile_failure && !nolower_r)
+  if (!compile_failure && !nolower_r && Flags::stop_after_pass >= Flags::AggregateRemoval)
     tds = do_stage("lowering C code",tds,do_lower,true,tds);
 
   // Removal of unused labels (optional optimization good b/c of patterns)

@@ -1180,7 +1180,7 @@ using Parse;
 %token AQ_ALIASABLE  AQ_REFCNT AQ_RESTRICTED AQ_UNIQUE AQUAL_T
 %token NUMELTS TAGOF VALUEOF VALUEOF_T TAGCHECK NUMELTS_QUAL THIN_QUAL
 %token FAT_QUAL NOTNULL_QUAL NULLABLE_QUAL REQUIRES_QUAL ENSURES_QUAL EFFECT_QUAL
-%token THROWS_QUAL
+%token THROWS_QUAL SUBSET_QUAL
 // Cyc:  CYCLONE qualifiers (e.g., @zeroterm, @tagged, @aqual, aquals)
 %token REGION_QUAL NOZEROTERM_QUAL ZEROTERM_QUAL TAGGED_QUAL ASSERT_QUAL ASSERT_FALSE_QUAL ALIAS_QUAL AQUALS CHECKS_QUAL
 %token EXTENSIBLE_QUAL AUTORELEASED_QUAL
@@ -1719,6 +1719,20 @@ type_specifier_notypedef:
     { $$=^$(type_spec(tag_type(new_evar(&Kinds::iko, NULL)),SLOC(@1))); }
 | VALUEOF_T '(' expression ')'
     { $$=^$(type_spec(valueof_type($3),LOC(@1,@4))); }
+| SUBSET_QUAL '(' specifier_qualifier_list declarator_withtypedef '|'
+    constant_expression ')'
+    { let $(tq,tspecs,atts) = $3;
+      if (tq.loc == 0) tq.loc = SLOC(@3);
+      let Declarator(qv,varloc,tms) = $4;
+      let t = speclist2typ(tspecs, SLOC(@3));
+      let $(tq2,t2,tvs,atts2) = apply_tms(tq,t,atts,tms);
+      if (tvs != NULL) Warn::err2(SLOC(@4),"parameter with bad type params");
+      if (is_qvar_qualified(qv))
+        Warn::err2(SLOC(@1),"parameter cannot be qualified with a namespace");
+      if (atts2 != NULL) Warn::warn2(LOC(@1,@4),"extra attributes on parameter, ignoring");
+      let vd = new_vardecl(varloc, qv, t2, NULL, NULL);
+      $$=^$(type_spec(new SubsetType(vd,$6,NULL),LOC(@1,@7))); 
+    }
 ;
 
 /* Cyc: new */

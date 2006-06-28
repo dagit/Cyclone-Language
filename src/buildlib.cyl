@@ -1079,6 +1079,9 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     case &TypeDeclType(&{.r = &Datatype_td(dd),...},_):
       fprintf(stderr,"Error: unexpected Datatype declaration\n");
       exit(1); return;
+    case &SubsetType(...):
+      fprintf(stderr,"Error: unexpected @subset type\n");
+      exit(1); return;
     case &Cvar(...):
       fprintf(stderr,"Error: unexpected Cvar\n");
       exit(1); return;

@@ -27,6 +27,7 @@
 #include "attributes.h"
 #include "pratt_prover.h"
 #include "warn.h"
+#include "absynpp.h"
 
 using Core;
 using Absyn;
@@ -331,6 +332,17 @@ static $(coercion_t, list_t<constraint_t>) subtype_impl(list_t<$(type_t,type_t)@
       }      
     }
     return $(Other_coercion, retc);
+  case $(&SubsetType(vd1,_,a1),&SubsetType(vd2,_,a2)):
+    if (!Unify::unify(vd1->type,vd2->type)) return SUBTYPE_FAIL;
+    let terms = new List{AssnDef::fresh_var(vd1,vd1->type), NULL};
+    let assn1 = AssnDef::existassnfn2assn((AssnDef::existassnfn_t)a1,terms);
+    let assn2 = AssnDef::existassnfn2assn((AssnDef::existassnfn_t)a2,terms);
+    if (AssnDef::simple_prove(assn1,assn2) ||
+        PrattProver::constraint_prove(assn1,assn2)) 
+      return $(No_coercion, retc);
+    return SUBTYPE_FAIL;
+  case $(&SubsetType(vd1,_,a1),t2):
+    return subtype_impl(assume,vd1->type,t2);
   case $(&FnType(f1), &FnType(f2)):
     if (f1.tvars != NULL || f2.tvars != NULL) {
       let tvs1 = f1.tvars;
@@ -600,11 +612,14 @@ static $(coercion_t, list_t<constraint_t>, bool)
   }
   t1 = compress(t1);
   t2 = compress(t2);
-  switch (t2) {
-  case &AppType(&VoidCon,_): return $(No_coercion, NULL, true);
-  // we can cast t1 to an int if t1 is a boxed type.
-  case &AppType(&IntCon(_,Int_sz),_):
-  case &AppType(&IntCon(_,Long_sz),_):
+  switch ($(t1,t2)) {
+  case $(_,&AppType(&VoidCon,_)): return $(No_coercion, NULL, true);
+  // we can cast t1 to an int if t1 is a boxed type -- but we don't
+  // want to handle coercions from subset types here because we want 
+  // to mark these as "no-coercion" -- so they are handled below.
+  case $(&SubsetType(...),_): break;
+  case $(_,&AppType(&IntCon(_,Int_sz),_)):
+  case $(_,&AppType(&IntCon(_,Long_sz),_)):
     if (type_kind(t1)->kind == BoxKind) return $(Other_coercion, NULL, false);
     if (is_pointer_type(t1)) {
       let cv1 = (type_t)get_pointer_bounds(t1);
@@ -619,6 +634,27 @@ static $(coercion_t, list_t<constraint_t>, bool)
   list_t<constraint_t,`H> retc = NULL;
   coercion_t coerce = No_coercion;
   switch($(t1,t2)) {
+  // FIX -- should really normalize nested subsets... oh well
+  case $(&SubsetType(vd1,_,a1),&SubsetType(vd2,_,a2)):
+    // check that vd1 and vd2 have the same types
+    if (!Unify::unify(vd1->type,vd2->type)) return CSUB_FAIL;
+    let terms = new List{AssnDef::fresh_var(vd1,vd1->type), NULL};
+    let assn1 = AssnDef::existassnfn2assn((AssnDef::existassnfn_t)a1,terms);
+    let assn2 = AssnDef::existassnfn2assn((AssnDef::existassnfn_t)a2,terms);
+    // see if a1 implies a2 -- if so, no coercion needed
+    if (AssnDef::simple_prove(assn1,assn2) ||
+        PrattProver::constraint_prove(assn1,assn2)) 
+      return $(No_coercion, NULL, true);
+    // otherwise, a coercion is possibly needed, it's up to vcgen to fix.
+    else return $(Other_coercion, NULL, true);
+  case $(&SubsetType(vd1,_,a1),t2):
+    // safe to always forget constraints on subsets
+    if (!Unify::unify(vd1->type,t2)) return CSUB_FAIL;
+    return $(No_coercion, NULL, true);
+  case $(_,&SubsetType(vd2,_,a2)):
+    // a coercion is possibly needed, it's up to vcgen to fix.
+    if (!Unify::unify(t1,vd2->type)) return CSUB_FAIL;
+    return $(Other_coercion, NULL, true);
   case $(&PointerType(PtrInfo(t1a,tqual1a,PtrAtts(eff1,null1a,b1,zt1,_,rel1,aq1))),
 	 &PointerType(PtrInfo(t2a,tqual2a,PtrAtts(eff2,null2a,b2,zt2,_,rel2,aq2)))):
     if(!Unify::unify(null1a, null2a) && force_type2bool(false,null1a) && !force_type2bool(false,null2a)) {
