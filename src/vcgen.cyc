@@ -1183,7 +1183,8 @@ static $(term_t,assn_map_t) vcgen_rexp_inner(env_t env, exp_t e, assn_map_t amin
     return $(fresh_var(NULL,NULL),false_assnmap());
   case &Absyn::NoInstantiate_e(e): return vcgen_debug_rexp(env,e,amin);
   case &Absyn::Instantiate_e(e,_): return vcgen_debug_rexp(env,e,amin);
-  case &Absyn::Cast_e(tp,e1,_,c):
+  case &Absyn::Cast_e(tp,e1,_,*coercion):
+    let c = *coercion;
     // FIX: when casting from zeroterm to nozeroterm, we need to
     // decrement the numelts somehow...
     // FIX: really need to put C coercions in terms...
@@ -1213,8 +1214,9 @@ static $(term_t,assn_map_t) vcgen_rexp_inner(env_t env, exp_t e, assn_map_t amin
       // we apply the assertion function to the term t and then check
       // that am.assn implies the resulting assertion.
       let check = existassnfn2assn((existassnfn_t)af, new List(t,NULL));
-      if (!implies(am.assn,check))
+      if (implies(am.assn,check)) {
         Warn::err(e->loc, "cannot prove that @subset predicate\n\t%s\nholds from\n\t%s",assn2string(check), assnmap2string(amin));
+      }
       am.assn = and(am.assn,check);
       return $(t,am);
       // these two cases allow us to drop a cast of a tag_t to int/long

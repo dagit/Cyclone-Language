@@ -552,6 +552,7 @@ namespace Absyn {
     Unknown_coercion, // initially, we don't know what kind of coercion
     No_coercion,      // a cast that C supports
     Null_to_NonNull,  // t*{n+m} -> t@{n}
+    Subset_coercion, // coercion to a subset type
       // FIX: should enumerate all other coercions so that we can
       // make sure the type-checker and code-generator are in sync.
     Other_coercion    // all the other coercions (see toc.cyc)

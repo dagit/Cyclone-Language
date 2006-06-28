@@ -404,7 +404,8 @@ qvar_t exn_name = &exn_name_v;
 
 datatypedecl_t exn_tud() {
   static string_t builtin_exns[] =
-    {"Null_Exception", "Array_bounds", "Match_Exception", "Bad_alloc"};
+    {"Null_Exception", "Array_bounds", "Match_Exception", "Bad_alloc",
+     "Assert"};
   static struct Datatypedecl * tud_opt = NULL;
   if(tud_opt == NULL) {
     list_t<datatypefield_t> tufs = NULL;

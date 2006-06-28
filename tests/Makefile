@@ -76,6 +76,7 @@ all: $(EXES)
 	./rc
 	./testasm
 	./testbget
+	./subset
 #	failtest 
 ifeq ($(HAVE_PTHREAD),yes)
 	./testexn

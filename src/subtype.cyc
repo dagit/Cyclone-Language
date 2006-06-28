@@ -646,7 +646,7 @@ static $(coercion_t, list_t<constraint_t>, bool)
         PrattProver::constraint_prove(assn1,assn2)) 
       return $(No_coercion, NULL, true);
     // otherwise, a coercion is possibly needed, it's up to vcgen to fix.
-    else return $(Other_coercion, NULL, true);
+    else return $(Subset_coercion, NULL, true);
   case $(&SubsetType(vd1,_,a1),t2):
     // safe to always forget constraints on subsets
     if (!Unify::unify(vd1->type,t2)) return CSUB_FAIL;
@@ -654,7 +654,7 @@ static $(coercion_t, list_t<constraint_t>, bool)
   case $(_,&SubsetType(vd2,_,a2)):
     // a coercion is possibly needed, it's up to vcgen to fix.
     if (!Unify::unify(t1,vd2->type)) return CSUB_FAIL;
-    return $(Other_coercion, NULL, true);
+    return $(Subset_coercion, NULL, true);
   case $(&PointerType(PtrInfo(t1a,tqual1a,PtrAtts(eff1,null1a,b1,zt1,_,rel1,aq1))),
 	 &PointerType(PtrInfo(t2a,tqual2a,PtrAtts(eff2,null2a,b2,zt2,_,rel2,aq2)))):
     if(!Unify::unify(null1a, null2a) && force_type2bool(false,null1a) && !force_type2bool(false,null2a)) {

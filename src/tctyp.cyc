@@ -725,7 +725,7 @@ static void update_qualifier_bounds(seg_t loc, cvtenv_t env,
   constrain_vars(loc, env, List::filter(aqualvar_unconstrained ,freeqvs), qb, def, false);
 }
 
-static bool may_access_mem_visit_exp(bool @mam, exp_t e) {
+static bool ok_as_assn_exp(bool @ok, exp_t e) {
   switch (e->r) {
   case &AssignOp_e(...):
   case &Increment_e(...):
@@ -738,21 +738,21 @@ static bool may_access_mem_visit_exp(bool @mam, exp_t e) {
   case &Malloc_e(...):
   case &Swap_e(...):
   case &Asm_e(...):
-    *mam = true;
+    *ok = false;
     return false;
-  default: return !(*mam);
+  default: return *ok;
   }
 }
-static bool may_access_mem_visit_stmt(bool @mam, stmt_t s) {
-  *mam = true;
+static bool ok_as_assn_stmt(bool @ok, stmt_t s) {
+  *ok = false;
   return false;
 }
 
 // check to see if an expression may access memory 
-static bool may_access_memory(exp_t e) {
-  bool mam = false;
-  visit_exp(may_access_mem_visit_exp,may_access_mem_visit_stmt,&mam,e);
-  return mam;
+static bool ok_as_assn(exp_t e) {
+  bool ok = true;
+  visit_exp(ok_as_assn_exp,ok_as_assn_stmt,&ok,e);
+  return ok;
 }
 
 //check definition against expected kind ... if it contains cvars these may get constrained
@@ -1343,8 +1343,8 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
                              te->in_tempest,te->tempest_generalize,
                              te->in_extern_c_inc_repeat};
     let vds = new List{(vardecl_opt_t)vd,NULL};
-    if (may_access_memory(e))
-      err2(e->loc,"@subset predicate cannot refer to contents of memory");
+    if (!ok_as_assn(e))
+      err2(e->loc,"@subset predicate is not a valid assertion\n\t[may access memory or throw exception]");
     let $(nenv,assn) = check_clause(env,"@subset",e);
     env = nenv;
     *a = AssnDef::assnmap2existassnfn(assn,vds);

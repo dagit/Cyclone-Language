@@ -283,5 +283,7 @@ type_t any_bounds(list_t<tvar_t,`H>);
   bool is_main(qvar_t);
   int tqual_cmp(tqual_t tq1, tqual_t tq2);
   bool will_lose_precision(type_t, type_t);
+  // imperatively substitute variable declarations with expressions
+  void substitute_vars(list_t<$(vardecl_opt_t,exp_t)@> subst,exp_t e);
 }
 #endif

@@ -424,6 +424,9 @@ type_t copy_type(type_t t) {
   case &SubsetType(vd,w,a):
     vardecl_t vd2 = (vardecl_t)copy_vardecl_opt(vd);
     exp_t w2 = deep_copy_exp(true,w);
+    let p = $((vardecl_opt_t)vd,varb_exp(new Local_b(vd2),0));
+    let subst = List{&p,NULL};
+    substitute_vars(&subst,w2);
     let a2 = a;
     return new SubsetType(vd2,w2,a2);
   }
@@ -2122,13 +2125,68 @@ type_t lookup_aquals(aqualbnds_t aquals_map, type_t t) {
   return (aq == NULL ? al_qual_type : aq);
 }
 
+static bool substitute_vars_exp(list_t<$(vardecl_opt_t,exp_t)@> subst,exp_t e) {
+  switch (e->r) {
+  case &Var_e(&Param_b(vd)): fallthru(vd);
+  case &Var_e(&Local_b(vd)): fallthru(vd);
+  case &Var_e(&Pat_b(vd)):
+    for (let s = subst; s != NULL; s = s->tl) {
+      let $(vdopt,e2) = *s->hd;
+      if (vdopt == NULL) continue;
+      if (qvar_cmp(vdopt->name,vd->name) == 0) {
+        e->r = e2->r;
+        return false;
+      }
+    }
+    break;
+  default: break;
+  }
+  return true;
+}
+
+static bool substitute_vars_stmt(list_t<$(vardecl_opt_t,exp_t)@> subst,stmt_t e) {
+  return true;
+}
+
+void substitute_vars(list_t<$(vardecl_opt_t,exp_t)@> subst,exp_t e) {
+  visit_exp(substitute_vars_exp,substitute_vars_stmt,subst,e);
+}
+
 // Replace e by a cast of e to t.  The caller must ensure that the cast is safe.
 void unchecked_cast(exp_t e, type_t t, coercion_t c) {
+  static int ucast_ctr = 0;
   if (unify((type_t)e->topt,t))
     return;
   let inner = copy_exp(e);
-  e->r    = new Cast_e(t,inner,false,c);
-  e->topt = t;
+  if (c == Subset_coercion) {
+    switch (compress(t)) {
+    case &SubsetType(vd,assn_exp,af):
+      // rewrite to ({ let temp = e; assert(assn_exp); temp })
+      // must make sure to substitute temp for vd in assn_exp.
+      var_t ux = new ((const char ?)aprintf("_utmpS%X",ucast_ctr++));
+      qvar_t x = new $(Loc_n(),ux);
+      let newvd = new_vardecl(e->loc,x,vd->type,inner,NULL);
+      let new_arg = varb_exp(new Local_b(newvd),e->loc);
+      new_arg->topt = vd->type;
+      let chk = deep_copy_exp(true,assn_exp);
+      $(vardecl_opt_t,exp_t) p = $((vardecl_opt_t)vd,new_arg);
+      let subst = List{&p,NULL};
+      visit_exp(substitute_vars_exp, substitute_vars_stmt, &subst, chk);
+      exp_t asrt = assert_exp(chk,false,e->loc);
+      asrt->topt = sint_type;
+      stmt_t s = decl_stmt(new Decl{new Var_d(newvd),e->loc},
+                           seq_stmt(exp_stmt(asrt,e->loc),
+                                    exp_stmt(copy_exp(new_arg),e->loc),
+                                    e->loc),e->loc);
+      e->r = new StmtExp_e(s);
+      e->topt = t;
+      break;
+    default: Warn::impos2("unchecked_cast (",t,")",e," with Subset_coercion");
+    }
+  } else {
+    e->r    = new Cast_e(t,inner,false,c);
+    e->topt = t;
+  }
 }
 
 // generating fresh tvars and tvar identities
@@ -2566,7 +2624,10 @@ type_t rsubstitute(region_t<`r> rgn,
     let vd2 = new *vd;
     vd2->type = rsubstitute(rgn,inst,vd->type);
     let e2 = (exp_t)rsubsexp(rgn,inst,e);
-    return new SubsetType(vd,e,a);
+    let p = $((vardecl_opt_t)vd,varb_exp(new Local_b(vd2),0));
+    let subst = List{&p,NULL};
+    substitute_vars(&subst,e2);
+    return new SubsetType(vd,e2,a);
   }
 }
 // This is just a map beefed up to avoid unnecessary allocation.

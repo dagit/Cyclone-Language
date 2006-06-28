@@ -1121,28 +1121,6 @@ static bool inst_with_joineff(list_t<$(tvar_t, type_t)@> orig,
   return found;
 }
 
-static bool substitute_vars_exp(list_t<$(vardecl_opt_t,exp_t)@> subst,exp_t e) {
-  switch (e->r) {
-  case &Var_e(&Param_b(vd)): fallthru(vd);
-  case &Var_e(&Local_b(vd)): fallthru(vd);
-  case &Var_e(&Pat_b(vd)):
-    for (let s = subst; s != NULL; s = s->tl) {
-      let $(vdopt,e2) = *s->hd;
-      if (vdopt == NULL) continue;
-      if (qvar_cmp(vdopt->name,vd->name) == 0) {
-        e->r = e2->r;
-        return false;
-      }
-    }
-    break;
-  default: break;
-  }
-  return true;
-}
-
-static bool substitute_vars_stmt(list_t<$(vardecl_opt_t,exp_t)@> subst,stmt_t e) {
-  return true;
-}
 
 
 // e(es)
@@ -1427,7 +1405,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,
              arg_vardecls=arg_vardecls->tl, es=es->tl) {
           subst = new List{new $(arg_vardecls->hd,es->hd),subst};
         }
-        visit_exp(substitute_vars_exp, substitute_vars_stmt, subst, subst_chk);
+        substitute_vars(subst,subst_chk);
         exp_t asrt = assert_exp(subst_chk,false,loc);
         asrt->topt = sint_type;
         exp_t fncall = fncall_exp(e,new_args,loc);

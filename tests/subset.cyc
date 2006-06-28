@@ -1,11 +1,18 @@
+/* This file provides some tests for the subset type constructor. */
+#include <stdio.h>
+
+// define the type of non-negative integers
 typedef @subset(int x | x >= 0) nonneg_t;
 
+// define pair to be a pair of non-negative integers
 struct Pair { nonneg_t x,y; };
 
+// should type-check with no warning
 struct Pair pair(nonneg_t x) {
-  return Pair{x,x};
+  return Pair{x,x}; 
 }
 
+// should type-check with no warning
 struct Pair pair2(int x) {
   if (x >= 0)
     return Pair{x,x};
@@ -13,17 +20,37 @@ struct Pair pair2(int x) {
     return Pair{0,0};
 }
 
+// define an orderd pair to be a pair where x >= y
 typedef @subset(struct Pair p | p.x >= p.y) ordered_pair_t;
 
+// should type-check with no warning
 nonneg_t g(ordered_pair_t p) {
   let xp = &p.x;
   return *xp;
+  // *xp = 42;  // should be rejected by type-checker
 }
 
 int main() {
+  // should succeed
   ordered_pair_t p = Pair{1,0};
+  // should succeed
   nonneg_t x = g(p);
-  return x;
+  // these tests should generate warnings and run-time errors
+  try {
+    nonneg_t z = -1;
+    fprintf(stderr,"OOPS!  subset: nonneg_t z = -1 succeeded when it should fail.");
+    return 1;
+  } catch {
+  case &Assert: break;
+  }
+  try {
+    ordered_pair_t p2 = Pair{0,1};
+    fprintf(stderr,"OOPS!  subset: ordered_pair_t p2 = Pair{1,0} succeeded when it should fail.");
+    return 1;
+  } catch {
+  case &Assert: break;
+  }
+  return 0;
 }
 
 
