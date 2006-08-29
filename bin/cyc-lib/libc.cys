@@ -2895,7 +2895,8 @@ cycstub fread {
   static datatype exn.Failure __fread_failure =
     Failure("fread: buffer insufficient");
   size_t fread(char ? @nozeroterm ptr, size_t size, size_t nmemb, FILE @f) {
-    if (size * nmemb > numelts(ptr)) throw &__fread_failure;
+    if (size == 0 || nmemb > (numelts(ptr) / size))
+      throw &__fread_failure;
     return Cstdio::fread((char * @nozeroterm)ptr, size, nmemb, f->file);
   }
 }
