@@ -2437,7 +2437,7 @@ _T2DD->topt=Cyc_Absyn_uint_type;goto _LLC8;}_LLC8:;}{
 # 2272
 int use_temp=arg3!=e2;_T2DE=zt2;
 if(_T2DE)goto _TL22D;else{goto _TL22F;}_TL22F: _T2DF=p2;_T2E0=_T2DF.elt_tq;_T2E1=_T2E0.real_const;if(_T2E1)goto _TL22D;else{goto _TL230;}
-_TL230: _T2E2=arg3;_T2E3=Cyc_Absyn_uint_exp(1U,0U);_T2E4=Cyc_Absyn_uint_type;_T2E5=Cyc_Absyn_set_type(_T2E3,_T2E4);_T2E6=Cyc_Absyn_prim2_exp(2U,_T2E2,_T2E5,0U);_T2E7=arg3;_T2E8=_T2E7->topt;_T2E9=_check_null(_T2E8);arg3=Cyc_Absyn_set_type(_T2E6,_T2E9);goto _TL22E;_TL22D: _TL22E: _T2EA=p2;_T2EB=_T2EA.elt_type;_T2EC=
+_TL230: _T2E2=arg3;_T2E3=Cyc_Absyn_uint_exp(1U,0U);_T2E4=Cyc_Absyn_uint_type;_T2E5=Cyc_Absyn_set_type(_T2E3,_T2E4);_T2E6=Cyc_Absyn_prim2_exp(2U,_T2E2,_T2E5,0U);_T2E7=arg3;_T2E8=_T2E7->topt;_T2E9=_check_null(_T2E8);arg3=Cyc_Absyn_set_type(_T2E6,_T2E9);goto _TL22E;_TL22D: _TL22E: _T2EA=p1;_T2EB=_T2EA.elt_type;_T2EC=
 Cyc_Toc_typ_to_c(_T2EB);_T2ED=Cyc_Absyn_sizeoftype_exp(_T2EC,0U);_T2EE=Cyc_Absyn_uint_type;_T2EF=Cyc_Absyn_set_type(_T2ED,_T2EE);_T2F0=Cyc_Absyn_uint_type;{struct Cyc_Absyn_Exp*arg2=Cyc_Absyn_set_type(_T2EF,_T2F0);_T2F1=use_temp;
 if(!_T2F1)goto _TL231;{struct Cyc_Absyn_Exp*_T60B[3];
 _T60B[0]=x_exp;_T60B[1]=arg2;_T60B[2]=arg3;_T2F3=Cyc_Toc__tag_fat_e;_T2F4=_tag_fat(_T60B,sizeof(struct Cyc_Absyn_Exp*),3);_T2F2=Cyc_Toc_fncall_exp_dl(_T2F3,_T2F4);}{struct Cyc_Absyn_Exp*tg_exp=_T2F2;_T2F5=tg_exp;
@@ -2448,7 +2448,7 @@ _T2FA->r=Cyc_Toc_stmt_exp_r(s);}}goto _TL232;
 # 2283
 _TL231: _T2FB=e;{struct Cyc_Absyn_Exp*_T60B[3];_T60B[0]=e1;_T60B[1]=arg2;_T60B[2]=arg3;_T2FD=Cyc_Toc__tag_fat_e;_T2FE=_tag_fat(_T60B,sizeof(struct Cyc_Absyn_Exp*),3);_T2FC=Cyc_Toc_fncall_exp_r(_T2FD,_T2FE);}_T2FB->r=_T2FC;_TL232:;}}}}}goto _TL222;
 # 2286
-_TL221: _T2FF=e;{struct Cyc_Absyn_Exp*_T608[3];_T608[0]=e1;_T301=p2;_T302=_T301.elt_type;_T303=
+_TL221: _T2FF=e;{struct Cyc_Absyn_Exp*_T608[3];_T608[0]=e1;_T301=p1;_T302=_T301.elt_type;_T303=
 Cyc_Toc_typ_to_c(_T302);_T304=Cyc_Absyn_sizeoftype_exp(_T303,0U);_T305=Cyc_Absyn_uint_type;_T306=Cyc_Absyn_set_type(_T304,_T305);_T307=Cyc_Absyn_uint_type;_T608[1]=Cyc_Absyn_set_type(_T306,_T307);_T608[2]=e2;_T308=Cyc_Toc__tag_fat_e;_T309=_tag_fat(_T608,sizeof(struct Cyc_Absyn_Exp*),3);_T300=Cyc_Toc_fncall_exp_r(_T308,_T309);}
 # 2286
 _T2FF->r=_T300;_TL222: _TL21C: goto _LLB9;}}_TL213: _T30A=_T604.f1;if(_T30A==0)goto _TL233;{

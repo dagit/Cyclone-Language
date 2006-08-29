@@ -2272,7 +2272,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	  bool use_temp = (arg3!=e2);
 	  if (!zt2 && !p2.elt_tq.real_const)
 	    arg3 = set_type(prim2_exp(Minus,arg3,set_type(uint_exp(1,DL),uint_type),DL),(type_t)arg3->topt);
-	  let arg2 = set_type(sizeoftype_exp(typ_to_c(p2.elt_type),DL),uint_type);
+	  let arg2 = set_type(sizeoftype_exp(typ_to_c(p1.elt_type),DL),uint_type);
 	  if(use_temp) {
 	    let tg_exp = fncall_exp_dl(_tag_fat_e,x_exp,arg2,arg3);
             tg_exp->topt = fat_ptr_type();
@@ -2284,7 +2284,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	} else
 	  // build the t ? struct
 	  e->r = fncall_exp_r(_tag_fat_e, e1,
-			      set_type(sizeoftype_exp(typ_to_c(p2.elt_type),DL),uint_type), e2);
+			      set_type(sizeoftype_exp(typ_to_c(p1.elt_type),DL),uint_type), e2);
 	break;
       case $(NULL, &_): //InsertChecks ensures not-at-toplevel and b2 is known
         // When we have t?ZEROTERM and are casting to
