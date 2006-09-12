@@ -50,6 +50,14 @@ AC_SUBST(abs_srcdir)
 CFLAGS=    # prevents AC_PROG_CC from setting CFLAGS=-g -O2
 AC_PROG_CC
 
+<<<<<<< configure.ac
+else
+CFLAGS=
+AC_PROG_CC(gcc)
+fi # end of GCC check
+
+=======
+>>>>>>> 1.21
 # Special cases -- these are for compiling the bin/genfiles
 if [[ "$build_vendor" = "apple" ]]; then
   CFLAGS="-no-cpp-precomp -Wno-long-double"

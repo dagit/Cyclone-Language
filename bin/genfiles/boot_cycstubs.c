@@ -349,12 +349,12 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 extern int open_without_mode(const char*,int);
 extern int open_with_mode(const char*,int,unsigned short);
 # 31
-int Cyc_open(const char*s,int i,struct _fat_ptr ms){struct _fat_ptr _T0;unsigned _T1;const char*_T2;int _T3;struct _fat_ptr _T4;unsigned char*_T5;unsigned short*_T6;unsigned short _T7;int _T8;int _T9;_T0=ms;_T1=
+int Cyc_open(const char*s,int i,struct _fat_ptr ms){struct _fat_ptr _T0;unsigned _T1;const char*_T2;int _T3;struct _fat_ptr _T4;unsigned char*_T5;unsigned short*_T6;unsigned short*_T7;unsigned short _T8;int _T9;int _TA;_T0=ms;_T1=
 # 34
-_get_fat_size(_T0,sizeof(unsigned short));if(_T1 < 1U)goto _TL0;_T2=s;_T3=i;_T4=ms;_T5=_T4.curr;_T6=(unsigned short*)_T5;_T7=_T6[0];_T8=
-open_with_mode(_T2,_T3,_T7);return _T8;
+_get_fat_size(_T0,sizeof(unsigned short));if(_T1 < 1U)goto _TL0;_T2=s;_T3=i;_T4=ms;_T5=_T4.curr;_T6=(unsigned short*)_T5;_T7=
+_check_null(_T6);_T8=_T7[0];_T9=open_with_mode(_T2,_T3,_T8);return _T9;
 # 37
-_TL0: _T9=open_without_mode(s,i);return _T9;}struct __abstractFILE;struct Cyc___cycFILE{struct __abstractFILE*file;};
+_TL0: _TA=open_without_mode(s,i);return _TA;}struct __abstractFILE;struct Cyc___cycFILE{struct __abstractFILE*file;};
 # 49
 extern int fclose(struct __abstractFILE*);
 # 51

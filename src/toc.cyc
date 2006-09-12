@@ -1181,8 +1181,8 @@ static enum PTR_ANS ptr_use_to_c(env_t nv, exp_t ptr, absyn_annot_t annot,
         // no bounds check is needed, then it must be that e is unsigned-<
         // numelts(x).  In turn, this implies that numelts(x) >= 0 which
         // implies x is not NULL.  (See insert_checks.)
-        if (index != NULL)
-          toc_impos("subscript of ? with no bounds check but need null check");
+	//         if (index != NULL)
+	//           toc_impos("subscript of ? with no bounds check but need null check");
       }
       // _check_null(e)
       ptr->r=fncall_exp_dl(_check_null_e,deep_copy(ptr))->r;

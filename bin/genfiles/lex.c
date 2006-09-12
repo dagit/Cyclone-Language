@@ -896,31 +896,31 @@ _TB->linenumpos_offset=1U;_T9=(struct Cyc_Lex_PosInfo*)_TB;}
 # 716
 return _T9;}}
 # 723
-static void Cyc_Lex_inc_linenumber (void){struct Cyc_Warn_String_Warn_Warg_struct _T0;int(*_T1)(struct _fat_ptr);void*(*_T2)(struct _fat_ptr);struct _fat_ptr _T3;struct Cyc_Lex_PosInfo*_T4;struct Cyc_Lex_PosInfo*_T5;struct Cyc_Lex_PosInfo*_T6;struct _fat_ptr _T7;struct _fat_ptr _T8;struct _RegionHandle*_T9;unsigned _TA;void*_TB;struct _fat_ptr _TC;unsigned _TD;int _TE;unsigned char*_TF;unsigned*_T10;struct _fat_ptr _T11;unsigned char*_T12;unsigned*_T13;unsigned _T14;int _T15;void(*_T16)(unsigned*);void(*_T17)(void*);struct _fat_ptr _T18;unsigned char*_T19;unsigned*_T1A;struct _fat_ptr _T1B;unsigned _T1C;int _T1D;unsigned char*_T1E;unsigned*_T1F;struct Cyc_Yyltype _T20;int _T21;struct Cyc_Lex_PosInfo*_T22;struct Cyc_Lex_PosInfo*_T23;struct Cyc_Lex_PosInfo*_T24;
-if(Cyc_Lex_pos_info!=0)goto _TLB6;{struct Cyc_Warn_String_Warn_Warg_struct _T25;_T25.tag=0;
-_T25.f1=_tag_fat("empty position info!",sizeof(char),21U);_T0=_T25;}{struct Cyc_Warn_String_Warn_Warg_struct _T25=_T0;void*_T26[1];_T26[0]=& _T25;_T2=Cyc_Warn_impos2;{int(*_T27)(struct _fat_ptr)=(int(*)(struct _fat_ptr))_T2;_T1=_T27;}_T3=_tag_fat(_T26,sizeof(void*),1);_T1(_T3);}goto _TLB7;_TLB6: _TLB7: {
+static void Cyc_Lex_inc_linenumber (void){struct Cyc_Warn_String_Warn_Warg_struct _T0;int(*_T1)(struct _fat_ptr);void*(*_T2)(struct _fat_ptr);struct _fat_ptr _T3;struct Cyc_Lex_PosInfo*_T4;struct Cyc_Lex_PosInfo*_T5;struct Cyc_Lex_PosInfo*_T6;struct _fat_ptr _T7;struct _fat_ptr _T8;struct _RegionHandle*_T9;unsigned _TA;void*_TB;struct _fat_ptr _TC;unsigned _TD;int _TE;unsigned char*_TF;unsigned*_T10;struct _fat_ptr _T11;unsigned char*_T12;unsigned*_T13;unsigned*_T14;unsigned _T15;int _T16;void(*_T17)(unsigned*);void(*_T18)(void*);struct _fat_ptr _T19;unsigned char*_T1A;unsigned*_T1B;struct _fat_ptr _T1C;unsigned _T1D;int _T1E;unsigned char*_T1F;unsigned*_T20;struct Cyc_Yyltype _T21;int _T22;struct Cyc_Lex_PosInfo*_T23;struct Cyc_Lex_PosInfo*_T24;struct Cyc_Lex_PosInfo*_T25;
+if(Cyc_Lex_pos_info!=0)goto _TLB6;{struct Cyc_Warn_String_Warn_Warg_struct _T26;_T26.tag=0;
+_T26.f1=_tag_fat("empty position info!",sizeof(char),21U);_T0=_T26;}{struct Cyc_Warn_String_Warn_Warg_struct _T26=_T0;void*_T27[1];_T27[0]=& _T26;_T2=Cyc_Warn_impos2;{int(*_T28)(struct _fat_ptr)=(int(*)(struct _fat_ptr))_T2;_T1=_T28;}_T3=_tag_fat(_T27,sizeof(void*),1);_T1(_T3);}goto _TLB7;_TLB6: _TLB7: {
 struct Cyc_Lex_PosInfo*p=Cyc_Lex_pos_info;
 struct _fat_ptr linenums=_tag_fat(0,0,0);_T4=p;{
-struct _fat_ptr _T25=_T4->linenumpos;struct _fat_ptr _T26=linenums;_T5=p;_T5->linenumpos=_T26;linenums=_T25;}_T6=p;{
+struct _fat_ptr _T26=_T4->linenumpos;struct _fat_ptr _T27=linenums;_T5=p;_T5->linenumpos=_T27;linenums=_T26;}_T6=p;{
 unsigned offset=_T6->linenumpos_offset;_T7=linenums;{
 unsigned n=_get_fat_size(_T7,sizeof(unsigned));
 # 732
-if(offset < n)goto _TLB8;{unsigned _T25=n * 2U;_T9=Cyc_Core_heap_region;_TA=Cyc_Core_unique_qual;_TB=_region_calloc(_T9,_TA,sizeof(unsigned),_T25);_T8=_tag_fat(_TB,sizeof(unsigned),_T25);}{
+if(offset < n)goto _TLB8;{unsigned _T26=n * 2U;_T9=Cyc_Core_heap_region;_TA=Cyc_Core_unique_qual;_TB=_region_calloc(_T9,_TA,sizeof(unsigned),_T26);_T8=_tag_fat(_TB,sizeof(unsigned),_T26);}{
 # 734
 struct _fat_ptr newlinenums=_T8;{
 unsigned i=0U;_TLBD: if(i < n)goto _TLBB;else{goto _TLBC;}
-_TLBB: _TC=newlinenums;_TD=i;_TE=(int)_TD;_TF=_check_fat_subscript(_TC,sizeof(unsigned),_TE);_T10=(unsigned*)_TF;_T11=linenums;_T12=_T11.curr;_T13=(unsigned*)_T12;_T14=i;_T15=(int)_T14;*_T10=_T13[_T15];
+_TLBB: _TC=newlinenums;_TD=i;_TE=(int)_TD;_TF=_check_fat_subscript(_TC,sizeof(unsigned),_TE);_T10=(unsigned*)_TF;_T11=linenums;_T12=_T11.curr;_T13=(unsigned*)_T12;_T14=_check_null(_T13);_T15=i;_T16=(int)_T15;*_T10=_T14[_T16];
 # 735
 i=i + 1;goto _TLBD;_TLBC:;}{
 # 737
-struct _fat_ptr _T25=linenums;struct _fat_ptr _T26=newlinenums;linenums=_T26;newlinenums=_T25;}_T17=Cyc_Core_ufree;{
+struct _fat_ptr _T26=linenums;struct _fat_ptr _T27=newlinenums;linenums=_T27;newlinenums=_T26;}_T18=Cyc_Core_ufree;{
 # 739
-void(*_T25)(unsigned*)=(void(*)(unsigned*))_T17;_T16=_T25;}_T18=newlinenums;_T19=_untag_fat_ptr_check_bound(_T18,sizeof(unsigned),1U);_T1A=(unsigned*)_T19;_T16(_T1A);}goto _TLB9;_TLB8: _TLB9: _T1B=linenums;_T1C=offset;_T1D=(int)_T1C;_T1E=_check_fat_subscript(_T1B,sizeof(unsigned),_T1D);_T1F=(unsigned*)_T1E;_T20=Cyc_yylloc;_T21=_T20.first_line;
+void(*_T26)(unsigned*)=(void(*)(unsigned*))_T18;_T17=_T26;}_T19=newlinenums;_T1A=_untag_fat_ptr_check_bound(_T19,sizeof(unsigned),1U);_T1B=(unsigned*)_T1A;_T17(_T1B);}goto _TLB9;_TLB8: _TLB9: _T1C=linenums;_T1D=offset;_T1E=(int)_T1D;_T1F=_check_fat_subscript(_T1C,sizeof(unsigned),_T1E);_T20=(unsigned*)_T1F;_T21=Cyc_yylloc;_T22=_T21.first_line;
 # 742
-*_T1F=(unsigned)_T21;_T22=p;
-_T22->linenumpos_offset=offset + 1U;
-Cyc_Lex_linenumber=Cyc_Lex_linenumber + 1;_T23=p;{
-struct _fat_ptr _T25=_T23->linenumpos;struct _fat_ptr _T26=linenums;_T24=p;_T24->linenumpos=_T26;linenums=_T25;}}}}}
+*_T20=(unsigned)_T22;_T23=p;
+_T23->linenumpos_offset=offset + 1U;
+Cyc_Lex_linenumber=Cyc_Lex_linenumber + 1;_T24=p;{
+struct _fat_ptr _T26=_T24->linenumpos;struct _fat_ptr _T27=linenums;_T25=p;_T25->linenumpos=_T27;linenums=_T26;}}}}}
 # 748
 static void Cyc_Lex_process_directive(struct _fat_ptr line){int _T0;struct Cyc_IntPtr_sa_ScanfArg_struct _T1;struct Cyc_CharPtr_sa_ScanfArg_struct _T2;char*_T3;struct _fat_ptr _T4;struct _fat_ptr _T5;struct _fat_ptr _T6;int _T7;char*_T8;struct _fat_ptr _T9;unsigned long _TA;unsigned long _TB;char*_TC;int _TD;char*_TE;char*_TF;char _T10;int _T11;struct _fat_ptr _T12;struct Cyc_String_pa_PrintArg_struct _T13;char*_T14;struct _fat_ptr _T15;int _T16;struct _fat_ptr _T17;struct _fat_ptr _T18;struct _fat_ptr _T19;struct _fat_ptr _T1A;struct Cyc_String_pa_PrintArg_struct _T1B;char*_T1C;struct _fat_ptr _T1D;struct _fat_ptr _T1E;struct Cyc_Lex_PosInfo*_T1F;struct _fat_ptr _T20;struct _fat_ptr _T21;int _T22;int _T23;struct Cyc_IntPtr_sa_ScanfArg_struct _T24;struct _fat_ptr _T25;struct _fat_ptr _T26;struct _fat_ptr _T27;struct Cyc_Lex_PosInfo*_T28;struct _RegionHandle*_T29;struct _fat_ptr _T2A;int _T2B;unsigned _T2C;struct Cyc_Lex_PosInfo*_T2D;
 int i;

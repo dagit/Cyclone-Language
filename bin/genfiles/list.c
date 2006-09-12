@@ -983,15 +983,15 @@ _check_null(x);{void*v=_T7->hd;_T8=x;x=_T8->tl;_T6=v;}_TA[_T5]=_T6;i=i + 1;goto 
 struct _fat_ptr Cyc_List_to_array(struct Cyc_List_List*x){struct _fat_ptr _T0;_T0=
 Cyc_List_rto_array(Cyc_Core_heap_region,x);return _T0;}
 # 743
-struct Cyc_List_List*Cyc_List_rfrom_array(struct _RegionHandle*r2,struct _fat_ptr arr){struct _fat_ptr _T0;struct Cyc_List_List*_T1;struct _RegionHandle*_T2;struct _fat_ptr _T3;unsigned char*_T4;void**_T5;unsigned _T6;int _T7;struct Cyc_List_List*_T8;
+struct Cyc_List_List*Cyc_List_rfrom_array(struct _RegionHandle*r2,struct _fat_ptr arr){struct _fat_ptr _T0;struct Cyc_List_List*_T1;struct _RegionHandle*_T2;struct _fat_ptr _T3;unsigned char*_T4;void**_T5;void**_T6;unsigned _T7;int _T8;struct Cyc_List_List*_T9;
 struct Cyc_List_List*ans=0;_T0=arr;{
 unsigned n=_get_fat_size(_T0,sizeof(void*));{
 unsigned i=n - 1U;_TL140: if(i < n)goto _TL13E;else{goto _TL13F;}
-_TL13E: _T2=r2;{struct Cyc_List_List*_T9=_region_malloc(_T2,0U,sizeof(struct Cyc_List_List));_T3=arr;_T4=_T3.curr;_T5=(void**)_T4;_T6=i;_T7=(int)_T6;_T9->hd=_T5[_T7];_T9->tl=ans;_T1=(struct Cyc_List_List*)_T9;}ans=_T1;
+_TL13E: _T2=r2;{struct Cyc_List_List*_TA=_region_malloc(_T2,0U,sizeof(struct Cyc_List_List));_T3=arr;_T4=_T3.curr;_T5=(void**)_T4;_T6=_check_null(_T5);_T7=i;_T8=(int)_T7;_TA->hd=_T6[_T8];_TA->tl=ans;_T1=(struct Cyc_List_List*)_TA;}ans=_T1;
 # 746
-i=i + -1;goto _TL140;_TL13F:;}_T8=ans;
+i=i + -1;goto _TL140;_TL13F:;}_T9=ans;
 # 748
-return _T8;}}
+return _T9;}}
 # 751
 struct Cyc_List_List*Cyc_List_from_array(struct _fat_ptr arr){struct Cyc_List_List*_T0;_T0=
 Cyc_List_rfrom_array(Cyc_Core_heap_region,arr);return _T0;}

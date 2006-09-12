@@ -579,37 +579,37 @@ static int Cyc_is_other_special(char c){char _T0;int _T1;_T0=c;_T1=(int)_T0;swit
  return 1;default:
  return 0;};}
 # 179
-static struct _fat_ptr Cyc_sh_escape_string(struct _fat_ptr s){int _T0;unsigned long _T1;unsigned long _T2;struct _fat_ptr _T3;unsigned char*_T4;const char*_T5;int _T6;char _T7;int _T8;int _T9;struct _fat_ptr _TA;struct Cyc_List_List*_TB;struct _fat_ptr*_TC;struct _fat_ptr*_TD;struct _fat_ptr _TE;struct _fat_ptr*_TF;struct _fat_ptr _T10;struct _fat_ptr _T11;unsigned long _T12;int _T13;unsigned long _T14;unsigned long _T15;int _T16;unsigned long _T17;struct _fat_ptr _T18;unsigned long _T19;char*_T1A;unsigned _T1B;unsigned _T1C;int _T1D;unsigned long _T1E;unsigned long _T1F;struct _fat_ptr _T20;unsigned char*_T21;const char*_T22;int _T23;char _T24;int _T25;int _T26;struct _fat_ptr _T27;int _T28;int _T29;unsigned char*_T2A;char*_T2B;unsigned _T2C;unsigned char*_T2D;char*_T2E;struct _fat_ptr _T2F;int _T30;int _T31;unsigned char*_T32;char*_T33;unsigned _T34;unsigned char*_T35;char*_T36;struct _fat_ptr _T37;
+static struct _fat_ptr Cyc_sh_escape_string(struct _fat_ptr s){int _T0;unsigned long _T1;unsigned long _T2;struct _fat_ptr _T3;unsigned char*_T4;const char*_T5;const char*_T6;int _T7;char _T8;int _T9;int _TA;struct _fat_ptr _TB;struct Cyc_List_List*_TC;struct _fat_ptr*_TD;struct _fat_ptr*_TE;struct _fat_ptr _TF;struct _fat_ptr*_T10;struct _fat_ptr _T11;struct _fat_ptr _T12;unsigned long _T13;int _T14;unsigned long _T15;unsigned long _T16;int _T17;unsigned long _T18;struct _fat_ptr _T19;unsigned long _T1A;char*_T1B;unsigned _T1C;unsigned _T1D;int _T1E;unsigned long _T1F;unsigned long _T20;struct _fat_ptr _T21;unsigned char*_T22;const char*_T23;const char*_T24;int _T25;char _T26;int _T27;int _T28;struct _fat_ptr _T29;int _T2A;int _T2B;unsigned char*_T2C;char*_T2D;unsigned _T2E;unsigned char*_T2F;char*_T30;struct _fat_ptr _T31;int _T32;int _T33;unsigned char*_T34;char*_T35;unsigned _T36;unsigned char*_T37;char*_T38;struct _fat_ptr _T39;
 unsigned long len=Cyc_strlen(s);
 # 183
 int single_quotes=0;
 int other_special=0;{
 int i=0;_TL2F: _T0=i;_T1=(unsigned long)_T0;_T2=len;if(_T1 < _T2)goto _TL2D;else{goto _TL2E;}
-_TL2D: _T3=s;_T4=_T3.curr;_T5=(const char*)_T4;_T6=i;{char c=_T5[_T6];_T7=c;_T8=(int)_T7;
-if(_T8!=39)goto _TL30;single_quotes=single_quotes + 1;goto _TL31;
-_TL30: _T9=Cyc_is_other_special(c);if(!_T9)goto _TL32;other_special=other_special + 1;goto _TL33;_TL32: _TL33: _TL31:;}
+_TL2D: _T3=s;_T4=_T3.curr;_T5=(const char*)_T4;_T6=_check_null(_T5);_T7=i;{char c=_T6[_T7];_T8=c;_T9=(int)_T8;
+if(_T9!=39)goto _TL30;single_quotes=single_quotes + 1;goto _TL31;
+_TL30: _TA=Cyc_is_other_special(c);if(!_TA)goto _TL32;other_special=other_special + 1;goto _TL33;_TL32: _TL33: _TL31:;}
 # 185
 i=i + 1;goto _TL2F;_TL2E:;}
 # 192
-if(single_quotes!=0)goto _TL34;if(other_special!=0)goto _TL34;_TA=s;
-return _TA;_TL34:
+if(single_quotes!=0)goto _TL34;if(other_special!=0)goto _TL34;_TB=s;
+return _TB;_TL34:
 # 196
- if(single_quotes!=0)goto _TL36;{struct _fat_ptr*_T38[3];{struct _fat_ptr*_T39=_cycalloc(sizeof(struct _fat_ptr));
-*_T39=_tag_fat("'",sizeof(char),2U);_TC=(struct _fat_ptr*)_T39;}_T38[0]=_TC;{struct _fat_ptr*_T39=_cycalloc(sizeof(struct _fat_ptr));_TE=s;*_T39=_TE;_TD=(struct _fat_ptr*)_T39;}_T38[1]=_TD;{struct _fat_ptr*_T39=_cycalloc(sizeof(struct _fat_ptr));*_T39=_tag_fat("'",sizeof(char),2U);_TF=(struct _fat_ptr*)_T39;}_T38[2]=_TF;_T10=_tag_fat(_T38,sizeof(struct _fat_ptr*),3);_TB=Cyc_List_list(_T10);}_T11=Cyc_strconcat_l(_TB);return _T11;_TL36: _T12=len;_T13=single_quotes;_T14=(unsigned long)_T13;_T15=_T12 + _T14;_T16=other_special;_T17=(unsigned long)_T16;{
+ if(single_quotes!=0)goto _TL36;{struct _fat_ptr*_T3A[3];{struct _fat_ptr*_T3B=_cycalloc(sizeof(struct _fat_ptr));
+*_T3B=_tag_fat("'",sizeof(char),2U);_TD=(struct _fat_ptr*)_T3B;}_T3A[0]=_TD;{struct _fat_ptr*_T3B=_cycalloc(sizeof(struct _fat_ptr));_TF=s;*_T3B=_TF;_TE=(struct _fat_ptr*)_T3B;}_T3A[1]=_TE;{struct _fat_ptr*_T3B=_cycalloc(sizeof(struct _fat_ptr));*_T3B=_tag_fat("'",sizeof(char),2U);_T10=(struct _fat_ptr*)_T3B;}_T3A[2]=_T10;_T11=_tag_fat(_T3A,sizeof(struct _fat_ptr*),3);_TC=Cyc_List_list(_T11);}_T12=Cyc_strconcat_l(_TC);return _T12;_TL36: _T13=len;_T14=single_quotes;_T15=(unsigned long)_T14;_T16=_T13 + _T15;_T17=other_special;_T18=(unsigned long)_T17;{
 # 200
-unsigned long len2=_T15 + _T17;_T19=len2 + 1U;{unsigned _T38=_T19 + 1U;_T1B=_check_times(_T38,sizeof(char));{char*_T39=_cycalloc_atomic(_T1B);{unsigned _T3A=_T38;unsigned i;i=0;_TL3B: if(i < _T3A)goto _TL39;else{goto _TL3A;}_TL39: _T1C=i;
-_T39[_T1C]='\000';i=i + 1;goto _TL3B;_TL3A: _T39[_T3A]=0;}_T1A=(char*)_T39;}_T18=_tag_fat(_T1A,sizeof(char),_T38);}{struct _fat_ptr s2=_T18;
+unsigned long len2=_T16 + _T18;_T1A=len2 + 1U;{unsigned _T3A=_T1A + 1U;_T1C=_check_times(_T3A,sizeof(char));{char*_T3B=_cycalloc_atomic(_T1C);{unsigned _T3C=_T3A;unsigned i;i=0;_TL3B: if(i < _T3C)goto _TL39;else{goto _TL3A;}_TL39: _T1D=i;
+_T3B[_T1D]='\000';i=i + 1;goto _TL3B;_TL3A: _T3B[_T3C]=0;}_T1B=(char*)_T3B;}_T19=_tag_fat(_T1B,sizeof(char),_T3A);}{struct _fat_ptr s2=_T19;
 int i=0;
 int j=0;
-_TL3F: _T1D=i;_T1E=(unsigned long)_T1D;_T1F=len;if(_T1E < _T1F)goto _TL3D;else{goto _TL3E;}
-_TL3D: _T20=s;_T21=_T20.curr;_T22=(const char*)_T21;_T23=i;{char c=_T22[_T23];_T24=c;_T25=(int)_T24;
-if(_T25==39)goto _TL42;else{goto _TL43;}_TL43: _T26=Cyc_is_other_special(c);if(_T26)goto _TL42;else{goto _TL40;}
-_TL42: _T27=s2;_T28=j;j=_T28 + 1;_T29=_T28;{struct _fat_ptr _T38=_fat_ptr_plus(_T27,sizeof(char),_T29);_T2A=_check_fat_subscript(_T38,sizeof(char),0U);_T2B=(char*)_T2A;{char _T39=*_T2B;char _T3A='\\';_T2C=_get_fat_size(_T38,sizeof(char));if(_T2C!=1U)goto _TL44;if(_T39!=0)goto _TL44;if(_T3A==0)goto _TL44;_throw_arraybounds();goto _TL45;_TL44: _TL45: _T2D=_T38.curr;_T2E=(char*)_T2D;*_T2E=_T3A;}}goto _TL41;_TL40: _TL41: _T2F=s2;_T30=j;
-j=_T30 + 1;_T31=_T30;{struct _fat_ptr _T38=_fat_ptr_plus(_T2F,sizeof(char),_T31);_T32=_check_fat_subscript(_T38,sizeof(char),0U);_T33=(char*)_T32;{char _T39=*_T33;char _T3A=c;_T34=_get_fat_size(_T38,sizeof(char));if(_T34!=1U)goto _TL46;if(_T39!=0)goto _TL46;if(_T3A==0)goto _TL46;_throw_arraybounds();goto _TL47;_TL46: _TL47: _T35=_T38.curr;_T36=(char*)_T35;*_T36=_T3A;}}}
+_TL3F: _T1E=i;_T1F=(unsigned long)_T1E;_T20=len;if(_T1F < _T20)goto _TL3D;else{goto _TL3E;}
+_TL3D: _T21=s;_T22=_T21.curr;_T23=(const char*)_T22;_T24=_check_null(_T23);_T25=i;{char c=_T24[_T25];_T26=c;_T27=(int)_T26;
+if(_T27==39)goto _TL42;else{goto _TL43;}_TL43: _T28=Cyc_is_other_special(c);if(_T28)goto _TL42;else{goto _TL40;}
+_TL42: _T29=s2;_T2A=j;j=_T2A + 1;_T2B=_T2A;{struct _fat_ptr _T3A=_fat_ptr_plus(_T29,sizeof(char),_T2B);_T2C=_check_fat_subscript(_T3A,sizeof(char),0U);_T2D=(char*)_T2C;{char _T3B=*_T2D;char _T3C='\\';_T2E=_get_fat_size(_T3A,sizeof(char));if(_T2E!=1U)goto _TL44;if(_T3B!=0)goto _TL44;if(_T3C==0)goto _TL44;_throw_arraybounds();goto _TL45;_TL44: _TL45: _T2F=_T3A.curr;_T30=(char*)_T2F;*_T30=_T3C;}}goto _TL41;_TL40: _TL41: _T31=s2;_T32=j;
+j=_T32 + 1;_T33=_T32;{struct _fat_ptr _T3A=_fat_ptr_plus(_T31,sizeof(char),_T33);_T34=_check_fat_subscript(_T3A,sizeof(char),0U);_T35=(char*)_T34;{char _T3B=*_T35;char _T3C=c;_T36=_get_fat_size(_T3A,sizeof(char));if(_T36!=1U)goto _TL46;if(_T3B!=0)goto _TL46;if(_T3C==0)goto _TL46;_throw_arraybounds();goto _TL47;_TL46: _TL47: _T37=_T3A.curr;_T38=(char*)_T37;*_T38=_T3C;}}}
 # 204
-i=i + 1;goto _TL3F;_TL3E: _T37=s2;
+i=i + 1;goto _TL3F;_TL3E: _T39=s2;
 # 210
-return _T37;}}}
+return _T39;}}}
 # 212
 static struct _fat_ptr*Cyc_sh_escape_stringptr(struct _fat_ptr*sp){struct _fat_ptr*_T0;struct _fat_ptr*_T1;struct _fat_ptr _T2;{struct _fat_ptr*_T3=_cycalloc(sizeof(struct _fat_ptr));_T1=sp;_T2=*_T1;
 *_T3=Cyc_sh_escape_string(_T2);_T0=(struct _fat_ptr*)_T3;}return _T0;}

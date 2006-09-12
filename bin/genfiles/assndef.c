@@ -867,13 +867,13 @@ return _TB;}}
 # 484
 _TL7C: _TC=resopt;_TD=*_TC;_TE=_TD->term;return _TE;}}
 # 487
-static void**Cyc_AssnDef_lookup_term_opt(struct Cyc_Hashtable_Table*h,void*t){struct Cyc_Hashtable_Table*_T0;struct _fat_ptr _T1;unsigned char*_T2;struct Cyc_Hashtable_Bucket*_T3;int _T4;unsigned _T5;struct _fat_ptr _T6;unsigned _T7;unsigned _T8;int _T9;struct Cyc_Hashtable_Bucket _TA;struct Cyc_Hashtable_Cell*_TB;void*_TC;void*_TD;int _TE;struct Cyc_Hashtable_Cell*_TF;void**_T10;struct Cyc_Hashtable_Cell*_T11;_T0=h;{
+static void**Cyc_AssnDef_lookup_term_opt(struct Cyc_Hashtable_Table*h,void*t){struct Cyc_Hashtable_Table*_T0;struct _fat_ptr _T1;unsigned char*_T2;struct Cyc_Hashtable_Bucket*_T3;struct Cyc_Hashtable_Bucket*_T4;int _T5;unsigned _T6;struct _fat_ptr _T7;unsigned _T8;unsigned _T9;int _TA;struct Cyc_Hashtable_Bucket _TB;struct Cyc_Hashtable_Cell*_TC;void*_TD;void*_TE;int _TF;struct Cyc_Hashtable_Cell*_T10;void**_T11;struct Cyc_Hashtable_Cell*_T12;_T0=h;{
 struct _fat_ptr tab=_T0->tab;_T1=tab;_T2=_T1.curr;_T3=(struct Cyc_Hashtable_Bucket*)_T2;_T4=
-Cyc_AssnDef_termhash(t);_T5=(unsigned)_T4;_T6=tab;_T7=_get_fat_size(_T6,sizeof(struct Cyc_Hashtable_Bucket));_T8=_T5 % _T7;_T9=(int)_T8;_TA=_T3[_T9];{struct Cyc_Hashtable_Cell*p=_TA.cells;
+_check_null(_T3);_T5=Cyc_AssnDef_termhash(t);_T6=(unsigned)_T5;_T7=tab;_T8=_get_fat_size(_T7,sizeof(struct Cyc_Hashtable_Bucket));_T9=_T6 % _T8;_TA=(int)_T9;_TB=_T4[_TA];{struct Cyc_Hashtable_Cell*p=_TB.cells;
 _TL81: if(p!=0)goto _TL7F;else{goto _TL80;}
-_TL7F: _TB=p;_TC=_TB->key;_TD=t;_TE=Cyc_AssnDef_termcmp(_TC,_TD);if(_TE!=0)goto _TL82;_TF=p;_T10=& _TF->value;return _T10;_TL82: _T11=p;
+_TL7F: _TC=p;_TD=_TC->key;_TE=t;_TF=Cyc_AssnDef_termcmp(_TD,_TE);if(_TF!=0)goto _TL82;_T10=p;_T11=& _T10->value;return _T11;_TL82: _T12=p;
 # 490
-p=_T11->next;goto _TL81;_TL80:
+p=_T12->next;goto _TL81;_TL80:
 # 493
  return 0;}}}
 # 497

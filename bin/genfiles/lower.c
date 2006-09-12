@@ -734,9 +734,12 @@ return 1;}}}}}case 11: _TD4=Cyc_Warn_impos;{
 int(*_TE4)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))_TD4;_TD3=_TE4;}_TD5=_tag_fat("fallthru in lower.cyc",sizeof(char),22U);_TD6=_tag_fat(0U,sizeof(void*),0);_TD3(_TD5,_TD6);default: _TD8=Cyc_Warn_impos;{
 int(*_TE4)(struct _fat_ptr,struct _fat_ptr)=(int(*)(struct _fat_ptr,struct _fat_ptr))_TD8;_TD7=_TE4;}_TD9=_tag_fat("try-catch in lower.cyc",sizeof(char),23U);_TDA=_tag_fat(0U,sizeof(void*),0);_TD7(_TD9,_TDA);}_LL0:;}}
 # 384
-static int Cyc_Lower_is_temp(struct _tuple0*qv){struct _tuple0*_T0;struct _tuple0 _T1;struct _fat_ptr*_T2;int _T3;struct _fat_ptr _T4;unsigned _T5;struct _fat_ptr _T6;unsigned char*_T7;const char*_T8;char _T9;int _TA;struct _fat_ptr _TB;unsigned char*_TC;const char*_TD;char _TE;int _TF;struct _fat_ptr _T10;unsigned char*_T11;const char*_T12;char _T13;int _T14;struct _fat_ptr _T15;unsigned char*_T16;const char*_T17;char _T18;int _T19;_T0=qv;_T1=*_T0;_T2=_T1.f1;{
+static int Cyc_Lower_is_temp(struct _tuple0*qv){struct _tuple0*_T0;struct _tuple0 _T1;struct _fat_ptr*_T2;int _T3;struct _fat_ptr _T4;unsigned _T5;struct _fat_ptr _T6;unsigned char*_T7;const char*_T8;const char*_T9;char _TA;int _TB;struct _fat_ptr _TC;unsigned char*_TD;const char*_TE;char _TF;int _T10;struct _fat_ptr _T11;unsigned char*_T12;const char*_T13;char _T14;int _T15;struct _fat_ptr _T16;unsigned char*_T17;const char*_T18;char _T19;int _T1A;_T0=qv;_T1=*_T0;_T2=_T1.f1;{
 struct _fat_ptr v=*_T2;_T4=v;_T5=
-_get_fat_size(_T4,sizeof(char));if(_T5 <= 4U)goto _TL35;_T6=v;_T7=_T6.curr;_T8=(const char*)_T7;_T9=_T8[0];_TA=(int)_T9;if(_TA!=95)goto _TL35;_TB=v;_TC=_TB.curr;_TD=(const char*)_TC;_TE=_TD[1];_TF=(int)_TE;if(_TF!=116)goto _TL35;_T10=v;_T11=_T10.curr;_T12=(const char*)_T11;_T13=_T12[2];_T14=(int)_T13;if(_T14!=109)goto _TL35;_T15=v;_T16=_T15.curr;_T17=(const char*)_T16;_T18=_T17[3];_T19=(int)_T18;_T3=_T19==112;goto _TL36;_TL35: _T3=0;_TL36: return _T3;}}
+_get_fat_size(_T4,sizeof(char));if(_T5 <= 4U)goto _TL35;_T6=v;_T7=_T6.curr;_T8=(const char*)_T7;_T9=
+_check_null(_T8);_TA=_T9[0];_TB=(int)_TA;
+# 386
+if(_TB!=95)goto _TL35;_TC=v;_TD=_TC.curr;_TE=(const char*)_TD;_TF=_TE[1];_T10=(int)_TF;if(_T10!=116)goto _TL35;_T11=v;_T12=_T11.curr;_T13=(const char*)_T12;_T14=_T13[2];_T15=(int)_T14;if(_T15!=109)goto _TL35;_T16=v;_T17=_T16.curr;_T18=(const char*)_T17;_T19=_T18[3];_T1A=(int)_T19;_T3=_T1A==112;goto _TL36;_TL35: _T3=0;_TL36: return _T3;}}
 # 394
 static struct Cyc_List_List*Cyc_Lower_lower_rhs_list(struct Cyc_Lower_Env*env,struct Cyc_List_List*es){int _T0;struct Cyc_List_List*_T1;void*_T2;struct Cyc_Absyn_Exp*_T3;int*_T4;unsigned _T5;struct Cyc_List_List*_T6;int _T7;struct Cyc_List_List*_T8;struct Cyc_List_List*_T9;struct Cyc_Lower_Env*_TA;struct Cyc_List_List*_TB;void*_TC;struct Cyc_Absyn_Exp*_TD;struct Cyc_List_List*_TE;struct Cyc_List_List*_TF;
 # 397

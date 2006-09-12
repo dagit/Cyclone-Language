@@ -510,21 +510,21 @@ static int Cyc_Absyndump_need_space_before (void){char _T0;int _T1;_T0=Cyc_Absyn
  return 0;default:
  return 1;};}
 # 130
-static void Cyc_Absyndump_dump(struct _fat_ptr s){int _T0;struct Cyc___cycFILE**_T1;struct Cyc___cycFILE*_T2;struct _fat_ptr _T3;unsigned char*_T4;const char*_T5;unsigned _T6;int _T7;struct Cyc___cycFILE**_T8;struct Cyc___cycFILE*_T9;struct _fat_ptr _TA;unsigned _TB;int _TC;
+static void Cyc_Absyndump_dump(struct _fat_ptr s){int _T0;struct Cyc___cycFILE**_T1;struct Cyc___cycFILE*_T2;struct _fat_ptr _T3;unsigned char*_T4;const char*_T5;const char*_T6;unsigned _T7;int _T8;struct Cyc___cycFILE**_T9;struct Cyc___cycFILE*_TA;struct _fat_ptr _TB;unsigned _TC;int _TD;
 unsigned sz=Cyc_strlen(s);
 # 137
 if(sz < 1U)goto _TL3;_T0=
 Cyc_Absyndump_need_space_before();if(!_T0)goto _TL5;_T1=Cyc_Absyndump_dump_file;_T2=*_T1;
-Cyc_fputc(32,_T2);goto _TL6;_TL5: _TL6: _T3=s;_T4=_T3.curr;_T5=(const char*)_T4;_T6=sz - 1U;_T7=(int)_T6;
-Cyc_Absyndump_prev_char=_T5[_T7];_T8=Cyc_Absyndump_dump_file;_T9=*_T8;_TA=s;_TB=sz;_TC=(int)_TB;
-Cyc_file_string_write(_T9,_TA,0,_TC);goto _TL4;_TL3: _TL4:;}
+Cyc_fputc(32,_T2);goto _TL6;_TL5: _TL6: _T3=s;_T4=_T3.curr;_T5=(const char*)_T4;_T6=
+_check_null(_T5);_T7=sz - 1U;_T8=(int)_T7;Cyc_Absyndump_prev_char=_T6[_T8];_T9=Cyc_Absyndump_dump_file;_TA=*_T9;_TB=s;_TC=sz;_TD=(int)_TC;
+Cyc_file_string_write(_TA,_TB,0,_TD);goto _TL4;_TL3: _TL4:;}
 # 145
-static void Cyc_Absyndump_dump_nospace(struct _fat_ptr s){unsigned long _T0;struct Cyc___cycFILE**_T1;struct Cyc___cycFILE*_T2;struct _fat_ptr _T3;int _T4;struct _fat_ptr _T5;unsigned char*_T6;const char*_T7;int _T8;_T0=
+static void Cyc_Absyndump_dump_nospace(struct _fat_ptr s){unsigned long _T0;struct Cyc___cycFILE**_T1;struct Cyc___cycFILE*_T2;struct _fat_ptr _T3;int _T4;struct _fat_ptr _T5;unsigned char*_T6;const char*_T7;const char*_T8;int _T9;_T0=
 Cyc_strlen(s);{int sz=(int)_T0;
 # 148
 if(sz < 1)goto _TL7;_T1=Cyc_Absyndump_dump_file;_T2=*_T1;_T3=s;_T4=sz;
-Cyc_file_string_write(_T2,_T3,0,_T4);_T5=s;_T6=_T5.curr;_T7=(const char*)_T6;_T8=sz - 1;
-Cyc_Absyndump_prev_char=_T7[_T8];goto _TL8;_TL7: _TL8:;}}
+Cyc_file_string_write(_T2,_T3,0,_T4);_T5=s;_T6=_T5.curr;_T7=(const char*)_T6;_T8=
+_check_null(_T7);_T9=sz - 1;Cyc_Absyndump_prev_char=_T8[_T9];goto _TL8;_TL7: _TL8:;}}
 # 153
 static void Cyc_Absyndump_dump_char(int c){int _T0;struct Cyc___cycFILE**_T1;struct Cyc___cycFILE*_T2;int _T3;_T0=c;_T1=Cyc_Absyndump_dump_file;_T2=*_T1;
 # 155
