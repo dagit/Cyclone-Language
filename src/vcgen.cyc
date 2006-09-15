@@ -1547,7 +1547,7 @@ static $(term_t,assn_map_t) vcgen_lexp(env_t env, exp_t e, assn_map_t amin){
     // let $(t1,am1) = vcgen_debug_rexp(env,e1,amin);
     // let $(t2,am2) = vcgen_debug_rexp(env,e2,am1);
     let $(t1,t2,am1) = vcgen_deref(env,e1,e2,amin);
-    return $(offseti(t1,t2,e1->topt),am1);
+    return $(offseti(t1,t2,NULL),am1);
   case &Absyn::AggrArrow_e(e1,f,...):
     // let $(t1,am1) = vcgen_debug_rexp(env,e1,amin);
     let $(t1,t2,am1) = vcgen_deref(env,e1,zero_exp(),amin);
