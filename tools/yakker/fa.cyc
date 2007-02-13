@@ -479,6 +479,60 @@ st_t rule2nfa(grammar_t grm, rule_t r) {
   return result;
 }
 
+/********* Experimental code for building Glushkov automata **********/
+void /* what to return? */
+rule2glush(grammar_t grm, rule_t r) {
+  let st_before = nfa_number_of_states;
+  let s = rule2nfa(grm,r);
+  let st_after = nfa_number_of_states;
+  Set::set_t<st_t> S = Set::empty(st_cmp);
+  let EPS = Graph::empty(st_cmp);
+  let REVEPS = Graph::empty(st_cmp);
+  for (let i = st_before; i < st_after; i++) {
+    let j = get_atrans(i);
+    if (j != NOTRANSITION) {
+      if (get_action(i) == EPSILON) { // i -> j by EPSILON
+	EPS = Graph::add_edge(EPS,i,j);
+	EPS = Graph::add_node(EPS,j);
+	REVEPS = Graph::add_edge(REVEPS,j,i);
+	REVEPS = Graph::add_node(REVEPS,i);
+      }
+      else {                          // i -> j by non-EPSILON
+	S = Set::insert(S,j);
+      }
+    }
+    j = get_etrans(i);
+    if (j != NOTRANSITION) {
+      EPS = Graph::add_edge(EPS,i,j);
+      EPS = Graph::add_node(EPS,j);
+      REVEPS = Graph::add_edge(REVEPS,j,i);
+      REVEPS = Graph::add_node(REVEPS,i);
+    }
+  }
+  let TCEPS = Graph::tc(EPS);
+  let TCREVEPS = Graph::tc(REVEPS);
+  /* TODO: maybe it makes sense to precompute intersection of S with all targets */
+  Set::set_t<st_t> F = Set::intersect(S,Graph::get_targets(TCREVEPS,get_final(s)));
+  let T = NULL;
+  for (let i = st_before; i < st_after; i++) {
+    let j = get_atrans(i);
+    let cs = get_action(i);
+    if (j != NOTRANSITION && cs != EPSILON) {
+      let A = Set::intersect(S,Graph::get_targets(TCREVEPS,i));
+      let B = Set::intersect(S,Graph::get_targets(TCEPS,j));
+      T = new List::List(new $(A,cs,B),T);
+    }
+  }
+  /* At this point the Glushkov automaton is encoded as follows:
+     States S
+     Start state s
+     Final states F
+     Transitions encoded as a set T of tuples (A,cs,B) where
+       (a -cs-> b) for all states a in A, b in B
+  */
+}
+
+
 /******************************* DFAS *******************************/
 /*
   Each state of a DFA is identified by a number.
