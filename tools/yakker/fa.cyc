@@ -493,9 +493,11 @@ rule2glush(grammar_t grm, rule_t r) {
     if (j != NOTRANSITION) {
       if (get_action(i) == EPSILON) { // i -> j by EPSILON
 	EPS = Graph::add_edge(EPS,i,j);
-	EPS = Graph::add_node(EPS,j);
+	EPS = Graph::add_edge(EPS,i,i);
+	EPS = Graph::add_edge(EPS,j,j);
 	REVEPS = Graph::add_edge(REVEPS,j,i);
-	REVEPS = Graph::add_node(REVEPS,i);
+	REVEPS = Graph::add_edge(REVEPS,i,i);
+	REVEPS = Graph::add_edge(REVEPS,j,j);
       }
       else {                          // i -> j by non-EPSILON
 	S = Set::insert(S,j);
@@ -504,9 +506,11 @@ rule2glush(grammar_t grm, rule_t r) {
     j = get_etrans(i);
     if (j != NOTRANSITION) {
       EPS = Graph::add_edge(EPS,i,j);
-      EPS = Graph::add_node(EPS,j);
+      EPS = Graph::add_edge(EPS,i,i);
+      EPS = Graph::add_edge(EPS,j,j);
       REVEPS = Graph::add_edge(REVEPS,j,i);
-      REVEPS = Graph::add_node(REVEPS,i);
+      REVEPS = Graph::add_edge(REVEPS,i,i);
+      REVEPS = Graph::add_edge(REVEPS,j,j);
     }
   }
   let TCEPS = Graph::tc(EPS);
