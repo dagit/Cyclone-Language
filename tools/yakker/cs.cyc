@@ -129,6 +129,26 @@ static const char ?cs_char_escape(unsigned int c) {
   else return aprintf("0x%x",c);
 }
 
+const char ?fsm_char_escape(unsigned int c) {
+  switch (c){
+  case '\t':
+    return aprintf("\\t");
+  case '\n':
+    return aprintf("\\n");
+  case ' ':
+    return aprintf("SPACE");
+  case '\'':
+    return aprintf("\\'");
+  case '"':
+    return aprintf("\\\"");
+  default:  
+    if (isprint(c))
+      return aprintf("%c",(unsigned char)c);
+    else 
+      return aprintf("\\%03u",c);
+  }
+}
+
 #include <buffer.h>
 
 const char ?cs2string(cs_t rng) {
@@ -415,7 +435,7 @@ List::list_t<$(unsigned int,unsigned int)@> cs2ranges(cs_t a) {
   unsigned int lb = 0;
   let result = NULL;
   for (unsigned int i = 0; i < MAXCSCHAR+1; i++) {
-    if (cs_member(a,i)) {
+    if (cs_member(a,(unsigned char)i)) {
       if (!in_range) {
         empty_so_far = 0;
         lb = i;
@@ -431,4 +451,13 @@ List::list_t<$(unsigned int,unsigned int)@> cs2ranges(cs_t a) {
     result = new List::List(new $(lb,MAXCSCHAR+1),result);
   result = List::imp_rev(result);
   return result;
+}
+
+List::list_t<unsigned int> cs2list(cs_t rng) {
+  List::list_t<unsigned int> chars = NULL;
+  for (unsigned int i = 0; i <= MAXCSCHAR; i++) {
+    if (cs_member(rng,(unsigned char)i))
+      chars = new List::List(i,chars);
+  }
+  return List::rev(chars);
 }

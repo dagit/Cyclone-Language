@@ -51,6 +51,7 @@ node_intersect(Graph::graph_t<`a> g, Set::set_t<`a,`H> x);
 Graph::graph_t<`a>
 node_delete(Graph::graph_t<`a> g, Set::set_t<`a,`H> x);
 
+const char ?char_escape(char c);
 const char ?string_escape(const char ?`H s);
 
 #endif

@@ -25,6 +25,7 @@
 #include <string.h>
 #include <hashtable.h>
 #include <list.h>
+#include <iter.h>
 #include "bnf.h"
 #include "cs.h"
 #include "axarray.h"
@@ -56,10 +57,13 @@ static int uint_cmp(unsigned int a, unsigned int b) {
 //  return Dict::make_iter(Core::heap_region,x);
 //}
 
+const char ?txtfile(const char ?x);
 
 /****************** NFA AND DFA COMMON DEFINITIONS ******************/
 typedef unsigned int st_t; // States.  Sometimes, 0 is reserved to mark no transition
 typedef Graph::graph_t<st_t> stgraph_t; // State graphs.
+// List of glushkov transitions.
+typedef List::list_t<$(Set::set_t<st_t>,cs_opt_t,Set::set_t<st_t>) @> glush_trans_t;
 #define NOTRANSITION 0
 
 typedef unsigned int act_t;
@@ -151,20 +155,131 @@ cs_opt_t get_action(st_t a) {
 st_t get_atrans(st_t a) {
   return Axarray::get((_@)atrans_array,a);
 }
-void nfa_print() {
+
+void nfa_print(FILE @f) {
   for (let i = 0; i < nfa_number_of_states; i++) {
-    printf("%d:",i);
+    fprintf(f,"%d:",i);
     let to = get_atrans(i);
     if (to != NOTRANSITION) {
       let a = get_action(i);
-      if (a == EPSILON) printf(" EPSILON->%d",to);
-      else { printf(" "); cs_print(stdout,a); printf("->%d",to); }
+      if (a == EPSILON) fprintf(f," EPSILON->%d",to);
+      else { fprintf(f," "); cs_print(f,a); fprintf(f,"->%d",to); }
     }
     to = get_etrans(i);
-    if (to != NOTRANSITION) printf(" EPSILON->%d",to);
-    printf("\n");
+    if (to != NOTRANSITION) fprintf(f," EPSILON->%d",to);
+    fprintf(f,"\n");
   }
 }
+
+/************ Code for printing NFA's in FSM format *************/
+typedef $(FILE *, cs_t, unsigned int) @fsm_info;
+
+void 
+target_iter($(fsm_info, st_t) @env, st_t target){
+  let &$(info, source) = env;
+  let &$(f, cs, out) = info;
+  let chars = cs2list(cs);
+  let branch_val = List::length(chars);
+  while (chars != NULL){
+    let branch_name = fsm_char_escape(List::hd(chars));
+    fprintf(f,"%d %d %s %d %d\n",source,target,branch_name,out,branch_val);
+    chars = List::tl(chars);
+  }
+}
+
+void 
+source_iter($(fsm_info, Set::set_t<st_t>) @env, st_t source){
+  let &$(info,B) = env;
+  Set::iter_c(target_iter, new $(info,source), B);
+}
+
+void 
+fsm_glush_print(FILE *`H f_fsm, Set::set_t<st_t> start_states, 
+		List::list_t<glush_trans_t> T_list, Set::set_t<st_t> final_states)
+{
+  // Create a "super" start state and add transitions to all rule start states.
+  let super_start = nfa_fresh_state();
+  st_t s = 0;
+  let out_sym = 1;
+  let starts_iter = Set::make_iter(Core::heap_region, start_states);
+  while (Iter::next(starts_iter,&s)){
+    // Omit weight -- defaults to "one".
+    fprintf(f_fsm,"%d %d %s %d\n",super_start,s,"EPSILON",out_sym);
+    out_sym++;
+  }
+    
+  for (; T_list != NULL; T_list = List::tl(T_list)) { 
+    // Print all transitions in T.
+    for (let T = List::hd(T_list); T != NULL; T = List::tl(T)) {
+      switch ( List::hd(T) ) {
+      case &$(A,EPSILON,B):
+	printf("ERROR: EPSILON encountered in Glushkov automata.\n");
+        exit(1);
+        break;
+      case &$(A,cs,B):
+	// default output is EPSILON, which is encoded as 0.
+	let info = new $(f_fsm, (cs_t)cs, 0);
+        Set::iter_c(source_iter,new $(info, B), A);
+      }
+    }
+  }
+
+  // Print final states. Default to weight of "one".
+  st_t f = 0;
+  let F_iter = Set::make_iter(Core::heap_region,final_states);
+  while (Iter::next(F_iter,&f)){
+    fprintf(f_fsm,"%d\n",f);
+  }
+}
+
+void fsm_print(FILE @f,Set::set_t<st_t> final_states) {
+  unsigned int output_symbol = 1;
+  for (let i = 0; i < nfa_number_of_states; i++) {
+    // Print final state. Default to weight of "one".
+    if (Set::member(final_states,i)){
+      fprintf(f,"%d\n",i);
+    }
+    int num_branches = 0;
+//     double branch_val = 1;
+    int branch_val = 0;
+    // default output is EPSILON, which is encoded as 0.
+    unsigned int out1 = 0;
+    unsigned int out2 = 0;
+
+    let e_to = get_etrans(i);
+    if (e_to != NOTRANSITION) num_branches++;
+
+    let a_to = get_atrans(i);
+    if (a_to != NOTRANSITION) {
+      let a = get_action(i);
+      if (a == EPSILON) {
+	if (e_to != NOTRANSITION) {
+	  // This state has two epsilon transitions so we output a "fresh" output symbol for each transition.
+	  out1 = output_symbol++;
+	  out2 = output_symbol++;
+	}
+	num_branches++;
+// 	branch_val = 1.0/(double)num_branches;
+	branch_val = num_branches;
+	fprintf(f,"%d %d EPSILON %d %d\n",i,a_to,out1,branch_val);
+      }
+      else { 
+	let chars = cs2list(a);
+	num_branches += List::length(chars);
+	branch_val = num_branches;
+	while (chars != NULL){
+	  let branch_name = fsm_char_escape(chars->hd);
+	  fprintf(f,"%d %d %s %d %d\n",i,a_to,branch_name,out1,branch_val);
+	  chars = chars->tl;
+	}
+      }
+    }
+    if (e_to != NOTRANSITION) {      
+      fprintf(f,"%d %d EPSILON %d %d\n",i,e_to,out2,branch_val);
+    }
+  }
+}
+
 /* Print out an NFA in DOT format, for display by Graphviz */
 void cs_dot_print(FILE @f,cs_t cs) {
   fprintf(f,"%s",string_escape(cs2string(cs)));
@@ -199,6 +314,13 @@ void nfa_dot(FILE @f,Set::set_t<st_t> final_states) {
   }
   fprintf(f,"}\n");
 }
+
+/*
+
+nfa_fsm final_states
+
+
+*/
 
 /* Invariant: all mk functions return a state s where get_final(s)
    has no transitions */
@@ -480,13 +602,18 @@ st_t rule2nfa(grammar_t grm, rule_t r) {
 }
 
 /********* Experimental code for building Glushkov automata **********/
-void /* what to return? */
+ /* what to return? */
+// return start states, transitions, and set of final states of automaton.
+$(st_t, glush_trans_t, Set::set_t<st_t>) @
 rule2glush(grammar_t grm, rule_t r) {
   let st_before = nfa_number_of_states;
   let s = rule2nfa(grm,r);
+
+  debugprint(1,"Created NFA, beginning Glushkov construction.\n");
+
   let st_after = nfa_number_of_states;
   Set::set_t<st_t> S = Set::singleton(st_cmp,s);
-  let EPS = Graph::empty(st_cmp);
+//   let EPS = Graph::empty(st_cmp);
   let REVEPS = Graph::empty(st_cmp);
   for (let i = st_before; i < st_after; i++) {
     EPS = Graph::add_edge(EPS,i,i);
@@ -494,7 +621,7 @@ rule2glush(grammar_t grm, rule_t r) {
     let j = get_atrans(i);
     if (j != NOTRANSITION) {
       if (get_action(i) == EPSILON) { // i -> j by EPSILON
-	EPS = Graph::add_edge(EPS,i,j);
+	//	EPS = Graph::add_edge(EPS,i,j);
 	REVEPS = Graph::add_edge(REVEPS,j,i);
       }
       else {                          // i -> j by non-EPSILON
@@ -503,31 +630,35 @@ rule2glush(grammar_t grm, rule_t r) {
     }
     j = get_etrans(i);
     if (j != NOTRANSITION) {
-      EPS = Graph::add_edge(EPS,i,j);
+      //      EPS = Graph::add_edge(EPS,i,j);
       REVEPS = Graph::add_edge(REVEPS,j,i);
     }
   }
-  let TCEPS = Graph::tc(EPS);
+//   let TCEPS = Graph::tc(EPS);
   let TCREVEPS = Graph::tc(REVEPS);
   /* TODO: maybe it makes sense to precompute intersection of S with all targets */
-  Set::set_t<st_t> F = Set::intersect(S,Graph::get_targets(TCREVEPS,get_final(s)));
+  Set::set_t<st_t> final_states = Set::intersect(S,Graph::get_targets(TCREVEPS,get_final(s)));
   let T = NULL;
   for (let i = st_before; i < st_after; i++) {
     let j = get_atrans(i);
     let cs = get_action(i);
     if (j != NOTRANSITION && cs != EPSILON) {
       let A = Set::intersect(S,Graph::get_targets(TCREVEPS,i));
-      let B = Set::intersect(S,Graph::get_targets(TCEPS,j));
+      let B = Set::singleton(st_cmp,j);
+//       let B = Set::intersect(S,Graph::get_targets(TCEPS,j));
       T = new List::List(new $(A,cs,B),T);
     }
   }
+
   /* At this point the Glushkov automaton is encoded as follows:
      States S
-     Start state s
-     Final states F
+     Start states start_states
+     Final states final_states
      Transitions encoded as a set T of tuples (A,cs,B) where
        (a -cs-> b) for all states a in A, b in B
   */
+
+  return new $(s,T,final_states);
 }
 
 
@@ -963,6 +1094,7 @@ static int leq_all(att_t a,aset_t x) {
 }
 int dfa_tiebreak(dfa_t dfa) {
   /* What final states can a given final state reach? */
+  /* YHM: reach going through *only* final states. */
   let final_reachable = node_intersect(dfa_reachable(dfa),dfa->final_states);
 
   /* { s | s is a final state with only one attribute } */
@@ -1915,6 +2047,8 @@ reachable_attributes(dfa_t dfa, stgraph_t reachable, st_t s) {
   }
   return result;
 }
+
+// YHM: what does this function do?
 static dfa_t short_circuit(dfa_t dfa) {
   let reachable = dfa_reachable(dfa);
   let done = Set::empty(st_cmp);
@@ -1971,24 +2105,36 @@ static dfa_t short_circuit(dfa_t dfa) {
 #include <errno.h>
 
 /* Construct the lookahead dfa */
+const char ?txtfile(const char ?x) {
+  return aprintf("ykdebug/%u-%s.txt",num_conflicts_ll,x);
+
+}
+
 const char ?dotfile(const char ?x) {
   return aprintf("ykdebug/%u-%s.dot",num_conflicts_ll,x);
 
 }
+
 dfa_t lookahead_dfa(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt) {
   //  if (!rules) return;
 
   nfa_init();
   let start_states = Set::empty(st_cmp);
+  let T_list = NULL;
   let final_states = Set::empty(st_cmp);
   List::list_t<unsigned int> interval_list = NULL;
   for (let rl = rules; rl; rl = rl->tl) {
     unsigned int Z = nfa_number_of_states; // First state of this nfa
     interval_list = new List::List(Z,interval_list);
-    let s = rule2nfa(grm,SEQ(rl->hd,right_ctxt));
-    //let s = rule2nfa(grm,rl->hd); // TEMPORARY: TRY WITHOUT RIGHT CONTEXT
+    //    let s = rule2nfa(grm,SEQ(rl->hd,right_ctxt));
+    //    start_states = Set::insert(start_states,s);
+    // //     let s = rule2nfa(grm,rl->hd); // TEMPORARY: TRY WITHOUT RIGHT CONTEXT
+    let &$(s,T,F) = rule2glush(grm,SEQ(rl->hd,right_ctxt));
+    debugprint(1,"Glushkov automaton built.\n");
     start_states = Set::insert(start_states,s);
-    final_states = Set::insert(final_states,get_final(s));
+    T_list = new List::List(T,T_list);
+    final_states = Set::union_two(final_states,F);
+    //final_states = Set::insert(final_states,get_final(s));
   }
   if (debug) {
     /* Make sure the ykdebug directory exists */
@@ -2008,8 +2154,16 @@ dfa_t lookahead_dfa(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt)
       eprintf("ERROR: ykdebug is not a directory\n");
       exit(1);
     }
-    FILE *f = fopen(dotfile("nfa"),"w");
-    if (f) { nfa_dot(f,final_states); fclose(f); }
+//     FILE *f = fopen(dotfile("nfa"),"w");
+//     if (f) { nfa_dot(f,final_states); fclose(f); }
+    /***********************************
+     * Print glushkov to FSM format.
+     ***********************************/
+    FILE *f_txt = fopen(txtfile("nfa"),"w");
+    if (f_txt) { 
+      fsm_glush_print(f_txt,start_states, T_list, final_states); 
+      fclose(f_txt); 
+    }
   }
   interval_list = List::imp_rev(interval_list);
   let intervals = Array::from_list(interval_list);
@@ -2020,6 +2174,9 @@ dfa_t lookahead_dfa(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt)
     }
     eprintf("\n");
   }
+  // XXX: premature end of function. for testing only.
+  return dfa_create();
+
   let dfa = nfa_distinguish(start_states,final_states,intervals);
   if (debug) {
     FILE *f = fopen(dotfile("dfa0"),"w");

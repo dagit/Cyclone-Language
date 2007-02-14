@@ -1,6 +1,7 @@
 include ../../Makefile.inc
 CYCFLAGS=
 #CYCFLAGS=-pg
+YAKFLAGS=-d
 
 PROG=yakker$(EXE)
 BINDIR=$(CYCDIR)/bin
@@ -36,13 +37,13 @@ indexer.o: indexer.cyc
 	$(CYCLONE) -c $< -o $@ --novcgen
 
 indexer.cyc: examples/indexer.yk yakker
-	./yakker -gen entry-list $< > $@
+	./yakker $(YAKFLAGS) -gen entry-list $< > $@
 
 wf: wf.o ykbuf.o ssl.o
 	$(CYCLONE) $^ -o $@ -lssl -lcrypto
 
 wf.cyc: examples/wf.yk yakker
-	./yakker -gen file $< > $@
+	./yakker $(YAKFLAGS) -gen file $< > $@
 
 imapcl: imapcl.o ykbuf.o ssl.o imap.o
 	$(CYCLONE) $^ -o $@ -lssl -lcrypto
@@ -55,7 +56,7 @@ imap.o: imap.cyc
 	$(CYCLONE) -c $< -o $@ --novcgen
 
 imap.cyc: imap.bnf
-	./yakker -gen command -no-main -lazyfill $< > $@
+	./yakker $(YAKFLAGS) -gen command -no-main -lazyfill $< > $@
 
 imapp.key:
 	openssl genrsa > $@
@@ -74,13 +75,13 @@ markdown: markdown.o ykbuf.o ssl.o bnf.o extract.o pr.o parse_tab.o util.o lex.o
 	$(CYCLONE) $^ -o $@ -lssl -lcrypto
 
 markdown.cyc: examples/markdown.yk yakker
-	./yakker -no-main -gen elim-cr-line -d $< > $@
+	./yakker $(YAKFLAGS) -no-main -gen elim-cr-line -d $< > $@
 
 boxextract: boxextract.o ykbuf.o ssl.o
 	$(CYCLONE) $^ -o $@ -lssl -lcrypto
 
 boxextract.cyc: boxextract.yk yakker
-	./yakker -gen lines $< > $@
+	./yakker $(YAKFLAGS) -gen lines $< > $@
 
 string_%.cyc: %.cyc
 	$(STRINGIFY) $< > $@

@@ -43,7 +43,8 @@ extern int is_cs_full(cs_t a);
 extern int is_cs_singleton(cs_t a);
 extern int first_of_cs(cs_t a);
 extern void minus_elim(grammar_t<`H> ds);
-extern const char ?char_escape(unsigned int c);
+extern const char ?fsm_char_escape(unsigned int c);
 extern List::list_t<$(unsigned int,unsigned int)@> cs2ranges(cs_t a);
 extern rule_t cs2rule(cs_t rng);
+extern List::list_t<unsigned int> cs2list(cs_t a);
 #endif
