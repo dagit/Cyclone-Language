@@ -485,19 +485,17 @@ rule2glush(grammar_t grm, rule_t r) {
   let st_before = nfa_number_of_states;
   let s = rule2nfa(grm,r);
   let st_after = nfa_number_of_states;
-  Set::set_t<st_t> S = Set::empty(st_cmp);
+  Set::set_t<st_t> S = Set::singleton(st_cmp,s);
   let EPS = Graph::empty(st_cmp);
   let REVEPS = Graph::empty(st_cmp);
   for (let i = st_before; i < st_after; i++) {
+    EPS = Graph::add_edge(EPS,i,i);
+    REVEPS = Graph::add_edge(REVEPS,i,i);
     let j = get_atrans(i);
     if (j != NOTRANSITION) {
       if (get_action(i) == EPSILON) { // i -> j by EPSILON
 	EPS = Graph::add_edge(EPS,i,j);
-	EPS = Graph::add_edge(EPS,i,i);
-	EPS = Graph::add_edge(EPS,j,j);
 	REVEPS = Graph::add_edge(REVEPS,j,i);
-	REVEPS = Graph::add_edge(REVEPS,i,i);
-	REVEPS = Graph::add_edge(REVEPS,j,j);
       }
       else {                          // i -> j by non-EPSILON
 	S = Set::insert(S,j);
@@ -506,11 +504,7 @@ rule2glush(grammar_t grm, rule_t r) {
     j = get_etrans(i);
     if (j != NOTRANSITION) {
       EPS = Graph::add_edge(EPS,i,j);
-      EPS = Graph::add_edge(EPS,i,i);
-      EPS = Graph::add_edge(EPS,j,j);
       REVEPS = Graph::add_edge(REVEPS,j,i);
-      REVEPS = Graph::add_edge(REVEPS,i,i);
-      REVEPS = Graph::add_edge(REVEPS,j,j);
     }
   }
   let TCEPS = Graph::tc(EPS);
