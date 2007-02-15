@@ -29,4 +29,5 @@ typedef struct DFA @dfa_t;
 extern dfa_t lookahead_dfa(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt);
 extern void dfa_generate1(dfa_t dfa);
 extern void dfa_generate2(dfa_t dfa);
+extern void lookahead_glush(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt);
 #endif

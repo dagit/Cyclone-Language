@@ -30,6 +30,7 @@ extern void report_right_recursion(grammar_t grm);
 extern void report_white_edges(grammar_t grm);
 extern void report_first_follow(grammar_t grm);
 extern void report_conflicts(grammar_t<`H> grm);
+extern void report_glush(grammar_t<`H> grm);
 extern void report_whitespace(grammar_t<`H> grm);
 extern void first(cs_t result, rule_t r);
 extern void last(cs_t result, rule_t r);

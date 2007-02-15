@@ -66,8 +66,9 @@ static int check_white_edges = 0;
 static int check_firstfollow = 0;
 static int check_conflicts = 0;
 static int check_whitespace = 0;
+static int check_glush = 0;
 
-static void check_all() { /* except conflicts1 */
+static void check_all() { /* except conflicts1, glush */
   check_undefined =
     check_multiple =
     check_empty =
@@ -88,7 +89,8 @@ static int check_any() {
     check_white_edges ||
     check_firstfollow ||
     check_conflicts ||
-    check_whitespace;
+    check_whitespace ||
+    check_glush;
 }
 
 static List::list_t<$(const char ?,const char ?)@> renamings = NULL;
@@ -202,6 +204,7 @@ int main(int argc, const char ?`H?argv) {
     else if (strcmp("-check-white-edges",argv[i]) == 0) check_white_edges = 1;
     else if (strcmp("-check-firstfollow",argv[i]) == 0) check_firstfollow = 1;
     else if (strcmp("-check-conflicts",argv[i]) == 0) check_conflicts = 1;
+    else if (strcmp("-check-glush",argv[i]) == 0) check_glush = 1;
     else if (strcmp("-check-whitespace",argv[i]) == 0) check_whitespace = 1;
     else if (strcmp("-extract-prose",argv[i]) == 0) extractprosep = 1;
     else if (strcmp("-graph",argv[i]) == 0) do_graph = 1;
@@ -437,6 +440,7 @@ int main(int argc, const char ?`H?argv) {
     minus_elim(ds);
     if (check_firstfollow) report_first_follow(ds);
     if (check_conflicts) report_conflicts(ds);
+    if (check_glush) report_glush(ds);
   }
   else if (pads) {
     minus_elim(ds);

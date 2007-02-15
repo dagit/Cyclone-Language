@@ -1308,3 +1308,139 @@ void report_whitespace(grammar_t<`H> grm) {
   */
 
 }
+
+
+/**************************** GLUSHKOV ****************************/
+// TODO: copied from conflicts -- should be refactored if we keep it
+static
+void glush0(rule_t,rule_t);
+static
+void glush_alt(rule_t r,rule_t right_ctxt) {
+  /* Same as glush0, but don't report Alt glush; only called
+     by glush0 when the Alt glush have already been reported */
+  switch (r->r) {
+  case &Alt(r2,r3):
+    glush_alt(r2,right_ctxt);
+    glush_alt(r3,right_ctxt);
+    return;
+  default:
+    glush0(r,right_ctxt);
+    return;
+  }
+}
+
+static grammar_t checking_glush_grammar;
+static
+void glush0(rule_t r,rule_t right_ctxt) {
+  switch (r->r) {
+  case &Seq(r2,r3):
+    glush0(r2,SEQ(r3,right_ctxt));
+    glush0(r3,right_ctxt);
+    return;
+  case &Alt(r2,r3):
+    let rng_all = cs_empty();
+    let rng_conflict = cs_empty();
+
+    let alts = alt2rules(r);
+    for (let rs = alts; rs; rs = rs->tl) {
+      let rng = cs_empty();
+      first(rng,SEQ(rs->hd,right_ctxt));
+      let rng2 = cs_dup(rng);
+      cs_intersect(rng2,rng_all);
+      cs_union(rng_conflict,rng2);
+      cs_union(rng_all,rng);
+    }
+    if (!is_cs_empty(rng_conflict)) {
+      /* an LL(1) conflict */
+      eprintf("************************************************************************\n");
+      num_conflicts_ll++;
+      eprintf("Conflict %u\n",num_conflicts_ll);
+      eprintf("LL(1) conflict on character(s) ");
+      cs_print(stderr,rng_conflict);
+      eprintf(" in Alt\n  ");
+      pr_rule(stderr,SEQ(r,right_ctxt));
+      int altnum = 1;
+      for (let x = alts; x; x = x->tl) {
+        eprintf("\nAlternative %d: ",altnum++);
+        pr_rule(stderr,x->hd);
+      }
+      eprintf("\nRight context: ");
+      pr_rule(stderr,right_ctxt);
+      eprintf("\n");
+      lookahead_glush(checking_glush_grammar,alts,right_ctxt);
+    }
+    glush_alt(r2,right_ctxt);
+    glush_alt(r3,right_ctxt);
+    return;
+  case &Opt(r2):
+    let rng2 = cs_empty();
+    let rng3 = cs_empty();
+    first(rng2,SEQ(r2,right_ctxt));
+    first(rng3,right_ctxt);
+    cs_intersect(rng2,rng3);
+    if (!is_cs_empty(rng2)) {
+      /* an LL(1) conflict */
+      eprintf("************************************************************************\n");
+      num_conflicts_ll++;
+      eprintf("Conflict %u\n",num_conflicts_ll);
+      eprintf("LL(1) conflict on character(s) ");
+      cs_print(stderr,rng2);
+      eprintf(" in Opt\n  ");
+      pr_rule(stderr,SEQ(r,right_ctxt));
+      eprintf("\n");
+      eprintf("Alternative 1: ");
+      pr_rule(stderr,r2);
+      eprintf("\nAlternative 2: ");
+      pr_rule(stderr,LIT(""));
+      eprintf("\nRight context: ");
+      pr_rule(stderr,right_ctxt);
+      eprintf("\n");
+      lookahead_glush(checking_glush_grammar,
+		    List::list(r2,LIT("")), // r2 first because greedy says try r2, only if fail assume ""
+		    right_ctxt);
+    }
+    glush0(r2,right_ctxt);
+    return;
+  case &Rcount(_,r2):
+    // FIX: we are assuming here a greedy parse
+    return;
+  case &Star(m,&Num(0),r2): return;
+  case &Star(m,&Num(n),r2):
+    if (m > n) return;
+    if (m == n) return; /* No choice involved */
+    glush0(OPT(r2),right_ctxt);
+    return;
+  case &Star(m,&Infinity,r2):
+    glush0(OPT(r2),right_ctxt);
+    return;
+  case &Hash(m,N,r2):
+    // FIX: not right.  r2 must be preceeded by comma...
+    if (repeat_zero(N)) return;
+    glush0(OPT(r2),right_ctxt);
+    return;
+  case &Symb(_,_):
+  case &Prose(_):
+  case &CharRange(_,_):
+  case &Minus(_,_):
+  case &Lit(_):
+    return;
+  }
+}
+
+void report_glush(grammar_t<`H> grm) {
+  reset_globals();
+  //  checking_glush_grammar = grm;
+  grammar_t followgrm = follow_grammar(grm);
+  grammar_t combinedgrm = List::append(grm,followgrm);
+  checking_glush_grammar = combinedgrm;
+  init_recursive(combinedgrm);
+  init_firstt(combinedgrm);
+  init_mayt(combinedgrm);
+  init_mustt(combinedgrm);
+  init_maybe_empty(combinedgrm);
+  for (let x = grm; x; x = x->tl) {
+    let &$(n,r,_) = x->hd;
+    let fn = follow_symbol(n);
+    glush0(r,SYMB(fn));
+  }
+}
