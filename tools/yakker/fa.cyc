@@ -173,27 +173,6 @@ void nfa_print(FILE @f) {
 }
 
 /************ Code for printing NFA's in FSM format *************/
-// typedef $(FILE *, cs_t, unsigned int) @fsm_info;
-
-// void 
-// target_iter($(fsm_info, st_t) @env, st_t target){
-//   let &$(info, source) = env;
-//   let &$(f, cs, out) = info;
-//   let chars = cs2list(cs);
-//   let branch_val = List::length(chars);
-//   while (chars != NULL){
-//     let branch_name = fsm_char_escape(List::hd(chars));
-//     fprintf(f,"%d %d %s %d %d\n",source,target,branch_name,out,branch_val);
-//     chars = List::tl(chars);
-//   }
-// }
-
-// void 
-// source_iter($(fsm_info, Set::set_t<st_t>) @env, st_t source){
-//   let &$(info,B) = env;
-//   Set::iter_c(target_iter, new $(info,source), B);
-// }
-
 void 
 fsm_glush_print(FILE *`H f_fsm, Set::set_t<st_t> start_states, 
 		List::list_t<glush_trans_t> T_list, Set::set_t<st_t> final_states)
