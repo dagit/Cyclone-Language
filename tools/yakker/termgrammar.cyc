@@ -240,12 +240,13 @@ rule_t rule2term(rule_t r) {
   }
 }
 
-rule_t escape_cs_UT(cs_t cs){
+rule_t escape_cs_rule_UT(rule_t r){
   // FIX: need to implement.
-  return LIT("ESCAPE_CS");
+//   let cs = rule2cs(r);
+  return mkterm_UT( fresh_tag("ESCAPE_CS"), r);
 }
 rule_t escape_lit_UT(const char ?`H s){
-  return mkterm_UT( fresh_tag("ESCAPE_ME"), LIT(s) );
+  return mkterm_UT( fresh_tag("ESCAPE_LIT"), LIT(s) );
 }
 
 static
@@ -253,17 +254,19 @@ rule_t rule2term_UT(rule_t r) {
   let res = NULL;
   switch (r->r) {
   case &Rcount(n,r2):
-    internal_err("Unsupported feature: Rcount in rule2term_UT\n");
-    return mkterm_UT(LIT("RCOUNT"), LIT("FIXME"));
+    if (is_cs(r2)) {
+      let escaped = escape_cs_rule_UT(r2);
+      return mkterm_UT( fresh_tag("RCount"), RCOUNT(n,escaped) );
+    }
+    return mkterm_UT( fresh_tag("RCount"), r2);
   case &Star(m,N,r2):
     if (is_cs(r2)) {
-      let cs = rule2cs(r2);
-      let escaped = escape_cs_UT(cs);
+      let escaped = escape_cs_rule_UT(r2);
       return mkterm_UT( fresh_tag("Star"), STAR(m,N,escaped) );
     }
-    return mkterm_UT( fresh_tag("Star"), STAR(m,N,rule2term(r2)) );
+    return mkterm_UT( fresh_tag("Star"), STAR(m,N,rule2term_UT(r2)) );
   case &Hash(m,N,r2):
-    return mkterm_UT( fresh_tag("Hash"), HASH(m,N,rule2term(r2)) );
+    return mkterm_UT( fresh_tag("Hash"), HASH(m,N,rule2term_UT(r2)) );
   case &Opt(r2):
     let some_term = mkterm_UT( fresh_tag("Some"), rule2term_UT(r2) );
     let none_term = mkterm_UT( fresh_tag("None"), LIT("") );
@@ -273,7 +276,7 @@ rule_t rule2term_UT(rule_t r) {
   case &Symb(_,_):
     return r;
   case &CharRange(_,_):
-    return escape_cs_UT(rule2cs(r));
+    return escape_cs_rule_UT(r);
   case &Lit(s):
     return escape_lit_UT(s);
 
