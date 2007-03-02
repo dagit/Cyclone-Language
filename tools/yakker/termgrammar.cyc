@@ -514,3 +514,109 @@ grammar_t grammar2termgrammar_UT(grammar_t ds) {
   res = imp_rev(res);
   return res;
 }
+
+// RRT = remove redundant tags
+/*
+
+    r : U
+-----------------
+   (T r) --> r
+
+
+ */
+
+// Checks whether rule r defines a term and if it does, returns its subrule. 
+// Returns NULL if r is not a term.
+Rule_t term_get_rule_UT(rule_t r){
+  switch (r->r){
+  case &Seq(&arule{.r= 
+	&Seq(&arule{.r= 
+	      &Seq(&arule{.r=
+		    &Lit(lp),...},
+		&arule{.r=&Lit(s),...}),...}, r1),...},
+    &arule{.r=&Lit(rp),...}) :
+    if (!strcmp(lp,"(") && ! strcmp(rp,")"))
+      return r1;
+    else
+      return NULL;
+  default:
+    return NULL;
+  }
+}
+
+// Checks whether rule r defines a term and if it does, returns its tag.
+// Returns NULL if r is not a term.
+Rule_t term_get_tag_UT(rule_t r){
+  switch (r->r){
+  case &Seq(&arule{.r= 
+	&Seq(&arule{.r= 
+	      &Seq(&arule{.r=
+		    &Lit(lp),...},
+		t as &arule{.r=&Lit(s),...}),...}, r1),...},
+    &arule{.r=&Lit(rp),...}) :
+    if (!strcmp(lp,"(") && !strcmp(rp,")"))
+      return t;
+    else
+      return NULL;
+  default:
+    return NULL;
+  }
+}
+
+// Checks whether rule r defines a term.
+bool is_term_UT(rule_t r){
+  switch (r->r){
+  case &Seq(&arule{.r= 
+	&Seq(&arule{.r= 
+	      &Seq(&arule{.r=
+		    &Lit(lp),...},
+		&arule{.r=&Lit(s),...}),...}, r1),...},
+    &arule{.r=&Lit(rp),...}) :
+    return !strcmp(lp,"(") && ! strcmp(rp,")");
+  case &Symb(_,_):
+    return true;
+  default:
+    return false;
+  }
+}
+
+rule_t rewrite_RRT(rule_t r){
+    let r2 = term_get_rule_UT(r);
+
+    if (r2) { // then rule is a term
+      let r2_r = rewrite_RRT(r2);
+      if (is_term_UT(r2_r))
+	return r2_r;
+      let tag = term_get_tag_UT(r);
+      return mkterm_UT(tag, r2_r);
+    }
+
+    switch (r->r) {
+    case &Opt(r1):
+      return OPT(rewrite_RRT(r1));
+    case &Seq(r1,r2):
+      return SEQ(rewrite_RRT(r1), rewrite_RRT(r2));
+    case &Alt(r1,r2):
+      return ALT(rewrite_RRT(r1), rewrite_RRT(r2));
+    case &Rcount(n,r1):
+      return RCOUNT(n,rewrite_RRT(r1));
+    case &Star(m,N,r1):
+      return STAR(m,N,rewrite_RRT(r1));
+    case &Hash(m,N,r1):
+      return HASH(m,N,rewrite_RRT(r1));
+    default:
+      return r;
+    }
+}
+
+grammar_t grammar_RRT(grammar_t ds) {
+  init_arityt(ds);
+  let res = NULL;
+  for (; ds; ds = ds->tl) {
+    let &$(n,r,a) = ds->hd;
+    let r2 = rewrite_RRT(r);
+    res = new List(new $(n,r2,a),res);
+  }
+  res = imp_rev(res);
+  return res;
+}

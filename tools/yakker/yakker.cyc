@@ -402,7 +402,9 @@ int main(int argc, const char ?`H?argv) {
   if (termgrammar_v2p) {
     debugprint(1,"Producing term grammar (version 2)... ");
     minus_elim(ds); // also marks character sets, needed for the conversion
-    pr_definitions(stdout,grammar2termgrammar_UT(ds));
+    let gr_orig = grammar2termgrammar_UT(ds);
+    let gr_RRT = grammar_RRT(gr_orig);
+    pr_definitions(stdout, gr_RRT);
     debugprint(1,"done\n");
     return 0;
   }
