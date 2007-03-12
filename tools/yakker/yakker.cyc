@@ -155,7 +155,6 @@ int main(int argc, const char ?`H?argv) {
   int termgrammarp = 0;
   int termgrammar_v2p = 0;
   int compare = 0;
-  int local_lookahead = 0;
   const char ?start_symbol = NULL;
   int mode = FILE_MODE;
 
@@ -403,8 +402,8 @@ int main(int argc, const char ?`H?argv) {
     debugprint(1,"Producing term grammar (version 2)... ");
     minus_elim(ds); // also marks character sets, needed for the conversion
     let gr_orig = grammar2termgrammar_UT(ds);
-    let gr_RRT = grammar_RRT(gr_orig);
-    pr_definitions(stdout, gr_RRT);
+//     let gr_RRT = grammar_RRT(gr_orig);
+    pr_definitions(stdout, gr_orig);
     debugprint(1,"done\n");
     return 0;
   }

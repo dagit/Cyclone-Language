@@ -325,10 +325,11 @@ int is_arg(rule_t r) {
 static
 int is_arg_UT(rule_t r) {
   switch (r->r) {
-  case &Symb(_,_):
+    // Are these artity checks correct?
   case &Star(_,_,_):
   case &CharRange(_,_):
     return (arity_rule(r) > 0);
+  case &Symb(_,_):
   case &Alt(_,_):
   case &Opt(_):
   case &Rcount(_,_):
@@ -349,7 +350,8 @@ list_t<rule_t> rule2args(rule_t r) {
 
 static
 list_t<rule_t> rule2args_UT(rule_t r) {
-  return filter(is_arg_UT,seq2rules(r));
+  return seq2rules(r);
+//   return filter(is_arg_UT,seq2rules(r));
 }
 
 static

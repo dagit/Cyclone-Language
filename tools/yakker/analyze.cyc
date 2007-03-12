@@ -655,6 +655,7 @@ grammar_t follow_grammar(grammar_t grm) {
   for (let x = grm; x; x = x->tl) {
     let &$(n,r,_) = x->hd;
     let fn = follow_symbol(n);
+//     eprintf("following %s\n",fn); fflush(stderr);
     follow_grammar0(rt,r,SYMB(fn));
   }
   acc = NULL;

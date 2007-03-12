@@ -486,11 +486,12 @@ void gen(grammar_t<`H> grm, const char ?`H start_symbol,
   // but still need to know whether a follow symbol is recursive
   debugprint(1,"Computing follow grammar... ");
   grammar_t followgrm = eof_follow_grammar(grm,start_symbol);
-  // grammar_t followgrm = follow_grammar(grm);
+//   grammar_t followgrm = follow_grammar(grm);
   debugprint(1,"done\n");
   if (debug > 1) {
-    eprintf("The follow grammar:\n");
+    eprintf("The follow grammar:\n");    
     pr_definitions(stderr,followgrm);
+    fflush(stderr);
   }
   grammar_t combinedgrm = List::append(grm,followgrm);
   init_recursive(combinedgrm);
