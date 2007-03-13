@@ -22,4 +22,5 @@
 extern grammar_t grammar2termgrammar(grammar_t ds);
 extern grammar_t grammar2termgrammar_UT(grammar_t ds);
 extern grammar_t grammar_RRT(grammar_t ds) ;
+extern grammar_t grammar_final(grammar_t ds) ;
 #endif

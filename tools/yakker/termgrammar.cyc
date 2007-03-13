@@ -50,6 +50,7 @@ term ::= "(" tag *term ")"
 
  */
 
+#include <core.h>
 #include "bnf.h"
 #include "pr.h"
 #include "analyze.h"
@@ -89,8 +90,105 @@ rule_t with_spaces(list_t<rule_t> rs) {
   return with_sep(rs," ");
 }
 
+
+// We use a dummy rule to mark terms so that they can be recognized by later 
+// optimization phases.
+static datatype Rule.Symb term_symb = Symb("TERM_DUMMY",NULL);
+struct arule term_rule = arule(NULL,NULL,NULL,NULL,&term_symb);
+
+// Make a new term.
 rule_t mkterm_UT(rule_t tag, rule_t args){
-    return SEQ(LIT("("), tag, args, LIT(")"));
+  return SEQ(LIT("("), tag, args, LIT(")"), &term_rule);
+}
+
+// Make a new term without the dummy term marker.
+rule_t mkterm_UT_nodummy(rule_t tag, rule_t args){
+  return SEQ(LIT("("), tag, args, LIT(")"));
+}
+
+// Checks whether rule r defines a term.
+bool is_term_UT(rule_t r){
+  switch (r->r){
+  case &Seq(_,last):
+    return last == &term_rule;
+  default:
+    return false;
+  }
+}
+
+// Checks whether rule r directly contains a term. 
+bool contains_term_UT(rule_t r){
+  switch (r->r){
+  case &Seq(_,last):
+    // r itself might be a term
+    return last == &term_rule;
+  case &Symb(_,_):
+    // r is a symbol, so its a definition is term.
+    return true;
+  default:
+    return false;
+  }
+}
+
+// Extract the tag from term. 
+// N.B. "term" must really be a term, or an Invalid argument exception will be raised.
+rule_t term_UT_get_tag(rule_t term){
+  switch (term->r){
+  case &Seq(&arule{.r= 
+	  &Seq(&arule{.r= 
+	     &Seq(&arule{.r= 
+		&Seq(&arule{.r=
+		   &Lit(lp),...},		     
+		   t as &arule{.r=&Lit(s),...}), ...}, 
+		r1),...},
+		  &arule{.r=
+		      &Lit(rp),...}),...},
+          dummy_rule) :
+      return t;
+  default:
+    throw new Core::Invalid_argument("Expecting term rule, received something else.");
+  }
+}
+
+// Extract the rule from term.
+// N.B. "term" must really be a term, or an Invalid argument exception will be raised.
+rule_t term_UT_get_rule(rule_t term){
+  switch (term->r){
+  case &Seq(&arule{.r= 
+	  &Seq(&arule{.r= 
+	     &Seq(&arule{.r= 
+		&Seq(&arule{.r=
+		   &Lit(lp),...},
+		     &arule{.r=
+		   &Lit(s),...}), ...}, 
+		r1),...},
+		  &arule{.r=
+		      &Lit(rp),...}),...},
+          dummy_rule) :
+      return r1;
+  default:
+    throw new Core::Invalid_argument("Expecting term rule, received something else.");
+  }
+}
+
+// "Eliminate" (extract the contents of) the term.
+// N.B. "term" must really be a term, or an Invalid argument exception will be raised.
+$(rule_t,rule_t) term_UT_elim(rule_t term){
+  switch (term->r){
+  case &Seq(&arule{.r= 
+	  &Seq(&arule{.r= 
+	     &Seq(&arule{.r= 
+		&Seq(&arule{.r=
+		   &Lit(lp),...},		     
+		   t as &arule{.r=&Lit(s),...}), ...}, 
+		r1),...},
+		  &arule{.r=
+		      &Lit(rp),...}),...},
+          dummy_rule) :
+    return $(t,r1);
+  default:
+    throw new Core::Invalid_argument("Expecting term rule, received something else.");
+  }
 }
 
 static int fresh_num=0;
@@ -351,7 +449,6 @@ list_t<rule_t> rule2args(rule_t r) {
 static
 list_t<rule_t> rule2args_UT(rule_t r) {
   return seq2rules(r);
-//   return filter(is_arg_UT,seq2rules(r));
 }
 
 static
@@ -484,8 +581,9 @@ grammar_t grammar2termgrammar(grammar_t ds) {
 
 static
 Rule_t seq2term_UT(rule_t r0) {
-  let rs = seq2rules(r0);
-  let args = filter(is_arg_UT,rs);
+//   let rs = seq2rules(r0);
+//   let args = filter(is_arg_UT,rs);
+  let args = seq2rules(r0);
   let len = length(args);
 
   if (len == 0) {
@@ -504,6 +602,7 @@ Rule_t seq2term_UT(rule_t r0) {
 
 grammar_t grammar2termgrammar_UT(grammar_t ds) {
   init_arityt(ds);
+
   let res = NULL;
   for (; ds; ds = ds->tl) {
     let &$(n,r,a) = ds->hd;
@@ -513,7 +612,17 @@ grammar_t grammar2termgrammar_UT(grammar_t ds) {
     res = new List(new $(n,r2,a),res);
     //    res = new List(new $(n,r2t(r),a),res);
   }
+
   res = imp_rev(res);
+
+  // Add the production that corresponds to the dummy rule (symbol
+  // __TERM__) used to mark terms. Probably not necessary, but ensures
+  // that the grammar is coherent (because the dummy-term symbol is
+  // defined.)
+//   let term_def = new $((const char ?)"TERM_DUMMY",LIT("t"),
+// 		       Attr{.ws=0,.re=0,.paramtype=NULL,.rettype=NULL});
+//   res = new List(term_def,res);
+
   return res;
 }
 
@@ -527,70 +636,18 @@ grammar_t grammar2termgrammar_UT(grammar_t ds) {
 
  */
 
-// Checks whether rule r defines a term and if it does, returns its subrule. 
-// Returns NULL if r is not a term.
-Rule_t term_get_rule_UT(rule_t r){
-  switch (r->r){
-  case &Seq(&arule{.r= 
-	&Seq(&arule{.r= 
-	      &Seq(&arule{.r=
-		    &Lit(lp),...},
-		&arule{.r=&Lit(s),...}),...}, r1),...},
-    &arule{.r=&Lit(rp),...}) :
-    if (!strcmp(lp,"(") && ! strcmp(rp,")"))
-      return r1;
-    else
-      return NULL;
-  default:
-    return NULL;
-  }
-}
-
-// Checks whether rule r defines a term and if it does, returns its tag.
-// Returns NULL if r is not a term.
-Rule_t term_get_tag_UT(rule_t r){
-  switch (r->r){
-  case &Seq(&arule{.r= 
-	&Seq(&arule{.r= 
-	      &Seq(&arule{.r=
-		    &Lit(lp),...},
-		t as &arule{.r=&Lit(s),...}),...}, r1),...},
-    &arule{.r=&Lit(rp),...}) :
-    if (!strcmp(lp,"(") && !strcmp(rp,")"))
-      return t;
-    else
-      return NULL;
-  default:
-    return NULL;
-  }
-}
-
-// Checks whether rule r defines a term.
-bool is_term_UT(rule_t r){
-  switch (r->r){
-  case &Seq(&arule{.r= 
-	&Seq(&arule{.r= 
-	      &Seq(&arule{.r=
-		    &Lit(lp),...},
-		&arule{.r=&Lit(s),...}),...}, r1),...},
-    &arule{.r=&Lit(rp),...}) :
-    return !strcmp(lp,"(") && ! strcmp(rp,")");
-  case &Symb(_,_):
-    return true;
-  default:
-    return false;
-  }
-}
-
+// Invariant: r is a term iff the return value is a term.
 rule_t rewrite_RRT(rule_t r){
-    let r2 = term_get_rule_UT(r);
+    if (is_term_UT(r)) { 
+      let $(tag,r_inner) = term_UT_elim(r);
 
-    if (r2) { // then rule is a term
-      let r2_r = rewrite_RRT(r2);
-      if (is_term_UT(r2_r))
-	return r2_r;
-      let tag = term_get_tag_UT(r);
-      return mkterm_UT(tag, r2_r);
+      // Check if nested rule is a term too. if so, strip the outer
+      // term wrapping by just returning the inner term.
+      if (contains_term_UT(r_inner))
+	return rewrite_RRT(r_inner);
+
+      // Otherwise, rewrite and rewrap.
+      return mkterm_UT(tag, rewrite_RRT(r_inner));
     }
 
     switch (r->r) {
@@ -617,6 +674,44 @@ grammar_t grammar_RRT(grammar_t ds) {
   for (; ds; ds = ds->tl) {
     let &$(n,r,a) = ds->hd;
     let r2 = rewrite_RRT(r);
+    res = new List(new $(n,r2,a),res);
+  }
+  res = imp_rev(res);
+  return res;
+}
+
+// Final pass on grammar. Currently, just used to cleanup dummy tags from terms.
+
+rule_t rewrite_final(rule_t r){
+    if (is_term_UT(r)) { 
+      let $(tag,r_inner) = term_UT_elim(r);
+      return mkterm_UT_nodummy(tag, rewrite_final(r_inner));
+    }
+
+    switch (r->r) {
+    case &Opt(r1):
+      return OPT(rewrite_final(r1));
+    case &Seq(r1,r2):
+      return SEQ(rewrite_final(r1), rewrite_final(r2));
+    case &Alt(r1,r2):
+      return ALT(rewrite_final(r1), rewrite_final(r2));
+    case &Rcount(n,r1):
+      return RCOUNT(n,rewrite_final(r1));
+    case &Star(m,N,r1):
+      return STAR(m,N,rewrite_final(r1));
+    case &Hash(m,N,r1):
+      return HASH(m,N,rewrite_final(r1));
+    default:
+      return r;
+    }
+}
+
+grammar_t grammar_final(grammar_t ds) {
+  init_arityt(ds);
+  let res = NULL;
+  for (; ds; ds = ds->tl) {
+    let &$(n,r,a) = ds->hd;
+    let r2 = rewrite_final(r);
     res = new List(new $(n,r2,a),res);
   }
   res = imp_rev(res);

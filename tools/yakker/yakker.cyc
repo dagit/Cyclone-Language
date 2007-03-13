@@ -129,6 +129,8 @@ static const char ?add_namespace = NULL;
 "         -nore <syms>           don't handle <syms> as regular expressions\n"\
 "         -re <syms>             do handle <syms> as regular expressions\n"\
 "         -termgrammar           produce a term grammar for the input grammar\n"\
+"         -termgrammar_v2        produce a version 2 term grammar for the input grammar\n"\
+"         -termgrammar_RRT       produce a version 2 term grammar for the input grammar, with redundant tags removed\n"\
 "         -no-main               don't output a default main procedure\n"\
 "         -lazyfill              use lazy filling (for interactive connections)\n"\
 "         -depend                produce a dependency graph of symbols in DOT format\n"\
@@ -154,6 +156,7 @@ int main(int argc, const char ?`H?argv) {
   int tsortp = 0;
   int termgrammarp = 0;
   int termgrammar_v2p = 0;
+  int termgrammar_RRTp = 0;
   int compare = 0;
   const char ?start_symbol = NULL;
   int mode = FILE_MODE;
@@ -181,6 +184,7 @@ int main(int argc, const char ?`H?argv) {
     else if (strcmp("-help",argv[i]) == 0) die();
     else if (strcmp("-termgrammar",argv[i]) == 0) termgrammarp = 1;
     else if (strcmp("-termgrammar_v2",argv[i]) == 0) termgrammar_v2p = 1;
+    else if (strcmp("-termgrammar_RRT",argv[i]) == 0) termgrammar_RRTp = 1;
     else if (strcmp("-compare",argv[i]) == 0) compare = 1;
     else if (strcmp("-unnamespace",argv[i]) == 0) unnamespace = 1;
     else if (strcmp("-local",argv[i]) == 0) local_lookahead = 1;
@@ -398,12 +402,17 @@ int main(int argc, const char ?`H?argv) {
   }
 
   /* Produce the term grammar, version 2, and exit */
-  if (termgrammar_v2p) {
+  if (termgrammar_v2p || termgrammar_RRTp) {
     debugprint(1,"Producing term grammar (version 2)... ");
     minus_elim(ds); // also marks character sets, needed for the conversion
-    let gr_orig = grammar2termgrammar_UT(ds);
-//     let gr_RRT = grammar_RRT(gr_orig);
-    pr_definitions(stdout, gr_orig);
+    let gr = grammar2termgrammar_UT(ds);
+    if (termgrammar_RRTp){
+      debugprint(1,"Removing redundant tags in term grammar ... ");
+      gr = grammar_RRT(gr);
+    }
+    debugprint(1,"Performing final pass on term grammar ... ");
+    gr = grammar_final(gr);
+    pr_definitions(stdout, gr);
     debugprint(1,"done\n");
     return 0;
   }
