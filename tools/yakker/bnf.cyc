@@ -505,8 +505,11 @@ List::list_t<rule_t> alt2rules(rule_t r) {
   return alt2rules0(r,NULL);
 }
 
-/* Turn a Seq rule into a list of the rule sequence */
-List::list_t<rule_t> seq2rules(rule_t r0) {
+/* Turn a rule into a list of the rule sequence. 
+   If r0 is not a sequence, will return a singleton list of r0.
+   Guaranteed to contain at least one element.
+ */
+List::List_t<rule_t> seq2rules(rule_t r0) {
   let res = NULL;
   let rs = List::list(r0);
   while (rs) {

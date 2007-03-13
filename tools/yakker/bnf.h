@@ -107,7 +107,7 @@ extern int repeat_zero(repeat_t);
 extern grammar_t get_reachable(grammar_t<`H> ds, List::list_t<const char ?@> roots);
 extern grammar_t close_definitions(grammar_t<`H> ds, List::list_t<grammar_t<`H>> e);
 extern List::list_t<rule_t> alt2rules(rule_t r);
-extern List::list_t<rule_t> seq2rules(rule_t r);
+extern List::List_t<rule_t> seq2rules(rule_t r);
 extern rule_t commas();
 
 typedef struct Hashtable::Table<const char ?@,cs_t,`H> @cs_table_t;
