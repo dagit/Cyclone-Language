@@ -1004,6 +1004,7 @@ unsigned int arity_rule(rule_t r) {
     warn("Undefined arity for %s\n",x);
     return 1;
   case &Star(m,&Num(n),_):
+    // FIX: is it okay that we're ignoring the underlying rule's arity?
     return (m==n)?0:1;
   case &Alt(_,_):
   case &Opt(_):

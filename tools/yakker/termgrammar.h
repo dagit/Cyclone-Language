@@ -23,5 +23,8 @@ extern grammar_t grammar2termgrammar(grammar_t ds);
 extern grammar_t grammar2termgrammar_UT(grammar_t ds);
 extern grammar_t grammar_MDTU(grammar_t ds);
 extern grammar_t grammar_RRT(grammar_t ds);
+extern grammar_t grammar_RNCT(grammar_t ds);
+extern grammar_t grammar_IT(grammar_t ds);
+extern grammar_t grammar_NOLITS(grammar_t ds);
 extern grammar_t grammar_final(grammar_t ds);
 #endif

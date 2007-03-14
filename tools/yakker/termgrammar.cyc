@@ -64,7 +64,7 @@ using List;
 
 static
 cs_t termchars() {
-  return string2cs("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_=~&@");
+  return string2cs("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*-_+=<,>.?/|{}\"[]:;'");
 }
 
 /* Separate a rule list with a given separator */
@@ -378,9 +378,18 @@ rule_t mkterm_UT(rule_t tag, rule_t args){
   return SEQ(LIT("("), tag, LIT(" "), args, LIT(")"), &term_rule);
 }
 
-// Make a new term without the dummy term marker.
+// Make a new term without the dummy term marker 
+// and convert nullary terms to simpler form.
 rule_t mkterm_UT_nodummy(rule_t tag, rule_t args){
-  return SEQ(LIT("("), tag, LIT(" "), args, LIT(")"));
+  // check if args is empty
+  switch(args->r){
+  case &Lit(s):
+    if (s[0] == '\0')
+      return tag;
+    fallthru;
+  default: 
+    return SEQ(LIT("("), tag, LIT(" "), args, LIT(")"));
+  }
 }
 
 // Checks whether rule r defines a term.
@@ -473,7 +482,7 @@ rule_t fresh_tag(const char ?`H name){
 }
 
 static rule_t alt2term_UT(rule_t r);
-static Rule_t seq2term_UT(rule_t r0);
+static rule_t seq2term_UT(rule_t r0);
 
 static
 cs_t escchars() {
@@ -484,10 +493,6 @@ rule_t escape_char(unsigned int c){
   return LIT(new {'\\',(char)c,'\0'});
 }
 
-rule_t mk_alt_lit(rule_t r, rule_t r_lit){
-  return ALT(r,r_lit);
-}
-
 static cs_opt_t cs_esc_chars = NULL;
 
 rule_t escape_cs_rule_UT(rule_t r){
@@ -495,13 +500,13 @@ rule_t escape_cs_rule_UT(rule_t r){
   let cs_ec = (cs_t)cs_esc_chars;
 
   let cs_r = rule2cs(r);
-  let cs_u = cs_dup(cs_r);
-  cs_union(cs_u,cs_ec);
-  if (is_cs_empty(cs_u))
+  let cs_i = cs_dup(cs_r);
+  cs_intersect(cs_i,cs_ec);
+  if (is_cs_empty(cs_i))
     // r includes no character that need escaping.
     return r;
   else {
-    let r_esc = SEQ(LIT("\\"), cs2rule(cs_u));
+    let r_esc = SEQ(LIT("\\"), cs2rule(cs_i));
     
     // Remove the escaped chars from the original cs.
     let cs_diff = cs_dup(cs_r);
@@ -513,6 +518,7 @@ rule_t escape_cs_rule_UT(rule_t r){
       return ALT(cs2rule(cs_diff),r_esc);
   }
 }
+
 rule_t escape_lit_UT(const char ?`H s){
   if (!cs_esc_chars) cs_esc_chars = escchars();
   let cs_ec = (cs_t)cs_esc_chars;
@@ -537,20 +543,20 @@ rule_t rule2term_UT(rule_t r) {
   case &Rcount(n,r2):
     if (is_cs(r2)) {
       let escaped = escape_cs_rule_UT(r2);
-      return mkterm_UT( fresh_tag("RCount"), RCOUNT(n,escaped) );
+      return RCOUNT(n, mkterm_UT( fresh_tag("rcount"), escaped) );
     }
-    return mkterm_UT( fresh_tag("RCount"), r2);
+    return RCOUNT(n, mkterm_UT( fresh_tag("rcount"), r2) );
   case &Star(m,N,r2):
     if (is_cs(r2)) {
       let escaped = escape_cs_rule_UT(r2);
-      return mkterm_UT( fresh_tag("Star"), STAR(m,N,escaped) );
+      return STAR(m,N, mkterm_UT( fresh_tag("star"), escaped) );
     }
-    return mkterm_UT( fresh_tag("Star"), STAR(m,N,rule2term_UT(r2)) );
+    return STAR(m,N, mkterm_UT( fresh_tag("star"), rule2term_UT(r2)) );
   case &Hash(m,N,r2):
-    return mkterm_UT( fresh_tag("Hash"), HASH(m,N,rule2term_UT(r2)) );
+    return HASH(m,N, mkterm_UT( fresh_tag("hash"), rule2term_UT(r2)) );
   case &Opt(r2):
-    let some_term = mkterm_UT( fresh_tag("Some"), rule2term_UT(r2) );
-    let none_term = mkterm_UT( fresh_tag("None"), LIT("") );
+    let some_term = mkterm_UT( fresh_tag("some"), rule2term_UT(r2) );
+    let none_term = mkterm_UT( fresh_tag("none"), LIT("") );
     return ALT(some_term,none_term);
   case &Alt(_,_):
     return alt2term_UT(r);
@@ -581,31 +587,8 @@ rule_t rule2term_UT(rule_t r) {
   }
 }
 
-/* Is a rule a necessary argument? */
-static
-int is_arg_UT(rule_t r) {
-  switch (r->r) {
-    // Are these artity checks correct?
-  case &Star(_,_,_):
-  case &CharRange(_,_):
-    return (arity_rule(r) > 0);
-  case &Symb(_,_):
-  case &Alt(_,_):
-  case &Opt(_):
-  case &Rcount(_,_):
-  case &Hash(_,_,_):
-  case &Lit(_):
-    return 1;
-  case &Seq(_,_):  // What is a sub-sequence doing here?
-  case &Prose(_):  // What is this???
-  case &Minus(_,_):  // What is this???
-    return 0;
-  }
-}
-
 static
 List_t<rule_t> rule2args_UT(rule_t r) {
-//   return filter(is_arg_UT,seq2rules(r));
   return seq2rules(r);
 }
 
@@ -616,14 +599,14 @@ rule_t alt2term_UT(rule_t r) {
   case &Alt(r1,r2):
     return ALT(alt2term_UT(r1),alt2term_UT(r2));
   default:
-    let tag = fresh_tag("Alt");
+    let tag = fresh_tag("alt");
     let body = seq2term_UT(r);
     return mkterm_UT( tag, body);
   }
 }
 
 static
-Rule_t seq2term_UT(rule_t r0) {
+rule_t seq2term_UT(rule_t r0) {
   let args = rule2args_UT(r0);
 
 //   if (args == NULL) {
@@ -642,9 +625,8 @@ grammar_t grammar2termgrammar_UT(grammar_t ds) {
   let res = NULL;
   for (; ds; ds = ds->tl) {
     let &$(n,r,a) = ds->hd;
-    let r2;
-    let args = rule2args_UT(r);
-    r2 = mkterm_UT(LIT(n),with_spaces(map(rule2term_UT,args)));
+    let body = seq2term_UT(r);
+    let r2 = mkterm_UT(LIT(n), body);
     res = new List(new $(n,r2,a),res);
     //    res = new List(new $(n,r2t(r),a),res);
   }
@@ -667,6 +649,8 @@ grammar_t grammar2termgrammar_UT(grammar_t ds) {
 // MDTU = move def to use
 ///////
 
+rule_t add_use_tags_alt(rule_t r);
+
 rule_t add_use_tags(rule_t r){
 
     if (is_term_UT(r)) { 
@@ -676,27 +660,37 @@ rule_t add_use_tags(rule_t r){
 
     switch (r->r) {
     case &Symb(s,_):
-      return mkterm_UT(LIT(s),r);
+      return r;
     case &Opt(r1):
-      return OPT(add_use_tags(r1));
+      return OPT(add_use_tags_alt(r1));
     case &Seq(r1,r2):
       return SEQ(add_use_tags(r1), add_use_tags(r2));
     case &Alt(r1,r2):
-      return ALT(add_use_tags(r1), add_use_tags(r2));
+      return ALT(add_use_tags_alt(r1), add_use_tags_alt(r2));
     case &Rcount(n,r1):
       return RCOUNT(n,add_use_tags(r1));
     case &Star(m,N,r1):
-      return STAR(m,N,add_use_tags(r1));
+      return STAR(m,N,add_use_tags_alt(r1));
     case &Hash(m,N,r1):
-      return HASH(m,N,add_use_tags(r1));
+      return HASH(m,N,add_use_tags_alt(r1));
     default:
       return r;
     }
   
 }
 
+rule_t add_use_tags_alt(rule_t r){
+    switch (r->r) {
+    case &Alt(r1,r2):
+      return ALT(add_use_tags_alt(r1), add_use_tags_alt(r2));
+    case &Symb(s,_):
+      return mkterm_UT(LIT(s),r);
+    default:
+      return add_use_tags(r);
+    } 
+}
+
 grammar_t grammar_MDTU(grammar_t ds) {
-  init_arityt(ds);
   let res = NULL;
   for (; ds; ds = ds->tl) {
     let &$(n,r,a) = ds->hd;
@@ -763,7 +757,6 @@ rule_t rewrite_RRT(rule_t r){
 }
 
 grammar_t grammar_RRT(grammar_t ds) {
-  init_arityt(ds);
   let res = NULL;
   for (; ds; ds = ds->tl) {
     let &$(n,r,a) = ds->hd;
@@ -774,7 +767,268 @@ grammar_t grammar_RRT(grammar_t ds) {
   return res;
 }
 
+////////
+// RNCT = remove no-conflict tags
+///////
+
+rule_t rewrite_RNCT_alt(rule_t r);
+
+rule_t rewrite_RNCT(rule_t r){
+    if (is_term_UT(r)) { 
+      let $(tag,r_inner) = term_UT_elim(r);
+      return mkterm_UT(tag, rewrite_RNCT(r_inner));
+    }
+
+    switch (r->r) {
+    case &Opt(r1):
+      return OPT(rewrite_RNCT(r1));
+    case &Seq(r1,r2):
+      return SEQ(rewrite_RNCT(r1), rewrite_RNCT(r2));
+    case &Alt(r1,r2):
+      return rewrite_RNCT_alt(r);
+    case &Rcount(n,r1):
+      return RCOUNT(n,rewrite_RNCT(r1));
+    case &Star(m,N,r1):
+      return STAR(m,N,rewrite_RNCT(r1));
+    case &Hash(m,N,r1):
+      return HASH(m,N,rewrite_RNCT(r1));
+    default:
+      return r;
+    }
+}
+
+// Try to remove any term wrappings from alt branches.
+// r must be a Alt.
+rule_t rewrite_RNCT_alt(rule_t r){
+  // FIX: just a placeholder
+  let right_ctxt = LIT("");
+  
+  let rng_all = cs_empty();
+  let rng_conflict = cs_empty();
+  
+  let alts = alt2rules(r);    
+  //     let csets = NULL;
+  //     let has_pred = 0;
+
+  for (let rs = alts; rs; rs = rs->tl) {
+    let rng = cs_empty();
+    let r_hd = is_term_UT(rs->hd) ? term_UT_get_rule(rs->hd) : rs->hd;	
+    first(rng,SEQ(r_hd,right_ctxt));
+    //       csets = new List::List(rng,csets);
+    let rng2 = cs_dup(rng);
+    cs_intersect(rng2,rng_all);
+    cs_union(rng_conflict,rng2);
+    cs_union(rng_all,rng);
+    //       if (rs->hd->p) has_pred = 1;
+  }
+  //     csets = List::imp_rev(csets);
+  //     if (has_pred) {
+  //       // FIX: for now assume all cases have predicates, do a greedy parse
+  //       printf("{\n");
+  //       for (; alts && csets; alts = alts->tl, csets = csets->tl) {
+  //         let pred = (alts->hd->p)?(alts->hd->p):"1";
+  //         printf("if (%s) {\n",pred);
+  //         gen0(alts->hd,right_ctxt);
+  //         printf("}\n");
+  //         printf("else\n");
+  //       }
+  //       printf("throw &Parse_error_val;\n");
+  //       printf("}\n");
+  //     }
+  //     else
+  if (!is_cs_empty(rng_conflict)){
+    // do nothing special, just apply rewrite to all branches.
+    let res = rewrite_RNCT(alts->hd);      
+    for (let rs = alts->tl; rs; rs = rs->tl){
+      res = ALT(res,rewrite_RNCT(rs->hd));
+    }
+    return res;
+  }
+
+  // Otherwise, strip off all term wrappings and rewrite all branches.
+  let res = is_term_UT(alts->hd) ? term_UT_get_rule(alts->hd) : alts->hd;
+  res = rewrite_RNCT(res);      
+  for (let rs = alts->tl; rs; rs = rs->tl){
+    let r_hd = is_term_UT(rs->hd) ? term_UT_get_rule(rs->hd) : rs->hd;
+    res = ALT(res,rewrite_RNCT(r_hd));
+  }
+  return res;
+}
+
+grammar_t grammar_RNCT(grammar_t ds) {
+  let res = NULL;
+  for (; ds; ds = ds->tl) {
+    let &$(n,r,a) = ds->hd;
+    let r2 = rewrite_RNCT(r);
+    res = new List(new $(n,r2,a),res);
+  }
+  res = imp_rev(res);
+  return res;
+}
+
+////////
+// IT = Improve tags
+///////
+
+rule_t rewrite_IT(rule_t r){
+    if (is_term_UT(r)) { 
+      let $(tag,r_inner) = term_UT_elim(r);
+
+      // Try to extract tag from inner term.
+      let new_tag = seqtag(r_inner);
+      return mkterm_UT(new_tag ? new_tag : tag, rewrite_IT(r_inner));
+    }
+
+    switch (r->r) {
+    case &Opt(r1):
+      return OPT(rewrite_IT(r1));
+    case &Seq(r1,r2):
+      return SEQ(rewrite_IT(r1), rewrite_IT(r2));
+    case &Alt(r1,r2):
+      return ALT(rewrite_IT(r1), rewrite_IT(r2));
+    case &Rcount(n,r1):
+      return RCOUNT(n,rewrite_IT(r1));
+    case &Star(m,N,r1):
+      return STAR(m,N,rewrite_IT(r1));
+    case &Hash(m,N,r1):
+      return HASH(m,N,rewrite_IT(r1));
+    default:
+      return r;
+    }
+}
+
+grammar_t grammar_IT(grammar_t ds) {
+  let res = NULL;
+  for (; ds; ds = ds->tl) {
+    let &$(n,r,a) = ds->hd;
+    let r2 = rewrite_IT(r);
+    res = new List(new $(n,r2,a),res);
+  }
+  res = imp_rev(res);
+  return res;
+}
+
+////////
+// Remove unnecessary literals
+///////
+
+/* Is a rule a necessary term argument? 
+   r must not be a Seq.
+*/
+static
+int is_arg_UT(rule_t r) {
+  switch (r->r) {
+    // Are these artity checks correct?
+  case &Symb(_,_):
+  case &Star(_,_,_):
+  case &CharRange(_,_):
+    return (arity_rule(r) > 0);
+  case &Alt(_,_):
+  case &Opt(_):
+  case &Rcount(_,_):
+  case &Hash(_,_,_):
+    return 1;
+  case &Seq(_,r2):
+    if (r2 == &term_rule)
+      return 1;
+    throw new Core::Invalid_argument("is_arg_UT: Not expecting sequence.");
+  case &Lit(_):
+  case &Prose(_):  
+  case &Minus(_,_):
+    return 0;
+  }
+}
+
+/* Turn a tern rule into a list of the rule sequences.  If r0 is not a
+   sequence, will return a singleton list of r0.  Guaranteed to
+   contain at least one element.  Different than seq2rule in that it
+   recognizes that terms are a special case of sequences.
+ */
+List::List_t<rule_t> termseq2rules(rule_t r0) {
+  let res = NULL;
+  let rs = List::list(r0);
+  while (rs) {
+    let r = rs->hd;
+    switch (r->r) {
+    case &Seq(r2,r3):
+      if (r3 != &term_rule){ // then its not a term
+	rs = new List::List(r2,new List::List(r3,rs->tl));
+	break;
+      }
+      fallthru;
+    case &Symb(_,_):
+    case &Alt(_,_):
+    case &Opt(_):
+    case &Rcount(_,_):
+    case &Star(_,_,_):
+    case &Hash(_,_,_):
+    case &CharRange(_,_):
+    case &Lit(_):
+    case &Prose(_):
+    case &Minus(_,_):
+      res = new List::List(r,res);
+      rs = rs->tl;
+      break;
+    }
+  }
+  res = List::imp_rev(res);
+  return res;
+}
+
+rule_t remove_lits(rule_t r){
+
+    if (is_term_UT(r)) { 
+      let $(tag,r_inner) = term_UT_elim(r);
+      return mkterm_UT(tag, remove_lits(r_inner));
+    }
+
+    switch (r->r) {
+    case &Lit(s):
+      // These empty lits will be cleaned up in the final phase.
+      return LIT("");
+    case &Opt(r1):
+      return OPT(remove_lits(r1));
+    case &Seq(_,_):
+      // the filter will remove any original literals as well as the spaces 
+      // added in during the first term-translation phase.
+
+
+      let args = filter(is_arg_UT, termseq2rules(r));
+
+
+      // recursively remove literals.
+      let args_nolits = map(remove_lits,args);
+      // put the spaces back now
+      return with_spaces(args_nolits);
+    case &Alt(r1,r2):
+      return ALT(remove_lits(r1), remove_lits(r2));
+    case &Rcount(n,r1):
+      return RCOUNT(n,remove_lits(r1));
+    case &Star(m,N,r1):
+      return STAR(m,N,remove_lits(r1));
+    case &Hash(m,N,r1):
+      return HASH(m,N,remove_lits(r1));
+    default:
+      return r;
+    }
+  
+}
+
+grammar_t grammar_NOLITS(grammar_t ds) {
+  let res = NULL;
+  for (; ds; ds = ds->tl) {
+    let &$(n,r,a) = ds->hd;
+    let r2 = remove_lits(r);
+    res = new List(new $(n,r2,a),res);
+  }
+  res = imp_rev(res);
+  return res;
+
+}
+
+////////////////////
 // Final pass on grammar. Currently, just used to cleanup dummy tags from terms.
+////////////////////
 
 rule_t rewrite_final(rule_t r){
     if (is_term_UT(r)) { 
@@ -801,7 +1055,6 @@ rule_t rewrite_final(rule_t r){
 }
 
 grammar_t grammar_final(grammar_t ds) {
-  init_arityt(ds);
   let res = NULL;
   for (; ds; ds = ds->tl) {
     let &$(n,r,a) = ds->hd;
@@ -811,3 +1064,6 @@ grammar_t grammar_final(grammar_t ds) {
   res = imp_rev(res);
   return res;
 }
+
+// TO DO
+// x final phase should convert nullary terms from (TAG "") to TAG.
