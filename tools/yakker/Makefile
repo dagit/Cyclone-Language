@@ -70,6 +70,18 @@ imapp: imapp.o ykbuf.o ssl.o imap.o
 imapp.o: examples/imapp.cyc
 	$(CYCLONE) -c $^ -o $@ -I.
 
+# Targets for testing termgrammar parsers.
+
+# --novcgen is temporary until a bug is fixed
+small_imap_termv3: small_imap_termv3.cyc ykbuf.o ssl.o
+	$(CYCLONE) $^ -o $@ --novcgen -lssl -lcrypto
+
+small_imap_termv3.cyc: small_imap_termv3.bnf
+	./yakker $(YAKFLAGS) -gen command $< > $@
+
+small_imap_termv3.bnf: examples/small_imap.bnf
+	./yakker -termgrammar_v3 $< > $@
+
 #
 markdown: markdown.o ykbuf.o ssl.o bnf.o extract.o pr.o parse_tab.o util.o lex.o axarray.o
 	$(CYCLONE) $^ -o $@ -lssl -lcrypto

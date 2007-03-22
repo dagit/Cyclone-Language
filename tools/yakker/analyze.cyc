@@ -208,7 +208,7 @@ void report_left_recursion(grammar_t grm) {
 }
 
 /****************************** FIRST ******************************/
-/* globals->maybe_empty must be initialized */
+/* globals->maybe_empty, globals->firstt must be initialized */
 void first(cs_t result, rule_t r) {
   switch (r->r) {
   case &CharRange(min,max):

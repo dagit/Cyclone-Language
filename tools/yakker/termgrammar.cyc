@@ -378,14 +378,14 @@ rule_t mkterm_UT(rule_t tag, rule_t args){
   return SEQ(LIT("("), tag, LIT(" "), args, LIT(")"), &term_rule);
 }
 
-// Make a new term without the dummy term marker 
-// and convert nullary terms to simpler form.
+// Make a new term without the dummy term marker.
+// Also, clean up terms with empty lit as only arg
 rule_t mkterm_UT_nodummy(rule_t tag, rule_t args){
   // check if args is empty
   switch(args->r){
   case &Lit(s):
     if (s[0] == '\0')
-      return tag;
+      return SEQ(LIT("("), tag, LIT(")"));;
     fallthru;
   default: 
     return SEQ(LIT("("), tag, LIT(" "), args, LIT(")"));
@@ -481,12 +481,20 @@ rule_t fresh_tag(const char ?`H name){
   return LIT(strconcat(name,num_string));
 }
 
+rule_t mk_alt(rule_t alts, rule_t r){
+  return ALT(alts, r);
+}
+
+rule_t mk_alt_term(rule_t alts, rule_t r){
+  return ALT(alts,mkterm_UT(fresh_tag("alt"), r));
+}
+
 static rule_t alt2term_UT(rule_t r);
 static rule_t seq2term_UT(rule_t r0);
 
 static
 cs_t escchars() {
-  return string2cs("\\() ");
+  return string2cs("\\() %");
 }
 
 rule_t escape_char(unsigned int c){
@@ -503,10 +511,11 @@ rule_t escape_cs_rule_UT(rule_t r){
   let cs_i = cs_dup(cs_r);
   cs_intersect(cs_i,cs_ec);
   if (is_cs_empty(cs_i))
-    // r includes no character that need escaping.
+    // r includes no character that needs escaping.
     return r;
   else {
-    let r_esc = SEQ(LIT("\\"), cs2rule(cs_i));
+    let esc_tag = fresh_tag("alt");
+    let r_esc = mkterm_UT( esc_tag, SEQ(LIT("\\"), cs2rule(cs_i)));
     
     // Remove the escaped chars from the original cs.
     let cs_diff = cs_dup(cs_r);
@@ -514,8 +523,11 @@ rule_t escape_cs_rule_UT(rule_t r){
 
     if (is_cs_empty(cs_diff))
       return r_esc;    
-    else
-      return ALT(cs2rule(cs_diff),r_esc);
+    else{      
+      let diff_tag = fresh_tag("alt");
+      let r_diff = mkterm_UT( diff_tag, cs2rule(cs_diff));
+      return ALT(r_diff,r_esc);
+    }
   }
 }
 
@@ -545,7 +557,7 @@ rule_t rule2term_UT(rule_t r) {
       let escaped = escape_cs_rule_UT(r2);
       return RCOUNT(n, mkterm_UT( fresh_tag("rcount"), escaped) );
     }
-    return RCOUNT(n, mkterm_UT( fresh_tag("rcount"), r2) );
+    return RCOUNT(n, mkterm_UT( fresh_tag("rcount"), rule2term_UT(r2)) );
   case &Star(m,N,r2):
     if (is_cs(r2)) {
       let escaped = escape_cs_rule_UT(r2);
@@ -645,50 +657,93 @@ grammar_t grammar2termgrammar_UT(grammar_t ds) {
 }
 
 ////////
-// Move top-level tags on non-terminal defs to uses.
-// MDTU = move def to use
+// Remove term wrappers on top-level rules.
+// RTLT =  remove top-level terms
 ///////
 
-rule_t add_use_tags_alt(rule_t r);
+grammar_t grammar_RTLT(grammar_t ds) {
+  let res = NULL;
+  for (; ds; ds = ds->tl) {
+    let &$(n,r,a) = ds->hd;
+    // remove term wrapper.
+    let r2 = term_UT_get_rule(r);
+    res = new List(new $(n,r2,a),res);
+  }
+  res = imp_rev(res);
+  return res;
+}
 
-rule_t add_use_tags(rule_t r){
+////////
+// Improve tags on symbols. Replace anonymous tags with name of symbol.
+// IST = improve symbol tags.
+///////
+
+rule_t rewrite_IST_alt(rule_t r);
+
+rule_t rewrite_IST(rule_t r){
 
     if (is_term_UT(r)) { 
       let $(tag,r_inner) = term_UT_elim(r);
-      return mkterm_UT(tag, add_use_tags(r_inner));
+      return mkterm_UT(tag, rewrite_IST(r_inner));
     }
 
     switch (r->r) {
     case &Symb(s,_):
       return r;
     case &Opt(r1):
-      return OPT(add_use_tags_alt(r1));
+      return OPT(rewrite_IST_alt(r1));
     case &Seq(r1,r2):
-      return SEQ(add_use_tags(r1), add_use_tags(r2));
+      return SEQ(rewrite_IST(r1), rewrite_IST(r2));
     case &Alt(r1,r2):
-      return ALT(add_use_tags_alt(r1), add_use_tags_alt(r2));
+      return ALT(rewrite_IST_alt(r1), rewrite_IST_alt(r2));
     case &Rcount(n,r1):
-      return RCOUNT(n,add_use_tags(r1));
+      return RCOUNT(n,rewrite_IST(r1));
     case &Star(m,N,r1):
-      return STAR(m,N,add_use_tags_alt(r1));
+      return STAR(m,N,rewrite_IST_alt(r1));
     case &Hash(m,N,r1):
-      return HASH(m,N,add_use_tags_alt(r1));
+      return HASH(m,N,rewrite_IST_alt(r1));
     default:
       return r;
     }
   
 }
 
-rule_t add_use_tags_alt(rule_t r){
+rule_t rewrite_IST_alt(rule_t r){
+
+    if (is_term_UT(r)) { 
+      let $(tag,r_inner) = term_UT_elim(r);
+      switch (r_inner->r) {
+      case &Symb(s,_):
+	return mkterm_UT(LIT(s),r_inner);
+      default:
+	return mkterm_UT(tag, rewrite_IST(r_inner));
+      } 
+    }
+
     switch (r->r) {
     case &Alt(r1,r2):
-      return ALT(add_use_tags_alt(r1), add_use_tags_alt(r2));
-    case &Symb(s,_):
-      return mkterm_UT(LIT(s),r);
+      return ALT(rewrite_IST_alt(r1), rewrite_IST_alt(r2));
     default:
-      return add_use_tags(r);
+      return rewrite_IST(r);
     } 
 }
+
+grammar_t grammar_IST(grammar_t ds) {
+  let res = NULL;
+  for (; ds; ds = ds->tl) {
+    let &$(n,r,a) = ds->hd;
+    let r2 = rewrite_IST(r);
+    res = new List(new $(n,r2,a),res);
+  }
+  res = imp_rev(res);
+  return res;
+
+}
+
+////////
+// Move top-level tags on non-terminal defs to uses.
+// MDTU = move def to use
+///////
 
 grammar_t grammar_MDTU(grammar_t ds) {
   let res = NULL;
@@ -697,7 +752,7 @@ grammar_t grammar_MDTU(grammar_t ds) {
     // remove def tag
     let r2 = term_UT_get_rule(r);
     // add any applicable use tags (for any symbol, not specifically this rule.
-    r2 = add_use_tags(r2);
+    r2 = rewrite_IST(r2);
     res = new List(new $(n,r2,a),res);
   }
   res = imp_rev(res);
@@ -800,62 +855,49 @@ rule_t rewrite_RNCT(rule_t r){
 // Try to remove any term wrappings from alt branches.
 // r must be a Alt.
 rule_t rewrite_RNCT_alt(rule_t r){
-  // FIX: just a placeholder
-  let right_ctxt = LIT("");
-  
   let rng_all = cs_empty();
   let rng_conflict = cs_empty();
   
   let alts = alt2rules(r);    
-  //     let csets = NULL;
-  //     let has_pred = 0;
+
+  // rewritten alts, with all terms stripped off.
+  let rw_alts = NULL;
+
+  let r_conflict = CHARRANGE(0,255);
 
   for (let rs = alts; rs; rs = rs->tl) {
     let rng = cs_empty();
     let r_hd = is_term_UT(rs->hd) ? term_UT_get_rule(rs->hd) : rs->hd;	
-    first(rng,SEQ(r_hd,right_ctxt));
-    //       csets = new List::List(rng,csets);
+    // rewrite the branch
+    r_hd = rewrite_RNCT(r_hd);
+    // save the rewrite for later
+    rw_alts = new List(r_hd, rw_alts);
+
+//     first(rng,SEQ(r_hd,right_ctxt));
+
+    // We follow r_hd with r_conflict to ensure that if any of the
+    // branches are nullable, there will be guaranteed a conflict.
+    first(rng,SEQ(r_hd,r_conflict));
     let rng2 = cs_dup(rng);
     cs_intersect(rng2,rng_all);
     cs_union(rng_conflict,rng2);
     cs_union(rng_all,rng);
-    //       if (rs->hd->p) has_pred = 1;
   }
-  //     csets = List::imp_rev(csets);
-  //     if (has_pred) {
-  //       // FIX: for now assume all cases have predicates, do a greedy parse
-  //       printf("{\n");
-  //       for (; alts && csets; alts = alts->tl, csets = csets->tl) {
-  //         let pred = (alts->hd->p)?(alts->hd->p):"1";
-  //         printf("if (%s) {\n",pred);
-  //         gen0(alts->hd,right_ctxt);
-  //         printf("}\n");
-  //         printf("else\n");
-  //       }
-  //       printf("throw &Parse_error_val;\n");
-  //       printf("}\n");
-  //     }
-  //     else
   if (!is_cs_empty(rng_conflict)){
-    // do nothing special, just apply rewrite to all branches.
-    let res = rewrite_RNCT(alts->hd);      
-    for (let rs = alts->tl; rs; rs = rs->tl){
-      res = ALT(res,rewrite_RNCT(rs->hd));
-    }
-    return res;
+    //  just rewrap rewritten alts
+    let alt_hd = mkterm_UT(fresh_tag("alt"), rw_alts->hd);      
+    return List::fold_left(mk_alt_term, alt_hd, rw_alts->tl);
   }
 
-  // Otherwise, strip off all term wrappings and rewrite all branches.
-  let res = is_term_UT(alts->hd) ? term_UT_get_rule(alts->hd) : alts->hd;
-  res = rewrite_RNCT(res);      
-  for (let rs = alts->tl; rs; rs = rs->tl){
-    let r_hd = is_term_UT(rs->hd) ? term_UT_get_rule(rs->hd) : rs->hd;
-    res = ALT(res,rewrite_RNCT(r_hd));
-  }
-  return res;
+  // Otherwise, just convert rw_alts list into an Alt.
+  return List::fold_left(mk_alt,rw_alts->hd,rw_alts->tl);
 }
 
 grammar_t grammar_RNCT(grammar_t ds) {
+  reset_globals();
+  init_maybe_empty(ds);
+  init_firstt(ds);
+
   let res = NULL;
   for (; ds; ds = ds->tl) {
     let &$(n,r,a) = ds->hd;
@@ -1065,5 +1107,223 @@ grammar_t grammar_final(grammar_t ds) {
   return res;
 }
 
+
+//////////////////////////
+// Version 3
+/////////////////////
+
+rule_t escape_cs_rule_v3(rule_t r){
+  if (!cs_esc_chars) cs_esc_chars = escchars();
+  let cs_ec = (cs_t)cs_esc_chars;
+
+  let cs_r = rule2cs(r);
+  let cs_i = cs_dup(cs_r);
+  cs_intersect(cs_i,cs_ec);
+  if (is_cs_empty(cs_i))
+    // r includes no character that needs escaping.
+    return r;
+  else {
+    let r_esc = SEQ(LIT("\\"), cs2rule(cs_i));
+    
+    // Remove the escaped chars from the original cs.
+    let cs_diff = cs_dup(cs_r);
+    cs_difference(cs_diff,cs_ec);
+
+    if (is_cs_empty(cs_diff))
+      return r_esc;    
+    else{      
+      let r_diff = cs2rule(cs_diff);
+      return ALT(r_diff,r_esc);
+    }
+  }
+}
+
+rule_t escape_lit_v3(const char ?`H s){
+  if (!cs_esc_chars) cs_esc_chars = escchars();
+  let cs_ec = (cs_t)cs_esc_chars;
+
+  let n = numelts(s);
+  // at most, we'll need 2n chars for the escaped string.
+  char ?@notnull s_new = malloc(2 * n * sizeof(char)); 
+  for (int i = 0, j = 0; i < n; i++, j++){
+    if (cs_member(cs_ec,s[i])){
+      s_new[j++] = '\\';
+    }
+    s_new[j] = s[i];
+  }
+    
+  return LIT(s_new);
+}
+
+// static
+// Rule_t rule2function_v3(rule_t r) {
+
+//   let res = NULL;
+//   switch (r->r) {
+//   case &Rcount(n,r2):
+//     return RCOUNT(n,rule2function_v3(r2));
+//   case &Star(m,N,r2):
+//     if (is_cs(r2)) {
+//       let escaped = escape_cs_rule_v3(r2);
+//       return STAR(m,N, escaped);
+//     }
+//     return STAR(m,N, rule2function_v3(r2));
+//   case &Hash(m,N,r2):
+//     return HASH(m,N, rule2function_v3(r2));
+//   case &Opt(r2):
+//     return OPT(rule2function_v3(r2) );
+//   case &Alt(r2,r3):
+//     return ALT(rule2function_v3(r2),rule2function_v3(r3));
+//   case &Symb(_,_):
+//     return r;
+//   case &CharRange(_,_):
+//     return escape_cs_rule_v3(r);
+//   case &Lit(s):
+//     return escape_lit_v3(s);
+
+//   case &Seq(r2,r3):
+//     return SEQ(rule2function_v3(r2),rule2function_v3(r3));
+
+//     /* Error cases */
+//   case &Prose(x):
+//     internal_err("Unexpected Prose(%s) in rule2function\n",x);
+//     exit(1);
+//   case &Minus(_,_):
+//     internal_err("Unexpected Minus in rule2function\n");
+//     exit(1);
+//   }
+// }
+
+static
+rule_t rule2term_v3(rule_t r) {
+  let res = NULL;
+  switch (r->r) {
+  case &Rcount(n,r2):
+    return RCOUNT(n,rule2term_v3(r2));
+  case &Star(m,N,r2):
+    if (is_cs(r2)) {
+      let escaped = escape_cs_rule_v3(r2);
+      return STAR(m,N, escaped);
+    }
+    return STAR(m,N, rule2term_v3(r2));
+  case &Hash(m,N,r2):
+    return HASH(m,N, rule2term_v3(r2));
+  case &Opt(r2):
+    return OPT(rule2term_v3(r2) );
+  case &Alt(r2,r3):
+    return ALT(rule2term_v3(r2),rule2term_v3(r3));
+  case &Symb(_,_):
+    return r;
+  case &CharRange(_,_):
+    return escape_cs_rule_v3(r);
+  case &Lit(s):
+    return escape_lit_v3(s);
+
+  case &Seq(r2,r3):
+    return SEQ(rule2term_v3(r2),rule2term_v3(r3));
+
+    /* Error cases */
+  case &Prose(x):
+    internal_err("Unexpected Prose(%s) in rule2term\n",x);
+    exit(1);
+  case &Minus(_,_):
+    internal_err("Unexpected Minus in rule2term\n");
+    exit(1);
+  }
+}
+
+static
+rule_t seq2term_v3(rule_t r) {
+  let args = filter(is_arg_UT, seq2rules(r));
+  return with_spaces(map(rule2term_v3,args));
+}
+
+const char? symbol2id(const char ?`H sym_name){
+  // FIX: implement.
+  return sym_name;
+}
+
+grammar_t grammar2termgrammar_v3(grammar_t ds) {
+  init_arityt(ds);
+
+  let s_format_strings = (const char ?)"format-strings";
+
+  let res = NULL;
+  for (; ds; ds = ds->tl) {
+    let &$(n,r,a) = ds->hd;
+    let r_esc = rule2term_v3(r);
+    if (is_arg_UT(SYMB(n))){
+      let n_o = strconcat(n,"_o");
+      let function_n = strconcat("process_", symbol2id(n));
+      let sem_action_n = strconcat(function_n, "();");
+      let term_body = seq2term_v3(r);
+      let r2 = mkterm_UT(LIT(n), term_body);
+      // Next, we'll start supporting format strings. For now, let's deal only with termgrammars.
+      //     let r_all = ALT(SYMB(n_o),r2, SYMB(s_format_strings));
+      let r_both = ALT(SYMB(n_o),r2);
+//       r_both->a = sem_action_n;
+      res = new List(new $(n,r_both,a),
+		     new List(new $(n_o, r_esc, a), res));
+    }else{
+      res = new List(new $(n,r_esc,a), res);
+    }
+  }
+
+  let r_format_strings = SEQ(LIT("%"), ALT(LIT("s"), LIT("d"), LIT("f")));
+  let entry_format_strings = new $(s_format_strings,r_format_strings, 
+				   Attr{.ws=0,.re=0,.paramtype=NULL,.rettype=NULL});
+  res = new List(entry_format_strings, res);
+
+  res = imp_rev(res);
+
+  return res;
+}
+
+
+////////////////////
+// Final pass on version 3 term grammar. 
+// Currently, just used to cleanup dummy tags from terms.
+////////////////////
+
+rule_t rewrite_final_v3(rule_t r){
+    if (is_term_UT(r)) { 
+      let $(tag,r_inner) = term_UT_elim(r);
+      return mkterm_UT_nodummy(tag, r_inner);
+    }
+
+    switch (r->r) {
+    case &Opt(r1):
+      return OPT(rewrite_final_v3(r1));
+    case &Seq(r1,r2):
+      return SEQ(rewrite_final_v3(r1), rewrite_final_v3(r2));
+    case &Alt(r1,r2):
+      return ALT(rewrite_final_v3(r1), rewrite_final_v3(r2));
+    case &Rcount(n,r1):
+      return RCOUNT(n,rewrite_final_v3(r1));
+    case &Star(m,N,r1):
+      return STAR(m,N,rewrite_final_v3(r1));
+    case &Hash(m,N,r1):
+      return HASH(m,N,rewrite_final_v3(r1));
+    default:
+      return r;
+    }
+}
+
+grammar_t grammar_final_v3(grammar_t ds) {
+  let res = NULL;
+  for (; ds; ds = ds->tl) {
+    let &$(n,r,a) = ds->hd;
+    let r2 = rewrite_final_v3(r);
+    r2->a = r->a; // preserve the semantic action.
+    res = new List(new $(n,r2,a),res);
+  }
+  res = imp_rev(res);
+  return res;
+}
+
+
 // TO DO
-// x final phase should convert nullary terms from (TAG "") to TAG.
+// Q:Why are there char sets that end with | ""?
+// Q: Why does follow for STAR use m2 =0?
+// turn * and # into list
+// cutoff of term transformation for reg.exps. (i.e. those rules that have all caps names).

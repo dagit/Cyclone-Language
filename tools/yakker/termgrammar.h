@@ -20,11 +20,19 @@
 #define TERMGRAMMAR_H
 #include "bnf.h"
 extern grammar_t grammar2termgrammar(grammar_t ds);
+// version 2
 extern grammar_t grammar2termgrammar_UT(grammar_t ds);
+// version 3
+extern grammar_t grammar2termgrammar_v3(grammar_t ds);
+extern grammar_t grammar_RTLT(grammar_t ds);
+// deprecated
 extern grammar_t grammar_MDTU(grammar_t ds);
+// deprecated
 extern grammar_t grammar_RRT(grammar_t ds);
-extern grammar_t grammar_RNCT(grammar_t ds);
 extern grammar_t grammar_IT(grammar_t ds);
 extern grammar_t grammar_NOLITS(grammar_t ds);
+extern grammar_t grammar_RNCT(grammar_t ds);
+extern grammar_t grammar_IST(grammar_t ds);
 extern grammar_t grammar_final(grammar_t ds);
+extern grammar_t grammar_final_v3(grammar_t ds);
 #endif

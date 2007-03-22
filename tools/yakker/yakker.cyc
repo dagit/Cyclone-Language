@@ -130,10 +130,12 @@ static const char ?add_namespace = NULL;
 "         -re <syms>             do handle <syms> as regular expressions\n"\
 "         -termgrammar           produce a term grammar for the input grammar\n"\
 "         -termgrammar_v2        produce a version 2 term grammar for the input grammar\n"\
+"         -termgrammar_v3        produce a version 3 term grammar for the input grammar\n"\
 "         -termgrammar_MDTU      produce a version 2 term grammar for the input grammar with def tags moved to uses\n"\
 "         -termgrammar_RRT       produce a version 2 term grammar for the input grammar with redundant tags removed\n"\
 "         -termgrammar_IT        produce a version 2 term grammar for the input grammar with improved tags\n"\
 "         -termgrammar_NOLITS    produce a version 2 term grammar for the input grammar with literals removed\n"\
+"         -termgrammar_RNCT      produce a version 2 term grammar for the input grammar with non-conflicting branches untagged.\n"\
 "         -no-main               don't output a default main procedure\n"\
 "         -lazyfill              use lazy filling (for interactive connections)\n"\
 "         -depend                produce a dependency graph of symbols in DOT format\n"\
@@ -159,10 +161,12 @@ int main(int argc, const char ?`H?argv) {
   int tsortp = 0;
   int termgrammarp = 0;
   int termgrammar_v2p = 0;
+  int termgrammar_v3p = 0;
   int termgrammar_MDTUp = 0;
   int termgrammar_RRTp = 0;
   int termgrammar_ITp = 0;
   int termgrammar_NOLITSp = 0;
+  int termgrammar_RNCTp = 0;
   int compare = 0;
   const char ?start_symbol = NULL;
   int mode = FILE_MODE;
@@ -190,10 +194,12 @@ int main(int argc, const char ?`H?argv) {
     else if (strcmp("-help",argv[i]) == 0) die();
     else if (strcmp("-termgrammar",argv[i]) == 0) termgrammarp = 1;
     else if (strcmp("-termgrammar_v2",argv[i]) == 0) termgrammar_v2p = 1;
+    else if (strcmp("-termgrammar_v3",argv[i]) == 0) termgrammar_v3p = 1;
     else if (strcmp("-termgrammar_MDTU",argv[i]) == 0) termgrammar_MDTUp = 1;
     else if (strcmp("-termgrammar_RRT",argv[i]) == 0) termgrammar_RRTp = 1;
     else if (strcmp("-termgrammar_IT",argv[i]) == 0) termgrammar_ITp = 1;
     else if (strcmp("-termgrammar_NOLITS",argv[i]) == 0) termgrammar_NOLITSp = 1;
+    else if (strcmp("-termgrammar_RNCT",argv[i]) == 0) termgrammar_RNCTp = 1;
     else if (strcmp("-compare",argv[i]) == 0) compare = 1;
     else if (strcmp("-unnamespace",argv[i]) == 0) unnamespace = 1;
     else if (strcmp("-local",argv[i]) == 0) local_lookahead = 1;
@@ -413,28 +419,48 @@ int main(int argc, const char ?`H?argv) {
   /* Produce the term grammar, version 2, and exit */
   if (termgrammar_v2p || termgrammar_MDTUp 
       || termgrammar_RRTp || termgrammar_ITp 
-      || termgrammar_NOLITSp) {
+      || termgrammar_NOLITSp || termgrammar_RNCTp ) {
     debugprint(1,"Producing term grammar (version 2)... ");
     minus_elim(ds); // also marks character sets, needed for the conversion
     let gr = grammar2termgrammar_UT(ds);
     if (termgrammar_MDTUp){
-      debugprint(1,"Moving def tags to use tags in term grammar ... ");
-      gr = grammar_MDTU(gr);
+      debugprint(1,"Removing term wrappers on top-level rules in term grammar ... ");
+      gr = grammar_RTLT(gr);
     }
     if (termgrammar_RRTp){
       debugprint(1,"Removing redundant tags in term grammar ... ");
       gr = grammar_RRT(gr);      
     }
     if (termgrammar_ITp){
-      debugprint(1,"Improving tag choices ... ");
+      debugprint(1,"Improving tag choices in term grammar based on literals ... ");
       gr = grammar_IT(gr);
     }
     if (termgrammar_NOLITSp){
       debugprint(1,"Removing unnecessary literals in term grammar ... ");
       gr = grammar_NOLITS(gr);
     }
+    if (termgrammar_RNCTp){
+      debugprint(1,"Removing tags from unconflicting branches in term grammar ... ");
+      gr = grammar_RNCT(gr);
+    }
+    if (termgrammar_MDTUp){
+      debugprint(1,"Improving tag choices for symbols in term grammar ... ");
+      gr = grammar_IST(gr);
+    }
     debugprint(1,"Performing final pass on term grammar ... ");
     gr = grammar_final(gr);
+    pr_definitions(stdout, gr);
+    debugprint(1,"done\n");
+    return 0;
+  }
+
+  /* Produce the term grammar, version 3, and exit */
+  if (termgrammar_v3p) {
+    debugprint(1,"Producing term grammar (version 2)... ");
+    minus_elim(ds); // also marks character sets, needed for the conversion
+    let gr = grammar2termgrammar_v3(ds);
+    debugprint(1,"Performing final pass on term grammar ... ");
+    gr = grammar_final_v3(gr);
     pr_definitions(stdout, gr);
     debugprint(1,"done\n");
     return 0;
