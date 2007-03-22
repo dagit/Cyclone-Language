@@ -1,0 +1,67 @@
+#include <buffer.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "ykbuf.h"
+#include "tg_stack.h"
+#define YKPOSN ((ykb->cur-ykb->bot)+ykb->discarded)
+
+extern int ykdebug;
+extern datatype exn {extern Parse_error };
+extern datatype exn.Parse_error Parse_error_val;
+
+extern void p_command(ykbuf_t @ykb);
+extern void p_seq_range(ykbuf_t @ykb);
+
+enum Root_rule{
+  Command, Seq_range
+};
+
+enum Root_rule root = Command;
+
+#define USAGE \
+"Usage:%s [OPTIONS]\n"\
+"Options: -root <sym>            parse starting from rule <sym>\n"\
+"         -d                     increase debug level by 1.\n"\
+"         -help                  print this message\n"
+
+static void die(const char ?prog_name) {
+  fprintf(stderr,USAGE,prog_name);
+  exit(1);
+}
+
+int main(int argc, char ??argv) {
+  for (int i = 1; i < argc; i++) {
+    if (strcmp("-help",argv[i]) == 0) die(argv[0]);
+    else if (strcmp(argv[i],"-d") == 0) ykdebug++;
+    else if(strcmp(argv[i],"-root") == 0){
+      if (root || i+1 >= argc) die(argv[0]);
+      if (strcmp(argv[i+1],"command") == 0)         root = Command;
+      else if (strcmp(argv[i+1],"seq-range") == 0)  root =  Seq_range;
+      else { fprintf(stderr,"Unrecognized rule name: %s\n",argv[i+1]); exit(1); }
+      i += 1;
+    }
+    else { fprintf(stderr,"Unrecognized option: %s\n",argv[i]); exit(1); }
+  }
+  ykbuf_t @ykb = fd2ykbuf(0); // read from stdin
+  try {
+    switch(root){
+    case Command: p_command(ykb);     break;
+    case Seq_rang : p_seq_range(ykb); break;
+    }
+    //let n = YKPOSN;
+    //if (n<60) for (int i = 0; i < n; i++) printf("^");
+    //printf(" accepted %d (0x%x) characters\n",n,n);
+    printf("Result: %s\n", tg_peek());
+  }
+  catch {
+  case &Parse_error:
+    let n = YKPOSN;
+    if (n<60) for (int i = 0; i < n; i++) printf(" ");
+    printf("^ failed at position %d (0x%x)\n",n,n);
+    break;
+  }
+  
+
+  return 0;
+}

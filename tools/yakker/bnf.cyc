@@ -120,6 +120,14 @@ rule_t MINUS_r(rule_t r,rule_t r1,rule_t r2) {
 }
 
 int lower_prec(rule_t r1, rule_t r2) {
+  // If r1 has a semantic action, that it automatically gets lower precendence.
+  // Otherwise, for example, 
+  //   (r1 | r2 {sem_act1;}){sem_act2;}
+  // will be printed as
+  //   r1 | r2 {sem_act1;}{sem_act2;}
+  // and then parsed as
+  //   (r1 | r2){sem_act2;}
+  if (r1->a) return 1;
   switch $(r1->r,r2->r) {
   case $(&Alt(_,_),&Alt(_,_)): return 0;
   case $(&Alt(_,_),_): return 1;

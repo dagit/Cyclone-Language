@@ -1111,6 +1111,32 @@ grammar_t grammar_final(grammar_t ds) {
 //////////////////////////
 // Version 3
 /////////////////////
+/*
+
+Algorithm for adding semantic actions to rules.
+
+[a_1 | ... | a_n] = a_1 | ... | a_n // nothing to do
+[a_1 ... a_n] = [a_1] ... [a_n] {merge_n(n);}
+[{n}a] = ({n}[a]) {merge_n(b);}
+
+[*a] = {push("")} *([a] {merge();})
+[#a] = {push("")} #([a] {merge();})
+[?a] = {push("")} ?([a] {merge();})
+[{n}a] = {push("")} {n}([a] {merge();})
+[a | b] = a | b // nothing to do
+[SYMB s] = SYMB s  //nothing to do
+[ [l,u]  ] = [l,u]$cr {push(cr)};
+[LIT] = LIT {push(LIT);}
+[a b] = [a] [b] {merge();}
+
+
+ */
+
+
+
+static
+rule_t add_semact_v3(rule_t r);
+
 
 rule_t escape_cs_rule_v3(rule_t r){
   if (!cs_esc_chars) cs_esc_chars = escchars();
@@ -1123,7 +1149,11 @@ rule_t escape_cs_rule_v3(rule_t r){
     // r includes no character that needs escaping.
     return r;
   else {
-    let r_esc = SEQ(LIT("\\"), cs2rule(cs_i));
+    let r_i = cs2rule(cs_i);
+    // add a semantic action to r_i to print the original literal.
+    let r_i_sem = add_semact_v3(r_i);   
+    // don't add a sem. action here, because we don't want to print the escape.
+    let r_esc = SEQ(LIT("\\"), r_i_sem);
     
     // Remove the escaped chars from the original cs.
     let cs_diff = cs_dup(cs_r);
@@ -1133,7 +1163,9 @@ rule_t escape_cs_rule_v3(rule_t r){
       return r_esc;    
     else{      
       let r_diff = cs2rule(cs_diff);
-      return ALT(r_diff,r_esc);
+      // add a semantic action to r_diff to print the appropriate literal.
+      let r_diff_sem = add_semact_v3(r_diff);   
+      return ALT(r_diff_sem,r_esc);
     }
   }
 }
@@ -1155,56 +1187,108 @@ rule_t escape_lit_v3(const char ?`H s){
   return LIT(s_new);
 }
 
-// static
-// Rule_t rule2function_v3(rule_t r) {
-
-//   let res = NULL;
-//   switch (r->r) {
-//   case &Rcount(n,r2):
-//     return RCOUNT(n,rule2function_v3(r2));
-//   case &Star(m,N,r2):
-//     if (is_cs(r2)) {
-//       let escaped = escape_cs_rule_v3(r2);
-//       return STAR(m,N, escaped);
-//     }
-//     return STAR(m,N, rule2function_v3(r2));
-//   case &Hash(m,N,r2):
-//     return HASH(m,N, rule2function_v3(r2));
-//   case &Opt(r2):
-//     return OPT(rule2function_v3(r2) );
-//   case &Alt(r2,r3):
-//     return ALT(rule2function_v3(r2),rule2function_v3(r3));
-//   case &Symb(_,_):
-//     return r;
-//   case &CharRange(_,_):
-//     return escape_cs_rule_v3(r);
-//   case &Lit(s):
-//     return escape_lit_v3(s);
-
-//   case &Seq(r2,r3):
-//     return SEQ(rule2function_v3(r2),rule2function_v3(r3));
-
-//     /* Error cases */
-//   case &Prose(x):
-//     internal_err("Unexpected Prose(%s) in rule2function\n",x);
-//     exit(1);
-//   case &Minus(_,_):
-//     internal_err("Unexpected Minus in rule2function\n");
-//     exit(1);
-//   }
-// }
+static Rule_t empty_push_rule = NULL;
 
 static
-rule_t rule2term_v3(rule_t r) {
+rule_t get_push_rule(){
+  if (!empty_push_rule){
+    empty_push_rule = LIT("");
+    empty_push_rule->a = "tg_push(\"\");";
+  }
+  return empty_push_rule;
+}
+
+const char ? sem_act_merge = "tg_merge();";
+
+const char ? mk_sem_act_push_expr(const char ?`H e){
+  let strings = List::list(new "tg_push(", new e, new ");");
+  return strconcat_l(strings);
+}
+
+const char ? mk_sem_act_push_lit(const char ?`H l){
+  let strings = List::list(new "tg_push(\"", new string_escape(l), new "\");");
+  return strconcat_l(strings);
+}
+
+static 
+rule_t add_semact0_v3(rule_t r) {
+
+  let res = NULL;
+  switch (r->r) {
+  case &Rcount(n,r2):
+    let r2_sem =  SEQ(LIT(""), add_semact_v3(r2));
+    r2_sem->a = sem_act_merge;
+    r2_sem->css = not_cs;
+    return SEQ(get_push_rule(), RCOUNT(n,r2_sem));
+  case &Star(m,N,r2):
+    let r2_sem =  SEQ(LIT(""), add_semact_v3(r2));
+    r2_sem->a = sem_act_merge;
+    r2_sem->css = not_cs;
+    return SEQ(get_push_rule(), STAR(m,N,r2_sem));
+  case &Hash(m,N,r2):
+    let r2_sem =  SEQ(LIT(""), add_semact_v3(r2));
+    r2_sem->a = sem_act_merge;
+    r2_sem->css = not_cs;
+    return SEQ(get_push_rule(), HASH(m,N, r2_sem));
+  case &Opt(r2):
+    let r2_sem =  SEQ(LIT(""), add_semact_v3(r2));
+    r2_sem->a = sem_act_merge;
+    r2_sem->css = not_cs;
+    return SEQ(get_push_rule(), OPT(r2_sem));
+  case &Alt(r2,r3):
+    return ALT(add_semact_v3(r2),add_semact_v3(r3));
+  case &Symb(_,_):
+    return r;
+  case &CharRange(_,_):
+    let r2 = new *r; // duplicate r to avoid modifying it.
+    let cr_id = "cr";
+    r2->a = mk_sem_act_push_expr(cr_id);
+    r2->v = cr_id;
+    return r2;
+  case &Lit(s):
+    let r2 = new *r;
+    r2->a = mk_sem_act_push_lit(s);
+    return r2;
+
+  case &Seq(r2,r3):
+    let r2_sem = SEQ(add_semact_v3(r2),add_semact_v3(r3));
+    r2_sem->a = sem_act_merge;
+    return r2_sem;
+
+    /* Error cases */
+  case &Prose(x):
+    internal_err("Unexpected Prose(%s) in add_semact\n",x);
+    exit(1);
+  case &Minus(_,_):
+    internal_err("Unexpected Minus in add_semact\n");
+    exit(1);
+  }
+}
+
+// wrapper to preserve css of transformed rule.
+static
+rule_t add_semact_v3(rule_t r){
+  let css = r->css;
+  let r2 = add_semact0_v3(r);
+  r2->css = css;
+  return r2;
+}
+
+
+static
+rule_t rule2term_v3(rule_t r);
+
+static
+rule_t rule2term0_v3(rule_t r) {
   let res = NULL;
   switch (r->r) {
   case &Rcount(n,r2):
     return RCOUNT(n,rule2term_v3(r2));
   case &Star(m,N,r2):
-    if (is_cs(r2)) {
-      let escaped = escape_cs_rule_v3(r2);
-      return STAR(m,N, escaped);
-    }
+//     if (is_cs(r2)) {
+//       let escaped = escape_cs_rule_v3(r2);
+//       return STAR(m,N, escaped);
+//     }
     return STAR(m,N, rule2term_v3(r2));
   case &Hash(m,N,r2):
     return HASH(m,N, rule2term_v3(r2));
@@ -1215,6 +1299,7 @@ rule_t rule2term_v3(rule_t r) {
   case &Symb(_,_):
     return r;
   case &CharRange(_,_):
+    internal_err("Unexpected CharRange in rule2term0_v3\n");
     return escape_cs_rule_v3(r);
   case &Lit(s):
     return escape_lit_v3(s);
@@ -1224,11 +1309,29 @@ rule_t rule2term_v3(rule_t r) {
 
     /* Error cases */
   case &Prose(x):
-    internal_err("Unexpected Prose(%s) in rule2term\n",x);
+    internal_err("Unexpected Prose(%s) in rule2term0_v3\n",x);
     exit(1);
   case &Minus(_,_):
-    internal_err("Unexpected Minus in rule2term\n");
+    internal_err("Unexpected Minus in rule2term0_v3\n");
     exit(1);
+  }
+}
+
+// wrapper to preserve semantic action and value id of transformed rule.
+static
+rule_t rule2term_v3(rule_t r){
+  switch(r->r){
+    // CharRange reprocesses the semantic action, so the
+    // standard wrapper is inappropriate.
+  case  &CharRange(_,_):
+    return escape_cs_rule_v3(r);
+  default:
+    let a = r->a;
+    let v = r->v;
+    let r2 = rule2term0_v3(r);
+    r2->a = a;
+    r2->v = v;
+    return r2;
   }
 }
 
@@ -1243,15 +1346,23 @@ const char? symbol2id(const char ?`H sym_name){
   return sym_name;
 }
 
-grammar_t grammar2termgrammar_v3(grammar_t ds) {
-  init_arityt(ds);
+grammar_t grammar2termgrammar_v3(grammar_t g) {
+  init_arityt(g);
 
   let s_format_strings = (const char ?)"format-strings";
 
-  let res = NULL;
+  grammar_t res = NULL,ds = g;
+//   for (ds = g; ds; ds = ds->tl) {
+//     let &$(n,r,a) = ds->hd;
+//     let r_semact = add_semact_v3(r);
+//     res = new List(new $(n,r_semact,a), res);
+//   }
+
+//   reset_globals();
+//   init_arityt(res);
   for (; ds; ds = ds->tl) {
     let &$(n,r,a) = ds->hd;
-    let r_esc = rule2term_v3(r);
+    let r_esc = rule2term_v3(add_semact_v3(r));
     if (is_arg_UT(SYMB(n))){
       let n_o = strconcat(n,"_o");
       let function_n = strconcat("process_", symbol2id(n));
@@ -1274,7 +1385,7 @@ grammar_t grammar2termgrammar_v3(grammar_t ds) {
 				   Attr{.ws=0,.re=0,.paramtype=NULL,.rettype=NULL});
   res = new List(entry_format_strings, res);
 
-  res = imp_rev(res);
+   res = imp_rev(res);
 
   return res;
 }
@@ -1285,7 +1396,11 @@ grammar_t grammar2termgrammar_v3(grammar_t ds) {
 // Currently, just used to cleanup dummy tags from terms.
 ////////////////////
 
-rule_t rewrite_final_v3(rule_t r){
+static
+rule_t rewrite_final_v3(rule_t);
+
+static
+rule_t rewrite_final0_v3(rule_t r){
     if (is_term_UT(r)) { 
       let $(tag,r_inner) = term_UT_elim(r);
       return mkterm_UT_nodummy(tag, r_inner);
@@ -1309,12 +1424,22 @@ rule_t rewrite_final_v3(rule_t r){
     }
 }
 
+// wrapper to preserve semantic action and value id of transformed rule.
+static
+rule_t rewrite_final_v3(rule_t r){
+  let a = r->a;
+  let v = r->v;
+  let r2 = rewrite_final0_v3(r);
+  r2->a = a;
+  r2->v = v;
+  return r2;
+}
+
 grammar_t grammar_final_v3(grammar_t ds) {
   let res = NULL;
   for (; ds; ds = ds->tl) {
     let &$(n,r,a) = ds->hd;
     let r2 = rewrite_final_v3(r);
-    r2->a = r->a; // preserve the semantic action.
     res = new List(new $(n,r2,a),res);
   }
   res = imp_rev(res);

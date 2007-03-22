@@ -241,7 +241,6 @@ rule_t cs2rule(cs_t rng) {
 }
 
 int is_cs(rule_t r) {
-//   if (!r->css || !*r->css) {
   if (!r->css) {
     internal_err("is_cs called before cs_annot\n");
     return 0;

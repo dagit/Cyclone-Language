@@ -1,0 +1,65 @@
+/* tg_stack.cyc
+
+   Implements the termgrammar stack, which is used for creating a
+   message as output from parsing a termgrammar term.
+
+   Currently implemented with list of strings.
+ */
+
+/* Copyright (C) 2007 AT&T.
+   This file is part of the Cyclone project.
+
+   Cyclone is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   Cyclone is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Cyclone; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+#include <core.h>
+#include <list.h>
+#include <buffer.h>
+#include <string.h>
+#include <stdio.h>
+#include "util.h"
+
+using List;
+
+datatype exn { TGStack_error };
+datatype exn.TGStack_error TGStack_error_val = TGStack_error;
+
+
+list_t<stringptr_t> tg_stack = NULL;
+
+void tg_push(const char ?`H s){
+  tg_stack = new List(new s, tg_stack);  
+}
+
+// peek at the top element of the stack
+const char ? tg_peek(){
+  if (tg_stack)
+    return *tg_stack->hd;
+  
+  internal_err("tg_peek: TG stack is empty.");
+  throw &TGStack_error_val;
+}
+
+// Merge the top two elements of the stack into one element.
+void tg_merge(){
+  switch (tg_stack) {
+  case &List(&s2, &List(&s1, ss)):
+    tg_stack = new List(new (const char ?)strconcat(s1,s2), ss);
+    break;
+  default:
+    internal_err("tg_merge: TG stack does not have two elements available.");
+    throw &TGStack_error_val;
+  }
+}

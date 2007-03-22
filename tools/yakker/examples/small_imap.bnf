@@ -16,7 +16,8 @@ atom-specials = "("|")"|"{"|SP|CTL|resp-specials.
 ; (command CLOSE)
 ; (command (COPY 7 INBOX))
 ; (command (CREATE "foo"))
-command = tag SP (command-auth|command-select) CRLF.
+;command = tag SP (command-auth|command-select) CRLF.
+command = tag SP (command-auth|command-select) SP.
 command-auth = create.
 command-select = "CLOSE"|copy.
 copy = "COPY" SP sequence-set SP mailbox.
