@@ -55,6 +55,7 @@ term ::= "(" tag *term ")"
 #include "pr.h"
 #include "analyze.h"
 #include "termgrammar.h"
+#include "pads.h"
 #include <list.h>
 #include <buffer.h>
 #include <string.h>
@@ -1200,45 +1201,54 @@ rule_t get_push_rule(){
 
 const char ? sem_act_merge = "tg_merge();";
 
-const char ? mk_sem_act_push_expr(const char ?`H e){
-  let strings = List::list(new "tg_push(", new e, new ");");
-  return strconcat_l(strings);
+// push a char
+const char ? mk_sem_act_push_char(int c){
+  return aprintf("tg_push(\"%c\");",c);
+}
+
+const char ? mk_sem_act_push_expr(const char ? e){
+  return aprintf("tg_push(%s);",e);
 }
 
 const char ? mk_sem_act_push_lit(const char ?`H l){
-  let strings = List::list(new "tg_push(\"", new string_escape(l), new "\");");
-  return strconcat_l(strings);
+  return aprintf("tg_push(\"%s\");", string_escape(l));
 }
 
+
+// Invariant: r is not changed and return value is always freshly allocated. 
 static 
 rule_t add_semact0_v3(rule_t r) {
 
   let res = NULL;
   switch (r->r) {
   case &Rcount(n,r2):
-    let r2_sem =  SEQ(LIT(""), add_semact_v3(r2));
-    r2_sem->a = sem_act_merge;
+    let r2_sem = add_semact_v3(r2);
+    let a = r2_sem->a;
+    r2_sem->a = a ? (const char ?)strconcat(a, sem_act_merge) : sem_act_merge;
     r2_sem->css = not_cs;
     return SEQ(get_push_rule(), RCOUNT(n,r2_sem));
   case &Star(m,N,r2):
-    let r2_sem =  SEQ(LIT(""), add_semact_v3(r2));
-    r2_sem->a = sem_act_merge;
+    let r2_sem = add_semact_v3(r2);
+    let a = r2_sem->a;
+    r2_sem->a = a ? (const char ?)strconcat(a, sem_act_merge) : sem_act_merge;
     r2_sem->css = not_cs;
     return SEQ(get_push_rule(), STAR(m,N,r2_sem));
   case &Hash(m,N,r2):
-    let r2_sem =  SEQ(LIT(""), add_semact_v3(r2));
-    r2_sem->a = sem_act_merge;
+    let r2_sem = add_semact_v3(r2);
+    let a = r2_sem->a;
+    r2_sem->a = a ? (const char ?)strconcat(a, sem_act_merge) : sem_act_merge;
     r2_sem->css = not_cs;
     return SEQ(get_push_rule(), HASH(m,N, r2_sem));
   case &Opt(r2):
-    let r2_sem =  SEQ(LIT(""), add_semact_v3(r2));
-    r2_sem->a = sem_act_merge;
+    let r2_sem = add_semact_v3(r2);
+    let a = r2_sem->a;
+    r2_sem->a = a ? (const char ?)strconcat(a, sem_act_merge) : sem_act_merge;
     r2_sem->css = not_cs;
     return SEQ(get_push_rule(), OPT(r2_sem));
   case &Alt(r2,r3):
     return ALT(add_semact_v3(r2),add_semact_v3(r3));
   case &Symb(_,_):
-    return r;
+    return new *r;
   case &CharRange(_,_):
     let r2 = new *r; // duplicate r to avoid modifying it.
     let cr_id = "cr";
@@ -1274,6 +1284,61 @@ rule_t add_semact_v3(rule_t r){
   return r2;
 }
 
+static
+const char ? mk_symbol_semact(const char ?`H sym){
+  return aprintf("process_%s();",make_c_identifier0(sym));  
+}
+
+// Should only be called when arity_rule(r) == 0
+static 
+const char ? get_semact_v3(rule_t r) {
+
+  let res = NULL;
+  switch (r->r) {
+  case &Star(m,&Num(n),r2):
+    if (arity_rule(r) == 0){
+      let r2_a = new get_semact_v3(r2);
+      let res = NULL;
+      for (let i=0; i<m; i++){
+	res = new List(r2_a, res);
+      }
+      return strconcat_l(res);
+    }
+    internal_err("Unexpected non-constant Star rule in get_semact\n");
+    exit(1);
+  case &Symb(s,_):
+    if (arity_rule(r) == 0)
+      return mk_symbol_semact(s);
+    internal_err("Unexpected non-zero arity Symbol %s in get_semact\n",s);
+    exit(1);
+  case &CharRange(min,max):
+    if (min == max){
+      return mk_sem_act_push_char(min);
+    }
+    fallthru;
+  case &Rcount(_,_):
+  case &Star(_,_,_):
+  case &Hash(_,_,_):
+  case &Opt(_):
+  case &Alt(_,_):
+    internal_err("Unexpected arg rule in get_semact\n");
+    exit(1);
+
+  case &Lit(s):
+    return mk_sem_act_push_lit(s);
+
+  case &Seq(r2,r3):
+    return strconcat(get_semact_v3(r2),get_semact_v3(r3));
+
+    /* Error cases */
+  case &Prose(x):
+    internal_err("Unexpected Prose(%s) in get_semact\n",x);
+    exit(1);
+  case &Minus(_,_):
+    internal_err("Unexpected Minus in get_semact\n");
+    exit(1);
+  }
+}
 
 static
 rule_t rule2term_v3(rule_t r);
@@ -1336,14 +1401,160 @@ rule_t rule2term_v3(rule_t r){
 }
 
 static
-rule_t seq2term_v3(rule_t r) {
-  let args = filter(is_arg_UT, seq2rules(r));
-  return with_spaces(map(rule2term_v3,args));
+rule_t seqrule2term_v3(rule_t r) {
+  if (is_arg_UT(r))
+    return rule2term_v3(add_semact_v3(r));
+
+  let r2 = LIT("");
+  r2->a = get_semact_v3(r);
+  return r2;
 }
 
-const char? symbol2id(const char ?`H sym_name){
-  // FIX: implement.
-  return sym_name;
+/* Separate a rule list with a given separator */
+static
+rule_t with_sep_sem_act(list_t<rule_t> rs, const char ?`H c) {
+  if (rs == NULL) return LIT("");
+
+  // Terms automatically insert a space after the tag. So,
+  // we need to make sure that none of the leading nullary arguments
+  // have a separator inserted *after* them.
+  //
+  // Once we've seen a non-nullary argument, we can switch to making sure
+  // that none of the nullary arguments get a separator *before* them.
+
+  let res = rs->hd;
+  let seen_nn;  // Have we seen a non-nullary argument?
+
+  // First check whether res is nullary.
+  switch(res->r){
+    case &Lit(s):
+      if (strcmp(s,"") != 0){
+	internal_err("Non-empty literal found in with_sep_sem_act");
+	fallthru;
+      }
+      seen_nn = 0;
+      break;
+    default:
+      seen_nn = 1;
+  }
+
+  rs = rs->tl;
+
+  // Now add args without separators until we see the first n.n. arg.
+  for (; !seen_nn && rs; rs = rs->tl){
+    switch(rs->hd->r){
+      case &Lit(s):
+	if (strcmp(s,"") != 0){
+	  internal_err("Non-empty literal found in with_sep_sem_act");
+	  fallthru;
+	}
+	break;
+      default:
+	seen_nn = 1;
+    }
+    res = SEQ(res,rs->hd);        
+    res->a = sem_act_merge;      
+  }
+  
+  let r_c = LIT(c);
+  // Now add n.n. args with seps and nullary args w/o seps.
+  for (; rs; rs = rs->tl){
+    switch(rs->hd->r){
+    case &Lit(s):
+      if (strcmp(s,"") != 0){
+	internal_err("Non-empty literal found in with_sep_sem_act");
+	fallthru;
+      }
+      // Leave out the separator because the arg is nullary.
+      res = SEQ(res,rs->hd);
+      break;
+    default:
+      res = SEQ(res,r_c,rs->hd);
+    }
+    res->a = sem_act_merge;      
+  }
+  
+  return res;
+}
+
+// Returns a possibly NULL semantic action and a sequence containing the 
+// the elements of the list separated by c.
+// The semantic action will be non-null if there are one or more nullary elements
+// at the beginnning of the list rs.
+// static
+// $(const char ?, Rule_t) with_sep_sem_act(list_t<rule_t> rs, const char ?`H c) {
+//   if (rs == NULL) return $("",LIT(""));
+//   let res = NULL;
+//   // list of leading actions.
+//   let leading_as = NULL;
+
+//   // Collect leading nullary rules.
+//   while(!res && rs){
+//     switch(rs->hd->r){
+//     case &Lit(s):
+//       if (strcmp(s,"") == 0){
+// 	leading_as = new List(new rs->hd->a, leading_as);
+//       }
+//       else {
+// 	internal_err("Non-empty literal found in with_sep_sem_act");
+//       }
+//       break;
+//     default:
+//       res = rs->hd;
+//     }    
+//     rs = rs->tl;
+//   }
+//   imp_rev(leading_as);
+//   let leading_a = leading_as ? strconcat_l (leading_as) : NULL;
+
+//   leading_as = NULL;
+//   let r_c = LIT(c);
+//   for (; rs; rs = rs->tl){
+//     switch(rs->hd->r){
+//     case &Lit(s):
+//       if (strcmp(s,"") == 0){
+// 	leading_as = new List(new rs->hd->a, leading_as);
+//         break;
+//       }
+//       else {
+// 	internal_err("Non-empty literal found in with_sep_sem_act");
+// 	fallthru;
+//       }
+//     default:
+//       if (!leading_as){
+// 	res = SEQ(res,r_c,rs->hd);
+//       }
+//       else{
+// 	let r_c = LIT(c);
+// 	imp_rev(leading_as);
+// 	r_c->a = strconcat_l(leading_as);
+// 	leading_as = NULL;
+// 	res = SEQ(res,r_c,rs->hd);
+//       }
+
+//       res->a = sem_act_merge;      
+//     }
+//   }
+  
+//   if (leading_as){
+//     imp_rev(leading_as);
+//     let trailing_a = strconcat_l(leading_as);
+//     res->a = aprintf("%s%s%s",res->a, trailing_a, sem_act_merge);      
+//   }
+
+//   return $(leading_a,res);
+// }
+
+/* Separate a rule list with spaces */
+static
+rule_t with_spaces_sem_act(list_t<rule_t> rs) {
+  return with_sep_sem_act(rs," ");
+}
+
+static
+rule_t seq2term_v3(rule_t r) {
+  let args = seq2rules(r);
+  return with_spaces_sem_act(map(seqrule2term_v3,args));
 }
 
 grammar_t grammar2termgrammar_v3(grammar_t g) {
@@ -1352,35 +1563,27 @@ grammar_t grammar2termgrammar_v3(grammar_t g) {
   let s_format_strings = (const char ?)"format-strings";
 
   grammar_t res = NULL,ds = g;
-//   for (ds = g; ds; ds = ds->tl) {
-//     let &$(n,r,a) = ds->hd;
-//     let r_semact = add_semact_v3(r);
-//     res = new List(new $(n,r_semact,a), res);
-//   }
-
-//   reset_globals();
-//   init_arityt(res);
   for (; ds; ds = ds->tl) {
     let &$(n,r,a) = ds->hd;
     let r_esc = rule2term_v3(add_semact_v3(r));
     if (is_arg_UT(SYMB(n))){
       let n_o = strconcat(n,"_o");
-      let function_n = strconcat("process_", symbol2id(n));
-      let sem_action_n = strconcat(function_n, "();");
       let term_body = seq2term_v3(r);
-      let r2 = mkterm_UT(LIT(n), term_body);
-      // Next, we'll start supporting format strings. For now, let's deal only with termgrammars.
-      //     let r_all = ALT(SYMB(n_o),r2, SYMB(s_format_strings));
-      let r_both = ALT(SYMB(n_o),r2);
-//       r_both->a = sem_action_n;
-      res = new List(new $(n,r_both,a),
+      let r_tag = LIT(n);
+      let r2 = mkterm_UT(r_tag, term_body);
+      let r_all = ALT(SYMB(n_o), r2, SEQ(LIT("%"), LIT(n), LIT(":"), SYMB(s_format_strings)));
+//       let r_both = ALT(SYMB(n_o),r2);
+      res = new List(new $(n,r_all,a),
 		     new List(new $(n_o, r_esc, a), res));
     }else{
       res = new List(new $(n,r_esc,a), res);
     }
   }
-
-  let r_format_strings = SEQ(LIT("%"), ALT(LIT("s"), LIT("d"), LIT("f")));
+  // %<symbol>:<format_string>
+  let r_string_fs = LIT("s"); r_string_fs->a = "tg_push_string();";
+  let r_int_fs = LIT("d"); r_int_fs->a = "tg_push_int();";
+  let r_float_fs = LIT("f"); r_float_fs->a = "tg_push_float();";
+  let r_format_strings = ALT(r_string_fs, r_int_fs, r_float_fs);
   let entry_format_strings = new $(s_format_strings,r_format_strings, 
 				   Attr{.ws=0,.re=0,.paramtype=NULL,.rettype=NULL});
   res = new List(entry_format_strings, res);
@@ -1452,3 +1655,4 @@ grammar_t grammar_final_v3(grammar_t ds) {
 // Q: Why does follow for STAR use m2 =0?
 // turn * and # into list
 // cutoff of term transformation for reg.exps. (i.e. those rules that have all caps names).
+// Independent line of research N+1: Teach RFCs: Generate examples when parse fails.

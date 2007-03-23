@@ -17,8 +17,6 @@ enum Root_rule{
   Command, Seq_range
 };
 
-enum Root_rule root = Command;
-
 #define USAGE \
 "Usage:%s [OPTIONS]\n"\
 "Options: -root <sym>            parse starting from rule <sym>\n"\
@@ -31,10 +29,19 @@ static void die(const char ?prog_name) {
 }
 
 int main(int argc, char ??argv) {
+  // position of last record in the stream.
+  int last_record_posn = 0;
+  enum Root_rule root = Command;
+  unsigned int start_args = argc; // index in argv of first argument
+				  // to our printer. Default indicates
+				  // that no arguments arg present in
+				  // argv.
+
   for (int i = 1; i < argc; i++) {
-    if (strcmp("-help",argv[i]) == 0) die(argv[0]);
-    else if (strcmp(argv[i],"-d") == 0) ykdebug++;
-    else if(strcmp(argv[i],"-root") == 0){
+    if (     strcmp(argv[i],  "-help") == 0) die(argv[0]);
+    else if (strcmp(argv[i],  "-d"   ) == 0) ykdebug++;
+    else if (strcmp(argv[i],  "-args") == 0) {start_args = i+1; break;}
+    else if(strcmp(argv[i],   "-root") == 0){
       if (root || i+1 >= argc) die(argv[0]);
       if (strcmp(argv[i+1],"command") == 0)         root = Command;
       else if (strcmp(argv[i+1],"seq-range") == 0)  root =  Seq_range;
@@ -43,20 +50,39 @@ int main(int argc, char ??argv) {
     }
     else { fprintf(stderr,"Unrecognized option: %s\n",argv[i]); exit(1); }
   }
+
+
+  // Initialize term grammar stack
+  tg_init(argv + start_args);
+
   ykbuf_t @ykb = fd2ykbuf(0); // read from stdin
   try {
-    switch(root){
-    case Command: p_command(ykb);     break;
-    case Seq_rang : p_seq_range(ykb); break;
+    // parse input until we hit an error (or EOF)
+    while (1) { 
+      switch(root){
+      case Command: p_command(ykb);     break;
+      case Seq_rang : p_seq_range(ykb); break;
+      }
+      //let n = YKPOSN;
+      //if (n<60) for (int i = 0; i < n; i++) printf("^");
+      //printf(" accepted %d (0x%x) characters\n",n,n);
+      printf("Result: %s\n", tg_pop());
+      // consume newline
+      char c = 0;
+      let sz = ykbread(&c,1,ykb);
+      if (1 != sz || '\n' != c)
+	// either missing newline or at EOF.
+	throw &Parse_error_val;
+      last_record_posn = YKPOSN;
     }
-    //let n = YKPOSN;
-    //if (n<60) for (int i = 0; i < n; i++) printf("^");
-    //printf(" accepted %d (0x%x) characters\n",n,n);
-    printf("Result: %s\n", tg_peek());
   }
   catch {
   case &Parse_error:
-    let n = YKPOSN;
+    let n = YKPOSN - last_record_posn;
+    char c;
+    let sz = ykbread(&c,1,ykb);
+    if (sz == 0)
+      break; // at EOF;
     if (n<60) for (int i = 0; i < n; i++) printf(" ");
     printf("^ failed at position %d (0x%x)\n",n,n);
     break;

@@ -462,8 +462,14 @@ int main(int argc, const char ?`H?argv) {
     debugprint(1,"Performing final pass on term grammar ... ");
     gr = grammar_final_v3(gr);
     pr_definitions(stdout, gr);
+    fprintf(stdout, "{extern void tg_push_string();}\n");
+    fprintf(stdout, "{extern void tg_push_int();}\n");
+    fprintf(stdout, "{extern void tg_push_float();}\n");
     fprintf(stdout, "{extern void tg_push(const char ?);}\n");
     fprintf(stdout, "{extern void tg_merge();} \n");
+    // FIX: these two functions should be generated
+    fprintf(stdout, "{extern void process_SP();} \n");
+    fprintf(stdout, "{extern void process_DQUOTE();} \n");
     debugprint(1,"done\n");
     return 0;
   }

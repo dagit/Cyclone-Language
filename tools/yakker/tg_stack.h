@@ -21,8 +21,17 @@
 
 #ifndef TG_STACK_H
 #define TG_STACK_H
-extern void tg_push(const char ?);
+extern void tg_init(char ?? args);
+
+extern void tg_push(const char ?`H);
+
+// push elements from var args.
+extern void tg_push_string();
+extern void tg_push_int();
+extern void tg_push_float();
+
 // peek at the top element of the stack
 extern const char ? tg_peek();
+extern const char ? tg_pop();
 extern void tg_merge();
 #endif

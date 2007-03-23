@@ -30,17 +30,46 @@
 #include <string.h>
 #include <stdio.h>
 #include "util.h"
+#include "tg_stack.h"
 
 using List;
 
 datatype exn { TGStack_error };
 datatype exn.TGStack_error TGStack_error_val = TGStack_error;
 
+static list_t<stringptr_t> tg_stack = NULL;
+static char ?? tg_args;
+static int tg_arg_num;
 
-list_t<stringptr_t> tg_stack = NULL;
+void tg_init(char ?? args){
+  tg_stack = NULL;
+  let n = numelts(args);
+  tg_args = new {for i< n: strdup(args[i])};    
+  tg_arg_num = 0;
+}
 
 void tg_push(const char ?`H s){
   tg_stack = new List(new s, tg_stack);  
+}
+
+// push elements from args.
+void tg_push_string(){
+  if (tg_arg_num < numelts(tg_args))
+    tg_push(tg_args[tg_arg_num++]);
+  else{
+    internal_err("tg_push_string: no arguments available.");
+    throw &TGStack_error_val;  
+  }
+}
+void tg_push_int(){
+  // FIX: to implement
+  internal_err("tg_push_int: not implemented.");
+  throw &TGStack_error_val;  
+}
+void tg_push_float(){
+  // FIX: to implement
+  internal_err("tg_push_float: not implemented.");
+  throw &TGStack_error_val;  
 }
 
 // peek at the top element of the stack
@@ -49,6 +78,17 @@ const char ? tg_peek(){
     return *tg_stack->hd;
   
   internal_err("tg_peek: TG stack is empty.");
+  throw &TGStack_error_val;
+}
+
+const char ? tg_pop(){
+  if (tg_stack){
+    let hd = *tg_stack->hd;
+    tg_stack = tg_stack->tl;
+    return hd;
+  }
+  
+  internal_err("tg_pop: TG stack is empty.");
   throw &TGStack_error_val;
 }
 
@@ -63,3 +103,14 @@ void tg_merge(){
     throw &TGStack_error_val;
   }
 }
+
+void process_SP(){
+  tg_push(" ");
+}
+
+void process_DQUOTE(){
+  tg_push("\"");
+}
+
+
+

@@ -1003,9 +1003,8 @@ unsigned int arity_rule(rule_t r) {
     if (arity_opt) return (*arity_opt)?1:0;
     warn("Undefined arity for %s\n",x);
     return 1;
-  case &Star(m,&Num(n),_):
-    // FIX: is it okay that we're ignoring the underlying rule's arity?
-    return (m==n)?0:1;
+  case &Star(m,&Num(n),r2):
+    return ((m==n) &&(arity_rule(r) == 0)) ? 0 : 1;
   case &Alt(_,_):
   case &Opt(_):
   case &Rcount(_,_):
