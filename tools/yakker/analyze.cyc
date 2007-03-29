@@ -1004,7 +1004,7 @@ unsigned int arity_rule(rule_t r) {
     warn("Undefined arity for %s\n",x);
     return 1;
   case &Star(m,&Num(n),r2):
-    return ((m==n) &&(arity_rule(r) == 0)) ? 0 : 1;
+    return ((m==n) && (arity_rule(r2) == 0)) ? 0 : 1;
   case &Alt(_,_):
   case &Opt(_):
   case &Rcount(_,_):

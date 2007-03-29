@@ -1,6 +1,6 @@
 include ../../Makefile.inc
 CYCFLAGS=
-#CYCFLAGS=-pg
+#CYCFLAGS=-g -save-c -pp
 YAKFLAGS=-d
 
 PROG=yakker$(EXE)
@@ -24,7 +24,7 @@ $(PROG): analyze.o axarray.o bnf.o cs.o extract.o fa.o termgrammar.o lex.o pads.
   parse_tab.o parsergen.o pr.o prose.o prose_elim_grm.o string_dfa_engine1.o \
   string_dfa_engine2_1.o corerules.o corerules_grm.o \
   util.o namespaces.o yakker.o
-	$(CYCLONE) $(CYCFLAGS) -L$(CYC_LIB_PATH) $^ -o $@
+	$(CYCLONE) $(CYCFLAGS) -L$(CYC_LIB_PATH) $^ -o $@ -lm
 
 testindexer: indexer 1rfc_index
 	./indexer < 1rfc_index
