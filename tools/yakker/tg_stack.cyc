@@ -42,12 +42,15 @@ static char ?? tg_args;
 static int tg_arg_num;
 // static int tg_print_rules = 0;
 
+int branch_id = 0;
+
 void tg_init(char ?? args){
   tg_stack = NULL;
   let n = numelts(args);
   tg_args = new {for i< n: strdup(args[i])};    
   tg_arg_num = 0;
 //   tg_print_rules = 0; // by default, rule printing is on.
+  branch_id = 0;
 }
 
 void tg_push(const char ?`H s){

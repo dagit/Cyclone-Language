@@ -85,8 +85,14 @@ small_imap_termv3.bnf: examples/small_imap.bnf yakker
 small_imap_pm: small_imap_pm.cyc ykbuf.o ssl.o tg_stack.o tgmain.o util.o
 	$(CYCLONE) $^ -o $@ --novcgen -lssl -lcrypto
 
-small_imap_pm.cyc: small_imap_pm.bnf
+small_imap_pm.cyc: small_imap_pm.bnf yakker
 	./yakker $(YAKFLAGS) -gen command_pm -no-main $< > $@
+
+small_imapvpm: small_imapvpm.cyc ykbuf.o ssl.o tg_stack.o pm_main.o util.o
+	$(CYCLONE) $^ -o $@ --novcgen -lssl -lcrypto
+
+small_imapvpm.cyc: examples/small_imapvpm.bnf yakker
+	./yakker $(YAKFLAGS) -gen command-pm -no-main $< > $@
 
 small_imap_pm.bnf: examples/small_imap.bnf yakker
 	./yakker -bindgrammar $< > $@

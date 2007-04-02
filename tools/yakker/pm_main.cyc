@@ -1,0 +1,113 @@
+#include <buffer.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "ykbuf.h"
+#include "tg_stack.h"
+#define YKPOSN ((ykb->cur-ykb->bot)+ykb->discarded)
+
+extern int ykdebug;
+extern datatype exn {extern Parse_error };
+extern datatype exn.Parse_error Parse_error_val;
+
+extern void p_command(ykbuf_t @ykb);
+extern void p_seq_range(ykbuf_t @ykb);
+extern void p_command_pm(ykbuf_t @ykb);
+
+static int chosen_branch = 0;
+
+void store(const char? s){
+  puts(s);
+}
+
+void set_branch(int i){chosen_branch=i;}
+
+enum Root_rule{
+  Command, Seq_range
+};
+
+#define USAGE \
+"Usage:%s [OPTIONS]\n"\
+"Options: -root <sym>            parse starting from rule <sym>\n"\
+"         -d                     increase debug level by 1.\n"\
+"         -help                  print this message\n"
+
+const char ?fresh_name() {
+  static int count = 0;
+  return aprintf("_bnf_%d",count++);
+}
+
+static void die(const char ?prog_name) {
+  fprintf(stderr,USAGE,prog_name);
+  exit(1);
+}
+
+int main(int argc, char ??argv) {
+  // position of last record in the stream.
+  int last_record_posn = 0;
+  enum Root_rule root = Command;
+  unsigned int start_args = argc; // index in argv of first argument
+				  // to our printer. Default indicates
+				  // that no arguments arg present in
+				  // argv.
+
+  for (int i = 1; i < argc; i++) {
+    if (     strcmp(argv[i],  "-help") == 0) die(argv[0]);
+    else if (strcmp(argv[i],  "-d"   ) == 0) ykdebug++;
+    else if (strcmp(argv[i],  "-args") == 0) {start_args = i+1; break;}
+    else if(strcmp(argv[i],   "-root") == 0){
+      if (root || i+1 >= argc) die(argv[0]);
+      if (strcmp(argv[i+1],"command") == 0)         root = Command;
+      else if (strcmp(argv[i+1],"seq-range") == 0)  root =  Seq_range;
+      else { fprintf(stderr,"Unrecognized rule name: %s\n",argv[i+1]); exit(1); }
+      i += 1;
+    }
+    else { fprintf(stderr,"Unrecognized option: %s\n",argv[i]); exit(1); }
+  }
+
+
+  // Initialize term grammar stack
+  tg_init(argv + start_args);
+
+  ykbuf_t @ykb = fd2ykbuf(0); // read from stdin
+  try {
+    // parse input until we hit an error (or EOF)
+    while (1) { 
+      switch(root){
+      case Command: 
+	p_command_pm(ykb);
+	printf("Branch: %d.\n", chosen_branch);
+	break;
+      case Seq_range : p_seq_range(ykb); break;
+      default :
+	fprintf(stderr,"Unknown symbol."); 
+	exit(1);
+      }
+      //let n = YKPOSN;
+      //if (n<60) for (int i = 0; i < n; i++) printf("^");
+      //printf(" accepted %d (0x%x) characters\n",n,n);
+//       printf("Result: %s\n", tg_pop());
+      // consume newline
+      char c = 0;
+      let sz = ykbread(&c,1,ykb);
+      if (1 != sz || '\n' != c)
+	// either missing newline or at EOF.
+	throw &Parse_error_val;
+      last_record_posn = YKPOSN;
+    }
+  }
+  catch {
+  case &Parse_error:
+    let n = YKPOSN - last_record_posn;
+    char c;
+    let sz = ykbread(&c,1,ykb);
+    if (sz == 0)
+      break; // at EOF;
+    if (n<60) for (int i = 0; i < n; i++) printf(" ");
+    printf("^ failed at position %d (0x%x)\n",n,n);
+    break;
+  }
+  
+
+  return 0;
+}

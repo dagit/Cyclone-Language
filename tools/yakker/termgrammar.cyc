@@ -1742,16 +1742,15 @@ grammar_t grammar2termgrammar_v3(grammar_t g) {
   return res;
 }
 
+// 
 rule_t mk_pattern_match(const char ?`H s){
-  let r_empty = LIT("");
-  r_empty->a = "set_branch(branch_id++);";
-
   let r_bar = LIT("|");
-  r_bar->a = mk_print_action("\\n| ",r_empty);
+  r_bar->a = "fprintf(stdout,\"\\n| \\\"\\\"{set_branch(%d);}\",branch_id++);";
 
+  let r_first = SYMB(s);
+  r_first->a = "fprintf(stdout,\" \\\"\\\"{set_branch(%d);}\",branch_id++);";
   let r = SYMB(s);
-  r->a = mk_print_action(" ",r_empty);
-  return SEQ(r, STAR(0,new Infinity,SEQ(r_bar, r))); 
+  return SEQ(r_first, STAR(0,new Infinity,SEQ(r_bar, r))); 
 }
 
 grammar_t grammar2bindgrammar(grammar_t g) {

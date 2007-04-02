@@ -38,6 +38,8 @@ extern void tg_push_spec(const char ?`H specifier);
 /* void tg_enter_binder(); */
 /* void tg_exit_binder(); */
 
+extern int branch_id;
+
 // peek at the top element of the stack
 extern const char ? tg_peek();
 extern const char ? tg_pop();
