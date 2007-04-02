@@ -24,5 +24,6 @@ extern void pr_repeat(FILE @f,repeat_t rp);
 extern void pr_rule(FILE @f,rule_t r);
 extern void pr_definition(FILE @f,definition_t d);
 extern void pr_definitions(FILE @f,grammar_t ds);
+extern const char ?pr_rule2string(rule_t r);
 extern int html_mode;
 #endif

@@ -1114,7 +1114,8 @@ grammar_t grammar_final(grammar_t ds) {
 /////////////////////
 /*
 
-Algorithm for adding semantic actions to rules.
+Algorithm for adding printing semantic actions to rules.
+Invariant: [a] results in a single string representing the result of a on the stack.
 
 [a_1 | ... | a_n] = a_1 | ... | a_n // nothing to do
 [a_1 ... a_n] = [a_1] ... [a_n] {merge_n(n);}
@@ -1130,13 +1131,10 @@ Algorithm for adding semantic actions to rules.
 [LIT] = LIT {push(LIT);}
 [a b] = [a] [b] {merge();}
 
-
  */
 
-
-
 static
-rule_t add_semact_v3(rule_t r);
+rule_t add_pr_semact_v3(rule_t r);
 
 
 rule_t escape_cs_rule_v3(rule_t r){
@@ -1152,7 +1150,7 @@ rule_t escape_cs_rule_v3(rule_t r){
   else {
     let r_i = cs2rule(cs_i);
     // add a semantic action to r_i to print the original literal.
-    let r_i_sem = add_semact_v3(r_i);   
+    let r_i_sem = add_pr_semact_v3(r_i);   
     // don't add a sem. action here, because we don't want to print the escape.
     let r_esc = SEQ(LIT("\\"), r_i_sem);
     
@@ -1165,7 +1163,7 @@ rule_t escape_cs_rule_v3(rule_t r){
     else{      
       let r_diff = cs2rule(cs_diff);
       // add a semantic action to r_diff to print the appropriate literal.
-      let r_diff_sem = add_semact_v3(r_diff);   
+      let r_diff_sem = add_pr_semact_v3(r_diff);   
       return ALT(r_diff_sem,r_esc);
     }
   }
@@ -1217,36 +1215,36 @@ const char ? mk_sem_act_push_lit(const char ?`H l){
 
 // Invariant: r is not changed and return value is always freshly allocated. 
 static 
-rule_t add_semact0_v3(rule_t r) {
+rule_t add_pr_semact0_v3(rule_t r) {
 
   let res = NULL;
   switch (r->r) {
   case &Rcount(n,r2):
-    let r2_sem = add_semact_v3(r2);
+    let r2_sem = add_pr_semact_v3(r2);
     let a = r2_sem->a;
     r2_sem->a = a ? (const char ?)strconcat(a, sem_act_merge) : sem_act_merge;
     r2_sem->css = not_cs;
     return SEQ(get_push_rule(), RCOUNT(n,r2_sem));
   case &Star(m,N,r2):
-    let r2_sem = add_semact_v3(r2);
+    let r2_sem = add_pr_semact_v3(r2);
     let a = r2_sem->a;
     r2_sem->a = a ? (const char ?)strconcat(a, sem_act_merge) : sem_act_merge;
     r2_sem->css = not_cs;
     return SEQ(get_push_rule(), STAR(m,N,r2_sem));
   case &Hash(m,N,r2):
-    let r2_sem = add_semact_v3(r2);
+    let r2_sem = add_pr_semact_v3(r2);
     let a = r2_sem->a;
     r2_sem->a = a ? (const char ?)strconcat(a, sem_act_merge) : sem_act_merge;
     r2_sem->css = not_cs;
     return SEQ(get_push_rule(), HASH(m,N, r2_sem));
   case &Opt(r2):
-    let r2_sem = add_semact_v3(r2);
+    let r2_sem = add_pr_semact_v3(r2);
     let a = r2_sem->a;
     r2_sem->a = a ? (const char ?)strconcat(a, sem_act_merge) : sem_act_merge;
     r2_sem->css = not_cs;
     return SEQ(get_push_rule(), OPT(r2_sem));
   case &Alt(r2,r3):
-    return ALT(add_semact_v3(r2),add_semact_v3(r3));
+    return ALT(add_pr_semact_v3(r2),add_pr_semact_v3(r3));
   case &Symb(_,_):
     return new *r;
   case &CharRange(_,_):
@@ -1261,25 +1259,25 @@ rule_t add_semact0_v3(rule_t r) {
     return r2;
 
   case &Seq(r2,r3):
-    let r2_sem = SEQ(add_semact_v3(r2),add_semact_v3(r3));
+    let r2_sem = SEQ(add_pr_semact_v3(r2),add_pr_semact_v3(r3));
     r2_sem->a = sem_act_merge;
     return r2_sem;
 
     /* Error cases */
   case &Prose(x):
-    internal_err("Unexpected Prose(%s) in add_semact\n",x);
+    internal_err("Unexpected Prose(%s) in add_pr_semact\n",x);
     exit(1);
   case &Minus(_,_):
-    internal_err("Unexpected Minus in add_semact\n");
+    internal_err("Unexpected Minus in add_pr_semact\n");
     exit(1);
   }
 }
 
 // wrapper to preserve css of transformed rule.
 static
-rule_t add_semact_v3(rule_t r){
+rule_t add_pr_semact_v3(rule_t r){
   let css = r->css;
-  let r2 = add_semact0_v3(r);
+  let r2 = add_pr_semact0_v3(r);
   r2->css = css;
   return r2;
 }
@@ -1291,13 +1289,13 @@ const char ? mk_symbol_semact(const char ?`H sym){
 
 // Should only be called when arity_rule(r) == 0
 static 
-const char ? get_semact_v3(rule_t r) {
+const char ? get_pr_semact_v3(rule_t r) {
 
   let res = NULL;
   switch (r->r) {
   case &Star(m,&Num(n),r2):
     if (arity_rule(r) == 0){
-      let r2_a = new get_semact_v3(r2);
+      let r2_a = new get_pr_semact_v3(r2);
       let res = NULL;
       for (let i=0; i<m; i++){
 	res = new List(r2_a, res);
@@ -1328,7 +1326,7 @@ const char ? get_semact_v3(rule_t r) {
     return mk_sem_act_push_lit(s);
 
   case &Seq(r2,r3):
-    return strconcat(get_semact_v3(r2),get_semact_v3(r3));
+    return strconcat(get_pr_semact_v3(r2),get_pr_semact_v3(r3));
 
     /* Error cases */
   case &Prose(x):
@@ -1340,9 +1338,228 @@ const char ? get_semact_v3(rule_t r) {
   }
 }
 
+////
+// Functions for adding conversion specifiers to grammar.
+////
+
+static Rule_t r_conversion_specifier = NULL;
+
+static
+rule_t mk_conversion_specifier (){
+  if (!r_conversion_specifier){
+    let r_escapes = ALT(CHARRANGE('s','s'),
+			CHARRANGE('d','d'),
+			CHARRANGE('f','f'));
+    r_escapes->v = "es";
+    r_escapes->a = "tg_push_spec(es);";
+    r_conversion_specifier = SEQ(LIT("%"), r_escapes);
+  }
+  return (rule_t) r_conversion_specifier;
+}
+
+static
+rule_t add_conversion_specifiers(rule_t);
+
+static
+rule_t seq_add_conversion_specifiers(rule_t r){
+    switch (r->r) {
+    case &Seq(r1,r2):
+      return SEQ_r(r,
+		   seq_add_conversion_specifiers(r1),
+		   seq_add_conversion_specifiers(r2));      
+    default:
+      return add_conversion_specifiers(r);
+    }
+}
+
+static
+rule_t alt_add_conversion_specifiers(rule_t r){
+  // catch all "alt-style" rules. They don't need another escape. The
+  // one for the root alt is enough.
+   switch (r->r) {
+    case &Alt(r1,r2):
+      return ALT_r(r,
+		   alt_add_conversion_specifiers(r1),
+		   alt_add_conversion_specifiers(r2));      
+    case &Opt(r1):
+      return OPT_r(r, alt_add_conversion_specifiers(r1));
+    case &Star(m,N,r1):
+      return STAR_r(r, m,N, alt_add_conversion_specifiers(r1));
+    case &Hash(m,N,r1):
+      return HASH_r(r, m,N, alt_add_conversion_specifiers(r1));
+    case &CharRange(_,_):
+      return r; 
+    default:
+      return add_conversion_specifiers(r);
+    }
+}
+
+static
+rule_t add_conversion_specifiers(rule_t r){
+    switch (r->r) {
+    case &Seq(r1,r2):
+      let r_fe = SEQ_r(r, 
+		       seq_add_conversion_specifiers(r1),
+		       seq_add_conversion_specifiers(r2));
+      return ALT(r_fe, mk_conversion_specifier());
+    case &Opt(r1):
+      let r_fe = OPT_r(r, alt_add_conversion_specifiers(r1));
+      return ALT(r_fe, mk_conversion_specifier());
+    case &Alt(r1,r2):
+      let r_fe = ALT_r(r,
+		       alt_add_conversion_specifiers(r1),
+		       alt_add_conversion_specifiers(r2));
+      return ALT(r_fe, mk_conversion_specifier());
+    case &Rcount(n,r1):
+      let r_fe = RCOUNT_r(r,n,add_conversion_specifiers(r1));
+      return ALT(r_fe, mk_conversion_specifier());
+    case &Star(m,N,r1):
+      let r_fe = STAR_r(r, m,N,alt_add_conversion_specifiers(r1));
+      return ALT(r_fe, mk_conversion_specifier());
+    case &Hash(m,N,r1):
+      let r_fe = HASH_r(r, m,N, alt_add_conversion_specifiers(r1));
+      return ALT(r_fe, mk_conversion_specifier());
+    case  &CharRange(min,max):
+      if (min == max) 
+	return r;
+      return ALT(r, mk_conversion_specifier());      
+    default:
+      return r;
+    }
+}
+////
+// Functions for adding binders to grammar.
+////
+
+// r should not be converted.
+static
+rule_t mk_binder (rule_t r){
+  let r_binder = LIT("%r");
+  r_binder->a = aprintf("let fn = fresh_name(); fputs(\" (\",stdout); fputs(\"%s\",stdout); printf(\")$%%s {store(%%s);}\",fn,fn);",
+			string_escape(pr_rule2string(r)));
+  return r_binder;
+}
+
+static
+const char ?mk_print_action(const char ?ws, rule_t r){
+  return aprintf("fputs(\"%s%s\",stdout);", ws, string_escape(pr_rule2string(r)));
+}
+
+// r should not be converted.
+static
+rule_t mk_print (rule_t r){
+  // copy r and set a new semantic action.
+  return new arule(mk_print_action(" ",r), r->p, r->v, r->css, r->r);
+}
+
+static
+rule_t mk_nl_print (rule_t r){
+  // copy r and set a new semantic action.
+  return new arule(mk_print_action("\\n",r), r->p, r->v, r->css, r->r);
+}
+
+// Print the value parsed by r, instead of
+// the rule. Used for char ranges to capture the particular char used
+// in the format string. r should not already be converted. 
+static
+rule_t mk_singleton_print (rule_t r){
+  let fn = fresh_name();
+  // copy r and set a new semantic action.
+  return new arule(aprintf("fputs(aprintf(\" %%%%d%%d\",%s[0]),stdout);", fn),
+		   r->p, fn, r->css, r->r);
+}
+
+// Print the symbol, instead of the rule. r should not be converted.
+static
+rule_t mk_symb_print (const char ?s, rule_t r){
+  // copy r and set a new semantic action.
+  return new arule(aprintf("fputs(\" %s\",stdout);", s),
+		   r->p, r->v, r->css, r->r);
+}
+
+static
+rule_t add_binders(rule_t);
+
+static
+rule_t seq_add_binders(rule_t r){
+    switch (r->r) {
+    case &Seq(r1,r2):
+      return SEQ_r(r,
+		   seq_add_binders(r1),
+		   seq_add_binders(r2));      
+    default:
+      return add_binders(r);
+    }
+}
+
+static
+rule_t alt_add_binders(rule_t r){
+  // catch all "alt-style" rules. They don't need another escape. The
+  // one for the root alt is enough.
+   switch (r->r) {
+    case &Alt(r1,r2):
+      return ALT_r(r,
+		   alt_add_binders(r1),
+		   alt_add_binders(r2));      
+    case &Opt(r1):
+      return OPT_r(r, alt_add_binders(r1));
+    case &Star(m,N,r1):
+      return STAR_r(r, m,N, alt_add_binders(r1));
+    case &Hash(m,N,r1):
+      return HASH_r(r, m,N, alt_add_binders(r1));
+    case &CharRange(_,_):
+      return mk_singleton_print(r); 
+    default:
+      return add_binders(r);
+    }
+}
+
+static
+rule_t add_binders(rule_t r){
+    switch (r->r) {
+    case &Seq(r1,r2):
+      let r_ab = SEQ_r(r, 
+		       seq_add_binders(r1),
+		       seq_add_binders(r2));
+      return ALT(r_ab, mk_binder(r));
+    case &Opt(r1):
+      let r_ab = OPT_r(r, alt_add_binders(r1));
+      return ALT(r_ab, mk_binder(r));
+    case &Alt(r1,r2):
+      let r_ab = ALT_r(r,
+		       alt_add_binders(r1),
+		       alt_add_binders(r2));
+      return ALT(r_ab, mk_binder(r));
+    case &Rcount(n,r1):
+      let r_ab = RCOUNT_r(r,n,add_binders(r1));
+      return ALT(r_ab, mk_binder(r));
+    case &Star(m,N,r1):
+      let r_ab = STAR_r(r, m,N,alt_add_binders(r1));
+      return ALT(r_ab, mk_binder(r));
+    case &Hash(m,N,r1):
+      let r_ab = HASH_r(r, m,N, alt_add_binders(r1));
+      return ALT(r_ab, mk_binder(r));
+    case &CharRange(min,max):
+      let r_s = mk_singleton_print(r);
+      if (min == max) 
+	return r_s;
+      return ALT(r_s, mk_binder(r));      
+    case &Symb(_,_):
+      // we don't print anything as the elements of the symbol's definition will print themselves.
+      return r;
+    default:
+      return mk_print(r);
+    }
+}
+
+////
+// Functions for escaping special characters in grammar.
+////
+
 static
 rule_t rule2term_v3(rule_t r);
 
+// Escape literals and character sets.
 static
 rule_t rule2term0_v3(rule_t r) {
   let res = NULL;
@@ -1385,6 +1602,9 @@ rule_t rule2term0_v3(rule_t r) {
 // wrapper to preserve semantic action and value id of transformed rule.
 static
 rule_t rule2term_v3(rule_t r){
+  if (r == r_conversion_specifier) // don't touch it
+    return r;
+
   switch(r->r){
     // CharRange reprocesses the semantic action, so the
     // standard wrapper is inappropriate.
@@ -1398,16 +1618,6 @@ rule_t rule2term_v3(rule_t r){
     r2->v = v;
     return r2;
   }
-}
-
-static
-rule_t seqrule2term_v3(rule_t r) {
-  if (is_arg_UT(r))
-    return rule2term_v3(add_semact_v3(r));
-
-  let r2 = LIT("");
-  r2->a = get_semact_v3(r);
-  return r2;
 }
 
 /* Separate a rule list with a given separator */
@@ -1477,80 +1687,31 @@ rule_t with_sep_sem_act(list_t<rule_t> rs, const char ?`H c) {
   return res;
 }
 
-// Returns a possibly NULL semantic action and a sequence containing the 
-// the elements of the list separated by c.
-// The semantic action will be non-null if there are one or more nullary elements
-// at the beginnning of the list rs.
-// static
-// $(const char ?, Rule_t) with_sep_sem_act(list_t<rule_t> rs, const char ?`H c) {
-//   if (rs == NULL) return $("",LIT(""));
-//   let res = NULL;
-//   // list of leading actions.
-//   let leading_as = NULL;
-
-//   // Collect leading nullary rules.
-//   while(!res && rs){
-//     switch(rs->hd->r){
-//     case &Lit(s):
-//       if (strcmp(s,"") == 0){
-// 	leading_as = new List(new rs->hd->a, leading_as);
-//       }
-//       else {
-// 	internal_err("Non-empty literal found in with_sep_sem_act");
-//       }
-//       break;
-//     default:
-//       res = rs->hd;
-//     }    
-//     rs = rs->tl;
-//   }
-//   imp_rev(leading_as);
-//   let leading_a = leading_as ? strconcat_l (leading_as) : NULL;
-
-//   leading_as = NULL;
-//   let r_c = LIT(c);
-//   for (; rs; rs = rs->tl){
-//     switch(rs->hd->r){
-//     case &Lit(s):
-//       if (strcmp(s,"") == 0){
-// 	leading_as = new List(new rs->hd->a, leading_as);
-//         break;
-//       }
-//       else {
-// 	internal_err("Non-empty literal found in with_sep_sem_act");
-// 	fallthru;
-//       }
-//     default:
-//       if (!leading_as){
-// 	res = SEQ(res,r_c,rs->hd);
-//       }
-//       else{
-// 	let r_c = LIT(c);
-// 	imp_rev(leading_as);
-// 	r_c->a = strconcat_l(leading_as);
-// 	leading_as = NULL;
-// 	res = SEQ(res,r_c,rs->hd);
-//       }
-
-//       res->a = sem_act_merge;      
-//     }
-//   }
-  
-//   if (leading_as){
-//     imp_rev(leading_as);
-//     let trailing_a = strconcat_l(leading_as);
-//     res->a = aprintf("%s%s%s",res->a, trailing_a, sem_act_merge);      
-//   }
-
-//   return $(leading_a,res);
-// }
-
 /* Separate a rule list with spaces */
 static
 rule_t with_spaces_sem_act(list_t<rule_t> rs) {
   return with_sep_sem_act(rs," ");
 }
 
+////
+// Functions for applying all of the transformations to the grammar.
+////
+
+static
+rule_t seqrule2term_v3(rule_t r) {
+  if (is_arg_UT(r))
+    return rule2term_v3(add_conversion_specifiers(add_pr_semact_v3(r)));
+//     return add_binders(r);
+
+  let r2 = LIT("");
+  r2->a = get_pr_semact_v3(r);
+//   let r2 = mk_print(r);
+//   r2->r = new Lit("");
+  return r2;
+}
+
+// Convert an ordinary sequence into a sequence appropriate for a term body.
+// basically: filter out nullary rules, escape rules, separate seq. by spaces.
 static
 rule_t seq2term_v3(rule_t r) {
   let args = seq2rules(r);
@@ -1560,36 +1721,59 @@ rule_t seq2term_v3(rule_t r) {
 grammar_t grammar2termgrammar_v3(grammar_t g) {
   init_arityt(g);
 
-  let s_format_strings = (const char ?)"format-strings";
-
   grammar_t res = NULL,ds = g;
   for (; ds; ds = ds->tl) {
     let &$(n,r,a) = ds->hd;
-    let r_esc = rule2term_v3(add_semact_v3(r));
+    let r_esc = rule2term_v3(add_conversion_specifiers(add_pr_semact_v3(r)));
     if (is_arg_UT(SYMB(n))){
       let n_o = strconcat(n,"_o");
       let term_body = seq2term_v3(r);
       let r_tag = LIT(n);
       let r2 = mkterm_UT(r_tag, term_body);
-      let r_all = ALT(SYMB(n_o), r2, SEQ(LIT("%"), LIT(n), LIT(":"), SYMB(s_format_strings)));
-//       let r_both = ALT(SYMB(n_o),r2);
-      res = new List(new $(n,r_all,a),
+      let r_both = ALT(SYMB(n_o),r2);
+      res = new List(new $(n,r_both,a),
 		     new List(new $(n_o, r_esc, a), res));
     }else{
       res = new List(new $(n,r_esc,a), res);
     }
   }
-  // %<symbol>:<format_string>
-  let r_string_fs = LIT("s"); r_string_fs->a = "tg_push_string();";
-  let r_int_fs = LIT("d"); r_int_fs->a = "tg_push_int();";
-  let r_float_fs = LIT("f"); r_float_fs->a = "tg_push_float();";
-  let r_format_strings = ALT(r_string_fs, r_int_fs, r_float_fs);
-  let entry_format_strings = new $(s_format_strings,r_format_strings, 
-				   Attr{.ws=0,.re=0,.paramtype=NULL,.rettype=NULL});
-  res = new List(entry_format_strings, res);
 
-   res = imp_rev(res);
+  res = imp_rev(res);
+  return res;
+}
 
+rule_t mk_pattern_match(const char ?`H s){
+  let r_empty = LIT("");
+  r_empty->a = "set_branch(branch_id++);";
+
+  let r_bar = LIT("|");
+  r_bar->a = mk_print_action("\\n| ",r_empty);
+
+  let r = SYMB(s);
+  r->a = mk_print_action(" ",r_empty);
+  return SEQ(r, STAR(0,new Infinity,SEQ(r_bar, r))); 
+}
+
+grammar_t grammar2bindgrammar(grammar_t g) {
+  init_arityt(g);
+
+  grammar_t res = NULL,ds = g;
+  for (; ds; ds = ds->tl) {
+    let &$(n,r,a) = ds->hd;
+    if (is_arg_UT(SYMB(n))){
+//       let n_o = strconcat(n,"_o");
+      let n_pm = strconcat(n,"_pm");
+      let r_ab = add_binders(r);
+      let r_pm = mk_pattern_match(n);
+      res = new List(new $(n_pm,r_pm,a),
+		     new List(new $(n, r_ab, a), res));
+    } else {
+      let r_sp = mk_symb_print(n,r);
+      res = new List(new $(n,r_sp,a), res);
+    }      
+  }
+
+  res = imp_rev(res);
   return res;
 }
 
@@ -1655,4 +1839,18 @@ grammar_t grammar_final_v3(grammar_t ds) {
 // Q: Why does follow for STAR use m2 =0?
 // turn * and # into list
 // cutoff of term transformation for reg.exps. (i.e. those rules that have all caps names).
+
 // Independent line of research N+1: Teach RFCs: Generate examples when parse fails.
+// USE return types on sem acts. Ask Trevor how they work.
+// Found possible bug in minus_elim. It removes sem. actions from branches of alts that are 
+//   classified as char.sets.
+// Also, our printf could perform dynamic check of well formedness. 
+//   Make optional with %t:... format? I.e. think of t: as annotation to be checked.
+//   Better syntax is %<fs>:<type>
+
+// The addition of conversion specifiers to Star in a sequence doesn't look quite right.
+// For example,
+//   bar = "sh" "X".
+//   zab = bar *("FF").
+
+

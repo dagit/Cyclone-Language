@@ -23,4 +23,5 @@
 extern grammar_t ws_definitions(grammar_t<`H> ds);
 extern void pads_definitions(grammar_t<`H> ds);
 extern const char ?make_c_identifier0(const char ?`H n);
+const char ?fresh_name();
 #endif

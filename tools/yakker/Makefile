@@ -1,7 +1,7 @@
 include ../../Makefile.inc
 CYCFLAGS=
 #CYCFLAGS=-g -save-c -pp
-YAKFLAGS=-d
+YAKFLAGS=
 
 PROG=yakker$(EXE)
 BINDIR=$(CYCDIR)/bin
@@ -81,6 +81,15 @@ small_imap_termv3.cyc: small_imap_termv3.bnf
 
 small_imap_termv3.bnf: examples/small_imap.bnf yakker
 	./yakker -termgrammar_v3 $< > $@
+
+small_imap_pm: small_imap_pm.cyc ykbuf.o ssl.o tg_stack.o tgmain.o util.o
+	$(CYCLONE) $^ -o $@ --novcgen -lssl -lcrypto
+
+small_imap_pm.cyc: small_imap_pm.bnf
+	./yakker $(YAKFLAGS) -gen command_pm -no-main $< > $@
+
+small_imap_pm.bnf: examples/small_imap.bnf yakker
+	./yakker -bindgrammar $< > $@
 
 tg_stack.o : tg_stack.cyc util.h
 	$(CYCLONE) -c $< -o $@ -I.

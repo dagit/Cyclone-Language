@@ -1,10 +1,12 @@
-T\ COPY\ %seq-number:s:1341\ INBOX\ 
-(command T (command-select (copy %seq-number:s:%seq-number:s INBOX)))
-(command T (command-select (copy %seq-range:s INBOX)))
-(command T (command-select (copy %seq-number:s INBOX)))
-(command T (create %astring:s))
-(command T %create:s)
-%command:s
+%s\ COPY\ %s\ %s\ 
+%s\ %s\ 
+%s
+T\ COPY\ %s:1341\ INBOX\ 
+(command T (command-select (copy %s:%s INBOX)))
+(command T (command-select (copy %s INBOX)))
+(command T (command-select (copy %s INBOX)))
+(command T (create %s))
+(command T %s)
 T\ COPY\ 5:1341\ INBOX\ 
 T\ COPY\ *:*,5:7\ "bar"\ 
 T\ COPY\ 1237\ "bar"\ 

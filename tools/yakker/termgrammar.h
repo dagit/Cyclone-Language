@@ -24,6 +24,9 @@ extern grammar_t grammar2termgrammar(grammar_t ds);
 extern grammar_t grammar2termgrammar_UT(grammar_t ds);
 // version 3
 extern grammar_t grammar2termgrammar_v3(grammar_t ds);
+
+grammar_t grammar2bindgrammar(grammar_t g);
+
 extern grammar_t grammar_RTLT(grammar_t ds);
 // deprecated
 extern grammar_t grammar_MDTU(grammar_t ds);

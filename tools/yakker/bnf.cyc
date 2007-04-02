@@ -127,6 +127,8 @@ int lower_prec(rule_t r1, rule_t r2) {
   //   r1 | r2 {sem_act1;}{sem_act2;}
   // and then parsed as
   //   (r1 | r2){sem_act2;}
+  // Also, Alt should have higher precedence than a semantic action or you get
+  // "(a|b){sem_act}" printed as "a|b{sem_act}" which is parsed as "a|(b{sem_act})"
   if (r1->a) return 1;
   switch $(r1->r,r2->r) {
   case $(&Alt(_,_),&Alt(_,_)): return 0;
@@ -500,6 +502,9 @@ grammar_t close_definitions(grammar_t<`H> ds, List::list_t<grammar_t<`H>> e) {
   return ds;
 }
 
+
+// N.B. This conversion will loose all sem. actions, etc. that are part of the
+// flattened Alts.
 static
 List::list_t<rule_t> alt2rules0(rule_t r,List::list_t<rule_t,`H> l) {
   switch (r->r) {

@@ -86,7 +86,7 @@ static const char ?new_definition(const char ?`H n) {
   else *defined = Set::insert(*defined,nptr);
   return make_c_identifier(n);
 }
-static const char ?fresh_name() {
+const char ?fresh_name() {
   static int count = 0;
   return aprintf("_bnf_%d",count++);
 }

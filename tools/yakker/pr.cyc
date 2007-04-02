@@ -34,9 +34,17 @@ static void pr_rule_paren(FILE @f,rule_t r) {
   fprintf(f,"("); pr_rule(f,r); fprintf(f,")");
 }
 void pr_rule(FILE @f,rule_t r) {
+  if (r->a) {
+    switch (r->r) {
+    case &Alt(_,_): fprintf(f,"("); break;
+    default: break;
+    }
+  }
+  
   if (r->v) {
     switch (r->r) {
     case &Seq(_,_): fprintf(f,"("); break;
+    case &Alt(_,_): fprintf(f,"("); break;
     default: break;
     }
   }
@@ -110,13 +118,20 @@ void pr_rule(FILE @f,rule_t r) {
   if (r->v) {
     switch (r->r) {
     case &Seq(_,_): fprintf(f,")"); break;
+    case &Alt(_,_): fprintf(f,")"); break;
     default: break;
     }
     fprintf(f,"$%s",r->v);
   }
-  if (r->a)
+  if (r->a) {
+    switch (r->r) {
+    case &Alt(_,_): fprintf(f,")"); break;
+    default: break;
+    }
     fprintf(f,"{%s}",r->a);
+  }
 }
+
 void pr_definition(FILE @f,definition_t d) {
   let &$(n,r,a) = d; // FIX: ws
   fprintf(f,"%s ",n);
@@ -136,3 +151,151 @@ void pr_definitions(FILE @f,grammar_t ds) {
   for (; ds; ds = ds->tl)
     pr_definition(f,ds->hd);
 }
+
+////////
+// Functions for printing to string.
+////////
+
+using List;
+
+// typedef List::list_t<stringptr_t<`H,`H>,`H> rs_list;
+typedef List::list_t<const char ?`H@`H,`H> rs_list;
+typedef const char ?`H chs;
+
+rs_list 
+pr_rule2string_l(rs_list rs_l, rule_t r);
+
+static rs_list
+pr_rule2string_paren_l(rs_list rs_l,rule_t r) {
+  rs_l = new List(new "(", rs_l);
+  rs_l = pr_rule2string_l(rs_l,r);
+  return new List(new ")", rs_l);
+}
+
+rs_list
+pr_rule2string_l(rs_list rs_l,rule_t r) {
+  if (r->a) {
+    switch (r->r) {
+    case &Alt(_,_): 
+      rs_l = new List(new "(", rs_l); 
+      break;
+    default: break;
+    }
+  }
+  
+  if (r->v) {
+    switch (r->r) {
+    case &Seq(_,_): 
+    case &Alt(_,_): 
+      rs_l = new List(new "(", rs_l); 
+      break;      
+    default: break;
+    }
+  }
+  switch (r->r) {
+  case &Prose(x):
+    /* FIX */
+    if (html_mode) {
+      rs_l = new List(new (chs)aprintf("&lt;%s&gt;",x), rs_l); break;
+    }
+    else {
+      rs_l = new List(new (chs)aprintf("<%s>",x), rs_l); break;
+    }
+    break;
+  case &Symb(x,y):
+    rs_l = new List(new (chs)aprintf("%s",x), rs_l);
+    if (y) 
+      rs_l = new List(new (chs)aprintf("@(%s)",y), rs_l);
+    break;
+  case &CharRange(low,high):
+    if (low == high) rs_l = new List(new (chs)aprintf("%%d%d",low), rs_l);
+    else rs_l = new List(new (chs)aprintf("%%d%d-%d",low,high), rs_l);
+    break;
+  case &Lit(x):
+    if (html_mode) {
+      if (strcmp("\"",x) == 0) rs_l = new List(new (chs)aprintf("<b>&lt;\"&gt;</b>"), rs_l);
+      else rs_l = new List(new (chs)aprintf("<b>%s</b>",x), rs_l);
+    }
+    else {
+      if (strcmp("\"",x) == 0) rs_l = new List(new (chs)aprintf("<\">"), rs_l);
+      else rs_l = new List(new (chs)aprintf("\"%s\"",x), rs_l);
+    }
+    break;
+  case &Opt(r2):
+    rs_l = new List(new (chs)aprintf("["), rs_l); rs_l = pr_rule2string_l(rs_l,r2); rs_l = new List(new (chs)aprintf("]"), rs_l); break;
+  case &Rcount(c,r2):
+    rs_l = new List(new (chs)aprintf("@repeat(%s)",c), rs_l); rs_l = pr_rule2string_l(rs_l,r2); break;
+  case &Seq(r2,r3):
+    if (lower_prec(r2,r)) 
+      rs_l = pr_rule2string_paren_l(rs_l,r2); 
+    else 
+      rs_l = pr_rule2string_l(rs_l,r2);
+    rs_l = new List(new (chs)aprintf(" "), rs_l);
+    if (lower_prec(r3,r)) rs_l = pr_rule2string_paren_l(rs_l,r3); 
+    else rs_l = pr_rule2string_l(rs_l,r3);
+    break;
+  case &Alt(r2,r3):
+    if (lower_prec(r2,r)) rs_l = pr_rule2string_paren_l(rs_l,r2); 
+    else rs_l = pr_rule2string_l(rs_l,r2);
+    rs_l = new List(new (chs)aprintf("|"), rs_l);
+    if (lower_prec(r3,r)) rs_l = pr_rule2string_paren_l(rs_l,r3); 
+    else rs_l = pr_rule2string_l(rs_l,r3);
+    break;
+  case &Star(m,&Num(n),r2):
+    if (m == n) rs_l = new List(new (chs)aprintf("%d",m), rs_l);
+    else if (m == 0) rs_l = new List(new (chs)aprintf("*%d",n), rs_l);
+    else rs_l = new List(new (chs)aprintf("%d*%d",m,n), rs_l);
+    if (lower_prec(r2,r)) rs_l = pr_rule2string_paren_l(rs_l,r2); 
+    else rs_l = pr_rule2string_l(rs_l,r2);
+    break;
+  case &Star(m,&Infinity,r2):
+    if (m == 0) rs_l = new List(new (chs)aprintf("*"), rs_l);
+    else rs_l = new List(new (chs)aprintf("%d*",m), rs_l);
+    if (lower_prec(r2,r)) rs_l = pr_rule2string_paren_l(rs_l,r2); 
+    else rs_l = pr_rule2string_l(rs_l,r2);
+    break;
+  case &Hash(m,&Num(n),r2):
+    if (m == 0) rs_l = new List(new (chs)aprintf("#%d",n), rs_l);
+    else rs_l = new List(new (chs)aprintf("%d#%d",m,n), rs_l);
+    if (lower_prec(r2,r)) rs_l = pr_rule2string_paren_l(rs_l,r2); 
+    else rs_l = pr_rule2string_l(rs_l,r2);
+    break;
+  case &Hash(m,&Infinity,r2):
+    if (m == 0) rs_l = new List(new (chs)aprintf("#"), rs_l);
+    else rs_l = new List(new (chs)aprintf("%d#",m), rs_l);
+    if (lower_prec(r2,r)) rs_l = pr_rule2string_paren_l(rs_l,r2); 
+    else rs_l = pr_rule2string_l(rs_l,r2);
+    break;
+  case &Minus(r2,r3):
+    rs_l = new List(new (chs)aprintf("("), rs_l); 
+    rs_l = pr_rule2string_paren_l(rs_l,r2); 
+    rs_l = new List(new (chs)aprintf("-"), rs_l); 
+    rs_l = pr_rule2string_paren_l(rs_l,r3); 
+    rs_l = new List(new (chs)aprintf(")"), rs_l);
+    break;
+  }
+  if (r->v) {
+    switch (r->r) {
+    case &Seq(_,_): 
+    case &Alt(_,_): 
+      rs_l = new List(new (chs)aprintf(")"), rs_l); break;
+    default: break;
+    }
+    rs_l = new List(new (chs)aprintf("$%s",r->v), rs_l);
+  }
+  if (r->a) {
+    switch (r->r) {
+    case &Alt(_,_): rs_l = new List(new (chs)aprintf(")"), rs_l); break;
+    default: break;
+    }
+    rs_l = new List(new (chs)aprintf("{%s}",r->a), rs_l);
+  }
+
+  return rs_l;
+}
+
+const char ?pr_rule2string(rule_t r){
+  let rs_l = pr_rule2string_l(NULL, r);
+  return strconcat_l(List::imp_rev(rs_l));
+}
+

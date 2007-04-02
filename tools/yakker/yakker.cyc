@@ -136,6 +136,7 @@ static const char ?add_namespace = NULL;
 "         -termgrammar_IT        produce a version 2 term grammar for the input grammar with improved tags\n"\
 "         -termgrammar_NOLITS    produce a version 2 term grammar for the input grammar with literals removed\n"\
 "         -termgrammar_RNCT      produce a version 2 term grammar for the input grammar with non-conflicting branches untagged.\n"\
+"         -bindgrammar           produce a grammar with binding capability for the input grammar\n"\
 "         -no-main               don't output a default main procedure\n"\
 "         -lazyfill              use lazy filling (for interactive connections)\n"\
 "         -depend                produce a dependency graph of symbols in DOT format\n"\
@@ -159,6 +160,7 @@ int main(int argc, const char ?`H?argv) {
   int sortp = 0;
   int isortp = 0;
   int tsortp = 0;
+  int bindgrammarp = 0;
   int termgrammarp = 0;
   int termgrammar_v2p = 0;
   int termgrammar_v3p = 0;
@@ -192,6 +194,7 @@ int main(int argc, const char ?`H?argv) {
       i += 1;
     }
     else if (strcmp("-help",argv[i]) == 0) die();
+    else if (strcmp("-bindgrammar",argv[i]) == 0) bindgrammarp = 1;
     else if (strcmp("-termgrammar",argv[i]) == 0) termgrammarp = 1;
     else if (strcmp("-termgrammar_v2",argv[i]) == 0) termgrammar_v2p = 1;
     else if (strcmp("-termgrammar_v3",argv[i]) == 0) termgrammar_v3p = 1;
@@ -456,20 +459,33 @@ int main(int argc, const char ?`H?argv) {
 
   /* Produce the term grammar, version 3, and exit */
   if (termgrammar_v3p) {
-    debugprint(1,"Producing term grammar (version 2)... ");
+    debugprint(1,"Producing term grammar (version 3)... ");
     minus_elim(ds); // also marks character sets, needed for the conversion
     let gr = grammar2termgrammar_v3(ds);
     debugprint(1,"Performing final pass on term grammar ... ");
     gr = grammar_final_v3(gr);
     pr_definitions(stdout, gr);
+    fprintf(stdout, "{extern const char ?fresh_name();}\n");
     fprintf(stdout, "{extern void tg_push_string();}\n");
     fprintf(stdout, "{extern void tg_push_int();}\n");
     fprintf(stdout, "{extern void tg_push_float();}\n");
+    fprintf(stdout, "{extern void tg_push_spec(const char ?);}\n");
     fprintf(stdout, "{extern void tg_push(const char ?);}\n");
     fprintf(stdout, "{extern void tg_merge();} \n");
     // FIX: these two functions should be generated
     fprintf(stdout, "{extern void process_SP();} \n");
     fprintf(stdout, "{extern void process_DQUOTE();} \n");
+    debugprint(1,"done\n");
+    return 0;
+  }
+
+  /* Produce the term grammar, version 3, and exit */
+  if (bindgrammarp) {
+    debugprint(1,"Producing bind grammar ... ");
+    minus_elim(ds); // also marks character sets, needed for the conversion
+    let gr = grammar2bindgrammar(ds);
+    pr_definitions(stdout, gr);
+    fprintf(stdout, "{extern const char ?fresh_name();}\n");
     debugprint(1,"done\n");
     return 0;
   }

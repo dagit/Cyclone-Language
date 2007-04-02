@@ -29,6 +29,14 @@ extern void tg_push(const char ?`H);
 extern void tg_push_string();
 extern void tg_push_int();
 extern void tg_push_float();
+extern void tg_push_spec(const char ?`H specifier);
+
+// Boolean: are we in printing mode.
+/* extern int tg_print(); */
+/* extern void tg_disable_print(); */
+/* extern int tg_enable_print(); */
+/* void tg_enter_binder(); */
+/* void tg_exit_binder(); */
 
 // peek at the top element of the stack
 extern const char ? tg_peek();

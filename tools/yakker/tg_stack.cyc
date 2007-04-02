@@ -40,12 +40,14 @@ datatype exn.TGStack_error TGStack_error_val = TGStack_error;
 static list_t<stringptr_t> tg_stack = NULL;
 static char ?? tg_args;
 static int tg_arg_num;
+// static int tg_print_rules = 0;
 
 void tg_init(char ?? args){
   tg_stack = NULL;
   let n = numelts(args);
   tg_args = new {for i< n: strdup(args[i])};    
   tg_arg_num = 0;
+//   tg_print_rules = 0; // by default, rule printing is on.
 }
 
 void tg_push(const char ?`H s){
@@ -70,6 +72,27 @@ void tg_push_float(){
   // FIX: to implement
   internal_err("tg_push_float: not implemented.");
   throw &TGStack_error_val;  
+}
+
+void tg_push_spec(const char ?`H specifier){
+
+  // specifier should a be a string containing a single character.
+  if (numelts(specifier) != 2){
+    internal_err("tg_push_spec: invalid format specifier.");
+    throw &TGStack_error_val;      
+  }
+
+  switch(*specifier){
+  case 's': tg_push_string();
+    break;
+  case 'd': tg_push_int();
+    break;
+  case 'f': tg_push_float();
+    break;
+  default:
+    internal_err("tg_push_spec: invalid format specifier.");
+    throw &TGStack_error_val;      
+  }
 }
 
 // peek at the top element of the stack
@@ -112,5 +135,14 @@ void process_DQUOTE(){
   tg_push("\"");
 }
 
+// void tg_enter_binder(){ tg_in_binder = 1;}
+// void tg_exit_binder(){ tg_in_binder = 0;}
+
+// int tg_print(){
+//   return !tg_in_binder || !tg_print_rules;
+// }
+
+// void tg_disable_print(){ if (tg_in_binder) {tg_print_rules++;}}
+// int tg_enable_print(){ return tg_in_binder ? --tg_print_rules : 1;}
 
 

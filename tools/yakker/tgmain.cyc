@@ -12,6 +12,8 @@ extern datatype exn.Parse_error Parse_error_val;
 
 extern void p_command(ykbuf_t @ykb);
 extern void p_seq_range(ykbuf_t @ykb);
+extern void p_command_pm(ykbuf_t @ykb);
+extern void p_seq_range_pm(ykbuf_t @ykb);
 
 enum Root_rule{
   Command, Seq_range
@@ -22,6 +24,11 @@ enum Root_rule{
 "Options: -root <sym>            parse starting from rule <sym>\n"\
 "         -d                     increase debug level by 1.\n"\
 "         -help                  print this message\n"
+
+const char ?fresh_name() {
+  static int count = 0;
+  return aprintf("_bnf_%d",count++);
+}
 
 static void die(const char ?prog_name) {
   fprintf(stderr,USAGE,prog_name);
@@ -60,13 +67,16 @@ int main(int argc, char ??argv) {
     // parse input until we hit an error (or EOF)
     while (1) { 
       switch(root){
-      case Command: p_command(ykb);     break;
-      case Seq_rang : p_seq_range(ykb); break;
+      case Command: p_command_pm(ykb);     break;
+      case Seq_range : p_seq_range_pm(ykb); break;
+      default :
+	fprintf(stderr,"Unknown symbol."); 
+	exit(1);
       }
       //let n = YKPOSN;
       //if (n<60) for (int i = 0; i < n; i++) printf("^");
       //printf(" accepted %d (0x%x) characters\n",n,n);
-      printf("Result: %s\n", tg_pop());
+//       printf("Result: %s\n", tg_pop());
       // consume newline
       char c = 0;
       let sz = ykbread(&c,1,ykb);
