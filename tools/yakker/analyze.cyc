@@ -646,6 +646,11 @@ static void follow_grammar0(rule_table_t rt, rule_t r, rule_t right_ctxt) {
 const char ?follow_symbol(const char ?n) {
   return (const char ?)aprintf("FOLLOW_%s",n);
 }
+
+int is_follow_symbol(const char ?n) {
+  return strncmp(n,"FOLLOW_",7) == 0;
+}
+
 static grammar_t acc = NULL;
 static void get_follow(const char ?@n, rule_t r) {
   acc = new List::List(new $(follow_symbol(*n),r,Attr(0,0,NULL,NULL)),acc);

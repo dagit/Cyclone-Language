@@ -42,7 +42,14 @@ extern void init_mustt(grammar_t grm);
 extern void init_maybe_empty(grammar_t grm);
 extern void init_arityt(grammar_t grm);
 extern unsigned int arity_rule(rule_t r);
+
+// Constuct the follow symbol for n based on n.
 extern const char ?follow_symbol(const char ?n);
+
+// Check whether n is a follow symbol 
+// (i.e. matches the pattern for follow symbols). 
+extern int is_follow_symbol(const char ?n);
+
 extern grammar_t follow_grammar(grammar_t grm);
 
 #endif

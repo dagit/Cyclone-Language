@@ -118,7 +118,7 @@ ykbuf_t @data2ykbuf(const char ?@nozeroterm s) {
   save is NULL if no input needs to be saved on a fill,
     else save points at the first character of the input to save.
   save_count is used to handle nested saves.  When it goes to zero, save should be NULL'd.
-  eof records whether end-of-file has been reached.  Note, re2c does it
+  eof records whether end-of-file has been reached.  Note, re2c (an independent tool) does it
     a bit differently, eof is a pointer, allows the sentinel to be a legal input character,
     at the cost of a comparison when a (possible) sentinel is under YKCURSOR.
 

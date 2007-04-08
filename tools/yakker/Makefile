@@ -82,20 +82,28 @@ small_imap_termv3.cyc: small_imap_termv3.bnf
 small_imap_termv3.bnf: examples/small_imap.bnf yakker
 	./yakker -termgrammar_v3 $< > $@
 
-small_imap_pm: small_imap_pm.cyc ykbuf.o ssl.o tg_stack.o tgmain.o util.o
+# Targets for testing pattern match parsers-generators.  I.e generates
+# BNF that can parse a pattern-match and produce a new BNF specialized
+# to that pattern-match. Note that the new BNF is intended to augment
+# the original.
+
+small_imap_genpm: small_imap_genpm.cyc ykbuf.o ssl.o tg_stack.o tgmain.o util.o
 	$(CYCLONE) $^ -o $@ --novcgen -lssl -lcrypto
 
-small_imap_pm.cyc: small_imap_pm.bnf yakker
-	./yakker $(YAKFLAGS) -gen command_pm -no-main $< > $@
+#	./yakker $(YAKFLAGS) -all-start -eof 10 -gen command_pm -no-main $< > $@
+small_imap_genpm.cyc: small_imap_genpm.bnf yakker
+	./yakker $(YAKFLAGS) -all-start -gen command_pm -no-main $< > $@
 
-small_imapvpm: small_imapvpm.cyc ykbuf.o ssl.o tg_stack.o pm_main.o util.o
-	$(CYCLONE) $^ -o $@ --novcgen -lssl -lcrypto
-
-small_imapvpm.cyc: examples/small_imapvpm.bnf yakker
-	./yakker $(YAKFLAGS) -gen command-pm -no-main $< > $@
-
-small_imap_pm.bnf: examples/small_imap.bnf yakker
+small_imap_genpm.bnf: examples/small_imap.bnf yakker
 	./yakker -bindgrammar $< > $@
+
+# Pattern matching BNF examples.
+
+%_pm: %_pm.cyc ykbuf.o ssl.o tg_stack.o pm_main.o util.o
+	$(CYCLONE) $^ -o $@ --novcgen -lssl -lcrypto
+
+%_pm.cyc: %_pm.bnf yakker
+	./yakker $(YAKFLAGS) -gen command-pm -no-main $< > $@
 
 tg_stack.o : tg_stack.cyc util.h
 	$(CYCLONE) -c $< -o $@ -I.

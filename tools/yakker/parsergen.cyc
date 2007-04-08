@@ -70,6 +70,7 @@ static unsigned int fill_amount(rule_t r) {
 
 static void gen_cs(cs_t cs) {
   let ranges = cs2ranges(cs);
+
   printf("if (0");
   for (; ranges; ranges = ranges->tl) {
     printf("||");
@@ -464,14 +465,29 @@ void gen0(rule_t r, rule_t right_ctxt) {
   return;
 }
 
+
+// Create a follow grammar where all symbols have eof in their follow grammar.
 static grammar_t
-eof_follow_grammar(grammar_t<`H> grm, const char ?`H symb) {
+eof_all_follow_grammar(grammar_t<`H> grm, unsigned int eof_val) {
+  grm = follow_grammar(grm);
+  let eof_cr = CHARRANGE(eof_val,eof_val);
+  for (let x = grm; x; x = x->tl) {
+    let &$(n,*r,_) = x->hd;
+    if (is_follow_symbol(n)) {
+      *r = ALT(eof_cr,*r);
+    }
+  }
+  return grm;
+}
+
+static grammar_t
+eof_follow_grammar(grammar_t<`H> grm, const char ?`H symb, unsigned int eof_val) {
   grm = follow_grammar(grm);
   let f = follow_symbol(symb);
   for (let x = grm; x; x = x->tl) {
     let &$(n,*r,_) = x->hd;
     if (strcmp(n,f) == 0) {
-      *r = ALT(CHARRANGE(0,1),*r);
+      *r = ALT(CHARRANGE(eof_val,eof_val),*r);
       break;
     }
   }
@@ -479,13 +495,14 @@ eof_follow_grammar(grammar_t<`H> grm, const char ?`H symb) {
 }
 
 void gen(grammar_t<`H> grm, const char ?`H start_symbol,
-         List::list_t<const char ?@>textblobs) {
+         List::list_t<const char ?@>textblobs, int all_start, 
+	 unsigned int eof_val) {
   reset_globals();
   semvalue_symbs = Set::empty(strptrcmp);
   // init_recursive(grm); // FIX: want to warn only on non-follow symbols,
   // but still need to know whether a follow symbol is recursive
   debugprint(1,"Computing follow grammar... ");
-  grammar_t followgrm = eof_follow_grammar(grm,start_symbol);
+  grammar_t followgrm = all_start ? eof_all_follow_grammar(grm,eof_val) : eof_follow_grammar(grm,start_symbol,eof_val);
 //   grammar_t followgrm = follow_grammar(grm);
   debugprint(1,"done\n");
   if (debug > 1) {

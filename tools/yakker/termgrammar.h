@@ -38,4 +38,5 @@ extern grammar_t grammar_RNCT(grammar_t ds);
 extern grammar_t grammar_IST(grammar_t ds);
 extern grammar_t grammar_final(grammar_t ds);
 extern grammar_t grammar_final_v3(grammar_t ds);
+extern grammar_t flatten_grammar(grammar_t g);
 #endif

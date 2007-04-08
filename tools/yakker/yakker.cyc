@@ -137,6 +137,9 @@ static const char ?add_namespace = NULL;
 "         -termgrammar_NOLITS    produce a version 2 term grammar for the input grammar with literals removed\n"\
 "         -termgrammar_RNCT      produce a version 2 term grammar for the input grammar with non-conflicting branches untagged.\n"\
 "         -bindgrammar           produce a grammar with binding capability for the input grammar\n"\
+"         -flatten               flatten the input grammar so that all nested sequences and alternatives become symbol defintions\n"\
+"         -all-start             allow any symbol to be used as a start symbol.\n"\
+"         -eof <val>             treat <val> as the eof character. <val> can be any value between 0 and 255.\n"\
 "         -no-main               don't output a default main procedure\n"\
 "         -lazyfill              use lazy filling (for interactive connections)\n"\
 "         -depend                produce a dependency graph of symbols in DOT format\n"\
@@ -161,6 +164,7 @@ int main(int argc, const char ?`H?argv) {
   int isortp = 0;
   int tsortp = 0;
   int bindgrammarp = 0;
+  int flattenp = 0;
   int termgrammarp = 0;
   int termgrammar_v2p = 0;
   int termgrammar_v3p = 0;
@@ -169,6 +173,8 @@ int main(int argc, const char ?`H?argv) {
   int termgrammar_ITp = 0;
   int termgrammar_NOLITSp = 0;
   int termgrammar_RNCTp = 0;
+  int all_startp = 0;
+  unsigned int eof_val = 0; //default value for eof is 0.
   int compare = 0;
   const char ?start_symbol = NULL;
   int mode = FILE_MODE;
@@ -187,6 +193,21 @@ int main(int argc, const char ?`H?argv) {
       start_symbol = argv[i+1];
       i += 1;
     }
+    else if (strcmp("-eof",argv[i]) == 0) {
+      if (i+1 >= argc) die();
+      int e;
+      let res = sscanf(argv[i+1],"%d",&e);
+      if (res != 1){
+	fprintf(stderr,"Invalid eof value: %s. Eof must be an integer between 0 and 255.",argv[i+1]);
+	exit(1);
+      }
+      if (e < 0 || e > 255){
+	fprintf(stderr,"Invalid eof value: %d. Eof must be between 0 and 255.",e);
+	exit(1);
+      }
+      eof_val = e;
+      i += 1;
+    }
     else if (strcmp("-namespace",argv[i]) == 0) {
       if (i+1 >= argc) die();
       add_namespace = argv[i+1];
@@ -194,7 +215,9 @@ int main(int argc, const char ?`H?argv) {
       i += 1;
     }
     else if (strcmp("-help",argv[i]) == 0) die();
+    else if (strcmp("-all-start",argv[i]) == 0) all_startp = 1;
     else if (strcmp("-bindgrammar",argv[i]) == 0) bindgrammarp = 1;
+    else if (strcmp("-flatten",argv[i]) == 0) flattenp = 1;
     else if (strcmp("-termgrammar",argv[i]) == 0) termgrammarp = 1;
     else if (strcmp("-termgrammar_v2",argv[i]) == 0) termgrammar_v2p = 1;
     else if (strcmp("-termgrammar_v3",argv[i]) == 0) termgrammar_v3p = 1;
@@ -479,13 +502,23 @@ int main(int argc, const char ?`H?argv) {
     return 0;
   }
 
-  /* Produce the term grammar, version 3, and exit */
+  /* Produce the bindgrammar and exit */
   if (bindgrammarp) {
     debugprint(1,"Producing bind grammar ... ");
     minus_elim(ds); // also marks character sets, needed for the conversion
     let gr = grammar2bindgrammar(ds);
     pr_definitions(stdout, gr);
     fprintf(stdout, "{extern const char ?fresh_name();}\n");
+    fprintf(stdout, "{extern int branch_id;}\n");
+    debugprint(1,"done\n");
+    return 0;
+  }
+
+  /* Produce the bindgrammar and exit */
+  if (flattenp) {
+    debugprint(1,"Producing flattenned grammar ... ");
+    let gr = flatten_grammar(ds);
+    pr_definitions(stdout, gr);
     debugprint(1,"done\n");
     return 0;
   }
@@ -555,7 +588,7 @@ int main(int argc, const char ?`H?argv) {
     if (!start_symbol) die();
     //    pgen(ds,start_symbol);
     debugprint(1,"Generating... ");
-    gen(ds,start_symbol,textblobs);
+    gen(ds,start_symbol,textblobs,all_startp, eof_val);
     debugprint(1,"done\n");
   }
   else

@@ -1,0 +1,1 @@
+%r COPY %r:5 INBOX |%r COPY %r INBOX |%r CREATE %r

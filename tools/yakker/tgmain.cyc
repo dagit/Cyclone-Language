@@ -66,6 +66,10 @@ int main(int argc, char ??argv) {
   try {
     // parse input until we hit an error (or EOF)
     while (1) { 
+//       char ?@nozeroterm b =
+//       ykbuf_t @ykb = data2ykbuf(b); 
+//       read(0,b,n); // read from stdin
+      tg_init(argv);
       switch(root){
       case Command: p_command_pm(ykb);     break;
       case Seq_range : p_seq_range_pm(ykb); break;
@@ -76,23 +80,26 @@ int main(int argc, char ??argv) {
       //let n = YKPOSN;
       //if (n<60) for (int i = 0; i < n; i++) printf("^");
       //printf(" accepted %d (0x%x) characters\n",n,n);
+
 //       printf("Result: %s\n", tg_pop());
+
       // consume newline
       char c = 0;
       let sz = ykbread(&c,1,ykb);
-      if (1 != sz || '\n' != c)
-	// either missing newline or at EOF.
-	throw &Parse_error_val;
+      if (1 != sz || '\n' != c)  // missing newline.
+	throw &Parse_error_val;      
+      printf("\n");
       last_record_posn = YKPOSN;
     }
   }
   catch {
   case &Parse_error:
     let n = YKPOSN - last_record_posn;
-    char c;
-    let sz = ykbread(&c,1,ykb);
-    if (sz == 0)
-      break; // at EOF;
+    if (n == 0){
+      break; // stopped because reached empty line; program done.
+    }
+    // Otherwise, there was an error.
+    printf("\n");
     if (n<60) for (int i = 0; i < n; i++) printf(" ");
     printf("^ failed at position %d (0x%x)\n",n,n);
     break;
