@@ -124,7 +124,7 @@ small_imap_pm.bnf: examples/test_genparse small_imap_genpm
 	./small_imap_genpm -name my-command < $< > $@
 
 small_imap_print.cyc: examples/test_genprint.txt small_imap_genpm 
-	./small_imap_genpm -print -name my-command < $< > $@
+	./small_imap_genpm -print -name my-command -args 7 < $< > $@
 
 %_pm: %_pm.cyc ykbuf.o ssl.o tg_stack.o pm_main.o util.o
 	$(CYCLONE) $^ -o $@ --novcgen -lssl -lcrypto

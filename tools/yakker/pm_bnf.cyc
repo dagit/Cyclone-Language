@@ -77,33 +77,59 @@ bool is_special_char(unsigned int i) {
   return (c<' ' || c>'~' || c=='\042' || c=='\\');
 }
 
-ps_list pat2print_code0(ps_list ps, rule_pat_t p){
+typedef List::list_t<const char ?@> arg_list;
+typedef $(char ?`r1 ?`r2, arg_list)@ pc_args<`r1,`r2>;
+
+$(ps_list, pc_args<`r1,`r2>)@
+pat2print_code0(rule_pat_t p, ps_list ps, pc_args<`r1,`r2> args){
   switch (p) {
+
   case &SymbPat(x):
-    return new List(new x, ps);
+    return new $(new List(new x, ps), args);
+
   case &LitPat(x):
-    return new List(new string_escape(x), ps);
+    return new $(new List(new string_escape(x), ps), args);
+
   case &CharPat(x):
-    // FIX: need to include the argument in the printf arg list.
-    if (!is_special_char(x))
-      return new List(new (const char ?)aprintf("%c",x), ps);
-    return new List(new "%c", ps);
+    if (!is_special_char(x)){
+      ps = new List(new (const char ?)aprintf("%c",x), ps);
+      return new $(ps,args);
+    }
+
+    // as x is a special char, we don't put it in the format string.
+    // instead, we add %c to the format string and add x to the argument
+    // list.
+    ps = new List(new "%c", ps);
+    let &$(args_in,args_out) = args;
+    args_out = new List(new (const char ?)aprintf("%u",x), args_out);
+
+    return new $(ps, new $(args_in,args_out));
+
   case &SeqPat(p1,p2):
-    let ps1 = pat2print_code0(ps,p1);
-    let ps2 = pat2print_code0(ps1,p2);
-    return ps2;
+    let &$(ps1, args1) = pat2print_code0(p1, ps, args);
+    return pat2print_code0(p2, ps1, args1);
+
   case &WildcardPat(_):
     // we can ignore the underlying symbol, for now, as we do no extra checking.
-    // FIX: need to include the argument in the printf arg list.
+
     ps = new List(new "%s",ps);
-    return ps;
+    let &$(args_in,args_out) = args;
+    // transfer an argument from args_in to args_out
+    // FIX: should check for too few args in args_in.
+    args_out = new List(new (const char ?)strdup(args_in[0]), args_out);
+    args_in++;
+
+    return new $(ps, new $(args_in, args_out));
   }
 }
 
-const char ?pat2print_code(rule_pat_t p){
-  let ps = pat2print_code0(NULL, p);
-  ps = new List(new "\"", ps);
-  ps = List::imp_rev(ps);
-  ps = new List(new "\"", ps);
+const char ?pat2print_code(rule_pat_t p, char ?? args){
+  let &$(ps, &$(args_in, args_out)) = 
+    pat2print_code0(p, list(new "printf(\""), new $(args, NULL));
+  ps = new List(new (args_out ? "\"," : "\""), ps);
+  let args_s = str_sepstr(imp_rev(args_out), ",");
+  ps = new List(new (const char ?)args_s, ps);
+  ps = new List(new ")", ps);
+  ps = imp_rev(ps);
   return strconcat_l(ps);
 }
