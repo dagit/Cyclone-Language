@@ -16,6 +16,7 @@
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
 
+#include <string.h>
 #include "util.h"
 
 int debug = 0;
@@ -109,7 +110,7 @@ node_delete(Graph::graph_t<`a> g, Set::set_t<`a,`H> x) {
 }
 
 static bool special_char(char c) {
-  return (c<=' ' || c>='~' || c=='\042' || c=='\\');
+  return (c<' ' || c>'~' || c=='\042' || c=='\\');
 }
 static bool special(const char ?s){
   int sz = numelts(s)-1;
@@ -208,4 +209,47 @@ const char ?string_escape(const char ?`H s) {
       break;
     }
   return t;
+}
+
+const char ?fresh_name() {
+  static int count = 0;
+  return aprintf("_bnf_%d",count++);
+}
+
+int ok_firstchar(char c) {
+  return (c == '_' || isalpha(c));
+}
+
+int ok_otherchar(char c) {
+  return (c == '_' || isalnum(c));
+}
+
+int is_c_identifier(const char ?n) {
+  /* FIX: Needs to check for keywords */
+  let len = strlen(n);
+  if (len == 0) return 0;
+  if (!ok_firstchar(n[0])) return 0;
+  for (int i = 1; i < len; i++)
+    if (!ok_otherchar(n[i])) return 0;
+  return 1;
+}
+
+const char ?make_c_identifier0(const char ?`H n) {
+  let len = strlen(n); 
+  char ?x = calloc(len+1,sizeof(char));
+  for (int i = 0; i < len; i++) {
+    let c = n[i];
+    if (ok_otherchar(c)) x[i] = n[i];
+    else x[i] = '_';
+  }    
+  return x;
+}
+
+const char ?make_c_identifier(const char ?`H n) {
+  if (is_c_identifier(n)) return n;
+
+  let len = strlen(n);
+  if (len == 0) return "ZEROLEN";
+  if (isalpha(n[0])) return make_c_identifier0(n);
+  else return aprintf("__cident_%s",make_c_identifier0(n));
 }

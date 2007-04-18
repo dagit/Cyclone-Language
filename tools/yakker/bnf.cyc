@@ -563,3 +563,19 @@ rule_t commas() {
   return r;
 }
 
+// encode a hash rule as combination of literal, sequence and star.
+rule_t hash2star(unsigned int m, repeat_t N, rule_t r){
+  let m_dec = m ? m-1 : 0;
+
+  let r_s;
+  switch(N){
+  case &Num(0):
+    r_s = STAR(m,N,r); break;
+  case &Num(n):
+    r_s = SEQ(r, STAR(m_dec, new Num(n-1), SEQ(LIT(","),r))); break;
+  case &Infinity:
+    r_s = SEQ(r, STAR(m_dec, N, SEQ(LIT(","),r))); break;
+  }
+  
+  return m ? r_s : OPT(r_s);
+}

@@ -148,4 +148,15 @@ void process_DQUOTE(){
 // void tg_disable_print(){ if (tg_in_binder) {tg_print_rules++;}}
 // int tg_enable_print(){ return tg_in_binder ? --tg_print_rules : 1;}
 
+////////////////
+// These functions belong in separate file (e.g. pm_lib.cyc),
+// but are placed here for convenience.
+
+static int chosen_branch = 0;
+
+void yk_store(const char? s){
+  printf("%s",s);
+}
+
+void set_branch(int i){chosen_branch=i;}
 

@@ -109,6 +109,8 @@ extern grammar_t close_definitions(grammar_t<`H> ds, List::list_t<grammar_t<`H>>
 extern List::list_t<rule_t> alt2rules(rule_t r);
 extern List::List_t<rule_t> seq2rules(rule_t r);
 extern rule_t commas();
+// encode a hash rule as a star.
+extern rule_t hash2star(unsigned int,repeat_t,rule_t);
 
 typedef struct Hashtable::Table<const char ?@,cs_t,`H> @cs_table_t;
 typedef struct Hashtable::Table<const char ?@,cs_t,`H> *cs_table_opt_t;

@@ -1,0 +1,109 @@
+#include <core.h>
+#include <list.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "bnf.h"
+#include "util.h"
+#include "pm_bnf.h"
+
+using List;
+
+rule_pat_t pats2seq(list_t<rule_pat_t> pats){
+  if (!pats)
+    return new LitPat("");
+
+  let res = pats->hd;
+  pats = pats->tl;
+  for (;pats; pats = pats->tl){
+    res = new SeqPat(res,pats->hd);
+  }
+  return res;
+}
+
+
+typedef List::list_t<const char ?`H@`H,`H> ps_list;
+
+ps_list pat2string0(ps_list ps, rule_pat_t p){
+  switch (p) {
+  case &SymbPat(x):
+    return new List(new x, ps);
+  case &LitPat(x):
+    return new List(new (const char ?)aprintf("\"%s\"",string_escape(x)), ps);
+  case &CharPat(x):
+    return new List(new (const char ?)aprintf("%%d%u",x), ps);
+  case &SeqPat(p1,p2):
+    let ps1 = pat2string0(ps,p1);
+    let ps_sp = new List(new " ",ps1);
+    let ps2 = pat2string0(ps_sp,p2);
+    return ps2;
+  case &WildcardPat(x):
+    ps = new List(new "%r(",ps);
+    ps = new List(new x, ps);
+    ps = new List(new ")",ps);
+    return ps;
+  }
+}
+
+const char ?pat2string(rule_pat_t p){
+  let ps = pat2string0(NULL, p);
+  return strconcat_l(List::imp_rev(ps));
+}
+
+
+rule_t pat2parse_rule(rule_pat_t p){
+  switch (p) {
+  case &SymbPat(x):
+    return SYMB(x);
+  case &LitPat(x):
+    return LIT(x);
+  case &CharPat(x):
+    return CHARRANGE(x,x);
+  case &SeqPat(p1,p2):
+    return SEQ(pat2parse_rule(p1),pat2parse_rule(p2));
+  case &WildcardPat(x):
+    let r = SYMB(x);
+
+    let fn = fresh_name();
+    r->v = fn;
+    r->a = aprintf("yk_store(%s);",fn);
+
+    return r;
+  }
+}
+
+bool is_special_char(unsigned int i) {
+  char c = (char)i;
+  return (c<' ' || c>'~' || c=='\042' || c=='\\');
+}
+
+ps_list pat2print_code0(ps_list ps, rule_pat_t p){
+  switch (p) {
+  case &SymbPat(x):
+    return new List(new x, ps);
+  case &LitPat(x):
+    return new List(new string_escape(x), ps);
+  case &CharPat(x):
+    // FIX: need to include the argument in the printf arg list.
+    if (!is_special_char(x))
+      return new List(new (const char ?)aprintf("%c",x), ps);
+    return new List(new "%c", ps);
+  case &SeqPat(p1,p2):
+    let ps1 = pat2print_code0(ps,p1);
+    let ps2 = pat2print_code0(ps1,p2);
+    return ps2;
+  case &WildcardPat(_):
+    // we can ignore the underlying symbol, for now, as we do no extra checking.
+    // FIX: need to include the argument in the printf arg list.
+    ps = new List(new "%s",ps);
+    return ps;
+  }
+}
+
+const char ?pat2print_code(rule_pat_t p){
+  let ps = pat2print_code0(NULL, p);
+  ps = new List(new "\"", ps);
+  ps = List::imp_rev(ps);
+  ps = new List(new "\"", ps);
+  return strconcat_l(ps);
+}

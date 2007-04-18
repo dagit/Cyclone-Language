@@ -51,7 +51,13 @@ node_intersect(Graph::graph_t<`a> g, Set::set_t<`a,`H> x);
 Graph::graph_t<`a>
 node_delete(Graph::graph_t<`a> g, Set::set_t<`a,`H> x);
 
-const char ?char_escape(char c);
-const char ?string_escape(const char ?`H s);
+extern const char ?char_escape(char c);
+extern const char ?string_escape(const char ?`H s);
 
+extern const char ?fresh_name();
+extern const char ?make_c_identifier0(const char ?`H n);
+extern int ok_firstchar(char c);
+extern int ok_otherchar(char c);
+extern int is_c_identifier(const char ?n);
+extern const char ?make_c_identifier(const char ?`H n);
 #endif

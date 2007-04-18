@@ -51,15 +51,17 @@ term ::= "(" tag *term ")"
  */
 
 #include <core.h>
+#include <list.h>
+#include <buffer.h>
+#include <string.h>
+#include <stdio.h>
+#include <hashtable.h>
+
 #include "bnf.h"
 #include "pr.h"
 #include "analyze.h"
 #include "termgrammar.h"
 #include "pads.h"
-#include <list.h>
-#include <buffer.h>
-#include <string.h>
-#include <stdio.h>
 
 using List;
 
@@ -1431,6 +1433,7 @@ rule_t add_conversion_specifiers(rule_t r){
 // Functions for adding binders to grammar.
 ////
 
+/******
 // r should not be converted.
 static
 rule_t mk_binder (rule_t r){
@@ -1552,6 +1555,263 @@ rule_t add_binders(rule_t r){
     }
 }
 
+*******/
+
+static
+const char ?rule2code(rule_t r){
+  switch (r->r) {
+  case &Symb(x,y):
+    return aprintf("p_%s(ykb);",x);
+  case &CharRange(low,high):
+    if (low == high) 
+      return aprintf("ykp_char(ykb,%d);",low);
+    else 
+      return aprintf("ykp_charrange(ykb,%d,%d);",low,high);
+  case &Lit(x):
+    if (strcmp("\"",x) == 0) 
+      return aprintf("ykp_char(ykb,'\"');");
+    else
+      return aprintf("ykp_string(\"%s\");",string_escape(x));
+  default:
+    internal_err("Unexpected rule in rule2code:%s\n",pr_rule2string(r));
+    return "";
+  }
+}
+
+// r should not be converted.
+static
+rule_t mk_parsegen_binder (const char ?symb_name){
+  let r_binder = LIT("%r");
+  r_binder->a = aprintf("let fn = fresh_name(); printf(\"let %%s_start = YKPOS;\",fn); fputs(\"p_%s(ykb);\",stdout); printf(\"yk_store(%%s_start, YKPOS);\",fn);",
+			symb_name);
+  return r_binder;
+}
+
+static
+const char ?mk_parse_action(const char ?ws, rule_t r){
+  return aprintf("fputs(\"%s%s\",stdout);", ws, string_escape(rule2code(r)));
+}
+
+// r should not be converted.
+static
+rule_t mk_parsegen (rule_t r){
+  // copy r and set a new semantic action.
+  return new arule(mk_parse_action(" ",r), r->p, r->v, r->css, r->r);
+}
+
+// Print the value parsed by r, instead of
+// the rule. Used for char ranges to capture the particular char used
+// in the format string. r should not already be converted. 
+static
+rule_t mk_singleton_parsegen (rule_t r){
+  let fn = fresh_name();
+  // copy r and set a new semantic action.
+  return new arule(aprintf("fputs(aprintf(\" ykp_char(ykb,%%d);\",%s[0]),stdout);", fn),
+		   r->p, fn, r->css, r->r);
+}
+
+// Print the symbol, instead of the rule. r should not be converted.
+static
+rule_t mk_symb_parsegen (const char ?s, rule_t r){
+  // copy r and set a new semantic action.
+  return new arule(aprintf("fputs(\" p_%s(ykb);\",stdout);", s),
+		   r->p, r->v, r->css, r->r);
+}
+
+static
+rule_t add_parsegen(rule_t r){
+    switch (r->r) {
+    case &Seq(r1,r2):
+      let r_ab = SEQ_r(r, 
+		       add_parsegen(r1),
+		       add_parsegen(r2));
+      return r_ab;
+    case &Opt(r1):
+      let r_ab = OPT_r(r, add_parsegen(r1));
+      return r_ab;
+    case &Alt(r1,r2):
+      let r_ab = ALT_r(r,
+		       add_parsegen(r1),
+		       add_parsegen(r2));
+      return r_ab;
+    case &Rcount(n,r1):
+      let r_ab = RCOUNT_r(r,n,add_parsegen(r1));
+      return r_ab;
+    case &Star(m,N,r1):
+      let r_ab = STAR_r(r, m,N,add_parsegen(r1));
+      return r_ab;
+    case &Hash(m,N,r1):
+      let r_ab = HASH_r(r, m,N, add_parsegen(r1));
+      return r_ab;
+    case &CharRange(min,max):
+      let r_s = mk_singleton_parsegen(r);
+      return r_s;
+    case &Symb(_,_):
+      // we don't print anything as the elements of the symbol's definition will print themselves.
+      return r;
+    default:
+      return mk_parsegen(r);
+    }
+}
+
+// r should not be converted.
+static
+rule_t mk_bnfgen_binder (const char ?`H symb_name){
+  let r_binder = LIT("%r");
+  r_binder->a = aprintf("return new WildcardPat(\"%s\");", symb_name);
+  return r_binder;
+}
+
+static
+const char ?lit2pat(const char ?`H x){
+  return aprintf("new LitPat(\"%s\")",string_escape(x));
+}
+
+// Print the value parsed by r, instead of
+// the rule. Used for char ranges to capture the particular char used
+// in the format string. r should not already be converted. 
+static
+rule_t mk_singleton_bnfgen (rule_t r){
+  let fn = fresh_name();
+  // copy r and set a new semantic action and a name.
+  return new arule(aprintf("new CharPat(%s[0])",fn),
+		   r->p, fn, r->css, r->r);
+}
+
+// Print the symbol, instead of the rule. r should not be converted.
+// static
+// rule_t mk_symb_bnfgen (const char ?`H s, rule_t r){
+//   // copy r and set a new semantic action.
+//   return new arule(aprintf("return new SymbPat(\"%s\");",s),
+// 		   r->p, r->v, r->css, r->r);
+// }
+
+// Mapping from (nullary) symbols to their BNF-building semantic actions. 
+static struct Hashtable::Table<const char ?@, const char ?@, `H> *symb_semacts;
+
+static
+const char ?get_bnfgen(rule_t r){
+  switch (r->r) {
+  case &Seq(r1,r2):
+    let a1 = get_bnfgen(r1);
+    let a2 = get_bnfgen(r2);
+    return aprintf("new SeqPat(%s,%s)",a1,a2);
+  case &Symb(x,_):
+    // lookup symbol in table.
+    let a = Hashtable::lookup_opt(symb_semacts,new x);
+    if (!a){
+      internal_err("Undefined symbol: %s\n",x);
+      return "ERR";
+    } 
+    return **a;
+  case &Lit(s):
+    return lit2pat(s);
+  case &CharRange(min,max):
+    if (min != max)
+      fallthru;
+    return aprintf("new CharPat(%u)",min);
+  default:
+    internal_err("Unexpected rule in get_bnfgen:%s\n",pr_rule2string(r));
+    return "ERR";
+  }
+}
+
+static rule_t add_bnfgen(rule_t r);
+
+static
+$(rule_t,const char ?) @add_bnfgen0(rule_t r){
+    switch (r->r) {
+    case &Seq(r1,r2):
+      let &$(r1,a1) = add_bnfgen0(r1);
+      let &$(r2,a2) = add_bnfgen0(r2);
+      let a = aprintf("new SeqPat(%s,%s)",a1,a2);
+      let r_ab = SEQ_r(r,r1,r2); 
+      return new $(r_ab,a);
+    case &CharRange(min,max):
+      let r_s = mk_singleton_bnfgen(r);
+      // "steal" the action from r_s.
+      let a = r_s->a;
+      r_s->a = NULL;
+      return new $(r_s,a);
+    case &Symb(_,_):
+      let fn = fresh_name();
+      // copy r and set a new name.
+      return new $(new arule(r->a, r->p, fn, r->css, r->r), fn);
+    case &Lit(s):
+      return new $(r, lit2pat(s));
+    default:
+      internal_err("Unexpected rule in add_bnfgen0:%s\n",pr_rule2string(r));
+      return new $(r,"ERR");
+    }
+}
+
+static
+rule_t add_bnfgen(rule_t r){
+    switch (r->r) {
+    case &Seq(r1,r2):
+      let &$(r1_ab,a1) = add_bnfgen0(r1);
+      let &$(r2_ab,a2) = add_bnfgen0(r2);
+      let a = aprintf("return new SeqPat(%s,%s);",a1,a2);
+      let r_ab = SEQ_r(r,r1_ab,r2_ab); 
+      r_ab->a = a;
+      return r_ab;
+
+    case &Opt(r1):
+      let fn = fresh_name();
+      let &$(r1_ab,a1) = add_bnfgen0(r1);
+      r1_ab->a = aprintf("%s = %s;",fn,a1);
+      let r_ab = OPT_r(r, r1_ab);
+      r_ab->a = aprintf("return %s ? %s : new LitPat(\"\");",fn,fn);
+      r_ab->v = strconcat("$",fn);
+      return r_ab;
+
+    case &Alt(r1,r2):
+      let r_ab = ALT_r(r,
+		       add_bnfgen(r1),
+		       add_bnfgen(r2));
+      return r_ab;
+
+    case &Rcount(n,r1):
+      let fn = fresh_name();
+      let &$(r1_ab,a1) = add_bnfgen0(r1);
+      r1_ab->a = aprintf("%s = new List::List(%s,%s);",fn,a1,fn);
+      let r_ab = RCOUNT_r(r,n,r1_ab);
+      r_ab->a = aprintf("return pats2seq(List::imp_rev(%s));",fn);
+      r_ab->v = strconcat("$",fn);
+      return r_ab;
+
+    case &Star(m,N,r1):
+      let fn = fresh_name();
+      let &$(r1_ab,a1) = add_bnfgen0(r1);
+      r1_ab->a = aprintf("%s = new List::List(%s,%s);",fn,a1,fn);
+      let r_ab = STAR_r(r,m,N,r1_ab);
+      r_ab->a = aprintf("return pats2seq(List::imp_rev(%s));",fn);
+      r_ab->v = strconcat("$",fn);
+      return r_ab;
+
+    case &CharRange(min,max):
+      let r_s = mk_singleton_bnfgen(r);
+      // convert r_s->a to a return statement.
+      r_s->a = aprintf("return %s;",r_s->a);
+      return r_s;
+
+    case &Symb(_,_):
+      let fn = fresh_name();
+      // copy r and set a new name.
+      return new arule(aprintf("return %s;",fn), r->p, fn, r->css, r->r);
+
+    case &Lit(s):
+      // copy r and set a new sem. action.
+      return new arule(aprintf("return %s;",lit2pat(s)), r->p, r->v, r->css, r->r);
+
+    default:
+      internal_err("Unexpected rule in add_bnfgen:%s\n",pr_rule2string(r));
+      return r;
+    }
+}
+
+
+
 ////
 // Functions for escaping special characters in grammar.
 ////
@@ -1639,7 +1899,7 @@ rule_t with_sep_sem_act(list_t<rule_t> rs, const char ?`H c) {
   switch(res->r){
     case &Lit(s):
       if (strcmp(s,"") != 0){
-	internal_err("Non-empty literal found in with_sep_sem_act");
+	internal_err("Non-empty literal found in with_sep_sem_act.\n");
 	fallthru;
       }
       seen_nn = 0;
@@ -1655,7 +1915,7 @@ rule_t with_sep_sem_act(list_t<rule_t> rs, const char ?`H c) {
     switch(rs->hd->r){
       case &Lit(s):
 	if (strcmp(s,"") != 0){
-	  internal_err("Non-empty literal found in with_sep_sem_act");
+	  internal_err("Non-empty literal found in with_sep_sem_act.\n");
 	  fallthru;
 	}
 	break;
@@ -1672,7 +1932,7 @@ rule_t with_sep_sem_act(list_t<rule_t> rs, const char ?`H c) {
     switch(rs->hd->r){
     case &Lit(s):
       if (strcmp(s,"") != 0){
-	internal_err("Non-empty literal found in with_sep_sem_act");
+	internal_err("Non-empty literal found in with_sep_sem_act.\n");
 	fallthru;
       }
       // Leave out the separator because the arg is nullary.
@@ -1802,7 +2062,7 @@ grammar_t grammar_final_v3(grammar_t ds) {
 // and pattern-matching support from a BNF.
 ////////////////////////////////
 
-// 
+/*
 rule_t mk_pattern_match(const char ?`H s){
   let r_bar = LIT("|");
   r_bar->a = "fprintf(stdout,\"\\n| \\\"\\\"{set_branch(%d);}\",branch_id++);";
@@ -1836,10 +2096,81 @@ grammar_t grammar2bindgrammar(grammar_t g) {
   return res;
 }
 
+*/
+struct Attr bnf_attr = Attr{.ws=0,.re=0,.paramtype=NULL,.rettype="rule_pat_t"};
+
+grammar_t grammar2bnfgen_grammar(grammar_t g) {
+  grammar_t res = NULL,ds = g;
+
+  for (; ds; ds = ds->tl) {
+    let &$(n,r,a) = ds->hd;
+    let r_bg = add_bnfgen(r);
+    res = new List(new $(n,r_bg,bnf_attr), res);
+  }
+
+  res = imp_rev(res);
+  return res;
+}
+
+grammar_t grammar2bindgrammar(grammar_t g) {
+  reset_globals();
+  init_arityt(g);
+
+  grammar_t res = NULL,ds = g;
+  for (; ds; ds = ds->tl) {
+    let &$(n,r,a) = ds->hd;
+
+    if (is_arg_UT(SYMB(n))){
+      let r_b = mk_bnfgen_binder(n);
+      res = new List(new $(n, ALT(r,r_b), a), res);
+    } else      
+      res = new List(new $(n,r,a), res);
+  }
+
+  res = imp_rev(res);
+  return res;
+}
+
+rule_t mk_pattern_match(const char ?`H s){
+  let r_bar = LIT("|");
+  r_bar->a = "fprintf(stdout,\"\\n| set_branch(%d);\",branch_id++);";
+
+  let r_first = SYMB(s);
+  r_first->a = "fprintf(stdout,\" set_branch(%d);\",branch_id++);";
+  let r = SYMB(s);
+  return SEQ(r_first, STAR(0,new Infinity,SEQ(r_bar, r))); 
+}
+
+// Make pattern-match grammar
+grammar_t grammar2pmgrammar(grammar_t g) {
+  reset_globals();
+  init_arityt(g);
+
+  grammar_t res = NULL,ds = g;
+  for (; ds; ds = ds->tl) {
+    let &$(n,r,a) = ds->hd;
+    if (is_arg_UT(SYMB(n))){
+//       let n_o = strconcat(n,"_o");
+      let n_pm = strconcat(n,"_pm");
+      let r_pg = add_parsegen(r);
+      let r_pm = mk_pattern_match(n);
+      res = new List(new $(n_pm,r_pm,a),
+		     new List(new $(n, r_pg, a), res));
+    } else {
+      let r_sp = mk_symb_parsegen(n,r);
+      res = new List(new $(n,r_sp,a), res);
+    }      
+  }
+
+  res = imp_rev(res);
+  return res;
+}
+
 
 /////////////////////////////////////////////
 // Functions for flattening a BNF - i.e. transferring
-// all nested elements into symbol definitions.
+// all nested elements into symbol definitions. Also decodes hash into
+// simple constructs.
 ////////////////////////////////
 
 $(grammar_t, rule_t) @flatten_rule0(const char ?`H ctxt_name, rule_t r);
@@ -1878,12 +2209,12 @@ $(grammar_t, rule_t, unsigned int) @alt_flatten_rule(const char ?`H ctxt_name, r
     }  
 }
 
-struct Attr empty_attr = Attr{.ws=0,.re=0,.paramtype=NULL,.rettype=NULL};
+static struct Attr empty_attr = Attr{.ws=0,.re=0,.paramtype=NULL,.rettype=NULL};
 
 $(grammar_t, rule_t) @flatten_rule0(const char ?`H ctxt_name, rule_t r){
     switch (r->r) {
     case &Seq(r1,r2):
-      let &$(defs1, r1_flat, n_elt) = seq_flatten_rule(ctxt_name, r1, 0);
+      let &$(defs1, r1_flat, n_elt) = seq_flatten_rule(ctxt_name, r1, 1);
       let &$(defs2, r2_flat, _)     = seq_flatten_rule(ctxt_name, r2, n_elt);
       let r_flat = SEQ_r(r, r1_flat, r2_flat);
       // define new symbol with r_flat
@@ -1893,7 +2224,7 @@ $(grammar_t, rule_t) @flatten_rule0(const char ?`H ctxt_name, rule_t r){
       return new $(defs, SYMB(ctxt_name));
 
     case &Opt(r1):
-      let new_ctxt_name = mk_name(ctxt_name, 0);      
+      let new_ctxt_name = mk_name(ctxt_name, 1);      
       let &$(defs1, r1_flat) = flatten_rule0(new_ctxt_name, r1);
       let r_flat = OPT_r(r, r1_flat);
       // define new symbol with r_flat
@@ -1903,7 +2234,7 @@ $(grammar_t, rule_t) @flatten_rule0(const char ?`H ctxt_name, rule_t r){
       return new $(defs, SYMB(new_ctxt_name));
 
     case &Alt(r1,r2):
-      let &$(defs1, r1_flat, n_elt) = alt_flatten_rule(ctxt_name, r1, 0);
+      let &$(defs1, r1_flat, n_elt) = alt_flatten_rule(ctxt_name, r1, 1);
       let &$(defs2, r2_flat, _)     = alt_flatten_rule(ctxt_name, r2, n_elt);
       let r_flat = ALT_r(r, r1_flat, r2_flat);
       // define new symbol with r_flat
@@ -1913,7 +2244,7 @@ $(grammar_t, rule_t) @flatten_rule0(const char ?`H ctxt_name, rule_t r){
       return new $(defs, SYMB(ctxt_name));
 
     case &Rcount(n,r1):
-      let new_ctxt_name = mk_name(ctxt_name, 0);      
+      let new_ctxt_name = mk_name(ctxt_name, 1);      
       let &$(defs1, r1_flat) = flatten_rule0(new_ctxt_name, r1);
       let r_flat = RCOUNT_r(r,n, r1_flat);
       // define new symbol with r_flat
@@ -1923,7 +2254,7 @@ $(grammar_t, rule_t) @flatten_rule0(const char ?`H ctxt_name, rule_t r){
       return new $(defs, SYMB(ctxt_name));
 
     case &Star(m,N,r1):
-      let new_ctxt_name = mk_name(ctxt_name, 0);      
+      let new_ctxt_name = mk_name(ctxt_name, 1);      
       let &$(defs1, r1_flat) = flatten_rule0(new_ctxt_name, r1);
       let r_flat = STAR_r(r, m,N, r1_flat);
       // define new symbol with r_flat
@@ -1933,14 +2264,8 @@ $(grammar_t, rule_t) @flatten_rule0(const char ?`H ctxt_name, rule_t r){
       return new $(defs, SYMB(ctxt_name));
 
     case &Hash(m,N,r1):
-      let new_ctxt_name = mk_name(ctxt_name, 0);      
-      let &$(defs1, r1_flat) = flatten_rule0(new_ctxt_name, r1);
-      let r_flat = HASH_r(r, m, N, r1_flat);
-      // define new symbol with r_flat
-      let r_def = new $(ctxt_name, r_flat, empty_attr);
-      // add new symbol to list of defs.
-      let defs = append(defs1, new List(r_def,NULL));
-      return new $(defs, SYMB(ctxt_name));
+      let r_s = hash2star(m,N,r1);
+      return flatten_rule0(ctxt_name,r_s);
 
     default:
       return new $(NULL, r);
@@ -1952,11 +2277,11 @@ $(grammar_t, rule_t) @flatten_rule(const char ?`H symb, rule_t r){
   //At the top level, we don't want elements being flattened.
   switch(r->r){
   case &Seq(_,_):
-    let &$(defs, r_flat, _) = seq_flatten_rule(ctxt_name, r, 0);
+    let &$(defs, r_flat, _) = seq_flatten_rule(ctxt_name, r, 1);
     return new $(defs, r_flat);
   
   case &Alt(r1,r2):
-    let &$(defs, r_flat, _) = alt_flatten_rule(ctxt_name, r, 0);
+    let &$(defs, r_flat, _) = alt_flatten_rule(ctxt_name, r, 1);
     return new $(defs, r_flat);
  
   case &Opt(r1):
@@ -1999,6 +2324,181 @@ grammar_t flatten_grammar(grammar_t g) {
   return res;
 }
 
+
+////////////////////////////////////////////////////////////////////
+// Termgrammar generation based on BNF-generating semantic actions.
+// Takes grammar already annotated with BNF-generating semantic actions,
+// and converts to termgrammar. Assumes any desired escaping is already done.
+///
+
+/* Separate a rule list with a given separator. There should only be
+   two types of rules: empty literals with actions and symbols with
+   ids.
+ */
+static
+rule_t with_sep_bnfgen(list_t<rule_t> rs, const char ?`H sep) {
+  if (rs == NULL) return LIT("");
+
+  // Terms automatically insert a space after the tag. So,
+  // we need to make sure that none of the leading nullary arguments
+  // have a separator inserted *after* them.
+  //
+  // Once we've seen a non-nullary argument, we can switch to making sure
+  // that none of the nullary arguments get a separator *before* them.
+
+  let res = new *(rs->hd);
+  let seqpat; // sequence pattern constructor for semantic action of this sequence.
+  let seen_nn;  // Have we seen a non-nullary argument?
+
+  // First check whether res is nullary.
+  switch(res->r){
+  case &Lit(s):
+    if (strcmp(s,"") != 0){
+      internal_err("Non-empty literal found in with_sep_bnf_gen.\n");
+      fallthru;
+    }
+    seen_nn = 0;
+    seqpat = res->a;
+    break;
+  case &Symb(_,_):
+    seen_nn = 1;
+    seqpat = res->v;
+    break;
+  case &CharRange(min,max):
+    seen_nn = 1;
+    seqpat = aprintf("new CharPat(%s[0])", res->v);
+    break;
+  default:
+    internal_err("Unexpected rule found in with_sep_bnf_gen: %s\n",pr_rule2string(rs->hd));
+    seen_nn = 0;  // ignore the rule and keep going.
+    seqpat = "ERR";
+  }
+
+  rs = rs->tl;
+
+  // Now add args without separators until we see the first n.n. arg.
+  for (; !seen_nn && rs; rs = rs->tl){
+    switch(rs->hd->r){
+    case &Lit(s):
+      if (strcmp(s,"") != 0){
+	internal_err("Non-empty literal found in with_sep_bnfgen.\n");
+	fallthru;
+      }
+      seqpat = aprintf("new SeqPat(%s,%s)",seqpat, rs->hd->a);
+      break;
+    case &Symb(_,_):
+      seen_nn = 1;
+      seqpat = aprintf("new SeqPat(%s,%s)",seqpat, rs->hd->v);
+      // put copy of rs->hd in res.
+      res = new *(rs->hd);
+      break;
+    case &CharRange(min,max):
+      seen_nn = 1;
+      // put copy of rs->hd in res.
+      res = new *(rs->hd);
+      seqpat = aprintf("new SeqPat(%s,new CharPat(%s[0]))",seqpat, res->v);
+      break;
+    default:
+      internal_err("Unexpected rule found in with_sep_bnf_gen: %s.\n",pr_rule2string(rs->hd));
+      // ignore the rule and keep going.
+    }
+  }
+  
+  // invariant: res holds a copy of the first symbol in the sequence,
+  // seqpat holds the accumulated semantic action (sequence pattern
+  // constructor) and rs points to the first unprocessed rule.
+
+  let r_sep = LIT(sep);
+  // Now add n.n. args with seps and nullary args w/o seps.
+  for (; rs; rs = rs->tl){
+    switch(rs->hd->r){
+    case &Lit(s):
+      if (strcmp(s,"") != 0){
+	internal_err("Non-empty literal found in with_sep_bnfgen.\n");
+	fallthru;
+      }
+      // Just add the pattern-construction to the args list.
+      seqpat = aprintf("new SeqPat(%s,%s)",seqpat, rs->hd->a);
+      break;
+    case &Symb(_,_):
+      seqpat = aprintf("new SeqPat(%s,%s)",seqpat, rs->hd->v);
+      res = SEQ(res,r_sep,rs->hd);
+      break;
+    case &CharRange(min,max):
+      seqpat = aprintf("new SeqPat(%s,new CharPat(%s[0]))",seqpat, rs->hd->v);
+      res = SEQ(res,r_sep,rs->hd);
+      break;
+    default:
+      internal_err("Unexpected rule found in with_sep_bnf_gen: %s.\n",pr_rule2string(rs->hd));
+      // ignore the rule and keep going.
+    }
+  }
+  
+  res->a = aprintf("return %s;",seqpat);
+  return res;
+}
+
+/* Separate a rule list with spaces */
+static
+rule_t with_spaces_bnfgen(list_t<rule_t> rs) {
+  return with_sep_bnfgen(rs," ");
+}
+
+static
+rule_t seqrule2term_bnf(rule_t r) {
+  if (is_arg_UT(r))
+    return r;
+
+  let r2 = LIT("");
+  r2->a = get_bnfgen(r);
+  return r2;
+}
+
+// Convert an ordinary sequence into a sequence appropriate for a term body.
+static
+rule_t seq2term_bnf(rule_t r) {
+  let args = seq2rules(r);
+  return with_spaces_bnfgen(map(seqrule2term_bnf,args));
+}
+
+rule_t mkterm_bnf(rule_t tag, rule_t args){
+  return mkterm_UT_nodummy(tag, args);
+}
+
+bool is_seq(rule_t r){
+  switch(r->r){
+  case &Seq(_,_): return true;
+  default: return false;
+  }
+}
+
+grammar_t grammar2termgrammar_bnf(grammar_t g) {
+  reset_globals();
+  init_arityt(g);
+  symb_semacts = Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr);
+
+  grammar_t res = NULL,ds = g;
+  for (; ds; ds = ds->tl) {
+    let &$(n,r,a) = ds->hd;
+    let is_arg = is_arg_UT(SYMB(n));
+    if (is_arg && is_seq(r)){
+      let term_body = seq2term_bnf(r);
+      let a_tb = term_body->a;
+      term_body->a = NULL;
+      let r_tag = LIT(n);
+      let r2 = mkterm_bnf(r_tag, term_body);
+      r2->a = a_tb;      
+      let r_both = ALT(r,r2);
+      res = new List(new $(n,r_both,a),res);
+    }else {
+      if (!is_arg) Hashtable::insert(symb_semacts, new n, new get_bnfgen(r));
+      res = new List(new $(n,r,a), res);
+    }
+  }
+
+  res = imp_rev(res);
+  return res;
+}
 
 
 // TO DO

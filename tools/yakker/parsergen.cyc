@@ -28,6 +28,7 @@
 #include <stdlib.h>
 
 int print_main = 1;
+int print_globals = 1;
 int local_lookahead = 0;
 int lazyfill = 0;
 
@@ -108,19 +109,24 @@ static
 void gen0(rule_t r, rule_t right_ctxt) {
   int save;
   if (r->v) {
-    switch (r->r) {
-    case &Symb(x,y):
-      if (Set::member(semvalue_symbs,new x)) {
-        printf("let %s = ",r->v);
-        break;
+    if ('$' == r->v[0]){
+      printf("let %s = NULL;",r->v + 1);
+    } else {
+      switch (r->r) {
+      case &Symb(x,y):
+	if (Set::member(semvalue_symbs,new x)) {
+	  printf("let %s = ",r->v);
+	  break;
+	}
+	else fallthru;
+      default:
+	save = scope++;
+	printf("let save%d = YKSAVE;\n",save);
+	break;
       }
-      else fallthru;
-    default:
-      save = scope++;
-      printf("let save%d = YKSAVE;\n",save);
-      break;
     }
   }
+
   switch (r->r) {
   case &Symb(x,y):
     printf("%s(ykb%s%s);\n",
@@ -449,16 +455,18 @@ void gen0(rule_t r, rule_t right_ctxt) {
     break;
   }
   if (r->v) {
-    switch (r->r) {
-    case &Symb(x,_):
-      if (Set::member(semvalue_symbs,new x)) break;
-      else fallthru;
-    default:
-      printf("unsigned char ?@nozeroterm ykr%d = YKRESTORE(save%d);\n"
-             "let %s = substring((const char ?@nozeroterm)ykr%d,0,YKCURSOR-ykr%d);\n",
-             save,save,
-             r->v,save,save);
-      break;
+    if ('$' != r->v[0]){
+      switch (r->r) {
+      case &Symb(x,_):
+	if (Set::member(semvalue_symbs,new x)) break;
+	else fallthru;
+      default:
+	printf("unsigned char ?@nozeroterm ykr%d = YKRESTORE(save%d);\n"
+	       "let %s = substring((const char ?@nozeroterm)ykr%d,0,YKCURSOR-ykr%d);\n",
+	       save,save,
+	       r->v,save,save);
+	break;
+      }
     }
   }
   if (r->a) printf("%s\n",r->a);
@@ -492,6 +500,48 @@ eof_follow_grammar(grammar_t<`H> grm, const char ?`H symb, unsigned int eof_val)
     }
   }
   return grm;
+}
+
+/* Print forward definitions of parsing functions in grammar grm. */
+void gen_header(grammar_t<`H> grm, List::list_t<const char ?@>textblobs){
+  printf("#include <buffer.h>\n"
+	 "#include <stdio.h>\n"
+	 "#include <stdlib.h>\n"
+	 "#include <string.h>\n");
+#ifndef STRINGINPUT
+  printf("#include \"ykbuf.h\"\n");
+#endif
+
+  /* Print first textblob.  Needed in case it defines typedefs used by parsing functions. */
+  if (textblobs) {
+    printf("%s\n",*textblobs->hd);
+    textblobs = textblobs->tl;
+  }
+
+  for (let x = grm; x; x = x->tl) {
+    let &$(n,r,a) = x->hd;
+    if (a.rettype) {
+      printf("%s ",a.rettype);
+    } else
+      printf("void ");
+    printf("%s(ykbuf_t @ykb%s%s);\n",
+	   p_id(n),
+	   (a.paramtype)?",":"",
+	   a.paramtype);
+  }
+}
+
+// generate a code fragment. None of the globals are reset. semvalue_symbs is initialized to empty, if NULL;
+void gen_frag(rule_t r){
+  if (!semvalue_symbs) semvalue_symbs = Set::empty(strptrcmp);
+  grammar_t combinedgrm = NULL;
+  init_recursive(combinedgrm);
+  init_firstt(combinedgrm);
+  init_mayt(combinedgrm);
+  init_mustt(combinedgrm);
+  init_maybe_empty(combinedgrm);
+
+  gen0(r,LIT(""));
 }
 
 void gen(grammar_t<`H> grm, const char ?`H start_symbol,
@@ -541,9 +591,16 @@ void gen(grammar_t<`H> grm, const char ?`H start_symbol,
          "#define YKSAVE ({ let x = 0; ykb->save_count++; if (ykb->save) x = ykb->cur-ykb->save; else ykb->save = ykb->cur; x; })\n"
          "#define YKRESTORE(x) ({ let p = ykb->save+x; if (--ykb->save_count == 0) ykb->save=NULL; p; })\n");
 #endif
-  printf("int ykdebug = 0;\n"
-         "datatype exn { Parse_error };\n"
-         "datatype exn.Parse_error Parse_error_val = Parse_error;\n");
+
+  if (print_globals){
+    printf("int ykdebug = 0;\n"
+	   "datatype exn { Parse_error };\n"
+	   "datatype exn.Parse_error Parse_error_val = Parse_error;\n");
+  }else{
+    printf("extern int ykdebug;\n"
+	   "datatype exn { extern Parse_error };\n"
+	   "extern datatype exn.Parse_error Parse_error_val;\n");
+  }
 
   /* Print first textblob.  Needed in case it defines typedefs used by parsing functions. */
   if (textblobs) {

@@ -22,7 +22,15 @@
 extern void gen(grammar_t<`H> grm, const char ?`H symb,
                 List::list_t<const char ?@>textblobs, 
 		int all_start, unsigned int eof_val);
+
+/* generate a code fragment.*/
+extern void gen_frag(rule_t r);
+
+/* Print forward definitions of parsing functions in grammar grm. */
+extern void gen_header(grammar_t<`H> grm, List::list_t<const char ?@>textblobs);
+
 extern int print_main;
+extern int print_globals;
 extern int lazyfill;
 extern int local_lookahead;
 

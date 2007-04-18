@@ -44,4 +44,7 @@ extern int branch_id;
 extern const char ? tg_peek();
 extern const char ? tg_pop();
 extern void tg_merge();
+
+extern void yk_store(const char?);
+extern void set_branch(int);
 #endif

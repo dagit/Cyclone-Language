@@ -71,8 +71,8 @@ int main(int argc, char ??argv) {
 //       read(0,b,n); // read from stdin
       tg_init(argv);
       switch(root){
-      case Command: p_command_pm(ykb);     break;
-      case Seq_range : p_seq_range_pm(ykb); break;
+      case Command: p_command(ykb);     break;
+      case Seq_range : p_seq_range(ykb); break;
       default :
 	fprintf(stderr,"Unknown symbol."); 
 	exit(1);

@@ -82,12 +82,25 @@ small_imap_termv3.cyc: small_imap_termv3.bnf
 small_imap_termv3.bnf: examples/small_imap.bnf yakker
 	./yakker -termgrammar_v3 $< > $@
 
-# Targets for testing pattern match parsers-generators.  I.e generates
+# Targets for testing pattern match parsers-generators.  Generates
 # BNF that can parse a pattern-match and produce a new BNF specialized
 # to that pattern-match. Note that the new BNF is intended to augment
 # the original.
 
-small_imap_genpm: small_imap_genpm.cyc ykbuf.o ssl.o tg_stack.o tgmain.o util.o
+# small_imap_genpm: small_imap_genpm.cyc ykbuf.o ssl.o tg_stack.o tgmain.o util.o
+# 	$(CYCLONE) $^ -o $@ --novcgen -lssl -lcrypto
+
+small_imap.o: small_imap.cyc
+	$(CYCLONE) -c $< -o $@ --novcgen
+
+small_imap.cyc: examples/small_imap.bnf yakker
+	./yakker $(YAKFLAGS) -gen command -no-main -no-globals $< > $@
+
+small_imap.h: examples/small_imap.bnf yakker
+	./yakker $(YAKFLAGS) -gen-header $< > $@
+
+small_imap_genpm: small_imap_genpm.cyc ykbuf.o ssl.o tg_stack.o ast_main.o pm_bnf.o\
+	bnf.o lex.o parse_tab.o pr.o util.o 
 	$(CYCLONE) $^ -o $@ --novcgen -lssl -lcrypto
 
 #	./yakker $(YAKFLAGS) -all-start -eof 10 -gen command_pm -no-main $< > $@
@@ -95,9 +108,23 @@ small_imap_genpm.cyc: small_imap_genpm.bnf yakker
 	./yakker $(YAKFLAGS) -all-start -gen command_pm -no-main $< > $@
 
 small_imap_genpm.bnf: examples/small_imap.bnf yakker
-	./yakker -bindgrammar $< > $@
+	./yakker -tsort -flatten -bindgrammar -termgrammar_bnf $< > $@
 
 # Pattern matching BNF examples.
+
+small_imap_pm: small_imap_pm.o ykbuf.o ssl.o tg_stack.o util.o small_imap.o
+	$(CYCLONE) $^ -o $@ --novcgen -lssl -lcrypto
+
+small_imap_pm.o: small_imap_pm.cyc small_imap.h
+
+small_imap_pm.cyc: small_imap_pm.bnf yakker
+	./yakker -no-close-defs -gen my-command $< > $@
+
+small_imap_pm.bnf: examples/test_genparse small_imap_genpm 
+	./small_imap_genpm -name my-command < $< > $@
+
+small_imap_print.cyc: examples/test_genprint.txt small_imap_genpm 
+	./small_imap_genpm -print -name my-command < $< > $@
 
 %_pm: %_pm.cyc ykbuf.o ssl.o tg_stack.o pm_main.o util.o
 	$(CYCLONE) $^ -o $@ --novcgen -lssl -lcrypto
@@ -109,6 +136,12 @@ tg_stack.o : tg_stack.cyc util.h
 	$(CYCLONE) -c $< -o $@ -I.
 
 tgmain.o : tgmain.cyc tg_stack.h
+	$(CYCLONE) -c $< -o $@ -I.
+
+ast_main.o : ast_main.cyc pm_bnf.h tg_stack.h
+	$(CYCLONE) -c $< -o $@ -I.
+
+pm_bnf.o : pm_bnf.cyc pm_bnf.h pads.h bnf.h
 	$(CYCLONE) -c $< -o $@ -I.
 
 #

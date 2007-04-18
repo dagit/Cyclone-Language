@@ -16,10 +16,27 @@
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
 
-#ifndef PADS_H
-#define PADS_H
+#ifndef PM_BNF_H
+#define PM_BNF_H
+#include <core.h>
 #include <list.h>
 #include "bnf.h"
-extern grammar_t ws_definitions(grammar_t<`H> ds);
-extern void pads_definitions(grammar_t<`H> ds);
+
+typedef datatype Rule_pattern *Rule_pat_t;
+typedef datatype Rule_pattern @rule_pat_t;
+datatype Rule_pattern {
+  SymbPat(const char ?); // abstract grammar symbol: name.
+  CharPat(unsigned int); // single character from a character range.
+  LitPat(const char ?);
+  SeqPat(rule_pat_t,rule_pat_t);
+  WildcardPat(const char ?); // symbol for which this is a wildcard.
+};
+
+
+extern rule_pat_t pats2seq(List::list_t<rule_pat_t>);
+
+extern const char ?pat2string(rule_pat_t);
+extern rule_t pat2parse_rule(rule_pat_t p);
+extern rule_t pat2print_rule(rule_pat_t p);
+extern const char ?pat2print_code(rule_pat_t p);
 #endif
