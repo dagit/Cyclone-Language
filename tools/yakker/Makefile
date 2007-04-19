@@ -1,5 +1,5 @@
 include ../../Makefile.inc
-CYCFLAGS=
+CYCFLAGS=-v
 #CYCFLAGS=-g -save-c -pp
 YAKFLAGS=
 
@@ -91,7 +91,7 @@ small_imap_termv3.bnf: examples/small_imap.bnf yakker
 # 	$(CYCLONE) $^ -o $@ --novcgen -lssl -lcrypto
 
 small_imap.o: small_imap.cyc
-	$(CYCLONE) -c $< -o $@ --novcgen
+	$(CYCLONE) $(CYCFLAGS) -c $< -o $@ --novcgen
 
 small_imap.cyc: examples/small_imap.bnf yakker
 	./yakker $(YAKFLAGS) -gen command -no-main -no-globals $< > $@
@@ -101,7 +101,7 @@ small_imap.h: examples/small_imap.bnf yakker
 
 small_imap_genpm: small_imap_genpm.cyc ykbuf.o ssl.o tg_stack.o ast_main.o pm_bnf.o\
 	bnf.o lex.o parse_tab.o pr.o util.o 
-	$(CYCLONE) $^ -o $@ --novcgen -lssl -lcrypto
+	$(CYCLONE) $(CYCFLAGS) $^ -o $@ --novcgen -lssl -lcrypto
 
 #	./yakker $(YAKFLAGS) -all-start -eof 10 -gen command_pm -no-main $< > $@
 # Use -no-minus-elim as minus elimination was already done, and redoing it causes problems (in particular, 
@@ -115,7 +115,7 @@ small_imap_genpm.bnf: examples/small_imap.bnf yakker
 # Pattern matching BNF examples.
 
 small_imap_pm: small_imap_pm.o ykbuf.o ssl.o tg_stack.o util.o small_imap.o
-	$(CYCLONE) $^ -o $@ --novcgen -lssl -lcrypto
+	$(CYCLONE) $(CYCFLAGS) $^ -o $@ --novcgen -lssl -lcrypto
 
 small_imap_pm.o: small_imap_pm.cyc small_imap.h
 

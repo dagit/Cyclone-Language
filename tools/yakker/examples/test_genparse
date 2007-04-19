@@ -1,1 +1,1 @@
-(command T COPY %r:5 INBOX)
+(command T (copy %seq-range INBOX))
