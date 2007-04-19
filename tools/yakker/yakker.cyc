@@ -130,16 +130,13 @@ static const char ?add_namespace = NULL;
 "         -nore <syms>           don't handle <syms> as regular expressions\n"\
 "         -re <syms>             do handle <syms> as regular expressions\n"\
 "         -termgrammar           produce a term grammar for the input grammar\n"\
-"         -termgrammar_v2        produce a version 2 term grammar for the input grammar\n"\
-"         -termgrammar_v3        produce a version 3 term grammar for the input grammar\n"\
-"         -termgrammar_MDTU      produce a version 2 term grammar for the input grammar with def tags moved to uses\n"\
-"         -termgrammar_RRT       produce a version 2 term grammar for the input grammar with redundant tags removed\n"\
-"         -termgrammar_IT        produce a version 2 term grammar for the input grammar with improved tags\n"\
-"         -termgrammar_NOLITS    produce a version 2 term grammar for the input grammar with literals removed\n"\
-"         -termgrammar_RNCT      produce a version 2 term grammar for the input grammar with non-conflicting branches untagged.\n"\
+"         -escape                escape special characters in the input grammar. \n"\
+"                                Currently, the set of special chars is {'(',')',' ','%%'},\n"\ 
+"                                with '%%' the escape character.\n"\
 "         -bindgrammar           produce a grammar with binding capability for the input grammar\n"\
 "           -termgrammar_bnf        add term forms to the bindgrammar\n"\
 "         -flatten               flatten the input grammar so that all nested sequences and alternatives become symbol defintions\n"\
+"         -no-minus-elim         turn of minus elimination.\n"\
 "         -all-start             allow any symbol to be used as a start symbol.\n"\
 "         -eof <val>             treat <val> as the eof character. <val> can be any value between 0 and 255.\n"\
 "         -no-main               don't output a default main procedure\n"\
@@ -170,15 +167,10 @@ int main(int argc, const char ?`H?argv) {
   int tsortp = 0;
   int bindgrammarp = 0;
   int termgrammar_bnfp = 0;
+  int escapep = 0;
   int flattenp = 0;
+  int minus_elimp = 1;
   int termgrammarp = 0;
-  int termgrammar_v2p = 0;
-  int termgrammar_v3p = 0;
-  int termgrammar_MDTUp = 0;
-  int termgrammar_RRTp = 0;
-  int termgrammar_ITp = 0;
-  int termgrammar_NOLITSp = 0;
-  int termgrammar_RNCTp = 0;
   int all_startp = 0;
   unsigned int eof_val = 0; //default value for eof is 0.
   int closedefsp = 1; // default is to close definitions.
@@ -226,15 +218,10 @@ int main(int argc, const char ?`H?argv) {
     else if (strcmp("-all-start",argv[i]) == 0) all_startp = 1;
     else if (strcmp("-bindgrammar",argv[i]) == 0) bindgrammarp = 1;
     else if (strcmp("-termgrammar_bnf",argv[i]) == 0) termgrammar_bnfp = 1;
+    else if (strcmp("-escape",argv[i]) == 0) escapep = 1;
     else if (strcmp("-flatten",argv[i]) == 0) flattenp = 1;
+    else if (strcmp("-no-minus-elim",argv[i]) == 0) minus_elimp = 0;
     else if (strcmp("-termgrammar",argv[i]) == 0) termgrammarp = 1;
-    else if (strcmp("-termgrammar_v2",argv[i]) == 0) termgrammar_v2p = 1;
-    else if (strcmp("-termgrammar_v3",argv[i]) == 0) termgrammar_v3p = 1;
-    else if (strcmp("-termgrammar_MDTU",argv[i]) == 0) termgrammar_MDTUp = 1;
-    else if (strcmp("-termgrammar_RRT",argv[i]) == 0) termgrammar_RRTp = 1;
-    else if (strcmp("-termgrammar_IT",argv[i]) == 0) termgrammar_ITp = 1;
-    else if (strcmp("-termgrammar_NOLITS",argv[i]) == 0) termgrammar_NOLITSp = 1;
-    else if (strcmp("-termgrammar_RNCT",argv[i]) == 0) termgrammar_RNCTp = 1;
     else if (strcmp("-compare",argv[i]) == 0) compare = 1;
     else if (strcmp("-unnamespace",argv[i]) == 0) unnamespace = 1;
     else if (strcmp("-local",argv[i]) == 0) local_lookahead = 1;
@@ -447,68 +434,9 @@ int main(int argc, const char ?`H?argv) {
   /* Produce the term grammar and exit */
   if (termgrammarp) {
     debugprint(1,"Producing term grammar... ");
-    minus_elim(ds); // also marks character sets, needed for the conversion
+    if(minus_elimp)
+      minus_elim(ds); // also marks character sets, needed for the conversion
     pr_definitions(stdout,grammar2termgrammar(ds));
-    debugprint(1,"done\n");
-    return 0;
-  }
-
-  /* Produce the term grammar, version 2, and exit */
-  if (termgrammar_v2p || termgrammar_MDTUp 
-      || termgrammar_RRTp || termgrammar_ITp 
-      || termgrammar_NOLITSp || termgrammar_RNCTp ) {
-    debugprint(1,"Producing term grammar (version 2)... ");
-    minus_elim(ds); // also marks character sets, needed for the conversion
-    let gr = grammar2termgrammar_UT(ds);
-    if (termgrammar_MDTUp){
-      debugprint(1,"Removing term wrappers on top-level rules in term grammar ... ");
-      gr = grammar_RTLT(gr);
-    }
-    if (termgrammar_RRTp){
-      debugprint(1,"Removing redundant tags in term grammar ... ");
-      gr = grammar_RRT(gr);      
-    }
-    if (termgrammar_ITp){
-      debugprint(1,"Improving tag choices in term grammar based on literals ... ");
-      gr = grammar_IT(gr);
-    }
-    if (termgrammar_NOLITSp){
-      debugprint(1,"Removing unnecessary literals in term grammar ... ");
-      gr = grammar_NOLITS(gr);
-    }
-    if (termgrammar_RNCTp){
-      debugprint(1,"Removing tags from unconflicting branches in term grammar ... ");
-      gr = grammar_RNCT(gr);
-    }
-    if (termgrammar_MDTUp){
-      debugprint(1,"Improving tag choices for symbols in term grammar ... ");
-      gr = grammar_IST(gr);
-    }
-    debugprint(1,"Performing final pass on term grammar ... ");
-    gr = grammar_final(gr);
-    pr_definitions(stdout, gr);
-    debugprint(1,"done\n");
-    return 0;
-  }
-
-  /* Produce the term grammar, version 3, and exit */
-  if (termgrammar_v3p) {
-    debugprint(1,"Producing term grammar (version 3)... ");
-    minus_elim(ds); // also marks character sets, needed for the conversion
-    let gr = grammar2termgrammar_v3(ds);
-    debugprint(1,"Performing final pass on term grammar ... ");
-    gr = grammar_final_v3(gr);
-    pr_definitions(stdout, gr);
-    fprintf(stdout, "{extern const char ?fresh_name();}\n");
-    fprintf(stdout, "{extern void tg_push_string();}\n");
-    fprintf(stdout, "{extern void tg_push_int();}\n");
-    fprintf(stdout, "{extern void tg_push_float();}\n");
-    fprintf(stdout, "{extern void tg_push_spec(const char ?);}\n");
-    fprintf(stdout, "{extern void tg_push(const char ?);}\n");
-    fprintf(stdout, "{extern void tg_merge();} \n");
-    // FIX: these two functions should be generated
-    fprintf(stdout, "{extern void process_SP();} \n");
-    fprintf(stdout, "{extern void process_DQUOTE();} \n");
     debugprint(1,"done\n");
     return 0;
   }
@@ -545,14 +473,26 @@ int main(int argc, const char ?`H?argv) {
     debugprint(1,"done\n");
   }
 
+  if (escapep && !bindgrammarp){
+    debugprint(1,"Escaping special characters in grammar ... ");
+    if (minus_elimp)
+      minus_elim(ds); // also marks character sets, needed for the conversion
+    ds = escape_grammar(ds);
+  }
+
   /* Produce the bindgrammar and exit */
   if (bindgrammarp) {
     debugprint(1,"Producing bind grammar ... ");
-    minus_elim(ds); // also marks character sets, needed for the conversion
+    if (minus_elimp)
+      minus_elim(ds); // also marks character sets, needed for the conversion
     let gr = ds;
+    if (escapep){
+      debugprint(1,"Escaping special characters in grammar ... ");
+      gr = escape_grammar(gr);
+    }
     if (flattenp) {
-      debugprint(1,"Flattenning grammar first ... ");
-      gr = flatten_grammar(ds);
+      debugprint(1,"Flattenning grammar ... ");
+      gr = flatten_grammar(gr);
     }
     debugprint(1,"Adding bnf/ast generation ... ");
     gr = grammar2bnfgen_grammar(gr);
@@ -588,13 +528,15 @@ int main(int argc, const char ?`H?argv) {
     if (check_left_recursion) report_left_recursion(ds);
     if (check_right_recursion) report_right_recursion(ds);
     if (check_white_edges) report_white_edges(ds);
-    minus_elim(ds);
+    if (minus_elimp)
+      minus_elim(ds);
     if (check_firstfollow) report_first_follow(ds);
     if (check_conflicts) report_conflicts(ds);
     if (check_glush) report_glush(ds);
   }
   else if (pads) {
-    minus_elim(ds);
+    if (minus_elimp)
+      minus_elim(ds);
     //    ds = ws_definitions(ds);
     pads_definitions(ds);
   }
@@ -603,9 +545,11 @@ int main(int argc, const char ?`H?argv) {
       fprintf(stderr,"Error: no definitions in input\n");
       exit(1);
     }
-    debugprint(1,"Minus elimination... ");
-    minus_elim(ds);
-    debugprint(1,"done\n");
+    if (minus_elimp){
+      debugprint(1,"Minus elimination... ");
+      minus_elim(ds);
+      debugprint(1,"done\n");
+    }
     debugprint(1,"Generating header... ");
     gen_header(ds,textblobs);
     debugprint(1,"done\n");
@@ -615,9 +559,11 @@ int main(int argc, const char ?`H?argv) {
       fprintf(stderr,"Error: no definitions in input\n");
       exit(1);
     }
-    debugprint(1,"Minus elimination... ");
-    minus_elim(ds);
-    debugprint(1,"done\n");
+    if (minus_elimp){
+      debugprint(1,"Minus elimination... ");
+      minus_elim(ds);
+      debugprint(1,"done\n");
+    }
     //    debugprint(1,"Processing whitespace... ");
     //    ds = ws_definitions(ds);
     //    debugprint(1,"done\n");
@@ -627,8 +573,13 @@ int main(int argc, const char ?`H?argv) {
     gen(ds,start_symbol,textblobs,all_startp, eof_val);
     debugprint(1,"done\n");
   }
-  else
-    // ds = ws_definitions(ds);
+  else {
+    if (minus_elimp){
+      debugprint(1,"Minus elimination... ");
+      minus_elim(ds);
+      debugprint(1,"done\n");
+    }
     pr_definitions(stdout,ds);
+  } 
   return 0;
 }

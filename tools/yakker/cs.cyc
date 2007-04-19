@@ -413,7 +413,7 @@ static void minus_elim_rule(rule_t r) {
   }
 }
 void minus_elim(grammar_t<`H> ds) {
-  cs_annot(ds); // FIX: throws away grammar, put this elsewhere
+  cs_annot(ds); // FIX: throws away the grammar return by cs_annot; put this elsewhere
   for (let t = ds; t; t = t->tl) {
     let &$(n,r,a) = t->hd;
     if (r->css && *r->css) { // The symbol defines a character set.
@@ -426,6 +426,20 @@ void minus_elim(grammar_t<`H> ds) {
     }
     else
       minus_elim_rule(r);
+  }
+}
+
+void cs_optimize(grammar_t<`H> ds) {
+  cs_annot(ds); // FIX: throws away the grammar returned by cs_annot; put this elsewhere
+  for (let t = ds; t; t = t->tl) {
+    let &$(n,r,a) = t->hd;
+    if (r->css && *r->css) { // The symbol defines a character set.
+      /* The point is to compress ("a"|..|"z") so DFA conversion is faster */
+      /* FIX: this can eliminate some ambiguities, e.g., ("a"|"b"|"a") */
+      let new_r = cs2rule(*r->css);
+      r->r = new_r->r;
+      r->css = new_r->css;
+    }
   }
 }
 

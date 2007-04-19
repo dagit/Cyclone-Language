@@ -104,11 +104,13 @@ small_imap_genpm: small_imap_genpm.cyc ykbuf.o ssl.o tg_stack.o ast_main.o pm_bn
 	$(CYCLONE) $^ -o $@ --novcgen -lssl -lcrypto
 
 #	./yakker $(YAKFLAGS) -all-start -eof 10 -gen command_pm -no-main $< > $@
+# Use -no-minus-elim as minus elimination was already done, and redoing it causes problems (in particular, 
+# the charset optimization loses necessary semantic actions.
 small_imap_genpm.cyc: small_imap_genpm.bnf yakker
-	./yakker $(YAKFLAGS) -all-start -gen command_pm -no-main $< > $@
+	./yakker $(YAKFLAGS) -all-start -no-minus-elim -gen command -no-main $< > $@
 
 small_imap_genpm.bnf: examples/small_imap.bnf yakker
-	./yakker -tsort -flatten -bindgrammar -termgrammar_bnf $< > $@
+	./yakker -tsort -escape -flatten -bindgrammar -termgrammar_bnf $< > $@
 
 # Pattern matching BNF examples.
 
@@ -121,10 +123,10 @@ small_imap_pm.cyc: small_imap_pm.bnf yakker
 	./yakker -no-close-defs -gen my-command $< > $@
 
 small_imap_pm.bnf: examples/test_genparse small_imap_genpm 
-	./small_imap_genpm -name my-command < $< > $@
+	./small_imap_genpm -unescape-pat -name my-command < $< > $@
 
 small_imap_print.cyc: examples/test_genprint.txt small_imap_genpm 
-	./small_imap_genpm -print -name my-command -args 7 < $< > $@
+	./small_imap_genpm -unescape-pat -print -name my-command -args 7 < $< > $@
 
 %_pm: %_pm.cyc ykbuf.o ssl.o tg_stack.o pm_main.o util.o
 	$(CYCLONE) $^ -o $@ --novcgen -lssl -lcrypto

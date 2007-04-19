@@ -42,6 +42,9 @@ extern int is_cs_empty(cs_t a);
 extern int is_cs_full(cs_t a);
 extern int is_cs_singleton(cs_t a);
 extern int first_of_cs(cs_t a);
+extern struct grammar @cs_annot(grammar_t<`H> ds);
+// convert all rules marked as css into actual css.
+extern void cs_optimize(grammar_t<`H> ds);
 extern void minus_elim(grammar_t<`H> ds);
 extern const char ?fsm_char_escape(unsigned int c);
 extern List::list_t<$(unsigned int,unsigned int)@> cs2ranges(cs_t a);

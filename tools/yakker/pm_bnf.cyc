@@ -133,3 +133,57 @@ const char ?pat2print_code(rule_pat_t p, char ?? args){
   ps = imp_rev(ps);
   return strconcat_l(ps);
 }
+
+static const char ?escape_str = "%";
+static const char escape_char = '%';
+
+static bool is_escape_lit(rule_pat_t p){
+  switch(p){
+  case &LitPat(x): return strcmp(x,escape_str) == 0;
+  case &CharPat(x): return x == escape_char;
+  default: return false;
+  }
+}
+
+static rule_pat_t unescape_char(rule_pat_t p){
+  switch(p){
+  case &CharPat(x): return p;
+  default: 
+    internal_err("Escape character not followed by CharPat.\n");
+    return p;
+  }
+}
+
+static const char ?unescape_lit(const char ?`H s){
+  let n = strlen(s); // use strlen instead of numelts, as the latter can include padding.
+
+  // at most, we'll need n+1 chars for the unescaped string.
+  char ?@notnull s_un = malloc((n + 1)* sizeof(char)); 
+  int i,j;
+  for (i = 0, j = 0; i < n; i++, j++){
+    if (s[i] == escape_char) {
+      i++; // just skip the escape char.
+      if (i == n-1)
+	internal_err("Found escape character %c at end of string.\n",escape_char);
+    }    
+    s_un[j] = s[i];
+  }
+  s_un[j] = '\0';
+  return s_un;
+}
+
+rule_pat_t unescape_pat(rule_pat_t p){
+  switch (p) {
+  case &LitPat(x):
+    return new LitPat(unescape_lit(x));
+  case &SeqPat(p1,p2):
+    if (is_escape_lit(p1))
+      return unescape_char(p2);
+    return new SeqPat(unescape_pat(p1), unescape_pat(p2));
+  case &SymbPat(_):
+  case &CharPat(_):
+  case &WildcardPat(_):
+    return p;
+  }
+}
+

@@ -166,10 +166,14 @@ const char ?string_escape(const char ?`H s) {
   int n = numelts(s) - 1;
   // Check for the expected NUL terminator of a string constant
   if (n>0 && s[n]=='\000') n--;
-  // determine length
+  // determine length of new string
   int len = 0;
   for (int i=0; i<=n; i++)
     switch (s[i]) {
+    case '\0':
+      // found an earlier \0. adjust n. implicitly will cause loop to exit.
+      n = i-1;
+      break;
     case '\a':
     case '\b':
     case '\f':
