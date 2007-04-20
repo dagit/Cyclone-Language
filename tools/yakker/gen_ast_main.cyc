@@ -1,0 +1,143 @@
+#include <buffer.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "bnf.h"
+#include "pr.h"
+#include "ykbuf.h"
+#include "pm_bnf.h"
+
+#define YKPOSN ((ykb->cur-ykb->bot)+ykb->discarded)
+
+extern int ykdebug;
+extern datatype exn {extern Parse_error };
+extern datatype exn.Parse_error Parse_error_val;
+enum Mode{ Print, Scan };
+
+#define USAGE \
+"Usage:%s [OPTIONS]\n"\
+"Options: -root <sym>            parse starting from rule <sym>\n"\
+"         -print                 generate printer from format string.\n"\
+"         -scan                  generate scanner from format string. This is the default option.\n"\
+"         -d                     increase debug level by 1.\n"\
+"         -unescape-pat <char>   unescape characters in the output, based on escape character <char>.\n"\
+"         -args <args>           pass the remaining arguments to the scan/print processor.\n"\
+"         -help                  print this message\n"
+
+static void die(const char ?prog_name) {
+  fprintf(stderr,USAGE,prog_name);
+  exit(1);
+}
+
+static struct Attr empty_attr = Attr{.ws=0,.re=0,.paramtype=NULL,.rettype=NULL};
+
+#include PATGEN_HEADER
+
+typedef enum{
+  SYMBOLS_ENUM_BODY
+}  root_rule_t;
+
+root_rule_t get_root(const char ?root_name){
+  GET_ROOT_BODY
+  else { 
+    fprintf(stderr,"Unrecognized symbol: %s. Defaulting to %s.\n",root_name,"command");
+    return GET_ROOT_DEFAULT;
+  }
+}
+
+int main(int argc, char ??argv) {
+  // position of last record in the stream.
+  int last_record_posn = 0;
+  char *@nozeroterm unescape_char = NULL;
+  enum Mode mode = Scan;
+  const char ? root_name = NULL; // name of root symbol specified by user.
+  const char ? def_name = NULL; // implicit name of symbol defined by format string.
+  unsigned int start_args = argc; // index in argv of first argument
+				  // to our printer. Default indicates
+				  // that no arguments arg present in
+				  // argv
+
+  for (int i = 1; i < argc; i++) {
+    if (     strcmp(argv[i],  "-help") == 0) die(argv[0]);
+    else if (strcmp(argv[i],  "-d") == 0) ykdebug++;
+    else if (strcmp(argv[i],  "-scan") == 0) mode = Scan;
+    else if (strcmp(argv[i],  "-print") == 0) mode = Print;
+    else if (strcmp(argv[i],  "-args") == 0) {start_args = i+1; break;}
+    else if (strcmp(argv[i],  "-unescape-pat") == 0) {
+      if (i+1 >= argc) die(argv[0]);
+      unescape_char = new argv[i+1][0];
+      i += 1;
+    }
+    else if(strcmp(argv[i],   "-root") == 0){
+      if (i+1 >= argc) die(argv[0]);
+      root_name = argv[i+1];
+      i += 1;
+    }
+    else if(strcmp(argv[i],   "-name") == 0){
+      if (i+1 >= argc) die(argv[0]);
+      def_name = strdup(argv[++i]);
+    }
+    else { fprintf(stderr,"Unrecognized option: %s\n",argv[i]); exit(1); }
+  }
+
+
+  root_rule_t root = get_root(root_name);
+  ykbuf_t @ykb = fd2ykbuf(0); // read from stdin
+  rule_pat_t p;
+  try {
+    // parse input until we hit an error or EOF.
+    while (1) { 
+      switch(root){
+	MAIN_SWITCH_CASES
+      default :
+	fprintf(stderr,"Unknown symbol."); 
+	exit(1);
+      }
+
+      if (unescape_char) 
+	p = unescape_pat(p, *unescape_char);
+
+      switch(mode){
+      case Scan:
+	let r = pat2parse_rule(p);
+	if (!def_name){
+	  def_name = strconcat("my-",root_name);
+	  fprintf(stderr,"Warning: no name specified for start symbol. Using \"%s\".\n",def_name);
+	}
+	let grm_r = List::list(new $(def_name,r,empty_attr));
+	pr_definitions(stdout, grm_r);
+	fprintf(stdout,"{#include \"small_imap.h\"}\n");
+	fprintf(stdout,"{#include \"tg_stack.h\"}\n");
+	break;
+      case Print:
+	let s = pat2print_code(p,argv + start_args);
+	fputs(s,stdout);
+	break;
+      default:
+	fprintf(stderr,"Unrecognized mode.");
+      }
+      // consume newline
+      char c = 0;
+      let sz = ykbread(&c,1,ykb);
+      if (1 != sz || '\n' != c)  // missing newline.
+	throw &Parse_error_val;      
+      printf("\n");
+      last_record_posn = YKPOSN;
+    }
+  }
+  catch {
+  case &Parse_error:
+    let n = YKPOSN - last_record_posn;
+    if (n == 0){
+      break; // stopped because reached empty line; program done.
+    }
+    // Otherwise, there was an error.
+    printf("\n");
+    if (n<60) for (int i = 0; i < n; i++) printf(" ");
+    printf("^ failed at position %d (0x%x)\n",n,n);
+    break;
+  }
+  
+
+  return 0;
+}

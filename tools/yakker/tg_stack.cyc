@@ -34,119 +34,11 @@
 
 using List;
 
-datatype exn { TGStack_error };
-datatype exn.TGStack_error TGStack_error_val = TGStack_error;
-
-static list_t<stringptr_t> tg_stack = NULL;
-static char ?? tg_args;
-static int tg_arg_num;
-// static int tg_print_rules = 0;
-
 int branch_id = 0;
 
-void tg_init(char ?? args){
-  tg_stack = NULL;
-  let n = numelts(args);
-  tg_args = new {for i< n: strdup(args[i])};    
-  tg_arg_num = 0;
-//   tg_print_rules = 0; // by default, rule printing is on.
+void tg_init(){
   branch_id = 0;
 }
-
-void tg_push(const char ?`H s){
-  tg_stack = new List(new s, tg_stack);  
-}
-
-// push elements from args.
-void tg_push_string(){
-  if (tg_arg_num < numelts(tg_args))
-    tg_push(tg_args[tg_arg_num++]);
-  else{
-    internal_err("tg_push_string: no arguments available.");
-    throw &TGStack_error_val;  
-  }
-}
-void tg_push_int(){
-  // FIX: to implement
-  internal_err("tg_push_int: not implemented.");
-  throw &TGStack_error_val;  
-}
-void tg_push_float(){
-  // FIX: to implement
-  internal_err("tg_push_float: not implemented.");
-  throw &TGStack_error_val;  
-}
-
-void tg_push_spec(const char ?`H specifier){
-
-  // specifier should a be a string containing a single character.
-  if (numelts(specifier) != 2){
-    internal_err("tg_push_spec: invalid format specifier.");
-    throw &TGStack_error_val;      
-  }
-
-  switch(*specifier){
-  case 's': tg_push_string();
-    break;
-  case 'd': tg_push_int();
-    break;
-  case 'f': tg_push_float();
-    break;
-  default:
-    internal_err("tg_push_spec: invalid format specifier.");
-    throw &TGStack_error_val;      
-  }
-}
-
-// peek at the top element of the stack
-const char ? tg_peek(){
-  if (tg_stack)
-    return *tg_stack->hd;
-  
-  internal_err("tg_peek: TG stack is empty.");
-  throw &TGStack_error_val;
-}
-
-const char ? tg_pop(){
-  if (tg_stack){
-    let hd = *tg_stack->hd;
-    tg_stack = tg_stack->tl;
-    return hd;
-  }
-  
-  internal_err("tg_pop: TG stack is empty.");
-  throw &TGStack_error_val;
-}
-
-// Merge the top two elements of the stack into one element.
-void tg_merge(){
-  switch (tg_stack) {
-  case &List(&s2, &List(&s1, ss)):
-    tg_stack = new List(new (const char ?)strconcat(s1,s2), ss);
-    break;
-  default:
-    internal_err("tg_merge: TG stack does not have two elements available.");
-    throw &TGStack_error_val;
-  }
-}
-
-void process_SP(){
-  tg_push(" ");
-}
-
-void process_DQUOTE(){
-  tg_push("\"");
-}
-
-// void tg_enter_binder(){ tg_in_binder = 1;}
-// void tg_exit_binder(){ tg_in_binder = 0;}
-
-// int tg_print(){
-//   return !tg_in_binder || !tg_print_rules;
-// }
-
-// void tg_disable_print(){ if (tg_in_binder) {tg_print_rules++;}}
-// int tg_enable_print(){ return tg_in_binder ? --tg_print_rules : 1;}
 
 ////////////////
 // These functions belong in separate file (e.g. pm_lib.cyc),
@@ -154,9 +46,9 @@ void process_DQUOTE(){
 
 static int chosen_branch = 0;
 
+void set_branch(int i){chosen_branch=i;}
+
 void yk_store(const char? s){
   printf("%s",s);
 }
-
-void set_branch(int i){chosen_branch=i;}
 

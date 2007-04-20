@@ -40,6 +40,6 @@ extern rule_t pat2parse_rule(rule_pat_t p);
 extern rule_t pat2print_rule(rule_pat_t p);
 extern const char ?pat2print_code(rule_pat_t p, char ?? args);
 
-extern rule_pat_t unescape_pat(rule_pat_t p);
+extern rule_pat_t unescape_pat(rule_pat_t p, char escape_char);
 
 #endif

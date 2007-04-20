@@ -21,30 +21,13 @@
 
 #ifndef TG_STACK_H
 #define TG_STACK_H
-extern void tg_init(char ?? args);
 
-extern void tg_push(const char ?`H);
-
-// push elements from var args.
-extern void tg_push_string();
-extern void tg_push_int();
-extern void tg_push_float();
-extern void tg_push_spec(const char ?`H specifier);
-
-// Boolean: are we in printing mode.
-/* extern int tg_print(); */
-/* extern void tg_disable_print(); */
-/* extern int tg_enable_print(); */
-/* void tg_enter_binder(); */
-/* void tg_exit_binder(); */
-
+extern void tg_init();
 extern int branch_id;
 
-// peek at the top element of the stack
-extern const char ? tg_peek();
-extern const char ? tg_pop();
-extern void tg_merge();
-
+////////////////
+// These functions belong in separate file (e.g. pm_lib.cyc),
+// but are placed here for convenience.
 extern void yk_store(const char?);
 extern void set_branch(int);
 #endif

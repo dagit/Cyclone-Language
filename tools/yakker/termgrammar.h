@@ -23,7 +23,9 @@ extern grammar_t grammar2termgrammar(grammar_t ds);
 // version 2
 extern grammar_t grammar2termgrammar_UT(grammar_t ds);
 
-extern grammar_t escape_grammar(grammar_t g);
+// if esc_chars is NULL, then a default set of chars is escaped.
+extern grammar_t escape_grammar(grammar_t g, const char? esc_chars);
+
 extern grammar_t flatten_grammar(grammar_t g);
 extern grammar_t grammar2bnfgen_grammar(grammar_t<`H> g);
 extern grammar_t grammar2termgrammar_bnf(grammar_t ds);

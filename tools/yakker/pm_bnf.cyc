@@ -135,7 +135,12 @@ const char ?pat2print_code(rule_pat_t p, char ?? args){
 }
 
 static const char ?escape_str = "%";
-static const char escape_char = '%';
+static char escape_char = '%';
+
+static void init_esc_char(char c){
+  escape_str = aprintf("%c",c);
+  escape_char = c;
+}
 
 static bool is_escape_lit(rule_pat_t p){
   switch(p){
@@ -172,14 +177,14 @@ static const char ?unescape_lit(const char ?`H s){
   return s_un;
 }
 
-rule_pat_t unescape_pat(rule_pat_t p){
+rule_pat_t unescape_pat0(rule_pat_t p){
   switch (p) {
   case &LitPat(x):
     return new LitPat(unescape_lit(x));
   case &SeqPat(p1,p2):
     if (is_escape_lit(p1))
       return unescape_char(p2);
-    return new SeqPat(unescape_pat(p1), unescape_pat(p2));
+    return new SeqPat(unescape_pat0(p1), unescape_pat0(p2));
   case &SymbPat(_):
   case &CharPat(_):
   case &WildcardPat(_):
@@ -187,3 +192,30 @@ rule_pat_t unescape_pat(rule_pat_t p){
   }
 }
 
+rule_pat_t unescape_pat(rule_pat_t p, char esc_char){
+  init_esc_char(esc_char);
+  return unescape_pat0(p);
+}
+
+
+// Complete a sequence from a partial list of its elements,
+// a list of its expected elements
+// expected_args must have at least one element.
+rule_pat_t compelete_seq(list<$(int, rule_pat_t) *> args, 
+			 const char?`H ?@notnull expected_args)
+{
+  args = sort_by_number(args);
+  
+  let arg = remove(args, 1);
+  rule_pat_t seq = arg ? (rule_pat_t) arg : new MissingPat(expected_args[0]);
+
+  let n = numelts(expected_args);
+  for (int i=1; i<n; i++){
+    arg = remove(args, i+1);
+    if (!arg) 
+      arg = new MissingPat(expected_args[i]);
+    seq = new SeqPat(seq,arg);
+  }
+
+  return seq;
+}

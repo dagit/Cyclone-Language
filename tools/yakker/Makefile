@@ -99,7 +99,7 @@ small_imap.cyc: examples/small_imap.bnf yakker
 small_imap.h: examples/small_imap.bnf yakker
 	./yakker $(YAKFLAGS) -gen-header $< > $@
 
-small_imap_genpm: small_imap_genpm.cyc ykbuf.o ssl.o tg_stack.o ast_main.o pm_bnf.o\
+small_imap_genpm: small_imap_genpm.cyc ykbuf.o ssl.o ast_main.o pm_bnf.o\
 	bnf.o lex.o parse_tab.o pr.o util.o 
 	$(CYCLONE) $(CYCFLAGS) $^ -o $@ --novcgen -lssl -lcrypto
 
@@ -109,8 +109,11 @@ small_imap_genpm: small_imap_genpm.cyc ykbuf.o ssl.o tg_stack.o ast_main.o pm_bn
 small_imap_genpm.cyc: small_imap_genpm.bnf yakker
 	./yakker $(YAKFLAGS) -all-start -no-minus-elim -gen command -no-main $< > $@
 
+small_imap_genpm.h: small_imap_genpm.bnf yakker
+	./yakker $(YAKFLAGS) -gen-header $< > $@
+
 small_imap_genpm.bnf: examples/small_imap.bnf yakker
-	./yakker -tsort -escape -flatten -bindgrammar -termgrammar_bnf $< > $@
+	./yakker -escape "\\%()" -flatten -bindgrammar -termgrammar_bnf $< > $@
 
 # Pattern matching BNF examples.
 
@@ -123,10 +126,10 @@ small_imap_pm.cyc: small_imap_pm.bnf yakker
 	./yakker -no-close-defs -gen my-command $< > $@
 
 small_imap_pm.bnf: examples/test_genparse small_imap_genpm 
-	./small_imap_genpm -unescape-pat -name my-command < $< > $@
+	./small_imap_genpm -unescape-pat "\\" -scan -name my-command < $< > $@
 
 small_imap_print.cyc: examples/test_genprint.txt small_imap_genpm 
-	./small_imap_genpm -unescape-pat -print -name my-command -args 7 < $< > $@
+	./small_imap_genpm -unescape-pat "\\" -print -name my-command -args 7 < $< > $@
 
 %_pm: %_pm.cyc ykbuf.o ssl.o tg_stack.o pm_main.o util.o
 	$(CYCLONE) $^ -o $@ --novcgen -lssl -lcrypto
@@ -140,7 +143,7 @@ tg_stack.o : tg_stack.cyc util.h
 tgmain.o : tgmain.cyc tg_stack.h
 	$(CYCLONE) -c $< -o $@ -I.
 
-ast_main.o : ast_main.cyc pm_bnf.h tg_stack.h
+ast_main.o : ast_main.cyc gen_ast_main.cyc pm_bnf.h small_imap_genpm.h
 	$(CYCLONE) -c $< -o $@ -I.
 
 pm_bnf.o : pm_bnf.cyc pm_bnf.h pads.h bnf.h
