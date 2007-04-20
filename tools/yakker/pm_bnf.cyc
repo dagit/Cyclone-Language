@@ -201,21 +201,21 @@ rule_pat_t unescape_pat(rule_pat_t p, char esc_char){
 // Complete a sequence from a partial list of its elements,
 // a list of its expected elements
 // expected_args must have at least one element.
-rule_pat_t compelete_seq(list<$(int, rule_pat_t) *> args, 
-			 const char?`H ?@notnull expected_args)
-{
-  args = sort_by_number(args);
+// rule_pat_t compelete_seq(list<$(int, rule_pat_t) *> args, 
+// 			 const char?`H ?@notnull expected_args)
+// {
+//   args = sort_by_number(args);
   
-  let arg = remove(args, 1);
-  rule_pat_t seq = arg ? (rule_pat_t) arg : new MissingPat(expected_args[0]);
+//   let arg = remove(args, 1);
+//   rule_pat_t seq = arg ? (rule_pat_t) arg : new MissingPat(expected_args[0]);
 
-  let n = numelts(expected_args);
-  for (int i=1; i<n; i++){
-    arg = remove(args, i+1);
-    if (!arg) 
-      arg = new MissingPat(expected_args[i]);
-    seq = new SeqPat(seq,arg);
-  }
+//   let n = numelts(expected_args);
+//   for (int i=1; i<n; i++){
+//     arg = remove(args, i+1);
+//     if (!arg) 
+//       arg = new MissingPat(expected_args[i]);
+//     seq = new SeqPat(seq,arg);
+//   }
 
-  return seq;
-}
+//   return seq;
+// }

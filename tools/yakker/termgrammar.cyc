@@ -834,31 +834,21 @@ grammar_t grammar2termgrammar_bnf(grammar_t g) {
 }
 
 
-// TO DO
-// Q:Why are there char sets that end with | ""?
-// Q: Why does follow for STAR use m2 =0?
-// turn * and # into list
-// cutoff of term transformation for reg.exps. (i.e. those rules that have all caps names).
-
-// Independent line of research N+1: Teach RFCs: Generate examples when parse fails.
-// USE return types on sem acts. Ask Trevor how they work.
-// Found possible bug in minus_elim. It removes sem. actions from branches of alts that are 
-//   classified as char.sets.
-// Also, our printf could perform dynamic check of well formedness. 
-//   Make optional with %t:... format? I.e. think of t: as annotation to be checked.
-//   Better syntax is %<fs>:<type>
-
-// The addition of conversion specifiers to Star in a sequence doesn't look quite right.
-// For example,
-//   bar = "sh" "X".
-//   zab = bar *("FF").
-
-
-// Improve efficiency of list handling for defs lists in flatten_grammar functions.
-
 ////////////////
 /// TO DO
 ///////////
+// Q: Why does follow for STAR use m2 =0?
+// x cutoff of term transformation for reg.exps. (i.e. those rules that have all caps names).
+
+// Independent line of research N+1: Teach RFCs: Generate examples when parse fails.
+// Found possible bug in minus_elim. It removes sem. actions from branches of alts that are 
+//   classified as char.sets.  Similarly, alt2rules loses semantic actions.
+// Our printf could perform dynamic check of well formedness. 
+//   Make optional with %t:... format? I.e. think of t: as annotation to be checked.
+//   Better syntax is %<fs>:<type>
+
+// Improve efficiency of list handling for defs lists in flatten_grammar functions.
+
 // Generate ast_main for every BNF. currently, specialized to small_imap.bnf.
 // Support termgrammars with paths used to fill in data.
 
