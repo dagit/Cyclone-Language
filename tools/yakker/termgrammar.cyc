@@ -20,36 +20,6 @@
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
 
-/*
- Sometimes want to format a rule so that it has a tag
-   f(...)
- Call this a *term*.
- Sometimes, with commas only, as in the ... above.
- Sometimes we format a rule, sometimes a list of rules.
-
-     +-------------+-----------------------------------+
-     |             |             OUTPUT                |
-     |  INPUT      |  tagged         sequence of args  |
-     |-------------+-----------------------------------+
-     |  rule       |  rule2term      rule2terms        |
-     |  rule list  |  rules2term     rules2terms       |
-     +-------------+-----------------------------------+
- */
-
-
-/*
-Unique-tags:
-
-Overall approach: 
-New grammar obeys meta-grammar (with implicit whitespace):
-
-tag  ::=  ... // valid identifier
-escaped-data ::= ... // data with whitespace, (, and \ escaped. All escaped with \.
-term ::= "(" tag *term ")"
-       | escaped-data
-
- */
-
 #include <core.h>
 #include <list.h>
 #include <buffer.h>
@@ -65,167 +35,6 @@ term ::= "(" tag *term ")"
 #include "pads.h"
 
 using List;
-
-static
-cs_t termchars() {
-  return string2cs("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*-_+=<,>.?/|{}\"[]:;'");
-}
-
-/* Separate a rule list with a given separator */
-static
-rule_t with_sep(list_t<rule_t> rs, const char ?`H c) {
-  if (rs == NULL) return LIT("");
-  let res = rs->hd;
-  rs = rs->tl;
-  for (; rs; rs = rs->tl)
-    res = SEQ(res,LIT(c),rs->hd);
-  return res;
-}
-
-/* Separate a rule list with commas */
-static
-rule_t with_commas(list_t<rule_t> rs) {
-  return with_sep(rs,",");
-}
-
-/* Separate a rule list with spaces */
-static
-rule_t with_spaces(list_t<rule_t> rs) {
-  return with_sep(rs," ");
-}
-
-/* Return a possible tag from a sequence, if any */
-static
-Rule_t seqtag(rule_t r) {
-  static cs_opt_t tc = NULL;
-  if (!tc) tc = termchars();
-  switch (r->r) {
-  case &Lit(x):
-    let cs = string2cs(x);
-  cs_difference(cs,(cs_t)tc);
-    if (is_cs_empty(cs))
-      // x includes no character outside the legal term characters
-      return r;
-    else return NULL;
-  case &Seq(r1,r2):
-    let tag_opt = seqtag(r1);
-    return (tag_opt)?tag_opt:seqtag(r2);
-  default:
-    return NULL;
-  }
-}
-
-/* If a rule expands to a unique string (the rule has arity 0),
-   return that string, else return NULL. */
-static
-const char ?rule2string(rule_t r0) {
-  let b = Buffer::create(23);
-  let rs = list(r0);
-  while (rs) {
-    let r = rs->hd;
-    switch (r->r) {
-    case &Symb(n,_):
-      if (arity_rule(r) != 0) return NULL;
-      /* FIX: need to look up rule! */
-      internal_err("rule2string needs to look up rule for symbol %s\n",n);
-      Buffer::add_string(b,n);
-      rs = rs->tl;
-      break;
-    case &Lit(x):
-      Buffer::add_string(b,x);
-      rs = rs->tl;
-      break;
-    case &Seq(r2,r3): /* Flatten r2 and r3 into the rule list */
-      rs = new List(r2,new List(r3,rs->tl));
-      break;
-
-    case &Star(m,&Num(n),r2):
-      if (m==n) {
-        let s = rule2string(r2);
-        for (let i = 0; i < m; i++) Buffer::add_string(b,s); 
-        break;
-      }
-      else return NULL;
-    case &Rcount(_,_):
-    case &Star(_,_,_):
-    case &Hash(_,_,_):
-    case &Opt(_):
-    case &Alt(_,_):
-    case &CharRange(_,_):
-      return NULL;
-    case &Prose(x): /* Should have been handled elsewhere */
-      internal_err("Unexpected Prose(%s) in rule2string\n",x);
-      return "<error>";
-    case &Minus(_,_): /* Should have been handled elsewhere */
-      internal_err("Unexpected Minus in rule2string\n");
-      return "<error>";
-    }
-  }
-  return Buffer::contents(b);
-}
-
-static rule_t alt2term(rule_t r);
-static Rule_t seq2term(rule_t r0);
-
-static cs_opt_t avoid_cs;
-static int avoid(cs_t cs) {
-  let x = string2cs("()[], \t\n\r");
-  cs_intersect(x,cs);
-  return !is_cs_empty(x);
-}
-
-static
-rule_t rule2term(rule_t r) {
-  let res = NULL;
-  switch (r->r) {
-  case &Rcount(n,r2):
-    // FIX: what to do about n???
-    return SEQ(LIT("["),
-               STAR(0,new Infinity,rule2term(r2)),
-               LIT("]"));
-  case &Star(m,N,r2):
-    if (is_cs(r2)) {
-      let cs = rule2cs(r2);
-      if (!avoid(cs))
-        return STAR(m,N,cs2rule(cs));
-    }
-    fallthru(m,N,r2);
-  case &Hash(m,N,r2):
-    return SEQ(LIT("["),
-               HASH(m,N,rule2term(r2)),
-               LIT("]"));
-  case &Opt(r2):
-    return SEQ(LIT("["),
-               OPT(rule2term(r2)),
-               LIT("]"));
-  case &Alt(_,_):
-    return alt2term(r);
-  case &Symb(_,_):
-    return r;
-  case &CharRange(_,_):
-    return r;
-  case &Lit(_):
-    return r;
-
-  case &Seq(_,_):
-    let r2 = seq2term(r);
-    if (r2) return r2;
-    else {
-      internal_err("rule2term: could not convert rule:\n");
-      pr_rule(stderr,r);
-      eprintf("\n");
-      return LIT("[]");
-    }
-
-    /* Error cases */
-  case &Prose(x):
-    internal_err("Unexpected Prose(%s) in rule2term\n",x);
-    exit(1);
-  case &Minus(_,_):
-    internal_err("Unexpected Minus in rule2term\n");
-    exit(1);
-  }
-}
 
 /* Is a rule a necessary argument? */
 static
@@ -248,253 +57,9 @@ int is_arg(rule_t r) {
   }
 }
 
-static
-list_t<rule_t> rule2args(rule_t r) {
-  return filter(is_arg,seq2rules(r));
-}
-
-static
-rule_t alt2term(rule_t r) {
-  switch (r->r) {
-  case &Alt(r1,r2):
-    return ALT(alt2term(r1),alt2term(r2));
-  default:
-    let tag = seqtag(r);
-    if (!tag) {
-      internal_err("alt2term: could not find tag:\n");
-      pr_rule(stderr,r);
-      eprintf("\n");
-      return r;
-    }
-    let args = rule2args(r);
-    if (args == NULL)
-      return tag;
-    else
-      return SEQ(tag,LIT("("),with_commas(map(rule2term,args)),LIT(")"));
-  }
-}
-
-static
-int is_term(rule_t r) {
-  if (is_cs(r)) return 1;
-  switch (r->r) {
-  case &Symb(_,_): return 1;
-  default:
-    break;
-  }
-  return !arity_rule(r); // An arity-0 rule is a term (a string literal)
-}
-
-static
-int non_zero_arity(rule_t r) {
-  /* Can't pass arity_rule to exists because it returns unsigned int instead
-     of int.  Have to do this annoying cast. */
-  return (arity_rule(r) != 0);
-}
-
-static
-Rule_t seq2term(rule_t r0) {
-  let rs = seq2rules(r0);
-  let args = filter(is_arg,rs);
-  let len = length(args);
-
-  if (len == 0) {
-    internal_err("seq2term: no args in sequence:\n");
-    pr_rule(stderr,r0);
-    eprintf("\n");
-    return LIT("[]");
-  }
-
-  if (len == 1) {
-    return rule2term(args->hd);
-  }
-
-  /* Look for an Alt which could serve as a tag */
-  list_t<rule_t,`H> revargs = NULL;
-  for (let x = args; x; x = x->tl) {
-    let r = x->hd;
-    switch (r->r) {
-    case &Alt(_,_):
-      let alts = alt2rules(r);
-      if (exists(non_zero_arity,alts)) {
-        revargs = new List(r,revargs);
-        continue;
-      }
-      else {
-        /* All alternatives have zero arity, so r can be used as a tag.
-           Gather up all the rest of the args and return. */
-        x = x->tl; // remove r from the list of args
-        for (; revargs; revargs = revargs->tl) // put back the already-examined args
-          x = new List(revargs->hd,x);
-        return SEQ(r,LIT("("),with_commas(map(rule2term,x)),LIT(")"));
-      }
-    default:
-      revargs = new List(r,revargs);
-      break;
-    }
-  }
-
- litsearch:
-  /* No Alt could be a tag, look for a Lit instead */
-  for (; rs; rs = rs->tl) {
-    let r = rs->hd;
-    switch (r->r) {
-    case &Lit(_):
-      return SEQ(r,LIT("("),with_commas(map(rule2term,args)),LIT(")"));
-    default:
-      break;
-    }
-  }
-
-  /* Nothing worked */
-  return NULL;
-}
-
-grammar_t grammar2termgrammar(grammar_t ds) {
-  init_arityt(ds);
-  let res = NULL;
-  for (; ds; ds = ds->tl) {
-    let &$(n,r,a) = ds->hd;
-    let r2;
-    let args = rule2args(r);
-    if (args == NULL)
-      r2 = LIT(n);
-    else
-      r2 = SEQ(LIT(n),LIT("("),with_commas(map(rule2term,args)),LIT(")"));
-    res = new List(new $(n,r2,a),res);
-    //    res = new List(new $(n,r2t(r),a),res);
-  }
-  res = imp_rev(res);
-  return res;
-}
-
-/////////////////
-// Termgrammar, version 2.
-////////////////
-
-// We use a dummy rule to mark terms so that they can be recognized by later 
-// optimization phases.
-static datatype Rule.Symb term_symb = Symb("TERM_DUMMY",NULL);
-struct arule term_rule = arule(NULL,NULL,NULL,NULL,&term_symb);
-
-// Make a new term.
-rule_t mkterm_UT(rule_t tag, rule_t args){
-  return SEQ(LIT("("), tag, LIT(" "), args, LIT(")"), &term_rule);
-}
-
-// Make a new term without the dummy term marker.
-// Also, clean up terms with empty lit as only arg
-rule_t mkterm_UT_nodummy(rule_t tag, rule_t args){
-  // check if args is empty
-  switch(args->r){
-  case &Lit(s):
-    if (s[0] == '\0')
-      return SEQ(LIT("("), tag, LIT(")"));;
-    fallthru;
-  default: 
-    return SEQ(LIT("("), tag, LIT(" "), args, LIT(")"));
-  }
-}
-
-// Checks whether rule r defines a term.
-bool is_term_UT(rule_t r){
-  switch (r->r){
-  case &Seq(_,last):
-    return last == &term_rule;
-  default:
-    return false;
-  }
-}
-
-// Checks whether rule r directly contains a term. 
-bool contains_term_UT(rule_t r){
-  return is_term_UT(r);
-}
-
-// Extract the tag from term. 
-// N.B. "term" must really be a term, or an Invalid argument exception will be raised.
-rule_t term_UT_get_tag(rule_t term){
-  switch (term->r){
-  case &Seq(
-	  &arule{.r= &Seq(
-	     &arule{.r=&Seq(
-	        &arule{.r=&Seq(
-		   &arule{.r= &Seq(
-                      &arule{.r= &Lit(lp),...},		     
-		      t as &arule{.r=&Lit(s),...}), ...}, 
-		   &arule{.r= &Lit(sp),...}),...},
-		r1),...},
-	     &arule{.r= &Lit(rp),...}),...},
-	  dummy_rule) :
-      return t;
-  default:
-    throw new Core::Invalid_argument("Expecting term rule, received something else.");
-  }
-}
-
-// Extract the rule from term.
-// N.B. "term" must really be a term, or an Invalid argument exception will be raised.
-rule_t term_UT_get_rule(rule_t term){
-  switch (term->r){
-  case &Seq(
-	  &arule{.r= &Seq(
-	     &arule{.r=&Seq(
-	        &arule{.r=&Seq(
-		   &arule{.r= &Seq(
-                      &arule{.r= &Lit(lp),...},		     
-		      &arule{.r = &Lit(t),...}), ...}, 
-		   &arule{.r= &Lit(sp),...}),...},
-		r1),...},
-	     &arule{.r= &Lit(rp),...}),...},
-	  dummy_rule) :
-      return r1;
-  default:
-    throw new Core::Invalid_argument("Expecting term rule, received something else.");
-  }
-}
-
-// "Eliminate" (extract the contents of) the term.
-// N.B. "term" must really be a term, or an Invalid argument exception will be raised.
-$(rule_t,rule_t) term_UT_elim(rule_t term){
-  switch (term->r){
-  case &Seq(
-	  &arule{.r= &Seq(
-	     &arule{.r=&Seq(
-	        &arule{.r=&Seq(
-		   &arule{.r= &Seq(
-                      &arule{.r= &Lit(lp),...},		     
-		      t as &arule{.r=&Lit(s),...}), ...}, 
-		   &arule{.r= &Lit(sp),...}),...},
-		r1),...},
-	     &arule{.r= &Lit(rp),...}),...},
-	  dummy_rule) :
-    return $(t,r1);
-  default:
-    throw new Core::Invalid_argument("Expecting term rule, received something else.");
-  }
-}
-
-static int fresh_num=0;
-static int get_fresh_num() { return fresh_num++; }
-
-/* Create a fresh tag. */
-static
-rule_t fresh_tag(const char ?`H name){
-  char num_string[30];
-  sprintf(num_string, "__%d", get_fresh_num());
-  return LIT(strconcat(name,num_string));
-}
-
-rule_t mk_alt(rule_t alts, rule_t r){
-  return ALT(alts, r);
-}
-
-rule_t mk_alt_term(rule_t alts, rule_t r){
-  return ALT(alts,mkterm_UT(fresh_tag("alt"), r));
-}
-
-static rule_t alt2term_UT(rule_t r);
-static rule_t seq2term_UT(rule_t r0);
+////
+// Functions for escaping special characters in grammar.
+////
 
 static const char ?default_esc_chars = "\\() %";
 static char esc_char = '\\'; // character used to escape characters (including itself). Defaults to \.
@@ -514,7 +79,7 @@ init_esc_chars(const char ?esc_chars){
   esc_char = esc_chars[0];
 }
 
-rule_t escape_cs_rule_UT(rule_t r){
+rule_t escape_cs_rule(rule_t r){
   check_esc_chars();
   let cs_ec = (cs_t)cs_esc_chars;
 
@@ -525,8 +90,8 @@ rule_t escape_cs_rule_UT(rule_t r){
     // r includes no character that needs escaping.
     return r;
   else {
-    let esc_tag = fresh_tag("alt");
-    let r_esc = mkterm_UT( esc_tag, SEQ(LIT("%"), cs2rule(cs_i)));
+    let r_i = cs2rule(cs_i);
+    let r_esc = SEQ(LIT("%"), r_i);
     
     // Remove the escaped chars from the original cs.
     let cs_diff = cs_dup(cs_r);
@@ -535,14 +100,13 @@ rule_t escape_cs_rule_UT(rule_t r){
     if (is_cs_empty(cs_diff))
       return r_esc;    
     else{      
-      let diff_tag = fresh_tag("alt");
-      let r_diff = mkterm_UT( diff_tag, cs2rule(cs_diff));
+      let r_diff = cs2rule(cs_diff);
       return ALT(r_diff,r_esc);
     }
   }
 }
 
-rule_t escape_lit_UT(const char ?`H s){
+rule_t escape_lit(const char ?`H s){
   check_esc_chars();
   let cs_ec = (cs_t)cs_esc_chars;
 
@@ -560,566 +124,64 @@ rule_t escape_lit_UT(const char ?`H s){
     
   return LIT(s_esc);
 }
-
+				     
+// Escape literals and character sets.
 static
-rule_t rule2term_UT(rule_t r) {
+rule_t escape_rule(rule_t r) {
   let res = NULL;
   switch (r->r) {
   case &Rcount(n,r2):
-    if (is_cs(r2)) {
-      let escaped = escape_cs_rule_UT(r2);
-      return RCOUNT(n, mkterm_UT( fresh_tag("rcount"), escaped) );
-    }
-    return RCOUNT(n, mkterm_UT( fresh_tag("rcount"), rule2term_UT(r2)) );
+    return RCOUNT(n,escape_rule(r2));
   case &Star(m,N,r2):
-    if (is_cs(r2)) {
-      let escaped = escape_cs_rule_UT(r2);
-      return STAR(m,N, mkterm_UT( fresh_tag("star"), escaped) );
-    }
-    return STAR(m,N, mkterm_UT( fresh_tag("star"), rule2term_UT(r2)) );
+//     if (is_cs(r2)) {
+//       let escaped = escape_cs_rule_v3(r2);
+//       return STAR(m,N, escaped);
+//     }
+    return STAR(m,N, escape_rule(r2));
   case &Hash(m,N,r2):
-    return HASH(m,N, mkterm_UT( fresh_tag("hash"), rule2term_UT(r2)) );
+    return HASH(m,N, escape_rule(r2));
   case &Opt(r2):
-    let some_term = mkterm_UT( fresh_tag("some"), rule2term_UT(r2) );
-    let none_term = mkterm_UT( fresh_tag("none"), LIT("") );
-    return ALT(some_term,none_term);
-  case &Alt(_,_):
-    return alt2term_UT(r);
+    return OPT(escape_rule(r2) );
+  case &Alt(r2,r3):
+    return ALT(escape_rule(r2),escape_rule(r3));
   case &Symb(_,_):
     return r;
-  case &CharRange(_,_):
-    return escape_cs_rule_UT(r);
-  case &Lit(s):
-    return escape_lit_UT(s);
 
-  case &Seq(_,_):
-    let r2 = seq2term_UT(r);
-    if (r2) return r2;
-    else {
-      internal_err("rule2term: could not convert rule:\n");
-      pr_rule(stderr,r);
-      eprintf("\n");
-      return LIT("[]");
-    }
+  case &CharRange(_,_):
+    return escape_cs_rule(r);
+  case &Lit(s):
+    return escape_lit(s);
+
+  case &Seq(r2,r3):
+    return SEQ(escape_rule(r2),escape_rule(r3));
 
     /* Error cases */
   case &Prose(x):
-    internal_err("Unexpected Prose(%s) in rule2term\n",x);
+    internal_err("Unexpected Prose(%s) in escape_rule\n",x);
     exit(1);
   case &Minus(_,_):
-    internal_err("Unexpected Minus in rule2term\n");
+    internal_err("Unexpected Minus in escape_rule\n");
     exit(1);
   }
 }
 
-static
-List_t<rule_t> rule2args_UT(rule_t r) {
-  return seq2rules(r);
-}
+grammar_t escape_grammar(grammar_t g, const char? esc_chars) {
+  grammar_t res = NULL,ds = g;
 
-// Unique-tags version.
-static
-rule_t alt2term_UT(rule_t r) {
-  switch (r->r) {
-  case &Alt(r1,r2):
-    return ALT(alt2term_UT(r1),alt2term_UT(r2));
-  default:
-    let tag = fresh_tag("alt");
-    let body = seq2term_UT(r);
-    return mkterm_UT( tag, body);
-  }
-}
+  if (esc_chars) 
+    init_esc_chars(esc_chars);
+  else
+    init_esc_chars(default_esc_chars);
 
-static
-rule_t seq2term_UT(rule_t r0) {
-  let args = rule2args_UT(r0);
-
-//   if (args == NULL) {
-//     internal_err("seq2term_UT: no args in sequence:\n");
-//     pr_rule(stderr,r0);
-//     eprintf("\n");
-//     return LIT("[]");
-//   }
-
-  return with_spaces(map(rule2term_UT,args));
-}
-
-grammar_t grammar2termgrammar_UT(grammar_t ds) {
-  init_arityt(ds);
-
-  let res = NULL;
   for (; ds; ds = ds->tl) {
     let &$(n,r,a) = ds->hd;
-    let body = seq2term_UT(r);
-    let r2 = mkterm_UT(LIT(n), body);
-    res = new List(new $(n,r2,a),res);
-    //    res = new List(new $(n,r2t(r),a),res);
+    let r_esc = escape_rule(r);
+    res = new List(new $(n, r_esc, a), res);
   }
 
   res = imp_rev(res);
-
-  // Add the production that corresponds to the dummy rule (symbol
-  // __TERM__) used to mark terms. Probably not necessary, but ensures
-  // that the grammar is coherent (because the dummy-term symbol is
-  // defined.)
-//   let term_def = new $((const char ?)"TERM_DUMMY",LIT("t"),
-// 		       Attr{.ws=0,.re=0,.paramtype=NULL,.rettype=NULL});
-//   res = new List(term_def,res);
-
   return res;
 }
-
-////////
-// Remove term wrappers on top-level rules.
-// RTLT =  remove top-level terms
-///////
-
-grammar_t grammar_RTLT(grammar_t ds) {
-  let res = NULL;
-  for (; ds; ds = ds->tl) {
-    let &$(n,r,a) = ds->hd;
-    // remove term wrapper.
-    let r2 = term_UT_get_rule(r);
-    res = new List(new $(n,r2,a),res);
-  }
-  res = imp_rev(res);
-  return res;
-}
-
-////////
-// Improve tags on symbols. Replace anonymous tags with name of symbol.
-// IST = improve symbol tags.
-///////
-
-rule_t rewrite_IST_alt(rule_t r);
-
-rule_t rewrite_IST(rule_t r){
-
-    if (is_term_UT(r)) { 
-      let $(tag,r_inner) = term_UT_elim(r);
-      return mkterm_UT(tag, rewrite_IST(r_inner));
-    }
-
-    switch (r->r) {
-    case &Symb(s,_):
-      return r;
-    case &Opt(r1):
-      return OPT(rewrite_IST_alt(r1));
-    case &Seq(r1,r2):
-      return SEQ(rewrite_IST(r1), rewrite_IST(r2));
-    case &Alt(r1,r2):
-      return ALT(rewrite_IST_alt(r1), rewrite_IST_alt(r2));
-    case &Rcount(n,r1):
-      return RCOUNT(n,rewrite_IST(r1));
-    case &Star(m,N,r1):
-      return STAR(m,N,rewrite_IST_alt(r1));
-    case &Hash(m,N,r1):
-      return HASH(m,N,rewrite_IST_alt(r1));
-    default:
-      return r;
-    }
-  
-}
-
-rule_t rewrite_IST_alt(rule_t r){
-
-    if (is_term_UT(r)) { 
-      let $(tag,r_inner) = term_UT_elim(r);
-      switch (r_inner->r) {
-      case &Symb(s,_):
-	return mkterm_UT(LIT(s),r_inner);
-      default:
-	return mkterm_UT(tag, rewrite_IST(r_inner));
-      } 
-    }
-
-    switch (r->r) {
-    case &Alt(r1,r2):
-      return ALT(rewrite_IST_alt(r1), rewrite_IST_alt(r2));
-    default:
-      return rewrite_IST(r);
-    } 
-}
-
-grammar_t grammar_IST(grammar_t ds) {
-  let res = NULL;
-  for (; ds; ds = ds->tl) {
-    let &$(n,r,a) = ds->hd;
-    let r2 = rewrite_IST(r);
-    res = new List(new $(n,r2,a),res);
-  }
-  res = imp_rev(res);
-  return res;
-
-}
-
-////////
-// Move top-level tags on non-terminal defs to uses.
-// MDTU = move def to use
-///////
-
-grammar_t grammar_MDTU(grammar_t ds) {
-  let res = NULL;
-  for (; ds; ds = ds->tl) {
-    let &$(n,r,a) = ds->hd;
-    // remove def tag
-    let r2 = term_UT_get_rule(r);
-    // add any applicable use tags (for any symbol, not specifically this rule.
-    r2 = rewrite_IST(r2);
-    res = new List(new $(n,r2,a),res);
-  }
-  res = imp_rev(res);
-  return res;
-
-}
-
-////////
-// RRT = remove redundant tags
-///////
-
-/*
-
---------
-symb: U
-
----------
-(T r) : U
-
-    r : U
------------------
-   (T r) --> r
-
-
- */
-
-// Invariant: r is a term iff the return value is a term.
-rule_t rewrite_RRT(rule_t r){
-    if (is_term_UT(r)) { 
-      let $(tag,r_inner) = term_UT_elim(r);
-
-      // Check if nested rule is a term too. if so, strip the outer
-      // term wrapping by just returning the inner term.
-      if (contains_term_UT(r_inner))
-	return rewrite_RRT(r_inner);
-
-      // Otherwise, rewrite and rewrap.
-      return mkterm_UT(tag, rewrite_RRT(r_inner));
-    }
-
-    switch (r->r) {
-    case &Opt(r1):
-      return OPT(rewrite_RRT(r1));
-    case &Seq(r1,r2):
-      return SEQ(rewrite_RRT(r1), rewrite_RRT(r2));
-    case &Alt(r1,r2):
-      return ALT(rewrite_RRT(r1), rewrite_RRT(r2));
-    case &Rcount(n,r1):
-      return RCOUNT(n,rewrite_RRT(r1));
-    case &Star(m,N,r1):
-      return STAR(m,N,rewrite_RRT(r1));
-    case &Hash(m,N,r1):
-      return HASH(m,N,rewrite_RRT(r1));
-    default:
-      return r;
-    }
-}
-
-grammar_t grammar_RRT(grammar_t ds) {
-  let res = NULL;
-  for (; ds; ds = ds->tl) {
-    let &$(n,r,a) = ds->hd;
-    let r2 = rewrite_RRT(r);
-    res = new List(new $(n,r2,a),res);
-  }
-  res = imp_rev(res);
-  return res;
-}
-
-////////
-// RNCT = remove no-conflict tags
-///////
-
-rule_t rewrite_RNCT_alt(rule_t r);
-
-rule_t rewrite_RNCT(rule_t r){
-    if (is_term_UT(r)) { 
-      let $(tag,r_inner) = term_UT_elim(r);
-      return mkterm_UT(tag, rewrite_RNCT(r_inner));
-    }
-
-    switch (r->r) {
-    case &Opt(r1):
-      return OPT(rewrite_RNCT(r1));
-    case &Seq(r1,r2):
-      return SEQ(rewrite_RNCT(r1), rewrite_RNCT(r2));
-    case &Alt(r1,r2):
-      return rewrite_RNCT_alt(r);
-    case &Rcount(n,r1):
-      return RCOUNT(n,rewrite_RNCT(r1));
-    case &Star(m,N,r1):
-      return STAR(m,N,rewrite_RNCT(r1));
-    case &Hash(m,N,r1):
-      return HASH(m,N,rewrite_RNCT(r1));
-    default:
-      return r;
-    }
-}
-
-// Try to remove any term wrappings from alt branches.
-// r must be a Alt.
-rule_t rewrite_RNCT_alt(rule_t r){
-  let rng_all = cs_empty();
-  let rng_conflict = cs_empty();
-  
-  let alts = alt2rules(r);    
-
-  // rewritten alts, with all terms stripped off.
-  let rw_alts = NULL;
-
-  let r_conflict = CHARRANGE(0,255);
-
-  for (let rs = alts; rs; rs = rs->tl) {
-    let rng = cs_empty();
-    let r_hd = is_term_UT(rs->hd) ? term_UT_get_rule(rs->hd) : rs->hd;	
-    // rewrite the branch
-    r_hd = rewrite_RNCT(r_hd);
-    // save the rewrite for later
-    rw_alts = new List(r_hd, rw_alts);
-
-//     first(rng,SEQ(r_hd,right_ctxt));
-
-    // We follow r_hd with r_conflict to ensure that if any of the
-    // branches are nullable, there will be guaranteed a conflict.
-    first(rng,SEQ(r_hd,r_conflict));
-    let rng2 = cs_dup(rng);
-    cs_intersect(rng2,rng_all);
-    cs_union(rng_conflict,rng2);
-    cs_union(rng_all,rng);
-  }
-  if (!is_cs_empty(rng_conflict)){
-    //  just rewrap rewritten alts
-    let alt_hd = mkterm_UT(fresh_tag("alt"), rw_alts->hd);      
-    return List::fold_left(mk_alt_term, alt_hd, rw_alts->tl);
-  }
-
-  // Otherwise, just convert rw_alts list into an Alt.
-  return List::fold_left(mk_alt,rw_alts->hd,rw_alts->tl);
-}
-
-grammar_t grammar_RNCT(grammar_t ds) {
-  reset_globals();
-  init_maybe_empty(ds);
-  init_firstt(ds);
-
-  let res = NULL;
-  for (; ds; ds = ds->tl) {
-    let &$(n,r,a) = ds->hd;
-    let r2 = rewrite_RNCT(r);
-    res = new List(new $(n,r2,a),res);
-  }
-  res = imp_rev(res);
-  return res;
-}
-
-////////
-// IT = Improve tags
-///////
-
-rule_t rewrite_IT(rule_t r){
-    if (is_term_UT(r)) { 
-      let $(tag,r_inner) = term_UT_elim(r);
-
-      // Try to extract tag from inner term.
-      let new_tag = seqtag(r_inner);
-      return mkterm_UT(new_tag ? new_tag : tag, rewrite_IT(r_inner));
-    }
-
-    switch (r->r) {
-    case &Opt(r1):
-      return OPT(rewrite_IT(r1));
-    case &Seq(r1,r2):
-      return SEQ(rewrite_IT(r1), rewrite_IT(r2));
-    case &Alt(r1,r2):
-      return ALT(rewrite_IT(r1), rewrite_IT(r2));
-    case &Rcount(n,r1):
-      return RCOUNT(n,rewrite_IT(r1));
-    case &Star(m,N,r1):
-      return STAR(m,N,rewrite_IT(r1));
-    case &Hash(m,N,r1):
-      return HASH(m,N,rewrite_IT(r1));
-    default:
-      return r;
-    }
-}
-
-grammar_t grammar_IT(grammar_t ds) {
-  let res = NULL;
-  for (; ds; ds = ds->tl) {
-    let &$(n,r,a) = ds->hd;
-    let r2 = rewrite_IT(r);
-    res = new List(new $(n,r2,a),res);
-  }
-  res = imp_rev(res);
-  return res;
-}
-
-////////
-// Remove unnecessary literals
-///////
-
-/* Is a rule a necessary term argument? 
-   r must not be a Seq.
-*/
-static
-int is_arg_UT(rule_t r) {
-  switch (r->r) {
-    // Are these artity checks correct?
-  case &Symb(_,_):
-  case &Star(_,_,_):
-  case &CharRange(_,_):
-    return (arity_rule(r) > 0);
-  case &Alt(_,_):
-  case &Opt(_):
-  case &Rcount(_,_):
-  case &Hash(_,_,_):
-    return 1;
-  case &Seq(_,r2):
-    if (r2 == &term_rule)
-      return 1;
-    throw new Core::Invalid_argument("is_arg_UT: Not expecting sequence.");
-  case &Lit(_):
-  case &Prose(_):  
-  case &Minus(_,_):
-    return 0;
-  }
-}
-
-/* Turn a tern rule into a list of the rule sequences.  If r0 is not a
-   sequence, will return a singleton list of r0.  Guaranteed to
-   contain at least one element.  Different than seq2rule in that it
-   recognizes that terms are a special case of sequences.
- */
-List::List_t<rule_t> termseq2rules(rule_t r0) {
-  let res = NULL;
-  let rs = List::list(r0);
-  while (rs) {
-    let r = rs->hd;
-    switch (r->r) {
-    case &Seq(r2,r3):
-      if (r3 != &term_rule){ // then its not a term
-	rs = new List::List(r2,new List::List(r3,rs->tl));
-	break;
-      }
-      fallthru;
-    case &Symb(_,_):
-    case &Alt(_,_):
-    case &Opt(_):
-    case &Rcount(_,_):
-    case &Star(_,_,_):
-    case &Hash(_,_,_):
-    case &CharRange(_,_):
-    case &Lit(_):
-    case &Prose(_):
-    case &Minus(_,_):
-      res = new List::List(r,res);
-      rs = rs->tl;
-      break;
-    }
-  }
-  res = List::imp_rev(res);
-  return res;
-}
-
-rule_t remove_lits(rule_t r){
-
-    if (is_term_UT(r)) { 
-      let $(tag,r_inner) = term_UT_elim(r);
-      return mkterm_UT(tag, remove_lits(r_inner));
-    }
-
-    switch (r->r) {
-    case &Lit(s):
-      // These empty lits will be cleaned up in the final phase.
-      return LIT("");
-    case &Opt(r1):
-      return OPT(remove_lits(r1));
-    case &Seq(_,_):
-      // the filter will remove any original literals as well as the spaces 
-      // added in during the first term-translation phase.
-
-
-      let args = filter(is_arg_UT, termseq2rules(r));
-
-
-      // recursively remove literals.
-      let args_nolits = map(remove_lits,args);
-      // put the spaces back now
-      return with_spaces(args_nolits);
-    case &Alt(r1,r2):
-      return ALT(remove_lits(r1), remove_lits(r2));
-    case &Rcount(n,r1):
-      return RCOUNT(n,remove_lits(r1));
-    case &Star(m,N,r1):
-      return STAR(m,N,remove_lits(r1));
-    case &Hash(m,N,r1):
-      return HASH(m,N,remove_lits(r1));
-    default:
-      return r;
-    }
-  
-}
-
-grammar_t grammar_NOLITS(grammar_t ds) {
-  let res = NULL;
-  for (; ds; ds = ds->tl) {
-    let &$(n,r,a) = ds->hd;
-    let r2 = remove_lits(r);
-    res = new List(new $(n,r2,a),res);
-  }
-  res = imp_rev(res);
-  return res;
-
-}
-
-////////////////////
-// Final pass on grammar. Currently, just used to cleanup dummy tags from terms.
-////////////////////
-
-rule_t rewrite_final(rule_t r){
-    if (is_term_UT(r)) { 
-      let $(tag,r_inner) = term_UT_elim(r);
-      return mkterm_UT_nodummy(tag, rewrite_final(r_inner));
-    }
-
-    switch (r->r) {
-    case &Opt(r1):
-      return OPT(rewrite_final(r1));
-    case &Seq(r1,r2):
-      return SEQ(rewrite_final(r1), rewrite_final(r2));
-    case &Alt(r1,r2):
-      return ALT(rewrite_final(r1), rewrite_final(r2));
-    case &Rcount(n,r1):
-      return RCOUNT(n,rewrite_final(r1));
-    case &Star(m,N,r1):
-      return STAR(m,N,rewrite_final(r1));
-    case &Hash(m,N,r1):
-      return HASH(m,N,rewrite_final(r1));
-    default:
-      return r;
-    }
-}
-
-grammar_t grammar_final(grammar_t ds) {
-  let res = NULL;
-  for (; ds; ds = ds->tl) {
-    let &$(n,r,a) = ds->hd;
-    let r2 = rewrite_final(r);
-    res = new List(new $(n,r2,a),res);
-  }
-  res = imp_rev(res);
-  return res;
-}
-
 
 //////////////////////////
 // Functions for adding bnf/ast generation to rules.
@@ -1325,7 +387,7 @@ grammar_t grammar2bindgrammar(grammar_t g) {
   grammar_t res = NULL,ds = g;
   for (; ds; ds = ds->tl) {
     let &$(n,r,a) = ds->hd;
-    if (is_arg_UT(SYMB(n))){
+    if (is_arg(SYMB(n))){
 //       let n_o = strconcat(n,"_o");
       let n_pm = strconcat(n,"_pm");
       let r_ab = add_binders(r);
@@ -1383,7 +445,7 @@ grammar_t grammar2bindgrammar(grammar_t g) {
   for (; ds; ds = ds->tl) {
     let &$(n,r,a) = ds->hd;
 
-    if (is_arg_UT(SYMB(n)) && !is_regexp(n)){
+    if (is_arg(SYMB(n)) && !is_regexp(n)){
       let r_b = mk_bnfgen_binder(n);
       res = new List(new $(n, ALT(r,r_b), a), res);
     } else      
@@ -1412,7 +474,7 @@ grammar_t grammar2bindgrammar(grammar_t g) {
 //   grammar_t res = NULL,ds = g;
 //   for (; ds; ds = ds->tl) {
 //     let &$(n,r,a) = ds->hd;
-//     if (is_arg_UT(SYMB(n))){
+//     if (is_arg(SYMB(n))){
 // //       let n_o = strconcat(n,"_o");
 //       let n_pm = strconcat(n,"_pm");
 //       let r_pg = add_parsegen(r);
@@ -1574,7 +636,7 @@ grammar_t flatten_grammar(grammar_t g) {
   grammar_t res = NULL,ds = g;
   for (; ds; ds = ds->tl) {
     let &$(n,r,a) = ds->hd;
-    if (is_arg_UT(SYMB(n))){
+    if (is_arg(SYMB(n))){
       let &$(new_defs, r_flat) = flatten_rule(n,r);
       res = revappend(new_defs,res);
       res = new List(new $(n, r_flat, a), res);
@@ -1709,7 +771,7 @@ rule_t with_spaces_bnfgen(list_t<rule_t> rs) {
 
 static
 rule_t seqrule2term_bnf(rule_t r) {
-  if (is_arg_UT(r))
+  if (is_arg(r))
     return r;
 
   let r2 = LIT("");
@@ -1725,7 +787,15 @@ rule_t seq2term_bnf(rule_t r) {
 }
 
 rule_t mkterm_bnf(rule_t tag, rule_t args){
-  return mkterm_UT_nodummy(tag, args);
+  // check if args is empty. If so, omit from term.
+  switch(args->r){
+  case &Lit(s):
+    if (s[0] == '\0')
+      return SEQ(LIT("("), tag, LIT(")"));;
+    fallthru;
+  default: 
+    return SEQ(LIT("("), tag, LIT(" "), args, LIT(")"));
+  }
 }
 
 bool is_seq(rule_t r){
@@ -1743,8 +813,8 @@ grammar_t grammar2termgrammar_bnf(grammar_t g) {
   grammar_t res = NULL,ds = g;
   for (; ds; ds = ds->tl) {
     let &$(n,r,a) = ds->hd;
-    let is_arg = is_arg_UT(SYMB(n));
-    if (is_arg && is_seq(r) && !is_regexp(n)){
+    let n_is_arg = is_arg(SYMB(n));
+    if (n_is_arg && is_seq(r) && !is_regexp(n)){
       let term_body = seq2term_bnf(r);
       let a_tb = term_body->a;
       term_body->a = NULL;
@@ -1754,7 +824,7 @@ grammar_t grammar2termgrammar_bnf(grammar_t g) {
       let r_both = ALT(r,r2);
       res = new List(new $(n,r_both,a),res);
     }else {
-      if (!is_arg) Hashtable::insert(symb_semacts, new n, new get_bnfgen(r));
+      if (!n_is_arg) Hashtable::insert(symb_semacts, new n, new get_bnfgen(r));
       res = new List(new $(n,r,a), res);
     }
   }
@@ -1763,100 +833,6 @@ grammar_t grammar2termgrammar_bnf(grammar_t g) {
   return res;
 }
 
-
-////
-// Functions for escaping special characters in grammar.
-////
-
-rule_t escape_cs_rule(rule_t r){
-  check_esc_chars();
-  let cs_ec = (cs_t)cs_esc_chars;
-
-  let cs_r = rule2cs(r);
-  let cs_i = cs_dup(cs_r);
-  cs_intersect(cs_i,cs_ec);
-  if (is_cs_empty(cs_i))
-    // r includes no character that needs escaping.
-    return r;
-  else {
-    let r_i = cs2rule(cs_i);
-    let r_esc = SEQ(LIT("%"), r_i);
-    
-    // Remove the escaped chars from the original cs.
-    let cs_diff = cs_dup(cs_r);
-    cs_difference(cs_diff,cs_ec);
-
-    if (is_cs_empty(cs_diff))
-      return r_esc;    
-    else{      
-      let r_diff = cs2rule(cs_diff);
-      return ALT(r_diff,r_esc);
-    }
-  }
-}
-
-rule_t escape_lit(const char ?`H s){
-  // FIX: get rid of escape_lit_UT and put its body here.
-  return escape_lit_UT(s);
-}
-				     
-// Escape literals and character sets.
-static
-rule_t escape_rule(rule_t r) {
-  let res = NULL;
-  switch (r->r) {
-  case &Rcount(n,r2):
-    return RCOUNT(n,escape_rule(r2));
-  case &Star(m,N,r2):
-//     if (is_cs(r2)) {
-//       let escaped = escape_cs_rule_v3(r2);
-//       return STAR(m,N, escaped);
-//     }
-    return STAR(m,N, escape_rule(r2));
-  case &Hash(m,N,r2):
-    return HASH(m,N, escape_rule(r2));
-  case &Opt(r2):
-    return OPT(escape_rule(r2) );
-  case &Alt(r2,r3):
-    return ALT(escape_rule(r2),escape_rule(r3));
-  case &Symb(_,_):
-    return r;
-
-  case &CharRange(_,_):
-    return escape_cs_rule(r);
-  case &Lit(s):
-    return escape_lit(s);
-
-  case &Seq(r2,r3):
-    return SEQ(escape_rule(r2),escape_rule(r3));
-
-    /* Error cases */
-  case &Prose(x):
-    internal_err("Unexpected Prose(%s) in escape_rule\n",x);
-    exit(1);
-  case &Minus(_,_):
-    internal_err("Unexpected Minus in escape_rule\n");
-    exit(1);
-  }
-}
-
-grammar_t escape_grammar(grammar_t g, const char? esc_chars) {
-  grammar_t res = NULL,ds = g;
-
-  if (esc_chars) 
-    init_esc_chars(esc_chars);
-  else
-    init_esc_chars(default_esc_chars);
-
-  for (; ds; ds = ds->tl) {
-    let &$(n,r,a) = ds->hd;
-    let r_esc = escape_rule(r);
-    res = new List(new $(n, r_esc, a), res);
-  }
-
-  res = imp_rev(res);
-  return res;
-}
 
 // TO DO
 // Q:Why are there char sets that end with | ""?

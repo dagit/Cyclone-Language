@@ -19,10 +19,6 @@
 #ifndef TERMGRAMMAR_H
 #define TERMGRAMMAR_H
 #include "bnf.h"
-extern grammar_t grammar2termgrammar(grammar_t ds);
-// version 2
-extern grammar_t grammar2termgrammar_UT(grammar_t ds);
-
 // if esc_chars is NULL, then a default set of chars is escaped.
 extern grammar_t escape_grammar(grammar_t g, const char? esc_chars);
 
