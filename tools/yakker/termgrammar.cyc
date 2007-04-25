@@ -553,10 +553,10 @@ $(grammar_t, rule_t) @flatten_rule0(const char ?`H ctxt_name, rule_t r){
       let &$(defs1, r1_flat) = flatten_rule0(new_ctxt_name, r1);
       let r_flat = OPT_r(r, r1_flat);
       // define new symbol with r_flat
-      let r_def = new $(new_ctxt_name, r_flat, empty_attr);
+      let r_def = new $(ctxt_name, r_flat, empty_attr);
       // add new symbol to list of defs.
       let defs = append(defs1, new List(r_def,NULL));
-      return new $(defs, SYMB(new_ctxt_name));
+      return new $(defs, SYMB(ctxt_name));
 
     case &Alt(r1,r2):
       let &$(defs1, r1_flat, n_elt) = alt_flatten_rule(ctxt_name, r1, 1);

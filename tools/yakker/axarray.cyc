@@ -25,6 +25,7 @@
 
 #include "axarray.h"
 #include <core.h>
+#include "util.h"
 using Core;
 
 namespace Axarray;
@@ -37,6 +38,7 @@ void bigger(xarray_t<`a> xarr, int minsize) { // NB minsize is number of element
   }
   // Otherwise we have to grow the array
   let newsize = minsize*2+1;
+  debugprint(0,"Growing array to %d.\n",newsize);
   if (xarr->num_elmts == 0)
     xarr->elmts = unew {for i < newsize : xarr->dflt};
   else {

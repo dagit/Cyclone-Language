@@ -34,6 +34,7 @@ extern void report_glush(grammar_t<`H> grm);
 extern void report_whitespace(grammar_t<`H> grm);
 extern void first(cs_t result, rule_t r);
 extern void last(cs_t result, rule_t r);
+extern int empty_rule(rule_t r);
 extern void init_recursive (grammar_t ds);
 extern void init_white_edge_symbols(grammar_t ds);
 extern void init_firstt(grammar_t grm);

@@ -1,0 +1,439 @@
+/* fa.cyc
+ * Finite automata library
+ */
+
+/* Copyright (C) 2005 Greg Morrisett, AT&T.
+   This file is part of the Cyclone project.
+
+   Cyclone is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   Cyclone is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Cyclone; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+#include <core.h>
+#include <stdio.h>
+#include <string.h>
+#include <hashtable.h>
+#include <list.h>
+#include <iter.h>
+#include <math.h>
+#include "bnf.h"
+#include "cs.h"
+#include "axarray.h"
+#include "analyze.h"
+#include "nfa.h"
+#include "pr.h"
+#include "util.h"
+#define MAXACTION MAXCSCHAR
+
+#include <time.h>
+
+static int uint_cmp(unsigned int a, unsigned int b) {
+  if (a == b) return 0; else if (a<b) return -1; else return 1;
+}
+
+#define iterator(x) (Set::make_iter(Core::heap_region,x))
+//static Iter::iter_t<`a> iterator(Set::set_t<`a,`H> x : regions(`a) > `H) {
+//  return Set::make_iter(Core::heap_region,x);
+//}
+#define dict_iter(x) (Dict::make_iter(Core::heap_region,x))
+//static Iter::iter_t<$(`a,`b)> dict_iter(Dict::dict_t<`a,`b,`H> x : regions($(`a,`b)) > `H) {
+//  return Dict::make_iter(Core::heap_region,x);
+//}
+
+const char ?txtfile(const char ?x);
+
+/****************** NFA AND DFA COMMON DEFINITIONS ******************/
+typedef unsigned int interval_t;
+typedef datatype StateThunk @state_thunk; // States.  
+datatype StateThunk {
+  ActualState(st_t);
+  LatentState(rule_t, interval_t, state_thunk); // rule and final state
+};
+
+static datatype StateThunk.ActualState notrans_thunk = ActualState(NOTRANSITION);
+
+#define NOTHUNK &notrans_thunk
+
+
+int st_hash(st_t a) { return (int)a; }
+int st_cmp(st_t a,st_t b) {
+  if (a == b) return 0; else if (a<b) return -1; else return 1;
+}
+
+/******************************* NFAS *******************************/
+/* This is not an implementation of general NFAs, it is intended for
+   NFAs constructed from regular expressions by Thompson's algorithm.
+
+   The NFAs are represented by some global arrays.  Each state has
+   a unique index, and the index 0 is for a dead state, all transitions
+   out of state 0 go to state 0, and state 0 is not a final state.
+
+   This is an imperative representation: NFAs are mutated in our
+   implementation of Thompson's algorithm.
+
+   All other states can have up to two transitions.  One of the two
+   transitions can be on any action, including EPSILON.  The other
+   transition can only be on EPSILON.  This is sufficient for
+   Thompson's algorithm.
+
+   The global arrays are:
+
+   * final_array[s]: holds the final state of the automaton with
+       initial state s.
+
+   * etrans_array[s]: holds a state t such that s moves to t on
+       EPSILON, or else holds NOTRANSITION.
+
+   * atrans_array[s] = holds a state t such that s moves to t on
+       action action_array[s], or else holds NOTRANSITION.
+
+   * action_array[s]: holds the action on which s moves to
+       state atrans_array[s]; meaningless if atrans_array[s] is
+       NOTRANSITION.
+
+   This is approximately the same representation used by flex.
+   Note, the array final_array is a bit of a waste, because in
+   Thompson's algorithm the final state of a state is used
+   immediately and then never used again.
+*/
+
+/* Globals */
+st_t nfa_number_of_states = 1;
+static struct Axarray::Xarray<st_t> *final_array;
+static struct Axarray::Xarray<state_thunk> *etrans_array;
+static struct Axarray::Xarray<state_thunk> *atrans_array;
+static struct Axarray::Xarray<cs_opt_t> *action_array;
+
+// Maps from states to their intervals (branch numbers).
+// Interval 0 corresponds to the non-branch states.
+static interval_t current_interval;
+static struct Axarray::Xarray<unsigned int> *interval_array;
+// State used in construction of NFAs.
+static $(strset_t, grammar_t, Hashtable::table_t<str_t,st_t>) *nfa_construction_state;
+
+static st_t rule2nfa_thunk(rule_t r, interval_t ival);
+static void etrans(st_t a, state_thunk b);
+static void action(st_t from, cs_opt_t x, state_thunk to);
+
+// force a lazy state to become an actual state.
+// static st_t force_ls(state_thunk ls){
+//   switch(ls){
+//   case &ActualState(s):
+//     return s;
+//   case &LatentState(r,f):
+//     let a = rule2nfa_thunk(r);
+//     etrans(get_final(a),f);
+//     return a;
+//   }
+// }
+
+static st_t force_atrans(st_t a){
+  let ls = Axarray::get((_@)atrans_array,a);
+  switch(ls){
+  case &ActualState(s):
+    return s;
+  case &LatentState(r,ival,f):
+    let b = rule2nfa_thunk(r,ival);
+    etrans(get_final(b),f);
+    
+    // replace Latent with Actual
+    let act = get_action(a);
+    action(a,act,new ActualState(b));
+    return b;
+  }
+}
+
+static st_t force_etrans(st_t a){
+  let ls = Axarray::get((_@)etrans_array,a);
+  switch(ls){
+  case &ActualState(s):
+    return s;
+  case &LatentState(r,ival,f):
+    let b = rule2nfa_thunk(r,ival);
+    etrans(get_final(b),f);
+
+    // replace Latent with Actual
+    etrans(a,new ActualState(b));
+    return b;
+  }
+}
+
+static void interval(st_t a, interval_t ival) {
+  Axarray::set((_@)interval_array,a,ival);
+}
+
+interval_t get_interval(st_t a) {
+  return Axarray::get((_@)interval_array,a);
+}
+
+static st_t nfa_fresh_state_internal(interval_t ival) {
+  interval(nfa_number_of_states, ival);
+  return nfa_number_of_states++;
+}
+
+st_t nfa_fresh_state() {
+  return nfa_fresh_state_internal(0);
+}
+
+static void final(st_t a, st_t b) {
+  Axarray::set((_@)final_array,a,b);
+}
+static void etrans(st_t a, state_thunk b) {
+  Axarray::set((_@)etrans_array,a,b);
+}
+static void action(st_t from, cs_opt_t x, state_thunk to) {
+  if (from == 0) return;
+  Axarray::set((_@)atrans_array,from,to);
+  Axarray::set((_@)action_array,from,x);
+}
+
+/* Invariant: all mk functions return a state s where get_final(s)
+   has no transitions */
+static st_t mk_lazy_alt(rule_t a,rule_t b, interval_t ival) {
+  let s = nfa_fresh_state_internal(ival); let f = nfa_fresh_state_internal(ival); final(s,f);
+  let st_a = new LatentState(a, ival, new ActualState(f));
+  let st_b = new LatentState(b, ival, new ActualState(f));
+  action(s,EPSILON,st_a);
+  etrans(s,st_b);
+  return s;
+}
+
+static st_t mk_lazy_seq(rule_t a,rule_t b, interval_t ival) {
+  let s = nfa_fresh_state_internal(ival); let f = nfa_fresh_state_internal(ival); final(s,f);
+  let st_b = new LatentState(b, ival, new ActualState(f));
+  let st_a = new LatentState(a, ival, st_b);
+  action(s,EPSILON,st_a);
+  return s;
+}
+
+static st_t mk_lazy_star(rule_t a, interval_t ival) {
+  let s = nfa_fresh_state_internal(ival); let f = nfa_fresh_state_internal(ival); final(s,f);
+  etrans(s, new ActualState(f));
+  let st_a = new LatentState(a, ival, new ActualState(s));
+  action(s,EPSILON,st_a);
+  return s;
+}
+
+// not actually lazy, as actions are the base case.
+static st_t mk_lazy_act(cs_t x, interval_t ival) {
+  let s = nfa_fresh_state_internal(ival); let f = nfa_fresh_state_internal(ival); final(s,f);
+  action(s,x,new ActualState(f));
+  return s;
+}
+
+#define CASE_INSENSITIVE 1
+/* A bit more space efficient than looping mk_lazy_act */
+static st_t mk_lazy_lit(const char ?x, interval_t ival) { 
+  let s = nfa_fresh_state_internal(ival);
+  let len = strlen(x);
+  if (len == 0) {
+    let f = nfa_fresh_state_internal(ival);
+    final(s,f);
+    action(s,EPSILON,new ActualState(f));
+  }
+  else {
+    let a = s;
+    for (let i = 0; i < len; i++) {
+      let b = nfa_fresh_state_internal(ival);
+      cs_opt_t y;
+      if (CASE_INSENSITIVE) {
+        y = cs_singleton(tolower(x[i]));
+        cs_insert(y,toupper(x[i]));
+      }
+      else y = cs_singleton(x[i]);
+      action(a,y,new ActualState(b));
+      a = b;
+    }
+    final(s,a);
+  }
+  return s;
+}
+
+
+/*************** CONVERT REGULAR EXPRESSIONS TO NFAS ***************/
+/* Approximately Thompson's algorithm */
+
+// This turns up so often we only want to warn once
+static int already_warn_repeat = 0;
+static void warn_repeat() {
+  if (already_warn_repeat) return;
+  already_warn_repeat++;
+  warn("using an approximation for @repeat in rule2nfa_thunk\n");
+}
+
+static Rule_t lookup_symbol(grammar_t grm, const char ?sym){
+  for (let g = grm; g; g = g->tl) {
+    let &$(x,r,_) = g->hd;
+    if (strcmp(sym,x) == 0) 
+      return r;
+  }
+  return NULL;
+}
+
+/* Convert a rule to an nfa.  If the rule contains a recursively-defined
+   symbol, then that symbol is only converted once, and all instances
+   share the resulting nfa. */
+static st_t
+rule2nfa_thunk(rule_t r, interval_t ival) {
+/* The variable recursive is the set of recursively defined symbols.
+   The table rt maps a recursively defined symbol to its start state.
+   When we need to convert a recursively defined symbol, we look up
+   its start state A and its final state B.
+   We create a start state s and corresponding final state f, for the
+   result of the conversion.  (We will be returning s.)
+   s gets an EPSILON transition to A.
+   Next we look at B, and we follow e-transitions until we reach
+   a state with no transitions.  We add an EPSILON transition from
+   that state to f, and another EPSILON transition to a fresh state.
+   At all times, the nfa for the symbol looks like
+
+     A -> ... -> B -> x1 -> x2 -> ... -> xn-1 -> xn
+                 |     |     |            |
+                 v     v     v            v
+                 f1    f2    f3           fn
+
+   where f1,...,fn are final states for the occurrences of the symbol
+   (with corresponding start states s1..sn that all have EPSILON
+   transitions to A).  x1..xn are just auxilliary nodes.
+
+   Notice that this construction (of course) allows us to deal with
+   the recursive case, where the nfa A->..->B is not yet defined.
+
+   Because of recursion we don't use mkcopy here.
+*/
+  switch (r->r) {
+  case &Symb(x,_):
+    if (!nfa_construction_state){
+	warn("nfa global state not initialized\n");
+	return mk_lazy_lit("",ival);
+    }
+    let &$(recursive_syms,nfa_grm,nfa_rt) = nfa_construction_state;
+    let xptr = new x;
+    if (expand_nonrec && !Set::member(recursive_syms,xptr)) {
+      Rule_t x_rule = lookup_symbol(nfa_grm, x);
+      if (!x_rule) {
+	warn("missing definition for %s in rule2nfa\n",x);
+	return mk_lazy_lit("",ival);
+      }
+      return rule2nfa_thunk(x_rule,ival);
+    }
+    st_t x_start;
+    if (!Hashtable::try_lookup(nfa_rt,xptr,&x_start)) {
+      Rule_t x_rule = lookup_symbol(nfa_grm, x);
+      if (!x_rule) {
+	warn("missing definition for %s in rule2nfa\n",x);
+	return mk_lazy_lit("",ival);
+      }
+      let s = nfa_fresh_state_internal(ival); let f = nfa_fresh_state_internal(ival); final(s,f);
+      Hashtable::insert(nfa_rt,xptr,s);
+      let s_body = new LatentState(x_rule, ival, new ActualState(f));
+      etrans(s,s_body);
+      x_start = s;
+    }
+    let s = nfa_fresh_state_internal(ival); let f = nfa_fresh_state_internal(ival); final(s,f);
+    etrans(s,new ActualState(x_start));
+    let x_last = get_final(x_start);
+    while (get_etrans(x_last) != NOTRANSITION) x_last = get_etrans(x_last);
+    /* Invariant: x_last has no transitions */
+    etrans(x_last,new ActualState(nfa_fresh_state_internal(ival)));
+    action(x_last,EPSILON,new ActualState(f));
+    return s;
+
+  case &Lit(x):
+    return mk_lazy_lit(x,ival);
+  case &CharRange(low,high):
+    if (low > high) {
+      internal_err("invalid character range in rule2nfa_thunk\n");
+      return mk_lazy_lit("",ival);
+    }
+    return mk_lazy_act(cs_range(low,high+1),ival);
+  case &Opt(r2):
+    return mk_lazy_alt(r2,LIT(""),ival);
+  case &Seq(r2,r3):
+    return mk_lazy_seq(r2,r3,ival);
+  case &Alt(r2,r3):
+    return mk_lazy_alt(r2,r3,ival);
+  case &Rcount(_,r2):
+    /* Since the semantic count can't be implemented in the NFA, we convert this as *r2
+       (a sequence of 0 or more r2's).  This is conservative when the nfa will be used for
+       conflict checking, for example.
+     */
+    warn_repeat();
+    fallthru(r2);
+  case &Star(0,&Infinity,r2):
+    return mk_lazy_star(r2,ival);
+  case &Star(m,i as &Infinity,r2):
+    let r_seq = SEQ(r2,STAR(m-1,i,r2));
+    return rule2nfa_thunk(r_seq,ival);
+  case &Star(0,&Num(0),r2):
+    return mk_lazy_lit("",ival);
+  case &Star(0,&Num(n),r2):
+    let r_opt = OPT(SEQ(r2,STAR(0, new Num(n-1),r2)));
+    return rule2nfa_thunk(r_opt,ival);
+  case &Star(m,&Num(n),r2):
+    if (m > n) return mk_lazy_lit("",ival);
+    let r_seq = SEQ(r2,STAR(m-1, new Num(n-1),r2));
+    return rule2nfa_thunk(r_seq,ival);
+  case &Hash(0,N,r2):
+    // same as [ r2 *{N-1}(commas r2) ]
+    return rule2nfa_thunk(OPT(SEQ(r2,STAR(0,minus_one(N),SEQ(commas(),r2)))),ival);
+  case &Hash(m,N,r2):
+    // same as r2 {m-1}*{N-1}(commas r2)
+    return rule2nfa_thunk(SEQ(r2,STAR(m-1,minus_one(N),SEQ(commas(),r2))),ival);
+  case &Prose(_):
+    warn("NFA conversion with Prose not supported\n");
+    return mk_lazy_lit("",ival);
+  case &Minus(_,_):
+    warn("NFA conversion with Minus not supported\n");
+    return mk_lazy_lit("",ival);
+  }
+}
+
+void nfa_init(grammar_t grm) {
+  nfa_number_of_states = 1;
+  final_array = Axarray::create(1023,NOTRANSITION);
+  etrans_array = Axarray::create(1023,NOTHUNK);
+  atrans_array = Axarray::create(1023,NOTHUNK);
+  action_array = Axarray::create(1023,EPSILON);
+
+  current_interval = 1;
+  interval_array = Axarray::create(1023,0);
+
+  let grm_copy = List::copy(grm);
+  
+  nfa_construction_state = new $(recursive_symbols(grm), grm_copy, Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr));
+}
+
+st_t get_final(st_t a) {
+  return Axarray::get((_@)final_array,a);
+}
+st_t get_etrans(st_t a) {
+  return force_etrans(a);
+}
+cs_opt_t get_action(st_t a) {
+  return Axarray::get((_@)action_array,a);
+}
+st_t get_atrans(st_t a) {
+  return force_atrans(a);
+}
+
+st_t
+rule2nfa(grammar_t grm, rule_t r){
+  return rule2nfa_thunk(r,current_interval++);
+}
+
+unsigned int
+what_interval(unsigned int ?intervals, unsigned int key) {
+  return get_interval(key);
+}

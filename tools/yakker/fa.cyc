@@ -31,6 +31,7 @@
 #include "cs.h"
 #include "axarray.h"
 #include "analyze.h"
+#include "nfa.h"
 #include "fa.h"
 #include "pr.h"
 #include "util.h"
@@ -61,101 +62,9 @@ static int uint_cmp(unsigned int a, unsigned int b) {
 const char ?txtfile(const char ?x);
 
 /****************** NFA AND DFA COMMON DEFINITIONS ******************/
-typedef unsigned int st_t; // States.  Sometimes, 0 is reserved to mark no transition
 typedef Graph::graph_t<st_t> stgraph_t; // State graphs.
 // List of glushkov transitions.
 typedef List::list_t<$(Set::set_t<st_t>,cs_opt_t,Set::set_t<st_t>) @> glush_trans_t;
-#define NOTRANSITION 0
-
-typedef unsigned int act_t;
-//#define EPSILON ((act_t)-1) // the empty action
-
-#define EPSILON NULL // the empty action
-
-static int st_hash(st_t a) { return (int)a; }
-static int st_cmp(st_t a,st_t b) {
-  if (a == b) return 0; else if (a<b) return -1; else return 1;
-}
-
-/******************************* NFAS *******************************/
-/* This is not an implementation of general NFAs, it is intended for
-   NFAs constructed from regular expressions by Thompson's algorithm.
-
-   The NFAs are represented by some global arrays.  Each state has
-   a unique index, and the index 0 is for a dead state, all transitions
-   out of state 0 go to state 0, and state 0 is not a final state.
-
-   This is an imperative representation: NFAs are mutated in our
-   implementation of Thompson's algorithm.
-
-   All other states can have up to two transitions.  One of the two
-   transitions can be on any action, including EPSILON.  The other
-   transition can only be on EPSILON.  This is sufficient for
-   Thompson's algorithm.
-
-   The global arrays are:
-
-   * final_array[s]: holds the final state of the automaton with
-       initial state s.
-
-   * etrans_array[s]: holds a state t such that s moves to t on
-       EPSILON, or else holds NOTRANSITION.
-
-   * atrans_array[s] = holds a state t such that s moves to t on
-       action action_array[s], or else holds NOTRANSITION.
-
-   * action_array[s]: holds the action on which s moves to
-       state atrans_array[s]; meaningless if atrans_array[s] is
-       NOTRANSITION.
-
-   This is approximately the same representation used by flex.
-   Note, the array final_array is a bit of a waste, because in
-   Thompson's algorithm the final state of a state is used
-   immediately and then never used again.
-*/
-
-/* Globals */
-st_t nfa_number_of_states = 1;
-struct Axarray::Xarray<st_t> *final_array;
-struct Axarray::Xarray<st_t> *etrans_array;
-struct Axarray::Xarray<st_t> *atrans_array;
-struct Axarray::Xarray<cs_opt_t> *action_array;
-
-void nfa_init() {
-  nfa_number_of_states = 1;
-  final_array = Axarray::create(1023,NOTRANSITION);
-  etrans_array = Axarray::create(1023,NOTRANSITION);
-  atrans_array = Axarray::create(1023,NOTRANSITION);
-  action_array = Axarray::create(1023,EPSILON);
-}
-
-st_t nfa_fresh_state() {
-  return nfa_number_of_states++;
-}
-
-void final(st_t a, st_t b) {
-  Axarray::set((_@)final_array,a,b);
-}
-st_t get_final(st_t a) {
-  return Axarray::get((_@)final_array,a);
-}
-void etrans(st_t a, st_t b) {
-  Axarray::set((_@)etrans_array,a,b);
-}
-st_t get_etrans(st_t a) {
-  return Axarray::get((_@)etrans_array,a);
-}
-void action(st_t from, cs_opt_t x, st_t to) {
-  if (from == 0) return;
-  Axarray::set((_@)atrans_array,from,to);
-  Axarray::set((_@)action_array,from,x);
-}
-cs_opt_t get_action(st_t a) {
-  return Axarray::get((_@)action_array,a);
-}
-st_t get_atrans(st_t a) {
-  return Axarray::get((_@)atrans_array,a);
-}
 
 void nfa_print(FILE @f) {
   for (let i = 0; i < nfa_number_of_states; i++) {
@@ -317,101 +226,6 @@ nfa_fsm final_states
 
 */
 
-/* Invariant: all mk functions return a state s where get_final(s)
-   has no transitions */
-st_t mkalt(st_t a,st_t b) {
-  let s = nfa_fresh_state(); let f = nfa_fresh_state(); final(s,f);
-  action(s,EPSILON,a);
-  etrans(s,b);
-  etrans(get_final(a),f);
-  etrans(get_final(b),f);
-  return s;
-}
-st_t mkseq(st_t a,st_t b) {
-  let s = nfa_fresh_state(); let f = nfa_fresh_state(); final(s,f);
-  action(s,EPSILON,a);
-  etrans(get_final(a),b);
-  etrans(get_final(b),f);
-  return s;
-}
-st_t mkstar(st_t a) {
-  let s = nfa_fresh_state(); let f = nfa_fresh_state(); final(s,f);
-  action(s,EPSILON,a);
-  etrans(get_final(a),s);
-  etrans(s,f);
-  return s;
-}
-st_t mkact(cs_t x) {
-  let s = nfa_fresh_state(); let f = nfa_fresh_state(); final(s,f);
-  action(s,x,f);
-  return s;
-}
-#define CASE_INSENSITIVE 1
-st_t mklit(const char ?x) { /* A bit more space efficient than looping mkact */
-  let s = nfa_fresh_state();
-  let len = strlen(x);
-  if (len == 0) {
-    let f = nfa_fresh_state();
-    final(s,f);
-    action(s,EPSILON,f);
-  }
-  else {
-    let a = s;
-    for (let i = 0; i < len; i++) {
-      let b = nfa_fresh_state();
-      cs_opt_t y;
-      if (CASE_INSENSITIVE) {
-        y = cs_singleton(tolower(x[i]));
-        cs_insert(y,toupper(x[i]));
-      }
-      else y = cs_singleton(x[i]);
-      action(a,y,b);
-      a = b;
-    }
-    final(s,a);
-  }
-  return s;
-}
-/* NB, the transitions out of the final state are not copied */
-st_t mkcopy(st_t a) {
-
-  let s = nfa_fresh_state(); let f = nfa_fresh_state(); final(s,f);
-
-  Hashtable::table_t<st_t,st_t> iso =
-    Hashtable::create(101,st_cmp,st_hash);
-
-  Hashtable::insert(iso,a,s);
-  st_t b = get_final(a);
-  Hashtable::insert(iso,b,f);
-
-  let todo = List::list(new $(s,a));
-  st_t t;
-
-  while (todo) {
-    let &$(s,a) = todo->hd;
-    todo = todo->tl;
-    b = get_atrans(a);
-    if (b != NOTRANSITION) {
-      if (!Hashtable::try_lookup(iso,b,&t)) {
-        t = nfa_fresh_state();
-        Hashtable::insert(iso,b,t);
-        todo = new List::List(new $(t,b),todo);
-      }
-      action(s,get_action(a),t);
-    }
-    b = get_etrans(a);
-    if (b != NOTRANSITION) {
-      if (!Hashtable::try_lookup(iso,b,&t)) {
-        t = nfa_fresh_state(); // add t,b
-        Hashtable::insert(iso,b,t);
-        todo = new List::List(new $(t,b),todo);
-      }
-      etrans(s,t);
-    }
-  }
-  return s;
-}
-
 /* Return the reachability graph of the states of an nfa */
 static stgraph_t nfa_onestep() {
   let g = Graph::empty(st_cmp);
@@ -435,166 +249,6 @@ stgraph_t nfa_reachable() {
   return Graph::tc(nfa_onestep());
 }
 
-
-/*************** CONVERT REGULAR EXPRESSIONS TO NFAS ***************/
-/* Approximately Thompson's algorithm */
-
-// This turns up so often we only want to warn once
-static int already_warn_repeat = 0;
-static void warn_repeat() {
-  if (already_warn_repeat) return;
-  already_warn_repeat++;
-  warn("using an approximation for @repeat in rule2nfa\n");
-}
-/* Convert a rule to an nfa.  If the rule contains a recursively-defined
-   symbol, then that symbol is only converted once, and all instances
-   share the resulting nfa. */
-static st_t
-rule2nfa0(strset_t recursive,
-	  Hashtable::table_t<str_t,st_t> rt,
-	  grammar_t grm,
-	  rule_t r) {
-/* The variable recursive is the set of recursively defined symbols.
-   The table rt maps a recursively defined symbol to its start state.
-   When we need to convert a recursively defined symbol, we look up
-   its start state A and its final state B.
-   We create a start state s and corresponding final state f, for the
-   result of the conversion.  (We will be returning s.)
-   s gets an EPSILON transition to A.
-   Next we look at B, and we follow e-transitions until we reach
-   a state with no transitions.  We add an EPSILON transition from
-   that state to f, and another EPSILON transition to a fresh state.
-   At all times, the nfa for the symbol looks like
-
-     A -> ... -> B -> x1 -> x2 -> ... -> xn-1 -> xn
-                 |     |     |            |
-                 v     v     v            v
-                 f1    f2    f3           fn
-
-   where f1,...,fn are final states for the occurrences of the symbol
-   (with corresponding start states s1..sn that all have EPSILON
-   transitions to A).  x1..xn are just auxilliary nodes.
-
-   Notice that this construction (of course) allows us to deal with
-   the recursive case, where the nfa A->..->B is not yet defined.
-
-   Because of recursion we don't use mkcopy here.
-*/
-  switch (r->r) {
-  case &Symb(x,_):
-    rule_t x_rule = LIT("");
-    let x_found = 0;
-    for (let g = grm; g; g = g->tl) {
-      let &$(x2,r2,_) = g->hd;
-      if (strcmp(x,x2) != 0) continue;
-      x_found = 1;
-      x_rule = r2;
-      break;
-    }
-    if (!x_found) {
-      warn("missing definition for %s in rule2nfa\n",x);
-      return mklit("");
-    }
-    let xptr = new x;
-    if (expand_nonrec && !Set::member(recursive,xptr)) {
-      return rule2nfa0(recursive,rt,grm,x_rule);
-    }
-    st_t x_start;
-    if (!Hashtable::try_lookup(rt,xptr,&x_start)) {
-      let s = nfa_fresh_state(); let f = nfa_fresh_state(); final(s,f);
-      Hashtable::insert(rt,xptr,s);
-      let s_body = rule2nfa0(recursive,rt,grm,x_rule);
-      etrans(s,s_body);
-      etrans(get_final(s_body),f);
-      x_start = s;
-    }
-    let s = nfa_fresh_state(); let f = nfa_fresh_state(); final(s,f);
-    etrans(s,x_start);
-    let x_last = get_final(x_start);
-    while (get_etrans(x_last) != NOTRANSITION) x_last = get_etrans(x_last);
-    /* Invariant: x_last has no transitions */
-    etrans(x_last,nfa_fresh_state());
-    action(x_last,EPSILON,f);
-    return s;
-  case &Lit(x):
-    return mklit(x);
-  case &CharRange(low,high):
-    if (low > high) {
-      internal_err("invalid character range in rule2nfa0\n");
-      return mklit("");
-    }
-    return mkact(cs_range(low,high+1));
-  case &Opt(r2):
-    let s2 = rule2nfa0(recursive,rt,grm,r2); let s3 = mklit("");
-    return mkalt(s2,s3);
-  case &Seq(r2,r3):
-    let s2 = rule2nfa0(recursive,rt,grm,r2); let s3 = rule2nfa0(recursive,rt,grm,r3);
-    return mkseq(s2,s3);
-  case &Alt(r2,r3):
-    let s2 = rule2nfa0(recursive,rt,grm,r2); let s3 = rule2nfa0(recursive,rt,grm,r3);
-    return mkalt(s2,s3);
-  case &Rcount(_,r2):
-    /* Since the semantic count can't be implemented in the NFA, we convert this as *r2
-       (a sequence of 0 or more r2's).  This is conservative when the nfa will be used for
-       conflict checking, for example.
-     */
-    warn_repeat();
-    fallthru(r2);
-  case &Star(0,&Infinity,r2):
-    let s2 = rule2nfa0(recursive,rt,grm,r2);
-    return mkstar(s2);
-  case &Star(m,&Infinity,r2):
-    let s = nfa_fresh_state(); let f = nfa_fresh_state(); final(s,f);
-    let s2 = rule2nfa0(recursive,rt,grm,r2);
-    action(s,EPSILON,s2);
-    for (let i = 1; i < m; i++) {
-      let s3 = rule2nfa0(recursive,rt,grm,r2);
-      etrans(get_final(s2),s3);
-      s2 = s3;
-    }
-    let s4 = mkstar(rule2nfa0(recursive,rt,grm,r2));
-    etrans(get_final(s2),s4);
-    etrans(get_final(s4), f);
-    return s;
-  case &Star(0,&Num(0),r2):
-    return mklit("");
-  case &Star(m,&Num(n),r2):
-    if (m > n) return mklit("");
-    let s = nfa_fresh_state(); let f = nfa_fresh_state(); final(s,f);
-    let s2 = rule2nfa0(recursive,rt,grm,r2);
-    action(s,EPSILON,s2);
-    if (m == 0) etrans(s,f);
-    for (let i = 1; i < n; i++) {
-      let s3 = rule2nfa0(recursive,rt,grm,r2);
-      etrans(get_final(s2),s3);
-      if (i+1 > m) action(get_final(s2),EPSILON,f);
-      s2 = s3;
-    }
-    etrans(get_final(s2),f);
-    return s;
-  case &Hash(0,N,r2):
-    // same as [ r2 *{N-1}(commas r2) ]
-    return rule2nfa0(recursive,rt,grm,
-                     OPT(SEQ(r2,STAR(0,minus_one(N),SEQ(commas(),r2)))));
-  case &Hash(m,N,r2):
-    // same as r2 {m-1}*{N-1}(commas r2)
-    return rule2nfa0(recursive,rt,grm,
-                     SEQ(r2,STAR(m-1,minus_one(N),SEQ(commas(),r2))));
-  case &Prose(_):
-    warn("NFA conversion with Prose not supported\n");
-    return mklit("");
-  case &Minus(_,_):
-    warn("NFA conversion with Minus not supported\n");
-    return mklit("");
-  }
-}
-st_t rule2nfa(grammar_t grm, rule_t r) {
-  let recursive = recursive_symbols(grm);
-  Hashtable::table_t<str_t,st_t> rt =
-    Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr);
-  let result = rule2nfa0(recursive,rt,grm,r);
-  return result;
-}
 
 /********* Experimental code for building Glushkov automata **********/
 #include <array.h>
@@ -730,7 +384,7 @@ lookahead_glush(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt) {
     }
 //  }
 
-  nfa_init();
+  nfa_init(grm);
   let nfa_final_states = Set::empty(st_cmp);
   let T_list = NULL;
   let F_all = Set::empty(st_cmp);
@@ -1297,6 +951,8 @@ nstate_insert(nstate_t n,st_t a) {
   if (a == 0 || Set::member(s,a)) return n;
   return new $(h+a,Set::insert(s,a));
 }
+
+// Convert a set of states to an nstate.
 static nstate_t
 stset2nstate(Set::set_t<st_t,`H> X) {
   let result = nstate_empty();
@@ -1307,6 +963,7 @@ stset2nstate(Set::set_t<st_t,`H> X) {
   }
   return result;
 }
+
 static nstate_t
 nstate_singleton(st_t a) {
   return nstate_insert(nstate_empty(),a);
@@ -1347,9 +1004,14 @@ epsilon_close(nstate_t n) {
   return result;
 }
 
+// return mapping from actions to state sets. Mapping from a to S
+// indicates that on input a, all states in S are reachable.
+// First value of tuple is minimum action. 
 static $(act_t,nstate_t ?) transitions(nstate_t n) {
   let &$(h,s) = n; // NB: Assume n is epsilon closed
   List::list_t<$(cs_t,st_t)@> ts = NULL;
+
+  // Collect action,target pairs.
   while (!Set::is_empty(s)) {
     let a = Set::choose(s);
     s = Set::delete(s,a);
@@ -1359,6 +1021,8 @@ static $(act_t,nstate_t ?) transitions(nstate_t n) {
     if (act == EPSILON) continue;
     ts = new List::List(new $(act,b),ts);
   }
+
+  // Determine minimum and maximum "actionable" chars.
   let lb = MAXACTION;
   let ub = 0;
   for (let t = ts; t; t = t->tl) {
@@ -1368,6 +1032,8 @@ static $(act_t,nstate_t ?) transitions(nstate_t n) {
     if (min < lb) lb = min;
     if (max > ub) ub = max;
   }
+
+  // Construct mapping from "actionable" chars to state-sets.
   let num_actions = (ub>=lb)?(ub-lb+1):(0);
   let default_nstate = nstate_empty();
   let targets = new {for i < num_actions : default_nstate};
@@ -1496,20 +1162,6 @@ dfa_t nfa2dfa(st_t start_state, Set::set_t<st_t,`H> final_states) {
    So, this algorithm should have a second pass that eliminates
    cases like this.
 */
-static unsigned int
-what_interval(unsigned int ?intervals, unsigned int key) {
-  /* intervals is an array like [4,9,12,25];
-     return the index of the least element greater than the key,
-     or the length of the array if none.  So key<4 --> 0,
-     4<=key<9 --> 1, key==16-->3, key>=25 --> 4
-  */
-  /* Linear; if this is a bottleneck we can do binary search instead, but we
-     expect the number of intervals to max out around a dozen or so */
-  let len = numelts(intervals);
-  for (unsigned int i = 0; i < len; i++)
-    if (intervals[i] > key) return i;
-  return len;
-}
 static Set::set_t<unsigned int>
 st2ivals(unsigned int ?intervals,Set::set_t<st_t,`H> s) {
   let result = Set::empty(uint_cmp);
@@ -1599,6 +1251,18 @@ dfa_t nfa_distinguish(Set::set_t<st_t,`H> start_states,
           let nfa_final_states = Set::intersect(nfa_states,final_states);
           let ivals = st2ivals(intervals,nfa_states);
           if (CUTOFF && Set::cardinality(ivals) == 1) {
+// 	    let ival = Set::choose(ivals);
+// 	    debugprint(1,"Cutting off. i = %d. Number of DFA states = %d. \n" i, dfa->number_of_states);
+//          let ns_card = Set::cardinality(nfa_states);
+// 	    debugprint(1,"Ival = %d. Cardinality of nfa_states = %d. NFA states: ", ival,ns_card);
+// 	    // print NFA states.
+// 	    let to_print = nfa_states;
+// 	    while (!Set::is_empty(to_print)) {
+// 	      let x = Set::choose(to_print);
+// 	      to_print = Set::delete(to_print,x);
+// 	      debugprint(1,"%d ",x);
+// 	    }
+// 	    debugprint(1,"\n");
             d_done = Set::insert(d_done,d);
             dfa_add_final(dfa,d,ivals);
           }
@@ -2203,7 +1867,39 @@ static dfa_t short_circuit(dfa_t dfa) {
 dfa_t lookahead_dfa(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt) {
   //  if (!rules) return;
 
-  nfa_init();
+  let try_local = 0; 
+  if (try_local){
+    nfa_init(grm);
+    let start_states = Set::empty(st_cmp);
+    let final_states = Set::empty(st_cmp);
+    List::list_t<unsigned int> interval_list = NULL;
+    for (let rl = rules; rl; rl = rl->tl) {
+      unsigned int Z = nfa_number_of_states; // First state of this nfa
+      interval_list = new List::List(Z,interval_list);
+      let s = rule2nfa(grm,rl->hd); // TRY WITHOUT RIGHT CONTEXT
+      start_states = Set::insert(start_states,s);
+      final_states = Set::insert(final_states,get_final(s));
+    }
+    interval_list = List::imp_rev(interval_list);
+    let intervals = Array::from_list(interval_list);
+
+    let dfa = nfa_distinguish(start_states,final_states,intervals);
+
+    dfa = dfa_minimize(dfa);
+
+    // If all conflicts were resolved without using the right context...
+    if (!dfa_tiebreak(dfa)) {
+      eprintf("The final dfa has %u states\n",dfa->number_of_states);      
+      if (dfa_unbounded(dfa)) {
+	num_conflicts_unbounded++;
+	FILE *f = fopen(dotfile("unbounded"),"w");
+	if (f) { dfa_dot(f,dfa); fclose(f); }
+      }
+      return dfa;
+    }
+  }
+
+  nfa_init(grm);
   let start_states = Set::empty(st_cmp);
   let final_states = Set::empty(st_cmp);
   List::list_t<unsigned int> interval_list = NULL;
@@ -2215,6 +1911,7 @@ dfa_t lookahead_dfa(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt)
     start_states = Set::insert(start_states,s);
     final_states = Set::insert(final_states,get_final(s));
   }
+
   if (debug) {
     /* Make sure the ykdebug directory exists */
     struct stat sb;
@@ -2236,8 +1933,10 @@ dfa_t lookahead_dfa(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt)
     FILE *f = fopen(dotfile("nfa"),"w");
     if (f) { nfa_dot(f,final_states); fclose(f); }
   }
+
   interval_list = List::imp_rev(interval_list);
   let intervals = Array::from_list(interval_list);
+
   if (debug) {
     eprintf("Intervals: ");
     for (let i = 0; i < numelts(intervals); i++) {
@@ -2245,16 +1944,21 @@ dfa_t lookahead_dfa(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt)
     }
     eprintf("\n");
   }
+
   let dfa = nfa_distinguish(start_states,final_states,intervals);
+
   if (debug) {
     FILE *f = fopen(dotfile("dfa0"),"w");
     if (f) { dfa_dot(f,dfa); fclose(f); }
   }
+
   dfa = dfa_minimize(dfa);
+
   if (debug) {
     FILE *f = fopen(dotfile("dfa1"),"w");
     if (f) { dfa_dot(f,dfa); fclose(f); }
   }
+
   if (dfa_tiebreak(dfa)) {
     dfa = short_circuit(dfa);
     dfa = dfa_minimize(dfa);
@@ -2276,250 +1980,3 @@ dfa_t lookahead_dfa(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt)
 }
 
 
-/************************* SIMPLIFIED VERSION OF LOOKAHEAD. *************************/
-
-/*************** CONVERT REGULAR EXPRESSIONS TO NFAS ***************/
-/* Approximately Thompson's algorithm */
-
-// This turns up so often we only want to warn once
-// static int already_warn_repeat = 0;
-// static void warn_repeat() {
-//   if (already_warn_repeat) return;
-//   already_warn_repeat++;
-//   warn("using an approximation for @repeat in rule2nfa\n");
-// }
-/* Convert a rule to an nfa.  If the rule contains a recursively-defined
-   symbol, then that symbol is only converted once, and all instances
-   share the resulting nfa. */
-static st_t
-simple_rule2nfa0(strset_t recursive,
-	  Hashtable::table_t<str_t,st_t> rt,
-	  grammar_t grm,
-	  rule_t r) {
-/* The variable recursive is the set of recursively defined symbols.
-   The table rt maps a recursively defined symbol to its start state.
-   When we need to convert a recursively defined symbol, we look up
-   its start state A and its final state B.
-   We create a start state s and corresponding final state f, for the
-   result of the conversion.  (We will be returning s.)
-   s gets an EPSILON transition to A.
-   Next we look at B, and we follow e-transitions until we reach
-   a state with no transitions.  We add an EPSILON transition from
-   that state to f, and another EPSILON transition to a fresh state.
-   At all times, the nfa for the symbol looks like
-
-     A -> ... -> B -> x1 -> x2 -> ... -> xn-1 -> xn
-                 |     |     |            |
-                 v     v     v            v
-                 f1    f2    f3           fn
-
-   where f1,...,fn are final states for the occurrences of the symbol
-   (with corresponding start states s1..sn that all have EPSILON
-   transitions to A).  x1..xn are just auxilliary nodes.
-
-   Notice that this construction (of course) allows us to deal with
-   the recursive case, where the nfa A->..->B is not yet defined.
-
-   Because of recursion we don't use mkcopy here.
-*/
-  switch (r->r) {
-  case &Symb(x,_):
-    rule_t x_rule = LIT("");
-    let x_found = 0;
-    for (let g = grm; g; g = g->tl) {
-      let &$(x2,r2,_) = g->hd;
-      if (strcmp(x,x2) != 0) continue;
-      x_found = 1;
-      x_rule = r2;
-      break;
-    }
-    if (!x_found) {
-      warn("missing definition for %s in rule2nfa\n",x);
-      return mklit("");
-    }
-    let xptr = new x;
-    if (expand_nonrec && !Set::member(recursive,xptr)) {
-      return rule2nfa0(recursive,rt,grm,x_rule);
-    }
-    st_t x_start;
-    if (!Hashtable::try_lookup(rt,xptr,&x_start)) {
-      let s = nfa_fresh_state(); let f = nfa_fresh_state(); final(s,f);
-      Hashtable::insert(rt,xptr,s);
-      let s_body = rule2nfa0(recursive,rt,grm,x_rule);
-      etrans(s,s_body);
-      etrans(get_final(s_body),f);
-      x_start = s;
-    }
-    let s = nfa_fresh_state(); let f = nfa_fresh_state(); final(s,f);
-    etrans(s,x_start);
-    let x_last = get_final(x_start);
-    while (get_etrans(x_last) != NOTRANSITION) x_last = get_etrans(x_last);
-    /* Invariant: x_last has no transitions */
-    etrans(x_last,nfa_fresh_state());
-    action(x_last,EPSILON,f);
-    return s;
-  case &Lit(x):
-    return mklit(x);
-  case &CharRange(low,high):
-    if (low > high) {
-      internal_err("invalid character range in rule2nfa0\n");
-      return mklit("");
-    }
-    return mkact(cs_range(low,high+1));
-  case &Opt(r2):
-    let s2 = rule2nfa0(recursive,rt,grm,r2); let s3 = mklit("");
-    return mkalt(s2,s3);
-  case &Seq(r2,r3):
-    let s2 = rule2nfa0(recursive,rt,grm,r2); let s3 = rule2nfa0(recursive,rt,grm,r3);
-    return mkseq(s2,s3);
-  case &Alt(r2,r3):
-    let s2 = rule2nfa0(recursive,rt,grm,r2); let s3 = rule2nfa0(recursive,rt,grm,r3);
-    return mkalt(s2,s3);
-  case &Rcount(_,r2):
-    /* Since the semantic count can't be implemented in the NFA, we convert this as *r2
-       (a sequence of 0 or more r2's).  This is conservative when the nfa will be used for
-       conflict checking, for example.
-     */
-    warn_repeat();
-    fallthru(r2);
-  case &Star(0,&Infinity,r2):
-    let s2 = rule2nfa0(recursive,rt,grm,r2);
-    return mkstar(s2);
-  case &Star(m,&Infinity,r2):
-    let s = nfa_fresh_state(); let f = nfa_fresh_state(); final(s,f);
-    let s2 = rule2nfa0(recursive,rt,grm,r2);
-    action(s,EPSILON,s2);
-    for (let i = 1; i < m; i++) {
-      let s3 = rule2nfa0(recursive,rt,grm,r2);
-      etrans(get_final(s2),s3);
-      s2 = s3;
-    }
-    let s4 = mkstar(rule2nfa0(recursive,rt,grm,r2));
-    etrans(get_final(s2),s4);
-    etrans(get_final(s4), f);
-    return s;
-  case &Star(0,&Num(0),r2):
-    return mklit("");
-  case &Star(m,&Num(n),r2):
-    if (m > n) return mklit("");
-    let s = nfa_fresh_state(); let f = nfa_fresh_state(); final(s,f);
-    let s2 = rule2nfa0(recursive,rt,grm,r2);
-    action(s,EPSILON,s2);
-    if (m == 0) etrans(s,f);
-    for (let i = 1; i < n; i++) {
-      let s3 = rule2nfa0(recursive,rt,grm,r2);
-      etrans(get_final(s2),s3);
-      if (i+1 > m) action(get_final(s2),EPSILON,f);
-      s2 = s3;
-    }
-    etrans(get_final(s2),f);
-    return s;
-  case &Hash(0,N,r2):
-    // same as [ r2 *{N-1}(commas r2) ]
-    return rule2nfa0(recursive,rt,grm,
-                     OPT(SEQ(r2,STAR(0,minus_one(N),SEQ(commas(),r2)))));
-  case &Hash(m,N,r2):
-    // same as r2 {m-1}*{N-1}(commas r2)
-    return rule2nfa0(recursive,rt,grm,
-                     SEQ(r2,STAR(m-1,minus_one(N),SEQ(commas(),r2))));
-  case &Prose(_):
-    warn("NFA conversion with Prose not supported\n");
-    return mklit("");
-  case &Minus(_,_):
-    warn("NFA conversion with Minus not supported\n");
-    return mklit("");
-  }
-}
-st_t simple_rule2nfa(grammar_t grm, rule_t r) {
-  let recursive = recursive_symbols(grm);
-  Hashtable::table_t<str_t,st_t> rt =
-    Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr);
-  let result = simple_rule2nfa0(recursive,rt,grm,r);
-  return result;
-}
-
-
-
-
-// Tests whether a prefix of non terminals is enough to distinguish choices.
-
-/* NB: first_right is modified */
-#include <array.h>
-#include <sys/stat.h>
-#include <errno.h>
-
-/* Construct the lookahead dfa */
-dfa_t simple_lookahead_dfa(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt) {
-  //  if (!rules) return;
-
-  nfa_init();
-  let start_states = Set::empty(st_cmp);
-  let final_states = Set::empty(st_cmp);
-  List::list_t<unsigned int> interval_list = NULL;
-  for (let rl = rules; rl; rl = rl->tl) {
-    unsigned int Z = nfa_number_of_states; // First state of this nfa
-    interval_list = new List::List(Z,interval_list);
-    let s = simple_rule2nfa(grm,SEQ(rl->hd,right_ctxt));
-    //let s = rule2nfa(grm,rl->hd); // TEMPORARY: TRY WITHOUT RIGHT CONTEXT
-    start_states = Set::insert(start_states,s);
-    final_states = Set::insert(final_states,get_final(s));
-  }
-  if (debug) {
-    /* Make sure the ykdebug directory exists */
-    struct stat sb;
-    int err = stat("ykdebug",&sb);
-    if (err && errno == ENOENT) {
-      if (mkdir("ykdebug",S_IRWXU)) {
-	eprintf("ERROR: could not create directory ykdebug\n");
-	exit(1);
-      }
-    }
-    else if (err) {
-      perror("Error on stat(ykdebug)");
-      exit(1);
-    }
-    else if (!(sb.st_mode & S_IFDIR)) {
-      eprintf("ERROR: ykdebug is not a directory\n");
-      exit(1);
-    }
-    FILE *f = fopen(dotfile("nfa"),"w");
-    if (f) { nfa_dot(f,final_states); fclose(f); }
-  }
-  interval_list = List::imp_rev(interval_list);
-  let intervals = Array::from_list(interval_list);
-  if (debug) {
-    eprintf("Intervals: ");
-    for (let i = 0; i < numelts(intervals); i++) {
-      eprintf("%u.",intervals[i]);
-    }
-    eprintf("\n");
-  }
-  let dfa = nfa_distinguish(start_states,final_states,intervals);
-  if (debug) {
-    FILE *f = fopen(dotfile("dfa0"),"w");
-    if (f) { dfa_dot(f,dfa); fclose(f); }
-  }
-  dfa = dfa_minimize(dfa);
-  if (debug) {
-    FILE *f = fopen(dotfile("dfa1"),"w");
-    if (f) { dfa_dot(f,dfa); fclose(f); }
-  }
-  if (dfa_tiebreak(dfa)) {
-    dfa = short_circuit(dfa);
-    dfa = dfa_minimize(dfa);
-  }
-  eprintf("The final dfa has %u states\n",dfa->number_of_states);
-
-  if (debug) {
-    FILE *f = fopen(dotfile("dfa2"),"w");
-    if (f) { dfa_dot(f,dfa); fclose(f); }
-  }
-  if (dfa_unbounded(dfa)) {
-    num_conflicts_unbounded++;
-    FILE *f = fopen(dotfile("unbounded"),"w");
-    if (f) { dfa_dot(f,dfa); fclose(f); }
-  }
-  //  if (debug>=2) dfa_generate2(dfa);
-  //  dfa_generate(dfa);
-  return dfa;
-}

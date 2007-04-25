@@ -79,7 +79,9 @@ void pr_rule(FILE @f,rule_t r) {
   case &Opt(r2):
     fprintf(f,"["); pr_rule(f,r2); fprintf(f,"]"); break;
   case &Rcount(c,r2):
-    fprintf(f,"@repeat(%s)",c); pr_rule(f,r2); break;
+    fprintf(f,"@repeat(%s)",c); 
+    if (r2->a || r2->v) pr_rule_paren(f,r2); else pr_rule(f,r2); 
+    break;
   case &Seq(r2,r3):
     if (lower_prec(r2,r)) pr_rule_paren(f,r2); else pr_rule(f,r2);
     fprintf(f," ");

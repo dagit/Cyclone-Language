@@ -74,7 +74,7 @@ strset_t recursive_symbols(grammar_t grm) {
 }
 
 /**************************** EMPTYNESS ****************************/
-static int empty_rule(rule_t r) {
+int empty_rule(rule_t r) {
   switch (r->r) {
   case &Symb(x,_):
     return Set::member(globals->maybe_empty,new x);
