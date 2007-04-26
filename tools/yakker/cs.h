@@ -33,6 +33,8 @@ extern cs_t cs_singleton(unsigned char x);
 extern cs_t cs_range(unsigned int lb, unsigned int ub); /* half-open interval [lb,ub) */
 extern $(unsigned char,unsigned char) cs_bounds(cs_t rng);
 extern void cs_print(FILE @f,cs_t rng);
+// print cs in format suitable for Graphviz
+extern void cs_dot_print(FILE @f,cs_t cs);
 extern const char ?cs2string(cs_t rng);
 extern cs_t string2cs(const char ?s);
 extern int cs_member(cs_t a,unsigned char c);

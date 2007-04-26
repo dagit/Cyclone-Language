@@ -13,7 +13,7 @@ STRINGIFY=$(BINDIR)/stringify
 
 FILES=analyze axarray bnf ykbuf corerules cs extract fa termgrammar lex pads parse_tab parsergen pr prose util yakker nfa_eager nfa_lazy
 
-NFA_IMPL=nfa_lazy.o
+NFA_IMPL=nfa_eager.o
 
 all: $(PROG)
 

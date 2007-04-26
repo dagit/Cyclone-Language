@@ -200,6 +200,10 @@ void cs_print(FILE @f,cs_t rng) {
   fprintf(f,"%s",cs2string(rng));
 }
 
+void cs_dot_print(FILE @f,cs_t cs) {
+  fprintf(f,"%s",string_escape(cs2string(cs)));
+}
+
 static rule_t cs_CHARRANGE(unsigned int min,unsigned int max) {
   let r = CHARRANGE(min,max);
   r->css = new (cs_opt_t)cs_range(min,max+1);

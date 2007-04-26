@@ -184,70 +184,12 @@ void fsm_print(FILE @f,Set::set_t<st_t> final_states) {
   }
 }
 
-/* Print out an NFA in DOT format, for display by Graphviz */
-void cs_dot_print(FILE @f,cs_t cs) {
-  fprintf(f,"%s",string_escape(cs2string(cs)));
-}
-void nfa_dot(FILE @f,Set::set_t<st_t> final_states) {
-  fprintf(f,"digraph {\n");
-  fprintf(f,"rankdir=LR;\n");
-  for (let i = 1; i < nfa_number_of_states; i++) {
-    fprintf(f,"%u [ shape = \"%s\"];\n",
-	    i,
-	    Set::member(final_states,i)?"doublecircle":"circle");
-  }
-  for (let i = 1; i < nfa_number_of_states; i++) {
-    let to = get_atrans(i);
-    if (to != NOTRANSITION) {
-      let a = get_action(i);
-      if (a == EPSILON) {
-        // Don't know a good way to print an epsilon on the arrow;
-        // UTF-8 for epsilon is 0xCE 0xB5, but it doesn't work so just leave empty
-        fprintf(f,"%u -> %u;\n",i,to);
-      }
-      else {
-        fprintf(f,"%u -> %u [ label = \"",i,to);
-        cs_dot_print(f,a);
-        fprintf(f,"\"];\n");
-      }
-    }
-    to = get_etrans(i);
-    if (to != NOTRANSITION) {
-      fprintf(f,"%u -> %u;\n",i,to);
-    }
-  }
-  fprintf(f,"}\n");
-}
-
 /*
 
 nfa_fsm final_states
 
 
 */
-
-/* Return the reachability graph of the states of an nfa */
-static stgraph_t nfa_onestep() {
-  let g = Graph::empty(st_cmp);
-  for (let i = 0; i < nfa_number_of_states; i++) {
-    g = Graph::add_node(g,i);
-    let t = get_etrans(i);
-    if (t != NOTRANSITION) {
-      g = Graph::add_node(g,t);
-      g = Graph::add_edge(g,i,t);
-    }
-    t = get_atrans(i);
-    if (t != NOTRANSITION) {
-      g = Graph::add_node(g,t);
-      g = Graph::add_edge(g,i,t);
-    }
-  }
-  return g;
-}
-stgraph_t nfa_reachable() {
-  // return tc(nfa_onestep());
-  return Graph::tc(nfa_onestep());
-}
 
 
 /********* Experimental code for building Glushkov automata **********/
@@ -1252,7 +1194,7 @@ dfa_t nfa_distinguish(Set::set_t<st_t,`H> start_states,
           let ivals = st2ivals(intervals,nfa_states);
           if (CUTOFF && Set::cardinality(ivals) == 1) {
 // 	    let ival = Set::choose(ivals);
-// 	    debugprint(1,"Cutting off. i = %d. Number of DFA states = %d. \n" i, dfa->number_of_states);
+	    debugprint(1,"Cutting off. Number of DFA states = %d.\n", dfa->number_of_states);
 //          let ns_card = Set::cardinality(nfa_states);
 // 	    debugprint(1,"Ival = %d. Cardinality of nfa_states = %d. NFA states: ", ival,ns_card);
 // 	    // print NFA states.

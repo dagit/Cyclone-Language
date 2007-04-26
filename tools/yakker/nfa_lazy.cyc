@@ -1,5 +1,5 @@
-/* fa.cyc
- * Finite automata library
+/* nfa_lazy.cyc
+ * Lazy implementation of NFA construction.
  */
 
 /* Copyright (C) 2005 Greg Morrisett, AT&T.
@@ -54,14 +54,20 @@ static int uint_cmp(unsigned int a, unsigned int b) {
 const char ?txtfile(const char ?x);
 
 /****************** NFA AND DFA COMMON DEFINITIONS ******************/
-typedef unsigned int interval_t;
-typedef datatype StateThunk @state_thunk; // States.  
-datatype StateThunk {
-  ActualState(st_t);
-  LatentState(rule_t, interval_t, state_thunk); // rule and final state
+typedef unsigned int branch_id_t;
+typedef union StateThunk @state_thunk; // States.  
+@tagged union StateThunk {
+  st_t ActualState;
+  $(rule_t, branch_id_t, state_thunk) @LatentState; // rule and final state
 };
 
-static datatype StateThunk.ActualState notrans_thunk = ActualState(NOTRANSITION);
+// typedef datatype StateThunk @state_thunk; // States.  
+// datatype StateThunk {
+//   ActualState(st_t);
+//   LatentState(rule_t, branch_id_t, state_thunk); // rule and final state
+// };
+
+static union StateThunk notrans_thunk = {.ActualState = NOTRANSITION};
 
 #define NOTHUNK &notrans_thunk
 
@@ -115,70 +121,95 @@ static struct Axarray::Xarray<state_thunk> *etrans_array;
 static struct Axarray::Xarray<state_thunk> *atrans_array;
 static struct Axarray::Xarray<cs_opt_t> *action_array;
 
-// Maps from states to their intervals (branch numbers).
-// Interval 0 corresponds to the non-branch states.
-static interval_t current_interval;
-static struct Axarray::Xarray<unsigned int> *interval_array;
-// State used in construction of NFAs.
-static $(strset_t, grammar_t, Hashtable::table_t<str_t,st_t>) *nfa_construction_state;
+// Maps from states to their branch_ids (branch numbers).
+// Branch_id 0 corresponds to the non-branch states.
+static branch_id_t current_branch_id;
+static struct Axarray::Xarray<unsigned int> *branch_id_array;
 
-static st_t rule2nfa_thunk(rule_t r, interval_t ival);
+// Information about the grammar for which the nfa is being constructed.
+static $(strset_t, grammar_t) *nfa_grm_state;
+
+// per-branch state
+static struct Axarray::Xarray<struct Hashtable::Table<str_t,st_t> *> *branch_symbols_array;
+
+static void symbols_table(branch_id_t b_id, Hashtable::table_t<str_t,st_t,`H> t){
+  Axarray::set((_@)branch_symbols_array, b_id, t);
+}
+
+static struct Hashtable::Table<str_t,st_t> *
+get_symbols_table(branch_id_t b_id){
+  return Axarray::get((_@)branch_symbols_array, b_id);
+}
+
+static st_t rule2nfa_thunk(rule_t r, branch_id_t b_id);
 static void etrans(st_t a, state_thunk b);
 static void action(st_t from, cs_opt_t x, state_thunk to);
 
 // force a lazy state to become an actual state.
-// static st_t force_ls(state_thunk ls){
+static st_t force_ls(state_thunk ls){
+  switch(ls){
+  case &{.ActualState = s}:
+    return s;
+  case &{.LatentState = &$(r,b_id,f)}:
+    let a = rule2nfa_thunk(r,b_id);
+    etrans(get_final(a),f);
+    // replace Latent with Actual
+    ls->ActualState = a;
+    return a;
+  }
+}
+
+state_thunk mk_ActualState(st_t a){
+  return new StateThunk{.ActualState = a};
+}
+
+state_thunk mk_LatentState(rule_t r, branch_id_t b_id, state_thunk f){
+    return new StateThunk{.LatentState = new $(r,b_id,f)};
+}
+
+// static st_t force_atrans(st_t a){
+//   let ls = Axarray::get((_@)atrans_array,a);
 //   switch(ls){
-//   case &ActualState(s):
+//   case &{.ActualState = s}:
 //     return s;
-//   case &LatentState(r,f):
-//     let a = rule2nfa_thunk(r);
-//     etrans(get_final(a),f);
-//     return a;
+//   case &{.LatentState = &$(r,b_id,f)}:
+//     let b = rule2nfa_thunk(r,b_id);
+//     etrans(get_final(b),f);
+    
+//     // replace Latent with Actual
+//     ls->ActualState = b;
+// //     let act = get_action(a);
+// //     action(a,act,mk_ActualState(b));    
+//     return b;
 //   }
 // }
 
-static st_t force_atrans(st_t a){
-  let ls = Axarray::get((_@)atrans_array,a);
-  switch(ls){
-  case &ActualState(s):
-    return s;
-  case &LatentState(r,ival,f):
-    let b = rule2nfa_thunk(r,ival);
-    etrans(get_final(b),f);
-    
-    // replace Latent with Actual
-    let act = get_action(a);
-    action(a,act,new ActualState(b));
-    return b;
-  }
+// static st_t force_etrans(st_t a){
+//   let ls = Axarray::get((_@)etrans_array,a);
+//   switch(ls){
+//   case &{.ActualState = s}:
+//     return s;
+//   case &{.LatentState = &$(r,b_id,f)}:
+//     let b = rule2nfa_thunk(r,b_id);
+//     etrans(get_final(b),f);
+
+//     // replace Latent with Actual
+//     ls->ActualState = b;
+// //     etrans(a,mk_ActualState(b));
+//     return b;
+//   }
+// }
+
+static void branch_id(st_t a, branch_id_t b_id) {
+  Axarray::set((_@)branch_id_array,a,b_id);
 }
 
-static st_t force_etrans(st_t a){
-  let ls = Axarray::get((_@)etrans_array,a);
-  switch(ls){
-  case &ActualState(s):
-    return s;
-  case &LatentState(r,ival,f):
-    let b = rule2nfa_thunk(r,ival);
-    etrans(get_final(b),f);
-
-    // replace Latent with Actual
-    etrans(a,new ActualState(b));
-    return b;
-  }
+branch_id_t get_branch_id(st_t a) {
+  return Axarray::get((_@)branch_id_array,a);
 }
 
-static void interval(st_t a, interval_t ival) {
-  Axarray::set((_@)interval_array,a,ival);
-}
-
-interval_t get_interval(st_t a) {
-  return Axarray::get((_@)interval_array,a);
-}
-
-static st_t nfa_fresh_state_internal(interval_t ival) {
-  interval(nfa_number_of_states, ival);
+static st_t nfa_fresh_state_internal(branch_id_t b_id) {
+  branch_id(nfa_number_of_states, b_id);
   return nfa_number_of_states++;
 }
 
@@ -200,59 +231,59 @@ static void action(st_t from, cs_opt_t x, state_thunk to) {
 
 /* Invariant: all mk functions return a state s where get_final(s)
    has no transitions */
-static st_t mk_lazy_alt(rule_t a,rule_t b, interval_t ival) {
-  let s = nfa_fresh_state_internal(ival); let f = nfa_fresh_state_internal(ival); final(s,f);
-  let st_a = new LatentState(a, ival, new ActualState(f));
-  let st_b = new LatentState(b, ival, new ActualState(f));
+static st_t mk_lazy_alt(rule_t a,rule_t b, branch_id_t b_id) {
+  let s = nfa_fresh_state_internal(b_id); let f = nfa_fresh_state_internal(b_id); final(s,f);
+  let st_a = mk_LatentState(a, b_id, mk_ActualState(f));
+  let st_b = mk_LatentState(b, b_id, mk_ActualState(f));
   action(s,EPSILON,st_a);
   etrans(s,st_b);
   return s;
 }
 
-static st_t mk_lazy_seq(rule_t a,rule_t b, interval_t ival) {
-  let s = nfa_fresh_state_internal(ival); let f = nfa_fresh_state_internal(ival); final(s,f);
-  let st_b = new LatentState(b, ival, new ActualState(f));
-  let st_a = new LatentState(a, ival, st_b);
+static st_t mk_lazy_seq(rule_t a,rule_t b, branch_id_t b_id) {
+  let s = nfa_fresh_state_internal(b_id); let f = nfa_fresh_state_internal(b_id); final(s,f);
+  let st_b = mk_LatentState(b, b_id, mk_ActualState(f));
+  let st_a = mk_LatentState(a, b_id, st_b);
   action(s,EPSILON,st_a);
   return s;
 }
 
-static st_t mk_lazy_star(rule_t a, interval_t ival) {
-  let s = nfa_fresh_state_internal(ival); let f = nfa_fresh_state_internal(ival); final(s,f);
-  etrans(s, new ActualState(f));
-  let st_a = new LatentState(a, ival, new ActualState(s));
+static st_t mk_lazy_star(rule_t a, branch_id_t b_id) {
+  let s = nfa_fresh_state_internal(b_id); let f = nfa_fresh_state_internal(b_id); final(s,f);
+  etrans(s, mk_ActualState(f));
+  let st_a = mk_LatentState(a, b_id, mk_ActualState(s));
   action(s,EPSILON,st_a);
   return s;
 }
 
 // not actually lazy, as actions are the base case.
-static st_t mk_lazy_act(cs_t x, interval_t ival) {
-  let s = nfa_fresh_state_internal(ival); let f = nfa_fresh_state_internal(ival); final(s,f);
-  action(s,x,new ActualState(f));
+static st_t mk_lazy_act(cs_t x, branch_id_t b_id) {
+  let s = nfa_fresh_state_internal(b_id); let f = nfa_fresh_state_internal(b_id); final(s,f);
+  action(s,x,mk_ActualState(f));
   return s;
 }
 
 #define CASE_INSENSITIVE 1
 /* A bit more space efficient than looping mk_lazy_act */
-static st_t mk_lazy_lit(const char ?x, interval_t ival) { 
-  let s = nfa_fresh_state_internal(ival);
+static st_t mk_lazy_lit(const char ?x, branch_id_t b_id) { 
+  let s = nfa_fresh_state_internal(b_id);
   let len = strlen(x);
   if (len == 0) {
-    let f = nfa_fresh_state_internal(ival);
+    let f = nfa_fresh_state_internal(b_id);
     final(s,f);
-    action(s,EPSILON,new ActualState(f));
+    action(s,EPSILON,mk_ActualState(f));
   }
   else {
     let a = s;
     for (let i = 0; i < len; i++) {
-      let b = nfa_fresh_state_internal(ival);
+      let b = nfa_fresh_state_internal(b_id);
       cs_opt_t y;
       if (CASE_INSENSITIVE) {
         y = cs_singleton(tolower(x[i]));
         cs_insert(y,toupper(x[i]));
       }
       else y = cs_singleton(x[i]);
-      action(a,y,new ActualState(b));
+      action(a,y,mk_ActualState(b));
       a = b;
     }
     final(s,a);
@@ -283,9 +314,12 @@ static Rule_t lookup_symbol(grammar_t grm, const char ?sym){
 
 /* Convert a rule to an nfa.  If the rule contains a recursively-defined
    symbol, then that symbol is only converted once, and all instances
-   share the resulting nfa. */
+   share the resulting nfa. 
+
+   Invariant: returns new state, which has a corresponding (new) final state.
+*/
 static st_t
-rule2nfa_thunk(rule_t r, interval_t ival) {
+rule2nfa_thunk(rule_t r, branch_id_t b_id) {
 /* The variable recursive is the set of recursively defined symbols.
    The table rt maps a recursively defined symbol to its start state.
    When we need to convert a recursively defined symbol, we look up
@@ -314,56 +348,57 @@ rule2nfa_thunk(rule_t r, interval_t ival) {
 */
   switch (r->r) {
   case &Symb(x,_):
-    if (!nfa_construction_state){
+    if (!nfa_grm_state){
 	warn("nfa global state not initialized\n");
-	return mk_lazy_lit("",ival);
+	return mk_lazy_lit("",b_id);
     }
-    let &$(recursive_syms,nfa_grm,nfa_rt) = nfa_construction_state;
+    let &$(recursive_syms,nfa_grm) = nfa_grm_state;
+    let nfa_rt = (_@)get_symbols_table(b_id);
     let xptr = new x;
     if (expand_nonrec && !Set::member(recursive_syms,xptr)) {
       Rule_t x_rule = lookup_symbol(nfa_grm, x);
       if (!x_rule) {
 	warn("missing definition for %s in rule2nfa\n",x);
-	return mk_lazy_lit("",ival);
+	return mk_lazy_lit("",b_id);
       }
-      return rule2nfa_thunk(x_rule,ival);
+      return rule2nfa_thunk(x_rule,b_id);
     }
     st_t x_start;
     if (!Hashtable::try_lookup(nfa_rt,xptr,&x_start)) {
       Rule_t x_rule = lookup_symbol(nfa_grm, x);
       if (!x_rule) {
 	warn("missing definition for %s in rule2nfa\n",x);
-	return mk_lazy_lit("",ival);
+	return mk_lazy_lit("",b_id);
       }
-      let s = nfa_fresh_state_internal(ival); let f = nfa_fresh_state_internal(ival); final(s,f);
+      let s = nfa_fresh_state_internal(b_id); let f = nfa_fresh_state_internal(b_id); final(s,f);
       Hashtable::insert(nfa_rt,xptr,s);
-      let s_body = new LatentState(x_rule, ival, new ActualState(f));
+      let s_body = mk_LatentState(x_rule, b_id, mk_ActualState(f));
       etrans(s,s_body);
       x_start = s;
     }
-    let s = nfa_fresh_state_internal(ival); let f = nfa_fresh_state_internal(ival); final(s,f);
-    etrans(s,new ActualState(x_start));
+    let s = nfa_fresh_state_internal(b_id); let f = nfa_fresh_state_internal(b_id); final(s,f);
+    etrans(s,mk_ActualState(x_start));
     let x_last = get_final(x_start);
     while (get_etrans(x_last) != NOTRANSITION) x_last = get_etrans(x_last);
     /* Invariant: x_last has no transitions */
-    etrans(x_last,new ActualState(nfa_fresh_state_internal(ival)));
-    action(x_last,EPSILON,new ActualState(f));
+    etrans(x_last,mk_ActualState(nfa_fresh_state_internal(b_id)));
+    action(x_last,EPSILON,mk_ActualState(f));
     return s;
 
   case &Lit(x):
-    return mk_lazy_lit(x,ival);
+    return mk_lazy_lit(x,b_id);
   case &CharRange(low,high):
     if (low > high) {
       internal_err("invalid character range in rule2nfa_thunk\n");
-      return mk_lazy_lit("",ival);
+      return mk_lazy_lit("",b_id);
     }
-    return mk_lazy_act(cs_range(low,high+1),ival);
+    return mk_lazy_act(cs_range(low,high+1),b_id);
   case &Opt(r2):
-    return mk_lazy_alt(r2,LIT(""),ival);
+    return mk_lazy_alt(r2,LIT(""),b_id);
   case &Seq(r2,r3):
-    return mk_lazy_seq(r2,r3,ival);
+    return mk_lazy_seq(r2,r3,b_id);
   case &Alt(r2,r3):
-    return mk_lazy_alt(r2,r3,ival);
+    return mk_lazy_alt(r2,r3,b_id);
   case &Rcount(_,r2):
     /* Since the semantic count can't be implemented in the NFA, we convert this as *r2
        (a sequence of 0 or more r2's).  This is conservative when the nfa will be used for
@@ -372,31 +407,31 @@ rule2nfa_thunk(rule_t r, interval_t ival) {
     warn_repeat();
     fallthru(r2);
   case &Star(0,&Infinity,r2):
-    return mk_lazy_star(r2,ival);
+    return mk_lazy_star(r2,b_id);
   case &Star(m,i as &Infinity,r2):
     let r_seq = SEQ(r2,STAR(m-1,i,r2));
-    return rule2nfa_thunk(r_seq,ival);
+    return rule2nfa_thunk(r_seq,b_id);
   case &Star(0,&Num(0),r2):
-    return mk_lazy_lit("",ival);
+    return mk_lazy_lit("",b_id);
   case &Star(0,&Num(n),r2):
     let r_opt = OPT(SEQ(r2,STAR(0, new Num(n-1),r2)));
-    return rule2nfa_thunk(r_opt,ival);
+    return rule2nfa_thunk(r_opt,b_id);
   case &Star(m,&Num(n),r2):
-    if (m > n) return mk_lazy_lit("",ival);
+    if (m > n) return mk_lazy_lit("",b_id);
     let r_seq = SEQ(r2,STAR(m-1, new Num(n-1),r2));
-    return rule2nfa_thunk(r_seq,ival);
+    return rule2nfa_thunk(r_seq,b_id);
   case &Hash(0,N,r2):
     // same as [ r2 *{N-1}(commas r2) ]
-    return rule2nfa_thunk(OPT(SEQ(r2,STAR(0,minus_one(N),SEQ(commas(),r2)))),ival);
+    return rule2nfa_thunk(OPT(SEQ(r2,STAR(0,minus_one(N),SEQ(commas(),r2)))),b_id);
   case &Hash(m,N,r2):
     // same as r2 {m-1}*{N-1}(commas r2)
-    return rule2nfa_thunk(SEQ(r2,STAR(m-1,minus_one(N),SEQ(commas(),r2))),ival);
+    return rule2nfa_thunk(SEQ(r2,STAR(m-1,minus_one(N),SEQ(commas(),r2))),b_id);
   case &Prose(_):
     warn("NFA conversion with Prose not supported\n");
-    return mk_lazy_lit("",ival);
+    return mk_lazy_lit("",b_id);
   case &Minus(_,_):
     warn("NFA conversion with Minus not supported\n");
-    return mk_lazy_lit("",ival);
+    return mk_lazy_lit("",b_id);
   }
 }
 
@@ -406,34 +441,71 @@ void nfa_init(grammar_t grm) {
   etrans_array = Axarray::create(1023,NOTHUNK);
   atrans_array = Axarray::create(1023,NOTHUNK);
   action_array = Axarray::create(1023,EPSILON);
-
-  current_interval = 1;
-  interval_array = Axarray::create(1023,0);
+  current_branch_id = 1;
+  branch_id_array = Axarray::create(1023,0);
 
   let grm_copy = List::copy(grm);
-  
-  nfa_construction_state = new $(recursive_symbols(grm), grm_copy, Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr));
+  nfa_grm_state = new $(recursive_symbols(grm), grm_copy);
+
+  branch_symbols_array = Axarray::create(10, NULL);
 }
 
 st_t get_final(st_t a) {
   return Axarray::get((_@)final_array,a);
 }
 st_t get_etrans(st_t a) {
-  return force_etrans(a);
+  let ls = Axarray::get((_@)etrans_array,a);
+  return force_ls(ls);
 }
 cs_opt_t get_action(st_t a) {
   return Axarray::get((_@)action_array,a);
 }
 st_t get_atrans(st_t a) {
-  return force_atrans(a);
+  let ls = Axarray::get((_@)atrans_array,a);
+  return force_ls(ls);
 }
 
 st_t
 rule2nfa(grammar_t grm, rule_t r){
-  return rule2nfa_thunk(r,current_interval++);
+  // Create a new recursive-symbols table for this branch.
+  symbols_table(current_branch_id, Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr));
+  return rule2nfa_thunk(r,current_branch_id++);
 }
 
 unsigned int
 what_interval(unsigned int ?intervals, unsigned int key) {
-  return get_interval(key);
+  // ignore first param.
+  return get_branch_id(key);
+}
+
+/* Print out an NFA in DOT format, for display by Graphviz */
+void nfa_dot(FILE @f,Set::set_t<st_t> final_states) {
+  fprintf(f,"digraph {\n");
+  fprintf(f,"rankdir=LR;\n");
+  for (let i = 1; i < nfa_number_of_states; i++) {
+    fprintf(f,"%u [ shape = \"%s\"];\n",
+	    i,
+	    Set::member(final_states,i)?"doublecircle":"circle");
+  }
+  for (let i = 1; i < nfa_number_of_states; i++) {
+    let to = get_atrans(i);
+    if (to != NOTRANSITION) {
+      let a = get_action(i);
+      if (a == EPSILON) {
+        // Don't know a good way to print an epsilon on the arrow;
+        // UTF-8 for epsilon is 0xCE 0xB5, but it doesn't work so just leave empty
+        fprintf(f,"%u -> %u;\n",i,to);
+      }
+      else {
+        fprintf(f,"%u -> %u [ label = \"",i,to);
+        cs_dot_print(f,a);
+        fprintf(f,"\"];\n");
+      }
+    }
+    to = get_etrans(i);
+    if (to != NOTRANSITION) {
+      fprintf(f,"%u -> %u;\n",i,to);
+    }
+  }
+  fprintf(f,"}\n");
 }

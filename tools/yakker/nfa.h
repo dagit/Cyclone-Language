@@ -41,4 +41,6 @@ st_t get_atrans(st_t a);
 st_t rule2nfa(grammar_t grm, rule_t r);
 
 unsigned int what_interval(unsigned int ?intervals, unsigned int key);
+void nfa_dot(FILE @f,Set::set_t<st_t> final_states);
+
 #endif
