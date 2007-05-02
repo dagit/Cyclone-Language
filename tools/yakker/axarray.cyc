@@ -66,3 +66,6 @@ xarray_t<`a,`r> rcreate(region_t<`r> r, int len, `a a) {
 xarray_t<`a> create(int len, `a a) {
   return rcreate(Core::heap_region, len, a);
 }
+int length(xarray_t<`a> xarr) {
+  return xarr->num_elmts;
+}
