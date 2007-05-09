@@ -18,6 +18,19 @@
 
 #ifndef FA_H
 #define FA_H
+typedef unsigned int st_t; // States.  Sometimes, 0 is reserved to mark no transition
+typedef unsigned int act_t;
+
+#define NOTRANSITION 0
+#define EPSILON NULL // the empty action
+
+extern int st_hash(st_t a);
+extern int st_cmp(st_t a,st_t b);
+
+extern st_t nfa_number_of_states;
+
+extern int use_lazy_nfa;
+
 extern unsigned int num_conflicts_ll;
 extern unsigned int num_conflicts_dfa;
 extern unsigned int num_conflicts_change_order;

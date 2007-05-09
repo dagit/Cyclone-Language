@@ -16,18 +16,13 @@
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
 
-#ifndef FA_IMPL_H
-#define FA_IMPL_H
-typedef unsigned int st_t; // States.  Sometimes, 0 is reserved to mark no transition
-typedef unsigned int act_t;
+#ifndef NFA_EAGER_H
+#define NFA_EAGER_H
+#include "bnf.h"
+#include "fa.h"
 
-#define NOTRANSITION 0
-#define EPSILON NULL // the empty action
-
-extern int st_hash(st_t a);
-extern int st_cmp(st_t a,st_t b);
-
-extern st_t nfa_number_of_states;
+/* This Nfa_eager and Nfa_lazy namespaces should have the same declarations */
+namespace Nfa_eager {
 
 void nfa_init(grammar_t grm);
 
@@ -42,5 +37,7 @@ st_t rule2nfa(grammar_t grm, rule_t r);
 
 unsigned int what_interval(unsigned int ?intervals, unsigned int key);
 void nfa_dot(FILE @f,Set::set_t<st_t> final_states);
+
+}
 
 #endif

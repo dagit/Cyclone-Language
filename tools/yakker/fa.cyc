@@ -31,13 +31,77 @@
 #include "cs.h"
 #include "axarray.h"
 #include "analyze.h"
-#include "nfa.h"
 #include "fa.h"
+#include "nfa_lazy.h"
+#include "nfa_eager.h"
 #include "pr.h"
 #include "util.h"
 #define MAXACTION MAXCSCHAR
 
 #include <time.h>
+
+int st_hash(st_t a) { return (int)a; }
+int st_cmp(st_t a,st_t b) {
+  if (a == b) return 0; else if (a<b) return -1; else return 1;
+}
+st_t nfa_number_of_states = 1;
+
+int use_lazy_nfa = 1;
+
+void nfa_init(grammar_t grm) {
+  if (use_lazy_nfa)
+    Nfa_lazy::nfa_init(grm);
+  else
+    Nfa_eager::nfa_init(grm);
+}
+st_t nfa_fresh_state() {
+  if (use_lazy_nfa)
+    return Nfa_lazy::nfa_fresh_state();
+  else
+    return Nfa_eager::nfa_fresh_state();
+}
+st_t get_final(st_t a) {
+  if (use_lazy_nfa)
+    return Nfa_lazy::get_final(a);
+  else
+    return Nfa_eager::get_final(a);
+}
+st_t get_etrans(st_t a) {
+  if (use_lazy_nfa)
+    return Nfa_lazy::get_etrans(a);
+  else
+    return Nfa_eager::get_etrans(a);
+}
+cs_opt_t get_action(st_t a) {
+  if (use_lazy_nfa)
+    return Nfa_lazy::get_action(a);
+  else
+    return Nfa_eager::get_action(a);
+}
+st_t get_atrans(st_t a) {
+  if (use_lazy_nfa)
+    return Nfa_lazy::get_atrans(a);
+  else
+    return Nfa_eager::get_atrans(a);
+}
+st_t rule2nfa(grammar_t grm, rule_t r) {
+  if (use_lazy_nfa)
+    return Nfa_lazy::rule2nfa(grm,r);
+  else
+    return Nfa_eager::rule2nfa(grm,r);
+}
+unsigned int what_interval(unsigned int ?intervals, unsigned int key) {
+  if (use_lazy_nfa)
+    return Nfa_lazy::what_interval(intervals,key);
+  else
+    return Nfa_eager::what_interval(intervals,key);
+}
+void nfa_dot(FILE @f,Set::set_t<st_t> final_states) {
+  if (use_lazy_nfa)
+    Nfa_lazy::nfa_dot(f,final_states);
+  else
+    Nfa_eager::nfa_dot(f,final_states);
+}
 
 unsigned int num_conflicts_ll = 0;
 unsigned int num_conflicts_dfa = 0;

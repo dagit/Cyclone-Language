@@ -31,12 +31,15 @@
 #include "cs.h"
 #include "axarray.h"
 #include "analyze.h"
-#include "nfa.h"
+#include "nfa_eager.h"
 #include "pr.h"
 #include "util.h"
+#include "fa.h"
 #define MAXACTION MAXCSCHAR
 
 #include <time.h>
+
+namespace Nfa_eager;
 
 static int uint_cmp(unsigned int a, unsigned int b) {
   if (a == b) return 0; else if (a<b) return -1; else return 1;
@@ -53,11 +56,6 @@ static int uint_cmp(unsigned int a, unsigned int b) {
 
 /****************** NFA AND DFA COMMON DEFINITIONS ******************/
 typedef Graph::graph_t<st_t> stgraph_t; // State graphs.
-
-int st_hash(st_t a) { return (int)a; }
-int st_cmp(st_t a,st_t b) {
-  if (a == b) return 0; else if (a<b) return -1; else return 1;
-}
 
 /******************************* NFAS *******************************/
 /* This is not an implementation of general NFAs, it is intended for
@@ -97,7 +95,6 @@ int st_cmp(st_t a,st_t b) {
 */
 
 /* Globals */
-st_t nfa_number_of_states = 1;
 static struct Axarray::Xarray<st_t> *final_array;
 static struct Axarray::Xarray<st_t> *etrans_array;
 static struct Axarray::Xarray<st_t> *atrans_array;

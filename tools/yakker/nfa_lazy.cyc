@@ -31,12 +31,15 @@
 #include "cs.h"
 #include "axarray.h"
 #include "analyze.h"
-#include "nfa.h"
+#include "nfa_lazy.h"
 #include "pr.h"
 #include "util.h"
+#include "fa.h"
 #define MAXACTION MAXCSCHAR
 
 #include <time.h>
+
+namespace Nfa_lazy;
 
 static int uint_cmp(unsigned int a, unsigned int b) {
   if (a == b) return 0; else if (a<b) return -1; else return 1;
@@ -115,7 +118,6 @@ int st_cmp(st_t a,st_t b) {
 */
 
 /* Globals */
-st_t nfa_number_of_states = 1;
 static struct Axarray::Xarray<st_t> *final_array;
 static struct Axarray::Xarray<state_thunk> *etrans_array;
 static struct Axarray::Xarray<state_thunk> *atrans_array;
