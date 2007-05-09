@@ -21,7 +21,7 @@
 #include "bnf.h"
 #include "fa.h"
 
-/* This Nfa_eager and Nfa_lazy namespaces should have the same declarations */
+/* The Nfa_eager and Nfa_lazy namespaces should have the same declarations */
 namespace Nfa_eager {
 
 void nfa_init(grammar_t grm);
@@ -36,7 +36,6 @@ st_t get_atrans(st_t a);
 st_t rule2nfa(grammar_t grm, rule_t r);
 
 unsigned int what_interval(unsigned int ?intervals, unsigned int key);
-void nfa_dot(FILE @f,Set::set_t<st_t> final_states);
 
 }
 

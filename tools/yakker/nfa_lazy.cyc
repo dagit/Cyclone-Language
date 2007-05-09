@@ -41,30 +41,15 @@
 
 namespace Nfa_lazy;
 
-static int uint_cmp(unsigned int a, unsigned int b) {
-  if (a == b) return 0; else if (a<b) return -1; else return 1;
-}
-
-#define iterator(x) (Set::make_iter(Core::heap_region,x))
-//static Iter::iter_t<`a> iterator(Set::set_t<`a,`H> x : regions(`a) > `H) {
-//  return Set::make_iter(Core::heap_region,x);
-//}
-#define dict_iter(x) (Dict::make_iter(Core::heap_region,x))
-//static Iter::iter_t<$(`a,`b)> dict_iter(Dict::dict_t<`a,`b,`H> x : regions($(`a,`b)) > `H) {
-//  return Dict::make_iter(Core::heap_region,x);
-//}
-
-const char ?txtfile(const char ?x);
-
 /****************** NFA AND DFA COMMON DEFINITIONS ******************/
 typedef unsigned int branch_id_t;
-typedef union StateThunk @state_thunk; // States.  
+typedef union StateThunk @state_thunk; // States.
 @tagged union StateThunk {
   st_t ActualState;
   $(rule_t, branch_id_t, state_thunk) @LatentState; // rule and final state
 };
 
-// typedef datatype StateThunk @state_thunk; // States.  
+// typedef datatype StateThunk @state_thunk; // States.
 // datatype StateThunk {
 //   ActualState(st_t);
 //   LatentState(rule_t, branch_id_t, state_thunk); // rule and final state
@@ -73,12 +58,6 @@ typedef union StateThunk @state_thunk; // States.
 static union StateThunk notrans_thunk = {.ActualState = NOTRANSITION};
 
 #define NOTHUNK &notrans_thunk
-
-
-int st_hash(st_t a) { return (int)a; }
-int st_cmp(st_t a,st_t b) {
-  if (a == b) return 0; else if (a<b) return -1; else return 1;
-}
 
 /******************************* NFAS *******************************/
 /* This is not an implementation of general NFAs, it is intended for
@@ -177,11 +156,11 @@ state_thunk mk_LatentState(rule_t r, branch_id_t b_id, state_thunk f){
 //   case &{.LatentState = &$(r,b_id,f)}:
 //     let b = rule2nfa_thunk(r,b_id);
 //     etrans(get_final(b),f);
-    
+
 //     // replace Latent with Actual
 //     ls->ActualState = b;
 // //     let act = get_action(a);
-// //     action(a,act,mk_ActualState(b));    
+// //     action(a,act,mk_ActualState(b));
 //     return b;
 //   }
 // }
@@ -267,7 +246,7 @@ static st_t mk_lazy_act(cs_t x, branch_id_t b_id) {
 
 #define CASE_INSENSITIVE 1
 /* A bit more space efficient than looping mk_lazy_act */
-static st_t mk_lazy_lit(const char ?x, branch_id_t b_id) { 
+static st_t mk_lazy_lit(const char ?x, branch_id_t b_id) {
   let s = nfa_fresh_state_internal(b_id);
   let len = strlen(x);
   if (len == 0) {
@@ -308,7 +287,7 @@ static void warn_repeat() {
 static Rule_t lookup_symbol(grammar_t grm, const char ?sym){
   for (let g = grm; g; g = g->tl) {
     let &$(x,r,_) = g->hd;
-    if (strcmp(sym,x) == 0) 
+    if (strcmp(sym,x) == 0)
       return r;
   }
   return NULL;
@@ -316,7 +295,7 @@ static Rule_t lookup_symbol(grammar_t grm, const char ?sym){
 
 /* Convert a rule to an nfa.  If the rule contains a recursively-defined
    symbol, then that symbol is only converted once, and all instances
-   share the resulting nfa. 
+   share the resulting nfa.
 
    Invariant: returns new state, which has a corresponding (new) final state.
 */
@@ -345,8 +324,6 @@ rule2nfa_thunk(rule_t r, branch_id_t b_id) {
 
    Notice that this construction (of course) allows us to deal with
    the recursive case, where the nfa A->..->B is not yet defined.
-
-   Because of recursion we don't use mkcopy here.
 */
   switch (r->r) {
   case &Symb(x,_):
@@ -478,36 +455,4 @@ unsigned int
 what_interval(unsigned int ?intervals, unsigned int key) {
   // ignore first param.
   return get_branch_id(key);
-}
-
-/* Print out an NFA in DOT format, for display by Graphviz */
-void nfa_dot(FILE @f,Set::set_t<st_t> final_states) {
-  fprintf(f,"digraph {\n");
-  fprintf(f,"rankdir=LR;\n");
-  for (let i = 1; i < nfa_number_of_states; i++) {
-    fprintf(f,"%u [ shape = \"%s\"];\n",
-	    i,
-	    Set::member(final_states,i)?"doublecircle":"circle");
-  }
-  for (let i = 1; i < nfa_number_of_states; i++) {
-    let to = get_atrans(i);
-    if (to != NOTRANSITION) {
-      let a = get_action(i);
-      if (a == EPSILON) {
-        // Don't know a good way to print an epsilon on the arrow;
-        // UTF-8 for epsilon is 0xCE 0xB5, but it doesn't work so just leave empty
-        fprintf(f,"%u -> %u;\n",i,to);
-      }
-      else {
-        fprintf(f,"%u -> %u [ label = \"",i,to);
-        cs_dot_print(f,a);
-        fprintf(f,"\"];\n");
-      }
-    }
-    to = get_etrans(i);
-    if (to != NOTRANSITION) {
-      fprintf(f,"%u -> %u;\n",i,to);
-    }
-  }
-  fprintf(f,"}\n");
 }

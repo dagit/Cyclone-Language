@@ -96,12 +96,46 @@ unsigned int what_interval(unsigned int ?intervals, unsigned int key) {
   else
     return Nfa_eager::what_interval(intervals,key);
 }
+//void nfa_dot(FILE @f,Set::set_t<st_t> final_states) {
+//  if (use_lazy_nfa)
+//    Nfa_lazy::nfa_dot(f,final_states);
+//  else
+//    Nfa_eager::nfa_dot(f,final_states);
+//}
+/* Print out an NFA in DOT format, for display by Graphviz */
 void nfa_dot(FILE @f,Set::set_t<st_t> final_states) {
-  if (use_lazy_nfa)
-    Nfa_lazy::nfa_dot(f,final_states);
-  else
-    Nfa_eager::nfa_dot(f,final_states);
+  fprintf(f,"digraph {\n");
+  fprintf(f,"rankdir=LR;\n");
+  for (let i = 1; i < nfa_number_of_states; i++) {
+    fprintf(f,"%u [ shape = \"%s\"];\n",
+	    i,
+	    Set::member(final_states,i)?"doublecircle":"circle");
+  }
+  for (let i = 1; i < nfa_number_of_states; i++) {
+    let to = get_atrans(i);
+    if (to != NOTRANSITION) {
+      let a = get_action(i);
+      if (a == EPSILON) {
+        // Don't know a good way to print an epsilon on the arrow;
+        // UTF-8 for epsilon is 0xCE 0xB5, but it doesn't work so just leave empty
+        fprintf(f,"%u -> %u;\n",i,to);
+      }
+      else {
+        fprintf(f,"%u -> %u [ label = \"",i,to);
+        cs_dot_print(f,a);
+        fprintf(f,"\"];\n");
+      }
+    }
+    to = get_etrans(i);
+    if (to != NOTRANSITION) {
+      fprintf(f,"%u -> %u;\n",i,to);
+    }
+  }
+  fprintf(f,"}\n");
 }
+
+
+
 
 unsigned int num_conflicts_ll = 0;
 unsigned int num_conflicts_dfa = 0;
@@ -110,7 +144,7 @@ unsigned int num_conflicts_resolved = 0;
 unsigned int num_conflicts_unresolved = 0;
 unsigned int num_conflicts_unbounded = 0;
 
-static int uint_cmp(unsigned int a, unsigned int b) {
+int uint_cmp(unsigned int a, unsigned int b) {
   if (a == b) return 0; else if (a<b) return -1; else return 1;
 }
 
@@ -126,7 +160,6 @@ static int uint_cmp(unsigned int a, unsigned int b) {
 const char ?txtfile(const char ?x);
 
 /****************** NFA AND DFA COMMON DEFINITIONS ******************/
-typedef Graph::graph_t<st_t> stgraph_t; // State graphs.
 // List of glushkov transitions.
 typedef List::list_t<$(Set::set_t<st_t>,cs_opt_t,Set::set_t<st_t>) @> glush_trans_t;
 

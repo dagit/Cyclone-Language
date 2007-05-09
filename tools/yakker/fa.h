@@ -19,11 +19,13 @@
 #ifndef FA_H
 #define FA_H
 typedef unsigned int st_t; // States.  Sometimes, 0 is reserved to mark no transition
+typedef Graph::graph_t<st_t> stgraph_t; // State graphs.
 typedef unsigned int act_t;
 
 #define NOTRANSITION 0
 #define EPSILON NULL // the empty action
 
+extern int uint_cmp(unsigned int a, unsigned int b);
 extern int st_hash(st_t a);
 extern int st_cmp(st_t a,st_t b);
 
