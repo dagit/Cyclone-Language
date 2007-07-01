@@ -111,9 +111,10 @@ static struct Axarray::Xarray<unsigned int> *branch_id_array;
 static $(strset_t, grammar_t) *nfa_grm_state;
 
 // per-branch state
-static struct Axarray::Xarray<struct Hashtable::Table<str_t,st_t> *> *branch_symbols_array;
+typedef struct Hashtable::Table<`a,`b,`r> *`r Table_t<`a,`b,`r>;
+static struct Axarray::Xarray<Table_t<str_t,st_t>> *branch_symbols_array;
 
-static void symbols_table(branch_id_t b_id, Hashtable::table_t<str_t,st_t,`H> t){
+static void symbols_table(branch_id_t b_id, Table_t<str_t,st_t,`H> t){
   Axarray::set((_@)branch_symbols_array, b_id, t);
 }
 
@@ -214,10 +215,23 @@ static void action(st_t from, cs_opt_t x, state_thunk to) {
    has no transitions */
 static st_t mk_lazy_alt(rule_t a,rule_t b, branch_id_t b_id) {
   let s = nfa_fresh_state_internal(b_id); let f = nfa_fresh_state_internal(b_id); final(s,f);
-  let st_a = mk_LatentState(a, b_id, mk_ActualState(f));
-  let st_b = mk_LatentState(b, b_id, mk_ActualState(f));
+  let st_f = mk_ActualState(f);
+  let st_a = mk_LatentState(a, b_id, st_f);
+  let st_b = mk_LatentState(b, b_id, st_f);
   action(s,EPSILON,st_a);
   etrans(s,st_b);
+  return s;
+}
+
+static st_t mk_alt(st_t a,st_t b, branch_id_t b_id) {
+  let s = nfa_fresh_state_internal(b_id); let f = nfa_fresh_state_internal(b_id); final(s,f);
+  let st_f = mk_ActualState(f);
+  let st_a = mk_ActualState(a);
+  let st_b = mk_ActualState(b);
+  action(s,EPSILON,st_a);
+  etrans(s,st_b);
+  etrans(get_final(a), st_f);
+  etrans(get_final(b), st_f);
   return s;
 }
 
@@ -229,6 +243,16 @@ static st_t mk_lazy_seq(rule_t a,rule_t b, branch_id_t b_id) {
   return s;
 }
 
+static st_t mk_seq(st_t a, st_t b, branch_id_t b_id) {
+  let s = nfa_fresh_state_internal(b_id); let f = nfa_fresh_state_internal(b_id); final(s,f);
+  let st_a = mk_ActualState(a);
+  action(s,EPSILON,st_a);
+  let st_b = mk_ActualState(b);
+  etrans(get_final(a),st_b);
+  etrans(get_final(b),mk_ActualState(f));
+  return s;
+}
+
 static st_t mk_lazy_star(rule_t a, branch_id_t b_id) {
   let s = nfa_fresh_state_internal(b_id); let f = nfa_fresh_state_internal(b_id); final(s,f);
   etrans(s, mk_ActualState(f));
@@ -237,16 +261,24 @@ static st_t mk_lazy_star(rule_t a, branch_id_t b_id) {
   return s;
 }
 
-// not actually lazy, as actions are the base case.
-static st_t mk_lazy_act(cs_t x, branch_id_t b_id) {
+static st_t mk_star(st_t a, branch_id_t b_id) {
+  let s = nfa_fresh_state_internal(b_id); let f = nfa_fresh_state_internal(b_id); final(s,f);
+  etrans(s, mk_ActualState(f));
+  let st_a = mk_ActualState(a);
+  etrans(get_final(a),mk_ActualState(s));
+  action(s,EPSILON,st_a);
+  return s;
+}
+// not lazy, as actions are the base case.
+static st_t mk_act(cs_t x, branch_id_t b_id) {
   let s = nfa_fresh_state_internal(b_id); let f = nfa_fresh_state_internal(b_id); final(s,f);
   action(s,x,mk_ActualState(f));
   return s;
 }
 
 #define CASE_INSENSITIVE 1
-/* A bit more space efficient than looping mk_lazy_act */
-static st_t mk_lazy_lit(const char ?x, branch_id_t b_id) {
+/* A bit more space efficient than looping mk_act */
+static st_t mk_lit(const char ?x, branch_id_t b_id) {
   let s = nfa_fresh_state_internal(b_id);
   let len = strlen(x);
   if (len == 0) {
@@ -329,7 +361,7 @@ rule2nfa_thunk(rule_t r, branch_id_t b_id) {
   case &Symb(x,_):
     if (!nfa_grm_state){
 	warn("nfa global state not initialized\n");
-	return mk_lazy_lit("",b_id);
+	return mk_lit("",b_id);
     }
     let &$(recursive_syms,nfa_grm) = nfa_grm_state;
     let nfa_rt = (_@)get_symbols_table(b_id);
@@ -338,23 +370,41 @@ rule2nfa_thunk(rule_t r, branch_id_t b_id) {
       Rule_t x_rule = lookup_symbol(nfa_grm, x);
       if (!x_rule) {
 	warn("missing definition for %s in rule2nfa\n",x);
-	return mk_lazy_lit("",b_id);
+	return mk_lit("",b_id);
       }
       return rule2nfa_thunk(x_rule,b_id);
     }
+
+    // Invariant: symbol x must be recursive. Force creation of entire
+    // cycle beginning at x.
     st_t x_start;
-    if (!Hashtable::try_lookup(nfa_rt,xptr,&x_start)) {
+
+    // Are we already in the process of expanding a cycle?
+    let start_expand = !nfa_rt;
+
+    if (start_expand) { 
+      // Create a new recursive-symbols table for this branch, for this expansion.
+      nfa_rt = Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr);
+      symbols_table(b_id, nfa_rt);
+    } 
+
+    if (start_expand || !Hashtable::try_lookup(nfa_rt,xptr,&x_start)) {
       Rule_t x_rule = lookup_symbol(nfa_grm, x);
       if (!x_rule) {
 	warn("missing definition for %s in rule2nfa\n",x);
-	return mk_lazy_lit("",b_id);
+	return mk_lit("",b_id);
       }
+      // Critical that this creation + table insertion happen *before*
+      // recursive call to rule2nfa_thunk.
       let s = nfa_fresh_state_internal(b_id); let f = nfa_fresh_state_internal(b_id); final(s,f);
       Hashtable::insert(nfa_rt,xptr,s);
-      let s_body = mk_LatentState(x_rule, b_id, mk_ActualState(f));
+      let a = rule2nfa_thunk(x_rule,b_id);
+      let s_body = mk_ActualState(a);
       etrans(s,s_body);
+      etrans(get_final(a),mk_ActualState(f));
       x_start = s;
     }
+
     let s = nfa_fresh_state_internal(b_id); let f = nfa_fresh_state_internal(b_id); final(s,f);
     etrans(s,mk_ActualState(x_start));
     let x_last = get_final(x_start);
@@ -362,22 +412,34 @@ rule2nfa_thunk(rule_t r, branch_id_t b_id) {
     /* Invariant: x_last has no transitions */
     etrans(x_last,mk_ActualState(nfa_fresh_state_internal(b_id)));
     action(x_last,EPSILON,mk_ActualState(f));
+
+    if (start_expand) { // End expansion process.
+      symbols_table(b_id, NULL);
+    }
+
     return s;
+    
 
   case &Lit(x):
-    return mk_lazy_lit(x,b_id);
+    return mk_lit(x,b_id);
   case &CharRange(low,high):
     if (low > high) {
       internal_err("invalid character range in rule2nfa_thunk\n");
-      return mk_lazy_lit("",b_id);
+      return mk_lit("",b_id);
     }
-    return mk_lazy_act(cs_range(low,high+1),b_id);
+    return mk_act(cs_range(low,high+1),b_id);
   case &Opt(r2):
-    return mk_lazy_alt(r2,LIT(""),b_id);
+    let a = rule2nfa_thunk(r2,b_id);    
+    let b = rule2nfa_thunk(LIT(""),b_id);    
+    return mk_alt(a,b,b_id);
   case &Seq(r2,r3):
-    return mk_lazy_seq(r2,r3,b_id);
+    let a = rule2nfa_thunk(r2,b_id);    
+    let b = rule2nfa_thunk(r3,b_id);    
+    return mk_seq(a,b,b_id);
   case &Alt(r2,r3):
-    return mk_lazy_alt(r2,r3,b_id);
+    let a = rule2nfa_thunk(r2,b_id);    
+    let b = rule2nfa_thunk(r3,b_id);    
+    return mk_alt(a,b,b_id);
   case &Rcount(_,r2):
     /* Since the semantic count can't be implemented in the NFA, we convert this as *r2
        (a sequence of 0 or more r2's).  This is conservative when the nfa will be used for
@@ -386,17 +448,18 @@ rule2nfa_thunk(rule_t r, branch_id_t b_id) {
     warn_repeat();
     fallthru(r2);
   case &Star(0,&Infinity,r2):
-    return mk_lazy_star(r2,b_id);
+    let a = rule2nfa_thunk(r2,b_id);    
+    return mk_star(a,b_id);
   case &Star(m,i as &Infinity,r2):
     let r_seq = SEQ(r2,STAR(m-1,i,r2));
     return rule2nfa_thunk(r_seq,b_id);
   case &Star(0,&Num(0),r2):
-    return mk_lazy_lit("",b_id);
+    return mk_lit("",b_id);
   case &Star(0,&Num(n),r2):
     let r_opt = OPT(SEQ(r2,STAR(0, new Num(n-1),r2)));
     return rule2nfa_thunk(r_opt,b_id);
   case &Star(m,&Num(n),r2):
-    if (m > n) return mk_lazy_lit("",b_id);
+    if (m > n) return mk_lit("",b_id);
     let r_seq = SEQ(r2,STAR(m-1, new Num(n-1),r2));
     return rule2nfa_thunk(r_seq,b_id);
   case &Hash(0,N,r2):
@@ -407,10 +470,10 @@ rule2nfa_thunk(rule_t r, branch_id_t b_id) {
     return rule2nfa_thunk(SEQ(r2,STAR(m-1,minus_one(N),SEQ(commas(),r2))),b_id);
   case &Prose(_):
     warn("NFA conversion with Prose not supported\n");
-    return mk_lazy_lit("",b_id);
+    return mk_lit("",b_id);
   case &Minus(_,_):
     warn("NFA conversion with Minus not supported\n");
-    return mk_lazy_lit("",b_id);
+    return mk_lit("",b_id);
   }
 }
 
@@ -446,8 +509,6 @@ st_t get_atrans(st_t a) {
 
 st_t
 rule2nfa(grammar_t grm, rule_t r){
-  // Create a new recursive-symbols table for this branch.
-  symbols_table(current_branch_id, Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr));
   return rule2nfa_thunk(r,current_branch_id++);
 }
 
