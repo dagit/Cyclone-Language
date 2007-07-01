@@ -1290,18 +1290,7 @@ dfa_t nfa_distinguish(Set::set_t<st_t,`H> start_states,
           let nfa_final_states = Set::intersect(nfa_states,final_states);
           let ivals = st2ivals(intervals,nfa_states);
           if (CUTOFF && Set::cardinality(ivals) == 1) {
-// 	    let ival = Set::choose(ivals);
 	    debugprint(1,"Cutting off. Number of DFA states = %d.\n", dfa->number_of_states);
-//          let ns_card = Set::cardinality(nfa_states);
-// 	    debugprint(1,"Ival = %d. Cardinality of nfa_states = %d. NFA states: ", ival,ns_card);
-// 	    // print NFA states.
-// 	    let to_print = nfa_states;
-// 	    while (!Set::is_empty(to_print)) {
-// 	      let x = Set::choose(to_print);
-// 	      to_print = Set::delete(to_print,x);
-// 	      debugprint(1,"%d ",x);
-// 	    }
-// 	    debugprint(1,"\n");
             d_done = Set::insert(d_done,d);
             dfa_add_final(dfa,d,ivals);
           }
@@ -1315,6 +1304,7 @@ dfa_t nfa_distinguish(Set::set_t<st_t,`H> start_states,
           else if (!Set::is_empty(nfa_final_states))
             dfa_add_final(dfa,d,st2ivals(intervals,nfa_final_states));
         }
+	// invariant: d is the dfa state corresponding to the epsilon-closure of n_unclosed.
         Hashtable::insert(n2d,n_unclosed,d);
       }
       if (!Set::member(d_done,d)) d_todo = Set::insert(d_todo,d);
@@ -1969,8 +1959,10 @@ dfa_t lookahead_dfa(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt)
       eprintf("ERROR: ykdebug is not a directory\n");
       exit(1);
     }
-    FILE *f = fopen(dotfile("nfa"),"w");
-    if (f) { nfa_dot(f,final_states); fclose(f); }
+    if (debug > 1) {
+      FILE *f = fopen(dotfile("nfa"),"w");
+      if (f) { nfa_dot(f,final_states); fclose(f); }
+    }
   }
 
   interval_list = List::imp_rev(interval_list);
@@ -1987,6 +1979,9 @@ dfa_t lookahead_dfa(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt)
   let dfa = nfa_distinguish(start_states,final_states,intervals);
 
   if (debug) {
+    FILE *f = fopen(dotfile("nfa_after"),"w");
+    if (f) { nfa_dot(f,final_states); fclose(f); }
+
     FILE *f = fopen(dotfile("dfa0"),"w");
     if (f) { dfa_dot(f,dfa); fclose(f); }
   }
