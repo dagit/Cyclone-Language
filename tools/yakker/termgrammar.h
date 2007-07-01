@@ -19,6 +19,9 @@
 #ifndef TERMGRAMMAR_H
 #define TERMGRAMMAR_H
 #include "bnf.h"
+// used to set whether anonymous binders will be added for every symbol.
+extern int include_anon_binder;
+
 // if esc_chars is NULL, then a default set of chars is escaped.
 extern grammar_t escape_grammar(grammar_t g, const char? esc_chars);
 

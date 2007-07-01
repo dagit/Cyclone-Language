@@ -116,7 +116,7 @@ small_imap_genpm.bnf: examples/small_imap.bnf yakker
 	./yakker -escape "\\%()" -flatten -bindgrammar -termgrammar_bnf $< > $@
 
 imap_genpm.bnf: imap.bnf yakker
-	./yakker -escape "\\%()" -flatten -bindgrammar -termgrammar_bnf $< > $@
+	./yakker -escape "\\%()" -flatten -bindgrammar -termgrammar_bnf -no-anon-bind $< > $@
 
 # Pattern matching BNF examples.
 

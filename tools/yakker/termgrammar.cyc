@@ -36,6 +36,8 @@
 
 using List;
 
+int include_anon_binder = 1;
+
 /* Is a rule a necessary argument? */
 static
 int is_arg(rule_t r) {
@@ -433,8 +435,7 @@ rule_t mk_bnfgen_binder (const char ?`H symb_name){
   let a = aprintf("return new WildcardPat(\"%s\");", symb_name);
   r_binder->a = a;
   r_binder_spec->a = a;
-//   return r_binder;
-  return ALT(r_binder, r_binder_spec);
+  return include_anon_binder ? ALT(r_binder, r_binder_spec) : r_binder_spec;
 }
 
 grammar_t grammar2bindgrammar(grammar_t g) {

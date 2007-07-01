@@ -1277,6 +1277,24 @@ dfa_t nfa_distinguish(Set::set_t<st_t,`H> start_states,
       let a = i + lb;
       let n_unclosed = ts[i];
       let d;
+//       let n;
+      
+//       let d_found = Hashtable::try_lookup(n2d,n_unclosed,&d);
+
+//       // check whether closure(d) has changed to verify that
+//       // n_unclosed "really" maps to d.
+//       if (d_found){
+// 	let n2 = Hashtable::lookup(d2n,d);
+// 	n = epsilon_close(n_unclosed);
+// 	if (nstate_cmp(n,n2) != 0) {
+// 	  Hashtable::remove(n2d,n_unclosed);
+// 	  d_found = 0;
+// 	}
+//       } else {
+//         n = epsilon_close(n_unclosed);
+//       }
+
+//       if (!d_found) {
       if (!Hashtable::try_lookup(n2d,n_unclosed,&d)) {
         let n = epsilon_close(n_unclosed);
         if (!Hashtable::try_lookup(n2d,n,&d)) {

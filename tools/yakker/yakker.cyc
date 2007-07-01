@@ -132,6 +132,7 @@ static const char ?add_namespace = NULL;
 "         -escape <chars>        escape special characters <chars> in the input grammar. The first char in <chars> is used as for escaping.\n"\
 "         -bindgrammar           produce a grammar with binding capability for the input grammar\n"\
 "           -termgrammar_bnf        add term forms to the bindgrammar\n"\
+"           -no-anon-bind           do not include anonymous binders, only named ones\n"\
 "         -flatten               flatten the input grammar so that all nested sequences and alternatives become symbol defintions\n"\
 "         -no-minus-elim         turn of minus elimination.\n"\
 "         -all-start             allow any symbol to be used as a start symbol.\n"\
@@ -219,6 +220,7 @@ int main(int argc, const char ?`H?argv) {
     else if (strcmp("-help",argv[i]) == 0) die();
     else if (strcmp("-all-start",argv[i]) == 0) all_startp = 1;
     else if (strcmp("-bindgrammar",argv[i]) == 0) bindgrammarp = 1;
+    else if (strcmp("-no-anon-bind",argv[i]) == 0) include_anon_binder = 0;
     else if (strcmp("-termgrammar_bnf",argv[i]) == 0) termgrammar_bnfp = 1;
     else if (strcmp("-flatten",argv[i]) == 0) flattenp = 1;
     else if (strcmp("-no-minus-elim",argv[i]) == 0) minus_elimp = 0;

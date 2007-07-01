@@ -304,6 +304,12 @@ static st_t mk_lit(const char ?x, branch_id_t b_id) {
   return s;
 }
 
+static st_t mk_lazy_sym(rule_t r, branch_id_t b_id) {
+  let s = nfa_fresh_state_internal(b_id); let f = nfa_fresh_state_internal(b_id); final(s,f);
+  let st_r = mk_LatentState(r, b_id, mk_ActualState(f));
+  action(s,EPSILON,st_r);
+  return s;
+}
 
 /*************** CONVERT REGULAR EXPRESSIONS TO NFAS ***************/
 /* Approximately Thompson's algorithm */
@@ -364,7 +370,6 @@ rule2nfa_thunk(rule_t r, branch_id_t b_id) {
 	return mk_lit("",b_id);
     }
     let &$(recursive_syms,nfa_grm) = nfa_grm_state;
-    let nfa_rt = (_@)get_symbols_table(b_id);
     let xptr = new x;
     if (expand_nonrec && !Set::member(recursive_syms,xptr)) {
       Rule_t x_rule = lookup_symbol(nfa_grm, x);
@@ -372,7 +377,7 @@ rule2nfa_thunk(rule_t r, branch_id_t b_id) {
 	warn("missing definition for %s in rule2nfa\n",x);
 	return mk_lit("",b_id);
       }
-      return rule2nfa_thunk(x_rule,b_id);
+      return mk_lazy_sym(x_rule,b_id);
     }
 
     // Invariant: symbol x must be recursive. Force creation of entire
@@ -380,14 +385,17 @@ rule2nfa_thunk(rule_t r, branch_id_t b_id) {
     st_t x_start;
 
     // Are we already in the process of expanding a cycle?
-    let start_expand = !nfa_rt;
+    let start_expand = get_symbols_table(b_id) == NULL;
 
+    let nfa_rt;
     if (start_expand) { 
       // Create a new recursive-symbols table for this branch, for this expansion.
       nfa_rt = Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr);
       symbols_table(b_id, nfa_rt);
-    } 
-
+    } else {
+       nfa_rt = (_@)get_symbols_table(b_id);
+    }
+    
     if (start_expand || !Hashtable::try_lookup(nfa_rt,xptr,&x_start)) {
       Rule_t x_rule = lookup_symbol(nfa_grm, x);
       if (!x_rule) {
