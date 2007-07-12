@@ -1,0 +1,135 @@
+sqlite3.h:
+include {
+SQLITE_ABORT
+SQLITE_ALTER_TABLE
+SQLITE_ANALYZE
+SQLITE_ANY
+SQLITE_ATTACH
+SQLITE_AUTH
+SQLITE_BLOB
+SQLITE_BUSY
+SQLITE_CANTOPEN
+SQLITE_CONSTRAINT
+SQLITE_COPY
+SQLITE_CORRUPT
+SQLITE_CREATE_INDEX
+SQLITE_CREATE_TABLE
+SQLITE_CREATE_TEMP_INDEX
+SQLITE_CREATE_TEMP_TABLE
+SQLITE_CREATE_TEMP_TRIGGER
+SQLITE_CREATE_TEMP_VIEW
+SQLITE_CREATE_TRIGGER
+SQLITE_CREATE_VIEW
+SQLITE_CREATE_VTABLE
+SQLITE_DELETE
+SQLITE_DENY
+SQLITE_DETACH
+SQLITE_DONE
+SQLITE_DROP_INDEX
+SQLITE_DROP_TABLE
+SQLITE_DROP_TEMP_INDEX
+SQLITE_DROP_TEMP_TABLE
+SQLITE_DROP_TEMP_TRIGGER
+SQLITE_DROP_TEMP_VIEW
+SQLITE_DROP_TRIGGER
+SQLITE_DROP_VIEW
+SQLITE_DROP_VTABLE
+SQLITE_EMPTY
+SQLITE_ERROR
+SQLITE_FLOAT
+SQLITE_FORMAT
+SQLITE_FULL
+SQLITE_IGNORE
+SQLITE_INSERT
+SQLITE_INTEGER
+SQLITE_INTERNAL
+SQLITE_INTERRUPT
+SQLITE_IOERR_BLOCKED
+SQLITE_IOERR_DELETE
+SQLITE_IOERR_DIR_FSYNC
+SQLITE_IOERR_FSTAT
+SQLITE_IOERR_FSYNC
+SQLITE_IOERR_RDLOCK
+SQLITE_IOERR_READ
+SQLITE_IOERR_SHORT_READ
+SQLITE_IOERR_TRUNCATE
+SQLITE_IOERR_UNLOCK
+SQLITE_IOERR_WRITE
+SQLITE_LOCKED
+SQLITE_MISMATCH
+SQLITE_MISUSE
+SQLITE_NOLFS
+SQLITE_NOMEM
+SQLITE_NOTADB
+SQLITE_NOTFOUND
+SQLITE_NULL
+SQLITE_OK
+SQLITE_PERM
+SQLITE_PRAGMA
+SQLITE_PROTOCOL
+SQLITE_RANGE
+SQLITE_READ
+SQLITE_READONLY
+SQLITE_REINDEX
+SQLITE_ROW
+SQLITE_SCHEMA
+SQLITE_SELECT
+SQLITE_STATIC
+SQLITE_TOOBIG
+SQLITE_TRANSACTION
+SQLITE_TRANSIENT
+SQLITE_UPDATE
+SQLITE_UTF16
+SQLITE_UTF16BE
+SQLITE_UTF16LE
+SQLITE_UTF16_ALIGNED
+SQLITE_UTF8
+SQLITE_VERSION
+SQLITE_VERSION_NUMBER
+sqlite_int64
+sqlite_uint64
+sqlite3
+sqlite3_blob
+sqlite3_context
+sqlite3_stmt
+sqlite3_value
+}
+hstub {
+  // Should fix buildlib to include this
+  struct sqlite3;
+}
+hstub {
+  typedef 
+    int (*sqlite3_callback<`a,`n>)(`a,tag_t<`n>,char**@numelts(valueof(`n)),char**@numelts(valueof(`n)));
+}
+hstub sqlite3_open {
+  extern "C"
+    int sqlite3_open(const char @filename, sqlite3 *@ppDb);
+}
+hstub sqlite3_close {
+  extern "C"
+    int sqlite3_close(sqlite3 @);
+}
+hstub sqlite3_exec {
+  extern "C"
+    int sqlite3_exec(sqlite3@, const char @,
+                     sqlite3_callback<`a>, `a,
+                     char **errmsg);
+}
+hstub sqlite3_errmsg {
+  const char ?sqlite3_errmsg(sqlite3@);
+}
+cycstub sqlite3_errmsg {
+  #include <string.h>
+  struct sqlite3;
+  namespace Csqlite3 {
+    extern "C"
+    const char *sqlite3_errmsg(sqlite3@);
+  }
+  const char ?sqlite3_errmsg(sqlite3@ s) {
+    const char *msg = Csqlite3::sqlite3_errmsg(s);
+    // Can't return msg because sqlite3 internals may reuse or free it later
+    return strdup(msg);
+  }
+}
+;

@@ -15,9 +15,9 @@ BB=build/$(build)
 BT=build/$(target)
 BL=bin/lib
 
-all: directories cyclone tools xml
+all: directories cyclone tools xml otherlibs
 
-cyclone-inf: banshee_engine directories cyclone-inf-inner 
+cyclone-inf: banshee_engine directories cyclone-inf-inner
 
 $(BL)/libcycboot.a: $(BB)/libcycboot.a
 	cp -p $< $@
@@ -182,6 +182,7 @@ directories::
 	@mkdir -p $(BB)/aprof
 	@mkdir -p $(BB)/gprof
 	@mkdir -p $(BB)/nocheck
+	@mkdir -p $(BB)/pthread
 ifneq ($(build),$(target))
 	@mkdir -p $(BT)
 	@mkdir -p $(BT)/include
@@ -229,7 +230,12 @@ tools: cyclone
 	$(MAKE) -C tools/yakker cyclone-install
 
 otherlibs: cyclone
-	@test ! \( -e "$(LIBPCRE)" \) -a \( -z "$(LIBPCRE)" \) || $(MAKE) -C otherlibs/pcre install
+ifeq ($(HAVE_PCRE),yes)
+	$(MAKE) -C otherlibs/pcre install
+endif
+ifeq ($(HAVE_SQLITE3),yes)
+	$(MAKE) -C otherlibs/sqlite3 install
+endif
 
 cyclone: \
   directories \
@@ -241,12 +247,12 @@ cyclone: \
   $(BL)/cyc-lib/$(build)/runtime_cyc.a \
   bin/cycdoc$(EXE)
 
-banshee_engine: 
+banshee_engine:
 	$(MAKE) CC=$(CC) -C $(BANSHEE) banshee
 
 cyclone-inf-inner: \
   directories \
-  bin/cyclone-inf$(EXE) 
+  bin/cyclone-inf$(EXE)
 
 ifeq ($(HAVE_PTHREAD),yes)
 cyclone: \

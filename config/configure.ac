@@ -48,16 +48,8 @@ AC_SUBST(abs_srcdir)
 
 # Figure out compiler characteristics
 CFLAGS=    # prevents AC_PROG_CC from setting CFLAGS=-g -O2
-AC_PROG_CC
-
-<<<<<<< configure.ac
-else
-CFLAGS=
 AC_PROG_CC(gcc)
-fi # end of GCC check
 
-=======
->>>>>>> 1.21
 # Special cases -- these are for compiling the bin/genfiles
 if [[ "$build_vendor" = "apple" ]]; then
   CFLAGS="-no-cpp-precomp -Wno-long-double"
@@ -161,8 +153,8 @@ AC_C_WCHAR_T_UNSIGNED
 # The next line is not sufficient:
 #  AC_CHECK_HEADERS([pthread.h],[ac_cv_pthreads=pthreads],[ac_cv_pthreads=no])
 # because some systems define an empty pthreads.h.  So we look for a
-# specific type we use from pthread.h, tlocal_key_t.
-AC_CHECK_TYPE(tlocal_key_t,[ac_cv_pthreads=pthreads],[ac_cv_pthreads=no],[pthread.h])
+# specific type we use from pthread.h, pthread_key_t.
+AC_CHECK_TYPE(pthread_key_t,[ac_cv_pthreads=pthreads],[ac_cv_pthreads=no],[#include <pthread.h>])
 if [[ "$ac_cv_pthreads" = "pthreads" ]]; then
   HAVE_PTHREAD=yes
 else
@@ -170,6 +162,23 @@ else
 fi
 AC_SUBST(HAVE_PTHREAD)
 
+# pcre -- Perl Compatible Regular Expressions
+AC_CHECK_HEADERS([pcre.h],[ac_cv_pcre=pcre],[ac_cv_pcre=no])
+if [[ "$ac_cv_pcre" = "pcre" ]]; then
+  HAVE_PCRE=yes
+else
+  HAVE_PCRE=no
+fi
+AC_SUBST(HAVE_PCRE)
+
+# sqlite3
+AC_CHECK_HEADERS([sqlite3.h],[ac_cv_sqlite3=sqlite3],[ac_cv_sqlite3=no])
+if [[ "$ac_cv_sqlite3" = "sqlite3" ]]; then
+  HAVE_SQLITE3=yes
+else
+  HAVE_SQLITE3=no
+fi
+AC_SUBST(HAVE_SQLITE3)
 
 # The rest...
 AC_SET_MAKE
