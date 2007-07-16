@@ -448,7 +448,7 @@ grammar_t grammar2bindgrammar(grammar_t g) {
 
     if (is_arg(SYMB(n)) && !is_regexp(n)){
       let r_b = mk_bnfgen_binder(n);
-      res = new List(new $(n, ALT(r,r_b), a), res);
+      res = new List(new $(n, ALT(r_b,r), a), res);
     } else      
       res = new List(new $(n,r,a), res);
   }
