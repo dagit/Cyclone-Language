@@ -1,0 +1,104 @@
+/* A simple imap server.
+*/
+#include <core.h>
+using Core;
+
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+
+#include <pthread.h>
+
+#include "ykbuf.h"
+
+/* TODO: remove/replace */
+void greeting_hook(const char ?x) {}
+void response_hook(const char ?x) {}
+void command_hook(const char ?x) {}
+
+int session_handler(int fd) {
+
+  ykbuf_t @buf = fd2ykbuf(fd); /* output to fd, input from buf */
+
+  /* TODO: send greeting to client */
+  /* greeting = "*" SP (resp-cond-auth|resp-cond-bye) CRLF.
+     resp-cond-auth = ("OK"|"PREAUTH") SP resp-text.
+     resp-text = ["[" resp-text-code "]" SP] text.
+     text = 1*TEXT-CHAR.
+  */
+  /*
+     fprintf(fd, "OK %text", "I'm an imap server");
+  */
+
+  while (1) {
+    /* TODO: Read command from client */
+
+    /* TODO: send server data */
+
+    /* TODO: send server completion result response */
+  }
+
+  return 0;
+}
+
+/* Wait for connection, when it comes, spawn a thread */
+static void server(int port) {
+  int listenfd, connfd;
+  pid_t childpid;
+  socklen_t clilen;
+  struct sockaddr_in cliaddr, servaddr;
+
+  listenfd = socket(AF_INET, SOCK_STREAM, 0);
+  if (listenfd < 0) {
+    fprintf(stderr, "Error opening socket\n");
+    exit(1);
+  }
+  bzero((_?)&servaddr,sizeof(servaddr));
+  servaddr.sin_family = AF_INET;
+  servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+  servaddr.sin_port = htons(port);
+  if (bind(listenfd, &servaddr, sizeof(servaddr)) < 0) {
+    fprintf(stderr, "Error binding socket\n");
+    exit(1);
+  }
+  if (listen(listenfd, 64) < 0) {
+    fprintf(stderr, "Error listening on socket\n");
+    exit(1);
+  }
+  fprintf(stderr, "Server started on port %d\n",port);
+
+  while (1) {
+    clilen = sizeof(cliaddr);
+    connfd = accept(listenfd, &cliaddr, &clilen);
+    if (connfd < 0) {
+      fprintf(stderr,"Error on accept()\n");
+      fflush(stderr);
+      continue;
+    }
+    pthread_t pid;
+    if ( (pthread_create(&pid,NULL,session_handler,connfd)) != 0) {
+      fprintf(stderr,"Error on pthread_create()\n");
+      fflush(stderr);
+    }
+    /* server */
+    close(connfd);
+  }
+}
+
+int main(int argc, mstring_t<`H>? argv) {
+  if (argc > 2) {
+    fprintf(stderr, "Usage: %s [port]\n", argv[0]);
+    exit(1);
+  }
+  int port = 143;
+  if (argc == 2) port = atoi(argv[1]);
+  server(port);
+  return 0;
+}

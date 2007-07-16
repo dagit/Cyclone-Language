@@ -53,7 +53,7 @@ imapcl.o: examples/imapcl.cyc
 
 # --novcgen is temporary until a bug is fixed
 imap.o: imap.cyc
-	$(CYCLONE) -c $< -o $@ --novcgen
+	$(CYCLONE) -pa -c $< -o $@ --novcgen
 
 imap.cyc: imap.bnf
 	./yakker $(YAKFLAGS) -gen command -no-main -lazyfill $< > $@
@@ -69,6 +69,12 @@ imapp: imapp.o ykbuf.o ssl.o imap.o
 
 imapp.o: examples/imapp.cyc
 	$(CYCLONE) -c $^ -o $@ -I.
+
+imapserver: imapserver.o ykbuf.o ssl.o imap.o
+	$(CYCLONE) -pa $^ -o $@ -lsqlite3 -lpthread -lssl -lcrypto
+
+imapserver.o: examples/imapserver.cyc
+	$(CYCLONE) -pa -c $^ -o $@ -I.
 
 # Targets for testing termgrammar parsers.
 

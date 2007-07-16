@@ -2134,7 +2134,7 @@ hstub pthread_create {
 				   `a (*__start_routine) (`b), `b arg);
   }
   static int pthread_create (pthread_t @thread, const pthread_attr_t *attr,
-		      `a (@`H cycfun) (`b), `b arg: regions(`b) > `H) {
+		      `a (@`H cycfun) (`b), `b arg: regions(`b) <= `H) {
     // FIX: heap allocation
     return Cpthread::pthread_create(thread,attr,
 				    Cpthread::pthread_cycfun_wrap,new $(cycfun,arg));
