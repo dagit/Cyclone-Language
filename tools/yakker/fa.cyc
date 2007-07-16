@@ -882,7 +882,6 @@ static int leq_all(att_t a,aset_t x) {
 }
 int dfa_tiebreak(dfa_t dfa) {
   /* What final states can a given final state reach? */
-  /* YHM: reach going through *only* final states. */
   let final_reachable = node_intersect(dfa_reachable(dfa),dfa->final_states);
 
   /* { s | s is a final state with only one attribute } */
@@ -910,6 +909,11 @@ int dfa_tiebreak(dfa_t dfa) {
       shared = Set::insert(shared,f);
       break;
     }
+  }
+
+  if (Set::cardinality(shared) == 0){
+    eprintf("All LL(1) conflicts were resolved in the lookahead dfa\n");
+    return 0;
   }
 
   let spantree = dfa_spantree(dfa);
@@ -958,8 +962,6 @@ int dfa_tiebreak(dfa_t dfa) {
     eprintf("Unable to resolve by prefix test or exclusive test (so %u wins)\n",chosen);
     Hashtable::insert(dfa->final_attrs,f,Set::singleton(att_cmp,chosen));
   }
-  if (Set::cardinality(shared) == 0)
-    eprintf("All conflicts were resolved in the lookahead dfa\n");
   return Set::cardinality(shared);
 }
 
@@ -1252,6 +1254,9 @@ dfa_t nfa_distinguish(Set::set_t<st_t,`H> start_states,
   d_todo = Set::insert(d_todo,d_curr);
 
   let gaveup = NULL;
+  let no_state_limit_warned = 1; // flag indicating whether the user
+				 // has been warned that the state
+				 // limit has been exceeded.
   /* Invariant: d_done and d_todo are disjoint */
   while (!Set::is_empty(d_todo)) {
     d_curr = Set::choose(d_todo);
@@ -1277,24 +1282,6 @@ dfa_t nfa_distinguish(Set::set_t<st_t,`H> start_states,
       let a = i + lb;
       let n_unclosed = ts[i];
       let d;
-//       let n;
-      
-//       let d_found = Hashtable::try_lookup(n2d,n_unclosed,&d);
-
-//       // check whether closure(d) has changed to verify that
-//       // n_unclosed "really" maps to d.
-//       if (d_found){
-// 	let n2 = Hashtable::lookup(d2n,d);
-// 	n = epsilon_close(n_unclosed);
-// 	if (nstate_cmp(n,n2) != 0) {
-// 	  Hashtable::remove(n2d,n_unclosed);
-// 	  d_found = 0;
-// 	}
-//       } else {
-//         n = epsilon_close(n_unclosed);
-//       }
-
-//       if (!d_found) {
       if (!Hashtable::try_lookup(n2d,n_unclosed,&d)) {
         let n = epsilon_close(n_unclosed);
         if (!Hashtable::try_lookup(n2d,n,&d)) {
@@ -1313,8 +1300,6 @@ dfa_t nfa_distinguish(Set::set_t<st_t,`H> start_states,
             dfa_add_final(dfa,d,ivals);
           }
           else if (dfa->number_of_states >= DFASTATELIMIT) {
-            if (dfa->number_of_states == DFASTATELIMIT)
-              warn("dfa state limit exceeded\n");
             d_done = Set::insert(d_done,d);
             dfa_add_final(dfa,d,ivals); /* Note, we simply don't know whether the ivals are separable */
             gaveup = new List::List(new $(d,ivals),gaveup);
@@ -1338,6 +1323,10 @@ dfa_t nfa_distinguish(Set::set_t<st_t,`H> start_states,
     }
     spans = List::imp_rev(spans);
     Axarray::set(dfa->states,d_curr,new trans(lb,spans));
+    if (dfa->number_of_states >= DFASTATELIMIT && no_state_limit_warned){
+      no_state_limit_warned = false;
+      warn("dfa state limit exceeded\n");
+    }
   }
   if (gaveup && debug) {
     let spantree = dfa_spantree(dfa);
