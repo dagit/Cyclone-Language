@@ -105,7 +105,7 @@ small_imap_genpm: small_imap_genpm.cyc ykbuf.o ssl.o ast_main.o pm_bnf.o\
 
 #	./yakker $(YAKFLAGS) -all-start -eof 10 -gen command_pm -no-main $< > $@
 # Use -no-minus-elim as minus elimination was already done, and redoing it causes problems (in particular, 
-# the charset optimization loses necessary semantic actions.
+# the charset optimization loses necessary semantic actions).
 small_imap_genpm.cyc: small_imap_genpm.bnf yakker
 	./yakker $(YAKFLAGS) -all-start -no-minus-elim -gen command -no-main $< > $@
 
