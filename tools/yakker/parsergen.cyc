@@ -210,14 +210,14 @@ void gen0(rule_t r, rule_t right_ctxt) {
       eprintf("LL(1) conflict on character(s) ");
       cs_print(stderr,rng_conflict);
       eprintf(" in Alt\n  ");
-      pr_rule(stderr,SEQ(r,right_ctxt));
+      pr_rule(stderr,SEQ(r,right_ctxt),0);
       int altnum = 1;
       for (let x = alts; x; x = x->tl) {
         eprintf("\nAlternative %d: ",altnum++);
-        pr_rule(stderr,x->hd);
+        pr_rule(stderr,x->hd,0);
       }
       eprintf("\nRight context: ");
-      pr_rule(stderr,right_ctxt);
+      pr_rule(stderr,right_ctxt,0);
       eprintf("\n");
       let dfa;
       if (local_lookahead) {
@@ -271,7 +271,7 @@ void gen0(rule_t r, rule_t right_ctxt) {
       eprintf("LL(1) conflict on character(s) ");
       cs_print(stderr,cs);
       eprintf(" in Opt\n  ");
-      pr_rule(stderr,SEQ(r,right_ctxt));
+      pr_rule(stderr,SEQ(r,right_ctxt),0);
       eprintf("\n");
       let dfa;
       if (local_lookahead) {
@@ -366,14 +366,14 @@ void gen0(rule_t r, rule_t right_ctxt) {
       eprintf("LL(1) conflict on character(s) ");
       cs_print(stderr,cs);
       eprintf(" in Star\n  ");
-      pr_rule(stderr,SEQ(r,right_ctxt));
+      pr_rule(stderr,SEQ(r,right_ctxt),0);
       eprintf("\n");
       eprintf("Alternative 1: ");
-      pr_rule(stderr,oneplus_r2);
+      pr_rule(stderr,oneplus_r2,0);
       eprintf("\nAlternative 2: ");
-      pr_rule(stderr,LIT(""));
+      pr_rule(stderr,LIT(""),0);
       eprintf("\nRight context: ");
-      pr_rule(stderr,right_ctxt);
+      pr_rule(stderr,right_ctxt,0);
       eprintf("\n");
       let dfa;
       if (local_lookahead) {

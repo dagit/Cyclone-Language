@@ -29,25 +29,31 @@ void pr_repeat(FILE @f,repeat_t rp) {
   case &Infinity: fprintf(f,"&"); break;
   }
 }
-void pr_rule(FILE @f,rule_t r);
-static void pr_rule_paren(FILE @f,rule_t r) {
-  fprintf(f,"("); pr_rule(f,r); fprintf(f,")");
+
+void pr_rule(FILE @f,rule_t r,int with_annotations);
+
+static void pr_rule_paren(FILE @f,rule_t r,int with_annotations) {
+  fprintf(f,"("); pr_rule(f,r,with_annotations); fprintf(f,")");
 }
-void pr_rule(FILE @f,rule_t r) {
-  if (r->a) {
-    switch (r->r) {
-    case &Alt(_,_): fprintf(f,"("); break;
-    default: break;
+
+void pr_rule(FILE @f,rule_t r,int with_annotations) {
+  if (with_annotations){
+    if (r->a) {
+      switch (r->r) {
+      case &Alt(_,_): fprintf(f,"("); break;
+      default: break;
+      }
     }
-  }
   
-  if (r->v) {
-    switch (r->r) {
-    case &Seq(_,_): fprintf(f,"("); break;
-    case &Alt(_,_): fprintf(f,"("); break;
-    default: break;
+    if (r->v) {
+      switch (r->r) {
+      case &Seq(_,_): fprintf(f,"("); break;
+      case &Alt(_,_): fprintf(f,"("); break;
+      default: break;
+      }
     }
   }
+
   switch (r->r) {
   case &Prose(x):
     /* FIX */
@@ -77,61 +83,65 @@ void pr_rule(FILE @f,rule_t r) {
     }
     break;
   case &Opt(r2):
-    fprintf(f,"["); pr_rule(f,r2); fprintf(f,"]"); break;
+    fprintf(f,"["); pr_rule(f,r2,with_annotations); fprintf(f,"]"); break;
   case &Rcount(c,r2):
     fprintf(f,"@repeat(%s)",c); 
-    if (r2->a || r2->v) pr_rule_paren(f,r2); else pr_rule(f,r2); 
+    if (r2->a || r2->v) pr_rule_paren(f,r2,with_annotations); else pr_rule(f,r2,with_annotations); 
     break;
   case &Seq(r2,r3):
-    if (lower_prec(r2,r)) pr_rule_paren(f,r2); else pr_rule(f,r2);
+    if (lower_prec(r2,r)) pr_rule_paren(f,r2,with_annotations); else pr_rule(f,r2,with_annotations);
     fprintf(f," ");
-    if (lower_prec(r3,r)) pr_rule_paren(f,r3); else pr_rule(f,r3);
+    if (lower_prec(r3,r)) pr_rule_paren(f,r3,with_annotations); else pr_rule(f,r3,with_annotations);
     break;
   case &Alt(r2,r3):
-    if (lower_prec(r2,r)) pr_rule_paren(f,r2); else pr_rule(f,r2);
+    if (lower_prec(r2,r)) pr_rule_paren(f,r2,with_annotations); else pr_rule(f,r2,with_annotations);
     fprintf(f,"|");
-    if (lower_prec(r3,r)) pr_rule_paren(f,r3); else pr_rule(f,r3);
+    if (lower_prec(r3,r)) pr_rule_paren(f,r3,with_annotations); else pr_rule(f,r3,with_annotations);
     break;
   case &Star(m,&Num(n),r2):
     if (m == n) fprintf(f,"%d",m);
     else if (m == 0) fprintf(f,"*%d",n);
     else fprintf(f,"%d*%d",m,n);
-    if (lower_prec(r2,r)) pr_rule_paren(f,r2); else pr_rule(f,r2);
+    if (lower_prec(r2,r)) pr_rule_paren(f,r2,with_annotations); else pr_rule(f,r2,with_annotations);
     break;
   case &Star(m,&Infinity,r2):
     if (m == 0) fprintf(f,"*");
     else fprintf(f,"%d*",m);
-    if (lower_prec(r2,r)) pr_rule_paren(f,r2); else pr_rule(f,r2);
+    if (lower_prec(r2,r)) pr_rule_paren(f,r2,with_annotations); else pr_rule(f,r2,with_annotations);
     break;
   case &Hash(m,&Num(n),r2):
     if (m == 0) fprintf(f,"#%d",n);
     else fprintf(f,"%d#%d",m,n);
-    if (lower_prec(r2,r)) pr_rule_paren(f,r2); else pr_rule(f,r2);
+    if (lower_prec(r2,r)) pr_rule_paren(f,r2,with_annotations); else pr_rule(f,r2,with_annotations);
     break;
   case &Hash(m,&Infinity,r2):
     if (m == 0) fprintf(f,"#");
     else fprintf(f,"%d#",m);
-    if (lower_prec(r2,r)) pr_rule_paren(f,r2); else pr_rule(f,r2);
+    if (lower_prec(r2,r)) pr_rule_paren(f,r2,with_annotations); else pr_rule(f,r2,with_annotations);
     break;
   case &Minus(r2,r3):
-    fprintf(f,"("); pr_rule_paren(f,r2); fprintf(f,"-"); pr_rule_paren(f,r3); fprintf(f,")");
+    fprintf(f,"("); pr_rule_paren(f,r2,with_annotations); fprintf(f,"-"); pr_rule_paren(f,r3,with_annotations); fprintf(f,")");
     break;
   }
-  if (r->v) {
-    switch (r->r) {
-    case &Seq(_,_): fprintf(f,")"); break;
-    case &Alt(_,_): fprintf(f,")"); break;
-    default: break;
+
+  if (with_annotations){
+    if (r->v) {
+      switch (r->r) {
+      case &Seq(_,_): fprintf(f,")"); break;
+      case &Alt(_,_): fprintf(f,")"); break;
+      default: break;
+      }
+      fprintf(f,"$%s",r->v);
     }
-    fprintf(f,"$%s",r->v);
-  }
-  if (r->a) {
-    switch (r->r) {
-    case &Alt(_,_): fprintf(f,")"); break;
-    default: break;
+    if (r->a) {
+      switch (r->r) {
+      case &Alt(_,_): fprintf(f,")"); break;
+      default: break;
+      }
+      fprintf(f,"{%s}",r->a);
     }
-    fprintf(f,"{%s}",r->a);
   }
+
 }
 
 void pr_definition(FILE @f,definition_t d) {
@@ -144,7 +154,7 @@ void pr_definition(FILE @f,definition_t d) {
   if (do_ws(d)) fprintf(f,".");
   if (do_re(d)) fprintf(f,"@");
   fprintf(f,"= ");
-  pr_rule(f,r);
+  pr_rule(f,r, 1);
   fprintf(f,".");
   if (html_mode) fprintf(f,"<br>");
   fprintf(f,"\n");
@@ -165,35 +175,38 @@ typedef List::list_t<const char ?`H@`H,`H> rs_list;
 typedef const char ?`H chs;
 
 rs_list 
-pr_rule2string_l(rs_list rs_l, rule_t r);
+pr_rule2string_l(rs_list rs_l, rule_t r,int with_annotations);
 
 static rs_list
-pr_rule2string_paren_l(rs_list rs_l,rule_t r) {
+pr_rule2string_paren_l(rs_list rs_l,rule_t r,int with_annotations) {
   rs_l = new List(new "(", rs_l);
-  rs_l = pr_rule2string_l(rs_l,r);
+  rs_l = pr_rule2string_l(rs_l,r,with_annotations);
   return new List(new ")", rs_l);
 }
 
 rs_list
-pr_rule2string_l(rs_list rs_l,rule_t r) {
-  if (r->a) {
-    switch (r->r) {
-    case &Alt(_,_): 
-      rs_l = new List(new "(", rs_l); 
+pr_rule2string_l(rs_list rs_l,rule_t r,int with_annotations) {
+  if (with_annotations){
+    if (r->a) {
+      switch (r->r) {
+      case &Alt(_,_): 
+	rs_l = new List(new "(", rs_l); 
       break;
-    default: break;
+      default: break;
+      }
     }
-  }
   
-  if (r->v) {
-    switch (r->r) {
-    case &Seq(_,_): 
-    case &Alt(_,_): 
-      rs_l = new List(new "(", rs_l); 
+    if (r->v) {
+      switch (r->r) {
+      case &Seq(_,_): 
+      case &Alt(_,_): 
+	rs_l = new List(new "(", rs_l); 
       break;      
-    default: break;
+      default: break;
+      }
     }
   }
+
   switch (r->r) {
   case &Prose(x):
     /* FIX */
@@ -224,80 +237,83 @@ pr_rule2string_l(rs_list rs_l,rule_t r) {
     }
     break;
   case &Opt(r2):
-    rs_l = new List(new "[", rs_l); rs_l = pr_rule2string_l(rs_l,r2); rs_l = new List(new "]", rs_l); break;
+    rs_l = new List(new "[", rs_l); rs_l = pr_rule2string_l(rs_l,r2,with_annotations); rs_l = new List(new "]", rs_l); break;
   case &Rcount(c,r2):
-    rs_l = new List(new (chs)aprintf("@repeat(%s)",c), rs_l); rs_l = pr_rule2string_l(rs_l,r2); break;
+    rs_l = new List(new (chs)aprintf("@repeat(%s)",c), rs_l); rs_l = pr_rule2string_l(rs_l,r2,with_annotations); break;
   case &Seq(r2,r3):
     if (lower_prec(r2,r)) 
-      rs_l = pr_rule2string_paren_l(rs_l,r2); 
+      rs_l = pr_rule2string_paren_l(rs_l,r2,with_annotations); 
     else 
-      rs_l = pr_rule2string_l(rs_l,r2);
+      rs_l = pr_rule2string_l(rs_l,r2,with_annotations);
     rs_l = new List(new " ", rs_l);
-    if (lower_prec(r3,r)) rs_l = pr_rule2string_paren_l(rs_l,r3); 
-    else rs_l = pr_rule2string_l(rs_l,r3);
+    if (lower_prec(r3,r)) rs_l = pr_rule2string_paren_l(rs_l,r3,with_annotations); 
+    else rs_l = pr_rule2string_l(rs_l,r3,with_annotations);
     break;
   case &Alt(r2,r3):
-    if (lower_prec(r2,r)) rs_l = pr_rule2string_paren_l(rs_l,r2); 
-    else rs_l = pr_rule2string_l(rs_l,r2);
+    if (lower_prec(r2,r)) rs_l = pr_rule2string_paren_l(rs_l,r2,with_annotations); 
+    else rs_l = pr_rule2string_l(rs_l,r2,with_annotations);
     rs_l = new List(new "|", rs_l);
-    if (lower_prec(r3,r)) rs_l = pr_rule2string_paren_l(rs_l,r3); 
-    else rs_l = pr_rule2string_l(rs_l,r3);
+    if (lower_prec(r3,r)) rs_l = pr_rule2string_paren_l(rs_l,r3,with_annotations); 
+    else rs_l = pr_rule2string_l(rs_l,r3,with_annotations);
     break;
   case &Star(m,&Num(n),r2):
     if (m == n) rs_l = new List(new (chs)aprintf("%d",m), rs_l);
     else if (m == 0) rs_l = new List(new (chs)aprintf("*%d",n), rs_l);
     else rs_l = new List(new (chs)aprintf("%d*%d",m,n), rs_l);
-    if (lower_prec(r2,r)) rs_l = pr_rule2string_paren_l(rs_l,r2); 
-    else rs_l = pr_rule2string_l(rs_l,r2);
+    if (lower_prec(r2,r)) rs_l = pr_rule2string_paren_l(rs_l,r2,with_annotations); 
+    else rs_l = pr_rule2string_l(rs_l,r2,with_annotations);
     break;
   case &Star(m,&Infinity,r2):
     if (m == 0) rs_l = new List(new "*", rs_l);
     else rs_l = new List(new (chs)aprintf("%d*",m), rs_l);
-    if (lower_prec(r2,r)) rs_l = pr_rule2string_paren_l(rs_l,r2); 
-    else rs_l = pr_rule2string_l(rs_l,r2);
+    if (lower_prec(r2,r)) rs_l = pr_rule2string_paren_l(rs_l,r2,with_annotations); 
+    else rs_l = pr_rule2string_l(rs_l,r2,with_annotations);
     break;
   case &Hash(m,&Num(n),r2):
     if (m == 0) rs_l = new List(new (chs)aprintf("#%d",n), rs_l);
     else rs_l = new List(new (chs)aprintf("%d#%d",m,n), rs_l);
-    if (lower_prec(r2,r)) rs_l = pr_rule2string_paren_l(rs_l,r2); 
-    else rs_l = pr_rule2string_l(rs_l,r2);
+    if (lower_prec(r2,r)) rs_l = pr_rule2string_paren_l(rs_l,r2,with_annotations); 
+    else rs_l = pr_rule2string_l(rs_l,r2,with_annotations);
     break;
   case &Hash(m,&Infinity,r2):
     if (m == 0) rs_l = new List(new "#", rs_l);
     else rs_l = new List(new (chs)aprintf("%d#",m), rs_l);
-    if (lower_prec(r2,r)) rs_l = pr_rule2string_paren_l(rs_l,r2); 
-    else rs_l = pr_rule2string_l(rs_l,r2);
+    if (lower_prec(r2,r)) rs_l = pr_rule2string_paren_l(rs_l,r2,with_annotations); 
+    else rs_l = pr_rule2string_l(rs_l,r2,with_annotations);
     break;
   case &Minus(r2,r3):
     rs_l = new List(new "(", rs_l); 
-    rs_l = pr_rule2string_paren_l(rs_l,r2); 
+    rs_l = pr_rule2string_paren_l(rs_l,r2,with_annotations); 
     rs_l = new List(new "-", rs_l); 
-    rs_l = pr_rule2string_paren_l(rs_l,r3); 
+    rs_l = pr_rule2string_paren_l(rs_l,r3,with_annotations); 
     rs_l = new List(new ")", rs_l);
     break;
   }
-  if (r->v) {
-    switch (r->r) {
-    case &Seq(_,_): 
-    case &Alt(_,_): 
-      rs_l = new List(new ")", rs_l); break;
-    default: break;
+
+  if (with_annotations){
+    if (r->v) {
+      switch (r->r) {
+      case &Seq(_,_): 
+      case &Alt(_,_): 
+	rs_l = new List(new ")", rs_l); break;
+      default: break;
+      }
+      rs_l = new List(new (chs)aprintf("$%s",r->v), rs_l);
     }
-    rs_l = new List(new (chs)aprintf("$%s",r->v), rs_l);
-  }
-  if (r->a) {
-    switch (r->r) {
-    case &Alt(_,_): rs_l = new List(new ")", rs_l); break;
-    default: break;
+    if (r->a) {
+      switch (r->r) {
+      case &Alt(_,_): rs_l = new List(new ")", rs_l); break;
+      default: break;
+      }
+      rs_l = new List(new (chs)aprintf("{%s}",r->a), rs_l);
     }
-    rs_l = new List(new (chs)aprintf("{%s}",r->a), rs_l);
   }
 
   return rs_l;
 }
 
 const char ?pr_rule2string(rule_t r){
-  let rs_l = pr_rule2string_l(NULL, r);
+  let rs_l = pr_rule2string_l(NULL, r, 1);
   return strconcat_l(List::imp_rev(rs_l));
 }
 

@@ -1,5 +1,5 @@
 include ../../Makefile.inc
-CYCFLAGS=-v
+CYCFLAGS=
 #CYCFLAGS=-g -save-c -pp
 YAKFLAGS=
 
@@ -114,6 +114,22 @@ small_imap_genpm.h: small_imap_genpm.bnf yakker
 
 small_imap_genpm.bnf: examples/small_imap.bnf yakker
 	./yakker -escape "\\%()" -flatten -bindgrammar -termgrammar_bnf $< > $@
+
+###############################################################################
+# Rules for full imap grammar with pattern-matching support.
+###############################################################################
+
+imap_genpm: imap_genpm.cyc ykbuf.o ssl.o ast_main.o pm_bnf.o\
+	bnf.o lex.o parse_tab.o pr.o util.o 
+	$(CYCLONE) $(CYCFLAGS) $^ -o $@ --novcgen -lssl -lcrypto
+
+# Use -no-minus-elim as minus elimination was already done, and redoing it causes problems (in particular, 
+# the charset optimization loses necessary semantic actions).
+imap_genpm.cyc: imap_genpm.bnf yakker
+	./yakker $(YAKFLAGS) -all-start -no-minus-elim -gen command -no-main $< > $@
+
+imap_genpm.h: imap_genpm.bnf yakker
+	./yakker $(YAKFLAGS) -gen-header $< > $@
 
 imap_genpm.bnf: imap.bnf yakker
 	./yakker -escape "\\%()" -flatten -bindgrammar -termgrammar_bnf $< > $@

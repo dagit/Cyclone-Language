@@ -324,7 +324,7 @@ void extract_prose(FILE @f) {
   for (let t = prose_list; t; t = t->tl) {
     let p = t->hd;
     if (prose_cmp(last,p) != 0) {
-      pr_rule(stdout,p);
+      pr_rule(stdout,p,1);
       printf("\n=\n\n.\n");
       last = p;
     }
