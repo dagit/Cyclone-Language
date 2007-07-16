@@ -693,32 +693,39 @@ void gen(grammar_t<`H> grm, const char ?`H start_symbol,
     eprintf("************************************************************************\n");
     eprintf("SUMMARY\n\n");
     if (num_conflicts_ll == 1)
-      eprintf("There was 1 LL(1) conflict\n");
+      eprintf("There was 1 LL(1) conflict.\n");
     else
-      eprintf("There were %u LL(1) conflicts\n", num_conflicts_ll);
+      eprintf("There were %u LL(1) conflicts.\n", num_conflicts_ll);
+
+    if (num_conflicts_unbounded == 1)
+      eprintf("1 LL(1) conflict might require unbounded lookahead.\n");
+    else
+      eprintf("%u LL(1) conflicts might require unbounded lookahead.\n",num_conflicts_unbounded);
+
     if (num_conflicts_dfa == 0)
-      eprintf("There were no conflicts for the lookahead dfas\n");
+      eprintf("There were no conflicts for the lookahead dfas.\n");
     else {
       if (num_conflicts_dfa == 1)
-        eprintf("There was 1 conflict in the dfas\n");
+        eprintf("There was 1 conflict in the lookahead dfas.\n");
       else if (num_conflicts_dfa > 1)
-        eprintf("There were %u conflicts in the dfas\n", num_conflicts_dfa);
-      if (num_conflicts_resolved == 1)
-        eprintf("  1 was resolved\n");
-      else
-        eprintf("  %u were resolved\n",num_conflicts_resolved);
+        eprintf("There were %u conflicts in the lookahead dfas.\n", num_conflicts_dfa);
+
+      if (num_conflicts_resolved){
+	if (num_conflicts_resolved == 1)
+	  eprintf("  1 conflict was resolved with tie-breaking.\n");
+	else
+	  eprintf("  %u conflicts were resolved with tie-breaking.\n",num_conflicts_resolved);
+      
+	if (num_conflicts_change_order == 1)
+	  eprintf("  1 tie-break resulted in branch reordering.\n");
+	else if (num_conflicts_change_order)
+	  eprintf("  %u tie-breaks resulted in branch reordering.\n",num_conflicts_change_order);
+      }
+
       if (num_conflicts_unresolved == 1)
-        eprintf("  1 was unresolved\n");
-      else
-        eprintf("  %u were unresolved\n",num_conflicts_unresolved);
-      if (num_conflicts_unbounded == 1)
-        eprintf("  1 instance might require unbounded lookahead\n");
-      else
-        eprintf("  %u instances might require unbounded lookahead\n",num_conflicts_unbounded);
-      if (num_conflicts_change_order == 1)
-        eprintf("  1 conflict was out of order\n");
-      else if (num_conflicts_change_order)
-        eprintf("  %u conflicts were out of order\n",num_conflicts_change_order);
+	eprintf("  1 conflict was unresolved.\n");
+      else if (num_conflicts_unresolved)
+	eprintf("  %u conflicts were unresolved.\n",num_conflicts_unresolved);
     }
   }
 }
