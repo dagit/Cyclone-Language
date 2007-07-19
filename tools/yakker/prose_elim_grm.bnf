@@ -263,39 +263,39 @@ ALPHA | DIGIT | HYPHEN
 .
 <ASCII HT, horizontal-tab>
 =
-HTAB
+%d9
 .
 <ASCII LF (linefeed)>
 =
-LF
+%d10
 .
 <ASCII LF, line feed, %x0A>
 =
-LF
+%d10
 .
 <ASCII LF, linefeed>
 =
-LF
+%d10
 .
 <ASCII SI, shift in>
 =
-<UNDEFINED>
+%d15
 .
 <ASCII SO, shift out>
 =
-<UNDEFINED>
+%d14
 .
 <ASCII SP, space>
 =
-SP
+%d32
 .
 <ASCII TAB (tab)>
 =
-HTAB
+%d9
 .
 <ASCII space, %x20>
 =
-SP
+%d32
 .
 <An extension token defined by a
                     standards-track RFC and registered
@@ -872,7 +872,7 @@ rfc1766:Language-Tag
 .
 <any ASCII alphabetic character>
 =
-%d97-122 | %d66-90
+%d97-122 | %d65-90
 .
 <any ASCII character>
 =
