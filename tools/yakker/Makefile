@@ -13,6 +13,21 @@ STRINGIFY=$(BINDIR)/stringify
 
 FILES=analyze axarray bnf ykbuf corerules cs extract fa termgrammar lex pads parse_tab parsergen pr prose util yakker nfa_eager nfa_lazy
 
+FILES=analyze axarray bnf cs extract fa nfa_lazy nfa_eager flatten termgrammar lex pads \
+  parse_tab parsergen pr prose prose_elim_grm string_dfa_engine1 \
+  string_dfa_engine2_1 corerules corerules_grm \
+  util namespaces yakker
+
+OBJS:=$(addsuffix .o,$(FILES))
+
+# OBJS compiled for allocation profiling.
+OBJS_PA=$(addsuffix _a.o,$(FILES))
+PROG_PA=$(PROG)_a
+
+###############################################################################
+# Targets
+###############################################################################
+
 all: $(PROG)
 
 cyclone-install: $(BINDIR)/$(PROG)
@@ -20,11 +35,11 @@ cyclone-install: $(BINDIR)/$(PROG)
 $(BINDIR)/$(PROG): $(PROG)
 	cp $< $@
 
-$(PROG): analyze.o axarray.o bnf.o cs.o extract.o fa.o nfa_lazy.o nfa_eager.o termgrammar.o lex.o pads.o \
-  parse_tab.o parsergen.o pr.o prose.o prose_elim_grm.o string_dfa_engine1.o \
-  string_dfa_engine2_1.o corerules.o corerules_grm.o \
-  util.o namespaces.o yakker.o
+$(PROG): $(OBJS)
 	$(CYCLONE) $(CYCFLAGS) -L$(CYC_LIB_PATH) $^ -o $@ -lm
+
+$(PROG_PA): $(OBJS_PA)
+	$(CYCLONE) $(CYCFLAGS) -pa -L$(CYC_LIB_PATH) $^ -o $@ -lm
 
 testindexer: indexer 1rfc_index
 	./indexer < 1rfc_index
@@ -105,7 +120,7 @@ small_imap.cyc: examples/small_imap.bnf yakker
 small_imap.h: examples/small_imap.bnf yakker
 	./yakker $(YAKFLAGS) -gen-header $< > $@
 
-small_imap_genpm: small_imap_genpm.cyc ykbuf.o ssl.o ast_main.o pm_bnf.o\
+small_imap_genpm: small_imap_genpm.o ykbuf.o ssl.o ast_main.o pm_bnf.o small_imap.o\
 	bnf.o lex.o parse_tab.o pr.o util.o 
 	$(CYCLONE) $(CYCFLAGS) $^ -o $@ --novcgen -lssl -lcrypto
 
@@ -113,13 +128,13 @@ small_imap_genpm: small_imap_genpm.cyc ykbuf.o ssl.o ast_main.o pm_bnf.o\
 # Use -no-minus-elim as minus elimination was already done, and redoing it causes problems (in particular, 
 # the charset optimization loses necessary semantic actions).
 small_imap_genpm.cyc: small_imap_genpm.bnf yakker
-	./yakker $(YAKFLAGS) -all-start -no-minus-elim -gen command -no-main $< > $@
+	./yakker $(YAKFLAGS) -cyc-namespace SmallImapFormat -all-start -no-minus-elim -gen command -no-main $< > $@
 
 small_imap_genpm.h: small_imap_genpm.bnf yakker
-	./yakker $(YAKFLAGS) -gen-header $< > $@
+	./yakker $(YAKFLAGS) -cyc-namespace SmallImapFormat -gen-header $< > $@
 
 small_imap_genpm.bnf: examples/small_imap.bnf yakker
-	./yakker -escape "\\%()" -flatten -bindgrammar -termgrammar_bnf $< > $@
+	./yakker -escape "\\%()" -flatten -bindgrammar -no-anon-bind -termgrammar_bnf $< > $@
 
 ###############################################################################
 # Rules for full imap grammar with pattern-matching support.
@@ -131,6 +146,8 @@ imap_genpm: imap_genpm.cyc ykbuf.o ssl.o ast_main.o pm_bnf.o\
 
 # Use -no-minus-elim as minus elimination was already done, and redoing it causes problems (in particular, 
 # the charset optimization loses necessary semantic actions).
+# imap_genpm.cyc: imap_genpm.bnf yakker_a
+# 	./yakker_a $(YAKFLAGS) -all-start -no-minus-elim -gen command -no-main $< > $@
 imap_genpm.cyc: imap_genpm.bnf yakker
 	./yakker $(YAKFLAGS) -all-start -no-minus-elim -gen command -no-main $< > $@
 
@@ -138,9 +155,11 @@ imap_genpm.h: imap_genpm.bnf yakker
 	./yakker $(YAKFLAGS) -gen-header $< > $@
 
 imap_genpm.bnf: imap.bnf yakker
-	./yakker -escape "\\%()" -flatten -bindgrammar -termgrammar_bnf $< > $@
+	./yakker -escape "\\%()" -flatten -bindgrammar -no-anon-bind -termgrammar_bnf $< > $@
 
+###############################################################################
 # Pattern matching BNF examples.
+###############################################################################
 
 small_imap_pm: small_imap_pm.o ykbuf.o ssl.o tg_stack.o util.o small_imap.o
 	$(CYCLONE) $(CYCFLAGS) $^ -o $@ --novcgen -lssl -lcrypto
@@ -199,15 +218,18 @@ prose_elim_grm.cyc: prose_elim_grm.bnf
 corerules_grm.cyc: corerules_grm.bnf
 	$(STRINGIFY) $< > $@
 
+###############################################################################
+# Automatic dependency generation
+###############################################################################
+
 %.d: %.cyc
 	$(CYCLONE) -M -MG $< > $@
 
-depend:
-
-# Interferes with make clean, so do it manually at the end of this file
-# -include $(addsuffix .d, $(FILES))
+.PHONY: depend
 
 depend: $(addsuffix .d, $(FILES))
+
+###############################################################################
 
 .SECONDARY: parse_tab.cyc
 
@@ -262,6 +284,11 @@ clean:
 
 %.p: %.bnf yakker
 	./yakker -pads $< > $@
+
+# .o dependency forces the _a.o to depend on the same files as the .o.
+# However, the .o is not really needed.
+$(OBJS_PA): %_a.o: %.cyc %.o 
+	$(CYCLONE) $(CYCFLAGS) -pa -c $< -o $@
 
 %.o: %.cyc
 	$(CYCLONE) $(CYCFLAGS) -c $<
@@ -384,24 +411,7 @@ rfc%.bnf: rfc%.txt yakker
 
 .PHONY: cyclone-install
 
-### dependencies generated by "make depend" and appended manually
-analyze.o: analyze.cyc analyze.h bnf.h util.h cs.h pr.h fa.h
-axarray.o: axarray.cyc axarray.h
-bnf.o: bnf.cyc bnf.h  util.h
-boxextract.o: boxextract.cyc ykbuf.h ssl.h
-corerules.o: corerules.cyc corerules.h bnf.h util.h
-cs.o: cs.cyc cs.h bnf.h util.h
-extract.o: extract.cyc  bnf.h  util.h pr.h extract.h prose.h
-nfa_lazy.o: nfa_lazy.cyc bnf.h util.h cs.h axarray.h analyze.h fa.h pr.h nfa_lazy.h
-nfa_eager.o: nfa_eager.cyc bnf.h util.h cs.h axarray.h analyze.h fa.h pr.h nfa_eager.h
-fa.o: fa.cyc bnf.h util.h cs.h axarray.h analyze.h fa.h nfa_lazy.h nfa_eager.h pr.h
-lex.o: lex.cyc bnf.h util.h parse_tab.h
-pads.o: pads.cyc bnf.h util.h pr.h cs.h prose.h
-parsergen.o: parsergen.cyc bnf.h util.h fa.h analyze.h cs.h pr.h pads.h
-parse_tab.o: parse_tab.cyc bnf.h util.h
-pr.o: pr.cyc bnf.h util.h pr.h
-prose.o: prose.cyc prose.h bnf.h util.h
-termgrammar.o: termgrammar.cyc bnf.h util.h pr.h analyze.h cs.h termgrammar.h
-util.o: util.cyc util.h
-yakker.o: yakker.cyc bnf.h util.h pr.h pads.h extract.h cs.h prose.h analyze.h fa.h parsergen.h termgrammar.h corerules.h namespaces.h
-ykbuf.o: ykbuf.cyc ykbuf.h ssl.h
+ifneq ($(MAKECMDGOALS),clean)
+  DEPENDS:=$(addsuffix .d, $(FILES))
+  -include $(DEPENDS)
+endif

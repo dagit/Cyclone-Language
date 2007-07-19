@@ -72,6 +72,7 @@ rule_t pat2parse_rule(rule_pat_t p){
   }
 }
 
+
 bool is_special_char(unsigned int i) {
   char c = (char)i;
   return (c<' ' || c>'~' || c=='\042' || c=='\\');
@@ -219,3 +220,102 @@ rule_pat_t unescape_pat(rule_pat_t p, char esc_char){
 
 //   return seq;
 // }
+
+
+//////////////////////////////////////////////////////////////////////
+// Taken from generated code.
+//////////////////////////////////////////////////////////////////////
+
+#define YKLIMIT ykb->lim
+#define YKCURSOR ykb->cur
+#define YKFILL(n) (ykfill(ykb,(n)))
+#define YKPOSN ((ykb->cur-ykb->bot)+ykb->discarded)
+#define YKMARKER ykb->mark
+#define YKSAVE ({ let x = 0; ykb->save_count++; if (ykb->save) x = ykb->cur-ykb->save; else ykb->save = ykb->cur; x; })
+#define YKRESTORE(x) ({ let p = ykb->save+x; if (--ykb->save_count == 0) ykb->save=NULL; p; })
+
+extern datatype exn {extern Parse_error };
+extern datatype exn.Parse_error Parse_error_val;
+
+//////////////////////////////////////////////////////////////////////
+
+// We use lazyfill to simplify the fill process and to avoid having to
+// eagerly compute the fill amount.  However, it should not matter
+// whether any parsing functions that we link to uses lazy or eager
+// fill.
+static void lazyfill(ykbuf_t @ykb, unsigned int fa) {
+  if (fa && ((YKLIMIT - YKCURSOR) < fa))
+      YKFILL(fa);
+}
+
+static void parse_lit(ykbuf_t @ykb, const char ?x)
+{
+  int c; // PHASE
+  int len = strlen(x);
+  lazyfill(ykb, len);
+  for (int k = 0; k < len; k++) {
+    c = *YKCURSOR++; //PHASE
+    let orig = x[k];
+    let l = tolower(orig);
+    let u = toupper(orig);
+    if (c!=l && c!=u) throw &Parse_error_val; // PHASE
+  }
+}
+
+static void parse_char(ykbuf_t @ykb, unsigned int x)
+{
+  int c; // PHASE
+  lazyfill(ykb,1);
+  c = *YKCURSOR++; //PHASE
+  let l = tolower(x);
+  let u = toupper(x);
+  if (c!=l && c!=u) throw &Parse_error_val; // PHASE  
+}
+
+static void parse_sym(ykbuf_t @`r ykb, parse_fun_table parse_funs, const char ?`H x)
+{
+  let x_ptr = new x;
+
+//   let parse_x = Hashtable::lookup_opt(parse_funs, x_ptr);
+//   if (parse_x)
+//     (*parse_x)(ykb);
+//   else {
+//     eprintf("Failed to find definition of symbol %s. Skipping...\n", x);    
+//   }
+
+  try{
+    let parse_x = Hashtable::lookup(parse_funs, x_ptr);
+    parse_x(ykb);
+  }catch {
+  case &Core::Not_found: 
+    eprintf("Failed to find definition of symbol %s. Skipping...\n", x);    
+    break;
+  }
+}
+
+strptr_array<`r1,`r2>
+parse_with_pat(ykbuf_t @`r ykb, parse_fun_table parse_funs, 
+	       rule_pat_t p, strptr_array<`r1,`r2> args){
+  switch (p) {
+  case &SymbPat(x):
+    parse_sym(ykb,parse_funs,x);
+    return args;
+  case &LitPat(x):
+    parse_lit(ykb,x);
+    return args;  
+  case &CharPat(c):
+    parse_char(ykb,c);
+    return args;  
+  case &SeqPat(p1,p2):
+    args = parse_with_pat(ykb,parse_funs,p1,args);
+    args = parse_with_pat(ykb,parse_funs,p2,args);
+    return args;  
+  case &WildcardPat(x):
+    let save = YKSAVE;
+    parse_sym(ykb,parse_funs,x);
+    unsigned char ?@nozeroterm ykr = YKRESTORE(save);
+    let x_str = substring((const char ?@nozeroterm)ykr,0,YKCURSOR-ykr);
+    **args = x_str;
+    return ++args;  
+  }
+}

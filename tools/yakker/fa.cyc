@@ -937,7 +937,7 @@ int dfa_tiebreak(dfa_t dfa) {
     if (Set::cardinality(attrs) == 1) {
       num_conflicts_resolved++;
       let chosen = Set::choose(attrs);
-      eprintf("Choose %u to win by prefix\n",chosen);
+      eprintf("Choose %u to win by prefix test\n",chosen);
       Hashtable::insert(dfa->final_attrs,f,attrs);
       if (!leq_all(chosen,f_attrs)) {
 	num_conflicts_change_order++;

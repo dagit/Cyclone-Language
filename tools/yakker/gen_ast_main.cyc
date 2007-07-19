@@ -7,21 +7,27 @@
 #include "ykbuf.h"
 #include "pm_bnf.h"
 
-#define YKPOSN ((ykb->cur-ykb->bot)+ykb->discarded)
+#define YKPOSN(ykb) ((ykb->cur-ykb->bot)+ykb->discarded)
 
 extern int ykdebug;
 extern datatype exn {extern Parse_error };
 extern datatype exn.Parse_error Parse_error_val;
-enum Mode{ Print, Scan };
+
+enum Mode{ Print, Scan, DynPrint, DynScan };
 
 #define USAGE \
 "Usage:%s [OPTIONS]\n"\
 "Options: -root <sym>            parse starting from rule <sym>\n"\
-"         -print                 generate printer from format string.\n"\
+"         -name <sym>            use <sym> as the name for the newly defined rule.\n"\
 "         -scan                  generate scanner from format string. This is the default option.\n"\
+"         -dyn-scan              run scanner from format string.\n"\
+"           -num-args <n>        allocate space for n arguments to scan.\n"\
+"         -print                 generate printer from format string.\n"\
+"         -dyn-print             run printer from format string.\n"\
+"           -args <args>         pass the remaining arguments to the print processor.\n"\
 "         -d                     increase debug level by 1.\n"\
 "         -unescape-pat <char>   unescape characters in the output, based on escape character <char>.\n"\
-"         -args <args>           pass the remaining arguments to the scan/print processor.\n"\
+"         -fmt <format-string>   use the given format string instead of reading from stdin.\n"\
 "         -help                  print this message\n"
 
 static void die(const char ?prog_name) {
@@ -31,6 +37,7 @@ static void die(const char ?prog_name) {
 
 static struct Attr empty_attr = Attr{.ws=0,.re=0,.paramtype=NULL,.rettype=NULL};
 
+#include ORIG_HEADER
 #include PATGEN_HEADER
 
 typedef enum{
@@ -45,6 +52,36 @@ root_rule_t get_root(const char ?root_name){
   }
 }
 
+int imap_internal_scanf(ykbuf_t@ ykb_source, ykbuf_t@ ykb_fmt, ...const char?`H @ args){
+  // parse the format string into a pattern AST.
+  rule_pat_t p;
+  try {
+    p = SmallImapFormat::p_command(ykb_fmt);
+  }
+  catch {
+  case &Parse_error:
+    let n = YKPOSN(ykb_fmt);
+    eprintf("Invalid format string at position %d (0x%x)\n",n,n);
+    return -1;
+    break;
+  }
+
+  let ft = Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr);
+  INITIALIZE_FUNCTION_TABLE(ft);
+
+  try {
+    parse_with_pat(ykb_source,ft,p,args);
+  } catch {
+  case &Parse_error:
+    let n = YKPOSN(ykb_source);
+    eprintf("Input parsing failed at position %d (0x%x)\n",n,n);
+    return -1;
+    break;
+  }
+
+  return YKPOSN(ykb_source);
+}
+
 int main(int argc, char ??argv) {
   // position of last record in the stream.
   int last_record_posn = 0;
@@ -52,6 +89,8 @@ int main(int argc, char ??argv) {
   enum Mode mode = Scan;
   const char ? root_name = NULL; // name of root symbol specified by user.
   const char ? def_name = NULL; // implicit name of symbol defined by format string.
+  const char ? format_string = NULL;
+  int num_args = 0;
   unsigned int start_args = argc; // index in argv of first argument
 				  // to our printer. Default indicates
 				  // that no arguments arg present in
@@ -61,11 +100,29 @@ int main(int argc, char ??argv) {
     if (     strcmp(argv[i],  "-help") == 0) die(argv[0]);
     else if (strcmp(argv[i],  "-d") == 0) ykdebug++;
     else if (strcmp(argv[i],  "-scan") == 0) mode = Scan;
+    else if (strcmp(argv[i],  "-dyn-scan") == 0) mode = DynScan;
     else if (strcmp(argv[i],  "-print") == 0) mode = Print;
+    else if (strcmp(argv[i],  "-dyn-print") == 0) mode = DynPrint;
     else if (strcmp(argv[i],  "-args") == 0) {start_args = i+1; break;}
     else if (strcmp(argv[i],  "-unescape-pat") == 0) {
       if (i+1 >= argc) die(argv[0]);
       unescape_char = new argv[i+1][0];
+      i += 1;
+    }
+    else if (strcmp(argv[i],  "-fmt") == 0) {
+      if (i+1 >= argc) die(argv[0]);
+      format_string = argv[i+1];
+      i += 1;
+    }
+    else if (strcmp(argv[i],  "-num-args") == 0) {
+      if (i+1 >= argc) die(argv[0]);
+      let endptr = (char @)argv[i+1];
+      num_args = (int)strtoul(argv[i+1],
+			      &endptr,10);
+      if (*endptr != '\0'){
+	fprintf(stderr,"-num-args option is not followed by valid integer: %s.\n",argv[i+1]);
+	num_args = 0;
+      }
       i += 1;
     }
     else if(strcmp(argv[i],   "-root") == 0){
@@ -82,7 +139,11 @@ int main(int argc, char ??argv) {
 
 
   root_rule_t root = get_root(root_name);
-  ykbuf_t @ykb = fd2ykbuf(0); // read from stdin
+  ykbuf_t @ykb = 
+    format_string ?
+    string2ykbuf(format_string) :
+    fd2ykbuf(0); // read from stdin
+  
   rule_pat_t p;
   try {
     // parse input until we hit an error or EOF.
@@ -110,24 +171,48 @@ int main(int argc, char ??argv) {
 	fprintf(stdout,"{#include \"tg_stack.h\"}\n");
 	break;
       case Print:
+      case DynPrint:
 	let s = pat2print_code(p,argv + start_args);
 	fputs(s,stdout);
+	break;
+      case DynScan:
+	let ft = Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr);
+	INITIALIZE_FUNCTION_TABLE(ft);
+	ykbuf_t @ykb = fd2ykbuf(3);
+	let scan_args = new {for i < num_args : new ((const char ?@zeroterm)NULL)}; 
+	try {
+          parse_with_pat(ykb,ft,p,scan_args);
+	  printf("Scanned args:\n");
+	  for (int j=0; j < num_args; j++)
+	    printf("> %s\n",*scan_args[j]);
+	} catch {
+	case &Parse_error:
+	  let n = YKPOSN(ykb) - last_record_posn;
+	  printf("\n");
+	  if (n<60) for (int i = 0; i < n; i++) printf(" ");
+	  printf("^ Input parsing failed at position %d (0x%x)\n",n,n);
+	  break;
+	}
 	break;
       default:
 	fprintf(stderr,"Unrecognized mode.");
       }
+
+      if (format_string)
+	break;
+
       // consume newline
       char c = 0;
       let sz = ykbread(&c,1,ykb);
       if (1 != sz || '\n' != c)  // missing newline.
 	throw &Parse_error_val;      
       printf("\n");
-      last_record_posn = YKPOSN;
+      last_record_posn = YKPOSN(ykb);
     }
   }
   catch {
   case &Parse_error:
-    let n = YKPOSN - last_record_posn;
+    let n = YKPOSN(ykb) - last_record_posn;
     if (n == 0){
       break; // stopped because reached empty line; program done.
     }
@@ -138,6 +223,7 @@ int main(int argc, char ??argv) {
     break;
   }
   
+  printf("\n");
 
   return 0;
 }

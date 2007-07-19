@@ -1,3 +1,4 @@
+#define ORIG_HEADER "small_imap.h"
 #define PATGEN_HEADER "small_imap_genpm.h"
 #define SYMBOLS_ENUM_BODY Command, Seq_range
 #define GET_ROOT_BODY \
@@ -6,8 +7,15 @@
 #define GET_ROOT_DEFAULT Command
 #define MAIN_SWITCH_CASES \
       case Command : \
-	p = p_command(ykb); break;\
+	p = SmallImapFormat::p_command(ykb); break;\
       case Seq_range : \
-	p = p_seq_range(ykb); break;
+	p = SmallImapFormat::p_seq_range(ykb); break;
+
+
+#define INITIALIZE_FUNCTION_TABLE(t)		\
+  do {\
+  Hashtable::insert((t), new "seq-range", p_seq_range<>);	\
+  Hashtable::insert((t), new "seq-number", p_seq_number<>);\
+  } while (0)
 
 #include "gen_ast_main.cyc"

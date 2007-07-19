@@ -100,9 +100,9 @@ static const char ?add_namespace = NULL;
 #define USAGE \
 "Usage: yakker [OPTIONS] [FILES]\n"\
 "Options: -gen <sym>             generate a parser using <sym> as the start symbol\n"\
-"           -gen-header          generate a header file for the parsing functions\n"\
 "           -local                 use only local lookahead (without FOLLOW)\n"\
 "           -no-expand             don't expand recursive symbols, share them instead\n"\
+"         -gen-header          generate a header file for the parsing functions\n"\
 "         -extract               extract EBNF from the input, assumed to be in RFC format\n"\
 "           -externals <bnfs>      use symbols from bnf files if needed in extraction\n"\
 "         -check                 perform all sanity checks on the input grammar\n"\
@@ -113,6 +113,7 @@ static const char ?add_namespace = NULL;
 "           -check-firstfollow     check the FIRST and FOLLOW sets\n"\
 "           -check-conflicts       check for conflicts\n"\
 "           -check-whitespace      check whitespace\n"\
+"         -cyc-namespace <sym>    use <sym> as the cyclone namespace for the generated cyclone code\n"\
 "         -namespace <sym>       use <sym> as the namespace for the grammar\n"\
 "         -unnamespace           remove any namespaces from the grammar\n"\
 "         -compare               compare two grammars\n"\
@@ -203,6 +204,12 @@ int main(int argc, const char ?`H?argv) {
 	exit(1);
       }
       eof_val = e;
+      i += 1;
+    }
+    else if (strcmp("-cyc-namespace",argv[i]) == 0) {
+      if (i+1 >= argc) die();
+      cyc_namespace = argv[i+1];
+      fprintf(stderr,"using cyclone namespace %s\n",cyc_namespace);
       i += 1;
     }
     else if (strcmp("-namespace",argv[i]) == 0) {

@@ -31,6 +31,7 @@ int print_main = 1;
 int print_globals = 1;
 int local_lookahead = 0;
 int lazyfill = 0;
+const char ?cyc_namespace = NULL;
 
 /**********************************************************************/
 /* A generator for parsers with dfa lookahead.
@@ -40,6 +41,7 @@ static const char ?p_id(const char ?`H n) {
 }
 static int scope = 0;
 
+// conservative estimate of required  number of bytes to input into buffer.
 static unsigned int fill_amount(rule_t r) {
   switch (r->r) {
   case &Lit(x):
@@ -518,6 +520,10 @@ void gen_header(grammar_t<`H> grm, List::list_t<const char ?@>textblobs){
     textblobs = textblobs->tl;
   }
 
+  if (cyc_namespace){
+    printf("namespace %s {\n\n",cyc_namespace);
+  }
+
   for (let x = grm; x; x = x->tl) {
     let &$(n,r,a) = x->hd;
     if (a.rettype) {
@@ -528,6 +534,9 @@ void gen_header(grammar_t<`H> grm, List::list_t<const char ?@>textblobs){
 	   p_id(n),
 	   (a.paramtype)?",":"",
 	   a.paramtype);
+  }
+  if (cyc_namespace){
+    printf("\n}\n");
   }
 }
 
@@ -608,6 +617,10 @@ void gen(grammar_t<`H> grm, const char ?`H start_symbol,
     textblobs = textblobs->tl;
   }
 
+  if (cyc_namespace){
+    printf("namespace %s {\n\n",cyc_namespace);
+  }
+
   /* Print forward definitions of parsing functions */
   for (let x = grm; x; x = x->tl) {
     let &$(n,r,a) = x->hd;
@@ -646,6 +659,11 @@ void gen(grammar_t<`H> grm, const char ?`H start_symbol,
     printf("  if (ykdebug) printf(\"[%%x,%%x):%s\\n\",YKq,YKPOSN);\n",n);
     printf("}\n");
   }
+
+  if (cyc_namespace){
+    printf("\n}\n");
+  }
+
   if (print_main) {
     printf("int main(int argc, char ??argv) {\n"
            "  while ((argc--)>1) {\n"
@@ -673,8 +691,13 @@ void gen(grammar_t<`H> grm, const char ?`H start_symbol,
     printf("  ykbuf_t @ykb = fd2ykbuf(0); // read from stdin\n");
 #endif
     printf("  try {\n");
-    printf("    %s(ykb);\n", // FIX: what if start_symbol takes args?
-           p_id(start_symbol));
+    printf("    ");
+    if (cyc_namespace){
+      printf("%s::",cyc_namespace);
+    }
+    printf("%s(ykb);\n", // FIX: what if start_symbol takes args?
+	   p_id(start_symbol));
+
     printf("    //let n = YKPOSN;\n"
            "    //if (n<60) for (int i = 0; i < n; i++) printf(\"^\");\n"
            "    //printf(\" accepted %%d (0x%%x) characters\\n\",n,n);\n"

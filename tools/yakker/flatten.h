@@ -16,23 +16,8 @@
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
 
-#ifndef PARSERGEN_H
-#define PARSERGEN_H
+#ifndef FLATTEN_H
+#define FLATTEN_H
 #include "bnf.h"
-extern void gen(grammar_t<`H> grm, const char ?`H symb,
-                List::list_t<const char ?@>textblobs, 
-		int all_start, unsigned int eof_val);
-
-/* generate a code fragment.*/
-extern void gen_frag(rule_t r);
-
-/* Print forward definitions of parsing functions in grammar grm. */
-extern void gen_header(grammar_t<`H> grm, List::list_t<const char ?@>textblobs);
-
-extern int print_main;
-extern int print_globals;
-extern int lazyfill;
-extern int local_lookahead;
-extern const char ?cyc_namespace;
-
+extern grammar_t flatten_grammar(grammar_t g);
 #endif
