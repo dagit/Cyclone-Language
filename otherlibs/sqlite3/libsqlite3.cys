@@ -97,9 +97,10 @@ sqlite3_value
 hstub {
   // Should fix buildlib to include this
   struct sqlite3;
+  struct sqlite3_stmt;
 }
 hstub {
-  typedef 
+  typedef
     int (*sqlite3_callback<`a,`n>)(`a,tag_t<`n>,char**@numelts(valueof(`n)),char**@numelts(valueof(`n)));
 }
 hstub sqlite3_open {
@@ -131,5 +132,74 @@ cycstub sqlite3_errmsg {
     // Can't return msg because sqlite3 internals may reuse or free it later
     return strdup(msg);
   }
+}
+hstub sqlite3_prepare {
+  int sqlite3_prepare(sqlite3 @db,
+                      const char @`r zSql,
+                      int nBytes,
+                      sqlite3_stmt *@ppStmt,
+                      const char *`r*pzTail);
+}
+cycstub sqlite3_prepare {
+  namespace Csqlite3 {
+    // Not quite right.  First, pzTail is left pointing just after
+    // the first statement in zSql; this could be outside of the
+    // region of zSql -- so this is not safe.  Second, nBytes is
+    // allowed to be negative, in which case sqlite stops after the
+    // NUL terminator of zSql -- so this is too restrictive.
+    extern "C"
+    int sqlite3_prepare(sqlite3 @db,
+                        const char @`r zSql,
+                        int nBytes,
+                        sqlite3_stmt *@ppStmt,
+                        const char *`r*pzTail);
+  }
+  // I am disabling the pzTail functionality for now
+  int sqlite3_prepare(sqlite3 @db,
+                      const char @`r zSql,
+                      int nBytes,
+                      sqlite3_stmt *@ppStmt,
+                      const char *`r*pzTail) {
+    if (nBytes < 0) {
+      let res = Csqlite3::sqlite3_prepare(db,zSql,nBytes,ppStmt,pzTail);
+      if (pzTail != NULL) *pzTail = NULL;
+      return res;
+    }
+    else {
+      let n = strlen(zSql);
+      if (nBytes > n) nBytes = n;
+      let res = Csqlite3::sqlite3_prepare(db,zSql,nBytes,ppStmt,pzTail);
+      if (pzTail != NULL) *pzTail = NULL;
+      return res;
+    }
+  }
+}
+hstub sqlite3_step {
+  extern "C"
+    int sqlite3_step(sqlite3_stmt@);
+}
+hstub sqlite3_column_count {
+  extern "C"
+    int sqlite3_column_count(sqlite3_stmt @);
+}
+hstub sqlite3_data_count {
+  extern "C"
+    int sqlite3_data_count(sqlite3_stmt @);
+}
+hstub sqlite3_column_double {
+  extern "C"
+    double sqlite3_column_double(sqlite3_stmt@, int);
+}
+hstub sqlite3_column_int {
+  extern "C"
+    int sqlite3_column_int(sqlite3_stmt@, int);
+}
+hstub sqlite3_column_int64 {
+  extern "C"
+    sqlite_int64 sqlite3_column_int64(sqlite3_stmt@, int);
+}
+hstub sqlite3_column_text {
+  extern "C"
+    const unsigned char *sqlite3_column_text(sqlite3_stmt@, int);
 }
 ;
