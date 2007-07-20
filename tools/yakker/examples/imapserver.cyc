@@ -21,6 +21,8 @@ using Core;
 #include "ykbuf.h"
 #include "sqlite3.h"
 
+#include "imap_scanf.h"
+
 /* TODO: this is not implemented in Cyclone*/
 // void pthread_exit(void *retval);
 extern "C" void pthread_exit(int);
@@ -192,262 +194,275 @@ static int session_handler(int fd) {
   fprintf(outbuf,"* OK Cyclone IMAP server\r\n");
   fflush(outbuf);
 
-  let tag = "sometag"; // temporary
+  const char ?tag = NULL;
+  const char ?val1 = NULL;
+  const char ?val2 = NULL;
 
   int c = 0;
   while (server_state != LOGOUT) {
     force(server_state,NOT_AUTHENTICATED,AUTHENTICATED,SELECTED);
-    switch (c) {
-    case 0:
-      /* (CAPABILITY tag) */
-      fprintf(outbuf,"* CAPABILITY IMAP4rev1\r\n");
-      /* TODO: Also send other capabilities */
-      fprintf(outbuf,"%s OK CAPABILITY completed\r\n",tag);
-      fflush(outbuf);
-      // Temp
-      c = 1;
-      break;
-    case 1:
+
+    if (command_scanf(inbuf,"(command %tag NOOP)",&tag)){
       /* (NOOP tag) */
       /* TODO: do stuff like renew timeout, report status */
+      fprintf(stdout, "Found NOOP\n");
       fprintf(outbuf,"%s OK NOOP completed\r\n",tag);
       fflush(outbuf);
-      // Temp
-      c = 3;
-      break;
+      }
+    else if (command_scanf(inbuf,"(command %tag CAPABILITY)",&tag))
+      {
+	/* (CAPABILITY tag) */
+	fprintf(outbuf,"* CAPABILITY IMAP4rev1\r\n");
+	/* TODO: Also send other capabilities */
+	fprintf(outbuf,"%s OK CAPABILITY completed\r\n",tag);
+	fflush(outbuf);
+      }
 
-    case 2:
+
+    else if (command_scanf(inbuf,"(command %tag LOGOUT)",&tag)){
       /* (LOGOUT tag) */
       fprintf(outbuf,"* BYE Cyclone IMAP server logging out\r\n");
       fprintf(outbuf,"%s OK LOGOUT completed\r\n",tag);
       fflush(outbuf);
       server_state = LOGOUT;
-      break;
+    }
 
-    case 3:
+    else if (command_scanf(inbuf,"(command %tag %login)",&tag,&val1)){
       /* (LOGIN tag username password) */
       force(server_state,NOT_AUTHENTICATED);
-      let username = "foo";
-      let password = "bar";
+      const char ? username = NULL;
+      const char ? password = NULL;
+      login_scanf(string2ykbuf(val1),"(login %userid %password)",&username,&password);
       fprintf(outbuf,"working on LOGIN\r\n");
       fflush(outbuf);
       if (!authorized(username,password)) {
-        fprintf(outbuf,"%s NO LOGIN failed\r\n",tag);
-        fflush(outbuf);
-        break; /* Back to top of loop */
-      }
-      fprintf(outbuf,"%s OK LOGIN completed\r\n",tag);
-      fflush(outbuf);
-      server_state = AUTHENTICATED;
+	fprintf(outbuf,"%s NO LOGIN failed\r\n",tag);
+	fflush(outbuf);
+	/* Back to top of loop */
+      } else {
+	fprintf(outbuf,"%s OK LOGIN completed\r\n",tag);
+	fflush(outbuf);
+	server_state = AUTHENTICATED;
       
-      /* Force some invariants on user state */
-      let user_mail_dir = aprintf("mail/%s",username);
-      if (force_mkdir(user_mail_dir)) {
-        fprintf(stderr, "Could not create ./%s directory\n", user_mail_dir);
-        fflush(stderr);
-        pthread_exit(1);
+	/* Force some invariants on user state */
+	let user_mail_dir = aprintf("mail/%s",username);
+	if (force_mkdir(user_mail_dir)) {
+	  fprintf(stderr, "Could not create ./%s directory\n", user_mail_dir);
+	  fflush(stderr);
+	  fclose(outbuf);
+	  pthread_exit(1);
+	}
+
+	let user_mailbox_db = aprintf("%s/mailboxes.db",user_mail_dir);
+	sqlite3 *db = NULL;
+	char *zErrMsg = NULL;
+	int rc = sqlite3_open(user_mailbox_db, &db); // should create if necessary
+	if (rc) {
+	  fprintf(stderr,"Can't open %s: %s\n",
+		  user_mailbox_db,sqlite3_errmsg(db));
+	  sqlite3_close(db);
+	  fclose(outbuf);
+	  pthread_exit(1);
+	}
+	// TODO: we ought to save the db in session state
+
+	// TEMP:
+	fclose(outbuf);
+	pthread_exit(0);
       }
+    }
 
-      let user_mailbox_db = aprintf("%s/mailboxes.db",user_mail_dir);
-      sqlite3 *db = NULL;
-      char *zErrMsg = NULL;
-      int rc = sqlite3_open(user_mailbox_db, &db); // should create if necessary
-      if (rc) {
-        fprintf(stderr,"Can't open %s: %s\n",
-                user_mailbox_db,sqlite3_errmsg(db));
-        sqlite3_close(db);
-        pthread_exit(1);
-      }
-      // TODO: we ought to save the db in session state
-
-      // TEMP:
-      pthread_exit(0);
-      break;
-
-    case 4:
+    else if (command_scanf(inbuf,"(command %tag STARTTLS)",&tag)){
       /* (STARTTLS tag) */
       force(server_state,NOT_AUTHENTICATED);
       /* TODO */
-      break;
+    }
 
-    case 5:
+    else if (command_scanf(inbuf,"(command %tag %authenticate)",&tag,&val1)){
       /* (AUTHENTICATE tag methodname) */
       force(server_state,NOT_AUTHENTICATED);
+      const char ?type=NULL, ?stuff=NULL;
+      authenticate_scanf(string2ykbuf(val1),"(authenticate %auth-type %authenticate__elt_4)",&type,&stuff);
+
       /* TODO */
-      break;
-
-    case 6:
-      /* (SELECT tag mbox_name) */
-      force(server_state,AUTHENTICATED,SELECTED);
-      /* TODO:
-         select the mailbox (deselect any selected mailbox first)
-         send flags defined in mailbox
-         send number of messages in mailbox
-         send number of "recent" messages in mailbox
-         send message number of first unseen message if available
-         send PERMANENTFLAGS
-         send UIDNEXT, the next unique identifier value
-         send UIDVALIDITY, the unique identifier validity value.
-         figure out whether mailbox is READ-ONLY or READ-WRITE
-         send tagged ok with permissions
-      */
-      break;
-
-    case 7:
-      /* (EXAMINE tag mbox_name) */
-      force(server_state,AUTHENTICATED,SELECTED);
-      /* TODO
-         Just like SELECT but forces READ-ONLY
-       */
-      break;
-
-    case 8:
-      /* (CREATE tag mbox_name) */
-      force(server_state,AUTHENTICATED,SELECTED);
-      /* TODO
-         create a new mailbox
-      */
-      break;
-    case 9:
-      /* (DELETE tag mbox_name) */
-      force(server_state,AUTHENTICATED,SELECTED);
-      /* TODO
-         delete the mailbox
-       */
-      break;
-    case 10:
-      /* (RENAME tag mbox_name mbox_name1) */
-      force(server_state,AUTHENTICATED,SELECTED);
-      /* TODO
-         rename mailbox mbox_name to mbox_name1
-       */
-      break;
-    case 11:
-      /* (SUBSCRIBE tag mbox_name) */
-      force(server_state,AUTHENTICATED,SELECTED);
-      /* TODO
-         add the mailbox to the list of subscribed mailboxes
-       */
-      break;
-    case 12:
-      /* (UNSUBSCRIBE tag mbox_name) */
-      force(server_state,AUTHENTICATED,SELECTED);
-      /* TODO
-         remove the mailbox from the list of subscribed mailboxes
-      */
-      break;
-    case 13:
-      /* (LIST tag reference_name mbox_name) */
-      force(server_state,AUTHENTICATED,SELECTED);
-      /* TODO
-         list mailboxes.  reference_name is the empty string or a
-         mailbox name.  mbox_name is a pattern that should match mailbox
-         names.  reference_name is like a directory, mbox_name is
-         for 'files' in the directory.
-      */
-      break;
-    case 14:
-      /* (LSUB tag reference_name mbox_name) */
-      force(server_state,AUTHENTICATED,SELECTED);
-      /* TODO
-         use reference_name and mbox_name to get a set of mailbox names
-         as in LIST.  return the subset of the names that are on the
-         subscribed list.
-       */
-      break;
-    case 15:
-      /* (STATUS tag mbox_name status_item1 ...) */
-      force(server_state,AUTHENTICATED,SELECTED);
-      /* TODO
-         return status of the mailbox.
-         requested status items can be
-         MESSAGES, RECENT, UIDNEXT, UIDVALIDITY, UNSEEN
-      */
-      break;
-    case 16:
-      /* (APPEND tag mbox_name (optional args) literal) */
-      force(server_state,AUTHENTICATED,SELECTED);
-      /* TODO
-         add a new message to the mailbox
-       */
-      break;
-
-    case 17:
-      /* (CHECK tag) */
-      force(server_state,SELECTED);
-      /* TODO
-         take a checkpoint, if that makes sense
-       */
-      break;
-    case 18:
-      /* (CLOSE tag) */
-      force(server_state,SELECTED);
-      server_state = AUTHENTICATED;
-      /* TODO
-         remove all \Deleted messages from mailbox
-       */
-      fprintf(outbuf,"%s OK CLOSE completed\r\n",tag);
-      fflush(outbuf);
-      break;
-    case 19:
-      /* (EXPUNGE tag) */
-      force(server_state,SELECTED);
-      /* TODO
-         remove all \Deleted messages from mailbox
-         send what messages are deleted
-       */
-      fprintf(outbuf,"%s OK EXPUNGE completed\r\n",tag);
-      fflush(outbuf);
-      break;
-    case 20:
-      /* (SEARCH tag [charset] criteria1 ...) */
-      force(server_state,SELECTED);
-      /* TODO
-         search mailbox for messages matching criteria
-         send numbers of matching messages
-       */
-      fprintf(outbuf,"%s OK SEARCH completed\r\n",tag);
-      fflush(outbuf);
-      break;
-    case 21:
-      /* (FETCH tag sequence_set items) */
-      force(server_state,SELECTED);
-      /* TODO
-         fetch pieces of messages.  complicated, see STORE.
-      */
-      break;
-    case 22:
-      /* (STORE tag sequence_set items values) */
-      force(server_state,SELECTED);
-      /* TODO
-         store pieces of messages.  complicated, see FETCH.
-       */
-      break;
-    case 23:
-      /* (COPY tag sequence_set mbox_name) */
-      force(server_state,SELECTED);
-      /* TODO
-         copy a set of messages to the end of a mailbox
-         kind of like APPEND
-       */
-      break;
-    case 24:
-      /* (UID tag command args) */
-      force(server_state,SELECTED);
-      /* TODO
-         if command is COPY, FETCH, STORE then do it, using UIDs
-           instead of message sequence numbers.
-         if command is SEARCH, do the search but return UIDs
-           instead of message sequence numbers.
-       */
-      break;
-
-    default: /* Should not be necessary */
-      /* Might have experimental commands */
-      /* Distinguish between commands that parse and garbled input? */
-      pthread_exit(1);
-      break;
+    } else {
+      fprintf(stderr,"Could not recognize command.\n");
+      fclose(outbuf);
+      pthread_exit(1);      
     }
+//     else switch (c) {
+//     case 6:
+//       /* (SELECT tag mbox_name) */
+//       force(server_state,AUTHENTICATED,SELECTED);
+//       /* TODO:
+//          select the mailbox (deselect any selected mailbox first)
+//          send flags defined in mailbox
+//          send number of messages in mailbox
+//          send number of "recent" messages in mailbox
+//          send message number of first unseen message if available
+//          send PERMANENTFLAGS
+//          send UIDNEXT, the next unique identifier value
+//          send UIDVALIDITY, the unique identifier validity value.
+//          figure out whether mailbox is READ-ONLY or READ-WRITE
+//          send tagged ok with permissions
+//       */
+//       break;
+
+//     case 7:
+//       /* (EXAMINE tag mbox_name) */
+//       force(server_state,AUTHENTICATED,SELECTED);
+//       /* TODO
+//          Just like SELECT but forces READ-ONLY
+//        */
+//       break;
+
+//     case 8:
+//       /* (CREATE tag mbox_name) */
+//       force(server_state,AUTHENTICATED,SELECTED);
+//       /* TODO
+//          create a new mailbox
+//       */
+//       break;
+//     case 9:
+//       /* (DELETE tag mbox_name) */
+//       force(server_state,AUTHENTICATED,SELECTED);
+//       /* TODO
+//          delete the mailbox
+//        */
+//       break;
+//     case 10:
+//       /* (RENAME tag mbox_name mbox_name1) */
+//       force(server_state,AUTHENTICATED,SELECTED);
+//       /* TODO
+//          rename mailbox mbox_name to mbox_name1
+//        */
+//       break;
+//     case 11:
+//       /* (SUBSCRIBE tag mbox_name) */
+//       force(server_state,AUTHENTICATED,SELECTED);
+//       /* TODO
+//          add the mailbox to the list of subscribed mailboxes
+//        */
+//       break;
+//     case 12:
+//       /* (UNSUBSCRIBE tag mbox_name) */
+//       force(server_state,AUTHENTICATED,SELECTED);
+//       /* TODO
+//          remove the mailbox from the list of subscribed mailboxes
+//       */
+//       break;
+//     case 13:
+//       /* (LIST tag reference_name mbox_name) */
+//       force(server_state,AUTHENTICATED,SELECTED);
+//       /* TODO
+//          list mailboxes.  reference_name is the empty string or a
+//          mailbox name.  mbox_name is a pattern that should match mailbox
+//          names.  reference_name is like a directory, mbox_name is
+//          for 'files' in the directory.
+//       */
+//       break;
+//     case 14:
+//       /* (LSUB tag reference_name mbox_name) */
+//       force(server_state,AUTHENTICATED,SELECTED);
+//       /* TODO
+//          use reference_name and mbox_name to get a set of mailbox names
+//          as in LIST.  return the subset of the names that are on the
+//          subscribed list.
+//        */
+//       break;
+//     case 15:
+//       /* (STATUS tag mbox_name status_item1 ...) */
+//       force(server_state,AUTHENTICATED,SELECTED);
+//       /* TODO
+//          return status of the mailbox.
+//          requested status items can be
+//          MESSAGES, RECENT, UIDNEXT, UIDVALIDITY, UNSEEN
+//       */
+//       break;
+//     case 16:
+//       /* (APPEND tag mbox_name (optional args) literal) */
+//       force(server_state,AUTHENTICATED,SELECTED);
+//       /* TODO
+//          add a new message to the mailbox
+//        */
+//       break;
+
+//     case 17:
+//       /* (CHECK tag) */
+//       force(server_state,SELECTED);
+//       /* TODO
+//          take a checkpoint, if that makes sense
+//        */
+//       break;
+//     case 18:
+//       /* (CLOSE tag) */
+//       force(server_state,SELECTED);
+//       server_state = AUTHENTICATED;
+//       /* TODO
+//          remove all \Deleted messages from mailbox
+//        */
+//       fprintf(outbuf,"%s OK CLOSE completed\r\n",tag);
+//       fflush(outbuf);
+//       break;
+//     case 19:
+//       /* (EXPUNGE tag) */
+//       force(server_state,SELECTED);
+//       /* TODO
+//          remove all \Deleted messages from mailbox
+//          send what messages are deleted
+//        */
+//       fprintf(outbuf,"%s OK EXPUNGE completed\r\n",tag);
+//       fflush(outbuf);
+//       break;
+//     case 20:
+//       /* (SEARCH tag [charset] criteria1 ...) */
+//       force(server_state,SELECTED);
+//       /* TODO
+//          search mailbox for messages matching criteria
+//          send numbers of matching messages
+//        */
+//       fprintf(outbuf,"%s OK SEARCH completed\r\n",tag);
+//       fflush(outbuf);
+//       break;
+//     case 21:
+//       /* (FETCH tag sequence_set items) */
+//       force(server_state,SELECTED);
+//       /* TODO
+//          fetch pieces of messages.  complicated, see STORE.
+//       */
+//       break;
+//     case 22:
+//       /* (STORE tag sequence_set items values) */
+//       force(server_state,SELECTED);
+//       /* TODO
+//          store pieces of messages.  complicated, see FETCH.
+//        */
+//       break;
+//     case 23:
+//       /* (COPY tag sequence_set mbox_name) */
+//       force(server_state,SELECTED);
+//       /* TODO
+//          copy a set of messages to the end of a mailbox
+//          kind of like APPEND
+//        */
+//       break;
+//     case 24:
+//       /* (UID tag command args) */
+//       force(server_state,SELECTED);
+//       /* TODO
+//          if command is COPY, FETCH, STORE then do it, using UIDs
+//            instead of message sequence numbers.
+//          if command is SEARCH, do the search but return UIDs
+//            instead of message sequence numbers.
+//        */
+//       break;
+
+//     default: /* Should not be necessary */
+//       /* Might have experimental commands */
+//       /* Distinguish between commands that parse and garbled input? */
+//       pthread_exit(1);
+//       break;
+//     }
   }
   return close(fd);
 }
@@ -489,8 +504,9 @@ static void server(int port) {
     fprintf(stderr,"New connection\n");
     fflush(stderr);
 
-    pthread_t pid;
-    if ( (pthread_create(&pid,NULL,session_handler,connfd)) != 0) {
+    pthread_t pid;    
+    let res = pthread_create(&pid,NULL,session_handler,connfd);
+    if (res != 0) {
       fprintf(stderr,"Error on pthread_create"); // NB no perror for pcreate_*
       fflush(stderr);
     }

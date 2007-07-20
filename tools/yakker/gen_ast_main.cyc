@@ -5,6 +5,7 @@
 #include "bnf.h"
 #include "pr.h"
 #include "ykbuf.h"
+#include "funtable.h"
 #include "pm_bnf.h"
 
 #define YKPOSN(ykb) ((ykb->cur-ykb->bot)+ykb->discarded)
@@ -52,34 +53,15 @@ root_rule_t get_root(const char ?root_name){
   }
 }
 
-int imap_internal_scanf(ykbuf_t@ ykb_source, ykbuf_t@ ykb_fmt, ...const char?`H @ args){
-  // parse the format string into a pattern AST.
-  rule_pat_t p;
-  try {
-    p = SmallImapFormat::p_command(ykb_fmt);
-  }
-  catch {
-  case &Parse_error:
-    let n = YKPOSN(ykb_fmt);
-    eprintf("Invalid format string at position %d (0x%x)\n",n,n);
-    return -1;
-    break;
-  }
+static struct Hashtable::Table<str_t,Funtable::parse_fun> *fun_table;
 
-  let ft = Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr);
-  INITIALIZE_FUNCTION_TABLE(ft);
-
-  try {
-    parse_with_pat(ykb_source,ft,p,args);
-  } catch {
-  case &Parse_error:
-    let n = YKPOSN(ykb_source);
-    eprintf("Input parsing failed at position %d (0x%x)\n",n,n);
-    return -1;
-    break;
-  }
-
-  return YKPOSN(ykb_source);
+static Funtable::table_t get_funtable(){
+  if (!fun_table){
+    let ft = get_function_table();
+    fun_table = ft;
+    return ft;
+  } 
+  return fun_table;
 }
 
 int main(int argc, char ??argv) {
@@ -176,8 +158,7 @@ int main(int argc, char ??argv) {
 	fputs(s,stdout);
 	break;
       case DynScan:
-	let ft = Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr);
-	INITIALIZE_FUNCTION_TABLE(ft);
+	let ft = get_funtable();
 	ykbuf_t @ykb = fd2ykbuf(3);
 	let scan_args = new {for i < num_args : new ((const char ?@zeroterm)NULL)}; 
 	try {

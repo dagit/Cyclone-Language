@@ -5,6 +5,7 @@
 
 #include "bnf.h"
 #include "util.h"
+#include "funtable.h"
 #include "pm_bnf.h"
 
 using List;
@@ -272,19 +273,10 @@ static void parse_char(ykbuf_t @ykb, unsigned int x)
   if (c!=l && c!=u) throw &Parse_error_val; // PHASE  
 }
 
-static void parse_sym(ykbuf_t @`r ykb, parse_fun_table parse_funs, const char ?`H x)
+static void parse_sym(ykbuf_t @`r ykb, Funtable::table_t parse_funs, const char ?`H x)
 {
-  let x_ptr = new x;
-
-//   let parse_x = Hashtable::lookup_opt(parse_funs, x_ptr);
-//   if (parse_x)
-//     (*parse_x)(ykb);
-//   else {
-//     eprintf("Failed to find definition of symbol %s. Skipping...\n", x);    
-//   }
-
   try{
-    let parse_x = Hashtable::lookup(parse_funs, x_ptr);
+    let parse_x = Funtable::lookup(parse_funs, x);
     parse_x(ykb);
   }catch {
   case &Core::Not_found: 
@@ -294,7 +286,7 @@ static void parse_sym(ykbuf_t @`r ykb, parse_fun_table parse_funs, const char ?`
 }
 
 strptr_array<`r1,`r2>
-parse_with_pat(ykbuf_t @`r ykb, parse_fun_table parse_funs, 
+parse_with_pat0(ykbuf_t @`r ykb, Funtable::table_t parse_funs, 
 	       rule_pat_t p, strptr_array<`r1,`r2> args){
   switch (p) {
   case &SymbPat(x):
@@ -307,8 +299,8 @@ parse_with_pat(ykbuf_t @`r ykb, parse_fun_table parse_funs,
     parse_char(ykb,c);
     return args;  
   case &SeqPat(p1,p2):
-    args = parse_with_pat(ykb,parse_funs,p1,args);
-    args = parse_with_pat(ykb,parse_funs,p2,args);
+    args = parse_with_pat0(ykb,parse_funs,p1,args);
+    args = parse_with_pat0(ykb,parse_funs,p2,args);
     return args;  
   case &WildcardPat(x):
     let save = YKSAVE;
@@ -318,4 +310,10 @@ parse_with_pat(ykbuf_t @`r ykb, parse_fun_table parse_funs,
     **args = x_str;
     return ++args;  
   }
+}
+
+void
+parse_with_pat(ykbuf_t @`r ykb, Funtable::table_t parse_funs, 
+	       rule_pat_t p, strptr_array<`r1,`r2> args){
+  parse_with_pat0(ykb,parse_funs,p,args);
 }

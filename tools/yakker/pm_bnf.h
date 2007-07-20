@@ -22,6 +22,8 @@
 #include <list.h>
 #include "bnf.h"
 #include "ykbuf.h"
+#include "funtable.h"
+#include "fn.h"
 
 typedef datatype Rule_pattern *Rule_pat_t;
 typedef datatype Rule_pattern @rule_pat_t;
@@ -30,11 +32,9 @@ datatype Rule_pattern {
   CharPat(unsigned int); // single character from a character range.
   LitPat(const char ?);
   SeqPat(rule_pat_t,rule_pat_t);
+/*   DepSeqPat(rule_pat_t,fn_t<const char ?,rule_pat_t,`H>); // Dependent sequence pattern. */
   WildcardPat(const char ?); // symbol for which this is a wildcard.
 };
-
-typedef void (@`H parse_fun)<`r>(ykbuf_t @`r ykb);
-typedef Hashtable::table_t<str_t,parse_fun,`H> parse_fun_table;
 
 extern rule_pat_t pats2seq(List::list_t<rule_pat_t>);
 
@@ -45,10 +45,10 @@ extern const char ?pat2print_code(rule_pat_t p, char ?? args);
 
 extern rule_pat_t unescape_pat(rule_pat_t p, char escape_char);
 
-// FIX: is  the regions of const char ? `H, or an implicit variable?
+// FIX: is the region of "const char ?" `H, or an implicit variable?
 typedef const char?`H @`r1 ?`r2 strptr_array<`r1,`r2>;
 
-extern strptr_array<`r1,`r2>
-parse_with_pat(ykbuf_t @`r ykb, parse_fun_table parse_funs, rule_pat_t p, strptr_array<`r1,`r2> args);
+extern void
+parse_with_pat(ykbuf_t @`r ykb, Funtable::table_t parse_funs, rule_pat_t p, strptr_array<`r1,`r2> args);
 
 #endif

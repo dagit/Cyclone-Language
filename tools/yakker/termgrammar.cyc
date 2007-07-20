@@ -93,22 +93,21 @@ rule_t escape_cs_rule(rule_t r){
     return r;
   else {
     let r_i = cs2rule(cs_i);
-    let r_esc = SEQ(LIT("%"), r_i);
     
     // Remove the escaped chars from the original cs.
     let cs_diff = cs_dup(cs_r);
     cs_difference(cs_diff,cs_ec);
 
     if (is_cs_empty(cs_diff))
-      return r_esc;    
+      return SEQ_r(r,LIT("%"), r_i);
     else{      
       let r_diff = cs2rule(cs_diff);
-      return ALT(r_diff,r_esc);
+      return ALT_r(r,r_diff,SEQ(LIT("%"), r_i));
     }
   }
 }
 
-rule_t escape_lit(const char ?`H s){
+const char ?escape_lit(const char ?`H s){
   check_esc_chars();
   let cs_ec = (cs_t)cs_esc_chars;
 
@@ -124,7 +123,7 @@ rule_t escape_lit(const char ?`H s){
   }
   s_esc[j] = s[n];
     
-  return LIT(s_esc);
+  return s_esc;
 }
 				     
 // Escape literals and character sets.
@@ -133,29 +132,29 @@ rule_t escape_rule(rule_t r) {
   let res = NULL;
   switch (r->r) {
   case &Rcount(n,r2):
-    return RCOUNT(n,escape_rule(r2));
+    return RCOUNT_r(r,n,escape_rule(r2));
   case &Star(m,N,r2):
 //     if (is_cs(r2)) {
 //       let escaped = escape_cs_rule_v3(r2);
 //       return STAR(m,N, escaped);
 //     }
-    return STAR(m,N, escape_rule(r2));
+    return STAR_r(r,m,N, escape_rule(r2));
   case &Hash(m,N,r2):
-    return HASH(m,N, escape_rule(r2));
+    return HASH_r(r,m,N, escape_rule(r2));
   case &Opt(r2):
-    return OPT(escape_rule(r2) );
+    return OPT_r(r,escape_rule(r2) );
   case &Alt(r2,r3):
-    return ALT(escape_rule(r2),escape_rule(r3));
+    return ALT_r(r,escape_rule(r2),escape_rule(r3));
   case &Symb(_,_):
     return r;
 
   case &CharRange(_,_):
     return escape_cs_rule(r);
   case &Lit(s):
-    return escape_lit(s);
+    return LIT_r(r,escape_lit(s));
 
   case &Seq(r2,r3):
-    return SEQ(escape_rule(r2),escape_rule(r3));
+    return SEQ_r(r,escape_rule(r2),escape_rule(r3));
 
     /* Error cases */
   case &Prose(x):
@@ -244,6 +243,7 @@ const char ?get_bnfgen(rule_t r){
 
 static rule_t add_bnfgen(rule_t r);
 
+// returns bnf'ed rule and expression for constructing the rule.
 static
 $(rule_t,const char ?) @add_bnfgen0(rule_t r){
   switch (r->r) {
@@ -306,6 +306,9 @@ rule_t add_bnfgen(rule_t r){
   switch (r->r) {
   case &Seq(r1,r2):
     let &$(r1_ab,a1) = add_bnfgen0(r1);
+//     if (r1->v){
+      
+//     }
     let &$(r2_ab,a2) = add_bnfgen0(r2);
     let a = aprintf("return new SeqPat(%s,%s);",a1,a2);
     let r_ab = SEQ_r(r,r1_ab,r2_ab); 
@@ -317,7 +320,7 @@ rule_t add_bnfgen(rule_t r){
     let &$(r1_ab,a1) = add_bnfgen0(r1);
     r1_ab->a = aprintf("%s = %s;",fn,a1);
     let r_ab = OPT_r(r, r1_ab);
-    r_ab->a = aprintf("return %s ? %s : new LitPat(\"\");",fn,fn);
+    r_ab->a = aprintf("return %s ? (datatype Rule_pattern @)%s : new LitPat(\"\");",fn,fn);
     r_ab->v = strconcat("$",fn);
     return r_ab;
 
@@ -407,7 +410,11 @@ grammar_t grammar2bindgrammar(grammar_t g) {
 }
 
 */
-struct Attr bnf_attr = Attr{.ws=0,.re=0,.paramtype=NULL,.rettype="rule_pat_t"};
+struct Attr mk_bnf_attr(struct Attr a){
+  return Attr{.ws=a.ws,.re=a.re,.paramtype=a.paramtype,
+      .rettype="rule_pat_t"};
+}
+
 
 grammar_t grammar2bnfgen_grammar(grammar_t<`H> g) {
   grammar_t res = NULL,ds = g;
@@ -415,7 +422,7 @@ grammar_t grammar2bnfgen_grammar(grammar_t<`H> g) {
   for (; ds; ds = ds->tl) {
     let &$(n,r,a) = ds->hd;
     let r_bg = add_bnfgen(r);
-    res = new List(new $(n,r_bg,bnf_attr), res);
+    res = new List(new $(n,r_bg,mk_bnf_attr(a)), res);
   }
 
   res = imp_rev(res);

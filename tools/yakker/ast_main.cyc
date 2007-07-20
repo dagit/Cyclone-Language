@@ -5,17 +5,12 @@
   if      (strcmp(root_name, "command")   == 0)  return Command;\
   else if (strcmp(root_name, "seq-range") == 0)  return Seq_range;
 #define GET_ROOT_DEFAULT Command
+#define NAMESPACE SmallImapFormat
 #define MAIN_SWITCH_CASES \
       case Command : \
 	p = SmallImapFormat::p_command(ykb); break;\
       case Seq_range : \
 	p = SmallImapFormat::p_seq_range(ykb); break;
 
-
-#define INITIALIZE_FUNCTION_TABLE(t)		\
-  do {\
-  Hashtable::insert((t), new "seq-range", p_seq_range<>);	\
-  Hashtable::insert((t), new "seq-number", p_seq_number<>);\
-  } while (0)
 
 #include "gen_ast_main.cyc"

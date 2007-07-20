@@ -34,5 +34,6 @@ extern int print_globals;
 extern int lazyfill;
 extern int local_lookahead;
 extern const char ?cyc_namespace;
+extern int gen_fun_table;
 
 #endif

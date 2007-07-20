@@ -521,6 +521,8 @@ List::list_t<rule_t> alt2rules(rule_t r) {
 /* Turn a rule into a list of the rule sequence. 
    If r0 is not a sequence, will return a singleton list of r0.
    Guaranteed to contain at least one element.
+
+   N.B. Will trip any attributes off of nested sequences.
  */
 List::List_t<rule_t> seq2rules(rule_t r0) {
   let res = NULL;
@@ -529,6 +531,42 @@ List::List_t<rule_t> seq2rules(rule_t r0) {
     let r = rs->hd;
     switch (r->r) {
     case &Seq(r2,r3):
+      rs = new List::List(r2,new List::List(r3,rs->tl));
+      break;
+    case &Symb(_,_):
+    case &Alt(_,_):
+    case &Opt(_):
+    case &Rcount(_,_):
+    case &Star(_,_,_):
+    case &Hash(_,_,_):
+    case &CharRange(_,_):
+    case &Lit(_):
+    case &Prose(_):
+    case &Minus(_,_):
+      res = new List::List(r,res);
+      rs = rs->tl;
+      break;
+    }
+  }
+  res = List::imp_rev(res);
+  return res;
+}
+
+/* Turn a rule into a list of the rule sequence. 
+   If r0 is not a sequence, will return a singleton list of r0.
+   Guaranteed to contain at least one element.
+
+   *Treats nested sequences with v attributes differently.*
+ */
+List::List_t<rule_t> depseq2rules(rule_t r0) {
+  let res = NULL;
+  let rs = List::list(r0);
+  while (rs) {
+    let r = rs->hd;
+    switch (r->r) {
+    case &Seq(r2,r3):
+      if (r2->v)
+	fallthru;
       rs = new List::List(r2,new List::List(r3,rs->tl));
       break;
     case &Symb(_,_):

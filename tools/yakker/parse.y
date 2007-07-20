@@ -193,7 +193,7 @@ rule2:
 { $$ = $!1; }
 | rule2 DOLLAR ID
 { $$ = ^$(new arule($1->a,$1->p,$3,$1->css,$1->r)); } // NB: THROW AWAY VID FROM $1
-| rule2 DOLLAR DOLLAR ID  // extra dollar indicates that rule2 returns semantic value.
+| rule2 DOLLAR DOLLAR ID  // extra dollar indicates ID should be bound in rule2.
 { $$ = ^$(new arule($1->a,$1->p,strconcat("$",$4),$1->css,$1->r)); } // NB: THROW AWAY VID FROM $1
 |     RCOUNT_T   rule3
 { $$ = ^$(RCOUNT($1,$2)); }

@@ -32,6 +32,7 @@ int print_globals = 1;
 int local_lookahead = 0;
 int lazyfill = 0;
 const char ?cyc_namespace = NULL;
+int gen_fun_table = 1;
 
 /**********************************************************************/
 /* A generator for parsers with dfa lookahead.
@@ -514,6 +515,10 @@ void gen_header(grammar_t<`H> grm, List::list_t<const char ?@>textblobs){
   printf("#include \"ykbuf.h\"\n");
 #endif
 
+  if (gen_fun_table){
+    printf("#include \"funtable.h\"\n");
+  }
+
   /* Print first textblob.  Needed in case it defines typedefs used by parsing functions. */
   if (textblobs) {
     printf("%s\n",*textblobs->hd);
@@ -522,6 +527,10 @@ void gen_header(grammar_t<`H> grm, List::list_t<const char ?@>textblobs){
 
   if (cyc_namespace){
     printf("namespace %s {\n\n",cyc_namespace);
+  }
+
+  if (gen_fun_table){
+    printf("\nFuntable::table_t get_function_table();\n");
   }
 
   for (let x = grm; x; x = x->tl) {
@@ -581,6 +590,11 @@ void gen(grammar_t<`H> grm, const char ?`H start_symbol,
 	 "#include <stdio.h>\n"
 	 "#include <stdlib.h>\n"
 	 "#include <string.h>\n");
+
+  if (gen_fun_table){
+    printf("#include \"funtable.h\"\n");
+  }
+
 #ifdef STRINGINPUT
   printf("unsigned char ?@nozeroterm YKSTART;\n"
          "unsigned char ?@nozeroterm YKCURSOR;\n"
@@ -638,6 +652,22 @@ void gen(grammar_t<`H> grm, const char ?`H start_symbol,
   /* Print the text blobs */
   for (let x = textblobs; x; x = x->tl) {
     printf("%s\n",*x->hd);
+  }
+
+  /* Optionally print a function table. 
+   */
+  if (gen_fun_table){
+    printf("\nFuntable::table_t get_function_table(){\n");
+    printf("  let t = Funtable::create(101);\n");
+    for (let x = grm; x; x = x->tl) {
+      let &$(n,r,a) = x->hd;
+      // Only includes function with this signature:     
+      //   void x(ykbuf_t @);
+      if (!a.rettype && !a.paramtype) {
+	printf("  Funtable::insert(t, \"%s\", %s<>);\n",n,p_id(n));
+      }
+    }
+    printf("  return t;\n}\n");
   }
 
   /* Print the parsing functions */
