@@ -1,0 +1,1216 @@
+
+Foo = "FOO" Bar
+    | ID    Zab
+
+Bars = "BAR" "|" Bars
+    | "BAR"
+
+Bars = "BAR" _Bars
+
+_Bars = "|" Bars
+      | 
+
+Lookahead engine must return branch number.
+
+************************************************
+
+I think the latter question is both very difficult to answer and the
+wrong question. Here's an example that demonstrates both
+problems. Imagine if one of the R_i was
+
+foo|[^f]..
+
+where the alphabet is only a-z. Then, the number of 3-character
+strings accepted by this regular expression is 26^3. Yet, given that
+"foo" is much more specific than "[^f]..", shouldn't it have a greater
+weight?
+
+Furthermore, our plan to divide the weight among all outgoing edges
+doesn't give us a weight of 1/26^3 for the string "foo". Rather, it
+gives us:
+
+1/26 * 1 * 1
+
+In order to get the desired answer, we would need to count *for the
+entire automata* how many strings of length n it could accept. While
+possible, this is not a local property of a path but a global property
+of the whole machine.
+
+Response.
+
+In the blog, we state our goal as 
+
+   For all x,y in Prefixes(L(Ri)), Ai(x) = Ai(y)
+
+and
+
+  For all n>0, 1 = Sum{ Ai(x) | x in Prefixes(L(Ri)) and |x| = n }
+
+The latter requirements eliminates the possibility of just assigning a
+weight of 1 to each transition. That said, we could replace 1 with any
+constant.  I think that we can generalize this requirement to the
+following, restated in terms of an automaton.
+
+   For a state q, how many strings of length n can get to q?
+
+If we ask this question of the final state, then we'll get a number M
+from which we can derive the weight of every prefix (1/M).
+
+I would propose that we change the above question to the following:
+
+   For a path p, how many strings of length n can traverse p?
+
+Notice that this question is limited to a specific path, rather than
+any path leading to some state q. Why is this question useful? We can
+take a string and run it through the automatan A_i and if it gets to a
+final state, ask this question. It will tell us how unique the string
+was relative to its path through the automata. We can then compare
+this value to its uniqueness passing through other automata's A_j, and
+break ties based on this number.
+
+Now, if you accept that this is in fact a good tie breaking mechanism,
+then a second strength is that we can compute it easily. For the
+(epsilon-free) NFA, consider every pair of states, p and q, with N (>0)
+transitions from p to q. Assign each transition a weight of N. Then,
+the weight of a path is exactly the number of possible strings along
+that path. The drawback of this approach is that it requires that the
+automaton structure be human-specified. The utility of
+path-uniqueness for arbitrary automata might be quite limited.
+
+
+*********************************************
+
+Glushkove pseudo-code:
+
+/* Convert a rule to an nfa.  If the rule contains a recursively-defined
+   symbol, then that symbol is only converted once, and all instances
+   share the resulting nfa. 
+
+   Invariant: we never modify or remove the start state or set of
+   final states of a symbol. We can, however, modify the final
+   states themselves (e.g. add actions.)  
+*/
+
+
+/*
+  state representation: 
+    Transitions:   NULL --> NO_TRANSITIONS (dead state).
+                          List of (cs_t, st_t) pairs --> representing transitions on cs_t into state st_t.
+    List of final states.
+    Symbol flag.
+
+   support functions:
+     add_action (st_t s, cs_t action, st_t target)
+     add_actions (st_t s, set_t<$(cs_t, st_t) @>)
+     set_t<$(cs_t, st_t) @> get_actions (st_t a)
+ 
+     add_final (st_t s,  st_t f)
+     add_finals (st_t s, set_t<st_t> finals)
+     set_t<st_t> get_finals (st_t s)
+     clear_finals (st_t s)
+
+     remove_state (st_t a)
+
+     bool is_symbol(st_t s)
+     mark_as_symbol (st_t s)
+ */
+
+static st_t
+mkact(cs_t x){
+  s = new_state;
+  f = new_state;
+  add_final(s,f);
+  add_action(s,x,f);
+  return s;  
+}
+
+st_t mkseq(st_t a,st_t b) {
+  let a_finals = get_finals a
+  let b_actions = get_actions b
+
+  if (not (is_symbol a) and not (is_final b))
+    clear_finals a
+
+  for each f in a_finals
+    add_actions (f, b_actions)
+
+  if (not (is_symbol a))
+    add_finals (a, get_finals b)
+ 
+  if (not is_symbol b)
+    remove_state b
+
+  return a
+}
+
+st_t mkalt(st_t a,st_t b) {
+  if (is_symbol a and is_symbol b)
+    s = new_state
+    add_actions (s, get_actions a)
+    add_actions (s, get_actions b)
+    add_finals  (s, get_finals a)
+    add_finals  (s, get_finals b)
+    return s
+  } else if (is_symbol a) {
+    // b is not a symbol
+    add_actions (b, get_actions a)
+    add_finals  (b, get_finals a)
+    return b
+  } else {
+    add_actions (a, get_actions b)
+    add_finals  (a, get_finals b)
+    remove_state b
+    return a
+  }
+}
+
+st_t mkstar(st_t a) {
+  let a_actions = get_actions a
+  let a_finals = get_finals a
+
+  // must mutate a, even if symbol
+  for each f in a_finals
+    add_actions (f, a_actions)
+
+  if (is_symbol a){
+    let s = new_state
+    add_actions (s, a_actions)
+    add_finals  (s, a_finals)    
+    add_final (s,s)
+    return s
+  } else {
+    add_final (a,a)
+    return a
+  }
+}
+
+#define CASE_INSENSITIVE 1
+st_t mklit(const char ?x) { /* A bit more space efficient than looping mkact */
+  let s = nfa_fresh_state();
+  let len = strlen(x);
+  let a = s;
+  for (let i = 0; i < len; i++) {
+    let b = nfa_fresh_state();
+    cs_opt_t y;
+    if (CASE_INSENSITIVE) {
+      y = cs_singleton(tolower(x[i]));
+      cs_insert(y,toupper(x[i]));
+    }
+    else y = cs_singleton(x[i]);
+    add_action(a,y,b);
+    a = b;
+  } 
+  add_final(s,a);
+  
+  return s;
+}
+
+static st_t
+rule2glush0(strset_t recursive,
+	  Hashtable::table_t<str_t,st_t> rt,
+	  grammar_t grm,
+	  rule_t r) {
+
+
+  switch (r->r) {
+
+
+  case &CharRange(low,high):
+    if (low > high) ... return ...
+    return mkact(cs_range(low,high+1));
+
+  case &Seq(r2,r3):
+    let s2 = rule2glush0 (r2)
+    let s3 = rule2glush0 (r3)
+    return mkseq(s2,s3);
+
+  case &Alt(r2,r3):
+    let s2 = rule2glush0 (r2)
+    let s3 = rule2glush0 (r3)
+    return mkalt(s2,s3);
+
+  case &Star(0,&Infinity,r2):
+    let s2 = rule2glush0 (r2)
+    return mkstar(s2);
+
+
+  case &Symb(x,_):
+    st_t x_start;
+    if (x not converted)
+      let x_rule = lookup_rule x
+      x_start = rule2nfa0(x_rule)
+      mark_as_symbol x_start;
+    else
+      x_start = lookup_nfa x
+    return x_start;
+
+  case &Lit(x):
+    return mklit(x);
+  }
+}
+/******************************************/
+
+/*
+1. From an abstract syntax, can we create a  minimal concrete syntax?
+2. From an abstract syntax and a concrete syntax, can we create a new minimal concrete syntax that mimics the original?
+
+3. If the original grammar is unambiguous, will the new grammar be
+   unambiguous?  I think that this should be our aim -- to design an
+   algorithm that selectively deletes literals, preserving
+   unambiguity. Currently, we delete (nearly) all literals, and then
+   selectively put some back to restore ambiguity. However, this can
+   be subtle and result in a grammar that cannot be easily inferred by
+   the reader based only on looking at the original grammar.
+
+4. Alternatively, just choose tags more judiciously. In fact, I think
+that we should avoid any complicated analysis. only a shallow analysis
+- no following symbols.
+
+
+We need to establish what invariants we want to preserve. One is : if
+G is LL(k) unambiguous for some k, then G' is LL(k') unambiguous, for
+some k'.
+
+Hmmm... when you have one literal, then replacing the tag with that
+literal must maintain the invariant. The problem is when you have a
+sequence of literals. Then, choosing the first one (if its less than
+k) does not guarantee that you maintain the LL(k) invariant. So, the
+real issue is not deciding on tags but figuring out which literals its
+okay to drop. After that, tags are trivial - just take the first
+literal, if any.
+
+I think that we can do a conservative analysis by setting follow of
+everything to cs_full (that is, %d0-d255). Is there a bias against
+removing literal prefixes, or can removing trailing literals have the
+same bad effect? No bias. And the analysis is not a local one as the
+literals in rule x can affect the ambiguity of rule y. For example,
+
+foo = ax|by|cz
+bar = aj|bk|cl
+zab = foo | bar
+
+If you optimize foo and bar they become identical and zab becomes ambiguous.
+
+One solution would be to determine the k for which LL(k) holds and
+then eliminate all literals after k. But, that doesn't help if k =
+infinity.  Given the non-local nature of this problem, I can't help
+but wonder whether its NP-complete, or worse. Given a proposed
+solution, I don't see how you could determine it to be minimal without
+trying all possibilities. What about forgetting optimal and just
+looking for a good greedy algorithm? by the way, all of this indicates
+that you don't need the whole term thing. term wrapping is really an
+orthogonal convenience to literal elimination.
+
+Algorithm:  
+Start with start symbol.
+Derive lookahead dfa, D.
+from each path, delete literals from both D and path until we hit non literal.
+Pass D' to non-literal N.
+Question: how to combine D' with N's lookahead DFA?
+
+
+Better: I think that for any sequence, the user must choose either its
+name or its literals. Our job is to make sure that does not introduce
+any conflicts, which we can do by effectively choosing new symbols from a different alphabet (hence the escaping...) */
+
+***************************************************
+
+3/26 :  Format string issues.
+
+Problem: how do we support arbitrary escaping in the format string
+without having conflicts up to wazoo? Are conflicts necessarily bad --
+can they be dealt with like other conflicts? At the least, we should
+understand the nature of any conflicts that we are introducing. If we
+understand them, then we can make an informed decision as to whether
+they present a problem or not.
+
+I looked at the code for the camlp4 quotation parser and they specify
+exactly where and how antiquotes can appear by hand. In this way, they
+can hand tune the grammar to avoid any conflicts.
+
+Notice that one of the problems with anywhere escaping is that places
+where specific literals differentiate choices in the old grammar, both
+of those literals can be replaced by a format string in the new
+grammar, creating conflicts (perhaps unresolvable). So, its not simply
+that the newly introduced format strings escapes can conflict with
+each other, but they can even "undermine" the structure of the
+existing grammar.  The question, then, is how to untuitively (to the
+user) constrain where format string escapes can appear.
+
+One thing is that if your data isn't malformed, you shouldn't be
+replacing literals, as you can only replace them with themselves, so
+what's the point? More than literals, we can make that argument about
+any nullary rule. So, that leaves us with n-ary rules (with n > 0).
+
+Second, the sequences that appear within a term are "protected" from
+conflicts by the uniqueness of the term tag itself. So, we can
+"safely" ignore outside context when determining whether to allow
+escapes in place of any argument to a term. I'm not quite sure how to
+take this into account as terms don't show up in the original grammar,
+only in the generated grammar.
+
+We can also use a conservative inference system, judging
+whether or a not a given rule is unambiguously escapeable.
+
+  a) Literals are not escapeable
+  b) Alt rules are escapeable if none of the choices are
+  escapeable.
+  c) Epsilon is escapeable iff the right-ctxt is escapeable. Note that
+  epsilon will not be escaped, as there's nothing to replace it
+  with. It just is used in case the epsilon is in an alt or seq.
+  d) Sequence is escapeable iff its first element is not escapeable.
+  e) Star, option, etc. can be built from the above.
+
+Or, we can just put in the escapes and let the conflict resolver do
+its best. The question, then, is where to put them. Right now, we just
+have them on symbol definitions. Here's an alternative:
+
+  a) Don't put them on literals.
+
+  b) Put them on sequences. But, order the Alt so that escape in the
+  sequence gets chosen before escape of the whole sequence. Should we
+  distinguish between "(a b) c" and "a b c" (i.e. allowing a format
+  escape to replace "a b" in the first but not in the second)? If so,
+  how - they are encoded the same way in the AST. 
+
+  b') ditto for RCOUNT.
+
+  c) Put on alts, just put last so that if there are conflicts the
+  branches will take precedence over the whole alt. This includes
+  Hash, Opt and Star. If I understand correctly, then any conflict on
+  the epsilon will resolve in favor of the follow set rather than the
+  Alt itself. Is this what we want?
+
+  e) Don't put on symbols. The rule definining the symbol will take
+  care of itself.
+
+
+Also, don't refer to a single format-string rule becuase that will
+lead to an intractable NFA approximation. Just replicate it
+everywhere.
+
+Whatever we do, we need a way to let the user specify what they intend
+when the default conflict resolution isn't what they want. One simple
+way to do this is with the %<symbol-name>:<conversion-spec>. However,
+this only works for symbols. It doesn't work for elements without
+names. This comes back to the question of how do you give names
+intuitively to nested BNF elements. I think that the perl approach of
+\1,\2,etc. might be a good way to go. We could use it support terms as
+well, if we wish.  
+
+A question I have is what is the implication of a conflict? Does it
+mean that the grammar is simpley ambiguous? Or are we only
+conservatively approximating, hence we could resolve the conflict in a
+way to that will cause a parse failure when there should have been a 
+success?
+
+It would be nice if yakker could give conflict messages that made it
+clear how to restructure the BNF to avoid escape-related
+conflicts. This would be helpful to the RFC writer.
+
+It occurs to me that the follow set for symbols within terms is
+different than outside of terms, because terms introduce  special
+separators. This should help reduce conflicts on %. Should we compute
+another follow grammar?
+
+-----------------------------------------------------------------------
+
+Generating data:
+
+Challenges: efficiency, termination
+
+Rank rules by some metric. Height in grammar could be one, with
+recursive rules having infinite height. Then, when generating data,
+when you encounter an alt branch, choose the smallest branch. 
+
+I think that for the metric we can choose the exact size of the data
+to be generated.
+
+
+-------------------------------------------------------------------------
+
+Parsing and Printing as specialization.
+
+Yakker already solves the problem of given a BNF, create a parser.
+We could also say given a BNF, create a printer.
+
+Then, could we solve the format string problem by converting the
+format string to a specialized BNF and then passing that through
+yakker? Or, at least, by calling the yakker-generated parsing
+functions on the input? So, we'd be running the termgrammar parser on
+the format-string and the normal parser on the input.
+
+
+(The follow set used to know when to stop?
+foo vs. foo foo)
+
+
+Challenge: if follow set is already computed, how do we allow
+arbitrary scanf format strings?
+A: Since we know the follow set, we could always check a given format
+string to see whether it would change the follow set. We could also
+compute lookaheads given the worst-case follow set for each
+symbol. Then, when analyzing the format string, if it would change the
+follow set, we just fall back to worst-case.
+
+The issue here is really one of naming. Given a BNF, how do we specify
+a *naming* string which assigns names to elements of the bnf. This
+issue is a general, yakker-wide problem. The issue with "conversion
+specifiers", is not "conversion" (because we don't really care about
+conversion), but "specification". As in "save this whole chunk of data
+in variable x" (ala. quotations) or "save this whole chunk of data
+in the next available argument in var args" (ala. scanf). An
+interesting point is that the format-string style uses an implicit
+numbering scheme, in that the ordering of the arguments must
+correspond directly with the ordering of the conversion
+specifiers. Indeed, a further parallel between f.s. numbering and Perl
+reg.exp. style is that in both the user is explicit about which part
+of the to assign a number. The advantage of the former, though, is
+that it allows a post-hoc assignment, whereas the Perl parens scheme
+requires that the parens already be embedded in the original r.e.
+
+So, solving this problem will not solve the general problem of
+assigning names. For example, when we have a conflict, we would need a
+name to disambiguate, but whence comes that name? Perhaps, though,
+this is a flaw in our design. Perhaps we *should* aim to allow the
+user to disambiguate, and thereby provide full support for post-hoc
+naming. But, suppose we don't. What does this scheme give
+us. i.e. what is it, if not a naming scheme. Its a *name inference*
+scheme. Given the BNF, it provides us with a simple (?) language for
+selecting the portions that we are interested in, *without*
+necessarily having to use names. As Trevor has pointed out, you can
+view every binding specifier as having a wildcard name that the
+compiler fills-in. The key service is the inference -- filling in the
+wildcards correctly.
+
+Put this way, I think we should take a two-layered approach. The
+bottom layer is a scheme for full and disambiguous naming. The
+top-layer is a scheme for inferring names based on reasonable
+defaults.  
+
+How do we use the binders? In the f.s. scheme, the string contents of
+the parsed data are placed into the appropriate vararg argument. For
+quotations, we simply assign it into the specified variables.
+
+foo = "x" " " "z".
+
+scanf_foo("x %r",&a)
+
+[%r]@n = store(n), 
+[*a] = *[a]
+[#a] = [?a *("," a)]
+[?a] = ?[a]
+[{n}a] = {n}[a]
+[a | b] = a | b // nothing to do
+[SYMB s] = SYMB s  //nothing to do
+[ [l,u]  ] = [l,u]$cr {consume(cr)};
+[LIT] = LIT {consume(LIT);}
+[a b] = [a] [b]
+
+where n is the name of the current element.
+
+The idea is that once we have a naming scheme, all we need to do is
+pass the name into the "holes". Here, "n" is a valid variable name,
+with type const string ?. however, this doesn't quite work as "n" will
+be referring to the segment in the *format string* while need it to
+refer to the segment in the *input*.
+
+Are we aiming for a mapping from from format strings to cyclone
+code. I.e. do we plan to do a static translation of these format
+strings, rather than just running them at runtime? If yes, then a
+format string should translate into a series of parser function
+calls. Of course, that only works if its symbols. If there are
+literals, then we get more generally, a chunk of yakker output
+code. Of course, once we're doing that, why not just output a BNF
+fragment (which can refer to the original BNF) and throw yakker at it?
+Given that the format string cannot contain any choices, it will be a
+trivial translation into code (modulo the issue of follow sets for
+now). A key addition of the inference engine will be to add semantic
+actions which store the string associated with its appropriate name to
+the next vararg. So, in fact there are three things going on here: 1)
+a binding mechanism for binding portions of the input to specific
+variables or varargs; 2) a naming scheme for components of rules; 3)
+an inference system to the binding scheme so that you can leave
+implicit the particular element of the rule that you're binding to.
+
+(A next step would be to devise a method for using the names to refer into
+the original BNF and then we could only generate the semantic
+actions and not the BNF (when the f.s. refers to an existing portion
+of BNF, and does not make up a new one).)
+
+//////////
+Binding
+/////////
+
+Problem: assuming a naming scheme for specifying portions of the
+input, how do we bind a piece of input to a varargs or a variable? Is
+it just a straightforward semantic action? Well,yes, if we're
+translating format strings to BNFs and then running that through
+yakker. But, if we want to simply use function calls, then we'll need
+to modify yakker so that it provides "entry points" for every nameable
+element in the grammar. Right now, it only provides entry points for
+symbols. So, we have a choice of two possibilities:
+
+Given BNF 
+  foo = "x" " " "z".
+the format string 
+  "x %r" 
+becomes either
+
+1) a new BNF
+
+  foo' = "x" " " "z"$r1 {store(r1)}
+
+(Alternatively, if we have a naming scheme in place,
+  foo' = "x" " " "z" {store($3)}
+where $3 is the assigned name for element "z".)
+
+or, if we had a scheme for multiple entry points, 
+
+2)  a series of function calls
+
+  foo$1(); foo$2(); store(foo$3());
+
+Looks to me like option 1 is more straightforward, but option 2 cuts
+out the need to call yakker again. It would therefore better support
+dynamic use of format strings, as we could build into the
+format-string parser the knowledge of which function calls to make
+where. Either way, the format-string BNF would be defined with judgements
+
+[r]@n = r'  and [[r]]@n = r'
+
+where [[r]] is version that adds support for binders.
+
+Then, option 1) (BNF -> BNF(fs->BNF)) is:
+[r] = 
+
+[r1 r2]@n = [r1]@n$1 [r2]@n$2 | f(r)
+[*a]@n = *[a]@n | f(r)
+//[#a] = [?a *("," a)] 
+[?a]@n = ?[a]@n | f(r)
+[{n}a]@n = {n}[a]@n | f(r)
+[a | b]@n = [a]@n$1 | [b]@n$2 | f(r)
+
+// otherwise:
+[r]@n = r {printf("%s",rule2string(r));} // where "r" is an escaped version of the rule r.
+
+where f(r) = "%r" {let fn = fresh_name();                // without naming scheme in place
+	     	   printf("(r)$%s {store(%s);}",fn,fn);} 
+or
+           = "%r" {printf("r {store(%s);}",n);} // with naming scheme in place
+
+and option 2) (BNF -> BNF(fs->function calls)) is:
+
+// Static version:
+
+[r1 r2]@n = [[r1]]@n$1 [[r2]]@n$2
+[*a]@n = *[[a]]@n
+//[#a] = [?a *("," a)]
+[?a]@n = ?[a]@n
+[{n}a]@n = {n}[[a]]@n
+[a | b]@n = [[a]]@n$1 | [[b]]@n$2
+// otherwise:
+[r]@n = r {echo "p_n();"}
+
+[[r]]@n = [r]@n | "%r" {echo "store(p_n());"} 
+
+// Dynamic version:
+
+[r1 r2]@n = [[r1]]@n$1 [[r2]]@n$2
+[*a]@n = *[[a]]@n
+//[#a] = [?a *("," a)]
+[?a]@n = ?[a]@n
+[{n}a]@n = {n}[[a]]@n
+[a | b]@n = [[a]]@n$1 | [[b]]@n$2
+// otherwise:
+[r]@n = r {p_n();}
+
+[[r]]@n = [r]@n | "%r" {store(p_n());} 
+
+Note that even though we don't currently have such fine grained entry
+points, we could still accomplish alot (at least for testing) just by
+limiting ourselves to explicit symbol names. Basically, any time we
+want to be able to replace an r with a %r we would have to modify the
+BNF and give that r a name. But, for testing, that should be fine.
+
+**************************
+
+On the use and placement of special symbol \000
+
+Question: The start symbol is special in that it has \000 added to its
+follow grammar. If the functions for parsing the symbols are created
+beforehand,  then we need some way to make sure that \000 is in the
+follow set of any function used as a start symbol. The flip side - we
+need to add other symbols to the follow set of the previous start
+symbol, or it will never succesfully parse.
+
+Let's start by simplifying the problem - let's say that the old start
+symbol won't be used and that the pattern-match will replace the old
+start symbol. So, we are not concerned with the old start symbol's
+function. Then, the only concern is that the pattern match's function
+also look for \000 just like the old start symbol used to. Solution:
+just add \000 to its follow set. Going a step further, if \000 is out
+of band, then why not just add it to *every* follow set? ultimately,
+don't we control when it gets put in? We would have to adjust the
+system to put it in more places. Or, maybe, we could just let the user
+put it in the format string. Note that this is not identical to EOF in
+files, as there we might very much *not* want to allow EOF to appear
+after any arbitrary symbol. But EOF is *real* symbol, whereas \000 we
+are assuming to be a special, out of band symbol. Of course, that just
+raises the question of why not just add a function to the runtime to
+check for eof.
+
+However, we really need to add new, separate symbols (entry points)
+for each symbol and for those new symbols add \000 to their follow
+set. This would solve the problem mentioned in note:
+https://trevor-home.research.att.com:8080/blog/trevor/EOF-200410281122.txt
+as the A mentioned in S would *not* derive a$. Rather, only a special
+A (call it A_ep) would derive it, but A_ep could not be referenced
+from anywhere within the BNF.  This is important for more than the
+reason mentioned in that note -- in general, if a symbol appears
+*within* the derivation of another symbol, we really *don't* want it
+to legally terminate on EOF. Rather, that should be an error. That
+said, all of this is accomplished exactly by the existing hack of
+putting $ in the follow of the start symbol.
+
+[That said, I don't quite understand the need for \000 at all. Why not
+just change the code generation so that it doesn't require a symbol to
+have *any* follow grammar? In this case, we just check the other
+alternatives and if they fail, we just default to the epsilon. Is
+there a problem with filling? I don't see why. We can still fill an
+EOF symbol to make sure that there's something in the buffer, we just
+need to make sure that its not the same as anything in a valid first
+set in the rule. I.e. make sure its not in the alpha-bet. then, we can
+be sure that EOF won't be accidentally chosen over a different, valid
+branch. Perhaps there's a problem if there's nesting? Indeed, I think
+is is the issue.]
+
+More of an issue, though , is the general dependence on the follow set
+to decide "we're done". Frankly, having looked at the code, I cannot
+understand why this is done. Its not generally done. Its only done
+when you have an alt with epsilon as one of the branches (e.g. star,
+opt,...). So, I'm not entirely sure that we can say that its being
+done for stopping. Its really being done to distinguish between the
+choices. Perhaps the point is, if lookahead doesn't match anything,
+then why throw an error? Leave it to the next routine to throw the
+error when the data doesn't match what it wants. This won't work,
+becuase you're assuming that the case which "should" match is the
+epsilon case and the data is validly missing. What if data genuinely
+needs to be absorbed by this Alt? Clearly, if none of the lookahead
+matches, we have a problem.
+
+Instead, I think we need to distinguish epsilon (follow) lookahead
+from non-follow lookahead. But how? It only makes sense if epsilon
+appears alone for the symbol. Or, put another way, if the lookahead
+comes from the symbol's follow set, then we can ignore on failure, but
+otherwise, its an error. This is what we need to make the symbol
+independent of its context. But how to do this safely? I think that
+the best solution is just to ad \000 to every follow grammar, and,
+then, in order to use symbol x indepedentenly, we just need to make
+sure that \000 is placed at the end of the input. Ultimately, I think
+that this all boils down to allowing every symbol to be the start
+symbol, which we've already solved.
+
+An alternative would require that we special case the treatement of
+symbol definitions, which seems undesireable. However, it might be
+preferable to treating all symbols as start symbols, because this
+choice results in more conflicts. Why? In order for the follow set to
+cause a conflict, there must be a rule that has eof in its *first* set
+that is alted with an epsilon. I don't think that this can
+happen. Can it?
+Upon closer examination, it doesn't lead to any new LL(1)
+conflicts. Rather, it leads to additional conflicts in the dfas. I
+don't know what this means. Compare,
+
+./yakker  -all-start -gen command_pm -no-main small_imap_genpm.bnf > small_imap_genpm.cyc
+SUMMARY
+
+There were 25 LL(1) conflicts
+There were 1108 conflicts in the dfas
+  942 were resolved
+  166 were unresolved
+  12 instances might require unbounded lookahead
+  760 conflicts were out of order
+
+./yakker  -gen command_pm -no-main small_imap_genpm.bnf > small_imap_genpm.cyc
+SUMMARY
+
+There were 25 LL(1) conflicts
+There were 1120 conflicts in the dfas
+  955 were resolved
+  165 were unresolved
+  12 instances might require unbounded lookahead
+  768 conflicts were out of order
+
+I'm not sure what to make of these stats. But, the difference doesn't
+look all that bad, so perhaps we just shouldn't worry for now.
+
+Summary: the follow set is not *really* used to decide "we're done."
+Rather, this behaviour is an artifact of the way lookahead is done,
+and we only want to circumvent it for symbols. Note, also, that it
+only comes up if the last element in a symbol def. is
+nullable (e.g. the symbol def. is a sequence ending in a *).
+
+In order to support modularity, we allow the user to make every symbol
+a start symbol -- i.e. add eof to the follow grammar of every
+symbol. This feature can be enabled with -all-start. Note that it is
+possible (even likely) to result in many more conflicts. 
+
+For convenience, we also allow the user to choose the value that will
+be treated as eof -- i.e. the value that will terminate all start
+symbols. I intend to add an option -escape-eof or -warn-eof-conflict
+that will, respectively, escape eof if it appears in the input
+alphabet or warn if eof appears in the input alphabet.
+
+Together, these two new features provide the user with two solutions: 
+1) Set eof to \000 (status quo). Then, manipulate the input to
+insert \000 where appropriate. For example, if we are parsing symbol x
+and we know it will be followed by \n, then provide a filter that will
+replace the \n with \000.
+2) We set eof to some other value and parsing of any symbol will
+terminate upon occurence of this other value. For example, if we are
+parsing symbol x and we know that it will be followed by \n, then we
+set eof to \n.  In this case, we will still need to take into account
+that ykbuf will indicate the *real* eof with \000. So, without
+intervention, x followed by \000 will result in a parser error because
+x is not generated to expect \000.
+
+----------------------------------------------------------------------
+
+4/7/2007
+--------
+Idea: can we "infer" a type for a pattern match (using a generic
+parser and algorithm) and then compare it against the "type" of a rule
+to make sure that its a subtype? Perhaps, but how would this help with
+the problem of binders? I suppose that we could also infer a list of
+required binders. The advantage of this approach is that it could
+potentially avoid the need for a specialized parser for the format
+string. However, if you think of pads, what is a parser but a
+special-purpose type checker? Also, the problem with the inference
+idea is that a generic alg. would have no idea how to tokenize the
+input. So, I think that it doesn't work.
+
+Next step: save compiled version of state machines. We would like to
+recompile the original BNF together with the output from compiling the
+format string *without* rechecking all conflicts and producing all of
+the lookahead DFAs. To do so, we need to save the DFA's somehow. In
+what format should we save them and how should we name them?
+
+First, why can't we just use the generated code? Why do we need a
+separate format? The problem is that the individual DFA's are not
+named, so we have no way of referring to them. If we had entry points
+for individual DFAs, then we would be fine. Perhaps we should do that,
+then? I.e. produce them as independent, named functions, rather than
+as inline code?
+
+Better idea: next step, add simple transformation: BNF
+flattening. Takes all nested elements out and gives them a name. Then,
+we will automatically get entry points for every element in the BNF
+and we can work from there. We'll only need functions for literals and
+character ranges. This means that we'll be using the second scheme -
+generating code, rather than the current scheme - generating BNF.
+
+---------------
+
+4/11/2007
+
+KEY KEY point: design *indepedent* composable transformations. Makes them much,
+much easier to write.  Key to independence is that they all have
+signature S -> S, where S is the set of BNFs. The original
+termgrammar_v2 transformations that I wrote were *not* really
+composable because they could only legally be run in a restricted
+order. So, they were composable, but not independant.  At this point I
+see a number of independent transformations:
+
+- flatten
+- binders
+- parsegen (scanf)
+- printgen (printf)
+- pattern matching
+- termgrammar
+- escape literals
+
+(order: escape, flatten, bnfgen, termgrammar, bindgrammar?)
+
+What about pattern matching? It seems that no matter what, we need
+pattern matching to be a BNF that we can analyze. The code generation
+approach won't work. So, we once again need some modular way for
+yakker to process BNFs.
+
+Or do we?  For pre-existing BNF's, we take the "solve all possible
+ambiguities approach." But, if a user is already writing their own
+pattern match, is this desireable? I would say no - let them write
+unambiguous pattern matches. Like normal pattern matching, the
+branches are tested in sequence. The pattern matching engine will
+factor different branches for efficiency, but it won't "peek" into
+symbol definitions - i.e. it won't deal with first sets, follow sets,
+etc.
+
+Once again, I think the best approach here is to use an independent
+transformation to do the factoring. What we currently generate can be
+used to check the validity of the pattern match and replace all
+binders with the appropriate symbols. Then, we can pass the resulting
+BNF to a "factor" transform which could output a new BNF/code to
+correctly do the parsing.
+
+Also, I think that we should add a flag that lets us treat all symbols
+"opaquely" so as to support modularity. THen, we never need to
+generate code. We can just generate BNF which is processed with the
+"abstract" flag to avoid reprocessing. But how will this work? Opaque
+symbols won't support lookahead. They will create unresolveable
+conflicts. Ahhh... unresolveable conflicts means that order will
+decide, which is exactly what we want. Cool. How do we encode this?
+First, each opaque symbol must have "full" first set. Next, the
+automata should be empty? Yes, they should be a single final
+state. Then, the DFA determinization and minimilization will return a
+conflict for that state in the DFA. But, what about the stuff after
+the opaque symbol? Won't it possibly allow the algorithm to ignore the
+DFA entirely? Yes, I don't think this idea works. We really want to
+reference the DFA that was computed in the original grammar, which
+brings us back to "how do we save DFAs"?. I think that wrapping them
+in named functions is the way to go.
+
+Basically, code/BNF should be interchangeable. The key "cost" of
+yakker is the analysis, not the code generation. So, if there is no
+analysis necessary, we may as well just generate it as BNF and then
+run through yakker, rather than spitting out code.This does rule out
+dynamically processing a pattern-match string, but is this a big deal?
+Why would you dynamically process a pattern-match string? Ok, maybe it
+would be nice. I suppose, once again, that it would be nice to support
+both usages - as a call with flag to yakker and as a standalone. Once
+again, it seems to all come down to partial evaluation.
+
+I think that the right way to go is write one analysis and then have
+generated bindgrammars return BNF ASTs rather then printing text. Then,
+the driver program can choose whether to print the BNF or whether to
+process it further.
+
+So, how do we factor? When factoring, any symbol is treated
+opaquely. I.e., if we hit a symbol, we have to give up on analysis,
+and just go with order. I guess the algorithm is just keep matching
+symbols until we hit a difference (including "the end") and then
+try in order. Requires
+backtracking? I'm mixing two things up -- factoring and opaque
+symbols. lets discuss independently. I think that abstract symbols
+require first sets, even with priority mechanism. Basically, any time
+there's a conflcit on first char, just go with higher priority. So, we
+need a way to save first sets. We can ignore follow for now as we
+restrict format string to existing grammar, so follow can't change. We
+can even save first set as string/array. Now, I can statically compare
+opaque symbols.
+
+So, algorithm for dealing with conflicting first sets is just prefer
+first. Exactly like algorithm now, but there's no NFA for opaque
+symbols. Or, we could use empty NFAs and make sure that we don't have
+anything after an opaque symbol and I think that the result would be
+the same.  I.e. if we have a sequence and we hit an opaque symbol, we
+stop constructing the NFA.
+
+-----------------------------------------------------------------
+
+4/19/2007
+----------
+Support termgrammars with paths used to fill in data.
+
+E.g.  (command (1 BLAH))
+==>
+printf("BLAH %s ",gen_command_auth());
+
+E.g.  (command (2 (create INBOX)))
+==>
+printf("%s CREATE INBOX ",gen_tag());
+
+E.g.  (command (1 FOO) (2 (create INBOX)))
+==>
+printf("FOO CREATE INBOX ");
+as does
+(command (2 (create INBOX)) (1 FOO))
+Notice the order change.
+
+We can also support nested paths:
+E.g.  (command (2 (copy (2 INBOX))))
+==>
+printf("%s COPY %s INBOX ", gen_tag() , gen_sequence_set());
+
+Here's another:
+E.g.  (command FOO (copy (2 INBOX)))
+==>
+printf("FOO COPY %s INBOX ", gen_sequence_set());
+Notice that at "command" level, there's nothing new. The path is only used in copy. 
+So, this would work the same:
+FOO\ (copy (2 INBOX))\ 
+
+But, directly nested projections are not supported, e.g.:
+(command (1 FOO) (2 (2 (2 (2 INBOX)))))
+does *not* expand to
+printf("FOO COPY %s INBOX ", gen_sequence_set());
+Supporting this type of nesting would be difficult, and not obviously useful,
+given how unreadable it is.
+
+-----------------------------------------------------------------
+
+4/23/2007
+----------
+Lazy NFA construction:
+
+static lazy_st_t
+rule2lazy_nfa0(strset_t recursive,
+	  Hashtable::table_t<str_t,st_t> rt,
+	  grammar_t grm,
+	  rule_t r,
+	  lazy_st_t final);
+
+A lazy state can point either to another state or to a rule_t.
+However, it should always have an associated final state. In fact, 
+the rule_t must be stored together with the ultimate final state, for
+future use.
+
+st_t mk_lazy_alt(rule_t a,rule_t b) {
+  let s = nfa_fresh_state(); let f = nfa_fresh_state(); final(s,f);
+  let st_a = new RuleState(a,f);
+  let st_b = new RuleState(b,f);
+  action(s,EPSILON,st_a);
+  etrans(s,st_b);
+  return s;
+}
+
+st_t mk_lazy_seq(rule_t a,rule_t b) {
+  let s = nfa_fresh_state(); let f = nfa_fresh_state(); final(s,f);
+  let st_b = new RuleState(b,f);
+  let st_a = new RuleState(a,st_b);
+  action(s,EPSILON,st_a);
+  return s;
+}
+
+st_t mk_lazy_star(rule_t a) {
+  let s = nfa_fresh_state(); let f = nfa_fresh_state(); final(s,f);
+  etrans(s,f);
+  let st_a = new RuleState(a,s);
+  action(s,EPSILON,st_a);
+  return s;
+}
+
+// not actually lazy, as actions are the base case.
+st_t mk_lazy_act(cs_t x) {
+  let s = nfa_fresh_state(); let f = nfa_fresh_state(); final(s,f);
+  action(s,x,new ActualState(f));
+  return s;
+}
+
+#define CASE_INSENSITIVE 1
+/* A bit more space efficient than looping mk_lazy_act */
+st_t mk_lazy_lit(const char ?x) { 
+  let s = nfa_fresh_state();
+  let len = strlen(x);
+  if (len == 0) {
+    let f = nfa_fresh_state();
+    final(s,f);
+    action(s,EPSILON,new ActualState(f));
+  }
+  else {
+    let a = s;
+    for (let i = 0; i < len; i++) {
+      let b = nfa_fresh_state();
+      cs_opt_t y;
+      if (CASE_INSENSITIVE) {
+        y = cs_singleton(tolower(x[i]));
+        cs_insert(y,toupper(x[i]));
+      }
+      else y = cs_singleton(x[i]);
+      action(a,y,new ActualState(b));
+      a = b;
+    }
+    final(s,a);
+  }
+  return s;
+}
+
+  case &Alt(r2,r3):
+    return mk_lazy_alt(r2,r3);
+
+  case &Seq(r2,r3):
+    return mk_lazy_seq(r2,r3);
+
+**************************************
+7/1/2007:
+
+Lazy Construction of NFAs in the Presence of Cycles.
+
+Cycles in the CFG result in the need to mutate existing states during
+the lazy construction. These mutations imply that the value of certain
+states does not remain the same throughout the lifetime of the
+state. Unfortunately, the assumption of our algorithms is that the
+NFA, once constructed, will not change, and this behaviour violates
+this assumption. More generally, laziness does not mix well with
+computational effects.
+
+I believe that a solution to the problem requires us to eagerly expand
+cycles in the graph/nfa.  Just like the star operator fully builds the
+cycle when first forced, recursive cycles in the graph must fully
+build the cycle (if not the contents) when first forced.  
+
+In order for these expansions to force *only* the cycles, we must at
+least treat all non-recursive symbols as terminals.  An additional
+optimization, would be to distinguish between independent cycles, and
+then, when computing cycle c, treat all symbols not in c (recursive of
+otherwise) as terminals. However, this optimization does not appear
+strictly necessary.
+
+How do we perform this eager instantiation?  We follow all symbols
+marked as recursive. The first time any element of a cycle is
+encountered, we force the entire cycle. We build a new table mapping
+recursive symbols to their NFAs and the proceed in an eager manner for
+recursive symbols (still treating non-recursive symbols lazily).
+
+By definition of cycles, if there is a reference from the definition
+of recursive symbol B to a symbol A , and A is not recursive, then A
+cannot be in B's cycle, and hence can be safely ignored (or, in our
+case, left for lazy expansion). If *other* cycles are reachable
+through A -- fine, they will be expanded when we get to them. So, all
+cycles will be fully forced upon first encounter.
+
+Does the lazy approach obviate the need to distinguish independent
+cycles? No more so then before. But, the only time we need to worry
+about distinguishing cycles is when there's a direct (one-way)
+connection from one cycle to another. Otherwise, they will be expanded
+at separate times.
+
+So, in summary: we instantiate NFAs lazily, but expand cycles eagerly
+in their entirety when encountered.  Note that an optimization we
+don't use is to expand any given cycle once and then copy the NFA each
+future time it needs to be expanded. However, this is consistent with
+non-recursive symbols, as there is not much computational cost in
+converting a regular expression into an NFA.
+
+Note that it is critical to know when we are in the process of forcing
+a cycle, so that we not end up in an infinite loop. 
+
+
+*** Important point: if no_expand is used, then we both don't need,
+    and must not use, laziness.
+
+
+************************************************************************
+A result, with the new laziness algorithm:
+
+ ./yakker -gen command -no-main -lazyfill imap_genpm.bnf >| imap_genpm.cyc
+
+...
+
+SUMMARY
+
+There were 420 LL(1) conflicts
+There were 630 conflicts in the dfas
+  542 were resolved
+  88 were unresolved
+  22 instances might require unbounded lookahead
+  517 conflicts were out of order
+
+and without anonymous binders (%r):
+
+SUMMARY
+
+There were 276 LL(1) conflicts
+There were 116 conflicts in the dfas
+  59 were resolved
+  57 were unresolved
+  10 instances might require unbounded lookahead
+  4 conflicts were out of order
+
+************************************************************************
+7/6/2007
+
+To do:
+1. Left factoring.
+2. Conflict printing should not be printing var bindings or sem actions.
+
+
+************************************************************************
+
+7/13/2007
+
+Working on conflict messages. Clarifying difference between LL(1)
+conflicts and lookahead-dfa conflicts.  Also moving report of
+unbounded lookahead out of dfa conflicts section, as its independent.
+
+7/18/2007
+
+Built on interpreter for format ASTs for scanf. (Already pretty-much
+had them for printf). The tricky part was building the table mapping
+symbol names to their parsing functions. Once that was done, I
+factored code out of gen_ast_main.cyc to form an (imap-specific) scanf
+function. Trevor and I hope to merge it into Trevors new imapserver.
+
+7/19/2007
+
+It seems that the @repeat operator will significantly complicate the
+scanf interpreter beyond just the issue of flattening.  The problem is
+that I'll need to represent the dependency in the AST somehow, which
+means I'll somehow need to deal with variable binding. Until now, I've
+just ignored it. But, given that it has semantic meaning at the
+*grammar* level, because the @repeat construct is dependent, I need to
+incorporate it into the AST.
+
+7/20/2007
+
+Dependent sequence naturally are right associative: the variable x is
+bound in everything to the right. Unfortunately, yakker sequences are
+left associative, so from an implementation perspective (and perhaps a
+user perspective) theres a mismatch.
+
+in the short term, I will avoid this problem by using parens to force
+the desired associativity. For example, this grammar rule
+
+  literal = "{" number$x "}" CRLF @repeat(atoi(x))CHAR8.
+
+will be written
+
+  literal = "{" (number$x ("}" CRLF @repeat(atoi(x))CHAR8)).
+
+Perhaps we should have this syntax:
+
+  literal = "{" sig x:number."}" CRLF @repeat(atoi(x))CHAR8.
+
+
+******
+Wildcard support -- allowing you to ignore args, would be nice.
+
+
+
+7/21/2007
+
+It seems limiting that when doing lookahead, we throw a parse error if
+none of the branches are met. If one (or more) of the branches are
+epsilon, then this forces the parsing function to be used only in a
+context that is known at code-gen time, because the function will
+check to make sure that the data following it meets one of its
+expected branches. Yet, this lookahead *does no parsing*. I.e. if we
+choose such a branch, we do not parse something at the point, we
+merely stop looking at the other branches in the if statement.
+
+To take a concrete example, we can consider the star operator, in
+particular, say *"a" with follow "b". We can *only* use this functions
+to match a series of a's followed by a "b", even though "b" is not
+part of the actual patter *"a".
+
+Instead, I would propose that all epsilon branches *not* show up in
+the if-else statement and that the final else *not* throw an
+exception, with the result being that we only consider "positive"
+matches -- i.e. those that will lead to parsing. This will add
+flexibility without sacrificing anything. I don't think it will even
+make any difference in terms of error reporting.
+
+Or, would it be enough (and simpler) to just change the final else of
+the if-then-else statement not to throw an exception? Then, we could
+ignore the issue of epsilon or not. The key point is that if we
+something unexpected in lookahead, we just let the next function in
+the parser deal with it.
+
+I discuss this issue earlier in note "On the use and placement of
+special symbol \000". However, I believe that my conclusions are
+wrong. Leaving out the expception means that the parsing error will be
+reported later, but it must be immediately afterwards because, if not,
+then that means the next character would have showed up in one of the
+lookahead cases. So, what do we lose? I believe in my earlier note I
+didn't see what there was to gain -- namely, the more flexible use of
+the generated parsing function.

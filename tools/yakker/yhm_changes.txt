@@ -1,0 +1,15 @@
+4/18/2007
+- Added option to yakker to escape grammar.
+- Decided to filter termgrammar and binder rules by  whether the
+symbols starts with a upper case letter.
+- Added minus_elim on grammar before printing it (when no other params
+specified).
+- Added option to turn of minus elimination. Most useful because it
+also turns off charset optimization. Ultimately, I think we should
+separate these features.
+
+
+4/17/2007
+
+- Added support for returning the value of semantic actions in nested
+  rules. Use "rule $$ id" instead of "rule $ id".

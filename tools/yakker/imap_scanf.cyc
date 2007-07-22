@@ -1,0 +1,85 @@
+#include <buffer.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "bnf.h"
+#include "pr.h"
+#include "ykbuf.h"
+#include "funtable.h"
+#include "pm_bnf.h"
+#include "imap.h"
+#include "imap_genpm.h"
+
+#include "imap_scanf.h"
+
+// N.B. The definitions of these macros are subtly different than the
+// definitions in generated yakker code.
+#define YKCURSOR(ykb) ykb->cur
+#define YKPOSN(ykb) ((ykb->cur-ykb->bot)+ykb->discarded)
+#define YKSAVE(ykb) ({ let x = 0; ykb->save_count++; if (ykb->save) x = ykb->cur-ykb->save; else ykb->save = ykb->cur; x; })
+#define YKUNSAVE(ykb) {if (--ykb->save_count == 0) ykb->save=NULL;}
+#define YKRESTORE(ykb,x) {let p = ykb->save+x; YKUNSAVE(ykb); ykb->cur = p;}
+#define YKCOMMIT(ykb) YKUNSAVE(ykb)
+
+extern int ykdebug;
+extern datatype exn {extern Parse_error };
+extern datatype exn.Parse_error Parse_error_val;
+
+static struct Hashtable::Table<str_t,Funtable::parse_fun> *fun_table;
+
+typedef rule_pat_t (@`H fmt_parse_fun)<`r>(ykbuf_t @`r ykb);
+
+static Funtable::table_t get_funtable(){
+  if (!fun_table){
+    let ft = get_function_table();
+    fun_table = ft;
+    return ft;
+  } 
+  return fun_table;
+}
+
+int imap_internal_scanf(fmt_parse_fun parse_f, ykbuf_t@ ykb_source, ykbuf_t@ ykb_fmt, const char?`H @ ?args){
+  // parse the format string into a pattern AST.
+  rule_pat_t p;
+  try {
+    p = parse_f(ykb_fmt);
+  }
+  catch {
+  case &Parse_error:
+    let n = YKPOSN(ykb_fmt);
+    eprintf("Invalid format string at position %d (0x%x)\n",n,n);
+    return 0;
+    break;
+  }
+
+  let ft = get_funtable();
+
+  let x = YKSAVE(ykb_source);
+  try {
+    parse_with_pat(ykb_source,ft,p,args);
+    YKCOMMIT(ykb_source);
+  } catch {
+  case &Parse_error:
+//     eprintf("Input parsing failed at position: %d.\n",YKPOSN(ykb_source));
+    YKRESTORE(ykb_source,x);
+    return 0;
+  }
+
+  return YKPOSN(ykb_source);
+}
+
+int command_scanf(ykbuf_t @ykb, const char ?fmt, ...const char?`H @ args){
+  ykbuf_t @ykb_fmt = string2ykbuf(fmt);
+  return imap_internal_scanf(ImapFormat::p_command<>,ykb,ykb_fmt,args);
+}
+
+int login_scanf(ykbuf_t @ykb, const char ?fmt, ...const char?`H @ args){
+  ykbuf_t @ykb_fmt = string2ykbuf(fmt);
+  return imap_internal_scanf(ImapFormat::p_login<>,ykb,ykb_fmt,args);
+}
+
+
+int authenticate_scanf(ykbuf_t @ykb, const char ?fmt, ...const char?`H @ args){
+  ykbuf_t @ykb_fmt = string2ykbuf(fmt);
+  return imap_internal_scanf(ImapFormat::p_authenticate<>,ykb,ykb_fmt,args);
+}
