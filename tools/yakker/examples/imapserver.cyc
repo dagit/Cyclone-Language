@@ -202,14 +202,7 @@ static int session_handler(int fd) {
   while (server_state != LOGOUT) {
     force(server_state,NOT_AUTHENTICATED,AUTHENTICATED,SELECTED);
 
-    if (command_scanf(inbuf,"(command %tag NOOP)",&tag)){
-      /* (NOOP tag) */
-      /* TODO: do stuff like renew timeout, report status */
-      fprintf(stdout, "Found NOOP\n");
-      fprintf(outbuf,"%s OK NOOP completed\r\n",tag);
-      fflush(outbuf);
-      }
-    else if (command_scanf(inbuf,"(command %tag CAPABILITY)",&tag))
+    if (command_scanf(inbuf,"(command %tag CAPABILITY)",&tag))
       {
 	/* (CAPABILITY tag) */
 	fprintf(outbuf,"* CAPABILITY IMAP4rev1\r\n");
@@ -217,8 +210,13 @@ static int session_handler(int fd) {
 	fprintf(outbuf,"%s OK CAPABILITY completed\r\n",tag);
 	fflush(outbuf);
       }
-
-
+    else if (command_scanf(inbuf,"(command %tag NOOP)",&tag)){
+      /* (NOOP tag) */
+      /* TODO: do stuff like renew timeout, report status */
+      fprintf(stderr, "Received NOOP\n");
+      fprintf(outbuf,"%s OK NOOP completed\r\n",tag);
+      fflush(outbuf);
+      }
     else if (command_scanf(inbuf,"(command %tag LOGOUT)",&tag)){
       /* (LOGOUT tag) */
       fprintf(outbuf,"* BYE Cyclone IMAP server logging out\r\n");
@@ -226,13 +224,24 @@ static int session_handler(int fd) {
       fflush(outbuf);
       server_state = LOGOUT;
     }
-
-    else if (command_scanf(inbuf,"(command %tag %login)",&tag,&val1)){
+//     else if (command_scanf(inbuf,"(command %tag %login)",&tag,&val1)){
+    else if (command_scanf(inbuf,"(command %tag (login %userid %password))",&tag,&val1,&val2)){
       /* (LOGIN tag username password) */
       force(server_state,NOT_AUTHENTICATED);
-      const char ? username = NULL;
-      const char ? password = NULL;
-      login_scanf(string2ykbuf(val1),"(login %userid %password)",&username,&password);
+//       const char ? username = NULL;
+//       const char ? password = NULL;
+      const char ? username = val1;
+      const char ? password = val2;
+/*
+  // In order to parse in this manner, we would need to generate the imap parsing functions with
+  // the -all-start option (just as we do for the termgrammar parsing functions.
+      if (!login_scanf(string2ykbuf(val1),"(login %userid %password)",&username,&password)){
+	fprintf(stderr, "Received LOGIN but failed to parser (from %s).\n",val1);	
+      } else
+	fprintf(stderr, "Received LOGIN with %s:%s from %s.\n",username,password,val1);      
+*/
+      fprintf(stderr, "Received LOGIN with %s:%s.\n",username,password);
+
       fprintf(outbuf,"working on LOGIN\r\n");
       fflush(outbuf);
       if (!authorized(username,password)) {
@@ -266,8 +275,8 @@ static int session_handler(int fd) {
 	}
 	// TODO: we ought to save the db in session state
 
-	// TEMP:
 	fclose(outbuf);
+	// TEMP:
 	pthread_exit(0);
       }
     }

@@ -253,14 +253,23 @@ static void parse_lit(ykbuf_t @ykb, const char ?x)
 {
   int c; // PHASE
   int len = strlen(x);
-  lazyfill(ykb, len);
   for (int k = 0; k < len; k++) {
+    lazyfill(ykb, 1);
     c = *YKCURSOR++; //PHASE
     let orig = x[k];
     let l = tolower(orig);
     let u = toupper(orig);
     if (c!=l && c!=u) throw &Parse_error_val; // PHASE
   }
+
+//   lazyfill(ykb, len);
+//   for (int k = 0; k < len; k++) {
+//     c = *YKCURSOR++; //PHASE
+//     let orig = x[k];
+//     let l = tolower(orig);
+//     let u = toupper(orig);
+//     if (c!=l && c!=u) throw &Parse_error_val; // PHASE
+//   }
 }
 
 static void parse_char(ykbuf_t @ykb, unsigned int x)
