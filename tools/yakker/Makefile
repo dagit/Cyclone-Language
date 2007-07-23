@@ -10,7 +10,7 @@ PROG=yakker$(EXE)
 # Set this to yakker to make all targets generated with yakker depend
 # on yakker.  Useful to turn off when simultenously modifying yakker
 # and working on a program based on generated code.
-PROG_DEP=
+PROG_DEP=$(PROG)
 
 BINDIR=$(CYCDIR)/bin
 # examples directory. Use full path to avoid ambiguity.
@@ -342,9 +342,10 @@ rfc%.txt:
 # literal needs to know about a prefixed length
 # capability-data causes an unusual conflict, avoided for now
 #	echo 'literal = "{" (number "")$$x "}" CRLF @repeat(atoi(x))CHAR8.' >> $@.tmp
+#	echo 'literal = "{" (number$$x ("}" CRLF @repeat(atoi(x))CHAR8)).' >> $@.tmp
 rfc3501.bnf: rfc3501.txt $(PROG_DEP)
 	./yakker -extract $< -omit literal capability-data > $@.tmp
-	echo 'literal = "{" (number$$x ("}" CRLF @repeat(atoi(x))CHAR8)).' >> $@.tmp
+	echo 'literal = "{" number$$x "}" CRLF CHAR8.' >> $@.tmp
 	echo 'capability-data = "CAPABILITY" *(SP capability).' >> $@.tmp
 	./yakker $@.tmp -namespace rfc3501 > $@
 	$(RM) $@.tmp
