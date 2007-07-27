@@ -32,8 +32,9 @@ datatype Rule_pattern {
   CharPat(unsigned int); // single character from a character range.
   LitPat(const char ?);
   SeqPat(rule_pat_t,rule_pat_t);
+/*   RepeatPat(int,rule_pat_t); */
 /*   DepSeqPat(rule_pat_t,fn_t<const char ?,rule_pat_t,`H>); // Dependent sequence pattern. */
-  WildcardPat(const char ?); // symbol for which this is a wildcard.
+  BinderPat(const char ?); // symbol for which this is a binder.
 };
 
 extern rule_pat_t pats2seq(List::list_t<rule_pat_t>);

@@ -25,7 +25,7 @@ extern int include_anon_binder;
 // if esc_chars is NULL, then a default set of chars is escaped.
 extern grammar_t escape_grammar(grammar_t g, const char? esc_chars);
 
-extern grammar_t flatten_grammar(grammar_t g);
+// Assumes that flattening has been performed.
 extern grammar_t grammar2bnfgen_grammar(grammar_t<`H> g);
 extern grammar_t grammar2termgrammar_bnf(grammar_t ds);
 extern grammar_t grammar2bindgrammar(grammar_t g);

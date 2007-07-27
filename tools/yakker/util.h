@@ -54,7 +54,12 @@ node_delete(Graph::graph_t<`a> g, Set::set_t<`a,`H> x);
 extern const char ?char_escape(char c);
 extern const char ?string_escape(const char ?`H s);
 
+// Creates a new string with the given prefix and a fresh suffix.
+const char ?fresh_suffix(const char? prefix);
+
+// Creates a fresh name.
 extern const char ?fresh_name();
+
 extern const char ?make_c_identifier0(const char ?`H n);
 extern int ok_firstchar(char c);
 extern int ok_otherchar(char c);

@@ -215,9 +215,13 @@ const char ?string_escape(const char ?`H s) {
   return t;
 }
 
-const char ?fresh_name() {
+const char ?fresh_suffix(const char? prefix) {
   static int count = 0;
-  return aprintf("_bnf_%d",count++);
+  return aprintf("%s_%d",prefix,count++);
+}
+
+const char ?fresh_name() {
+  return fresh_suffix("_bnf");
 }
 
 int ok_firstchar(char c) {

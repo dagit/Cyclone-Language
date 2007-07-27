@@ -502,6 +502,14 @@ grammar_t close_definitions(grammar_t<`H> ds, List::list_t<grammar_t<`H>> e) {
   return ds;
 }
 
+Rule_t lookup_symbol(grammar_t grm, const char ?sym){
+  for (let g = grm; g; g = g->tl) {
+    let &$(x,r,_) = g->hd;
+    if (strcmp(sym,x) == 0)
+      return r;
+  }
+  return NULL;
+}
 
 // N.B. This conversion will loose all sem. actions, etc. that are part of the
 // flattened Alts.
@@ -552,40 +560,61 @@ List::List_t<rule_t> seq2rules(rule_t r0) {
   return res;
 }
 
+rule_t rules2seq(List::List_t<rule_t> rules){
+  _* rs = rules;
+  let res = rs->hd;
+  rs = rs->tl;
+  while(rs){
+    res = arule_inj(new Seq(res,rs->hd));
+    rs = rs->tl;      
+  }
+  return res;
+}
+
 /* Turn a rule into a list of the rule sequence. 
    If r0 is not a sequence, will return a singleton list of r0.
    Guaranteed to contain at least one element.
 
-   *Treats nested sequences with v attributes differently.*
+   *Preserves elements with v attributes.*
  */
 List::List_t<rule_t> depseq2rules(rule_t r0) {
   let res = NULL;
   let rs = List::list(r0);
   while (rs) {
     let r = rs->hd;
-    switch (r->r) {
-    case &Seq(r2,r3):
-      if (r2->v)
-	fallthru;
-      rs = new List::List(r2,new List::List(r3,rs->tl));
-      break;
-    case &Symb(_,_):
-    case &Alt(_,_):
-    case &Opt(_):
-    case &Rcount(_,_):
-    case &Star(_,_,_):
-    case &Hash(_,_,_):
-    case &CharRange(_,_):
-    case &Lit(_):
-    case &Prose(_):
-    case &Minus(_,_):
+    if (r->v){
       res = new List::List(r,res);
       rs = rs->tl;
+    } else {
+      switch (r->r) {
+      case &Seq(r2,r3):
+	rs = new List::List(r2,new List::List(r3,rs->tl));
       break;
+      case &Symb(_,_):
+      case &Alt(_,_):
+      case &Opt(_):
+      case &Rcount(_,_):
+      case &Star(_,_,_):
+      case &Hash(_,_,_):
+      case &CharRange(_,_):
+      case &Lit(_):
+      case &Prose(_):
+      case &Minus(_,_):
+	res = new List::List(r,res);
+      rs = rs->tl;
+      break;
+      }
     }
   }
   res = List::imp_rev(res);
   return res;
+}
+
+bool is_symb(rule_t r){
+  switch (r->r) { 
+  case &Symb(_,_): return true; 
+  default: return false;
+  };
 }
 
 // Annoying that this does not take a const char ?; a problem with <lexing.h>

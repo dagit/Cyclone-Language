@@ -1031,6 +1031,10 @@ unsigned int arity_rule(rule_t r) {
   }
 }
 
+void set_arity_symb(const char ?`H symb, unsigned int arity){
+  Hashtable::insert(globals->arityt,new symb, arity);
+}
+
 void init_arityt(grammar_t ds) {
   if (!globals) reset_globals();
   if (globals->arityt) return;

@@ -106,6 +106,14 @@ extern repeat_t minus_one(repeat_t);
 extern int repeat_zero(repeat_t);
 extern grammar_t get_reachable(grammar_t<`H> ds, List::list_t<const char ?@> roots);
 extern grammar_t close_definitions(grammar_t<`H> ds, List::list_t<grammar_t<`H>> e);
+extern Rule_t lookup_symbol(grammar_t grm, const char ?sym);
+/** returns NULL if symbol cannot be found. */
+
+extern bool is_symb(rule_t r);
+/**
+   Indicate whether [r] is a symbol.
+ */
+
 extern List::list_t<rule_t> alt2rules(rule_t r);
 
 extern List::List_t<rule_t> seq2rules(rule_t r);
@@ -113,8 +121,11 @@ extern List::List_t<rule_t> seq2rules(rule_t r);
    If [r] is not a sequence, will return a singleton list of [r].
    Guaranteed to contain at least one element.
 
-   N.B. Will trip any attributes off of nested sequences.
+   N.B. Will strip any attributes off of nested sequences.
  */
+
+extern rule_t rules2seq(List::List_t<rule_t> rules);
+/** Turn a list of rules into a sequence.*/
 
 extern List::List_t<rule_t> depseq2rules(rule_t r);
 /** Turn a rule into a list of the rule sequence. 

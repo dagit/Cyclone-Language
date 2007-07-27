@@ -1214,3 +1214,243 @@ then that means the next character would have showed up in one of the
 lookahead cases. So, what do we lose? I believe in my earlier note I
 didn't see what there was to gain -- namely, the more flexible use of
 the generated parsing function.
+
+7/23/2007
+
+- Lazyfill appears to be somewhat broken for literals in the case of
+erroneous input.
+
+- Trevor asked whether lookahead correctly handles EOF -- i.e. when it
+see \0 does it correctly verify that the input is at eof, or not?
+
+- We decided to compile main code with -all-start flag so as to allow
+all functions to be called in any context. Trevor felt that this was
+clearer than changing the error-raising properties of lookahead. I
+should add my notes on this to the blog.
+
+7/24/2007
+
+#####
+# Supporting "repeat" in format strings.
+###
+
+There are two possible interpretations of repeat for format
+strings. First, if the format string includes the number of
+repetitions, then we could use this immediately in parsing the format
+string itself. That is, a repeat in the original grammar can be
+translated into a repeat in the format string's grammar. 
+
+In fact, this is really a property of dependent sequences. If the
+value is present, then we can eagerly use it in parsing the rest of
+the sequence. If the value is not present, then we must delay
+computation until the value is available to us.  We have devised ways
+to support both of these approaches. The key question is how to
+support them *simulteneously*. We need a way to decide at runtime --
+while parsing the format string -- whether we can use the value
+eagerly or not.
+
+A most general solution, then, would address it for dependent
+sequences. However, given that only repeat is the (currently) the only
+construct to use the dependency, we could in principle attempt to
+address it there. However, this isn't quite true as predicates can
+also refer to bound variables. So, I think that the more general
+solution is the right approach.
+
+A key contraint is the need of the format-string grammar to be
+transparently compatible with the original grammar. Hence, any
+contraints we would wish to place on the grammar for the sake of the
+f.s. grammar, must make sense as well for the normal grammar.
+
+Returning to the case of repeat, the code used by the repeat assumes x
+to have type string. That code is part of the grammar, so the parsing
+of the format string is dependent on that code. I had originally
+thought to eagerly parse the format string and only lazily construct
+the result, where the construction of RepeatPat depends on x, but not
+the parsing that leads to it. This approach is flawed, though, in that
+it does not allow the user to *ever* use the value, even when it is
+available in the format string. Hence the seeming need to
+simultaneously support two different approaches.
+
+Now, though, I think that we haven't gone far enough. The parsing of
+the remainder of the format string should be done lazily, not just the
+construction of the pattern. However, this raises the question of how
+we parse what's *after* the dependent sequence. I don't think that
+this works.
+
+What about Trevor's suggestion that we allow repeat in the format
+string?  Perhaps that would do the trick? So, we would support format
+strings like: "{%number$x}@repeat(atoi(x))%CHAR8". Yet, we can't do
+this because of the unrestricted code that can appear in a
+repeat. Even if we restrict the syntax of repeat to only use a single
+variable name, we still have a problem for predicates. Point being,
+that such a restriction is not a very general solution.  Also, what
+happens when we flatten repeats? The variable(s) upon which they
+depend must be passed as params to their symbol. That would require us
+to do dynamic typing on all symbol parsing functions.
+
+Summary: I don't feel that I have a good, general solution for dealing
+with them at this point. Instead, I'd like to limit their use in
+format strings.  The most draconion way to do this is just forbid them
+from format strings. So, if you have a dependent sequence, your only
+choice would be a binder (e.g. "%foo") to capture it.  Alternatively,
+I think it would also be possible to just forbid use of binders for
+the bound part of the sequence -- i.e. it would have to be explicit in
+the format string.  However, this would be harder to implement and I'm
+not sure how useful it would be.
+
+My instinct is to go with the simpler approach and only do something
+more complicated if we find a need for it.
+
+(cont' 7/26/2007)
+
+The solution in the end is to go with the latter approach. We allow
+you to do whatever you want with the value to be bound. We check,
+however, before allowing you to use it that it is in fact a
+value. To be more specific, the translation is as follows:
+
+[r1] = r1',e1   [r2] = r2',e2
+---------------------------------------- (F = ...)
+[r1$x r2] = r1' ast2string@(e1)$x r2' { F(e1,e2); } 
+
+Each rule is translated into a new rule and an action, which is an
+expression that will construct the bnf for that rule. The function F
+in this case is just a function to construct a SeqPat from e1 and
+e2. Its details are not important for the purposes of this note.
+
+In order to bind the variable x correctly, we pass its action
+expression to a special symbol "ast2string", which will attempt to
+translate the (value of the) action into a string. If it succeeds,
+then that string will be bound to the original variable "x", just as
+if we were parsing with the source bnf. If it fails, then it will
+raise a parse error. In essence, we are solving the problem by relying
+on "dynamic check" in the ast2string function, rather than baking the
+restriction in to generated BNF. For this reason, we do not need to
+translate r1 or r2 in any special (restricted) way.
+
+Following is the definition of the ast2string symbol:
+ast2string@(rule_pat_t p)$$(const char ?) = ""{return ast2string(p);}.
+
+The function "ast2string" will be defined in pm_bnf.cyc.
+
+So far, we have described the way things work for bnf generation and
+binders. However, we have not discussed termgrammars. For now, (do to
+laziness) we do not generate termgrammar BNF for dependent
+sequences. I don't believe there's any essential reason that we
+can't. The problem is that the dependency forced me not to flatten
+dep. seq. Yet, the termgrammar generation assumes flattened rules. For
+BNF gen, I fixed this by relaxing the assumption. When I get a chance,
+I'll probably do the same sort of fix for termgrammar generation. For
+now, though, we simply check for dep. seq. and ignore them when found.
+
+##### Independent specification of semantic actions.  ##
+
+Fusion for parsers so that you can efficiently write the semantic
+actions separately from the parser. Alternatively, a syntax for doing
+that and have yakker fuse them.
+
+I think that given the flattening module we can easily add support for
+independent specification of semantic actions. We might need, though,
+independent specification of binding as well. Alternatively, we could
+by default bind each grammar element to its own, well-specified name,
+and that could be used in the semantic actions.
+
+
+#### Left factoring #####
+
+I think it would be useful to find a standard reference on
+left-factoring grammars. Appels book is skimpy here, only discussing
+the simplest case. We're interested in nested left factoring.
+
+In the meantime, here are my thoughts: We handle nested factoring by
+factoring sequences only. I.e. if we reach a diference between two
+branches on a symbol, we crack open the symbol(s). Then, we only
+continue factoring if the symbol definitions are sequences. Ignoring
+recursive symbols, we'll be most effective if we factor in dependency
+order. That way, if a symbol is originally defined as an alt, any
+possible factoring will already have been done by the time a user of
+the symbol gets to it. 
+
+Note that this dep. first, sequence-only approach is not a full
+solution, as conflicts between sequences and alts (where not all
+branches conflict with the sequence) will not be fixed. For example,
+
+foo = "ab" | "cd"
+bar = "ae" | foo
+
+when we attempt to factor foo, nothing will happen as there is no
+useful factoring to be done within foo. Then, when we try to factor
+the branches of bar, we'll give up because foo is an alt. But, we
+could have factored successfully:
+
+==>
+foo = "ab" | "cd"
+bar = "ae" | ("ab" | "cd")
+==>
+foo = "ab" | "cd"
+bar = ("ae" | "ab") | "cd"
+==>
+foo = "ab" | "cd"
+bar = "a" ("e" | "b") | "cd"
+
+But, we have to start somewhere and this approach should by us a lot.
+
+As for recursive symbols, here's an example:
+
+expr = "a" expr | expr "a"
+
+How will the algorithm work? Given the sequence restriction, it will
+open expr, find it to be an alt and stop. I think that the
+seq. restriction will guarantee protection against infinite loops
+because by definition if we are trying to factor then we are in an
+alt, which means that when we return to this symbol via a cycle we
+will stop.
+
+If factor a symbol then we need to inline some or all of the
+factoring. I go for inlining the factored part but leaving the
+remainder. So, the symbol would be redefined. Consider the following
+grammar fragment:
+
+X = r1r2.
+Y = ...X... | ...
+
+Now, if when processing Y we choose to look into X,  and factor out r1
+then we would rewrite this fragment as:
+
+X' = r2.
+X = r1 X'.
+Y = .. r1  (X'... | ...)
+
+The key point is to only duplicate as much grammar as is necessary.
+
+
+Algorithm (simple, without symbol-sharing discussed above):
+
+Inputs: r1 r2
+
+rules1 = to_seq r1
+rules2 = to_seq r2
+res = EMPTY
+
+while not done, non-empty rules1, and non-empty rules2
+  h1 = head rules1
+  h2 = head rules2    
+  if equal(h1,h2) then
+    add h1 to res.
+  else if is-symbol h1 or is-symbol h2 then
+    o1 = open h1
+    o2 = open h2
+    rules1 = o1 @ rules1
+    rules2 = o2 @ rules2
+  else
+    done = true
+end while
+
+factor = rules2seq res
+remainder = ALT(rules1,rules2)
+return SEQ(factor, remainder)
+
+    
+ 
+Results look good. Need to break down literals into separate chars.
+Would be nice to reconstruct wholly-deconstructed symbols. Could do
+this with a hash table.

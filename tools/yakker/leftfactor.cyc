@@ -1,0 +1,199 @@
+/* flatten.cyc
+ * Library for converting an ABNF grammar into an ABNF grammar with .
+ */
+
+/* Copyright (C) 2007 Greg Morrisett, AT&T.
+   This file is part of the Cyclone project.
+
+   Cyclone is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   Cyclone is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Cyclone; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+#include <core.h>
+#include <list.h>
+#include <string.h>
+#include <stdio.h>
+#include <hashtable.h>
+
+#include "bnf.h"
+#include "analyze.h"
+#include "leftfactor.h"
+#include "pr.h"
+
+using List;
+
+// legal to call when r is not a symbol -- returns singleton list of r
+// in this case.
+// returns null if r is a symbol, but not defined.
+static List::list_t<rule_t> open_symb(grammar_t g, rule_t r){
+  switch (r->r) {
+  case &Symb(x,_):
+    Rule_t x_rule = lookup_symbol(g, x);
+    if (!x_rule) {
+      warn("missing definition for %s in open_sym\n",x);
+      return NULL;
+    }
+    return depseq2rules(x_rule);
+  default: 
+    return list(r);
+  }
+}
+
+static $(const char ?,const char ?,const char?) 
+left_factor_lits(const char ?`H x, const char ?`H y){
+  int i=0;
+//   int n = numelts(x) < numelts(y) ? numelts(x) : numelts(y);
+  int n = numelts(x);
+  
+  // safe to use only x's bound because if y is shorter than first
+  // condition will terminate loop when reach the \0 in y.
+  while (x[i]==y[i] && i < n) i++;
+  if (i){
+    let factor = substring(x,0,i);
+    return $(factor, x + i, y + i);
+  }
+  else {
+    return $(NULL,x,y);
+  }
+}
+
+
+static rule_t left_factor(grammar_t g,rule_t r1, rule_t r2){
+  list_t rs1 = depseq2rules(r1);
+  list_t rs2 = depseq2rules(r2);
+
+  list_t rs1_save = rs1;
+  list_t rs2_save = rs2;
+
+  let res = NULL;
+
+  while (rs1 && rs2){
+    let h1 = rs1->hd;
+    let h2 = rs2->hd;
+    if (rule_cmp(h1,h2) == 0){
+      res = new List(h1,res);      
+      // commit
+      rs1 = rs1->tl;
+      rs2 = rs2->tl;
+      rs1_save = rs1;
+      rs2_save = rs2;
+    } else {
+      switch ($(rs1->hd->r,rs2->hd->r)){
+      case $(&Symb(_,_),_):
+      case $(_,&Symb(_,_)):{
+	// open up the symbols and try for a match that way.
+	let o1 = open_symb(g,h1);
+	let o2 = open_symb(g,h2);
+	if (!o1 || !o2){
+	  // can't factor with undefined symbol. 
+	  // end the loop.
+	  rs1 = NULL;
+	  rs2 = NULL;
+	} else {
+	  rs1 = append(o1,rs1->tl);
+	  rs2 = append(o2,rs2->tl);
+	}
+      }
+      break;
+      
+      case $(&Lit(x),&Lit(y)):
+	let $(factor,x1,y1) = left_factor_lits(x,y);
+	if (factor){
+	  res = new List(LIT(factor),res);
+	  // commit
+	  rs1 = rs1->tl;
+	  rs2 = rs2->tl;
+	  if (x1) rs1 = new List(LIT(x1), rs1);
+	  if (y1) rs2 = new List(LIT(y1), rs2);
+	  rs1_save = rs1;
+	  rs2_save = rs2;
+	  break;
+	} 
+	fallthru;
+	
+      default:
+	// end the loop
+	rs1 = NULL;
+	rs2 = NULL;
+	break;
+      }
+    }
+  }
+  
+  if (!res) {
+    return ALT(r1,r2);
+  } else {
+    imp_rev(res);
+    let factor = rules2seq(res);
+    if (rs1_save || rs2_save) {
+      rule_t remainder;
+      if (rs1_save && rs2_save) {
+	remainder = ALT(rules2seq(rs1_save),rules2seq(rs2_save));    
+      } else if (rs1_save) {
+	remainder = OPT(rules2seq(rs1_save));
+      } else {
+	remainder = OPT(rules2seq(rs2_save));
+      } 
+      return SEQ(factor,remainder);
+    }  
+    return factor;
+  }
+}
+
+static
+rule_t left_factor_rule(grammar_t g, rule_t r){
+  switch (r->r) {
+  case &Seq(r1,r2):
+    let r1_lf = left_factor_rule(g,r1);
+    let r2_lf = left_factor_rule(g,r2);
+    return SEQ_r(r,r1_lf,r2_lf);
+
+  case &Opt(r1):
+    return OPT_r(r,left_factor_rule(g,r1));
+
+  case &Alt(r1,r2):
+    let r1_lf = left_factor_rule(g,r1);
+    let r2_lf = left_factor_rule(g,r2);
+    return left_factor(g, r1_lf,r2_lf);
+
+  case &Rcount(n,r1):
+    return RCOUNT_r(r,n,left_factor_rule(g,r1));
+
+  case &Star(m,N,r1):
+    return STAR_r(r,m,N,left_factor_rule(g,r1));
+
+  case &CharRange(_,_):
+  case &Symb(_,_):
+  case &Lit(_):
+    return r;
+
+  default:
+    internal_err("Unexpected rule in left_factor_rule:%s\n",pr_rule2string(r));
+    return r;
+  }
+}
+
+grammar_t left_factor_grammar(grammar_t g) {
+  grammar_t res = NULL,ds = g;
+  for (; ds; ds = ds->tl) {
+    let &$(n,r,a) = ds->hd;
+    let r_lf = left_factor_rule(g,r);
+    res = new List(new $(n, r_lf, a), res);
+  }
+
+  res = imp_rev(res);
+  return res;
+}
+
+

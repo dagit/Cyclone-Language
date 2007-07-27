@@ -187,15 +187,6 @@ static void warn_repeat() {
   warn("using an approximation for @repeat in rule2nfa\n");
 }
 
-static Rule_t lookup_symbol(grammar_t grm, const char ?sym){
-  for (let g = grm; g; g = g->tl) {
-    let &$(x,r,_) = g->hd;
-    if (strcmp(sym,x) == 0)
-      return r;
-  }
-  return NULL;
-}
-
 /* Convert a rule to an nfa.  If the rule contains a recursively-defined
    symbol, then that symbol is only converted once, and all instances
    share the resulting nfa. */

@@ -241,36 +241,117 @@ const char ?get_bnfgen(rule_t r){
   }
 }
 
-static rule_t add_bnfgen(rule_t r);
+static $(rule_t,const char ?) @add_bnfgen0(rule_t r);
 
-// returns bnf'ed rule and expression for constructing the rule.
+// // returns list of bound bnf-variables, bnf'ed rule and expression for
+// // constructing the representation of the rule.
+// static
+// $(List::list_t<str_t>, rule_t,const char ?) @depseq_add_bnfgen(rule_t r){
+//   switch (r->r) {
+//   case &Seq(r1,r2):
+//     let &$(vars1,r1,a1) = depseq_add_bnfgen(r1);
+//     let &$(vars2,r2,a2) = depseq_add_bnfgen(r2);
+//     let a = aprintf("new SeqPat(%s,%s)",a1,a2);
+//     let r_ab = SEQ_r(r,r1,r2); 
+//     return new $(List::append(vars1,vars2),r_ab,a);
+//   case &CharRange(min,max):
+//     let r_s = mk_cs_bnfgen(r);
+//     // "steal" the action from r_s.
+//     let a = r_s->a;
+//     r_s->a = NULL;
+//     return new $(List::list(new r_s->v), r_s, a);
+//   case &Symb(_,_):
+//     let fn = fresh_name();
+//     // copy r and set a new name.
+//     let new_r = new arule(r->a, r->p, fn, r->css, r->r);
+//     if (r->v){
+//       // if r is bound, then rebind by converting ast value bound to
+//       // new name (fn) to a string and binding it to the original
+//       // name.
+//       let conv_r = new arule (NULL,NULL,r->v,NULL,new Symb("ast2string",fn));
+//       new_r = arule_inj(new Seq(new_r,conv_r));
+//     }
+//     return new $(List::list(new fn), new_r, fn);
+//   case &Lit(s):
+//     return new $(NULL, r, lit2pat(s));
+//   default:
+//     internal_err("Unexpected rule in depseq_add_bnfgen:%s\n",pr_rule2string(r));
+//     return new $(NULL, r, "ERR");
+//   }
+// }
+
 static
-$(rule_t,const char ?) @add_bnfgen0(rule_t r){
+$(rule_t, const char ?) @seq_add_bnfgen(rule_t r){
+  let res;
+  let seq_a;
+  let rules = depseq2rules(r);
+  let r_elt = rules->hd;
+  // rules is defined to be non-null, so we assign it to nullable variable.
+  _* rs = rules->tl;
+
+  // Process first element to set initial value for res (and defs).
+  
+  if (r_elt->v){ 
+    // if r is bound, then rebind by converting ast value bound to
+    // new name (fn) to a string and binding it to the original
+    // name.
+    // If the bound AST cannot be converted to a string, then
+    // ast2string will raise an exception.
+
+    // Need to make r_elt non-dependent (NULL-ify r_elt->v) before
+    // processing it, or will end up in infinite-loop.
+    let v = r_elt->v;
+    r_elt->v = NULL; 
+    let &$(r_ab,a) = add_bnfgen0(r_elt);    
+    r_elt->v = v; //restore it now.
+
+    let conv_r = new arule (NULL,NULL,r_elt->v,NULL,new Symb("ast2string",a));
+    res = arule_inj(new Seq(r_ab,conv_r));
+    seq_a = a;
+  } else {
+    let &$(r_ab,a) = add_bnfgen0(r_elt);
+    res = r_ab;
+    seq_a = a;
+  }
+
+  // Process remaining elements
+  while (rs){
+    let r_elt = rs->hd;
+    rs = rs->tl;
+
+    if (r_elt->v){ 
+      let &$(r_ab,a) = add_bnfgen0(r_elt);
+      let conv_r = new arule (NULL,NULL,r_elt->v,NULL,new Symb("ast2string",a));
+      res = SEQ(res,r_ab,conv_r);
+      seq_a = aprintf("new SeqPat(%s,%s)",seq_a,a);
+    } else {
+      let &$(r_ab,a) = add_bnfgen0(r_elt);
+      res = arule_inj(new Seq(res,r_ab));
+      seq_a = aprintf("new SeqPat(%s,%s)",seq_a,a);
+    }
+  }
+
+  return new $(res,seq_a);
+}
+
+static
+rule_t alt_add_bnfgen(const char? return_var, rule_t r){
   switch (r->r) {
-  case &Seq(r1,r2):
-    let &$(r1,a1) = add_bnfgen0(r1);
-    let &$(r2,a2) = add_bnfgen0(r2);
-    let a = aprintf("new SeqPat(%s,%s)",a1,a2);
-    let r_ab = SEQ_r(r,r1,r2); 
-    return new $(r_ab,a);
-  case &CharRange(min,max):
-    let r_s = mk_cs_bnfgen(r);
-    // "steal" the action from r_s.
-    let a = r_s->a;
-    r_s->a = NULL;
-    return new $(r_s,a);
-  case &Symb(_,_):
-    let fn = fresh_name();
-    // copy r and set a new name.
-    return new $(new arule(r->a, r->p, fn, r->css, r->r), fn);
-  case &Lit(s):
-    return new $(r, lit2pat(s));
+  case &Alt(r1,r2):
+    let r_ab = ALT_r(r,
+		     alt_add_bnfgen(return_var, r1),
+		     alt_add_bnfgen(return_var, r2));
+    return r_ab;
+
   default:
-    internal_err("Unexpected rule in add_bnfgen0:%s\n",pr_rule2string(r));
-    return new $(r,"ERR");
+    let &$(r_ab,a) = add_bnfgen0(r);
+    r_ab->a = aprintf("%s = %s;",return_var, a);
+    return r_ab;
   }
 }
 
+
+/*
 static
 rule_t alt_add_bnfgen(rule_t r){
   switch (r->r) {
@@ -300,14 +381,23 @@ rule_t alt_add_bnfgen(rule_t r){
     return r;
   }
 }
+*/
 
+/*
 static
 rule_t add_bnfgen(rule_t r){
   switch (r->r) {
   case &Seq(r1,r2):
     let &$(r1_ab,a1) = add_bnfgen0(r1);
-//     if (r1->v){
-      
+//     if (r1->v){ // Dependent sequence.
+//       let &$(bound_vars, r2_ab, a2) = depseq_add_bnfgen(r2);
+//       let fun_args = str_sepstr(bound_vars,new ',');
+//       let fun_name = fresh_suffix("hoas_fun");
+//       let fun_decl = aprintf("rule_pat_t %s(%s){return %s;}",fun_name, fun_args, a2);
+//       let a = aprintf("return new DepSeqPat(%s,%s<>);",a1,fun_name);
+//       let r_ab = SEQ_r(r,r1_ab,r2_ab); 
+//       r_ab->a = a;
+//       return $(List::list(new fun_decl),r_ab);
 //     }
     let &$(r2_ab,a2) = add_bnfgen0(r2);
     let a = aprintf("return new SeqPat(%s,%s);",a1,a2);
@@ -338,6 +428,11 @@ rule_t add_bnfgen(rule_t r){
     r_ab->a = aprintf("return pats2seq(List::imp_rev(%s));",fn);
     r_ab->v = strconcat("$",fn);
     return r_ab;
+//     // Use predicates to put these branches together. The question is
+//     // how to know that n depends on x (for some x).
+//     let &$(r1_ab,a1) = add_bnfgen0(r1);
+//     r1_ab->a = aprintf("return RepeatPat((%s),%s);",n,a1);
+//     return r1_ab;
 
   case &Star(m,N,r1):
     let fn = fresh_name();
@@ -368,7 +463,87 @@ rule_t add_bnfgen(rule_t r){
     return r;
   }
 }
+*/
 
+
+// invariant: For return value r', r'->a is not set, r'->v might be set, r'->p == r->p.
+static
+$(rule_t,const char ?) @add_bnfgen0(rule_t r){
+  switch (r->r) {
+  case &Seq(r1,r2):
+    return seq_add_bnfgen(r);
+
+  case &Opt(r1):
+    let fn = fresh_name();
+
+    let &$(r1_ab,a1) = add_bnfgen0(r1);
+    r1_ab->a = aprintf("%s = %s;",fn,a1);
+
+    let r_ab = OPT_r(r, r1_ab);
+    let a = aprintf("(%s ? (_ @)%s : new LitPat(\"\"))",fn,fn);
+    r_ab->v = strconcat("$",fn);
+
+    return new $(r_ab,a);
+
+  case &Alt(r1,r2):
+    // Add a $$ variable to the alt, then pass that variable name to alt_add_bnfgen.
+    // Inside, it will replace "return e;" with "%s = e;".
+    let fn = fresh_name();
+    let r_ab = ALT_r(r,
+		     alt_add_bnfgen(fn, r1),
+		     alt_add_bnfgen(fn, r2));
+    r_ab->v = strconcat("$",fn);
+
+    return new $(r_ab,fn);
+
+  case &Rcount(n,r1):
+    let fn = fresh_name();
+
+    let &$(r1_ab,a1) = add_bnfgen0(r1);
+    r1_ab->a = aprintf("%s = new List::List(%s,%s);",fn,a1,fn);
+
+    let r_ab = RCOUNT_r(r,n,r1_ab);
+    let a = aprintf("pats2seq(List::imp_rev(%s))",fn);
+    r_ab->v = strconcat("$",fn);
+
+    return new $(r_ab,a);
+
+  case &Star(m,N,r1):
+    let fn = fresh_name();
+
+    let &$(r1_ab,a1) = add_bnfgen0(r1);
+    r1_ab->a = aprintf("%s = new List::List(%s,%s);",fn,a1,fn);
+
+    let r_ab = STAR_r(r,m,N,r1_ab);
+    let a = aprintf("pats2seq(List::imp_rev(%s))",fn);
+    r_ab->v = strconcat("$",fn);
+
+    return new $(r_ab,a);
+
+  case &CharRange(min,max):
+    let r_s = mk_cs_bnfgen(r);
+    return new $(r_s,r_s->a);
+
+  case &Symb(_,_):
+    let fn = fresh_name();
+    // copy r and set a new name.
+    let r_s = new arule(r->a, r->p, fn, r->css, r->r);
+    return new $(r_s,fn);
+
+  case &Lit(s):
+    return new $(r, lit2pat(s));
+
+  default:
+    internal_err("Unexpected rule in add_bnfgen0:%s\n",pr_rule2string(r));
+    return new $(r,"ERR");
+  }
+}
+
+rule_t add_bnfgen(rule_t r){
+  let &$(r_ab,a) = add_bnfgen0(r);
+  r_ab->a = aprintf("return %s;",a);
+  return r_ab;
+}
 
 /////////////////////////////////////////////
 // Functions for deriving a BNF with binders 
@@ -439,7 +614,7 @@ static
 rule_t mk_bnfgen_binder (const char ?`H symb_name){
   let r_binder = LIT("%r"); // generic binder
   let r_binder_spec = SEQ(LIT("%"), LIT(symb_name)); // binder specific to this symbol.
-  let a = aprintf("return new WildcardPat(\"%s\");", symb_name);
+  let a = aprintf("return new BinderPat(\"%s\");", symb_name);
   r_binder->a = a;
   r_binder_spec->a = a;
   return include_anon_binder ? ALT(r_binder, r_binder_spec) : r_binder_spec;
@@ -648,9 +823,14 @@ rule_t mkterm_bnf(rule_t tag, rule_t args){
   }
 }
 
+bool is_dep_seq(rule_t r){
+  let rules = depseq2rules(r);
+  return rules->hd->v != NULL;
+}
+
 bool is_seq(rule_t r){
   switch(r->r){
-  case &Seq(_,_): return true;
+  case &Seq(_,_): return !is_dep_seq(r); // make sure not a dep. sequence.
   default: return false;
   }
 }
@@ -658,6 +838,7 @@ bool is_seq(rule_t r){
 grammar_t grammar2termgrammar_bnf(grammar_t g) {
   reset_globals();
   init_arityt(g);
+
   symb_semacts = Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr);
 
   grammar_t res = NULL,ds = g;

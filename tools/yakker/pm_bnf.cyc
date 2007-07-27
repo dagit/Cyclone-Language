@@ -38,7 +38,7 @@ ps_list pat2string0(ps_list ps, rule_pat_t p){
     let ps_sp = new List(new " ",ps1);
     let ps2 = pat2string0(ps_sp,p2);
     return ps2;
-  case &WildcardPat(x):
+  case &BinderPat(x):
     ps = new List(new "%r(",ps);
     ps = new List(new x, ps);
     ps = new List(new ")",ps);
@@ -62,7 +62,7 @@ rule_t pat2parse_rule(rule_pat_t p){
     return CHARRANGE(x,x);
   case &SeqPat(p1,p2):
     return SEQ(pat2parse_rule(p1),pat2parse_rule(p2));
-  case &WildcardPat(x):
+  case &BinderPat(x):
     let r = SYMB(x);
 
     let fn = fresh_name();
@@ -111,7 +111,7 @@ pat2print_code0(rule_pat_t p, ps_list ps, pc_args<`r1,`r2> args){
     let &$(ps1, args1) = pat2print_code0(p1, ps, args);
     return pat2print_code0(p2, ps1, args1);
 
-  case &WildcardPat(_):
+  case &BinderPat(_):
     // we can ignore the underlying symbol, for now, as we do no extra checking.
 
     ps = new List(new "%s",ps);
@@ -189,7 +189,7 @@ rule_pat_t unescape_pat0(rule_pat_t p){
     return new SeqPat(unescape_pat0(p1), unescape_pat0(p2));
   case &SymbPat(_):
   case &CharPat(_):
-  case &WildcardPat(_):
+  case &BinderPat(_):
     return p;
   }
 }
@@ -311,7 +311,19 @@ parse_with_pat0(ykbuf_t @`r ykb, Funtable::table_t parse_funs,
     args = parse_with_pat0(ykb,parse_funs,p1,args);
     args = parse_with_pat0(ykb,parse_funs,p2,args);
     return args;  
-  case &WildcardPat(x):
+//   case &RepeatPat(n,p1):
+//     for (int i=0; i<n; i++)
+//       args = parse_with_pat0(ykb,parse_funs,p1,args);
+//     return args;
+//   case &DepSeqPat(p1,f):
+//     let save = YKSAVE;
+//     args = parse_with_pat0(ykb,parse_funs,p1,args);    
+//     unsigned char ?@nozeroterm ykr = YKRESTORE(save);
+//     let x = substring((const char ?@nozeroterm)ykr,0,YKCURSOR-ykr);
+//     let p2 = Fn::apply(f,x);
+//     args = parse_with_pat0(ykb,parse_funs,p2,args);
+//     return args;
+  case &BinderPat(x):
     let save = YKSAVE;
     parse_sym(ykb,parse_funs,x);
     unsigned char ?@nozeroterm ykr = YKRESTORE(save);

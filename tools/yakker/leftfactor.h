@@ -16,26 +16,8 @@
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
 
-#include <core.h>
-#include <hashtable.h>
-#include <string.h>
-#include "util.h"
-#include "funtable.h"
-
-namespace Funtable {
-
-table_t create(int sz){
-  return Hashtable::create(sz,strptrcmp,Hashtable::hash_stringptr);
-}
-
-void insert(table_t ft, const char ?`H name, parse_fun f){
-  Hashtable::insert(ft, new name, f<>);
-}
-
-parse_fun lookup(table_t ft, const char ?`H name){
-  int foo(int x){return x+1;}
-  let y = foo(2);
-  return (Hashtable::lookup(ft, new name))<>;
-}
-
-}
+#ifndef LEFTFACTOR_H
+#define LEFTFACTOR_H
+#include "bnf.h"
+grammar_t left_factor_grammar(grammar_t g);
+#endif
