@@ -1036,6 +1036,33 @@ st_t mk_lazy_lit(const char ?x) {
 
 Lazy Construction of NFAs in the Presence of Cycles.
 
+First, some motivation. These grammars cause a problem in the previous
+algorithm because they modify states that have already been visited,
+causeing problems. For eager, the NFA is final before the
+determinization algorithm looks at it, which isn't true for lazy. For
+example, consider these grammars:
+
+yakker$ cat bar.bnf
+g = "z" | f.
+f = "x" g.
+h = "c" f "h".
+i = "c" f "i".
+
+yakker$ cat foo.bnf
+f = "x".
+h = "c" f "h".
+i = "c" f "i".
+
+foo = (f "m" h) | (f "m" i).
+
+
+The second demonstrates the problem when you use -no-expand for
+non-recursive definitions. That forces yakker to reuse NFA definitions
+for non-recursive elements the same way we do for recursive ones,
+thereby evoking the same behaviour.
+
+Solution:
+
 Cycles in the CFG result in the need to mutate existing states during
 the lazy construction. These mutations imply that the value of certain
 states does not remain the same throughout the lifetime of the

@@ -25,11 +25,6 @@ CYCBISON=$(BINDIR)/cycbison
 CYCLEX=$(BINDIR)/cyclex
 STRINGIFY=$(BINDIR)/stringify
 
-# Tell make to search for generated files in the gen directory.
-vpath %.bnf $(GENDIR)
-vpath %.h $(GENDIR)
-vpath %.cyc $(GENDIR)
-
 YAKKER_FILES = analyze axarray bnf cs extract fa nfa_lazy nfa_eager leftfactor flatten termgrammar lex pads \
   parse_tab parsergen pr prose prose_elim_grm string_dfa_engine1 \
   string_dfa_engine2_1 corerules corerules_grm \
