@@ -13,7 +13,7 @@ PROG=yakker$(EXE)
 PROG_DEP= $(PROG)
 
 # build directory.
-BUILDDIR=.build
+BUILDDIR=build
 GENDIR=gen
 BNFDIR=$(GENDIR)
 BINDIR=$(CYCDIR)/bin
