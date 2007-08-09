@@ -181,7 +181,7 @@ st_t mklit(const char ?x) { /* A bit more space efficient than looping mkact */
 
 // This turns up so often we only want to warn once
 static int already_warn_repeat = 0;
-static void warn_repeat() {
+void warn_repeat() {
   if (already_warn_repeat) return;
   already_warn_repeat++;
   warn("using an approximation for @repeat in rule2nfa\n");

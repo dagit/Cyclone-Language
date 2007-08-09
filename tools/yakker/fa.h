@@ -39,10 +39,21 @@ extern unsigned int num_conflicts_change_order;
 extern unsigned int num_conflicts_resolved;
 extern unsigned int num_conflicts_unresolved;
 extern unsigned int num_conflicts_unbounded;
+typedef unsigned int att_t;  // Attributes
+typedef Set::set_t<att_t> aset_t;
 extern struct DFA;
 typedef struct DFA @dfa_t;
+st_t target(dfa_t dfa,st_t s,act_t a);
+extern Set::set_t<st_t> dfa_final_states(dfa_t dfa);
+extern void dfa_set_final(dfa_t dfa, st_t final, aset_t attrs);
+extern dfa_t nfa2dfa(st_t start_state, Set::set_t<st_t,`H> final_states);
+extern int dfa_is_final(dfa_t dfa,st_t s);
+extern aset_t dfa_final_attrs(dfa_t dfa,st_t s);
 extern dfa_t lookahead_dfa(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt);
 extern void dfa_generate1(dfa_t dfa);
 extern void dfa_generate2(dfa_t dfa);
 extern void lookahead_glush(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt);
+extern void nfa_dot(FILE @f,Set::set_t<st_t> final_states);
+extern void dfa_dot(FILE @f, dfa_t dfa);
+extern dfa_t dfa_minimize(dfa_t dfa);
 #endif

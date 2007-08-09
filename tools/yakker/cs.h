@@ -23,21 +23,21 @@
 extern void cs_intersect(cs_t a,cs_t b);
 extern void cs_union(cs_t a,cs_t b);
 extern void cs_xor(cs_t a,cs_t b);
-extern void cs_insert(cs_t a,unsigned char x);
+extern void cs_insert(cs_t a,unsigned int x);
 extern void cs_difference(cs_t a,cs_t b);
 extern void cs_complement(cs_t a);
 extern cs_t cs_dup(cs_t a);
 extern cs_t cs_empty();
 extern cs_t cs_full();
-extern cs_t cs_singleton(unsigned char x);
+extern cs_t cs_singleton(unsigned int x);
 extern cs_t cs_range(unsigned int lb, unsigned int ub); /* half-open interval [lb,ub) */
-extern $(unsigned char,unsigned char) cs_bounds(cs_t rng);
+extern $(unsigned int,unsigned int) cs_bounds(cs_t rng);
 extern void cs_print(FILE @f,cs_t rng);
 // print cs in format suitable for Graphviz
 extern void cs_dot_print(FILE @f,cs_t cs);
 extern const char ?cs2string(cs_t rng);
 extern cs_t string2cs(const char ?s);
-extern int cs_member(cs_t a,unsigned char c);
+extern int cs_member(cs_t a,unsigned int c);
 extern int is_cs(rule_t r);
 extern cs_t rule2cs(rule_t r);
 extern int is_cs_empty(cs_t a);
@@ -48,6 +48,7 @@ extern struct grammar @cs_annot(grammar_t<`H> ds);
 // convert all rules marked as css into actual css.
 extern void cs_optimize(grammar_t<`H> ds);
 extern void minus_elim(grammar_t<`H> ds);
+extern const char ?cs_char_escape(unsigned int c);
 extern const char ?fsm_char_escape(unsigned int c);
 extern List::list_t<$(unsigned int,unsigned int)@> cs2ranges(cs_t a);
 extern rule_t cs2rule(cs_t rng);

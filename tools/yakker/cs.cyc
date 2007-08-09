@@ -65,7 +65,7 @@ void cs_xor(cs_t a,cs_t b) {
   for (let i = 0; i < BUCKETS; i++)
     a[i] ^= b[i];
 }
-void cs_insert(cs_t a,unsigned char x) { /* Note, have to change for Unicode */
+void cs_insert(cs_t a,unsigned int x) { /* Note, have to change for Unicode */
   if (x > MAXCSCHAR) {
     eprintf("character sets can't hold large character %u\n",x);
     return;
@@ -86,7 +86,7 @@ cs_t cs_dup(cs_t a) {
 cs_t cs_empty() {
   return new {for i<BUCKETS: (unsigned char)0};
 }
-cs_t cs_singleton(unsigned char x) {
+cs_t cs_singleton(unsigned int x) {
   let r = cs_empty();
   cs_insert(r,x);
   return r;
@@ -98,32 +98,32 @@ cs_t cs_full() {
 cs_t cs_range(unsigned int lb, unsigned int ub) {
   let r = cs_empty();
   for (; lb < ub; lb++) {
-    cs_insert(r,(unsigned char)lb);
+    cs_insert(r,lb);
   }
   return r;
 }
-int cs_member(cs_t a,unsigned char c) {
+int cs_member(cs_t a,unsigned int c) {
   return (a[c/8] & (1<<(c%8))) != 0;
 }
 /* Returns correct bounds IF cs not empty */
-$(unsigned char,unsigned char) cs_bounds(cs_t rng) {
+$(unsigned int,unsigned int) cs_bounds(cs_t rng) {
   unsigned int min = MAXCSCHAR;
   unsigned int max = 0;
   for (unsigned int i = 0; i <= MAXCSCHAR; i++) {
-    if (!cs_member(rng,(unsigned char)i)) continue;
+    if (!cs_member(rng,i)) continue;
     min = i;
     max = i;
     break;
   }
   for (unsigned int i = MAXCSCHAR; i >min; i--) {
-    if (!cs_member(rng,(unsigned char)i)) continue;
+    if (!cs_member(rng,i)) continue;
     max = i;
     break;
   }
-  return $((unsigned char)min,(unsigned char)max);
+  return $(min,max);
 }
 
-static const char ?cs_char_escape(unsigned int c) {
+const char ?cs_char_escape(unsigned int c) {
   if (isprint(c) && c != ' ' && c != ',' && c != '-')
     return aprintf("%c",(unsigned char)c);
   else return aprintf("0x%x",c);
@@ -159,7 +159,7 @@ const char ?cs2string(cs_t rng) {
   int first_print = 1;
   unsigned int left_edge = 0;
   for (unsigned int i = 0; i <= MAXCSCHAR; i++) {
-    if (state != cs_member(rng,(unsigned char)i)) {
+    if (state != cs_member(rng,i)) {
       if (!state) left_edge = i;
       else {
 	if (!first_print) Buffer::add_char(b,','); else first_print = 0;
@@ -453,7 +453,7 @@ List::list_t<$(unsigned int,unsigned int)@> cs2ranges(cs_t a) {
   unsigned int lb = 0;
   let result = NULL;
   for (unsigned int i = 0; i < MAXCSCHAR+1; i++) {
-    if (cs_member(a,(unsigned char)i)) {
+    if (cs_member(a,i)) {
       if (!in_range) {
         empty_so_far = 0;
         lb = i;
@@ -474,7 +474,7 @@ List::list_t<$(unsigned int,unsigned int)@> cs2ranges(cs_t a) {
 List::list_t<unsigned int> cs2list(cs_t rng) {
   List::list_t<unsigned int> chars = NULL;
   for (unsigned int i = 0; i <= MAXCSCHAR; i++) {
-    if (cs_member(rng,(unsigned char)i))
+    if (cs_member(rng,i))
       chars = new List::List(i,chars);
   }
   return List::rev(chars);

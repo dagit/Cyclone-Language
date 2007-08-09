@@ -104,7 +104,7 @@ unsigned int what_interval(unsigned int ?intervals, unsigned int key) {
 //}
 /* Print out an NFA in DOT format, for display by Graphviz */
 void nfa_dot(FILE @f,Set::set_t<st_t> final_states) {
-  fprintf(f,"digraph {\n");
+  fprintf(f,"digraph g {\n");
   fprintf(f,"rankdir=LR;\n");
   for (let i = 1; i < nfa_number_of_states; i++) {
     fprintf(f,"%u [ shape = \"%s\"];\n",
@@ -475,11 +475,9 @@ lookahead_glush(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt) {
   us about ambiguities.
 */
 
-typedef unsigned int att_t;  // Attributes
 static void att_print(FILE @f, att_t a) {
   fprintf(f,"%u",a);
 }
-typedef Set::set_t<att_t> aset_t;
 static int att_hash(att_t a) { return (int)a; }
 static int att_cmp(att_t a,att_t b) { return Core::intcmp((int)a,(int)b); }
 aset_t aset_empty() {
@@ -533,6 +531,15 @@ struct DFA {
   unsigned int ?ranges;
   unsigned int number_of_actions; // numelts(ranges)-1
 };
+int dfa_is_final(dfa_t dfa,st_t s) {
+  return Set::member(dfa->final_states,s);
+}
+Set::set_t<st_t> dfa_final_states(dfa_t dfa) {
+  return dfa->final_states;
+}
+aset_t dfa_final_attrs(dfa_t dfa,st_t s) {
+  return Hashtable::lookup(dfa->final_attrs,s);
+}
 st_t target(dfa_t dfa,st_t s,act_t a) {
   let t = Axarray::get(dfa->states,s);
   if (!t) return 0; /* target is the dead state */
@@ -540,7 +547,8 @@ st_t target(dfa_t dfa,st_t s,act_t a) {
   for (let sp = t->spans; sp; sp = sp->tl)
     if (a < sp->hd->ub) return sp->hd->target;
   /* Should never get here */
-  internal_err("no target for action %u in state %u\n",a,s);
+  // We now use target() sometimes when we do not expect a target
+  // internal_err("no target for action %u in state %u\n",a,s);
   return 0;
 }
 dfa_t dfa_create() {
@@ -618,6 +626,15 @@ void dfa_add_final(dfa_t dfa, st_t final, aset_t attrs) {
     Hashtable::insert(dfa->final_attrs,final,attrs);
   dfa->final_states = Set::insert(dfa->final_states,final);
 }
+void dfa_set_final(dfa_t dfa, st_t final, aset_t attrs) {
+  // NB: we allow marking a state final with empty attrs
+  aset_t *att_opt = Hashtable::lookup_opt(dfa->final_attrs,final);
+  if (att_opt) {
+    Hashtable::remove(dfa->final_attrs,final);
+  }
+  Hashtable::insert(dfa->final_attrs,final,attrs);
+  dfa->final_states = Set::insert(dfa->final_states,final);
+}
 void dfa_print(dfa_t dfa) {
   let len = dfa->number_of_states;
   if (len == 1) eprintf("There is 1 state\n");
@@ -664,20 +681,24 @@ void dfa_print(dfa_t dfa) {
 }
 /* Print the graph in dot format, for display by GraphViz */
 void dfa_dot(FILE @f, dfa_t dfa) {
-  fprintf(f,"digraph {\n");
+  fprintf(f,"digraph g {\n");
   let len = dfa->number_of_states;
   /* print nodes */
   for (let i = 1; i < len; i++) { /* Don't bother printing dead state 0 */
     if (Set::member(dfa->final_states,i)) {
       fprintf(f,"%u [ label = \"%u (",i,i);
-      let x = Hashtable::lookup(dfa->final_attrs,i);
-      let y = Set::choose(x);
-      x = Set::delete(x,y);
-      fprintf(f,"%u",y);
-      while (!Set::is_empty(x)) {
-	y = Set::choose(x);
-	x = Set::delete(x,y);
-	fprintf(f,",%u",y);
+      try {
+        let x = Hashtable::lookup(dfa->final_attrs,i);
+        let y = Set::choose(x);
+        x = Set::delete(x,y);
+        fprintf(f,"%u",y);
+        while (!Set::is_empty(x)) {
+          y = Set::choose(x);
+          x = Set::delete(x,y);
+          fprintf(f,",%u",y);
+        }
+      } catch {
+      default: break; // Set::choose() fails for final state w/o attributes
       }
       fprintf(f,")\" shape = \"doublecircle\"];\n");
     }
@@ -1081,7 +1102,7 @@ static $(act_t,nstate_t ?) transitions(nstate_t n) {
   for (let i = lb; i <= ub; i++) {
     for (let t = ts; t; t = t->tl) {
       let &$(act,target) = t->hd;
-      if (!cs_member(act,(unsigned char)i)) continue;
+      if (!cs_member(act,i)) continue;
       targets[i-lb] = nstate_insert(targets[i-lb],target);
     }
   }

@@ -316,7 +316,7 @@ static st_t mk_lazy_sym(rule_t r, branch_id_t b_id) {
 
 // This turns up so often we only want to warn once
 static int already_warn_repeat = 0;
-static void warn_repeat() {
+void warn_repeat() {
   if (already_warn_repeat) return;
   already_warn_repeat++;
   warn("using an approximation for @repeat in rule2nfa_thunk\n");

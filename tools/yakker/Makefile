@@ -28,7 +28,7 @@ STRINGIFY=$(BINDIR)/stringify
 YAKKER_FILES = analyze axarray bnf cs extract fa nfa_lazy nfa_eager leftfactor flatten termgrammar lex pads \
   parse_tab parsergen pr prose prose_elim_grm string_dfa_engine1 \
   string_dfa_engine2_1 corerules corerules_grm \
-  util namespaces yakker
+  util namespaces earley yakker
 
 FILES=$(YAKKER_FILES) ast_main pm_bnf imap_scanf funtable
 
@@ -100,7 +100,8 @@ imapp.o: examples/imapp.cyc
 
 #	$(CYCLONE) $^ -o $@ /Users/yitzhakm/projects/cyclone/otherlibs/sqlite3/libsqlite3.a -lpthread -lssl -lcrypto
 imapserver: imapserver.o imap_scanf.o pm_bnf.o bnf.o lex.o parse_tab.o util.o funtable.o imap_genpm.o ykbuf.o ssl.o imap.o
-	$(CYCLONE) $^ -o $(BUILDDIR)/$@ /Users/yitzhakm/projects/cyclone/otherlibs/sqlite3/libsqlite3.a -lpthread -lssl -lcrypto
+#	$(CYCLONE) $^ -o $(BUILDDIR)/$@ /Users/yitzhakm/projects/cyclone/otherlibs/sqlite3/libsqlite3.a -lpthread -lssl -lcrypto
+	$(CYCLONE) $^ -o $(BUILDDIR)/$@ -lsqlite3 -lpthread -lssl -lcrypto
 
 imapserver.o: $(EXDIR)/imapserver.cyc
 	$(CYCLONE) -c $^ -o $(BUILDDIR)/$@ -I.
@@ -258,7 +259,8 @@ corerules_grm.cyc: corerules_grm.bnf
 ###############################################################################
 
 $(BUILDDIR)/%.d: %.cyc
-	$(CYCLONE) -M -MG $< > $@
+	echo -n "$(BUILDDIR)/" > $@
+	$(CYCLONE) -M -MG $< >> $@
 
 .PHONY: depend
 
@@ -406,8 +408,12 @@ $(BNFDIR)/rfc2234.bnf: rfc2234.txt $(PROG_DEP)
 	echo 'char-val = DQUOTE *(%x20-21 / %x23-7E) DQUOTE.' >> $@
 	echo 'prose-val = "<" *(%x20-3D / %x3F-7E) ">".' >> $@
 
+# TEMPORARY: CFWS blows up lookahead construction
+# TEMPORARY: FWS blows up lookahead construction
 $(BNFDIR)/rfc2822.bnf: rfc2822.txt $(PROG_DEP)
-	./yakker -extract $< >$@
+	./yakker -extract $< -omit CFWS FWS >$@
+	echo 'CFWS = SP.' >> $@
+	echo 'FWS = SP.' >> $@
 	echo 'dtext = NO-WS-CTL / %d33-90 / %d94-126.' >> $@
 	echo 'qtext = NO-WS-CTL / %d33 / %d35-91 / %d93-126.' >> $@
 	echo 'ctext = NO-WS-CTL / %d33-39 / %d42-91 / %d93-126.' >> $@

@@ -44,8 +44,10 @@ datatype Rule {
   Minus(rule_t,rule_t);
 };
 /* Character sets -- a cs is a set of 8-bit characters */
-#define BUCKETS 32
-#define MAXCSCHAR 255
+// #define BUCKETS 32
+// #define MAXCSCHAR 255
+#define BUCKETS 33
+#define MAXCSCHAR 263
 typedef unsigned char @{BUCKETS}@nozeroterm cs_t;
 typedef unsigned char *{BUCKETS}@nozeroterm cs_opt_t;
 

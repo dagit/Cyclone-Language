@@ -24,18 +24,18 @@
 /* The Nfa_eager and Nfa_lazy namespaces should have the same declarations */
 namespace Nfa_lazy {
 
-void nfa_init(grammar_t grm);
+extern void nfa_init(grammar_t grm);
 
-st_t nfa_fresh_state();
+extern st_t nfa_fresh_state();
 
-st_t get_final(st_t a);
-st_t get_etrans(st_t a);
-cs_opt_t get_action(st_t a);
-st_t get_atrans(st_t a);
+extern st_t get_final(st_t a);
+extern st_t get_etrans(st_t a);
+extern cs_opt_t get_action(st_t a);
+extern st_t get_atrans(st_t a);
 
-st_t rule2nfa(grammar_t grm, rule_t r);
+extern st_t rule2nfa(grammar_t grm, rule_t r);
 
-unsigned int what_interval(unsigned int ?intervals, unsigned int key);
+extern unsigned int what_interval(unsigned int ?intervals, unsigned int key);
 
 }
 
