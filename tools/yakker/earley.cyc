@@ -1,0 +1,308 @@
+/* (So far incomplete) Earley parser */
+
+#include <string.h>
+#include <core.h>
+#include "bnf.h"
+#include "fa.h"
+#include "axarray.h"
+#include "cs.h"
+#include "analyze.h"
+
+#include "nfa_eager.h"
+using Nfa_eager;
+
+namespace Earley;
+
+/* The alphabet of the automaton is the set of terminals and
+   non-terminals.  Assume for now that cs_t can represent a set of
+   terminals and non-terminals.  Number our new actions starting
+   at 256. */
+
+static unsigned int symb_action_counter = 257;
+static struct Hashtable::Table<str_t,act_t> *symb_action_table = NULL;
+static act_t callout_action() {
+  return 256;
+}
+static cs_t callout_cs() {
+  return cs_singleton(callout_action());
+}
+static act_t consume_symb_action(const char ?`H symb) {
+  if (symb_action_table == NULL)
+    symb_action_table =
+      Hashtable::create(11,strptrcmp,Hashtable::hash_stringptr);
+  let symbptr = new symb;
+  let aptr = Hashtable::lookup_opt(symb_action_table,symbptr);
+  if (aptr != NULL) return *aptr;
+  let a = symb_action_counter++;
+  fprintf(stderr,"Symbol %s has action 0x%x\n",symb,a);
+  Hashtable::insert((_@)symb_action_table,symbptr,a);
+  return a;
+}
+static cs_t consume_symb_cs(const char ?`H symb) {
+  return cs_singleton(consume_symb_action(symb));
+}
+
+/* An automaton state and parent pointer */
+typedef $(st_t,unsigned int) @earley_item_t;
+typedef $(st_t,unsigned int) *earley_item_opt_t;
+
+static int earley_item_cmp(earley_item_t a,earley_item_t b) {
+  let $(ai,aj) = *a;
+  let $(bi,bj) = *b;
+  let c = Core::intcmp(ai,bi);
+  if (c) return c;
+  return Core::intcmp(aj,bj);
+}
+
+static int earley_item_hash(earley_item_t a) {
+  let $(ai,aj) = *a;
+  /* Both ai and aj are ints starting at 0, ai maxes out at the
+     number of states, aj maxes out at the input length.
+     TODO: see what typical sizes are for these and adjust the
+     hash function accordingly.
+  */
+  return (aj << 16) ^ ai;
+}
+
+typedef Set::set_t<earley_item_t> earley_state_t;
+
+/* Create the control NFA for Earley parsing.
+   The rule specifies what to parse.
+   Symbols from the grammar will be used if needed, otherwise ignored.
+   The symb_st table maps used symbols to states and should be
+   initialized to the empty table.
+   On return the table will hold mappings for all symbols encountered.
+   */
+st_t rule2earley0(Hashtable::table_t<str_t,st_t> symb_st,
+                  grammar_t grm,
+                  rule_t r) {
+  switch (r->r) {
+  case &Symb(x,_):
+    let xptr = new x;
+    st_t x_start; /* start state of the NFA for the symbol */
+    if (!Hashtable::try_lookup(symb_st,xptr,&x_start)) {
+      /* Symbol has not been converted to NFA yet */
+      Rule_t x_rule = lookup_symbol(grm, x);
+      if (!x_rule) {
+	warn("missing definition for %s in rule2earley()\n",x);
+	return mklit("");
+      }
+      /* Allocate a start state for the symbol.  Do this before
+         converting to NFA in case the symbol is defined recursively. */
+      let s = nfa_fresh_state(); let f = nfa_fresh_state(); final(s,f);
+      Hashtable::insert(symb_st,xptr,s);
+      let s_body = rule2earley0(symb_st,grm,x_rule);
+      etrans(s,s_body);
+      etrans(get_final(s_body),f);
+      x_start = s;
+    }
+    let s = nfa_fresh_state();
+    let s2 = nfa_fresh_state();
+    let f = nfa_fresh_state(); final(s,f);
+    action(s,callout_cs(),x_start);
+    etrans(s,s2);
+    action(s2,consume_symb_cs(x),f);
+    return s;
+  case &Lit(x):
+    return mklit(x);
+  case &CharRange(low,high):
+    if (low > high) {
+      internal_err("invalid character range in rule2earley()\n");
+      return mklit("");
+    }
+    return mkact(cs_range(low,high+1));
+  case &Opt(r2):
+    let s2 = rule2earley0(symb_st,grm,r2); let s3 = mklit("");
+    return mkalt(s2,s3);
+  case &Seq(r2,r3):
+    let s2 = rule2earley0(symb_st,grm,r2); let s3 = rule2earley0(symb_st,grm,r3);
+    return mkseq(s2,s3);
+  case &Alt(r2,r3):
+    let s2 = rule2earley0(symb_st,grm,r2); let s3 = rule2earley0(symb_st,grm,r3);
+    return mkalt(s2,s3);
+  case &Rcount(_,r2):
+    /* Conservative approximation */
+    warn_repeat();
+    fallthru(r2);
+  case &Star(0,&Infinity,r2):
+    let s2 = rule2earley0(symb_st,grm,r2);
+    return mkstar(s2);
+  case &Star(m,i as &Infinity,r2):
+    let r_seq = SEQ(r2,STAR(m-1,i,r2));
+    return rule2earley0(symb_st,grm,r_seq);
+  case &Star(0,&Num(0),r2):
+    return mklit("");
+
+  case &Star(0,&Num(n),r2):
+    let r_opt = OPT(SEQ(r2,STAR(0, new Num(n-1),r2)));
+    return rule2earley0(symb_st,grm,r_opt);
+  case &Star(m,&Num(n),r2):
+    if (m > n) return mklit("");
+    let r_seq = SEQ(r2,STAR(m-1, new Num(n-1),r2));
+    return rule2earley0(symb_st,grm, r_seq);
+
+  case &Hash(0,N,r2):
+    // same as [ r2 *{N-1}(commas r2) ]
+    return rule2earley0(symb_st,grm,
+                        OPT(SEQ(r2,STAR(0,minus_one(N),SEQ(commas(),r2)))));
+  case &Hash(m,N,r2):
+    // same as r2 {m-1}*{N-1}(commas r2)
+    return rule2earley0(symb_st,grm,
+                        SEQ(r2,STAR(m-1,minus_one(N),SEQ(commas(),r2))));
+  case &Prose(_):
+    warn("Prose not supported in rule2earley()\n");
+    return mklit("");
+  case &Minus(_,_):
+    warn("Minus not supported in rule2earley()\n");
+    return mklit("");
+  }
+}
+
+$(dfa_t,Set::set_t<st_t>) rule2earley(grammar_t grm, rule_t r) {
+  nfa_init(grm);
+  Hashtable::table_t<str_t,st_t> symb_st =
+    Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr);
+  let start_state = rule2earley0(symb_st,grm,r);
+  let final_state = get_final(start_state); /* final state for r */
+  fprintf(stderr,"Start state is %d, final state is %d\n",start_state,final_state);
+  /* Collect set of final states for symbols */
+  let symb_final_states = Set::empty(st_cmp);
+  let act_table = Hashtable::create(11,st_cmp,st_hash); // should be act_cmp
+  for (let rules = grm; rules != NULL; rules = rules->tl) {
+    let &$(symb,_,_) = rules->hd;
+    let st_opt = Hashtable::lookup_opt(symb_st,new symb);
+    if (!st_opt) continue;
+    let symb_final = get_final(*st_opt);
+    fprintf(stderr,"Symbol %s start is %d final is %d\n",symb,*st_opt,symb_final);
+    symb_final_states = Set::insert(symb_final_states,symb_final);
+    Hashtable::insert(act_table,
+                      symb_final,
+                      consume_symb_action(symb));
+  }
+  nfa_dot(stderr,Set::insert(symb_final_states,final_state));
+  let dfa = nfa2dfa(start_state,
+                    Set::insert(symb_final_states,final_state));
+  dfa = dfa_minimize(dfa);
+  let dfa_final = Set::empty(st_cmp);
+  /* Final states in the DFA have as attributes the set of corresponding
+     NFA final states.  Map these to the correct consume_symb_action() */
+  for (let states = Set::to_list(dfa_final_states(dfa));
+       states != NULL; states = states->tl) {
+    let s = states->hd;
+    let action_attrs = Set::empty(st_cmp); // should be attr_cmp
+    for (let s_attrs = Set::to_list(dfa_final_attrs(dfa,s));
+         s_attrs != NULL; s_attrs = s_attrs->tl) {
+      let a = s_attrs->hd;
+      if (a == final_state) {
+        dfa_final = Set::insert(dfa_final,s);
+        // final_state of the original rule r does not correspond to
+        // the parsing of a symbol hence does not return.  So we do not
+        // want it in the attributes which indicate what symbols are
+        // returning.
+        continue;
+      }
+      let act = Hashtable::lookup(act_table,a);
+      action_attrs = Set::insert(action_attrs,act);
+    }
+    dfa_set_final(dfa,s,action_attrs);
+  }
+  return $(dfa,dfa_final);
+}
+
+/* Add an item to an Earley state.
+   If the item has an automaton state that transitions to another state
+   by epsilon, add items for those states too.
+   Epsilons may be for CALLS to parse non-terminals or
+   RETURNS from parsing non-terminals.
+ */
+void
+push_closure(dfa_t dfa,
+             Axarray::xarray_t<earley_state_t> estates,
+             unsigned int i,
+             earley_item_t ei,
+             const char ?reason) {
+
+  let es = Axarray::get(estates,i);
+  if (Set::member(es,ei)) return;
+  fprintf(stderr,"estates[%d] += (%d,%d) %s\n",i,ei->f0,ei->f1,reason);fflush(stderr);
+  Axarray::set(estates,i,Set::insert(es,ei));
+
+  let &$(s,backptr) = ei;
+
+  /* Close under CALLS */
+  let t = target(dfa,s,callout_action());
+  if (t != 0)
+    push_closure(dfa,estates,i,new $(t,i),"(call)");
+
+  /* Close under RETURNS */
+  if (dfa_is_final(dfa,s)) {
+    /* Some symbol is completed.
+       es_back is the Earley state that CALLed the symbol. */
+    let es_back = Axarray::get(estates,backptr);
+
+    /* For every completed symbol... */
+    for (let completed = Set::to_list(dfa_final_attrs(dfa,s));
+         completed != NULL; completed = completed->tl) {
+      let symb = completed->hd;
+
+      /* ... look at every DFA state in es_back... */
+      for (let es_back_list = Set::to_list(es_back);
+           es_back_list != NULL;
+           es_back_list = es_back_list->tl) {
+
+        let &$(t,tbackptr) = es_back_list->hd;
+        let ttarget = target(dfa,t,symb);
+        /* ... see if the DFA state did a CALL and RETURN if so. */
+        if (ttarget != 0)
+          push_closure(dfa,estates,i,new $(ttarget,tbackptr),
+                       aprintf("(return 0x%x)",symb));
+      }
+    }
+  }
+}
+
+/* Earley recognizer.
+   Returns 1 if input is recognizes, 0 otherwise.
+ */
+int recognize(grammar_t grm, rule_t r,const char ?input) {
+  init_maybe_empty(grm);
+  let $(dfa,dfa_final) = rule2earley(grm,r);
+  dfa_dot(stderr,dfa);
+  fflush(stderr);
+
+  /* Initialize the sequence of Earley states with s0 */
+  let estates = /* Earley states  s0, s1, s2, ... */
+    Axarray::create(12,Set::empty(earley_item_cmp));
+  let earley_item_0 = new $(1,0); // 1 is initial state of dfa, 0 is i in si
+  push_closure(dfa,estates,0,earley_item_0,"(initial)");
+               
+  /* Scan the input */
+  let input_len = strlen(input);
+  for (let i = 0; i < input_len; i++) {
+    fprintf(stderr,"input[%d]==%s\n",i,cs_char_escape(input[i]));fflush(stderr);
+    for (let si_list = Set::to_list(Axarray::get(estates,i));
+         si_list != NULL;
+         si_list = si_list->tl) {
+
+      let &$(state,parent) = si_list->hd;
+      let k = target(dfa,state,input[i]);
+      if (k != 0)
+        push_closure(dfa,estates,i+1,new $(k,parent),"(input)");
+    }
+  }
+
+  /* See if we ended up in a final state */
+  fprintf(stderr,"Looking in estates[%d] for:",input_len);
+  for (let fs = Set::to_list(dfa_final); fs != NULL; fs = fs->tl)
+    fprintf(stderr," (%d,0)",fs->hd);
+  fprintf(stderr,"\n");fflush(stderr);
+
+  for (let slast_list = Set::to_list(Axarray::get(estates,input_len));
+       slast_list != NULL;
+       slast_list = slast_list->tl) {
+      let &$(state,parent) = slast_list->hd;
+      if (Set::member(dfa_final,state) && parent == 0)
+        return 1;
+  }
+  return 0;
+}

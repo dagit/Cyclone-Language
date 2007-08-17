@@ -22,6 +22,10 @@
 #include "cs.h"
 #include <string.h>
 #include <ctype.h>
+#include "util.h"
+
+/* TODO: Someday calculate this dynamically */
+#define MAXCSCHAR MAXACTION
 
 int is_cs_empty(cs_t a) {
   for (let i = 0; i < BUCKETS; i++)
@@ -30,7 +34,7 @@ int is_cs_empty(cs_t a) {
 }
 int is_cs_full(cs_t a) {
   for (let i = 0; i < BUCKETS; i++)
-    if (a[i] != 255) return 0;
+    if (a[i] != 0xff) return 0;
   return 1;
 }
 int is_cs_singleton(cs_t a) {
@@ -105,7 +109,7 @@ cs_t cs_range(unsigned int lb, unsigned int ub) {
 int cs_member(cs_t a,unsigned int c) {
   return (a[c/8] & (1<<(c%8))) != 0;
 }
-/* Returns correct bounds IF cs not empty */
+/* Returns correct bounds IF cs not empty. */
 $(unsigned int,unsigned int) cs_bounds(cs_t rng) {
   unsigned int min = MAXCSCHAR;
   unsigned int max = 0;
@@ -141,56 +145,38 @@ const char ?fsm_char_escape(unsigned int c) {
     return aprintf("\\'");
   case '"':
     return aprintf("\\\"");
-  default:  
+  default:
     if (isprint(c))
       return aprintf("%c",(unsigned char)c);
-    else 
+    else
       return aprintf("\\%03u",c);
   }
 }
 
 #include <buffer.h>
 
+/* Return a string representation of a character set. */
 const char ?cs2string(cs_t rng) {
-  if (is_cs_empty(rng)) return "<EMPTY>";
+  let ranges = cs2ranges(rng);
+  if (ranges == NULL) return "<EMPTY>";
 
   let b = Buffer::create(32);
-  int state = 0;
-  int first_print = 1;
-  unsigned int left_edge = 0;
-  for (unsigned int i = 0; i <= MAXCSCHAR; i++) {
-    if (state != cs_member(rng,i)) {
-      if (!state) left_edge = i;
-      else {
-	if (!first_print) Buffer::add_char(b,','); else first_print = 0;
-	if (left_edge == i-1) Buffer::add_string(b,cs_char_escape(left_edge));
-	else if (left_edge == i-2) {
-          Buffer::add_string(b,cs_char_escape(left_edge));
-          Buffer::add_char(b,',');
-          Buffer::add_string(b,cs_char_escape(i-1));
-        }
-	else {
-          Buffer::add_string(b,cs_char_escape(left_edge));
-          Buffer::add_char(b,'-');
-          Buffer::add_string(b,cs_char_escape(i-1));
-        }
-      }
-      state = !state;
-    }
-  }
-  if (state) {
-    if (!first_print) Buffer::add_char(b,',');
-    if (left_edge == 255) Buffer::add_string(b,cs_char_escape(255));
-    else if (left_edge == 254) {
-      Buffer::add_string(b,cs_char_escape(left_edge));
+  for (; ranges != NULL; ranges = ranges->tl) {
+    let &$(lb,ub) = ranges->hd; // [lb,ub)
+    if (lb+1 == ub)
+      Buffer::add_string(b,cs_char_escape(lb));
+    else if (lb+2 == ub) {
+      Buffer::add_string(b,cs_char_escape(lb));
       Buffer::add_char(b,',');
-      Buffer::add_string(b,cs_char_escape(255));
+      Buffer::add_string(b,cs_char_escape(ub-1));
     }
     else {
-      Buffer::add_string(b,cs_char_escape(left_edge));
+      Buffer::add_string(b,cs_char_escape(lb));
       Buffer::add_char(b,'-');
-      Buffer::add_string(b,cs_char_escape(255));
+      Buffer::add_string(b,cs_char_escape(ub-1));
     }
+    if (ranges->tl != NULL)
+      Buffer::add_char(b,',');
   }
   //  return Buffer::extract(b);
   return Buffer::contents(b);
@@ -204,54 +190,6 @@ void cs_dot_print(FILE @f,cs_t cs) {
   fprintf(f,"%s",string_escape(cs2string(cs)));
 }
 
-static rule_t cs_CHARRANGE(unsigned int min,unsigned int max) {
-  let r = CHARRANGE(min,max);
-  r->css = new (cs_opt_t)cs_range(min,max+1);
-  return r;
-}
-
-rule_t cs2rule(cs_t rng) {
-  List::list_t<rule_t> rngs = NULL;
-  int mark = 0;
-  let state = 0; /* last saw 0 or 1 */
-  for (let i = 0; i<BUCKETS; i++) {
-    for (let j = 0; j<8; j++) {
-      let new_state = (rng[i] & (1<<j)) != 0;
-      // eprintf("%d",new_state);
-      if (new_state && !state)
-	mark = i*8+j;
-      else if (!new_state && state)
-	rngs = new List::List(cs_CHARRANGE(mark,i*8+j-1),rngs);
-      state = new_state;
-    }
-    // eprintf("\n");
-  }
-  if (state)
-    rngs = new List::List(cs_CHARRANGE(mark,255),rngs);
-  if (rngs == NULL) {
-    internal_err("cs2rule called on empty character set\n");
-    let result = LIT("");
-    result->css = not_cs;
-    return result;
-  }
-  let result = rngs->hd;
-  for (let t = rngs->tl; t; t = t->tl) {
-    let cs = cs_dup(*result->css);
-    cs_union(cs,*t->hd->css);
-    result = ALT(t->hd,result);
-    result->css = new (cs_opt_t)cs;
-  }
-  return result;
-}
-
-int is_cs(rule_t r) {
-  if (!r->css) {
-    internal_err("is_cs called before cs_annot\n");
-    return 0;
-  }
-  else return (*r->css != NULL);
-}
-
 cs_t string2cs(const char ?s) {
   let res = cs_empty();
   let n = strlen(s);
@@ -260,193 +198,7 @@ cs_t string2cs(const char ?s) {
   return res;
 }
 
-
-/* Add cs annotations to a rule.  Expects that it will be called on
-   rules that are topologically sorted, symbols that do not depend on
-   others first. */
-/* FIX: this does not handle recursively defined symbols that define
-   character sets. */
-cs_opt_t cs_annot_rule(struct grammar @g,rule_t r) {
-  switch (r->r) {
-  case &Symb(x,_):
-    for (let t = g->rules; t; t = t->tl) {
-      let &$(n,r0,_) = t->hd;
-      if (strcmp(n,x) == 0) {
-        if (!r0->css) {
-          warn("Recursion on symbol %s\n",n);
-          r0->css = not_cs;
-        }
-        r->css = r0->css;
-        return *r->css;
-      }
-    }
-    r->css = not_cs;
-    return NULL;
-  case &CharRange(a,b):
-    let result = new {for i<BUCKETS: (unsigned char)0};
-    for (unsigned int i = a; i<=b && i<=MAXCSCHAR; i++) {
-      let j = i/8;
-      let k = i%8;
-      result[j] = (unsigned char)(result[j] | (1<<k));
-    }
-    r->css = new (cs_opt_t)result;
-    return result;
-  case &Lit(x):
-    if (strlen(x) == 1) {
-      let c = x[0];
-      if (isalpha(c)) {
-        /* String literals are case insensitive */
-        let result = cs_annot_rule(g,ALT(cs_CHARRANGE(tolower(c),tolower(c)),
-                                         cs_CHARRANGE(toupper(c),toupper(c))));
-        r->css = new result;
-        return result;
-      } else {
-        let result = cs_annot_rule(g,cs_CHARRANGE(c,c));
-        r->css = new result;
-        return result;
-      }
-    }
-    else {
-      r->css = not_cs;
-      return NULL;
-    }
-  case &Minus(r2,r3):
-    let x = cs_annot_rule(g,r2);
-    let y = cs_annot_rule(g,r3);
-    if (!x || !y) {
-      warn("Minus is applied to non-character sets\n");
-      r->css = not_cs;
-      return NULL;
-    }
-    let result = new {for i<BUCKETS: (unsigned char)(x[i] & ~y[i])};
-    r->css = new (cs_opt_t)result;
-    return result;
-  case &Alt(r2,r3):
-    let x = cs_annot_rule(g,r2);
-    let y = cs_annot_rule(g,r3);
-    if (!x || !y) {
-      r->css = not_cs;
-      return NULL;
-    }
-    let result = new {for i<BUCKETS: (unsigned char)(x[i] | y[i])};
-    r->css = new (cs_opt_t)result;
-    return result;
-  case &Seq(r2,r3):
-    cs_annot_rule(g,r2);
-    cs_annot_rule(g,r3);
-    r->css = not_cs; // FIX: can be character set if r2/r3 is the empty string
-    return NULL;
-  case &Prose(_):
-    r->css = not_cs;
-    return NULL;
-  case &Star(1,&Num(1),r2): fallthru(r2);
-  case &Hash(1,&Num(1),r2):
-    cs_annot_rule(g,r2);
-    r->css = r2->css;
-    return *r->css;
-  case &Opt(r2): fallthru(r2);
-  case &Rcount(_,r2): fallthru(r2);
-  case &Star(_,_,r2): fallthru(r2);
-  case &Hash(_,_,r2):
-    cs_annot_rule(g,r2);
-    r->css = not_cs;
-    return NULL;
-  }
-}
-struct grammar @cs_annot(grammar_t<`H> ds) {
-  ds = sort_definitions(ds);
-  struct grammar @g = new grammar {
-    .rules = ds,
-    .maybe_empty = NULL,    
-    .firstt = NULL,         
-    .lastt = NULL,          
-    .followt = NULL,        
-    .mayt = NULL,           
-    .mustt = NULL,          
-    .rec_symbols = NULL,    
-    .rec_dep_symbols = NULL,
-    .white_edge_symbols = NULL,
-    .arityt = NULL
-  };
-  for (let x = ds; x; x = x->tl) {
-    let &$(n,r,_) = x->hd;
-    cs_annot_rule(g,r);
-    if (!r->css) { // sanity check
-      internal_err("cs_annot did not annotate %s\n",n);
-      r->css = not_cs;
-    }
-  }
-  return g;
-}
-
-
-/* Return the set of characters defined by rule, or the empty cs
-   if the rule does not seem to define a set of characters. */
-cs_t rule2cs(rule_t r) {
-  if (!r->css) {
-    internal_err("rule2cs called before cs_annot\n");
-    return new {for i<BUCKETS: (unsigned char)0};
-  }
-  if (!(*r->css))
-    return new {for i<BUCKETS: (unsigned char)0};
-  return *r->css;
-}
-static void minus_elim_rule(rule_t r) {
-  switch (r->r) {
-  case &Minus(r2,r3):
-    let new_r = cs2rule(*r->css);
-    r->r = new_r->r;
-    r->css = new_r->css;
-    return;
-  case &Alt(r2,r3): fallthru(r2,r3);
-  case &Seq(r2,r3):
-    minus_elim_rule(r2);
-    minus_elim_rule(r3);
-    return;
-  case &Opt(r2): fallthru(r2);
-  case &Rcount(_,r2): fallthru(r2);
-  case &Star(_,_,r2): fallthru(r2);
-  case &Hash(_,_,r2):
-    minus_elim_rule(r2);
-    return;
-  case &Symb(_,_):
-  case &CharRange(_,_):
-  case &Lit(_):
-  case &Prose(_):
-    return;
-  }
-}
-void minus_elim(grammar_t<`H> ds) {
-  cs_annot(ds); // FIX: throws away the grammar return by cs_annot; put this elsewhere
-  for (let t = ds; t; t = t->tl) {
-    let &$(n,r,a) = t->hd;
-    if (r->css && *r->css) { // The symbol defines a character set.
-      /* This is not actually needed for minus elimination, */
-      /* the point is to compress ("a"|..|"z") so DFA conversion is faster */
-      /* FIX: this can eliminate some ambiguities, e.g., ("a"|"b"|"a") */
-      let new_r = cs2rule(*r->css);
-      r->r = new_r->r;
-      r->css = new_r->css;
-    }
-    else
-      minus_elim_rule(r);
-  }
-}
-
-void cs_optimize(grammar_t<`H> ds) {
-  cs_annot(ds); // FIX: throws away the grammar returned by cs_annot; put this elsewhere
-  for (let t = ds; t; t = t->tl) {
-    let &$(n,r,a) = t->hd;
-    if (r->css && *r->css) { // The symbol defines a character set.
-      /* The point is to compress ("a"|..|"z") so DFA conversion is faster */
-      /* FIX: this can eliminate some ambiguities, e.g., ("a"|"b"|"a") */
-      let new_r = cs2rule(*r->css);
-      r->r = new_r->r;
-      r->css = new_r->css;
-    }
-  }
-}
-
+/* return list of half-open intervals in sorted order */
 List::list_t<$(unsigned int,unsigned int)@> cs2ranges(cs_t a) {
   let empty_so_far = 1;
   let in_range = 0;
@@ -456,13 +208,13 @@ List::list_t<$(unsigned int,unsigned int)@> cs2ranges(cs_t a) {
     if (cs_member(a,i)) {
       if (!in_range) {
         empty_so_far = 0;
-        lb = i;
+        lb = i;                                    // lb is a member
         in_range = 1;
       }
     }
     else if (in_range) {
       in_range = 0;
-      result = new List::List(new $(lb,i),result);
+      result = new List::List(new $(lb,i),result); // i is not a member
     }
   }
   if (in_range)

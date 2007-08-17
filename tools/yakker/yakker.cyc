@@ -450,13 +450,13 @@ int main(int argc, const char ?`H?argv) {
   if (earley_regexp != NULL) {
     use_lazy_nfa = 0;
     // TODO: assume regexp is a symbol for now
-    debugprint(1,"Earley parsing stdin... ");
+    printf("Earley parsing stdin... ");
     int c;
     let b = Buffer::create(101);
     while ( (c = fgetc(stdin)) != EOF)
       Buffer::add_char(b,c);
     let ans = Earley::recognize(ds,SYMB(earley_regexp),Buffer::contents(b));
-    debugprint(1,"done -- answer is %d\n",ans);
+    printf("done -- answer is %d\n",ans);
     return 0;
   }
 

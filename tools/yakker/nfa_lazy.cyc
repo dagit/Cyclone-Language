@@ -35,7 +35,6 @@
 #include "pr.h"
 #include "util.h"
 #include "fa.h"
-#define MAXACTION MAXCSCHAR
 
 #include <time.h>
 

@@ -30,20 +30,20 @@ using Core;
 
 namespace Axarray;
 static
-void bigger(xarray_t<`a> xarr, int minsize) { // NB minsize is number of elements not index (1-based not 0-based)
+void bigger(xarray_t<`a> xarr, unsigned int minsize) { // NB minsize is number of elements not index (1-based not 0-based)
   if (xarr->num_elmts >= minsize) return;
   else if (numelts(xarr->elmts) >= minsize) {
     xarr->num_elmts = minsize;
     return;
   }
   // Otherwise we have to grow the array
-  let newsize = minsize*2+1;
+  unsigned int newsize = minsize*2+1;
   debugprint(2,"Growing array to %d.\n",newsize);
   if (xarr->num_elmts == 0)
     xarr->elmts = unew {for i < newsize : xarr->dflt};
   else {
     `a ?newarr = unew {for i < newsize : xarr->dflt};
-    for (int i=1; i < xarr->num_elmts; ++i)
+    for (int i=0; i < xarr->num_elmts; i++)
       newarr[i] = xarr->elmts[i];
     xarr->elmts :=: newarr;
     Core::ufree((_*)newarr); // cast to avoid warning

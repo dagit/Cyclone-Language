@@ -18,7 +18,16 @@
 
 #ifndef CS_H
 #define CS_H
-#include "bnf.h"
+#include <stdio.h>
+#include <list.h>
+
+/* Character (action) sets */
+
+// TODO: remove BUCKETS and MAXACTION from interface
+#define BUCKETS 53
+#define MAXACTION ((BUCKETS*8)-1)
+typedef unsigned char @{BUCKETS}@nozeroterm cs_t;
+typedef unsigned char *{BUCKETS}@nozeroterm cs_opt_t;
 
 extern void cs_intersect(cs_t a,cs_t b);
 extern void cs_union(cs_t a,cs_t b);
@@ -31,26 +40,26 @@ extern cs_t cs_empty();
 extern cs_t cs_full();
 extern cs_t cs_singleton(unsigned int x);
 extern cs_t cs_range(unsigned int lb, unsigned int ub); /* half-open interval [lb,ub) */
-extern $(unsigned int,unsigned int) cs_bounds(cs_t rng);
-extern void cs_print(FILE @f,cs_t rng);
-// print cs in format suitable for Graphviz
-extern void cs_dot_print(FILE @f,cs_t cs);
-extern const char ?cs2string(cs_t rng);
 extern cs_t string2cs(const char ?s);
+
 extern int cs_member(cs_t a,unsigned int c);
-extern int is_cs(rule_t r);
-extern cs_t rule2cs(rule_t r);
 extern int is_cs_empty(cs_t a);
 extern int is_cs_full(cs_t a);
 extern int is_cs_singleton(cs_t a);
 extern int first_of_cs(cs_t a);
-extern struct grammar @cs_annot(grammar_t<`H> ds);
-// convert all rules marked as css into actual css.
-extern void cs_optimize(grammar_t<`H> ds);
-extern void minus_elim(grammar_t<`H> ds);
+/* return min and max characters for non-empty set */
+extern $(unsigned int,unsigned int) cs_bounds(cs_t rng);
+/* return a list of all characters in the set */
+extern List::list_t<unsigned int> cs2list(cs_t a);
+/* return list of half-open intervals in sorted order */
+extern List::list_t<$(unsigned int,unsigned int)@> cs2ranges(cs_t a);
+
+/* convert/print in (nonstandard) readable format */
+extern const char ?cs2string(cs_t rng);
+extern void cs_print(FILE @f,cs_t rng);
+/* suitable for Graphviz */
+extern void cs_dot_print(FILE @f,cs_t cs);
+
 extern const char ?cs_char_escape(unsigned int c);
 extern const char ?fsm_char_escape(unsigned int c);
-extern List::list_t<$(unsigned int,unsigned int)@> cs2ranges(cs_t a);
-extern rule_t cs2rule(cs_t rng);
-extern List::list_t<unsigned int> cs2list(cs_t a);
 #endif

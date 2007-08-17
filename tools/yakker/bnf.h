@@ -22,6 +22,7 @@
 #include <hashtable.h>
 #include <graph.h>
 #include "util.h"
+#include "cs.h"
 
 datatype Repeat {
   Num(unsigned int);
@@ -33,7 +34,7 @@ typedef struct arule *Rule_t;
 datatype Rule {
   Symb(const char ?,const char ?); // grammar symbol, params
   Lit(const char ?);
-  CharRange(unsigned int,unsigned int); // inclusive range [l,u]
+  CharRange(unsigned int,unsigned int); // closed interval [l,u]
   Prose(const char ?);
   Opt(rule_t);
   Seq(rule_t,rule_t);
@@ -43,13 +44,6 @@ datatype Rule {
   Hash(unsigned int,repeat_t,rule_t);
   Minus(rule_t,rule_t);
 };
-/* Character sets -- a cs is a set of 8-bit characters */
-// #define BUCKETS 32
-// #define MAXCSCHAR 255
-#define BUCKETS 33
-#define MAXCSCHAR 263
-typedef unsigned char @{BUCKETS}@nozeroterm cs_t;
-typedef unsigned char *{BUCKETS}@nozeroterm cs_opt_t;
 
 extern cs_opt_t @not_cs; // a pointer to NULL
 
@@ -64,7 +58,7 @@ rule_t arule_inj(datatype Rule @`H);
 /* Constructors with NULL semantic actions */
 rule_t SYMB(const char ?`H);
 rule_t LIT(const char ?`H);
-rule_t CHARRANGE(unsigned int,unsigned int);
+rule_t CHARRANGE(unsigned int,unsigned int); // closed interval
 rule_t PROSE(const char ?`H);
 rule_t OPT(rule_t);
 rule_t SEQ(... rule_t);
@@ -76,7 +70,7 @@ rule_t MINUS(rule_t,rule_t);
 /* Constructors that copy all of the properties of the first argument */
 rule_t SYMB_r(rule_t,const char ?`H,const char ?`H);
 rule_t LIT_r(rule_t,const char ?`H);
-rule_t CHARRANGE_r(rule_t,unsigned int,unsigned int);
+rule_t CHARRANGE_r(rule_t,unsigned int,unsigned int); // closed interval
 rule_t PROSE_r(rule_t,const char ?`H);
 rule_t OPT_r(rule_t,rule_t);
 rule_t SEQ_r(rule_t,rule_t,rule_t);
@@ -159,4 +153,14 @@ struct grammar {
   strset_opt_t   white_edge_symbols; // Symbols with white edges
   uint_table_opt_t arityt;        // Arity of symbols for printing
 };
+
+extern int is_cs(rule_t r);
+extern cs_t rule2cs(rule_t r);
+extern struct grammar @cs_annot(grammar_t<`H> ds);
+// convert all rules marked as css into actual css.
+extern void cs_optimize(grammar_t<`H> ds);
+extern void minus_elim(grammar_t<`H> ds);
+extern rule_t cs2rule(cs_t rng);
+
+
 #endif

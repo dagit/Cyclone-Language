@@ -646,3 +646,219 @@ rule_t hash2star(unsigned int m, repeat_t N, rule_t r){
   
   return m ? r_s : OPT(r_s);
 }
+
+int is_cs(rule_t r) {
+  if (!r->css) {
+    internal_err("is_cs called before cs_annot\n");
+    return 0;
+  }
+  else return (*r->css != NULL);
+}
+/* Return the set of characters defined by rule, or the empty cs
+   if the rule does not seem to define a set of characters. */
+cs_t rule2cs(rule_t r) {
+  if (!r->css) {
+    internal_err("rule2cs called before cs_annot\n");
+    return cs_empty();
+  }
+  if (!(*r->css))
+    return cs_empty();
+  return *r->css;
+}
+static void minus_elim_rule(rule_t r) {
+  switch (r->r) {
+  case &Minus(r2,r3):
+    let new_r = cs2rule(*r->css);
+    r->r = new_r->r;
+    r->css = new_r->css;
+    return;
+  case &Alt(r2,r3): fallthru(r2,r3);
+  case &Seq(r2,r3):
+    minus_elim_rule(r2);
+    minus_elim_rule(r3);
+    return;
+  case &Opt(r2): fallthru(r2);
+  case &Rcount(_,r2): fallthru(r2);
+  case &Star(_,_,r2): fallthru(r2);
+  case &Hash(_,_,r2):
+    minus_elim_rule(r2);
+    return;
+  case &Symb(_,_):
+  case &CharRange(_,_):
+  case &Lit(_):
+  case &Prose(_):
+    return;
+  }
+}
+void minus_elim(grammar_t<`H> ds) {
+  cs_annot(ds); // FIX: throws away the grammar return by cs_annot; put this elsewhere
+  for (let t = ds; t; t = t->tl) {
+    let &$(n,r,a) = t->hd;
+    if (r->css && *r->css) { // The symbol defines a character set.
+      /* This is not actually needed for minus elimination, */
+      /* the point is to compress ("a"|..|"z") so DFA conversion is faster */
+      /* FIX: this can eliminate some ambiguities, e.g., ("a"|"b"|"a") */
+      let new_r = cs2rule(*r->css);
+      r->r = new_r->r;
+      r->css = new_r->css;
+    }
+    else
+      minus_elim_rule(r);
+  }
+}
+
+void cs_optimize(grammar_t<`H> ds) {
+  cs_annot(ds); // FIX: throws away the grammar returned by cs_annot; put this elsewhere
+  for (let t = ds; t; t = t->tl) {
+    let &$(n,r,a) = t->hd;
+    if (r->css && *r->css) { // The symbol defines a character set.
+      /* The point is to compress ("a"|..|"z") so DFA conversion is faster */
+      /* FIX: this can eliminate some ambiguities, e.g., ("a"|"b"|"a") */
+      let new_r = cs2rule(*r->css);
+      r->r = new_r->r;
+      r->css = new_r->css;
+    }
+  }
+}
+static rule_t cs_CHARRANGE(unsigned int min,unsigned int max) {
+  let r = CHARRANGE(min,max);
+  r->css = new (cs_opt_t)cs_range(min,max+1);
+  return r;
+}
+
+rule_t cs2rule(cs_t rng) {
+  let rngs = NULL;
+  for (let ranges = cs2ranges(rng); ranges != NULL; ranges = ranges->tl) {
+    let &$(min,max_plus_1) = ranges->hd;
+    rngs = new List::List(cs_CHARRANGE(min,max_plus_1 - 1),rngs);
+  }
+  if (rngs == NULL) {
+    internal_err("cs2rule called on empty character set\n");
+    let result = LIT("");
+    result->css = not_cs;
+    return result;
+  }
+  let result = rngs->hd;
+  for (let t = rngs->tl; t; t = t->tl) {
+    let cs = cs_dup(*result->css);
+    cs_union(cs,*t->hd->css);
+    result = ALT(t->hd,result);
+    result->css = new (cs_opt_t)cs;
+  }
+  return result;
+}
+/* Add cs annotations to a rule.  Expects that it will be called on
+   rules that are topologically sorted, symbols that do not depend on
+   others first. */
+/* FIX: this does not handle recursively defined symbols that define
+   character sets. */
+cs_opt_t cs_annot_rule(struct grammar @g,rule_t r) {
+  switch (r->r) {
+  case &Symb(x,_):
+    for (let t = g->rules; t; t = t->tl) {
+      let &$(n,r0,_) = t->hd;
+      if (strcmp(n,x) == 0) {
+        if (!r0->css) {
+          warn("Recursion on symbol %s\n",n);
+          r0->css = not_cs;
+        }
+        r->css = r0->css;
+        return *r->css;
+      }
+    }
+    r->css = not_cs;
+    return NULL;
+  case &CharRange(a,b):
+    let result = cs_range(a,b+1);
+    r->css = new (cs_opt_t)result;
+    return result;
+  case &Lit(x):
+    if (strlen(x) == 1) {
+      let c = x[0];
+      if (isalpha(c)) {
+        /* String literals are case insensitive */
+        let result = cs_annot_rule(g,ALT(cs_CHARRANGE(tolower(c),tolower(c)),
+                                         cs_CHARRANGE(toupper(c),toupper(c))));
+        r->css = new result;
+        return result;
+      } else {
+        let result = cs_annot_rule(g,cs_CHARRANGE(c,c));
+        r->css = new result;
+        return result;
+      }
+    }
+    else {
+      r->css = not_cs;
+      return NULL;
+    }
+  case &Minus(r2,r3):
+    let x = cs_annot_rule(g,r2);
+    let y = cs_annot_rule(g,r3);
+    if (!x || !y) {
+      warn("Minus is applied to non-character sets\n");
+      r->css = not_cs;
+      return NULL;
+    }
+    let result = cs_dup(x);
+    cs_difference(result,y);
+    r->css = new (cs_opt_t)result;
+    return result;
+  case &Alt(r2,r3):
+    let x = cs_annot_rule(g,r2);
+    let y = cs_annot_rule(g,r3);
+    if (!x || !y) {
+      r->css = not_cs;
+      return NULL;
+    }
+    let result = cs_dup(x);
+    cs_union(result,y);
+    r->css = new (cs_opt_t)result;
+    return result;
+  case &Seq(r2,r3):
+    cs_annot_rule(g,r2);
+    cs_annot_rule(g,r3);
+    r->css = not_cs; // FIX: can be character set if r2/r3 is the empty string
+    return NULL;
+  case &Prose(_):
+    r->css = not_cs;
+    return NULL;
+  case &Star(1,&Num(1),r2): fallthru(r2);
+  case &Hash(1,&Num(1),r2):
+    cs_annot_rule(g,r2);
+    r->css = r2->css;
+    return *r->css;
+  case &Opt(r2): fallthru(r2);
+  case &Rcount(_,r2): fallthru(r2);
+  case &Star(_,_,r2): fallthru(r2);
+  case &Hash(_,_,r2):
+    cs_annot_rule(g,r2);
+    r->css = not_cs;
+    return NULL;
+  }
+}
+struct grammar @cs_annot(grammar_t<`H> ds) {
+  ds = sort_definitions(ds);
+  struct grammar @g = new grammar {
+    .rules = ds,
+    .maybe_empty = NULL,    
+    .firstt = NULL,         
+    .lastt = NULL,          
+    .followt = NULL,        
+    .mayt = NULL,           
+    .mustt = NULL,          
+    .rec_symbols = NULL,    
+    .rec_dep_symbols = NULL,
+    .white_edge_symbols = NULL,
+    .arityt = NULL
+  };
+  for (let x = ds; x; x = x->tl) {
+    let &$(n,r,_) = x->hd;
+    cs_annot_rule(g,r);
+    if (!r->css) { // sanity check
+      internal_err("cs_annot did not annotate %s\n",n);
+      r->css = not_cs;
+    }
+  }
+  return g;
+}
+

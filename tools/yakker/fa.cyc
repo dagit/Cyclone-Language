@@ -36,7 +36,6 @@
 #include "nfa_eager.h"
 #include "pr.h"
 #include "util.h"
-#define MAXACTION MAXCSCHAR
 
 #include <time.h>
 
