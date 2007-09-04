@@ -258,7 +258,10 @@ corerules_grm.cyc: corerules_grm.bnf
 # Automatic dependency generation
 ###############################################################################
 
-$(BUILDDIR)/%.d: %.cyc
+$(BUILDDIR):
+	mkdir -p $@
+
+$(BUILDDIR)/%.d: %.cyc $(BUILDDIR)
 	echo -n "$(BUILDDIR)/" > $@
 	$(CYCLONE) -M -MG $< >> $@
 
@@ -315,6 +318,7 @@ clean:
 	$(RM) imap_genpm.cyc 
 	$(RM) small_imap.h small_imap.cyc small_imap_genpm.h small_imap_genpm.cyc
 	$(RM) string_dfa_engine1.*
+	$(RM) string_dfa_engine2_1.*
 	$(RM) prose_elim_grammar.cyc
 	$(RM) prose_elim_grm.cyc corerules_grm.cyc
 	$(RM) indexer indexer.cyc 1rfc_index 1rfc_index.txt
@@ -322,7 +326,7 @@ clean:
 	$(RM) http.cyc
 	$(RM) imapp imapcl imapp.key imapp.cert
 	$(RM) markdown.cyc markdown
-	$(RM) $(BUILDDIR)/*
+	$(RM) -r $(BUILDDIR)
 	$(RM) $(GENDIR)/*
 	$(RM) $(BNFDIR)/*
 
@@ -334,7 +338,7 @@ clean:
 $(OBJS_PA): $(BUILDDIR)/%_a.o: %.cyc $(BUILDDIR)/%.o 
 	$(CYCLONE) $(CYCFLAGS) -pa -c $< -o $@
 
-$(BUILDDIR)/%.o: %.cyc
+$(BUILDDIR)/%.o: %.cyc $(BUILDDIR)
 	$(CYCLONE) $(CYCFLAGS) -c $< -o $@
 
 %_tab.cyc: %.y
