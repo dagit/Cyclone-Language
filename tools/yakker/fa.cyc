@@ -519,6 +519,8 @@ struct DFA {
 
   Set::set_t<st_t> final_states; // this could be calculated from final_attrs
 
+  //  Hashtable::table_t<act_t,str_t> act_map;
+
   // For compression
   // if (ranges) then actions in the transitions are translated
   // as follows:
@@ -556,6 +558,7 @@ dfa_t dfa_create() {
       .final_attrs = Hashtable::create(11,att_cmp,att_hash),
       .states = Axarray::create(11,NULL),
       .final_states = Set::empty(st_cmp),
+       //      .act_map = Hashtable::create(11,st_cmp,st_hash),
       .ranges = NULL,
       .number_of_actions = MAXACTION+1
       };
