@@ -49,7 +49,6 @@ static cs_t consume_symb_cs(const char ?`H symb) {
 
 /* An automaton state and parent pointer */
 typedef $(st_t,unsigned int) @earley_item_t;
-typedef $(st_t,unsigned int) *earley_item_opt_t;
 
 static int earley_item_cmp(earley_item_t a,earley_item_t b) {
   let $(ai,aj) = *a;
@@ -59,14 +58,27 @@ static int earley_item_cmp(earley_item_t a,earley_item_t b) {
   return Core::intcmp(aj,bj);
 }
 
-static int earley_item_hash(earley_item_t a) {
-  let $(ai,aj) = *a;
-  /* Both ai and aj are ints starting at 0, ai maxes out at the
-     number of states, aj maxes out at the input length.
+typedef $(st_t,unsigned int,unsigned int) @earley_node_t;
+typedef $(st_t,unsigned int,unsigned int) *earley_node_opt_t;
+typedef  Hashtable::table_t<earley_item_t,List::list_t<earley_node_t,`r>,`r> earley_graph_t<`r>;
+static int earley_node_cmp(earley_node_t a,earley_node_t b) {
+  let $(ai,aj,ak) = *a;
+  let $(bi,bj,bk) = *b;
+  let c = Core::intcmp(ai,bi);
+  if (c) return c;
+  c = Core::intcmp(aj,bj);
+  if (c) return c;
+  return Core::intcmp(ak,bk);
+}
+
+static int earley_node_hash(earley_node_t a) {
+  let $(ai,aj,ak) = *a;
+  /* All ai, aj, and ak are ints starting at 0, ai maxes out at the
+     number of states, aj and ak max out at the input length.
      TODO: see what typical sizes are for these and adjust the
      hash function accordingly.
   */
-  return (aj << 16) ^ ai;
+  return ai ^ (aj+ak);
 }
 
 typedef Set::set_t<earley_item_t> earley_state_t;
@@ -168,6 +180,154 @@ st_t rule2earley0(Hashtable::table_t<str_t,st_t> symb_st,
   }
 }
 
+$(st_t,st_t,st_t)
+  merge(Hashtable::table_t<str_t,st_t> symb_st,
+        grammar_t grm,
+        rule_t r) {
+  switch (r->r) {
+  case &Symb(x,_):
+    let xptr = new x;
+    st_t x_start; /* start state of the NFA for the symbol */
+    if (!Hashtable::try_lookup(symb_st,xptr,&x_start)) {
+      /* Symbol has not been converted to NFA yet */
+      Rule_t x_rule = lookup_symbol(grm, x);
+      if (!x_rule) {
+	warn("missing definition for %s in merge()\n",x);
+	return merge(symb_st,grm,LIT(""));
+      }
+      /* Allocate a start state for the symbol.  Do this before
+         converting to NFA in case the symbol is defined recursively. */
+      let s = nfa_fresh_state(); let f = nfa_fresh_state();
+      Hashtable::insert(symb_st,xptr,s);
+      let $(s_body,_,_) = merge(symb_st,grm,x_rule);
+      etrans(s,s_body);
+      x_start = s;
+    }
+    let s = nfa_fresh_state();
+    let s2 = nfa_fresh_state();
+    let e = nfa_fresh_state();
+    let f = nfa_fresh_state();
+    action(s,callout_cs(),x_start);
+    etrans(s,s2);
+    action(s2,consume_symb_cs(x),f);
+    /* If the symbol can derive the empty string make sure this gets
+       reflected into the automaton --- effectively doing a RETURN in
+       the automaton instead of the Earley evaluator itself */
+    if (empty_rule(SYMB(x)))
+      etrans(s2,e);
+    return $(s,f,e);
+  case &Lit(x):
+    if (!strcmp(x,"")) {
+      let s = nfa_fresh_state();
+      let f = nfa_fresh_state();
+      let e = nfa_fresh_state();
+      etrans(s,e);
+      return $(s,f,e);
+    }
+    else {
+      let s = mklit(x);
+      let f = get_final(s);
+      let e = nfa_fresh_state();
+      return $(s,f,e);
+    }
+  case &CharRange(low,high):
+    if (low > high) {
+      internal_err("invalid character range in merge()\n");
+      let s = nfa_fresh_state();
+      let f = nfa_fresh_state();
+      return $(s,f,s);
+    }
+    else {
+      let s = mkact(cs_range(low,high+1));
+      let f = get_final(s);
+      let e = nfa_fresh_state();
+      return $(s,f,s);
+    }
+  case &Opt(r2):
+    let s = nfa_fresh_state();
+    let e = nfa_fresh_state();
+    let $(s2,f2,e2) = merge(symb_st,grm,r2);
+    etrans(s,s2);
+    action(s,EPSILON,e);
+    etrans(e2,e);
+    return $(s,f2,e);
+  case &Seq(r2,r3):
+    let s = nfa_fresh_state();
+    let f = nfa_fresh_state();
+    let e = nfa_fresh_state();
+    let $(s2,f2,e2) = merge(symb_st,grm,r2);
+    let $(s3,f3,e3) = merge(symb_st,grm,r3);
+    let scall = rule2earley0(symb_st,grm,r3);
+    let fcall = get_final(scall);
+    etrans(s,s2);
+    etrans(f2,scall);
+    etrans(e2,s3);
+    etrans(f3,f);
+    etrans(fcall,f);
+    etrans(e3,e);
+    return $(s,f,e);
+  case &Alt(r2,r3):
+    let s = nfa_fresh_state();
+    let f = nfa_fresh_state();
+    let e = nfa_fresh_state();
+    let $(s2,f2,e2) = merge(symb_st,grm,r2);
+    let $(s3,f3,e3) = merge(symb_st,grm,r3);
+    etrans(s,s2);
+    action(s,EPSILON,s3);
+    etrans(f2,f);
+    etrans(f3,f);
+    etrans(e2,e);
+    etrans(e3,e);
+    return $(s,f,e);
+  case &Rcount(_,r2):
+    /* Conservative approximation */
+    warn_repeat();
+    fallthru(r2);
+  case &Star(0,&Infinity,r2):
+    let s = nfa_fresh_state();
+    let f = nfa_fresh_state();
+    let e = nfa_fresh_state();
+    let $(s2,f2,e2) = merge(symb_st,grm,r2);
+    let scall = rule2earley0(symb_st,grm,r2);
+    let fcall = get_final(scall);
+    etrans(s,s2);
+    etrans(e2,s2);
+    etrans(f2,scall);
+    action(f2,EPSILON,f);
+    etrans(fcall,scall);
+    action(fcall,EPSILON,f);
+    action(e2,EPSILON,e);
+    return $(s,f,e);
+  case &Star(m,i as &Infinity,r2):
+    let r_seq = SEQ(r2,STAR(m-1,i,r2));
+    return merge(symb_st,grm,r_seq);
+  case &Star(0,&Num(0),r2):
+    return merge(symb_st,grm,LIT(""));
+  case &Star(0,&Num(n),r2):
+    let r_opt = OPT(SEQ(r2,STAR(0, new Num(n-1),r2)));
+    return merge(symb_st,grm,r_opt);
+  case &Star(m,&Num(n),r2):
+    if (m > n) return merge(symb_st,grm,LIT(""));
+    let r_seq = SEQ(r2,STAR(m-1, new Num(n-1),r2));
+    return merge(symb_st,grm, r_seq);
+
+  case &Hash(0,N,r2):
+    // same as [ r2 *{N-1}(commas r2) ]
+    return merge(symb_st,grm,
+                 OPT(SEQ(r2,STAR(0,minus_one(N),SEQ(commas(),r2)))));
+  case &Hash(m,N,r2):
+    // same as r2 {m-1}*{N-1}(commas r2)
+    return merge(symb_st,grm,
+                 SEQ(r2,STAR(m-1,minus_one(N),SEQ(commas(),r2))));
+  case &Prose(_):
+    warn("Prose not supported in merge()\n");
+    return merge(symb_st,grm,LIT(""));
+  case &Minus(_,_):
+    warn("Minus not supported in merge()\n");
+    return merge(symb_st,grm,LIT(""));
+  }
+}
+
 $(dfa_t,Set::set_t<st_t>) rule2earley(grammar_t grm, rule_t r) {
   nfa_init(grm);
   Hashtable::table_t<str_t,st_t> symb_st =
@@ -231,16 +391,19 @@ push_closure(dfa_t dfa,
              unsigned int i,
              earley_item_t ei,
              const char ?reason,
-             Hashtable::table_t<earley_item_t,List::list_t<earley_item_t,`H>,`H> tbl,
-             earley_item_opt_t back) {
+             Hashtable::table_t<earley_node_t,List::list_t<earley_node_t,`H>,`H> pred,
+             Hashtable::table_t<earley_node_t,List::list_t<earley_node_t,`H>,`H> retn,
+             earley_node_opt_t back) {
 
+  let &$(s,backptr) = ei;
+  let node = new $(s,backptr,i);
   if (back != NULL) {
-    let backlistptr = Hashtable::lookup_opt(tbl,ei);
+    let backlistptr = Hashtable::lookup_opt(pred,node);
     if (backlistptr != NULL) {
-      Hashtable::remove(tbl,ei);
-      Hashtable::insert(tbl,ei,new List::List(back,*backlistptr));
+      Hashtable::remove(pred,node);
+      Hashtable::insert(pred,node,new List::List(back,*backlistptr));
     }
-    else Hashtable::insert(tbl,ei,List::list(back));
+    else Hashtable::insert(pred,node,List::list(back));
   }
 
   let es = Axarray::get(estates,i);
@@ -248,12 +411,10 @@ push_closure(dfa_t dfa,
   fprintf(stderr,"estates[%d] += (%d,%d) %s\n",i,ei->f0,ei->f1,reason);fflush(stderr);
   Axarray::set(estates,i,Set::insert(es,ei));
 
-  let &$(s,backptr) = ei;
-
   /* Close under CALLS */
   let t = target(dfa,s,callout_action());
   if (t != 0)
-    push_closure(dfa,estates,i,new $(t,i),"(call)",tbl,ei);
+    push_closure(dfa,estates,i,new $(t,i),"(call)",pred,retn,node);
 
   /* Close under RETURNS */
   if (i != backptr // we parsed the empty string, RETURN handled by dfa already
@@ -277,7 +438,8 @@ push_closure(dfa_t dfa,
         /* ... see if the DFA state did a CALL and RETURN if so. */
         if (ttarget != 0)
           push_closure(dfa,estates,i,new $(ttarget,tbackptr),
-                       aprintf("(return 0x%x)",symb),tbl,ei);
+                       aprintf("(return 0x%x)",symb),
+                       pred,retn,node); // prbly node should be causal
       }
     }
   }
@@ -285,10 +447,11 @@ push_closure(dfa_t dfa,
 
 
 /* See if a parse was ambiguous */
-int ambiguous(Hashtable::table_t<earley_item_t,List::list_t<earley_item_t>,`H> tbl,
-              earley_item_t ei) {
+int ambiguous(Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H> pred,
+              Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H> retn,
+              earley_node_t ei) {
   if (ei->f0 == 1 && ei->f1 == 0) return 0; // start reached, unambiguous
-  let before = Hashtable::lookup(tbl,ei);
+  let before = Hashtable::lookup(pred,ei);
   let len = List::length(before);
   if (len == 0) {
     fprintf(stderr,"impossible 0 before list\n"); fflush(stderr);
@@ -305,7 +468,7 @@ int ambiguous(Hashtable::table_t<earley_item_t,List::list_t<earley_item_t>,`H> t
 
     return 1; // more than one predecessor, ambiguous
   }
-  return ambiguous(tbl,before->hd);
+  return ambiguous(pred,retn,before->hd);
 }
 
 /* Earley recognizer.
@@ -318,13 +481,23 @@ int recognize(grammar_t grm, rule_t r,const char ?input) {
   fflush(stderr);
 
   /* Keep track of parse trees */
-  let back = Hashtable::create(11,earley_item_cmp,earley_item_hash);
+  let
+    pred = Hashtable::create(11,earley_node_cmp,earley_node_hash);
+  let
+    retn = Hashtable::create(11,earley_node_cmp,earley_node_hash);
 
   /* Initialize the sequence of Earley states with s0 */
   let estates = /* Earley states  s0, s1, s2, ... */
     Axarray::create(11,Set::empty(earley_item_cmp));
   let earley_item_0 = new $(1,0); // 1 is initial state of dfa, 0 is i in si
-  push_closure(dfa,estates,0,earley_item_0,"(initial)",back,NULL);
+  push_closure(dfa,
+               estates,
+               0,
+               earley_item_0,
+               "(initial)",
+               pred,
+               retn,
+               NULL);
                
   /* Scan the input */
   let input_len = strlen(input);
@@ -337,7 +510,7 @@ int recognize(grammar_t grm, rule_t r,const char ?input) {
       let &$(state,parent) = si_list->hd;
       let k = target(dfa,state,input[i]);
       if (k != 0)
-        push_closure(dfa,estates,i+1,new $(k,parent),"(input)",back,si_list->hd);
+        push_closure(dfa,estates,i+1,new $(k,parent),"(input)",pred,retn,new $(state,parent,i));
     }
   }
 
@@ -352,7 +525,7 @@ int recognize(grammar_t grm, rule_t r,const char ?input) {
        slast_list = slast_list->tl) {
       let &$(state,parent) = slast_list->hd;
       if (Set::member(dfa_final,state) && parent == 0) {
-        ambiguous(back,slast_list->hd);
+        ambiguous(pred,retn,new $(state,parent,input_len));
         return 1;
       }
   }

@@ -12,8 +12,6 @@ PROG=yakker$(EXE)
 # and working on a program based on generated code.
 PROG_DEP= $(PROG)
 
-# build directory.
-BUILDDIR=build
 GENDIR=gen
 BNFDIR=$(GENDIR)
 BINDIR=$(CYCDIR)/bin
@@ -32,13 +30,13 @@ YAKKER_FILES = analyze axarray cs bnf extract fa nfa_lazy nfa_eager leftfactor f
 
 FILES=$(YAKKER_FILES) ast_main pm_bnf imap_scanf funtable
 
-OBJS:=$(foreach yfile,$(YAKKER_FILES),$(BUILDDIR)/$(yfile).o)
+OBJS:=$(foreach yfile,$(YAKKER_FILES),build/$(yfile).o)
 
 # OBJS compiled for allocation profiling.
-OBJS_PA=$(foreach yfile,$(YAKKER_FILES),$(BUILDDIR)/$(yfile)_a.o)
+OBJS_PA=$(foreach yfile,$(YAKKER_FILES),build/$(yfile)_a.o)
 PROG_PA=$(PROG)_a
 
-DEPENDS:=$(foreach file,$(FILES),$(BUILDDIR)/$(file).d)
+DEPENDS:=$(foreach file,$(FILES),build/$(file).d)
 
 ###############################################################################
 # Targets
@@ -84,7 +82,7 @@ imapcl.o: examples/imapcl.cyc
 
 # --novcgen is temporary until a bug is fixed
 imap.o: imap.cyc
-	$(CYCLONE) -c $< -o $(BUILDDIR)/$@ --novcgen
+	$(CYCLONE) -c $< -o build/$@ --novcgen
 
 imapp.key:
 	openssl genrsa > $@
@@ -100,11 +98,11 @@ imapp.o: examples/imapp.cyc
 
 #	$(CYCLONE) $^ -o $@ /Users/yitzhakm/projects/cyclone/otherlibs/sqlite3/libsqlite3.a -lpthread -lssl -lcrypto
 imapserver: imapserver.o imap_scanf.o pm_bnf.o bnf.o lex.o parse_tab.o util.o funtable.o imap_genpm.o ykbuf.o ssl.o imap.o
-#	$(CYCLONE) $^ -o $(BUILDDIR)/$@ /Users/yitzhakm/projects/cyclone/otherlibs/sqlite3/libsqlite3.a -lpthread -lssl -lcrypto
-	$(CYCLONE) $^ -o $(BUILDDIR)/$@ -lsqlite3 -lpthread -lssl -lcrypto
+#	$(CYCLONE) $^ -o build/$@ /Users/yitzhakm/projects/cyclone/otherlibs/sqlite3/libsqlite3.a -lpthread -lssl -lcrypto
+	$(CYCLONE) $^ -o build/$@ -lsqlite3 -lpthread -lssl -lcrypto
 
 imapserver.o: $(EXDIR)/imapserver.cyc
-	$(CYCLONE) -c $^ -o $(BUILDDIR)/$@ -I.
+	$(CYCLONE) -c $^ -o build/$@ -I.
 
 # Targets for testing pattern match parsers-generators.  Generates
 # BNF that can parse a pattern-match and produce a new BNF specialized
@@ -155,7 +153,7 @@ $(GENDIR)/imap_genpm.cyc: $(GENDIR)/imap_genpm.bnf $(PROG_DEP)
                              -no-minus-elim \
                              -no-main \
                              -no-globals \
-                             $< > $(BUILDDIR)/$@
+                             $< > build/$@
 
 $(GENDIR)/imap_genpm.h: $(GENDIR)/imap_genpm.bnf $(PROG_DEP)
 	./yakker $(YAKFLAGS) -cyc-namespace ImapFormat -gen-header $< > $@
@@ -224,10 +222,10 @@ $(GENDIR)/imap_flat.bnf: $(BNFDIR)/imap.bnf $(PROG_DEP)
 # 	$(CYCLONE) -c $< -o $@ -I.
 
 $(BUILD)/ast_main.o : ast_main.cyc gen_ast_main.cyc pm_bnf.h $(GENDIR)/small_imap_genpm.h
-	$(CYCLONE) -c $< -o $(BUILDDIR)/$@ -I.
+	$(CYCLONE) -c $< -o build/$@ -I.
 
 $(BUILD)/pm_bnf.o : pm_bnf.cyc pm_bnf.h pads.h bnf.h
-	$(CYCLONE) -c $< -o $(BUILDDIR)/$@ -I.
+	$(CYCLONE) -c $< -o build/$@ -I.
 ###############################################################################
 
 markdown: markdown.o ykbuf.o ssl.o bnf.o extract.o pr.o parse_tab.o util.o lex.o axarray.o
@@ -258,11 +256,8 @@ corerules_grm.cyc: corerules_grm.bnf
 # Automatic dependency generation
 ###############################################################################
 
-$(BUILDDIR):
-	mkdir -p $@
-
-$(BUILDDIR)/%.d: %.cyc $(BUILDDIR)
-	echo -n "$(BUILDDIR)/" > $@
+build/%.d: %.cyc
+	echo -n "build/" > $@
 	$(CYCLONE) -M -MG $< >> $@
 
 .PHONY: depend
@@ -312,6 +307,7 @@ $(BNFDIR)/vcard.bnf: $(BNFDIR)/rfc2426.bnf $(BNFDIR)/rfc2425.bnf $(BNFDIR)/rfc17
 
 clean:
 	$(RM) *.d *.o parse_tab.cyc parse_tab.h lex.cyc $(PROG)
+	$(RM) $(OBJS) $(DEPENDS)
 	$(RM) in out errs parse.output
 	$(RM) http.bnf http.p message-header.bnf message-header.p
 	$(RM) imap.bnf imap.h imap.cyc rfc3501.bnf rfc2234.bnf rfc3501.txt rfc2234.txt
@@ -326,7 +322,6 @@ clean:
 	$(RM) http.cyc
 	$(RM) imapp imapcl imapp.key imapp.cert
 	$(RM) markdown.cyc markdown
-	$(RM) -r $(BUILDDIR)
 	$(RM) $(GENDIR)/*
 	$(RM) $(BNFDIR)/*
 
@@ -335,10 +330,10 @@ clean:
 
 # .o dependency forces the _a.o to depend on the same files as the .o.
 # However, the .o is not really needed.
-$(OBJS_PA): $(BUILDDIR)/%_a.o: %.cyc $(BUILDDIR)/%.o 
+$(OBJS_PA): build/%_a.o: %.cyc build/%.o 
 	$(CYCLONE) $(CYCFLAGS) -pa -c $< -o $@
 
-$(BUILDDIR)/%.o: %.cyc $(BUILDDIR)
+build/%.o: %.cyc
 	$(CYCLONE) $(CYCFLAGS) -c $< -o $@
 
 %_tab.cyc: %.y
