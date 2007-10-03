@@ -156,15 +156,20 @@ const char ?fsm_char_escape(unsigned int c) {
 #include <buffer.h>
 
 /* Return a string representation of a character set. */
-const char ?cs2string(cs_t rng) {
-  let ranges = cs2ranges(rng);
+const char ?cs2string(cs_t rng, cs_pred_t special) {
+  let ranges = cs2ranges(rng,special);
   if (ranges == NULL) return "<EMPTY>";
 
   let b = Buffer::create(32);
   for (; ranges != NULL; ranges = ranges->tl) {
     let &$(lb,ub) = ranges->hd; // [lb,ub)
-    if (lb+1 == ub)
-      Buffer::add_string(b,cs_char_escape(lb));
+    if (lb+1 == ub) {
+      const char ?`H s = NULL;
+      if (special && (s = special(lb)))
+        Buffer::add_string(b,s);
+      else
+        Buffer::add_string(b,cs_char_escape(lb));
+    }
     else if (lb+2 == ub) {
       Buffer::add_string(b,cs_char_escape(lb));
       Buffer::add_char(b,',');
@@ -183,11 +188,11 @@ const char ?cs2string(cs_t rng) {
 }
 
 void cs_print(FILE @f,cs_t rng) {
-  fprintf(f,"%s",cs2string(rng));
+  fprintf(f,"%s",cs2string(rng,NULL));
 }
 
-void cs_dot_print(FILE @f,cs_t cs) {
-  fprintf(f,"%s",string_escape(cs2string(cs)));
+void cs_dot_print(FILE @f,cs_t cs,cs_pred_t special) {
+  fprintf(f,"%s",string_escape(cs2string(cs,special)));
 }
 
 cs_t string2cs(const char ?s) {
@@ -198,15 +203,24 @@ cs_t string2cs(const char ?s) {
   return res;
 }
 
-/* return list of half-open intervals in sorted order */
-List::list_t<$(unsigned int,unsigned int)@> cs2ranges(cs_t a) {
+/* return list of half-open intervals in sorted order.
+   special is a predicate that indicates that certain characters should
+   not be grouped with other characters, i.e., they should always appear
+   alone in their own half-open interval. */
+List::list_t<$(unsigned int,unsigned int)@> cs2ranges(cs_t a, cs_pred_t special) {
   let empty_so_far = 1;
   let in_range = 0;
   unsigned int lb = 0;
   let result = NULL;
   for (unsigned int i = 0; i < MAXCSCHAR+1; i++) {
     if (cs_member(a,i)) {
-      if (!in_range) {
+      if (special && special(i)) {
+        if (in_range)
+          result = new List::List(new $(lb,i),result);
+        result = new List::List(new $(i,i+1),result);
+        in_range = 0;
+      }
+      else if (!in_range) {
         empty_so_far = 0;
         lb = i;                                    // lb is a member
         in_range = 1;

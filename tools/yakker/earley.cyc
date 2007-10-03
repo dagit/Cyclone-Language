@@ -17,34 +17,54 @@ namespace Earley;
 /* The alphabet of the automaton is the set of terminals and
    non-terminals.  Assume for now that cs_t can represent a set of
    terminals and non-terminals.  Number our new actions starting
-   at 256. */
+   at 256.
+
+   NB: there is a max number of actions hard-coded in cs.h.
+*/
 
 static unsigned int symb_action_counter = 257;
 static struct Hashtable::Table<str_t,act_t> *symb_action_table = NULL;
+static struct Hashtable::Table<act_t,str_t> *action_symb_table = NULL;
 static act_t callout_action() {
   return 256;
 }
 static act_t new_action() {
   let a = symb_action_counter++;
+  if (a > MAXACTION) {
+    fprintf(stderr,"Internal error: maximum number of actions exceeded\n");
+    fflush(stderr);
+    exit(1);
+  }
   return a;
 }
 static cs_t callout_cs() {
   return cs_singleton(callout_action());
 }
-static act_t consume_symb_action(const char ?`H symb) {
+const char ?act2symb(act_t act) {
+  let sopt = Hashtable::lookup_opt(action_symb_table,act);
+  if (sopt == NULL || *sopt == NULL) return NULL;
+  else return **sopt;
+}
+static act_t symb2act(const char ?`H symb) {
   if (symb_action_table == NULL)
     symb_action_table =
       Hashtable::create(11,strptrcmp,Hashtable::hash_stringptr);
+  if (action_symb_table == NULL) {
+    action_symb_table =
+      Hashtable::create(11,st_cmp,st_hash);
+    Hashtable::insert(action_symb_table,callout_action(),new "CALL");
+  }
   let symbptr = new symb;
   let aptr = Hashtable::lookup_opt(symb_action_table,symbptr);
   if (aptr != NULL) return *aptr;
   let a = new_action();
   fprintf(stderr,"Symbol %s has action 0x%x\n",symb,a);
   Hashtable::insert((_@)symb_action_table,symbptr,a);
+  Hashtable::insert((_@)action_symb_table,a,symbptr);
   return a;
 }
 static cs_t consume_symb_cs(const char ?`H symb) {
-  return cs_singleton(consume_symb_action(symb));
+  return cs_singleton(symb2act(symb));
 }
 
 /* An automaton state and parent pointer */
@@ -90,6 +110,11 @@ typedef Set::set_t<earley_item_t> earley_state_t;
    initialized to the empty table.
    On return the table will hold mappings for all symbols encountered.
    */
+$(st_t,st_t,st_t)
+  merge(Hashtable::table_t<str_t,st_t> symb_st,
+        grammar_t grm,
+        rule_t r);
+
 st_t rule2earley0(Hashtable::table_t<str_t,st_t> symb_st,
                   grammar_t grm,
                   rule_t r) {
@@ -108,9 +133,9 @@ st_t rule2earley0(Hashtable::table_t<str_t,st_t> symb_st,
          converting to NFA in case the symbol is defined recursively. */
       let s = nfa_fresh_state(); let f = nfa_fresh_state(); final(s,f);
       Hashtable::insert(symb_st,xptr,s);
-      let s_body = rule2earley0(symb_st,grm,x_rule);
+      let $(s_body,f_body,_) = merge(symb_st,grm,x_rule);
+      final(s,f_body); // merge does not do this
       etrans(s,s_body);
-      etrans(get_final(s_body),f);
       x_start = s;
     }
     let s = nfa_fresh_state();
@@ -199,7 +224,9 @@ $(st_t,st_t,st_t)
          converting to NFA in case the symbol is defined recursively. */
       let s = nfa_fresh_state(); let f = nfa_fresh_state();
       Hashtable::insert(symb_st,xptr,s);
-      let $(s_body,_,_) = merge(symb_st,grm,x_rule);
+      let $(s_body,f_body,_) = merge(symb_st,grm,x_rule);
+      // need e_body too???
+      final(s,f_body); // merge does not do this
       etrans(s,s_body);
       x_start = s;
     }
@@ -207,7 +234,7 @@ $(st_t,st_t,st_t)
     let s2 = nfa_fresh_state();
     let e = nfa_fresh_state();
     let f = nfa_fresh_state();
-    action(s,callout_cs(),x_start);
+    action(s,EPSILON,x_start);
     etrans(s,s2);
     action(s2,consume_symb_cs(x),f);
     /* If the symbol can derive the empty string make sure this gets
@@ -291,12 +318,13 @@ $(st_t,st_t,st_t)
     let scall = rule2earley0(symb_st,grm,r2);
     let fcall = get_final(scall);
     etrans(s,s2);
+    action(s,EPSILON,e);
     etrans(e2,s2);
+    action(e2,EPSILON,e);
     etrans(f2,scall);
     action(f2,EPSILON,f);
     etrans(fcall,scall);
     action(fcall,EPSILON,f);
-    action(e2,EPSILON,e);
     return $(s,f,e);
   case &Star(m,i as &Infinity,r2):
     let r_seq = SEQ(r2,STAR(m-1,i,r2));
@@ -329,33 +357,53 @@ $(st_t,st_t,st_t)
 }
 
 $(dfa_t,Set::set_t<st_t>) rule2earley(grammar_t grm, rule_t r) {
-  nfa_init(grm);
+  /* Build the NFA for the grammar */
+
+  /* symb_st maps symbols to start states */
   Hashtable::table_t<str_t,st_t> symb_st =
     Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr);
-  let start_state = rule2earley0(symb_st,grm,r);
-  let final_state = get_final(start_state); /* final state for r */
+
+  nfa_init(grm);
+  let $(start_state,f,e) = merge(symb_st,grm,r);
+  let final_state = nfa_fresh_state();
+  etrans(f,final_state);
+  etrans(e,final_state);
+  final(start_state,final_state);
   fprintf(stderr,"Start state is %d, final state is %d\n",start_state,final_state);
-  /* Collect set of final states for symbols */
+  nfa_dot(stderr,Set::singleton(st_cmp,final_state),act2symb);
+
+  /* Collect the set of final states for symbols... */
   let symb_final_states = Set::empty(st_cmp);
+  /* ... and the mapping from symbol actions to symbols */
   let act_table = Hashtable::create(11,st_cmp,st_hash); // should be act_cmp
   for (let rules = grm; rules != NULL; rules = rules->tl) {
     let &$(symb,_,_) = rules->hd;
     let st_opt = Hashtable::lookup_opt(symb_st,new symb);
     if (!st_opt) continue;
     let symb_final = get_final(*st_opt);
-    //    fprintf(stderr,"Symbol %s start is %d final is %d\n",symb,*st_opt,symb_final);
     symb_final_states = Set::insert(symb_final_states,symb_final);
     Hashtable::insert(act_table,
                       symb_final,
-                      consume_symb_action(symb));
+                      symb2act(symb));
   }
-  //  nfa_dot(stderr,Set::insert(symb_final_states,final_state));
+
+  /* Convert to DFA */
   let dfa = nfa2dfa(start_state,
                     Set::insert(symb_final_states,final_state));
   dfa = dfa_minimize(dfa);
+
+  /* We want an automata with final attributes that indicate which
+     symbol has been completed, but our NFAs do not have final
+     attributes.  The nfa2dfa conversion creates a DFA whose final
+     states have as attributes the corresponding NFA final states.
+     Therefore we can post-process the DFA to map these attributes to
+     indicate the symbol (as indicated by symb2act()).
+
+     We also record in dfa_final the subset of final states that
+     correspond to the full RHS that is being parsed, as distinguished
+     from the final states that indicate parsing of symbols.
+  */
   let dfa_final = Set::empty(st_cmp);
-  /* Final states in the DFA have as attributes the set of corresponding
-     NFA final states.  Map these to the correct consume_symb_action() */
   for (let states = Set::to_list(dfa_final_states(dfa));
        states != NULL; states = states->tl) {
     let s = states->hd;
@@ -414,7 +462,7 @@ push_closure(dfa_t dfa,
   /* Close under CALLS */
   let t = target(dfa,s,callout_action());
   if (t != 0)
-    push_closure(dfa,estates,i,new $(t,i),"(call)",pred,retn,node);
+    push_closure(dfa,estates,i,new $(t,i),"(call)",pred,retn,NULL);
 
   /* Close under RETURNS */
   if (i != backptr // we parsed the empty string, RETURN handled by dfa already
@@ -436,39 +484,93 @@ push_closure(dfa_t dfa,
         let &$(t,tbackptr) = es_back_list->hd;
         let ttarget = target(dfa,t,symb);
         /* ... see if the DFA state did a CALL and RETURN if so. */
-        if (ttarget != 0)
+        if (ttarget != 0) {
           push_closure(dfa,estates,i,new $(ttarget,tbackptr),
                        aprintf("(return 0x%x)",symb),
-                       pred,retn,node); // prbly node should be causal
+                       pred,retn,new $(t,tbackptr,backptr));
+          let retnode = new $(ttarget,tbackptr,i);
+          let backlistptr = Hashtable::lookup_opt(retn,retnode);
+          if (backlistptr != NULL) {
+            Hashtable::remove(retn,retnode);
+            Hashtable::insert(retn,retnode,new List::List(node,*backlistptr));
+          }
+          else Hashtable::insert(retn,retnode,List::list(node));
+        }
       }
     }
   }
 }
 
 
-/* See if a parse was ambiguous */
-int ambiguous(Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H> pred,
-              Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H> retn,
-              earley_node_t ei) {
-  if (ei->f0 == 1 && ei->f1 == 0) return 0; // start reached, unambiguous
-  let before = Hashtable::lookup(pred,ei);
-  let len = List::length(before);
-  if (len == 0) {
-    fprintf(stderr,"impossible 0 before list\n"); fflush(stderr);
-    return 0;
-  }
-  if (len > 1) {
-    fprintf(stderr,"Ambiguous parse, (%d,%d) has multiple predecessors\n",
-            ei->f0,ei->f1);
-    while (before) {
-      fprintf(stderr,"(%d,%d)\n",before->hd->f0,before->hd->f1);
-      before = before->tl;
+// returns 1 if ambiguous, 0 otherwise
+int derivation(Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H> pred,
+               Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H> retn,
+               earley_node_t ei,
+               const char ?input,
+               dfa_t dfa) {
+  let retcode = 0;
+  let maybe_retn = Hashtable::lookup_opt(retn,ei);
+  if (maybe_retn != NULL) {
+    let len = List::length(*maybe_retn);
+    if (len > 1){
+      retcode = 1;
+      fprintf(stderr,"Ambiguous parse, (%d,%d,%d) has multiple RETURNs\n",
+              ei->f0,ei->f1,ei->f2);
+    } 
+    // only print one derivation even if > 1
+    if (len > 0) {
+      retcode = retcode || derivation(pred,retn,(*maybe_retn)->hd,input,dfa);
+      let &$(x,i,j) = (*maybe_retn)->hd;
+      // x is state, parse started at i, finished at j
+      let completed = Set::to_list(dfa_final_attrs(dfa,x));
+      if (completed != NULL) {
+        let attr = completed->hd;
+        printf(" <- %s [%d,%d]\n",act2symb(attr),i,j);
+      }
+      else
+        // should never happen
+        printf(" <- ??? [%d,%d]\n",i,j);
     }
-    fflush(stderr);
-
-    return 1; // more than one predecessor, ambiguous
   }
-  return ambiguous(pred,retn,before->hd);
+
+  let before_opt = Hashtable::lookup_opt(pred,ei);
+  if (before_opt == NULL) return retcode;
+
+  let before = *before_opt;
+  let len = List::length(before);
+
+  if (len > 1) {
+    retcode = 1;
+    fprintf(stderr,"Ambiguous parse, (%d,%d,%d) has multiple predecessors\n",
+            ei->f0,ei->f1,ei->f2);
+//    while (before) {
+//      fprintf(stderr,"(%d,%d,%d)\n",before->hd->f0,before->hd->f1,before->hd->f2);
+//      before = before->tl;
+//    }
+//    fflush(stderr);
+  }
+  if (len > 0)
+    retcode = retcode || derivation(pred,retn,before->hd,input,dfa);
+
+  if (maybe_retn == NULL) {
+    // did not get here by RETURN, so we read a terminal, print it
+    let i = ei->f2;
+    printf("%c",input[i-1]);
+  }
+  else {
+    // got here by a RETURN, therefore we just parsed a nonterminal, print it
+    let &$(x,i,j) = (*maybe_retn)->hd;
+    // x is state, parse started at i, finished at j
+    let completed = Set::to_list(dfa_final_attrs(dfa,x));
+    if (completed != NULL) {
+      let attr = completed->hd;
+      printf(" %s ",act2symb(attr));
+    }
+    else
+      // should never happen
+      printf(" ??? ");
+  }
+  return retcode;
 }
 
 /* Earley recognizer.
@@ -477,7 +579,7 @@ int ambiguous(Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H> p
 int recognize(grammar_t grm, rule_t r,const char ?input) {
   init_maybe_empty(grm);
   let $(dfa,dfa_final) = rule2earley(grm,r);
-  dfa_dot(stderr,dfa);
+  dfa_dot(stderr,dfa,act2symb);
   fflush(stderr);
 
   /* Keep track of parse trees */
@@ -525,7 +627,8 @@ int recognize(grammar_t grm, rule_t r,const char ?input) {
        slast_list = slast_list->tl) {
       let &$(state,parent) = slast_list->hd;
       if (Set::member(dfa_final,state) && parent == 0) {
-        ambiguous(pred,retn,new $(state,parent,input_len));
+        derivation(pred,retn,new $(state,parent,input_len),input,dfa);
+        printf(" <- START\n");
         return 1;
       }
   }

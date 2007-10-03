@@ -156,10 +156,9 @@ struct grammar {
 
 extern int is_cs(rule_t r);
 extern cs_t rule2cs(rule_t r);
-extern struct grammar @cs_annot(grammar_t<`H> ds);
 // convert all rules marked as css into actual css.
-extern void cs_optimize(grammar_t<`H> ds);
-extern void minus_elim(grammar_t<`H> ds);
+extern void cs_optimize(grammar_t ds);
+extern void minus_elim(grammar_t ds);
 extern rule_t cs2rule(cs_t rng);
 
 

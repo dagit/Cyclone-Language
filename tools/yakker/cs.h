@@ -29,6 +29,9 @@
 typedef unsigned char @{BUCKETS}@nozeroterm cs_t;
 typedef unsigned char *{BUCKETS}@nozeroterm cs_opt_t;
 
+/* Predicates on character sets -- NULL is all false, NULL return is false */
+typedef const char ? (*cs_pred_t)(unsigned int);
+
 extern void cs_intersect(cs_t a,cs_t b);
 extern void cs_union(cs_t a,cs_t b);
 extern void cs_xor(cs_t a,cs_t b);
@@ -51,14 +54,17 @@ extern int first_of_cs(cs_t a);
 extern $(unsigned int,unsigned int) cs_bounds(cs_t rng);
 /* return a list of all characters in the set */
 extern List::list_t<unsigned int> cs2list(cs_t a);
-/* return list of half-open intervals in sorted order */
-extern List::list_t<$(unsigned int,unsigned int)@> cs2ranges(cs_t a);
+/* return list of half-open intervals in sorted order.
+   special is a predicate that indicates that certain characters should
+   not be grouped with other characters, i.e., they should always appear
+   alone in their own half-open interval. */
+extern List::list_t<$(unsigned int,unsigned int)@> cs2ranges(cs_t a,cs_pred_t special);
 
 /* convert/print in (nonstandard) readable format */
-extern const char ?cs2string(cs_t rng);
+extern const char ?cs2string(cs_t rng,cs_pred_t special);
 extern void cs_print(FILE @f,cs_t rng);
 /* suitable for Graphviz */
-extern void cs_dot_print(FILE @f,cs_t cs);
+extern void cs_dot_print(FILE @f,cs_t cs,cs_pred_t special);
 
 extern const char ?cs_char_escape(unsigned int c);
 extern const char ?fsm_char_escape(unsigned int c);

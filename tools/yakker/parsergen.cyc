@@ -73,7 +73,7 @@ static unsigned int fill_amount(rule_t r) {
 }
 
 static void gen_cs(cs_t cs) {
-  let ranges = cs2ranges(cs);
+  let ranges = cs2ranges(cs,NULL);
 
   printf("if (0");
   for (; ranges; ranges = ranges->tl) {

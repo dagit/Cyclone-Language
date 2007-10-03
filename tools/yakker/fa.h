@@ -53,7 +53,7 @@ extern dfa_t lookahead_dfa(grammar_t grm,List::list_t<rule_t> rules, rule_t righ
 extern void dfa_generate1(dfa_t dfa);
 extern void dfa_generate2(dfa_t dfa);
 extern void lookahead_glush(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt);
-extern void nfa_dot(FILE @f,Set::set_t<st_t> final_states);
-extern void dfa_dot(FILE @f, dfa_t dfa);
+extern void nfa_dot(FILE @f,Set::set_t<st_t> final_states,cs_pred_t special);
+extern void dfa_dot(FILE @f, dfa_t dfa, cs_pred_t special);
 extern dfa_t dfa_minimize(dfa_t dfa);
 #endif

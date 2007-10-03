@@ -95,14 +95,8 @@ unsigned int what_interval(unsigned int ?intervals, unsigned int key) {
   else
     return Nfa_eager::what_interval(intervals,key);
 }
-//void nfa_dot(FILE @f,Set::set_t<st_t> final_states) {
-//  if (use_lazy_nfa)
-//    Nfa_lazy::nfa_dot(f,final_states);
-//  else
-//    Nfa_eager::nfa_dot(f,final_states);
-//}
 /* Print out an NFA in DOT format, for display by Graphviz */
-void nfa_dot(FILE @f,Set::set_t<st_t> final_states) {
+void nfa_dot(FILE @f,Set::set_t<st_t> final_states,cs_pred_t special) {
   fprintf(f,"digraph g {\n");
   fprintf(f,"rankdir=LR;\n");
   for (let i = 1; i < nfa_number_of_states; i++) {
@@ -121,7 +115,7 @@ void nfa_dot(FILE @f,Set::set_t<st_t> final_states) {
       }
       else {
         fprintf(f,"%u -> %u [ label = \"",i,to);
-        cs_dot_print(f,a);
+        cs_dot_print(f,a,special);
         fprintf(f,"\"];\n");
       }
     }
@@ -331,7 +325,7 @@ void glush_dot(FILE @f, Set::set_t<st_t,`H> S, st_t s, Set::set_t<st_t> F,
       for (let AAA = AA; AAA; AAA = AAA->tl) {
 	let a = AAA->hd;
 	fprintf(f,"%u -> %u [ label = \"",a,b);
-	cs_dot_print(f,cs);
+	cs_dot_print(f,cs,NULL);
 	fprintf(f,"\"];\n");
       }
     }
@@ -440,7 +434,7 @@ lookahead_glush(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt) {
 
 //  if (debug) {
     FILE *f = fopen(dotfile("nfa"),"w");
-    if (f) { nfa_dot(f,nfa_final_states); fclose(f); }
+    if (f) { nfa_dot(f,nfa_final_states,NULL); fclose(f); }
 
     f = fopen(txtfile("fsm"),"w");
     if (f) { fsm_glush_print(f,s_all, T_list, F_all); fclose(f); }
@@ -682,7 +676,10 @@ void dfa_print(dfa_t dfa) {
   }
 }
 /* Print the graph in dot format, for display by GraphViz */
-void dfa_dot(FILE @f, dfa_t dfa) {
+/* Hint: to get the graph to print on one page try
+     dot -Tps -Gsize=7,9 | lpr
+*/
+void dfa_dot(FILE @f, dfa_t dfa, cs_pred_t special) {
   fprintf(f,"digraph g {\n");
   let len = dfa->number_of_states;
   /* print nodes */
@@ -693,11 +690,17 @@ void dfa_dot(FILE @f, dfa_t dfa) {
         let x = Hashtable::lookup(dfa->final_attrs,i);
         let y = Set::choose(x);
         x = Set::delete(x,y);
-        fprintf(f,"%u",y);
+        if (special && special(y))
+          fprintf(f,"%s",special(y));
+        else
+          fprintf(f,"%u",y);
         while (!Set::is_empty(x)) {
           y = Set::choose(x);
           x = Set::delete(x,y);
-          fprintf(f,",%u",y);
+          if (special && special(y))
+            fprintf(f,",%s",special(y));
+          else
+            fprintf(f,",%u",y);
         }
       } catch {
       default: break; // Set::choose() fails for final state w/o attributes
@@ -738,7 +741,7 @@ void dfa_dot(FILE @f, dfa_t dfa) {
       let x = Hashtable::lookup(target_spans,target);
       //      x = List::imp_rev(x);
       fprintf(f,"%u -> %u [ label = \"",i,target);
-      cs_dot_print(f,x);
+      cs_dot_print(f,x,special);
 //      for (; x; x = x->tl) {
 //	let &$(lb,ub) = x->hd;
 //	while (x->tl) { /* Merge adjacent spans */
@@ -1952,7 +1955,7 @@ dfa_t lookahead_dfa(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt)
       if (dfa_unbounded(dfa)) {
 	num_conflicts_unbounded++;
 	FILE *f = fopen(dotfile("unbounded"),"w");
-	if (f) { dfa_dot(f,dfa); fclose(f); }
+	if (f) { dfa_dot(f,dfa,NULL); fclose(f); }
       }
       return dfa;
     }
@@ -1991,7 +1994,7 @@ dfa_t lookahead_dfa(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt)
     }
     if (debug > 1) {
       FILE *f = fopen(dotfile("nfa"),"w");
-      if (f) { nfa_dot(f,final_states); fclose(f); }
+      if (f) { nfa_dot(f,final_states,NULL); fclose(f); }
     }
   }
 
@@ -2010,17 +2013,17 @@ dfa_t lookahead_dfa(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt)
 
   if (debug) {
     FILE *f = fopen(dotfile("nfa_after"),"w");
-    if (f) { nfa_dot(f,final_states); fclose(f); }
+    if (f) { nfa_dot(f,final_states,NULL); fclose(f); }
 
     FILE *f = fopen(dotfile("dfa0"),"w");
-    if (f) { dfa_dot(f,dfa); fclose(f); }
+    if (f) { dfa_dot(f,dfa,NULL); fclose(f); }
   }
 
   dfa = dfa_minimize(dfa);
 
   if (debug) {
     FILE *f = fopen(dotfile("dfa1"),"w");
-    if (f) { dfa_dot(f,dfa); fclose(f); }
+    if (f) { dfa_dot(f,dfa,NULL); fclose(f); }
   }
 
   if (dfa_tiebreak(dfa)) {
@@ -2031,12 +2034,12 @@ dfa_t lookahead_dfa(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt)
 
   if (debug) {
     FILE *f = fopen(dotfile("dfa2"),"w");
-    if (f) { dfa_dot(f,dfa); fclose(f); }
+    if (f) { dfa_dot(f,dfa,NULL); fclose(f); }
   }
   if (dfa_unbounded(dfa)) {
     num_conflicts_unbounded++;
     FILE *f = fopen(dotfile("unbounded"),"w");
-    if (f) { dfa_dot(f,dfa); fclose(f); }
+    if (f) { dfa_dot(f,dfa,NULL); fclose(f); }
   }
   //  if (debug>=2) dfa_generate2(dfa);
   //  dfa_generate(dfa);
