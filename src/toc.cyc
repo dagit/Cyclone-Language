@@ -3753,21 +3753,16 @@ static void stmt_to_c(env_t nv, stmt_t s) {
     case &Exp_s(e):       exp_to_c(nv, e); return;
     case &Return_s(NULL): do_npop_before(get_npop(s),s); return;
     case &Return_s(e):
-      fprintf(stderr,"xx1\n");fflush(stderr);
       // pop **after** evaluating expression
       type_t t = typ_to_c((type_t)e->topt);
-      fprintf(stderr,"xx2\n");fflush(stderr);
       exp_to_c(nv,e);
-      fprintf(stderr,"xx3\n");fflush(stderr);
       int npop = get_npop(s);
-      fprintf(stderr,"xx4\n");fflush(stderr);
       if(npop > 0) {
 	let x = temp_var();
 	let retn_stmt = return_stmt(set_type(var_exp(x,DL),t),DL);
 	do_npop_before(npop,retn_stmt);
 	s->r = declare_stmt(x, t, e, retn_stmt, DL)->r;
       }
-      fprintf(stderr,"xx5\n");fflush(stderr);
       return;
     case &Seq_s(s1,s2):
       stmt_to_c(nv,s1);
@@ -3872,16 +3867,13 @@ static void stmt_to_c(env_t nv, stmt_t s) {
         stmt_to_c(nv,s);
         break;
       case &Fn_d(fd):
-        fprintf(stderr,"0000001\n");fflush(stderr);
         /* The save/restore is necessary because pop_tables are not
            in the environment but rather in globals at the moment.
            Should change this. */
         let old_pop_table = fn_pop_table; // save
 	fndecl_to_c(nv, fd, false);
         fn_pop_table = old_pop_table; // restore
-        fprintf(stderr,"0000002\n");fflush(stderr);
 	stmt_to_c(nv,body);
-        fprintf(stderr,"0000003\n");fflush(stderr);
         break;
       case &Region_d(tv, vd, open_exp_opt):
         // NOTE:  _npop_handler has to deal with regions as well as exceptions
@@ -3990,7 +3982,6 @@ static void stmt_to_c(env_t nv, stmt_t s) {
 //              Translation of Declarations                  //
 ///////////////////////////////////////////////////////////////
 static void fndecl_to_c(env_t nv, fndecl_t f, bool cinclude) {
-  fprintf(stderr,"00\n");fflush(stderr);
   f->i.tvars  = NULL;
   f->i.effect = NULL;
   //  f->i.rgn_po = NULL;
@@ -4003,21 +3994,16 @@ static void fndecl_to_c(env_t nv, fndecl_t f, bool cinclude) {
   f->i.ret_type  = typ_to_c(f->i.ret_type);
   f->cached_type = typ_to_c((type_t)f->cached_type);
   region frgn;
-  fprintf(stderr,"01\n");fflush(stderr);
   let nv = share_env(frgn,nv);
-  fprintf(stderr,"02\n");fflush(stderr);
   for (let args=f->i.args; args != NULL; args = args->tl)
     (*args->hd)[2] = typ_to_c((*args->hd)[2]);
   // for C code, we need to go through and convert all of the types
   // from Cyclone types to C, but otherwise leave the code alone.
-  fprintf(stderr,"03\n");fflush(stderr);
   if (cinclude) {
     stmttypes_to_c(f->body);
     return;
   }
-  fprintf(stderr,"04\n");fflush(stderr);
   fn_pop_table = new Hashtable::lookup(*gpop_tables,f);
-  fprintf(stderr,"05\n");fflush(stderr);
   if (f->i.cyc_varargs && f->i.cyc_varargs->name != NULL) {
     let VarargInfo{n,tq,t,i} = *f->i.cyc_varargs;
     let t2 = typ_to_c(fatptr_type(t,heap_rgn_type,al_qual_type,tq,false_type,false_type));// region irrelevant
@@ -4025,13 +4011,10 @@ static void fndecl_to_c(env_t nv, fndecl_t f, bool cinclude) {
     f->i.args = append(f->i.args,new List(new $((var_t)n,tq,t2),NULL));
     f->i.cyc_varargs = NULL;
   }
-  fprintf(stderr,"06\n");fflush(stderr);
   // Tovc would like to use param_vardecls:
   for(let arg_vds = f->param_vardecls->v; arg_vds!=NULL; arg_vds=arg_vds->tl)
     arg_vds->hd->type = typ_to_c(arg_vds->hd->type);
-  fprintf(stderr,"07\n");fflush(stderr);
   stmt_to_c(clear_toplevel(frgn,nv),f->body);
-  fprintf(stderr,"08\n");fflush(stderr);
 }
 
 static scope_t scope_to_c(scope_t s) {
@@ -4490,9 +4473,7 @@ static void decls_to_c(env_t nv, list_t<decl_t> ds, bool cinclude) {
 	fd->name = new $(Abs_n(NULL,true),(*fd->name)[1]);
         fd->sc = Public; // function declarations can't be extern
       }
-      fprintf(stderr,"0001\n");fflush(stderr);
       fndecl_to_c(nv, fd, cinclude);
-      fprintf(stderr,"0002\n");fflush(stderr);
       result_decls = new List(d,result_decls);
       break;
     case &Let_d(...):

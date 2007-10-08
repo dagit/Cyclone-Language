@@ -418,7 +418,7 @@ lib_install lib_uninstall:
 	@(echo "no lib directory specified"; exit 1)
 endif
 .PHONY: install uninstall inc_install lib_install bin_install
-.PHONY: inc_uninstall lib_uninstall bin_uninstall unupdate
+.PHONY: inc_uninstall lib_uninstall bin_uninstall
 
 BUILDDIR=build/boot
 GENDIR=bin/genfiles
@@ -481,9 +481,6 @@ dbg_src:
 dbg_lib_src:
 	$(MAKE) BUILDDIR=build/dbg CYCFLAGS="$(CYCFLAGS) -g" lib_src
 
-# The directory in which the "unupdate" information is stored.
-UNUPDATEDIR=unupdate
-
 # The update files that go from BUILDDIR to GENDIR.
 BUILDDIR_UPDATE_FILES=$(UPDATE_SRCS) $(C_BOOT_LIBS) precore_c.h boot_cycstubs.c
 
@@ -514,78 +511,24 @@ cmp:
 # This target updates what is in bin/genfiles and include.
 # It would be "dangerous" to invoke this target if we did not have
 # version control.  Only updates changed files (makes cvs faster).
-# A backup copy is stored in UNUPDATEDIR; it can be restored by
-# issuing "make unupdate". Only the latest "update" is kept.
 update: cfiles
-	@test ! -e $(UNUPDATEDIR) || mv $(UNUPDATEDIR) $(UNUPDATEDIR)-backup
-	@mkdir -p $(UNUPDATEDIR)/include $(UNUPDATEDIR)/genfiles $(UNUPDATEDIR)/lib $(UNUPDATEDIR)/bin/cyc-lib
 	@for i in $(BUILDDIR_UPDATE_FILES);\
            do (cmp -s $(BUILDDIR)/$$i $(GENDIR)/$$i\
                || (echo UPDATING $(GENDIR)/$$i;\
-		   cp -pR $(GENDIR)/$$i $(UNUPDATEDIR)/genfiles/$$i;\
-		   touch $(UNUPDATEDIR)/contains-files;\
 	           cp $(BUILDDIR)/$$i $(GENDIR)/$$i)) done
 	@for i in $(LIB_UPDATE_FILES);\
            do (cmp -s lib/$$i $(GENDIR)/$$i\
                || (echo UPDATING $(GENDIR)/$$i;\
-		   cp -pR $(GENDIR)/$$i $(UNUPDATEDIR)/genfiles/$$i;\
-		   touch $(UNUPDATEDIR)/contains-files;\
                    cp lib/$$i $(GENDIR)/$$i)) done
 	@for i in $(CYCLONE_H);\
            do (test ! -e lib/$$i || cmp -s lib/$$i include/$$i\
                || (echo UPDATING include/$$i;\
-		   cp -pR include/$$i $(UNUPDATEDIR)/include/$$i;\
-		   cp -pR lib/$$i $(UNUPDATEDIR)/lib/$$i;\
-		   touch $(UNUPDATEDIR)/contains-files;\
                    mv lib/$$i include/$$i)) done
 	@for i in $(CYC_LIB_UPDATE_FILES);\
            do (test ! -e lib/$$i\
                || cmp -s lib/$$i bin/cyc-lib/$$i\
                || (echo UPDATING bin/cyc-lib/$$i;\
-		   cp -pR bin/cyc-lib/$$i $(UNUPDATEDIR)/bin/cyc-lib/$$i;\
-		   cp -pR lib/$$i $(UNUPDATEDIR)/lib/$$i;\
-		   touch $(UNUPDATEDIR)/contains-files;\
                    mv lib/$$i bin/cyc-lib/$$i)) done
-	@test -e $(UNUPDATEDIR)/contains-files || \
-           ($(RM) -r $(UNUPDATEDIR) && mv $(UNUPDATEDIR)-backup $(UNUPDATEDIR) \
-            && echo "No changes found; keeping unupdate information from previous update.")
-
-
-# Undo the most recent update. This can only be done once after an update; if the unupdate is
-# successful, the unupdate directory is removed. Because it is very risky to keep the compiler
-# built by the previous update around (this compiler would be used to build the C files for
-# the next update), a clean bootstrap is executed immediately after restoring the old files.
-unupdate:
-	@test -e $(UNUPDATEDIR) || (echo "There is nothing to unupdate." && false)
-	@test ! -e $(UNUPDATEDIR)/genfiles/* || cp -av $(UNUPDATEDIR)/genfiles/* $(GENDIR)
-	@test ! -e $(UNUPDATEDIR)/lib/* || cp -pR $(UNUPDATEDIR)/lib/* lib
-	@test ! -e $(UNUPDATEDIR)/include/* || cp -pR $(UNUPDATEDIR)/include/* include
-	@test ! -e $(UNUPDATEDIR)/bin/cyc-lib/* || cp -pR $(UNUPDATEDIR)/bin/cyc-lib/* bin/cyc-lib
-	@$(RM) -r $(UNUPDATEDIR)
-	@echo
-	@echo "Unupdate complete. Now \"make clean\" and \"make all\" will be run to restore your"
-	@echo "compiler, tools and libraries to their previous state."
-	@echo
-	$(MAKE) clean
-	$(MAKE) all
-	@echo
-	@echo "Unupdate is complete."
-	@echo
-
-# Test the bootstrap sequence and execute the test suite on the bootstrapped compiler;
-# if this fails, unupdate
-safeupdate: test_src_compiler
-	@($(MAKE) update && $(MAKE) clean && $(MAKE) all && $(MAKE) test) \
-           || (echo && echo "XXXXXXXXX Safe update failed; unupdating:" && echo\
-               && $(MAKE) unupdate \
-               && echo && echo "XXXXXXXXX Safe update failed." && echo && false)
-	@echo
-	@echo "The test suite did not return with an error, so the update has been retained."
-	@echo "However, be sure to check the output of the testsuite for any problems, as"
-	@echo "the testsuite may ignore the errors it finds. If you see any problems, you can"
-	@echo "undo this update by running \"make unupdate\" until the next time you do a"
-	@echo "\"make update\" or \"make safeupdate\"."
-	@echo
 
 test_src_compiler: cyclone_src
 	@$(RM) -r build/boot_test_src_compiler
