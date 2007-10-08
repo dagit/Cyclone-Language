@@ -23,7 +23,7 @@
 // or C--.  In particular, the translation eliminates nested expressions
 // and essentially A-normalizes the resulting code, binding every
 // computation to a temporary variable (and thus forcing evaluation-
-// order to be left-to-right.)  
+// order to be left-to-right.)
 
 #include "absyn.h"
 #include "warn.h"
@@ -55,7 +55,7 @@ typedef struct Env {
 
 // Create an empty environment
 static env_t new_env() {
-  return new Env{.stmts = NULL, 
+  return new Env{.stmts = NULL,
                  .temps = NULL,
                  .assign_last_exp = NULL,
                  .break_label = NULL,
@@ -70,7 +70,7 @@ static stmt_t rev_seq_stmts(list_t<stmt_t> ss) {
     let s = ss->hd;
     switch (s->r) {
     case &Skip_s: continue;
-    case &Label_s(x,&Stmt{.r = &Skip_s,...}): 
+    case &Label_s(x,&Stmt{.r = &Skip_s,...}):
       res = label_stmt(x,res,s->loc);
       continue;
     default: res = seq_stmt(s,res,s->loc);
@@ -157,7 +157,7 @@ static $(vardecl_t,exp_t) fresh_var(env_t env, exp_t e) {
   if (e->topt == NULL) {
     bool ism = false;
     switch (e->r) {
-    case &Var_e(b): 
+    case &Var_e(b):
       if (is_macro(binding2qvar(b))) ism = true; break;
       switch (b) {
       case &Global_b(vd): fallthru(vd);
@@ -173,7 +173,7 @@ static $(vardecl_t,exp_t) fresh_var(env_t env, exp_t e) {
     case &Instantiate_e(...): ism = true; break;
     default: break;
     }
-    if (!ism) 
+    if (!ism)
       Warn::warn(e->loc,"expression missing type: %s",Absynpp::exp2string(e));
     t = typeof_type(e);
   } else {
@@ -218,7 +218,7 @@ static exp_t lower_lhs(env_t env, exp_t e);
 static bool  lower_stmt(env_t env, stmt_t s);
 static void  lower_cond(env_t env, exp_t e, var_t truelab, var_t falselab, seg_t loc);
 static var_opt_t lower_true(env_t env, exp_t e, var_t falselab, seg_t loc);
-
+static fndecl_t lower_fn(fndecl_t fd);
 
 // Emits statements into the environment.  Returns true if the
 // statement might fall-through to any next statement, and false
@@ -231,12 +231,12 @@ static bool lower_stmt(env_t env, stmt_t s) {
  LOOP:
   switch (s->r) {
   case &Skip_s: return true;
-  case &Exp_s(e): 
+  case &Exp_s(e):
     switch (get_assign_last_exp(env)) {
     case NULL: lower_rhs(env, true, false, e); break;
-    case v: 
+    case v:
       set_assign_last_exp(env,NULL);
-      emit_assign(env,v,lower_rhs(env,false,true,e),0); 
+      emit_assign(env,v,lower_rhs(env,false,true,e),0);
       break;
     }
     return true;
@@ -266,7 +266,7 @@ static bool lower_stmt(env_t env, stmt_t s) {
     let b = lower_stmt(env,s2);
     if (a || b) {
       emit_label(env,j_lab,0); return true;
-    } 
+    }
     return false;
   case &While_s($(e,_),s1):
     let $(c_lab,t_lab,b_lab) = $(new_label(env),new_label(env),new_label(env));
@@ -327,7 +327,7 @@ static bool lower_stmt(env_t env, stmt_t s) {
     return true;
   case &Decl_s(d,s1):
     switch (d->r) {
-    case &Var_d(vd): 
+    case &Var_d(vd):
       let newvd = new *vd;
       // Must skip static declarations -- they can't be A-normalized
       // any more than top-level initializers.
@@ -343,7 +343,18 @@ static bool lower_stmt(env_t env, stmt_t s) {
       set_prev_stmts(env,p);
       emit_stmt(env,decl_stmt(new Decl{new Var_d(newvd),d->loc},body,0));
       return a;
-    case &Fn_d(fd): Warn::impos("Fn decl in lower_stmt");
+    case &Fn_d(fd):
+      let fn_r = d->r;
+      if (fd->orig_scope != ExternC)
+        fn_r = new Fn_d(lower_fn(fd));
+      let p = prev_stmts(env);
+      set_prev_stmts(env,NULL);
+      let a = lower_stmt(env,s1);
+      let body = rev_seq_stmts(prev_stmts(env));
+      set_prev_stmts(env,p);
+      emit_stmt(env,decl_stmt(new Decl{d->r,d->loc},body,0));
+      return a;
+      //      Warn::impos("Fn decl in lower_stmt");
     case &Aggr_d(ad): Warn::impos("Aggregate decl in lower_stmt");
     case &Enum_d(ed): Warn::impos("Enum decl in lower_stmt");
     case &Using_d(...): Warn::impos("Using decl in lower");
@@ -393,7 +404,7 @@ static bool is_temp(qvar_t qv) {
 // effect in the list.  That avoids copying things in to temps.
 static list_t<exp_t> lower_rhs_list(env_t env, list_t<exp_t,`H> es) {
   // avoid generating temps for arguments to functions or primops
-  // when the arguments are already constants or variables.  
+  // when the arguments are already constants or variables.
   bool no_eff = true;
   for (let es2 = es; no_eff && es2 != NULL; es2 = es2->tl) {
     switch (es2->hd->r) {
@@ -403,7 +414,7 @@ static list_t<exp_t> lower_rhs_list(env_t env, list_t<exp_t,`H> es) {
   }
   if (no_eff) return es;
   let res = NULL;
-  for (; es != NULL; es = es->tl) 
+  for (; es != NULL; es = es->tl)
     res = new List{lower_rhs(env,false,false,es->hd),res};
   return List::imp_rev(res);
 }
@@ -424,7 +435,7 @@ static bool might_have_effect(exp_t e) {
 // is and will discard it.  That allows us to avoid generating a temp
 // for things like procedure calls or assignments where the result
 // isn't used, and in turn, that's important to avoid generating
-// temps of type "void".  
+// temps of type "void".
 static exp_t lower_rhs(env_t env, bool effect_only, bool has_target, exp_t e) {
   exp_t res;
   if (e->topt != NULL && Unify::unify(e->topt,void_type)) effect_only = true;
@@ -432,7 +443,7 @@ static exp_t lower_rhs(env_t env, bool effect_only, bool has_target, exp_t e) {
   case &Const_e(_) : return e;
   case &Pragma_e(_): return uint_exp(1,e->loc);
   case &Var_e(&Funname_b(...)): return e;
-  case &Var_e(b):    
+  case &Var_e(b):
     // Note, a temp is already a "value", but a C variable is not --
     // since it might be side effected.  So we have to bind the
     // result to a temp and return the temp in that case.
@@ -492,7 +503,7 @@ static exp_t lower_rhs(env_t env, bool effect_only, bool has_target, exp_t e) {
       return uint_exp(0,0);
     } else {
       let $(vd,temp) = fresh_var(env,e);
-      lower_stmt(env, 
+      lower_stmt(env,
                  ifthenelse_stmt(e1,
                                  assign_it(temp,e2,0),
                                  assign_it(deep_copy(temp),e3,0),e->loc));
@@ -537,9 +548,9 @@ static exp_t lower_rhs(env_t env, bool effect_only, bool has_target, exp_t e) {
     bool is_setjmp = false;
   LOOP:
     switch (e1->r) {
-    case &Instantiate_e(e2,...): 
+    case &Instantiate_e(e2,...):
       e1 = e2; goto LOOP;
-    case &Var_e(&Unresolved_b(&$(_,n))): 
+    case &Var_e(&Unresolved_b(&$(_,n))):
       // because setjmp's argument is of different types on different
       // platforms, we avoid lowering that particular call.
       if (strcmp(*n,"setjmp") == 0) is_setjmp = true;
@@ -562,7 +573,7 @@ static exp_t lower_rhs(env_t env, bool effect_only, bool has_target, exp_t e) {
     // FIX:  need to lower e but for now, we punt...
   case &Sizeofexp_e(...): res = e; break;
   case &Offsetof_e(t,fs): res = e; break;
-  case &Deref_e(e1): 
+  case &Deref_e(e1):
     res = deref_exp(lower_rhs(env,false,false,e1),e->loc); break;
   case &AggrMember_e(e1,f,it,ir):
     // Hmmm.  It's not clear that we want to break apart
@@ -570,7 +581,7 @@ static exp_t lower_rhs(env_t env, bool effect_only, bool has_target, exp_t e) {
     res = aggrmember_exp(lower_rhs(env,false,false,e1),f,e->loc);
     break;
   case &AggrArrow_e(e1,f,it,ir):
-    // Hmmm.  We might eliminate e.f in favor of *(e.f).  
+    // Hmmm.  We might eliminate e.f in favor of *(e.f).
     res = aggrarrow_exp(lower_rhs(env,false,false,e1),f,e->loc);
     break;
   case &Subscript_e(e1,e2):
@@ -614,7 +625,7 @@ static exp_t lower_rhs(env_t env, bool effect_only, bool has_target, exp_t e) {
   case &Asm_e(...): res = e; break;
   case &NoInstantiate_e(_):
     Warn::impos("no instantiate expression in lower_rhs (%s)",Absynpp::exp2string(e));
-  case &Array_e(dles): 
+  case &Array_e(dles):
     Warn::impos("array in lower_rhs");
   case &Aggregate_e(tdn,ts,es,ad):
     Warn::impos("aggregate in lower_rhs");
@@ -647,7 +658,7 @@ static exp_t lower_rhs(env_t env, bool effect_only, bool has_target, exp_t e) {
     Warn::impos("new expression in lower_rhs (%s)",Absynpp::exp2string(e));
   }
   if (effect_only) {
-    if (might_have_effect(res)) 
+    if (might_have_effect(res))
       emit_stmt(env,exp_stmt(res,0));
     return res;
   } else {
@@ -660,7 +671,7 @@ static exp_t lower_rhs(env_t env, bool effect_only, bool has_target, exp_t e) {
     } else {
       return res;
     }
-  } 
+  }
 }
 
 // We have problems eliminating multi-dimensional array subscripts
@@ -675,7 +686,7 @@ static exp_t lower_rhs_subs(env_t env, exp_t e) {
 }
 
 // Here, we don't have the luxury of generating temps since we need
-// the address of a variable etc.  
+// the address of a variable etc.
 static exp_t lower_lhs(env_t env, exp_t e) {
   switch (e->r) {
   case &Var_e(_): return e;
@@ -711,9 +722,9 @@ static exp_t lower_lhs(env_t env, exp_t e) {
     return deref_exp(lower_rhs(env,false,false,e1),e->loc);
   case &Cast_e(t,e1,...):
     // warn when we have a silly cast...
-    if (e1->topt == NULL || !Unify::unify(t,(type_t)e1->topt)) 
+    if (e1->topt == NULL || !Unify::unify(t,(type_t)e1->topt))
       Warn::warn(e->loc,"cast on lhs %s : %s --> %s\n",
-                 Absynpp::exp2string(e1), 
+                 Absynpp::exp2string(e1),
                  Absynpp::typ2string((type_t)e1->topt),
                  Absynpp::typ2string(t));
     return lower_lhs(env,e1);
@@ -819,11 +830,11 @@ static list_t<decl_t> anormalize(list_t<decl_t> ds) {
   for (; ds != NULL; ds = ds->tl) {
     let d = ds->hd;
     switch (d->r) {
-    case &Fn_d(fd): 
+    case &Fn_d(fd):
       // skip extern C bodies.
       if (fd->orig_scope != ExternC)
         res = new List{new Decl{.r = new Fn_d(lower_fn(fd)),
-                                .loc = d->loc},res}; 
+                                .loc = d->loc},res};
       else
         res = new List{d,res};
       break;

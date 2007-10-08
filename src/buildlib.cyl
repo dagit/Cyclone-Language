@@ -638,12 +638,12 @@ and commands = parse /* returns 1 if more to do, 0 if all done */
 { return 0; }
 | ';'
 { return 0; }
-| "include" ws+ '{'
+| "include" ws* '{'
 { snarfed_symbols = NULL;
   while (snarfsymbols(lexbuf)) /* skip */;
   current_symbols = append(snarfed_symbols,current_symbols);
   return 1; }
-| "omitvariables" ws+ '{'
+| "omitvariables" ws* '{'
 { snarfed_symbols = NULL;
   let tmp_user_defs = current_user_defs; 
   while (snarfsymbols(lexbuf)) /* skip */;
@@ -654,7 +654,7 @@ and commands = parse /* returns 1 if more to do, 0 if all done */
   }
   current_omit_symbols = append(snarfed_symbols,current_omit_symbols);
   return 1; }
-| "hstub" ws+ '{'
+| "hstub" ws* '{'
 { braces_to_match = 1;
   specbuf = Buffer::create(255);
   while (block(lexbuf)) /* skip */;
@@ -662,7 +662,7 @@ and commands = parse /* returns 1 if more to do, 0 if all done */
                         (string_t)Buffer::contents((Buffer::T)specbuf));
   current_hstubs = new List(x,current_hstubs);
   return 1; }
-| "hstub" ws+ idchar+ ws+ '{'
+| "hstub" ws+ idchar+ ws* '{'
 { let s = lexeme(lexbuf);
   s += strlen("hstub");
   while (isspace(*s)) s++;
@@ -676,7 +676,7 @@ and commands = parse /* returns 1 if more to do, 0 if all done */
                         (string_t)Buffer::contents((Buffer::T)specbuf));
   current_hstubs = new List(x,current_hstubs);
   return 1; }
-| "cstub" ws+ '{'
+| "cstub" ws* '{'
 { braces_to_match = 1;
   specbuf = Buffer::create(255);
   while (block(lexbuf)) /* skip */;
@@ -684,7 +684,7 @@ and commands = parse /* returns 1 if more to do, 0 if all done */
                         (string_t)Buffer::contents((Buffer::T)specbuf));
   current_cstubs = new List(x,current_cstubs);
   return 1; }
-| "cstub" ws+ idchar+ ws+ '{'
+| "cstub" ws+ idchar+ ws* '{'
 { let s = lexeme(lexbuf);
   s += strlen("cstub");
   while (isspace(*s)) s++;
@@ -698,7 +698,7 @@ and commands = parse /* returns 1 if more to do, 0 if all done */
                         (string_t)Buffer::contents((Buffer::T)specbuf));
   current_cstubs = new List(x,current_cstubs);
   return 1; }
-| "cycstub" ws+ '{'
+| "cycstub" ws* '{'
 { braces_to_match = 1;
   specbuf = Buffer::create(255);
   while (block(lexbuf)) /* skip */;
@@ -706,7 +706,7 @@ and commands = parse /* returns 1 if more to do, 0 if all done */
                         (string_t)Buffer::contents((Buffer::T)specbuf));
   current_cycstubs = new List(x,current_cycstubs);
   return 1; }
-| "cycstub" ws+ idchar+ ws+ '{'
+| "cycstub" ws+ idchar+ ws* '{'
 { let s = lexeme(lexbuf);
   s += strlen("cycstub");
   while (isspace(*s)) s++;
@@ -747,7 +747,7 @@ parse
   idchar+
 { snarfed_symbols = new List(new (string_t)lexeme(lexbuf),snarfed_symbols);
   return 1; }
-| idchar+ ws+ '{'
+| idchar+ ws* '{'
 { let s = lexeme(lexbuf);
   char ?t = s;
   while (!isspace(*t)) t++;

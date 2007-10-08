@@ -142,11 +142,10 @@ hstub sqlite3_prepare {
 }
 cycstub sqlite3_prepare {
   namespace Csqlite3 {
-    // Not quite right.  First, pzTail is left pointing just after
+    // Not quite right.  pzTail is left pointing just after
     // the first statement in zSql; this could be outside of the
-    // region of zSql -- so this is not safe.  Second, nBytes is
-    // allowed to be negative, in which case sqlite stops after the
-    // NUL terminator of zSql -- so this is too restrictive.
+    // region of zSql -- so this is not safe.
+    // I am disabling the pzTail functionality for now
     extern "C"
     int sqlite3_prepare(sqlite3 @db,
                         const char @`r zSql,
@@ -154,12 +153,52 @@ cycstub sqlite3_prepare {
                         sqlite3_stmt *@ppStmt,
                         const char *`r*pzTail);
   }
-  // I am disabling the pzTail functionality for now
   int sqlite3_prepare(sqlite3 @db,
                       const char @`r zSql,
                       int nBytes,
                       sqlite3_stmt *@ppStmt,
                       const char *`r*pzTail) {
+    if (nBytes < 0) {
+      let res = Csqlite3::sqlite3_prepare(db,zSql,nBytes,ppStmt,pzTail);
+      if (pzTail != NULL) *pzTail = NULL;
+      return res;
+    }
+    else {
+      let n = strlen(zSql);
+      if (nBytes > n) nBytes = n;
+      let res = Csqlite3::sqlite3_prepare(db,zSql,nBytes,ppStmt,pzTail);
+      if (pzTail != NULL) *pzTail = NULL;
+      return res;
+    }
+  }
+}
+hstub sqlite3_prepare_v2 {
+  // Differs from sqlite3_prepare in that a pointer to zSql is stored
+  // in the sqlite3_stmt, so we need to make it `H for now
+  int sqlite3_prepare_v2(sqlite3 @db,
+                         const char @`H zSql,
+                         int nBytes,
+                         sqlite3_stmt *@ppStmt,
+                         const char *`H*pzTail);
+}
+cycstub sqlite3_prepare_v2 {
+  namespace Csqlite3 {
+    // Not quite right.  pzTail is left pointing just after
+    // the first statement in zSql; this could be outside of the
+    // region of zSql -- so this is not safe.
+    // I am disabling the pzTail functionality for now
+    extern "C"
+    int sqlite3_prepare_v2(sqlite3 @db,
+                           const char @`H zSql,
+                           int nBytes,
+                           sqlite3_stmt *@ppStmt,
+                           const char *`H*pzTail);
+  }
+  int sqlite3_prepare_v2(sqlite3 @db,
+                         const char @`H zSql,
+                         int nBytes,
+                         sqlite3_stmt *@ppStmt,
+                         const char *`H*pzTail) {
     if (nBytes < 0) {
       let res = Csqlite3::sqlite3_prepare(db,zSql,nBytes,ppStmt,pzTail);
       if (pzTail != NULL) *pzTail = NULL;
@@ -201,5 +240,13 @@ hstub sqlite3_column_int64 {
 hstub sqlite3_column_text {
   extern "C"
     const unsigned char *sqlite3_column_text(sqlite3_stmt@, int);
+}
+hstub sqlite3_finalize {
+  extern "C"
+    int sqlite3_finalize(sqlite3_stmt@);
+}
+hstub sqlite3_reset {
+  extern "C"
+    int sqlite3_reset(sqlite3_stmt@);
 }
 ;
