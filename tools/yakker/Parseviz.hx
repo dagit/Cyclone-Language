@@ -73,11 +73,20 @@ class Color {
     var B = normalize(b);
     return ((R<<16) | (G<<8) | B);
   }
+  private static var colorMap = new Hash();
+  public static function
+  colorFor(s:String):Int {
+    if (colorMap.exists(s))
+      return colorMap.get(s);
+    var c = random();
+    colorMap.set(s,c);
+    return c;
+  }
 }
 
 class Parseviz {
   static var gridHeight = 20;
-  static var gridWidth = 10;
+  static var gridWidth = 12;
   public static function
   drawText(spr:DisplayObjectContainer,tf:TextFormat,
            x:Float,y:Float,s:String):Sprite
@@ -99,8 +108,8 @@ class Parseviz {
     return c;
   }
   public static function
-  drawSpan(spr:DisplayObjectContainer,tf:TextFormat,
-           x:Float,y:Float,i:Int,w:Int,z:Int,s:String):Sprite
+  drawSpanBelow(spr:DisplayObjectContainer,tf:TextFormat,
+                x:Float,y:Float,i:Int,w:Int,z:Int,s:String):Sprite
   {
     var c = new Sprite();
     var t:TextField = new TextField();
@@ -116,7 +125,7 @@ class Parseviz {
 
     c.addChild(t);
     c.graphics.lineStyle(1,0x0,0.5);
-    c.graphics.beginFill(Color.random());
+    c.graphics.beginFill(Color.colorFor(s));
     c.graphics.drawRect(i*gridWidth,gridHeight,w*gridWidth,z*gridHeight);
     c.graphics.endFill();
     c.x = x;
@@ -124,12 +133,46 @@ class Parseviz {
     spr.addChild(c);
     return c;
   }
-  static function drawSpans(a:Array<Dynamic>) {
+  static function drawSpansBelow(a:Array<Dynamic>) {
     for (x in a) {
-      drawSpan(flash.Lib.current,font,10,50,x.l,x.r-x.l,x.h,x.s);
+      drawSpanBelow(flash.Lib.current,font,0,0,x.l,x.r-x.l,x.h,x.s);
       if (!Reflect.hasField(x,"c")) return;
       var a:Array<Dynamic> = x.c;
-      drawSpans(a);
+      drawSpansBelow(a);
+    }
+  }
+  public static function
+  drawSpanAbove(spr:DisplayObjectContainer,tf:TextFormat,
+                x:Float,y:Float,i:Int,w:Int,z:Int,s:String):Sprite
+  {
+    var c = new Sprite();
+    var t:TextField = new TextField();
+    t.defaultTextFormat = tf;
+    t.autoSize = flash.text.TextFieldAutoSize.LEFT;
+    t.selectable = false;
+    if (s.length > w) {
+      s = s.substr(0,w);
+    }
+    t.text = s;
+    t.x = i * gridWidth;
+    t.y = -z * gridHeight;
+
+    c.addChild(t);
+    c.graphics.lineStyle(1,0x0,0.5);
+    c.graphics.beginFill(Color.colorFor(s));
+    c.graphics.drawRect(i*gridWidth,0,w*gridWidth,-z*gridHeight);
+    c.graphics.endFill();
+    c.x = x;
+    c.y = y;
+    spr.addChild(c);
+    return c;
+  }
+  static function drawSpansAbove(a:Array<Dynamic>) {
+    for (x in a) {
+      drawSpanAbove(flash.Lib.current,font,0,0,x.l,x.r-x.l,x.h,x.s);
+      if (!Reflect.hasField(x,"c")) return;
+      var a:Array<Dynamic> = x.c;
+      drawSpansAbove(a);
     }
   }
   static function markHeight(x:Dynamic):Int {
@@ -149,26 +192,21 @@ class Parseviz {
   }
   static var font = new TextFormat("Courier",16,0x0);
   // example
-//  static var contents:String = new String("The quick brown fox");
-//  static var a:Array<Dynamic> =
-//    [ {s:"aardvark",l:0,r:8,
-//       c:[ {s:"boa constrictor",l:1,r:7,
-//            c:[{s:"zoorilla",l:2,r:4,
-//                    c:[{s:"kangaroo",l:2,r:3},
-//                       {s:"giraffe",l:3,r:4}]},
-//               {s:"doggy",l:4,r:7,
-//                c:[{s:"elephant",l:4,r:5}
-//                  ]}]} ]} ];
   static var contents:String =
     new String("{a:1, b:2} ");
   static var a:Array<Dynamic> =
     [{c:[{c:[{c:[],s:"LF",l:10,r:11}],s:"ws",l:10,r:11},{c:[{c:[{c:[{c:[],s:"DIGIT",l:8,r:9}],s:"int",l:8,r:9}],s:"v",l:8,r:9},{c:[{c:[],s:"ALPHA",l:6,r:7}],s:"id",l:6,r:7},{c:[{c:[],s:"SP",l:5,r:6}],s:"ws",l:5,r:6},{c:[{c:[{c:[],s:"DIGIT",l:3,r:4}],s:"int",l:3,r:4}],s:"v",l:3,r:4},{c:[{c:[],s:"ALPHA",l:1,r:2}],s:"id",l:1,r:2}],s:"v",l:0,r:10}],s:"wv",l:0,r:11}];
 
   static function main() {
-    var tf = drawText(flash.Lib.current,font,10,50,contents);
+    var tf = drawText(flash.Lib.current,font,0,0,contents);
+    var maxHeight = 0;
     for (x in a) {
-      markHeight(x);
+      var h = markHeight(x);
+      if (h > maxHeight) maxHeight = h;
     }
-    drawSpans(a);
+    drawSpansBelow(a);
+    drawSpansAbove(a);
+    flash.Lib.current.x = 10;
+    flash.Lib.current.y = maxHeight * gridHeight + 10;
   }
 }
