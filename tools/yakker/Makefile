@@ -324,6 +324,7 @@ clean:
 	$(RM) markdown.cyc markdown
 	$(RM) $(GENDIR)/*
 	$(RM) $(BNFDIR)/*
+	$(RM) parseviz.swf
 
 %.p: %.bnf $(PROG_DEP)
 	./yakker -pads $< > $@
@@ -459,6 +460,9 @@ $(BNFDIR)/rfc2426.bnf: rfc2426.txt $(PROG_DEP)
 
 $(BNFDIR)/rfc%.bnf: rfc%.txt $(PROG_DEP)
 	./yakker -extract $< >$@
+
+parseviz.swf: Parseviz.hx
+	haxe -swf-version 9 -swf $@ -swf-header 320:240:12 -main $<
 
 .PHONY: cyclone-install
 

@@ -1,8 +1,10 @@
 /* (So far incomplete) Earley parser */
 
+#include <buffer.h>
 #include <string.h>
 #include <core.h>
 #include <list.h>
+#include <graph.h>
 #include "bnf.h"
 #include "fa.h"
 #include "axarray.h"
@@ -89,6 +91,10 @@ static int earley_node_cmp(earley_node_t a,earley_node_t b) {
   c = Core::intcmp(aj,bj);
   if (c) return c;
   return Core::intcmp(ak,bk);
+}
+static void earley_node_pr(FILE @f,earley_node_t a) {
+  let $(ai,aj,ak) = *a;
+  fprintf(f,"(%d,%d,%d)",ai,aj,ak);
 }
 
 static int earley_node_hash(earley_node_t a) {
@@ -370,7 +376,8 @@ $(dfa_t,Set::set_t<st_t>) rule2earley(grammar_t grm, rule_t r) {
   etrans(e,final_state);
   final(start_state,final_state);
   fprintf(stderr,"Start state is %d, final state is %d\n",start_state,final_state);
-  nfa_dot(stderr,Set::singleton(st_cmp,final_state),act2symb);
+  if (debug)
+    nfa_dot(stderr,Set::singleton(st_cmp,final_state),act2symb);
 
   /* Collect the set of final states for symbols... */
   let symb_final_states = Set::empty(st_cmp);
@@ -427,6 +434,45 @@ $(dfa_t,Set::set_t<st_t>) rule2earley(grammar_t grm, rule_t r) {
   return $(dfa,dfa_final);
 }
 
+struct rstate {
+  dfa_t dfa;
+  Axarray::xarray_t<earley_state_t> estates;
+  Hashtable::table_t<earley_node_t,List::list_t<earley_node_t,`H>,`H> pred;
+  Hashtable::table_t<earley_node_t,List::list_t<earley_node_t,`H>,`H> retn;
+  Hashtable::table_t<earley_node_t,List::list_t<earley_node_t,`H>,`H> call;
+};
+typedef struct rstate @rstate_t;
+
+static void dot_iter(earley_node_t s,List::list_t<earley_node_t> ts) {
+  let &$(si,sj,sk) = s;
+  for (; ts; ts = ts->tl) {
+    let &$(ti,tj,tk) = ts->hd;
+    printf("\"(%d,%d,%d)\" -> ",si,sj,sk);
+    printf("\"(%d,%d,%d)\";\n",ti,tj,tk);
+  }
+}
+static void rstate_dot(rstate_t rs) {
+  printf("digraph g {\n");
+  Hashtable::iter(dot_iter,rs->pred);
+  printf("edge [style=bold]\n");
+  Hashtable::iter(dot_iter,rs->retn);
+  printf("edge [style=dotted]\n");
+  Hashtable::iter(dot_iter,rs->call);
+  printf("}\n");
+}
+
+void point_to(Hashtable::table_t<earley_node_t,List::list_t<earley_node_t,`H>,`H> tbl,
+              earley_node_t source,
+              earley_node_t target) {
+
+  let ptr = Hashtable::lookup_opt(tbl,source);
+  if (ptr != NULL) {
+    Hashtable::remove(tbl,source);
+    Hashtable::insert(tbl,source,new List::List(target,*ptr));
+  }
+  else Hashtable::insert(tbl,source,List::list(target));
+}
+
 /* Add an item to an Earley state.
    If the item has an automaton state that transitions to another state
    by epsilon, add items for those states too.
@@ -434,45 +480,39 @@ $(dfa_t,Set::set_t<st_t>) rule2earley(grammar_t grm, rule_t r) {
    RETURNS from parsing non-terminals.
  */
 void
-push_closure(dfa_t dfa,
-             Axarray::xarray_t<earley_state_t> estates,
+push_closure(rstate_t rs,
              unsigned int i,
              earley_item_t ei,
              const char ?reason,
-             Hashtable::table_t<earley_node_t,List::list_t<earley_node_t,`H>,`H> pred,
-             Hashtable::table_t<earley_node_t,List::list_t<earley_node_t,`H>,`H> retn,
              earley_node_opt_t back) {
 
   let &$(s,backptr) = ei;
   let node = new $(s,backptr,i);
   if (back != NULL) {
-    let backlistptr = Hashtable::lookup_opt(pred,node);
-    if (backlistptr != NULL) {
-      Hashtable::remove(pred,node);
-      Hashtable::insert(pred,node,new List::List(back,*backlistptr));
-    }
-    else Hashtable::insert(pred,node,List::list(back));
+    point_to(rs->pred,node,back);
   }
 
-  let es = Axarray::get(estates,i);
+  let es = Axarray::get(rs->estates,i);
   if (Set::member(es,ei)) return;
   fprintf(stderr,"estates[%d] += (%d,%d) %s\n",i,ei->f0,ei->f1,reason);fflush(stderr);
-  Axarray::set(estates,i,Set::insert(es,ei));
+  Axarray::set(rs->estates,i,Set::insert(es,ei));
 
   /* Close under CALLS */
-  let t = target(dfa,s,callout_action());
-  if (t != 0)
-    push_closure(dfa,estates,i,new $(t,i),"(call)",pred,retn,NULL);
+  let t = target(rs->dfa,s,callout_action());
+  if (t != 0) {
+    point_to(rs->call,new $(t,i,i),node);
+    push_closure(rs,i,new $(t,i),"(call)",NULL);
+  }
 
   /* Close under RETURNS */
   if (i != backptr // we parsed the empty string, RETURN handled by dfa already
-      && dfa_is_final(dfa,s)) {
+      && dfa_is_final(rs->dfa,s)) {
     /* Some symbol is completed.
        es_back is the Earley state that CALLed the symbol. */
-    let es_back = Axarray::get(estates,backptr);
+    let es_back = Axarray::get(rs->estates,backptr);
 
     /* For every completed symbol... */
-    for (let completed = Set::to_list(dfa_final_attrs(dfa,s));
+    for (let completed = Set::to_list(dfa_final_attrs(rs->dfa,s));
          completed != NULL; completed = completed->tl) {
       let symb = completed->hd;
 
@@ -482,19 +522,14 @@ push_closure(dfa_t dfa,
            es_back_list = es_back_list->tl) {
 
         let &$(t,tbackptr) = es_back_list->hd;
-        let ttarget = target(dfa,t,symb);
+        let ttarget = target(rs->dfa,t,symb);
         /* ... see if the DFA state did a CALL and RETURN if so. */
         if (ttarget != 0) {
-          push_closure(dfa,estates,i,new $(ttarget,tbackptr),
-                       aprintf("(return 0x%x)",symb),
-                       pred,retn,new $(t,tbackptr,backptr));
+          push_closure(rs,i,new $(ttarget,tbackptr),
+                       aprintf("(return %s)",act2symb(symb)),
+                       new $(t,tbackptr,backptr));
           let retnode = new $(ttarget,tbackptr,i);
-          let backlistptr = Hashtable::lookup_opt(retn,retnode);
-          if (backlistptr != NULL) {
-            Hashtable::remove(retn,retnode);
-            Hashtable::insert(retn,retnode,new List::List(node,*backlistptr));
-          }
-          else Hashtable::insert(retn,retnode,List::list(node));
+          point_to(rs->retn,retnode,node);
         }
       }
     }
@@ -503,11 +538,14 @@ push_closure(dfa_t dfa,
 
 
 // returns 1 if ambiguous, 0 otherwise
+struct Buffer::t *b = NULL;
+
 int derivation(Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H> pred,
                Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H> retn,
                earley_node_t ei,
                const char ?input,
                dfa_t dfa) {
+
   let retcode = 0;
   let maybe_retn = Hashtable::lookup_opt(retn,ei);
   if (maybe_retn != NULL) {
@@ -516,20 +554,40 @@ int derivation(Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H> 
       retcode = 1;
       fprintf(stderr,"Ambiguous parse, (%d,%d,%d) has multiple RETURNs\n",
               ei->f0,ei->f1,ei->f2);
+      for (let bf = *maybe_retn; bf; bf = bf->tl) {
+        fprintf(stderr,"(%d,%d,%d)\n",bf->hd->f0,bf->hd->f1,bf->hd->f2);
+      }
+      fflush(stderr);
     } 
     // only print one derivation even if > 1
     if (len > 0) {
-      retcode = retcode || derivation(pred,retn,(*maybe_retn)->hd,input,dfa);
+      let l = Buffer::length(b);
+      if (l > 0) {
+        // DOESN'T WORK -- CYCLONE BUG        
+//        let z = Buffer::extract(b);
+//        char maybe_brace = z[l-1];
+//        Buffer::restore(b,z);
+        // INEFFICIENT WORKAROUND
+        let z = Buffer::contents(b);
+        char maybe_brace = z[l-1];
+        if (maybe_brace == '}')
+          Buffer::add_string(b,",");
+      }
+      Buffer::add_string(b,"{c:[");
+      let rc = derivation(pred,retn,(*maybe_retn)->hd,input,dfa);
+      retcode = retcode || rc;
       let &$(x,i,j) = (*maybe_retn)->hd;
       // x is state, parse started at i, finished at j
       let completed = Set::to_list(dfa_final_attrs(dfa,x));
       if (completed != NULL) {
         let attr = completed->hd;
-        printf(" <- %s [%d,%d]\n",act2symb(attr),i,j);
+        Buffer::add_string(b, aprintf("],s:\"%s\",l:%d,r:%d}",act2symb(attr),i,j));
+      //        printf(" <- %s [%d,%d]\n",act2symb(attr),i,j);
       }
       else
         // should never happen
-        printf(" <- ??? [%d,%d]\n",i,j);
+        Buffer::add_string(b, aprintf("],s:\"%s\",l:%d,r:%d}","???",i,j));
+      //        printf(" <- ??? [%d,%d]\n",i,j);
     }
   }
 
@@ -543,19 +601,22 @@ int derivation(Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H> 
     retcode = 1;
     fprintf(stderr,"Ambiguous parse, (%d,%d,%d) has multiple predecessors\n",
             ei->f0,ei->f1,ei->f2);
-//    while (before) {
-//      fprintf(stderr,"(%d,%d,%d)\n",before->hd->f0,before->hd->f1,before->hd->f2);
-//      before = before->tl;
-//    }
-//    fflush(stderr);
+    
+    for (let bf = before; bf; bf = bf->tl) {
+      fprintf(stderr,"(%d,%d,%d)\n",bf->hd->f0,bf->hd->f1,bf->hd->f2);
+    }
+    fflush(stderr);
   }
-  if (len > 0)
-    retcode = retcode || derivation(pred,retn,before->hd,input,dfa);
+  if (len > 0) {
+    //    fprintf(stderr,"following (%d,%d,%d)\n",before->hd->f0,before->hd->f1,before->hd->f2);
+    let rc = derivation(pred,retn,before->hd,input,dfa);
+    retcode = retcode || rc;
+  }
 
   if (maybe_retn == NULL) {
     // did not get here by RETURN, so we read a terminal, print it
     let i = ei->f2;
-    printf("%c",input[i-1]);
+    //    printf("%c",input[i-1]);
   }
   else {
     // got here by a RETURN, therefore we just parsed a nonterminal, print it
@@ -564,13 +625,26 @@ int derivation(Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H> 
     let completed = Set::to_list(dfa_final_attrs(dfa,x));
     if (completed != NULL) {
       let attr = completed->hd;
-      printf(" %s ",act2symb(attr));
+      //      printf(" %s ",act2symb(attr));
     }
     else
       // should never happen
-      printf(" ??? ");
+      0;
+      //      printf(" ??? ");
   }
   return retcode;
+}
+
+typedef Graph::graph_t<earley_node_t> egraph_t;
+egraph_t *ggg;
+void cvti(earley_node_t s,List::list_t<earley_node_t> ts) {
+  for (; ts; ts = ts->tl)
+    *ggg = Graph::add_edge(*ggg,s,ts->hd);
+}
+egraph_t cvt(Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H> tbl) {
+  ggg = new Graph::empty(earley_node_cmp);
+  Hashtable::iter(cvti,tbl);
+  return *ggg;
 }
 
 /* Earley recognizer.
@@ -579,7 +653,8 @@ int derivation(Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H> 
 int recognize(grammar_t grm, rule_t r,const char ?input) {
   init_maybe_empty(grm);
   let $(dfa,dfa_final) = rule2earley(grm,r);
-  dfa_dot(stderr,dfa,act2symb);
+  if (debug)
+    dfa_dot(stderr,dfa,act2symb);
   fflush(stderr);
 
   /* Keep track of parse trees */
@@ -587,18 +662,18 @@ int recognize(grammar_t grm, rule_t r,const char ?input) {
     pred = Hashtable::create(11,earley_node_cmp,earley_node_hash);
   let
     retn = Hashtable::create(11,earley_node_cmp,earley_node_hash);
+  let
+    call = Hashtable::create(11,earley_node_cmp,earley_node_hash);
 
   /* Initialize the sequence of Earley states with s0 */
   let estates = /* Earley states  s0, s1, s2, ... */
     Axarray::create(11,Set::empty(earley_item_cmp));
   let earley_item_0 = new $(1,0); // 1 is initial state of dfa, 0 is i in si
-  push_closure(dfa,
-               estates,
+  let rs = new rstate {dfa,estates,pred,retn,call};
+  push_closure(rs,
                0,
                earley_item_0,
                "(initial)",
-               pred,
-               retn,
                NULL);
                
   /* Scan the input */
@@ -612,7 +687,7 @@ int recognize(grammar_t grm, rule_t r,const char ?input) {
       let &$(state,parent) = si_list->hd;
       let k = target(dfa,state,input[i]);
       if (k != 0)
-        push_closure(dfa,estates,i+1,new $(k,parent),"(input)",pred,retn,new $(state,parent,i));
+        push_closure(rs,i+1,new $(k,parent),"(input)",new $(state,parent,i));
     }
   }
 
@@ -622,15 +697,26 @@ int recognize(grammar_t grm, rule_t r,const char ?input) {
     fprintf(stderr," (%d,0)",fs->hd);
   fprintf(stderr,"\n");fflush(stderr);
 
+  printf("AA\n");
+  rstate_dot(rs);
+  //  Graph::print(stdout,cvt(pred),earley_node_pr);
+  printf("BB\n");
+  //  Graph::print(stdout,cvt(retn),earley_node_pr);
+
   for (let slast_list = Set::to_list(Axarray::get(estates,input_len));
        slast_list != NULL;
        slast_list = slast_list->tl) {
-      let &$(state,parent) = slast_list->hd;
-      if (Set::member(dfa_final,state) && parent == 0) {
-        derivation(pred,retn,new $(state,parent,input_len),input,dfa);
-        printf(" <- START\n");
-        return 1;
-      }
+    let &$(state,parent) = slast_list->hd;
+    if (Set::member(dfa_final,state) && parent == 0) {
+      b = Buffer::create(1024);
+      Buffer::add_string(b,"[");
+      derivation(pred,retn,new $(state,parent,input_len),input,dfa);
+      //        printf(" <- START\n");
+      Buffer::add_string(b,"];\n");
+      printf("Input:\n%s\nParse:\n",input);
+      printf("%s",Buffer::contents(b));
+      return 1;
+    }
   }
   return 0;
 }
