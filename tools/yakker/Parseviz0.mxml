@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
+                applicationComplete="appComplete();">
+
+<mx:HBox width="100%">
+  <mx:Label id="lbl" text="Input:"/>
+  <mx:TextArea id="parseInput" width="100%" height="20"/>
+</mx:HBox>
+<mx:HBox width="100%">
+  <mx:Label text="Parse:"/>
+  <mx:TextArea id="parseAbove" width="100%"/>
+</mx:HBox>
+<mx:HBox width="100%">
+  <mx:Label text="Parse:"/>
+  <mx:TextArea id="parseBelow" width="100%"/>
+</mx:HBox>
+<mx:Button label="Render" id="renderButton"/>
+<mx:Canvas id="mainCanvas" borderStyle="solid" width="100%" height="100%" />
+
+<mx:Script>
+<![CDATA[
+  import flash.system.Security;
+  import flash.display.Shape;
+  import mx.events.ItemClickEvent;
+  import mx.containers.TitleWindow;
+  import mx.controls.TextArea;
+  import mx.controls.Button;
+  import mx.controls.PopUpMenuButton;
+  import mx.managers.PopUpManager;
+  /* This is not called anywhere, it just ensures that TitleWindow
+    etc. is in the compiled .swf file for use from the haXe side */
+  private function doit():void {
+    var tw:TitleWindow = PopUpManager.createPopUp(this,TitleWindow,true) as TitleWindow;
+    var qbox:TextArea = new TextArea();
+    var hbox:HBox = new HBox();
+    var bbutton:Button = new Button();
+    var ubutton:PopUpMenuButton = new PopUpMenuButton();
+  }
+  private function appComplete():void {
+    var ldr:Loader = new Loader();
+    var swfUrl:String = "parseviz.swf";
+    var req:URLRequest = new URLRequest(swfUrl);
+    var ldrContext:LoaderContext =
+      new LoaderContext(false, ApplicationDomain.currentDomain);
+    ldr.load(req, ldrContext);
+    ldr.contentLoaderInfo.addEventListener(Event.COMPLETE, swfLoaded);
+
+    function swfLoaded(e:Event):void {
+      var parseVizDef:Class =
+        ApplicationDomain.currentDomain.getDefinition("Parseviz") as Class;
+      var o:Object = new parseVizDef();
+      o.start(Application.application);
+    }
+  }
+]]>
+</mx:Script>
+
+</mx:Application>

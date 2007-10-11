@@ -573,21 +573,25 @@ int derivation(Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H> 
         if (maybe_brace == '}')
           Buffer::add_string(b,",");
       }
-      Buffer::add_string(b,"{c:[");
-      let rc = derivation(pred,retn,(*maybe_retn)->hd,input,dfa);
-      retcode = retcode || rc;
       let &$(x,i,j) = (*maybe_retn)->hd;
       // x is state, parse started at i, finished at j
       let completed = Set::to_list(dfa_final_attrs(dfa,x));
       if (completed != NULL) {
         let attr = completed->hd;
-        Buffer::add_string(b, aprintf("],s:\"%s\",l:%d,r:%d}",act2symb(attr),i,j));
-      //        printf(" <- %s [%d,%d]\n",act2symb(attr),i,j);
+        Buffer::add_string(b,
+                           aprintf("<t s=\"%s\" l=\"%d\" r=\"%d\">",
+                                   act2symb(attr),i,j));
       }
       else
         // should never happen
-        Buffer::add_string(b, aprintf("],s:\"%s\",l:%d,r:%d}","???",i,j));
+        Buffer::add_string(b,
+                           aprintf("<t s=\"???\" l=\"%d\" r=\"%d\">",
+                                   i,j));
       //        printf(" <- ??? [%d,%d]\n",i,j);
+
+      let rc = derivation(pred,retn,(*maybe_retn)->hd,input,dfa);
+      retcode = retcode || rc;
+      Buffer::add_string(b,"</t>");
     }
   }
 
@@ -709,12 +713,10 @@ int recognize(grammar_t grm, rule_t r,const char ?input) {
     let &$(state,parent) = slast_list->hd;
     if (Set::member(dfa_final,state) && parent == 0) {
       b = Buffer::create(1024);
-      Buffer::add_string(b,"[");
       derivation(pred,retn,new $(state,parent,input_len),input,dfa);
       //        printf(" <- START\n");
-      Buffer::add_string(b,"];\n");
       printf("Input:\n%s\nParse:\n",input);
-      printf("%s",Buffer::contents(b));
+      printf("%s\n",Buffer::contents(b));
       return 1;
     }
   }

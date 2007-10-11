@@ -461,8 +461,10 @@ $(BNFDIR)/rfc2426.bnf: rfc2426.txt $(PROG_DEP)
 $(BNFDIR)/rfc%.bnf: rfc%.txt $(PROG_DEP)
 	./yakker -extract $< >$@
 
+parseviz0.swf: Parseviz0.mxml
+	mxmlc -output $@ -use-network=false $<
 parseviz.swf: Parseviz.hx
-	haxe -swf-version 9 -swf $@ -swf-header 320:240:12 -main $<
+	haxe -debug -swf-version 9 -swf $@ -lib flex $<
 
 .PHONY: cyclone-install
 

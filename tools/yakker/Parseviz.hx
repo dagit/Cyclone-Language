@@ -1,4 +1,5 @@
 import flash.display.Sprite;
+import flash.events.Event;
 import flash.events.MouseEvent;
 import flash.display.DisplayObjectContainer;
 import flash.text.TextField;
@@ -116,6 +117,7 @@ class Parseviz {
     t.defaultTextFormat = tf;
     t.autoSize = flash.text.TextFieldAutoSize.LEFT;
     t.selectable = false;
+    var color = Color.colorFor(s); // BEFORE chopping s
     if (s.length > w) {
       s = s.substr(0,w);
     }
@@ -125,7 +127,7 @@ class Parseviz {
 
     c.addChild(t);
     c.graphics.lineStyle(1,0x0,0.5);
-    c.graphics.beginFill(Color.colorFor(s));
+    c.graphics.beginFill(color);
     c.graphics.drawRect(i*gridWidth,gridHeight,w*gridWidth,z*gridHeight);
     c.graphics.endFill();
     c.x = x;
@@ -133,12 +135,12 @@ class Parseviz {
     spr.addChild(c);
     return c;
   }
-  static function drawSpansBelow(a:Array<Dynamic>) {
+  static function drawSpansBelow(spr:DisplayObjectContainer,a:Array<Dynamic>) {
     for (x in a) {
-      drawSpanBelow(flash.Lib.current,font,0,0,x.l,x.r-x.l,x.h,x.s);
+      drawSpanBelow(spr,font,0,0,x.l,x.r-x.l,x.h,x.s);
       if (!Reflect.hasField(x,"c")) return;
       var a:Array<Dynamic> = x.c;
-      drawSpansBelow(a);
+      drawSpansBelow(spr,a);
     }
   }
   public static function
@@ -150,6 +152,7 @@ class Parseviz {
     t.defaultTextFormat = tf;
     t.autoSize = flash.text.TextFieldAutoSize.LEFT;
     t.selectable = false;
+    var color = Color.colorFor(s); // BEFORE chopping s
     if (s.length > w) {
       s = s.substr(0,w);
     }
@@ -159,7 +162,7 @@ class Parseviz {
 
     c.addChild(t);
     c.graphics.lineStyle(1,0x0,0.5);
-    c.graphics.beginFill(Color.colorFor(s));
+    c.graphics.beginFill(color);
     c.graphics.drawRect(i*gridWidth,0,w*gridWidth,-z*gridHeight);
     c.graphics.endFill();
     c.x = x;
@@ -167,12 +170,12 @@ class Parseviz {
     spr.addChild(c);
     return c;
   }
-  static function drawSpansAbove(a:Array<Dynamic>) {
+  static function drawSpansAbove(spr:DisplayObjectContainer,a:Array<Dynamic>) {
     for (x in a) {
-      drawSpanAbove(flash.Lib.current,font,0,0,x.l,x.r-x.l,x.h,x.s);
+      drawSpanAbove(spr,font,0,0,x.l,x.r-x.l,x.h,x.s);
       if (!Reflect.hasField(x,"c")) return;
       var a:Array<Dynamic> = x.c;
-      drawSpansAbove(a);
+      drawSpansAbove(spr,a);
     }
   }
   static function markHeight(x:Dynamic):Int {
@@ -191,22 +194,83 @@ class Parseviz {
     return h;
   }
   static var font = new TextFormat("Courier",16,0x0);
-  // example
-  static var contents:String =
-    new String("{a:1, b:2} ");
-  static var a:Array<Dynamic> =
-    [{c:[{c:[{c:[],s:"LF",l:10,r:11}],s:"ws",l:10,r:11},{c:[{c:[{c:[{c:[],s:"DIGIT",l:8,r:9}],s:"int",l:8,r:9}],s:"v",l:8,r:9},{c:[{c:[],s:"ALPHA",l:6,r:7}],s:"id",l:6,r:7},{c:[{c:[],s:"SP",l:5,r:6}],s:"ws",l:5,r:6},{c:[{c:[{c:[],s:"DIGIT",l:3,r:4}],s:"int",l:3,r:4}],s:"v",l:3,r:4},{c:[{c:[],s:"ALPHA",l:1,r:2}],s:"id",l:1,r:2}],s:"v",l:0,r:10}],s:"wv",l:0,r:11}];
-
-  static function main() {
-    var tf = drawText(flash.Lib.current,font,0,0,contents);
-    var maxHeight = 0;
-    for (x in a) {
+  static var parseInput:String = "";
+  static var parseAbove:Array<Dynamic> = [];
+  static var parseBelow:Array<Dynamic> = [];
+  static function drawTrees(spr:DisplayObjectContainer) {
+    var tf = drawText(spr,font,0,0,parseInput);
+    var maxHeightAbove = 0;
+    for (x in parseAbove) {
       var h = markHeight(x);
-      if (h > maxHeight) maxHeight = h;
+      if (h > maxHeightAbove) maxHeightAbove = h;
     }
-    drawSpansBelow(a);
-    drawSpansAbove(a);
-    flash.Lib.current.x = 10;
-    flash.Lib.current.y = maxHeight * gridHeight + 10;
+    var maxHeightBelow = 0;
+    for (x in parseBelow) {
+      var h = markHeight(x);
+      if (h > maxHeightBelow) maxHeightBelow = h;
+    }
+    drawSpansBelow(spr,parseBelow);
+    drawSpansAbove(spr,parseAbove);
+    spr.y = maxHeightAbove * gridHeight; // puts top-left at origin
+  }
+  static function decode(t:String):Array<Dynamic> {
+    var c:Array<Dynamic> = [];
+    try {
+      var xml = Xml.parse(t);
+      if (xml == null) return c;
+      for (x in xml.elements()) {
+        c.push(xml2obj(x));
+      }
+    }
+    catch (e:Dynamic) {
+    }
+    return c;
+// <t s="lkjfdsfds" l="1" r="9"></t>
+  }
+  static function xml2obj(xml:Xml):Dynamic {
+    if (xml == null) return null;
+
+    var s = xml.get('s');
+    var l = Std.parseInt(xml.get('l'));
+    var r = Std.parseInt(xml.get('r'));
+    var c:Array<Dynamic> = [];
+    for (x in xml.elements()) {
+      c.push(xml2obj(x));
+    }
+    
+    return {s:s,l:l,r:r,c:c};
+  }
+  /* Main entry point */
+  public function start(app:Dynamic) {
+    // In fact app:Application, but it is convenient to use Dynamic to
+    // more easily access UI components
+
+
+    /* mainCanvas is a mx.containers.Canvas, and its addChild method
+       requires that the argument implement IUIComponent, which most
+       flash DisplayObjects do not.  Therefore we add a regular
+       DisplayObject as a child using rawChildren, and the rest of the
+       program will add children to c as usual. */
+    var c = new Sprite();
+    app.mainCanvas.rawChildren.addChild(c);
+
+    app.renderButton.addEventListener
+    (MouseEvent.CLICK,
+     function (e:Event) {
+       while (c.numChildren > 0)
+         c.removeChildAt(0);
+
+       try {
+         parseInput = app.parseInput.text;
+         parseAbove = decode(app.parseAbove.text);
+         parseBelow = decode(app.parseBelow.text);
+         drawTrees(c);
+       }
+       catch (e:Dynamic) {
+         drawText(c,font,0,0,"Exception!!");
+       }
+     });
   }
 }
+
+//         [{c:[{c:[{c:[],s:"LF",l:10,r:11}],s:"ws",l:10,r:11},{c:[{c:[{c:[{c:[],s:"DIGIT",l:8,r:9}],s:"int",l:8,r:9}],s:"v",l:8,r:9},{c:[{c:[],s:"ALPHA",l:6,r:7}],s:"id",l:6,r:7},{c:[{c:[],s:"SP",l:5,r:6}],s:"ws",l:5,r:6},{c:[{c:[{c:[],s:"DIGIT",l:3,r:4}],s:"int",l:3,r:4}],s:"v",l:3,r:4},{c:[{c:[],s:"ALPHA",l:1,r:2}],s:"id",l:1,r:2}],s:"v",l:0,r:10}],s:"wv",l:0,r:11}];
