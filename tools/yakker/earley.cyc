@@ -274,7 +274,7 @@ $(st_t,st_t,st_t)
       let s = mkact(cs_range(low,high+1));
       let f = get_final(s);
       let e = nfa_fresh_state();
-      return $(s,f,s);
+      return $(s,f,e);
     }
   case &Opt(r2):
     let s = nfa_fresh_state();
