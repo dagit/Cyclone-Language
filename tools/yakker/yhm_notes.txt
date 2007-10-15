@@ -1476,8 +1476,78 @@ factor = rules2seq res
 remainder = ALT(rules1,rules2)
 return SEQ(factor, remainder)
 
-    
- 
-Results look good. Need to break down literals into separate chars.
+*******
+
 Would be nice to reconstruct wholly-deconstructed symbols. Could do
 this with a hash table.
+
+Next: Compare alts in non-binary fashion. How? One solution would be
+to just try matching up every alternative and seeing what
+happens. Will order matter? Yes, because we don't allow you to crack
+open alts. So, if we factor two branches, and then try to factor a
+third which factors better, we won't be able to refactor. e.g.
+("ABC" | "AX" | "ABD") should ideally be
+"A" ("X"|("B" ("C"|"D)))
+but instead will be
+"A" (("BC" | "X")) | "BD")
+
+One solution would be general deep factoring, but how do we do it?
+Consider just one literal and an arbitrary regexp. Lets start with our
+example above:
+
+("BC" | "X")) | "BD"
+
+Try factoring with each branch in turn. Clearly, since they don't
+factor with themselves, it can't be successful on all them , but so
+what.
+
+Let's start with some equivalences(?):
+
+(A|B)|C  = (A|C) | (B|C)
+
+So, we can duplictate C and then try recursively. However, we must be
+sure not to introduce extra conflicts. So, we can only leave copies of
+C around if some factoring succeeds. in fact, that should be iff
+becuase if none succeeds then we must preserve the original. (Notice
+that we're not limited to literals for C). (Note: this approach leads
+to an N-squared algorithm.)
+
+How do we avoid infinite loops on recursive symbols?
+
+given: lit, r1, r1
+
+(factor1, rem1) <- try_factor(lit,r1)
+(factor2, rem2) <- try_factor(lit,r2)
+if !factor1 && !factor2 then factor failed.
+else
+  put Alt back together with new branches.
+  add to res.
+  commit.
+
+
+
+################################################################################
+
+Reading notes:
+
+"Generalized Regular Parsers" 
+  Doesn't seem very relevant. It relates to the technique of
+  converting recursion in the grammar into regular expressions where
+  possible and then implementing those portions of the grammar in the
+  PDA without a stack.
+
+"Generalised Recursive Descent Parsing and Follow Determinism"
+- Noticed that they don't handle left recursion whereas regular
+  lookahead has no problem. I'm not sure why this is (it doesn't seem
+  to bother them -- perhaps they have some prepass to solve this?)
+
+- In some cases, left-factoring is neither necessary nore
+  sufficient. Instead, a new technique can be used which exploits a
+  notion called "follow determinism." 
+
+- Main takeaway -- follow determinism can give you greater efficiency
+  than longest match and can parse some languages not expressable as
+  LL or LR.  Need to think more about how it relates to our regular
+  lookahead. Note, FD is a property of the grammars which they can
+  exploit to resolve LL and LR ambiguities in some cases, it is not a
+  general technique for resolving any ambiguity.

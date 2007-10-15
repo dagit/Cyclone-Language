@@ -43,7 +43,11 @@ typedef unsigned int att_t;  // Attributes
 typedef Set::set_t<att_t> aset_t;
 extern struct DFA;
 typedef struct DFA @dfa_t;
+
+// Does state s have a transition on a in DFA dfa?
+// Returns: target state, if yes; 0, if no.
 st_t target(dfa_t dfa,st_t s,act_t a);
+
 extern Set::set_t<st_t> dfa_final_states(dfa_t dfa);
 extern void dfa_set_final(dfa_t dfa, st_t final, aset_t attrs);
 extern dfa_t nfa2dfa(st_t start_state, Set::set_t<st_t,`H> final_states);

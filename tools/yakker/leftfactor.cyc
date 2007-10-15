@@ -68,8 +68,7 @@ left_factor_lits(const char ?`H x, const char ?`H y){
   }
 }
 
-
-static rule_t left_factor(grammar_t g,rule_t r1, rule_t r2){
+static Rule_t left_factor(grammar_t g,rule_t r1, rule_t r2){
   list_t rs1 = depseq2rules(r1);
   list_t rs2 = depseq2rules(r2);
 
@@ -82,6 +81,7 @@ static rule_t left_factor(grammar_t g,rule_t r1, rule_t r2){
     let h1 = rs1->hd;
     let h2 = rs2->hd;
     if (rule_cmp(h1,h2) == 0){
+//       printf("Rules equal.\n");      
       res = new List(h1,res);      
       // commit
       rs1 = rs1->tl;
@@ -89,7 +89,7 @@ static rule_t left_factor(grammar_t g,rule_t r1, rule_t r2){
       rs1_save = rs1;
       rs2_save = rs2;
     } else {
-      switch ($(rs1->hd->r,rs2->hd->r)){
+      switch ($(h1->r,h2->r)){
       case $(&Symb(_,_),_):
       case $(_,&Symb(_,_)):{
 	// open up the symbols and try for a match that way.
@@ -107,15 +107,35 @@ static rule_t left_factor(grammar_t g,rule_t r1, rule_t r2){
       }
       break;
       
+      case $(&Alt(r1,r2), _):
+// 	printf("Alt factoring\n");
+	let lf1 = left_factor(g,r1,h2);
+	let lf2 = left_factor(g,r2,h2);
+	if (!lf1 && !lf2){
+	  // factoring failed, end the loop.
+	  rs1 = NULL;
+	  rs2 = NULL;
+	  break;
+	}
+	let lf = ALT((lf1 ? lf1 : r1), (lf2 ? lf2 : r2));
+	res = new List(lf,res);      
+	// commit
+	rs1 = rs1->tl;
+	rs2 = rs2->tl;
+	rs1_save = rs1;
+	rs2_save = rs2;	
+	break;
+
       case $(&Lit(x),&Lit(y)):
+// 	printf("Lit factoring\n");
 	let $(factor,x1,y1) = left_factor_lits(x,y);
 	if (factor){
 	  res = new List(LIT(factor),res);
 	  // commit
 	  rs1 = rs1->tl;
 	  rs2 = rs2->tl;
-	  if (x1) rs1 = new List(LIT(x1), rs1);
-	  if (y1) rs2 = new List(LIT(y1), rs2);
+	  if (x1 && (numelts(x1) > 1)) rs1 = new List(LIT(x1), rs1);
+	  if (y1 && (numelts(y1) > 1)) rs2 = new List(LIT(y1), rs2);
 	  rs1_save = rs1;
 	  rs2_save = rs2;
 	  break;
@@ -123,7 +143,7 @@ static rule_t left_factor(grammar_t g,rule_t r1, rule_t r2){
 	fallthru;
 	
       default:
-	// end the loop
+	// factoring failed, end the loop
 	rs1 = NULL;
 	rs2 = NULL;
 	break;
@@ -131,11 +151,23 @@ static rule_t left_factor(grammar_t g,rule_t r1, rule_t r2){
     }
   }
   
+//   printf("Result has %d elements\n",List::length(res));
+//   printf("Left = ");
+//   pr_rule(stdout,r1,0);
+//   printf("\nRight = ");
+//   pr_rule(stdout,r2,0);
+//   printf("\n");
+
   if (!res) {
-    return ALT(r1,r2);
+    return NULL; // no factoring was possible.
   } else {
-    imp_rev(res);
+    res = imp_rev(res); 
     let factor = rules2seq(res);
+
+//     printf("Factor: \n");
+//     pr_rule(stdout,factor,0);
+//     printf("\n");
+
     if (rs1_save || rs2_save) {
       rule_t remainder;
       if (rs1_save && rs2_save) {
@@ -146,7 +178,7 @@ static rule_t left_factor(grammar_t g,rule_t r1, rule_t r2){
 	remainder = OPT(rules2seq(rs2_save));
       } 
       return SEQ(factor,remainder);
-    }  
+    }
     return factor;
   }
 }
@@ -165,7 +197,8 @@ rule_t left_factor_rule(grammar_t g, rule_t r){
   case &Alt(r1,r2):
     let r1_lf = left_factor_rule(g,r1);
     let r2_lf = left_factor_rule(g,r2);
-    return left_factor(g, r1_lf,r2_lf);
+    let r = left_factor(g, r1_lf,r2_lf);
+    return r ? (_@)r : ALT(r1_lf,r2_lf);
 
   case &Rcount(n,r1):
     return RCOUNT_r(r,n,left_factor_rule(g,r1));

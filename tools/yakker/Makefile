@@ -1,7 +1,7 @@
 include ../../Makefile.inc
 CYCFLAGS=
 #CYCFLAGS=-g -save-c -pp
-YAKFLAGS=
+YAKFLAGS=-d -d
 
 CURDIR=$(shell pwd)
 
@@ -184,6 +184,9 @@ $(GENDIR)/imap_bind.bnf: $(BNFDIR)/imap.bnf $(PROG_DEP)
 
 # imap_none.bnf: imap.bnf $(PROG_DEP)
 # 	./yakker $< > $@
+
+$(GENDIR)/imap_lf.cyc: $(BNFDIR)/imap_lf.bnf $(PROG_DEP)
+	./yakker $(YAKFLAGS) -gen command -no-main -lazyfill $< > $@
 
 $(GENDIR)/imap_lf.bnf: $(BNFDIR)/imap.bnf $(PROG_DEP)
 	./yakker -left-factor $< > $@

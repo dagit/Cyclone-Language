@@ -134,7 +134,7 @@ static const char ?add_namespace = NULL;
 "         -ws <syms>             do perform whitespace elimination on the definitions of <syms>\n"\
 "         -nore <syms>           don't handle <syms> as regular expressions\n"\
 "         -re <syms>             do handle <syms> as regular expressions\n"\
-"         -escape <chars>        escape special characters <chars> in the input grammar. The first char in <chars> is used as for escaping.\n"\
+"         -escape <chars>        escape special characters <chars> in the input grammar. The first char in <chars> is used for escaping.\n"\
 "         -bindgrammar           produce a grammar with binding capability for the input grammar\n"\
 "           -termgrammar_bnf        add term forms to the bindgrammar\n"\
 "           -no-anon-bind           do not include anonymous binders, only named ones\n"\
@@ -545,13 +545,11 @@ int main(int argc, const char ?`H?argv) {
     return 0;
   }
 
-  /* Left-factor the grammar and exit */
+  /* Left-factor the grammar. */
   if (leftfactorp) {
     debugprint(1,"Left-factoring the grammar ... ");
-    let gr = left_factor_grammar(ds);
-    pr_definitions(stdout, gr);
+    ds = left_factor_grammar(ds);
     debugprint(1,"done\n");
-    return 0;
   }
 
   if (escape_chars){
