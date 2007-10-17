@@ -1,3 +1,4 @@
 DIGIT = %d48-57.
-number = 1*DIGIT.
+number = 1*(DIGIT).
 e = e "+" e | e "*" e | number.
+s = e.

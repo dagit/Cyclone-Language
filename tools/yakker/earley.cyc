@@ -19,17 +19,57 @@ namespace Earley;
 typedef List::list_t<datatype ParseTree @`H,`H> parse_forest_t;
 typedef List::List_t<datatype ParseTree @`H,`H> Parse_forest_t;
 
+typedef datatype ParseTree @`H parse_tree_t;
+
 datatype ParseTree{
   NonTerm(const char ?`H, int, int, parse_forest_t);
-//   // List of 2 or more alternative parses
-//   Merge(Parse_forest);
+  SharedNonTerm(const char ?`H, int, int, List::List_t<parse_forest_t,`H>);
 };
 
-// datatype SPPF{
-//   NonTerm(const char ?`H, int, int, parse_forest_t);
-//   // List of 2 or more alternative parses
-//   Merge(Parse_forest);
-// };
+void print_LD_parse_forest(parse_forest_t pf);
+
+void print_LD(datatype ParseTree @pt){
+  switch (pt) {
+  case &NonTerm(name,l,r,children):
+    printf("<t s=\"%s\" l=\"%d\" r=\"%d\">",name,l,r);
+    print_LD_parse_forest(children);
+    printf("</t>");
+    break;
+  case &SharedNonTerm(name,l,r,children_list):
+    printf("<t s=\"%s\" l=\"%d\" r=\"%d\">",name,l,r);
+    print_LD_parse_forest(children_list->hd);
+    printf("</t>");
+    break;
+  }
+}
+
+void print_LD_parse_forest(parse_forest_t pf){
+  List::iter(print_LD,pf);
+}
+
+void print_RD_parse_forest(parse_forest_t pf);
+
+`a reflect(`a last_seen,`a current){return current;}
+
+void print_RD(datatype ParseTree @pt){
+  switch (pt) {
+  case &NonTerm(name,l,r,children):
+    printf("<t s=\"%s\" l=\"%d\" r=\"%d\">",name,l,r);
+    print_RD_parse_forest(children);
+    printf("</t>");
+    break;
+  case &SharedNonTerm(name,l,r,children_list):
+    printf("<t s=\"%s\" l=\"%d\" r=\"%d\">",name,l,r);
+    let last_derivation = List::fold_left(reflect,children_list->hd,children_list);
+    print_RD_parse_forest(last_derivation);
+    printf("</t>");
+    break;
+  }
+}
+
+void print_RD_parse_forest(parse_forest_t pf){
+  List::iter(print_RD,pf);
+}
 
 void print_parse_forest(parse_forest_t pf);
 
@@ -39,6 +79,9 @@ void print_parse_tree(datatype ParseTree @pt){
     printf("<t s=\"%s\" l=\"%d\" r=\"%d\">",name,l,r);
     print_parse_forest(children);
     printf("</t>");
+    break;
+  default:
+    fprintf(stderr,"Ambiguous parse tree!\n");
     break;
   }
 }
@@ -470,7 +513,7 @@ struct rstate {
   dfa_t dfa;
   Axarray::xarray_t<earley_state_t> estates;
   Hashtable::table_t<earley_node_t,List::list_t<earley_node_t,`H>,`H> pred;
-  Hashtable::table_t<earley_node_t,List::list_t<earley_node_t,`H>,`H> retn;
+  Hashtable::table_t<earley_node_t,List::list_t<$(earley_node_opt_t,earley_node_t) @`H,`H>,`H> retn;
   Hashtable::table_t<earley_node_t,List::list_t<earley_node_t,`H>,`H> call;
 };
 typedef struct rstate @rstate_t;
@@ -483,19 +526,43 @@ static void dot_iter(earley_node_t s,List::list_t<earley_node_t> ts) {
     printf("\"(%d,%d,%d)\";\n",ti,tj,tk);
   }
 }
+
+static void dot_pred_iter(earley_node_t s,List::list_t<$(earley_node_opt_t,earley_node_t) @`H> ts) {
+  let &$(si,sj,sk) = s;
+  for (; ts; ts = ts->tl) {
+    let &$(_,p) = ts->hd; // only bind pred edge.
+    let &$(ti,tj,tk) = p;
+    printf("\"(%d,%d,%d)\" -> ",si,sj,sk);
+    printf("\"(%d,%d,%d)\";\n",ti,tj,tk);
+  }
+}
+
+static void dot_retn_iter(earley_node_t s,List::list_t<$(earley_node_opt_t,earley_node_t) @`H> ts) {
+  let &$(si,sj,sk) = s;
+  for (; ts; ts = ts->tl) {
+    let &$(r,_) = ts->hd; // only bind retn edge, not pred edge.
+    if (r != NULL){
+      let &$(ti,tj,tk) = r;
+      printf("\"(%d,%d,%d)\" -> ",si,sj,sk);
+      printf("\"(%d,%d,%d)\";\n",ti,tj,tk);
+    }
+  }
+}
+
 static void rstate_dot(rstate_t rs) {
   printf("digraph g {\n");
-  Hashtable::iter(dot_iter,rs->pred);
+//   Hashtable::iter(dot_pred_iter,rs->pred);
+  Hashtable::iter(dot_pred_iter,rs->retn);
   printf("edge [style=bold]\n");
-  Hashtable::iter(dot_iter,rs->retn);
+  Hashtable::iter(dot_retn_iter,rs->retn);
   printf("edge [style=dotted]\n");
   Hashtable::iter(dot_iter,rs->call);
   printf("}\n");
 }
 
-void point_to(Hashtable::table_t<earley_node_t,List::list_t<earley_node_t,`H>,`H> tbl,
+void point_to(Hashtable::table_t<earley_node_t,List::list_t<`a,`H>,`H> tbl,
               earley_node_t source,
-              earley_node_t target) {
+              `a target) {
 
   let ptr = Hashtable::lookup_opt(tbl,source);
   if (ptr != NULL) {
@@ -514,14 +581,18 @@ void point_to(Hashtable::table_t<earley_node_t,List::list_t<earley_node_t,`H>,`H
 void
 push_closure(rstate_t rs,
              unsigned int i,
-             earley_item_t ei,
+             earley_item_t ei, // YHM: I think this should be an early node
+			       // instead of an earley item for
+			       // efficiency sake (to save allocations).
              const char ?reason,
-             earley_node_opt_t back) {
+             earley_node_opt_t back,
+	     earley_node_opt_t up) {
 
   let &$(s,backptr) = ei;
   let node = new $(s,backptr,i);
   if (back != NULL) {
     point_to(rs->pred,node,back);
+    point_to(rs->retn,node,new $(up,back));
   }
 
   let es = Axarray::get(rs->estates,i);
@@ -533,7 +604,7 @@ push_closure(rstate_t rs,
   let t = target(rs->dfa,s,callout_action());
   if (t != 0) {
     point_to(rs->call,new $(t,i,i),node);
-    push_closure(rs,i,new $(t,i),"(call)",NULL);
+    push_closure(rs,i,new $(t,i),"(call)",NULL,NULL);
   }
 
   /* Close under RETURNS */
@@ -557,11 +628,13 @@ push_closure(rstate_t rs,
         let ttarget = target(rs->dfa,t,symb);
         /* ... see if the DFA state did a CALL and RETURN if so. */
         if (ttarget != 0) {
+	  // Earley node w/ dot before symb.
+	  let backnode = new $(t,tbackptr,backptr);
+	  // Earley node w/ dot after symb.
+          let retnode = new $(ttarget,tbackptr,i);
           push_closure(rs,i,new $(ttarget,tbackptr),
                        aprintf("(return %s)",act2symb(symb)),
-                       new $(t,tbackptr,backptr));
-          let retnode = new $(ttarget,tbackptr,i);
-          point_to(rs->retn,retnode,node);
+                       backnode, node);
         }
       }
     }
@@ -574,212 +647,238 @@ push_closure(rstate_t rs,
 //
 struct Buffer::t *b = NULL;
 
-int derivation(Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H> pred,
-               Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H> retn,
-               earley_node_t ei,
-               const char ?input,
-               dfa_t dfa) {
+// int derivation(Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H> pred,
+//                Hashtable::table_t<earley_node_t,List::list_t<$(earley_node_t,earley_node_t) @`H>,`H> retn,
+//                earley_node_t ei,
+//                const char ?input,
+//                dfa_t dfa) {
 
-  let retcode = 0;
-  let maybe_retn = Hashtable::lookup_opt(retn,ei);
-  if (maybe_retn != NULL) {
-    let len = List::length(*maybe_retn);
-    if (len > 1){
-      retcode = 1;
-      fprintf(stderr,"Ambiguous parse, (%d,%d,%d) has multiple RETURNs\n",
-              ei->f0,ei->f1,ei->f2);
-      for (let bf = *maybe_retn; bf; bf = bf->tl) {
-        fprintf(stderr,"(%d,%d,%d)\n",bf->hd->f0,bf->hd->f1,bf->hd->f2);
-      }
-      fflush(stderr);
-    } 
-    // only print one derivation even if > 1
-    if (len > 0) {
-      let l = Buffer::length(b);
-      if (l > 0) {
-        // DOESN'T WORK -- CYCLONE BUG        
-//        let z = Buffer::extract(b);
-//        char maybe_brace = z[l-1];
-//        Buffer::restore(b,z);
-        // INEFFICIENT WORKAROUND
-        let z = Buffer::contents(b);
-        char maybe_brace = z[l-1];
-        if (maybe_brace == '}')
-          Buffer::add_string(b,",");
-      }
-      let &$(x,i,j) = (*maybe_retn)->hd;
-      // x is state, parse started at i, finished at j
-      let completed = Set::to_list(dfa_final_attrs(dfa,x));
-      if (completed != NULL) {
-	// YHM: why don't we warn/report whether completed has more than one element?
-        let attr = completed->hd;
-        Buffer::add_string(b,
-                           aprintf("<t s=\"%s\" l=\"%d\" r=\"%d\">",
-                                   act2symb(attr),i,j));
-      }
-      else
-        // should never happen
-        Buffer::add_string(b,
-                           aprintf("<t s=\"???\" l=\"%d\" r=\"%d\">",
-                                   i,j));
-      //        printf(" <- ??? [%d,%d]\n",i,j);
+//   let retcode = 0;
+//   let maybe_retn = Hashtable::lookup_opt(retn,ei);
+//   if (maybe_retn != NULL) {
+//     let len = List::length(*maybe_retn);
+//     if (len > 1){
+//       retcode = 1;
+//       fprintf(stderr,"Ambiguous parse, (%d,%d,%d) has multiple RETURNs\n",
+//               ei->f0,ei->f1,ei->f2);
+//       for (let bf = *maybe_retn; bf; bf = bf->tl) {
+//         fprintf(stderr,"(%d,%d,%d)\n",bf->hd->f0->f0,bf->hd->f0->f1,bf->hd->f0->f2);
+//       }
+//       fflush(stderr);
+//     } 
+//     // only print one derivation even if > 1
+//     if (len > 0) {
+//       let l = Buffer::length(b);
+//       if (l > 0) {
+//         // DOESN'T WORK -- CYCLONE BUG        
+// //        let z = Buffer::extract(b);
+// //        char maybe_brace = z[l-1];
+// //        Buffer::restore(b,z);
+//         // INEFFICIENT WORKAROUND
+//         let z = Buffer::contents(b);
+//         char maybe_brace = z[l-1];
+//         if (maybe_brace == '}')
+//           Buffer::add_string(b,",");
+//       }
+//       let &$(x,i,j) = (*maybe_retn)->hd->f0;
+//       // x is state, parse started at i, finished at j
+//       let completed = Set::to_list(dfa_final_attrs(dfa,x));
+//       if (completed != NULL) {
+// 	// YHM: why don't we warn/report whether completed has more than one element?
+//         let attr = completed->hd;
+//         Buffer::add_string(b,
+//                            aprintf("<t s=\"%s\" l=\"%d\" r=\"%d\">",
+//                                    act2symb(attr),i,j));
+//       }
+//       else
+//         // should never happen
+//         Buffer::add_string(b,
+//                            aprintf("<t s=\"???\" l=\"%d\" r=\"%d\">",
+//                                    i,j));
+//       //        printf(" <- ??? [%d,%d]\n",i,j);
 
-      let rc = derivation(pred,retn,(*maybe_retn)->hd,input,dfa);
-      retcode = retcode || rc;
-      Buffer::add_string(b,"</t>");
-    }
-  }
+//       let rc = derivation(pred,retn,(*maybe_retn)->hd->f0,input,dfa);
+//       retcode = retcode || rc;
+//       Buffer::add_string(b,"</t>");
+//     }
+//   }
 
-  let before_opt = Hashtable::lookup_opt(pred,ei);
-  // YHM: why return here?
-  if (before_opt == NULL) return retcode;
+//   let before_opt = Hashtable::lookup_opt(pred,ei);
+//   // YHM: why return here?
+//   if (before_opt == NULL) return retcode;
 
-  let before = *before_opt;
-  let len = List::length(before);
+//   let before = *before_opt;
+//   let len = List::length(before);
 
-  if (len > 1) {
-    retcode = 1;
-    fprintf(stderr,"Ambiguous parse, (%d,%d,%d) has multiple predecessors\n",
-            ei->f0,ei->f1,ei->f2);
+//   if (len > 1) {
+//     retcode = 1;
+//     fprintf(stderr,"Ambiguous parse, (%d,%d,%d) has multiple predecessors\n",
+//             ei->f0,ei->f1,ei->f2);
     
-    for (let bf = before; bf; bf = bf->tl) {
-      fprintf(stderr,"(%d,%d,%d)\n",bf->hd->f0,bf->hd->f1,bf->hd->f2);
-    }
-    fflush(stderr);
-  }
-  if (len > 0) {
-    //    fprintf(stderr,"following (%d,%d,%d)\n",before->hd->f0,before->hd->f1,before->hd->f2);
-    // YHM: nearly a tail call.
-    let rc = derivation(pred,retn,before->hd,input,dfa);
-    retcode = retcode || rc;
-  }
+//     for (let bf = before; bf; bf = bf->tl) {
+//       fprintf(stderr,"(%d,%d,%d)\n",bf->hd->f0,bf->hd->f1,bf->hd->f2);
+//     }
+//     fflush(stderr);
+//   }
+//   if (len > 0) {
+//     //    fprintf(stderr,"following (%d,%d,%d)\n",before->hd->f0,before->hd->f1,before->hd->f2);
+//     // YHM: nearly a tail call.
+//     let rc = derivation(pred,retn,before->hd,input,dfa);
+//     retcode = retcode || rc;
+//   }
 
-  // YHM: Dead code?
-  if (maybe_retn == NULL) {
-    // did not get here by RETURN, so we read a terminal, print it
-    let i = ei->f2;
-    //    printf("%c",input[i-1]);
-  }
-  else {
-    // got here by a RETURN, therefore we just parsed a nonterminal, print it
-    let &$(x,i,j) = (*maybe_retn)->hd;
-    // x is state, parse started at i, finished at j
-    let completed = Set::to_list(dfa_final_attrs(dfa,x));
-    if (completed != NULL) {
-      let attr = completed->hd;
-      //      printf(" %s ",act2symb(attr));
-    }
-    else
-      // should never happen
-      0;
-      //      printf(" ??? ");
-  }
-  // YHM: End ead code.
+//   // YHM: Dead code?
+//   if (maybe_retn == NULL) {
+//     // did not get here by RETURN, so we read a terminal, print it
+//     let i = ei->f2;
+//     //    printf("%c",input[i-1]);
+//   }
+//   else {
+//     // got here by a RETURN, therefore we just parsed a nonterminal, print it
+//     let &$(x,i,j) = (*maybe_retn)->hd;
+//     // x is state, parse started at i, finished at j
+//     let completed = Set::to_list(dfa_final_attrs(dfa,x));
+//     if (completed != NULL) {
+//       let attr = completed->hd;
+//       //      printf(" %s ",act2symb(attr));
+//     }
+//     else
+//       // should never happen
+//       0;
+//       //      printf(" ??? ");
+//   }
+//   // YHM: End ead code.
 
-  return retcode;
+//   return retcode;
+// }
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// YHM: (current) invariant: always called with final state in early item ei.
+
+parse_tree_t
+derivation_redux(Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H> pred,
+		 Hashtable::table_t<earley_node_t,List::list_t<$(earley_node_opt_t,earley_node_t) @`H>,`H> retn,
+		 const char ?input,
+		 dfa_t dfa,
+		 earley_node_t ei);
+
+// List::List_t<parse_forest_t> prefix_all(parse_tree_t,List::List_t<parse_forest_t>);
+// imperative update of fs.
+void prefix_all_imp(parse_tree_t t,List::list_t<parse_forest_t> fs){
+  for (;fs;fs = fs->tl){
+    fs->hd = new List::List(t,fs->hd);
+  }
 }
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-$(int,parse_forest_t)
-derivation_redux(Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H> pred,
-               Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H> retn,
-               earley_node_t ei,
-               const char ?input,
-	       dfa_t dfa,
-	       int is_ambiguous) {
-  // loop vars: ei and retcode
-  let retcode = is_ambiguous;
-  int num_preds = 0;
-  parse_forest_t forest = NULL;
-  do {
-    let maybe_retn = Hashtable::lookup_opt(retn,ei);
-    if (maybe_retn != NULL) {
+List::list_t<parse_forest_t>
+derivation_horizontal(Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H> pred,
+		      Hashtable::table_t<earley_node_t,List::list_t<$(earley_node_opt_t,earley_node_t) @`H>,`H> retn,
+		      const char ?input,
+		      dfa_t dfa,
+		      earley_node_t ei){
 
-      //////////// Debug Code ////////
-      let len = List::length(*maybe_retn);
-      if (len > 1){
-	retcode = 1;
-	fprintf(stderr,"Ambiguous parse, (%d,%d,%d) has multiple RETURNs\n",
-		ei->f0,ei->f1,ei->f2);
-	for (let bf = *maybe_retn; bf; bf = bf->tl) {
-	  fprintf(stderr,"(%d,%d,%d)\n",bf->hd->f0,bf->hd->f1,bf->hd->f2);
-	}
-	fflush(stderr);
-      }
-      //////////////////////////////////
+  fprintf(stderr,"Enter horz.\n");
 
-      // Compute all derivations.
-      let alts = NULL;
-      for (let bf = *maybe_retn; bf; bf = bf->tl) {
-	let $(rc,children_forest) = derivation_redux(pred,retn, bf->hd, input, dfa, retcode);
-	retcode = rc;
 
-	let tree;
-	let &$(x,i,j) = bf->hd;
-	// x is state, parse started at i, finished at j
-	let completed = Set::to_list(dfa_final_attrs(dfa,x));
-	if (completed != NULL) {
-	  // YHM: why don't we warn/report whether completed has more than one element?
-	  let attr = completed->hd;
-	  tree = new NonTerm(act2symb(attr),i,j,children_forest);
-	} 
-	else { // should never happen
-	  // FIX: add appropriate error report or raise exception.
-	  tree = new NonTerm("???",i,j,children_forest);
-	}
+  List::list_t<parse_forest_t> derivations = NULL;
+  let maybe_links = Hashtable::lookup_opt(retn,ei);
+  if (maybe_links != NULL) {
 
-	alts = new List::List(tree,alts);
-      }
+    // Compute all derivations.
+    for (let xs = *maybe_links; xs; xs = xs->tl) {
+      let &$(retn_link,pred_link) = xs->hd;
       
-      alts = List::imp_rev(alts);
-      if (alts != NULL)
- 	forest = new List::List(alts->hd, forest);
+      let pred_derivations = derivation_horizontal(pred,retn,input,dfa, 
+						   pred_link);
+      if (retn_link){
+	let child_tree = derivation_redux(pred,retn,input,dfa,
+					  retn_link);
+	// prefix all forests of pred_derivations with child_tree.
+	prefix_all_imp(child_tree,pred_derivations);
+      } 
 
-//       // Distinguish ambiguous from unamb. parses.
-//       switch (alts) {
-//       case NULL  : 
-// 	// YHM: can len == 0 ? If so, how did entry ever get created?
-// 	break;
-//       case &{hd=tree, tl=NULL}  : 
-// 	// Add newly created tree to forest.
-// 	forest = new List::List(tree, forest);
-// 	break;
-//       default :
-// 	// Merge alternative parse trees and add to forest.
-// 	forest = new List::List(new Merge(alts), forest);
-//       }
+      derivations = List::append(derivations,pred_derivations);
     }
+      
+  }else
+    // A single, empty derivation.
+    derivations = List::list(NULL);
+
     
-    let before_opt = Hashtable::lookup_opt(pred,ei);
+  //////////// Debug Code ///////////
+  if (derivations != NULL && derivations->tl != NULL) {
+    // More than one derivation, so ambiguous.
+    fprintf(stderr,"Ambiguous parse, (%d,%d,%d) has multiple derivations\n",
+	    ei->f0,ei->f1,ei->f2);
+    fflush(stderr);
+  }
+  //////////////////////////////////
 
-    if (before_opt == NULL){
-      // no pred links to explore, end loop.
-      num_preds = 0;
-    } else {
-      let before = *before_opt;
-      num_preds = List::length(before);
+  return derivations;
+}
 
-      if (num_preds > 1) {
-	// More than one pred, so ambiguous.
-	retcode = 1;
-	fprintf(stderr,"Ambiguous parse, (%d,%d,%d) has multiple predecessors\n",
-		ei->f0,ei->f1,ei->f2);
-    
-	for (let bf = before; bf; bf = bf->tl) {
-	  fprintf(stderr,"(%d,%d,%d)\n",bf->hd->f0,bf->hd->f1,bf->hd->f2);
-	}
-	fflush(stderr);
-      }
+parse_tree_t
+derivation_redux(Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H> pred,
+		 Hashtable::table_t<earley_node_t,List::list_t<$(earley_node_opt_t,earley_node_t) @`H>,`H> retn,
+		 const char ?input,
+		 dfa_t dfa,
+		 earley_node_t ei) {
+  fprintf(stderr,"Enter vert.\n");
 
-      // YHM: can num_preds == 0 ?
-      if (num_preds > 0) {
-	ei = before->hd;
-      }
-    }
-  }while(num_preds > 0);
+  let &$(x,i,j) = ei;
+  const char? name = "TOP";
+  let completed = Set::to_list(dfa_final_attrs(dfa,x));
+  if (completed == NULL) {
+    // FIX: add real error handling code.
+    // ERROR: precondition of this function is that x is a final state.
+    fprintf(stderr,"completed is NULL.\n");
+//     return tree;
+  } 
+  else {
+    // pick any attribute (we choose the first)
+    // FIX: use *all* attributes.
+    let attr = completed->hd;
+    name = act2symb(attr);
+    fprintf(stderr,"completed is %s.\n",name);
+// THIS CODE CAUSES A CYCLONE BUG !!!
+//     switch (h_derivations) {
+//     case NULL  : 
+//       // YHM: can len == 0 ? If so, how did entry ever get created?
+//       // ERROR?
+//       break;
+//     case &List::List{.hd=d, .tl=NULL} : 
+//       // Unambiguous
+//       tree = new NonTerm(act2symb(attr),i,j,d);
+//       break;
+//     case &List::List{.hd=d, .tl=NULL} : 
+//       // Unambiguous
+//       tree = new NonTerm(act2symb(attr),i,j,d);
+//       break;
+//     default :
+//       // Ambiguous
+//       tree = new SharedNonTerm(act2symb(attr),i,j,h_derivations);
+//     }
+  } 
 
-  return $(retcode,List::imp_rev(forest));
+  parse_tree_t tree;
+
+  let h_derivations = derivation_horizontal(pred,retn,input,dfa, ei);
+  // distinguish ambiguous from unamb. parses.
+  if (h_derivations == NULL){
+    // YHM: can len == 0 ? If so, how did entry ever get created?
+    // Yes, because it can be a string of terminals.
+    fprintf(stderr,"No derivations returned.\n");
+    tree = new NonTerm(name,i,j,NULL);
+  } else if(h_derivations->tl == NULL){
+    // Unambiguous
+    tree = new NonTerm(name,i,j,h_derivations->hd);
+  } else {
+    // Ambiguous
+    tree = new SharedNonTerm(name,i,j,h_derivations);
+  }
+
+  return tree;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -824,7 +923,7 @@ int recognize(grammar_t grm, rule_t r,const char ?input) {
                0,
                earley_item_0,
                "(initial)",
-               NULL);
+               NULL,NULL);
                
   /* Scan the input */
   let input_len = strlen(input);
@@ -837,7 +936,7 @@ int recognize(grammar_t grm, rule_t r,const char ?input) {
       let &$(state,parent) = si_list->hd;
       let k = target(dfa,state,input[i]);
       if (k != 0) // where k==0 indicates there is no valid target.
-        push_closure(rs,i+1,new $(k,parent),"(input)",new $(state,parent,i));
+        push_closure(rs,i+1,new $(k,parent),"(input)",new $(state,parent,i),NULL);
     }
   }
 
@@ -859,12 +958,16 @@ int recognize(grammar_t grm, rule_t r,const char ?input) {
     let &$(state,parent) = slast_list->hd;
     if (Set::member(dfa_final,state) && parent == 0) {
       b = Buffer::create(1024);
-      derivation(pred,retn,new $(state,parent /*== 0*/,input_len),input,dfa);
+//       derivation(pred,retn,new $(state,parent /*== 0*/,input_len),input,dfa);
       printf("Input:\n%s\nParse:\n",input);
       printf("%s\n",Buffer::contents(b));
-      let $(_,pf) = derivation_redux(pred,retn,new $(state,parent /*== 0*/,input_len),input,dfa,0);
-      printf("Input:\n%s\nParse:\n",input);
-      print_parse_forest(pf);
+      let completed = Set::to_list(dfa_final_attrs(dfa,state));
+      fprintf(stderr,"Completed is null: %d.\n",completed == NULL);
+      let derivation_tree = derivation_redux(pred,retn,input,dfa,new $(state,parent /*== 0*/,input_len));
+      printf("Input:\n%s\nLeftmost derivation:\n",input);
+      print_LD(derivation_tree);
+      printf("\nRightmost derivation:\n");
+      print_RD(derivation_tree);
       printf("\n");
       return 1;
     }
