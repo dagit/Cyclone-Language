@@ -778,9 +778,6 @@ derivation_horizontal(Hashtable::table_t<earley_node_t,List::list_t<earley_node_
 		      dfa_t dfa,
 		      earley_node_t ei){
 
-  fprintf(stderr,"Enter horz.\n");
-
-
   List::list_t<parse_forest_t> derivations = NULL;
   let maybe_links = Hashtable::lookup_opt(retn,ei);
   if (maybe_links != NULL) {
@@ -807,12 +804,12 @@ derivation_horizontal(Hashtable::table_t<earley_node_t,List::list_t<earley_node_
 
     
   //////////// Debug Code ///////////
-  if (derivations != NULL && derivations->tl != NULL) {
-    // More than one derivation, so ambiguous.
-    fprintf(stderr,"Ambiguous parse, (%d,%d,%d) has multiple derivations\n",
-	    ei->f0,ei->f1,ei->f2);
-    fflush(stderr);
-  }
+//   if (derivations != NULL && derivations->tl != NULL) {
+//     // More than one derivation, so ambiguous.
+//     fprintf(stderr,"Ambiguous parse, (%d,%d,%d) has multiple derivations\n",
+// 	    ei->f0,ei->f1,ei->f2);
+//     fflush(stderr);
+//   }
   //////////////////////////////////
 
   return derivations;
@@ -824,15 +821,12 @@ derivation_redux(Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H
 		 const char ?input,
 		 dfa_t dfa,
 		 earley_node_t ei) {
-  fprintf(stderr,"Enter vert.\n");
-
   let &$(x,i,j) = ei;
   const char? name = "TOP";
   let completed = Set::to_list(dfa_final_attrs(dfa,x));
   if (completed == NULL) {
     // FIX: add real error handling code.
     // ERROR: precondition of this function is that x is a final state.
-    fprintf(stderr,"completed is NULL.\n");
 //     return tree;
   } 
   else {
@@ -840,7 +834,6 @@ derivation_redux(Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H
     // FIX: use *all* attributes.
     let attr = completed->hd;
     name = act2symb(attr);
-    fprintf(stderr,"completed is %s.\n",name);
 // THIS CODE CAUSES A CYCLONE BUG !!!
 //     switch (h_derivations) {
 //     case NULL  : 
@@ -957,12 +950,11 @@ int recognize(grammar_t grm, rule_t r,const char ?input) {
        slast_list = slast_list->tl) {
     let &$(state,parent) = slast_list->hd;
     if (Set::member(dfa_final,state) && parent == 0) {
-      b = Buffer::create(1024);
+//       b = Buffer::create(1024);
 //       derivation(pred,retn,new $(state,parent /*== 0*/,input_len),input,dfa);
-      printf("Input:\n%s\nParse:\n",input);
-      printf("%s\n",Buffer::contents(b));
+//       printf("Input:\n%s\nParse:\n",input);
+//       printf("%s\n",Buffer::contents(b));
       let completed = Set::to_list(dfa_final_attrs(dfa,state));
-      fprintf(stderr,"Completed is null: %d.\n",completed == NULL);
       let derivation_tree = derivation_redux(pred,retn,input,dfa,new $(state,parent /*== 0*/,input_len));
       printf("Input:\n%s\nLeftmost derivation:\n",input);
       print_LD(derivation_tree);
