@@ -1,4 +1,5 @@
 DIGIT = %d48-57.
 number = 1*(DIGIT).
-e = e "+" e | e "*" e | number.
+LETTERA = "A".
+e = e "+" e | e "*" e | number | "{" number @repeat(number)LETTERA.
 s = e.

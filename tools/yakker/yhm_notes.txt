@@ -8,7 +8,7 @@ Bars = "BAR" "|" Bars
 Bars = "BAR" _Bars
 
 _Bars = "|" Bars
-      | 
+      |
 
 Lookahead engine must return branch number.
 
@@ -38,7 +38,7 @@ of the whole machine.
 
 Response.
 
-In the blog, we state our goal as 
+In the blog, we state our goal as
 
    For all x,y in Prefixes(L(Ri)), Ai(x) = Ai(y)
 
@@ -84,16 +84,16 @@ Glushkove pseudo-code:
 
 /* Convert a rule to an nfa.  If the rule contains a recursively-defined
    symbol, then that symbol is only converted once, and all instances
-   share the resulting nfa. 
+   share the resulting nfa.
 
    Invariant: we never modify or remove the start state or set of
    final states of a symbol. We can, however, modify the final
-   states themselves (e.g. add actions.)  
+   states themselves (e.g. add actions.)
 */
 
 
 /*
-  state representation: 
+  state representation:
     Transitions:   NULL --> NO_TRANSITIONS (dead state).
                           List of (cs_t, st_t) pairs --> representing transitions on cs_t into state st_t.
     List of final states.
@@ -103,7 +103,7 @@ Glushkove pseudo-code:
      add_action (st_t s, cs_t action, st_t target)
      add_actions (st_t s, set_t<$(cs_t, st_t) @>)
      set_t<$(cs_t, st_t) @> get_actions (st_t a)
- 
+
      add_final (st_t s,  st_t f)
      add_finals (st_t s, set_t<st_t> finals)
      set_t<st_t> get_finals (st_t s)
@@ -121,7 +121,7 @@ mkact(cs_t x){
   f = new_state;
   add_final(s,f);
   add_action(s,x,f);
-  return s;  
+  return s;
 }
 
 st_t mkseq(st_t a,st_t b) {
@@ -136,7 +136,7 @@ st_t mkseq(st_t a,st_t b) {
 
   if (not (is_symbol a))
     add_finals (a, get_finals b)
- 
+
   if (not is_symbol b)
     remove_state b
 
@@ -175,7 +175,7 @@ st_t mkstar(st_t a) {
   if (is_symbol a){
     let s = new_state
     add_actions (s, a_actions)
-    add_finals  (s, a_finals)    
+    add_finals  (s, a_finals)
     add_final (s,s)
     return s
   } else {
@@ -199,9 +199,9 @@ st_t mklit(const char ?x) { /* A bit more space efficient than looping mkact */
     else y = cs_singleton(x[i]);
     add_action(a,y,b);
     a = b;
-  } 
+  }
   add_final(s,a);
-  
+
   return s;
 }
 
@@ -301,7 +301,7 @@ looking for a good greedy algorithm? by the way, all of this indicates
 that you don't need the whole term thing. term wrapping is really an
 orthogonal convenience to literal elimination.
 
-Algorithm:  
+Algorithm:
 Start with start symbol.
 Derive lookahead dfa, D.
 from each path, delete literals from both D and path until we hit non literal.
@@ -371,7 +371,7 @@ have them on symbol definitions. Here's an alternative:
   sequence gets chosen before escape of the whole sequence. Should we
   distinguish between "(a b) c" and "a b c" (i.e. allowing a format
   escape to replace "a b" in the first but not in the second)? If so,
-  how - they are encoded the same way in the AST. 
+  how - they are encoded the same way in the AST.
 
   b') ditto for RCOUNT.
 
@@ -396,12 +396,12 @@ this only works for symbols. It doesn't work for elements without
 names. This comes back to the question of how do you give names
 intuitively to nested BNF elements. I think that the perl approach of
 \1,\2,etc. might be a good way to go. We could use it support terms as
-well, if we wish.  
+well, if we wish.
 
 A question I have is what is the implication of a conflict? Does it
 mean that the grammar is simpley ambiguous? Or are we only
 conservatively approximating, hence we could resolve the conflict in a
-way to that will cause a parse failure when there should have been a 
+way to that will cause a parse failure when there should have been a
 success?
 
 It would be nice if yakker could give conflict messages that made it
@@ -421,7 +421,7 @@ Challenges: efficiency, termination
 
 Rank rules by some metric. Height in grammar could be one, with
 recursive rules having infinite height. Then, when generating data,
-when you encounter an alt branch, choose the smallest branch. 
+when you encounter an alt branch, choose the smallest branch.
 
 I think that for the metric we can choose the exact size of the data
 to be generated.
@@ -486,7 +486,7 @@ wildcards correctly.
 Put this way, I think we should take a two-layered approach. The
 bottom layer is a scheme for full and disambiguous naming. The
 top-layer is a scheme for inferring names based on reasonable
-defaults.  
+defaults.
 
 How do we use the binders? In the f.s. scheme, the string contents of
 the parsed data are placed into the appropriate vararg argument. For
@@ -496,7 +496,7 @@ foo = "x" " " "z".
 
 scanf_foo("x %r",&a)
 
-[%r]@n = store(n), 
+[%r]@n = store(n),
 [*a] = *[a]
 [#a] = [?a *("," a)]
 [?a] = ?[a]
@@ -551,10 +551,10 @@ to modify yakker so that it provides "entry points" for every nameable
 element in the grammar. Right now, it only provides entry points for
 symbols. So, we have a choice of two possibilities:
 
-Given BNF 
+Given BNF
   foo = "x" " " "z".
-the format string 
-  "x %r" 
+the format string
+  "x %r"
 becomes either
 
 1) a new BNF
@@ -565,7 +565,7 @@ becomes either
   foo' = "x" " " "z" {store($3)}
 where $3 is the assigned name for element "z".)
 
-or, if we had a scheme for multiple entry points, 
+or, if we had a scheme for multiple entry points,
 
 2)  a series of function calls
 
@@ -582,11 +582,11 @@ where. Either way, the format-string BNF would be defined with judgements
 where [[r]] is version that adds support for binders.
 
 Then, option 1) (BNF -> BNF(fs->BNF)) is:
-[r] = 
+[r] =
 
 [r1 r2]@n = [r1]@n$1 [r2]@n$2 | f(r)
 [*a]@n = *[a]@n | f(r)
-//[#a] = [?a *("," a)] 
+//[#a] = [?a *("," a)]
 [?a]@n = ?[a]@n | f(r)
 [{n}a]@n = {n}[a]@n | f(r)
 [a | b]@n = [a]@n$1 | [b]@n$2 | f(r)
@@ -595,7 +595,7 @@ Then, option 1) (BNF -> BNF(fs->BNF)) is:
 [r]@n = r {printf("%s",rule2string(r));} // where "r" is an escaped version of the rule r.
 
 where f(r) = "%r" {let fn = fresh_name();                // without naming scheme in place
-	     	   printf("(r)$%s {store(%s);}",fn,fn);} 
+	     	   printf("(r)$%s {store(%s);}",fn,fn);}
 or
            = "%r" {printf("r {store(%s);}",n);} // with naming scheme in place
 
@@ -612,7 +612,7 @@ and option 2) (BNF -> BNF(fs->function calls)) is:
 // otherwise:
 [r]@n = r {echo "p_n();"}
 
-[[r]]@n = [r]@n | "%r" {echo "store(p_n());"} 
+[[r]]@n = [r]@n | "%r" {echo "store(p_n());"}
 
 // Dynamic version:
 
@@ -625,7 +625,7 @@ and option 2) (BNF -> BNF(fs->function calls)) is:
 // otherwise:
 [r]@n = r {p_n();}
 
-[[r]]@n = [r]@n | "%r" {store(p_n());} 
+[[r]]@n = [r]@n | "%r" {store(p_n());}
 
 Note that even though we don't currently have such fine grained entry
 points, we could still accomplish alot (at least for testing) just by
@@ -754,7 +754,7 @@ nullable (e.g. the symbol def. is a sequence ending in a *).
 In order to support modularity, we allow the user to make every symbol
 a start symbol -- i.e. add eof to the follow grammar of every
 symbol. This feature can be enabled with -all-start. Note that it is
-possible (even likely) to result in many more conflicts. 
+possible (even likely) to result in many more conflicts.
 
 For convenience, we also allow the user to choose the value that will
 be treated as eof -- i.e. the value that will terminate all start
@@ -762,7 +762,7 @@ symbols. I intend to add an option -escape-eof or -warn-eof-conflict
 that will, respectively, escape eof if it appears in the input
 alphabet or warn if eof appears in the input alphabet.
 
-Together, these two new features provide the user with two solutions: 
+Together, these two new features provide the user with two solutions:
 1) Set eof to \000 (status quo). Then, manipulate the input to
 insert \000 where appropriate. For example, if we are parsing symbol x
 and we know it will be followed by \n, then provide a filter that will
@@ -936,9 +936,9 @@ Here's another:
 E.g.  (command FOO (copy (2 INBOX)))
 ==>
 printf("FOO COPY %s INBOX ", gen_sequence_set());
-Notice that at "command" level, there's nothing new. The path is only used in copy. 
+Notice that at "command" level, there's nothing new. The path is only used in copy.
 So, this would work the same:
-FOO\ (copy (2 INBOX))\ 
+FOO\ (copy (2 INBOX))\
 
 But, directly nested projections are not supported, e.g.:
 (command (1 FOO) (2 (2 (2 (2 INBOX)))))
@@ -961,7 +961,7 @@ rule2lazy_nfa0(strset_t recursive,
 	  lazy_st_t final);
 
 A lazy state can point either to another state or to a rule_t.
-However, it should always have an associated final state. In fact, 
+However, it should always have an associated final state. In fact,
 the rule_t must be stored together with the ultimate final state, for
 future use.
 
@@ -999,7 +999,7 @@ st_t mk_lazy_act(cs_t x) {
 
 #define CASE_INSENSITIVE 1
 /* A bit more space efficient than looping mk_lazy_act */
-st_t mk_lazy_lit(const char ?x) { 
+st_t mk_lazy_lit(const char ?x) {
   let s = nfa_fresh_state();
   let len = strlen(x);
   if (len == 0) {
@@ -1074,7 +1074,7 @@ computational effects.
 I believe that a solution to the problem requires us to eagerly expand
 cycles in the graph/nfa.  Just like the star operator fully builds the
 cycle when first forced, recursive cycles in the graph must fully
-build the cycle (if not the contents) when first forced.  
+build the cycle (if not the contents) when first forced.
 
 In order for these expansions to force *only* the cycles, we must at
 least treat all non-recursive symbols as terminals.  An additional
@@ -1110,7 +1110,7 @@ non-recursive symbols, as there is not much computational cost in
 converting a regular expression into an NFA.
 
 Note that it is critical to know when we are in the process of forcing
-a cycle, so that we not end up in an infinite loop. 
+a cycle, so that we not end up in an infinite loop.
 
 
 *** Important point: if no_expand is used, then we both don't need,
@@ -1265,7 +1265,7 @@ There are two possible interpretations of repeat for format
 strings. First, if the format string includes the number of
 repetitions, then we could use this immediately in parsing the format
 string itself. That is, a repeat in the original grammar can be
-translated into a repeat in the format string's grammar. 
+translated into a repeat in the format string's grammar.
 
 In fact, this is really a property of dependent sequences. If the
 value is present, then we can eagerly use it in parsing the rest of
@@ -1337,7 +1337,7 @@ value. To be more specific, the translation is as follows:
 
 [r1] = r1',e1   [r2] = r2',e2
 ---------------------------------------- (F = ...)
-[r1$x r2] = r1' ast2string@(e1)$x r2' { F(e1,e2); } 
+[r1$x r2] = r1' ast2string@(e1)$x r2' { F(e1,e2); }
 
 Each rule is translated into a new rule and an action, which is an
 expression that will construct the bnf for that rule. The function F
@@ -1395,7 +1395,7 @@ continue factoring if the symbol definitions are sequences. Ignoring
 recursive symbols, we'll be most effective if we factor in dependency
 order. That way, if a symbol is originally defined as an alt, any
 possible factoring will already have been done by the time a user of
-the symbol gets to it. 
+the symbol gets to it.
 
 Note that this dep. first, sequence-only approach is not a full
 solution, as conflicts between sequences and alts (where not all
@@ -1460,7 +1460,7 @@ res = EMPTY
 
 while not done, non-empty rules1, and non-empty rules2
   h1 = head rules1
-  h2 = head rules2    
+  h2 = head rules2
   if equal(h1,h2) then
     add h1 to res.
   else if is-symbol h1 or is-symbol h2 then
@@ -1530,7 +1530,7 @@ else
 
 Reading notes:
 
-"Generalized Regular Parsers" 
+"Generalized Regular Parsers"
   Doesn't seem very relevant. It relates to the technique of
   converting recursion in the grammar into regular expressions where
   possible and then implementing those portions of the grammar in the
@@ -1543,7 +1543,7 @@ Reading notes:
 
 - In some cases, left-factoring is neither necessary nore
   sufficient. Instead, a new technique can be used which exploits a
-  notion called "follow determinism." 
+  notion called "follow determinism."
 
 - Main takeaway -- follow determinism can give you greater efficiency
   than longest match and can parse some languages not expressable as
@@ -1551,3 +1551,73 @@ Reading notes:
   lookahead. Note, FD is a property of the grammars which they can
   exploit to resolve LL and LR ambiguities in some cases, it is not a
   general technique for resolving any ambiguity.
+
+
+################################################################################
+10/17/07
+
+For starters, let's skip derivation reconstruction -- just give Repeat
+access to the substring (in fact, we'll even convert it first to an
+int). But, how should parser know which substring is needed --
+i.e. how do we handle binding in interpreter? I think we need to
+handle at binding point, rather than at use point. Also, repeat only
+mentions variable names -- no C expressions (because we can't interpret
+them).
+
+Next, any bound regexp will be converted into a fresh symbol
+definition if it is not already a symbol. We need the state to be
+entered on a call so that we can know its extent upon completion. For
+any bound non-terminal, mark the destination of the transition on that
+non-terminal as a LATENT state and map each LATENT state to a set of
+regular expressions (can use a list representation; don't need
+membership checks).
+
+When push_closure sees a return, checks if the state following the
+transition is a LATENT state. If so, uses i,j from completed state to
+know the substring that needs binding. Converts substring to int and
+then substitutes into each of the latent regexps.  Substitution will
+also handle unfolding repeats specified number of times.
+
+Next, we do the normal regular expression processing. Convert each
+regexp into NFA. Then, union together all NFAs (perhaps need to track
+some final attributes -- not sure). Then determinize, minimize, etc.
+
+Finally, once the fresh portion of the DFA has been created,
+push_closure will create new Earley item with same back-pointer as
+LATENT state but with the newly created DFA state. Add predecessor
+link to LATENT item because the transition from LATENT state to new
+state is essentially a scan on epsilon.
+
+Q: Why do we map each LATENT state to a set of regular expressions?
+
+A: Because we might have multiple alternatives that all bind the same
+non-terminal, e.g.
+
+A = ...
+B = ...
+C = ...
+...
+Z = ...
+X = Z$x  @repeat(x)(A) 
+    |  Z$x  @repeat(x)(B)
+    |  Z$x @repeat(x)(C)
+
+So, once the NFA is determinized, the DFA state machine for X will look like  
+
+       2 ->  Z's DFA -> n
+     /
+CALL
+/
+1 --Z--> 3
+
+with LatentMap = [3 -> @repeat(x)(A), @repeat(x)(B), @repeat(x)(C)]
+and LatentSet = {3}.  Note that LatentSet is probably implicit (that
+is, doesn't need its own data structure) -- either b/c we can just use
+the domain of LatentMap or by adding a transition on some special
+symbol LATENT to all LATENT states; but the details aren't critical.
+
+
+Q: Why not use environments to map bound names to substrings?  
+
+A: It avoids needing to attach environments everywhere.
+

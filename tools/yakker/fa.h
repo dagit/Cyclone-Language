@@ -48,6 +48,7 @@ typedef struct DFA @dfa_t;
 // Returns: target state, if yes; 0, if no.
 st_t target(dfa_t dfa,st_t s,act_t a);
 
+extern act_t* first_action_but(dfa_t dfa,st_t s,act_t a);
 extern Set::set_t<st_t> dfa_final_states(dfa_t dfa);
 extern void dfa_set_final(dfa_t dfa, st_t final, aset_t attrs);
 extern dfa_t nfa2dfa(st_t start_state, Set::set_t<st_t,`H> final_states);
@@ -60,4 +61,11 @@ extern void lookahead_glush(grammar_t grm,List::list_t<rule_t> rules, rule_t rig
 extern void nfa_dot(FILE @f,Set::set_t<st_t> final_states,cs_pred_t special);
 extern void dfa_dot(FILE @f, dfa_t dfa, cs_pred_t special);
 extern dfa_t dfa_minimize(dfa_t dfa);
+// Construct a repeat dfa: a series of n states each transitioning to
+// the given target state "target_s" on the "target" action. Each
+// state transitions to the next on action "next".
+// The last state is connected to the specified final state "f".
+extern st_t construct_repeat_dfa(dfa_t dfa, unsigned int n, 
+				 act_t next, 
+				 st_t target_s, act_t target, st_t f);
 #endif

@@ -1,0 +1,5 @@
+DIGIT = %d48-57.
+number = 1*(DIGIT).
+LETTERA = "A".
+;e = "{" number LETTERA LETTERA LETTERA.
+e = "{" number @repeat(number)LETTERA.

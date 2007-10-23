@@ -546,6 +546,29 @@ st_t target(dfa_t dfa,st_t s,act_t a) {
   // internal_err("no target for action %u in state %u\n",a,s);
   return 0;
 }
+
+// Return pointer to first action not equal to a, for which there's a transition to a non-empty state.
+// Return NULL if there is none.
+act_t* first_action_but(dfa_t dfa,st_t s,act_t a) {
+  let t = Axarray::get(dfa->states,s);
+  if (!t) return NULL; /* target is the dead state */
+
+  let lb = t->lb;
+  for (let sp = t->spans; sp; sp = sp->tl){
+    if (sp->hd->target != 0){
+      if (lb != a)
+	return new lb;      
+      else if (lb+1 < sp->hd->ub)
+	// if the next one is still within range, return it.
+	// otherwise, move on to next range
+	return new (lb+1);
+    } 
+    lb = sp->hd->ub;
+  }
+  
+  return NULL;
+}
+
 dfa_t dfa_create() {
   return new DFA {
     .number_of_states = 1, // there's always a "dead" state 0
@@ -2047,3 +2070,26 @@ dfa_t lookahead_dfa(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt)
 }
 
 
+// Construct a repeat dfa: a series of n states each transitioning to
+// the given target state "target_s" on the "target" action. Each
+// state transitions to the next on action "next".
+// The last state is connected to the specified final state "f".
+st_t construct_repeat_dfa(dfa_t dfa, unsigned int n, 
+			  act_t next, 
+			  st_t target_s, act_t target, st_t f){
+  let lb = target;
+  let target_span = new span(target_s,lb+1);
+  // everything b/w CALL and nt.
+  let pre_next_span = new span(NOTRANSITION,next);
+  let last_d = f;
+  for (int i = 0; i < n; i++){
+    let d = dfa_fresh_state(dfa);
+    let next_span = new span(last_d,next+1);
+    let spans = next > lb+1 ?
+      List::list(target_span, pre_next_span, next_span) : 
+      List::list(target_span, next_span);
+    Axarray::set(dfa->states,d,new trans(lb,spans));
+    last_d = d;
+  }
+  return last_d;
+}

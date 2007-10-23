@@ -3,6 +3,7 @@
 #include <buffer.h>
 #include <string.h>
 #include <core.h>
+#include <stdlib.h>
 #include <list.h>
 #include <graph.h>
 #include "bnf.h"
@@ -99,11 +100,14 @@ void print_parse_forest(parse_forest_t pf){
    NB: there is a max number of actions hard-coded in cs.h.
 */
 
-static unsigned int symb_action_counter = 257;
+static unsigned int symb_action_counter = 258;
 static struct Hashtable::Table<str_t,act_t> *symb_action_table = NULL;
 static struct Hashtable::Table<act_t,str_t> *action_symb_table = NULL;
 static act_t callout_action() {
   return 256;
+}
+static act_t repeat_action() {
+  return 257;
 }
 static act_t new_action() {
   let a = symb_action_counter++;
@@ -116,6 +120,9 @@ static act_t new_action() {
 }
 static cs_t callout_cs() {
   return cs_singleton(callout_action());
+}
+static cs_t repeat_cs() {
+  return cs_singleton(repeat_action());
 }
 const char ?act2symb(act_t act) {
   let sopt = Hashtable::lookup_opt(action_symb_table,act);
@@ -130,6 +137,7 @@ static act_t symb2act(const char ?`H symb) {
     action_symb_table =
       Hashtable::create(11,st_cmp,st_hash);
     Hashtable::insert(action_symb_table,callout_action(),new "CALL");
+    Hashtable::insert(action_symb_table,repeat_action(),new "REPEAT");
   }
   let symbptr = new symb;
   let aptr = Hashtable::lookup_opt(symb_action_table,symbptr);
@@ -248,10 +256,55 @@ st_t rule2earley0(Hashtable::table_t<str_t,st_t> symb_st,
   case &Alt(r2,r3):
     let s2 = rule2earley0(symb_st,grm,r2); let s3 = rule2earley0(symb_st,grm,r3);
     return mkalt(s2,s3);
-  case &Rcount(_,r2):
+  case &Rcount(var,r2):
     /* Conservative approximation */
     warn_repeat();
-    fallthru(r2);
+    // 1. check that r2 is valid -- only symbols allowed.
+    // TODO
+
+    // 2. s2 <- generate NFA for r2.
+    let s2 = rule2earley0(symb_st,grm,r2);
+
+    // 2.a. Convert var -- the "repeater" because it determines the repetition -- to action.
+    let repeater_cs =  consume_symb_cs(var);
+    // 2.b. Convert target -- the "repeatee" because gets repeated -- to action.
+    let repeatee_cs;
+    switch (r2->r) {
+    case &Symb(x,_):
+      // overwrite s2 with start state of symbol *definition*.
+      Hashtable::try_lookup(symb_st,new x,&s2);
+      repeatee_cs = consume_symb_cs(x);
+      break;
+    default:
+      fprintf(stderr,"Error: repeatee of repeat is not a symbol.\n");
+      return mklit("");
+    }
+    // 2.c.  and add to final state of s2. FIX: can't do this, b/c no
+    // attrs for NFA final states. For now, just enforce that user use
+    // unique nonterm in which case, var will be added automatically.
+
+    // 3. Create start and final state for the repeat.
+    let s = nfa_fresh_state();
+    let f = nfa_fresh_state(); 
+    final(s,f);
+
+    // 4. add fresh states that CALL to s2 and transition (to final
+    // state) on var. Not a real states -- just used to store info
+    // about s_rep: the NFA to call, nonterm symbol (action), and
+    // final state of repeat. Could use separate table.
+    let s_rep_call = nfa_fresh_state();
+    let s_rep_trans_repeater = nfa_fresh_state();
+    let s_rep_trans_repeatee = nfa_fresh_state();
+    action(s_rep_call,callout_cs(),s2);
+    etrans(s_rep_call,s_rep_trans_repeater);
+    action(s_rep_trans_repeater,repeater_cs,s_rep_trans_repeatee); 
+    action(s_rep_trans_repeatee,repeatee_cs,f); 
+
+    // 4. Transition start state to CALL state on repeat to indicate a
+    // repeat is happening.
+    action(s,repeat_cs(),s_rep_call);
+
+    return s;
   case &Star(0,&Infinity,r2):
     let s2 = rule2earley0(symb_st,grm,r2);
     return mkstar(s2);
@@ -387,9 +440,12 @@ $(st_t,st_t,st_t)
     etrans(e2,e);
     etrans(e3,e);
     return $(s,f,e);
-  case &Rcount(_,r2):
-    /* Conservative approximation */
+  case &Rcount(var,r2):
     warn_repeat();
+    //  repeat should never show up in a merge, because that implies
+    // that it might be preceded by epsilon, in which case it will have 
+    // no value on which to depend.
+    warn("@repeat appears, in a sequence, possibly preceded by epsilon.\n");
     fallthru(r2);
   case &Star(0,&Infinity,r2):
     let s = nfa_fresh_state();
@@ -404,6 +460,13 @@ $(st_t,st_t,st_t)
     action(e2,EPSILON,e);
     etrans(f2,scall);
     action(f2,EPSILON,f);
+
+    // We could replace the following two transitions
+    // with this single transition:
+    // etrans(fcall,f2);
+    // and then this would resemble the standard 
+    // Star construction,  with f2 playing the 
+    // role of s.
     etrans(fcall,scall);
     action(fcall,EPSILON,f);
     return $(s,f,e);
@@ -572,6 +635,11 @@ void point_to(Hashtable::table_t<earley_node_t,List::list_t<`a,`H>,`H> tbl,
   else Hashtable::insert(tbl,source,List::list(target));
 }
 
+
+$(unsigned int, unsigned int) *
+get_bounds(Hashtable::table_t<earley_node_t,List::list_t<$(earley_node_opt_t,earley_node_t) @`H>,`H> retn,
+	   dfa_t dfa, earley_node_t en, act_t nt);
+
 /* Add an item to an Earley state.
    If the item has an automaton state that transitions to another state
    by epsilon, add items for those states too.
@@ -580,6 +648,7 @@ void point_to(Hashtable::table_t<earley_node_t,List::list_t<`a,`H>,`H> tbl,
  */
 void
 push_closure(rstate_t rs,
+	     const char ?input,
              unsigned int i,
              earley_item_t ei, // YHM: I think this should be an early node
 			       // instead of an earley item for
@@ -604,11 +673,72 @@ push_closure(rstate_t rs,
   let t = target(rs->dfa,s,callout_action());
   if (t != 0) {
     point_to(rs->call,new $(t,i,i),node);
-    push_closure(rs,i,new $(t,i),"(call)",NULL,NULL);
+    push_closure(rs,input,i,new $(t,i),"(call)",NULL,NULL);
   }
 
-  /* Close under RETURNS */
-  if (i != backptr // we parsed the empty string, RETURN handled by dfa already
+  /* Close under REPEATS. Only works if target has *one* non-call target. */
+  let t = target(rs->dfa,s,repeat_action());
+  if (t != 0) {
+    /* 1. Retrieve the number from the Earley parse trail.*/
+
+    // Find the non-term to which repeat is bound.
+    // Note: after determinizing, possibly many calls from single
+    // state, but shouldn't be any terminals (is this true?). So, we
+    // will need to perform repeat for *all* nonterminals that appear.
+    fprintf(stderr,"Looking for non-CALL transition.\n");
+    fflush(stderr);
+
+    let nt_opt = first_action_but(rs->dfa,t,callout_action());
+    if (!nt_opt){
+      fprintf(stderr,"Error: repeat state does not transition on non-call.\n");
+      return;
+    }
+    let repeater_nt = *nt_opt;
+    fprintf(stderr,"Repeat based on non terminal %s.\n",act2symb(repeater_nt));
+    // get the bounds (inclusive) of parsed non-terminal nt from the
+    // Earley parse history.
+    let bounds_opt = get_bounds(rs->retn,rs->dfa,node,repeater_nt);
+    if (!bounds_opt){
+      fprintf(stderr,"Error: bounds could not be find for non terminal %s.\n",act2symb(repeater_nt));
+      return;
+    }
+    let &$(j,k) = (_@)bounds_opt;
+    let num = atoi(substring(input,j,k-j+1));
+    fprintf(stderr,"Repeat encountered with n=%d.\n",num);
+
+    /* 2. Build new DFA using retrieved number. */
+
+    // Find the action of the repeated symbol.
+    let s_repeatee = target(rs->dfa,t,repeater_nt);
+    let nt_opt = first_action_but(rs->dfa,s_repeatee,0);
+    if (!nt_opt){
+      fprintf(stderr,"Error: repeatee state does not transition.\n");
+      return;
+    }
+    let repeatee_nt = *nt_opt;
+    fprintf(stderr,"Repeat non terminal %s.\n",act2symb(repeatee_nt));
+
+    // Find the start state of the repeated DFA.
+    let nt_start = target(rs->dfa,t,callout_action());
+    let nt_final = target(rs->dfa,s_repeatee,repeatee_nt);
+    // Construct chain of states that transition on repeatee_nt and each call
+    // this DFA (nt_start). Chain has length "num". The chain ends
+    // with the final state.
+    let t_new = construct_repeat_dfa(rs->dfa,num,repeatee_nt,nt_start,callout_action(),nt_final);
+
+    if (debug){
+      fprintf(stderr,"Printing DFA after unrolling repeat.\n");
+      dfa_dot(stderr,rs->dfa,act2symb);
+      fflush(stderr);
+    }
+
+    /* 3. Call push_closure again as if we started in this
+       state. ie. t_new replaces s. So, we reuse back and up. */
+    push_closure(rs,input,i,new $(t_new,backptr),"(repeat)",back,up);
+  } 
+  /* Close under RETURNS.  Use else, becaause a REPEAT state can't
+     also be a final state. */  
+  else if (i != backptr // we parsed the empty string, RETURN handled by dfa already
       && dfa_is_final(rs->dfa,s)) {
     /* Some symbol is completed.
        es_back is the Earley state that CALLed the symbol. */
@@ -632,7 +762,7 @@ push_closure(rstate_t rs,
 	  let backnode = new $(t,tbackptr,backptr);
 	  // Earley node w/ dot after symb.
           let retnode = new $(ttarget,tbackptr,i);
-          push_closure(rs,i,new $(ttarget,tbackptr),
+          push_closure(rs,input,i,new $(ttarget,tbackptr),
                        aprintf("(return %s)",act2symb(symb)),
                        backnode, node);
         }
@@ -752,6 +882,40 @@ struct Buffer::t *b = NULL;
 //   return retcode;
 // }
 
+
+// Retrieve bounds of previously-appearing non terminal within currently parsing RHS.
+// If appears multiple times, only returns one answer.
+// If can't be found, return NULL;
+$(unsigned int, unsigned int) *
+get_bounds(Hashtable::table_t<earley_node_t,List::list_t<$(earley_node_opt_t,earley_node_t) @`H>,`H> retn,
+	   dfa_t dfa, earley_node_t en, act_t nt){
+
+  List::list_t<parse_forest_t> derivations = NULL;
+  let maybe_links = Hashtable::lookup_opt(retn,en);
+  if (maybe_links != NULL) {
+
+    // OPTIMIZATION: we could use a loop instead of recursion if there
+    // is only one link.
+
+    // Search all predecessor paths
+    for (let xs = *maybe_links; xs; xs = xs->tl) {
+      let &$(retn_link,pred_link) = xs->hd;
+      
+      if (retn_link){
+	let &$(x,i,j) = (_@)retn_link;
+	if (Set::member(dfa_final_attrs(dfa,x),nt))
+	  // found it
+	  return new $(i,j);
+      } else {//recurse: keep looking.
+	let b = get_bounds(retn, dfa, pred_link, nt);
+	if (b) return b;
+      }
+    }
+  }
+
+  return NULL;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 // YHM: (current) invariant: always called with final state in early item ei.
@@ -776,10 +940,10 @@ derivation_horizontal(Hashtable::table_t<earley_node_t,List::list_t<earley_node_
 		      Hashtable::table_t<earley_node_t,List::list_t<$(earley_node_opt_t,earley_node_t) @`H>,`H> retn,
 		      const char ?input,
 		      dfa_t dfa,
-		      earley_node_t ei){
+		      earley_node_t en){
 
   List::list_t<parse_forest_t> derivations = NULL;
-  let maybe_links = Hashtable::lookup_opt(retn,ei);
+  let maybe_links = Hashtable::lookup_opt(retn,en);
   if (maybe_links != NULL) {
 
     // Compute all derivations.
@@ -807,7 +971,7 @@ derivation_horizontal(Hashtable::table_t<earley_node_t,List::list_t<earley_node_
 //   if (derivations != NULL && derivations->tl != NULL) {
 //     // More than one derivation, so ambiguous.
 //     fprintf(stderr,"Ambiguous parse, (%d,%d,%d) has multiple derivations\n",
-// 	    ei->f0,ei->f1,ei->f2);
+// 	    en->f0,en->f1,en->f2);
 //     fflush(stderr);
 //   }
   //////////////////////////////////
@@ -892,13 +1056,17 @@ egraph_t cvt(Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H> tb
 /* Earley recognizer.
    Returns 1 if input is recognized, 0 otherwise.
  */
-int recognize(grammar_t grm, rule_t r,const char ?input) {
+$(dfa_t,Set::set_t<st_t>) compile(grammar_t grm, rule_t r) {
   init_maybe_empty(grm);
   let $(dfa,dfa_final) = rule2earley(grm,r);
   if (debug)
     dfa_dot(stderr,dfa,act2symb);
   fflush(stderr);
 
+  return $(dfa,dfa_final);
+}
+
+int recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input) {
   /* Keep track of parse trees */
   let
     pred = Hashtable::create(11,earley_node_cmp,earley_node_hash);
@@ -912,13 +1080,15 @@ int recognize(grammar_t grm, rule_t r,const char ?input) {
     Axarray::create(11,Set::empty(earley_item_cmp));
   let earley_item_0 = new $(1,0); // 1 is initial state of dfa, 0 is i in si
   let rs = new rstate {dfa,estates,pred,retn,call};
-  push_closure(rs,
+  push_closure(rs, 
+	       input,
                0,
                earley_item_0,
                "(initial)",
                NULL,NULL);
                
   /* Scan the input */
+  fprintf(stderr,"Scanning the input.\n");
   let input_len = strlen(input);
   for (let i = 0; i < input_len; i++) {
     fprintf(stderr,"input[%d]==%s\n",i,cs_char_escape(input[i]));fflush(stderr);
@@ -929,7 +1099,7 @@ int recognize(grammar_t grm, rule_t r,const char ?input) {
       let &$(state,parent) = si_list->hd;
       let k = target(dfa,state,input[i]);
       if (k != 0) // where k==0 indicates there is no valid target.
-        push_closure(rs,i+1,new $(k,parent),"(input)",new $(state,parent,i),NULL);
+        push_closure(rs,input,i+1,new $(k,parent),"(input)",new $(state,parent,i),NULL);
     }
   }
 

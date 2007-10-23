@@ -22,7 +22,8 @@
 #include "fa.h"
 
 namespace Earley {
-  extern int recognize(grammar_t grm, rule_t r,const char ?input);
+  extern $(dfa_t,Set::set_t<st_t>) compile(grammar_t grm, rule_t r);
+  extern int recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input);
 }
 
 #endif
