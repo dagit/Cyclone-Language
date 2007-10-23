@@ -906,10 +906,12 @@ get_bounds(Hashtable::table_t<earley_node_t,List::list_t<$(earley_node_opt_t,ear
 	if (Set::member(dfa_final_attrs(dfa,x),nt))
 	  // found it
 	  return new $(i,j);
-      } else {//recurse: keep looking.
-	let b = get_bounds(retn, dfa, pred_link, nt);
-	if (b) return b;
-      }
+      } 
+
+      // keep looking -- recurse.
+      let b = get_bounds(retn, dfa, pred_link, nt);
+      if (b) return b;
+      
     }
   }
 
