@@ -525,6 +525,9 @@ int main(int argc, const char ?`H?argv) {
 
   /* Produce the bindgrammar and exit */
   if (bindgrammarp) {
+    // activate function-table generation in parsergen
+    gen_fun_table = 1;
+
     debugprint(1,"Producing bind grammar ... ");
     let gr = ds;
 
@@ -561,6 +564,7 @@ int main(int argc, const char ?`H?argv) {
     debugprint(1,"Adding binders ... ");
     gr = grammar2bindgrammar(gr);
     pr_definitions(stdout, gr);
+    fprintf(stdout, "ast2string@(rule_pat_t p)$$(const char ?) = \"\"{return ast2string(p);}.");
     fprintf(stdout, "{#include \"pm_bnf.h\"}\n");
 //     fprintf(stdout, "{extern const char ?fresh_name();}\n");
 //     fprintf(stdout, "{extern int branch_id;}\n");

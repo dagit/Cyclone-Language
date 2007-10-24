@@ -1,7 +1,10 @@
 include ../../Makefile.inc
+
+# vpath %.o build
+
 CYCFLAGS=
 #CYCFLAGS=-g -save-c -pp
-YAKFLAGS=-d -d
+YAKFLAGS=
 
 CURDIR=$(shell pwd)
 
@@ -30,10 +33,11 @@ YAKKER_FILES = analyze axarray cs bnf extract fa nfa_lazy nfa_eager leftfactor f
 
 FILES=$(YAKKER_FILES) ast_main pm_bnf imap_scanf funtable
 
-OBJS:=$(foreach yfile,$(YAKKER_FILES),build/$(yfile).o)
+# OBJS:=$(foreach yfile,$(YAKKER_FILES),build/$(yfile).o)
+OBJS:=$(foreach yfile,$(YAKKER_FILES),$(yfile).o)
 
 # OBJS compiled for allocation profiling.
-OBJS_PA=$(foreach yfile,$(YAKKER_FILES),build/$(yfile)_a.o)
+OBJS_PA=$(foreach yfile,$(YAKKER_FILES),$(yfile)_a.o)
 PROG_PA=$(PROG)_a
 
 DEPENDS:=$(foreach file,$(FILES),build/$(file).d)
@@ -81,8 +85,8 @@ imapcl.o: examples/imapcl.cyc
 	$(CYCLONE) -c $^ -o $@ -I.
 
 # --novcgen is temporary until a bug is fixed
-imap.o: imap.cyc
-	$(CYCLONE) -c $< -o build/$@ --novcgen
+imap.o: $(GENDIR)/imap.cyc
+	$(CYCLONE) -I. -c $< -o $@ --novcgen
 
 imapp.key:
 	openssl genrsa > $@
@@ -99,10 +103,10 @@ imapp.o: examples/imapp.cyc
 #	$(CYCLONE) $^ -o $@ /Users/yitzhakm/projects/cyclone/otherlibs/sqlite3/libsqlite3.a -lpthread -lssl -lcrypto
 imapserver: imapserver.o imap_scanf.o pm_bnf.o bnf.o lex.o parse_tab.o util.o funtable.o imap_genpm.o ykbuf.o ssl.o imap.o
 #	$(CYCLONE) $^ -o build/$@ /Users/yitzhakm/projects/cyclone/otherlibs/sqlite3/libsqlite3.a -lpthread -lssl -lcrypto
-	$(CYCLONE) $^ -o build/$@ -lsqlite3 -lpthread -lssl -lcrypto
+	$(CYCLONE) $^ -o $@ -lsqlite3 -lpthread -lssl -lcrypto
 
 imapserver.o: $(EXDIR)/imapserver.cyc
-	$(CYCLONE) -c $^ -o build/$@ -I.
+	$(CYCLONE) -c $^ -o $@ -I.
 
 # Targets for testing pattern match parsers-generators.  Generates
 # BNF that can parse a pattern-match and produce a new BNF specialized
@@ -153,7 +157,7 @@ $(GENDIR)/imap_genpm.cyc: $(GENDIR)/imap_genpm.bnf $(PROG_DEP)
                              -no-minus-elim \
                              -no-main \
                              -no-globals \
-                             $< > build/$@
+                             $< > $@
 
 $(GENDIR)/imap_genpm.h: $(GENDIR)/imap_genpm.bnf $(PROG_DEP)
 	./yakker $(YAKFLAGS) -cyc-namespace ImapFormat -gen-header $< > $@
@@ -224,11 +228,11 @@ $(GENDIR)/imap_flat.bnf: $(BNFDIR)/imap.bnf $(PROG_DEP)
 # tgmain.o : tgmain.cyc tg_stack.h
 # 	$(CYCLONE) -c $< -o $@ -I.
 
-$(BUILD)/ast_main.o : ast_main.cyc gen_ast_main.cyc pm_bnf.h $(GENDIR)/small_imap_genpm.h
-	$(CYCLONE) -c $< -o build/$@ -I.
+ast_main.o : ast_main.cyc gen_ast_main.cyc pm_bnf.h $(GENDIR)/small_imap_genpm.h
+	$(CYCLONE) -c $< -o $@ -I.
 
-$(BUILD)/pm_bnf.o : pm_bnf.cyc pm_bnf.h pads.h bnf.h
-	$(CYCLONE) -c $< -o build/$@ -I.
+pm_bnf.o : pm_bnf.cyc pm_bnf.h pads.h bnf.h
+	$(CYCLONE) -c $< -o $@ -I.
 ###############################################################################
 
 markdown: markdown.o ykbuf.o ssl.o bnf.o extract.o pr.o parse_tab.o util.o lex.o axarray.o
@@ -260,7 +264,7 @@ corerules_grm.cyc: corerules_grm.bnf
 ###############################################################################
 
 build/%.d: %.cyc
-	echo -n "build/" > $@
+# 	echo -n "build/" > $@
 	$(CYCLONE) -M -MG $< >> $@
 
 .PHONY: depend
@@ -310,7 +314,6 @@ $(BNFDIR)/vcard.bnf: $(BNFDIR)/rfc2426.bnf $(BNFDIR)/rfc2425.bnf $(BNFDIR)/rfc17
 
 clean:
 	$(RM) *.d *.o parse_tab.cyc parse_tab.h lex.cyc $(PROG)
-	$(RM) $(OBJS) $(DEPENDS)
 	$(RM) in out errs parse.output
 	$(RM) http.bnf http.p message-header.bnf message-header.p
 	$(RM) imap.bnf imap.h imap.cyc rfc3501.bnf rfc2234.bnf rfc3501.txt rfc2234.txt
@@ -327,6 +330,7 @@ clean:
 	$(RM) markdown.cyc markdown
 	$(RM) $(GENDIR)/*
 	$(RM) $(BNFDIR)/*
+	$(RM) build/*
 	$(RM) parseviz.swf
 
 %.p: %.bnf $(PROG_DEP)
@@ -334,10 +338,10 @@ clean:
 
 # .o dependency forces the _a.o to depend on the same files as the .o.
 # However, the .o is not really needed.
-$(OBJS_PA): build/%_a.o: %.cyc build/%.o 
+$(OBJS_PA): %_a.o: %.cyc %.o 
 	$(CYCLONE) $(CYCFLAGS) -pa -c $< -o $@
 
-build/%.o: %.cyc
+%.o: %.cyc
 	$(CYCLONE) $(CYCFLAGS) -c $< -o $@
 
 %_tab.cyc: %.y
@@ -374,7 +378,6 @@ rfc%.txt:
 # 	echo 'literal = "{" number$$x "}" CRLF CHAR8.' >> $@.tmp
 $(BNFDIR)/rfc3501.bnf: rfc3501.txt $(PROG_DEP)
 	./yakker -extract $< -omit literal capability-data > $@.tmp
-	echo 'ast2string@(rule_pat_t p)$$(const char ?) = ""{return ast2string(p);}.' >> $@.tmp
 	echo 'literal = "{" number$$x "}" CRLF @repeat(atoi(x))CHAR8.' >> $@.tmp
 	echo 'capability-data = "CAPABILITY" *(SP capability).' >> $@.tmp
 	./yakker $@.tmp -namespace rfc3501 > $@

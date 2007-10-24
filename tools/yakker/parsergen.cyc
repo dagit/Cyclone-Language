@@ -32,7 +32,7 @@ int print_globals = 1;
 int local_lookahead = 0;
 int lazyfill = 0;
 const char ?cyc_namespace = NULL;
-int gen_fun_table = 1;
+int gen_fun_table = 0; // off by default
 
 /**********************************************************************/
 /* A generator for parsers with dfa lookahead.
