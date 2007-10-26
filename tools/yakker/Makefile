@@ -100,6 +100,14 @@ imapp: imapp.o ykbuf.o ssl.o imap.o
 imapp.o: examples/imapp.cyc
 	$(CYCLONE) -c $^ -o $@ -I.
 
+# Echo server
+
+echop.o: examples/echop.cyc
+	$(CYCLONE) -c $^ -o $@ -I.
+
+echop: echop.o ykbuf.o ssl.o
+	$(CYCLONE) $^ -o $@ -lssl -lcrypto
+
 #	$(CYCLONE) $^ -o $@ /Users/yitzhakm/projects/cyclone/otherlibs/sqlite3/libsqlite3.a -lpthread -lssl -lcrypto
 imapserver: imapserver.o imap_scanf.o pm_bnf.o bnf.o lex.o parse_tab.o util.o funtable.o imap_genpm.o ykbuf.o ssl.o imap.o
 #	$(CYCLONE) $^ -o build/$@ /Users/yitzhakm/projects/cyclone/otherlibs/sqlite3/libsqlite3.a -lpthread -lssl -lcrypto

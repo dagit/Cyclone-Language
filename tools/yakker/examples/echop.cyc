@@ -17,9 +17,6 @@ using Core;
 #include "ssl.h"
 #include "ykbuf.h"
 
-extern void p_my_greeting(ykbuf_t @ykb);
-extern void p_my_response(ykbuf_t @ykb);
-extern void p_my_command(ykbuf_t @ykb);
 
 SSL *clissl = NULL;
 SSL *servssl = NULL;
@@ -29,31 +26,6 @@ int cli_fd, serv_fd;
 
 // local files into which raw data is dumped
 FILE *server_file, *client_file;
-
-void greeting_hook(const char ?x) {
-  /* A greeting read from server will be echoed to client */
-  fprintf(server_file, "%s",x);
-  if (use_ssl)
-    SSL_write(clissl,x,numelts(x)-1); // don't echo extra NIL
-  else
-    write(cli_fd,x,numelts(x)-1);
-}
-void response_hook(const char ?x) {
-  /* A response read from server will be echoed to client */
-  fprintf(server_file, "%s",x);
-  if (use_ssl)
-    SSL_write(clissl,x,numelts(x)-1);
-  else
-    write(cli_fd,x,numelts(x)-1);
-}
-void command_hook(const char ?x) {
-  /* A command read from client will be echoed to server */
-  fprintf(stdout, "%s",x);
-  if (use_ssl)
-    SSL_write(servssl,x,numelts(x)-1);
-  else
-    write(serv_fd,x,numelts(x)-1);
-}
 
 void prErr(int i) {
   switch (i) {
@@ -67,141 +39,6 @@ void prErr(int i) {
   case SSL_ERROR_WANT_CONNECT     : fprintf(stderr,"SSL_ERROR_WANT_CONNECT\n"); break;
   case SSL_ERROR_WANT_ACCEPT      : fprintf(stderr,"SSL_ERROR_WANT_ACCEPT\n"); break;
   default                         : fprintf(stderr,"%d\n",i); break;
-  }
-}
-
-static void
-proxy(int connfd, string_t host, int port) {
-  // open local dump files
-  server_file = fopen("server.dump", "a");
-  client_file = fopen("client.dump", "a");
-  
-  /* Negotiate SSL with client */
-  
-  SSL_CTX *clictx = SSL_CTX_new(SSLv23_method());
-
-  if (!(SSL_CTX_use_certificate_file(clictx, "imapp.cert", SSL_FILETYPE_PEM))) {
-    fprintf(stderr, "Error loading certificate\n");
-    ERR_print_errors_fp(stderr);
-    exit(1);
-  }
-
-  if (!(SSL_CTX_use_PrivateKey_file(clictx, "imapp.key", SSL_FILETYPE_PEM))) {
-    fprintf(stderr, "Error loading private key\n");
-    ERR_print_errors_fp(stderr);
-    exit(1);
-  }
-
-  if (!SSL_CTX_check_private_key(clictx)) {
-    fprintf(stderr, "Error verifying private key\n");
-    ERR_print_errors_fp(stderr);
-    exit(1);
-  }
-
-  clissl = SSL_new(clictx);
-  SSL_set_fd(clissl,connfd); 
-
-  int r;
-  if ( (r = SSL_accept(clissl)) <= 0) {
-    fprintf(stderr, "Error on SSL accept\n");
-    fprintf(stderr, "SSL_get_error(%d) is %d\n", r, SSL_get_error(clissl,r));
-    prErr(SSL_get_error(clissl,r));
-    fprintf(stderr, "A\n");
-    ERR_print_errors_fp(stderr);
-    fprintf(stderr, "B\n");
-    exit(0);
-  }
-
-  /* Open connection to server */
-  struct hostent *he;
-  struct servent *se;
-  struct protoent *pe;
-  struct sockaddr_in sin;
-
-  char buf[10000]@zeroterm={for i<9999:0};
-  int bytes, b;
-
-  he = gethostbyname(host);
-  if (!he) {
-    fprintf(stderr, "unknown host - %s\n", host);
-    exit(1);
-  }
-  se = getservbyname("telnet","tcp");
-  if (!se) {
-    fprintf(stderr, "unknown service\n");
-    exit(1);
-  }
-  pe = getprotobyname(se->s_proto);
-  if (!pe) {
-    fprintf(stderr, "unknown protocol\n");
-    exit(1);
-  }
-  bzero((_?)&sin,sizeof(sin));
-  sin.sin_family = (sa_family_t)he->h_addrtype;
-
-  int fd = socket(he->h_addrtype, SOCK_STREAM, pe->p_proto);
-  if (fd < 0) perror("socket");
-
-  if (bind(fd, &sin, sizeof(sin)) < 0) perror("bind");
-  bcopy(he->h_addr, &sin.sin_addr, he->h_length);
-
-  sin.sin_port = htons((unsigned short)port);
-
-  fprintf(stderr,"Connecting to server %s:%d... ",host,port);
-  if (connect(fd, &sin, sizeof(sin)) < 0) {
-    perror("connect");
-    exit(1);
-  }
-  fprintf(stderr,"done\n");
-
-  /* Make SSL connection. */
-  SSL_CTX *servctx = SSL_CTX_new(SSLv23_client_method());
-  servssl = SSL_new(servctx);
-  SSL_set_fd(servssl, fd);
-  int r = SSL_connect(servssl);
-  if (r <= 0) {
-    fprintf(stderr, "%s - SSL connection failed - %d\n", host, r);
-    fprintf(stderr, "error is %d\n", SSL_get_error(servssl,r));
-    ERR_print_errors_fp(stderr);
-    exit(1);
-  }
-  fprintf(stderr, "Initial connection to %s established\n", host);
-
-  ykbuf_t @servykb = ssl2ykbuf(servssl);
-  /* Read greeting from server and echo to client */
-  try { p_my_greeting(servykb); }
-  catch {
-  default:
-    fprintf(stderr, "server failed 1\n");
-    exit(1);
-    break;
-  }
-
-  if (fork() == 0) {
-    ykbuf_t @cliykb = ssl2ykbuf(clissl);
-    while (1) {
-      /* Read command from client and echo to server */
-      try { p_my_command(cliykb); }
-      catch {
-      default:
-        fprintf(stderr, "server failed 2\n");
-        ykdumpbuf(cliykb);
-        exit(1);
-        break;
-      }
-    }
-  }
-  else {
-    while (1) {
-      /* Read response from server and echo to client */
-      try { p_my_response(servykb); }
-      catch {
-      default:
-        fprintf(stderr, "server failed 3\n");
-        exit(1);
-        break;
-      }
-    }
   }
 }
 
@@ -260,9 +97,15 @@ insecure_proxy(int connfd, string_t host, int port) {
   // set global server fd
   serv_fd = fd;
 
-  ykbuf_t @servykb = fd2ykbuf(fd);
+  ssize_t bytes_read;
+//   ykbuf_t @servykb = fd2ykbuf(fd);
   /* Read greeting from server and echo to client */
-  try { p_my_greeting(servykb); }
+  try { 
+    bytes_read = read(fd, buf, 1); 
+    buf[bytes_read] = 0;
+    fprintf(server_file,"%s",buf);
+    write(cli_fd,buf,bytes_read);    
+  }
   catch {
   default:
     fprintf(stderr, "server failed 1\n");
@@ -271,23 +114,31 @@ insecure_proxy(int connfd, string_t host, int port) {
   }
 
   if (fork() == 0) {
-    ykbuf_t @cliykb = fd2ykbuf(connfd);
+//     ykbuf_t @cliykb = fd2ykbuf(connfd);
     while (1) {
       /* Read command from client and echo to server */
-      try { p_my_command(cliykb); }
-      catch {
-      default:
-        fprintf(stderr, "server failed 2\n");
-        ykdumpbuf(cliykb);
-        exit(1);
-        break;
+      
+      bytes_read = read(connfd, buf, 1); 
+      if (bytes_read == -1){
+	perror("server error in read");
+// 	fprintf(stderr, "server error in read: %d\n",errno);
+	exit(1);
       }
+      buf[bytes_read] = 0;
+      
+      fprintf(stdout,"%s",buf);
+      write(serv_fd,buf,bytes_read);    
     }
   }
   else {
     while (1) {
       /* Read response from server and echo to client */
-      try { p_my_response(servykb); }
+      try { 
+	bytes_read = read(fd, buf, 1); 
+	buf[bytes_read] = 0;
+	fprintf(server_file,"%s",buf);
+	write(cli_fd,buf,bytes_read);    
+      }
       catch {
       default:
         fprintf(stderr, "server failed 3\n");
@@ -342,10 +193,10 @@ server(string_t host, int lport, int port, int use_ssl) {
       /* client */
       close(listenfd);
       if (use_ssl) 
-	proxy(connfd,host,port);
-      else 
+	printf("SSL not currently supported.\n");
+      else
 	insecure_proxy(connfd,host,port);
-     
+      
       exit(0);
     }
     /* server */
