@@ -1,9 +1,12 @@
 import flash.display.Sprite;
 import flash.events.Event;
+import mx.events.ResizeEvent;
+import mx.events.FlexEvent;
 import flash.events.MouseEvent;
 import flash.display.DisplayObjectContainer;
 import flash.text.TextField;
 import flash.text.TextFormat;
+import flash.geom.Rectangle;
 
 class Color {
   public static function
@@ -86,6 +89,7 @@ class Color {
 }
 
 class Parseviz {
+  static var zoom = 1.0;
   static var gridHeight = 20;
   static var gridWidth = 12;
   public static function
@@ -197,9 +201,8 @@ class Parseviz {
   static var parseInput:String = "";
   static var parseAbove:Array<Dynamic> = [];
   static var parseBelow:Array<Dynamic> = [];
+  static var maxHeightAbove = 0;
   static function drawTrees(spr:DisplayObjectContainer) {
-    var tf = drawText(spr,font,0,0,parseInput);
-    var maxHeightAbove = 0;
     for (x in parseAbove) {
       var h = markHeight(x);
       if (h > maxHeightAbove) maxHeightAbove = h;
@@ -209,9 +212,18 @@ class Parseviz {
       var h = markHeight(x);
       if (h > maxHeightBelow) maxHeightBelow = h;
     }
+    var bg = new Sprite();
+    spr.addChild(bg);
+    bg.graphics.beginFill(0xffffff);
+    bg.graphics.drawRect(0,
+                         -maxHeightAbove * gridHeight,
+                         parseInput.length * gridWidth,
+                         (maxHeightAbove + maxHeightBelow + 1) * gridHeight);
+    bg.graphics.endFill();
+    var tf = drawText(spr,font,0,0,parseInput);
     drawSpansBelow(spr,parseBelow);
     drawSpansAbove(spr,parseAbove);
-    spr.y = maxHeightAbove * gridHeight; // puts top-left at origin
+//    spr.y = maxHeightAbove * gridHeight; // puts top-left at origin
   }
   static function decode(t:String):Array<Dynamic> {
     var c:Array<Dynamic> = [];
@@ -253,22 +265,109 @@ class Parseviz {
        program will add children to c as usual. */
     var c = new Sprite();
     app.mainCanvas.rawChildren.addChild(c);
+//    c.opaqueBackground = 0xffffff;  // useless b/c doesn't get mouse
+    var bg = new Sprite();
+    c.addChild(bg);
+    bg.graphics.beginFill(0xffffff,0.5);
+    bg.graphics.drawRect(0,0,1,1);
+    bg.graphics.endFill();
+
+    c.scrollRect = new Rectangle(0,0,app.mainCanvas.width,app.mainCanvas.height);
+    var resizeC = function () {
+      var r = c.scrollRect;
+      r.width = app.mainCanvas.width;
+      r.height = app.mainCanvas.height;
+      c.scrollRect = r;
+      bg.scaleX = app.mainCanvas.width;
+      bg.scaleY = app.mainCanvas.height;
+    }
+    resizeC();
+    app.mainCanvas.addEventListener(ResizeEvent.RESIZE,
+                                    function (e:Event) {
+                                      resizeC();
+                                    });
+    var scrollX = 0.0;
+    var scrollY = 0.0;
+    var inScroll = function (e:MouseEvent) {
+      var dX = e.stageX - scrollX;
+      var dY = e.stageY - scrollY;
+      scrollX = e.stageX;
+      scrollY = e.stageY;
+      var r = c.scrollRect;
+      r.x -= dX;
+      r.y -= dY;
+      c.scrollRect = r;
+      bg.x = r.x;
+      bg.y = r.y;
+    }
+    var spr:Sprite = null;
+    var stopScroll = function (e:MouseEvent) {}
+    stopScroll = function (e:MouseEvent) {
+      bg.removeEventListener(MouseEvent.MOUSE_MOVE,inScroll);
+      bg.removeEventListener(MouseEvent.MOUSE_UP,stopScroll);
+      bg.removeEventListener(MouseEvent.MOUSE_OUT,stopScroll);
+      if (spr != null) {
+        spr.removeEventListener(MouseEvent.MOUSE_MOVE,inScroll);
+        spr.removeEventListener(MouseEvent.MOUSE_UP,stopScroll);
+      }
+    }
+    var startScroll = function (e:MouseEvent) {
+      bg.addEventListener(MouseEvent.MOUSE_MOVE,inScroll);
+      bg.addEventListener(MouseEvent.MOUSE_UP,stopScroll);
+      bg.addEventListener(MouseEvent.MOUSE_OUT,stopScroll);
+      if (spr != null) {
+        spr.addEventListener(MouseEvent.MOUSE_MOVE,inScroll);
+        spr.addEventListener(MouseEvent.MOUSE_UP,stopScroll);
+      }
+      scrollX = e.stageX;
+      scrollY = e.stageY;
+    }
+    bg.addEventListener(MouseEvent.MOUSE_DOWN,startScroll);
 
     app.renderButton.addEventListener
     (MouseEvent.CLICK,
      function (e:Event) {
-       while (c.numChildren > 0)
-         c.removeChildAt(0);
+       if (spr != null)
+         c.removeChild(spr);
+
+       spr = new Sprite();
+       c.addChild(spr);
+       spr.addEventListener(MouseEvent.MOUSE_DOWN,startScroll);
+
+       bg.x = bg.y = 0;
+       var r = c.scrollRect;
+       r.x = r.y = 0;
+       c.scrollRect = r;
+       zoom = 1;
 
        try {
          parseInput = app.parseInput.text;
          parseAbove = decode(app.parseAbove.text);
          parseBelow = decode(app.parseBelow.text);
-         drawTrees(c);
+         drawTrees(spr);
+
+         var r = c.scrollRect;
+         r.x = 0;
+         r.y = -maxHeightAbove * gridHeight;
+         c.scrollRect = r;
        }
        catch (e:Dynamic) {
-         drawText(c,font,0,0,"Exception!!");
+         drawText(c,font,0,0,"Error: uncaught exception");
        }
+     });
+    app.minusButton.addEventListener
+    (FlexEvent.BUTTON_DOWN,
+     function (e:Event) {
+       if (spr == null || zoom <= 0.6) return;
+       zoom -= 0.1;
+       spr.scaleX = spr.scaleY = zoom;
+     });
+    app.plusButton.addEventListener
+    (FlexEvent.BUTTON_DOWN,
+     function (e:Event) {
+       if (spr == null || zoom >= 4) return;
+       zoom += 0.1;
+       spr.scaleX = spr.scaleY = zoom;
      });
   }
 }
