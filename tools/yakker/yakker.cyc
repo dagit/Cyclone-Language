@@ -35,6 +35,7 @@
 #include <string.h>
 #include <buffer.h>
 #include <list.h>
+#include <stdlib.h>
 using List;
 
 extern List::list_t<const char ?@> nowslist;
@@ -150,8 +151,8 @@ static const char ?add_namespace = NULL;
 "         -eagernfa              use eager nfa construction (default is lazy)\n"\
 "         -depend                produce a dependency graph of symbols in DOT format\n"\
 "         -earley <regexp>       Earley parse stdin according to regexp and grammar\n"\
-"         -earley-shell <regexp> Earley parse stdin, line-by-line, according to regexp and grammar\n"\
-"         -earley-server <regexp> Earley parse files specified interactively on command line, according to regexp and grammar\n"\
+"         -earley-line <regexp> Earley parse stdin, line-by-line, according to regexp and grammar\n"\
+"         -earley-shell <regexp> Earley parse files specified interactively on command line, according to regexp and grammar\n"\
 "         -help                  print this message\n"
 
 static void die() {
@@ -243,13 +244,13 @@ int main(int argc, const char ?`H?argv) {
       earley_regexp = argv[i+1];
       i += 1;
     }
-    else if (strcmp("-earley-shell",argv[i]) == 0) {
+    else if (strcmp("-earley-line",argv[i]) == 0) {
       if (i+1 >= argc) die();
       interactive_earley = 1;
       earley_regexp = argv[i+1];      
       i += 1;
     }
-    else if (strcmp("-earley-server",argv[i]) == 0) {
+    else if (strcmp("-earley-shell",argv[i]) == 0) {
       if (i+1 >= argc) die();
       interactive_earley = 2;
       earley_regexp = argv[i+1];      
@@ -495,33 +496,52 @@ int main(int argc, const char ?`H?argv) {
     case 2:
     default:
       if (interactive_earley > 2){
-	fprintf(stderr,"Internal error: invalid value for interactive earley. Assuming server mode.\n");
+	fprintf(stderr,"Internal error: invalid value for variable interactive_earley. Assuming shell mode.\n");
       }
-      char buf[200]@zeroterm={for i<199:0};
+      char cmd[200]@zeroterm={for i<199:0};
+      char arg[200]@zeroterm={for i<199:0};
       while(1){
 	int c;
 
-	// Get the file name.
+	// Print prompt.
 	printf("earley:> "); fflush(stdout);
-	let b_filename = Buffer::create(101);
-	while ( (c = fgetc(stdin)) != '\n')
-	  Buffer::add_char(b_filename,c);
-	let s = Buffer::contents(b_filename);
-
-	// Parse the file
-	printf("Earley parsing %s ... \n",s); 
-	FILE *fp = fopen(s,"r");
-	if (!fp){
-	  fprintf(stderr,"Bad file name.\n");
+	
+	// Get the command and arg.
+	scanf("%s %s",cmd,arg);
+	
+	// Parse command line
+	if (!strcmp(cmd, "parse")){
+	  // Parse the file
+	  printf("Earley parsing %s ... \n",arg); 
+	  FILE *fp = fopen(arg,"r");
+	  if (!fp){
+	    fprintf(stderr,"Bad file name.\n");
+	    continue;
+	  }
+	  let b = Buffer::create(101);
+	  while ( (c = fgetc(fp)) != EOF)
+	    Buffer::add_char(b,c);
+	  fclose(fp);
+	  printf("File read complete.\n"); 
+	  let ans = Earley::recognize(dfa,dfa_final,Buffer::contents(b));
+	  printf("done -- answer is %d\n",ans); 
+	  if (ans) printf("Parse tree saved.\n");
+	  fflush(stdout);
+  	} else if (!strcmp(cmd,"refine")){
+	  let arg_end = (char @@zeroterm)arg;
+	  let depth = strtod(arg,&arg_end);
+	  if (arg_end == arg){
+	    fprintf(stderr,"Bad depth.\n");
+	    continue;
+	  }
+	  Earley::print_LT(Earley::last_derivation_tree,depth);
+	  printf("\n");
+	  Earley::print_RT(Earley::last_derivation_tree,depth);
+	  printf("\n");
+	} else {
+	  fprintf(stderr,"Undefined command.\n");
 	  continue;
 	}
-	let b = Buffer::create(101);
-	while ( (c = fgetc(fp)) != EOF)
-	  Buffer::add_char(b,c);
-	fclose(fp);
-	printf("File read complete.\n"); 
-	let ans = Earley::recognize(dfa,dfa_final,Buffer::contents(b));
-	printf("done -- answer is %d\n",ans); fflush(stdout);
       }
       break;
     }

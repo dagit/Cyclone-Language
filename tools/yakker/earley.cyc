@@ -27,50 +27,68 @@ datatype ParseTree{
   SharedNonTerm(const char ?`H, int, int, List::List_t<parse_forest_t,`H>);
 };
 
-void print_LD_parse_forest(parse_forest_t pf);
+/* Global variable that saves last derivation tree.*/
+datatype ParseTree *last_derivation_tree = NULL;
 
-void print_LD(datatype ParseTree @pt){
+void print_LT_parse_forest(parse_forest_t pf, int depth);
+
+void print_LT(datatype ParseTree @pt, int depth){
   switch (pt) {
   case &NonTerm(name,l,r,children):
     printf("<t s=\"%s\" l=\"%d\" r=\"%d\">",name,l,r);
-    print_LD_parse_forest(children);
+  print_LT_parse_forest(children, depth);
     printf("</t>");
     break;
   case &SharedNonTerm(name,l,r,children_list):
     printf("<t s=\"%s\" l=\"%d\" r=\"%d\">",name,l,r);
-    print_LD_parse_forest(children_list->hd);
+  print_LT_parse_forest(children_list->hd,depth);
     printf("</t>");
     break;
   }
 }
 
-void print_LD_parse_forest(parse_forest_t pf){
-  List::iter(print_LD,pf);
+void print_LT_parse_forest(parse_forest_t pf, int depth){
+  if (depth > 0){
+    let d = depth - 1;
+    for(let ts = (_*)pf; ts; ts = ts->tl)
+      print_LT(ts->hd, d);
+  } else if(depth == -1) {
+    for(let ts = (_*)pf; ts; ts = ts->tl)
+      print_LT(ts->hd, -1);
+  }
 }
 
-void print_RD_parse_forest(parse_forest_t pf);
+void print_RT_parse_forest(parse_forest_t pf, int depth);
 
 `a reflect(`a last_seen,`a current){return current;}
 
-void print_RD(datatype ParseTree @pt){
+void print_RT(datatype ParseTree @pt, int depth){
   switch (pt) {
   case &NonTerm(name,l,r,children):
     printf("<t s=\"%s\" l=\"%d\" r=\"%d\">",name,l,r);
-    print_RD_parse_forest(children);
+  print_RT_parse_forest(children,depth);
     printf("</t>");
     break;
   case &SharedNonTerm(name,l,r,children_list):
     printf("<t s=\"%s\" l=\"%d\" r=\"%d\">",name,l,r);
     let last_derivation = List::fold_left(reflect,children_list->hd,children_list);
-    print_RD_parse_forest(last_derivation);
+    print_RT_parse_forest(last_derivation,depth);
     printf("</t>");
     break;
   }
 }
 
-void print_RD_parse_forest(parse_forest_t pf){
-  List::iter(print_RD,pf);
+void print_RT_parse_forest(parse_forest_t pf, int depth){
+  if (depth > 0){
+    let d = depth - 1;
+    for(let ts = (_*)pf; ts; ts = ts->tl)
+      print_RT(ts->hd, d);
+  } else if(depth == -1) {
+    for(let ts = (_*)pf; ts; ts = ts->tl)
+      print_RT(ts->hd, -1);
+  }
 }
+
 
 void print_parse_forest(parse_forest_t pf);
 
@@ -1128,11 +1146,13 @@ int recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input) {
 //       printf("%s\n",Buffer::contents(b));
       let completed = Set::to_list(dfa_final_attrs(dfa,state));
       let derivation_tree = derivation_redux(pred,retn,input,dfa,new $(state,parent /*== 0*/,input_len));
-      printf("Input:\n%s\nLeftmost derivation:\n",input);
-      print_LD(derivation_tree);
-      printf("\nRightmost derivation:\n");
-      print_RD(derivation_tree);
+      printf("Input:\n%s\nLeftmost tree:\n",input);
+      print_LT(derivation_tree,-1);
+      printf("\nRightmost tree:\n");
+      print_RT(derivation_tree,-1);
       printf("\n");
+
+      last_derivation_tree = derivation_tree;
       return 1;
     }
   }
