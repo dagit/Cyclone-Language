@@ -1,12 +1,16 @@
 import flash.display.Sprite;
 import flash.events.Event;
 import mx.events.ResizeEvent;
+import mx.events.NumericStepperEvent;
 import mx.events.FlexEvent;
+import mx.controls.ToolTip;
+import mx.managers.ToolTipManager;
 import flash.events.MouseEvent;
 import flash.display.DisplayObjectContainer;
 import flash.text.TextField;
 import flash.text.TextFormat;
 import flash.geom.Rectangle;
+import flash.geom.Point;
 
 class Color {
   public static function
@@ -121,28 +125,40 @@ class Parseviz {
     t.defaultTextFormat = tf;
     t.autoSize = flash.text.TextFieldAutoSize.LEFT;
     t.selectable = false;
-    var color = Color.colorFor(s); // BEFORE chopping s
-    if (s.length > w) {
-      s = s.substr(0,w);
-    }
-    t.text = s;
+    if (s.length > w)
+      t.text = s.substr(0,w);
+    else
+      t.text = s;
     t.x = i * gridWidth;
     t.y = z * gridHeight;
 
     c.addChild(t);
     c.graphics.lineStyle(1,0x0,0.5);
-    c.graphics.beginFill(color);
+    c.graphics.beginFill(Color.colorFor(s));
     c.graphics.drawRect(i*gridWidth,gridHeight,w*gridWidth,z*gridHeight);
     c.graphics.endFill();
     c.x = x;
     c.y = y;
     spr.addChild(c);
+
+    var mouseOut = function (e:MouseEvent) {};
+    var mouseOver = function (e:MouseEvent) {
+      var pt = c.localToGlobal(new Point(i*gridWidth+c.width,c.y+c.height));
+      var tt = ToolTipManager.createToolTip(s,pt.x,pt.y);
+      mouseOut = function (e:MouseEvent) {
+        ToolTipManager.destroyToolTip(tt);
+        c.removeEventListener(MouseEvent.ROLL_OUT,mouseOut);
+      };
+      c.addEventListener(MouseEvent.ROLL_OUT,mouseOut);
+    };
+    c.addEventListener(MouseEvent.ROLL_OVER,mouseOver);
+
     return c;
   }
   static function drawSpansBelow(spr:DisplayObjectContainer,a:Array<Dynamic>) {
     for (x in a) {
       drawSpanBelow(spr,font,0,0,x.l,x.r-x.l,x.h,x.s);
-      if (!Reflect.hasField(x,"c")) return;
+      if (x.h == 1 || !Reflect.hasField(x,"c")) return;
       var a:Array<Dynamic> = x.c;
       drawSpansBelow(spr,a);
     }
@@ -156,41 +172,53 @@ class Parseviz {
     t.defaultTextFormat = tf;
     t.autoSize = flash.text.TextFieldAutoSize.LEFT;
     t.selectable = false;
-    var color = Color.colorFor(s); // BEFORE chopping s
-    if (s.length > w) {
-      s = s.substr(0,w);
-    }
-    t.text = s;
+    if (s.length > w)
+      t.text = s.substr(0,w);
+    else
+      t.text = s;
     t.x = i * gridWidth;
     t.y = -z * gridHeight;
 
     c.addChild(t);
     c.graphics.lineStyle(1,0x0,0.5);
-    c.graphics.beginFill(color);
+    c.graphics.beginFill(Color.colorFor(s));
     c.graphics.drawRect(i*gridWidth,0,w*gridWidth,-z*gridHeight);
     c.graphics.endFill();
     c.x = x;
     c.y = y;
     spr.addChild(c);
+
+    var mouseOut = function (e:MouseEvent) {};
+    var mouseOver = function (e:MouseEvent) {
+      var pt = c.localToGlobal(new Point(i*gridWidth+c.width,c.y-c.height));
+      var tt = ToolTipManager.createToolTip(s,pt.x,pt.y);
+      mouseOut = function (e:MouseEvent) {
+        ToolTipManager.destroyToolTip(tt);
+        c.removeEventListener(MouseEvent.ROLL_OUT,mouseOut);
+      };
+      c.addEventListener(MouseEvent.ROLL_OUT,mouseOut);
+    };
+    c.addEventListener(MouseEvent.ROLL_OVER,mouseOver);
+
     return c;
   }
   static function drawSpansAbove(spr:DisplayObjectContainer,a:Array<Dynamic>) {
     for (x in a) {
       drawSpanAbove(spr,font,0,0,x.l,x.r-x.l,x.h,x.s);
-      if (!Reflect.hasField(x,"c")) return;
+      if (x.h == 1 || !Reflect.hasField(x,"c")) return;
       var a:Array<Dynamic> = x.c;
       drawSpansAbove(spr,a);
     }
   }
-  static function markHeight(x:Dynamic):Int {
-    if (!Reflect.hasField(x,"c")) {
+  static function markHeight(x:Dynamic,limit:Int):Int {
+    if (limit == 1 || !Reflect.hasField(x,"c")) {
       Reflect.setField(x,"h",1);
       return 1;
     }
     var h = 0;
     var a:Array<Dynamic> = x.c;
     for (y in a) {
-      var yh = markHeight(y);
+      var yh = markHeight(y,limit-1);
       if (yh > h) h = yh;
     }
     h++;
@@ -202,14 +230,16 @@ class Parseviz {
   static var parseAbove:Array<Dynamic> = [];
   static var parseBelow:Array<Dynamic> = [];
   static var maxHeightAbove = 0;
+  static var limit = 0;
   static function drawTrees(spr:DisplayObjectContainer) {
+    maxHeightAbove = 0; // needed if limit can change
     for (x in parseAbove) {
-      var h = markHeight(x);
+      var h = markHeight(x,limit);
       if (h > maxHeightAbove) maxHeightAbove = h;
     }
     var maxHeightBelow = 0;
     for (x in parseBelow) {
-      var h = markHeight(x);
+      var h = markHeight(x,limit);
       if (h > maxHeightBelow) maxHeightBelow = h;
     }
     var bg = new Sprite();
@@ -223,7 +253,6 @@ class Parseviz {
     var tf = drawText(spr,font,0,0,parseInput);
     drawSpansBelow(spr,parseBelow);
     drawSpansAbove(spr,parseAbove);
-//    spr.y = maxHeightAbove * gridHeight; // puts top-left at origin
   }
   static function decode(t:String):Array<Dynamic> {
     var c:Array<Dynamic> = [];
@@ -237,7 +266,6 @@ class Parseviz {
     catch (e:Dynamic) {
     }
     return c;
-// <t s="lkjfdsfds" l="1" r="9"></t>
   }
   static function xml2obj(xml:Xml):Dynamic {
     if (xml == null) return null;
@@ -324,37 +352,33 @@ class Parseviz {
     }
     bg.addEventListener(MouseEvent.MOUSE_DOWN,startScroll);
 
-    app.renderButton.addEventListener
-    (MouseEvent.CLICK,
-     function (e:Event) {
-       if (spr != null)
-         c.removeChild(spr);
+    var render = function (e:Event) {
+      if (spr != null)
+        c.removeChild(spr);
 
-       spr = new Sprite();
-       c.addChild(spr);
-       spr.addEventListener(MouseEvent.MOUSE_DOWN,startScroll);
+      spr = new Sprite();
+      c.addChild(spr);
+      spr.addEventListener(MouseEvent.MOUSE_DOWN,startScroll);
 
-       bg.x = bg.y = 0;
-       var r = c.scrollRect;
-       r.x = r.y = 0;
-       c.scrollRect = r;
-       zoom = 1;
+      limit = app.limit.value;
 
-       try {
-         parseInput = app.parseInput.text;
-         parseAbove = decode(app.parseAbove.text);
-         parseBelow = decode(app.parseBelow.text);
-         drawTrees(spr);
+      try {
+        parseInput = app.parseInput.text;
+        parseAbove = decode(app.parseAbove.text);
+        parseBelow = decode(app.parseBelow.text);
+        drawTrees(spr);
 
-         var r = c.scrollRect;
-         r.x = 0;
-         r.y = -maxHeightAbove * gridHeight;
-         c.scrollRect = r;
-       }
-       catch (e:Dynamic) {
-         drawText(c,font,0,0,"Error: uncaught exception");
-       }
-     });
+        zoom = 1;
+        var r = c.scrollRect;
+        bg.x = r.x = 0;
+        bg.y = r.y = -maxHeightAbove * gridHeight;
+        c.scrollRect = r;
+      }
+      catch (e:Dynamic) {
+        drawText(c,font,0,0,"Error: uncaught exception");
+      }
+    }
+    app.renderButton.addEventListener(MouseEvent.CLICK, render);
     app.minusButton.addEventListener
     (FlexEvent.BUTTON_DOWN,
      function (e:Event) {
@@ -369,7 +393,21 @@ class Parseviz {
        zoom += 0.1;
        spr.scaleX = spr.scaleY = zoom;
      });
+
+    limit = app.limit.value;
+    app.limit.addEventListener
+    (NumericStepperEvent.CHANGE,
+     function (e:Event) {
+       limit = app.limit.value;
+       render(e);
+     });
   }
 }
 
-//         [{c:[{c:[{c:[],s:"LF",l:10,r:11}],s:"ws",l:10,r:11},{c:[{c:[{c:[{c:[],s:"DIGIT",l:8,r:9}],s:"int",l:8,r:9}],s:"v",l:8,r:9},{c:[{c:[],s:"ALPHA",l:6,r:7}],s:"id",l:6,r:7},{c:[{c:[],s:"SP",l:5,r:6}],s:"ws",l:5,r:6},{c:[{c:[{c:[],s:"DIGIT",l:3,r:4}],s:"int",l:3,r:4}],s:"v",l:3,r:4},{c:[{c:[],s:"ALPHA",l:1,r:2}],s:"id",l:1,r:2}],s:"v",l:0,r:10}],s:"wv",l:0,r:11}];
+
+/*
+foo login bar "baz"  
+*/
+/*
+<t s="TOP" l="0" r="21"><t s="command" l="0" r="21"><t s="CRLF" l="19" r="21"><t s="LF" l="20" r="21"></t><t s="CR" l="19" r="20"></t></t><t s="command-nonauth" l="4" r="19"><t s="login" l="4" r="19"><t s="password" l="14" r="19"><t s="astring" l="14" r="19"><t s="string" l="14" r="19"><t s="quoted" l="14" r="19"><t s="DQUOTE" l="18" r="19"></t><t s="QUOTED-CHAR" l="17" r="18"></t><t s="QUOTED-CHAR" l="16" r="17"></t><t s="QUOTED-CHAR" l="15" r="16"></t><t s="DQUOTE" l="14" r="15"></t></t></t></t></t><t s="SP" l="13" r="14"></t><t s="userid" l="10" r="13"><t s="astring" l="10" r="13"><t s="ASTRING-CHAR" l="12" r="13"></t><t s="ASTRING-CHAR" l="11" r="12"></t><t s="ASTRING-CHAR" l="10" r="11"></t></t></t><t s="SP" l="9" r="10"></t></t></t><t s="SP" l="3" r="4"></t><t s="tag" l="0" r="3"></t></t></t>
+*/

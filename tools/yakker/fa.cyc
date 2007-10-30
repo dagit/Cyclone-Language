@@ -787,6 +787,59 @@ void dfa_dot(FILE @f, dfa_t dfa, cs_pred_t special) {
   fprintf(f,"}\n");
 }
 
+/* Print the dfa as a haxe datastructure. */
+void dfa_haxe(FILE @f, dfa_t dfa) {
+  let len = dfa->number_of_states;
+  /* print final attributes */
+  let first = 1;
+  fprintf(f,"var attributes = function (state:Int) {\nswitch (state) {\n");
+  for (let i = 1; i < len; i++) {
+    if (!Set::member(dfa->final_states,i)) continue;
+    fprintf(f,"case %d: return [",i);
+    let firstattr = 1;
+    let x = Hashtable::lookup(dfa->final_attrs,i);
+    while (!Set::is_empty(x)) {
+      if (firstattr) firstattr = 0;
+      else fprintf(f,",");
+      let y = Set::choose(x);
+      x = Set::delete(x,y);
+      fprintf(f,"%u",y);
+    }
+    fprintf(f,"];\n");
+  }
+  fprintf(f,"default: return null;\n}\n};\n");
+  
+  /* print transitions */
+  first = 1;
+  fprintf(f,"var transitions = function (state:Int) {\nswitch (state) {\n");
+  for (let i = 1; i < len; i++) {
+    let transitions = Axarray::get(dfa->states,i);
+    if (!transitions) continue;
+    let allzeros = 1;
+    for (let spans = transitions->spans; spans; spans = spans->tl) {
+      if (spans->hd->target == 0) continue;
+      allzeros = 0;
+      break;
+    }
+    if (allzeros) continue;
+    fprintf(f,"case %d: return function (act:Int):Null<Int> {",i);
+    fprintf(f,"switch (act) {");
+    let lb = transitions->lb;
+    for (let spans = transitions->spans; spans; spans = spans->tl) {
+      let ub = spans->hd->ub;
+      let target = spans->hd->target;
+      if (target) { /* Don't print transitions to dead state 0 */
+        for (let j = lb; j < ub; j++) {
+          fprintf(f," case %d: return %d;",j,target);
+        }
+      }
+      lb = ub;
+    }
+    fprintf(f,"default: return null;}};\n");
+  }
+  fprintf(f,"default: return null;\n}\n};\n");
+}
+
 /* Return the graph with an edge between state s and t iff
    s moves to t in a single step, and neither s nor t is
    the dead state */

@@ -17,6 +17,10 @@
 <mx:HBox width="100%">
 <mx:Button label="Render" id="renderButton"/>
 <mx:Spacer width="100%"/>
+<mx:Label text="Limit"/>
+<mx:NumericStepper id="limit" maximum="99" />
+<mx:Spacer width="10"/>
+<mx:Label text="Zoom"/>
 <mx:Button label="-" id="minusButton" autoRepeat="true"/>
 <mx:Button label="+" id="plusButton" autoRepeat="true"/>
 </mx:HBox>
@@ -32,6 +36,8 @@
   import mx.controls.Button;
   import mx.controls.PopUpMenuButton;
   import mx.managers.PopUpManager;
+  import mx.controls.ToolTip;
+  import mx.managers.ToolTipManager;
   /* This is not called anywhere, it just ensures that TitleWindow
     etc. is in the compiled .swf file for use from the haXe side */
   private function doit():void {
@@ -40,6 +46,7 @@
     var hbox:HBox = new HBox();
     var bbutton:Button = new Button();
     var ubutton:PopUpMenuButton = new PopUpMenuButton();
+    var tt:ToolTip = ToolTipManager.createToolTip("text",0,0) as ToolTip;
   }
   private function appComplete():void {
     var ldr:Loader = new Loader();
