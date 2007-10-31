@@ -1,4 +1,5 @@
 import flash.display.Sprite;
+import mx.controls.TextArea;
 import flash.events.Event;
 import mx.events.ResizeEvent;
 import mx.events.NumericStepperEvent;
@@ -280,10 +281,23 @@ class Parseviz {
     
     return {s:s,l:l,r:r,c:c};
   }
+  static function loadFile(file:String,t:TextArea) {
+    var ul:flash.net.URLLoader = new flash.net.URLLoader();
+    ul.addEventListener
+    (Event.COMPLETE,
+     function (e:Event) {
+       t.text = ul.data;
+     });
+    ul.load(new flash.net.URLRequest(file));
+  }
   /* Main entry point */
   public function start(app:Dynamic) {
     // In fact app:Application, but it is convenient to use Dynamic to
     // more easily access UI components
+
+    loadFile("input",app.parseInput);
+    loadFile("left.xml",app.parseAbove);
+    loadFile("right.xml",app.parseBelow);
 
 
     /* mainCanvas is a mx.containers.Canvas, and its addChild method

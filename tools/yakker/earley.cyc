@@ -1089,7 +1089,7 @@ $(dfa_t,Set::set_t<st_t>) compile(grammar_t grm, rule_t r) {
 }
 
 int recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input) {
-  //  dfa_haxe(stdout,dfa); //TEMP
+  dfa_haxe(stdout,dfa); //TEMP
   /* Keep track of parse trees */
   let
     pred = Hashtable::create(11,earley_node_cmp,earley_node_hash);
