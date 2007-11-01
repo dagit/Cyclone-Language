@@ -319,11 +319,12 @@ $(BNFDIR)/imap-ext%.bnf: $(BNFDIR)/rfc%.bnf $(PROG_DEP)
 # 	mv $@.tmp $@
 # 	./yakker $@ -omit `./yakker -list-defs $(BNFDIR)/imap-ext2342.bnf` > $@.tmp
 # 	cat $(BNFDIR)/imap-ext2342.bnf >> $@.tmp
-$(BNFDIR)/imap_revised.bnf: $(BNFDIR)/imap.bnf \
+$(BNFDIR)/imap_revised.bnf: $(BNFDIR)/rfc3501.bnf \
   $(BNFDIR)/imap-ext2088.bnf  \
   $(BNFDIR)/imap-ext3502.bnf $(BNFDIR)/imap-ext3516.bnf \
   $(BNFDIR)/imap-ext4466.bnf 
-	./yakker $(BNFDIR)/imap.bnf -omit `./yakker -list-defs $(BNFDIR)/imap-ext2088.bnf` > $@.tmp
+	./yakker $(BNFDIR)/rfc3501.bnf -tsort -unnamespace > $@
+	./yakker $@ -omit `./yakker -list-defs $(BNFDIR)/imap-ext2088.bnf` > $@.tmp
 	cat $(BNFDIR)/imap-ext2088.bnf >> $@.tmp
 	mv $@.tmp $@
 	./yakker $@ -omit `./yakker -list-defs $(BNFDIR)/imap-ext3502.bnf` > $@.tmp
@@ -340,13 +341,18 @@ $(BNFDIR)/imap_revised.bnf: $(BNFDIR)/imap.bnf \
 # FIX: not sure of the real definition of set. Looks to be identical to sequence-set.
 # session is added for conveinience.
 $(BNFDIR)/imap_revised_fixed.bnf: $(BNFDIR)/imap_revised.bnf
-	./yakker $< -omit literal literal8 > $@.tmp
+	./yakker $< -rename set sequence-set -omit literal literal8 > $@.tmp
 	echo "literal = \"{\" number [\"+\"] \"}\" CRLF @repeat(number)CHAR8." >> $@.tmp
 	echo "literal8 = \"~{\" number [\"+\"] \"}\" CRLF @repeat(number)OCTET." >> $@.tmp
-	echo "set = sequence-set." >> $@.tmp
-	echo "session = 1*command." >> $@.tmp
 	./yakker -tsort $@.tmp > $@
 	rm $@.tmp
+	echo 'my-greeting = ("" greeting)$$x {greeting_hook(x);}.' >> $@
+	echo 'my-response = ("" response)$$x {response_hook(x);}.' >> $@
+	echo 'my-command = ("" command)$$x {command_hook(x);}.' >> $@
+	echo "my-session = 1*command." >> $@
+	echo '{ extern void greeting_hook(const char ?); }' >> $@
+	echo '{ extern void response_hook(const char ?); }' >> $@
+	echo '{ extern void command_hook(const char ?); }' >> $@
 
 
 $(BNFDIR)/vcard.bnf: $(BNFDIR)/rfc2426.bnf $(BNFDIR)/rfc2425.bnf $(BNFDIR)/rfc1738.bnf \
