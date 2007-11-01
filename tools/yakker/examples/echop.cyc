@@ -13,6 +13,7 @@ using Core;
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <time.h>
 
 #include "ssl.h"
 #include "ykbuf.h"
@@ -46,8 +47,9 @@ static void
 insecure_proxy(int connfd, string_t host, int port) {
 
   // open local dump files
-  server_file = fopen("server.dump", "a");
-  client_file = fopen("client.dump", "a");
+  let t = time(NULL);
+  let sfile = aprintf("dumps/server.%d.dump",t);
+  server_file = fopen(sfile, "w");
   
   // set global client fd.
   cli_fd = connfd;
@@ -98,42 +100,77 @@ insecure_proxy(int connfd, string_t host, int port) {
   serv_fd = fd;
 
   ssize_t bytes_read;
+  ssize_t bytes_written;
 //   ykbuf_t @servykb = fd2ykbuf(fd);
   /* Read greeting from server and echo to client */
-  bytes_read = read(fd, buf, 1); 
+  bytes_read = read(serv_fd, buf, 1); 
   if (bytes_read == -1){
-    perror("server error in read 2");
+    perror("error reading greeting from server");
+    close(serv_fd);
+    close(cli_fd);
+    fflush(server_file);
     exit(1);
   }
   buf[bytes_read] = 0;
   fprintf(server_file,"%s",buf);
-  write(cli_fd,buf,bytes_read);    
+  bytes_written = write(cli_fd,buf,bytes_read);    
+  if (bytes_written == -1){
+    perror("error echoing greeting to client");
+    exit(1);
+  }
+
+  // flush the server file before forking so we can immediately close it in the 
+  // client-reading process.
+  fflush(server_file);
 
   if (fork() == 0) {
 //     ykbuf_t @cliykb = fd2ykbuf(connfd);
+    fclose(server_file);
+    let cfile = aprintf("dumps/client.%d.dump",t);
+    client_file = fopen(cfile, "w");
     while (1) {
       /* Read command from client and echo to server */   
-      bytes_read = read(connfd, buf, 1); 
+      bytes_read = read(cli_fd, buf, 1); 
       if (bytes_read == -1){
-	perror("server error in read 2");
+	perror("error reading from client");
+	close(serv_fd);
+	close(cli_fd);
+	fflush(client_file);
 	exit(1);
       }
       buf[bytes_read] = 0;
-      fprintf(stdout,"%s",buf);
-      write(serv_fd,buf,bytes_read);    
+      fprintf(client_file,"%s",buf);
+      bytes_written = write(serv_fd,buf,bytes_read);    
+      if (bytes_written == -1){
+	perror("error echoing data to server");
+	close(serv_fd);
+	close(cli_fd);
+	fflush(client_file);
+	exit(1);
+      }
     }
   }
   else {
     while (1) {
       /* Read response from server and echo to client */
-      bytes_read = read(fd, buf, 1); 
+      bytes_read = read(serv_fd, buf, 1); 
       if (bytes_read == -1){
-	perror("server error in read 3");
+	perror("error reading from server");
+	close(serv_fd);
+	close(cli_fd);
+	fflush(server_file);
 	exit(1);
       }
       buf[bytes_read] = 0;
       fprintf(server_file,"%s",buf);
-      write(cli_fd,buf,bytes_read);    
+      bytes_written = write(cli_fd,buf,bytes_read);    
+      if (bytes_written == -1){
+	perror("error echoing data to client");
+	close(serv_fd);
+	close(cli_fd);
+	fflush(server_file);
+	exit(1);
+      }
     }
   }
 }
