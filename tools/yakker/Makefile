@@ -349,7 +349,8 @@ $(BNFDIR)/imap_revised_fixed.bnf: $(BNFDIR)/imap_revised.bnf
 	echo 'my-greeting = ("" greeting)$$x {greeting_hook(x);}.' >> $@
 	echo 'my-response = ("" response)$$x {response_hook(x);}.' >> $@
 	echo 'my-command = ("" command)$$x {command_hook(x);}.' >> $@
-	echo "my-session = 1*command." >> $@
+	echo "my-client-session = 1*command." >> $@
+	echo "my-server-session = greeting *response." >> $@
 	echo '{ extern void greeting_hook(const char ?); }' >> $@
 	echo '{ extern void response_hook(const char ?); }' >> $@
 	echo '{ extern void command_hook(const char ?); }' >> $@

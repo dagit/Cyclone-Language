@@ -30,6 +30,9 @@ datatype ParseTree{
 /* Global variable that saves last derivation tree.*/
 datatype ParseTree *last_derivation_tree = NULL;
 
+// Flag indicating whether to print parsing progress to stderr.
+static int show_prog = 0;
+
 void print_LT_parse_forest(parse_forest_t pf, int depth);
 
 void print_LT(datatype ParseTree @pt, int depth){
@@ -695,7 +698,9 @@ push_closure(rstate_t rs,
 
   let es = Axarray::get(rs->estates,i);
   if (Set::member(es,ei)) return;
-//   fprintf(stderr,"estates[%d] += (%d,%d) %s\n",i,ei->f0,ei->f1,reason);fflush(stderr);
+  if (show_prog){
+    fprintf(stderr,"estates[%d] += (%d,%d) %s\n",i,ei->f0,ei->f1,reason);fflush(stderr);
+  }
   Axarray::set(rs->estates,i,Set::insert(es,ei));
 
   /* Close under CALLS */
@@ -1097,7 +1102,10 @@ $(dfa_t,Set::set_t<st_t>) compile(grammar_t grm, rule_t r) {
   return $(dfa,dfa_final);
 }
 
-int recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input) {
+int recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input, int show_progress) {
+
+  show_prog = show_progress;
+
   /* Keep track of parse trees */
   let
     pred = Hashtable::create(11,earley_node_cmp,earley_node_hash);
@@ -1122,7 +1130,11 @@ int recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input) {
   fprintf(stderr,"Scanning the input.\n");
   let input_len = strlen(input);
   for (let i = 0; i < input_len; i++) {
-//     fprintf(stderr,"input[%d]==%s\n",i,cs_char_escape(input[i]));fflush(stderr);
+
+    if (show_prog){
+      fprintf(stderr,"input[%d]==%s\n",i,cs_char_escape(input[i]));fflush(stderr);
+    }
+    
     for (let si_list = Set::to_list(Axarray::get(estates,i));
          si_list != NULL;
          si_list = si_list->tl) {
@@ -1173,3 +1185,7 @@ int recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input) {
   }
   return 0;
 }
+
+
+// Add report of "valid parse in progress"
+// Add to command to shell: "amb?"

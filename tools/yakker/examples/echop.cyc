@@ -14,6 +14,7 @@ using Core;
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <time.h>
+#include <fcntl.h>
 
 #include "ssl.h"
 #include "ykbuf.h"
@@ -126,6 +127,7 @@ insecure_proxy(int connfd, string_t host, int port) {
   if (fork() == 0) {
 //     ykbuf_t @cliykb = fd2ykbuf(connfd);
     fclose(server_file);
+
     let cfile = aprintf("dumps/client.%d.dump",t);
     client_file = fopen(cfile, "w");
     while (1) {
@@ -144,14 +146,28 @@ insecure_proxy(int connfd, string_t host, int port) {
       if (bytes_written == -1){
 	perror("error echoing data to server");
 	close(serv_fd);
-	close(cli_fd);
+
+	// drain remaining data in cli_fd
+	fcntl(cli_fd,F_SETFL,O_NONBLOCK);
+	bytes_read = read(cli_fd, buf, 1000); 
+	while (bytes_read > 0) {
+	  buf[bytes_read] = 0;
+	  fprintf(client_file,"%s",buf);
+	  bytes_read = read(cli_fd, buf, 1000); 
+	}
 	fflush(client_file);
+	close(cli_fd);
+
 	exit(1);
       }
     }
   }
   else {
+    fclose(client_file);
+
     while (1) {
+      fcntl(serv_fd,F_SETFL,O_NONBLOCK);
+
       /* Read response from server and echo to client */
       bytes_read = read(serv_fd, buf, 1); 
       if (bytes_read == -1){
@@ -166,9 +182,19 @@ insecure_proxy(int connfd, string_t host, int port) {
       bytes_written = write(cli_fd,buf,bytes_read);    
       if (bytes_written == -1){
 	perror("error echoing data to client");
-	close(serv_fd);
 	close(cli_fd);
+
+	// drain remaining data in cli_fd
+	fcntl(serv_fd,F_SETFL,O_NONBLOCK);
+	bytes_read = read(serv_fd, buf, 1000); 
+	while (bytes_read > 0) {
+	  buf[bytes_read] = 0;
+	  fprintf(server_file,"%s",buf);
+	  bytes_read = read(serv_fd, buf, 1000); 
+	}
 	fflush(server_file);
+	close(serv_fd);
+
 	exit(1);
       }
     }
