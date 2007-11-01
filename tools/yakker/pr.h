@@ -26,6 +26,8 @@ extern void pr_repeat(FILE @f,repeat_t rp);
 extern void pr_rule(FILE @f,rule_t r, int with_annotations);
 extern void pr_definition(FILE @f,definition_t d);
 extern void pr_definitions(FILE @f,grammar_t ds);
+// print the names of the definitions, but not the defs. themselves.
+extern void pr_definition_names(FILE @f,grammar_t ds);
 extern const char ?pr_rule2string(rule_t r);
 extern int html_mode;
 #endif

@@ -58,8 +58,17 @@ extern dfa_t lookahead_dfa(grammar_t grm,List::list_t<rule_t> rules, rule_t righ
 extern void dfa_generate1(dfa_t dfa);
 extern void dfa_generate2(dfa_t dfa);
 extern void lookahead_glush(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt);
+
 extern void nfa_dot(FILE @f,Set::set_t<st_t> final_states,cs_pred_t special);
 extern void dfa_dot(FILE @f, dfa_t dfa, cs_pred_t special);
+
+// print symbols in FSM symbol-file format.
+void symbols_fsm(FILE @f, struct Hashtable::Table<act_t,str_t,`r> *`r action_symb_table);
+// print nfa in FSM text format. Action-symbol table contains specialized symbol names
+// for actions. Any actions not in table will print out using fsm_char_escape.
+void nfa_fsm(FILE @f,Set::set_t<st_t> final_states, 
+	     struct Hashtable::Table<act_t,str_t,`r> *`r action_symb_table);
+
 extern dfa_t dfa_minimize(dfa_t dfa);
 // Construct a repeat dfa: a series of n states each transitioning to
 // the given target state "target_s" on the "target" action. Each

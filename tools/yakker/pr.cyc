@@ -159,9 +159,18 @@ void pr_definition(FILE @f,definition_t d) {
   if (html_mode) fprintf(f,"<br>");
   fprintf(f,"\n");
 }
+
 void pr_definitions(FILE @f,grammar_t ds) {
   for (; ds; ds = ds->tl)
     pr_definition(f,ds->hd);
+}
+
+void pr_definition_names(FILE @f,grammar_t ds) {
+  for (; ds; ds = ds->tl){
+    let &$(n,_,_) = ds->hd;
+    fprintf(f,"%s ",n);
+  }
+  fprintf(f,"\n");
 }
 
 ////////

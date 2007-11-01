@@ -303,14 +303,51 @@ http.bnf: $(PROG_DEP) rfc2616.bnf rfc2617.bnf rfc2396.bnf rfc2822.bnf rfc3501.bn
 message-header.bnf: http.bnf $(PROG_DEP)
 	./yakker $< -subset message-header > $@
 
-$(BNFDIR)/imap.bnf: $(GENDIR)/rfc3501.bnf $(PROG_DEP)
-	./yakker $(GENDIR)/rfc3501.bnf -tsort -unnamespace > $@
+$(BNFDIR)/imap.bnf: $(BNFDIR)/rfc3501.bnf $(PROG_DEP)
+	./yakker $(BNFDIR)/rfc3501.bnf -tsort -unnamespace > $@
 	echo 'my-greeting = ("" greeting)$$x {greeting_hook(x);}.' >> $@
 	echo 'my-response = ("" response)$$x {response_hook(x);}.' >> $@
 	echo 'my-command = ("" command)$$x {command_hook(x);}.' >> $@
 	echo '{ extern void greeting_hook(const char ?); }' >> $@
 	echo '{ extern void response_hook(const char ?); }' >> $@
 	echo '{ extern void command_hook(const char ?); }' >> $@
+
+$(BNFDIR)/imap-ext%.bnf: $(BNFDIR)/rfc%.bnf $(PROG_DEP)
+	./yakker $< -tsort -unnamespace > $@
+
+# $(BNFDIR)/imap-ext2342.bnf is causing problems. Not extracted correctly.
+# 	mv $@.tmp $@
+# 	./yakker $@ -omit `./yakker -list-defs $(BNFDIR)/imap-ext2342.bnf` > $@.tmp
+# 	cat $(BNFDIR)/imap-ext2342.bnf >> $@.tmp
+$(BNFDIR)/imap_revised.bnf: $(BNFDIR)/imap.bnf \
+  $(BNFDIR)/imap-ext2088.bnf  \
+  $(BNFDIR)/imap-ext3502.bnf $(BNFDIR)/imap-ext3516.bnf \
+  $(BNFDIR)/imap-ext4466.bnf 
+	./yakker $(BNFDIR)/imap.bnf -omit `./yakker -list-defs $(BNFDIR)/imap-ext2088.bnf` > $@.tmp
+	cat $(BNFDIR)/imap-ext2088.bnf >> $@.tmp
+	mv $@.tmp $@
+	./yakker $@ -omit `./yakker -list-defs $(BNFDIR)/imap-ext3502.bnf` > $@.tmp
+	cat $(BNFDIR)/imap-ext3502.bnf >> $@.tmp
+	mv $@.tmp $@
+	./yakker $@ -omit `./yakker -list-defs $(BNFDIR)/imap-ext3516.bnf` > $@.tmp
+	cat $(BNFDIR)/imap-ext3516.bnf >> $@.tmp
+	mv $@.tmp $@
+	./yakker $@ -omit `./yakker -list-defs $(BNFDIR)/imap-ext4466.bnf` > $@.tmp
+	cat $(BNFDIR)/imap-ext4466.bnf >> $@.tmp
+	./yakker $@.tmp -tsort > $@
+	rm $@.tmp
+
+# FIX: not sure of the real definition of set. Looks to be identical to sequence-set.
+# session is added for conveinience.
+$(BNFDIR)/imap_revised_fixed.bnf: $(BNFDIR)/imap_revised.bnf
+	./yakker $< -omit literal literal8 > $@.tmp
+	echo "literal = \"{\" number [\"+\"] \"}\" CRLF @repeat(number)CHAR8." >> $@.tmp
+	echo "literal8 = \"~{\" number [\"+\"] \"}\" CRLF @repeat(number)OCTET." >> $@.tmp
+	echo "set = sequence-set." >> $@.tmp
+	echo "session = 1*command." >> $@.tmp
+	./yakker -tsort $@.tmp > $@
+	rm $@.tmp
+
 
 $(BNFDIR)/vcard.bnf: $(BNFDIR)/rfc2426.bnf $(BNFDIR)/rfc2425.bnf $(BNFDIR)/rfc1738.bnf \
 	             $(BNFDIR)/rfc1766.bnf $(BNFDIR)/rfc3501.bnf $(PROG_DEP)
@@ -390,6 +427,39 @@ $(BNFDIR)/rfc3501.bnf: rfc3501.txt $(PROG_DEP)
 	echo 'capability-data = "CAPABILITY" *(SP capability).' >> $@.tmp
 	./yakker $@.tmp -namespace rfc3501 > $@
 	$(RM) $@.tmp
+
+# IMAP extension: non-synchronizing literals
+# First command line should be: ./yakker -extract $< > $@.tmp, 
+# but results in empty bnf because defined with ::= instead of =.
+$(BNFDIR)/rfc2088.bnf: rfc2088.txt $(PROG_DEP)
+	echo "literal = \"{\" number [\"+\"] \"}\" CRLF *CHAR8." > $@.tmp
+	./yakker $@.tmp -namespace rfc2088 > $@
+	$(RM) $@.tmp
+
+# IMAP extension: Namespace
+$(BNFDIR)/rfc2342.bnf: rfc2342.txt $(PROG_DEP)
+	./yakker -extract $< > $@.tmp
+	./yakker $@.tmp -namespace rfc2342 > $@
+	$(RM) $@.tmp
+
+# IMAP extension: MULTIAPPEND
+$(BNFDIR)/rfc3502.bnf: rfc3502.txt $(PROG_DEP)
+	./yakker -extract $< > $@.tmp
+	./yakker $@.tmp -namespace rfc3502 > $@
+	$(RM) $@.tmp
+
+# IMAP extension: Binary content
+$(BNFDIR)/rfc3516.bnf: rfc3516.txt $(PROG_DEP)
+	./yakker -extract $< > $@.tmp
+	./yakker $@.tmp -namespace rfc3516 > $@
+	$(RM) $@.tmp
+
+# Updated IMAP. Updates 2088, 2342, 3501, 3502, 3516
+$(BNFDIR)/rfc4466.bnf: rfc4466.txt $(PROG_DEP)
+	./yakker -extract $< > $@.tmp
+	./yakker $@.tmp -namespace rfc4466 > $@
+	$(RM) $@.tmp
+
 
 # A1, A2, and passwd are extracted by mistake
 # Request-URI is the proper spelling (defined in rfc2616)

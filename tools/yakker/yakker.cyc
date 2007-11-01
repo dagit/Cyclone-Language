@@ -110,6 +110,7 @@ static const char ?add_namespace = NULL;
 "         -gen-header          generate a header file for the parsing functions\n"\
 "         -extract               extract EBNF from the input, assumed to be in RFC format\n"\
 "           -externals <bnfs>      use symbols from bnf files if needed in extraction\n"\
+"         -list-defs             print the names of the definitions defined in the BNF\n"\
 "         -check                 perform all sanity checks on the input grammar\n"\
 "           -check-undefined       check for undefined symbols\n"\
 "           -check-multiple        check for multiply defined symbols\n"\
@@ -167,6 +168,7 @@ int main(int argc, const char ?`H?argv) {
   int dependp = 0;
   int extractp = 0;
   int extractprosep = 0;
+  int list_nonterms = 0;
   int generate = 0;
   int generate_header = 0;
   int subset = 0;
@@ -278,6 +280,7 @@ int main(int argc, const char ?`H?argv) {
     else if (strcmp("-ws-on",argv[i]) == 0) ws_on = 1;
     else if (strcmp("-re-on",argv[i]) == 0) re_on = 1;
     else if (strcmp("-extract",argv[i]) == 0) extractp = 1;
+    else if (strcmp("-list-defs",argv[i]) == 0) list_nonterms = 1;
     else if (strcmp("-pads",argv[i]) == 0) pads = 1;
     else if (strcmp("-sort",argv[i]) == 0) sortp = 1;
     else if (strcmp("-depend",argv[i]) == 0) dependp = 1;
@@ -527,7 +530,7 @@ int main(int argc, const char ?`H?argv) {
 	  printf("done -- answer is %d\n",ans); 
 	  if (ans) printf("Parse tree saved.\n");
 	  fflush(stdout);
-  	} else if (!strcmp(cmd,"refine")){
+  	} else if (!strcmp(cmd,"print")){
 	  let arg_end = (char @@zeroterm)arg;
 	  let depth = strtod(arg,&arg_end);
 	  if (arg_end == arg){
@@ -714,6 +717,13 @@ int main(int argc, const char ?`H?argv) {
     gen(ds,start_symbol,textblobs,all_startp, eof_val);
     debugprint(1,"done\n");
   }
+  else if(list_nonterms) {
+    if (!ds) {
+      fprintf(stderr,"Error: no definitions in input\n");
+      exit(1);
+    }
+    pr_definition_names(stdout,ds);
+  } 
   else {
     if (minus_elimp){
       debugprint(1,"Minus elimination... ");

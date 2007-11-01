@@ -534,8 +534,9 @@ $(dfa_t,Set::set_t<st_t>) rule2earley(grammar_t grm, rule_t r) {
   etrans(e,final_state);
   final(start_state,final_state);
   fprintf(stderr,"Start state is %d, final state is %d\n",start_state,final_state);
-  if (debug)
+  if (debug > 1){
     nfa_dot(stderr,Set::singleton(st_cmp,final_state),act2symb);
+  }
 
   /* Collect the set of final states for symbols... */
   let symb_final_states = Set::empty(st_cmp);
@@ -550,6 +551,16 @@ $(dfa_t,Set::set_t<st_t>) rule2earley(grammar_t grm, rule_t r) {
     Hashtable::insert(act_table,
                       symb_final,
                       symb2act(symb));
+  }
+
+  if (debug){
+    FILE *f = fopen("ykdebug/nfa.fsm","w");
+    if (f) { nfa_fsm(f,symb_final_states,action_symb_table); fclose(f); }
+    else fprintf(stderr, "Failed to open file ykdebug/nfa.fsm.\n");
+
+    FILE *f = fopen("fsm/nfa.sym","w");
+    if (f) { symbols_fsm(f,action_symb_table); fclose(f); }
+    else fprintf(stderr, "Failed to open file fsm/nfa.sym.\n");
   }
 
   /* Convert to DFA */
@@ -686,7 +697,7 @@ push_closure(rstate_t rs,
 
   let es = Axarray::get(rs->estates,i);
   if (Set::member(es,ei)) return;
-  fprintf(stderr,"estates[%d] += (%d,%d) %s\n",i,ei->f0,ei->f1,reason);fflush(stderr);
+//   fprintf(stderr,"estates[%d] += (%d,%d) %s\n",i,ei->f0,ei->f1,reason);fflush(stderr);
   Axarray::set(rs->estates,i,Set::insert(es,ei));
 
   /* Close under CALLS */
@@ -746,7 +757,7 @@ push_closure(rstate_t rs,
     // with the final state.
     let t_new = construct_repeat_dfa(rs->dfa,num,repeatee_nt,nt_start,callout_action(),nt_final);
 
-    if (debug){
+    if (debug > 1){
       fprintf(stderr,"Printing DFA after unrolling repeat.\n");
       dfa_dot(stderr,rs->dfa,act2symb);
       fflush(stderr);
@@ -1081,7 +1092,7 @@ egraph_t cvt(Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H> tb
 $(dfa_t,Set::set_t<st_t>) compile(grammar_t grm, rule_t r) {
   init_maybe_empty(grm);
   let $(dfa,dfa_final) = rule2earley(grm,r);
-  if (debug)
+  if (debug > 1)
     dfa_dot(stderr,dfa,act2symb);
   fflush(stderr);
 
@@ -1114,7 +1125,7 @@ int recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input) {
   fprintf(stderr,"Scanning the input.\n");
   let input_len = strlen(input);
   for (let i = 0; i < input_len; i++) {
-    fprintf(stderr,"input[%d]==%s\n",i,cs_char_escape(input[i]));fflush(stderr);
+//     fprintf(stderr,"input[%d]==%s\n",i,cs_char_escape(input[i]));fflush(stderr);
     for (let si_list = Set::to_list(Axarray::get(estates,i));
          si_list != NULL;
          si_list = si_list->tl) {
@@ -1133,7 +1144,8 @@ int recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input) {
   fprintf(stderr,"\n");fflush(stderr);
 
   printf("AA\n");
-  rstate_dot(rs);
+  if (debug)
+    rstate_dot(rs);
   //  Graph::print(stdout,cvt(pred),earley_node_pr);
   printf("BB\n");
   //  Graph::print(stdout,cvt(retn),earley_node_pr);
@@ -1147,13 +1159,16 @@ int recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input) {
 //       derivation(pred,retn,new $(state,parent /*== 0*/,input_len),input,dfa);
 //       printf("Input:\n%s\nParse:\n",input);
 //       printf("%s\n",Buffer::contents(b));
+
       let completed = Set::to_list(dfa_final_attrs(dfa,state));
       let derivation_tree = derivation_redux(pred,retn,input,dfa,new $(state,parent /*== 0*/,input_len));
-      printf("Input:\n%s\nLeftmost tree:\n",input);
-      print_LT(derivation_tree,-1);
-      printf("\nRightmost tree:\n");
-      print_RT(derivation_tree,-1);
-      printf("\n");
+      if (debug) {
+	printf("Input:\n%s\nLeftmost tree:\n",input);
+	print_LT(derivation_tree,-1);
+	printf("\nRightmost tree:\n");
+	print_RT(derivation_tree,-1);
+	printf("\n");
+      }
 
       last_derivation_tree = derivation_tree;
       return 1;

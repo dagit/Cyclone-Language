@@ -226,7 +226,16 @@ fsm_glush_print(FILE *`H f_fsm, Set::set_t<st_t> start_states,
   }
 }
 
-void fsm_print(FILE @f,Set::set_t<st_t> final_states) {
+static void print_act_symb(act_t a, str_t s, FILE @f){
+  fprintf(f,"%s %d\n",*s,a);
+}
+
+void symbols_fsm(FILE @f, struct Hashtable::Table<act_t,str_t,`r> *`r action_symb_table){
+  Hashtable::iter_c(print_act_symb, action_symb_table, f); 
+}
+
+void nfa_fsm(FILE @f,Set::set_t<st_t> final_states, 
+	     struct Hashtable::Table<act_t,str_t,`r> *`r action_symb_table) {
   unsigned int output_symbol = 1;
   for (let i = 0; i < nfa_number_of_states; i++) {
     // Print final state. Default to weight of "one".
@@ -255,21 +264,27 @@ void fsm_print(FILE @f,Set::set_t<st_t> final_states) {
 	num_branches++;
 // 	branch_val = 1.0/(double)num_branches;
 	branch_val = num_branches;
-	fprintf(f,"%d %d EPSILON %d %d\n",i,a_to,out1,branch_val);
+// 	fprintf(f,"%d %d EPSILON %d %d\n",i,a_to,out1,branch_val);
+	fprintf(f,"%d %d EPSILON\n",i,a_to);
       }
       else { 
-	let chars = cs2list(a);
-	num_branches += List::length(chars);
-	branch_val = num_branches;
-	while (chars != NULL){
-	  let branch_name = fsm_char_escape(chars->hd);
-	  fprintf(f,"%d %d %s %d %d\n",i,a_to,branch_name,out1,branch_val);
-	  chars = chars->tl;
+// 	num_branches += List::length(syms);
+// 	branch_val = num_branches;
+	for (let syms = cs2list(a); syms; syms = syms->tl){
+	  let sopt = Hashtable::lookup_opt(action_symb_table,syms->hd);
+	  const char ? branch_name;
+	  if (sopt == NULL || *sopt == NULL) 
+	    branch_name = fsm_char_escape(syms->hd);
+	  else 
+	    branch_name = **sopt;
+// 	  fprintf(f,"%d %d %s %d %d\n",i,a_to,branch_name,out1,branch_val);
+	  fprintf(f,"%d %d %s\n",i,a_to,branch_name);
 	}
       }
     }
     if (e_to != NOTRANSITION) {      
-      fprintf(f,"%d %d EPSILON %d %d\n",i,e_to,out2,branch_val);
+//       fprintf(f,"%d %d EPSILON %d %d\n",i,e_to,out2,branch_val);
+      fprintf(f,"%d %d EPSILON\n",i,e_to);
     }
   }
 }
