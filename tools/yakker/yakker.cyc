@@ -503,17 +503,19 @@ int main(int argc, const char ?`H?argv) {
       }
       char cmd[200]@zeroterm={for i<199:0};
       char arg[200]@zeroterm={for i<199:0};
-      while(1){
+      int done = 0;
+      while(!done){
 	int c;
 
 	// Print prompt.
 	printf("earley:> "); fflush(stdout);
 	
-	// Get the command and arg.
-	scanf("%s %s",cmd,arg);
+	// Get the command followed by arbitrary whitespace.
+	scanf("%s",cmd);
 	
 	// Parse command line
 	if (!strcmp(cmd, "parse")){
+	  scanf("%s",arg);
 	  // Parse the file
 	  printf("Earley parsing %s ... \n",arg); 
 	  FILE *fp = fopen(arg,"r");
@@ -530,7 +532,15 @@ int main(int argc, const char ?`H?argv) {
 	  printf("done -- answer is %d\n",ans); 
 	  if (ans) printf("Parse tree saved.\n");
 	  fflush(stdout);
+  	} else if (!strcmp(cmd,"print-dfa")){
+	  scanf("%s",arg);
+	  if (!strcmp(arg,"haxe")){
+	    dfa_haxe(stdout,dfa); 
+	  } else {
+	    fprintf(stderr,"Invalid dfa format: %s.\n",arg);
+	  }
   	} else if (!strcmp(cmd,"print")){
+	  scanf("%s",arg);
 	  let arg_end = (char @@zeroterm)arg;
 	  let depth = strtod(arg,&arg_end);
 	  if (arg_end == arg){
@@ -541,6 +551,8 @@ int main(int argc, const char ?`H?argv) {
 	  printf("\n");
 	  Earley::print_RT(Earley::last_derivation_tree,depth);
 	  printf("\n");
+  	} else if (!strcmp(cmd,"exit")){
+	  done = 1; // shell is done; exit loop.
 	} else {
 	  fprintf(stderr,"Undefined command.\n");
 	  continue;

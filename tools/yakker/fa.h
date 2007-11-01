@@ -69,6 +69,9 @@ void symbols_fsm(FILE @f, struct Hashtable::Table<act_t,str_t,`r> *`r action_sym
 void nfa_fsm(FILE @f,Set::set_t<st_t> final_states, 
 	     struct Hashtable::Table<act_t,str_t,`r> *`r action_symb_table);
 
+/* Print the dfa as a haxe datastructure. */
+extern void dfa_haxe(FILE@,dfa_t);
+
 extern dfa_t dfa_minimize(dfa_t dfa);
 // Construct a repeat dfa: a series of n states each transitioning to
 // the given target state "target_s" on the "target" action. Each

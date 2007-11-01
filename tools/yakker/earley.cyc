@@ -15,8 +15,6 @@
 #include "nfa_eager.h"
 using Nfa_eager;
 
-extern void dfa_haxe(FILE@,dfa_t);
-
 namespace Earley;
 
 typedef List::list_t<datatype ParseTree @`H,`H> parse_forest_t;
@@ -1100,7 +1098,6 @@ $(dfa_t,Set::set_t<st_t>) compile(grammar_t grm, rule_t r) {
 }
 
 int recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input) {
-  dfa_haxe(stdout,dfa); //TEMP
   /* Keep track of parse trees */
   let
     pred = Hashtable::create(11,earley_node_cmp,earley_node_hash);
