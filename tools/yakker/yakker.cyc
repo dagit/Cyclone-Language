@@ -473,11 +473,11 @@ int main(int argc, const char ?`H?argv) {
   if (earley_regexp != NULL) {
     use_lazy_nfa = 0;
     
-    // TODO: assume regexp is a symbol for now
-    let $(dfa,dfa_final) = Earley::compile(ds,SYMB(earley_regexp));
-    
     switch (interactive_earley){
     case 0:
+      // TODO: assume regexp is a symbol for now
+      let $(dfa,dfa_final) = Earley::compile(ds,SYMB(earley_regexp));
+    
       printf("Earley parsing stdin... "); fflush(stdout);
       int c;
       let b = Buffer::create(101);
@@ -488,6 +488,9 @@ int main(int argc, const char ?`H?argv) {
       fflush(stdout);
       break;
     case 1:      
+      // TODO: assume regexp is a symbol for now
+      let $(dfa,dfa_final) = Earley::compile(ds,SYMB(earley_regexp));
+    
       while(1){
 	printf("Earley parsing stdin... "); fflush(stdout);
 	int c;
@@ -506,9 +509,11 @@ int main(int argc, const char ?`H?argv) {
       char cmd[200]@zeroterm={for i<199:0};
       char arg[200]@zeroterm={for i<199:0};
       int done = 0;
+      dfa_t *p_dfa = NULL;
+      Set::set_t<st_t> *p_dfa_final = NULL;
       while(!done){
 	int c;
-
+	
 	// Print prompt.
 	printf("earley:> "); fflush(stdout);
 	
@@ -516,7 +521,51 @@ int main(int argc, const char ?`H?argv) {
 	scanf("%s",cmd);
 	
 	// Parse command line
-	if (!strcmp(cmd, "parse")){
+	if (!strcmp(cmd, "compile")){
+
+	  // TODO: assume regexp is a symbol for now
+	  let $(dfa,dfa_final) = Earley::compile(ds,SYMB(earley_regexp));
+	  p_dfa = new dfa;
+	  p_dfa_final = new dfa_final;
+
+	} else if (!strcmp(cmd, "print-nfa")){
+
+	  char filename[200]@zeroterm={for i<199:0};
+	  scanf("%s %s",arg,filename);
+
+	  if (!strcmp(arg,"fsm")){
+	    // TODO: assume regexp is a symbol for now
+	    Earley::rule_fsm(filename,ds,SYMB(earley_regexp));
+	  } else {
+	    fprintf(stderr,"Invalid NFA format: %s.\n",arg);
+	  }
+	  
+	} else if (!strcmp(cmd, "load-dfa")){
+
+	  char filename[200]@zeroterm={for i<199:0};
+	  scanf("%s %s",arg,filename);
+
+	  if (!strcmp(arg,"fsm")){
+	    // TODO: assume regexp is a symbol for now
+	    let r = Earley::fsm2dfa(filename,earley_regexp);
+	    if (r){
+	      let $(dfa,dfa_final) = *r;
+	      p_dfa = new dfa;
+	      p_dfa_final = new dfa_final;
+	    } else {
+	      fprintf(stderr,"Failed to reconstruct DFA.\n");
+	    }
+	  } else {
+	    fprintf(stderr,"Invalid DFA format: %s.\n",arg);
+	  }
+	  
+	} else if (!strcmp(cmd, "parse")){
+
+	  if (!p_dfa || !p_dfa_final){
+	    fprintf(stderr, "Need to compile DFA first.\n");
+	    continue;
+	  }
+
 	  // Read file name
 	  scanf("%s",arg);
 
@@ -541,24 +590,32 @@ int main(int argc, const char ?`H?argv) {
 	  printf("File read complete.\n"); 
 
 	  // Parse the file
-	  let $(valid,valid_prefix) = Earley::recognize(dfa,dfa_final,Buffer::contents(b), show_progress);
+	  let $(valid,valid_prefix) = Earley::recognize(*p_dfa,*p_dfa_final,Buffer::contents(b), show_progress);
 	  printf("done -- is valid string :%d. is valid prefix: %d\n",valid, valid_prefix);
 	  if (valid) printf("Parse tree saved.\n");
 	  fflush(stdout);
 
   	} else if (!strcmp(cmd,"amb?")){
+
 	  let is_amb = Earley::isAmb_parse_tree(Earley::last_derivation_tree);
 	  if (is_amb)
 	    printf("Parse tree is ambiguous.\n");
 	  else
 	    printf("Parse tree is not ambiguous.\n");
+
   	} else if (!strcmp(cmd,"print-dfa")){
 
 	  scanf("%s",arg);
+
+	  if (!p_dfa){
+	    fprintf(stderr, "Need to compile DFA first.\n");
+	    continue;
+	  }
+
 	  if (!strcmp(arg,"haxe")){
-	    dfa_haxe(stdout,dfa); 
+	    dfa_haxe(stdout,*p_dfa); 
 	  } else {
-	    fprintf(stderr,"Invalid dfa format: %s.\n",arg);
+	    fprintf(stderr,"Invalid DFA format: %s.\n",arg);
 	  }
 
   	} else if (!strcmp(cmd,"print")){

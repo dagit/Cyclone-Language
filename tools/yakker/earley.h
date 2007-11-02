@@ -36,6 +36,13 @@ namespace Earley {
   extern void print_RT(datatype ParseTree @pt, int depth);
 
   extern int isAmb_parse_tree(datatype ParseTree @pt);
+
+  // Convert and print the rule as an NFA in FSM format.
+  // Writes two files based on the filename_base: .fsm and .sym. The
+  // former holds the NFA, the latter the mapping from symbolic names to
+  // numbers.
+  extern void rule_fsm(const char ?filename_base, grammar_t grm, rule_t r);
+  extern $(dfa_t,Set::set_t<st_t>) *fsm2dfa(const char ?filename, const char ?`H start_symb);
 }
 
 #endif

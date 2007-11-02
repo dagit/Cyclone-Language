@@ -142,7 +142,7 @@ int isAmb_parse_forest(parse_forest_t pf){
    NB: there is a max number of actions hard-coded in cs.h.
 */
 
-static unsigned int symb_action_counter = 258;
+static unsigned int symb_action_counter = 259;
 static struct Hashtable::Table<str_t,act_t> *symb_action_table = NULL;
 static struct Hashtable::Table<act_t,str_t> *action_symb_table = NULL;
 static act_t callout_action() {
@@ -150,6 +150,9 @@ static act_t callout_action() {
 }
 static act_t repeat_action() {
   return 257;
+}
+static act_t final_st_action() {
+  return 258;
 }
 static act_t new_action() {
   let a = symb_action_counter++;
@@ -166,6 +169,9 @@ static cs_t callout_cs() {
 static cs_t repeat_cs() {
   return cs_singleton(repeat_action());
 }
+static cs_t final_st_cs() {
+  return cs_singleton(final_st_action());
+}
 const char ?act2symb(act_t act) {
   let sopt = Hashtable::lookup_opt(action_symb_table,act);
   if (sopt == NULL || *sopt == NULL) return NULL;
@@ -180,6 +186,7 @@ static act_t symb2act(const char ?`H symb) {
       Hashtable::create(11,st_cmp,st_hash);
     Hashtable::insert(action_symb_table,callout_action(),new "CALL");
     Hashtable::insert(action_symb_table,repeat_action(),new "REPEAT");
+    Hashtable::insert(action_symb_table,final_st_action(),new "FINAL-STATE");
   }
   let symbptr = new symb;
   let aptr = Hashtable::lookup_opt(symb_action_table,symbptr);
@@ -542,6 +549,56 @@ $(st_t,st_t,st_t)
   }
 }
 
+// Convert and print the rule as an NFA in FSM format.
+// Writes two files based on the filename_base: .fsm and .sym. The
+// former holds the NFA, the latter the mapping from symbolic names to
+// numbers.
+void rule_fsm(const char ?filename_base, grammar_t grm, rule_t r) {
+  /* Build the NFA for the grammar */
+  init_maybe_empty(grm);
+
+  /* symb_st maps symbols to start states */
+  Hashtable::table_t<str_t,st_t> symb_st =
+    Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr);
+
+  nfa_init(grm);
+  let $(start_state,f,e) = merge(symb_st,grm,r);
+  let final_state = nfa_fresh_state();
+  etrans(f,final_state);
+  etrans(e,final_state);
+  final(start_state,final_state);
+  fprintf(stderr,"Start state is %d, final state is %d\n",start_state,final_state);
+
+  /* Collect the set of final states for symbols... */
+  let symb_final_states = Set::empty(st_cmp);
+  /* ... and the mapping from final states to symbol actions */
+  let act_table = Hashtable::create(11,st_cmp,st_hash); // should be act_cmp
+  for (let rules = grm; rules != NULL; rules = rules->tl) {
+    let &$(symb,_,_) = rules->hd;
+    let st_opt = Hashtable::lookup_opt(symb_st,new symb);
+    if (!st_opt) continue;
+    let symb_final = get_final(*st_opt);
+    symb_final_states = Set::insert(symb_final_states,symb_final);
+    Hashtable::insert(act_table,
+                      symb_final,
+                      symb2act(symb));
+  }
+
+  let fsm_file = aprintf("%s.fsm",filename_base);
+  FILE *f = fopen(fsm_file,"w");
+  if (f) { nfa_fsm(f,symb_final_states,action_symb_table,act_table); fclose(f); }
+  else fprintf(stderr, "Failed to open file %s.\n",fsm_file);
+
+  let sym_file = aprintf("%s.sym",filename_base);
+  FILE *f = fopen(sym_file,"w");
+  if (f) { symbols_fsm(f,action_symb_table); fclose(f); }
+  else fprintf(stderr, "Failed to open file %s.\n",sym_file);
+}
+
+$(dfa_t,Set::set_t<st_t>) *fsm2dfa(const char ?filename, const char ?`H start_symb) {
+  return fsm_dfa(filename,start_symb,symb2act);
+}
+
 $(dfa_t,Set::set_t<st_t>) rule2earley(grammar_t grm, rule_t r) {
   /* Build the NFA for the grammar */
 
@@ -562,7 +619,7 @@ $(dfa_t,Set::set_t<st_t>) rule2earley(grammar_t grm, rule_t r) {
 
   /* Collect the set of final states for symbols... */
   let symb_final_states = Set::empty(st_cmp);
-  /* ... and the mapping from symbol actions to symbols */
+  /* ... and the mapping from final states to symbol actions */
   let act_table = Hashtable::create(11,st_cmp,st_hash); // should be act_cmp
   for (let rules = grm; rules != NULL; rules = rules->tl) {
     let &$(symb,_,_) = rules->hd;
@@ -577,12 +634,12 @@ $(dfa_t,Set::set_t<st_t>) rule2earley(grammar_t grm, rule_t r) {
 
   if (debug){
     FILE *f = fopen("ykdebug/nfa.fsm","w");
-    if (f) { nfa_fsm(f,symb_final_states,action_symb_table); fclose(f); }
+    if (f) { nfa_fsm(f,symb_final_states,action_symb_table,act_table); fclose(f); }
     else fprintf(stderr, "Failed to open file ykdebug/nfa.fsm.\n");
 
-    FILE *f = fopen("fsm/nfa.sym","w");
+    FILE *f = fopen("ykdebug/nfa.sym","w");
     if (f) { symbols_fsm(f,action_symb_table); fclose(f); }
-    else fprintf(stderr, "Failed to open file fsm/nfa.sym.\n");
+    else fprintf(stderr, "Failed to open file ykdebug/nfa.sym.\n");
   }
 
   /* Convert to DFA */
@@ -1210,5 +1267,7 @@ $(int,int) recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input, i
 }
 
 
-// Add report of "valid parse in progress"
-// Add command to shell: "amb?"
+// x Add report of "valid parse in progress"
+// x Add command to shell: "amb?"
+// Does FSM need symbols? I think it would be much simpler if we dropped the symbols names
+// and just used numbers.

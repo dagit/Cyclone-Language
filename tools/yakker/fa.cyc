@@ -230,24 +230,28 @@ static void print_act_symb(act_t a, str_t s, FILE @f){
   fprintf(f,"%s %d\n",*s,a);
 }
 
-void symbols_fsm(FILE @f, struct Hashtable::Table<act_t,str_t,`r> *`r action_symb_table){
+void symbols_fsm(FILE @f, Hashtable::table_t<act_t,str_t> action_symb_table){
   Hashtable::iter_c(print_act_symb, action_symb_table, f); 
 }
 
 void nfa_fsm(FILE @f,Set::set_t<st_t> final_states, 
-	     struct Hashtable::Table<act_t,str_t,`r> *`r action_symb_table) {
+	     Hashtable::table_t<act_t,str_t> action_symb_table,
+	     Hashtable::table_t<st_t,act_t> act_table) {
   unsigned int output_symbol = 1;
   for (let i = 0; i < nfa_number_of_states; i++) {
     // Print final state. Default to weight of "one".
     if (Set::member(final_states,i)){
       fprintf(f,"%d\n",i);
+      // associate it in the NFA w/ its symbol.
+      let s = nfa_fresh_state();
+      fprintf(f,"%d %d FINAL-STATE\n",i,s);
+      let act = Hashtable::lookup(act_table,i);      
+      let symb = Hashtable::lookup(action_symb_table,act);
+      fprintf(f,"%d %d %s\n",s,s,*symb);
     }
     int num_branches = 0;
-//     double branch_val = 1;
-    int branch_val = 0;
-    // default output is EPSILON, which is encoded as 0.
-    unsigned int out1 = 0;
-    unsigned int out2 = 0;
+    double branch_val = 1.0;
+//     int branch_val = 0;
 
     let e_to = get_etrans(i);
     if (e_to != NOTRANSITION) num_branches++;
@@ -257,38 +261,31 @@ void nfa_fsm(FILE @f,Set::set_t<st_t> final_states,
       let a = get_action(i);
       if (a == EPSILON) {
 	num_branches++;
-// 	branch_val = 1.0/(double)num_branches;
-	branch_val = num_branches;
-	fprintf(f,"%d %d EPSILON %d\n",i,a_to,branch_val);
+ 	branch_val = 1.0/(double)num_branches;
+// 	branch_val = num_branches;
+	fprintf(f,"%d %d EPSILON %lf\n",i,a_to,branch_val);
       }
       else { 
-	let syms = cs2list(a);
-	num_branches += List::length(syms);
-	branch_val = num_branches;
-	for (; syms; syms = syms->tl){
-	  let sopt = Hashtable::lookup_opt(action_symb_table,syms->hd);
+	let acts = cs2list(a);
+	num_branches += List::length(acts);
+ 	branch_val = 1.0/(double)num_branches;
+// 	branch_val = num_branches;
+	for (; acts; acts = acts->tl){
+	  let sopt = Hashtable::lookup_opt(action_symb_table,acts->hd);
 	  const char ? branch_name;
 	  if (sopt == NULL || *sopt == NULL) 
-	    branch_name = fsm_char_escape(syms->hd);
+	    branch_name = fsm_char_escape(acts->hd);
 	  else 
 	    branch_name = **sopt;
-	  fprintf(f,"%d %d %s %d\n",i,a_to,branch_name, branch_val);
+	  fprintf(f,"%d %d %s %lf\n",i,a_to,branch_name, branch_val);
 	}
       }
     }
     if (e_to != NOTRANSITION) {      
-      fprintf(f,"%d %d EPSILON %d\n",i,e_to,branch_val);
+      fprintf(f,"%d %d EPSILON %lf\n",i,e_to,branch_val);
     }
   }
 }
-
-/*
-
-nfa_fsm final_states
-
-
-*/
-
 
 /********* Experimental code for building Glushkov automata **********/
 #include <array.h>
@@ -555,6 +552,70 @@ st_t target(dfa_t dfa,st_t s,act_t a) {
   return 0;
 }
 
+void dfa_add_trans(dfa_t dfa,st_t s, st_t dst, act_t act) {
+  let t = Axarray::get(dfa->states,s);
+  if (!t) {
+    eprintf("Warning: attempt to add transition to dead state.\n");
+    return; /* target is the dead state */
+  }
+  if (act < t->lb) {
+    let old_lb = t->lb;
+    let sp1 = new span(dst,act+1);
+    let sp2 = new span(0,old_lb);
+    t->lb = act;
+    t->spans = new List::List(sp1,new List::List(sp2, t->spans));
+    return;
+  }
+  let lb = t->lb;
+  for (let ss = t->spans; ss; ss = ss->tl){
+    if (act < ss->hd->ub){ 
+      if (ss->hd->target == dst)
+	return; // nothing to change
+      let old_span = ss->hd;
+      if (act > lb) {
+	ss->hd = new span(old_span->target,act);
+	ss->tl = new List::List(old_span /* filler, about to be changed */, 
+				ss->tl);
+	ss = ss->tl;
+      }
+
+      ss->hd = new span(dst,act+1);
+
+      if (act+1 < old_span->ub){
+	ss->tl = new List::List(new span(old_span->target,old_span->ub),
+				ss->tl);
+	ss = ss->tl;
+      }
+
+      return;
+    }
+    lb = ss->hd->ub;
+  }
+
+  let new_ss = List::list(new span(dst,act+1));
+  if (act > lb) {
+    new_ss = new List::List(new span(0,act), new_ss);
+  } 
+  t->spans = List::imp_append(t->spans, new_ss);
+}
+
+aset_t dfa_get_transitions(dfa_t dfa,st_t s) {
+  let t = Axarray::get(dfa->states,s);
+  let txs = Set::empty(st_cmp); // FIX: should be act_cmp
+  if (!t) return txs; /* target is the dead state */
+
+  let lb = t->lb;
+  for (let sp = t->spans; sp; sp = sp->tl){
+    if (sp->hd->target){ // add every element of this span to txs.
+      for (int ub = sp->hd->ub; lb < ub; lb++)
+	txs = Set::insert(txs,lb);
+    } else // skips this span
+      lb = sp->hd->ub;
+  }
+
+  return txs;
+}
+
 // Return pointer to first action not equal to a, for which there's a transition to a non-empty state.
 // Return NULL if there is none.
 act_t* first_action_but(dfa_t dfa,st_t s,act_t a) {
@@ -642,6 +703,10 @@ void dfa_compress(dfa_t dfa) {
 st_t dfa_fresh_state(dfa_t dfa) {
   return dfa->number_of_states++;
 }
+void dfa_register_state(dfa_t dfa,st_t s) {
+  if (dfa->number_of_states <= s)
+    dfa->number_of_states = s + 1;
+}
 void dfa_add_final(dfa_t dfa, st_t final, aset_t attrs) {
   // NB: we allow marking a state final with empty attrs
   aset_t *att_opt = Hashtable::lookup_opt(dfa->final_attrs,final);
@@ -662,6 +727,7 @@ void dfa_set_final(dfa_t dfa, st_t final, aset_t attrs) {
   Hashtable::insert(dfa->final_attrs,final,attrs);
   dfa->final_states = Set::insert(dfa->final_states,final);
 }
+
 void dfa_print(dfa_t dfa) {
   let len = dfa->number_of_states;
   if (len == 1) eprintf("There is 1 state\n");
@@ -847,6 +913,92 @@ void dfa_haxe(FILE @f, dfa_t dfa) {
   }
   fprintf(f,"default: return null;\n}\n};\n");
 }
+
+// Create a DFA from an FSM file.
+$(dfa_t,Set::set_t<st_t>) *fsm_dfa(const char ?filename, const char ?`H start_symb,
+				   act_t (@symb2act)(const char ?`H)) {
+
+  FILE *f = fopen(filename,"w");
+  if (!f) {
+    fprintf(stderr, "Failed to open file %s.\n",filename);
+    return NULL;
+  }
+  
+  dfa_t dfa = dfa_create();
+
+  int src,dst;
+  char ?dst_or_val = calloc(100,sizeof(char));
+  char ?symb = calloc(100,sizeof(char));
+  double val;
+
+  let num_conv = fscanf(f,"%d %s %s %lf\n",&src,dst_or_val,symb,&val);
+  for (let lineno = 1; num_conv != EOF; lineno++){
+    switch (num_conv) {
+    case 0:
+      fprintf(stderr, "Parse error: scanf unable to perform any conversions on line: %d.\n", lineno);
+      return NULL;
+    case 1: // Final state, cost 1
+      dfa_register_state(dfa,src);
+
+      dfa->final_states = Set::insert(dfa->final_states,src);
+      break;
+    case 2: // Final state, given cost
+      dfa_register_state(dfa,src);
+
+//       sscanf(dst_or_val,"%lf",&val);
+      fprintf(stderr, "Warning (line: %d): cost assigned to final state.\n", lineno);
+      dfa->final_states = Set::insert(dfa->final_states,src);
+      break;
+    case 3: // Arc, cost 1
+      dfa_register_state(dfa,src);
+
+      sscanf(dst_or_val,"%d",&dst);
+      dfa_add_trans(dfa,src,dst,symb2act(symb));
+      break;
+    case 4: // Arc, given cost
+      dfa_register_state(dfa,src);
+
+      sscanf(dst_or_val,"%d",&dst);
+      dfa_add_trans(dfa,src,dst,symb2act(symb));
+      break;
+    default:
+      fprintf(stderr, "Internal error: too many conversions in scanf.\n");
+      return NULL;
+    }
+  } // end while(num_conv != EOF)
+
+  // FIX: should coalesce spans of each state (for efficiency).
+
+  // Build mapping of DFA final states to completed symbols.
+
+  let dfa_final = Set::empty(st_cmp);
+  let start_act = symb2act(start_symb);
+  let final_st_action = symb2act("FINAL-STATE");
+
+  for (let states = Set::to_list(dfa_final_states(dfa));
+       states != NULL; states = states->tl) {
+    let s = states->hd;
+    let t = target(dfa,s,final_st_action);
+    let action_attrs = Set::empty(st_cmp); // should be attr_cmp
+    for (let s_txs = Set::to_list(dfa_get_transitions(dfa,t));
+         s_txs != NULL; s_txs = s_txs->tl) {
+      let act = s_txs->hd;
+      if (act == start_act) {
+        dfa_final = Set::insert(dfa_final,s);
+        // action of the start symbol does not correspond to
+        // the parsing of a symbol hence does not return.  So we do not
+        // want it in the attributes which indicate what symbols are
+        // returning.
+        continue;
+      }
+      action_attrs = Set::insert(action_attrs,act);
+    }
+    dfa_set_final(dfa,s,action_attrs);
+  }
+
+  return new $(dfa,dfa_final);
+}
+
 
 /* Return the graph with an edge between state s and t iff
    s moves to t in a single step, and neither s nor t is

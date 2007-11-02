@@ -63,11 +63,17 @@ extern void nfa_dot(FILE @f,Set::set_t<st_t> final_states,cs_pred_t special);
 extern void dfa_dot(FILE @f, dfa_t dfa, cs_pred_t special);
 
 // print symbols in FSM symbol-file format.
-void symbols_fsm(FILE @f, struct Hashtable::Table<act_t,str_t,`r> *`r action_symb_table);
+void symbols_fsm(FILE @f, Hashtable::table_t<act_t,str_t> action_symb_table);
+
 // print nfa in FSM text format. Action-symbol table contains specialized symbol names
 // for actions. Any actions not in table will print out using fsm_char_escape.
 void nfa_fsm(FILE @f,Set::set_t<st_t> final_states, 
-	     struct Hashtable::Table<act_t,str_t,`r> *`r action_symb_table);
+	     Hashtable::table_t<act_t,str_t> action_symb_table,
+	     Hashtable::table_t<st_t,act_t> act_table);
+// read a dfa from the FSM format.
+// returns NULL on failure.
+$(dfa_t,Set::set_t<st_t>) *fsm_dfa(const char ?filename, const char ?`H start_symb,
+				   act_t (@symb2act)(const char ?`H));
 
 /* Print the dfa as a haxe datastructure. */
 extern void dfa_haxe(FILE@,dfa_t);
