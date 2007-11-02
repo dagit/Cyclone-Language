@@ -1,7 +1,5 @@
 /* An imap proxy.
 */
-#include <core.h>
-using Core;
 
 #include <unistd.h>
 #include <stdlib.h>
@@ -11,6 +9,7 @@ using Core;
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/errno.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
@@ -18,61 +17,74 @@ using Core;
 #include <fcntl.h>
 #include <signal.h>
 
-#include "ssl.h"
-#include "ykbuf.h"
+/* #include "ssl.h" */
+/* #include "ykbuf.h" */
 
-extern "C" int errno;
+/* extern "C" int errno; */
 
-SSL *clissl = NULL;
-SSL *servssl = NULL;
 int use_ssl = 1;
 
 int cli_fd, serv_fd;
 
-void prErr(int i) {
-  switch (i) {
-  case SSL_ERROR_NONE             : fprintf(stderr,"SSL_ERROR_NONE\n"); break;
-  case SSL_ERROR_SSL              : fprintf(stderr,"SSL_ERROR_SSL\n"); break;
-  case SSL_ERROR_WANT_READ        : fprintf(stderr,"SSL_ERROR_WANT_READ\n"); break;
-  case SSL_ERROR_WANT_WRITE       : fprintf(stderr,"SSL_ERROR_WANT_WRITE\n"); break;
-  case SSL_ERROR_WANT_X509_LOOKUP : fprintf(stderr,"SSL_ERROR_WANT_X509_LOOKUP\n"); break;
-  case SSL_ERROR_SYSCALL          : fprintf(stderr,"SSL_ERROR_SYSCALL\n"); break;
-  case SSL_ERROR_ZERO_RETURN      : fprintf(stderr,"SSL_ERROR_ZERO_RETURN\n"); break;
-  case SSL_ERROR_WANT_CONNECT     : fprintf(stderr,"SSL_ERROR_WANT_CONNECT\n"); break;
-  case SSL_ERROR_WANT_ACCEPT      : fprintf(stderr,"SSL_ERROR_WANT_ACCEPT\n"); break;
-  default                         : fprintf(stderr,"%d\n",i); break;
-  }
-}
 
 #define EXIT_SUCCESS 0
 #define EXIT_FAILURE 1
 
 static FILE* server_log_file = NULL;
+static FILE* server_file = NULL;
+static int server_done = 0;
 
 static void child_handler(int signum)
 {
     switch(signum) {
     case SIGALRM: fprintf(server_log_file,"SIGALRM\n"); break;
     case SIGUSR1: fprintf(server_log_file,"SIGUSR1\n"); break;
+    case SIGUSR2: fprintf(server_log_file,"SIGUSR2\n"); break;
     case SIGCHLD: fprintf(server_log_file,"SIGCHLD\n"); break;
-    case SIGTERM: fprintf(server_log_file,"SIGTERM\n"); break;
+    case SIGINT: fprintf(server_log_file,"SIGINT\n"); break;
     case SIGHUP: fprintf(server_log_file,"SIGHUP\n"); break;
+    case SIGTERM: fprintf(server_log_file,"SIGTERM\n"); break;
+    case SIGIO: fprintf(server_log_file,"SIGIO\n"); break;
+    case SIGPIPE: fprintf(server_log_file,"SIGPIPE\n"); break;
     default: fprintf(server_log_file,"unknown signal\n");
     }
-
     fflush(server_log_file);
-    fclose(server_log_file);
 
-    exit(EXIT_FAILURE);
+    server_done = 1;
+
+/*     close(cli_fd); */
+    
+/*     // drain remaining data in serv_fd */
+/*     fprintf(server_log_file,"Draining remaining data from socket.\n"); */
+/*     fflush(server_log_file); */
+/*     fclose(server_log_file); */
+    
+/*     fcntl(serv_fd,F_SETFL,O_NONBLOCK); */
+/*     char buf[1001]; */
+/*     int bytes_read = read(serv_fd, buf, 1000);  */
+/*     while (bytes_read > 0) { */
+/*       buf[bytes_read] = 0; */
+/*       fprintf(server_file,"%s",buf); */
+/*       bytes_read = read(serv_fd, buf, 1000);  */
+/*     } */
+/*     fflush(server_file); */
+/*     fclose(server_file); */
+/*     close(serv_fd); */
+
+/*     exit(EXIT_FAILURE); */
 }
+
+typedef const char *string_t;
 
 static void
 insecure_proxy(int connfd, string_t host, int port) {
 
+  char name[1000];
+
   // open local dump files
-  let t = time(NULL);
-  let sfile = aprintf("dumps/server.%d.dump",t);
-  let server_file = fopen(sfile, "w");
+  int t = time(NULL);
+  int sfile = sprintf(name,"dumps/server.%d.dump",t);
+  server_file = fopen(name, "w");
 
   // set global client fd.
   cli_fd = connfd;
@@ -83,7 +95,7 @@ insecure_proxy(int connfd, string_t host, int port) {
   struct protoent *pe;
   struct sockaddr_in sin;
 
-  char buf[10000]@zeroterm={for i<9999:0};
+  char buf[10000];
   int bytes, b;
 
   he = gethostbyname(host);
@@ -101,7 +113,7 @@ insecure_proxy(int connfd, string_t host, int port) {
     fprintf(stderr, "unknown protocol\n");
     exit(1);
   }
-  bzero((_?)&sin,sizeof(sin));
+  bzero(&sin,sizeof(sin));
   sin.sin_family = (sa_family_t)he->h_addrtype;
 
   int fd = socket(he->h_addrtype, SOCK_STREAM, pe->p_proto);
@@ -146,14 +158,14 @@ insecure_proxy(int connfd, string_t host, int port) {
   // client-reading process.
   fflush(server_file);
 
-  let parent = getpid();
-  let childpid = fork();
+  pid_t parent = getpid();
+  pid_t childpid = fork();
   if (childpid != 0) {
 //     ykbuf_t @cliykb = fd2ykbuf(connfd);
     fclose(server_file);
 
-    let cfile = aprintf("dumps/client.%d.dump",t);
-    let client_file = fopen(cfile, "w");
+    int r = sprintf(name,"dumps/client.%d.dump",t);
+    FILE* client_file = fopen(name, "w");
     while (1) {
       /* Read command from client and echo to server */   
       bytes_read = read(cli_fd, buf, 1); 
@@ -166,12 +178,12 @@ insecure_proxy(int connfd, string_t host, int port) {
 
 	// let child know we're done.
 // 	kill( childpid, SIGTERM );
-	fprintf(stderr,"Waiting (%d) for child (%d) to die ...\n",parent,childpid);fflush(stderr);
-	let status = 0;
-	let wpid = waitpid(childpid,&status,WNOHANG);
-	if ( wpid != childpid ){
-	  fprintf(stderr,"No such child: %d.\n",wpid);fflush(stderr);
-	}
+/* 	fprintf(stderr,"Waiting (%d) for child (%d) to die ...\n",parent,childpid);fflush(stderr); */
+/* 	int status = 0; */
+/* 	pid_t wpid = waitpid(childpid,&status,WNOHANG); */
+/* 	if ( wpid != childpid ){ */
+/* 	  fprintf(stderr,"No such child: %d.\n",wpid);fflush(stderr); */
+/* 	} */
 
 	exit(0);
       }
@@ -201,24 +213,27 @@ insecure_proxy(int connfd, string_t host, int port) {
     }
   }
   else {
-    let slog_file = aprintf("dumps/server.%d.log",t);
-    server_log_file = fopen(slog_file, "w");
+    int r = sprintf(name,"dumps/server.%d.log",t);
+    server_log_file = fopen(name, "w");
 
     fprintf(server_log_file,"starting echo ...\n");
     fflush(server_log_file);
     /* Trap signals that we expect to recieve */
-//     signal(SIGCHLD,child_handler);
-//     signal(SIGUSR1,child_handler);
-//     signal(SIGALRM,child_handler);
+    signal(SIGCHLD,child_handler);
+    signal(SIGUSR1,child_handler);
+    signal(SIGUSR2,child_handler);
+    signal(SIGALRM,child_handler);
     signal(SIGTERM,child_handler);
-//     signal(SIGHUP,child_handler);
+    signal(SIGHUP,child_handler);
+    signal(SIGINT,child_handler);
+    signal(SIGIO,child_handler);
+    signal(SIGPIPE,child_handler);
 
-    while (1) {
+    while (!server_done) {
       /* Read response from server and echo to client */
       bytes_read = read(serv_fd, buf, 1); 
       if (bytes_read == -1){
-// 	let emsg = strerror(errno);
-	let emsg = "???";
+	const char * emsg = strerror(errno);
 	fprintf(server_log_file,"error reading from server: %s.\n",emsg);
 	close(serv_fd);
 	close(cli_fd);
@@ -226,40 +241,42 @@ insecure_proxy(int connfd, string_t host, int port) {
 	fclose(server_log_file);
 	fflush(server_file);
 	fclose(server_file);
-// 	exit(1);
-      } else if (bytes_read != 1){
-	fprintf(server_log_file,"bytes read: %d\n",bytes_read);
-	fflush(server_log_file);
-      } else {
-	buf[bytes_read] = 0;
-	fprintf(server_file,"%s",buf);
-	bytes_written = write(cli_fd,buf,bytes_read);    
+	exit(1);
+      } 
+      buf[bytes_read] = 0;
+      fprintf(server_file,"%s",buf);
+      bytes_written = write(cli_fd,buf,bytes_read);    
+
+      if (bytes_written == -1){
+	const char* emsg = strerror(errno);
+	fprintf(server_log_file,"error echoing data to client: %s.\n",emsg);
+	server_done = 1;
       }
-
-//       if (bytes_written == -1){
-// 	let emsg = strerror(errno);
-// 	fprintf(server_log_file,"error echoing data to client: %s.\n",emsg);
-// 	close(cli_fd);
-
-// 	// drain remaining data in cli_fd
-// 	fprintf(server_log_file,"Draining remaining data from socket.\n");
-// 	fflush(server_log_file);
-// 	fclose(server_log_file);
-
-// 	fcntl(serv_fd,F_SETFL,O_NONBLOCK);
-// 	bytes_read = read(serv_fd, buf, 1000); 
-// 	while (bytes_read > 0) {
-// 	  buf[bytes_read] = 0;
-// 	  fprintf(server_file,"%s",buf);
-// 	  bytes_read = read(serv_fd, buf, 1000); 
-// 	}
-// 	fflush(server_file);
-// 	fclose(server_file);
-// 	close(serv_fd);
-
-// 	exit(1);
-//       }
     }
+
+    //
+    // Server echo is done.
+    //
+
+    close(cli_fd);
+
+    // drain remaining data in cli_fd
+    fprintf(server_log_file,"Draining remaining data from socket.\n");
+    fflush(server_log_file);
+    fclose(server_log_file);
+
+    fcntl(serv_fd,F_SETFL,O_NONBLOCK);
+    bytes_read = read(serv_fd, buf, 1000); 
+    while (bytes_read > 0) {
+      buf[bytes_read] = 0;
+      fprintf(server_file,"%s",buf);
+      bytes_read = read(serv_fd, buf, 1000); 
+    }
+    fflush(server_file);
+    fclose(server_file);
+    close(serv_fd);
+
+    exit(0);
   }
 }
 
@@ -273,17 +290,12 @@ server(string_t host, int lport, int port, int use_ssl) {
   socklen_t clilen;
   struct sockaddr_in cliaddr, servaddr;
 
-  if (use_ssl){
-    SSL_load_error_strings();
-    SSLeay_add_ssl_algorithms();
-  }
-
   listenfd = socket(AF_INET, SOCK_STREAM, 0);
   if (listenfd < 0) {
     fprintf(stderr, "Error opening socket\n");
     exit(1);
   }
-  bzero((_?)&servaddr,sizeof(servaddr));
+  bzero(&servaddr,sizeof(servaddr));
   servaddr.sin_family = AF_INET;
   servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
   servaddr.sin_port = htons(lport);
@@ -320,9 +332,7 @@ server(string_t host, int lport, int port, int use_ssl) {
   }
 }
 
-extern void p_command(ykbuf_t @ykb);
-
-int main(int argc, mstring_t<`H>? argv) {
+int main(int argc, char** argv) {
   if (argc < 2 || argc > 4) {
     fprintf(stderr, "Usage: %s <ssl imap server> [local port]\n", argv[0]);
     exit(1);

@@ -256,35 +256,28 @@ void nfa_fsm(FILE @f,Set::set_t<st_t> final_states,
     if (a_to != NOTRANSITION) {
       let a = get_action(i);
       if (a == EPSILON) {
-	if (e_to != NOTRANSITION) {
-	  // This state has two epsilon transitions so we output a "fresh" output symbol for each transition.
-	  out1 = output_symbol++;
-	  out2 = output_symbol++;
-	}
 	num_branches++;
 // 	branch_val = 1.0/(double)num_branches;
 	branch_val = num_branches;
-// 	fprintf(f,"%d %d EPSILON %d %d\n",i,a_to,out1,branch_val);
-	fprintf(f,"%d %d EPSILON\n",i,a_to);
+	fprintf(f,"%d %d EPSILON %d\n",i,a_to,branch_val);
       }
       else { 
-// 	num_branches += List::length(syms);
-// 	branch_val = num_branches;
-	for (let syms = cs2list(a); syms; syms = syms->tl){
+	let syms = cs2list(a);
+	num_branches += List::length(syms);
+	branch_val = num_branches;
+	for (; syms; syms = syms->tl){
 	  let sopt = Hashtable::lookup_opt(action_symb_table,syms->hd);
 	  const char ? branch_name;
 	  if (sopt == NULL || *sopt == NULL) 
 	    branch_name = fsm_char_escape(syms->hd);
 	  else 
 	    branch_name = **sopt;
-// 	  fprintf(f,"%d %d %s %d %d\n",i,a_to,branch_name,out1,branch_val);
-	  fprintf(f,"%d %d %s\n",i,a_to,branch_name);
+	  fprintf(f,"%d %d %s %d\n",i,a_to,branch_name, branch_val);
 	}
       }
     }
     if (e_to != NOTRANSITION) {      
-//       fprintf(f,"%d %d EPSILON %d %d\n",i,e_to,out2,branch_val);
-      fprintf(f,"%d %d EPSILON\n",i,e_to);
+      fprintf(f,"%d %d EPSILON %d\n",i,e_to,branch_val);
     }
   }
 }

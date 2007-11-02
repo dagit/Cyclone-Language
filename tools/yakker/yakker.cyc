@@ -483,8 +483,9 @@ int main(int argc, const char ?`H?argv) {
       let b = Buffer::create(101);
       while ( (c = fgetc(stdin)) != EOF)
 	Buffer::add_char(b,c);
-      let ans = Earley::recognize(dfa,dfa_final,Buffer::contents(b), 1);
-      printf("done -- answer is %d\n",ans); fflush(stdout);
+      let $(valid,valid_prefix) = Earley::recognize(dfa,dfa_final,Buffer::contents(b), 1);
+      printf("done -- is valid string :%d. is valid prefix: %d\n",valid, valid_prefix);
+      fflush(stdout);
       break;
     case 1:      
       while(1){
@@ -493,8 +494,9 @@ int main(int argc, const char ?`H?argv) {
 	let b = Buffer::create(101);
 	while ( (c = fgetc(stdin)) != '\n' && c != EOF)
 	  Buffer::add_char(b,c);
-	let ans = Earley::recognize(dfa,dfa_final,Buffer::contents(b), 1);
-	printf("done -- answer is %d\n",ans); fflush(stdout);
+	let $(valid,valid_prefix) = Earley::recognize(dfa,dfa_final,Buffer::contents(b), 1);
+	printf("done -- is valid string :%d. is valid prefix: %d\n",valid, valid_prefix);
+	fflush(stdout);
       }
     case 2:
     default:
@@ -539,11 +541,17 @@ int main(int argc, const char ?`H?argv) {
 	  printf("File read complete.\n"); 
 
 	  // Parse the file
-	  let ans = Earley::recognize(dfa,dfa_final,Buffer::contents(b), show_progress);
-	  printf("done -- answer is %d\n",ans); 
-	  if (ans) printf("Parse tree saved.\n");
+	  let $(valid,valid_prefix) = Earley::recognize(dfa,dfa_final,Buffer::contents(b), show_progress);
+	  printf("done -- is valid string :%d. is valid prefix: %d\n",valid, valid_prefix);
+	  if (valid) printf("Parse tree saved.\n");
 	  fflush(stdout);
 
+  	} else if (!strcmp(cmd,"amb?")){
+	  let is_amb = Earley::isAmb_parse_tree(Earley::last_derivation_tree);
+	  if (is_amb)
+	    printf("Parse tree is ambiguous.\n");
+	  else
+	    printf("Parse tree is not ambiguous.\n");
   	} else if (!strcmp(cmd,"print-dfa")){
 
 	  scanf("%s",arg);

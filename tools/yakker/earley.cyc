@@ -113,6 +113,27 @@ void print_parse_forest(parse_forest_t pf){
 }
 
 
+int isAmb_parse_forest(parse_forest_t pf);
+
+int isAmb_parse_tree0(int isAmb, datatype ParseTree @pt){
+  if (isAmb) return 1;
+
+  switch (pt) {
+  case &NonTerm(name,l,r,children):
+    return isAmb_parse_forest(children);
+  default:
+    return 1;
+  }
+}
+
+int isAmb_parse_tree(datatype ParseTree @pt){
+  return isAmb_parse_tree0(0,pt);
+}
+
+int isAmb_parse_forest(parse_forest_t pf){
+  return List::fold_left(isAmb_parse_tree0,0,pf);
+}
+
 /* The alphabet of the automaton is the set of terminals and
    non-terminals.  Assume for now that cs_t can represent a set of
    terminals and non-terminals.  Number our new actions starting
@@ -1102,7 +1123,7 @@ $(dfa_t,Set::set_t<st_t>) compile(grammar_t grm, rule_t r) {
   return $(dfa,dfa_final);
 }
 
-int recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input, int show_progress) {
+$(int,int) recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input, int show_progress) {
 
   show_prog = show_progress;
 
@@ -1159,9 +1180,11 @@ int recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input, int show
   printf("BB\n");
   //  Graph::print(stdout,cvt(retn),earley_node_pr);
 
+  let partial_parses = 0;
   for (let slast_list = Set::to_list(Axarray::get(estates,input_len));
        slast_list != NULL;
        slast_list = slast_list->tl) {
+    partial_parses++;
     let &$(state,parent) = slast_list->hd;
     if (Set::member(dfa_final,state) && parent == 0) {
 //       b = Buffer::create(1024);
@@ -1180,12 +1203,12 @@ int recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input, int show
       }
 
       last_derivation_tree = derivation_tree;
-      return 1;
+      return $(1,partial_parses);
     }
   }
-  return 0;
+  return $(0,partial_parses);
 }
 
 
 // Add report of "valid parse in progress"
-// Add to command to shell: "amb?"
+// Add command to shell: "amb?"

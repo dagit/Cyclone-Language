@@ -23,7 +23,8 @@
 
 namespace Earley {
   extern $(dfa_t,Set::set_t<st_t>) compile(grammar_t grm, rule_t r);
-  extern int recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input, int show_progress);
+  // returns: int pair: a) was the input a valid string? b) was the input a valid prefix?
+  extern $(int,int) recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input, int show_progress);
 
   /* Global variable that saves last derivation tree.
    !! Treat as read-only outside of earley.cyc.
@@ -33,6 +34,8 @@ namespace Earley {
   extern void print_LT(datatype ParseTree @pt, int depth);
   /* Print right-most parse tree to depth of "depth". Use -1 to print entire tree. */
   extern void print_RT(datatype ParseTree @pt, int depth);
+
+  extern int isAmb_parse_tree(datatype ParseTree @pt);
 }
 
 #endif
