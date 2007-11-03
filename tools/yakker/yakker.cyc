@@ -613,6 +613,7 @@ int main(int argc, const char ?`H?argv) {
 	  }
 
 	  if (!strcmp(arg,"haxe")){
+            Earley::act2symb_haxe(stdout);
 	    dfa_haxe(stdout,*p_dfa); 
 	  } else {
 	    fprintf(stderr,"Invalid DFA format: %s.\n",arg);

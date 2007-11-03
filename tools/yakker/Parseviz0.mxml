@@ -16,6 +16,7 @@
 </mx:HBox>
 <mx:HBox width="100%">
 <mx:Button label="Render" id="renderButton"/>
+<mx:Button label="Parse" id="parseButton"/>
 <mx:Spacer width="100%"/>
 <mx:Label text="Limit"/>
 <mx:NumericStepper id="limit" maximum="99" />

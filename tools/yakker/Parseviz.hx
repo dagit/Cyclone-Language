@@ -1,3 +1,7 @@
+/**********************************************************************/
+/**********************************************************************/
+
+
 import flash.display.Sprite;
 import mx.controls.TextArea;
 import flash.events.Event;
@@ -212,10 +216,12 @@ class Parseviz {
     }
   }
   static function markHeight(x:Dynamic,limit:Int):Int {
+    try {
     if (limit == 1 || !Reflect.hasField(x,"c")) {
       Reflect.setField(x,"h",1);
       return 1;
     }
+    } catch (e:Dynamic) {throw "in markheight";}
     var h = 0;
     var a:Array<Dynamic> = x.c;
     for (y in a) {
@@ -414,6 +420,37 @@ class Parseviz {
      function (e:Event) {
        limit = app.limit.value;
        render(e);
+     });
+    app.parseButton.addEventListener
+    (MouseEvent.CLICK,
+     function (e:Event) {
+       if (spr != null)
+         c.removeChild(spr);
+
+       spr = new Sprite();
+       c.addChild(spr);
+       spr.addEventListener(MouseEvent.MOUSE_DOWN,startScroll);
+
+       limit = app.limit.value;
+
+       try {
+         parseInput = app.parseInput.text + "\r\n";
+//         parseInput = "foo login bar \"baz\"\r\n";
+         parseAbove = Recognize.parseToRender(parseInput);
+//         parseAbove = [{s:"foo",l:0,r:3,c:[]}];
+//         parseAbove = [Recognize.render({a:0,l:0,r:3,c:[]})];
+         parseBelow = [];
+         drawTrees(spr);
+
+         zoom = 1;
+         var r = c.scrollRect;
+         bg.x = r.x = 0;
+         bg.y = r.y = -maxHeightAbove * gridHeight;
+         c.scrollRect = r;
+       }
+       catch (e:Dynamic) {
+         drawText(c,font,0,0,"Error: uncaught exception: " + e.toString());
+       }
      });
   }
 }

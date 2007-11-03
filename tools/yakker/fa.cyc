@@ -866,7 +866,7 @@ void dfa_haxe(FILE @f, dfa_t dfa) {
   let len = dfa->number_of_states;
   /* print final attributes */
   let first = 1;
-  fprintf(f,"var attributes = function (state:Int) {\nswitch (state) {\n");
+  fprintf(f,"static function attributes(state:Int) {\nswitch (state) {\n");
   for (let i = 1; i < len; i++) {
     if (!Set::member(dfa->final_states,i)) continue;
     fprintf(f,"case %d: return [",i);
@@ -881,11 +881,11 @@ void dfa_haxe(FILE @f, dfa_t dfa) {
     }
     fprintf(f,"];\n");
   }
-  fprintf(f,"default: return null;\n}\n};\n");
+  fprintf(f,"default: return null;\n}\n}\n");
   
   /* print transitions */
   first = 1;
-  fprintf(f,"var transitions = function (state:Int) {\nswitch (state) {\n");
+  fprintf(f,"static function transitions(state:Int) {\nswitch (state) {\n");
   for (let i = 1; i < len; i++) {
     let transitions = Axarray::get(dfa->states,i);
     if (!transitions) continue;
@@ -911,7 +911,7 @@ void dfa_haxe(FILE @f, dfa_t dfa) {
     }
     fprintf(f,"default: return 0;}};\n");
   }
-  fprintf(f,"default: return null;\n}\n};\n");
+  fprintf(f,"default: return null;\n}\n}\n");
 }
 
 // Create a DFA from an FSM file.

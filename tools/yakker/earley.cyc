@@ -177,6 +177,16 @@ const char ?act2symb(act_t act) {
   if (sopt == NULL || *sopt == NULL) return NULL;
   else return **sopt;
 }
+void act2symb_haxe(FILE @f) {
+    fprintf(f,"static function act2symb(a:Int) {\n");
+    fprintf(f,"  switch (a) {\n");
+  for (let a = repeat_action()+1; a < symb_action_counter; a++) {
+    fprintf(f,"  case %d: return \"%s\";\n",a,act2symb(a));
+  }
+    fprintf(f,"  default: return \"?unknown?\";\n");
+    fprintf(f,"  }\n");
+    fprintf(f,"}\n");
+}
 static act_t symb2act(const char ?`H symb) {
   if (symb_action_table == NULL)
     symb_action_table =
