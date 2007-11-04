@@ -227,7 +227,7 @@ fsm_glush_print(FILE *`H f_fsm, Set::set_t<st_t> start_states,
 }
 
 static void print_act_symb(act_t a, str_t s, FILE @f){
-  fprintf(f,"%s %d\n",*s,a);
+  fprintf(f,"%s %d\n",*s,a+1); // shift everything by one because epsilon is 0.
 }
 
 void symbols_fsm(FILE @f, Hashtable::table_t<act_t,str_t> action_symb_table){
@@ -248,6 +248,8 @@ void nfa_fsm(FILE @f,Set::set_t<st_t> final_states,
       let act = Hashtable::lookup(act_table,i);      
       let symb = Hashtable::lookup(action_symb_table,act);
       fprintf(f,"%d %d %s\n",s,s,*symb);
+      // mark s as final so it won't be deleted.
+      fprintf(f,"%d\n",s);
     }
     int num_branches = 0;
     double branch_val = 1.0;
@@ -555,8 +557,9 @@ st_t target(dfa_t dfa,st_t s,act_t a) {
 void dfa_add_trans(dfa_t dfa,st_t s, st_t dst, act_t act) {
   let t = Axarray::get(dfa->states,s);
   if (!t) {
-    eprintf("Warning: attempt to add transition to dead state.\n");
-    return; /* target is the dead state */
+    t = new trans(act,List::list(new span(dst,act+1)));
+    Axarray::set(dfa->states,s,t);
+    return;
   }
   if (act < t->lb) {
     let old_lb = t->lb;
@@ -918,7 +921,7 @@ void dfa_haxe(FILE @f, dfa_t dfa) {
 $(dfa_t,Set::set_t<st_t>) *fsm_dfa(const char ?filename, const char ?`H start_symb,
 				   act_t (@symb2act)(const char ?`H)) {
 
-  FILE *f = fopen(filename,"w");
+  FILE *f = fopen(filename,"r");
   if (!f) {
     fprintf(stderr, "Failed to open file %s.\n",filename);
     return NULL;
@@ -927,45 +930,74 @@ $(dfa_t,Set::set_t<st_t>) *fsm_dfa(const char ?filename, const char ?`H start_sy
   dfa_t dfa = dfa_create();
 
   int src,dst;
+  char ?ln = calloc(1000,sizeof(char));
   char ?dst_or_val = calloc(100,sizeof(char));
   char ?symb = calloc(100,sizeof(char));
   double val;
 
-  let num_conv = fscanf(f,"%d %s %s %lf\n",&src,dst_or_val,symb,&val);
-  for (let lineno = 1; num_conv != EOF; lineno++){
+//     let last_dst = 0;
+//     let last_ub = lb;
+//     let first_time = 1;
+//     let spans = NULL;
+//       if (first_time) { last_d = d; first_time = 0; }
+//       else if (d != last_d) {
+//         spans = new List::List(new span(last_d,i+lb),spans);
+//         last_ub = i + lb;
+//         last_d = d;
+//       }
+
+
+  let ln_s = fgets(ln,1000,f);
+  for (let lineno = 1; ln_s != NULL; (ln_s = fgets(ln,1000,f)), lineno++){
+    let num_conv = sscanf( ln, "%d %s %s %lf", &src, dst_or_val, symb, &val);
+    src++; // incr. all state numbers to avoid state 0, which is the dead state.
+    dfa_register_state(dfa,src);
+
     switch (num_conv) {
     case 0:
       fprintf(stderr, "Parse error: scanf unable to perform any conversions on line: %d.\n", lineno);
       return NULL;
     case 1: // Final state, cost 1
-      dfa_register_state(dfa,src);
-
       dfa->final_states = Set::insert(dfa->final_states,src);
       break;
     case 2: // Final state, given cost
-      dfa_register_state(dfa,src);
-
 //       sscanf(dst_or_val,"%lf",&val);
-      fprintf(stderr, "Warning (line: %d): cost assigned to final state.\n", lineno);
       dfa->final_states = Set::insert(dfa->final_states,src);
       break;
     case 3: // Arc, cost 1
-      dfa_register_state(dfa,src);
-
-      sscanf(dst_or_val,"%d",&dst);
-      dfa_add_trans(dfa,src,dst,symb2act(symb));
-      break;
+      fallthru;
     case 4: // Arc, given cost
-      dfa_register_state(dfa,src);
-
       sscanf(dst_or_val,"%d",&dst);
-      dfa_add_trans(dfa,src,dst,symb2act(symb));
+      dst++;
+      dfa_register_state(dfa,dst);
+
+      let act = fsm_char_unescape(symb);
+      if (act == -1){
+	act = symb2act(symb);
+// 	fprintf(stderr,"%s\n",symb);
+      }
+
+//       if (first_time) { last_dst = dst; first_time = 0; }
+// //       else if (src == last_src && dst == last_dst && act == last_act + 1) {
+//       else if (src == last_src && dst == last_dst && act > last_act + 1) {
+//         spans = new List::List(new span(last_dst,),spans);
+//         last_ub = i + lb;
+//         last_d = d;
+//       }
+      dfa_add_trans(dfa,src,dst,act);
       break;
     default:
       fprintf(stderr, "Internal error: too many conversions in scanf.\n");
       return NULL;
     }
   } // end while(num_conv != EOF)
+
+//   if (numelts(ts)) {
+//     spans = new List::List(new span(last_d,lb+numelts(ts)),spans);
+//   }
+//   spans = List::imp_rev(spans);
+//   Axarray::set(dfa->states,d_curr,new trans(lb,spans));
+
 
   // FIX: should coalesce spans of each state (for efficiency).
 

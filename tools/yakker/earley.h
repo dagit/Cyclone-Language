@@ -45,6 +45,7 @@ namespace Earley {
   // numbers.
   extern void rule_fsm(const char ?filename_base, grammar_t grm, rule_t r);
   extern $(dfa_t,Set::set_t<st_t>) *fsm2dfa(const char ?filename, const char ?`H start_symb);
+  extern void dfa2dot(dfa_t dfa, const char ?dot_file);
 }
 
 #endif

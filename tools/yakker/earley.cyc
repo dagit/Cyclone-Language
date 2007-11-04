@@ -187,10 +187,15 @@ void act2symb_haxe(FILE @f) {
     fprintf(f,"  }\n");
     fprintf(f,"}\n");
 }
+
 static act_t symb2act(const char ?`H symb) {
-  if (symb_action_table == NULL)
+  if (symb_action_table == NULL){
     symb_action_table =
       Hashtable::create(11,strptrcmp,Hashtable::hash_stringptr);
+    Hashtable::insert(symb_action_table,new "CALL",callout_action());
+    Hashtable::insert(symb_action_table,new "REPEAT",repeat_action());
+    Hashtable::insert(symb_action_table,new "FINAL-STATE",final_st_action());
+  }
   if (action_symb_table == NULL) {
     action_symb_table =
       Hashtable::create(11,st_cmp,st_hash);
@@ -198,11 +203,14 @@ static act_t symb2act(const char ?`H symb) {
     Hashtable::insert(action_symb_table,repeat_action(),new "REPEAT");
     Hashtable::insert(action_symb_table,final_st_action(),new "FINAL-STATE");
   }
-  let symbptr = new symb;
+//   let symbptr = new symb;
+  let symbptr = new (const char ?)aprintf("%s",symb);
   let aptr = Hashtable::lookup_opt(symb_action_table,symbptr);
   if (aptr != NULL) return *aptr;
   let a = new_action();
   fprintf(stderr,"Symbol %s has action 0x%x\n",symb,a);
+  // allocate a new string before putting it in table to ensure
+  // that 
   Hashtable::insert((_@)symb_action_table,symbptr,a);
   Hashtable::insert((_@)action_symb_table,a,symbptr);
   return a;
@@ -607,6 +615,12 @@ void rule_fsm(const char ?filename_base, grammar_t grm, rule_t r) {
 
 $(dfa_t,Set::set_t<st_t>) *fsm2dfa(const char ?filename, const char ?`H start_symb) {
   return fsm_dfa(filename,start_symb,symb2act);
+}
+
+void dfa2dot(dfa_t dfa, const char ?dot_file){
+  FILE *f = fopen(dot_file,"w");
+  if (f) { dfa_dot(f,dfa,act2symb); fclose(f); }
+  else fprintf(stderr, "Failed to open file %s.\n",dot_file);
 }
 
 $(dfa_t,Set::set_t<st_t>) rule2earley(grammar_t grm, rule_t r) {

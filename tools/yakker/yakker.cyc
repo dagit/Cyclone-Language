@@ -559,6 +559,23 @@ int main(int argc, const char ?`H?argv) {
 	    fprintf(stderr,"Invalid DFA format: %s.\n",arg);
 	  }
 	  
+	} else if (!strcmp(cmd, "print-dfa")){
+
+	  char filename[200]@zeroterm={for i<199:0};
+	  scanf("%s %s",arg,filename);
+
+	  if (!p_dfa){
+	    fprintf(stderr, "Need to compile or load DFA first.\n");
+	    continue;
+	  }
+
+	  if (!strcmp(arg,"dot")){
+	    // TODO: assume regexp is a symbol for now
+	    Earley::dfa2dot(*p_dfa,filename);
+	  } else {
+	    fprintf(stderr,"Invalid DFA output format: %s.\n",arg);
+	  }
+	  
 	} else if (!strcmp(cmd, "parse")){
 
 	  if (!p_dfa || !p_dfa_final){

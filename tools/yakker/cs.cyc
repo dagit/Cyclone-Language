@@ -153,6 +153,27 @@ const char ?fsm_char_escape(unsigned int c) {
   }
 }
 
+int fsm_char_unescape(const char? s) {
+  if (!strcmp(s,"\\t")) return '\t';
+  else if (!strcmp(s,"\\n")) return '\n';
+  else if (!strcmp(s,"SPACE")) return ' ';
+  else if (!strcmp(s,"\\'")) return '\'';
+  else if (!strcmp(s,"\\\"")) return '"';
+  else {
+    if (s[0] == '\\' && s[1]){
+      int c;
+      if (sscanf(s+1,"%u",&c))
+	return c;
+      else return -1;
+    }
+
+    if (!s[1]) // its a single character.
+      return s[0];
+    else 
+      return -1;
+  }
+}
+
 #include <buffer.h>
 
 /* Return a string representation of a character set. */

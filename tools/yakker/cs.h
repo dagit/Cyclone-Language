@@ -68,4 +68,6 @@ extern void cs_dot_print(FILE @f,cs_t cs,cs_pred_t special);
 
 extern const char ?cs_char_escape(unsigned int c);
 extern const char ?fsm_char_escape(unsigned int c);
+// return -1 if its not an escaped character.
+extern int fsm_char_unescape(const char? s);
 #endif
