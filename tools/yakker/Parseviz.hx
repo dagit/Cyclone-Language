@@ -1,7 +1,6 @@
 /**********************************************************************/
 /**********************************************************************/
 
-
 import flash.display.Sprite;
 import mx.controls.TextArea;
 import flash.events.Event;
@@ -11,6 +10,7 @@ import mx.events.FlexEvent;
 import mx.controls.ToolTip;
 import mx.managers.ToolTipManager;
 import flash.events.MouseEvent;
+import flash.events.IOErrorEvent;
 import flash.display.DisplayObjectContainer;
 import flash.text.TextField;
 import flash.text.TextFormat;
@@ -163,7 +163,7 @@ class Parseviz {
   static function drawSpansBelow(spr:DisplayObjectContainer,a:Array<Dynamic>) {
     for (x in a) {
       drawSpanBelow(spr,font,0,0,x.l,x.r-x.l,x.h,x.s);
-      if (x.h == 1 || !Reflect.hasField(x,"c")) return;
+      if (x.h == 1 || !Reflect.hasField(x,"c")) continue;
       var a:Array<Dynamic> = x.c;
       drawSpansBelow(spr,a);
     }
@@ -210,18 +210,16 @@ class Parseviz {
   static function drawSpansAbove(spr:DisplayObjectContainer,a:Array<Dynamic>) {
     for (x in a) {
       drawSpanAbove(spr,font,0,0,x.l,x.r-x.l,x.h,x.s);
-      if (x.h == 1 || !Reflect.hasField(x,"c")) return;
+      if (x.h == 1 || !Reflect.hasField(x,"c")) continue;
       var a:Array<Dynamic> = x.c;
       drawSpansAbove(spr,a);
     }
   }
   static function markHeight(x:Dynamic,limit:Int):Int {
-    try {
     if (limit == 1 || !Reflect.hasField(x,"c")) {
       Reflect.setField(x,"h",1);
       return 1;
     }
-    } catch (e:Dynamic) {throw "in markheight";}
     var h = 0;
     var a:Array<Dynamic> = x.c;
     for (y in a) {
@@ -293,6 +291,11 @@ class Parseviz {
     (Event.COMPLETE,
      function (e:Event) {
        t.text = ul.data;
+     });
+    ul.addEventListener
+    (IOErrorEvent.IO_ERROR,
+     function (e:Event) {
+       /* if file does not exist just ignore it */
      });
     ul.load(new flash.net.URLRequest(file));
   }
@@ -372,7 +375,7 @@ class Parseviz {
     }
     bg.addEventListener(MouseEvent.MOUSE_DOWN,startScroll);
 
-    var render = function (e:Event) {
+    var render = function () {
       if (spr != null)
         c.removeChild(spr);
 
@@ -382,23 +385,29 @@ class Parseviz {
 
       limit = app.limit.value;
 
-      try {
-        parseInput = app.parseInput.text;
-        parseAbove = decode(app.parseAbove.text);
-        parseBelow = decode(app.parseBelow.text);
-        drawTrees(spr);
+      drawTrees(spr);
 
-        zoom = 1;
-        var r = c.scrollRect;
-        bg.x = r.x = 0;
-        bg.y = r.y = -maxHeightAbove * gridHeight;
-        c.scrollRect = r;
-      }
-      catch (e:Dynamic) {
-        drawText(c,font,0,0,"Error: uncaught exception");
-      }
+//      zoom = 1;
+      spr.scaleX = spr.scaleY = zoom;
+
+      var r = c.scrollRect;
+      bg.x = r.x = 0;
+      bg.y = r.y = -maxHeightAbove * gridHeight;
+      c.scrollRect = r;
     }
-    app.renderButton.addEventListener(MouseEvent.CLICK, render);
+    app.renderButton.addEventListener
+    (MouseEvent.CLICK,
+     function (e:Event) {
+       try {
+         parseInput = app.parseInput.text;
+         parseAbove = decode(app.parseAbove.text);
+         parseBelow = decode(app.parseBelow.text);
+         render();
+       }
+       catch (e:Dynamic) {
+         drawText(c,font,0,0,"Error: uncaught exception");
+       }
+     });
     app.minusButton.addEventListener
     (FlexEvent.BUTTON_DOWN,
      function (e:Event) {
@@ -419,37 +428,20 @@ class Parseviz {
     (NumericStepperEvent.CHANGE,
      function (e:Event) {
        limit = app.limit.value;
-       render(e);
+       render();
      });
     app.parseButton.addEventListener
     (MouseEvent.CLICK,
      function (e:Event) {
-       if (spr != null)
-         c.removeChild(spr);
-
-       spr = new Sprite();
-       c.addChild(spr);
-       spr.addEventListener(MouseEvent.MOUSE_DOWN,startScroll);
-
-       limit = app.limit.value;
-
        try {
          parseInput = app.parseInput.text + "\r\n";
-//         parseInput = "foo login bar \"baz\"\r\n";
-         parseAbove = Recognize.parseToRender(parseInput);
-//         parseAbove = [{s:"foo",l:0,r:3,c:[]}];
-//         parseAbove = [Recognize.render({a:0,l:0,r:3,c:[]})];
-         parseBelow = [];
-         drawTrees(spr);
-
-         zoom = 1;
-         var r = c.scrollRect;
-         bg.x = r.x = 0;
-         bg.y = r.y = -maxHeightAbove * gridHeight;
-         c.scrollRect = r;
+         var parses = Earley.parseToRender(parseInput);
+         parseAbove = parses.left;
+         parseBelow = parses.right;
+         render();
        }
        catch (e:Dynamic) {
-         drawText(c,font,0,0,"Error: uncaught exception: " + e.toString());
+         drawText(c,font,0,0,"Uncaught exn " + e.toString());
        }
      });
   }

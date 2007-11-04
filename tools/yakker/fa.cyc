@@ -866,7 +866,7 @@ void dfa_haxe(FILE @f, dfa_t dfa) {
   let len = dfa->number_of_states;
   /* print final attributes */
   let first = 1;
-  fprintf(f,"static function attributes(state:Int) {\nswitch (state) {\n");
+  fprintf(f,"static public function attributes(state:Int) {\nswitch (state) {\n");
   for (let i = 1; i < len; i++) {
     if (!Set::member(dfa->final_states,i)) continue;
     fprintf(f,"case %d: return [",i);
@@ -885,7 +885,7 @@ void dfa_haxe(FILE @f, dfa_t dfa) {
   
   /* print transitions */
   first = 1;
-  fprintf(f,"static function transitions(state:Int) {\nswitch (state) {\n");
+  fprintf(f,"static public function transitions(state:Int) {\nswitch (state) {\n");
   for (let i = 1; i < len; i++) {
     let transitions = Axarray::get(dfa->states,i);
     if (!transitions) continue;

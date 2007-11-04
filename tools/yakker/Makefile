@@ -554,8 +554,8 @@ $(BNFDIR)/rfc%.bnf: rfc%.txt $(PROG_DEP)
 
 parseviz0.swf: Parseviz0.mxml
 	mxmlc -output $@ -use-network=false $<
-parseviz.swf: Parseviz.hx
-	haxe -debug -swf-version 9 -swf $@ -lib flex $<
+parseviz.swf: Dfa.hx Earley.hx Parseviz.hx
+	haxe -debug -swf-version 9 -swf $@ -lib flex $^
 
 .PHONY: cyclone-install
 

@@ -178,7 +178,7 @@ const char ?act2symb(act_t act) {
   else return **sopt;
 }
 void act2symb_haxe(FILE @f) {
-    fprintf(f,"static function act2symb(a:Int) {\n");
+    fprintf(f,"static public function act2symb(a:Int) {\n");
     fprintf(f,"  switch (a) {\n");
   for (let a = repeat_action()+1; a < symb_action_counter; a++) {
     fprintf(f,"  case %d: return \"%s\";\n",a,act2symb(a));
