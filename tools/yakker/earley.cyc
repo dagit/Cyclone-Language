@@ -218,7 +218,7 @@ static act_t symb2act(const char ?`H symb) {
   let a = new_action();
   fprintf(stderr,"Symbol %s has action 0x%x\n",symb,a);
   // allocate a new string before putting it in table to ensure
-  // that 
+  // that
   Hashtable::insert((_@)symb_action_table,symbptr,a);
   Hashtable::insert((_@)action_symb_table,a,symbptr);
   return a;
@@ -360,7 +360,7 @@ st_t rule2earley0(Hashtable::table_t<str_t,st_t> symb_st,
 
     // 3. Create start and final state for the repeat.
     let s = nfa_fresh_state();
-    let f = nfa_fresh_state(); 
+    let f = nfa_fresh_state();
     final(s,f);
 
     // 4. add fresh states that CALL to s2 and transition (to final
@@ -372,8 +372,8 @@ st_t rule2earley0(Hashtable::table_t<str_t,st_t> symb_st,
     let s_rep_trans_repeatee = nfa_fresh_state();
     action(s_rep_call,callout_cs(),s2);
     etrans(s_rep_call,s_rep_trans_repeater);
-    action(s_rep_trans_repeater,repeater_cs,s_rep_trans_repeatee); 
-    action(s_rep_trans_repeatee,repeatee_cs,f); 
+    action(s_rep_trans_repeater,repeater_cs,s_rep_trans_repeatee);
+    action(s_rep_trans_repeatee,repeatee_cs,f);
 
     // 4. Transition start state to CALL state on repeat to indicate a
     // repeat is happening.
@@ -518,7 +518,7 @@ $(st_t,st_t,st_t)
   case &Rcount(var,r2):
     warn_repeat();
     //  repeat should never show up in a merge, because that implies
-    // that it might be preceded by epsilon, in which case it will have 
+    // that it might be preceded by epsilon, in which case it will have
     // no value on which to depend.
     warn("@repeat appears, in a sequence, possibly preceded by epsilon.\n");
     fallthru(r2);
@@ -539,8 +539,8 @@ $(st_t,st_t,st_t)
     // We could replace the following two transitions
     // with this single transition:
     // etrans(fcall,f2);
-    // and then this would resemble the standard 
-    // Star construction,  with f2 playing the 
+    // and then this would resemble the standard
+    // Star construction,  with f2 playing the
     // role of s.
     etrans(fcall,scall);
     action(fcall,EPSILON,f);
@@ -720,8 +720,11 @@ struct rstate {
   Hashtable::table_t<earley_node_t,List::list_t<earley_node_t,`H>,`H> pred;
   Hashtable::table_t<earley_node_t,List::list_t<$(earley_node_opt_t,earley_node_t) @`H,`H>,`H> retn;
   Hashtable::table_t<earley_node_t,List::list_t<earley_node_t,`H>,`H> call;
+  Hashtable::table_t<earley_node_t,$(float,float)@> weights; //PROB
 };
 typedef struct rstate @rstate_t;
+
+static float zeroWeight = 1.0; //PROB
 
 static void dot_iter(earley_node_t s,List::list_t<earley_node_t> ts) {
   let &$(si,sj,sk) = s;
@@ -777,6 +780,16 @@ void point_to(Hashtable::table_t<earley_node_t,List::list_t<`a,`H>,`H> tbl,
   else Hashtable::insert(tbl,source,List::list(target));
 }
 
+//PROB
+void add_weights(rstate_t rs, earley_node_t node, float forward, float inner) { //PROB
+  let ptr = Hashtable::lookup_opt(rs->weights,node);                            //PROB
+  if (ptr != NULL) {                                                            //PROB
+    $(float,float)@y = *ptr;                                                    //PROB
+    y->f0 += forward;                                                           //PROB
+    y->f1 += inner;                                                             //PROB
+  }                                                                             //PROB
+  else Hashtable::insert(rs->weights,node,new $(forward,inner));                //PROB
+}                                                                               //PROB
 
 $(unsigned int, unsigned int) *
 get_bounds(Hashtable::table_t<earley_node_t,List::list_t<$(earley_node_opt_t,earley_node_t) @`H>,`H> retn,
@@ -797,7 +810,9 @@ push_closure(rstate_t rs,
 			       // efficiency sake (to save allocations).
              const char ?reason,
              earley_node_opt_t back,
-	     earley_node_opt_t up) {
+	     earley_node_opt_t up
+             , float forward, float inner //PROB
+             ) {
 
   let &$(s,backptr) = ei;
   let node = new $(s,backptr,i);
@@ -805,6 +820,7 @@ push_closure(rstate_t rs,
     point_to(rs->pred,node,back);
     point_to(rs->retn,node,new $(up,back));
   }
+  add_weights(rs,node,forward,inner); //PROB
 
   let es = Axarray::get(rs->estates,i);
   if (Set::member(es,ei)) return;
@@ -817,7 +833,10 @@ push_closure(rstate_t rs,
   let t = target(rs->dfa,s,callout_action());
   if (t != 0) {
     point_to(rs->call,new $(t,i,i),node);
-    push_closure(rs,input,i,new $(t,i),"(call)",NULL,NULL);
+    let w = zeroWeight; //PROB: should be prob from dfa
+    push_closure(rs,input,i,new $(t,i),"(call)",NULL,NULL
+                 ,w*forward,zeroWeight //PROB
+                 );
   }
 
   /* Close under REPEATS. Only works if target has *one* non-call target. */
@@ -878,10 +897,12 @@ push_closure(rstate_t rs,
 
     /* 3. Call push_closure again as if we started in this
        state. ie. t_new replaces s. So, we reuse back and up. */
-    push_closure(rs,input,i,new $(t_new,backptr),"(repeat)",back,up);
-  } 
+    push_closure(rs,input,i,new $(t_new,backptr),"(repeat)",back,up
+                 ,1.0,1.0 //PROB: didn't figure this out yet
+                 );
+  }
   /* Close under RETURNS.  Use else, becaause a REPEAT state can't
-     also be a final state. */  
+     also be a final state. */
   else if (i != backptr // we parsed the empty string, RETURN handled by dfa already
       && dfa_is_final(rs->dfa,s)) {
     /* Some symbol is completed.
@@ -906,9 +927,13 @@ push_closure(rstate_t rs,
 	  let backnode = new $(t,tbackptr,backptr);
 	  // Earley node w/ dot after symb.
           let retnode = new $(ttarget,tbackptr,i);
+          let w = zeroWeight; //PROB: should be prob of return on symb
+          let &$(backnode_forward,backnode_inner) = Hashtable::lookup(rs->weights,backnode); //PROB
           push_closure(rs,input,i,new $(ttarget,tbackptr),
                        aprintf("(return %s)",act2symb(symb)),
-                       backnode, node);
+                       backnode, node
+                       ,w*inner*backnode_forward,w*inner*backnode_inner //PROB
+                       );
         }
       }
     }
@@ -939,12 +964,12 @@ struct Buffer::t *b = NULL;
 //         fprintf(stderr,"(%d,%d,%d)\n",bf->hd->f0->f0,bf->hd->f0->f1,bf->hd->f0->f2);
 //       }
 //       fflush(stderr);
-//     } 
+//     }
 //     // only print one derivation even if > 1
 //     if (len > 0) {
 //       let l = Buffer::length(b);
 //       if (l > 0) {
-//         // DOESN'T WORK -- CYCLONE BUG        
+//         // DOESN'T WORK -- CYCLONE BUG
 // //        let z = Buffer::extract(b);
 // //        char maybe_brace = z[l-1];
 // //        Buffer::restore(b,z);
@@ -988,7 +1013,7 @@ struct Buffer::t *b = NULL;
 //     retcode = 1;
 //     fprintf(stderr,"Ambiguous parse, (%d,%d,%d) has multiple predecessors\n",
 //             ei->f0,ei->f1,ei->f2);
-    
+
 //     for (let bf = before; bf; bf = bf->tl) {
 //       fprintf(stderr,"(%d,%d,%d)\n",bf->hd->f0,bf->hd->f1,bf->hd->f2);
 //     }
@@ -1044,18 +1069,18 @@ get_bounds(Hashtable::table_t<earley_node_t,List::list_t<$(earley_node_opt_t,ear
     // Search all predecessor paths
     for (let xs = *maybe_links; xs; xs = xs->tl) {
       let &$(retn_link,pred_link) = xs->hd;
-      
+
       if (retn_link){
 	let &$(x,i,j) = (_@)retn_link;
 	if (Set::member(dfa_final_attrs(dfa,x),nt))
 	  // found it
 	  return new $(i,j);
-      } 
+      }
 
       // keep looking -- recurse.
       let b = get_bounds(retn, dfa, pred_link, nt);
       if (b) return b;
-      
+
     }
   }
 
@@ -1095,24 +1120,24 @@ derivation_horizontal(Hashtable::table_t<earley_node_t,List::list_t<earley_node_
     // Compute all derivations.
     for (let xs = *maybe_links; xs; xs = xs->tl) {
       let &$(retn_link,pred_link) = xs->hd;
-      
-      let pred_derivations = derivation_horizontal(pred,retn,input,dfa, 
+
+      let pred_derivations = derivation_horizontal(pred,retn,input,dfa,
 						   pred_link);
       if (retn_link){
 	let child_tree = derivation_redux(pred,retn,input,dfa,
 					  retn_link);
 	// prefix all forests of pred_derivations with child_tree.
 	prefix_all_imp(child_tree,pred_derivations);
-      } 
+      }
 
       derivations = List::append(derivations,pred_derivations);
     }
-      
+
   }else
     // A single, empty derivation.
     derivations = List::list(NULL);
 
-    
+
   //////////// Debug Code ///////////
 //   if (derivations != NULL && derivations->tl != NULL) {
 //     // More than one derivation, so ambiguous.
@@ -1138,7 +1163,7 @@ derivation_redux(Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H
     // FIX: add real error handling code.
     // ERROR: precondition of this function is that x is a final state.
 //     return tree;
-  } 
+  }
   else {
     // pick any attribute (we choose the first)
     // FIX: use *all* attributes.
@@ -1146,15 +1171,15 @@ derivation_redux(Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H
     name = act2symb(attr);
 // THIS CODE CAUSES A CYCLONE BUG !!!
 //     switch (h_derivations) {
-//     case NULL  : 
+//     case NULL  :
 //       // YHM: can len == 0 ? If so, how did entry ever get created?
 //       // ERROR?
 //       break;
-//     case &List::List{.hd=d, .tl=NULL} : 
+//     case &List::List{.hd=d, .tl=NULL} :
 //       // Unambiguous
 //       tree = new NonTerm(act2symb(attr),i,j,d);
 //       break;
-//     case &List::List{.hd=d, .tl=NULL} : 
+//     case &List::List{.hd=d, .tl=NULL} :
 //       // Unambiguous
 //       tree = new NonTerm(act2symb(attr),i,j,d);
 //       break;
@@ -1162,7 +1187,7 @@ derivation_redux(Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H
 //       // Ambiguous
 //       tree = new SharedNonTerm(act2symb(attr),i,j,h_derivations);
 //     }
-  } 
+  }
 
   parse_tree_t tree;
 
@@ -1223,19 +1248,25 @@ $(int,int) recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input, i
     retn = Hashtable::create(11,earley_node_cmp,earley_node_hash);
   let
     call = Hashtable::create(11,earley_node_cmp,earley_node_hash);
+  let                                                                 //PROB
+    weights = Hashtable::create(11,earley_node_cmp,earley_node_hash); //PROB
 
   /* Initialize the sequence of Earley states with s0 */
   let estates = /* Earley states  s0, s1, s2, ... */
     Axarray::create(11,Set::empty(earley_item_cmp));
   let earley_item_0 = new $(1,0); // 1 is initial state of dfa, 0 is i in si
-  let rs = new rstate {dfa,estates,pred,retn,call};
-  push_closure(rs, 
+  let rs = new rstate {dfa,estates,pred,retn,call
+                       ,weights //PROB
+  };
+  push_closure(rs,
 	       input,
                0,
                earley_item_0,
                "(initial)",
-               NULL,NULL);
-               
+               NULL,NULL
+               ,zeroWeight,zeroWeight //PROB
+               );
+
   /* Scan the input */
   fprintf(stderr,"Scanning the input.\n");
   let input_len = strlen(input);
@@ -1244,15 +1275,20 @@ $(int,int) recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input, i
     if (show_prog){
       fprintf(stderr,"input[%d]==%s\n",i,cs_char_escape(input[i]));fflush(stderr);
     }
-    
+
     for (let si_list = Set::to_list(Axarray::get(estates,i));
          si_list != NULL;
          si_list = si_list->tl) {
 
       let &$(state,parent) = si_list->hd;
       let k = target(dfa,state,input[i]);
+      let eitem = new $(state,parent,i);
+      let w = zeroWeight; //PROB: should be weight of transition from dfa
+      let &$(forward,inner) = Hashtable::lookup(rs->weights,eitem);
       if (k != 0) // where k==0 indicates there is no valid target.
-        push_closure(rs,input,i+1,new $(k,parent),"(input)",new $(state,parent,i),NULL);
+        push_closure(rs,input,i+1,new $(k,parent),"(input)",eitem,NULL
+                     ,w*forward,w*inner //PROB
+                     );
     }
   }
 

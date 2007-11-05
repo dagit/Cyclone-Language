@@ -13,6 +13,10 @@ typedef Eitem = {
   back:Int    // back pointer -- where parse of non-terminal started
 };
 
+/* Each Earley item is associated with two weights,
+   the forward weight and the inner weight */
+typedef Weight = {forward:Float,inner:Float};
+
 typedef Render = {
   s:String,l:Int,r:Int,c:Array<Render>
 };
@@ -30,13 +34,13 @@ class Earley {
      or until then end of eitems[] if stateIndexes[i+1] does not
      exist.
   */
-  static var eitems:Array<Eitem> = new Array();
-  static var stateIndexes:Array<Int> = new Array();
+  static var eitems:Array<Eitem> = [];
+  static var stateIndexes:Array<Int> = [];
 
   /* If pred[i] == [..j..], eitems[j] is a predecessor of eitems[i].
      If pred[i] == null, eitems[i] has no predecessor.
   */
-  static var pred:Array<Array<Int>> = new Array();
+  static var pred:Array<Array<Int>> = [];
   static function addPred(n:Int,p:Null<Int>) {
     if (p == null) return;
     var old = pred[n];
@@ -62,7 +66,7 @@ class Earley {
           +",r:"+o.r
           +"}");
   }
-  static var retn:Array<Array<{pred:Int,retn:Int,a:Int,r:Int}>> = new Array();
+  static var retn:Array<Array<{pred:Int,retn:Int,a:Int,r:Int}>> = [];
   static function addRetn(n:Int,o:{pred:Int,retn:Int,a:Int,r:Int}) {
     if (o == null) return;
     var old = retn[n];
@@ -78,8 +82,16 @@ class Earley {
     retn[n].push(o);
   }
 
+  static var weights:Array<Weight> = [];
+  static var zeroWeight = 1.0; // should depend on chosen semiring
+  static function addWeights(n:Int,forward:Float,inner:Float) {
+    var ws = weights[n];
+    ws.forward += forward;
+    ws.inner += inner;
+  }
+
   static var calloutAction = 256;
-  static function pushClosure(ei:Eitem,p:Null<Int>,o:{pred:Int,retn:Int,a:Int,r:Int}) {
+  static function pushClosure(ei:Eitem,p:Null<Int>,o:{pred:Int,retn:Int,a:Int,r:Int},forward:Float,inner:Float) {
     var begin = stateIndexes[stateIndexes.length - 1];
     var dstate = ei.dstate;
     var back = ei.back;
@@ -89,6 +101,7 @@ class Earley {
       if (ei2.dstate == dstate && ei2.back == back) {
         addPred(n,p);
         addRetn(n,o);
+        addWeights(n,forward,inner);
         return;
       }
     }
@@ -98,30 +111,45 @@ class Earley {
     addPred(elen,p);
     retn.push(null);
     addRetn(elen,o);
+    weights.push({forward:forward,inner:inner});
     var i = stateIndexes.length - 1;
     /* close under calls */
     var trans = Dfa.transitions(dstate);
     if (trans != null) {
       var t = trans(calloutAction);
+      var w = zeroWeight; // TODO: get weight from automaton
       if (t != 0) {
-        pushClosure({dstate:t,back:i},null,null);
+        pushClosure({dstate:t,back:i},null,null,
+                    w*forward,zeroWeight);
+        // {dstate:t,back:i}.forward += w*ei.forward
+        // {dstate:t,back:i}.inner    = zeroWeight
+        // {dstate:t,back:i}.inner   += zeroWeight
+        // Q: possible that our assignment will override?
       }
     }
     /* close under returns... */
     if (back == i) return; /* ...unless call parsed empty */
+    // BUT: may need to adjust probabilities??
     /* for every completed symbol... */
     var attrs = Dfa.attributes(dstate);
     if (attrs == null) return;
     for (a in attrs) {
 //      flash.Lib.trace("Returning on "+a+" to "+back);
       /* ... look at every DFA state in the back Earley state... */
+      var w = zeroWeight; // TODO: get weight from automaton
+      // NB weight of each RETURN(a) can be different
       for (m in stateIndexes[back]...stateIndexes[back+1]) {
         var backItem = eitems[m];
         var backtrans = Dfa.transitions(backItem.dstate);
         if (backtrans == null) continue;
-        var returnTarget = backtrans(a);
+        var returnTarget = backtrans(a); // CALL a
         if (returnTarget == 0) continue;
-        pushClosure({dstate:returnTarget,back:backItem.back},null,{pred:m,retn:elen,a:a,r:i});
+        pushClosure({dstate:returnTarget,back:backItem.back},null,{pred:m,retn:elen,a:a,r:i},
+                    w*inner*weights[m].forward,
+                    w*inner*weights[m].inner);
+        // var targetItem = {dstate:returnTarget,back:backItem.back}
+        // targetItem.forward += w*eitem.inner*backItem.forward
+        // targetItem.inner   += w*eitem.inner*backItem.inner
       }
     }
   }
@@ -137,8 +165,14 @@ class Earley {
   static function parse(input:String) {
     init();
     stateIndexes.push(0);
-//    flash.Lib.trace("stateIndexes["+(stateIndexes.length-1)+"]="+stateIndexes[stateIndexes.length-1]);
-    pushClosure({dstate:1,back:0},null,null);
+    pushClosure({dstate:1,back:0},null,null,zeroWeight,zeroWeight);
+    // {dstate:1,back:0}.forward = zeroWeight
+    // {dstate:1,back:0}.inner = zeroWeight
+    // B/C invariant that {dstate:1,back:0} is fresh, same as
+    //   {dstate:1,back:0}.forward += zeroWeight
+    //   {dstate:1,back:0}.inner   += zeroWeight
+    // if we initialize to zeroWeight for fresh
+
     // loop invariant: eitems[stateIndexes[i]] to end is Earley state i
     // we are about to scan
     var ilen = input.length;
@@ -154,13 +188,18 @@ class Earley {
         var trans = Dfa.transitions(dstate);
         if (trans == null) continue;
         var k = trans(input.charCodeAt(i));
+        var w = zeroWeight; // TODO: get weight from automaton
         if (k != 0) {
-          pushClosure({dstate:k,back:back},j,null);
+          pushClosure({dstate:k,back:back},j,null,
+                      w*weights[j].forward,
+                      w*weights[j].inner);
+          // {dstate:k,back:back}.forward += w*eitem.forward
+          // {dstate:k,back:back}.inner   += w*eitem.inner
         }
       }
       // if (eitems.length == len) break; // no eitems added, we are done
     }
-    var result = new Array();
+    var result = [];
     for (j in stateIndexes[ilen]...eitems.length) {
       var eitem = eitems[j];
       if (eitem.back == 0 &&
@@ -170,10 +209,6 @@ class Earley {
       }
     }
     return result;
-  }
-  static function prefixAllImp(t:Parsetree,fs:Array<Parseforest>) {
-    for (f in fs)
-      f.unshift(t);
   }
   static function dr(o:{pred:Int,retn:Int,a:Int,r:Int}):Parsetree {
     /* Parsed an o.a starting at eitem o.pred ending at eitem o.retn. */
