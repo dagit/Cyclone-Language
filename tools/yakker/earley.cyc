@@ -173,6 +173,14 @@ static cs_t final_st_cs() {
   return cs_singleton(final_st_action());
 }
 const char ?act2symb(act_t act) {
+  if (action_symb_table == NULL) {
+    action_symb_table =
+      Hashtable::create(11,st_cmp,st_hash);
+    Hashtable::insert(action_symb_table,callout_action(),new "CALL");
+    Hashtable::insert(action_symb_table,repeat_action(),new "REPEAT");
+    Hashtable::insert(action_symb_table,final_st_action(),new "FINAL-STATE");
+  }
+
   let sopt = Hashtable::lookup_opt(action_symb_table,act);
   if (sopt == NULL || *sopt == NULL) return NULL;
   else return **sopt;
@@ -189,19 +197,19 @@ void act2symb_haxe(FILE @f) {
 }
 
 static act_t symb2act(const char ?`H symb) {
-  if (symb_action_table == NULL){
-    symb_action_table =
-      Hashtable::create(11,strptrcmp,Hashtable::hash_stringptr);
-    Hashtable::insert(symb_action_table,new "CALL",callout_action());
-    Hashtable::insert(symb_action_table,new "REPEAT",repeat_action());
-    Hashtable::insert(symb_action_table,new "FINAL-STATE",final_st_action());
-  }
   if (action_symb_table == NULL) {
     action_symb_table =
       Hashtable::create(11,st_cmp,st_hash);
     Hashtable::insert(action_symb_table,callout_action(),new "CALL");
     Hashtable::insert(action_symb_table,repeat_action(),new "REPEAT");
     Hashtable::insert(action_symb_table,final_st_action(),new "FINAL-STATE");
+  }
+  if (symb_action_table == NULL){
+    symb_action_table =
+      Hashtable::create(11,strptrcmp,Hashtable::hash_stringptr);
+    Hashtable::insert(symb_action_table,new "CALL",callout_action());
+    Hashtable::insert(symb_action_table,new "REPEAT",repeat_action());
+    Hashtable::insert(symb_action_table,new "FINAL-STATE",final_st_action());
   }
 //   let symbptr = new symb;
   let symbptr = new (const char ?)aprintf("%s",symb);

@@ -142,7 +142,7 @@ static const char ?add_namespace = NULL;
 "           -no-anon-bind           do not include anonymous binders, only named ones\n"\
 "         -left-factor           left factor the grammar\n"\
 "         -flatten               flatten the input grammar so that all nested sequences and alternatives become symbol defintions\n"\
-"         -no-minus-elim         turn of minus elimination.\n"\
+"         -no-minus-elim         turn off minus elimination.\n"\
 "         -all-start             allow any symbol to be used as a start symbol.\n"\
 "         -eof <val>             treat <val> as the eof character. <val> can be any value between 0 and 255.\n"\
 "         -no-main               don't output a default main procedure\n"\

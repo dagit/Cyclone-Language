@@ -1621,3 +1621,57 @@ Q: Why not use environments to map bound names to substrings?
 
 A: It avoids needing to attach environments everywhere.
 
+
+************************************************************
+11/4/07
+
+Migrating termgrammar support to new Earley framework.
+
+Old framework is based on parsing functions and a map of symbols to
+their parsing functions. For earley interpreter, we should instead
+have a map from symbols to dfa start states. The uber-scanf function
+would have this signature:
+
+int uber_scanf(dfa_t tg_dfa, dfa_t orig_dfa, 
+               (st_t @symb2st)(const char? s),
+	       const char ?fmt, ...const char?`H @ args);
+
+
+In addition, I'd like to support our pattern match syntax again, but
+that's been dead for a while. The only special thing it requires is to
+return which branch matched.
+
+How can we convert from ParseTree to Rule_pattern? FIrst, ignore
+amb. trees. Then:
+
+NonTerm(_,i,j,NULL), where input[i] == '%' -->
+  BinderPat(input[i+1,j])
+
+NonTerm(_,i,j,NULL), where i = j -1 -->
+  Char(input[i])
+
+NonTerm(_,i,j,NULL), where input[i] != '%' -->
+  LitPat(input[i,j])
+
+NonTerm(_,_,_,children), where children != NULL -->
+  children2seqpats( children )
+
+
+I don't see any way to reconstruct terms, though, b/c we're missing
+the info about omitted syntax. In current construction, that info is
+supplied in the semantic action.
+
+So, we need to support semantic actions. One solution might be to
+generate code that simulates parsing by walking over the parse tree,
+and then performs the semantic actions as if it were parsing. This
+will be simpler then generating Earley parsing code with the semantic
+actions embedded b/c I won't need to figure out how to generate Earley
+parsing code. So, the sequence of events is:
+* Earley parse
+* Earley reconstruct derivation
+* pseudo parse with derivation. return result.
+
+We'll need to add a attribute to parse trees that indicates which
+choice was made for every choice. However, this might run into nasty
+ambiguity issues.
+

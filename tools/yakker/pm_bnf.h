@@ -28,7 +28,7 @@
 typedef datatype Rule_pattern *Rule_pat_t;
 typedef datatype Rule_pattern @rule_pat_t;
 datatype Rule_pattern {
-  SymbPat(const char ?); // abstract grammar symbol: name.
+  SymbPat(const char ?); // abstract grammar symbol: name. !! apparently deprecated !!
   CharPat(unsigned int); // single character from a character range.
   LitPat(const char ?);
   SeqPat(rule_pat_t,rule_pat_t);
