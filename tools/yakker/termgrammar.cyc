@@ -113,7 +113,7 @@ const char ?escape_lit(const char ?`H s){
 
   let n = numelts(s) - 1; // substract one for \0.
   // at most, we'll need 2n + 1 chars for the escaped string.
-  char ?@zeroterm @notnull s_esc = malloc((2 * n + 1)* sizeof(char)); 
+  char ?@zeroterm @notnull s_esc = calloc((2 * n + 1), sizeof(char)); 
   int i,j;
   for (i = 0, j = 0; i < n; i++, j++){
     if (cs_member(cs_ec,s[i])){
@@ -480,7 +480,7 @@ $(rule_t,const char ?) @add_bnfgen0(rule_t r){
     r1_ab->a = aprintf("%s = %s;",fn,a1);
 
     let r_ab = OPT_r(r, r1_ab);
-    let a = aprintf("(%s ? (_ @)%s : new LitPat(\"\"))",fn,fn);
+    let a = aprintf("(%s ? (_ @)%s : (_ @) (new LitPat(\"\")))",fn,fn);
     r_ab->v = strconcat("$",fn);
 
     return new $(r_ab,a);
@@ -611,31 +611,57 @@ static bool is_regexp(const char ?s){
 }
 
 static
-rule_t mk_bnfgen_binder (const char ?`H symb_name){
-  let r_binder = LIT("%r"); // generic binder
+$(rule_t,const char ?,rule_t) mk_bnfgen_binder (const char ?`H symb_name){
+  // FIX: make sure this name is unique w.r.t. input grammar.
+  let r_binder = SYMB("anon-tg-binder"); // generic binder
   let r_binder_spec = SEQ(LIT("%"), LIT(symb_name)); // binder specific to this symbol.
   let a = aprintf("return new BinderPat(\"%s\");", symb_name);
   r_binder->a = a;
   r_binder_spec->a = a;
-  return include_anon_binder ? ALT(r_binder, r_binder_spec) : r_binder_spec;
+
+  let r_binder_spec_name = aprintf("%s-tg-binder",symb_name);
+  let r_binder_symb = SYMB(r_binder_spec_name); 
+  r_binder_symb->v = fresh_name();
+  r_binder_symb->a = aprintf("return %s;",r_binder_symb->v);
+
+  let r = include_anon_binder ? ALT(r_binder, r_binder_symb) : r_binder_symb;
+  return $(r,r_binder_spec_name,r_binder_spec);
 }
 
 grammar_t grammar2bindgrammar(grammar_t g) {
   reset_globals();
   init_arityt(g);
 
+  attr_t b_attr = Attr{.ws=0,.re=0,.paramtype=NULL,.rettype="rule_pat_t"};
+
   grammar_t res = NULL,ds = g;
   for (; ds; ds = ds->tl) {
     let &$(n,r,a) = ds->hd;
 
     if (arity_rule(SYMB(n)) && !is_regexp(n)){
-      let r_b = mk_bnfgen_binder(n);
-      res = new List(new $(n, ALT(r_b,r), a), res);
+      let n_orig = aprintf("%s-tg-orig",n);
+      let r_orig = SYMB(n_orig);
+      r_orig->v = fresh_name();
+      r_orig->a = aprintf("return %s;",r_orig->v);
+
+      let $(r_b, b_name, b_rule) = mk_bnfgen_binder(n);
+
+      res = new List(new $(b_name, b_rule, b_attr),
+		     new List(new $(n_orig, r, a), 
+			      new List(new $(n, ALT(r_b,r_orig), a), 
+				       res)));
     } else      
       res = new List(new $(n,r,a), res);
   }
 
   res = imp_rev(res);
+
+  if (include_anon_binder){
+    let anon_bind_def = new $((const char ?)"anon-tg-binder",LIT("%r"),
+			      Attr{.ws=0,.re=0,.paramtype=NULL,.rettype=NULL});
+    res = new List(anon_bind_def,res);
+  }
+
   return res;
 }
 

@@ -26,6 +26,16 @@ namespace Earley {
   // returns: int pair: a) was the input a valid string? b) was the input a valid prefix?
   extern $(int,int) recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input, int show_progress);
 
+  typedef List::list_t<datatype ParseTree @`H,`H> parse_forest_t;
+  typedef List::List_t<datatype ParseTree @`H,`H> Parse_forest_t;
+
+  typedef datatype ParseTree @`H parse_tree_t;
+
+  extern datatype ParseTree{
+    NonTerm(const char ?`H, int, int, parse_forest_t);
+    SharedNonTerm(const char ?`H, int, int, List::List_t<parse_forest_t,`H>);
+  };
+
   /* Global variable that saves last derivation tree.
    !! Treat as read-only outside of earley.cyc.
    */

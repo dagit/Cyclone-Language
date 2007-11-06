@@ -830,10 +830,9 @@ push_closure(rstate_t rs,
   Axarray::set(rs->estates,i,Set::insert(es,ei));
 
   /* Close under CALLS */
-  let t = target(rs->dfa,s,callout_action());
+  let $(t,w) = target_w_weight(rs->dfa,s,callout_action()); //PROB
   if (t != 0) {
     point_to(rs->call,new $(t,i,i),node);
-    let w = zeroWeight; //PROB: should be prob from dfa
     push_closure(rs,input,i,new $(t,i),"(call)",NULL,NULL
                  ,w*forward,zeroWeight //PROB
                  );
@@ -908,6 +907,7 @@ push_closure(rstate_t rs,
     /* Some symbol is completed.
        es_back is the Earley state that CALLed the symbol. */
     let es_back = Axarray::get(rs->estates,backptr);
+    let final_w = dfa_final_prob(rs->dfa,s);
 
     /* For every completed symbol... */
     for (let completed = Set::to_list(dfa_final_attrs(rs->dfa,s));
@@ -927,12 +927,12 @@ push_closure(rstate_t rs,
 	  let backnode = new $(t,tbackptr,backptr);
 	  // Earley node w/ dot after symb.
           let retnode = new $(ttarget,tbackptr,i);
-          let w = zeroWeight; //PROB: should be prob of return on symb
+//           let w = zeroWeight; //PROB: should be prob of return on symb
           let &$(backnode_forward,backnode_inner) = Hashtable::lookup(rs->weights,backnode); //PROB
           push_closure(rs,input,i,new $(ttarget,tbackptr),
                        aprintf("(return %s)",act2symb(symb)),
                        backnode, node
-                       ,w*inner*backnode_forward,w*inner*backnode_inner //PROB
+                       ,final_w*inner*backnode_forward,final_w*inner*backnode_inner //PROB
                        );
         }
       }
@@ -1281,9 +1281,8 @@ $(int,int) recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input, i
          si_list = si_list->tl) {
 
       let &$(state,parent) = si_list->hd;
-      let k = target(dfa,state,input[i]);
+      let $(k,w) = target_w_weight(dfa,state,input[i]); //PROB
       let eitem = new $(state,parent,i);
-      let w = zeroWeight; //PROB: should be weight of transition from dfa
       let &$(forward,inner) = Hashtable::lookup(rs->weights,eitem);
       if (k != 0) // where k==0 indicates there is no valid target.
         push_closure(rs,input,i+1,new $(k,parent),"(input)",eitem,NULL

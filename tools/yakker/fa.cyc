@@ -505,6 +505,7 @@ typedef double probability_t;
 const double prob_zero = 0.0;
 const double prob_half = .5;
 const double prob_one = 1.0;
+
 // returns: 1 on success, 0 on failure
 int scan_prob(const char ?prob_s,probability_t @p_p){
   if( sscanf(prob_s,"%lf",p_p) != 1 )
@@ -572,6 +573,9 @@ Set::set_t<st_t> dfa_final_states(dfa_t dfa) {
 aset_t dfa_final_attrs(dfa_t dfa,st_t s) {
   return Hashtable::lookup(dfa->final_attrs,s);
 }
+probability_t dfa_final_prob(dfa_t dfa,st_t s){
+  return *(Hashtable::lookup(dfa->final_probs,s));
+}
 st_t target(dfa_t dfa,st_t s,act_t a) {
   let t = Axarray::get(dfa->states,s);
   if (!t) return 0; /* target is the dead state */
@@ -582,6 +586,18 @@ st_t target(dfa_t dfa,st_t s,act_t a) {
   // We now use target() sometimes when we do not expect a target
   // internal_err("no target for action %u in state %u\n",a,s);
   return 0;
+}
+
+$(st_t,weight_t) target_w_weight(dfa_t dfa,st_t s,act_t a) {
+  let t = Axarray::get(dfa->states,s);
+  if (!t) return $(0,prob_zero); /* target is the dead state */
+  if (a < t->lb) return $(0,prob_zero);
+  for (let sp = t->spans; sp; sp = sp->tl)
+    if (a < sp->hd->ub) return $(sp->hd->target,sp->hd->p);
+  /* Should never get here */
+  // We now use target() sometimes when we do not expect a target
+  // internal_err("no target for action %u in state %u\n",a,s);
+  return $(0,prob_zero);
 }
 
 void dfa_add_trans(dfa_t dfa,st_t s, st_t dst, act_t act, probability_t p) {

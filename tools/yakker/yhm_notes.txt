@@ -1332,8 +1332,9 @@ more complicated if we find a need for it.
 
 The solution in the end is to go with the latter approach. We allow
 you to do whatever you want with the value to be bound. We check,
-however, before allowing you to use it that it is in fact a
-value. To be more specific, the translation is as follows:
+however, before allowing you to use it that it is in fact a value
+(i.e. no binders in it). To be more specific, the translation is as
+follows:
 
 [r1] = r1',e1   [r2] = r2',e2
 ---------------------------------------- (F = ...)
@@ -1355,7 +1356,7 @@ restriction in to generated BNF. For this reason, we do not need to
 translate r1 or r2 in any special (restricted) way.
 
 Following is the definition of the ast2string symbol:
-ast2string@(rule_pat_t p)$$(const char ?) = ""{return ast2string(p);}.
+ast2string@(rule_pat_t p)$(const char ?) = ""{return ast2string(p);}.
 
 The function "ast2string" will be defined in pm_bnf.cyc.
 

@@ -25,6 +25,7 @@
 #include "analyze.h"
 #include "fa.h"
 #include "parsergen.h"
+#include "crawlergen.h"
 #include "leftfactor.h"
 #include "flatten.h"
 #include "termgrammar.h"
@@ -107,6 +108,7 @@ static const char ?add_namespace = NULL;
 "Options: -gen <sym>             generate a parser using <sym> as the start symbol\n"\
 "           -local                 use only local lookahead (without FOLLOW)\n"\
 "           -no-expand             don't expand recursive symbols, share them instead\n"\
+"         -crawl <sym>         generate a parse-tree crawler using <sym> as the start symbol\n"\
 "         -gen-header          generate a header file for the parsing functions\n"\
 "         -extract               extract EBNF from the input, assumed to be in RFC format\n"\
 "           -externals <bnfs>      use symbols from bnf files if needed in extraction\n"\
@@ -142,6 +144,8 @@ static const char ?add_namespace = NULL;
 "           -no-anon-bind           do not include anonymous binders, only named ones\n"\
 "         -left-factor           left factor the grammar\n"\
 "         -flatten               flatten the input grammar so that all nested sequences and alternatives become symbol defintions\n"\
+"         -flatten-full          flatten the input grammar so that all nested sequences and alternative-sets become symbol \n"\
+"                                definitions, and all alternatives within an alt-set becomes symbol definitions.\n"\
 "         -no-minus-elim         turn off minus elimination.\n"\
 "         -all-start             allow any symbol to be used as a start symbol.\n"\
 "         -eof <val>             treat <val> as the eof character. <val> can be any value between 0 and 255.\n"\
@@ -171,6 +175,7 @@ int main(int argc, const char ?`H?argv) {
   int list_nonterms = 0;
   int generate = 0;
   int generate_header = 0;
+  int crawl = 0;
   int subset = 0;
   int pads = 0;
   int sortp = 0;
@@ -205,6 +210,12 @@ int main(int argc, const char ?`H?argv) {
     }
     else if (strcmp("-gen",argv[i]) == 0) {
       generate = 1;
+      if (i+1 >= argc) die();
+      start_symbol = argv[i+1];
+      i += 1;
+    }
+    else if (strcmp("-crawl",argv[i]) == 0) {
+      crawl = 1;
       if (i+1 >= argc) die();
       start_symbol = argv[i+1];
       i += 1;
@@ -266,6 +277,7 @@ int main(int argc, const char ?`H?argv) {
     else if (strcmp("-termgrammar_bnf",argv[i]) == 0) termgrammar_bnfp = 1;
     else if (strcmp("-left-factor",argv[i]) == 0) leftfactorp = 1;
     else if (strcmp("-flatten",argv[i]) == 0) flattenp = 1;
+    else if (strcmp("-flatten-full",argv[i]) == 0) flattenp = 2;
     else if (strcmp("-no-minus-elim",argv[i]) == 0) minus_elimp = 0;
     else if (strcmp("-compare",argv[i]) == 0) compare = 1;
     else if (strcmp("-unnamespace",argv[i]) == 0) unnamespace = 1;
@@ -717,8 +729,8 @@ int main(int argc, const char ?`H?argv) {
       minus_elim(gr); // also marks character sets, needed for the conversion
 
     if (leftfactorp) {
-      debugprint(1,"Left-factoring grammar ... ");
-      gr = left_factor_grammar(gr);
+      debugprint(1,"Left-factoring is no longer supported ... ");
+//       gr = left_factor_grammar(gr);
     }
 
     if (escape_chars){
@@ -728,11 +740,21 @@ int main(int argc, const char ?`H?argv) {
 
     if (flattenp) {
       debugprint(1,"Flattenning grammar ... ");
+      if (flattenp == 2)
+	Flatten::fully_flatten_alts = 1;
       gr = flatten_grammar(gr);
     }
 
     debugprint(1,"Adding bnf/ast generation ... ");
     gr = grammar2bnfgen_grammar(gr);
+
+    // Next, add definition of ast2string, as references to
+    // it might have been added in previous step.
+    let r = LIT("");
+    r->a = "return ast2string(p);";
+    let d = new $((const char ?)"ast2string",r,
+		  Attr{.ws=0,.re=0,.paramtype="rule_pat_t p",.rettype="const char ?"});
+    gr = new List::List(d,gr);
 
     if (termgrammar_bnfp) {
       debugprint(1,"Adding term forms ... ");
@@ -742,7 +764,6 @@ int main(int argc, const char ?`H?argv) {
     debugprint(1,"Adding binders ... ");
     gr = grammar2bindgrammar(gr);
     pr_definitions(stdout, gr);
-    fprintf(stdout, "ast2string@(rule_pat_t p)$$(const char ?) = \"\"{return ast2string(p);}.");
     fprintf(stdout, "{#include \"pm_bnf.h\"}\n");
 //     fprintf(stdout, "{extern const char ?fresh_name();}\n");
 //     fprintf(stdout, "{extern int branch_id;}\n");
@@ -767,6 +788,8 @@ int main(int argc, const char ?`H?argv) {
   /* Flatten the grammar and exit */
   if (flattenp) {
     debugprint(1,"Producing flattenned grammar ... ");
+    if (flattenp == 2)
+      Flatten::fully_flatten_alts = 1;
     let gr = flatten_grammar(ds);
     pr_definitions(stdout, gr);
     debugprint(1,"done\n");
@@ -825,6 +848,25 @@ int main(int argc, const char ?`H?argv) {
     //    pgen(ds,start_symbol);
     debugprint(1,"Generating... ");
     gen(ds,start_symbol,textblobs,all_startp, eof_val);
+    debugprint(1,"done\n");
+  }
+  else if (crawl) {
+    if (!ds) {
+      fprintf(stderr,"Error: no definitions in input\n");
+      exit(1);
+    }
+    if (minus_elimp){
+      debugprint(1,"Minus elimination... ");
+      minus_elim(ds);
+      debugprint(1,"done\n");
+    }
+    //    debugprint(1,"Processing whitespace... ");
+    //    ds = ws_definitions(ds);
+    //    debugprint(1,"done\n");
+    if (!start_symbol) die();
+    //    pgen(ds,start_symbol);
+    debugprint(1,"Generating crawler... ");
+    Crawlergen::gen_crawl(ds,start_symbol,textblobs,all_startp, eof_val);
     debugprint(1,"done\n");
   }
   else if(list_nonterms) {

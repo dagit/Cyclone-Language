@@ -16,14 +16,18 @@
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
 
-#ifndef FLATTEN_H
-#define FLATTEN_H
+#ifndef CRAWLERGEN_H
+#define CRAWLERGEN_H
 #include "bnf.h"
-extern grammar_t flatten_grammar(grammar_t g);
 
-namespace Flatten{
-  // Flag: for alts, put every alternative as a separate symbol definition.
-  // default is 0;
-  extern int fully_flatten_alts;
+namespace Crawlergen {
+
+extern void gen_crawl(grammar_t<`H> grm, const char ?`H symb,
+                List::list_t<const char ?@>textblobs, 
+		int all_start, unsigned int eof_val);
+
+extern const char ?cyc_namespace;
+extern int gen_fun_table;
 }
+
 #endif

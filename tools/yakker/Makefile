@@ -27,7 +27,7 @@ CYCLEX=$(BINDIR)/cyclex
 STRINGIFY=$(BINDIR)/stringify
 
 YAKKER_FILES = analyze axarray cs bnf extract fa nfa_lazy nfa_eager leftfactor flatten termgrammar lex pads \
-  parse_tab parsergen pr prose prose_elim_grm string_dfa_engine1 \
+  parse_tab parsergen crawlergen pr prose prose_elim_grm string_dfa_engine1 \
   string_dfa_engine2_1 corerules corerules_grm \
   util namespaces earley yakker
 
@@ -342,8 +342,8 @@ $(BNFDIR)/imap_revised.bnf: $(BNFDIR)/rfc3501.bnf \
 # session is added for conveinience.
 $(BNFDIR)/imap_revised_fixed.bnf: $(BNFDIR)/imap_revised.bnf
 	./yakker $< -rename set sequence-set -omit literal literal8 > $@.tmp
-	echo "literal = \"{\" number [\"+\"] \"}\" CRLF @repeat(number)CHAR8." >> $@.tmp
-	echo "literal8 = \"~{\" number [\"+\"] \"}\" CRLF @repeat(number)OCTET." >> $@.tmp
+	echo 'literal = "{" number$$number ["+"] "}" CRLF @repeat(number)CHAR8.' >> $@.tmp
+	echo 'literal8 = "~{" number$$number ["+"] "}" CRLF @repeat(number)OCTET.' >> $@.tmp
 	./yakker -tsort $@.tmp > $@
 	rm $@.tmp
 	echo 'my-greeting = ("" greeting)$$x {greeting_hook(x);}.' >> $@

@@ -37,12 +37,22 @@ datatype Rule_pattern {
   BinderPat(const char ?); // symbol for which this is a binder.
 };
 
+extern datatype exn{
+  extern Pat_exception;
+};
+
 extern rule_pat_t pats2seq(List::list_t<rule_pat_t>);
 
 extern const char ?pat2string(rule_pat_t);
 extern rule_t pat2parse_rule(rule_pat_t p);
 extern rule_t pat2print_rule(rule_pat_t p);
 extern const char ?pat2print_code(rule_pat_t p, char ?? args);
+
+
+// Treat a pattern as an AST and translate back into source
+// string. Raises exception Pat_exception if cannot be translated
+// (e.g. contains binders).
+extern const char ?ast2string(rule_pat_t p);
 
 extern rule_pat_t unescape_pat(rule_pat_t p, char escape_char);
 

@@ -10,6 +10,10 @@
 
 using List;
 
+datatype exn{
+  Pat_exception;
+};
+
 rule_pat_t pats2seq(list_t<rule_pat_t> pats){
   if (!pats)
     return new LitPat("");
@@ -51,6 +55,34 @@ const char ?pat2string(rule_pat_t p){
   return strconcat_l(List::imp_rev(ps));
 }
 
+ps_list ast2string0(ps_list ps, rule_pat_t p){
+  switch (p) {
+  case &SymbPat(x):
+    // SymbPats are deprecated
+    throw new Pat_exception;
+  case &LitPat(x):
+    return new List(new x), ps);
+  case &CharPat(x):
+    const char ? s = calloc(2,sizeof(char));
+    s[0] = x;
+    return new List(new s, ps);
+  case &SeqPat(p1,p2):
+    let ps1 = pat2string0(ps,p1);
+    let ps_sp = new List(new " ",ps1);
+    let ps2 = pat2string0(ps_sp,p2);
+    return ps2;
+  case &BinderPat(x):
+    throw new Pat_exception;
+  }
+}
+
+// Treat a pattern as an AST and translate back into source
+// string. Raises exception Pat_exception if cannot be translated
+// (e.g. contains binders).
+const char ?ast2string(rule_pat_t p){
+  let ps = ast2string0(NULL, p);
+  return strconcat_l(List::imp_rev(ps));
+}
 
 rule_t pat2parse_rule(rule_pat_t p){
   switch (p) {
