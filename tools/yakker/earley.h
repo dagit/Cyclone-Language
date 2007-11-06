@@ -23,7 +23,8 @@
 
 namespace Earley {
   extern $(dfa_t,Set::set_t<st_t>) compile(grammar_t grm, rule_t r);
-  // returns: int pair: a) was the input a valid string? b) was the input a valid prefix?
+  // returns: int pair: a) the number of valid complete parses of the string.
+  //                    b) the number of valid prefix parses of the string.
   extern $(int,int) recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input, int show_progress);
 
   typedef List::list_t<datatype ParseTree @`H,`H> parse_forest_t;

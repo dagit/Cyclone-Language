@@ -341,9 +341,9 @@ $(BNFDIR)/imap_revised.bnf: $(BNFDIR)/rfc3501.bnf \
 # FIX: not sure of the real definition of set. Looks to be identical to sequence-set.
 # session is added for conveinience.
 $(BNFDIR)/imap_revised_fixed.bnf: $(BNFDIR)/imap_revised.bnf
-	./yakker $< -rename set sequence-set -omit literal literal8 > $@.tmp
 	echo 'literal = "{" number$$number ["+"] "}" CRLF @repeat(number)CHAR8.' >> $@.tmp
 	echo 'literal8 = "~{" number$$number ["+"] "}" CRLF @repeat(number)OCTET.' >> $@.tmp
+	./yakker $< -rename set sequence-set -omit literal literal8 > $@.tmp
 	./yakker -tsort $@.tmp > $@
 	rm $@.tmp
 	echo 'my-greeting = ("" greeting)$$x {greeting_hook(x);}.' >> $@

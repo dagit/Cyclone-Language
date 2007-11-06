@@ -1006,6 +1006,9 @@ $(dfa_t,Set::set_t<st_t>) *fsm_dfa(const char ?filename, const char ?`H start_sy
 	fprintf(stderr, "Parse error: scanf unable to convert probability: %s, on line %d.\n", dst_or_val, lineno);
 	return NULL;
       }
+      if (val == 0.0){
+	fprintf(stderr, "Final probability of zero on line %d.\n", lineno);
+      }
       Hashtable::insert(dfa->final_probs,src,new val);
       break;
     case 3: // Arc, cost 1
@@ -1042,6 +1045,9 @@ $(dfa_t,Set::set_t<st_t>) *fsm_dfa(const char ?filename, const char ?`H start_sy
       if (!r){
 	fprintf(stderr, "Parse error: scanf unable to convert probability: %s, on line %d.\n", val_str, lineno);
 	return NULL;
+      }
+      if (val == 0.0){
+	fprintf(stderr, "Transition probability of zero on line %d.\n", lineno);
       }
 
       dfa_add_trans(dfa,src,dst,act,val);

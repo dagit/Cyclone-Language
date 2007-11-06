@@ -897,7 +897,7 @@ push_closure(rstate_t rs,
     /* 3. Call push_closure again as if we started in this
        state. ie. t_new replaces s. So, we reuse back and up. */
     push_closure(rs,input,i,new $(t_new,backptr),"(repeat)",back,up
-                 ,1.0,1.0 //PROB: didn't figure this out yet
+                 ,forward,inner //PROB
                  );
   }
   /* Close under RETURNS.  Use else, becaause a REPEAT state can't
@@ -1305,6 +1305,7 @@ $(int,int) recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input, i
   //  Graph::print(stdout,cvt(retn),earley_node_pr);
 
   let partial_parses = 0;
+  let complete_parses = 0;
   for (let slast_list = Set::to_list(Axarray::get(estates,input_len));
        slast_list != NULL;
        slast_list = slast_list->tl) {
@@ -1316,8 +1317,10 @@ $(int,int) recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input, i
 //       printf("Input:\n%s\nParse:\n",input);
 //       printf("%s\n",Buffer::contents(b));
 
-      let completed = Set::to_list(dfa_final_attrs(dfa,state));
-      let derivation_tree = derivation_redux(pred,retn,input,dfa,new $(state,parent /*== 0*/,input_len));
+      complete_parses++;
+
+      let en = new $(state,parent /*== 0*/,input_len);
+      let derivation_tree = derivation_redux(pred,retn,input,dfa,en);
       if (debug) {
 	printf("Input:\n%s\nLeftmost tree:\n",input);
 	print_LT(derivation_tree,-1);
@@ -1327,10 +1330,11 @@ $(int,int) recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input, i
       }
 
       last_derivation_tree = derivation_tree;
-      return $(1,partial_parses);
+      let &$(w_forward,w_inner) = Hashtable::lookup(rs->weights, en);
+      printf("Probability: %lf\n",w_forward);
     }
   }
-  return $(0,partial_parses);
+  return $(complete_parses,partial_parses);
 }
 
 
