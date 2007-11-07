@@ -16,19 +16,20 @@
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
 
-#ifndef CRAWLERGEN_H
-#define CRAWLERGEN_H
-#include "bnf.h"
+#ifndef SEMIRING_H
+#define SEMIRING_H
+namespace Semiring{
 
-namespace Crawlergen {
-
-  extern void gen_crawl(grammar_t<`H> grm, const char ?`H symb,
-			List::list_t<const char ?@>textblobs, 
-			int all_start, unsigned int eof_val);
-  /* Print forward definitions of parsing functions in grammar grm. */
-  extern void gen_header(grammar_t<`H> grm, List::list_t<const char ?@>textblobs);
-  extern const char ?cyc_namespace;
-  extern int gen_fun_table;
+  typedef double weight_t;
+  
+  extern const weight_t zero_weight;
+  extern const weight_t one_weight;
+  /** returns: 1 on success, 0 on failure */
+  extern int scan_weight(const char ?weight_s, weight_t @w_p);
+  extern const char ?print_weight(weight_t);
+  extern int check_nonzero(weight_t w);
+  extern weight_t from_prob(double p);
+  extern weight_t add(weight_t w1, weight_t w2);
+  extern weight_t mult(weight_t w1, weight_t w2);
 }
-
 #endif

@@ -121,6 +121,20 @@ $(grammar_t, rule_t) @seq_flatten_rule(const char ?`H ctxt_name, rule_t r){
   return new $(defs,res);
 }
 
+$(grammar_t, rule_t) @fully_flatten_rule(const char ?`H ctxt_name, rule_t r){
+    switch (r->r) {
+    case &Lit(_):
+    case &CharRange(_,_):
+      // define new symbol with r
+      let r_def = new $(ctxt_name, r, empty_attr);
+      // add new symbol to list of defs.
+      let defs = list(r_def);
+      return new $(defs, SYMB(ctxt_name));
+    default:
+      return flatten_rule0(ctxt_name, r);
+    }  
+}
+
 $(grammar_t, rule_t, unsigned int) @
 alt_flatten_rule(const char ?`H ctxt_name, rule_t r, unsigned int n_elt){
     switch (r->r) {
@@ -130,22 +144,14 @@ alt_flatten_rule(const char ?`H ctxt_name, rule_t r, unsigned int n_elt){
       return new $(append(defs2,defs1), 
 		   ALT_r(r, r1_flat, r2_flat),
 		   mn_elt);
-    case &Lit(_):
-    case &CharRange(_,_):
-      if (fully_flatten_alts){
-	let new_ctxt_name = mk_name(ctxt_name, n_elt);
-	// define new symbol with r
-	let r_def = new $(new_ctxt_name, r, empty_attr);
-	// add new symbol to list of defs.
-	let defs = list(r_def);
-	return new $(defs, SYMB(new_ctxt_name),n_elt + 1);
-      }else
-	fallthru;
     default:
       let new_ctxt_name = mk_name(ctxt_name, n_elt);
-      let &$(g, r_flat) = flatten_rule0(new_ctxt_name, r);
+      let &$(g, r_flat) =  
+	fully_flatten_alts ?
+	fully_flatten_rule( new_ctxt_name, r )
+      : flatten_rule0(new_ctxt_name, r);
       return new $(g, r_flat, n_elt + 1);
-    }  
+    } 
 }
 
 $(grammar_t, rule_t) @flatten_rule0(const char ?`H ctxt_name, rule_t r){
@@ -160,7 +166,9 @@ $(grammar_t, rule_t) @flatten_rule0(const char ?`H ctxt_name, rule_t r){
 
     case &Opt(r1):
       let new_ctxt_name = mk_name(ctxt_name, 1);      
-      let &$(defs1, r1_flat) = flatten_rule0(new_ctxt_name, r1);
+      let &$(defs1, r1_flat) = 	fully_flatten_alts ?
+	fully_flatten_rule( new_ctxt_name, r1 )
+      : flatten_rule0(new_ctxt_name, r1);
       let r_flat = OPT_r(r, r1_flat);
       // define new symbol with r_flat
       let r_def = new $(ctxt_name, r_flat, empty_attr);

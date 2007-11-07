@@ -18,6 +18,8 @@
 
 #ifndef FA_H
 #define FA_H
+#include "semiring.h"
+
 typedef unsigned int st_t; // States.  Sometimes, 0 is reserved to mark no transition
 typedef Graph::graph_t<st_t> stgraph_t; // State graphs.
 typedef unsigned int act_t;
@@ -48,18 +50,17 @@ typedef struct DFA @dfa_t;
 // Returns: target state, if yes; 0, if no.
 st_t target(dfa_t dfa,st_t s,act_t a);
 
-typedef double weight_t;
-// Returns: target state and transition weight, if yes; $(0,prob_zero) if no.
-$(st_t,weight_t) target_w_weight(dfa_t dfa,st_t s,act_t a);
+// Returns: target state and transition weight, if yes; $(0,zero_weight) if no.
+$(st_t,Semiring::weight_t) target_w_weight(dfa_t dfa,st_t s,act_t a);
 
-extern act_t* first_action_but(dfa_t dfa,st_t s,act_t a);
+extern act_t* first_action_after(dfa_t dfa,st_t s,act_t a);
 extern Set::set_t<st_t> dfa_final_states(dfa_t dfa);
 extern void dfa_set_final(dfa_t dfa, st_t final, aset_t attrs);
 extern dfa_t nfa2dfa(st_t start_state, Set::set_t<st_t,`H> final_states);
 extern int dfa_is_final(dfa_t dfa,st_t s);
 extern aset_t dfa_final_attrs(dfa_t dfa,st_t s);
-// dfa_final_prob will throw exception if s is not a final state.
-extern weight_t dfa_final_prob(dfa_t dfa,st_t s);
+// dfa_final_weight will throw exception if s is not a final state.
+extern Semiring::weight_t dfa_final_weight(dfa_t dfa,st_t s);
 extern dfa_t lookahead_dfa(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt);
 extern void dfa_generate1(dfa_t dfa);
 extern void dfa_generate2(dfa_t dfa);

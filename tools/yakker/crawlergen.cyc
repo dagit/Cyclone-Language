@@ -75,11 +75,33 @@ void gen0(rule_t r) {
 
   switch (r->r) {
   case &Symb(x,y):
-    printf("%s(children->hd,ykinput%s%s);\n",
-	   p_id(x),
-	   (y?",":""),
-	   y);
-    printf("children = children->tl;\n");
+    // If symbol is nullable, then need to check whether the current child is
+    // corresponds to this symbol.
+//     if (empty_rule(r)){
+//       printf("{  let result;\n"); 
+//       printf("   let child_name;\n"); 
+//       printf("   switch (children->hd) {\n"); 
+//       printf("   case &Earley::NonTerm(name,_,_,_,_):\n"
+// 	     "   fallthru(name);\n"); 
+//       printf("   case &Earley::SharedNonTerm(name,_,_,_,_):\n"); 
+//       printf("     child_name=name; break;\n"); 
+//       printf("   }\n");
+
+//       printf("if ( !strcmp(child_name,\"%s\") )\n{", x);
+//       printf("   result = %s(children->hd,ykinput%s%s);\n",
+// 	     p_id(x),
+// 	     (y?",":""),
+// 	     y);
+//       printf("   children = children->tl;\n");
+//       printf("}\n");
+//     } else 
+    {
+      printf("%s(children->hd,ykinput%s%s);\n",
+	     p_id(x),
+	     (y?",":""),
+	     y);
+      printf("children = children->tl;\n");
+    }
     break;
   case &Lit(_):
   case &CharRange(_,_):
@@ -101,14 +123,16 @@ void gen0(rule_t r) {
     let alts = alt2rules(r);
     // FIX: do we need to deal w/ predicates?
 
+    //
     // Invariant: all of the alts are symbols.
     //
+
     // Lookup the child nonterminal name.
     printf("let child_name;\n"); 
     printf("switch (children->hd) {\n"); 
-    printf("case &Earley::NonTerm(name,_,_,_):\n"
+    printf("case &Earley::NonTerm(name,_,_,_,_):\n"
 	   "fallthru(name);\n"); 
-    printf("case &Earley::SharedNonTerm(name,_,_,_):\n"); 
+    printf("case &Earley::SharedNonTerm(name,_,_,_,_):\n"); 
     printf("  child_name=name; break;\n"); 
     printf("}\n");
 
@@ -128,13 +152,44 @@ void gen0(rule_t r) {
 	break;
       }
     }
+    // FIX!!!
+    // if > 1 nullable child then ambiguous
     printf("\n  throw &Parse_error_val;\n");
+    // else 
+    // call nullable child
     break;
   case &Opt(r2):
-    printf("if ( children != NULL ){\n"); 
-    gen0(r2);
+    //
+    // Invariant: r2 is a symbol.
+    //
+
+    // Lookup the child nonterminal name.
+    printf("let child_name;\n"); 
+    printf("switch (children->hd) {\n"); 
+    printf("case &Earley::NonTerm(name,_,_,_,_):\n"
+	   "fallthru(name);\n"); 
+    printf("case &Earley::SharedNonTerm(name,_,_,_,_):\n"); 
+    printf("  child_name=name; break;\n"); 
     printf("}\n");
+
+    switch (r2->r){
+    case &Symb(n,_):
+      printf("if ( !strcmp(child_name,\"%s\") ){\n", n);
+      gen0(r2);
+      printf("}\n");
+      break;
+    default:
+      // ERR!
+      internal_err("Option body in gen0 with non-symbol alternative.\n");
+      fflush(stderr);
+      pr_rule(stderr,r2,1);fflush(stderr);
+
+      printf("// !!! ERROR !!!\n");
+      printf("throw &Parse_error_val;\n");
+      break;
+    }
     break;
+
   case &Rcount(c,r2):
     printf("{\n");
     // FIX: need to get this bounds right, given new interp. of repeat.
@@ -211,10 +266,8 @@ void gen_header(grammar_t<`H> grm, List::list_t<const char ?@>textblobs){
   printf("#include <buffer.h>\n"
 	 "#include <stdio.h>\n"
 	 "#include <stdlib.h>\n"
-	 "#include <string.h>\n");
-#ifndef STRINGINPUT
-  printf("#include \"ykbuf.h\"\n");
-#endif
+	 "#include <string.h>\n"
+	 "#include \"earley.h\"\n");
 
   if (gen_fun_table){
     printf("#include \"funtable.h\"\n");
@@ -255,6 +308,13 @@ void gen_crawl(grammar_t<`H> grm, const char ?`H start_symbol,
 	 unsigned int eof_val) {
   reset_globals();
   semvalue_symbs = Set::empty(strptrcmp);
+
+  init_recursive(grm);
+  init_firstt(grm);
+  init_mayt(grm);
+  init_mustt(grm);
+  init_maybe_empty(grm);
+
 
   printf("#include <buffer.h>\n"
 	 "#include <stdio.h>\n"
@@ -334,12 +394,12 @@ void gen_crawl(grammar_t<`H> grm, const char ?`H start_symbol,
 	   (a.paramtype)?",":"",
 	   a.paramtype);
     printf("switch (t) {\n"); 
-    printf("case &Earley::NonTerm(name,i,j,children):\n"); 
-
+    printf("case &Earley::NonTerm(name,i,j,w,children):\n"); 
+    
     // TODO: HANDLE IMAP STRING SPECIAL CASE AS IN PGEN
     gen0(r);
     printf("break;\n");
-    printf("case &Earley::SharedNonTerm(name,i,j,children_list):\n"); 
+    printf("case &Earley::SharedNonTerm(name,i,j,w,children_list):\n"); 
     printf("throw &Parse_error_val;\n");
     printf("}\n");
     printf("}\n\n");

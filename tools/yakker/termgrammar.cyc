@@ -522,7 +522,9 @@ $(rule_t,const char ?) @add_bnfgen0(rule_t r){
 
   case &CharRange(min,max):
     let r_s = mk_cs_bnfgen(r);
-    return new $(r_s,r_s->a);
+    let a = r_s->a;
+    r_s->a = NULL;
+    return new $(r_s,a);
 
   case &Symb(_,_):
     let fn = fresh_name();

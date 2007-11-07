@@ -13,7 +13,10 @@
 #include "analyze.h"
 
 #include "nfa_eager.h"
+#include "semiring.h"
+
 using Nfa_eager;
+using Semiring;
 
 namespace Earley;
 
@@ -23,8 +26,8 @@ typedef List::List_t<datatype ParseTree @`H,`H> Parse_forest_t;
 typedef datatype ParseTree @`H parse_tree_t;
 
 datatype ParseTree{
-  NonTerm(const char ?`H, int, int, parse_forest_t);
-  SharedNonTerm(const char ?`H, int, int, List::List_t<parse_forest_t,`H>);
+  NonTerm(const char ?`H, int, int, weight_t, parse_forest_t);
+  SharedNonTerm(const char ?`H, int, int, weight_t, List::List_t<parse_forest_t,`H>);
 };
 
 /* Global variable that saves last derivation tree.*/
@@ -32,18 +35,19 @@ datatype ParseTree *last_derivation_tree = NULL;
 
 // Flag indicating whether to print parsing progress to stderr.
 static int show_prog = 0;
+static int show_prog_start = 0;
 
 void print_LT_parse_forest(parse_forest_t pf, int depth);
 
 void print_LT(datatype ParseTree @pt, int depth){
   switch (pt) {
-  case &NonTerm(name,l,r,children):
-    printf("<t s=\"%s\" l=\"%d\" r=\"%d\">",name,l,r);
+  case &NonTerm(name,l,r,w,children):
+    printf("<t s=\"%s(%s)\" l=\"%d\" r=\"%d\">",name,Semiring::print_weight(w),l,r);
   print_LT_parse_forest(children, depth);
     printf("</t>");
     break;
-  case &SharedNonTerm(name,l,r,children_list):
-    printf("<t s=\"%s\" l=\"%d\" r=\"%d\">",name,l,r);
+  case &SharedNonTerm(name,l,r,w,children_list):
+    printf("<t s=\"%s(%s)\" l=\"%d\" r=\"%d\">",name,Semiring::print_weight(w),l,r);
   print_LT_parse_forest(children_list->hd,depth);
     printf("</t>");
     break;
@@ -67,13 +71,13 @@ void print_RT_parse_forest(parse_forest_t pf, int depth);
 
 void print_RT(datatype ParseTree @pt, int depth){
   switch (pt) {
-  case &NonTerm(name,l,r,children):
-    printf("<t s=\"%s\" l=\"%d\" r=\"%d\">",name,l,r);
+  case &NonTerm(name,l,r,w,children):
+    printf("<t s=\"%s(%s)\" l=\"%d\" r=\"%d\">",name,Semiring::print_weight(w),l,r);
   print_RT_parse_forest(children,depth);
     printf("</t>");
     break;
-  case &SharedNonTerm(name,l,r,children_list):
-    printf("<t s=\"%s\" l=\"%d\" r=\"%d\">",name,l,r);
+  case &SharedNonTerm(name,l,r,w,children_list):
+    printf("<t s=\"%s(%s)\" l=\"%d\" r=\"%d\">",name,Semiring::print_weight(w),l,r);
     let last_derivation = List::fold_left(reflect,children_list->hd,children_list);
     print_RT_parse_forest(last_derivation,depth);
     printf("</t>");
@@ -97,8 +101,8 @@ void print_parse_forest(parse_forest_t pf);
 
 void print_parse_tree(datatype ParseTree @pt){
   switch (pt) {
-  case &NonTerm(name,l,r,children):
-    printf("<t s=\"%s\" l=\"%d\" r=\"%d\">",name,l,r);
+  case &NonTerm(name,l,r,w,children):
+    printf("<t s=\"%s(%s)\" l=\"%d\" r=\"%d\">",name,Semiring::print_weight(w),l,r);
     print_parse_forest(children);
     printf("</t>");
     break;
@@ -119,7 +123,7 @@ int isAmb_parse_tree0(int isAmb, datatype ParseTree @pt){
   if (isAmb) return 1;
 
   switch (pt) {
-  case &NonTerm(name,l,r,children):
+  case &NonTerm(name,l,r,w,children):
     return isAmb_parse_forest(children);
   default:
     return 1;
@@ -720,11 +724,9 @@ struct rstate {
   Hashtable::table_t<earley_node_t,List::list_t<earley_node_t,`H>,`H> pred;
   Hashtable::table_t<earley_node_t,List::list_t<$(earley_node_opt_t,earley_node_t) @`H,`H>,`H> retn;
   Hashtable::table_t<earley_node_t,List::list_t<earley_node_t,`H>,`H> call;
-  Hashtable::table_t<earley_node_t,$(float,float)@> weights; //PROB
+  Hashtable::table_t<earley_node_t,$(weight_t,weight_t)@> weights; //PROB
 };
 typedef struct rstate @rstate_t;
-
-static float zeroWeight = 1.0; //PROB
 
 static void dot_iter(earley_node_t s,List::list_t<earley_node_t> ts) {
   let &$(si,sj,sk) = s;
@@ -781,14 +783,19 @@ void point_to(Hashtable::table_t<earley_node_t,List::list_t<`a,`H>,`H> tbl,
 }
 
 //PROB
-void add_weights(rstate_t rs, earley_node_t node, float forward, float inner) { //PROB
+$(weight_t,weight_t) add_weights(rstate_t rs, earley_node_t node, weight_t forward, weight_t inner) { //PROB
   let ptr = Hashtable::lookup_opt(rs->weights,node);                            //PROB
+  let old_f = Semiring::one_weight;
+  let old_i = Semiring::one_weight;
   if (ptr != NULL) {                                                            //PROB
-    $(float,float)@y = *ptr;                                                    //PROB
-    y->f0 += forward;                                                           //PROB
-    y->f1 += inner;                                                             //PROB
+    $(weight_t,weight_t)@y = *ptr;                                                    //PROB
+    old_f = y->f0; old_i = y->f1;
+    y->f0 = Semiring::add( y->f0, forward );                                    //PROB
+    y->f1 = Semiring::add( y->f1, inner );                                      //PROB
   }                                                                             //PROB
   else Hashtable::insert(rs->weights,node,new $(forward,inner));                //PROB
+
+  return $(old_f,old_i);
 }                                                                               //PROB
 
 $(unsigned int, unsigned int) *
@@ -811,7 +818,7 @@ push_closure(rstate_t rs,
              const char ?reason,
              earley_node_opt_t back,
 	     earley_node_opt_t up
-             , float forward, float inner //PROB
+             , weight_t forward, weight_t inner //PROB
              ) {
 
   let &$(s,backptr) = ei;
@@ -820,12 +827,23 @@ push_closure(rstate_t rs,
     point_to(rs->pred,node,back);
     point_to(rs->retn,node,new $(up,back));
   }
-  add_weights(rs,node,forward,inner); //PROB
+  let $(old_f,old_i) = add_weights(rs,node,forward,inner); //PROB
 
   let es = Axarray::get(rs->estates,i);
-  if (Set::member(es,ei)) return;
-  if (show_prog){
-    fprintf(stderr,"estates[%d] += (%d,%d) %s\n",i,ei->f0,ei->f1,reason);fflush(stderr);
+  if (Set::member(es,ei)) {
+    if (show_prog && show_prog_start < i){
+      let &$(new_f,new_i) = Hashtable::lookup(rs->weights, node);
+      fprintf(stderr,"estates[%d]: (%d,%d,%s,%s -> [%s,%s] -> %s,%s) %s\n",i,ei->f0,ei->f1,
+	      Semiring::print_weight(old_f),Semiring::print_weight(old_i),
+	      Semiring::print_weight(forward),Semiring::print_weight(inner),
+	      Semiring::print_weight(new_f),Semiring::print_weight(new_i),
+	      reason);fflush(stderr);
+    }
+    return;
+  }
+  if (show_prog && show_prog_start < i){
+    fprintf(stderr,"estates[%d] += (%d,%d,%s,%s) %s\n",i,ei->f0,ei->f1,
+	    Semiring::print_weight(forward),Semiring::print_weight(inner),reason);fflush(stderr);
   }
   Axarray::set(rs->estates,i,Set::insert(es,ei));
 
@@ -834,7 +852,7 @@ push_closure(rstate_t rs,
   if (t != 0) {
     point_to(rs->call,new $(t,i,i),node);
     push_closure(rs,input,i,new $(t,i),"(call)",NULL,NULL
-                 ,w*forward,zeroWeight //PROB
+                 ,mult(w, forward),Semiring::one_weight //PROB
                  );
   }
 
@@ -850,7 +868,7 @@ push_closure(rstate_t rs,
     fprintf(stderr,"Looking for non-CALL transition.\n");
     fflush(stderr);
 
-    let nt_opt = first_action_but(rs->dfa,t,callout_action());
+    let nt_opt = first_action_after(rs->dfa,t,callout_action());
     if (!nt_opt){
       fprintf(stderr,"Error: repeat state does not transition on non-call.\n");
       return;
@@ -872,7 +890,7 @@ push_closure(rstate_t rs,
 
     // Find the action of the repeated symbol.
     let s_repeatee = target(rs->dfa,t,repeater_nt);
-    let nt_opt = first_action_but(rs->dfa,s_repeatee,0);
+    let nt_opt = first_action_after(rs->dfa,s_repeatee,0);
     if (!nt_opt){
       fprintf(stderr,"Error: repeatee state does not transition.\n");
       return;
@@ -907,7 +925,7 @@ push_closure(rstate_t rs,
     /* Some symbol is completed.
        es_back is the Earley state that CALLed the symbol. */
     let es_back = Axarray::get(rs->estates,backptr);
-    let final_w = dfa_final_prob(rs->dfa,s);
+    let final_w = dfa_final_weight(rs->dfa,s);
 
     /* For every completed symbol... */
     for (let completed = Set::to_list(dfa_final_attrs(rs->dfa,s));
@@ -927,12 +945,12 @@ push_closure(rstate_t rs,
 	  let backnode = new $(t,tbackptr,backptr);
 	  // Earley node w/ dot after symb.
           let retnode = new $(ttarget,tbackptr,i);
-//           let w = zeroWeight; //PROB: should be prob of return on symb
           let &$(backnode_forward,backnode_inner) = Hashtable::lookup(rs->weights,backnode); //PROB
           push_closure(rs,input,i,new $(ttarget,tbackptr),
                        aprintf("(return %s)",act2symb(symb)),
                        backnode, node
-                       ,final_w*inner*backnode_forward,final_w*inner*backnode_inner //PROB
+                       ,mult( mult(final_w, inner), backnode_forward), //PROB
+		       mult( mult(final_w,inner), backnode_inner) //PROB
                        );
         }
       }
@@ -1092,11 +1110,9 @@ get_bounds(Hashtable::table_t<earley_node_t,List::list_t<$(earley_node_opt_t,ear
 // YHM: (current) invariant: always called with final state in early item ei.
 
 parse_tree_t
-derivation_redux(Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H> pred,
-		 Hashtable::table_t<earley_node_t,List::list_t<$(earley_node_opt_t,earley_node_t) @`H>,`H> retn,
+derivation_redux(rstate_t rs,
 		 const char ?input,
-		 dfa_t dfa,
-		 earley_node_t ei);
+		 earley_node_t en);
 
 // List::List_t<parse_forest_t> prefix_all(parse_tree_t,List::List_t<parse_forest_t>);
 // imperative update of fs.
@@ -1107,25 +1123,21 @@ void prefix_all_imp(parse_tree_t t,List::list_t<parse_forest_t> fs){
 }
 
 List::list_t<parse_forest_t>
-derivation_horizontal(Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H> pred,
-		      Hashtable::table_t<earley_node_t,List::list_t<$(earley_node_opt_t,earley_node_t) @`H>,`H> retn,
+derivation_horizontal(rstate_t rs,
 		      const char ?input,
-		      dfa_t dfa,
 		      earley_node_t en){
 
   List::list_t<parse_forest_t> derivations = NULL;
-  let maybe_links = Hashtable::lookup_opt(retn,en);
+  let maybe_links = Hashtable::lookup_opt(rs->retn,en);
   if (maybe_links != NULL) {
 
     // Compute all derivations.
     for (let xs = *maybe_links; xs; xs = xs->tl) {
       let &$(retn_link,pred_link) = xs->hd;
 
-      let pred_derivations = derivation_horizontal(pred,retn,input,dfa,
-						   pred_link);
+      let pred_derivations = derivation_horizontal(rs,input, pred_link);
       if (retn_link){
-	let child_tree = derivation_redux(pred,retn,input,dfa,
-					  retn_link);
+	let child_tree = derivation_redux(rs,input, retn_link);
 	// prefix all forests of pred_derivations with child_tree.
 	prefix_all_imp(child_tree,pred_derivations);
       }
@@ -1151,14 +1163,12 @@ derivation_horizontal(Hashtable::table_t<earley_node_t,List::list_t<earley_node_
 }
 
 parse_tree_t
-derivation_redux(Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H> pred,
-		 Hashtable::table_t<earley_node_t,List::list_t<$(earley_node_opt_t,earley_node_t) @`H>,`H> retn,
+derivation_redux(rstate_t rs,
 		 const char ?input,
-		 dfa_t dfa,
-		 earley_node_t ei) {
-  let &$(x,i,j) = ei;
+		 earley_node_t en) {
+  let &$(x,i,j) = en;
   const char? name = "TOP";
-  let completed = Set::to_list(dfa_final_attrs(dfa,x));
+  let completed = Set::to_list(dfa_final_attrs(rs->dfa,x));
   if (completed == NULL) {
     // FIX: add real error handling code.
     // ERROR: precondition of this function is that x is a final state.
@@ -1191,19 +1201,20 @@ derivation_redux(Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H
 
   parse_tree_t tree;
 
-  let h_derivations = derivation_horizontal(pred,retn,input,dfa, ei);
+  let h_derivations = derivation_horizontal(rs,input,en);
+  let &$(w_forward,w_inner) = Hashtable::lookup(rs->weights, en);
   // distinguish ambiguous from unamb. parses.
   if (h_derivations == NULL){
     // YHM: can len == 0 ? If so, how did entry ever get created?
     // Yes, because it can be a string of terminals.
     fprintf(stderr,"No derivations returned.\n");
-    tree = new NonTerm(name,i,j,NULL);
+    tree = new NonTerm(name,i,j,w_forward,NULL);
   } else if(h_derivations->tl == NULL){
     // Unambiguous
-    tree = new NonTerm(name,i,j,h_derivations->hd);
+    tree = new NonTerm(name,i,j,w_forward,h_derivations->hd);
   } else {
-    // Ambiguous
-    tree = new SharedNonTerm(name,i,j,h_derivations);
+     // Ambiguous
+    tree = new SharedNonTerm(name,i,j,w_forward,h_derivations);
   }
 
   return tree;
@@ -1237,6 +1248,101 @@ $(dfa_t,Set::set_t<st_t>) compile(grammar_t grm, rule_t r) {
   return $(dfa,dfa_final);
 }
 
+// $(int,int) recognize_frag(dfa_t dfa, st_t symb_start, Set::set_t<st_t> symb_final, 
+// 			  const char ?input, int show_progress) {
+  
+//   show_prog = show_progress;
+
+//   /* Keep track of parse trees */
+//   let
+//     pred = Hashtable::create(11,earley_node_cmp,earley_node_hash);
+//   let
+//     retn = Hashtable::create(11,earley_node_cmp,earley_node_hash);
+//   let
+//     call = Hashtable::create(11,earley_node_cmp,earley_node_hash);
+//   let                                                                 //PROB
+//     weights = Hashtable::create(11,earley_node_cmp,earley_node_hash); //PROB
+
+//   /* Initialize the sequence of Earley states with s0 */
+//   let estates = /* Earley states  s0, s1, s2, ... */
+//     Axarray::create(11,Set::empty(earley_item_cmp));
+//   let earley_item_0 = new $(symb_start,0); // symb_start is initial state of symb in dfa, 0 is i in si
+//   let rs = new rstate {dfa,estates,pred,retn,call
+//                        ,weights //PROB
+//   };
+//   push_closure(rs,
+// 	       input,
+//                0,
+//                earley_item_0,
+//                "(initial)",
+//                NULL,NULL
+//                ,Semiring::one_weight,Semiring::one_weight //PROB
+//                );
+
+//   /* Scan the input */
+//   fprintf(stderr,"Scanning the input.\n");
+//   let i = 0;
+//   for (let estate_i = Axarray::get(estates,0); !Set::is_empty(estate_i); estate_i = Axarray::get(estates,++i)) {
+
+//     if (show_prog && show_prog_start < i){
+//       fprintf(stderr,"input[%d]==%s\n",i,cs_char_escape(input[i]));fflush(stderr);
+//     }
+
+//     if
+//     for (let si_list = Set::to_list(estate_i);
+//          si_list != NULL;
+//          si_list = si_list->tl) {
+
+//       let &$(state,parent) = si_list->hd;
+//       let $(k,w) = target_w_weight(dfa,state,input[i]); //PROB
+//       if (k != 0) {// where k==0 indicates there is no valid target.
+// 	let eitem = new $(state,parent,i);
+// 	let &$(forward,inner) = Hashtable::lookup(rs->weights,eitem);
+// 	if (show_prog && show_prog_start < i){
+// 	  printf("Weights are w=%s, forw=%s, inn=%s.\n",Semiring::print_weight(w),Semiring::print_weight(forward),
+// 		 Semiring::print_weight(inner));
+// 	}
+//         push_closure(rs,input,i+1,new $(k,parent),"(input)",eitem,NULL
+//                      ,Semiring::mult(w, forward), Semiring::mult(w, inner) //PROB
+//                      );
+//       }
+//     }
+//   }
+
+//   // Search for last final state
+
+
+//   for (; i >= 0; i--){
+
+//   for (let si_list = Set::to_list(Axarray::get(estates,i));
+//        si_list != NULL;
+//        si_list = si_list->tl) {
+//     let &$(state,parent) = si_list->hd;
+//     if (Set::member(symb_final,state) && parent == 0) {
+
+//       let en = new $(state,parent /*== 0*/,input_len);
+//       let derivation_tree = derivation_redux(rs,input,en);
+//       if (debug) {
+// 	printf("Input:\n%s\nLeftmost tree:\n",input);
+// 	print_LT(derivation_tree,-1);
+// 	printf("\nRightmost tree:\n");
+// 	print_RT(derivation_tree,-1);
+// 	printf("\n");
+//       }
+
+//       last_derivation_tree = derivation_tree;
+//       let &$(w_forward,w_inner) = Hashtable::lookup(rs->weights, en);
+//       if ( !Semiring::check_nonzero(w_forward) )
+// 	printf("Weight: ~Zero.\n");
+//       else {
+// 	printf("Weight: %s\n",Semiring::print_weight(w_forward));
+//       }
+//     }
+//   }
+//   }
+//   return $(complete_parses,partial_parses);
+// }
+
 $(int,int) recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input, int show_progress) {
 
   show_prog = show_progress;
@@ -1264,7 +1370,7 @@ $(int,int) recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input, i
                earley_item_0,
                "(initial)",
                NULL,NULL
-               ,zeroWeight,zeroWeight //PROB
+               ,Semiring::one_weight,Semiring::one_weight //PROB
                );
 
   /* Scan the input */
@@ -1272,7 +1378,7 @@ $(int,int) recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input, i
   let input_len = strlen(input);
   for (let i = 0; i < input_len; i++) {
 
-    if (show_prog){
+    if (show_prog && show_prog_start < i){
       fprintf(stderr,"input[%d]==%s\n",i,cs_char_escape(input[i]));fflush(stderr);
     }
 
@@ -1282,12 +1388,17 @@ $(int,int) recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input, i
 
       let &$(state,parent) = si_list->hd;
       let $(k,w) = target_w_weight(dfa,state,input[i]); //PROB
-      let eitem = new $(state,parent,i);
-      let &$(forward,inner) = Hashtable::lookup(rs->weights,eitem);
-      if (k != 0) // where k==0 indicates there is no valid target.
+      if (k != 0) {// where k==0 indicates there is no valid target.
+	let eitem = new $(state,parent,i);
+	let &$(forward,inner) = Hashtable::lookup(rs->weights,eitem);
+	if (show_prog && show_prog_start < i){
+	  printf("Weights are w=%s, forw=%s, inn=%s.\n",Semiring::print_weight(w),Semiring::print_weight(forward),
+		 Semiring::print_weight(inner));
+	}
         push_closure(rs,input,i+1,new $(k,parent),"(input)",eitem,NULL
-                     ,w*forward,w*inner //PROB
+                     ,Semiring::mult(w, forward), Semiring::mult(w, inner) //PROB
                      );
+      }
     }
   }
 
@@ -1297,7 +1408,7 @@ $(int,int) recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input, i
     fprintf(stderr," (%d,0)",fs->hd);
   fprintf(stderr,"\n");fflush(stderr);
 
-  printf("AA\n");
+  printf("AAs\n");
   if (debug)
     rstate_dot(rs);
   //  Graph::print(stdout,cvt(pred),earley_node_pr);
@@ -1320,7 +1431,7 @@ $(int,int) recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input, i
       complete_parses++;
 
       let en = new $(state,parent /*== 0*/,input_len);
-      let derivation_tree = derivation_redux(pred,retn,input,dfa,en);
+      let derivation_tree = derivation_redux(rs,input,en);
       if (debug) {
 	printf("Input:\n%s\nLeftmost tree:\n",input);
 	print_LT(derivation_tree,-1);
@@ -1331,7 +1442,11 @@ $(int,int) recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input, i
 
       last_derivation_tree = derivation_tree;
       let &$(w_forward,w_inner) = Hashtable::lookup(rs->weights, en);
-      printf("Probability: %lf\n",w_forward);
+      if ( !Semiring::check_nonzero(w_forward) )
+	printf("Weight: ~Zero.\n");
+      else {
+	printf("Weight: %s\n",Semiring::print_weight(w_forward));
+      }
     }
   }
   return $(complete_parses,partial_parses);

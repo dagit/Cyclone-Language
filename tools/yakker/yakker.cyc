@@ -108,8 +108,9 @@ static const char ?add_namespace = NULL;
 "Options: -gen <sym>             generate a parser using <sym> as the start symbol\n"\
 "           -local                 use only local lookahead (without FOLLOW)\n"\
 "           -no-expand             don't expand recursive symbols, share them instead\n"\
-"         -crawl <sym>         generate a parse-tree crawler using <sym> as the start symbol\n"\
 "         -gen-header          generate a header file for the parsing functions\n"\
+"         -gen-crawl <sym>     generate a parse-tree crawler using <sym> as the start symbol\n"\
+"         -gen-crawl-header    generate a header file for the crawling functions\n"\
 "         -extract               extract EBNF from the input, assumed to be in RFC format\n"\
 "           -externals <bnfs>      use symbols from bnf files if needed in extraction\n"\
 "         -list-defs             print the names of the definitions defined in the BNF\n"\
@@ -176,6 +177,7 @@ int main(int argc, const char ?`H?argv) {
   int generate = 0;
   int generate_header = 0;
   int crawl = 0;
+  int crawl_header = 0;
   int subset = 0;
   int pads = 0;
   int sortp = 0;
@@ -214,7 +216,7 @@ int main(int argc, const char ?`H?argv) {
       start_symbol = argv[i+1];
       i += 1;
     }
-    else if (strcmp("-crawl",argv[i]) == 0) {
+    else if (strcmp("-gen-crawl",argv[i]) == 0) {
       crawl = 1;
       if (i+1 >= argc) die();
       start_symbol = argv[i+1];
@@ -270,6 +272,7 @@ int main(int argc, const char ?`H?argv) {
       i += 1;
     }
     else if (strcmp("-gen-header",argv[i]) == 0) generate_header = 1;
+    else if (strcmp("-gen-crawl-header",argv[i]) == 0) crawl_header = 1;
     else if (strcmp("-help",argv[i]) == 0) die();
     else if (strcmp("-all-start",argv[i]) == 0) all_startp = 1;
     else if (strcmp("-bindgrammar",argv[i]) == 0) bindgrammarp = 1;
@@ -848,6 +851,20 @@ int main(int argc, const char ?`H?argv) {
     //    pgen(ds,start_symbol);
     debugprint(1,"Generating... ");
     gen(ds,start_symbol,textblobs,all_startp, eof_val);
+    debugprint(1,"done\n");
+  }
+  else if (crawl_header){
+    if (!ds) {
+      fprintf(stderr,"Error: no definitions in input\n");
+      exit(1);
+    }
+    if (minus_elimp){
+      debugprint(1,"Minus elimination... ");
+      minus_elim(ds);
+      debugprint(1,"done\n");
+    }
+    debugprint(1,"Generating crawl header... ");
+    Crawlergen::gen_header(ds,textblobs);
     debugprint(1,"done\n");
   }
   else if (crawl) {

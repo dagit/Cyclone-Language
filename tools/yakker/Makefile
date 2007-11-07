@@ -26,7 +26,8 @@ CYCBISON=$(BINDIR)/cycbison
 CYCLEX=$(BINDIR)/cyclex
 STRINGIFY=$(BINDIR)/stringify
 
-YAKKER_FILES = analyze axarray cs bnf extract fa nfa_lazy nfa_eager leftfactor flatten termgrammar lex pads \
+YAKKER_FILES = analyze axarray cs bnf extract semiring fa nfa_lazy nfa_eager leftfactor \
+  flatten termgrammar lex pads \
   parse_tab parsergen crawlergen pr prose prose_elim_grm string_dfa_engine1 \
   string_dfa_engine2_1 corerules corerules_grm \
   util namespaces earley yakker
@@ -144,7 +145,7 @@ small_imap_genpm.cyc: small_imap_genpm.bnf $(PROG_DEP)
 	./yakker $(YAKFLAGS) -cyc-namespace SmallImapFormat -all-start -no-minus-elim -gen command -no-main $< > $@
 
 small_imap_genpm.h: small_imap_genpm.bnf $(PROG_DEP)
-	./yakker $(YAKFLAGS) -cyc-namespace SmallImapFormat -gen-header $< > $@
+	./yakker $(YAKFLAGS) -cyc-namespace SmallImapFormat -gen-crawl-header $< > $@
 
 small_imap_genpm.bnf: examples/small_imap.bnf $(PROG_DEP)
 	./yakker -escape "\\%()" -flatten -bindgrammar -no-anon-bind -termgrammar_bnf $< > $@
@@ -156,10 +157,9 @@ small_imap_genpm.bnf: examples/small_imap.bnf $(PROG_DEP)
 # 	./yakker_a $(YAKFLAGS) -all-start -no-minus-elim -gen command -no-main $< > $@
 
 # Use -no-minus-elim as minus elimination was already done, and redoing it causes problems (in particular, 
-# the charset optimization loses necessary semantic actions).
-$(GENDIR)/imap_genpm.cyc: $(GENDIR)/imap_genpm.bnf $(PROG_DEP)
-	./yakker $(YAKFLAGS) -left-factor \
-                             -gen command \
+# the charset optimization loses necessary semantic actions, and flattening can be undone).
+imap_genpm.cyc: $(GENDIR)/imap_genpm.bnf $(PROG_DEP)
+	./yakker $(YAKFLAGS) -gen-crawl command \
                              -cyc-namespace ImapFormat \
                              -all-start \
                              -no-minus-elim \
@@ -167,20 +167,20 @@ $(GENDIR)/imap_genpm.cyc: $(GENDIR)/imap_genpm.bnf $(PROG_DEP)
                              -no-globals \
                              $< > $@
 
-$(GENDIR)/imap_genpm.h: $(GENDIR)/imap_genpm.bnf $(PROG_DEP)
-	./yakker $(YAKFLAGS) -cyc-namespace ImapFormat -gen-header $< > $@
+imap_genpm.h: $(GENDIR)/imap_genpm.bnf $(PROG_DEP)
+	./yakker $(YAKFLAGS) -cyc-namespace ImapFormat -gen-crawl-header $< > $@
 
-$(GENDIR)/imap_genpm_lf.bnf: $(BNFDIR)/imap_genpm.bnf $(PROG_DEP)
-	./yakker -left-factor $< > $@
+# $(GENDIR)/imap_genpm_lf.bnf: $(BNFDIR)/imap_genpm.bnf $(PROG_DEP)
+# 	./yakker -left-factor $< > $@
 
-$(GENDIR)/imap_genpm.bnf: $(BNFDIR)/imap.bnf $(PROG_DEP)
-	./yakker -left-factor -escape "\\%()" -flatten -bindgrammar -termgrammar_bnf $< > $@
+$(GENDIR)/imap_genpm.bnf: $(BNFDIR)/imap_revised_fixed.bnf $(PROG_DEP)
+	./yakker -escape "\\%()" -flatten-full -bindgrammar $< > $@
 
-$(GENDIR)/imap.cyc: $(BNFDIR)/imap.bnf $(PROG_DEP)
-	./yakker $(YAKFLAGS) -gen command -no-main -lazyfill $< > $@
+# $(GENDIR)/imap.cyc: $(BNFDIR)/imap.bnf $(PROG_DEP)
+# 	./yakker $(YAKFLAGS) -gen command -no-main -lazyfill $< > $@
 
-$(GENDIR)/imap.h: $(BNFDIR)/imap.bnf $(PROG_DEP)
-	./yakker $(YAKFLAGS) -gen-header $< > $@
+# $(GENDIR)/imap.h: $(BNFDIR)/imap.bnf $(PROG_DEP)
+# 	./yakker $(YAKFLAGS) -gen-header $< > $@
 
 # imap_genpm.bnf: imap_flat.bnf $(PROG_DEP)
 # 	./yakker -no-minus-elim -bindgrammar -no-anon-bind -termgrammar_bnf $< > $@
@@ -197,11 +197,11 @@ $(GENDIR)/imap_bind.bnf: $(BNFDIR)/imap.bnf $(PROG_DEP)
 # imap_none.bnf: imap.bnf $(PROG_DEP)
 # 	./yakker $< > $@
 
-$(GENDIR)/imap_lf.cyc: $(BNFDIR)/imap_lf.bnf $(PROG_DEP)
-	./yakker $(YAKFLAGS) -gen command -no-main -lazyfill $< > $@
+# $(GENDIR)/imap_lf.cyc: $(BNFDIR)/imap_lf.bnf $(PROG_DEP)
+# 	./yakker $(YAKFLAGS) -gen command -no-main -lazyfill $< > $@
 
-$(GENDIR)/imap_lf.bnf: $(BNFDIR)/imap.bnf $(PROG_DEP)
-	./yakker -left-factor $< > $@
+# $(GENDIR)/imap_lf.bnf: $(BNFDIR)/imap.bnf $(PROG_DEP)
+# 	./yakker -left-factor $< > $@
 
 $(GENDIR)/imap_flat.bnf: $(BNFDIR)/imap.bnf $(PROG_DEP)
 	./yakker -escape "\\%()" -flatten $< > $@
@@ -273,7 +273,7 @@ corerules_grm.cyc: corerules_grm.bnf
 
 build/%.d: %.cyc
 # 	echo -n "build/" > $@
-	$(CYCLONE) -M -MG $< >> $@
+	$(CYCLONE) -M -MG $< > $@
 
 .PHONY: depend
 
@@ -340,10 +340,13 @@ $(BNFDIR)/imap_revised.bnf: $(BNFDIR)/rfc3501.bnf \
 
 # FIX: not sure of the real definition of set. Looks to be identical to sequence-set.
 # session is added for conveinience.
+# FIX: flattened ["+"] by hand b/c haven't written code yet to properly flatten dep. sequences.
 $(BNFDIR)/imap_revised_fixed.bnf: $(BNFDIR)/imap_revised.bnf
-	echo 'literal = "{" number$$number ["+"] "}" CRLF @repeat(number)CHAR8.' >> $@.tmp
-	echo 'literal8 = "~{" number$$number ["+"] "}" CRLF @repeat(number)OCTET.' >> $@.tmp
 	./yakker $< -rename set sequence-set -omit literal literal8 > $@.tmp
+	echo 'PLUS = "+".' >> $@.tmp
+	echo 'optional-plus = [PLUS].' >> $@.tmp
+	echo 'literal = "{" number$$number optional-plus "}" CRLF @repeat(number)CHAR8.' >> $@.tmp
+	echo 'literal8 = "~{" number$$number optional-plus "}" CRLF @repeat(number)OCTET.' >> $@.tmp
 	./yakker -tsort $@.tmp > $@
 	rm $@.tmp
 	echo 'my-greeting = ("" greeting)$$x {greeting_hook(x);}.' >> $@

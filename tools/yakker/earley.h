@@ -20,6 +20,7 @@
 #define EARLEY_H
 #include "bnf.h"
 #include "fa.h"
+#include "semiring.h"
 
 namespace Earley {
   extern $(dfa_t,Set::set_t<st_t>) compile(grammar_t grm, rule_t r);
@@ -33,8 +34,8 @@ namespace Earley {
   typedef datatype ParseTree @`H parse_tree_t;
 
   extern datatype ParseTree{
-    NonTerm(const char ?`H, int, int, parse_forest_t);
-    SharedNonTerm(const char ?`H, int, int, List::List_t<parse_forest_t,`H>);
+    NonTerm(const char ?`H, int, int, Semiring::weight_t, parse_forest_t);
+    SharedNonTerm(const char ?`H, int, int, Semiring::weight_t, List::List_t<parse_forest_t,`H>);
   };
 
   /* Global variable that saves last derivation tree.
