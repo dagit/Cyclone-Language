@@ -66,10 +66,8 @@ extern void dfa_generate1(dfa_t dfa);
 extern void dfa_generate2(dfa_t dfa);
 extern void lookahead_glush(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt);
 
-typedef $(const char ? (@`H)(act_t, `a),`a) *act_lookup_t<`a>;
-
-extern void nfa_dot(FILE @f,Set::set_t<st_t> final_states, act_lookup_t<`a> special);
-extern void dfa_dot(FILE @f, dfa_t dfa, act_lookup_t<`a> special);
+extern void nfa_dot(FILE @f,Set::set_t<st_t> final_states, cs_pred_t special);
+extern void dfa_dot(FILE @f, dfa_t dfa, cs_pred_t special);
 
 // print symbols in FSM symbol-file format.
 void symbols_fsm(FILE @f, Hashtable::table_t<act_t,str_t> action_symb_table);

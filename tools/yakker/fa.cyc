@@ -97,7 +97,7 @@ unsigned int what_interval(unsigned int ?intervals, unsigned int key) {
     return Nfa_eager::what_interval(intervals,key);
 }
 /* Print out an NFA in DOT format, for display by Graphviz */
-void nfa_dot(FILE @f,Set::set_t<st_t> final_states,act_lookup_t<`a> special) {
+void nfa_dot(FILE @f,Set::set_t<st_t> final_states,cs_pred_t special) {
   fprintf(f,"digraph g {\n");
   fprintf(f,"rankdir=LR;\n");
   for (let i = 1; i < nfa_number_of_states; i++) {
@@ -116,8 +116,7 @@ void nfa_dot(FILE @f,Set::set_t<st_t> final_states,act_lookup_t<`a> special) {
       }
       else {
         fprintf(f,"%u -> %u [ label = \"",i,to);
-      // FIX!! Need to get this to work,but not right now.
-//         cs_dot_print(f,a,special);
+        cs_dot_print(f,a,special);
         fprintf(f,"\"];\n");
       }
     }
@@ -807,7 +806,7 @@ void dfa_print(dfa_t dfa) {
 /* Hint: to get the graph to print on one page try
      dot -Tps -Gsize=7,9 | lpr
 */
-void dfa_dot(FILE @f, dfa_t dfa, act_lookup_t<`a> special) {
+void dfa_dot(FILE @f, dfa_t dfa, cs_pred_t special) {
   fprintf(f,"digraph g {\n");
   let len = dfa->number_of_states;
   /* print nodes */
@@ -818,15 +817,15 @@ void dfa_dot(FILE @f, dfa_t dfa, act_lookup_t<`a> special) {
         let x = Hashtable::lookup(dfa->final_attrs,i);
         let y = Set::choose(x);
         x = Set::delete(x,y);
-        if (special && special->f0(y,special->f1))
-          fprintf(f,"%s",special->f0(y,special->f1));
+        if (special && special(y))
+          fprintf(f,"%s",special(y));
         else
           fprintf(f,"%u",y);
         while (!Set::is_empty(x)) {
           y = Set::choose(x);
           x = Set::delete(x,y);
-          if (special && special->f0(y,special->f1))
-            fprintf(f,",%s",special->f0(y,special->f1));
+          if (special && special(y))
+            fprintf(f,",%s",special(y));
           else
             fprintf(f,",%u",y);
         }
@@ -870,10 +869,7 @@ void dfa_dot(FILE @f, dfa_t dfa, act_lookup_t<`a> special) {
       //      x = List::imp_rev(x);
       fprintf(f,"%u -> %u [ label = \"",i,target);
 
-      // FIX!! Need to get this to work,but not right now.
-//       cs_dot_print(f,x,special);
-
-
+      cs_dot_print(f,x,special);
 //      for (; x; x = x->tl) {
 //	let &$(lb,ub) = x->hd;
 //	while (x->tl) { /* Merge adjacent spans */

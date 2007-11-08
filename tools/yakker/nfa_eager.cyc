@@ -35,6 +35,7 @@
 #include "pr.h"
 #include "util.h"
 #include "fa.h"
+#include "semiring.h"
 
 #include <time.h>
 
@@ -174,6 +175,120 @@ st_t mklit(const char ?x) { /* A bit more space efficient than looping mkact */
   }
   return s;
 }
+
+////////////////////////////////////////
+// FSM-generating versions of above
+////////////////////////////////////////
+
+void final_fsm(FILE@ f_fsm, st_t a, st_t b, const char ?symb) {
+  final(a,b);
+
+  fprintf(f_fsm,"%d\n",b);
+  // associate it in the NFA w/ its symbol.
+  let s = nfa_fresh_state();
+  fprintf(f_fsm,"%d %d FINAL-STATE\n",b,s);
+  fprintf(f_fsm,"%d %d %s\n",s,s,symb);
+  // mark s as final so it won't be deleted.
+  fprintf(f_fsm,"%d\n",s);
+}
+
+void etrans_fsm(FILE@ f_fsm, st_t a, st_t b, Semiring::weight_t w) {
+  etrans(a,b);
+  fprintf(f_fsm,"%d %d EPSILON %lf\n",a,b,w);
+}
+
+void action_fsm(FILE@ f_fsm, st_t from, cs_opt_t x, st_t to, 
+		Semiring::weight_t w) {
+  if (from == 0) return;
+  action(from,x,to);
+
+  if (to == NOTRANSITION)
+    return;
+
+  if (x == EPSILON) {
+    fprintf(f_fsm,"%d %d EPSILON %lf\n",from,to,w);
+  }
+  else { 
+    let acts = cs2list(x);
+    for (; acts; acts = acts->tl){
+      let s = fsm_char_escape(acts->hd);
+      fprintf(f_fsm,"%d %d %s %lf\n",from,to,s, w);
+    }
+  }
+}
+
+void single_action_fsm(FILE@ f_fsm, st_t from, act_t a, const char ? name, 
+		       st_t to, Semiring::weight_t w) {
+  if (from == 0) return;
+  let x = cs_singleton(a);
+  action(from,x,to);
+
+  if (to == NOTRANSITION)
+    return;
+
+  if (x == EPSILON) {
+    fprintf(f_fsm,"%d %d EPSILON %lf\n",from,to,w);
+  } else { 
+    fprintf(f_fsm,"%d %d %s %lf\n",from,to,name, w);
+  }
+}
+
+/* Invariant: all mk functions return a state s where get_final(s)
+   has no transitions */
+st_t mkopt_fsm(FILE@ f_fsm, st_t a) {
+  let s = nfa_fresh_state(); let f = nfa_fresh_state(); final(s,f);
+  action_fsm(f_fsm, s,EPSILON,a, Semiring::from_inv_prob(2.0));
+  etrans_fsm(f_fsm, s,f, Semiring::from_inv_prob(2.0));
+  etrans_fsm(f_fsm, get_final(a),f, Semiring::one_weight);
+  return s;
+}
+st_t mkseq_fsm(FILE@ f_fsm, st_t a,st_t b) {
+  let s = nfa_fresh_state(); let f = nfa_fresh_state(); final(s,f);
+  action_fsm(f_fsm, s,EPSILON,a, Semiring::one_weight);
+  etrans_fsm(f_fsm, get_final(a),b, Semiring::one_weight);
+  etrans_fsm(f_fsm, get_final(b),f, Semiring::one_weight);
+  return s;
+}
+st_t mkstar_fsm(FILE@ f_fsm, st_t a) {
+  let s = nfa_fresh_state(); let f = nfa_fresh_state(); final(s,f);
+  action_fsm(f_fsm, s,EPSILON,a, Semiring::from_inv_prob(2.0));
+  etrans_fsm(f_fsm, get_final(a),s, Semiring::one_weight);
+  etrans_fsm(f_fsm, s,f, Semiring::from_inv_prob(2.0));
+  return s;
+}
+st_t mkact_fsm(FILE@ f_fsm, cs_t x) {
+  let s = nfa_fresh_state(); let f = nfa_fresh_state(); final(s,f);
+  let acts = cs2list(x);
+  let w = Semiring::from_inv_prob(List::length(acts));
+  action_fsm(f_fsm, s,x,f, w);
+  return s;
+}
+st_t mklit_fsm(FILE@ f_fsm, const char ?x) { /* A bit more space efficient than looping mkact */
+  let s = nfa_fresh_state();
+  let len = strlen(x);
+  if (len == 0) {
+    let f = nfa_fresh_state();
+    final(s,f);
+    action_fsm(f_fsm, s,EPSILON,f, Semiring::one_weight);
+  }
+  else {
+    let a = s;
+    for (let i = 0; i < len; i++) {
+      let b = nfa_fresh_state();
+      cs_opt_t y;
+      if (CASE_INSENSITIVE) {
+        y = cs_singleton(tolower(x[i]));
+        cs_insert(y,toupper(x[i]));
+      }
+      else y = cs_singleton(x[i]);
+      action_fsm(f_fsm, a,y,b, Semiring::one_weight);
+      a = b;
+    }
+    final(s,a);
+  }
+  return s;
+}
+
 
 /*************** CONVERT REGULAR EXPRESSIONS TO NFAS ***************/
 /* Approximately Thompson's algorithm */
