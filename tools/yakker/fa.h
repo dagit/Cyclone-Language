@@ -66,8 +66,10 @@ extern void dfa_generate1(dfa_t dfa);
 extern void dfa_generate2(dfa_t dfa);
 extern void lookahead_glush(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt);
 
-extern void nfa_dot(FILE @f,Set::set_t<st_t> final_states,cs_pred_t special);
-extern void dfa_dot(FILE @f, dfa_t dfa, cs_pred_t special);
+typedef $(const char ? (@`H)(act_t, `a),`a) *act_lookup_t<`a>;
+
+extern void nfa_dot(FILE @f,Set::set_t<st_t> final_states, act_lookup_t<`a> special);
+extern void dfa_dot(FILE @f, dfa_t dfa, act_lookup_t<`a> special);
 
 // print symbols in FSM symbol-file format.
 void symbols_fsm(FILE @f, Hashtable::table_t<act_t,str_t> action_symb_table);
@@ -80,7 +82,7 @@ void nfa_fsm(FILE @f,Set::set_t<st_t> final_states,
 // read a dfa from the FSM format.
 // returns NULL on failure.
 $(dfa_t,Set::set_t<st_t>) *fsm_dfa(const char ?filename, const char ?`H start_symb,
-				   act_t (@symb2act)(const char ?`H));
+				   act_t (@symb2act)(const char ?`H, `a),`a symb_info);
 
 /* Print the dfa as a haxe datastructure. */
 extern void dfa_haxe(FILE@,dfa_t);

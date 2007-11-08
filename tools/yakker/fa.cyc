@@ -97,7 +97,7 @@ unsigned int what_interval(unsigned int ?intervals, unsigned int key) {
     return Nfa_eager::what_interval(intervals,key);
 }
 /* Print out an NFA in DOT format, for display by Graphviz */
-void nfa_dot(FILE @f,Set::set_t<st_t> final_states,cs_pred_t special) {
+void nfa_dot(FILE @f,Set::set_t<st_t> final_states,act_lookup_t<`a> special) {
   fprintf(f,"digraph g {\n");
   fprintf(f,"rankdir=LR;\n");
   for (let i = 1; i < nfa_number_of_states; i++) {
@@ -116,7 +116,8 @@ void nfa_dot(FILE @f,Set::set_t<st_t> final_states,cs_pred_t special) {
       }
       else {
         fprintf(f,"%u -> %u [ label = \"",i,to);
-        cs_dot_print(f,a,special);
+      // FIX!! Need to get this to work,but not right now.
+//         cs_dot_print(f,a,special);
         fprintf(f,"\"];\n");
       }
     }
@@ -806,7 +807,7 @@ void dfa_print(dfa_t dfa) {
 /* Hint: to get the graph to print on one page try
      dot -Tps -Gsize=7,9 | lpr
 */
-void dfa_dot(FILE @f, dfa_t dfa, cs_pred_t special) {
+void dfa_dot(FILE @f, dfa_t dfa, act_lookup_t<`a> special) {
   fprintf(f,"digraph g {\n");
   let len = dfa->number_of_states;
   /* print nodes */
@@ -817,15 +818,15 @@ void dfa_dot(FILE @f, dfa_t dfa, cs_pred_t special) {
         let x = Hashtable::lookup(dfa->final_attrs,i);
         let y = Set::choose(x);
         x = Set::delete(x,y);
-        if (special && special(y))
-          fprintf(f,"%s",special(y));
+        if (special && special->f0(y,special->f1))
+          fprintf(f,"%s",special->f0(y,special->f1));
         else
           fprintf(f,"%u",y);
         while (!Set::is_empty(x)) {
           y = Set::choose(x);
           x = Set::delete(x,y);
-          if (special && special(y))
-            fprintf(f,",%s",special(y));
+          if (special && special->f0(y,special->f1))
+            fprintf(f,",%s",special->f0(y,special->f1));
           else
             fprintf(f,",%u",y);
         }
@@ -868,7 +869,11 @@ void dfa_dot(FILE @f, dfa_t dfa, cs_pred_t special) {
       let x = Hashtable::lookup(target_spans,target);
       //      x = List::imp_rev(x);
       fprintf(f,"%u -> %u [ label = \"",i,target);
-      cs_dot_print(f,x,special);
+
+      // FIX!! Need to get this to work,but not right now.
+//       cs_dot_print(f,x,special);
+
+
 //      for (; x; x = x->tl) {
 //	let &$(lb,ub) = x->hd;
 //	while (x->tl) { /* Merge adjacent spans */
@@ -946,7 +951,8 @@ void dfa_haxe(FILE @f, dfa_t dfa) {
 
 // Create a DFA from an FSM file.
 $(dfa_t,Set::set_t<st_t>) *fsm_dfa(const char ?filename, const char ?`H start_symb,
-				   act_t (@symb2act)(const char ?`H)) {
+				   act_t (@symb2act)(const char ?`H, `a),`a symb_info)
+{
 
   FILE *f = fopen(filename,"r");
   if (!f) {
@@ -1000,7 +1006,7 @@ $(dfa_t,Set::set_t<st_t>) *fsm_dfa(const char ?filename, const char ?`H start_sy
 
       let act = fsm_char_unescape(symb);
       if (act == -1){
-	act = symb2act(symb);
+	act = symb2act(symb,symb_info);
       }
 
       dfa_add_trans(dfa,src,dst,act,one_weight);
@@ -1016,7 +1022,7 @@ $(dfa_t,Set::set_t<st_t>) *fsm_dfa(const char ?filename, const char ?`H start_sy
 
       let act = fsm_char_unescape(symb);
       if (act == -1){
-	act = symb2act(symb);
+	act = symb2act(symb,symb_info);
       }
 
       let r = scan_weight(val_str,&val);
@@ -1041,8 +1047,8 @@ $(dfa_t,Set::set_t<st_t>) *fsm_dfa(const char ?filename, const char ?`H start_sy
   // Build mapping of DFA final states to completed symbols.
 
   let dfa_final = Set::empty(st_cmp);
-  let start_act = symb2act(start_symb);
-  let final_st_action = symb2act("FINAL-STATE");
+  let start_act = symb2act(start_symb,symb_info);
+  let final_st_action = symb2act("FINAL-STATE",symb_info);
 
   for (let states = Set::to_list(dfa_final_states(dfa));
        states != NULL; states = states->tl) {

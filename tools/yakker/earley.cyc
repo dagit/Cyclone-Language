@@ -146,9 +146,18 @@ int isAmb_parse_forest(parse_forest_t pf){
    NB: there is a max number of actions hard-coded in cs.h.
 */
 
-static unsigned int symb_action_counter = 259;
-static struct Hashtable::Table<str_t,act_t> *symb_action_table = NULL;
-static struct Hashtable::Table<act_t,str_t> *action_symb_table = NULL;
+struct symbInfo {
+  unsigned int symb_action_counter;
+  struct Hashtable::Table<str_t,act_t> *symb_action_table;
+  struct Hashtable::Table<act_t,str_t> *action_symb_table;
+};
+
+typedef struct symbInfo @symb_info_t;
+
+symb_info_t new_symb_info(){
+  return new symbInfo(259,NULL,NULL);
+}
+
 static act_t callout_action() {
   return 256;
 }
@@ -158,8 +167,8 @@ static act_t repeat_action() {
 static act_t final_st_action() {
   return 258;
 }
-static act_t new_action() {
-  let a = symb_action_counter++;
+static act_t new_action(symb_info_t si) {
+  let a = si->symb_action_counter++;
   if (a > MAXACTION) {
     fprintf(stderr,"Internal error: maximum number of actions exceeded\n");
     fflush(stderr);
@@ -176,59 +185,59 @@ static cs_t repeat_cs() {
 static cs_t final_st_cs() {
   return cs_singleton(final_st_action());
 }
-const char ?act2symb(act_t act) {
-  if (action_symb_table == NULL) {
-    action_symb_table =
+const char ?act2symb(act_t act, symb_info_t si) {
+  if (si->action_symb_table == NULL) {
+    si->action_symb_table =
       Hashtable::create(11,st_cmp,st_hash);
-    Hashtable::insert(action_symb_table,callout_action(),new "CALL");
-    Hashtable::insert(action_symb_table,repeat_action(),new "REPEAT");
-    Hashtable::insert(action_symb_table,final_st_action(),new "FINAL-STATE");
+    Hashtable::insert(si->action_symb_table,callout_action(),new "CALL");
+    Hashtable::insert(si->action_symb_table,repeat_action(),new "REPEAT");
+    Hashtable::insert(si->action_symb_table,final_st_action(),new "FINAL-STATE");
   }
 
-  let sopt = Hashtable::lookup_opt(action_symb_table,act);
+  let sopt = Hashtable::lookup_opt(si->action_symb_table,act);
   if (sopt == NULL || *sopt == NULL) return NULL;
   else return **sopt;
 }
-void act2symb_haxe(FILE @f) {
+void act2symb_haxe(FILE @f, symb_info_t si) {
     fprintf(f,"static public function act2symb(a:Int) {\n");
     fprintf(f,"  switch (a) {\n");
-  for (let a = repeat_action()+1; a < symb_action_counter; a++) {
-    fprintf(f,"  case %d: return \"%s\";\n",a,act2symb(a));
+  for (let a = repeat_action()+1; a < si->symb_action_counter; a++) {
+    fprintf(f,"  case %d: return \"%s\";\n",a,act2symb(a,si));
   }
     fprintf(f,"  default: return \"?unknown?\";\n");
     fprintf(f,"  }\n");
     fprintf(f,"}\n");
 }
 
-static act_t symb2act(const char ?`H symb) {
-  if (action_symb_table == NULL) {
-    action_symb_table =
+static act_t symb2act(const char ?`H symb, symb_info_t si) {
+  if (si->action_symb_table == NULL) {
+    si->action_symb_table =
       Hashtable::create(11,st_cmp,st_hash);
-    Hashtable::insert(action_symb_table,callout_action(),new "CALL");
-    Hashtable::insert(action_symb_table,repeat_action(),new "REPEAT");
-    Hashtable::insert(action_symb_table,final_st_action(),new "FINAL-STATE");
+    Hashtable::insert(si->action_symb_table,callout_action(),new "CALL");
+    Hashtable::insert(si->action_symb_table,repeat_action(),new "REPEAT");
+    Hashtable::insert(si->action_symb_table,final_st_action(),new "FINAL-STATE");
   }
-  if (symb_action_table == NULL){
-    symb_action_table =
+  if (si->symb_action_table == NULL){
+    si->symb_action_table =
       Hashtable::create(11,strptrcmp,Hashtable::hash_stringptr);
-    Hashtable::insert(symb_action_table,new "CALL",callout_action());
-    Hashtable::insert(symb_action_table,new "REPEAT",repeat_action());
-    Hashtable::insert(symb_action_table,new "FINAL-STATE",final_st_action());
+    Hashtable::insert(si->symb_action_table,new "CALL",callout_action());
+    Hashtable::insert(si->symb_action_table,new "REPEAT",repeat_action());
+    Hashtable::insert(si->symb_action_table,new "FINAL-STATE",final_st_action());
   }
 //   let symbptr = new symb;
   let symbptr = new (const char ?)aprintf("%s",symb);
-  let aptr = Hashtable::lookup_opt(symb_action_table,symbptr);
+  let aptr = Hashtable::lookup_opt(si->symb_action_table,symbptr);
   if (aptr != NULL) return *aptr;
-  let a = new_action();
+  let a = new_action(si);
   fprintf(stderr,"Symbol %s has action 0x%x\n",symb,a);
   // allocate a new string before putting it in table to ensure
   // that
-  Hashtable::insert((_@)symb_action_table,symbptr,a);
-  Hashtable::insert((_@)action_symb_table,a,symbptr);
+  Hashtable::insert((_@)si->symb_action_table,symbptr,a);
+  Hashtable::insert((_@)si->action_symb_table,a,symbptr);
   return a;
 }
-static cs_t consume_symb_cs(const char ?`H symb) {
-  return cs_singleton(symb2act(symb));
+static cs_t consume_symb_cs(const char ?`H symb,symb_info_t si) {
+  return cs_singleton(symb2act(symb,si));
 }
 
 /* An automaton state and parent pointer */
@@ -281,11 +290,13 @@ typedef Set::set_t<earley_item_t> earley_state_t;
 $(st_t,st_t,st_t)
   merge(Hashtable::table_t<str_t,st_t> symb_st,
         grammar_t grm,
-        rule_t r);
+        rule_t r,
+	symb_info_t symb_info);
 
 st_t rule2earley0(Hashtable::table_t<str_t,st_t> symb_st,
                   grammar_t grm,
-                  rule_t r) {
+                  rule_t r,
+		  symb_info_t symb_info) {
   switch (r->r) {
   case &Symb(x,_):
     let xptr = new x;
@@ -301,7 +312,7 @@ st_t rule2earley0(Hashtable::table_t<str_t,st_t> symb_st,
          converting to NFA in case the symbol is defined recursively. */
       let s = nfa_fresh_state(); let f = nfa_fresh_state(); final(s,f);
       Hashtable::insert(symb_st,xptr,s);
-      let $(s_body,f_body,_) = merge(symb_st,grm,x_rule);
+      let $(s_body,f_body,_) = merge(symb_st,grm,x_rule,symb_info);
       final(s,f_body); // merge does not do this
       etrans(s,s_body);
       x_start = s;
@@ -311,7 +322,7 @@ st_t rule2earley0(Hashtable::table_t<str_t,st_t> symb_st,
     let f = nfa_fresh_state(); final(s,f);
     action(s,callout_cs(),x_start);
     etrans(s,s2);
-    action(s2,consume_symb_cs(x),f);
+    action(s2,consume_symb_cs(x,symb_info),f);
     /* If the symbol can derive the empty string make sure this gets
        reflected into the automaton --- effectively doing a RETURN in
        the automaton instead of the Earley evaluator itself */
@@ -327,13 +338,13 @@ st_t rule2earley0(Hashtable::table_t<str_t,st_t> symb_st,
     }
     return mkact(cs_range(low,high+1));
   case &Opt(r2):
-    let s2 = rule2earley0(symb_st,grm,r2); let s3 = mklit("");
+    let s2 = rule2earley0(symb_st,grm,r2,symb_info); let s3 = mklit("");
     return mkalt(s2,s3);
   case &Seq(r2,r3):
-    let s2 = rule2earley0(symb_st,grm,r2); let s3 = rule2earley0(symb_st,grm,r3);
+    let s2 = rule2earley0(symb_st,grm,r2,symb_info); let s3 = rule2earley0(symb_st,grm,r3,symb_info);
     return mkseq(s2,s3);
   case &Alt(r2,r3):
-    let s2 = rule2earley0(symb_st,grm,r2); let s3 = rule2earley0(symb_st,grm,r3);
+    let s2 = rule2earley0(symb_st,grm,r2,symb_info); let s3 = rule2earley0(symb_st,grm,r3,symb_info);
     return mkalt(s2,s3);
   case &Rcount(var,r2):
     /* Conservative approximation */
@@ -342,17 +353,17 @@ st_t rule2earley0(Hashtable::table_t<str_t,st_t> symb_st,
     // TODO
 
     // 2. s2 <- generate NFA for r2.
-    let s2 = rule2earley0(symb_st,grm,r2);
+    let s2 = rule2earley0(symb_st,grm,r2,symb_info);
 
     // 2.a. Convert var -- the "repeater" because it determines the repetition -- to action.
-    let repeater_cs =  consume_symb_cs(var);
+    let repeater_cs =  consume_symb_cs(var,symb_info);
     // 2.b. Convert target -- the "repeatee" because gets repeated -- to action.
     let repeatee_cs;
     switch (r2->r) {
     case &Symb(x,_):
       // overwrite s2 with start state of symbol *definition*.
       Hashtable::try_lookup(symb_st,new x,&s2);
-      repeatee_cs = consume_symb_cs(x);
+      repeatee_cs = consume_symb_cs(x,symb_info);
       break;
     default:
       fprintf(stderr,"Error: repeatee of repeat is not a symbol.\n");
@@ -385,30 +396,32 @@ st_t rule2earley0(Hashtable::table_t<str_t,st_t> symb_st,
 
     return s;
   case &Star(0,&Infinity,r2):
-    let s2 = rule2earley0(symb_st,grm,r2);
+    let s2 = rule2earley0(symb_st,grm,r2,symb_info);
     return mkstar(s2);
   case &Star(m,i as &Infinity,r2):
     let r_seq = SEQ(r2,STAR(m-1,i,r2));
-    return rule2earley0(symb_st,grm,r_seq);
+    return rule2earley0(symb_st,grm,r_seq,symb_info);
   case &Star(0,&Num(0),r2):
     return mklit("");
 
   case &Star(0,&Num(n),r2):
     let r_opt = OPT(SEQ(r2,STAR(0, new Num(n-1),r2)));
-    return rule2earley0(symb_st,grm,r_opt);
+    return rule2earley0(symb_st,grm,r_opt,symb_info);
   case &Star(m,&Num(n),r2):
     if (m > n) return mklit("");
     let r_seq = SEQ(r2,STAR(m-1, new Num(n-1),r2));
-    return rule2earley0(symb_st,grm, r_seq);
+    return rule2earley0(symb_st,grm, r_seq,symb_info);
 
   case &Hash(0,N,r2):
     // same as [ r2 *{N-1}(commas r2) ]
     return rule2earley0(symb_st,grm,
-                        OPT(SEQ(r2,STAR(0,minus_one(N),SEQ(commas(),r2)))));
+                        OPT(SEQ(r2,STAR(0,minus_one(N),SEQ(commas(),r2)))),
+			symb_info);
   case &Hash(m,N,r2):
     // same as r2 {m-1}*{N-1}(commas r2)
     return rule2earley0(symb_st,grm,
-                        SEQ(r2,STAR(m-1,minus_one(N),SEQ(commas(),r2))));
+                        SEQ(r2,STAR(m-1,minus_one(N),SEQ(commas(),r2))),
+			symb_info);
   case &Prose(_):
     warn("Prose not supported in rule2earley()\n");
     return mklit("");
@@ -421,7 +434,8 @@ st_t rule2earley0(Hashtable::table_t<str_t,st_t> symb_st,
 $(st_t,st_t,st_t)
   merge(Hashtable::table_t<str_t,st_t> symb_st,
         grammar_t grm,
-        rule_t r) {
+        rule_t r,
+	symb_info_t symb_info) {
   switch (r->r) {
   case &Symb(x,_):
     let xptr = new x;
@@ -431,13 +445,13 @@ $(st_t,st_t,st_t)
       Rule_t x_rule = lookup_symbol(grm, x);
       if (!x_rule) {
 	warn("missing definition for %s in merge()\n",x);
-	return merge(symb_st,grm,LIT(""));
+	return merge(symb_st,grm,LIT(""),symb_info);
       }
       /* Allocate a start state for the symbol.  Do this before
          converting to NFA in case the symbol is defined recursively. */
       let s = nfa_fresh_state(); let f = nfa_fresh_state();
       Hashtable::insert(symb_st,xptr,s);
-      let $(s_body,f_body,_) = merge(symb_st,grm,x_rule);
+      let $(s_body,f_body,_) = merge(symb_st,grm,x_rule,symb_info);
       // need e_body too???
       final(s,f_body); // merge does not do this
       etrans(s,s_body);
@@ -449,7 +463,7 @@ $(st_t,st_t,st_t)
     let f = nfa_fresh_state();
     action(s,EPSILON,x_start);
     etrans(s,s2);
-    action(s2,consume_symb_cs(x),f);
+    action(s2,consume_symb_cs(x,symb_info),f);
     /* If the symbol can derive the empty string make sure this gets
        reflected into the automaton --- effectively doing a RETURN in
        the automaton instead of the Earley evaluator itself */
@@ -486,7 +500,7 @@ $(st_t,st_t,st_t)
   case &Opt(r2):
     let s = nfa_fresh_state();
     let e = nfa_fresh_state();
-    let $(s2,f2,e2) = merge(symb_st,grm,r2);
+    let $(s2,f2,e2) = merge(symb_st,grm,r2,symb_info);
     etrans(s,s2);
     action(s,EPSILON,e);
     etrans(e2,e);
@@ -495,9 +509,9 @@ $(st_t,st_t,st_t)
     let s = nfa_fresh_state();
     let f = nfa_fresh_state();
     let e = nfa_fresh_state();
-    let $(s2,f2,e2) = merge(symb_st,grm,r2);
-    let $(s3,f3,e3) = merge(symb_st,grm,r3);
-    let scall = rule2earley0(symb_st,grm,r3);
+    let $(s2,f2,e2) = merge(symb_st,grm,r2,symb_info);
+    let $(s3,f3,e3) = merge(symb_st,grm,r3,symb_info);
+    let scall = rule2earley0(symb_st,grm,r3,symb_info);
     let fcall = get_final(scall);
     etrans(s,s2);
     etrans(f2,scall);
@@ -510,8 +524,8 @@ $(st_t,st_t,st_t)
     let s = nfa_fresh_state();
     let f = nfa_fresh_state();
     let e = nfa_fresh_state();
-    let $(s2,f2,e2) = merge(symb_st,grm,r2);
-    let $(s3,f3,e3) = merge(symb_st,grm,r3);
+    let $(s2,f2,e2) = merge(symb_st,grm,r2,symb_info);
+    let $(s3,f3,e3) = merge(symb_st,grm,r3,symb_info);
     etrans(s,s2);
     action(s,EPSILON,s3);
     etrans(f2,f);
@@ -530,8 +544,8 @@ $(st_t,st_t,st_t)
     let s = nfa_fresh_state();
     let f = nfa_fresh_state();
     let e = nfa_fresh_state();
-    let $(s2,f2,e2) = merge(symb_st,grm,r2);
-    let scall = rule2earley0(symb_st,grm,r2);
+    let $(s2,f2,e2) = merge(symb_st,grm,r2,symb_info);
+    let scall = rule2earley0(symb_st,grm,r2,symb_info);
     let fcall = get_final(scall);
     etrans(s,s2);
     action(s,EPSILON,e);
@@ -551,31 +565,31 @@ $(st_t,st_t,st_t)
     return $(s,f,e);
   case &Star(m,i as &Infinity,r2):
     let r_seq = SEQ(r2,STAR(m-1,i,r2));
-    return merge(symb_st,grm,r_seq);
+    return merge(symb_st,grm,r_seq,symb_info);
   case &Star(0,&Num(0),r2):
-    return merge(symb_st,grm,LIT(""));
+    return merge(symb_st,grm,LIT(""),symb_info);
   case &Star(0,&Num(n),r2):
     let r_opt = OPT(SEQ(r2,STAR(0, new Num(n-1),r2)));
-    return merge(symb_st,grm,r_opt);
+    return merge(symb_st,grm,r_opt,symb_info);
   case &Star(m,&Num(n),r2):
-    if (m > n) return merge(symb_st,grm,LIT(""));
+    if (m > n) return merge(symb_st,grm,LIT(""),symb_info);
     let r_seq = SEQ(r2,STAR(m-1, new Num(n-1),r2));
-    return merge(symb_st,grm, r_seq);
+    return merge(symb_st,grm, r_seq,symb_info);
 
   case &Hash(0,N,r2):
     // same as [ r2 *{N-1}(commas r2) ]
     return merge(symb_st,grm,
-                 OPT(SEQ(r2,STAR(0,minus_one(N),SEQ(commas(),r2)))));
+                 OPT(SEQ(r2,STAR(0,minus_one(N),SEQ(commas(),r2)))),symb_info);
   case &Hash(m,N,r2):
     // same as r2 {m-1}*{N-1}(commas r2)
     return merge(symb_st,grm,
-                 SEQ(r2,STAR(m-1,minus_one(N),SEQ(commas(),r2))));
+                 SEQ(r2,STAR(m-1,minus_one(N),SEQ(commas(),r2))),symb_info);
   case &Prose(_):
     warn("Prose not supported in merge()\n");
-    return merge(symb_st,grm,LIT(""));
+    return merge(symb_st,grm,LIT(""),symb_info);
   case &Minus(_,_):
     warn("Minus not supported in merge()\n");
-    return merge(symb_st,grm,LIT(""));
+    return merge(symb_st,grm,LIT(""),symb_info);
   }
 }
 
@@ -592,7 +606,9 @@ void rule_fsm(const char ?filename_base, grammar_t grm, rule_t r) {
     Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr);
 
   nfa_init(grm);
-  let $(start_state,f,e) = merge(symb_st,grm,r);
+  let symb_info = new_symb_info();
+
+  let $(start_state,f,e) = merge(symb_st,grm,r,symb_info);
   let final_state = nfa_fresh_state();
   etrans(f,final_state);
   etrans(e,final_state);
@@ -611,46 +627,54 @@ void rule_fsm(const char ?filename_base, grammar_t grm, rule_t r) {
     symb_final_states = Set::insert(symb_final_states,symb_final);
     Hashtable::insert(act_table,
                       symb_final,
-                      symb2act(symb));
+                      symb2act(symb,symb_info));
   }
 
   let fsm_file = aprintf("%s.fsm",filename_base);
   FILE *f = fopen(fsm_file,"w");
-  if (f) { nfa_fsm(f,symb_final_states,action_symb_table,act_table); fclose(f); }
+  if (f) { nfa_fsm(f,symb_final_states,symb_info->action_symb_table,act_table); fclose(f); }
   else fprintf(stderr, "Failed to open file %s.\n",fsm_file);
 
   let sym_file = aprintf("%s.sym",filename_base);
   FILE *f = fopen(sym_file,"w");
-  if (f) { symbols_fsm(f,action_symb_table); fclose(f); }
+  if (f) { symbols_fsm(f,symb_info->action_symb_table); fclose(f); }
   else fprintf(stderr, "Failed to open file %s.\n",sym_file);
 }
 
-$(dfa_t,Set::set_t<st_t>) *fsm2dfa(const char ?filename, const char ?`H start_symb) {
-  return fsm_dfa(filename,start_symb,symb2act);
+$(dfa_t,Set::set_t<st_t>,symb_info_t) *fsm2dfa(const char ?filename, const char ?`H start_symb) {
+  let si = new_symb_info();
+  let r = fsm_dfa(filename,start_symb,symb2act,si);
+  if (!r) return NULL;
+  else{
+    let &$(dfa,final_states) = (_@)r;
+    return new $(dfa,final_states,si);
+  }
 }
 
-void dfa2dot(dfa_t dfa, const char ?dot_file){
+void dfa2dot(dfa_t dfa, symb_info_t symb_info, const char ?dot_file){
   FILE *f = fopen(dot_file,"w");
-  if (f) { dfa_dot(f,dfa,act2symb); fclose(f); }
+  if (f) { dfa_dot(f,dfa,new $(act2symb,symb_info)); fclose(f); }
   else fprintf(stderr, "Failed to open file %s.\n",dot_file);
 }
 
-$(dfa_t,Set::set_t<st_t>) rule2earley(grammar_t grm, rule_t r) {
+$(dfa_t,Set::set_t<st_t>,symb_info_t) rule2earley(grammar_t grm, rule_t r) {
   /* Build the NFA for the grammar */
 
   /* symb_st maps symbols to start states */
   Hashtable::table_t<str_t,st_t> symb_st =
     Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr);
 
+  let symb_info = new_symb_info();
+
   nfa_init(grm);
-  let $(start_state,f,e) = merge(symb_st,grm,r);
+  let $(start_state,f,e) = merge(symb_st,grm,r,symb_info);
   let final_state = nfa_fresh_state();
   etrans(f,final_state);
   etrans(e,final_state);
   final(start_state,final_state);
   fprintf(stderr,"Start state is %d, final state is %d\n",start_state,final_state);
   if (debug > 1){
-    nfa_dot(stderr,Set::singleton(st_cmp,final_state),act2symb);
+    nfa_dot(stderr,Set::singleton(st_cmp,final_state),new $(act2symb,symb_info));
   }
 
   /* Collect the set of final states for symbols... */
@@ -665,16 +689,16 @@ $(dfa_t,Set::set_t<st_t>) rule2earley(grammar_t grm, rule_t r) {
     symb_final_states = Set::insert(symb_final_states,symb_final);
     Hashtable::insert(act_table,
                       symb_final,
-                      symb2act(symb));
+                      symb2act(symb, symb_info));
   }
 
   if (debug){
     FILE *f = fopen("ykdebug/nfa.fsm","w");
-    if (f) { nfa_fsm(f,symb_final_states,action_symb_table,act_table); fclose(f); }
+    if (f) { nfa_fsm(f,symb_final_states,symb_info->action_symb_table,act_table); fclose(f); }
     else fprintf(stderr, "Failed to open file ykdebug/nfa.fsm.\n");
 
     FILE *f = fopen("ykdebug/nfa.sym","w");
-    if (f) { symbols_fsm(f,action_symb_table); fclose(f); }
+    if (f) { symbols_fsm(f,symb_info->action_symb_table); fclose(f); }
     else fprintf(stderr, "Failed to open file ykdebug/nfa.sym.\n");
   }
 
@@ -715,11 +739,15 @@ $(dfa_t,Set::set_t<st_t>) rule2earley(grammar_t grm, rule_t r) {
     }
     dfa_set_final(dfa,s,action_attrs);
   }
-  return $(dfa,dfa_final);
+  return $(dfa,dfa_final,symb_info);
 }
 
 struct rstate {
   dfa_t dfa;
+  symb_info_t symb_info;
+  act_t start_act; // the action for the symbol being parsed; -1 ,if
+		   // there is no such action (e.g. we're not parsing
+		   // a particular symbol).
   Axarray::xarray_t<earley_state_t> estates;
   Hashtable::table_t<earley_node_t,List::list_t<earley_node_t,`H>,`H> pred;
   Hashtable::table_t<earley_node_t,List::list_t<$(earley_node_opt_t,earley_node_t) @`H,`H>,`H> retn;
@@ -874,12 +902,13 @@ push_closure(rstate_t rs,
       return;
     }
     let repeater_nt = *nt_opt;
-    fprintf(stderr,"Repeat based on non terminal %s.\n",act2symb(repeater_nt));
+    fprintf(stderr,"Repeat based on non terminal %s.\n",act2symb(repeater_nt,rs->symb_info));
     // get the bounds (inclusive) of parsed non-terminal nt from the
     // Earley parse history.
     let bounds_opt = get_bounds(rs->retn,rs->dfa,node,repeater_nt);
     if (!bounds_opt){
-      fprintf(stderr,"Error: bounds could not be find for non terminal %s.\n",act2symb(repeater_nt));
+      fprintf(stderr,"Error: bounds could not be find for non terminal %s.\n",
+	      act2symb(repeater_nt,rs->symb_info));
       return;
     }
     let &$(j,k) = (_@)bounds_opt;
@@ -896,7 +925,7 @@ push_closure(rstate_t rs,
       return;
     }
     let repeatee_nt = *nt_opt;
-    fprintf(stderr,"Repeat non terminal %s.\n",act2symb(repeatee_nt));
+    fprintf(stderr,"Repeat non terminal %s.\n",act2symb(repeatee_nt,rs->symb_info));
 
     // Find the start state of the repeated DFA.
     let nt_start = target(rs->dfa,t,callout_action());
@@ -908,7 +937,7 @@ push_closure(rstate_t rs,
 
     if (debug > 1){
       fprintf(stderr,"Printing DFA after unrolling repeat.\n");
-      dfa_dot(stderr,rs->dfa,act2symb);
+      dfa_dot(stderr,rs->dfa,new $(act2symb,rs->symb_info));
       fflush(stderr);
     }
 
@@ -918,7 +947,8 @@ push_closure(rstate_t rs,
                  ,forward,inner //PROB
                  );
   }
-  /* Close under RETURNS.  Use else, becaause a REPEAT state can't
+
+  /* Close under RETURNS.  Use else, because a REPEAT state can't
      also be a final state. */
   else if (i != backptr // we parsed the empty string, RETURN handled by dfa already
       && dfa_is_final(rs->dfa,s)) {
@@ -930,7 +960,12 @@ push_closure(rstate_t rs,
     /* For every completed symbol... */
     for (let completed = Set::to_list(dfa_final_attrs(rs->dfa,s));
          completed != NULL; completed = completed->tl) {
-      let symb = completed->hd;
+      let symb_act = completed->hd;
+
+      // don't perform a completion if the this is the final
+      // state for the start symbol.
+      if (symb_act == rs->start_act && backptr == 0)
+	continue;
 
       /* ... look at every DFA state in es_back... */
       for (let es_back_list = Set::to_list(es_back);
@@ -938,7 +973,7 @@ push_closure(rstate_t rs,
            es_back_list = es_back_list->tl) {
 
         let &$(t,tbackptr) = es_back_list->hd;
-        let ttarget = target(rs->dfa,t,symb);
+        let ttarget = target(rs->dfa,t,symb_act);
         /* ... see if the DFA state did a CALL and RETURN if so. */
         if (ttarget != 0) {
 	  // Earley node w/ dot before symb.
@@ -947,7 +982,7 @@ push_closure(rstate_t rs,
           let retnode = new $(ttarget,tbackptr,i);
           let &$(backnode_forward,backnode_inner) = Hashtable::lookup(rs->weights,backnode); //PROB
           push_closure(rs,input,i,new $(ttarget,tbackptr),
-                       aprintf("(return %s)",act2symb(symb)),
+                       aprintf("(return %s)",act2symb(symb_act,rs->symb_info)),
                        backnode, node
                        ,mult( mult(final_w, inner), backnode_forward), //PROB
 		       mult( mult(final_w,inner), backnode_inner) //PROB
@@ -1178,7 +1213,7 @@ derivation_redux(rstate_t rs,
     // pick any attribute (we choose the first)
     // FIX: use *all* attributes.
     let attr = completed->hd;
-    name = act2symb(attr);
+    name = act2symb(attr,rs->symb_info);
 // THIS CODE CAUSES A CYCLONE BUG !!!
 //     switch (h_derivations) {
 //     case NULL  :
@@ -1238,112 +1273,102 @@ egraph_t cvt(Hashtable::table_t<earley_node_t,List::list_t<earley_node_t>,`H> tb
 /* Earley recognizer.
    Returns 1 if input is recognized, 0 otherwise.
  */
-$(dfa_t,Set::set_t<st_t>) compile(grammar_t grm, rule_t r) {
+$(dfa_t,Set::set_t<st_t>,symb_info_t) compile(grammar_t grm, rule_t r) {
   init_maybe_empty(grm);
-  let $(dfa,dfa_final) = rule2earley(grm,r);
+  let $(dfa,dfa_final,symb_info) = rule2earley(grm,r);
   if (debug > 1)
-    dfa_dot(stderr,dfa,act2symb);
+    dfa_dot(stderr,dfa,new $(act2symb,symb_info));
   fflush(stderr);
 
-  return $(dfa,dfa_final);
+  return $(dfa,dfa_final,symb_info);
 }
 
-// $(int,int) recognize_frag(dfa_t dfa, st_t symb_start, Set::set_t<st_t> symb_final, 
-// 			  const char ?input, int show_progress) {
+parse_forest_t recognize_frag(dfa_t dfa, symb_info_t symb_info, 
+			      const char?`H symb_name, st_t symb_start, Set::set_t<st_t> symb_final, 
+			      const char ?input, int show_progress) {
   
-//   show_prog = show_progress;
+  show_prog = show_progress;
 
-//   /* Keep track of parse trees */
-//   let
-//     pred = Hashtable::create(11,earley_node_cmp,earley_node_hash);
-//   let
-//     retn = Hashtable::create(11,earley_node_cmp,earley_node_hash);
-//   let
-//     call = Hashtable::create(11,earley_node_cmp,earley_node_hash);
-//   let                                                                 //PROB
-//     weights = Hashtable::create(11,earley_node_cmp,earley_node_hash); //PROB
+  /* Keep track of parse trees */
+  let
+    pred = Hashtable::create(11,earley_node_cmp,earley_node_hash);
+  let
+    retn = Hashtable::create(11,earley_node_cmp,earley_node_hash);
+  let
+    call = Hashtable::create(11,earley_node_cmp,earley_node_hash);
+  let                                                                 //PROB
+    weights = Hashtable::create(11,earley_node_cmp,earley_node_hash); //PROB
 
-//   /* Initialize the sequence of Earley states with s0 */
-//   let estates = /* Earley states  s0, s1, s2, ... */
-//     Axarray::create(11,Set::empty(earley_item_cmp));
-//   let earley_item_0 = new $(symb_start,0); // symb_start is initial state of symb in dfa, 0 is i in si
-//   let rs = new rstate {dfa,estates,pred,retn,call
-//                        ,weights //PROB
-//   };
-//   push_closure(rs,
-// 	       input,
-//                0,
-//                earley_item_0,
-//                "(initial)",
-//                NULL,NULL
-//                ,Semiring::one_weight,Semiring::one_weight //PROB
-//                );
+  /* Initialize the sequence of Earley states with s0 */
+  let estates = /* Earley states  s0, s1, s2, ... */
+    Axarray::create(11,Set::empty(earley_item_cmp));
+  let earley_item_0 = new $(symb_start,0); // symb_start is initial state of symb in dfa, 0 is i in si
+  let rs = new rstate {dfa,symb_info,symb2act(symb_name,symb_info),estates,pred,retn,call
+                       ,weights //PROB
+  };
+  push_closure(rs,
+	       input,
+               0,
+               earley_item_0,
+               "(initial)",
+               NULL,NULL
+               ,Semiring::one_weight,Semiring::one_weight //PROB
+               );
 
-//   /* Scan the input */
-//   fprintf(stderr,"Scanning the input.\n");
-//   let i = 0;
-//   for (let estate_i = Axarray::get(estates,0); !Set::is_empty(estate_i); estate_i = Axarray::get(estates,++i)) {
+  /* Scan the input */
+  fprintf(stderr,"Scanning the input.\n");
+  let i = 0;
+  for (let estate_i = Axarray::get(estates,0); !Set::is_empty(estate_i); estate_i = Axarray::get(estates,++i)) {
 
-//     if (show_prog && show_prog_start < i){
-//       fprintf(stderr,"input[%d]==%s\n",i,cs_char_escape(input[i]));fflush(stderr);
-//     }
+    if (show_prog && show_prog_start < i){
+      fprintf(stderr,"input[%d]==%s\n",i,cs_char_escape(input[i]));fflush(stderr);
+    }
 
-//     if
-//     for (let si_list = Set::to_list(estate_i);
-//          si_list != NULL;
-//          si_list = si_list->tl) {
+    for (let si_list = Set::to_list(estate_i);
+         si_list != NULL;
+         si_list = si_list->tl) {
 
-//       let &$(state,parent) = si_list->hd;
-//       let $(k,w) = target_w_weight(dfa,state,input[i]); //PROB
-//       if (k != 0) {// where k==0 indicates there is no valid target.
-// 	let eitem = new $(state,parent,i);
-// 	let &$(forward,inner) = Hashtable::lookup(rs->weights,eitem);
-// 	if (show_prog && show_prog_start < i){
-// 	  printf("Weights are w=%s, forw=%s, inn=%s.\n",Semiring::print_weight(w),Semiring::print_weight(forward),
-// 		 Semiring::print_weight(inner));
-// 	}
-//         push_closure(rs,input,i+1,new $(k,parent),"(input)",eitem,NULL
-//                      ,Semiring::mult(w, forward), Semiring::mult(w, inner) //PROB
-//                      );
-//       }
-//     }
-//   }
+      let &$(state,parent) = si_list->hd;
+      let $(k,w) = target_w_weight(dfa,state,input[i]); //PROB
+      if (k != 0) {// where k==0 indicates there is no valid target.
+	let enode = new $(state,parent,i);
+	let &$(forward,inner) = Hashtable::lookup(rs->weights,enode);
+        push_closure(rs,input,i+1,new $(k,parent),"(input)",enode,NULL
+                     ,Semiring::mult(w, forward), Semiring::mult(w, inner) //PROB
+                     );
+      }
+    }
+  }
 
-//   // Search for last final state
+  // Search for last final state(s)
+  let derivations = NULL;
+  for (; i >= 0 && derivations == NULL; i--){
+    for (let si_list = Set::to_list(Axarray::get(estates,i));
+	 si_list != NULL;
+	 si_list = si_list->tl) {
 
+      let &$(state,parent) = si_list->hd;
+      if (Set::member(symb_final,state) && parent == 0) {
+	let en = new $(state,parent /*== 0*/,i);
+	let h_derivations = derivation_horizontal(rs,input,en);
+	let &$(forward,_) = Hashtable::lookup(rs->weights,en);
+	parse_tree_t tree;
+	if (h_derivations == NULL){
+	  tree = new NonTerm(symb_name,0,i,forward,NULL);
+	} else if(h_derivations->tl == NULL){
+	  tree = new NonTerm(symb_name,0,i,forward,h_derivations->hd);
+	} else {
+	  tree = new SharedNonTerm(symb_name,0,i,forward,h_derivations);
+	}
+	derivations = new List::List(tree, derivations);
+      }
+    }
+  }
+  return derivations;
+}
 
-//   for (; i >= 0; i--){
-
-//   for (let si_list = Set::to_list(Axarray::get(estates,i));
-//        si_list != NULL;
-//        si_list = si_list->tl) {
-//     let &$(state,parent) = si_list->hd;
-//     if (Set::member(symb_final,state) && parent == 0) {
-
-//       let en = new $(state,parent /*== 0*/,input_len);
-//       let derivation_tree = derivation_redux(rs,input,en);
-//       if (debug) {
-// 	printf("Input:\n%s\nLeftmost tree:\n",input);
-// 	print_LT(derivation_tree,-1);
-// 	printf("\nRightmost tree:\n");
-// 	print_RT(derivation_tree,-1);
-// 	printf("\n");
-//       }
-
-//       last_derivation_tree = derivation_tree;
-//       let &$(w_forward,w_inner) = Hashtable::lookup(rs->weights, en);
-//       if ( !Semiring::check_nonzero(w_forward) )
-// 	printf("Weight: ~Zero.\n");
-//       else {
-// 	printf("Weight: %s\n",Semiring::print_weight(w_forward));
-//       }
-//     }
-//   }
-//   }
-//   return $(complete_parses,partial_parses);
-// }
-
-$(int,int) recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input, int show_progress) {
+$(int,int) recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, symb_info_t symb_info, 
+		     const char ?input, int show_progress) {
 
   show_prog = show_progress;
 
@@ -1361,7 +1386,7 @@ $(int,int) recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input, i
   let estates = /* Earley states  s0, s1, s2, ... */
     Axarray::create(11,Set::empty(earley_item_cmp));
   let earley_item_0 = new $(1,0); // 1 is initial state of dfa, 0 is i in si
-  let rs = new rstate {dfa,estates,pred,retn,call
+  let rs = new rstate {dfa,symb_info,-1,estates,pred,retn,call
                        ,weights //PROB
   };
   push_closure(rs,
@@ -1389,13 +1414,14 @@ $(int,int) recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input, i
       let &$(state,parent) = si_list->hd;
       let $(k,w) = target_w_weight(dfa,state,input[i]); //PROB
       if (k != 0) {// where k==0 indicates there is no valid target.
-	let eitem = new $(state,parent,i);
-	let &$(forward,inner) = Hashtable::lookup(rs->weights,eitem);
+	let enode = new $(state,parent,i);
+	let &$(forward,inner) = Hashtable::lookup(rs->weights,enode);
 	if (show_prog && show_prog_start < i){
-	  printf("Weights are w=%s, forw=%s, inn=%s.\n",Semiring::print_weight(w),Semiring::print_weight(forward),
+	  printf("Weights are w=%s, forw=%s, inn=%s.\n",
+		 Semiring::print_weight(w),Semiring::print_weight(forward),
 		 Semiring::print_weight(inner));
 	}
-        push_closure(rs,input,i+1,new $(k,parent),"(input)",eitem,NULL
+        push_closure(rs,input,i+1,new $(k,parent),"(input)",enode,NULL
                      ,Semiring::mult(w, forward), Semiring::mult(w, inner) //PROB
                      );
       }

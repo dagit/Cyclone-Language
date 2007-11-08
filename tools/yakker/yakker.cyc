@@ -491,20 +491,20 @@ int main(int argc, const char ?`H?argv) {
     switch (interactive_earley){
     case 0:
       // TODO: assume regexp is a symbol for now
-      let $(dfa,dfa_final) = Earley::compile(ds,SYMB(earley_regexp));
+      let $(dfa,dfa_final,symb_info) = Earley::compile(ds,SYMB(earley_regexp));
     
       printf("Earley parsing stdin... "); fflush(stdout);
       int c;
       let b = Buffer::create(101);
       while ( (c = fgetc(stdin)) != EOF)
 	Buffer::add_char(b,c);
-      let $(valid,valid_prefix) = Earley::recognize(dfa,dfa_final,Buffer::contents(b), 1);
+      let $(valid,valid_prefix) = Earley::recognize(dfa,symb_info,dfa_final,Buffer::contents(b), 1);
       printf("done -- is valid string :%d. is valid prefix: %d\n",valid, valid_prefix);
       fflush(stdout);
       break;
     case 1:      
       // TODO: assume regexp is a symbol for now
-      let $(dfa,dfa_final) = Earley::compile(ds,SYMB(earley_regexp));
+      let $(dfa,dfa_final,symb_info) = Earley::compile(ds,SYMB(earley_regexp));
     
       while(1){
 	printf("Earley parsing stdin... "); fflush(stdout);
@@ -512,7 +512,7 @@ int main(int argc, const char ?`H?argv) {
 	let b = Buffer::create(101);
 	while ( (c = fgetc(stdin)) != '\n' && c != EOF)
 	  Buffer::add_char(b,c);
-	let $(valid,valid_prefix) = Earley::recognize(dfa,dfa_final,Buffer::contents(b), 1);
+	let $(valid,valid_prefix) = Earley::recognize(dfa,symb_info,dfa_final,Buffer::contents(b), 1);
 	printf("done -- is valid string :%d. is valid prefix: %d\n",valid, valid_prefix);
 	fflush(stdout);
       }
@@ -525,6 +525,7 @@ int main(int argc, const char ?`H?argv) {
       char arg[200]@zeroterm={for i<199:0};
       int done = 0;
       dfa_t *p_dfa = NULL;
+      Earley::symb_info_t *p_symb_info = NULL;
       Set::set_t<st_t> *p_dfa_final = NULL;
       while(!done){
 	int c;
@@ -539,9 +540,10 @@ int main(int argc, const char ?`H?argv) {
 	if (!strcmp(cmd, "compile")){
 
 	  // TODO: assume regexp is a symbol for now
-	  let $(dfa,dfa_final) = Earley::compile(ds,SYMB(earley_regexp));
+	  let $(dfa,dfa_final,symb_info) = Earley::compile(ds,SYMB(earley_regexp));
 	  p_dfa = new dfa;
 	  p_dfa_final = new dfa_final;
+	  p_symb_info = new symb_info;
 
 	} else if (!strcmp(cmd, "print-nfa")){
 
@@ -564,9 +566,10 @@ int main(int argc, const char ?`H?argv) {
 	    // TODO: assume regexp is a symbol for now
 	    let r = Earley::fsm2dfa(filename,earley_regexp);
 	    if (r){
-	      let $(dfa,dfa_final) = *r;
+	      let $(dfa,dfa_final,symb_info) = *r;
 	      p_dfa = new dfa;
 	      p_dfa_final = new dfa_final;
+	      p_symb_info = new symb_info;	      
 	    } else {
 	      fprintf(stderr,"Failed to reconstruct DFA.\n");
 	    }
@@ -586,7 +589,7 @@ int main(int argc, const char ?`H?argv) {
 
 	  if (!strcmp(arg,"dot")){
 	    // TODO: assume regexp is a symbol for now
-	    Earley::dfa2dot(*p_dfa,filename);
+	    Earley::dfa2dot(*p_dfa,*p_symb_info,filename);
 	  } else {
 	    fprintf(stderr,"Invalid DFA output format: %s.\n",arg);
 	  }
@@ -622,7 +625,8 @@ int main(int argc, const char ?`H?argv) {
 	  printf("File read complete.\n"); 
 
 	  // Parse the file
-	  let $(valid,valid_prefix) = Earley::recognize(*p_dfa,*p_dfa_final,Buffer::contents(b), show_progress);
+	  let $(valid,valid_prefix) = 
+	    Earley::recognize(*p_dfa,*p_symb_info, *p_dfa_final,Buffer::contents(b), show_progress);
 	  printf("done -- is valid string :%d. is valid prefix: %d\n",valid, valid_prefix);
 	  if (valid) printf("Parse tree saved.\n");
 	  fflush(stdout);

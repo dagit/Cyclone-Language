@@ -23,20 +23,32 @@
 #include "semiring.h"
 
 namespace Earley {
-  extern $(dfa_t,Set::set_t<st_t>) compile(grammar_t grm, rule_t r);
-  // returns: int pair: a) the number of valid complete parses of the string.
-  //                    b) the number of valid prefix parses of the string.
-  extern $(int,int) recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, const char ?input, int show_progress);
 
   typedef List::list_t<datatype ParseTree @`H,`H> parse_forest_t;
   typedef List::List_t<datatype ParseTree @`H,`H> Parse_forest_t;
 
   typedef datatype ParseTree @`H parse_tree_t;
 
+  typedef struct symbInfo @symb_info_t;
+
   extern datatype ParseTree{
     NonTerm(const char ?`H, int, int, Semiring::weight_t, parse_forest_t);
     SharedNonTerm(const char ?`H, int, int, Semiring::weight_t, List::List_t<parse_forest_t,`H>);
   };
+
+
+  extern $(dfa_t,Set::set_t<st_t>,symb_info_t) compile(grammar_t grm, rule_t r);
+  extern $(dfa_t,Set::set_t<st_t>,symb_info_t) *fsm2dfa(const char ?filename, const char ?`H start_symb);
+
+  // returns: int pair: a) the number of valid complete parses of the string.
+  //                    b) the number of valid prefix parses of the string.
+  extern $(int,int) recognize(dfa_t dfa, symb_info_t symb_info, Set::set_t<st_t> dfa_final, 
+			      const char ?input, int show_progress);
+
+  extern parse_forest_t recognize_frag(dfa_t dfa, symb_info_t symb_info, const char?`H symb_name, 
+				       st_t symb_start, Set::set_t<st_t> symb_final, 
+				       const char ?input, int show_progress);
+
 
   /* Global variable that saves last derivation tree.
    !! Treat as read-only outside of earley.cyc.
@@ -56,8 +68,7 @@ namespace Earley {
   // former holds the NFA, the latter the mapping from symbolic names to
   // numbers.
   extern void rule_fsm(const char ?filename_base, grammar_t grm, rule_t r);
-  extern $(dfa_t,Set::set_t<st_t>) *fsm2dfa(const char ?filename, const char ?`H start_symb);
-  extern void dfa2dot(dfa_t dfa, const char ?dot_file);
+  extern void dfa2dot(dfa_t dfa, symb_info_t symb_info, const char ?dot_file);
 }
 
 #endif
