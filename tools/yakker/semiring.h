@@ -29,6 +29,8 @@ namespace Semiring{
   extern const char ?print_weight(weight_t);
   extern int check_nonzero(weight_t w);
   extern weight_t from_prob(double p);
+  // prob = 1/p
+  extern weight_t from_inv_prob(double p);
   extern weight_t add(weight_t w1, weight_t w2);
   extern weight_t mult(weight_t w1, weight_t w2);
 }

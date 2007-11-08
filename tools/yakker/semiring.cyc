@@ -80,3 +80,10 @@ weight_t from_prob(double p){
 
   return - log (p);
 }
+
+weight_t from_inv_prob(double p){
+  if (p == 0.0)
+    return one_weight;
+
+  return log (p);
+}

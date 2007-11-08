@@ -15,20 +15,13 @@
 #include "nfa_eager.h"
 #include "semiring.h"
 
+#include "earley.h"
+
 using Nfa_eager;
 using Semiring;
 
 namespace Earley;
 
-typedef List::list_t<datatype ParseTree @`H,`H> parse_forest_t;
-typedef List::List_t<datatype ParseTree @`H,`H> Parse_forest_t;
-
-typedef datatype ParseTree @`H parse_tree_t;
-
-datatype ParseTree{
-  NonTerm(const char ?`H, int, int, weight_t, parse_forest_t);
-  SharedNonTerm(const char ?`H, int, int, weight_t, List::List_t<parse_forest_t,`H>);
-};
 
 /* Global variable that saves last derivation tree.*/
 datatype ParseTree *last_derivation_tree = NULL;
@@ -152,8 +145,6 @@ struct symbInfo {
   struct Hashtable::Table<act_t,str_t> @action_symb_table;
 };
 
-typedef struct symbInfo @symb_info_t;
-
 static act_t callout_action() {
   return 256;
 }
@@ -200,10 +191,7 @@ static cs_t final_st_cs() {
   return cs_singleton(final_st_action());
 }
 const char ?act2symb(act_t act, symb_info_t si) {
-  printf("Retrieving action-symbol table... ");
-  fflush(stdout);
   let as_table = si->action_symb_table;
-
 ////////////////////////////////////////////////////////////////////////
 // CAUSES COMPILER EXCEPTION:
 //   let as_table = 
@@ -212,14 +200,7 @@ const char ?act2symb(act_t act, symb_info_t si) {
 //   Hashtable::insert(as_table,repeat_action(),new "REPEAT");
 //   Hashtable::insert(as_table,final_st_action(),new "FINAL-STATE");
 ////////////////////////////////////////////////////////////////////////
-//   struct Hashtable::Table<act_t,str_t> @ as_table = 
-//     Hashtable::create(11,st_cmp,st_hash);
-
-  printf("Looking up action %d... ",act);
-  fflush(stdout);
   let sopt = Hashtable::lookup_opt(as_table,act);
-
-  printf("done.\n");
   if (sopt == NULL || *sopt == NULL) return NULL;
   else return **sopt;
 }
@@ -604,6 +585,321 @@ $(st_t,st_t,st_t)
   }
 }
 
+// $(st_t,st_t,st_t)
+// merge_wfsm(FILE@f_fsm, Hashtable::table_t<str_t,st_t> symb_st,
+//         grammar_t grm,
+//         rule_t r,
+// 	symb_info_t symb_info);
+
+// st_t rule2wfsm0(FILE@f_fsm, Hashtable::table_t<str_t,st_t> symb_st,
+//                   grammar_t grm,
+//                   rule_t r,
+// 		  symb_info_t symb_info) {
+//   switch (r->r) {
+//   case &Symb(x,_):
+//     let xptr = new x;
+//     st_t x_start; /* start state of the NFA for the symbol */
+//     if (!Hashtable::try_lookup(symb_st,xptr,&x_start)) {
+//       /* Symbol has not been converted to NFA yet */
+//       Rule_t x_rule = lookup_symbol(grm, x);
+//       if (!x_rule) {
+// 	warn("missing definition for %s in rule2wfsm()\n",x);
+// 	return mklit("");
+//       }
+//       /* Allocate a start state for the symbol.  Do this before
+//          converting to NFA in case the symbol is defined recursively. */
+//       let s = nfa_fresh_state(); let f = nfa_fresh_state(); final(s,f);
+//       Hashtable::insert(symb_st,xptr,s);
+//       let $(s_body,f_body,_) = merge_wfsm(f_fsm,symb_st,grm,x_rule,symb_info);
+//       final(s,f_body); // merge_wfsm does not do this
+//       etrans(s,s_body);
+//       x_start = s;
+//     }
+//     let s = nfa_fresh_state();
+//     let s2 = nfa_fresh_state();
+//     let f = nfa_fresh_state(); final(s,f);
+//     action(s,callout_cs(),x_start);
+//     etrans(s,s2);
+//     action(s2,consume_symb_cs(x,symb_info),f);
+//     /* If the symbol can derive the empty string make sure this gets
+//        reflected into the automaton --- effectively doing a RETURN in
+//        the automaton instead of the Earley evaluator itself */
+//     if (empty_rule(SYMB(x)))
+//       etrans(s2,f);
+//     return s;
+//   case &Lit(x):
+//     return mklit(x);
+//   case &CharRange(low,high):
+//     if (low > high) {
+//       internal_err("invalid character range in rule2wfsm()\n");
+//       return mklit("");
+//     }
+//     return mkact(cs_range(low,high+1));
+//   case &Opt(r2):
+//     let s2 = rule2wfsm0(f_fsm,symb_st,grm,r2,symb_info); let s3 = mklit("");
+//     return mkalt(s2,s3);
+//   case &Seq(r2,r3):
+//     let s2 = rule2wfsm0(f_fsm,symb_st,grm,r2,symb_info); let s3 = rule2wfsm0(f_fsm,symb_st,grm,r3,symb_info);
+//     return mkseq(s2,s3);
+//   case &Alt(r2,r3):
+//     let s2 = rule2wfsm0(f_fsm,symb_st,grm,r2,symb_info); let s3 = rule2wfsm0(f_fsm,symb_st,grm,r3,symb_info);
+//     return mkalt(s2,s3);
+//   case &Rcount(var,r2):
+//     /* Conservative approximation */
+//     warn_repeat();
+//     // 1. check that r2 is valid -- only symbols allowed.
+//     // TODO
+
+//     // 2. s2 <- generate NFA for r2.
+//     let s2 = rule2wfsm0(f_fsm,symb_st,grm,r2,symb_info);
+
+//     // 2.a. Convert var -- the "repeater" because it determines the repetition -- to action.
+//     let repeater_cs =  consume_symb_cs(var,symb_info);
+//     // 2.b. Convert target -- the "repeatee" because gets repeated -- to action.
+//     let repeatee_cs;
+//     switch (r2->r) {
+//     case &Symb(x,_):
+//       // overwrite s2 with start state of symbol *definition*.
+//       Hashtable::try_lookup(symb_st,new x,&s2);
+//       repeatee_cs = consume_symb_cs(x,symb_info);
+//       break;
+//     default:
+//       fprintf(stderr,"Error: repeatee of repeat is not a symbol.\n");
+//       return mklit("");
+//     }
+//     // 2.c.  and add to final state of s2. FIX: can't do this, b/c no
+//     // attrs for NFA final states. For now, just enforce that user use
+//     // unique nonterm in which case, var will be added automatically.
+
+//     // 3. Create start and final state for the repeat.
+//     let s = nfa_fresh_state();
+//     let f = nfa_fresh_state();
+//     final(s,f);
+
+//     // 4. add fresh states that CALL to s2 and transition (to final
+//     // state) on var. Not a real states -- just used to store info
+//     // about s_rep: the NFA to call, nonterm symbol (action), and
+//     // final state of repeat. Could use separate table.
+//     let s_rep_call = nfa_fresh_state();
+//     let s_rep_trans_repeater = nfa_fresh_state();
+//     let s_rep_trans_repeatee = nfa_fresh_state();
+//     action(s_rep_call,callout_cs(),s2);
+//     etrans(s_rep_call,s_rep_trans_repeater);
+//     action(s_rep_trans_repeater,repeater_cs,s_rep_trans_repeatee);
+//     action(s_rep_trans_repeatee,repeatee_cs,f);
+
+//     // 4. Transition start state to CALL state on repeat to indicate a
+//     // repeat is happening.
+//     action(s,repeat_cs(),s_rep_call);
+
+//     return s;
+//   case &Star(0,&Infinity,r2):
+//     let s2 = rule2wfsm0(f_fsm,symb_st,grm,r2,symb_info);
+//     return mkstar(s2);
+//   case &Star(m,i as &Infinity,r2):
+//     let r_seq = SEQ(r2,STAR(m-1,i,r2));
+//     return rule2wfsm0(f_fsm,symb_st,grm,r_seq,symb_info);
+//   case &Star(0,&Num(0),r2):
+//     return mklit("");
+
+//   case &Star(0,&Num(n),r2):
+//     let r_opt = OPT(SEQ(r2,STAR(0, new Num(n-1),r2)));
+//     return rule2wfsm0(f_fsm,symb_st,grm,r_opt,symb_info);
+//   case &Star(m,&Num(n),r2):
+//     if (m > n) return mklit("");
+//     let r_seq = SEQ(r2,STAR(m-1, new Num(n-1),r2));
+//     return rule2wfsm0(f_fsm,symb_st,grm, r_seq,symb_info);
+
+//   case &Hash(0,N,r2):
+//     // same as [ r2 *{N-1}(commas r2) ]
+//     return rule2wfsm0(f_fsm,symb_st,grm,
+//                         OPT(SEQ(r2,STAR(0,minus_one(N),SEQ(commas(),r2)))),
+// 			symb_info);
+//   case &Hash(m,N,r2):
+//     // same as r2 {m-1}*{N-1}(commas r2)
+//     return rule2wfsm0(f_fsm,symb_st,grm,
+//                         SEQ(r2,STAR(m-1,minus_one(N),SEQ(commas(),r2))),
+// 			symb_info);
+//   case &Prose(_):
+//     warn("Prose not supported in rule2wfsm()\n");
+//     return mklit("");
+//   case &Minus(_,_):
+//     warn("Minus not supported in rule2wfsm()\n");
+//     return mklit("");
+//   }
+// }
+
+// $(st_t,st_t,st_t)
+//   merge_wfsm(FILE@f_fsm, Hashtable::table_t<str_t,st_t> symb_st,
+//         grammar_t grm,
+//         rule_t r,
+// 	symb_info_t symb_info) {
+//   switch (r->r) {
+//   case &Symb(x,_):
+//     let xptr = new x;
+//     st_t x_start; /* start state of the NFA for the symbol */
+//     if (!Hashtable::try_lookup(symb_st,xptr,&x_start)) {
+//       /* Symbol has not been converted to NFA yet */
+//       Rule_t x_rule = lookup_symbol(grm, x);
+//       if (!x_rule) {
+// 	warn("missing definition for %s in merge_wfsm(f_fsm,)\n",x);
+// 	return merge_wfsm(f_fsm,symb_st,grm,LIT(""),symb_info);
+//       }
+//       /* Allocate a start state for the symbol.  Do this before
+//          converting to NFA in case the symbol is defined recursively. */
+//       let s = nfa_fresh_state(); let f = nfa_fresh_state();
+//       Hashtable::insert(symb_st,xptr,s);
+//       let $(s_body,f_body,_) = merge_wfsm(f_fsm,symb_st,grm,x_rule,symb_info);
+//       // need e_body too???      
+//       // only marked final in FSM because this is a symbol.
+//       final_fsm(f_fsm, s, f_body); // merge_wfsm does not do this
+//       etrans_fsm(s,s_body,Semiring::one_weight);
+//       x_start = s;
+//     }
+//     let s = nfa_fresh_state();
+//     let s2 = nfa_fresh_state();
+//     let e = nfa_fresh_state();
+//     let f = nfa_fresh_state();
+//     action_fsm(f_fsm, s,EPSILON,x_start,Semiring::from_prob(0.5));
+//     etrans_fsm(f_fsm, s,s2,Semiring::from_prob(0.5));
+
+//     /* If the symbol can derive the empty string make sure this gets
+//        reflected into the automaton --- effectively doing a RETURN in
+//        the automaton instead of the Earley evaluator itself */
+//     if (empty_rule(SYMB(x))){
+//       etrans_fsm(f_fsm, s2,e,Semiring::from_prob(0.5));
+//       action_fsm(f_fsm, s2,consume_symb_cs(x,symb_info),f,Semiring::from_prob(0.5));
+//     } else
+//       action_fsm(f_fsm, s2,consume_symb_cs(x,symb_info),f,Semiring::one_weight);
+
+//     return $(s,f,e);
+//   case &Lit(x):
+//     if (!strcmp(x,"")) {
+//       let s = nfa_fresh_state();
+//       let f = nfa_fresh_state();
+//       let e = nfa_fresh_state();
+//       etrans_fsm(f_fsm, s,e,Semiring::one_weight);
+//       return $(s,f,e);
+//     }
+//     else {
+//       let s = mklit_fsm(f_fsm, x);
+//       let f = get_final(s);
+//       let e = nfa_fresh_state();
+//       return $(s,f,e);
+//     }
+//   case &CharRange(low,high):
+//     if (low > high) {
+//       internal_err("invalid character range in merge_wfsm(f_fsm,)\n");
+//       let s = nfa_fresh_state();
+//       let f = nfa_fresh_state();
+//       return $(s,f,s);
+//     }
+//     else {
+//       let s = mkact_fsm(f_fsm, cs_range(low,high+1));
+//       let f = get_final(s);
+//       let e = nfa_fresh_state();
+//       return $(s,f,e);
+//     }
+//   case &Opt(r2):
+//     let s = nfa_fresh_state();
+//     let e = nfa_fresh_state();
+//     let $(s2,f2,e2) = merge_wfsm(f_fsm,symb_st,grm,r2,symb_info);
+//     etrans_fsm(f_fsm,s,s2,Semiring::from_prob(0.5));
+//     action_fsm(f_fsm,s,EPSILON,e,Semiring::from_prob(0.5));
+//     etrans_fsm(f_fsm,e2,e,Semiring::one_weight);
+//     return $(s,f2,e);
+//   case &Seq(r2,r3):
+//     let s = nfa_fresh_state();
+//     let f = nfa_fresh_state();
+//     let e = nfa_fresh_state();
+//     let $(s2,f2,e2) = merge_wfsm(f_fsm,symb_st,grm,r2,symb_info);
+//     let $(s3,f3,e3) = merge_wfsm(f_fsm,symb_st,grm,r3,symb_info);
+//     let scall = rule2wfsm0(f_fsm,symb_st,grm,r3,symb_info);
+//     let fcall = get_final(scall);
+//     etrans_fsm(f_fsm, s,s2,     Semiring::one_weight);
+//     etrans_fsm(f_fsm, f2,scall, Semiring::one_weight);
+//     etrans_fsm(f_fsm, e2,s3,    Semiring::one_weight);
+//     etrans_fsm(f_fsm, f3,f,     Semiring::one_weight);
+//     etrans_fsm(f_fsm, fcall,f,  Semiring::one_weight);
+//     etrans_fsm(f_fsm, e3,e,     Semiring::one_weight);
+//     return $(s,f,e);
+//   case &Alt(_,_):
+//     let s = nfa_fresh_state();
+//     let f = nfa_fresh_state();
+//     let e = nfa_fresh_state();
+
+//     let rules = alt2rules(r);
+//     let n = List::length(rules);
+//     let w = Semiring::from_inv_prob(n);
+
+//     for (; rules; rules = rules->tl){
+//       let $(s2,f2,e2) = merge_wfsm(f_fsm,symb_st,grm,rules->hd,symb_info);
+//       etrans_fsm(f_fsm, s,s2, w);
+//       etrans_fsm(f_fsm, f2,f, Semiring::one_weight);
+//       etrans_fsm(f_fsm, e2,e, Semiring::one_weight);
+//     }
+
+//     return $(s,f,e);
+//   case &Rcount(var,r2):
+//     warn_repeat();
+//     //  repeat should never show up in a merge_wfsm, because that implies
+//     // that it might be preceded by epsilon, in which case it will have
+//     // no value on which to depend.
+//     warn("@repeat appears, in a sequence, possibly preceded by epsilon.\n");
+//     fallthru(r2);
+//   case &Star(0,&Infinity,r2):
+//     let s = nfa_fresh_state();
+//     let f = nfa_fresh_state();
+//     let e = nfa_fresh_state();
+//     let $(s2,f2,e2) = merge_wfsm(f_fsm,symb_st,grm,r2,symb_info);
+//     let scall = rule2wfsm0(f_fsm,symb_st,grm,r2,symb_info);
+//     let fcall = get_final(scall);
+//     etrans(s,s2);
+//     action(s,EPSILON,e);
+//     etrans(e2,s2);
+//     action(e2,EPSILON,e);
+//     etrans(f2,scall);
+//     action(f2,EPSILON,f);
+
+//     // We could replace the following two transitions
+//     // with this single transition:
+//     // etrans(fcall,f2);
+//     // and then this would resemble the standard
+//     // Star construction,  with f2 playing the
+//     // role of s.
+//     etrans(fcall,scall);
+//     action(fcall,EPSILON,f);
+//     return $(s,f,e);
+//   case &Star(m,i as &Infinity,r2):
+//     let r_seq = SEQ(r2,STAR(m-1,i,r2));
+//     return merge_wfsm(f_fsm,symb_st,grm,r_seq,symb_info);
+//   case &Star(0,&Num(0),r2):
+//     return merge_wfsm(f_fsm,symb_st,grm,LIT(""),symb_info);
+//   case &Star(0,&Num(n),r2):
+//     let r_opt = OPT(SEQ(r2,STAR(0, new Num(n-1),r2)));
+//     return merge_wfsm(f_fsm,symb_st,grm,r_opt,symb_info);
+//   case &Star(m,&Num(n),r2):
+//     if (m > n) return merge_wfsm(f_fsm,symb_st,grm,LIT(""),symb_info);
+//     let r_seq = SEQ(r2,STAR(m-1, new Num(n-1),r2));
+//     return merge_wfsm(f_fsm,symb_st,grm, r_seq,symb_info);
+
+//   case &Hash(0,N,r2):
+//     // same as [ r2 *{N-1}(commas r2) ]
+//     return merge_wfsm(f_fsm,symb_st,grm,
+//                  OPT(SEQ(r2,STAR(0,minus_one(N),SEQ(commas(),r2)))),symb_info);
+//   case &Hash(m,N,r2):
+//     // same as r2 {m-1}*{N-1}(commas r2)
+//     return merge_wfsm(f_fsm,symb_st,grm,
+//                  SEQ(r2,STAR(m-1,minus_one(N),SEQ(commas(),r2))),symb_info);
+//   case &Prose(_):
+//     warn("Prose not supported in merge_wfsm(f_fsm,)\n");
+//     return merge_wfsm(f_fsm,symb_st,grm,LIT(""),symb_info);
+//   case &Minus(_,_):
+//     warn("Minus not supported in merge_wfsm(f_fsm,)\n");
+//     return merge_wfsm(f_fsm,symb_st,grm,LIT(""),symb_info);
+//   }
+// }
+
 // Convert and print the rule as an NFA in FSM format.
 // Writes two files based on the filename_base: .fsm and .sym. The
 // former holds the NFA, the latter the mapping from symbolic names to
@@ -963,13 +1259,11 @@ push_closure(rstate_t rs,
      also be a final state. */
   else if (i != backptr // we parsed the empty string, RETURN handled by dfa already
       && dfa_is_final(rs->dfa,s)) {
-    printf("Checkking for retunrs\n");
     /* Some symbol is completed.
        es_back is the Earley state that CALLed the symbol. */
     let es_back = Axarray::get(rs->estates,backptr);
     let final_w = dfa_final_weight(rs->dfa,s);
 
-    printf("Start loop\n");
     /* For every completed symbol... */
     for (let completed = Set::to_list(dfa_final_attrs(rs->dfa,s));
          completed != NULL; completed = completed->tl) {
@@ -980,7 +1274,7 @@ push_closure(rstate_t rs,
       if (symb_act == rs->start_act && backptr == 0)
 	continue;
 
-      printf("... look at every DFA state in es_back...\n");
+//       printf("... look at every DFA state in es_back...\n");
       /* ... look at every DFA state in es_back... */
       for (let es_back_list = Set::to_list(es_back);
            es_back_list != NULL;
@@ -988,19 +1282,16 @@ push_closure(rstate_t rs,
 
         let &$(t,tbackptr) = es_back_list->hd;
         let ttarget = target(rs->dfa,t,symb_act);
-	printf("... see if the DFA state did a CALL and RETURN if so.\n");
+// 	printf("... see if the DFA state did a CALL and RETURN if so.\n");
         /* ... see if the DFA state did a CALL and RETURN if so. */
         if (ttarget != 0) {
 	  // Earley node w/ dot before symb.
 	  let backnode = new $(t,tbackptr,backptr);
 	  // Earley node w/ dot after symb.
           let retnode = new $(ttarget,tbackptr,i);
-	  printf("Found target; looking up weights.\n");
           let &$(backnode_forward,backnode_inner) = Hashtable::lookup(rs->weights,backnode); //PROB
-	  printf("Mapping action to symbol.\n");
 	  fflush(stdout);
 	  let symb = act2symb(symb_act,rs->symb_info);
-	  printf("Pushing closure.\n");
           push_closure(rs,input,i,new $(ttarget,tbackptr),
                        aprintf("(return %s)",symb),
                        backnode, node
@@ -1009,8 +1300,6 @@ push_closure(rstate_t rs,
                        );
         }
       }
-      printf("done looking at DFA states in es_back.\n");
-
     }
   }
 }
@@ -1389,7 +1678,7 @@ parse_forest_t recognize_frag(dfa_t dfa, symb_info_t symb_info,
   return derivations;
 }
 
-$(int,int) recognize(dfa_t dfa, Set::set_t<st_t> dfa_final, symb_info_t symb_info, 
+$(int,int) recognize(dfa_t dfa, symb_info_t symb_info, Set::set_t<st_t> dfa_final, 
 		     const char ?input, int show_progress) {
 
   show_prog = show_progress;

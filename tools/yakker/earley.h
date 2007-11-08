@@ -53,13 +53,13 @@ namespace Earley {
   /* Global variable that saves last derivation tree.
    !! Treat as read-only outside of earley.cyc.
    */
-  extern datatype ParseTree @last_derivation_tree;
+  extern datatype ParseTree *last_derivation_tree;
   /* Print left-most parse tree to depth of "depth". Use -1 to print entire tree. */
   extern void print_LT(datatype ParseTree @pt, int depth);
   /* Print right-most parse tree to depth of "depth". Use -1 to print entire tree. */
   extern void print_RT(datatype ParseTree @pt, int depth);
 
-  extern void act2symb_haxe(FILE @f);
+  extern void act2symb_haxe(FILE @f, symb_info_t si);
 
   extern int isAmb_parse_tree(datatype ParseTree @pt);
 
