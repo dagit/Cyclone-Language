@@ -29,7 +29,7 @@ namespace Earley {
 
   typedef datatype ParseTree @`H parse_tree_t;
 
-  typedef struct symbInfo @symb_info_t;
+  typedef struct symbInfo @`H symb_info_t;
 
   extern datatype ParseTree{
     NonTerm(const char ?`H, int, int, Semiring::weight_t, parse_forest_t);

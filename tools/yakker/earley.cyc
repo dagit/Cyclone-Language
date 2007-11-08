@@ -148,15 +148,11 @@ int isAmb_parse_forest(parse_forest_t pf){
 
 struct symbInfo {
   unsigned int symb_action_counter;
-  struct Hashtable::Table<str_t,act_t> *symb_action_table;
-  struct Hashtable::Table<act_t,str_t> *action_symb_table;
+  struct Hashtable::Table<str_t,act_t> @symb_action_table;
+  struct Hashtable::Table<act_t,str_t> @action_symb_table;
 };
 
 typedef struct symbInfo @symb_info_t;
-
-symb_info_t new_symb_info(){
-  return new symbInfo(259,NULL,NULL);
-}
 
 static act_t callout_action() {
   return 256;
@@ -167,6 +163,24 @@ static act_t repeat_action() {
 static act_t final_st_action() {
   return 258;
 }
+
+symb_info_t new_symb_info(){
+  struct Hashtable::Table<act_t,str_t> @ as_table =
+    Hashtable::create(11,st_cmp,st_hash);
+  Hashtable::insert(as_table,callout_action(),new "CALL");
+  Hashtable::insert(as_table,repeat_action(),new "REPEAT");
+  Hashtable::insert(as_table,final_st_action(),new "FINAL-STATE");
+
+  struct Hashtable::Table<str_t,act_t> @sa_table =
+    Hashtable::create(11,strptrcmp,Hashtable::hash_stringptr);
+  Hashtable::insert(sa_table,new "CALL",callout_action());
+  Hashtable::insert(sa_table,new "REPEAT",repeat_action());
+  Hashtable::insert(sa_table,new "FINAL-STATE",final_st_action());
+
+  return new symbInfo{.symb_action_counter=259,.symb_action_table=sa_table,
+      .action_symb_table= as_table};
+}
+
 static act_t new_action(symb_info_t si) {
   let a = si->symb_action_counter++;
   if (a > MAXACTION) {
@@ -186,15 +200,26 @@ static cs_t final_st_cs() {
   return cs_singleton(final_st_action());
 }
 const char ?act2symb(act_t act, symb_info_t si) {
-  if (si->action_symb_table == NULL) {
-    si->action_symb_table =
-      Hashtable::create(11,st_cmp,st_hash);
-    Hashtable::insert(si->action_symb_table,callout_action(),new "CALL");
-    Hashtable::insert(si->action_symb_table,repeat_action(),new "REPEAT");
-    Hashtable::insert(si->action_symb_table,final_st_action(),new "FINAL-STATE");
-  }
+  printf("Retrieving action-symbol table... ");
+  fflush(stdout);
+  let as_table = si->action_symb_table;
 
-  let sopt = Hashtable::lookup_opt(si->action_symb_table,act);
+////////////////////////////////////////////////////////////////////////
+// CAUSES COMPILER EXCEPTION:
+//   let as_table = 
+//     Hashtable::create(11,st_cmp,st_hash);
+//   Hashtable::insert(as_table,callout_action(),new "CALL");
+//   Hashtable::insert(as_table,repeat_action(),new "REPEAT");
+//   Hashtable::insert(as_table,final_st_action(),new "FINAL-STATE");
+////////////////////////////////////////////////////////////////////////
+//   struct Hashtable::Table<act_t,str_t> @ as_table = 
+//     Hashtable::create(11,st_cmp,st_hash);
+
+  printf("Looking up action %d... ",act);
+  fflush(stdout);
+  let sopt = Hashtable::lookup_opt(as_table,act);
+
+  printf("done.\n");
   if (sopt == NULL || *sopt == NULL) return NULL;
   else return **sopt;
 }
@@ -210,20 +235,6 @@ void act2symb_haxe(FILE @f, symb_info_t si) {
 }
 
 static act_t symb2act(const char ?`H symb, symb_info_t si) {
-  if (si->action_symb_table == NULL) {
-    si->action_symb_table =
-      Hashtable::create(11,st_cmp,st_hash);
-    Hashtable::insert(si->action_symb_table,callout_action(),new "CALL");
-    Hashtable::insert(si->action_symb_table,repeat_action(),new "REPEAT");
-    Hashtable::insert(si->action_symb_table,final_st_action(),new "FINAL-STATE");
-  }
-  if (si->symb_action_table == NULL){
-    si->symb_action_table =
-      Hashtable::create(11,strptrcmp,Hashtable::hash_stringptr);
-    Hashtable::insert(si->symb_action_table,new "CALL",callout_action());
-    Hashtable::insert(si->symb_action_table,new "REPEAT",repeat_action());
-    Hashtable::insert(si->symb_action_table,new "FINAL-STATE",final_st_action());
-  }
 //   let symbptr = new symb;
   let symbptr = new (const char ?)aprintf("%s",symb);
   let aptr = Hashtable::lookup_opt(si->symb_action_table,symbptr);
@@ -952,11 +963,13 @@ push_closure(rstate_t rs,
      also be a final state. */
   else if (i != backptr // we parsed the empty string, RETURN handled by dfa already
       && dfa_is_final(rs->dfa,s)) {
+    printf("Checkking for retunrs\n");
     /* Some symbol is completed.
        es_back is the Earley state that CALLed the symbol. */
     let es_back = Axarray::get(rs->estates,backptr);
     let final_w = dfa_final_weight(rs->dfa,s);
 
+    printf("Start loop\n");
     /* For every completed symbol... */
     for (let completed = Set::to_list(dfa_final_attrs(rs->dfa,s));
          completed != NULL; completed = completed->tl) {
@@ -967,6 +980,7 @@ push_closure(rstate_t rs,
       if (symb_act == rs->start_act && backptr == 0)
 	continue;
 
+      printf("... look at every DFA state in es_back...\n");
       /* ... look at every DFA state in es_back... */
       for (let es_back_list = Set::to_list(es_back);
            es_back_list != NULL;
@@ -974,21 +988,29 @@ push_closure(rstate_t rs,
 
         let &$(t,tbackptr) = es_back_list->hd;
         let ttarget = target(rs->dfa,t,symb_act);
+	printf("... see if the DFA state did a CALL and RETURN if so.\n");
         /* ... see if the DFA state did a CALL and RETURN if so. */
         if (ttarget != 0) {
 	  // Earley node w/ dot before symb.
 	  let backnode = new $(t,tbackptr,backptr);
 	  // Earley node w/ dot after symb.
           let retnode = new $(ttarget,tbackptr,i);
+	  printf("Found target; looking up weights.\n");
           let &$(backnode_forward,backnode_inner) = Hashtable::lookup(rs->weights,backnode); //PROB
+	  printf("Mapping action to symbol.\n");
+	  fflush(stdout);
+	  let symb = act2symb(symb_act,rs->symb_info);
+	  printf("Pushing closure.\n");
           push_closure(rs,input,i,new $(ttarget,tbackptr),
-                       aprintf("(return %s)",act2symb(symb_act,rs->symb_info)),
+                       aprintf("(return %s)",symb),
                        backnode, node
                        ,mult( mult(final_w, inner), backnode_forward), //PROB
 		       mult( mult(final_w,inner), backnode_inner) //PROB
                        );
         }
       }
+      printf("done looking at DFA states in es_back.\n");
+
     }
   }
 }
