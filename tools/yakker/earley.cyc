@@ -942,16 +942,22 @@ void rule_fsm(const char ?filename_base, grammar_t grm, rule_t r) {
   nfa_init(grm);
   let symb_info = new_symb_info();
 
-
-
   let fsm_file = aprintf("%s.fsm",filename_base);
   FILE *f = fopen(fsm_file,"w");
   if (f) { 
-    let $(start_state,f_s,e_s) = merge_wfsm(f, symb_st,grm,r,symb_info);
-//   let final_state = nfa_fresh_state();
-//   etrans_fsm(f,f_s,final_state);
-//   etrans(f,e_s,final_state);
-//   final_fsm(start_state,final_state);
+    // N.B. MUST ensure that start state is printed first.
+    // Print transition to dummy state. weight doesn't matter b/c
+    // determinization will eliminate this transition.
+    let start_s = nfa_fresh_state();
+    etrans_fsm(f,start_s,NOTRANSITION,Semiring::from_inv_prob(2.0));
+    let $(r_start_state,f_s,e_s) = merge_wfsm(f, symb_st,grm,r,symb_info);
+    action_fsm(f, start_s, EPSILON, r_start_state, Semiring::one_weight);
+    // Don't know if the following is necessary:
+    let final_state = nfa_fresh_state();
+    etrans_fsm(f,f_s,final_state, Semiring::one_weight);
+    etrans_fsm(f,e_s,final_state, Semiring::one_weight);
+    final_fsm(f, r_start_state,final_state, NULL);
+
     fclose(f); 
   }
 
@@ -1221,7 +1227,7 @@ push_closure(rstate_t rs,
 
   let es = Axarray::get(rs->estates,i);
   if (Set::member(es,ei)) {
-    if (show_prog && show_prog_start < i){
+    if (show_prog && show_prog_start <= i){
       let &$(new_f,new_i) = Hashtable::lookup(rs->weights, node);
       fprintf(stderr,"estates[%d]: (%d,%d,%s,%s -> [%s,%s] -> %s,%s) %s\n",i,ei->f0,ei->f1,
 	      Semiring::print_weight(old_f),Semiring::print_weight(old_i),
@@ -1231,7 +1237,7 @@ push_closure(rstate_t rs,
     }
     return;
   }
-  if (show_prog && show_prog_start < i){
+  if (show_prog && show_prog_start <= i){
     fprintf(stderr,"estates[%d] += (%d,%d,%s,%s) %s\n",i,ei->f0,ei->f1,
 	    Semiring::print_weight(forward),Semiring::print_weight(inner),reason);fflush(stderr);
   }
@@ -1689,7 +1695,7 @@ parse_forest_t recognize_frag(dfa_t dfa, symb_info_t symb_info,
   let i = 0;
   for (let estate_i = Axarray::get(estates,0); !Set::is_empty(estate_i); estate_i = Axarray::get(estates,++i)) {
 
-    if (show_prog && show_prog_start < i){
+    if (show_prog && show_prog_start <= i){
       fprintf(stderr,"input[%d]==%s\n",i,cs_char_escape(input[i]));fflush(stderr);
     }
 
@@ -1772,7 +1778,7 @@ $(int,int) recognize(dfa_t dfa, symb_info_t symb_info, Set::set_t<st_t> dfa_fina
   let input_len = strlen(input);
   for (let i = 0; i < input_len; i++) {
 
-    if (show_prog && show_prog_start < i){
+    if (show_prog && show_prog_start <= i){
       fprintf(stderr,"input[%d]==%s\n",i,cs_char_escape(input[i]));fflush(stderr);
     }
 
@@ -1785,7 +1791,7 @@ $(int,int) recognize(dfa_t dfa, symb_info_t symb_info, Set::set_t<st_t> dfa_fina
       if (k != 0) {// where k==0 indicates there is no valid target.
 	let enode = new $(state,parent,i);
 	let &$(forward,inner) = Hashtable::lookup(rs->weights,enode);
-	if (show_prog && show_prog_start < i){
+	if (show_prog && show_prog_start <= i){
 	  printf("Weights are w=%s, forw=%s, inn=%s.\n",
 		 Semiring::print_weight(w),Semiring::print_weight(forward),
 		 Semiring::print_weight(inner));

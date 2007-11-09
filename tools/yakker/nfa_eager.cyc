@@ -184,12 +184,15 @@ void final_fsm(FILE@ f_fsm, st_t a, st_t b, const char ?symb) {
   final(a,b);
 
   fprintf(f_fsm,"%d\n",b);
-  // associate it in the NFA w/ its symbol.
-  let s = nfa_fresh_state();
-  fprintf(f_fsm,"%d %d FINAL-STATE\n",b,s);
-  fprintf(f_fsm,"%d %d %s\n",s,s,symb);
-  // mark s as final so it won't be deleted.
-  fprintf(f_fsm,"%d\n",s);
+
+  if (symb){
+    // associate it in the NFA w/ its symbol.
+    let s = nfa_fresh_state();
+    fprintf(f_fsm,"%d %d FINAL-STATE\n",b,s);
+    fprintf(f_fsm,"%d %d %s\n",s,s,symb);
+    // mark s as final so it won't be deleted.
+    fprintf(f_fsm,"%d\n",s);
+  }
 }
 
 void etrans_fsm(FILE@ f_fsm, st_t a, st_t b, Semiring::weight_t w) {
