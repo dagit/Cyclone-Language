@@ -46,7 +46,6 @@ namespace Earley {
 			      const char ?input, int show_progress);
 
   extern parse_forest_t recognize_frag(dfa_t dfa, symb_info_t symb_info, const char?`H symb_name, 
-				       st_t symb_start, Set::set_t<st_t> symb_final, 
 				       const char ?input, int show_progress);
 
 

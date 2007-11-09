@@ -148,7 +148,7 @@ small_imap_genpm.h: small_imap_genpm.bnf $(PROG_DEP)
 	./yakker $(YAKFLAGS) -cyc-namespace SmallImapFormat -gen-crawl-header $< > $@
 
 small_imap_genpm.bnf: examples/small_imap.bnf $(PROG_DEP)
-	./yakker -escape "\\%()" -flatten -bindgrammar -no-anon-bind -termgrammar_bnf $< > $@
+	./yakker -escape "\\%()" -flatten -bindgrammar -no-anon-bind $< > $@
 
 ###############################################################################
 # Rules for full imap grammar with pattern-matching support.
@@ -174,7 +174,7 @@ imap_genpm.h: $(GENDIR)/imap_genpm.bnf $(PROG_DEP)
 # 	./yakker -left-factor $< > $@
 
 $(GENDIR)/imap_genpm.bnf: $(BNFDIR)/imap_revised_fixed.bnf $(PROG_DEP)
-	./yakker -escape "\\%()" -flatten-full -bindgrammar $< > $@
+	./yakker -escape "\\%()" -flatten-full -bindgrammar -termgrammar_bnf $< > $@
 
 # $(GENDIR)/imap.cyc: $(BNFDIR)/imap.bnf $(PROG_DEP)
 # 	./yakker $(YAKFLAGS) -gen command -no-main -lazyfill $< > $@

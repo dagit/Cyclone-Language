@@ -143,6 +143,8 @@ struct symbInfo {
   unsigned int symb_action_counter;
   struct Hashtable::Table<str_t,act_t> @symb_action_table;
   struct Hashtable::Table<act_t,str_t> @action_symb_table;
+  // maps symbol name to start state and final states.
+  struct Hashtable::Table<str_t,$(st_t,Set::set_t<st_t>)@> @symb_start_and_finals_table;
 };
 
 static act_t callout_action() {
@@ -168,8 +170,9 @@ symb_info_t new_symb_info(){
   Hashtable::insert(sa_table,new "REPEAT",repeat_action());
   Hashtable::insert(sa_table,new "FINAL-STATE",final_st_action());
 
-  return new symbInfo{.symb_action_counter=259,.symb_action_table=sa_table,
-      .action_symb_table= as_table};
+  let ssnf_table = Hashtable::create(11,strptrcmp,Hashtable::hash_stringptr);
+
+  return new symbInfo(259,sa_table,as_table,ssnf_table);
 }
 
 static act_t new_action(symb_info_t si) {
@@ -228,6 +231,12 @@ static act_t symb2act(const char ?`H symb, symb_info_t si) {
   Hashtable::insert((_@)si->action_symb_table,a,symbptr);
   return a;
 }
+
+static $(st_t,Set::set_t<st_t>)* symb2snf(const char ?`H symb, symb_info_t si) {
+  let r = Hashtable::lookup_opt(si->symb_start_and_finals_table,new symb);
+  if (r) return *r; else return NULL;
+}
+
 static cs_t consume_symb_cs(const char ?`H symb,symb_info_t si) {
   return cs_singleton(symb2act(symb,si));
 }
@@ -1219,11 +1228,11 @@ push_closure(rstate_t rs,
 
   let &$(s,backptr) = ei;
   let node = new $(s,backptr,i);
+  let $(old_f,old_i) = add_weights(rs,node,forward,inner); //PROB
   if (back != NULL) {
     point_to(rs->pred,node,back);
     point_to(rs->retn,node,new $(up,back));
   }
-  let $(old_f,old_i) = add_weights(rs,node,forward,inner); //PROB
 
   let es = Axarray::get(rs->estates,i);
   if (Set::member(es,ei)) {
@@ -1659,7 +1668,7 @@ $(dfa_t,Set::set_t<st_t>,symb_info_t) compile(grammar_t grm, rule_t r) {
 }
 
 parse_forest_t recognize_frag(dfa_t dfa, symb_info_t symb_info, 
-			      const char?`H symb_name, st_t symb_start, Set::set_t<st_t> symb_final, 
+			      const char?`H symb_name,
 			      const char ?input, int show_progress) {
   
   show_prog = show_progress;
@@ -1673,6 +1682,13 @@ parse_forest_t recognize_frag(dfa_t dfa, symb_info_t symb_info,
     call = Hashtable::create(11,earley_node_cmp,earley_node_hash);
   let                                                                 //PROB
     weights = Hashtable::create(11,earley_node_cmp,earley_node_hash); //PROB
+
+  let r = symb2snf(symb_name,symb_info);
+  if (!r){
+    fprintf(stderr,"Invalid symbol (%s) given to recognize_frag.\n",symb_name);
+    return NULL;
+  }
+  let $(symb_start, symb_final) = *r;
 
   /* Initialize the sequence of Earley states with s0 */
   let estates = /* Earley states  s0, s1, s2, ... */
