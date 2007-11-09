@@ -1,0 +1,8 @@
+* OK [%resp-text-code] bigmail.research.att.com IMAP4rev1 2004.357 at Thu, 1 Nov 2007 15:01:20 -0400 %(EDT%)
+1 OK [%resp-text-code] User yitzhak authenticated
+* LIST %(%\NoSelect%) "/" ""
+2 %resp-cond-state
+* %response-payload
+3 OK STATUS completed
+* BYE %resp-text
+4 OK LOGOUT completed
