@@ -1,0 +1,5 @@
+DIGIT = %d48-57.
+number = 1*(DIGIT).
+LETTERA = "A".
+expr = expr "+" expr | expr "*" expr | number | "{" number$number "}" @repeat(number)LETTERA.
+start = expr.

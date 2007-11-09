@@ -1,0 +1,6 @@
+foo = "123".
+bar = "456".
+DIGIT = %d48-57.
+number = 1*(DIGIT).
+expr = number | foo | bar.
+start = expr.
