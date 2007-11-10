@@ -295,12 +295,12 @@ uri_one_string.p: $(PROG_DEP) uri_orig.bnf
 	cat $@.tmp | ./fix_hostname.pl | ./add_precord.pl URI_reference_t | cat > $@
 	$(RM) $@.tmp
 
-http.bnf: $(PROG_DEP) rfc2616.bnf rfc2617.bnf rfc2396.bnf rfc2822.bnf rfc3501.bnf
-	./yakker rfc2616.bnf \
-	  -externals rfc2617.bnf rfc2396.bnf rfc2822.bnf rfc3501.bnf \
+gen/http.bnf: $(PROG_DEP) gen/rfc2616.bnf gen/rfc2617.bnf gen/rfc2396.bnf gen/rfc2822.bnf gen/rfc3501.bnf
+	./yakker gen/rfc2616.bnf \
+	  -externals gen/rfc2617.bnf gen/rfc2396.bnf gen/rfc2822.bnf gen/rfc3501.bnf \
 	   >$@
 
-message-header.bnf: http.bnf $(PROG_DEP)
+gen/message-header.bnf: http.bnf $(PROG_DEP)
 	./yakker $< -subset message-header > $@
 
 $(BNFDIR)/imap.bnf: $(BNFDIR)/rfc3501.bnf $(PROG_DEP)
