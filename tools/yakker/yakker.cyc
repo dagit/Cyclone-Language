@@ -157,13 +157,22 @@ static const char ?add_namespace = NULL;
 "         -eagernfa              use eager nfa construction (default is lazy)\n"\
 "         -depend                produce a dependency graph of symbols in DOT format\n"\
 "         -earley <regexp>       Earley parse stdin according to regexp and grammar\n"\
-"         -earley-line <regexp> Earley parse stdin, line-by-line, according to regexp and grammar\n"\
+"         -earley-line <regexp>  Earley parse stdin, line-by-line, according to regexp and grammar\n"\
 "         -earley-shell <regexp> Earley parse files specified interactively on command line, according to regexp and grammar\n"\
+"         -earley-fsm <regexp>   Earley parse stdin according to regexp and grammar, using FSM for weighted parsing\n"\
 "         -help                  print this message\n"
 
 static void die() {
   fprintf(stderr,USAGE);
   exit(1);
+}
+
+void mkTemp(char @pattern) {
+  int fd = mkstemp(pattern);
+  if (fd < 0 || close(fd) < 0) {
+    fprintf(stderr,"Error: problem creating temp file %s\n",pattern);
+    exit(1);
+  }
 }
 
 int main(int argc, const char ?`H?argv) {
@@ -197,10 +206,11 @@ int main(int argc, const char ?`H?argv) {
   const char ?escape_chars = NULL;
   const char ?earley_regexp = NULL;
 
-  // 0 (default) = is to parse entire stdin
-  // 1 = parse line-by-line
+  // 0 (default) = is to parse entire stdin, non-weighted
+  // 1 = parse line-by-line, non-weighted
   // 2 = treat each line as a file name and parse entire specified file.
-  int interactive_earley = 0; 
+  // 3 = parse stdin, non-weighted
+  int earley_mode = 0; 
 
   let omitset = Set::empty(strptrcmp);
 
@@ -261,14 +271,20 @@ int main(int argc, const char ?`H?argv) {
     }
     else if (strcmp("-earley-line",argv[i]) == 0) {
       if (i+1 >= argc) die();
-      interactive_earley = 1;
+      earley_mode = 1;
       earley_regexp = argv[i+1];      
       i += 1;
     }
     else if (strcmp("-earley-shell",argv[i]) == 0) {
       if (i+1 >= argc) die();
-      interactive_earley = 2;
+      earley_mode = 2;
       earley_regexp = argv[i+1];      
+      i += 1;
+    }
+    else if (strcmp("-earley-fsm",argv[i]) == 0) {
+      if (i+1 >= argc) die();
+      earley_mode = 3;
+      earley_regexp = argv[i+1];
       i += 1;
     }
     else if (strcmp("-gen-header",argv[i]) == 0) generate_header = 1;
@@ -488,7 +504,7 @@ int main(int argc, const char ?`H?argv) {
   if (earley_regexp != NULL) {
     use_lazy_nfa = 0;
     
-    switch (interactive_earley){
+    switch (earley_mode){
     case 0:
       // TODO: assume regexp is a symbol for now
       let $(dfa,dfa_final,symb_info) = Earley::compile(ds,SYMB(earley_regexp));
@@ -516,10 +532,61 @@ int main(int argc, const char ?`H?argv) {
 	printf("done -- is valid string :%d. is valid prefix: %d\n",valid, valid_prefix);
 	fflush(stdout);
       }
+    case 3: // Use FSM
+      dfa_t *p_dfa = NULL;
+      Earley::symb_info_t *p_symb_info = NULL;
+      Set::set_t<st_t> *p_dfa_final = NULL;
+
+      /* Convert grammar to weighted NFA */
+      char f1[]@zeroterm = "f1-XXXXXX";
+      char f2[]@zeroterm = "f2-XXXXXX";
+      char f3[]@zeroterm = "f3-XXXXXX";
+      mkTemp(f1);
+      mkTemp(f2);
+      mkTemp(f3);
+
+      // TODO: assume regexp is a symbol for now
+      Earley::rule_fsm(f1,f2,ds,SYMB(earley_regexp));
+
+      /* Run FSM */
+      let cmd = aprintf("fsmcompile -i %s %s | "
+                        "fsmrmepsilon | "
+                        "fsmdeterminize | "
+                        "fsmprint -i %s > %s",
+                        f2,f1,f2,f3);
+      if (system(cmd) != 0) {
+        fprintf(stderr,"Error: fsm failed\n");
+        exit(1);
+      }
+
+      let r = Earley::fsm2dfa(f3,earley_regexp);
+      if (r){
+        let $(dfa,dfa_final,symb_info) = *r;
+        p_dfa = new dfa;
+        p_dfa_final = new dfa_final;
+        p_symb_info = new symb_info;	      
+      } else {
+        fprintf(stderr,"Failed to reconstruct DFA.\n");
+        exit(1);
+      }
+
+      printf("Earley parsing stdin... "); fflush(stdout);
+      int c;
+      let b = Buffer::create(101);
+      while ( (c = fgetc(stdin)) != EOF)
+	Buffer::add_char(b,c);
+
+      let $(valid,valid_prefix) = 
+        Earley::recognize(*p_dfa,*p_symb_info, *p_dfa_final,Buffer::contents(b), 0);
+      printf("done -- is valid string :%d. is valid prefix: %d\n",valid, valid_prefix);
+      if (valid) printf("Parse tree saved.\n");
+      fflush(stdout);
+
+      break;
     case 2:
     default:
-      if (interactive_earley > 2){
-	fprintf(stderr,"Internal error: invalid value for variable interactive_earley. Assuming shell mode.\n");
+      if (earley_mode > 3){
+	fprintf(stderr,"Internal error: invalid value for variable earley_mode. Assuming shell mode.\n");
       }
       char cmd[200]@zeroterm={for i<199:0};
       char arg[200]@zeroterm={for i<199:0};
@@ -552,7 +619,9 @@ int main(int argc, const char ?`H?argv) {
 
 	  if (!strcmp(arg,"fsm")){
 	    // TODO: assume regexp is a symbol for now
-	    Earley::rule_fsm(filename,ds,SYMB(earley_regexp));
+            let fsm_file = aprintf("%s.fsm",filename);
+            let sym_file = aprintf("%s.sym",filename);
+	    Earley::rule_fsm(fsm_file,sym_file,ds,SYMB(earley_regexp));
 	  } else {
 	    fprintf(stderr,"Invalid NFA format: %s.\n",arg);
 	  }

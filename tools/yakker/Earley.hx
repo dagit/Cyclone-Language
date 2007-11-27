@@ -21,6 +21,14 @@ typedef Render = {
   s:String,l:Int,r:Int,c:Array<Render>
 };
 
+class Semiring {
+  public static var zero = Math.POSITIVE_INFINITY;
+  public static var one = 0.0;
+  public static function mult(x:Float,y:Float):Float {
+    return x+y;
+  }
+}
+
 class Earley {
 
   /*** State of the Earley parser ***/
@@ -90,7 +98,9 @@ class Earley {
     ws.inner += inner;
   }
 
-  static var calloutAction = 256;
+  static var callAction = 256;
+  static var repeatAction = 257;
+  static var maxAction = ((53*8)-1); // from cs.h
   static function pushClosure(ei:Eitem,p:Null<Int>,o:{pred:Int,retn:Int,a:Int,r:Int},forward:Float,inner:Float) {
     var begin = stateIndexes[stateIndexes.length - 1];
     var dstate = ei.dstate;
@@ -113,10 +123,10 @@ class Earley {
     addRetn(elen,o);
     weights.push({forward:forward,inner:inner});
     var i = stateIndexes.length - 1;
-    /* close under calls */
     var trans = Dfa.transitions(dstate);
     if (trans != null) {
-      var t = trans(calloutAction);
+      /* close under calls */
+      var t = trans(callAction);
       var w = zeroWeight; // TODO: get weight from automaton
       if (t != 0) {
         pushClosure({dstate:t,back:i},null,null,
@@ -125,6 +135,41 @@ class Earley {
         // {dstate:t,back:i}.inner    = zeroWeight
         // {dstate:t,back:i}.inner   += zeroWeight
         // Q: possible that our assignment will override?
+      }
+      /* close under repeat */
+      t = trans(repeatAction);
+      if (t != 0) {
+        var trans2 = Dfa.transitions(t);
+        var bodyOfRepeat = 0;
+        var numberAction = 0;
+        var numberTarget = 0;
+        var bodyAction = 0;
+        var bodyTarget = 0;
+        if (trans2 != null) {
+          bodyOfRepeat = trans2(callAction);
+          for (act in repeatAction+1...maxAction+1) {
+            numberTarget = trans2(act);
+            if (numberTarget != 0) {
+              numberAction = act;
+              break;
+            }
+          }
+          if (numberTarget != 0) {
+            var trans3 = Dfa.transitions(numberTarget);
+            if (trans3 != null) {
+              for (act in repeatAction+1...maxAction+1) {
+                bodyTarget = trans3(act);
+                if (bodyTarget != 0) {
+                  bodyAction = act;
+                  break;
+                }
+              }
+            }
+          }
+        }
+        if (bodyTarget != 0) {
+          //TODO: get num, construct new dfa for the repeat, recurse
+        }
       }
     }
     /* close under returns... */
@@ -323,3 +368,50 @@ class Earley {
     else flash.Lib.trace("no.");
   }
 }
+
+/*  
+ *  Statically a repeat is encoded as the following DFA structure,
+ *  
+ *      *s*--repeatAction-->*t*--callAction-->*bodyOfRepeat*
+ *                           |
+ *                           |
+ *                           +--numAction--->*numTarget*--bodyAction-->*bodyTarget*
+ *  
+ *  where s is the current DFA state,
+ *  REPEAT is indicated by the repeatAction,
+ *  the body of the repeat is indicated next by the callAction,
+ *  the numAction identifies the nonterminal that tells how many times to
+ *  repeat,
+ *  the bodyAction identifies the nonterminal that should be repeated;
+ *  its start state is bodyOfRepeat,
+ *  and bodyTarget is a final state and presumably bodyOfRepeat reaches a
+ *  final state, so, minimization will leave this structure intact.
+ *  
+ *  At parse time when we see the structure above we construct first look
+ *  back through the parse and find an occurrence of the nonterminal
+ *  identified by numAction.  This gives us num, the number of times to
+ *  repeat.  Then we build a new dfa as follows,
+ *  
+ *  
+ *        *s'*--callAction-->*bodyOfRepeat*
+ *           |
+ *           |bodyAction
+ *           v
+ *           *--callAction-->*bodyOfRepeat*
+ *           |
+ *           |bodyAction
+ *           v
+ *           .
+ *           .  (num times)
+ *           .
+ *           *--callAction-->*bodyOfRepeat*
+ *           |
+ *           |bodyAction
+ *           v
+ *      *bodyTarget*
+ *  
+ *  where s' and every state * is fresh.
+ *  
+ *  All of this is happening in pushClosure.  When we are done with this
+ *  we simply call pushClosure on s'.
+ */

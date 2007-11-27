@@ -66,8 +66,11 @@ namespace Earley {
   // Writes two files based on the filename_base: .fsm and .sym. The
   // former holds the NFA, the latter the mapping from symbolic names to
   // numbers.
-  extern void rule_fsm(const char ?filename_base, grammar_t grm, rule_t r);
+  extern void rule_fsm(const char ?fms_file,const char ?sym_file, grammar_t grm, rule_t r);
+
   extern void dfa2dot(dfa_t dfa, symb_info_t symb_info, const char ?dot_file);
+
+  extern const char ?yk_inputs;
 }
 
 #endif
