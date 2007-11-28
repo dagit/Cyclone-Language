@@ -556,6 +556,7 @@ int main(int argc, const char ?`H?argv) {
                         f2,f1,f2,f3);
       if (system(cmd) != 0) {
         fprintf(stderr,"Error: fsm failed\n");
+        remove(f1); remove(f2); remove(f3);
         exit(1);
       }
 
@@ -567,9 +568,11 @@ int main(int argc, const char ?`H?argv) {
         p_symb_info = new symb_info;	      
       } else {
         fprintf(stderr,"Failed to reconstruct DFA.\n");
+        remove(f1); remove(f2); remove(f3);
         exit(1);
       }
 
+      remove(f1); remove(f2); remove(f3);
       printf("Earley parsing stdin... "); fflush(stdout);
       int c;
       let b = Buffer::create(101);
@@ -594,7 +597,7 @@ int main(int argc, const char ?`H?argv) {
       dfa_t *p_dfa = NULL;
       Earley::symb_info_t *p_symb_info = NULL;
       Set::set_t<st_t> *p_dfa_final = NULL;
-      while(!done){
+      while(!done) {
 	int c;
 	
 	// Print prompt.
@@ -604,7 +607,7 @@ int main(int argc, const char ?`H?argv) {
 	scanf("%s",cmd);
 	
 	// Parse command line
-	if (!strcmp(cmd, "compile")){
+	if (!strcmp(cmd, "compile")) {
 
 	  // TODO: assume regexp is a symbol for now
 	  let $(dfa,dfa_final,symb_info) = Earley::compile(ds,SYMB(earley_regexp));
@@ -612,7 +615,7 @@ int main(int argc, const char ?`H?argv) {
 	  p_dfa_final = new dfa_final;
 	  p_symb_info = new symb_info;
 
-	} else if (!strcmp(cmd, "print-nfa")){
+	} else if (!strcmp(cmd, "print-nfa")) {
 
 	  char filename[200]@zeroterm={for i<199:0};
 	  scanf("%s %s",arg,filename);
@@ -651,7 +654,7 @@ int main(int argc, const char ?`H?argv) {
 	  char filename[200]@zeroterm={for i<199:0};
 	  scanf("%s %s",arg,filename);
 
-	  if (!p_dfa){
+	  if (!p_dfa || !p_symb_info) {
 	    fprintf(stderr, "Need to compile or load DFA first.\n");
 	    continue;
 	  }
@@ -659,10 +662,31 @@ int main(int argc, const char ?`H?argv) {
 	  if (!strcmp(arg,"dot")){
 	    // TODO: assume regexp is a symbol for now
 	    Earley::dfa2dot(*p_dfa,*p_symb_info,filename);
-	  } else {
-	    fprintf(stderr,"Invalid DFA output format: %s.\n",arg);
 	  }
-	  
+          else if (!strcmp(arg,"cyclone")) {
+            FILE *f = fopen(filename,"w");
+            if (f) { 
+              fprintf(f,
+                      "typedef unsigned int act_t;\n"
+                      "typedef unsigned int st_t;\n"
+                      "typedef double weight_t;\n");
+              Earley::act2symb_cyclone(f,*p_symb_info);
+              dfa_cyclone(f,*p_dfa);
+              fclose(f); 
+            }
+            else fprintf(stderr, "Failed to open file %s.\n",filename);
+	  } else if (!strcmp(arg,"haxe")) {
+            FILE *f = fopen(filename,"w");
+            if (f) { 
+              Earley::act2symb_haxe(f,*p_symb_info);
+              dfa_haxe(f,*p_dfa);
+              fclose(f); 
+            }
+            else fprintf(stderr, "Failed to open file %s.\n",filename);
+	  } else {
+	    fprintf(stderr,"Invalid DFA format: %s.\n",arg);
+	  }
+
 	} else if (!strcmp(cmd, "parse")){
 
 	  if (!p_dfa || !p_dfa_final){
@@ -765,22 +789,6 @@ int main(int argc, const char ?`H?argv) {
 	    printf("Parse tree is ambiguous.\n");
 	  else
 	    printf("Parse tree is not ambiguous.\n");
-
-  	} else if (!strcmp(cmd,"print-dfa")){
-
-	  scanf("%s",arg);
-
-	  if (!p_dfa || !p_symb_info){
-	    fprintf(stderr, "Need to compile DFA first.\n");
-	    continue;
-	  }
-
-	  if (!strcmp(arg,"haxe")){
-            Earley::act2symb_haxe(stdout,*p_symb_info);
-	    dfa_haxe(stdout,*p_dfa); 
-	  } else {
-	    fprintf(stderr,"Invalid DFA format: %s.\n",arg);
-	  }
 
   	} else if (!strcmp(cmd,"print")){
 

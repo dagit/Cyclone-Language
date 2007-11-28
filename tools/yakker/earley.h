@@ -58,6 +58,7 @@ namespace Earley {
   /* Print right-most parse tree to depth of "depth". Use -1 to print entire tree. */
   extern void print_RT(datatype ParseTree @pt, int depth);
 
+  extern void act2symb_cyclone(FILE @f, symb_info_t si);
   extern void act2symb_haxe(FILE @f, symb_info_t si);
 
   extern int isAmb_parse_tree(datatype ParseTree @pt);

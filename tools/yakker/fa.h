@@ -82,6 +82,8 @@ void nfa_fsm(FILE @f,Set::set_t<st_t> final_states,
 $(dfa_t,Set::set_t<st_t>) *fsm_dfa(const char ?filename, const char ?`H start_symb,
 				   act_t (@symb2act)(const char ?`H, `a),`a symb_info);
 
+/* Print the dfa as a cyclone datastructure. */
+extern void dfa_cyclone(FILE@,dfa_t);
 /* Print the dfa as a haxe datastructure. */
 extern void dfa_haxe(FILE@,dfa_t);
 
