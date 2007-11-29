@@ -77,7 +77,8 @@ typedef struct elink @`H elink_t;
 					                  repeat_final_action(), nt_final)
 #define DFA_FINAL_WEIGHT(dfa,f) dfa_final_weight(dfa->d,f)
 // XXX: find more efficient way to get array.
-#define DFA_FINAL_ATTRS(dfa,f) List::to_array(Set::to_list(dfa_final_attrs(dfa->d,f)))
+//#define DFA_FINAL_ATTRS(dfa,f) List::to_array(Set::to_list(dfa_final_attrs(dfa->d,f)))
+#define DFA_FINAL_ATTRS(dfa,f) Set::to_list(dfa_final_attrs(dfa->d,f))
 #define DFA_GET_START(dfa) dfa->start
 #define DFA_IS_DFA_FINAL(dfa,s) Set::member(dfa->finals, s)
 
@@ -305,9 +306,11 @@ push_closure(rstate_t rs,
 
     /* For every completed symbol... */
     let completed = DFA_FINAL_ATTRS(DFA_OF_RS(rs),s);
-    let n = numelts(completed);
-    for (int i; i<n; i++) {
-      let symb_act = completed[i];
+    for (; completed; completed=completed->tl) {
+      let symb_act = completed->hd;
+//      let n = numelts(completed);
+//      for (int i; i<n; i++) {
+//        let symb_act = completed[i];
 
       /* ... look at every DFA state in es_back... */
 			for (let es_back_list = Set::to_list(es_back);
@@ -402,7 +405,7 @@ mk_parse_tree(rstate_t rs,
 }
 
 
-List::list_t<$(parse_tree_t,Semiring::weight_t)@> 
+$(List::list_t<$(parse_tree_t,Semiring::weight_t)@>,int,int) 
 parse(DFA_TY dfa, const char? input) {
 	/* Keep track of parse trees */
 	let
@@ -451,12 +454,17 @@ parse(DFA_TY dfa, const char? input) {
 	}
 
 	/* See if we ended up in a final state */
+  let partial_parses = 0;
+  let complete_parses = 0;
 	let trees = NULL;
 	for (let slast_list = Set::to_list(Axarray::get(estates,input_len));
 			slast_list != NULL;
 			slast_list = slast_list->tl) {
+    partial_parses++;
 		let &$(state,parent) = slast_list->hd;
 		if (DFA_IS_DFA_FINAL(dfa,state) && parent == 0) {
+      complete_parses++;
+			
 			if (do_reconstruct) {
 				let en = new $(state,parent /*== 0*/,input_len);
 				let derivation_tree = mk_parse_tree(rs,input,en);
@@ -465,5 +473,5 @@ parse(DFA_TY dfa, const char? input) {
 			}
 		}
 	}
-	return trees;
+	return $(trees,complete_parses,partial_parses);
 }

@@ -14,7 +14,7 @@ namespace EarleyBackend {
 
 	typedef datatype ParseTree @`H parse_tree_t;
 
-	extern List::list_t<$(parse_tree_t,Semiring::weight_t)@>
+	extern $(List::list_t<$(parse_tree_t,Semiring::weight_t)@>,int,int)
 	parse(DFA::Rep::dfa_rep_t dfa_rep, const char? input);
 }
 

@@ -583,12 +583,9 @@ int main(int argc, const char ?`H?argv) {
       while ( (c = fgetc(stdin)) != EOF )
       	Buffer::add_char(b,c);
 
-      let dfa_rep = new DFA::Rep::dfa_rep(*p_dfa,1,*p_dfa_final);
-      let trees = EarleyBackend::parse(dfa_rep,Buffer::contents(b));
-//      Earley::recognize(*p_dfa,*p_symb_info, *p_dfa_final,Buffer::contents(b), 0);
-      printf("done -- is valid string :%d.d\n",trees != NULL);
-//      if (trees) printf("Parse tree saved.\n");
-      fflush(stdout);
+  	  let dfa_rep = new DFA::Rep::dfa_rep(*p_dfa,1,*p_dfa_final);
+      let $(trees,valid,valid_prefix) = EarleyBackend::parse(dfa_rep,Buffer::contents(b));
+      printf("done -- is valid string :%d; is valid prefix: %d\n",valid,valid_prefix);
 
       break;
     case 2:
