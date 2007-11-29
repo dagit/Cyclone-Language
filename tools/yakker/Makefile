@@ -30,7 +30,7 @@ YAKKER_FILES = analyze axarray cs bnf extract semiring fa nfa_lazy nfa_eager lef
   flatten termgrammar lex pads \
   parse_tab parsergen crawlergen pr prose prose_elim_grm string_dfa_engine1 \
   string_dfa_engine2_1 corerules corerules_grm \
-  util namespaces earley earley-backend yakker
+  util namespaces earley abnf-echo earley-backend yakker
 
 FILES=$(YAKKER_FILES) ast_main pm_bnf imap_scanf funtable
 
