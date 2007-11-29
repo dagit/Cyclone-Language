@@ -165,6 +165,9 @@ static const char ?add_namespace = NULL;
 "         -earley-shell <regexp> Earley parse files specified interactively on command line, according to regexp and grammar\n"\
 "         -earley-fsm <regexp>   Earley parse stdin according to regexp and grammar, using FSM for weighted parsing\n"\
 "         -earley-run <regexp>   Earley parse stdin according to regexp and linked dfa\n"\
+"         -earley-gen-dot <regexp>   Generate a dot-encoded DFA of the regexp.\n"\
+"         -earley-gen-cyc <regexp>   Generate a cyclone-encoded DFA of the regexp.\n"\
+"         -earley-gen-haxe <regexp>   Generate a haxe-encoded DFA of the regexp.\n"\
 "         -help                  print this message\n"
 
 static void die() {
@@ -295,6 +298,24 @@ int main(int argc, const char ?`H?argv) {
     else if (strcmp("-earley-run",argv[i]) == 0) {
       if (i+1 >= argc) die();
       earley_mode = 4;
+      earley_regexp = argv[i+1];
+      i += 1;
+    }
+    else if (strcmp("-earley-gen-dot",argv[i]) == 0) {
+      if (i+1 >= argc) die();
+      earley_mode = 5;
+      earley_regexp = argv[i+1];
+      i += 1;
+    }
+    else if (strcmp("-earley-gen-cyc",argv[i]) == 0) {
+      if (i+1 >= argc) die();
+      earley_mode = 6;
+      earley_regexp = argv[i+1];
+      i += 1;
+    }
+    else if (strcmp("-earley-gen-haxe",argv[i]) == 0) {
+      if (i+1 >= argc) die();
+      earley_mode = 7;
       earley_regexp = argv[i+1];
       i += 1;
     }
@@ -608,9 +629,86 @@ int main(int argc, const char ?`H?argv) {
       printf("done -- is valid string :%d; is valid prefix: %d\n",valid,valid_prefix);
 
       break;
+    // Use FSM to generate dfa  
+    case 5: // in dot 
+    case 6: // in cyclone
+    case 7: // in haxe
+    	dfa_t *p_dfa = NULL;
+      Earley::symb_info_t *p_symb_info = NULL;
+      Set::set_t<st_t> *p_dfa_final = NULL;
+
+      /* Convert grammar to weighted NFA */
+      char f1[]@zeroterm = "f1-XXXXXX";
+      char f2[]@zeroterm = "f2-XXXXXX";
+      char f3[]@zeroterm = "f3-XXXXXX";
+      mkTemp(f1);
+      mkTemp(f2);
+      mkTemp(f3);
+
+      // TODO: assume regexp is a symbol for now
+      Earley::rule_fsm(f1,f2,ds,SYMB(earley_regexp));
+
+      /* Run FSM */
+      let cmd = aprintf("fsmcompile -i %s %s | "
+                        "fsmrmepsilon | "
+                        "fsmdeterminize | "
+                        "fsmprint -i %s > %s",
+                        f2,f1,f2,f3);
+      if (system(cmd) != 0) {
+        fprintf(stderr,"Error: fsm failed\n");
+        remove(f1); remove(f2); remove(f3);
+        exit(1);
+      }
+
+      let r = Earley::fsm2dfa(f3,earley_regexp);
+      if (r){
+        let $(dfa,dfa_final,symb_info) = *r;
+        p_dfa = new dfa;
+        p_dfa_final = new dfa_final;
+        p_symb_info = new symb_info;	      
+      } else {
+        fprintf(stderr,"Failed to reconstruct DFA.\n");
+        remove(f1); remove(f2); remove(f3);
+        exit(1);
+      }
+
+      remove(f1); remove(f2); remove(f3);
+
+      let filename = aprintf("/dev/stdout");
+      switch (earley_mode){
+      case 5:
+				// TODO: assume regexp is a symbol for now
+				Earley::dfa2dot(*p_dfa,*p_symb_info,filename);
+				break;
+      case 6:
+				FILE *f = fopen(filename,"w");
+				if (f) {
+					fprintf(f,
+							"#include \"semiring.h\"\n\n"
+							"namespace DFACyc;\n\n"
+							"typedef unsigned int act_t;\n"
+							"typedef unsigned int st_t;\n");
+					Earley::act2symb_cyclone(f,*p_symb_info);
+					dfa_cyclone(f,*p_dfa);
+					fclose(f);
+				}
+				else fprintf(stderr, "Failed to open file %s.\n",filename);
+				break;
+      case 7:
+				FILE *f = fopen(filename,"w");
+				if (f) {
+					Earley::act2symb_haxe(f,*p_symb_info);
+					dfa_haxe(f,*p_dfa);
+					fclose(f);
+				}
+				else fprintf(stderr, "Failed to open file %s.\n",filename);
+      default:
+				fprintf(stderr,"Invalid DFA format.\n");
+			}
+      break;
     case 2:
     default:
-      if (earley_mode > 3){
+      if (earley_mode > 5){
 	fprintf(stderr,"Internal error: invalid value for variable earley_mode. Assuming shell mode.\n");
       }
       char cmd[200]@zeroterm={for i<199:0};

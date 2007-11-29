@@ -73,6 +73,9 @@ indexer.o: indexer.cyc
 indexer.cyc: examples/indexer.yk $(PROG_DEP)
 	./yakker $(YAKFLAGS) -gen entry-list $< > $@
 
+abnf-echo-dfa.cyc: abnf-echo.bnf
+	./yakker -earley-gen-cyc rulelist $< > $@
+
 abnf-echo.cyc: abnf-echo.bnf
 	./yakker -gen rulelist $< > $@
 
