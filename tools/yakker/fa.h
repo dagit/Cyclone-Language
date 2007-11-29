@@ -18,6 +18,7 @@
 
 #ifndef FA_H
 #define FA_H
+#include <graph.h>
 #include "semiring.h"
 
 typedef unsigned int st_t; // States.  Sometimes, 0 is reserved to mark no transition
@@ -92,7 +93,7 @@ extern dfa_t dfa_minimize(dfa_t dfa);
 // the given target state "target_s" on the "target" action. Each
 // state transitions to the next on action "next".
 // The last state is connected to the specified final state "f".
-extern st_t construct_repeat_dfa(dfa_t dfa, unsigned int n, 
-				 act_t next, 
-				 st_t target_s, act_t target, st_t f);
+extern st_t construct_repeat_dfa(dfa_t dfa, act_t next, 
+				 act_t target_act, st_t target_s, 
+				 act_t final_act, st_t f);
 #endif

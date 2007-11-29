@@ -62,6 +62,4 @@ typedef const char?`H @`r1 ?`r2 strptr_array<`r1,`r2>;
 extern void
 parse_with_pat(ykbuf_t @`r ykb, Funtable::table_t parse_funs, rule_pat_t p, strptr_array<`r1,`r2> args);
 
-extern void
-earley_parse_with_pat(ykbuf_t @`r ykb, Funtable::table_t parse_funs, rule_pat_t p, strptr_array<`r1,`r2> args);
 #endif

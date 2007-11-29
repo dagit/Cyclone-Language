@@ -1081,9 +1081,6 @@ $(dfa_t,Set::set_t<st_t>) *fsm_dfa(const char ?filename, const char ?`H start_sy
 	fprintf(stderr, "Parse error: scanf unable to convert weight: %s, on line %d.\n", val_str, lineno);
 	return NULL;
       }
-      if ( !check_nonzero(val) ){
-	fprintf(stderr, "Transition weight of ~zero on line %d.\n", lineno);
-      }
 
       dfa_add_trans(dfa,src,dst,act,val);
       break;
@@ -1111,6 +1108,10 @@ $(dfa_t,Set::set_t<st_t>) *fsm_dfa(const char ?filename, const char ?`H start_sy
       let act = s_txs->hd;
       if (act == start_act) {
         dfa_final = Set::insert(dfa_final,s);
+        // TODO: This is **broken**. If the start symbol shows up elsewhere in the grammar
+        // this will prevent a valid return from taking place. Notice that what's done here 
+        // is different than what's done in rule2earley. There, the final state in question 
+        // is uniquely the final state of the whole dfa.
         // action of the start symbol does not correspond to
         // the parsing of a symbol hence does not return.  So we do not
         // want it in the attributes which indicate what symbols are
@@ -2409,28 +2410,33 @@ dfa_t lookahead_dfa(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt)
 }
 
 
-// Construct a repeat dfa: a series of n states each transitioning to
-// the given target state "target_s" on the "target" action. Each
-// state transitions to the next on action "next".
-// The last state is connected to the specified final state "f".
-st_t construct_repeat_dfa(dfa_t dfa, unsigned int n, 
-			  act_t next, 
-			  st_t target_s, act_t target, st_t f){
-  let lb = target;
+// Construct a repeat dfa: ...
+// The new  state is connected to the specified final state "f".
+st_t construct_repeat_dfa(dfa_t dfa, act_t next, 
+				 act_t target_act, st_t target_s, 
+			  act_t final_act, st_t f){
+// st_t construct_repeat_dfa(dfa_t dfa, unsigned int n, 
+// 			  act_t next, 
+// 			  st_t target_s, act_t target, st_t f){
     // FIX: is this the right weight?
-  let target_span = new span(target_s,lb+1,Semiring::from_prob(0.5));
-  // everything b/w CALL and nt.
+
+  let d = dfa_fresh_state(dfa);
+  
+  // Transitions don't sum to one b/c we've really compacted many states into one.
+  let target_span = new span(target_s,target_act+1,Semiring::from_inv_prob(2));
+  // everything b/w target_act and final_act.
+  let pre_final_span = new span(NOTRANSITION,final_act,zero_weight);
+  let final_span = new span(f,final_act+1,Semiring::one_weight);
+  // everything b/w target_act and next.
   let pre_next_span = new span(NOTRANSITION,next,zero_weight);
-  let last_d = f;
-  for (int i = 0; i < n; i++){
-    let d = dfa_fresh_state(dfa);
-    // FIX: is this the right weight?
-    let next_span = new span(last_d,next+1,Semiring::from_prob(0.5));
-    let spans = next > lb+1 ?
-      List::list(target_span, pre_next_span, next_span) : 
-      List::list(target_span, next_span);
-    Axarray::set(dfa->states,d,new trans(lb,spans));
-    last_d = d;
-  }
-  return last_d;
+  let next_span = new span(d,next+1,Semiring::from_inv_prob(2));
+
+  let spans = next > final_act+1 ?
+    List::list(final_span, pre_next_span, next_span) : 
+    List::list(final_span, next_span);
+  spans = final_act > target_act + 1 ?
+    new List::List(target_span, new List::List(pre_final_span, spans)) : 
+    new List::List(target_span, spans);
+  Axarray::set(dfa->states,d,new trans(target_act,spans));
+  return d;
 }

@@ -724,6 +724,57 @@ int main(int argc, const char ?`H?argv) {
 	  if (valid) printf("Parse tree saved.\n");
 	  fflush(stdout);
 
+// 	} else if (!strcmp(cmd, "repeat-parse")){
+
+// 	  if (!p_dfa || !p_dfa_final){
+// 	    fprintf(stderr, "Need to compile DFA first.\n");
+// 	    continue;
+// 	  }
+
+// 	  // Read file name
+// 	  scanf("%s",arg);
+
+// 	  // Check for options
+// 	  let show_progress = 0;
+// 	  if (!strcmp(arg,"--show-prog")){
+// 	    show_progress = 1;
+// 	    scanf("%s",arg);
+// 	  }
+
+// 	  // Read the file
+// 	  printf("Earley parsing %s one message at a time ... \n",arg); 
+// 	  FILE *fp = fopen(arg,"r");
+// 	  if (!fp){
+// 	    fprintf(stderr,"Bad file name.\n");
+// 	    continue;
+// 	  }
+// 	  let b = Buffer::create(101);
+// 	  let is_valid = 1;
+// 	  while ( (c = fgetc(fp)) != EOF){
+// 	    if (c == '\r'){
+// 	      do{
+// 		Buffer::add_char(b,'\r');
+// 		c = fgetc(fp);
+// 	      } while (c == '\r');
+// 	      if (c == '\n'){
+// 		Buffer::add_char(b,c);
+// 		let msg = Buffer::contents(b);
+// 		Buffer::clear(b);
+
+// 		// Parse the message
+// 		let $(msg_valid,_) = 
+// 		  Earley::recognize(*p_dfa,*p_symb_info, *p_dfa_final,msg, show_progress);
+// 		is_valid = is_valid && msg_valid;
+// 		continue;
+// 	      }
+// 	    }
+// 	    Buffer::add_char(b,c);
+// 	  }
+
+// 	  printf("done -- is valid string :%d.\n",is_valid);
+// 	  fflush(stdout);
+// 	  fclose(fp);
+// 	  printf("File read complete.\n"); 
 // 	} else if (!strcmp(cmd, "parse-tg")){
 	  
 // 	  char input_dfa_n[200]@zeroterm={for i<199:0};

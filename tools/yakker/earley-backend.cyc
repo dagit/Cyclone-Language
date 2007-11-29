@@ -1,0 +1,469 @@
+#include <buffer.h>
+#include <string.h>
+#include <core.h>
+#include <stdlib.h>
+#include <list.h>
+#include <graph.h>
+#include "bnf.h"
+#include "fa.h"
+#include "axarray.h"
+#include "cs.h"
+#include "analyze.h"
+
+#include <hashtable.h>
+
+#include "pm_bnf.h"
+#include "earley-backend.h"
+
+using List;
+using Semiring;
+
+namespace EarleyBackend;
+
+/* An automaton state and parent pointer */
+typedef $(st_t,unsigned int) @earley_item_t;
+
+static int earley_item_cmp(earley_item_t a,earley_item_t b) {
+  let $(ai,aj) = *a;
+  let $(bi,bj) = *b;
+  let c = Core::intcmp(ai,bi);
+  if (c) return c;
+  return Core::intcmp(aj,bj);
+}
+
+typedef $(st_t,unsigned int,unsigned int) @earley_node_t;
+typedef $(st_t,unsigned int,unsigned int) *earley_node_opt_t;
+typedef  Hashtable::table_t<earley_item_t,List::list_t<earley_node_t,`r>,`r> earley_graph_t<`r>;
+static int earley_node_cmp(earley_node_t a,earley_node_t b) {
+  let $(ai,aj,ak) = *a;
+  let $(bi,bj,bk) = *b;
+  let c = Core::intcmp(ai,bi);
+  if (c) return c;
+  c = Core::intcmp(aj,bj);
+  if (c) return c;
+  return Core::intcmp(ak,bk);
+}
+
+static int earley_node_hash(earley_node_t a) {
+  let $(ai,aj,ak) = *a;
+  /* All ai, aj, and ak are ints starting at 0, ai maxes out at the
+     number of states, aj and ak max out at the input length.
+     TODO: see what typical sizes are for these and adjust the
+     hash function accordingly.
+  */
+  return ai ^ (aj+ak);
+}
+
+typedef Set::set_t<earley_item_t> earley_state_t;
+
+struct elink {
+	earley_node_t      pred;
+	Semiring::weight_t p_weight; // predecessor weight
+	earley_node_opt_t  retn;
+};
+typedef struct elink @`H elink_t;
+
+//DFA::Rep::dfa_rep_t dr
+#define DFA_TY DFA::Rep::dfa_rep_t
+#define DFA_OF_RS(rs) rs->dfa
+#define DFA_TRANS(dfa,s,a) (target(dfa->d,s,a))
+#define DFA_TRANS_W(dfa,s,a) (target_w_weight(dfa->d,s,a))
+#define DFA_GET_REPEAT_ACT(dfa,s) *(first_action_after(dfa->d,s,callout_action()))
+#define DFA_GET_REPEATEE_ACT(dfa,s) *(first_action_after(dfa->d,s,0))
+#define DFA_IN_FINAL(dfa,nt,s) (Set::member(dfa_final_attrs(dfa->d,s),nt))
+#define DFA_IS_FINAL(dfa,s) (dfa_is_final(dfa->d,s))
+#define DFA_R_EXTEND(dfa,nt,nt_start,nt_final) \
+	construct_repeat_dfa(dfa->d,nt,repeat_decr_action(),nt_start,\
+					                  repeat_final_action(), nt_final)
+#define DFA_FINAL_WEIGHT(dfa,f) dfa_final_weight(dfa->d,f)
+// XXX: find more efficient way to get array.
+#define DFA_FINAL_ATTRS(dfa,f) List::to_array(Set::to_list(dfa_final_attrs(dfa->d,f)))
+#define DFA_GET_START(dfa) dfa->start
+#define DFA_IS_DFA_FINAL(dfa,s) Set::member(dfa->finals, s)
+
+struct rstate {
+  DFA_TY dfa;
+  Axarray::xarray_t<earley_state_t> estates;
+  Hashtable::table_t<earley_node_t,List::list_t<struct elink @`H,`H>,`H> links;
+  Hashtable::table_t<earley_node_t,$(Semiring::weight_t,Semiring::weight_t)@> weights; //PROB
+  Hashtable::table_t<st_t,int @,`H> repeat_counts;
+};
+typedef struct rstate @rstate_t;
+
+static act_t callout_action() {
+  return 256;
+}
+static act_t repeat_action() {
+  return 257;
+}
+static act_t final_st_action() {
+  return 258;
+}
+static act_t repeat_decr_action() {
+  return 259;
+}
+
+static act_t repeat_final_action() {
+  return 260;
+}
+
+#define MIN_ACTION 261
+
+static const char ?act2symb(act_t act, Hashtable::table_t<act_t,str_t> as_table) {
+  let sopt = Hashtable::lookup_opt(as_table,act);
+  if (sopt == NULL || *sopt == NULL) return NULL;
+  else return **sopt;
+}
+
+static void set_repeat_count(rstate_t rs, st_t s, int n){
+  Hashtable::insert(rs->repeat_counts,s, new n);
+}
+
+static int decr_repeat_count(rstate_t rs, st_t s){
+  let rc = Hashtable::lookup(rs->repeat_counts,s);
+  return (*rc)--;
+}
+
+static void remove_repeat_count(rstate_t rs, st_t s){
+  Hashtable::remove(rs->repeat_counts,s);
+}
+
+static int do_reconstruct = 1;
+
+void point_to(Hashtable::table_t<earley_node_t,List::list_t<`a,`H>,`H> tbl,
+              earley_node_t source,
+              `a target) {
+
+  let ptr = Hashtable::lookup_opt(tbl,source);
+  if (ptr != NULL) {
+    Hashtable::remove(tbl,source);
+    Hashtable::insert(tbl,source,new List::List(target,*ptr));
+  }
+  else Hashtable::insert(tbl,source,List::list(target));
+}
+
+// Retrieve bounds of previously-appearing non terminal within currently parsing RHS.
+// If appears multiple times, only returns one answer.
+// If can't be found, return NULL;
+$(unsigned int, unsigned int) *
+get_bounds(Hashtable::table_t<earley_node_t, list_t<elink_t>,`H> links,
+	   DFA_TY dfa,
+	   earley_node_t en, act_t nt){
+
+  let maybe_links = Hashtable::lookup_opt(links,en);
+  if (maybe_links == NULL) 
+  	return NULL;
+  else {
+		// OPTIMIZATION: we could use a loop instead of recursion if there
+		// is only one link.
+
+		// Search all predecessor paths
+		for (let xs = *maybe_links; xs; xs = xs->tl) {
+			let &elink(pred_link,_,retn_link) = xs->hd;
+
+			if (retn_link) {
+				let &$(x,i,j) = (_@)retn_link;
+				if (DFA_IN_FINAL(dfa,nt,x))
+				// found it
+				return new $(i,j);
+			}
+
+			// keep looking -- recurse.
+			let b = get_bounds(links, dfa, pred_link, nt);
+			if (b) return b;
+
+		}
+	}
+
+	return NULL;
+}
+
+//PROB
+void add_weights(rstate_t rs, earley_node_t node, weight_t forward, weight_t inner) { //PROB
+  let ptr = Hashtable::lookup_opt(rs->weights,node);                            //PROB
+  if (ptr != NULL) {                                                            //PROB
+    $(weight_t,weight_t)@y = *ptr;                                                    //PROB
+    y->f0 = Semiring::add( y->f0, forward );                                    //PROB
+    y->f1 = Semiring::add( y->f1, inner );                                      //PROB
+  }                                                                             //PROB
+  else Hashtable::insert(rs->weights,node,new $(forward,inner));                //PROB
+
+  return;
+}                                                                               //PROB
+
+
+/* Add an item to an Earley state.
+   If the item has an automaton state that transitions to another state
+   by epsilon, add items for those states too.
+   Epsilons may be for CALLS to parse non-terminals or
+   RETURNS from parsing non-terminals.
+ */
+void
+push_closure(rstate_t rs,
+		const char ?input,
+		unsigned int i,
+		earley_item_t ei, // YHM: I think this should be an early node
+		// instead of an earley item for
+		// efficiency sake (to save allocations).
+		earley_node_opt_t back,
+		earley_node_opt_t up
+		, weight_t forward, weight_t inner //PROB
+) {
+
+  let &$(s,backptr) = ei;
+  let node = new $(s,backptr,i);
+  add_weights(rs,node,forward,inner); //PROB
+  if (back != NULL) {
+    point_to(rs->links,node,new elink(back,inner,up));
+  }
+
+  let es = Axarray::get(rs->estates,i);
+  if (Set::member(es,ei)) {
+    return;
+  }
+  Axarray::set(rs->estates,i,Set::insert(es,ei));
+
+  /* Close under CALLS. We don't use the weight here. */
+  let t = DFA_TRANS(DFA_OF_RS(rs),s,callout_action()); 
+  if (t != 0) {
+    push_closure(rs,input,i,new $(t,i),NULL,NULL
+                 ,forward,Semiring::one_weight //PROB
+                 );
+  } 
+
+  /* Close under REPEAT-DECR (special type of call). */
+  let t = DFA_TRANS(DFA_OF_RS(rs),s,repeat_decr_action());
+  if (t != 0) {
+    // Lookup and decrement repeat count
+    let rc = decr_repeat_count(rs,s);
+    // if zero, remove transition on repeat_final and continue.
+    if (rc == 0){
+      remove_repeat_count(rs,s);
+      let t = DFA_TRANS(DFA_OF_RS(rs),s,repeat_final_action());
+      /* Call push_closure again as if we started in this
+	 state. ie. t replaces s. So, we reuse back and up. */
+      push_closure(rs,input,i,new $(t,backptr),back,up
+		   ,forward,inner //PROB
+		   );
+      return;
+    }
+    // If non zero, continue as in call
+    push_closure(rs,input,i,new $(t,i),NULL,NULL
+		 ,forward,Semiring::one_weight //PROB
+                 );
+  }
+
+  /* Close under REPEATS. Only works if target has *one* non-call target. */  
+  let t = DFA_TRANS(DFA_OF_RS(rs),s,repeat_action());
+  if (t != 0) {
+    /* 1. Retrieve the number from the Earley parse trail.*/
+
+    // Find the non-term to which repeat is bound.
+    // Note: after determinizing, possibly many calls from single
+    // state, but shouldn't be any terminals (is this true?). So, we
+    // will need to perform repeat for *all* nonterminals that appear.
+    let repeater_nt = DFA_GET_REPEAT_ACT(DFA_OF_RS(rs),t);
+    // get the bounds (inclusive) of parsed non-terminal nt from the
+    // Earley parse history.
+    let bounds_opt = get_bounds(rs->links, DFA_OF_RS(rs), node,repeater_nt);
+    if (!bounds_opt){
+      fprintf(stderr,"Error: bounds could not be find for non terminal.\n");
+      return;
+    }
+    let &$(j,k) = (_@)bounds_opt;
+    let num = atoi(substring(input,j,k-j+1));
+
+    /* 2. Build new DFA using retrieved number. */
+
+    // Find the action of the repeated symbol.
+    let s_repeatee = DFA_TRANS(DFA_OF_RS(rs),t,repeater_nt);
+    let repeatee_nt = DFA_GET_REPEATEE_ACT(DFA_OF_RS(rs), s_repeatee);
+
+    // Find the start state of the repeated DFA.
+    let nt_start = DFA_TRANS(DFA_OF_RS(rs),t,callout_action());
+    let nt_final = DFA_TRANS(DFA_OF_RS(rs),s_repeatee,repeatee_nt);
+
+    let t_new = DFA_R_EXTEND(DFA_OF_RS(rs),
+    										   repeatee_nt,nt_start,nt_final);
+    set_repeat_count(rs,t_new,num);
+
+    /* 3. Call push_closure again as if we started in this
+       state. ie. t_new replaces s. So, we reuse back and up. */
+    push_closure(rs,input,i,new $(t_new,backptr),back,up
+                 ,forward,inner //PROB
+                 );
+  }
+
+  /* Close under RETURNS.  Use else, because a REPEAT state can't
+     also be a final state. */
+  else if (i != backptr // we parsed the empty string, RETURN handled by dfa already
+      && DFA_IS_FINAL(DFA_OF_RS(rs),s)) {
+    /* Some symbol is completed.
+       es_back is the Earley state that CALLed the symbol. */
+    let es_back = Axarray::get(rs->estates,backptr);
+    let final_w = DFA_FINAL_WEIGHT(DFA_OF_RS(rs),s);
+
+    /* For every completed symbol... */
+    let completed = DFA_FINAL_ATTRS(DFA_OF_RS(rs),s);
+    let n = numelts(completed);
+    for (int i; i<n; i++) {
+      let symb_act = completed[i];
+
+      /* ... look at every DFA state in es_back... */
+			for (let es_back_list = Set::to_list(es_back);
+			es_back_list != NULL;
+			es_back_list = es_back_list->tl) {
+
+				let &$(t,tbackptr) = es_back_list->hd;
+				let ttarget = DFA_TRANS(DFA_OF_RS(rs),t,symb_act);
+				/* ... see if the DFA state did a CALL and RETURN if so. */
+				if (ttarget != 0) {
+					// Earley node w/ dot before symb.
+					let backnode = new $(t,tbackptr,backptr);
+					// Earley node w/ dot after symb.
+					let retnode = new $(ttarget,tbackptr,i);
+					let &$(backnode_forward,backnode_inner) = Hashtable::lookup(rs->weights,backnode); //PROB
+					fflush(stdout);
+					let w_m = mult(inner, final_w);
+					push_closure(rs,input,i,new $(ttarget,tbackptr),
+					backnode, node
+					,mult( w_m, backnode_forward), //PROB
+					mult( w_m, backnode_inner) //PROB
+					);
+				}
+			}
+		}
+	}
+}
+
+
+
+
+
+
+
+
+//namespace DFA {
+//st_t mk_call(dfa_kit_t dk, const char ?symb, st_t final) {
+//	// get symbol action
+//	let s_a = get_symb_action(dfa_kit, x);
+//	// get symbol start state
+//	let start = get_symb_start(dfa_kit, s_a);
+//	return mkcall_dfa(start,s_a);
+//}
+//
+//st_t mk_lit(dfa_kit_t dk, const char ?lit, st_t final){
+//	  assert (x[0] != '\0');
+//      int n = strlen(x);
+//      st_t dst = final;
+//	  for (int i=n-1; i >= 0; i--){
+//		  let s = new_dfa_state dfa_kit;
+//		  mkact_dfa(s,x[i],dst);
+//		  dst = s;
+//	  }
+//	  return dst;
+//}
+//
+//st_t mk_char(dfa_kit_t dk, char c, st_t final){
+//	
+//}
+//
+//}
+
+//st_t
+//pat2dfa0(rule_pat_t p, DFA::Kit::dfa_kit_t dfa_kit, st_t final){
+//  switch (p) {
+//  case &SymbPat(x):
+//  	fallthru(x);
+//  case &BinderPat(x):
+//	  return DFA::Kit::mk_call(dfa_kit,x,final);
+//  case &LitPat(x):
+//	  return DFA::Kit::mk_lit(dfa_kit,x,final);
+//  case &CharPat(c):
+//	  return DFA::Kit::mk_char(dfa_kit,c, final);
+//  case &SeqPat(p1,p2):
+//	  let s2 = pat2dfa0(p2,dfa_kit, final);
+//      return pat2dfa0(p1,dfa_kit, s2);
+//  }
+//}
+//
+//struct DFA::Rep::dfa_rep *pat2dfa(rule_pat_t p, DFA::Kit::dfa_kit_t dfa_kit){
+//	// TODO
+//	return NULL;
+//}
+
+datatype ParseTree{ Empty ; };
+
+parse_tree_t
+mk_parse_tree(rstate_t rs,
+		 const char ?input,
+		 earley_node_t en){
+	return new Empty;
+}
+
+
+List::list_t<$(parse_tree_t,Semiring::weight_t)@> 
+parse(DFA_TY dfa, const char? input) {
+	/* Keep track of parse trees */
+	let
+	links = Hashtable::create(11,earley_node_cmp,earley_node_hash);
+	let //PROB
+	weights = Hashtable::create(11,earley_node_cmp,earley_node_hash); //PROB
+	let
+	rcounts = Hashtable::create(11,st_cmp,st_hash);
+
+	/* Initialize the sequence of Earley states with s0 */
+	let estates = /* Earley states  s0, s1, s2, ... */
+	Axarray::create(11,Set::empty(earley_item_cmp));
+	let earley_item_0 = new $(DFA_GET_START(dfa),0); //  0 is i in si
+	let rs = new rstate {
+		dfa,
+		estates,links
+		,weights //PROB
+		,rcounts
+	};
+	push_closure(rs,
+			input,
+			0,
+			earley_item_0,
+			NULL,NULL
+			,Semiring::one_weight,Semiring::one_weight //PROB
+	);
+
+	/* Scan the input */
+	let input_len = strlen(input);
+	for (let i = 0; i < input_len; i++) {
+
+		for (let si_list = Set::to_list(Axarray::get(estates,i));
+				si_list != NULL;
+				si_list = si_list->tl) {
+
+			let &$(state,parent) = si_list->hd;
+			let $(k,w) = DFA_TRANS_W(dfa,state,input[i]); //PROB
+			if (k != 0) {// where k==0 indicates there is no valid target.
+				let enode = new $(state,parent,i);
+				let &$(forward,inner) = Hashtable::lookup(rs->weights,enode);
+				push_closure(rs,input,i+1,new $(k,parent),enode,NULL
+						,Semiring::mult(w, forward), Semiring::mult(w, inner) //PROB
+				);
+			}
+		}
+	}
+
+	/* See if we ended up in a final state */
+	let trees = NULL;
+	for (let slast_list = Set::to_list(Axarray::get(estates,input_len));
+			slast_list != NULL;
+			slast_list = slast_list->tl) {
+		let &$(state,parent) = slast_list->hd;
+		if (DFA_IS_DFA_FINAL(dfa,state) && parent == 0) {
+			if (do_reconstruct) {
+				let en = new $(state,parent /*== 0*/,input_len);
+				let derivation_tree = mk_parse_tree(rs,input,en);
+				let &$(w_forward,w_inner) = Hashtable::lookup(rs->weights, en);
+				trees = new List::List(new $(derivation_tree,w_forward),trees);
+			}
+		}
+	}
+	return trees;
+}

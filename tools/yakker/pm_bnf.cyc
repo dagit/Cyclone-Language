@@ -370,3 +370,12 @@ parse_with_pat(ykbuf_t @`r ykb, Funtable::table_t parse_funs,
 	       rule_pat_t p, strptr_array<`r1,`r2> args){
   parse_with_pat0(ykb,parse_funs,p,args);
 }
+
+
+//   switch (p) {
+//   case &SymbPat(x):
+//   case &LitPat(x):
+//   case &CharPat(c):
+//   case &SeqPat(p1,p2):
+//   case &BinderPat(x):
+//   }

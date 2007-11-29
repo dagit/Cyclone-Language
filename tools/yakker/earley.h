@@ -20,10 +20,12 @@
 #define EARLEY_H
 #include "bnf.h"
 #include "fa.h"
+#include "dfa.h"
 #include "semiring.h"
+#include "pm_bnf.h"
 
 namespace Earley {
-
+  
   typedef List::list_t<datatype ParseTree @`H,`H> parse_forest_t;
   typedef List::List_t<datatype ParseTree @`H,`H> Parse_forest_t;
 
@@ -35,18 +37,17 @@ namespace Earley {
     NonTerm(const char ?`H, int, int, Semiring::weight_t, parse_forest_t);
     SharedNonTerm(const char ?`H, int, int, Semiring::weight_t, List::List_t<parse_forest_t,`H>);
   };
-
-
+  
   extern $(dfa_t,Set::set_t<st_t>,symb_info_t) compile(grammar_t grm, rule_t r);
-  extern $(dfa_t,Set::set_t<st_t>,symb_info_t) *fsm2dfa(const char ?filename, const char ?`H start_symb);
+  extern $(dfa_t,Set::set_t<st_t>,symb_info_t) *fsm2dfa(const char ?filename, const char ?`H start_symb) ;
 
   // returns: int pair: a) the number of valid complete parses of the string.
   //                    b) the number of valid prefix parses of the string.
   extern $(int,int) recognize(dfa_t dfa, symb_info_t symb_info, Set::set_t<st_t> dfa_final, 
-			      const char ?input, int show_progress);
+		     const char ?input, int show_progress);
 
-  extern parse_forest_t recognize_frag(dfa_t dfa, symb_info_t symb_info, const char?`H symb_name, 
-				       const char ?input, int show_progress);
+//  extern parse_forest_t recognize_frag(dfa_t dfa, symb_info_t symb_info, const char?`H symb_name, 
+//				       const char ?input, int show_progress);
 
 
   /* Global variable that saves last derivation tree.
@@ -70,7 +71,7 @@ namespace Earley {
   extern void rule_fsm(const char ?fms_file,const char ?sym_file, grammar_t grm, rule_t r);
 
   extern void dfa2dot(dfa_t dfa, symb_info_t symb_info, const char ?dot_file);
-
+  
   extern const char ?yk_inputs;
 }
 

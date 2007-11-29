@@ -279,12 +279,16 @@ st_t mklit_fsm(FILE@ f_fsm, const char ?x) { /* A bit more space efficient than 
     for (let i = 0; i < len; i++) {
       let b = nfa_fresh_state();
       cs_opt_t y;
+      let w = Semiring::one_weight;
       if (CASE_INSENSITIVE) {
         y = cs_singleton(tolower(x[i]));
-        cs_insert(y,toupper(x[i]));
+	if (tolower(x[i]) != toupper(x[i])){
+	  cs_insert(y,toupper(x[i]));
+	  w = Semiring::from_prob(0.5);
+	}
       }
       else y = cs_singleton(x[i]);
-      action_fsm(f_fsm, a,y,b, Semiring::one_weight);
+      action_fsm(f_fsm, a,y,b,w);
       a = b;
     }
     final(s,a);

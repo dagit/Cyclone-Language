@@ -24,7 +24,7 @@
 /* Character (action) sets */
 
 // TODO: remove BUCKETS and MAXACTION from interface
-#define BUCKETS 225
+#define BUCKETS 250
 #define MAXACTION ((BUCKETS*8)-1)
 typedef unsigned char @{BUCKETS}@nozeroterm cs_t;
 typedef unsigned char *{BUCKETS}@nozeroterm cs_opt_t;

@@ -317,6 +317,9 @@ any conflicts, which we can do by effectively choosing new symbols from a differ
 
 3/26 :  Format string issues.
 
+(11/10/07: I believe that the term "escape" in this note is what we
+now call a binder.)
+
 Problem: how do we support arbitrary escaping in the format string
 without having conflicts up to wazoo? Are conflicts necessarily bad --
 can they be dealt with like other conflicts? At the least, we should
@@ -1676,3 +1679,24 @@ We'll need to add a attribute to parse trees that indicates which
 choice was made for every choice. However, this might run into nasty
 ambiguity issues.
 
+
+############################################################
+
+11/11/07
+
+* Seems to me that we should really bind both the string *and* the parse
+tree. Otherwise, if you want to refine the parse you need to reparse
+the string.
+
+* What about a type system for protocols?
+
+#############################################################
+
+11/21/07
+
+Implementing termgrammar parsing
+
+1. Convert pattern to BNF.
+2. Combine original grammar's dfa and new regular expression and to get
+new dfa. We can create DFA directly b/c there is no choice in format strings.
+3. Pass new dfa to earley parse and walla! we're done.

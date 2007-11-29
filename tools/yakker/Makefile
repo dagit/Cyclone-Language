@@ -342,7 +342,8 @@ $(BNFDIR)/imap_revised.bnf: $(BNFDIR)/rfc3501.bnf \
 # session is added for conveinience.
 # FIX: flattened ["+"] by hand b/c haven't written code yet to properly flatten dep. sequences.
 $(BNFDIR)/imap_revised_fixed.bnf: $(BNFDIR)/imap_revised.bnf
-	./yakker $< -rename set sequence-set -omit literal literal8 > $@.tmp
+	./yakker $< -rename set sequence-set -omit literal literal8 mailbox-data > $@.tmp
+	echo 'mailbox-data = ("FLAGS" SP flag-list)|("LIST" SP mailbox-list)|("LSUB" SP mailbox-list)|("SEARCH" *(SP nz-number))|("STATUS" SP mailbox SP "(" [status-att-list] ")")|(number SP "EXISTS")|(number SP "RECENT")|Namespace-Response|esearch-response.' >> $@.tmp
 	echo 'PLUS = "+".' >> $@.tmp
 	echo 'optional-plus = [PLUS].' >> $@.tmp
 	echo 'literal = "{" number$$number optional-plus "}" CRLF @repeat(number)CHAR8.' >> $@.tmp
