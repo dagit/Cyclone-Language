@@ -982,7 +982,7 @@ void dfa_haxe(FILE @f, dfa_t dfa) {
       break;
     }
     if (allzeros) continue;
-    fprintf(f,"case %d: return function (act:Int):Int {",i);
+    fprintf(f,"case %d: return function (act:Int) {",i);
     fprintf(f,"switch (act) {");
     let lb = transitions->lb;
     for (let spans = transitions->spans; spans; spans = spans->tl) {
@@ -990,12 +990,12 @@ void dfa_haxe(FILE @f, dfa_t dfa) {
       let target = spans->hd->target;
       if (target) { /* Don't print transitions to dead state 0 */
         for (let j = lb; j < ub; j++) {
-          fprintf(f," case %d: return %d;",j,target);
+          fprintf(f," case %d: return {t:%d,w:%f};",j,target,spans->hd->w);
         }
       }
       lb = ub;
     }
-    fprintf(f,"default: return 0;}};\n");
+    fprintf(f,"default: return {t:0,w:0.0};}};\n");
   }
   fprintf(f,"default: return null;\n}\n}\n");
 }

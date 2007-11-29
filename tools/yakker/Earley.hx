@@ -126,8 +126,9 @@ class Earley {
     var trans = Dfa.transitions(dstate);
     if (trans != null) {
       /* close under calls */
-      var t = trans(callAction);
-      var w = zeroWeight; // TODO: get weight from automaton
+      var o = trans(callAction);
+      var t = o.t;
+      var w = o.w;
       if (t != 0) {
         pushClosure({dstate:t,back:i},null,null,
                     w*forward,zeroWeight);
@@ -137,7 +138,8 @@ class Earley {
         // Q: possible that our assignment will override?
       }
       /* close under repeat */
-      t = trans(repeatAction);
+      o = trans(repeatAction);
+      t = o.t;
       if (t != 0) {
         var trans2 = Dfa.transitions(t);
         var bodyOfRepeat = 0;
@@ -146,9 +148,9 @@ class Earley {
         var bodyAction = 0;
         var bodyTarget = 0;
         if (trans2 != null) {
-          bodyOfRepeat = trans2(callAction);
+          bodyOfRepeat = trans2(callAction).t; // weight?
           for (act in repeatAction+1...maxAction+1) {
-            numberTarget = trans2(act);
+            numberTarget = trans2(act).t; // weight?
             if (numberTarget != 0) {
               numberAction = act;
               break;
@@ -158,7 +160,7 @@ class Earley {
             var trans3 = Dfa.transitions(numberTarget);
             if (trans3 != null) {
               for (act in repeatAction+1...maxAction+1) {
-                bodyTarget = trans3(act);
+                bodyTarget = trans3(act).t; // weight?
                 if (bodyTarget != 0) {
                   bodyAction = act;
                   break;
@@ -181,13 +183,13 @@ class Earley {
     for (a in attrs) {
 //      flash.Lib.trace("Returning on "+a+" to "+back);
       /* ... look at every DFA state in the back Earley state... */
-      var w = zeroWeight; // TODO: get weight from automaton
-      // NB weight of each RETURN(a) can be different
       for (m in stateIndexes[back]...stateIndexes[back+1]) {
         var backItem = eitems[m];
         var backtrans = Dfa.transitions(backItem.dstate);
         if (backtrans == null) continue;
-        var returnTarget = backtrans(a); // CALL a
+        var o = backtrans(a); // CALL a
+        var returnTarget = o.t;
+        var w = o.w;
         if (returnTarget == 0) continue;
         pushClosure({dstate:returnTarget,back:backItem.back},null,{pred:m,retn:elen,a:a,r:i},
                     w*inner*weights[m].forward,
@@ -232,8 +234,9 @@ class Earley {
 //        flash.Lib.trace("Looking at ("+dstate+","+back+")");
         var trans = Dfa.transitions(dstate);
         if (trans == null) continue;
-        var k = trans(input.charCodeAt(i));
-        var w = zeroWeight; // TODO: get weight from automaton
+        var o = trans(input.charCodeAt(i));
+        var k = o.t;
+        var w = o.w;
         if (k != 0) {
           pushClosure({dstate:k,back:back},j,null,
                       w*weights[j].forward,
