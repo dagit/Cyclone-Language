@@ -32,6 +32,10 @@
 #include "corerules.h"
 #include "namespaces.h"
 #include "earley.h"
+
+#include "dfa.h"
+#include "earley-backend.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <buffer.h>
@@ -576,13 +580,14 @@ int main(int argc, const char ?`H?argv) {
       printf("Earley parsing stdin... "); fflush(stdout);
       int c;
       let b = Buffer::create(101);
-      while ( (c = fgetc(stdin)) != EOF)
-	Buffer::add_char(b,c);
+      while ( (c = fgetc(stdin)) != EOF )
+      	Buffer::add_char(b,c);
 
-      let $(valid,valid_prefix) = 
-        Earley::recognize(*p_dfa,*p_symb_info, *p_dfa_final,Buffer::contents(b), 0);
-      printf("done -- is valid string :%d. is valid prefix: %d\n",valid, valid_prefix);
-      if (valid) printf("Parse tree saved.\n");
+      let dfa_rep = new DFA::Rep::dfa_rep(*p_dfa,1,*p_dfa_final);
+      let trees = EarleyBackend::parse(dfa_rep,Buffer::contents(b));
+//      Earley::recognize(*p_dfa,*p_symb_info, *p_dfa_final,Buffer::contents(b), 0);
+      printf("done -- is valid string :%d.d\n",trees != NULL);
+//      if (trees) printf("Parse tree saved.\n");
       fflush(stdout);
 
       break;
