@@ -73,6 +73,12 @@ indexer.o: indexer.cyc
 indexer.cyc: examples/indexer.yk $(PROG_DEP)
 	./yakker $(YAKFLAGS) -gen entry-list $< > $@
 
+abnf-echo.cyc: abnf-echo.bnf
+	./yakker -gen rulelist $< > $@
+
+abnf-echo: abnf-echo.o bnf.o cs.o pr.o util.o ykbuf.o ssl.o
+	cyclone -o $@ $^  -lssl
+
 wf: wf.o ykbuf.o ssl.o
 	$(CYCLONE) $^ -o $@ -lssl -lcrypto
 

@@ -1,0 +1,64 @@
+{
+#include "bnf.h"
+#include "pr.h"
+}
+ALPHA = %d65-90|%d97-122.
+BIT = "0"|"1".
+CR = %d13.
+CRLF = CR LF.
+DIGIT = %d48-57.
+DQUOTE = %d34.
+HEXDIG = DIGIT|"A"|"B"|"C"|"D"|"E"|"F".
+HTAB = %d9.
+LF = %d10.
+SP = %d32.
+VCHAR = %d33-126.
+WSP = SP|HTAB.
+alternation$(rule_t)
+  = concatenation$x {rule_t r = x;}
+    *(*c-wsp ("/"|"|") *c-wsp concatenation$y {r = ALT(r,y);}) {return r;}.
+bin-val = "b" 1*BIT [1*("." 1*BIT)|("-" 1*BIT)].
+c-nl = comment|LF|CRLF.
+c-wsp = WSP|(c-nl WSP).
+char-line = %d13 %d10 %d32-126 %d13 %d10.
+char-val$(rule_t) = DQUOTE (*(%d32-33|%d35-126))$x DQUOTE {return LIT(x);}.
+comment = ";" *(WSP|VCHAR) (LF|CRLF).
+concatenation$(rule_t)
+  = repetition$x {rule_t r = x;}
+    *(1*c-wsp repetition$y {r = SEQ(r,y);}){return r;}.
+dec-val$(rule_t) = "d" 1*DIGIT [1*("." 1*DIGIT)|("-" 1*DIGIT)] {return LIT("TODO");}.
+defined-as = *c-wsp ("="|"=/") *c-wsp.
+element$(rule_t)
+  = rulename$x {return SYMB(x);}
+  |group$x {return x;}
+  |option$x {return x;}
+  |char-val$x {return x;}
+  |num-val$x {return x;}
+  |prose-val$x {return x;}.
+elements$(rule_t) = alternation$x *c-wsp {return x;}.
+group$(rule_t) = "(" *c-wsp alternation$x *c-wsp ")" {return x;}.
+hex-val$(rule_t) = "x" 1*HEXDIG [1*("." 1*HEXDIG)|("-" 1*HEXDIG)] {return LIT("TODO");}.
+num-val$(rule_t) = "%" (bin-val|dec-val|hex-val) {return LIT("TODO");}.
+option$(rule_t) = "[" *c-wsp alternation$x *c-wsp "]" {return OPT(x);}.
+prose-val$(rule_t) = "<" (*(%d32-61|%d63-126))$x ">" {return PROSE(x);}.
+repeat$($(unsigned int, repeat_t))
+  = (1*DIGIT)$x {return $(atoi(x),new Infinity);}
+  |(*DIGIT$x "*" *DIGIT$y)
+   { let xlen = strlen(x); let ylen = strlen(y);
+     unsigned int xval = 0;
+     if (xlen > 0) xval = atoi(x);
+     repeat_t yval = new Infinity;
+     if (ylen > 0) yval = new Num(atoi(y));
+     return $(xval,yval);}.
+repetition$(rule_t)
+  = "" { int with_repeat = 0; unsigned int m = 0; repeat_t n = new Infinity; }
+  [repeat$x { with_repeat = 1; m = x.f0; n = x.f1; } ]
+  element$y {if (with_repeat) return STAR(m,n,y); else return y;}.
+rule = rulename$x defined-as elements$y "." *c-wsp c-nl
+  {printf("%s = ",x);pr_rule(stdout,y,0);printf(".\n");}.
+rulelist = 1*(rule|(*c-wsp c-nl)).
+rulename = ALPHA *(ALPHA|DIGIT|"-"|":").
+{
+grammar_t parse_string(char ?s) {return NULL;}
+}
+
