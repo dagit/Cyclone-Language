@@ -405,11 +405,12 @@ clean:
 	$(RM) indexer indexer.cyc 1rfc_index 1rfc_index.txt
 	$(RM) wf wf.cyc
 	$(RM) http.cyc
+	$(RM) abnf-echo abnf-echo.cyc abnf-echo-dfa.cyc
 	$(RM) imapp imapcl imapp.key imapp.cert
 	$(RM) markdown.cyc markdown
 	$(RM) $(GENDIR)/*
 	$(RM) $(BNFDIR)/*
-	$(RM) build/*
+	$(RM) build/*.d
 	$(RM) parseviz.swf
 
 %.p: %.bnf $(PROG_DEP)
