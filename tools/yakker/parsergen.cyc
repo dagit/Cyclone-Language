@@ -113,7 +113,7 @@ void gen0(rule_t r, rule_t right_ctxt) {
   int save;
   if (r->v) {
     if ('$' == r->v[0]){
-      printf("let %s = NULL;",r->v + 1);
+      printf("let %s;",r->v + 1);
     } else {
       switch (r->r) {
       case &Symb(x,y):

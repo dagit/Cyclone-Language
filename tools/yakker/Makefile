@@ -88,13 +88,13 @@ abnf-echo.cyc: abnf-echo.bnf
 	./yakker -gen rulelist $< > $@
 
 abnf-echo: abnf-echo.o bnf.o cs.o pr.o util.o ykbuf.o ssl.o
-	cyclone -o $@ $^  -lssl
+	cyclone -o $@ $^  -lssl -lcrypto
 
 abnf-echo-dfa.cyc: abnf-echo.bnf yakker
 	./yakker -earley-gen-cyc rulelist $< > $@
 
 earley-be: $(EBE_OBJS)
-	cyclone -o $@ $^  -lssl
+	cyclone -o $@ $^  -lssl -lm
 
 wf: wf.o ykbuf.o ssl.o
 	$(CYCLONE) $^ -o $@ -lssl -lcrypto

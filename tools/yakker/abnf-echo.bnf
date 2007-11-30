@@ -15,8 +15,8 @@ SP = %d32.
 VCHAR = %d33-126.
 WSP = SP|HTAB.
 alternation$(rule_t)
-  = concatenation$x (""{r = x;}
-    *(*c-wsp ("/"|"|") *c-wsp concatenation$y {r = ALT(r,y);}))$$r {return r;}.
+  = concatenation$x 
+    *(*c-wsp ("/"|"|") *c-wsp concatenation$y {r = ALT(r,y);})$$r={x} {return r;}.
 bin-val = "b" 1*BIT [1*("." 1*BIT)|("-" 1*BIT)].
 c-nl = comment|LF|CRLF.
 c-wsp = WSP|(c-nl WSP).
@@ -24,8 +24,8 @@ char-line = %d13 %d10 %d32-126 %d13 %d10.
 char-val$(rule_t) = DQUOTE (*(%d32-33|%d35-126))$x DQUOTE {return LIT(x);}.
 comment = ";" *(WSP|VCHAR) (LF|CRLF).
 concatenation$(rule_t)
-  = repetition$x (""{r = x;}
-    *(1*c-wsp repetition$y {r = SEQ(r,y);}))$$r {return r;}.
+  = repetition$x
+    *(1*c-wsp repetition$y {r = SEQ(r,y);})$$r={x} {return r;}.
 dec-val$(rule_t) = "d" 1*DIGIT [1*("." 1*DIGIT)|("-" 1*DIGIT)] {return LIT("TODO");}.
 defined-as = *c-wsp ("="|"=/") *c-wsp.
 element$(rule_t)

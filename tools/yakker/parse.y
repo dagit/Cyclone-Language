@@ -107,6 +107,7 @@ static int re_for_id(const char ?id) {
 %type <definition_t>                  definition
 %type <$(const char ?`H,const char ?`H)> typestuff
 %type <rule_t>                        rule rule1 rule2 rule3 rule0
+%type <const char ?`H>                dd_init_opt
 %start grammar
 %%
 grammar: definitions
@@ -193,8 +194,13 @@ rule2:
 { $$ = $!1; }
 | rule2 DOLLAR ID
 { $$ = ^$(new arule($1->a,$1->p,$3,$1->css,$1->r)); } // NB: THROW AWAY VID FROM $1
-| rule2 DOLLAR DOLLAR ID  // extra dollar indicates ID should be bound in rule2.
-{ $$ = ^$(new arule($1->a,$1->p,strconcat("$",$4),$1->css,$1->r)); } // NB: THROW AWAY VID FROM $1
+| rule2 DOLLAR DOLLAR ID dd_init_opt // extra dollar indicates ID should be bound in rule2, with (optional) initializer.
+{ let init_rule = LIT("");
+  init_rule->a = strconcat_l(List::list(new $4, new "=", new ($5? $5 : "NULL"), new ";"));
+  let new_r = new arule($1->a,$1->p,NULL,$1->css,$1->r); // NB: THROW AWAY VID FROM $1
+  $$ = ^$(new arule(NULL,NULL,strconcat("$",$4) ,$1->css,new Seq(init_rule, new_r))); } 
+// | rule2 DOLLAR DOLLAR ID // extra dollar indicates ID should be bound in rule2.
+// { $$ = ^$(new arule($1->a,$1->p,strconcat("$",$4),$1->css,$1->r)); } // NB: THROW AWAY VID FROM $1
 |     RCOUNT_T   rule3
 { $$ = ^$(RCOUNT($1,$2)); }
 |     STAR_T     rule3
@@ -240,6 +246,12 @@ rule3:
 { $$ = $!2; }
 | LBRACKET rule RBRACKET
 { $$ = ^$(OPT($2)); }
+
+dd_init_opt:
+  DEF SEMACTION
+{ $$ = ^$($2); }
+| 
+{ $$ = ^$(NULL); }
 
 %%
 
