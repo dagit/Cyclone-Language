@@ -232,7 +232,7 @@ void gen0(rule_t r, rule_t right_ctxt) {
       }
       printf("{ int ykaccept = 0;\n");
       printf("{ let save = YKSAVE;\n");
-      dfa_generate2(dfa);
+      dfa_generate2(dfa,lazyfill);
       printf("YKCURSOR = YKRESTORE(save);\n}\n");
       printf("switch (ykaccept) {\n");
       for (unsigned int i = 1; alts; alts = alts->tl, i++) {
@@ -291,7 +291,7 @@ void gen0(rule_t r, rule_t right_ctxt) {
       }
       printf("{ int ykaccept = 0;\n");
       printf("{ let save = YKSAVE;\n");
-      dfa_generate2(dfa);
+      dfa_generate2(dfa,lazyfill);
       printf("YKCURSOR = YKRESTORE(save);\n}\n");
       printf("switch (ykaccept) {\n");
       printf("case 1:\n");
@@ -394,7 +394,7 @@ void gen0(rule_t r, rule_t right_ctxt) {
       printf("A%d: 0;\n",before);
       printf("{ int ykaccept = 0;\n");
       printf("{ let save = YKSAVE;\n");
-      dfa_generate2(dfa);
+      dfa_generate2(dfa,lazyfill);
       printf("YKCURSOR = YKRESTORE(save);\n}\n");
       printf("switch (ykaccept) {\n");
       printf("case 1:\n");

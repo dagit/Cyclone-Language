@@ -19,6 +19,7 @@
 #ifndef FA_H
 #define FA_H
 #include <graph.h>
+#include "bnf.h"
 #include "semiring.h"
 
 typedef unsigned int st_t; // States.  Sometimes, 0 is reserved to mark no transition
@@ -64,7 +65,7 @@ extern aset_t dfa_final_attrs(dfa_t dfa,st_t s);
 extern Semiring::weight_t dfa_final_weight(dfa_t dfa,st_t s);
 extern dfa_t lookahead_dfa(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt);
 extern void dfa_generate1(dfa_t dfa);
-extern void dfa_generate2(dfa_t dfa);
+extern void dfa_generate2(dfa_t dfa, int lazyfill);
 extern void lookahead_glush(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt);
 
 extern void nfa_dot(FILE @f,Set::set_t<st_t> final_states, cs_pred_t special);

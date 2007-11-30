@@ -1,6 +1,8 @@
 #ifndef DFA_CYC_H_
 #define DFA_CYC_H_
 
+#include "fa.h"
+
 namespace DFACyc{
 
 //char ?act2symb(act_t);

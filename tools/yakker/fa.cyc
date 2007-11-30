@@ -2139,8 +2139,7 @@ static void fill_table0(dfa_t dfa, stgraph_t reachable, stgraph_t scc, unsigned 
     if (result[s] < distance) result[s] = distance;
   }
 }
-extern int lazyfill; // in parsergen.cyc
-static unsigned int ?fill_table(dfa_t dfa) {
+static unsigned int ?fill_table(dfa_t dfa, int lazyfill) {
   if (lazyfill) return new {for i < dfa->number_of_states : 1 };
   unsigned int ?result = new {for i < dfa->number_of_states : 0 };
   let g = dfa_onestep(dfa);
@@ -2153,8 +2152,8 @@ static unsigned int ?fill_table(dfa_t dfa) {
 }
 extern const char ?dfa_engine2_1;
 static unsigned int dfa_num = 1;
-void dfa_generate2(dfa_t dfa) {
-  let my_fill_table = fill_table(dfa);
+void dfa_generate2(dfa_t dfa, int lazyfill) {
+  let my_fill_table = fill_table(dfa,lazyfill);
   let base = dfa_num++;
   // TEMP comment out header
   // printf("%s",dfa_engine2_1);

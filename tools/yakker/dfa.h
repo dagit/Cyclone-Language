@@ -4,6 +4,7 @@
 #include <hashtable.h>
 #include "fa.h"
 #include "axarray.h"
+//#include "util.h"
 
 namespace DFA {
 //	namespace Kit {

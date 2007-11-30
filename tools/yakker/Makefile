@@ -26,12 +26,13 @@ CYCBISON=$(BINDIR)/cycbison
 CYCLEX=$(BINDIR)/cyclex
 STRINGIFY=$(BINDIR)/stringify
 
-YAKKER_FILES = analyze axarray cs bnf extract semiring fa nfa_lazy nfa_eager leftfactor \
+YAKKER_FILES = analyze axarray cs bnf extract semiring fa nfa_lazy nfa_eager \
   flatten termgrammar lex pads \
   parse_tab parsergen crawlergen pr prose prose_elim_grm string_dfa_engine1 \
   string_dfa_engine2_1 corerules corerules_grm \
-  util namespaces earley abnf-echo-dfa earley-backend yakker
-
+  util namespaces earley \
+  yakker
+  
 FILES=$(YAKKER_FILES) ast_main pm_bnf imap_scanf funtable
 
 # OBJS:=$(foreach yfile,$(YAKKER_FILES),build/$(yfile).o)
@@ -41,13 +42,20 @@ OBJS:=$(foreach yfile,$(YAKKER_FILES),$(yfile).o)
 OBJS_PA=$(foreach yfile,$(YAKKER_FILES),$(yfile)_a.o)
 PROG_PA=$(PROG)_a
 
+EBE_FILES = analyze axarray cs bnf  semiring fa nfa_lazy nfa_eager \
+     lex parse_tab pr prose prose_elim_grm string_dfa_engine1 \
+  string_dfa_engine2_1 corerules corerules_grm \
+  util namespaces abnf-echo-dfa earley-backend
+
+EBE_OBJS:=$(foreach yfile,$(EBE_FILES),$(yfile).o)
+
 DEPENDS:=$(foreach file,$(FILES),build/$(file).d)
 
 ###############################################################################
 # Targets
 ###############################################################################
 
-all: $(PROG)
+all: $(BTS-PROG) $(PROG)
 
 cyclone-install: $(BINDIR)/$(PROG)
 
@@ -56,6 +64,9 @@ $(BINDIR)/$(PROG): $(PROG)
 
 $(PROG): $(OBJS)
 	$(CYCLONE) $(CYCFLAGS) -L$(CYC_LIB_PATH) $^ -o $@ -lm	
+
+# $(BTS_PROG): $(BTS_OBJS)
+#	$(CYCLONE) $(CYCFLAGS) -L$(CYC_LIB_PATH) $^ -o $@ -lm	
 
 $(PROG_PA): $(OBJS_PA)
 	$(CYCLONE) $(CYCFLAGS) -pa -L$(CYC_LIB_PATH) $^ -o $@ -lm
@@ -73,13 +84,16 @@ indexer.o: indexer.cyc
 indexer.cyc: examples/indexer.yk $(PROG_DEP)
 	./yakker $(YAKFLAGS) -gen entry-list $< > $@
 
-abnf-echo-dfa.cyc: abnf-echo.bnf
-	./yakker -earley-gen-cyc rulelist $< > $@
-
 abnf-echo.cyc: abnf-echo.bnf
 	./yakker -gen rulelist $< > $@
 
 abnf-echo: abnf-echo.o bnf.o cs.o pr.o util.o ykbuf.o ssl.o
+	cyclone -o $@ $^  -lssl
+
+abnf-echo-dfa.cyc: abnf-echo.bnf yakker
+	./yakker -earley-gen-cyc rulelist $< > $@
+
+earley-be: $(EBE_OBJS)
 	cyclone -o $@ $^  -lssl
 
 wf: wf.o ykbuf.o ssl.o

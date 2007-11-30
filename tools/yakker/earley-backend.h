@@ -2,9 +2,9 @@
 #define EARLEYBACKEND_H_
 
 #include <list.h>
-#include "dfa.h"
-#include "bnf.h"
-#include "pm_bnf.h"
+//#include "dfa.h"
+//#include "bnf.h"
+//#include "pm_bnf.h"
 #include "semiring.h"
 
 #define DFA_TY int

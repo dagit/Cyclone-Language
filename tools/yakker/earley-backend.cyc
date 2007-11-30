@@ -4,15 +4,12 @@
 #include <stdlib.h>
 #include <list.h>
 #include <graph.h>
-#include "bnf.h"
 #include "fa.h"
 #include "axarray.h"
-#include "cs.h"
-#include "analyze.h"
 
 #include <hashtable.h>
 
-#include "pm_bnf.h"
+//#include "pm_bnf.h"
 #include "earley-backend.h"
 
 #include "dfa_cyc.h"
@@ -36,6 +33,23 @@
 
 using List;
 using Semiring;
+
+
+#include <stdio.h>
+#include <buffer.h>
+
+int main(void){
+	printf("Earley parsing stdin ... \n.");
+	
+	int c;	
+	let b = Buffer::create(101);
+	while ( (c = fgetc(stdin)) != EOF )
+   	Buffer::add_char(b,c);
+
+	let dfa_rep = 0;
+	let $(trees,valid,valid_prefix) = EarleyBackend::parse(dfa_rep,Buffer::contents(b));
+	printf("done -- is valid string :%d; is valid prefix: %d\n",valid,valid_prefix);
+}
 
 namespace EarleyBackend;
 
@@ -109,12 +123,6 @@ static act_t repeat_final_action() {
 }
 
 #define MIN_ACTION 261
-
-static const char ?act2symb(act_t act, Hashtable::table_t<act_t,str_t> as_table) {
-  let sopt = Hashtable::lookup_opt(as_table,act);
-  if (sopt == NULL || *sopt == NULL) return NULL;
-  else return **sopt;
-}
 
 static void set_repeat_count(rstate_t rs, st_t s, int n){
   Hashtable::insert(rs->repeat_counts,s, new n);
