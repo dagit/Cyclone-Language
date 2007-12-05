@@ -11,6 +11,14 @@ unsigned int btoi(char ?s) {
     strtoul(s,NULL,2);
   return x;
 }
+rule_t bindit(const char ?x,const char?init, rule_t r) {
+  let init_rule = LIT("");
+  init_rule->a = aprintf("%s = %s;",x,init);
+  let r = SEQ(init_rule,r);
+  r->v = strconcat("$",x);
+  return r;
+}
+
 }
 
 BACKSLASH = "\".
@@ -19,7 +27,8 @@ string = DQUOTE *inside-string DQUOTE.
 inside-string
 = BACKSLASH DQUOTE
 | BACKSLASH BACKSLASH
-| (OCTET - BACKSLASH).
+| BACKSLASH ((OCTET - BACKSLASH) - DQUOTE)
+| ((OCTET - BACKSLASH) - DQUOTE).
 
 parens = "(" *inside ")".
 braces = "{" *inside "}".
@@ -41,9 +50,20 @@ LF = %d10.
 SP = %d32.
 VCHAR = %d33-126.
 WSP = SP|HTAB.
+ID = (ALPHA|"_") *(ALPHA|DIGIT|"_").
 alternation$(rule_t)
-  = concatenation$x 
-    *(*c-wsp ("/"|"|") *c-wsp concatenation$y {r = ALT(r,y);})$$r={x} {return r;}.
+  = concatenation$x [*c-wsp infix-op-stuff$y {
+    let $(op,r) = y;
+    switch(op) {
+    case 0: return ALT(x,r);
+    default: return MINUS(x,r); // BUG: should be right associative
+    }
+  }] {return x;}.
+infix-op-stuff$($(int,rule_t))
+  = "/" *c-wsp alternation$x {return $(0,x);}
+  | "|" *c-wsp alternation$x {return $(0,x);}
+  | " - " *c-wsp alternation$x {return $(1,x);}
+.
 bin-val$(rule_t)
   = "b" (1*BIT)$x
     (*("." (1*BIT)$y{r = ALT(CHARRANGE(atoi(y),atoi(y)));}))$$r={CHARRANGE(btoi(x),btoi(x))}
@@ -57,8 +77,8 @@ char-val$(rule_t)
   | "<" DQUOTE ">" {return LIT("\"");}.
 comment = ";" *(WSP|VCHAR) (LF|CRLF).
 concatenation$(rule_t)
-  = repetition$x
-    *(1*c-wsp repetition$y {r = SEQ(r,y);})$$r={x} {return r;}.
+  = binding$x
+    *(1*c-wsp binding$y {r = SEQ(r,y);})$$r={x} {return r;}.
 dec-val$(rule_t)
 = "d" (1*DIGIT)$x
   (*("." (1*DIGIT)$y {r = ALT(CHARRANGE(atoi(y),atoi(y)));}))$$r={CHARRANGE(atoi(x),atoi(x))}
@@ -76,8 +96,6 @@ element$(rule_t)
 elements$(rule_t) = alternation$x *c-wsp {return x;}.
 group$(rule_t)
   = "(" *c-wsp alternation$x *c-wsp ")" {return x;}
-;  | "(" *c-wsp alternation$x 1*c-wsp "-" 1*c-wsp alternation$y *c-wsp ")"
-;    {return MINUS(x,y);}
 .
 hex-val$(rule_t)
   = "x" (1*HEXDIG)$x
@@ -87,21 +105,38 @@ hex-val$(rule_t)
 num-val$(rule_t) = "%" (bin-val$x{return x;}|dec-val$x{return x;}|hex-val$x{return x;}).
 option$(rule_t) = "[" *c-wsp alternation$x *c-wsp "]" {return OPT(x);}.
 prose-val$(rule_t) = "<" (*(%d32-61|%d63-126))$x ">" {return PROSE(x);}.
-repeat$($(unsigned int, repeat_t))
-  = (1*DIGIT)$x {return $(atoi(x),new Infinity);}
-  |(*DIGIT$x "*" *DIGIT$y)
+repeat$($(int, unsigned int, repeat_t))
+  = (1*DIGIT)$x {return $(0,atoi(x),new Infinity);}
+  |(*DIGIT$x ("*"|"#")$z *DIGIT$y)
    { let xlen = strlen(x); let ylen = strlen(y);
      unsigned int xval = 0;
      if (xlen > 0) xval = atoi(x);
      repeat_t yval = new Infinity;
      if (ylen > 0) yval = new Num(atoi(y));
-     return $(xval,yval);}.
+     let star_or_hash = 1;
+     if (!strcmp("*",z)) star_or_hash = 0;
+     return $(star_or_hash,xval,yval);}.
+binding$(rule_t)
+  = repetition$x
+    [("$" ID$y { x->v = y; return x; }
+     | "$$" ID$y ["={" *inside$z "}" {return bindit(y,z,x);}]
+       {return bindit(y,"NULL",x);}
+    )]
+    {return x;}.
 repetition$(rule_t)
-  = "" { int with_repeat = 0; unsigned int m = 0; repeat_t n = new Infinity; }
-  [repeat$x { with_repeat = 1; m = x.f0; n = x.f1; } ]
-  element$y {if (with_repeat) return STAR(m,n,y); else return y;}.
-rule$(definition_t) = rulename$x defined-as elements$y ["." *c-wsp] c-nl
-  {return new $((const char ?)x,y,Attr(0,0,NULL,NULL));}.
+  = "" { int with_repeat = -1; unsigned int m = 0; repeat_t n = new Infinity; }
+  [repeat$x { with_repeat = x.f0; m = x.f1; n = x.f2; } ]
+  element$y {if (with_repeat == -1) return y;
+             else if (with_repeat == 0) return STAR(m,n,y);
+             else return HASH(m,n,y);}.
+rule$(definition_t) = rulename$x typestuff$y defined-as elements$z ["." *c-wsp] c-nl
+  {let $(ptype,rtype) = y;
+   return new $((const char ?)x,z,Attr(0,0,ptype,rtype));}.
+typestuff$($(const char ?`H,const char ?`H))
+  = "" {return $(NULL,NULL);}
+  | "$" parens$x {return $(NULL,x);}
+  | "@" parens$x {return $(x,NULL);}
+  | "@" parens$x "$" parens$y {return $(x,y);}.
 rulelist$(grammar_t)
   = 1*(rule$x{l=new List::List(x,l);}|(*c-wsp c-nl))$$l={NULL}
 { l = List::imp_rev(l);
