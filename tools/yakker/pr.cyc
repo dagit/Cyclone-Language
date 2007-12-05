@@ -120,7 +120,7 @@ void pr_rule(FILE @f,rule_t r,int with_annotations) {
     if (lower_prec(r2,r)) pr_rule_paren(f,r2,with_annotations); else pr_rule(f,r2,with_annotations);
     break;
   case &Minus(r2,r3):
-    fprintf(f,"("); pr_rule_paren(f,r2,with_annotations); fprintf(f,"-"); pr_rule_paren(f,r3,with_annotations); fprintf(f,")");
+    fprintf(f,"("); pr_rule_paren(f,r2,with_annotations); fprintf(f," - "); pr_rule_paren(f,r3,with_annotations); fprintf(f,")");
     break;
   }
 
@@ -138,7 +138,7 @@ void pr_rule(FILE @f,rule_t r,int with_annotations) {
       case &Alt(_,_): fprintf(f,")"); break;
       default: break;
       }
-      fprintf(f,"{%s}",r->a);
+      fprintf(f," {%s}",r->a);
     }
   }
 
@@ -146,11 +146,12 @@ void pr_rule(FILE @f,rule_t r,int with_annotations) {
 
 void pr_definition(FILE @f,definition_t d) {
   let &$(n,r,a) = d; // FIX: ws
-  fprintf(f,"%s ",n);
+  fprintf(f,"%s",n);
   if (a.paramtype)
-    fprintf(f,"@(%s) ",a.paramtype);
+    fprintf(f,"@(%s)",a.paramtype);
   if (a.rettype)
-    fprintf(f,"$(%s) ",a.rettype);
+    fprintf(f,"$(%s)",a.rettype);
+  fprintf(f," ");
   if (do_ws(d)) fprintf(f,".");
   if (do_re(d)) fprintf(f,"@");
   fprintf(f,"= ");
@@ -314,7 +315,7 @@ pr_rule2string_l(rs_list rs_l,rule_t r,int with_annotations) {
       case &Alt(_,_): rs_l = new List(new ")", rs_l); break;
       default: break;
       }
-      rs_l = new List(new (chs)aprintf("{%s}",r->a), rs_l);
+      rs_l = new List(new (chs)aprintf(" {%s}",r->a), rs_l);
     }
   }
 

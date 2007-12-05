@@ -1,5 +1,5 @@
 ASTRING-CHAR = ATOM-CHAR|resp-specials.
-ATOM-CHAR = ((CHAR)-(atom-specials)).
+ATOM-CHAR = ((CHAR) - (atom-specials)).
 CHAR = %d1-127.
 CHAR8 = %d1-255.
 CR = %d13.
@@ -8,9 +8,9 @@ CTL = %d0-31|%d127.
 DIGIT = %d48-57.
 DQUOTE = %d34.
 LF = %d10.
-QUOTED-CHAR = (((TEXT-CHAR)-(quoted-specials)))|("\" quoted-specials).
+QUOTED-CHAR = (((TEXT-CHAR) - (quoted-specials)))|("\" quoted-specials).
 SP = %d32.
-TEXT-CHAR = ((CHAR)-(CR|LF)).
+TEXT-CHAR = ((CHAR) - (CR|LF)).
 astring = 1*ASTRING-CHAR|string.
 atom-specials = "("|")"|"{"|SP|CTL|resp-specials.
 ; (command CLOSE)
@@ -33,7 +33,7 @@ seq-number = nz-number|"*".
 seq-range = seq-number ":" seq-number.
 sequence-set = (seq-number|seq-range) *("," sequence-set).
 string = quoted.
-tag = 1*(((ASTRING-CHAR)-("+"))).
+tag = 1*(((ASTRING-CHAR) - ("+"))).
 ; A CREATE foo
 ;
 ; B CLOSE

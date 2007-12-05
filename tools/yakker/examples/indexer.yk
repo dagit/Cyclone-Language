@@ -9,35 +9,35 @@
 
 entry-list = *entry { dump_table(); }. ;;; The start symbol
 entry =
-  number$n ws "Not Issued." end-of-entry
-    { add_not_issued(atoi(n)); }
-| number$n ws title$t "." ws authors$a "." ws date$d "."
-    { List::list_t<char ?`H@`H,`H> comments = NULL; }
-  1*(ws comment$c
-    { compress_whitespace(c); comments = new List::List(new c,comments); }
-     ) end-of-entry
-    {
-      compress_whitespace(t);
-      compress_whitespace(a);
-      compress_whitespace(d);
-      comments = List::imp_rev(comments);
-      add_entry(atoi(n),t,a,d,comments);
-    }
+    number$n ws "Not Issued." end-of-entry
+      { add_not_issued(atoi(n)); }
+  | number$n ws title$t "." ws authors$a "." ws date$d "."
+      { List::list_t<char ?`H@`H,`H> comments = NULL; }
+    1*(ws comment$c
+      { compress_whitespace(c); comments = new List::List(new c,comments); }
+       ) end-of-entry
+      {
+        compress_whitespace(t);
+        compress_whitespace(a);
+        compress_whitespace(d);
+        comments = List::imp_rev(comments);
+        add_entry(atoi(n),t,a,d,comments);
+      }
   .
 end-of-entry = *(SP|HTAB) LF LF *(SP|HTAB).
 number = 1*DIGIT.
 ws = 1*([ LF ] (SP|HTAB)).
 ws-char = SP|HTAB|CR|LF.
 title =
-  "M.I.T"
-| "Correction to BBN Report No. 1822 (NIC NO 7958)"
-| title-word *(ws title-word) .
+    "M.I.T"
+  | "Correction to BBN Report No. 1822 (NIC NO 7958)"
+  | title-word *(ws title-word) .
 title-word =
-  "(E.I.S.S.-Report"
-| "3.0/3.1"
-| "Rec."
-| ".sex"
-| 1*title-char *("." 1*title-char).
+    "(E.I.S.S.-Report"
+  | "3.0/3.1"
+  | "Rec."
+  | ".sex"
+  | 1*title-char *("." 1*title-char).
 
 title-char = ALPHA | DIGIT | "(" | ")" | "-" | ":" | "'" | "," | "/" | "#" | DQUOTE | "$" | "?" | "=" | "!" | "+" | "&" | "_" | "'" | "*" .
 authors = author-word *(ws author-word).
