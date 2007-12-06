@@ -2,7 +2,7 @@ include ../../Makefile.inc
 
 # vpath %.o build
 
-CYCFLAGS=
+CYCFLAGS=--novcgen
 #CYCFLAGS=-g -save-c -pp
 YAKFLAGS=
 
@@ -41,13 +41,6 @@ OBJS:=$(foreach yfile,$(YAKKER_FILES),$(yfile).o)
 # OBJS compiled for allocation profiling.
 OBJS_PA=$(foreach yfile,$(YAKKER_FILES),$(yfile)_a.o)
 PROG_PA=$(PROG)_a
-
-EBE_FILES = analyze axarray cs bnf  semiring fa nfa_lazy nfa_eager \
-     lex parse_tab pr prose prose_elim_grm string_dfa_engine1 \
-  string_dfa_engine2_1 corerules corerules_grm \
-  util namespaces abnf-echo-dfa earley-backend
-
-EBE_OBJS:=$(foreach yfile,$(EBE_FILES),$(yfile).o)
 
 DEPENDS:=$(foreach file,$(FILES),build/$(file).d)
 
@@ -90,11 +83,134 @@ abnf-echo.cyc: abnf-echo.bnf
 abnf-echo: abnf-echo.o bnf.o cs.o pr.o util.o ykbuf.o ssl.o
 	cyclone -o $@ $^  -lssl -lcrypto
 
-abnf-echo-dfa.cyc: abnf-echo.bnf yakker
+#######################################
+## Earley-related files
+#######################################
+EBE_FILES = analyze axarray cs bnf  semiring fa nfa_lazy nfa_eager \
+     lex parse_tab pr prose prose_elim_grm string_dfa_engine1 \
+  string_dfa_engine2_1 corerules corerules_grm \
+  util namespaces
+
+EBE_CYC_FILES = $(EBE_FILES)  earley-backend-c
+EBE_DFA_FILES = $(EBE_FILES)  earley-backend-i
+  
+AE_CYC_FILES = $(EBE_CYC_FILES) abnf-dfa parse-main-c
+AE_CYC_CR_FILES = $(EBE_CYC_FILES) abnf-flat-dfa aecrawl-cyc
+
+AE_DFA_FILES = $(EBE_DFA_FILES) earley parse-main-i
+AE_DFA_CR_FILES = $(EBE_DFA_FILES) earley aecrawl-dfa
+
+AE_CYC_OBJS:=$(foreach yfile,$(AE_CYC_FILES),$(yfile).o)
+AE_CYC_CR_OBJS:=$(foreach yfile,$(AE_CYC_CR_FILES),$(yfile).o)
+
+AE_DFA_OBJS:=$(foreach yfile,$(AE_DFA_FILES),$(yfile).o)
+AE_DFA_CR_OBJS:=$(foreach yfile,$(AE_DFA_CR_FILES),$(yfile).o)
+
+earley-backend-c.o: earley-backend.cyc
+	cyclone -o $@ -c -DUSE_COMPILED_DFA $< 
+
+earley-backend-i.o: earley-backend.o
+	cp $< $@
+
+parse-main-c.o: parse-main.cyc
+	cyclone -o $@ -c -DUSE_COMPILED_DFA $< 
+
+parse-main-i.o: parse-main.o
+	cp $< $@
+
+abnf-cyc-eb: $(AE_CYC_OBJS)
+	cyclone -o $@ $^  -lssl -lm
+
+abnf-cyc-cr-eb: $(AE_CYC_CR_OBJS)
+	cyclone -o $@ $^  -lssl -lm
+
+abnf-dfa-eb: $(AE_DFA_OBJS)
+	cyclone -o $@ $^ -lssl -lm
+
+abnf-dfa-cr-eb: $(AE_DFA_CR_OBJS)
+	cyclone -o $@ $^ -lssl -lm
+
+abnf-dfa.cyc: abnf-echo.bnf yakker
 	./yakker -earley-gen-cyc rulelist $< > $@
 
-earley-be: $(EBE_OBJS)
+abnf-flat-dfa.cyc: abnf-echo.bnf yakker
+	./yakker -flatten-full -earley-gen-cyc rulelist $< > $@
+
+abnf-dfa.txt: abnf-echo.bnf yakker
+	./yakker -earley-gen-fsm rulelist abnf-echo.bnf > $@
+
+abnf-flat-dfa.txt: abnf-echo.bnf yakker
+	./yakker -flatten-full -earley-gen-fsm rulelist abnf-echo.bnf > $@
+
+aecrawl-cyc.o: aecrawl.cyc
+	cyclone -o $@ -c -DUSE_COMPILED_DFA $<
+	
+aecrawl-dfa.o: aecrawl.o
+	cp $< $@
+
+aecrawl.cyc: abnf-echo.bnf yakker crawl-main.cyc
+	./yakker -flatten-full -gen-crawl rulelist $< > $@
+	echo '#define CRAWLFUN p_rulelist' >> $@
+	echo '#include "crawl-main.cyc"' >> $@
+
+CALC_CYC_FILES = $(EBE_CYC_FILES) calc-dfa parse-main-c
+CALC_CYC_CR_FILES = $(EBE_CYC_FILES) calc-flat-dfa calccrawl-cyc
+
+CALC_DFA_FILES = $(EBE_DFA_FILES) earley parse-main-i
+CALC_DFA_CR_FILES = $(EBE_DFA_FILES) earley calccrawl-dfa
+
+CALC_CYC_OBJS:=$(foreach yfile,$(CALC_CYC_FILES),$(yfile).o)
+CALC_CYC_CR_OBJS:=$(foreach yfile,$(CALC_CYC_CR_FILES),$(yfile).o)
+
+CALC_DFA_OBJS:=$(foreach yfile,$(CALC_DFA_FILES),$(yfile).o)
+CALC_DFA_CR_OBJS:=$(foreach yfile,$(CALC_DFA_CR_FILES),$(yfile).o)
+
+
+calc-cyc-eb: $(CALC_CYC_OBJS)
 	cyclone -o $@ $^  -lssl -lm
+
+calc-cyc-cr-eb: $(CALC_CYC_CR_OBJS)
+	cyclone -o $@ $^  -lssl -lm
+
+calc-dfa-eb: $(CALC_DFA_OBJS)
+	cyclone -o $@ $^ -lssl -lm
+
+calc-dfa-cr-eb: $(CALC_DFA_CR_OBJS)
+	cyclone -o $@ $^ -lssl -lm
+
+calc-dfa.cyc: examples/calc.bnf yakker
+	./yakker -earley-gen-cyc start $< > $@
+
+calc-flat-dfa.cyc: examples/calc.bnf yakker
+	./yakker -flatten-full -earley-gen-cyc start $< > $@
+
+calc-dfa.txt: examples/calc.bnf yakker
+	./yakker -earley-gen-fsm start examples/calc.bnf > $@
+
+calc-flat-dfa.txt: examples/calc.bnf yakker
+	./yakker -flatten-full -earley-gen-fsm start examples/calc.bnf > $@
+
+calccrawl-cyc.o: calccrawl.cyc
+	cyclone -o $@ -c -DUSE_COMPILED_DFA $<
+	
+calccrawl-dfa.o: calccrawl.o
+	cp $< $@
+
+calccrawl.cyc: examples/calc.bnf yakker crawl-main.cyc
+	./yakker -flatten-full -gen-crawl start $< > $@
+	echo '#define CRAWLFUN p_start' >> $@
+	echo '#include "crawl-main.cyc"' >> $@
+
+
+
+#calccrawl.cyc: examples/calc.bnf yakker crawl-main.cyc
+#	./yakker -flatten-full -gen-crawl start $< > $@
+#	echo '#include "crawl-main.cyc"' >> $@
+#
+#calc-dfa.cyc: examples/calc.bnf yakker
+#	./yakker -earley-gen-cyc start $< > $@
+
+#####################################
 
 wf: wf.o ykbuf.o ssl.o
 	$(CYCLONE) $^ -o $@ -lssl -lcrypto

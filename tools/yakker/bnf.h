@@ -54,8 +54,10 @@ struct arule {
   cs_opt_t *css;    // NULL if cs_status hasn't been determined
   datatype Rule @r; // rule
 };
+/* construct an arule with all properties set to NULL. */
 rule_t arule_inj(datatype Rule @`H);
-/* Constructors with NULL semantic actions */
+
+/* Constructors with NULL properties */
 rule_t SYMB(const char ?`H);
 rule_t LIT(const char ?`H);
 rule_t CHARRANGE(unsigned int,unsigned int); // closed interval
@@ -102,7 +104,9 @@ extern repeat_t minus_one(repeat_t);
 extern int repeat_zero(repeat_t);
 extern grammar_t get_reachable(grammar_t<`H> ds, List::list_t<const char ?@> roots);
 extern grammar_t close_definitions(grammar_t<`H> ds, List::list_t<grammar_t<`H>> e);
-extern Rule_t lookup_symbol(grammar_t grm, const char ?sym);
+extern Rule_t lookup_symbol(grammar_t grm, string_t sym);
+/** returns NULL if symbol cannot be found. */
+extern attr_t *lookup_symbol_attr(grammar_t grm, string_t sym);
 /** returns NULL if symbol cannot be found. */
 
 extern bool is_symb(rule_t r);

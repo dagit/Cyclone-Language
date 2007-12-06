@@ -81,7 +81,7 @@ void nfa_fsm(FILE @f,Set::set_t<st_t> final_states,
 	     Hashtable::table_t<st_t,act_t> act_table);
 // read a dfa from the FSM format.
 // returns NULL on failure.
-$(dfa_t,Set::set_t<st_t>) *fsm_dfa(const char ?filename, const char ?`H start_symb,
+$(dfa_t,Set::set_t<st_t>) *fsm_dfa(const char ?filename,
 				   act_t (@symb2act)(const char ?`H, `a),`a symb_info);
 
 /* Print the dfa as a cyclone datastructure. */

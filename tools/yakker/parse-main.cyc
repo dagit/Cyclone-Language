@@ -1,0 +1,56 @@
+#include <stdio.h>
+#include <buffer.h>
+#include "earley-backend.h"
+
+#ifndef USE_COMPILED_DFA
+#include "dfa.h"
+#include "earley.h"
+#endif
+
+int main(int argc, const char ?`H?argv) {
+	printf("ABNF parsing stdin ... \n");
+
+	int c;
+	let b = Buffer::create(101);
+	while ( (c = fgetc(stdin)) != EOF)
+		Buffer::add_char(b, c);
+
+	int print_depth = 2;
+	if (argc > 1){
+	  sscanf(argv[1],"%d",&print_depth);
+	}
+
+#ifdef USE_COMPILED_DFA
+  let dfa_rep = 0;
+#else
+	if (argc < 3){
+		printf("Missing dfa filename\n");
+		return 1;
+	}
+	let filename = argv[2];
+  let r = Earley::fsm2dfa(filename);
+  if (!r){
+    fprintf(stderr,"Failed to reconstruct DFA.\n");
+    return 1;
+  }
+  fprintf(stderr,"Successfully reconstructed DFA.\n");
+  
+  let $(dfa,dfa_final,symb_info) = *r;
+  let dfa_rep = new DFA::Rep::dfa_rep(dfa,1,dfa_final,
+  		Earley::get_as_table(symb_info));
+#endif
+  
+	let input = Buffer::contents(b);
+	let $(trees, valid, valid_prefix) = EarleyBackend::parse(dfa_rep,input);
+	if (trees) {
+		printf("done -- is valid string :%d; is valid prefix: %d\n", valid,
+				valid_prefix);
+		if (trees->tl) {
+			printf("Ambiguous parse.\n");
+		} else {
+			EarleyBackend::print_LT(trees->hd->f0,print_depth);
+		}
+
+	} else
+		printf("Parse failed. Valid prefix: %d\n", valid_prefix);
+}

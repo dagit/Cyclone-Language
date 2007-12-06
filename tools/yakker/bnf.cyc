@@ -511,6 +511,15 @@ Rule_t lookup_symbol(grammar_t grm, const char ?sym){
   return NULL;
 }
 
+attr_t *lookup_symbol_attr(grammar_t grm, const char ?sym){
+  for (let g = grm; g; g = g->tl) {
+    let &$(x,_,a) = g->hd;
+    if (strcmp(sym,x) == 0)
+      return new a;
+  }
+  return NULL;
+}
+
 // N.B. This conversion will loose all sem. actions, etc. that are part of the
 // flattened Alts.
 static
@@ -578,36 +587,45 @@ rule_t rules2seq(List::List_t<rule_t> rules){
    *Preserves elements with v attributes.*
  */
 List::List_t<rule_t> depseq2rules(rule_t r0) {
-  let res = NULL;
-  let rs = List::list(r0);
-  while (rs) {
-    let r = rs->hd;
-    if (r->v){
-      res = new List::List(r,res);
-      rs = rs->tl;
-    } else {
-      switch (r->r) {
-      case &Seq(r2,r3):
-	rs = new List::List(r2,new List::List(r3,rs->tl));
-      break;
-      case &Symb(_,_):
-      case &Alt(_,_):
-      case &Opt(_):
-      case &Rcount(_,_):
-      case &Star(_,_,_):
-      case &Hash(_,_,_):
-      case &CharRange(_,_):
-      case &Lit(_):
-      case &Prose(_):
-      case &Minus(_,_):
-	res = new List::List(r,res);
-      rs = rs->tl;
-      break;
-      }
-    }
-  }
-  res = List::imp_rev(res);
-  return res;
+	let res = NULL;
+	let rs = List::list(r0);
+	do {
+		let r = rs->hd;
+		if (r != r0 && r->v) {
+			res = new List::List(r,res);
+			rs = rs->tl;
+		} else {
+			switch (r->r) {
+			case &Seq(r2, r3):
+				if (r != r0 && r->a){
+					// try to transfer the action to r3
+					if (!r3->a){
+						// clone r3 and update its semantic action.
+						r3 = new *r3;
+						r3->a = r->a;
+					} else
+  					warn("Losing semantic action ({%s})in sequence conversion.\n",r->a);
+				}
+				rs = new List::List(r2,new List::List(r3,rs->tl));
+				break;
+			case &Symb(_, _):
+			case &Alt(_, _):
+			case &Opt(_):
+			case &Rcount(_, _):
+			case &Star(_, _, _):
+			case &Hash(_, _, _):
+			case &CharRange(_, _):
+			case &Lit(_):
+			case &Prose(_):
+			case &Minus(_, _):
+				res = new List::List(r,res);
+				rs = rs->tl;
+				break;
+			}
+		}
+	} while (rs);
+	res = List::imp_rev(res);
+	return res;
 }
 
 bool is_symb(rule_t r){

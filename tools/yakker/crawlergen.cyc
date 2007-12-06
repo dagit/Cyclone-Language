@@ -16,16 +16,18 @@
  write to the Free Software Foundation, Inc., 59 Temple Place -
  Suite 330, Boston, MA 02111-1307, USA. */
 
+#include <string.h>
+#include <stdio.h>
+#include <buffer.h>
+#include <stdlib.h>
+
 #include "bnf.h"
 #include "fa.h"
 #include "analyze.h"
 #include "pr.h"
 #include "pads.h"
 #include "cs.h"
-#include <string.h>
-#include <stdio.h>
-#include <buffer.h>
-#include <stdlib.h>
+#include "flatten.h"
 
 namespace Crawlergen;
 
@@ -55,8 +57,7 @@ static struct Set::Set<const char ?@> *semvalue_symbs;
 // invariant: children is set to current parse forest, and nt_name to
 // the current nonterm name.
 static
-//void gen0(rule_t r, int has_sem) {
-void gen0(rule_t r) {
+void gen0(rule_t r, grammar_t grm) {
 	if (r->v) {
 		if ('$' == r->v[0]) {
 			printf("let %s = NULL;", r->v + 1);
@@ -82,9 +83,9 @@ void gen0(rule_t r) {
 		//       printf("{  let result;\n"); 
 		//       printf("   let child_name;\n"); 
 		//       printf("   switch (children->hd) {\n"); 
-		//       printf("   case &Earley::NonTerm(name,_,_,_,_):\n"
+		//       printf("   case &EarleyBackend::NonTerm(name,_,_,_,_):\n"
 		// 	     "   fallthru(name);\n"); 
-		//       printf("   case &Earley::SharedNonTerm(name,_,_,_,_):\n"); 
+		//       printf("   case &EarleyBackend::SharedNonTerm(name,_,_,_,_):\n"); 
 		//       printf("     child_name=name; break;\n"); 
 		//       printf("   }\n");
 
@@ -96,10 +97,26 @@ void gen0(rule_t r) {
 		//       printf("   children = children->tl;\n");
 		//       printf("}\n");
 		//     } else 
-	{
-		printf("%s(children->hd,ykinput%s%s);\n", p_id(x), (y ? "," : ""), y);
-		printf("children = children->tl;\n");
-	}
+
+	  // Check whether its a "real" symbol, or a flattened one.
+		if (Flatten::is_flattened_symb(x)) {
+			let r_opt = lookup_symbol(grm, x);
+			if (!r_opt)
+				internal_err("Missing definition of symbol %s.\n", x);
+			else {
+				// inline code for r
+				printf("switch (children->hd) {\n"
+					"case &EarleyBackend::NonTerm(name,i,j,w,children):\n");
+				gen0(r_opt, grm);
+				printf("break;\n"
+					"case &EarleyBackend::SharedNonTerm(name,i,j,w,children_list):\n"
+					"throw &Parse_error_val;\n"
+					"}\n");
+			}
+		} else {
+			printf("%s(children->hd,ykinput%s%s);\n", p_id(x), (y ? "," : ""), y);
+		}
+  	printf("children = children->tl;\n");
 		break;
 	case &Lit(_):
 	case &CharRange(_, _):
@@ -113,8 +130,8 @@ void gen0(rule_t r) {
 		break;
 
 	case &Seq(r2, r3):
-		gen0(r2);
-		gen0(r3);
+		gen0(r2,grm);
+		gen0(r3,grm);
 		break;
 
 	case &Alt(r2, r3):
@@ -123,7 +140,6 @@ void gen0(rule_t r) {
 
 		//
 		// Invariant: all of the alts are symbols.
-		// New invariant: all of the alts with semantic actions are symbols.
 
 //		// Check each branch for semantic action.
 //	  if (has_sem){
@@ -131,29 +147,30 @@ void gen0(rule_t r) {
 //	  }
 	
 		// Lookup the child nonterminal name.
-		printf("let child_name;\n");
-		printf("switch (children->hd) {\n");
-		printf("case &Earley::NonTerm(name,_,_,_,_):\n"
-			"fallthru(name);\n");
-		printf("case &Earley::SharedNonTerm(name,_,_,_,_):\n");
-		printf("  child_name=name; break;\n");
-		printf("}\n");
+		printf("let child_name;\n"
+				"switch (children->hd) {\n"
+				"case &EarleyBackend::NonTerm(name,_,_,_,_):\n"
+				"fallthru(name);\n"
+				"case &EarleyBackend::SharedNonTerm(name,_,_,_,_):\n"
+				"  child_name=name; break;\n"
+				"}\n");
 
 		// Use cascading if-else to go through the alts.
 		for (; alts; alts = alts->tl) {
 			switch (alts->hd->r) {
 			case &Symb(n, _):
 				printf("if ( !strcmp(child_name,\"%s\") ){\n", n);
-				gen0(alts->hd);
+				gen0(alts->hd,grm);
 				printf("}\n");
 				printf("else ");
 				break;
 			default:
 				// ERR!
 				internal_err("Alt in gen0 with non-symbol alternative.\n");
-				fflush(stdout);
-				pr_rule(stdout,alts->hd,1);
-				fflush(stdout);
+				fflush(stderr);
+				pr_rule(stderr,alts->hd,1);
+				fprintf(stderr,"\n");
+				fflush(stderr);
 				break;
 			}
 		}
@@ -171,16 +188,16 @@ void gen0(rule_t r) {
 		// Lookup the child nonterminal name.
 		printf("let child_name;\n");
 		printf("switch (children->hd) {\n");
-		printf("case &Earley::NonTerm(name,_,_,_,_):\n"
+		printf("case &EarleyBackend::NonTerm(name,_,_,_,_):\n"
 			"fallthru(name);\n");
-		printf("case &Earley::SharedNonTerm(name,_,_,_,_):\n");
+		printf("case &EarleyBackend::SharedNonTerm(name,_,_,_,_):\n");
 		printf("  child_name=name; break;\n");
 		printf("}\n");
 
 		switch (r2->r) {
 		case &Symb(n, _):
 			printf("if ( !strcmp(child_name,\"%s\") ){\n", n);
-			gen0(r2);
+			gen0(r2,grm);
 			printf("}\n");
 			break;
 		default:
@@ -202,7 +219,7 @@ void gen0(rule_t r) {
 		printf("unsigned int bounds = atoi(%s);\n", c);
 		printf("unsigned int count;\n");
 		printf("for (count = 0; count < bounds; count++) {\n");
-		gen0(r2);
+		gen0(r2,grm);
 		printf("}\n");
 		printf("}\n");
 		break;
@@ -212,43 +229,43 @@ void gen0(rule_t r) {
 		if (m > n)
 			break;
 		for (; m > 0; m--, n--) {
-			gen0(r2);
+			gen0(r2,grm);
 		}
 		for (; n > 0; n--) {
-			gen0(OPT(STAR(1,new Num(n-1),r2)));
+			gen0(OPT(STAR(1,new Num(n-1),r2)),grm);
 		}
 		break;
 	case &Star(m, &Infinity, r2):
 		let inf = new Infinity;
 		for (; m > 0; m--) {
-			gen0(r2);
+			gen0(r2,grm);
 		}
 
 		let before = scope++;
 		let after = scope++;
 
 		printf("while (children) {\n");
-		gen0(r2);
+		gen0(r2,grm);
 		printf("}\n");
 		break;
 	case &Hash(0, &Infinity, r2): // 0# r2 -> [r2 *(commas r2)]
-		gen0(OPT(SEQ(r2, STAR(0, new Infinity, SEQ(commas(), r2)))));
+		gen0(OPT(SEQ(r2, STAR(0, new Infinity, SEQ(commas(), r2)))),grm);
 		// NB: no need to fill for right context, that will be handled by the STAR
 		break;
 	case &Hash(m, &Infinity, r2): // m# r2 -> r2 (m-1)*(commas r2)
-		gen0(SEQ(r2, STAR(m-1, new Infinity, SEQ(commas(), r2))));
+		gen0(SEQ(r2, STAR(m-1, new Infinity, SEQ(commas(), r2))),grm);
 		break;
 	case &Hash(0, &Num(0), r2): // #0 r2 -> ""
-		gen0(LIT(""));
+		gen0(LIT(""),grm);
 		break;
 	case &Hash(0, &Num(1), r2): // #1 r2 -> [r2]
-		gen0(OPT(r2));
+		gen0(OPT(r2),grm);
 		break;
 	case &Hash(0, &Num(n), r2): // #n r2 -> [r2 *(n-1)(commas r2)]
-		gen0(OPT(SEQ(r2, STAR(0, new Num(n-1), SEQ(commas(), r2)))));
+		gen0(OPT(SEQ(r2, STAR(0, new Num(n-1), SEQ(commas(), r2)))),grm);
 		break;
 	case &Hash(m, &Num(n), r2): // m#n r2 -> r2 (m-1)*(n-1)(commas r2)
-		gen0(SEQ(r2, STAR(m-1, new Num(n-1), SEQ(commas(), r2))));
+		gen0(SEQ(r2, STAR(m-1, new Num(n-1), SEQ(commas(), r2))),grm);
 		break;
 	}
 
@@ -277,7 +294,7 @@ void gen_header(grammar_t<`H> grm, List::list_t<const char ?@>textblobs) {
 			"#include <stdio.h>\n"
 			"#include <stdlib.h>\n"
 			"#include <string.h>\n"
-			"#include \"earley.h\"\n");
+			"#include \"earley-backend.h\"\n");
 
 	if (gen_fun_table) {
 		printf("#include \"funtable.h\"\n");
@@ -303,7 +320,7 @@ void gen_header(grammar_t<`H> grm, List::list_t<const char ?@>textblobs) {
 			printf("%s ",a.rettype);
 		} else
 		printf("void ");
-		printf("%s(Earley::parse_tree_t t, const char? ykinput%s%s);\n",
+		printf("%s(EarleyBackend::parse_tree_t t, const char? ykinput%s%s);\n",
 				p_id(n),
 				(a.paramtype)?",":"",
 				a.paramtype);
@@ -329,7 +346,7 @@ unsigned int eof_val) {
 	"#include <stdio.h>\n"
 	"#include <stdlib.h>\n"
 	"#include <string.h>\n"
-	"#include \"earley.h\"\n");
+	"#include \"earley-backend.h\"\n");
 
 	if (gen_fun_table) {
 		printf("#include \"funtable.h\"\n");
@@ -359,12 +376,16 @@ unsigned int eof_val) {
 	/* Print forward definitions of pseudo-parsing functions */
 	for (let x = grm; x; x = x->tl) {
 		let &$(n,r,a) = x->hd;
+		
+		if (Flatten::is_flattened_symb(n) )
+			continue;
+		
 		if (a.rettype) {
 			printf("%s ",a.rettype);
 			semvalue_symbs = Set::insert(semvalue_symbs,new n);
 		} else
 		printf("void ");
-		printf("%s(Earley::parse_tree_t t, const char? ykinput%s%s);\n",
+		printf("%s(EarleyBackend::parse_tree_t t, const char? ykinput%s%s);\n",
 		p_id(n),
 		(a.paramtype)?",":"",
 		a.paramtype);
@@ -394,21 +415,25 @@ unsigned int eof_val) {
 	/* Print the pseudo-parsing functions */
 	for (let x = grm; x; x = x->tl) {
 		let &$(n,r,a) = x->hd;
+		
+		if (Flatten::is_flattened_symb(n) )
+			continue;
+		
 		if (a.rettype)
 		printf("%s ",a.rettype);
 		else
 		printf("void ");
-		printf("%s(Earley::parse_tree_t t, const char? ykinput%s%s) {\n",
+		printf("%s(EarleyBackend::parse_tree_t t, const char? ykinput%s%s) {\n",
 		p_id(n),
 		(a.paramtype)?",":"",
 		a.paramtype);
 		printf("switch (t) {\n");
-		printf("case &Earley::NonTerm(name,i,j,w,children):\n");
+		printf("case &EarleyBackend::NonTerm(name,i,j,w,children):\n");
 
 		// TODO: HANDLE IMAP STRING SPECIAL CASE AS IN PGEN
-		gen0(r);
+		gen0(r,grm);
 		printf("break;\n");
-		printf("case &Earley::SharedNonTerm(name,i,j,w,children_list):\n");
+		printf("case &EarleyBackend::SharedNonTerm(name,i,j,w,children_list):\n");
 		printf("throw &Parse_error_val;\n");
 		printf("}\n");
 		printf("}\n\n");

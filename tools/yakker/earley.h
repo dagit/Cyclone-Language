@@ -38,8 +38,9 @@ namespace Earley {
     SharedNonTerm(const char ?`H, int, int, Semiring::weight_t, List::List_t<parse_forest_t,`H>);
   };
   
+  extern Hashtable::table_t<act_t,str_t> get_as_table(symb_info_t si);  		
   extern $(dfa_t,Set::set_t<st_t>,symb_info_t) compile(grammar_t grm, rule_t r);
-  extern $(dfa_t,Set::set_t<st_t>,symb_info_t) *fsm2dfa(const char ?filename, const char ?`H start_symb) ;
+  extern $(dfa_t,Set::set_t<st_t>,symb_info_t) *fsm2dfa(const char ?filename) ;
 
   // returns: int pair: a) the number of valid complete parses of the string.
   //                    b) the number of valid prefix parses of the string.

@@ -1,0 +1,3 @@
+nullable = "".
+expr = nullable "bye".
+start = "a " expr.

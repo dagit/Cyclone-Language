@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <hashtable.h>
 
+#include <ctype.h>
 #include "bnf.h"
 #include "analyze.h"
 #include "flatten.h"
@@ -40,36 +41,94 @@ using List;
 // Flag: for alts, put every alternative as a separate symbol definition.
 namespace Flatten{
   int fully_flatten_alts = 0;
+  int is_flattened_symb(string_t s){
+  	let suff = strstr(s,"__");
+  	return suff && numelts(suff) > 2  && isdigit(suff[2]);
+  }
 }
 using Flatten;
-
-$(grammar_t, rule_t) @flatten_rule0(const char ?`H ctxt_name, rule_t r);
 
 const char ?mk_name(const char ?`H ctxt_name, unsigned int n){
   return strconcat(ctxt_name, aprintf("_%d",n));
 }
 
-// $(grammar_t, rule_t, unsigned int) @seq_flatten_rule(const char ?`H ctxt_name, rule_t r, unsigned int n_elt){
-//     switch (r->r) { 
-//    case &Seq(r1,r2):
-//      let &$(defs1, r1_flat, m_elt)  = seq_flatten_rule(ctxt_name, r1, n_elt);
-//      let &$(defs2, r2_flat, mn_elt) = seq_flatten_rule(ctxt_name, r2, m_elt);
-//      return new $(append(defs1,defs2), 
-// 		  SEQ_r(r, r1_flat, r2_flat),
-// 		  mn_elt);
-//     default:
-//       let new_ctxt_name = mk_name(ctxt_name, n_elt);
-//       let &$(g, r_flat) = flatten_rule0(new_ctxt_name, r);
-//       return new $(g, r_flat, n_elt + 1);
-//     }  
-// }
-
 static struct Attr empty_attr = Attr{.ws=0,.re=0,.paramtype=NULL,.rettype=NULL};
 
+typedef list_t<$(const char ?,const char ?)@> ty_env_t;
+
+static ty_env_t empty_ty_env = NULL;
+
+static int is_empty_tyenv(ty_env_t e){return e == NULL;}
+
+// *functional* extension.
+static ty_env_t extend_tyenv(ty_env_t e, const char?`H ty, const char?`H v){
+	return new List(new $(ty,v), e);
+}
+
+static grammar_t current_grammar = NULL;
+
+// TODO: add type annotations to $$ rules so that we can infer their type.
+static const char ?get_rule_ty(rule_t r){
+	switch(r->r){
+	case &Symb(x,_):
+		let a = lookup_symbol_attr(current_grammar, x);
+		if (!a) {
+			fprintf(stderr,"Flatten: Missing definition of symbol %s.\n",x);
+			return "const char ?";
+		} 
+		if (!a->rettype) return "const char ?";
+	  return a->rettype;
+	default: 
+		return "const char ?";
+	}
+}
+
+static attr_t params2attr(const char?`H params){
+	if (!params) return empty_attr;
+	return Attr{.ws=0,.re=0,.paramtype=params,.rettype=NULL};
+}
+
+static const char? @binder2param($(const char ?, const char ?) @b){
+	return new (const char ?)strconcat(strconcat(b->f1," "),b->f0);
+}
+// map to list of formal params
+static const char ?ty_env2params(ty_env_t e){
+	if (is_empty_tyenv(e)) return NULL;
+	return str_sepstr(map(binder2param,e),",");
+}
+
+static const char? @binder2aparam($(const char ?`H, const char ?`H) @b){
+	return new b->f0;
+}
+// map to list of actual params
+static const char ?ty_env2aparams(ty_env_t e){
+	if (is_empty_tyenv(e)) return NULL;
+	return str_sepstr(map(binder2aparam,e),",");
+}
+
+static rule_t mk_symb(const char ?`H x,ty_env_t e, rule_t r){
+	let new_r = is_empty_tyenv(e) ?
+			SYMB(x) : 
+				arule_inj(new Symb(x,ty_env2aparams(e)));
+	new_r->v = r->v; 
+	if (new_r->v) new_r->a = r->a;
+	return new_r;
+}
+
+// clear the semantic action and the variable.
+static void clear_av(rule_t r){
+	if (r->v) {
+		r->a=NULL; 
+		r->v=NULL;
+	}
+}
+
+static $(grammar_t, rule_t) @flatten_rule0(const char ?`H ctxt_name, rule_t r, ty_env_t ty_env);
+
 // Handles dependent sequences correctly.
-$(grammar_t, rule_t) @seq_flatten_rule(const char ?`H ctxt_name, rule_t r){
-  let n_elt = 1;
-  let rules = depseq2rules(r);
+static $(grammar_t, rule_t) @depseq_flatten_rule(const char ?`H ctxt_name, rule_t r_in, ty_env_t ty_env){
+	let n_elt = 1;
+  let rules = depseq2rules(r_in);
   let res;
   let defs;
   let r = rules->hd;
@@ -77,138 +136,201 @@ $(grammar_t, rule_t) @seq_flatten_rule(const char ?`H ctxt_name, rule_t r){
   _* rs = rules->tl;
 
   // Process first element to set initial value for res (and defs).
+  let new_ctxt_name = mk_name(ctxt_name, n_elt);
+  let &$(g, r_flat) = flatten_rule0(new_ctxt_name, r,ty_env);
+  res = r_flat;
+  defs = g;
+  n_elt++;
   if (r->v){
-    // The remainder of the sequence is dependent, so we don't flatten.
-    return new $(NULL,r);
-  } else {    
-    let new_ctxt_name = mk_name(ctxt_name, n_elt);
-    let &$(g, r_flat) = flatten_rule0(new_ctxt_name, r);
-    res = r_flat;
-    defs = g;
-    n_elt++;
-  }
+  	ty_env = extend_tyenv(ty_env, r->v, get_rule_ty(r));
+  } 
 
   // Process remaining elements
   while (rs){
     let r = rs->hd;
 
-    if (r->v){
-      // The remainder of the sequence is dependent, so we wrap up
-      // remaining rs w/o flattening them.
-      r = rules2seq(rs);
-
-      // Then, we flatten the dep. sequence as a whole.
-      let new_ctxt_name = mk_name(ctxt_name, n_elt);
-      // define new symbol with r
-      let r_def = new $(new_ctxt_name, r, empty_attr);
-      // add new symbol to list of defs.
-      defs = new List(r_def,defs);
-
-      // Create new, flattened sequence based on newly defined symbol.
-      let r_flat = SYMB(new_ctxt_name);
-      res = arule_inj(new Seq(res,r_flat));
-      break;
-    } 
-
+//    if (r->v){
+//      // The remainder of the sequence is dependent, so we wrap up
+//      // remaining rs w/o flattening them.
+//      r = rules2seq(rs);
+//
+//      // Then, we flatten the dep. sequence as a whole.
+//      let new_ctxt_name = mk_name(ctxt_name, n_elt);
+//      // define new symbol with r
+//      let r_def = new $(new_ctxt_name, r, empty_attr);
+//      // add new symbol to list of defs.
+//      defs = new List(r_def,defs);
+//
+//      // Create new, flattened sequence based on newly defined symbol.
+//      let r_flat = SYMB(new_ctxt_name);
+//      res = arule_inj(new Seq(res,r_flat));
+//      break;
+//    } 
     let new_ctxt_name = mk_name(ctxt_name, n_elt);
-    let &$(g, r_flat) = flatten_rule0(new_ctxt_name, r);
+    let &$(g, r_flat) = flatten_rule0(new_ctxt_name, r,ty_env);
     res = arule_inj(new Seq(res,r_flat));
     defs = append(g,defs);
     rs = rs->tl;
     n_elt++;
+    if (r->v){
+    	ty_env = extend_tyenv(ty_env, r->v,get_rule_ty(r));
+    }
   }
 
-  return new $(defs,res);
+  let r_out = new *r_in;
+  r_out->r = res->r;
+  return new $(defs,r_out);
 }
 
-$(grammar_t, rule_t) @fully_flatten_rule(const char ?`H ctxt_name, rule_t r){
+//$(grammar_t, rule_t) @seq_flatten_rule(const char ?`H ctxt_name, rule_t r){
+//  let n_elt = 1;
+//  let rules = depseq2rules(r);
+//  let res;
+//  let defs;
+//  let r = rules->hd;
+//  // rules is defined to be non-null, so we assign it to nullable variable.
+//  _* rs = rules->tl;
+//
+//  // Process first element to set initial value for res (and defs).
+//  if (r->v){
+//    // The remainder of the sequence is dependent, so we don't flatten.
+//    return new $(NULL,r);
+//  } else {    
+//    let new_ctxt_name = mk_name(ctxt_name, n_elt);
+//    let &$(g, r_flat) = flatten_rule0(new_ctxt_name, r);
+//    res = r_flat;
+//    defs = g;
+//    n_elt++;
+//  }
+//
+//  // Process remaining elements
+//  while (rs){
+//    let r = rs->hd;
+//
+//    if (r->v){
+//      // The remainder of the sequence is dependent, so we wrap up
+//      // remaining rs w/o flattening them.
+//      r = rules2seq(rs);
+//
+//      // Then, we flatten the dep. sequence as a whole.
+//      let new_ctxt_name = mk_name(ctxt_name, n_elt);
+//      // define new symbol with r
+//      let r_def = new $(new_ctxt_name, r, empty_attr);
+//      // add new symbol to list of defs.
+//      defs = new List(r_def,defs);
+//
+//      // Create new, flattened sequence based on newly defined symbol.
+//      let r_flat = SYMB(new_ctxt_name);
+//      res = arule_inj(new Seq(res,r_flat));
+//      break;
+//    } 
+//
+//    let new_ctxt_name = mk_name(ctxt_name, n_elt);
+//    let &$(g, r_flat) = flatten_rule0(new_ctxt_name, r);
+//    res = arule_inj(new Seq(res,r_flat));
+//    defs = append(g,defs);
+//    rs = rs->tl;
+//    n_elt++;
+//  }
+//
+//  return new $(defs,res);
+//}
+
+static $(grammar_t, rule_t) @fully_flatten_rule(const char ?`H ctxt_name, rule_t r, ty_env_t ty_env){
     switch (r->r) {
     case &Lit(_):
     case &CharRange(_,_):
       // define new symbol with r
-      let r_def = new $(ctxt_name, r, empty_attr);
-      // add new symbol to list of defs.
+    	let r_flat = new *r;
+    	clear_av(r_flat);
+      let r_def = new $(ctxt_name, r_flat, params2attr(ty_env2params(ty_env)));
+    // add new symbol to list of defs.
       let defs = list(r_def);
-      return new $(defs, SYMB(ctxt_name));
+      return new $(defs, mk_symb(ctxt_name,ty_env,r));
     default:
-      return flatten_rule0(ctxt_name, r);
+      return flatten_rule0(ctxt_name, r, ty_env);
     }  
 }
 
-$(grammar_t, rule_t, unsigned int) @
-alt_flatten_rule(const char ?`H ctxt_name, rule_t r, unsigned int n_elt){
+static $(grammar_t, rule_t, unsigned int) @
+alt_flatten_rule(const char ?`H ctxt_name, rule_t r, unsigned int n_elt, ty_env_t ty_env){
     switch (r->r) {
     case &Alt(r1,r2):
-      let &$(defs1, r1_flat, m_elt)  = alt_flatten_rule(ctxt_name, r1, n_elt);
-      let &$(defs2, r2_flat, mn_elt) = alt_flatten_rule(ctxt_name, r2, m_elt);
-      return new $(append(defs2,defs1), 
-		   ALT_r(r, r1_flat, r2_flat),
-		   mn_elt);
+      let &$(defs1, r1_flat, m_elt)  = alt_flatten_rule(ctxt_name, r1, n_elt, ty_env);
+      let &$(defs2, r2_flat, mn_elt) = alt_flatten_rule(ctxt_name, r2, m_elt, ty_env);
+      let r_flat = ALT_r(r, r1_flat, r2_flat);
+      return new $(append(defs2,defs1), r_flat, mn_elt);
     default:
-      let new_ctxt_name = mk_name(ctxt_name, n_elt);
-      let &$(g, r_flat) =  
-	fully_flatten_alts ?
-	fully_flatten_rule( new_ctxt_name, r )
-      : flatten_rule0(new_ctxt_name, r);
-      return new $(g, r_flat, n_elt + 1);
-    } 
+		let new_ctxt_name = mk_name(ctxt_name, n_elt);
+		let &$(g, r_flat) =
+		fully_flatten_alts ?
+		fully_flatten_rule( new_ctxt_name, r, ty_env )
+		: flatten_rule0(new_ctxt_name, r, ty_env);
+		return new $(g, r_flat, n_elt + 1);
+	}
 }
 
-$(grammar_t, rule_t) @flatten_rule0(const char ?`H ctxt_name, rule_t r){
+static $(grammar_t, rule_t) @flatten_rule0(const char ?`H ctxt_name, rule_t r, ty_env_t ty_env){
     switch (r->r) {
     case &Seq(r1,r2):
-      let &$(defs, r_flat) = seq_flatten_rule(ctxt_name, r);
-      // define new symbol with r_flat
-      let r_def = new $(ctxt_name, r_flat, empty_attr);
+      let &$(defs, r_flat) = depseq_flatten_rule(ctxt_name, r, ty_env);
+      clear_av(r_flat);
+    // define new symbol with r_flat
+      let r_def = new $(ctxt_name, r_flat, params2attr(ty_env2params(ty_env)));
       // add new symbol to list of defs.
       let defs = new List(r_def, defs);
-      return new $(defs, SYMB(ctxt_name));
+      return new $(defs, mk_symb(ctxt_name,ty_env,r));
 
     case &Opt(r1):
       let new_ctxt_name = mk_name(ctxt_name, 1);      
       let &$(defs1, r1_flat) = 	fully_flatten_alts ?
-	fully_flatten_rule( new_ctxt_name, r1 )
-      : flatten_rule0(new_ctxt_name, r1);
+      fully_flatten_rule( new_ctxt_name, r1, ty_env)
+      : flatten_rule0(new_ctxt_name, r1, ty_env);
       let r_flat = OPT_r(r, r1_flat);
+      clear_av(r_flat);
       // define new symbol with r_flat
-      let r_def = new $(ctxt_name, r_flat, empty_attr);
+      let r_def = new $(ctxt_name, r_flat, params2attr(ty_env2params(ty_env)));
       // add new symbol to list of defs.
       let defs = new List(r_def, defs1);
-      return new $(defs, SYMB(ctxt_name));
+      return new $(defs, mk_symb(ctxt_name,ty_env,r));
 
     case &Alt(r1,r2):
-      let &$(defs1, r1_flat, n_elt) = alt_flatten_rule(ctxt_name, r1, 1);
-      let &$(defs2, r2_flat, _)     = alt_flatten_rule(ctxt_name, r2, n_elt);
+      let &$(defs1, r1_flat, n_elt) = alt_flatten_rule(ctxt_name, r1, 1, ty_env);
+      let &$(defs2, r2_flat, _)     = alt_flatten_rule(ctxt_name, r2, n_elt, ty_env);
       let r_flat = ALT_r(r, r1_flat, r2_flat);
+      clear_av(r_flat);
       // define new symbol with r_flat
-      let r_def = new $(ctxt_name, r_flat, empty_attr);
+      let r_def = new $(ctxt_name, r_flat, params2attr(ty_env2params(ty_env)));
       // add new symbol to list of defs.
       let defs = new List(r_def, append(defs2, defs1));
-      return new $(defs, SYMB(ctxt_name));
+      return new $(defs, mk_symb(ctxt_name,ty_env,r));
 
     case &Rcount(n,r1):
       let new_ctxt_name = mk_name(ctxt_name, 1);      
-      let &$(defs1, r1_flat) = flatten_rule0(new_ctxt_name, r1);
+      let &$(defs1, r1_flat) = flatten_rule0(new_ctxt_name, r1, ty_env);
       let r_flat = RCOUNT_r(r,n, r1_flat);
+      clear_av(r_flat);
       // define new symbol with r_flat
-      let r_def = new $(ctxt_name, r_flat, empty_attr);
+      let r_def = new $(ctxt_name, r_flat, params2attr(ty_env2params(ty_env)));
       // add new symbol to list of defs.
       let defs = new List(r_def, defs1);
-      return new $(defs, SYMB(ctxt_name));
+      return new $(defs, mk_symb(ctxt_name,ty_env,r));
 
     case &Star(m,N,r1):
       let new_ctxt_name = mk_name(ctxt_name, 1);      
-      let &$(defs1, r1_flat) = flatten_rule0(new_ctxt_name, r1);
+      let &$(defs1, r1_flat) = flatten_rule0(new_ctxt_name, r1, ty_env);
       let r_flat = STAR_r(r, m,N, r1_flat);
+      clear_av(r_flat);
       // define new symbol with r_flat
-      let r_def = new $(ctxt_name, r_flat, empty_attr);
+      let r_def = new $(ctxt_name, r_flat, params2attr(ty_env2params(ty_env)));
       // add new symbol to list of defs.
       let defs = new List(r_def, defs1);
-      return new $(defs, SYMB(ctxt_name));
+      return new $(defs, mk_symb(ctxt_name,ty_env,r));
 
     case &Hash(m,N,r1):
-      let r_s = hash2star(m,N,r1);
-      return flatten_rule0(ctxt_name,r_s);
+    	// TODO: does hash2star preserve semaction, vars, ...?
+    	let r_s = hash2star(m,N,r1);
+      return flatten_rule0(ctxt_name,r_s, ty_env);
 
     default:
       return new $(NULL, r);
@@ -219,48 +341,51 @@ $(grammar_t, rule_t) @flatten_rule0(const char ?`H ctxt_name, rule_t r){
 // define a separate function for dealing with top-level elements.
 // Definitions are returned in *reverse* order of dependency between them.
 $(grammar_t, rule_t) @flatten_rule(const char ?`H symb, rule_t r){
-  switch(r->r){
+	// TODO should initialize ty env. here to incoming parameters.
+	switch(r->r){
   case &Seq(_,_):
-    let &$(defs, r_flat) = seq_flatten_rule(symb, r);
+    let &$(defs, r_flat) = depseq_flatten_rule(symb, r, empty_ty_env);
     return new $(defs, r_flat);
   
   case &Alt(r1,r2):
-    let &$(defs, r_flat, _) = alt_flatten_rule(symb, r, 1);
+    let &$(defs, r_flat, _) = alt_flatten_rule(symb, r, 1, empty_ty_env);
     return new $(defs, r_flat);
  
   case &Opt(r1):
     let ctxt_name = mk_name(symb,1);
-    let &$(defs1, r1_flat) = flatten_rule0(ctxt_name, r1);
+    let &$(defs1, r1_flat) = flatten_rule0(ctxt_name, r1, empty_ty_env);
     return new $(defs1, OPT_r(r, r1_flat));
 
   case &Rcount(n,r1):
     let ctxt_name = mk_name(symb,1);
-    let &$(defs1, r1_flat) = flatten_rule0(ctxt_name, r1);
+    let &$(defs1, r1_flat) = flatten_rule0(ctxt_name, r1, empty_ty_env);
     return new $(defs1, RCOUNT_r(r, n, r1_flat));
 
   case &Star(m,N,r1):
     let ctxt_name = mk_name(symb,1);
-    let &$(defs1, r1_flat) = flatten_rule0(ctxt_name, r1);
+    let &$(defs1, r1_flat) = flatten_rule0(ctxt_name, r1, empty_ty_env);
     return new $(defs1, STAR_r(r, m,N, r1_flat));
 
   case &Hash(m,N,r1):
     let ctxt_name = mk_name(symb,1);
-    let &$(defs1, r1_flat) = flatten_rule0(ctxt_name, r1);
+    let &$(defs1, r1_flat) = flatten_rule0(ctxt_name, r1, empty_ty_env);
     return new $(defs1, HASH_r(r, m,N, r1_flat));
 
    default:
-      return flatten_rule0(symb, r);
+      return flatten_rule0(symb, r, empty_ty_env);
   }
 }
 
-grammar_t flatten_grammar(grammar_t g) {
+grammar_t flatten_grammar(grammar_t<`H> g) {
   init_arityt(g);
+  current_grammar = g;
 
   grammar_t res = NULL,ds = g;
   for (; ds; ds = ds->tl) {
     let &$(n,r,a) = ds->hd;
     if (arity_rule(SYMB(n))){
-      let &$(new_defs, r_flat) = flatten_rule(n,r);
+    	// append underscore to make it easy to differentiate suffix from original symbol name.
+      let &$(new_defs, r_flat) = flatten_rule(strconcat(n,"_"),r);
       res = revappend(new_defs,res);
       res = new List(new $(n, r_flat, a), res);
     } else {

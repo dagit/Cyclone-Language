@@ -59,7 +59,7 @@ namespace DFA {
 			st_t start;
 			// final states of entire dfa (as opposed to final states of all symbols).
 			Set::set_t<st_t> finals;
-//			Hashtable::table_t<act_t,str_t> action_symb_table;
+			Hashtable::table_t<act_t,str_t> action_symb_table;
 		};
 
 		typedef struct dfa_rep@ dfa_rep_t;

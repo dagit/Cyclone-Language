@@ -146,6 +146,8 @@ struct symbInfo {
   struct Hashtable::Table<act_t,str_t> @action_symb_table;
 };
 
+Hashtable::table_t<act_t,str_t> get_as_table(symb_info_t si){return si->action_symb_table;}
+
 static act_t callout_action() {
   return 256;
 }
@@ -219,7 +221,7 @@ const char ?act2symb(act_t act, Hashtable::table_t<act_t,str_t> as_table) {
   else return **sopt;
 }
 void act2symb_cyclone(FILE @f, symb_info_t si) {
-    fprintf(f,"const char ?act2symb(st_t a) {\n");
+    fprintf(f,"const char ?act2symb(act_t a) {\n");
     fprintf(f,"  switch (a) {\n");
   for (let a = repeat_action()+1; a < si->symb_action_counter; a++) {
     fprintf(f,"  case %d: return \"%s\";\n",a,act2symb(a,si->action_symb_table));
@@ -245,7 +247,8 @@ static act_t symb2act(const char ?`H symb, symb_info_t si) {
   let aptr = Hashtable::lookup_opt(si->symb_action_table,symbptr);
   if (aptr != NULL) return *aptr;
   let a = new_action(si);
-  fprintf(stderr,"Symbol %s has action 0x%x\n",symb,a);
+  if (debug)
+    fprintf(stderr,"Symbol %s has action 0x%x\n",symb,a);
   // allocate a new string before putting it in table to ensure
   // that
   Hashtable::insert((_@)si->symb_action_table,symbptr,a);
@@ -635,7 +638,8 @@ st_t rule2wfsm0(FILE@f_fsm, Hashtable::table_t<str_t,st_t> symb_st,
          converting to NFA in case the symbol is defined recursively. */
       let s = nfa_fresh_state(); let f = nfa_fresh_state(); final(s,f);
       Hashtable::insert(symb_st,xptr,s);
-      let $(s_body,f_body,_) = merge_wfsm(f_fsm,symb_st,grm,x_rule,symb_info);
+      let $(s_body,f_body,e_body) = merge_wfsm(f_fsm,symb_st,grm,x_rule,symb_info);
+      final_fsm(f_fsm, s, e_body,x); // merge_wfsm does not do this
       final_fsm(f_fsm, s, f_body,x); // merge_wfsm does not do this
       etrans_fsm(f_fsm, s,s_body,Semiring::one_weight);
       x_start = s;
@@ -647,15 +651,16 @@ st_t rule2wfsm0(FILE@f_fsm, Hashtable::table_t<str_t,st_t> symb_st,
     // CALLS get zero b/c, in essence, they are *never*
     // traversed. They are just stand-ins for the real traversal on
     // the symbol.
-    if (empty_rule(SYMB(x))){
-    /* If the symbol can derive the empty string make sure this gets
-       reflected into the automaton --- effectively doing a RETURN in
-       the automaton instead of the Earley evaluator itself */
-      single_action_fsm(f_fsm, s,callout_action(),"CALL",x_start, Semiring::zero_weight);
-      etrans_fsm(f_fsm, s, s2,Semiring::one_weight);
-      etrans_fsm(f_fsm, s2,f,Semiring::from_inv_prob(2));
-      single_action_fsm(f_fsm, s2,symb2act(x,symb_info),x,f,Semiring::from_inv_prob(2));
-    } else {
+//    if (empty_rule(SYMB(x))){
+//    /* If the symbol can derive the empty string make sure this gets
+//       reflected into the automaton --- effectively doing a RETURN in
+//       the automaton instead of the Earley evaluator itself */
+//      single_action_fsm(f_fsm, s,callout_action(),"CALL",x_start, Semiring::zero_weight);
+//      etrans_fsm(f_fsm, s, s2,Semiring::one_weight);
+//      etrans_fsm(f_fsm, s2,f,Semiring::from_inv_prob(2));
+//      single_action_fsm(f_fsm, s2,symb2act(x,symb_info),x,f,Semiring::from_inv_prob(2));
+//    } else 
+    {
       single_action_fsm(f_fsm, s,callout_action(),"CALL",x_start, Semiring::zero_weight);
       etrans_fsm(f_fsm, s,s2,                   Semiring::one_weight);
       single_action_fsm(f_fsm, s2,symb2act(x,symb_info),x,f,Semiring::one_weight);
@@ -803,9 +808,10 @@ $(st_t,st_t,st_t)
          converting to NFA in case the symbol is defined recursively. */
       let s = nfa_fresh_state(); let f = nfa_fresh_state();
       Hashtable::insert(symb_st,xptr,s);
-      let $(s_body,f_body,_) = merge_wfsm(f_fsm,symb_st,grm,x_rule,symb_info);
-      // need e_body too???      
-      // only marked final in FSM because this is a symbol.
+      let $(s_body,f_body,e_body) = merge_wfsm(f_fsm,symb_st,grm,x_rule,symb_info);
+      // 1. need e_body too??? Yes, in case symb is nullable.      
+      // 2. only marked final in FSM because this is a symbol.
+      final_fsm(f_fsm, s, e_body, x); // merge_wfsm does not do this
       final_fsm(f_fsm, s, f_body, x); // merge_wfsm does not do this
       etrans_fsm(f_fsm, s,s_body,Semiring::one_weight);
       x_start = s;
@@ -814,16 +820,17 @@ $(st_t,st_t,st_t)
     let e = nfa_fresh_state();
     let f = nfa_fresh_state();
 
-    if (empty_rule(SYMB(x))){
-    /* If the symbol can derive the empty string make sure this gets
-       reflected into the automaton --- effectively doing a RETURN in
-       the automaton instead of the Earley evaluator itself */
-      let s2 = nfa_fresh_state();
-      action_fsm(f_fsm, s,EPSILON,x_start, Semiring::one_weight);
-      etrans_fsm(f_fsm, s, s2,Semiring::one_weight);
-      etrans_fsm(f_fsm, s2,e,Semiring::from_inv_prob(2));
-      single_action_fsm(f_fsm, s2,symb2act(x,symb_info),x,f,Semiring::from_inv_prob(2));
-    } else {
+//    if (empty_rule(SYMB(x))){
+//    /* If the symbol can derive the empty string make sure this gets
+//       reflected into the automaton --- effectively doing a RETURN in
+//       the automaton instead of the Earley evaluator itself */
+//      let s2 = nfa_fresh_state();
+//      action_fsm(f_fsm, s,EPSILON,x_start, Semiring::one_weight);
+//      etrans_fsm(f_fsm, s, s2,Semiring::one_weight);
+//      etrans_fsm(f_fsm, s2,e,Semiring::from_inv_prob(2));
+//      single_action_fsm(f_fsm, s2,symb2act(x,symb_info),x,f,Semiring::from_inv_prob(2));
+//    } else 
+    {
       etrans_fsm(f_fsm, s,x_start,Semiring::one_weight);
       single_action_fsm(f_fsm, s,symb2act(x,symb_info),x,f,Semiring::one_weight);
     }
@@ -1027,9 +1034,9 @@ void rule_fsm(const char ?fsm_file,const char ?sym_file, grammar_t grm, rule_t r
   else fprintf(stderr, "Failed to open file %s.\n",sym_file);
 }
 
-$(dfa_t,Set::set_t<st_t>,symb_info_t) *fsm2dfa(const char ?filename, const char ?`H start_symb) {
+$(dfa_t,Set::set_t<st_t>,symb_info_t) *fsm2dfa(const char ?filename) {
   let si = new_symb_info();
-  let r = fsm_dfa(filename,start_symb,symb2act,si);
+  let r = fsm_dfa(filename,symb2act,si);
   if (!r) return NULL;
   else{
     let &$(dfa,final_states) = (_@)r;

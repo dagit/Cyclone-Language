@@ -1011,7 +1011,7 @@ void dfa_haxe(FILE @f, dfa_t dfa) {
 }
 
 // Create a DFA from an FSM file.
-$(dfa_t,Set::set_t<st_t>) *fsm_dfa(const char ?filename, const char ?`H start_symb,
+$(dfa_t,Set::set_t<st_t>) *fsm_dfa(const char ?filename,
 				   act_t (@symb2act)(const char ?`H, `a),`a symb_info)
 {
 
@@ -1105,31 +1105,21 @@ $(dfa_t,Set::set_t<st_t>) *fsm_dfa(const char ?filename, const char ?`H start_sy
   // Build mapping of DFA final states to completed symbols.
 
   let dfa_final = Set::empty(st_cmp);
-  let start_act = symb2act(start_symb,symb_info);
   let final_st_action = symb2act("FINAL-STATE",symb_info);
 
   for (let states = Set::to_list(dfa_final_states(dfa));
        states != NULL; states = states->tl) {
+    let action_attrs = Set::empty(st_cmp); // should be attr_cmp
     let s = states->hd;
     let t = target(dfa,s,final_st_action);
-    let action_attrs = Set::empty(st_cmp); // should be attr_cmp
-    for (let s_txs = Set::to_list(dfa_get_transitions(dfa,t));
-         s_txs != NULL; s_txs = s_txs->tl) {
-      let act = s_txs->hd;
-      if (act == start_act) {
-        dfa_final = Set::insert(dfa_final,s);
-        // TODO: This is **broken**. If the start symbol shows up elsewhere in the grammar
-        // this will prevent a valid return from taking place. Notice that what's done here 
-        // is different than what's done in rule2earley. There, the final state in question 
-        // is uniquely the final state of the whole dfa.
-        // action of the start symbol does not correspond to
-        // the parsing of a symbol hence does not return.  So we do not
-        // want it in the attributes which indicate what symbols are
-        // returning.
-        continue;
-      }
-      action_attrs = Set::insert(action_attrs,act);
-    }
+    if (t==0) {
+			dfa_final = Set::insert(dfa_final,s);
+		} else {
+			for (let s_txs = Set::to_list(dfa_get_transitions(dfa,t));
+					s_txs != NULL; s_txs = s_txs->tl) {
+				action_attrs = Set::insert(action_attrs,s_txs->hd);
+			}
+		}
     dfa_set_final(dfa,s,action_attrs);
   }
 

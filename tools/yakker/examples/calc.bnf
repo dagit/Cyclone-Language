@@ -1,5 +1,17 @@
+nullable = "".
+goo = "+".
+; number = "3".
 DIGIT = %d48-57.
 number = 1*(DIGIT).
-LETTERA = "A".
-expr = expr "+" expr | expr "*" expr | number | "{" number$number "}" @repeat(number)LETTERA.
-start = expr.
+expr =  expr "+" expr | expr "*" expr | number | "{" number$number "}".
+; expr = [ nullable "bye" expr ].
+start = "a " expr.
+
+; number = "3".
+; expr = expr "+" expr | number.
+; start = "a " expr.
+; DIGIT = %d48-57.
+; number = 1*(DIGIT).
+; LETTERA = "A".
+; expr = expr "+" expr | expr "*" expr | number | "{" number$number "}" @repeat(number)LETTERA.
+; start = "a " expr.

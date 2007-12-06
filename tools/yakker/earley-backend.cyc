@@ -12,8 +12,14 @@
 //#include "pm_bnf.h"
 #include "earley-backend.h"
 
+#ifdef USE_COMPILED_DFA
+
 #include "dfa_cyc.h"
-/*
+
+#else
+
+#include "dfa.h"
+
 #define DFA_TY DFA::Rep::dfa_rep_t
 #define DFA_TRANS(dfa,s,a) (target(dfa->d,s,a))
 #define DFA_TRANS_W(dfa,s,a) (target_w_weight(dfa->d,s,a))
@@ -25,31 +31,49 @@
 	construct_repeat_dfa(dfa->d,nt,repeat_decr_action(),nt_start,\
 					                  repeat_final_action(), nt_final)
 #define DFA_FINAL_WEIGHT(dfa,f) dfa_final_weight(dfa->d,f)
+static att_t ?`H wrap_final_attrs(dfa_t dfa,st_t s) {
+	try {
+		let fs_set = dfa_final_attrs(dfa,s);
+		if (Set::is_empty(fs_set))
+				return new {};
+		return List::to_array(Set::to_list(fs_set));
+	} catch
+	{
+		case &Core::Not_found:
+		return NULL;
+	}
+}
 // XXX: find more efficient way to get array.
-#define DFA_FINAL_ATTRS(dfa,f) List::to_array(Set::to_list(dfa_final_attrs(dfa->d,f)))
+#define DFA_FINAL_ATTRS(dfa,f) wrap_final_attrs(dfa->d,f) 
 #define DFA_GET_START(dfa) dfa->start
-#define DFA_IS_DFA_FINAL(dfa,s) Set::member(dfa->finals, s)
-*/
+//#define DFA_IS_DFA_FINAL(dfa,s) Set::member(dfa->finals, s)
+#define DFA_ACT2SYMB(dfa,a) act2symb(attr,dfa->action_symb_table);
+
+#endif
+
+#define DFA_IS_DFA_FINAL(dfa,s) \
+	({let as = DFA_FINAL_ATTRS(dfa,s); as && numelts(as) == 0;})
+
 
 using List;
 using Semiring;
 
 
-#include <stdio.h>
-#include <buffer.h>
-
-int main(void){
-	printf("Earley parsing stdin ... \n.");
-	
-	int c;	
-	let b = Buffer::create(101);
-	while ( (c = fgetc(stdin)) != EOF )
-   	Buffer::add_char(b,c);
-
-	let dfa_rep = 0;
-	let $(trees,valid,valid_prefix) = EarleyBackend::parse(dfa_rep,Buffer::contents(b));
-	printf("done -- is valid string :%d; is valid prefix: %d\n",valid,valid_prefix);
-}
+//#include <stdio.h>
+//#include <buffer.h>
+//
+//int main(void){
+//	printf("Earley parsing stdin ... \n.");
+//	
+//	int c;	
+//	let b = Buffer::create(101);
+//	while ( (c = fgetc(stdin)) != EOF )
+//   	Buffer::add_char(b,c);
+//
+//	let dfa_rep = 0;
+//	let $(trees,valid,valid_prefix) = EarleyBackend::parse(dfa_rep,Buffer::contents(b));
+//	printf("done -- is valid string :%d; is valid prefix: %d\n",valid,valid_prefix);
+//}
 
 namespace EarleyBackend;
 
@@ -123,6 +147,13 @@ static act_t repeat_final_action() {
 }
 
 #define MIN_ACTION 261
+
+const char ?act2symb(act_t act, Hashtable::table_t<act_t,str_t> as_table) {
+  let sopt = Hashtable::lookup_opt(as_table,act);
+  if (sopt == NULL || *sopt == NULL) return NULL;
+  else return **sopt;
+}
+
 
 static void set_repeat_count(rstate_t rs, st_t s, int n){
   Hashtable::insert(rs->repeat_counts,s, new n);
@@ -228,19 +259,66 @@ push_closure(rstate_t rs,
 
   let es = Axarray::get(rs->estates,i);
   if (Set::member(es,ei)) {
-    return;
+  	// XXX: is it okay to return if the weight has changed???
+  	return;
   }
+//  fprintf(stderr,"estates[%d] += (%d,%d)\n",i,ei->f0,ei->f1);fflush(stderr);
   Axarray::set(rs->estates,i,Set::insert(es,ei));
 
   /* Close under CALLS. We don't use the weight here. */
   let t = DFA_TRANS(rs->dfa,s,callout_action()); 
   if (t != 0) {
-    push_closure(rs,input,i,new $(t,i),NULL,NULL
-                 ,forward,Semiring::one_weight //PROB
-                 );
-  } 
+		// Check for RETURN of nullable symbols
+  	// TODO: do the same for REPEAT calls.
+		if (DFA_IS_FINAL(rs->dfa,t)) {
+			let final_w = DFA_FINAL_WEIGHT(rs->dfa,t);
 
-  /* Close under REPEAT-DECR (special type of call). */
+			/* For every completed symbol... */
+			let ss = DFA_FINAL_ATTRS(rs->dfa,t);
+			let n = numelts(ss);
+			for (int sym_i=0; sym_i < n; sym_i++) {
+				let symb_act = ss[sym_i];
+
+				let starget = DFA_TRANS(rs->dfa,s,symb_act);
+				if (starget != 0) {
+					// Earley node that completed nullable RHS.
+					let causal_node = new $(t,i,i);
+					let &$(node_forward,node_inner) = Hashtable::lookup(rs->weights,node); //PROB
+					let w_m = mult(inner, final_w);
+					push_closure(rs,input,i,new $(starget,backptr),
+							node, causal_node
+							,mult( w_m, node_forward), //PROB
+							mult( w_m, node_inner) //PROB
+					);
+				}
+				
+				let ttarget = DFA_TRANS(rs->dfa,t,symb_act);
+				if (ttarget != 0) {
+					// Earley node that completed nullable RHS.
+					let causal_node = new $(t,i,i);
+					let &$(node_forward,node_inner) = Hashtable::lookup(rs->weights,node); //PROB
+					let w_m = mult(inner, final_w);
+					push_closure(rs,input,i,new $(ttarget,i),
+							node, causal_node
+							,mult( w_m, node_forward), //PROB
+							mult( w_m, node_inner) //PROB
+					);
+				}
+			
+				// Sanity check:
+				if (ttarget == 0 && starget == 0) {
+					fprintf(stderr,"Error: target for %d not found in call source state %d or target state %d.\n",symb_act,s,t);
+				} 
+
+			}
+		}
+		
+		push_closure(rs,input,i,new $(t,i),NULL,NULL
+				,forward,Semiring::one_weight //PROB
+		);
+  } /* End, Close under CALLS. */
+
+  /* Close under REPEAT-DECR (special type of CALL). */
   let t = DFA_TRANS(rs->dfa,s,repeat_decr_action());
   if (t != 0) {
     // Lookup and decrement repeat count
@@ -276,7 +354,7 @@ push_closure(rstate_t rs,
     // Earley parse history.
     let bounds_opt = get_bounds(rs->links, rs->dfa, node,repeater_nt);
     if (!bounds_opt){
-      fprintf(stderr,"Error: bounds could not be find for non terminal.\n");
+      fprintf(stderr,"Error: bounds could not be found for non terminal.\n");
       return;
     }
     let &$(j,k) = (_@)bounds_opt;
@@ -305,8 +383,8 @@ push_closure(rstate_t rs,
 
   /* Close under RETURNS.  Use else, because a REPEAT state can't
      also be a final state. */
-  else if (i != backptr // we parsed the empty string, RETURN handled by dfa already
-      && DFA_IS_FINAL(rs->dfa,s)) {
+  else if (i != backptr && // we parsed the empty string, RETURN handled by dfa already
+       DFA_IS_FINAL(rs->dfa,s)) {
     /* Some symbol is completed.
        es_back is the Earley state that CALLed the symbol. */
     let es_back = Axarray::get(rs->estates,backptr);
@@ -329,10 +407,8 @@ push_closure(rstate_t rs,
 				if (ttarget != 0) {
 					// Earley node w/ dot before symb.
 					let backnode = new $(t,tbackptr,backptr);
-					// Earley node w/ dot after symb.
-					let retnode = new $(ttarget,tbackptr,i);
-					let &$(backnode_forward,backnode_inner) = Hashtable::lookup(rs->weights,backnode); //PROB
-					fflush(stdout);
+					let &$(backnode_forward,backnode_inner) = 
+						Hashtable::lookup(rs->weights,backnode); //PROB
 					let w_m = mult(inner, final_w);
 					push_closure(rs,input,i,new $(ttarget,tbackptr),
 					backnode, node
@@ -401,14 +477,110 @@ push_closure(rstate_t rs,
 //	return NULL;
 //}
 
-datatype ParseTree{ Empty ; };
-
 parse_tree_t
 mk_parse_tree(rstate_t rs,
-		 const char ?input,
-		 earley_node_t en){
-	return new Empty;
+		 string_t input,
+		 earley_node_t en);
+
+// List::List_t<parse_forest_t> prefix_all(parse_tree_t,List::List_t<parse_forest_t>);
+// imperative update of fs.
+void prefix_all_imp(parse_tree_t t,List::list_t<parse_forest_t> fs){
+  for (;fs;fs = fs->tl){
+    fs->hd = new List::List(t,fs->hd);
+  }
 }
+
+//List::list_t<$(parse_forest_t,Semiring::weight_t) @>
+List::list_t<parse_forest_t>
+mk_parse_branches(rstate_t rs,
+		      string_t input,
+		      earley_node_t en){
+  let derivations = NULL;
+  let maybe_links = Hashtable::lookup_opt(rs->links,en);
+  if (maybe_links != NULL) {
+
+    // Compute all derivations.
+    for (let xs = *maybe_links; xs; xs = xs->tl) {
+      let &elink(pred_link,w,retn_link) = xs->hd;
+
+      let pred_derivations = mk_parse_branches(rs, input, pred_link);
+			if (retn_link) {
+				let child_tree = mk_parse_tree(rs, input, retn_link);
+				// prefix all forests of pred_derivations with child_tree.
+				prefix_all_imp(child_tree, pred_derivations);
+			}
+
+			derivations = List::append(derivations, pred_derivations);
+		}
+
+  }else
+    // A single, empty derivation.
+    derivations = List::list(NULL);
+
+
+  //////////// Debug Code ///////////
+//   if (derivations != NULL && derivations->tl != NULL) {
+//     // More than one derivation, so ambiguous.
+//     fprintf(stderr,"Ambiguous parse, (%d,%d,%d) has multiple derivations\n",
+// 	    en->f0,en->f1,en->f2);
+//     fflush(stderr);
+//   }
+  //////////////////////////////////
+
+  return derivations;
+}
+
+/**
+ * INVARIANT: state of en must be final.
+ * */
+parse_tree_t
+mk_parse_tree(rstate_t rs,
+		 string_t input,
+		 earley_node_t en) {
+	
+  let &$(x,i,j) = en;
+  const char? name = "TOP";
+  let completed = DFA_FINAL_ATTRS(rs->dfa,x);
+	if (!completed){
+		fprintf(stderr,"State %d is not a final state.\n",x);
+		exit(1);
+	}
+
+  if (numelts(completed) == 0) {
+    // TODO: add real error handling code.
+    // ERROR: precondition of this function is that x is a final state.
+//     return tree;
+  }
+  else {
+    // pick any attribute (we choose the first)
+    // TODO: use *all* attributes.
+    let attr = completed[0];
+    name = DFA_ACT2SYMB(rs->dfa,attr);
+  }
+
+  parse_tree_t tree;
+
+  let h_derivations = mk_parse_branches(rs,input,en);
+  let &$(w_forward,w_inner) = Hashtable::lookup(rs->weights, en);
+  // distinguish ambiguous from unamb. parses.
+  if (h_derivations == NULL){
+    // YHM: can len == 0 ? If so, how did entry ever get created?
+    // Yes, because it can be a string of terminals.
+    //fprintf(stderr,"No derivations returned.\n");
+    tree = new NonTerm(name,i,j,w_forward,NULL);
+  } else if(h_derivations->tl == NULL){
+    // Unambiguous
+    tree = new NonTerm(name,i,j,w_forward,h_derivations->hd);
+  } else {
+     // Ambiguous
+    tree = new SharedNonTerm(name,i,j,w_forward,h_derivations);
+  }
+
+  return tree;
+  
+
+}
+
 
 
 $(List::list_t<$(parse_tree_t,Semiring::weight_t)@>,int,int) 
@@ -470,14 +642,44 @@ parse(DFA_TY dfa, const char? input) {
 		let &$(state,parent) = slast_list->hd;
 		if (DFA_IS_DFA_FINAL(dfa,state) && parent == 0) {
       complete_parses++;
-			
-			if (do_reconstruct) {
-				let en = new $(state,parent /*== 0*/,input_len);
-				let derivation_tree = mk_parse_tree(rs,input,en);
-				let &$(w_forward,w_inner) = Hashtable::lookup(rs->weights, en);
-				trees = new List::List(new $(derivation_tree,w_forward),trees);
-			}
+
+				if (do_reconstruct) {
+					let en = new $(state,parent /*== 0*/,input_len);
+					let derivation_tree = mk_parse_tree(rs,input,en);
+					let &$(w_forward,w_inner) = Hashtable::lookup(rs->weights, en);
+					trees = new List::List(new $(derivation_tree,w_forward),trees);
+				}
 		}
 	}
-	return $(trees,complete_parses,partial_parses);
+
+	return $(trees,complete_parses,partial_parses);	
 }
+
+void print_LT_parse_forest(parse_forest_t pf, int depth);
+
+void print_LT(datatype ParseTree @pt, int depth){
+  switch (pt) {
+  case &NonTerm(name,l,r,w,children):
+    printf("<t s=\"%s(%s)\" l=\"%d\" r=\"%d\">",name,Semiring::print_weight(w),l,r);
+  print_LT_parse_forest(children, depth);
+    printf("</t>");
+    break;
+  case &SharedNonTerm(name,l,r,w,children_list):
+    printf("<t s=\"%s(%s)\" l=\"%d\" r=\"%d\">",name,Semiring::print_weight(w),l,r);
+  print_LT_parse_forest(children_list->hd,depth);
+    printf("</t>");
+    break;
+  }
+}
+
+void print_LT_parse_forest(parse_forest_t pf, int depth){
+  if (depth > 0){
+    let d = depth - 1;
+    for(let ts = (_*)List::rev(pf); ts; ts = ts->tl)
+      print_LT(ts->hd, d);
+  } else if(depth == -1) {
+    for(let ts = (_*)List::rev(pf); ts; ts = ts->tl)
+      print_LT(ts->hd, -1);
+  }
+}
+

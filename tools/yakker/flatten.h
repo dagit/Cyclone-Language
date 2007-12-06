@@ -18,12 +18,14 @@
 
 #ifndef FLATTEN_H
 #define FLATTEN_H
+#include <core.h>
 #include "bnf.h"
-extern grammar_t flatten_grammar(grammar_t g);
+extern grammar_t flatten_grammar(grammar_t<`H> g);
 
 namespace Flatten{
   // Flag: for alts, put every alternative as a separate symbol definition.
   // default is 0;
   extern int fully_flatten_alts;
+  extern int is_flattened_symb(string_t s);
 }
 #endif
