@@ -53,9 +53,13 @@ int main(int argc, const char ?`H?argv) {
 		if (trees->tl) {
 			printf("Ambiguous parse.\n");
 		} else {
-			EarleyBackend::print_LT(trees->hd->f0,print_depth);
+			EarleyBackend::print_tree(trees->hd->f0,print_depth);
 			printf("\nPerforming crawl.\n");			
-			CRAWLFUN(trees->hd->f0, input);
+			// "tree" encodes top-level regexp, but we want to crawl starting from symbol
+			// with regexp.
+			// TODO: generate function that represents the top-level regexp.
+			let child_tree = trees->hd->f0->children[0];
+			CRAWLFUN(child_tree, input);
 		}
 
 	} else

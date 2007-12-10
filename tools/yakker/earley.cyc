@@ -1666,37 +1666,15 @@ derivation_redux(rstate_t rs,
 		 const char ?input,
 		 earley_node_t en) {
   let &$(x,i,j) = en;
-  const char? name = "TOP";
+  string_t name;
   let completed = Set::to_list(dfa_final_attrs(rs->dfa,x));
-  if (completed == NULL) {
-    // FIX: add real error handling code.
-    // ERROR: precondition of this function is that x is a final state.
-//     return tree;
-  }
-  else {
+  if (completed) {
     // pick any attribute (we choose the first)
-    // FIX: use *all* attributes.
+    // TODO: use *all* attributes.
     let attr = completed->hd;
     name = act2symb(attr,rs->as_table);
-// THIS CODE CAUSES A CYCLONE BUG !!!
-//     switch (h_derivations) {
-//     case NULL  :
-//       // YHM: can len == 0 ? If so, how did entry ever get created?
-//       // ERROR?
-//       break;
-//     case &List::List{.hd=d, .tl=NULL} :
-//       // Unambiguous
-//       tree = new NonTerm(act2symb(attr),i,j,d);
-//       break;
-//     case &List::List{.hd=d, .tl=NULL} :
-//       // Unambiguous
-//       tree = new NonTerm(act2symb(attr),i,j,d);
-//       break;
-//     default :
-//       // Ambiguous
-//       tree = new SharedNonTerm(act2symb(attr),i,j,h_derivations);
-//     }
-  }
+  }else // it must be the final state of the dfa:
+  	name = "TOP";
 
   parse_tree_t tree;
 

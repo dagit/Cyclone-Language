@@ -140,7 +140,22 @@ abnf-dfa.txt: abnf-echo.bnf yakker
 	./yakker -earley-gen-fsm rulelist abnf-echo.bnf > $@
 
 abnf-flat-dfa.txt: abnf-echo.bnf yakker
-	./yakker -flatten-full -earley-gen-fsm rulelist abnf-echo.bnf > $@
+	./yakker -flatten-full -earley-gen-fsm rulelist $< > $@
+
+abnf-flat-dfa.dot: abnf-echo.bnf yakker
+	./yakker -flatten-full -earley-gen-dot rulelist $< > $@
+
+testing/abnf-trunc-flat.bnf: testing/abnf-trunc.bnf yakker
+	./yakker -flatten-full $< > $@
+
+testing/abnf-flat.bnf: abnf-echo.bnf yakker
+	./yakker -flatten-full $< > $@
+
+abnf-trunc-flat-dfa.txt: testing/abnf-trunc.bnf yakker
+	./yakker -flatten-full -earley-gen-fsm rulelist $< > $@
+
+abnf-trunc-flat-dfa.dot: testing/abnf-trunc.bnf yakker
+	./yakker -flatten-full -earley-gen-dot rulelist $< > $@
 
 aecrawl-cyc.o: aecrawl.cyc
 	cyclone -o $@ -c -DUSE_COMPILED_DFA $<
