@@ -67,7 +67,7 @@ $(PROG_PA): $(OBJS_PA)
 testindexer: indexer 1rfc_index
 	./indexer < 1rfc_index
 
-indexer: indexer.o ykbuf.o ssl.o bnf.o extract.o pr.o parse_tab.o util.o lex.o
+indexer: indexer.o ykbuf.o ssl.o bnf.o extract.o pr.o parse_tab.o util.o lex.o cs.o
 	$(CYCLONE) $^ -o $@ -lssl -lcrypto
 
 # --novcgen is temporary until a bug is fixed

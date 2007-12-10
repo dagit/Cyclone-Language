@@ -6,6 +6,7 @@
   <mx:Label id="lbl" text="Input:"/>
   <mx:TextArea id="parseInput" width="100%" height="20"/>
 </mx:HBox>
+<!--
 <mx:HBox width="100%">
   <mx:Label text="Parse:"/>
   <mx:TextArea id="parseAbove" width="100%"/>
@@ -14,8 +15,11 @@
   <mx:Label text="Parse:"/>
   <mx:TextArea id="parseBelow" width="100%"/>
 </mx:HBox>
+-->
 <mx:HBox width="100%">
+<!--
 <mx:Button label="Render" id="renderButton"/>
+-->
 <mx:Button label="Parse" id="parseButton"/>
 <mx:Spacer width="100%"/>
 <mx:Label text="Limit"/>

@@ -305,8 +305,10 @@ class Parseviz {
     // more easily access UI components
 
     loadFile("input",app.parseInput);
+/*
     loadFile("left.xml",app.parseAbove);
     loadFile("right.xml",app.parseBelow);
+*/
 
 
     /* mainCanvas is a mx.containers.Canvas, and its addChild method
@@ -395,6 +397,7 @@ class Parseviz {
       bg.y = r.y = -maxHeightAbove * gridHeight;
       c.scrollRect = r;
     }
+/*
     app.renderButton.addEventListener
     (MouseEvent.CLICK,
      function (e:Event) {
@@ -408,6 +411,7 @@ class Parseviz {
          drawText(c,font,0,0,"Error: uncaught exception");
        }
      });
+*/
     app.minusButton.addEventListener
     (FlexEvent.BUTTON_DOWN,
      function (e:Event) {
