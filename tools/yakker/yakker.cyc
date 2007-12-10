@@ -853,6 +853,7 @@ int main(int argc, const char ?`H?argv) {
 					fclose(f);
 				}
 				else fprintf(stderr, "Failed to open file %s.\n",filename);
+				break;
       default:
 				fprintf(stderr,"Invalid DFA format.\n");
 			}
