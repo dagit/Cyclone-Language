@@ -1149,9 +1149,9 @@ int main(int argc, const char ?`H?argv) {
     if (check_empty) report_empty_nonterminals(ds);
     if (check_left_recursion) report_left_recursion(ds);
     if (check_right_recursion) report_right_recursion(ds);
-    if (check_white_edges) report_white_edges(ds);
     if (minus_elimp)
       minus_elim(ds);
+    if (check_white_edges) report_white_edges(ds);
     if (check_firstfollow) report_first_follow(ds);
     if (check_conflicts) report_conflicts(ds);
     if (check_glush) report_glush(ds);

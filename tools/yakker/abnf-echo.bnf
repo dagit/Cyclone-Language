@@ -129,13 +129,13 @@ bin-val$(rule_t)
     (*("." (1*BIT)$y {r = ALT(CHARRANGE(atoi(y),atoi(y)));}))$$r={CHARRANGE(btoi(x),btoi(x))}
   {return r;}
   | "b" (1*BIT)$x "-" (1*BIT)$y {return CHARRANGE(btoi(x),btoi(y));}.
-c-nl = comment|LF|CRLF.
+c-nl = comment|LF|CR.
 c-wsp = WSP|(c-nl WSP).
 char-line = %d13 %d10 %d32-126 %d13 %d10.
 char-val$(rule_t)
   = DQUOTE (*(%d32-33|%d35-126))$x DQUOTE {return LIT(x);}
   | "<" DQUOTE ">" {return LIT("\"");}.
-comment = ";" *(WSP|VCHAR) (LF|CRLF).
+comment = ";" *(WSP|VCHAR) (LF|CR).
 concatenation$(rule_t)
   = binding$x
     *(1*c-wsp binding$y {r = SEQ(r,y);})$$r={x} {return r;}.
@@ -144,7 +144,7 @@ dec-val$(rule_t)
     (*("." (1*DIGIT)$y {r = ALT(CHARRANGE(atoi(y),atoi(y)));}))$$r={CHARRANGE(atoi(x),atoi(x))}
     {return r;}
   | "d" (1*DIGIT)$x "-" (1*DIGIT)$y {return CHARRANGE(atoi(x),atoi(y));}.
-defined-as = *c-wsp ("="|"=/") *c-wsp.
+defined-as = ("="|"=/").
 element$(rule_t)
   = rulename$x {return SYMB(x);}
   |group$x {return x;}
@@ -191,7 +191,7 @@ repetition$(rule_t)
              else return HASH(m,n,y);}
   | "@repeat(" *inside$x ")" *c-wsp element$y {return RCOUNT(x,y);}.
 rule$(definition_t)
-  = rulename$x typestuff$y *c-wsp defined-as elements$z
+  = rulename$x typestuff$y *c-wsp defined-as *c-wsp elements$z
     ["." *c-wsp [ "{" *inside$w "}" {add_textblob(w);} ] ] c-nl
   {let &$(ptype,rtype) = y;
    return new $((const char ?)x,z,Attr(0,0,ptype,rtype));}.
@@ -201,7 +201,7 @@ typestuff$($(const char ?`H,const char ?`H)@)
   | "@" parens$x typestuff$y {y->f0 = x; return y;}.
 rulelist$(grammar_t)
   = 1*(*c-wsp (rule$x {l=new List::List(x,l);}
-              |c-nl
+              | c-nl
               |"{" *inside$x "}" {add_textblob(x);}))$$l={NULL}
     { l = List::imp_rev(l);
       pr_definitions(stdout,l);

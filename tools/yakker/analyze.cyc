@@ -483,8 +483,8 @@ void init_white_edge_symbols(grammar_t grm) {
 void report_white_edges(grammar_t grm) {
   init_white_edge_symbols(grm);
 
-  //  let ws = string2cs(" \t\r\n");
-  let ws = string2cs(" ");
+  let ws = string2cs(" \t\r\n");
+  //  let ws = string2cs(" ");
   let L = EMPTYSET;
   let R = EMPTYSET;
   let B = EMPTYSET;
@@ -508,7 +508,7 @@ void report_white_edges(grammar_t grm) {
   if (Set::is_empty(L))
     eprintf("No symbols have only left white edges.\n");
   else {
-    eprintf("%d symbols have white edges:\n",Set::cardinality(L));
+    eprintf("%d symbols have only left white edges:\n",Set::cardinality(L));
     while (Set::cardinality(L) > 0) {
       let x = Set::choose(L);
       L = Set::delete(L,x);
