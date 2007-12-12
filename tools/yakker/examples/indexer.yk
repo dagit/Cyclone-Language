@@ -7,7 +7,7 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-entry-list = *entry { dump_table(); }. ;;; The start symbol
+entry-list = 1*entry { dump_table(); }. ;;; The start symbol
 entry =
     number$n ws "Not Issued." end-of-entry
       { add_not_issued(atoi(n)); }

@@ -1,0 +1,65 @@
+reply-msg = string.
+reply = 3DIGIT [reply-msg] CRLF.
+command =
+           "USER" SP username CRLF
+      |     "PASS" SP password CRLF
+      |     "ACCT" SP account-information CRLF
+      |     "CWD"  SP pathname CRLF
+      |     "CDUP" CRLF
+      |     "SMNT" SP pathname CRLF
+      |     "QUIT" CRLF
+      |     "REIN" CRLF
+      |     "PORT" SP host-port CRLF
+      |     "PASV" CRLF
+      |     "TYPE" SP type-code CRLF
+      |     "STRU" SP structure-code CRLF
+      |     "MODE" SP mode-code CRLF
+      |     "RETR" SP pathname CRLF
+      |     "STOR" SP pathname CRLF
+      |     "STOU" CRLF
+      |     "APPE" SP pathname CRLF
+      |     "ALLO" SP decimal-integer
+              [SP "R" SP decimal-integer] CRLF
+      |     "REST" SP marker CRLF
+      |     "RNFR" SP pathname CRLF
+      |     "RNTO" SP pathname CRLF
+      |     "ABOR" CRLF
+      |     "DELE" SP pathname CRLF
+      |     "RMD"  SP pathname CRLF
+      |     "MKD"  SP pathname CRLF
+      |     "PWD"  CRLF
+      |     "LIST" [SP pathname] CRLF
+      |     "NLST" [SP pathname] CRLF
+      |     "SITE" SP string CRLF
+      |     "SYST" CRLF
+      |     "STAT" [SP pathname] CRLF
+      |     "HELP" [SP string] CRLF
+      |     "NOOP" CRLF.
+
+username = string.
+password = string.
+account-information = string.
+string = 1*(char).
+char = (((%d0-127) - (CR)) - (LF)).
+marker = pr-string.
+pr-string = 1*(pr-char).
+pr-char = %d33-126.
+byte-size = number.
+host-port = host-number "," port-number.
+host-number = number "," number "," number "," number.
+port-number = number "," number.
+; any decimal integer 1 through 255.
+number = DIGIT
+       | %d49-57 DIGIT
+       | "1" 2DIGIT
+       | "2" %d48-52 DIGIT
+       | "25" %d48-53.
+form-code = "N" | "T" | "C".
+type-code = "A" [SP form-code]
+          | "E" [SP form-code]
+          | "I"
+          | "L" SP byte-size.
+structure-code = "F" | "R" | "P".
+mode-code = "S" | "B" | "C".
+pathname = string.
+decimal-integer = 1*(DIGIT).

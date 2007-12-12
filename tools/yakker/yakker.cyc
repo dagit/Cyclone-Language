@@ -33,7 +33,7 @@
 #include "earley.h"
 
 #include "dfa.h"
-#include "earley-backend.h"
+//#include "earley-backend.h"
 
 #include <stdio.h>
 #include <string.h>

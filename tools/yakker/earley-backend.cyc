@@ -582,36 +582,6 @@ mk_parse_forest(rstate_t rs,
 
 ////////////////////////
 
-parse_tree_t
-mk_parse_tree(rstate_t rs,
-		 string_t input,
-		 string_t<`H> top_level_name,
-		 earley_node_t en);
-
-// Throws Invalid_argument if earley graph is ambiguous
-List::list_t<parse_tree_t>
-mk_parse_children(rstate_t rs,
-		      string_t input,
-		      earley_node_t en){
-  let derivations = NULL;
-  let maybe_links = Hashtable::lookup_opt(rs->links,en);
-  while (maybe_links != NULL) {
-  	let links = *maybe_links;
-  	// Check for ambiguity.
-  	if (links->tl != NULL)
-  		throw new Core::Invalid_argument("Earley graph is ambiguous.");
-
-    let &elink(pred_link, w, retn_link) = links->hd;
-
-		if (retn_link) {
-			derivations = new List::List(mk_parse_tree(rs, input, NULL, retn_link),
-																	 derivations);
-		}
-		maybe_links = Hashtable::lookup_opt(rs->links,pred_link);
-  }
-  
-  return derivations;
-}
 
 // Reconstruct a parse tree. Throws Invalid_argument if earley graph is ambiguous 
 parse_tree_t
@@ -619,6 +589,8 @@ mk_parse_tree(rstate_t rs,
 		 string_t input,
 		 string_t<`H> top_level_name,
 		 earley_node_t en) {
+	// map: early_node_t -> parse_tree_t
+	let trees = Hashtable::create(11,earley_node_cmp,earley_node_hash);
 	
   let &$(x,i,j) = en;
 //  string_t<`H> name;
@@ -640,11 +612,35 @@ mk_parse_tree(rstate_t rs,
     name = DFA_ACT2SYMB(rs->dfa,attr);
   }
 
-  parse_tree_t tree;
+  // reconstruct trees of children (i.e. RHS).
+  let children_trees = NULL;
+  let maybe_links = Hashtable::lookup_opt(rs->links,en);
+  while (maybe_links != NULL) {
+  	let links = *maybe_links;
+  	// Check for ambiguity.
+  	if (links->tl != NULL)
+  		throw new Core::Invalid_argument("Earley graph is ambiguous.");
 
-  let h_derivations = mk_parse_children(rs,input,en);
+    let &elink(pred_link, w, retn_link) = links->hd;
+
+		if (retn_link) {
+			let retn_tree_opt = Hashtable::lookup_opt(trees,retn_link);
+			let retn_tree;
+			if (!retn_tree_opt){
+				retn_tree = mk_parse_tree(rs, input, NULL, retn_link);
+				Hashtable::insert(trees,retn_link,retn_tree);
+			} else
+				retn_tree = *retn_tree_opt;
+	    // we can build the list backwards because we are starting at the end of 
+			// the RHS and traversing pred links towards the beginning.
+			children_trees = new List::List(retn_tree,
+																	 children_trees);
+		}
+		maybe_links = Hashtable::lookup_opt(rs->links,pred_link);
+  }
+  
   let &$(w_forward,w_inner) = Hashtable::lookup(rs->weights, en);
-  return new parse_tree(name,i,j,w_forward, List::to_array( h_derivations ));
+  return new parse_tree(name,i,j,w_forward, List::to_array( children_trees ));
 }
 
 
@@ -751,9 +747,15 @@ parse(DFA_TY dfa, const char? input) {
 
 				if (do_reconstruct) {
 					let en = new $(state,parent /*== 0*/,input_len);
-					let derivation_tree = mk_parse_tree(rs,input,"TOP LEVEL",en);
-					let &$(w_forward,w_inner) = Hashtable::lookup(rs->weights, en);
-					trees = new List::List(new $(derivation_tree,w_forward),trees);
+					try{
+						let derivation_tree = mk_parse_tree(rs,input,"TOP LEVEL",en);
+						let &$(w_forward,w_inner) = Hashtable::lookup(rs->weights, en);
+						trees = new List::List(new $(derivation_tree,w_forward),trees);
+					} catch {
+						case &Core::Invalid_argument(msg):
+							fprintf(stderr,"Ambiguous tree at early node (%d,0,%d):\n\t%s\n",state,input_len,msg);
+						break;	
+					}
 				}
 		}
 	}
