@@ -111,7 +111,7 @@ abnf-echo-earley-cyc: $(AE_CYC_CR_OBJS)
 abnf-echo-earley-dfa: $(AE_DFA_CR_OBJS)
 	cyclone -o $@ $^ -lssl -lm
 
-abnf-echo-dfa.txt: abnf-echo.bnf yakker
+abnf-echo-dfa.txt: examples/abnf-echo.bnf yakker
 	./yakker -flatten-full -earley-gen-fsm rulelist $< > $@
 
 include examples/calc.mk

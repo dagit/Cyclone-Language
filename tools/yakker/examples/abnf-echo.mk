@@ -2,7 +2,7 @@
 ## Lookahead version
 ################################
 
-abnf-echo.cyc: abnf-echo.bnf
+abnf-echo.cyc: examples/abnf-echo.bnf
 	./yakker -gen rulelist $< > $@
 
 ################################
@@ -39,22 +39,22 @@ abnf-cyc-eb: $(AE_CYC_OBJS)
 abnf-dfa-eb: $(AE_DFA_OBJS)
 	cyclone -o $@ $^ -lssl -lm
 
-abnf-dfa.cyc: abnf-echo.bnf yakker
+abnf-dfa.cyc: examples/abnf-echo.bnf yakker
 	./yakker -earley-gen-cyc rulelist $< > $@
 
-abnf-flat-dfa.cyc: abnf-echo.bnf yakker
+abnf-flat-dfa.cyc: examples/abnf-echo.bnf yakker
 	./yakker -flatten-full -earley-gen-cyc rulelist $< > $@
 
-abnf-dfa.txt: abnf-echo.bnf yakker
-	./yakker -earley-gen-fsm rulelist abnf-echo.bnf > $@
+abnf-dfa.txt: examples/abnf-echo.bnf yakker
+	./yakker -earley-gen-fsm rulelist examples/abnf-echo.bnf > $@
 
-abnf-flat-dfa.dot: abnf-echo.bnf yakker
+abnf-flat-dfa.dot: examples/abnf-echo.bnf yakker
 	./yakker -flatten-full -earley-gen-dot rulelist $< > $@
 
 testing/abnf-trunc-flat.bnf: testing/abnf-trunc.bnf yakker
 	./yakker -flatten-full $< > $@
 
-testing/abnf-flat.bnf: abnf-echo.bnf yakker
+testing/abnf-flat.bnf: examples/abnf-echo.bnf yakker
 	./yakker -flatten-full $< > $@
 
 #abnf-trunc-flat-dfa.txt: testing/abnf-trunc.bnf yakker
@@ -69,7 +69,7 @@ aecrawl-cyc.o: aecrawl.cyc
 aecrawl-dfa.o: aecrawl.o
 	cp $< $@
 
-aecrawl.cyc: abnf-echo.bnf yakker crawl-main.cyc
+aecrawl.cyc: examples/abnf-echo.bnf yakker crawl-main.cyc
 	./yakker -flatten-full -gen-crawl rulelist $< > $@
 	echo '#define CRAWLFUN p_rulelist' >> $@
 	echo '#include "crawl-main.cyc"' >> $@
