@@ -405,37 +405,16 @@ void gen0(rule_t r, grammar_t grm) {
 				break;
 			}
 		}
-		// FIX!!!
+		// TODO: FIX!!!
 		// if > 1 nullable child then ambiguous
 		printf("\n  throw &Parse_error_val;\n");
 		// else 
 		// call nullable child
 		break;
 	case &Opt(r2):
-		//
-		// Invariant: r2 is a symbol.
-		//
-
-		// Lookup the child nonterminal name.
-		printf("let child_name = children[0]->nonterminal;\n");
-
-		switch (r2->r) {
-		case &Symb(n, _):
-			printf("if ( !strcmp(child_name,\"%s\") ){\n", n);
-			gen0(r2,grm);
-			printf("}\n");
-			break;
-		default:
-			// ERR!
-			internal_err("Option body in gen0 with non-symbol alternative.\n");
-			fflush(stderr);
-			pr_rule(stderr,r2,1);
-			fflush(stderr);
-
-			printf("// !!! ERROR !!!\n");
-			printf("throw &Parse_error_val;\n");
-			break;
-		}
+		printf("if (numelts(children) > 0){\n");
+  	gen0(r2,grm);
+  	printf("}\n");
 		break;
 
 	case &Rcount(c, r2):

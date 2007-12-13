@@ -14,16 +14,20 @@
 #endif
 
 int main(int argc, const char ?`H?argv) {
-	printf("ABNF parsing stdin ... \n");
+	fprintf(stderr,"ABNF parsing stdin ... \n");
 
 	int c;
 	let b = Buffer::create(101);
 	while ( (c = fgetc(stdin)) != EOF)
 		Buffer::add_char(b, c);
 
-	int print_depth = 2;
+	int print_depth = 0;
+  int do_print = 0;
 	if (argc > 1){
-	  sscanf(argv[1],"%d",&print_depth);
+	  if (sscanf(argv[1],"%d",&print_depth))
+	  	do_print = 1;
+	  else
+	  	fprintf(stderr,"First argument not valid depth: %s.\n",argv[1]);
 	}
 
 #ifdef USE_COMPILED_DFA
@@ -48,20 +52,20 @@ int main(int argc, const char ?`H?argv) {
 	let input = Buffer::contents(b);
 	let $(trees, valid, valid_prefix) = EarleyBackend::parse(dfa_rep,input);
 	if (trees) {
-		printf("done -- is valid string :%d; is valid prefix: %d\n", valid,
+		fprintf(stderr,"done -- is valid string :%d; is valid prefix: %d\n", valid,
 				valid_prefix);
 		if (trees->tl) {
-			printf("Ambiguous parse.\n");
+			fprintf(stderr,"Ambiguous parse.\n");
 		} else {
-			EarleyBackend::print_tree(trees->hd->f0,print_depth);
-			printf("\nPerforming crawl.\n");			
+			if (do_print)
+				EarleyBackend::print_tree(trees->hd->f0,print_depth);
 			// "tree" encodes top-level regexp, but we want to crawl starting from symbol
 			// with regexp.
-			// TODO: generate function that represents the top-level regexp.
+			// TODO: generate function that crawls the top-level regexp.
 			let child_tree = trees->hd->f0->children[0];
 			CRAWLFUN(child_tree, input);
 		}
 
 	} else
-		printf("Parse failed. Valid prefix: %d\n", valid_prefix);
+		fprintf(stderr,"Parse failed. Valid prefix: %d\n", valid_prefix);
 }

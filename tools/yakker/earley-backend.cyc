@@ -268,6 +268,7 @@ push_closure(rstate_t rs,
   /* Close under CALLS. We don't use the weight here. */
   let t = DFA_TRANS(rs->dfa,s,callout_action()); 
   if (t != 0) {
+#if defined(NULL_PLAN_B) || defined(NULL_PLAN_C)  	
 		// Check for RETURN of nullable symbols
   	// TODO: do the same for REPEAT calls.
 		if (DFA_IS_FINAL(rs->dfa,t)) {
@@ -306,12 +307,14 @@ push_closure(rstate_t rs,
 				}
 			
 				// Sanity check:
+#ifdef NULL_PLAN_B
 				if (ttarget == 0 && starget == 0) {
 					fprintf(stderr,"Error: target for %d not found in call source state %d or target state %d.\n",symb_act,s,t);
 				} 
-
+#endif
 			}
 		}
+#endif
 		
 		push_closure(rs,input,i,new $(t,i),NULL,NULL
 				,forward,Semiring::one_weight //PROB
@@ -387,7 +390,9 @@ push_closure(rstate_t rs,
   		// TODO: commenting-out the following line is only a short-term solution to dealing with 
   		// nullable elements. It is inefficient -- we should look for another way to do
   		// this.
-  		// i != backptr && // we parsed the empty string, RETURN handled by dfa already
+#if defined(NULL_PLAN_A) || defined(NULL_PLAN_C)  		
+  		 i != backptr && // we parsed the empty string, RETURN handled by dfa already
+#endif
        DFA_IS_FINAL(rs->dfa,s)) {
     /* Some symbol is completed.
        es_back is the Earley state that CALLed the symbol. */
@@ -582,6 +587,7 @@ mk_parse_forest(rstate_t rs,
 
 ////////////////////////
 
+#define RESOLVE_AMBS
 
 // Reconstruct a parse tree. Throws Invalid_argument if earley graph is ambiguous 
 parse_tree_t
@@ -618,9 +624,14 @@ mk_parse_tree(rstate_t rs,
   while (maybe_links != NULL) {
   	let links = *maybe_links;
   	// Check for ambiguity.
-  	if (links->tl != NULL)
-  		throw new Core::Invalid_argument("Earley graph is ambiguous.");
-
+  	if (links->tl != NULL){
+#ifndef RESOLVE_AMBS 		
+  		throw new Core::Invalid_argument(aprintf("Earley graph is ambiguous for symbol %s at substring [%d,%d).",name,i,j));
+#else
+  		if (debug)
+  			fprintf(stderr,"Earley graph is ambiguous for symbol %s at substring [%d,%d). Choosing first derivation.\n",name,i,j);
+#endif
+  	}
     let &elink(pred_link, w, retn_link) = links->hd;
 
 		if (retn_link) {
@@ -676,6 +687,7 @@ parse(DFA_TY dfa, const char? input) {
 	
 	let t = DFA_GET_START(dfa);
 	let i = 0;
+#if defined(NULL_PLAN_B) || defined(NULL_PLAN_C)  	
 	/* Check for RETURN of nullable symbols */
 	if (DFA_IS_FINAL(rs->dfa,t)) {
 		let final_w = DFA_FINAL_WEIGHT(rs->dfa,t);
@@ -695,12 +707,15 @@ parse(DFA_TY dfa, const char? input) {
 						causal_node, causal_node
 						,w_m, w_m //PROB
 				);
-			} else {// Sanity check:
+			} 
+#ifdef NULL_PLAN_C
+			else {// Sanity check:
 				fprintf(stderr,"Error: target for %d not found in initial state.\n",symb_act);
 			} 
-
+#endif
 		}
 	}
+#endif
 
 	/* Scan the input */
 	let input_len = strlen(input);

@@ -26,6 +26,9 @@
 
 namespace Earley {
   
+	// Given a symbol name A, return corresponding "epsilon" version.
+  extern string_t eps_symb(string_t symb);
+
   typedef List::list_t<datatype ParseTree @`H,`H> parse_forest_t;
   typedef List::List_t<datatype ParseTree @`H,`H> Parse_forest_t;
 

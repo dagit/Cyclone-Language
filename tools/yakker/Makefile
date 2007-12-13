@@ -2,7 +2,18 @@ include ../../Makefile.inc
 
 # vpath %.o build
 
-CYCFLAGS=--novcgen
+# How to deal with nullable symbols:
+# Plan A: short circuit them and they are lost during reconstruction.
+# Use -DNULL_PLAN_A
+# Plan B: don't short circuit them. Instead, at beginning of DFA and at calls, 
+# check whether call target is a final state and do an immediate return, 
+# if so. RETURN closure is modified to allow returns on epsilon.
+# Use -DNULL_PLAN_B
+# Plan C: Short circuit nullable symbols by marking their start state as final 
+# *and*, at beginning of DFA and at calls, 
+# check whether call target is a final state and, if so, do an immediate return.
+# Use -DNULL_PLAN_C
+CYCFLAGS=--novcgen -DNULL_PLAN_B
 #CYCFLAGS=-g -save-c -pp
 YAKFLAGS=
 
@@ -44,6 +55,18 @@ PROG_PA=$(PROG)_a
 
 DEPENDS:=$(foreach file,$(FILES),build/$(file).d)
 
+#######################################
+## Earley-related variables
+#######################################
+EBE_FILES = analyze axarray cs bnf  semiring fa nfa_lazy nfa_eager \
+     lex pr prose prose_elim_grm string_dfa_engine1 \
+  string_dfa_engine2_1 corerules corerules_grm \
+  util namespaces
+
+EBE_CYC_FILES = $(EBE_FILES)  earley-backend-c
+EBE_DFA_FILES = $(EBE_FILES)  earley-backend-i
+  
+
 ###############################################################################
 # Targets
 ###############################################################################
@@ -77,197 +100,22 @@ indexer.o: indexer.cyc
 indexer.cyc: examples/indexer.yk $(PROG_DEP)
 	./yakker $(YAKFLAGS) -gen entry-list $< > $@
 
-abnf-echo.cyc: abnf-echo.bnf
-	./yakker -gen rulelist $< > $@
+include examples/abnf-echo.mk
 
 abnf-echo: abnf-echo.o bnf.o cs.o pr.o util.o ykbuf.o ssl.o
 	cyclone -o $@ $^  -lssl -lcrypto
 
-#######################################
-## Earley-related files
-#######################################
-EBE_FILES = analyze axarray cs bnf  semiring fa nfa_lazy nfa_eager \
-     lex parse_tab pr prose prose_elim_grm string_dfa_engine1 \
-  string_dfa_engine2_1 corerules corerules_grm \
-  util namespaces
-
-EBE_CYC_FILES = $(EBE_FILES)  earley-backend-c
-EBE_DFA_FILES = $(EBE_FILES)  earley-backend-i
-  
-AE_CYC_FILES = $(EBE_CYC_FILES) abnf-dfa parse-main-c
-AE_CYC_CR_FILES = $(EBE_CYC_FILES) abnf-flat-dfa aecrawl-cyc
-
-AE_DFA_FILES = $(EBE_DFA_FILES) earley parse-main-i
-AE_DFA_CR_FILES = $(EBE_DFA_FILES) earley aecrawl-dfa
-
-AE_CYC_OBJS:=$(foreach yfile,$(AE_CYC_FILES),$(yfile).o)
-AE_CYC_CR_OBJS:=$(foreach yfile,$(AE_CYC_CR_FILES),$(yfile).o)
-
-AE_DFA_OBJS:=$(foreach yfile,$(AE_DFA_FILES),$(yfile).o)
-AE_DFA_CR_OBJS:=$(foreach yfile,$(AE_DFA_CR_FILES),$(yfile).o)
-
-earley-backend-c.o: earley-backend.cyc
-	cyclone -o $@ -c -DUSE_COMPILED_DFA $< 
-
-earley-backend-i.o: earley-backend.o
-	cp $< $@
-
-parse-main-c.o: parse-main.cyc
-	cyclone -o $@ -c -DUSE_COMPILED_DFA $< 
-
-parse-main-i.o: parse-main.o
-	cp $< $@
-
-abnf-cyc-eb: $(AE_CYC_OBJS)
+abnf-echo-earley-cyc: $(AE_CYC_CR_OBJS)
 	cyclone -o $@ $^  -lssl -lm
 
-abnf-cyc-cr-eb: $(AE_CYC_CR_OBJS)
-	cyclone -o $@ $^  -lssl -lm
-
-abnf-dfa-eb: $(AE_DFA_OBJS)
+abnf-echo-earley-dfa: $(AE_DFA_CR_OBJS)
 	cyclone -o $@ $^ -lssl -lm
 
-abnf-dfa-cr-eb: $(AE_DFA_CR_OBJS)
-	cyclone -o $@ $^ -lssl -lm
-
-abnf-dfa.cyc: abnf-echo.bnf yakker
-	./yakker -earley-gen-cyc rulelist $< > $@
-
-abnf-flat-dfa.cyc: abnf-echo.bnf yakker
-	./yakker -flatten-full -earley-gen-cyc rulelist $< > $@
-
-abnf-dfa.txt: abnf-echo.bnf yakker
-	./yakker -earley-gen-fsm rulelist abnf-echo.bnf > $@
-
-abnf-flat-dfa.txt: abnf-echo.bnf yakker
+abnf-echo-dfa.txt: abnf-echo.bnf yakker
 	./yakker -flatten-full -earley-gen-fsm rulelist $< > $@
 
-abnf-flat-dfa.dot: abnf-echo.bnf yakker
-	./yakker -flatten-full -earley-gen-dot rulelist $< > $@
-
-testing/abnf-trunc-flat.bnf: testing/abnf-trunc.bnf yakker
-	./yakker -flatten-full $< > $@
-
-testing/abnf-flat.bnf: abnf-echo.bnf yakker
-	./yakker -flatten-full $< > $@
-
-#abnf-trunc-flat-dfa.txt: testing/abnf-trunc.bnf yakker
-#	./yakker -flatten-full -earley-gen-fsm rulelist $< > $@
-
-#abnf-trunc-flat-dfa.dot: testing/abnf-trunc.bnf yakker
-#	./yakker -flatten-full -earley-gen-dot rulelist $< > $@
-
-aecrawl-cyc.o: aecrawl.cyc
-	cyclone -o $@ -c -DUSE_COMPILED_DFA $<
-	
-aecrawl-dfa.o: aecrawl.o
-	cp $< $@
-
-aecrawl.cyc: abnf-echo.bnf yakker crawl-main.cyc
-	./yakker -flatten-full -gen-crawl rulelist $< > $@
-	echo '#define CRAWLFUN p_rulelist' >> $@
-	echo '#include "crawl-main.cyc"' >> $@
-
-CALC_CYC_FILES = $(EBE_CYC_FILES) calc-dfa parse-main-c
-CALC_CYC_CR_FILES = $(EBE_CYC_FILES) calc-flat-dfa calccrawl-cyc
-
-CALC_DFA_FILES = $(EBE_DFA_FILES) earley parse-main-i
-CALC_DFA_CR_FILES = $(EBE_DFA_FILES) earley calccrawl-dfa
-
-CALC_CYC_OBJS:=$(foreach yfile,$(CALC_CYC_FILES),$(yfile).o)
-CALC_CYC_CR_OBJS:=$(foreach yfile,$(CALC_CYC_CR_FILES),$(yfile).o)
-
-CALC_DFA_OBJS:=$(foreach yfile,$(CALC_DFA_FILES),$(yfile).o)
-CALC_DFA_CR_OBJS:=$(foreach yfile,$(CALC_DFA_CR_FILES),$(yfile).o)
-
-
-calc-cyc-eb: $(CALC_CYC_OBJS)
-	cyclone -o $@ $^  -lssl -lm
-
-calc-cyc-cr-eb: $(CALC_CYC_CR_OBJS)
-	cyclone -o $@ $^  -lssl -lm
-
-calc-dfa-eb: $(CALC_DFA_OBJS)
-	cyclone -o $@ $^ -lssl -lm
-
-calc-dfa-cr-eb: $(CALC_DFA_CR_OBJS)
-	cyclone -o $@ $^ -lssl -lm
-
-calc-dfa.cyc: examples/calc.bnf yakker
-	./yakker -earley-gen-cyc start $< > $@
-
-calc-flat-dfa.cyc: examples/calc.bnf yakker
-	./yakker -flatten-full -earley-gen-cyc start $< > $@
-
-calc-dfa.txt: examples/calc.bnf yakker
-	./yakker -earley-gen-fsm start examples/calc.bnf > $@
-
-calc-flat-dfa.txt: examples/calc.bnf yakker
-	./yakker -flatten-full -earley-gen-fsm start examples/calc.bnf > $@
-
-calccrawl-cyc.o: calccrawl.cyc
-	cyclone -o $@ -c -DUSE_COMPILED_DFA $<
-	
-calccrawl-dfa.o: calccrawl.o
-	cp $< $@
-
-calccrawl.cyc: examples/calc.bnf yakker crawl-main.cyc
-	./yakker -flatten-full -gen-crawl start $< > $@
-	echo '#define CRAWLFUN p_start' >> $@
-	echo '#include "crawl-main.cyc"' >> $@
-
-indexer_CYC_FILES = $(EBE_CYC_FILES) indexer-dfa parse-main-c
-indexer_CYC_CR_FILES = $(EBE_CYC_FILES) indexer-flat-dfa indexer-crawl-cyc
-
-indexer_DFA_FILES = $(EBE_DFA_FILES) earley parse-main-i
-indexer_DFA_CR_FILES = $(EBE_DFA_FILES) earley indexer-crawl-dfa
-
-indexer_CYC_OBJS:=$(foreach yfile,$(indexer_CYC_FILES),$(yfile).o)
-indexer_CYC_CR_OBJS:=$(foreach yfile,$(indexer_CYC_CR_FILES),$(yfile).o)
-
-indexer_DFA_OBJS:=$(foreach yfile,$(indexer_DFA_FILES),$(yfile).o)
-indexer_DFA_CR_OBJS:=$(foreach yfile,$(indexer_DFA_CR_FILES),$(yfile).o)
-
-indexer_BNF = examples/indexer.yk
-# Start symbol
-indexer_START = entry-list
-# Function corresponding to start symbol
-indexer_START_F = entry-list
-
-indexer-cyc-eb: $(indexer_CYC_OBJS)
-	cyclone -o $@ $^  -lssl -lm
-
-indexer-cyc-cr-eb: $(indexer_CYC_CR_OBJS)
-	cyclone -o $@ $^  -lssl -lm
-
-indexer-dfa-eb: $(indexer_DFA_OBJS)
-	cyclone -o $@ $^ -lssl -lm
-
-indexer-dfa-cr-eb: $(indexer_DFA_CR_OBJS)
-	cyclone -o $@ $^ -lssl -lm
-
-indexer-dfa.cyc: $(indexer_BNF) yakker
-	./yakker -earley-gen-cyc $(indexer_START) $< > $@
-
-indexer-flat-dfa.cyc: $(indexer_BNF) yakker
-	./yakker -flatten-full -earley-gen-cyc $(indexer_START) $< > $@
-
-indexer-dfa.txt: $(indexer_BNF) yakker
-	./yakker -earley-gen-fsm $(indexer_START) $(indexer_BNF) > $@
-
-indexer-flat-dfa.txt: $(indexer_BNF) yakker
-	./yakker -flatten-full -earley-gen-fsm $(indexer_START) $(indexer_BNF) > $@
-
-indexercrawl-cyc.o: indexercrawl.cyc
-	cyclone -o $@ -c -DUSE_COMPILED_DFA $<
-	
-indexercrawl-dfa.o: indexercrawl.o
-	cp $< $@
-
-indexercrawl.cyc: $(indexer_BNF) yakker crawl-main.cyc
-	./yakker -flatten-full -gen-crawl $(indexer_START) $< > $@
-	echo '#define CRAWLFUN' $(indexer_START_F) >> $@
-	echo '#include "crawl-main.cyc"' >> $@
+include examples/calc.mk
+include examples/indexer.mk
 
 #####################################
 

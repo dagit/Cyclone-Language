@@ -23,6 +23,9 @@ using Semiring;
 
 namespace Earley;
 
+string_t eps_symb(string_t symb){
+	return aprintf("__EPSILON-%s",symb);
+}
 
 /* Global variable that saves last derivation tree.*/
 datatype ParseTree *last_derivation_tree = NULL;
@@ -639,7 +642,13 @@ st_t rule2wfsm0(FILE@f_fsm, Hashtable::table_t<str_t,st_t> symb_st,
       let s = nfa_fresh_state(); let f = nfa_fresh_state(); final(s,f);
       Hashtable::insert(symb_st,xptr,s);
       let $(s_body,f_body,e_body) = merge_wfsm(f_fsm,symb_st,grm,x_rule,symb_info);
-      final_fsm(f_fsm, s, e_body,x); // merge_wfsm does not do this
+      if (empty_rule(SYMB(x))){
+#ifdef NULL_PLAN_B      	
+      	final_fsm(f_fsm, s, e_body,x); // merge_wfsm does not do this
+#elif defined(NULL_PLAN_C)
+      	final_fsm(f_fsm, s, s,eps_symb(x));
+#endif
+      }
       final_fsm(f_fsm, s, f_body,x); // merge_wfsm does not do this
       etrans_fsm(f_fsm, s,s_body,Semiring::one_weight);
       x_start = s;
@@ -651,7 +660,18 @@ st_t rule2wfsm0(FILE@f_fsm, Hashtable::table_t<str_t,st_t> symb_st,
     // CALLS get zero b/c, in essence, they are *never*
     // traversed. They are just stand-ins for the real traversal on
     // the symbol.
-//    if (empty_rule(SYMB(x))){
+#ifdef NULL_PLAN_A
+    if (empty_rule(SYMB(x))){
+    /* If the symbol can derive the empty string make sure this gets
+       reflected into the automaton --- effectively doing a RETURN in
+       the automaton instead of the Earley evaluator itself */
+      single_action_fsm(f_fsm, s,callout_action(),"CALL",x_start, Semiring::zero_weight);
+      etrans_fsm(f_fsm, s, s2,Semiring::one_weight);
+      etrans_fsm(f_fsm, s2,f,Semiring::from_inv_prob(2));
+      single_action_fsm(f_fsm, s2,symb2act(x,symb_info),x,f,Semiring::from_inv_prob(2));
+    } else 
+#elif defined(NULL_PLAN_C)
+    if (empty_rule(SYMB(x))){
 //    /* If the symbol can derive the empty string make sure this gets
 //       reflected into the automaton --- effectively doing a RETURN in
 //       the automaton instead of the Earley evaluator itself */
@@ -659,7 +679,22 @@ st_t rule2wfsm0(FILE@f_fsm, Hashtable::table_t<str_t,st_t> symb_st,
 //      etrans_fsm(f_fsm, s, s2,Semiring::one_weight);
 //      etrans_fsm(f_fsm, s2,f,Semiring::from_inv_prob(2));
 //      single_action_fsm(f_fsm, s2,symb2act(x,symb_info),x,f,Semiring::from_inv_prob(2));
-//    } else 
+      /* If the symbol can derive the empty string make sure this gets
+         reflected into the automaton */
+      let s3 = nfa_fresh_state();
+
+			single_action_fsm(f_fsm, s, callout_action(), "CALL", x_start,
+					Semiring::zero_weight);
+			etrans_fsm(f_fsm, s, s2, Semiring::one_weight);
+
+			single_action_fsm(f_fsm, s2, symb2act(x, symb_info), x, f,
+					Semiring::from_inv_prob(2));
+			etrans_fsm(f_fsm, s2, s3, Semiring::from_inv_prob(2));
+
+			single_action_fsm(f_fsm, s3, symb2act(eps_symb(x), symb_info), eps_symb(x), f, 
+					Semiring::one_weight);
+    } else 
+#endif    	
     {
       single_action_fsm(f_fsm, s,callout_action(),"CALL",x_start, Semiring::zero_weight);
       etrans_fsm(f_fsm, s,s2,                   Semiring::one_weight);
@@ -811,7 +846,13 @@ $(st_t,st_t,st_t)
       let $(s_body,f_body,e_body) = merge_wfsm(f_fsm,symb_st,grm,x_rule,symb_info);
       // 1. need e_body too??? Yes, in case symb is nullable.      
       // 2. only marked final in FSM because this is a symbol.
-      final_fsm(f_fsm, s, e_body, x); // merge_wfsm does not do this
+      if (empty_rule(SYMB(x))){
+#ifdef NULL_PLAN_B      	
+      	final_fsm(f_fsm, s, e_body,x); // merge_wfsm does not do this
+#elif defined(NULL_PLAN_C)
+      	final_fsm(f_fsm, s, s,eps_symb(x));
+#endif
+      }
       final_fsm(f_fsm, s, f_body, x); // merge_wfsm does not do this
       etrans_fsm(f_fsm, s,s_body,Semiring::one_weight);
       x_start = s;
@@ -820,16 +861,46 @@ $(st_t,st_t,st_t)
     let e = nfa_fresh_state();
     let f = nfa_fresh_state();
 
-//    if (empty_rule(SYMB(x))){
-//    /* If the symbol can derive the empty string make sure this gets
-//       reflected into the automaton --- effectively doing a RETURN in
-//       the automaton instead of the Earley evaluator itself */
-//      let s2 = nfa_fresh_state();
-//      action_fsm(f_fsm, s,EPSILON,x_start, Semiring::one_weight);
-//      etrans_fsm(f_fsm, s, s2,Semiring::one_weight);
-//      etrans_fsm(f_fsm, s2,e,Semiring::from_inv_prob(2));
-//      single_action_fsm(f_fsm, s2,symb2act(x,symb_info),x,f,Semiring::from_inv_prob(2));
-//    } else 
+#ifdef NULL_PLAN_A  
+    if (empty_rule(SYMB(x))){
+    /* If the symbol can derive the empty string make sure this gets
+			 reflected into the automaton --- effectively doing a RETURN in
+			 the automaton instead of the Earley evaluator itself */
+			let s2 = nfa_fresh_state();
+			action_fsm(f_fsm, s,EPSILON,x_start, Semiring::one_weight);
+			etrans_fsm(f_fsm, s, s2,Semiring::one_weight);
+			etrans_fsm(f_fsm, s2,e,Semiring::from_inv_prob(2));
+			single_action_fsm(f_fsm, s2,symb2act(x,symb_info),x,f,Semiring::from_inv_prob(2));
+    } else 
+#elif defined(NULL_PLAN_C)
+    if (empty_rule(SYMB(x))){
+    	//    /* If the symbol can derive the empty string make sure this gets
+    	//       reflected into the automaton --- effectively doing a RETURN in
+    	//       the automaton instead of the Earley evaluator itself */
+    	//      let s2 = nfa_fresh_state();
+    	//      action_fsm(f_fsm, s,EPSILON,x_start, Semiring::one_weight);
+    	//      etrans_fsm(f_fsm, s, s2,Semiring::one_weight);
+    	//      etrans_fsm(f_fsm, s2,e,Semiring::from_inv_prob(2));
+    	//      single_action_fsm(f_fsm, s2,symb2act(x,symb_info),x,f,Semiring::from_inv_prob(2));
+    /* If the symbol can derive the empty string make sure this gets
+       reflected into the automaton. */
+      let s2 = nfa_fresh_state();
+      let s3 = nfa_fresh_state();
+      
+      action_fsm(f_fsm, s,EPSILON,x_start, 
+      		Semiring::one_weight);
+      etrans_fsm(f_fsm, s, s2,
+      		Semiring::one_weight);
+
+      single_action_fsm(f_fsm, s2, symb2act(x,symb_info), x, f, 
+      		Semiring::from_inv_prob(2));
+      etrans_fsm(f_fsm,        s2, s3, 
+      		Semiring::from_inv_prob(2));
+
+      single_action_fsm(f_fsm, s3, symb2act(eps_symb(x),symb_info), eps_symb(x), e, 
+      		Semiring::one_weight);
+    } else 
+#endif    	
     {
       etrans_fsm(f_fsm, s,x_start,Semiring::one_weight);
       single_action_fsm(f_fsm, s,symb2act(x,symb_info),x,f,Semiring::one_weight);

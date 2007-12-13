@@ -1,0 +1,212 @@
+{
+/*
+Bootstrapping ABNF parser.  Started with RFC4234 and modified.
+
+Still missing from parse.y:
+  directives WS_ON WS_OFF RE_ON RE_OFF.
+  PARAMS @() in RHS.
+  PRED @when() in RHS.
+  Other kinds of definitions:
+    DEF         = or := 
+    DEF_WS      .= 
+    DEF_RE      @= 
+    DEF_WSRE    .@= 
+
+  Textblobs are handled differently.
+
+Known deficiencies:
+
+  There are places where abnf-echo.bnf requires spaces that parse.y does not,
+  e.g.,
+
+    a = b$x{foo();}
+
+  fails between the x and the left brace.  Need context-sensitive whitespace to
+  fix this.
+
+Misc. notes:
+
+  Old MINUS needs parens.
+  Old semantic action cannot appear at beginning of rule.
+    New semantic action can -- equivalent to old "" {}.
+    Maybe make it a rule_t?
+  Can't do:
+    (a|b)$x { ... x ... }
+  when a and b have semantic values, have to do
+    (a$x { ... x ... }|b$x { ... x ... })
+  instead.
+  Maybe should eliminate $$.
+
+Notes on RFC4234:
+  Does not define HASH #.
+  Does not allow spaces between the numbers
+    for repeat: "1*3a" works, but "1 *3a," "1* 3a," and "1*3 a" do not.
+  Uses *c-wsp to consume whitespace, but that must end in a SP
+  or HTAB, so that
+
+  a
+  = b
+
+  fails, but
+
+  a
+   = b
+
+  succeeds.
+
+*/
+#include "bnf.h"
+#include "pr.h"
+List::list_t<const char ?@> textblobs = NULL;
+void add_textblob(const char ?`H b) {
+  textblobs = new List::List(new b,textblobs);
+}
+unsigned int htoi(char ?s) {
+  unsigned long int x =
+    strtoul(s,NULL,16);
+  return x;
+}
+unsigned int btoi(char ?s) {
+  unsigned long int x =
+    strtoul(s,NULL,2);
+  return x;
+}
+rule_t bindit(const char ?x,const char?init, rule_t r) {
+  let init_rule = LIT("");
+  init_rule->a = aprintf("%s = %s;",x,init);
+  let r = SEQ(init_rule,r);
+  r->v = strconcat("$",x);
+  return r;
+}
+
+}
+
+BACKSLASH = "\".
+string = DQUOTE *inside-string DQUOTE.
+
+inside-string
+ = BACKSLASH DQUOTE
+ | BACKSLASH BACKSLASH
+ | BACKSLASH ((OCTET - BACKSLASH) - DQUOTE)
+ | ((OCTET - BACKSLASH) - DQUOTE).
+
+parens = "(" *inside ")".
+braces = "{" *inside "}".
+inside
+ = parens
+ | string
+ | braces
+ | (((((OCTET - "(") - ")") - "{") - "}") - DQUOTE).
+
+ALPHA = %d65-90|%d97-122.
+BIT = "0"|"1".
+CR = %d13.
+CRLF = CR LF.
+DIGIT = %d48-57.
+DQUOTE = %d34.
+HEXDIG = DIGIT|"A"|"B"|"C"|"D"|"E"|"F".
+HTAB = %d9.
+LF = %d10.
+SP = %d32.
+VCHAR = %d33-126.
+WSP = SP|HTAB.
+ID = (ALPHA|"_") *(ALPHA|DIGIT|"_").
+alternation$(rule_t)
+  = concatenation$x [*c-wsp infix-op-stuff$y {
+    let $(op,r) = y;
+    switch(op) {
+    case 0: return ALT(x,r);
+    default: return MINUS(x,r); // BUG: should be right associative
+    }
+  }] {return x;}.
+infix-op-stuff$($(int,rule_t))
+  = "/" *c-wsp alternation$x {return $(0,x);}
+  | "|" *c-wsp alternation$x {return $(0,x);}
+  | " - " *c-wsp alternation$x {return $(1,x);}
+ .
+bin-val$(rule_t)
+  = "b" (1*BIT)$x
+    (*("." (1*BIT)$y {r = ALT(CHARRANGE(atoi(y),atoi(y)));}))$$r={CHARRANGE(btoi(x),btoi(x))}
+  {return r;}
+  | "b" (1*BIT)$x "-" (1*BIT)$y {return CHARRANGE(btoi(x),btoi(y));}.
+c-nl = comment|LF|CR.
+c-wsp = WSP|(c-nl WSP).
+char-line = %d13 %d10 %d32-126 %d13 %d10.
+char-val$(rule_t)
+  = DQUOTE (*(%d32-33|%d35-126))$x DQUOTE {return LIT(x);}
+  | "<" DQUOTE ">" {return LIT("\"");}.
+comment = ";" *(WSP|VCHAR) (LF|CR).
+concatenation$(rule_t)
+  = binding$x
+    *(1*c-wsp binding$y {r = SEQ(r,y);})$$r={x} {return r;}.
+dec-val$(rule_t)
+  = "d" (1*DIGIT)$x
+    (*("." (1*DIGIT)$y {r = ALT(CHARRANGE(atoi(y),atoi(y)));}))$$r={CHARRANGE(atoi(x),atoi(x))}
+    {return r;}
+  | "d" (1*DIGIT)$x "-" (1*DIGIT)$y {return CHARRANGE(atoi(x),atoi(y));}.
+defined-as = ("="|"=/").
+element$(rule_t)
+  = rulename$x {return SYMB(x);}
+  |group$x {return x;}
+  |option$x {return x;}
+  |char-val$x {return x;}
+  |num-val$x {return x;}
+  |prose-val$x {return x;}
+  |"{" (*inside)$x "}" {let r = LIT(""); r->a = x; return r;}.
+elements$(rule_t) = alternation$x *c-wsp {return x;}.
+group$(rule_t)
+  = "(" *c-wsp alternation$x *c-wsp ")" {return x;}.
+hex-val$(rule_t)
+  = "x" (1*HEXDIG)$x
+   (*("." (1*HEXDIG)$y {r = ALT(CHARRANGE(htoi(y),htoi(y)));}))$$r={CHARRANGE(htoi(x),htoi(x))}
+   {return r;}
+  | "x" (1*HEXDIG)$x "-" (1*HEXDIG)$y {return CHARRANGE(htoi(x),htoi(y));} .
+num-val$(rule_t) = "%" (bin-val$x {return x;}|dec-val$x {return x;}|hex-val$x {return x;}).
+option$(rule_t) = "[" *c-wsp alternation$x *c-wsp "]" {return OPT(x);}.
+inside-prose = %d32-61|%d63-126 .
+prose-val$(rule_t) = "<" [(inside-prose - DQUOTE) *inside-prose]$x ">" {return PROSE(x);}.
+repeat$($(int, unsigned int, repeat_t))
+  = (1*DIGIT)$x {return $(0,atoi(x),new Infinity);}
+  |(*DIGIT$x ("*"|"#")$z *DIGIT$y)
+   { let xlen = strlen(x); let ylen = strlen(y);
+     unsigned int xval = 0;
+     if (xlen > 0) xval = atoi(x);
+     repeat_t yval = new Infinity;
+     if (ylen > 0) yval = new Num(atoi(y));
+     let star_or_hash = 1;
+     if (!strcmp("*",z)) star_or_hash = 0;
+     return $(star_or_hash,xval,yval);}.
+binding$(rule_t)
+  = repetition$x
+    [("$" ID$y { x->v = y; return x; }
+     | "$$" ID$y ["={" *inside$z "}" {return bindit(y,z,x);}]
+       {return bindit(y,"NULL",x);}
+    )]
+    {return x;}.
+repetition$(rule_t)
+  = "" { int with_repeat = -1; unsigned int m = 0; repeat_t n = new Infinity; }
+  [repeat$x { with_repeat = x.f0; m = x.f1; n = x.f2; } ]
+  element$y {if (with_repeat == -1) return y;
+             else if (with_repeat == 0) return STAR(m,n,y);
+             else return HASH(m,n,y);}
+  | "@repeat(" *inside$x ")" *c-wsp element$y {return RCOUNT(x,y);}.
+rule$(definition_t)
+  = rulename$x typestuff$y *c-wsp defined-as *c-wsp elements$z
+    ["." *c-wsp [ "{" *inside$w "}" {add_textblob(w);} ] ] c-nl
+  {let &$(ptype,rtype) = y;
+   return new $((const char ?)x,z,Attr(0,0,ptype,rtype));}.
+typestuff$($(const char ?`H,const char ?`H)@)
+  = "" {return new $(NULL,NULL);}
+  | "$" parens$x typestuff$y {y->f1 = x; return y;}
+  | "@" parens$x typestuff$y {y->f0 = x; return y;}.
+rulelist$(grammar_t)
+  = 1*(*c-wsp (rule$x {l=new List::List(x,l);}
+              | c-nl
+              |"{" *inside$x "}" {add_textblob(x);}))$$l={NULL}
+    { l = List::imp_rev(l);
+      pr_definitions(stdout,l);
+      return l;}.
+rulename = ALPHA *(ALPHA|DIGIT|"-"|":").
+{
+grammar_t parse_string(char ?s) {return NULL;}
+}
