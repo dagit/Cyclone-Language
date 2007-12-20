@@ -32,6 +32,8 @@ typedef unsigned int act_t;
 extern int uint_cmp(unsigned int a, unsigned int b);
 extern int st_hash(st_t a);
 extern int st_cmp(st_t a,st_t b);
+extern int act_hash(act_t a);
+extern int act_cmp(act_t a,act_t b);
 
 extern st_t nfa_number_of_states;
 

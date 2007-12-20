@@ -1,5 +1,11 @@
 #ifndef DFA_FSM_H_
 #define DFA_FSM_H_
+#include <core.h>
+#include "fa.h"
+
+extern act_t grm_get_symb_action(EarleyFsmBackend::DFA::grammar_edfa_t dfa, string_t<`H> symb);
+extern st_t grm_get_symb_start(EarleyFsmBackend::DFA::grammar_edfa_t dfa, act_t symb_act);
+extern unsigned int grm_get_num_states(EarleyFsmBackend::DFA::grammar_edfa_t dfa);
 
 #define DFA_TRANS(dfa,s,a) (target(dfa->d,s,a))
 #define DFA_TRANS_W(dfa,s,a) (target_w_weight(dfa->d,s,a))
@@ -11,18 +17,6 @@
 	construct_repeat_dfa(dfa->d,nt,repeat_decr_action(),nt_start,\
 					                  repeat_final_action(), nt_final)
 #define DFA_FINAL_WEIGHT(dfa,f) dfa_final_weight(dfa->d,f)
-static att_t ?`H wrap_final_attrs(dfa_t dfa,st_t s) {
-	try {
-		let fs_set = dfa_final_attrs(dfa,s);
-		if (Set::is_empty(fs_set))
-				return new {};
-		return List::to_array(Set::to_list(fs_set));
-	} catch
-	{
-		case &Core::Not_found:
-		return NULL;
-	}
-}
 // XXX: find more efficient way to get array.
 #define DFA_FINAL_ATTRS(dfa,f) wrap_final_attrs(dfa->d,f) 
 #define DFA_GET_START(dfa) dfa->start

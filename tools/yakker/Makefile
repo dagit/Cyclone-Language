@@ -69,18 +69,21 @@ endef
 EBE_FILES = analyze axarray cs bnf  semiring fa nfa_lazy nfa_eager \
      lex pr prose prose_elim_grm string_dfa_engine1 \
   string_dfa_engine2_1 corerules corerules_grm \
-  util namespaces
+  util namespaces earley earley-parsetree
 
-EBE_CYC_FILES = $(EBE_FILES)  earley-backend-c
+EBE_OBJS := $(foreach file,$(EBE_FILES),$(file).o) 
+
+EBE_CYC_FILES = earley-backend-c
 EBE_CYC_OBJS := $(foreach file,$(EBE_CYC_FILES),$(file).o) 
-EBE_DFA_FILES = $(EBE_FILES)  earley-backend-i
+EBE_DFA_FILES = earley-backend-i
+EBE_DFA_OBJS := $(foreach file,$(EBE_DFA_FILES),$(file).o) 
 
 #######################################
 ## libyakker-related variables
 #######################################
 
 LIB_YAKKER_FILES = ykbuf ssl
-LIB_YAKKER_OBJS := $(EBE_CYC_OBJS) $(foreach file,$(LIB_YAKKER_FILES),$(file).o)
+LIB_YAKKER_OBJS := $(EBE_OBJS) $(EBE_CYC_OBJS) $(EBE_DFA_OBJS) $(foreach file,$(LIB_YAKKER_FILES),$(file).o)
 
 ###############################################################################
 # Targets
@@ -122,39 +125,34 @@ $(LIB_YAKKER) : $(LIB_YAKKER_OBJS)
 	$(ARCHIVE)
     
 earley-backend-c.o: earley-backend.cyc
-	cyclone $(CYCFLAGS) -o $@ -c -DUSE_COMPILED_DFA $< 
+	$(CYCLONE) $(CYCFLAGS) -o $@ -c -DUSE_COMPILED_DFA $< 
 
 earley-backend-i.o: earley-backend.cyc
-	cyclone $(CYCFLAGS) -o $@ -c -DUSE_FSM_DFA $< 
+	$(CYCLONE) $(CYCFLAGS) -o $@ -c -DUSE_FSM_DFA $< 
 
-parse-main-c.o: parse-main.cyc
-	cyclone $(CYCFLAGS) -o $@ -c -DUSE_COMPILED_DFA $< 
+ext-dfa-c.o: ext-dfa.cyc
+	$(CYCLONE) $(CYCFLAGS) -o $@ -c -DUSE_COMPILED_DFA $< 
 
-parse-main-i.o: parse-main.cyc
-	cyclone $(CYCFLAGS) -o $@ -c -DUSE_FSM_DFA $< 
+ext-dfa-i.o: ext-dfa.cyc
+	$(CYCLONE) $(CYCFLAGS) -o $@ -c -DUSE_FSM_DFA $< 
 
 include examples/abnf-echo.mk
 
 abnf-echo: abnf-echo.o $(LIB_YAKKER)
-	cyclone -o $@ $^  -lssl -lcrypto
+	$(CYCLONE) -o $@ $^  -lssl -lcrypto
 
 #abnf-echo: abnf-echo.o bnf.o cs.o pr.o util.o ykbuf.o ssl.o
-#	cyclone -o $@ $^  -lssl -lcrypto
+#	$(CYCLONE) -o $@ $^  -lssl -lcrypto
 
-#abnf-echo-earley-cyc: $(AE_CYC_CR_OBJS) $(EBE_CYC_OBJS)
-#	cyclone -o $@ $(AE_CYC_CR_OBJS) $(EBE_CYC_OBJS) -lssl -lm -L. -lebe_c
-	
-abnf-echo-earley-cyc: $(AE_CYC_CR_OBJS) $(LIB_YAKKER)
-	cyclone -o $@ $(AE_CYC_CR_OBJS) -lssl -lm $(LIB_YAKKER)
-
-abnf-echo-earley-dfa: $(AE_DFA_CR_OBJS)
-	cyclone -o $@ $^ -lssl -lm
+abnf-echo-earley: $(AE_CR_OBJS) $(LIB_YAKKER)
+	$(CYCLONE) -o $@ $(AE_CR_OBJS) -lssl -lm $(LIB_YAKKER)
 
 abnf-echo-dfa.txt: examples/abnf-echo.bnf yakker
 	./yakker -flatten-full -earley-gen-fsm rulelist $< > $@
 
-include examples/calc.mk
-include examples/indexer.mk
+# Broken: need to be fixed:
+#include examples/calc.mk
+#include examples/indexer.mk
 
 #####################################
 
@@ -460,14 +458,23 @@ clean:
 	$(RM) imap.bnf imap.h imap.cyc rfc3501.bnf rfc2234.bnf rfc3501.txt rfc2234.txt
 	$(RM) imap_genpm.cyc 
 	$(RM) small_imap.h small_imap.cyc small_imap_genpm.h small_imap_genpm.cyc
+	$(RM) imap.h imap.cyc imap_genpm.h imap_genpm.cyc
+	$(RM) indexer.h indexer.cyc indexer_genpm.h indexer_genpm.cyc
 	$(RM) string_dfa_engine1.*
 	$(RM) string_dfa_engine2_1.*
 	$(RM) prose_elim_grammar.cyc
 	$(RM) prose_elim_grm.cyc corerules_grm.cyc
 	$(RM) indexer indexer.cyc 1rfc_index 1rfc_index.txt
+	$(RM) c_echop echop
 	$(RM) wf wf.cyc
 	$(RM) http.cyc
 	$(RM) abnf-echo abnf-echo.cyc abnf-echo-dfa.cyc
+	$(RM) abnf-cyc-cr-eb abnf-cyc-eb abnf-dfa-cr-eb abnf-dfa-eb abnf-dfa.cyc
+	$(RM) abnf-dfa.txt abnf-echo-crawl.cyc abnf-echo-dfa.dot abnf-echo-earley-cyc abnf-echo-earley-dfa
+	$(RM) abnf-flat-dfa.cyc abnf-flat-dfa.dot abnf-flat-dfa.txt abnf-flat.bnf
+	$(RM) aecrawl-cyc.c aecrawl-cyc.cyc
+	$(RM) calc-cyc-cr-eb calc-cyc-eb calc-dfa-cr-eb calc-dfa-eb calc-dfa.cyc calc-dfa.dot
+	$(RM) calc-dfa.txt calc-flat-dfa.cyc calc-flat-dfa.dot calc-flat-dfa.txt calc.cyc calc.dot calc.txt
 	$(RM) imapp imapcl imapp.key imapp.cert
 	$(RM) markdown.cyc markdown
 	$(RM) $(GENDIR)/*

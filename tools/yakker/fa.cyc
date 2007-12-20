@@ -46,6 +46,11 @@ int st_cmp(st_t a,st_t b) {
 }
 st_t nfa_number_of_states = 1;
 
+int act_hash(act_t a) { return (int)a; }
+int act_cmp(act_t a,act_t b) {
+  if (a == b) return 0; else if (a<b) return -1; else return 1;
+}
+
 int use_lazy_nfa = 1;
 
 void nfa_init(grammar_t grm) {

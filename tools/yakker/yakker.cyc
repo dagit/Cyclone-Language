@@ -840,7 +840,7 @@ int main(int argc, const char ?`H?argv) {
 				if (f) {
 					fprintf(f,
 							"#include \"semiring.h\"\n\n"
-							"namespace DFACyc;\n\n"
+                                            "namespace CycDFA;\n\n"
 							"typedef unsigned int act_t;\n"
 							"typedef unsigned int st_t;\n");
 					Earley::act2symb_cyclone(f,*p_symb_info);

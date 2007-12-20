@@ -16,6 +16,7 @@
  write to the Free Software Foundation, Inc., 59 Temple Place -
  Suite 330, Boston, MA 02111-1307, USA. */
 
+#include <core.h>
 #include <string.h>
 #include <stdio.h>
 #include <buffer.h>
@@ -31,6 +32,7 @@
 
 namespace Crawlergen;
 
+//string_t earley_backend_ns;
 int print_main = 0;
 int print_globals = 1;
 int local_lookahead = 0;
@@ -43,8 +45,18 @@ int gen_fun_table = 0; // off by default
  parse tree and call semantic actions as if the parse had just
  occured.
  */
+
+//static void set_earleyns(earley_backend_t n){
+//  switch(n){
+//  case 0: earley_backend_ns= "EarleyCycBackend"; break;
+//  case 1: earley_backend_ns = "EarleyFsmBackend"; break;
+////  case 2: earley_backend_ns = "EarleyExtBackend"; break;
+//  default: raise new Core::Invalid_argument(aprintf("Invalid earley-backend namespace specified: %d.",n));
+//  }
+//}
+
 static const char ?p_id(const char ?`H n) {
-	return aprintf("p_%s",make_c_identifier0(n));
+  return aprintf("p_%s",make_c_identifier0(n));
 }
 static int scope = 0;
 
@@ -60,234 +72,234 @@ namespace Amb {
 // the current nonterm name.
 static
 void gen0(rule_t r, grammar_t grm) {
-	if (r->v) {
-		if ('$' == r->v[0]) {
-			printf("let %s;", r->v + 1);
-		} else {
-			switch (r->r) {
-			case &Symb(x, y):
-				if (Set::member(semvalue_symbs, new x)) {
-					printf("let %s = ", r->v);
-					break;
-				} else
-					fallthru;
-			default:
-				break;
-			}
-		}
-	}
+  if (r->v) {
+    if ('$' == r->v[0]) {
+      printf("let %s;", r->v + 1);
+    } else {
+      switch (r->r) {
+      case &Symb(x, y):
+        if (Set::member(semvalue_symbs, new x)) {
+          printf("let %s = ", r->v);
+          break;
+        } else
+          fallthru;
+      default:
+        break;
+      }
+    }
+  }
 
-	switch (r->r) {
-	case &Symb(x, y):
-		// If symbol is nullable, then need to check whether the current child is
-		// corresponds to this symbol.
-		//     if (empty_rule(r)){
-		//       printf("{  let result;\n"); 
-		//       printf("   let child_name;\n"); 
-		//       printf("   switch (children->hd) {\n"); 
-		//       printf("   case &EarleyBackend::NonTerm(name,_,_,_,_):\n"
-		// 	     "   fallthru(name);\n"); 
-		//       printf("   case &EarleyBackend::SharedNonTerm(name,_,_,_,_):\n"); 
-		//       printf("     child_name=name; break;\n"); 
-		//       printf("   }\n");
+  switch (r->r) {
+  case &Symb(x, y):
+    // If symbol is nullable, then need to check whether the current child is
+    // corresponds to this symbol.
+    //     if (empty_rule(r)){
+    //       printf("{  let result;\n"); 
+    //       printf("   let child_name;\n"); 
+    //       printf("   switch (children->hd) {\n"); 
+    //       printf("   case &EarleyParsetree::NonTerm(name,_,_,_,_):\n"
+    //        "   fallthru(name);\n"); 
+    //       printf("   case &EarleyParsetree::SharedNonTerm(name,_,_,_,_):\n"); 
+    //       printf("     child_name=name; break;\n"); 
+    //       printf("   }\n");
 
-		//       printf("if ( !strcmp(child_name,\"%s\") )\n{", x);
-		//       printf("   result = %s(children->hd,ykinput%s%s);\n",
-		// 	     p_id(x),
-		// 	     (y?",":""),
-		// 	     y);
-		//       printf("   children = children->tl;\n");
-		//       printf("}\n");
-		//     } else 
+    //       printf("if ( !strcmp(child_name,\"%s\") )\n{", x);
+    //       printf("   result = %s(children->hd,ykinput%s%s);\n",
+    //        p_id(x),
+    //        (y?",":""),
+    //        y);
+    //       printf("   children = children->tl;\n");
+    //       printf("}\n");
+    //     } else 
 
-	  // Check whether its a "real" symbol, or a flattened one.
-		if (Flatten::is_flattened_symb(x)) {
-			let r_opt = lookup_symbol(grm, x);
-			if (!r_opt)
-				internal_err("Missing definition of symbol %s.\n", x);
-			else {
-				// inline code for r
-				printf("switch (children->hd) {\n"
-					"case &EarleyBackend::NonTerm(name,i,j,w,children):\n");
-				gen0(r_opt, grm);
-				printf("break;\n"
-					"case &EarleyBackend::SharedNonTerm(name,i,j,w,children_list):\n"
-					"throw &Parse_error_val;\n"
-					"}\n");
-			}
-		} else {
-			printf("%s(children->hd,ykinput%s%s);\n", p_id(x), (y ? "," : ""), y);
-		}
-  	printf("children = children->tl;\n");
-		break;
-	case &Lit(_):
-	case &CharRange(_, _):
-		// do nothing. literals don't show up in parse tree.
-		break;
-	case &Prose(x):
-		internal_err("Prose in gen0: <%s>\n", x);
-		break;
-	case &Minus(_, _):
-		internal_err("Minus in gen0\n");
-		break;
+    // Check whether its a "real" symbol, or a flattened one.
+    if (Flatten::is_flattened_symb(x)) {
+      let r_opt = lookup_symbol(grm, x);
+      if (!r_opt)
+        internal_err("Missing definition of symbol %s.\n", x);
+      else {
+        // inline code for r
+        printf("switch (children->hd) {\n"
+          "case &EarleyParsetree::NonTerm(name,i,j,w,children):\n");
+        gen0(r_opt, grm);
+        printf("break;\n"
+          "case &EarleyParsetree::SharedNonTerm(name,i,j,w,children_list):\n"
+          "throw &Parse_error_val;\n"
+          "}\n");
+      }
+    } else {
+      printf("%s(children->hd,ykinput%s%s);\n", p_id(x), (y ? "," : ""), y);
+    }
+    printf("children = children->tl;\n");
+    break;
+  case &Lit(_):
+  case &CharRange(_, _):
+    // do nothing. literals don't show up in parse tree.
+    break;
+  case &Prose(x):
+    internal_err("Prose in gen0: <%s>\n", x);
+    break;
+  case &Minus(_, _):
+    internal_err("Minus in gen0\n");
+    break;
 
-	case &Seq(r2, r3):
-		gen0(r2,grm);
-		gen0(r3,grm);
-		break;
+  case &Seq(r2, r3):
+    gen0(r2,grm);
+    gen0(r3,grm);
+    break;
 
-	case &Alt(r2, r3):
-		let alts = alt2rules(r);
-		// FIX: do we need to deal w/ predicates?
+  case &Alt(r2, r3):
+    let alts = alt2rules(r);
+    // FIX: do we need to deal w/ predicates?
 
-		//
-		// Invariant: all of the alts are symbols.
+    //
+    // Invariant: all of the alts are symbols.
 
-//		// Check each branch for semantic action.
-//	  if (has_sem){
-//	  	
-//	  }
-	
-		// Lookup the child nonterminal name.
-		printf("let child_name;\n"
-				"switch (children->hd) {\n"
-				"case &EarleyBackend::NonTerm(name,_,_,_,_):\n"
-				"fallthru(name);\n"
-				"case &EarleyBackend::SharedNonTerm(name,_,_,_,_):\n"
-				"  child_name=name; break;\n"
-				"}\n");
+//    // Check each branch for semantic action.
+//    if (has_sem){
+//      
+//    }
+  
+    // Lookup the child nonterminal name.
+    printf("let child_name;\n"
+        "switch (children->hd) {\n"
+        "case &EarleyParsetree::NonTerm(name,_,_,_,_):\n"
+        "fallthru(name);\n"
+        "case &EarleyParsetree::SharedNonTerm(name,_,_,_,_):\n"
+        "  child_name=name; break;\n"
+        "}\n");
 
-		// Use cascading if-else to go through the alts.
-		for (; alts; alts = alts->tl) {
-			switch (alts->hd->r) {
-			case &Symb(n, _):
-				printf("if ( !strcmp(child_name,\"%s\") ){\n", n);
-				gen0(alts->hd,grm);
-				printf("}\n");
-				printf("else ");
-				break;
-			default:
-				// ERR!
-				internal_err("Alt in gen0 with non-symbol alternative.\n");
-				fflush(stderr);
-				pr_rule(stderr,alts->hd,1);
-				fprintf(stderr,"\n");
-				fflush(stderr);
-				break;
-			}
-		}
-		// FIX!!!
-		// if > 1 nullable child then ambiguous
-		printf("\n  throw &Parse_error_val;\n");
-		// else 
-		// call nullable child
-		break;
-	case &Opt(r2):
-		//
-		// Invariant: r2 is a symbol.
-		//
+    // Use cascading if-else to go through the alts.
+    for (; alts; alts = alts->tl) {
+      switch (alts->hd->r) {
+      case &Symb(n, _):
+        printf("if ( !strcmp(child_name,\"%s\") ){\n", n);
+        gen0(alts->hd,grm);
+        printf("}\n");
+        printf("else ");
+        break;
+      default:
+        // ERR!
+        internal_err("Alt in gen0 with non-symbol alternative.\n");
+        fflush(stderr);
+        pr_rule(stderr,alts->hd,1);
+        fprintf(stderr,"\n");
+        fflush(stderr);
+        break;
+      }
+    }
+    // FIX!!!
+    // if > 1 nullable child then ambiguous
+    printf("\n  throw &Parse_error_val;\n");
+    // else 
+    // call nullable child
+    break;
+  case &Opt(r2):
+    //
+    // Invariant: r2 is a symbol.
+    //
 
-		// Lookup the child nonterminal name.
-		printf("let child_name;\n");
-		printf("switch (children->hd) {\n");
-		printf("case &EarleyBackend::NonTerm(name,_,_,_,_):\n"
-			"fallthru(name);\n");
-		printf("case &EarleyBackend::SharedNonTerm(name,_,_,_,_):\n");
-		printf("  child_name=name; break;\n");
-		printf("}\n");
+    // Lookup the child nonterminal name.
+    printf("let child_name;\n");
+    printf("switch (children->hd) {\n");
+    printf("case &EarleyParsetree::NonTerm(name,_,_,_,_):\n"
+      "fallthru(name);\n");
+    printf("case &EarleyParsetree::SharedNonTerm(name,_,_,_,_):\n");
+    printf("  child_name=name; break;\n");
+    printf("}\n");
 
-		switch (r2->r) {
-		case &Symb(n, _):
-			printf("if ( !strcmp(child_name,\"%s\") ){\n", n);
-			gen0(r2,grm);
-			printf("}\n");
-			break;
-		default:
-			// ERR!
-			internal_err("Option body in gen0 with non-symbol alternative.\n");
-			fflush(stderr);
-			pr_rule(stderr,r2,1);
-			fflush(stderr);
+    switch (r2->r) {
+    case &Symb(n, _):
+      printf("if ( !strcmp(child_name,\"%s\") ){\n", n);
+      gen0(r2,grm);
+      printf("}\n");
+      break;
+    default:
+      // ERR!
+      internal_err("Option body in gen0 with non-symbol alternative.\n");
+      fflush(stderr);
+      pr_rule(stderr,r2,1);
+      fflush(stderr);
 
-			printf("// !!! ERROR !!!\n");
-			printf("throw &Parse_error_val;\n");
-			break;
-		}
-		break;
+      printf("// !!! ERROR !!!\n");
+      printf("throw &Parse_error_val;\n");
+      break;
+    }
+    break;
 
-	case &Rcount(c, r2):
-		printf("{\n");
-		// FIX: need to get this bounds right, given new interp. of repeat.
-		printf("unsigned int bounds = atoi(%s);\n", c);
-		printf("unsigned int count;\n");
-		printf("for (count = 0; count < bounds; count++) {\n");
-		gen0(r2,grm);
-		printf("}\n");
-		printf("}\n");
-		break;
-	case &Star(m, &Num(0), r2):
-		break;
-	case &Star(m, &Num(n), r2):
-		if (m > n)
-			break;
-		for (; m > 0; m--, n--) {
-			gen0(r2,grm);
-		}
-		for (; n > 0; n--) {
-			gen0(OPT(STAR(1,new Num(n-1),r2)),grm);
-		}
-		break;
-	case &Star(m, &Infinity, r2):
-		let inf = new Infinity;
-		for (; m > 0; m--) {
-			gen0(r2,grm);
-		}
+  case &Rcount(c, r2):
+    printf("{\n");
+    // FIX: need to get this bounds right, given new interp. of repeat.
+    printf("unsigned int bounds = atoi(%s);\n", c);
+    printf("unsigned int count;\n");
+    printf("for (count = 0; count < bounds; count++) {\n");
+    gen0(r2,grm);
+    printf("}\n");
+    printf("}\n");
+    break;
+  case &Star(m, &Num(0), r2):
+    break;
+  case &Star(m, &Num(n), r2):
+    if (m > n)
+      break;
+    for (; m > 0; m--, n--) {
+      gen0(r2,grm);
+    }
+    for (; n > 0; n--) {
+      gen0(OPT(STAR(1,new Num(n-1),r2)),grm);
+    }
+    break;
+  case &Star(m, &Infinity, r2):
+    let inf = new Infinity;
+    for (; m > 0; m--) {
+      gen0(r2,grm);
+    }
 
-		let before = scope++;
-		let after = scope++;
+    let before = scope++;
+    let after = scope++;
 
-		printf("while (children) {\n");
-		gen0(r2,grm);
-		printf("}\n");
-		break;
-	case &Hash(0, &Infinity, r2): // 0# r2 -> [r2 *(commas r2)]
-		gen0(OPT(SEQ(r2, STAR(0, new Infinity, SEQ(commas(), r2)))),grm);
-		// NB: no need to fill for right context, that will be handled by the STAR
-		break;
-	case &Hash(m, &Infinity, r2): // m# r2 -> r2 (m-1)*(commas r2)
-		gen0(SEQ(r2, STAR(m-1, new Infinity, SEQ(commas(), r2))),grm);
-		break;
-	case &Hash(0, &Num(0), r2): // #0 r2 -> ""
-		gen0(LIT(""),grm);
-		break;
-	case &Hash(0, &Num(1), r2): // #1 r2 -> [r2]
-		gen0(OPT(r2),grm);
-		break;
-	case &Hash(0, &Num(n), r2): // #n r2 -> [r2 *(n-1)(commas r2)]
-		gen0(OPT(SEQ(r2, STAR(0, new Num(n-1), SEQ(commas(), r2)))),grm);
-		break;
-	case &Hash(m, &Num(n), r2): // m#n r2 -> r2 (m-1)*(n-1)(commas r2)
-		gen0(SEQ(r2, STAR(m-1, new Num(n-1), SEQ(commas(), r2))),grm);
-		break;
-	}
+    printf("while (children) {\n");
+    gen0(r2,grm);
+    printf("}\n");
+    break;
+  case &Hash(0, &Infinity, r2): // 0# r2 -> [r2 *(commas r2)]
+    gen0(OPT(SEQ(r2, STAR(0, new Infinity, SEQ(commas(), r2)))),grm);
+    // NB: no need to fill for right context, that will be handled by the STAR
+    break;
+  case &Hash(m, &Infinity, r2): // m# r2 -> r2 (m-1)*(commas r2)
+    gen0(SEQ(r2, STAR(m-1, new Infinity, SEQ(commas(), r2))),grm);
+    break;
+  case &Hash(0, &Num(0), r2): // #0 r2 -> ""
+    gen0(LIT(""),grm);
+    break;
+  case &Hash(0, &Num(1), r2): // #1 r2 -> [r2]
+    gen0(OPT(r2),grm);
+    break;
+  case &Hash(0, &Num(n), r2): // #n r2 -> [r2 *(n-1)(commas r2)]
+    gen0(OPT(SEQ(r2, STAR(0, new Num(n-1), SEQ(commas(), r2)))),grm);
+    break;
+  case &Hash(m, &Num(n), r2): // m#n r2 -> r2 (m-1)*(n-1)(commas r2)
+    gen0(SEQ(r2, STAR(m-1, new Num(n-1), SEQ(commas(), r2))),grm);
+    break;
+  }
 
-	if (r->v) {
-		if ('$' != r->v[0]) {
-			switch (r->r) {
-			case &Symb(x, _):
-				if (Set::member(semvalue_symbs, new x))
-					break;
-				else
-					fallthru;
-			default:
-				printf("let %s = substring(ykinput,i,j);\n", r->v);
-				break;
-			}
-		}
-	}
-	if (r->a)
-		printf("%s\n", r->a);
-	return;
+  if (r->v) {
+    if ('$' != r->v[0]) {
+      switch (r->r) {
+      case &Symb(x, _):
+        if (Set::member(semvalue_symbs, new x))
+          break;
+        else
+          fallthru;
+      default:
+        printf("let %s = substring(ykinput,i,j);\n", r->v);
+        break;
+      }
+    }
+  }
+  if (r->a)
+    printf("%s\n", r->a);
+  return;
 }
 
 } // End namespace Amb.
@@ -297,375 +309,374 @@ void gen0(rule_t r, grammar_t grm) {
 // the current nonterm name.
 static
 void gen0(rule_t r, grammar_t grm) {
-	if (r->v) {
-		if ('$' == r->v[0]) {
-			printf("let %s;", r->v + 1);
-		} else {
-			switch (r->r) {
-			case &Symb(x, y):
-				if (Set::member(semvalue_symbs, new x)) {
-					printf("let %s = ", r->v);
-				} else {
-					printf("let __GEN__left = children[0]->left;\n"
-							   "let __GEN__right = children[0]->right;\n");
-				}
-			break;
-			default:
-				break;
-			}
-		}
-	}
+  if (r->v) {
+    if ('$' == r->v[0]) {
+      printf("let %s;", r->v + 1);
+    } else {
+      switch (r->r) {
+      case &Symb(x, y):
+        if (Set::member(semvalue_symbs, new x)) {
+          printf("let %s = ", r->v);
+        } else {
+          printf("let __GEN__left = children[0]->left;\n"
+                 "let __GEN__right = children[0]->right;\n");
+        }
+      break;
+      default:
+        break;
+      }
+    }
+  }
 
-	switch (r->r) {
-	case &Symb(x, y):
-		// If symbol is nullable, then need to check whether the current child is
-		// corresponds to this symbol.
-		//     if (empty_rule(r)){
-		//       printf("{  let result;\n"); 
-		//       printf("   let child_name;\n"); 
-		//       printf("   switch (children->hd) {\n"); 
-		//       printf("   case &EarleyBackend::NonTerm(name,_,_,_,_):\n"
-		// 	     "   fallthru(name);\n"); 
-		//       printf("   case &EarleyBackend::SharedNonTerm(name,_,_,_,_):\n"); 
-		//       printf("     child_name=name; break;\n"); 
-		//       printf("   }\n");
+  switch (r->r) {
+  case &Symb(x, y):
+    // If symbol is nullable, then need to check whether the current child is
+    // corresponds to this symbol.
+    //     if (empty_rule(r)){
+    //       printf("{  let result;\n"); 
+    //       printf("   let child_name;\n"); 
+    //       printf("   switch (children->hd) {\n"); 
+    //       printf("   case &EarleyParsetree::NonTerm(name,_,_,_,_):\n"
+    //        "   fallthru(name);\n"); 
+    //       printf("   case &EarleyParsetree::SharedNonTerm(name,_,_,_,_):\n"); 
+    //       printf("     child_name=name; break;\n"); 
+    //       printf("   }\n");
 
-		//       printf("if ( !strcmp(child_name,\"%s\") )\n{", x);
-		//       printf("   result = %s(children->hd,ykinput%s%s);\n",
-		// 	     p_id(x),
-		// 	     (y?",":""),
-		// 	     y);
-		//       printf("   children = children->tl;\n");
-		//       printf("}\n");
-		//     } else 
+    //       printf("if ( !strcmp(child_name,\"%s\") )\n{", x);
+    //       printf("   result = %s(children->hd,ykinput%s%s);\n",
+    //        p_id(x),
+    //        (y?",":""),
+    //        y);
+    //       printf("   children = children->tl;\n");
+    //       printf("}\n");
+    //     } else 
 
-	  // Check whether its a "real" symbol, or a flattened one.
-		if (Flatten::is_flattened_symb(x)) {
-			let r_opt = lookup_symbol(grm, x);
-			if (!r_opt)
-				internal_err("Missing definition of symbol %s.\n", x);
-			else {
-				// inline code for r
-		  	printf("{\nlet &EarleyBackend::parse_tree(name,i,j,w,children) = children[0];\n");
-				gen0(r_opt, grm);
-				printf("}\n");
-			}
-		} else {
-			printf("%s(children[0],ykinput%s%s);\n", p_id(x), (y ? "," : ""), y);
-		}
-  	printf("children++;\n");
-		break;
-	case &Lit(_):
-	case &CharRange(_, _):
-		// do nothing. literals don't show up in parse tree.
-		break;
-	case &Prose(x):
-		internal_err("Prose in gen0: <%s>\n", x);
-		break;
-	case &Minus(_, _):
-		internal_err("Minus in gen0\n");
-		break;
+    // Check whether its a "real" symbol, or a flattened one.
+    if (Flatten::is_flattened_symb(x)) {
+      let r_opt = lookup_symbol(grm, x);
+      if (!r_opt)
+        internal_err("Missing definition of symbol %s.\n", x);
+      else {
+        // inline code for r
+        printf("{\nlet &EarleyParsetree::parse_tree(name,i,j,w,children) = children[0];\n");
+        gen0(r_opt, grm);
+        printf("}\n");
+      }
+    } else {
+      printf("%s(children[0],ykinput%s%s);\n", p_id(x), (y ? "," : ""), y);
+    }
+    printf("children++;\n");
+    break;
+  case &Lit(_):
+  case &CharRange(_, _):
+    // do nothing. literals don't show up in parse tree.
+    break;
+  case &Prose(x):
+    internal_err("Prose in gen0: <%s>\n", x);
+    break;
+  case &Minus(_, _):
+    internal_err("Minus in gen0\n");
+    break;
 
-	case &Seq(r2, r3):
-		gen0(r2,grm);
-		gen0(r3,grm);
-		break;
+  case &Seq(r2, r3):
+    gen0(r2,grm);
+    gen0(r3,grm);
+    break;
 
-	case &Alt(r2, r3):
-		let alts = alt2rules(r);
-		// FIX: do we need to deal w/ predicates?
+  case &Alt(r2, r3):
+    let alts = alt2rules(r);
+    // FIX: do we need to deal w/ predicates?
 
-		//
-		// Invariant: all of the alts are symbols.
+    //
+    // Invariant: all of the alts are symbols.
 
-//		// Check each branch for semantic action.
-//	  if (has_sem){
-//	  	
-//	  }
-	
-		// Lookup the child nonterminal name.
-		printf("let child_name = children[0]->nonterminal;\n");
+//    // Check each branch for semantic action.
+//    if (has_sem){
+//      
+//    }
+  
+    // Lookup the child nonterminal name.
+    printf("let child_name = children[0]->nonterminal;\n");
 
-		// Use cascading if-else to go through the alts.
-		for (; alts; alts = alts->tl) {
-			switch (alts->hd->r) {
-			case &Symb(n, _):
-				printf("if ( !strcmp(child_name,\"%s\") ){\n", n);
-				gen0(alts->hd,grm);
-				printf("}\n");
-				printf("else ");
-				break;
-			default:
-				// ERR!
-				internal_err("Alt in gen0 with non-symbol alternative.\n");
-				fflush(stderr);
-				pr_rule(stderr,alts->hd,1);
-				fprintf(stderr,"\n");
-				fflush(stderr);
-				break;
-			}
-		}
-		// TODO: FIX!!!
-		// if > 1 nullable child then ambiguous
-		printf("\n  throw &Parse_error_val;\n");
-		// else 
-		// call nullable child
-		break;
-	case &Opt(r2):
-		printf("if (numelts(children) > 0){\n");
-  	gen0(r2,grm);
-  	printf("}\n");
-		break;
+    // Use cascading if-else to go through the alts.
+    for (; alts; alts = alts->tl) {
+      switch (alts->hd->r) {
+      case &Symb(n, _):
+        printf("if ( !strcmp(child_name,\"%s\") ){\n", n);
+        gen0(alts->hd,grm);
+        printf("}\n");
+        printf("else ");
+        break;
+      default:
+        // ERR!
+        internal_err("Alt in gen0 with non-symbol alternative.\n");
+        fflush(stderr);
+        pr_rule(stderr,alts->hd,1);
+        fprintf(stderr,"\n");
+        fflush(stderr);
+        break;
+      }
+    }
+    // TODO: FIX!!!
+    // if > 1 nullable child then ambiguous
+    printf("\n  throw &Parse_error_val;\n");
+    // else 
+    // call nullable child
+    break;
+  case &Opt(r2):
+    printf("if (numelts(children) > 0){\n");
+    gen0(r2,grm);
+    printf("}\n");
+    break;
 
-	case &Rcount(c, r2):
-		printf("{\n");
-		// FIX: need to get this bounds right, given new interp. of repeat.
-		printf("unsigned int bounds = atoi(%s);\n", c);
-		printf("unsigned int count;\n");
-		printf("for (count = 0; count < bounds; count++) {\n");
-		gen0(r2,grm);
-		printf("}\n");
-		printf("}\n");
-		break;
-	case &Star(m, &Num(0), r2):
-		break;
-	case &Star(m, &Num(n), r2):
-		if (m > n)
-			break;
-		for (; m > 0; m--, n--) {
-			gen0(r2,grm);
-		}
-		for (; n > 0; n--) {
-			gen0(OPT(STAR(1,new Num(n-1),r2)),grm);
-		}
-		break;
-	case &Star(m, &Infinity, r2):
-		let inf = new Infinity;
-		for (; m > 0; m--) {
-			gen0(r2,grm);
-		}
+  case &Rcount(c, r2):
+    printf("{\n");
+    // FIX: need to get this bounds right, given new interp. of repeat.
+    printf("unsigned int bounds = atoi(%s);\n", c);
+    printf("unsigned int count;\n");
+    printf("for (count = 0; count < bounds; count++) {\n");
+    gen0(r2,grm);
+    printf("}\n");
+    printf("}\n");
+    break;
+  case &Star(m, &Num(0), r2):
+    break;
+  case &Star(m, &Num(n), r2):
+    if (m > n)
+      break;
+    for (; m > 0; m--, n--) {
+      gen0(r2,grm);
+    }
+    for (; n > 0; n--) {
+      gen0(OPT(STAR(1,new Num(n-1),r2)),grm);
+    }
+    break;
+  case &Star(m, &Infinity, r2):
+    let inf = new Infinity;
+    for (; m > 0; m--) {
+      gen0(r2,grm);
+    }
 
-		let before = scope++;
-		let after = scope++;
+    let before = scope++;
+    let after = scope++;
 
-		printf("while (numelts(children) > 0) {\n");
-		gen0(r2,grm);
-		printf("}\n");
-		break;
-	case &Hash(0, &Infinity, r2): // 0# r2 -> [r2 *(commas r2)]
-		gen0(OPT(SEQ(r2, STAR(0, new Infinity, SEQ(commas(), r2)))),grm);
-		// NB: no need to fill for right context, that will be handled by the STAR
-		break;
-	case &Hash(m, &Infinity, r2): // m# r2 -> r2 (m-1)*(commas r2)
-		gen0(SEQ(r2, STAR(m-1, new Infinity, SEQ(commas(), r2))),grm);
-		break;
-	case &Hash(0, &Num(0), r2): // #0 r2 -> ""
-		gen0(LIT(""),grm);
-		break;
-	case &Hash(0, &Num(1), r2): // #1 r2 -> [r2]
-		gen0(OPT(r2),grm);
-		break;
-	case &Hash(0, &Num(n), r2): // #n r2 -> [r2 *(n-1)(commas r2)]
-		gen0(OPT(SEQ(r2, STAR(0, new Num(n-1), SEQ(commas(), r2)))),grm);
-		break;
-	case &Hash(m, &Num(n), r2): // m#n r2 -> r2 (m-1)*(n-1)(commas r2)
-		gen0(SEQ(r2, STAR(m-1, new Num(n-1), SEQ(commas(), r2))),grm);
-		break;
-	}
+    printf("while (numelts(children) > 0) {\n");
+    gen0(r2,grm);
+    printf("}\n");
+    break;
+  case &Hash(0, &Infinity, r2): // 0# r2 -> [r2 *(commas r2)]
+    gen0(OPT(SEQ(r2, STAR(0, new Infinity, SEQ(commas(), r2)))),grm);
+    // NB: no need to fill for right context, that will be handled by the STAR
+    break;
+  case &Hash(m, &Infinity, r2): // m# r2 -> r2 (m-1)*(commas r2)
+    gen0(SEQ(r2, STAR(m-1, new Infinity, SEQ(commas(), r2))),grm);
+    break;
+  case &Hash(0, &Num(0), r2): // #0 r2 -> ""
+    gen0(LIT(""),grm);
+    break;
+  case &Hash(0, &Num(1), r2): // #1 r2 -> [r2]
+    gen0(OPT(r2),grm);
+    break;
+  case &Hash(0, &Num(n), r2): // #n r2 -> [r2 *(n-1)(commas r2)]
+    gen0(OPT(SEQ(r2, STAR(0, new Num(n-1), SEQ(commas(), r2)))),grm);
+    break;
+  case &Hash(m, &Num(n), r2): // m#n r2 -> r2 (m-1)*(n-1)(commas r2)
+    gen0(SEQ(r2, STAR(m-1, new Num(n-1), SEQ(commas(), r2))),grm);
+    break;
+  }
 
-	if (r->v) {
-		if ('$' != r->v[0]) {
-			switch (r->r) {
-			case &Symb(x, _):
-				if (Set::member(semvalue_symbs, new x))
-					break;
-				else
-					fallthru;
-			default:
-				printf("let %s = substring(ykinput,__GEN__left,__GEN__right - __GEN__left);\n", r->v);
-				break;
-			}
-		}
-	}
-	if (r->a)
-		printf("%s\n", r->a);
-	return;
+  if (r->v) {
+    if ('$' != r->v[0]) {
+      switch (r->r) {
+      case &Symb(x, _):
+        if (Set::member(semvalue_symbs, new x))
+          break;
+        else
+          fallthru;
+      default:
+        printf("let %s = substring(ykinput,__GEN__left,__GEN__right - __GEN__left);\n", r->v);
+        break;
+      }
+    }
+  }
+  if (r->a)
+    printf("%s\n", r->a);
+  return;
 }
 
 /* Print forward definitions of parsing functions in grammar grm. */
-void gen_header(grammar_t<`H> grm, List::list_t<const char ?@>textblobs) {
-	printf("#include <buffer.h>\n"
-			"#include <stdio.h>\n"
-			"#include <stdlib.h>\n"
-			"#include <string.h>\n"
-			"#include \"earley-backend.h\"\n");
+void gen_header(grammar_t<`H> grm, List::list_t<const char ?@>textblobs
+    //,earley_backend_t earley_backend
+    ) {
+  printf("#include <buffer.h>\n"
+      "#include <stdio.h>\n"
+      "#include <stdlib.h>\n"
+      "#include <string.h>\n"
+      "#include \"earley-parsetree.h\"\n"
+      "#include \"earley-backend.h\"\n");
 
-	if (gen_fun_table) {
-		printf("#include \"funtable.h\"\n");
-	}
+  if (gen_fun_table) {
+    printf("#include \"funtable.h\"\n");
+  }
 
-	/* Print first textblob.  Needed in case it defines typedefs used by parsing functions. */
-	if (textblobs) {
-		printf("%s\n",*textblobs->hd);
-		textblobs = textblobs->tl;
-	}
+  /* Print first textblob.  Needed in case it defines typedefs used by parsing functions. */
+  if (textblobs) {
+    printf("%s\n",*textblobs->hd);
+    textblobs = textblobs->tl;
+  }
 
-	if (cyc_namespace) {
-		printf("namespace %s {\n\n",cyc_namespace);
-	}
+  if (cyc_namespace) {
+    printf("namespace %s {\n\n",cyc_namespace);
+  }
 
-	if (gen_fun_table) {
-		printf("\nFuntable::table_t get_function_table();\n");
-	}
+  if (gen_fun_table) {
+    printf("\nFuntable::table_t get_function_table();\n");
+  }
 
-	for (let x = grm; x; x = x->tl) {
-		let &$(n,r,a) = x->hd;
-		if (a.rettype) {
-			printf("%s ",a.rettype);
-		} else
-		printf("void ");
-		printf("%s(EarleyBackend::parse_tree_t t, const char? ykinput%s%s);\n",
-				p_id(n),
-				(a.paramtype)?",":"",
-				a.paramtype);
-	}
-	if (cyc_namespace) {
-		printf("\n}\n");
-	}
+  for (let x = grm; x; x = x->tl) {
+    let &$(n,r,a) = x->hd;
+    if (a.rettype) {
+      printf("%s ",a.rettype);
+    } else
+    printf("void ");
+    printf("%s(EarleyParsetree::parse_tree_t t, const char? ykinput%s%s);\n",
+        p_id(n),
+        (a.paramtype)?",":"",
+        a.paramtype);
+  }
+  if (cyc_namespace) {
+    printf("\n}\n");
+  }
 }
 
 static int handleAmb = 0;
 
 void gen_crawl(grammar_t<`H> grm, const char ?`H start_symbol,
 List::list_t<const char ?@>textblobs, int all_start,
-unsigned int eof_val) {
-	reset_globals();
-	semvalue_symbs = Set::empty(strptrcmp);
+unsigned int eof_val
+//,earley_backend_t earley_backend
+) {
+  reset_globals();
+  semvalue_symbs = Set::empty(strptrcmp);
 
-	init_recursive(grm);
-	init_firstt(grm);
-	init_mayt(grm);
-	init_mustt(grm);
-	init_maybe_empty(grm);
+  init_recursive(grm);
+  init_firstt(grm);
+  init_mayt(grm);
+  init_mustt(grm);
+  init_maybe_empty(grm);
+  
+//  set_earleyns(earley_backend);
 
-	printf("#include <buffer.h>\n"
-	"#include <stdio.h>\n"
-	"#include <stdlib.h>\n"
-	"#include <string.h>\n"
-	"#include \"earley-backend.h\"\n");
+  printf("#include <buffer.h>\n"
+  "#include <stdio.h>\n"
+  "#include <stdlib.h>\n"
+  "#include <string.h>\n"
+  "#include \"earley-parsetree.h\"\n"
+  "#include \"earley-backend.h\"\n");
 
-	if (gen_fun_table) {
-		printf("#include \"funtable.h\"\n");
-	}
+  if (gen_fun_table) {
+    printf("#include \"funtable.h\"\n");
+  }
 
-	if (print_globals) {
-		printf("int ykdebug = 0;\n"
-		"datatype exn { Parse_error };\n"
-		"datatype exn.Parse_error Parse_error_val = Parse_error;\n");
-	} else {
-		printf("extern int ykdebug;\n"
-		"datatype exn { extern Parse_error };\n"
-		"extern datatype exn.Parse_error Parse_error_val;\n");
-	}
+  if (print_globals) {
+    printf("int ykdebug = 0;\n"
+    "datatype exn { Parse_error };\n"
+    "datatype exn.Parse_error Parse_error_val = Parse_error;\n");
+  } else {
+    printf("extern int ykdebug;\n"
+    "datatype exn { extern Parse_error };\n"
+    "extern datatype exn.Parse_error Parse_error_val;\n");
+  }
 
-	/* Print first textblob.  Needed in case it defines typedefs used by
-	 pseudo-parsing functions. */
-	if (textblobs) {
-		printf("%s\n",*textblobs->hd);
-		textblobs = textblobs->tl;
-	}
+  /* Print first textblob.  Needed in case it defines typedefs used by
+   pseudo-parsing functions. */
+  if (textblobs) {
+    printf("%s\n",*textblobs->hd);
+    textblobs = textblobs->tl;
+  }
 
-	if (cyc_namespace) {
-		printf("namespace %s {\n\n",cyc_namespace);
-	}
+  if (cyc_namespace) {
+    printf("namespace %s {\n\n",cyc_namespace);
+  }
 
-	/* Print forward definitions of pseudo-parsing functions */
-	for (let x = grm; x; x = x->tl) {
-		let &$(n,r,a) = x->hd;
-		
-		if (Flatten::is_flattened_symb(n) )
-			continue;
-		
-		if (a.rettype) {
-			printf("%s ",a.rettype);
-			semvalue_symbs = Set::insert(semvalue_symbs,new n);
-		} else
-		printf("void ");
-		printf("%s(EarleyBackend::parse_tree_t t, const char? ykinput%s%s);\n",
-		p_id(n),
-		(a.paramtype)?",":"",
-		a.paramtype);
-	}
+  /* Print forward definitions of pseudo-parsing functions */
+  for (let x = grm; x; x = x->tl) {
+    let &$(n,r,a) = x->hd;
+    
+    if (Flatten::is_flattened_symb(n) )
+      continue;
+    
+    if (a.rettype) {
+      printf("%s ",a.rettype);
+      semvalue_symbs = Set::insert(semvalue_symbs,new n);
+    } else
+    printf("void ");
+    printf("%s(EarleyParsetree::parse_tree_t t, const char? ykinput%s%s);\n",
+    p_id(n),
+    (a.paramtype)?",":"",
+    a.paramtype);
+  }
 
-	/* Print the text blobs */
-	for (let x = textblobs; x; x = x->tl) {
-		printf("%s\n",*x->hd);
-	}
+  /* Print the text blobs */
+  for (let x = textblobs; x; x = x->tl) {
+    printf("%s\n",*x->hd);
+  }
 
-	/* Optionally print a function table. 
-	 */
-	if (gen_fun_table) {
-		printf("\nFuntable::table_t get_function_table(){\n");
-		printf("  let t = Funtable::create(101);\n");
-		for (let x = grm; x; x = x->tl) {
-			let &$(n,r,a) = x->hd;
-			// Only includes function with this signature:     
-			//   void x(ykbuf_t @);
-			if (!a.rettype && !a.paramtype) {
-				printf("  Funtable::insert(t, \"%s\", %s<>);\n",n,p_id(n));
-			}
-		}
-		printf("  return t;\n}\n");
-	}
+  /* Optionally print a function table. 
+   */
+  if (gen_fun_table) {
+    printf("\nFuntable::table_t get_function_table(){\n");
+    printf("  let t = Funtable::create(101);\n");
+    for (let x = grm; x; x = x->tl) {
+      let &$(n,r,a) = x->hd;
+      // Only includes function with this signature:     
+      //   void x(ykbuf_t @);
+      if (!a.rettype && !a.paramtype) {
+        printf("  Funtable::insert(t, \"%s\", %s<>);\n",n,p_id(n));
+      }
+    }
+    printf("  return t;\n}\n");
+  }
 
-	/* Print the crawling functions */
-	for (let x = grm; x; x = x->tl) {
-		let &$(n,r,a) = x->hd;
-		
-		if (Flatten::is_flattened_symb(n) )
-			continue;
-		
-		if (a.rettype)
-		printf("%s ",a.rettype);
-		else
-		printf("void ");
-		printf("%s(EarleyBackend::parse_tree_t t, const char? ykinput%s%s) {\n",
-		p_id(n),
-		(a.paramtype)?",":"",
-		a.paramtype);
-		
-		if (handleAmb){
-  		printf("switch (t) {\n");
-	  	printf("case &EarleyBackend::NonTerm(name,i,j,w,children):\n");
-			// TODO: HANDLE IMAP STRING SPECIAL CASE AS IN PGEN
-			Amb::gen0(r,grm);
-			printf("break;\n");
-			printf("case &EarleyBackend::SharedNonTerm(name,i,j,w,children_list):\n");
-			printf("throw &Parse_error_val;\n");
-		} else	{
-	  	printf("{\nlet &EarleyBackend::parse_tree(name,i,j,w,children) = t;\n");
-			gen0(r,grm);			
-		}
-		printf("}\n");
-		printf("}\n\n");
-	}
+  /* Print the crawling functions */
+  for (let x = grm; x; x = x->tl) {
+    let &$(n,r,a) = x->hd;
+    
+    if (Flatten::is_flattened_symb(n) )
+      continue;
+    
+    if (a.rettype)
+    printf("%s ",a.rettype);
+    else
+    printf("void ");
+    printf("%s(EarleyParsetree::parse_tree_t t, const char? ykinput%s%s) {\n",
+    p_id(n),
+    (a.paramtype)?",":"",
+    a.paramtype);
+    
+    if (handleAmb){
+      printf("switch (t) {\n");
+      printf("case &EarleyParsetree::NonTerm(name,i,j,w,children):\n");
+      // TODO: HANDLE IMAP STRING SPECIAL CASE AS IN PGEN
+      Amb::gen0(r,grm);
+      printf("break;\n");
+      printf("case &EarleyParsetree::SharedNonTerm(name,i,j,w,children_list):\n");
+      printf("throw &Parse_error_val;\n");
+    } else  {
+      printf("{\nlet &EarleyParsetree::parse_tree(name,i,j,w,children) = t;\n");
+      gen0(r,grm);      
+    }
+    printf("}\n");
+    printf("}\n\n");
+  }
 
-	// function to parse and then crawl the start symbol.
-  printf("#ifdef USE_COMPILED_DFA\n");
+/*
+  // function to parse and then crawl the start symbol.
+  // TODO: add decl of this function to header.
   printf("int earley_parse_string(char ?input, int resolve_amb) {\n");
-  printf(" let dfa_rep = 0;\n");
-  printf("#else\n");
-  printf("int earley_parse_string(string_t dfa_filename, char ?input, int resolve_amb) {\n");
-  printf(" let r = Earley::fsm2dfa(dfa_filename);\n");
-  printf(" if (!r){\n");
-  printf("   fprintf(stderr,\"Failed to reconstruct DFA.\\n\");\n");
-  printf("   return 1;\n");
-  printf(" }\n");
-  printf(" let $(dfa,_,symb_info) = *r;\n");
-  printf(" let dfa_rep = DFA::create_edfa(dfa,symb_info);\n");
-  printf("#endif\n");
+  printf(" let dfa_rep = %s::init_dfa();\n",earley_backend_ns);
   printf("\n");
-  printf(" let $(trees,_,_) = EarleyBackend::parse(dfa_rep,input);\n");
+  printf(" let $(trees,_,_) = %s::parse(dfa_rep,input);\n",earley_backend_ns);
   printf(" if (!trees) return 1; //parse failed.\n");
   printf(" if (trees->tl && !resolve_amb) {\n");
   printf("   fprintf(stderr,\"Ambiguous parse.\\n\");\n");
@@ -676,58 +687,59 @@ unsigned int eof_val) {
   printf(" let child_tree = trees->hd->f0->children[0];\n");
   printf(" %s(child_tree, input);\n", p_id(start_symbol));
   printf("}\n");
+*/
+  
+  if (cyc_namespace) {
+    printf("\n}\n");
+  }
 
-	if (cyc_namespace) {
-		printf("\n}\n");
-	}
-
-	if (print_main) {
-		printf("int main(int argc, char ??argv) {\n"
-		"  while ((argc--)>1) {\n"
-		"    if (strcmp(*(++argv),\"-d\") == 0) ykdebug++;\n"
-		"    else { fprintf(stderr,\"Unrecognized option: %%s\\n\",*argv); exit(1); }\n"
-		"  }\n");
+  if (print_main) {
+    printf("int main(int argc, char ??argv) {\n"
+    "  while ((argc--)>1) {\n"
+    "    if (strcmp(*(++argv),\"-d\") == 0) ykdebug++;\n"
+    "    else { fprintf(stderr,\"Unrecognized option: %%s\\n\",*argv); exit(1); }\n"
+    "  }\n");
 #ifdef STRINGINPUT
-		printf("  fprintf(stderr,\"Getting input... \");\n"
-		"  Buffer::T buf = Buffer::create(1024);\n"
-		"  int c;\n"
-		"  while ( (c = getchar()) != -1) Buffer::add_char(buf,(char)c);\n"
-		"  let len = Buffer::length(buf);\n"
-		"  let buf = Buffer::extract(buf);\n"
-		"  unsigned char ?@nozeroterm input = malloc((len+1)*sizeof(unsigned char));\n"
-		"  for (let i = 0; i < len; i++) input[i] = buf[i];\n"
-		"  input[len] = '\\0';\n"
-		"  fprintf(stderr,\"done\\n\");\n"
-		"  // fprintf(stderr,\"%%s\",input);\n"
-		"  fprintf(stderr,\"Trying to parse...\\n\");\n"
-		"  YKCURSOR = input;\n"
-		"  YKSTART = input;\n"
-		"  YKMARKER = input;\n"
-		"  YKLIMIT = input+numelts(input);\n");
+    printf("  fprintf(stderr,\"Getting input... \");\n"
+    "  Buffer::T buf = Buffer::create(1024);\n"
+    "  int c;\n"
+    "  while ( (c = getchar()) != -1) Buffer::add_char(buf,(char)c);\n"
+    "  let len = Buffer::length(buf);\n"
+    "  let buf = Buffer::extract(buf);\n"
+    "  unsigned char ?@nozeroterm input = malloc((len+1)*sizeof(unsigned char));\n"
+    "  for (let i = 0; i < len; i++) input[i] = buf[i];\n"
+    "  input[len] = '\\0';\n"
+    "  fprintf(stderr,\"done\\n\");\n"
+    "  // fprintf(stderr,\"%%s\",input);\n"
+    "  fprintf(stderr,\"Trying to parse...\\n\");\n"
+    "  YKCURSOR = input;\n"
+    "  YKSTART = input;\n"
+    "  YKMARKER = input;\n"
+    "  YKLIMIT = input+numelts(input);\n");
 #else
-		printf("  ykbuf_t @ykb = fd2ykbuf(0); // read from stdin\n");
+    printf("  ykbuf_t @ykb = fd2ykbuf(0); // read from stdin\n");
 #endif
-		printf("  try {\n");
-		printf("    ");
-		if (cyc_namespace) {
-			printf("%s::",cyc_namespace);
-		}
-		printf("%s(ykb);\n", // FIX: what if start_symbol takes args?
-		p_id(start_symbol));
+    printf("  try {\n");
+    printf("    ");
+    if (cyc_namespace) {
+      printf("%s::",cyc_namespace);
+    }
+    printf("%s(ykb);\n", // FIX: what if start_symbol takes args?
+    p_id(start_symbol));
 
-		printf("    //let n = YKPOSN;\n"
-		"    //if (n<60) for (int i = 0; i < n; i++) printf(\"^\");\n"
-		"    //printf(\" accepted %%d (0x%%x) characters\\n\",n,n);\n"
-		"  }\n"
-		"  catch {\n"
-		"  case &Parse_error:\n"
-		"    let n = YKPOSN;\n"
-		"    if (n<60) for (int i = 0; i < n; i++) printf(\" \");\n"
-		"    printf(\"^ failed at position %%d (0x%%x)\\n\",n,n);\n"
-		"    break;\n"
-		"  }\n"
-		"  return 0;\n"
-		"}\n");
-	}
+    printf("    //let n = YKPOSN;\n"
+    "    //if (n<60) for (int i = 0; i < n; i++) printf(\"^\");\n"
+    "    //printf(\" accepted %%d (0x%%x) characters\\n\",n,n);\n"
+    "  }\n"
+    "  catch {\n"
+    "  case &Parse_error:\n"
+    "    let n = YKPOSN;\n"
+    "    if (n<60) for (int i = 0; i < n; i++) printf(\" \");\n"
+    "    printf(\"^ failed at position %%d (0x%%x)\\n\",n,n);\n"
+    "    break;\n"
+    "  }\n"
+    "  return 0;\n"
+    "}\n");
+  }
 }
 

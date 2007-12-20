@@ -1,56 +1,68 @@
 #include <stdio.h>
 #include <buffer.h>
+#include "earley-parsetree.h"
 #include "earley-backend.h"
 
-#include "dfa.h"
-
-#ifndef USE_COMPILED_DFA
-#include "earley.h"
-#endif
-
 int main(int argc, const char ?`H?argv) {
-	printf("ABNF parsing stdin ... \n");
+  fprintf(stderr,"ABNF parsing stdin ... \n");
 
-	int c;
-	let b = Buffer::create(101);
-	while ( (c = fgetc(stdin)) != EOF)
-		Buffer::add_char(b, c);
+  int c;
+  let b = Buffer::create(101);
+  while ( (c = fgetc(stdin)) != EOF)
+    Buffer::add_char(b, c);
 
-	int print_depth = 2;
-	if (argc > 1){
-	  sscanf(argv[1],"%d",&print_depth);
-	}
+  let input = Buffer::contents(b);
 
-#ifdef USE_COMPILED_DFA
-  let dfa_rep = 0;
-#else
-	if (argc < 3){
-		printf("Missing dfa filename\n");
-		return 1;
-	}
-	let filename = argv[2];
-  let r = Earley::fsm2dfa(filename);
-  if (!r){
-    fprintf(stderr,"Failed to reconstruct DFA.\n");
-    return 1;
+  int print_depth = 0;
+  int do_print = 0;
+  int backend;
+
+  int argi = 1;
+  
+  if (argi < argc){
+    if (!strcmp(argv[argi],"-cyc")){
+      backend = 0;
+      argi++;
+    } 
+    else if (!strcmp(argv[argi],"-fsm")){
+      backend = 1;
+      argi++;
+    }
+    else {
+      fprintf(stderr,"Argument %d is not backend. Defaulting to cyclone backend.\n", argi);
+      backend = 0;
+    }
+  }else {
+    fprintf(stderr,"Defaulting to cyclone backend.\n");
+    backend = 0;
   }
-  fprintf(stderr,"Successfully reconstructed DFA.\n");
-  
-  let $(dfa,dfa_final,symb_info) = *r;
-  let dfa_rep = DFA::create_edfa(dfa,symb_info);
-#endif
-  
-	let input = Buffer::contents(b);
-	let $(trees, valid, valid_prefix) = EarleyBackend::parse(dfa_rep,input);
-	if (trees) {
-		printf("done -- is valid string :%d; is valid prefix: %d\n", valid,
-				valid_prefix);
-		if (trees->tl) {
-			printf("Ambiguous parse.\n");
-		} else {
-			EarleyBackend::print_LT(trees->hd->f0,print_depth);
-		}
+  if (argi < argc){
+    if (sscanf(argv[argi],"%d",&print_depth))
+      do_print = 1;
+    else
+      fprintf(stderr,"Argument %d not valid depth: %s.\n",argi, argv[argi]);
+  }
 
-	} else
-		printf("Parse failed. Valid prefix: %d\n", valid_prefix);
+  let $(trees, valid, valid_prefix) = 
+  (backend == 0) ? ({
+    let dfa_rep = EarleyCycBackend::init_dfa();
+    EarleyCycBackend::parse(dfa_rep,input);
+  }) : ({
+    let dfa_rep = EarleyFsmBackend::init_dfa();
+    EarleyFsmBackend::parse(dfa_rep,input);
+  });
+  
+  if (trees) {
+    fprintf(stderr,"done -- is valid string :%d; is valid prefix: %d\n", valid,
+        valid_prefix);
+    if (trees->tl) {
+      fprintf(stderr,"Ambiguous parse.\n");
+    } else {
+      if (do_print)
+        EarleyParsetree::print_tree(trees->hd->f0,print_depth);
+      // "tree" encodes top-level regexp, but we want to crawl starting from symbol
+      // with regexp.
+    }
+  } else
+    fprintf(stderr,"Parse failed. Valid prefix: %d\n", valid_prefix);
 }

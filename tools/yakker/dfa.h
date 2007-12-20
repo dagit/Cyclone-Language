@@ -1,5 +1,3 @@
-#ifndef DFA_H_
-#define DFA_H_
 #include <set.h>
 #include <hashtable.h>
 #include "fa.h"
@@ -25,56 +23,62 @@
 
 
 #ifdef USE_COMPILED_DFA
-
-#include "dfa_cyc.h"
-
-namespace DFA{
-	typedef int edfa_t;
-	typedef int grammar_edfa_t;
+#ifndef DFA_H_CYC_
+#define DFA_H_CYC_
+namespace EarleyCycBackend{
+namespace DFA {
+  typedef int edfa_t;
+  typedef int grammar_edfa_t;
 }
+}
+#endif
 
 #elif defined(USE_FSM_DFA)
-
-#include "dfa_fsm.h"
-
+#ifndef DFA_H_FSM_
+#define DFA_H_FSM_
+namespace EarleyFsmBackend{
 namespace DFA {
-		struct edfa {
-			dfa_t d;
-			st_t start;
-			Hashtable::table_t<act_t,str_t> action_symb_table;
-		};
+  struct edfa {
+    dfa_t d;
+    st_t start;
+    Hashtable::table_t<act_t,str_t> action_symb_table;
+  };
 
-		typedef struct edfa@ edfa_t;
-		
-		extern edfa_t create_edfa(dfa_t dfa, Earley::symb_info_t si);
-		
-		struct grammar_edfa {
-			dfa_t d;
-			Hashtable::table_t<act_t,str_t> action_symb_table;
-			Hashtable::table_t<str_t,act_t> symb_action_table;
-			Axarray::xarray_t<st_t> symb_start_states;
-		};
-		
-		typedef struct grammar_edfa @grammar_edfa_t;
+  typedef struct edfa@ edfa_t;
+
+  extern edfa_t create_edfa(dfa_t dfa, Earley::symb_info_t si);
+
+  struct grammar_edfa {
+    dfa_t d;
+    Hashtable::table_t<act_t,str_t> action_symb_table;
+    Hashtable::table_t<str_t,act_t> symb_action_table;
+    Axarray::xarray_t<st_t> symb_start_states;
+  };
+
+  typedef struct grammar_edfa @grammar_edfa_t;
 }
+}
+#endif
+
 #elif defined(USE_EXT_DFA)
-
-#include "dfa_ext.h"
-
+#ifndef DFA_H_EXT_
+#define DFA_H_EXT_
+namespace EarleyExtBackend {
 namespace DFA {
-		struct edfa {
-			dfa_t d;
-			st_t start;
-			Hashtable::table_t<act_t,str_t> action_symb_table;
-		};
+  struct edfa {
+    dfa_t d;
+    st_t start;
+    Hashtable::table_t<act_t,str_t> action_symb_table;
+  };
 
-		typedef struct edfa@ edfa_t;
-		
-		typedef int grammar_edfa_t;
+  typedef struct edfa@ edfa_t;
+
+  typedef int grammar_edfa_t;
 }
+}
+#endif
 
 #else
 #error "No DFA implementation specified."
 #endif
 
-#endif /*DFA_H_*/

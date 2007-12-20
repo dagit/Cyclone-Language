@@ -2,35 +2,32 @@
 ## Lookahead version
 ################################
 
-abnf-echo.cyc: examples/abnf-echo.bnf
-	./yakker -gen rulelist $< > $@
+# Targets for abnf-echo lib.
 
 abnf-lookahead.cyc: examples/abnf-echo.bnf
 	./yakker -no-main -gen rulelist $< > $@
+
+# Targets for stand-alone abnf-echo program.
+
+abnf-echo.cyc: examples/abnf-echo.bnf
+	./yakker -gen rulelist $< > $@
 
 ################################
 ## Earley version
 ################################
 
-AE_CYC_CR_FILES = abnf-flat-dfa aecrawl-cyc
-AE_DFA_CR_FILES = $(EBE_DFA_FILES) earley aecrawl-dfa
-AE_CYC_CR_OBJS:=$(foreach yfile,$(AE_CYC_CR_FILES),$(yfile).o)
-AE_DFA_CR_OBJS:=$(foreach yfile,$(AE_DFA_CR_FILES),$(yfile).o)
+AE_CR_FILES = abnf-flat-dfa aecrawl
+AE_CR_OBJS:=$(foreach yfile,$(AE_CR_FILES),$(yfile).o)
 
 abnf-flat-dfa.cyc: examples/abnf-echo.bnf yakker
 	./yakker -flatten-full -earley-gen-cyc rulelist $< > $@
 
+# Targets for abnf-echo lib.
+
 abnf-earley.cyc: examples/abnf-echo.bnf yakker
 	./yakker -flatten-full -gen-crawl rulelist $< > $@
 
-
 # Targets for stand-alone abnf-echo program.
-
-aecrawl-cyc.o: aecrawl.cyc
-	cyclone $(CYCFLAGS) -o $@ -c -DUSE_COMPILED_DFA $<
-	
-aecrawl-dfa.o: aecrawl.cyc
-	cyclone $(CYCFLAGS) -o $@ -c -DUSE_FSM_DFA $<
 
 aecrawl.cyc: examples/abnf-echo.bnf yakker crawl-main.cyc
 	./yakker -flatten-full -gen-crawl rulelist $< > $@
@@ -41,8 +38,8 @@ aecrawl.cyc: examples/abnf-echo.bnf yakker crawl-main.cyc
 #######################################
 # Earley debugging targets
 ######################################
-AE_CYC_FILES = $(EBE_CYC_FILES) abnf-dfa parse-main-c
-AE_DFA_FILES = $(EBE_DFA_FILES) earley parse-main-i
+AE_CYC_FILES = $(EBE_CYC_FILES) abnf-dfa parse-main
+AE_DFA_FILES = $(EBE_DFA_FILES) earley parse-main
 AE_CYC_OBJS:=$(foreach yfile,$(AE_CYC_FILES),$(yfile).o)
 AE_DFA_OBJS:=$(foreach yfile,$(AE_DFA_FILES),$(yfile).o)
 
