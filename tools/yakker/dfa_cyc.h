@@ -22,11 +22,10 @@ static int array_find(act_t ?arr,act_t a){
 	return -1;
 }
 
-#define DFA_TY int
 #define DFA_TRANS(dfa,s,a) ({let $(t,w) = DFACyc::transitions(s,a); t;})
 #define DFA_TRANS_W(dfa,s,a) (DFACyc::transitions(s,a))
 
-// XXX Need to implement
+// TODO: Need to implement
 #define DFA_GET_REPEAT_ACT(dfa,s) ({fprintf(stderr,"Failure: DFA_GET_REPEAT_ACT unimplemented.\n");exit(1);0;})
 #define DFA_GET_REPEATEE_ACT(dfa,s) ({fprintf(stderr,"Failure: DFA_GET_REPEATEE_ACT unimplemented.\n");exit(1);0;})
 #define DFA_R_EXTEND(dfa,nt,nt_start,nt_final) ({fprintf(stderr,"Failure: DFA_GET_REPEATEE_ACT unimplemented.\n");exit(1);nt_final;})
@@ -37,5 +36,10 @@ static int array_find(act_t ?arr,act_t a){
 #define DFA_FINAL_ATTRS(dfa,f) DFACyc::attributes(f)
 #define DFA_GET_START(dfa) 1
 #define DFA_ACT2SYMB(dfa,a) DFACyc::act2symb(a);
+
+#define GRM_DFA_GET_SYMB_ACTION(dfa,symb) ({fprintf(stderr,"Failure: GRM_DFA_GET_SYMB_ACTION unimplemented.\n");exit(1);0;})
+#define GRM_DFA_GET_SYMB_START(dfa,a) ({fprintf(stderr,"Failure: GRM_DFA_GET_SYMB_START unimplemented.\n");exit(1);0;})
+#define GRM_DFA_GET_NUM_STATES(dfa) ({fprintf(stderr,"Failure: GRM_DFA_GET_NUM_STATES unimplemented.\n");exit(1);0;})
+
 
 #endif /*DFA_CYC_H_*/

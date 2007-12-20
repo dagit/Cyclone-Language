@@ -20,14 +20,16 @@
 #define EARLEY_H
 #include "bnf.h"
 #include "fa.h"
-#include "dfa.h"
 #include "semiring.h"
 #include "pm_bnf.h"
 
+#define MIN_ACTION 262
+
+
 namespace Earley {
   
-	// Given a symbol name A, return corresponding "epsilon" version.
-  extern string_t eps_symb(string_t symb);
+//	// Given a symbol name A, return corresponding "epsilon" version.
+//  extern string_t eps_symb(string_t symb);
 
   typedef List::list_t<datatype ParseTree @`H,`H> parse_forest_t;
   typedef List::List_t<datatype ParseTree @`H,`H> Parse_forest_t;
@@ -35,13 +37,19 @@ namespace Earley {
   typedef datatype ParseTree @`H parse_tree_t;
 
   typedef struct symbInfo @`H symb_info_t;
+  extern symb_info_t new_symb_info();
+  extern act_t symb2act(string_t<`H> symb, symb_info_t si);
 
   extern datatype ParseTree{
     NonTerm(const char ?`H, int, int, Semiring::weight_t, parse_forest_t);
     SharedNonTerm(const char ?`H, int, int, Semiring::weight_t, List::List_t<parse_forest_t,`H>);
   };
   
+  extern act_t callout_action();
+  extern act_t start_states_table_action();
+  
   extern Hashtable::table_t<act_t,str_t> get_as_table(symb_info_t si);  		
+  extern Hashtable::table_t<str_t,act_t> get_sa_table(symb_info_t si);  		
   extern $(dfa_t,Set::set_t<st_t>,symb_info_t) compile(grammar_t grm, rule_t r);
   extern $(dfa_t,Set::set_t<st_t>,symb_info_t) *fsm2dfa(const char ?filename) ;
 

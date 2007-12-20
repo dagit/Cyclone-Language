@@ -9,71 +9,74 @@
 
 #include <hashtable.h>
 
+#include "earley.h"
+
 //#include "pm_bnf.h"
 #include "earley-backend.h"
 
-#ifdef USE_COMPILED_DFA
-
-#include "dfa_cyc.h"
-
-#else
-
 #include "dfa.h"
 
-#define DFA_TY DFA::Rep::dfa_rep_t
-#define DFA_TRANS(dfa,s,a) (target(dfa->d,s,a))
-#define DFA_TRANS_W(dfa,s,a) (target_w_weight(dfa->d,s,a))
-#define DFA_GET_REPEAT_ACT(dfa,s) *(first_action_after(dfa->d,s,callout_action()))
-#define DFA_GET_REPEATEE_ACT(dfa,s) *(first_action_after(dfa->d,s,0))
-#define DFA_IN_FINAL(dfa,nt,s) (Set::member(dfa_final_attrs(dfa->d,s),nt))
-#define DFA_IS_FINAL(dfa,s) (dfa_is_final(dfa->d,s))
-#define DFA_R_EXTEND(dfa,nt,nt_start,nt_final) \
-	construct_repeat_dfa(dfa->d,nt,repeat_decr_action(),nt_start,\
-					                  repeat_final_action(), nt_final)
-#define DFA_FINAL_WEIGHT(dfa,f) dfa_final_weight(dfa->d,f)
-static att_t ?`H wrap_final_attrs(dfa_t dfa,st_t s) {
-	try {
-		let fs_set = dfa_final_attrs(dfa,s);
-		if (Set::is_empty(fs_set))
-				return new {};
-		return List::to_array(Set::to_list(fs_set));
-	} catch
-	{
-		case &Core::Not_found:
-		return NULL;
-	}
+// TODO: find somewhere better for this.
+#ifdef USE_FSM_DFA
+
+namespace DFA{
+edfa_t create_edfa(dfa_t dfa, Earley::symb_info_t si){
+  return new edfa(dfa,1,Earley::get_as_table(si));
 }
-// XXX: find more efficient way to get array.
-#define DFA_FINAL_ATTRS(dfa,f) wrap_final_attrs(dfa->d,f) 
-#define DFA_GET_START(dfa) dfa->start
-//#define DFA_IS_DFA_FINAL(dfa,s) Set::member(dfa->finals, s)
-#define DFA_ACT2SYMB(dfa,a) act2symb(attr,dfa->action_symb_table);
+}
+
+/*
+ *  Implementation of grammar edfa for interpreted dfa.
+ */
+
+// Get the symbol-action for the specified symbol.
+static act_t grm_get_symb_action(DFA::grammar_edfa_t dfa, string_t<`H> symb){
+  let symbptr = new symb; // (const char ?)aprintf("%s",symb);
+	return Hashtable::lookup(dfa->symb_action_table, symbptr);
+}
+
+// Get the start state for the specified symbol-action.
+static st_t grm_get_symb_start(DFA::grammar_edfa_t dfa, act_t symb_act){
+	return Axarray::get(dfa->symb_start_states,symb_act - MIN_ACTION);
+}
+
+static unsigned int grm_get_num_states(DFA::grammar_edfa_t dfa){
+	dfa_get_num_states(dfa->d);
+}
+
+static DFA::grammar_edfa_t fsm2grm_edfa(string_t filename) {
+  let si = Earley::new_symb_info();
+  let r = fsm_dfa(filename,Earley::symb2act,si);
+  if (!r) throw new Core::Invalid_argument((const char ?)aprintf("Invalid DFA in file %s.",filename));
+  else{
+    let &$(dfa,_) = (_@)r;
+    //);
+    // Table of start states is encoded as transitions from special state,
+    // reachable from state 1 via transition on symbol __START_STATES_TABLE__.
+    let sst_st = target(dfa,1,Earley::start_states_table_action());
+    if (sst_st == 0)
+      throw new Core::Invalid_argument((const char ?)aprintf("Grammar DFA in file %s is missing start-states table.",filename));
+    let txs = dfa_get_trans_map(dfa,sst_st);
+    let sz = (!txs) ? 0 : txs->hd->f0 - MIN_ACTION; /* guess that the first action is the maximum, 
+                                           so use as length of the array.*/
+    let start_states = Axarray::create(sz, (st_t)0);
+    for(;txs; txs = txs->tl){
+    	Axarray::set(start_states,txs->hd->f0 - MIN_ACTION, txs->hd->f1);
+    }
+    return new DFA::grammar_edfa(dfa,
+    		Earley::get_as_table(si), 
+    		Earley::get_sa_table(si),
+    		start_states);
+  }
+}
 
 #endif
 
 #define DFA_IS_DFA_FINAL(dfa,s) \
 	({let as = DFA_FINAL_ATTRS(dfa,s); as && numelts(as) == 0;})
 
-
 using List;
 using Semiring;
-
-
-//#include <stdio.h>
-//#include <buffer.h>
-//
-//int main(void){
-//	printf("Earley parsing stdin ... \n.");
-//	
-//	int c;	
-//	let b = Buffer::create(101);
-//	while ( (c = fgetc(stdin)) != EOF )
-//   	Buffer::add_char(b,c);
-//
-//	let dfa_rep = 0;
-//	let $(trees,valid,valid_prefix) = EarleyBackend::parse(dfa_rep,Buffer::contents(b));
-//	printf("done -- is valid string :%d; is valid prefix: %d\n",valid,valid_prefix);
-//}
 
 namespace EarleyBackend;
 
@@ -121,7 +124,7 @@ struct elink {
 typedef struct elink @`H elink_t;
 
 struct rstate {
-  DFA_TY dfa;
+  DFA::edfa_t dfa;
   Axarray::xarray_t<earley_state_t> estates;
   Hashtable::table_t<earley_node_t,List::list_t<struct elink @`H,`H>,`H> links;
   Hashtable::table_t<earley_node_t,$(Semiring::weight_t,Semiring::weight_t)@> weights; //PROB
@@ -145,8 +148,6 @@ static act_t repeat_decr_action() {
 static act_t repeat_final_action() {
   return 260;
 }
-
-#define MIN_ACTION 261
 
 const char ?act2symb(act_t act, Hashtable::table_t<act_t,str_t> as_table) {
   let sopt = Hashtable::lookup_opt(as_table,act);
@@ -187,7 +188,7 @@ void point_to(Hashtable::table_t<earley_node_t,List::list_t<`a,`H>,`H> tbl,
 // If can't be found, return NULL;
 $(unsigned int, unsigned int) *
 get_bounds(Hashtable::table_t<earley_node_t, list_t<elink_t>,`H> links,
-	   DFA_TY dfa,
+	   DFA::edfa_t dfa,
 	   earley_node_t en, act_t nt){
 
   let maybe_links = Hashtable::lookup_opt(links,en);
@@ -430,62 +431,6 @@ push_closure(rstate_t rs,
 	}
 }
 
-
-
-
-
-
-
-
-//namespace DFA {
-//st_t mk_call(dfa_kit_t dk, const char ?symb, st_t final) {
-//	// get symbol action
-//	let s_a = get_symb_action(dfa_kit, x);
-//	// get symbol start state
-//	let start = get_symb_start(dfa_kit, s_a);
-//	return mkcall_dfa(start,s_a);
-//}
-//
-//st_t mk_lit(dfa_kit_t dk, const char ?lit, st_t final){
-//	  assert (x[0] != '\0');
-//      int n = strlen(x);
-//      st_t dst = final;
-//	  for (int i=n-1; i >= 0; i--){
-//		  let s = new_dfa_state dfa_kit;
-//		  mkact_dfa(s,x[i],dst);
-//		  dst = s;
-//	  }
-//	  return dst;
-//}
-//
-//st_t mk_char(dfa_kit_t dk, char c, st_t final){
-//	
-//}
-//
-//}
-
-//st_t
-//pat2dfa0(rule_pat_t p, DFA::Kit::dfa_kit_t dfa_kit, st_t final){
-//  switch (p) {
-//  case &SymbPat(x):
-//  	fallthru(x);
-//  case &BinderPat(x):
-//	  return DFA::Kit::mk_call(dfa_kit,x,final);
-//  case &LitPat(x):
-//	  return DFA::Kit::mk_lit(dfa_kit,x,final);
-//  case &CharPat(c):
-//	  return DFA::Kit::mk_char(dfa_kit,c, final);
-//  case &SeqPat(p1,p2):
-//	  let s2 = pat2dfa0(p2,dfa_kit, final);
-//      return pat2dfa0(p1,dfa_kit, s2);
-//  }
-//}
-//
-//struct DFA::Rep::dfa_rep *pat2dfa(rule_pat_t p, DFA::Kit::dfa_kit_t dfa_kit){
-//	// TODO
-//	return NULL;
-//}
-
 shared_parse_tree_t
 mk_parse_forest(rstate_t rs,
 		 string_t input,
@@ -658,7 +603,7 @@ mk_parse_tree(rstate_t rs,
 
 
 $(List::list_t<$(parse_tree_t,Semiring::weight_t)@>,int,int) 
-parse(DFA_TY dfa, const char? input) {
+parse(DFA::edfa_t dfa, const char? input) {
 	/* Keep track of parse trees */
 	let
 	links = Hashtable::create(11,earley_node_cmp,earley_node_hash);

@@ -23,9 +23,9 @@ using Semiring;
 
 namespace Earley;
 
-string_t eps_symb(string_t symb){
-	return aprintf("__EPSILON-%s",symb);
-}
+//string_t eps_symb(string_t symb){
+//	return aprintf("__EPSILON-%s",symb);
+//}
 
 /* Global variable that saves last derivation tree.*/
 datatype ParseTree *last_derivation_tree = NULL;
@@ -150,8 +150,9 @@ struct symbInfo {
 };
 
 Hashtable::table_t<act_t,str_t> get_as_table(symb_info_t si){return si->action_symb_table;}
+Hashtable::table_t<str_t,act_t> get_sa_table(symb_info_t si){return si->symb_action_table;}
 
-static act_t callout_action() {
+act_t callout_action() {
   return 256;
 }
 static act_t repeat_action() {
@@ -168,7 +169,9 @@ static act_t repeat_final_action() {
   return 260;
 }
 
-#define MIN_ACTION 261
+act_t start_states_table_action(){
+	return 261;
+}
 
 symb_info_t new_symb_info(){
   struct Hashtable::Table<act_t,str_t> @ as_table =
@@ -178,6 +181,7 @@ symb_info_t new_symb_info(){
   Hashtable::insert(as_table,repeat_decr_action(),new "REPEAT-DECR");
   Hashtable::insert(as_table,repeat_final_action(),new "REPEAT-FINAL");
   Hashtable::insert(as_table,final_st_action(),new "FINAL-STATE");
+  Hashtable::insert(as_table,start_states_table_action(),new "__START-STATES-TABLE__");
 
   struct Hashtable::Table<str_t,act_t> @sa_table =
     Hashtable::create(11,strptrcmp,Hashtable::hash_stringptr);
@@ -186,6 +190,7 @@ symb_info_t new_symb_info(){
   Hashtable::insert(sa_table,new "REPEAT-DECR",repeat_decr_action());
   Hashtable::insert(sa_table,new "REPEAT-FINAL",repeat_final_action());
   Hashtable::insert(sa_table,new "FINAL-STATE",final_st_action());
+  Hashtable::insert(sa_table,new "__START-STATES-TABLE__",start_states_table_action());
 
   let ssnf_table = Hashtable::create(11,strptrcmp,Hashtable::hash_stringptr);
 
@@ -209,6 +214,9 @@ static cs_t repeat_cs() {
 }
 static cs_t final_st_cs() {
   return cs_singleton(final_st_action());
+}
+static cs_t start_states_table_cs() {
+  return cs_singleton(start_states_table_action());
 }
 const char ?act2symb(act_t act, Hashtable::table_t<act_t,str_t> as_table) {
 ////////////////////////////////////////////////////////////////////////
@@ -244,7 +252,7 @@ void act2symb_haxe(FILE @f, symb_info_t si) {
     fprintf(f,"}\n");
 }
 
-static act_t symb2act(const char ?`H symb, symb_info_t si) {
+act_t symb2act(string_t<`H> symb, symb_info_t si) {
 //   let symbptr = new symb;
   let symbptr = new (const char ?)aprintf("%s",symb);
   let aptr = Hashtable::lookup_opt(si->symb_action_table,symbptr);
@@ -643,14 +651,17 @@ st_t rule2wfsm0(FILE@f_fsm, Hashtable::table_t<str_t,st_t> symb_st,
       Hashtable::insert(symb_st,xptr,s);
       let $(s_body,f_body,e_body) = merge_wfsm(f_fsm,symb_st,grm,x_rule,symb_info);
       if (empty_rule(SYMB(x))){
-#ifdef NULL_PLAN_B      	
+#if defined(NULL_PLAN_B)     	
       	final_fsm(f_fsm, s, e_body,x); // merge_wfsm does not do this
-#elif defined(NULL_PLAN_C)
-      	final_fsm(f_fsm, s, s,eps_symb(x));
+#elif defined(NULL_PLAN_C) 
+      	let s2 = nfa_fresh_state();
+      	action_fsm(f_fsm, s,EPSILON,s2, Semiring::from_inv_prob(2));
+        etrans_fsm(f_fsm, s,s_body,Semiring::from_inv_prob(2));
+      	final_w_fsm(f_fsm, s, s2,x);
 #endif
       }
-      final_fsm(f_fsm, s, f_body,x); // merge_wfsm does not do this
       etrans_fsm(f_fsm, s,s_body,Semiring::one_weight);
+      final_fsm(f_fsm, s, f_body,x); // merge_wfsm does not do this
       x_start = s;
     }
     let s = nfa_fresh_state();
@@ -669,30 +680,6 @@ st_t rule2wfsm0(FILE@f_fsm, Hashtable::table_t<str_t,st_t> symb_st,
       etrans_fsm(f_fsm, s, s2,Semiring::one_weight);
       etrans_fsm(f_fsm, s2,f,Semiring::from_inv_prob(2));
       single_action_fsm(f_fsm, s2,symb2act(x,symb_info),x,f,Semiring::from_inv_prob(2));
-    } else 
-#elif defined(NULL_PLAN_C)
-    if (empty_rule(SYMB(x))){
-//    /* If the symbol can derive the empty string make sure this gets
-//       reflected into the automaton --- effectively doing a RETURN in
-//       the automaton instead of the Earley evaluator itself */
-//      single_action_fsm(f_fsm, s,callout_action(),"CALL",x_start, Semiring::zero_weight);
-//      etrans_fsm(f_fsm, s, s2,Semiring::one_weight);
-//      etrans_fsm(f_fsm, s2,f,Semiring::from_inv_prob(2));
-//      single_action_fsm(f_fsm, s2,symb2act(x,symb_info),x,f,Semiring::from_inv_prob(2));
-      /* If the symbol can derive the empty string make sure this gets
-         reflected into the automaton */
-      let s3 = nfa_fresh_state();
-
-			single_action_fsm(f_fsm, s, callout_action(), "CALL", x_start,
-					Semiring::zero_weight);
-			etrans_fsm(f_fsm, s, s2, Semiring::one_weight);
-
-			single_action_fsm(f_fsm, s2, symb2act(x, symb_info), x, f,
-					Semiring::from_inv_prob(2));
-			etrans_fsm(f_fsm, s2, s3, Semiring::from_inv_prob(2));
-
-			single_action_fsm(f_fsm, s3, symb2act(eps_symb(x), symb_info), eps_symb(x), f, 
-					Semiring::one_weight);
     } else 
 #endif    	
     {
@@ -847,14 +834,17 @@ $(st_t,st_t,st_t)
       // 1. need e_body too??? Yes, in case symb is nullable.      
       // 2. only marked final in FSM because this is a symbol.
       if (empty_rule(SYMB(x))){
-#ifdef NULL_PLAN_B      	
+#if defined(NULL_PLAN_B)      	
       	final_fsm(f_fsm, s, e_body,x); // merge_wfsm does not do this
 #elif defined(NULL_PLAN_C)
-      	final_fsm(f_fsm, s, s,eps_symb(x));
+      	let s2 = nfa_fresh_state();
+      	action_fsm(f_fsm, s,EPSILON,s2, Semiring::from_inv_prob(2));
+        etrans_fsm(f_fsm, s,s_body,Semiring::from_inv_prob(2));
+      	final_w_fsm(f_fsm, s, s2,x);
 #endif
       }
-      final_fsm(f_fsm, s, f_body, x); // merge_wfsm does not do this
       etrans_fsm(f_fsm, s,s_body,Semiring::one_weight);
+      final_fsm(f_fsm, s, f_body, x); // merge_wfsm does not do this
       x_start = s;
     }
     let s = nfa_fresh_state();
@@ -871,34 +861,6 @@ $(st_t,st_t,st_t)
 			etrans_fsm(f_fsm, s, s2,Semiring::one_weight);
 			etrans_fsm(f_fsm, s2,e,Semiring::from_inv_prob(2));
 			single_action_fsm(f_fsm, s2,symb2act(x,symb_info),x,f,Semiring::from_inv_prob(2));
-    } else 
-#elif defined(NULL_PLAN_C)
-    if (empty_rule(SYMB(x))){
-    	//    /* If the symbol can derive the empty string make sure this gets
-    	//       reflected into the automaton --- effectively doing a RETURN in
-    	//       the automaton instead of the Earley evaluator itself */
-    	//      let s2 = nfa_fresh_state();
-    	//      action_fsm(f_fsm, s,EPSILON,x_start, Semiring::one_weight);
-    	//      etrans_fsm(f_fsm, s, s2,Semiring::one_weight);
-    	//      etrans_fsm(f_fsm, s2,e,Semiring::from_inv_prob(2));
-    	//      single_action_fsm(f_fsm, s2,symb2act(x,symb_info),x,f,Semiring::from_inv_prob(2));
-    /* If the symbol can derive the empty string make sure this gets
-       reflected into the automaton. */
-      let s2 = nfa_fresh_state();
-      let s3 = nfa_fresh_state();
-      
-      action_fsm(f_fsm, s,EPSILON,x_start, 
-      		Semiring::one_weight);
-      etrans_fsm(f_fsm, s, s2,
-      		Semiring::one_weight);
-
-      single_action_fsm(f_fsm, s2, symb2act(x,symb_info), x, f, 
-      		Semiring::from_inv_prob(2));
-      etrans_fsm(f_fsm,        s2, s3, 
-      		Semiring::from_inv_prob(2));
-
-      single_action_fsm(f_fsm, s3, symb2act(eps_symb(x),symb_info), eps_symb(x), e, 
-      		Semiring::one_weight);
     } else 
 #endif    	
     {

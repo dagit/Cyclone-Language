@@ -542,6 +542,12 @@ struct DFA {
   unsigned int ?ranges;
   unsigned int number_of_actions; // numelts(ranges)-1
 };
+
+unsigned int dfa_get_num_states(dfa_t dfa){
+	return dfa->number_of_states;
+}
+
+
 int dfa_is_final(dfa_t dfa,st_t s) {
   return Set::member(dfa->final_states,s);
 }
@@ -641,6 +647,24 @@ aset_t dfa_get_transitions(dfa_t dfa,st_t s) {
     } else // skips this span
       lb = sp->hd->ub;
   }
+
+  return txs;
+}
+
+List::list_t<$(act_t,st_t)@> dfa_get_trans_map(dfa_t dfa,st_t s) {
+  let t = Axarray::get(dfa->states,s);
+  let txs = NULL;
+  if (!t) return txs; /* target is the dead state */
+
+  let lb = t->lb;
+  for (let sp = t->spans; sp; sp = sp->tl) {
+		if (sp->hd->target) { // add every element of this span to txs.
+			for (int ub = sp->hd->ub; lb < ub; lb++)
+				txs = new List::List(new $(lb, sp->hd->target), txs);
+		} else
+			// skips this span
+			lb = sp->hd->ub;
+	}
 
   return txs;
 }

@@ -44,7 +44,7 @@ indexercrawl-cyc.o: indexercrawl.cyc
 	cyclone $(CYCFLAGS) -o $@ -c -DUSE_COMPILED_DFA $<
 	
 indexercrawl-dfa.o: indexercrawl.o
-	cp $< $@
+	cyclone $(CYCFLAGS) -o $@ -c -DUSE_FSM_DFA $< 
 
 indexercrawl.cyc: $(indexer_BNF) yakker crawl-main.cyc
 	./yakker -flatten-full -gen-crawl $(indexer_START) $< > $@

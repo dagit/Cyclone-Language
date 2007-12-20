@@ -2,8 +2,9 @@
 #include <buffer.h>
 #include "earley-backend.h"
 
-#ifndef USE_COMPILED_DFA
 #include "dfa.h"
+
+#ifndef USE_COMPILED_DFA
 #include "earley.h"
 #endif
 
@@ -36,8 +37,7 @@ int main(int argc, const char ?`H?argv) {
   fprintf(stderr,"Successfully reconstructed DFA.\n");
   
   let $(dfa,dfa_final,symb_info) = *r;
-  let dfa_rep = new DFA::Rep::dfa_rep(dfa,1,dfa_final,
-  		Earley::get_as_table(symb_info));
+  let dfa_rep = DFA::create_edfa(dfa,symb_info);
 #endif
   
 	let input = Buffer::contents(b);

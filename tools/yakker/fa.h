@@ -66,6 +66,12 @@ extern Semiring::weight_t dfa_final_weight(dfa_t dfa,st_t s);
 extern dfa_t lookahead_dfa(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt);
 extern void dfa_generate1(dfa_t dfa);
 extern void dfa_generate2(dfa_t dfa, int lazyfill);
+
+extern void dfa_add_trans(dfa_t dfa,st_t s, st_t dst, act_t act, Semiring::weight_t w);
+extern unsigned int dfa_get_num_states(dfa_t dfa);
+extern st_t dfa_fresh_state(dfa_t dfa);
+extern List::list_t<$(act_t,st_t)@> dfa_get_trans_map(dfa_t dfa,st_t s);
+
 extern void lookahead_glush(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt);
 
 extern void nfa_dot(FILE @f,Set::set_t<st_t> final_states, cs_pred_t special);

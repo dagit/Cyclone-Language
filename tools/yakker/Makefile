@@ -21,6 +21,8 @@ CURDIR=$(shell pwd)
 
 PROG=yakker$(EXE)
 
+LIB_YAKKER=libyakker.a
+
 # Set this to yakker to make all targets generated with yakker depend
 # on yakker.  Useful to turn off when simultenously modifying yakker
 # and working on a program based on generated code.
@@ -55,6 +57,12 @@ PROG_PA=$(PROG)_a
 
 DEPENDS:=$(foreach file,$(FILES),build/$(file).d)
 
+define ARCHIVE
+	-$(RM) $@
+	$(AR) rc $@ $^
+	$(RANLIB) $@
+endef
+
 #######################################
 ## Earley-related variables
 #######################################
@@ -64,8 +72,15 @@ EBE_FILES = analyze axarray cs bnf  semiring fa nfa_lazy nfa_eager \
   util namespaces
 
 EBE_CYC_FILES = $(EBE_FILES)  earley-backend-c
+EBE_CYC_OBJS := $(foreach file,$(EBE_CYC_FILES),$(file).o) 
 EBE_DFA_FILES = $(EBE_FILES)  earley-backend-i
-  
+
+#######################################
+## libyakker-related variables
+#######################################
+
+LIB_YAKKER_FILES = ykbuf ssl
+LIB_YAKKER_OBJS := $(EBE_CYC_OBJS) $(foreach file,$(LIB_YAKKER_FILES),$(file).o)
 
 ###############################################################################
 # Targets
@@ -100,13 +115,37 @@ indexer.o: indexer.cyc
 indexer.cyc: examples/indexer.yk $(PROG_DEP)
 	./yakker $(YAKFLAGS) -gen entry-list $< > $@
 
+#########################
+## Earley-backend targets
+
+$(LIB_YAKKER) : $(LIB_YAKKER_OBJS)
+	$(ARCHIVE)
+    
+earley-backend-c.o: earley-backend.cyc
+	cyclone $(CYCFLAGS) -o $@ -c -DUSE_COMPILED_DFA $< 
+
+earley-backend-i.o: earley-backend.cyc
+	cyclone $(CYCFLAGS) -o $@ -c -DUSE_FSM_DFA $< 
+
+parse-main-c.o: parse-main.cyc
+	cyclone $(CYCFLAGS) -o $@ -c -DUSE_COMPILED_DFA $< 
+
+parse-main-i.o: parse-main.cyc
+	cyclone $(CYCFLAGS) -o $@ -c -DUSE_FSM_DFA $< 
+
 include examples/abnf-echo.mk
 
-abnf-echo: abnf-echo.o bnf.o cs.o pr.o util.o ykbuf.o ssl.o
+abnf-echo: abnf-echo.o $(LIB_YAKKER)
 	cyclone -o $@ $^  -lssl -lcrypto
 
-abnf-echo-earley-cyc: $(AE_CYC_CR_OBJS)
-	cyclone -o $@ $^  -lssl -lm
+#abnf-echo: abnf-echo.o bnf.o cs.o pr.o util.o ykbuf.o ssl.o
+#	cyclone -o $@ $^  -lssl -lcrypto
+
+#abnf-echo-earley-cyc: $(AE_CYC_CR_OBJS) $(EBE_CYC_OBJS)
+#	cyclone -o $@ $(AE_CYC_CR_OBJS) $(EBE_CYC_OBJS) -lssl -lm -L. -lebe_c
+	
+abnf-echo-earley-cyc: $(AE_CYC_CR_OBJS) $(LIB_YAKKER)
+	cyclone -o $@ $(AE_CYC_CR_OBJS) -lssl -lm $(LIB_YAKKER)
 
 abnf-echo-earley-dfa: $(AE_DFA_CR_OBJS)
 	cyclone -o $@ $^ -lssl -lm

@@ -6,16 +6,7 @@
 //#include "pm_bnf.h"
 #include "semiring.h"
 
-#ifdef USE_COMPILED_DFA
-
-#define DFA_TY int
-
-#else
-
 #include "dfa.h"
-#define DFA_TY DFA::Rep::dfa_rep_t
-
-#endif
 
 namespace EarleyBackend {
 
@@ -44,7 +35,7 @@ namespace EarleyBackend {
   };
 
 	extern $(List::list_t<$(parse_tree_t,Semiring::weight_t)@>,int,int)
-	parse(DFA_TY dfa_rep, const char? input);
+	parse(DFA::edfa_t dfa_rep, const char? input);
   extern void print_LT(datatype SharedParseTree @pt, int depth);
   extern void print_tree(parse_tree_t pt, int depth);
 }

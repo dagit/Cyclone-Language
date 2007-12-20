@@ -39,7 +39,7 @@ calccrawl-cyc.o: calccrawl.cyc
 	cyclone $(CYCFLAGS) -o $@ -c -DUSE_COMPILED_DFA $<
 	
 calccrawl-dfa.o: calccrawl.o
-	cp $< $@
+	cyclone $(CYCFLAGS) -o $@ -c -DUSE_FSM_DFA $< 
 
 calccrawl.cyc: examples/calc.bnf yakker crawl-main.cyc
 	./yakker -flatten-full -gen-crawl start $< > $@
