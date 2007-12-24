@@ -4,12 +4,19 @@
 #include "semiring.h"
 #include "earley.h"
 #include "dfa.h"
+
+// TODO: generalize this.
+#define USE_FSM_DFA
 #include "dfa-impl.h"
 
-namespace ExtensibleDFA {
+namespace ExtDFA; 
+
+//////////////////////////////////
+// Internally-visible functions //
+//////////////////////////////////
 
 struct ext_edfa {
-  DFA::grammar_edfa_t grm_dfa;
+  EarleyFsmBackend::DFA::grammar_edfa_t grm_dfa;
   // Extensions to the transition function
   Hashtable::table_t<$(st_t,act_t) @`H, $(st_t,Semiring::weight_t) @`H> trans_exts;
   unsigned int number_of_states;
@@ -17,7 +24,8 @@ struct ext_edfa {
 
 typedef struct ext_edfa @ext_edfa_t;
 
-extern ext_edfa_t create_ext_edfa(DFA::grammar_edfa_t gd);
+// Extension functions
+extern ext_edfa_t create_ext_edfa(EarleyFsmBackend::DFA::grammar_edfa_t gd);
 
 // Get the symbol-action for the specified symbol.
 extern act_t get_symb_action(ext_edfa_t ed, string_t<`H> symb);
@@ -35,9 +43,7 @@ extern st_t fresh_state(ext_edfa_t ed);
 extern st_t mk_call(ext_edfa_t ed, string_t<`H> symb, st_t final);
 extern st_t mk_lit(ext_edfa_t ed, string_t lit, st_t final);
 extern st_t mk_char(ext_edfa_t ed, unsigned int c, st_t final);
-}
 
-namespace ExtensibleDFA {
 static int st_act_cmp($(st_t,act_t) @sa1,$(st_t,act_t) @sa2) {
   let c_st = st_cmp(sa1->f0,sa2->f0);
   if (c_st) return c_st;
@@ -48,31 +54,32 @@ static int st_act_hash($(st_t,act_t) @sa) {
   return st_hash(sa->f0) ^ act_hash(sa->f1);
 }
 
-ext_edfa_t create_ext_edfa(DFA::grammar_edfa_t gd) {
+static ext_edfa_t create_ext_edfa(EarleyFsmBackend::DFA::grammar_edfa_t gd) {
   return new ext_edfa(gd,
       Hashtable::create(50,st_act_cmp,st_act_hash),
       GRM_DFA_GET_NUM_STATES(gd));
 }
 
-void add_trans(ext_edfa_t ed, st_t s, act_t a, st_t f, Semiring::weight_t w) {
+static void add_trans(ext_edfa_t ed, st_t s, act_t a, st_t f, Semiring::weight_t w) {
   Hashtable::insert(ed->trans_exts, new $(s,a), new $(f,w));
 }
-st_t fresh_state(ext_edfa_t ed) {
+
+static st_t fresh_state(ext_edfa_t ed) {
   return ed->number_of_states++;
 }
 
 // Get the start state for the specified symbol-action.
-st_t get_symb_start(ext_edfa_t ed, act_t symb_act) {
+static st_t get_symb_start(ext_edfa_t ed, act_t symb_act) {
   return GRM_DFA_GET_SYMB_START(ed->grm_dfa,symb_act);
 }
 
-act_t get_symb_action(ext_edfa_t ed, string_t<`H> symb) {
+static act_t get_symb_action(ext_edfa_t ed, string_t<`H> symb) {
   return GRM_DFA_GET_SYMB_ACTION(ed->grm_dfa,symb);
 }
 
 #define CASE_INSENSITIVE 1
 
-st_t mk_call(ext_edfa_t ed, string_t<`H> symb, st_t final) {
+static st_t mk_call(ext_edfa_t ed, string_t<`H> symb, st_t final) {
   // get symbol action
   let s_a = get_symb_action(ed, symb);
   // get symbol start state
@@ -83,7 +90,7 @@ st_t mk_call(ext_edfa_t ed, string_t<`H> symb, st_t final) {
   return s;
 }
 
-st_t mk_lit(ext_edfa_t ed, string_t lit, st_t final) {
+static st_t mk_lit(ext_edfa_t ed, string_t lit, st_t final) {
   assert (lit[0] != '\0');
   int n = strlen(lit);
   st_t dst = final;
@@ -101,7 +108,7 @@ st_t mk_lit(ext_edfa_t ed, string_t lit, st_t final) {
   return dst;
 }
 
-st_t mk_char(ext_edfa_t ed, unsigned int c, st_t final) {
+static st_t mk_char(ext_edfa_t ed, unsigned int c, st_t final) {
   let s = fresh_state(ed);
   if (CASE_INSENSITIVE && tolower(c) != toupper(c)) {
     let w = Semiring::from_inv_prob(2);
@@ -112,9 +119,47 @@ st_t mk_char(ext_edfa_t ed, unsigned int c, st_t final) {
   add_trans(ed, s,c,final,Semiring::one_weight);
   return s;
 }
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Externally-visible functions
+/////////////////////////////////
+
+using EarleyExtFsmBackend;
+
+st_t trans(DFA::edfa_t ed, st_t s, act_t a){
+  return DFA_TRANS(ed->d,s,a);
 }
 
-st_t pat2dfa0(rule_pat_t p, ExtensibleDFA::ext_edfa_t ed, st_t final) {
+$(st_t,Semiring::weight_t) trans_w(DFA::edfa_t ed, st_t s, act_t a){
+  return DFA_TRANS_W(ed->d,s,a);
+}
+
+int in_final(DFA::edfa_t ed, act_t a, st_t s){
+  return DFA_IN_FINAL(ed->d,a,s);
+}
+
+int is_final(DFA::edfa_t ed, st_t s){
+  return DFA_IS_FINAL(ed->d,s);
+}
+
+Semiring::weight_t final_weight(DFA::edfa_t ed, st_t s){
+  return DFA_FINAL_WEIGHT(ed->d,s);
+}
+
+act_t ?final_attrs(DFA::edfa_t ed, st_t s){
+  return DFA_FINAL_ATTRS(ed->d,s);
+}
+
+st_t get_start(DFA::edfa_t ed){
+  return DFA_GET_START(ed->d);
+}
+
+string_t act_2_symb(DFA::edfa_t ed, act_t a){
+  return DFA_ACT2SYMB(ed->d, a);
+}
+
+static st_t pat2dfa0(rule_pat_t p, ext_edfa_t ed, st_t final) {
   switch (p) {
   case &SymbPat(x):
     fallthru(x);
@@ -122,21 +167,21 @@ st_t pat2dfa0(rule_pat_t p, ExtensibleDFA::ext_edfa_t ed, st_t final) {
     // TODO: mk_call will need to somehow ensure that if this is executed, the data is bound.
     // This will need t o be done in a crawl because of ambiguity issues (e.g. you can start a 
     // path which doesn't complete, so don't want to bind until you know that path completed).
-    return ExtensibleDFA::mk_call(ed, x, final);
+    return mk_call(ed, x, final);
   case &LitPat(x):
-    return ExtensibleDFA::mk_lit(ed, x, final);
+    return mk_lit(ed, x, final);
   case &CharPat(c):
-    return ExtensibleDFA::mk_char(ed, c, final);
+    return mk_char(ed, c, final);
   case &SeqPat(p1, p2):
     let s2 = pat2dfa0(p2, ed, final);
     return pat2dfa0(p1, ed, s2);
   }
 }
 
-ExtensibleDFA::ext_edfa_t pat2dfa(rule_pat_t p, DFA::grammar_edfa_t grm_dfa) {
-  let ed = ExtensibleDFA::create_ext_edfa(grm_dfa);
-  let final_state = ExtensibleDFA::fresh_state(ed);
+DFA::edfa_t pat2dfa(rule_pat_t p, EarleyFsmBackend::DFA::grammar_edfa_t grm_dfa) {
+  let ed = create_ext_edfa(grm_dfa);
+  let final_state = fresh_state(ed);
   let start_state = pat2dfa0(p, ed, final_state);
-  return ed;
+  return new DFA::edfa(GRM_DFA_GET_DFA(grm_dfa,start_state), ed->trans_exts);
 }
 

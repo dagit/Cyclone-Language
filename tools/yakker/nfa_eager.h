@@ -53,7 +53,8 @@ extern void etrans_fsm(FILE@ f_fsm, st_t a, st_t b, Semiring::weight_t w);
 extern void action_fsm(FILE@ f_fsm, st_t from, cs_opt_t x, st_t to, 
 		       Semiring::weight_t w);
 
- extern void single_action_fsm(FILE@ f_fsm, st_t from, act_t x, const char ? name,
+// transition on a named action.
+extern void single_action_fsm(FILE@ f_fsm, st_t from, act_t x, const char ? name,
 			       st_t to, Semiring::weight_t w);
 
 extern st_t mkact_fsm(FILE@ f_fsm, cs_t x);

@@ -77,13 +77,16 @@ EBE_CYC_FILES = earley-backend-c
 EBE_CYC_OBJS := $(foreach file,$(EBE_CYC_FILES),$(file).o) 
 EBE_DFA_FILES = earley-backend-i
 EBE_DFA_OBJS := $(foreach file,$(EBE_DFA_FILES),$(file).o) 
+EBE_EXT_FILES = earley-backend-e ext-dfa
+EBE_EXT_OBJS := $(foreach file,$(EBE_EXT_FILES),$(file).o) 
 
 #######################################
 ## libyakker-related variables
 #######################################
 
 LIB_YAKKER_FILES = ykbuf ssl
-LIB_YAKKER_OBJS := $(EBE_OBJS) $(EBE_CYC_OBJS) $(EBE_DFA_OBJS) $(foreach file,$(LIB_YAKKER_FILES),$(file).o)
+LIB_YAKKER_OBJS := $(EBE_OBJS) $(EBE_CYC_OBJS) $(EBE_DFA_OBJS) $(EBE_EXT_OBJS) \
+                   $(foreach file,$(LIB_YAKKER_FILES),$(file).o)
 
 ###############################################################################
 # Targets
@@ -130,11 +133,8 @@ earley-backend-c.o: earley-backend.cyc
 earley-backend-i.o: earley-backend.cyc
 	$(CYCLONE) $(CYCFLAGS) -o $@ -c -DUSE_FSM_DFA $< 
 
-ext-dfa-c.o: ext-dfa.cyc
-	$(CYCLONE) $(CYCFLAGS) -o $@ -c -DUSE_COMPILED_DFA $< 
-
-ext-dfa-i.o: ext-dfa.cyc
-	$(CYCLONE) $(CYCFLAGS) -o $@ -c -DUSE_FSM_DFA $< 
+earley-backend-e.o: earley-backend.cyc
+	$(CYCLONE) $(CYCFLAGS) -o $@ -c -DUSE_EXT_DFA $< 
 
 include examples/abnf-echo.mk
 

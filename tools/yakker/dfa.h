@@ -1,3 +1,6 @@
+#ifndef DFA_H_
+#define DFA_H_
+
 #include <set.h>
 #include <hashtable.h>
 #include "fa.h"
@@ -22,20 +25,13 @@
 
 
 
-#ifdef USE_COMPILED_DFA
-#ifndef DFA_H_CYC_
-#define DFA_H_CYC_
 namespace EarleyCycBackend{
 namespace DFA {
   typedef int edfa_t;
   typedef int grammar_edfa_t;
 }
 }
-#endif
 
-#elif defined(USE_FSM_DFA)
-#ifndef DFA_H_FSM_
-#define DFA_H_FSM_
 namespace EarleyFsmBackend{
 namespace DFA {
   struct edfa {
@@ -58,27 +54,18 @@ namespace DFA {
   typedef struct grammar_edfa @grammar_edfa_t;
 }
 }
-#endif
 
-#elif defined(USE_EXT_DFA)
-#ifndef DFA_H_EXT_
-#define DFA_H_EXT_
-namespace EarleyExtBackend {
+namespace EarleyExtFsmBackend {
 namespace DFA {
   struct edfa {
-    dfa_t d;
-    st_t start;
-    Hashtable::table_t<act_t,str_t> action_symb_table;
+    EarleyFsmBackend::DFA::edfa_t d;
+    Hashtable::table_t<$(st_t,act_t) @`H, $(st_t,Semiring::weight_t) @`H> trans_exts;
   };
 
   typedef struct edfa@ edfa_t;
-
-  typedef int grammar_edfa_t;
 }
-}
-#endif
 
-#else
-#error "No DFA implementation specified."
-#endif
+}
+
+#endif /*DFA_H_*/
 

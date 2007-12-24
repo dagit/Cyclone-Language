@@ -254,6 +254,7 @@ void act2symb_haxe(FILE @f, symb_info_t si) {
 
 act_t symb2act(string_t<`H> symb, symb_info_t si) {
 //   let symbptr = new symb;
+  // TODO: document why we copy the string in the line below.
   let symbptr = new (const char ?)aprintf("%s",symb);
   let aptr = Hashtable::lookup_opt(si->symb_action_table,symbptr);
   if (aptr != NULL) return *aptr;
@@ -624,11 +625,53 @@ $(st_t,st_t,st_t)
   }
 }
 
+/****************************************************/
+/* Weighted FSM version of rule2earley and merge.   */
+/****************************************************/
 $(st_t,st_t,st_t)
 merge_wfsm(FILE@f_fsm, Hashtable::table_t<str_t,st_t> symb_st,
         grammar_t grm,
         rule_t r,
-	symb_info_t symb_info);
+        symb_info_t symb_info);
+
+/* Convert symbol symb to NFA and add to table. */
+static st_t add_symb_nfa_wfsm(FILE@f_fsm,
+    Hashtable::table_t<str_t,st_t> symb_st, grammar_t grm, string_t<`H> symb,
+    symb_info_t symb_info) {
+  
+  let symb_ptr = new symb;
+  st_t symb_start; /* start state of the NFA for the symbol */
+  if (Hashtable::try_lookup(symb_st,symb_ptr,&symb_start)) {
+    return symb_start;
+  }
+  /* Symbol has not been converted to NFA yet */
+  Rule_t symb_rule = lookup_symbol(grm, symb);
+  if (!symb_rule) {
+    throw new Core::Invalid_argument(
+        aprintf("missing definition for %s in add_symb_nfa_wfsm\n", symb));
+  }
+  /* Allocate a start state for the symbol.  Do this before
+   converting to NFA in case the symbol is defined recursively. */
+  let s = nfa_fresh_state();
+  let f = nfa_fresh_state();
+  Hashtable::insert(symb_st, symb_ptr, s);
+  let $(s_body, f_body, e_body) = merge_wfsm(f_fsm,symb_st,grm,symb_rule,symb_info);
+  // 1. need e_body too??? Yes, in case symb is nullable.      
+  // 2. only marked final in FSM because this is a symbol.
+  if (empty_rule(SYMB(symb))) {
+#if defined(NULL_PLAN_B)        
+    final_fsm(f_fsm, s, e_body,symb); // merge_wfsm does not do this
+#elif defined(NULL_PLAN_C)
+    let s2 = nfa_fresh_state();
+    action_fsm(f_fsm, s,EPSILON,s2, Semiring::from_inv_prob(2));
+    etrans_fsm(f_fsm, s,s_body,Semiring::from_inv_prob(2));
+    final_w_fsm(f_fsm, s, s2,symb);
+#endif
+  }
+  etrans_fsm(f_fsm, s, s_body, Semiring::one_weight);
+  final_fsm(f_fsm, s, f_body, symb); // merge_wfsm does not do this
+  return s;
+}
 
 st_t rule2wfsm0(FILE@f_fsm, Hashtable::table_t<str_t,st_t> symb_st,
                   grammar_t grm,
@@ -636,34 +679,16 @@ st_t rule2wfsm0(FILE@f_fsm, Hashtable::table_t<str_t,st_t> symb_st,
 		  symb_info_t symb_info) {
   switch (r->r) {
   case &Symb(x,_):
-    let xptr = new x;
-    st_t x_start; /* start state of the NFA for the symbol */
-    if (!Hashtable::try_lookup(symb_st,xptr,&x_start)) {
-      /* Symbol has not been converted to NFA yet */
-      Rule_t x_rule = lookup_symbol(grm, x);
-      if (!x_rule) {
-	warn("missing definition for %s in rule2wfsm()\n",x);
-	return mklit("");
-      }
-      /* Allocate a start state for the symbol.  Do this before
-         converting to NFA in case the symbol is defined recursively. */
-      let s = nfa_fresh_state(); let f = nfa_fresh_state(); final(s,f);
-      Hashtable::insert(symb_st,xptr,s);
-      let $(s_body,f_body,e_body) = merge_wfsm(f_fsm,symb_st,grm,x_rule,symb_info);
-      if (empty_rule(SYMB(x))){
-#if defined(NULL_PLAN_B)     	
-      	final_fsm(f_fsm, s, e_body,x); // merge_wfsm does not do this
-#elif defined(NULL_PLAN_C) 
-      	let s2 = nfa_fresh_state();
-      	action_fsm(f_fsm, s,EPSILON,s2, Semiring::from_inv_prob(2));
-        etrans_fsm(f_fsm, s,s_body,Semiring::from_inv_prob(2));
-      	final_w_fsm(f_fsm, s, s2,x);
-#endif
-      }
-      etrans_fsm(f_fsm, s,s_body,Semiring::one_weight);
-      final_fsm(f_fsm, s, f_body,x); // merge_wfsm does not do this
-      x_start = s;
+    st_t x_start;
+    try {
+      x_start = add_symb_nfa_wfsm(f_fsm, symb_st, grm, x, symb_info);
+    } 
+    catch {
+    case &Core::Invalid_argument(msg):
+      warn("%s",msg);
+      return mklit_fsm(f_fsm, "");
     }
+
     let s = nfa_fresh_state();
     let s2 = nfa_fresh_state();
     let f = nfa_fresh_state(); final(s,f);
@@ -817,36 +842,16 @@ $(st_t,st_t,st_t)
 	symb_info_t symb_info) {
   switch (r->r) {
   case &Symb(x,_):
-    let xptr = new x;
-    st_t x_start; /* start state of the NFA for the symbol */
-    if (!Hashtable::try_lookup(symb_st,xptr,&x_start)) {
-      /* Symbol has not been converted to NFA yet */
-      Rule_t x_rule = lookup_symbol(grm, x);
-      if (!x_rule) {
-	warn("missing definition for %s in merge_wfsm(f_fsm,)\n",x);
-	return merge_wfsm(f_fsm,symb_st,grm,LIT(""),symb_info);
-      }
-      /* Allocate a start state for the symbol.  Do this before
-         converting to NFA in case the symbol is defined recursively. */
-      let s = nfa_fresh_state(); let f = nfa_fresh_state();
-      Hashtable::insert(symb_st,xptr,s);
-      let $(s_body,f_body,e_body) = merge_wfsm(f_fsm,symb_st,grm,x_rule,symb_info);
-      // 1. need e_body too??? Yes, in case symb is nullable.      
-      // 2. only marked final in FSM because this is a symbol.
-      if (empty_rule(SYMB(x))){
-#if defined(NULL_PLAN_B)      	
-      	final_fsm(f_fsm, s, e_body,x); // merge_wfsm does not do this
-#elif defined(NULL_PLAN_C)
-      	let s2 = nfa_fresh_state();
-      	action_fsm(f_fsm, s,EPSILON,s2, Semiring::from_inv_prob(2));
-        etrans_fsm(f_fsm, s,s_body,Semiring::from_inv_prob(2));
-      	final_w_fsm(f_fsm, s, s2,x);
-#endif
-      }
-      etrans_fsm(f_fsm, s,s_body,Semiring::one_weight);
-      final_fsm(f_fsm, s, f_body, x); // merge_wfsm does not do this
-      x_start = s;
+    st_t x_start;
+    try {
+      x_start = add_symb_nfa_wfsm(f_fsm, symb_st, grm, x, symb_info);
+    } 
+    catch {
+    case &Core::Invalid_argument(msg):
+      warn("%s",msg);
+      return merge_wfsm(f_fsm, symb_st, grm, LIT(""), symb_info);
     }
+
     let s = nfa_fresh_state();
     let e = nfa_fresh_state();
     let f = nfa_fresh_state();
@@ -854,13 +859,13 @@ $(st_t,st_t,st_t)
 #ifdef NULL_PLAN_A  
     if (empty_rule(SYMB(x))){
     /* If the symbol can derive the empty string make sure this gets
-			 reflected into the automaton --- effectively doing a RETURN in
-			 the automaton instead of the Earley evaluator itself */
-			let s2 = nfa_fresh_state();
-			action_fsm(f_fsm, s,EPSILON,x_start, Semiring::one_weight);
-			etrans_fsm(f_fsm, s, s2,Semiring::one_weight);
-			etrans_fsm(f_fsm, s2,e,Semiring::from_inv_prob(2));
-			single_action_fsm(f_fsm, s2,symb2act(x,symb_info),x,f,Semiring::from_inv_prob(2));
+       reflected into the automaton --- effectively doing a RETURN in
+       the automaton instead of the Earley evaluator itself */
+      let s2 = nfa_fresh_state();
+      action_fsm(f_fsm, s,EPSILON,x_start, Semiring::one_weight);
+      etrans_fsm(f_fsm, s, s2,Semiring::one_weight);
+      etrans_fsm(f_fsm, s2,e,Semiring::from_inv_prob(2));
+      single_action_fsm(f_fsm, s2,symb2act(x,symb_info),x,f,Semiring::from_inv_prob(2));
     } else 
 #endif    	
     {
@@ -1056,6 +1061,41 @@ void rule_fsm(const char ?fsm_file,const char ?sym_file, grammar_t grm, rule_t r
 //   let fsm_file = aprintf("%s.fsm",filename_base);
 //   FILE *f = fopen(fsm_file,"w");
 //   if (f) { nfa_fsm(f,symb_final_states,symb_info->action_symb_table,act_table); fclose(f); }
+  else fprintf(stderr, "Failed to open file %s.\n",fsm_file);
+
+  FILE *f = fopen(sym_file,"w");
+  if (f) {
+    fprintf(f,"%s",yk_inputs);
+    symbols_fsm(f,symb_info->action_symb_table);
+    fclose(f);
+  }
+  else fprintf(stderr, "Failed to open file %s.\n",sym_file);
+}
+
+void grammar_fsm(const char ?fsm_file,const char ?sym_file, grammar_t grm) {
+  /* Build the NFA for the grammar */
+  init_maybe_empty(grm);
+
+  /* symb_st maps symbols to start states */
+  Hashtable::table_t<str_t,st_t> symb_st =
+    Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr);
+
+  nfa_init(grm);
+  let symb_info = new_symb_info();
+
+  FILE *f = fopen(fsm_file,"w");
+  if (f) { 
+    // N.B. MUST ensure that start state is printed first.
+    let start_s = nfa_fresh_state();
+
+    for (let ds = grm; ds; ds = ds->tl){
+      let &$(n,r,_) = ds->hd;
+      st_t n_start = add_symb_nfa_wfsm(f, symb_st, grm, n, symb_info);
+      single_action_fsm(f, start_s, symb2act(n,symb_info), n,
+          n_start, Semiring::zero_weight);
+    }
+    fclose(f); 
+  }
   else fprintf(stderr, "Failed to open file %s.\n",fsm_file);
 
   FILE *f = fopen(sym_file,"w");

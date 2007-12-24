@@ -14,11 +14,11 @@ extern string_t act2symb(act_t a);
 }
 
 static int array_find(act_t ?arr,act_t a){
-	let n = numelts(arr);
-	for (int i=0; i<n; i++){
-		if (arr[i] == a) return i;
-	}
-	return -1;
+  let n = numelts(arr);
+  for (int i=0; i<n; i++){
+    if (arr[i] == a) return i;
+  }
+  return -1;
 }
 
 #define DFA_TRANS(dfa,s,a) ({let $(t,w) = CycDFA::transitions(s,a); t;})
@@ -34,11 +34,12 @@ static int array_find(act_t ?arr,act_t a){
 #define DFA_FINAL_WEIGHT(dfa,f) (CycDFA::is_final(f).f1)
 #define DFA_FINAL_ATTRS(dfa,f) CycDFA::attributes(f)
 #define DFA_GET_START(dfa) 1
-#define DFA_ACT2SYMB(dfa,a) CycDFA::act2symb(a);
+#define DFA_ACT2SYMB(dfa,a) CycDFA::act2symb(a)
 
+// TODO: Need to implement
 #define GRM_DFA_GET_SYMB_ACTION(dfa,symb) ({fprintf(stderr,"Failure: GRM_DFA_GET_SYMB_ACTION unimplemented.\n");exit(1);0;})
 #define GRM_DFA_GET_SYMB_START(dfa,a) ({fprintf(stderr,"Failure: GRM_DFA_GET_SYMB_START unimplemented.\n");exit(1);0;})
 #define GRM_DFA_GET_NUM_STATES(dfa) ({fprintf(stderr,"Failure: GRM_DFA_GET_NUM_STATES unimplemented.\n");exit(1);0;})
-
+#define GRM_DFA_GET_DFA(dfa,start) ({fprintf(stderr,"Failure: GRM_DFA_GET_DFA unimplemented.\n");exit(1);0;})
 
 #endif /*DFA_CYC_H_*/

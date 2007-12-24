@@ -82,6 +82,8 @@ namespace Earley {
   // numbers.
   extern void rule_fsm(const char ?fms_file,const char ?sym_file, grammar_t grm, rule_t r);
 
+  extern void grammar_fsm(const char ?fms_file,const char ?sym_file, grammar_t grm);
+
   extern void dfa2dot(dfa_t dfa, symb_info_t symb_info, const char ?dot_file);
   
   extern const char ?yk_inputs;
