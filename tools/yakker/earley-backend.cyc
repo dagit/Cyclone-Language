@@ -44,7 +44,7 @@ att_t ?`H wrap_final_attrs(dfa_t dfa,st_t s) {
 
 const char ?act2symb(act_t act, Hashtable::table_t<act_t,str_t> as_table) {
   let sopt = Hashtable::lookup_opt(as_table,act);
-  if (sopt == NULL || *sopt == NULL) return NULL;
+  if (sopt == NULL || *sopt == NULL) return "?unknown?";
   else return **sopt;
 }
 
@@ -71,7 +71,7 @@ EarleyFsmBackend::DFA::edfa_t grm_get_dfa(EarleyFsmBackend::DFA::grammar_edfa_t 
   return new EarleyFsmBackend::DFA::edfa(dfa->d,start,dfa->action_symb_table);
 }
 
-static EarleyFsmBackend::DFA::grammar_edfa_t fsm2grm_edfa(string_t filename) {
+EarleyFsmBackend::DFA::grammar_edfa_t fsm2grm_edfa(string_t filename) {
   let si = Earley::new_symb_info();
   let r = fsm_dfa(filename,Earley::symb2act,si);
   if (!r) throw new Core::Invalid_argument((const char ?)aprintf("Invalid DFA in file %s.",filename));
@@ -313,7 +313,7 @@ push_closure(rstate_t rs,
     // XXX: is it okay to return if the weight has changed???
     return;
   }
-  fprintf(stderr,"estates[%d] += (%d,%d)\n",i,ei->f0,ei->f1);fflush(stderr);
+  // fprintf(stderr,"estates[%d] += (%d,%d)\n",i,ei->f0,ei->f1);fflush(stderr);
   Axarray::set(rs->estates,i,Set::insert(es,ei));
 
   /* Close under CALLS. We don't use the weight here. */
@@ -681,7 +681,7 @@ static void dot_retn_iter(earley_node_t s, List::list_t<struct elink @`H,`H> ts,
   for (; ts; ts = ts->tl) {
     let r = ts->hd->retn;
     if (r != NULL){
-      let &$(ti,tj,tk) = r;
+      let $(ti,tj,tk) = *r;
       printf("\"(%d,%d,%d)\" -> ",si,sj,sk);
       printf("\"(%d,%d,%d)\"",ti,tj,tk);
       printf(" [ label = \"%s\" ];\n",DFA_ACT2SYMB(rs->dfa,ts->hd->resp_act));
@@ -767,7 +767,7 @@ parse(DFA::edfa_t dfa, const char? input) {
   let live = 1;
   for (i = 0; live && i < input_len; i++) {
     live = 0; // reset for this round.
-    fprintf(stderr,"input[%d]==%s\n",i,cs_char_escape(input[i]));fflush(stderr);
+    //fprintf(stderr,"input[%d]==%s\n",i,cs_char_escape(input[i]));fflush(stderr);
     for (let si_list = Set::to_list(Axarray::get(estates,i));
         si_list != NULL;
         si_list = si_list->tl) {
@@ -792,7 +792,7 @@ parse(DFA::edfa_t dfa, const char? input) {
     exit(1);
   } else {
     fprintf(stderr, "No parse errors detected. Searching for final states.\n");
-    rstate_dot(rs);
+    //rstate_dot(rs);
   }
   /* See if we ended up in a final state */
   let partial_parses = 0;

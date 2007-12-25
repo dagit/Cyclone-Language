@@ -6,6 +6,7 @@
 #include "fa.h"
 #include "axarray.h"
 #include "earley.h"
+#include "pm_bnf.h"
 //#include "util.h"
 
 /*
@@ -55,16 +56,28 @@ namespace DFA {
 }
 }
 
+namespace FsmDFA {
+extern EarleyFsmBackend::DFA::grammar_edfa_t fsm2grm_edfa(string_t filename);
+}
+
 namespace EarleyExtFsmBackend {
 namespace DFA {
   struct edfa {
     EarleyFsmBackend::DFA::edfa_t d;
+    st_t final; // final state of the DFA.
     Hashtable::table_t<$(st_t,act_t) @`H, $(st_t,Semiring::weight_t) @`H> trans_exts;
   };
 
   typedef struct edfa@ edfa_t;
 }
+}
 
+namespace ExtDFA{
+// build an extensible DFA from a grammar DFA.
+extern EarleyExtFsmBackend::DFA::edfa_t 
+pat2dfa(rule_pat_t p, EarleyFsmBackend::DFA::grammar_edfa_t grm_dfa);
+// Print an extensible DFA to stderr.
+extern void dfa_dot(EarleyExtFsmBackend::DFA::edfa_t ed);
 }
 
 #endif /*DFA_H_*/

@@ -24,9 +24,6 @@ extern act_t ?final_attrs(DFA::edfa_t ed, st_t s);
 extern st_t get_start(DFA::edfa_t ed);
 
 extern string_t act_2_symb(DFA::edfa_t ed, act_t a);
-
-extern DFA::edfa_t pat2dfa(rule_pat_t p, EarleyFsmBackend::DFA::grammar_edfa_t grm_dfa);
-
 }
 
 #define DFA_TRANS(dfa,s,a) (ExtDFA::trans(dfa,s,a))

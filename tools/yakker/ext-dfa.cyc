@@ -129,11 +129,21 @@ static st_t mk_char(ext_edfa_t ed, unsigned int c, st_t final) {
 using EarleyExtFsmBackend;
 
 st_t trans(DFA::edfa_t ed, st_t s, act_t a){
-  return DFA_TRANS(ed->d,s,a);
+  let t = DFA_TRANS(ed->d,s,a);
+  if (t) return t;
+  let p_tw_opt = Hashtable::lookup_opt(ed->trans_exts,new $(s,a));
+  if (!p_tw_opt)
+    return t;
+  return (*p_tw_opt)->f0;
 }
 
 $(st_t,Semiring::weight_t) trans_w(DFA::edfa_t ed, st_t s, act_t a){
-  return DFA_TRANS_W(ed->d,s,a);
+  let tw = DFA_TRANS_W(ed->d,s,a);
+  if (tw.f0) return tw;
+  let p_tw_opt = Hashtable::lookup_opt(ed->trans_exts,new $(s,a));
+  if (!p_tw_opt)
+    return tw;
+  return **p_tw_opt;
 }
 
 int in_final(DFA::edfa_t ed, act_t a, st_t s){
@@ -141,14 +151,18 @@ int in_final(DFA::edfa_t ed, act_t a, st_t s){
 }
 
 int is_final(DFA::edfa_t ed, st_t s){
-  return DFA_IS_FINAL(ed->d,s);
+  return DFA_IS_FINAL(ed->d,s) || s == ed->final;
 }
 
 Semiring::weight_t final_weight(DFA::edfa_t ed, st_t s){
+  if (s == ed->final) 
+    return Semiring::one_weight;  
   return DFA_FINAL_WEIGHT(ed->d,s);
 }
 
 act_t ?final_attrs(DFA::edfa_t ed, st_t s){
+  if (s == ed->final) return new {};
+  
   return DFA_FINAL_ATTRS(ed->d,s);
 }
 
@@ -158,6 +172,23 @@ st_t get_start(DFA::edfa_t ed){
 
 string_t act_2_symb(DFA::edfa_t ed, act_t a){
   return DFA_ACT2SYMB(ed->d, a);
+}
+
+static void dot_trans_iter($(st_t,act_t) @`H src, 
+    $(st_t,Semiring::weight_t) @`H tgt,
+    DFA::edfa_t ed){
+  let &$(s,a) = src;
+  let &$(t,_) = tgt;
+  let act = a > 255 ? DFA_ACT2SYMB(ed->d,a) : cs2string(cs_range(a,a+1),NULL);
+  printf("%d -> %d [ label = \"%s\" ];\n",s,t,act);
+}
+
+// prints to standard error.
+void dfa_dot(DFA::edfa_t ed) {
+  printf("digraph g {\n");
+  printf("%d [ shape = \"doublecircle\" ];\n",ed->d->start);
+  Hashtable::iter_c(dot_trans_iter,ed->trans_exts,ed);
+  printf("}\n");
 }
 
 static st_t pat2dfa0(rule_pat_t p, ext_edfa_t ed, st_t final) {
@@ -183,6 +214,6 @@ DFA::edfa_t pat2dfa(rule_pat_t p, EarleyFsmBackend::DFA::grammar_edfa_t grm_dfa)
   let ed = create_ext_edfa(grm_dfa);
   let final_state = fresh_state(ed);
   let start_state = pat2dfa0(p, ed, final_state);
-  return new DFA::edfa(GRM_DFA_GET_DFA(grm_dfa,start_state), ed->trans_exts);
+  return new DFA::edfa(GRM_DFA_GET_DFA(grm_dfa,start_state), final_state, ed->trans_exts);
 }
 

@@ -2,9 +2,10 @@
 #include <buffer.h>
 #include "earley-parsetree.h"
 #include "earley-backend.h"
+#include "dfa.h"
 
 /* REQUIRED: 
- * To use this file, need to define CRAWLFUN.
+ * To use this file, need to define TGFUN.
  * */
 
 int main(int argc, const char ?`H?argv) {
@@ -20,6 +21,7 @@ int main(int argc, const char ?`H?argv) {
   int print_depth = 0;
   int do_print = 0;
   int backend;
+  string_t input_file;
 
   int argi = 1;
   
@@ -36,16 +38,32 @@ int main(int argc, const char ?`H?argv) {
       fprintf(stderr,"Argument %d is not backend. Defaulting to cyclone backend.\n", argi);
       backend = 0;
     }
-  }else {
-    fprintf(stderr,"Defaulting to cyclone backend.\n");
+  } else {
+    fprintf(stderr,"No backend specified. Defaulting to cyclone backend.\n");
     backend = 0;
   }
   if (argi < argc){
-    if (sscanf(argv[argi],"%d",&print_depth))
+    if (sscanf(argv[argi],"%d",&print_depth)){
       do_print = 1;
-    else
+      argi++;
+    } else
       fprintf(stderr,"Argument %d not valid depth: %s.\n",argi, argv[argi]);
   }
+  if (argi < argc){
+    input_file = argv[argi];
+    fprintf(stderr,"Using secondary input file %s.\n",input_file);
+    argi++;
+  } else {
+    fprintf(stderr,"Error: missing secondary input file.\n");
+    return 1;
+  }
+  
+  // TODO: allow these to be specified independently on command line.
+  int do_print_sec = do_print;
+  int sec_print_depth = print_depth;
+
+  fprintf(stderr, "Loading grammar dfa from grammar_dfa.txt.\n");
+  let gr_edfa = FsmDFA::fsm2grm_edfa("grammar_dfa.txt");
 
   let $(trees, valid, valid_prefix) = 
   (backend == 0) ? ({
@@ -56,20 +74,62 @@ int main(int argc, const char ?`H?argv) {
     EarleyFsmBackend::parse(dfa_rep,input);
   });
   
-  if (trees) {
-    fprintf(stderr,"done -- is valid string :%d; is valid prefix: %d\n", valid,
-        valid_prefix);
-    if (trees->tl) {
-      fprintf(stderr,"Ambiguous parse.\n");
-    } else {
-      if (do_print)
-        EarleyParsetree::print_tree(trees->hd->f0,print_depth);
-      // "tree" encodes top-level regexp, but we want to crawl starting from symbol
-      // with regexp.
-      // TODO: generate function that crawls the top-level regexp.
-      let child_tree = trees->hd->f0->children[0];
-      CRAWLFUN(child_tree, input);
-    }
-  } else
+  if (!trees) {
     fprintf(stderr,"Parse failed. Valid prefix: %d\n", valid_prefix);
+    return 1;
+  }
+  
+  fprintf(stderr,"done -- is valid string :%d; is valid prefix: %d\n", valid,
+      valid_prefix);
+  
+  if (trees->tl) {
+    fprintf(stderr,"Ambiguous parse. Choosing first derivation.\n");
+  }
+
+  if (do_print){
+    EarleyParsetree::print_tree(trees->hd->f0,print_depth);
+    printf("\n");
+  }
+
+  // "tree" encodes top-level regexp, but we want to crawl starting from symbol
+  // with regexp.
+  // TODO: generate function that crawls the top-level regexp.
+  let child_tree = trees->hd->f0->children[0];
+  let rule_pat = TGFUN(child_tree, input);
+  fprintf(stderr,"Parsed pattern %s.\n",pat2string(rule_pat));
+
+  let ext_edfa = ExtDFA::pat2dfa(rule_pat, gr_edfa);
+  ExtDFA::dfa_dot(ext_edfa);
+  
+  // slurp in all of secondary input.
+  FILE *f = fopen(input_file,"r");
+  if (!f) {
+    fprintf(stderr, "Failed to open secondary input file %s.\n", input_file);
+    return 1;
+  }
+  int c;
+  let b = Buffer::create(101);
+  while ( (c = fgetc(f)) != EOF)
+    Buffer::add_char(b, c);
+  fclose(f);
+  let sec_input = Buffer::contents(b);
+  fprintf(stderr,"Parsing secondary input.\n");
+  
+  let $(sec_trees, sec_valid, sec_valid_prefix) = EarleyExtFsmBackend::parse(ext_edfa,sec_input);
+  if (!sec_trees) {
+    fprintf(stderr,"Parse failed. Valid prefix: %d\n", sec_valid_prefix);
+    return 1;
+  }
+  
+  fprintf(stderr,"done -- is valid string :%d; is valid prefix: %d\n", sec_valid,
+      sec_valid_prefix);
+  
+  if (sec_trees->tl) {
+    fprintf(stderr,"Ambiguous parse. Choosing first derivation.\n");
+  }
+
+  if (do_print_sec) {
+    EarleyParsetree::print_tree(sec_trees->hd->f0,sec_print_depth);
+    printf("\n");
+  }
 }
