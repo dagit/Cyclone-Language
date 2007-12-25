@@ -371,6 +371,45 @@ parse_with_pat(ykbuf_t @`r ykb, Funtable::table_t parse_funs,
   parse_with_pat0(ykb,parse_funs,p,args);
 }
 
+void
+crawl_with_pat0(rule_pat_t p, EarleyParsetree::parse_tree_t ? children, 
+    string_t ykinput,
+    strptr_array<`r1,`r2> args) {
+  
+  let pats = List::list(p);
+  while (pats) {
+    switch (pats->hd) {
+    case &SymbPat(x):
+      children++;
+      pats = pats->tl;
+      break;
+    case &BinderPat(x):
+      let x_str = substring(ykinput, children[0]->left, children[0]->right - children[0]->left);
+      **args = x_str;
+      args++;
+      children++;
+      pats = pats->tl;
+      break;
+    case &LitPat(_):
+    case &CharPat(_):
+      // do nothing -- just advance pats. literals don't show up in parse tree;
+      pats = pats->tl;
+      break;
+    case &SeqPat(p1,p2):
+      // replace the hd with p1 and p2.
+      pats = new List::List(p1, new List::List(p2, pats->tl));
+      break;
+    }
+
+  }
+}
+
+void
+crawl_with_pat(rule_pat_t p, EarleyParsetree::parse_tree_t pt, string_t ykinput,
+    strptr_array<`r1,`r2> args){
+  let &EarleyParsetree::parse_tree(name,i,j,w,children) = pt;
+  crawl_with_pat0(p,children,ykinput,args);
+}
 
 //   switch (p) {
 //   case &SymbPat(x):

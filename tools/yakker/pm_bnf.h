@@ -24,6 +24,7 @@
 #include "ykbuf.h"
 #include "funtable.h"
 #include "fn.h"
+#include "earley-parsetree.h"
 
 typedef datatype Rule_pattern *Rule_pat_t;
 typedef datatype Rule_pattern @rule_pat_t;
@@ -62,4 +63,7 @@ typedef const char?`H @`r1 ?`r2 strptr_array<`r1,`r2>;
 extern void
 parse_with_pat(ykbuf_t @`r ykb, Funtable::table_t parse_funs, rule_pat_t p, strptr_array<`r1,`r2> args);
 
+extern void
+crawl_with_pat(rule_pat_t p, EarleyParsetree::parse_tree_t pt, string_t ykinput,
+    strptr_array<`r1,`r2> args);
 #endif

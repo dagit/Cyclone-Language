@@ -8,59 +8,85 @@
  * To use this file, need to define TGFUN.
  * */
 
+#define USAGE \
+"Usage:%s [OPTIONS] <input-file>\n"\
+"Options: -depth <n>           print parse tree to depth of n.\n"\
+"         -num-args <n>        allocate space for n arguments to scan.\n"\
+"         -cyc                 use cyclone backend when parsing format string.\n"\
+"         -fsm                 use fsm backend when parsing format string.\n"\
+"         -fmt <format-string> use the given format string instead of reading from stdin.\n"\
+"         -help                print this message\n"
+
+static void die(const char ?prog_name) {
+  fprintf(stderr,USAGE,prog_name);
+  exit(1);
+}
+
+
 int main(int argc, const char ?`H?argv) {
-  fprintf(stderr,"ABNF parsing stdin ... \n");
-
-  int c;
-  let b = Buffer::create(101);
-  while ( (c = fgetc(stdin)) != EOF)
-    Buffer::add_char(b, c);
-
-  let input = Buffer::contents(b);
-
   int print_depth = 0;
   int do_print = 0;
-  int backend;
-  string_t input_file;
+  int backend = -1;
+  string_t input_file = NULL;
+  string_t format_string = NULL;
+  int num_args = 0;
 
-  int argi = 1;
+  for (int argi = 1; argi < argc; argi++) {
+    if (     ! strcmp(argv[argi], "-help")) die(argv[0]);
+    else if (! strcmp(argv[argi], "-cyc")) backend = 0;
+    else if (! strcmp(argv[argi], "-fsm")) backend = 1;
+    else if (! strcmp(argv[argi], "-fmt")) {
+      if (argi+1 >= argc) die(argv[0]);
+      format_string = argv[argi+1];
+      argi += 1;
+    }
+    else if (! strcmp(argv[argi], "-num-args")) {
+      if (argi+1 >= argc) die(argv[0]);
+      if (!sscanf(argv[argi+1],"%d",&num_args)){
+        fprintf(stderr,"-num-args option is not followed by valid integer: %s.\n",argv[argi+1]);
+        num_args = 0;
+      }
+      argi += 1;
+    }
+    else if (! strcmp(argv[argi], "-depth")) {
+      if (argi+1 >= argc) die(argv[0]);
+      if (sscanf(argv[argi+1],"%d",&print_depth)){
+        do_print = 1;
+        argi++;
+      } else {
+        fprintf(stderr,"Argument %d not valid depth: %s.\n",argi+1, argv[argi+1]);
+        die(argv[0]);
+      }
+      argi += 1;
+    }
+    else if (!input_file) input_file = argv[argi];
+    else { fprintf(stderr,"Unrecognized option: %s\n",argv[argi]); exit(1); }
+  }
   
-  if (argi < argc){
-    if (!strcmp(argv[argi],"-cyc")){
-      backend = 0;
-      argi++;
-    } 
-    else if (!strcmp(argv[argi],"-fsm")){
-      backend = 1;
-      argi++;
-    }
-    else {
-      fprintf(stderr,"Argument %d is not backend. Defaulting to cyclone backend.\n", argi);
-      backend = 0;
-    }
+  if (input_file){
+    fprintf(stderr,"Using input file %s.\n",input_file);
   } else {
+    fprintf(stderr,"Error: missing input file.\n");
+    return 1;
+  }
+    
+  if (backend == -1) {     
     fprintf(stderr,"No backend specified. Defaulting to cyclone backend.\n");
     backend = 0;
   }
-  if (argi < argc){
-    if (sscanf(argv[argi],"%d",&print_depth)){
-      do_print = 1;
-      argi++;
-    } else
-      fprintf(stderr,"Argument %d not valid depth: %s.\n",argi, argv[argi]);
-  }
-  if (argi < argc){
-    input_file = argv[argi];
-    fprintf(stderr,"Using secondary input file %s.\n",input_file);
-    argi++;
-  } else {
-    fprintf(stderr,"Error: missing secondary input file.\n");
-    return 1;
-  }
   
   // TODO: allow these to be specified independently on command line.
-  int do_print_sec = do_print;
-  int sec_print_depth = print_depth;
+  int do_print_input = do_print;
+  int input_print_depth = print_depth;
+  
+  if (!format_string){
+    fprintf(stderr,"Reading format string from stdin ... \n");
+    int c;
+    let b = Buffer::create(101);
+    while ( (c = fgetc(stdin)) != EOF)
+      Buffer::add_char(b, c);
+    format_string = Buffer::contents(b);
+  }
 
   fprintf(stderr, "Loading grammar dfa from grammar_dfa.txt.\n");
   let gr_edfa = FsmDFA::fsm2grm_edfa("grammar_dfa.txt");
@@ -68,10 +94,10 @@ int main(int argc, const char ?`H?argv) {
   let $(trees, valid, valid_prefix) = 
   (backend == 0) ? ({
     let dfa_rep = EarleyCycBackend::init_dfa();
-    EarleyCycBackend::parse(dfa_rep,input);
+    EarleyCycBackend::parse(dfa_rep,format_string);
   }) : ({
     let dfa_rep = EarleyFsmBackend::init_dfa();
-    EarleyFsmBackend::parse(dfa_rep,input);
+    EarleyFsmBackend::parse(dfa_rep,format_string);
   });
   
   if (!trees) {
@@ -95,16 +121,16 @@ int main(int argc, const char ?`H?argv) {
   // with regexp.
   // TODO: generate function that crawls the top-level regexp.
   let child_tree = trees->hd->f0->children[0];
-  let rule_pat = TGFUN(child_tree, input);
+  let rule_pat = TGFUN(child_tree, format_string);
   fprintf(stderr,"Parsed pattern %s.\n",pat2string(rule_pat));
 
   let ext_edfa = ExtDFA::pat2dfa(rule_pat, gr_edfa);
   ExtDFA::dfa_dot(ext_edfa);
   
-  // slurp in all of secondary input.
+  // slurp in all of input.
   FILE *f = fopen(input_file,"r");
   if (!f) {
-    fprintf(stderr, "Failed to open secondary input file %s.\n", input_file);
+    fprintf(stderr, "Failed to open input file %s.\n", input_file);
     return 1;
   }
   int c;
@@ -112,24 +138,30 @@ int main(int argc, const char ?`H?argv) {
   while ( (c = fgetc(f)) != EOF)
     Buffer::add_char(b, c);
   fclose(f);
-  let sec_input = Buffer::contents(b);
-  fprintf(stderr,"Parsing secondary input.\n");
+  let input = Buffer::contents(b);
+  fprintf(stderr,"Parsing input.\n");
   
-  let $(sec_trees, sec_valid, sec_valid_prefix) = EarleyExtFsmBackend::parse(ext_edfa,sec_input);
-  if (!sec_trees) {
-    fprintf(stderr,"Parse failed. Valid prefix: %d\n", sec_valid_prefix);
+  let $(input_trees, input_valid, input_valid_prefix) = EarleyExtFsmBackend::parse(ext_edfa,input);
+  if (!input_trees) {
+    fprintf(stderr,"Parse failed. Valid prefix: %d\n", input_valid_prefix);
     return 1;
   }
   
-  fprintf(stderr,"done -- is valid string :%d; is valid prefix: %d\n", sec_valid,
-      sec_valid_prefix);
+  fprintf(stderr,"done -- is valid string :%d; is valid prefix: %d\n", input_valid,
+      input_valid_prefix);
   
-  if (sec_trees->tl) {
+  if (input_trees->tl) {
     fprintf(stderr,"Ambiguous parse. Choosing first derivation.\n");
   }
 
-  if (do_print_sec) {
-    EarleyParsetree::print_tree(sec_trees->hd->f0,sec_print_depth);
+  if (do_print_input) {
+    EarleyParsetree::print_tree(input_trees->hd->f0,input_print_depth);
     printf("\n");
   }
+  
+  let scan_args = new {for i < num_args : new ((const char ?@zeroterm)NULL)}; 
+  crawl_with_pat(rule_pat, input_trees->hd->f0, input, scan_args);
+  printf("Scanned args:\n");
+  for (int j=0; j < num_args; j++)
+    printf("> %s\n",*scan_args[j]);
 }
